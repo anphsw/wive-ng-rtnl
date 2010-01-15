@@ -601,7 +601,7 @@ menuL1_link = new Array("", "index.asp", "OperationMode.asp", "aidisk.asp", "EZQ
 
 function show_menu(L1, L2, L3){
 
-	if(productid == "RT-N13"){
+	if(productid == "RTNL"){
 		tabtitle[3].splice(1,2);//remove USB
 		tablink[3].splice(1,2);
 		menuL2_link[4] = "";    //remove USB

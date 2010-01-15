@@ -5585,11 +5585,11 @@ do_upgrade_post(char *url, FILE *stream, int len, char *boundary)
 
 			if (strncmp(ProductID, buf+36, strlen(ProductID))==0)
 				cmpHeader=1;
-			else if (strncmp(buf+36, "RT-N13U", 7)==0)	// for distinguish RT-N13U/RT-N13
+			else if (strncmp(buf+36, "RTNL", 7)==0)	// for distinguish RT-N13U/RT-N13
 				cmpHeader=1;
-			else if (strncmp(buf+36, "RT-n13", 6)==0)	// for distinguish RT-N13U/RT-N13
+			else if (strncmp(buf+36, "RTnl", 6)==0)	// for distinguish RT-N13U/RT-N13
 				cmpHeader=1;
-			else if (strncmp(buf+36, "RT-n13u", 7)==0)	// for distinguish RT-N13U/RT-N13
+			else if (strncmp(buf+36, "RTn", 7)==0)	// for distinguish RT-N13U/RT-N13
 				cmpHeader=1;
 			else
 			{

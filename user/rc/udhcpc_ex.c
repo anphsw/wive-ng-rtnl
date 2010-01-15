@@ -134,7 +134,7 @@ bound(void)
 			expires(lan_ifname, atoi(value));
 		}
 	}
-	else	// step 1 of 2-step dhcp lease application for RT-N13 repeater mode UI
+	else	// step 1 of 2-step dhcp lease application for RTNL repeater mode UI
 	{
 		if ((value = getenv("ip")))
 			nvram_set(strcat_r(prefix, "ipaddr_new", tmp), trim_r(value));
@@ -177,7 +177,7 @@ bound(void)
 	}
 
 	if (nvram_match("sw_mode_ex", "2") && nvram_match("ui_triggered", "1"))
-	{	// apply dhcp lease in case RT-N13 repeater mode UI does not
+	{	// apply dhcp lease in case RTNL repeater mode UI does not
                 char *dhcpc_argv[] = {"dhcpc_apply_delayed", NULL};
                 pid_t pid;
 
@@ -219,7 +219,7 @@ renew(void)
 }
 
 static int
-apply(void)	// step 2 of 2-step dhcp lease application for RT-N13 repeater mode UI
+apply(void)	// step 2 of 2-step dhcp lease application for RTNL repeater mode UI
 {
 	char lan_ifname[5];
 	char udhcpstate_local[8];

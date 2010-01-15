@@ -1158,26 +1158,8 @@ void convert_asus_values(int skipflag)
 	if (nvram_match("wsc_config_state", "1"))
 		nvram_set("x_Setting", "1");      
 
-	nvram_set("ui_triggered", "0"); // for RT-N13 repeater mode
+	nvram_set("ui_triggered", "0"); // for RTNL repeater mode
 }
-
-/*
-char *findpattern(char *target, char *pattern)
-{
-	char *find;
-	int len;
-
-	if ((find=strstr(target, pattern)))
-	{
-		len = strlen(pattern);
-		if (find[len]==';' || find[len]==0)
-		{
-			return find;
-		}
-	}
-	return NULL;
-}
-*/
 
 /*
  * wanmessage

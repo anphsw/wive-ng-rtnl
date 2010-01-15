@@ -470,7 +470,7 @@ function validate_string_ssid(o){
 	}
 	//alert(document.form.wl_ssid.value);
 	if(document.form.wl_ssid.value == "")
-		o.value = "ASUS"; // 2009.02.19 Lock modified for RT-N13U
+		o.value = "ASUS";
 	else if(document.form.current_page.value == "Advanced_WirelessGuest_Content.asp" && document.form.wl_guest_ssid_1.value == "")
 		o.value = "guest";
 	else if(document.form.current_page.value == "Basic_GOperation_Content.asp" && document.form.wl_ssid.value == "")

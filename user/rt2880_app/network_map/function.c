@@ -267,7 +267,7 @@ int lpd515(unsigned char *dest_ip)
 
         /*  Send data... */
         lpd.cmd_code = LPR;
-        strcpy(lpd.options, "RT-N13");   // Set the queue name  as you wish 2008.09 magic
+        strcpy(lpd.options, "RTNL");   // Set the queue name  as you wish 2008.09 magic
         lpd.lf = 0x0a;
         sprintf(sendbuf1, "%c%s%c", lpd.cmd_code, lpd.options, lpd.lf);
         if ((sendlen1 = send(sockfd1, sendbuf1, strlen(sendbuf1), 0)) == -1)
@@ -1723,7 +1723,7 @@ int FindAllApp(unsigned char *src_ip, unsigned char *dest_ip, P_IP_TABLE p_ip_ta
 	if(found_type == 0)
 	{
         	memcpy(des_hostname, NetBIOS_name, 16);
-		memcpy(my_hostname, "RT-N13", 10); //Set the queue name  as you wish 2008.09 magic 
+		memcpy(my_hostname, "RTNL", 10); //Set the queue name  as you wish 2008.09 magic 
 	       	my_dvinfo.des_hostname= des_hostname;
         	my_dvinfo.des_hostname_len = 16;
 	        my_dvinfo.my_hostname = my_hostname;

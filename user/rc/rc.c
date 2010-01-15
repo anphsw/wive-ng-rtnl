@@ -1062,7 +1062,7 @@ main_loop(void)
 	nvram_set("upnp_ENABLE", nvram_safe_get("upnp_enable"));
 	nvram_set("wan_route_X", nvram_safe_get("wan_route_x"));
 	nvram_set("lan_proto_X", nvram_safe_get("lan_proto_x"));
-	nvram_set("productid", "RT-N13U");
+	nvram_set("productid", "RTNL");
 #endif
 
 #ifdef W7_LOGO

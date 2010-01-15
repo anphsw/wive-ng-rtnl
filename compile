@@ -3,7 +3,6 @@
 DOS2UNIX=NO
 FULLREBUILD=NO
 
-
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
 echo -------------------------------FULL-CLEAR-------------------------------
@@ -12,7 +11,6 @@ fi
 
 echo -------------------------------MAKE-TOOLS-------------------------------
 make all -C tools
-make menuconfig
 
 echo --------------------------------COPY-CONFIG-----------------------------
 cp -fv ./config-acorp/config-busybox	./user/busybox/.config
@@ -25,10 +23,9 @@ ln -fs vendors/Ralink/RT3052/config.arch config.arch
 
 echo -------------------------------MAKE-KERNEL------------------------------
 
+make oldconfig
 make oldconfig -C linux
 make prepare -C linux
-
-#make all -C linux
 
 #for wantusoid`s like.
 if [ "$DOS2UNIX" = "YES" ] ; then

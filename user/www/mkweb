@@ -21,12 +21,7 @@ if [ -n "$1" ]; then
 			MODELID="$MODEL"
 			rm -rf ./web
 			cp -rf ./web_asus_en ./web
-			if [ "$MODEL" = "WL520gu" ] || [ "$MODEL" = "RT-N13" ]; then
-	                        cp -rf web_asus_en/Title.asp.TWCN web_asus_en/Title.asp
-			else
-				cp -rf web_asus_en/Title.asp.500gp web_asus_en/Title.asp
-			fi
-                        #cp -rf web_asus_en/Advanced_StorageRight_Content.asp.TWCN web_asus_en/Advanced_StorageRight_Content.asp
+	                cp -rf web_asus_en/Title.asp.TWCN web_asus_en/Title.asp
 		elif [ "$2" = "KR" ]; then
 			if [ "$MODEL" = "WL500bv2" ]; then
 				MODEL_STR="WL500b"

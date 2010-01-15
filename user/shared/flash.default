@@ -531,10 +531,10 @@
 {"st_samba_mode", "1", 0},
 {"st_ftp_mode", "1", 0},
 {"st_max_user", "5", 0},
-{"computer_name", "RT-N13U", 0},
-{"computer_nameb", "RT-N13U", 0}, // 2008.03 James.
+{"computer_name", "RTNL", 0},
+{"computer_nameb", "RTNL", 0},
 {"st_samba_workgroup", "WORKGROUP", 0},
-{"st_samba_workgroupb", "WORKGROUP", 0}, // 2008.03 James.
+{"st_samba_workgroupb", "WORKGROUP", 0},
 
 {"apps_dl", "1", 0},
 {"apps_dl_share", "0", 0},

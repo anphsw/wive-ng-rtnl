@@ -168,7 +168,7 @@ function getConnectingStatus(){
 var times = 5; // times for retry request;
 var secs = 80;
 
-function ajaxGetUREIP(e) { //Use AJAX to get New IP of RT-N13U from ureip.asp( urelease hook ).
+function ajaxGetUREIP(e) { //Use AJAX to get New IP of RTNL from ureip.asp( urelease hook ).
   $.ajax({
     url: 'ureip.asp', // Get status from aplist again.
     dataType: 'script', 

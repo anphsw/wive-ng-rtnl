@@ -121,7 +121,7 @@ enum BTNSETUP_STATE
 #endif
 
 // for log message title
-#define LOGNAME	"RT-N13U"
+#define LOGNAME	"RTNL"
 #define ERR	"err"
 
 // wl_guest	// ham 1031

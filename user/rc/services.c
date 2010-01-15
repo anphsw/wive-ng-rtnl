@@ -153,7 +153,7 @@ start_telnetd()
 	system("killall telnetd");
 
 	chpass(nvram_safe_get("http_username"), nvram_safe_get("http_passwd"));
-	system("hostname RT-N13U");
+	system("hostname RTNL");
 
 	//return s_eval2(telnetd_argv, NULL, 0, NULL);
 	return system("telnetd");
@@ -164,32 +164,6 @@ stop_telnetd()
 {
 	return system("killall telnetd");
 }
-
-/*
-int
-start_telnetd2()
-{
-        char *telnetd_argv[] = {"telnetd", "&", NULL};
-
-        system("killall telnetd");
-
-        chpass(nvram_safe_get("http_username"), nvram_safe_get("http_passwd"));
-        system("hostname RT-N13U");
-
-        return _eval(telnetd_argv, NULL, 0, NULL);
-}
-
-int
-start_telnetd3()
-{
-        system("killall telnetd");
-
-        chpass(nvram_safe_get("http_username"), nvram_safe_get("http_passwd"));
-        system("hostname RT-N13U");
-
-        return eval("telnetd", "&");
-}
-*/
 
 int
 start_httpd(void)

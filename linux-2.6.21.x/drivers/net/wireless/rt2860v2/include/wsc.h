@@ -282,17 +282,17 @@
 
 // Common definition
 /*ASUS EXT by Jiahao */
-#define WSC_MANUFACTURE         "ASUSTek Computer Inc."
+#define WSC_MANUFACTURE         "OSS"
 #ifdef CONFIG_AP_SUPPORT
-#define AP_WSC_MODEL_NAME               "ASUS Wireless Router"
-#define AP_WSC_DEVICE_NAME              "ASUS Wireless Router RT-N13U"
+#define AP_WSC_MODEL_NAME               "Wireless Router"
+#define AP_WSC_DEVICE_NAME              "Wireless Router RTNL"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
-#define STA_WSC_MODEL_NAME              "ASUS Wireless Station"
-#define STA_WSC_DEVICE_NAME             "ASUS Wireless Station RT-N13U"
-#define WSC_DEVICE_NAME_R       "ASUS EX-Registrar"
+#define STA_WSC_MODEL_NAME              "Wireless Station"
+#define STA_WSC_DEVICE_NAME             "Wireless Station RTNL"
+#define WSC_DEVICE_NAME_R       "EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
-#define WSC_MODEL_NUMBER        "RT-N13U"
+#define WSC_MODEL_NUMBER        "RTNL"
 /*ASUS EXT by Jiahao */
 #define	WSC_MODEL_SERIAL	"12345678"
 

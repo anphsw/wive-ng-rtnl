@@ -608,7 +608,7 @@ echo "<?xml version=\"1.0\"?>
                 <manufacturerURL>http://www.asus.com/</manufacturerURL>
                 <modelDescription>ASUS Wireless Router</modelDescription>
                 <modelName>Wireless Router</modelName>
-                <modelNumber>RT-N13U</modelNumber>
+                <modelNumber>RTNL</modelNumber>
                 <serialNumber>1.00</serialNumber>
                 <UDN>uuid:75802409-bccb-40e7-8e6c-fa095ecce13e</UDN>
                 <iconList>
@@ -637,7 +637,7 @@ echo "<?xml version=\"1.0\"?>
                                 <manufacturerURL>http://www.asus.com/</manufacturerURL>
                                 <modelDescription>ASUS Wireless Router</modelDescription>
                                 <modelName>Wireless Router</modelName>
-                                <modelNumber>RT-N13U</modelNumber>
+                                <modelNumber>RTNL</modelNumber>
                                 <modelURL>http://www.asus.com/</modelURL>
                                 <serialNumber>1.00</serialNumber>
                                 <UDN>uuid:c4131cbd-0408-463d-91b0-38dd1ee22fd6</UDN>
@@ -659,7 +659,7 @@ echo "<?xml version=\"1.0\"?>
                                                 <manufacturerURL>http://www.asus.com/</manufacturerURL>
                                                 <modelDescription>ASUS Wireless Router</modelDescription>
                                                 <modelName>Wireless Router</modelName>
-                                                <modelNumber>RT-N13U</modelNumber>
+                                                <modelNumber>RTNL</modelNumber>
                                                 <modelURL>http://www.asus.com/</modelURL>
                                                 <serialNumber>0.95</serialNumber>
                                                 <UDN>uuid:5f75f342-9f96-4ecc-9dbd-6f981efc3f14</UDN>
