@@ -1,0 +1,28 @@
+#!/bin/sh
+
+PIDFILE=/var/run/l2tpd.pid
+
+case $1 in
+
+start)
+	l2tpd
+	while [ ! -r /var/run/l2tp-control ] ; do
+	    sleep 1
+	done
+	echo 'c seubras' > /var/run/l2tp-control
+	;;
+
+stop)
+	# Ignore SIGTERM
+	trap "" 15
+
+	if [ -r "$PIDFILE" ] ; then
+	PID=`cat $PIDFILE`
+
+	kill -9 $PID > /dev/null 2>&1
+	fi
+	;;
+*)
+echo "Please specify your action: route / start / stop"
+;;
+esac

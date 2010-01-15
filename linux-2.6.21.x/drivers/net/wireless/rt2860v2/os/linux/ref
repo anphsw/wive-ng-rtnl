@@ -1,0 +1,27 @@
+2003c2003
+< int	Set_ATE_TX_FREQOFFSET_Proc(
+---
+> INT	Set_ATE_TX_FREQOFFSET_Proc(
+2026d2025
+< /* original SDK 3.3.0.0
+2037,2056d2035
+< original SDK 3.3.0.0 */
+< 	UCHAR RFValue;
+< 	if (IS_RT30xx(pAd) || IS_RT3572(pAd))
+< 	{
+< 		// Set RF offset
+< 		ATE_RF_IO_READ8_BY_REG_ID(pAd, RF_R23, (PUCHAR)&RFValue);
+< //2008/08/06: KH modified "pAd->RFFreqOffset" to "pAd->ate.RFFreqOffset"
+< 		RFValue = ((RFValue & 0x80) | pAd->ate.RFFreqOffset);
+< 		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R23, (UCHAR)RFValue);
+< 	}
+< 	else
+< #ifdef RT305x
+< 	if (1)
+< 	{
+< 		ATE_RF_IO_READ8_BY_REG_ID(pAd, RF_R23, (PUCHAR)&RFValue);
+< 		RFValue = ((RFValue & 0x80) | pAd->ate.RFFreqOffset);
+< 		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R23, (UCHAR)RFValue);
+< 	}
+< 	else
+< #endif // RT305x //

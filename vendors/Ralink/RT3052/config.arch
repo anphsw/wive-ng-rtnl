@@ -1,0 +1,37 @@
+.EXPORT_ALL_VARIABLES:
+############################################################################
+#
+# Vendor specific settings
+#
+
+CONSOLE_BAUD_RATE = 57600
+
+############################################################################
+
+CPUFLAGS :=
+VENDOR_CFLAGS :=
+DISABLE_XIP := 1
+DISABLE_MOVE_RODATA := 1       # until we get a toolchain release
+
+LOPT += -Os                  # library is alway 02
+UOPT += -Os                  # user apps are always Os
+
+############################################################################
+
+MODEL_NAME		   = RTNL
+CONFIG_NOUSB		   = y
+ACHINE			   = mips
+ARCH		           = mips
+ROOTDIR			   = /opt/Wive-RTNL
+FIRMROOT        	   = $(ROOTDIR)
+TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
+CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
+
+include $(ROOTDIR)/vendors/config/mips/config.arch
+
+#added by Steven Liu
+CFLAGS  +=  -I$(ROOTDIR)
+CFLAGS  +=  
+#--
+
+############################################################################

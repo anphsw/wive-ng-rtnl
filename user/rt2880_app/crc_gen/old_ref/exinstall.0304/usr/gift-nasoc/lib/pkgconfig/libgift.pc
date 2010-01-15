@@ -1,0 +1,11 @@
+prefix=/root/broadcom/src/router/app-packages/../mipsel/exinstall/usr/gift-nasoc
+exec_prefix=/root/broadcom/src/router/app-packages/../mipsel/exinstall/usr/gift-nasoc
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libgift
+Description: libgift
+Version: 0.11.8
+Libs: -L${libdir} -lgift
+Cflags: -I${includedir}
+

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+DOS2UNIX=NO
+FULLREBUILD=NO
+
+
+#for clear all binary
+if [ "$FULLREBUILD" = "YES" ] ; then
+echo -------------------------------FULL-CLEAR-------------------------------
+    ./clear
+fi
+
+echo -------------------------------MAKE-TOOLS-------------------------------
+make all -C tools
+make menuconfig
+
+echo --------------------------------COPY-CONFIG-----------------------------
+cp -fv ./config-acorp/config-busybox	./user/busybox/.config
+cp -fv ./config-acorp/config-config	./config/.config
+cp -fv ./config-acorp/config-cpp	./uClibc++/.config
+cp -fv ./config-acorp/config-kernel	./linux/.config
+cp -fv ./config-acorp/config-lib	./lib/.config
+cp -fv ./config-acorp/config-all	.config
+ln -fs vendors/Ralink/RT3052/config.arch config.arch
+
+echo -------------------------------MAKE-KERNEL------------------------------
+
+make oldconfig -C linux
+make prepare -C linux
+
+#make all -C linux
+
+#for wantusoid`s like.
+if [ "$DOS2UNIX" = "YES" ] ; then
+echo ---------------------------------DOS2UNIX--------------------------------
+    find -type f -exec dos2unix -U -b {} \;
+fi
+
+echo ---------------------------------MAKE-ALL--------------------------------
+make
+

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Clean temporary files..."
+find $PWD -name 'config.log' | xargs rm -f
+find $PWD/user -name '*.o' | xargs rm -f
+find $PWD -name '*.old' | xargs rm -f
+find $PWD -name '*.log' | xargs rm -f
+find $PWD -name CVS -type d | xargs rm -rf
+
+make clean -C tools
+make clean
+make mrproper
+

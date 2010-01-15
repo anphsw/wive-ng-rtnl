@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#nvram set apps_ver
+
+/shares/bin/rcex stop
+
+#rm -rf /shares/lib
+#rm -rf /shares/bin
+#rm -rf /shares/usr
+#rm -rf /shares/wwwapps
+
+#POOL=`nvram get apps_pool`
+#SHARE=`nvram get apps_share`
+#TARGETDIR="shares/${POOL}/${SHARE}"
+#POOLDIR="shares/${POOL}"
+#nvram set apps_pool=""
+#nvram set apps_share=""
+
+killall httpd

@@ -1,0 +1,58 @@
+#! /bin/sh
+
+echo "automount start" >> /tmp/tmplog
+if [ "$1" == "" ]; then
+echo "parameter is none" 
+echo "parameter is none" >> /tmp/tmplog
+exit 1
+fi
+mounted=`mount | grep $1 | wc -l`
+
+# mounted, assume we umount
+if [ $mounted -ge 1 ]; then
+swapoff /tmp/harddisk/part0/.swap
+rm -rf /tmp/harddisk/part0
+echo "R/media/$1" 
+echo "R/media/$1" 
+if ! umount2 "/media/$1"; then
+echo "automount exit" >> /tmp/tmplog
+exit 1
+fi
+
+if ! rm -r "/media/$1"; then
+echo "automount exit 2" >> /tmp/tmplog
+exit 1
+fi
+# not mounted, lets mount under /media
+else
+echo "mkdir -p /media/$1" >> /tmp/tmplog
+if ! mkdir -p "/media/$1"; then
+exit 1
+fi
+
+echo "mount /dev/$1" >> /tmp/tmplog
+if ! mount "/dev/$1" "/media/$1"; then
+# failed to mount, clean up mountpoint
+echo "ntfs-3g /dev/$1 /media/$1 -o force" >> /tmp/tmplog
+if ! ntfs-3g "/dev/$1" "/media/$1" -o force; then
+echo "rm -r /media/$1" >> /tmp/tmplog
+if ! rm -r "/media/$1"; then
+echo "automount exit 3" >> /tmp/tmplog
+exit 1
+fi
+fi
+echo "automount exit 3" >> /tmp/tmplog
+exit 1
+fi
+echo "A/media/$1" >> /tmp/tmplog
+echo "A/media/$1" 
+echo "A/media/$1" >> /tmp/tmplog
+echo "A/media/$1" 
+fi
+
+echo "killall SIGTTIN init" >> /tmp/tmplog
+# rc need to know the event.
+killall -SIGTTIN init
+
+exit 0
+

@@ -1,0 +1,477 @@
+#!/usr/bin/perl
+###############################################################################
+##
+## $Id: gift-setup.in,v 1.1 2007/04/12 07:07:16 ham Exp $
+##
+## Wrapper for the configuration templates installed in ${datadir}/giFT.
+##
+## Copyright (C) 2001-2003 giFT project (gift.sourceforge.net)
+##
+## This program is free software; you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by the
+## Free Software Foundation; either version 2, or (at your option) any
+## later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+###############################################################################
+
+use strict;
+use Data::Dumper;
+use IO::File;
+
+###############################################################################
+
+my $datadir = '/root/proj-n13u/RT288x_SDK/dm/exinstall/usr/gift-nasoc/share/giFT';
+my $confdir = "$ENV{HOME}/.giFT";
+
+###############################################################################
+
+main();
+
+sub main
+{
+	return if (!check_uid ());
+		
+	my $templates = find_templates ($datadir);
+	my $configed  = find_configured ($confdir);
+
+	# no available templates, bogus install
+	if (scalar @$templates == 0)
+	{
+		print <<"__EOF__";
+
+ *** ERROR ***
+
+No available configuration templates were found.  This could mean that you
+legitimately have none and need to install the giFT daemon properly or that
+you have placed them in an alternate data directory than this script is
+looking.  The configuration template path being used is:
+
+	$datadir
+
+__EOF__
+
+		return;
+	}
+
+	#
+	# Configuration modules which will be read from the available templates.
+	# This basically creates a new data structure which is a hash of module
+	# entries, including ->{path_cfg} and ->{path_tpl}.  This data
+	# structure may be further trimmed through the condition below.
+	#
+	my $modules_hash = build_modules ($configed, $templates);
+
+	#
+	# If there have been previously configured modules, we need to ask the
+	# user if they'd like us to rebuild from available templates or only
+	# add new configuration templates to the confdir.
+	#
+	if (scalar @$configed > 0)
+	{
+		print <<"__EOF__";
+
+ *** WARNING ***
+
+Previous configuration has been detected.  This script is capable of
+preserving that configuration and only adding from new available templates.
+If you choose no, all presently installed configuration modules will be used
+in place of any custom configuration you have.  In the future, previous
+configuration will be read and used as defaults, but this script does not
+currently have such a feature.
+
+__EOF__
+
+ gotos_are_bad:
+		print "Would you like to preserve old configuration? [Yn] ";
+
+		chomp (my $yesno = <>); $yesno = 'y' unless $yesno;
+		goto gotos_are_bad unless $yesno =~ m/[yn]/i;
+
+		# print a little separator to help the user organize this output
+		print_sep();
+
+		if ($yesno =~ m/y/i)
+		{
+			#
+			# Iterate through each configured entry and remove it from the
+			# modules hash constructed above.  This is a horribly hackish
+			# approach, but hey, it works and this is perl :)
+			#
+			foreach my $cfg (@$configed)
+			{
+				delete $modules_hash->{$cfg->{name}};
+			}
+		}
+	}
+
+	#
+	# Convert the hash data structure to a list now that we don't need
+	# the delete/exists hack.  This will also take care of fudging the
+	# order so that gift and ui are before plugins.
+	#
+	my @modules = get_modules_list ($modules_hash);
+
+	if (scalar @modules == 0)
+	{
+		print <<'__EOF__';
+No configuration modules are available for processing.  This could be because
+you have chosen to preserve old configuration and no new modules have been
+added since last configuration.
+
+__EOF__
+
+		return;
+	}
+
+	# and away we go...
+	my $n = process_modules (@modules);
+	printf ("%d module(s) successfully processed.\n", $n);
+}
+
+###############################################################################
+
+sub print_sep
+{
+	print "\n", '#' x 78, "\n\n";
+}
+
+###############################################################################
+
+#
+# Construct a list of all templates that are installed and available.
+#
+sub find_templates
+{
+	return find_conf_modules (shift, "*.conf.template");
+}
+
+#
+# Construct a list of all configuration files that currently exist in the
+# supplied config directory.
+#
+sub find_configured
+{
+	return find_conf_modules (shift, "*.conf");
+}
+
+sub find_conf_modules
+{
+	my $dir = shift;
+	my $glob = shift;
+
+	my @modules = ();
+
+	#
+	# Quick and dirty hack to access all template files in the supplied data
+	# dir and the first depth underneath.  I would prefer to avoid using
+	# File::Find, if possible.
+	#
+	foreach my $path ((glob ("$dir/$glob"), glob ("$dir/*/$glob")))
+	{
+		# just making sure...
+		die "Cannot read $path: $!" unless -f $path && -r $path;
+
+		#
+		# Expose only the module name, that is the configuration object
+		# name, instead of the path and file extension.  For example,
+		# if given /usr/local/share/giFT/OpenFT/OpenFT.conf.template,
+		# 'OpenFT' should be added as the module.
+		#
+		my @pathelem = split ('/', $path); my $file = pop @pathelem;
+		my ($module) = $file =~ m/^(\w+)/;
+
+		push @modules, { 'name' => $module, 'path' => $path };
+	}
+
+	return \@modules;
+}
+
+###############################################################################
+
+sub build_modules
+{
+	my $cfg = shift;
+	my $tpl = shift;
+
+	my $modules = {};
+
+	foreach my $template (@$tpl)
+	{
+		my $module = construct_module ($modules, $template->{name});
+		$module->{path_tpl} = $template->{path};
+
+		# try to guess the configuration path, in case no real config
+		# module is present by that name...
+		$module->{path_cfg} = guess_config_path ($module->{name});
+	}
+
+	foreach my $config (@$cfg)
+	{
+		#
+		# Only templates are allowed to construct new module elements, because
+		# we dont want to present configuration when no template exists
+		# for parsing...
+		#
+		next unless exists $modules->{$config->{name}};
+
+		# add the path_cfg member to the module object
+		my $module = $modules->{$config->{name}};
+		$module->{path_cfg} = $config->{path};
+	}
+
+	return $modules;
+}
+
+# simple short-hand to reduce code duplication
+sub construct_module
+{
+	my $modules = shift;
+	my $name    = shift;
+
+	$modules->{$name} = {} unless exists $modules->{$name};
+
+	$modules->{$name}->{name} = $name;
+	return $modules->{$name};
+}
+
+sub guess_config_path
+{
+	my $name = shift;
+
+	return "$confdir/giftd.conf" if ($name eq 'giftd');
+	return "$confdir/$name/$name.conf";
+}
+
+###############################################################################
+
+sub get_modules_list
+{
+	my $hash = shift;
+	my @modules = ();
+
+	# fudge the order
+	push @modules, delete $hash->{'giftd'} if exists $hash->{'giftd'};
+	push @modules, delete $hash->{'ui'} if exists $hash->{'ui'};
+
+	push @modules, values %$hash;
+
+	return @modules;
+}
+
+###############################################################################
+
+sub process_modules
+{
+	my @modules = @_;
+
+	# number of successfully processed modules
+	my $ret = 0;
+
+	foreach my $module (@modules)
+	{
+		# process this module atomically and flush all configuration
+		$ret += process_module ($module);
+	}
+
+	return $ret;
+}
+
+sub process_module
+{
+	my $module = shift;
+
+	printf ("Configuring %s (%s):\n", $module->{name}, $module->{path_tpl});
+	print_sep();
+
+	my $cfg_ents = parse_template ($module->{path_tpl});
+	my $cfg_tbl  = {};
+
+	foreach my $ent (@$cfg_ents)
+	{
+		my $dont_ask = 0;
+
+		# WARNING: This is an absolutely terrible hack!  This functionality
+		# needs to exist in the config template itself!
+		if ($module->{name} eq 'OpenFT')
+		{
+			# if the user has configured as something other than a search
+			# node, do not present relevant configuration switches to them.
+			$dont_ask = 1 if ($ent->{key} =~ m%^/search/% &&
+			                  !($cfg_tbl->{'/main/class'} & 0x2));
+		}
+
+		if ($ent->{default} =~ m/^random \((\d+), (\d+)\)/)
+		{
+			# create a random number and pretend the default value was that
+			$ent->{value} = get_random_port ($1, $2);
+		}
+
+		my $resp;
+
+		unless ($dont_ask)
+		{
+			printf ("%s\n\n", $ent->{label}) if $ent->{label};
+			printf ("%s [%s] ", $ent->{key}, $ent->{value});
+
+			$resp = <>; chomp $resp;
+		}
+
+		$resp = $ent->{value} unless $resp;
+		$cfg_tbl->{$ent->{key}} = $resp;
+
+		print_sep() unless $dont_ask;
+	}
+
+	write_config ($cfg_tbl, $module->{path_cfg}, $module->{path_tpl});
+
+	1;
+}
+
+sub write_config
+{
+	my $cfg_tbl  = shift;
+	my $path_cfg = shift;
+	my $path_tpl = shift;
+
+	my ($path_cfg_dir) = $path_cfg =~ m/^(.*)\/[^\/]+$/;
+	mkdir ($path_cfg_dir, 0755) unless (-d $path_cfg_dir);
+	
+	my $fcfg = new IO::File;
+	my $ftpl = new IO::File;
+
+	open ($fcfg, ">$path_cfg") or
+	  die "Cannot open $path_cfg: $!";
+
+	open ($ftpl, $path_tpl) or
+	  die "Cannot open $path_tpl: $!";
+
+	my $cfg_hdr;
+
+	while (<$ftpl>)
+	{
+		$cfg_hdr = $1 if m/^\[(\w+)\]$/;
+
+		if (m/^\#?(\w+) =\s?(.*)$/)
+		{
+			die unless defined $cfg_hdr;
+			printf $fcfg ("%s = %s\n", $1, $cfg_tbl->{"/$cfg_hdr/$1"});
+		}
+		else
+		{
+			print $fcfg $_;
+		}
+	}
+
+	close $fcfg;
+	close $ftpl;
+
+	printf ("Wrote %s.\n", $path_cfg);
+}
+
+###############################################################################
+
+sub parse_template
+{
+	my $template = shift;
+	my @cfg_tbl = ();
+	my $cfg_ent = {};
+	my $cfg_hdr = undef;
+	
+	my $fhandle = new IO::File;
+
+	open ($fhandle, $template) or
+	  die "Cannot open $template: $!";
+
+	#
+	# Special flag used to switch on reading of the leading config switch
+	# documentation.  This is switched on as soon as a blank comment line
+	# is observed, which by convention begins the comment.  It is turned off
+	# once the actual configuration switch is seen.
+	#
+	my $reading = 0;
+
+	while (<$fhandle>)
+	{
+		$cfg_hdr = $1 if m/^\[(\w+)\]$/;
+
+		# determine when to begin processing a single config switch
+		$reading = 1 if m/^\#\s*$/ or m/^\w+ =/;
+		next unless $reading;
+
+		if (m/^\#\s(.*)$/ or m/^\#(\s*)$/)
+		{
+			$cfg_ent->{label} .= "$1\n";
+			$cfg_ent->{default} = $1 if ($1 =~ m/^Default: (.*)$/);
+		}
+		else
+		{
+			if (m/^\#?(\w+) =\s?(.*)$/)
+			{
+				$cfg_ent->{key} = "/$cfg_hdr/$1";
+				$cfg_ent->{value} = $2;
+
+				# tidy up
+				$cfg_ent->{label} =~ s/^\s*//;
+				$cfg_ent->{label} =~ s/\s*$//;
+				$cfg_ent->{default} = undef if ($cfg_ent->{default} eq 'none');
+
+				push @cfg_tbl, $cfg_ent;
+			}
+			else
+			{
+				print "shouldnt happen, bogus template, something!\n\n$_\n\n";
+				print Dumper $cfg_ent;
+			}
+
+			$cfg_ent = {};
+			$reading = 0;
+		}
+	}
+
+	close $fhandle;
+
+	return \@cfg_tbl;
+}
+
+###############################################################################
+
+sub get_random_port
+{
+	my ($min, $max) = @_;
+
+	# TODO: should we do any checks on the value before we spit it back out?
+	my $num = int (rand (($max - $min)) + $min);
+
+	return $num;
+}
+
+###############################################################################
+
+sub check_uid
+{
+	return 1 if $<;
+
+	print <<"__EOF__";
+
+ *** WARNING ***
+
+You are running this script as root.  Instead, you should run it as the
+user you intend to run giFT as (setup files are created in the user's
+home directory).  If you intend to run giFT as root (not advised), or
+if your system does not support multiple users, you may continue at
+your own risk.
+
+__EOF__
+
+	my $yesno;
+	do {
+		print "Do you want to continue anyway? [yN] ";
+	} while (($yesno = <>) !~ m/^[yn]?$/i);
+
+	return ($yesno =~ m/y/i);
+}

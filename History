@@ -1,0 +1,40 @@
+Ralink AP SDK - History
+
+Version 3.2.0.0
+===============
+- [Switch setting] set XOR48 and enable aging by default  
+- [Phy setting] Improve Ethernet conformance 
+- [Ethernet] [RT305x] Improve multicast efficiency.
+- [USB] power-saving design for USB interface. (Release the corresponding Application Note in parallel.)
+- [Wifi] AP version 2.0.0.0
+- [Wifi] STA version 1.8.0.0                                                             
+- [Wifi] MCS12->MCS11, not MCS12->MCS4.
+- [Wifi] Low threshold of rate adaption table: 25->15 @ (SGI & MCS 15)
+- [Wifi] 20M/40M power delta issue                                                       
+- [SDK] Increase core voltage for system stability
+- [SDK] Disable mdc/mdio by default                                                      
+- [SDK] MTD-based Flash API
+- [SDK] Mesh AP support
+- [SDK] Turn off wireless by timer in WebUI (GreenAP).                                   
+- [SDK] change to mips-gcc 3.4.2 cross-compiler (optimize for size)
+- [SDK] RT3050/RT3051 support
+- [SDK] Samba with FAT32 bug fix  
+
+Version 3.1.0.0
+===============
+- [Wifi Driver] AP version 1.9.0.0
+- [Wifi Driver] STA version 1.7.0.0
+- [Raeth Driver] fix RT3052 multicast issue
+- [System] Fix web firmware upgrade issue for Spansion flash
+- [System] USB Performance tuning
+- [App] Wireless Tool v29
+
+Version 3.0.0.0
+===============
+- [System] RT3052 MP/MP2 Support 
+- [WebUI] Upgrade firmware from USB
+- [WebUI] Layer7 QoS & Content Filter
+- [WebUI] FTP/Samba Server
+- [System] support Spansion 4MB flash S29GL032N
+- [System] support Spansion 8MB flash S29GL064N, this feature need Uboot support (ver >= 2.0)
+- [System] support Mxic 8MB flash MX29LV640B, this feature need Uboot support (ver >= 2.0)

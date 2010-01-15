@@ -1,0 +1,141 @@
+/* Shared library add-on to iptables to add related packet matching support. */
+#include <stdio.h>
+#include <netdb.h>
+#include <string.h>
+#include <stdlib.h>
+#include <getopt.h>
+
+#include <iptables.h>
+#include <linux/netfilter_ipv4/ipt_helper.h>
+
+/* Function which prints out usage message. */
+static void
+help(void)
+{
+	printf(
+"helper match v%s options:\n"
+"[!] --helper value         Match helper value\n"
+"[!] --related value        Match related helper value\n"
+"\n",
+IPTABLES_VERSION);
+}
+
+static struct option opts[] = {
+	{ "helper", 1, 0, '1' },
+	{ "related", 1, 0, '2' },
+	{0}
+};
+
+/* Initialize the match. */
+static void
+init(struct ipt_entry_match *m, unsigned int *nfcache)
+{
+	/* Can't cache this. */
+	*nfcache |= NFC_UNKNOWN;
+}
+
+/* Function which parses command options; returns true if it
+   ate an option */
+static int
+parse(int c, char **argv, int invert, unsigned int *flags,
+      const struct ipt_entry *entry,
+      unsigned int *nfcache,
+      struct ipt_entry_match **match)
+{
+	struct ipt_helper_info *info = (struct ipt_helper_info *)(*match)->data;
+
+	switch (c) {
+	case '1':
+		/*check_inverse(optarg, &invert, &invert, 0);
+		strncpy(info->name, optarg, 29);
+		if (invert)
+			info->invert = 1;
+		*flags = 1;*/
+		info->cmd |= IPT_HELPER_HELPER;
+		break;
+	case '2':
+		info->cmd |= IPT_HELPER_RELATED;
+		break;
+	default:
+		return 0;
+	}
+	check_inverse(optarg, &invert, &invert, 0);
+	strncpy(info->name, optarg, 29);
+	if (invert)
+		info->invert = 1;
+	*flags = 1;
+	return 1;
+}
+
+/* Final check; must have specified --helper. */
+static void
+final_check(unsigned int flags)
+{
+	if (!flags)
+		exit_error(PARAMETER_PROBLEM,
+			   "helper match: You must specify `--helper' or '--related' \n");
+}
+
+/* Prints out the info. */
+static void
+print(const struct ipt_ip *ip,
+      const struct ipt_entry_match *match,
+      int numeric)
+{
+	struct ipt_helper_info *info = (struct ipt_helper_info *)match->data;
+
+	//printf("helper match %s\"%s\" ", info->invert ? "! " : "", info->name);
+	if((info->cmd & IPT_HELPER_HELPER) == IPT_HELPER_HELPER)
+		printf("helper match %s\"%s\" ", info->invert ? "! " : "", info->name);
+	if((info->cmd & IPT_HELPER_RELATED) == IPT_HELPER_RELATED)
+		printf("related match %s\"%s\" ", info->invert ? "! " : "", info->name);
+}
+
+/* Saves the union ipt_info in parsable form to stdout. */
+static void
+save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
+{
+	struct ipt_helper_info *info = (struct ipt_helper_info *)match->data;
+
+	//printf("%s--helper \"%s\" ",info->invert ? "! " : "", info->name);
+	if((info->cmd & IPT_HELPER_HELPER) == IPT_HELPER_HELPER)
+		printf("%s--helper \"%s\" ",info->invert ? "! " : "", info->name);
+	if((info->cmd & IPT_HELPER_RELATED) == IPT_HELPER_RELATED)
+		printf("%s--related \"%s\" ",info->invert ? "! " : "", info->name);
+}
+
+static struct iptables_match helper = { 
+	.next		= NULL,
+	.name		= "helper",
+	.version	= IPTABLES_VERSION,
+	.size		= IPT_ALIGN(sizeof(struct ipt_helper_info)),
+	.help		= &help,
+	.parse		= &parse,
+	.final_check	= &final_check,
+	.print		= &print,
+	.save		= &save,
+	.extra_opts	= opts
+};
+
+#if 0
+static
+struct iptables_match helper
+= { NULL,
+    "helper",
+    IPTABLES_VERSION,
+    IPT_ALIGN(sizeof(struct ipt_helper_info)),
+    IPT_ALIGN(sizeof(struct ipt_helper_info)),
+    &help,
+    &init,
+    &parse,
+    &final_check,
+    &print,
+    &save,
+    opts
+};
+#endif
+
+void _init(void)
+{
+	register_match(&helper);
+}

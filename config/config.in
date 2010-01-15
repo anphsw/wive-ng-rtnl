@@ -1,0 +1,321 @@
+mainmenu_name "Ralink SDK Embedded Linux Application Configuration"
+
+mainmenu_option next_comment
+comment 'Library Configuration'
+
+comment 'Force build (Normally built when required)'
+bool 'Build libgmp'		CONFIG_LIB_LIBGMP_FORCE
+bool 'Build libpthread'		CONFIG_LIB_LIBPTHREAD_FORCE
+bool 'Build libnvram'		CONFIG_LIB_LIBNVRAM_FORCE
+bool 'Build libntfs-3g'		CONFIG_LIB_LIBNTFS3G_FORCE
+bool 'Build libupnp1.3.1 (UPnP + IXML + ThreadUtil)'	CONFIG_LIB_LIBUPNP_FORCE
+bool 'Build zlib'		CONFIG_LIB_ZLIB_FORCE
+bool 'Build uClibc (libstdc++)'	CONFIG_LIB_LIBSTDC_PLUS_FORCE
+dep_bool ' Hello World Example (c++)'  CONFIG_USER_HELLO_WORLD $CONFIG_LIB_LIBSTDC_PLUS_FORCE
+
+comment 'Force build extra libraries in uClibc'
+bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE
+bool 'Build libm'		CONFIG_LIB_LIBM_FORCE
+bool 'Build libnsl'		CONFIG_LIB_NSL_FORCE
+bool 'Build libutil'		CONFIG_LIB_UTIL_FORCE
+bool 'Build libresolv'		CONFIG_LIB_RESOLV_FORCE
+bool 'Build librt'		CONFIG_LIB_RT_FORCE
+
+endmenu
+
+#############################################################################
+
+mainmenu_option next_comment
+
+comment 'MTD utils'
+bool 'mtd-utils'		CONFIG_USER_MTDUTILS
+dep_bool '  erase'        CONFIG_USER_MTDUTILS_ERASE $CONFIG_USER_MTDUTILS
+dep_bool '  eraseall'     CONFIG_USER_MTDUTILS_ERASEALL $CONFIG_USER_MTDUTILS
+dep_bool '  ftl_check'    CONFIG_USER_MTDUTILS_FTL_CHECK $CONFIG_USER_MTDUTILS
+dep_bool '  ftl_format'   CONFIG_USER_MTDUTILS_FTL_FORMAT $CONFIG_USER_MTDUTILS
+dep_bool '  mkfs.jffs'    CONFIG_USER_MTDUTILS_MKFSJFFS $CONFIG_USER_MTDUTILS
+dep_bool '  mkfs.jff2'    CONFIG_USER_MTDUTILS_MKFSJFFS2 $CONFIG_USER_MTDUTILS
+dep_bool '  nftldump'     CONFIG_USER_MTDUTILS_NFTLDUMP $CONFIG_USER_MTDUTILS
+dep_bool '  nftl_format'  CONFIG_USER_MTDUTILS_NFTL_FORMAT $CONFIG_USER_MTDUTILS
+dep_bool '  nanddump'     CONFIG_USER_MTDUTILS_NANDDUMP $CONFIG_USER_MTDUTILS
+dep_bool '  nandtest'     CONFIG_USER_MTDUTILS_NANDTEST $CONFIG_USER_MTDUTILS
+dep_bool '  nandwrite'    CONFIG_USER_MTDUTILS_NANDWRITE $CONFIG_USER_MTDUTILS
+dep_bool '  doc_loadbios' CONFIG_USER_MTDUTILS_DOC_LOADBIOS $CONFIG_USER_MTDUTILS
+dep_bool '  doc_loadipl'  CONFIG_USER_MTDUTILS_DOC_LOADIPL $CONFIG_USER_MTDUTILS
+define_bool CONFIG_LIB_ZLIB_FORCE $CONFIG_USER_MTDUTILS
+
+endmenu
+
+#############################################################################
+
+mainmenu_option next_comment
+comment 'Network Applications'
+
+bool 'bridge utils'				CONFIG_USER_BRCTL_BRCTL
+bool 'bigpond'					CONFIG_USER_BIGPOND
+bool 'ctorrent (lightweith BitTorrent Client)'	CONFIG_USER_CTORRENT
+if [ "$CONFIG_USER_CTORRENT" = "y" ]; then
+	define_bool CONFIG_LIB_LIBM_FORCE y
+fi
+bool 'dhcp6'					CONFIG_USER_DHCP6
+dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
+dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
+bool 'dnsmasq (DNS forwarder, DHCP server)'	CONFIG_USER_DNSMASQ
+bool 'disktype(detect format of a disk)'	CONFIG_USER_DISKTYPE
+bool 'echo server'				CONFIG_USER_ECHO_SERVER
+bool 'storage(enable chmod, fdisk in busybox)'	CONFIG_USER_STORAGE
+
+if [ "$CONFIG_USER_STORAGE" = "y" ]; then
+	define_bool CONFIG_USER_MKDOSFS y
+fi
+
+dep_bool 'stupid ftpd'				CONFIG_USER_STUPID_FTPD $CONFIG_USER_STORAGE
+dep_bool 'samba server(need hostname cmd)'	CONFIG_USER_SAMBA $CONFIG_USER_STORAGE
+if [ "$CONFIG_USER_SAMBA" = "y" ]; then
+	define_bool CONFIG_USER_GOAHEAD_HOSTNAME y
+	define_bool CONFIG_LIB_NSL_FORCE y
+fi
+if [ "$CONFIG_USER_SAMBA" = "n" ]; then
+	define_bool CONFIG_USER_GOAHEAD_HOSTNAME n
+fi
+bool 'go-ahead webserver'			CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable IPv6 support'		CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable SSL support'			CONFIG_USER_GOAHEAD_SSL $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable hostname support'		CONFIG_USER_GOAHEAD_HOSTNAME $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  language pack - English'		CONFIG_USER_GOAHEAD_LANG_EN $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  language pack - Traditional Chinese'	CONFIG_USER_GOAHEAD_LANG_ZHTW $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  language pack - Simple Chinese'	CONFIG_USER_GOAHEAD_LANG_ZHCN $CONFIG_USER_GOAHEAD_HTTPD
+if [ "$CONFIG_USER_GOAHEAD_HTTPD" = "y" ]; then
+	define_bool CONFIG_LIB_LIBNVRAM_FORCE y
+fi
+if [ "$CONFIG_USER_GOAHEAD_HTTPD" = "n" ]; then
+	define_bool CONFIG_LIB_LIBNVRAM_FORCE n
+fi
+if [ "$CONFIG_USER_GOAHEAD_SSL" = "y" ]; then
+	define_bool CONFIG_USER_MATRIXSSL y
+fi
+if [ "$CONFIG_USER_GOAHEAD_SSL" = "n" ]; then
+	define_bool CONFIG_USER_MATRIXSSL n
+fi
+if [ "$CONFIG_USER_GOAHEAD_LANG_EN" = "n" -a "$CONFIG_USER_GOAHEAD_LANG_ZHTW" = "n" -a "$CONFIG_USER_GOAHEAD_LANG_ZHCN" = "n" ]; then
+	define_bool CONFIG_USER_GOAHEAD_LANG_EN y
+fi
+
+
+bool 'igmp proxy (RFC4605)'			CONFIG_USER_IGMP_PROXY
+bool 'inadyn (DDNS Client)'     		CONFIG_USER_INADYN
+bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
+bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES
+bool 'iproute2'					CONFIG_USER_IPROUTE2
+dep_bool '  ss'		  CONFIG_USER_IPROUTE2_SS	$CONFIG_USER_IPROUTE2
+dep_bool '  nstat'        CONFIG_USER_IPROUTE2_NSTAT	$CONFIG_USER_IPROUTE2
+dep_bool '  ifstat'       CONFIG_USER_IPROUTE2_IFSTAT	$CONFIG_USER_IPROUTE2
+dep_bool '  rtacct'       CONFIG_USER_IPROUTE2_RTACCT	$CONFIG_USER_IPROUTE2
+dep_bool '  lnstat'       CONFIG_USER_IPROUTE2_LNSTAT	$CONFIG_USER_IPROUTE2
+dep_bool '  ip'		  CONFIG_USER_IPROUTE2_IP	$CONFIG_USER_IPROUTE2
+dep_bool '  rtmon'        CONFIG_USER_IPROUTE2_RTMON	$CONFIG_USER_IPROUTE2
+dep_bool '  tc'		  CONFIG_USER_IPROUTE2_TC	$CONFIG_USER_IPROUTE2
+if [ "$CONFIG_USER_IPROUTE2" = "y" ]; then
+	define_bool CONFIG_LIB_LIBM_FORCE y
+fi
+
+bool 'matrixssl'				CONFIG_USER_MATRIXSSL
+bool 'miniupnpd'				CONFIG_USER_MINIUPNPD
+bool 'mkdosfs (DOS file system utilty)'		CONFIG_USER_MKDOSFS
+bool 'ntpclient: Ntpclient'			CONFIG_USER_NTPCLIENT_NTPCLIENT
+bool 'ntpclient: Adjtimex'			CONFIG_USER_NTPCLIENT_ADJTIMEX
+bool 'openssl'					CONFIG_USER_OPENSSL
+bool 'openswan-apps'  CONFIG_USER_OPENSWAN
+if [ "$CONFIG_USER_OPENSWAN" = "y" ]; then
+      bool '  pluto'          CONFIG_USER_OPENSWAN_PLUTO_PLUTO
+      bool '  whack'          CONFIG_USER_OPENSWAN_PLUTO_WHACK
+      bool '  ranbits'        CONFIG_USER_OPENSWAN_UTILS_RANBITS
+      bool '  rsasigkey'      CONFIG_USER_OPENSWAN_UTILS_RSASIGKEY
+      bool '  eroute'         CONFIG_USER_OPENSWAN_KLIPS_EROUTE
+      bool '  klipsdebug'     CONFIG_USER_OPENSWAN_KLIPS_KLIPSDEBUG
+      bool '  spi'            CONFIG_USER_OPENSWAN_KLIPS_SPI
+      bool '  spigrp'         CONFIG_USER_OPENSWAN_KLIPS_SPIGRP
+      bool '  tncfg'          CONFIG_USER_OPENSWAN_KLIPS_TNCFG
+fi
+define_bool CONFIG_LIB_LIBGMP_FORCE $CONFIG_USER_OPENSWAN
+
+bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
+bool 'portmap'					CONFIG_USER_PORTMAP
+bool 'HSDPA'					CONFIG_USER_HSDPA
+bool 'pppd'					CONFIG_USER_PPPD
+dep_bool '  pppoe client'                       CONFIG_USER_PPPD_WITH_PPPOE $CONFIG_USER_PPPD
+dep_bool '  ppp status'                         CONFIG_USER_PPPD_PPPSTATS $CONFIG_USER_PPPD
+dep_bool '  ppp dump'                           CONFIG_USER_PPPD_PPPDUMP $CONFIG_USER_PPPD
+bool 'pppoe relay'                              CONFIG_USER_RPPPPOE_RELAY
+bool 'pppoe sniffer'                            CONFIG_USER_RPPPPOE_SNIFF
+bool 'pppoecd (pppoe client)'			CONFIG_USER_PPPOECD
+bool 'pptp'                                     CONFIG_USER_PPTP_CLIENT
+bool 'ripd-zebra (RIP)' 						CONFIG_USER_ZEBRA
+if [ "$CONFIG_USER_ZEBRA" = "y" ]; then
+    define_bool CONFIG_LIB_LIBZEBRA_FORCE y
+fi
+if [ "$CONFIG_USER_ZEBRA" = "n" ]; then
+    define_bool CONFIG_LIB_LIBZEBRA_FORCE n
+fi
+
+bool 'rp-l2tp'                                  CONFIG_USER_RP_L2TP
+bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
+dep_bool '  radvd dump'			        CONFIG_USER_RADVD_DUMP $CONFIG_USER_RADVD
+bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
+bool 'rt61apd (Legacy 802.1x Authenticator)'	CONFIG_USER_RT2561_802_1X
+
+bool 'totd (DNS proxy)'				CONFIG_USER_TOTD
+bool 'linux-igd'				CONFIG_USER_UPNP_IGD
+bool 'wpa-supplicant'				CONFIG_USER_WPA_SUPPLICANT
+if [ "$CONFIG_USER_WPA_SUPPLICANT" = "y" ]; then
+	define_bool CONFIG_USER_OPENSSL y
+fi
+if [ "$CONFIG_USER_WPA_SUPPLICANT" = "n" ]; then
+	define_bool CONFIG_USER_OPENSSL n
+fi
+
+bool 'wscd (WSC/WPS)'				CONFIG_USER_WSC
+if [ "$CONFIG_USER_UPNP_IGD" = "y" -o "$CONFIG_USER_WSC" = "y" ]; then
+	define_bool CONFIG_LIB_LIBPTHREAD_FORCE y
+	define_bool CONFIG_LIB_LIBUPNP_FORCE y
+fi
+
+if [ "$CONFIG_USER_UPNP_IGD" = "n" -a "$CONFIG_USER_WSC" = "n" ]; then
+	define_bool CONFIG_LIB_LIBPTHREAD_FORCE n
+	define_bool CONFIG_LIB_LIBUPNP_FORCE n
+fi
+
+
+comment 'Wireless-tools'
+bool 'wireless_tools support'	CONFIG_USER_WIRELESS_TOOLS
+if [ "$CONFIG_USER_WIRELESS_TOOLS" = "y" ]; then
+	bool '  iwconfig'	CONFIG_USER_WIRELESS_TOOLS_IWCONFIG
+	bool '  iwgetid'	CONFIG_USER_WIRELESS_TOOLS_IWGETID
+	bool '  iwlist'		CONFIG_USER_WIRELESS_TOOLS_IWLIST
+	bool '  iwpriv'		CONFIG_USER_WIRELESS_TOOLS_IWPRIV
+	bool '  iwspy'		CONFIG_USER_WIRELESS_TOOLS_IWSPY
+	bool '  iwevent'	CONFIG_USER_WIRELESS_TOOLS_IWEVENT
+fi
+
+endmenu
+
+
+#############################################################################
+
+mainmenu_option next_comment
+comment 'Miscellaneous Applications'
+
+bool 'busybox'                  CONFIG_USER_BUSYBOX_BUSYBOX
+bool 'bonnie++'			CONFIG_USER_BONNIE
+bool 'ethtool-6.0'		CONFIG_USER_ETHTOOL
+bool 'gdbreplay'		CONFIG_USER_GDB_GDBREPLAY
+bool 'gdbserver'		CONFIG_USER_GDB_GDBSERVER
+bool 'ixia Endpoint 6.5'	CONFIG_USER_IXIA_ENDPOINT
+bool 'lmbench 3.0'		CONFIG_LMBENCH3
+bool 'netcat'                   CONFIG_USER_NETCAT
+bool 'netstat-nat'              CONFIG_USER_NETSTAT_NAT
+bool 'ntfs-3g'			CONFIG_USER_NTFS3G
+bool 'ntfsprogs'		CONFIG_USER_NTFSPROGS
+if [ "$CONFIG_USER_NTFS3G" = "y" ]; then
+	define_bool CONFIG_LIB_LIBNTFS3G_FORCE y
+	define_bool CONFIG_LIB_LIBPTHREAD_FORCE y
+fi
+if [ "$CONFIG_USER_NTFS3G" = "n" ]; then
+	define_bool CONFIG_LIB_LIBNTFS3G_FORCE n
+fi
+bool 'strace'			CONFIG_USER_STRACE_STRACE
+bool 'tcpdump (Binary Only)'	CONFIG_USER_TCPDUMP
+bool 'lspci'			CONFIG_USER_PCIUTIL_LSPCI
+bool 'setpci'			CONFIG_USER_PCIUTIL_SETPCI
+if [ "$CONFIG_USER_PCIUTIL_LSPCI" = "y" -o "$CONFIG_USER_PCIUTIL_SETPCI" = "y" ]; then
+    define_bool CONFIG_LIB_ZLIB_FORCE y
+fi
+
+endmenu
+
+#############################################################################
+
+mainmenu_option next_comment
+comment 'Ralink RT288x Application'
+
+bool 'RT288x Application'		CONFIG_RT2880_APP
+if [ "$CONFIG_RT2880_APP" = "y" ]; then
+bool 'RT2880 ATE Agent'			CONFIG_RT2880_ATED
+bool 'RT2880 Register R/W'		CONFIG_RT2880_REG_RW
+bool 'RT2880 CSR Test'			CONFIG_RT2880_CSR_TEST
+bool 'RT2880 Flash Test'		CONFIG_RT2880_FLASH_TEST
+bool 'RT2880 HW Nat Test'		CONFIG_RT2880_HWNAT_TEST
+bool 'RT2880 SW Nat Test'		CONFIG_RT2880_SWNAT_TEST
+bool 'RT2880 MiiMgr '			CONFIG_RT2880_MII_MGR
+bool 'RT2880 NVRAM'			CONFIG_RT2880_NVRAM
+if [ "$CONFIG_RT2880_NVRAM" = "y" ]; then
+	define_bool CONFIG_LIB_LIBNVRAM_FORCE y
+fi
+if [ "$CONFIG_RT2880_NVRAM" = "n" -a "$CONFIG_USER_GOAHEAD_HTTPD" = "n" ]; then
+	define_bool CONFIG_LIB_LIBNVRAM_FORCE n
+fi
+bool 'RT2880 RALINK INIT'		CONFIG_RT2880_RAINIT
+bool 'RT2880 Layer2 Management'		CONFIG_RT2880_L2_MANAGE
+bool 'RT2880 MTD Application'		CONFIG_RT2880_MTD
+bool 'RT2880 GPIO Test'			CONFIG_RT2880_GPIO_TEST
+bool 'RT2880 SPI Command'		CONFIG_RT2880_SPI
+bool 'RT2880 I2C Command'		CONFIG_RT2880_I2C
+bool 'RT2880 Scripts'			CONFIG_RT2880_SCRIPTS
+bool 'RT2880 memory usage test'		CONFIG_RT2880_MEMORY_USAGE_TEST
+bool 'RT2880 QoS'				CONFIG_RALINKAPP_SWQOS
+if [ "$CONFIG_RALINKAPP_SWQOS" = "y" ]; then
+	define_bool CONFIG_USER_IPROUTE2 y
+	define_bool CONFIG_USER_IPROUTE2_TC y
+fi
+
+if [ "$CONFIG_DEFAULTS_RALINK_RT3052" = "y" ]; then
+bool 'RT3052 Switch Command'		CONFIG_RT3052_SWITCH
+fi
+
+if [ "$CONFIG_DEFAULTS_RALINK_RT3052" = "y" -o "$CONFIG_DEFAULTS_RALINK_RT2883" = "y" ]; then
+bool 'I2S Command'		CONFIG_RALINKAPP_I2S
+bool 'PCM Command'		CONFIG_RALINKAPP_PCM
+bool 'WanDuck'			CONFIG_RT2880_WANDUCK
+bool 'UsbTest'			CONFIG_USB_TEST
+bool 'CRC_GEN'			CONFIG_CRC_GEN
+bool 'NetworkMap'		CONFIG_RT2880_NETWORK_MAP
+bool 'ASUS_NTFS-3G'             CONFIG_ASUS_NTFS3G
+fi
+
+fi
+endmenu
+
+##############################################################################
+
+mainmenu_option next_comment
+comment 'Windows Rally Program'
+bool 'Link Layer Topology Discovery Protocol'		CONFIG_LLDT
+endmenu
+
+mainmenu_option next_comment
+comment 'ASUS Application'
+bool 'ASUS Shared Library'              CONFIG_ASUS_SHARED
+bool 'ASUS Mini Init'                   CONFIG_ASUS_RC
+bool 'ASUS NVRAM'                       CONFIG_ASUS_NVRAM
+bool 'asus_netconf'                     CONFIG_ASUS_NETCONF
+bool 'dproxy'                           CONFIG_DPROXY
+bool 'infosvr'                          CONFIG_ASUS_INFOSVR
+bool 'httpd'                            CONFIG_ASUS_HTTPD
+bool 'pppoe-relay'                      CONFIG_PPPOE_RELAY
+bool 'tc'                               CONFIG_TC
+bool 'udhcpd'                           CONFIG_UDHCPD
+bool 'bpalogin'                         CONFIG_BPALOGIN
+bool 'ntpclient'                        CONFIG_ASUS_NTPCLIENT
+bool 'upnp'                             CONFIG_UPNP
+bool 'pppd'                             CONFIG_PPPD
+bool 'ez-ipupdate'                      CONFIG_EZ_IPUPDATE
+bool 'www'                              CONFIG_ASUS_WWW
+bool 'igmpproxy'                        CONFIG_IGMPPROXY
+bool 'l2tp'                             CONFIG_L2TP
+bool 'vsftpd'                           CONFIG_VSFTPD
+bool 'pptp-client'                      CONFIG_PPTP_CLIENT
+bool 'LPRng'				CONFIG_LPRNG
+bool 'libusb'				CONFIG_LIBUSB
+bool 'u2ec'				CONFIG_U2EC
+endmenu
+

@@ -1,0 +1,5 @@
+#!/bin/sh
+	cd /bin
+	mkdir /var/local
+	ixia_ep&
+	cd ..
