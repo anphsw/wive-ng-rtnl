@@ -316,7 +316,6 @@ destroy_conntrack(struct nf_conntrack *nfct)
 {
 	struct ip_conntrack *ct = (struct ip_conntrack *)nfct;
 	struct ip_conntrack_protocol *proto;
-	struct ip_conntrack_helper *helper;
 	typeof(ip_conntrack_destroyed) destroyed;
 
 	DEBUGP("destroy_conntrack(%p)\n", ct);
@@ -325,10 +324,6 @@ destroy_conntrack(struct nf_conntrack *nfct)
 
 	ip_conntrack_event(IPCT_DESTROY, ct);
 	set_bit(IPS_DYING_BIT, &ct->status);
-
-	helper = ct->helper;
-	if (helper && helper->destroy)
-		helper->destroy(ct);
 
 	/* To make sure we don't get any weird locking issues here:
 	 * destroy_conntrack() MUST NOT be called with a write lock
@@ -370,6 +365,11 @@ destroy_conntrack(struct nf_conntrack *nfct)
 static void death_by_timeout(unsigned long ul_conntrack)
 {
 	struct ip_conntrack *ct = (void *)ul_conntrack;
+	struct ip_conntrack_helper *helper;
+
+	helper = ct->helper;
+	if (helper && helper->destroy)
+		helper->destroy(ct);
 
 	write_lock_bh(&ip_conntrack_lock);
 	/* Inside lock so preempt is disabled on module removal path.
