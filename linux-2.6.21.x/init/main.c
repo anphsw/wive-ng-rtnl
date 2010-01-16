@@ -744,26 +744,6 @@ static int noinline init_post(void)
 	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
 		printk(KERN_WARNING "Warning: unable to open an initial console.\n");
 
-	(void) sys_dup(0);
-	(void) sys_dup(0);
-
-	if (ramdisk_execute_command) {
-		run_init_process(ramdisk_execute_command);
-		printk(KERN_WARNING "Failed to execute %s\n",
-				ramdisk_execute_command);
-	}
-
-	/*
-	 * We try each of these until one succeeds.
-	 *
-	 * The Bourne shell can be used instead of init if we are
-	 * trying to recover a really broken machine.
-	 */
-	if (execute_command) {
-		run_init_process(execute_command);
-		printk(KERN_WARNING "Failed to execute %s.  Attempting "
-					"defaults...\n", execute_command);
-	}
 #ifdef CONFIG_PROC_FS
         if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
             printk("mount /proc file system fail!\n");
@@ -793,6 +773,27 @@ static int noinline init_post(void)
             else
             printk("mount /tmp file system ok!\n");
 #endif
+
+	(void) sys_dup(0);
+	(void) sys_dup(0);
+
+	if (ramdisk_execute_command) {
+		run_init_process(ramdisk_execute_command);
+		printk(KERN_WARNING "Failed to execute %s\n",
+				ramdisk_execute_command);
+	}
+
+	/*
+	 * We try each of these until one succeeds.
+	 *
+	 * The Bourne shell can be used instead of init if we are
+	 * trying to recover a really broken machine.
+	 */
+	if (execute_command) {
+		run_init_process(execute_command);
+		printk(KERN_WARNING "Failed to execute %s.  Attempting "
+					"defaults...\n", execute_command);
+	}
 	run_init_process("/bin/init");
 
 	panic("No init found.  Try passing init= option to kernel.");
