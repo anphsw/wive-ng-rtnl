@@ -2,7 +2,7 @@
  * Automatically generated C config: don't edit
  * Busybox version: 1.15.3
  */
-#define AUTOCONF_TIMESTAMP "2010-01-16 08:37:51 OMST"
+#define AUTOCONF_TIMESTAMP "2010-01-16 09:10:12 OMST"
 
 #define CONFIG_HAVE_DOT_CONFIG 1
 #define ENABLE_HAVE_DOT_CONFIG 1
@@ -1572,7 +1572,7 @@
 #define ENABLE_DEFAULT_MODULES_DIR 1
 #define IF_DEFAULT_MODULES_DIR(...) __VA_ARGS__
 #define IF_NOT_DEFAULT_MODULES_DIR(...)
-#define CONFIG_DEFAULT_DEPMOD_FILE "/lib/modules/2.6.21/modules.dep"
+#define CONFIG_DEFAULT_DEPMOD_FILE "/lib/modules/2.6.21.7/modules.dep"
 #define ENABLE_DEFAULT_DEPMOD_FILE 1
 #define IF_DEFAULT_DEPMOD_FILE(...) __VA_ARGS__
 #define IF_NOT_DEFAULT_DEPMOD_FILE(...)

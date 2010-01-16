@@ -1551,7 +1551,7 @@ ej_SiteSurvey(int eid, webs_t wp, int argc, char_t **argv)
 		return retval;
 	}
 
-	value = nvram_safe_get("wl_country_code");
+/*	value = nvram_safe_get("wl_country_code");
 	if (	(strcasecmp(value, "CA") == 0) || (strcasecmp(value, "CO") == 0) ||
 		(strcasecmp(value, "DO") == 0) || (strcasecmp(value, "GT") == 0) ||
 		(strcasecmp(value, "MX") == 0) || (strcasecmp(value, "NO") == 0) ||
@@ -1562,8 +1562,6 @@ ej_SiteSurvey(int eid, webs_t wp, int argc, char_t **argv)
 		channellistnum = 11;
 	}
 	else if (!value ||
-		(strcmp(value, "") == 0) || (strcasecmp(value, "DB") == 0)/* ||
-		(strcasecmp(value, "JP") == 0)*/)
 	{
 		channellistnum = 14;
 	}
@@ -1571,6 +1569,8 @@ ej_SiteSurvey(int eid, webs_t wp, int argc, char_t **argv)
 	{
 		channellistnum = 13;
 	}
+*/
+	channellistnum = 14;
 
 	memset(data, 0x00, 255); 
 	strcpy(data, "SiteSurvey=1"); 

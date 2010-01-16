@@ -381,7 +381,7 @@ static const char *const bbconfig_config =
 "CONFIG_FEATURE_MODUTILS_ALIAS=y\n"
 "CONFIG_FEATURE_MODUTILS_SYMBOLS=y\n"
 "CONFIG_DEFAULT_MODULES_DIR=\"/lib/modules\"\n"
-"CONFIG_DEFAULT_DEPMOD_FILE=\"/lib/modules/2.6.21/modules.dep\"\n"
+"CONFIG_DEFAULT_DEPMOD_FILE=\"/lib/modules/2.6.21.7/modules.dep\"\n"
 "# CONFIG_ACPID is not set\n"
 "# CONFIG_FEATURE_ACPID_COMPAT is not set\n"
 "# CONFIG_BLKID is not set\n"

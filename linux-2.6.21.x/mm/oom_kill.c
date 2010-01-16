@@ -414,15 +414,14 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 		show_mem();
 	}
 
+	cpuset_lock();
+	read_lock(&tasklist_lock);
+
 	/*
 	 * Check if there were limitations on the allocation (only relevant for
 	 * NUMA) that may require different handling.
 	 */
-	constraint = constrained_alloc(zonelist, gfp_mask);
-	cpuset_lock();
-	read_lock(&tasklist_lock);
-
-	switch (constraint) {
+	switch (constrained_alloc(zonelist, gfp_mask)) {
 	case CONSTRAINT_MEMORY_POLICY:
 		ct_policy = 1;
 		oom_kill_process(current, points,
