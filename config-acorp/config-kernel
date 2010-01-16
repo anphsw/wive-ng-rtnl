@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Sat Jan 16 11:34:00 2010
+# Sat Jan 16 12:27:15 2010
 #
 CONFIG_MIPS=y
 
@@ -800,6 +800,7 @@ CONFIG_PPP_SYNC_TTY=y
 CONFIG_PPP_MPPE=y
 CONFIG_PPPOE=y
 CONFIG_PPPOL2TP=y
+CONFIG_PPTP=y
 # CONFIG_SLIP is not set
 CONFIG_SLHC=y
 # CONFIG_SHAPER is not set

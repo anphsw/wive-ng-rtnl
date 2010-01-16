@@ -2957,6 +2957,15 @@ config PPPOL2TP
           and session setup). One such daemon is OpenL2TP
           (http://openl2tp.sourceforge.net/).
 
+config PPTP
+        tristate "PPTP (Point-to-Point Tunneling Protocol) (EXPERIMENTAL)"
+        depends on EXPERIMENTAL && PPP
+        help
+          Support for Microsoft Point-to-Point Tunneling Protocol.
+ 
+          See http://accel-pptp.sourceforge.net/ for information on
+          configuring PPTP clients and servers to utilize this driver.
+
 config SLIP
 	tristate "SLIP (serial line) support"
 	---help---
