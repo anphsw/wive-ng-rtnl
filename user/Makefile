@@ -50,7 +50,6 @@ dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 
 #Added by Steven
-dir_$(CONFIG_LMBENCH3)			    += lmbench3
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_LLDT)			    += lldt
 dir_$(CONFIG_USER_IXIA_ENDPOINT)	    += ixia_endpoint

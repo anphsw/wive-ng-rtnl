@@ -545,7 +545,7 @@
 {"apps_pool", "harddisk/part0", 0},
 {"apps_share", "share", 0},
 {"apps_ver", "", 0},
-{"machine_name", "RT-N13U", 0},
+{"machine_name", "RTNL", 0},
 #endif
 
 {"temp_lang", "", 0},
