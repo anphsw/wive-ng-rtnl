@@ -6,6 +6,7 @@ include ../Config
 TCMODULES :=
 TCMODULES += q_fifo.o
 TCMODULES += q_sfq.o
+TCMODULES += q_esfq.o
 TCMODULES += q_red.o
 TCMODULES += q_prio.o
 # TCMODULES += q_tbf.o
