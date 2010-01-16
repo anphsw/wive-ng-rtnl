@@ -98,9 +98,10 @@ dir_y$(CONFIG_USER_HSDPA)                   += hso-1.6
 
 
 all: config
-#	$(MAKE) -j$(HOST_NCPU) $(sort $(dir_y) $(dir_v) $(dir_p)) || exit $$?
+ifeq ($(CONFIG_PPPD),y)
+	cd ppp && ./DoConfigure.sh && make && make install && make romfs && cd ..
+endif
 	$(MAKE) -j$(HOST_NCPU) $(dir_y) $(dir_v) $(dir_p) || exit $$?	
-#	$(MAKE) -DWEBSTRFILTER -j$(HOST_NCPU) $(dir_y) $(dir_v) $(dir_p) || exit $$?	
 
 #
 # add directory dependancies here
