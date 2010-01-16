@@ -1120,7 +1120,7 @@
             
       {"FirewallLog", "Status", NULL, ARGV("firewall.log",""), FALSE, FALSE},
 
-      {"SystemLog", "Status", NULL, ARGV("syslog.log",""), FALSE, FALSE},
+      {"SystemLog", "Status", NULL, ARGV("messages",""), FALSE, FALSE},
 
       {"SystemCmd", "Status", NULL, ARGV("syscmd.log",""), FALSE, FALSE},
                  

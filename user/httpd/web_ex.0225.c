@@ -1508,13 +1508,13 @@ ej_dump(int eid, webs_t wp, int argc, char_t **argv)
 
 	ret = 0;
 			   
-	if (strcmp(file, "syslog.log")==0)
+	if (strcmp(file, "messages")==0)
 	{
-           	sprintf(filename, "/tmp/%s-1", file);
+           	sprintf(filename, "/var/log/%s-1", file);
 	   	ret+=dump_file(wp, filename); 
 	}
 	   			   
-	sprintf(filename, "/tmp/%s", file);
+	sprintf(filename, "/var/log/%s", file);
 	ret+=dump_file(wp, filename);					
 	   
 	return ret;	    
@@ -3530,8 +3530,8 @@ apply_cgi(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 	else if(!strcmp(value," Clear "))
 	{
 		// current only syslog implement this button
-		unlink("/tmp/syslog.log-1");
-		unlink("/tmp/syslog.log");
+		unlink("/var/log/messages-1");
+		unlink("/var/log/messages");
 		websRedirect(wp, current_url);
 		return 0;
 	}
@@ -5275,8 +5275,8 @@ static char log_headers[] =
 static void 
 do_log_cgi(char *path, FILE *stream)
 {
-	dump_file(stream, "/tmp/syslog.log-1");
-	dump_file(stream, "/tmp/syslog.log");
+	dump_file(stream, "/var/log/messages-1");
+	dump_file(stream, "/var/log/messages");
 	fputs("\r\n", stream); /* terminator */
 	fputs("\r\n", stream); /* terminator */
 }

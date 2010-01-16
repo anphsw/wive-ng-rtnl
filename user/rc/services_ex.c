@@ -671,13 +671,13 @@ start_syslogd()
 
         if (nvram_invmatch("log_ipaddr", ""))
         {
-                char *syslogd_argv[] = {"/sbin/syslogd", "-l", "0", "-O", "/tmp/syslog.log", "-R", nvram_safe_get("log_ipaddr"), "-L", NULL};
+                char *syslogd_argv[] = {"syslogd", "-l", "1", "-O", "/var/log/messages", "-R", nvram_safe_get("log_ipaddr"), "-L", NULL};
 
                 _eval(syslogd_argv, NULL, 0, &pid);
         }
         else
         {
-                char *syslogd_argv[] = {"/sbin/syslogd", "-l", "0", "-O", "/tmp/syslog.log", NULL};
+                char *syslogd_argv[] = {"syslogd", "-l", "1", "-O", "/var/log/messages", NULL};
 
                 _eval(syslogd_argv, NULL, 0, &pid);
         }
