@@ -1,4 +1,5 @@
 #!/bin/sh
+
 CONF_DIR=/etc/l2tp
 CONF_FILE=$CONF_DIR/l2tpd.conf
 L2TP_FILE=$CONF_DIR/options.l2tpd

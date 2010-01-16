@@ -146,7 +146,6 @@ bool 'HSDPA'					CONFIG_USER_HSDPA
 bool 'pppoe relay'                              CONFIG_USER_RPPPPOE_RELAY
 bool 'pppoe sniffer'                            CONFIG_USER_RPPPPOE_SNIFF
 bool 'pppoecd (pppoe client)'			CONFIG_USER_PPPOECD
-bool 'pptp'                                     CONFIG_USER_PPTP_CLIENT
 bool 'ripd-zebra (RIP)' 						CONFIG_USER_ZEBRA
 if [ "$CONFIG_USER_ZEBRA" = "y" ]; then
     define_bool CONFIG_LIB_LIBZEBRA_FORCE y
@@ -155,7 +154,9 @@ if [ "$CONFIG_USER_ZEBRA" = "n" ]; then
     define_bool CONFIG_LIB_LIBZEBRA_FORCE n
 fi
 
+bool 'pppd'                             	CONFIG_USER_PPPD
 bool 'rp-l2tp'                                  CONFIG_USER_RP_L2TP
+
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
 dep_bool '  radvd dump'			        CONFIG_USER_RADVD_DUMP $CONFIG_USER_RADVD
 bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
@@ -182,7 +183,6 @@ if [ "$CONFIG_USER_UPNP_IGD" = "n" -a "$CONFIG_USER_WSC" = "n" ]; then
 	define_bool CONFIG_LIB_LIBUPNP_FORCE n
 fi
 
-
 comment 'Wireless-tools'
 bool 'wireless_tools support'	CONFIG_USER_WIRELESS_TOOLS
 if [ "$CONFIG_USER_WIRELESS_TOOLS" = "y" ]; then
@@ -207,7 +207,6 @@ bool 'bonnie++'			CONFIG_USER_BONNIE
 bool 'ethtool-6.0'		CONFIG_USER_ETHTOOL
 bool 'gdbreplay'		CONFIG_USER_GDB_GDBREPLAY
 bool 'gdbserver'		CONFIG_USER_GDB_GDBSERVER
-bool 'ixia Endpoint 6.5'	CONFIG_USER_IXIA_ENDPOINT
 bool 'netcat'                   CONFIG_USER_NETCAT
 bool 'netstat-nat'              CONFIG_USER_NETSTAT_NAT
 bool 'ntfs-3g'			CONFIG_USER_NTFS3G
@@ -299,17 +298,14 @@ bool 'infosvr'                          CONFIG_ASUS_INFOSVR
 bool 'httpd'                            CONFIG_ASUS_HTTPD
 bool 'pppoe-relay'                      CONFIG_PPPOE_RELAY
 bool 'tc'                               CONFIG_TC
-bool 'udhcpd'                           CONFIG_UDHCPD
 bool 'bpalogin'                         CONFIG_BPALOGIN
 bool 'ntpclient'                        CONFIG_ASUS_NTPCLIENT
 bool 'upnp'                             CONFIG_UPNP
-bool 'pppd'                             CONFIG_PPPD
 bool 'ez-ipupdate'                      CONFIG_EZ_IPUPDATE
 bool 'www'                              CONFIG_ASUS_WWW
 bool 'igmpproxy'                        CONFIG_IGMPPROXY
 bool 'l2tp'                             CONFIG_L2TP
 bool 'vsftpd'                           CONFIG_VSFTPD
-bool 'pptp-client'                      CONFIG_PPTP_CLIENT
 bool 'LPRng'				CONFIG_LPRNG
 bool 'libusb'				CONFIG_LIBUSB
 bool 'u2ec'				CONFIG_U2EC

@@ -30,64 +30,57 @@ dir_y =
 dir_n =
 dir_  =
 
+dir_$(CONFIG_VSFTPD)	                    += libdisk
+dir_y                			    += detectWAN
+
 dir_$(CONFIG_ASUS_SHARED)                   += shared
 dir_$(CONFIG_ASUS_NVRAM)		    += nvram
-dir_y			                    += libdisk
-dir_$(CONFIG_USER_BRCTL_BRCTL)              += bridge-utils
-dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
+dir_$(CONFIG_ASUS_NETCONF)                  += netconf
+dir_$(CONFIG_ASUS_RC)                       += rc
+dir_$(CONFIG_ASUS_INFOSVR)                  += infosvr
+dir_$(CONFIG_ASUS_NTPCLIENT)                += ntpclient.asus
+dir_$(CONFIG_ASUS_HTTPD)                    += httpd
+dir_$(CONFIG_ASUS_WWW)                      += www #2008.10 magic
+
+dir_$(CONFIG_USER_MTDUTILS)                 += mtd-utils
+
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
+dir_$(CONFIG_USER_STRACE_STRACE)            += strace
+
+dir_$(CONFIG_USER_BRCTL_BRCTL)              += bridge-utils
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 dir_$(CONFIG_USER_NTPCLIENT_NTPCLIENT)      += ntpclient
 dir_$(CONFIG_USER_NTPCLIENT_ADJTIMEX)       += ntpclient
 dir_$(CONFIG_USER_NTPD_NTPDATE)             += ntp
-dir_$(CONFIG_USER_MTDUTILS)                 += mtd-utils
-
-dir_$(CONFIG_USER_STRACE_STRACE)            += strace
 dir_$(CONFIG_USER_UPNP_IGD)                 += linux-igd
 dir_$(CONFIG_USER_WIRELESS_TOOLS)           += wireless_tools
 dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
-
-#Added by Steven
-dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_LLDT)			    += lldt
-dir_$(CONFIG_USER_IXIA_ENDPOINT)	    += ixia_endpoint
-
-#--
-#Added by YY
 dir_$(CONFIG_USER_INADYN)                   += inadyn
 dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
-ir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant-0.4.9
+dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant-0.4.9
 dir_$(CONFIG_USER_WSC)			    += wsc_upnp
 dir_$(CONFIG_USER_802_1X)		    += 802.1x
-#--
-
-#Jiahao
-dir_$(CONFIG_ASUS_NETCONF)                  += netconf
-dir_$(CONFIG_ASUS_RC)                       += rc
 dir_$(CONFIG_DPROXY)                  	    += dproxy
-dir_$(CONFIG_ASUS_INFOSVR)                  += infosvr
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
-dir_y                			    += detectWAN #2008.10 magic
-dir_$(CONFIG_ASUS_HTTPD)                    += httpd
 dir_$(CONFIG_TC)                   	    += iproute2
-dir_$(CONFIG_UDHCPD)                   	    += udhcpd
 dir_$(CONFIG_BPALOGIN)                      += bpalogin
-dir_$(CONFIG_ASUS_NTPCLIENT)                += ntpclient.asus
 dir_$(CONFIG_UPNP)                	    += upnp
 dir_$(CONFIG_EZ_IPUPDATE)                   += ez-ipupdate
-dir_$(CONFIG_ASUS_WWW)                      += www #2008.10 magic
-dir_$(CONFIG_L2TP)                          += rp-l2tp
 dir_$(CONFIG_VSFTPD)                        += vsftpd
-dir_$(CONFIG_IGMPPROXY)                     += igmpproxy
 dir_$(CONFIG_LIBUSB)                        += libusb
 dir_$(CONFIG_U2EC)                          += u2ec
 dir_$(CONFIG_LPRNG)                         += LPRng
 
-dir_$(CONFIG_PPPD)                	    += pppd
-dir_$(CONFIG_PPTP_CLIENT)                   += pptp-client
+dir_$(CONFIG_USER_PPPD)                	    += pppd
 dir_$(CONFIG_PPPOE_RELAY)                   += pppoe-relay
+dir_$(CONFIG_L2TP)                          += rp-l2tp
+dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
+
+dir_$(CONFIG_IGMPPROXY)                     += igmpproxy
+dir_$(CONFIG_USER_UDPXY)                    += udpxy
 
 # add for HSDPA support                      
 dir_y$(CONFIG_USER_HSDPA)		    += usb_modeswitch-0.9.5
@@ -95,7 +88,9 @@ dir_y$(CONFIG_USER_HSDPA)		    += comgt-0.32
 #dir_y$(CONFIG_USER_HSDPA)                   += sdparm-1.02
 dir_y$(CONFIG_USER_HSDPA)                   += hso-1.6
 
-dir_$(CONFIG_USER_UDPXY)                    += udpxy
+
+#busybox need last for replace unneeded apps to busybox applets
+dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 
 all: config
 ifeq ($(CONFIG_PPPD),y)

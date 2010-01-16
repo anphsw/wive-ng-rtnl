@@ -1199,8 +1199,8 @@ configure:20795: $? = 0
 configure:20807: result: yes
 configure:20814: checking for _doprnt
 configure:20871: /opt/Wive-RTNL/toolchain/bin/mipsel-linux-gcc -o conftest  -Os -Wall   conftest.c  >&5
-/tmp//ccWgVi0W.o: In function `main':conftest.c:(.text+0x10): undefined reference to `_doprnt'
-/tmp//ccWgVi0W.o:(.data.rel+0x0): undefined reference to `_doprnt'
+/tmp//cckLWEIl.o: In function `main':conftest.c:(.text+0x10): undefined reference to `_doprnt'
+/tmp//cckLWEIl.o:(.data.rel+0x0): undefined reference to `_doprnt'
 collect2: ld returned 1 exit status
 configure:20877: $? = 1
 configure: failed program was:
@@ -1464,7 +1464,7 @@ configure:21236: checking whether pthreads work without any flags
 configure:21327: /opt/Wive-RTNL/toolchain/bin/mipsel-linux-gcc -o conftest  -Os -Wall    conftest.c   >&5
 conftest.c: In function `main':
 conftest.c:58: warning: 'th' might be used uninitialized in this function
-/tmp//ccwx0UpK.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
+/tmp//ccWfjEIp.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
 :conftest.c:(.text+0x48): undefined reference to `_pthread_cleanup_push'
 :conftest.c:(.text+0x60): undefined reference to `pthread_create'
 :conftest.c:(.text+0x7c): undefined reference to `_pthread_cleanup_pop'
@@ -1540,7 +1540,7 @@ configure:21327: /opt/Wive-RTNL/toolchain/bin/mipsel-linux-gcc -o conftest  -Os 
 mipsel-linux-gcc: unrecognized option `-Kthread'
 conftest.c: In function `main':
 conftest.c:58: warning: 'th' might be used uninitialized in this function
-/tmp//ccEiZMfV.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
+/tmp//ccCeY3jU.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
 :conftest.c:(.text+0x48): undefined reference to `_pthread_cleanup_push'
 :conftest.c:(.text+0x60): undefined reference to `pthread_create'
 :conftest.c:(.text+0x7c): undefined reference to `_pthread_cleanup_pop'
@@ -1616,7 +1616,7 @@ configure:21327: /opt/Wive-RTNL/toolchain/bin/mipsel-linux-gcc -o conftest  -Os 
 mipsel-linux-gcc: unrecognized option `-kthread'
 conftest.c: In function `main':
 conftest.c:58: warning: 'th' might be used uninitialized in this function
-/tmp//ccsPfQa1.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
+/tmp//cc1QtOAm.o: In function `main':conftest.c:(.text+0x18): undefined reference to `pthread_join'
 :conftest.c:(.text+0x48): undefined reference to `_pthread_cleanup_push'
 :conftest.c:(.text+0x60): undefined reference to `pthread_create'
 :conftest.c:(.text+0x7c): undefined reference to `_pthread_cleanup_pop'
