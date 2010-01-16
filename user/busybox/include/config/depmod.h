@@ -1,1 +1,1 @@
-#undef CONFIG_DEPMOD
+#define CONFIG_DEPMOD 1

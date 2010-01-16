@@ -25,6 +25,8 @@ ARCH		           = mips
 ROOTDIR			   = /opt/Wive-RTNL
 FIRMROOT        	   = $(ROOTDIR)
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
+LINUXDIR		   = $(FIRMROOT)/linux-2.6.21.x
+LINUXINCDIR                = $(LINUXDIR)/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 
 include $(ROOTDIR)/vendors/config/mips/config.arch

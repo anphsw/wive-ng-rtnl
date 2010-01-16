@@ -61,8 +61,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <errno.h>
-#include <nvram/bcmnvram.h>	// 1204 ham
-#include <nvram/bcmutils.h>	// 1204 ham
 #ifdef _PRECISION_SIOCGSTAMP
 #include <sys/ioctl.h>
 #endif
@@ -354,7 +352,6 @@ void stuff_net_addr(struct in_addr *p, char *hostname)
 		fprintf(stderr,"oops %d\n",ntpserver->h_length);
 		exit(1);
 	}
-	nvram_set("ntp_ready", "1"); //2008.10 magic
 	memcpy(&(p->s_addr),ntpserver->h_addr_list[0],4);
 }
 

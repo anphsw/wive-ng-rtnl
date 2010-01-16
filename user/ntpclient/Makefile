@@ -17,7 +17,7 @@ SHDIR = $(ROOTDIR)/user/shared
 CFLAGS += -D__USE_BSD -DASUS_NVRAM
 CFLAGS += -I$(ROOTDIR)/linux-2.6.21.x/include	# 1204 ham
 
-LDFLAGS = -L. -L$(SHDIR) -lshared	# 1204 ham
+LDFLAGS = -L. -L$(SHDIR) #-lshared	# 1204 ham
 
 all: $(EXEC1) $(EXEC2)
 

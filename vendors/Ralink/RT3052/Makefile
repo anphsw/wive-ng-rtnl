@@ -48,7 +48,6 @@ endif
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
 	$(ROMFSINST) /etc_ro/rcS
-	$(ROMFSINST) /etc/fstab
 
 	$(ROMFSINST) -e CONFIG_RALINK_RT3052AP_2T2R /etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin
 	$(ROMFSINST) -e CONFIG_RALINK_RT3051AP_1T2R /etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin
