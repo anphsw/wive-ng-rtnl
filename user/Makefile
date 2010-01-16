@@ -56,6 +56,7 @@ dir_$(CONFIG_USER_WIRELESS_TOOLS)           += wireless_tools
 dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_LLDT)			    += lldt
+
 dir_$(CONFIG_USER_INADYN)                   += inadyn
 dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant-0.4.9
