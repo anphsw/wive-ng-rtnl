@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* fdisk.c -- Partition table manipulator for Linux.
  *
@@ -25,15 +9,22 @@
 
 #ifndef _LARGEFILE64_SOURCE
 /* For lseek64 */
-#define _LARGEFILE64_SOURCE
+# define _LARGEFILE64_SOURCE
 #endif
 #include <assert.h>             /* assert */
+#include <sys/mount.h>
+#if !defined(BLKSSZGET)
+# define BLKSSZGET _IO(0x12, 104)
+#endif
+#if !defined(BLKGETSIZE64)
+# define BLKGETSIZE64 _IOR(0x12,114,size_t)
+#endif
 #include "libbb.h"
 
 /* Looks like someone forgot to add this to config system */
 #ifndef ENABLE_FEATURE_FDISK_BLKSIZE
 # define ENABLE_FEATURE_FDISK_BLKSIZE 0
-# define USE_FEATURE_FDISK_BLKSIZE(a)
+# define IF_FEATURE_FDISK_BLKSIZE(a)
 #endif
 
 #define DEFAULT_SECTOR_SIZE      512
@@ -53,25 +44,15 @@
 #define LINUX_LVM               0x8e
 #define LINUX_RAID              0xfd
 
-#define FDISK_ENHANCEMENT_FOR_STORAGE			/* fdisk enhancement for Storage Management */
 
 enum {
-	OPT_b 	= 1 << 0,
-	OPT_C 	= 1 << 1,
-	OPT_H 	= 1 << 2,
-	OPT_l 	= 1 << 3,
-	OPT_S 	= 1 << 4,
-#ifdef FDISK_ENHANCEMENT_FOR_STORAGE
-	OPT_p 	= 1 << 5,
-	OPT_v 	= 1 << 6,
-	OPT_u 	= 1 << 7,
-	OPT_D 	= 1 << 8,
-	OPT_r 	= 1 << 9,
-	OPT_s 	= (1 << 10) * ENABLE_FEATURE_FDISK_BLKSIZE,
-#else
-	OPT_u 	= 1 << 5,
-	OPT_s 	= (1 << 6) * ENABLE_FEATURE_FDISK_BLKSIZE,
-#endif
+	OPT_b = 1 << 0,
+	OPT_C = 1 << 1,
+	OPT_H = 1 << 2,
+	OPT_l = 1 << 3,
+	OPT_S = 1 << 4,
+	OPT_u = 1 << 5,
+	OPT_s = (1 << 6) * ENABLE_FEATURE_FDISK_BLKSIZE,
 };
 
 
@@ -109,7 +90,7 @@ struct partition {
 	unsigned char size4[4];         /* nr of sectors in partition */
 } PACKED;
 
-static const char unable_to_open[] ALIGN1 = "can't open %s";
+static const char unable_to_open[] ALIGN1 = "can't open '%s'";
 static const char unable_to_read[] ALIGN1 = "can't read from %s";
 static const char unable_to_seek[] ALIGN1 = "can't seek on %s";
 
@@ -328,7 +309,6 @@ struct globals {
 #endif
 	int ext_index;                  /* the prime extended partition */
 	unsigned user_cylinders, user_heads, user_sectors;
-	unsigned new_part, part_vol;
 	unsigned pt_heads, pt_sectors;
 	unsigned kern_heads, kern_sectors;
 	ullong extended_offset;         /* offset of link pointers */
@@ -364,10 +344,6 @@ struct globals {
 #define user_cylinders          (G.user_cylinders         )
 #define user_heads              (G.user_heads             )
 #define user_sectors            (G.user_sectors           )
-#ifdef FDISK_ENHANCEMENT_FOR_STORAGE
-#define new_part				(G.new_part               )
-#define part_vol				(G.part_vol               )
-#endif
 #define pt_heads                (G.pt_heads               )
 #define pt_sectors              (G.pt_sectors             )
 #define kern_heads              (G.kern_heads             )
@@ -1333,7 +1309,7 @@ static int get_boot(void)
 // or get_boot() [table is bad] -> create_sunlabel() -> get_boot(CREATE_EMPTY_SUN).
 // (just factor out re-init of ptes[0,1,2,3] in a separate fn instead?)
 // So skip opening device _again_...
-	if (what == CREATE_EMPTY_DOS  USE_FEATURE_SUN_LABEL(|| what == CREATE_EMPTY_SUN))
+	if (what == CREATE_EMPTY_DOS  IF_FEATURE_SUN_LABEL(|| what == CREATE_EMPTY_SUN))
 		goto created_table;
 
 	fd = open(disk_device, (option_mask32 & OPT_l) ? O_RDONLY : O_RDWR);
@@ -1403,7 +1379,7 @@ static int get_boot(void)
 				  "partition table, nor Sun, SGI or OSF "
 				  "disklabel\n");
 #ifdef __sparc__
-			USE_FEATURE_SUN_LABEL(create_sunlabel();)
+			IF_FEATURE_SUN_LABEL(create_sunlabel();)
 #else
 			create_doslabel();
 #endif
@@ -1415,7 +1391,8 @@ static int get_boot(void)
  created_table:
 #endif /* FEATURE_FDISK_WRITABLE */
 
-	USE_FEATURE_FDISK_WRITABLE(warn_cylinders();)
+
+	IF_FEATURE_FDISK_WRITABLE(warn_cylinders();)
 	warn_geometry();
 
 	for (i = 0; i < 4; i++) {
@@ -1436,7 +1413,7 @@ static int get_boot(void)
 				pe->sectorbuffer[510],
 				pe->sectorbuffer[511],
 				i + 1);
-			USE_FEATURE_FDISK_WRITABLE(pe->changed = 1;)
+			IF_FEATURE_FDISK_WRITABLE(pe->changed = 1;)
 		}
 	}
 
@@ -1698,6 +1675,7 @@ delete_partition(int i)
 			/* the first logical in a longer chain */
 			pe = &ptes[5];
 
+			if (pe->part_table) /* prevent SEGFAULT */
 				set_start_sect(pe->part_table,
 						   get_partition_start(pe) -
 						   extended_offset);
@@ -2260,124 +2238,6 @@ verify(void)
 			printf("%d unallocated sectors\n", total);
 	}
 }
-
-#ifdef FDISK_ENHANCEMENT_FOR_STORAGE
-static unsigned
-get_last_cylinder(unsigned vol, unsigned base)
-{
-	unsigned i;
-	int absolute = 0;
-
-	i = vol;
-	absolute = 1000000;
-	if (absolute) {
-		ullong bytes;
-		unsigned long unit;
-
-		bytes = (ullong) i * absolute;
-		unit = sector_size * units_per_sector;
-		bytes += unit/2; /* round */
-		bytes /= unit;
-		i = bytes;
-	}
-	i += base;
-
-	return i;
-}
-
-static void
-create_partition(int n, int sys, unsigned vol)
-{
-	int i;
-	struct partition *p = ptes[n].part_table;
-	struct partition *q = ptes[ext_index].part_table;
-	ullong limit;
-	ullong start, stop = 0;
-	ullong first[g_partitions], last[g_partitions];
-
-	if (p && p->sys_ind) {
-		printf(msg_part_already_defined, n + 1);
-		return;
-	}
-	fill_bounds(first, last);
-	if (n < 4) {
-		start = sector_offset;
-		if (display_in_cyl_units || !total_number_of_sectors)
-            limit = (ullong) g_heads * g_sectors * g_cylinders - 1;
-        else
-            limit = total_number_of_sectors - 1;
-        if (extended_offset) {
-            first[ext_index] = extended_offset;
-            last[ext_index] = get_start_sect(q) +
-                get_nr_sects(q) - 1;
-        }
-    } else {
-        start = extended_offset + sector_offset;
-        limit = get_start_sect(q) + get_nr_sects(q) - 1;
-    }
-    if (display_in_cyl_units)
-        for (i = 0; i < g_partitions; i++)
-            first[i] = (cround(first[i]) - 1) * units_per_sector;
-
-	//do {
-    for (i = 0; i < g_partitions; i++) {
-        int lastplusoff;
-
-        if (start == ptes[i].offset)
-            start += sector_offset;
-        lastplusoff = last[i] + ((n < 4) ? 0 : sector_offset);
-        if (start >= first[i] && start <= lastplusoff)
-            start = lastplusoff + 1;
-    }
-	// while();
-
-    for (i = 0; i < g_partitions; i++) {
-        struct pte *pe = &ptes[i];
-
-        if (start < pe->offset && limit >= pe->offset)
-            limit = pe->offset - 1;
-        if (start < first[i] && limit >= first[i])
-            limit = first[i] - 1;
-    }
-
-    stop = get_last_cylinder(vol, cround(start));
-    if (display_in_cyl_units) {
-        stop = stop * units_per_sector - 1;
-    }
-
-    set_partition(n, 0, start, stop, sys);
-
-	/* write table */
-	if (LABEL_IS_DOS) {
-		for (i = 0; i < 3; i++)
-			if (ptes[i].changed)
-				ptes[3].changed = 1;
-		for (i = 3; i < g_partitions; i++) {
-			struct pte *pe = &ptes[i];
-
-			if (pe->changed) {
-				write_part_table_flag(pe->sectorbuffer);
-				write_sector(pe->offset, pe->sectorbuffer);
-			}
-		}
-	}
-	else if (LABEL_IS_SGI) {
-		/* no test on change? the printf below might be mistaken */
-		sgi_write_table();
-	}
-	else if (LABEL_IS_SUN) {
-		int needw = 0;
-
-		for (i = 0; i < 8; i++)
-			if (ptes[i].changed)
-				needw = 1;
-		if (needw)
-			sun_write_table();
-	}
-
-	printf("The partition table has been altered!\n\n");
-}
-#endif
 
 static void
 add_partition(int n, int sys)
@@ -2943,17 +2803,9 @@ int fdisk_main(int argc, char **argv)
 
 	close_dev_fd(); /* needed: fd 3 must not stay closed */
 
-#ifdef FDISK_ENHANCEMENT_FOR_STORAGE
-	opt_complementary = "b+:C+:H+:S+:p+:v+";
-	opt = getopt32(argv, "b:C:H:lS:p:v:uDr" USE_FEATURE_FDISK_BLKSIZE("s"),
-				&sector_size, &user_cylinders, &user_heads, &user_sectors,
-				&new_part, &part_vol);
-#else
 	opt_complementary = "b+:C+:H+:S+"; /* numeric params */
-	opt = getopt32(argv, "b:C:H:lS:u" USE_FEATURE_FDISK_BLKSIZE("s"),
+	opt = getopt32(argv, "b:C:H:lS:u" IF_FEATURE_FDISK_BLKSIZE("s"),
 				&sector_size, &user_cylinders, &user_heads, &user_sectors);
-#endif
-
 	argc -= optind;
 	argv += optind;
 	if (opt & OPT_b) { // -b
@@ -2990,69 +2842,6 @@ int fdisk_main(int argc, char **argv)
 		}
 		return 0;
 #if ENABLE_FEATURE_FDISK_WRITABLE
-	}
-#endif
-
-#ifdef FDISK_ENHANCEMENT_FOR_STORAGE
-	if (opt & OPT_p)
-	{
-		disk_device = argv[0];
-		printf("New partitions\n");
-		printf("new_part: %u, part_vol: %u\n", new_part, part_vol);
-		get_boot(OPEN_MAIN);
-		if (LABEL_IS_OSF) {
-			/* OSF label, and no DOS label */
-			printf("Detected an OSF/1 disklabel on %s, entering "
-					"disklabel mode\n", disk_device);
-			bsd_select();
-			/*Why do we do this?  It seems to be counter-intuitive*/
-			current_label_type = LABEL_DOS;
-			/* If we return we may want to make an empty DOS label? */
-		}
-		create_partition(new_part-1, 0x0c, part_vol);
-
-		return 0;
-	}
-
-	if (opt & OPT_D)
-	{
-		disk_device = argv[0];
-		printf("Delete all partitions\n");
-		get_boot(OPEN_MAIN);
-
-		if (LABEL_IS_OSF) {
-			/* OSF label, and no DOS label */
-			printf("Detected an OSF/1 disklabel on %s, entering "
-					"disklabel mode\n", disk_device);
-			bsd_select();
-			/*Why do we do this?  It seems to be counter-intuitive*/
-			current_label_type = LABEL_DOS;
-			/* If we return we may want to make an empty DOS label? */
-		}
-		create_doslabel();
-		write_table();
-
-		return 0;
-	}
-
-	if (opt & OPT_r)
-	{
-		disk_device = argv[0];
-		printf("reread all partitions\n");
-		get_boot(OPEN_MAIN);
-
-		if (LABEL_IS_OSF) {
-			/* OSF label, and no DOS label */
-			printf("Detected an OSF/1 disklabel on %s, entering "
-					"disklabel mode\n", disk_device);
-			bsd_select();
-			/*Why do we do this?  It seems to be counter-intuitive*/
-			current_label_type = LABEL_DOS;
-			/* If we return we may want to make an empty DOS label? */
-		}
-		reread_partition_table(1);
-
-		return 0;
 	}
 #endif
 

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* stty -- change and print terminal line settings
    Copyright (C) 1990-1999 Free Software Foundation, Inc.
@@ -693,8 +677,8 @@ static tcflag_t *mode_type_flag(unsigned type, const struct termios *mode)
 	return NULL;
 }
 
-static void set_speed_or_die(enum speed_setting type, const char *const arg,
-					struct termios * const mode)
+static void set_speed_or_die(enum speed_setting type, const char *arg,
+					struct termios *mode)
 {
 	speed_t baud;
 
@@ -817,7 +801,7 @@ enum {
 	param_ospeed  = 8 | 0x80,
 };
 
-static int find_param(const char *const name)
+static int find_param(const char *name)
 {
 	static const char params[] ALIGN1 =
 		"line\0"    /* 1 */

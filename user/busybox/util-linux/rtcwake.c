@@ -1,23 +1,9 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * rtcwake -- enter a system sleep state until specified wakeup time.
  *
  * This version was taken from util-linux and scrubbed down for busybox.
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  *
  * This uses cross-platform Linux interfaces to enter a system sleep state,
  * and leave it no later than a specified time.  It uses any RTC framework
@@ -128,7 +114,7 @@ int rtcwake_main(int argc UNUSED_PARAM, char **argv)
 	int utc = -1;
 	int fd;
 
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 	static const char rtcwake_longopts[] ALIGN1 =
 		"auto\0"    No_argument "a"
 		"local\0"   No_argument "l"
@@ -173,7 +159,7 @@ int rtcwake_main(int argc UNUSED_PARAM, char **argv)
 		bb_error_msg_and_die("%s not enabled for wakeup events", rtcname);
 
 	/* relative or absolute alarm time, normalized to time_t */
-	sys_time = time(0);
+	sys_time = time(NULL);
 	if (sys_time == (time_t)-1)
 		bb_perror_msg_and_die("read system time");
 	rtc_time = rtc_read_time(fd, utc);

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * iprule.c		"ip rule".
@@ -29,7 +13,7 @@
  * Changes:
  *
  * Rani Assaf <rani@magic.metawire.com> 980929:	resolve addresses
- * initially integrated into busybox by Bernhard Fischer
+ * initially integrated into busybox by Bernhard Reutner-Fischer
  */
 
 #include <netinet/in.h>
@@ -56,7 +40,7 @@ static void usage(void)
 }
 */
 
-static int print_rule(const struct sockaddr_nl *who UNUSED_PARAM,
+static int FAST_FUNC print_rule(const struct sockaddr_nl *who UNUSED_PARAM,
 					struct nlmsghdr *n, void *arg UNUSED_PARAM)
 {
 	struct rtmsg *r = NLMSG_DATA(n);
@@ -94,7 +78,6 @@ static int print_rule(const struct sockaddr_nl *who UNUSED_PARAM,
 	if (tb[RTA_SRC]) {
 		if (r->rtm_src_len != host_len) {
 			printf("%s/%u", rt_addr_n2a(r->rtm_family,
-							 RTA_PAYLOAD(tb[RTA_SRC]),
 							 RTA_DATA(tb[RTA_SRC]),
 							 abuf, sizeof(abuf)),
 				r->rtm_src_len
@@ -115,7 +98,6 @@ static int print_rule(const struct sockaddr_nl *who UNUSED_PARAM,
 	if (tb[RTA_DST]) {
 		if (r->rtm_dst_len != host_len) {
 			printf("to %s/%u ", rt_addr_n2a(r->rtm_family,
-							 RTA_PAYLOAD(tb[RTA_DST]),
 							 RTA_DATA(tb[RTA_DST]),
 							 abuf, sizeof(abuf)),
 				r->rtm_dst_len
@@ -254,8 +236,7 @@ static int iprule_modify(int cmd, char **argv)
 			   key == ARG_priority) {
 			uint32_t pref;
 			NEXT_ARG();
-			if (get_u32(&pref, *argv, 0))
-				invarg(*argv, "preference");
+			pref = get_u32(*argv, "preference");
 			addattr32(&req.n, sizeof(req), RTA_PRIORITY, pref);
 		} else if (key == ARG_tos) {
 			uint32_t tos;
@@ -266,8 +247,7 @@ static int iprule_modify(int cmd, char **argv)
 		} else if (key == ARG_fwmark) {
 			uint32_t fwmark;
 			NEXT_ARG();
-			if (get_u32(&fwmark, *argv, 0))
-				invarg(*argv, "fwmark");
+			fwmark = get_u32(*argv, "fwmark");
 			addattr32(&req.n, sizeof(req), RTA_PROTOINFO, fwmark);
 		} else if (key == ARG_realms) {
 			uint32_t realm;

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * stolen from net-tools-1.59 and stripped down for busybox by
@@ -21,7 +5,7 @@
  *
  * Heavily modified by Manuel Novoa III       Mar 12, 2001
  *
- *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 #include "libbb.h"
@@ -79,9 +63,6 @@ int FAST_FUNC INET_resolve(const char *name, struct sockaddr_in *s_in, int hostf
 #ifdef DEBUG
 	res_init();
 	_res.options |= RES_DEBUG;
-#endif
-
-#ifdef DEBUG
 	bb_error_msg("gethostbyname(%s)", name);
 #endif
 	hp = gethostbyname(name);
@@ -212,7 +193,7 @@ char* FAST_FUNC INET6_rresolve(struct sockaddr_in6 *sin6, int numeric)
 
 	if (sin6->sin6_family != AF_INET6) {
 #ifdef DEBUG
-		bb_error_msg("rresolve: unsupport address family %d!",
+		bb_error_msg("rresolve: unsupported address family %d!",
 				  sin6->sin6_family);
 #endif
 		errno = EAFNOSUPPORT;

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -54,6 +38,14 @@ int FAST_FUNC ndelay_off(int fd)
 int FAST_FUNC close_on_exec_on(int fd)
 {
 	return fcntl(fd, F_SETFD, FD_CLOEXEC);
+}
+
+char* FAST_FUNC strncpy_IFNAMSIZ(char *dst, const char *src)
+{
+#ifndef IFNAMSIZ
+	enum { IFNAMSIZ = 16 };
+#endif
+	return strncpy(dst, src, IFNAMSIZ);
 }
 
 /* Convert unsigned long long value into compact 4-char
@@ -276,6 +268,17 @@ off_t FAST_FUNC fdlength(int fd)
 }
 #endif
 
+char* FAST_FUNC xmalloc_ttyname(int fd)
+{
+	char *buf = xzalloc(128);
+	int r = ttyname_r(fd, buf, 127);
+	if (r) {
+		free(buf);
+		buf = NULL;
+	}
+	return buf;
+}
+
 /* It is perfectly ok to pass in a NULL for either width or for
  * height, in which case that value will not be set.  */
 int FAST_FUNC get_terminal_width_height(int fd, unsigned *width, unsigned *height)
@@ -304,4 +307,9 @@ int FAST_FUNC get_terminal_width_height(int fd, unsigned *width, unsigned *heigh
 	}
 
 	return ret;
+}
+
+int FAST_FUNC tcsetattr_stdin_TCSANOW(const struct termios *tp)
+{
+	return tcsetattr(STDIN_FILENO, TCSANOW, tp);
 }

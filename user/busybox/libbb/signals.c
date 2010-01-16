@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -26,6 +10,14 @@
  */
 
 #include "libbb.h"
+
+/* All known arches use small ints for signals */
+smallint bb_got_signal;
+
+void record_signo(int signo)
+{
+	bb_got_signal = signo;
+}
 
 /* Saves 2 bytes on x86! Oh my... */
 int FAST_FUNC sigaction_set(int signum, const struct sigaction *act)
@@ -55,7 +47,7 @@ void FAST_FUNC bb_signals(int sigs, void (*f)(int))
 	}
 }
 
-void FAST_FUNC bb_signals_recursive(int sigs, void (*f)(int))
+void FAST_FUNC bb_signals_recursive_norestart(int sigs, void (*f)(int))
 {
 	int sig_no = 0;
 	int bit = 1;

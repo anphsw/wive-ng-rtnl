@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * res_gdt.c --- reserve blocks for growing the group descriptor table
@@ -129,11 +113,11 @@ errcode_t ext2fs_create_resize_inode(ext2_filsys fs)
 		inode_size *= fs->blocksize;
 		inode.i_size = inode_size & 0xFFFFFFFF;
 		inode.i_size_high = (inode_size >> 32) & 0xFFFFFFFF;
-		if(inode.i_size_high) {
+		if (inode.i_size_high) {
 			sb->s_feature_ro_compat |=
 				EXT2_FEATURE_RO_COMPAT_LARGE_FILE;
 		}
-		inode.i_ctime = time(0);
+		inode.i_ctime = time(NULL);
 	}
 
 	for (rsv_off = 0, gdt_off = fs->desc_blocks,
@@ -225,7 +209,7 @@ out_inode:
 	       inode.i_size);
 #endif
 	if (inode_dirty) {
-		inode.i_atime = inode.i_mtime = time(0);
+		inode.i_atime = inode.i_mtime = time(NULL);
 		retval2 = ext2fs_write_inode(fs, EXT2_RESIZE_INO, &inode);
 		if (!retval)
 			retval = retval2;

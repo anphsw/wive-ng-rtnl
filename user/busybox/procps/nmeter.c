@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
 ** Licensed under the GPL v2, see the file LICENSE in this tarball
 **
 ** Based on nanotop.c from floppyfw project
@@ -33,16 +17,18 @@
 //  totalram=2107416576, freeram=211525632, sharedram=0, bufferram=157204480}
 //  totalswap=134209536, freeswap=134209536, procs=157})
 
-#include <time.h>
 #include "libbb.h"
 
 typedef unsigned long long ullong;
 
-enum { PROC_FILE_SIZE = 4096 };
+enum {  /* Preferably use powers of 2 */
+	PROC_MIN_FILE_SIZE = 256,
+	PROC_MAX_FILE_SIZE = 16 * 1024,
+};
 
 typedef struct proc_file {
 	char *file;
-	//const char *name;
+	int file_sz;
 	smallint last_gen;
 } proc_file;
 
@@ -140,30 +126,42 @@ static void put_question_marks(int count)
 		put_c('?');
 }
 
-static void readfile_z(char *buf, int sz, const char* fname)
+static void readfile_z(proc_file *pf, const char* fname)
 {
 // open_read_close() will do two reads in order to be sure we are at EOF,
 // and we don't need/want that.
-//	sz = open_read_close(fname, buf, sz-1);
+	int fd;
+	int sz, rdsz;
+	char *buf;
 
-	int fd = xopen(fname, O_RDONLY);
+	sz = pf->file_sz;
+	buf = pf->file;
+	if (!buf) {
+		buf = xmalloc(PROC_MIN_FILE_SIZE);
+		sz = PROC_MIN_FILE_SIZE;
+	}
+ again:
+	fd = xopen(fname, O_RDONLY);
 	buf[0] = '\0';
-	sz = read(fd, buf, sz - 1);
-	if (sz > 0)
-		buf[sz] = '\0';
+	rdsz = read(fd, buf, sz-1);
 	close(fd);
+	if (rdsz > 0) {
+		if (rdsz == sz-1 && sz < PROC_MAX_FILE_SIZE) {
+			sz *= 2;
+			buf = xrealloc(buf, sz);
+			goto again;
+		}
+		buf[rdsz] = '\0';
+	}
+	pf->file_sz = sz;
+	pf->file = buf;
 }
 
 static const char* get_file(proc_file *pf)
 {
 	if (pf->last_gen != gen) {
 		pf->last_gen = gen;
-		// We allocate PROC_FILE_SIZE bytes. This wastes memory,
-		// but allows us to allocate only once (at first sample)
-		// per proc file, and reuse buffer for each sample
-		if (!pf->file)
-			pf->file = xmalloc(PROC_FILE_SIZE);
-		readfile_z(pf->file, PROC_FILE_SIZE, proc_name[pf - &first_proc_file]);
+		readfile_z(pf, proc_name[pf - &first_proc_file]);
 	}
 	return pf->file;
 }
@@ -283,14 +281,14 @@ static void scale(ullong ul)
 #define S_STAT(a) \
 typedef struct a { \
 	struct s_stat *next; \
-	void (*collect)(struct a *s); \
+	void (*collect)(struct a *s) FAST_FUNC; \
 	const char *label;
 #define S_STAT_END(a) } a;
 
 S_STAT(s_stat)
 S_STAT_END(s_stat)
 
-static void collect_literal(s_stat *s UNUSED_PARAM)
+static void FAST_FUNC collect_literal(s_stat *s UNUSED_PARAM)
 {
 }
 
@@ -327,7 +325,7 @@ S_STAT(cpu_stat)
 S_STAT_END(cpu_stat)
 
 
-static void collect_cpu(cpu_stat *s)
+static void FAST_FUNC collect_cpu(cpu_stat *s)
 {
 	ullong data[CPU_FIELDCNT] = { 0, 0, 0, 0, 0, 0, 0 };
 	unsigned frac[CPU_FIELDCNT] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -401,7 +399,7 @@ S_STAT(int_stat)
 	int no;
 S_STAT_END(int_stat)
 
-static void collect_int(int_stat *s)
+static void FAST_FUNC collect_int(int_stat *s)
 {
 	ullong data[1];
 	ullong old;
@@ -435,7 +433,7 @@ S_STAT(ctx_stat)
 	ullong old;
 S_STAT_END(ctx_stat)
 
-static void collect_ctx(ctx_stat *s)
+static void FAST_FUNC collect_ctx(ctx_stat *s)
 {
 	ullong data[1];
 	ullong old;
@@ -464,7 +462,7 @@ S_STAT(blk_stat)
 	ullong old[2];
 S_STAT_END(blk_stat)
 
-static void collect_blk(blk_stat *s)
+static void FAST_FUNC collect_blk(blk_stat *s)
 {
 	ullong data[2];
 	int i;
@@ -506,7 +504,7 @@ S_STAT(fork_stat)
 	ullong old;
 S_STAT_END(fork_stat)
 
-static void collect_thread_nr(fork_stat *s UNUSED_PARAM)
+static void FAST_FUNC collect_thread_nr(fork_stat *s UNUSED_PARAM)
 {
 	ullong data[1];
 
@@ -517,7 +515,7 @@ static void collect_thread_nr(fork_stat *s UNUSED_PARAM)
 	scale(data[0]);
 }
 
-static void collect_fork(fork_stat *s)
+static void FAST_FUNC collect_fork(fork_stat *s)
 {
 	ullong data[1];
 	ullong old;
@@ -551,7 +549,7 @@ S_STAT(if_stat)
 	char *device_colon;
 S_STAT_END(if_stat)
 
-static void collect_if(if_stat *s)
+static void FAST_FUNC collect_if(if_stat *s)
 {
 	ullong data[4];
 	int i;
@@ -626,7 +624,7 @@ S_STAT_END(mem_stat)
 //HugePages_Total:     0
 //HugePages_Free:      0
 //Hugepagesize:     4096 kB
-static void collect_mem(mem_stat *s)
+static void FAST_FUNC collect_mem(mem_stat *s)
 {
 	ullong m_total = 0;
 	ullong m_free = 0;
@@ -673,7 +671,7 @@ static s_stat* init_mem(const char *param)
 S_STAT(swp_stat)
 S_STAT_END(swp_stat)
 
-static void collect_swp(swp_stat *s UNUSED_PARAM)
+static void FAST_FUNC collect_swp(swp_stat *s UNUSED_PARAM)
 {
 	ullong s_total[1];
 	ullong s_free[1];
@@ -697,7 +695,7 @@ static s_stat* init_swp(const char *param UNUSED_PARAM)
 S_STAT(fd_stat)
 S_STAT_END(fd_stat)
 
-static void collect_fd(fd_stat *s UNUSED_PARAM)
+static void FAST_FUNC collect_fd(fd_stat *s UNUSED_PARAM)
 {
 	ullong data[2];
 
@@ -722,7 +720,7 @@ S_STAT(time_stat)
 	int scale;
 S_STAT_END(time_stat)
 
-static void collect_time(time_stat *s)
+static void FAST_FUNC collect_time(time_stat *s)
 {
 	char buf[sizeof("12:34:56.123456")];
 	struct tm* tm;
@@ -757,7 +755,7 @@ static s_stat* init_time(const char *param)
 	return (s_stat*)s;
 }
 
-static void collect_info(s_stat *s)
+static void FAST_FUNC collect_info(s_stat *s)
 {
 	gen ^= 1;
 	while (s) {

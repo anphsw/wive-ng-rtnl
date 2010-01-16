@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini copy_file implementation for busybox
@@ -22,41 +6,42 @@
  * SELinux support by Yuichi Nakamura <ynakam@hitachisoft.jp>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
- *
  */
-
 #include "libbb.h"
 
+// FEATURE_NON_POSIX_CP:
+//
 // POSIX: if exists and -i, ask (w/o -i assume yes).
 // Then open w/o EXCL (yes, not unlink!).
 // If open still fails and -f, try unlink, then try open again.
 // Result: a mess:
-// If dest is a softlink, we overwrite softlink's destination!
+// If dest is a (sym)link, we overwrite link destination!
 // (or fail, if it points to dir/nonexistent location/etc).
 // This is strange, but POSIX-correct.
 // coreutils cp has --remove-destination to override this...
-//
-// NB: we have special code which still allows for "cp file /dev/node"
-// to work POSIX-ly (the only realistic case where it makes sense)
 
-#define DO_POSIX_CP 0  /* 1 - POSIX behavior, 0 - safe behavior */
-
-// errno must be set to relevant value ("why we cannot create dest?")
-// for POSIX mode to give reasonable error message
+/* Called if open of destination, link creation etc fails.
+ * errno must be set to relevant value ("why we cannot create dest?")
+ * to give reasonable error message */
 static int ask_and_unlink(const char *dest, int flags)
 {
 	int e = errno;
-#if DO_POSIX_CP
+
+#if !ENABLE_FEATURE_NON_POSIX_CP
 	if (!(flags & (FILEUTILS_FORCE|FILEUTILS_INTERACTIVE))) {
-		// Either it exists, or the *path* doesnt exist
+		/* Either it exists, or the *path* doesnt exist */
 		bb_perror_msg("cannot create '%s'", dest);
 		return -1;
 	}
 #endif
-	// If !DO_POSIX_CP, act as if -f is always in effect - we don't want
-	// "cannot create" msg, we want unlink to be done (silently unless -i).
+	// else: act as if -f is always in effect.
+	// We don't want "cannot create" msg, we want unlink to be done
+	// (silently unless -i). Why? POSIX cp usually succeeds with
+	// O_TRUNC open of existing file, and user is left ignorantly happy.
+	// With above block unconditionally enabled, non-POSIX cp
+	// will complain a lot more than POSIX one.
 
-	// TODO: maybe we should do it only if ctty is present?
+	/* TODO: maybe we should do it only if ctty is present? */
 	if (flags & FILEUTILS_INTERACTIVE) {
 		// We would not do POSIX insanity. -i asks,
 		// then _unlinks_ the offender. Presto.
@@ -64,7 +49,7 @@ static int ask_and_unlink(const char *dest, int flags)
 		// Or else we will end up having 3 open()s!
 		fprintf(stderr, "%s: overwrite '%s'? ", applet_name, dest);
 		if (!bb_ask_confirmation())
-			return 0; // not allowed to overwrite
+			return 0; /* not allowed to overwrite */
 	}
 	if (unlink(dest) < 0) {
 #if ENABLE_FEATURE_VERBOSE_CP_MESSAGE
@@ -72,14 +57,14 @@ static int ask_and_unlink(const char *dest, int flags)
 			/* e == ENOTDIR is similar: path has non-dir component,
 			 * but in this case we don't even reach copy_file() */
 			bb_error_msg("cannot create '%s': Path does not exist", dest);
-			return -1; // error
+			return -1; /* error */
 		}
 #endif
-		errno = e;
+		errno = e; /* do not use errno from unlink */
 		bb_perror_msg("cannot create '%s'", dest);
-		return -1; // error
+		return -1; /* error */
 	}
-	return 1; // ok (to try again)
+	return 1; /* ok (to try again) */
 }
 
 /* Return:
@@ -101,8 +86,8 @@ int FAST_FUNC copy_file(const char *source, const char *dest, int flags)
 #define FLAGS_DEREF (flags & FILEUTILS_DEREFERENCE)
 
 	if ((FLAGS_DEREF ? stat : lstat)(source, &source_stat) < 0) {
-		// This may be a dangling symlink.
-		// Making [sym]links to dangling symlinks works, so...
+		/* This may be a dangling symlink.
+		 * Making [sym]links to dangling symlinks works, so... */
 		if (flags & (FILEUTILS_MAKE_SOFTLINK|FILEUTILS_MAKE_HARDLINK))
 			goto make_links;
 		bb_perror_msg("cannot stat '%s'", source);
@@ -228,9 +213,9 @@ int FAST_FUNC copy_file(const char *source, const char *dest, int flags)
 	if (flags & (FILEUTILS_MAKE_SOFTLINK|FILEUTILS_MAKE_HARDLINK)) {
 		int (*lf)(const char *oldpath, const char *newpath);
  make_links:
-		// Hmm... maybe
-		// if (DEREF && MAKE_SOFTLINK) source = realpath(source) ?
-		// (but realpath returns NULL on dangling symlinks...)
+		/* Hmm... maybe
+		 * if (DEREF && MAKE_SOFTLINK) source = realpath(source) ?
+		 * (but realpath returns NULL on dangling symlinks...) */
 		lf = (flags & FILEUTILS_MAKE_SOFTLINK) ? symlink : link;
 		if (lf(source, dest) < 0) {
 			ovr = ask_and_unlink(dest, flags);
@@ -242,7 +227,7 @@ int FAST_FUNC copy_file(const char *source, const char *dest, int flags)
 			}
 		}
 		/* _Not_ jumping to preserve_mode_ugid_time:
-		 * hard/softlinks don't have those */
+		 * (sym)links don't have those */
 		return 0;
 	}
 
@@ -290,19 +275,12 @@ int FAST_FUNC copy_file(const char *source, const char *dest, int flags)
 		if (!S_ISREG(source_stat.st_mode))
 			new_mode = 0666;
 
-		/* POSIX way is a security problem versus symlink attacks,
-		 * we do it only for non-symlinks, and only for non-recursive,
-		 * non-interactive cp. NB: it is still racy
-		 * for "cp file /home/bad_user/file" case
-		 * (user can rm file and create a link to /etc/passwd) */
-		if (DO_POSIX_CP
-		 || (dest_exists
-		     && !(flags & (FILEUTILS_RECUR|FILEUTILS_INTERACTIVE))
-		     && !S_ISLNK(dest_stat.st_mode))
-		) {
+		// POSIX way is a security problem versus (sym)link attacks
+		if (!ENABLE_FEATURE_NON_POSIX_CP) {
 			dst_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, new_mode);
-		} else  /* safe way: */
+		} else { /* safe way: */
 			dst_fd = open(dest, O_WRONLY|O_CREAT|O_EXCL, new_mode);
+		}
 		if (dst_fd == -1) {
 			ovr = ask_and_unlink(dest, flags);
 			if (ovr <= 0) {

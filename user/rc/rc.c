@@ -144,8 +144,7 @@ virtual_radio_restore_defaults(void)
 static void
 restore_defaults(void)
 {
-	eval("insmod", "nvram_linux.o");
-
+	eval("modprobe", "nvram_linux");
 
 #ifdef CONFIG_SENTRY5
 #include "rcs5.h"
@@ -303,49 +302,9 @@ insmod(void)
 	struct utsname name;
 	struct stat tmp_stat;
 
-	eval("insmod", "-q", "rt2860v2_ap");
-	eval("insmod", "-q", "lm");
-	eval("insmod", "-q", "dwc_otg");
-	//eval("insmod", "-q", "usblp");
-/*
-	if(strcmp(nvram_safe_get("wan_proto"), "3g") == 0)
-	{
-		printf("ins 3g modules\n");	// tmp test
-        	system("insmod usbserial");
-        	system("insmod hso");
-	}
-*/
-#ifdef USB_SUPPORT
-#ifdef LANGUAGE_TW
-/*
-	eval("insmod", "nls_cp950.o");
-	eval("insmod", "nls_big5.o");
-	eval("insmod", "nls_cp936.o");
-	eval("insmod", "nls_gb2312.o");
-	eval("insmod", "nls_utf8.o");
-*/
-#endif
-#ifdef LANGUAGE_CN
-/*
-	eval("insmod", "nls_cp936.o");
-	eval("insmod", "nls_gb2312.o");
-	eval("insmod", "nls_cp950.o");
-	eval("insmod", "nls_big5.o");
-	eval("insmod", "nls_utf8.o");
-*/
-#endif
-#ifdef LANGUAGE_KR
-	eval("insmod", "nls_cp949.o");
-	eval("insmod", "nls_euc-kr.o");
-	eval("insmod", "nls_utf8.o");
-#endif
-#ifdef LANGUAGE_JP
-	eval("insmod", "nls_cp932.o");
-	eval("insmod", "nls_euc-jp.o");
-	eval("insmod", "nls_sjis.o");
-	eval("insmod", "nls_utf8.o");
-#endif
-#endif
+	eval("modprobe", "rt2860v2_ap");
+	eval("modprobe", "lm");
+	eval("modprobe", "dwc_otg");
 }
 
 /* States */

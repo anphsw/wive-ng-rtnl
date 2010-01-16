@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * lash -- the BusyBox Lame-Ass SHell
@@ -328,8 +312,9 @@ static int builtin_help(struct child_prog UNUSED_PARAM *dummy)
 {
 	const struct built_in_command *x;
 
-	printf("\nBuilt-in commands:\n"
-	       "-------------------\n");
+	printf(
+		"Built-in commands:\n"
+		"------------------\n");
 	for (x = bltins; x <= &VEC_LAST(bltins); x++) {
 		if (x->descr == NULL)
 			continue;

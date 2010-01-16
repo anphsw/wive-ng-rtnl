@@ -1,24 +1,7 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  */
-
 #include "libbb.h"
 #include <syslog.h>
 
@@ -38,7 +21,7 @@ static char* new_password(const struct passwd *pw, uid_t myuid, int algo)
 	if (myuid && pw->pw_passwd[0]) {
 		char *encrypted;
 
-		orig = bb_askpass(0, "Old password:"); /* returns ptr to static */
+		orig = bb_ask_stdin("Old password:"); /* returns ptr to static */
 		if (!orig)
 			goto err_ret;
 		encrypted = pw_encrypt(orig, pw->pw_passwd, 1); /* returns malloced str */
@@ -51,16 +34,16 @@ static char* new_password(const struct passwd *pw, uid_t myuid, int algo)
 		}
 		if (ENABLE_FEATURE_CLEAN_UP) free(encrypted);
 	}
-	orig = xstrdup(orig); /* or else bb_askpass() will destroy it */
-	newp = bb_askpass(0, "New password:"); /* returns ptr to static */
+	orig = xstrdup(orig); /* or else bb_ask_stdin() will destroy it */
+	newp = bb_ask_stdin("New password:"); /* returns ptr to static */
 	if (!newp)
 		goto err_ret;
-	newp = xstrdup(newp); /* we are going to bb_askpass() again, so save it */
+	newp = xstrdup(newp); /* we are going to bb_ask_stdin() again, so save it */
 	if (ENABLE_FEATURE_PASSWD_WEAK_CHECK
 	 && obscure(orig, newp, pw) && myuid)
 		goto err_ret; /* non-root is not allowed to have weak passwd */
 
-	cp = bb_askpass(0, "Retype password:");
+	cp = bb_ask_stdin("Retype password:");
 	if (!cp)
 		goto err_ret;
 	if (strcmp(cp, newp)) {
@@ -116,7 +99,7 @@ int passwd_main(int argc UNUSED_PARAM, char **argv)
 #endif
 
 	logmode = LOGMODE_BOTH;
-	openlog(applet_name, LOG_NOWAIT, LOG_AUTH);
+	openlog(applet_name, 0, LOG_AUTH);
 	opt = getopt32(argv, "a:lud", &opt_a);
 	//argc -= optind;
 	argv += optind;
@@ -131,12 +114,10 @@ int passwd_main(int argc UNUSED_PARAM, char **argv)
 		bb_show_usage();
 
 	/* Will complain and die if username not found */
-	myname = xstrdup(bb_getpwuid(NULL, -1, myuid));
+	myname = xstrdup(xuid2uname(myuid));
 	name = argv[0] ? argv[0] : myname;
 
-	pw = getpwnam(name);
-	if (!pw)
-		bb_error_msg_and_die("unknown user %s", name);
+	pw = xgetpwnam(name);
 	if (myuid && pw->pw_uid != myuid) {
 		/* LOGMODE_BOTH */
 		bb_error_msg_and_die("%s can't change password for %s", myname, name);
@@ -199,12 +180,12 @@ int passwd_main(int argc UNUSED_PARAM, char **argv)
 
 #if ENABLE_FEATURE_SHADOWPASSWDS
 	filename = bb_path_shadow_file;
-	rc = update_passwd(bb_path_shadow_file, name, newp);
+	rc = update_passwd(bb_path_shadow_file, name, newp, NULL);
 	if (rc == 0) /* no lines updated, no errors detected */
 #endif
 	{
 		filename = bb_path_passwd_file;
-		rc = update_passwd(bb_path_passwd_file, name, newp);
+		rc = update_passwd(bb_path_passwd_file, name, newp, NULL);
 	}
 	/* LOGMODE_BOTH */
 	if (rc < 0)

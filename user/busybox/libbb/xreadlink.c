@@ -1,23 +1,9 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
- *  xreadlink.c - safe implementation of readlink.
- *  Returns a NULL on failure...
+ * xreadlink.c - safe implementation of readlink.
+ * Returns a NULL on failure...
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 #include "libbb.h"
@@ -105,7 +91,11 @@ char* FAST_FUNC xmalloc_readlink_or_warn(const char *path)
 	char *buf = xmalloc_readlink(path);
 	if (!buf) {
 		/* EINVAL => "file: Invalid argument" => puzzled user */
-		bb_error_msg("%s: cannot read link (not a symlink?)", path);
+		const char *errmsg = "not a symlink";
+		int err = errno;
+		if (err != EINVAL)
+			errmsg = strerror(err);
+		bb_error_msg("%s: cannot read link: %s", path, errmsg);
 	}
 	return buf;
 }

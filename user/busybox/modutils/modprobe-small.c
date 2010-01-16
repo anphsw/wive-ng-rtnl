@@ -1,25 +1,9 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * simplified modprobe
  *
  * Copyright (c) 2008 Vladimir Dronnikov
- * Copyright (c) 2008 Bernhard Fischer (initial depmod code)
+ * Copyright (c) 2008 Bernhard Reutner-Fischer (initial depmod code)
  *
  * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
@@ -234,6 +218,7 @@ static void parse_module(module_info *info, const char *pathname)
 	bksp(); /* remove last ' ' */
 	appendc('\0');
 	info->aliases = copy_stringbuf();
+	replace(info->aliases, '-', '_');
 
 	/* "dependency1 depandency2" */
 	reset_stringbuf();
@@ -615,19 +600,23 @@ static void process_module(char *name, const char *cmdline_options)
 	}
 	free(deps);
 
-	/* insmod -> load it */
+	/* modprobe -> load it */
 	if (!is_rmmod) {
-		errno = 0;
-		if (load_module(info->pathname, options) != 0) {
-			if (EEXIST != errno) {
-				bb_error_msg("'%s': %s",
+		if (!options || strstr(options, "blacklist") == NULL) {
+			errno = 0;
+			if (load_module(info->pathname, options) != 0) {
+				if (EEXIST != errno) {
+					bb_error_msg("'%s': %s",
 						info->pathname,
 						moderror(errno));
-			} else {
-				dbg1_error_msg("'%s': %s",
+				} else {
+					dbg1_error_msg("'%s': %s",
 						info->pathname,
 						moderror(errno));
+				}
 			}
+		} else {
+			dbg1_error_msg("'%s': blacklisted", info->pathname);
 		}
 	}
  ret:
@@ -668,7 +657,7 @@ depmod -[aA] [-n -e -v -q -V -r -u]
       [-b basedirectory] [forced_version]
 depmod [-n -e -v -q -r -u] [-F kernelsyms] module1.ko module2.ko ...
 If no arguments (except options) are given, "depmod -a" is assumed.
-depmod will output a dependancy list suitable for the modprobe utility.
+depmod will output a dependency list suitable for the modprobe utility.
 Options:
     -a, --all           Probe all modules
     -A, --quick         Only does the work if there's a new module
@@ -691,7 +680,7 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 {
 	struct utsname uts;
 	char applet0 = applet_name[0];
-	USE_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE(char *options;)
+	IF_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE(char *options;)
 
 	/* are we lsmod? -> just dump /proc/modules */
 	if ('l' == applet0) {
@@ -704,8 +693,10 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 	/* Prevent ugly corner cases with no modules at all */
 	modinfo = xzalloc(sizeof(modinfo[0]));
 
-	/* Goto modules directory */
-	xchdir(CONFIG_DEFAULT_MODULES_DIR);
+	if ('i' != applet0) { /* not insmod */
+		/* Goto modules directory */
+		xchdir(CONFIG_DEFAULT_MODULES_DIR);
+	}
 	uname(&uts); /* never fails */
 
 	/* depmod? */
@@ -752,8 +743,10 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 		option_mask32 |= OPT_r;
 	}
 
-	/* Goto $VERSION directory */
-	xchdir(uts.release);
+	if ('i' != applet0) { /* not insmod */
+		/* Goto $VERSION directory */
+		xchdir(uts.release);
+	}
 
 #if ENABLE_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE
 	/* If not rmmod, parse possible module options given on command line.
@@ -774,17 +767,32 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 		argv[1] = NULL;
 #endif
 
+	if ('i' == applet0) { /* insmod */
+		size_t len;
+		void *map;
+
+		len = MAXINT(ssize_t);
+		map = xmalloc_xopen_read_close(*argv, &len);
+		if (init_module(map, len,
+			IF_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE(options ? options : "")
+			IF_NOT_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE("")
+				) != 0)
+			bb_error_msg_and_die("can't insert '%s': %s",
+					*argv, moderror(errno));
+		return 0;
+	}
+
 	/* Try to load modprobe.dep.bb */
 	load_dep_bb();
 
 	/* Load/remove modules.
-	 * Only rmmod loops here, insmod/modprobe has only argv[0] */
+	 * Only rmmod loops here, modprobe has only argv[0] */
 	do {
 		process_module(*argv++, options);
 	} while (*argv);
 
 	if (ENABLE_FEATURE_CLEAN_UP) {
-		USE_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE(free(options);)
+		IF_FEATURE_MODPROBE_SMALL_OPTIONS_ON_CMDLINE(free(options);)
 	}
 	return EXIT_SUCCESS;
 }

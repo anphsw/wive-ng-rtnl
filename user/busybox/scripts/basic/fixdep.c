@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * "Optimize" a list of dependencies as spit out by gcc -MD
  * for the kernel build
  * ===========================================================================
@@ -241,32 +225,36 @@ void use_config(char *m, int slen)
 void parse_config_file(char *map, size_t len)
 {
 	/* modified for bbox */
-	char *end_4 = map + len - 4; /* 4 == length of "USE_" */
+	char *end_3 = map + len - 3; /* 3 == length of "IF_" */
 	char *end_7 = map + len - 7;
 	char *p = map;
 	char *q;
 	int off;
 
-	for (; p < end_4; p++) {
+	for (; p <= end_3; p++) {
+		/* Find next identifier's beginning */
+		if (!(isalnum(*p) || *p == '_'))
+			continue;
+
+		/* Check it */
 		if (p < end_7 && p[6] == '_') {
 			if (!memcmp(p, "CONFIG", 6)) goto conf7;
 			if (!memcmp(p, "ENABLE", 6)) goto conf7;
+			if (!memcmp(p, "IF_NOT", 6)) goto conf7;
 		}
-		/* We have at least 5 chars: for() has
-		 * "p < end-4", not "p <= end-4"
-		 * therefore we don't need to check p <= end-5 here */
-		if (p[4] == '_')
-			if (!memcmp(p, "SKIP", 4)) goto conf5;
-		/* Ehhh, gcc is too stupid to just compare it as 32bit int */
-		if (p[0] == 'U')
-			if (!memcmp(p, "USE_", 4)) goto conf4;
+		/* we have at least 3 chars because of p <= end_3 */
+		/*if (!memcmp(p, "IF_", 3)) goto conf3;*/
+		if (p[0] == 'I' && p[1] == 'F' && p[2] == '_') goto conf3;
+
+		/* This identifier is not interesting, skip it */
+		while (p <= end_3 && (isalnum(*p) || *p == '_'))
+			p++;
 		continue;
 
-	conf4:	off = 4;
-	conf5:	off = 5;
+	conf3:	off = 3;
 	conf7:	off = 7;
 		p += off;
-		for (q = p; q < end_4+4; q++) {
+		for (q = p; q < end_3+3; q++) {
 			if (!(isalnum(*q) || *q == '_'))
 				break;
 		}

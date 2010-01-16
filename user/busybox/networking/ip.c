@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ip.c		"ip" utility frontend.
@@ -26,7 +10,7 @@
  * Changes:
  *
  * Rani Assaf <rani@magic.metawire.com> 980929:	resolve addresses
- * Bernhard Fischer rewrote to use index_in_substr_array
+ * Bernhard Reutner-Fischer rewrote to use index_in_substr_array
  */
 
 #include "libbb.h"
@@ -47,7 +31,7 @@ static int NORETURN ip_print_help(char **argv UNUSED_PARAM)
 
 static int ip_do(int (*ip_func)(char **argv), char **argv)
 {
-	argv = ip_parse_common_args(argv);
+	argv = ip_parse_common_args(argv + 1);
 	return ip_func(argv);
 }
 
@@ -92,18 +76,18 @@ int ip_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int ip_main(int argc UNUSED_PARAM, char **argv)
 {
 	static const char keywords[] ALIGN1 =
-		USE_FEATURE_IP_ADDRESS("address\0")
-		USE_FEATURE_IP_ROUTE("route\0")
-		USE_FEATURE_IP_LINK("link\0")
-		USE_FEATURE_IP_TUNNEL("tunnel\0" "tunl\0")
-		USE_FEATURE_IP_RULE("rule\0")
+		IF_FEATURE_IP_ADDRESS("address\0")
+		IF_FEATURE_IP_ROUTE("route\0")
+		IF_FEATURE_IP_LINK("link\0")
+		IF_FEATURE_IP_TUNNEL("tunnel\0" "tunl\0")
+		IF_FEATURE_IP_RULE("rule\0")
 		;
 	enum {
-		USE_FEATURE_IP_ADDRESS(IP_addr,)
-		USE_FEATURE_IP_ROUTE(IP_route,)
-		USE_FEATURE_IP_LINK(IP_link,)
-		USE_FEATURE_IP_TUNNEL(IP_tunnel, IP_tunl,)
-		USE_FEATURE_IP_RULE(IP_rule,)
+		IF_FEATURE_IP_ADDRESS(IP_addr,)
+		IF_FEATURE_IP_ROUTE(IP_route,)
+		IF_FEATURE_IP_LINK(IP_link,)
+		IF_FEATURE_IP_TUNNEL(IP_tunnel, IP_tunl,)
+		IF_FEATURE_IP_RULE(IP_rule,)
 		IP_none
 	};
 	int (*ip_func)(char**) = ip_print_help;

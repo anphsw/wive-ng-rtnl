@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -28,12 +12,14 @@
 
 #define NOT_DIGIT(a) (((unsigned char)(a-'0')) > 9)
 
+#if 0 // UNUSED
 double FAST_FUNC bb_strtod(const char *arg, char **endp)
 {
 	double v;
 	char *endptr;
 
-	if (arg[0] != '-' && NOT_DIGIT(arg[0]))
+	/* Allow .NN form. People want to use "sleep .15" etc */
+	if (arg[0] != '-' && arg[0] != '.' && NOT_DIGIT(arg[0]))
 		goto err;
 	errno = 0;
 	v = strtod(arg, &endptr);
@@ -51,6 +37,7 @@ double FAST_FUNC bb_strtod(const char *arg, char **endp)
 	}
 	return v;
 }
+#endif
 
 #if 0
 /* String to timespec: "NNNN[.NNNNN]" -> struct timespec.

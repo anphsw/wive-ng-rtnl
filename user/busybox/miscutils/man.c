@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* mini man implementation for busybox
  * Copyright (C) 2008 Denys Vlasenko <vda.linux@googlemail.com>
  * Licensed under GPLv2, see file LICENSE in this tarball for details.
@@ -184,10 +168,12 @@ int man_main(int argc UNUSED_PARAM, char **argv)
 
 	sec_list = xstrdup("1:2:3:4:5:6:7:8:9");
 	/* Last valid man_path_list[] is [0x10] */
-	man_path_list = xzalloc(0x11 * sizeof(man_path_list[0]));
 	count_mp = 0;
-	man_path_list[0] = xstrdup(getenv("MANPATH"));
-	if (man_path_list[0])
+	man_path_list = xzalloc(0x11 * sizeof(man_path_list[0]));
+	man_path_list[0] = getenv("MANPATH");
+	if (!man_path_list[0]) /* default, may be overridden by /etc/man.conf */
+		man_path_list[0] = (char*)"/usr/man";
+	else
 		count_mp++;
 	pager = getenv("MANPAGER");
 	if (!pager) {
@@ -196,17 +182,45 @@ int man_main(int argc UNUSED_PARAM, char **argv)
 			pager = "more";
 	}
 
-	/* Parse man.conf */
-	parser = config_open("/etc/man.conf");
+	/* Parse man.conf[ig] */
+	/* man version 1.6f uses man.config */
+	parser = config_open2("/etc/man.config", fopen_for_read);
+	if (!parser)
+		parser = config_open2("/etc/man.conf", fopen_for_read);
+
 	while (config_read(parser, token, 2, 0, "# \t", PARSE_NORMAL)) {
 		if (!token[1])
 			continue;
 		if (strcmp("MANPATH", token[0]) == 0) {
-			man_path_list = xrealloc_vector(man_path_list, 4, count_mp);
-			man_path_list[count_mp] = xstrdup(token[1]);
-			count_mp++;
-			/* man_path_list is NULL terminated */
-			/*man_path_list[count_mp] = NULL; - xrealloc_vector did it */
+			char *path = token[1];
+			while (*path) {
+				char *next_path;
+				char **path_element;
+
+				next_path = strchr(path, ':');
+				if (next_path) {
+					*next_path = '\0';
+					if (next_path++ == path) /* "::"? */
+						goto next;
+				}
+				/* Do we already have path? */
+				path_element = man_path_list;
+				while (*path_element) {
+					if (strcmp(*path_element, path) == 0)
+						goto skip;
+					path_element++;
+				}
+				man_path_list = xrealloc_vector(man_path_list, 4, count_mp);
+				man_path_list[count_mp] = xstrdup(path);
+				count_mp++;
+				/* man_path_list is NULL terminated */
+				/*man_path_list[count_mp] = NULL; - xrealloc_vector did it */
+ skip:
+				if (!next_path)
+					break;
+ next:
+				path = next_path;
+			}
 		}
 		if (strcmp("MANSECT", token[0]) == 0) {
 			free(sec_list);
@@ -226,41 +240,34 @@ int man_main(int argc UNUSED_PARAM, char **argv)
 		}
 		while ((cur_path = man_path_list[cur_mp++]) != NULL) {
 			/* for each MANPATH */
-			do { /* for each MANPATH item */
-				char *next_path = strchrnul(cur_path, ':');
-				int path_len = next_path - cur_path;
-				cur_sect = sec_list;
-				do { /* for each section */
-					char *next_sect = strchrnul(cur_sect, ':');
-					int sect_len = next_sect - cur_sect;
-					char *man_filename;
-					int cat0man1 = 0;
+			cur_sect = sec_list;
+			do { /* for each section */
+				char *next_sect = strchrnul(cur_sect, ':');
+				int sect_len = next_sect - cur_sect;
+				char *man_filename;
+				int cat0man1 = 0;
 
-					/* Search for cat, then man page */
-					while (cat0man1 < 2) {
-						int found_here;
-						man_filename = xasprintf("%.*s/%s%.*s/%s.%.*s" Z_SUFFIX,
-								path_len, cur_path,
-								"cat\0man" + (cat0man1 * 4),
-								sect_len, cur_sect,
-								*argv,
-								sect_len, cur_sect);
-						found_here = show_manpage(pager, man_filename, cat0man1, 0);
-						found |= found_here;
-						cat0man1 += found_here + 1;
-						free(man_filename);
-					}
+				/* Search for cat, then man page */
+				while (cat0man1 < 2) {
+					int found_here;
+					man_filename = xasprintf("%s/%s%.*s/%s.%.*s" Z_SUFFIX,
+							cur_path,
+							"cat\0man" + (cat0man1 * 4),
+							sect_len, cur_sect,
+							*argv,
+							sect_len, cur_sect);
+					found_here = show_manpage(pager, man_filename, cat0man1, 0);
+					found |= found_here;
+					cat0man1 += found_here + 1;
+					free(man_filename);
+				}
 
-					if (found && !(opt & OPT_a))
-						goto next_arg;
-					cur_sect = next_sect;
-					while (*cur_sect == ':')
-						cur_sect++;
-				} while (*cur_sect);
-				cur_path = next_path;
-				while (*cur_path == ':')
-					cur_path++;
-			} while (*cur_path);
+				if (found && !(opt & OPT_a))
+					goto next_arg;
+				cur_sect = next_sect;
+				while (*cur_sect == ':')
+					cur_sect++;
+			} while (*cur_sect);
 		}
  check_found:
 		if (!found) {

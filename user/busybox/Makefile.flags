@@ -23,6 +23,7 @@ CFLAGS += $(call cc-option,-Wwrite-strings,)
 CFLAGS += $(call cc-option,-Wundef,)
 CFLAGS += $(call cc-option,-Wstrict-prototypes,)
 CFLAGS += $(call cc-option,-Wunused -Wunused-parameter,)
+CFLAGS += $(call cc-option,-Wunused-function -Wunused-value,)
 CFLAGS += $(call cc-option,-Wmissing-prototypes -Wmissing-declarations,)
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
@@ -31,6 +32,15 @@ CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 
 ifeq ($(CONFIG_WERROR),y)
 CFLAGS += $(call cc-option,-Werror,)
+## TODO:
+## gcc version 4.4.0 20090506 (Red Hat 4.4.0-4) (GCC) is a PITA:
+## const char *ptr; ... off_t v = *(off_t*)ptr; -> BOOM
+## and no easy way to convince it to shut the hell up.
+## We have a lot of such things all over the place.
+## Classic *(off_t*)(void*)ptr does not work,
+## and I am unwilling to do crazy gcc specific ({ void *ppp = ...; })
+## stuff in macros. This would obfuscate the code too much.
+#CFLAGS += $(call cc-ifversion, -eq, 0404, -fno-strict-aliasing)
 endif
 # gcc 3.x emits bogus "old style proto" warning on find.c:alloc_action()
 CFLAGS += $(call cc-ifversion, -ge, 0400, -Wold-style-definition)
@@ -81,6 +91,11 @@ CFLAGS_busybox += $(ARCH_PIE)
 CFLAGS += $(ARCH_FPIE)
 endif
 
+ifneq ($(CONFIG_EXTRA_CFLAGS),)
+CFLAGS += $(strip $(subst ",,$(CONFIG_EXTRA_CFLAGS)))
+#"))
+endif
+
 LDLIBS += m crypt
 
 ifeq ($(CONFIG_PAM),y)
@@ -99,12 +114,12 @@ ifeq ($(CONFIG_DMALLOC),y)
 LDLIBS += dmalloc
 endif
 
-# If a flat binary should be built, CFLAGS_busybox="-Wl,-elf2flt"
+# If a flat binary should be built, CFLAGS_busybox="-elf2flt"
 # env var should be set for make invocation.
 # Here we check whether CFLAGS_busybox indeed contains that flag.
 # (For historical reasons, we also check LDFLAGS, which doesn't
-# seem to be entirely correct variable to put "-Wl,-elf2flt" into).
-W_ELF2FLT = -Wl,-elf2flt
+# seem to be entirely correct variable to put "-elf2flt" into).
+W_ELF2FLT = -elf2flt
 ifneq (,$(findstring $(W_ELF2FLT),$(LDFLAGS) $(CFLAGS_busybox)))
 SKIP_STRIP = y
 endif

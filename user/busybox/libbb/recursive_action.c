@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -77,6 +61,7 @@ int FAST_FUNC recursive_action(const char *fileName,
 		unsigned depth)
 {
 	struct stat statbuf;
+	unsigned follow;
 	int status;
 	DIR *dir;
 	struct dirent *next;
@@ -84,14 +69,22 @@ int FAST_FUNC recursive_action(const char *fileName,
 	if (!fileAction) fileAction = true_action;
 	if (!dirAction) dirAction = true_action;
 
-	status = ACTION_FOLLOWLINKS; /* hijack a variable for bitmask... */
-	if (!depth)
-		status = ACTION_FOLLOWLINKS | ACTION_FOLLOWLINKS_L0;
-	status = ((flags & status) ? stat : lstat)(fileName, &statbuf);
+	follow = ACTION_FOLLOWLINKS;
+	if (depth == 0)
+		follow = ACTION_FOLLOWLINKS | ACTION_FOLLOWLINKS_L0;
+	follow &= flags;
+	status = (follow ? stat : lstat)(fileName, &statbuf);
 	if (status < 0) {
 #ifdef DEBUG_RECURS_ACTION
 		bb_error_msg("status=%d flags=%x", status, flags);
 #endif
+		if ((flags & ACTION_DANGLING_OK)
+		 && errno == ENOENT
+		 && lstat(fileName, &statbuf) == 0
+		) {
+			/* Dangling link */
+			return fileAction(fileName, &statbuf, userData, depth);
+		}
 		goto done_nak_warn;
 	}
 

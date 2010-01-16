@@ -1,1 +1,1 @@
-#undef CONFIG_BZIP2
+#define CONFIG_BZIP2 1

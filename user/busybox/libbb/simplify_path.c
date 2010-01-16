@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * bb_simplify_path implementation for busybox
@@ -22,22 +6,13 @@
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  */
-
 #include "libbb.h"
 
-char* FAST_FUNC bb_simplify_path(const char *path)
+char* FAST_FUNC bb_simplify_abs_path_inplace(char *start)
 {
-	char *s, *start, *p;
+	char *s, *p;
 
-	if (path[0] == '/')
-		start = xstrdup(path);
-	else {
-		s = xrealloc_getcwd_or_warn(NULL);
-		start = concat_path_file(s, path);
-		free(s);
-	}
 	p = s = start;
-
 	do {
 		if (*p == '/') {
 			if (*s == '/') {	/* skip duplicate (or initial) slash */
@@ -63,7 +38,22 @@ char* FAST_FUNC bb_simplify_path(const char *path)
 	if ((p == start) || (*p != '/')) {	/* not a trailing slash */
 		++p;					/* so keep last character */
 	}
-	*p = 0;
+	*p = '\0';
+	return p;
+}
 
-	return start;
+char* FAST_FUNC bb_simplify_path(const char *path)
+{
+	char *s, *p;
+
+	if (path[0] == '/')
+		s = xstrdup(path);
+	else {
+		p = xrealloc_getcwd_or_warn(NULL);
+		s = concat_path_file(p, path);
+		free(p);
+	}
+
+	bb_simplify_abs_path_inplace(s);
+	return s;
 }

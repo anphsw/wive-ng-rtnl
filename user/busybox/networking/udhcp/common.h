@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* common.h
  *
@@ -22,19 +6,16 @@
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  */
-
-#ifndef _COMMON_H
-#define _COMMON_H
+#ifndef UDHCP_COMMON_H
+#define UDHCP_COMMON_H 1
 
 #include "libbb.h"
 #include <netinet/udp.h>
 #include <netinet/ip.h>
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility push(hidden)
-#endif
+PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 
-#define DEFAULT_SCRIPT   CONFIG_DHCPC_DEFAULT_SCRIPT
+#define DEFAULT_SCRIPT   CONFIG_UDHCPC_DEFAULT_SCRIPT
 
 extern const uint8_t MAC_BCAST_ADDR[6]; /* six all-ones */
 
@@ -42,56 +23,60 @@ extern const uint8_t MAC_BCAST_ADDR[6]; /* six all-ones */
 
 #define DHCP_OPTIONS_BUFSIZE  308
 
-struct dhcpMessage {
-	uint8_t op;
-	uint8_t htype;
-	uint8_t hlen;
-	uint8_t hops;
-	uint32_t xid;
-	uint16_t secs;
-	uint16_t flags;
-	uint32_t ciaddr;
-	uint32_t yiaddr;
-	uint32_t siaddr;
-	uint32_t giaddr;
-	uint8_t chaddr[16];
-	uint8_t sname[64];
-	uint8_t file[128];
-	uint32_t cookie;
+//TODO: rename ciaddr/yiaddr/chaddr
+struct dhcp_packet {
+	uint8_t op;      /* 1 = BOOTREQUEST, 2 = BOOTREPLY */
+	uint8_t htype;   /* hardware address type. 1 = 10mb ethernet */
+	uint8_t hlen;    /* hardware address length */
+	uint8_t hops;    /* used by relay agents only */
+	uint32_t xid;    /* unique id */
+	uint16_t secs;   /* elapsed since client began acquisition/renewal */
+	uint16_t flags;  /* only one flag so far: */
+#define BROADCAST_FLAG 0x8000 /* "I need broadcast replies" */
+	uint32_t ciaddr; /* client IP (if client is in BOUND, RENEW or REBINDING state) */
+	uint32_t yiaddr; /* 'your' (client) IP address */
+	/* IP address of next server to use in bootstrap, returned in DHCPOFFER, DHCPACK by server */
+	uint32_t siaddr_nip;
+	uint32_t gateway_nip; /* relay agent IP address */
+	uint8_t chaddr[16];   /* link-layer client hardware address (MAC) */
+	uint8_t sname[64];    /* server host name (ASCIZ) */
+	uint8_t file[128];    /* boot file name (ASCIZ) */
+	uint32_t cookie;      /* fixed first four option bytes (99,130,83,99 dec) */
 	uint8_t options[DHCP_OPTIONS_BUFSIZE + CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS];
 } PACKED;
 
-struct udp_dhcp_packet {
+struct ip_udp_dhcp_packet {
 	struct iphdr ip;
 	struct udphdr udp;
-	struct dhcpMessage data;
+	struct dhcp_packet data;
 } PACKED;
 
 /* Let's see whether compiler understood us right */
-struct BUG_bad_sizeof_struct_udp_dhcp_packet {
-	char BUG_bad_sizeof_struct_udp_dhcp_packet
-		[(sizeof(struct udp_dhcp_packet) != 576 + CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS) ? -1 : 1];
+struct BUG_bad_sizeof_struct_ip_udp_dhcp_packet {
+	char BUG_bad_sizeof_struct_ip_udp_dhcp_packet
+		[(sizeof(struct ip_udp_dhcp_packet) != 576 + CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS) ? -1 : 1];
 };
 
-uint16_t udhcp_checksum(void *addr, int count);
+uint16_t udhcp_checksum(void *addr, int count) FAST_FUNC;
 
-void udhcp_init_header(struct dhcpMessage *packet, char type);
+void udhcp_init_header(struct dhcp_packet *packet, char type) FAST_FUNC;
 
-/*int udhcp_recv_raw_packet(struct dhcpMessage *payload, int fd); - in dhcpc.h */
-int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd);
+/*int udhcp_recv_raw_packet(struct dhcp_packet *dhcp_pkt, int fd); - in dhcpc.h */
+int udhcp_recv_kernel_packet(struct dhcp_packet *packet, int fd) FAST_FUNC;
 
-int udhcp_send_raw_packet(struct dhcpMessage *payload,
+int udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_ip, int source_port,
-		uint32_t dest_ip, int dest_port,
-		const uint8_t *dest_arp, int ifindex);
-int udhcp_send_kernel_packet(struct dhcpMessage *payload,
+		uint32_t dest_ip, int dest_port, const uint8_t *dest_arp,
+		int ifindex) FAST_FUNC;
+
+int udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_ip, int source_port,
-		uint32_t dest_ip, int dest_port);
+		uint32_t dest_ip, int dest_port) FAST_FUNC;
 
 
 /**/
 
-void udhcp_run_script(struct dhcpMessage *packet, const char *name);
+void udhcp_run_script(struct dhcp_packet *packet, const char *name) FAST_FUNC;
 
 // Still need to clean these up...
 
@@ -100,27 +85,42 @@ void udhcp_run_script(struct dhcpMessage *packet, const char *name);
 #define end_option		udhcp_end_option
 #define add_option_string	udhcp_add_option_string
 #define add_simple_option	udhcp_add_simple_option
-/* from socket.h */
-#define listen_socket		udhcp_listen_socket
-#define read_interface		udhcp_read_interface
 
-void udhcp_sp_setup(void);
-int udhcp_sp_fd_set(fd_set *rfds, int extra_fd);
-int udhcp_sp_read(const fd_set *rfds);
-int raw_socket(int ifindex);
-int read_interface(const char *interface, int *ifindex, uint32_t *addr, uint8_t *arp);
-int listen_socket(/*uint32_t ip,*/ int port, const char *inf);
+void udhcp_sp_setup(void) FAST_FUNC;
+int udhcp_sp_fd_set(fd_set *rfds, int extra_fd) FAST_FUNC;
+int udhcp_sp_read(const fd_set *rfds) FAST_FUNC;
+int udhcp_read_interface(const char *interface, int *ifindex, uint32_t *nip, uint8_t *mac) FAST_FUNC;
+int udhcp_raw_socket(int ifindex) FAST_FUNC;
+int udhcp_listen_socket(/*uint32_t ip,*/ int port, const char *inf) FAST_FUNC;
 /* Returns 1 if no reply received */
-int arpping(uint32_t test_ip, uint32_t from_ip, uint8_t *from_mac, const char *interface);
+int arpping(uint32_t test_nip,
+		const uint8_t *safe_mac,
+		uint32_t from_ip,
+		uint8_t *from_mac,
+		const char *interface) FAST_FUNC;
 
-#if ENABLE_FEATURE_UDHCP_DEBUG
-# define DEBUG(str, args...) bb_info_msg("### " str, ## args)
+#if defined CONFIG_UDHCP_DEBUG && CONFIG_UDHCP_DEBUG >= 1
+extern unsigned dhcp_verbose;
+# define log1(...) do { if (dhcp_verbose >= 1) bb_info_msg(__VA_ARGS__); } while (0)
+# if CONFIG_UDHCP_DEBUG >= 2
+void udhcp_dump_packet(struct dhcp_packet *packet) FAST_FUNC;
+#  define log2(...) do { if (dhcp_verbose >= 2) bb_info_msg(__VA_ARGS__); } while (0)
+# else
+#  define udhcp_dump_packet(...) ((void)0)
+#  define log2(...) ((void)0)
+# endif
+# if CONFIG_UDHCP_DEBUG >= 3
+#  define log3(...) do { if (dhcp_verbose >= 3) bb_info_msg(__VA_ARGS__); } while (0)
+# else
+#  define log3(...) ((void)0)
+# endif
 #else
-# define DEBUG(str, args...) do {;} while (0)
+# define udhcp_dump_packet(...) ((void)0)
+# define log1(...) ((void)0)
+# define log2(...) ((void)0)
+# define log3(...) ((void)0)
 #endif
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility pop
-#endif
+POP_SAVED_FUNCTION_VISIBILITY
 
 #endif

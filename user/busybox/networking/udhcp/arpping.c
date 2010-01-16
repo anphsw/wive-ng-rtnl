@@ -1,33 +1,17 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * arpping.c
  *
  * Mostly stolen from: dhcpcd - DHCP client daemon
  * by Yoichi Hariguchi <yoichi@fore.com>
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
-
 #include <netinet/if_ether.h>
 #include <net/if_arp.h>
 
 #include "common.h"
 #include "dhcpd.h"
-
 
 struct arpMsg {
 	/* Ethernet header */
@@ -52,10 +36,12 @@ enum {
 	ARP_MSG_SIZE = 0x2a
 };
 
-
 /* Returns 1 if no reply received */
-
-int arpping(uint32_t test_ip, uint32_t from_ip, uint8_t *from_mac, const char *interface)
+int FAST_FUNC arpping(uint32_t test_nip,
+		const uint8_t *safe_mac,
+		uint32_t from_ip,
+		uint8_t *from_mac,
+		const char *interface)
 {
 	int timeout_ms;
 	struct pollfd pfd[1];
@@ -87,8 +73,8 @@ int arpping(uint32_t test_ip, uint32_t from_ip, uint8_t *from_mac, const char *i
 	arp.operation = htons(ARPOP_REQUEST);           /* ARP op code */
 	memcpy(arp.sHaddr, from_mac, 6);                /* source hardware address */
 	memcpy(arp.sInaddr, &from_ip, sizeof(from_ip)); /* source IP address */
-	/* tHaddr is zero-fiiled */                     /* target hardware address */
-	memcpy(arp.tInaddr, &test_ip, sizeof(test_ip)); /* target IP address */
+	/* tHaddr is zero-filled */                     /* target hardware address */
+	memcpy(arp.tInaddr, &test_nip, sizeof(test_nip));/* target IP address */
 
 	memset(&addr, 0, sizeof(addr));
 	safe_strncpy(addr.sa_data, interface, sizeof(addr.sa_data));
@@ -112,13 +98,24 @@ int arpping(uint32_t test_ip, uint32_t from_ip, uint8_t *from_mac, const char *i
 			r = read(s, &arp, sizeof(arp));
 			if (r < 0)
 				break;
+
+			//log3("sHaddr %02x:%02x:%02x:%02x:%02x:%02x",
+			//	arp.sHaddr[0], arp.sHaddr[1], arp.sHaddr[2],
+			//	arp.sHaddr[3], arp.sHaddr[4], arp.sHaddr[5]);
+
 			if (r >= ARP_MSG_SIZE
 			 && arp.operation == htons(ARPOP_REPLY)
 			 /* don't check it: Linux doesn't return proper tHaddr (fixed in 2.6.24?) */
 			 /* && memcmp(arp.tHaddr, from_mac, 6) == 0 */
-			 && *((uint32_t *) arp.sInaddr) == test_ip
+			 && *((uint32_t *) arp.sInaddr) == test_nip
 			) {
-				rv = 0;
+				/* if ARP source MAC matches safe_mac
+				 * (which is client's MAC), then it's not a conflict
+				 * (client simply already has this IP and replies to ARPs!)
+				 */
+				if (!safe_mac || memcmp(safe_mac, arp.sHaddr, 6) != 0)
+					rv = 0;
+				//else log2("sHaddr == safe_mac");
 				break;
 			}
 		}
@@ -127,6 +124,6 @@ int arpping(uint32_t test_ip, uint32_t from_ip, uint8_t *from_mac, const char *i
 
  ret:
 	close(s);
-	DEBUG("%srp reply received for this address", rv ? "No a" : "A");
+	log1("%srp reply received for this address", rv ? "No a" : "A");
 	return rv;
 }

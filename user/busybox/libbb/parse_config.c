@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * config file parser helper
@@ -21,11 +5,12 @@
  * Copyright (C) 2008 by Vladimir Dronnikov <dronnikov@gmail.com>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
+ * Also for use in uClibc (http://uclibc.org/) licensed under LGPLv2.1 or later.
  */
 
 #include "libbb.h"
 
-#if ENABLE_PARSE
+#if defined ENABLE_PARSE && ENABLE_PARSE
 int parse_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int parse_main(int argc UNUSED_PARAM, char **argv)
 {
@@ -94,7 +79,7 @@ parser_t* FAST_FUNC config_open(const char *filename)
 	return config_open2(filename, fopen_or_warn_stdin);
 }
 
-static void config_free_data(parser_t *const parser)
+static void config_free_data(parser_t *parser)
 {
 	free(parser->line);
 	parser->line = NULL;

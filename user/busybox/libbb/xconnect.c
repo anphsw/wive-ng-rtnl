@@ -1,28 +1,15 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
  *
  * Connect to host at port using address resolution from getaddrinfo
  *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 #include <netinet/in.h>
+#include <net/if.h>
+#include <sys/un.h>
 #include "libbb.h"
 
 void FAST_FUNC setsockopt_reuseaddr(int fd)
@@ -32,6 +19,40 @@ void FAST_FUNC setsockopt_reuseaddr(int fd)
 int FAST_FUNC setsockopt_broadcast(int fd)
 {
 	return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &const_int_1, sizeof(const_int_1));
+}
+int FAST_FUNC setsockopt_bindtodevice(int fd, const char *iface)
+{
+	int r;
+	struct ifreq ifr;
+	strncpy_IFNAMSIZ(ifr.ifr_name, iface);
+	/* NB: passing (iface, strlen(iface) + 1) does not work!
+	 * (maybe it works on _some_ kernels, but not on 2.6.26)
+	 * Actually, ifr_name is at offset 0, and in practice
+	 * just giving char[IFNAMSIZ] instead of struct ifreq works too.
+	 * But just in case it's not true on some obscure arch... */
+	r = setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof(ifr));
+	if (r)
+		bb_perror_msg("can't bind to interface %s", iface);
+	return r;
+}
+
+len_and_sockaddr* FAST_FUNC get_sock_lsa(int fd)
+{
+	len_and_sockaddr lsa;
+	len_and_sockaddr *lsa_ptr;
+
+	lsa.len = LSA_SIZEOF_SA;
+	if (getsockname(fd, &lsa.u.sa, &lsa.len) != 0)
+		return NULL;
+
+	lsa_ptr = xzalloc(LSA_LEN_SIZE + lsa.len);
+	if (lsa.len > LSA_SIZEOF_SA) { /* rarely (if ever) happens */
+		lsa_ptr->len = lsa.len;
+		getsockname(fd, &lsa_ptr->u.sa, &lsa_ptr->len);
+	} else {
+		memcpy(lsa_ptr, &lsa, LSA_LEN_SIZE + lsa.len);
+	}
+	return lsa_ptr;
 }
 
 void FAST_FUNC xconnect(int s, const struct sockaddr *s_addr, socklen_t addrlen)
@@ -49,8 +70,9 @@ void FAST_FUNC xconnect(int s, const struct sockaddr *s_addr, socklen_t addrlen)
 
 /* Return port number for a service.
  * If "port" is a number use it as the port.
- * If "port" is a name it is looked up in /etc/services, if it isnt found return
- * default_port */
+ * If "port" is a name it is looked up in /etc/services,
+ * if it isnt found return default_port
+ */
 unsigned FAST_FUNC bb_lookup_port(const char *port, const char *protocol, unsigned default_port)
 {
 	unsigned port_nr = default_port;
@@ -135,23 +157,37 @@ void FAST_FUNC set_nport(len_and_sockaddr *lsa, unsigned port)
  * port: if neither of above specifies port # */
 static len_and_sockaddr* str2sockaddr(
 		const char *host, int port,
-USE_FEATURE_IPV6(sa_family_t af,)
+IF_FEATURE_IPV6(sa_family_t af,)
 		int ai_flags)
 {
 	int rc;
-	len_and_sockaddr *r = NULL;
+	len_and_sockaddr *r;
 	struct addrinfo *result = NULL;
 	struct addrinfo *used_res;
 	const char *org_host = host; /* only for error msg */
 	const char *cp;
 	struct addrinfo hint;
 
+	if (ENABLE_FEATURE_UNIX_LOCAL && strncmp(host, "local:", 6) == 0) {
+		struct sockaddr_un *sun;
+
+		r = xzalloc(LSA_LEN_SIZE + sizeof(struct sockaddr_un));
+		r->len = sizeof(struct sockaddr_un);
+		r->u.sa.sa_family = AF_UNIX;
+		sun = (struct sockaddr_un *)&r->u.sa;
+		safe_strncpy(sun->sun_path, host + 6, sizeof(sun->sun_path));
+		return r;
+	}
+
+	r = NULL;
+
 	/* Ugly parsing of host:addr */
 	if (ENABLE_FEATURE_IPV6 && host[0] == '[') {
 		/* Even uglier parsing of [xx]:nn */
 		host++;
 		cp = strchr(host, ']');
-		if (!cp || cp[1] != ':') { /* Malformed: must have [xx]:nn */
+		if (!cp || (cp[1] != ':' && cp[1] != '\0')) {
+			/* Malformed: must be [xx]:nn or [xx] */
 			bb_error_msg("bad address '%s'", org_host);
 			if (ai_flags & DIE_ON_ERROR)
 				xfunc_die();
@@ -166,9 +202,13 @@ USE_FEATURE_IPV6(sa_family_t af,)
 	}
 	if (cp) { /* points to ":" or "]:" */
 		int sz = cp - host + 1;
+
 		host = safe_strncpy(alloca(sz), host, sz);
-		if (ENABLE_FEATURE_IPV6 && *cp != ':')
+		if (ENABLE_FEATURE_IPV6 && *cp != ':') {
 			cp++; /* skip ']' */
+			if (*cp == '\0') /* [xx] without port */
+				goto skip;
+		}
 		cp++; /* skip ':' */
 		port = bb_strtou(cp, NULL, 10);
 		if (errno || (unsigned)port > 0xffff) {
@@ -177,6 +217,7 @@ USE_FEATURE_IPV6(sa_family_t af,)
 				xfunc_die();
 			return NULL;
 		}
+ skip: ;
 	}
 
 	memset(&hint, 0 , sizeof(hint));
@@ -248,9 +289,9 @@ len_and_sockaddr* FAST_FUNC xdotted2sockaddr(const char *host, int port)
 }
 
 #undef xsocket_type
-int FAST_FUNC xsocket_type(len_and_sockaddr **lsap, USE_FEATURE_IPV6(int family,) int sock_type)
+int FAST_FUNC xsocket_type(len_and_sockaddr **lsap, IF_FEATURE_IPV6(int family,) int sock_type)
 {
-	SKIP_FEATURE_IPV6(enum { family = AF_INET };)
+	IF_NOT_FEATURE_IPV6(enum { family = AF_INET };)
 	len_and_sockaddr *lsa;
 	int fd;
 	int len;
@@ -282,7 +323,7 @@ int FAST_FUNC xsocket_type(len_and_sockaddr **lsap, USE_FEATURE_IPV6(int family,
 
 int FAST_FUNC xsocket_stream(len_and_sockaddr **lsap)
 {
-	return xsocket_type(lsap, USE_FEATURE_IPV6(AF_UNSPEC,) SOCK_STREAM);
+	return xsocket_type(lsap, IF_FEATURE_IPV6(AF_UNSPEC,) SOCK_STREAM);
 }
 
 static int create_and_bind_or_die(const char *bindaddr, int port, int sock_type)
@@ -295,7 +336,7 @@ static int create_and_bind_or_die(const char *bindaddr, int port, int sock_type)
 		/* user specified bind addr dictates family */
 		fd = xsocket(lsa->u.sa.sa_family, sock_type, 0);
 	} else {
-		fd = xsocket_type(&lsa, USE_FEATURE_IPV6(AF_UNSPEC,) sock_type);
+		fd = xsocket_type(&lsa, IF_FEATURE_IPV6(AF_UNSPEC,) sock_type);
 		set_nport(lsa, htons(port));
 	}
 	setsockopt_reuseaddr(fd);
@@ -344,6 +385,13 @@ static char* FAST_FUNC sockaddr2str(const struct sockaddr *sa, int flags)
 	char serv[16];
 	int rc;
 	socklen_t salen;
+
+	if (ENABLE_FEATURE_UNIX_LOCAL && sa->sa_family == AF_UNIX) {
+		struct sockaddr_un *sun = (struct sockaddr_un *)sa;
+		return xasprintf("local:%.*s",
+				(int) sizeof(sun->sun_path),
+				sun->sun_path);
+	}
 
 	salen = LSA_SIZEOF_SA;
 #if ENABLE_FEATURE_IPV6

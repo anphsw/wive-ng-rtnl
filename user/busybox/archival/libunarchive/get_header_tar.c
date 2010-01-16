@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  *
@@ -29,6 +13,74 @@
 
 #include "libbb.h"
 #include "unarchive.h"
+
+/*
+ * GNU tar uses "base-256 encoding" for very large numbers (>8 billion).
+ * Encoding is binary, with highest bit always set as a marker
+ * and sign in next-highest bit:
+ * 80 00 .. 00 - zero
+ * bf ff .. ff - largest positive number
+ * ff ff .. ff - minus 1
+ * c0 00 .. 00 - smallest negative number
+ *
+ * We expect it only in size field, where negative numbers don't make sense.
+ */
+static off_t getBase256_len12(const char *str)
+{
+	off_t value;
+	int len;
+
+	/* if (*str & 0x40) error; - caller prevents this */
+
+	if (sizeof(off_t) >= 12) {
+		/* Probably 128-bit (16 byte) off_t. Can be optimized. */
+		len = 12;
+		value = *str++ & 0x3f;
+		while (--len)
+			value = (value << 8) + (unsigned char) *str++;
+		return value;
+	}
+
+#ifdef CHECK_FOR_OVERFLOW
+	/* Can be optimized to eat 32-bit chunks */
+	char c = *str++ & 0x3f;
+	len = 12;
+	while (1) {
+		if (c)
+			bb_error_msg_and_die("overflow in base-256 encoded file size");
+		if (--len == sizeof(off_t))
+			break;
+		c = *str++;
+	}
+#else
+	str += (12 - sizeof(off_t));
+#endif
+
+/* Now str points to sizeof(off_t) least significant bytes.
+ *
+ * Example of tar file with 8914993153 (0x213600001) byte file.
+ * Field starts at offset 7c:
+ * 00070  30 30 30 00 30 30 30 30  30 30 30 00 80 00 00 00  |000.0000000.....|
+ * 00080  00 00 00 02 13 60 00 01  31 31 31 32 30 33 33 36  |.....`..11120336|
+ *
+ * str is at offset 80 or 84 now (64-bit or 32-bit off_t).
+ * We (ab)use the fact that value happens to be aligned,
+ * and fetch it in one go:
+ */
+	if (sizeof(off_t) == 8) {
+		value = *(off_t*)str;
+		value = SWAP_BE64(value);
+	} else if (sizeof(off_t) == 4) {
+		value = *(off_t*)str;
+		value = SWAP_BE32(value);
+	} else {
+		value = 0;
+		len = sizeof(off_t);
+		while (--len)
+			value = (value << 8) + (unsigned char) *str++;
+	}
+	return value;
+}
 
 /* NB: _DESTROYS_ str[len] character! */
 static unsigned long long getOctal(char *str, int len)
@@ -92,8 +144,8 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 //	if (!archive_handle->ah_priv_inited) {
 //		archive_handle->ah_priv_inited = 1;
 //		p_end = 0;
-//		USE_FEATURE_TAR_GNU_EXTENSIONS(p_longname = NULL;)
-//		USE_FEATURE_TAR_GNU_EXTENSIONS(p_linkname = NULL;)
+//		IF_FEATURE_TAR_GNU_EXTENSIONS(p_longname = NULL;)
+//		IF_FEATURE_TAR_GNU_EXTENSIONS(p_linkname = NULL;)
 //	}
 
 	if (sizeof(tar) != 512)
@@ -107,7 +159,7 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 
  again_after_align:
 
-#if ENABLE_DESKTOP
+#if ENABLE_DESKTOP || ENABLE_FEATURE_TAR_AUTODETECT
 	/* to prevent misdetection of bz2 sig */
 	*(uint32_t*)(&tar) = 0;
 	i = full_read(archive_handle->src_fd, &tar, 512);
@@ -124,7 +176,7 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 		bb_error_msg_and_die("short read");
 	}
 	if (i != 512) {
-		USE_FEATURE_TAR_AUTODETECT(goto autodetect;)
+		IF_FEATURE_TAR_AUTODETECT(goto autodetect;)
 		goto short_read;
 	}
 
@@ -158,7 +210,7 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 #if ENABLE_FEATURE_TAR_AUTODETECT
 		char FAST_FUNC (*get_header_ptr)(archive_handle_t *);
 
- USE_DESKTOP(autodetect:)
+ autodetect:
 		/* tar gz/bz autodetect: check for gz/bz2 magic.
 		 * If we see the magic, and it is the very first block,
 		 * we can switch to get_header_tar_gz/bz2/lzma().
@@ -213,14 +265,14 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 #if ENABLE_FEATURE_TAR_OLDGNU_COMPATIBILITY
 	sum = strtoul(tar.chksum, &cp, 8);
 	if ((*cp && *cp != ' ')
-	 || (sum_u != sum USE_FEATURE_TAR_OLDSUN_COMPATIBILITY(&& sum_s != sum))
+	 || (sum_u != sum IF_FEATURE_TAR_OLDSUN_COMPATIBILITY(&& sum_s != sum))
 	) {
 		bb_error_msg_and_die("invalid tar header checksum");
 	}
 #else
 	/* This field does not need special treatment (getOctal) */
 	sum = xstrtoul(tar.chksum, 8);
-	if (sum_u != sum USE_FEATURE_TAR_OLDSUN_COMPATIBILITY(&& sum_s != sum)) {
+	if (sum_u != sum IF_FEATURE_TAR_OLDSUN_COMPATIBILITY(&& sum_s != sum)) {
 		bb_error_msg_and_die("invalid tar header checksum");
 	}
 #endif
@@ -249,8 +301,15 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 	file_header->uname = tar.uname[0] ? xstrndup(tar.uname, sizeof(tar.uname)) : NULL;
 	file_header->gname = tar.gname[0] ? xstrndup(tar.gname, sizeof(tar.gname)) : NULL;
 #endif
-	file_header->mtime = GET_OCTAL(tar.mtime);
-	file_header->size = GET_OCTAL(tar.size);
+	/* mtime: rudimentally handle GNU tar's "base256 encoding"
+	 * People report tarballs with NEGATIVE unix times encoded that way */
+	file_header->mtime = (tar.mtime[0] & 0x80) /* base256? */
+			? 0 /* bogus */
+			: GET_OCTAL(tar.mtime);
+	/* size: handle GNU tar's "base256 encoding" */
+	file_header->size = (tar.size[0] & 0xc0) == 0x80 /* positive base256? */
+			? getBase256_len12(tar.size)
+			: GET_OCTAL(tar.size);
 	file_header->gid = GET_OCTAL(tar.gid);
 	file_header->uid = GET_OCTAL(tar.uid);
 	/* Set bits 0-11 of the files mode */
@@ -301,7 +360,7 @@ char FAST_FUNC get_header_tar(archive_handle_t *archive_handle)
 		file_header->mode |= S_IFBLK;
 		goto size0;
 	case '5':
- USE_FEATURE_TAR_OLDGNU_COMPATIBILITY(set_dir:)
+ IF_FEATURE_TAR_OLDGNU_COMPATIBILITY(set_dir:)
 		file_header->mode |= S_IFDIR;
 		goto size0;
 	case '6':

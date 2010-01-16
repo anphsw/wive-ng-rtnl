@@ -3800,7 +3800,7 @@ sta_wps_pbc()
 		ifconfig(URE, 0, NULL, NULL);
 		ifconfig(WIF, 0, NULL, NULL);
 		eval("rmmod", "rt2860v2_ap");
-		eval("insmod", "rt2860v2_sta");
+		eval("modprobe", "rt2860v2_sta");
 		ifconfig(WIF, IFUP, NULL, NULL);
 	}
 	else
@@ -3852,7 +3852,7 @@ sta_wps_stop()
 
 		ifconfig(WIF, 0, NULL, NULL);
 		eval("rmmod", "rt2860v2_sta");
-		eval("insmod", "rt2860v2_ap");
+		eval("modprobe", "rt2860v2_ap");
 
 		gen_ralink_config();
 		ifconfig(WIF, IFUP, NULL, NULL);
@@ -3889,7 +3889,7 @@ ap_wps_stop()
 
 		ifconfig(WIF, 0, NULL, NULL);
 		eval("rmmod", "rt2860v2_sta");
-		eval("insmod", "rt2860v2_ap");
+		eval("modprobe", "rt2860v2_ap");
 /*
 		nvram_set("wl_ssid", nvram_safe_get("sta_ssid"));
 		nvram_set("wl_auth_mode", nvram_safe_get("sta_auth_mode"));

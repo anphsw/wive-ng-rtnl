@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini grep implementation for busybox using libc regex.
@@ -41,10 +25,12 @@
 /* options */
 #define OPTSTR_GREP \
 	"lnqvscFiHhe:f:Lorm:" \
-	USE_FEATURE_GREP_CONTEXT("A:B:C:") \
-	USE_FEATURE_GREP_EGREP_ALIAS("E") \
-	USE_DESKTOP("w") \
+	IF_FEATURE_GREP_CONTEXT("A:B:C:") \
+	IF_FEATURE_GREP_EGREP_ALIAS("E") \
+	IF_DESKTOP("w") \
+	IF_EXTRA_COMPAT("z") \
 	"aI"
+
 /* ignored: -a "assume all files to be text" */
 /* ignored: -I "assume binary files have no matches" */
 
@@ -65,11 +51,12 @@ enum {
 	OPTBIT_o, /* show only matching parts of lines */
 	OPTBIT_r, /* recurse dirs */
 	OPTBIT_m, /* -m MAX_MATCHES */
-	USE_FEATURE_GREP_CONTEXT(    OPTBIT_A ,) /* -A NUM: after-match context */
-	USE_FEATURE_GREP_CONTEXT(    OPTBIT_B ,) /* -B NUM: before-match context */
-	USE_FEATURE_GREP_CONTEXT(    OPTBIT_C ,) /* -C NUM: -A and -B combined */
-	USE_FEATURE_GREP_EGREP_ALIAS(OPTBIT_E ,) /* extended regexp */
-	USE_DESKTOP(                 OPTBIT_w ,) /* whole word match */
+	IF_FEATURE_GREP_CONTEXT(    OPTBIT_A ,) /* -A NUM: after-match context */
+	IF_FEATURE_GREP_CONTEXT(    OPTBIT_B ,) /* -B NUM: before-match context */
+	IF_FEATURE_GREP_CONTEXT(    OPTBIT_C ,) /* -C NUM: -A and -B combined */
+	IF_FEATURE_GREP_EGREP_ALIAS(OPTBIT_E ,) /* extended regexp */
+	IF_DESKTOP(                 OPTBIT_w ,) /* whole word match */
+	IF_EXTRA_COMPAT(            OPTBIT_z ,) /* input is NUL terminated */
 	OPT_l = 1 << OPTBIT_l,
 	OPT_n = 1 << OPTBIT_n,
 	OPT_q = 1 << OPTBIT_q,
@@ -86,11 +73,12 @@ enum {
 	OPT_o = 1 << OPTBIT_o,
 	OPT_r = 1 << OPTBIT_r,
 	OPT_m = 1 << OPTBIT_m,
-	OPT_A = USE_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_A)) + 0,
-	OPT_B = USE_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_B)) + 0,
-	OPT_C = USE_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_C)) + 0,
-	OPT_E = USE_FEATURE_GREP_EGREP_ALIAS((1 << OPTBIT_E)) + 0,
-	OPT_w = USE_DESKTOP(                 (1 << OPTBIT_w)) + 0,
+	OPT_A = IF_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_A)) + 0,
+	OPT_B = IF_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_B)) + 0,
+	OPT_C = IF_FEATURE_GREP_CONTEXT(    (1 << OPTBIT_C)) + 0,
+	OPT_E = IF_FEATURE_GREP_EGREP_ALIAS((1 << OPTBIT_E)) + 0,
+	OPT_w = IF_DESKTOP(                 (1 << OPTBIT_w)) + 0,
+	OPT_z = IF_EXTRA_COMPAT(            (1 << OPTBIT_z)) + 0,
 };
 
 #define PRINT_FILES_WITH_MATCHES    (option_mask32 & OPT_l)
@@ -100,6 +88,7 @@ enum {
 #define PRINT_MATCH_COUNTS          (option_mask32 & OPT_c)
 #define FGREP_FLAG                  (option_mask32 & OPT_F)
 #define PRINT_FILES_WITHOUT_MATCHES (option_mask32 & OPT_L)
+#define NUL_DELIMITED               (option_mask32 & OPT_z)
 
 struct globals {
 	int max_matches;
@@ -116,7 +105,7 @@ struct globals {
 	int lines_before;
 	int lines_after;
 	char **before_buf;
-	USE_EXTRA_COMPAT(size_t *before_buf_size;)
+	IF_EXTRA_COMPAT(size_t *before_buf_size;)
 	int last_line_printed;
 #endif
 	/* globals used internally */
@@ -131,17 +120,18 @@ struct globals {
 } while (0)
 #define max_matches       (G.max_matches         )
 #if !ENABLE_EXTRA_COMPAT
-#define reflags           (G.reflags             )
+# define reflags          (G.reflags             )
 #else
-#define case_fold         (G.case_fold           )
+# define case_fold        (G.case_fold           )
 /* http://www.delorie.com/gnu/docs/regex/regex_46.html */
-#define reflags           re_syntax_options
-#undef REG_NOSUB
-#undef REG_EXTENDED
-#undef REG_ICASE
-#define REG_NOSUB    bug:is:here /* should not be used */
-#define REG_EXTENDED RE_SYNTAX_EGREP
-#define REG_ICASE    bug:is:here /* should not be used */
+# define reflags           re_syntax_options
+# undef REG_NOSUB
+# undef REG_EXTENDED
+# undef REG_ICASE
+# define REG_NOSUB    bug:is:here /* should not be used */
+/* Just RE_SYNTAX_EGREP is not enough, need to enable {n[,[m]]} too */
+# define REG_EXTENDED (RE_SYNTAX_EGREP | RE_INTERVALS | RE_NO_BK_BRACES)
+# define REG_ICASE    bug:is:here /* should not be used */
 #endif
 #define invert_search     (G.invert_search       )
 #define print_filename    (G.print_filename      )
@@ -202,7 +192,7 @@ static void print_line(const char *line, size_t line_len, int linenum, char deco
 		puts(line);
 #else
 		fwrite(line, 1, line_len, stdout);
-		putchar('\n');
+		putchar(NUL_DELIMITED ? '\0' : '\n');
 #endif
 	}
 }
@@ -213,12 +203,13 @@ static ssize_t FAST_FUNC bb_getline(char **line_ptr, size_t *line_alloc_len, FIL
 {
 	ssize_t res_sz;
 	char *line;
+	int delim = (NUL_DELIMITED ? '\0' : '\n');
 
-	res_sz = getline(line_ptr, line_alloc_len, file);
+	res_sz = getdelim(line_ptr, line_alloc_len, delim, file);
 	line = *line_ptr;
 
 	if (res_sz > 0) {
-		if (line[res_sz - 1] == '\n')
+		if (line[res_sz - 1] == delim)
 			line[--res_sz] = '\0';
 	} else {
 		free(line); /* uclibc allocates a buffer even on EOF. WTF? */
@@ -379,11 +370,28 @@ static int grep_file(FILE *file)
 						 * (unless -v: -Fov doesnt print anything at all) */
 						if (found)
 							print_line(gl->pattern, strlen(gl->pattern), linenum, ':');
-					} else {
-						line[gl->matched_range.rm_eo] = '\0';
+					} else while (1) {
+						unsigned end = gl->matched_range.rm_eo;
+						char old = line[end];
+						line[end] = '\0';
 						print_line(line + gl->matched_range.rm_so,
-								gl->matched_range.rm_eo - gl->matched_range.rm_so,
+								end - gl->matched_range.rm_so,
 								linenum, ':');
+						if (old == '\0')
+							break;
+						line[end] = old;
+#if !ENABLE_EXTRA_COMPAT
+						if (regexec(&gl->compiled_regex, line + end,
+								1, &gl->matched_range, REG_NOTBOL) != 0)
+							break;
+						gl->matched_range.rm_so += end;
+						gl->matched_range.rm_eo += end;
+#else
+						if (re_search(&gl->compiled_regex, line, line_len,
+								end, line_len - end,
+								&gl->matched_range) < 0)
+							break;
+#endif
 					}
 				} else {
 					print_line(line, line_len, linenum, ':');
@@ -400,7 +408,7 @@ static int grep_file(FILE *file)
 				/* Add the line to the circular 'before' buffer */
 				free(before_buf[curpos]);
 				before_buf[curpos] = line;
-				USE_EXTRA_COMPAT(before_buf_size[curpos] = line_len;)
+				IF_EXTRA_COMPAT(before_buf_size[curpos] = line_len;)
 				curpos = (curpos + 1) % lines_before;
 				/* avoid free(line) - we took the line */
 				line = NULL;
@@ -413,8 +421,11 @@ static int grep_file(FILE *file)
 #endif
 		/* Did we print all context after last requested match? */
 		if ((option_mask32 & OPT_m)
-		 && !print_n_lines_after && nmatches == max_matches)
+		 && !print_n_lines_after
+		 && nmatches == max_matches
+		) {
 			break;
+		}
 	} /* while (read line) */
 
 	/* special-case file post-processing for options where we don't print line
@@ -541,7 +552,7 @@ int grep_main(int argc, char **argv)
 		lines_after = 0;
 	} else if (lines_before > 0) {
 		before_buf = xzalloc(lines_before * sizeof(before_buf[0]));
-		USE_EXTRA_COMPAT(before_buf_size = xzalloc(lines_before * sizeof(before_buf_size[0]));)
+		IF_EXTRA_COMPAT(before_buf_size = xzalloc(lines_before * sizeof(before_buf_size[0]));)
 	}
 #else
 	/* with auto sanity checks */

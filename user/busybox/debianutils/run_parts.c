@@ -1,24 +1,8 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini run-parts implementation for busybox
  *
- * Copyright (C) 2007 Bernhard Fischer
+ * Copyright (C) 2007 Bernhard Reutner-Fischer
  *
  * Based on a older version that was in busybox which was 1k big..
  *   Copyright (C) 2001 by Emanuele Aina <emanuele.aina@tiscali.it>
@@ -140,7 +124,7 @@ int run_parts_main(int argc UNUSED_PARAM, char **argv)
 	/* We require exactly one argument: the directory name */
 	/* We require exactly one argument: the directory name */
 	opt_complementary = "=1:a::";
-	getopt32(argv, "ra:u:t"USE_FEATURE_RUN_PARTS_FANCY("l"), &arg_list, &umask_p);
+	getopt32(argv, "ra:u:t"IF_FEATURE_RUN_PARTS_FANCY("l"), &arg_list, &umask_p);
 
 	umask(xstrtou_range(umask_p, 8, 0, 07777));
 
@@ -180,7 +164,7 @@ int run_parts_main(int argc UNUSED_PARAM, char **argv)
 			continue;
 		n = 1;
 		if (ret < 0)
-			bb_perror_msg("can't exec %s", name);
+			bb_perror_msg("can't execute '%s'", name);
 		else /* ret > 0 */
 			bb_error_msg("%s exited with code %d", name, ret);
 	}

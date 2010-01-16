@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * setsid.c -- execute a command in a new session
@@ -42,7 +26,8 @@ int setsid_main(int argc UNUSED_PARAM, char **argv)
 	 * Otherwise our PID serves as PGID of some existing process group
 	 * and cannot be used as PGID of a new process group. */
 	if (getpgrp() == getpid())
-		forkexit_or_rexec(argv);
+		if (fork_or_rexec(argv))
+			exit(EXIT_SUCCESS); /* parent */
 
 	setsid();  /* no error possible */
 

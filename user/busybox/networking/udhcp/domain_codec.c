@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 
 /* RFC1035 domain compression routines (C) 2007 Gabriel Somlo <somlo at cmu.edu>
@@ -23,7 +7,7 @@
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  */
 
-#if ENABLE_FEATURE_RFC3397
+#if ENABLE_FEATURE_UDHCP_RFC3397
 
 #include "common.h"
 #include "options.h"
@@ -39,17 +23,10 @@
  * returns a newly allocated string containing the space-separated domains,
  * prefixed with the contents of string pre, or NULL if an error occurs.
  */
-char *dname_dec(const uint8_t *cstr, int clen, const char *pre)
+char* FAST_FUNC dname_dec(const uint8_t *cstr, int clen, const char *pre)
 {
-	const uint8_t *c;
-	int crtpos, retpos, depth, plen = 0, len = 0;
+	char *ret = ret; /* for compiler */
 	char *dst = NULL;
-
-	if (!cstr)
-		return NULL;
-
-	if (pre)
-		plen = strlen(pre);
 
 	/* We make two passes over the cstr string. First, we compute
 	 * how long the resulting string would be. Then we allocate a
@@ -58,59 +35,71 @@ char *dname_dec(const uint8_t *cstr, int clen, const char *pre)
 	 * having to deal with requiring callers to supply their own
 	 * buffer, then having to check if it's sufficiently large, etc.
 	 */
-
-	while (!dst) {
-
-		if (len > 0) {	/* second pass? allocate dst buffer and copy pre */
-			dst = xmalloc(len + plen);
-			memcpy(dst, pre, plen);
-		}
+	while (1) {
+		/* note: "return NULL" below are leak-safe since
+		 * dst isn't yet allocated */
+		const uint8_t *c;
+		unsigned crtpos, retpos, depth, len;
 
 		crtpos = retpos = depth = len = 0;
-
 		while (crtpos < clen) {
 			c = cstr + crtpos;
 
-			if ((*c & NS_CMPRSFLGS) != 0) {	/* pointer */
-				if (crtpos + 2 > clen)		/* no offset to jump to? abort */
+			if (*c & NS_CMPRSFLGS) {
+				/* pointer */
+				if (crtpos + 2 > clen) /* no offset to jump to? abort */
 					return NULL;
-				if (retpos == 0)			/* toplevel? save return spot */
+				if (retpos == 0) /* toplevel? save return spot */
 					retpos = crtpos + 2;
 				depth++;
-				crtpos = ((*c & 0x3f) << 8) | (*(c + 1) & 0xff); /* jump */
-			} else if (*c) {			/* label */
-				if (crtpos + *c + 1 > clen)		/* label too long? abort */
+				crtpos = ((c[0] & 0x3f) << 8) | (c[1] & 0xff); /* jump */
+			} else if (*c) {
+				/* label */
+				if (crtpos + *c + 1 > clen) /* label too long? abort */
 					return NULL;
 				if (dst)
-					memcpy(dst + plen + len, c + 1, *c);
+					memcpy(dst + len, c + 1, *c);
 				len += *c + 1;
 				crtpos += *c + 1;
 				if (dst)
-					*(dst + plen + len - 1) = '.';
-			} else {					/* null: end of current domain name */
-				if (retpos == 0) {			/* toplevel? keep going */
+					dst[len - 1] = '.';
+			} else {
+				/* null: end of current domain name */
+				if (retpos == 0) {
+					/* toplevel? keep going */
 					crtpos++;
-				} else {					/* return to toplevel saved spot */
+				} else {
+					/* return to toplevel saved spot */
 					crtpos = retpos;
 					retpos = depth = 0;
 				}
 				if (dst)
-					*(dst + plen + len - 1) = ' ';
+					dst[len - 1] = ' ';
 			}
 
-			if (depth > NS_MAXDNSRCH || /* too many jumps? abort, it's a loop */
-				len > NS_MAXDNAME * NS_MAXDNSRCH) /* result too long? abort */
+			if (depth > NS_MAXDNSRCH /* too many jumps? abort, it's a loop */
+			 || len > NS_MAXDNAME * NS_MAXDNSRCH /* result too long? abort */
+			) {
 				return NULL;
+			}
 		}
 
-		if (!len)			/* expanded string has 0 length? abort */
+		if (!len) /* expanded string has 0 length? abort */
 			return NULL;
 
-		if (dst)
-			*(dst + plen + len - 1) = '\0';
+		if (!dst) { /* first pass? */
+			/* allocate dst buffer and copy pre */
+			unsigned plen = strlen(pre);
+			ret = dst = xmalloc(plen + len);
+			memcpy(dst, pre, plen);
+			dst += plen;
+		} else {
+			dst[len - 1] = '\0';
+			break;
+		}
 	}
 
-	return dst;
+	return ret;
 }
 
 /* Convert a domain name (src) from human-readable "foo.blah.com" format into
@@ -194,7 +183,7 @@ static int find_offset(const uint8_t *cstr, int clen, const uint8_t *dname)
  * The computed string is returned directly; its length is returned via retlen;
  * NULL and 0, respectively, are returned if an error occurs.
  */
-uint8_t *dname_enc(const uint8_t *cstr, int clen, const char *src, int *retlen)
+uint8_t* FAST_FUNC dname_enc(const uint8_t *cstr, int clen, const char *src, int *retlen)
 {
 	uint8_t *d, *dname;
 	int off;
@@ -218,4 +207,4 @@ uint8_t *dname_enc(const uint8_t *cstr, int clen, const char *src, int *retlen)
 	return dname;
 }
 
-#endif /* ENABLE_FEATURE_RFC3397 */
+#endif /* ENABLE_FEATURE_UDHCP_RFC3397 */

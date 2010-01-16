@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini chown implementation for busybox
@@ -32,13 +16,13 @@
 /* This is a NOEXEC applet. Be very careful! */
 
 
-#define OPT_STR     ("Rh" USE_DESKTOP("vcfLHP"))
+#define OPT_STR     ("Rh" IF_DESKTOP("vcfLHP"))
 #define BIT_RECURSE 1
 #define OPT_RECURSE (opt & 1)
 #define OPT_NODEREF (opt & 2)
-#define OPT_VERBOSE (USE_DESKTOP(opt & 0x04) SKIP_DESKTOP(0))
-#define OPT_CHANGED (USE_DESKTOP(opt & 0x08) SKIP_DESKTOP(0))
-#define OPT_QUIET   (USE_DESKTOP(opt & 0x10) SKIP_DESKTOP(0))
+#define OPT_VERBOSE (IF_DESKTOP(opt & 0x04) IF_NOT_DESKTOP(0))
+#define OPT_CHANGED (IF_DESKTOP(opt & 0x08) IF_NOT_DESKTOP(0))
+#define OPT_QUIET   (IF_DESKTOP(opt & 0x10) IF_NOT_DESKTOP(0))
 /* POSIX options
  * -L traverse every symbolic link to a directory encountered
  * -H if a command line argument is a symbolic link to a directory, traverse it
@@ -48,10 +32,10 @@
  * The last option specified shall determine the behavior of the utility." */
 /* -L */
 #define BIT_TRAVERSE 0x20
-#define OPT_TRAVERSE (USE_DESKTOP(opt & BIT_TRAVERSE) SKIP_DESKTOP(0))
+#define OPT_TRAVERSE (IF_DESKTOP(opt & BIT_TRAVERSE) IF_NOT_DESKTOP(0))
 /* -H or -L */
 #define BIT_TRAVERSE_TOP (0x20|0x40)
-#define OPT_TRAVERSE_TOP (USE_DESKTOP(opt & BIT_TRAVERSE_TOP) SKIP_DESKTOP(0))
+#define OPT_TRAVERSE_TOP (IF_DESKTOP(opt & BIT_TRAVERSE_TOP) IF_NOT_DESKTOP(0))
 
 typedef int (*chown_fptr)(const char *, uid_t, gid_t);
 
@@ -101,7 +85,7 @@ int chown_main(int argc UNUSED_PARAM, char **argv)
 	/* This matches coreutils behavior (almost - see below) */
 	if (OPT_NODEREF
 	    /* || (OPT_RECURSE && !OPT_TRAVERSE_TOP): */
-	    USE_DESKTOP( || (opt & (BIT_RECURSE|BIT_TRAVERSE_TOP)) == BIT_RECURSE)
+	    IF_DESKTOP( || (opt & (BIT_RECURSE|BIT_TRAVERSE_TOP)) == BIT_RECURSE)
 	) {
 		param.chown_func = lchown;
 	}

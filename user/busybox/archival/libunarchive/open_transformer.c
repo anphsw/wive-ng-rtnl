@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
@@ -28,7 +12,7 @@
  * in include/unarchive.h. On NOMMU, transformer is removed.
  */
 void FAST_FUNC open_transformer(int fd,
-	USE_DESKTOP(long long) int FAST_FUNC (*transformer)(int src_fd, int dst_fd),
+	IF_DESKTOP(long long) int FAST_FUNC (*transformer)(int src_fd, int dst_fd),
 	const char *transform_prog)
 {
 	struct fd_pair fd_pipe;
@@ -68,7 +52,7 @@ void FAST_FUNC open_transformer(int fd,
 			argv[2] = (char*)"-";
 			argv[3] = NULL;
 			BB_EXECVP(transform_prog, argv);
-			bb_perror_msg_and_die("can't exec %s", transform_prog);
+			bb_perror_msg_and_die("can't execute '%s'", transform_prog);
 		}
 #endif
 		/* notreached */

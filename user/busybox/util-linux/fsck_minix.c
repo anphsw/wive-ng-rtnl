@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * fsck.c - a file system consistency checker for Linux.
@@ -167,7 +151,7 @@ struct globals {
 	char superblock_buffer[BLOCK_SIZE];
 	char add_zone_ind_blk[BLOCK_SIZE];
 	char add_zone_dind_blk[BLOCK_SIZE];
-	USE_FEATURE_MINIX2(char add_zone_tind_blk[BLOCK_SIZE];)
+	IF_FEATURE_MINIX2(char add_zone_tind_blk[BLOCK_SIZE];)
 	char check_file_blk[BLOCK_SIZE];
 
 	/* File-name data */
@@ -309,7 +293,7 @@ static void die(const char *str) NORETURN;
 static void die(const char *str)
 {
 	if (termios_set)
-		tcsetattr(0, TCSANOW, &sv_termios);
+		tcsetattr_stdin_TCSANOW(&sv_termios);
 	bb_error_msg_and_die("%s", str);
 }
 
@@ -390,38 +374,28 @@ static int ask(const char *string, int def)
  */
 static void check_mount(void)
 {
-	FILE *f;
-	struct mntent *mnt;
-	int cont;
-	int fd;
-//XXX:FIXME use find_mount_point()
-	f = setmntent(MOUNTED, "r");
-	if (f == NULL)
-		return;
-	while ((mnt = getmntent(f)) != NULL)
-		if (strcmp(device_name, mnt->mnt_fsname) == 0)
-			break;
-	endmntent(f);
-	if (!mnt)
-		return;
+	if (find_mount_point(device_name, 0)) {
+		int cont;
+#if ENABLE_FEATURE_MTAB_SUPPORT
+		/*
+		 * If the root is mounted read-only, then /etc/mtab is
+		 * probably not correct; so we won't issue a warning based on
+		 * it.
+		 */
+		int fd = open(bb_path_mtab_file, O_RDWR);
 
-	/*
-	 * If the root is mounted read-only, then /etc/mtab is
-	 * probably not correct; so we won't issue a warning based on
-	 * it.
-	 */
-	fd = open(MOUNTED, O_RDWR);
-	if (fd < 0 && errno == EROFS)
-		return;
-	close(fd);
-
-	printf("%s is mounted. ", device_name);
-	cont = 0;
-	if (isatty(0) && isatty(1))
-		cont = ask("Do you really want to continue", 0);
-	if (!cont) {
-		printf("Check aborted\n");
-		exit(EXIT_SUCCESS);
+		if (fd < 0 && errno == EROFS)
+			return;
+		close(fd);
+#endif
+		printf("%s is mounted. ", device_name);
+		cont = 0;
+		if (isatty(0) && isatty(1))
+			cont = ask("Do you really want to continue", 0);
+		if (!cont) {
+			printf("Check aborted\n");
+			exit(EXIT_SUCCESS);
+		}
 	}
 }
 
@@ -1270,7 +1244,7 @@ int fsck_minix_main(int argc UNUSED_PARAM, char **argv)
 		tcgetattr(0, &sv_termios);
 		tmp = sv_termios;
 		tmp.c_lflag &= ~(ICANON | ECHO);
-		tcsetattr(0, TCSANOW, &tmp);
+		tcsetattr_stdin_TCSANOW(&tmp);
 		termios_set = 1;
 	}
 
@@ -1315,7 +1289,7 @@ int fsck_minix_main(int argc UNUSED_PARAM, char **argv)
 		write_superblock();
 
 	if (OPT_manual)
-		tcsetattr(0, TCSANOW, &sv_termios);
+		tcsetattr_stdin_TCSANOW(&sv_termios);
 
 	if (changed)
 		retcode += 3;

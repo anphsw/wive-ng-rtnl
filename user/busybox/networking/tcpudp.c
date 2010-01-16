@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* Based on ipsvd utilities written by Gerrit Pape <pape@smarden.org>
  * which are released into public domain by the author.
  * Homepage: http://smarden.sunsite.dk/ipsvd/
@@ -101,8 +85,7 @@ static void undo_xsetenv(void)
 	char **pp = env_cur = &env_var[0];
 	while (*pp) {
 		char *var = *pp;
-		*strchrnul(var, '=') = '\0';
-		unsetenv(var);
+		bb_unsetenv(var);
 		free(var);
 		*pp++ = NULL;
 	}
@@ -163,7 +146,7 @@ static void connection_status(void)
 static void sig_child_handler(int sig UNUSED_PARAM)
 {
 	int wstat;
-	int pid;
+	pid_t pid;
 
 	while ((pid = wait_any_nohang(&wstat)) > 0) {
 		if (max_per_host)
@@ -201,6 +184,7 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 	int sock;
 	int conn;
 	unsigned backlog = 20;
+	unsigned opts;
 
 	INIT_G();
 
@@ -209,18 +193,18 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 	/* 3+ args, -i at most once, -p implies -h, -v is counter, -b N, -c N */
 	opt_complementary = "-3:i--i:ph:vv:b+:c+";
 #ifdef SSLSVD
-	getopt32(argv, "+c:C:i:x:u:l:Eb:hpt:vU:/:Z:K:",
+	opts = getopt32(argv, "+c:C:i:x:u:l:Eb:hpt:vU:/:Z:K:",
 		&cmax, &str_C, &instructs, &instructs, &user, &preset_local_hostname,
 		&backlog, &str_t, &ssluser, &root, &cert, &key, &verbose
 	);
 #else
 	/* "+": stop on first non-option */
-	getopt32(argv, "+c:C:i:x:u:l:Eb:hpt:v",
+	opts = getopt32(argv, "+c:C:i:x:u:l:Eb:hpt:v",
 		&cmax, &str_C, &instructs, &instructs, &user, &preset_local_hostname,
 		&backlog, &str_t, &verbose
 	);
 #endif
-	if (option_mask32 & OPT_C) { /* -C n[:message] */
+	if (opts & OPT_C) { /* -C n[:message] */
 		max_per_host = bb_strtou(str_C, &str_C, 10);
 		if (str_C[0]) {
 			if (str_C[0] != ':')
@@ -231,14 +215,14 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 	}
 	if (max_per_host > cmax)
 		max_per_host = cmax;
-	if (option_mask32 & OPT_u) {
+	if (opts & OPT_u) {
 		xget_uidgid(&ugid, user);
 	}
 #ifdef SSLSVD
-	if (option_mask32 & OPT_U) ssluser = optarg;
-	if (option_mask32 & OPT_slash) root = optarg;
-	if (option_mask32 & OPT_Z) cert = optarg;
-	if (option_mask32 & OPT_K) key = optarg;
+	if (opts & OPT_U) ssluser = optarg;
+	if (opts & OPT_slash) root = optarg;
+	if (opts & OPT_Z) cert = optarg;
+	if (opts & OPT_K) key = optarg;
 #endif
 	argv += optind;
 	if (!argv[0][0] || LONE_CHAR(argv[0], '0'))
@@ -253,11 +237,11 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 #ifdef SSLSVD
 	sslser = user;
 	client = 0;
-	if ((getuid() == 0) && !(option_mask32 & OPT_u)) {
+	if ((getuid() == 0) && !(opts & OPT_u)) {
 		xfunc_exitcode = 100;
 		bb_error_msg_and_die("-U ssluser must be set when running as root");
 	}
-	if (option_mask32 & OPT_u)
+	if (opts & OPT_u)
 		if (!uidgid_get(&sslugid, ssluser, 1)) {
 			if (errno) {
 				bb_perror_msg_and_die("can't get user/group: %s", ssluser);
@@ -293,14 +277,16 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 	setsockopt_reuseaddr(sock);
 	sa_len = lsa->len; /* I presume sockaddr len stays the same */
 	xbind(sock, &lsa->u.sa, sa_len);
-	if (tcp)
+	if (tcp) {
 		xlisten(sock, backlog);
-	else /* udp: needed for recv_from_to to work: */
+		close_on_exec_on(sock);
+	} else { /* udp: needed for recv_from_to to work: */
 		socket_want_pktinfo(sock);
+	}
 	/* ndelay_off(sock); - it is the default I think? */
 
 #ifndef SSLSVD
-	if (option_mask32 & OPT_u) {
+	if (opts & OPT_u) {
 		/* drop permissions */
 		xsetgid(ugid.gid);
 		xsetuid(ugid.uid);
@@ -309,13 +295,12 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 
 	if (verbose) {
 		char *addr = xmalloc_sockaddr2dotted(&lsa->u.sa);
-		bb_error_msg("listening on %s, starting", addr);
-		free(addr);
-#ifndef SSLSVD
-		if (option_mask32 & OPT_u)
-			printf(", uid %u, gid %u",
+		if (opts & OPT_u)
+			bb_error_msg("listening on %s, starting, uid %u, gid %u", addr,
 				(unsigned)ugid.uid, (unsigned)ugid.gid);
-#endif
+		else
+			bb_error_msg("listening on %s, starting", addr);
+		free(addr);
 	}
 
 	/* Main accept() loop */
@@ -427,10 +412,6 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 
 	/* Child: prepare env, log, and exec prog */
 
-	/* Closing tcp listening socket */
-	if (tcp)
-		close(sock);
-
 	{ /* vfork alert! every xmalloc in this block should be freed! */
 		char *local_hostname = local_hostname; /* for compiler */
 		char *local_addr = NULL;
@@ -438,10 +419,10 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 		char *free_me1 = NULL;
 		char *free_me2 = NULL;
 
-		if (verbose || !(option_mask32 & OPT_E)) {
+		if (verbose || !(opts & OPT_E)) {
 			if (!max_per_host) /* remote_addr is not yet known */
 				free_me0 = remote_addr = xmalloc_sockaddr2dotted(&remote.u.sa);
-			if (option_mask32 & OPT_h) {
+			if (opts & OPT_h) {
 				free_me1 = remote_hostname = xmalloc_sockaddr2host_noport(&remote.u.sa);
 				if (!remote_hostname) {
 					bb_error_msg("cannot look up hostname for %s", remote_addr);
@@ -455,7 +436,7 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 				getsockname(0, &local.u.sa, &local.len);
 			/* else: for UDP it is done earlier by parent */
 			local_addr = xmalloc_sockaddr2dotted(&local.u.sa);
-			if (option_mask32 & OPT_h) {
+			if (opts & OPT_h) {
 				local_hostname = preset_local_hostname;
 				if (!local_hostname) {
 					free_me2 = local_hostname = xmalloc_sockaddr2host_noport(&local.u.sa);
@@ -472,7 +453,7 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 					remote_addr,
 					cur_per_host, max_per_host);
 			}
-			bb_error_msg((option_mask32 & OPT_h)
+			bb_error_msg((opts & OPT_h)
 				? "start %u %s-%s (%s-%s)"
 				: "start %u %s-%s",
 				pid,
@@ -480,7 +461,7 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 				local_hostname, remote_hostname);
 		}
 
-		if (!(option_mask32 & OPT_E)) {
+		if (!(opts & OPT_E)) {
 			/* setup ucspi env */
 			const char *proto = tcp ? "TCP" : "UDP";
 
@@ -496,7 +477,7 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 			xsetenv_plain("PROTO", proto);
 			xsetenv_proto(proto, "LOCALADDR", local_addr);
 			xsetenv_proto(proto, "REMOTEADDR", remote_addr);
-			if (option_mask32 & OPT_h) {
+			if (opts & OPT_h) {
 				xsetenv_proto(proto, "LOCALHOST", local_hostname);
 				xsetenv_proto(proto, "REMOTEHOST", remote_hostname);
 			}
@@ -513,9 +494,9 @@ int tcpudpsvd_main(int argc UNUSED_PARAM, char **argv)
 
 	xdup2(0, 1);
 
-	signal(SIGTERM, SIG_DFL);
-	signal(SIGPIPE, SIG_DFL);
-	signal(SIGCHLD, SIG_DFL);
+	signal(SIGPIPE, SIG_DFL); /* this one was SIG_IGNed */
+	/* Non-ignored signals revert to SIG_DFL on exec anyway */
+	/*signal(SIGCHLD, SIG_DFL);*/
 	sig_unblock(SIGCHLD);
 
 #ifdef SSLSVD

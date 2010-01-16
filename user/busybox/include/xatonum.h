@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ascii-to-numbers implementations for busybox
@@ -23,9 +7,7 @@
  * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility push(hidden)
-#endif
+PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 
 /* Provides extern declarations of functions */
 #define DECLARE_STR_CONV(type, T, UT) \
@@ -40,6 +22,7 @@ unsigned type xato##UT##_sfx(const char *str, const struct suffix_mult *sfx) FAS
 unsigned type xato##UT(const char *str) FAST_FUNC; \
 type xstrto##T##_range_sfx(const char *str, int b, type l, type u, const struct suffix_mult *sfx) FAST_FUNC; \
 type xstrto##T##_range(const char *str, int b, type l, type u) FAST_FUNC; \
+type xstrto##T(const char *str, int b) FAST_FUNC; \
 type xato##T##_range_sfx(const char *str, type l, type u, const struct suffix_mult *sfx) FAST_FUNC; \
 type xato##T##_range(const char *str, type l, type u) FAST_FUNC; \
 type xato##T##_sfx(const char *str, const struct suffix_mult *sfx) FAST_FUNC; \
@@ -83,6 +66,9 @@ narrow xstrto##N##_range_sfx(const char *str, int b, narrow l, narrow u, const s
 static ALWAYS_INLINE \
 narrow xstrto##N##_range(const char *str, int b, narrow l, narrow u) \
 { return xstrto##W##_range(str, b, l, u); } \
+static ALWAYS_INLINE \
+narrow xstrto##N(const char *str, int b) \
+{ return xstrto##W(str, b); } \
 static ALWAYS_INLINE \
 narrow xato##N##_range_sfx(const char *str, narrow l, narrow u, const struct suffix_mult *sfx) \
 { return xato##W##_range_sfx(str, l, u, sfx); } \
@@ -187,6 +173,4 @@ uint32_t bb_strtou32(const char *arg, char **endp, int base)
 
 double bb_strtod(const char *arg, char **endp) FAST_FUNC;
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility pop
-#endif
+POP_SAVED_FUNCTION_VISIBILITY

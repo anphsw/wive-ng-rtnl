@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Copyright 1989 - 1991, Julianne Frances Haugh <jockgrrl@austin.rr.com>
@@ -48,15 +32,15 @@
 
 void FAST_FUNC setup_environment(const char *shell, int clear_env, int change_env, const struct passwd *pw)
 {
+	/* Change the current working directory to be the home directory
+	 * of the user */
+	if (chdir(pw->pw_dir)) {
+		xchdir("/");
+		bb_error_msg("can't chdir to home directory '%s'", pw->pw_dir);
+	}
+
 	if (clear_env) {
 		const char *term;
-
-		/* Change the current working directory to be the home directory
-		 * of the user */
-		if (chdir(pw->pw_dir)) {
-			xchdir("/");
-			bb_error_msg("can't chdir to home directory '%s'", pw->pw_dir);
-		}
 
 		/* Leave TERM unchanged. Set HOME, SHELL, USER, LOGNAME, PATH.
 		   Unset all other environment variables.  */

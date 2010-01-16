@@ -18,13 +18,13 @@ ROMFS_DIRS = \
 	etc \
 	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g etc_ro/ppp/plugins etc_ro/wlan etc_ro/Wireless etc_ro/xml \
 	etc_ro/linuxigd \
-	lib lib/modules lib/ipsec\
+	lib lib/modules lib/ipsec lib/pppd lib/l2tp lib/l2tp/plugins\
 	mnt \
 	proc \
-	sbin \
 	sys \
 	media \
-	usr usr/bin usr/sbin usr/codepages usr/lib/pppd usr/lib/l2tp usr/lib/l2tp/plugins\
+	share \
+	usr usr/codepages \
 	www \
         apps \
         var 
@@ -42,21 +42,17 @@ ifneq	($(LINUXDIR),linux-2.4.x)
 	@if [ \! -d $(ROMFSDIR)/dev ];then mkdir -p $(ROMFSDIR)/dev;fi;
 	./makedevlinks $(ROMFSDIR)
 endif
+	$(ROMFSINST) -s ./bin /sbin
+	$(ROMFSINST) -s ../bin /usr/bin
+	$(ROMFSINST) -s ../bin /usr/sbin
+	$(ROMFSINST) -s ../lib /usr/lib
+	$(ROMFSINST) -s ../share /usr/share
 	$(ROMFSINST) /etc_ro/rcS
-	#$(ROMFSINST) /etc_ro/inittab
-	#$(ROMFSINST) /etc_ro/motd
 	$(ROMFSINST) /etc/fstab
 
 	$(ROMFSINST) -e CONFIG_RALINK_RT3052AP_2T2R /etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin
 	$(ROMFSINST) -e CONFIG_RALINK_RT3051AP_1T2R /etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin
 	$(ROMFSINST) -e CONFIG_RALINK_RT3050AP_1T1R /etc_ro/wlan/RT3050_AP_1T1R_V1_0.bin
-
-	#$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_vlan
-
-	#$(ROMFSINST) -e CONFIG_RT2880v2_INIC_AP /etc_ro/Wireless/RT2880/iNIC_ap.bin
-	#$(ROMFSINST) -e CONFIG_RT2880v2_INIC_AP /etc_ro/Wireless/RT2880/iNIC_ap.dat
-	#$(ROMFSINST) -e CONFIG_RT2880v2_INIC_STA /etc_ro/Wireless/RT2880/iNIC_sta.bin
-	#$(ROMFSINST) -e CONFIG_RT2880v2_INIC_STA /etc_ro/Wireless/RT2880/iNIC_sta.dat
 
 romfs.post:: 
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
@@ -69,7 +65,6 @@ else
 	#linux2.6.x support squashfs with lzma
 ifeq	($(CONFIG_BLK_DEV_INITRD),)
 	$(CONFIG_CROSS_COMPILER_PATH)/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK)
-#	$(CONFIG_CROSS_COMPILER_PATH)/mksquashfs_lzma-3.0 $(ROMFSDIR) $(RAMDISK)
 endif
 endif
 

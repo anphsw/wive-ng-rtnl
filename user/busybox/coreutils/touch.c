@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini touch implementation for busybox
@@ -57,19 +41,40 @@ int touch_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int touch_main(int argc UNUSED_PARAM, char **argv)
 {
 #if ENABLE_DESKTOP
+# if ENABLE_LONG_OPTS
+	static const char touch_longopts[] ALIGN1 =
+		/* name, has_arg, val */
+		"no-create\0"         No_argument       "c"
+		"reference\0"         Required_argument "r"
+		"date\0"              Required_argument "d"
+	;
+# endif
 	struct utimbuf timebuf;
 	char *reference_file = NULL;
+	char *date_str = NULL;
 #else
-#define reference_file NULL
-#define timebuf        (*(struct utimbuf*)NULL)
+# define reference_file NULL
+# define date_str       NULL
+# define timebuf        (*(struct utimbuf*)NULL)
 #endif
 	int fd;
 	int status = EXIT_SUCCESS;
-	int flags = getopt32(argv, "c" USE_DESKTOP("r:")
-				/*ignored:*/ "fma"
-				USE_DESKTOP(, &reference_file));
+	int opts;
 
-	flags &= 1; /* only -c bit is left */
+#if ENABLE_DESKTOP && ENABLE_LONG_OPTS
+	applet_long_options = touch_longopts;
+#endif
+	/* -d and -t both set time. In coreutils,
+	 * accepted data format differs a bit between -d and -t.
+	 * We accept the same formats for both */
+	opts = getopt32(argv, "c" IF_DESKTOP("r:d:t:")
+				/*ignored:*/ "fma"
+				IF_DESKTOP(, &reference_file)
+				IF_DESKTOP(, &date_str)
+				IF_DESKTOP(, &date_str)
+	);
+
+	opts &= 1; /* only -c bit is left */
 	argv += optind;
 	if (!*argv) {
 		bb_show_usage();
@@ -82,10 +87,27 @@ int touch_main(int argc UNUSED_PARAM, char **argv)
 		timebuf.modtime = stbuf.st_mtime;
 	}
 
+	if (date_str) {
+		struct tm tm_time;
+		time_t t;
+
+		//time(&t);
+		//localtime_r(&t, &tm_time);
+		memset(&tm_time, 0, sizeof(tm_time));
+		parse_datestr(date_str, &tm_time);
+
+		/* Correct any day of week and day of year etc. fields */
+		tm_time.tm_isdst = -1;	/* Be sure to recheck dst */
+		t = validate_tm_time(date_str, &tm_time);
+
+		timebuf.actime = t;
+		timebuf.modtime = t;
+	}
+
 	do {
 		if (utime(*argv, reference_file ? &timebuf : NULL)) {
 			if (errno == ENOENT) { /* no such file */
-				if (flags) { /* creation is disabled, so ignore */
+				if (opts) { /* creation is disabled, so ignore */
 					continue;
 				}
 				/* Try to create the file. */

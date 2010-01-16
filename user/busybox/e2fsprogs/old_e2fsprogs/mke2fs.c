@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * mke2fs.c - Make a ext2fs filesystem.
@@ -21,8 +5,7 @@
  * Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
  *	2003, 2004, 2005 by Theodore Ts'o.
  *
- * This file may be redistributed under the terms of the GNU Public
- * License.
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 /* Usage: mke2fs [options] device
@@ -692,7 +675,7 @@ static int set_os(struct ext2_super_block *sb, char *os)
 		return 1;
 	}
 
-	if((sb->s_creator_os = e2p_string2os(os)) >= 0) {
+	if ((sb->s_creator_os = e2p_string2os(os)) >= 0) {
 		return 1;
 	} else if (!strcasecmp("GNU", os)) {
 		sb->s_creator_os = EXT2_OS_HURD;
@@ -1203,7 +1186,7 @@ int mke2fs_main (int argc, char **argv)
 
 	if (ENABLE_FEATURE_CLEAN_UP)
 		atexit(mke2fs_clean_up);
-	if(!PRS(argc, argv))
+	if (!PRS(argc, argv))
 		return 0;
 
 #ifdef CONFIG_TESTIO_DEBUG

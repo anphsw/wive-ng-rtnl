@@ -23,9 +23,12 @@ ifeq ($(CONFIG_INSTALL_SH_APPLET_SCRIPT_WRAPPER),y)
 INSTALL_OPTS:= --scriptwrapper
 endif
 endif
-romfs install: $(srctree)/applets/install.sh busybox busybox.links
+install: $(srctree)/applets/install.sh busybox busybox.links
 	$(Q)DO_INSTALL_LIBS="$(strip $(LIBBUSYBOX_SONAME) $(DO_INSTALL_LIBS))" \
 		$(SHELL) $< $(CONFIG_PREFIX) $(INSTALL_OPTS)
+romfs install: $(srctree)/applets/install.sh busybox busybox.links
+	$(Q)DO_INSTALL_LIBS="$(strip $(LIBBUSYBOX_SONAME) $(DO_INSTALL_LIBS))" \
+	        $(SHELL) $< $(CONFIG_PREFIX) $(INSTALL_OPTS)
 ifeq ($(strip $(CONFIG_FEATURE_SUID)),y)
 	@echo
 	@echo
@@ -104,6 +107,12 @@ bigdata: busybox_unstripped
 # Documentation Targets
 .PHONY: doc
 doc: docs/busybox.pod docs/BusyBox.txt docs/BusyBox.1 docs/BusyBox.html
+
+# FIXME: Doesn't belong here
+       cmd_doc =
+ quiet_cmd_doc = $(Q)echo "  DOC     $(@F)"
+silent_cmd_doc =
+disp_doc       = $($(quiet)cmd_doc)
 
 docs/busybox.pod: $(srctree)/docs/busybox_header.pod \
 		$(srctree)/include/usage.h \

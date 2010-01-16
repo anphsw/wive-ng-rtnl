@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  *  Common code for gunzip-like applets
@@ -46,13 +30,14 @@ int open_to_or_warn(int to_fd, const char *filename, int flags, int mode)
 
 int FAST_FUNC bbunpack(char **argv,
 	char* (*make_new_name)(char *filename),
-	USE_DESKTOP(long long) int (*unpacker)(void)
+	IF_DESKTOP(long long) int (*unpacker)(unpack_info_t *info)
 )
 {
 	struct stat stat_buf;
-	USE_DESKTOP(long long) int status;
+	IF_DESKTOP(long long) int status;
 	char *filename, *new_name;
 	smallint exitcode = 0;
+	unpack_info_t info;
 
 	do {
 		/* NB: new_name is *maybe* malloc'ed! */
@@ -108,14 +93,29 @@ int FAST_FUNC bbunpack(char **argv,
 					"use -f to force it");
 		}
 
-		status = unpacker();
+		/* memset(&info, 0, sizeof(info)); */
+		info.mtime = 0; /* so far it has one member only */
+		status = unpacker(&info);
 		if (status < 0)
 			exitcode = 1;
 
 		if (filename) {
 			char *del = new_name;
 			if (status >= 0) {
-				/* TODO: restore user/group/times here? */
+				/* TODO: restore other things? */
+				if (info.mtime) {
+					struct utimbuf times;
+
+					times.actime = info.mtime;
+					times.modtime = info.mtime;
+					/* Close first.
+					 * On some systems calling utime
+					 * then closing resets the mtime. */
+					close(STDOUT_FILENO);
+					/* Ignoring errors */
+					utime(new_name, &times);
+				}
+
 				/* Delete _compressed_ file */
 				del = filename;
 				/* restore extension (unless tgz -> tar case) */
@@ -175,7 +175,7 @@ char* make_new_name_bunzip2(char *filename)
 }
 
 static
-USE_DESKTOP(long long) int unpack_bunzip2(void)
+IF_DESKTOP(long long) int unpack_bunzip2(unpack_info_t *info UNUSED_PARAM)
 {
 	return unpack_bz2_stream_prime(STDIN_FILENO, STDOUT_FILENO);
 }
@@ -251,9 +251,9 @@ char* make_new_name_gunzip(char *filename)
 }
 
 static
-USE_DESKTOP(long long) int unpack_gunzip(void)
+IF_DESKTOP(long long) int unpack_gunzip(unpack_info_t *info)
 {
-	USE_DESKTOP(long long) int status = -1;
+	IF_DESKTOP(long long) int status = -1;
 
 	/* do the decompression, and cleanup */
 	if (xread_char(STDIN_FILENO) == 0x1f) {
@@ -263,7 +263,7 @@ USE_DESKTOP(long long) int unpack_gunzip(void)
 		if (ENABLE_FEATURE_SEAMLESS_Z && magic2 == 0x9d) {
 			status = unpack_Z_stream(STDIN_FILENO, STDOUT_FILENO);
 		} else if (magic2 == 0x8b) {
-			status = unpack_gz_stream(STDIN_FILENO, STDOUT_FILENO);
+			status = unpack_gz_stream_with_info(STDIN_FILENO, STDOUT_FILENO, info);
 		} else {
 			goto bad_magic;
 		}
@@ -325,7 +325,7 @@ char* make_new_name_unlzma(char *filename)
 }
 
 static
-USE_DESKTOP(long long) int unpack_unlzma(void)
+IF_DESKTOP(long long) int unpack_unlzma(unpack_info_t *info UNUSED_PARAM)
 {
 	return unpack_lzma_stream(STDIN_FILENO, STDOUT_FILENO);
 }
@@ -360,9 +360,9 @@ char* make_new_name_uncompress(char *filename)
 }
 
 static
-USE_DESKTOP(long long) int unpack_uncompress(void)
+IF_DESKTOP(long long) int unpack_uncompress(unpack_info_t *info UNUSED_PARAM)
 {
-	USE_DESKTOP(long long) int status = -1;
+	IF_DESKTOP(long long) int status = -1;
 
 	if ((xread_char(STDIN_FILENO) != 0x1f) || (xread_char(STDIN_FILENO) != 0x9d)) {
 		bb_error_msg("invalid magic");

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -33,37 +17,52 @@
  * Given any other file (or directory), find the mount table entry for its
  * filesystem.
  */
-struct mntent* FAST_FUNC find_mount_point(const char *name, const char *table)
+struct mntent* FAST_FUNC find_mount_point(const char *name, int subdir_too)
 {
 	struct stat s;
-	dev_t mountDevice;
-	FILE *mountTable;
+	FILE *mtab_fp;
 	struct mntent *mountEntry;
+	dev_t devno_of_name;
+	bool block_dev;
 
 	if (stat(name, &s) != 0)
-		return 0;
+		return NULL;
 
-	if ((s.st_mode & S_IFMT) == S_IFBLK)
-		mountDevice = s.st_rdev;
-	else
-		mountDevice = s.st_dev;
+	devno_of_name = s.st_dev;
+	block_dev = 0;
+	if (S_ISBLK(s.st_mode)) {
+		devno_of_name = s.st_rdev;
+		block_dev = 1;
+	}
 
+	mtab_fp = setmntent(bb_path_mtab_file, "r");
+	if (!mtab_fp)
+		return NULL;
 
-	mountTable = setmntent(table ? table : bb_path_mtab_file, "r");
-	if (!mountTable)
-		return 0;
+	while ((mountEntry = getmntent(mtab_fp)) != NULL) {
+		/* rootfs mount in Linux 2.6 exists always,
+		 * and it makes sense to always ignore it.
+		 * Otherwise people can't reference their "real" root! */
+		if (strcmp(mountEntry->mnt_fsname, "rootfs") == 0)
+			continue;
 
-	while ((mountEntry = getmntent(mountTable)) != 0) {
 		if (strcmp(name, mountEntry->mnt_dir) == 0
 		 || strcmp(name, mountEntry->mnt_fsname) == 0
 		) { /* String match. */
 			break;
 		}
-		if (stat(mountEntry->mnt_fsname, &s) == 0 && s.st_rdev == mountDevice)	/* Match the device. */
+
+		if (!(subdir_too || block_dev))
+			continue;
+
+		/* Is device's dev_t == name's dev_t? */
+		if (stat(mountEntry->mnt_fsname, &s) == 0 && s.st_rdev == devno_of_name)
 			break;
-		if (stat(mountEntry->mnt_dir, &s) == 0 && s.st_dev == mountDevice)	/* Match the directory's mount point. */
+		/* Match the directory's mount point. */
+		if (stat(mountEntry->mnt_dir, &s) == 0 && s.st_dev == devno_of_name)
 			break;
 	}
-	endmntent(mountTable);
+	endmntent(mtab_fp);
+
 	return mountEntry;
 }

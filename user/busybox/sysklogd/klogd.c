@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini klogd implementation for busybox
@@ -58,14 +42,14 @@ int klogd_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int klogd_main(int argc UNUSED_PARAM, char **argv)
 {
 	int i = 0;
-	char *start;
+	char *opt_c;
 	int opt;
-	
+	int used = 0;
 
-	opt = getopt32(argv, "c:n", &start);
+	opt = getopt32(argv, "c:n", &opt_c);
 	if (opt & OPT_LEVEL) {
 		/* Valid levels are between 1 and 8 */
-		i = xatou_range(start, 1, 8);
+		i = xatou_range(opt_c, 1, 8);
 	}
 	if (!(opt & OPT_FOREGROUND)) {
 		bb_daemonize_or_rexec(DAEMON_CHDIR_ROOT, argv);
@@ -73,10 +57,7 @@ int klogd_main(int argc UNUSED_PARAM, char **argv)
 
 	openlog("kernel", 0, LOG_KERN);
 
-	bb_signals(0
-		+ (1 << SIGINT)
-		+ (1 << SIGTERM)
-		, klogd_signal);
+	bb_signals(BB_FATAL_SIGS, klogd_signal);
 	signal(SIGHUP, SIG_IGN);
 
 	/* "Open the log. Currently a NOP" */
@@ -89,16 +70,14 @@ int klogd_main(int argc UNUSED_PARAM, char **argv)
 
 	syslog(LOG_NOTICE, "klogd started: %s", bb_banner);
 
-	/* Note: this code does not detect incomplete messages
-	 * (messages not ending with '\n' or just when kernel
-	 * generates too many messages for us to keep up)
-	 * and will split them in two separate lines */
 	while (1) {
 		int n;
 		int priority;
+		char *start;
 
 		/* "2 -- Read from the log." */
-		n = klogctl(2, log_buffer, KLOGD_LOGBUF_SIZE - 1);
+		start = log_buffer + used;
+		n = klogctl(2, start, KLOGD_LOGBUF_SIZE-1 - used);
 		if (n < 0) {
 			if (errno == EINTR)
 				continue;
@@ -106,35 +85,49 @@ int klogd_main(int argc UNUSED_PARAM, char **argv)
 					errno);
 			break;
 		}
-		log_buffer[n] = '\n';
-		i = 0;
-		while (i < n) {
-			priority = LOG_INFO;
-			//priority = LOG_ERR;	// N13U
-			start = &log_buffer[i];
-			if (log_buffer[i] == '<') {
-				i++;
-				// kernel never ganerates multi-digit prios
-				//priority = 0;
-				//while (log_buffer[i] >= '0' && log_buffer[i] <= '9') {
-				//	priority = priority * 10 + (log_buffer[i] - '0');
-				//	i++;
-				//}
-				if (isdigit(log_buffer[i])) {
-					priority = (log_buffer[i] - '0');
-					i++;
-				}
-				if (log_buffer[i] == '>')
-					i++;
-				start = &log_buffer[i];
-			}
-			while (log_buffer[i] != '\n')
-				i++;
-			log_buffer[i] = '\0';
+		start[n] = '\0';
 
-			if(priority < 4)	// N13U
+		/* klogctl buffer parsing modelled after code in dmesg.c */
+		/* Process each newline-terminated line in the buffer */
+		start = log_buffer;
+		while (1) {
+			char *newline = strchrnul(start, '\n');
+
+			if (*newline == '\0') {
+				/* This line is incomplete... */
+				if (start != log_buffer) {
+					/* move it to the front of the buffer */
+					overlapping_strcpy(log_buffer, start);
+					used = newline - start;
+					/* don't log it yet */
+					break;
+				}
+				/* ...but if buffer is full, log it anyway */
+				used = 0;
+				newline = NULL;
+			} else {
+				*newline++ = '\0';
+			}
+
+			/* Extract the priority */
+			priority = LOG_INFO;
+			if (*start == '<') {
+				start++;
+				if (*start) {
+					/* kernel never generates multi-digit prios */
+					priority = (*start - '0');
+					start++;
+				}
+				if (*start == '>')
+					start++;
+			}
+			/* Log (only non-empty lines) */
+			if (*start)
 				syslog(priority, "%s", start);
-			i++;
+
+			if (!newline)
+				break;
+			start = newline;
 		}
 	}
 

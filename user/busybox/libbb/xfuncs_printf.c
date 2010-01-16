@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -224,6 +208,10 @@ void FAST_FUNC xwrite(int fd, const void *buf, size_t count)
 			bb_error_msg_and_die("short write");
 	}
 }
+void FAST_FUNC xwrite_str(int fd, const char *str)
+{
+	xwrite(fd, str, strlen(str));
+}
 
 // Die with an error message if we can't lseek to the right spot.
 off_t FAST_FUNC xlseek(int fd, off_t offset, int whence)
@@ -349,6 +337,29 @@ void FAST_FUNC xsetenv(const char *key, const char *value)
 		bb_error_msg_and_die(bb_msg_memory_exhausted);
 }
 
+/* Handles "VAR=VAL" strings, even those which are part of environ
+ * _right now_
+ */
+void FAST_FUNC bb_unsetenv(const char *var)
+{
+	char *tp = strchr(var, '=');
+
+	if (!tp) {
+		unsetenv(var);
+		return;
+	}
+
+	/* In case var was putenv'ed, we can't replace '='
+	 * with NUL and unsetenv(var) - it won't work,
+	 * env is modified by the replacement, unsetenv
+	 * sees "VAR" instead of "VAR=VAL" and does not remove it!
+	 * horror :( */
+	tp = xstrndup(var, tp - var);
+	unsetenv(tp);
+	free(tp);
+}
+
+
 // Die with an error message if we can't set gid.  (Because resource limits may
 // limit this user to a given number of processes, and if that fills up the
 // setgid() will fail and we'll _still_be_root_, which is bad.)
@@ -409,7 +420,7 @@ int FAST_FUNC xsocket(int domain, int type, int protocol)
 		const char *s = "INET";
 		if (domain == AF_PACKET) s = "PACKET";
 		if (domain == AF_NETLINK) s = "NETLINK";
-USE_FEATURE_IPV6(if (domain == AF_INET6) s = "INET6";)
+IF_FEATURE_IPV6(if (domain == AF_INET6) s = "INET6";)
 		bb_perror_msg_and_die("socket(AF_%s)", s);
 #else
 		bb_perror_msg_and_die("socket");
@@ -433,7 +444,7 @@ void FAST_FUNC xlisten(int s, int backlog)
 
 /* Die with an error message if sendto failed.
  * Return bytes sent otherwise  */
-ssize_t FAST_FUNC xsendto(int s, const  void *buf, size_t len, const struct sockaddr *to,
+ssize_t FAST_FUNC xsendto(int s, const void *buf, size_t len, const struct sockaddr *to,
 				socklen_t tolen)
 {
 	ssize_t ret = sendto(s, buf, len, 0, to, tolen);

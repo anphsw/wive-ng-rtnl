@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * eject implementation for busybox
@@ -29,7 +13,11 @@
  * Most of the dirty work blatantly ripped off from cat.c =)
  */
 
+#include <sys/mount.h>
 #include "libbb.h"
+/* Must be after libbb.h: they need size_t */
+#include <scsi/sg.h>
+#include <scsi/scsi.h>
 
 /* various defines swiped from linux/cdrom.h */
 #define CDROMCLOSETRAY            0x5319  /* pendant of CDROMEJECT  */
@@ -42,9 +30,6 @@
 
 /* Code taken from the original eject (http://eject.sourceforge.net/),
  * refactored it a bit for busybox (ne-bb@nicoerfurth.de) */
-
-#include <scsi/sg.h>
-#include <scsi/scsi.h>
 
 static void eject_scsi(const char *dev)
 {
@@ -105,7 +90,7 @@ int eject_main(int argc UNUSED_PARAM, char **argv)
 	const char *device;
 
 	opt_complementary = "?1:t--T:T--t";
-	flags = getopt32(argv, "tT" USE_FEATURE_EJECT_SCSI("s"));
+	flags = getopt32(argv, "tT" IF_FEATURE_EJECT_SCSI("s"));
 	device = argv[optind] ? argv[optind] : "/dev/cdrom";
 
 	/* We used to do "umount <device>" here, but it was buggy

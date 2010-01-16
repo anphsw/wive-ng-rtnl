@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ll_map.c
@@ -55,7 +39,7 @@ static struct idxmap *find_by_index(int idx)
 	return NULL;
 }
 
-int ll_remember_index(const struct sockaddr_nl *who UNUSED_PARAM,
+int FAST_FUNC ll_remember_index(const struct sockaddr_nl *who UNUSED_PARAM,
 		struct nlmsghdr *n,
 		void *arg UNUSED_PARAM)
 {
@@ -102,7 +86,7 @@ int ll_remember_index(const struct sockaddr_nl *who UNUSED_PARAM,
 	return 0;
 }
 
-const char *ll_idx_n2a(int idx, char *buf)
+const char FAST_FUNC *ll_idx_n2a(int idx, char *buf)
 {
 	struct idxmap *im;
 
@@ -116,7 +100,7 @@ const char *ll_idx_n2a(int idx, char *buf)
 }
 
 
-const char *ll_index_to_name(int idx)
+const char FAST_FUNC *ll_index_to_name(int idx)
 {
 	static char nbuf[16];
 
@@ -137,7 +121,7 @@ int ll_index_to_type(int idx)
 }
 #endif
 
-unsigned ll_index_to_flags(int idx)
+unsigned FAST_FUNC ll_index_to_flags(int idx)
 {
 	struct idxmap *im;
 
@@ -149,7 +133,7 @@ unsigned ll_index_to_flags(int idx)
 	return 0;
 }
 
-int xll_name_to_index(const char *const name)
+int FAST_FUNC xll_name_to_index(const char *name)
 {
 	int ret = 0;
 	int sock_fd;
@@ -188,11 +172,11 @@ int xll_name_to_index(const char *const name)
 #endif
 
 	sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sock_fd) {
+	if (sock_fd >= 0) {
 		struct ifreq ifr;
 		int tmp;
 
-		strncpy(ifr.ifr_name, name, IFNAMSIZ);
+		strncpy_IFNAMSIZ(ifr.ifr_name, name);
 		ifr.ifr_ifindex = -1;
 		tmp = ioctl(sock_fd, SIOCGIFINDEX, &ifr);
 		close(sock_fd);
@@ -208,7 +192,7 @@ int xll_name_to_index(const char *const name)
 	return ret;
 }
 
-int ll_init_map(struct rtnl_handle *rth)
+int FAST_FUNC ll_init_map(struct rtnl_handle *rth)
 {
 	xrtnl_wilddump_request(rth, AF_UNSPEC, RTM_GETLINK);
 	xrtnl_dump_filter(rth, ll_remember_index, &idxmap);

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Rexec program for system have fork() as vfork() with foreground option
@@ -82,9 +66,9 @@ pid_t FAST_FUNC xspawn(char **argv)
 	return pid;
 }
 
-int FAST_FUNC safe_waitpid(int pid, int *wstat, int options)
+pid_t FAST_FUNC safe_waitpid(pid_t pid, int *wstat, int options)
 {
-	int r;
+	pid_t r;
 
 	do
 		r = waitpid(pid, wstat, options);
@@ -92,13 +76,13 @@ int FAST_FUNC safe_waitpid(int pid, int *wstat, int options)
 	return r;
 }
 
-int FAST_FUNC wait_any_nohang(int *wstat)
+pid_t FAST_FUNC wait_any_nohang(int *wstat)
 {
 	return safe_waitpid(-1, wstat, WNOHANG);
 }
 
 // Wait for the specified child PID to exit, returning child's error return.
-int FAST_FUNC wait4pid(int pid)
+int FAST_FUNC wait4pid(pid_t pid)
 {
 	int status;
 
@@ -141,6 +125,7 @@ int FAST_FUNC run_nofork_applet_prime(struct nofork_save_area *old, int applet_n
 	int rc, argc;
 
 	applet_name = APPLET_NAME(applet_no);
+
 	xfunc_error_retval = EXIT_FAILURE;
 
 	/* Special flag for xfunc_die(). If xfunc will "die"
@@ -148,7 +133,30 @@ int FAST_FUNC run_nofork_applet_prime(struct nofork_save_area *old, int applet_n
 	 * die_sleep and longjmp here instead. */
 	die_sleep = -1;
 
-	/* option_mask32 = 0; - not needed */
+	/* In case getopt() or getopt32() was already called:
+	 * reset the libc getopt() function, which keeps internal state.
+	 *
+	 * BSD-derived getopt() functions require that optind be set to 1 in
+	 * order to reset getopt() state.  This used to be generally accepted
+	 * way of resetting getopt().  However, glibc's getopt()
+	 * has additional getopt() state beyond optind, and requires that
+	 * optind be set to zero to reset its state.  So the unfortunate state of
+	 * affairs is that BSD-derived versions of getopt() misbehave if
+	 * optind is set to 0 in order to reset getopt(), and glibc's getopt()
+	 * will core dump if optind is set 1 in order to reset getopt().
+	 *
+	 * More modern versions of BSD require that optreset be set to 1 in
+	 * order to reset getopt().  Sigh.  Standards, anyone?
+	 */
+#ifdef __GLIBC__
+	optind = 0;
+#else /* BSD style */
+	optind = 1;
+	/* optreset = 1; */
+#endif
+	/* optarg = NULL; opterr = 1; optopt = 63; - do we need this too? */
+	/* (values above are what they initialized to in glibc and uclibc) */
+	/* option_mask32 = 0; - not needed, no applet depends on it being 0 */
 
 	argc = 1;
 	while (argv[argc])
@@ -177,8 +185,16 @@ int FAST_FUNC run_nofork_applet_prime(struct nofork_save_area *old, int applet_n
 			rc = 0;
 	}
 
-	/* Restoring globals */
+	/* Restoring some globals */
 	restore_nofork_data(old);
+
+	/* Other globals can be simply reset to defaults */
+#ifdef __GLIBC__
+	optind = 0;
+#else /* BSD style */
+	optind = 1;
+#endif
+
 	return rc & 0xff; /* don't confuse people with "exitcodes" >255 */
 }
 
@@ -235,35 +251,32 @@ void FAST_FUNC re_exec(char **argv)
 	bb_perror_msg_and_die("exec %s", bb_busybox_exec_path);
 }
 
-void FAST_FUNC forkexit_or_rexec(char **argv)
+pid_t FAST_FUNC fork_or_rexec(char **argv)
 {
 	pid_t pid;
 	/* Maybe we are already re-execed and come here again? */
 	if (re_execed)
-		return;
-
+		return 0;
 	pid = vfork();
 	if (pid < 0) /* wtf? */
 		bb_perror_msg_and_die("vfork");
 	if (pid) /* parent */
-		exit(EXIT_SUCCESS);
+		return pid;
 	/* child - re-exec ourself */
 	re_exec(argv);
 }
 #else
 /* Dance around (void)...*/
-#undef forkexit_or_rexec
-void FAST_FUNC forkexit_or_rexec(void)
+#undef fork_or_rexec
+pid_t FAST_FUNC fork_or_rexec(void)
 {
 	pid_t pid;
 	pid = fork();
 	if (pid < 0) /* wtf? */
 		bb_perror_msg_and_die("fork");
-	if (pid) /* parent */
-		exit(EXIT_SUCCESS);
-	/* child */
+	return pid;
 }
-#define forkexit_or_rexec(argv) forkexit_or_rexec()
+#define fork_or_rexec(argv) fork_or_rexec()
 #endif
 
 /* Due to a #define in libbb.h on MMU systems we actually have 1 argument -
@@ -294,7 +307,8 @@ void FAST_FUNC bb_daemonize_or_rexec(int flags, char **argv)
 		fd = dup(fd); /* have 0,1,2 open at least to /dev/null */
 
 	if (!(flags & DAEMON_ONLY_SANITIZE)) {
-		forkexit_or_rexec(argv);
+		if (fork_or_rexec(argv))
+			exit(EXIT_SUCCESS); /* parent */
 		/* if daemonizing, make sure we detach from stdio & ctty */
 		setsid();
 		dup2(fd, 0);

@@ -671,13 +671,13 @@ start_syslogd()
 
         if (nvram_invmatch("log_ipaddr", ""))
         {
-                char *syslogd_argv[] = {"/sbin/syslogd", "-m", "0", "-t", nvram_safe_get("time_zone_x"), "-O", "/tmp/syslog.log", "-R", nvram_safe_get("log_ipaddr"), "-L", NULL};
+                char *syslogd_argv[] = {"/sbin/syslogd", "-l", "0", "-O", "/tmp/syslog.log", "-R", nvram_safe_get("log_ipaddr"), "-L", NULL};
 
                 _eval(syslogd_argv, NULL, 0, &pid);
         }
         else
         {
-                char *syslogd_argv[] = {"/sbin/syslogd", "-m", "0", "-t", nvram_safe_get("time_zone_x"), "-O", "/tmp/syslog.log", NULL};
+                char *syslogd_argv[] = {"/sbin/syslogd", "-l", "0", "-O", "/tmp/syslog.log", NULL};
 
                 _eval(syslogd_argv, NULL, 0, &pid);
         }
@@ -806,35 +806,15 @@ start_usb(void)
 	start_u2ec();
 
 #ifdef PRINTER_SUPPORT
-/*
-#ifdef PARPORT_SUPPORT	
-	symlink("/dev/printers/0", "/dev/lp0");
-	symlink("/dev/lp0", "/tmp/lp0");
-	eval("insmod", "parport.o");
-	eval("insmod", "parport_splink.o");
-	eval("insmod", "lp.o");
-#endif	
-*/	
-	//eval("insmod", "printer.o");	// 2.4
 	mkdir("/var/state", 0777);
 	mkdir("/var/state/parport", 0777);
 	mkdir("/var/state/parport/svr_statue", 0777);
-/*
-	{
-		char *lpd_argv[]={"lpd", NULL};
-		pid_t pid;
-
-		sleep(1);
-		_eval(lpd_argv, ">/dev/null", 0, &pid);	
-	}
-*/
 #endif	
 	umask(0000);			// added by Jiahao for WL500gP
 	mkdir("/tmp/harddisk", 0777);
 
 #ifdef CDMA
-	eval("insmod", "-q", "cdc-acm");
-	/* eval("insmod", "usbserial.o", "vendor=0x1165", "product=0x0001"); */
+	eval("modprobe", "cdc-acm");
 #endif
 }
 
@@ -1235,7 +1215,7 @@ stop_usblp()
 int 
 start_usblp()
 {
-	return system("insmod -q usblp");
+	return system("insmod usblp.ko");
 }
 
 void 
@@ -2064,7 +2044,7 @@ int hotplug_hsdpa(char *product)
                 eval("mknod", "/dev/ttyUSB2", "c", "188", "2");
                 eval("mknod", "/dev/ttyUSB3", "c", "188", "3");
 
-                eval("insmod", "usbserial", vid, pid);
+                eval("modprobe", "usbserial", vid, pid);
 
                 if(!strncmp(product, "1a8d/", 5)){
                         logmessage("Add USB Modem", product);

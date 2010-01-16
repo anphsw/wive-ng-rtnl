@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * bare bones 'talk to modem' program - similar to 'cu -l $device'
@@ -24,14 +8,6 @@
  * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 #include "libbb.h"
-
-/* All known arches use small ints for signals */
-static volatile smallint signalled;
-
-static void signal_handler(int signo)
-{
-	signalled = signo;
-}
 
 // set raw tty mode
 static void xget1(int fd, struct termios *t, struct termios *oldt)
@@ -107,10 +83,10 @@ int microcom_main(int argc UNUSED_PARAM, char **argv)
 		+ (1 << SIGINT)
 		+ (1 << SIGTERM)
 		+ (1 << SIGPIPE)
-		, signal_handler);
+		, record_signo);
 
 	// error exit code if we fail to open the device
-	signalled = 1;
+	bb_got_signal = 1;
 
 	// open device
 	sfd = open_or_warn(argv[0], O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -139,9 +115,9 @@ int microcom_main(int argc UNUSED_PARAM, char **argv)
 	pfd[1].fd = STDIN_FILENO;
 	pfd[1].events = POLLIN;
 
-	signalled = 0;
+	bb_got_signal = 0;
 	nfd = 2;
-	while (!signalled && safe_poll(pfd, nfd, timeout) > 0) {
+	while (!bb_got_signal && safe_poll(pfd, nfd, timeout) > 0) {
 		if (nfd > 1 && pfd[1].revents) {
 			char c;
 			// read from stdin -> write to device
@@ -175,7 +151,7 @@ skip_write: ;
 				full_write(STDOUT_FILENO, iobuf, len);
 			else {
 				// EOF/error -> bail out
-				signalled = SIGHUP;
+				bb_got_signal = SIGHUP;
 				break;
 			}
 		}
@@ -191,5 +167,5 @@ done:
 	if (device_lock_file)
 		unlink(device_lock_file);
 
-	return signalled;
+	return bb_got_signal;
 }

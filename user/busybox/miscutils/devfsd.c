@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
@@ -108,8 +92,8 @@
 #define DEVFS_PATHLEN               1024
 /*  Never change this otherwise the binary interface will change   */
 
-struct devfsd_notify_struct
-{	/*  Use native C types to ensure same types in kernel and user space     */
+struct devfsd_notify_struct {
+	/*  Use native C types to ensure same types in kernel and user space     */
 	unsigned int type;           /*  DEVFSD_NOTIFY_* value                   */
 	unsigned int mode;           /*  Mode of the inode or device entry       */
 	unsigned int major;          /*  Major number of device entry            */
@@ -167,32 +151,27 @@ struct devfsd_notify_struct
 #define AC_RMNEWCOMPAT				10
 #define AC_RESTORE					11
 
-struct permissions_type
-{
+struct permissions_type {
 	mode_t mode;
 	uid_t uid;
 	gid_t gid;
 };
 
-struct execute_type
-{
+struct execute_type {
 	char *argv[MAX_ARGS + 1];  /*  argv[0] must always be the programme  */
 };
 
-struct copy_type
-{
+struct copy_type {
 	const char *source;
 	const char *destination;
 };
 
-struct action_type
-{
+struct action_type {
 	unsigned int what;
 	unsigned int when;
 };
 
-struct config_entry_struct
-{
+struct config_entry_struct {
 	struct action_type action;
 	regex_t preg;
 	union
@@ -205,8 +184,7 @@ struct config_entry_struct
 	struct config_entry_struct *next;
 };
 
-struct get_variable_info
-{
+struct get_variable_info {
 	const struct devfsd_notify_struct *info;
 	const char *devname;
 	char devpath[STRING_LENGTH];
@@ -1352,8 +1330,7 @@ static void expand_regexp(char *output, size_t outsize, const char *input,
 
 /* from compat_name.c */
 
-struct translate_struct
-{
+struct translate_struct {
 	const char *match;    /*  The string to match to(up to length)                */
 	const char *format;   /*  Format of output, "%s" takes data past match string,
 			NULL is effectively "%s"(just more efficient)       */

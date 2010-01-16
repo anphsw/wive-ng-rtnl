@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini dd implementation for busybox
@@ -24,7 +8,6 @@
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  */
 
-#include <signal.h>  /* For FEATURE_DD_SIGNAL_HANDLING */
 #include "libbb.h"
 
 /* This is a NOEXEC applet. Be very careful! */
@@ -303,23 +286,26 @@ int dd_main(int argc UNUSED_PARAM, char **argv)
 	}
 
 	while (!(flags & FLAG_COUNT) || (G.in_full + G.in_part != count)) {
-		if (flags & FLAG_NOERROR) /* Pre-zero the buffer if conv=noerror */
-			memset(ibuf, 0, ibs);
 		n = safe_read(ifd, ibuf, ibs);
 		if (n == 0)
 			break;
 		if (n < 0) {
+			/* "Bad block" */
 			if (!(flags & FLAG_NOERROR))
 				goto die_infile;
-			n = ibs;
 			bb_simple_perror_msg(infile);
+			/* GNU dd with conv=noerror skips over bad blocks */
+			xlseek(ifd, ibs, SEEK_CUR);
+			/* conv=noerror,sync writes NULs,
+			 * conv=noerror just ignores input bad blocks */
+			n = 0;
 		}
 		if ((size_t)n == ibs)
 			G.in_full++;
 		else {
 			G.in_part++;
 			if (flags & FLAG_SYNC) {
-				memset(ibuf + n, '\0', ibs - n);
+				memset(ibuf + n, 0, ibs - n);
 				n = ibs;
 			}
 		}

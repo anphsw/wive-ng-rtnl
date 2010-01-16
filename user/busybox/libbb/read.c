@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -157,7 +141,7 @@ char* FAST_FUNC xmalloc_reads(int fd, char *buf, size_t *maxsz_p)
 {
 	char *p;
 	size_t sz = buf ? strlen(buf) : 0;
-	size_t maxsz = maxsz_p ? *maxsz_p : MAXINT(size_t);
+	size_t maxsz = maxsz_p ? *maxsz_p : (INT_MAX - 4095);
 
 	goto jump_in;
 	while (sz < maxsz) {
@@ -214,7 +198,7 @@ void* FAST_FUNC xmalloc_read(int fd, size_t *maxsz_p)
 	size_t to_read;
 	struct stat st;
 
-	to_read = maxsz_p ? *maxsz_p : MAXINT(ssize_t); /* max to read */
+	to_read = maxsz_p ? *maxsz_p : (INT_MAX - 4095); /* max to read */
 
 	/* Estimate file size */
 	st.st_size = 0; /* in case fstat fails, assume 0 */
@@ -245,7 +229,7 @@ void* FAST_FUNC xmalloc_read(int fd, size_t *maxsz_p)
 		if (size > 64*1024)
 			size = 64*1024;
 	}
-	xrealloc(buf, total + 1);
+	buf = xrealloc(buf, total + 1);
 	buf[total] = '\0';
 
 	if (maxsz_p)
@@ -278,7 +262,7 @@ void* FAST_FUNC xmalloc_open_read_close(const char *filename, size_t *maxsz_p)
 	len = lseek(fd, 0, SEEK_END) | 0x3ff; /* + up to 1k */
 	if (len != (off_t)-1) {
 		xlseek(fd, 0, SEEK_SET);
-		size = maxsz_p ? *maxsz_p : INT_MAX;
+		size = maxsz_p ? *maxsz_p : (INT_MAX - 4095);
 		if (len < size)
 			size = len;
 	}
@@ -289,7 +273,7 @@ void* FAST_FUNC xmalloc_open_read_close(const char *filename, size_t *maxsz_p)
 		free(buf);
 		return NULL;
 	}
-	xrealloc(buf, size + 1);
+	buf = xrealloc(buf, size + 1);
 	buf[size] = '\0';
 
 	if (maxsz_p)
@@ -331,7 +315,7 @@ int FAST_FUNC open_zipped(const char *fname)
 	char *sfx;
 	int fd;
 #if BB_MMU
-	USE_DESKTOP(long long) int FAST_FUNC (*xformer)(int src_fd, int dst_fd);
+	IF_DESKTOP(long long) int FAST_FUNC (*xformer)(int src_fd, int dst_fd);
 	enum { xformer_prog = 0 };
 #else
 	enum { xformer = 0 };
@@ -368,7 +352,7 @@ int FAST_FUNC open_zipped(const char *fname)
 				 || magic[0] != 'B' || magic[1] != 'Z'
 				) {
 					bb_error_msg_and_die("no gzip"
-						USE_FEATURE_SEAMLESS_BZ2("/bzip2")
+						IF_FEATURE_SEAMLESS_BZ2("/bzip2")
 						" magic");
 				}
 #if BB_MMU

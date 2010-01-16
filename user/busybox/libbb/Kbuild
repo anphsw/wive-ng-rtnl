@@ -13,7 +13,7 @@ lib-y += bb_basename.o
 lib-y += bb_do_delay.o
 lib-y += bb_pwd.o
 lib-y += bb_qsort.o
-lib-y += bb_strtod.o
+#lib-y += bb_strtod.o
 lib-y += bb_strtonum.o
 lib-y += change_identity.o
 lib-y += chomp.o
@@ -58,6 +58,8 @@ lib-y += make_directory.o
 lib-y += makedev.o
 lib-y += match_fstype.o
 lib-y += md5.o
+# Alternative (disabled) implementation
+#lib-y += md5prime.o
 lib-y += messages.o
 lib-y += mode_string.o
 lib-y += mtab_file.o
@@ -75,6 +77,7 @@ lib-y += process_escape_sequence.o
 lib-y += procps.o
 lib-y += ptr_to_globals.o
 lib-y += read.o
+lib-y += read_key.o
 lib-y += recursive_action.o
 lib-y += remove_file.o
 lib-y += restricted_shell.o
@@ -113,24 +116,37 @@ lib-y += xgethostbyname.o
 lib-y += xreadlink.o
 lib-y += xrealloc_vector.o
 
-# conditionally compiled objects:
-lib-$(CONFIG_FEATURE_MOUNT_LOOP) += loop.o
-lib-$(CONFIG_LOSETUP) += loop.o
+# A mix of optimizations (why build stuff we know won't be used)
+# and objects which may fail to build (SELinux on selinux-less system)
+lib-$(CONFIG_SELINUX) += selinux_common.o
 lib-$(CONFIG_FEATURE_MTAB_SUPPORT) += mtab.o
-lib-$(CONFIG_PASSWD) += pw_encrypt.o crypt_make_salt.o update_passwd.o
-lib-$(CONFIG_CHPASSWD) += pw_encrypt.o crypt_make_salt.o update_passwd.o
-lib-$(CONFIG_CRYPTPW) += pw_encrypt.o crypt_make_salt.o
+lib-$(CONFIG_FEATURE_ASSUME_UNICODE) += unicode.o
+lib-$(CONFIG_FEATURE_CHECK_NAMES) += die_if_bad_username.o
+
+lib-$(CONFIG_LOSETUP) += loop.o
+lib-$(CONFIG_FEATURE_MOUNT_LOOP) += loop.o
+
+lib-$(CONFIG_ADDGROUP) += update_passwd.o
+lib-$(CONFIG_ADDUSER) += update_passwd.o
+lib-$(CONFIG_DELGROUP) += update_passwd.o
+lib-$(CONFIG_DELUSER) += update_passwd.o
+
+lib-$(CONFIG_PASSWD) += pw_encrypt.o update_passwd.o
+lib-$(CONFIG_CHPASSWD) += pw_encrypt.o update_passwd.o
+lib-$(CONFIG_CRYPTPW) += pw_encrypt.o
 lib-$(CONFIG_SULOGIN) += pw_encrypt.o
-lib-$(CONFIG_FEATURE_HTTPD_AUTH_MD5) += pw_encrypt.o
 lib-$(CONFIG_VLOCK) += pw_encrypt.o correct_password.o
 lib-$(CONFIG_SU) += pw_encrypt.o correct_password.o
 lib-$(CONFIG_LOGIN) += pw_encrypt.o correct_password.o
+lib-$(CONFIG_FEATURE_HTTPD_AUTH_MD5) += pw_encrypt.o
+
 lib-$(CONFIG_DF) += find_mount_point.o
 lib-$(CONFIG_MKFS_MINIX) += find_mount_point.o
-lib-$(CONFIG_SELINUX) += selinux_common.o
+lib-$(CONFIG_FSCK_MINIX) += find_mount_point.o
+lib-$(CONFIG_MOUNT) += find_mount_point.o
+
 lib-$(CONFIG_HWCLOCK) += rtc.o
 lib-$(CONFIG_RTCWAKE) += rtc.o
-lib-$(CONFIG_FEATURE_CHECK_NAMES) += die_if_bad_username.o
 
 # We shouldn't build xregcomp.c if we don't need it - this ensures we don't
 # require regex.h to be in the include dir even if we don't need it thereby

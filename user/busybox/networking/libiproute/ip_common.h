@@ -1,22 +1,6 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
-#ifndef _IP_COMMON_H
-#define _IP_COMMON_H 1
+#ifndef IP_COMMON_H
+#define IP_COMMON_H 1
 
 #include "libbb.h"
 #include <asm/types.h>
@@ -29,9 +13,7 @@
 #include <linux/if_link.h>
 #endif
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility push(hidden)
-#endif
+PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 
 extern char **ip_parse_common_args(char **argv);
 extern int print_neigh(struct sockaddr_nl *who, struct nlmsghdr *n, void *arg);
@@ -50,8 +32,6 @@ extern int do_ipmonitor(char **argv);
 extern int do_multiaddr(char **argv);
 extern int do_multiroute(char **argv);
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility pop
-#endif
+POP_SAVED_FUNCTION_VISIBILITY
 
-#endif /* ip_common.h */
+#endif

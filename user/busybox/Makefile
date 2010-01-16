@@ -1,6 +1,6 @@
 VERSION = 1
-PATCHLEVEL = 12
-SUBLEVEL = 1
+PATCHLEVEL = 15
+SUBLEVEL = 3
 EXTRAVERSION =
 NAME = Unnamed
 
@@ -168,6 +168,7 @@ ifeq ($(CROSS_COMPILE),)
 CROSS_COMPILE := $(shell grep ^CONFIG_CROSS_COMPILER_PREFIX .config 2>/dev/null)
 CROSS_COMPILE := $(subst CONFIG_CROSS_COMPILER_PREFIX=,,$(CROSS_COMPILE))
 CROSS_COMPILE := $(subst ",,$(CROSS_COMPILE))
+#")
 endif
 
 # SUBARCH tells the usermode build what the underlying arch is.  That is set
@@ -277,8 +278,8 @@ HOSTCXXFLAGS	:=
 # We need some generic definitions
 include $(srctree)/scripts/Kbuild.include
 
-HOSTCFLAGS	+= $(call hostcc-option,-Wall -Wstrict-prototypes -Os -fomit-frame-pointer,)
-HOSTCXXFLAGS	+= -Os
+HOSTCFLAGS	+= $(call hostcc-option,-Wall -Wstrict-prototypes -O2 -fomit-frame-pointer,)
+HOSTCXXFLAGS	+= -O2
 
 # For maximum performance (+ possibly random breakage, uncomment
 # the following)
@@ -356,6 +357,15 @@ scripts_basic:
 
 # To avoid any implicit rule to kick in, define an empty command.
 scripts/basic/%: scripts_basic ;
+
+# bbox: we have helpers in applets/
+# we depend on scripts_basic, since scripts/basic/fixdep
+# must be built before any other host prog
+PHONY += applets_dir
+applets_dir: scripts_basic
+	$(Q)$(MAKE) $(build)=applets
+
+applets/%: applets_dir ;
 
 PHONY += outputmakefile
 # outputmakefile generates a Makefile in the output directory, if using a
@@ -456,6 +466,7 @@ libs-y		:= \
 		libbb/ \
 		libpwdgrp/ \
 		loginutils/ \
+		mailutils/ \
 		miscutils/ \
 		modutils/ \
 		networking/ \
@@ -505,7 +516,7 @@ endif
 # command line.
 # This allow a user to issue only 'make' to build a kernel including modules
 # Defaults busybox but it is usually overridden in the arch makefile
-all: busybox
+all: busybox doc
 
 -include $(srctree)/arch/$(ARCH)/Makefile
 
@@ -795,7 +806,7 @@ ifneq ($(KBUILD_MODULES),)
 	$(Q)rm -f $(MODVERDIR)/*
 endif
 
-archprepare: prepare1 scripts_basic
+archprepare: prepare1 scripts_basic applets_dir
 
 prepare0: archprepare FORCE
 	$(Q)$(MAKE) $(build)=.
@@ -965,6 +976,12 @@ clean: archclean $(clean-dirs)
 		\( -name '*.[oas]' -o -name '*.ko' -o -name '.*.cmd' \
 		-o -name '.*.d' -o -name '.*.tmp' -o -name '*.mod.c' \) \
 		-type f -print | xargs rm -f
+
+PHONY += doc-clean
+doc-clean: rm-files := docs/busybox.pod \
+		  docs/BusyBox.html docs/BusyBox.1 docs/BusyBox.txt
+doc-clean:
+	$(call cmd,rmfiles)
 
 # mrproper - Delete all generated files, including .config
 #

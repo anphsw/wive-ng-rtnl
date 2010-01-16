@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * clientsocket.c -- DHCP client socket creation
@@ -36,8 +20,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#include "common.h"
+#include "dhcpd.h"
+#include "dhcpc.h"
 
-#include <features.h>
+
+//#include <features.h>
 #include <asm/types.h>
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1) || defined(_NEWLIB_VERSION)
 #include <netpacket/packet.h>
@@ -48,11 +36,7 @@
 #endif
 #include <linux/filter.h>
 
-#include "common.h"
-#include "dhcpd.h"
-#include "dhcpc.h"
-
-int raw_socket(int ifindex)
+int FAST_FUNC udhcp_raw_socket(int ifindex)
 {
 	int fd;
 	struct sockaddr_ll sock;
@@ -101,24 +85,24 @@ int raw_socket(int ifindex)
 		.filter = (struct sock_filter *) filter_instr,
 	};
 
-	DEBUG("opening raw socket on ifindex %d", ifindex);
+	log1("Opening raw socket on ifindex %d", ifindex); //log2?
 
 	fd = xsocket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
-	DEBUG("got raw socket fd %d", fd);
+	log1("Got raw socket fd %d", fd); //log2?
 
 	if (SERVER_PORT == 67 && CLIENT_PORT == 68) {
 		/* Use only if standard ports are in use */
 		/* Ignoring error (kernel may lack support for this) */
 		if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter_prog,
 				sizeof(filter_prog)) >= 0)
-			DEBUG("attached filter to raw socket fd %d", fd);
+			log1("Attached filter to raw socket fd %d", fd); // log?
 	}
 
 	sock.sll_family = AF_PACKET;
 	sock.sll_protocol = htons(ETH_P_IP);
 	sock.sll_ifindex = ifindex;
 	xbind(fd, (struct sockaddr *) &sock, sizeof(sock));
-	DEBUG("bound to raw socket fd %d", fd);
+	log1("Created raw socket");
 
 	return fd;
 }

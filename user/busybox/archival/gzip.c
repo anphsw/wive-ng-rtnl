@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Gzip implementation for busybox
@@ -56,6 +40,7 @@ aa:      85.1% -- replaced with aa.gz
 */
 
 #include "libbb.h"
+#include "unarchive.h"
 
 
 /* ===========================================================================
@@ -282,7 +267,7 @@ struct globals {
 #define DECLARE(type, array, size) \
 	type * array
 #define ALLOC(type, array, size) \
-	array = xzalloc((size_t)(((size)+1L)/2) * 2*sizeof(type));
+	array = xzalloc((size_t)(((size)+1L)/2) * 2*sizeof(type))
 #define FREE(array) \
 	do { free(array); array = NULL; } while (0)
 
@@ -402,19 +387,6 @@ static void put_32bit(ulg n)
 	put_16bit(n);
 	put_16bit(n >> 16);
 }
-
-/* ===========================================================================
- * Clear input and output buffers
- */
-static void clear_bufs(void)
-{
-	G1.outcnt = 0;
-#ifdef DEBUG
-	G1.insize = 0;
-#endif
-	G1.isize = 0;
-}
-
 
 /* ===========================================================================
  * Run a set of bytes through the crc shift register.  If s is a NULL
@@ -2030,11 +2002,41 @@ char* make_new_name_gzip(char *filename)
 }
 
 static
-USE_DESKTOP(long long) int pack_gzip(void)
+IF_DESKTOP(long long) int pack_gzip(unpack_info_t *info UNUSED_PARAM)
 {
 	struct stat s;
 
-	clear_bufs();
+	/* Clear input and output buffers */
+	G1.outcnt = 0;
+#ifdef DEBUG
+	G1.insize = 0;
+#endif
+	G1.isize = 0;
+
+	/* Reinit G2.xxx */
+	memset(&G2, 0, sizeof(G2));
+	G2.l_desc.dyn_tree     = G2.dyn_ltree;
+	G2.l_desc.static_tree  = G2.static_ltree;
+	G2.l_desc.extra_bits   = extra_lbits;
+	G2.l_desc.extra_base   = LITERALS + 1;
+	G2.l_desc.elems        = L_CODES;
+	G2.l_desc.max_length   = MAX_BITS;
+	//G2.l_desc.max_code     = 0;
+	G2.d_desc.dyn_tree     = G2.dyn_dtree;
+	G2.d_desc.static_tree  = G2.static_dtree;
+	G2.d_desc.extra_bits   = extra_dbits;
+	//G2.d_desc.extra_base   = 0;
+	G2.d_desc.elems        = D_CODES;
+	G2.d_desc.max_length   = MAX_BITS;
+	//G2.d_desc.max_code     = 0;
+	G2.bl_desc.dyn_tree    = G2.bl_tree;
+	//G2.bl_desc.static_tree = NULL;
+	G2.bl_desc.extra_bits  = extra_blbits,
+	//G2.bl_desc.extra_base  = 0;
+	G2.bl_desc.elems       = BL_CODES;
+	G2.bl_desc.max_length  = MAX_BL_BITS;
+	//G2.bl_desc.max_code    = 0;
+
 	s.st_ctime = 0;
 	fstat(STDIN_FILENO, &s);
 	zip(s.st_ctime);
@@ -2065,7 +2067,7 @@ int gzip_main(int argc UNUSED_PARAM, char **argv)
 	unsigned opt;
 
 	/* Must match bbunzip's constants OPT_STDOUT, OPT_FORCE! */
-	opt = getopt32(argv, "cfv" USE_GUNZIP("dt") "q123456789n");
+	opt = getopt32(argv, "cfv" IF_GUNZIP("dt") "q123456789n");
 #if ENABLE_GUNZIP /* gunzip_main may not be visible... */
 	if (opt & 0x18) // -d and/or -t
 		return gunzip_main(argc, argv);
@@ -2079,29 +2081,6 @@ int gzip_main(int argc UNUSED_PARAM, char **argv)
 	SET_PTR_TO_GLOBALS(xzalloc(sizeof(struct globals) + sizeof(struct globals2))
 			+ sizeof(struct globals));
 	barrier();
-	G2.l_desc.dyn_tree    = G2.dyn_ltree;
-	G2.l_desc.static_tree = G2.static_ltree;
-	G2.l_desc.extra_bits  = extra_lbits;
-	G2.l_desc.extra_base  = LITERALS + 1;
-	G2.l_desc.elems       = L_CODES;
-	G2.l_desc.max_length  = MAX_BITS;
-	//G2.l_desc.max_code    = 0;
-
-	G2.d_desc.dyn_tree    = G2.dyn_dtree;
-	G2.d_desc.static_tree = G2.static_dtree;
-	G2.d_desc.extra_bits  = extra_dbits;
-	//G2.d_desc.extra_base  = 0;
-	G2.d_desc.elems       = D_CODES;
-	G2.d_desc.max_length  = MAX_BITS;
-	//G2.d_desc.max_code    = 0;
-
-	G2.bl_desc.dyn_tree    = G2.bl_tree;
-	//G2.bl_desc.static_tree = NULL;
-	G2.bl_desc.extra_bits  = extra_blbits,
-	//G2.bl_desc.extra_base  = 0;
-	G2.bl_desc.elems       = BL_CODES;
-	G2.bl_desc.max_length  = MAX_BL_BITS;
-	//G2.bl_desc.max_code    = 0;
 
 	/* Allocate all global buffers (for DYN_ALLOC option) */
 	ALLOC(uch, G1.l_buf, INBUFSIZ);

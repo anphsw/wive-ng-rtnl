@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * arping.c - Ping hosts by ARP requests/replies
@@ -169,6 +153,15 @@ static bool recv_pack(unsigned char *buf, int len, struct sockaddr_ll *FROM)
 	struct arphdr *ah = (struct arphdr *) buf;
 	unsigned char *p = (unsigned char *) (ah + 1);
 	struct in_addr src_ip, dst_ip;
+	/* moves below assume in_addr is 4 bytes big, ensure that */
+	struct BUG_in_addr_must_be_4 {
+		char BUG_in_addr_must_be_4[
+			sizeof(struct in_addr) == 4 ? 1 : -1
+		];
+		char BUG_s_addr_must_be_4[
+			sizeof(src_ip.s_addr) == 4 ? 1 : -1
+		];
+	};
 
 	/* Filter out wild packets */
 	if (FROM->sll_pkttype != PACKET_HOST
@@ -176,7 +169,7 @@ static bool recv_pack(unsigned char *buf, int len, struct sockaddr_ll *FROM)
 	 && FROM->sll_pkttype != PACKET_MULTICAST)
 		return false;
 
-	/* Only these types are recognised */
+	/* Only these types are recognized */
 	if (ah->ar_op != htons(ARPOP_REQUEST) && ah->ar_op != htons(ARPOP_REPLY))
 		return false;
 
@@ -187,13 +180,13 @@ static bool recv_pack(unsigned char *buf, int len, struct sockaddr_ll *FROM)
 
 	/* Protocol must be IP. */
 	if (ah->ar_pro != htons(ETH_P_IP)
-		|| (ah->ar_pln != 4)
-		|| (ah->ar_hln != me.sll_halen)
-		|| (len < (int)(sizeof(*ah) + 2 * (4 + ah->ar_hln))))
+	 || (ah->ar_pln != 4)
+	 || (ah->ar_hln != me.sll_halen)
+	 || (len < (int)(sizeof(*ah) + 2 * (4 + ah->ar_hln))))
 		return false;
 
-	memcpy(&src_ip, p + ah->ar_hln, 4);
-	memcpy(&dst_ip, p + ah->ar_hln + 4 + ah->ar_hln, 4);
+	move_from_unaligned32(src_ip.s_addr, p + ah->ar_hln);
+	move_from_unaligned32(dst_ip.s_addr, p + ah->ar_hln + 4 + ah->ar_hln);
 
 	if (dst.s_addr != src_ip.s_addr)
 		return false;
@@ -216,7 +209,7 @@ static bool recv_pack(unsigned char *buf, int len, struct sockaddr_ll *FROM)
 		   dst_ip/dst_hw do not matter.
 		 */
 		if ((memcmp(p, &me.sll_addr, me.sll_halen) == 0)
-			|| (src.s_addr && src.s_addr != dst_ip.s_addr))
+		 || (src.s_addr && src.s_addr != dst_ip.s_addr))
 			return false;
 	}
 	if (!(option_mask32 & QUIET)) {
@@ -302,7 +295,7 @@ int arping_main(int argc UNUSED_PARAM, char **argv)
 		struct ifreq ifr;
 
 		memset(&ifr, 0, sizeof(ifr));
-		strncpy(ifr.ifr_name, device, sizeof(ifr.ifr_name) - 1);
+		strncpy_IFNAMSIZ(ifr.ifr_name, device);
 		/* We use ifr.ifr_name in error msg so that problem
 		 * with truncated name will be visible */
 		ioctl_or_perror_and_die(sock_fd, SIOCGIFINDEX, &ifr, err_str, "not found");
@@ -322,7 +315,7 @@ int arping_main(int argc UNUSED_PARAM, char **argv)
 	/* if (!inet_aton(target, &dst)) - not needed */ {
 		len_and_sockaddr *lsa;
 		lsa = xhost_and_af2sockaddr(target, 0, AF_INET);
-		memcpy(&dst, &lsa->u.sin.sin_addr.s_addr, 4);
+		dst = lsa->u.sin.sin_addr;
 		if (ENABLE_FEATURE_CLEAN_UP)
 			free(lsa);
 	}
@@ -338,8 +331,7 @@ int arping_main(int argc UNUSED_PARAM, char **argv)
 		struct sockaddr_in saddr;
 		int probe_fd = xsocket(AF_INET, SOCK_DGRAM, 0);
 
-		if (setsockopt(probe_fd, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device) + 1) == -1)
-			bb_perror_msg("cannot bind to device %s", device);
+		setsockopt_bindtodevice(probe_fd, device);
 		memset(&saddr, 0, sizeof(saddr));
 		saddr.sin_family = AF_INET;
 		if (src.s_addr) {
@@ -356,9 +348,10 @@ int arping_main(int argc UNUSED_PARAM, char **argv)
 			if (setsockopt(probe_fd, SOL_SOCKET, SO_DONTROUTE, &const_int_1, sizeof(const_int_1)) == -1)
 				bb_perror_msg("setsockopt(SO_DONTROUTE)");
 			xconnect(probe_fd, (struct sockaddr *) &saddr, sizeof(saddr));
-			if (getsockname(probe_fd, (struct sockaddr *) &saddr, &alen) == -1) {
-				bb_perror_msg_and_die("getsockname");
-			}
+			getsockname(probe_fd, (struct sockaddr *) &saddr, &alen);
+			//never happens:
+			//if (getsockname(probe_fd, (struct sockaddr *) &saddr, &alen) == -1)
+			//	bb_perror_msg_and_die("getsockname");
 			if (saddr.sin_family != AF_INET)
 				bb_error_msg_and_die("no IP address configured");
 			src = saddr.sin_addr;
@@ -373,10 +366,10 @@ int arping_main(int argc UNUSED_PARAM, char **argv)
 
 	{
 		socklen_t alen = sizeof(me);
-
-		if (getsockname(sock_fd, (struct sockaddr *) &me, &alen) == -1) {
-			bb_perror_msg_and_die("getsockname");
-		}
+		getsockname(sock_fd, (struct sockaddr *) &me, &alen);
+		//never happens:
+		//if (getsockname(sock_fd, (struct sockaddr *) &me, &alen) == -1)
+		//	bb_perror_msg_and_die("getsockname");
 	}
 	if (me.sll_halen == 0) {
 		bb_error_msg(err_str, "is not ARPable (no ll address)");

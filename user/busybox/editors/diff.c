@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini diff implementation for busybox, adapted from OpenBSD diff.
@@ -119,8 +103,8 @@ struct globals {
 	smallint exit_status;
 	int opt_U_context;
 	size_t max_context;     /* size of context_vec_start */
-	USE_FEATURE_DIFF_DIR(int dl_count;)
-	USE_FEATURE_DIFF_DIR(char **dl;)
+	IF_FEATURE_DIFF_DIR(int dl_count;)
+	IF_FEATURE_DIFF_DIR(char **dl;)
 	char *opt_S_start;
 	const char *label1;
 	const char *label2;
@@ -874,7 +858,7 @@ static void print_header(const char *file1, const char *file2)
  * lines appended (beginning at b).  If c is greater than d then there are
  * lines missing from the to file.
  */
-static void change(char *file1, FILE *f1, char *file2, FILE *f2,
+static void change(const char *file1, FILE *f1, const char *file2, FILE *f2,
 			int a, int b, int c, int d)
 {
 	if ((a > b && c > d) || (option_mask32 & FLAG_q)) {
@@ -918,7 +902,7 @@ static void change(char *file1, FILE *f1, char *file2, FILE *f2,
 }
 
 
-static void output(char *file1, FILE *f1, char *file2, FILE *f2)
+static void output(const char *file1, FILE *f1, const char *file2, FILE *f2)
 {
 	/* Note that j0 and j1 can't be used as they are defined in math.h.
 	 * This also allows the rather amusing variable 'j00'... */
@@ -1015,7 +999,7 @@ static void output(char *file1, FILE *f1, char *file2, FILE *f2)
  */
 /* NB: files can be not REGular. The only sure thing that they
  * are not both DIRectories. */
-static unsigned diffreg(char *file1, char *file2, int flags)
+static unsigned diffreg(const char *file1, const char *file2, int flags)
 {
 	int *member;     /* will be overlaid on nfile[1] */
 	int *class;      /* will be overlaid on nfile[0] */
@@ -1038,13 +1022,11 @@ static unsigned diffreg(char *file1, char *file2, int flags)
 
 	if (flags & D_EMPTY1)
 		/* can't be stdin, but xfopen_stdin() is smaller code */
-		f1 = xfopen_stdin(bb_dev_null);
-	else
-		f1 = xfopen_stdin(file1);
+		file1 = bb_dev_null;
+	f1 = xfopen_stdin(file1);
 	if (flags & D_EMPTY2)
-		f2 = xfopen_stdin(bb_dev_null);
-	else
-		f2 = xfopen_stdin(file2);
+		file2 = bb_dev_null;
+	f2 = xfopen_stdin(file2);
 
 	/* NB: if D_EMPTY1/2 is set, other file is always a regular file,
 	 * not pipe/fifo/chardev/etc - D_EMPTY is used by "diff -r" only,
@@ -1205,7 +1187,7 @@ static char **get_recursive_dirlist(char *path)
 		recursive_action(path, ACTION_RECURSE|ACTION_FOLLOWLINKS,
 					add_to_dirlist, /* file_action */
 					NULL, /* dir_action */
-					(void*)(strlen(path) + 1),
+					(void*)(ptrdiff_t)(strlen(path) + 1),
 					0);
 	} else {
 		DIR *dp;
@@ -1316,6 +1298,8 @@ int diff_main(int argc UNUSED_PARAM, char **argv)
 	 */
 	f1 = argv[0];
 	f2 = argv[1];
+	/* Compat: "diff file name_which_doesnt_exist" exits with 2 */
+	xfunc_error_retval = 2;
 	if (LONE_DASH(f1)) {
 		fstat(STDIN_FILENO, &stb1);
 		gotstdin++;
@@ -1326,6 +1310,7 @@ int diff_main(int argc UNUSED_PARAM, char **argv)
 		gotstdin++;
 	} else
 		xstat(f2, &stb2);
+	xfunc_error_retval = 1;
 
 	if (gotstdin && (S_ISDIR(stb1.st_mode) || S_ISDIR(stb2.st_mode)))
 		bb_error_msg_and_die("can't compare stdin to a directory");

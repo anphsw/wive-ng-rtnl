@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini start-stop-daemon implementation(s) for busybox
@@ -363,13 +347,13 @@ int start_stop_daemon_main(int argc UNUSED_PARAM, char **argv)
 	/* -xa (at least one) is required if -S is given */
 	/* -q turns off -v */
 	opt_complementary = "K:S:K--S:S--K:m?p:K?xpun:S?xa"
-		USE_FEATURE_START_STOP_DAEMON_FANCY("q-v");
+		IF_FEATURE_START_STOP_DAEMON_FANCY("q-v");
 	opt = getopt32(argv, "KSbqtma:n:s:u:c:x:p:"
-		USE_FEATURE_START_STOP_DAEMON_FANCY("ovN:"),
-//		USE_FEATURE_START_STOP_DAEMON_FANCY("ovN:R:"),
+		IF_FEATURE_START_STOP_DAEMON_FANCY("ovN:R:"),
 		&startas, &cmdname, &signame, &userspec, &chuid, &execname, &pidfile
-		USE_FEATURE_START_STOP_DAEMON_FANCY(,&opt_N)
-//		USE_FEATURE_START_STOP_DAEMON_FANCY(,&retry_arg)
+		IF_FEATURE_START_STOP_DAEMON_FANCY(,&opt_N)
+		/* We accept and ignore -R <param> / --retry <param> */
+		IF_FEATURE_START_STOP_DAEMON_FANCY(,NULL)
 	);
 
 	if (opt & OPT_s) {
@@ -382,7 +366,7 @@ int start_stop_daemon_main(int argc UNUSED_PARAM, char **argv)
 	if (!execname) /* in case -a is given and -x is not */
 		execname = startas;
 
-//	USE_FEATURE_START_STOP_DAEMON_FANCY(
+//	IF_FEATURE_START_STOP_DAEMON_FANCY(
 //		if (retry_arg)
 //			retries = xatoi_u(retry_arg);
 //	)
@@ -444,7 +428,7 @@ int start_stop_daemon_main(int argc UNUSED_PARAM, char **argv)
 		write_pidfile(pidfile);
 	}
 	if (opt & OPT_c) {
-		struct bb_uidgid_t ugid;
+		struct bb_uidgid_t ugid = { -1, -1 };
 		parse_chown_usergroup_or_die(&ugid, chuid);
 		if (ugid.gid != (gid_t) -1) xsetgid(ugid.gid);
 		if (ugid.uid != (uid_t) -1) xsetuid(ugid.uid);

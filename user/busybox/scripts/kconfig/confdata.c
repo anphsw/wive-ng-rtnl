@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Copyright (C) 2002 Roman Zippel <zippel@linux-m68k.org>
  * Released under the terms of the GNU GPL v2.0.
  */
@@ -474,8 +458,8 @@ int conf_write(const char *name)
 						fprintf(out_h, "#undef CONFIG_%s\n", sym->name);
 						/* bbox */
 						fprintf(out_h, "#define ENABLE_%s 0\n", sym->name);
-						fprintf(out_h, "#define USE_%s(...)\n", sym->name);
-						fprintf(out_h, "#define SKIP_%s(...) __VA_ARGS__\n", sym->name);
+						fprintf(out_h, "#define IF_%s(...)\n", sym->name);
+						fprintf(out_h, "#define IF_NOT_%s(...) __VA_ARGS__\n", sym->name);
 					}
 					break;
 				case mod:
@@ -489,8 +473,8 @@ int conf_write(const char *name)
 						fprintf(out_h, "#define CONFIG_%s 1\n", sym->name);
 						/* bbox */
 						fprintf(out_h, "#define ENABLE_%s 1\n", sym->name);
-						fprintf(out_h, "#define USE_%s(...) __VA_ARGS__\n", sym->name);
-						fprintf(out_h, "#define SKIP_%s(...)\n", sym->name);
+						fprintf(out_h, "#define IF_%s(...) __VA_ARGS__\n", sym->name);
+						fprintf(out_h, "#define IF_NOT_%s(...)\n", sym->name);
 					}
 					break;
 				}
@@ -521,8 +505,8 @@ int conf_write(const char *name)
 					fputs("\"\n", out_h);
 					/* bbox */
 					fprintf(out_h, "#define ENABLE_%s 1\n", sym->name);
-					fprintf(out_h, "#define USE_%s(...) __VA_ARGS__\n", sym->name);
-					fprintf(out_h, "#define SKIP_%s(...)\n", sym->name);
+					fprintf(out_h, "#define IF_%s(...) __VA_ARGS__\n", sym->name);
+					fprintf(out_h, "#define IF_NOT_%s(...)\n", sym->name);
 				}
 				break;
 			case S_HEX:
@@ -533,20 +517,22 @@ int conf_write(const char *name)
 						fprintf(out_h, "#define CONFIG_%s 0x%s\n", sym->name, str);
 						/* bbox */
 						fprintf(out_h, "#define ENABLE_%s 1\n", sym->name);
-						fprintf(out_h, "#define USE_%s(...) __VA_ARGS__\n", sym->name);
-						fprintf(out_h, "#define SKIP_%s(...)\n", sym->name);
+						fprintf(out_h, "#define IF_%s(...) __VA_ARGS__\n", sym->name);
+						fprintf(out_h, "#define IF_NOT_%s(...)\n", sym->name);
 					}
 					break;
 				}
 			case S_INT:
 				str = sym_get_string_value(sym);
+				if (!str[0])
+					str = "0";
 				fprintf(out, "CONFIG_%s=%s\n", sym->name, str);
 				if (out_h) {
 					fprintf(out_h, "#define CONFIG_%s %s\n", sym->name, str);
 					/* bbox */
 					fprintf(out_h, "#define ENABLE_%s 1\n", sym->name);
-					fprintf(out_h, "#define USE_%s(...) __VA_ARGS__\n", sym->name);
-					fprintf(out_h, "#define SKIP_%s(...)\n", sym->name);
+					fprintf(out_h, "#define IF_%s(...) __VA_ARGS__\n", sym->name);
+					fprintf(out_h, "#define IF_NOT_%s(...)\n", sym->name);
 				}
 				break;
 			}

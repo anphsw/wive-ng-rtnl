@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -26,7 +10,7 @@
 
 #include "libbb.h"
 
-static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, int chop_off)
+static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, int chop_off, size_t *maxsz_p)
 {
 	char *linebuf = NULL;
 	const int term_length = strlen(terminating_string);
@@ -34,6 +18,7 @@ static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, 
 	int linebufsz = 0;
 	int idx = 0;
 	int ch;
+	size_t maxsz = *maxsz_p;
 
 	while (1) {
 		ch = fgetc(file);
@@ -46,6 +31,11 @@ static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, 
 		if (idx >= linebufsz) {
 			linebufsz += 200;
 			linebuf = xrealloc(linebuf, linebufsz);
+			if (idx >= maxsz) {
+				linebuf[idx] = ch;
+				idx++;
+				break;
+			}
 		}
 
 		linebuf[idx] = ch;
@@ -64,6 +54,7 @@ static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, 
 	/* Grow/shrink *first*, then store NUL */
 	linebuf = xrealloc(linebuf, idx + 1);
 	linebuf[idx] = '\0';
+	*maxsz_p = idx;
 	return linebuf;
 }
 
@@ -73,10 +64,23 @@ static char *xmalloc_fgets_internal(FILE *file, const char *terminating_string, 
  * Return NULL if EOF is reached immediately.  */
 char* FAST_FUNC xmalloc_fgets_str(FILE *file, const char *terminating_string)
 {
-	return xmalloc_fgets_internal(file, terminating_string, 0);
+	size_t maxsz = INT_MAX - 4095;
+	return xmalloc_fgets_internal(file, terminating_string, 0, &maxsz);
+}
+
+char* FAST_FUNC xmalloc_fgets_str_len(FILE *file, const char *terminating_string, size_t *maxsz_p)
+{
+	size_t maxsz;
+
+	if (!maxsz_p) {
+		maxsz = INT_MAX - 4095;
+		maxsz_p = &maxsz;
+	}
+	return xmalloc_fgets_internal(file, terminating_string, 0, maxsz_p);
 }
 
 char* FAST_FUNC xmalloc_fgetline_str(FILE *file, const char *terminating_string)
 {
-	return xmalloc_fgets_internal(file, terminating_string, 1);
+	size_t maxsz = INT_MAX - 4095;
+	return xmalloc_fgets_internal(file, terminating_string, 1, &maxsz);
 }

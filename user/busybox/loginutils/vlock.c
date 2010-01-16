@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * vlock implementation for busybox
@@ -54,14 +38,9 @@ int vlock_main(int argc UNUSED_PARAM, char **argv)
 	struct termios term;
 	struct termios oterm;
 	struct vt_mode ovtm;
-	uid_t uid;
 	struct passwd *pw;
-/* XXX: xgetpwuid */
-	uid = getuid();
-	pw = getpwuid(uid);
-	if (pw == NULL)
-		bb_error_msg_and_die("unknown uid %d", (int)uid);
 
+	pw = xgetpwuid(getuid());
 	opt_complementary = "=0"; /* no params! */
 	getopt32(argv, "a");
 
@@ -103,7 +82,7 @@ int vlock_main(int argc UNUSED_PARAM, char **argv)
 	term.c_iflag |= IGNBRK;
 	term.c_lflag &= ~ISIG;
 	term.c_lflag &= ~(ECHO | ECHOCTL);
-	tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	tcsetattr_stdin_TCSANOW(&term);
 
 	do {
 		printf("Virtual console%s locked by %s.\n",
@@ -117,6 +96,6 @@ int vlock_main(int argc UNUSED_PARAM, char **argv)
 	} while (1);
 
 	ioctl(STDIN_FILENO, VT_SETMODE, &ovtm);
-	tcsetattr(STDIN_FILENO, TCSANOW, &oterm);
+	tcsetattr_stdin_TCSANOW(&oterm);
 	fflush_stdout_and_exit(EXIT_SUCCESS);
 }

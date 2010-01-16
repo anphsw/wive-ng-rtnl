@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * libnetlink.c	RTnetlink service routines.
@@ -42,22 +26,23 @@ int FAST_FUNC xrtnl_open(struct rtnl_handle *rth/*, unsigned subscriptions*/)
 {
 	socklen_t addr_len;
 
-	memset(rth, 0, sizeof(rth));
-
+	memset(rth, 0, sizeof(*rth));
 	rth->fd = xsocket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-
-	memset(&rth->local, 0, sizeof(rth->local));
 	rth->local.nl_family = AF_NETLINK;
 	/*rth->local.nl_groups = subscriptions;*/
 
 	xbind(rth->fd, (struct sockaddr*)&rth->local, sizeof(rth->local));
 	addr_len = sizeof(rth->local);
+	getsockname(rth->fd, (struct sockaddr*)&rth->local, &addr_len);
+
+/* too much paranoia
 	if (getsockname(rth->fd, (struct sockaddr*)&rth->local, &addr_len) < 0)
 		bb_perror_msg_and_die("getsockname");
 	if (addr_len != sizeof(rth->local))
 		bb_error_msg_and_die("wrong address length %d", addr_len);
 	if (rth->local.nl_family != AF_NETLINK)
 		bb_error_msg_and_die("wrong address family %d", rth->local.nl_family);
+*/
 	rth->seq = time(NULL);
 	return 0;
 }
@@ -119,7 +104,7 @@ int FAST_FUNC rtnl_dump_request(struct rtnl_handle *rth, int type, void *req, in
 }
 
 static int rtnl_dump_filter(struct rtnl_handle *rth,
-		int (*filter)(const struct sockaddr_nl *, struct nlmsghdr *n, void *),
+		int (*filter)(const struct sockaddr_nl *, struct nlmsghdr *n, void *) FAST_FUNC,
 		void *arg1/*,
 		int (*junk)(struct sockaddr_nl *, struct nlmsghdr *n, void *),
 		void *arg2*/)
@@ -211,7 +196,7 @@ static int rtnl_dump_filter(struct rtnl_handle *rth,
 }
 
 int FAST_FUNC xrtnl_dump_filter(struct rtnl_handle *rth,
-		int (*filter)(const struct sockaddr_nl *, struct nlmsghdr *, void *),
+		int (*filter)(const struct sockaddr_nl *, struct nlmsghdr *, void *) FAST_FUNC,
 		void *arg1)
 {
 	int ret = rtnl_dump_filter(rth, filter, arg1/*, NULL, NULL*/);
@@ -221,10 +206,10 @@ int FAST_FUNC xrtnl_dump_filter(struct rtnl_handle *rth,
 }
 
 int FAST_FUNC rtnl_talk(struct rtnl_handle *rtnl, struct nlmsghdr *n,
-	      pid_t peer, unsigned groups,
-	      struct nlmsghdr *answer,
-	      int (*junk)(struct sockaddr_nl *, struct nlmsghdr *, void *),
-	      void *jarg)
+		pid_t peer, unsigned groups,
+		struct nlmsghdr *answer,
+		int (*junk)(struct sockaddr_nl *, struct nlmsghdr *, void *),
+		void *jarg)
 {
 /* bbox doesn't use parameters no. 3, 4, 6, 7, they are stubbed out */
 #define peer   0
@@ -357,7 +342,7 @@ int FAST_FUNC addattr32(struct nlmsghdr *n, int maxlen, int type, uint32_t data)
 	rta = (struct rtattr*)(((char*)n) + NLMSG_ALIGN(n->nlmsg_len));
 	rta->rta_type = type;
 	rta->rta_len = len;
-	memcpy(RTA_DATA(rta), &data, 4);
+	move_to_unaligned32(RTA_DATA(rta), data);
 	n->nlmsg_len = NLMSG_ALIGN(n->nlmsg_len) + len;
 	return 0;
 }
@@ -388,7 +373,7 @@ int FAST_FUNC rta_addattr32(struct rtattr *rta, int maxlen, int type, uint32_t d
 	subrta = (struct rtattr*)(((char*)rta) + RTA_ALIGN(rta->rta_len));
 	subrta->rta_type = type;
 	subrta->rta_len = len;
-	memcpy(RTA_DATA(subrta), &data, 4);
+	move_to_unaligned32(RTA_DATA(subrta), data);
 	rta->rta_len = NLMSG_ALIGN(rta->rta_len) + len;
 	return 0;
 }

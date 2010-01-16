@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
@@ -37,7 +21,7 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 	/* Check if the file already exists */
 	if (archive_handle->ah_flags & ARCHIVE_EXTRACT_UNCONDITIONAL) {
 		/* Remove the entry if it exists */
-		if (((file_header->mode & S_IFMT) != S_IFDIR)
+		if ((!S_ISDIR(file_header->mode))
 		 && (unlink(file_header->name) == -1)
 		 && (errno != ENOENT)
 		) {
@@ -93,7 +77,9 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 		}
 		case S_IFDIR:
 			res = mkdir(file_header->name, file_header->mode);
-			if ((res == -1) && (errno != EISDIR)
+			if ((res == -1)
+			 && (errno != EISDIR) /* btw, Linux doesn't return this */
+			 && (errno != EEXIST)
 			 && !(archive_handle->ah_flags & ARCHIVE_EXTRACT_QUIET)
 			) {
 				bb_perror_msg("cannot make dir %s", file_header->name);
@@ -129,23 +115,24 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 
 	if (!(archive_handle->ah_flags & ARCHIVE_NOPRESERVE_OWN)) {
 #if ENABLE_FEATURE_TAR_UNAME_GNAME
-		uid_t uid = file_header->uid;
-		gid_t gid = file_header->gid;
+		if (!(archive_handle->ah_flags & ARCHIVE_NUMERIC_OWNER)) {
+			uid_t uid = file_header->uid;
+			gid_t gid = file_header->gid;
 
-		if (file_header->uname) {
-			struct passwd *pwd = getpwnam(file_header->uname);
-			if (pwd) uid = pwd->pw_uid;
-		}
-		if (file_header->gname) {
-			struct group *grp = getgrnam(file_header->gname);
-			if (grp) gid = grp->gr_gid;
-		}
-		lchown(file_header->name, uid, gid);
-#else
-		lchown(file_header->name, file_header->uid, file_header->gid);
+			if (file_header->uname) {
+				struct passwd *pwd = getpwnam(file_header->uname);
+				if (pwd) uid = pwd->pw_uid;
+			}
+			if (file_header->gname) {
+				struct group *grp = getgrnam(file_header->gname);
+				if (grp) gid = grp->gr_gid;
+			}
+			lchown(file_header->name, uid, gid);
+		} else
 #endif
+			lchown(file_header->name, file_header->uid, file_header->gid);
 	}
-	if ((file_header->mode & S_IFMT) != S_IFLNK) {
+	if (!S_ISLNK(file_header->mode)) {
 		/* uclibc has no lchmod, glibc is even stranger -
 		 * it has lchmod which seems to do nothing!
 		 * so we use chmod... */

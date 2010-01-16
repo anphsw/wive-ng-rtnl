@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*      $Slackware: inetd.c 1.79s 2001/02/06 13:18:00 volkerdi Exp $    */
 /*      $OpenBSD: inetd.c,v 1.79 2001/01/30 08:30:57 deraadt Exp $      */
@@ -239,7 +223,7 @@ typedef struct servtab_t {
 	smallint se_checked;                  /* looked at during merge */
 	unsigned se_max;                      /* allowed instances per minute */
 	unsigned se_count;                    /* number started since se_time */
-	unsigned se_time;                     /* whem we started counting */
+	unsigned se_time;                     /* when we started counting */
 	char *se_user;                        /* user name to run as */
 	char *se_group;                       /* group name to run as, can be NULL */
 #ifdef INETD_BUILTINS_ENABLED
@@ -255,36 +239,36 @@ typedef struct servtab_t {
 #ifdef INETD_BUILTINS_ENABLED
 /* Echo received data */
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_ECHO
-static void echo_stream(int, servtab_t *);
-static void echo_dg(int, servtab_t *);
+static void FAST_FUNC echo_stream(int, servtab_t *);
+static void FAST_FUNC echo_dg(int, servtab_t *);
 #endif
 /* Internet /dev/null */
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_DISCARD
-static void discard_stream(int, servtab_t *);
-static void discard_dg(int, servtab_t *);
+static void FAST_FUNC discard_stream(int, servtab_t *);
+static void FAST_FUNC discard_dg(int, servtab_t *);
 #endif
 /* Return 32 bit time since 1900 */
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_TIME
-static void machtime_stream(int, servtab_t *);
-static void machtime_dg(int, servtab_t *);
+static void FAST_FUNC machtime_stream(int, servtab_t *);
+static void FAST_FUNC machtime_dg(int, servtab_t *);
 #endif
 /* Return human-readable time */
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_DAYTIME
-static void daytime_stream(int, servtab_t *);
-static void daytime_dg(int, servtab_t *);
+static void FAST_FUNC daytime_stream(int, servtab_t *);
+static void FAST_FUNC daytime_dg(int, servtab_t *);
 #endif
 /* Familiar character generator */
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_CHARGEN
-static void chargen_stream(int, servtab_t *);
-static void chargen_dg(int, servtab_t *);
+static void FAST_FUNC chargen_stream(int, servtab_t *);
+static void FAST_FUNC chargen_dg(int, servtab_t *);
 #endif
 
 struct builtin {
 	/* NB: not necessarily NUL terminated */
 	char bi_service7[7];      /* internally provided service name */
 	uint8_t bi_fork;          /* 1 if stream fn should run in child */
-	void (*bi_stream_fn)(int, servtab_t *);
-	void (*bi_dgram_fn)(int, servtab_t *);
+	void (*bi_stream_fn)(int, servtab_t *) FAST_FUNC;
+	void (*bi_dgram_fn)(int, servtab_t *) FAST_FUNC;
 };
 
 static const struct builtin builtins[] = {
@@ -311,14 +295,15 @@ struct globals {
 	struct rlimit rlim_ofile;
 	servtab_t *serv_list;
 	int global_queuelen;
+	int maxsock;		/* max fd# in allsock, -1: unknown */
+	/* whenever maxsock grows, prev_maxsock is set to new maxsock,
+	 * but if maxsock is set to -1, prev_maxsock is not changed */
 	int prev_maxsock;
-	int maxsock;
 	unsigned max_concurrency;
 	smallint alarm_armed;
 	uid_t real_uid; /* user ID who ran us */
-	unsigned config_lineno;
 	const char *config_filename;
-	FILE *fconfig;
+	parser_t *parser;
 	char *default_local_hostname;
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_CHARGEN
 	char *end_ring;
@@ -338,14 +323,13 @@ struct BUG_G_too_big {
 #define rlim_ofile      (G.rlim_ofile     )
 #define serv_list       (G.serv_list      )
 #define global_queuelen (G.global_queuelen)
-#define prev_maxsock    (G.prev_maxsock   )
 #define maxsock         (G.maxsock        )
+#define prev_maxsock    (G.prev_maxsock   )
 #define max_concurrency (G.max_concurrency)
 #define alarm_armed     (G.alarm_armed    )
 #define real_uid        (G.real_uid       )
-#define config_lineno   (G.config_lineno  )
 #define config_filename (G.config_filename)
-#define fconfig         (G.fconfig        )
+#define parser          (G.parser         )
 #define default_local_hostname (G.default_local_hostname)
 #define first_ps_byte   (G.first_ps_byte  )
 #define last_ps_byte    (G.last_ps_byte   )
@@ -477,7 +461,7 @@ static void add_fd_to_set(int fd)
 		FD_SET(fd, &allsock);
 		if (maxsock >= 0 && fd > maxsock) {
 			prev_maxsock = maxsock = fd;
-			if ((rlim_t)maxsock > rlim_ofile_cur - FD_MARGIN)
+			if ((rlim_t)fd > rlim_ofile_cur - FD_MARGIN)
 				bump_nofile();
 		}
 	}
@@ -486,6 +470,10 @@ static void add_fd_to_set(int fd)
 static void recalculate_maxsock(void)
 {
 	int fd = 0;
+
+	/* We may have no services, in this case maxsock should still be >= 0
+	 * (code elsewhere is not happy with maxsock == -1) */
+	maxsock = 0;
 	while (fd <= prev_maxsock) {
 		if (FD_ISSET(fd, &allsock))
 			maxsock = fd;
@@ -559,59 +547,18 @@ static int reopen_config_file(void)
 {
 	free(default_local_hostname);
 	default_local_hostname = xstrdup("*");
-	if (fconfig != NULL)
-		fclose(fconfig);
-	config_lineno = 0;
-	fconfig = fopen_or_warn(config_filename, "r");
-	return (fconfig != NULL);
+	if (parser != NULL)
+		config_close(parser);
+	parser = config_open(config_filename);
+	return (parser != NULL);
 }
 
 static void close_config_file(void)
 {
-	if (fconfig) {
-		fclose(fconfig);
-		fconfig = NULL;
+	if (parser) {
+		config_close(parser);
+		parser = NULL;
 	}
-}
-
-static char *next_line(void)
-{
-	if (fgets(line, LINE_SIZE, fconfig) == NULL)
-		return NULL;
-	config_lineno++;
-	*strchrnul(line, '\n') = '\0';
-	return line;
-}
-
-static char *next_word(char **cpp)
-{
-	char *start;
-	char *cp = *cpp;
-
-	if (cp == NULL)
-		return NULL;
- again:
-	while (*cp == ' ' || *cp == '\t')
-		cp++;
-	if (*cp == '\0') {
-		int c = getc(fconfig);
-		ungetc(c, fconfig);
-		if (c == ' ' || c == '\t') {
-			cp = next_line();
-			if (cp)
-				goto again;
-		}
-		*cpp = NULL;
-		return NULL;
-	}
-	start = cp;
-	while (*cp && *cp != ' ' && *cp != '\t')
-		cp++;
-	if (*cp != '\0')
-		*cp++ = '\0';
-
-	*cpp = cp;
-	return start;
 }
 
 static void free_servtab_strings(servtab_t *cp)
@@ -659,55 +606,49 @@ static servtab_t *dup_servtab(servtab_t *sep)
 }
 
 /* gcc generates much more code if this is inlined */
-static NOINLINE servtab_t *parse_one_line(void)
+static servtab_t *parse_one_line(void)
 {
 	int argc;
-	char *p, *cp, *arg;
+	char *token[6+MAXARGV];
+	char *p, *arg;
 	char *hostdelim;
 	servtab_t *sep;
 	servtab_t *nsep;
  new:
 	sep = new_servtab();
  more:
-	while ((cp = next_line()) && *cp == '#')
-		continue; /* skip comment lines */
-	if (cp == NULL) {
+	argc = config_read(parser, token, 6+MAXARGV, 1, "# \t", PARSE_NORMAL);
+	if (!argc) {
 		free(sep);
 		return NULL;
 	}
 
-	arg = next_word(&cp);
-	if (arg == NULL) /* a blank line. */
-		goto more;
-
 	/* [host:]service socktype proto wait user[:group] prog [args] */
 	/* Check for "host:...." line */
+	arg = token[0];
 	hostdelim = strrchr(arg, ':');
 	if (hostdelim) {
 		*hostdelim = '\0';
 		sep->se_local_hostname = xstrdup(arg);
 		arg = hostdelim + 1;
-		if (*arg == '\0') {
-			arg = next_word(&cp);
-			if (arg == NULL) {
-				/* Line has just "host:", change the
-				 * default host for the following lines. */
-				free(default_local_hostname);
-				default_local_hostname = sep->se_local_hostname;
-				goto more;
-			}
+		if (*arg == '\0' && argc == 1) {
+			/* Line has just "host:", change the
+			 * default host for the following lines. */
+			free(default_local_hostname);
+			default_local_hostname = sep->se_local_hostname;
+			goto more;
 		}
 	} else
 		sep->se_local_hostname = xstrdup(default_local_hostname);
 
 	/* service socktype proto wait user[:group] prog [args] */
 	sep->se_service = xstrdup(arg);
+
 	/* socktype proto wait user[:group] prog [args] */
-	arg = next_word(&cp);
-	if (arg == NULL) {
+	if (argc < 6) {
  parse_err:
 		bb_error_msg("parse error on line %u, line is ignored",
-				config_lineno);
+				parser->lineno);
 		free_servtab_strings(sep);
 		/* Just "goto more" can make sep to carry over e.g.
 		 * "rpc"-ness (by having se_rpcver_lo != 0).
@@ -715,8 +656,9 @@ static NOINLINE servtab_t *parse_one_line(void)
 		free(sep);
 		goto new;
 	}
+
 	{
-		static int8_t SOCK_xxx[] ALIGN1 = {
+		static const int8_t SOCK_xxx[] ALIGN1 = {
 			-1,
 			SOCK_STREAM, SOCK_DGRAM, SOCK_RDM,
 			SOCK_SEQPACKET, SOCK_RAW
@@ -724,13 +666,11 @@ static NOINLINE servtab_t *parse_one_line(void)
 		sep->se_socktype = SOCK_xxx[1 + index_in_strings(
 			"stream""\0" "dgram""\0" "rdm""\0"
 			"seqpacket""\0" "raw""\0"
-			, arg)];
+			, token[1])];
 	}
 
 	/* {unix,[rpc/]{tcp,udp}[6]} wait user[:group] prog [args] */
-	sep->se_proto = arg = xstrdup(next_word(&cp));
-	if (arg == NULL)
-		goto parse_err;
+	sep->se_proto = arg = xstrdup(token[2]);
 	if (strcmp(arg, "unix") == 0) {
 		sep->se_family = AF_UNIX;
 	} else {
@@ -789,9 +729,7 @@ static NOINLINE servtab_t *parse_one_line(void)
 	}
 
 	/* [no]wait[.max] user[:group] prog [args] */
-	arg = next_word(&cp);
-	if (arg == NULL)
-		goto parse_err;
+	arg = token[3];
 	sep->se_max = max_concurrency;
 	p = strchr(arg, '.');
 	if (p) {
@@ -807,9 +745,7 @@ static NOINLINE servtab_t *parse_one_line(void)
 		goto parse_err;
 
 	/* user[:group] prog [args] */
-	sep->se_user = xstrdup(next_word(&cp));
-	if (sep->se_user == NULL)
-		goto parse_err;
+	sep->se_user = xstrdup(token[4]);
 	arg = strchr(sep->se_user, '.');
 	if (arg == NULL)
 		arg = strchr(sep->se_user, ':');
@@ -819,9 +755,7 @@ static NOINLINE servtab_t *parse_one_line(void)
 	}
 
 	/* prog [args] */
-	sep->se_program = xstrdup(next_word(&cp));
-	if (sep->se_program == NULL)
-		goto parse_err;
+	sep->se_program = xstrdup(token[5]);
 #ifdef INETD_BUILTINS_ENABLED
 	if (strcmp(sep->se_program, "internal") == 0
 	 && strlen(sep->se_service) <= 7
@@ -842,7 +776,7 @@ static NOINLINE servtab_t *parse_one_line(void)
 	}
 #endif
 	argc = 0;
-	while ((arg = next_word(&cp)) != NULL && argc < MAXARGV)
+	while ((arg = token[6+argc]) != NULL && argc < MAXARGV)
 		sep->se_argv[argc++] = xstrdup(arg);
 
 	/* catch mixups. "<service> stream udp ..." == wtf */
@@ -854,6 +788,11 @@ static NOINLINE servtab_t *parse_one_line(void)
 		if (sep->se_proto_no == IPPROTO_TCP)
 			goto parse_err;
 	}
+
+//	bb_info_msg(
+//		"ENTRY[%s][%s][%s][%d][%d][%d][%d][%d][%s][%s][%s]",
+//		sep->se_local_hostname, sep->se_service, sep->se_proto, sep->se_wait, sep->se_proto_no,
+//		sep->se_max, sep->se_count, sep->se_time, sep->se_user, sep->se_group, sep->se_program);
 
 	/* check if the hostname specifier is a comma separated list
 	 * of hostnames. we'll make new entries for each address. */
@@ -1092,10 +1031,10 @@ static void reap_child(int sig UNUSED_PARAM)
 				continue;
 			/* One of our "wait" services */
 			if (WIFEXITED(status) && WEXITSTATUS(status))
-				bb_error_msg("%s: exit status 0x%x",
+				bb_error_msg("%s: exit status %u",
 						sep->se_program, WEXITSTATUS(status));
 			else if (WIFSIGNALED(status))
-				bb_error_msg("%s: exit signal 0x%x",
+				bb_error_msg("%s: exit signal %u",
 						sep->se_program, WTERMSIG(status));
 			sep->se_wait = 1;
 			add_fd_to_set(sep->se_fd);
@@ -1180,7 +1119,12 @@ int inetd_main(int argc UNUSED_PARAM, char **argv)
 	else
 		bb_sanitize_stdio();
 	if (!(opt & 4)) {
-		openlog(applet_name, LOG_PID | LOG_NOWAIT, LOG_DAEMON);
+		/* LOG_NDELAY: connect to syslog daemon NOW.
+		 * Otherwise, we may open syslog socket
+		 * in vforked child, making opened fds and syslog()
+		 * internal state inconsistent.
+		 * This was observed to leak file descriptors. */
+		openlog(applet_name, LOG_PID | LOG_NDELAY, LOG_DAEMON);
 		logmode = LOGMODE_SYSLOG;
 	}
 
@@ -1228,7 +1172,8 @@ int inetd_main(int argc UNUSED_PARAM, char **argv)
 
 		readable = allsock; /* struct copy */
 		/* if there are no fds to wait on, we will block
-		 * until signal wakes us up */
+		 * until signal wakes us up (maxsock == 0, but readable
+		 * never contains fds 0 and 1...) */
 		ready_fd_cnt = select(maxsock + 1, &readable, NULL, NULL, NULL);
 		if (ready_fd_cnt < 0) {
 			if (errno != EINTR) {
@@ -1359,7 +1304,7 @@ int inetd_main(int argc UNUSED_PARAM, char **argv)
 			if (sep->se_builtin) {
 				if (pid) { /* "pid" is -1: we did vfork */
 					close(sep->se_fd); /* listening socket */
-					logmode = 0; /* make xwrite etc silent */
+					logmode = LOGMODE_NONE; /* make xwrite etc silent */
 				}
 				restore_sigmask(&omask);
 				if (sep->se_socktype == SOCK_STREAM)
@@ -1415,14 +1360,23 @@ int inetd_main(int argc UNUSED_PARAM, char **argv)
 			if (rlim_ofile.rlim_cur != rlim_ofile_cur)
 				if (setrlimit(RLIMIT_NOFILE, &rlim_ofile) < 0)
 					bb_perror_msg("setrlimit");
-			closelog();
-			xmove_fd(ctrl, 0);
-			xdup2(0, 1);
-			xdup2(0, 2);
-			/* NB: among others, this loop closes listening socket
+
+			/* closelog(); - WRONG. we are after vfork,
+			 * this may confuse syslog() internal state.
+			 * Let's hope libc sets syslog fd to CLOEXEC...
+			 */
+			xmove_fd(ctrl, STDIN_FILENO);
+			xdup2(STDIN_FILENO, STDOUT_FILENO);
+			/* manpages of inetd I managed to find either say
+			 * that stderr is also redirected to the network,
+			 * or do not talk about redirection at all (!) */
+			if (!sep->se_wait) /* only for usual "tcp nowait" */
+				xdup2(STDIN_FILENO, STDERR_FILENO);
+			/* NB: among others, this loop closes listening sockets
 			 * for nowait stream children */
 			for (sep2 = serv_list; sep2; sep2 = sep2->se_next)
-				maybe_close(sep2->se_fd);
+				if (sep2->se_fd != ctrl)
+					maybe_close(sep2->se_fd);
 			sigaction_set(SIGPIPE, &saved_pipe_handler);
 			restore_sigmask(&omask);
 			BB_EXECVP(sep->se_program, sep->se_argv);
@@ -1446,7 +1400,7 @@ static const char *const cat_args[] = { "cat", NULL };
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_ECHO
 /* Echo service -- echo data back. */
 /* ARGSUSED */
-static void echo_stream(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC echo_stream(int s, servtab_t *sep UNUSED_PARAM)
 {
 #if BB_MMU
 	while (1) {
@@ -1467,7 +1421,7 @@ static void echo_stream(int s, servtab_t *sep UNUSED_PARAM)
 	/* on failure we return to main, which does exit(EXIT_FAILURE) */
 #endif
 }
-static void echo_dg(int s, servtab_t *sep)
+static void FAST_FUNC echo_dg(int s, servtab_t *sep)
 {
 	enum { BUFSIZE = 12*1024 }; /* for jumbo sized packets! :) */
 	char *buf = xmalloc(BUFSIZE); /* too big for stack */
@@ -1485,9 +1439,9 @@ static void echo_dg(int s, servtab_t *sep)
 
 
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_DISCARD
-/* Discard service -- ignore data. MMU arches only. */
+/* Discard service -- ignore data. */
 /* ARGSUSED */
-static void discard_stream(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC discard_stream(int s, servtab_t *sep UNUSED_PARAM)
 {
 #if BB_MMU
 	while (safe_read(s, line, LINE_SIZE) > 0)
@@ -1506,7 +1460,7 @@ static void discard_stream(int s, servtab_t *sep UNUSED_PARAM)
 #endif
 }
 /* ARGSUSED */
-static void discard_dg(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC discard_dg(int s, servtab_t *sep UNUSED_PARAM)
 {
 	/* dgram builtins are non-forking - DONT BLOCK! */
 	recv(s, line, LINE_SIZE, MSG_DONTWAIT);
@@ -1527,7 +1481,7 @@ static void init_ring(void)
 }
 /* Character generator. MMU arches only. */
 /* ARGSUSED */
-static void chargen_stream(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC chargen_stream(int s, servtab_t *sep UNUSED_PARAM)
 {
 	char *rs;
 	int len;
@@ -1555,7 +1509,7 @@ static void chargen_stream(int s, servtab_t *sep UNUSED_PARAM)
 	}
 }
 /* ARGSUSED */
-static void chargen_dg(int s, servtab_t *sep)
+static void FAST_FUNC chargen_dg(int s, servtab_t *sep)
 {
 	int len;
 	char text[LINESIZ + 2];
@@ -1604,14 +1558,14 @@ static uint32_t machtime(void)
 	return htonl((uint32_t)(tv.tv_sec + 2208988800));
 }
 /* ARGSUSED */
-static void machtime_stream(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC machtime_stream(int s, servtab_t *sep UNUSED_PARAM)
 {
 	uint32_t result;
 
 	result = machtime();
 	full_write(s, &result, sizeof(result));
 }
-static void machtime_dg(int s, servtab_t *sep)
+static void FAST_FUNC machtime_dg(int s, servtab_t *sep)
 {
 	uint32_t result;
 	len_and_sockaddr *lsa = alloca(LSA_LEN_SIZE + sep->se_lsa->len);
@@ -1629,14 +1583,14 @@ static void machtime_dg(int s, servtab_t *sep)
 #if ENABLE_FEATURE_INETD_SUPPORT_BUILTIN_DAYTIME
 /* Return human-readable time of day */
 /* ARGSUSED */
-static void daytime_stream(int s, servtab_t *sep UNUSED_PARAM)
+static void FAST_FUNC daytime_stream(int s, servtab_t *sep UNUSED_PARAM)
 {
 	time_t t;
 
 	t = time(NULL);
 	fdprintf(s, "%.24s\r\n", ctime(&t));
 }
-static void daytime_dg(int s, servtab_t *sep)
+static void FAST_FUNC daytime_dg(int s, servtab_t *sep)
 {
 	time_t t;
 	len_and_sockaddr *lsa = alloca(LSA_LEN_SIZE + sep->se_lsa->len);

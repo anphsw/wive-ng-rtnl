@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * bb_inode.c --- routines to update the bad block inode.
@@ -141,9 +125,9 @@ errcode_t ext2fs_update_bb_inode(ext2_filsys fs, ext2_badblocks_list bb_list)
 	if (retval)
 		goto cleanup;
 
-	inode.i_atime = inode.i_mtime = time(0);
+	inode.i_atime = inode.i_mtime = time(NULL);
 	if (!inode.i_ctime)
-		inode.i_ctime = time(0);
+		inode.i_ctime = time(NULL);
 	inode.i_blocks = rec.bad_block_count * (fs->blocksize / 512);
 	inode.i_size = rec.bad_block_count * fs->blocksize;
 

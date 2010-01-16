@@ -1,18 +1,6 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 /*
 You need to define the following (example):
@@ -167,6 +155,11 @@ type FAST_FUNC xstrto(_range_sfx)(const char *numstr, int base,
 type FAST_FUNC xstrto(_range)(const char *numstr, int base, type lower, type upper)
 {
 	return xstrto(_range_sfx)(numstr, base, lower, upper, NULL);
+}
+
+type FAST_FUNC xstrto()(const char *numstr, int base)
+{
+	return xstrto(_range_sfx)(numstr, base, XSTR_TYPE_MIN, XSTR_TYPE_MAX, NULL);
 }
 
 type FAST_FUNC xato(_range_sfx)(const char *numstr,

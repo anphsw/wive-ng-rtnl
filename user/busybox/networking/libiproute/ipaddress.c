@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ipaddress.c		"ip address".
@@ -99,7 +83,7 @@ static void print_queuelen(char *name)
 		return;
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+	strncpy_IFNAMSIZ(ifr.ifr_name, name);
 	if (ioctl_or_warn(s, SIOCGIFTXQLEN, &ifr) < 0) {
 		close(s);
 		return;
@@ -212,7 +196,7 @@ static int flush_update(void)
 	return 0;
 }
 
-static int print_addrinfo(const struct sockaddr_nl *who UNUSED_PARAM,
+static int FAST_FUNC print_addrinfo(const struct sockaddr_nl *who UNUSED_PARAM,
 		struct nlmsghdr *n, void *arg UNUSED_PARAM)
 {
 	struct ifaddrmsg *ifa = NLMSG_DATA(n);
@@ -296,17 +280,16 @@ static int print_addrinfo(const struct sockaddr_nl *who UNUSED_PARAM,
 
 	if (rta_tb[IFA_LOCAL]) {
 		fputs(rt_addr_n2a(ifa->ifa_family,
-					      RTA_PAYLOAD(rta_tb[IFA_LOCAL]),
 					      RTA_DATA(rta_tb[IFA_LOCAL]),
 					      abuf, sizeof(abuf)), stdout);
 
-		if (rta_tb[IFA_ADDRESS] == NULL ||
-		    memcmp(RTA_DATA(rta_tb[IFA_ADDRESS]), RTA_DATA(rta_tb[IFA_LOCAL]), 4) == 0) {
+		if (rta_tb[IFA_ADDRESS] == NULL
+		 || memcmp(RTA_DATA(rta_tb[IFA_ADDRESS]), RTA_DATA(rta_tb[IFA_LOCAL]), 4) == 0
+		) {
 			printf("/%d ", ifa->ifa_prefixlen);
 		} else {
 			printf(" peer %s/%d ",
 				rt_addr_n2a(ifa->ifa_family,
-					    RTA_PAYLOAD(rta_tb[IFA_ADDRESS]),
 					    RTA_DATA(rta_tb[IFA_ADDRESS]),
 					    abuf, sizeof(abuf)),
 				ifa->ifa_prefixlen);
@@ -316,14 +299,12 @@ static int print_addrinfo(const struct sockaddr_nl *who UNUSED_PARAM,
 	if (rta_tb[IFA_BROADCAST]) {
 		printf("brd %s ",
 			rt_addr_n2a(ifa->ifa_family,
-				    RTA_PAYLOAD(rta_tb[IFA_BROADCAST]),
 				    RTA_DATA(rta_tb[IFA_BROADCAST]),
 				    abuf, sizeof(abuf)));
 	}
 	if (rta_tb[IFA_ANYCAST]) {
 		printf("any %s ",
 			rt_addr_n2a(ifa->ifa_family,
-				    RTA_PAYLOAD(rta_tb[IFA_ANYCAST]),
 				    RTA_DATA(rta_tb[IFA_ANYCAST]),
 				    abuf, sizeof(abuf)));
 	}
@@ -368,8 +349,7 @@ static int print_addrinfo(const struct sockaddr_nl *who UNUSED_PARAM,
 }
 
 
-struct nlmsg_list
-{
+struct nlmsg_list {
 	struct nlmsg_list *next;
 	struct nlmsghdr	  h;
 };
@@ -396,7 +376,7 @@ static int print_selected_addrinfo(int ifindex, struct nlmsg_list *ainfo)
 }
 
 
-static int store_nlmsg(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg)
+static int FAST_FUNC store_nlmsg(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg)
 {
 	struct nlmsg_list **linfo = (struct nlmsg_list**)arg;
 	struct nlmsg_list *h;

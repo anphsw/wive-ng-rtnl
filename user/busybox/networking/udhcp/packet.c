@@ -1,21 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
-
+/*
+ * packet.c -- packet ops
+ * Rewrite by Russ Dill <Russ.Dill@asu.edu> July 2001
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
+ */
 #include <netinet/in.h>
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1) || defined _NEWLIB_VERSION
 #include <netpacket/packet.h>
@@ -30,16 +19,15 @@
 #include "dhcpd.h"
 #include "options.h"
 
-
-void udhcp_init_header(struct dhcpMessage *packet, char type)
+void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
-	memset(packet, 0, sizeof(struct dhcpMessage));
-	packet->op = BOOTREQUEST;
+	memset(packet, 0, sizeof(struct dhcp_packet));
+	packet->op = BOOTREQUEST; /* if client to a server */
 	switch (type) {
 	case DHCPOFFER:
 	case DHCPACK:
 	case DHCPNAK:
-		packet->op = BOOTREPLY;
+		packet->op = BOOTREPLY; /* if server to client */
 	}
 	packet->htype = ETH_10MB;
 	packet->hlen = ETH_10MB_LEN;
@@ -48,9 +36,55 @@ void udhcp_init_header(struct dhcpMessage *packet, char type)
 	add_simple_option(packet->options, DHCP_MESSAGE_TYPE, type);
 }
 
+#if defined CONFIG_UDHCP_DEBUG && CONFIG_UDHCP_DEBUG >= 2
+void FAST_FUNC udhcp_dump_packet(struct dhcp_packet *packet)
+{
+	char buf[sizeof(packet->chaddr)*2 + 1];
 
-/* read a packet from socket fd, return -1 on read error, -2 on packet error */
-int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd)
+	if (dhcp_verbose < 2)
+		return;
+
+	bb_info_msg(
+		//" op %x"
+		//" htype %x"
+		" hlen %x"
+		//" hops %x"
+		" xid %x"
+		//" secs %x"
+		//" flags %x"
+		" ciaddr %x"
+		" yiaddr %x"
+		" siaddr %x"
+		" giaddr %x"
+		//" chaddr %s"
+		//" sname %s"
+		//" file %s"
+		//" cookie %x"
+		//" options %s"
+		//, packet->op
+		//, packet->htype
+		, packet->hlen
+		//, packet->hops
+		, packet->xid
+		//, packet->secs
+		//, packet->flags
+		, packet->ciaddr
+		, packet->yiaddr
+		, packet->siaddr_nip
+		, packet->gateway_nip
+		//, packet->chaddr[16]
+		//, packet->sname[64]
+		//, packet->file[128]
+		//, packet->cookie
+		//, packet->options[]
+	);
+	*bin2hex(buf, (void *) packet->chaddr, sizeof(packet->chaddr)) = '\0';
+	bb_info_msg(" chaddr %s", buf);
+}
+#endif
+
+/* Read a packet from socket fd, return -1 on read error, -2 on packet error */
+int FAST_FUNC udhcp_recv_kernel_packet(struct dhcp_packet *packet, int fd)
 {
 	int bytes;
 	unsigned char *vendor;
@@ -58,15 +92,16 @@ int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd)
 	memset(packet, 0, sizeof(*packet));
 	bytes = safe_read(fd, packet, sizeof(*packet));
 	if (bytes < 0) {
-		DEBUG("cannot read on listening socket, ignoring");
+		log1("Packet read error, ignoring");
 		return bytes; /* returns -1 */
 	}
 
 	if (packet->cookie != htonl(DHCP_MAGIC)) {
-		bb_error_msg("received bogus message, ignoring");
+		bb_info_msg("Packet with bad magic, ignoring");
 		return -2;
 	}
-	DEBUG("Received a packet");
+	log1("Received a packet");
+	udhcp_dump_packet(packet);
 
 	if (packet->op == BOOTREQUEST) {
 		vendor = get_option(packet, DHCP_VENDOR);
@@ -81,7 +116,7 @@ int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd)
 				if (vendor[OPT_LEN - 2] == (uint8_t)strlen(broken_vendors[i])
 				 && !strncmp((char*)vendor, broken_vendors[i], vendor[OPT_LEN - 2])
 				) {
-					DEBUG("broken client (%s), forcing broadcast",
+					log1("Broken client (%s), forcing broadcast replies",
 						broken_vendors[i]);
 					packet->flags |= htons(BROADCAST_FLAG);
 				}
@@ -90,7 +125,7 @@ int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd)
 			if (vendor[OPT_LEN - 2] == (uint8_t)(sizeof("MSFT 98")-1)
 			 && memcmp(vendor, "MSFT 98", sizeof("MSFT 98")-1) == 0
 			) {
-				DEBUG("broken client (%s), forcing broadcast", "MSFT 98");
+				log1("Broken client (%s), forcing broadcast replies", "MSFT 98");
 				packet->flags |= htons(BROADCAST_FLAG);
 			}
 #endif
@@ -100,11 +135,10 @@ int udhcp_recv_kernel_packet(struct dhcpMessage *packet, int fd)
 	return bytes;
 }
 
-
-uint16_t udhcp_checksum(void *addr, int count)
+uint16_t FAST_FUNC udhcp_checksum(void *addr, int count)
 {
 	/* Compute Internet Checksum for "count" bytes
-	 *         beginning at location "addr".
+	 * beginning at location "addr".
 	 */
 	int32_t sum = 0;
 	uint16_t *source = (uint16_t *) addr;
@@ -130,21 +164,21 @@ uint16_t udhcp_checksum(void *addr, int count)
 	return ~sum;
 }
 
-
 /* Construct a ip/udp header for a packet, send packet */
-int udhcp_send_raw_packet(struct dhcpMessage *payload,
+int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_ip, int source_port,
-		uint32_t dest_ip, int dest_port, const uint8_t *dest_arp, int ifindex)
+		uint32_t dest_ip, int dest_port, const uint8_t *dest_arp,
+		int ifindex)
 {
 	struct sockaddr_ll dest;
-	struct udp_dhcp_packet packet;
+	struct ip_udp_dhcp_packet packet;
 	int fd;
 	int result = -1;
 	const char *msg;
 
 	enum {
-		IP_UPD_DHCP_SIZE = sizeof(struct udp_dhcp_packet) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
-		UPD_DHCP_SIZE    = IP_UPD_DHCP_SIZE - offsetof(struct udp_dhcp_packet, udp),
+		IP_UPD_DHCP_SIZE = sizeof(struct ip_udp_dhcp_packet) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
+		UPD_DHCP_SIZE    = IP_UPD_DHCP_SIZE - offsetof(struct ip_udp_dhcp_packet, udp),
 	};
 
 	fd = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
@@ -155,7 +189,7 @@ int udhcp_send_raw_packet(struct dhcpMessage *payload,
 
 	memset(&dest, 0, sizeof(dest));
 	memset(&packet, 0, sizeof(packet));
-	packet.data = *payload; /* struct copy */
+	packet.data = *dhcp_pkt; /* struct copy */
 
 	dest.sll_family = AF_PACKET;
 	dest.sll_protocol = htons(ETH_P_IP);
@@ -188,6 +222,7 @@ int udhcp_send_raw_packet(struct dhcpMessage *payload,
 	 * If you need to change this: last byte of the packet is
 	 * packet.data.options[end_option(packet.data.options)]
 	 */
+	udhcp_dump_packet(dhcp_pkt);
 	result = sendto(fd, &packet, IP_UPD_DHCP_SIZE, 0,
 				(struct sockaddr *) &dest, sizeof(dest));
 	msg = "sendto";
@@ -200,9 +235,8 @@ int udhcp_send_raw_packet(struct dhcpMessage *payload,
 	return result;
 }
 
-
 /* Let the kernel do all the work for packet generation */
-int udhcp_send_kernel_packet(struct dhcpMessage *payload,
+int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_ip, int source_port,
 		uint32_t dest_ip, int dest_port)
 {
@@ -212,7 +246,7 @@ int udhcp_send_kernel_packet(struct dhcpMessage *payload,
 	const char *msg;
 
 	enum {
-		DHCP_SIZE = sizeof(struct dhcpMessage) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
+		DHCP_SIZE = sizeof(struct dhcp_packet) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
 	};
 
 	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -241,7 +275,8 @@ int udhcp_send_kernel_packet(struct dhcpMessage *payload,
 	}
 
 	/* Currently we send full-sized DHCP packets (see above) */
-	result = safe_write(fd, payload, DHCP_SIZE);
+	udhcp_dump_packet(dhcp_pkt);
+	result = safe_write(fd, dhcp_pkt, DHCP_SIZE);
 	msg = "write";
  ret_close:
 	close(fd);

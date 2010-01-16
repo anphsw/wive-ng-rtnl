@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini ps implementation(s) for busybox
@@ -41,14 +25,14 @@ enum { MAX_WIDTH = 2*1024 };
 
 #if ENABLE_SELINUX
 #define SELINUX_O_PREFIX "label,"
-#define DEFAULT_O_STR    (SELINUX_O_PREFIX "pid,user" USE_FEATURE_PS_TIME(",time") ",args")
+#define DEFAULT_O_STR    (SELINUX_O_PREFIX "pid,user" IF_FEATURE_PS_TIME(",time") ",args")
 #else
-#define DEFAULT_O_STR    ("pid,user" USE_FEATURE_PS_TIME(",time") ",args")
+#define DEFAULT_O_STR    ("pid,user" IF_FEATURE_PS_TIME(",time") ",args")
 #endif
 
 typedef struct {
 	uint16_t width;
-	char name[6];
+	char name6[6];
 	const char *header;
 	void (*f)(char *buf, int size, const procps_status_t *ps);
 	int ps_flags;
@@ -190,6 +174,11 @@ static void func_user(char *buf, int size, const procps_status_t *ps)
 #endif
 }
 
+static void func_group(char *buf, int size, const procps_status_t *ps)
+{
+	safe_strncpy(buf, get_cached_groupname(ps->gid), size+1);
+}
+
 static void func_comm(char *buf, int size, const procps_status_t *ps)
 {
 	safe_strncpy(buf, ps->comm, size+1);
@@ -243,6 +232,26 @@ static void func_tty(char *buf, int size, const procps_status_t *ps)
 		snprintf(buf, size+1, "%u,%u", ps->tty_major, ps->tty_minor);
 }
 
+
+#if ENABLE_FEATURE_PS_ADDITIONAL_COLUMNS
+
+static void func_rgroup(char *buf, int size, const procps_status_t *ps)
+{
+	safe_strncpy(buf, get_cached_groupname(ps->rgid), size+1);
+}
+
+static void func_ruser(char *buf, int size, const procps_status_t *ps)
+{
+	safe_strncpy(buf, get_cached_username(ps->ruid), size+1);
+}
+
+static void func_nice(char *buf, int size, const procps_status_t *ps)
+{
+	sprintf(buf, "%*d", size, ps->niceness);
+}
+
+#endif /* FEATURE_PS_ADDITIONAL_COLUMNS */
+
 #if ENABLE_FEATURE_PS_TIME
 static void func_etime(char *buf, int size, const procps_status_t *ps)
 {
@@ -292,6 +301,7 @@ static void func_pcpu(char *buf, int size, const procps_status_t *ps)
 static const ps_out_t out_spec[] = {
 // Mandated by POSIX:
 	{ 8                  , "user"  ,"USER"   ,func_user  ,PSSCAN_UIDGID  },
+	{ 8                  , "group" ,"GROUP"  ,func_group ,PSSCAN_UIDGID  },
 	{ 16                 , "comm"  ,"COMMAND",func_comm  ,PSSCAN_COMM    },
 	{ 256                , "args"  ,"COMMAND",func_args  ,PSSCAN_COMM    },
 	{ 5                  , "pid"   ,"PID"    ,func_pid   ,PSSCAN_PID     },
@@ -300,11 +310,12 @@ static const ps_out_t out_spec[] = {
 #if ENABLE_FEATURE_PS_TIME
 	{ sizeof("ELAPSED")-1, "etime" ,"ELAPSED",func_etime ,PSSCAN_START_TIME },
 #endif
-//	{ sizeof("GROUP"  )-1, "group" ,"GROUP"  ,func_group ,PSSCAN_UIDGID  },
-//	{ sizeof("NI"     )-1, "nice"  ,"NI"     ,func_nice  ,PSSCAN_        },
-//	{ sizeof("%CPU"   )-1, "pcpu"  ,"%CPU"   ,func_pcpu  ,PSSCAN_        },
-//	{ sizeof("RGROUP" )-1, "rgroup","RGROUP" ,func_rgroup,PSSCAN_UIDGID  },
-//	{ sizeof("RUSER"  )-1, "ruser" ,"RUSER"  ,func_ruser ,PSSCAN_UIDGID  },
+#if ENABLE_FEATURE_PS_ADDITIONAL_COLUMNS
+	{ 5                  , "nice"  ,"NI"     ,func_nice  ,PSSCAN_NICE    },
+	{ 8                  , "rgroup","RGROUP" ,func_rgroup,PSSCAN_RUIDGID },
+	{ 8                  , "ruser" ,"RUSER"  ,func_ruser ,PSSCAN_RUIDGID },
+//	{ 5                  , "pcpu"  ,"%CPU"   ,func_pcpu  ,PSSCAN_        },
+#endif
 #if ENABLE_FEATURE_PS_TIME
 	{ 6                  , "time"  ,"TIME"   ,func_time  ,PSSCAN_STIME | PSSCAN_UTIME },
 #endif
@@ -327,7 +338,7 @@ static const ps_out_t* find_out_spec(const char *name)
 {
 	unsigned i;
 	for (i = 0; i < ARRAY_SIZE(out_spec); i++) {
-		if (!strcmp(name, out_spec[i].name))
+		if (!strncmp(name, out_spec[i].name6, 6))
 			return &out_spec[i];
 	}
 	bb_error_msg_and_die("bad -o argument '%s'", name);
@@ -441,7 +452,7 @@ int ps_main(int argc UNUSED_PARAM, char **argv)
 {
 	procps_status_t *p;
 	llist_t* opt_o = NULL;
-	USE_SELINUX(int opt;)
+	IF_SELINUX(int opt;)
 
 	// POSIX:
 	// -a  Write information for all processes associated with terminals
@@ -455,7 +466,7 @@ int ps_main(int argc UNUSED_PARAM, char **argv)
 	//     Select which columns to display
 	/* We allow (and ignore) most of the above. FIXME */
 	opt_complementary = "o::";
-	USE_SELINUX(opt =) getopt32(argv, "Zo:aAdefl", &opt_o);
+	IF_SELINUX(opt =) getopt32(argv, "Zo:aAdefl", &opt_o);
 	if (opt_o) {
 		do {
 			parse_o(llist_pop(&opt_o));
@@ -502,8 +513,8 @@ int ps_main(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
 {
 	procps_status_t *p = NULL;
 	int len;
-	SKIP_SELINUX(const) int use_selinux = 0;
-	USE_SELINUX(int i;)
+	IF_NOT_SELINUX(const) int use_selinux = 0;
+	IF_SELINUX(int i;)
 #if !ENABLE_FEATURE_PS_WIDE
 	enum { terminal_width = 79 };
 #else
@@ -514,7 +525,7 @@ int ps_main(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
 #if ENABLE_FEATURE_PS_WIDE || ENABLE_SELINUX
 #if ENABLE_FEATURE_PS_WIDE
 	opt_complementary = "-:ww";
-	USE_SELINUX(i =) getopt32(argv, USE_SELINUX("Z") "w", &w_count);
+	IF_SELINUX(i =) getopt32(argv, IF_SELINUX("Z") "w", &w_count);
 	/* if w is given once, GNU ps sets the width to 132,
 	 * if w is given more than once, it is "unlimited"
 	 */

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -28,7 +12,6 @@
 
 /* From <linux/kd.h> */
 enum { KDGKBTYPE = 0x4B33 };  /* get keyboard type */
-
 
 static int open_a_console(const char *fnam)
 {
@@ -53,7 +36,6 @@ static int open_a_console(const char *fnam)
  * We try several things because opening /dev/console will fail
  * if someone else used X (which does a chown on /dev/console).
  */
-
 int FAST_FUNC get_console_fd_or_die(void)
 {
 	static const char *const console_names[] = {

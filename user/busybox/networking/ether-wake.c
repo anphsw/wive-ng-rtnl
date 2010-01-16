@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ether-wake.c - Send a magic packet to wake up sleeping machines.
@@ -235,7 +219,7 @@ int ether_wake_main(int argc UNUSED_PARAM, char **argv)
 	{
 		struct ifreq if_hwaddr;
 
-		strncpy(if_hwaddr.ifr_name, ifname, sizeof(if_hwaddr.ifr_name));
+		strncpy_IFNAMSIZ(if_hwaddr.ifr_name, ifname);
 		ioctl_or_perror_and_die(s, SIOCGIFHWADDR, &if_hwaddr, "SIOCGIFHWADDR on %s failed", ifname);
 
 		memcpy(outpack+6, if_hwaddr.ifr_hwaddr.sa_data, 6);
@@ -271,7 +255,7 @@ int ether_wake_main(int argc UNUSED_PARAM, char **argv)
 #if defined(PF_PACKET)
 	{
 		struct ifreq ifr;
-		strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, ifname);
 		xioctl(s, SIOCGIFINDEX, &ifr);
 		memset(&whereto, 0, sizeof(whereto));
 		whereto.sll_family = AF_PACKET;

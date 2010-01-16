@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
 Copyright (c) 2001-2006, Gerrit Pape
 All rights reserved.
 
@@ -216,11 +200,11 @@ int chpst_main(int argc UNUSED_PARAM, char **argv)
 		// if yes -> getopt converts strings to numbers for us
 		opt_complementary = "-1:a+:c+:d+:f+:l+:m+:o+:p+:r+:s+:t+";
 		opt = getopt32(argv, "+a:c:d:f:l:m:o:p:r:s:t:u:U:e:"
-			USE_CHPST("/:n:vP012"),
+			IF_CHPST("/:n:vP012"),
 			&limita, &limitc, &limitd, &limitf, &limitl,
 			&limitm, &limito, &limitp, &limitr, &limits, &limitt,
 			&set_user, &env_user, &env_dir
-			USE_CHPST(, &root, &nicestr));
+			IF_CHPST(, &root, &nicestr));
 		argv += optind;
 		if (opt & OPT_m) { // -m means -asld
 			limita = limits = limitl = limitd = limitm;

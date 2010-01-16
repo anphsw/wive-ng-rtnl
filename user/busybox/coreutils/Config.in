@@ -136,12 +136,12 @@ config DF
 	  df reports the amount of disk space used and available
 	  on filesystems.
 
-config FEATURE_DF_INODE
-	bool "Enable -i (inode information)"
+config FEATURE_DF_FANCY
+	bool "Enable -a, -i, -B"
 	default n
 	depends on DF
 	help
-	  This option enables support for df -i.
+	  This option enables -a, -i and -B.
 
 config DIRNAME
 	bool "dirname"
@@ -189,7 +189,7 @@ config ECHO
 config FEATURE_FANCY_ECHO
 	bool "Enable echo options (-n and -e)"
 	default y
-	depends on ECHO
+	depends on ECHO || ASH_BUILTIN_ECHO || HUSH
 	help
 	  This adds options (-n and -e) to echo.
 
@@ -204,7 +204,7 @@ config ENV
 config FEATURE_ENV_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on ENV && GETOPT_LONG
+	depends on ENV && LONG_OPTS
 	help
 	  Support long options for the env applet.
 
@@ -217,7 +217,7 @@ config EXPAND
 config FEATURE_EXPAND_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on EXPAND && GETOPT_LONG
+	depends on EXPAND && LONG_OPTS
 	help
 	  Support long options for the expand applet.
 
@@ -248,6 +248,12 @@ config FOLD
 	default n
 	help
 	  Wrap text to fit a specific width.
+
+config FSYNC
+	bool "fsync"
+	default n
+	help
+	  fsync is used to flush file-related cached blocks to disk.
 
 config HEAD
 	bool "head"
@@ -285,7 +291,7 @@ config INSTALL
 config FEATURE_INSTALL_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on INSTALL && GETOPT_LONG
+	depends on INSTALL && LONG_OPTS
 	help
 	  Support long options for the install applet.
 
@@ -358,7 +364,7 @@ config FEATURE_LS_USERNAME
 config FEATURE_LS_COLOR
 	bool "Allow use of color to identify file types"
 	default y
-	depends on LS && GETOPT_LONG
+	depends on LS && LONG_OPTS
 	help
 	  This enables the --color option to ls.
 
@@ -388,7 +394,7 @@ config MKDIR
 config FEATURE_MKDIR_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on MKDIR && GETOPT_LONG
+	depends on MKDIR && LONG_OPTS
 	help
 	  Support long options for the mkdir applet.
 
@@ -415,7 +421,7 @@ config MV
 config FEATURE_MV_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on MV && GETOPT_LONG
+	depends on MV && LONG_OPTS
 	help
 	  Support long options for the mv applet.
 
@@ -492,7 +498,7 @@ config RMDIR
 config FEATURE_RMDIR_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on RMDIR && GETOPT_LONG
+	depends on RMDIR && LONG_OPTS
 	help
 	  Support long options for the rmdir applet, including
 	  --ignore-fail-on-non-empty for compatibility with GNU rmdir.
@@ -508,6 +514,18 @@ config SHA1SUM
 	default n
 	help
 	  Compute and check SHA1 message digest
+
+config SHA256SUM
+	bool "sha256sum"
+	default n
+	help
+	  Compute and check SHA256 message digest
+
+config SHA512SUM
+	bool "sha512sum"
+	default n
+	help
+	  Compute and check SHA512 message digest
 
 config SLEEP
 	bool "sleep"
@@ -617,7 +635,7 @@ config TAIL
 	  from files.
 
 config FEATURE_FANCY_TAIL
-	bool "Enable extra tail options (-q, -s, and -v)"
+	bool "Enable extra tail options (-q, -s, -v, and -F)"
 	default y
 	depends on TAIL
 	help
@@ -649,7 +667,7 @@ config TEST
 config FEATURE_TEST_64
 	bool "Extend test to 64 bit"
 	default n
-	depends on TEST
+	depends on TEST || ASH_BUILTIN_TEST || HUSH
 	help
 	  Enable 64-bit support in test.
 
@@ -714,7 +732,7 @@ config UNEXPAND
 config FEATURE_UNEXPAND_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on UNEXPAND && GETOPT_LONG
+	depends on UNEXPAND && LONG_OPTS
 	help
 	  Support long options for the unexpand applet.
 
@@ -754,7 +772,7 @@ config FEATURE_WC_LARGE
 	default n
 	depends on WC
 	help
-	  Use "unsigned long long" in wc for count variables.
+	  Use "unsigned long long" in wc for counter variables.
 
 config WHO
 	bool "who"

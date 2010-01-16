@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* Copyright (C) 1991,92,95,96,97,98,99,2000,01 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
@@ -31,27 +15,20 @@
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, write to the Free
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
-
+   02111-1307 USA.
+ */
 /*
  *	POSIX Standard: 9.2.1 Group Database Access	<grp.h>
  */
+#ifndef BB_GRP_H
+#define BB_GRP_H 1
 
-#ifndef	_GRP_H
-#define	_GRP_H 1
+PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility push(hidden)
-#endif
-
-/* The group structure.	 */
-struct group {
-	char *gr_name;          /* Group name.  */
-	char *gr_passwd;        /* Password.    */
-	gid_t gr_gid;           /* Group ID.    */
-	char **gr_mem;          /* Member list. */
-};
-
+/* This file is #included after #include <grp.h>
+ * We will use libc-defined structures, but will #define function names
+ * so that function calls are directed to bb_internal_XXX replacements
+ */
 
 #define setgrent     bb_internal_setgrent
 #define endgrent     bb_internal_endgrent
@@ -69,9 +46,7 @@ struct group {
 
 
 /* All function names below should be remapped by #defines above
- * in order to not collide with libc names.
- * In theory it isn't necessary, but I saw weird interactions at link time.
- * Let's play safe */
+ * in order to not collide with libc names. */
 
 
 /* Rewind the group-file stream.  */
@@ -87,14 +62,14 @@ extern struct group *getgrent(void);
 extern struct group *fgetgrent(FILE *__stream);
 
 /* Write the given entry onto the given stream.  */
-extern int putgrent(__const struct group *__restrict __p,
+extern int putgrent(const struct group *__restrict __p,
 		     FILE *__restrict __f);
 
 /* Search for an entry with a matching group ID.  */
 extern struct group *getgrgid(gid_t __gid);
 
 /* Search for an entry with a matching group name.  */
-extern struct group *getgrnam(__const char *__name);
+extern struct group *getgrnam(const char *__name);
 
 /* Reentrant versions of some of the functions above.
 
@@ -114,7 +89,7 @@ extern int getgrgid_r(gid_t __gid, struct group *__restrict __resultbuf,
 		       struct group **__restrict __result);
 
 /* Search for an entry with a matching group name.  */
-extern int getgrnam_r(__const char *__restrict __name,
+extern int getgrnam_r(const char *__restrict __name,
 		       struct group *__restrict __resultbuf,
 		       char *__restrict __buffer, size_t __buflen,
 		       struct group **__restrict __result);
@@ -129,16 +104,14 @@ extern int fgetgrent_r(FILE *__restrict __stream,
 /* Store at most *NGROUPS members of the group set for USER into
    *GROUPS.  Also include GROUP.  The actual number of groups found is
    returned in *NGROUPS.  Return -1 if the if *NGROUPS is too small.  */
-extern int getgrouplist(__const char *__user, gid_t __group,
+extern int getgrouplist(const char *__user, gid_t __group,
 			 gid_t *__groups, int *__ngroups);
 
 /* Initialize the group set for the current user
    by reading the group database and using all groups
    of which USER is a member.  Also include GROUP.  */
-extern int initgroups(__const char *__user, gid_t __group);
+extern int initgroups(const char *__user, gid_t __group);
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility pop
-#endif
+POP_SAVED_FUNCTION_VISIBILITY
 
 #endif

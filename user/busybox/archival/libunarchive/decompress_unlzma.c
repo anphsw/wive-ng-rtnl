@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Small lzma deflate implementation.
@@ -244,10 +228,10 @@ enum {
 };
 
 
-USE_DESKTOP(long long) int FAST_FUNC
+IF_DESKTOP(long long) int FAST_FUNC
 unpack_lzma_stream(int src_fd, int dst_fd)
 {
-	USE_DESKTOP(long long total_written = 0;)
+	IF_DESKTOP(long long total_written = 0;)
 	lzma_header_t header;
 	int lc, pb, lp;
 	uint32_t pos_state_mask;
@@ -346,7 +330,7 @@ unpack_lzma_stream(int src_fd, int dst_fd)
 				global_pos += header.dict_size;
 				if (full_write(dst_fd, buffer, header.dict_size) != (ssize_t)header.dict_size)
 					goto bad;
-				USE_DESKTOP(total_written += header.dict_size;)
+				IF_DESKTOP(total_written += header.dict_size;)
 			}
 #else
 			len = 1;
@@ -484,20 +468,20 @@ unpack_lzma_stream(int src_fd, int dst_fd)
 			}
 
 			len += LZMA_MATCH_MIN_LEN;
- SKIP_FEATURE_LZMA_FAST(string:)
+ IF_NOT_FEATURE_LZMA_FAST(string:)
 			do {
 				pos = buffer_pos - rep0;
 				while (pos >= header.dict_size)
 					pos += header.dict_size;
 				previous_byte = buffer[pos];
- SKIP_FEATURE_LZMA_FAST(one_byte2:)
+ IF_NOT_FEATURE_LZMA_FAST(one_byte2:)
 				buffer[buffer_pos++] = previous_byte;
 				if (buffer_pos == header.dict_size) {
 					buffer_pos = 0;
 					global_pos += header.dict_size;
 					if (full_write(dst_fd, buffer, header.dict_size) != (ssize_t)header.dict_size)
 						goto bad;
-					USE_DESKTOP(total_written += header.dict_size;)
+					IF_DESKTOP(total_written += header.dict_size;)
 				}
 				len--;
 			} while (len != 0 && buffer_pos < header.dst_size);
@@ -505,8 +489,8 @@ unpack_lzma_stream(int src_fd, int dst_fd)
 	}
 
 	{
-		SKIP_DESKTOP(int total_written = 0; /* success */)
-		USE_DESKTOP(total_written += buffer_pos;)
+		IF_NOT_DESKTOP(int total_written = 0; /* success */)
+		IF_DESKTOP(total_written += buffer_pos;)
 		if (full_write(dst_fd, buffer, buffer_pos) != (ssize_t)buffer_pos) {
  bad:
 			total_written = -1; /* failure */

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini expr implementation for busybox
@@ -239,13 +223,13 @@ static VALUE *docolon(VALUE *sv, VALUE *pv)
 	tostring(pv);
 
 	if (pv->u.s[0] == '^') {
-		bb_error_msg("\
-warning: unportable BRE: `%s': using `^' as the first character\n\
-of a basic regular expression is not portable; it is being ignored", pv->u.s);
+		bb_error_msg(
+"warning: '%s': using '^' as the first character\n"
+"of a basic regular expression is not portable; it is ignored", pv->u.s);
 	}
 
 	memset(&re_buffer, 0, sizeof(re_buffer));
-	memset(re_regs, 0, sizeof(*re_regs));
+	memset(re_regs, 0, sizeof(re_regs));
 	xregcomp(&re_buffer, pv->u.s, 0);
 
 	/* expr uses an anchored pattern match, so check that there was a
@@ -254,7 +238,7 @@ of a basic regular expression is not portable; it is being ignored", pv->u.s);
 	 && re_regs[0].rm_so == 0
 	) {
 		/* Were \(...\) used? */
-		if (re_buffer.re_nsub > 0) {
+		if (re_buffer.re_nsub > 0 && re_regs[1].rm_so >= 0) {
 			sv->u.s[re_regs[1].rm_eo] = '\0';
 			v = str_value(sv->u.s + re_regs[1].rm_so);
 		} else {
@@ -267,7 +251,7 @@ of a basic regular expression is not portable; it is being ignored", pv->u.s);
 		else
 			v = int_value(0);
 	}
-//FIXME: sounds like here is a bit missing: regfree(&re_buffer);
+	regfree(&re_buffer);
 	return v;
 }
 
@@ -497,24 +481,21 @@ static VALUE *eval(void)
 }
 
 int expr_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
-int expr_main(int argc, char **argv)
+int expr_main(int argc UNUSED_PARAM, char **argv)
 {
 	VALUE *v;
 
-	if (argc == 1) {
+	xfunc_error_retval = 2; /* coreutils compat */
+	G.args = argv + 1;
+	if (*G.args == NULL) {
 		bb_error_msg_and_die("too few arguments");
 	}
-
-	G.args = argv + 1;
-
 	v = eval();
 	if (*G.args)
 		bb_error_msg_and_die("syntax error");
-
 	if (v->type == INTEGER)
 		printf("%" PF_REZ "d\n", PF_REZ_TYPE v->u.i);
 	else
 		puts(v->u.s);
-
 	fflush_stdout_and_exit(null(v));
 }

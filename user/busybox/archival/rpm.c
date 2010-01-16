@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini rpm applet for busybox
@@ -131,8 +115,8 @@ int rpm_main(int argc, char **argv)
 		}
 	}
 	argv += optind;
-	argc -= optind;
-	if (!argc) bb_show_usage();
+	//argc -= optind;
+	if (!argv[0]) bb_show_usage();
 
 	while (*argv) {
 		rpm_fd = xopen(*argv++, O_RDONLY);
@@ -206,7 +190,7 @@ static void extract_cpio_gz(int fd)
 	archive_handle_t *archive_handle;
 	unsigned char magic[2];
 #if BB_MMU
-	USE_DESKTOP(long long) int FAST_FUNC (*xformer)(int src_fd, int dst_fd);
+	IF_DESKTOP(long long) int FAST_FUNC (*xformer)(int src_fd, int dst_fd);
 	enum { xformer_prog = 0 };
 #else
 	enum { xformer = 0 };
@@ -218,7 +202,12 @@ static void extract_cpio_gz(int fd)
 	archive_handle->seek = seek_by_read;
 	//archive_handle->action_header = header_list;
 	archive_handle->action_data = data_extract_all;
-	archive_handle->ah_flags = ARCHIVE_PRESERVE_DATE | ARCHIVE_CREATE_LEADING_DIRS;
+	archive_handle->ah_flags = ARCHIVE_PRESERVE_DATE | ARCHIVE_CREATE_LEADING_DIRS
+		/* compat: overwrite existing files.
+		 * try "rpm -i foo.src.rpm" few times in a row -
+		 * standard rpm will not complain.
+		 * (TODO? real rpm creates "file;1234" and then renames it) */
+		| ARCHIVE_EXTRACT_UNCONDITIONAL;
 	archive_handle->src_fd = fd;
 	/*archive_handle->offset = 0; - init_handle() did it */
 
@@ -235,7 +224,7 @@ static void extract_cpio_gz(int fd)
 		 || magic[0] != 'B' || magic[1] != 'Z'
 		) {
 			bb_error_msg_and_die("no gzip"
-				USE_FEATURE_SEAMLESS_BZ2("/bzip2")
+				IF_FEATURE_SEAMLESS_BZ2("/bzip2")
 				" magic");
 		}
 #if BB_MMU
@@ -262,7 +251,7 @@ static void extract_cpio_gz(int fd)
 static rpm_index **rpm_gettags(int fd, int *num_tags)
 {
 	/* We should never need mode than 200, and realloc later */
-	rpm_index **tags = xzalloc(200 * sizeof(struct rpmtag *));
+	rpm_index **tags = xzalloc(200 * sizeof(tags[0]));
 	int pass, tagindex = 0;
 
 	xlseek(fd, 96, SEEK_CUR); /* Seek past the unused lead */
@@ -276,6 +265,9 @@ static rpm_index **rpm_gettags(int fd, int *num_tags)
 			uint32_t entries; /* Number of entries in header (4 bytes) */
 			uint32_t size; /* Size of store (4 bytes) */
 		} header;
+		struct BUG_header {
+			char BUG_header[sizeof(header) == 16 ? 1 : -1];
+		};
 		rpm_index *tmpindex;
 		int storepos;
 
@@ -289,8 +281,8 @@ static rpm_index **rpm_gettags(int fd, int *num_tags)
 		storepos = xlseek(fd,0,SEEK_CUR) + header.entries * 16;
 
 		while (header.entries--) {
-			tmpindex = tags[tagindex++] = xmalloc(sizeof(rpm_index));
-			xread(fd, tmpindex, sizeof(rpm_index));
+			tmpindex = tags[tagindex++] = xmalloc(sizeof(*tmpindex));
+			xread(fd, tmpindex, sizeof(*tmpindex));
 			tmpindex->tag = ntohl(tmpindex->tag);
 			tmpindex->type = ntohl(tmpindex->type);
 			tmpindex->count = ntohl(tmpindex->count);
@@ -303,7 +295,7 @@ static rpm_index **rpm_gettags(int fd, int *num_tags)
 		if (pass == 0)
 			xlseek(fd, (8 - (xlseek(fd,0,SEEK_CUR) % 8)) % 8, SEEK_CUR);
 	}
-	tags = xrealloc(tags, tagindex * sizeof(struct rpmtag *)); /* realloc tags to save space */
+	tags = xrealloc(tags, tagindex * sizeof(tags[0])); /* realloc tags to save space */
 	*num_tags = tagindex;
 	return tags; /* All done, leave the file at the start of the gzipped cpio archive */
 }
@@ -394,9 +386,11 @@ static void fileaction_dobackup(char *filename, int fileref)
 
 static void fileaction_setowngrp(char *filename, int fileref)
 {
-	int uid, gid;
-	uid = xuname2uid(rpm_getstr(TAG_FILEUSERNAME, fileref));
-	gid = xgroup2gid(rpm_getstr(TAG_FILEGROUPNAME, fileref));
+	/* real rpm warns: "user foo does not exist - using <you>" */
+	struct passwd *pw = getpwnam(rpm_getstr(TAG_FILEUSERNAME, fileref));
+	int uid = pw ? pw->pw_uid : getuid(); /* or euid? */
+	struct group *gr = getgrnam(rpm_getstr(TAG_FILEGROUPNAME, fileref));
+	int gid = gr ? gr->gr_gid : getgid();
 	chown(filename, uid, gid);
 }
 

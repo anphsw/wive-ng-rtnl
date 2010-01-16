@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* uncompress for busybox -- (c) 2002 Robert Griebl
  *
@@ -88,11 +72,11 @@
  * be stored in the compressed file.
  */
 
-USE_DESKTOP(long long) int FAST_FUNC
+IF_DESKTOP(long long) int FAST_FUNC
 unpack_Z_stream(int fd_in, int fd_out)
 {
-	USE_DESKTOP(long long total_written = 0;)
-	USE_DESKTOP(long long) int retval = -1;
+	IF_DESKTOP(long long total_written = 0;)
+	IF_DESKTOP(long long) int retval = -1;
 	unsigned char *stackp;
 	long code;
 	int finchar;
@@ -281,7 +265,7 @@ unpack_Z_stream(int fd_in, int fd_out)
 						if (outpos >= OBUFSIZ) {
 							full_write(fd_out, outbuf, outpos);
 //error check??
-							USE_DESKTOP(total_written += outpos;)
+							IF_DESKTOP(total_written += outpos;)
 							outpos = 0;
 						}
 						stackp += i;
@@ -310,10 +294,10 @@ unpack_Z_stream(int fd_in, int fd_out)
 	if (outpos > 0) {
 		full_write(fd_out, outbuf, outpos);
 //error check??
-		USE_DESKTOP(total_written += outpos;)
+		IF_DESKTOP(total_written += outpos;)
 	}
 
-	retval = USE_DESKTOP(total_written) + 0;
+	retval = IF_DESKTOP(total_written) + 0;
  err:
 	free(inbuf);
 	free(outbuf);

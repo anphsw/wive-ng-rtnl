@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini chmod implementation for busybox
@@ -36,10 +20,10 @@
 
 
 #define OPT_RECURSE (option_mask32 & 1)
-#define OPT_VERBOSE (USE_DESKTOP(option_mask32 & 2) SKIP_DESKTOP(0))
-#define OPT_CHANGED (USE_DESKTOP(option_mask32 & 4) SKIP_DESKTOP(0))
-#define OPT_QUIET   (USE_DESKTOP(option_mask32 & 8) SKIP_DESKTOP(0))
-#define OPT_STR     "R" USE_DESKTOP("vcf")
+#define OPT_VERBOSE (IF_DESKTOP(option_mask32 & 2) IF_NOT_DESKTOP(0))
+#define OPT_CHANGED (IF_DESKTOP(option_mask32 & 4) IF_NOT_DESKTOP(0))
+#define OPT_QUIET   (IF_DESKTOP(option_mask32 & 8) IF_NOT_DESKTOP(0))
+#define OPT_STR     "R" IF_DESKTOP("vcf")
 
 /* coreutils:
  * chmod never changes the permissions of symbolic links; the chmod

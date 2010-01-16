@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * stat -- display file or file system status
@@ -141,6 +125,20 @@ static const char *human_fstype(uint32_t f_type)
 	return humantypes[i].fs;
 }
 
+/* "man statfs" says that statfsbuf->f_fsid is a mess */
+/* coreutils treats it as an array of ints, most significant first */
+static unsigned long long get_f_fsid(const struct statfs *statfsbuf)
+{
+	const unsigned *p = (const void*) &statfsbuf->f_fsid;
+	unsigned sz = sizeof(statfsbuf->f_fsid) / sizeof(unsigned);
+	unsigned long long r = 0;
+
+	do
+		r = (r << (sizeof(unsigned)*8)) | *p++;
+	while (--sz > 0);
+	return r;
+}
+
 #if ENABLE_FEATURE_STAT_FORMAT
 static void strcatc(char *str, char c)
 {
@@ -158,17 +156,17 @@ static void printfs(char *pformat, const char *msg)
 /* print statfs info */
 static void print_statfs(char *pformat, const char m,
 		const char *const filename, const void *data
-		USE_SELINUX(, security_context_t scontext))
+		IF_SELINUX(, security_context_t scontext))
 {
 	const struct statfs *statfsbuf = data;
 	if (m == 'n') {
 		printfs(pformat, filename);
 	} else if (m == 'i') {
-		strcat(pformat, "Lx");
-		printf(pformat, statfsbuf->f_fsid);
+		strcat(pformat, "llx");
+		printf(pformat, get_f_fsid(statfsbuf));
 	} else if (m == 'l') {
 		strcat(pformat, "lu");
-		printf(pformat, statfsbuf->f_namelen);
+		printf(pformat, (unsigned long) (statfsbuf->f_namelen));
 	} else if (m == 't') {
 		strcat(pformat, "lx");
 		printf(pformat, (unsigned long) (statfsbuf->f_type)); /* no equiv */
@@ -205,7 +203,7 @@ static void print_statfs(char *pformat, const char m,
 /* print stat info */
 static void print_stat(char *pformat, const char m,
 		const char *const filename, const void *data
-		USE_SELINUX(, security_context_t scontext))
+		IF_SELINUX(, security_context_t scontext))
 {
 #define TYPE_SIGNED(t) (! ((t) 0 < (t) -1))
 	struct stat *statbuf = (struct stat *) data;
@@ -308,9 +306,9 @@ static void print_stat(char *pformat, const char m,
 }
 
 static void print_it(const char *masterformat, const char *filename,
-		void (*print_func) (char*, char, const char*, const void* USE_SELINUX(, security_context_t scontext)),
+		void (*print_func) (char*, char, const char*, const void* IF_SELINUX(, security_context_t scontext)),
 		const void *data
-		USE_SELINUX(, security_context_t scontext) )
+		IF_SELINUX(, security_context_t scontext) )
 {
 	/* Create a working copy of the format string */
 	char *format = xstrdup(masterformat);
@@ -349,7 +347,7 @@ static void print_it(const char *masterformat, const char *filename,
 			break;
 		default:
 			/* Completes "%<modifiers>" with specifier and printfs */
-			print_func(dest, *p, filename, data USE_SELINUX(,scontext));
+			print_func(dest, *p, filename, data IF_SELINUX(,scontext));
 			break;
 		}
 	}
@@ -365,10 +363,11 @@ static void print_it(const char *masterformat, const char *filename,
 #endif
 static bool do_statfs(const char *filename, const char *format)
 {
+	struct statfs statfsbuf;
+
 #if !ENABLE_FEATURE_STAT_FORMAT
 	const char *format;
 #endif
-	struct statfs statfsbuf;
 #if ENABLE_SELINUX
 	security_context_t scontext = NULL;
 
@@ -417,15 +416,15 @@ static bool do_statfs(const char *filename, const char *format)
 			);
 #endif /* SELINUX */
 	}
-	print_it(format, filename, print_statfs, &statfsbuf USE_SELINUX(, scontext));
+	print_it(format, filename, print_statfs, &statfsbuf IF_SELINUX(, scontext));
 #else /* FEATURE_STAT_FORMAT */
 	format = (option_mask32 & OPT_TERSE
 		? "%s %llx %lu "
 		: "  File: \"%s\"\n"
-		  "    ID: %-8Lx Namelen: %-7lu ");
+		  "    ID: %-8llx Namelen: %-7lu ");
 	printf(format,
 	       filename,
-	       statfsbuf.f_fsid,
+	       get_f_fsid(&statfsbuf),
 	       statfsbuf.f_namelen);
 
 	if (option_mask32 & OPT_TERSE)
@@ -561,11 +560,11 @@ static bool do_stat(const char *filename, const char *format)
 		}
 #endif
 	}
-	print_it(format, filename, print_stat, &statbuf USE_SELINUX(, scontext));
+	print_it(format, filename, print_stat, &statbuf IF_SELINUX(, scontext));
 #else	/* FEATURE_STAT_FORMAT */
 	if (option_mask32 & OPT_TERSE) {
 		printf("%s %ju %ju %lx %lu %lu %jx %ju %lu %lx %lx %lu %lu %lu %lu"
-		       SKIP_SELINUX("\n"),
+		       IF_NOT_SELINUX("\n"),
 		       filename,
 		       (uintmax_t) (statbuf.st_size),
 		       (uintmax_t) statbuf.st_blocks,
@@ -643,14 +642,14 @@ static bool do_stat(const char *filename, const char *format)
 int stat_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int stat_main(int argc, char **argv)
 {
-	USE_FEATURE_STAT_FORMAT(char *format = NULL;)
+	IF_FEATURE_STAT_FORMAT(char *format = NULL;)
 	int i;
 	int ok = 1;
 	statfunc_ptr statfunc = do_stat;
 
 	getopt32(argv, "ftL"
-		USE_SELINUX("Z")
-		USE_FEATURE_STAT_FORMAT("c:", &format)
+		IF_SELINUX("Z")
+		IF_FEATURE_STAT_FORMAT("c:", &format)
 	);
 
 	if (option_mask32 & OPT_FILESYS) /* -f */
@@ -664,7 +663,7 @@ int stat_main(int argc, char **argv)
 	}
 #endif	/* ENABLE_SELINUX */
 	for (i = optind; i < argc; ++i)
-		ok &= statfunc(argv[i] USE_FEATURE_STAT_FORMAT(, format));
+		ok &= statfunc(argv[i] IF_FEATURE_STAT_FORMAT(, format));
 
 	return (ok ? EXIT_SUCCESS : EXIT_FAILURE);
 }

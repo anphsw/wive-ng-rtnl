@@ -53,12 +53,12 @@ config AR
 	  probably say N here.
 
 config FEATURE_AR_LONG_FILENAMES
-	bool "Support for long filenames (not need for debs)"
+	bool "Support for long filenames (not needed for debs)"
 	default n
 	depends on AR
 	help
-	  By default the ar format can only store the first 15 characters of
-	  the filename, this option removes that limitation.
+	  By default the ar format can only store the first 15 characters
+	  of the filename, this option removes that limitation.
 	  It supports the GNU ar long filename method which moves multiple long
 	  filenames into a the data section of a new ar entry.
 
@@ -110,9 +110,17 @@ config FEATURE_CPIO_O
 	  This implementation of cpio can create cpio archives in the "newc"
 	  format only.
 
+config FEATURE_CPIO_P
+	bool "Support for passthrough mode"
+	default n
+	depends on FEATURE_CPIO_O
+	help
+	  Passthrough mode. Rarely used.
+
 config DPKG
 	bool "dpkg"
 	default n
+	select FEATURE_SEAMLESS_GZ
 	help
 	  dpkg is a medium-level tool to install, build, remove and manage
 	  Debian packages.
@@ -123,9 +131,9 @@ config DPKG
 config DPKG_DEB
 	bool "dpkg_deb"
 	default n
+	select FEATURE_SEAMLESS_GZ
 	help
-	  dpkg-deb packs, unpacks and provides information about Debian
-	  archives.
+	  dpkg-deb unpacks and provides information about Debian archives.
 
 	  This implementation of dpkg-deb cannot pack archives.
 
@@ -156,6 +164,21 @@ config GZIP
 	help
 	  gzip is used to compress files.
 	  It's probably the most widely used UNIX compression program.
+
+config LZOP
+	bool "lzop"
+	default n
+	help
+	  Lzop compression/decompresion.
+
+config LZOP_COMPR_HIGH
+	bool "lzop complession levels 7,8,9 (not very useful)"
+	default n
+	depends on LZOP
+	help
+	  High levels (7,8,9) of lzop compression. These levels
+	  are actually slower than gzip at equivalent compression ratios
+	  and take up 3.2K of code.
 
 config RPM2CPIO
 	bool "rpm2cpio"
@@ -188,11 +211,11 @@ config FEATURE_TAR_CREATE
 	  tar archives using the `-c' option.
 
 config FEATURE_TAR_AUTODETECT
-	bool "Autodetect gz/bz2 compressed tarballs"
+	bool "Autodetect compressed tarballs"
 	default n
 	depends on FEATURE_SEAMLESS_Z || FEATURE_SEAMLESS_GZ || FEATURE_SEAMLESS_BZ2 || FEATURE_SEAMLESS_LZMA
 	help
-	  With this option tar can automatically detect gzip/bzip2 compressed
+	  With this option tar can automatically detect compressed
 	  tarballs. Currently it works only on files (not pipes etc).
 
 config FEATURE_TAR_FROM
@@ -233,7 +256,7 @@ config FEATURE_TAR_GNU_EXTENSIONS
 config FEATURE_TAR_LONG_OPTIONS
 	bool "Enable long options"
 	default n
-	depends on TAR && GETOPT_LONG
+	depends on TAR && LONG_OPTS
 	help
 	  Enable use of long options, increases size by about 400 Bytes
 

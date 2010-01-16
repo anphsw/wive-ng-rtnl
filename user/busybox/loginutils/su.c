@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  *  Mini su implementation for busybox
@@ -59,14 +43,12 @@ int su_main(int argc UNUSED_PARAM, char **argv)
 		the user, especially if someone su's from a su-shell.
 		But getlogin can fail -- usually due to lack of utmp entry.
 		in this case resort to getpwuid.  */
-		old_user = xstrdup(USE_FEATURE_UTMP(getlogin() ? : ) (pw = getpwuid(cur_uid)) ? pw->pw_name : "");
-		tty = ttyname(2) ? : "none";
+		old_user = xstrdup(IF_FEATURE_UTMP(getlogin() ? : ) (pw = getpwuid(cur_uid)) ? pw->pw_name : "");
+		tty = xmalloc_ttyname(2) ? : "none";
 		openlog(applet_name, 0, LOG_AUTH);
 	}
 
-	pw = getpwnam(opt_username);
-	if (!pw)
-		bb_error_msg_and_die("unknown id: %s", opt_username);
+	pw = xgetpwnam(opt_username);
 
 	/* Make sure pw->pw_shell is non-NULL.  It may be NULL when NEW_USER
 	   is a username that is retrieved via NIS (YP), but that doesn't have
@@ -109,7 +91,7 @@ int su_main(int argc UNUSED_PARAM, char **argv)
 	change_identity(pw);
 	/* setup_environment params: shell, clear_env, change_env, pw */
 	setup_environment(opt_shell, flags & SU_OPT_l, !(flags & SU_OPT_mp), pw);
-	USE_SELINUX(set_current_security_context(NULL);)
+	IF_SELINUX(set_current_security_context(NULL);)
 
 	/* Never returns */
 	run_shell(opt_shell, flags & SU_OPT_l, opt_command, (const char**)argv);

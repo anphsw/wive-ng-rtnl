@@ -74,14 +74,19 @@ config FEATURE_UDHCP_PORT
 	  At the cost of ~300 bytes, enables -P port option.
 	  This feature is typically not needed.
 
-config FEATURE_UDHCP_DEBUG
-	bool "Compile udhcp with noisy debugging messages"
-	default n
-	depends on APP_UDHCPD || APP_UDHCPC
+config UDHCP_DEBUG
+	int "Maximum verbosity level for udhcp applets (0..9)"
+	default 0
+	range 0 9
+	depends on APP_UDHCPD || APP_UDHCPC || APP_DHCPRELAY
 	help
-	  If selected, udhcpd will output extra debugging output.
+	  Verbosity can be increased with multiple -v options.
+	  This options controls how high it can be cranked up.
 
-config FEATURE_RFC3397
+	  Bigger values result in bigger code. Levels above 1
+	  are very verbose and useful for debugging only.
+
+config FEATURE_UDHCP_RFC3397
 	bool "Support for RFC3397 domain search (experimental)"
 	default n
 	depends on APP_UDHCPD || APP_UDHCPC
@@ -89,7 +94,7 @@ config FEATURE_RFC3397
 	  If selected, both client and server will support passing of domain
 	  search lists via option 119, specified in RFC3397.
 
-config DHCPC_DEFAULT_SCRIPT
+config UDHCPC_DEFAULT_SCRIPT
 	string "Absolute path to config script"
 	default "/usr/share/udhcpc/default.script"
 	depends on APP_UDHCPC

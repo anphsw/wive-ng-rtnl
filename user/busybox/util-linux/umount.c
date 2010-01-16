@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini umount implementation for busybox
@@ -23,8 +7,37 @@
  *
  * Licensed under GPL version 2, see file LICENSE in this tarball for details.
  */
-
 #include <mntent.h>
+#include <sys/mount.h>
+/* Make sure we have all the new mount flags we actually try to use. */
+#ifndef MS_BIND
+# define MS_BIND        (1 << 12)
+#endif
+#ifndef MS_MOVE
+# define MS_MOVE        (1 << 13)
+#endif
+#ifndef MS_RECURSIVE
+# define MS_RECURSIVE   (1 << 14)
+#endif
+#ifndef MS_SILENT
+# define MS_SILENT      (1 << 15)
+#endif
+/* The shared subtree stuff, which went in around 2.6.15. */
+#ifndef MS_UNBINDABLE
+# define MS_UNBINDABLE  (1 << 17)
+#endif
+#ifndef MS_PRIVATE
+# define MS_PRIVATE     (1 << 18)
+#endif
+#ifndef MS_SLAVE
+# define MS_SLAVE       (1 << 19)
+#endif
+#ifndef MS_SHARED
+# define MS_SHARED      (1 << 20)
+#endif
+#ifndef MS_RELATIME
+# define MS_RELATIME    (1 << 21)
+#endif
 #include "libbb.h"
 
 #if defined(__dietlibc__)
@@ -85,13 +98,13 @@ int umount_main(int argc UNUSED_PARAM, char **argv)
 	fp = setmntent(bb_path_mtab_file, "r");
 	if (!fp) {
 		if (opt & OPT_ALL)
-			bb_error_msg_and_die("can't open %s", bb_path_mtab_file);
+			bb_error_msg_and_die("can't open '%s'", bb_path_mtab_file);
 	} else {
 		while (getmntent_r(fp, &me, path, PATH_MAX)) {
 			/* Match fstype if passed */
-			if (fstype && match_fstype(&me, fstype))
+			if (!match_fstype(&me, fstype))
 				continue;
-			m = xmalloc(sizeof(struct mtab_list));
+			m = xzalloc(sizeof(*m));
 			m->next = mtl;
 			m->device = xstrdup(me.mnt_fsname);
 			m->dir = xstrdup(me.mnt_dir);

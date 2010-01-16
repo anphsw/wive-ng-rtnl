@@ -1,28 +1,9 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Copyright (C) 2003 by Glenn McGrath
  * SELinux support: by Yuichi Nakamura <ynakam@hitachisoft.jp>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
- *
- * TODO: -d option, need a way of recursively making directories and changing
- *           owner/group, will probably modify bb_make_directory(...)
  */
 
 #include "libbb.h"
@@ -69,7 +50,8 @@ static void setdefaultfilecon(const char *path)
 
 	if (lsetfilecon(path, scontext) < 0) {
 		if (errno != ENOTSUP) {
-			bb_perror_msg("warning: failed to change context of %s to %s", path, scontext);
+			bb_perror_msg("warning: failed to change context"
+					" of %s to %s", path, scontext);
 		}
 	}
 
@@ -91,7 +73,7 @@ int install_main(int argc, char **argv)
 	const char *uid_str;
 	const char *mode_str;
 	int copy_flags = FILEUTILS_DEREFERENCE | FILEUTILS_FORCE;
-	int flags;
+	int opts;
 	int min_args = 1;
 	int ret = EXIT_SUCCESS;
 	int isdir = 0;
@@ -103,56 +85,58 @@ int install_main(int argc, char **argv)
 		OPT_c             = 1 << 0,
 		OPT_v             = 1 << 1,
 		OPT_b             = 1 << 2,
-		OPT_DIRECTORY     = 1 << 3,
-		OPT_PRESERVE_TIME = 1 << 4,
-		OPT_STRIP         = 1 << 5,
-		OPT_GROUP         = 1 << 6,
-		OPT_MODE          = 1 << 7,
-		OPT_OWNER         = 1 << 8,
+		OPT_MKDIR_LEADING = 1 << 3,
+		OPT_DIRECTORY     = 1 << 4,
+		OPT_PRESERVE_TIME = 1 << 5,
+		OPT_STRIP         = 1 << 6,
+		OPT_GROUP         = 1 << 7,
+		OPT_MODE          = 1 << 8,
+		OPT_OWNER         = 1 << 9,
 #if ENABLE_SELINUX
-		OPT_SET_SECURITY_CONTEXT = 1 << 9,
-		OPT_PRESERVE_SECURITY_CONTEXT = 1 << 10,
+		OPT_SET_SECURITY_CONTEXT = 1 << 10,
+		OPT_PRESERVE_SECURITY_CONTEXT = 1 << 11,
 #endif
 	};
 
 #if ENABLE_FEATURE_INSTALL_LONG_OPTIONS
 	applet_long_options = install_longopts;
 #endif
-	opt_complementary = "s--d:d--s" USE_SELINUX(":Z--\xff:\xff--Z");
+	opt_complementary = "s--d:d--s" IF_SELINUX(":Z--\xff:\xff--Z");
 	/* -c exists for backwards compatibility, it's needed */
 	/* -v is ignored ("print name of each created directory") */
 	/* -b is ignored ("make a backup of each existing destination file") */
-	flags = getopt32(argv, "cvb" "dpsg:m:o:" USE_SELINUX("Z:"),
-			&gid_str, &mode_str, &uid_str USE_SELINUX(, &scontext));
+	opts = getopt32(argv, "cvb" "Ddpsg:m:o:" IF_SELINUX("Z:"),
+			&gid_str, &mode_str, &uid_str IF_SELINUX(, &scontext));
 	argc -= optind;
 	argv += optind;
 
 #if ENABLE_SELINUX
-	if (flags & (OPT_PRESERVE_SECURITY_CONTEXT|OPT_SET_SECURITY_CONTEXT)) {
+	if (opts & (OPT_PRESERVE_SECURITY_CONTEXT|OPT_SET_SECURITY_CONTEXT)) {
 		selinux_or_die();
 		use_default_selinux_context = 0;
-		if (flags & OPT_PRESERVE_SECURITY_CONTEXT) {
+		if (opts & OPT_PRESERVE_SECURITY_CONTEXT) {
 			copy_flags |= FILEUTILS_PRESERVE_SECURITY_CONTEXT;
 		}
-		if (flags & OPT_SET_SECURITY_CONTEXT) {
+		if (opts & OPT_SET_SECURITY_CONTEXT) {
 			setfscreatecon_or_die(scontext);
 			copy_flags |= FILEUTILS_SET_SECURITY_CONTEXT;
 		}
 	}
 #endif
 
-	/* preserve access and modification time, this is GNU behaviour, BSD only preserves modification time */
-	if (flags & OPT_PRESERVE_TIME) {
+	/* preserve access and modification time, this is GNU behaviour,
+	 * BSD only preserves modification time */
+	if (opts & OPT_PRESERVE_TIME) {
 		copy_flags |= FILEUTILS_PRESERVE_STATUS;
 	}
-	mode = 0666;
-	if (flags & OPT_MODE)
+	mode = 0755; /* GNU coreutils 6.10 compat */
+	if (opts & OPT_MODE)
 		bb_parse_mode(mode_str, &mode);
-	uid = (flags & OPT_OWNER) ? get_ug_id(uid_str, xuname2uid) : getuid();
-	gid = (flags & OPT_GROUP) ? get_ug_id(gid_str, xgroup2gid) : getgid();
+	uid = (opts & OPT_OWNER) ? get_ug_id(uid_str, xuname2uid) : getuid();
+	gid = (opts & OPT_GROUP) ? get_ug_id(gid_str, xgroup2gid) : getgid();
 
 	last = argv[argc - 1];
-	if (!(flags & OPT_DIRECTORY)) {
+	if (!(opts & OPT_DIRECTORY)) {
 		argv[argc - 1] = NULL;
 		min_args++;
 
@@ -165,7 +149,7 @@ int install_main(int argc, char **argv)
 
 	while ((arg = *argv++) != NULL) {
 		char *dest = last;
-		if (flags & OPT_DIRECTORY) {
+		if (opts & OPT_DIRECTORY) {
 			dest = arg;
 			/* GNU coreutils 6.9 does not set uid:gid
 			 * on intermediate created directories
@@ -175,6 +159,13 @@ int install_main(int argc, char **argv)
 				goto next;
 			}
 		} else {
+			if (opts & OPT_MKDIR_LEADING) {
+				char *ddir = xstrdup(dest);
+				bb_make_directory(dirname(ddir), 0755, FILEUTILS_RECUR);
+				/* errors are not checked. copy_file
+				 * will fail if dir is not created. */
+				free(ddir);
+			}
 			if (isdir)
 				dest = concat_path_file(last, basename(arg));
 			if (copy_file(arg, dest, copy_flags)) {
@@ -184,8 +175,9 @@ int install_main(int argc, char **argv)
 			}
 		}
 
-		/* Set the file mode */
-		if ((flags & OPT_MODE) && chmod(dest, mode) == -1) {
+		/* Set the file mode (always, not only with -m).
+		 * GNU coreutils 6.10 is not affected by umask. */
+		if (chmod(dest, mode) == -1) {
 			bb_perror_msg("can't change %s of %s", "permissions", dest);
 			ret = EXIT_FAILURE;
 		}
@@ -194,13 +186,13 @@ int install_main(int argc, char **argv)
 			setdefaultfilecon(dest);
 #endif
 		/* Set the user and group id */
-		if ((flags & (OPT_OWNER|OPT_GROUP))
+		if ((opts & (OPT_OWNER|OPT_GROUP))
 		 && lchown(dest, uid, gid) == -1
 		) {
 			bb_perror_msg("can't change %s of %s", "ownership", dest);
 			ret = EXIT_FAILURE;
 		}
-		if (flags & OPT_STRIP) {
+		if (opts & OPT_STRIP) {
 			char *args[3];
 			args[0] = (char*)"strip";
 			args[1] = dest;

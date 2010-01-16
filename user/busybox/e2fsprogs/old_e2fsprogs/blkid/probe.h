@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * probe.h - constants and on-disk structures for extracting device data
@@ -27,9 +11,8 @@
  * GNU Lesser General Public License.
  * %End-Header%
  */
-
-#ifndef _BLKID_PROBE_H
-#define _BLKID_PROBE_H
+#ifndef BLKID_PROBE_H
+#define BLKID_PROBE_H 1
 
 #include <linux/types.h>
 
@@ -324,9 +307,9 @@ _INLINE_ __u32 blkid_swab32(__u32 val)
 #ifdef EXT2FS_REQUIRE_486
 	__asm__("bswap %0" : "=r" (val) : "0" (val));
 #else
-	__asm__("xchgb %b0,%h0\n\t"	/* swap lower bytes	*/
-		"rorl $16,%0\n\t"	/* swap words		*/
-		"xchgb %b0,%h0"		/* swap higher bytes	*/
+	__asm__("xchgb %b0,%h0\n\t"	/* swap lower bytes  */
+		"rorl $16,%0\n\t"	/* swap words        */
+		"xchgb %b0,%h0"		/* swap higher bytes */
 		:"=q" (val)
 		: "0" (val));
 #endif
@@ -335,9 +318,9 @@ _INLINE_ __u32 blkid_swab32(__u32 val)
 
 _INLINE_ __u16 blkid_swab16(__u16 val)
 {
-	__asm__("xchgb %b0,%h0"		/* swap bytes		*/ \
-		: "=q" (val) \
-		:  "0" (val)); \
+	__asm__("xchgb %b0,%h0"		/* swap bytes */
+		: "=q" (val)
+		:  "0" (val));
 		return val;
 }
 

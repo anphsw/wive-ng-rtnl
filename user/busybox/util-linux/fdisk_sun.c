@@ -1,19 +1,17 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
+ * fdisk_sun.c
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * I think this is mostly, or entirely, due to
+ *      Jakub Jelinek (jj@sunsite.mff.cuni.cz), July 1996
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * Merged with fdisk for other architectures, aeb, June 1998.
+ *
+ * Sat Mar 20 EST 1999 Arnaldo Carvalho de Melo <acme@conectiva.com.br>
+ *      Internationalization
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
+
 #if ENABLE_FEATURE_SUN_LABEL
 
 #define SUNOS_SWAP 3
@@ -28,19 +26,6 @@
 #define FLOPPY_MAJOR    2
 
 #define SCSI_IOCTL_GET_IDLUN 0x5382
-
-/*
- * fdisksunlabel.c
- *
- * I think this is mostly, or entirely, due to
- *      Jakub Jelinek (jj@sunsite.mff.cuni.cz), July 1996
- *
- * Merged with fdisk for other architectures, aeb, June 1998.
- *
- * Sat Mar 20 EST 1999 Arnaldo Carvalho de Melo <acme@conectiva.com.br>
- *      Internationalization
- */
-
 
 static int sun_other_endian;
 static int scsi_disk;

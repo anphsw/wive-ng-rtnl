@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
@@ -35,7 +19,9 @@ enum { STACK_SIZE = (COMMON_BUFSIZE - offsetof(struct globals, stack)) / sizeof(
 #define pointer   (G.pointer   )
 #define base      (G.base      )
 #define stack     (G.stack     )
-#define INIT_G() do { } while (0)
+#define INIT_G() do { \
+	base = 10; \
+} while (0)
 
 
 static void push(double a)
@@ -69,12 +55,14 @@ static void mul(void)
 	push(pop() * pop());
 }
 
+#if ENABLE_FEATURE_DC_LIBM
 static void power(void)
 {
 	double topower = pop();
 
 	push(pow(pop(), topower));
 }
+#endif
 
 static void divide(void)
 {
@@ -112,19 +100,45 @@ static void not(void)
 
 static void set_output_base(void)
 {
-	base = (unsigned)pop();
-	if ((base != 10) && (base != 16)) {
-		bb_error_msg("error, base %d is not supported", base);
+	static const char bases[] ALIGN1 = { 2, 8, 10, 16, 0 };
+	unsigned b = (unsigned)pop();
+
+	base = *strchrnul(bases, b);
+	if (base == 0) {
+		bb_error_msg("error, base %u is not supported", b);
 		base = 10;
 	}
 }
 
 static void print_base(double print)
 {
-	if (base == 16)
-		printf("%x\n", (unsigned)print);
-	else
+	unsigned x, i;
+
+	if (base == 10) {
 		printf("%g\n", print);
+		return;
+	}
+
+	x = (unsigned)print;
+	switch (base) {
+	case 16:
+		printf("%x\n", x);
+		break;
+	case 8:
+		printf("%o\n", x);
+		break;
+	default: /* base 2 */
+		i = (unsigned)INT_MAX + 1;
+		do {
+			if (x & i) break;
+			i >>= 1;
+		} while (i > 1);
+		do {
+			bb_putchar('1' - !(x & i));
+			i >>= 1;
+		} while (i);
+		bb_putchar('\n');
+	}
 }
 
 static void print_stack_no_pop(void)
@@ -153,9 +167,11 @@ static const struct op operators[] = {
 	{"mul", mul},
 	{"/",   divide},
 	{"div", divide},
+#if ENABLE_FEATURE_DC_LIBM
 	{"**",  power},
 	{"exp", power},
 	{"pow", power},
+#endif
 	{"%",   mod},
 	{"mod", mod},
 	{"and", and},

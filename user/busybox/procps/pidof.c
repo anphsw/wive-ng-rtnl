@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * pidof implementation for busybox
@@ -26,10 +10,10 @@
 #include "libbb.h"
 
 enum {
-	USE_FEATURE_PIDOF_SINGLE(OPTBIT_SINGLE,)
-	USE_FEATURE_PIDOF_OMIT(  OPTBIT_OMIT  ,)
-	OPT_SINGLE = USE_FEATURE_PIDOF_SINGLE((1<<OPTBIT_SINGLE)) + 0,
-	OPT_OMIT   = USE_FEATURE_PIDOF_OMIT(  (1<<OPTBIT_OMIT  )) + 0,
+	IF_FEATURE_PIDOF_SINGLE(OPTBIT_SINGLE,)
+	IF_FEATURE_PIDOF_OMIT(  OPTBIT_OMIT  ,)
+	OPT_SINGLE = IF_FEATURE_PIDOF_SINGLE((1<<OPTBIT_SINGLE)) + 0,
+	OPT_OMIT   = IF_FEATURE_PIDOF_OMIT(  (1<<OPTBIT_OMIT  )) + 0,
 };
 
 int pidof_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
@@ -44,19 +28,19 @@ int pidof_main(int argc UNUSED_PARAM, char **argv)
 
 	/* do unconditional option parsing */
 	opt = getopt32(argv, ""
-			USE_FEATURE_PIDOF_SINGLE ("s")
-			USE_FEATURE_PIDOF_OMIT("o:", &omits));
+			IF_FEATURE_PIDOF_SINGLE ("s")
+			IF_FEATURE_PIDOF_OMIT("o:", &omits));
 
 #if ENABLE_FEATURE_PIDOF_OMIT
 	/* fill omit list.  */
 	{
 		llist_t *omits_p = omits;
-		while (omits_p) {
+		while (1) {
+			omits_p = llist_find_str(omits_p, "%PPID");
+			if (!omits_p)
+				break;
 			/* are we asked to exclude the parent's process ID?  */
-			if (strcmp(omits_p->data, "%PPID") == 0) {
-				omits_p->data = utoa((unsigned)getppid());
-			}
-			omits_p = omits_p->link;
+			omits_p->data = utoa((unsigned)getppid());
 		}
 	}
 #endif

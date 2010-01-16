@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * fsck --- A generic, parallelizing front-end for the fsck program.
@@ -36,10 +20,7 @@
  * Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
  *      2001, 2002, 2003, 2004, 2005 by  Theodore Ts'o.
  *
- * %Begin-Header%
- * This file may be redistributed under the terms of the GNU Public
- * License.
- * %End-Header%
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 /* All filesystem specific hooks have been removed.
@@ -329,10 +310,10 @@ static void load_fs_info(const char *filename)
 	// Loop through entries
 	while (getmntent_r(fstab, &mte, bb_common_bufsiz1, COMMON_BUFSIZE)) {
 		//bb_info_msg("CREATE[%s][%s][%s][%s][%d]", mte.mnt_fsname, mte.mnt_dir,
-		//	mte.mnt_type, mte.mnt_opts, 
+		//	mte.mnt_type, mte.mnt_opts,
 		//	mte.mnt_passno);
 		fs = create_fs_device(mte.mnt_fsname, mte.mnt_dir,
-			mte.mnt_type, mte.mnt_opts, 
+			mte.mnt_type, mte.mnt_opts,
 			mte.mnt_passno);
 	}
 	endmntent(fstab);

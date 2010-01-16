@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * CRONTAB
@@ -28,18 +12,16 @@
 
 #include "libbb.h"
 
-#ifndef CRONTABS
-#define CRONTABS        "/var/spool/cron/crontabs"
-#endif
+#define CRONTABS        CONFIG_FEATURE_CROND_DIR "/crontabs"
 #ifndef CRONUPDATE
 #define CRONUPDATE      "cron.update"
 #endif
 
 static void change_user(const struct passwd *pas)
 {
-	setenv("USER", pas->pw_name, 1);
-	setenv("HOME", pas->pw_dir, 1);
-	setenv("SHELL", DEFAULT_SHELL, 1);
+	xsetenv("USER", pas->pw_name);
+	xsetenv("HOME", pas->pw_dir);
+	xsetenv("SHELL", DEFAULT_SHELL);
 
 	/* initgroups, setgid, setuid */
 	change_identity(pas);
@@ -142,15 +124,9 @@ int crontab_main(int argc UNUSED_PARAM, char **argv)
 	}
 
 	if (opt_ler & OPT_u) {
-		pas = getpwnam(user_name);
-		if (!pas)
-			bb_error_msg_and_die("user %s is not known", user_name);
+		pas = xgetpwnam(user_name);
 	} else {
-/* XXX: xgetpwuid */
-		uid_t my_uid = getuid();
-		pas = getpwuid(my_uid);
-		if (!pas)
-			bb_perror_msg_and_die("unknown uid %d", (int)my_uid);
+		pas = xgetpwuid(getuid());
 	}
 
 #define user_name DONT_USE_ME_BEYOND_THIS_POINT

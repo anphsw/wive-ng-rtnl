@@ -26,6 +26,7 @@ echo -------------------------------MAKE-KERNEL------------------------------
 make oldconfig
 make oldconfig -C linux
 make prepare -C linux
+make dep
 
 #for wantusoid`s like.
 if [ "$DOS2UNIX" = "YES" ] ; then

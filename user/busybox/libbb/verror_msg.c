@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Utility routines.
@@ -31,7 +15,7 @@ const char *msg_eol = "\n";
 
 void FAST_FUNC bb_verror_msg(const char *s, va_list p, const char* strerr)
 {
-	char *msg;
+	char *msg, *msg1;
 	int applet_len, strerr_len, msgeol_len, used;
 
 	if (!logmode)
@@ -52,27 +36,36 @@ void FAST_FUNC bb_verror_msg(const char *s, va_list p, const char* strerr)
 	applet_len = strlen(applet_name) + 2; /* "applet: " */
 	strerr_len = strerr ? strlen(strerr) : 0;
 	msgeol_len = strlen(msg_eol);
+	/* can't use xrealloc: it calls error_msg on failure,
+	 * that may result in a recursion */
 	/* +3 is for ": " before strerr and for terminating NUL */
-	msg = xrealloc(msg, applet_len + used + strerr_len + msgeol_len + 3);
-	/* TODO: maybe use writev instead of memmoving? Need full_writev? */
-	memmove(msg + applet_len, msg, used);
-	used += applet_len;
-	strcpy(msg, applet_name);
-	msg[applet_len - 2] = ':';
-	msg[applet_len - 1] = ' ';
-	if (strerr) {
-		if (s[0]) { /* not perror_nomsg? */
-			msg[used++] = ':';
-			msg[used++] = ' ';
+	msg1 = realloc(msg, applet_len + used + strerr_len + msgeol_len + 3);
+	if (!msg1) {
+		msg[used++] = '\n'; /* overwrites NUL */
+		applet_len = 0;
+	} else {
+		msg = msg1;
+		/* TODO: maybe use writev instead of memmoving? Need full_writev? */
+		memmove(msg + applet_len, msg, used);
+		used += applet_len;
+		strcpy(msg, applet_name);
+		msg[applet_len - 2] = ':';
+		msg[applet_len - 1] = ' ';
+		if (strerr) {
+			if (s[0]) { /* not perror_nomsg? */
+				msg[used++] = ':';
+				msg[used++] = ' ';
+			}
+			strcpy(&msg[used], strerr);
+			used += strerr_len;
 		}
-		strcpy(&msg[used], strerr);
-		used += strerr_len;
+		strcpy(&msg[used], msg_eol);
+		used += msgeol_len;
 	}
-	strcpy(&msg[used], msg_eol);
 
 	if (logmode & LOGMODE_STDIO) {
 		fflush(stdout);
-		full_write(STDERR_FILENO, msg, used + msgeol_len);
+		full_write(STDERR_FILENO, msg, used);
 	}
 	if (logmode & LOGMODE_SYSLOG) {
 		syslog(LOG_ERR, "%s", msg + applet_len);

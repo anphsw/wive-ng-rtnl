@@ -1786,7 +1786,7 @@ start_lan(void)
                                                 nvram_set("wl_channel", "6");
 
                                         sprintf(tmpstr, "mac_address=%s", nvram_safe_get("et0macaddr"));
-                                        eval("insmod","rt2400.o",tmpstr);
+                                        eval("modprobe","rt2400",tmpstr);
                                         eval("brctl","addif",lan_ifname,"ra0");
                                         ifconfig("ra0",IFUP,NULL,NULL);
                                         nvram_set("nobr","1");

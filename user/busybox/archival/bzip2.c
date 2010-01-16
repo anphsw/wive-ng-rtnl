@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Copyright (C) 2007 Denys Vlasenko <vda.linux@googlemail.com>
  *
  * This file uses bzip2 library code which is written
@@ -24,6 +8,7 @@
  */
 
 #include "libbb.h"
+#include "unarchive.h"
 
 #define CONFIG_BZIP2_FEATURE_SPEED 1
 
@@ -79,7 +64,7 @@ static uint8_t level;
  * total written bytes so far otherwise
  */
 static
-USE_DESKTOP(long long) int bz_write(bz_stream *strm, void* rbuf, ssize_t rlen, void *wbuf)
+IF_DESKTOP(long long) int bz_write(bz_stream *strm, void* rbuf, ssize_t rlen, void *wbuf)
 {
 	int n, n2, ret;
 
@@ -113,13 +98,13 @@ USE_DESKTOP(long long) int bz_write(bz_stream *strm, void* rbuf, ssize_t rlen, v
 		if (rlen && strm->avail_in == 0)
 			break;
 	}
-	return 0 USE_DESKTOP( + strm->total_out );
+	return 0 IF_DESKTOP( + strm->total_out );
 }
 
 static
-USE_DESKTOP(long long) int compressStream(void)
+IF_DESKTOP(long long) int compressStream(unpack_info_t *info UNUSED_PARAM)
 {
-	USE_DESKTOP(long long) int total;
+	IF_DESKTOP(long long) int total;
 	ssize_t count;
 	bz_stream bzs; /* it's small */
 #define strm (&bzs)
@@ -178,7 +163,7 @@ int bzip2_main(int argc UNUSED_PARAM, char **argv)
 
 	opt_complementary = "s2"; /* -s means -2 (compatibility) */
 	/* Must match bbunzip's constants OPT_STDOUT, OPT_FORCE! */
-	opt = getopt32(argv, "cfv" USE_BUNZIP2("dt") "123456789qzs");
+	opt = getopt32(argv, "cfv" IF_BUNZIP2("dt") "123456789qzs");
 #if ENABLE_BUNZIP2 /* bunzip2_main may not be visible... */
 	if (opt & 0x18) // -d and/or -t
 		return bunzip2_main(argc, argv);

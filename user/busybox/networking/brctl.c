@@ -1,24 +1,8 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Small implementation of brctl for busybox.
  *
- * Copyright (C) 2008 by Bernhard Fischer
+ * Copyright (C) 2008 by Bernhard Reutner-Fischer
  *
  * Some helper functions from bridge-utils are
  * Copyright (C) 2000 Lennert Buytenhek
@@ -31,6 +15,20 @@
 #include "libbb.h"
 #include <linux/sockios.h>
 #include <net/if.h>
+
+#ifndef SIOCBRADDBR
+# define SIOCBRADDBR BRCTL_ADD_BRIDGE
+#endif
+#ifndef SIOCBRDELBR
+# define SIOCBRDELBR BRCTL_DEL_BRIDGE
+#endif
+#ifndef SIOCBRADDIF
+# define SIOCBRADDIF BRCTL_ADD_IF
+#endif
+#ifndef SIOCBRDELIF
+# define SIOCBRDELIF BRCTL_DEL_IF
+#endif
+
 
 /* Maximum number of ports supported per bridge interface.  */
 #ifndef MAX_PORTS
@@ -101,20 +99,20 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 {
 	static const char keywords[] ALIGN1 =
 		"addbr\0" "delbr\0" "addif\0" "delif\0"
-	USE_FEATURE_BRCTL_FANCY(
+	IF_FEATURE_BRCTL_FANCY(
 		"stp\0"
 		"setageing\0" "setfd\0" "sethello\0" "setmaxage\0"
 		"setpathcost\0" "setportprio\0" "setbridgeprio\0"
 	)
-	USE_FEATURE_BRCTL_SHOW("showmacs\0" "show\0");
+	IF_FEATURE_BRCTL_SHOW("showmacs\0" "show\0");
 
 	enum { ARG_addbr = 0, ARG_delbr, ARG_addif, ARG_delif
-		USE_FEATURE_BRCTL_FANCY(,
+		IF_FEATURE_BRCTL_FANCY(,
 		   ARG_stp,
 		   ARG_setageing, ARG_setfd, ARG_sethello, ARG_setmaxage,
 		   ARG_setpathcost, ARG_setportprio, ARG_setbridgeprio
 		)
-		USE_FEATURE_BRCTL_SHOW(, ARG_showmacs, ARG_show)
+		IF_FEATURE_BRCTL_SHOW(, ARG_showmacs, ARG_show)
 	};
 
 	int fd;
@@ -153,7 +151,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 
 				if (!if_indextoname(bridx[i], brname))
 					bb_perror_msg_and_die("can't get bridge name for index %d", i);
-				strncpy(ifr.ifr_name, brname, IFNAMSIZ);
+				strncpy_IFNAMSIZ(ifr.ifr_name, brname);
 
 				arm_ioctl(args, BRCTL_GET_BRIDGE_INFO,
 							(unsigned long) &bi, 0);
@@ -207,7 +205,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 		if (!*argv) /* all but 'addif/delif' need at least two arguments */
 			bb_show_usage();
 
-		strncpy(ifr.ifr_name, br, IFNAMSIZ);
+		strncpy_IFNAMSIZ(ifr.ifr_name, br);
 		if (key == ARG_addif || key == ARG_delif) { /* addif or delif */
 			brif = *argv;
 			ifr.ifr_ifindex = if_nametoindex(brif);

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Support code for the hexdump and od applets,
@@ -314,7 +298,7 @@ static void rewrite(priv_dumper_t *dumper, FS *fs)
 	 * if, rep count is greater than 1, no trailing whitespace
 	 * gets output from the last iteration of the format unit.
 	 */
-	for (fu = fs->nextfu;; fu = fu->nextfu) {
+	for (fu = fs->nextfu; fu; fu = fu->nextfu) {
 		if (!fu->nextfu && fs->bcnt < dumper->blocksize
 		 && !(fu->flags & F_SETREP) && fu->bcnt
 		) {
@@ -595,11 +579,11 @@ static void display(priv_dumper_t* dumper)
 
 							switch (pr->bcnt) {
 							case 4:
-								memmove(&fval, bp, sizeof(fval));
+								memcpy(&fval, bp, sizeof(fval));
 								printf(pr->fmt, fval);
 								break;
 							case 8:
-								memmove(&dval, bp, sizeof(dval));
+								memcpy(&dval, bp, sizeof(dval));
 								printf(pr->fmt, dval);
 								break;
 							}
@@ -614,11 +598,11 @@ static void display(priv_dumper_t* dumper)
 								printf(pr->fmt, (int) *bp);
 								break;
 							case 2:
-								memmove(&sval, bp, sizeof(sval));
+								memcpy(&sval, bp, sizeof(sval));
 								printf(pr->fmt, (int) sval);
 								break;
 							case 4:
-								memmove(&ival, bp, sizeof(ival));
+								memcpy(&ival, bp, sizeof(ival));
 								printf(pr->fmt, ival);
 								break;
 							}
@@ -645,11 +629,11 @@ static void display(priv_dumper_t* dumper)
 								printf(pr->fmt, (unsigned) *bp);
 								break;
 							case 2:
-								memmove(&sval, bp, sizeof(sval));
+								memcpy(&sval, bp, sizeof(sval));
 								printf(pr->fmt, (unsigned) sval);
 								break;
 							case 4:
-								memmove(&ival, bp, sizeof(ival));
+								memcpy(&ival, bp, sizeof(ival));
 								printf(pr->fmt, ival);
 								break;
 							}
@@ -739,7 +723,8 @@ void FAST_FUNC bb_dump_add(dumper_t* pub_dumper, const char *fmt)
 	nextfupp = &tfs->nextfu;
 
 	/* take the format string and break it up into format units */
-	for (p = fmt;;) {
+	p = fmt;
+	for (;;) {
 		p = skip_whitespace(p);
 		if (!*p) {
 			break;

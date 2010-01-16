@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * ext2fs.h --- ext2fs
@@ -25,9 +9,8 @@
  * License.
  * %End-Header%
  */
-
-#ifndef _EXT2FS_EXT2FS_H
-#define _EXT2FS_EXT2FS_H
+#ifndef EXT2FS_EXT2FS_H
+#define EXT2FS_EXT2FS_H 1
 
 
 #define EXT2FS_ATTR(x)
@@ -936,4 +919,4 @@ extern blk_t ext2fs_inode_data_blocks(ext2_filsys fs,
 }
 #endif
 
-#endif /* _EXT2FS_EXT2FS_H */
+#endif

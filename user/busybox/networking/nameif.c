@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * nameif.c - Naming Interfaces based on MAC address for busybox.
@@ -160,7 +144,9 @@ int nameif_main(int argc, char **argv)
 
 	if (1 & getopt32(argv, "sc:", &fname)) {
 		openlog(applet_name, 0, LOG_LOCAL0);
-		logmode = LOGMODE_SYSLOG;
+		/* Why not just "="? I assume logging to stderr
+		 * can't hurt. 2>/dev/null if you don't like it: */
+		logmode |= LOGMODE_SYSLOG;
 	}
 	argc -= optind;
 	argv += optind;
@@ -193,7 +179,7 @@ int nameif_main(int argc, char **argv)
 
 		/* Find the current interface name and copy it to ifr.ifr_name */
 		memset(&ifr, 0, sizeof(struct ifreq));
-		strncpy(ifr.ifr_name, token[0], sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, token[0]);
 
 #if ENABLE_FEATURE_NAMEIF_EXTENDED
 		/* Check for driver etc. */

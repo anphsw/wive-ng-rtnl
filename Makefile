@@ -289,6 +289,7 @@ romfs.subdirs:
 romfs.post:
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
+	./strip.sh
 
 .PHONY: image
 image:

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* 'time' utility to display resource usage of processes.
    Copyright (C) 1990, 91, 92, 93, 96 Free Software Foundation, Inc.
@@ -105,7 +89,7 @@ static void printargv(char *const *argv)
    This is funky since the pagesize could be less than 1K.
    Note: Some machines express getrusage statistics in terms of K,
    others in terms of pages.  */
-static unsigned long ptok(unsigned pagesize, unsigned long pages)
+static unsigned long ptok(const unsigned pagesize, const unsigned long pages)
 {
 	unsigned long tmp;
 
@@ -319,7 +303,7 @@ static void summarize(const char *fmt, char **command, resource_t *resp)
 				printf("%lu", ptok(pagesize, (UL) resp->ru.ru_ixrss) / cpu_ticks);
 				break;
 			case 'Z':	/* Page size.  */
-				printf("%u", getpagesize());
+				printf("%u", pagesize);
 				break;
 			case 'c':	/* Involuntary context switches.  */
 				printf("%lu", resp->ru.ru_nivcsw);

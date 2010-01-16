@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * June 30, 2001                 Manuel Novoa III
@@ -40,6 +24,8 @@
  *
  *      Some code to omit the decimal point and tenths digit is sketched out
  *      and "#if 0"'d below.
+ *
+ * Licensed under GPLv2, see file LICENSE in this tarball for details.
  */
 
 #include "libbb.h"
@@ -48,7 +34,9 @@ const char* FAST_FUNC make_human_readable_str(unsigned long long size,
 	unsigned long block_size, unsigned long display_unit)
 {
 	/* The code will adjust for additional (appended) units */
-	static const char zero_and_units[] ALIGN1 = { '0', 0, 'k', 'M', 'G', 'T' };
+	static const char unit_chars[] ALIGN1 = {
+		'\0', 'K', 'M', 'G', 'T', 'P', 'E'
+	};
 	static const char fmt[] ALIGN1 = "%llu";
 	static const char fmt_tenths[] ALIGN1 = "%llu.%d%c";
 
@@ -58,26 +46,33 @@ const char* FAST_FUNC make_human_readable_str(unsigned long long size,
 	int frac;
 	const char *u;
 	const char *f;
+	smallint no_tenths;
 
-	u = zero_and_units;
+	if (size == 0)
+		return "0";
+
+	/* If block_size is 0 then do not print tenths */
+	no_tenths = 0;
+	if (block_size == 0) {
+		no_tenths = 1;
+		block_size = 1;
+	}
+
+	u = unit_chars;
+	val = size * block_size;
 	f = fmt;
 	frac = 0;
-
-	val = size * block_size;
-	if (val == 0) {
-		return u;
-	}
 
 	if (display_unit) {
 		val += display_unit/2;	/* Deal with rounding */
 		val /= display_unit;	/* Don't combine with the line above!!! */
+		/* will just print it as ulonglong (below) */
 	} else {
-		++u;
 		while ((val >= 1024)
-		 && (u < zero_and_units + sizeof(zero_and_units) - 1)
+		 && (u < unit_chars + sizeof(unit_chars) - 1)
 		) {
 			f = fmt_tenths;
-			++u;
+			u++;
 			frac = (((int)(val % 1024)) * 10 + 1024/2) / 1024;
 			val /= 1024;
 		}
@@ -85,9 +80,9 @@ const char* FAST_FUNC make_human_readable_str(unsigned long long size,
 			++val;
 			frac = 0;
 		}
-#if 0
+#if 1
 		/* Sample code to omit decimal point and tenths digit. */
-		if (/* no_tenths */ 1) {
+		if (no_tenths) {
 			if (frac >= 5) {
 				++val;
 			}

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* od -- dump files in octal and other formats
    Copyright (C) 92, 1995-2004 Free Software Foundation, Inc.
 
@@ -848,7 +832,7 @@ format_address_std(off_t address, char c)
 	printf(address_fmt, address);
 }
 
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 /* only used with --traditional */
 static void
 format_address_paren(off_t address, char c)
@@ -969,7 +953,7 @@ get_lcm(void)
 	return l_c_m;
 }
 
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 /* If S is a valid traditional offset specification with an optional
    leading '+' return nonzero and set *OFFSET to the offset it denotes.  */
 
@@ -1215,9 +1199,9 @@ int od_main(int argc, char **argv)
 		OPT_s = 1 << 15,
 		OPT_S = 1 << 16,
 		OPT_w = 1 << 17,
-		OPT_traditional = (1 << 18) * ENABLE_GETOPT_LONG,
+		OPT_traditional = (1 << 18) * ENABLE_LONG_OPTS,
 	};
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 	static const char od_longopts[] ALIGN1 =
 		"skip-bytes\0"        Required_argument "j"
 		"address-radix\0"     Required_argument "A"
@@ -1251,7 +1235,7 @@ int od_main(int argc, char **argv)
 
 	/* Parse command line */
 	opt_complementary = "w+:t::"; /* -w N, -t is a list */
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 	applet_long_options = od_longopts;
 #endif
 	opt = getopt32(argv, "A:N:abcdfhij:lot:vxsS:"
@@ -1322,7 +1306,7 @@ int od_main(int argc, char **argv)
 	 * FIXME: POSIX 1003.1-2001 with XSI requires support for the
 	 * traditional syntax even if --traditional is not given.  */
 
-#if ENABLE_GETOPT_LONG
+#if ENABLE_LONG_OPTS
 	if (opt & OPT_traditional) {
 		off_t o1, o2;
 

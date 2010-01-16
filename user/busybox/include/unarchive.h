@@ -1,26 +1,8 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
-#ifndef	__UNARCHIVE_H__
-#define	__UNARCHIVE_H__
+#ifndef UNARCHIVE_H
+#define UNARCHIVE_H 1
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility push(hidden)
-#endif
+PUSH_AND_SET_FUNCTION_VISIBILITY_TO_HIDDEN
 
 #define ARCHIVE_PRESERVE_DATE           1
 #define ARCHIVE_CREATE_LEADING_DIRS     2
@@ -29,6 +11,7 @@
 #define ARCHIVE_EXTRACT_NEWER           16
 #define ARCHIVE_NOPRESERVE_OWN          32
 #define ARCHIVE_NOPRESERVE_PERM         64
+#define ARCHIVE_NUMERIC_OWNER           128
 
 typedef struct file_header_t {
 	char *name;
@@ -93,6 +76,12 @@ typedef struct archive_handle_t {
 } archive_handle_t;
 
 
+/* Info struct unpackers can fill out to inform users of thing like
+ * timestamps of unpacked files */
+typedef struct unpack_info_t {
+	time_t mtime;
+} unpack_info_t;
+
 extern archive_handle_t *init_handle(void) FAST_FUNC;
 
 extern char filter_accept_all(archive_handle_t *archive_handle) FAST_FUNC;
@@ -136,27 +125,30 @@ typedef struct inflate_unzip_result {
 	uint32_t crc;
 } inflate_unzip_result;
 
-USE_DESKTOP(long long) int inflate_unzip(inflate_unzip_result *res, off_t compr_size, int src_fd, int dst_fd) FAST_FUNC;
+IF_DESKTOP(long long) int inflate_unzip(inflate_unzip_result *res, off_t compr_size, int src_fd, int dst_fd) FAST_FUNC;
 /* lzma unpacker takes .lzma stream from offset 0 */
-USE_DESKTOP(long long) int unpack_lzma_stream(int src_fd, int dst_fd) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_lzma_stream(int src_fd, int dst_fd) FAST_FUNC;
 /* the rest wants 2 first bytes already skipped by the caller */
-USE_DESKTOP(long long) int unpack_bz2_stream(int src_fd, int dst_fd) FAST_FUNC;
-USE_DESKTOP(long long) int unpack_gz_stream(int src_fd, int dst_fd) FAST_FUNC;
-USE_DESKTOP(long long) int unpack_Z_stream(int fd_in, int fd_out) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_bz2_stream(int src_fd, int dst_fd) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_gz_stream(int src_fd, int dst_fd) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_gz_stream_with_info(int src_fd, int dst_fd, unpack_info_t *info) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_Z_stream(int fd_in, int fd_out) FAST_FUNC;
 /* wrapper which checks first two bytes to be "BZ" */
-USE_DESKTOP(long long) int unpack_bz2_stream_prime(int src_fd, int dst_fd) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_bz2_stream_prime(int src_fd, int dst_fd) FAST_FUNC;
+
+int bbunpack(char **argv,
+	     char* (*make_new_name)(char *filename),
+	     IF_DESKTOP(long long) int (*unpacker)(unpack_info_t *info)) FAST_FUNC;
 
 #if BB_MMU
 void open_transformer(int fd,
-	USE_DESKTOP(long long) int FAST_FUNC (*transformer)(int src_fd, int dst_fd)) FAST_FUNC;
+	IF_DESKTOP(long long) int FAST_FUNC (*transformer)(int src_fd, int dst_fd)) FAST_FUNC;
 #define open_transformer(fd, transformer, transform_prog) open_transformer(fd, transformer)
 #else
 void open_transformer(int src_fd, const char *transform_prog) FAST_FUNC;
 #define open_transformer(fd, transformer, transform_prog) open_transformer(fd, transform_prog)
 #endif
 
-#if __GNUC_PREREQ(4,1)
-# pragma GCC visibility pop
-#endif
+POP_SAVED_FUNCTION_VISIBILITY
 
 #endif

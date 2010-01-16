@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini netstat implementation(s) for busybox
@@ -34,15 +18,15 @@
 #include "inet_common.h"
 
 #define NETSTAT_OPTS "laentuwx" \
-	USE_ROUTE(               "r") \
-	USE_FEATURE_NETSTAT_WIDE("W") \
-	USE_FEATURE_NETSTAT_PRG( "p")
+	IF_ROUTE(               "r") \
+	IF_FEATURE_NETSTAT_WIDE("W") \
+	IF_FEATURE_NETSTAT_PRG( "p")
 
 enum {
 	OPTBIT_KEEP_OLD = 7,
-	USE_ROUTE(               OPTBIT_ROUTE,)
-	USE_FEATURE_NETSTAT_WIDE(OPTBIT_WIDE ,)
-	USE_FEATURE_NETSTAT_PRG( OPTBIT_PRG  ,)
+	IF_ROUTE(               OPTBIT_ROUTE,)
+	IF_FEATURE_NETSTAT_WIDE(OPTBIT_WIDE ,)
+	IF_FEATURE_NETSTAT_PRG( OPTBIT_PRG  ,)
 	OPT_sock_listen = 1 << 0, // l
 	OPT_sock_all    = 1 << 1, // a
 	OPT_extended    = 1 << 2, // e
@@ -51,9 +35,9 @@ enum {
 	OPT_sock_udp    = 1 << 5, // u
 	OPT_sock_raw    = 1 << 6, // w
 	OPT_sock_unix   = 1 << 7, // x
-	OPT_route       = USE_ROUTE(               (1 << OPTBIT_ROUTE)) + 0, // r
-	OPT_wide        = USE_FEATURE_NETSTAT_WIDE((1 << OPTBIT_WIDE )) + 0, // W
-	OPT_prg         = USE_FEATURE_NETSTAT_PRG( (1 << OPTBIT_PRG  )) + 0, // p
+	OPT_route       = IF_ROUTE(               (1 << OPTBIT_ROUTE)) + 0, // r
+	OPT_wide        = IF_FEATURE_NETSTAT_WIDE((1 << OPTBIT_WIDE )) + 0, // W
+	OPT_prg         = IF_FEATURE_NETSTAT_PRG( (1 << OPTBIT_PRG  )) + 0, // p
 };
 
 #define NETSTAT_CONNECTED 0x01

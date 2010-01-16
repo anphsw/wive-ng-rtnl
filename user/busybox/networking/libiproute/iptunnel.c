@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * iptunnel.c	       "ip tunnel"
@@ -21,7 +5,6 @@
  * Licensed under the GPL v2 or later, see the file LICENSE in this tarball.
  *
  * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
- *
  *
  * Changes:
  *
@@ -34,10 +17,52 @@
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <asm/types.h>
+
 #ifndef __constant_htons
 #define __constant_htons htons
 #endif
-#include <linux/if_tunnel.h>
+
+// FYI: #define SIOCDEVPRIVATE 0x89F0
+
+/* From linux/if_tunnel.h. #including it proved troublesome
+ * (redefiniton errors due to name collisions in linux/ and net[inet]/) */
+#define SIOCGETTUNNEL   (SIOCDEVPRIVATE + 0)
+#define SIOCADDTUNNEL   (SIOCDEVPRIVATE + 1)
+#define SIOCDELTUNNEL   (SIOCDEVPRIVATE + 2)
+#define SIOCCHGTUNNEL   (SIOCDEVPRIVATE + 3)
+//#define SIOCGETPRL      (SIOCDEVPRIVATE + 4)
+//#define SIOCADDPRL      (SIOCDEVPRIVATE + 5)
+//#define SIOCDELPRL      (SIOCDEVPRIVATE + 6)
+//#define SIOCCHGPRL      (SIOCDEVPRIVATE + 7)
+#define GRE_CSUM        __constant_htons(0x8000)
+//#define GRE_ROUTING     __constant_htons(0x4000)
+#define GRE_KEY         __constant_htons(0x2000)
+#define GRE_SEQ         __constant_htons(0x1000)
+//#define GRE_STRICT      __constant_htons(0x0800)
+//#define GRE_REC         __constant_htons(0x0700)
+//#define GRE_FLAGS       __constant_htons(0x00F8)
+//#define GRE_VERSION     __constant_htons(0x0007)
+struct ip_tunnel_parm {
+	char            name[IFNAMSIZ];
+	int             link;
+	uint16_t        i_flags;
+	uint16_t        o_flags;
+	uint32_t        i_key;
+	uint32_t        o_key;
+	struct iphdr    iph;
+};
+/* SIT-mode i_flags */
+//#define SIT_ISATAP 0x0001
+//struct ip_tunnel_prl {
+//	uint32_t          addr;
+//	uint16_t          flags;
+//	uint16_t          __reserved;
+//	uint32_t          datalen;
+//	uint32_t          __reserved2;
+//	/* data follows */
+//};
+///* PRL flags */
+//#define PRL_DEFAULT 0x0001
 
 #include "ip_common.h"  /* #include "libbb.h" is inside */
 #include "rt_names.h"
@@ -50,7 +75,7 @@ static int do_ioctl_get_ifindex(char *dev)
 	struct ifreq ifr;
 	int fd;
 
-	strncpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
+	strncpy_IFNAMSIZ(ifr.ifr_name, dev);
 	fd = xsocket(AF_INET, SOCK_DGRAM, 0);
 	xioctl(fd, SIOCGIFINDEX, &ifr);
 	close(fd);
@@ -63,7 +88,7 @@ static int do_ioctl_get_iftype(char *dev)
 	int fd;
 	int err;
 
-	strncpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
+	strncpy_IFNAMSIZ(ifr.ifr_name, dev);
 	fd = xsocket(AF_INET, SOCK_DGRAM, 0);
 	err = ioctl_or_warn(fd, SIOCGIFHWADDR, &ifr);
 	close(fd);
@@ -89,7 +114,7 @@ static int do_get_ioctl(const char *basedev, struct ip_tunnel_parm *p)
 	int fd;
 	int err;
 
-	strncpy(ifr.ifr_name, basedev, sizeof(ifr.ifr_name));
+	strncpy_IFNAMSIZ(ifr.ifr_name, basedev);
 	ifr.ifr_ifru.ifru_data = (void*)p;
 	fd = xsocket(AF_INET, SOCK_DGRAM, 0);
 	err = ioctl_or_warn(fd, SIOCGETTUNNEL, &ifr);
@@ -104,9 +129,9 @@ static int do_add_ioctl(int cmd, const char *basedev, struct ip_tunnel_parm *p)
 	int fd;
 
 	if (cmd == SIOCCHGTUNNEL && p->name[0]) {
-		strncpy(ifr.ifr_name, p->name, sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, p->name);
 	} else {
-		strncpy(ifr.ifr_name, basedev, sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, basedev);
 	}
 	ifr.ifr_ifru.ifru_data = (void*)p;
 	fd = xsocket(AF_INET, SOCK_DGRAM, 0);
@@ -130,9 +155,9 @@ static int do_del_ioctl(const char *basedev, struct ip_tunnel_parm *p)
 	int fd;
 
 	if (p->name[0]) {
-		strncpy(ifr.ifr_name, p->name, sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, p->name);
 	} else {
-		strncpy(ifr.ifr_name, basedev, sizeof(ifr.ifr_name));
+		strncpy_IFNAMSIZ(ifr.ifr_name, basedev);
 	}
 	ifr.ifr_ifru.ifru_data = (void*)p;
 	fd = xsocket(AF_INET, SOCK_DGRAM, 0);
@@ -164,7 +189,7 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 	int key;
 
 	memset(p, 0, sizeof(*p));
-	memset(&medium, 0, sizeof(medium));
+	medium[0] = '\0';
 
 	p->iph.version = 4;
 	p->iph.ihl = 5;
@@ -181,23 +206,23 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 			if (key == ARG_ipip ||
 			    key == ARG_ip_ip) {
 				if (p->iph.protocol && p->iph.protocol != IPPROTO_IPIP) {
-					bb_error_msg_and_die("you managed to ask for more than one tunnel mode");
+					bb_error_msg_and_die("%s tunnel mode", "you managed to ask for more than one");
 				}
 				p->iph.protocol = IPPROTO_IPIP;
 			} else if (key == ARG_gre ||
 				   key == ARG_gre_ip) {
 				if (p->iph.protocol && p->iph.protocol != IPPROTO_GRE) {
-					bb_error_msg_and_die("you managed to ask for more than one tunnel mode");
+					bb_error_msg_and_die("%s tunnel mode", "you managed to ask for more than one");
 				}
 				p->iph.protocol = IPPROTO_GRE;
 			} else if (key == ARG_sit ||
 				   key == ARG_ip6_ip) {
 				if (p->iph.protocol && p->iph.protocol != IPPROTO_IPV6) {
-					bb_error_msg_and_die("you managed to ask for more than one tunnel mode");
+					bb_error_msg_and_die("%s tunnel mode", "you managed to ask for more than one");
 				}
 				p->iph.protocol = IPPROTO_IPV6;
 			} else {
-				bb_error_msg_and_die("cannot guess tunnel mode");
+				bb_error_msg_and_die("%s tunnel mode", "cannot guess");
 			}
 		} else if (key == ARG_key) {
 			unsigned uval;
@@ -207,9 +232,7 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 			if (strchr(*argv, '.'))
 				p->i_key = p->o_key = get_addr32(*argv);
 			else {
-				if (get_unsigned(&uval, *argv, 0) < 0) {
-					bb_error_msg_and_die("invalid value of \"key\"");
-				}
+				uval = get_unsigned(*argv, "key");
 				p->i_key = p->o_key = htonl(uval);
 			}
 		} else if (key == ARG_ikey) {
@@ -219,9 +242,7 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 			if (strchr(*argv, '.'))
 				p->o_key = get_addr32(*argv);
 			else {
-				if (get_unsigned(&uval, *argv, 0) < 0) {
-					bb_error_msg_and_die("invalid value of \"ikey\"");
-				}
+				uval = get_unsigned(*argv, "ikey");
 				p->i_key = htonl(uval);
 			}
 		} else if (key == ARG_okey) {
@@ -231,9 +252,7 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 			if (strchr(*argv, '.'))
 				p->o_key = get_addr32(*argv);
 			else {
-				if (get_unsigned(&uval, *argv, 0) < 0) {
-					bb_error_msg_and_die("invalid value of \"okey\"");
-				}
+				uval = get_unsigned(*argv, "okey");
 				p->o_key = htonl(uval);
 			}
 		} else if (key == ARG_seq) {
@@ -266,14 +285,13 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 				p->iph.saddr = get_addr32(*argv);
 		} else if (key == ARG_dev) {
 			NEXT_ARG();
-			strncpy(medium, *argv, IFNAMSIZ-1);
+			strncpy_IFNAMSIZ(medium, *argv);
 		} else if (key == ARG_ttl) {
 			unsigned uval;
 			NEXT_ARG();
 			key = index_in_strings(keywords, *argv);
 			if (key != ARG_inherit) {
-				if (get_unsigned(&uval, *argv, 0))
-					invarg(*argv, "TTL");
+				uval = get_unsigned(*argv, "TTL");
 				if (uval > 255)
 					invarg(*argv, "TTL must be <=255");
 				p->iph.ttl = uval;
@@ -295,7 +313,7 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 			}
 			if (p->name[0])
 				duparg2("name", *argv);
-			strncpy(p->name, *argv, IFNAMSIZ);
+			strncpy_IFNAMSIZ(p->name, *argv);
 			if (cmd == SIOCCHGTUNNEL && count == 0) {
 				struct ip_tunnel_parm old_p;
 				memset(&old_p, 0, sizeof(old_p));
@@ -339,7 +357,6 @@ static void parse_args(char **argv, int cmd, struct ip_tunnel_parm *p)
 		bb_error_msg_and_die("broadcast tunnel requires a source address");
 	}
 }
-
 
 /* Return value becomes exitcode. It's okay to not return at all */
 static int do_add(int cmd, char **argv)
@@ -458,7 +475,7 @@ static void do_tunnels_list(struct ip_tunnel_parm *p)
 	if (fp == NULL) {
 		return;
 	}
-
+	/* skip headers */
 	fgets(buf, sizeof(buf), fp);
 	fgets(buf, sizeof(buf), fp);
 

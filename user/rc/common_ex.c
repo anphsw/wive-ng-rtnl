@@ -1060,8 +1060,8 @@ void convert_asus_values(int skipflag)
 #if 0
 	if(nvram_invmatch("sp_battle_ips", "0") && !skipflag)
 	{
-		eval("insmod", "ip_nat_starcraft.o");
-		eval("insmod", "ipt_NETMAP.o");
+		eval("modprobe", "ip_nat_starcraft");
+		eval("modprobe", "ipt_NETMAP");
 	}
 
 	//2005/09/22 insmod FTP module
@@ -1070,13 +1070,13 @@ void convert_asus_values(int skipflag)
 		char ports[32];
 
 		sprintf(ports, "ports=21,%d", atoi(nvram_get("usb_ftpport_x")));
-		eval("insmod", "/lib/modules/2.4.30/kernel/net/ipv4/netfilter/ip_conntrack_ftp.o", ports);	
-		eval("insmod", "/lib/modules/2.4.30/kernel/net/ipv4/netfilter/ip_nat_ftp.o", ports);
+		eval("modprobe", "ip_conntrack_ftp", ports);	
+		eval("modprobe", "ip_nat_ftp", ports);
 	}
 	else
 	{
-		eval("insmod", "/lib/modules/2.4.30/kernel/net/ipv4/netfilter/ip_conntrack_ftp.o");
-		eval("insmod", "/lib/modules/2.4.30/kernel/net/ipv4/netfilter/ip_nat_ftp.o");
+		eval("modprobe", "ip_conntrack_ftp");
+		eval("modprobe", "ip_nat_ftp");
 	}
 #endif
 	//update_lan_status(1);

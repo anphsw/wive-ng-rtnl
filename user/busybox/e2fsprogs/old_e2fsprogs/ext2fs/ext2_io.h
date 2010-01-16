@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * io.h --- the I/O manager abstraction
@@ -25,9 +9,8 @@
  * License.
  * %End-Header%
  */
-
-#ifndef _EXT2FS_EXT2_IO_H
-#define _EXT2FS_EXT2_IO_H
+#ifndef EXT2FS_EXT2_IO_H
+#define EXT2FS_EXT2_IO_H 1
 
 /*
  * ext2_loff_t is defined here since unix_io.c needs it.
@@ -126,5 +109,4 @@ extern void (*test_io_cb_write_blk)
 extern void (*test_io_cb_set_blksize)
 	(int blksize, errcode_t err);
 
-#endif /* _EXT2FS_EXT2_IO_H */
-
+#endif

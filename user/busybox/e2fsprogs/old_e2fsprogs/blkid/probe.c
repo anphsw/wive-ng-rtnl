@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * probe.c - identify a block device by its contents, and return a dev
@@ -578,7 +562,7 @@ blkid_dev blkid_verify(blkid_cache cache, blkid_dev dev)
 	if (!dev)
 		return NULL;
 
-	now = time(0);
+	now = time(NULL);
 	diff = now - dev->bid_time;
 
 	if ((now < dev->bid_time) ||
@@ -675,7 +659,7 @@ try_again:
 found_type:
 	if (dev && type) {
 		dev->bid_devno = st.st_rdev;
-		dev->bid_time = time(0);
+		dev->bid_time = time(NULL);
 		dev->bid_flags |= BLKID_BID_FL_VERIFIED;
 		cache->bic_flags |= BLKID_BIC_FL_CHANGED;
 

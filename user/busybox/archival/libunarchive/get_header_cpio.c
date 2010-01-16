@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /* Copyright 2002 Laurence Anderson
  *
@@ -43,6 +27,7 @@ char FAST_FUNC get_header_cpio(archive_handle_t *archive_handle)
 
 #define hardlinks_to_create (*(hardlinks_t **)(&archive_handle->ah_priv[0]))
 #define created_hardlinks   (*(hardlinks_t **)(&archive_handle->ah_priv[1]))
+#define block_count         (archive_handle->ah_priv[2])
 //	if (!archive_handle->ah_priv_inited) {
 //		archive_handle->ah_priv_inited = 1;
 //		hardlinks_to_create = NULL;
@@ -92,7 +77,7 @@ char FAST_FUNC get_header_cpio(archive_handle_t *archive_handle)
 
 	if (strcmp(file_header->name, "TRAILER!!!") == 0) {
 		/* Always round up. ">> 9" divides by 512 */
-		printf("%"OFF_FMT"u blocks\n", (archive_handle->offset + 511) >> 9);
+		block_count = (void*)(ptrdiff_t) ((archive_handle->offset + 511) >> 9);
 		goto create_hardlinks;
 	}
 

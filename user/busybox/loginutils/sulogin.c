@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * Mini sulogin implementation for busybox
@@ -48,11 +32,12 @@ int sulogin_main(int argc UNUSED_PARAM, char **argv)
 
 	opt_complementary = "t+"; /* -t N */
 	getopt32(argv, "t:", &timeout);
+	argv += optind;
 
-	if (argv[optind]) {
+	if (argv[0]) {
 		close(0);
 		close(1);
-		dup(xopen(argv[optind], O_RDWR));
+		dup(xopen(argv[0], O_RDWR));
 		close(2);
 		dup(0);
 	}
@@ -66,7 +51,7 @@ int sulogin_main(int argc UNUSED_PARAM, char **argv)
 	/* Clear dangerous stuff, set PATH */
 	sanitize_env_if_suid();
 
-// bb_askpass() already handles this
+// bb_ask() already handles this
 //	signal(SIGALRM, catchalarm);
 
 	pwd = getpwuid(0);
@@ -92,7 +77,7 @@ int sulogin_main(int argc UNUSED_PARAM, char **argv)
 		int r;
 
 		/* cp points to a static buffer that is zeroed every time */
-		cp = bb_askpass(timeout,
+		cp = bb_ask(STDIN_FILENO, timeout,
 				"Give root password for system maintenance\n"
 				"(or type Control-D for normal startup):");
 
@@ -114,7 +99,7 @@ int sulogin_main(int argc UNUSED_PARAM, char **argv)
 
 	bb_info_msg("System Maintenance Mode");
 
-	USE_SELINUX(renew_current_security_context());
+	IF_SELINUX(renew_current_security_context());
 
 	shell = getenv("SUSHELL");
 	if (!shell)

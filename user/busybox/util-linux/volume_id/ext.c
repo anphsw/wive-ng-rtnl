@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * volume_id - reads filesystem label and uuid
  *
  * Copyright (C) 2004 Kay Sievers <kay.sievers@vrfy.org>
@@ -59,8 +43,9 @@ struct ext2_super_block {
 #define EXT3_FEATURE_INCOMPAT_JOURNAL_DEV	0x00000008
 #define EXT_SUPERBLOCK_OFFSET			0x400
 
-int volume_id_probe_ext(struct volume_id *id, uint64_t off)
+int volume_id_probe_ext(struct volume_id *id /*,uint64_t off*/)
 {
+#define off ((uint64_t)0)
 	struct ext2_super_block *es;
 
 	dbg("ext: probing at offset 0x%llx", (unsigned long long) off);

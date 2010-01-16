@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * vconfig implementation for busybox
@@ -66,13 +50,14 @@ struct vlan_ioctl_args {
 #define VLAN_GROUP_ARRAY_LEN 4096
 #define SIOCSIFVLAN	0x8983		/* Set 802.1Q VLAN options */
 
-/* On entry, table points to the length of the current string plus
- * nul terminator plus data length for the subsequent entry.  The
- * return value is the last data entry for the matching string. */
+/* On entry, table points to the length of the current string
+ * plus NUL terminator plus data length for the subsequent entry.
+ * The return value is the last data entry for the matching string. */
 static const char *xfind_str(const char *table, const char *str)
 {
 	while (strcasecmp(str, table+1) != 0) {
-		if (!*(table += table[0])) {
+		table += table[0];
+		if (!*table) {
 			bb_show_usage();
 		}
 	}
@@ -137,7 +122,7 @@ int vconfig_main(int argc, char **argv)
 	/* Will die if 802.1q is not present */
 	xopen(conf_file_name, O_RDONLY);
 
-	memset(&ifr, 0, sizeof(struct vlan_ioctl_args));
+	memset(&ifr, 0, sizeof(ifr));
 
 	++argv;
 	p = xfind_str(cmds+2, *argv);
@@ -149,7 +134,7 @@ int vconfig_main(int argc, char **argv)
 	if (ifr.cmd == SET_VLAN_NAME_TYPE_CMD) { /* set_name_type */
 		ifr.u.name_type = *xfind_str(name_types+1, argv[1]);
 	} else {
-		strncpy(ifr.device1, argv[1], IFNAMSIZ);
+		strncpy_IFNAMSIZ(ifr.device1, argv[1]);
 		p = argv[2];
 
 		/* I suppose one could try to combine some of the function calls below,

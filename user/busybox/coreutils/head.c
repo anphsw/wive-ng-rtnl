@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * head implementation for busybox
@@ -56,7 +40,6 @@ int head_main(int argc, char **argv)
 	int count_bytes = 0;
 	int header_threshhold = 1;
 #endif
-
 	FILE *fp;
 	const char *fmt;
 	char *p;
@@ -66,7 +49,7 @@ int head_main(int argc, char **argv)
 
 #if ENABLE_INCLUDE_SUSv2 || ENABLE_FEATURE_FANCY_HEAD
 	/* Allow legacy syntax of an initial numeric option without -n. */
-	if (argc > 1 && argv[1][0] == '-'
+	if (argv[1] && argv[1][0] == '-'
 	 && isdigit(argv[1][1])
 	) {
 		--argc;
@@ -95,7 +78,6 @@ int head_main(int argc, char **argv)
 #if ENABLE_INCLUDE_SUSv2 || ENABLE_FEATURE_FANCY_HEAD
  GET_COUNT:
 #endif
-
 #if !ENABLE_FEATURE_FANCY_HEAD
 			count = xatoul(p);
 #else
@@ -144,10 +126,12 @@ int head_main(int argc, char **argv)
 				putchar(c);
 			}
 			if (fclose_if_not_stdin(fp)) {
-				bb_simple_perror_msg(*argv);	/* Avoid multibyte problems. */
+				bb_simple_perror_msg(*argv);
 				retval = EXIT_FAILURE;
 			}
 			die_if_ferror_stdout();
+		} else {
+			retval = EXIT_FAILURE;
 		}
 		fmt = header_fmt_str;
 	} while (*++argv);

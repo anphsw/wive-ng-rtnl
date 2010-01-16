@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * iproute.c		"ip route".
@@ -94,7 +78,7 @@ static unsigned get_hz(void)
 	return hz_internal;
 }
 
-static int print_route(const struct sockaddr_nl *who UNUSED_PARAM,
+static int FAST_FUNC print_route(const struct sockaddr_nl *who UNUSED_PARAM,
 		struct nlmsghdr *n, void *arg UNUSED_PARAM)
 {
 	struct rtmsg *r = NLMSG_DATA(n);
@@ -218,7 +202,6 @@ static int print_route(const struct sockaddr_nl *who UNUSED_PARAM,
 	if (tb[RTA_DST]) {
 		if (r->rtm_dst_len != host_len) {
 			printf("%s/%u ", rt_addr_n2a(r->rtm_family,
-						RTA_PAYLOAD(tb[RTA_DST]),
 						RTA_DATA(tb[RTA_DST]),
 						abuf, sizeof(abuf)),
 					r->rtm_dst_len
@@ -238,7 +221,6 @@ static int print_route(const struct sockaddr_nl *who UNUSED_PARAM,
 	if (tb[RTA_SRC]) {
 		if (r->rtm_src_len != host_len) {
 			printf("from %s/%u ", rt_addr_n2a(r->rtm_family,
-						RTA_PAYLOAD(tb[RTA_SRC]),
 						RTA_DATA(tb[RTA_SRC]),
 						abuf, sizeof(abuf)),
 					r->rtm_src_len
@@ -268,7 +250,6 @@ static int print_route(const struct sockaddr_nl *who UNUSED_PARAM,
 		   and symbolic name will not be useful.
 		 */
 		printf(" src %s ", rt_addr_n2a(r->rtm_family,
-					RTA_PAYLOAD(tb[RTA_PREFSRC]),
 					RTA_DATA(tb[RTA_PREFSRC]),
 					abuf, sizeof(abuf)));
 	}
@@ -306,17 +287,18 @@ static int print_route(const struct sockaddr_nl *who UNUSED_PARAM,
 static int iproute_modify(int cmd, unsigned flags, char **argv)
 {
 	static const char keywords[] ALIGN1 =
-		"src\0""via\0""mtu\0""lock\0""protocol\0"USE_FEATURE_IP_RULE("table\0")
-		"dev\0""oif\0""to\0";
+		"src\0""via\0""mtu\0""lock\0""protocol\0"IF_FEATURE_IP_RULE("table\0")
+		"dev\0""oif\0""to\0""metric\0";
 	enum {
 		ARG_src,
 		ARG_via,
 		ARG_mtu, PARM_lock,
 		ARG_protocol,
-USE_FEATURE_IP_RULE(ARG_table,)
+IF_FEATURE_IP_RULE(ARG_table,)
 		ARG_dev,
 		ARG_oif,
-		ARG_to
+		ARG_to,
+		ARG_metric,
 	};
 	enum {
 		gw_ok = 1 << 0,
@@ -382,8 +364,7 @@ USE_FEATURE_IP_RULE(ARG_table,)
 				mxlock |= (1 << RTAX_MTU);
 				NEXT_ARG();
 			}
-			if (get_unsigned(&mtu, *argv, 0))
-				invarg(*argv, "mtu");
+			mtu = get_unsigned(*argv, "mtu");
 			rta_addattr32(mxrta, sizeof(mxbuf), RTAX_MTU, mtu);
 		} else if (arg == ARG_protocol) {
 			uint32_t prot;
@@ -403,6 +384,11 @@ USE_FEATURE_IP_RULE(ARG_table,)
 		} else if (arg == ARG_dev || arg == ARG_oif) {
 			NEXT_ARG();
 			d = *argv;
+		} else if (arg == ARG_metric) {
+			uint32_t metric;
+			NEXT_ARG();
+			metric = get_u32(*argv, "metric");
+			addattr32(&req.n, sizeof(req), RTA_PRIORITY, metric);
 		} else {
 			int type;
 			inet_prefix dst;

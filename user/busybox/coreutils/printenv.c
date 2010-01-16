@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4: */
 /*
  * printenv implementation for busybox
@@ -29,6 +13,8 @@
 int printenv_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 int printenv_main(int argc UNUSED_PARAM, char **argv)
 {
+	int exit_code = EXIT_SUCCESS;
+
 	/* no variables specified, show whole env */
 	if (!argv[1]) {
 		int e = 0;
@@ -42,8 +28,10 @@ int printenv_main(int argc UNUSED_PARAM, char **argv)
 			env = getenv(arg);
 			if (env)
 				puts(env);
+			else
+				exit_code = EXIT_FAILURE;
 		}
 	}
 
-	fflush_stdout_and_exit(EXIT_SUCCESS);
+	fflush_stdout_and_exit(exit_code);
 }
