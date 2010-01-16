@@ -130,6 +130,11 @@ int br_handle_frame(struct net_bridge_port *p, struct sk_buff **pskb)
 		goto err;
 
 	if (unlikely(is_link_local(dest))) {
+
+                /* Pause frames shouldn't be passed up by driver anyway */
+                if (skb->protocol == htons(ETH_P_PAUSE))
+                       goto drop;
+
 		skb->pkt_type = PACKET_HOST;
 		return NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_IN, skb, skb->dev,
 			       NULL, br_handle_local_finish) != 0;
@@ -154,4 +159,9 @@ int br_handle_frame(struct net_bridge_port *p, struct sk_buff **pskb)
 err:
 	kfree_skb(skb);
 	return 1;
+out:
+        return 0;
+drop:
+        kfree_skb(skb);
+        goto out;
 }
