@@ -62,6 +62,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/string.h>
 #include <linux/list.h>
 #include <asm/uaccess.h>
@@ -1029,9 +1030,9 @@ end:
 
 /* Work queue handler for pppol2tp_xmit().
  */
-static void pppol2tp_wq_send(void *data)
+static void pppol2tp_wq_send(struct work_struct *work)
 {
-	struct pppol2tp_send *send = (struct pppol2tp_send *) data;
+	struct pppol2tp_send *send = container_of(work, struct pppol2tp_send, send_task);
 	int error;
 	mm_segment_t oldfs;
 
@@ -1172,7 +1173,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	init_sync_kiocb(&send->iocb, NULL);
 	send->iocb.private = &send->siocb;
 
-	INIT_WORK(&send->send_task, pppol2tp_wq_send, send);
+	INIT_WORK(&send->send_task, pppol2tp_wq_send);
 	queue_work(tunnel->wq, &send->send_task);
 	return 1;
 
@@ -2487,13 +2488,11 @@ static int pppol2tp_proc_show(struct seq_file *m, void *v)
 		   (tunnel->magic == L2TP_TUNNEL_MAGIC) ? "OK" : "BAD");
 	seq_printf(m, " %08x %llu/%llu/%llu %llu/%llu/%llu\n",
 		   tunnel->debug,
-		   (unsigned long long)tunnel->stats.tx_packets,
-		   (unsigned long long)tunnel->stats.tx_bytes,
-		   (unsigned long long)tunnel->stats.tx_errors,
-		   (unsigned long long)tunnel->stats.rx_packets,
-		   (unsigned long long)tunnel->stats.rx_bytes,
-		   (unsigned long long)tunnel->stats.rx_errors);
-		   
+		   tunnel->stats.tx_packets, tunnel->stats.tx_bytes,
+		   tunnel->stats.tx_errors,
+		   tunnel->stats.rx_packets, tunnel->stats.rx_bytes,
+		   tunnel->stats.rx_errors);
+
 	if (tunnel->magic != L2TP_TUNNEL_MAGIC) {
 		seq_puts(m, "*** Aborting ***\n");
 		goto out;
@@ -2526,12 +2525,12 @@ static int pppol2tp_proc_show(struct seq_file *m, void *v)
 				   JIFFIES_TO_MS(session->reorder_timeout));
 			seq_printf(m, "   %hu/%hu %llu/%llu/%llu %llu/%llu/%llu\n",
 				   session->nr, session->ns,
-		                   (unsigned long long)session->stats.tx_packets,
-            			   (unsigned long long)session->stats.tx_bytes,
-		                   (unsigned long long)session->stats.tx_errors,
-            			   (unsigned long long)session->stats.rx_packets,
-		                   (unsigned long long)session->stats.rx_bytes,
-            			   (unsigned long long)session->stats.rx_errors);
+				   session->stats.tx_packets,
+				   session->stats.tx_bytes,
+				   session->stats.tx_errors,
+				   session->stats.rx_packets,
+				   session->stats.rx_bytes,
+				   session->stats.rx_errors);
 
 			if (session->magic != L2TP_SESSION_MAGIC) {
 				seq_puts(m, "*** Aborting ***\n");
@@ -2603,10 +2602,8 @@ int __init pppol2tp_init(void)
 out:
 	return err;
 
-#ifdef CONFIG_PROC_FS
 out_unregister_pppox_proto:
 	unregister_pppox_proto(PX_PROTO_OL2TP);
-#endif
 out_unregister_pppol2tp_proto:
 	proto_unregister(&pppol2tp_sk_proto);
 	goto out;

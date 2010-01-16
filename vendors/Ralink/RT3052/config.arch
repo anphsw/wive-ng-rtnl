@@ -1,26 +1,26 @@
 .EXPORT_ALL_VARIABLES:
-############################################################################
-#
-# Vendor specific settings
-#
 
 CONSOLE_BAUD_RATE = 57600
-
-############################################################################
-
-CPUFLAGS :=
-VENDOR_CFLAGS :=
-DISABLE_XIP := 1
-DISABLE_MOVE_RODATA := 1       # until we get a toolchain release
 
 LOPT += -Os                  # library is alway 02
 UOPT += -Os                  # user apps are always Os
 
-############################################################################
-
 MODEL_NAME		   = RTNL
+KERNEL_VER		   = "1.2"
+FS_VER			   = "0.0"
+PRODUCTID		   = "RT-NL"
+HWL1			   = "1.0"
+HWH1			   = "0.0"
+HWL2			   = "0.0"
+HWH2			   = "0.0"
+HWL3			   = "0.0"
+HWH3			   = "0.0"
+HWL4			   = "0.0"
+HWH4			   = "0.0"
+
 CONFIG_NOUSB		   = y
-ACHINE			   = mips
+
+MACHINE			   = mips
 ARCH		           = mips
 ROOTDIR			   = /opt/Wive-RTNL
 FIRMROOT        	   = $(ROOTDIR)

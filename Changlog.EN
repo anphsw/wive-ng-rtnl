@@ -1,0 +1,9 @@
+1) Fix configs scripts for support bash >=4 and change product name
+2) Kernel version up to 2.6.21.7
+3) Redesign filesystem. Busybox up to 1.15.3
+4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc
+5) Add ACELL-PPTP Kernel support
+6) Mount ramfs particions in kernel mode
+7) BGIDGE: Pause frames shouldn't be passed up by driver anyway
+8) Add ESFQ support
+9) Initial auto detect memory size (fix me 32bit mode support)

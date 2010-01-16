@@ -1,4 +1,4 @@
-include version.conf
+include config.arch
 
 KERNELZ = $(IMAGEDIR)/zImage
 RAMDISK  = $(IMAGEDIR)/ramdisk

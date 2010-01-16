@@ -96,6 +96,7 @@ dir_y$(CONFIG_USER_HSDPA)		    += comgt-0.32
 #dir_y$(CONFIG_USER_HSDPA)                   += sdparm-1.02
 dir_y$(CONFIG_USER_HSDPA)                   += hso-1.6
 
+dir_$(CONFIG_USER_UDPXY)                    += udpxy
 
 all: config
 ifeq ($(CONFIG_PPPD),y)

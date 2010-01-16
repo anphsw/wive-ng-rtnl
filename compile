@@ -21,11 +21,9 @@ cp -fv ./config-acorp/config-lib	./lib/.config
 cp -fv ./config-acorp/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch
 
-echo -------------------------------MAKE-KERNEL------------------------------
+echo -------------------------------MAKE-OLDCONFIGS---------------------------
 
 make oldconfig
-make oldconfig -C linux
-make prepare -C linux
 make dep
 
 #for wantusoid`s like.

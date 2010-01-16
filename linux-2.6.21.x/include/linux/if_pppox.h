@@ -21,6 +21,7 @@
 #include <asm/byteorder.h>
 
 #ifdef  __KERNEL__
+#include <linux/workqueue.h>
 #include <linux/if_ether.h>
 #include <linux/if.h>
 #include <linux/netdevice.h>
