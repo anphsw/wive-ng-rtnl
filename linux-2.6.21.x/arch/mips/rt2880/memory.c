@@ -43,6 +43,15 @@
 #include <linux/ioport.h>
 #include <asm/bootinfo.h>
 #include <asm/page.h>
+#include <asm/system.h>
+
+#include <linux/irq.h>
+#include <asm/irq_cpu.h>
+
+spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
+
+unsigned short totall_system_memory_detected;
+unsigned long detect_ram_sequence[4];
 
 #include <asm/rt2880/prom.h>
 //#define DEBUG
@@ -161,20 +170,69 @@ static int __init prom_memtype_classify (unsigned int type)
 
 void __init prom_meminit(void)
 {
-	//struct prom_pmemblock *p;
+
+    char *ptr;
+    unsigned long memsize;
+    unsigned long reg_mem;
+    //int cnt=1;
+    unsigned long mempos;
+    unsigned long memmeg;
+    unsigned short save_dword;
+    unsigned long flags;
+
+    //struct prom_pmemblock *p;
 #ifdef DEBUG
 	struct prom_pmemblock *psave;
 #endif
+        spin_lock_irqsave(&rtlmem_lock, flags);
+       //Maximum RAM
+       reg_mem = 32;
+       detect_ram_sequence[0] = reg_mem;
+       detect_ram_sequence[1] = reg_mem;
+       //Test to be sure in RAM capacity
+       for(memmeg=4;memmeg<reg_mem;memmeg+=4){
 
-	//printk("ram start= %x, ram end= %x\n",rt2880_res_ram.start, rt2880_res_ram.end); 
-	//printk("size = %x\n",rt2880_res_ram.end - rt2880_res_ram.start); 
- 	//add_memory_region(0x0a000000, rt2880_res_ram.end - rt2880_res_ram.start, BOOT_MEM_RAM);
+           mempos = 0xa0000000L + memmeg * 0x100000;
+
+           save_dword = *(volatile unsigned short *)mempos;
+
+           *(volatile unsigned short *)mempos = (unsigned short)0xABCD;
+
+           if (*(volatile unsigned short *)mempos != (unsigned short)0xABCD){
+               *(volatile unsigned short *)mempos = save_dword;
+               break;
+           }
+
+           *(volatile unsigned short *)mempos = (unsigned short)0xDCBA;
+
+           if (*(volatile unsigned short *)mempos != (unsigned short)0xDCBA){
+               *(volatile unsigned short *)mempos = save_dword;
+               break;
+           }
+
+           *(volatile unsigned short *)mempos = save_dword;
+       }
+
+       memsize = memmeg << 20;
+
+       detect_ram_sequence[2] = memmeg;
+       detect_ram_sequence[3] = memsize;
+       spin_unlock_irq(&rtlmem_lock);
+       totall_system_memory_detected = memmeg;
+
+#ifdef CONFIG_RAM_SIZE_AUTO
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
- 	add_memory_region(0x08000000, RAM_SIZE, BOOT_MEM_RAM);
+	add_memory_region(0x08000000, memsize, BOOT_MEM_RAM);
+#else
+	add_memory_region(0x00000000, memsize, BOOT_MEM_RAM);
+#endif
+#else
+#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
+        add_memory_region(0x08000000, RAM_SIZE, BOOT_MEM_RAM);
 #else
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
 #endif
-	
+#endif	
 	//p = prom_getmdesc();
 #ifdef DEBUG
 	prom_printf("MEMORY DESCRIPTOR dump:\n");

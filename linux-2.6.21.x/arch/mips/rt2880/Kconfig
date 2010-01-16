@@ -24,6 +24,8 @@ endchoice
 endif
 
 #--------------------------
+config	RAM_SIZE_AUTO
+	bool "Autodetect RAM size"
 
 config FLASH_REMAP_NEED
        bool

@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21
-# Sat Jan 16 05:26:46 2010
+# Linux kernel version: 2.6.21.7
+# Sat Jan 16 11:34:00 2010
 #
 CONFIG_MIPS=y
 
@@ -13,6 +13,7 @@ CONFIG_RALINK_RT3052_MP2=y
 # CONFIG_RALINK_RT2880 is not set
 CONFIG_RALINK_RT3052=y
 CONFIG_RT3052_ASIC=y
+CONFIG_RAM_SIZE_AUTO=y
 # CONFIG_RT2880_DRAM_8M is not set
 # CONFIG_RT2880_DRAM_16M is not set
 CONFIG_RT2880_DRAM_32M=y
