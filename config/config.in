@@ -142,10 +142,6 @@ define_bool CONFIG_LIB_LIBGMP_FORCE $CONFIG_USER_OPENSWAN
 bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
 bool 'portmap'					CONFIG_USER_PORTMAP
 bool 'HSDPA'					CONFIG_USER_HSDPA
-bool 'pppd'					CONFIG_USER_PPPD
-dep_bool '  pppoe client'                       CONFIG_USER_PPPD_WITH_PPPOE $CONFIG_USER_PPPD
-dep_bool '  ppp status'                         CONFIG_USER_PPPD_PPPSTATS $CONFIG_USER_PPPD
-dep_bool '  ppp dump'                           CONFIG_USER_PPPD_PPPDUMP $CONFIG_USER_PPPD
 bool 'pppoe relay'                              CONFIG_USER_RPPPPOE_RELAY
 bool 'pppoe sniffer'                            CONFIG_USER_RPPPPOE_SNIFF
 bool 'pppoecd (pppoe client)'			CONFIG_USER_PPPOECD

@@ -1,8 +1,13 @@
 #!/bin/sh
+
+
 mount -a
 mkdir -p /var/run
 cat /etc_ro/motd
 nvram_daemon&
+
+nvram set sw_mode=1
+
 goahead&
 
 #for telnet debugging

@@ -86,9 +86,6 @@ dir_$(CONFIG_LIBUSB)                        += libusb
 dir_$(CONFIG_U2EC)                          += u2ec
 dir_$(CONFIG_LPRNG)                         += LPRng
 
-dir_$(CONFIG_USER_PPPD)                     += ppp-2.4.2	# from SDK 2.1, not used in n13u
-dir_$(CONFIG_USER_PPPD_PPPSTATS)            += ppp-2.4.2	# from SDK 2.1
-dir_$(CONFIG_USER_PPPD_PPPDUMP)             += ppp-2.4.2	# from SDK 2.1
 dir_$(CONFIG_PPPD)                	    += pppd
 dir_$(CONFIG_PPTP_CLIENT)                   += pptp-client
 dir_$(CONFIG_PPPOE_RELAY)                   += pppoe-relay

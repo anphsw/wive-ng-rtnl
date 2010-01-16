@@ -397,10 +397,6 @@ void sys_script(char *name)
 	   	system("echo None > /tmp/syscmd.log\n");
 	   }
      }
-     else if (strcmp(name, "syslog.sh")==0)
-     {
-	   // to nothing
-     }	
      else if (strcmp(name, "wan.sh")==0)
      {
 	   kill_pidfile_s("/var/run/infosvr.pid", SIGUSR1);
