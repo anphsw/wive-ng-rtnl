@@ -764,10 +764,36 @@ static int noinline init_post(void)
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
-	run_init_process("/sbin/init");
-	run_init_process("/etc/init");
+#ifdef CONFIG_PROC_FS
+        if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
+            printk("mount /proc file system fail!\n");
+            else
+            printk("mount /proc file system ok!\n");
+#ifdef CONFIG_USB_DEVICEFS
+        if (sys_mount("usbfs", "/proc/bus/usb", "usbfs", 0, NULL) < 0)
+            printk("mount /proc/bus/usb file system fail!\n");
+            else
+            printk("mount /proc/bus/usb file system ok!\n");
+#endif
+#endif
+#ifdef CONFIG_SYSFS
+        if (sys_mount("sysfs", "/sys", "sysfs", 0, NULL) < 0)
+            printk("mount /sys file system fail!\n");
+            else
+            printk("mount /sys file system ok!\n");
+#endif
+#ifdef CONFIG_RAMFS
+        if (sys_mount("ramfs", "/var", "ramfs", 0, NULL) < 0)
+            printk("mount /var file system fail!\n");
+            else
+            printk("mount /var file system ok!\n");
+
+        if (sys_mount("ramfs", "/tmp", "ramfs", 0, NULL) < 0)
+            printk("mount /tmp file system fail!\n");
+            else
+            printk("mount /tmp file system ok!\n");
+#endif
 	run_init_process("/bin/init");
-	run_init_process("/bin/sh");
 
 	panic("No init found.  Try passing init= option to kernel.");
 	return 0;
