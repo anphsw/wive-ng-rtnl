@@ -782,12 +782,6 @@ static int noinline init_post(void)
             printk("mount /etc file system fail!\n");
             else
             printk("mount /etc file system ok!\n");
-#ifdef CONFIG_LEGACY_PTYS
-        if (sys_mount("devpts", "/dev/pts", "devpts", 0, NULL) < 0)
-            printk("mount /devpts file system fail!\n");
-            else
-            printk("mount /devpts file system ok!\n");
-#endif
 #endif
 
 

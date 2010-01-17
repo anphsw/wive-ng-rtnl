@@ -14,6 +14,10 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
+if [ "$lan_ip" = "" ]; then
+    lan_ip="192.168.1.1"
+    nvram_set 2860 lan_ipaddr 192.168.1.1
+fi
 
 ifRaxWdsxDown()
 {
@@ -196,6 +200,18 @@ addRaL02Br0()
 
 genSysFiles()
 {
+        echo "genSysFiles"
+        admID=`nvram_get 2860 Login`
+        if [ "$admID" = "" ]; then
+            admID="Admin"
+            nvram_set 2860 Login Admin
+        fi
+            admPW=`nvram_get 2860 Password`
+        if [ "$admPW" = "" ]; then
+            admPW="Admin"
+            nvram_set 2860 Password Admin
+        fi
+
 	login=`nvram_get 2860 Login`
 	pass=`nvram_get 2860 Password`
 	echo "$login::0:0:Adminstrator:/:/bin/sh" > /etc/passwd
@@ -203,43 +219,6 @@ genSysFiles()
 	chpasswd.sh $login $pass
 }
 
-genDevNode()
-{
-#Linux2.6 uses udev instead of devfs, we have to create static dev node by myself.
-if [ "$CONFIG_DWC_OTG" == "m" -a "$CONFIG_HOTPLUG" == "y" ]; then
-	mounted=`mount | grep mdev | wc -l`
-	if [ $mounted -eq 0 ]; then
-	mount -t ramfs mdev /dev
-	mkdir /dev/pts
-	mount -t devpts devpts /dev/pts
-        mdev -s
-
-        mknod   /dev/spiS0       c       217     0
-        mknod   /dev/i2cM0       c       218     0
-        mknod   /dev/rdm0        c       254     0
-        mknod   /dev/flash0      c       200     0
-        mknod   /dev/swnat0      c       210     0
-        mknod   /dev/hwnat0      c       220     0
-        mknod   /dev/acl0        c       230     0
-        mknod   /dev/ac0         c       240     0
-        mknod   /dev/mtr0        c       250     0
-        mknod   /dev/gpio        c       252     0
-	mknod   /dev/PCM         c       233     0
-	mknod   /dev/I2S         c       234     0
-	fi
-
-	echo "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]" > /etc/mdev.conf
-        echo "# The special characters have the meaning:" >> /etc/mdev.conf
-        echo "# @ Run after creating the device." >> /etc/mdev.conf
-        echo "# $ Run before removing the device." >> /etc/mdev.conf
-        echo "# * Run both after creating and before removing the device." >> /etc/mdev.conf
-        echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
-
-        #enable usb hot-plug feature
-        echo "/sbin/mdev" > /proc/sys/kernel/hotplug
-
-fi
-}
 
 # opmode adjustment:
 #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
@@ -254,7 +233,6 @@ if [ "$opmode" = "2" -a "$CONFIG_RT2860V2_STA" == "" ]; then
 fi
 
 genSysFiles
-genDevNode
 
 if [ "$CONFIG_DWC_OTG" == "m" ]; then
 isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`

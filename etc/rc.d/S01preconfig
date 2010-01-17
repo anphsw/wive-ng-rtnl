@@ -19,10 +19,14 @@ echo 1    > /proc/sys/vm/panic_on_oom
 
 echo "Mount all filesystems"
 mount -a
+mount -t devpts /dev/pts /dev/pts
 
 echo "Create some folders"
 mkdir -p /var/run
 mkdir -p /var/log
+
+echo "Start NVRAM"
+nvram_daemon &
 
 genDevNode
 modulesload

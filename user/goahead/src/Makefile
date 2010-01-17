@@ -40,7 +40,7 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  internet.o utils.o wireless.o \
 				  firewall.o management.o $(NAME).o
 
-ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "y")
+ifeq ("$(CONFIG_RT2860V2_AP_WSC)", "y")
 DEPEND_FILES += wps.o
 endif
 ifneq ("$(CONFIG_RT2860V2_STA)", "")
@@ -63,11 +63,11 @@ ifeq ("$(CONFIG_USER_STORAGE)", "y")
 DEPEND_FILES += storage.o
 endif
 
+OTHERS	= -DB_STATS -DB_FILL -DDEBUG
 CFLAGS	+= -DWEBS -DUEMF -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 CFLAGS  += -Wall -fno-strict-aliasing
 CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/drivers/char
-CFLAGS  += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash 
-OTHERS	= -DB_STATS -DB_FILL -DDEBUG
+CFLAGS  += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash $(OTHERS)
 LDFLAGS	+= $(SSLLIB) $(IFMODLIB)
 LDLIBS	+= -lnvram
 

@@ -1,9 +1,9 @@
 #The word of "Default" must not be removed
 Default
 WebInit=1
-HostName=ralink
-Login=admin
-Password=admin
+HostName=Wive-RTNL
+Login=Admin
+Password=Admin
 OperationMode=1
 Platform=RT3052
 wanConnectionMode=DHCP
@@ -28,15 +28,15 @@ wan_pptp_mode=0
 wan_pptp_ip=192.168.1.1
 wan_pptp_netmask=255.255.255.0
 wan_pptp_gateway=192.168.1.254
-lan_ipaddr=10.10.10.254
+lan_ipaddr=192.168.1.1
 lan_netmask=255.255.255.0
 dhcpEnabled=1
-dhcpStart=10.10.10.100
-dhcpEnd=10.10.10.200
+dhcpStart=192.168.1.2
+dhcpEnd=192.168.1.254
 dhcpMask=255.255.255.0
-dhcpPriDns=10.10.10.251
+dhcpPriDns=192.168.1.1
 dhcpSecDns=168.95.1.1
-dhcpGateway=10.10.10.254
+dhcpGateway=192.168.1.1
 dhcpLease=86400
 stpEnabled=0
 lltdEnabled=0

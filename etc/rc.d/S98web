@@ -5,7 +5,12 @@
 
 start() {
 echo "Start goahead"
+    
     goahead &
+    
+    echo "Init GPIO"
+    gpio r &
+
 }
 
 stop() {

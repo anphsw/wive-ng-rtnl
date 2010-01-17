@@ -1,2 +1,2 @@
 ::sysinit:/etc/rc
-ttyS0::off:-/bin/sh
+ttyS1::off:-/bin/sh

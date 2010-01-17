@@ -532,7 +532,7 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2561_NVRAM, "SSID", ssid);
 
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 //#WPS
 	{
 		char *wordlist= nvram_bufget(RT2561_NVRAM, "WscModeOption");

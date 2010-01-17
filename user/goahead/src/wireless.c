@@ -67,7 +67,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query);
 static void wirelessWmm(webs_t wp, char_t *path, char_t *query);
 static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query);
 static void APSecurity(webs_t wp, char_t *path, char_t *query);
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv);
 #endif
 int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* for Access Policy list deletion*/
@@ -85,7 +85,7 @@ void formDefineWireless(void) {
 	websAspDefine(T("getDLSBuilt"), getDLSBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("getWlanWdsEncType"), getWlanWdsEncType);
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
 #endif
 	websFormDefine(T("wirelessBasic"), wirelessBasic);
@@ -611,7 +611,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2860_NVRAM, "SSID1", ssid);
 
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 //#WPS
 	{
 		char *wordlist= nvram_bufget(RT2860_NVRAM, "WscModeOption");
@@ -1006,7 +1006,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 void WPSRestart(void);
 #endif
 /* goform/wirelessWmm */
@@ -1058,7 +1058,7 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	doSystem("ralink_init make_wireless_config rt2860");
 	doSystem("ifconfig ra0 up");
 	//after ra0 down&up we must restore WPS status
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 	WPSRestart();
 #endif
 	websHeader(wp);
@@ -1598,7 +1598,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
 
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 //# WPS
 	{
 		if(nvram == RT2860_NVRAM && mbssid == 0){		// only ra0 supports WPS now.
@@ -1625,7 +1625,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 			doSystem("ifconfig ra%d down", i);
 			doSystem("ifconfig ra%d up", i);
 		}
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 		WPSRestart();
 #endif
 	}else if(nvram == RTINIC_NVRAM){
@@ -1688,7 +1688,7 @@ static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query)
 	DeleteAccessPolicyList(RT2860_NVRAM, wp, path, query);
 }
 
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	if(g_wsc_configured){

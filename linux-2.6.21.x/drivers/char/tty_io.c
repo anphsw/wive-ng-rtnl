@@ -2537,7 +2537,7 @@ retry_open:
 		extern struct tty_driver *console_driver;
 		driver = console_driver;
 		index = fg_console;
-		noctty = 1;
+		noctty = 0;
 		goto got_driver;
 	}
 #endif
@@ -2546,7 +2546,7 @@ retry_open:
 		if (driver) {
 			/* Don't let /dev/console block */
 			filp->f_flags |= O_NONBLOCK;
-			noctty = 1;
+			noctty = 0;
 			goto got_driver;
 		}
 		mutex_unlock(&tty_mutex);

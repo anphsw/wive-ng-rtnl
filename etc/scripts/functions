@@ -6,27 +6,6 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
-ifRaxWdsxDown()
-{
-	echo "ifRaxWdsxDown"
-	ifconfig ra0 down
-	ifconfig ra1 down
-	ifconfig ra2 down
-	ifconfig ra3 down
-	ifconfig ra4 down
-	ifconfig ra5 down
-	ifconfig ra6 down
-	ifconfig ra7 down
-
-	ifconfig wds0 down
-	ifconfig wds1 down
-	ifconfig wds2 down
-	ifconfig wds3 down
-
-	ifconfig apcli0 down
-}
-
-
 addRax2Br0()
 {
 	echo "addRax2Br0 $bssidnum"

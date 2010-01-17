@@ -16,7 +16,8 @@ ROMFS_DIRS = \
 	dev dev/pts \
 	home \
 	etc \
-	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g etc_ro/ppp/plugins etc_ro/wlan etc_ro/Wireless etc_ro/xml \
+	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g etc_ro/ppp/plugins etc_ro/wlan etc_ro/Wireless \
+	etc_ro/Wireless/RT2860AP etc_ro/xml \
 	etc_ro/linuxigd \
 	lib lib/modules lib/ipsec lib/pppd lib/l2tp lib/l2tp/plugins\
 	mnt \
@@ -48,6 +49,9 @@ endif
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
 	$(ROMFSINST) /bin/rcS
+	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_vlan
+	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
+	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_oneport
 	$(ROMFSINST) -e CONFIG_RALINK_RT3052AP_2T2R /etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin
 	$(ROMFSINST) -e CONFIG_RALINK_RT3051AP_1T2R /etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin
 	$(ROMFSINST) -e CONFIG_RALINK_RT3050AP_1T1R /etc_ro/wlan/RT3050_AP_1T1R_V1_0.bin

@@ -2,7 +2,7 @@
  * Automatically generated C config: don't edit
  * Busybox version: 1.15.3
  */
-#define AUTOCONF_TIMESTAMP "2010-01-17 18:35:43 OMST"
+#define AUTOCONF_TIMESTAMP "2010-01-18 01:01:42 OMST"
 
 #define CONFIG_HAVE_DOT_CONFIG 1
 #define ENABLE_HAVE_DOT_CONFIG 1
@@ -3016,10 +3016,10 @@
 #define ENABLE_ASH_BASH_COMPAT 1
 #define IF_ASH_BASH_COMPAT(...) __VA_ARGS__
 #define IF_NOT_ASH_BASH_COMPAT(...)
-#define CONFIG_ASH_JOB_CONTROL 1
-#define ENABLE_ASH_JOB_CONTROL 1
-#define IF_ASH_JOB_CONTROL(...) __VA_ARGS__
-#define IF_NOT_ASH_JOB_CONTROL(...)
+#undef CONFIG_ASH_JOB_CONTROL
+#define ENABLE_ASH_JOB_CONTROL 0
+#define IF_ASH_JOB_CONTROL(...)
+#define IF_NOT_ASH_JOB_CONTROL(...) __VA_ARGS__
 #define CONFIG_ASH_READ_NCHARS 1
 #define ENABLE_ASH_READ_NCHARS 1
 #define IF_ASH_READ_NCHARS(...) __VA_ARGS__

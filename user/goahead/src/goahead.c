@@ -93,7 +93,7 @@ extern void ripdRestart(void);
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
-#ifdef CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 extern void WPSAPPBCStartAll(void);
 extern void WPSSingleTriggerHandler(void);
 extern void WPSSTAPBCStartEnr(void);
@@ -184,7 +184,7 @@ int writeGoPid(void)
 
 static void goaSigHandler(int signum)
 {
-#ifdef CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 	char *opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	char *ethCon = nvram_bufget(RT2860_NVRAM, "ethConvert");
 #endif
@@ -192,7 +192,7 @@ static void goaSigHandler(int signum)
 	if (signum != SIGUSR1)
 		return;
 
-#ifdef CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 	if(!strcmp(opmode, "2") || (!strcmp(opmode, "0") &&   !strcmp(ethCon, "1") ) )		// wireless isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
@@ -225,7 +225,7 @@ static int initSystem(void)
 		return (-1);
 #endif
 	signal(SIGUSR1, goaSigHandler);
-#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
+#ifdef CONFIG_RT2860V2_AP_WSC
 	signal(SIGXFSZ, WPSSingleTriggerHandler);
 #endif
 	ledAlways(12, LED_ON); //turn on power LED (gpio 12) at startup

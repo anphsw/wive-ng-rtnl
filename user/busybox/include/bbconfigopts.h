@@ -733,7 +733,7 @@ static const char *const bbconfig_config =
 "# CONFIG_FEATURE_SH_IS_NONE is not set\n"
 "CONFIG_ASH=y\n"
 "CONFIG_ASH_BASH_COMPAT=y\n"
-"CONFIG_ASH_JOB_CONTROL=y\n"
+"# CONFIG_ASH_JOB_CONTROL is not set\n"
 "CONFIG_ASH_READ_NCHARS=y\n"
 "CONFIG_ASH_READ_TIMEOUT=y\n"
 "CONFIG_ASH_ALIAS=y\n"

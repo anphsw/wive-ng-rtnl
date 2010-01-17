@@ -29,7 +29,7 @@
 #include "webs.h"
 #include "internet.h"
 #include "wireless.h"
-#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_STA_WSC */
+#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_AP_WSC */
 #include "wps.h"
 
 #define AP_MODE
@@ -47,7 +47,7 @@ int g_wsc_configured = 0;							// export for wireless.c
 static int g_WscResult = 0;							// for AP only ( STA WPS don't need this)
 static int g_isEnrollee = 0;						// for AP only
 
-#ifdef CONFIG_RT2860V2_STA_WSC						// if RT2880 support Wifi - STA 
+#ifdef CONFIG_RT2860V2_AP_WSC						// if RT2880 support Wifi - STA 
 #include "stapriv.h"
 #define WPS_STA_TIMEOUT_SECS			120000				// 120 seconds
 #define WPS_STA_CATCH_CONFIGURED_TIMER	10					// 10 * 1000 microsecond = every 0.010 sec
@@ -75,7 +75,7 @@ extern PRT_PROFILE_SETTING headerProfileSetting;
 
 static char	*g_pAPListData = NULL;
 
-#endif	/* CONFIG_RT2860V2_STA_WSC */
+#endif	/* CONFIG_RT2860V2_AP_WSC */
 
 static void resetTimerAll(void)
 {
@@ -868,7 +868,7 @@ static void WPS(webs_t wp, char_t *path, char_t *query)
 }
 
 
-#ifdef CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 static char_t *DevicePasswordIDTranslate(unsigned short num)
 {
 	static char_t result[32];
@@ -2371,7 +2371,7 @@ static char_t *addWPSSTAProfile(char_t *result)
 	return result;
 }
 
-#endif /* CONFIG_RT2860V2_STA_WSC */
+#endif /* CONFIG_RT2860V2_AP_WSC */
 
 void formDefineWPS(void){
 	websAspDefine(T("getWPSModeASP"), getWPSModeASP);
@@ -2383,7 +2383,7 @@ void formDefineWPS(void){
 	websFormDefine(T("WPS"), WPS);
 
 
-#ifdef CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 	websAspDefine(T("getStaWPSBSSIDListASP"), getStaWPSBSSIDListASP);
 	websFormDefine(T("WPSSTABSSIDListReset"), WPSSTABSSIDListReset);
 	websFormDefine(T("WPSSTAGenNewPIN"), WPSSTAGenNewPIN);
@@ -2409,5 +2409,5 @@ void formDefineWPS(void){
 	websFormDefine(T("WPSSTAPBCReg"), WPSSTAPBCReg);
 
 	websFormDefine(T("WPSSTAMode"), WPSSTAMode);
-#endif /* CONFIG_RT2860V2_STA_WSC */
+#endif /* CONFIG_RT2860V2_AP_WSC */
 }

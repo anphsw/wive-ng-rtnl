@@ -1,3 +1,0 @@
-#!/bin/msh
-nvram set apps_ver=1.00
-nvram commit

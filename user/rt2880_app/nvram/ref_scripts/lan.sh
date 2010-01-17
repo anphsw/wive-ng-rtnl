@@ -21,6 +21,12 @@ echo "" > /var/udhcpd.leases
 # ip address
 ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`
+
+if [ "$ip" = "" ]; then
+    ip="192.168.1.1"
+    nvram_set 2860 lan_ipaddr 192.168.1.1
+fi
+
 ifconfig $lan_if down
 ifconfig $lan_if $ip netmask $nm
 opmode=`nvram_get 2860 OperationMode`
