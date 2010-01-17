@@ -27,7 +27,6 @@
 */
 #ifndef _OID_H_
 #define _OID_H_
-#undef LLTD_SUPPORT
 //#include <linux/wireless.h>
 
 #ifndef TRUE

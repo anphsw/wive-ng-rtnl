@@ -5,7 +5,8 @@
 #
 # Target Features and Options
 #
-# UCLIBCXX_HAS_FLOATS is not set
+UCLIBCXX_HAS_FLOATS=y
+UCLIBCXX_HAS_LONG_DOUBLE=y
 # UCLIBCXX_HAS_TLS is not set
 WARNINGS="-Wall"
 BUILD_EXTRA_LIBRARIES=""
@@ -41,4 +42,4 @@ IMPORT_LIBSUP=y
 # IMPORT_LIBGCC_EH is not set
 BUILD_STATIC_LIB=y
 # BUILD_ONLY_STATIC_LIB is not set
-DODEBUG=y
+# DODEBUG is not set

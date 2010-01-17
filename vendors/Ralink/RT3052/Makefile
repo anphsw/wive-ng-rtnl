@@ -16,7 +16,9 @@ ROMFS_DIRS = \
 	dev dev/pts \
 	home \
 	etc \
-	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g etc_ro/ppp/plugins etc_ro/wlan etc_ro/Wireless \
+	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g \
+	etc_ro/ppp/plugins \
+	etc_ro/wlan etc_ro/Wireless \
 	etc_ro/Wireless/RT2860AP etc_ro/xml \
 	etc_ro/linuxigd \
 	lib lib/modules lib/ipsec lib/pppd lib/l2tp lib/l2tp/plugins\
@@ -27,8 +29,8 @@ ROMFS_DIRS = \
 	share \
 	usr usr/codepages \
 	www \
-        apps \
-        var 
+	apps \
+	var 
 
 clean:
 	rm -f mkimage
@@ -38,11 +40,6 @@ romfs:
 	for i in $(ROMFS_DIRS); do \
 		[ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)/$$i; \
 	done
-	#generate device node
-ifneq	($(LINUXDIR),linux-2.4.x)
-	@if [ \! -d $(ROMFSDIR)/dev ];then mkdir -p $(ROMFSDIR)/dev;fi;
-	./makedevlinks $(ROMFSDIR)
-endif
 	$(ROMFSINST) -s ./bin /sbin
 	$(ROMFSINST) -s ../bin /usr/bin
 	$(ROMFSINST) -s ../bin /usr/sbin

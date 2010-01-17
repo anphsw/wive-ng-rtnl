@@ -17,3 +17,4 @@ endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")	
 	rm -rf $(ROMFSDIR)/sbin/mesh.sh
 endif
+	cp -rvf * $(ROMFSDIR)/bin

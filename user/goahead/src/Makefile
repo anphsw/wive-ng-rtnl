@@ -63,7 +63,7 @@ ifeq ("$(CONFIG_USER_STORAGE)", "y")
 DEPEND_FILES += storage.o
 endif
 
-OTHERS	= -DB_STATS -DB_FILL -DDEBUG
+#OTHERS	= -DB_STATS -DB_FILL -DDEBUG
 CFLAGS	+= -DWEBS -DUEMF -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 CFLAGS  += -Wall -fno-strict-aliasing
 CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/drivers/char

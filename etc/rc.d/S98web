@@ -4,18 +4,24 @@
 . /etc/scripts/functions
 
 start() {
+    
+echo "Start NVRAM"
+/bin/nvram_daemon &
+
+echo "Init GPIO"
+/bin/gpio r &
+
 echo "Start goahead"
-    
-    goahead &
-    
-    echo "Init GPIO"
-    gpio r &
+/bin/goahead &
+
+echo "Start goahead DONE!!!"
 
 }
 
 stop() {
 echo "Stop goahead"
     killall -9 goahead
+    killall -9 nvram_daemon
 }
 
 case "$1" in

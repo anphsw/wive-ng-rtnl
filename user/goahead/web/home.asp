@@ -76,7 +76,7 @@ function initLanguage()
 
   <FRAME SRC="title.htm" NAME="title" FRAMEBORDER="NO" SCROLLING="NO" MARGINWIDTH="0" MARGINHEIGHT="0">
 
-  <FRAMESET COLS="180,1*"> 
+  <FRAMESET COLS="250,1*"> 
  
     <FRAME SRC="treeapp.asp" NAME="menu" MARGINWIDTH="0" MARGINHEIGHT="0" scrolling="AUTO" FRAMEBORDER="NO" >
 

@@ -1,1 +1,1 @@
-#define CONFIG_LFS 1
+#undef CONFIG_LFS

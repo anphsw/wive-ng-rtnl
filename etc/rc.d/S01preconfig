@@ -23,48 +23,40 @@ mount -t devpts /dev/pts /dev/pts
 
 echo "Create some folders"
 mkdir -p /var/run
+mkdir -p /var/lock
+mkdir -p /var/lock/subsys
 mkdir -p /var/log
 
-echo "Start NVRAM"
-nvram_daemon &
+mdev -s
+echo "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]" > /etc/mdev.conf
+echo "# The special characters have the meaning:" >> /etc/mdev.conf
+echo "# @ Run after creating the device." >> /etc/mdev.conf
+echo "# $ Run before removing the device." >> /etc/mdev.conf
+echo "# * Run both after creating and before removing the device." >> /etc/mdev.conf
+echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
 
-genDevNode
-modulesload
+#enable usb hot-plug feature
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
 
-}
-
-modulesload()
-{
-#    modprobe nvram_linux
-    modprobe ralink_gdma
-    modprobe ts_bm
-    modprobe ts_fsm
-    modprobe ts_kmp
-    modprobe ipt_recent
-    modprobe xt_CLASSIFY.ko  
-    modprobe xt_connmark.ko  
-    modprobe xt_CONNMARK.ko  
-    modprobe xt_limit.ko  
-    modprobe xt_mark.ko  
-    modprobe xt_string.ko
-}
-
-genDevNode()
-{
-        mdev -s
-        echo "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]" > /etc/mdev.conf
-        echo "# The special characters have the meaning:" >> /etc/mdev.conf
-        echo "# @ Run after creating the device." >> /etc/mdev.conf
-        echo "# $ Run before removing the device." >> /etc/mdev.conf
-        echo "# * Run both after creating and before removing the device." >> /etc/mdev.conf
-        echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
-
-        #enable usb hot-plug feature
-        echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+#modprobe nvram_linux
+modprobe ralink_gdma
+modprobe ts_bm
+modprobe ts_fsm
+modprobe ts_kmp
+modprobe ipt_recent
+modprobe xt_CLASSIFY.ko  
+modprobe xt_connmark.ko  
+modprobe xt_CONNMARK.ko  
+modprobe xt_limit.ko  
+modprobe xt_mark.ko  
+modprobe xt_string.ko
 }
 
 stop() {
+
 echo "Stop preconfigure."
+killall -9 mdev
+
 }
 
 case "$1" in
@@ -74,14 +66,6 @@ case "$1" in
 
 	stop)
 	    stop
-	    ;;
-
-	modulesload)
-	    modulesload
-	    ;;
-
-	genDevNode)
-	    genDevNode
 	    ;;
 
 	restart)

@@ -23,7 +23,6 @@
     Who          When          What
     ---------    ----------    ----------------------------------------------
 */
-#undef LLTD_SUPPORT
 #include "rt_config.h"
 
 #ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
@@ -1601,7 +1600,6 @@ INT RTMPAPQueryInformation(
 			DBGPRINT(RT_DEBUG_TRACE, ("Not Support : Get repeater AP lineage.\n"));
 			break;
 #endif // APCLI_SUPPORT //
-
 #endif // LLTD_SUPPORT //
 		case OID_802_11_RADIUS_QUERY_SETTING:
 			DBGPRINT(RT_DEBUG_TRACE, ("Query::Get Radius setting(%d)\n", sizeof(RADIUS_CONF)));

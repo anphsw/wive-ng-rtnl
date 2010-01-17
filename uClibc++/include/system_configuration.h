@@ -11,7 +11,8 @@
 /*
  * Target Features and Options
  */
-#undef __UCLIBCXX_HAS_FLOATS__
+#define __UCLIBCXX_HAS_FLOATS__ 1
+#define __UCLIBCXX_HAS_LONG_DOUBLE__ 1
 #undef __UCLIBCXX_HAS_TLS__
 #define __WARNINGS__ "-Wall"
 #define __BUILD_EXTRA_LIBRARIES__ ""
@@ -47,4 +48,4 @@
 #undef __IMPORT_LIBGCC_EH__
 #define __BUILD_STATIC_LIB__ 1
 #undef __BUILD_ONLY_STATIC_LIB__
-#define __DODEBUG__ 1
+#undef __DODEBUG__
