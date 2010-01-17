@@ -2163,16 +2163,22 @@ rt_private_set_wsc_u32_item(struct net_device *dev, struct iw_request_info *info
                 	if (value < 10000)
                 	{
 						pAdapter->StaCfg.WscControl.WscPinCodeLen = 4;
+#ifdef CONFIG_ASUS_EXT
 						pAdapter->StaCfg.WscControl.WscEnrolleePinCodeLen = 4;		// ASUS EXT by Jiahao
+#endif
 			}
 					else
 			{
 						pAdapter->StaCfg.WscControl.WscPinCodeLen = 8;
+#ifdef CONFIG_ASUS_EXT
 						pAdapter->StaCfg.WscControl.WscEnrolleePinCodeLen = 8;		// ASUS EXT by Jiahao
+#endif
 			}
                     pAdapter->StaCfg.WscControl.WscRejectSamePinFromEnrollee = FALSE;
         	    	pAdapter->StaCfg.WscControl.WscPinCode = (UINT)value;
+#ifdef CONFIG_ASUS_EXT
         	    	pAdapter->StaCfg.WscControl.WscEnrolleePinCode = pAdapter->StaCfg.WscControl.WscPinCode;// ASUS EXT by Jiahao
+#endif
                     pAdapter->StaCfg.WscControl.WscLastPinFromEnrollee = pAdapter->StaCfg.WscControl.WscPinCode;
         	    	WscGetRegDataPIN(pAdapter, pAdapter->StaCfg.WscControl.WscPinCode, &pAdapter->StaCfg.WscControl);
                 }        	    

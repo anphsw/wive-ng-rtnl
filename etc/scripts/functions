@@ -1,0 +1,177 @@
+#!/bin/sh
+
+lan_ip=`nvram_get 2860 lan_ipaddr`
+stp_en=`nvram_get 2860 stpEnabled`
+nat_en=`nvram_get 2860 natEnabled`
+bssidnum=`nvram_get 2860 BssidNum`
+radio_off=`nvram_get 2860 RadioOff`
+
+ifRaxWdsxDown()
+{
+	echo "ifRaxWdsxDown"
+	ifconfig ra0 down
+	ifconfig ra1 down
+	ifconfig ra2 down
+	ifconfig ra3 down
+	ifconfig ra4 down
+	ifconfig ra5 down
+	ifconfig ra6 down
+	ifconfig ra7 down
+
+	ifconfig wds0 down
+	ifconfig wds1 down
+	ifconfig wds2 down
+	ifconfig wds3 down
+
+	ifconfig apcli0 down
+}
+
+
+addRax2Br0()
+{
+	echo "addRax2Br0 $bssidnum"
+	if [ "$bssidnum" = "2" ]; then
+		brctl addif br0 ra1
+	elif [ "$bssidnum" = "3" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+	elif [ "$bssidnum" = "4" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+		brctl addif br0 ra3
+	elif [ "$bssidnum" = "5" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+		brctl addif br0 ra3
+		brctl addif br0 ra4
+	elif [ "$bssidnum" = "6" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+		brctl addif br0 ra3
+		brctl addif br0 ra4
+		brctl addif br0 ra5
+	elif [ "$bssidnum" = "7" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+		brctl addif br0 ra3
+		brctl addif br0 ra4
+		brctl addif br0 ra5
+		brctl addif br0 ra6
+	elif [ "$bssidnum" = "8" ]; then
+		brctl addif br0 ra1
+		brctl addif br0 ra2
+		brctl addif br0 ra3
+		brctl addif br0 ra4
+		brctl addif br0 ra5
+		brctl addif br0 ra6
+		brctl addif br0 ra7
+	fi
+}
+
+addWds2Br0()
+{
+	echo "addWds2Br0"
+	wds_en=`nvram_get 2860 WdsEnable`
+	if [ "$wds_en" != "0" ]; then
+		echo "addWds2Br0 test if"
+		ifconfig wds0 up
+		ifconfig wds1 up
+		ifconfig wds2 up
+		ifconfig wds3 up
+		brctl addif br0 wds0
+		brctl addif br0 wds1
+		brctl addif br0 wds2
+		brctl addif br0 wds3
+	fi
+}
+
+addRaix2Br0()
+{
+	echo "addRaix2Br0"
+	inic_bssnum=`nvram_get inic BssidNum`
+
+	brctl addif br0 rai0
+
+	echo "r2b test 2 $inic_bassnum"
+	if [ "$inic_bssnum" = "2" ]; then
+		ifconfig rai1 up
+		brctl addif br0 rai1
+	elif [ "$inic_bssnum" = "3" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+	elif [ "$inic_bssnum" = "4" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		ifconfig rai3 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+		brctl addif br0 rai3
+	elif [ "$inic_bssnum" = "5" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		ifconfig rai3 up
+		ifconfig rai4 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+		brctl addif br0 rai3
+		brctl addif br0 rai4
+	elif [ "$inic_bssnum" = "6" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		ifconfig rai3 up
+		ifconfig rai4 up
+		ifconfig rai5 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+		brctl addif br0 rai3
+		brctl addif br0 rai4
+		brctl addif br0 rai5
+	elif [ "$inic_bssnum" = "7" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		ifconfig rai3 up
+		ifconfig rai4 up
+		ifconfig rai5 up
+		ifconfig rai6 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+		brctl addif br0 rai3
+		brctl addif br0 rai4
+		brctl addif br0 rai5
+		brctl addif br0 rai6
+	elif [ "$inic_bssnum" = "8" ]; then
+		ifconfig rai1 up
+		ifconfig rai2 up
+		ifconfig rai3 up
+		ifconfig rai4 up
+		ifconfig rai5 up
+		ifconfig rai6 up
+		ifconfig rai7 up
+		brctl addif br0 rai1
+		brctl addif br0 rai2
+		brctl addif br0 rai3
+		brctl addif br0 rai4
+		brctl addif br0 rai5
+		brctl addif br0 rai6
+		brctl addif br0 rai7
+	fi
+}
+
+addInicWds2Br0()
+{
+	echo "addInicWds2Br0"
+	wds_en=`nvram_get inic WdsEnable`
+	if [ "$wds_en" != "0" ]; then
+		echo "InicWds2Br0 test 2"
+		ifconfig wdsi0 up
+		ifconfig wdsi1 up
+		ifconfig wdsi2 up
+		ifconfig wdsi3 up
+		brctl addif br0 wdsi0
+		brctl addif br0 wdsi1
+		brctl addif br0 wdsi2
+		brctl addif br0 wdsi3
+	fi
+}

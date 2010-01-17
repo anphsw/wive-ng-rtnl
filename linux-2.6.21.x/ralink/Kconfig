@@ -13,6 +13,9 @@ source "drivers/net/raeth/Kconfig"
 #############
 # Wireless
 #############
+config  ASUS_EXT
+	bool 
+	default n
 
 config  RT2860V2_2850
         bool "Dual Band"

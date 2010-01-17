@@ -175,8 +175,7 @@ typedef struct image_header {
 	uint8_t		ih_arch;	/* CPU architecture		*/
 	uint8_t		ih_type;	/* Image Type			*/
 	uint8_t		ih_comp;	/* Compression Type		*/
-//	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
-	TAIL		tail;		/* ASUS firmware infomation	*/
+	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
 } image_header_t;
 
 

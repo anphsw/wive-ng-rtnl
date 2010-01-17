@@ -11,7 +11,11 @@
  *
  * $Id: nvram_linux.c,v 1.1 2007/06/08 07:38:05 arthur Exp $
  */
+#ifdef CONFIG_ASUS_EXT
 #define ASUS_NVRAM														//eric++
+#else
+#undef ASUS_NVRAM
+#endif
 
 #include <linux/config.h>
 #include <linux/init.h>

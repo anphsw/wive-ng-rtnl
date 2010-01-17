@@ -287,10 +287,11 @@ romfs.subdirs:
 
 .PHONY: romfs.post
 romfs.post:
-	cp -vfr $(ROOTDIR)/rw_etc/* $(ROMFSDIR)/etc
+	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 	./strip.sh
+	./make_rwfs.sh
 
 .PHONY: image
 image:

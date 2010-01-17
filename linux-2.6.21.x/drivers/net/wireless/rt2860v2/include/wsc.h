@@ -280,12 +280,10 @@
 #define WSC_SCSTATE_UNCONFIGURED	0x01
 #define WSC_SCSTATE_CONFIGURED		0x02
 
-// Common definition
-/*ASUS EXT by Jiahao */
+#define AP_WSC_DEVICE_NAME              "Wireless Router RTNL"
+#define AP_WSC_MODEL_NAME               "Wireless Router"
 #define WSC_MANUFACTURE         "OSS"
 #ifdef CONFIG_AP_SUPPORT
-#define AP_WSC_MODEL_NAME               "Wireless Router"
-#define AP_WSC_DEVICE_NAME              "Wireless Router RTNL"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
 #define STA_WSC_MODEL_NAME              "Wireless Station"
@@ -293,7 +291,6 @@
 #define WSC_DEVICE_NAME_R       "EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
 #define WSC_MODEL_NUMBER        "RTNL"
-/*ASUS EXT by Jiahao */
 #define	WSC_MODEL_SERIAL	"12345678"
 
 // Time-Out, param for timer func, count by micro-sec, not ticks

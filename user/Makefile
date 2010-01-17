@@ -30,7 +30,7 @@ dir_y =
 dir_n =
 dir_  =
 
-
+#basy system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
 dir_$(CONFIG_USER_STRACE_STRACE)            += strace
@@ -57,18 +57,8 @@ dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMPPROXY)                += igmpproxy
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
 
-# add for HSDPA support                      
-dir_$(CONFIG_LIBUSB)                        += libusb
-dir_$(CONFIG_U2EC)                          += u2ec
-dir_$(CONFIG_LPRNG)                         += LPRng
-dir_$(CONFIG_USER_HSDPA)		    += usb_modeswitch-0.9.5
-dir_$(CONFIG_USER_HSDPA)		    += comgt-0.32
-dir_$(CONFIG_USER_HSDPA)                    += sdparm-1.02
-dir_y$(CONFIG_USER_HSDPA)                   += hso-1.6
-
-dir_$(CONFIG_ASUS_SHARED)                   += shared
+#only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
-dir_$(CONFIG_RT2880_APP)		    += asus
 
 #need last
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox

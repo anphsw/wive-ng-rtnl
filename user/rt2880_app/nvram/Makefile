@@ -25,4 +25,4 @@ romfs:
 	ln -sf ralink_init nvram_set
 	mv -f nvram_get $(ROMFSDIR)/bin
 	mv -f nvram_set $(ROMFSDIR)/bin
-
+	cp -rvf ref_scripts/* $(ROMFSDIR)/bin

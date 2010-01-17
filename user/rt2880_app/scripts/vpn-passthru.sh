@@ -23,20 +23,20 @@ fi
 
 if [ "$pptp_pt" = "1" -o "$l2tp_pt" = "1" -o "$ipsec_pt" = "1" ]; then
 if [ "$CONFIG_NF_CONNTRACK_SUPPORT" = "y" ]; then
-	insmod -q nf_conntrack_proto_gre
-	insmod -q nf_nat_proto_gre
+	modprobe nf_conntrack_proto_gre
+	modprobe nf_nat_proto_gre
 
 	if [ "$pptp_pt" = "1" ]; then
-		insmod -q nf_conntrack_pptp
-		insmod -q nf_nat_pptp
+		modprobe nf_conntrack_pptp
+		modprobe nf_nat_pptp
 	fi
 else
-	insmod -q ip_conntrack_proto_gre
-	insmod -q ip_nat_proto_gre
+	modprobe ip_conntrack_proto_gre
+	modprobe ip_nat_proto_gre
 
 	if [ "$pptp_pt" = "1" ]; then
-		insmod -q ip_conntrack_pptp
-		insmod -q ip_nat_pptp
+		modprobe ip_conntrack_pptp
+		modprobe ip_nat_pptp
 	fi
 fi 
 fi 

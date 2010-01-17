@@ -6175,8 +6175,10 @@ VOID	RTMPAddWcidAttributeEntry(
 	IN 	UCHAR		 	CipherAlg,
 	IN 	MAC_TABLE_ENTRY *pEntry);
 
+#ifdef CONFIG_IS_ASUS
 PSTRING GetEncryptType(
 	CHAR enc);
+#endif
 
 PSTRING GetAuthMode(
 	CHAR auth);

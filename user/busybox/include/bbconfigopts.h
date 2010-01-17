@@ -762,7 +762,7 @@ static const char *const bbconfig_config =
 "# CONFIG_MSH is not set\n"
 "CONFIG_SH_MATH_SUPPORT=y\n"
 "# CONFIG_SH_MATH_SUPPORT_64 is not set\n"
-"CONFIG_FEATURE_SH_EXTRA_QUIET=y\n"
+"# CONFIG_FEATURE_SH_EXTRA_QUIET is not set\n"
 "# CONFIG_FEATURE_SH_STANDALONE is not set\n"
 "# CONFIG_FEATURE_SH_NOFORK is not set\n"
 "# CONFIG_CTTYHACK is not set\n"

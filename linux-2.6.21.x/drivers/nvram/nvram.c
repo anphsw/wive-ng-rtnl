@@ -12,7 +12,12 @@
  * $Id: nvram.c,v 1.1 2007/06/08 07:38:05 arthur Exp $
  */
 
+#ifdef CONFIG_ASUS_EXT
 #ifdef ASUS_NVRAM
+#else
+#undef ASUS_NVRAM
+#endif
+
 #include <linux/string.h>
 #include <nvram/typedefs.h>
 #include <nvram/bcmdefs.h>

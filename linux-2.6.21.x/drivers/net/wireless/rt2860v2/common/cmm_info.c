@@ -2263,6 +2263,7 @@ PSTRING GetEncryptType(CHAR enc)
 }
 #endif
 
+#ifdef CONFIG_ASUS_EXT 
 PSTRING GetEncryptType(CHAR enc)	// ASUS EXT by Jiahao
 {
     if(enc == Ndis802_11WEPDisabled)
@@ -2283,8 +2284,7 @@ PSTRING GetEncryptType(CHAR enc)	// ASUS EXT by Jiahao
     else
     	return "Unknown";
 }
-
-#if 0
+#else
 PSTRING GetAuthMode(CHAR auth)
 {
     if(auth == Ndis802_11AuthModeOpen)
@@ -2318,6 +2318,7 @@ PSTRING GetAuthMode(CHAR auth)
 }		
 #endif
 
+#ifdef CONFIG_ASUS_EXT
 PSTRING GetAuthMode(CHAR auth)	// ASUS EXT by Jiahao
 {
     if(auth == Ndis802_11AuthModeOpen)
@@ -2352,7 +2353,7 @@ PSTRING GetAuthMode(CHAR auth)	// ASUS EXT by Jiahao
 
     return "Unknown";
 }
-
+#endif
 /* 
     ==========================================================================
     Description:
@@ -2489,7 +2490,9 @@ VOID	RTMPCommSiteSurveyData(
 		}
 
 //		sprintf(SecurityStr, "%s/%s", GetAuthMode((CHAR)ap_auth_mode), GetEncryptType((CHAR)ap_cipher));		
+#ifdef CONFIG_IS_ASUS
 		sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));		// ASUS EXT by Jiahao for httpd hook
+#endif
 		sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));		// ASUS EXT by Jiahao for httpd hook
 	}			
 	else
@@ -2505,7 +2508,9 @@ VOID	RTMPCommSiteSurveyData(
 		else
 		{
 //			sprintf(SecurityStr, "%s/%s", GetAuthMode((CHAR)ap_auth_mode), GetEncryptType((CHAR)ap_cipher));		
+#ifdef CONFIG_IS_ASUS
 			sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));	// ASUS EXT by Jiahao for httpd hook
+#endif
 			sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));	// ASUS EXT by Jiahao for httpd hook
 		}
 	}

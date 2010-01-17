@@ -51,6 +51,7 @@
 
 #include "rt_config.h"
 
+#ifdef CONFIG_ASUS_EXT
 /* ASUS EXT by Jiahao */
 #define Link_Up_Threshold 3
 extern UINT count_DeAssoc;
@@ -58,7 +59,7 @@ UINT count_Alive;
 UINT flag_Reconnect;
 extern UINT ApcliMonitorPid;
 /* ASUS EXT by Jiahao */
-
+#endif
 /* --------------------------------- Public -------------------------------- */
 /*
 ========================================================================
@@ -631,10 +632,12 @@ BOOLEAN ApCliLinkUp(
 	{
 		if (ifIndex < MAX_APCLI_NUM)
 		{
+#ifdef CONFIG_IS_ASUS
 			DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK UP - IF(apcli%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", 
 										ifIndex, 
 										pAd->ApCfg.ApCliTab[ifIndex].AuthMode, GetAuthMode(pAd->ApCfg.ApCliTab[ifIndex].AuthMode),
 										pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus)));			
+#endif
 		}
 		else
 		{
@@ -1024,13 +1027,13 @@ VOID ApCliIfUp(
 			&& (pApCliEntry->Enable == TRUE)
 			&& (pApCliEntry->Valid == FALSE))
 		{
-			/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
 			count_Alive=0;
 			count_DeAssoc=0;
 			flag_Reconnect = (flag_Reconnect % 65535) + 1;
 //			printk("ApCliIfUp(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //				count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
-			/* ASUS EXT by Jiahao */
+#endif			/* ASUS EXT by Jiahao */
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startup.\n", __FUNCTION__, ifIndex));
 			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
 		}
@@ -1105,7 +1108,7 @@ VOID ApCliIfMonitor(
 			RTMP_MLME_HANDLER(pAd);
 		}
 */
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		if ((pApCliEntry->Valid == TRUE))
 		{
 			if ((RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
@@ -1144,7 +1147,7 @@ VOID ApCliIfMonitor(
 					count_Alive = Link_Up_Threshold * 2;
 			}
 		}
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -1779,11 +1782,12 @@ BOOLEAN 	ApCliValidateRSNIE(
 				// Check the Pair & Group, if different, turn on mixed mode flag
 				if (WPA.GroupCipher != WPA.PairCipher)
 					WPA.bMixMode = TRUE;
-
+#ifdef CONFIG_IS_ASUS
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliValidateRSNIE - RSN-WPA1 PairWiseCipher(%s), GroupCipher(%s), AuthMode(%s)\n",
 											((WPA.bMixMode) ? "Mix" : GetEncryptType(WPA.PairCipher)), 
 											GetEncryptType(WPA.GroupCipher),
 											GetAuthMode(WPA_AuthMode)));
+#endif
 
 				Sanity |= 0x1;
 				break; // End of case IE_WPA //
@@ -1915,10 +1919,12 @@ BOOLEAN 	ApCliValidateRSNIE(
 				// Check the Pair & Group, if different, turn on mixed mode flag
 				if (WPA2.GroupCipher != WPA2.PairCipher)
 					WPA2.bMixMode = TRUE;
+#ifdef CONFIG_IS_ASUS
 
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliValidateRSNIE - RSN-WPA2 PairWiseCipher(%s), GroupCipher(%s), AuthMode(%s)\n",
 									(WPA2.bMixMode ? "Mix" : GetEncryptType(WPA2.PairCipher)), GetEncryptType(WPA2.GroupCipher),
 									GetAuthMode(WPA2_AuthMode)));
+#endif
 
 				Sanity |= 0x2;
 				break; // End of case IE_RSN //

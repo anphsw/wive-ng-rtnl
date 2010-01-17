@@ -772,7 +772,24 @@ static int noinline init_post(void)
             printk("mount /tmp file system fail!\n");
             else
             printk("mount /tmp file system ok!\n");
+
+        if (sys_mount("ramfs", "/dev", "ramfs", 0, NULL) < 0)
+            printk("mount /dev file system fail!\n");
+            else
+            printk("mount /dev file system ok!\n");
+
+        if (sys_mount("ramfs", "/etc", "ramfs", 0, NULL) < 0)
+            printk("mount /etc file system fail!\n");
+            else
+            printk("mount /etc file system ok!\n");
+#ifdef CONFIG_LEGACY_PTYS
+        if (sys_mount("devpts", "/dev/pts", "devpts", 0, NULL) < 0)
+            printk("mount /devpts file system fail!\n");
+            else
+            printk("mount /devpts file system ok!\n");
 #endif
+#endif
+
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);
@@ -795,6 +812,7 @@ static int noinline init_post(void)
 					"defaults...\n", execute_command);
 	}
 	run_init_process("/bin/init");
+	run_init_process("/bin/busybox init");
 
 	panic("No init found.  Try passing init= option to kernel.");
 	return 0;
@@ -836,7 +854,7 @@ static int __init init(void * unused)
 	 */
 
 	if (!ramdisk_execute_command)
-		ramdisk_execute_command = "/init";
+		ramdisk_execute_command = "/bin/init";
 
 	if (sys_access((const char __user *) ramdisk_execute_command, 0) != 0) {
 		ramdisk_execute_command = NULL;

@@ -75,7 +75,7 @@ if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
 	a.add(406, 400, _("treeapp qos"),                   "javascript:go('station/qos.asp');");
 	a.add(407, 400, _("treeapp 11n configurations"),    "javascript:go('station/11n_cfg.asp');");
 	a.add(408, 400, _("treeapp about"),                 "javascript:go('station/about.asp');");
-	a.add(409, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
+//	a.add(409, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
 }
 else
 {
@@ -83,7 +83,7 @@ else
 	a.add(401, 400, _("treeapp basic"),                 "javascript:go('wireless/basic.asp');");
 	a.add(402, 400, _("treeapp advanced"),              "javascript:go('wireless/advanced.asp');");
 	a.add(403, 400, _("treeapp security"),              "javascript:go('wireless/security.asp');");
-	a.add(404, 400, _("treeapp wps"),                   "javascript:go('wps/wps.asp');");
+//	a.add(404, 400, _("treeapp wps"),                   "javascript:go('wps/wps.asp');");
 	if (opmode == '3')
 		a.add(405, 400, _("treeapp ap client"),     "javascript:go('wireless/apcli.asp');");
 	a.add(406, 400, _("treeapp station list"),          "javascript:go('wireless/stainfo.asp');");
@@ -94,7 +94,7 @@ if (rai == "1") {
 	a.add(501, 500, _("treeapp basic"),                 "javascript:go('inic/basic.asp');");
 	a.add(502, 500, _("treeapp advanced"),              "javascript:go('inic/advanced.asp');");
 	a.add(503, 500, _("treeapp security"),              "javascript:go('inic/security.asp');");
-	a.add(504, 500, _("treeapp wps"),                   "javascript:go('wps/wps_inic.asp');");
+//	a.add(504, 500, _("treeapp wps"),                   "javascript:go('wps/wps_inic.asp');");
 }
 var raL = "<% getIfLiveWeb("raL0"); %>";
 if (raL == "1") {
@@ -102,7 +102,7 @@ if (raL == "1") {
 	a.add(601, 600, _("treeapp basic"),                 "javascript:go('legacy/basic.asp');");
 	a.add(602, 600, _("treeapp advanced"),              "javascript:go('legacy/advanced.asp');");
 	a.add(603, 600, _("treeapp security"),              "javascript:go('legacy/security.asp');");
-	// a.add(604, 600, 'WPS',			"javascript:go('wps/wps_inic.asp');");
+//	// a.add(604, 600, 'WPS',			"javascript:go('wps/wps_inic.asp');");
 	a.add(605, 600, _("treeapp station list"),          "javascript:go('legacy/stainfo.asp');");
 }
 a.add(700,   0, _("treeapp firewall"),              "javascript:a.oo(700);");

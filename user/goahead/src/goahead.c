@@ -93,9 +93,9 @@ extern void ripdRestart(void);
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
+#ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSAPPBCStartAll(void);
 extern void WPSSingleTriggerHandler(void);
-#ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSSTAPBCStartEnr(void);
 #endif
 
@@ -196,8 +196,8 @@ static void goaSigHandler(int signum)
 	if(!strcmp(opmode, "2") || (!strcmp(opmode, "0") &&   !strcmp(ethCon, "1") ) )		// wireless isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
-#endif
 		WPSAPPBCStartAll();
+#endif
 }
 
 
@@ -225,7 +225,9 @@ static int initSystem(void)
 		return (-1);
 #endif
 	signal(SIGUSR1, goaSigHandler);
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	signal(SIGXFSZ, WPSSingleTriggerHandler);
+#endif
 	ledAlways(12, LED_ON); //turn on power LED (gpio 12) at startup
 
 	return 0;
@@ -333,9 +335,8 @@ static int initWebs(void)
 	}
 	intaddr.s_addr = inet_addr(lan_ip);
 	if (intaddr.s_addr == INADDR_NONE) {
-		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data"),
-				lan_ip);
-		return -1;
+		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data use 192.168.1.1"),lan_ip);
+		intaddr.s_addr == inet_addr("192.168.1.1");
 	}
 #endif
 

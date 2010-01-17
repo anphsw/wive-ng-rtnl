@@ -918,8 +918,10 @@ VOID APStartUp(
 	        	SendSingalToDaemon(SIGUSR1, pObj->apd_pid);
     		}
 
+#ifdef CONFIG_IS_ASUS
 		DBGPRINT(RT_DEBUG_TRACE, ("### BSS(%d) AuthMode(%d)=%s, WepStatus(%d)=%s , AccessControlList.Policy=%ld\n", apidx, pMbss->AuthMode, GetAuthMode(pMbss->AuthMode), 
 																  pMbss->WepStatus, GetEncryptType(pMbss->WepStatus), pMbss->AccessControlList.Policy));
+#endif
 	}
 
 	// Disable Protection first.

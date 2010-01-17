@@ -23,14 +23,14 @@
     Who          When          What
     ---------    ----------    ----------------------------------------------
 */
-
+#undef LLTD_SUPPORT
 #include "rt_config.h"
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
 UINT ApcliMonitorPid = 0;
 extern UINT count_Alive;
 extern UINT flag_Reconnect;
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 
 #define A_BAND_REGION_0				0
 #define A_BAND_REGION_1				1
@@ -522,11 +522,11 @@ INT	Set_RadioOn_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PSTRING			arg);
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
 INT	Set_ApcliMonitorPid_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PUCHAR			arg);
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 
 INT Set_APSiteSurvey_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -796,9 +796,9 @@ static struct {
 	{"ACLClearAll",					Set_ACLClearAll_Proc},
 	{"WPAPSK",					Set_AP_WPAPSK_Proc},
 	{"RadioOn",					Set_RadioOn_Proc},
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
 	{"ApcliMonitorPid",				Set_ApcliMonitorPid_Proc},
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 	{"SiteSurvey",					Set_APSiteSurvey_Proc},
 	{"ResetCounter",				Set_ResetStatCounter_Proc},
 	{"DisConnectSta",				Set_DisConnectSta_Proc},
@@ -4081,7 +4081,7 @@ INT	Set_RadioOn_Proc(
 	return TRUE;
 }
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
 INT	Set_ApcliMonitorPid_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PUCHAR			arg)
@@ -4091,7 +4091,7 @@ INT	Set_ApcliMonitorPid_Proc(
 	
 	return TRUE;
 }
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 
 /* 
     ==========================================================================
@@ -4236,6 +4236,7 @@ INT	Show_StaSecurityInfo_Proc(
 	printk("\n");
 	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
 	{
+#ifdef CONFIG_IS_ASUS
 		printk(" BSS(%d) AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s, WPAMixPairCipher(0x%02X)\n", 
 							apidx, 
 							pAd->ApCfg.MBSSID[apidx].AuthMode, 
@@ -4245,6 +4246,7 @@ INT	Show_StaSecurityInfo_Proc(
 							pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus, 
 							GetEncryptType(pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus),
 							pAd->ApCfg.MBSSID[apidx].WpaMixPairCipher);		
+#endif
 	}
 	printk("\n");
 	
@@ -4256,6 +4258,7 @@ INT	Show_StaSecurityInfo_Proc(
 		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[i];
 		if (pEntry && pEntry->ValidAsCLI && pEntry->Sst == SST_ASSOC)
 		{
+#ifdef CONFIG_IS_ASUS
 			printk("%02X:%02X:%02X:%02X:%02X:%02X  ",
 				pEntry->Addr[0], pEntry->Addr[1], pEntry->Addr[2],
 				pEntry->Addr[3], pEntry->Addr[4], pEntry->Addr[5]);
@@ -4264,6 +4267,7 @@ INT	Show_StaSecurityInfo_Proc(
 			printk("%-15s", GetAuthMode(pEntry->AuthMode));
 			printk("%-12s", GetEncryptType(pEntry->WepStatus));						
 			printk("\n");
+#endif
 		}
 	} 
 
@@ -6288,7 +6292,7 @@ INT Set_ApCli_Enable_Proc(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("I/F(apcli%d) Set_ApCli_Enable_Proc::(enable = %d)\n", ifIndex, pAd->ApCfg.ApCliTab[ifIndex].Enable));
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT /* ASUS EXT by Jiahao */
 	if (Enable > 0)
 	{
 		flag_Reconnect = (flag_Reconnect % 65535) + 1;
@@ -6299,7 +6303,7 @@ INT Set_ApCli_Enable_Proc(
 		count_Alive = 0;
 //		printk("set count_Alive = 0 in Set_ApCli_Enable_Proc()\n");
 	}
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 
 	ApCliIfDown(pAd);
 

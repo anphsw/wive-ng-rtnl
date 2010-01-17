@@ -933,9 +933,9 @@ VOID	NICReadEEPROMParameters(
 #ifdef WSC_INCLUDED
 	/* WSC hardware push button function 0811 */
 // TODO: Shiang, Need to check about the gpio value, it seems has issue in RT2880/RT3052 board.
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
         WSC_HDR_BTN_MR_HDR_SUPPORT_SET(pAd, 0);
-/* ASUS EXT by Jiahao */
+#endif /* ASUS EXT by Jiahao */
 #endif // WSC_INCLUDED //
 
 #ifdef CONFIG_AP_SUPPORT

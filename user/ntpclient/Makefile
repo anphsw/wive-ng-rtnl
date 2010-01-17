@@ -14,7 +14,7 @@ OBJS2 = adjtimex.o
 
 SHDIR = $(ROOTDIR)/user/shared
 
-CFLAGS += -D__USE_BSD -DASUS_NVRAM
+CFLAGS += -D__USE_BSD
 CFLAGS += -I$(ROOTDIR)/linux-2.6.21.x/include	# 1204 ham
 
 LDFLAGS = -L. -L$(SHDIR) #-lshared	# 1204 ham

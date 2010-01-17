@@ -1407,7 +1407,7 @@ static void layout_sections(struct module *mod,
 static void set_license(struct module *mod, const char *license)
 {
 	if (!license)
-		license = "unspecified";
+		license = "GPL";
 
 	if (!license_is_gpl_compatible(license)) {
 		if (!(tainted & TAINT_PROPRIETARY_MODULE))

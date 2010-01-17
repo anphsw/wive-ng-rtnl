@@ -10,7 +10,9 @@ romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)
 ifeq ("$(CONFIG_RT2860V2_STA)", "")
 	rm -rf $(ROMFSDIR)/$(ROOT_DIRECTORY)/station
+ifeq ("$(CONFIG_RT2860V2_AP_WSC)", "")
 	rm -rf $(ROMFSDIR)/$(ROOT_DIRECTORY)/wps/wps_sta.asp
+endif
 endif
 ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)/$(ROOT_DIRECTORY)/storage

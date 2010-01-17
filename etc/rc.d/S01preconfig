@@ -1,0 +1,91 @@
+#!/bin/sh
+
+#include functions from script
+. /etc/scripts/functions
+
+start() {
+
+echo "Preconfigure..."
+#on kernel crash
+echo 328  > /proc/sys/vm/min_free_kbytes
+echo 256  > /proc/sys/kernel/threads-max
+echo 1    > /proc/sys/vm/page-cluster
+echo 0    > /proc/sys/vm/overcommit_ratio
+echo 0    > /proc/sys/vm/overcommit_memory
+#on kernel crash
+echo 1    > /proc/sys/kernel/panic
+echo 1    > /proc/sys/kernel/panic_on_oops
+echo 1    > /proc/sys/vm/panic_on_oom
+
+echo "Mount all filesystems"
+mount -a
+
+echo "Create some folders"
+mkdir -p /var/run
+mkdir -p /var/log
+
+genDevNode
+modulesload
+
+}
+
+modulesload()
+{
+#    modprobe nvram_linux
+    modprobe ralink_gdma
+    modprobe ts_bm
+    modprobe ts_fsm
+    modprobe ts_kmp
+    modprobe ipt_recent
+    modprobe xt_CLASSIFY.ko  
+    modprobe xt_connmark.ko  
+    modprobe xt_CONNMARK.ko  
+    modprobe xt_limit.ko  
+    modprobe xt_mark.ko  
+    modprobe xt_string.ko
+}
+
+genDevNode()
+{
+        mdev -s
+        echo "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]" > /etc/mdev.conf
+        echo "# The special characters have the meaning:" >> /etc/mdev.conf
+        echo "# @ Run after creating the device." >> /etc/mdev.conf
+        echo "# $ Run before removing the device." >> /etc/mdev.conf
+        echo "# * Run both after creating and before removing the device." >> /etc/mdev.conf
+        echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
+
+        #enable usb hot-plug feature
+        echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+}
+
+stop() {
+echo "Stop preconfigure."
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	modulesload)
+	    modulesload
+	    ;;
+
+	genDevNode)
+	    genDevNode
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

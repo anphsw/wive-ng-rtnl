@@ -27,9 +27,9 @@
 */
 #include "rt_config.h"
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
 UINT count_DeAssoc;
-/* ASUS EXT by Jiahao */
+#endif/* ASUS EXT by Jiahao */
 
 static VOID ApCliCtrlJoinReqAction(
 	IN PRTMP_ADAPTER pAd, 
@@ -255,10 +255,10 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
 	if (ApScanRunning(pAd) == TRUE)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 		return;
 	}
 
@@ -359,10 +359,10 @@ static VOID ApCliCtrlProbeRspAction(
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Probe respond fail.\n", __FUNCTION__));
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -423,10 +423,10 @@ static VOID ApCliCtrlAuthRspAction(
 			NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 			pApCliEntry->AuthReqCnt = 0;
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-			/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "0");
 			nvram_set("sta_authorized", "0");
-			/* ASUS EXT by Jiahao */
+#endif			/* ASUS EXT by Jiahao */
 		}
 	}
 
@@ -470,10 +470,10 @@ static VOID ApCliCtrlAuth2RspAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Sta Auth Rsp Failure.\n", __FUNCTION__));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -506,10 +506,10 @@ static VOID ApCliCtrlAuthReqTimeoutAction(
 	if (pApCliEntry->AuthReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -572,19 +572,19 @@ static VOID ApCliCtrlAssocRspAction(
 		if (ApCliLinkUp(pAd, ifIndex))
 		{
 			*pCurrState = APCLI_CTRL_CONNECTED;
-			/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "1");
-			/* ASUS EXT by Jiahao */
+#endif			/* ASUS EXT by Jiahao */
 		}
 		else
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Insert Remote AP to MacTable failed.\n", __FUNCTION__,  ifIndex));
 			// Reset the apcli interface as disconnected and Invalid.
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-			/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "0");
 			nvram_set("sta_authorized", "0");
-			/* ASUS EXT by Jiahao */
+#endif			/* ASUS EXT by Jiahao */
 			pApCliEntry->Valid = FALSE;
 		}
 	}
@@ -593,10 +593,10 @@ static VOID ApCliCtrlAssocRspAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Receive Assoc Rsp Failure.\n", __FUNCTION__,  ifIndex));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */
+#endif		/* ASUS EXT by Jiahao */
 
 		// set the apcli interface be valid.
 		pApCliEntry->Valid = FALSE;
@@ -637,10 +637,10 @@ static VOID ApCliCtrlDeAssocRspAction(
 		ApCliLinkDown(pAd, ifIndex);
 	
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-	/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-	/* ASUS EXT by Jiahao */
+#endif	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -672,10 +672,10 @@ static VOID ApCliCtrlAssocReqTimeoutAction(
 	if (pApCliEntry->AssocReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-		/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-		/* ASUS EXT by Jiahao */		
+#endif		/* ASUS EXT by Jiahao */		
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -728,10 +728,10 @@ static VOID ApCliCtrlDisconnectReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-	/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-	/* ASUS EXT by Jiahao */
+#endif	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -752,14 +752,13 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Peer DeAssoc Req.\n", __FUNCTION__));
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
 	count_DeAssoc = (count_DeAssoc % 65535) + 1;
-//	if (pAd->ApCfg.ApCliTab[ifIndex].AuthMode <= Ndis802_11AuthModeAutoSwitch || count_DeAssoc > 1)
 	{
 		nvram_set("sta_authorized", "0");
 		printk("Peer DeAssoc Req: %d\n", count_DeAssoc);
 	}
-/* ASUS EXT by Jiahao */
+#endif/* ASUS EXT by Jiahao */
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -778,9 +777,9 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-	/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
-	/* ASUS EXT by Jiahao */
+#endif	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -875,10 +874,10 @@ static VOID ApCliCtrlDeAuthAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-	/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-	/* ASUS EXT by Jiahao */
+#endif	/* ASUS EXT by Jiahao */
 
 	return;
 }

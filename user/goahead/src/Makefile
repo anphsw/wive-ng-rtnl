@@ -38,7 +38,11 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  md5c.o um.o umui.o websda.o emfdb.o \
 				  webrom.o webs.o websuemf.o \
 				  internet.o utils.o wireless.o \
-				  firewall.o management.o wps.o $(NAME).o
+				  firewall.o management.o $(NAME).o
+
+ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "y")
+DEPEND_FILES += wps.o
+endif
 ifneq ("$(CONFIG_RT2860V2_STA)", "")
 DEPEND_FILES += station.o
 endif

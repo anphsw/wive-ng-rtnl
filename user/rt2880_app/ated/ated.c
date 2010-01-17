@@ -27,8 +27,7 @@
 #include <linux/wireless.h>
 #include "ated.h"
 #include "linux/autoconf.h"
-//#include "nvram.h" // replaced by ASUS nvram
-//#include <nvram/bcmnvram.h>
+#include "nvram.h"
 
 #define SIGNAL
 
@@ -245,8 +244,7 @@ static int OpenRaCfgSocket(void)
 	memset(&ifr, 0, sizeof(ifr));
 	memcpy(ifr.ifr_name, "eth2" , 5);
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
-//	opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
-	opmode = nvram_get("wan_nat_X");
+	opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	if (opmode != NULL && !strcmp(opmode, "1")) { // gateway mode
 		memcpy(ifr.ifr_name, "eth2.1" , 7);
 	}

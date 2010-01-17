@@ -968,11 +968,13 @@ INT	Show_WdsTable_Proc(
 
 	for(i = 0; i < MAX_WDS_ENTRY; i++)
 	{					
+#ifdef CONFIG_IS_ASUS
 		DBGPRINT(RT_DEBUG_OFF, ("IF/WDS%d-%02x:%02x:%02x:%02x:%02x:%02x(%s) ,%s, KeyId=%d\n", i, 
 								PRINT_MAC(pAd->WdsTab.WdsEntry[i].PeerWdsAddr), 
 								pAd->WdsTab.WdsEntry[i].Valid == 1 ? "Valid" : "Invalid",
 								GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus), 
 								pAd->WdsTab.WdsEntry[i].KeyIdx));
+#endif
 
 		if (pAd->WdsTab.WdsEntry[i].WdsKey.KeyLen > 0)
 			hex_dump("Wds Key", pAd->WdsTab.WdsEntry[i].WdsKey.Key, pAd->WdsTab.WdsEntry[i].WdsKey.KeyLen);
@@ -1092,8 +1094,9 @@ VOID rtmp_read_wds_from_file(
 	            pAd->WdsTab.WdsEntry[i].WepStatus = Ndis802_11Encryption3Enabled;
 	        else
 	            pAd->WdsTab.WdsEntry[i].WepStatus = Ndis802_11WEPDisabled;
-
+#ifdef CONFIG_IS_ASUS
 	        DBGPRINT(RT_DEBUG_TRACE, ("WdsEncrypType[%d]=%d(%s)\n", i, pAd->WdsTab.WdsEntry[i].WepStatus, GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus)));
+#endif
 	    }
 		
 		// Previous WDS only supports single encryption type.
@@ -1103,7 +1106,9 @@ VOID rtmp_read_wds_from_file(
 			for (j = 1; j < MAX_WDS_ENTRY; j++)
 			{
 				pAd->WdsTab.WdsEntry[j].WepStatus = pAd->WdsTab.WdsEntry[0].WepStatus;	
+#ifdef CONFIG_IS_ASUS
 				DBGPRINT(RT_DEBUG_TRACE, ("@WdsEncrypType[%d]=%d(%s)\n", j, pAd->WdsTab.WdsEntry[i].WepStatus, GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus)));	
+#endif
 			}
 		}
 			

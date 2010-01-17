@@ -32,7 +32,7 @@
   #include	<linux/socket.h>
   #include	<linux/if.h>
 #endif
-#include	<linux/wireless.h>
+#include	"wireless.h"
 
 #include	"internet.h"
 #include	"nvram.h"
@@ -67,7 +67,9 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query);
 static void wirelessWmm(webs_t wp, char_t *path, char_t *query);
 static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query);
 static void APSecurity(webs_t wp, char_t *path, char_t *query);
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv);
+#endif
 int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* for Access Policy list deletion*/
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
@@ -83,7 +85,9 @@ void formDefineWireless(void) {
 	websAspDefine(T("getDLSBuilt"), getDLSBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("getWlanWdsEncType"), getWlanWdsEncType);
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
+#endif
 	websFormDefine(T("wirelessBasic"), wirelessBasic);
 	websFormDefine(T("wirelessAdvanced"), wirelessAdvanced);
 	websFormDefine(T("wirelessApcli"), wirelessApcli);
@@ -607,6 +611,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2860_NVRAM, "SSID1", ssid);
 
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 //#WPS
 	{
 		char *wordlist= nvram_bufget(RT2860_NVRAM, "WscModeOption");
@@ -619,6 +624,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 
 //#WPS
+#endif
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
 	i = 2;
@@ -1000,8 +1006,9 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 void WPSRestart(void);
-
+#endif
 /* goform/wirelessWmm */
 static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 {
@@ -1051,8 +1058,9 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	doSystem("ralink_init make_wireless_config rt2860");
 	doSystem("ifconfig ra0 up");
 	//after ra0 down&up we must restore WPS status
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	WPSRestart();
-
+#endif
 	websHeader(wp);
 	websWrite(wp, T("ap_aifsn_all: %s<br>\n"), ap_aifsn_all);
 	websWrite(wp, T("ap_cwmin_all: %s<br>\n"), ap_cwmin_all);
@@ -1590,6 +1598,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
 
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 //# WPS
 	{
 		if(nvram == RT2860_NVRAM && mbssid == 0){		// only ra0 supports WPS now.
@@ -1603,7 +1612,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		}
 	}
 //# WPS
-
+#endif
 	nvram_commit(nvram);
 
 	/*
@@ -1616,21 +1625,21 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 			doSystem("ifconfig ra%d down", i);
 			doSystem("ifconfig ra%d up", i);
 		}
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 		WPSRestart();
+#endif
 	}else if(nvram == RTINIC_NVRAM){
 		doSystem("ralink_init make_wireless_config rtinic");
 		for(i=0; i<mbssid_num; i++){
 			doSystem("ifconfig rai%d down", i);
 			doSystem("ifconfig rai%d up", i);
 		}
-		// WPSRestart();
 	} else if(nvram == RT2561_NVRAM) {
 		doSystem("ralink_init make_wireless_config rt2561");
 		for(i=0; i<mbssid_num; i++){
 			doSystem("ifconfig raL%d down", i);
 			doSystem("ifconfig raL%d up", i);
 		}
-		// WPSRestart();
 	}else
 		printf("*** Unknown interface.\n");
 
@@ -1679,6 +1688,7 @@ static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query)
 	DeleteAccessPolicyList(RT2860_NVRAM, wp, path, query);
 }
 
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	if(g_wsc_configured){
@@ -1687,3 +1697,4 @@ static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, T("0"));	
 	return 0;
 }
+#endif

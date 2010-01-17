@@ -1,8 +1,7 @@
-#NVDIR = $(ROOTDIR)/lib/libnvram #replaced by ASUS nvram
-SHDIR = $(ROOTDIR)/user/shared
-#CFLAGS += -I$(NVDIR)
-CFLAGS += -DASUS_NVRAM -I$(SHDIR)/include -I$(ROOTDIR)/linux-2.6.21.x/include
-LDFLAGS += -L$(SHDIR) -lshared
+NVDIR = $(ROOTDIR)/lib/libnvram
+CFLAGS += -I$(NVDIR)
+CFLAGS += -I$(ROOTDIR)/linux-2.6.21.x/include
+LDFLAGS += -lnvram
 EXEC = ated
 SRCS = ated.c
 

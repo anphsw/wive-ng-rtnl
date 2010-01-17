@@ -474,6 +474,7 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RTINIC_NVRAM, "SSID1", ssid);
 
 //#WPS
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	{
 		char *wordlist= nvram_bufget(RTINIC_NVRAM, "WscModeOption");
 		if(wordlist){
@@ -483,7 +484,7 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 			g_wsc_configured = 1;
 		}
 	}
-
+#endif
 //#WPS
 
 	i = 2;

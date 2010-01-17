@@ -9,7 +9,10 @@ echo -------------------------------FULL-CLEAR-------------------------------
     ./clear
 fi
 
+rm -rfv romfs/*
+
 echo -------------------------------MAKE-TOOLS-------------------------------
+
 make all -C tools
 
 echo --------------------------------COPY-CONFIG-----------------------------
@@ -20,6 +23,7 @@ cp -fv ./config-acorp/config-kernel	./linux/.config
 cp -fv ./config-acorp/config-lib	./lib/.config
 cp -fv ./config-acorp/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch
+ln -fs config/autoconf.h autoconf.h
 
 echo -------------------------------MAKE-OLDCONFIGS---------------------------
 

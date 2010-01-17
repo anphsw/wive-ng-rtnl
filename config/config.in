@@ -146,7 +146,6 @@ define_bool CONFIG_LIB_LIBGMP_FORCE $CONFIG_USER_OPENSWAN
 bool 'dropbear (sshd daemon)'            	CONFIG_USER_DROPBEAR
 bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
 bool 'portmap'					CONFIG_USER_PORTMAP
-bool 'HSDPA'					CONFIG_USER_HSDPA
 bool 'pppd'                             	CONFIG_USER_PPPD
 bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
 bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
@@ -262,8 +261,6 @@ fi
 if [ "$CONFIG_DEFAULTS_RALINK_RT3052" = "y" -o "$CONFIG_DEFAULTS_RALINK_RT2883" = "y" ]; then
 bool 'I2S Command'		CONFIG_RALINKAPP_I2S
 bool 'PCM Command'		CONFIG_RALINKAPP_PCM
-bool 'WanDuck'			CONFIG_RT2880_WANDUCK
-bool 'UsbTest'			CONFIG_USB_TEST
 bool 'CRC_GEN'			CONFIG_CRC_GEN
 bool 'NetworkMap'		CONFIG_RT2880_NETWORK_MAP
 bool 'ASUS_NTFS-3G'             CONFIG_ASUS_NTFS3G
@@ -277,22 +274,5 @@ endmenu
 mainmenu_option next_comment
 comment 'Windows Rally Program'
 bool 'Link Layer Topology Discovery Protocol'		CONFIG_LLDT
-endmenu
-
-mainmenu_option next_comment
-comment 'ASUS Application'
-bool 'ASUS Shared Library'              CONFIG_ASUS_SHARED
-bool 'ASUS Mini Init'                   CONFIG_ASUS_RC
-bool 'ASUS NVRAM'                       CONFIG_ASUS_NVRAM
-bool 'asus_netconf'                     CONFIG_ASUS_NETCONF
-bool 'infosvr'                          CONFIG_ASUS_INFOSVR
-bool 'httpd'                            CONFIG_ASUS_HTTPD
-bool 'bpalogin'                         CONFIG_BPALOGIN
-bool 'ntpclient'                        CONFIG_ASUS_NTPCLIENT
-bool 'ez-ipupdate'                      CONFIG_EZ_IPUPDATE
-bool 'www'                              CONFIG_ASUS_WWW
-bool 'LPRng'				CONFIG_LPRNG
-bool 'libusb'				CONFIG_LIBUSB
-bool 'u2ec'				CONFIG_U2EC
 endmenu
 

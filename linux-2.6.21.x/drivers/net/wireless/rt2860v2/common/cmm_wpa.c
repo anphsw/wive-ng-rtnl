@@ -28,9 +28,9 @@
 */
 #include "rt_config.h"
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
 extern UINT count_DeAssoc;
-/* ASUS EXT by Jiahao */
+#endif/* ASUS EXT by Jiahao */
 
 // WPA OUI
 UCHAR		OUI_WPA_NONE_AKM[4]		= {0x00, 0x50, 0xF2, 0x00};
@@ -1156,10 +1156,12 @@ VOID PeerPairMsg3Action(
 	    // Indicate Connected for GUI
 	    pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
+#ifdef CONFIG_IS_ASUS
 		DBGPRINT(RT_DEBUG_TRACE, ("PeerPairMsg3Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
 									GetAuthMode(pEntry->AuthMode),
 									GetEncryptType(pEntry->WepStatus),
 									GetEncryptType(group_cipher)));
+#endif
 	}
 	else
 	{	
@@ -1187,7 +1189,7 @@ VOID PeerPairMsg3Action(
 					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, TRUE);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg3Action: send Msg4 of 4-way \n"));
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "1");
@@ -1198,7 +1200,7 @@ VOID PeerPairMsg3Action(
 	printk("PeerPairMsg3Action(), set sta_authorized as 1, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
 #endif
-/* ASUS EXT by Jiahao */
+#endif/* ASUS EXT by Jiahao */
 }
 
 /*
@@ -1328,12 +1330,13 @@ VOID PeerPairMsg4Action(
 			// send wireless event - for set key done WPA2
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-	 
+#ifdef CONFIG_IS_ASUS	 
 	        DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 									pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 									pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 									group_cipher, 
 									GetEncryptType(group_cipher)));
+#endif
 		}
 		else
 		{
@@ -1529,12 +1532,12 @@ VOID	PeerGroupMsg1Action(
     // Indicate Connected for GUI
     pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
-	
+#ifdef CONFIG_IS_ASUS	
 	DBGPRINT(RT_DEBUG_TRACE, ("PeerGroupMsg1Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
 									GetAuthMode(pEntry->AuthMode),
 									GetEncryptType(pEntry->WepStatus),
 									GetEncryptType(group_cipher)));
-		
+#endif		
 	// init header and Fill Packet and send Msg 2 to authenticator	
 	MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pCurrentAddr, EAPOL);	
 	RTMPToWirelessSta(pAd, pEntry, 
@@ -1543,7 +1546,7 @@ VOID	PeerGroupMsg1Action(
 					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, FALSE);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerGroupMsg1Action: sned group message 2\n"));
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "2");
@@ -1554,7 +1557,7 @@ VOID	PeerGroupMsg1Action(
 	printk("PeerGroupMsg1Action(), set sta_authorized as 2, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
 #endif
-/* ASUS EXT by Jiahao */
+#endif/* ASUS EXT by Jiahao */
 }	
 
 /*
@@ -1621,22 +1624,24 @@ VOID PeerGroupMsg2Action(
 			// send wireless event - for set key done WPA2
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-
+#ifdef CONFIG_IS_ASUS
 			DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
+#endif
 		}
 		else
 		{
 			// send wireless event - for set key done WPA
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA1_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-
+#ifdef CONFIG_IS_ASUS
         	DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA1, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
+#endif
 		}	
     }while(FALSE);  
 }

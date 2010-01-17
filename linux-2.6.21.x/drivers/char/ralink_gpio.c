@@ -464,8 +464,10 @@ int __init ralink_gpio_init(void)
 		ralink_gpio_info[i].pid = 0;
 	}
 
+#ifndef CONFIG_ASUS_EXT
 #ifdef CONFIG_RALINK_GPIO_LED
-	//ralink_gpio_led_init_timer();	// ASUS disable
+	ralink_gpio_led_init_timer();	// ASUS disable
+#endif
 #endif
 	printk("Ralink gpio driver initialized\n");
 	return 0;

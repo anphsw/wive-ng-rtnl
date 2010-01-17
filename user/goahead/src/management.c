@@ -35,11 +35,12 @@
 #include "wireless.h"
 
 #include "management.h"
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 #include "wps.h"
 
 extern void WPSRestart(void);
 extern void formDefineWPS(void);
-
+#endif
 
 #define COMMAND_MAX	1024
 static char system_command[COMMAND_MAX];
@@ -735,8 +736,9 @@ void management_init(void)
 {
 	doSystem("ntp.sh");
 	doSystem("ddns.sh");
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	WPSRestart();
-
+#endif
 	doSystem("killall -q klogd");
 	doSystem("killall -q syslogd");
 	doSystem("syslogd -C8 1>/dev/null 2>&1");
@@ -779,6 +781,7 @@ void formDefineManagement(void)
 
 	websFormDefine(T("syslog"), syslog);
 	websFormDefine(T("clearlog"), clearlog);
-
+#if defined(CONFIG_RT2860V2_STA_WSC) || defined(CONFIG_RT2860V2_AP_WSC)
 	formDefineWPS();
+#endif
 }

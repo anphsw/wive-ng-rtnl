@@ -29,7 +29,7 @@ fi
 #wait for state change
 sleep 10
 
-#insmod usbserial module
+#modprobe usbserial module
 if [ "$dev" = "MU-Q101" ]; then
         vend_id="0x0408"
         prod_id="0xea02"
@@ -53,13 +53,13 @@ if [ "$dev" != "OPTION-ICON225" ]; then
 	rmmod usbserial
 	rmmod hso
 	sleep 3
-	insmod usbserial vendor=$vend_id product=$prod_id
+	modprobe usbserial vendor=$vend_id product=$prod_id
 	sleep 3
 elif [ "$dev" = "OPTION-ICON225" ]; then
 	rmmod usbserial
 	rmmod hso
 	sleep 3
-	insmod hso
+	modprobe hso
 	sleep 3
 fi
 
