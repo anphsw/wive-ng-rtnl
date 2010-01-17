@@ -1,0 +1,3 @@
+none            /etc            ramfs   defaults 0 0
+none            /media          ramfs   defaults 0 0
+none            /dev/pts        devpts  default  0 0

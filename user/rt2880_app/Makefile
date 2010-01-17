@@ -18,7 +18,6 @@ ra_dir_$(CONFIG_RALINKAPP_SWQOS)    += sw_qos
 ra_dir_$(CONFIG_RT2880_WANDUCK)     += wanduck
 ra_dir_$(CONFIG_USB_TEST)     	    += usbtest
 ra_dir_$(CONFIG_CRC_GEN)     	    += crc_gen
-ra_dir_$(CONFIG_RT2880_NETWORK_MAP) += network_map
 ra_dir_$(CONFIG_ASUS_NTFS3G)   	    += ntfs-3g
 #ra_dir_y   	    		    += sig_test	# only for test
 ra_dir_y   	    		    += xfr_test	# only for test

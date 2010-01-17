@@ -67,8 +67,8 @@ dir_$(CONFIG_USER_HSDPA)                    += sdparm-1.02
 dir_y$(CONFIG_USER_HSDPA)                   += hso-1.6
 
 dir_$(CONFIG_ASUS_SHARED)                   += shared
-dir_$(CONFIG_RT2880_APP)		    += asus
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
+dir_$(CONFIG_RT2880_APP)		    += asus
 
 #need last
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
