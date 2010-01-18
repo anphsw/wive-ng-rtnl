@@ -1,0 +1,54 @@
+#!/bin/sh
+
+start() {
+ echo "Starting sysctl: "
+    sysctl -p /etc/sysctl.conf > /dev/null
+    sysctl -w net.ipv4.conf.default.rp_filter=1
+    sysctl -w net.ipv4.conf.all.accept_source_route=0
+    sysctl -w net.ipv4.netfilter.ip_conntrack_generic_timeout=200
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_established=3600
+    sysctl -w net.ipv4.ip_conntrack_max=512
+    sysctl -w net.ipv4.netfilter.ip_conntrack_icmp_timeout=30
+    sysctl -w net.ipv4.netfilter.ip_conntrack_udp_timeout_stream=120
+    sysctl -w net.ipv4.netfilter.ip_conntrack_udp_timeout=30
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_close=10
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait=60
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_last_ack=30
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_close_wait=60
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_fin_wait=100
+    sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_syn_sent=80
+    sysctl -w net.ipv4.tcp_keepalive_time=900
+    sysctl -w net.ipv4.tcp_keepalive_intvl=225
+    sysctl -w net.ipv4.tcp_keepalive_probes=4
+    sysctl -w net.ipv4.conf.default.proxy_arp=0
+    sysctl -w net.ipv4.conf.all.proxy_arp=0
+    sysctl -w net.ipv4.neigh.default.gc_thresh3=1024
+    sysctl -w net.ipv4.neigh.default.gc_thresh2=768
+    sysctl -w net.ipv4.neigh.default.gc_thresh1=512
+    sysctl -w net.ipv4.neigh.default.gc_interval=20
+ echo " Ok"
+}
+
+stop() {
+ echo "Stopping sysctl: "
+ echo " Ok"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

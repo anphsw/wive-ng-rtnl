@@ -120,6 +120,12 @@ int main(int argc, char** argv)
 	if (initSystem() < 0)
 		return -1;
 
+
+	/* Start needed services */
+	doSystem("/bin/nvram_daemon &");
+	doSystem("/bin/gpio r &");
+
+
 /*
  *	Initialize the web server
  */

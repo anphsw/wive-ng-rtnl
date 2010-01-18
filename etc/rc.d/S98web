@@ -1,25 +1,18 @@
 #!/bin/sh
 
-#include functions from script
-. /etc/scripts/functions
-
 start() {
-    
-echo "Start NVRAM"
-/bin/nvram_daemon &
+ echo "Start NVRAM"
+    /bin/nvram_daemon &
 
-echo "Init GPIO"
-/bin/gpio r &
+ echo "Init GPIO"
+    /bin/gpio r &
 
-echo "Start goahead"
-/bin/goahead &
-
-echo "Start goahead DONE!!!"
-
+ echo "Start goahead"
+    /bin/goahead &
 }
 
 stop() {
-echo "Stop goahead"
+ echo "Stop goahead"
     killall -9 goahead
     killall -9 nvram_daemon
 }

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+modtest=`uname -r`
+moddir=/lib/modules/$modtest
+
+start() {
+ echo "Starting modules.dep generate..."
+    depmod
+    ln -sf $moddir/modules.dep /etc/modules.dep
+    echo "OK"
+}
+
+stop() {
+ echo "Stop modules.dep generate..."
+    echo "OK"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

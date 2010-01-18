@@ -1,7 +1,7 @@
 <HTML>
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
 <HEAD>
-<TITLE>GoAhead WebServer</TITLE>
+<TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html">
 <script language="JavaScript" type="text/javascript">
 function initLanguage()

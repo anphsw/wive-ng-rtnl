@@ -4,23 +4,23 @@
 . /etc/scripts/functions
 
 start() {
-    echo "Start loopback network interface..."
+ echo "Start loopback network interface..."
     ifconfig lo 127.0.0.1 up
     ip route add 127.0.0.0/8 dev lo
     ip route add 127.0.0.0/8 dev lo table default
 
-    echo "Add bridge in the system"
+ echo "Add bridge in the system"
     brctl addbr br0
 
-    echo "Drop ip in eth2"
+ echo "Drop ip in eth2"
     ifconfig eth2 up
 
-    echo "Set hostname"
+ echo "Set hostname"
     /bin/hostname Wive-RTNL
 }
 
 stop() {
-    echo ""
+ echo "OK"
 }
 
 case "$1" in

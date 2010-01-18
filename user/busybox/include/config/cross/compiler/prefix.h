@@ -1,1 +1,1 @@
-#define CONFIG_CROSS_COMPILER_PREFIX "mipsel-linux-"
+#define CONFIG_CROSS_COMPILER_PREFIX "../../toolchain/bin/mipsel-linux-"
