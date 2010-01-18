@@ -1,12 +1,6 @@
 #!/bin/sh
 
 start() {
- echo "Start NVRAM"
-    /bin/nvram_daemon &
-
- echo "Init GPIO"
-    /bin/gpio r &
-
  echo "Start goahead"
     /bin/goahead &
 }

@@ -341,7 +341,7 @@ static const char *const bbconfig_config =
 "CONFIG_FIRST_SYSTEM_ID=0\n"
 "CONFIG_LAST_SYSTEM_ID=0\n"
 "# CONFIG_DELUSER is not set\n"
-"# CONFIG_GETTY is not set\n"
+"CONFIG_GETTY=y\n"
 "# CONFIG_FEATURE_UTMP is not set\n"
 "# CONFIG_FEATURE_WTMP is not set\n"
 "CONFIG_LOGIN=y\n"

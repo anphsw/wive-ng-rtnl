@@ -8,7 +8,7 @@ bool 'Build libgmp'		CONFIG_LIB_LIBGMP_FORCE
 bool 'Build libpthread'		CONFIG_LIB_LIBPTHREAD_FORCE
 bool 'Build libnvram'		CONFIG_LIB_LIBNVRAM_FORCE
 bool 'Build libntfs-3g'		CONFIG_LIB_LIBNTFS3G_FORCE
-bool 'Build libupnp1.3.1 (UPnP + IXML + ThreadUtil)'	CONFIG_LIB_LIBUPNP_FORCE
+bool 'Build libupnp1.3.1'	CONFIG_LIB_LIBUPNP_FORCE
 bool 'Build zlib'		CONFIG_LIB_ZLIB_FORCE
 bool 'Build uClibc (libstdc++)'	CONFIG_LIB_LIBSTDC_PLUS_FORCE
 dep_bool ' Hello World Example (c++)'  CONFIG_USER_HELLO_WORLD $CONFIG_LIB_LIBSTDC_PLUS_FORCE

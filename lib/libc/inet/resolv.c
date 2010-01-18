@@ -1558,7 +1558,7 @@ int __read_etc_hosts_r(FILE * fp, const char * name, int type,
 		} else {
 			DPRINTF("Error\n");
 			ret=TRY_AGAIN;
-			break; /* bad ip address */
+			continue; /* bad ip address, ignore */
         }
 
 		if (action!=GETHOSTENT) {
@@ -1920,7 +1920,7 @@ int gethostbyname_r(const char * name,
 		int old_errno = errno;	/* Save the old errno and reset errno */
 		__set_errno(0);			/* to check for missing /etc/hosts. */
 
-		if ((i=__get_hosts_byname_r(name, AF_INET, result_buf,
+		if ((i=__get_hosts_byname_r(name, AF_INET6, result_buf,
 				buf, buflen, result, h_errnop))==0)
 			return i;
 		switch (*h_errnop) {

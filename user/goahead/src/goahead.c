@@ -115,15 +115,16 @@ int main(int argc, char** argv)
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
+	/* Start needed services */
+	doSystem("/bin/nvram_daemon &");
+	doSystem("/bin/gpio r &");
+
 	if (writeGoPid() < 0)
 		return -1;
 	if (initSystem() < 0)
 		return -1;
 
 
-	/* Start needed services */
-	doSystem("/bin/nvram_daemon &");
-	doSystem("/bin/gpio r &");
 
 
 /*

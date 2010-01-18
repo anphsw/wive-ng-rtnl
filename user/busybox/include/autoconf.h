@@ -2,7 +2,7 @@
  * Automatically generated C config: don't edit
  * Busybox version: 1.15.3
  */
-#define AUTOCONF_TIMESTAMP "2010-01-18 20:50:53 OMST"
+#define AUTOCONF_TIMESTAMP "2010-01-18 22:31:50 OMST"
 
 #define CONFIG_HAVE_DOT_CONFIG 1
 #define ENABLE_HAVE_DOT_CONFIG 1
@@ -1404,10 +1404,10 @@
 #define ENABLE_DELUSER 0
 #define IF_DELUSER(...)
 #define IF_NOT_DELUSER(...) __VA_ARGS__
-#undef CONFIG_GETTY
-#define ENABLE_GETTY 0
-#define IF_GETTY(...)
-#define IF_NOT_GETTY(...) __VA_ARGS__
+#define CONFIG_GETTY 1
+#define ENABLE_GETTY 1
+#define IF_GETTY(...) __VA_ARGS__
+#define IF_NOT_GETTY(...)
 #undef CONFIG_FEATURE_UTMP
 #define ENABLE_FEATURE_UTMP 0
 #define IF_FEATURE_UTMP(...)

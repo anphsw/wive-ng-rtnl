@@ -49,7 +49,9 @@ int __libc_sigaction (int sig, const struct sigaction *act, struct sigaction *oa
 	memcpy (&kact.sa_mask, &act->sa_mask, sizeof (kact.sa_mask));
 	kact.sa_flags = act->sa_flags;
 
-	kact.sa_flags = act->sa_flags | SA_RESTORER;
+/* http://bugs.uclibc.org/view.php?id=480 
+	        kact.sa_flags = act->sa_flags | SA_RESTORER; */ 
+
 #ifdef HAVE_SA_RESTORER
 	kact.sa_restorer = act->sa_restorer;
 #endif
