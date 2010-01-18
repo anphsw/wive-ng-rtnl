@@ -1,0 +1,36 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Starting pppoe-relay: "
+    pppr=`nvram_get 2860 pppoeREnabled`
+    if [ "$pppr" = "1" ]; then
+        pppoe-relay -S $wan_if -B $lan_if
+    fi
+}
+
+stop() {
+ echo "Stopping pppoe-relay: "
+    killall pppoe-relay
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

@@ -105,7 +105,7 @@ function pageInit(){
 </script></head><body onLoad="pageInit()">
 <table class="body"><tbody><tr><td>
 <h1 id="uploadTitle">Upgrade Firmware</h1>
-<p><font id="uploadIntroduction1">Upgrade the RT2880 firmware to obtain new functionality. </font><font id="uploadIntroduction2" color="#ff0000">It takes about 1 minute to upload &amp; upgrade flash and be patient please. Caution! A corrupted image will hang up the system.</font> </p>
+<p><font id="uploadIntroduction1">Upgrade the Acorp WR-NL firmware to obtain new functionality. </font><font id="uploadIntroduction2" color="#ff0000">It takes about 1 minute to upload &amp; upgrade flash and be patient please. Caution! A corrupted image will hang up the system.</font> </p>
 
 <!-- ----------------- Upload firmware Settings ----------------- -->
 <form method="post" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data">

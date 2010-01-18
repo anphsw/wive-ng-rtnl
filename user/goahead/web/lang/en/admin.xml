@@ -66,7 +66,7 @@
   <message msgid="man ddns" msgstr="DDNS" />
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
-  <message msgid="upload introduction1" msgstr="Upgrade the RT2880 firmware to obtain new functionality. " />
+  <message msgid="upload introduction1" msgstr="Upgrade the WR-NL firmware to obtain new functionality. " />
   <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang up the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
@@ -106,7 +106,7 @@
   <message msgid="status ethernet port status" msgstr="Ethernet Port Status" />
 
   <message msgid="statistic title" msgstr="Statistic" />
-  <message msgid="statistic introduction" msgstr=" Take a look at the RT2880 statistics " />
+  <message msgid="statistic introduction" msgstr=" Take a look at the WR-NL statistics " />
   <message msgid="statistic memory" msgstr="Memory" />
   <message msgid="statistic memory total" msgstr="Memory total: " />
   <message msgid="statistic memory left" msgstr="Memory left: " />

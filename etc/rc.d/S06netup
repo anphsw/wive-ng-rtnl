@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#include functions from script
-. /etc/scripts/functions
-
 start() {
  echo "Start loopback network interface..."
     ifconfig lo 127.0.0.1 up

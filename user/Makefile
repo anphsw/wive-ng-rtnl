@@ -51,10 +51,13 @@ dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_BPALOGIN)                      += bpalogin
 dir_$(CONFIG_USER_TC)                  	    += iproute2
+dir_$(CONFIG_USER_RADVD)               	    += flex
+dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_PPPD)                	    += pppd
-dir_$(CONFIG_USER_PPPOE_RELAY)              += pppoe-relay
+dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
-dir_$(CONFIG_USER_IGMPPROXY)                += igmpproxy
+dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
+#dir_$(CONFIG_USER_MINIUPNPD)                += upnp
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
 
 #only ralink apps and scripts

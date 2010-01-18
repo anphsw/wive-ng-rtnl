@@ -2,6 +2,7 @@
 
 start() {
  echo "Start goahead"
+    killall nvram_daemon
     /bin/goahead &
 }
 

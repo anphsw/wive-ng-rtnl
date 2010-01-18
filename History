@@ -1,40 +1,19 @@
-Ralink AP SDK - History
+Changes
+1) Fix configs scripts for support bash >=4 and change product name
+2) Kernel version up to 2.6.21.7
+3) Redesign filesystem. Busybox up to 1.15.3
+4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc
+5) Add ACELL-PPTP Kernel support
+6) Mount ramfs particions in kernel mode
+7) BGIDGE: Pause frames shouldn't be passed up by driver anyway
+8) Add ESFQ support
+9) Initial auto detect memory size (fix me 32bit mode support)
+10) Add udpxy
+11) Code cleanup
+12) Remove ASUS Code
+13) Original Ralink gui now work
 
-Version 3.2.0.0
-===============
-- [Switch setting] set XOR48 and enable aging by default  
-- [Phy setting] Improve Ethernet conformance 
-- [Ethernet] [RT305x] Improve multicast efficiency.
-- [USB] power-saving design for USB interface. (Release the corresponding Application Note in parallel.)
-- [Wifi] AP version 2.0.0.0
-- [Wifi] STA version 1.8.0.0                                                             
-- [Wifi] MCS12->MCS11, not MCS12->MCS4.
-- [Wifi] Low threshold of rate adaption table: 25->15 @ (SGI & MCS 15)
-- [Wifi] 20M/40M power delta issue                                                       
-- [SDK] Increase core voltage for system stability
-- [SDK] Disable mdc/mdio by default                                                      
-- [SDK] MTD-based Flash API
-- [SDK] Mesh AP support
-- [SDK] Turn off wireless by timer in WebUI (GreenAP).                                   
-- [SDK] change to mips-gcc 3.4.2 cross-compiler (optimize for size)
-- [SDK] RT3050/RT3051 support
-- [SDK] Samba with FAT32 bug fix  
-
-Version 3.1.0.0
-===============
-- [Wifi Driver] AP version 1.9.0.0
-- [Wifi Driver] STA version 1.7.0.0
-- [Raeth Driver] fix RT3052 multicast issue
-- [System] Fix web firmware upgrade issue for Spansion flash
-- [System] USB Performance tuning
-- [App] Wireless Tool v29
-
-Version 3.0.0.0
-===============
-- [System] RT3052 MP/MP2 Support 
-- [WebUI] Upgrade firmware from USB
-- [WebUI] Layer7 QoS & Content Filter
-- [WebUI] FTP/Samba Server
-- [System] support Spansion 4MB flash S29GL032N
-- [System] support Spansion 8MB flash S29GL064N, this feature need Uboot support (ver >= 2.0)
-- [System] support Mxic 8MB flash MX29LV640B, this feature need Uboot support (ver >= 2.0)
+ToDo
+1) Add rwfs
+2) Job control fix
+3) rp-l2tp replace fresh x2ltpd code from Wive-NG/DSL SDK

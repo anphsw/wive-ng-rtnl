@@ -1,0 +1,1 @@
+./configure --host=mipsel-linux CC=/opt/buildroot-gcc342/bin/mipsel-linux-gcc LDFLAGS=-L../flex-2.5.33

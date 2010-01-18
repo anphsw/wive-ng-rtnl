@@ -37,7 +37,7 @@ function refresh(){
 }
 </script>
 
-<p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p>
+<p><center>|<a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a>|</center></p>
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';

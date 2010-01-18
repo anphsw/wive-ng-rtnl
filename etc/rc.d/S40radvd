@@ -1,0 +1,43 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Starting radvd: "
+    radvd=`nvram_get 2860 radvdEnabled`
+    ifconfig sit0 down
+    echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+    if [ "$radvd" = "1" ]; then
+        echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
+        ifconfig sit0 up
+        ifconfig sit0 add 2002:1101:101::1101:101/16
+        route -A inet6 add 2000::/3 gw ::17.1.1.20 dev sit0
+        route -A inet6 add 2002:1101:101:0::/64 dev br0
+        radvd -C /etc/radvd.conf -d 1 &
+    fi
+}
+
+stop() {
+ echo "Stopping radvd: "
+    killall radvd
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

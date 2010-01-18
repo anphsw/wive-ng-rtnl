@@ -1,15 +1,11 @@
 #!/bin/sh
 
-. /etc/network/interfaces
-
-#remove gw if dgw in ppp
-if [ "$BUGGY_NAS" = "yes" ] ; then
-    ip route del $5
-fi
-
-#Replace DNS servers from pppd
-if [ "$PPTP_PEERDNS" = "yes" ] || [ "$PPPOE_PEERDNS" = "yes" ] ; then
+    #replace DNS from ppp
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$1
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$1
     cat /var/tmp/resolv.$1 >> /etc/resolv.conf
-fi
+    
+    #restart dns server
+    service dnsserver stop
+    service dnsserver start
+

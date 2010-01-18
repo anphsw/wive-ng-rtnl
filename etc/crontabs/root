@@ -4,6 +4,4 @@ MAILTO=root
 HOME=/
 
 # run-parts
-*/8 * * * * /etc/scripts/pinger
-* */1 * * * /etc/scripts/ntp_adjust
 * */2 * * * echo > /var/log/cron.log

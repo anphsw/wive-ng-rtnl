@@ -3,9 +3,13 @@
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
 
-/bin/echo "Start init..." > /dev/console
+/bin/echo "Prepare start init!" > /dev/console
 export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+/bin/echo "Init RW etc and dev particion" > /dev/console
+/bin/zcat /dev.gz | /bin/tar xf - -C /
+/bin/zcat /rwfs.gz | /bin/tar xf - -C /
 
+/bin/echo "Start init..." > /dev/console
 for i in /etc/rc.d/S??* ;do
      # Ignore dangling symlinks (if any).
      [ ! -f "$i" ] && continue

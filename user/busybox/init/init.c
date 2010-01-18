@@ -170,6 +170,7 @@ static void console_init(void)
 	s = getenv("CONSOLE");
 	if (!s)
 		s = getenv("console");
+
 	if (s) {
 		int fd = open(s, O_RDWR | O_NONBLOCK | O_NOCTTY);
 		if (fd >= 0) {

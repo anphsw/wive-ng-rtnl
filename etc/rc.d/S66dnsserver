@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# dns proxy
+dnsp=`nvram_get 2860 dnsPEnabled`
+admID=`nvram_get 2860 Login`
+
+start() {
+ echo "Starting DNSMASQ: "
+    /sbin/dnsmasq --conf-file=/etc/dnsmasq.conf -u $admID -g $admID
+ echo " Ok"
+}
+
+stop() {
+ echo "Stopping DNSMASQ: "
+  killall dnsmasq
+ echo " Ok"
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

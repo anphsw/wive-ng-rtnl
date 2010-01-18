@@ -805,8 +805,7 @@ static int noinline init_post(void)
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
-	run_init_process("/bin/init");
-	run_init_process("/bin/busybox init");
+	run_init_process("/linuxrc");
 
 	panic("No init found.  Try passing init= option to kernel.");
 	return 0;
@@ -847,14 +846,14 @@ static int __init init(void * unused)
 	 * the work
 	 */
 
-	if (!ramdisk_execute_command)
+/*	if (!ramdisk_execute_command)
 		ramdisk_execute_command = "/bin/init";
 
 	if (sys_access((const char __user *) ramdisk_execute_command, 0) != 0) {
 		ramdisk_execute_command = NULL;
 		prepare_namespace();
 	}
-
+*/
 	/*
 	 * Ok, we have completed the initial bootup, and
 	 * we're essentially up and running. Get rid of the

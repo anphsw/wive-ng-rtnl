@@ -1,0 +1,41 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Config br-stp: "
+    if [ "$wan_if" = "br0" -o "$lan_if" = "br0" ]; then
+        stp=`nvram_get 2860 stpEnabled`
+        if [ "$stp" = "1" ]; then
+                brctl setfd br0 15
+                brctl stp br0 1
+        else
+                brctl setfd br0 1
+                brctl stp br0 0
+        fi
+    fi
+}
+
+stop() {
+ echo "OK "
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

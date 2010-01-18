@@ -65,7 +65,7 @@ function formCheck()
 <table class="body"><tr><td>
 
 <h1 id="statisticTitle">Statistic</h1>
-<p id="statisticIntroduction"> Take a look at the RT2880 statistics </p>
+<p id="statisticIntroduction"> Take a look at the WR-NL statistics </p>
 
 
 <table border="1" cellpadding="2" cellspacing="1" width="95%">

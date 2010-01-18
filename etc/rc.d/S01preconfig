@@ -4,10 +4,6 @@ start() {
  echo "Preconfigure..."
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
-    echo "Init RW etc and dev particion" > /dev/console
-    zcat /dev.gz | /bin/tar xf - -C /
-    zcat /rwfs.gz | /bin/tar xf - -C /
-    
     echo "Mount all filesystems"
     mount -a
     mount -t devpts /dev/pts /dev/pts
@@ -17,10 +13,14 @@ start() {
     mkdir -p /var/lock
     mkdir -p /var/lock/subsys
     mkdir -p /var/log
+
+    echo "Start nvram daemon"
+    nvram_daemon &
 }
 
 stop() {
  echo "Stop preconfigure."
+ killall nvram_daemon
 }
 
 case "$1" in

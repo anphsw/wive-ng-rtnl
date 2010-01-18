@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>Ralink RT2880 Overview</TITLE>
+<TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <LINK REL="stylesheet" HREF="style/normal_ws.css" TYPE="text/css">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
@@ -73,7 +73,7 @@ function setLanguage()
 <BODY onLoad="initValue()">
 <table class="body"><tr><td>
 
-<H1>Ralink RT2880</H1>
+<H1>WR-NL</H1>
 <p id="ovIntroduction" />
 
 <!-- ----------------- Langauge Settings ----------------- -->

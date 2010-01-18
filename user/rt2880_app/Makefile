@@ -9,7 +9,6 @@ ra_dir_$(CONFIG_RT2880_MTD)         += mtd
 ra_dir_$(CONFIG_RT2880_GPIO_TEST)   += gpio
 ra_dir_$(CONFIG_RT2880_SPI)         += spicmd
 ra_dir_$(CONFIG_RT2880_I2C)         += i2ccmd
-ra_dir_$(CONFIG_RT2880_SCRIPTS)     += scripts
 ra_dir_$(CONFIG_RT2880_MEMORY_USAGE_TEST)		+= mem_usage
 ra_dir_$(CONFIG_RT3052_SWITCH)      += switch
 ra_dir_$(CONFIG_RALINKAPP_I2S)      += i2scmd
