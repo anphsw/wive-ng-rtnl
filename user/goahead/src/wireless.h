@@ -1,4 +1,20 @@
 /*
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
+ */
+/*
  * This file define a set of standard wireless extensions
  *
  * Version :	22	16.3.07
@@ -9,8 +25,7 @@
 
 #ifndef _LINUX_WIRELESS_H
 #define _LINUX_WIRELESS_H
-#define IFNAMSIZ 16
-#define ifr_name        ifr_ifrn.ifrn_name
+
 /************************** DOCUMENTATION **************************/
 /*
  * Initial APIs (1996 -> onward) :
@@ -74,6 +89,7 @@
  * for that purpose. Those includes are usually not compatible with glibc.
  * To know which includes to use in user-space, check iwlib.h. */
 #include <linux/types.h>		/* for "caddr_t" et al		*/
+#include "if.h"			/* for IFNAMSIZ and co... */
 #ifdef __KERNEL__
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
@@ -299,6 +315,9 @@
 /* Power saving stuff (power management, unicast and multicast) */
 #define SIOCSIWPOWER	0x8B2C		/* set Power Management settings */
 #define SIOCGIWPOWER	0x8B2D		/* get Power Management settings */
+/* Modulation bitmask */
+#define SIOCSIWMODUL	0x8B2E		/* set Modulations settings */
+#define SIOCGIWMODUL	0x8B2F		/* get Modulations settings */
 
 /* WPA : Generic IEEE 802.11 informatiom element (e.g., for WPA/RSN/WMM).
  * This ioctl uses struct iw_point and data buffer that includes IE id and len
@@ -496,6 +515,7 @@
 #define IW_POWER_TYPE		0xF000	/* Type of parameter */
 #define IW_POWER_PERIOD		0x1000	/* Value is a period/duration of  */
 #define IW_POWER_TIMEOUT	0x2000	/* Value is a timeout (to go asleep) */
+#define IW_POWER_SAVING		0x4000	/* Value is relative (how aggressive)*/
 #define IW_POWER_MODE		0x0F00	/* Power Management mode */
 #define IW_POWER_UNICAST_R	0x0100	/* Receive only unicast messages */
 #define IW_POWER_MULTICAST_R	0x0200	/* Receive only multicast messages */
@@ -644,6 +664,27 @@
 #define IW_EVENT_CAPA_SET(event_capa, cmd) (event_capa[IW_EVENT_CAPA_INDEX(cmd)] |= IW_EVENT_CAPA_MASK(cmd))
 #define IW_EVENT_CAPA_SET_KERNEL(event_capa) {event_capa[0] |= IW_EVENT_CAPA_K_0; event_capa[1] |= IW_EVENT_CAPA_K_1; }
 
+/* Modulations bitmasks */
+#define IW_MODUL_ALL		0x00000000	/* Everything supported */
+#define IW_MODUL_FH		0x00000001	/* Frequency Hopping */
+#define IW_MODUL_DS		0x00000002	/* Original Direct Sequence */
+#define IW_MODUL_CCK		0x00000004	/* 802.11b : 5.5 + 11 Mb/s */
+#define IW_MODUL_11B		(IW_MODUL_DS | IW_MODUL_CCK)
+#define IW_MODUL_PBCC		0x00000008	/* TI : 5.5 + 11 + 22 Mb/s */
+#define IW_MODUL_OFDM_A		0x00000010	/* 802.11a : 54 Mb/s */
+#define IW_MODUL_11A		(IW_MODUL_OFDM_A)
+#define IW_MODUL_11AB		(IW_MODUL_11B | IW_MODUL_11A)
+#define IW_MODUL_OFDM_G		0x00000020	/* 802.11g : 54 Mb/s */
+#define IW_MODUL_11G		(IW_MODUL_11B | IW_MODUL_OFDM_G)
+#define IW_MODUL_11AG		(IW_MODUL_11G | IW_MODUL_11A)
+#define IW_MODUL_TURBO		0x00000040	/* ATH : bonding, 108 Mb/s */
+/* In here we should define MIMO stuff. Later... */
+#define IW_MODUL_CUSTOM		0x40000000	/* Driver specific */
+
+/* Bitrate flags available */
+#define IW_BITRATE_TYPE		0x00FF	/* Type of value */
+#define IW_BITRATE_UNICAST	0x0001	/* Maximum/Fixed unicast bitrate */
+#define IW_BITRATE_BROADCAST	0x0002	/* Fixed broadcast bitrate */
 
 /****************************** TYPES ******************************/
 
@@ -663,7 +704,6 @@ struct	iw_param
  *	For all data larger than 16 octets, we need to use a
  *	pointer to memory allocated in user space.
  */
-
 struct	iw_point
 {
   void __user	*pointer;	/* Pointer to the data  (in user space) */
@@ -1042,6 +1082,17 @@ struct	iw_range
 	 * because each entry contain its channel index */
 
 	__u32		enc_capa;	/* IW_ENC_CAPA_* bit field */
+
+	/* More power management stuff */
+	__s32		min_pms;	/* Minimal PM saving */
+	__s32		max_pms;	/* Maximal PM saving */
+	__u16		pms_flags;	/* How to decode max/min PM saving */
+
+	/* All available modulations for driver (hw may support less) */
+	__s32		modul_capa;	/* IW_MODUL_* bit field */
+
+	/* More bitrate stuff */
+	__u32		bitrate_capa;	/* Types of bitrates supported */
 };
 
 /*
@@ -1072,6 +1123,7 @@ struct iw_event
 	__u16		cmd;			/* Wireless IOCTL */
 	union iwreq_data	u;		/* IOCTL fixed payload */
 };
+
 /* Size of the Event prefix (including padding and alignement junk) */
 #define IW_EV_LCP_LEN	(sizeof(struct iw_event) - sizeof(union iwreq_data))
 /* Size of the various events */

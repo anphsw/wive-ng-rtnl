@@ -210,7 +210,7 @@ match(const struct sk_buff *skb,
 	ct = nf_ct_get((struct sk_buff *)skb, &ctinfo);
 #endif
 	if (NULL == ct) {
-		printk("ipt_connlimit: Oops: invalid ct state ?\n");
+		//printk("ipt_connlimit: Oops: invalid ct state ?\n");
 		*hotdrop = 1;
 		return 0;
 	}

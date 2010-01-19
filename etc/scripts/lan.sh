@@ -14,6 +14,7 @@ service dnsserver stop
 service pppoe-relay stop
 service radvd stop
 service dhcpd stop
+service udpxy stop
 service upnp stop
 
 #start all
@@ -26,4 +27,5 @@ service pppoe-relay start
 service radvd start
 service stp start
 service dhcpd start
+service udpxy start
 service upnp start

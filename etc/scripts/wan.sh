@@ -63,13 +63,8 @@ elif [ "$wanmode" = "PPPOE" ]; then
 	u=`nvram_get 2860 wan_pppoe_user`
 	pw=`nvram_get 2860 wan_pppoe_pass`
 	pppoe_opmode=`nvram_get 2860 wan_pppoe_opmode`
-	if [ "$pppoe_opmode" = "" ]; then
-		echo "pppoecd $wan_if -u $u -p $pw"
-		pppoecd $wan_if -u "$u" -p "$pw"
-	else
-		pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
-		config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime
-	fi
+	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
+	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime
 elif [ "$wanmode" = "L2TP" ]; then
 	srv=`nvram_get 2860 wan_l2tp_server`
 	u=`nvram_get 2860 wan_l2tp_user`

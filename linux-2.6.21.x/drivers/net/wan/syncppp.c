@@ -264,7 +264,7 @@ static void sppp_input (struct net_device *dev, struct sk_buff *skb)
 					h->address, h->control, ntohs (h->protocol));
 			goto drop;
 		}
-		printk(" ***[K_s] recv frame [%x]***\n", ntohs (h->protocol));	// tmp test
+		//printk(" ***[K_s] recv frame [%x]***\n", ntohs (h->protocol));	// tmp test
 
 		switch (ntohs (h->protocol)) {
 		default:

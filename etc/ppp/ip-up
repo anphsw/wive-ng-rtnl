@@ -4,6 +4,9 @@
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$1
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$1
     cat /var/tmp/resolv.$1 >> /etc/resolv.conf
+
+    #corbiba hack
+    ip route del $5
     
     #restart dns server
     service dnsserver stop

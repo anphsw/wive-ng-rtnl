@@ -15,6 +15,9 @@ start() {
     mkdir -p /var/lock
     mkdir -p /var/lock/subsys
     mkdir -p /var/log
+    mkdir -p /var/tmp
+    mkdir -p /var/run/xl2tpd
+
 
     echo "Start nvram daemon"
     nvram_daemon &

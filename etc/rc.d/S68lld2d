@@ -9,7 +9,6 @@ start() {
     if [ "$lltd" = "1" ]; then
         lld2d $lan_if
     fi
- echo " Ok"
 }
 
 stop() {

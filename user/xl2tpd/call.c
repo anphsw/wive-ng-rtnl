@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -43,6 +27,8 @@
 #include "l2tp.h"
 
 #include "ipsecmast.h"
+
+extern void child_handler (int signal);
 
 struct buffer *new_payload (struct sockaddr_in peer)
 {
@@ -140,8 +126,6 @@ int read_packet (struct buffer *buf, int fd, int convert)
                 /*
                    * Hmm..  Nothing to read.  It happens
                  */
-		pos=0;
-		max=0;
                 return 0;
             }
             else if ((errno == EIO) || (errno == EINTR) || (errno == EAGAIN))
@@ -153,8 +137,6 @@ int read_packet (struct buffer *buf, int fd, int convert)
                    * anyway, we discared whatever it is we
                    * have
                  */
-		pos=0;
-		max=0;
                 return 0;
             }
             errors++;
@@ -186,16 +168,20 @@ int read_packet (struct buffer *buf, int fd, int convert)
 
             if (convert)
             {
-                if (buf->len == 0) {
-		    /* if the buffer is empty, then we have the beginning
-		     * of a packet, not the end
-		     */
-                    break;
-		}
-		
-                /* must be the end, drop the FCS */
-                buf->len -= 2;
-            }
+	      if (buf->len >= 2) {
+		/* must be the end, drop the FCS */
+		buf->len -= 2;
+	      }
+	      else if (buf->len == 1) {
+		/* Do nothing, just return the single character*/
+	      }
+	      else {
+		/* if the buffer is empty, then we have the beginning
+		 * of a packet, not the end
+		 */
+		break;
+	      }
+	    }
             else
             {
 		/* if there is space, then insert the byte */
@@ -226,7 +212,7 @@ int read_packet (struct buffer *buf, int fd, int convert)
                 p++;
                 buf->len++;
                 break;
-            };
+            }
             l2tp_log (LOG_WARNING, "%s: read overrun\n", __FUNCTION__);
 	    pos=0;
 	    max=0;
@@ -236,7 +222,7 @@ int read_packet (struct buffer *buf, int fd, int convert)
 
     /* I should never get here */
     l2tp_log (LOG_WARNING, "%s: You should not see this message.  If you do, please enter "
-			"a bug report at http://sourceforge.net/projects/l2tpd", __FUNCTION__);
+			"a bug report at http://lists.xelerance.com/mailman/listinfo/xl2tpd", __FUNCTION__);
     return -EINVAL;
 }
 
@@ -443,10 +429,40 @@ void destroy_call (struct call *c)
     pid = c->pppd;
     if (pid)
     {
-        /* Set c->pppd to zero to prevent recursion with child_handler */
-        c->pppd = 0;
-        kill (pid, SIGTERM);
-        waitpid (pid, NULL, 0);
+      /* we'll do waitpid here so disable child_handler while at it */
+      signal (SIGCHLD, SIG_DFL);
+      /* Set c->pppd to zero to prevent recursion with child_handler */
+      c->pppd = 0;
+      /*
+       * There is a bug in some pppd versions where sending a SIGTERM
+       * does not actually seem to kill pppd, and xl2tpd waits indefinately
+       * using waitpid, not accepting any new connections either. Therefor
+       * we now use some more force and send it a SIGKILL instead of SIGTERM.
+       * One confirmed buggy version of pppd is ppp-2.4.2-6.4.RHEL4
+       * See http://bugs.xelerance.com/view.php?id=739
+       *
+       * Sometimes pppd takes 7 sec to go down! We don't have that much time,
+       * since all other calls are suspended while doing this.
+       */
+
+#ifdef TRUST_PPPD_TO_DIE
+ #ifdef DEBUG_PPPD
+      l2tp_log (LOG_DEBUG, "Terminating pppd: sending TERM signal to pid %d\n", pid);
+ #endif
+      kill (pid, SIGTERM);
+#else
+ #ifdef DEBUG_PPPD
+      l2tp_log (LOG_DEBUG, "Terminating pppd: sending KILL signal to pid %d\n", pid);
+ #endif
+      kill (pid, SIGKILL);
+#endif
+
+      waitpid (pid, NULL, 0);
+#ifdef DEBUG_PPPD
+      l2tp_log (LOG_DEBUG, "pppd %d successfully terminated\n", pid);
+#endif
+      /* restore child_handler */
+      signal (SIGCHLD, &child_handler);
     }
     if (c->container)
     {
@@ -481,7 +497,7 @@ void destroy_call (struct call *c)
             c->lac->active)
         {
 #ifdef DEBUG_MAGIC
-            l2tp_log (LOG_LOG, "Will redial in %d seconds\n",
+            l2tp_log (LOG_DEBUG, "Will redial in %d seconds\n",
                  c->lac->rtimeout);
 #endif
             tv.tv_sec = c->lac->rtimeout;
@@ -492,6 +508,11 @@ void destroy_call (struct call *c)
 
     free (c);
 
+    /*
+     * Signal child_handler just to be sure that waitpid is done if some
+     * pppd's died meanwhile
+     */
+    kill (SIGCHLD, getpid ());
 }
 
 
@@ -638,9 +659,8 @@ struct call *get_call (int tunnel, int call, unsigned int addr, int port,
             }
             st = st->next;
         }
-
-        l2tp_log (LOG_INFO, "Can not find tunnel %u (refhim=%u)\n",
-		  tunnel, refhim);
+	 //sfstudio - no log
+        //l2tp_log (LOG_INFO, "Can not find tunnel %u (refhim=%u)\n", tunnel, refhim);
         return NULL;
     }
     else

@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -73,7 +57,7 @@ struct host
 #endif
 #define ALT_DEFAULT_AUTH_FILE "/etc/l2tpd/l2tp-secrets"
 #define ALT_DEFAULT_CONFIG_FILE "/etc/l2tp/l2tpd.conf"
-#define DEFAULT_PID_FILE "/var/run/xl2tpd/xl2tpd.pid"
+#define DEFAULT_PID_FILE "/var/run/xl2tpd.pid"
 
 /* Definition of an LNS */
 struct lns
@@ -127,6 +111,7 @@ struct lac
     unsigned int localaddr;     /* Local IP address */
     unsigned int remoteaddr;    /* Force remote address to this */
     char authname[STRLEN];      /* Who we authenticate as */
+    char password[STRLEN];      /* Password to authenticate with */
     char peername[STRLEN];      /* Force peer name to this */
     char hostname[STRLEN];      /* Hostname to report */
     char entname[STRLEN];       /* Name of this entry */

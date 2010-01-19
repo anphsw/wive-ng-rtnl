@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -193,6 +177,9 @@ int control_finish (struct tunnel *t, struct call *c)
     char ip1[STRLEN];
     char ip2[STRLEN];
     char dummy_buf[128] = "/var/l2tp/"; /* jz: needed to read /etc/ppp/var.options - just kick it if you dont like */
+    char passwdfd_buf[32] = ""; /* buffer for the fd, not the password */
+    int i;
+    int pppd_passwdfd[2];            
     int tmptid,tmpcid;
 
     if (c->msgtype < 0)
@@ -425,6 +412,7 @@ int control_finish (struct tunnel *t, struct call *c)
         {
             if ((y->tid == t->tid) &&
                 (y->peer.sin_addr.s_addr == t->peer.sin_addr.s_addr) &&
+                (!gconfig.ipsecsaref || y->refhim == t->refhim) &&
                 (y != t))
             {
                 /* This can happen if we get a duplicate
@@ -835,7 +823,7 @@ int control_finish (struct tunnel *t, struct call *c)
         control_xmit (buf);
         po = NULL;
         po = add_opt (po, "passive");
-        po = add_opt (po, "-detach");
+        po = add_opt (po, "nodetach");
         if (c->lac)
         {
             if (c->lac->defaultroute)
@@ -873,6 +861,27 @@ int control_finish (struct tunnel *t, struct call *c)
             }
             if (c->lac->debug)
                 po = add_opt (po, "debug");
+            if (c->lac->password[0])
+            {                    
+                if (pipe (pppd_passwdfd) == -1)
+                {
+                  l2tp_log (LOG_DEBUG,
+                            "%s: Unable to create password pipe for pppd\n", __FUNCTION__);
+                  return -EINVAL;
+                }
+                write (pppd_passwdfd[1], c->lac->password, strlen (c->lac->password));
+                close (pppd_passwdfd[1]);
+
+                /* clear memory used for password, paranoid?  */
+                for (i = 0; i < STRLEN; i++)
+                    c->lac->password[i] = '\0';
+
+                po = add_opt (po, "plugin");
+                po = add_opt (po, "passwordfd.so");
+                po = add_opt (po, "passwordfd");
+                snprintf (passwdfd_buf, 32, "%d", pppd_passwdfd[0]);
+                po = add_opt (po, passwdfd_buf);
+            }
             if (c->lac->pppoptfile[0])
             {
                 po = add_opt (po, "file");
@@ -895,23 +904,27 @@ int control_finish (struct tunnel *t, struct call *c)
         if (c->txspeed < 1)
         {
             l2tp_log (LOG_DEBUG,
-                 "%s: Peer did not specify transmit speed\n", __FUNCTION__);
-            c->needclose = -1;
+                 "%s: Warning: Peer did not specify transmit speed\n", __FUNCTION__);
+            /* don't refuse the connection over this
+	    c->needclose = -1;
             return -EINVAL;
+	    */
         };
         if (c->frame < 1)
         {
             l2tp_log (LOG_DEBUG,
-                 "%s: Peer did not specify framing type\n", __FUNCTION__);
+                 "%s: Warning: Peer did not specify framing type\n", __FUNCTION__);
+             /* don't refuse the connection over this
             c->needclose = -1;
             return -EINVAL;
+            */
         }
         c->state = ICCN;
         strncpy (ip1, IPADDY (c->lns->localaddr), sizeof (ip1));
         strncpy (ip2, IPADDY (c->addr), sizeof (ip2));
         po = NULL;
         po = add_opt (po, "passive");
-        po = add_opt (po, "-detach");
+        po = add_opt (po, "nodetach");
         po = add_opt (po, "%s:%s", c->lns->localaddr ? ip1 : "", ip2);
         if (c->lns->authself)
         {
@@ -959,7 +972,7 @@ int control_finish (struct tunnel *t, struct call *c)
     case OCCN:                 /* jz: get OCCN, so the only thing we must do is to start the pppd */
         po = NULL;
         po = add_opt (po, "passive");
-        po = add_opt (po, "-detach");
+        po = add_opt (po, "nodetach");
         po = add_opt (po, "file");
         strcat (dummy_buf, c->dial_no); /* jz: use /etc/ppp/dialnumber.options for pppd - kick it if you dont like */
         strcat (dummy_buf, ".options");
@@ -1125,10 +1138,11 @@ inline int check_control (const struct buffer *buf, struct tunnel *t,
 #endif
     if (h->Ns != t->control_rec_seq_num)
     {
-        if (DEBUG)
+        /*if (DEBUG)
             l2tp_log (LOG_DEBUG,
                  "%s: Received out of order control packet on tunnel %d (got %d, expected %d)\n",
                  __FUNCTION__, t->tid, h->Ns, t->control_rec_seq_num);
+        sfstudio - no log*/
         if (((h->Ns < t->control_rec_seq_num) && 
             ((t->control_rec_seq_num - h->Ns) < 32768)) ||
             ((h->Ns > t->control_rec_seq_num) &&
@@ -1524,8 +1538,9 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
 
     if (c->fd < 0)
     {
-        if (DEBUG || 1)
-            l2tp_log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
+        //sfstudio not in log
+        //if (DEBUG || 1)
+        //    l2tp_log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
         return -EIO;
     }
     /*
@@ -1688,9 +1703,11 @@ inline int handle_packet (struct buffer *buf, struct tunnel *t,
                           struct call *c)
 {
     int res;
+/* tv code is commented out below
 #ifdef DEBUG_ZLB
     struct timeval tv;
 #endif
+*/
     if (CTBIT (*((_u16 *) buf->start)))
     {
         /* We have a control packet */
@@ -1730,8 +1747,8 @@ inline int handle_packet (struct buffer *buf, struct tunnel *t,
             }
         }
         else
-        {
-            l2tp_log (LOG_DEBUG, "%s: bad control packet!\n", __FUNCTION__);
+        {    //sfstudio - no log
+            //l2tp_log (LOG_DEBUG, "%s: bad control packet!\n", __FUNCTION__);
             return -EINVAL;
         }
     }

@@ -1538,7 +1538,7 @@ ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 	if(dbg_print)
 	{
 		//printk("[KI]\n");	// tmp test
-		printk(" ***[K] recv frame [%x]***\n", proto);	// tmp test
+		//printk(" ***[K] recv frame [%x]***\n", proto);	// tmp test
 		if(proto == 0x80fd)
 			dbg_print = 0;
 

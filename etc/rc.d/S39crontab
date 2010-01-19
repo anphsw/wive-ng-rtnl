@@ -3,7 +3,6 @@
 start() {
  echo "Starting crontab: "
  /sbin/crond -l 0 -L /var/log/cron.log
- echo " Ok"
 }
 
 stop() {

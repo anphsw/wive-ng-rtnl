@@ -658,41 +658,6 @@ static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 }
 
 
-/*
- * callee must free memory.
- */
-/*
-static char *getLog(char *filename)
-{
-	FILE *fp;
-	struct stat filestat;
-	char *log;
-
-	if(stat(filename, &filestat) == -1)
-		return NULL;
-
-//	printf("%d\n", filestat.st_size);
-	log = (char *)malloc(sizeof(char) * (filestat.st_size + 1) );
-	if(!log)
-		return NULL;
-
-	if(!(fp = fopen(filename, "r"))){
-		return NULL;
-	}
-
-	if( fread(log, 1, filestat.st_size, fp) != filestat.st_size){
-		printf("read not enough\n");
-		free(log);
-		return NULL;
-	}
-
-	log[filestat.st_size] = '\0';
-
-	fclose(fp);
-	return log;
-}
-*/
-
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
 	doSystem("service syslog stop");
@@ -709,7 +674,8 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
 
-	fp = popen("logread", "r");
+	fp = popen("cat /var/log/messages", "r");
+//	fp = popen("logread", "r");
 	if(!fp){
 		websWrite(wp, "-1");
 		goto error;

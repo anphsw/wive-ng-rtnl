@@ -7,7 +7,6 @@ start() {
  echo "Starting modules.dep generate..."
     depmod
     ln -sf $moddir/modules.dep /etc/modules.dep
-    echo "OK"
 }
 
 stop() {

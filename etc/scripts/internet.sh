@@ -348,10 +348,10 @@ iptables --flush -t mangle
 #
 if [ "$opmode" = "0" ]; then
 	addBr0
-	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-		echo "##### restore IC+ to dump switch #####"
-		config-vlan.sh 0 0
-	elif [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+#	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
+#		echo "##### restore IC+ to dump switch #####"
+#		config-vlan.sh 0 0
+	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
 		config-vlan.sh 1 0
 	elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
@@ -427,10 +427,10 @@ elif [ "$opmode" = "2" ]; then
 	#   error(E_L, E_LOG, T("internet.c: profiles in nvram is broken"));
 	# else
 	#   initStaConnection();
-	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-		echo "##### restore IC+ to dump switch #####"
-		config-vlan.sh 0 0
-	fi
+#	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
+#		echo "##### restore IC+ to dump switch #####"
+#		config-vlan.sh 0 0
+#	fi
 	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
 		config-vlan.sh 1 0
@@ -444,10 +444,10 @@ elif [ "$opmode" = "2" ]; then
 	nat.sh
 elif [ "$opmode" = "3" ]; then
 	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-		if [ "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-			echo "##### restore IC+ to dump switch #####"
-			config-vlan.sh 0 0
-		fi
+#		if [ "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
+#			echo "##### restore IC+ to dump switch #####"
+#			config-vlan.sh 0 0
+#		fi
 		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 			echo "##### restore Vtss to dump switch #####"
 			config-vlan.sh 1 0

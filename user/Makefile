@@ -58,8 +58,10 @@ dir_$(CONFIG_USER_PPPD)                	    += pppd
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
-#dir_$(CONFIG_USER_MINIUPNPD)                += upnp
+dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
+dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
+#dir_$(CONFIG_USER_MINIUPNPD)                += upnp
 
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
@@ -76,6 +78,9 @@ ifeq ($(CONFIG_USER_DROPBEAR),y)
 endif
 ifeq ($(CONFIG_USER_ZEBRA),y)
 	cd zebra  && ./DoConfigure.sh && make && make install && cd ..
+endif
+ifeq ($(CONFIG_USER_ETHTOOL),y)
+	cd ethtool  && ./DoConfigure.sh && make && make install && cd ..
 endif
 	$(MAKE) -j$(HOST_NCPU) $(dir_y) $(dir_v) $(dir_p) || exit $$?	
 
@@ -97,11 +102,8 @@ romfs:
 	for i in $(sort $(dir_y)) $(dir_p) ; do \
 		[ ! -d $$i ] || $(MAKE) -C $$i romfs || exit $$? ; \
 	done
-ifeq ($(CONFIG_PPPD),y)
+ifeq ($(CONFIG_USER_PPPD),y)
 	cd ppp && make romfs && cd ..
-endif
-ifeq ($(CONFIG_USER_ZEBRA),y)
-	cd zebra && make romfs && cd ..
 endif
 
 clean:

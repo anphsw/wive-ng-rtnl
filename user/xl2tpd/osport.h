@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -50,14 +34,5 @@
 # endif /* SOLARIS < 260 */
 
 #endif /* defined(SOLARIS) */
-
-
-/* Added by Steven Liu */
-#if defined(LINUX)
-# define index(x, y)        strchr(x, y)
-# define bcopy(S1, S2, LEN) ((void)memcpy(S2, S1, LEN))
-# define bzero(S1, LEN)     ((void)memset(S1,  0, LEN))
-# define bcmp(S1,S2,LEN)    ((memcmp(S2, S1, LEN)==0)?0:1)
-#endif /* defined(LINUX) */
 
 #endif /* _OSPORT_H_ */

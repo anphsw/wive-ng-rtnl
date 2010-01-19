@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -38,6 +22,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+#ifndef LINUX
+# include <sys/uio.h>
+#endif
 #include "l2tp.h"
 #include "ipsecmast.h"
 
@@ -77,18 +64,24 @@ int init_network (void)
              __FUNCTION__);
         return -EINVAL;
     }
+
+#ifdef LINUX
     /*
      * For L2TP/IPsec with KLIPSng, set the socket to receive IPsec REFINFO
      * values.
      */
     arg=1;
-    if(setsockopt(server_socket, SOL_IP, IP_IPSEC_REFINFO,
+    if(setsockopt(server_socket, IPPROTO_IP, IP_IPSEC_REFINFO,
 		  &arg, sizeof(arg)) != 0) {
-	    l2tp_log(LOG_CRIT, "setsockopt recvref: %s\n", strerror(errno));
+	    l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", IP_IPSEC_REFINFO, strerror(errno));
 
 	    gconfig.ipsecsaref=0;
     }
-    
+#else
+	l2tp_log(LOG_INFO, "No attempt being made to use IPsec SAref's since we're not on a Linux machine.\n");
+
+#endif
+
 #ifdef USE_KERNEL
     if (gconfig.forceuserspace)
     {
@@ -283,7 +276,7 @@ void udp_xmit (struct buffer *buf, struct tunnel *t)
 	msgh.msg_controllen = sizeof(cbuf);
 
 	cmsg = CMSG_FIRSTHDR(&msgh);
-	cmsg->cmsg_level = SOL_IP;
+	cmsg->cmsg_level = IPPROTO_IP;
 	cmsg->cmsg_type  = IP_IPSEC_REFINFO;
 	cmsg->cmsg_len   = CMSG_LEN(sizeof(unsigned int));
 
@@ -390,7 +383,7 @@ void network_thread ()
     struct tunnel *st;          /* Tunnel */
     fd_set readfds;             /* Descriptors to watch for reading */
     int max;                    /* Highest fd */
-    struct timeval tv;          /* Timeout for select */
+    struct timeval tv, *ptv;    /* Timeout for select */
     struct msghdr msgh;
     struct iovec iov;
     char cbuf[256];
@@ -404,12 +397,35 @@ void network_thread ()
 
     for (;;)
     {
+        int ret;
         max = build_fdset (&readfds);
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
-        schedule_unlock ();
-        select (max + 1, &readfds, NULL, NULL, NULL);
-        schedule_lock ();
+        ptv = process_schedule(&tv);
+        ret = select (max + 1, &readfds, NULL, NULL, ptv);
+        
+        /*if (ret <= 0)
+        {
+             if (ret == 0)
+            {
+                if (gconfig.debug_network)
+                {
+                    l2tp_log (LOG_DEBUG, "%s: select timeout\n", __FUNCTION__);
+                }
+            }
+            else
+            {
+                if (gconfig.debug_network)
+                {
+                    l2tp_log (LOG_DEBUG,
+                        "%s: select returned error %d (%s)\n",
+                        __FUNCTION__, errno, strerror (errno));
+                }
+            }
+            
+            
+            continue;
+        }
+        */
+        
         if (FD_ISSET (control_fd, &readfds))
         {
             do_control ();
@@ -529,11 +545,12 @@ void network_thread ()
 		    /* get a new buffer */
 		    buf = new_buf (MAX_RECV_SIZE);
 		}
-		else
-		    l2tp_log (LOG_DEBUG,
+		else{
+		    /*l2tp_log (LOG_DEBUG,
 			      "%s: unable to find call or tunnel to handle packet.  call = %d, tunnel = %d Dumping.\n",
 			      __FUNCTION__, call, tunnel);
-		
+		sfstudio - no log*/
+		    }
 	    }
 	    else
 	    {
@@ -568,11 +585,12 @@ void network_thread ()
                     /* Got some payload to send */
                     int result;
                     recycle_payload (buf, sc->container->peer);
+/*
 #ifdef DEBUG_FLOW_MORE
                     l2tp_log (LOG_DEBUG, "%s: rws = %d, pSs = %d, pLr = %d\n",
                          __FUNCTION__, sc->rws, sc->pSs, sc->pLr);
 #endif
-/*		    if ((sc->rws>0) && (sc->pSs > sc->pLr + sc->rws) && !sc->rbit) {
+		    if ((sc->rws>0) && (sc->pSs > sc->pLr + sc->rws) && !sc->rbit) {
 #ifdef DEBUG_FLOW
 						log(LOG_DEBUG, "%s: throttling payload (call = %d, tunnel = %d, Lr = %d, Ss = %d, rws = %d)!\n",__FUNCTION__,
 								 sc->cid, sc->container->tid, sc->pLr, sc->pSs, sc->rws); 

@@ -9,7 +9,6 @@ start() {
     if [ "$igmp" = "1" ]; then
         config-igmpproxy.sh $wan_if $lan_if
     fi
- echo " Ok"
 }
 
 stop() {

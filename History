@@ -1,19 +1,21 @@
-Changes
-1) Fix configs scripts for support bash >=4 and change product name
-2) Kernel version up to 2.6.21.7
-3) Redesign filesystem. Busybox up to 1.15.3
-4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc
-5) Add ACELL-PPTP Kernel support
-6) Mount ramfs particions in kernel mode
-7) BGIDGE: Pause frames shouldn't be passed up by driver anyway
-8) Add ESFQ support
-9) Initial auto detect memory size (fix me 32bit mode support)
-10) Add udpxy
-11) Code cleanup
-12) Remove ASUS Code
-13) Original Ralink gui now work
+Changes:<br>
+1) Fix configs scripts for support bash >=4 and change product name<br>
+2) Kernel version up to 2.6.21.7<br>
+3) Redesign filesystem. Busybox up to 1.15.3<br>
+4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc<br>
+5) Add ACELL-PPTP Kernel support<br>
+6) Mount ramfs particions in kernel mode<br>
+7) BGIDGE: Pause frames shouldn't be passed up by driver anyway<br>
+8) Add ESFQ support<br>
+9) Initial auto detect memory size (fix me 32bit mode support)<br>
+10) Add udpxy<br>
+11) Code cleanup<br>
+12) Remove ASUS Code<br>
+13) Original Ralink gui now work<br>
+14) pptp/l2tp/pppoe tun now works<br>
+15) Full rc scrips is write in rwfs
 
 ToDo
-1) Add rwfs
-2) Job control fix
-3) rp-l2tp replace fresh x2ltpd code from Wive-NG/DSL SDK
+1) Add rwfs<br>
+2) Job control fix<br>
+3) upnp daemon need

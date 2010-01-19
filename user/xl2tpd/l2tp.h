@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -39,6 +23,9 @@ typedef unsigned long long _u64;
 
 #include <netinet/in.h>
 #include <termios.h>
+#ifdef OPENBSD
+# include <util.h>
+#endif
 #include "osport.h"
 #include "scheduler.h"
 #include "misc.h"
@@ -50,18 +37,16 @@ typedef unsigned long long _u64;
 #include "common.h"
 #include "ipsecmast.h"
 
-#define CONTROL_PIPE "/var/run/l2tp-control"
+#define CONTROL_PIPE "/var/run/xl2tpd/l2tp-control"
 
 #define BINARY "xl2tpd"
-#define SERVER_VERSION "xl2tpd-1.1.06"
+#define SERVER_VERSION "xl2tpd-1.2.5"
 #define VENDOR_NAME "xelerance.com"
 #ifndef PPPD
-#define PPPD		"/bin/pppd"
+#define PPPD		"/sbin/pppd"
 #endif
 #define CALL_PPP_OPTS "defaultroute"
 #define FIRMWARE_REV	0x0690  /* Revision of our firmware (software, in this case) */
-#define DEF_MAX_TUNNELS 32      /* By default only allow this many
-                                   tunnels to exist */
 
 #define HELLO_DELAY 60          /* How often to send a Hello message */
 
@@ -218,7 +203,6 @@ extern struct tunnel_list tunnels;
 extern void tunnel_close (struct tunnel *t);
 extern void network_thread ();
 extern int init_network ();
-extern int max_tunnels;
 extern int kernel_support;
 extern int server_socket;
 extern struct tunnel *new_tunnel ();

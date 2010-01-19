@@ -1,0 +1,38 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Starting WPS: "
+    lan_if_addr=`nvram_get 2860 lan_if_addr`
+    wsc=`nvram_get 2860 WscModeOption`
+    if [ $wsc != "0" ]; then
+	wscd -m 1 -a $lan_if_add -i ra0 &
+    fi
+}
+
+stop() {
+ echo "Stopping WPS: "
+    killall wscd
+    killall -9 wscd
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

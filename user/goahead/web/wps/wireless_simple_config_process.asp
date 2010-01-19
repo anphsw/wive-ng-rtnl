@@ -12,9 +12,10 @@
 
 <% wscRedirectUIPageASP(); %>
 
-<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link href="css.css" rel="stylesheet" type="text/css">
 <title>Ralink Wireless Access Point</title>
 

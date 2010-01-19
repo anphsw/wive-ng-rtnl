@@ -6,6 +6,8 @@
 <head>
 <title>DTree</title>
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1" />
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />
 <link rel="StyleSheet" href="dtree.css" type="text/css" />
 <script type="text/javascript" src="/dtree/dtree.js"></script>
@@ -37,7 +39,7 @@ function refresh(){
 }
 </script>
 
-<p><center>|<a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a>|</center></p>
+<!--<p><center>>|&nbsp <a href="javascript: a.openAll();" id="openall">open</a>&nbsp | &nbsp <a href="javascript: a.closeAll();" id="closeall">close</a>&nbsp|<</center></p> -->
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
@@ -53,7 +55,7 @@ a.config.useStatusText=true;
 a.config.useCookies=false;
 
 //  nodeID, parent nodeID,  Name,  URL
-a.add(000,  -1, _("treeapp ralink"),                "javascript:go('overview.asp');");
+a.add(000,  -1, _("treeapp Router"),                "javascript:go('overview.asp');");
 a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
 a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
 if (opmode != '0') {
@@ -115,7 +117,7 @@ a.add(904, 900, _("treeapp status"),                "javascript:go('adm/status.a
 a.add(905, 900, _("treeapp statistics"),            "javascript:go('adm/statistic.asp');");
 a.add(906, 900, _("treeapp system command"),        "javascript:go('adm/system_command.asp');");
 a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
-a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
+a.add(907, 900, _("treeapp history"),           "javascript:go('cgi-bin/history.sh');");
 document.write(a);
 </script>
 

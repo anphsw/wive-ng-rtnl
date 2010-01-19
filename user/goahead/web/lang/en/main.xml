@@ -4,14 +4,14 @@
   <message msgid="main apply" msgstr="Apply" />
   <message msgid="main cancel" msgstr="Cancel" />
 
-  <message msgid="overview introduction" msgstr="Ralink is a world leader in IEEE 802.11 technology. Our RT2880 SOC combines Ralink's 2T3R MAC/BBP, a 266-MHz Mips4KEc CPU core, a Gigabit Ethernet MAC, and a PCI host/device, to enable a multitude of high performance and cost-effective draft 802.11n applications. RT2880 is Wi-Fi Certified and provides convenient wireless connectivity from computing devices to peripherals such as printers and network attached storage." />
+  <message msgid="overview introduction" msgstr="" />
   <message msgid="overview select language" msgstr="Select Language" />
   <message msgid="overview status link" msgstr="Status" />
   <message msgid="overview statistic link" msgstr="Statistic" />
   <message msgid="overview management link" msgstr="Management" />
   <message msgid="treeapp openall" msgstr="open all" />
   <message msgid="treeapp closeall" msgstr="close all" />
-  <message msgid="treeapp ralink" msgstr="Ralink" />
+  <message msgid="treeapp Router" msgstr="Router" />
   <message msgid="treeapp operation mode" msgstr="Operation Mode" />
   <message msgid="treeapp internet settings" msgstr="Internet Settings" />
   <message msgid="treeapp wan" msgstr="WAN" />
@@ -48,7 +48,7 @@
   <message msgid="treeapp status" msgstr="Status" />
   <message msgid="treeapp system command" msgstr="System Command" />
   <message msgid="treeapp system log" msgstr="System Log" />
-  <message msgid="treeapp sdk history" msgstr="SDK History" />
+  <message msgid="treeapp history" msgstr="Version history" />
   <message msgid="treeapp system firewall" msgstr="System Security Settings" />
 
   <message msgid="treeapp storage" msgstr="Storage" />

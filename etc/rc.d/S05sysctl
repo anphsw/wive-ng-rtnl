@@ -26,7 +26,6 @@ start() {
     sysctl -w net.ipv4.neigh.default.gc_thresh2=768
     sysctl -w net.ipv4.neigh.default.gc_thresh1=512
     sysctl -w net.ipv4.neigh.default.gc_interval=20
- echo " Ok"
 }
 
 stop() {

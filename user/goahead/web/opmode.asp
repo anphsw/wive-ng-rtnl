@@ -3,6 +3,8 @@
 <title>Operation Mode</title>
 <link rel="stylesheet" href="style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("main");
@@ -163,10 +165,13 @@ function msg()
 <dl>
   <dt><input type="radio" name="opMode" id="opMode" value="0" onClick="changeMode()"><b id="oModeB">Bridge:</b></dt>
   <dd id="oModeBIntro"></dd>
+
   <dt><input type="radio" name="opMode" id="opMode" value="1" onClick="changeMode()"><b id="oModeG">Gateway:</b></dt>
   <dd id="oModeGIntro"></dd>
-  <dt id="stadt"><input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()"><b id="oModeE">Ethernet Converter:</b></dt>
+
+  <dt id="stadt"><input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()"> <b id="oModeE">Ethernet Converter:</b></dt>
   <dd id="stadd"></dd>
+
   <dt id="apclidt"><input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()"><b id="oModeA">AP Client:</b></dt>
   <dd id="apclidd"></dd>
 </dl>

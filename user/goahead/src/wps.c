@@ -350,9 +350,7 @@ void WPSRestart(void)
 	char *mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
 	doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-	doSystem("killall wscd 1>/dev/null 2>&1");
-	Sleep(2);
-	doSystem("killall -9 wscd 1>/dev/null 2>&1");
+	doSystem("service wscd stop");
 
 	if(!strcmp(mode, "0" )){		//bridge 
 		// nop
@@ -377,7 +375,7 @@ void WPSRestart(void)
 				return;
 			}
 			doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
-			doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
+			doSystem("service wscd start");
 			doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 		}else{
 			// WPS disable
@@ -406,45 +404,6 @@ static int getPINASP(int eid, webs_t wp, int argc, char_t **argv)
 	websWrite(wp, T("%d"), getAPPIN("ra0"));
 	return 0;
 }
-
-/*
-static int getWlanWscDevPinCodeASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int ioctl_sock;
-	struct iwreq iwr;
-	char *wordlist=NULL;
-	unsigned long WscPinCode = 0;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
-	iwr.u.data.pointer = (caddr_t) &WscPinCode;
-	iwr.u.data.flags = RT_OID_WSC_PIN_CODE;
-
-	ioctl_sock = socket(PF_INET, SOCK_DGRAM, 0);
-	if (ioctl_sock < 0){
-		fprintf(stderr, "ioctl sock fail!!!\n");
-		websWrite(wp, T("%s"), "00000000");
-		return 0;
-	}
-
-	if (ioctl(ioctl_sock, RT_PRIV_IOCTL, &iwr) < 0){
-		fprintf(stderr, "ioctl -> RT_PRIV_IOCTL Fail !\n");
-		websWrite(wp, T("%s"), "00000000");
-		return 0;
-	}
-
-	wordlist = nvram_get(RT2860_NVRAM, "WscPinCode");
-
-	if ((wordlist == NULL) || (strcmp(wordlist, "") == 0))
-		websWrite(wp, T("%d"), (int)WscPinCode);
-	else
-		websWrite(wp, T("%s"), wordlist);
-
-	close(ioctl_sock);
-	return 0;
-}
-*/
-
 
 /* Load from Web */
 #define LFW(x, y)	do{												\
@@ -500,8 +459,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 
 	if (wsc_enable == 0){
 		doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-		doSystem("killall wscd 1>/dev/null 2>&1");
-		doSystem("killall -9 wscd 1>/dev/null 2>&1");
+		doSystem("service wscd stop");
 		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
 	}else{
 		char lan_if_addr[16];
@@ -511,9 +469,8 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("route add -host 239.255.255.250 dev br0");
-		doSystem("killall wscd 1>/dev/null 2>&1");
-		doSystem("killall -9 wscd 1>/dev/null 2>&1");
-		doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
+		doSystem("service wscd stop");
+		doSystem("service wscd start");
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 //		doSystem("iwpriv ra0 set WscConfMode=%d", wsc_enable + wsc_proxy + wsc_reg);
 //		printf("wsc_enable:%d\nwsc_proxy:%d\nwsc_reg:%d\n",  wsc_enable ,wsc_proxy ,wsc_reg);
@@ -595,15 +552,6 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
 
 	restart8021XDaemon(RT2860_NVRAM);
 
-/*	if ((getIfIp(getLanIfName(), lan_if_addr)) == -1) {
-		printf("WPSRestart error\n");
-		return;
-	}
-	
-	doSystem("killall wscd 1>/dev/null 2>&1");
-	doSystem("killall -9 wscd 1>/dev/null 2>&1");
-    doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
-*/
 	WPSRestart();
 
 	websRedirect(wp, "wps/wps.asp");

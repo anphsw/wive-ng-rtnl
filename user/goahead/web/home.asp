@@ -3,6 +3,8 @@
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script language="JavaScript" type="text/javascript">
 function initLanguage()
 {

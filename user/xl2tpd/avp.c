@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -140,6 +124,10 @@ void wrong_length (struct call *c, char *field, int expected, int found,
     c->needclose = -1;
 }
 
+struct unaligned_u16 {
+	_u16	s;
+} __attribute__((packed));
+
 /*
  * t, c, data, and datalen may be assumed to be defined for all avp's
  */
@@ -153,8 +141,8 @@ int message_type_avp (struct tunnel *t, struct call *c, void *data,
      * (assuming sanity check)
      */
 
-    _u16 *raw = data;
-    c->msgtype = ntohs (raw[3]);
+    struct unaligned_u16 *raw = data;
+    c->msgtype = ntohs (raw[3].s);
     if (datalen != 8)
     {
         if (DEBUG)
@@ -354,9 +342,10 @@ int rand_vector_avp (struct tunnel *t, struct call *c, void *data,
                      int datalen)
 {
     int size;
-    _u16 *raw = (_u16 *) data;
-    size = raw[0] & 0x03FF;
+    struct unaligned_u16 *raw = data;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
+#ifdef SANITY
     if (t->sanity)
     {
         if (size < 0)
@@ -376,10 +365,11 @@ int rand_vector_avp (struct tunnel *t, struct call *c, void *data,
             return -EINVAL;
         }
     }
+#endif
     if (gconfig.debug_avp)
         l2tp_log (LOG_DEBUG, "%s: Random Vector of %d octets\n", __FUNCTION__,
              size);
-    t->chal_us.vector = (unsigned char *) &raw[3];
+    t->chal_us.vector = (unsigned char *) &raw[3].s;
     t->chal_us.vector_len = size;
     return 0;
 }
@@ -451,7 +441,7 @@ int result_code_avp (struct tunnel *t, struct call *c, void *data,
 
     int error;
     int result;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 #ifdef SANITY
     if (t->sanity)
     {
@@ -478,8 +468,8 @@ int result_code_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    result = ntohs (raw[3]);
-    error = ntohs (raw[4]);
+    result = ntohs (raw[3].s);
+    error = ntohs (raw[4].s);
     if ((c->msgtype == StopCCN) && ((result > 7) || (result < 1)))
     {
         if (DEBUG)
@@ -500,7 +490,7 @@ int result_code_avp (struct tunnel *t, struct call *c, void *data,
 
     c->error = error;
     c->result = result;
-    safe_copy (c->errormsg, (char *) &raw[5], datalen - 10);
+    safe_copy (c->errormsg, (char *) &raw[5].s, datalen - 10);
     if (gconfig.debug_avp)
     {
         if (DEBUG && (c->msgtype == StopCCN))
@@ -530,7 +520,7 @@ int protocol_version_avp (struct tunnel *t, struct call *c, void *data,
      */
 
     int ver;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 #ifdef SANITY
     if (t->sanity)
     {
@@ -557,7 +547,7 @@ int protocol_version_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    ver = ntohs (raw[3]);
+    ver = ntohs (raw[3].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -577,7 +567,7 @@ int framing_caps_avp (struct tunnel *t, struct call *c, void *data,
      */
 
     int caps;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -605,7 +595,7 @@ int framing_caps_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    caps = ntohs (raw[4]);
+    caps = ntohs (raw[4].s);
     if (gconfig.debug_avp)
         if (DEBUG)
             l2tp_log (LOG_DEBUG,
@@ -623,7 +613,7 @@ int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,
      * What kind of bearer channels does our peer support?
      */
     int caps;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -651,7 +641,7 @@ int bearer_caps_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    caps = ntohs (raw[4]);
+    caps = ntohs (raw[4].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -678,7 +668,7 @@ int firmware_rev_avp (struct tunnel *t, struct call *c, void *data,
      * Report and record remote firmware version
      */
     int ver;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -706,7 +696,7 @@ int firmware_rev_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    ver = ntohs (raw[3]);
+    ver = ntohs (raw[3].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -725,7 +715,7 @@ int bearer_type_avp (struct tunnel *t, struct call *c, void *data,
      * What kind of bearer channel is the call on?
      */
     int b;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -753,7 +743,7 @@ int bearer_type_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    b = ntohs (raw[4]);
+    b = ntohs (raw[4].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -771,7 +761,7 @@ int frame_type_avp (struct tunnel *t, struct call *c, void *data, int datalen)
      * What kind of frame channel is the call on?
      */
     int b;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -800,7 +790,7 @@ int frame_type_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    b = ntohs (raw[4]);
+    b = ntohs (raw[4].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -818,7 +808,7 @@ int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)
      * What is the peer's name?
      */
     int size;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -846,7 +836,7 @@ int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size > MAXSTRLEN - 1)
     {
@@ -855,7 +845,7 @@ int hostname_avp (struct tunnel *t, struct call *c, void *data, int datalen)
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->hostname, (char *) &raw[3], size);
+    safe_copy (t->hostname, (char *) &raw[3].s, size);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -873,7 +863,7 @@ int dialing_number_avp (struct tunnel *t, struct call *c, void *data,
      * What is the peer's name?
      */
     int size;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -900,7 +890,7 @@ int dialing_number_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size > MAXSTRLEN - 1)
     {
@@ -910,7 +900,7 @@ int dialing_number_avp (struct tunnel *t, struct call *c, void *data,
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->call_head->dialing, (char *) &raw[3], size);
+    safe_copy (t->call_head->dialing, (char *) &raw[3].s, size);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -928,7 +918,7 @@ int dialed_number_avp (struct tunnel *t, struct call *c, void *data,
      * What is the peer's name?
      */
     int size;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -956,7 +946,7 @@ int dialed_number_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size > MAXSTRLEN - 1)
     {
@@ -966,7 +956,7 @@ int dialed_number_avp (struct tunnel *t, struct call *c, void *data,
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->call_head->dialed, (char *) &raw[3], size);
+    safe_copy (t->call_head->dialed, (char *) &raw[3].s, size);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -984,7 +974,7 @@ int sub_address_avp (struct tunnel *t, struct call *c, void *data,
      * What is the peer's name?
      */
     int size;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1012,7 +1002,7 @@ int sub_address_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size > MAXSTRLEN - 1)
     {
@@ -1022,7 +1012,7 @@ int sub_address_avp (struct tunnel *t, struct call *c, void *data,
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->call_head->subaddy, (char *) &raw[3], size);
+    safe_copy (t->call_head->subaddy, (char *) &raw[3].s, size);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1039,7 +1029,7 @@ int vendor_avp (struct tunnel *t, struct call *c, void *data, int datalen)
      * What vendor makes the other end?
      */
     int size;
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1067,7 +1057,7 @@ int vendor_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size > MAXSTRLEN - 1)
     {
@@ -1076,7 +1066,7 @@ int vendor_avp (struct tunnel *t, struct call *c, void *data, int datalen)
                  __FUNCTION__, size);
         size = MAXSTRLEN - 1;
     }
-    safe_copy (t->vendor, (char *) &raw[3], size);
+    safe_copy (t->vendor, (char *) &raw[3].s, size);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1091,7 +1081,7 @@ int challenge_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     /*
      * We are sent a challenge
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
     int size;
 #ifdef SANITY
     if (t->sanity)
@@ -1119,9 +1109,9 @@ int challenge_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    /* size = raw[0] & 0x0FFF; */
+    /* size = raw[0].s & 0x0FFF; */
     /* length field of AVP's is only 10 bits long, not 12 */
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     /* if (size != MD_SIG_SIZE)
     {
@@ -1136,7 +1126,7 @@ int challenge_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     {
         return -ENOMEM;
     }
-    bcopy (&raw[3], (t->chal_us.challenge), size);
+    bcopy (&raw[3].s, (t->chal_us.challenge), size);
     t->chal_us.chal_len = size;
     t->chal_us.state = STATE_CHALLENGED;
     if (gconfig.debug_avp)
@@ -1151,7 +1141,7 @@ int chalresp_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     /*
      * We are sent a challenge
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
     int size;
 #ifdef SANITY
     if (t->sanity)
@@ -1179,7 +1169,7 @@ int chalresp_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    size = raw[0] & 0x03FF;
+    size = raw[0].s & 0x03FF;
     size -= sizeof (struct avp_hdr);
     if (size != MD_SIG_SIZE)
     {
@@ -1188,7 +1178,7 @@ int chalresp_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         return -EINVAL;
     }
 
-    bcopy (&raw[3], t->chal_them.reply, MD_SIG_SIZE);
+    bcopy (&raw[3].s, t->chal_them.reply, MD_SIG_SIZE);
     if (gconfig.debug_avp)
     {
         l2tp_log (LOG_DEBUG, "%s: Challenge reply found\n", __FUNCTION__);
@@ -1202,7 +1192,7 @@ int assigned_tunnel_avp (struct tunnel *t, struct call *c, void *data,
     /*
      * What is their TID that we must use from now on?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1233,18 +1223,18 @@ int assigned_tunnel_avp (struct tunnel *t, struct call *c, void *data,
 #endif
     if (c->msgtype == StopCCN)
     {
-        t->qtid = ntohs (raw[3]);
+        t->qtid = ntohs (raw[3].s);
     }
     else
     {
-        t->tid = ntohs (raw[3]);
+        t->tid = ntohs (raw[3].s);
     }
     if (gconfig.debug_avp)
     {
         if (DEBUG)
             l2tp_log (LOG_DEBUG,
                  "%s: using peer's tunnel %d\n", __FUNCTION__,
-                 ntohs (raw[3]));
+                 ntohs (raw[3].s));
     }
     return 0;
 }
@@ -1255,7 +1245,7 @@ int assigned_call_avp (struct tunnel *t, struct call *c, void *data,
     /*
      * What is their CID that we must use from now on?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1288,19 +1278,19 @@ int assigned_call_avp (struct tunnel *t, struct call *c, void *data,
 #endif
     if (c->msgtype == CDN)
     {
-        c->qcid = ntohs (raw[3]);
+        c->qcid = ntohs (raw[3].s);
     }
     else if (c->msgtype == ICRQ)
     {
-        t->call_head->cid = ntohs (raw[3]);
+        t->call_head->cid = ntohs (raw[3].s);
     }
     else if (c->msgtype == ICRP)
     {
-        c->cid = ntohs (raw[3]);
+        c->cid = ntohs (raw[3].s);
     }
     else if (c->msgtype == OCRP)
     {                           /* jz: copy callid to c->cid */
-        c->cid = ntohs (raw[3]);
+        c->cid = ntohs (raw[3].s);
     }
     else
     {
@@ -1311,7 +1301,7 @@ int assigned_call_avp (struct tunnel *t, struct call *c, void *data,
     {
         if (DEBUG)
             l2tp_log (LOG_DEBUG,
-                 "%s: using peer's call %d\n", __FUNCTION__, ntohs (raw[3]));
+                 "%s: using peer's call %d\n", __FUNCTION__, ntohs (raw[3].s));
     }
     return 0;
 }
@@ -1322,7 +1312,7 @@ int packet_delay_avp (struct tunnel *t, struct call *c, void *data,
     /*
      * What is their CID that we must use from now on?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1353,13 +1343,13 @@ int packet_delay_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    c->ppd = ntohs (raw[3]);
+    c->ppd = ntohs (raw[3].s);
     if (gconfig.debug_avp)
     {
         if (DEBUG)
             l2tp_log (LOG_DEBUG,
                  "%s: peer's delay is %d 1/10's of a second\n", __FUNCTION__,
-                 ntohs (raw[3]));
+                 ntohs (raw[3].s));
     }
     return 0;
 }
@@ -1369,7 +1359,7 @@ int call_serno_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     /*
      * What is the serial number of the call?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1404,8 +1394,8 @@ int call_serno_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    t->call_head->serno = (((unsigned int) ntohs (raw[3])) << 16) |
-        ((unsigned int) ntohs (raw[4]));
+    t->call_head->serno = (((unsigned int) ntohs (raw[3].s)) << 16) |
+        ((unsigned int) ntohs (raw[4].s));
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1421,7 +1411,7 @@ int rx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     /*
      * What is the received baud rate of the call?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1450,8 +1440,8 @@ int rx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    c->rxspeed = (((unsigned int) ntohs (raw[3])) << 16) |
-        ((unsigned int) ntohs (raw[4]));
+    c->rxspeed = (((unsigned int) ntohs (raw[3].s)) << 16) |
+        ((unsigned int) ntohs (raw[4].s));
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1466,7 +1456,7 @@ int tx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
     /*
      * What is the tranmsit baud rate of the call?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1495,8 +1485,8 @@ int tx_speed_avp (struct tunnel *t, struct call *c, void *data, int datalen)
         }
     }
 #endif
-    c->txspeed = (((unsigned int) ntohs (raw[3])) << 16) |
-        ((unsigned int) ntohs (raw[4]));
+    c->txspeed = (((unsigned int) ntohs (raw[3].s)) << 16) |
+        ((unsigned int) ntohs (raw[4].s));
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1511,7 +1501,7 @@ int call_physchan_avp (struct tunnel *t, struct call *c, void *data,
     /*
      * What is the physical channel?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1541,8 +1531,8 @@ int call_physchan_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    t->call_head->physchan = (((unsigned int) ntohs (raw[3])) << 16) |
-        ((unsigned int) ntohs (raw[4]));
+    t->call_head->physchan = (((unsigned int) ntohs (raw[3].s)) << 16) |
+        ((unsigned int) ntohs (raw[4].s));
     if (gconfig.debug_avp)
     {
         if (DEBUG)
@@ -1559,7 +1549,7 @@ int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,
     /*
      * What is their RWS?
      */
-    _u16 *raw = data;
+    struct unaligned_u16 *raw = data;
 
 #ifdef SANITY
     if (t->sanity)
@@ -1592,7 +1582,7 @@ int receive_window_size_avp (struct tunnel *t, struct call *c, void *data,
         }
     }
 #endif
-    t->rws = ntohs (raw[3]);
+    t->rws = ntohs (raw[3].s);
 /*	if (c->rws >= 0)
 		c->fbit = FBIT; */
     if (gconfig.debug_avp)

@@ -1,9 +1,10 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
-<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Advanced Wireless Settings</title>
@@ -639,7 +640,7 @@ function wmm_capable_enable_switch()
     <td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
   </tr>
   <tr> 
-    <td class="head" id="advWMM">WMM Capable</td>
+    <td class="head" id="advWMM">WMM and UDPXY</td>
     <td>
       <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable &nbsp;</font>
       <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>

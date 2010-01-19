@@ -2,7 +2,6 @@
 
 start() {
 echo "Generate host key for first start"
-    admID=`nvram_get 2860 Login`
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
 	echo DSS file exist
     else
@@ -12,11 +11,12 @@ echo "Generate host key for first start"
     fi
 
 echo "Starting inetd: "
+    admID=`nvram_get 2860 Login`
     if [ "$admID" = "" ]; then
         admID="Admin"
-	echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
-        echo "telnet  stream  tcp     nowait  $admID    /bin/telnetd        /bin/telnetd -i"  >> /etc/inetd.conf
     fi
+    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
+    echo "telnet  stream  tcp     nowait  $admID    /bin/telnetd        /bin/telnetd -i"  >> /etc/inetd.conf
     /sbin/inetd
 }
 

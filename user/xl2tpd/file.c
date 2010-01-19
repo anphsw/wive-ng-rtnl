@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -65,7 +49,7 @@ int init_config ()
     gconfig.debug_state = 0;
     lnslist = NULL;
     laclist = NULL;
-    deflac = (struct lac *) malloc (sizeof (struct lac));
+    deflac = (struct lac *) calloc (1, sizeof (struct lac));
 
     f = fopen (gconfig.configfile, "r");
     if (!f) 
@@ -95,7 +79,7 @@ int init_config ()
 struct lns *new_lns ()
 {
     struct lns *tmp;
-    tmp = (struct lns *) malloc (sizeof (struct lns));
+    tmp = (struct lns *) calloc (1, sizeof (struct lns));
     if (!tmp)
     {
         l2tp_log (LOG_CRIT, "%s: Unable to allocate memory for new LNS\n",
@@ -140,7 +124,7 @@ struct lns *new_lns ()
 struct lac *new_lac ()
 {
     struct lac *tmp;
-    tmp = (struct lac *) malloc (sizeof (struct lac));
+    tmp = (struct lac *) calloc (1, sizeof (struct lac));
     if (!tmp)
     {
         l2tp_log (LOG_CRIT, "%s: Unable to allocate memory for lac entry!\n",
@@ -624,7 +608,7 @@ int set_papchap (char *word, char *value, int context, void *item)
                 l->pap_require = result;
         else if (c[0] == 'a')   /* Authentication */
             if (word[2] == 'f')
-                l->authself = result;
+                l->authself = !result;
             else
                 l->authpeer = result;
         else /* CHAP */ if (word[2] == 'f')
@@ -1094,6 +1078,9 @@ int set_ipsec_saref (char *word, char *value, int context, void *item)
 		    return -1;
 	    if(g->ipsecsaref) {
 		    l2tp_log(LOG_WARNING, "Enabling IPsec SAref processing for L2TP transport mode SAs\n");
+	    }
+	    if(g->forceuserspace != 1) {
+		    l2tp_log(LOG_WARNING, "IPsec SAref does not work with L2TP kernel mode yet, enabling forceuserspace=yes\n");
 	    }
 	    break;
     default:

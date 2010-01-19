@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
@@ -45,7 +29,7 @@
 #include <unistd.h>
 #include <time.h>
 #if (__GLIBC__ < 2)
-# if defined(FREEBSD)
+# if defined(FREEBSD) || defined(OPENBSD)
 #  include <sys/signal.h>
 # elif defined(LINUX)
 #  include <bsd/signal.h>
@@ -55,20 +39,18 @@
 #else
 # include <signal.h>
 #endif
+#ifndef LINUX
+# include <sys/socket.h>
+#endif
 #include <netdb.h>
 #include <string.h>
 #include <strings.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef USE_KERNEL
-#include <sys/ioctl.h>
-#endif
 #include "l2tp.h"
-#include "pidfile.h"
 
 struct tunnel_list tunnels;
-int max_tunnels = DEF_MAX_TUNNELS;
 int rand_source;
 int ppd = 1;                    /* Packet processing delay */
 int control_fd;                 /* descriptor of control area */
@@ -98,7 +80,7 @@ void show_status (void)
     unsigned long cnt = 0;
 
     int s = 0;
-    l2tp_log (LOG_WARNING, "====== l2tpd statistics ========\n");
+    l2tp_log (LOG_WARNING, "====== xl2tpd statistics ========\n");
     l2tp_log (LOG_WARNING, " Scheduler entries:\n");
     se = events;
     while (se)
@@ -255,6 +237,9 @@ void child_handler (int signal)
                      * OK...pppd died, we can go ahead and close the pty for
                      * it
                      */
+#ifdef USE_KERNEL
+                 if (!kernel_support)
+#endif
                     close (c->fd);
                     c->fd = -1;
                     /*
@@ -314,7 +299,8 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     char *stropt[80];
     struct ppp_opts *p;
 #ifdef USE_KERNEL
-    struct l2tp_call_opts co;
+    struct sockaddr_pppol2tp sax;
+    int flags;
 #endif
     int pos = 1;
     int fd2;
@@ -350,12 +336,39 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
 #ifdef USE_KERNEL
     if (kernel_support)
     {
-        co.ourtid = c->container->ourtid;
-        co.ourcid = c->ourcid;
-        ioctl (server_socket, L2TPIOCGETCALLOPTS, &co);
-        stropt[pos++] = strdup ("channel");
-        stropt[pos] = (char *) malloc (10);
-        snprintf (stropt[pos], 10, "%d", co.id);
+       fd2 = socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OL2TP);
+       if (fd2 < 0) {
+           l2tp_log (LOG_WARNING, "%s: Unable to allocate PPPoL2TP socket.\n",
+                __FUNCTION__);
+           return -EINVAL;
+       }
+       flags = fcntl(fd2, F_GETFL);
+       if (flags == -1 || fcntl(fd2, F_SETFL, flags | O_NONBLOCK) == -1) {
+           l2tp_log (LOG_WARNING, "%s: Unable to set PPPoL2TP socket nonblock.\n",
+                __FUNCTION__);
+           return -EINVAL;
+       }
+       sax.sa_family = AF_PPPOX;
+       sax.sa_protocol = PX_PROTO_OL2TP;
+       sax.pppol2tp.pid = 0;
+       sax.pppol2tp.fd = server_socket;
+       sax.pppol2tp.addr.sin_addr.s_addr = c->container->peer.sin_addr.s_addr;
+       sax.pppol2tp.addr.sin_port = c->container->peer.sin_port;
+       sax.pppol2tp.addr.sin_family = AF_INET;
+       sax.pppol2tp.s_tunnel  = c->container->ourtid;
+       sax.pppol2tp.s_session = c->ourcid;
+       sax.pppol2tp.d_tunnel  = c->container->tid;
+       sax.pppol2tp.d_session = c->cid;
+       if (connect(fd2, (struct sockaddr *)&sax, sizeof(sax)) < 0) {
+           l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
+                __FUNCTION__);
+           return -EINVAL;
+       }
+       stropt[pos++] = strdup ("plugin");
+       stropt[pos++] = strdup ("pppol2tp.so");
+       stropt[pos++] = strdup ("pppol2tp");
+       stropt[pos] = (char *) malloc (10);
+       snprintf (stropt[pos], 10, "%d", fd2);
         pos++;
         stropt[pos] = NULL;
     }
@@ -416,10 +429,15 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
         close (0); /* redundant; the dup2() below would do that, too */
         close (1); /* ditto */
         /* close (2); No, we want to keep the connection to /dev/null. */ 
+#ifdef USE_KERNEL
+       if (!kernel_support)
+#endif
+       {
 
         /* connect the pty to stdin and stdout */
         dup2 (fd2, 0);
         dup2 (fd2, 1);
+	close(fd2);
 
         /* close all the calls pty fds */
         st = tunnels.head;
@@ -433,6 +451,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
             }
             st = st->next;
         }
+       }
 
         /* close the UDP socket fd */
         close (server_socket);
@@ -765,11 +784,6 @@ struct tunnel *new_tunnel ()
     tmp->hello = NULL;
 #ifndef TESTING
 /*      while(get_call((tmp->ourtid = rand() & 0xFFFF),0,0,0)); */
-#ifdef USE_KERNEL
-    if (kernel_support)
-        tmp->ourtid = ioctl (server_socket, L2TPIOCADDTUNNEL, 0);
-    else
-#endif
 /*        tmp->ourtid = rand () & 0xFFFF; */
         /* get_entropy((char *)&tmp->ourtid, 2); */
         get_entropy(entropy_buf, 2);
@@ -791,7 +805,9 @@ struct tunnel *new_tunnel ()
     tmp->peer.sin_family = AF_INET;
     tmp->peer.sin_port = 0;
     bzero (&(tmp->peer.sin_addr), sizeof (tmp->peer.sin_addr));
+#ifdef SANITY
     tmp->sanity = -1;
+#endif
     tmp->qtid = -1;
     tmp->ourfc = ASYNC_FRAMING | SYNC_FRAMING;
     tmp->ourbc = 0;
@@ -833,6 +849,9 @@ void do_control ()
     char *tunstr;
     char *callstr;
 
+    char *authname = NULL;
+    char *password = NULL;
+    char delims[] = " ";
     char *sub_str;              /* jz: use by the strtok function */
     char *tmp_ptr;              /* jz: use by the strtok function */
     struct lac *lac;
@@ -841,6 +860,7 @@ void do_control ()
     int cnt = -1;
     int done = 0;
 
+    bzero(buf, sizeof(buf));
     buf[0]='\0';
 
     while (!done)
@@ -874,7 +894,12 @@ void do_control ()
         case 'c':
             switch_io = 1;  /* jz: Switch for Incoming - Outgoing Calls */
             
-            tunstr = strchr (buf, ' ') + 1;
+            tunstr = strtok (&buf[1], delims);
+
+            /* Are these passed on the command line? */
+            authname = strtok (NULL, delims);
+            password = strtok (NULL, delims);
+
             lac = laclist;
             while (lac && strcasecmp (lac->entname, tunstr)!=0)
             {
@@ -884,6 +909,10 @@ void do_control ()
             if(lac) {
                 lac->active = -1;
                 lac->rtries = 0;
+                if (authname != NULL)
+                    strncpy (lac->authname, authname, STRLEN);
+                if (password != NULL)
+                    strncpy (lac->password, password, STRLEN);
                 if (!lac->c)
                 magic_lac_dial (lac);
                 else {
@@ -1005,7 +1034,7 @@ void do_control ()
 
 void usage(void) {
     printf("\nxl2tpd version:  %s\n",SERVER_VERSION);
-    printf("Usage: l2tpd [-c <config file>] [-s <secret file>] [-p <pid file>]  \n             [-C <control file>] [-D]\n");
+    printf("Usage: xl2tpd [-c <config file>] [-s <secret file>] [-p <pid file>]  \n             [-C <control file>] [-D]\n");
     printf("\n");
     exit(1);
 }
@@ -1113,7 +1142,7 @@ void consider_pidfile() {
     /* Read previous pid file. */
     i = open(gconfig.pidfile,O_RDONLY);
     if (i < 0) {
-        /* l2tp_log(LOG_LOG, "%s: Unable to read pid file [%s]\n",
+        /* l2tp_log(LOG_DEBUG, "%s: Unable to read pid file [%s]\n",
            __FUNCTION__, gconfig.pidfile);
          */
     } else
@@ -1130,7 +1159,8 @@ void consider_pidfile() {
            complain and exit immediately. */
         if (pid && pid != getpid () && kill (pid, 0) == 0)
         {
-            l2tp_log(LOG_INFO, "%s: There's already a l2tpd server running.\n",
+            l2tp_log(LOG_INFO,
+                    "%s: There's already a xl2tpd server running.\n",
                     __FUNCTION__);
             close(server_socket);
             exit(1);
@@ -1207,16 +1237,16 @@ void init (int argc,char *argv[])
 
     open_controlfd();
 
-    l2tp_log (LOG_INFO, "xl2tpd version " SERVER_VERSION " started on %s PID:%d\n",
-         hostname, getpid ());
-    l2tp_log (LOG_INFO,
-         "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
+    l2tp_log (LOG_INFO, "xl2tpd version " SERVER_VERSION " started on %s PID:%d\n", hostname, getpid ());
+
+/*  l2tp_log (LOG_INFO, "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
     l2tp_log (LOG_INFO, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
     l2tp_log (LOG_INFO, "Inherited by Jeff McAdams, (C) 2002\n");
     l2tp_log (LOG_INFO, "Forked again by Xelerance (www.xelerance.com) (C) 2006\n");
+    l2tp_log (LOG_INFO, "Listening on IP address %s, port %d\n", inet_ntoa(listenaddr), gconfig.port);
+sfstudio - no log */
+
     listenaddr.s_addr = gconfig.listenaddr;
-    l2tp_log (LOG_INFO, "Listening on IP address %s, port %d\n",
-              inet_ntoa(listenaddr), gconfig.port);
     lac = laclist;
     while (lac)
     {
@@ -1234,19 +1264,10 @@ void init (int argc,char *argv[])
     }
 }
 
-void l2tp_start_pid(const char *pidfile)
-{
-        int pid_fd;
-
-	pid_fd = pidfile_acquire(pidfile);
-	pidfile_write_release(pid_fd);
-}
-
 int main (int argc, char *argv[])
 {
     init(argc,argv);
     dial_no_tmp = calloc (128, sizeof (char));
-    l2tp_start_pid("/var/run/l2tpd.pid");
     network_thread ();
     return 0;
 }

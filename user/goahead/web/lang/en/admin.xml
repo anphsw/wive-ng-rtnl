@@ -39,9 +39,9 @@
   <message msgid="man ntp south africa" msgstr="(GMT+02:00) South Africa" />
   <message msgid="man ntp iraq" msgstr="(GMT+03:00) Iraq, Jordan, Kuwait" />
   <message msgid="man ntp moscow winter" msgstr="(GMT+03:00) Moscow Winter Time" />
-  <message msgid="man ntp armenia" msgstr="(GMT+04:00) Armenia" />
-  <message msgid="man ntp pakistan" msgstr="(GMT+05:00) Pakistan, Russia" />
-  <message msgid="man ntp bangladesh" msgstr="(GMT+06:00) Bangladesh, Russia" />
+  <message msgid="man ntp armenia" msgstr="(GMT+04:00) ST. Petersburg, Armenia" />
+  <message msgid="man ntp pakistan" msgstr="(GMT+05:00) Ekaterinburg, Pakistan, Russia" />
+  <message msgid="man ntp bangladesh" msgstr="(GMT+06:00) Omsk, Novosibirsk Russia" />
   <message msgid="man ntp thailand" msgstr="(GMT+07:00) Thailand, Russia" />
   <message msgid="man ntp chinacoast" msgstr="(GMT+08:00) China Coast, Hong Kong" />
   <message msgid="man ntp taipei" msgstr="(GMT+08:00) Taipei" />
