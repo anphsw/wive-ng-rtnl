@@ -1,4 +1,4 @@
-Changes:<br>
+<b>Changes:</b><br>
 1) Fix configs scripts for support bash >=4 and change product name<br>
 2) Kernel version up to 2.6.21.7<br>
 3) Redesign filesystem. Busybox up to 1.15.3<br>
@@ -13,9 +13,12 @@ Changes:<br>
 12) Remove ASUS Code<br>
 13) Original Ralink gui now work<br>
 14) pptp/l2tp/pppoe tun now works<br>
-15) Full rc scrips is write in rwfs
+15) Full rc scrips is write in rwfs<br>
+16) RT3052F embed switch full work now<br>
+17) Rewrite pptp/l2tp/pppoe scripts to support buggy nas (corbina etc)<br>
 
-ToDo
+<br>
+<b>ToDo:</b><br>
 1) Add rwfs<br>
 2) Job control fix<br>
-3) upnp daemon need
+3) upnp daemon need<br>

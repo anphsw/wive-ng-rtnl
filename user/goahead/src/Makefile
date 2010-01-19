@@ -50,9 +50,9 @@ ifneq ("$(CONFIG_RT2880v2_INIC)", "")
 DEPEND_FILES += inic.o
 CFLAGS += -DINICv2_SUPPORT
 endif
-#ifneq ("$(CONFIG_RT2561_AP)", "")
+ifneq ("$(CONFIG_RT2561_AP)", "")
 DEPEND_FILES += legacy.o
-#endif
+endif
 ifeq ("$(CONFIG_USER_GOAHEAD_IPV6)", "y")
 CFLAGS += -DWF_USE_IPV6
 endif

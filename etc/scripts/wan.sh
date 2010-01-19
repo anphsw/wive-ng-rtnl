@@ -12,6 +12,10 @@ killall -q udhcpc
 killall -q l2tpd
 killall -q pppd
 
+#workaround fix me!!!
+if [ "$wan_if" = "" ]; then
+    wan_if="eth2.2"
+fi
 
 clone_en=`nvram_get 2860 macCloneEnabled`
 clone_mac=`nvram_get 2860 macCloneMac`
@@ -33,11 +37,6 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	#lan and wan ip should not be the same except in bridge mode
 	if [ "$opmode" != "0" ]; then
 		lan_ip=`nvram_get 2860 lan_ipaddr`
-		if [ "$lan_ip" = "" ]; then
-		    lan_ip="192.168.1.1"
-		    nvram_set 2860 lan_ipaddr 192.168.1.1
-		fi
-
 		if [ "$ip" = "$lan_ip" ]; then
 			echo "wan.sh: warning: WAN's IP address is set identical to LAN"
 			exit 0
@@ -45,10 +44,6 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	else
 		#use lan's ip address instead
 		ip=`nvram_get 2860 lan_ipaddr`
-                if [ "$lan_ip" = "" ]; then
-                    lan_ip="192.168.1.1"
-                    nvram_set 2860 lan_ipaddr 192.168.1.1
-                fi
 		nm=`nvram_get 2860 lan_netmask`
 	fi
 	ifconfig $wan_if $ip netmask $nm
@@ -64,45 +59,74 @@ elif [ "$wanmode" = "PPPOE" ]; then
 	pw=`nvram_get 2860 wan_pppoe_pass`
 	pppoe_opmode=`nvram_get 2860 wan_pppoe_opmode`
 	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
-	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime
+
+	killall -9 config-pptp.sh > /dev/null
+	killall -9 xl2tpd > /dev/null
+	killall -9 ppdd > /dev/null
+
+	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
+
 elif [ "$wanmode" = "L2TP" ]; then
-	srv=`nvram_get 2860 wan_l2tp_server`
-	u=`nvram_get 2860 wan_l2tp_user`
-	pw=`nvram_get 2860 wan_l2tp_pass`
 	mode=`nvram_get 2860 wan_l2tp_mode`
 	l2tp_opmode=`nvram_get 2860 wan_l2tp_opmode`
 	l2tp_optime=`nvram_get 2860 wan_l2tp_optime`
-	if [ "$mode" = "0" ]; then
-		ip=`nvram_get 2860 wan_l2tp_ip`
-		nm=`nvram_get 2860 wan_l2tp_netmask`
-		gw=`nvram_get 2860 wan_l2tp_gateway`
-		if [ "$gw" = "" ]; then
-			gw="0.0.0.0"
-		fi
-		config-l2tp.sh static $wan_if $ip $nm $gw $srv $u $pw $l2tp_opmode $l2tp_optime
+
+	killall -9 config-pptp.sh > /dev/null
+	killall -9 xl2tpd > /dev/null
+	killall -9 ppdd > /dev/null
+
+        if [ "$mode" = "0" ]; then
+	#static
+    	    ip=`nvram_get 2860 wan_l2tp_ip`
+	    nm=`nvram_get 2860 wan_l2tp_netmask`
+	    gw=`nvram_get 2860 wan_l2tp_gateway`
+    	    ifconfig $wan_if $ip netmask $nm up
+            if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
+		route add -host $ip dev $wan_ip gw $gw
+    		route del default
+        	route add default gw $gw
+    	    else
+		route add -host $ip dev $wan_ip
+	    fi
 	else
-		config-l2tp.sh dhcp $wan_if $srv $u $pw $l2tp_opmode $l2tp_optime
+	#dhcp
+            killall -q udhcpc
+    	    udhcpc -i $wan_if -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid &
+	    sleep 3
 	fi
+	config-l2tp.sh &
+
 elif [ "$wanmode" = "PPTP" ]; then
-	srv=`nvram_get 2860 wan_pptp_server`
-	u=`nvram_get 2860 wan_pptp_user`
-	pw=`nvram_get 2860 wan_pptp_pass`
-	mode=`nvram_get 2860 wan_pptp_mode`
-	pptp_opmode=`nvram_get 2860 wan_pptp_opmode`
-	pptp_optime=`nvram_get 2860 wan_pptp_optime`
-	if [ "$mode" = "0" ]; then
-		ip=`nvram_get 2860 wan_pptp_ip`
-		nm=`nvram_get 2860 wan_pptp_netmask`
-		gw=`nvram_get 2860 wan_pptp_gateway`
-		if [ "$gw" = "" ]; then
-			gw="0.0.0.0"
-		fi
-		config-pptp.sh static $wan_if $ip $nm $gw $srv $u $pw $pptp_opmode $pptp_optime
+        srv=`nvram_get 2860 wan_pptp_server`
+        mode=`nvram_get 2860 wan_pptp_mode`
+        pptp_opmode=`nvram_get 2860 wan_pptp_opmode`
+        pptp_optime=`nvram_get 2860 wan_pptp_optime`
+
+	killall -9 config-pptp.sh > /dev/null
+	killall -9 xl2tpd > /dev/null
+	killall -9 ppdd > /dev/null
+
+        if [ "$mode" = "0" ]; then
+	#static
+            ip=`nvram_get 2860 wan_pptp_ip`
+            nm=`nvram_get 2860 wan_pptp_netmask`
+            gw=`nvram_get 2860 wan_pptp_gateway`
+    	    ifconfig $wan_if $ip netmask $nm up
+            if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
+		route add -host $ip dev $wan_ip gw $gw
+    		route del default
+        	route add default gw $gw
+    	    else
+		route add -host $ip dev $wan_ip
+	    fi
 	else
-		config-pptp.sh dhcp $wan_if $srv $u $pw $pptp_opmode $pptp_optime
+	#dhcp
+            killall -q udhcpc
+    	    udhcpc -i $wan_if -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid &
+	    sleep 3
 	fi
+	config-pptp.sh &
 else
 	echo "wan.sh: unknown wan connection type: $wanmode"
 	exit 1
 fi
-

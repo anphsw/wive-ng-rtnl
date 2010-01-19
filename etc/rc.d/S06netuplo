@@ -6,12 +6,14 @@ start() {
     ip route add 127.0.0.0/8 dev lo
     ip route add 127.0.0.0/8 dev lo table default
 
-  echo "Add bridge in the system"
-    brctl addbr br0
-    ifconfig br0 0.0.0.0 up 
+#  echo "Add bridge in the system"
+#    brctl addbr br0
+#    ifconfig br0 0.0.0.0 up 
 }
 
 stop() {
+ ifconfig br0 down
+ brctl delbr br0
  echo "OK"
 }
 

@@ -13,10 +13,7 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
-if [ "$lan_ip" = "" ]; then
-    lan_ip="192.168.1.1"
-    nvram_set 2860 lan_ipaddr 192.168.1.1
-fi
+service pass start
 
 ifRaxWdsxDown()
 {
@@ -209,7 +206,6 @@ if [ "$opmode" = "2" -a "$CONFIG_RT2860V2_STA" == "" ]; then
 	opmode="1"
 fi
 
-service pass start
 
 if [ "$CONFIG_DWC_OTG" == "m" ]; then
     isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`
@@ -329,15 +325,9 @@ elif [ "$CONFIG_ICPLUS_PHY" = "y" ]; then
 	ifconfig eth2:1 0.0.0.0 1>&2 2>/dev/null
 fi
 
-ifconfig lo 127.0.0.1
-ifconfig br0 down
-brctl delbr br0
-
-# stop all
-iptables --flush
-iptables --flush -t nat
-iptables --flush -t mangle
-
+service netuplo stop
+service iptables stop
+service netuplo start
 
 #
 # init ip address to all interfaces for different OperationMode:
@@ -348,9 +338,6 @@ iptables --flush -t mangle
 #
 if [ "$opmode" = "0" ]; then
 	addBr0
-#	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-#		echo "##### restore IC+ to dump switch #####"
-#		config-vlan.sh 0 0
 	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
 		config-vlan.sh 1 0
@@ -413,9 +400,6 @@ elif [ "$opmode" = "1" ]; then
 		fi
 		addWds2Br0
 
-		#
-		# setup ip alias for user to access web page.
-		#
 		ifconfig eth2:1 172.32.1.254 netmask 255.255.255.0 up
 	fi
 
@@ -423,14 +407,6 @@ elif [ "$opmode" = "1" ]; then
 	lan.sh
 	nat.sh
 elif [ "$opmode" = "2" ]; then
-	# if (-1 == initStaProfile())
-	#   error(E_L, E_LOG, T("internet.c: profiles in nvram is broken"));
-	# else
-	#   initStaConnection();
-#	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-#		echo "##### restore IC+ to dump switch #####"
-#		config-vlan.sh 0 0
-#	fi
 	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
 		config-vlan.sh 1 0
@@ -444,10 +420,6 @@ elif [ "$opmode" = "2" ]; then
 	nat.sh
 elif [ "$opmode" = "3" ]; then
 	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-#		if [ "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-#			echo "##### restore IC+ to dump switch #####"
-#			config-vlan.sh 0 0
-#		fi
 		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 			echo "##### restore Vtss to dump switch #####"
 			config-vlan.sh 1 0

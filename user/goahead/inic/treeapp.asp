@@ -124,6 +124,7 @@ a.add(905, 900, _("treeapp statistics"),            "javascript:go('adm/statisti
 a.add(906, 900, _("treeapp system command"),        "javascript:go('adm/system_command.asp');");
 a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
 a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
+a.add(907, 900, _("treeapp reboot"),           	    "javascript:go('cgi-bin/reboot.sh');");
 document.write(a);
 </script>
 

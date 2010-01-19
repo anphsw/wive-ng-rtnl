@@ -4,7 +4,7 @@
 #
 # usage: config-pppoe.sh <user> <password> <wan_if_name>
 #
-
+echo "==================START-PPPOE-CLIENT======================="
 usage()
 {
 	echo "Usage:"
@@ -35,9 +35,6 @@ OPTFILE="file /etc/ppp/options.pppoe"
 PPP_STD_OPTIONS="noipdefault noauth -detach defaultroute persist usepeerdns"
 # PPPoE invocation
 PPPOE_CMD="$3 user $1 password $2"
-
-    killall -9 pppd
-    killall -9 xl2tpd
 
 pppd $OPTFILE mtu 1400 mru 1400 $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD &
 
