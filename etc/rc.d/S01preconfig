@@ -3,6 +3,8 @@
 start() {
  echo "Preconfigure..."
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+    rm -f /etc/zebra.conf
+    rm -f /etc/ripd.conf
 
     echo "Mount all filesystems"
     mount -a
