@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Starting IPTABLES: "
+        iptables -A INPUT  -i lo+ -j ACCEPT
+	iptables -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	iptables -I INPUT -m state --state INVALID -j DROP
+
+        iptables -N servicelimit
+        iptables -I INPUT -j servicelimit
+	
+        iptables -F servicelimit
+	#telnet ssh snmp limit
+        iptables -A servicelimit -p tcp --dport 21:23 -m connlimit --connlimit-above 4 -j REJECT
+	#web limit
+        iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
+        #icmp limit
+	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
+        iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
+}
+
+stop() {
+ echo "Stopping IPTABLES: "
+	echo -e "*nat\nCOMMIT\n*filter\nCOMMIT\n*mangle\nCOMMIT\n" | iptables-restore
+	iptables -F
+	iptables -t nat -F
+        iptables -t filter -F
+        iptables -t mangle -F
+        iptables -X
+        iptables -t nat -X
+        iptables -t filter -X
+        iptables -t mangle -X
+
+        iptables -t mangle -F PREROUTING
+        iptables -t mangle -F FORWARD
+        iptables -t mangle -F INPUT
+        iptables -t mangle -F OUTPUT
+        iptables -t mangle -F POSTROUTING
+
+        iptables -t nat -Z
+        iptables -t filter -Z
+        iptables -t mangle -Z
+	iptables -Z
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

@@ -143,7 +143,8 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TZ", tz);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("ntp.sh");
+	doSystem("service ntp stop");
+	doSystem("service ntp start");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
@@ -205,7 +206,8 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("ddns.sh");
+	doSystem("service ddns stop");
+	doSystem("service ddns start");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -693,11 +695,8 @@ static char *getLog(char *filename)
 
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
-	doSystem("syslogd -C8 1>/dev/null 2>&1");
-	doSystem("klogd 1>/dev/null 2>&1");
-
+	doSystem("service syslog stop");
+	doSystem("service syslog start");
 	websRedirect(wp, "adm/syslog.asp");
 }
 
@@ -734,21 +733,20 @@ error:
 
 void management_init(void)
 {
-	doSystem("ntp.sh");
-	doSystem("ddns.sh");
+	doSystem("service ntp stop");
+	doSystem("service ntp start");
+	doSystem("service ddns stop");
+	doSystem("service ddns start");
 #ifdef CONFIG_RT2860V2_AP_WSC
 	WPSRestart();
 #endif
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
-	doSystem("syslogd -C8 1>/dev/null 2>&1");
-	doSystem("klogd 1>/dev/null 2>&1");
+	doSystem("service syslog stop");
+	doSystem("service syslog start");
 }
 
 void management_fini(void)
 {
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
+	doSystem("service syslog stop");
 }
 
 void formDefineManagement(void)

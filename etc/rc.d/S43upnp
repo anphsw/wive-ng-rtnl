@@ -1,0 +1,40 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Start upnp "
+    if [ "$opmode" = "0" -o "$opmode" = "1" ]; then
+        upnp=`nvram_get 2860 upnpEnabled`
+        if [ "$upnp" = "1" ]; then
+                route add -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if
+                upnp_xml.sh $ip
+                upnpd -f $wan_ppp_if $lan_if &
+        fi
+    fi
+}
+
+stop() {
+ echo "Stop upnp "
+    killall upnpd
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

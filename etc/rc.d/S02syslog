@@ -12,6 +12,7 @@ stop() {
  echo "Stop goahead"
     killall -9 klogd
     killall -9 syslogd
+    echo > /var/log/messages
 }
 
 case "$1" in

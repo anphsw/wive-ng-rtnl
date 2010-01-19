@@ -257,7 +257,8 @@ static void iptablesAllFilterClear(void)
 	iptablesForwardFilterClear();
 	iptablesIPPortFilterClear();
 	iptablesWebContentFilterClear();
-
+	
+	doSystem("service iptables stop");
 	doSystem("iptables -P INPUT ACCEPT");
 	doSystem("iptables -P OUTPUT ACCEPT");
 	doSystem("iptables -P FORWARD ACCEPT");
@@ -727,7 +728,9 @@ static void iptablesAllFilterRun(void)
 
 	/* system filter */
 	iptablesRemoteManagementRun();
-
+	
+	/* user iptables */
+	doSystem("service iptables start");
 }
 
 static void iptablesAllNATRun(void)

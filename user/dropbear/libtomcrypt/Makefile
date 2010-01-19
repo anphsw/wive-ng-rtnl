@@ -2,7 +2,6 @@
 #
 # Tom St Denis
 # Modified by Clay Culver
-CC=mips-linux-gcc
 # The version
 VERSION=1.16
 

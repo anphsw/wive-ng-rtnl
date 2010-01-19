@@ -1,0 +1,39 @@
+#!/bin/sh
+
+start() {
+echo "Generate host key for first start"
+    if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
+	echo DSS file exist
+    else
+        echo "Generating ssh keys"
+        echo If no DSS key  and generate new key
+        dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
+    fi
+ echo "Starting inetd: "
+    /sbin/inetd
+}
+
+stop() {
+ echo "Stopping inetd: "
+ killall inetd
+ echo " Ok"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

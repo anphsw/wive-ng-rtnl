@@ -21,6 +21,5 @@ fi
 syslogd -m 0
 pppoe.sh $1 $2 $3 $4 $5
 pppd file /etc/options.pppoe &
-#iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 

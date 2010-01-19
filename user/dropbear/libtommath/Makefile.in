@@ -1,7 +1,6 @@
 #Makefile for GCC
 #
 #Tom St Denis
-CC=mips-linux-gcc
 #version of library 
 VERSION=0.40
 

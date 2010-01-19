@@ -1,0 +1,53 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Starting DynDNS: "
+    srv=`nvram_get 2860 DDNSProvider`
+    ddns=`nvram_get 2860 DDNS`
+    u=`nvram_get 2860 DDNSAccount`
+    pw=`nvram_get 2860 DDNSPassword`
+
+    if [ "$srv" = "" -o "$srv" = "none" ] || [ "$ddns" = "" -o "$u" = "" -o "$pw" = "" ]; then
+	exit 0
+    else
+	if [ "$srv" = "dyndns.org" ]; then
+	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv &
+	elif [ "$srv" = "freedns.afraid.org" ]; then
+	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
+	elif [ "$srv" = "zoneedit.com" ]; then
+	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
+	elif [ "$srv" = "no-ip.com" ]; then
+    	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
+	else
+	    echo "$0: unknown DDNS provider: $srv"
+	    exit 1
+        fi
+    fi
+}
+
+stop() {
+ echo "Stopping DynDns: "
+    killall -q inadyn
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

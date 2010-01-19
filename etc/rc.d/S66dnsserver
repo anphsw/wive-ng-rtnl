@@ -6,8 +6,9 @@ admID=`nvram_get 2860 Login`
 
 start() {
  echo "Starting DNSMASQ: "
+ if [ -f /etc/dnsmasq.conf ]; then
     /sbin/dnsmasq --conf-file=/etc/dnsmasq.conf -u $admID -g $admID
- echo " Ok"
+ fi 
 }
 
 stop() {

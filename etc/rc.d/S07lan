@@ -1,0 +1,69 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ ip=`nvram_get 2860 lan_ipaddr`
+ nm=`nvram_get 2860 lan_netmask`
+ echo "Add bridge in the system"
+    brctl addbr br0
+
+
+    ifconfig $lan_if down
+    ifconfig $lan_if $ip netmask $nm
+
+    opmode=`nvram_get 2860 OperationMode`
+    if [ "$opmode" = "0" ]; then
+        gw=`nvram_get 2860 wan_gateway`
+        pd=`nvram_get 2860 wan_primary_dns`
+        sd=`nvram_get 2860 wan_secondary_dns`
+        route del default
+        route add default gw $gw
+        config-dns.sh $pd $sd
+    fi
+
+    ifconfig "br0:9" down
+    ifconfig "eth2:9" down
+    lan2enabled=`nvram_get 2860 Lan2Enabled`
+    if [ "$lan2enabled" = "1" ]; then
+        ip_2=`nvram_get 2860 lan2_ipaddr`
+        nm_2=`nvram_get 2860 lan2_netmask`
+        if [ "$opmode" = "0" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "1" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "2" ]; then
+                ifconfig "eth2:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "3" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        fi
+    fi
+}
+
+stop() {
+ echo "OK"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

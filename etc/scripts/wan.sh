@@ -8,7 +8,6 @@
 . /sbin/global.sh
 
 # stop all
-killall -q syslogd
 killall -q udhcpc
 killall -q l2tpd
 killall -q pppd

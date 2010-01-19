@@ -17,16 +17,6 @@ start() {
     echo "Start nvram daemon"
     nvram_daemon &
     
-    echo "Make devices"
-    mknod /dev/pts/0              c       136     0
-    mknod /dev/pts/1              c       136     1
-    mknod /dev/pts/2              c       136     2
-    mknod /dev/pts/3              c       136     3
-    mknod /dev/pts/4              c       136     4
-    mknod /dev/pts/5              c       136     5
-    mknod /dev/pts/6              c       136     6
-    mknod /dev/pts/7              c       136     7
-
     mkdir /dev/pty
     mknod /dev/pty/m0             c       2       0
     mknod /dev/pty/m1             c       2       1
@@ -48,9 +38,6 @@ start() {
     mkdir /dev/tts
     mknod /dev/tts/0              c       4       64
     mknod /dev/tts/1              c       4       65
-    mknod /dev/tty                c       5       0
-    mknod /dev/console    c       5       1
-    mknod /dev/ptmx               c       5       2
 
     mkdir /dev/cua
     mknod /dev/cua/0              c       5       64

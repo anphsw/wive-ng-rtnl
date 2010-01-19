@@ -1,0 +1,71 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ echo "Start dhcpserver "
+ dhcp=`nvram_get 2860 dhcpEnabled`
+ if [ "$dhcp" = "1" ]; then
+        start=`nvram_get 2860 dhcpStart`
+        end=`nvram_get 2860 dhcpEnd`
+        mask=`nvram_get 2860 dhcpMask`
+        pd=`nvram_get 2860 dhcpPriDns`
+        sd=`nvram_get 2860 dhcpSecDns`
+        gw=`nvram_get 2860 dhcpGateway`
+        lease=`nvram_get 2860 dhcpLease`
+        static1=`nvram_get 2860 dhcpStatic1 | sed -e 's/;/ /'`
+        static2=`nvram_get 2860 dhcpStatic2 | sed -e 's/;/ /'`
+        static3=`nvram_get 2860 dhcpStatic3 | sed -e 's/;/ /'`
+	echo > /etc/udhcpd.conf
+	echo "" > /var/udhcpd.leases
+        config-udhcpd.sh -s $start
+        config-udhcpd.sh -e $end
+        config-udhcpd.sh -i $lan_if
+        config-udhcpd.sh -m $mask
+        if [ "$pd" != "" -o "$sd" != "" ]; then
+                config-udhcpd.sh -d $pd $sd
+        fi
+        if [ "$gw" != "" ]; then
+                config-udhcpd.sh -g $gw
+        fi
+        if [ "$lease" != "" ]; then
+                config-udhcpd.sh -t $lease
+        fi
+        if [ "$static1" != "" ]; then
+                config-udhcpd.sh -S $static1
+        fi
+        if [ "$static2" != "" ]; then
+                config-udhcpd.sh -S $static2
+        fi
+        if [ "$static3" != "" ]; then
+                config-udhcpd.sh -S $static3
+        fi
+        config-udhcpd.sh -r
+fi
+
+}
+
+stop() {
+ echo "Stop dhcpserver "
+    killall udhcpd	
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

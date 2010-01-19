@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+start() {
+ if [ -f /etc/ripd.conf ]; then
+    echo "Starting RIPD: "
+    ripd -f /etc/ripd.conf -d
+ fi 
+}
+
+stop() {
+ echo "Stopping RIPD: "
+  killall ripd
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

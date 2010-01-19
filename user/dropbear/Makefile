@@ -64,15 +64,15 @@ exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 sbindir=${exec_prefix}/sbin
 
-CC=mips-linux-gcc
+CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
 AR=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 RANLIB=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib
-STRIP=mipsel-linux-strip
+STRIP=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip
 INSTALL=install
 CPPFLAGS=
-CFLAGS=-I. -I$(srcdir) -I$(srcdir)/libtomcrypt/src/headers/ $(CPPFLAGS) -s -Os -fomit-frame-pointer -mno-memcpy
+CFLAGS=-I. -I$(srcdir) -I$(srcdir)/libtomcrypt/src/headers/ $(CPPFLAGS) -Os                   -Os                   -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL 
 LIBS=$(LTC) $(LTM)  -lcrypt
-LDFLAGS=-s -Os
+LDFLAGS=-Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 
 EXEEXT=
 

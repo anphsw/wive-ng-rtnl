@@ -53,6 +53,7 @@ dir_$(CONFIG_BPALOGIN)                      += bpalogin
 dir_$(CONFIG_USER_TC)                  	    += iproute2
 dir_$(CONFIG_USER_RADVD)               	    += flex
 dir_$(CONFIG_USER_RADVD)               	    += radvd
+dir_$(CONFIG_USER_ZEBRA)		    += zebra
 dir_$(CONFIG_USER_PPPD)                	    += pppd
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
@@ -72,6 +73,9 @@ ifeq ($(CONFIG_USER_PPPD),y)
 endif
 ifeq ($(CONFIG_USER_DROPBEAR),y)
 	cd dropbear  && ./DoConfigure.sh && make && make install && cd ..
+endif
+ifeq ($(CONFIG_USER_ZEBRA),y)
+	cd zebra  && ./DoConfigure.sh && make && make install && cd ..
 endif
 	$(MAKE) -j$(HOST_NCPU) $(dir_y) $(dir_v) $(dir_p) || exit $$?	
 
@@ -95,6 +99,9 @@ romfs:
 	done
 ifeq ($(CONFIG_PPPD),y)
 	cd ppp && make romfs && cd ..
+endif
+ifeq ($(CONFIG_USER_ZEBRA),y)
+	cd zebra && make romfs && cd ..
 endif
 
 clean:
