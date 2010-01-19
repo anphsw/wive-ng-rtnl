@@ -189,10 +189,10 @@ function PageInit()
 </table>
 
 
-<H1 id="statusEthPortStatus">Ethernet Port Status</H1>
+<!-- <H1 id="statusEthPortStatus">Ethernet Port Status</H1>
 <table border="1">
 <script type="text/javascript">showPortStatus();</script>
-</table>
+</table> -->
 
 </tr></td></table>
 </body>
