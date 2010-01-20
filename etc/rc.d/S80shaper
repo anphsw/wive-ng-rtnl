@@ -1,0 +1,53 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+lan_ip=`nvram_get 2860 lan_ipaddr`
+nm=`nvram_get 2860 lan_netmask`
+NAT=`nvram_get 2860 natEnabled`
+SEC=`nvram_get 2860 SecurityMode`
+IMQ=0
+start() {
+ echo "Starting SHAPER: "
+    tc qdisc del dev $lan_if root /dev/null 2>&1
+    tc qdisc del dev $lan_if ingress /dev/null 2>&1
+    tc qdisc del dev $wan_if root  /dev/null 2>&1
+    tc qdisc del dev $wan_if ingress  /dev/null 2>&1
+    if [ "$IMQ" = "0" ]; then
+	echo "ooo"
+    else
+	#round-robin per session for WAN output
+	tc qdisc add dev $wan_if root sfq perturb 10 quantum 1500	
+	#round-robin per session for LAN output
+	tc qdisc add dev $lan_if root esfq perturb 10 quantum 1500	
+    fi
+	
+}
+
+stop() {
+ echo "Stopping SHAPER: "
+    tc qdisc del dev $lan_if root /dev/null 2>&1
+    tc qdisc del dev $lan_if ingress /dev/null 2>&1
+    tc qdisc del dev $wan_if root  /dev/null 2>&1
+    tc qdisc del dev $wan_if ingress  /dev/null 2>&1
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

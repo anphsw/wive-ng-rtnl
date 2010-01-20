@@ -430,6 +430,10 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	C(nfct_reasm);
 	nf_conntrack_get_reasm(skb->nfct_reasm);
 #endif
+#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
+	C(imq_flags);
+	C(nf_info);
+#endif /*CONFIG_IMQ*/
 #ifdef CONFIG_BRIDGE_NETFILTER
 	C(nf_bridge);
 	nf_bridge_get(skb->nf_bridge);
@@ -494,6 +498,10 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 #if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 	new->ipvs_property = old->ipvs_property;
 #endif
+#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
+	new->imq_flags	= old->imq_flags;
+	new->nf_info	= old->nf_info;
+#endif /*CONFIG_IMQ*/
 #ifdef CONFIG_BRIDGE_NETFILTER
 	new->nf_bridge	= old->nf_bridge;
 	nf_bridge_get(old->nf_bridge);

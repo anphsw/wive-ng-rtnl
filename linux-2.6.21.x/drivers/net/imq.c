@@ -261,7 +261,7 @@ err6:
 err5:
 	nf_unregister_queue_handler(PF_INET6);
 err4:
-	nf_unregister_hook(&imq_egress_ipv4);
+	nf_unregister_hook(&imq_egress_ipv6);
 #endif
 err3:
 	nf_unregister_hook(&imq_ingress_ipv4);
@@ -287,8 +287,8 @@ static int __init imq_dev_init(struct net_device *dev)
 {
 	dev->hard_start_xmit    = imq_dev_xmit;
 	dev->type               = ARPHRD_VOID;
-	dev->mtu                = 1500;
-	dev->tx_queue_len       = 30;
+	dev->mtu                = 16000;
+	dev->tx_queue_len       = 11000;
 	dev->flags              = IFF_NOARP;
 	dev->priv = kmalloc(sizeof(struct net_device_stats), GFP_KERNEL);
 	if (dev->priv == NULL)

@@ -20,6 +20,7 @@
 19) Add rwfs support (fs save | fs restore | fs load)<br>
 20) Auto set mss size<br>
 21) Masqrade now work correctly<br>
+22) IMQ support added
 
 <br>
 <b>ToDo:</b><br>

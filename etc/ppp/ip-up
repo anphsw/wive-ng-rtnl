@@ -8,13 +8,6 @@
     #corbiba hack
     ip route del $5
     
-
-    #add masq
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    nm=`nvram_get 2860 lan_netmask`
-    iptables -I FORWARD -o $1 -s $lan_ip/$nm -j ACCEPT 2> /dev/null
-    iptables -I POSTROUTING -t nat -o $1 -s $lan_ip/$nm -j MASQUERADE 2> /dev/null
-
     #calculate min mtu
     MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
     iptables -t mangle -A FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* Shared library add-on to iptables to add IMQ target support. */
 #include <stdio.h>
 #include <string.h>
@@ -96,20 +80,19 @@ save(const struct ipt_ip *ip, const struct ipt_entry_target *target)
 	printf("--todev %u", mr->todev);
 }
 
-static
-struct iptables_target imq
-= { NULL,
-    "IMQ",
-    IPTABLES_VERSION,
-    IPT_ALIGN(sizeof(struct ipt_imq_info)),
-    IPT_ALIGN(sizeof(struct ipt_imq_info)),
-    &help,
-    &init,
-    &parse,
-    &final_check,
-    &print,
-    &save,
-    opts
+static struct iptables_target imq = {
+	.next		= NULL,
+	.name		= "IMQ",
+	.version	= IPTABLES_VERSION,
+	.size		= IPT_ALIGN(sizeof(struct ipt_imq_info)),
+	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_imq_info)),
+	.help		= &help,
+	.init		= &init,
+	.parse		= &parse,
+	.final_check	= &final_check,
+	.print		= &print,
+	.save		= &save,
+	.extra_opts	= opts
 };
 
 void _init(void)

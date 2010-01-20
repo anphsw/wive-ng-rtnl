@@ -1,23 +1,16 @@
 #!/bin/sh
 
-    #restart dns server
-    service dnsserver stop
-    service dnsserver start
-
-
     #Flush route cache
     ip route flush cache
-
-    #Del masquerade over $1 interface
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    nm=`nvram_get 2860 lan_netmask`
-    iptables -D FORWARD -o $1 -s $lan_ip/$nm -j ACCEPT 2> /dev/null
-    iptables -D POSTROUTING -t nat -o $1 -s $lan_ip/$nm -j MASQUERADE 2> /dev/null
 
     #read min mtu
     MINMTU=`cat /tmp/ppp-mtu`
     iptables -t mangle -D FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     rm -f /tmp/ppp-mtu
+
+    #restart dns server
+    service dnsserver stop
+    service dnsserver start
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

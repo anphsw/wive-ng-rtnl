@@ -5,25 +5,47 @@
 
 lan_ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`
-NAT=`nvram_get 2860  natEnabled`
+NAT=`nvram_get 2860 natEnabled`
+SEC=`nvram_get 2860 SecurityMode`
 
 #calculate min mtu
 MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
 
 start() {
  echo "Starting IPTABLES: "
-        iptables -A INPUT  -i lo+ -j ACCEPT
-	iptables -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-	iptables -I INPUT -m state --state INVALID -j DROP
+	#default filters
+        iptables -A INPUT -i lo+ -j ACCEPT
+	iptables -A INPUT -m state --state INVALID -j DROP
+	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-        iptables -N servicelimit
-        iptables -A INPUT -j servicelimit
-	
+	#rules for access services from wan (DROP)
+	if [ "$SEC" = "0" ]; then
+	echo "Drop acess from wan"
+	    iptables -A INPUT -i $wan_if -m state --state NEW -j DROP
+    	    iptables -A INPUT -i $wan_if ! -p icmp -j DROP
+	    iptables -A INPUT -i ppp+ -m state --state NEW -j DROP
+    	    iptables -A INPUT -i ppp+ ! -p icmp -j DROP
+	fi
+
+	#enable services for local network
+	iptables -A INPUT -i $lan_if -s $lan_ip/$nm -j ACCEPT
+
+	#enable forward only from local network to wan/ppp
+	iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
+	iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
+        iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
+
+        #add limit connection rules for local services
+	iptables -N servicelimit
         iptables -F servicelimit
+        iptables -A INPUT -j servicelimit
+
 	#telnet ssh snmp limit
-        iptables -A servicelimit -p tcp --dport 21:23 -m connlimit --connlimit-above 4 -j REJECT
+        iptables -A servicelimit -p tcp --dport 22:23 -m connlimit --connlimit-above 4 -j REJECT
 	#web limit
         iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
+	#udpxy limit
+        iptables -A servicelimit -p tcp --dport 81 -m connlimit --connlimit-above 8 -j REJECT
         #icmp limit
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
         iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
@@ -33,11 +55,14 @@ start() {
 	iptables -t mangle -A FORWARD -p tcp ! -o ppp+ --tcp-flags SYN,RST SYN \
 			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
         
+	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ]; then
 	echo "Add masqrade rules"
+	    iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
     	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
 	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE
 	fi
+	
 }
 
 stop() {
@@ -62,6 +87,12 @@ stop() {
         iptables -t filter -Z > /dev/null 2>&1
         iptables -t mangle -Z > /dev/null 2>&1
 	iptables -Z > /dev/null 2>&1
+
+	#default actions
+	iptables -P FORWARD DROP > /dev/null 2>&1
+	iptables -P INPUT ACCEPT > /dev/null 2>&1
+	iptables -P OUTPUT ACCEPT > /dev/null 2>&1
+
 }
 
 case "$1" in

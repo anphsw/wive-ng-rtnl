@@ -836,6 +836,7 @@ static void tcp_init_metrics(struct sock *sk)
 	tcp_bound_rto(sk);
 	if (inet_csk(sk)->icsk_rto < TCP_TIMEOUT_INIT && !tp->rx_opt.saw_tstamp)
 		goto reset;
+cwnd:
 	tp->snd_cwnd = tcp_init_cwnd(tp, dst);
 	tp->snd_cwnd_stamp = tcp_time_stamp;
 	return;
@@ -850,6 +851,7 @@ reset:
 		tp->mdev = tp->mdev_max = tp->rttvar = TCP_TIMEOUT_INIT;
 		inet_csk(sk)->icsk_rto = TCP_TIMEOUT_INIT;
 	}
+goto cwnd;
 }
 
 static void tcp_update_reordering(struct sock *sk, const int metric,
