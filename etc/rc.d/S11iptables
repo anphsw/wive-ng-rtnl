@@ -6,7 +6,7 @@
 lan_ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`
 NAT=`nvram_get 2860 natEnabled`
-SEC=`nvram_get 2860 SecurityMode`
+RMG=`nvram_get 2860 RemoteManagement`
 
 #calculate min mtu
 MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
@@ -18,13 +18,24 @@ start() {
 	iptables -A INPUT -m state --state INVALID -j DROP
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+	iptables -t filter -N web_filter
+	iptables -t filter -N macipport_filter
+    	iptables -t filter -A FORWARD -j macipport_filter
+	iptables -t filter -A FORWARD -j web_filter
+
 	#rules for access services from wan (DROP)
-	if [ "$SEC" = "0" ]; then
-	echo "Drop acess from wan"
+	if [ "$RMG" = "0" ]; then
+	echo "Drop acess from wan $wan_if"
 	    iptables -A INPUT -i $wan_if -m state --state NEW -j DROP
     	    iptables -A INPUT -i $wan_if ! -p icmp -j DROP
 	    iptables -A INPUT -i ppp+ -m state --state NEW -j DROP
     	    iptables -A INPUT -i ppp+ ! -p icmp -j DROP
+	else
+	echo "Allow acess from wan $wan_if"
+	    iptables -A INPUT -i $wan_if -m state --state NEW -j RETURN
+    	    iptables -A INPUT -i $wan_if ! -p icmp -j RETURN
+	    iptables -A INPUT -i ppp+ -m state --state NEW -j RETURN
+    	    iptables -A INPUT -i ppp+ ! -p icmp -j RETURN
 	fi
 
 	#enable services for local network
@@ -58,6 +69,10 @@ start() {
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ]; then
 	echo "Add masqrade rules"
+	    iptables -t nat -N port_forward
+	    iptables -t nat -N DMZ
+	    iptables -t nat -I PREROUTING 1 -j port_forward
+	    iptables -t nat -I PREROUTING 2 -j DMZ
 	    iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
     	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
 	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE

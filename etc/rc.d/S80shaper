@@ -10,13 +10,15 @@ SEC=`nvram_get 2860 SecurityMode`
 IMQ=0
 start() {
  echo "Starting SHAPER: "
-    tc qdisc del dev $lan_if root /dev/null 2>&1
-    tc qdisc del dev $lan_if ingress /dev/null 2>&1
-    tc qdisc del dev $wan_if root  /dev/null 2>&1
-    tc qdisc del dev $wan_if ingress  /dev/null 2>&1
-    if [ "$IMQ" = "0" ]; then
-	echo "ooo"
+    tc qdisc del dev $lan_if root > /dev/null 2>&1
+    tc qdisc del dev $lan_if ingress > /dev/null 2>&1
+    tc qdisc del dev $wan_if root  > /dev/null 2>&1
+    tc qdisc del dev $wan_if ingress > /dev/null 2>&1
+    if [ "$IMQ" = "1" ]; then
+	echo "IMQ fullshape mode"
+	ifconfig imq0 up
     else
+	echo "Non IMQ base shaper mode"
 	#round-robin per session for WAN output
 	tc qdisc add dev $wan_if root sfq perturb 10 quantum 1500	
 	#round-robin per session for LAN output
@@ -27,10 +29,13 @@ start() {
 
 stop() {
  echo "Stopping SHAPER: "
-    tc qdisc del dev $lan_if root /dev/null 2>&1
-    tc qdisc del dev $lan_if ingress /dev/null 2>&1
-    tc qdisc del dev $wan_if root  /dev/null 2>&1
-    tc qdisc del dev $wan_if ingress  /dev/null 2>&1
+    tc qdisc del dev $lan_if root > /dev/null 2>&1
+    tc qdisc del dev $lan_if ingress > /dev/null 2>&1
+    tc qdisc del dev $wan_if root  > /dev/null 2>&1
+    tc qdisc del dev $wan_if ingress > /dev/null 2>&1
+    tc qdisc del dev imq0 root > /dev/null 2>&1
+    tc qdisc del dev imq0 ingress > /dev/null 2>&1
+    ifconfig imq0 down > /dev/null 2>&1
 }
 
 case "$1" in

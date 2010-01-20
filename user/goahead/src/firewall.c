@@ -1930,28 +1930,19 @@ void formDefineFirewall(void)
 
 void firewall_init(void)
 {
-	// init filter (clear all and set defaults actions)
+	//clear filter (clear all and set defaults actions)
 	doSystem("service iptables stop");
-	iptablesForwardFilterClear();
+	doSystem("service shaper stop");
+
+	////----DROP-ALL-RULES-IN-RC.D----////
+	/*iptablesForwardFilterClear();
 	iptablesIPPortFilterClear();
 	iptablesWebContentFilterClear();
-	iptablesAllNATClear();
+	iptablesAllNATClear();*/
 
-	// init FILTERS chains
+	//init filters and rules
 	doSystem("service iptables start");
-	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-
-	// init NAT(DMZ) chains
-	// We use -I instead of -A here to prevent from default MASQUERADE NAT rule 
-	// being in front of us.
-	// So "port forward chain" has the highest priority in the system, and "DMZ chain" is the second one.
-	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 1 -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
-	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 2 -j %s 1>/dev/null 2>&1", DMZ_CHAIN, DMZ_CHAIN);
-
-	//filters and rules
+	doSystem("service shaper start");
 	iptablesIPPortFilterRun();
 	iptablesWebsFilterRun();
 	iptablesRemoteManagementRun();
