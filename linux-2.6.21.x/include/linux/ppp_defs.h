@@ -1,4 +1,4 @@
-/*	$Id: ppp_defs.h,v 1.1.1.1 2007-05-25 06:50:12 bruce Exp $	*/
+/*	$Id: ppp_defs.h,v 1.2 1994/09/21 01:31:06 paulus Exp $	*/
 
 /*
  * ppp_defs.h - PPP definitions.

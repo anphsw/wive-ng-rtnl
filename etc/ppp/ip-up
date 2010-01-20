@@ -8,9 +8,6 @@
     #corbiba hack
     ip route del $5
     
-    #restart dns server
-    service dnsserver stop
-    service dnsserver start
 
     #add masq
     lan_ip=`nvram_get 2860 lan_ipaddr`
@@ -23,5 +20,11 @@
     iptables -t mangle -A FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     echo $MINMTU > /tmp/ppp-mtu
+
+    #restart dns server and ntp sync
+    service ntp stop
+    service dnsserver stop
+    service ntp start
+    service dnsserver start
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

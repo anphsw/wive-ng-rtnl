@@ -89,7 +89,7 @@
   <message msgid="status introduction" msgstr="Let's take a look at the status of Ralink 2880 Platform." />
   <message msgid="status system information" msgstr="System Info" />
   <message msgid="status sdk version" msgstr="SDK Version" />
-  <message msgid="status system up time" msgstr="System Up Time" />
+  <message msgid="status system time" msgstr="System Time" />
   <message msgid="status system platform" msgstr="System Platform" />
   <message msgid="status operate mode" msgstr="Operation Mode" />
   <message msgid="status internet config" msgstr="Internet Configurations" />

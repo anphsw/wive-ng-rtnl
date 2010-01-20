@@ -1519,7 +1519,7 @@ ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 	ppp_recv_unlock(ppp);
 }
 
-unsigned int dbg_print = 1;
+unsigned int dbg_print = 0;
 unsigned int dbg_max_print = 0;
 
 void

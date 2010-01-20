@@ -68,7 +68,7 @@ function initTranslation()
 	e = document.getElementById("statusSDKVersion");
 	e.innerHTML = _("status sdk version");
 	e = document.getElementById("statusSysUpTime");
-	e.innerHTML = _("status system up time");
+	e.innerHTML = _("status system time");
 	e = document.getElementById("statusSysPlatform");
 	e.innerHTML = _("status system platform");
 	e = document.getElementById("statusOPMode");
@@ -126,7 +126,7 @@ function PageInit()
   <td><% getSdkVersion(); %> (<% getSysBuildTime(); %>)</td>
 </tr>
 <tr>
-  <td class="head" id="statusSysUpTime">System Up Time</td>
+  <td class="head" id="statusSysUpTime">System Time</td>
   <td><% getSysUptime(); %></td>
 </tr>
 <tr>

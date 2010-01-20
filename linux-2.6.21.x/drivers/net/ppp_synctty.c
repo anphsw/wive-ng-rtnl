@@ -594,7 +594,8 @@ ppp_sync_txmunge(struct syncppp *ap, struct sk_buff *skb)
 				return NULL;
 			}
 			skb_reserve(npkt,2);
-			memcpy(skb_put(npkt,skb->len), skb->data, skb->len);
+			skb_copy_from_linear_data(skb,
+				      skb_put(npkt, skb->len), skb->len);
 			kfree_skb(skb);
 			skb = npkt;
 		}
@@ -621,25 +622,11 @@ ppp_sync_txmunge(struct syncppp *ap, struct sk_buff *skb)
  * If the packet was not accepted, we will call ppp_output_wakeup
  * at some later time.
  */
-#define PPP_PROTO(skb)  (((skb)->data[0] << 8) + (skb)->data[1])        // tmp test
-
-extern unsigned int dbg_print;
-extern unsigned int dbg_max_print;
-
 static int
 ppp_sync_send(struct ppp_channel *chan, struct sk_buff *skb)
 {
 	struct syncppp *ap = chan->private;
-	unsigned int proto;
 
-	if(dbg_print)
-	{
-		proto = PPP_PROTO(skb);
-		printk(" ***[K_sync] send frame [%x]***\n", proto);	// tmp test
-		++dbg_max_print;
-		if(dbg_max_print > 50)
-			dbg_print = 0;
-	}
 	ppp_sync_push(ap);
 
 	if (test_and_set_bit(XMIT_FULL, &ap->xmit_flags))

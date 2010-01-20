@@ -637,16 +637,11 @@ ppp_async_encode(struct asyncppp *ap)
  * If the packet was not accepted, we will call ppp_output_wakeup
  * at some later time.
  */
-#define PPP_PROTO(skb)  (((skb)->data[0] << 8) + (skb)->data[1])	// tmp test
-
 static int
 ppp_async_send(struct ppp_channel *chan, struct sk_buff *skb)
 {
 	struct asyncppp *ap = chan->private;
-	//unsigned int proto;	// tmp test
 
-	//proto = PPP_PROTO(skb);
-	//printk(" ***[K_asyn] send frame [%x]***\n", proto);	// tmp test
 	ppp_async_push(ap);
 
 	if (test_and_set_bit(XMIT_FULL, &ap->xmit_flags))
