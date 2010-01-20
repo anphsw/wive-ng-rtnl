@@ -60,6 +60,7 @@ dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
 dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
+dir_$(CONFIG_USER_MCPROBE)                  += mcprobe
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 

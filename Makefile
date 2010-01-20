@@ -289,6 +289,7 @@ romfs.subdirs:
 romfs.post:
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
+	date +%D > $(ROMFSDIR)/etc/compile-date
 	cp -vf  $(ROOTDIR)/linux/.config $(ROMFSDIR)/etc/scripts/config.sh
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh

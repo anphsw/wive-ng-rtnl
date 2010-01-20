@@ -105,6 +105,7 @@ fi
 
 bool 'igmp proxy (RFC4605)'			CONFIG_USER_IGMP_PROXY
 bool 'udpxy'					CONFIG_USER_UDPXY
+bool 'mcprobe'					CONFIG_USER_MCPROBE
 bool 'inadyn (DDNS Client)'     		CONFIG_USER_INADYN
 bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
 bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES

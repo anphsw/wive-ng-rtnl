@@ -1771,10 +1771,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("MAC Clone Enable: %s<br>\n"), clone_en);
 	if (!strncmp(clone_en, "1", 2))
 		websWrite(wp, T("MAC Address: %s<br>\n"), clone_mac);
-
-        /* restart dns server */
-        doSystem("service dnsserver stop && service dnsserver start");
-
 	websFooter(wp);
 	websDone(wp, 200);
 }

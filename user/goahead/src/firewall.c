@@ -258,7 +258,6 @@ static void iptablesAllFilterClear(void)
 	iptablesIPPortFilterClear();
 	iptablesWebContentFilterClear();
 	
-	doSystem("service iptables stop");
 	doSystem("iptables -P INPUT ACCEPT");
 	doSystem("iptables -P OUTPUT ACCEPT");
 	doSystem("iptables -P FORWARD ACCEPT");
@@ -460,8 +459,6 @@ static void iptablesRemoteManagementRun(void)
 
 	if(rmE && atoi(rmE) == 1)
 		return;
-
-	doSystem("iptables -A INPUT -i %s -m state --state RELATED,ESTABLISHED -j ACCEPT", getWanIfNamePPP());
 	if(getOnePortOnly()){
 		// make the web server to be reachable.
 		doSystem("iptables -A INPUT -i %s -m state -d 172.32.1.254 -p tcp --dport 80 --state NEW,INVALID -j ACCEPT", getWanIfNamePPP());
@@ -530,12 +527,6 @@ static void iptablesIPPortFilterRun(void)
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		default_policy = "0";
-
-	if(atoi(default_policy) == 1){
-		//the default policy is drop
-		doSystem("iptables -t filter -A %s -m state --state RELATED,ESTABLISHED -j ACCEPT", IPPORT_FILTER_CHAIN);
-	}
-
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
         // get sip 1
         if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
@@ -728,9 +719,6 @@ static void iptablesAllFilterRun(void)
 
 	/* system filter */
 	iptablesRemoteManagementRun();
-	
-	/* user iptables */
-	doSystem("service iptables start");
 }
 
 static void iptablesAllNATRun(void)
@@ -1974,13 +1962,15 @@ void formDefineFirewall(void)
 void firewall_init(void)
 {
 	// init filter
+	doSystem("service iptables stop");
 	iptablesAllFilterClear();
+
 	// make a new chain
+	doSystem("service iptables start");
 	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
 	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
 	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
 	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-	doSystem("iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 1>/dev/null 2>&1");
 	iptablesAllFilterRun();
 
 	// init NAT(DMZ)

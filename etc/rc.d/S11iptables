@@ -3,6 +3,13 @@
 #get params
 . /sbin/global.sh
 
+lan_ip=`nvram_get 2860 lan_ipaddr`
+nm=`nvram_get 2860 lan_netmask`
+NAT=`nvram_get 2860  natEnabled`
+
+#calculate min mtu
+MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
+
 start() {
  echo "Starting IPTABLES: "
         iptables -A INPUT  -i lo+ -j ACCEPT
@@ -10,7 +17,7 @@ start() {
 	iptables -I INPUT -m state --state INVALID -j DROP
 
         iptables -N servicelimit
-        iptables -I INPUT -j servicelimit
+        iptables -A INPUT -j servicelimit
 	
         iptables -F servicelimit
 	#telnet ssh snmp limit
@@ -20,6 +27,17 @@ start() {
         #icmp limit
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
         iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
+
+	#tune mss size for tranzit packets
+	iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	iptables -t mangle -A FORWARD -p tcp ! -o ppp+ --tcp-flags SYN,RST SYN \
+			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
+        
+	if [ "$NAT" = "1" ]; then
+	echo "Add masqrade rules"
+    	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
+	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE
+	fi
 }
 
 stop() {

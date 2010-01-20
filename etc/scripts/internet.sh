@@ -326,7 +326,6 @@ elif [ "$CONFIG_ICPLUS_PHY" = "y" ]; then
 fi
 
 service netuplo stop
-service iptables stop
 service netuplo start
 
 #

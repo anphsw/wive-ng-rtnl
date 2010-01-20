@@ -8,24 +8,25 @@
 . /sbin/global.sh
 
 # stop all
-service lld2d stop
-service igmpproxy stop
 service dnsserver stop
-service pppoe-relay stop
-service radvd stop
 service dhcpd stop
-service udpxy stop
+service igmpproxy stop
 service upnp stop
+service udpxy stop
+service radvd stop
+service lld2d stop
+service pppoe-relay stop
+service stp stop
 
 #start all
 service lan start
 service hostname start
+service stp start
 service lld2d start
-service igmpproxy start
-service dnsserver start
 service pppoe-relay start
 service radvd start
-service stp start
-service dhcpd start
 service udpxy start
+service igmpproxy start
 service upnp start
+service dhcpd start
+service dnsserver start

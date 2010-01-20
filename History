@@ -18,6 +18,8 @@
 17) Rewrite pptp/l2tp/pppoe scripts to support buggy nas (corbina etc)<br>
 18) miniupnpd now work too<br>
 19) Add rwfs support (fs save | fs restore | fs load)<br>
+20) Auto set mss size<br>
+21) Masqrade now work correctly<br>
 
 <br>
 <b>ToDo:</b><br>
