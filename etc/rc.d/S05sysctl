@@ -7,7 +7,6 @@ start() {
     sysctl -w net.ipv4.conf.all.accept_source_route=0
     sysctl -w net.ipv4.netfilter.ip_conntrack_generic_timeout=200
     sysctl -w net.ipv4.netfilter.ip_conntrack_tcp_timeout_established=3600
-    sysctl -w net.ipv4.ip_conntrack_max=512
     sysctl -w net.ipv4.netfilter.ip_conntrack_icmp_timeout=30
     sysctl -w net.ipv4.netfilter.ip_conntrack_udp_timeout_stream=120
     sysctl -w net.ipv4.netfilter.ip_conntrack_udp_timeout=30
@@ -30,7 +29,6 @@ start() {
 
 stop() {
  echo "Stopping sysctl: "
- echo " Ok"
 }
 
 case "$1" in

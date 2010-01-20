@@ -111,7 +111,7 @@ static void nvramIrqHandler(int signum)
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 		loadDefault(2561);
 #endif
-		system("reboot");
+		system("fs restore");
 	}
 }
 

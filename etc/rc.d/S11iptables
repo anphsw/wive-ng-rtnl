@@ -24,26 +24,26 @@ start() {
 
 stop() {
  echo "Stopping IPTABLES: "
-	echo -e "*nat\nCOMMIT\n*filter\nCOMMIT\n*mangle\nCOMMIT\n" | iptables-restore
-	iptables -F
-	iptables -t nat -F
-        iptables -t filter -F
-        iptables -t mangle -F
-        iptables -X
-        iptables -t nat -X
-        iptables -t filter -X
-        iptables -t mangle -X
+	echo -e "*nat\nCOMMIT\n*filter\nCOMMIT\n*mangle\nCOMMIT\n" | iptables-restore > /dev/null 2>&1
+	iptables -F > /dev/null 2>&1
+	iptables -t nat -F > /dev/null 2>&1
+        iptables -t filter -F > /dev/null 2>&1
+        iptables -t mangle -F > /dev/null 2>&1
+        iptables -X > /dev/null 2>&1
+        iptables -t nat -X > /dev/null 2>&1
+        iptables -t filter -X > /dev/null 2>&1
+        iptables -t mangle -X > /dev/null 2>&1
 
-        iptables -t mangle -F PREROUTING
-        iptables -t mangle -F FORWARD
-        iptables -t mangle -F INPUT
-        iptables -t mangle -F OUTPUT
-        iptables -t mangle -F POSTROUTING
+        iptables -t mangle -F PREROUTING > /dev/null 2>&1
+        iptables -t mangle -F FORWARD > /dev/null 2>&1
+        iptables -t mangle -F INPUT > /dev/null 2>&1
+        iptables -t mangle -F OUTPUT > /dev/null 2>&1
+        iptables -t mangle -F POSTROUTING > /dev/null 2>&1
 
-        iptables -t nat -Z
-        iptables -t filter -Z
-        iptables -t mangle -Z
-	iptables -Z
+        iptables -t nat -Z > /dev/null 2>&1
+        iptables -t filter -Z > /dev/null 2>&1
+        iptables -t mangle -Z > /dev/null 2>&1
+	iptables -Z > /dev/null 2>&1
 }
 
 case "$1" in

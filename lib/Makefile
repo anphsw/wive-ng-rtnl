@@ -72,8 +72,12 @@ endif
 ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
     DIRS += libzebra
 endif
-# 3g support
-    DIRS += libusb-0.1.12
+ifeq ($(CONFIG_LIB_USB),y)
+    DIRS += libusb
+endif
+ifeq ($(CONFIG_LIB_NAT),y)
+    DIRS += libnatpmp
+endif
 
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
@@ -128,6 +132,12 @@ ifeq ($(CONFIG_LIB_LIBPTHREAD_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
 	@$(MAKE) -C libzebra shared
+endif
+ifeq ($(CONFIG_LIB_USB),y)
+	@$(MAKE) -C libusb shared
+endif
+ifeq ($(CONFIG_LIB_NAT),y)
+	@$(MAKE) -C libnatpmp shared
 endif
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 	@$(MAKE) -C libintl shared

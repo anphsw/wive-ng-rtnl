@@ -3,13 +3,39 @@
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
 
-/bin/echo "Prepare start init!" > /dev/console
-export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
-/bin/echo "Init RW etc and dev particion" > /dev/console
-/bin/zcat /dev.gz | /bin/tar xf - -C /
-/bin/zcat /rwfs.gz | /bin/tar xf - -C /
+TGZfs_size=131072
 
-/bin/echo "Start init..." > /dev/console
+get_size(){
+  ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
+}
+
+echo "Prepare start init!" > /dev/console
+export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+echo "Init DEV particion" > /dev/console
+zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
+
+echo "Init RW particion" > /dev/console
+zcat /dev/mtdblock4 | /bin/tar xf - -C / > /dev/null 2>&1
+
+if [ -f /etc/filesystem.ok ]; then
+    echo "RW File system is ok - preparing ..." > /dev/console
+  else
+    echo "File system is clear or poor." > /dev/console
+    zcat /rwfs.gz | tar xf - -C / >>/dev/null
+    echo > /etc/filesystem.ok
+    echo "Compress config files" > /dev/console
+    tmp="/tmp/tgzfs"
+    tar cf - /etc | gzip -9 > $tmp
+    if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
+	echo "Write configs to flash" > /dev/console
+	dd if=$tmp of=/dev/mtdblock4 bs=64k count=2 conv=sync > /dev/null 2>&1
+	echo "Config saved. OK." > /dev/console
+    else
+	echo "Error: File $tmp too big: $(get_size $tmp)k" > /dev/console
+    fi
+     rm $tmp
+fi
+
 for i in /etc/rc.d/S??* ;do
      # Ignore dangling symlinks (if any).
      [ ! -f "$i" ] && continue

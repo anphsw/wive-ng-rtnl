@@ -2,7 +2,7 @@
  * Automatically generated C config: don't edit
  * Busybox version: 1.15.3
  */
-#define AUTOCONF_TIMESTAMP "2010-01-20 04:02:53 OMST"
+#define AUTOCONF_TIMESTAMP "2010-01-20 11:11:06 OMST"
 
 #define CONFIG_HAVE_DOT_CONFIG 1
 #define ENABLE_HAVE_DOT_CONFIG 1
@@ -376,14 +376,14 @@
 #define ENABLE_GZIP 1
 #define IF_GZIP(...) __VA_ARGS__
 #define IF_NOT_GZIP(...)
-#undef CONFIG_LZOP
-#define ENABLE_LZOP 0
-#define IF_LZOP(...)
-#define IF_NOT_LZOP(...) __VA_ARGS__
-#undef CONFIG_LZOP_COMPR_HIGH
-#define ENABLE_LZOP_COMPR_HIGH 0
-#define IF_LZOP_COMPR_HIGH(...)
-#define IF_NOT_LZOP_COMPR_HIGH(...) __VA_ARGS__
+#define CONFIG_LZOP 1
+#define ENABLE_LZOP 1
+#define IF_LZOP(...) __VA_ARGS__
+#define IF_NOT_LZOP(...)
+#define CONFIG_LZOP_COMPR_HIGH 1
+#define ENABLE_LZOP_COMPR_HIGH 1
+#define IF_LZOP_COMPR_HIGH(...) __VA_ARGS__
+#define IF_NOT_LZOP_COMPR_HIGH(...)
 #undef CONFIG_RPM2CPIO
 #define ENABLE_RPM2CPIO 0
 #define IF_RPM2CPIO(...)

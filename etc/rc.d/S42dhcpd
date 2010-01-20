@@ -48,7 +48,7 @@ fi
 
 stop() {
  echo "Stop dhcpserver "
-    killall udhcpd	
+    killall udhcpd  > /dev/null 2>&1
 }
 
 case "$1" in

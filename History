@@ -16,9 +16,9 @@
 15) Full rc scrips is write in rwfs<br>
 16) RT3052F embed switch full work now<br>
 17) Rewrite pptp/l2tp/pppoe scripts to support buggy nas (corbina etc)<br>
+18) miniupnpd now work too<br>
+19) Add rwfs support (fs save | fs restore | fs load)<br>
 
 <br>
 <b>ToDo:</b><br>
-1) Add rwfs<br>
-2) Job control fix<br>
-3) upnp daemon need<br>
+1) Job control fix<br>

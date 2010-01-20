@@ -13,8 +13,7 @@ start() {
 
 stop() {
  echo "Stopping DNSMASQ: "
-  killall dnsmasq
- echo " Ok"
+  killall dnsmasq > /dev/null 2>&1
 }
 
 case "$1" in

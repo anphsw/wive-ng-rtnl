@@ -61,7 +61,7 @@ dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
 dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
-#dir_$(CONFIG_USER_MINIUPNPD)                += upnp
+dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
@@ -104,6 +104,9 @@ romfs:
 	done
 ifeq ($(CONFIG_USER_PPPD),y)
 	cd ppp && make romfs && cd ..
+endif
+ifeq ($(CONFIG_USER_MINIUPNPD),y)
+	cd miniupnp  && ./genconfig.sh && make && make install && cd ..
 endif
 
 clean:

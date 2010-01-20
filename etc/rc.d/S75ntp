@@ -9,6 +9,7 @@ start() {
     sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
 
+    backup_time=`date +%T`
     sync=`expr $sync \* 3600`
 
     if [ "$tz" = "" ]; then
@@ -20,6 +21,7 @@ start() {
     sed -e 's#\(.*\)--\(.*\)#\1\2#' /etc/tmpTZ2 > /etc/TZ
     rm -rf /etc/tmpTZ
     rm -rf /etc/tmpTZ2
+    date +%T -s $backup_time
 
     if [ "$srv" != "" ]; then
 	ntpclient -s -c 0 -h $srv -i $sync &
@@ -28,7 +30,7 @@ start() {
 
 stop() {
  echo "Stopping NTP: "
-    killall ntpclient
+    killall ntpclient > /dev/null 2>&1
 }
 
 case "$1" in

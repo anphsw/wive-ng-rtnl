@@ -7,8 +7,7 @@ start() {
 
 stop() {
  echo "Stopping crontab: "
- killall crond
- echo " Ok"
+ killall crond > /dev/null 2>&1
 }
 
 case "$1" in

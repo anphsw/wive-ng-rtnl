@@ -5,16 +5,12 @@ start() {
     ifconfig lo 127.0.0.1 up
     ip route add 127.0.0.0/8 dev lo
     ip route add 127.0.0.0/8 dev lo table default
-
-#  echo "Add bridge in the system"
-#    brctl addbr br0
-#    ifconfig br0 0.0.0.0 up 
 }
 
 stop() {
- ifconfig br0 down
- brctl delbr br0
- echo "OK"
+ echo "Stop br0 network interface..."
+ ifconfig br0 down > /dev/null 2>&1
+ brctl delbr br0 > /dev/null 2>&1
 }
 
 case "$1" in

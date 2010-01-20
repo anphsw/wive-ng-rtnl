@@ -20,7 +20,7 @@ start() {
 
 stop() {
  echo "Stopping radvd: "
-    killall radvd
+    killall radvd > /dev/null 2>&1
 }
 
 case "$1" in

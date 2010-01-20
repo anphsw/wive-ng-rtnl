@@ -105,12 +105,14 @@ static struct mtd_partition rt2880_partitions[] = {
 	}, {
                 name:           "RootFS2",
                 size:           MTD_ROOTFS2_PART_SIZE,
-                offset:         MTD_ROOTFS2_PART_OFFSET,
+                offset:         MTD_KERN2_PART_OFFSET,
 #endif
-        }
-#else
-	}
 #endif 
+	}, {
+                name:           "RW-FS",
+                size:           MTD_RWFS_PART_SIZE,
+                offset:         MTDPART_OFS_APPEND,
+	}
 };
 #else //not 32M flash
 static struct mtd_partition rt2880_partitions[] = {
@@ -157,10 +159,12 @@ static struct mtd_partition rt2880_partitions[] = {
                 size:           MTD_ROOTFS2_PART_SIZE,
                 offset:         MTD_ROOTFS2_PART_OFFSET,
 #endif
-        }
-#else
-	}
 #endif 
+	}, {
+                name:           "RW-FS",
+                size:           MTD_RWFS_PART_SIZE,
+                offset:         MTDPART_OFS_APPEND,
+	}
 };
 #endif
 

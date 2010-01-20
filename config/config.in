@@ -11,7 +11,8 @@ bool 'Build libntfs-3g'		CONFIG_LIB_LIBNTFS3G_FORCE
 bool 'Build libupnp1.3.1'	CONFIG_LIB_LIBUPNP_FORCE
 bool 'Build zlib'		CONFIG_LIB_ZLIB_FORCE
 bool 'Build uClibc (libstdc++)'	CONFIG_LIB_LIBSTDC_PLUS_FORCE
-dep_bool ' Hello World Example (c++)'  CONFIG_USER_HELLO_WORLD $CONFIG_LIB_LIBSTDC_PLUS_FORCE
+bool 'Build libnatpmp'		CONFIG_LIB_USB
+bool 'Build libnatpmp'		CONFIG_LIB_NAT
 
 comment 'Force build extra libraries in uClibc'
 bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE

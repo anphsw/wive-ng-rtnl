@@ -2,14 +2,14 @@
 
 start() {
  echo "Start goahead"
-    killall nvram_daemon
+    killall nvram_daemon > /dev/null 2>&1
     /bin/goahead &
 }
 
 stop() {
  echo "Stop goahead"
-    killall -9 goahead
-    killall -9 nvram_daemon
+    killall -9 goahead > /dev/null 2>&1
+    killall -9 nvram_daemon > /dev/null 2>&1
 }
 
 case "$1" in

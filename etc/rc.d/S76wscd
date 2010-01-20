@@ -14,8 +14,8 @@ start() {
 
 stop() {
  echo "Stopping WPS: "
-    killall wscd
-    killall -9 wscd
+    killall wscd > /dev/null 2>&1
+    killall -9 wscd > /dev/null 2>&1
 }
 
 case "$1" in

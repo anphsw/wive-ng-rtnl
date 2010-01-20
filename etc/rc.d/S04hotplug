@@ -14,7 +14,7 @@ start() {
 
 stop() {
  echo "Stop mdev generate..."
-    echo "OK"
+    killall mdev > /dev/null 2>&1
 }
 
 case "$1" in

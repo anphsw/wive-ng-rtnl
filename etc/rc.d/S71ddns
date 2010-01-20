@@ -30,7 +30,7 @@ start() {
 
 stop() {
  echo "Stopping DynDns: "
-    killall -q inadyn
+    killall -q inadyn > /dev/null 2>&1
 }
 
 case "$1" in

@@ -287,11 +287,20 @@ romfs.subdirs:
 
 .PHONY: romfs.post
 romfs.post:
+	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
+	cp -vf  $(ROOTDIR)/linux/.config $(ROMFSDIR)/etc/scripts/config.sh
+	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
+	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh
+	tar -cp --gzip etc > $(ROMFSDIR)/rwfs.gz
+	tar -zxvf dev.tgz
+	cp -vf dev.tgz $(ROMFSDIR)/dev.gz
+	cp -rfv dev/* $(ROMFSDIR)/dev
+	rm -fr $(ROOTDIR)/dev
+	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
+	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
-	./strip.sh
-	./make_rwfs.sh
 
 .PHONY: image
 image:

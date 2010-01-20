@@ -13,8 +13,7 @@ start() {
 
 stop() {
  echo "Stopping IGMPPROXY: "
-  killall igmpproxy
- echo " Ok"
+  killall igmpproxy > /dev/null 2>&1
 }
 
 case "$1" in

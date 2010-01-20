@@ -13,9 +13,8 @@ start() {
 
 stop() {
  echo "Stopping LLD2D: "
-  rm -rf /var/run/lld2d-*
   killall lld2d
- echo " Ok"
+  rm -rf /var/run/lld2d-* > /dev/null 2>&1
 }
 
 case "$1" in
