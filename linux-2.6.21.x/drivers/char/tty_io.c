@@ -3318,7 +3318,7 @@ int tty_ioctl(struct inode * inode, struct file * file,
 		case TIOCSTI:
 			return tiocsti(tty, p);
 		case TIOCGWINSZ:
-			return tiocgwinsz(tty, p);
+			return tiocgwinsz(real_tty, p);
 		case TIOCSWINSZ:
 			return tiocswinsz(tty, real_tty, p);
 		case TIOCCONS:
