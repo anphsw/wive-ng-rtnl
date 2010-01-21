@@ -18,6 +18,8 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA 02111-1307 USA
 
+CFLAGS += -Os
+export $(CFLAGS)
 
 #--------------------------------------------------------------
 # You shouldn't need to mess with anything beyond this point...
@@ -66,9 +68,6 @@ endif
 ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
     #DIRS += libntfs-3g
 endif
-ifeq ($(CONFIG_LIB_LIBUPNP_FORCE),y)
-    DIRS += libupnp
-endif
 ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
     DIRS += libzebra
 endif
@@ -78,7 +77,6 @@ endif
 ifeq ($(CONFIG_LIB_NAT),y)
     DIRS += libnatpmp
 endif
-
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
 all: headers pregen subdirs shared finished
@@ -114,9 +112,6 @@ ifeq ($(CONFIG_LIB_LIBNVRAM_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
 	@$(MAKE) -C libntfs-3g shared
-endif
-ifeq ($(CONFIG_LIB_LIBUPNP_FORCE),y)
-	@$(MAKE) -C libupnp shared
 endif
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	@$(MAKE) -C libgmp shared
@@ -448,12 +443,8 @@ clean:
 	$(MAKE) -C extra/locale clean
 	$(MAKE) -C utils clean
 	$(MAKE) -C extra clean
-
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	$(MAKE) -C libgmp clean
-endif
-ifeq ($(CONFIG_LIB_LIBUPNP_FORCE),y)
-	$(MAKE) -C libupnp clean
 endif
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \

@@ -510,7 +510,7 @@ float ftod () { return (float) ftod_data; }
 
 GMP_PROG_CC_WORKS_PART([$1], [gnupro alpha ev6 char spilling],
 [/* The following provokes an internal compiler error from gcc version
-   "2.9-gnupro-99r1" under "-O2 -mcpu=ev6", apparently relating to char
+   "2.9-gnupro-99r1" under "-Os -mcpu=ev6", apparently relating to char
    values being spilled into floating point registers.  The problem doesn't
    show up all the time, but has occurred enough in GMP for us to reject
    this compiler+flags.  */
@@ -586,7 +586,7 @@ int f ()
 GMP_PROG_CC_WORKS_PART([$1], [long long reliability test 1],
 [/* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
-   1666 to segfault with e.g., -O2 -mpowerpc64.  */
+   1666 to segfault with e.g., -Os -mpowerpc64.  */
 
 #ifdef __GNUC__
 typedef unsigned long long t1;typedef t1*t2;
@@ -940,7 +940,7 @@ dnl  %ebx which otherwise usually holds the GOT, and is what gcc used in the
 dnl  past.
 dnl
 dnl  %ecx and %edx are also candidates for this sort of optimization, and
-dnl  are used under lesser optimization levels, like -O2 in 3.3.3.  FIXME:
+dnl  are used under lesser optimization levels, like -Os in 3.3.3.  FIXME:
 dnl  It's not quite clear what the conditions for using %eax are, we might
 dnl  need more test code to provoke it.
 dnl

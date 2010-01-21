@@ -5,7 +5,7 @@
 # in making the (32-bit) DLL, png32bd.dll. It uses the "stdcall" calling 
 # convention.
 
-CFLAGS= -ps -O2 -C -K -N- -k- -d -3 -r- -w-par -w-aus -WDE
+CFLAGS= -ps -Os -C -K -N- -k- -d -3 -r- -w-par -w-aus -WDE
 CC=f:\bc45\bin\bcc32
 LIBFLAGS= /C
 LIB=f:\bc45\bin\tlib

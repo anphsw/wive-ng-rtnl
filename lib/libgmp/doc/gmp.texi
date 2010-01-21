@@ -971,7 +971,7 @@ variables @samp{CXX} and @samp{CXXFLAGS} in the usual way.  The default for
 @samp{CXX} is the first compiler that works from a list of likely candidates,
 with @command{g++} normally preferred when available.  The default for
 @samp{CXXFLAGS} is to try @samp{CFLAGS}, @samp{CFLAGS} without @samp{-g}, then
-for @command{g++} either @samp{-g -O2} or @samp{-O2}, or for other compilers
+for @command{g++} either @samp{-g -Os} or @samp{-Os}, or for other compilers
 @samp{-g} or nothing.  Trying @samp{CFLAGS} this way is convenient when using
 @samp{gcc} and @samp{g++} together, since the flags for @samp{gcc} will
 usually suit @samp{g++}.

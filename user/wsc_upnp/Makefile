@@ -14,25 +14,26 @@ TARGET_HOST = mipsel-linux
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 STRIP = $(CROSS_COMPILE)strip
-#WIRELESS_H_INCLUDE_PATH = $(ROOTDIR)/linux-2.4.x/include/
 WIRELESS_H_INCLUDE_PATH = $(ROOTDIR)/$(LINUXDIR)/include/
 
 PWD = $(shell pwd)
 
-LIBUPNP_SRC_PATH = $(ROOTDIR)/lib/libupnp
+LIBUPNP_SRC_PATH = libupnp-1.4.6
 LIBUPNP_LIB_PATH = $(PWD)/$(LIBUPNP_SRC_PATH)
 
 INCLUDE_PATH += -I. -I$(LIBUPNP_SRC_PATH) -I$(LIBUPNP_SRC_PATH)/upnp/inc -I$(LIBUPNP_SRC_PATH)/upnp/src/inc
 INCLUDE_PATH += -I$(LIBUPNP_SRC_PATH)/ixml/inc -I$(LIBUPNP_SRC_PATH)/ixml/src/inc  -I$(LIBUPNP_SRC_PATH)/threadutil/inc
 INCLUDE_PATH += -I$(WIRELESS_H_INCLUDE_PATH)
 
-#INCLUDE_LIBS := -static -L$(LIBUPNP_LIB_PATH)/upnp/.libs/ -lupnp -L$(LIBUPNP_LIB_PATH)/ixml/.libs/ -lixml -L$(LIBUPNP_LIB_PATH)/threadutil/.libs -lthreadutil -lpthread
+INCLUDE_LIBS := -static -L$(LIBUPNP_LIB_PATH)/upnp/.libs/ -lupnp -L$(LIBUPNP_LIB_PATH)/ixml/.libs/ \
+	-lixml -L$(LIBUPNP_LIB_PATH)/threadutil/.libs -lthreadutil -lpthread
 
 # YY
 # wscd .a version
 #INCLUDE_LIBS := -L$(PWD) -lupnp -lixml -lthreadutil -lpthread
 # wscd .so version
-INCLUDE_LIBS := -L$(LIB_PATH) -lupnp -lixml -lthreadutil -lpthread
+#INCLUDE_LIBS := -L$(LIB_PATH) -lupnp -lixml -lthreadutil -lpthread
+#INCLUDE_LIBS := -L$(LIB_PATH) -lixml -lthreadutil -lpthread
 
 OBJS = wsc_main.o wsc_common.o wsc_ioctl.o wsc_netlink.o wsc_upnp_device.o wsc_upnp_cp.o sample_util.o wsc_msg.o
 
@@ -44,30 +45,31 @@ CFLAGS += -DMULTIPLE_CARD_SUPPORT
 
 all: $(EXEC)
 
-#$(LIBUPNP_SRC_PATH)/Makefile:
-#	make -C $(LIBUPNP_SRC_PATH) -f Makefile.src TARGET_HOST=$(TARGET_HOST)
+$(LIBUPNP_SRC_PATH)/Makefile:
+	make -C $(LIBUPNP_SRC_PATH) -f Makefile.src TARGET_HOST=$(TARGET_HOST)
 
-#$(EXEC): libupnp $(OBJS)
-$(EXEC):  $(OBJS)
+$(EXEC): libupnp $(OBJS)
+#$(EXEC):  $(OBJS)
 #	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)  $(INCLUDE_LIBS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)  $(INCLUDE_LIBS)
 	$(STRIP) -s $(EXEC)
 
-#libupnp: $(LIBUPNP_SRC_PATH)/Makefile 
-#	make -C $(LIBUPNP_SRC_PATH)
-#	cp $(LIBUPNP_LIB_PATH)/upnp/.libs/libupnp.a .
-#	cp $(LIBUPNP_LIB_PATH)/ixml/.libs/libixml.a .
-#	cp $(LIBUPNP_LIB_PATH)/threadutil/.libs/libthreadutil.a .
-#	cp $(LIBUPNP_LIB_PATH)/upnp/.libs/libupnp.so .
-#	cp $(LIBUPNP_LIB_PATH)/ixml/.libs/libixml.so .
-#	cp $(LIBUPNP_LIB_PATH)/threadutil/.libs/libthreadutil.so .
+libupnp: $(LIBUPNP_SRC_PATH)/Makefile 
+	cd $(LIBUPNP_SRC_PATH) && ./DoConfigure.sh && cd
+	make -C $(LIBUPNP_SRC_PATH)
+	cp $(LIBUPNP_LIB_PATH)/upnp/.libs/libupnp.a .
+	cp $(LIBUPNP_LIB_PATH)/ixml/.libs/libixml.a .
+	cp $(LIBUPNP_LIB_PATH)/threadutil/.libs/libthreadutil.a .
+	cp $(LIBUPNP_LIB_PATH)/upnp/.libs/libupnp.so .
+	cp $(LIBUPNP_LIB_PATH)/ixml/.libs/libixml.so .
+	cp $(LIBUPNP_LIB_PATH)/threadutil/.libs/libthreadutil.so .
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -rf *.o *~ *.bak $(EXEC)
-
+	make -C $(LIBUPNP_LIB_PATH) clean
 cleanall: clean
 	make -C $(LIBUPNP_SRC_PATH) clean
 	rm -f *.a

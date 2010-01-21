@@ -80,7 +80,7 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BISON = @BISON@
-CC = @CC@
+#CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -280,14 +280,7 @@ BUILT_SOURCES = \
 	skel.c
 
 
-SUBDIRS = \
-	. \
-	doc \
-	m4  \
-	examples \
-	po \
-	tools \
-
+SUBDIRS =
 
 localedir = $(datadir)/locale
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I@includedir@ -I$(top_srcdir)/intl

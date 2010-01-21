@@ -71,16 +71,11 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = mipsel-unknown-linux-gnu
-ACLOCAL = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run aclocal-1.7
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run tar
-AUTOCONF = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run automake-1.7
 AWK = gawk
 BISON = /usr/bin/bison
-CC = /opt/buildroot-gcc342/bin/mipsel-linux-gcc
+#CC = /opt/buildroot-gcc342/bin/mipsel-linux-gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -Os
 CPP = /opt/buildroot-gcc342/bin/mipsel-linux-gcc -E
@@ -280,14 +275,7 @@ BUILT_SOURCES = \
 	skel.c
 
 
-SUBDIRS = \
-	. \
-	doc \
-	m4  \
-	examples \
-	po \
-	tools \
-
+SUBDIRS = 
 
 localedir = $(datadir)/locale
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I${prefix}/include -I$(top_srcdir)/intl

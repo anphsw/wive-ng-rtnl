@@ -44,7 +44,7 @@ available_tags=" CXX F77"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host compiler:
+# Libtool was configured on host sfstudio.sadnet.lo:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -71,24 +71,24 @@ host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # An echo program that does not interpret backslashes.
 echo="echo"
 
 # The archiver.
-AR="mipsel-linux-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="mipsel-linux-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-Os                   -Os                   -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
-CC="mipsel-linux-gcc"
+CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -97,16 +97,16 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/buildroot-gdb/mipsel-linux-uclibc/bin/ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/opt/buildroot-gdb/bin/mipsel-linux-nm -B"
+NM="nm"
 
 # A symbol stripping program
-STRIP="mipsel-linux-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -118,7 +118,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="as"
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -199,7 +199,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="mipsel-linux-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -224,8 +224,8 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="mipsel-linux-strip --strip-debug"
-striplib="mipsel-linux-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -325,10 +325,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/ /usr/lib/gcc/mipsel-linux-uclibc/3.3.6/ /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.3.6/ /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib hwcap 0 nosegneg /usr/lib64/mysql /usr/lib64/qt-3.3/lib /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7215,7 +7215,7 @@ disable_libs=static
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host compiler:
+# Libtool was configured on host sfstudio.sadnet.lo:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -7242,24 +7242,24 @@ host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # An echo program that does not interpret backslashes.
 echo="echo"
 
 # The archiver.
-AR="mipsel-linux-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="mipsel-linux-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-Os                   -Os                   -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
-CC="mipsel-linux-g++"
+CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ "
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -7268,16 +7268,16 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/buildroot-gdb/mipsel-linux-uclibc/bin/ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/opt/buildroot-gdb/bin/mipsel-linux-nm -B"
+NM="nm"
 
 # A symbol stripping program
-STRIP="mipsel-linux-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -7289,7 +7289,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="as"
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -7370,7 +7370,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="mipsel-linux-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -7392,16 +7392,16 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="mipsel-linux-strip --strip-debug"
-striplib="mipsel-linux-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="/opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/crti.o /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/crtbeginS.o"
+predep_objects="/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crti.o /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="/opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/crtendS.o /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/crtn.o"
+postdep_objects="/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtendS.o /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7413,7 +7413,7 @@ postdeps="-lstdc++ -lm -lgcc -lc -lgcc"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6 -L/opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib"
+compiler_lib_search_path="-L/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2 -L/opt/Wive-RTNL/toolchain/bin/../lib/gcc -L/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib"
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7493,10 +7493,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/ /usr/lib/gcc/mipsel-linux-uclibc/3.3.6/ /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.3.6/ /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/../../../../mipsel-linux-uclibc/lib/"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib hwcap 0 nosegneg /usr/lib64/mysql /usr/lib64/qt-3.3/lib /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7520,7 +7520,7 @@ include_expsyms=""
 
 # ### BEGIN LIBTOOL TAG CONFIG: F77
 
-# Libtool was configured on host compiler:
+# Libtool was configured on host sfstudio.sadnet.lo:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -7547,21 +7547,21 @@ host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # An echo program that does not interpret backslashes.
 echo="echo"
 
 # The archiver.
-AR="mipsel-linux-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="mipsel-linux-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-Os                   -Os                   -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
 CC="gfortran"
@@ -7573,16 +7573,16 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/buildroot-gdb/mipsel-linux-uclibc/bin/ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
 
 # A BSD-compatible nm program.
-NM="/opt/buildroot-gdb/bin/mipsel-linux-nm -B"
+NM="nm"
 
 # A symbol stripping program
-STRIP="mipsel-linux-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -7594,7 +7594,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="as"
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -7647,7 +7647,7 @@ dlopen_self=unknown
 dlopen_self_static=unknown
 
 # Compiler flag to prevent dynamic linking.
-link_static_flag="-static"
+link_static_flag=""
 
 # Compiler flag to turn off builtin functions.
 no_builtin_flag=""
@@ -7675,7 +7675,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="mipsel-linux-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -7700,8 +7700,8 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="mipsel-linux-strip --strip-debug"
-striplib="mipsel-linux-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7801,10 +7801,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/x86_64-redhat-linux/4.1.1/ /usr/lib/gcc/x86_64-redhat-linux/4.1.1/ /usr/lib/gcc/x86_64-redhat-linux/4.1.1/../../../../x86_64-redhat-linux/lib/x86_64-redhat-linux/4.1.1/ /usr/lib/gcc/x86_64-redhat-linux/4.1.1/../../../../x86_64-redhat-linux/lib/ /usr/lib/gcc/x86_64-redhat-linux/4.1.1/../../../x86_64-redhat-linux/4.1.1/ /usr/lib/gcc/x86_64-redhat-linux/4.1.1/../../../ /lib/x86_64-redhat-linux/4.1.1/ /lib/ /usr/lib/x86_64-redhat-linux/4.1.1/ /usr/lib/"
+sys_lib_search_path_spec=" /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/../../../../i586-manbo-linux-gnu/lib/i586-manbo-linux-gnu/4.4.2/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/../../../../i586-manbo-linux-gnu/lib/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/../../../i586-manbo-linux-gnu/4.4.2/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.2/../../../ /lib/i586-manbo-linux-gnu/4.4.2/ /lib/ /usr/lib/i586-manbo-linux-gnu/4.4.2/ /usr/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib hwcap 0 nosegneg /usr/lib64/mysql /usr/lib64/qt-3.3/lib /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""

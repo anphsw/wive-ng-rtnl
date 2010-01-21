@@ -12,6 +12,9 @@ ifndef ROOTDIR
 ROOTDIR=..
 endif
 
+CFLAGS += -Os
+export $(CFLAGS)
+
 UCLINUX_BUILD_USER=1
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)

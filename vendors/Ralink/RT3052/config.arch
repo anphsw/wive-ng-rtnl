@@ -1,9 +1,13 @@
 .EXPORT_ALL_VARIABLES:
 
+include $(ROOTDIR)/vendors/config/mips/config.arch
+
 CONSOLE_BAUD_RATE = 57600
 
-LOPT += -Os                  # library is alway 02
+CFLAGS  +=  -I$(ROOTDIR)
+CFLAGS  +=  -Os
 UOPT += -Os                  # user apps are always Os
+LOPT += -Os                  # library is alway 02
 
 MODEL_NAME		   = RTNL
 KERNEL_VER		   = "1.2"
@@ -27,12 +31,3 @@ FIRMROOT        	   = $(ROOTDIR)
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
-
-include $(ROOTDIR)/vendors/config/mips/config.arch
-
-#added by Steven Liu
-CFLAGS  +=  -I$(ROOTDIR)
-CFLAGS  +=  
-#--
-
-############################################################################

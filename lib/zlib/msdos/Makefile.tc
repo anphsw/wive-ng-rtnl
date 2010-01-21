@@ -14,8 +14,8 @@
 
 # ------------- Turbo C 2.0 -------------
 MODEL=l
-# CFLAGS=-O2 -G -Z -m$(MODEL) -DMAX_WBITS=11 -DMAX_MEM_LEVEL=3
-CFLAGS=-O2 -G -Z -m$(MODEL)
+# CFLAGS=-Os -G -Z -m$(MODEL) -DMAX_WBITS=11 -DMAX_MEM_LEVEL=3
+CFLAGS=-Os -G -Z -m$(MODEL)
 CC=tcc -I\tc\include
 LD=tcc -L\tc\lib
 AR=tlib

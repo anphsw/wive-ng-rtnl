@@ -11,6 +11,7 @@ srcdir=.
 CFLAGS += -I$(srcdir)
 
 #CFLAGS  +=  -I./ -Wall -W -Wshadow -Wsign-compare
+
 #install as this user
 ifndef INSTALL_GROUP
    GROUP=wheel

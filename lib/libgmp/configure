@@ -2512,7 +2512,7 @@ _ACEOF
     # gcc 3.1 adds ev45, ev67 (but ev45 is the same as ev4).
     # gcc 3.2 adds nothing.
     #
-    # gcc version "2.9-gnupro-99r1" under "-O2 -mcpu=ev6" strikes internal
+    # gcc version "2.9-gnupro-99r1" under "-Os -mcpu=ev6" strikes internal
     # compiler errors too easily and is rejected by GMP_PROG_CC_WORKS.  Each
     # -mcpu=ev6 below has a fallback to -mcpu=ev56 for this reason.
     #
@@ -2585,7 +2585,7 @@ echo "include_mpn(\`alpha/default.m4')" >> $gmp_tmpconfigm4i
         cc_cflags_optlist="opt cpu"
 
         # not sure if -fast works on old versions, so make it optional
-	cc_cflags_opt="-fast -O2"
+	cc_cflags_opt="-fast -Os"
 
     	# DEC C V5.9-005 knows ev4, ev5, ev56, pca56, ev6.
     	# Compaq C V6.3-029 adds ev67.
@@ -2668,7 +2668,7 @@ echo "include_mpn(\`arm/arm-defs.m4')" >> $gmp_tmpconfigm4i
     # checking sizeof(long), either 4 or 8 bytes respectively.  Do this in
     # ABI=1.0 too, in case someone tries to build that with a 2.0w gcc.
     #
-    gcc_cflags="-O2"
+    gcc_cflags="-Os"
     gcc_cflags_optlist="arch"
     gcc_testlist="sizeof-long-4"
     SPEED_CYCLECOUNTER_OBJ=hppa.lo
@@ -2721,7 +2721,7 @@ echo "include_mpn(\`arm/arm-defs.m4')" >> $gmp_tmpconfigm4i
         # -mpa-risc-2-0 is only an optional flag, in case an old gcc is
         # used.  Assembler support for 2.0 is essential though, for our asm
         # files.
-	gcc_20n_cflags="-O2"
+	gcc_20n_cflags="-Os"
 	gcc_20n_cflags_optlist="arch"
         gcc_20n_cflags_arch="-mpa-risc-2-0 -mpa-risc-1-1"
         gcc_20n_testlist="sizeof-long-4 hppa-level-2.0"
@@ -2743,7 +2743,7 @@ echo "include_mpn(\`arm/arm-defs.m4')" >> $gmp_tmpconfigm4i
           esac
 
           cclist_20w="gcc cc"
-	  gcc_20w_cflags="-O2 -mpa-risc-2-0"
+	  gcc_20w_cflags="-Os -mpa-risc-2-0"
           cc_20w_cflags="+DD64 +O2"
           cc_20w_testlist="hpc-hppa-2-0"
           path_20w="pa64"
@@ -2792,7 +2792,7 @@ echo "include_mpn(\`ia64/ia64-defs.m4')" >> $gmp_tmpconfigm4i
 	# Don't use -O3, it is for "large data sets" and also miscompiles GMP.
 	# But icc miscompiles GMP at any optimization level, at higher levels
 	# it miscompiles more files...
-	icc_cflags_opt="-O2 -O1"
+	icc_cflags_opt="-Os -O1"
 	;;
 
       *-*-hpux*)
@@ -2807,7 +2807,7 @@ echo "include_mpn(\`ia64/ia64-defs.m4')" >> $gmp_tmpconfigm4i
         cc_32_cflags=""
         cc_32_cflags_optlist="opt"
         cc_32_cflags_opt="+O3 +O2 +O1"
-        gcc_32_cflags="-milp32 -O2"
+        gcc_32_cflags="-milp32 -Os"
         limb_32=longlong
         SPEED_CYCLECOUNTER_OBJ_32=ia64.lo
         cyclecounter_size_32=2
@@ -2822,7 +2822,7 @@ echo "include_mpn(\`ia64/ia64-defs.m4')" >> $gmp_tmpconfigm4i
         cc_64_cppflags="+DD64"
         cc_64_cflags_optlist="opt"
         cc_64_cflags_opt="+O3 +O2 +O1"
-        gcc_64_cflags="-mlp64 -O2"
+        gcc_64_cflags="-mlp64 -Os"
         ;;
     esac
     ;;
@@ -2838,7 +2838,7 @@ _ACEOF
 
 echo "include_mpn(\`m68k/m68k-defs.m4')" >> $gmp_tmpconfigm4i
 
-    gcc_cflags="-O2 $fomit_frame_pointer"
+    gcc_cflags="-Os $fomit_frame_pointer"
     gcc_cflags_optlist="arch"
 
     # gcc 2.7.2 knows -m68000, -m68020, -m68030, -m68040.
@@ -2869,7 +2869,7 @@ echo "include_mpn(\`m68k/m68k-defs.m4')" >> $gmp_tmpconfigm4i
     path="m88k"
     ;;
   m88110*-*-*)
-    # FIXME: Use `-O2'?
+    # FIXME: Use `-Os'?
     gcc_cflags="-O -m88110"
     path="m88k/mc88110 m88k"
     ;;
@@ -2900,7 +2900,7 @@ echo "include_mpn(\`m68k/m68k-defs.m4')" >> $gmp_tmpconfigm4i
     gcc_cflags_abi="-mabi=32"
     gcc_testlist="gcc-mips-o32"
     path="mips32"
-    cc_cflags="-O2 -o32"   # no -g, it disables all optimizations
+    cc_cflags="-Os -o32"   # no -g, it disables all optimizations
     # this suits both mips32 and mips64
 
 echo "include_mpn(\`mips32/mips-defs.m4')" >> $gmp_tmpconfigm4i
@@ -2911,15 +2911,15 @@ echo "include_mpn(\`mips32/mips-defs.m4')" >> $gmp_tmpconfigm4i
         abilist="n32 64 o32"
 
         cclist_n32="gcc cc"
-        gcc_n32_cflags="-O2 -mabi=n32"
-        cc_n32_cflags="-O2 -n32"	# no -g, it disables all optimizations
+        gcc_n32_cflags="-Os -mabi=n32"
+        cc_n32_cflags="-Os -n32"	# no -g, it disables all optimizations
         limb_n32=longlong
         path_n32="mips64"
 
         cclist_64="gcc cc"
-        gcc_64_cflags="-O2 -mabi=64"
+        gcc_64_cflags="-Os -mabi=64"
         gcc_64_ldflags="-Wc,-mabi=64"
-        cc_64_cflags="-O2 -64"		# no -g, it disables all optimizations
+        cc_64_cflags="-Os -64"		# no -g, it disables all optimizations
         cc_64_ldflags="-Wc,-64"
         path_64="mips64"
         ;;
@@ -2957,8 +2957,8 @@ _ACEOF
     HAVE_HOST_CPU_FAMILY_powerpc=1
     abilist="32"
     cclist="gcc cc"
-    cc_cflags="-O2"
-    gcc_cflags="-O2 -mpowerpc"
+    cc_cflags="-Os"
+    gcc_cflags="-Os -mpowerpc"
     gcc_cflags_optlist="precomp subtype asm cpu"
     gcc_cflags_precomp="-no-cpp-precomp"
     gcc_cflags_subtype="-force_cpusubtype_ALL"	# for vmx on darwin
@@ -3024,7 +3024,7 @@ _ACEOF
     case $host in
       *-*-aix*)
         cclist="gcc xlc cc"
-        xlc_cflags="-O2 -qmaxmem=20000"
+        xlc_cflags="-Os -qmaxmem=20000"
         xlc_cflags_optlist="arch"
 
         # xlc (what version?) knows -qarch=ppc, ppcgr, 601, 602, 603, 604,
@@ -3057,10 +3057,10 @@ _ACEOF
             # Need -Wc to pass object type flags through to the linker.
             abilist="aix64 $abilist"
             cclist_aix64="gcc xlc"
-            gcc_aix64_cflags="-O2 -maix64 -mpowerpc64"
+            gcc_aix64_cflags="-Os -maix64 -mpowerpc64"
             gcc_aix64_cflags_optlist="cpu"
 	    gcc_aix64_ldflags="-Wc,-maix64"
-            xlc_aix64_cflags="-O2 -q64 -qtune=pwr3 -qmaxmem=20000"
+            xlc_aix64_cflags="-Os -q64 -qtune=pwr3 -qmaxmem=20000"
 	    xlc_aix64_ldflags="-Wc,-q64"
             # Must indicate object type to ar and nm
 	    ar_aix64_flags="-X64"
@@ -3091,18 +3091,18 @@ _ACEOF
 	    # incompatible with a shared library.
 	    #
 	    abilist="mode64 mode32 $abilist"
-	    gcc_cflags_opt="-O3 -O2 -O1"	# will this become used?
+	    gcc_cflags_opt="-O3 -Os -O1"	# will this become used?
 	    cclist_mode32="gcc"
 	    gcc_mode32_cflags="-mpowerpc64"
 	    gcc_mode32_cflags_optlist="subtype cpu opt"
 	    gcc_mode32_cflags_subtype="-force_cpusubtype_ALL"
-	    gcc_mode32_cflags_opt="-O3 -O2 -O1"
+	    gcc_mode32_cflags_opt="-O3 -Os -O1"
 	    path_mode32="powerpc64/mode32 $vmx_path powerpc64"
 	    limb_mode32=longlong
 	    cclist_mode64="gcc"
 	    gcc_mode64_cflags="-m64"
 	    gcc_mode64_cflags_optlist="cpu opt"
-	    gcc_mode64_cflags_opt="-O3 -O2 -O1"
+	    gcc_mode64_cflags_opt="-O3 -Os -O1"
 	    path_mode64="powerpc64/mode64 $vmx_path powerpc64"
             SPEED_CYCLECOUNTER_OBJ_mode64=powerpc64.lo
             cyclecounter_size_mode64=0
@@ -3127,13 +3127,13 @@ _ACEOF
 	    cclist_mode32="gcc"
 	    gcc_mode32_cflags="-mpowerpc64 -Wa,-mppc64"
 	    gcc_mode32_cflags_optlist="cpu opt"
-	    gcc_mode32_cflags_opt="-O3 -O2 -O1"
+	    gcc_mode32_cflags_opt="-O3 -Os -O1"
 	    path_mode32="powerpc64/mode32 $vmx_path powerpc64"
 	    limb_mode32=longlong
 	    cclist_mode64="gcc gcc64"
 	    gcc_mode64_cflags_maybe="-m64"
 	    gcc_mode64_cflags_optlist="cpu opt"
-	    gcc_mode64_cflags_opt="-O3 -O2 -O1"
+	    gcc_mode64_cflags_opt="-O3 -Os -O1"
 	    path_mode64="powerpc64/mode64 $vmx_path powerpc64"
             SPEED_CYCLECOUNTER_OBJ_mode64=powerpc64.lo
             cyclecounter_size_mode64=0
@@ -3171,7 +3171,7 @@ _ACEOF
     case $host in
     *-*-aix*)
       cclist="gcc xlc"
-      xlc_cflags="-O2 -qarch=pwr -qmaxmem=20000"
+      xlc_cflags="-Os -qarch=pwr -qmaxmem=20000"
       ;;
     esac
     ;;
@@ -3184,7 +3184,7 @@ _ACEOF
 
   # IBM s/370 and similar
   s3[6-9]0*-*-*)
-    gcc_cflags="-O2 $fomit_frame_pointer"
+    gcc_cflags="-Os $fomit_frame_pointer"
     path="s390"
     extra_functions="udiv_w_sdiv"
     ;;
@@ -3237,9 +3237,9 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
     #
     case $host_cpu in
       sparc64 | sparcv9* | ultrasparc*)
-        gcc_cflags="-O2 -Wa,-xarch=v8plus" ;;
+        gcc_cflags="-Os -Wa,-xarch=v8plus" ;;
       *)
-        gcc_cflags="-O2" ;;
+        gcc_cflags="-Os" ;;
     esac
     gcc_32_cflags_maybe="-m32"
     gcc_cflags_optlist="cpu"
@@ -3270,8 +3270,8 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
     	cc_cflags=
     	cc_cflags_optlist="opt arch cpu"
 
-        # SunOS cc doesn't know -xO4, fallback to -O2.
-    	cc_cflags_opt="-xO4 -O2"
+        # SunOS cc doesn't know -xO4, fallback to -Os.
+    	cc_cflags_opt="-xO4 -Os"
 
         # SunOS cc doesn't know -xarch, apparently always generating v7
         # code, so make this optional
@@ -3344,7 +3344,7 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
         # it until we're sure.  (Might want -xarch=v9a or -xarch=v9b for the
         # higher cpu types instead.)
         #
-        gcc_64_cflags="-O2 -m64 -mptr64"
+        gcc_64_cflags="-Os -m64 -mptr64"
         gcc_64_ldflags="-Wc,-m64"
         gcc_64_cflags_optlist="cpu"
 
@@ -3384,7 +3384,7 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
     # (config/vax/vax.h FRAME_POINTER_REQUIRED=1), so -fomit-frame-pointer
     # will be ignored.
     #
-    gcc_cflags="-O2 $fomit_frame_pointer"
+    gcc_cflags="-Os $fomit_frame_pointer"
     path="vax"
     extra_functions="udiv_w_sdiv"
     ;;
@@ -3392,7 +3392,7 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
 
   # AMD and Intel x86 configurations, including AMD64
   #
-  # Rumour has it gcc -O2 used to give worse register allocation than just
+  # Rumour has it gcc -Os used to give worse register allocation than just
   # -O, but lets assume that's no longer true.
   #
   # -m32 forces 32-bit mode on a bi-arch 32/64 amd64 build of gcc.  -m64 is
@@ -3408,11 +3408,11 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
   i?86*-*-* | k[5-8]*-*-* | pentium*-*-* | athlon-*-* | viac3*-*-* | athlon64-*-* | core2-*-* | x86_64-*-*)
     abilist="32"
     cclist="gcc icc cc"
-    gcc_cflags="-O2 $fomit_frame_pointer"
+    gcc_cflags="-Os $fomit_frame_pointer"
     gcc_32_cflags_maybe="-m32"
     icc_cflags="-no-gcc"
     icc_cflags_optlist="opt"
-    icc_cflags_opt="-O3 -O2 -O1"
+    icc_cflags_opt="-O3 -Os -O1"
     any_32_testlist="sizeof-long-4"
     CALLING_CONVENTIONS_OBJS='x86call.lo x86check$U.lo'
 
@@ -3575,7 +3575,7 @@ echo "include_mpn(\`sparc32/sparc-defs.m4')" >> $gmp_tmpconfigm4i
     case $host_cpu in
       athlon64 | core2 | pentium4 | x86_64)
         cclist_64="gcc"
-        gcc_64_cflags="-O2 -m64"
+        gcc_64_cflags="-Os -m64"
         gcc_64_cflags_optlist="cpu"
         CALLING_CONVENTIONS_OBJS_64='amd64call.lo amd64check$U.lo'
         SPEED_CYCLECOUNTER_OBJ_64=x86_64.lo
@@ -4186,7 +4186,7 @@ if test "$gmp_prog_cc_works" = yes; then
   rm -f conftest* a.out b.out a.exe a_out.exe
   cat >conftest.c <<EOF
 /* The following provokes an internal compiler error from gcc version
-   "2.9-gnupro-99r1" under "-O2 -mcpu=ev6", apparently relating to char
+   "2.9-gnupro-99r1" under "-Os -mcpu=ev6", apparently relating to char
    values being spilled into floating point registers.  The problem doesn't
    show up all the time, but has occurred enough in GMP for us to reject
    this compiler+flags.  */
@@ -4446,7 +4446,7 @@ if test "$gmp_prog_cc_works" = yes; then
   cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
-   1666 to segfault with e.g., -O2 -mpowerpc64.  */
+   1666 to segfault with e.g., -Os -mpowerpc64.  */
 
 #ifdef __GNUC__
 typedef unsigned long long t1;typedef t1*t2;
@@ -5678,7 +5678,7 @@ if test "$gmp_prog_cc_works" = yes; then
   rm -f conftest* a.out b.out a.exe a_out.exe
   cat >conftest.c <<EOF
 /* The following provokes an internal compiler error from gcc version
-   "2.9-gnupro-99r1" under "-O2 -mcpu=ev6", apparently relating to char
+   "2.9-gnupro-99r1" under "-Os -mcpu=ev6", apparently relating to char
    values being spilled into floating point registers.  The problem doesn't
    show up all the time, but has occurred enough in GMP for us to reject
    this compiler+flags.  */
@@ -5938,7 +5938,7 @@ if test "$gmp_prog_cc_works" = yes; then
   cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
-   1666 to segfault with e.g., -O2 -mpowerpc64.  */
+   1666 to segfault with e.g., -Os -mpowerpc64.  */
 
 #ifdef __GNUC__
 typedef unsigned long long t1;typedef t1*t2;
@@ -7121,13 +7121,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
+    CFLAGS="-g -Os"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O2"
+    CFLAGS="-Os"
   else
     CFLAGS=
   fi
@@ -8212,13 +8212,13 @@ if test "$ac_test_CXXFLAGS" = set; then
   CXXFLAGS=$ac_save_CXXFLAGS
 elif test $ac_cv_prog_cxx_g = yes; then
   if test "$GXX" = yes; then
-    CXXFLAGS="-g -O2"
+    CXXFLAGS="-g -Os"
   else
     CXXFLAGS="-g"
   fi
 else
   if test "$GXX" = yes; then
-    CXXFLAGS="-O2"
+    CXXFLAGS="-Os"
   else
     CXXFLAGS=
   fi

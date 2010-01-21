@@ -31,8 +31,8 @@ LD=$(CC)
 AR=tlib
 
 # compiler flags
-CFLAGS=-O2 -Z -m$(MODEL) $(LOC)
-#   replace "-O2" by "-O -G -a -d" for Turbo C++ 1.0
+CFLAGS=-Os -Z -m$(MODEL) $(LOC)
+#   replace "-Os" by "-O -G -a -d" for Turbo C++ 1.0
 
 LDFLAGS=-m$(MODEL)
 

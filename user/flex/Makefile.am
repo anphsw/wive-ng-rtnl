@@ -131,13 +131,7 @@ BUILT_SOURCES = \
 	skel.c
 
 SUBDIRS = \
-	. \
-	doc \
-	m4  \
-	examples \
-	po \
-	tools \
-	tests
+	.
 
 localedir = $(datadir)/locale
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I@includedir@ -I$(top_srcdir)/intl

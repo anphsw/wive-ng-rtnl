@@ -1,4 +1,4 @@
-prefix=/usr/local
+prefix=/opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/filesystem
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

@@ -52,7 +52,7 @@ RM         = rm -f
 
 # Select the compiler needed to build binaries for your development system
 HOSTCC     = gcc
-HOSTCFLAGS = -O2 
+HOSTCFLAGS = -Os 
 
 
 #---------------------------------------------------------
@@ -250,8 +250,8 @@ export LDPIEFLAG:=$(shell $(LD) --help | grep -q pie && echo "-Wl,-pie")
 endif
 endif
 
-# Use '-Os' optimization if available, else use -O2, allow Config to override
-OPTIMIZATION+=$(call check_gcc,-Os,-O2)
+# Use '-Os' optimization if available, else use -Os, allow Config to override
+OPTIMIZATION+=$(call check_gcc,-Os,-Os)
 # Use the gcc 3.4 -funit-at-a-time optimization when available
 OPTIMIZATION+=$(call check_gcc,-funit-at-a-time,)
 
