@@ -9,7 +9,7 @@
     ip route del $5
     
     #calculate min mtu
-    MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
+    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
     iptables -t mangle -A FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     echo $MINMTU > /tmp/ppp-mtu
@@ -17,7 +17,10 @@
     #restart dns server and ntp sync
     service ntp stop
     service dnsserver stop
+    service shaper stop
+
     service ntp start
     service dnsserver start
+    service shaper start
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

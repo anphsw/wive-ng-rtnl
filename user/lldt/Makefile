@@ -12,5 +12,7 @@ depend:
 
 romfs:
 	$(ROMFSINST) -e CONFIG_LLDT       /bin/lld2d
+	$(ROMFSINST) -e CONFIG_LLDT       /bin/icon.ico
+	$(ROMFSINST) -e CONFIG_LLDT       /bin/icon.large.ico
 
 -include .depend

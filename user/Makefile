@@ -126,7 +126,8 @@ clean:
 			rm -f $$i/.sgbuilt_user; \
 		fi; \
 	done
-	@set -e; for i in $(SUBDIRS_APP); do make -C $$i clean; done
+	echo "Full cleanUP"
+	@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rfd $$i/filesystem/*; done
 
 prune:
 	-for i in $(sort $(dir_n) $(dir_)) ; do \
