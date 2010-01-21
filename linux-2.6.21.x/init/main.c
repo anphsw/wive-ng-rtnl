@@ -744,6 +744,7 @@ static int noinline init_post(void)
 	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
 		printk(KERN_WARNING "Warning: unable to open an initial console.\n");
 
+#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
 #ifdef CONFIG_PROC_FS
         if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
             printk("mount /proc file system fail!\n");
@@ -783,7 +784,7 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
-
+#endif
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);

@@ -54,6 +54,7 @@ clean:
 	rm -f `find . -name '*.[oas]' -print`
 	rm -f `find . -name 'core' -print`
 	rm -f `find . -name '*~' -print`
+	rm -rf filesystem
 	cd chat; $(MAKE) clean
 	cd pppd/plugins; $(MAKE) clean
 	cd pppd; $(MAKE) clean

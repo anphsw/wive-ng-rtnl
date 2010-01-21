@@ -16,8 +16,13 @@
 
 #define  REFRESH_TIMEOUT		"40000"		/* 40000 = 40 secs*/
 
-#include "include/linux/autoconf.h"		/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
-                                        /*   CONFIG_RT2880_ROOTFS_IN_FLASH */
+#include "include/linux/autoconf.h"
+
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+#define CONFIG_MTD_KERNEL_PART_SIZ 0
+#endif
+#endif
                                         /*   CONFIG_RT2880_ROOTFS_IN_RAM   */
 #define RFC_ERROR "RFC1867 error"
 

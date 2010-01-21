@@ -19,7 +19,7 @@ start() {
 	ifconfig imq0 up
     else
 	echo "Non IMQ base shaper mode"
-	echo "------------------OUT----------------------------"
+	echo "------------------IN----------------------------"
 	#input
 	tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
 	tc qdisc add dev $lan_if parent 1:1 handle 10: esfq

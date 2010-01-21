@@ -80,7 +80,7 @@ clean_ruleset_interval=600
 #quickrules=no
 
 # uuid : generate your own with "make genuuid"
-uuid=c4812a24-ac1b-47b7-8549-8d195fd6b6ca
+uuid=b700e45d-7b50-432d-b3e7-904bc2340095
 
 # serial and model number the daemon will report to clients
 # in its XML description
