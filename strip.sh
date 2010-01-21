@@ -11,7 +11,8 @@ $STRIP $RO_ROOT/lib/*.so
 
 echo --------------------------------STRIP AND SSTRIP-----------------------------
 echo Strip binary files
-NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep "not stripped" | grep -v "modules" | cut -d":" -f1`
+#NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep "not stripped" | grep -v "modules" | cut -d":" -f1`
+NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep -v "modules" | cut -d":" -f1`
 NON_STRIPS_LIB=`find $RO_ROOT/lib -type f -print -exec file {} \; | grep "not stripped" | grep -v "modules" | cut -d":" -f1`
 
 if [ "$NON_STRIPS_BIN" != "" ]; then
