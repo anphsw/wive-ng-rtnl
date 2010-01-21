@@ -227,7 +227,7 @@ static int initSystem(void)
 		return (-1);
 	if (initInternet() < 0)
 		return (-1);
-#if defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 	if (initStorage() < 0)
 		return (-1);
 #endif
@@ -395,7 +395,7 @@ static int initWebs(void)
  */
 	formDefineUtilities();
 	formDefineInternet();
-#if defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 	formDefineStorage();
 #endif
 	formDefineWireless();
@@ -405,7 +405,7 @@ static int initWebs(void)
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	formDefineLegacy();
 #endif
-#if defined CONFIG_RT2860V2_STA_MODULE
+#ifdef CONFIG_RT2860V2_STA_MODULE
 	formDefineStation();
 #endif
 	formDefineFirewall();

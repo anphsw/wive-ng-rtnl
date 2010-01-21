@@ -38,7 +38,7 @@ OBJS = wsc_main.o wsc_common.o wsc_ioctl.o wsc_netlink.o wsc_upnp_device.o wsc_u
 
 EXEC = wscd
 
-CFLAGS += -O2 -Wall -D_REENTRANT $(INCLUDE_PATH)
+CFLAGS += -Os -Wall -D_REENTRANT $(INCLUDE_PATH)
 #CFLAGS += -DRT_DEBUG
 CFLAGS += -DMULTIPLE_CARD_SUPPORT
 

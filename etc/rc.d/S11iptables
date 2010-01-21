@@ -5,8 +5,24 @@
 
 lan_ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`
+wan_mode=`nvram_get 2860 wanConnectionMode`
+upnp=`nvram_get 2860 upnpEnabled`
 NAT=`nvram_get 2860 natEnabled`
 RMG=`nvram_get 2860 RemoteManagement`
+
+#change wan if
+if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+    wan_upnp_if="ppp0"
+else
+    if [ "$wan_if" = "" ]; then
+        wan_upnp_if="eth2.2"
+    else
+        wan_upnp_if=$wan_if
+    fi
+fi
+
+#get wan IP
+EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
 
 #calculate min mtu
 MINMTU=`ip link show | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
@@ -26,10 +42,10 @@ start() {
 	#rules for access services from wan (DROP)
 	if [ "$RMG" = "0" ]; then
 	echo "Drop acess from wan $wan_if"
-	    iptables -A INPUT -i $wan_if -m state --state NEW -j DROP
-    	    iptables -A INPUT -i $wan_if ! -p icmp -j DROP
-	    iptables -A INPUT -i ppp+ -m state --state NEW -j DROP
-    	    iptables -A INPUT -i ppp+ ! -p icmp -j DROP
+	    iptables -A INPUT -i $wan_if -p tcp -m state --state NEW -j DROP
+    	    iptables -A INPUT -i $wan_if -p udp -j DROP
+	    iptables -A INPUT -i ppp+ -p tcp -m state --state NEW -j DROP
+    	    iptables -A INPUT -i ppp+ -p udp -j DROP
 	else
 	echo "Allow acess from wan $wan_if"
 	    iptables -A INPUT -i $wan_if -m state --state NEW -j RETURN
@@ -65,6 +81,16 @@ start() {
 	iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	iptables -t mangle -A FORWARD -p tcp ! -o ppp+ --tcp-flags SYN,RST SYN \
 			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
+
+        #rules for upnp
+	if [ "$upnp" = "1" ]; then
+            iptables -t nat -N MINIUPNPD
+            iptables -t nat -F MINIUPNPD
+            iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
+            iptables -t filter -N MINIUPNPD
+            iptables -t filter -F MINIUPNPD
+            iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
+        fi
         
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ]; then

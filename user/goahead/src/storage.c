@@ -45,10 +45,10 @@ void formDefineStorage(void) {
 	websFormDefine(T("storageAdm"), storageAdm);
 	websFormDefine(T("StorageAddUser"), StorageAddUser);
 	websFormDefine(T("StorageEditUser"), StorageEditUser);
-#if defined CONFIG_USER_STUPID_FTPD
+#ifdef CONFIG_USER_STUPID_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
-#if defined CONFIG_USER_SAMBA
+#ifdef CONFIG_USER_SAMBA
 	websFormDefine(T("storageSmbSrv"), storageSmbSrv);
 #endif
 }
@@ -182,7 +182,7 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 }
 
-#if defined CONFIG_USER_STUPID_FTPD
+#ifdef CONFIG_USER_STUPID_FTPD
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -222,7 +222,7 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#if defined CONFIG_USER_SAMBA
+#ifdef CONFIG_USER_SAMBA
 /* goform/storageSmbSrv */
 static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -258,10 +258,10 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 int initStorage(void)
 {
 		doSystem("storage.sh admin");
-#if defined CONFIG_USER_STUPID_FTPD
+#ifdef CONFIG_USER_STUPID_FTPD
 		doSystem("storage.sh ftp");
 #endif
-#if defined CONFIG_USER_SAMBA
+#ifdef CONFIG_USER_SAMBA
 		doSystem("storage.sh samba");
 #endif
 

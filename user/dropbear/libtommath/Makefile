@@ -11,23 +11,6 @@ srcdir=.
 CFLAGS += -I$(srcdir)
 
 #CFLAGS  +=  -I./ -Wall -W -Wshadow -Wsign-compare
-
-ifndef IGNORE_SPEED
-
-#for speed 
-#CFLAGS += -O3 -funroll-all-loops
-
-#for size 
-#CFLAGS += -Os
-
-#x86 optimizations [should be valid for any GCC install though]
-#CFLAGS  += -fomit-frame-pointer
-
-#debug
-#CFLAGS += -g3
-
-endif
-
 #install as this user
 ifndef INSTALL_GROUP
    GROUP=wheel

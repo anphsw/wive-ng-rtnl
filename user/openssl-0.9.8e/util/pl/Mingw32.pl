@@ -19,7 +19,7 @@ $cc='gcc';
 if ($debug)
 	{ $cflags="-DL_ENDIAN -DDSO_WIN32 -g2 -ggdb"; }
 else
-	{ $cflags="-DL_ENDIAN -DDSO_WIN32 -fomit-frame-pointer -O3 -march=i486 -Wall"; }
+	{ $cflags="-DL_ENDIAN -DDSO_WIN32 -fomit-frame-pointer -Os -march=i486 -Wall"; }
 
 if ($gaswin and !$no_asm)
 	{

@@ -26,18 +26,6 @@ CFLAGS += -Wsystem-headers -Wdeclaration-after-statement -Wbad-function-cast -Wc
 		  -Wmissing-declarations -Wpointer-arith 
 endif
 
-ifndef IGNORE_SPEED
-
-# optimize for SPEED
-#CFLAGS += -O3 -funroll-loops
-
-# add -fomit-frame-pointer.  hinders debugging!
-#CFLAGS += -fomit-frame-pointer
-
-# optimize for SIZE
-#CFLAGS += -Os -DLTC_SMALL_CODE
-
-endif
 
 # older GCCs can't handle the "rotate with immediate" ROLc/RORc/etc macros
 # define this to help

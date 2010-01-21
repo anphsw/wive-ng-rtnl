@@ -10,7 +10,6 @@ EXEC = i2scmd
 			
 OBJS = i2scmd.o 
 #$(MP3OBJS) 
-#MP3_CFLAGS = -O3 -DFPM_MIPS -DOPT_SPEED
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/$(LINUXDIR)/drivers/char/i2s
 #-I$(MP3PATH) 
 #$(MP3_CFLAGS)

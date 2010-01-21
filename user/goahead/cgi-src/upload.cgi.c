@@ -139,10 +139,10 @@ void mtd_write_firmware(char *filename, int offset, int len)
 {
     char cmd[512];
 
-#if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
+#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
     snprintf(cmd, 512, "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
     system(cmd);
-#elif defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
+#elif CONFIG_RT2880_ROOTFS_IN_FLASH
     if(CONFIG_MTD_KERNEL_PART_SIZ > len){
       printf("fatal error");
       return;
@@ -158,7 +158,7 @@ void mtd_write_firmware(char *filename, int offset, int len)
     return ;
 }
 
-#if defined (UPLOAD_FIRMWARE_SUPPORT)
+#ifdef UPLOAD_FIRMWARE_SUPPORT
 /*
  *  taken from "mkimage -l" with few modified....
  */
@@ -422,7 +422,7 @@ getenv("SERVER_SOFTWARE"));
     // printf("file:%s, file_begin:%d, len:%d<br>\n", filename, file_begin, file_end - file_begin);
     
     // examination
-#if defined (UPLOAD_FIRMWARE_SUPPORT)
+#ifdef UPLOAD_FIRMWARE_SUPPORT
     if(!check(filename, file_begin, file_end - file_begin) ){
         printf("Not a valid firmware.");
         javascriptUpdate(0);

@@ -20,6 +20,12 @@ UCLINUX_BUILD_USER=1
 
 VEND=$(ROOTDIR)/vendors
 
+#for all cleanap
+SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe ntpclient radvd wireless_tools zebra bpalogin dropbear
+SUBDIRS_APP += goahead iptables miniupnp openssl-0.9.8e rt2880_app wpa_supplicant-0.5.7 bridge-utils ethtool
+SUBDIRS_APP += igmpproxy lldt mkimage ppp strace wsc_upnp busybox flex inadyn ntp pppoe-relay udpxy xl2tpd
+
+
 #
 # must run the vendor build first
 #
@@ -44,9 +50,9 @@ dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_LLDT)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
+dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant-0.4.9
-dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_BPALOGIN)                      += bpalogin
@@ -117,6 +123,7 @@ clean:
 			rm -f $$i/.sgbuilt_user; \
 		fi; \
 	done
+	@set -e; for i in $(SUBDIRS_APP); do make -C $$i clean; done
 
 prune:
 	-for i in $(sort $(dir_n) $(dir_)) ; do \
@@ -148,4 +155,3 @@ prune_openswan:
 	@mkdir -p $(ROOTDIR)/openswan/linux/net/ipsec
 	@mv $(ROOTDIR)/$@/* $(ROOTDIR)/openswan/linux/net/ipsec/
 	@rm -fr $(ROOTDIR)/$@
-

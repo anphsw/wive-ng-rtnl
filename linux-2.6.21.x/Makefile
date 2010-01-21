@@ -294,7 +294,7 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE
-CFLAGS_MODULE   = $(MODFLAGS)
+CFLAGS_MODULE   = $(MODFLAGS) -Os
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r
 CFLAGS_KERNEL	=
@@ -479,11 +479,7 @@ endif # $(dot-config)
 # Defaults vmlinux but it is usually overridden in the arch makefile
 all: vmlinux
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 CFLAGS		+= -Os
-else
-CFLAGS		+= -Os
-endif
 
 include $(srctree)/arch/$(ARCH)/Makefile
 

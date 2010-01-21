@@ -426,7 +426,7 @@ function wmm_capable_enable_switch()
     <td class="title" colspan="2">Wi-Fi Multimedia</td>
   </tr>
   <tr> 
-    <td class="head">WMM Capable</td>
+    <td class="head">WMM/UDPXY</td>
     <td>
       <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked>Enable &nbsp;
       <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()">Disable

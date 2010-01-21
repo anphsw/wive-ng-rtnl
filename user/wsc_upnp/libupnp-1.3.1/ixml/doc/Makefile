@@ -100,13 +100,13 @@ AUTOMAKE = ${SHELL} /home/yy/RT288x_SDK/source/lib/libupnp/config.aux/missing --
 AWK = gawk
 CC = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/home/yy/RT288x_SDK/source/lib/include -I/home/yy/RT288x_SDK/source  -O2 -Wall -D_REENTRANT -I. -I./libupnp-1.3.1 -I./libupnp-1.3.1/upnp/inc -I./libupnp-1.3.1/upnp/src/inc -I./libupnp-1.3.1/ixml/inc -I./libupnp-1.3.1/ixml/src/inc  -I./libupnp-1.3.1/threadutil/inc -I../../linux-2.6.21.x/include/ -Os
-CPP = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-gcc -E
+CFLAGS = -Os -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/home/yy/RT288x_SDK/source/lib/include -I/home/yy/RT288x_SDK/source  -Os -Wall -D_REENTRANT -I. -I./libupnp-1.3.1 -I./libupnp-1.3.1/upnp/inc -I./libupnp-1.3.1/upnp/src/inc -I./libupnp-1.3.1/ixml/inc -I./libupnp-1.3.1/ixml/src/inc  -I./libupnp-1.3.1/threadutil/inc -I../../linux-2.6.21.x/include/ -Os
+#CPP = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
-CXX = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-g++ 
-CXXCPP = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-g++  -E
+#CXX = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-g++ 
+#CXXCPP = /opt/buildroot-gdb/bin/mipsel-linux-uclibc-g++  -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/home/yy/RT288x_SDK/source/lib/include -I/home/yy/RT288x_SDK/source  
+CXXFLAGS = -Os -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/home/yy/RT288x_SDK/source/lib/include -I/home/yy/RT288x_SDK/source  
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -127,7 +127,7 @@ ENABLE_WEBSERVER_FALSE = #
 ENABLE_WEBSERVER_TRUE = 
 EXEEXT = 
 F77 = f95
-FFLAGS = -g -O2
+FFLAGS = -g -Os
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}

@@ -519,7 +519,7 @@ static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -528,7 +528,7 @@ static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_STUPID_FTPD
+#ifdef CONFIG_USER_STUPID_FTPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -537,7 +537,7 @@ static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_SAMBA
+#ifdef CONFIG_USER_SAMBA
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -546,7 +546,7 @@ static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
     return websWrite(wp, T("1"));
 #else
     return websWrite(wp, T("0"));
@@ -635,7 +635,7 @@ static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_RPPPPOE_RELAY
+#ifdef CONFIG_USER_PPPPOE_RELAY
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1475,10 +1475,11 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	/*
 	 * lan and wan ip should not be the same except in bridge mode
 	 */
-	if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, wan_ip, 15)) {
+/*	if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, wan_ip, 15)) {
 		websError(wp, 200, "IP address is identical to WAN");
 		return;
 	}
+*/
 	// configure gateway and dns (WAN) at bridge mode
 	if (!strncmp(opmode, "0", 2)) {
 		gw = websGetVar(wp, T("lanGateway"), T(""));

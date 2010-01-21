@@ -68,12 +68,12 @@ AWK = gawk
 BISON = /usr/bin/bison
 CC = /opt/buildroot-gcc342/bin/mipsel-linux-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
+CFLAGS = -g -Os
 CPP = /opt/buildroot-gcc342/bin/mipsel-linux-gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -Os
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps

@@ -71,16 +71,23 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = mipsel-unknown-linux-gnu
+ACLOCAL = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run aclocal-1.7
 AMDEP_FALSE = #
 AMDEP_TRUE = 
+AMTAR = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run tar
+AUTOCONF = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run automake-1.7
 AWK = gawk
 BISON = /usr/bin/bison
+CC = /opt/buildroot-gcc342/bin/mipsel-linux-gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -Os
+CPP = /opt/buildroot-gcc342/bin/mipsel-linux-gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -Os
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -110,7 +117,7 @@ LTLIBICONV =
 LTLIBINTL = 
 LTLIBOBJS = 
 M4 = /usr/bin/m4
-#MAKEINFO = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run makeinfo
 MKINSTALLDIRS = $(top_builddir)/./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
 MSGMERGE = /usr/bin/msgmerge
@@ -157,6 +164,7 @@ host_os = linux-gnu
 host_vendor = unknown
 includedir = ${prefix}/include
 infodir = ${prefix}/info
+install_sh = /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -274,7 +282,11 @@ BUILT_SOURCES = \
 
 SUBDIRS = \
 	. \
+	doc \
+	m4  \
+	examples \
 	po \
+	tools \
 
 
 localedir = $(datadir)/locale
@@ -903,9 +915,6 @@ distclean: distclean-recursive
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic distclean-hdr \
 	distclean-tags
-
-romfs:
-	echo "OK"
 
 dvi: dvi-recursive
 

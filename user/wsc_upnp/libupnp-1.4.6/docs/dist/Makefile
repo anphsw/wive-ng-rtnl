@@ -73,13 +73,13 @@ AUTOMAKE = ${SHELL} /home/yy/RT288x_SDK/source/user/WSC_UPNP/libupnp-1.4.6/confi
 AWK = gawk
 CC = mipsel-linux-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -Wall
+CFLAGS = -g -Os -Wall
 CPP = mipsel-linux-gcc -E
 CPPFLAGS = 
 CXX = mipsel-linux-g++
 CXXCPP = mipsel-linux-g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -Os
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -102,7 +102,7 @@ ENABLE_WEBSERVER_FALSE = #
 ENABLE_WEBSERVER_TRUE = 
 EXEEXT = 
 F77 = gfortran
-FFLAGS = -g -O2
+FFLAGS = -g -Os
 GREP = /bin/grep
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}

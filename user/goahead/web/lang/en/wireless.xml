@@ -87,7 +87,7 @@
   <message msgid="adv country code ie" msgstr="IE (Ireland)" />
   <message msgid="adv country code hk" msgstr="HK (Hong Kong)" />
   <message msgid="adv wmm" msgstr="Wi-Fi Multimedia" />
-  <message msgid="adv wmm capable" msgstr="WMM Capable" />
+  <message msgid="adv wmm capable" msgstr="WMM/UDPXY" />
   <message msgid="adv apds capable" msgstr="APSD Capable" />
   <message msgid="adv dls capable" msgstr="DLS Capable" />
   <message msgid="adv wmm parameter" msgstr="WMM Parameters" />

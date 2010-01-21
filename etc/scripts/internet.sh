@@ -404,7 +404,6 @@ elif [ "$opmode" = "1" ]; then
 
 	wan.sh
 	lan.sh
-	nat.sh
 elif [ "$opmode" = "2" ]; then
 	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
@@ -416,7 +415,6 @@ elif [ "$opmode" = "2" ]; then
 	fi
 	wan.sh
 	lan.sh
-	nat.sh
 elif [ "$opmode" = "3" ]; then
 	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
 		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
@@ -432,7 +430,6 @@ elif [ "$opmode" = "3" ]; then
 	fi
 	wan.sh
 	lan.sh
-	nat.sh
 else
 	echo "unknown OperationMode: $opmode"
                                 echo '##### config RT3052 vlan partition (WLLLL) #####'
