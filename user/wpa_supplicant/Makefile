@@ -14,6 +14,7 @@ ALL=wpa_supplicant wpa_passphrase wpa_cli dynamic_eap_methods
 all: verify_config $(ALL)
 
 verify_config:
+	cp -fv config-ralink .config
 	@if [ ! -r .config ]; then \
 		echo 'Building wpa_supplicant requires a configuration file'; \
 		echo '(.config). See README for more instructions. You can'; \

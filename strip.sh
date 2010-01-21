@@ -3,6 +3,7 @@
 RO_ROOT=romfs
 STRIP=./toolchain/bin/mipsel-linux-strip
 SSTRIP=./tools/sstrip/sstrip
+MODULES=`find romfs/lib/modules -type f`;
 
 echo ---------------------------------STRIP-LIB-SDK-------------------------------
 #$STRIP $RO_ROOT/lib/*.a
@@ -23,7 +24,11 @@ if [ "$NON_STRIPS_LIB" != "" ]; then
   $STRIP $NON_STRIPS_LIB
   $SSTRIP $NON_STRIPS_LIB
 fi
+for i in $MODULES; do
+  echo $i;
+  mips-linux-objcopy --strip-debug --strip-unneeded $i $i
+done
+
 echo -----------------------------------SYNC!!-------------------------------------
 sync
 echo ----------------------------APP STRIP AND COPY OK-----------------------------
-              

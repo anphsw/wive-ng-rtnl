@@ -2,11 +2,17 @@
 
 modtest=`uname -r`
 moddir=/lib/modules/$modtest
+MODULES=`find /lib/modules -type f`;
 
 start() {
  echo "Starting modules.dep generate..."
     depmod
     ln -sf $moddir/modules.dep /etc/modules.dep
+    for i in $MODULES; do
+	echo $i;
+	insmod $i
+    done
+
 }
 
 stop() {

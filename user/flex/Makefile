@@ -71,18 +71,23 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = mipsel-unknown-linux-gnu
+ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = #
 AMDEP_TRUE = 
+AMTAR = @AMTAR@
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+AUTOMAKE = @AUTOMAKE@
 AWK = gawk
 BISON = /usr/bin/bison
 #CC = /opt/buildroot-gcc342/bin/mipsel-linux-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -Os
+CFLAGS = -g -O2
 CPP = /opt/buildroot-gcc342/bin/mipsel-linux-gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -Os
+CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -112,7 +117,7 @@ LTLIBICONV =
 LTLIBINTL = 
 LTLIBOBJS = 
 M4 = /usr/bin/m4
-MAKEINFO = ${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/missing --run makeinfo
+MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = $(top_builddir)/./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
 MSGMERGE = /usr/bin/msgmerge
@@ -159,7 +164,7 @@ host_os = linux-gnu
 host_vendor = unknown
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_F5D8235-4_v2000_20081112_SDK3200/user/flex-2.5.33/install-sh
+install_sh = @install_sh@
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -275,7 +280,7 @@ BUILT_SOURCES = \
 	skel.c
 
 
-SUBDIRS = 
+SUBDIRS =
 
 localedir = $(datadir)/locale
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I${prefix}/include -I$(top_srcdir)/intl
@@ -903,6 +908,9 @@ distclean: distclean-recursive
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic distclean-hdr \
 	distclean-tags
+
+romfs:
+	echo "OK"
 
 dvi: dvi-recursive
 

@@ -4,6 +4,9 @@ start() {
  echo "Start goahead"
     killall nvram_daemon > /dev/null 2>&1
     /bin/goahead &
+
+ echo "Unload unneeded modules"
+    rmmod -a
 }
 
 stop() {

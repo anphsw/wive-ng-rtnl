@@ -515,9 +515,9 @@ NXTARG:		;
 	hdr->ih_type  = opt_type;
 	hdr->ih_comp  = opt_comp;
 
-//	strncpy((char *)hdr->ih_name, name, IH_NMLEN);
+	strncpy((char *)hdr->ih_name, name, IH_NMLEN);
 	strncpy((char *)tail_pre.productid, name, MAX_STRING);
-	memcpy(&hdr->tail, &tail_pre, sizeof(TAIL));
+//	memcpy(&hdr->tail, &tail_pre, sizeof(TAIL));
 
 	checksum = crc32(0,(const char *)hdr,sizeof(image_header_t));
 
@@ -747,8 +747,8 @@ print_header (image_header_t *hdr)
 	timestamp = (time_t)ntohl(hdr->ih_time);
 	size = ntohl(hdr->ih_size);
 
-//	printf ("Image Name:   %.*s\n", IH_NMLEN, hdr->ih_name);
-	printf ("Product ID:   %.*s\n", MAX_STRING, hdr->tail.productid);
+	printf ("Image Name:   %.*s\n", IH_NMLEN, hdr->ih_name);
+//	printf ("Product ID:   %.*s\n", MAX_STRING, hdr->tail.productid);
 	printf ("Created:      %s", ctime(&timestamp));
 	printf ("Image Type:   "); print_type(hdr);
 	printf ("Data Size:    %d Bytes = %.2f kB = %.2f MB\n",
@@ -756,12 +756,12 @@ print_header (image_header_t *hdr)
 	printf ("Load Address: 0x%08X\n", ntohl(hdr->ih_load));
 	printf ("Entry Point:  0x%08X\n", ntohl(hdr->ih_ep));
 
-	printf ("Kernel Ver.:  %d.%d\n", hdr->tail.kernel.major, hdr->tail.kernel.minor);
-	printf ("FS Ver:       %d.%d\n", hdr->tail.fs.major, hdr->tail.fs.minor);
-	printf ("Hardware Compatible List:\n");
+//	printf ("Kernel Ver.:  %d.%d\n", hdr->tail.kernel.major, hdr->tail.kernel.minor);
+//	printf ("FS Ver:       %d.%d\n", hdr->tail.fs.major, hdr->tail.fs.minor);
+//	printf ("Hardware Compatible List:\n");
 
-	for(i=0; i<8; i++)
-		printf("	%d: %d.%d\n", i+1, hdr->tail.hw[i].major, hdr->tail.hw[i].minor);
+//	for(i=0; i<8; i++)
+//		printf("	%d: %d.%d\n", i+1, hdr->tail.hw[i].major, hdr->tail.hw[i].minor);
 
 	if (hdr->ih_type == IH_TYPE_MULTI || hdr->ih_type == IH_TYPE_SCRIPT) {
 		int i, ptrs;
