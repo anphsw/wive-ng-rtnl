@@ -354,7 +354,7 @@ if [ "$opmode" = "0" ]; then
 	addRaL02Br0
 	wan.sh
 	lan.sh
-	echo 0 > /proc/sys/net/ipv4/ip_forward
+
 elif [ "$opmode" = "1" ]; then
 	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
 		if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then

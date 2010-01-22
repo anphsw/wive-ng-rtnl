@@ -4,10 +4,7 @@
 . /sbin/global.sh
 
 start() {
-    srv=`nvram_get 2860 DDNSProvider`
-    ddns=`nvram_get 2860 DDNS`
-    u=`nvram_get 2860 DDNSAccount`
-    pw=`nvram_get 2860 DDNSPassword`
+    get_param
     if [ "$srv" = "" -o "$srv" = "none" ] || [ "$ddns" = "" -o "$u" = "" -o "$pw" = "" ]; then
 	exit 0
     else
@@ -25,6 +22,13 @@ start() {
 	    exit 1
         fi
     fi
+}
+
+get_param() {
+    srv=`nvram_get 2860 DDNSProvider`
+    ddns=`nvram_get 2860 DDNS`
+    u=`nvram_get 2860 DDNSAccount`
+    pw=`nvram_get 2860 DDNSPassword`
 }
 
 stop() {

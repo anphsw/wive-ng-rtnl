@@ -13,4 +13,8 @@
     service dnsserver stop
     service dnsserver start
 
+    #rebuild shaper rules
+    service shaper stop
+    service shaper start
+
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

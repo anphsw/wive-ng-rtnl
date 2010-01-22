@@ -3,32 +3,9 @@
 #get params
 . /sbin/global.sh
 
-lan_ip=`nvram_get 2860 lan_ipaddr`
-nm=`nvram_get 2860 lan_netmask`
-wan_mode=`nvram_get 2860 wanConnectionMode`
-upnp=`nvram_get 2860 upnpEnabled`
-NAT=`nvram_get 2860 natEnabled`
-RMG=`nvram_get 2860 RemoteManagement`
-
-#change wan if
-if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
-    wan_upnp_if="ppp0"
-else
-    if [ "$wan_if" = "" ]; then
-        wan_upnp_if="eth2.2"
-    else
-        wan_upnp_if=$wan_if
-    fi
-fi
-
-#get wan IP
-EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
-
-#calculate min mtu
-MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
-
 start() {
  echo "Starting IPTABLES: "
+ get_param
 	#default filters
         iptables -A INPUT -i lo+ -j ACCEPT
 	iptables -A INPUT -m state --state INVALID -j DROP
@@ -95,19 +72,24 @@ start() {
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ]; then
 	echo "Add masqrade rules"
+	    sysctl -w net.ipv4.ip_forward=1
 	    iptables -t nat -N port_forward
 	    iptables -t nat -N DMZ
 	    iptables -t nat -I PREROUTING 1 -j port_forward
 	    iptables -t nat -I PREROUTING 2 -j DMZ
 	    iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
     	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
+	    #wireless
 	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE
+	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$nm -j MASQUERADE
 	fi
 	
 }
 
+
 stop() {
  echo "Stopping IPTABLES: "
+ get_param
 	echo -e "*nat\nCOMMIT\n*filter\nCOMMIT\n*mangle\nCOMMIT\n" | iptables-restore > /dev/null 2>&1
 	iptables -F > /dev/null 2>&1
 	iptables -t nat -F > /dev/null 2>&1
@@ -136,6 +118,34 @@ stop() {
 
 }
 
+get_param() {
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    nm=`nvram_get 2860 lan_netmask`
+    wan_mode=`nvram_get 2860 wanConnectionMode`
+    upnp=`nvram_get 2860 upnpEnabled`
+    NAT=`nvram_get 2860 natEnabled`
+    RMG=`nvram_get 2860 RemoteManagement`
+
+    #change wan if
+    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+        wan_upnp_if="ppp0"
+    else
+        if [ "$wan_if" = "" ]; then
+            wan_upnp_if="eth2.2"
+        else
+            wan_upnp_if=$wan_if
+        fi
+    fi
+
+    #get wan IP
+    EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
+    
+    #calculate min mtu
+    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
+    
+    #check ppp
+    PPPUP=`ip link show up | grep ppp0 -c`
+}
 case "$1" in
         start)
             start

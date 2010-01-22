@@ -9,8 +9,8 @@ start() {
 
 stop() {
  echo "Stop br0 network interface..."
- ifconfig br0 down > /dev/null 2>&1
- brctl delbr br0 > /dev/null 2>&1
+    ifconfig br0 down > /dev/null 2>&1
+    brctl delbr br0 > /dev/null 2>&1
 }
 
 case "$1" in
