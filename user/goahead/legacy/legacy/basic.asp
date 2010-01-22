@@ -632,7 +632,7 @@ function RadioStatusChange(rs)
         <option value=0>11b/g mixed mode</option>
         <option value=1>11b only</option>
         <option value=2>11g only</option>
-        <option value=3>11a only</option>
+<!--        <option value=3>11a only</option> -->
       </select>
     </td>
   </tr>
@@ -652,7 +652,7 @@ function RadioStatusChange(rs)
     <td class="head">BSSID</td>
     <td>&nbsp;&nbsp;<% getLegacyCurrentMac(); %></td>
   </tr>
-  <tr id="div_11a_channel" name="div_11a_channel" style="visibility:visible;">
+<!--  <tr id="div_11a_channel" name="div_11a_channel" style="visibility:visible;">
     <td class="head">Frequency (Channel)</td>
     <td>
       <select id="sz11aChannel" name="sz11aChannel" size="1">
@@ -660,7 +660,7 @@ function RadioStatusChange(rs)
 	<% getLegacy11aChannels(); %>
       </select>
     </td>
-  </tr>
+  </tr> -->
   <tr id="div_11b_channel" name="div_11b_channel" style="visibility:visible;">
     <td class="head">Frequency (Channel)</td>
     <td>

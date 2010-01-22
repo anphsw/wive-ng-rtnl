@@ -4,10 +4,12 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/zebra ]; then
  if [ -f /etc/zebra.conf ]; then
     echo "Starting ZEBRA: "
     zebra -d -f /etc/zebra.conf
  fi
+fi
 }
 
 stop() {

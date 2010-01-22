@@ -4,10 +4,12 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/ripd ]; then
  if [ -f /etc/ripd.conf ]; then
     echo "Starting RIPD: "
     ripd -f /etc/ripd.conf -d
  fi 
+fi
 }
 
 stop() {

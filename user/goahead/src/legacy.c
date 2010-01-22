@@ -36,7 +36,9 @@
 
 extern int g_wsc_configured;
 
+#ifdef CONFIG_802_11_a
 static int  getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv);
+#endif
 static int  getLegacy11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLegacy11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLegacyChannel(int eid, webs_t wp, int argc, char_t **argv);
@@ -51,7 +53,9 @@ static void LEGACYSecurity(webs_t wp, char_t *path, char_t *query);
 
 void formDefineLegacy(void)
 {
+#ifdef CONFIG_802_11_a
 	websAspDefine(T("getLegacy11aChannels"), getLegacy11aChannels);
+#endif
 	websAspDefine(T("getLegacy11bChannels"), getLegacy11bChannels);
 	websAspDefine(T("getLegacy11gChannels"), getLegacy11gChannels);
 	websAspDefine(T("getLegacyChannel"), getLegacyChannel);
@@ -68,6 +72,7 @@ void formDefineLegacy(void)
 /*
  * description: write 802.11a channels in <select> tag
  */
+#ifdef CONFIG_802_11_a
 static int getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int  idx = 0, channel;
@@ -116,7 +121,7 @@ static int getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-
+#endif
 /*
  * description: write 802.11b channels in <select> tag
  */
@@ -486,7 +491,9 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	mssid_3 = websGetVar(wp, T("mssid_3"), T("")); 
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
 	broadcastssid = websGetVar(wp, T("broadcastssid"), T("1")); 
+#ifdef CONFIG_802_11_a
 	sz11aChannel = websGetVar(wp, T("sz11aChannel"), T("")); 
+#endif
 	sz11bChannel = websGetVar(wp, T("sz11bChannel"), T("")); 
 	sz11gChannel = websGetVar(wp, T("sz11gChannel"), T("")); 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0")); 
@@ -594,13 +601,21 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	}
 
 	//11abg Channel or AutoSelect
+#ifdef CONFIG_802_11_a
 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
+#else
+	if ((0 == strlen(sz11bChannel)) &&
+#endif
 			(0 == strlen(sz11gChannel))) {
 		nvram_commit(RT2561_NVRAM);
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
+#ifdef CONFIG_802_11_a
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
+#else
+	if (!strncmp(sz11bChannel, "0", 2) &&
+#endif
 			!strncmp(sz11gChannel, "0", 2))
 		nvram_bufset(RT2561_NVRAM, "AutoChannelSelect", "1");
 	else

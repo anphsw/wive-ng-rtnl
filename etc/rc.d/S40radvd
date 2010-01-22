@@ -4,6 +4,7 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/radvd ]; then
  echo "Starting radvd: "
     radvd=`nvram_get 2860 radvdEnabled`
     ifconfig sit0 down
@@ -16,6 +17,7 @@ start() {
         route -A inet6 add 2002:1101:101:0::/64 dev br0
         radvd -C /etc/radvd.conf -d 1 &
     fi
+fi
 }
 
 stop() {

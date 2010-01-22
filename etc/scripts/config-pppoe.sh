@@ -5,6 +5,10 @@
 # usage: config-pppoe.sh <user> <password> <wan_if_name>
 #
 echo "==================START-PPPOE-CLIENT======================="
+
+killall -9 pppd > /dev/null 2>&1
+killall -9 xl2tpd > /dev/null 2>&1
+
 usage()
 {
 	echo "Usage:"

@@ -4,6 +4,7 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/ntpclient ]; then
  echo "Starting NTP: "
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
@@ -26,6 +27,7 @@ start() {
     if [ "$srv" != "" ]; then
 	ntpclient -s -c 0 -h $srv -i $sync &
     fi
+fi
 }
 
 stop() {

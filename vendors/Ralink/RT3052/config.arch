@@ -9,7 +9,7 @@ CFLAGS  +=  -Os
 UOPT += -Os                  # user apps are always Os
 LOPT += -Os                  # library is alway 02
 
-MODEL_NAME		   = RTNL
+MODEL_NAME		   = RT-NL
 KERNEL_VER		   = "1.2"
 FS_VER			   = "0.0"
 PRODUCTID		   = "RT-NL"

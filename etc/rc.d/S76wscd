@@ -4,12 +4,14 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/wscd ]; then
  echo "Starting WPS: "
     lan_if_addr=`nvram_get 2860 lan_if_addr`
     wsc=`nvram_get 2860 WscModeOption`
     if [ $wsc != "0" ]; then
 	wscd -m 1 -a $lan_if_add -i ra0 &
     fi
+fi
 }
 
 stop() {

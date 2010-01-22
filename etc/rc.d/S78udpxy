@@ -1,11 +1,13 @@
 #!/bin/sh
 
 start() {
+if [ -f /bin/udpxy ]; then
  QOS=`nvram_get 2860 WmmCapable`
     if [ "$QOS" = "1" ]; then
       echo "UDPXY start"
 	udpxy -m br0 -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi
+fi
 }
 
 stop() {

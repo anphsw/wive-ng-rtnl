@@ -1,7 +1,8 @@
 #!/bin/sh
 
 start() {
- echo "Start mdev for support HOTPLUG"
+if [ -f /bin/mdev ]; then
+     echo "Start mdev for support HOTPLUG"
     mdev -s
     echo "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]" > /etc/mdev.conf
     echo "# The special characters have the meaning:" >> /etc/mdev.conf
@@ -10,6 +11,7 @@ start() {
     echo "# * Run both after creating and before removing the device." >> /etc/mdev.conf
     echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
     echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+fi
 }
 
 stop() {

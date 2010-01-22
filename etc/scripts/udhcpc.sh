@@ -34,6 +34,7 @@ case "$1" in
         for i in $dns ; do
             echo adding dns $i
             echo nameserver $i >> $RESOLV_CONF
+	    service dns restart
         done
 		# notify goahead when the WAN IP has been acquired. --yy
 		killall -SIGUSR2 goahead

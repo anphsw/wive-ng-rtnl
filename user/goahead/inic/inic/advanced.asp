@@ -397,13 +397,13 @@ function wmm_capable_enable_switch()
       <input type=radio name=pkt_aggregate value="0" checked>Disable
     </td>
   </tr>
-  <tr> 
+<!--  <tr> 
     <td class="head">IEEE 802.11H Support</td>
     <td>
       <input type=radio name=ieee_80211h value="1">Enable &nbsp;
       <input type=radio name=ieee_80211h value="0" checked>Disable <font color="#808080">(only in A band)</font>
     </td>
-  </tr>
+  </tr> -->
   <tr> 
     <td class="head">Country Code</td>
     <td>

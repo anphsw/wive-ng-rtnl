@@ -288,7 +288,7 @@ if [ ! -z ${output_file} ]; then
 	rm ${cpio_list}
 	if [ "$use_lzma" == "y" ]; then
 		cross_compile_path=`echo ${CONFIG_CROSS_COMPILER_PATH} | sed -e 's/\"//g'`
-		${cross_compile_path}/lzma_alone e ${cpio_tfile} ${output_file} -d20
+		${cross_compile_path}/lzma_alone e ${cpio_tfile} ${output_file} -a1
 	else
 		cat ${cpio_tfile} | gzip -f -9 - > ${output_file}
 	fi

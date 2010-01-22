@@ -700,10 +700,8 @@ INT Set_EntryLifeCheck_Proc(
 #endif // CONFIG_AP_SUPPORT //
 
 
-static struct {
-	PSTRING name;
-	INT (*set_proc)(PRTMP_ADAPTER pAdapter, PSTRING arg);
-} *PRTMP_PRIVATE_SET_PROC, RTMP_PRIVATE_SUPPORT_PROC[] = {
+static struct { PSTRING name; INT (*set_proc)(PRTMP_ADAPTER pAdapter, PSTRING arg);}
+ *PRTMP_PRIVATE_SET_PROC, RTMP_PRIVATE_SUPPORT_PROC[] = {
 	{"DriverVersion",				Set_DriverVersion_Proc},
 	{"CountryRegion",				Set_CountryRegion_Proc},
 	{"CountryRegionABand",			Set_CountryRegionABand_Proc},

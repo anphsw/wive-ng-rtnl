@@ -3444,7 +3444,11 @@ static int myGetSuppAMode(void)
 		{
 			if ( pNetworkTypeList->NetworkType[i] == Ndis802_11OFDM5 )
 			{
+#ifdef CONFIG_802_11_a
 				G_bSupportAMode = 1;
+#else
+				G_bSupportAMode = 0;
+#endif
 				break;
 			}
 		}
@@ -3459,10 +3463,14 @@ static int myGetSuppAMode(void)
  */
 static int getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv)
 {
-	if (myGetSuppAMode() == 1)
+#ifdef CONFIG_802_11_a
+ 	if (myGetSuppAMode() == 1)
 		ejSetResult(eid, "1");
 	else
 		ejSetResult(eid, "0");
+#else
+		ejSetResult(eid, "0");
+#endif
 	return 0;
 }
 
@@ -3473,18 +3481,27 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char *mode_s = nvram_bufget(RT2860_NVRAM, "WirelessMode");
 	int mode;
+#ifdef CONFIG_802_11_a
 	int bSuppA = myGetSuppAMode();
-
+#endif
 	mode = (NULL == mode_s)? 0 : atoi(mode_s);
 	websWrite(wp, "<option value=0 %s>802.11 B/G mixed mode</option>", (mode == 0)? "selected" : "");
 	websWrite(wp, "<option value=1 %s>802.11 B Only</option>", (mode == 1)? "selected" : "");
+#ifdef CONFIG_802_11_a
 	if (bSuppA) {
 		websWrite(wp, "<option value=2 %s>802.11 A Only</option>", (mode == 2)? "selected" : "");
 		websWrite(wp, "<option value=3 %s>802.11 A/B/G mixed mode</option>", (mode == 3)? "selected" : "");
 	}
+#else
 	websWrite(wp, "<option value=4 %s>802.11 G Only</option>", (mode == 4)? "selected" : "");
 	websWrite(wp, "<option value=6 %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
-	websWrite(wp, "<option value=7 %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
+#endif
+	websWrite(wp, "<option value=7 %s>802.11 G/N mixed mode</option>", (mode == 7)? "selected" : "");
+	websWrite(wp, "<option value=6 %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
+#ifndef CONFIG_802_11_a
+	websWrite(wp, "<option value=9 %s>802.11 BGN mixed mode</option>", (mode == 9)? "selected" : "");
+#endif
+#ifdef CONFIG_802_11_a
 	if (bSuppA) {
 		websWrite(wp, "<option value=8 %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
 	}
@@ -3493,7 +3510,7 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, "<option value=10 %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
 		websWrite(wp, "<option value=5 %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
 	}
-
+#endif
 	return 0;
 }
 

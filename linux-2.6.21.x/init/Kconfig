@@ -326,6 +326,10 @@ source "usr/Kconfig"
 
 endif
 
+config LZMA_COMPRESS_LEVEL
+        int "Compress level for LZMA"
+        default "23"
+
 config CC_OPTIMIZE_FOR_SIZE
 	bool "Optimize for size (Look out for broken compilers!)"
 	default y

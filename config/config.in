@@ -21,6 +21,8 @@ bool 'Build libutil'		CONFIG_LIB_UTIL_FORCE
 bool 'Build libresolv'		CONFIG_LIB_RESOLV_FORCE
 bool 'Build librt'		CONFIG_LIB_RT_FORCE
 
+comment 'Build options'
+bool '802.11a support'		CONFIG_802_11_a
 endmenu
 
 #############################################################################
@@ -107,6 +109,7 @@ bool 'udpxy'					CONFIG_USER_UDPXY
 bool 'mcprobe'					CONFIG_USER_MCPROBE
 bool 'inadyn (DDNS Client)'     		CONFIG_USER_INADYN
 bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
+bool 'iptables-tools'				CONFIG_USER_IPTABLES_SAVE_RESTORE
 bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES
 bool 'tc'                               	CONFIG_USER_TC
 

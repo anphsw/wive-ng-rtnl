@@ -90,7 +90,6 @@ start() {
 stop() {
  echo "Stopping IPTABLES: "
  get_param
-	echo -e "*nat\nCOMMIT\n*filter\nCOMMIT\n*mangle\nCOMMIT\n" | iptables-restore > /dev/null 2>&1
 	iptables -F > /dev/null 2>&1
 	iptables -t nat -F > /dev/null 2>&1
         iptables -t filter -F > /dev/null 2>&1

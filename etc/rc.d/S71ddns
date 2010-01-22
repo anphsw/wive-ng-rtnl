@@ -4,6 +4,7 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/inadyn ]; then
     get_param
     if [ "$srv" = "" -o "$srv" = "none" ] || [ "$ddns" = "" -o "$u" = "" -o "$pw" = "" ]; then
 	exit 0
@@ -22,6 +23,7 @@ start() {
 	    exit 1
         fi
     fi
+fi
 }
 
 get_param() {

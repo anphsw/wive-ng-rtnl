@@ -120,24 +120,24 @@ function insertChannelOption(vChannel, band)
 {
 	var y = document.createElement('option');
 
-	if (1*band == 24)
-	{
+//	if (1*band == 24)
+//	{
 		y.text = ChannelList_24G[1*vChannel - 1];
 		y.value = 1*vChannel;
-	}
-	else if (1*band == 5)
-	{
-		y.value = 1*vChannel;
-		if (1*vChannel <= 140)
-			y.text = ChannelList_5G[((1*vChannel) - 36) / 4];
-		else
-			y.text = ChannelList_5G[((1*vChannel) - 36 - 1) / 4];
-	}
+//	}
+//	else if (1*band == 5)
+//	{
+//		y.value = 1*vChannel;
+//		if (1*vChannel <= 140)
+//			y.text = ChannelList_5G[((1*vChannel) - 36) / 4];
+//		else
+//			y.text = ChannelList_5G[((1*vChannel) - 36 - 1) / 4];
+//	}
 
-	if (1*band == 24)
+//	if (1*band == 24)
 		var x=document.getElementById("sz11gChannel");
-	else if (1*band == 5)
-		var x=document.getElementById("sz11aChannel");
+//	else if (1*band == 5)
+//		var x=document.getElementById("sz11aChannel");
 
 	try
 	{
@@ -1161,8 +1161,8 @@ function CheckValue()
         <option value=0>11b/g mixed mode</option>
         <option value=1>11b only</option>
         <option value=4>11g only</option>
-        <option value=2>11a only</option>
-        <option value=8>11a/n mixed mode</option>
+<!--        <option value=2>11a only</option>
+        <option value=8>11a/n mixed mode</option> -->
         <option value=9>11b/g/n mixed mode</option>
       </select>
       <!--

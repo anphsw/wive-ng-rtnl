@@ -3,12 +3,22 @@
 #get params
 . /sbin/global.sh
 
+lan_ip=`nvram_get 2860 lan_ipaddr`
+nm=`nvram_get 2860 lan_netmask`
+
 start() {
- echo "Starting IGMPPROXY: "
+if [ -f /bin/igmpproxy ]; then
+  echo "Starting IGMPPROXY: "
     igmp=`nvram_get 2860 igmpEnabled`
     if [ "$igmp" = "1" ]; then
-        config-igmpproxy.sh $wan_if $lan_if
+	echo "quickleave" > /etc/igmpproxy.conf
+	echo "phyint $wan_if upstream  ratelimit 0  threshold 1" >> /etc/igmpproxy.conf
+	echo "phyint $lan_if downstream  ratelimit 0  threshold 1" >> /etc/igmpproxy.conf
+	echo "phyint ppp0 disabled" >> /etc/igmpproxy.conf
+	echo "" >> /etc/igmpproxy.conf
+        igmpproxy $wan_if $lan_if
     fi
+fi
 }
 
 stop() {

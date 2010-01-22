@@ -79,7 +79,7 @@ mkimage: $(MKIMAGE_DIR)/crc32.c $(MKIMAGE_DIR)/mkimage.c
 
 image: mkimage
 	$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S $(ROOTDIR)/$(LINUXDIR)/vmlinux  $(KERNELZ)
-	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; $(CONFIG_CROSS_COMPILER_PATH)/lzma_alone e -a1 -d27  $(KERNELZ) $(KERNELZ).$(COMP)
+	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; $(CONFIG_CROSS_COMPILER_PATH)/lzma_alone e -a1 -d$(CONFIG_LZMA_COMPRESS_LEVEL)  $(KERNELZ) $(KERNELZ).$(COMP)
 
 ifeq	($(CONFIG_BLK_DEV_INITRD),)
 	@#============================================================

@@ -4712,12 +4712,8 @@ VOID  WscInformFromWPA(
 #ifdef CONFIG_ASUS_EXT
         nvram_set("stop_wps_led", "1");	
 #endif
-#endif
-
-        DBGPRINT(RT_DEBUG_TRACE, ("Reset EntryIfIdx to %d\n", WSC_INIT_ENTRY_APIDX));
     }
-
-    DBGPRINT(RT_DEBUG_TRACE, ("<----- WscInformFromWPA\n"));
+#endif
 }
 
 VOID WscDelWPARetryTimer(
@@ -4729,7 +4725,9 @@ VOID WscDelWPARetryTimer(
 
     DBGPRINT(RT_DEBUG_TRACE, ("<----- WscDelWPARetryTimer\n"));
     
+#ifndef CONFIG_RT2860V2_STA_WSC
     pEntry = MacTableLookup(pAd, pAd->ApCfg.MBSSID[apidx].WscControl.EntryAddr);
+#endif
     
     if (pEntry)
     {

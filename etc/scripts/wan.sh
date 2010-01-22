@@ -9,8 +9,6 @@
 
 # stop all
 killall -q udhcpc
-killall -q l2tpd
-killall -q pppd
 
 #workaround fix me!!!
 if [ "$wan_if" = "" ]; then
@@ -53,7 +51,7 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	fi
 	config-dns.sh $pd $sd
 elif [ "$wanmode" = "DHCP" ]; then
-	udhcpc -i $wan_if -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid &
+	udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
 elif [ "$wanmode" = "PPPOE" ]; then
 	u=`nvram_get 2860 wan_pppoe_user`
 	pw=`nvram_get 2860 wan_pppoe_pass`
@@ -61,8 +59,6 @@ elif [ "$wanmode" = "PPPOE" ]; then
 	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
 
 	killall -9 config-pptp.sh > /dev/null
-	killall -9 xl2tpd > /dev/null
-	killall -9 ppdd > /dev/null
 
 	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
 
@@ -72,8 +68,6 @@ elif [ "$wanmode" = "L2TP" ]; then
 	l2tp_optime=`nvram_get 2860 wan_l2tp_optime`
 
 	killall -9 config-pptp.sh > /dev/null
-	killall -9 xl2tpd > /dev/null
-	killall -9 ppdd > /dev/null
 
         if [ "$mode" = "0" ]; then
 	#static
@@ -91,8 +85,8 @@ elif [ "$wanmode" = "L2TP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid &
-	    sleep 3
+    	    udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid > /dev/null 2>&1 &
+	    sleep 10
 	fi
 	config-l2tp.sh &
 
@@ -103,8 +97,6 @@ elif [ "$wanmode" = "PPTP" ]; then
         pptp_optime=`nvram_get 2860 wan_pptp_optime`
 
 	killall -9 config-pptp.sh > /dev/null
-	killall -9 xl2tpd > /dev/null
-	killall -9 ppdd > /dev/null
 
         if [ "$mode" = "0" ]; then
 	#static
@@ -122,8 +114,8 @@ elif [ "$wanmode" = "PPTP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid &
-	    sleep 3
+    	    udhcpc -i $wan_if  -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid  > /dev/null 2>&1 &
+	    sleep 10
 	fi
 	config-pptp.sh &
 else

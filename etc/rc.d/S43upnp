@@ -3,35 +3,40 @@
 #get params
 . /sbin/global.sh
 
-wan_mode=`nvram_get 2860 wanConnectionMode`
-if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
-    wan_upnp_if="ppp0"
-else
-    if [ "$wan_if" = "" ]; then
-	wan_upnp_if="eth2.2"
-    else
-	wan_upnp_if=$wan_if
-    fi
-fi
-
 start() {
+if [ -f /bin/miniupnpd ]; then
  echo "Start upnp "
+ get_param
     if [ "$opmode" = "0" -o "$opmode" = "1" ]; then
-        upnp=`nvram_get 2860 upnpEnabled`
         if [ "$upnp" = "1" ]; then
-	    ip=`nvram_get 2860 lan_ipaddr`
 	    EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
 	    echo "External IP = $EXTIP"
             route add -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if
-            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -a $ip &
+            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $ip &
 	fi
     fi
+fi
 }
 
 stop() {
  echo "Stop upnp "
     killall miniupnpd > /dev/null 2>&1
     route del -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if > /dev/null 2>&1
+}
+
+get_param() {
+    ip=`nvram_get 2860 lan_ipaddr`
+    upnp=`nvram_get 2860 upnpEnabled`
+    wan_mode=`nvram_get 2860 wanConnectionMode`
+    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+	wan_upnp_if="ppp0"
+    else
+	if [ "$wan_if" = "" ]; then
+	    wan_upnp_if="eth2.2"
+	else
+	    wan_upnp_if=$wan_if
+        fi
+    fi
 }
 
 case "$1" in

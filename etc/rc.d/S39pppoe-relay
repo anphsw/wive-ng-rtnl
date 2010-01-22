@@ -4,11 +4,13 @@
 . /sbin/global.sh
 
 start() {
+if [ -f /bin/pppoe-relay ]; then
  echo "Starting pppoe-relay: "
     pppr=`nvram_get 2860 pppoeREnabled`
     if [ "$pppr" = "1" ]; then
         pppoe-relay -S $wan_if -B $lan_if
     fi
+fi
 }
 
 stop() {

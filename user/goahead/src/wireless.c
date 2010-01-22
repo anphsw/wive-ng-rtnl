@@ -48,7 +48,9 @@ static int default_shown_mbssid[3]  = {0,0,0};
 
 extern int g_wsc_configured;
 
+#ifdef CONFIG_802_11_a
 static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
+#endif
 static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -72,7 +74,9 @@ static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
 
 void formDefineWireless(void) {
+#ifdef CONFIG_802_11_a
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
+#endif
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
 	websAspDefine(T("getWlanApcliBuilt"), getWlanApcliBuilt);
@@ -97,6 +101,7 @@ void formDefineWireless(void) {
 /*
  * description: write 802.11a channels in <select> tag
  */
+#ifdef CONFIG_802_11_a
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int  idx = 0, channel;
@@ -145,7 +150,7 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-
+#endif
 /*
  * description: write 802.11b channels in <select> tag
  */
@@ -554,7 +559,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	mssid_7 = websGetVar(wp, T("mssid_7"), T("")); 
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
 	broadcastssid = websGetVar(wp, T("broadcastssid"), T("1")); 
+#ifdef CONFIG_802_11_a
 	sz11aChannel = websGetVar(wp, T("sz11aChannel"), T("")); 
+#endif
 	sz11bChannel = websGetVar(wp, T("sz11bChannel"), T("")); 
 	sz11gChannel = websGetVar(wp, T("sz11gChannel"), T("")); 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0")); 
@@ -718,13 +725,21 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 
 	//11abg Channel or AutoSelect
+#ifdef CONFIG_802_11_a
 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
+#else
+	if ((0 == strlen(sz11bChannel)) &&
+#endif
 			(0 == strlen(sz11gChannel))) {
 		nvram_commit(RT2860_NVRAM);
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
+#ifdef CONFIG_802_11_a
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
+#else
+	if (!strncmp(sz11bChannel, "0", 2) &&
+#endif
 			!strncmp(sz11gChannel, "0", 2))
 		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
 	else

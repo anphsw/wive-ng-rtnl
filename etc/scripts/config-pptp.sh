@@ -1,5 +1,8 @@
 #!/bin/sh
 
+killall -9 pppd > /dev/null 2>&1
+killall -9 xl2tpd > /dev/null 2>&1
+
 echo "==================START-PPTP-CLIENT======================="
 #clear all configs
 ppp=/etc/ppp

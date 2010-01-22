@@ -2,7 +2,11 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
-MODE=1T1R
+
+#----WR-NL-2M/16M---WR-NL+-4M-32M----#
+#MODE=1T1R
+MODE=2T2R
+#------------------------------------#
 
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
@@ -19,7 +23,10 @@ make all -C tools
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./config-acorp/config-kernel-1t1r	./linux/.config
-else
+    cp -fv ./config-acorp/config-config-1t1r	./config/.config
+fi
+if [ "$MODE" = "2T2R" ] ; then
+    cp -fv ./config-acorp/config-config-2t2r	./config/.config
     cp -fv ./config-acorp/config-kernel-2t2r	./linux/.config
 fi
 cp -fv ./config-acorp/config-busybox	./user/busybox/.config
