@@ -23,6 +23,7 @@
 22) IMQ support added<br>
 23) Initial shaper scripts (default priomap and esfq for decrase torrents prio)<br>
 24) Kernel ip account support added<br>
+25) Fix crash on sta list
 
 <br>
 <b>ToDo:</b><br>
