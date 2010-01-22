@@ -3,13 +3,13 @@
 
 #ifdef __KERNEL__
 #include <linux/init.h>
-#include <linux/types.h>
 #include <linux/skbuff.h>
 #include <linux/net.h>
 #include <linux/if.h>
 #include <linux/wait.h>
 #include <linux/list.h>
 #endif
+#include <linux/types.h>
 #include <linux/compiler.h>
 
 /* Responses from hook functions. */

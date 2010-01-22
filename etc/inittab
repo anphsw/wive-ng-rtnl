@@ -1,1 +1,1 @@
-::sysinit:/etc/init.d/rcS
+::sysinit:/bin/cttyhack /etc/init.d/rcS
