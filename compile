@@ -2,6 +2,7 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
+MODE=1T1R
 
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
@@ -16,10 +17,14 @@ echo -------------------------------MAKE-TOOLS-------------------------------
 make all -C tools
 
 echo --------------------------------COPY-CONFIG-----------------------------
+if [ "$MODE" = "1T1R" ] ; then
+    cp -fv ./config-acorp/config-kernel-1t1r	./linux/.config
+else
+    cp -fv ./config-acorp/config-kernel-2t2r	./linux/.config
+fi
 cp -fv ./config-acorp/config-busybox	./user/busybox/.config
 cp -fv ./config-acorp/config-config	./config/.config
 cp -fv ./config-acorp/config-cpp	./uClibc++/.config
-cp -fv ./config-acorp/config-kernel	./linux/.config
 cp -fv ./config-acorp/config-lib	./lib/.config
 cp -fv ./config-acorp/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch

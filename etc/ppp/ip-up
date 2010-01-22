@@ -18,12 +18,14 @@
     iptables -t mangle -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
     echo $MINMTU > /tmp/ppp-mtu
 
-    #restart dns server and ntp sync
+    #restart dns server, dyndns, ntp sync and rebuild shaper rules
     service ntp stop
     service dnsserver stop
     service shaper stop
+    service ddns stop
 
     service ntp start
+    service ddns start
     service dnsserver start
     service shaper start
 

@@ -296,6 +296,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	struct iwreq iwr;
 	RT_802_11_MAC_TABLE table = {0};
 
+	printf("get socket");
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
 	iwr.u.data.pointer = (caddr_t) &table;
@@ -304,14 +305,15 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 		websError(wp, 500, "ioctl sock failed!");
 		return -1;
 	}
-
+	printf("ioctl");
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
 		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
 		close(s);
 		return -1;
 	}
-
-	for (i = 0; i < table.Num; i++) {
+	printf("write");
+        if (table.Num){
+	    for (i = 0; i < table.Num; i++) {
 		websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
 				table.Entry[i].Addr[0], table.Entry[i].Addr[1],
 				table.Entry[i].Addr[2], table.Entry[i].Addr[3],
@@ -322,8 +324,11 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 				table.Entry[i].TxRate.field.MCS,
 				(table.Entry[i].TxRate.field.BW == 0)? "20M":"40M",
 				table.Entry[i].TxRate.field.ShortGI, table.Entry[i].TxRate.field.STBC);
+	    }
 	}
+	printf("close");
 	close(s);
+	printf("return");
 	return 0;
 }
 
