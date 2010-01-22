@@ -20,8 +20,22 @@
 19) Add rwfs support (fs save | fs restore | fs load)<br>
 20) Auto set mss size<br>
 21) Masqrade now work correctly<br>
-22) IMQ support added
+22) IMQ support added<br>
+23) Initial shaper scripts (default priomap and esfq for decrase torrents prio)<br>
+24) Kernel ip account support added<br>
 
 <br>
 <b>ToDo:</b><br>
 1) Job control fix<br>
+
+<br><br>
+<b>For support see:</b><br>
+<a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
+<a href="http://ddixlab.ru">ddixlab.ru - Laboratory of built in systems.
+</a><br>
+<br><br>
+<b>News and changes in Russian:</b><br>
+<a href="http://sadnet.ru">sadnet.ru - Development opensource routers firmware</a><br>
+<br><br>
+<b>Bug report please sfstudio[at]mail.ru</b>
+<br>
