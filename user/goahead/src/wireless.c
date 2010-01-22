@@ -287,6 +287,10 @@ typedef struct _RT_802_11_MAC_ENTRY {
 	unsigned char            Aid;
 	unsigned char            Psm;     // 0:PWR_ACTIVE, 1:PWR_SAVE
 	unsigned char            MimoPs;  // 0:MMPS_STATIC, 1:MMPS_DYNAMIC, 3:MMPS_Enabled
+	char 			 AvgRssi0;
+	char 			 AvgRssi1;
+	char 			 AvgRssi2;
+	unsigned int 		 ConnectedTime;
 	MACHTTRANSMIT_SETTING    TxRate;
 } RT_802_11_MAC_ENTRY;
 
@@ -301,13 +305,9 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	struct iwreq iwr;
 	RT_802_11_MAC_TABLE table = {0};
 
-/*	s = socket( AF_INET, SOCK_DGRAM, 0 );
+	s = socket( AF_INET, SOCK_DGRAM, 0 );
 	( void )memset( &iwr, 0, sizeof( struct iwreq ) );
-	( void )strncpy( iwr.ifr_name, "ra0", sizeof( iwr.ifr_name ) ); */
-
-        memset(&iwr, 0, sizeof(iwr) );
-	strncpy( iwr.ifr_name, "ra0", sizeof( iwr.ifr_name ) - 1 );
-	iwr.ifr_name[sizeof( iwr.ifr_name ) - 1] = 0; //AndreyRS version
+	( void )strncpy( iwr.ifr_name, "ra0", sizeof( iwr.ifr_name ) );
 
 	iwr.u.data.pointer = (caddr_t) &table;
 

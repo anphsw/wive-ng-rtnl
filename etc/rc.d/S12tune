@@ -1,0 +1,81 @@
+#!/bin/sh
+
+start() {
+echo "Tune kernel..."
+#network
+#tune stack
+#more reserved memory for send/recive tcp buffers 192Kb max
+echo "64000 128000 192000" > /proc/sys/net/ipv4/tcp_mem
+echo "64000 128000 192000" > /proc/sys/net/ipv4/tcp_rmem
+echo "64000 128000 192000" > /proc/sys/net/ipv4/tcp_wmem
+#disable extentions
+echo 0    > /proc/sys/net/ipv4/tcp_rfc1337
+echo 0    > /proc/sys/net/ipv4/tcp_tw_reuse
+echo 0    > /proc/sys/net/ipv4/tcp_timestamps
+#route
+echo 8192 > /proc/sys/net/ipv4/route/max_size
+echo 1024 > /proc/sys/net/ipv4/route/gc_thresh
+echo 8    > /proc/sys/net/ipv4/route/gc_elasticity
+echo 60   > /proc/sys/net/ipv4/route/gc_interval
+echo 100  > /proc/sys/net/ipv4/route/gc_timeout
+#tune
+echo 3072 8192 > /proc/sys/net/ipv4/ip_local_port_range
+echo 2560 > /proc/sys/net/ipv4/ip_conntrack_max
+echo 2560 > /proc/sys/net/ipv4/netfilter/ip_conntrack_max
+echo 1707 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp
+echo 853  > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp
+echo 800  > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
+echo 0 	  > /proc/sys/net/ipv4/netfilter/ip_conntrack_checksum
+echo 1 	  > /proc/sys/net/ipv4/tcp_workaround_signed_windows
+echo 2048 > /proc/sys/net/ipv4/tcp_max_orphans
+echo 3600 > /proc/sys/net/ipv4/tcp_keepalive_time
+echo 30   > /proc/sys/net/ipv4/tcp_keepalive_intvl
+echo 6    > /proc/sys/net/ipv4/tcp_retries2
+echo 6    > /proc/sys/net/ipv4/tcp_keepalive_probes
+#sec
+echo 1    > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
+echo 1    > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+echo 1    > /proc/sys/net/ipv4/ip_nonlocal_bind
+echo 0	  > /proc/sys/net/ipv4/conf/all/accept_redirects
+echo 0	  > /proc/sys/net/ipv4/conf/all/secure_redirects
+#memory
+echo 512  > /proc/sys/net/core/somaxconn
+echo 128  > /proc/sys/net/core/netdev_max_backlog
+echo 192  > /proc/sys/vm/min_free_kbytes
+echo 128  > /proc/sys/kernel/threads-max
+echo 1    > /proc/sys/vm/page-cluster
+echo 0    > /proc/sys/vm/overcommit_ratio
+echo 0    > /proc/sys/vm/overcommit_memory
+#on kernel crash
+echo 1    > /proc/sys/kernel/panic
+echo 1    > /proc/sys/kernel/panic_on_oops
+echo 1    > /proc/sys/vm/panic_on_oom
+#disable iptables hook
+echo 0    > /proc/sys/net/bridge/bridge-nf-call-arptables
+echo 0    > /proc/sys/net/bridge/bridge-nf-call-ip6tables
+echo 0    > /proc/sys/net/bridge/bridge-nf-call-iptables
+echo 0    > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged
+}
+
+stop() {
+echo "Tune kernel..."
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac
