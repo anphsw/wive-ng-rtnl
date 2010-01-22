@@ -55,7 +55,7 @@ start() {
         iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 
 	#tune mss size for tranzit packets
-	iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	iptables -t mangle -A FORWARD -p tcp ! -o ppp+ --tcp-flags SYN,RST SYN \
 			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
 
