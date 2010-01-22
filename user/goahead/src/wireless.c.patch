@@ -1,0 +1,112 @@
+--- wireless.c.old	2010-01-23 00:56:43.000000000 +0600
++++ wireless.c	2010-01-23 01:02:23.941835110 +0600
+@@ -48,7 +48,9 @@
+ 
+ extern int g_wsc_configured;
+ 
++#ifdef CONFIG_802_11_a
+ static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
++#endif
+ static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
+ static int  getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv);
+ static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
+@@ -72,7 +74,9 @@
+ void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
+ 
+ void formDefineWireless(void) {
++#ifdef CONFIG_802_11_a
+ 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
++#endif
+ 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
+ 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
+ 	websAspDefine(T("getWlanApcliBuilt"), getWlanApcliBuilt);
+@@ -97,6 +101,7 @@
+ /*
+  * description: write 802.11a channels in <select> tag
+  */
++#ifdef CONFIG_802_11_a
+ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
+ {
+ 	int  idx = 0, channel;
+@@ -145,7 +150,7 @@
+ 	}
+ 	return 0;
+ }
+-
++#endif
+ /*
+  * description: write 802.11b channels in <select> tag
+  */
+@@ -296,19 +301,22 @@
+ 	struct iwreq iwr;
+ 	RT_802_11_MAC_TABLE table = {0};
+ 
+-	s = socket(AF_INET, SOCK_DGRAM, 0);
+-	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
++	s = socket( AF_INET, SOCK_DGRAM, 0 );
++        ( void )memset( &iwr, 0, sizeof( struct iwreq ) );
++	( void )strncpy( iwr.ifr_name, "ra0", sizeof( iwr.ifr_name ) );
+ 	iwr.u.data.pointer = (caddr_t) &table;
+ 
+-	if (s < 0) {
+-		websError(wp, 500, "ioctl sock failed!");
+-		return -1;
++        if( s < 0 )
++	{
++    	    fprintf( stderr, "socket(SOCK_DRAGM)\n" );
++    	    return 0;
+ 	}
+ 
+-	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
+-		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
+-		close(s);
+-		return -1;
++	if( ioctl( s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr ) < 0 )
++	{
++    	    fprintf( stderr, "IOCTL_STA_INFO for ra0 failed!\n");
++    	    close( s );
++    	    return 0;
+ 	}
+ 
+ 	for (i = 0; i < table.Num; i++) {
+@@ -322,7 +330,7 @@
+ 				table.Entry[i].TxRate.field.MCS,
+ 				(table.Entry[i].TxRate.field.BW == 0)? "20M":"40M",
+ 				table.Entry[i].TxRate.field.ShortGI, table.Entry[i].TxRate.field.STBC);
+-	}
++        }
+ 	close(s);
+ 	return 0;
+ }
+@@ -549,7 +557,9 @@
+ 	mssid_7 = websGetVar(wp, T("mssid_7"), T("")); 
+ 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
+ 	broadcastssid = websGetVar(wp, T("broadcastssid"), T("1")); 
++#ifdef CONFIG_802_11_a
+ 	sz11aChannel = websGetVar(wp, T("sz11aChannel"), T("")); 
++#endif
+ 	sz11bChannel = websGetVar(wp, T("sz11bChannel"), T("")); 
+ 	sz11gChannel = websGetVar(wp, T("sz11gChannel"), T("")); 
+ 	wds_mode = websGetVar(wp, T("wds_mode"), T("0")); 
+@@ -713,13 +723,21 @@
+ 	}
+ 
+ 	//11abg Channel or AutoSelect
++#ifdef CONFIG_802_11_a
+ 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
++#else
++	if ((0 == strlen(sz11bChannel)) &&
++#endif
+ 			(0 == strlen(sz11gChannel))) {
+ 		nvram_commit(RT2860_NVRAM);
+ 		websError(wp, 403, T("'Channel' should not be empty!"));
+ 		return;
+ 	}
++#ifdef CONFIG_802_11_a
+ 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
++#else
++	if (!strncmp(sz11bChannel, "0", 2) &&
++#endif
+ 			!strncmp(sz11gChannel, "0", 2))
+ 		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
+ 	else
