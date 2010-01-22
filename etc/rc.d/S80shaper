@@ -83,7 +83,7 @@ start() {
 	tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip dport 80 0xffff flowid 1:2
 	tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip sport 80 0xffff flowid 1:2
 	tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip dport 20 0xffff flowid 1:2
-	tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip rotocol 17 0xff flowid 1:2
+	tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip protocol 17 0xff flowid 1:2
 
 	#LOW smtp/pop and others
 	tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 110 0xffff flowid 1:3

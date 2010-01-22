@@ -89,7 +89,7 @@ install:	miniupnpd genuuid
 	$(INSTALL) -d $(PREFIX)/etc/init.d
 	$(INSTALL) linux/miniupnpd.init.d.script $(PREFIX)/etc/init.d/miniupnpd
 
-romfs:
+romfs: install
 	cp -fv ./filesystem/usr/sbin/miniupnpd $(ROOTDIR)/romfs/bin/miniupnpd
 
 
