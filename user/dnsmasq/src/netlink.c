@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2009 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2010 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -129,6 +129,7 @@ int iface_enumerate(void *parm, int (*ipv4_callback)(), int (*ipv6_callback)())
   ssize_t len;
   static unsigned int seq = 0;
   int family = AF_INET;
+  int ipv4_done = 0;
 
   struct {
     struct nlmsghdr nlh;
@@ -207,9 +208,12 @@ int iface_enumerate(void *parm, int (*ipv4_callback)(), int (*ipv6_callback)())
 		    rta = RTA_NEXT(rta, len1);
 		  }
 		
-		if (addr.s_addr && ipv4_callback)
+		if (addr.s_addr && ipv4_callback) {
 		  if (!((*ipv4_callback)(addr, ifa->ifa_index, netmask, broadcast, parm)))
 		    return 0;
+		  else
+		    ipv4_done = 1;
+		}
 	      }
 #ifdef HAVE_IPV6
 	    else if (ifa->ifa_family == AF_INET6)
@@ -225,7 +229,7 @@ int iface_enumerate(void *parm, int (*ipv4_callback)(), int (*ipv6_callback)())
 		
 		if (addrp && ipv6_callback)
 		  if (!((*ipv6_callback)(addrp, ifa->ifa_index, ifa->ifa_index, parm)))
-		    return 0;
+		    return ipv4_done;
 	      }
 #endif
 	  }
