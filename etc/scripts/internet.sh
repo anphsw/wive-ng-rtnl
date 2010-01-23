@@ -225,7 +225,7 @@ else
 	fi
 	modprobe rt2860v2_ap
 fi
-vpn-passthru.sh
+vpn-passthru.sh &
 
 
 # INIC support

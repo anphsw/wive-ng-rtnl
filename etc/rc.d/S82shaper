@@ -13,9 +13,9 @@ if [ -f /bin/tc ]; then
     tc qdisc del dev $wan_if ingress > /dev/null 2>&1
     if [ "$IMQ" = "1" ]; then
 	echo "IMQ fullshape mode"
-	modprobe imq
-	modprobe ipt_IMQ
-	ifconfig imq0 up
+	modprobe imq > /dev/null 2>&1
+	modprobe ipt_IMQ > /dev/null 2>&1
+	ifconfig imq0 up > /dev/null 2>&1
     else
 	echo "Non IMQ base shaper mode"
 	echo "------------------IN----------------------------"
@@ -94,8 +94,8 @@ stop() {
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
     ifconfig imq0 down > /dev/null 2>&1
     ifconfig imq1 down > /dev/null 2>&1
-    rmmod imq
-    rmmod ipt_IMQ
+    rmmod imq > /dev/null 2>&1
+    rmmod ipt_IMQ > /dev/null 2>&1
 
 }
 

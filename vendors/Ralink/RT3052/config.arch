@@ -10,10 +10,10 @@ UOPT += -Os                  # user apps are always Os
 LOPT += -Os                  # library is alway 02
 
 MODEL_NAME		   = RT-NL
-KERNEL_VER		   = "1.2"
+KERNEL_VER		   = "0.1.0"
 FS_VER			   = "0.0"
 PRODUCTID		   = "RT-NL"
-HWL1			   = "1.0"
+HWL1			   = "0.1.0"
 HWH1			   = "0.0"
 HWL2			   = "0.0"
 HWH2			   = "0.0"
