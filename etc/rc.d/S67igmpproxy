@@ -13,10 +13,11 @@ if [ -f /bin/igmpproxy ]; then
     if [ "$igmp" = "1" ]; then
 	echo "quickleave" > /etc/igmpproxy.conf
 	echo "phyint $wan_if upstream  ratelimit 0  threshold 1" >> /etc/igmpproxy.conf
+	echo "altnet 0.0.0.0/0" >> /etc/igmpproxy.conf
 	echo "phyint $lan_if downstream  ratelimit 0  threshold 1" >> /etc/igmpproxy.conf
 	echo "phyint ppp0 disabled" >> /etc/igmpproxy.conf
 	echo "" >> /etc/igmpproxy.conf
-        igmpproxy $wan_if $lan_if
+        igmpproxy $wan_if $lan_if /etc/igmpproxy.conf
     fi
 fi
 }

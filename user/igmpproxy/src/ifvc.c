@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
 **  igmpproxy - IGMP proxy based multicast router 
 **  Copyright (C) 2005 Johnny Egeland <johnny@rlo.org>
 **
@@ -43,12 +27,11 @@
 **  
 **  mrouted 3.9-beta3 - COPYRIGHT 1989 by The Board of Trustees of 
 **  Leland Stanford Junior University.
-**  - Original license can be found in the "doc/mrouted-LINCESE" file.
+**  - Original license can be found in the Stanford.txt file.
 **
 */
 
-#include "defs.h"
-#include <linux/sockios.h>
+#include "igmpproxy.h"
 
 struct IfDesc IfDescVc[ MAX_IF ], *IfDescEp = IfDescVc;
 
@@ -64,7 +47,7 @@ void buildIfVc() {
     int Sock;
 
     if ( (Sock = socket( AF_INET, SOCK_DGRAM, 0 )) < 0 )
-        log( LOG_ERR, errno, "RAW socket open" );
+        my_log( LOG_ERR, errno, "RAW socket open" );
 
     /* get If vector
      */
@@ -75,7 +58,7 @@ void buildIfVc() {
         IoCtlReq.ifc_len = sizeof( IfVc );
 
         if ( ioctl( Sock, SIOCGIFCONF, &IoCtlReq ) < 0 )
-            log( LOG_ERR, errno, "ioctl SIOCGIFCONF" );
+            my_log( LOG_ERR, errno, "ioctl SIOCGIFCONF" );
 
         IfEp = (void *)((char *)IfVc + IoCtlReq.ifc_len);
     }
@@ -83,15 +66,24 @@ void buildIfVc() {
     /* loop over interfaces and copy interface info to IfDescVc
      */
     {
-        struct ifreq  *IfPt;
-        struct IfDesc *IfDp;
+        struct ifreq  *IfPt, *IfNext;
 
         // Temp keepers of interface params...
-        uint32 addr, subnet, mask;
+        uint32_t addr, subnet, mask;
 
-        for ( IfPt = IfVc; IfPt < IfEp; IfPt++ ) {
+        for ( IfPt = IfVc; IfPt < IfEp; IfPt = IfNext ) {
             struct ifreq IfReq;
             char FmtBu[ 32 ];
+
+	    IfNext = (struct ifreq *)((char *)&IfPt->ifr_addr +
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+				    IfPt->ifr_addr.sa_len
+#else
+				    sizeof(struct sockaddr_in)
+#endif
+		    );
+	    if (IfNext < IfPt + 1)
+		    IfNext = IfPt + 1;
 
             strncpy( IfDescEp->Name, IfPt->ifr_name, sizeof( IfDescEp->Name ) );
 
@@ -114,20 +106,14 @@ void buildIfVc() {
             addr = IfDescEp->InAdr.s_addr;
 
             memcpy( IfReq.ifr_name, IfDescEp->Name, sizeof( IfReq.ifr_name ) );
+            IfReq.ifr_addr.sa_family = AF_INET;
+            ((struct sockaddr_in *)&IfReq.ifr_addr)->sin_addr.s_addr = addr;
 
             // Get the subnet mask...
             if (ioctl(Sock, SIOCGIFNETMASK, &IfReq ) < 0)
-                log(LOG_ERR, errno, "ioctl SIOCGIFNETMASK for %s", IfReq.ifr_name);
+                my_log(LOG_ERR, errno, "ioctl SIOCGIFNETMASK for %s", IfReq.ifr_name);
             mask = ((struct sockaddr_in *)&IfReq.ifr_addr)->sin_addr.s_addr;
             subnet = addr & mask;
-
-            // Get the physical index of the Interface
-            if (ioctl(Sock, SIOCGIFINDEX, &IfReq ) < 0)
-                log(LOG_ERR, errno, "ioctl SIOCGIFINDEX for %s", IfReq.ifr_name);
-            
-            log(LOG_DEBUG, 0, "Physical Index value of IF '%s' is %d",
-                IfDescEp->Name, IfReq.ifr_ifindex);
-
 
             /* get if flags
             **
@@ -139,13 +125,13 @@ void buildIfVc() {
             ** ipipx 0x00C1 -> NoArp, Running, Up
             */
             if ( ioctl( Sock, SIOCGIFFLAGS, &IfReq ) < 0 )
-                log( LOG_ERR, errno, "ioctl SIOCGIFFLAGS" );
+                my_log( LOG_ERR, errno, "ioctl SIOCGIFFLAGS" );
 
             IfDescEp->Flags = IfReq.ifr_flags;
 
             // Insert the verified subnet as an allowed net...
             IfDescEp->allowednets = (struct SubnetList *)malloc(sizeof(struct SubnetList));
-            if(IfDescEp->allowednets == NULL) log(LOG_ERR, 0, "Out of memory !");
+            if(IfDescEp->allowednets == NULL) my_log(LOG_ERR, 0, "Out of memory !");
             
             // Create the network address for the IF..
             IfDescEp->allowednets->next = NULL;
@@ -160,7 +146,7 @@ void buildIfVc() {
             
 
             // Debug log the result...
-            IF_DEBUG log( LOG_DEBUG, 0, "buildIfVc: Interface %s Addr: %s, Flags: 0x%04x, Network: %s",
+            my_log( LOG_DEBUG, 0, "buildIfVc: Interface %s Addr: %s, Flags: 0x%04x, Network: %s",
                  IfDescEp->Name,
                  fmtInAdr( FmtBu, IfDescEp->InAdr ),
                  IfDescEp->Flags,
@@ -207,10 +193,12 @@ struct IfDesc *getIfByIx( unsigned Ix ) {
 *   the supplied IP adress. The IP must match a interfaces
 *   subnet, or any configured allowed subnet on a interface.
 */
-struct IfDesc *getIfByAddress( uint32 ipaddr ) {
+struct IfDesc *getIfByAddress( uint32_t ipaddr ) {
 
-    struct IfDesc       *Dp, *_Dp = NULL;
+    struct IfDesc *Dp, *_Dp = NULL;
     struct SubnetList   *currsubnet;
+    struct IfDesc       *res = NULL;
+    uint32_t            last_subnet_mask = 0;
 
     for ( Dp = IfDescVc; Dp < IfDescEp; Dp++ ) {
         // Loop through all registered allowed nets of the VIF...
@@ -219,8 +207,9 @@ struct IfDesc *getIfByAddress( uint32 ipaddr ) {
             if((currsubnet->subnet_addr & currsubnet->subnet_mask) == 0) {
                 _Dp = Dp; // fallback to wildcard
             } else
-            if((ipaddr & currsubnet->subnet_mask) == currsubnet->subnet_addr) {
-                return Dp;
+            if(currsubnet->subnet_mask > last_subnet_mask && (ipaddr & currsubnet->subnet_mask) == currsubnet->subnet_addr) {
+                _Dp = Dp;
+                last_subnet_mask = currsubnet->subnet_mask;
             }
         }
     }
@@ -250,7 +239,7 @@ struct IfDesc *getIfByVifIndex( unsigned vifindex ) {
 *   Function that checks if a given ipaddress is a valid
 *   address for the supplied VIF.
 */
-int isAdressValidForIf( struct IfDesc* intrface, uint32 ipaddr ) {
+int isAdressValidForIf( struct IfDesc* intrface, uint32_t ipaddr ) {
     struct SubnetList   *currsubnet;
     
     if(intrface == NULL) {
@@ -258,16 +247,6 @@ int isAdressValidForIf( struct IfDesc* intrface, uint32 ipaddr ) {
     }
     // Loop through all registered allowed nets of the VIF...
     for(currsubnet = intrface->allowednets; currsubnet != NULL; currsubnet = currsubnet->next) {
-
-        /*
-        IF_DEBUG log(LOG_DEBUG, 0, "Testing %s for subnet %s, mask %s: Result net: %s",
-            inetFmt(ipaddr, s1),
-            inetFmt(currsubnet->subnet_addr, s2),
-            inetFmt(currsubnet->subnet_mask, s3),
-            inetFmt((ipaddr & currsubnet->subnet_mask), s4)
-            );
-            */
-
         // Check if the ip falls in under the subnet....
         if((ipaddr & currsubnet->subnet_mask) == currsubnet->subnet_addr) {
             return 1;

@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "http_client.h"
 #include "debug_if.h"
 
-#define DYNDNS_VERSION_STRING  "1.96"
+#define DYNDNS_VERSION_STRING  "1.96.2"
 #define DYNDNS_AGENT_NAME  "inadyn/" DYNDNS_VERSION_STRING
 #define DYNDNS_EMAIL_ADDR	"inarcis2002@hotpop.com"
 
@@ -89,11 +89,11 @@ typedef enum
 
 /* Conversation with the IP server */
 #define DYNDNS_GET_MY_IP_HTTP_REQUEST  \
-	"GET http://%s%s HTTP/1.0\r\n\r\n"
+	"GET http://%s:%d%s HTTP/1.0\r\n\r\n"
 
 /* dyndns.org specific update address format */	
 #define DYNDNS_GET_MY_IP_HTTP_REQUEST_FORMAT \
-	"GET http://%s%s" \
+	"GET http://%s:%d%s" \
 		"system=%s&" \
 		"hostname=%s&" \
 		"myip=%s&" \
@@ -108,7 +108,7 @@ typedef enum
     
 /*freedns.afraid.org specific update request format */    
 #define FREEDNS_UPDATE_MY_IP_REQUEST_FORMAT \
-    "GET http://%s%s" \
+    "GET http://%s:%d%s" \
     "%s " \
 	 "HTTP/1.0\r\n" \
 	"Host: %s\r\n" \
@@ -122,14 +122,14 @@ typedef enum
 	The parameter here is the entire request but NOT including the alias.
 */
 #define GENERIC_DNS_BASIC_AUTH_MY_IP_REQUEST_FORMAT \
-    "GET http://%s%s%s " \
+    "GET http://%s:%d%s%s " \
 	 "HTTP/1.0\r\n" \
 	"Authorization: Basic %s\r\n" \
 	"Host: %s\r\n" \
 	"User-Agent: "DYNDNS_AGENT_NAME " " DYNDNS_EMAIL_ADDR"\r\n\r\n"
 
 #define GENERIC_NOIP_AUTH_MY_IP_REQUEST_FORMAT \
-    "GET http://%s%s%s&myip=%s " \
+    "GET http://%s:%d%s%s&myip=%s " \
 	 "HTTP/1.0\r\n" \
 	"Authorization: Basic %s\r\n" \
 	"Host: %s\r\n" \

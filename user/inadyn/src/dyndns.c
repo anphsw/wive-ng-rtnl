@@ -32,6 +32,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /*
+Copyright (C) 2003-2006 INAtech
+Author: Narcis Ilisei
+
+*/
+/**
 	Dyn Dns update main implementation file 
 	Author: narcis Ilisei
 	Date: May 2003
@@ -173,6 +178,7 @@ static int get_req_for_dyndns_server(DYN_DNS_CLIENT *p_self, int cnt,DYNDNS_SYST
 		(DYNDNS_ORG_SPECIFIC_DATA*) p_sys_info->p_specific_data;
 	return sprintf(p_self->p_req_buffer, DYNDNS_GET_MY_IP_HTTP_REQUEST_FORMAT,
         p_self->info.dyndns_server_name.name,
+        p_self->info.dyndns_server_name.port,
 		p_self->info.dyndns_server_url,
 		p_dyndns_specific->p_system,
 		p_self->alias_info.names[cnt].name,
@@ -188,6 +194,7 @@ static int get_req_for_freedns_server(DYN_DNS_CLIENT *p_self, int cnt, DYNDNS_SY
 	(void)p_sys_info;
 	return sprintf(p_self->p_req_buffer, FREEDNS_UPDATE_MY_IP_REQUEST_FORMAT,
         p_self->info.dyndns_server_name.name,
+        p_self->info.dyndns_server_name.port,
 		p_self->info.dyndns_server_url,
 		p_self->alias_info.hashes[cnt].str,
         p_self->info.dyndns_server_name.name);
@@ -199,6 +206,7 @@ static int get_req_for_generic_http_dns_server(DYN_DNS_CLIENT *p_self, int cnt, 
 	(void)p_sys_info;
 	return sprintf(p_self->p_req_buffer, GENERIC_DNS_BASIC_AUTH_MY_IP_REQUEST_FORMAT,
         p_self->info.dyndns_server_name.name,
+        p_self->info.dyndns_server_name.port,
 		p_self->info.dyndns_server_url,		
 		p_self->alias_info.names[cnt].name,
         p_self->info.credentials.p_enc_usr_passwd_buffer,
@@ -209,6 +217,7 @@ static int get_req_for_noip_http_dns_server(DYN_DNS_CLIENT *p_self, int cnt,  DY
 	(void)p_sys_info;
 	return sprintf(p_self->p_req_buffer, GENERIC_NOIP_AUTH_MY_IP_REQUEST_FORMAT,
         p_self->info.dyndns_server_name.name,
+        p_self->info.dyndns_server_name.port,
 		p_self->info.dyndns_server_url,		
 		p_self->alias_info.names[cnt].name,
 		p_self->info.my_ip_address.name,
@@ -220,7 +229,7 @@ static int get_req_for_noip_http_dns_server(DYN_DNS_CLIENT *p_self, int cnt,  DY
 static int get_req_for_ip_server(DYN_DNS_CLIENT *p_self, void *p_specific_data)
 {
     return sprintf(p_self->p_req_buffer, DYNDNS_GET_MY_IP_HTTP_REQUEST,
-        p_self->info.ip_server_name.name, p_self->info.ip_server_url);
+        p_self->info.ip_server_name.name, p_self->info.ip_server_name.port, p_self->info.ip_server_url);
 }
 
 /* 
@@ -471,9 +480,10 @@ static RC_TYPE do_update_alias_table(DYN_DNS_CLIENT *p_self)
 					}
 					else
 					{
-						DBG_PRINTF((LOG_WARNING,"W:" MODULE_TAG "Error validating DYNDNS svr answer. Check usr,pass,hostname!\n", http_tr.p_rsp));
+						DBG_PRINTF((LOG_WARNING,"W:" MODULE_TAG "Error validating DYNDNS svr answer. Check usr,pass,hostname,abuse...!\n", http_tr.p_rsp));
+                        rc = RC_DYNDNS_RSP_NOTOK;						
 					}
-					if (p_self->dbg.level > 2)
+					if (p_self->dbg.level > 2 || !update_ok)
 					{							
 						http_tr.p_rsp[http_tr.rsp_len] = 0;
 						DBG_PRINTF((LOG_WARNING,"W:" MODULE_TAG "DYNDNS Server response:\n%s\n", http_tr.p_rsp));
@@ -582,7 +592,7 @@ void dyn_dns_print_hello(void*p)
 
     DBG_PRINTF((LOG_INFO, MODULE_TAG "Started 'INADYN version %s' - dynamic DNS updater.\n", DYNDNS_VERSION_STRING));
 }
-/*
+/**
 	 basic resource allocations for the dyn_dns object
 */
 RC_TYPE dyn_dns_construct(DYN_DNS_CLIENT **pp_self)
@@ -681,7 +691,7 @@ RC_TYPE dyn_dns_construct(DYN_DNS_CLIENT **pp_self)
 }
 
 
-/*
+/**
 	Resource free.
 */	
 RC_TYPE dyn_dns_destruct(DYN_DNS_CLIENT *p_self)
@@ -734,7 +744,7 @@ RC_TYPE dyn_dns_destruct(DYN_DNS_CLIENT *p_self)
 	return RC_OK;
 }
 
-/* 
+/** 
 	Sets up the object.
 	- sets the IPs of the DYN DNS server
     - if proxy server is set use it! 
@@ -783,7 +793,7 @@ RC_TYPE dyn_dns_init(DYN_DNS_CLIENT *p_self)
 	return RC_OK;
 }
 
-/* 
+/** 
 	Disconnect and some other clean up.
 */
 RC_TYPE dyn_dns_shutdown(DYN_DNS_CLIENT *p_self)
@@ -801,7 +811,7 @@ RC_TYPE dyn_dns_shutdown(DYN_DNS_CLIENT *p_self)
 	return RC_OK;
 }
 
-/* the real action:
+/** the real action:
 	- increment the forced update times counter
 	- detect current IP
 		- connect to an HTTP server 
@@ -867,9 +877,7 @@ RC_TYPE dyn_dns_update_ip(DYN_DNS_CLIENT *p_self)
 }
 
 
-/* MAIN - Dyn DNS update entry point.*/
-
-/* 
+/** MAIN - Dyn DNS update entry point 
 	Actions:
 		- read the configuration options
 		- perform various init actions as specified in the options
@@ -880,8 +888,6 @@ int dyn_dns_main(DYN_DNS_CLIENT *p_dyndns, int argc, char* argv[])
 {
 	RC_TYPE rc = RC_OK;
 	int iterations = 0;
-	BOOL quit_flag = FALSE;
-	BOOL init_flag;
 	BOOL os_handler_installed = FALSE;
 
 	if (p_dyndns == NULL)
@@ -952,13 +958,11 @@ int dyn_dns_main(DYN_DNS_CLIENT *p_dyndns, int argc, char* argv[])
 	do
 	{
 		/* init object */			
-		init_flag = FALSE;
 		rc = dyn_dns_init(p_dyndns);
 		if (rc != RC_OK)
 		{
 			break;
 		}		
-		init_flag = TRUE;				
 
 		rc = get_encoded_user_passwd(p_dyndns);
 		if (rc != RC_OK)
@@ -985,11 +989,19 @@ int dyn_dns_main(DYN_DNS_CLIENT *p_dyndns, int argc, char* argv[])
 			if (rc != RC_OK)
 			{
 				DBG_PRINTF((LOG_WARNING,"W:'%s' (0x%x) updating the IPs. (it %d)\n",
-					errorcode_get_name(rc), rc, iterations));			
-				
+					errorcode_get_name(rc), rc, iterations)); 
+                if (rc == RC_DYNDNS_RSP_NOTOK)
+                { 
+                    DBG_PRINTF((LOG_ERR,"E: The response of DYNDNS svr was an error! Aborting.\n"));
+                    break;              			
+                }
 			}
-			/* check if the user wants us to stop */
-			++iterations;
+			else /*count only the successful iterations */
+			{
+			   ++iterations;
+			}
+			
+			/* check if the user wants us to stop */			
 			if (iterations >= p_dyndns->total_iterations &&
 				p_dyndns->total_iterations != 0)
 			{
@@ -1012,29 +1024,10 @@ int dyn_dns_main(DYN_DNS_CLIENT *p_dyndns, int argc, char* argv[])
 					DBG_PRINTF((LOG_DEBUG,"."));
 				}
 				p_dyndns->times_since_last_update ++;
-			}
-			else
-			{
-			    dyn_dns_shutdown(p_dyndns);
-			    init_flag = FALSE;
-			    break;
-			}
-									
-		}	
-		
-		/*if everything ok here we should exit. End of program*/
-		if (rc == RC_OK)
-		{
-		    break;
-		} 	
+			}									
+		}	 	
 	}
-	while(quit_flag == FALSE);	
-
-	if (init_flag == TRUE)
-	{
-	    /* dyn_dns_shutdown object */			
-	    rc = dyn_dns_shutdown(p_dyndns);
-	}
+	while(FALSE);	
 	
 	return rc;
 }

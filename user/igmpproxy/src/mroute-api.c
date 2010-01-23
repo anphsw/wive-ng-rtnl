@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
 **  igmpproxy - IGMP proxy based multicast router 
 **  Copyright (C) 2005 Johnny Egeland <johnny@rlo.org>
 **
@@ -43,7 +27,7 @@
 **  
 **  mrouted 3.9-beta3 - COPYRIGHT 1989 by The Board of Trustees of 
 **  Leland Stanford Junior University.
-**  - Original license can be found in the "doc/mrouted-LINCESE" file.
+**  - Original license can be found in the Stanford.txt file.
 **
 */
 /**
@@ -53,8 +37,7 @@
 */
 
 
-#define USE_LINUX_IN_H
-#include "defs.h"
+#include "igmpproxy.h"
 
 // MAX_MC_VIFS from mclab.h must have same value as MAXVIFS from mroute.h
 #if MAX_MC_VIFS != MAXVIFS
@@ -86,7 +69,7 @@ int enableMRouter()
     int Va = 1;
 
     if ( (MRouterFD  = socket(AF_INET, SOCK_RAW, IPPROTO_IGMP)) < 0 )
-        log( LOG_ERR, errno, "IGMP socket open" );
+        my_log( LOG_ERR, errno, "IGMP socket open" );
 
     if ( setsockopt( MRouterFD, IPPROTO_IP, MRT_INIT, 
                      (void *)&Va, sizeof( Va ) ) )
@@ -105,7 +88,7 @@ void disableMRouter()
          || close( MRouterFD )
        ) {
         MRouterFD = 0;
-        log( LOG_ERR, errno, "MRT_DONE/close" );
+        my_log( LOG_ERR, errno, "MRT_DONE/close" );
     }
 
     MRouterFD = 0;
@@ -130,7 +113,7 @@ void addVIF( struct IfDesc *IfDp )
     /* no more space
      */
     if ( VifDp >= VCEP( VifDescVc ) )
-        log( LOG_ERR, ENOMEM, "addVIF, out of VIF space" );
+        my_log( LOG_ERR, ENOMEM, "addVIF, out of VIF space" );
 
     VifDp->IfDp = IfDp;
 
@@ -145,22 +128,20 @@ void addVIF( struct IfDesc *IfDp )
     // Set the index...
     VifDp->IfDp->index = VifCtl.vifc_vifi;
 
-    log( LOG_NOTICE, 0, "adding VIF, Ix %d Fl 0x%x IP 0x%08x %s, Threshold: %d, Ratelimit: %d", 
+    my_log( LOG_NOTICE, 0, "adding VIF, Ix %d Fl 0x%x IP 0x%08x %s, Threshold: %d, Ratelimit: %d", 
          VifCtl.vifc_vifi, VifCtl.vifc_flags,  VifCtl.vifc_lcl_addr.s_addr, VifDp->IfDp->Name,
          VifCtl.vifc_threshold, VifCtl.vifc_rate_limit);
 
-    IF_DEBUG {
-        struct SubnetList *currSubnet;
-        for(currSubnet = IfDp->allowednets; currSubnet; currSubnet = currSubnet->next) {
-            log(LOG_DEBUG, 0, "        Network for [%s] : %s",
-                IfDp->Name,
-                inetFmts(currSubnet->subnet_addr, currSubnet->subnet_mask, s1));
-        }
+    struct SubnetList *currSubnet;
+    for(currSubnet = IfDp->allowednets; currSubnet; currSubnet = currSubnet->next) {
+	my_log(LOG_DEBUG, 0, "        Network for [%s] : %s",
+	    IfDp->Name,
+	    inetFmts(currSubnet->subnet_addr, currSubnet->subnet_mask, s1));
     }
 
     if ( setsockopt( MRouterFD, IPPROTO_IP, MRT_ADD_VIF, 
                      (char *)&VifCtl, sizeof( VifCtl ) ) )
-        log( LOG_ERR, errno, "MRT_ADD_VIF" );
+        my_log( LOG_ERR, errno, "MRT_ADD_VIF" );
 
 }
 
@@ -173,6 +154,7 @@ void addVIF( struct IfDesc *IfDp )
 int addMRoute( struct MRouteDesc *Dp )
 {
     struct mfcctl CtlReq;
+    int rc;
 
     CtlReq.mfcc_origin    = Dp->OriginAdr;
     CtlReq.mfcc_mcastgrp  = Dp->McAdr;
@@ -180,26 +162,25 @@ int addMRoute( struct MRouteDesc *Dp )
 
     /* copy the TTL vector
      */
-    if (    sizeof( CtlReq.mfcc_ttls ) != sizeof( Dp->TtlVc ) 
-            || VCMC( CtlReq.mfcc_ttls ) != VCMC( Dp->TtlVc )
-       )
-        log( LOG_ERR, 0, "data types doesn't match in " __FILE__ ", source adaption needed !" );
 
     memcpy( CtlReq.mfcc_ttls, Dp->TtlVc, sizeof( CtlReq.mfcc_ttls ) );
 
     {
         char FmtBuO[ 32 ], FmtBuM[ 32 ];
 
-        log( LOG_NOTICE, 0, "Adding MFC: %s -> %s, InpVIf: %d", 
+        my_log( LOG_NOTICE, 0, "Adding MFC: %s -> %s, InpVIf: %d", 
              fmtInAdr( FmtBuO, CtlReq.mfcc_origin ), 
              fmtInAdr( FmtBuM, CtlReq.mfcc_mcastgrp ),
-             CtlReq.mfcc_parent == ALL_VIFS ? -1 : CtlReq.mfcc_parent
+             (int)CtlReq.mfcc_parent
            );
     }
 
-    if ( setsockopt( MRouterFD, IPPROTO_IP, MRT_ADD_MFC,
-                     (void *)&CtlReq, sizeof( CtlReq ) ) )
-        log( LOG_WARNING, errno, "MRT_ADD_MFC" );
+    rc = setsockopt( MRouterFD, IPPROTO_IP, MRT_ADD_MFC,
+		    (void *)&CtlReq, sizeof( CtlReq ) );
+    if (rc)
+        my_log( LOG_WARNING, errno, "MRT_ADD_MFC" );
+
+    return rc;
 }
 
 /*
@@ -211,6 +192,7 @@ int addMRoute( struct MRouteDesc *Dp )
 int delMRoute( struct MRouteDesc *Dp )
 {
     struct mfcctl CtlReq;
+    int rc;
 
     CtlReq.mfcc_origin    = Dp->OriginAdr;
     CtlReq.mfcc_mcastgrp  = Dp->McAdr;
@@ -223,16 +205,19 @@ int delMRoute( struct MRouteDesc *Dp )
     {
         char FmtBuO[ 32 ], FmtBuM[ 32 ];
 
-        log( LOG_NOTICE, 0, "Removing MFC: %s -> %s, InpVIf: %d", 
+        my_log( LOG_NOTICE, 0, "Removing MFC: %s -> %s, InpVIf: %d", 
              fmtInAdr( FmtBuO, CtlReq.mfcc_origin ), 
              fmtInAdr( FmtBuM, CtlReq.mfcc_mcastgrp ),
-             CtlReq.mfcc_parent == ALL_VIFS ? -1 : CtlReq.mfcc_parent
+             (int)CtlReq.mfcc_parent
            );
     }
 
-    if ( setsockopt( MRouterFD, IPPROTO_IP, MRT_DEL_MFC,
-                     (void *)&CtlReq, sizeof( CtlReq ) ) )
-        log( LOG_WARNING, errno, "MRT_DEL_MFC" );
+    rc = setsockopt( MRouterFD, IPPROTO_IP, MRT_DEL_MFC,
+		    (void *)&CtlReq, sizeof( CtlReq ) );
+    if (rc)
+        my_log( LOG_WARNING, errno, "MRT_DEL_MFC" );
+
+    return rc;
 }
 
 /*
