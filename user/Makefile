@@ -24,7 +24,7 @@ UCLINUX_BUILD_USER=1
 VEND=$(ROOTDIR)/vendors
 
 #for all cleanap
-SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe ntpclient radvd wireless_tools zebra bpalogin dropbear
+SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe ntpclient radvd wireless_tools zebra dropbear
 SUBDIRS_APP += goahead iptables miniupnp openssl-0.9.8e rt2880_app wpa_supplicant bridge-utils ethtool
 SUBDIRS_APP += igmpproxy lldt mkimage ppp strace wsc_upnp busybox flex inadyn ntp pppoe-relay udpxy xl2tpd
 
@@ -58,7 +58,6 @@ dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
-dir_$(CONFIG_BPALOGIN)                      += bpalogin
 dir_$(CONFIG_USER_TC)                  	    += iproute2
 dir_$(CONFIG_USER_RADVD)               	    += flex
 dir_$(CONFIG_USER_RADVD)               	    += radvd
