@@ -1,5 +1,5 @@
 # PPP top-level Makefile for Linux.
-include ../../config.arch
+#include ../../config.arch
 
 DESTDIR = $(INSTROOT)@DESTDIR@
 BINDIR = $(DESTDIR)/sbin

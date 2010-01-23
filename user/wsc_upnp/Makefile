@@ -68,8 +68,9 @@ libupnp: $(LIBUPNP_SRC_PATH)/Makefile
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -rf *.o *~ *.bak $(EXEC)
+	rm -rf *.o *~ *.bak *.so *.a $(EXEC)
 	make -C $(LIBUPNP_LIB_PATH) clean
+
 cleanall: clean
 	make -C $(LIBUPNP_SRC_PATH) clean
 	rm -f *.a
