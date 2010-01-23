@@ -20,10 +20,7 @@ echo 60   > /proc/sys/net/ipv4/route/gc_interval
 echo 100  > /proc/sys/net/ipv4/route/gc_timeout
 #tune
 echo 3072 8192 > /proc/sys/net/ipv4/ip_local_port_range
-echo 2560 > /proc/sys/net/ipv4/ip_conntrack_max
 echo 2560 > /proc/sys/net/ipv4/netfilter/ip_conntrack_max
-echo 1707 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp
-echo 853  > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp
 echo 800  > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
 echo 0 	  > /proc/sys/net/ipv4/netfilter/ip_conntrack_checksum
 echo 1 	  > /proc/sys/net/ipv4/tcp_workaround_signed_windows
@@ -50,11 +47,6 @@ echo 0    > /proc/sys/vm/overcommit_memory
 echo 1    > /proc/sys/kernel/panic
 echo 1    > /proc/sys/kernel/panic_on_oops
 echo 1    > /proc/sys/vm/panic_on_oom
-#disable iptables hook
-echo 0    > /proc/sys/net/bridge/bridge-nf-call-arptables
-echo 0    > /proc/sys/net/bridge/bridge-nf-call-ip6tables
-echo 0    > /proc/sys/net/bridge/bridge-nf-call-iptables
-echo 0    > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged
 }
 
 stop() {

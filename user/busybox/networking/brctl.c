@@ -32,7 +32,7 @@
 
 /* Maximum number of ports supported per bridge interface.  */
 #ifndef MAX_PORTS
-#define MAX_PORTS 32
+#define MAX_PORTS 1024
 #endif
 
 /* Use internal number parsing and not the "exact" conversion.  */
@@ -48,8 +48,9 @@ static ALWAYS_INLINE void strtotimeval(struct timeval *tv,
 {
 	double secs;
 #if BRCTL_USE_INTERNAL
+	errno = 0;
 	secs = /*bb_*/strtod(time_str, NULL);
-	if (!secs)
+	if (errno)
 #else
 	if (sscanf(time_str, "%lf", &secs) != 1)
 #endif
@@ -104,7 +105,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 		"setageing\0" "setfd\0" "sethello\0" "setmaxage\0"
 		"setpathcost\0" "setportprio\0" "setbridgeprio\0"
 	)
-	IF_FEATURE_BRCTL_SHOW("showmacs\0" "show\0");
+	IF_FEATURE_BRCTL_SHOW("show\0");
 
 	enum { ARG_addbr = 0, ARG_delbr, ARG_addif, ARG_delif
 		IF_FEATURE_BRCTL_FANCY(,
@@ -112,7 +113,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 		   ARG_setageing, ARG_setfd, ARG_sethello, ARG_setmaxage,
 		   ARG_setpathcost, ARG_setportprio, ARG_setbridgeprio
 		)
-		IF_FEATURE_BRCTL_SHOW(, ARG_showmacs, ARG_show)
+		IF_FEATURE_BRCTL_SHOW(, ARG_show)
 	};
 
 	int fd;
@@ -168,6 +169,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 				printf(bi.stp_enabled ? "\tyes" : "\tno");
 
 				/* print interface list */
+				memset(ifidx, 0, sizeof ifidx);
 				arm_ioctl(args, BRCTL_GET_PORT_LIST,
 							(unsigned long) ifidx, MAX_PORTS);
 				xioctl(fd, SIOCDEVPRIVATE, &ifr);
@@ -196,9 +198,19 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 		br = *argv++;
 
 		if (key == ARG_addbr || key == ARG_delbr) { /* addbr or delbr */
-			ioctl_or_perror_and_die(fd,
-					key == ARG_addbr ? SIOCBRADDBR : SIOCBRDELBR,
-					br, "bridge %s", br);
+			int ret;
+			ret = ioctl(fd,
+				key == ARG_addbr ? SIOCBRADDBR : SIOCBRDELBR,
+				br);
+			if (ret < 0) {
+				arm_ioctl(args,
+					key == ARG_addbr ? BRCTL_ADD_BRIDGE : BRCTL_DEL_BRIDGE,
+					(unsigned long) br, 0); 
+				ret = ioctl(fd, SIOCSIFBR, args);
+			}
+			if (ret < 0) {
+				bb_perror_msg_and_die("bridge %s", br);
+			}
 			goto done;
 		}
 
@@ -207,14 +219,27 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 
 		strncpy_IFNAMSIZ(ifr.ifr_name, br);
 		if (key == ARG_addif || key == ARG_delif) { /* addif or delif */
+			int ret;
+			int if_index;
 			brif = *argv;
-			ifr.ifr_ifindex = if_nametoindex(brif);
-			if (!ifr.ifr_ifindex) {
+			if_index = if_nametoindex(brif);
+			if (!if_index) {
 				bb_perror_msg_and_die("iface %s", brif);
 			}
-			ioctl_or_perror_and_die(fd,
+			ifr.ifr_ifindex = if_index;
+			ret = ioctl(fd,
 					key == ARG_addif ? SIOCBRADDIF : SIOCBRDELIF,
-					&ifr, "bridge %s", br);
+					&ifr);
+			if (ret < 0) {
+				arm_ioctl(args,
+					key == ARG_addif ? BRCTL_ADD_IF : BRCTL_DEL_IF,
+					if_index, 0); 
+				ifr.ifr_data = (char *) &args;
+				ret = ioctl(fd, SIOCDEVPRIVATE, &ifr);
+			}
+			if (ret < 0) {
+				bb_perror_msg_and_die("bridge %s", br);
+			}
 			goto done_next_argv;
 		}
 #if ENABLE_FEATURE_BRCTL_FANCY
