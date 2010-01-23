@@ -25,7 +25,7 @@ VEND=$(ROOTDIR)/vendors
 
 #for all cleanap
 SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe ntpclient radvd wireless_tools zebra bpalogin dropbear
-SUBDIRS_APP += goahead iptables miniupnp openssl-0.9.8e rt2880_app wpa_supplicant-0.5.7 bridge-utils ethtool
+SUBDIRS_APP += goahead iptables miniupnp openssl-0.9.8e rt2880_app wpa_supplicant bridge-utils ethtool
 SUBDIRS_APP += igmpproxy lldt mkimage ppp strace wsc_upnp busybox flex inadyn ntp pppoe-relay udpxy xl2tpd
 
 
