@@ -1,0 +1,12 @@
+mainmenu_option next_comment
+comment 'Ralink Common Flash Driver'
+bool '    Ralink Common Flash R/W API' CONFIG_RALINK_FLASH_API
+if [ "$CONFIG_RALINK_FLASH_API" = "y" ]; then
+   hex '    Physical start address of flash mapping' CONFIG_FLASH_PHYSMAP_START 0xBC400000
+   bool '    Mxic     MX29LV320'     CONFIG_FLASH_MX29LV320
+   bool '    EON      EN29LV320'     CONFIG_FLASH_EN29LV320
+   bool '    Samsung  K8D3X16U'      CONFIG_FLASH_K8D3X16U
+   bool '    SST      SST39VF320X'   CONFIG_FLASH_SST39VF320X
+fi
+
+endmenu
