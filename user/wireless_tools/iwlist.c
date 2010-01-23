@@ -1318,7 +1318,6 @@ print_pm_info(int		skfd,
   return(0);
 }
 
-#ifndef WE_ESSENTIAL
 /************************** TRANSMIT POWER **************************/
 
 /*------------------------------------------------------------------*/
@@ -1421,6 +1420,7 @@ print_txpower_info(int		skfd,
   return(0);
 }
 
+#ifndef WE_ESSENTIAL
 /*********************** RETRY LIMIT/LIFETIME ***********************/
 
 /*------------------------------------------------------------------*/
@@ -2076,8 +2076,8 @@ static const struct iwlist_entry iwlist_cmds[] = {
   { "encryption",	print_keys_info,	0, NULL },
   { "keys",		print_keys_info,	0, NULL },
   { "power",		print_pm_info,		0, NULL },
-#ifndef WE_ESSENTIAL
   { "txpower",		print_txpower_info,	0, NULL },
+#ifndef WE_ESSENTIAL
   { "retry",		print_retry_info,	0, NULL },
   { "ap",		print_ap_info,		0, NULL },
   { "accesspoints",	print_ap_info,		0, NULL },

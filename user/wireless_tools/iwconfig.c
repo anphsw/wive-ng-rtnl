@@ -122,16 +122,6 @@ get_info(int			skfd,
     if(wrq.u.data.length > 1)
       info->has_nickname = 1;
 
-  if((info->has_range) && (info->range.we_version_compiled > 9))
-    {
-      /* Get Transmit Power */
-      if(iw_get_ext(skfd, ifname, SIOCGIWTXPOW, &wrq) >= 0)
-	{
-	  info->has_txpower = 1;
-	  memcpy(&(info->txpower), &(wrq.u.txpower), sizeof(iwparam));
-	}
-    }
-
   /* Get sensitivity */
   if(iw_get_ext(skfd, ifname, SIOCGIWSENS, &wrq) >= 0)
     {
@@ -148,6 +138,17 @@ get_info(int			skfd,
 	  memcpy(&(info->retry), &(wrq.u.retry), sizeof(iwparam));
 	}
     }
+#endif	/* WE_ESSENTIAL */
+
+  if((info->has_range) && (info->range.we_version_compiled > 9))
+    {
+      /* Get Transmit Power */
+      if(iw_get_ext(skfd, ifname, SIOCGIWTXPOW, &wrq) >= 0)
+	{
+	  info->has_txpower = 1;
+	  memcpy(&(info->txpower), &(wrq.u.txpower), sizeof(iwparam));
+	}
+    }
 
   /* Get RTS threshold */
   if(iw_get_ext(skfd, ifname, SIOCGIWRTS, &wrq) >= 0)
@@ -162,7 +163,6 @@ get_info(int			skfd,
       info->has_frag = 1;
       memcpy(&(info->frag), &(wrq.u.frag), sizeof(iwparam));
     }
-#endif	/* WE_ESSENTIAL */
 
   return(0);
 }
@@ -285,7 +285,6 @@ display_info(struct wireless_info *	info,
       printf("Bit Rate%c%s   ", (info->bitrate.fixed ? '=' : ':'), buffer);
     }
 
-#ifndef WE_ESSENTIAL
   /* Display the Transmit Power */
   if(info->has_txpower)
     {
@@ -302,6 +301,7 @@ display_info(struct wireless_info *	info,
       printf("Tx-Power%c%s   ", (info->txpower.fixed ? '=' : ':'), buffer);
     }
 
+#ifndef WE_ESSENTIAL
   /* Display sensitivity */
   if(info->has_sens)
     {
@@ -356,6 +356,7 @@ display_info(struct wireless_info *	info,
       printf("   ");
       tokens += 5;	/* Between 3 and 5, depend on flags */
     }
+#endif	/* WE_ESSENTIAL */
 
   /* Display the RTS threshold */
   if(info->has_rts)
@@ -399,7 +400,6 @@ display_info(struct wireless_info *	info,
   /* Formating */
   if(tokens > 0)
     printf("\n          ");
-#endif	/* WE_ESSENTIAL */
 
   /* Display encryption information */
   /* Note : we display only the "current" key, use iwlist to list all keys */
@@ -1050,8 +1050,8 @@ set_power_info(int		skfd,
 	wrq.u.power.disabled = 0;
 
 	/* Is there any value to grab ? */
-	value = strtod(args[0], &unit);
-	if(unit != args[0])
+	value = strtod(args[i], &unit);
+	if(unit != args[i])
 	  {
 	    struct iw_range	range;
 	    int			flags;
@@ -1212,6 +1212,7 @@ set_nwid_info(int		skfd,
   /* 1 arg */
   return(1);
 }
+#endif	/* WE_ESSENTIAL */
 
 /*------------------------------------------------------------------*/
 /*
@@ -1378,6 +1379,7 @@ set_txpower_info(int		skfd,
   return(i);
 }
 
+#ifndef WE_ESSENTIAL
 /*------------------------------------------------------------------*/
 /*
  * Set Sensitivity
@@ -1475,6 +1477,7 @@ set_retry_info(int		skfd,
   /* Var args */
   return(i);
 }
+#endif	/* WE_ESSENTIAL */
 
 /*------------------------------------------------------------------*/
 /*
@@ -1581,6 +1584,7 @@ set_frag_info(int		skfd,
   return(1);
 }
 
+#ifndef WE_ESSENTIAL
 /*------------------------------------------------------------------*/
 /*
  * Set Modulation
@@ -1735,21 +1739,21 @@ static const struct iwconfig_entry iwconfig_cmds[] = {
 	"Set Nickname",			"NNN" },
   { "nwid",		set_nwid_info,		1,	SIOCSIWNWID,
 	"Set NWID",			"{NN|on|off}" },
+  { "sens",		set_sens_info,		1,	SIOCSIWSENS,
+	"Set Sensitivity",		"N" },
+  { "modulation",	set_modulation_info,	1,	SIOCGIWMODUL,
+	"Set Modulation",		"{11g|11a|CCK|OFDMg|...}" },
+  { "retry",		set_retry_info,		1,	SIOCSIWRETRY,
+	"Set Retry Limit",		"{limit N|lifetime N}" },
+#endif	/* WE_ESSENTIAL */
   { "ap",		set_apaddr_info,	1,	SIOCSIWAP,
 	"Set AP Address",		"{N|off|auto}" },
   { "txpower",		set_txpower_info,	1,	SIOCSIWTXPOW,
 	"Set Tx Power",			"{NmW|NdBm|off|auto}" },
-  { "sens",		set_sens_info,		1,	SIOCSIWSENS,
-	"Set Sensitivity",		"N" },
-  { "retry",		set_retry_info,		1,	SIOCSIWRETRY,
-	"Set Retry Limit",		"{limit N|lifetime N}" },
   { "rts",		set_rts_info,		1,	SIOCSIWRTS,
 	"Set RTS Threshold",		"{N|auto|fixed|off}" },
   { "frag",		set_frag_info,		1,	SIOCSIWFRAG,
 	"Set Fragmentation Threshold",	"{N|auto|fixed|off}" },
-  { "modulation",	set_modulation_info,	1,	SIOCGIWMODUL,
-	"Set Modulation",		"{11g|11a|CCK|OFDMg|...}" },
-#endif	/* WE_ESSENTIAL */
   { "commit",		set_commit_info,	0,	SIOCSIWCOMMIT,
 	"Commit changes",		"" },
   { NULL, NULL, 0, 0, NULL, NULL },
