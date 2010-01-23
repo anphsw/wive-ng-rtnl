@@ -17,7 +17,7 @@ if [ -f /bin/igmpproxy ]; then
 	echo "phyint $lan_if downstream  ratelimit 0  threshold 1" >> /etc/igmpproxy.conf
 	echo "phyint ppp0 disabled" >> /etc/igmpproxy.conf
 	echo "" >> /etc/igmpproxy.conf
-        igmpproxy /etc/igmpproxy.conf
+        igmpproxy /etc/igmpproxy.conf &
     fi
 fi
 }
