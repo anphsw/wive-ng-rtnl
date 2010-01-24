@@ -153,7 +153,7 @@ case "$1" in
     rm -f $pidfile
     touch $leases
     echo "lease_file $leases" >> $fname
-    udhcpd $fname
+    udhcpd -S $fname &
 	reset_all_phys ;;
   "-k")
     if [ -e ${pidfile} ]; then

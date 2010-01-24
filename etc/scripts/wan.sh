@@ -85,7 +85,7 @@ elif [ "$wanmode" = "L2TP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid > /dev/null 2>&1 &
+    	    udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
 	    sleep 10
 	fi
 	config-l2tp.sh &
@@ -114,7 +114,7 @@ elif [ "$wanmode" = "PPTP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if  -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpd.pid  > /dev/null 2>&1 &
+    	    udhcpc -i $wan_if  -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid  > /dev/null 2>&1 &
 	    sleep 10
 	fi
 	config-pptp.sh &
