@@ -644,7 +644,7 @@ static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_UPNP_IGD
+#ifdef CONFIG_USER_MINIUPNPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

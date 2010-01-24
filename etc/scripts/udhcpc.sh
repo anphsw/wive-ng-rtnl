@@ -5,7 +5,7 @@
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
 RESOLV_CONF="/etc/resolv.conf"
-STARTEDPPPD=`ps | grep pppd -c`
+STARTEDPPPD=`ip link show up | grep ppp -c`
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -17,7 +17,7 @@ case "$1" in
 
     renew|bound)
         #no change routes if pppd is started
-        if [ "$STARTEDPPPD" != "1" ]; then
+        if [ "$STARTEDPPPD" != "0" ]; then
                 echo "PPPD IS STARTED!!! No deleting or routers and adresses"
         else
     	    ifconfig $interface $ip $BROADCAST $NETMASK
@@ -39,7 +39,10 @@ case "$1" in
         for i in $dns ; do
             echo adding dns $i
             echo nameserver $i >> $RESOLV_CONF
-	    service dns restart
+	    service dns stop
+	    service upnp stop
+	    service dns start
+	    service upnp start
         done
 		# notify goahead when the WAN IP has been acquired. --yy
 		killall -SIGUSR2 goahead

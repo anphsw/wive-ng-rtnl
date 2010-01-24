@@ -15,8 +15,16 @@ if [ "$wan_if" = "" ]; then
     wan_if="eth2.2"
 fi
 
-HOSTNAME=`hostname`
-UDHCPC="udhcpc -i $wan_if -H $HOSTNAME -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid"
+HOSTNAME_SYS=`hostname`
+HOSTNAME_NVRAM=`nvram_get 2860 HostName`
+
+if [ "$HOSTNAME_NVRAM" != "" ]; then
+   HOSTNAME="$HOSTNAME_NVRAM"
+else
+   HOSTNAME="$HOSTNAME_SYS"
+fi
+
+UDHCPCOPTS="-r -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid &"
 
 clone_en=`nvram_get 2860 macCloneEnabled`
 clone_mac=`nvram_get 2860 macCloneMac`
@@ -54,14 +62,14 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	fi
 	config-dns.sh $pd $sd
 elif [ "$wanmode" = "DHCP" ]; then
-	$UDHCPC > /dev/null 2>&1 &
+	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
 elif [ "$wanmode" = "PPPOE" ]; then
 	u=`nvram_get 2860 wan_pppoe_user`
 	pw=`nvram_get 2860 wan_pppoe_pass`
 	pppoe_opmode=`nvram_get 2860 wan_pppoe_opmode`
 	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
 
-	killall -q -9 config-pptp.sh > /dev/null &
+	killall -q -9 config-pptp.sh
 
 	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
 
@@ -70,7 +78,7 @@ elif [ "$wanmode" = "L2TP" ]; then
 	l2tp_opmode=`nvram_get 2860 wan_l2tp_opmode`
 	l2tp_optime=`nvram_get 2860 wan_l2tp_optime`
 
-	killall -q -9 config-pptp.sh > &
+	killall -q -9 config-pptp.sh
 
         if [ "$mode" = "0" ]; then
 	#static
@@ -87,8 +95,7 @@ elif [ "$wanmode" = "L2TP" ]; then
 	    fi
 	else
 	#dhcp
-            killall -q udhcpc
-    	    $UDHCPC > /dev/null 2>&1 &
+    	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
 	    sleep 5
 	fi
 	config-l2tp.sh &
@@ -99,7 +106,7 @@ elif [ "$wanmode" = "PPTP" ]; then
         pptp_opmode=`nvram_get 2860 wan_pptp_opmode`
         pptp_optime=`nvram_get 2860 wan_pptp_optime`
 
-	killall -q -9 config-pptp.sh > /dev/null &
+	killall -q -9 config-pptp.sh
 
         if [ "$mode" = "0" ]; then
 	#static
@@ -116,8 +123,7 @@ elif [ "$wanmode" = "PPTP" ]; then
 	    fi
 	else
 	#dhcp
-            killall -q udhcpc
-    	    $UDHCPC  > /dev/null 2>&1 &
+    	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS  > /dev/null 2>&1 &
 	    sleep 5
 	fi
 	config-pptp.sh &

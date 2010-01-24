@@ -26,6 +26,8 @@
 25) Fix crash on sta list<br>
 26) Update userspace daemons and utility<br>
 27) Some busybox fixes<br>
+28) Auto generate UUID for UPNP service on first upnpd start<br>
+29) Check if ppp is up do not change ip from dhcp<br>
 
 <br>
 <b>ToDo:</b><br>

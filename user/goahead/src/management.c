@@ -706,13 +706,6 @@ void management_init(void)
 #ifdef CONFIG_RT2860V2_AP_WSC
 	WPSRestart();
 #endif
-	doSystem("service syslog stop");
-	doSystem("service syslog start");
-}
-
-void management_fini(void)
-{
-	doSystem("service syslog stop");
 }
 
 void formDefineManagement(void)

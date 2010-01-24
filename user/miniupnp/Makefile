@@ -67,7 +67,7 @@ TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 EXECUTABLES = miniupnpd testupnpdescgen testgetifstats \
               testupnppermissions miniupnpdctl testgetifaddr
 
-.PHONY:	all clean install depend genuuid
+.PHONY:	all clean install depend #genuuid
 
 all:	$(EXECUTABLES)
 
@@ -78,7 +78,7 @@ clean:
 	$(RM) testupnppermissions.o testgetifaddr.o
 	$(RM) miniupnpdctl.o
 
-install:	miniupnpd genuuid
+install:	miniupnpd #genuuid
 	$(STRIP) miniupnpd
 	$(INSTALL) -d $(SBININSTALLDIR)
 	$(INSTALL) miniupnpd $(SBININSTALLDIR)
@@ -96,7 +96,8 @@ romfs: install
 # genuuid is using the uuidgen CLI tool which is part of libuuid
 # from the e2fsprogs
 genuuid:
-	sed -i -e "s/^uuid=[-0-9a-f]*/uuid=`(genuuid||uuidgen) 2>/dev/null`/" miniupnpd.conf
+	echo "OK"
+#sed -i -e "s/^uuid=[-0-9a-f]*/uuid=`(genuuid||uuidgen) 2>/dev/null`/" miniupnpd.conf
 
 miniupnpd:	$(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS) $(LIBS)
 
