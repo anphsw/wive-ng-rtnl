@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 
-#define UPNP_VERSION	"20100124"
+#define UPNP_VERSION	"20100125"
 #define USE_NETFILTER 1
 #define OS_NAME		"MandrivaLinux"
 #define OS_VERSION	"MandrivaLinux/2010.0"
