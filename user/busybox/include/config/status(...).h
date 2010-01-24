@@ -1,1 +1,0 @@
-#define IF_NOT_FEATURE_IFCONFIG_STATUS(...)
