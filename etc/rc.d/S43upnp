@@ -20,7 +20,7 @@ fi
 
 stop() {
  echo "Stop upnp "
-    killall miniupnpd > /dev/null 2>&1
+    killall -q miniupnpd
     route del -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if > /dev/null 2>&1
 }
 

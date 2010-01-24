@@ -12,7 +12,7 @@ fi
 
 stop() {
     echo "UDPXY stop"
-    killall udpxy > /dev/null 2>&1
+    killall -q udpxy
 }
 
 case "$1" in

@@ -32,7 +32,7 @@ fi
 
 stop() {
  echo "Stopping NTP: "
-    killall ntpclient > /dev/null 2>&1
+    killall -q ntpclient
 }
 
 case "$1" in

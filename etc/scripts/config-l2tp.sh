@@ -11,8 +11,8 @@ SERVER=`nvram_get 2860 wan_l2tp_server`
 USER=`nvram_get 2860 wan_l2tp_user`
 PASSWORD=`nvram_get 2860 wan_l2tp_pass`
 
-killall -9 pppd > /dev/null 2>&1
-killall -9 xl2tpd > /dev/null 2>&1
+killall -q -9 pppd > /dev/null 2>&1
+killall -q -9 xl2tpd > /dev/null 2>&1
 
 echo "Add static route to vpn server"
 ADDRESS=`nslookup "$SERVER" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`

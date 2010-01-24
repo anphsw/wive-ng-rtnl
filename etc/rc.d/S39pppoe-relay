@@ -15,7 +15,7 @@ fi
 
 stop() {
  echo "Stopping pppoe-relay: "
-    killall pppoe-relay > /dev/null 2>&1
+    killall -q pppoe-relay
 }
 
 case "$1" in

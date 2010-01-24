@@ -22,7 +22,7 @@ fi
 
 stop() {
  echo "Stopping radvd: "
-    killall radvd > /dev/null 2>&1
+    killall -q radvd
 }
 
 case "$1" in

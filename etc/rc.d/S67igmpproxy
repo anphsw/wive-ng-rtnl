@@ -24,7 +24,7 @@ fi
 
 stop() {
  echo "Stopping IGMPPROXY: "
-  killall igmpproxy > /dev/null 2>&1
+  killall -q igmpproxy
 }
 
 case "$1" in

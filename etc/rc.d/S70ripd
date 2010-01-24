@@ -14,7 +14,7 @@ fi
 
 stop() {
  echo "Stopping RIPD: "
-  killall ripd > /dev/null 2>&1
+  killall -q ripd
 }
 
 case "$1" in

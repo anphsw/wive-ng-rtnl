@@ -23,7 +23,7 @@ echo "Starting inetd: "
 
 stop() {
  echo "Stopping inetd: "
- killall inetd > /dev/null 2>&1
+ killall -q inetd
 }
 
 case "$1" in

@@ -61,7 +61,7 @@ elif [ "$wanmode" = "PPPOE" ]; then
 	pppoe_opmode=`nvram_get 2860 wan_pppoe_opmode`
 	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
 
-	killall -9 config-pptp.sh > /dev/null &
+	killall -q -9 config-pptp.sh > /dev/null &
 
 	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
 
@@ -70,7 +70,7 @@ elif [ "$wanmode" = "L2TP" ]; then
 	l2tp_opmode=`nvram_get 2860 wan_l2tp_opmode`
 	l2tp_optime=`nvram_get 2860 wan_l2tp_optime`
 
-	killall -9 config-pptp.sh > /dev/null &
+	killall -q -9 config-pptp.sh > &
 
         if [ "$mode" = "0" ]; then
 	#static
@@ -99,7 +99,7 @@ elif [ "$wanmode" = "PPTP" ]; then
         pptp_opmode=`nvram_get 2860 wan_pptp_opmode`
         pptp_optime=`nvram_get 2860 wan_pptp_optime`
 
-	killall -9 config-pptp.sh > /dev/null &
+	killall -q -9 config-pptp.sh > /dev/null &
 
         if [ "$mode" = "0" ]; then
 	#static

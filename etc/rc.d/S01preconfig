@@ -53,7 +53,7 @@ start() {
 
 stop() {
  echo "Stop preconfigure."
- killall nvram_daemon > /dev/null 2>&1
+ killall -q nvram_daemon
 }
 
 case "$1" in

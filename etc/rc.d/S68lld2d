@@ -15,7 +15,7 @@ fi
 
 stop() {
  echo "Stopping LLD2D: "
-  killall lld2d
+  killall -q lld2d
   rm -rf /var/run/lld2d-* > /dev/null 2>&1
 }
 

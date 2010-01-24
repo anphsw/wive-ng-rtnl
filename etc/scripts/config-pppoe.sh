@@ -6,8 +6,8 @@
 #
 echo "==================START-PPPOE-CLIENT======================="
 
-killall -9 pppd > /dev/null 2>&1
-killall -9 xl2tpd > /dev/null 2>&1
+killall -q -9 pppd > /dev/null 2>&1
+killall -q -9 xl2tpd > /dev/null 2>&1
 
 usage()
 {

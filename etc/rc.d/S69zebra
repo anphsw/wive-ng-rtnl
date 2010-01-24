@@ -14,7 +14,7 @@ fi
 
 stop() {
  echo "Stopping ZEBRA: "
-  killall zebra > /dev/null 2>&1
+  killall -q zebra
 }
 
 case "$1" in

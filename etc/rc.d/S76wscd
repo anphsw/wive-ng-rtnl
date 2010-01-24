@@ -16,8 +16,8 @@ fi
 
 stop() {
  echo "Stopping WPS: "
-    killall wscd > /dev/null 2>&1
-    killall -9 wscd > /dev/null 2>&1
+    killall -q wscd
+    killall -q -9 wscd
 }
 
 case "$1" in

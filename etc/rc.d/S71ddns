@@ -35,7 +35,7 @@ get_param() {
 
 stop() {
  echo "Stopping DynDns: "
-    killall -q inadyn > /dev/null 2>&1
+    killall -q inadyn
 }
 
 case "$1" in
