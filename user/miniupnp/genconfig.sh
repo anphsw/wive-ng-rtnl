@@ -11,8 +11,8 @@ CONFIGFILE="config.h"
 CONFIGMACRO="__CONFIG_H__"
 
 # version reported in XML descriptions
-#UPNP_VERSION=20070827
-UPNP_VERSION=`date +"%Y%m%d"`
+UPNP_VERSION=20100125
+#UPNP_VERSION=`date +"%Y%m%d"`
 # Facility to syslog
 LOG_MINIUPNPD="LOG_DAEMON"
 
