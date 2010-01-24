@@ -9,6 +9,7 @@
 
 # stop all
 killall -q udhcpc
+HOSTNAME=`hostname`
 
 #workaround fix me!!!
 if [ "$wan_if" = "" ]; then
@@ -51,7 +52,7 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	fi
 	config-dns.sh $pd $sd
 elif [ "$wanmode" = "DHCP" ]; then
-	udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
+	udhcpc -i $wan_if -H "$HOSTNAME" -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
 elif [ "$wanmode" = "PPPOE" ]; then
 	u=`nvram_get 2860 wan_pppoe_user`
 	pw=`nvram_get 2860 wan_pppoe_pass`
@@ -85,8 +86,8 @@ elif [ "$wanmode" = "L2TP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
-	    sleep 10
+    	    udhcpc -i $wan_if -H "$HOSTNAME" -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid > /dev/null 2>&1 &
+	    sleep 5
 	fi
 	config-l2tp.sh &
 
@@ -114,8 +115,8 @@ elif [ "$wanmode" = "PPTP" ]; then
 	else
 	#dhcp
             killall -q udhcpc
-    	    udhcpc -i $wan_if  -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid  > /dev/null 2>&1 &
-	    sleep 10
+    	    udhcpc -i $wan_if -H "$HOSTNAME" -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid  > /dev/null 2>&1 &
+	    sleep 5
 	fi
 	config-pptp.sh &
 else
