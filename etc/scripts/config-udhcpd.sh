@@ -62,6 +62,8 @@ config () {
         echo "static_lease $2 $3" >> $fname
 	return
       fi
+      echo "pidfile $pidfile" >> $fbak ;;
+      echo "" >> $fbak ;;
       ;;
     *) return;;
   esac
