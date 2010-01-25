@@ -3,16 +3,30 @@
 modtest=`uname -r`
 moddir=/lib/modules/$modtest
 MODULES=`find /lib/modules -type f`;
+FULLMODULELOAD="NO"
+CONNTRACKMODULELOAD="YES"
 
 start() {
  echo "Starting modules.dep generate..."
     depmod
     ln -sf $moddir/modules.dep /etc/modules.dep
+ ############LOAD##ALL###MODULES###################
+ if [ $FULLMODULELOAD = "YES" ]; then
     for i in $MODULES; do
 	echo $i;
 	insmod $i
     done
-
+ else
+  ############CONNTRCAK###FILTERS##################
+  if [ $CONNTRACKMODULELOAD = "YES" ]; then
+    MODULES_IPT=$MODULES/kernel/net/ipv4/netfilter
+    for i in $MODULES_IPT; do
+	echo $i;
+	insmod $i
+    done
+  fi
+  ##################################################
+ fi
 }
 
 stop() {
