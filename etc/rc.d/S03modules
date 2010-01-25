@@ -14,7 +14,7 @@ start() {
  if [ $FULLMODULELOAD = "YES" ]; then
     for i in $MODULES; do
 	echo $i;
-	insmod $i
+	insmod $i > /dev/null 2>&1
     done
  else
   ############CONNTRCAK###FILTERS##################
@@ -22,7 +22,7 @@ start() {
     MODULES_IPT=$MODULES/kernel/net/ipv4/netfilter
     for i in $MODULES_IPT; do
 	echo $i;
-	insmod $i
+	insmod $i > /dev/null 2>&1
     done
   fi
   ##################################################
