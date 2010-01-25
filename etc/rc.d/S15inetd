@@ -1,16 +1,6 @@
 #!/bin/sh
 
 start() {
-echo "Generate host key for first start"
-    if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
-	echo "DSS file exist"
-    else
-        echo "Generating ssh keys"
-        echo "If no DSS key  and generate new key"
-        dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
-	fs save
-    fi
-
 echo "Starting inetd: "
     admID=`nvram_get 2860 Login`
     if [ "$admID" = "" ]; then

@@ -17,21 +17,21 @@ service pass start
 
 ifRaxWdsxDown()
 {
-	ifconfig ra0 down
-	ifconfig ra1 down
-	ifconfig ra2 down
-	ifconfig ra3 down
-	ifconfig ra4 down
-	ifconfig ra5 down
-	ifconfig ra6 down
-	ifconfig ra7 down
+	ifconfig ra0 down > /dev/null 2>&1
+	ifconfig ra1 down > /dev/null 2>&1
+	ifconfig ra2 down > /dev/null 2>&1
+	ifconfig ra3 down > /dev/null 2>&1
+	ifconfig ra4 down > /dev/null 2>&1
+	ifconfig ra5 down > /dev/null 2>&1
+	ifconfig ra6 down > /dev/null 2>&1
+	ifconfig ra7 down > /dev/null 2>&1
 
-	ifconfig wds0 down
-	ifconfig wds1 down
-	ifconfig wds2 down
-	ifconfig wds3 down
+	ifconfig wds0 down > /dev/null 2>&1
+	ifconfig wds1 down > /dev/null 2>&1
+	ifconfig wds2 down > /dev/null 2>&1
+	ifconfig wds3 down > /dev/null 2>&1
 
-	ifconfig apcli0 down
+	ifconfig apcli0 down > /dev/null 2>&1
 }
 
 addBr0()
@@ -214,8 +214,8 @@ fi
 ifconfig eth2 0.0.0.0
 
 ifRaxWdsxDown
-rmmod rt2860v2_ap
-rmmod rt2860v2_sta
+rmmod rt2860v2_ap > /dev/null 2>&1
+rmmod rt2860v2_sta > /dev/null 2>&1
 ralink_init make_wireless_config rt2860
 if [ "$stamode" = "y" ]; then
 	modprobe rt2860v2_sta
@@ -230,8 +230,8 @@ vpn-passthru.sh &
 
 # INIC support
 if [ "$CONFIG_RT2880_INIC" != "" ]; then
-	ifconfig rai0 down
-	rmmod rt_pci_dev
+	ifconfig rai0 down > /dev/null 2>&1
+	rmmod rt_pci_dev > /dev/null 2>&1
 	ralink_init make_wireless_config inic
 	modprobe rt_pci_dev
 	ifconfig rai0 up
@@ -241,9 +241,9 @@ fi
 # INIC support
 if [ "$CONFIG_RT2880v2_INIC_MII" != "" -o "$CONFIG_RT2880v2_INIC_PCI" != "" ]; then
         iNIC_Mii_en=`nvram_get inic InicMiiEnable`
-        ifconfig rai0 down
-        rmmod iNIC_pci
-        rmmod iNIC_mii
+        ifconfig rai0 down > /dev/null 2>&1
+        rmmod iNIC_pci > /dev/null 2>&1
+        rmmod iNIC_mii > /dev/null 2>&1
         ralink_init make_wireless_config inic
 if [ "$iNIC_Mii_en" != "1" ]; then
         modprobe iNIC_pci mode=ap
@@ -256,8 +256,8 @@ fi
 
 # RT2561(Legacy) support
 if [ "$CONFIG_RT2561_AP" != "" ]; then
-	ifconfig raL0 down
-	rmmod rt2561ap
+	ifconfig raL0 down > /dev/null 2>&1
+	rmmod rt2561ap > /dev/null 2>&1
 	ralink_init make_wireless_config rt2561
 	modprobe rt2561ap
 	ifconfig raL0 up
@@ -312,7 +312,7 @@ if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG
 	modprobe 8021q
 	vconfig add eth2 1
 	vconfig add eth2 2
-	ifconfig eth2.2 down
+	ifconfig eth2.2 down > /dev/null 2>&1
 	wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
 	if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
 	ifconfig eth2.2 hw ether $wan_mac

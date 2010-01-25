@@ -3,6 +3,9 @@
 #include functions and env
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 start() {
 if [ -f /bin/tc ]; then
  echo "Starting SHAPER: "

@@ -2,6 +2,12 @@
 
 . /sbin/config.sh
 
+web_wait(){
+#wait to start web and run from goahead code
+    if [ ! -f /tmp/webrun ]; then
+      exit 0
+    fi
+}
 
 # WAN interface name -> $wan_if
 getWanIfName()

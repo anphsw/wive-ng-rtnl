@@ -26,9 +26,9 @@ br0_mirror=eth2
 
 unload_ra0()
 {
-	ifconfig ra0 down
-	rmmod rt2860v2_ap 2>/dev/null
-	rmmod rt2860v2_sta 2>/dev/null
+	ifconfig ra0 down > /dev/null 2>&1
+	rmmod rt2860v2_ap > /dev/null 2>&1
+	rmmod rt2860v2_sta > /dev/null 2>&1
 }
 
 unload_ra0br0()
@@ -40,13 +40,13 @@ unload_ra0br0()
 
 	if [ "$ra0_mac" = "$br0_mac" ]; then
 		#destory br0
-		ifconfig br0 down
-		brctl delbr br0
+		ifconfig br0 down > /dev/null 2>&1
+		brctl delbr br0 > /dev/null 2>&1
 
 		unload_ra0
 
 		#mirror br0 to eth2x
-		ifconfig $1 down
+		ifconfig $1 down > /dev/null 2>&1
 		ifconfig $1 hw ether $br0_mac
 		ifconfig $1 $br0_ip netmask $br0_netmask
 		ifconfig $1 up

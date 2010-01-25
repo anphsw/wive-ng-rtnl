@@ -14,7 +14,7 @@
 
 
 
-#define  REFRESH_TIMEOUT		"40000"		/* 40000 = 40 secs*/
+#define  REFRESH_TIMEOUT		"80000"		/* 80000 = 80 secs*/
 
 #include "include/linux/autoconf.h"
 
@@ -280,7 +280,7 @@ int getIfIp(char *ifname, char *if_addr)
  * I'm too lazy to use popen() instead of system()....
  * ( note:  static buffer used)
  */
-#define DEFAULT_LAN_IP "10.10.10.254"
+#define DEFAULT_LAN_IP "192.168.1.1"
 char *getLanIP(void)
 {
 	static char buf[64];

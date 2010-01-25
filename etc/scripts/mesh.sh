@@ -1,8 +1,8 @@
 case $1 in
 	"init")
 		brctl delif br0 mesh0
-		ifconfig mesh0 down
-		ifconfig ra0 down
+		ifconfig mesh0 down > /dev/null 2>&1
+		ifconfig ra0 down > /dev/null 2>&1
 		ralink_init make_wireless_config 2860
 		ifconfig ra0 up
 		meshenabled=`nvram_get 2860 MeshEnabled`

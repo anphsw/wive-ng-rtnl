@@ -3,6 +3,9 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 start() {
  echo "Start dhcpserver "
  dhcp=`nvram_get 2860 dhcpEnabled`

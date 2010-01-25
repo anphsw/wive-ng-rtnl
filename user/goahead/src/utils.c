@@ -1260,7 +1260,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			char *lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
 
 			if(! strlen(lan_ip))
-				lan_ip = "10.10.10.254";
+				lan_ip = "192.168.1.1";
 			snprintf(redirect_url, 512, "http://%s", lan_ip);
 			redirect_wholepage(wp, redirect_url);
 			goto final;

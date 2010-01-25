@@ -1,5 +1,11 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
 start() {
 if [ -f /bin/udpxy ]; then
  QOS=`nvram_get 2860 WmmCapable`

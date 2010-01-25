@@ -10,8 +10,8 @@ start() {
 
 stop() {
  echo "Stop syslog and klog"
-    killall -q -9 klogd > /dev/null 2>&1
-    killall -q -9 syslogd > /dev/null 2>&1
+    killall -q -9 klogd
+    killall -q -9 syslogd
     rm -f /var/log/messages > /dev/null 2>&1
 }
 

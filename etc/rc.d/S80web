@@ -3,7 +3,9 @@
 start() {
  echo "Start goahead"
     killall -q nvram_daemon
+    echo > /tmp/webrun
     /bin/goahead &
+    sleep 10
 }
 
 stop() {

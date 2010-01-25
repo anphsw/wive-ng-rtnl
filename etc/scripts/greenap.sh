@@ -4,65 +4,65 @@ setGreenAP()
 	end=`nvram_get 2860 GreenAPEnd1`
 	action=`nvram_get 2860 GreenAPAction1`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
-		echo "$start * * * greenap.sh txpower 25" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX50" ]; then
-		echo "$start * * * greenap.sh txpower 50" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 50" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX75" ]; then
-		echo "$start * * * greenap.sh txpower 75" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 75" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	fi
 	start=`nvram_get 2860 GreenAPStart2`
 	end=`nvram_get 2860 GreenAPEnd2`
 	action=`nvram_get 2860 GreenAPAction2`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
-		echo "$start * * * greenap.sh txpower 25" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX50" ]; then
-		echo "$start * * * greenap.sh txpower 50" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 50" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX75" ]; then
-		echo "$start * * * greenap.sh txpower 75" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 75" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	fi
 	start=`nvram_get 2860 GreenAPStart3`
 	end=`nvram_get 2860 GreenAPEnd3`
 	action=`nvram_get 2860 GreenAPAction3`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
-		echo "$start * * * greenap.sh txpower 25" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX50" ]; then
-		echo "$start * * * greenap.sh txpower 50" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 50" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX75" ]; then
-		echo "$start * * * greenap.sh txpower 75" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 75" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	fi
 	start=`nvram_get 2860 GreenAPStart4`
 	end=`nvram_get 2860 GreenAPEnd4`
 	action=`nvram_get 2860 GreenAPAction4`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
-		echo "$start * * * greenap.sh txpower 25" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX50" ]; then
-		echo "$start * * * greenap.sh txpower 50" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 50" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	elif [ "$action" = "TX75" ]; then
-		echo "$start * * * greenap.sh txpower 75" >> /var/spool/cron/crontabs/admin
-		echo "$end * * * greenap.sh txpower normal" >> /var/spool/cron/crontabs/admin
+		echo "$start * * * greenap.sh txpower 75" >> /etc/crontabs/admin
+		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
 	fi
 }
 
@@ -70,7 +70,7 @@ case $1 in
 	"init")
 		killall -q crond
 		mkdir -p /var/spool/cron/crontabs
-		rm -f /var/spool/cron/crontabs/admin
+		rm -f /etc/crontabs/admin
 		cronebl="0"
 		action=`nvram_get 2860 GreenAPAction1`
 		if [ "$action" != "Disable" -a "$action" != "" ]; then
@@ -112,11 +112,11 @@ case $1 in
 			hour=$3
 			minute=`expr $2 - 1`
 		fi
-		echo "$minute $hour * * * greenap.sh chkntp" >> /var/spool/cron/crontabs/admin
+		echo "$minute $hour * * * greenap.sh chkntp" >> /etc/crontabs/admin
 		;;
 	"chkntp")
-		cat /var/spool/cron/crontabs/admin | sed '/ifconfig/d' > /var/spool/cron/crontabs/admin
-		cat /var/spool/cron/crontabs/admin | sed '/txpower/d' > /var/spool/cron/crontabs/admin
+		cat /etc/crontabs/admin | sed '/ifconfig/d' > /etc/crontabs/admin
+		cat /etc/crontabs/admin | sed '/txpower/d' > /etc/crontabs/admin
 		index=1
 		while [ "$index" -le 10 ]
 		do

@@ -30,7 +30,7 @@ clone_en=`nvram_get 2860 macCloneEnabled`
 clone_mac=`nvram_get 2860 macCloneMac`
 #MAC Clone: bridge mode doesn't support MAC Clone
 if [ "$opmode" != "0" -a "$clone_en" = "1" ]; then
-	ifconfig $wan_if down
+	ifconfig $wan_if down > /dev/null 2>&1
 	ifconfig $wan_if hw ether $clone_mac
 	ifconfig $wan_if up
 fi

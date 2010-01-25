@@ -28,6 +28,8 @@
 27) Some busybox fixes<br>
 28) Auto generate UUID for UPNP service on first upnpd start<br>
 29) Check if ppp is up do not change ip from dhcp<br>
+30) Regenerate mac if drop to defaults<br>
+31) Some services start only thwn start goahead<br>
 
 <br>
 <b>ToDo:</b><br>

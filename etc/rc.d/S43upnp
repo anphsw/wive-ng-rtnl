@@ -3,10 +3,12 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 start() {
 if [ -f /bin/miniupnpd ]; then
  echo "Start upnp "
- gen_uuid
  get_param
     if [ "$opmode" = "0" -o "$opmode" = "1" ]; then
 	EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
@@ -41,27 +43,7 @@ get_param() {
         fi
     fi
 }
-gen_uuid() {
-if [ -f /etc/miniupnpd.conf.uuid ]; then
- echo "Use old UUID file"
-else
-   echo "Generate UUID for miniupnpd"
-   num=0
-    for i in `seq 1 36`; do
-        id=`cat /dev/urandom | hexdump | head -1 | cut -c9`
-        num=`expr $num + 1`
-        if [ $num = "9" ] || [ $num = "19" ] || [ $num = "24" ]; then
-            id="-"
-        fi
-        outid=$outid$id
-    done
-    echo "UPNP UUID is $outid"
-    echo "uuid=""$outid" >> /etc/miniupnpd.conf.uuid
-    serial=`hostid`
-    echo "serial=""$serial" >> /etc/miniupnpd.conf.uuid
-    fs save
-fi
-}
+
 
 case "$1" in
 	start)

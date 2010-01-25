@@ -3,6 +3,9 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 start() {
  echo "Starting IPTABLES: "
  get_param

@@ -1,0 +1,73 @@
+#!/bin/sh
+
+start() {
+    if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
+	echo "DSS file exist"
+    else
+	echo "Generate host key for first start"
+        echo "If no DSS key  and generate new key"
+        dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
+	fs save
+    fi
+
+    if [ -f /etc/miniupnpd.conf.uuid ]; then
+       echo "Use exist UUID file"
+    else
+       echo "Generate UUID for miniupnpd"
+       num=0
+        for i in `seq 1 36`; do
+            id=`cat /dev/urandom | hexdump | head -1 | cut -c9`
+            num=`expr $num + 1`
+            if [ $num = "9" ] || [ $num = "19" ] || [ $num = "24" ]; then
+	        id="-"
+            fi
+            outid=$outid$id
+        done
+        echo "UPNP UUID is $outid"
+        echo "uuid=""$outid" >> /etc/miniupnpd.conf.uuid
+        serial=`hostid`
+        echo "serial=""$serial" >> /etc/miniupnpd.conf.uuid
+        fs save
+    fi
+
+    MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
+    if [ $MAC = "0" ]; then
+    echo "First start MAC generate"
+	macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+
+    echo "Set new mac!"
+	WLAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
+    echo WLAN_MACADDR="$WLAN_MACADDR"
+	nvram_set WAN_MAC_ADDR "$WLAN_MACADDR"
+    else
+    echo "Use current mac."
+    fi
+
+}
+
+stop() {
+ echo "OK"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

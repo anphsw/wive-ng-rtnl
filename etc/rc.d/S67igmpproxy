@@ -3,6 +3,9 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 lan_ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`
 
