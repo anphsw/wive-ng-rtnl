@@ -4,14 +4,14 @@
   <message msgid="main apply" msgstr="Apply" />
   <message msgid="main cancel" msgstr="Cancel" />
 
-  <message msgid="overview introduction" msgstr="Ralink is a world leader in IEEE 802.11 technology. Our Ralink SoC SOC combines Ralink's 2T3R MAC/BBP, a 266-MHz Mips4KEc CPU core, a Gigabit Ethernet MAC, and a PCI host/device, to enable a multitude of high performance and cost-effective draft 802.11n applications. Ralink SoC is Wi-Fi Certified and provides convenient wireless connectivity from computing devices to peripherals such as printers and network attached storage." />
+  <message msgid="overview introduction" msgstr="." />
   <message msgid="overview select language" msgstr="Select Language" />
   <message msgid="overview status link" msgstr="Status" />
   <message msgid="overview statistic link" msgstr="Statistic" />
   <message msgid="overview management link" msgstr="Management" />
   <message msgid="treeapp openall" msgstr="open all" />
   <message msgid="treeapp closeall" msgstr="close all" />
-  <message msgid="treeapp ralink" msgstr="Ralink" />
+  <message msgid="treeapp router" msgstr="Router" />
   <message msgid="treeapp operation mode" msgstr="Operation Mode" />
   <message msgid="treeapp internet settings" msgstr="Internet Settings" />
   <message msgid="treeapp wan" msgstr="WAN" />

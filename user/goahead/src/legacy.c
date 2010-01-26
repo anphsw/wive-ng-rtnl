@@ -9,7 +9,7 @@
 
 #include	<stdlib.h>
 #include	<arpa/inet.h>
-#include	<linux/wireless.h>
+#include	"wireless.h"
 #include	"internet.h"
 #include	"nvram.h"
 #include	"utils.h"
@@ -238,7 +238,7 @@ static int getLegacyStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	RT_802_11_MAC_TABLE table = {0};
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	strncpy(iwr.ifr_name, "raL0", IFNAMSIZ);
+	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
 	iwr.u.data.pointer = (caddr_t) &table;
 
 	if (s < 0) {

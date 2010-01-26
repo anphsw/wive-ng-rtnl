@@ -140,7 +140,7 @@ function PageInit()
 <body onload="PageInit()">
 <table class="body"><tr><td>
 <H1 id="statusTitle">Access Point Status</H1>
-<P id="statusIntroduction">Let's take a look at the status of Ralink SoC Platform. </P>
+<P id="statusIntroduction">Let's take a look at the status. </P>
 
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <!-- ================= System Info ================= -->

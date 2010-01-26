@@ -70,7 +70,7 @@
   <message msgid="man ddns" msgstr="DDNS" />
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
-  <message msgid="upload introduction1" msgstr="Upgrade the Ralink SoC firmware to obtain new functionality. " />
+  <message msgid="upload introduction1" msgstr="Upgrade the WR-NL firmware to obtain new functionality. " />
   <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang up the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
@@ -93,7 +93,7 @@
   <message msgid="setman load default" msgstr="Load Default" />
 
   <message msgid="status title" msgstr="Access Point Status" />
-  <message msgid="status introduction" msgstr="Let's take a look at the status of Ralink SoC Platform." />
+  <message msgid="status introduction" msgstr="Let's take a look at the status of WR-NL." />
   <message msgid="status system information" msgstr="System Info" />
   <message msgid="status sdk version" msgstr="SDK Version" />
   <message msgid="status system up time" msgstr="System Up Time" />
@@ -113,7 +113,7 @@
   <message msgid="status ethernet port status" msgstr="Ethernet Port Status" />
 
   <message msgid="statistic title" msgstr="Statistic" />
-  <message msgid="statistic introduction" msgstr=" Take a look at the Ralink SoC statistics " />
+  <message msgid="statistic introduction" msgstr=" Take a look at the WR-NL statistics " />
   <message msgid="statistic memory" msgstr="Memory" />
   <message msgid="statistic memory total" msgstr="Memory total: " />
   <message msgid="statistic memory left" msgstr="Memory left: " />

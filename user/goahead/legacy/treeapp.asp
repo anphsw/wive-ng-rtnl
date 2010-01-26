@@ -4,6 +4,8 @@
 <head>
 <title>DTree</title>
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1" />
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />
 <link rel="StyleSheet" href="dtree.css" type="text/css" />
 <script type="text/javascript" src="/dtree/dtree.js"></script>
@@ -63,7 +65,7 @@ a.config.useStatusText=true;
 a.config.useCookies=false;
 
 //  nodeID, parent nodeID,  Name,  URL
-a.add(000,  -1, _("treeapp ralink"),                "javascript:go('overview.asp');");
+a.add(000,  -1, _("treeapp router"),                "javascript:go('overview.asp');");
 a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
 a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
 if (opmode != '0') {
@@ -182,6 +184,7 @@ if (syslogb == "1")
 	a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
 }
 a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
+a.add(909, 900, _("treeapp reboot"),                       "javascript:go('cgi-bin/reboot.sh');");
 document.write(a);
 </script>
 

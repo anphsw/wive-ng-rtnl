@@ -7,7 +7,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
-<title>Ralink Wireless Station Add Profile</title>
+<title>Wireless Station Add Profile</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 

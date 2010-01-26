@@ -341,9 +341,7 @@ void WPSRestart(void)
 	char *mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
 	doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-	doSystem("killall wscd 1>/dev/null 2>&1");
-	Sleep(2);
-	doSystem("killall -9 wscd 1>/dev/null 2>&1");
+	doSystem("service wscd stop");
 
 	if(!strcmp(mode, "0" )){		//bridge 
 		// nop
@@ -371,7 +369,7 @@ void WPSRestart(void)
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
 		doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
-		doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
+		doSystem("service wscd start");
 	}
 		
 	wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
@@ -472,8 +470,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 
 	if (wsc_enable == 0){
 		doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-		doSystem("killall wscd 1>/dev/null 2>&1");
-		doSystem("killall -9 wscd 1>/dev/null 2>&1");
+		doSystem("service wscd stop");
 		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
 	}else{
 		char lan_if_addr[16];
@@ -483,9 +480,8 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("route add -host 239.255.255.250 dev br0");
-		doSystem("killall wscd 1>/dev/null 2>&1");
-		doSystem("killall -9 wscd 1>/dev/null 2>&1");
-		doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
+		doSystem("service wscd stop");
+		doSystem("service wscd start");
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 //		doSystem("iwpriv ra0 set WscConfMode=%d", wsc_enable + wsc_proxy + wsc_reg);
 //		printf("wsc_enable:%d\nwsc_proxy:%d\nwsc_reg:%d\n",  wsc_enable ,wsc_proxy ,wsc_reg);

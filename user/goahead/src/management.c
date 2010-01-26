@@ -134,7 +134,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TZ", tz);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("ntp.sh");
+	doSystem("service ntp start");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
@@ -271,7 +271,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("ddns.sh");
+	doSystem("service ddns start");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -829,11 +829,8 @@ static char *getLog(char *filename)
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
-	doSystem("syslogd -C8 1>/dev/null 2>&1");
-	doSystem("klogd 1>/dev/null 2>&1");
-
+        doSystem("service syslog stop");
+        doSystem("service syslog start");
 	websRedirect(wp, "adm/syslog.asp");
 }
 #endif
@@ -846,7 +843,8 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
-	fp = popen("logread", "r");
+	fp = popen("cat /var/log/messages", "r");
+
 	if(!fp){
 		websWrite(wp, "-1");
 		goto error;
@@ -870,23 +868,12 @@ error:
 
 void management_init(void)
 {
-	doSystem("ntp.sh");
+	doSystem("service ntp start");
 #ifdef CONFIG_USER_GOAHEAD_GreenAP
     	doSystem("greenap.sh init");
 #endif
-	doSystem("ddns.sh");
+	doSystem("service ddns start");
 	WPSRestart();
-
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
-	doSystem("syslogd -C8 1>/dev/null 2>&1");
-	doSystem("klogd 1>/dev/null 2>&1");
-}
-
-void management_fini(void)
-{
-	doSystem("killall -q klogd");
-	doSystem("killall -q syslogd");
 }
 
 static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)

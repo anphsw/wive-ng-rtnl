@@ -7,22 +7,19 @@
  *	$Id: wireless.c,v 1.113.2.3 2009-04-17 03:37:53 chhung Exp $
  */
 
+#include	"../../autoconf.h"
 #include	<stdlib.h>
 #include	<sys/ioctl.h>
 #include	<arpa/inet.h>
-#include	"../../autoconf.h"
-#ifdef CONFIG_DEFAULTS_KERNEL_2_6_21
-  #include	<linux/types.h>
-  #include	<linux/socket.h>
-  #include	<linux/if.h>
-#endif
-#include	<linux/wireless.h>
+#include	<linux/types.h>
+#include	<linux/socket.h>
+#include	<linux/if.h>
+#include	"wireless.h"
 
 #include	"internet.h"
 #include	"nvram.h"
 #include	"utils.h"
 #include	"webs.h"
-#include	"wireless.h"
 #define AP_MODE
 #include	"oid.h"
 

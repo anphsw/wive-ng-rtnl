@@ -5,7 +5,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
-<title>Ralink Wireless Station AMPDU Originator Add</title>
+<title>Wireless Station AMPDU Originator Add</title>
 <script language="JavaScript" type="text/javascript">
 
 function initValue()

@@ -29,7 +29,7 @@ function PageInit()
 }
 </script>
 
-<title>Ralink Wireless Station About</title>
+<title>Wireless Station About</title>
 </head>
 
 

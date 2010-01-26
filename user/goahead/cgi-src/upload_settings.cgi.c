@@ -143,7 +143,7 @@ void import(char *filename, int offset, int len)
     unlink(pname);
 }
 
-#define DEFAULT_LAN_IP "10.10.10.254"
+#define DEFAULT_LAN_IP "192.168.1.1"
 char *getLanIP(void)
 {
 	static char buf[64];

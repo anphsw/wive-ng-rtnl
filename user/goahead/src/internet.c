@@ -820,7 +820,7 @@ static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_UPNP_IGD
+#ifdef CONFIG_USER_MINIUPNPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1464,7 +1464,7 @@ void ripdRestart(void)
 	char *password = nvram_bufget(RT2860_NVRAM, "Password");
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("killall -q ripd");
+	doSystem("service ripd stop");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1500,7 +1500,7 @@ void ripdRestart(void)
 	}
 	doSystem("echo \"version 2\" >> /etc/ripd.conf");
 	doSystem("echo \"log syslog\" >> /etc/ripd.conf");
-	doSystem("ripd -f /etc/ripd.conf -d");
+	doSystem("service ripd start");
 }
 
 inline void zebraRestart(void)
@@ -1510,7 +1510,7 @@ inline void zebraRestart(void)
 
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("killall -q zebra");
+	doSystem("service ripd zebra");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1527,7 +1527,7 @@ inline void zebraRestart(void)
 	doSystem("echo \"password %s\" >> /etc/zebra.conf ", password);
 	doSystem("echo \"enable password rt2880\" >> /etc/zebra.conf ");
 	doSystem("echo \"log syslog\" >> /etc/zebra.conf ");
-	doSystem("zebra -d -f /etc/zebra.conf");
+	doSystem("service zebra start");
 }
 
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
@@ -1549,8 +1549,8 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	}else if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "1")){
 		nvram_bufset(RT2860_NVRAM, "RIPEnable", rip);
 		nvram_commit(RT2860_NVRAM);
-		doSystem("killall -q ripd");
-		doSystem("killall -q zebra");
+		doSystem("service ripd stop");
+		doSystem("service zebra stop");
 	}else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0")){
 		nvram_bufset(RT2860_NVRAM, "RIPEnable", rip);
 		nvram_commit(RT2860_NVRAM);

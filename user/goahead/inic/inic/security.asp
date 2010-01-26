@@ -4,7 +4,7 @@
 <meta http-equiv="Expires" content="-1">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <script type="text/javascript" src="/lang/b28n.js"></script>
-<link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Ralink Wireless Security Settings</title>
+<link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Security Settings</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");

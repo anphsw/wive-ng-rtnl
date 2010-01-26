@@ -362,7 +362,7 @@ function submit_apply()
   }
 }
 </script>
-<title>Ralink Wireless WMM Configuration</title>
+<title>Wireless WMM Configuration</title>
 
 <body onLoad="initValue()">
 <form method=post name=wmm action="/goform/inicWmm">

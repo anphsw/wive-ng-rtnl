@@ -6,7 +6,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
-<title>Ralink Wireless Station QoS</title>
+<title>Wireless Station QoS</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 /*

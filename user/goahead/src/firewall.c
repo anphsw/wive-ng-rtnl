@@ -204,13 +204,6 @@ static void iptablesForwardFilterClear(void)
 	doSystem("iptables -F -t filter 1>/dev/null 2>&1");
 }
 
-/*
-static void iptablesForwardFilterFlush(void)
-{
-	doSystem("iptables -t filter -F FORWARD  1>/dev/null 2>&1");
-}
-*/
-
 static void iptablesIPPortFilterFlush(void){
 	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
 }
@@ -241,17 +234,6 @@ static void iptablesDMZClear(void){
 static void iptablesPortForwardClear(void){
 	doSystem("iptables -t nat -D PREROUTING -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
 	doSystem("iptables -t nat -F %s  1>/dev/null 2>&1; iptables -t nat -X %s  1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
-}
-
-static void iptablesAllFilterClear(void)
-{
-	iptablesForwardFilterClear();
-	iptablesIPPortFilterClear();
-	iptablesWebContentFilterClear();
-
-	doSystem("iptables -P INPUT ACCEPT");
-	doSystem("iptables -P OUTPUT ACCEPT");
-	doSystem("iptables -P FORWARD ACCEPT");
 }
 
 static void iptablesAllNATClear(void)
@@ -457,22 +439,6 @@ static void iptablesRemoteManagementRun(void)
 	if(rmE && atoi(rmE) == 1)
 		return;
 
-	if (atoi(spifw) == 0)
-		;//doSystem("iptables -A INPUT -i %s -j ACCEPT", getWanIfNamePPP());
-	else
-		doSystem("iptables -A INPUT -i %s -m state --state RELATED,ESTABLISHED -j ACCEPT", getWanIfNamePPP());
-	if(getOnePortOnly()){
-		// make the web server to be reachable.
-		if (atoi(spifw) == 0)
-			doSystem("iptables -A INPUT -i %s -d 172.32.1.254 -p tcp --dport 80 -j ACCEPT", getWanIfNamePPP());
-		else
-			doSystem("iptables -A INPUT -i %s -m state -d 172.32.1.254 -p tcp --dport 80 --state NEW,INVALID -j ACCEPT", getWanIfNamePPP());
-	}
-	if (atoi(spifw) == 0)
-		doSystem("iptables -A INPUT -i %s -p tcp --dport 80 -j DROP", getWanIfNamePPP());
-	else
-		doSystem("iptables -A INPUT -i %s -m state -p tcp --dport 80 --state NEW,INVALID -j DROP", getWanIfNamePPP());
-
 	return;
 }
 
@@ -536,14 +502,6 @@ static void iptablesIPPortFilterRun(void)
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		default_policy = "0";
-
-	if(atoi(default_policy) == 1){
-		//the default policy is drop
-	    if (atoi(spifw) == 0)
-			;//doSystem("iptables -t filter -A %s -j ACCEPT", IPPORT_FILTER_CHAIN);
-	    else
-			doSystem("iptables -t filter -A %s -m state --state RELATED,ESTABLISHED -j ACCEPT", IPPORT_FILTER_CHAIN);
-	}
 
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
         // get sip 1
@@ -735,8 +693,9 @@ static void iptablesAllFilterRun(void)
 
 	iptablesWebsFilterRun();
 
-	/* system filter */
-	iptablesRemoteManagementRun();
+        //rebuild all rules at apply push
+        firewall_init();
+
 
 }
 
@@ -2095,30 +2054,17 @@ void formDefineFirewall(void)
 
 void firewall_init(void)
 {
+	////----DROP-ALL-RULES-IN-RC.D----////
+        doSystem("service iptables stop");
+        doSystem("service shaper stop");
+
+	////----SET-RULES----------------////
 	LoadLayer7FilterName();
+        doSystem("service iptables start");
+        doSystem("service shaper start");
+        iptablesIPPortFilterRun();
+        iptablesWebsFilterRun();
+        iptablesRemoteManagementRun();
+        iptablesAllNATRun();
 
-	// init filter
-	iptablesAllFilterClear();
-	// make a new chain
-	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 1>/dev/null 2>&1");
-	iptablesAllFilterRun();
-
-	// init NAT(DMZ)
-	// We use -I instead of -A here to prevent from default MASQUERADE NAT rule 
-	// being in front of us.
-	// So "port forward chain" has the highest priority in the system, and "DMZ chain" is the second one.
-	iptablesAllNATClear();
-	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 1 -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
-	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 2 -j %s 1>/dev/null 2>&1", DMZ_CHAIN, DMZ_CHAIN);
-	iptablesAllNATRun();
-}
-
-void firewall_fini(void)
-{
-	iptablesAllFilterClear();
-	iptablesAllNATClear();
 }

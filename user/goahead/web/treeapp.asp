@@ -65,7 +65,7 @@ a.config.useStatusText=true;
 a.config.useCookies=false;
 
 //  nodeID, parent nodeID,  Name,  URL
-a.add(000,  -1, _("treeapp ralink"),                "javascript:go('overview.asp');");
+a.add(000,  -1, _("treeapp router"),                "javascript:go('overview.asp');");
 a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
 a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
 if (opmode != '0') {

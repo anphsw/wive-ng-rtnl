@@ -44,7 +44,6 @@ dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
 dir_$(CONFIG_USER_STRACE_STRACE)            += strace
 dir_$(CONFIG_USER_BRCTL_BRCTL)              += bridge-utils
-dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 dir_$(CONFIG_USER_NTPD_NTPDATE)             += ntp
 dir_$(CONFIG_USER_NTPCLIENT_NTPCLIENT)      += ntpclient
 dir_$(CONFIG_USER_NTPCLIENT_ADJTIMEX)       += ntpclient
@@ -75,8 +74,9 @@ dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 
-#need last
+#need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
+dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
 all: config
 ifeq ($(CONFIG_USER_PPPD),y)

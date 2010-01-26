@@ -71,7 +71,7 @@ endif
 ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "y")
 DEPEND_FILES += media.o
 endif
-ifeq ("$(CONFIG_RALINKAPP_SWQOS)", "y")
+ifeq ("$(CONFIG_NET_SCHED)", "y")
 DEPEND_FILES += qos.o
 endif
 
