@@ -19,7 +19,7 @@ include .config
 
 #changed by Steven Liu
 #all: ucfront cksum subdirs romfs image
-all: lib_only uClibc++_only user_only modules romfs linux image
+all: tools lib_only uClibc++_only user_only modules romfs linux image
 else
 all: config_error
 endif
@@ -360,6 +360,9 @@ dep:
 
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) dep
 
+tools:
+	make -C tools
+
 # This one removes all executables from the tree and forces their relinking
 .PHONY: relink
 relink:
@@ -374,6 +377,7 @@ clean: modules_clean
 	rm -rf $(LINUXDIR)/net/ipsec/alg/libaes $(LINUXDIR)/net/ipsec/alg/perlasm
 	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
 	make -C uClibc++/extra/config clean
+	make -C tools clean
 
 real_clean mrproper: clean
 	-$(MAKEARCH_KERNEL) -C $(LINUXDIR) mrproper
