@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  *	Wireless Tools
  *
  *		Jean II - HPL 04
@@ -92,10 +76,12 @@ extern int
 #undef iw_usage
 #undef main
 
+#ifndef WE_ESSENTIAL
 /* Get iwspy in there, it's not that big. */
 #define main(args...) main_iwspy(args)
 #include "iwspy.c"
 #undef main
+#endif	/* WE_ESSENTIAL */
 
 /* Get iwpriv in there. Mandatory for HostAP and some other drivers. */
 #define main(args...) main_iwpriv(args)
@@ -142,8 +128,10 @@ main(int	argc,
     return(main_iwconfig(argc, argv));
   if(!strcmp(call_name, "iwlist"))
     return(main_iwlist(argc, argv));
+#ifndef WE_ESSENTIAL
   if(!strcmp(call_name, "iwspy"))
     return(main_iwspy(argc, argv));
+#endif	/* WE_ESSENTIAL */
   if(!strcmp(call_name, "iwpriv"))
     return(main_iwpriv(argc, argv));
   if(!strcmp(call_name, "iwgetid"))

@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  *	Wireless Tools
  *
  *		Jean II - HPLB '99 - HPL 99->07
@@ -1318,6 +1302,7 @@ print_pm_info(int		skfd,
   return(0);
 }
 
+#ifndef WE_ESSENTIAL
 /************************** TRANSMIT POWER **************************/
 
 /*------------------------------------------------------------------*/
@@ -1420,7 +1405,6 @@ print_txpower_info(int		skfd,
   return(0);
 }
 
-#ifndef WE_ESSENTIAL
 /*********************** RETRY LIMIT/LIFETIME ***********************/
 
 /*------------------------------------------------------------------*/
@@ -2076,8 +2060,8 @@ static const struct iwlist_entry iwlist_cmds[] = {
   { "encryption",	print_keys_info,	0, NULL },
   { "keys",		print_keys_info,	0, NULL },
   { "power",		print_pm_info,		0, NULL },
-  { "txpower",		print_txpower_info,	0, NULL },
 #ifndef WE_ESSENTIAL
+  { "txpower",		print_txpower_info,	0, NULL },
   { "retry",		print_retry_info,	0, NULL },
   { "ap",		print_ap_info,		0, NULL },
   { "accesspoints",	print_ap_info,		0, NULL },
