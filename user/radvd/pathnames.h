@@ -1,5 +1,5 @@
 /*
- *   $Id: pathnames.h,v 1.8 2005/12/30 15:13:11 psavola Exp $
+ *   $Id: pathnames.h,v 1.2 2007-10-25 09:01:59 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -18,9 +18,7 @@
 #define PATHNAMES_H
 
 #ifndef PATH_RADVD_CONF
-// +++ Gemtek
-#define PATH_RADVD_CONF "/var/radvd.conf"
-// --- Gemtek
+#define PATH_RADVD_CONF "/etc_ro/radvd.conf"
 #endif
 
 #ifndef PATH_RADVD_PID
@@ -28,7 +26,7 @@
 #endif
 
 #ifndef PATH_RADVD_LOG
-#define PATH_RADVD_LOG "/var/log/radvd.log"
+#define PATH_RADVD_LOG "/var/radvd.log"
 #endif
 
 #define PATH_PROC_NET_IF_INET6 "/proc/net/if_inet6"

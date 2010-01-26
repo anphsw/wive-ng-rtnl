@@ -1,5 +1,5 @@
 /*
- *   $Id: device-linux.c,v 1.19 2005/12/31 15:34:22 psavola Exp $
+ *   $Id: device-linux.c,v 1.1 2007-09-03 04:44:34 winfred Exp $
  *
  *   Authors:
  *    Lars Fenneberg		<lf@elemental.net>	 
@@ -33,7 +33,7 @@ setup_deviceinfo(int sock, struct Interface *iface)
 {
 	struct ifreq	ifr;
 	struct AdvPrefix *prefix;
-	char zero[HWADDR_MAX];
+	char zero[sizeof(iface->if_addr)];
 	
 	strncpy(ifr.ifr_name, iface->Name, IFNAMSIZ-1);
 	ifr.ifr_name[IFNAMSIZ-1] = '\0';
@@ -90,10 +90,16 @@ setup_deviceinfo(int sock, struct Interface *iface)
 		iface->if_prefix_len);
 
 	if (iface->if_hwaddr_len != -1) {
-		memcpy(iface->if_hwaddr, ifr.ifr_hwaddr.sa_data, (unsigned int)((iface->if_hwaddr_len + 7) >> 3));
+		unsigned int if_hwaddr_len_bytes = (iface->if_hwaddr_len + 7) >> 3;
+		
+		if (if_hwaddr_len_bytes > sizeof(iface->if_hwaddr)) {
+			flog(LOG_ERR, "address length %d too big for %s", if_hwaddr_len_bytes, iface->Name);
+			return(-2);
+		}
+		memcpy(iface->if_hwaddr, ifr.ifr_hwaddr.sa_data, if_hwaddr_len_bytes);
 
-		memset(zero, 0, (unsigned int)((iface->if_hwaddr_len + 7) >> 3));
-		if (!memcmp(iface->if_hwaddr, zero, (unsigned int)((iface->if_hwaddr_len + 7) >> 3)))
+		memset(zero, 0, sizeof(zero));
+		if (!memcmp(iface->if_hwaddr, zero, if_hwaddr_len_bytes))
 			flog(LOG_WARNING, "WARNING, MAC address on %s is all zero!",
 				iface->Name);
 	}
@@ -116,7 +122,7 @@ setup_deviceinfo(int sock, struct Interface *iface)
 
 /*
  * this function extracts the link local address and interface index
- * from PATH_PROC_NET_IF_INET6
+ * from PATH_PROC_NET_IF_INET6.  Note: 'sock' unused in Linux.
  */
 int setup_linklocal_addr(int sock, struct Interface *iface)
 {
@@ -148,7 +154,7 @@ int setup_linklocal_addr(int sock, struct Interface *iface)
 				sscanf(str_addr + i * 2, "%02x", &ap);
 				addr.s6_addr[i] = (unsigned char)ap;
 			}
-			memcpy(&iface->if_addr, &addr, sizeof(addr));
+			memcpy(&iface->if_addr, &addr, sizeof(iface->if_addr));
 
 			iface->if_index = if_idx;
 			fclose(fp);

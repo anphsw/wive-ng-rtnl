@@ -1,5 +1,5 @@
 /*
- *   $Id: send.c,v 1.20 2005/12/30 15:13:11 psavola Exp $
+ *   $Id: send.c,v 1.1 2007-09-03 04:44:34 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -31,9 +31,31 @@ send_ra(int sock, struct Interface *iface, struct in6_addr *dest)
 	struct nd_router_advert *radvert;
 	struct AdvPrefix *prefix;
 	struct AdvRoute *route;
+	struct AdvRDNSS *rdnss;
+	/* XXX: we don't keep track if buff gets overflowed.  In theory the sysadmin could
+	   do that with e.g., too many advertised prefixes or routes, but buff is just so
+	   large that this should never happen and if it does, it's admin's fault :-)  */
 	unsigned char buff[MSG_SIZE];
 	int len = 0;
 	int err;
+
+	/* First we need to check that the interface hasn't been removed or deactivated */
+	if(check_device(sock, iface) < 0) {
+		if (iface->IgnoreIfMissing)  /* a bit more quiet warning message.. */
+			dlog(LOG_DEBUG, 4, "interface %s does not exist, ignoring the interface", iface->Name);
+		else {
+			flog(LOG_WARNING, "interface %s does not exist, ignoring the interface", iface->Name);
+		}
+		iface->HasFailed = 1;
+	} else {
+		/* check_device was successful, act if it has failed previously */
+		if (iface->HasFailed == 1) {
+			flog(LOG_WARNING, "interface %s seems to have come back up, trying to reinitialize", iface->Name);
+			iface->HasFailed = 0;
+			/* XXX: reinitializes 'iface', so this probably isn't going to work until next send_ra().. */
+			reload_config();	
+		}
+	}
 
 	/* Make sure that we've joined the all-routers multicast group */
 	if (check_allrouters_membership(sock, iface) < 0)
@@ -57,6 +79,7 @@ send_ra(int sock, struct Interface *iface, struct in6_addr *dest)
 	addr.sin6_port = htons(IPPROTO_ICMPV6);
 	memcpy(&addr.sin6_addr, dest, sizeof(struct in6_addr));
 
+	memset(&buff, 0, sizeof(buff));
 	radvert = (struct nd_router_advert *) buff;
 
 	radvert->nd_ra_type  = ND_ROUTER_ADVERT;
@@ -147,6 +170,38 @@ send_ra(int sock, struct Interface *iface, struct in6_addr *dest)
 		len += sizeof(*rinfo);
 
 		route = route->next;
+	}
+	
+	rdnss = iface->AdvRDNSSList;
+	
+	/*
+	 *	add rdnss options
+	 */
+
+	while(rdnss)
+	{
+		struct nd_opt_rdnss_info_local *rdnssinfo;
+		
+		rdnssinfo = (struct nd_opt_rdnss_info_local *) (buff + len);
+
+		rdnssinfo->nd_opt_rdnssi_type	     = ND_OPT_RDNSS_INFORMATION;
+		rdnssinfo->nd_opt_rdnssi_len	     = 1 + 2*rdnss->AdvRDNSSNumber;
+		rdnssinfo->nd_opt_rdnssi_pref_flag_reserved = 
+		((rdnss->AdvRDNSSPreference << ND_OPT_RDNSSI_PREF_SHIFT) & ND_OPT_RDNSSI_PREF_MASK);
+		rdnssinfo->nd_opt_rdnssi_pref_flag_reserved |=
+		((rdnss->AdvRDNSSOpenFlag)?ND_OPT_RDNSSI_FLAG_S:0);
+
+		rdnssinfo->nd_opt_rdnssi_lifetime	= htonl(rdnss->AdvRDNSSLifetime);
+			
+		memcpy(&rdnssinfo->nd_opt_rdnssi_addr1, &rdnss->AdvRDNSSAddr1,
+		       sizeof(struct in6_addr));
+		memcpy(&rdnssinfo->nd_opt_rdnssi_addr2, &rdnss->AdvRDNSSAddr2,
+		       sizeof(struct in6_addr));
+		memcpy(&rdnssinfo->nd_opt_rdnssi_addr3, &rdnss->AdvRDNSSAddr3,
+		       sizeof(struct in6_addr));
+		len += sizeof(*rdnssinfo) - (3-rdnss->AdvRDNSSNumber)*sizeof(struct in6_addr);
+
+		rdnss = rdnss->next;
 	}
 	
 	/*
@@ -255,6 +310,7 @@ send_ra(int sock, struct Interface *iface, struct in6_addr *dest)
 			addr.sin6_scope_id = iface->if_index;
 #endif
 
+	memset(&mhdr, 0, sizeof(mhdr));
 	mhdr.msg_name = (caddr_t)&addr;
 	mhdr.msg_namelen = sizeof(struct sockaddr_in6);
 	mhdr.msg_iov = &iov;
@@ -265,6 +321,9 @@ send_ra(int sock, struct Interface *iface, struct in6_addr *dest)
 	err = sendmsg(sock, &mhdr, 0);
 	
 	if (err < 0) {
-		flog(LOG_WARNING, "sendmsg: %s", strerror(errno));
+		if (!iface->IgnoreIfMissing || !(errno == EINVAL || errno == ENODEV))
+			flog(LOG_WARNING, "sendmsg: %s", strerror(errno));
+		else
+			dlog(LOG_DEBUG, 3, "sendmsg: %s", strerror(errno));
 	}
 }

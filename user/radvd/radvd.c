@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.c,v 1.25 2005/12/30 15:13:11 psavola Exp $
+ *   $Id: radvd.c,v 1.2 2007-09-03 06:18:39 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -58,7 +58,6 @@ void timer_handler(void *data);
 void config_interface(void);
 void kickoff_adverts(void);
 void stop_adverts(void);
-void reload_config(void);
 void version(void);
 void usage(void);
 int drop_root_privileges(const char *);
@@ -72,6 +71,7 @@ main(int argc, char *argv[])
 	char pidstr[16];
 	int c, log_method;
 	char *logfile, *pidfile;
+	 sigset_t oset, nset;
 	int facility, fd;
 	char *username = NULL;
 	char *chrootdir = NULL;
@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	log_method = L_STDERR_SYSLOG;
 	logfile = PATH_RADVD_LOG;
 	conf_file = PATH_RADVD_CONF;
-	facility = LOG_FACILITY;
+	facility = LOG_DAEMON;
 	pidfile = PATH_RADVD_PID;
 
 	/* parse args */
@@ -182,7 +182,7 @@ main(int argc, char *argv[])
 	if (log_open(log_method, pname, logfile, facility) < 0)
 		exit(1);
 
-	flog(LOG_INFO, "version %s started", VERSION);
+	flog(LOG_INFO, "version 1.0 started");
 
 	/* get a raw socket for sending and receiving ICMPv6 messages */
 	sock = open_icmpv6_socket();
@@ -237,17 +237,26 @@ main(int argc, char *argv[])
 		if (daemon(0, 0) < 0)
 			perror("daemon");
 
-		/*
-		 * reopen logfile, so that we get the process id right in the syslog
-		 */
-		if (log_reopen() < 0)
+		/* close old logfiles, including stderr */
+		log_close();
+		
+		/* reopen logfiles, but don't log to stderr unless explicitly requested */
+		if (log_method == L_STDERR_SYSLOG)
+			log_method = L_SYSLOG;
+		if (log_open(log_method, pname, logfile, facility) < 0)
 			exit(1);
 
 	}
 
 	/*
-	 *	config signal handlers
+	 *	config signal handlers, also make sure ALRM isn't blocked and raise a warning if so
+	 *      (some stupid scripts/pppd appears to do this...)
 	 */
+	sigemptyset(&nset);
+	sigaddset(&nset, SIGALRM);
+	sigprocmask(SIG_UNBLOCK, &nset, &oset);
+	if (sigismember(&oset, SIGALRM))
+		flog(LOG_WARNING, "SIGALRM has been unblocked. Your startup environment might be wrong.");
 
 	signal(SIGHUP, sighup_handler);
 	signal(SIGTERM, sigterm_handler);
@@ -302,6 +311,13 @@ timer_handler(void *data)
 	send_ra(sock, iface, NULL);
 
 	next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval); 
+
+	if (iface->init_racount < MAX_INITIAL_RTR_ADVERTISEMENTS)
+	{
+		iface->init_racount++;
+		next = min(MAX_INITIAL_RTR_ADVERT_INTERVAL, next);
+	}
+
 	set_timer(&iface->tm, next);
 }
 
@@ -341,7 +357,11 @@ kickoff_adverts(void)
 				/* send an initial advertisement */
 				send_ra(sock, iface, NULL);
 
-				set_timer(&iface->tm, iface->MaxRtrAdvInterval);
+				iface->init_racount++;
+
+				set_timer(&iface->tm,
+					  min(MAX_INITIAL_RTR_ADVERT_INTERVAL,
+					      iface->MaxRtrAdvInterval));
 			}
 		}
 	}
@@ -394,6 +414,7 @@ void reload_config(void)
 		struct Interface *next_iface = iface->next;
 		struct AdvPrefix *prefix;
 		struct AdvRoute *route;
+		struct AdvRDNSS *rdnss;
 
 		dlog(LOG_DEBUG, 4, "freeing interface %s", iface->Name);
 		
@@ -413,7 +434,16 @@ void reload_config(void)
 
 			free(route);
 			route = next_route;
-		}  
+		}
+		
+		rdnss = iface->AdvRDNSSList;
+		while (rdnss) 
+		{
+			struct AdvRDNSS *next_rdnss = rdnss->next;
+			
+			free(rdnss);
+			rdnss = next_rdnss;
+		}	 
 
 		free(iface);
 		iface = next_iface;
@@ -525,7 +555,8 @@ check_conffile_perm(const char *username, const char *conf_file)
         return 0;
 
 errorout:
-	free(st);
+	if (st)
+		free(st);
 	return(-1);
 }
 
@@ -586,12 +617,12 @@ readin_config(char *fname)
 void
 version(void)
 {
-	fprintf(stderr, "Version: %s\n\n", VERSION);
+	fprintf(stderr, "Version: 1.0\n\n");
 	fprintf(stderr, "Compiled in settings:\n");
 	fprintf(stderr, "  default config file		\"%s\"\n", PATH_RADVD_CONF);
 	fprintf(stderr, "  default pidfile		\"%s\"\n", PATH_RADVD_PID);
 	fprintf(stderr, "  default logfile		\"%s\"\n", PATH_RADVD_LOG);
-	fprintf(stderr, "  default syslog facililty	%d\n", LOG_FACILITY);
+	fprintf(stderr, "  default syslog facililty	%d\n", LOG_DAEMON);
 	fprintf(stderr, "Please send bug reports or suggestions to %s.\n",
 		CONTACT_EMAIL);
 

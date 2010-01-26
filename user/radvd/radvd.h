@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.h,v 1.17 2005/12/30 16:12:23 psavola Exp $
+ *   $Id: radvd.h,v 1.1 2007-09-03 04:44:34 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -40,6 +40,8 @@ struct timer_lst {
 	struct timer_lst	*prev;	
 };
 
+#define min(a,b)	(((a) < (b)) ? (a) : (b))
+
 struct AdvPrefix;
 
 #define HWADDR_MAX 16
@@ -49,6 +51,8 @@ struct Interface {
 
 	struct in6_addr		if_addr;
 	unsigned int		if_index;
+
+	uint8_t			init_racount;	/* Initial RAs */
 
 	uint8_t			if_hwaddr[HWADDR_MAX];
 	int			if_hwaddr_len;
@@ -66,7 +70,7 @@ struct Interface {
 	uint32_t		AdvReachableTime;
 	uint32_t		AdvRetransTimer;
 	uint8_t			AdvCurHopLimit;
-	uint16_t		AdvDefaultLifetime;
+	int32_t			AdvDefaultLifetime;   /* XXX: really uint16_t but we need to use -1 */
 	int			AdvDefaultPreference;
 	int			AdvSourceLLAddress;
 	int			UnicastOnly;
@@ -76,18 +80,22 @@ struct Interface {
 	int			AdvHomeAgentInfo;
 	int			AdvHomeAgentFlag;
 	uint16_t		HomeAgentPreference;
-	uint16_t		HomeAgentLifetime;
+	int32_t			HomeAgentLifetime;    /* XXX: really uint16_t but we need to use -1 */
 
 	/* NEMO extensions */
 	int			AdvMobRtrSupportFlag;
 
 	struct AdvPrefix	*AdvPrefixList;
 	struct AdvRoute		*AdvRouteList;
+	struct AdvRDNSS		*AdvRDNSSList;
 	struct timer_lst	tm;
-	time_t                  last_multicast_sec;
-	suseconds_t             last_multicast_usec;
-	struct Interface	*next;
+	time_t			last_multicast_sec;
+	suseconds_t		last_multicast_usec;
 
+	/* Info whether this interface has failed in the past (and may need to be reinitialized) */
+	int			HasFailed;
+
+	struct Interface	*next;
 };
 
 struct AdvPrefix {
@@ -100,7 +108,7 @@ struct AdvPrefix {
 	uint32_t		AdvPreferredLifetime;
 
 	/* Mobile IPv6 extensions */
-        int                     AdvRouterAddr;
+	int             	AdvRouterAddr;
 
 	/* 6to4 extensions */
 	char			if6to4[IFNAMSIZ];
@@ -119,6 +127,19 @@ struct AdvRoute {
 	uint32_t		AdvRouteLifetime;
 
 	struct AdvRoute		*next;
+};
+
+/* Option for DNS configuration */
+struct AdvRDNSS {
+	int 			AdvRDNSSNumber;
+	uint8_t			AdvRDNSSPreference;
+	int 			AdvRDNSSOpenFlag;
+	uint32_t		AdvRDNSSLifetime;
+	struct in6_addr		AdvRDNSSAddr1;
+	struct in6_addr		AdvRDNSSAddr2;
+	struct in6_addr		AdvRDNSSAddr3;
+	
+	struct AdvRDNSS 	*next; 
 };
 
 /* Mobile IPv6 extensions */
@@ -147,6 +168,7 @@ int yylex(void);
 
 /* radvd.c */
 int check_ip6_forwarding(void);
+void reload_config(void);
 
 /* timer.c */
 void set_timer(struct timer_lst *tm, double);
@@ -155,8 +177,8 @@ void init_timer(struct timer_lst *, void (*)(void *), void *);
 
 /* log.c */
 int log_open(int, char *, char*, int);
-int flog(int, char *, ...);
-int dlog(int, int, char *, ...);
+void flog(int, char *, ...);
+void dlog(int, int, char *, ...);
 int log_close(void);
 int log_reopen(void);
 void set_debuglevel(int);
@@ -178,6 +200,7 @@ int set_interface_retranstimer(const char *, uint32_t);
 void iface_init_defaults(struct Interface *);
 void prefix_init_defaults(struct AdvPrefix *);
 void route_init_defaults(struct AdvRoute *, struct Interface *);
+void rdnss_init_defaults(struct AdvRDNSS *, struct Interface *);
 int check_iface(struct Interface *);
 
 /* socket.c */
@@ -197,5 +220,6 @@ int recv_rs_ra(int, unsigned char *, struct sockaddr_in6 *, struct in6_pktinfo *
 void mdelay(double);
 double rand_between(double, double);
 void print_addr(struct in6_addr *, char *);
+int check_rdnss_presence(struct AdvRDNSS *, struct in6_addr *);
 
 #endif

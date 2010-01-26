@@ -1,5 +1,5 @@
 /*
- *   $Id: socket.c,v 1.7 2005/10/18 19:17:29 lutchann Exp $
+ *   $Id: socket.c,v 1.1 2007-09-03 04:44:34 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>

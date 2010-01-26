@@ -1,5 +1,5 @@
 /*
- *   $Id: recv.c,v 1.8 2005/12/30 15:13:11 psavola Exp $
+ *   $Id: recv.c,v 1.1 2007-09-03 04:44:34 winfred Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -34,7 +34,10 @@ recv_rs_ra(int sock, unsigned char *msg, struct sockaddr_in6 *addr,
 	{
 		chdrlen = CMSG_SPACE(sizeof(struct in6_pktinfo)) +
 				CMSG_SPACE(sizeof(int));
-		chdr = malloc( chdrlen );
+		if ((chdr = malloc(chdrlen)) == NULL) {
+			flog(LOG_ERR, "recv_rs_ra: malloc: %s", strerror(errno));
+			return -1;
+		}
 	}
 
 	FD_ZERO( &rfds );
@@ -51,8 +54,9 @@ recv_rs_ra(int sock, unsigned char *msg, struct sockaddr_in6 *addr,
 	iov.iov_len = MSG_SIZE;
 	iov.iov_base = (caddr_t) msg;
 
+	memset(&mhdr, 0, sizeof(mhdr));
 	mhdr.msg_name = (caddr_t)addr;
-	mhdr.msg_namelen = sizeof(struct sockaddr_in6);
+	mhdr.msg_namelen = sizeof(*addr);
 	mhdr.msg_iov = &iov;
 	mhdr.msg_iovlen = 1;
 	mhdr.msg_control = (void *)chdr;
@@ -70,7 +74,7 @@ recv_rs_ra(int sock, unsigned char *msg, struct sockaddr_in6 *addr,
 
 	*hoplimit = 255;
 
-        for (cmsg = CMSG_FIRSTHDR(&mhdr); cmsg; cmsg = CMSG_NXTHDR(&mhdr, cmsg))
+        for (cmsg = CMSG_FIRSTHDR(&mhdr); cmsg != NULL; cmsg = CMSG_NXTHDR(&mhdr, cmsg))
 	{
           if (cmsg->cmsg_level != IPPROTO_IPV6)
           	continue;
