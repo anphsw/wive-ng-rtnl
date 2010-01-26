@@ -30,7 +30,7 @@ VOID RTMPIoctlGetMacTable(
 	IN PRTMP_ADAPTER pAd, 
 	IN struct iwreq *wrq);
 
-//#ifdef DBG		// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 VOID RTMPAPIoctlBBP(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
@@ -49,7 +49,7 @@ VOID RTMPAPIoctlRF(
 	IN	struct iwreq	*wrq);
 #endif // RTMP_RF_RW_SUPPORT //
 
-//#endif // DBG //	// by Jiahao for ASUS ATE
+#endif // DBG //	// by Jiahao for ASUS ATE
 
 VOID RT28XX_IOCTL_MaxRateGet(
 	IN	RTMP_ADAPTER			*pAd,

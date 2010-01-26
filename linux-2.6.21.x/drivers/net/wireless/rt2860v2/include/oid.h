@@ -130,9 +130,9 @@
 #define	OID_802_11_TX_PACKET_BURST					0x0522
 #define	RT_OID_802_11_QUERY_NOISE_LEVEL				0x0523
 #define	RT_OID_802_11_EXTRA_INFO					0x0524
-//#ifdef	DBG	// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 #define	RT_OID_802_11_HARDWARE_REGISTER				0x0525
-//#endif		// by Jiahao for ASUS ATE
+#endif		// by Jiahao for ASUS ATE
 #define OID_802_11_ENCRYPTION_STATUS            OID_802_11_WEP_STATUS
 #define OID_802_11_DEAUTHENTICATION                 0x0526
 #define OID_802_11_DROP_UNENCRYPTED                 0x0527
@@ -695,7 +695,7 @@ typedef struct _NDIS_802_11_CAPABILITY
 #define RT_PRIV_IOCTL							(SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
 #define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
 
-//#ifdef DBG		// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 #define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
 #define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
 
@@ -705,7 +705,7 @@ typedef struct _NDIS_802_11_CAPABILITY
 #endif // RTMP_RF_RW_SUPPORT //
 
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
-//#endif // DBG //	// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 
 #ifdef RALINK_ATE
 #ifdef RALINK_28xx_QA
@@ -772,7 +772,7 @@ enum {
 #define RT_PRIV_IOCTL								(SIOCIWFIRSTPRIV + 0x01)
 #define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
 				
-//#ifdef DBG		// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 #define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
 #define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
 
@@ -790,7 +790,7 @@ enum {
 #define RTPRIV_IOCTL_FLAG_NODUMPMSG	0x0002	// Notify driver cannot dump msg to stdio/stdout when run this private ioctl cmd
 #define RTPRIV_IOCTL_FLAG_NOSPACE		0x0004	// Notify driver didn't need copy msg to caller due to the caller didn't reserve space for this cmd
 
-//#endif // DBG //	// by Jiahao for ASUS ATE
+#endif // DBG //	// by Jiahao for ASUS ATE
 
 #ifdef RALINK_ATE
 #ifdef RALINK_28xx_QA

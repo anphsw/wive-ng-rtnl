@@ -5247,6 +5247,7 @@ VOID RTMPIoctlStaticWepCopy(
     return;
 }
 
+#ifdef CONFIG_ASUS_EXT
 //#ifdef DBG	// by Jiahao for ASUS ATE
 /* 
     ==========================================================================
@@ -5667,7 +5668,7 @@ done:
 }
 
 
-#ifdef RTMP_RF_RW_SUPPORT
+#if defined(RTMP_RF_RW_SUPPORT) || defined(DBG)
 /* 
     ==========================================================================
     Description:
@@ -6060,6 +6061,7 @@ done:
 	DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlE2PROM\n"));
 }
 //#endif //#ifdef DBG	// by Jiahao for ASUS ATE
+#endif //asus ext or DBG
 
 /* 
     ==========================================================================

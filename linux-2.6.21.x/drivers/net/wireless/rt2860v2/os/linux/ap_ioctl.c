@@ -44,7 +44,7 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_GET_MAC_TABLE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_mac_table"}, 
-//#ifdef DBG		// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 { RTPRIV_IOCTL_BBP,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "bbp"},
@@ -59,7 +59,7 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "rf"},
 #endif // RTMP_RF_RW_SUPPORT //
-//#endif // DBG //	// by Jiahao for ASUS ATE
+#endif // DBG //	// by Jiahao for ASUS ATE
 
 #ifdef WSC_AP_SUPPORT
 { RTPRIV_IOCTL_WSC_PROFILE,
@@ -458,7 +458,7 @@ INT rt28xx_ap_ioctl(
 		    RTMPIoctlQueryBaTable(pAd, wrq);
 		    break;
 #endif // DOT11_N_SUPPORT //
-//#ifdef DBG		// by Jiahao for ASUS ATE
+#if defined(CONFIG_ASUS_EXT) || defined(DBG)
 		case RTPRIV_IOCTL_BBP:
 			RTMPAPIoctlBBP(pAd, wrq);
 			break;
@@ -476,7 +476,7 @@ INT rt28xx_ap_ioctl(
 			RTMPAPIoctlRF(pAd, wrq);
 			break;
 #endif // RTMP_RF_RW_SUPPORT //
-//#endif // DBG //	// by Jiahao for ASUS ATE
+#endif // DBG //	// by Jiahao for ASUS ATE
 
 		default:
 //			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd));
