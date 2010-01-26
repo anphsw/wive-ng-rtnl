@@ -1,24 +1,9 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdio.h>
 #include <fcntl.h>
 #include "pcm_ctrl.h"
 
 pcm_record_type pcm_record;
+pcm_playback_type pcm_playback;
 char buffer[4096*1024];
 
 void usage(char *cmd)
@@ -26,6 +11,8 @@ void usage(char *cmd)
 	printf("Usage: 0 - pcm dma start\n");
 	printf("       1 - pcm dma stop\n");
 	printf("       2 N (frames) I (CH) - number of frames (0~10000) for pcm record\n");
+	printf("       3 N (frames) I (CH) - number of frames (0~10000) for pcm playback\n");
+	printf("       4 Ch Codec (1 for ulaw, 2 for alaw, 3 for g.729ab, and 4 for g.723a)\n");
 	exit(0);
 }
 
@@ -44,15 +31,15 @@ int main(int argc, char *argv[])
     	return -1;
     }
     
-	switch (argv[1][0]) {
-	case '0':
+	switch (atoi(argv[1])) {
+	case 0:
 		ioctl(pcm_fd, PCM_START, NULL);
 		break;
-	case '1':
+	case 1:
 		ioctl(pcm_fd, PCM_STOP, NULL);
 		close(pcm_fd);
 		break;
-	case '2':
+	case 2:
 		if (argc < 4)
 			usage(argv[0]);
 		total = atoi(argv[2]);
@@ -84,13 +71,62 @@ int main(int argc, char *argv[])
 				nLen = fwrite(pcm_record.pcmbuf, 1, pcm_record.size, fp_pcm);
 				pcm_record.size = 0;
 				nframe++;
+				printf("Record %d frame...\n",nframe);
 			}
-			sleep(0);
+			//sleep(0);
 		}
 		ioctl(pcm_fd, PCM_SET_UNRECORD, chid);
 		fclose(fp_pcm);
 		close(pcm_fd);
 		break;
+	case 3:	
+		if (argc < 4)
+			usage(argv[0]);
+		total = atoi(argv[2]);
+		if((total < 0)||(total > 10000))
+			usage(argv[0]);
+		chid = atoi(argv[3]);
+		if((chid < 0)||(chid > 2))
+			usage(argv[0]);
+						
+		pcm_playback.pcmbuf = buffer;
+		if(pcm_playback.pcmbuf<=0)
+		{
+			printf("mmap failed=%d\n",pcm_playback.pcmbuf);
+			return -1;
+		}	
+		fp_pcm = fopen("/mnt/record.pcm","rb");
+	    if(fp_pcm==NULL)
+	    {
+	    	printf("open pcm file failed..exit\n");
+	    	return -1;
+	    }
+		ioctl(pcm_fd, PCM_SET_PLAYBACK, chid);
+		nframe = 0;
+		while(nframe < total)
+		{
+			pcm_playback.size = fread(pcm_playback.pcmbuf, 1, PCM_PAGE_SIZE, fp_pcm);
+			if(pcm_playback.size>0)
+			{
+				ioctl(pcm_fd, PCM_WRITE_PCM, &pcm_playback);
+				pcm_playback.size = 0;
+				nframe++;
+				printf("Playback %d frame...\n",nframe);
+			}
+			//sleep(0);
+		}
+		ioctl(pcm_fd, PCM_SET_UNPLAYBACK, chid);
+		fclose(fp_pcm);
+		close(pcm_fd);
+		break;
+	case 4:
+		{
+			long param[2];
+			param[0] = atoi(argv[2]);
+			param[1] = atoi(argv[3]);
+			ioctl(pcm_fd, PCM_SET_CODEC_TYPE, param);
+		}
+		break;					
 	default:
 		{
 		usage(argv[0]);

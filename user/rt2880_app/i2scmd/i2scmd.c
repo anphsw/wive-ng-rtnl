@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -23,7 +7,7 @@
 #include "i2s_ctrl.h"
 
 int i2s_fd;
-void *shbuf;
+void *shbuf[MAX_I2S_PAGE];
 struct stat i2s_stat;
 
 void usage(char *cmd)
@@ -49,7 +33,7 @@ int main(int argc, char *argv[])
     if (fstat(STDIN_FILENO, &i2s_stat) == -1 ||i2s_stat.st_size == 0)
 		return -1;
 		
-    i2s_fd = open("dev/I2S", O_RDWR|O_SYNC); 
+    i2s_fd = open("/dev/I2S", O_RDWR|O_SYNC); 
     if(i2s_fd<0)
     {
     	printf("i2scmd:open i2s driver failed (%d)...exit\n",i2s_fd);
@@ -59,14 +43,19 @@ int main(int argc, char *argv[])
 	fdm = mmap(0, i2s_stat.st_size, PROT_READ, MAP_SHARED, STDIN_FILENO, 0);
 	if (fdm == MAP_FAILED)
 		return -1;
-		
-    shbuf = mmap(0, I2S_PAGE_SIZE*MAX_I2S_PAGE, PROT_WRITE, MAP_SHARED, i2s_fd, 0);
-	if (shbuf == MAP_FAILED)
-	{
-		printf("i2scmd:failed to mmap..\n");
-		return -1;
-	}
 	
+	for(i = 0; i < MAX_I2S_PAGE; i++)
+	{
+    	shbuf[i] = mmap(0, I2S_PAGE_SIZE, PROT_WRITE, MAP_SHARED, i2s_fd, i*I2S_PAGE_SIZE);
+    	
+		if (shbuf[i] == MAP_FAILED)
+		{
+			printf("i2scmd:failed to mmap..\n");
+			return -1;
+		}
+
+	}
+
     switch(argv[1][0])
     {
     case '0':
@@ -78,7 +67,7 @@ int main(int argc, char *argv[])
     	while((pos+I2S_PAGE_SIZE)<=i2s_stat.st_size)
     	{
     		ioctl(i2s_fd, I2S_GET_WBUF, &index);
-    		pBuf = (char*)shbuf + index*I2S_PAGE_SIZE;
+    		pBuf = (char*)shbuf[index];
     		memcpy(pBuf, (char*)fdm+pos, I2S_PAGE_SIZE);    		
     		pos+=I2S_PAGE_SIZE;	
     	}
@@ -95,7 +84,13 @@ int main(int argc, char *argv[])
 
 EXIT:
  	munmap(fdm, i2s_stat.st_size);
- 	munmap(i2s_fd, I2S_PAGE_SIZE*MAX_I2S_PAGE);	 
+	 
+   	for(i = 0; i < MAX_I2S_PAGE; i++)
+	{
+    	munmap(shbuf[i], I2S_PAGE_SIZE);
+    	if(nRet!=0)
+			printf("i2scmd : munmap i2s mmap faild\n");
+	}
    	close(i2s_fd);
 
     printf("i2scmd ...quit\n");

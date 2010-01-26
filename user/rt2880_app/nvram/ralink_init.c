@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -124,6 +108,9 @@ void usage(char *cmd)
 	printf("command:\n");
 	printf("  rt2860_nvram_show - display rt2860 values in nvram\n");
 	printf("  inic_nvram_show   - display inic values in nvram\n");
+#ifdef CONFIG_DUAL_IMAGE
+	printf("  uboot_nvram_show - display uboot parameter values\n");
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	printf("  rt2561_nvram_show - display rt2561 values in nvram\n");
 #endif
@@ -134,6 +121,9 @@ void usage(char *cmd)
 	printf("platform:\n");
 	printf("  2860    - rt2860\n");
 	printf("  inic    - intelligent nic\n");
+#ifdef CONFIG_DUAL_IMAGE
+	printf("  uboot    - uboot parameter\n");
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	printf("  2561    - rt2561\n");
 #endif
@@ -165,6 +155,10 @@ int main(int argc, char *argv[])
 			nvram_show(RT2860_NVRAM);
 		else if (!strncmp(argv[1], "inic_nvram_show", 16))
 			nvram_show(RTINIC_NVRAM);
+#ifdef CONFIG_DUAL_IMAGE
+		else if (!strncmp(argv[1], "uboot_nvram_show", 17))
+			nvram_show(UBOOT_NVRAM);
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 		else if (!strncmp(argv[1], "rt2561_nvram_show", 18))
 			nvram_show(RT2561_NVRAM);
@@ -180,6 +174,10 @@ int main(int argc, char *argv[])
 				gen_config(RT2860_NVRAM);
 			else if (!strncasecmp(argv[2], "inic", 5))
 				gen_config(RTINIC_NVRAM);
+#ifdef CONFIG_DUAL_IMAGE
+			else if (!strncasecmp(argv[2], "uboot", 6))
+				printf("No support of gen command of uboot parameter.\n");
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 			else if (!strncmp(argv[2], "2561", 5) ||
 			    	 !strncasecmp(argv[2], "rt2561", 7))
@@ -193,6 +191,10 @@ int main(int argc, char *argv[])
 				nvram_show(RT2860_NVRAM);
 			else if (!strncasecmp(argv[2], "inic", 5))
 				nvram_show(RTINIC_NVRAM);
+#ifdef CONFIG_DUAL_IMAGE
+			else if (!strncasecmp(argv[2], "uboot", 6))
+				nvram_show(UBOOT_NVRAM);
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 			else if (!strncmp(argv[2], "2561", 5) ||
 			    	 !strncasecmp(argv[2], "rt2561", 7))
@@ -206,6 +208,10 @@ int main(int argc, char *argv[])
 				nvram_clear(RT2860_NVRAM);
 			else if (!strncasecmp(argv[2], "inic", 5))
 				nvram_clear(RTINIC_NVRAM);
+#ifdef CONFIG_DUAL_IMAGE
+			else if (!strncasecmp(argv[2], "uboot", 6))
+				nvram_clear(UBOOT_NVRAM);
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 			else if (!strncmp(argv[2], "2561", 5) || 
 				 !strncasecmp(argv[2], "rt2561", 7))
@@ -222,6 +228,10 @@ int main(int argc, char *argv[])
 				renew_nvram(RT2860_NVRAM, argv[3]);
 			else if (!strncasecmp(argv[2], "inic", 5))
 				renew_nvram(RTINIC_NVRAM, argv[3]);
+#ifdef CONFIG_DUAL_IMAGE
+			else if (!strncasecmp(argv[2], "uboot", 6))
+				printf("No support of renew command of uboot parameter.\n");
+#endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 			else if (!strncmp(argv[2], "2561", 5) ||
 			    	 !strncasecmp(argv[2], "rt2561", 7))
@@ -238,7 +248,7 @@ int gen_config(int mode)
 {
 	FILE *fp;
 	int  i, ssid_num = 1;
-	char tx_rate[12], wmm_enable[8];
+	char tx_rate[16], wmm_enable[16];
 
 	nvram_init(mode);
 
@@ -247,13 +257,22 @@ int gen_config(int mode)
 	nvram_bufset(mode, "ModuleName", "RT2860");
 	nvram_commit(mode);
 	*/
+	unsigned char temp[2], buf[4];
+	flash_read_NicConf(buf);
+	sprintf(temp, "%x", buf[1]);
+	nvram_bufset(mode, "RFICType", temp);
+	sprintf(temp, "%x", buf[1]&0xf0>>4);
+	nvram_bufset(mode, "TXPath", temp);
+	sprintf(temp, "%x", buf[0]&0x0f);
+	nvram_bufset(mode, "RXPath", temp);
+	nvram_commit(mode);
 
 	system("mkdir -p /etc/Wireless/RT2860");
 	if (mode == RT2860_NVRAM) {
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
 	} else if (mode == RTINIC_NVRAM) {
-		system("mkdir -p /etc/Wireless/RT2880");
-		fp = fopen("/etc/Wireless/RT2880/iNIC_ap.dat", "w+");
+		system("mkdir -p /etc/Wireless/iNIC");
+		fp = fopen("/etc/Wireless/iNIC/iNIC_ap.dat", "w+");
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	} else if (mode == RT2561_NVRAM) {
 		system("mkdir -p /etc/Wireless/RT2561");
@@ -288,7 +307,7 @@ int gen_config(int mode)
 		FPRINT_STR(FixedTxMode);
 
 		//TxRate(FixedRate)
-		bzero(tx_rate, sizeof(char)*12);
+		bzero(tx_rate, sizeof(char)*16);
 		for (i = 0; i < ssid_num; i++)
 		{
 			sprintf(tx_rate+strlen(tx_rate), "%d",
@@ -315,7 +334,7 @@ int gen_config(int mode)
 		fprintf(fp, "TurboRate=0\n");
 
 		//WmmCapable
-		bzero(wmm_enable, sizeof(char)*8);
+		bzero(wmm_enable, sizeof(char)*16);
 		for (i = 0; i < ssid_num; i++)
 		{
 			sprintf(wmm_enable+strlen(wmm_enable), "%d",
@@ -359,9 +378,19 @@ int gen_config(int mode)
 		FPRINT_NUM(DFS_R66);
 		FPRINT_STR(BlockCh);
 
+		FPRINT_NUM(GreenAP);
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);
+        /*kurtis: WAPI*/
+		FPRINT_STR(WapiPsk1);
+		FPRINT_STR(WapiPskType);
+		FPRINT_STR(Wapiifname);
+		FPRINT_STR(WapiAsCertPath);
+		FPRINT_STR(WapiUserCertPath);
+		FPRINT_STR(WapiAsIpAddr);
+		FPRINT_STR(WapiAsPort);
+        
 		FPRINT_NUM(BssidNum);
 
 		FPRINT_STR(RekeyMethod);
@@ -454,6 +483,8 @@ int gen_config(int mode)
 			fprintf(fp, "WscConfStatus=%d\n", 1);
 		else
 			fprintf(fp, "WscConfStatus=%d\n", 2);
+		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
+			FPRINT_STR(WscVendorPinCode);
 
 		FPRINT_NUM(AccessPolicy0);
 		FPRINT_STR(AccessControlList0);
@@ -595,6 +626,15 @@ int gen_config(int mode)
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);
+        /*kurtis: WAPI*/
+		FPRINT_STR(WapiPsk1);
+		FPRINT_STR(WapiPskType);
+		FPRINT_STR(Wapiifname);
+		FPRINT_STR(WapiAsCertPath);
+		FPRINT_STR(WapiUserCertPath);
+		FPRINT_STR(WapiAsIpAddr);
+		FPRINT_STR(WapiAsPort);
+
 		FPRINT_NUM(RekeyInterval);
 		FPRINT_STR(RekeyMethod);
 		FPRINT_STR(PMKCachePeriod);
@@ -708,6 +748,7 @@ int renew_nvram(int mode, char *fname)
 	flash_read_mac(buf);
 	sprintf(wan_mac,"%0X:%0X:%0X:%0X:%0X:%0X\n",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
 	nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR", wan_mac);
+
 	need_commit = 1;
 
 	if (need_commit)
@@ -721,8 +762,9 @@ int renew_nvram(int mode, char *fname)
 int nvram_show(int mode)
 {
 	char *buffer, *p;
-	int rc, len = 0x4000;
+	int rc;
 	int crc;
+	unsigned int len = 0x4000;
 
 	nvram_init(mode);
 	len = getNvramBlockSize(mode);

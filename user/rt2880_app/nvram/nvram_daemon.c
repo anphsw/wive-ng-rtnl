@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -43,7 +27,9 @@ void loadDefault(int chip_id)
     {
     case 2860:
 	system("ralink_init clear 2860");
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
+	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+#elif defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE 
 	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
 #elif defined(CONFIG_ICPLUS_PHY)
 	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
@@ -53,7 +39,9 @@ void loadDefault(int chip_id)
 	break;
     case 2880:
 	system("ralink_init clear inic");
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
+	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+#elif defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
 	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
 #elif defined(CONFIG_ICPLUS_PHY)
 	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
@@ -104,14 +92,13 @@ static void nvramIrqHandler(int signum)
 	} else if (signum == SIGUSR2) {
 		printf("load default and reboot..\n");
 		loadDefault(2860);
-#if defined (CONFIG_RT2880v2_INIC_MII) || defined (CONFIG_RT2880v2_INIC_MII_MODULE) || \
-    defined (CONFIG_RT2880v2_INIC_PCI) || defined (CONFIG_RT2880v2_INIC_PCI_MODULE)
+#if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI) 
 		loadDefault(2880);
 #endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 		loadDefault(2561);
 #endif
-		system("fs restore");
+		system("reboot");
 	}
 }
 
@@ -136,7 +123,11 @@ int initGpio(void)
 	info.irq = 0;
 #else
 	//RT2883, RT3052 use gpio 10 for load-to-default
+#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE	
+	info.irq = 43;
+#else
 	info.irq = 10;
+#endif	
 #endif
 
 	fd = open(GPIO_DEV, O_RDONLY);
@@ -145,7 +136,7 @@ int initGpio(void)
 		return -1;
 	}
 	//set gpio direction to input
-	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (RALINK_GPIO_DIR_IN<<info.irq)) < 0)
+	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
 		goto ioctl_err;
 	//enable gpio interrupt
 	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
@@ -213,8 +204,7 @@ int main(int argc,char **argv)
 		loadDefault(2860);
 	}
 	
-#if defined (CONFIG_RT2880v2_INIC_MII) || defined (CONFIG_RT2880v2_INIC_MII_MODULE) || \
-    defined (CONFIG_RT2880v2_INIC_PCI) || defined (CONFIG_RT2880v2_INIC_PCI_MODULE)
+#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
 	if (strcmp(nvram_bufget(RTINIC_NVRAM, "WebInit"),"1")) {
 		loadDefault(2880);
 	}

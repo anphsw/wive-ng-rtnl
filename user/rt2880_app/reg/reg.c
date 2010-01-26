@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdlib.h>             /* malloc, free, etc. */
 #include <stdio.h>              /* stdin, stdout, stderr */
 #include <string.h>             /* strdup */
@@ -32,9 +16,10 @@ int main(int argc, char *argv[])
 
 	if (argc < 3)
 	{
-		printf("syntax: reg [method(r/w/s)] [offset(hex)] [value(hex, w only)]\n");
+		printf("syntax: reg [method(r/w/s/d)] [offset(hex)] [value(hex, w only)]\n");
 		printf("read example : reg r 18\n");
 		printf("write example : reg w 18 12345678\n");
+		printf("dump example : reg d 18 \n");
 		printf("To use system register: reg s 0\n");
 		printf("To use wireless register: reg s 1\n");
 		printf("To use other base address offset: reg s [offset]\n");
@@ -47,6 +32,10 @@ int main(int argc, char *argv[])
 	if (*p == 'r')
 	{
 		method = RT_RDM_CMD_SHOW;
+	}
+	else if (*p == 'd')
+	{
+		method = RT_RDM_CMD_DUMP;
 	}
 	else if (*p == 'w')
 	{

@@ -1,6 +1,6 @@
 EXEC = reg
 OBJS = reg.o
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/rt_rdm
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/rt_rdm -I$(ROOTDIR)/$(LINUXDIR)/include
 
 all: $(EXEC)
 
