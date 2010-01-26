@@ -1,8 +1,9 @@
 <html><head><!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
 
-<meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="-1">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Security Settings</title>
 

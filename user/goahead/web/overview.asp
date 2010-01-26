@@ -2,7 +2,9 @@
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <LINK REL="stylesheet" HREF="style/normal_ws.css" TYPE="text/css">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript">
@@ -73,7 +75,7 @@ function setLanguage()
 <BODY onLoad="initValue()">
 <table class="body"><tr><td>
 
-<H1>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</H1>
+<H1>Wive-RTNL - firmware for Acorp WiFi CPE</H1>
 <p id="ovIntroduction" />
 
 <!-- ----------------- Langauge Settings ----------------- -->

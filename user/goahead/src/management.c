@@ -766,28 +766,17 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
 	system("ralink_init clear 2860");
-#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
         system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
-#elif defined(CONFIG_ICPLUS_PHY)
-        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
-#else
-        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
-#endif
 #if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI)
 	system("ralink_init clear inic");
-#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
         system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
-#elif defined(CONFIG_ICPLUS_PHY)
-        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
-#else
-        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
-#endif
 #endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	system("ralink_init clear 2561");
         system("ralink_init renew 2561 /etc_ro/Wireless/RT61AP/RT2561_default");
 #endif
-	system("reboot");
+	
+	system("fs restore");
 }
 
 

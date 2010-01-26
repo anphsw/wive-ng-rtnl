@@ -60,9 +60,6 @@ endif
 ifneq ("$(CONFIG_RT2561_AP)", "")
 	$(ROMFSINST) legacy $(ROOT_DIRECTORY)
 endif
-ifneq ("$(CONFIG_USER_GOAHEAD_LANG_EN)", "y")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/en
-endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
 endif
@@ -70,14 +67,6 @@ ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHCN)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhcn
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
-ifeq ("$(CONFIG_LOGREAD)", "")
-	rm $(ROMFSDIR)$(ROOT_DIRECTORY)/adm/syslog.asp
-else
-ifeq ("$(CONFIG_KLOGD)", "")
-	rm $(ROMFSDIR)$(ROOT_DIRECTORY)/adm/syslog.asp
-else
-endif
-endif
 
 clean:
 	for i in $(DIRS) ; do make -C $$i clean ; done

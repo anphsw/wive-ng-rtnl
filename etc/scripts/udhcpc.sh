@@ -46,6 +46,8 @@ case "$1" in
         done
 		# notify goahead when the WAN IP has been acquired. --yy
 		killall -SIGUSR2 goahead
+		service igmpproxy stop
+		service igmpproxy start
         ;;
 esac
 

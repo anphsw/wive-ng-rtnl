@@ -1017,7 +1017,7 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 	FILE *fp;
 	char buf[1024];
 
-	for(port=0; port<5; port++){
+	for(port=4; port>-1; port--){
 		char *pos;
 		char link = '0';
 		int speed = 100;

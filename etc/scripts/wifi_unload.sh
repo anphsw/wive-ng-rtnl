@@ -20,13 +20,16 @@ kill_apps="udhcpd udhcpc syslogd klogd zebra ripd wscd rt2860apd rt61apd inadyn 
 iwevent stupid-ftpd smbd ated ntpclient lld2d igmpproxy dnsmasq telnetd"
 
 bssidnum=`nvram_get 2860 BssidNum`
-is_ra0_in_br0=`brctl show  | sed -n '/ra0/p'`
-is_eth21_in_br0=`brctl show  | sed -n '/eth2\.1/p'`
+is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
+is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
+is_usb0_in_br0=`brctl show | sed -n '/usb0/p'`
+
 br0_mirror=eth2
 
 unload_ra0()
 {
 	ifconfig ra0 down > /dev/null 2>&1
+	ifconfig eth2.2 down > /dev/null 2>&1
 	rmmod rt2860v2_ap > /dev/null 2>&1
 	rmmod rt2860v2_sta > /dev/null 2>&1
 }
@@ -71,6 +74,10 @@ if [ "$is_ra0_in_br0" == "" ]; then
 	unload_ra0
 	exit 1
 else
+	if [ "$is_usb0_in_br0" != "" ]; then
+		exit 1
+	fi
+
 	if [ "$is_eth21_in_br0" != "" ]; then
 		br0_mirror=eth2.1
 	fi
@@ -78,4 +85,3 @@ else
 	unload_ra0br0 $br0_mirror
 	exit 1
 fi
-

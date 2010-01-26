@@ -31,7 +31,7 @@
  *	By license terms the server software name defined in the following line of
  *	code must not be modified.
  */
-#define WEBS_NAME				T("GoAhead-Webs")
+#define WEBS_NAME				T("WebServer")
 #define WEBS_VERSION			T("2.1.8")
 
 #define WEBS_HEADER_BUFINC 		512			/* Header buffer size */

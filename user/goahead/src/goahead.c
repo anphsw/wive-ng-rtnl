@@ -43,7 +43,7 @@
 #include	"linux/autoconf.h"
 #include	"config/autoconf.h" //user config
 
-#ifdef CONFIG_RALINKAPP_SWQOS
+#ifdef CONFIG_NET_SCHED
 #include      "qos.h"
 #endif
 
@@ -431,7 +431,7 @@ static int initWebs(void)
  */
 	formDefineUtilities();
 	formDefineInternet();
-#if defined CONFIG_RALINKAPP_SWQOS
+#if defined CONFIG_NET_SCHED
 	formDefineQoS();
 #endif
 #if defined CONFIG_USB

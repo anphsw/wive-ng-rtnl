@@ -3,7 +3,7 @@
 
 <head>
 <title>DTree</title>
-<meta http-equiv="content-type" content="text/html;charset=iso-8859-1" />
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />

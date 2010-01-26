@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: config-udhcpd.sh,v 1.6 2008-09-30 03:35:43 steven Exp $
+# $Id: config-udhcpd.sh,v 1.6.4.4 2009-04-22 02:46:43 michael Exp $
 #
 # usage: see function usage()
 #
@@ -13,7 +13,7 @@ pidfile="/var/run/udhcpd.pid"
 leases="/var/udhcpd.leases"
 
 usage () {
-  echo "usage: goahead-udhcpd.sh [option]..."
+  echo "usage: config-udhcpd.sh [option]..."
   echo "options:"
   echo "  -h              : print this help"
   echo "  -s ipaddr       : set ipaddr as start of the IP lease block"
@@ -23,7 +23,7 @@ usage () {
   echo "  -m mask         : set mask as subnet netmask"
   echo "  -g gateway      : set gateway as router's IP address"
   echo "  -t time         : set time seconds as the IP life time"
-  echo "  -r              : run dhcp server"
+  echo "  -r [sleep_time] : run dhcp server"
   echo "  -k              : kill the running dhcp server"
   echo "  -S [mac ipaddr] : statically assign IP to given MAC address"
   exit
@@ -73,7 +73,7 @@ config () {
 }
 
 #  arg1:  phy address.
-reset_phy()
+link_down()
 {
 	# get original register value
 	get_mii=`mii_mgr -g -p $1 -r 0`
@@ -81,7 +81,7 @@ reset_phy()
 
 	# stupid hex value calculation.
 	pre=`echo $orig | sed 's/...$//'`
-	post=`echo $orig | sed 's/^..//'`
+	post=`echo $orig | sed 's/^..//'` 
 	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
 	case $num_hex in
 		"0")	rep="8"	;;
@@ -98,12 +98,39 @@ reset_phy()
 	new=$pre$rep$post
 	# power down
 	mii_mgr -s -p $1 -r 0 -v $new
+}
+
+link_up()
+{
+	# get original register value
+	get_mii=`mii_mgr -g -p $1 -r 0`
+	orig=`echo $get_mii | sed 's/^.....................//'`
+
+	# stupid hex value calculation.
+	pre=`echo $orig | sed 's/...$//'`
+	post=`echo $orig | sed 's/^..//'` 
+	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
+	case $num_hex in
+		"8")	rep="0"	;;
+		"9")	rep="1"	;;
+		"a")	rep="2"	;;
+		"b")	rep="3"	;;
+		"c")	rep="4"	;;
+		"d")	rep="5"	;;
+		"e")	rep="6"	;;
+		"f")	rep="7"	;;
+		# The power is already up
+		*)		echo "Warning in PHY reset script";return;;
+	esac
+	new=$pre$rep$post
 	# power up
-	mii_mgr -s -p $1 -r 0 -v $orig
+	mii_mgr -s -p $1 -r 0 -v $new
 }
 
 reset_all_phys()
 {
+	sleep_time=$1
+
 	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
 		return
 	fi
@@ -112,12 +139,23 @@ reset_all_phys()
 
 	#skip WAN port
 	if [ "$opmode" != "1" ]; then
-		reset_phy 0
+		link_down 0
 	fi
-	reset_phy 1
-	reset_phy 2
-	reset_phy 3
-	reset_phy 4
+	link_down 1
+	link_down 2
+	link_down 3
+	link_down 4
+
+	#force Windows clients to renew IP and update DNS server
+	sleep $sleep_time
+
+	if [ "$opmode" != "1" ]; then
+		link_up 0
+	fi
+	link_up 1
+	link_up 2
+	link_up 3
+	link_up 4
 }
 
 
@@ -156,7 +194,7 @@ case "$1" in
     touch $leases
     echo "lease_file $leases" >> $fname
     udhcpd -S $fname &
-	reset_all_phys ;;
+	reset_all_phys $2;;
   "-k")
     if [ -e ${pidfile} ]; then
       kill `cat $pidfile`

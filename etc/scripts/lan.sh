@@ -8,6 +8,7 @@
 . /sbin/global.sh
 
 # stop all
+service lan stop
 service dnsserver stop
 service dhcpd stop
 service igmpproxy stop

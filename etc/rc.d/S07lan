@@ -14,7 +14,26 @@ start() {
     else
 	ifconfig $lan_if 0.0.0.0	
     fi
-    #only prepare... config from goahead code
+
+    lan2enabled=`nvram_get 2860 Lan2Enabled`
+    if [ "$lan2enabled" = "1" ]; then
+ echo "Add LAN2 iface"
+        ip_2=`nvram_get 2860 lan2_ipaddr`
+        nm_2=`nvram_get 2860 lan2_netmask`
+        if [ "$opmode" = "0" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "1" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "2" ]; then
+                ifconfig "eth2:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
+        elif [ "$opmode" = "3" ]; then
+                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
+                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+        fi
+    fi
 
  echo "Add default gateway"
     opmode=`nvram_get 2860 OperationMode`
@@ -26,10 +45,14 @@ start() {
         route add default gw $gw
         config-dns.sh $pd $sd
     fi
+
 }
 
 stop() {
- echo "Stop lan - NO NEEED!"
+ echo "Stop lan!"
+    ifconfig $lan_if down
+    ifconfig "br0:9" down
+    ifconfig "eth2:9" down
 }
 
 case "$1" in

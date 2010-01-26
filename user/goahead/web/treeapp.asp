@@ -5,7 +5,9 @@
 
 <head>
 <title>DTree</title>
-<meta http-equiv="content-type" content="text/html;charset=iso-8859-1" />
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />
 <link rel="StyleSheet" href="dtree.css" type="text/css" />
 <script type="text/javascript" src="/dtree/dtree.js"></script>
@@ -37,7 +39,7 @@ function refresh(){
 }
 </script>
 
-<p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p>
+<!-- <p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p> -->
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';

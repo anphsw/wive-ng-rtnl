@@ -9,11 +9,37 @@
 . /sbin/global.sh
 
 lan_ip=`nvram_get 2860 lan_ipaddr`
+stp_en=`nvram_get 2860 stpEnabled`
 nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
 service pass start
+
+set_vlan_map()
+{
+        if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
+        # vlan priority tag => skb->priority mapping
+        vconfig set_ingress_map $1 0 0
+        vconfig set_ingress_map $1 1 1
+        vconfig set_ingress_map $1 2 2
+        vconfig set_ingress_map $1 3 3
+        vconfig set_ingress_map $1 4 4
+        vconfig set_ingress_map $1 5 5
+        vconfig set_ingress_map $1 6 6
+        vconfig set_ingress_map $1 7 7
+
+        # skb->priority => vlan priority tag mapping
+        vconfig set_egress_map $1 0 0
+        vconfig set_egress_map $1 1 1
+        vconfig set_egress_map $1 2 2
+        vconfig set_egress_map $1 3 3
+        vconfig set_egress_map $1 4 4
+        vconfig set_egress_map $1 5 5
+        vconfig set_egress_map $1 6 6
+        vconfig set_egress_map $1 7 7
+        fi
+}
 
 ifRaxWdsxDown()
 {
@@ -32,12 +58,24 @@ ifRaxWdsxDown()
 	ifconfig wds3 down > /dev/null 2>&1
 
 	ifconfig apcli0 down > /dev/null 2>&1
+	ifconfig mesh0 down > /dev/null 2>&1
 }
 
 addBr0()
 {
 	brctl addbr br0
 	brctl addif br0 ra0
+}
+
+addMesh2Br0()
+{
+        meshenabled=`nvram_get 2860 MeshEnabled`
+        if [ "$meshenabled" = "1" ]; then
+                ifconfig mesh0 up
+                brctl addif br0 mesh0
+                meshhostname=`nvram_get 2860 MeshHostName`
+                iwpriv mesh0 set  MeshHostName="$meshhostname"
+        fi
 }
 
 addRax2Br0()
@@ -311,7 +349,9 @@ fi
 if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
 	modprobe 8021q
 	vconfig add eth2 1
+	set_vlan_map eth2.1
 	vconfig add eth2 2
+	set_vlan_map eth2.2
 	ifconfig eth2.2 down > /dev/null 2>&1
 	wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
 	if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
@@ -348,7 +388,17 @@ if [ "$opmode" = "0" ]; then
 	if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
 		addRax2Br0
 	fi
-	addWds2Br0
+        #start mii iNIC after network interface is working
+        iNIC_Mii_en=`nvram_get inic InicMiiEnable`
+        if [ "$iNIC_Mii_en" == "1" ]; then
+             ifconfig rai0 down
+             rmmod iNIC_mii
+             insmod -q iNIC_mii miimaster=eth2
+             ifconfig rai0 up
+        fi
+ 
+        addWds2Br0
+        addMesh2Br0
 	addRaix2Br0
 	addInicWds2Br0
 	addRaL02Br0
@@ -385,6 +435,7 @@ elif [ "$opmode" = "1" ]; then
 			addRax2Br0
 		fi
 		addWds2Br0
+		addMesh2Br0
 		addRaix2Br0
 		addInicWds2Br0
 		addRaL02Br0
@@ -398,6 +449,7 @@ elif [ "$opmode" = "1" ]; then
 			addRax2Br0
 		fi
 		addWds2Br0
+		addMesh2Br0
 
 		ifconfig eth2:1 172.32.1.254 netmask 255.255.255.0 up
 	fi
@@ -444,6 +496,17 @@ else
                 addInicWds2Br0
                 addRaL02Br0
 	exit 1
+fi
+
+# INIC support
+if [ "$CONFIG_RT2880_INIC" != "" ]; then
+       ifconfig rai0 down
+       rmmod rt_pci_dev
+       ralink_init make_wireless_config inic
+       insmod -q rt_pci_dev
+       ifconfig rai0 up
+       RaAP&
+       sleep 3
 fi
 
 # in order to use broadcast IP address in L2 management daemon

@@ -242,38 +242,6 @@ function checkIpAddr(field, ismask)
 		field.focus();
 		return false;
 	}
-
-	if (isAllNum(field.value) == 0) {
-		alert('It should be a [0-9] number.');
-		field.value = field.defaultValue;
-		field.focus();
-		return false;
-	}
-
-	if (ismask) {
-		if ((!checkRange(field.value, 1, 0, 256)) ||
-				(!checkRange(field.value, 2, 0, 256)) ||
-				(!checkRange(field.value, 3, 0, 256)) ||
-				(!checkRange(field.value, 4, 0, 256)))
-		{
-			alert('IP adress format error.');
-			field.value = field.defaultValue;
-			field.focus();
-			return false;
-		}
-	}
-	else {
-		if ((!checkRange(field.value, 1, 0, 255)) ||
-				(!checkRange(field.value, 2, 0, 255)) ||
-				(!checkRange(field.value, 3, 0, 255)) ||
-				(!checkRange(field.value, 4, 1, 254)))
-		{
-			alert('IP adress format error.');
-			field.value = field.defaultValue;
-			field.focus();
-			return false;
-		}
-	}
 	return true;
 }
 
@@ -679,7 +647,7 @@ function initValue()
       <option value="PPPOE" id="wConnTypePppoe">PPPOE (ADSL)</option>
       <option value="L2TP" id="wConnTypeL2tp">L2TP</option>
       <option value="PPTP" id="wConnTypePptp">PPTP</option>
-      <option value="3G" id="wConnType3G">3G</option> 
+<!--      <option value="3G" id="wConnType3G">3G</option> -->
     </select>
   </td>
 </tr>

@@ -26,7 +26,7 @@
 #include	"config/autoconf.h" //user config
 #include	"user/busybox/include/autoconf.h" //busybox config
 
-#ifdef CONFIG_RALINKAPP_SWQOS
+#ifdef CONFIG_NET_SCHED
 #include      "qos.h"
 #endif
 
@@ -678,7 +678,7 @@ static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RALINKAPP_SWQOS
+#if defined CONFIG_NET_SCHED
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -784,11 +784,7 @@ static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getGWBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
 	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
 }
 
 static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv)
@@ -1510,7 +1506,7 @@ inline void zebraRestart(void)
 
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service ripd zebra");
+	doSystem("service zebra start");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1618,7 +1614,7 @@ int initInternet(void)
 	firewall_init();
 	management_init();
 	RoutingInit();
-#ifdef CONFIG_RALINKAPP_SWQOS
+#ifdef CONFIG_NET_SCHED
 	QoSInit();
 #endif
 

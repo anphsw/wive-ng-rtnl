@@ -50,7 +50,8 @@
   <message msgid="treeapp status" msgstr="Status" />
   <message msgid="treeapp system command" msgstr="System Command" />
   <message msgid="treeapp system log" msgstr="System Log" />
-  <message msgid="treeapp sdk history" msgstr="SDK History" />
+  <message msgid="treeapp sdk history" msgstr="Version History" />
+  <message msgid="treeapp reboot" msgstr="Reboot you router" />
   <message msgid="treeapp system firewall" msgstr="System Security" />
 
   <message msgid="treeapp usb" msgstr="USB App." />
