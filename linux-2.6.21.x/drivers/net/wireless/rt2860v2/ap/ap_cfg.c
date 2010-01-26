@@ -5668,7 +5668,7 @@ done:
 }
 
 
-#if defined(RTMP_RF_RW_SUPPORT) || defined(DBG)
+#ifdef RTMP_RF_RW_SUPPORT
 /* 
     ==========================================================================
     Description:
