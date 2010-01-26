@@ -7,6 +7,7 @@ find $PWD -name '*.old' | xargs rm -f
 find $PWD -name '*.log' | xargs rm -f
 find $PWD -name CVS -type d | xargs rm -rf
 
+make clean -C Uboot
 make clean -C tools
 make clean
 make mrproper
