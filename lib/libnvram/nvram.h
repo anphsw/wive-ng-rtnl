@@ -1,9 +1,19 @@
 #ifndef _NVRAM_H
 #define _NVRAM_H 	1
 
+#include <linux/autoconf.h>
+
+#ifdef CONFIG_DUAL_IMAGE
+
+#define UBOOT_NVRAM	0
+#define RT2860_NVRAM    1
+#define RTINIC_NVRAM    2
+#define RT2561_NVRAM    3
+#else
 #define RT2860_NVRAM    0
 #define RTINIC_NVRAM    1
 #define RT2561_NVRAM    2
+#endif
 
 void nvram_init(int index);
 void nvram_close(int index);

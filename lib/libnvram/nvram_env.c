@@ -6,6 +6,7 @@
 #include "nvram_env.h"
 #include "flash_api.h"
 
+#include <linux/autoconf.h>
 
 char libnvram_debug = 0;
 #define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
@@ -34,10 +35,22 @@ typedef struct block_s {
 	char dirty;
 } block_t;
 
+#ifdef CONFIG_DUAL_IMAGE
+#define FLASH_BLOCK_NUM	4
+#else
 #define FLASH_BLOCK_NUM	3
+#endif
 
 static block_t fb[FLASH_BLOCK_NUM] =
 {
+#ifdef CONFIG_DUAL_IMAGE
+	{
+		.name = "uboot",
+		.flash_offset =  0x0,
+		.flash_max_len = ENV_UBOOT_SIZE,
+		.valid = 0
+	},
+#endif
 	{
 		.name = "2860",
 		.flash_offset =  0x2000,
