@@ -705,7 +705,7 @@ typedef struct _NDIS_802_11_CAPABILITY
 #endif // RTMP_RF_RW_SUPPORT //
 
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
-#if defined(CONFIG_ASUS_EXT) || defined(DBG)
+#endif
 
 #ifdef RALINK_ATE
 #ifdef RALINK_28xx_QA
