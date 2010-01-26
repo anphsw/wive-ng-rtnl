@@ -1805,7 +1805,7 @@ static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "pptpPassThru", pptp_pt);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("vpn-passthru.sh");
+//	doSystem("vpn-passthru.sh"); no more need
 
 	//debug print
 	websHeader(wp);

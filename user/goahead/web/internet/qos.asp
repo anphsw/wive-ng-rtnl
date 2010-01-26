@@ -220,14 +220,19 @@ function onInit()
 		document.QoSSetup.QoSSelect.options.selectedIndex = 1;
 	else if(QoS == "2")
 		document.QoSSetup.QoSSelect.options.selectedIndex = 2;
+	else if(QoS == "3")
+		document.QoSSetup.QoSSelect.options.selectedIndex = 3;
 }
 
 function QoSSetupCheck()
 {
-	if(document.QoSSetup.QoSSelect.options.selectedIndex == 0){
+	if(document.QoSSetup.QoSSelect.options.selectedIndex == 0 || 
+		document.QoSSetup.QoSSelect.options.selectedIndex == 2 || 
+		document.QoSSetup.QoSSelect.options.selectedIndex == 3){
 		;  // do nothing
-	}else if(	document.QoSSetup.QoSSelect.options.selectedIndex == 1 ||
-				document.QoSSetup.QoSSelect.options.selectedIndex == 2){
+	}else if(	document.QoSSetup.QoSSelect.options.selectedIndex == 1
+			// ||	document.QoSSetup.QoSSelect.options.selectedIndex == 2
+		    ){
 		if(document.QoSSetup.UploadBandwidth.value == "custom"){
 			if(document.QoSSetup.UploadBandwidth_Custom.value == ""){
 				alert("Please fill the upload bandwidth.");
@@ -273,13 +278,16 @@ function QoSSetupCheck()
 
 function QoSSelectChange()
 {
-	if(document.QoSSetup.QoSSelect.options.selectedIndex == 0){
+	if(document.QoSSetup.QoSSelect.options.selectedIndex == 0 ||  
+		document.QoSSetup.QoSSelect.options.selectedIndex == 2 ||
+		document.QoSSetup.QoSSelect.options.selectedIndex == 3) {
 		document.QoSSetup.UploadBandwidth.disabled = true;
 		document.QoSSetup.DownloadBandwidth.disabled = true;
 		document.QoSSetup.UploadBandwidth_Custom.disabled = true;
 		document.QoSSetup.DownloadBandwidth_Custom.disabled = true;
-	}else if(	document.QoSSetup.QoSSelect.options.selectedIndex == 1 ||
-				document.QoSSetup.QoSSelect.options.selectedIndex == 2){
+	}else if(	document.QoSSetup.QoSSelect.options.selectedIndex == 1 
+			//|| document.QoSSetup.QoSSelect.options.selectedIndex == 2
+		 ){
 		document.QoSSetup.UploadBandwidth.disabled = false;
 		LoadUploadBW();
 		document.QoSSetup.DownloadBandwidth.disabled = false;
@@ -483,7 +491,9 @@ function checkNum(str)
 	<td>
 	<select name="QoSSelect" size="1" onChange="QoSSelectChange()">
 	<option value=0 id="QoSDisableStr">Disable</option>
-	<option value=1 id="QoSEnableStr">Enable</option>
+	<option value=1 id="QoSEnableStr">User WEB</option>
+	<option value=2 id="QoSEnableStr">User Console</option>
+	<option value=3 id="QoSEnableStr">User Console IMQ</option>
 <!--
 	<option value=2 id="QoSDSCPMakerOnlyStr">DSCP mark only</option>
 -->

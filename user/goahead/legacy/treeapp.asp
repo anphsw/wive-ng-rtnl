@@ -75,9 +75,9 @@ a.add(302, 300, _("treeapp lan"),                   "javascript:go('internet/lan
 if (dhcpen == "1") {
 	a.add(303, 300, _("treeapp dhcp clients"),          "javascript:go('internet/dhcpcliinfo.asp');");
 }
-if (vpnen == "1") {
-	a.add(304, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
-}
+//if (vpnen == "1") {
+//	a.add(304, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
+//}
 if (opmode != '0') {
 	a.add(305, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
 }

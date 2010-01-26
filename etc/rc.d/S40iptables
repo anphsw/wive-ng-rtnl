@@ -34,13 +34,30 @@ start() {
     	    iptables -A INPUT -i ppp+ ! -p icmp -j RETURN
 	fi
 
+	#ping from wan
+	if [ "$WANPingFilter" = "0" ]; then
+	echo "Drop ping from wan $wan_if"
+    	    iptables -A INPUT -i $wan_if -p icmp -j DROP
+    	    iptables -A INPUT -i ppp+ -p icmp -j DROP
+	else
+	echo "Allow ping from wan $wan_if"
+    	    iptables -A INPUT -i $wan_if -p icmp -j RETURN
+    	    iptables -A INPUT -i ppp+ -p icmp -j RETURN
+	fi
+    
 	#enable services for local network
 	iptables -A INPUT -i $lan_if -s $lan_ip/$nm -j ACCEPT
+	if [ "$Lan2Enabled" = "1" ]; then
+	    iptables -A INPUT -i br0:9 -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	fi
 
 	#enable forward only from local network to wan/ppp
 	iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
 	iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
         iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
+	if [ "$Lan2Enabled" = "1" ]; then
+	    iptables -A FORWARD -o br0:9 -d $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	fi
 
         #add limit connection rules for local services
 	iptables -N servicelimit
@@ -82,9 +99,16 @@ start() {
 	    iptables -t nat -I PREROUTING 2 -j DMZ
 	    iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
     	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
+    	    iptables -t nat -A POSTROUTING -o br+ -s $lan_ip/$nm -j MASQUERADE
+
 	    #wireless
 	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE
 	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$nm -j MASQUERADE
+	    
+	    #second lan
+	    if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -t nat -A POSTROUTING -o br+ -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	    fi
 	fi
 	
 }
@@ -123,8 +147,12 @@ stop() {
 get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     nm=`nvram_get 2860 lan_netmask`
+    Lan2Enabled=`nvram_get 2860 Lan2Enabled`
+    lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
+    lan2_netmask=`nvram_get 2860 lan2_netmask`
     wan_mode=`nvram_get 2860 wanConnectionMode`
     upnp=`nvram_get 2860 upnpEnabled`
+    WANPingFilter=`nvram_get 2860 WANPingFilter`
     NAT=`nvram_get 2860 natEnabled`
     RMG=`nvram_get 2860 RemoteManagement`
 

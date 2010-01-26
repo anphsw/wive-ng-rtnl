@@ -34,13 +34,8 @@ struct entry_s QOS_PROFILE[QOS_PROFILE_ENTRYS_MAX] = {
 
 inline void QoSRestart(void)
 {
-	doSystem("service shaper stop");
-	FILE *fp = fopen("/bin/qos_run", "r");
-	if(!fp)
-		return;
-	fclose(fp);
-	doSystem("/bin/qos_run");
-	doSystem("service shaper start");
+    doSystem("service shaper stop");
+    doSystem("service shaper start");
 }
 
 inline void QoSInit(void)
@@ -96,7 +91,7 @@ static void QoSAFAttribute(webs_t wp, char_t *path, char_t *query)
     websWrite(wp, T("Content-Type: text/html\n"));
     websWrite(wp, T("\n"));
     websWrite(wp, T("<html>\n<head>\n"));
-    websWrite(wp, T("<title>My Title</title>"));
+    websWrite(wp, T("<title>QoS</title>"));
     websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
     websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">"));
     websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
@@ -272,7 +267,7 @@ static void qosClassifier(webs_t wp, char_t *path, char_t *query)
     websWrite(wp, T("Content-Type: text/html\n"));
     websWrite(wp, T("\n"));
     websWrite(wp, T("<html>\n<head>\n"));
-    websWrite(wp, T("<title>My Title</title>"));
+    websWrite(wp, T("<title>QoS</title>"));
     websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
     websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">"));
     websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
@@ -323,11 +318,11 @@ static void QoSDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(&del_index, 1, new_rule, ';');
 
 	nvram_bufset(RT2860_NVRAM, tmp, new_rule);
-    nvram_commit(RT2860_NVRAM);
+	nvram_commit(RT2860_NVRAM);
 
 	free(new_rule);
 
-	doSystem("qos_run c");
+	QoSRestart();
 
 err:
 
@@ -425,14 +420,14 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 			if(!download_bandwidth_custom)
 				return;
 
-	if(!strcmp(qos_enable, "1") || !strcmp(qos_enable, "2")){
+	if(!strcmp(qos_enable, "1") /*|| !strcmp(qos_enable, "2")*/){
 		if(!strlen(upload_bandwidth)) /* in fact we don't care about the download bandwidth */
 			return;
 	}
 
 	nvram_bufset(RT2860_NVRAM, "QoSEnable", qos_enable);
 
-	if(!strcmp(qos_enable, "1") || !strcmp(qos_enable, "2")){
+	if(!strcmp(qos_enable, "1") /*|| !strcmp(qos_enable, "2")*/){
 		char postfix[16];
 		strncpy(postfix, upload_bandwidth_custom, sizeof(postfix));
 		if(!strchr(postfix, 'k') && !strchr(postfix, 'K')  && !strchr(postfix, 'm') && !strchr(postfix, 'M') )
