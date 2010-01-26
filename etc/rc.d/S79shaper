@@ -5,17 +5,18 @@
 
 #wait to start web and run from goahead code
 web_wait
+QoSEnable=`nvram_get 2860 QoSEnable`
 
 start() {
-if [ -f /bin/tc ]; then
+if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
+get_param
  echo "Starting SHAPER: "
- get_param
     tc qdisc del dev $lan_if root > /dev/null 2>&1
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
     tc qdisc del dev $wan_if root  > /dev/null 2>&1
     tc qdisc del dev $wan_if ingress > /dev/null 2>&1
     if [ "$QoSEnable" = "1" ]; then
-	echo "--------------RALINK-SFQ------------------------"
+	echo "--------------RALINK-QOS------------------------"
 	qos_run
     fi
     if [ "$QoSEnable" = "2" ]; then
@@ -85,6 +86,8 @@ if [ -f /bin/tc ]; then
 	    modprobe ipt_IMQ > /dev/null 2>&1
 	    ifconfig imq0 up > /dev/null 2>&1
     fi
+else
+	    echo "----------------QOS-DISABLED----------------------"
 fi
 }
 
@@ -111,7 +114,6 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     nm=`nvram_get 2860 lan_netmask`
     wan_mode=`nvram_get 2860 wanConnectionMode`
-    QoSEnable=`nvram_get 2860 QoSEnable`
     NAT=`nvram_get 2860 natEnabled`
     SEC=`nvram_get 2860 SecurityMode`
     INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1`

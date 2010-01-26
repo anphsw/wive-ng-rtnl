@@ -35,19 +35,19 @@ case "$1" in
     	    fi
 	fi
         echo -n > $RESOLV_CONF
-        [ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+        #[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
         for i in $dns ; do
             echo adding dns $i
             echo nameserver $i >> $RESOLV_CONF
+        done
 	    service dns stop
 	    service upnp stop
 	    service dns start
 	    service upnp start
-        done
-		# notify goahead when the WAN IP has been acquired. --yy
-		killall -SIGUSR2 goahead
-		service igmpproxy stop
-		service igmpproxy start
+	    # notify goahead when the WAN IP has been acquired. --yy
+	    killall -SIGUSR2 goahead
+	    service igmpproxy stop
+	    service igmpproxy start
         ;;
 esac
 

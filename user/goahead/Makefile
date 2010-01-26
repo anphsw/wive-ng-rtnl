@@ -8,8 +8,11 @@ all:
 
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)
-ifeq ("$(CONFIG_USER_PPPOECD)", "y")
+ifeq ("$(CONFIG_USER_WAN_SIMPLE)", "y")
 	mv $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan_simple.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
+endif
+ifeq ("$(CONFIG_USER_3G)", "y")
+	mv $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
 endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")

@@ -129,8 +129,6 @@ link_up()
 
 reset_all_phys()
 {
-	sleep_time=$1
-
 	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
 		return
 	fi
@@ -147,7 +145,7 @@ reset_all_phys()
 	link_down 4
 
 	#force Windows clients to renew IP and update DNS server
-	sleep $sleep_time
+	sleep 1
 
 	if [ "$opmode" != "1" ]; then
 		link_up 0

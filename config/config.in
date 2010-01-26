@@ -145,6 +145,8 @@ bool 'portmap'					CONFIG_USER_PORTMAP
 bool 'pppd'                             	CONFIG_USER_PPPD
 bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
 bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
+bool 'Simple WAN cfg'                           CONFIG_USER_WAN_SIMPLE
+
 
 bool 'ripd-zebra (RIP)' 						CONFIG_USER_ZEBRA
 if [ "$CONFIG_USER_ZEBRA" = "y" ]; then

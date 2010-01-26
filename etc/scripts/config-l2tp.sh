@@ -14,16 +14,20 @@ PASSWORD=`nvram_get 2860 wan_l2tp_pass`
 killall -q -9 pppd > /dev/null 2>&1
 killall -q -9 xl2tpd > /dev/null 2>&1
 
-echo "Add static route to vpn server"
-ADDRESS=`nslookup "$SERVER" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
+    echo "Get vpn server ip adress"
+    ADDRESS=`nslookup "$SERVER" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
     if [ "$ADDRESS" != "" ]; then
         SERVER=$ADDRESS
       else
         SERVER=$SERVER
     fi
 
+    echo "Get route to vpn server."
     ROUTE=`ip r get "$SERVER" | grep dev | cut -f -3 -d " "`
-    ip r add $ROUTE
+    if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
+        echo "Add route to vpn server."
+        ip r add $ROUTE
+    fi
 
     echo "Remove default route"
     ip route del default 2> /dev/null

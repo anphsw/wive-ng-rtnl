@@ -62,8 +62,8 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	fi
 	ifconfig $wan_if $ip netmask $nm
 	route del default
-	if [ "$gw" != "" ]; then
-	route add default gw $gw
+	if [ "$gw" != "" ] || [ "$gw" != "0.0.0.0" ]; then
+	    route add default gw $gw
 	fi
 	config-dns.sh $pd $sd
 elif [ "$wanmode" = "DHCP" ]; then
