@@ -1,27 +1,11 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * webs.c -- GoAhead Embedded HTTP webs server
  *
  * Copyright (c) GoAhead Software Inc., 1995-2000. All Rights Reserved.
  *
  * See the file "license.txt" for usage and redistribution license requirements
  *
- * $Id: webs.c,v 1.14 2008-02-20 08:11:51 yy Exp $
+ * $Id: webs.c,v 1.15 2008-05-27 12:15:27 yy Exp $
  */
 
 /******************************** Description *********************************/
@@ -808,18 +792,19 @@ static int websParseFirst(webs_t wp, char_t *text)
 #ifndef __NO_CGI_BIN
 	if (gstrstr(url, CGI_BIN) != NULL) {
 		wp->flags |= WEBS_CGI_REQUEST;
+
+		// special case: upload.cgi
+		if(gstrstr(url, CGI_FIRMWARE_UPLOAD) != NULL){
+			wp->flags |= WEBS_CGI_FIRMWARE_UPLOAD;
+		}
+
 		if (wp->flags & WEBS_POST_REQUEST) {
-			wp->cgiStdin = websGetCgiCommName();
+			wp->cgiStdin = websGetCgiCommName(wp);
 		}
 
 		// ex: upload_setting....
 		if(gstrstr(url, CGI_UPLOAD) != NULL){
 			wp->flags |= WEBS_CGI_UPLOAD;
-		}
-
-		// special case: upload.cgi
-		if(gstrstr(url, CGI_FIRMWARE_UPLOAD) != NULL){
-			wp->flags |= WEBS_CGI_FIRMWARE_UPLOAD;
 		}
 	}
 #endif

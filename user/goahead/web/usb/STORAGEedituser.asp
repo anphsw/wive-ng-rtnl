@@ -1,28 +1,24 @@
 <!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
 <title>Edit User Account</title>
 <script language="JavaScript" type="text/javascript">
-Butterlate.setTextDomain("storage");
-var index = opener.document.forms[0].hiddenIndex.value;
-var user = opener.document.forms[0].hiddenUser.value;
-var pw = opener.document.forms[0].hiddenPassword.value;
-var max = opener.document.forms[0].hiddenMaxLogins.value;
-var mode = opener.document.forms[0].hiddenMode.value;
-/*
-var index = opener.document.storage_adm.hiddenIndex.value;
-var user = opener.document.storage_adm.hiddenUser.value;
-var pw = opener.document.storage_adm.hiddenPassword.value;
-var max = opener.document.storage_adm.hiddenMaxLogins.value;
-var mode = opener.document.storage_adm.hiddenMode.value;
-*/
+Butterlate.setTextDomain("usb");
+var index = opener.document.forms[0].selectIndex.value;
+var user = opener.document.forms[0].selectUser.value;
+var pw = opener.document.forms[0].selectPassword.value;
+var ftp = opener.document.forms[0].selectFtp.value;
+var maxlogins = opener.document.forms[0].selectMaxLogins.value;
+var mode = opener.document.forms[0].selectMode.value;
+var smb = opener.document.forms[0].selectSmb.value;
+var ftpb = '<% getFtpBuilt(); %>';
+var smbb = '<% getSmbBuilt(); %>';
 
 function initTranslation()
 {
@@ -33,73 +29,107 @@ function initTranslation()
 	e = document.getElementById("edituserMulLogins");
 	e.innerHTML = _("adduser mullogins");
 	e = document.getElementById("edituserMulLoginsEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("edituserMulLoginsDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("edituserMaxLogins");
 	e.innerHTML = _("adduser maxlogins");
 	e = document.getElementById("edituserDL");
 	e.innerHTML = _("adduser download");
 	e = document.getElementById("edituserDLEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("edituserDLDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("edituserUL");
 	e.innerHTML = _("adduser upload");
 	e = document.getElementById("edituserULEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("edituserULDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("edituserOW");
 	e.innerHTML = _("adduser overwrite");
 	e = document.getElementById("edituserOWEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("edituserOWDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("edituserER");
 	e.innerHTML = _("adduser erase");
 	e = document.getElementById("edituserEREnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("edituserERDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
+
 	e = document.getElementById("edituserApply");
-	e.value = _("storage apply");
+	e.value = _("usb apply");
 	e = document.getElementById("edituserCancel");
-	e.value = _("storage cancel");
+	e.value = _("usb cancel");
 }
 	
 function initValue()
 {
 	initTranslation();
 
+	document.storage_adduser.adduser_ftp[0].disabled = true;
+	document.storage_adduser.adduser_ftp[1].disabled = true;
+	document.storage_adduser.adduser_smb[0].disabled = true;
+	document.storage_adduser.adduser_smb[1].disabled = true;
 	document.storage_edituser.edituser_pw.value = pw;
-	if (mode.indexOf("M") >= 0)
+	if (ftp == "1" && ftpb == "1")
 	{
-		document.storage_edituser.edituser_mullogins[0].checked = true;
-		document.storage_edituser.edituser_maxlogins.disabled = false;
-		document.storage_edituser.edituser_maxlogins.value = max;
+		document.storage_edituser.edituser_ftp[0].disabled = false;
+		document.storage_edituser.edituser_ftp[1].disabled = false;
+		document.storage_edituser.edituser_ftp[0].checked = true;
+		if (mode.indexOf("M") >= 0)
+		{
+			document.storage_edituser.edituser_mullogins[0].checked = true;
+			document.storage_edituser.edituser_maxlogins.disabled = false;
+			document.storage_edituser.edituser_maxlogins.value = maxlogins;
+		}
+		else
+		{
+			document.storage_edituser.edituser_mullogins[1].checked = true;
+			document.storage_edituser.edituser_maxlogins.disabled = true;
+		}
+		if (mode.indexOf("D") >= 0)
+			document.storage_edituser.edituser_download[0].checked = true;
+		else
+			document.storage_edituser.edituser_download[1].checked = true;
+		if (mode.indexOf("U") >= 0)
+			document.storage_edituser.edituser_upload[0].checked = true;
+		else
+			document.storage_edituser.edituser_upload[1].checked = true;
+		if (mode.indexOf("O") >= 0)
+			document.storage_edituser.edituser_overwrite[0].checked = true;
+		else
+			document.storage_edituser.edituser_overwrite[1].checked = true;
+		if (mode.indexOf("E") >= 0)
+			document.storage_edituser.edituser_erase[0].checked = true;
+		else
+			document.storage_edituser.edituser_erase[1].checked = true;
 	}
 	else
 	{
-		document.storage_edituser.edituser_mullogins[1].checked = true;
+		document.storage_edituser.edituser_ftp[1].checked = true;
+		document.storage_edituser.edituser_mullogins[0].disabled = true;
+		document.storage_edituser.edituser_mullogins[1].disabled = true;
 		document.storage_edituser.edituser_maxlogins.disabled = true;
+		document.storage_edituser.edituser_download[0].disabled = true;
+		document.storage_edituser.edituser_download[1].disabled = true;
+		document.storage_edituser.edituser_upload[0].disabled = true;
+		document.storage_edituser.edituser_upload[1].disabled = true;
+		document.storage_edituser.edituser_overwrite[0].disabled = true;
+		document.storage_edituser.edituser_overwrite[1].disabled = true;
+		document.storage_edituser.edituser_erase[0].disabled = true;
+		document.storage_edituser.edituser_erase[1].disabled = true;
 	}
-	if (mode.indexOf("D") >= 0)
-		document.storage_edituser.edituser_download[0].checked = true;
+	if (smb == "1" && smbb == "1")
+	{
+		document.storage_edituser.edituser_smb[0].disabled = false;
+		document.storage_edituser.edituser_smb[1].disabled = false;
+		document.storage_edituser.edituser_smb[0].checked = true;
+	}
 	else
-		document.storage_edituser.edituser_download[1].checked = true;
-	if (mode.indexOf("U") >= 0)
-		document.storage_edituser.edituser_upload[0].checked = true;
-	else
-		document.storage_edituser.edituser_upload[1].checked = true;
-	if (mode.indexOf("O") >= 0)
-		document.storage_edituser.edituser_overwrite[0].checked = true;
-	else
-		document.storage_edituser.edituser_overwrite[1].checked = true;
-	if (mode.indexOf("E") >= 0)
-		document.storage_edituser.edituser_erase[0].checked = true;
-	else
-		document.storage_edituser.edituser_erase[1].checked = true;
+		document.storage_edituser.edituser_smb[1].checked = true;
 }
 
 function checkData()
@@ -133,6 +163,38 @@ function checkData()
 
 
 	return true;
+}
+
+function ftp_enable_switch()
+{
+	if (document.storage_edituser.edituser_ftp[0].checked == true)
+	{
+		document.storage_edituser.edituser_mullogins[0].disabled = false;
+		document.storage_edituser.edituser_mullogins[1].disabled = false;
+		document.storage_edituser.edituser_maxlogins.disabled = true;
+		document.storage_edituser.edituser_download[0].disabled = false;
+		document.storage_edituser.edituser_download[1].disabled = false;
+		document.storage_edituser.edituser_upload[0].disabled = false;
+		document.storage_edituser.edituser_upload[1].disabled = false;
+		document.storage_edituser.edituser_overwrite[0].disabled = false;
+		document.storage_edituser.edituser_overwrite[1].disabled = false;
+		document.storage_edituser.edituser_erase[0].disabled = false;
+		document.storage_edituser.edituser_erase[1].disabled = false;
+	}
+	else
+	{
+		document.storage_edituser.edituser_mullogins[0].disabled = true;
+		document.storage_edituser.edituser_mullogins[1].disabled = true;
+		document.storage_edituser.edituser_maxlogins.disabled = true;
+		document.storage_edituser.edituser_download[0].disabled = true;
+		document.storage_edituser.edituser_download[1].disabled = true;
+		document.storage_edituser.edituser_upload[0].disabled = true;
+		document.storage_edituser.edituser_upload[1].disabled = true;
+		document.storage_edituser.edituser_overwrite[0].disabled = true;
+		document.storage_edituser.edituser_overwrite[1].disabled = true;
+		document.storage_edituser.edituser_erase[0].disabled = true;
+		document.storage_edituser.edituser_erase[1].disabled = true;
+	}
 }
 
 function mullogins_enable_switch()
@@ -171,9 +233,11 @@ function submit_apply()
 <form method=post name="storage_edituser" action="/goform/StorageEditUser">
 <input type=hidden name=hiddenIndex value="">
 <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <tr> 
+    <td class="title" colspan="2" id="edituserbasic">Basic Setup</td>
+  </tr>
   <tr>
     <td class="head" id="edituserName">User Name</td>
-    </td>
     <td>
     <script language="JavaScript" type="text/javascript">
       document.write(user);
@@ -183,6 +247,18 @@ function submit_apply()
   <tr>
     <td class="head" id="edituserPW">Password</td>
     <td><input type="password" name="edituser_pw" size="16" maxlength="16" value=""></td>
+  </tr>
+</table>
+
+<br />
+
+<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <tr> 
+    <td class="title" id="edituserFtp">Ftp Setup</td>
+    <td>
+      <input type=radio name=edituser_ftp value="1" onClick="ftp_enable_switch()"><font id="edituserFtpEnable">Enable</font>&nbsp;
+      <input type=radio name=edituser_ftp value="0" onClick="ftp_enable_switch()"><font id="edituserFtpDisable">Disable</font>
+    </td>
   </tr>
   <tr>
     <td class="head" id="edituserMulLogins">Multiple Logins</td>
@@ -226,6 +302,21 @@ function submit_apply()
     </td>
   </tr>
 </table>
+
+<hr />
+<br />
+
+<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <tr> 
+    <td class="title" id="edituserSmb">Samba Setup</td>
+    <td>
+      <input type=radio name=edituser_smb value="1"><font id="edituserSmbEnable">Enable</font>&nbsp;
+      <input type=radio name=edituser_smb value="0"><font id="edituserSmbDisable">Disable</font>
+    </td>
+  </tr>
+</table>
+
+<hr />
 <br />
 
 <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
@@ -237,5 +328,8 @@ function submit_apply()
   </tr>
 </table>
 </form>
+
+</td></tr></table>
 </body>
 </html>
+

@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4 fdm=marker: */
 /*
  *	internet.c -- Internet Settings
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: internet.c,v 1.135.2.2 2008-04-01 06:42:25 yy Exp $
+ *	$Id: internet.c,v 1.167.2.8 2009-04-22 01:31:35 chhung Exp $
  */
 
 #include	<stdlib.h>
@@ -28,6 +12,7 @@
 #include	<net/if.h>
 #include	<net/route.h>
 #include    <string.h>
+#include    <dirent.h>
 #include	"internet.h"
 #include	"nvram.h"
 #include	"webs.h"
@@ -39,31 +24,53 @@
 
 #include	"linux/autoconf.h"  //kernel config
 #include	"config/autoconf.h" //user config
+#include	"user/busybox/include/autoconf.h" //busybox config
+
+#ifdef CONFIG_RALINKAPP_SWQOS
+#include      "qos.h"
+#endif
+
+static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getMBSSIDBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getUSBiNICBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getGWBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
 static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv);
 static int getDns(int eid, webs_t wp, int argc, char_t **argv);
 static int getHostSupp(int eid, webs_t wp, int argc, char_t **argv);
 static int getIfLiveWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getIfIsUpWeb(int eid, webs_t wp, int argc, char_t **argv);
-static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanMac(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv);
-static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanIp(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanMac(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv);
-static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
 static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
 static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setVpnPaThru(webs_t wp, char_t *path, char_t *query);
@@ -72,7 +79,6 @@ static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void addRouting(webs_t wp, char_t *path, char_t *query);
 static void delRouting(webs_t wp, char_t *path, char_t *query);
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
-static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
 inline void zebraRestart(void);
 void ripdRestart(void);
 
@@ -83,11 +89,13 @@ void formDefineInternet(void) {
 	websAspDefine(T("getIfLiveWeb"), getIfLiveWeb);
 	websAspDefine(T("getIfIsUpWeb"), getIfIsUpWeb);
 	websAspDefine(T("getIgmpProxyBuilt"), getIgmpProxyBuilt);
+	websAspDefine(T("getVPNBuilt"), getVPNBuilt);
 	websAspDefine(T("getLanIp"), getLanIp);
 	websAspDefine(T("getLanMac"), getLanMac);
 	websAspDefine(T("getLanIfNameWeb"), getLanIfNameWeb);
 	websAspDefine(T("getLanNetmask"), getLanNetmask);
 	websAspDefine(T("getDnsmasqBuilt"), getDnsmasqBuilt);
+	websAspDefine(T("getGWBuilt"), getGWBuilt);
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
 	websAspDefine(T("getPppoeRelayBuilt"), getPppoeRelayBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
@@ -98,9 +106,18 @@ void formDefineInternet(void) {
 	websAspDefine(T("getWanNetmask"), getWanNetmask);
 	websAspDefine(T("getWanGateway"), getWanGateway);
 	websAspDefine(T("getRoutingTable"), getRoutingTable);
+	websAspDefine(T("getMeshBuilt"), getMeshBuilt);
+	websAspDefine(T("getWDSBuilt"), getWDSBuilt);
+	websAspDefine(T("getWSCBuilt"), getWSCBuilt);
+	websAspDefine(T("getMBSSIDBuilt"), getMBSSIDBuilt);
+	websAspDefine(T("getUSBBuilt"), getUSBBuilt);
 	websAspDefine(T("getStorageBuilt"), getStorageBuilt);
 	websAspDefine(T("getFtpBuilt"), getFtpBuilt);
 	websAspDefine(T("getSmbBuilt"), getSmbBuilt);
+	websAspDefine(T("getMediaBuilt"), getMediaBuilt);
+	websAspDefine(T("getWebCamBuilt"), getWebCamBuilt);
+	websAspDefine(T("getPrinterSrvBuilt"), getPrinterSrvBuilt);
+	websAspDefine(T("getUSBiNICBuilt"), getUSBiNICBuilt);
 	websFormDefine(T("setLan"), setLan);
 	websFormDefine(T("setVpnPaThru"), setVpnPaThru);
 	websFormDefine(T("setWan"), setWan);
@@ -109,6 +126,11 @@ void formDefineInternet(void) {
 	websFormDefine(T("delRouting"), delRouting);
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
+	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
+	websAspDefine(T("getDATEBuilt"), getDATEBuilt);
+	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
+	websAspDefine(T("getSysLogBuilt"), getSysLogBuilt);
+	websAspDefine(T("getETHTOOLBuilt"), getETHTOOLBuilt);
 }
 
 /*
@@ -165,6 +187,7 @@ int getIfMac(char *ifname, char *if_hw)
 
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
 	if(ioctl(skfd, SIOCGIFHWADDR, &ifr) < 0) {
+		close(skfd);
 		//error(E_L, E_LOG, T("getIfMac: ioctl SIOCGIFHWADDR error for %s"), ifname);
 		return -1;
 	}
@@ -195,6 +218,7 @@ int getIfIp(char *ifname, char *if_addr)
 
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
 	if (ioctl(skfd, SIOCGIFADDR, &ifr) < 0) {
+		close(skfd);
 		//error(E_L, E_LOG, T("getIfIp: ioctl SIOCGIFADDR error for %s"), ifname);
 		return -1;
 	}
@@ -250,6 +274,7 @@ int getIfNetmask(char *ifname, char *if_net)
 
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
 	if (ioctl(skfd, SIOCGIFNETMASK, &ifr) < 0) {
+		close(skfd);
 		//error(E_L, E_LOG, T("getIfNetmask: ioctl SIOCGIFNETMASK error for %s\n"), ifname);
 		return -1;
 	}
@@ -289,8 +314,13 @@ char* getWanIfNamePPP(void)
 {
     char *cm;
     cm = nvram_bufget(RT2860_NVRAM, "wanConnectionMode");
-    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
+    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
+#ifdef CONFIG_USER_3G
+		|| !strncmp(cm, "3G", 3)
+#endif
+	){
         return "ppp0";
+	}
 
     return getWanIfName();
 }
@@ -350,7 +380,7 @@ char *getLanWanNamebyIf(char *ifname)
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
-		if(!strcmp(ifname, "eth2.2"))
+		if(!strcmp(ifname, "eth2.2") || !strcmp(ifname, "ppp0"))
 			return "WAN";
 		return ifname;
 #elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
@@ -359,7 +389,7 @@ char *getLanWanNamebyIf(char *ifname)
 			return "LAN";
 		if(atoi(num_s) == 1 && !strcmp(ifname, "ra0"))
 			return "LAN";
-		if (!strcmp(ifname, "eth2"))
+		if (!strcmp(ifname, "eth2") || !strcmp(ifname, "ppp0"))
 			return "WAN";
 		return ifname;
 #else
@@ -391,6 +421,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fp;
 	struct dhcpOfferedAddr {
+		unsigned char hostname[16];
 		unsigned char mac[16];
 		unsigned long ip;
 		unsigned long expires;
@@ -406,7 +437,8 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	if (NULL == fp)
 		return websWrite(wp, T(""));
 	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease)) {
-		websWrite(wp, T("<tr><td>%02X"), lease.mac[0]);
+		websWrite(wp, T("<tr><td>%-16s</td>"), lease.hostname);
+		websWrite(wp, T("<td>%02X"), lease.mac[0]);
 		for (i = 1; i < 6; i++)
 			websWrite(wp, T(":%02X"), lease.mac[i]);
 		addr.s_addr = lease.ip;
@@ -517,9 +549,64 @@ static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #endif
 }
 
+static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_NF_CONNTRACK_PPTP || defined CONFIG_NF_CONNTRACK_PPTP_MODULE || \
+    defined CONFIG_IP_NF_PPTP        || defined CONFIG_IP_NF_PPTP_MODULE
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_RT2860V2_AP_MESH || defined CONFIG_RT2860V2_STA_MESH
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_RT2860V2_AP_WDS
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_RT2860V2_AP_WSC || defined CONFIG_RT2860V2_STA_WSC
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getMBSSIDBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_RT2860V2_AP_MBSS
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USB
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
 static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_STORAGE
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -528,7 +615,7 @@ static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_STUPID_FTPD
+#if defined CONFIG_USER_STUPID_FTPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -537,7 +624,43 @@ static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_SAMBA
+#if defined CONFIG_USER_SAMBA
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getUSBiNICBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_INIC_USB 
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -546,13 +669,57 @@ static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_ZEBRA
+#if defined CONFIG_USER_ZEBRA
     return websWrite(wp, T("1"));
 #else
     return websWrite(wp, T("0"));
 #endif
 }
 
+static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_RALINKAPP_SWQOS
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_DATE
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USER_INADYN
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_USER_ETHTOOL
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
 
 /*
  * description: write LAN ip address accordingly
@@ -615,6 +782,15 @@ static int getLanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("%s"), if_net);
 }
 
+static int getGWBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
 static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_DNSMASQ
@@ -626,7 +802,7 @@ static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_LLDT && defined CONFIG_RT2860V2_AP_LLTD
+#if defined CONFIG_USER_LLTD && defined CONFIG_RT2860V2_AP_LLTD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -635,7 +811,7 @@ static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_PPPPOE_RELAY
+#ifdef CONFIG_USER_RPPPPOE_RELAY
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -644,7 +820,7 @@ static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_MINIUPNPD
+#ifdef CONFIG_USER_UPNP_IGD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -716,9 +892,11 @@ static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	char *cm;
 
 	cm = nvram_bufget(RT2860_NVRAM, "wanConnectionMode");
-	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) ||
-			!strncmp(cm, "PPTP", 5)) //fetch ip from ppp0
-	{
+	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
+#ifdef CONFIG_USER_3G
+			|| !strncmp(cm, "3G", 3)
+#endif
+	){ //fetch ip from ppp0
 		if (-1 == getIfNetmask("ppp0", if_net)) {
 			return websWrite(wp, T(""));
 		}
@@ -1286,7 +1464,7 @@ void ripdRestart(void)
 	char *password = nvram_bufget(RT2860_NVRAM, "Password");
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service ripd stop");
+	doSystem("killall -q ripd");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1322,7 +1500,7 @@ void ripdRestart(void)
 	}
 	doSystem("echo \"version 2\" >> /etc/ripd.conf");
 	doSystem("echo \"log syslog\" >> /etc/ripd.conf");
-	doSystem("service ripd start");
+	doSystem("ripd -f /etc/ripd.conf -d");
 }
 
 inline void zebraRestart(void)
@@ -1332,7 +1510,7 @@ inline void zebraRestart(void)
 
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service zebra stop");
+	doSystem("killall -q zebra");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1349,7 +1527,7 @@ inline void zebraRestart(void)
 	doSystem("echo \"password %s\" >> /etc/zebra.conf ", password);
 	doSystem("echo \"enable password rt2880\" >> /etc/zebra.conf ");
 	doSystem("echo \"log syslog\" >> /etc/zebra.conf ");
-	doSystem("service zebra start");
+	doSystem("zebra -d -f /etc/zebra.conf");
 }
 
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
@@ -1371,8 +1549,8 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	}else if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "1")){
 		nvram_bufset(RT2860_NVRAM, "RIPEnable", rip);
 		nvram_commit(RT2860_NVRAM);
-		doSystem("service ripd stop");
-		doSystem("service zebra stop");
+		doSystem("killall -q ripd");
+		doSystem("killall -q zebra");
 	}else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0")){
 		nvram_bufset(RT2860_NVRAM, "RIPEnable", rip);
 		nvram_commit(RT2860_NVRAM);
@@ -1390,8 +1568,6 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
-
-
 /*
  * description: setup internet according to nvram configurations
  *              (assume that nvram_init has already been called)
@@ -1399,27 +1575,52 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
  */
 int initInternet(void)
 {
+#ifndef CONFIG_RALINK_RT2880
 	char *auth_mode = nvram_bufget(RT2860_NVRAM, "AuthMode");
+#endif
+#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+	char *opmode;
+#endif
 
 	doSystem("internet.sh");
 
-	//if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-	//	ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
-	//else
-	//	ledAlways(13, LED_ON); //turn on security LED (gpio 13)
+	//automatically connect to AP according to the active profile
+#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+	opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
+	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") &&
+				!strcmp("1", nvram_get(RT2860_NVRAM, "ethConver")))) {
+		if (-1 != initStaProfile())
+			initStaConnection();
+	}
+#endif
+
+#ifndef CONFIG_RALINK_RT2880
+	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
+		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
+	else
+		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
+#endif
 
 #if defined (CONFIG_RT2860V2_AP) || defined (CONFIG_RT2860V2_AP_MODULE)
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
 #endif
-#if defined (CONFIG_RT2880v2_INIC) || defined (CONFIG_RT2880v2_INIC_MODULE)
+#if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_PCI) || defined (CONFIG_INIC_USB) 
 	restart8021XDaemon(RTINIC_NVRAM);	// in wireless.c
 #endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	restart8021XDaemon(RT2561_NVRAM);	// in wireless.c
 #endif
+
+#ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY
+	AntennaDiversityInit();
+#endif
+
 	firewall_init();
 	management_init();
 	RoutingInit();
+#ifdef CONFIG_RALINKAPP_SWQOS
+	QoSInit();
+#endif
 
 	return 0;
 }
@@ -1429,7 +1630,7 @@ static void getMyMAC(webs_t wp, char_t *path, char_t *query)
 	char myMAC[32];
 
 	arplookup(wp->ipaddr, myMAC);
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("%s"), myMAC);
 	websDone(wp, 200);
 }
@@ -1440,6 +1641,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	char_t	*ip, *nm, *dhcp_tp, *stp_en, *lltd_en, *igmp_en, *upnp_en,
 			*radvd_en, *pppoer_en, *dnsp_en;
 	char_t	*gw = NULL, *pd = NULL, *sd = NULL;
+	char_t *lan2enabled, *lan2_ip, *lan2_nm;
 #ifdef GA_HOSTNAME_SUPPORT
 	char_t	*host;
 #endif
@@ -1447,9 +1649,13 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	char_t	*dhcp_sl1, *dhcp_sl2, *dhcp_sl3;
 	char	*opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	char	*wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
+	char	*ctype = nvram_bufget(RT2860_NVRAM, "connectionType");
 
 	ip = websGetVar(wp, T("lanIp"), T(""));
 	nm = websGetVar(wp, T("lanNetmask"), T(""));
+	lan2enabled = websGetVar(wp, T("lan2enabled"), T(""));
+	lan2_ip = websGetVar(wp, T("lan2Ip"), T(""));
+	lan2_nm = websGetVar(wp, T("lan2Netmask"), T(""));
 #ifdef GA_HOSTNAME_SUPPORT
 	host = websGetVar(wp, T("hostname"), T("0"));
 #endif
@@ -1473,13 +1679,26 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	dhcp_sl3 = websGetVar(wp, T("dhcpStatic3"), T(""));
 
 	/*
+	 * check static ip address:
 	 * lan and wan ip should not be the same except in bridge mode
 	 */
-/*	if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, wan_ip, 15)) {
-		websError(wp, 200, "IP address is identical to WAN");
-		return;
+	if (strncmp(ctype, "STATIC", 7)) {
+		if (strcmp(opmode, "0") && !strncmp(ip, wan_ip, 15)) {
+			websError(wp, 200, "IP address is identical to WAN");
+			return;
+		}
+		if (!strcmp(lan2enabled, "1"))
+		{
+			if (strcmp(opmode, "0") && !strncmp(lan2_ip, wan_ip, 15)) {
+				websError(wp, 200, "LAN2 IP address is identical to WAN");
+				return;
+			}
+			else if (strcmp(opmode, "0") && !strncmp(lan2_ip, ip, 15)) {
+				websError(wp, 200, "LAN2 IP address is identical to LAN1");
+				return;
+			}
+		}
 	}
-*/
 	// configure gateway and dns (WAN) at bridge mode
 	if (!strncmp(opmode, "0", 2)) {
 		gw = websGetVar(wp, T("lanGateway"), T(""));
@@ -1491,6 +1710,9 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2860_NVRAM, "lan_ipaddr", ip);
 	nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
+	nvram_bufset(RT2860_NVRAM, "Lan2Enabled", lan2enabled);
+	nvram_bufset(RT2860_NVRAM, "lan2_ipaddr", lan2_ip);
+	nvram_bufset(RT2860_NVRAM, "lan2_netmask", lan2_nm);
 #ifdef GA_HOSTNAME_SUPPORT
 	nvram_bufset(RT2860_NVRAM, "HostName", host);
 #endif
@@ -1533,15 +1755,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("lan.sh");
-
-	updateFlash8021x(RT2860_NVRAM);
-	doSystem("ralink_init make_wireless_config rt2860");
-	restart8021XDaemon(RT2860_NVRAM);
-
-	firewall_init();
-	management_init();
-	RoutingInit();
+	initInternet();
 
 	//debug print
 	websHeader(wp);
@@ -1551,6 +1765,9 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #endif
 	websWrite(wp, T("IP: %s<br>\n"), ip);
 	websWrite(wp, T("Netmask: %s<br>\n"), nm);
+	websWrite(wp, T("LAN2 Enabled: %s<br>\n"), lan2enabled);
+	websWrite(wp, T("LAN2 IP: %s<br>\n"), lan2_ip);
+	websWrite(wp, T("LAN2 Netmask: %s<br>\n"), lan2_nm);
 	if (!strncmp(opmode, "0", 2)) {
 		websWrite(wp, T("Gateway: %s<br>\n"), gw);
 		websWrite(wp, T("PriDns: %s<br>\n"), pd);
@@ -1613,8 +1830,12 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t	*clone_en, *clone_mac;
 	char_t  *pptp_srv, *pptp_mode;
 	char_t  *l2tp_srv, *l2tp_mode;
+#ifdef CONFIG_USER_3G
+	char_t	*usb3g_dev;
+#endif
 	char	*opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
+	char	*lan2enabled = nvram_bufget(RT2860_NVRAM, "Lan2Enabled");
 
 	ctype = ip = nm = gw = pd = sd = eth = user = pass = 
 		clone_en = clone_mac = pptp_srv = pptp_mode = l2tp_srv = l2tp_mode =
@@ -1643,6 +1864,15 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			websError(wp, 200, "IP address is identical to LAN");
 			return;
 		}
+		if (!strcmp(lan2enabled, "1"))
+		{
+			char	*lan2_ip = nvram_bufget(RT2860_NVRAM, "lan2_ipaddr");
+			if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, lan2_ip, 15)) {
+				nvram_commit(RT2860_NVRAM);
+				websError(wp, 200, "IP address is identical to LAN2");
+				return;
+			}
+		}
 		nvram_bufset(RT2860_NVRAM, "wan_ipaddr", ip);
 		if (-1 == inet_addr(nm)) {
 			nvram_commit(RT2860_NVRAM);
@@ -1666,13 +1896,24 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
 	}
 	else if (!strncmp(ctype, "PPPOE", 6)) {
+		char_t *pppoe_opmode, *pppoe_optime;
+
 		user = websGetVar(wp, T("pppoeUser"), T(""));
 		pass = websGetVar(wp, T("pppoePass"), T(""));
+		pppoe_opmode = websGetVar(wp, T("pppoeOPMode"), T(""));
+		if (0 == strcmp(pppoe_opmode, "OnDemand"))
+			pppoe_optime = websGetVar(wp, T("pppoeIdleTime"), T(""));
+		else 
+			pppoe_optime = websGetVar(wp, T("pppoeRedialPeriod"), T(""));
 		nvram_bufset(RT2860_NVRAM, "wan_pppoe_user", user);
 		nvram_bufset(RT2860_NVRAM, "wan_pppoe_pass", pass);
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
+		nvram_bufset(RT2860_NVRAM, "wan_pppoe_opmode", pppoe_opmode);
+		nvram_bufset(RT2860_NVRAM, "wan_pppoe_optime", pppoe_optime);
 	}
 	else if (!strncmp(ctype, "L2TP", 5)) {
+		char_t *l2tp_opmode, *l2tp_optime;
+
 		l2tp_srv = websGetVar(wp, T("l2tpServer"), T(""));
 		user = websGetVar(wp, T("l2tpUser"), T(""));
 		pass = websGetVar(wp, T("l2tpPass"), T(""));
@@ -1680,12 +1921,18 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		ip = websGetVar(wp, T("l2tpIp"), T(""));
 		nm = websGetVar(wp, T("l2tpNetmask"), T(""));
 		gw = websGetVar(wp, T("l2tpGateway"), T(""));
-
+		l2tp_opmode = websGetVar(wp, T("l2tpOPMode"), T(""));
+		if (0 == strcmp(l2tp_opmode, "OnDemand"))
+			l2tp_optime = websGetVar(wp, T("l2tpIdleTime"), T(""));
+		else
+			l2tp_optime = websGetVar(wp, T("l2tpRedialPeriod"), T(""));
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
 		nvram_bufset(RT2860_NVRAM, "wan_l2tp_server", l2tp_srv);
 		nvram_bufset(RT2860_NVRAM, "wan_l2tp_user", user);
 		nvram_bufset(RT2860_NVRAM, "wan_l2tp_pass", pass);
 		nvram_bufset(RT2860_NVRAM, "wan_l2tp_mode", l2tp_mode);
+		nvram_bufset(RT2860_NVRAM, "wan_l2tp_opmode", l2tp_opmode);
+		nvram_bufset(RT2860_NVRAM, "wan_l2tp_optime", l2tp_optime);
 		if (!strncmp(l2tp_mode, "0", 2)) {
 			nvram_bufset(RT2860_NVRAM, "wan_l2tp_ip", ip);
 			nvram_bufset(RT2860_NVRAM, "wan_l2tp_netmask", nm);
@@ -1693,6 +1940,8 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	else if (!strncmp(ctype, "PPTP", 5)) {
+		char_t *pptp_opmode, *pptp_optime;
+
 		pptp_srv = websGetVar(wp, T("pptpServer"), T(""));
 		user = websGetVar(wp, T("pptpUser"), T(""));
 		pass = websGetVar(wp, T("pptpPass"), T(""));
@@ -1700,18 +1949,33 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		ip = websGetVar(wp, T("pptpIp"), T(""));
 		nm = websGetVar(wp, T("pptpNetmask"), T(""));
 		gw = websGetVar(wp, T("pptpGateway"), T(""));
+		pptp_opmode = websGetVar(wp, T("pptpOPMode"), T(""));
+		if (0 == strcmp(pptp_opmode, "OnDemand"))
+			pptp_optime = websGetVar(wp, T("pptpIdleTime"), T(""));
+		else
+			pptp_optime = websGetVar(wp, T("pptpRedialPeriod"), T(""));
 
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
 		nvram_bufset(RT2860_NVRAM, "wan_pptp_server", pptp_srv);
 		nvram_bufset(RT2860_NVRAM, "wan_pptp_user", user);
 		nvram_bufset(RT2860_NVRAM, "wan_pptp_pass", pass);
 		nvram_bufset(RT2860_NVRAM, "wan_pptp_mode", pptp_mode);
+		nvram_bufset(RT2860_NVRAM, "wan_pptp_opmode", pptp_opmode);
+		nvram_bufset(RT2860_NVRAM, "wan_pptp_optime", pptp_optime);
 		if (!strncmp(pptp_mode, "0", 2)) {
 			nvram_bufset(RT2860_NVRAM, "wan_pptp_ip", ip);
 			nvram_bufset(RT2860_NVRAM, "wan_pptp_netmask", nm);
 			nvram_bufset(RT2860_NVRAM, "wan_pptp_gateway", gw);
 		}
 	}
+#ifdef CONFIG_USER_3G
+	else if (!strncmp(ctype, "3G", 3)) {
+		usb3g_dev = websGetVar(wp, T("Dev3G"), T(""));
+
+		nvram_bufset(RT2860_NVRAM, "wan_3g_dev", usb3g_dev);
+		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
+	}
+#endif
 	else {
 		websHeader(wp);
 		websWrite(wp, T("<h2>Unknown Connection Type: %s</h2><br>\n"), ctype);
@@ -1743,7 +2007,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	else if (!strncmp(ctype, "DHCP", 5)) {
 	}
 	else if (!strncmp(ctype, "PPPOE", 6)) {
-		websWrite(wp, T("Ethernet Card: %s<br>\n"), eth);
 		websWrite(wp, T("User Name: %s<br>\n"), user);
 		websWrite(wp, T("Password: %s<br>\n"), pass);
 	}
@@ -1769,6 +2032,12 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			websWrite(wp, T("Gateway: %s<br>\n"), gw);
 		}
 	}
+#ifdef CONFIG_USER_3G
+	else if (!strncmp(ctype, "3G", 3)) {
+		websWrite(wp, T("3G device: %s<br>\n"), usb3g_dev);
+	}
+#endif
+
 	websWrite(wp, T("MAC Clone Enable: %s<br>\n"), clone_en);
 	if (!strncmp(clone_en, "1", 2))
 		websWrite(wp, T("MAC Address: %s<br>\n"), clone_mac);

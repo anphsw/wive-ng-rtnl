@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  *  station.c -- Station Mode
  *
  *  Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *  $Id: station.c,v 1.39.4.1 2008-03-24 08:23:48 winfred Exp $
+ *  $Id: station.c,v 1.44 2008-12-17 12:33:48 yy Exp $
  */
 
 #include	<sys/ioctl.h>
@@ -140,6 +124,7 @@ PRT_PROFILE_SETTING selectedProfileSetting = NULL, headerProfileSetting = NULL, 
 unsigned char   Connection_flag=0, Active_flag=0, nConfig_flag=0;
 unsigned int    m_nSigQua = 0;
 unsigned long   m_lTxCount = 0;
+unsigned long   m_lRxCount = 0;
 unsigned long   m_lChannelQuality = 0;
 char    G_bRadio = 1; //TRUE
 char    G_bdBm_ischeck = 0; //false
@@ -514,7 +499,17 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 						unsigned int* pOUI = (unsigned int*)((char*)pVarIE->data);
 						//fprintf(stderr, "pOUI=0x%08x\n", pOUI);
 						if (*pOUI != WPA_OUI_TYPE)
-							break;
+						{
+							lIELoc += pVarIE->Length;
+							lIELoc += 2;
+							pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+							if(pVarIE->Length <= 0)
+								break;
+
+							continue;
+						}
+
 						unsigned int* plGroupKey; 
 						unsigned short* pdPairKeyCount;
 						unsigned int* plPairwiseKey=NULL;
@@ -534,7 +529,16 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 								bAESCCMP = TRUE;
 						}
 						else
-							break;
+						{
+							lIELoc += pVarIE->Length;
+							lIELoc += 2;
+							pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+							if(pVarIE->Length <= 0)
+								break;
+							
+							continue;
+						}
 				
 						pdPairKeyCount = (unsigned short*)((char*)plGroupKey + 4);
 						plPairwiseKey = (unsigned int*) ((char*)pdPairKeyCount + 2);
@@ -602,7 +606,16 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 								bAESCCMP = TRUE;
 						}
 						else
-							break;
+						{
+							lIELoc += pVarIE->Length;
+							lIELoc += 2;
+							pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+							if(pVarIE->Length <= 0)
+								break;
+							
+							continue;
+						}
 
 						pdPairKeyCount = (unsigned short*)((char*)plGroupKey + 4);
 						plPairwiseKey = (unsigned int*)((char*)pdPairKeyCount + 2);
@@ -3128,9 +3141,11 @@ static int getStaRadioStatus(int eid, webs_t wp, int argc, char_t **argv)
 static int getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int ConnectStatus = 0;
+	RT_802_11_LINK_STATUS LinkStatus;
 	int s;
-	s = socket(AF_INET, SOCK_DGRAM, 0);
 	char tmp[8];
+
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
 	if (ConnectStatus == 0) {
@@ -3138,11 +3153,19 @@ static int getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv)
 		return websWrite(wp, "0");
 	}
 
-	double fLastRxRate = 1;
-	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_RX_RATE, &fLastRxRate);
+	// Get Link Status Info from driver
+	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(RT_802_11_LINK_STATUS));
+
+	// Rx Throughput (KBits/sec) (LinkStatus.RxByteCount - m_lRxCount) * 8(bits) /1000 / 2(secs)
+	if (m_lRxCount != 0)
+		snprintf(tmp, 8, "%.1f", (double)(LinkStatus.RxByteCount - m_lRxCount) / 250);
+	else
+		snprintf(tmp, 8, "%.1f", (double)0);
+
+	websWrite(wp, "%s", tmp);
+	m_lRxCount = LinkStatus.RxByteCount;
 	close(s);
-	snprintf(tmp, 8, "%.1f", fLastRxRate);
-	return websWrite(wp, "%s", tmp);
+	return 0;
 }
 
 /*
@@ -3425,6 +3448,11 @@ static int getStaStatsTx(int eid, webs_t wp, int argc, char_t **argv)
 		// RTS Frames Fail To Receive CTS
 		sprintf(tmpStatisics, "%8lld", Statistics.RTSFailureCount.QuadPart);
 		websWrite(wp, "<tr><td class=\"head\">%s</td><td>%s</td></tr>", "RTS Frames Fail To Receive CTS", tmpStatisics);
+
+		// Frames Received Successfully
+		sprintf(tmpStatisics, "%8lld", Statistics.ReceivedFragmentCount.QuadPart);
+		websWrite(wp, "<tr><td class=\"title\" colspan=2 id=statisticRx>Receive Statistics</td></tr>");
+		websWrite(wp, "<tr><td class=\"head\">%s</td><td>%s</td></tr>", "Frames Received Successfully", tmpStatisics);
 		return 0;
 	}
 	else
@@ -3444,11 +3472,7 @@ static int myGetSuppAMode(void)
 		{
 			if ( pNetworkTypeList->NetworkType[i] == Ndis802_11OFDM5 )
 			{
-#ifdef CONFIG_802_11_a
 				G_bSupportAMode = 1;
-#else
-				G_bSupportAMode = 0;
-#endif
 				break;
 			}
 		}
@@ -3463,14 +3487,10 @@ static int myGetSuppAMode(void)
  */
 static int getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_802_11_a
- 	if (myGetSuppAMode() == 1)
+	if (myGetSuppAMode() == 1)
 		ejSetResult(eid, "1");
 	else
 		ejSetResult(eid, "0");
-#else
-		ejSetResult(eid, "0");
-#endif
 	return 0;
 }
 
@@ -3481,27 +3501,18 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char *mode_s = nvram_bufget(RT2860_NVRAM, "WirelessMode");
 	int mode;
-#ifdef CONFIG_802_11_a
 	int bSuppA = myGetSuppAMode();
-#endif
+
 	mode = (NULL == mode_s)? 0 : atoi(mode_s);
 	websWrite(wp, "<option value=0 %s>802.11 B/G mixed mode</option>", (mode == 0)? "selected" : "");
 	websWrite(wp, "<option value=1 %s>802.11 B Only</option>", (mode == 1)? "selected" : "");
-#ifdef CONFIG_802_11_a
 	if (bSuppA) {
 		websWrite(wp, "<option value=2 %s>802.11 A Only</option>", (mode == 2)? "selected" : "");
 		websWrite(wp, "<option value=3 %s>802.11 A/B/G mixed mode</option>", (mode == 3)? "selected" : "");
 	}
-#else
 	websWrite(wp, "<option value=4 %s>802.11 G Only</option>", (mode == 4)? "selected" : "");
 	websWrite(wp, "<option value=6 %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
-#endif
-	websWrite(wp, "<option value=7 %s>802.11 G/N mixed mode</option>", (mode == 7)? "selected" : "");
-	websWrite(wp, "<option value=6 %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
-#ifndef CONFIG_802_11_a
-	websWrite(wp, "<option value=9 %s>802.11 BGN mixed mode</option>", (mode == 9)? "selected" : "");
-#endif
-#ifdef CONFIG_802_11_a
+	websWrite(wp, "<option value=7 %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
 	if (bSuppA) {
 		websWrite(wp, "<option value=8 %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
 	}
@@ -3510,7 +3521,7 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, "<option value=10 %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
 		websWrite(wp, "<option value=5 %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
 	}
-#endif
+
 	return 0;
 }
 
@@ -4781,8 +4792,7 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2860_NVRAM, "HT_AutoBA", autoBA);
 	nvram_bufset(RT2860_NVRAM, "HT_MpduDensity", mpdu_density);
-	if (!strcmp(a_msdu_enable, "on"))
-		nvram_bufset(RT2860_NVRAM, "HT_AMSDU", mpdu_density);
+	nvram_bufset(RT2860_NVRAM, "HT_AMSDU", strcmp(a_msdu_enable, "off")? "1":"0");
 	nvram_commit(RT2860_NVRAM);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);

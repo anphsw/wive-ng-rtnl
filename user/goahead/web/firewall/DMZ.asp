@@ -3,8 +3,6 @@
 <title>MAC Filtering Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
@@ -212,6 +210,6 @@ function updateState()
 <br>
 <hr />
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>

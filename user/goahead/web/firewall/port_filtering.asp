@@ -3,8 +3,6 @@
 <title>IP/Port Filtering Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
@@ -503,7 +501,7 @@ function protocolChange()
 <hr />
 
 
-<!-----------------------    BASIC  form  ----------------------->
+<!-- ====================   BASIC  form  ==================== -->
 <form method=post name="BasicSettings" action=/goform/BasicSettings>
 <table width="400" border="1" cellpadding="2" cellspacing="1">
 <tr>
@@ -544,7 +542,7 @@ function protocolChange()
 <br>
 <hr />
 
-<!-----------------------    MAC/IP/Port  form  ----------------------->
+<!-- ====================   MAC/IP/Port form   ==================== -->
 <form method=post name="ipportFilter" action=/goform/ipportFilter>
 <table width="500" border="1" cellpadding="2" cellspacing="1">
 <tr>
@@ -652,7 +650,7 @@ function protocolChange()
 <br>
 <hr />
 
-<!----------------------------  delete rules  ---------------------------->
+<!-- =========================  delete rules  ========================= -->
 <form action=/goform/ipportFilterDelete method=POST name="ipportFilterDelete">
 
 <table width="500" border="1" cellpadding="2" cellspacing="1">	
@@ -681,6 +679,6 @@ function protocolChange()
 <input type="reset" value="Reset" id="portCurrentFilterReset" name="reset">
 </form>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>

@@ -3,11 +3,35 @@
 <title>Local Area Network (LAN) Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
+var lan2 = '<% getCfgZero(1, "Lan2Enabled"); %>';
+
+var secs
+var timerID = null
+var timerRunning = false
+function StartTheTimer(){
+	if (secs==0){
+		TimeoutReload(5);
+		//window.location.reload();
+		window.location.href=window.location.href;	//reload page
+    }else{
+        self.status = secs
+        secs = secs - 1
+        timerRunning = true
+        timerID = self.setTimeout("StartTheTimer()", 1000)
+    }
+}
+
+function TimeoutReload(timeout)
+{
+	secs = timeout;
+	if(timerRunning)
+		clearTimeout(timerID)
+	timerRunning = false
+	StartTheTimer();	
+}
 
 function display_on()
 {
@@ -107,6 +131,16 @@ function initTranslation()
 	e.innerHTML = _("inet ip");
 	e = document.getElementById("lNetmask");
 	e.innerHTML = _("inet netmask");
+	e = document.getElementById("lLan2");
+	e.innerHTML = _("inet lan2");
+	e = document.getElementById("lLan2Enable");
+	e.innerHTML = _("inet enable");
+	e = document.getElementById("lLan2Disable");
+	e.innerHTML = _("inet disable");
+	e = document.getElementById("lLan2Ip");
+	e.innerHTML = _("inet lan2 ip");
+	e = document.getElementById("lLan2Netmask");
+	e.innerHTML = _("inet lan2 netmask");
 	e = document.getElementById("lGateway");
 	e.innerHTML = _("inet gateway");
 	e = document.getElementById("lPriDns");
@@ -219,6 +253,25 @@ function initValue()
 
 	initTranslation();
 
+	if (lan2 == "1")
+	{
+		var lan2_ip = '<% getCfgGeneral(1, "lan2_ipaddr"); %>';
+		var lan2_nm = '<% getCfgGeneral(1, "lan2_netmask"); %>';
+
+		document.lanCfg.lan2enabled[0].checked = true;
+		document.lanCfg.lan2Ip.disabled = false;
+		document.lanCfg.lan2Ip.value = lan2_ip;
+		document.lanCfg.lan2Netmask.disabled = false;
+		document.lanCfg.lan2Netmask.value = lan2_nm;
+	}
+	else
+	{
+		document.lanCfg.lan2enabled[1].checked = true;
+		document.lanCfg.lan2Ip.disabled = true;
+		document.lanCfg.lan2Netmask.disabled = true;
+	}
+
+
 	document.lanCfg.lanDhcpType.options.selectedIndex = 1*dhcp;
 	dhcpTypeSwitch();
 	document.lanCfg.stpEnbl.options.selectedIndex = 1*stp;
@@ -239,6 +292,7 @@ function initValue()
 		document.getElementById("brSecDns").style.display = "none";
 	}
 
+	/* ppp0 is not a disabled interface anymore..
 	if (wan == "PPPOE" || wan == "L2TP" || wan == "PPTP") {
 		document.getElementById("igmpProxy").style.visibility = "hidden";
 		document.getElementById("igmpProxy").style.display = "none";
@@ -247,6 +301,7 @@ function initValue()
 		document.getElementById("igmpProxy").style.visibility = "visible";
 		document.getElementById("igmpProxy").style.display = display_on();
 	}
+	*/
 
 	if (lltdb == "0") {
 		document.getElementById("lltd").style.visibility = "hidden";
@@ -331,6 +386,38 @@ function checkIpAddr(field, ismask)
 		field.focus();
 		return false;
 	}
+
+	if (isAllNum(field.value) == 0) {
+		alert('It should be a [0-9] number.');
+		field.value = field.defaultValue;
+		field.focus();
+		return false;
+	}
+
+	if (ismask) {
+		if ((!checkRange(field.value, 1, 0, 256)) ||
+				(!checkRange(field.value, 2, 0, 256)) ||
+				(!checkRange(field.value, 3, 0, 256)) ||
+				(!checkRange(field.value, 4, 0, 256)))
+		{
+			alert('IP adress format error.');
+			field.value = field.defaultValue;
+			field.focus();
+			return false;
+		}
+	}
+	else {
+		if ((!checkRange(field.value, 1, 0, 255)) ||
+				(!checkRange(field.value, 2, 0, 255)) ||
+				(!checkRange(field.value, 3, 0, 255)) ||
+				(!checkRange(field.value, 4, 1, 254)))
+		{
+			alert('IP adress format error.');
+			field.value = field.defaultValue;
+			field.focus();
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -347,6 +434,13 @@ function CheckValue()
 		return false;
 	if (!checkIpAddr(document.lanCfg.lanNetmask, true))
 		return false;
+	if (document.lanCfg.lan2enabled[0].checked == true)
+	{
+		if (!checkIpAddr(document.lanCfg.lan2Ip, false))
+			return false;
+		if (!checkIpAddr(document.lanCfg.lan2Netmask, true))
+			return false;
+	}
 	if (document.lanCfg.lanGateway.value != "")
 		if (!checkIpAddr(document.lanCfg.lanGateway, false))
 			return false;
@@ -407,6 +501,72 @@ function CheckValue()
 	}
 	return true;
 }
+
+function lan2_enable_switch()
+{
+	if (document.lanCfg.lan2enabled[1].checked == true)
+	{
+		document.lanCfg.lan2Ip.disabled = true;
+		document.lanCfg.lan2Netmask.disabled = true;
+	}
+	else
+	{
+		document.lanCfg.lan2Ip.disabled = false;
+		document.lanCfg.lan2Netmask.disabled = false;
+	}
+}
+
+var oldIp;
+function recIpCfg()
+{
+	oldIp = document.lanCfg.lanIp.value;
+}
+
+/*
+ * Try to modify dhcp server configurations:
+ *   dhcp start/end ip address to the same as new lan ip address
+ */
+function modDhcpCfg()
+{
+	var i, j;
+	var mask = document.lanCfg.lanNetmask.value;
+	var newNet = document.lanCfg.lanIp.value;
+
+	//support simple subnet mask only
+	if (mask == "255.255.255.0")
+		mask = 3;
+	else if (mask == "255.255.0.0")
+		mask = 2;
+	else if (mask == "255.0.0.0")
+		mask = 1;
+	else
+		return;
+
+	//get the old subnet
+	for (i=0, j=0; i<oldIp.length; i++) {
+		if (oldIp.charAt(i) == '.') {
+			j++;
+			if (j != mask)
+				continue;
+			oldIp = oldIp.substring(0, i);
+			break;
+		}
+	}
+
+	//get the new subnet
+	for (i=0, j=0; i<newNet.length; i++) {
+		if (newNet.charAt(i) == '.') {
+			j++;
+			if (j != mask)
+				continue;
+			newNet = newNet.substring(0, i);
+			break;
+		}
+	}
+
+	document.lanCfg.dhcpStart.value = document.lanCfg.dhcpStart.value.replace(oldIp, newNet);
+	document.lanCfg.dhcpEnd.value = document.lanCfg.dhcpEnd.value.replace(oldIp, newNet);
+}
 </script>
 </head>
 
@@ -430,11 +590,26 @@ function CheckValue()
 </tr>
 <tr>
   <td class="head" id="lIp">IP Address</td>
-  <td><input name="lanIp" maxlength=15 value="<% getLanIp(); %>"></td>
+  <td><input name="lanIp" maxlength=15 value="<% getLanIp(); %>" onFocus="recIpCfg()" onBlur="modDhcpCfg()"></td>
 </tr>
 <tr>
   <td class="head" id="lNetmask">Subnet Mask</td>
   <td><input name="lanNetmask" maxlength=15 value="<% getLanNetmask(); %>"></td>
+</tr>
+<tr>
+  <td class="head" id="lLan2">LAN2</td>
+  <td>
+    <input type="radio" name="lan2enabled" value="1" onclick="lan2_enable_switch()"><font id="lLan2Enable">Enablei</font>&nbsp;
+    <input type="radio" name="lan2enabled" value="0" onClick="lan2_enable_switch()" checked><font id="lLan2Disable">Disable</font>
+  </td>
+</tr>
+<tr>
+  <td class="head" id="lLan2Ip">LAN2 IP Address</td>
+  <td><input name="lan2Ip" maxlength=15 value=""></td>
+</tr>
+<tr>
+  <td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
+  <td><input name="lan2Netmask" maxlength=15 value=""></td>
 </tr>
 <tr id="brGateway">
   <td class="head" id="lGateway">Default Gateway</td>
@@ -588,14 +763,14 @@ function CheckValue()
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
-    <input type=submit style="{width:120px;}" value="Apply" id="lApply">&nbsp;&nbsp;
+    <input type=submit style="{width:120px;}" value="Apply" id="lApply"  onClick="TimeoutReload(20)">&nbsp;&nbsp;
     <input type=reset  style="{width:120px;}" value="Cancel" id="lCancel" onClick="window.location.reload()">
   </td>
 </tr>
 </table>
 </form>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>
 

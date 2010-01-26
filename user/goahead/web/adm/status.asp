@@ -3,13 +3,23 @@
 <title>Access Point Status</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <META HTTP-EQUIV="refresh" CONTENT="3; URL=./status.asp">
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
+
+function style_display_on()
+{
+	if (window.ActiveXObject)
+	{ // IE
+		return "block";
+	}
+	else if (window.XMLHttpRequest)
+	{ // Mozilla, Safari,...
+		return "table-row";
+	}
+}
 
 function showOpMode()
 {
@@ -68,7 +78,7 @@ function initTranslation()
 	e = document.getElementById("statusSDKVersion");
 	e.innerHTML = _("status sdk version");
 	e = document.getElementById("statusSysUpTime");
-	e.innerHTML = _("status system time");
+	e.innerHTML = _("status system up time");
 	e = document.getElementById("statusSysPlatform");
 	e.innerHTML = _("status system platform");
 	e = document.getElementById("statusOPMode");
@@ -106,7 +116,23 @@ function initTranslation()
 
 function PageInit()
 {
+	var ethtoolb = "<% getETHTOOLBuilt(); %>";
 	initTranslation();
+
+	if (ethtoolb == "1")
+	{
+		//document.getElementById("statusEthPortStatus").style.visibility = "visible";
+		//document.getElementById("statusEthPortStatus").style.display = style_display_on();
+		document.getElementById("div_ethtool").style.visibility = "visible";
+		document.getElementById("div_ethtool").style.display = style_display_on();
+	}
+	else
+	{
+		//document.getElementById("statusEthPortStatus").style.visibility = "hidden";
+		//document.getElementById("statusEthPortStatus").style.display = "none";
+		document.getElementById("div_ethtool").style.visibility = "hidden";
+		document.getElementById("div_ethtool").style.display = "none";
+	}
 }
 </script>
 </head>
@@ -114,10 +140,10 @@ function PageInit()
 <body onload="PageInit()">
 <table class="body"><tr><td>
 <H1 id="statusTitle">Access Point Status</H1>
-<P id="statusIntroduction">Let's take a look at the status of Ralink 2880 Platform. </P>
+<P id="statusIntroduction">Let's take a look at the status of Ralink SoC Platform. </P>
 
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
-<!-- ----------------- System Info ----------------- -->
+<!-- ================= System Info ================= -->
 <tr>
   <td class="title" colspan="2" id="statusSysInfo">System Info</td>
 </tr>
@@ -126,7 +152,7 @@ function PageInit()
   <td><% getSdkVersion(); %> (<% getSysBuildTime(); %>)</td>
 </tr>
 <tr>
-  <td class="head" id="statusSysUpTime">System Time</td>
+  <td class="head" id="statusSysUpTime">System Up Time</td>
   <td><% getSysUptime(); %></td>
 </tr>
 <tr>
@@ -137,7 +163,7 @@ function PageInit()
   <td class="head" id="statusOPMode">Operation Mode</td>
   <td><script type="text/javascript">showOpMode();</script></td>
 </tr>
-<!-- ----------------- Internet Configurations ----------------- -->
+<!-- ================= Internet Configurations ================= -->
 <tr>
   <td class="title" colspan="2" id="statusInternetConfig">Internet Configurations</td>
 </tr>
@@ -149,27 +175,27 @@ function PageInit()
   <td class="head" id="statusWANIPAddr">WAN IP Address</td>
   <td><% getWanIp(); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusSubnetMask">Subnet Mask</td>
   <td><% getWanNetmask(); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusDefaultGW">Default Gateway</td>
   <td><% getWanGateway(); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusPrimaryDNS">Primary Domain Name Server</td>
   <td><% getDns(1); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusSecondaryDNS">Secondary Domain Name Server</td>
   <td><% getDns(2); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusWANMAC">MAC Address</td>
   <td><% getWanMac(); %></td>
 </tr>
-<!-- ----------------- Local Network ----------------- -->
+<!-- ================= Local Network ================= -->
 <tr>
   <td class="title" colspan="2" id="statusLocalNet">Local Network</td>
 </tr>
@@ -177,23 +203,31 @@ function PageInit()
   <td class="head" id="statusLANIPAddr">Local IP Address</td>
   <td><% getLanIp(); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusLocalNetmask">Local Netmask</td>
   <td><% getLanNetmask(); %></td>
 </tr>
-</tr>
+<tr>
   <td class="head" id="statusLANMAC">MAC Address</td>
   <td><% getLanMac(); %></td>
 </tr>
-<!-- ----------------- Other Information ----------------- -->
+<!-- ================= Other Information ================= -->
 </table>
 
 
-<!-- <H1 id="statusEthPortStatus">Ethernet Port Status</H1>
-<table border="1">
-<script type="text/javascript">showPortStatus();</script>
-</table> -->
+<table border="0" id="div_ethtool">
+<tr>
+  <td>
+    <H1 id="statusEthPortStatus">Ethernet Port Status</H1>
+  </td>
+</tr>
+<tr>
+  <td>
+    <script type="text/javascript">showPortStatus();</script>
+  </td>
+</tr>
+</table>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>

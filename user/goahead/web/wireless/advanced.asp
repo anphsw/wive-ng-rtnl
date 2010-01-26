@@ -1,17 +1,16 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Advanced Wireless Settings</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
-var basicRate = '<% getCfgZero(1, "BasicRate"); %>';
+//var basicRate = '<% getCfgZero(1, "BasicRate"); %>';
 var bgProtection = '<% getCfgZero(1, "BGProtection"); %>';
 //var dataRate = '<!--#include ssi=getWlanDataRate()-->';
 var beaconInterval = '<% getCfgZero(1, "BeaconPeriod"); %>';
@@ -32,6 +31,8 @@ var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "M2UEnabled"); %>';
+var dfsb = '<% getDFSBuilt(); %>';
+var carrierib = '<% getCarrierBuilt(); %>';
 
 function style_display_on()
 {
@@ -62,12 +63,14 @@ function initTranslation()
 	e.innerHTML = _("wireless on");
 	e = document.getElementById("advBGProOff");
 	e.innerHTML = _("wireless off");
+	/*
 	e = document.getElementById("advBasicDtRt");
 	e.innerHTML = _("adv basic data rate");
 	e = document.getElementById("advBasicDtRtDefault");
 	e.innerHTML = _("adv basic data rate default");
 	e = document.getElementById("advBasicDtRtAll");
 	e.innerHTML = _("adv basic data rate all");
+	*/
 	e = document.getElementById("advBeaconInterval");
 	e.innerHTML = _("adv beacon interval");
 	e = document.getElementById("advBeaconIntervalRange");
@@ -120,6 +123,8 @@ function initTranslation()
 	e.innerHTML = _("wireless disable");
 	e = document.getElementById("adv80211HDisableDescribe");
 	e.innerHTML = _("adv 80211h disable describe");
+	e = document.getElementById("advRDRegion");
+	e.innerHTML = _("adv rdregion");
 	e = document.getElementById("advCountryCode");
 	e.innerHTML = _("adv country code");
 	e = document.getElementById("advCountryCodeUS");
@@ -136,6 +141,12 @@ function initTranslation()
 	e.innerHTML = _("adv country code hk");
 	e = document.getElementById("advCountryCodeNONE");
 	e.innerHTML = _("wireless none");
+	e = document.getElementById("advCarrierDetect");
+	e.innerHTML = _("adv carrier");
+	e = document.getElementById("advCarrierDetectEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advCarrierDetectDisable");
+	e.innerHTML = _("wireless disable");
 
 	e = document.getElementById("advWiFiMM");
 	e.innerHTML = _("adv wmm");
@@ -183,6 +194,7 @@ function initValue()
 	initTranslation();
 	bgProtection = 1*bgProtection;
 	document.wireless_advanced.bg_protection.options.selectedIndex = bgProtection;
+	/*
 	basicRate = 1*basicRate;
 
 	if (basicRate == 3)
@@ -191,11 +203,12 @@ function initValue()
 		document.wireless_advanced.basic_rate.options.selectedIndex = 1;
 	else if (basicRate == 351)
 		document.wireless_advanced.basic_rate.options.selectedIndex = 2;
+	*/
 
 	wirelessMode = 1*wirelessMode;
 
 	if ((wirelessMode == 2) || (wirelessMode == 8))
-		document.wireless_advanced.basic_rate.disabled = true;
+		; //document.wireless_advanced.basic_rate.disabled = true;
 	else
 		document.wireless_advanced.ieee_80211h.disabled = true;
 
@@ -260,8 +273,44 @@ function initValue()
 	else
 		document.wireless_advanced.ieee_80211h[1].checked = true;
 
-	wmmCapable = 1*wmmCapable;
-	if (wmmCapable == 1)
+	ieee80211h_switch();
+	if (dfsb == "1" && ieee80211h == 1)
+	{
+		var rdregion = '<% getCfgGeneral(1, "RDRegion"); %>';
+		if (rdregion == "CE")
+			document.wireless_advanced.rd_region.options.selectedIndex = 2;
+		else if (rdregion == "JAP")
+			document.wireless_advanced.rd_region.options.selectedIndex = 1;
+		else
+			document.wireless_advanced.rd_region.options.selectedIndex = 0;
+	}
+
+	carrierib = 1*carrierib;
+	if (carrierib == 1)
+	{
+		document.getElementById("div_carrier_detect").style.visibility = "visible";
+		document.getElementById("div_carrier_detect").style.display = style_display_on();
+		document.wireless_advanced.carrier_detect.disabled = false;
+		var carrierebl = '<% getCfgZero(1, "CarrierDetect"); %>';
+		if (carrierebl == "1")
+		{
+			document.wireless_advanced.carrier_detect[0].checked = true;
+			document.wireless_advanced.carrier_detect[1].checked = false;
+		}
+		else
+		{
+			document.wireless_advanced.carrier_detect[0].checked = false;
+			document.wireless_advanced.carrier_detect[1].checked = true;
+		}
+	}
+	else
+	{
+		document.getElementById("div_carrier_detect").style.visibility = "hidden";
+		document.getElementById("div_carrier_detect").style.display = "none";
+		document.wireless_advanced.carrier_detect.disabled = true;
+	}
+
+	if (wmmCapable.indexOf("1") >= 0)
 	{
 		document.wireless_advanced.wmm_capable[0].checked = true;
 		document.wireless_advanced.wmm_capable[1].checked = false;
@@ -272,26 +321,7 @@ function initValue()
 		document.wireless_advanced.wmm_capable[1].checked = true;
 	}
 
-	document.getElementById("div_apsd_capable").style.visibility = "hidden";
-	document.getElementById("div_apsd_capable").style.display = "none";
-	document.wireless_advanced.apsd_capable.disabled = true;
-	document.getElementById("div_dls_capable").style.visibility = "hidden";
-	document.getElementById("div_dls_capable").style.display = "none";
-	document.wireless_advanced.dls_capable.disabled = true;
-
-	DLSBuilt = 1*DLSBuilt;
-	if (wmmCapable == 1)
-	{
-		document.getElementById("div_apsd_capable").style.visibility = "visible";
-		document.getElementById("div_apsd_capable").style.display = style_display_on();
-		document.wireless_advanced.apsd_capable.disabled = false;
-		if (DLSBuilt == 1)
-		{
-			document.getElementById("div_dls_capable").style.visibility = "visible";
-			document.getElementById("div_dls_capable").style.display = style_display_on();
-			document.wireless_advanced.dls_capable.disabled = false;
-		}
-	}
+	wmm_capable_enable_switch();
 
 	APSDCapable = 1*APSDCapable;
 	if (APSDCapable == 1)
@@ -494,16 +524,12 @@ function wmm_capable_enable_switch()
 {
 	document.getElementById("div_apsd_capable").style.visibility = "hidden";
 	document.getElementById("div_apsd_capable").style.display = "none";
+	document.wireless_advanced.apsd_capable.disabled = true;
 	document.getElementById("div_dls_capable").style.visibility = "hidden";
 	document.getElementById("div_dls_capable").style.display = "none";
-	document.wireless_advanced.apsd_capable.disabled = true;
+	document.wireless_advanced.dls_capable.disabled = true;
 
 	DLSBuilt = 1*DLSBuilt;
-	if (DLSBuilt == 1)
-	{
-		document.wireless_advanced.dls_capable.disabled = true;
-	}
-
 	if (document.wireless_advanced.wmm_capable[0].checked == true)
 	{
 		document.getElementById("div_apsd_capable").style.visibility = "visible";
@@ -515,6 +541,22 @@ function wmm_capable_enable_switch()
 			document.getElementById("div_dls_capable").style.display = style_display_on();
 			document.wireless_advanced.dls_capable.disabled = false;
 		}
+	}
+}
+
+function ieee80211h_switch()
+{
+	if (dfsb == "1" && document.wireless_advanced.ieee_80211h[0].checked == true)
+	{
+		document.getElementById("div_dfs_rdregion").style.visibility = "visible";
+		document.getElementById("div_dfs_rdregion").style.display = style_display_on();
+		document.wireless_advanced.rd_region.disabled = false;
+	}
+	else
+	{
+		document.getElementById("div_dfs_rdregion").style.visibility = "hidden";
+		document.getElementById("div_dfs_rdregion").style.display = "none";
+		document.wireless_advanced.rd_region.disabled = true;
 	}
 }
 </script>
@@ -543,6 +585,7 @@ function wmm_capable_enable_switch()
       </select>
     </td>
   </tr>
+  <!--
   <tr> 
     <td class="head" id="advBasicDtRt">Basic Data Rates</td>
     <td>
@@ -553,6 +596,7 @@ function wmm_capable_enable_switch()
       </select>
     </td>
   </tr>
+  -->
   <tr> 
     <td class="head" id="advBeaconInterval">Beacon Interval</td>
     <td>
@@ -614,8 +658,18 @@ function wmm_capable_enable_switch()
   <tr> 
     <td class="head" id="adv80211H">IEEE 802.11H Support</td>
     <td>
-      <input type=radio name=ieee_80211h value="1"><font id="adv80211HEnable">Enable &nbsp;</font>
-      <input type=radio name=ieee_80211h value="0" checked><font id="adv80211HDisable">Disable </font><font color="#808080" id="adv80211HDisableDescribe">(only in A band)</font>
+      <input type=radio name=ieee_80211h value="1" onClick="ieee80211h_switch()"><font id="adv80211HEnable">Enable &nbsp;</font>
+      <input type=radio name=ieee_80211h value="0" checked onClick="ieee80211h_switch()"><font id="adv80211HDisable">Disable </font><font color="#808080" id="adv80211HDisableDescribe">(only in A band)</font>
+    </td>
+  </tr>
+  <tr id="div_dfs_rdregion" name="div_dfs_rdregion">
+    <td class="head" id="advRDRegion">DFS RDRegion</td>
+    <td>
+    	<select name="rd_region">
+	  <option value="FCC">FCC</option>
+	  <option value="JAP">JAP</option>
+	  <option value="CE">CE</option>
+	</select>
     </td>
   </tr>
   <tr> 
@@ -632,6 +686,13 @@ function wmm_capable_enable_switch()
       </select>
     </td>
   </tr>
+  <tr id="div_carrier_detect" name="div_carrier_detect">
+    <td class="head" id="advCarrierDetect">Carrier Detect</td>
+    <td>
+      <input type="radio" name="carrier_detect" value="1"><font id="advCarrierDetectEnable">Enable</font>&nbsp;&nbsp;
+      <input type="radio" name="carrier_detect" value="0" checked><font id="advCarrierDetectDisable">Disable</font>
+    </td>
+  </tr>
 </table>
 <hr />
 
@@ -640,7 +701,7 @@ function wmm_capable_enable_switch()
     <td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
   </tr>
   <tr> 
-    <td class="head" id="advWMM">WMM and UDPXY</td>
+    <td class="head" id="advWMM">WMM Capable</td>
     <td>
       <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable &nbsp;</font>
       <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>
@@ -692,9 +753,6 @@ function wmm_capable_enable_switch()
   </tr>
 </table>
 </form>
-
-
 </td></tr></table>
 </body>
 </html>
-

@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
@@ -22,7 +6,7 @@
  *
  * See the file "license.txt" for usage and redistribution license requirements
  *
- * $Id: goahead.c,v 1.79.4.2 2008-03-26 03:29:15 yy Exp $
+ * $Id: goahead.c,v 1.100.2.4 2009-04-08 08:52:59 chhung Exp $
  */
 
 /******************************** Description *********************************/
@@ -37,6 +21,7 @@
 #include	"uemf.h"
 #include	"wsIntrn.h"
 #include	"nvram.h"
+#include	"ralink_gpio.h"
 #include	"internet.h"
 #if defined INIC_SUPPORT || defined INICv2_SUPPORT
 #include	"inic.h"
@@ -49,13 +34,18 @@
 #include	"firewall.h" 
 #include	"management.h"
 #include	"station.h"
-#include	"storage.h"
+#include	"usb.h"
+#include	"media.h"
 #include	<signal.h>
 #include	<unistd.h> 
 #include	<sys/types.h>
 #include	<sys/wait.h>
 #include	"linux/autoconf.h"
 #include	"config/autoconf.h" //user config
+
+#ifdef CONFIG_RALINKAPP_SWQOS
+#include      "qos.h"
+#endif
 
 #ifdef WEBS_SSL_SUPPORT
 #include	"websSSL.h"
@@ -93,12 +83,20 @@ extern void ripdRestart(void);
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
-#ifdef CONFIG_RT2860V2_AP_WSC
 extern void WPSAPPBCStartAll(void);
-extern void WPSSingleTriggerHandler(void);
+extern void WPSSingleTriggerHandler(int);
+#if defined CONFIG_USB
+extern void hotPluglerHandler(int);
+#endif
+
+
+#ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSSTAPBCStartEnr(void);
 #endif
 
+#ifdef CONFIG_DUAL_IMAGE
+static int set_stable_flag(void);
+#endif
 /*********************************** Code *************************************/
 /*
  *	Main -- entry point from LINUX
@@ -115,17 +113,10 @@ int main(int argc, char** argv)
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
-	/* Start needed services */
-	doSystem("/bin/nvram_daemon &");
-	doSystem("/bin/gpio r &");
-
 	if (writeGoPid() < 0)
 		return -1;
 	if (initSystem() < 0)
 		return -1;
-
-
-
 
 /*
  *	Initialize the web server
@@ -133,6 +124,11 @@ int main(int argc, char** argv)
 	if (initWebs() < 0) {
 		return -1;
 	}
+
+#ifdef CONFIG_DUAL_IMAGE
+/* Set stable flag after the web server is started */
+	set_stable_flag();
+#endif
 
 #ifdef WEBS_SSL_SUPPORT
 	websSSLOpen();
@@ -191,7 +187,7 @@ int writeGoPid(void)
 
 static void goaSigHandler(int signum)
 {
-#ifdef CONFIG_RT2860V2_AP_WSC
+#ifdef CONFIG_RT2860V2_STA_WSC
 	char *opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	char *ethCon = nvram_bufget(RT2860_NVRAM, "ethConvert");
 #endif
@@ -199,14 +195,48 @@ static void goaSigHandler(int signum)
 	if (signum != SIGUSR1)
 		return;
 
-#ifdef CONFIG_RT2860V2_AP_WSC
+#ifdef CONFIG_RT2860V2_STA_WSC
 	if(!strcmp(opmode, "2") || (!strcmp(opmode, "0") &&   !strcmp(ethCon, "1") ) )		// wireless isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
-		WPSAPPBCStartAll();
 #endif
+		WPSAPPBCStartAll();
 }
 
+#ifndef CONFIG_RALINK_RT2880
+static void goaInitGpio()
+{
+	int fd;
+	ralink_gpio_reg_info info;
+
+	fd = open("/dev/gpio", O_RDONLY);
+	if (fd < 0) {
+		perror("/dev/gpio");
+		return;
+	}
+	//set gpio direction to input
+	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, RALINK_GPIO(0)) < 0)
+		goto ioctl_err;
+	//enable gpio interrupt
+	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
+		goto ioctl_err;
+	//register my information
+	info.pid = getpid();
+	info.irq = 0;
+	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
+		goto ioctl_err;
+	close(fd);
+
+	//issue a handler to handle SIGUSR1
+	signal(SIGUSR1, goaSigHandler);
+	return;
+
+ioctl_err:
+	perror("ioctl");
+	close(fd);
+	return;
+}
+#endif
 
 static void dhcpcHandler(int signum)
 {
@@ -227,15 +257,16 @@ static int initSystem(void)
 		return (-1);
 	if (initInternet() < 0)
 		return (-1);
-#ifdef CONFIG_USER_STORAGE
-	if (initStorage() < 0)
-		return (-1);
+#if defined CONFIG_USB
+	signal(SIGTTIN, hotPluglerHandler);
+	hotPluglerHandler(SIGTTIN);
 #endif
+#ifdef CONFIG_RALINK_RT2880
 	signal(SIGUSR1, goaSigHandler);
-#ifdef CONFIG_RT2860V2_AP_WSC
-	signal(SIGXFSZ, WPSSingleTriggerHandler);
+#else
+	goaInitGpio();
 #endif
-	ledAlways(12, LED_ON); //turn on power LED (gpio 12) at startup
+	signal(SIGXFSZ, WPSSingleTriggerHandler);
 
 	return 0;
 }
@@ -342,8 +373,9 @@ static int initWebs(void)
 	}
 	intaddr.s_addr = inet_addr(lan_ip);
 	if (intaddr.s_addr == INADDR_NONE) {
-		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data use 192.168.1.1"),lan_ip);
-		intaddr.s_addr == inet_addr("192.168.1.1");
+		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data"),
+				lan_ip);
+		return -1;
 	}
 #endif
 
@@ -395,8 +427,14 @@ static int initWebs(void)
  */
 	formDefineUtilities();
 	formDefineInternet();
-#ifdef CONFIG_USER_STORAGE
-	formDefineStorage();
+#if defined CONFIG_RALINKAPP_SWQOS
+	formDefineQoS();
+#endif
+#if defined CONFIG_USB
+	formDefineUSB();
+#endif
+#if defined CONFIG_RALINKAPP_MPLAYER
+	formDefineMedia();
 #endif
 	formDefineWireless();
 #if defined INIC_SUPPORT || defined INICv2_SUPPORT
@@ -405,7 +443,7 @@ static int initWebs(void)
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	formDefineLegacy();
 #endif
-#ifdef CONFIG_RT2860V2_STA_MODULE
+#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
 	formDefineStation();
 #endif
 	formDefineFirewall();
@@ -476,8 +514,32 @@ void defaultTraceHandler(int level, char_t *buf)
  *	Returns a pointer to an allocated qualified unique temporary file name.
  *	This filename must eventually be deleted with bfree();
  */
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+char_t *websGetCgiCommName(webs_t wp)
+{
+	char *force_mem_upgrade = nvram_bufget(RT2860_NVRAM, "Force_mem_upgrade");
+	char_t	*pname1 = NULL, *pname2 = NULL;
+	char *part;
 
-char_t *websGetCgiCommName()
+	if(!strcmp(force_mem_upgrade, "1")){
+		pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
+	}else if(wp && (wp->flags & WEBS_CGI_FIRMWARE_UPLOAD) ){
+		// see if usb disk is present and available space is enough?
+		if( (part = isStorageOK()) )
+			pname1 = (char_t *)tempnam(part, T("cgi"));
+		else
+			pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
+	}else{
+		pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
+	}
+
+	pname2 = bstrdup(B_L, pname1);
+	free(pname1);
+
+	return pname2;
+}
+#else
+char_t *websGetCgiCommName(webs_t wp)
 {
 	char_t	*pname1, *pname2;
 
@@ -487,7 +549,7 @@ char_t *websGetCgiCommName()
 
 	return pname2;
 }
-
+#endif
 /******************************************************************************/
 /*
  *	Launch the CGI process and return a handle to it.
@@ -543,12 +605,12 @@ DONE:
  *	Check the CGI process.  Return 0 if it does not exist; non 0 if it does.
  */
 
-int websCheckCgiProc(int handle)
+int websCheckCgiProc(int handle, int *status)
 {
 /*
  *	Check to see if the CGI child process has terminated or not yet.  
  */
-	if (waitpid(handle, NULL, WNOHANG) == handle) {
+	if (waitpid(handle, status, WNOHANG) == handle) {
 		return 0;
 	} else {
 		return 1;
@@ -592,3 +654,26 @@ int getGoAHeadServerPort(void)
 {
     return port;
 }
+
+#ifdef CONFIG_DUAL_IMAGE
+static int set_stable_flag(void)
+{
+	int set = 0;
+	char *wordlist = nvram_get(UBOOT_NVRAM, "Image1Stable");
+
+	if (wordlist) {
+		if (strcmp(wordlist, "1") != 0)
+			set = 1;
+	}
+	else
+		set = 1;
+
+	if (set) {
+		printf("Set Image1 stable flag\n");
+		nvram_set(UBOOT_NVRAM, "Image1Stable", "1");
+	}
+	
+	return 0;
+
+}
+#endif

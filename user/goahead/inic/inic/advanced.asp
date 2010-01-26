@@ -1,14 +1,15 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Advanced Wireless Settings</title>
 
 <script language="JavaScript" type="text/javascript">
+Butterlate.setTextDomain("wireless");
 var basicRate = '<% getCfg2Zero(1, "BasicRate"); %>';
 var bgProtection = '<% getCfg2Zero(1, "BGProtection"); %>';
 //var dataRate = '<!--#include ssi=getInicDataRate()-->';
@@ -40,10 +41,128 @@ function style_display_on()
 	}
 }
 
+function initTranslation()
+{
+	var e = document.getElementById("advTitle");
+	e.innerHTML = _("adv title");
+	e = document.getElementById("advIntroduction");
+	e.innerHTML = _("adv introduction");
+
+	e = document.getElementById("advWireless");
+	e.innerHTML = _("adv wireless");
+	e = document.getElementById("advBGProtect");
+	e.innerHTML = _("adv bgpro");
+	e = document.getElementById("advBGProAuto");
+	e.innerHTML = _("wireless auto");
+	e = document.getElementById("advBGProOn");
+	e.innerHTML = _("wireless on");
+	e = document.getElementById("advBGProOff");
+	e.innerHTML = _("wireless off");
+	e = document.getElementById("advBasicDtRt");
+	e.innerHTML = _("adv basic data rate");
+	e = document.getElementById("advBasicDtRtDefault");
+	e.innerHTML = _("adv basic data rate default");
+	e = document.getElementById("advBasicDtRtAll");
+	e.innerHTML = _("adv basic data rate all");
+	e = document.getElementById("advBeaconInterval");
+	e.innerHTML = _("adv beacon interval");
+	e = document.getElementById("advBeaconIntervalRange");
+	e.innerHTML = _("adv beacon interval range");
+	e = document.getElementById("advDTIM");
+	e.innerHTML = _("adv dtim");
+	e = document.getElementById("advDTIMRange");
+	e.innerHTML = _("adv dtim range");
+	e = document.getElementById("advFrag");
+	e.innerHTML = _("adv fragment threshold");
+	e = document.getElementById("advFragRange");
+	e.innerHTML = _("adv fragment threshold range");
+	e = document.getElementById("advRTS");
+	e.innerHTML = _("adv rts threshold");
+	e = document.getElementById("advRTSRange");
+	e.innerHTML = _("adv rts threshold range");
+	e = document.getElementById("advTxPW");
+	e.innerHTML = _("adv tx power");
+	e = document.getElementById("advTxPWRange");
+	e.innerHTML = _("adv tx power range");
+	e = document.getElementById("advShortPre");
+	e.innerHTML = _("adv short preamble");
+	e = document.getElementById("advShortPreEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advShortPreDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("advShortSlot");
+	e.innerHTML = _("adv short slot");
+	e = document.getElementById("advShortSlotEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advShortSlotDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("advTxBurst");
+	e.innerHTML = _("adv tx burst");
+	e = document.getElementById("advTxBurstEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advTxBurstDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("advPktAggr");
+	e.innerHTML = _("adv pkt aggregate");
+	e = document.getElementById("advPktAggrEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advPktAggrDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("adv80211H");
+	e.innerHTML = _("adv 80211h");
+	e = document.getElementById("adv80211HEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("adv80211HDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("adv80211HDisableDescribe");
+	e.innerHTML = _("adv 80211h disable describe");
+	e = document.getElementById("advCountryCode");
+	e.innerHTML = _("adv country code");
+	e = document.getElementById("advCountryCodeUS");
+	e.innerHTML = _("adv country code us");
+	e = document.getElementById("advCountryCodeJP");
+	e.innerHTML = _("adv country code jp");
+	e = document.getElementById("advCountryCodeFR");
+	e.innerHTML = _("adv country code fr");
+	e = document.getElementById("advCountryCodeTW");
+	e.innerHTML = _("adv country code tw");
+	e = document.getElementById("advCountryCodeIE");
+	e.innerHTML = _("adv country code ie");
+	e = document.getElementById("advCountryCodeHK");
+	e.innerHTML = _("adv country code hk");
+	e = document.getElementById("advCountryCodeNONE");
+	e.innerHTML = _("wireless none");
+
+	e = document.getElementById("advWiFiMM");
+	e.innerHTML = _("adv wmm");
+	e = document.getElementById("advWMM");
+	e.innerHTML = _("adv wmm capable");
+	e = document.getElementById("advWMMEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advWMMDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("advAPDS");
+	e.innerHTML = _("adv apds capable");
+	e = document.getElementById("advAPDSEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("advAPDSDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("advWMMParameter");
+	e.innerHTML = _("adv wmm parameter");
+	e = document.getElementById("advWMMConf");
+	e.value = _("adv wmm configuration");
+
+	e = document.getElementById("advApply");
+	e.value = _("wireless apply");
+	e = document.getElementById("advCancel");
+	e.value = _("wireless cancel");
+}
+
 function initValue()
 {
 	var datarateArray;
 
+	initTranslation();
 	bgProtection = 1*bgProtection;
 	document.wireless_advanced.bg_protection.options.selectedIndex = bgProtection;
 	basicRate = 1*basicRate;
@@ -265,7 +384,6 @@ function CheckValue()
 	else
 	{
 		document.wireless_advanced.apsd_capable[1].checked = true;
-		//document.wireless_advanced.dls_capable[1].checked = true;
 
 		if (1*wmmCapable == 1)
 			document.wireless_advanced.rebootAP.value = 1;
@@ -310,111 +428,111 @@ function wmm_capable_enable_switch()
 <table class="body"><tr><td>
 
 
-<h1>Advanced Wireless Settings </h1>
-<p>Use the Advanced Setup page to make detailed settings for the Wireless. Advanced Setup includes items that are not available from the Basic Setup page, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
+<h1 id="advTitle">Advanced Wireless Settings </h1>
+<p id="advIntroduction">Use the Advanced Setup page to make detailed settings for the Wireless. Advanced Setup includes items that are not available from the Basic Setup page, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
 <hr />
 
 <form method=post name=wireless_advanced action="/goform/inicAdvanced" onSubmit="return CheckValue()">
 <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="2">Advanced Wireless</td>
+    <td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
   </tr>
   <tr> 
-    <td class="head">BG Protection Mode</td>
+    <td class="head" id="advBGProtect">BG Protection Mode</td>
     <td>
       <select name="bg_protection" size="1">
-	<option value=0 selected>Auto</option>
-	<option value=1>On</option>
-	<option value=2>Off</option>
+	<option value=0 selected id="advBGProAuto">Auto</option>
+	<option value=1 id="advBGProOn">On</option>
+	<option value=2 id="advBGProOff">Off</option>
       </select>
     </td>
   </tr>
   <tr> 
-    <td class="head">Basic Data Rates</td>
+    <td class="head" id="advBasicDtRt">Basic Data Rates</td>
     <td>
       <select name="basic_rate" size="1">
 	<option value="3" >1-2 Mbps</option>
-	<option value="15" >Default(1-2-5.5-11 Mbps)</option>
-	<option value="351" >All(1-2-5.5-6-11-12-24 Mbps)</option>
+	<option value="15" id="advBasicDtRtDefault">Default(1-2-5.5-11 Mbps)</option>
+	<option value="351" id="advBasicDtRtAll">All(1-2-5.5-6-11-12-24 Mbps)</option>
       </select>
     </td>
   </tr>
   <tr> 
-    <td class="head">Beacon Interval</td>
+    <td class="head" id="advBeaconInterval">Beacon Interval</td>
     <td>
-      <input type=text name=beacon size=5 maxlength=3 value="100"> ms <font color="#808080">(range 20 - 999, default 100)</font>
+      <input type=text name=beacon size=5 maxlength=3 value="100"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Data Beacon Rate (DTIM) </td>
+    <td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
     <td>
-      <input type=text name=dtim size=5 maxlength=3 value="1"> ms <font color="#808080">(range 1 - 255, default 1)</font>
+      <input type=text name=dtim size=5 maxlength=3 value="1"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Fragment Threshold</td>
+    <td class="head" id="advFrag">Fragment Threshold</td>
     <td>
-      <input type=text name=fragment size=5 maxlength=4 value=""> <font color="#808080">(range 256 - 2346, default 2346)</font>
+      <input type=text name=fragment size=5 maxlength=4 value=""> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">RTS Threshold</td>
+    <td class="head" id="advRTS">RTS Threshold</td>
     <td>
-      <input type=text name=rts size=5 maxlength=4 value=""> <font color="#808080">(range 1 - 2347, default 2347)</font>
+      <input type=text name=rts size=5 maxlength=4 value=""> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">TX Power</td>
+    <td class="head" id="advTxPW">TX Power</td>
     <td>
-      <input type=text name=tx_power size=5 maxlength=3 value="100"> <font color="#808080">(range 1 - 100, default 100)</font>
+      <input type=text name=tx_power size=5 maxlength=3 value="100"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Short Preamble</td>
+    <td class="head" id="advShortPre">Short Preamble</td>
     <td>
-      <input type=radio name=short_preamble value="1" checked>Enable &nbsp;
-      <input type=radio name=short_preamble value="0">Disable
+      <input type=radio name=short_preamble value="1" checked><font id="advShortPreEnable">Enable &nbsp;</font>
+      <input type=radio name=short_preamble value="0"><font id="advShortPreDisable">Disable</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Short Slot</td>
+    <td class="head" id="advShortSlot">Short Slot</td>
     <td>
-      <input type=radio name=short_slot value="1" checked>Enable &nbsp;
-      <input type=radio name=short_slot value="0">Disable
+      <input type=radio name=short_slot value="1" checked><font id="advShortSlotEnable">Enable &nbsp;</font>
+      <input type=radio name=short_slot value="0"><font id="advShortSlotDisable">Disable</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Tx Burst</td>
+    <td class="head" id="advTxBurst">Tx Burst</td>
     <td>
-      <input type=radio name=tx_burst value="1" checked>Enable &nbsp;
-      <input type=radio name=tx_burst value="0">Disable
+      <input type=radio name=tx_burst value="1" checked><font id="advTxBurstEnable">Enable &nbsp;</font>
+      <input type=radio name=tx_burst value="0"><font id="advTxBurstDisable">Disable</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">Pkt_Aggregate</td>
+    <td class="head" id="advPktAggr">Pkt_Aggregate</td>
     <td>
-      <input type=radio name=pkt_aggregate value="1">Enable &nbsp;
-      <input type=radio name=pkt_aggregate value="0" checked>Disable
+      <input type=radio name=pkt_aggregate value="1"><font id="advPktAggrEnable">Enable &nbsp;</font>
+      <input type=radio name=pkt_aggregate value="0" checked><font id="advPktAggrDisable">Disable</font>
     </td>
   </tr>
-<!--  <tr> 
-    <td class="head">IEEE 802.11H Support</td>
-    <td>
-      <input type=radio name=ieee_80211h value="1">Enable &nbsp;
-      <input type=radio name=ieee_80211h value="0" checked>Disable <font color="#808080">(only in A band)</font>
-    </td>
-  </tr> -->
   <tr> 
-    <td class="head">Country Code</td>
+    <td class="head" id="adv80211H">IEEE 802.11H Support</td>
+    <td>
+      <input type=radio name=ieee_80211h value="1"><font id="adv80211HEnable">Enable &nbsp;</font>
+      <input type=radio name=ieee_80211h value="0" checked><font id="adv80211HDisable">Disable </font><font color="#808080" id="adv80211HDisableDescribe">(only in A band)</font>
+    </td>
+  </tr>
+  <tr> 
+    <td class="head" id="advCountryCode">Country Code</td>
     <td>
       <select name="country_code">
-        <option value="US">US (United States)</option>
-        <option value="JP">JP (Japan)</option>
-        <option value="FR">FR (France)</option>
-        <option value="TW">TW (Taiwan)</option>
-        <option value="IE">IE (Ireland)</option>
-        <option value="HK">HK (Hong Kong)</option>
-        <option value="NONE" selected>NONE</option>
+        <option value="US" id="advCountryCodeUS">US (United States)</option>
+        <option value="JP" id="advCountryCodeJP">JP (Japan)</option>
+        <option value="FR" id="advCountryCodeFR">FR (France)</option>
+        <option value="TW" id="advCountryCodeTW">TW (Taiwan)</option>
+        <option value="IE" id="advCountryCodeIE">IE (Ireland)</option>
+        <option value="HK" id="advCountryCodeHK">HK (Hong Kong)</option>
+        <option value="NONE" selected id="advCountryCodeNONE">NONE</option>
       </select>
     </td>
   </tr>
@@ -423,26 +541,26 @@ function wmm_capable_enable_switch()
 
 <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="2">Wi-Fi Multimedia</td>
+    <td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
   </tr>
   <tr> 
-    <td class="head">WMM/UDPXY</td>
+    <td class="head" id="advWMM">WMM Capable</td>
     <td>
-      <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked>Enable &nbsp;
-      <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()">Disable
+      <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable &nbsp;</font>
+      <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>
     </td>
   </tr>
   <tr id="div_apsd_capable" name="div_apsd_capable">
-    <td class="head">APSD Capable</td>
+    <td class="head" id="advAPDS">APSD Capable</td>
     <td>
-      <input type=radio name=apsd_capable value="1">Enable &nbsp;
-      <input type=radio name=apsd_capable value="0" checked>Disable
+      <input type=radio name=apsd_capable value="1"><font id="advAPDSEnable">Enable &nbsp;</font>
+      <input type=radio name=apsd_capable value="0" checked><font id="advAPDSDisable">Disable</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">WMM Parameters</td>
+    <td class="head" id="advWMMParameter">WMM Parameters</td>
     <td>
-      <input type=button name="wmm_list" value="WMM Configuration" onClick="open_wmm_window()">
+      <input type=button name="wmm_list" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
     </td>
   </tr>
   <input type="hidden" name="rebootAP" value="0">
@@ -451,8 +569,8 @@ function wmm_capable_enable_switch()
 <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
-      <input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
+      <input type=submit style="{width:120px;}" value="Apply" id="advApply"> &nbsp; &nbsp;
+      <input type=reset  style="{width:120px;}" value="Cancel" id="advCancel" onClick="window.location.reload()">
     </td>
   </tr>
 </table>

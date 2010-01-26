@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -24,6 +8,8 @@
 #include <ctype.h>
 #include <errno.h>
 #include "linux/autoconf.h"
+#include "config/autoconf.h" //user config
+#include "user/busybox/include/autoconf.h" //busybox config
 
 #ifdef USER_MANAGEMENT_SUPPORT
 #include "um.h"
@@ -35,12 +21,11 @@
 #include "wireless.h"
 
 #include "management.h"
-#ifdef CONFIG_RT2860V2_AP_WSC
 #include "wps.h"
 
 extern void WPSRestart(void);
 extern void formDefineWPS(void);
-#endif
+
 
 #define COMMAND_MAX	1024
 static char system_command[COMMAND_MAX];
@@ -69,6 +54,12 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "Login", admuser);
 	nvram_bufset(RT2860_NVRAM, "Password", admpass);
 	nvram_commit(RT2860_NVRAM);
+
+	/* modify /etc/passwd to new user name and passwd */
+	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
+	doSystem("cp /etc/newpw /etc/passwd");
+	doSystem("rm -f /etc/newpw");
+	doSystem("chpasswd.sh %s %s", admuser, admpass);
 
 #ifdef USER_MANAGEMENT_SUPPORT
 	if (umGroupExists(T("adm")) == FALSE)
@@ -143,8 +134,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TZ", tz);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ntp stop");
-	doSystem("service ntp start");
+	doSystem("ntp.sh");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
@@ -155,6 +145,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);        
 }
 
+#ifdef CONFIG_DATE
 /*
  * goform/NTPSyncWithHost
  */
@@ -165,15 +156,89 @@ static void NTPSyncWithHost(webs_t wp, char_t *path, char_t *query)
 	if(strchr(query, ';'))
 		return;
 
-    doSystem("date -s %s", query);
+	doSystem("date -s %s", query);
 
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
-    websWrite(wp, T("n/a"));
-    websDone(wp, 200);
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("n/a"));
+	websDone(wp, 200);
 }
+#endif
 
+#ifdef CONFIG_USER_GOAHEAD_GreenAP
+/*
+ * goform/GreenAP
+ */
+static void GreenAP(webs_t wp, char_t *path, char_t *query)
+{
+	char_t *shour1, *sminute1, *ehour1, *eminute1, *action1;
+	char_t *shour2, *sminute2, *ehour2, *eminute2, *action2;
+	char_t *shour3, *sminute3, *ehour3, *eminute3, *action3;
+	char_t *shour4, *sminute4, *ehour4, *eminute4, *action4;
+	char start[6], end[6];
+	shour1 = websGetVar(wp, T("GAPSHour1"), T(""));
+	sminute1 = websGetVar(wp, T("GAPSMinute1"), T(""));
+	ehour1 = websGetVar(wp, T("GAPEHour1"), T(""));
+	eminute1 = websGetVar(wp, T("GAPEMinute1"), T(""));
+	action1 = websGetVar(wp, T("GAPAction1"), T(""));
+	sprintf(start, "%s %s", sminute1, shour1);
+	sprintf(end, "%s %s", eminute1, ehour1);
+	nvram_bufset(RT2860_NVRAM, "GreenAPStart1", start);
+	nvram_bufset(RT2860_NVRAM, "GreenAPEnd1", end);
+	nvram_bufset(RT2860_NVRAM, "GreenAPAction1", action1);
+	shour2 = websGetVar(wp, T("GAPSHour2"), T(""));
+	sminute2 = websGetVar(wp, T("GAPSMinute2"), T(""));
+	ehour2 = websGetVar(wp, T("GAPEHour2"), T(""));
+	eminute2 = websGetVar(wp, T("GAPEMinute2"), T(""));
+	action2 = websGetVar(wp, T("GAPAction2"), T(""));
+	sprintf(start, "%s %s", sminute2, shour2);
+	sprintf(end, "%s %s", eminute2, ehour2);
+	nvram_bufset(RT2860_NVRAM, "GreenAPStart2", start);
+	nvram_bufset(RT2860_NVRAM, "GreenAPEnd2", end);
+	nvram_bufset(RT2860_NVRAM, "GreenAPAction2", action2);
+	shour3 = websGetVar(wp, T("GAPSHour3"), T(""));
+	sminute3 = websGetVar(wp, T("GAPSMinute3"), T(""));
+	ehour3 = websGetVar(wp, T("GAPEHour3"), T(""));
+	eminute3 = websGetVar(wp, T("GAPEMinute3"), T(""));
+	action3 = websGetVar(wp, T("GAPAction3"), T(""));
+	sprintf(start, "%s %s", sminute3, shour3);
+	sprintf(end, "%s %s", eminute3, ehour3);
+	nvram_bufset(RT2860_NVRAM, "GreenAPStart3", start);
+	nvram_bufset(RT2860_NVRAM, "GreenAPEnd3", end);
+	nvram_bufset(RT2860_NVRAM, "GreenAPAction3", action3);
+	shour4 = websGetVar(wp, T("GAPSHour4"), T(""));
+	sminute4 = websGetVar(wp, T("GAPSMinute4"), T(""));
+	ehour4 = websGetVar(wp, T("GAPEHour4"), T(""));
+	eminute4 = websGetVar(wp, T("GAPEMinute4"), T(""));
+	action4 = websGetVar(wp, T("GAPAction4"), T(""));
+	sprintf(start, "%s %s", sminute4, shour4);
+	sprintf(end, "%s %s", eminute4, ehour4);
+	nvram_bufset(RT2860_NVRAM, "GreenAPStart4", start);
+	nvram_bufset(RT2860_NVRAM, "GreenAPEnd4", end);
+	nvram_bufset(RT2860_NVRAM, "GreenAPAction4", action4);
+	nvram_commit(RT2860_NVRAM);
 
+	doSystem("greenap.sh init");
+
+	websHeader(wp);
+	websWrite(wp, T("GreenAPStart1: %s %s<br>\n"), sminute1, shour1);
+	websWrite(wp, T("GreenAPEnd1: %s %s<br>\n"), eminute1, ehour1);
+	websWrite(wp, T("GreenAPAction1: %s<br>\n"), action1);
+	websWrite(wp, T("GreenAPStart2: %s %s<br>\n"), sminute2, shour2);
+	websWrite(wp, T("GreenAPEnd2: %s %s<br>\n"), eminute2, ehour2);
+	websWrite(wp, T("GreenAPAction2: %s<br>\n"), action2);
+	websWrite(wp, T("GreenAPStart3: %s %s<br>\n"), sminute3, shour3);
+	websWrite(wp, T("GreenAPEnd3: %s %s<br>\n"), eminute3, ehour3);
+	websWrite(wp, T("GreenAPAction3: %s<br>\n"), action3);
+	websWrite(wp, T("GreenAPStart4: %s %s<br>\n"), sminute4, shour4);
+	websWrite(wp, T("GreenAPEnd4: %s %s<br>\n"), eminute4, ehour4);
+	websWrite(wp, T("GreenAPAction4: %s<br>\n"), action4);
+	websFooter(wp);
+	websDone(wp, 200);        
+}
+#endif
+
+#ifdef CONFIG_USER_INADYN
 /*
  * goform/DDNS
  */
@@ -206,8 +271,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ddns stop");
-	doSystem("service ddns start");
+	doSystem("ddns.sh");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -218,6 +282,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);        
 }
+#endif
 
 static void SystemCommand(webs_t wp, char_t *path, char_t *query)
 {
@@ -236,9 +301,16 @@ static void SystemCommand(webs_t wp, char_t *path, char_t *query)
 	if(strlen(system_command))
 		doSystem(system_command);
 
-	// FIXME/TODO, YYHuang 07/04/11
-	// the path here should be obtained by goahead internal function.
-	// (is it existed?)
+	websRedirect(wp, "adm/system_command.asp");
+
+	return;
+}
+
+static void repeatLastSystemCommand(webs_t wp, char_t *path, char_t *query)
+{
+	if(strlen(system_command))
+		doSystem(system_command);
+
 	websRedirect(wp, "adm/system_command.asp");
 
 	return;
@@ -283,7 +355,7 @@ char* getField(char *a_line, char *delim, int count)
         i++;
 		tok = strtok(NULL, delim);
     }
-    if(tok)
+    if(tok && isdigit(*tok))
 		return tok;
 
 	return NULL;
@@ -520,6 +592,7 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 
 	while(fgets(buf, 1024, fp)){
 		char *ifname, *semiColon;
+		long long if_rc;
 		if(skip_line != 0){
 			skip_line--;
 			continue;
@@ -530,14 +603,21 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 
 		ifname = buf;
 		ifname = strip_space(ifname);
-		if(first_time_flag){
-			pos = snprintf(result+rc, 1024-rc, "\"%s\"", ifname);
-			rc += pos;
-			first_time_flag = 0;
-		}else{
-			pos = snprintf(result+rc, 1024-rc, ",\"%s\"", ifname);
-			rc += pos;
-		}
+
+		/* try to get statistics data */
+		if(getIfStatistic(ifname, RXPACKET) >= 0){
+			/* a success try */
+			if(first_time_flag){
+				pos = snprintf(result+rc, 1024-rc, "\"%s\"", ifname);
+				rc += pos;
+				first_time_flag = 0;
+			}else{
+				pos = snprintf(result+rc, 1024-rc, ",\"%s\"", ifname);
+				rc += pos;
+			}
+
+		}else	/* failed and just skip */
+			continue;
 
 		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, RXPACKET));
 		rc += pos;
@@ -625,46 +705,138 @@ int getMemLeftASP(int eid, webs_t wp, int argc, char_t **argv)
 	return -1;
 }
 
+static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if 0
+	FILE *fp;
+	char ver[128], week[32], mon[32] , date[32], time[32], *pos;
+	
+	char *expect = nvram_bufget(RT2860_NVRAM, "Expect_Firmware");
+	if(!expect || !strlen(expect) )
+		return 0;
+
+	fp = fopen("/proc/version", "r");
+	if(!fp)
+		return 0;
+
+	fgets(ver, 128, fp);
+	fclose(fp);	
+
+	if(!(pos = strchr(ver, '#')) )
+		return 0;
+
+	if(!(pos = strchr(pos+1, ' ')) )
+		return 0;
+
+	pos++;
+	sscanf(pos, "%s %s %s %s", week, mon, date, time);
+	sprintf(ver, "Linux Kernel Image %s%s%s", mon, date, time); 
+
+	if(!strcmp(expect, ver)){
+		websWrite(wp, T("alert(\"Firmware Upgrade Success.\");"));
+		nvram_bufset(RT2860_NVRAM, "Expect_Firmware", "");
+		nvram_commit(RT2860_NVRAM);
+	}else{
+		websWrite(wp, T("alert(\"Firmware Upgrade may be failed:\\nexpect new image : %s\\ncurrent : %s\");"), expect, ver);
+	}	
+	return 0;
+#endif
+	FILE *fp;
+	char buf[512];
+	char *old_firmware = nvram_bufget(RT2860_NVRAM, "old_firmware");
+	if(!old_firmware || !strlen(old_firmware) )
+		return 0;
+	fp = fopen("/proc/version", "r");
+	if(!fp)
+		return 0;
+
+	fgets(buf, sizeof(buf), fp);
+	fclose(fp);	
+	if(!strcmp(buf, old_firmware)){
+		websWrite(wp, T("alert(\"Warning!The firmware didn't change.\");"));
+	}else{
+		websWrite(wp, T("alert(\"Firmware Upgrade success\");"));
+	}	
+	nvram_bufset(RT2860_NVRAM, "old_firmware", "");
+	nvram_commit(RT2860_NVRAM);
+
+	return 0;
+}
+
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("ralink_init clear 2860");
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-	doSystem("ralink_init clear inic");
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	doSystem("ralink_init clear 2561");
-#endif
-
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
-	doSystem("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
-	#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	doSystem("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
-	#endif
+	system("ralink_init clear 2860");
+#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
+        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
 #elif defined(CONFIG_ICPLUS_PHY)
-	doSystem("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
-	#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	doSystem("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
-	#endif
+        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
 #else
-	doSystem("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
-	#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	doSystem("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
-	#endif
+        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+#endif
+#if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI)
+	system("ralink_init clear inic");
+#if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
+        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
+#elif defined(CONFIG_ICPLUS_PHY)
+        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
+#else
+        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+#endif
 #endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	doSystem("ralink_init renew 2561 /etc_ro/Wireless/RT61AP/RT2561_default");
+	system("ralink_init clear 2561");
+        system("ralink_init renew 2561 /etc_ro/Wireless/RT61AP/RT2561_default");
 #endif
 	system("reboot");
 }
 
 
+/*
+ * callee must free memory.
+ */
+/*
+static char *getLog(char *filename)
+{
+	FILE *fp;
+	struct stat filestat;
+	char *log;
+
+	if(stat(filename, &filestat) == -1)
+		return NULL;
+
+//	printf("%d\n", filestat.st_size);
+	log = (char *)malloc(sizeof(char) * (filestat.st_size + 1) );
+	if(!log)
+		return NULL;
+
+	if(!(fp = fopen(filename, "r"))){
+		return NULL;
+	}
+
+	if( fread(log, 1, filestat.st_size, fp) != filestat.st_size){
+		printf("read not enough\n");
+		free(log);
+		return NULL;
+	}
+
+	log[filestat.st_size] = '\0';
+
+	fclose(fp);
+	return log;
+}
+*/
+
+#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("service syslog stop");
-	doSystem("service syslog start");
+	doSystem("killall -q klogd");
+	doSystem("killall -q syslogd");
+	doSystem("syslogd -C8 1>/dev/null 2>&1");
+	doSystem("klogd 1>/dev/null 2>&1");
+
 	websRedirect(wp, "adm/syslog.asp");
 }
-
+#endif
 
 #define LOG_MAX (16384)
 static void syslog(webs_t wp, char_t *path, char_t *query)
@@ -672,10 +844,9 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 	FILE *fp = NULL;
 	char *log;
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
-	fp = popen("cat /var/log/messages", "r");
-//	fp = popen("logread", "r");
+	fp = popen("logread", "r");
 	if(!fp){
 		websWrite(wp, "-1");
 		goto error;
@@ -699,12 +870,31 @@ error:
 
 void management_init(void)
 {
-	doSystem("service ntp stop");
-	doSystem("service ntp start");
-	doSystem("service ddns stop");
-	doSystem("service ddns start");
-#ifdef CONFIG_RT2860V2_AP_WSC
+	doSystem("ntp.sh");
+#ifdef CONFIG_USER_GOAHEAD_GreenAP
+    	doSystem("greenap.sh init");
+#endif
+	doSystem("ddns.sh");
 	WPSRestart();
+
+	doSystem("killall -q klogd");
+	doSystem("killall -q syslogd");
+	doSystem("syslogd -C8 1>/dev/null 2>&1");
+	doSystem("klogd 1>/dev/null 2>&1");
+}
+
+void management_fini(void)
+{
+	doSystem("killall -q klogd");
+	doSystem("killall -q syslogd");
+}
+
+static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_GOAHEAD_GreenAP
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
 #endif
 }
 
@@ -713,9 +903,17 @@ void formDefineManagement(void)
 	websFormDefine(T("setSysAdm"), setSysAdm);
 	websFormDefine(T("setSysLang"), setSysLang);
 	websFormDefine(T("NTP"), NTP);
+#ifdef CONFIG_DATE
 	websFormDefine(T("NTPSyncWithHost"), NTPSyncWithHost);
+#endif
 	websAspDefine(T("getCurrentTimeASP"), getCurrentTimeASP);
+	websAspDefine(T("getGAPBuilt"), getGAPBuilt);
+#ifdef CONFIG_USER_GOAHEAD_GreenAP
+	websFormDefine(T("GreenAP"), GreenAP);
+#endif
+#ifdef CONFIG_USER_INADYN
 	websFormDefine(T("DDNS"), DDNS);
+#endif
 
 	websAspDefine(T("getMemLeftASP"), getMemLeftASP);
 	websAspDefine(T("getMemTotalASP"), getMemTotalASP);
@@ -733,12 +931,16 @@ void formDefineManagement(void)
 
 	websAspDefine(T("showSystemCommandASP"), showSystemCommandASP);
 	websFormDefine(T("SystemCommand"), SystemCommand);
+	websFormDefine(T("repeatLastSystemCommand"), repeatLastSystemCommand);
 
 	websFormDefine(T("LoadDefaultSettings"), LoadDefaultSettings);
 
 	websFormDefine(T("syslog"), syslog);
+#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 	websFormDefine(T("clearlog"), clearlog);
-#ifdef CONFIG_RT2860V2_AP_WSC
-	formDefineWPS();
 #endif
+
+	websAspDefine(T("FirmwareUpgradePostASP"), FirmwareUpgradePostASP);
+
+	formDefineWPS();
 }

@@ -2,8 +2,6 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
@@ -49,7 +47,7 @@ function setFocus()
 <h1 id="syscommandTitle">System Command</h1>
 <p id="syscommandIntroduction"> Run a system command as root: </p>
 
-<!-- ----------------- System command ----------------- -->
+<!-- ================= System command ================= -->
 <form method="post" name="SystemCommand" action="/goform/SystemCommand">
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
 <tbody><tr>
@@ -67,8 +65,14 @@ function setFocus()
 </table>
 <input value="Apply" id="syscommandApply" name="SystemCommandSubmit" onclick="return formCheck()" type="submit"> &nbsp;&nbsp;
 <input value="Reset" id="syscommandCancel" name="reset" type="reset">
+</form> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<!-- ================ repeat last system command ================= -->
+<form method="post" name="repeatLastSystemCommand" action="/goform/repeatLastSystemCommand">
+<input value="Repeat Last Command" id="repeatLastCommand" name="repeatLastCommand" type="submit"> &nbsp;&nbsp;
 </form>
 
+
 <br>
-</tr></td></table>
+</td></tr></table>
 </body></html>

@@ -1,18 +1,22 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Basic Wireless Settings</title>
 
 <script language="JavaScript" type="text/javascript">
+Butterlate.setTextDomain("wireless");
 
 var PhyMode  = '<% getCfg2Zero(1, "WirelessMode"); %>';
 var broadcastssidEnable  = '<% getCfg2Zero(1, "HideSSID"); %>';
+
+
 var channel_index  = '<% getInicChannel(); %>';
+var fxtxmode = '<% getCfg2General(1, "FixedTxMode"); %>';
 var wdsMode  = '<% getCfg2Zero(1, "WdsEnable"); %>';
 var wdsList  = '<% getCfg2General(1, "WdsList"); %>';
 var wdsPhyMode  = '<% getCfg2Zero(1, "WdsPhyMode"); %>';
@@ -120,24 +124,24 @@ function insertChannelOption(vChannel, band)
 {
 	var y = document.createElement('option');
 
-//	if (1*band == 24)
-//	{
+	if (1*band == 24)
+	{
 		y.text = ChannelList_24G[1*vChannel - 1];
 		y.value = 1*vChannel;
-//	}
-//	else if (1*band == 5)
-//	{
-//		y.value = 1*vChannel;
-//		if (1*vChannel <= 140)
-//			y.text = ChannelList_5G[((1*vChannel) - 36) / 4];
-//		else
-//			y.text = ChannelList_5G[((1*vChannel) - 36 - 1) / 4];
-//	}
+	}
+	else if (1*band == 5)
+	{
+		y.value = 1*vChannel;
+		if (1*vChannel <= 140)
+			y.text = ChannelList_5G[((1*vChannel) - 36) / 4];
+		else
+			y.text = ChannelList_5G[((1*vChannel) - 36 - 1) / 4];
+	}
 
-//	if (1*band == 24)
+	if (1*band == 24)
 		var x=document.getElementById("sz11gChannel");
-//	else if (1*band == 5)
-//		var x=document.getElementById("sz11aChannel");
+	else if (1*band == 5)
+		var x=document.getElementById("sz11aChannel");
 
 	try
 	{
@@ -501,6 +505,129 @@ function Check5GBandChannelException()
 	}
 }
 
+function initTranslation()
+{
+	var e = document.getElementById("basicTitle");
+	e.innerHTML = _("basic title");
+	e = document.getElementById("basicIntroduction");
+	e.innerHTML = _("basic introduction");
+
+	e = document.getElementById("basicWirelessNet");
+	e.innerHTML = _("basic wireless network");
+	e = document.getElementById("basicNetMode");
+	e.innerHTML = _("basic network mode");
+	e = document.getElementById("basicSSID");
+	e.innerHTML = _("basic ssid");
+	e = document.getElementById("basicMSSID1");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID2");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID3");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID4");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID5");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID6");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicMSSID7");
+	e.innerHTML = _("basic multiple ssid");
+	e = document.getElementById("basicBroadcastSSIDEnable");
+	e.innerHTML = _("wireless enable");
+	e = document.getElementById("basicBroadcastSSIDDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("basicBroadcastSSID");
+	e.innerHTML = _("basic broadcast ssid");
+	e = document.getElementById("basicBSSID");
+	e.innerHTML = _("basic bssid");
+	e = document.getElementById("basicFreqA");
+	e.innerHTML = _("basic frequency");
+	e = document.getElementById("basicFreqAAuto");
+	e.innerHTML = _("basic frequency auto");
+	e = document.getElementById("basicFreqB");
+	e.innerHTML = _("basic frequency");
+	e = document.getElementById("basicFreqBAuto");
+	e.innerHTML = _("basic frequency auto");
+	e = document.getElementById("basicFreqG");
+	e.innerHTML = _("basic frequency");
+	e = document.getElementById("basicFreqGAuto");
+	e.innerHTML = _("basic frequency auto");
+	/*
+	e = document.getElementById("basicRate");
+	e.innerHTML = _("basic rate");
+	*/
+
+	e = document.getElementById("basicWDSTitle");
+	e.innerHTML = _("basic wds title");
+	e = document.getElementById("basicWDSMode");
+	e.innerHTML = _("basic wds mode");
+	e = document.getElementById("basicWDSDisable");
+	e.innerHTML = _("wireless disable");
+	e = document.getElementById("basicWDSPhyMode");
+	e.innerHTML = _("basic wds phy mode");
+	e = document.getElementById("basicWDSEncrypType");
+	e.innerHTML = _("basic wds encryp type");
+	e = document.getElementById("basicWDSEncrypKey");
+	e.innerHTML = _("basic wds encryp key");
+	e = document.getElementById("basicWDSAPMacAddr");
+	e.innerHTML = _("basic wds ap macaddr");
+
+	e = document.getElementById("basicHTPhyMode");
+	e.innerHTML = _("basic ht phy mode");
+	e = document.getElementById("basicHTOPMode");
+	e.innerHTML = _("basic ht op mode");
+      	e = document.getElementById("basicHTMixed");
+	e.innerHTML = _("basic ht op mixed");
+    	e = document.getElementById("basicHTChannelBW");
+	e.innerHTML = _("basic ht channel bandwidth");
+    	e = document.getElementById("basicHTGI");
+	e.innerHTML = _("basic ht guard interval");
+      	e = document.getElementById("basicHTLongGI");
+	e.innerHTML = _("wireless long");
+      	e = document.getElementById("basicHTAutoGI");
+	e.innerHTML = _("wireless auto");
+    	e = document.getElementById("basicHTAutoMCS");
+	e.innerHTML = _("wireless auto");
+    	e = document.getElementById("basicHTRDG");
+	e.innerHTML = _("basic ht rdg");
+    	e = document.getElementById("basicHTRDGDisable");
+	e.innerHTML = _("wireless disable");
+    	e = document.getElementById("basicHTRDGEnable");
+	e.innerHTML = _("wireless enable");
+    	e = document.getElementById("basicHTExtChannel");
+	e.innerHTML = _("basic ht extension channel");
+    	e = document.getElementById("basicHTAMSDU");
+	e.innerHTML = _("basic ht amsdu");
+    	e = document.getElementById("basicHTAMSDUDisable");
+	e.innerHTML = _("wireless disable");
+    	e = document.getElementById("basicHTAMSDUEnable");
+	e.innerHTML = _("wireless enable");
+    	e = document.getElementById("basicHTAddBA");
+	e.innerHTML = _("basic ht addba");
+    	e = document.getElementById("basicHTAddBADisable");
+	e.innerHTML = _("wireless disable");
+    	e = document.getElementById("basicHTAddBAEnable");
+	e.innerHTML = _("wireless enable");
+    	e = document.getElementById("basicHTDelBA");
+	e.innerHTML = _("basic ht delba");
+    	e = document.getElementById("basicHTDelBADisable");
+	e.innerHTML = _("wireless disable");
+    	e = document.getElementById("basicHTDelBAEnable");
+	e.innerHTML = _("wireless enable");
+
+    	e = document.getElementById("basicOther");
+	e.innerHTML = _("basic other");
+    	e = document.getElementById("basicHTTxStream");
+	e.innerHTML = _("basic ht txstream");
+    	e = document.getElementById("basicHTRxStream");
+	e.innerHTML = _("basic ht rxstream");
+
+	e = document.getElementById("basicApply");
+	e.value = _("wireless apply");
+	e = document.getElementById("basicCancel");
+	e.value = _("wireless cancel");
+}
+
 function initValue()
 {
 	var ssidArray;
@@ -509,6 +636,7 @@ function initValue()
 	var channel_11a_index;
 	var current_channel_length;
 
+	initTranslation();
 	if (countrycode == '')
 		countrycode = 'NONE';
 
@@ -733,6 +861,97 @@ function initValue()
 			document.wireless_basic.sz11aChannel.options.selectedIndex = channel_index;
 	}
 
+	//ABG Rate
+	/*
+	if ((PhyMode == 0) || (PhyMode == 2) || (PhyMode == 3))
+	{
+		ht_mcs = 1*ht_mcs;
+		document.wireless_basic.abg_rate.options.length = 0;
+		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
+		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
+		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
+		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		document.wireless_basic.abg_rate.options[4] = new Option("6 Mbps", "6");
+		document.wireless_basic.abg_rate.options[5] = new Option("9 Mbps", "9");
+		document.wireless_basic.abg_rate.options[6] = new Option("11 Mbps", "11");
+		document.wireless_basic.abg_rate.options[7] = new Option("12 Mbps", "12");
+		document.wireless_basic.abg_rate.options[8] = new Option("18 Mbps", "18");
+		document.wireless_basic.abg_rate.options[9] = new Option("24 Mbps", "24");
+		document.wireless_basic.abg_rate.options[10] = new Option("36 Mbps", "36");
+		document.wireless_basic.abg_rate.options[11] = new Option("48 Mbps", "48");
+		document.wireless_basic.abg_rate.options[12] = new Option("54 Mbps", "54");
+		if (fxtxmode == "CCK" || fxtxmode == "cck") {
+			if (ht_mcs == 0)
+				document.wireless_basic.abg_rate.options.selectedIndex = 1;
+			else if (ht_mcs == 1)
+				document.wireless_basic.abg_rate.options.selectedIndex = 2;
+			else if (ht_mcs == 2)
+				document.wireless_basic.abg_rate.options.selectedIndex = 3;
+			else if (ht_mcs == 3)
+				document.wireless_basic.abg_rate.options.selectedIndex = 6;
+			else
+				document.wireless_basic.abg_rate.options.selectedIndex = 0;
+		}
+		else {
+			if (ht_mcs == 0)
+				document.wireless_basic.abg_rate.options.selectedIndex = 4;
+			else if (ht_mcs == 1)
+				document.wireless_basic.abg_rate.options.selectedIndex = 5;
+			else if (ht_mcs == 2)
+				document.wireless_basic.abg_rate.options.selectedIndex = 7;
+			else if (ht_mcs == 3)
+				document.wireless_basic.abg_rate.options.selectedIndex = 8;
+			else if (ht_mcs == 4)
+				document.wireless_basic.abg_rate.options.selectedIndex = 9;
+			else if (ht_mcs == 5)
+				document.wireless_basic.abg_rate.options.selectedIndex = 10;
+			else if (ht_mcs == 6)
+				document.wireless_basic.abg_rate.options.selectedIndex = 11;
+			else if (ht_mcs == 7)
+				document.wireless_basic.abg_rate.options.selectedIndex = 12;
+			else
+				document.wireless_basic.abg_rate.options.selectedIndex = 0;
+		}
+	}
+	else if (PhyMode == 1)
+	{
+		ht_mcs = 1*ht_mcs;
+		document.wireless_basic.abg_rate.options.length = 0;
+		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
+		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
+		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
+		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		document.wireless_basic.abg_rate.options[4] = new Option("11 Mbps", "11");
+		if (ht_mcs == 0)
+			document.wireless_basic.abg_rate.options.selectedIndex = 1;
+		else if (ht_mcs == 1)
+			document.wireless_basic.abg_rate.options.selectedIndex = 2;
+		else if (ht_mcs == 2)
+			document.wireless_basic.abg_rate.options.selectedIndex = 3;
+		else if (ht_mcs == 3)
+			document.wireless_basic.abg_rate.options.selectedIndex = 4;
+		else
+			document.wireless_basic.abg_rate.options.selectedIndex = 0;
+	}
+	else
+	{
+		document.getElementById("div_abg_rate").style.visibility = "hidden";
+		document.getElementById("div_abg_rate").style.display = "none";
+		document.wireless_basic.abg_rate.disabled = true;
+	}
+	*/
+
+	//WDS Phy Mode
+	document.wireless_basic.wds_phy_mode.options.length = 1;
+	if (PhyMode != 1) {
+		document.wireless_basic.wds_phy_mode.options[1] = new Option("OFDM", "OFDM");
+		if (PhyMode != 0 && PhyMode != 2 && PhyMode != 4)
+		{
+			document.wireless_basic.wds_phy_mode.options[2] = new Option("HTMIX", "HTMIX");
+			document.wireless_basic.wds_phy_mode.options[3] = new Option("GREENFIELD", "GREENFIELD");
+		}
+	}
+
 	if (wdsList != "")
 	{
 		wdslistArray = wdsList.split(";");
@@ -750,7 +969,6 @@ function initValue()
 	}
 
 	wdsMode = 1*wdsMode;
-
 	if (wdsMode == 0)
 		document.wireless_basic.wds_mode.options.selectedIndex = 0;
 	else if (wdsMode == 4)
@@ -760,7 +978,14 @@ function initValue()
 	else if (wdsMode == 3)
 		document.wireless_basic.wds_mode.options.selectedIndex = 3;
 
-	document.wireless_basic.wds_phy_mode.options.selectedIndex = 1*wdsPhyMode;
+	if (wdsPhyMode.indexOf("CCK") >= 0 || wdsPhyMode.indexOf("cck") >= 0)
+		document.wireless_basic.wds_phy_mode.options.selectedIndex = 0;
+	else if (wdsPhyMode.indexOf("OFDM") >= 0 || wdsPhyMode.indexOf("ofdm") >= 0)
+		document.wireless_basic.wds_phy_mode.options.selectedIndex = 1;
+	else if (wdsPhyMode.indexOf("HTMIX") >= 0 || wdsPhyMode.indexOf("htmix") >= 0)
+		document.wireless_basic.wds_phy_mode.options.selectedIndex = 2;
+	else if (wdsPhyMode.indexOf("GREENFIELD") >= 0 || wdsPhyMode.indexOf("greenfield") >= 0)
+		document.wireless_basic.wds_phy_mode.options.selectedIndex = 3;
 	document.wireless_basic.wds_encryp_type.options.selectedIndex = 1*wdsEncrypType;
 	document.wireless_basic.wds_encryp_key.value = wdsEncrypKey;
 
@@ -892,6 +1117,11 @@ function wirelessModeChange()
 	document.getElementById("div_11g_channel").style.visibility = "hidden";
 	document.getElementById("div_11g_channel").style.display = "none";
 	document.wireless_basic.sz11gChannel.disabled = true;
+	/*
+	document.getElementById("div_abg_rate").style.visibility = "hidden";
+	document.getElementById("div_abg_rate").style.display = "none";
+	document.wireless_basic.abg_rate.disabled = true;
+	*/
 	document.getElementById("div_11n").style.display = "none";
 	document.wireless_basic.n_mode.disabled = true;
 	document.wireless_basic.n_bandwidth.disabled = true;
@@ -990,6 +1220,99 @@ function wirelessModeChange()
 
 		insertExtChannelOption();
 	}
+
+	//ABG Rate
+	/*
+	if ((wmode == 0) || (wmode == 2) || (wmode == 3))
+	{
+		ht_mcs = 1*ht_mcs;
+		document.wireless_basic.abg_rate.options.length = 0;
+		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
+		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
+		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
+		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		document.wireless_basic.abg_rate.options[4] = new Option("6 Mbps", "6");
+		document.wireless_basic.abg_rate.options[5] = new Option("9 Mbps", "9");
+		document.wireless_basic.abg_rate.options[6] = new Option("11 Mbps", "11");
+		document.wireless_basic.abg_rate.options[7] = new Option("12 Mbps", "12");
+		document.wireless_basic.abg_rate.options[8] = new Option("18 Mbps", "18");
+		document.wireless_basic.abg_rate.options[9] = new Option("24 Mbps", "24");
+		document.wireless_basic.abg_rate.options[10] = new Option("36 Mbps", "36");
+		document.wireless_basic.abg_rate.options[11] = new Option("48 Mbps", "48");
+		document.wireless_basic.abg_rate.options[12] = new Option("54 Mbps", "54");
+		if (fxtxmode == "CCK" || fxtxmode == "cck") {
+			if (ht_mcs == 0)
+				document.wireless_basic.abg_rate.options.selectedIndex = 1;
+			else if (ht_mcs == 1)
+				document.wireless_basic.abg_rate.options.selectedIndex = 2;
+			else if (ht_mcs == 2)
+				document.wireless_basic.abg_rate.options.selectedIndex = 3;
+			else if (ht_mcs == 3)
+				document.wireless_basic.abg_rate.options.selectedIndex = 6;
+			else
+				document.wireless_basic.abg_rate.options.selectedIndex = 0;
+		}
+		else {
+			if (ht_mcs == 0)
+				document.wireless_basic.abg_rate.options.selectedIndex = 4;
+			else if (ht_mcs == 1)
+				document.wireless_basic.abg_rate.options.selectedIndex = 5;
+			else if (ht_mcs == 2)
+				document.wireless_basic.abg_rate.options.selectedIndex = 7;
+			else if (ht_mcs == 3)
+				document.wireless_basic.abg_rate.options.selectedIndex = 8;
+			else if (ht_mcs == 4)
+				document.wireless_basic.abg_rate.options.selectedIndex = 9;
+			else if (ht_mcs == 5)
+				document.wireless_basic.abg_rate.options.selectedIndex = 10;
+			else if (ht_mcs == 6)
+				document.wireless_basic.abg_rate.options.selectedIndex = 11;
+			else if (ht_mcs == 7)
+				document.wireless_basic.abg_rate.options.selectedIndex = 12;
+			else
+				document.wireless_basic.abg_rate.options.selectedIndex = 0;
+		}
+
+		document.getElementById("div_abg_rate").style.visibility = "visible";
+		document.getElementById("div_abg_rate").style.display = style_display_on();
+		document.wireless_basic.abg_rate.disabled = false;
+	}
+	else if (wmode == 1)
+	{
+		ht_mcs = 1*ht_mcs;
+		document.wireless_basic.abg_rate.options.length = 0;
+		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
+		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
+		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
+		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		document.wireless_basic.abg_rate.options[4] = new Option("11 Mbps", "11");
+		if (ht_mcs == 0)
+			document.wireless_basic.abg_rate.options.selectedIndex = 1;
+		else if (ht_mcs == 1)
+			document.wireless_basic.abg_rate.options.selectedIndex = 2;
+		else if (ht_mcs == 2)
+			document.wireless_basic.abg_rate.options.selectedIndex = 3;
+		else if (ht_mcs == 3)
+			document.wireless_basic.abg_rate.options.selectedIndex = 4;
+		else
+			document.wireless_basic.abg_rate.options.selectedIndex = 0;
+
+		document.getElementById("div_abg_rate").style.visibility = "visible";
+		document.getElementById("div_abg_rate").style.display = style_display_on();
+		document.wireless_basic.abg_rate.disabled = false;
+	}
+	*/
+
+	//WDS Phy Mode
+	document.wireless_basic.wds_phy_mode.options.length = 1;
+	if (wmode != 1) {
+		document.wireless_basic.wds_phy_mode.options[1] = new Option("OFDM", "OFDM");
+		if (wmode != 0 && wmode != 2 && wmode != 3)
+		{
+			document.wireless_basic.wds_phy_mode.options[2] = new Option("HTMIX", "HTMIX");
+			document.wireless_basic.wds_phy_mode.options[3] = new Option("GREENFIELD", "GREENFIELD");
+		}
+	}
 }
 
 function WdsModeOnChange()
@@ -1025,7 +1348,7 @@ function WdsModeOnChange()
 		document.getElementById("div_wds_encryp_type").style.display = style_display_on();
 		document.wireless_basic.wds_encryp_type.disabled = false;
 
-		if (document.wireless_basic.wds_encryp_type.options.selectedIndex >= 2)
+		if (document.wireless_basic.wds_encryp_type.options.selectedIndex >= 1)
 		{
 			document.getElementById("div_wds_encryp_key").style.visibility = "visible";
 			document.getElementById("div_wds_encryp_key").style.display = style_display_on();
@@ -1056,14 +1379,11 @@ function WdsSecurityOnChange()
 	document.getElementById("div_wds_encryp_key").style.display = "none";
 	document.wireless_basic.wds_encryp_key.disabled = true;
 
-	if (document.wireless_basic.wds_encryp_type.options.selectedIndex >= 2)
+	if (document.wireless_basic.wds_encryp_type.options.selectedIndex >= 1)
 	{
 		document.getElementById("div_wds_encryp_key").style.visibility = "visible";
 		document.getElementById("div_wds_encryp_key").style.display = style_display_on();
 		document.wireless_basic.wds_encryp_key.disabled = false;
-	}
-	else if (document.wireless_basic.wds_encryp_type.options.selectedIndex == 1)
-	{
 	}
 }
 
@@ -1145,24 +1465,24 @@ function CheckValue()
 <body onLoad="initValue()">
 <table class="body"><tr><td>
 
-<h1>Basic Wireless Settings </h1>
-<p> You could configure the minimum number of Wireless settings for communication, such as Network Name (SSID) and Channel. The Access Point can be set simply with only the minimum setting items. </p>
+<h1 id="basicTitle">Basic Wireless Settings </h1>
+<p id="basicIntroduction"> You could configure the minimum number of Wireless settings for communication, such as Network Name (SSID) and Channel. The Access Point can be set simply with only the minimum setting items. </p>
 <hr />
 
 <form method=post name=wireless_basic action="/goform/inicBasic" onSubmit="return CheckValue()">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="2">Wireless Network</td>
+    <td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
   </tr>
   <tr> 
-    <td class="head">Network Mode</td>
+    <td class="head" id="basicNetMode">Network Mode</td>
     <td>
       <select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange()">
         <option value=0>11b/g mixed mode</option>
         <option value=1>11b only</option>
         <option value=4>11g only</option>
-<!--        <option value=2>11a only</option>
-        <option value=8>11a/n mixed mode</option> -->
+        <option value=2>11a only</option>
+        <option value=8>11a/n mixed mode</option>
         <option value=9>11b/g/n mixed mode</option>
       </select>
       <!--
@@ -1183,86 +1503,95 @@ function CheckValue()
   </tr>
   <input type="hidden" name="bssid_num" value="1">
   <tr> 
-    <td class="head">Network Name(SSID)</td>
+    <td class="head" id="basicSSID">Network Name(SSID)</td>
     <td><input type=text name=ssid size=20 maxlength=32 value="<% getCfg2General(1, "SSID1"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID1</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID1">Multiple SSID</font>1</td>
     <td><input type=text name=mssid_1 size=20 maxlength=32 value="<% getCfg2General(1, "SSID2"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID2</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID2">Multiple SSID</font>2</td>
     <td><input type=text name=mssid_2 size=20 maxlength=32 value="<% getCfg2General(1, "SSID3"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID3</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID3">Multiple SSID</font>3</td>
     <td><input type=text name=mssid_3 size=20 maxlength=32 value="<% getCfg2General(1, "SSID4"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID4</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID4">Multiple SSID</font>4</td>
     <td><input type=text name=mssid_4 size=20 maxlength=32 value="<% getCfg2General(1, "SSID5"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID5</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID5">Multiple SSID</font>5</td>
     <td><input type=text name=mssid_5 size=20 maxlength=32 value="<% getCfg2General(1, "SSID6"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID6</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID6">Multiple SSID</font>6</td>
     <td><input type=text name=mssid_6 size=20 maxlength=32 value="<% getCfg2General(1, "SSID7"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multiple SSID7</td>
+    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID7">Multiple SSID</font>7</td>
     <td><input type=text name=mssid_7 size=20 maxlength=32 value="<% getCfg2General(1, "SSID8"); %>"></td>
   </tr>
   <tr> 
-    <td class="head">Broadcast Network Name (SSID)</td>
+    <td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
     <td>
-      <input type=radio name=broadcastssid value="1" checked>Enable&nbsp;
-      <input type=radio name=broadcastssid value="0">Disable
+      <input type=radio name=broadcastssid value="1" checked><font id="basicBroadcastSSIDEnable">Enable&nbsp;</font>
+      <input type=radio name=broadcastssid value="0"><font id="basicBroadcastSSIDDisable">Disable</font>
     </td>
   </tr>
   <tr> 
-    <td class="head">BSSID</td>
+    <td class="head" id="basicBSSID">BSSID</td>
     <td>&nbsp;&nbsp;<% getInicCurrentMac(); %></td>
   </tr>
   <tr id="div_11a_channel" name="div_11a_channel">
-    <td class="head">Frequency (Channel)</td>
+    <td class="head"><font id="basicFreqA">Frequency (Channel)</font></td>
     <td>
       <select id="sz11aChannel" name="sz11aChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0>AutoSelect</option>
+	<option value=0 id="basicFreqAAuto">AutoSelect</option>
 	<% getInic11aChannels(); %>
       </select>
     </td>
   </tr>
   <tr id="div_11b_channel" name="div_11b_channel">
-    <td class="head">Frequency (Channel)</td>
+    <td class="head"><font id="basicFreqB">Frequency (Channel)</font></td>
     <td>
       <select id="sz11bChannel" name="sz11bChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0>AutoSelect</option>
+	<option value=0 id="basicFreqBAuto">AutoSelect</option>
 	<% getInic11bChannels(); %>
       </select>
     </td>
   </tr>
   <tr id="div_11g_channel" name="div_11g_channel">
-    <td class="head">Frequency (Channel)</td>
+    <td class="head"><font id="basicFreqG">Frequency (Channel)</font></td>
     <td>
       <select id="sz11gChannel" name="sz11gChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0>AutoSelect</option>
+	<option value=0 id="basicFreqGAuto">AutoSelect</option>
 	<% getInic11gChannels(); %>
       </select>
     </td>
   </tr>
+  <!--
+  <tr id="div_abg_rate">
+    <td class="head"><font id="basicRate">Rate</font></td>
+    <td>
+      <select name="abg_rate" size="1">
+      </select>
+    </td>
+  </tr>
+  -->
 </table>
 
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="2">Wireless Distribution System(WDS)</td>
+    <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System(WDS)</td>
   </tr>
   <tr> 
-    <td class="head">WDS Mode</td>
+    <td class="head" id="basicWDSMode">WDS Mode</td>
     <td>
       <select name="wds_mode" id="wds_mode" size="1" onchange="WdsModeOnChange()">
-	<option value=0 SELECTED>Disable</option>
+	<option value=0 SELECTED id="basicWDSDisable">Disable</option>
 	<option value=4>Lazy Mode</option>
 	<option value=2>Bridge Mode</option>
 	<option value=3>Repeater Mode</option>
@@ -1270,45 +1599,43 @@ function CheckValue()
     </td>
   </tr>
   <tr id="div_wds_phy_mode" name="div_wds_phy_mode"> 
-    <td class="head">Phy Mode</td>
+    <td class="head" id="basicWDSPhyMode">Phy Mode</td>
     <td>
       <select name="wds_phy_mode" id="wds_phy_mode" size="1">
-	<option value=0 selected>CCK</option>
-	<option value=1>OFDM</option>
-	<option value=2>HTMIX</option>
-	<option value=3>GREENFIELD</option>
+	<option value="CCK;CCK;CCK;CCK" selected>CCK</option>
+	<!-- other modes are added by javascript -->
       </select>
     </td>
   </tr>
   <tr id="div_wds_encryp_type" name="div_wds_encryp_type"> 
-    <td class="head">EncrypType</td>
+    <td class="head" id="basicWDSEncrypType">EncrypType</td>
     <td>
       <select name="wds_encryp_type" id="wds_encryp_type" size="1" onchange="WdsSecurityOnChange()">
-	<option value="NONE" selected>NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
+	<option value="NONE;NONE;NONE;NONE" selected>NONE</option>
+	<option value="WEP;WEP;WEP;WEP">WEP</option>
+	<option value="TKIP;TKIP;TKIP;TKIP">TKIP</option>
+	<option value="AES;AES;AES;AES">AES</option>
       </select>
     </td>
   </tr>
   <tr id="div_wds_encryp_key" name="div_wds_encryp_key">
-    <td class="head">Encryp Key</td>
+    <td class="head" id="basicWDSEncrypKey">Encryp Key</td>
     <td><input type=text name=wds_encryp_key size=28 maxlength=64 value=""></td>
   </tr>
   <tr id="wds_mac_list_1" name="wds_mac_list_1">
-    <td class="head">AP MAC Address</td>
+    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
     <td><input type=text name=wds_1 size=20 maxlength=17 value=""></td>
   </tr>
   <tr id="wds_mac_list_2" name="wds_mac_list_2">
-    <td class="head">AP MAC Address</td>
+    <td class="head" id="basicWDSAPMacAddr">AP MAC Addres</td>
     <td><input type=text name=wds_2 size=20 maxlength=17 value=""></td>
   </tr>
   <tr id="wds_mac_list_3" name="wds_mac_list_3">
-    <td class="head">AP MAC Address</td>
+    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
     <td><input type=text name=wds_3 size=20 maxlength=17 value=""></td>
   </tr>
   <tr id="wds_mac_list_4" name="wds_mac_list_4">
-    <td class="head">AP MAC Address</td>
+    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
     <td><input type=text name=wds_4 size=20 maxlength=17 value=""></td>
   </tr>
   <input type="hidden" name="wds_list" value="1">
@@ -1316,27 +1643,27 @@ function CheckValue()
 
 <table id="div_11n" name="div_11n" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">
   <tr> 
-    <td class="title" colspan="2">HT Physical Mode</td>
+    <td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
   </tr>
   <tr>
-    <td class="head">Operating Mode</td>
+    <td class="head" id="basicHTOPMode">Operating Mode</td>
     <td>
-      <input type=radio name=n_mode value="0" checked>Mixed Mode&nbsp;
+      <input type=radio name=n_mode value="0" checked><font id="basicHTMixed">Mixed Mode&nbsp;</font>
       <input type=radio name=n_mode value="1">Green Field
     </td>
   </tr>
   <tr>
-    <td class="head">Channel BandWidth</td>
+    <td class="head" id="basicHTChannelBW">Channel BandWidth</td>
     <td>
       <input type=radio name=n_bandwidth value="0" onClick="Channel_BandWidth_onClick()" checked>20&nbsp;
       <input type=radio name=n_bandwidth value="1" onClick="Channel_BandWidth_onClick()">20/40
     </td>
   </tr>
   <tr>
-    <td class="head">Guard Interval</td>
+    <td class="head" id="basicHTGI">Guard Interval</td>
     <td>
-      <input type=radio name=n_gi value="0" checked>long&nbsp;
-      <input type=radio name=n_gi value="1">Auto
+      <input type=radio name=n_gi value="0" checked><font id="basicHTLongGI">long&nbsp;</font>
+      <input type=radio name=n_gi value="1"><font id="basicHTAutoGI">Auto</font>
     </td>
   </tr>
   <tr>
@@ -1360,19 +1687,19 @@ function CheckValue()
 	<option value = 14>14</option>
 	<option value = 15>15</option>
 	<option value = 32>32</option>
-	<option value = 33 selected>Auto</option>
+	<option value = 33 selected id="basicHTAutoMCS">Auto</option>
       </select>
     </td>
   </tr>
   <tr>
-    <td class="head">Reverse Direction Grant(RDG)</td>
+    <td class="head" id="basicHTRDG">Reverse Direction Grant(RDG)</td>
     <td>
-      <input type=radio name=n_rdg value="0" checked>Disable&nbsp;
-      <input type=radio name=n_rdg value="1">Enable
+      <input type=radio name=n_rdg value="0" checked><font id="basicHTRDGDisable">Disable&nbsp;</font>
+      <input type=radio name=n_rdg value="1"><font id="basicHTRDGEnable">Enable</font>
     </td>
   </tr>
   <tr name="extension_channel" id="extension_channel">
-    <td class="head">Extension Channel</td>
+    <td class="head" id="basicHTExtChannel">Extension Channel</td>
     <td>
       <select id="n_extcha" name="n_extcha" size="1">
 	<option value=1 selected>2412MHz (Channel 1)</option>
@@ -1380,24 +1707,24 @@ function CheckValue()
     </td>
   </tr>
   <tr>
-    <td class="head">Aggregation MSDU(A-MSDU)</td>
+    <td class="head" id="basicHTAMSDU">Aggregation MSDU(A-MSDU)</td>
     <td>
-      <input type=radio name=n_amsdu value="0" checked>Disable&nbsp;
-      <input type=radio name=n_amsdu value="1">Enable
+      <input type=radio name=n_amsdu value="0" checked><font id="basicHTAMSDUDisable">Disable&nbsp;</font>
+      <input type=radio name=n_amsdu value="1"><font id="basicHTAMSDUEnable">Enable</font>
     </td>
   </tr>
   <tr>
-    <td class="head">Auto Block ACK</td>
+    <td class="head" id="basicHTAddBA">Auto Block ACK</td>
     <td>
-      <input type=radio name=n_autoba value="0" checked>Disable&nbsp;
-      <input type=radio name=n_autoba value="1">Enable
+      <input type=radio name=n_autoba value="0" checked><font id="basicHTAddBADisable">Disable&nbsp;</font>
+      <input type=radio name=n_autoba value="1"><font id="basicHTAddBAEnable">Enable</font>
     </td>
   </tr>
   <tr>
-    <td class="head">Decline BA Request</td>
+    <td class="head" id="basicHTDelBA">Decline BA Request</td>
     <td>
-      <input type=radio name=n_badecline value="0" checked>Disable&nbsp;
-      <input type=radio name=n_badecline value="1">Enable
+      <input type=radio name=n_badecline value="0" checked><font id="basicHTDelBADisable">Disable&nbsp;</font>
+      <input type=radio name=n_badecline value="1"><font id="basicHTDelBAEnable">Enable</font>
     </td>
   </tr>
 </table>
@@ -1405,7 +1732,7 @@ function CheckValue()
 <!--<table id="div_11n_plugfest" name="div_11n_plugfest" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">-->
 <table id="div_11n_plugfest" name="div_11n_plugfest" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="2">Other</td>
+    <td class="title" colspan="2" id="basicOther">Other</td>
   </tr>
   <!--
   <tr>
@@ -1424,7 +1751,7 @@ function CheckValue()
   </tr>
   -->
   <tr>
-    <td class="head">HT TxStream</td>
+    <td class="head" id="basicHTTxStream">HT TxStream</td>
     <td>
       <select name="tx_stream" size="1">
 	<option value = 1>1</option>
@@ -1433,7 +1760,7 @@ function CheckValue()
     </td>
   </tr>
   <tr>
-    <td class="head">HT RxStream</td>
+    <td class="head" id="basicHTRxStream">HT RxStream</td>
     <td>
       <select name="rx_stream" size="1">
 	<option value = 1>1</option>
@@ -1447,8 +1774,8 @@ function CheckValue()
 <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
-      <input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
+      <input type=submit style="{width:120px;}" value="Apply" id="basicApply"> &nbsp; &nbsp;
+      <input type=reset  style="{width:120px;}" value="Cancel" id="basicCancel" onClick="window.location.reload()">
     </td>
   </tr>
 </table>

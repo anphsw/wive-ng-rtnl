@@ -6,8 +6,6 @@
 <head>
 <title>DTree</title>
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1" />
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />
 <link rel="StyleSheet" href="dtree.css" type="text/css" />
 <script type="text/javascript" src="/dtree/dtree.js"></script>
@@ -39,23 +37,35 @@ function refresh(){
 }
 </script>
 
-<!--<p><center>>|&nbsp <a href="javascript: a.openAll();" id="openall">open</a>&nbsp | &nbsp <a href="javascript: a.closeAll();" id="closeall">close</a>&nbsp|<</center></p> -->
+<p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p>
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
 var dhcpen = '<% getCfgZero(1, "dhcpEnabled"); %>';
 var dpbsta = '<% getDpbSta(); %>';
+var vpnen = '<% getVPNBuilt(); %>';
 var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
+var meshb = '<% getMeshBuilt(); %>';
+var wdsb = '<% getWDSBuilt(); %>';
+var wscb = '<% getWSCBuilt(); %>';
+var usbb = '<% getUSBBuilt(); %>';
 var storageb = '<% getStorageBuilt(); %>';
 var ftpb = '<% getFtpBuilt(); %>';
 var smbb = '<% getSmbBuilt(); %>';
+var mediab = '<% getMediaBuilt(); %>';
+var webcamb = '<% getWebCamBuilt(); %>';
+var printersrvb = '<% getPrinterSrvBuilt(); %>';
+var usbiNICb = '<% getUSBiNICBuilt(); %>';
+var syslogb = '<% getSysLogBuilt(); %>';
+var swqos = '<% getSWQoSBuilt(); %>';
+var ad = '<% isAntennaDiversityBuilt(); %>';
 
 a = new dTree('a');
 a.config.useStatusText=true;
 a.config.useCookies=false;
 
 //  nodeID, parent nodeID,  Name,  URL
-a.add(000,  -1, _("treeapp Router"),                "javascript:go('overview.asp');");
+a.add(000,  -1, _("treeapp ralink"),                "javascript:go('overview.asp');");
 a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
 a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
 if (opmode != '0') {
@@ -65,8 +75,16 @@ a.add(302, 300, _("treeapp lan"),                   "javascript:go('internet/lan
 if (dhcpen == "1") {
 	a.add(303, 300, _("treeapp dhcp clients"),          "javascript:go('internet/dhcpcliinfo.asp');");
 }
-//a.add(304, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
-a.add(305, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
+if (vpnen == "1") {
+	a.add(304, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
+}
+if (opmode != '0') {
+	a.add(305, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
+}
+
+if (swqos == '1') {
+	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
+}
 
 if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
 {
@@ -79,7 +97,8 @@ if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
 	a.add(406, 400, _("treeapp qos"),                   "javascript:go('station/qos.asp');");
 	a.add(407, 400, _("treeapp 11n configurations"),    "javascript:go('station/11n_cfg.asp');");
 	a.add(408, 400, _("treeapp about"),                 "javascript:go('station/about.asp');");
-//	a.add(409, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
+	if (wscb == "1")
+		a.add(409, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
 }
 else
 {
@@ -87,28 +106,56 @@ else
 	a.add(401, 400, _("treeapp basic"),                 "javascript:go('wireless/basic.asp');");
 	a.add(402, 400, _("treeapp advanced"),              "javascript:go('wireless/advanced.asp');");
 	a.add(403, 400, _("treeapp security"),              "javascript:go('wireless/security.asp');");
-//	a.add(404, 400, _("treeapp wps"),                   "javascript:go('wps/wps.asp');");
+	if (wdsb == "1")
+	{
+		a.add(404, 400, _("treeapp wds"),                   "javascript:go('wireless/wds.asp');");
+	}
+	if (wscb == "1")
+		a.add(405, 400, _("treeapp wps"),                   "javascript:go('wps/wps.asp');");
 	if (opmode == '3')
-		a.add(405, 400, _("treeapp ap client"),     "javascript:go('wireless/apcli.asp');");
-	a.add(406, 400, _("treeapp station list"),          "javascript:go('wireless/stainfo.asp');");
+		a.add(406, 400, _("treeapp ap client"),     "javascript:go('wireless/apcli.asp');");
+	a.add(407, 400, _("treeapp station list"),          "javascript:go('wireless/stainfo.asp');");
+	if (ad == '1')
+		a.add(408, 400, "Antenna Diversity",		"javascript:go('wireless/ant_diversity.asp');");
+	if (meshb == "1")
+	{
+		a.add(410, 400, _("treeapp mesh settings"),     "javascript:go('wireless/mesh.asp');");
+	}
 }
-a.add(700,   0, _("treeapp firewall"),              "javascript:a.oo(700);");
-a.add(701, 700, _("treeapp ip/port filtering"),     "javascript:go('firewall/port_filtering.asp');");
-a.add(703, 700, _("treeapp port forwarding"),       "javascript:go('firewall/port_forward.asp');");
-a.add(704, 700, _("treeapp dmz"),                   "javascript:go('firewall/DMZ.asp');");
-a.add(705, 700, _("treeapp system firewall"),       "javascript:go('firewall/system_firewall.asp');");
-a.add(706, 700, _("treeapp content filtering"),     "javascript:go('firewall/content_filtering.asp');");
 
-if (storageb == "1")
-{
-	a.add(800,   0, _("treeapp storage"),		"javascript:a.oo(800);");
-	a.add(801, 800, _("treeapp management"),	"javascript:go('storage/management.asp');");
-	if (ftpb == "1")
-		a.add(802, 800, _("treeapp ftpsrv"),		"javascript:go('storage/ftpsrv.asp');");
-	if (smbb == "1")
-		a.add(803, 800, _("treeapp sambasrv"),		"javascript:go('storage/smbsrv.asp');");
-	//a.add(804, 800, _("treeapp disk"),		"javascript:go('firewall/disk.asp');");
+if (opmode != '0') {
+	a.add(700,   0, _("treeapp firewall"),              "javascript:a.oo(700);");
+	a.add(701, 700, _("treeapp ip/port filtering"),     "javascript:go('firewall/port_filtering.asp');");
+	a.add(703, 700, _("treeapp port forwarding"),       "javascript:go('firewall/port_forward.asp');");
+	a.add(704, 700, _("treeapp dmz"),                   "javascript:go('firewall/DMZ.asp');");
+	a.add(705, 700, _("treeapp system firewall"),       "javascript:go('firewall/system_firewall.asp');");
+	a.add(706, 700, _("treeapp content filtering"),     "javascript:go('firewall/content_filtering.asp');");
 }
+
+if (usbb == "1")
+{
+	if ((webcamb == "1") || (printersrvb == "1") || (usbiNICb == "1"))
+		a.add(800,   0, _("treeapp usb"),		"javascript:a.oo(800);");
+	if (webcamb == "1")
+		a.add(801, 800, _("treeapp webcam"),		"javascript:go('usb/UVCwebcam.asp');");
+	if (printersrvb == "1")
+		a.add(802, 800, _("treeapp printersrv"),	"javascript:go('usb/P910NDprintersrv.asp');");
+	if (usbiNICb == "1")
+		a.add(803, 800, _("treeapp usbinic"),		"javascript:go('usb/INICusb_inic.asp');");
+	if (storageb == "1")
+	{
+		a.add(850,   0, _("treeapp storage"),		"javascript:a.oo(850);");
+		a.add(851, 850, _("treeapp useradmin"),	"javascript:go('usb/STORAGEuser_admin.asp');");
+		a.add(852, 850, _("treeapp disk"),		"javascript:go('usb/STORAGEdisk_admin.asp');");
+		if (ftpb == "1")
+			a.add(853, 850, _("treeapp ftpsrv"),		"javascript:go('usb/STORAGEftpsrv.asp');");
+		if (smbb == "1")
+			a.add(854, 850, _("treeapp sambasrv"),		"javascript:go('usb/STORAGEsmbsrv.asp');");
+		if (mediab == "1")
+			a.add(855, 850, _("treeapp mediasrv"),		"javascript:go('usb/USHAREmediasrv.asp');");
+	}
+}
+
 a.add(900,   0, _("treeapp administration"),        "javascript:a.oo(900);");
 a.add(901, 900, _("treeapp management"),            "javascript:go('adm/management.asp');");
 a.add(902, 900, _("treeapp upload firmware"),       "javascript:go('adm/upload_firmware.asp');");
@@ -116,9 +163,11 @@ a.add(903, 900, _("treeapp settings management"),   "javascript:go('adm/settings
 a.add(904, 900, _("treeapp status"),                "javascript:go('adm/status.asp');");
 a.add(905, 900, _("treeapp statistics"),            "javascript:go('adm/statistic.asp');");
 a.add(906, 900, _("treeapp system command"),        "javascript:go('adm/system_command.asp');");
-a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
-a.add(907, 900, _("treeapp history"),               "javascript:go('cgi-bin/history.sh');");
-a.add(909, 900, _("treeapp reboot"),           	    "javascript:go('cgi-bin/reboot.sh');");
+if (syslogb == "1")
+{
+	a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
+}
+a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
 document.write(a);
 </script>
 

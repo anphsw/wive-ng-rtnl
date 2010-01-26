@@ -4,7 +4,7 @@
 #
 # Copyright (c) GoAhead Software, Inc. 1995-2000
 #
-# $Id: Makefile,v 1.44 2008-03-07 09:53:10 chhung Exp $
+# $Id: Makefile,v 1.57.2.1 2009-04-08 08:52:59 chhung Exp $
 #
 
 NAME	= goahead
@@ -38,17 +38,23 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  md5c.o um.o umui.o websda.o emfdb.o \
 				  webrom.o webs.o websuemf.o \
 				  internet.o utils.o wireless.o \
-				  firewall.o management.o $(NAME).o
-
-ifeq ("$(CONFIG_RT2860V2_AP_WSC)", "y")
-DEPEND_FILES += wps.o
-endif
+				  firewall.o management.o wps.o $(NAME).o
 ifneq ("$(CONFIG_RT2860V2_STA)", "")
 DEPEND_FILES += station.o
 endif
-ifneq ("$(CONFIG_RT2880v2_INIC)", "")
+ifneq ("$(CONFIG_INIC_MII)", "") 
 DEPEND_FILES += inic.o
 CFLAGS += -DINICv2_SUPPORT
+else
+ifneq ("$(CONFIG_INIC_PCI)", "")
+DEPEND_FILES += inic.o
+CFLAGS += -DINICv2_SUPPORT
+else
+ifneq ("$(CONFIG_INIC_USB)", "")
+DEPEND_FILES += inic.o
+CFLAGS += -DINICv2_SUPPORT
+endif
+endif
 endif
 ifneq ("$(CONFIG_RT2561_AP)", "")
 DEPEND_FILES += legacy.o
@@ -59,20 +65,27 @@ endif
 ifeq ("$(CONFIG_USER_GOAHEAD_HOSTNAME)", "y")
 CFLAGS += -DGA_HOSTNAME_SUPPORT
 endif
-ifeq ("$(CONFIG_USER_STORAGE)", "y")
-DEPEND_FILES += storage.o
+ifneq ("$(CONFIG_USB)", "")
+DEPEND_FILES += usb.o
+endif
+ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "y")
+DEPEND_FILES += media.o
+endif
+ifeq ("$(CONFIG_RALINKAPP_SWQOS)", "y")
+DEPEND_FILES += qos.o
 endif
 
-#OTHERS	= -DB_STATS -DB_FILL -DDEBUG
 CFLAGS	+= -DWEBS -DUEMF -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 CFLAGS  += -Wall -fno-strict-aliasing
-CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/drivers/char
-CFLAGS  += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash $(OTHERS)
+CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/drivers/char -I$(ROOTDIR)/$(LINUXDIR)/include
+CFLAGS  += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash 
+OTHERS	= -DB_STATS -DB_FILL -DDEBUG
 LDFLAGS	+= $(SSLLIB) $(IFMODLIB)
 LDLIBS	+= -lnvram
 
 CONF_H	= $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
 UCONF_H	= $(ROOTDIR)/config/autoconf.h
+BUSYCONF_H = $(ROOTDIR)/user/busybox/include/autoconf.h
 
 all:	$(NAME)
 
@@ -119,7 +132,7 @@ firewall.o: firewall.c webs.h firewall.h
 
 form.o:  form.c webs.h wsIntrn.h ej.h ejIntrn.h uemf.h
 
-goahead.o: goahead.c uemf.h wsIntrn.h internet.h utils.h wireless.h firewall.h management.h $(CONF_H)
+goahead.o: goahead.c uemf.h wsIntrn.h internet.h utils.h wireless.h firewall.h management.h qos.h $(CONF_H) $(UCONF_H) $(BUSYBOXCONF_H)
 
 h.o:  h.c uemf.h
 
@@ -129,13 +142,15 @@ inic.o: inic.c inic.h internet.h utils.h webs.h
 
 legacy.o: legacy.c legacy.h internet.h utils.h webs.h 
 
-internet.o: internet.c internet.h utils.h webs.h  $(CONF_H) $(UCONF_H)
+internet.o: internet.c internet.h utils.h webs.h  $(CONF_H) $(UCONF_H) $(BUSYBOXCONF_H)
 
-management.o: management.c management.h webs.h $(CONF_H)
+management.o: management.c management.h webs.h $(CONF_H) $(UCONF_H) 
 
 matrix_ssl.o: matrix_ssl.c wsIntrn.h webs.h websSSL.h sslSocket.h
 
 md5c.o:  md5.h wsIntrn.h uemf.h
+
+media.o: media.c media.h webs.h
 
 mime.o:  mime.c webs.h wsIntrn.h ej.h ejIntrn.h uemf.h
 
@@ -157,7 +172,7 @@ sslSocket.o: sslSocket.c sslSocket.h
 
 station.o: station.c station.h oid.h stapriv.h webs.h
 
-storage.o: storage.c storage.h webs.h
+usb.o: usb.c usb.h webs.h $(UCONF_H)
 
 sym.o:  sym.c uemf.h
 
@@ -183,6 +198,8 @@ websuemf.o:  websuemf.c webs.h wsIntrn.h ej.h ejIntrn.h uemf.h
 
 websSSL.o:  websSSL.c websSSL.h wsIntrn.h ej.h ejIntrn.h uemf.h
 
-wireless.o: wireless.c wireless.h internet.h utils.h webs.h $(CONF_H)
+wireless.o: wireless.c wireless.h internet.h utils.h webs.h $(CONF_H) $(UCONF_H)
 
 wps.o: wps.c wps.h utils.h webs.h internet.h wireless.h station.h oid.h $(CONF_H)
+
+qos.o: qos.h utils.h $(CONF_H)

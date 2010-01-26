@@ -1,16 +1,15 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>FTP Settings</title>
 
 <script language="JavaScript" type="text/javascript">
-Butterlate.setTextDomain("storage");
+Butterlate.setTextDomain("usb");
 var ftpenabled = '<% getCfgZero(1, "FtpEnabled"); %>';
 var anonymous = '<% getCfgZero(1, "FtpAnonymous"); %>';
 var port = '<% getCfgGeneral(1, "FtpPort"); %>';
@@ -30,15 +29,15 @@ function initTranslation()
 	e = document.getElementById("ftpSrv");
 	e.innerHTML = _("ftp server enable");
 	e = document.getElementById("ftpSrvEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("ftpSrvDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("ftpSrvAnonymous");
 	e.innerHTML = _("ftp server anonymous");
 	e = document.getElementById("ftpSrvAnonymousEnable");
-	e.innerHTML = _("storage enable");
+	e.innerHTML = _("usb enable");
 	e = document.getElementById("ftpSrvAnonymousDisable");
-	e.innerHTML = _("storage disable");
+	e.innerHTML = _("usb disable");
 	e = document.getElementById("ftpSrvPort");
 	e.innerHTML = _("ftp server port");
 	e = document.getElementById("ftpSrvMaxUsers");
@@ -49,9 +48,9 @@ function initTranslation()
 	e.innerHTML = _("ftp server staytimeout");
 
 	e = document.getElementById("ftpApply");
-	e.value = _("storage apply");
+	e.value = _("usb apply");
 	e = document.getElementById("ftpReset");
-	e.value = _("storage reset");
+	e.value = _("usb reset");
 }
 
 function initValue()
@@ -74,19 +73,10 @@ function initValue()
 	document.storage_ftp.ftp_login_timeout.disabled = true;
 	document.storage_ftp.ftp_stay_timeout.disabled = true;
 
-	if (ftpenabled == 1)
+	if (ftpenabled == "1")
 	{
 		// alert("FTP E");
-		document.storage_ftp.ftp_enabled[0].checked = 1;
-	}
-	else
-	{
-		// alert("FTP D");
-		document.storage_ftp.ftp_enabled[1].checked = 1;
-	}
-
-	if (ftpenabled == 1)
-	{
+		document.storage_ftp.ftp_enabled[0].checked = true;
 		document.storage_ftp.ftp_anonymous[0].disabled = false;
 		document.storage_ftp.ftp_anonymous[1].disabled = false;
 		if (anonymous == 1)
@@ -110,6 +100,11 @@ function initValue()
 		document.storage_ftp.ftp_stay_timeout.disabled = false;
 		document.storage_ftp.ftp_stay_timeout.value = staytimeout;
 	}
+	else
+	{
+		// alert("FTP D");
+		document.storage_ftp.ftp_enabled[1].checked = true;
+	}
 }
 
 function CheckValue()
@@ -124,7 +119,7 @@ function CheckValue()
 			return false;
 		}
 		else if (isNaN(document.storage_ftp.ftp_port.value) ||
-			       document.storage_ftp.ftp_port.value > 65535)
+			 parseInt(document.storage_ftp.ftp_port.value,10) > 65535)
 		{
 			alert('Please specify valid number');
 			document.storage_ftp.ftp_port.focus();
@@ -258,7 +253,7 @@ function ftp_enable_switch()
   </tr>
 </table>
 <hr />
-<br>
+<br />
 <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
@@ -268,7 +263,6 @@ function ftp_enable_switch()
   </tr>
 </table>
 </form>
-
 
 </td></tr></table>
 </body>

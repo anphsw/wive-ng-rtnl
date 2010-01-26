@@ -2,8 +2,6 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
@@ -105,7 +103,7 @@ function refreshlogclick()
 	<input type="submit" value="Clear" id="syslogSysLogClear" name="clearlog" onclick="clearlogclick();">
 </form>
 
-<!-- ----------------- System log ----------------- -->
+<!-- ================= System log ================= -->
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
 <tbody>
 <tr>
@@ -120,5 +118,5 @@ function refreshlogclick()
 
 
 <br>
-</tr></td></table>
+</td></tr></table>
 </body></html>

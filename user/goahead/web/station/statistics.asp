@@ -2,10 +2,9 @@
 <html>
 <head>
 <META HTTP-EQUIV="refresh" CONTENT="3; URL=./statistics.asp">
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
@@ -49,6 +48,7 @@ function PageInit()
     <td class="title" colspan="2" id="statisticTx">Transmit Statistics</td>
   </tr>
   <% getStaStatsTx(); %>
+  <!--
   <tr>
     <td class="title" colspan="2" id="statisticRx">Receive Statistics</td>
   </tr>
@@ -56,6 +56,7 @@ function PageInit()
     <td class="head">Frames Received Successfully</td>
     <td><% getStaStatsRxOk(); %></td>
   </tr>
+  -->
 
   <tr>
     <td width="65%" bgcolor="#E8F8FF" >Frames Received With CRC Error </td>
@@ -84,7 +85,7 @@ function PageInit()
 </table>
 </form>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>
 

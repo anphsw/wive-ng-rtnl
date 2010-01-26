@@ -2,8 +2,6 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
@@ -67,17 +65,16 @@ function formCheck()
 <table class="body"><tr><td>
 
 <h1 id="statisticTitle">Statistic</h1>
-<p id="statisticIntroduction"> Take a look at the WR-NL statistics </p>
+<p id="statisticIntroduction"> Take a look at the Ralink SoC statistics </p>
 
 
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
-
 <tbody>
 
-<!--------------------  MEMORY  ---------------------------->
+<!-- =================  MEMORY  ================= -->
 <tr>
   <td class="title" colspan="2" id="statisticMM">Memory</td>
-<tr>
+</tr>
 <tr>
   <td class="head" id="statisticMMTotal">Memory total: </td>
   <td> <% getMemTotalASP(); %></td>
@@ -88,10 +85,10 @@ function formCheck()
 </tr>
 
 
-<!--------------------  WAN/LAN ---------------------------->
+<!-- =================  WAN/LAN  ================== -->
 <tr>
   <td class="title" colspan="2" id="statisticWANLAN">WAN/LAN</td>
-<tr>
+</tr>
 <tr>
   <td class="head" id="statisticWANRxPkt">WAN Rx packets: </td>
   <td> <% getWANRxPacketASP(); %></td>
@@ -125,7 +122,7 @@ function formCheck()
   <td> <% getLANTxByteASP(); %></td>
 </tr>
 
-<!--------------------  ALL  ---------------------------->
+<!-- =================  ALL  ================= -->
 <tr>
   <td class="title" colspan="2" id="statisticAllIF">All interfaces</td>
 <tr>
@@ -161,12 +158,11 @@ for(i=0; i<a.length; i+=5){
 	document.write(a[i+4]);
 	document.write("</td></tr>");
 }
-
 </script>
 
+</tbody>
 </table>
-<br>
 
-</tr></td></table>
+</td></tr></table>
 </body></html>
 

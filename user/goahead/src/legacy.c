@@ -1,31 +1,15 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  *	legacy.c -- RT2561 Settings 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: legacy.c,v 1.5 2007-12-18 14:15:34 chhung Exp $
+ *	$Id: legacy.c,v 1.6 2008-09-17 13:11:34 chhung Exp $
  */
 
 #include	<stdlib.h>
 #include	<arpa/inet.h>
-#include	"wireless.h"
+#include	<linux/wireless.h>
 #include	"internet.h"
 #include	"nvram.h"
 #include	"utils.h"
@@ -36,9 +20,7 @@
 
 extern int g_wsc_configured;
 
-#ifdef CONFIG_802_11_a
 static int  getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv);
-#endif
 static int  getLegacy11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLegacy11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLegacyChannel(int eid, webs_t wp, int argc, char_t **argv);
@@ -53,9 +35,7 @@ static void LEGACYSecurity(webs_t wp, char_t *path, char_t *query);
 
 void formDefineLegacy(void)
 {
-#ifdef CONFIG_802_11_a
 	websAspDefine(T("getLegacy11aChannels"), getLegacy11aChannels);
-#endif
 	websAspDefine(T("getLegacy11bChannels"), getLegacy11bChannels);
 	websAspDefine(T("getLegacy11gChannels"), getLegacy11gChannels);
 	websAspDefine(T("getLegacyChannel"), getLegacyChannel);
@@ -72,7 +52,6 @@ void formDefineLegacy(void)
 /*
  * description: write 802.11a channels in <select> tag
  */
-#ifdef CONFIG_802_11_a
 static int getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int  idx = 0, channel;
@@ -121,7 +100,7 @@ static int getLegacy11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-#endif
+
 /*
  * description: write 802.11b channels in <select> tag
  */
@@ -259,7 +238,7 @@ static int getLegacyStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	RT_802_11_MAC_TABLE table = {0};
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
+	strncpy(iwr.ifr_name, "raL0", IFNAMSIZ);
 	iwr.u.data.pointer = (caddr_t) &table;
 
 	if (s < 0) {
@@ -293,13 +272,13 @@ static int getLegacyWdsEncType(int eid, webs_t wp, int argc, char_t **argv)
 
 	if (NULL == value)
 		return websWrite(wp, T("0"));
-	else if (strcmp(value, "NONE") == 0)
+	else if (strcmp(value, "NONE;NONE;NONE;NONE") == 0)
 		websWrite(wp, T("0"));
-	else if (strcmp(value, "WEP") == 0)
+	else if (strcmp(value, "WEP;WEP;WEP;WEP") == 0)
 		websWrite(wp, T("1"));
-	else if (strcmp(value, "TKIP") == 0)
+	else if (strcmp(value, "TKIP;TKIP;TKIP;TKIP") == 0)
 		websWrite(wp, T("2"));
-	else if (strcmp(value, "AES") == 0)
+	else if (strcmp(value, "AES;AES;AES;AES") == 0)
 		websWrite(wp, T("3"));
 	else
 		return websWrite(wp, T("0"));
@@ -491,9 +470,7 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	mssid_3 = websGetVar(wp, T("mssid_3"), T("")); 
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
 	broadcastssid = websGetVar(wp, T("broadcastssid"), T("1")); 
-#ifdef CONFIG_802_11_a
 	sz11aChannel = websGetVar(wp, T("sz11aChannel"), T("")); 
-#endif
 	sz11bChannel = websGetVar(wp, T("sz11bChannel"), T("")); 
 	sz11gChannel = websGetVar(wp, T("sz11gChannel"), T("")); 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0")); 
@@ -539,7 +516,6 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2561_NVRAM, "SSID", ssid);
 
-#ifdef CONFIG_RT2860V2_AP_WSC
 //#WPS
 	{
 		char *wordlist= nvram_bufget(RT2561_NVRAM, "WscModeOption");
@@ -551,7 +527,6 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 //#WPS
-#endif
 	i = 2;
 	if (0 != strlen(mssid_1)) {
 		STFs(RT2561_NVRAM, i, "SSID", mssid_1);
@@ -601,21 +576,13 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	}
 
 	//11abg Channel or AutoSelect
-#ifdef CONFIG_802_11_a
 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
-#else
-	if ((0 == strlen(sz11bChannel)) &&
-#endif
 			(0 == strlen(sz11gChannel))) {
 		nvram_commit(RT2561_NVRAM);
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
-#ifdef CONFIG_802_11_a
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
-#else
-	if (!strncmp(sz11bChannel, "0", 2) &&
-#endif
 			!strncmp(sz11gChannel, "0", 2))
 		nvram_bufset(RT2561_NVRAM, "AutoChannelSelect", "1");
 	else

@@ -1,23 +1,15 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #ifndef __WPS__H__
 #define __WPS__H__
 
+#ifdef CONFIG_RT2860V2_STA_WSC                      // if RT2880 support Wifi - STA
+#include "stapriv.h"
+#endif
+
+#ifdef CONFIG_RALINK_RT2880
 #define WPS_AP_PBC_LED_GPIO     13   // 0 ~ 24( or disable this feature by undefine it)
+#else
+#define WPS_AP_PBC_LED_GPIO     14   // 0 ~ 24( or disable this feature by undefine it)
+#endif
 
 #ifdef WPS_AP_PBC_LED_GPIO
 #include "utils.h"
@@ -59,6 +51,32 @@ typedef struct PACKED _WSC_CONFIGURED_VALUE {
 } WSC_CONFIGURED_VALUE;
 
 
+#ifdef CONFIG_RT2860V2_STA_WSC
+// WSC configured credential
+typedef struct  _WSC_CREDENTIAL
+{
+    NDIS_802_11_SSID    SSID;               // mandatory
+    USHORT              AuthType;           // mandatory, 1: open, 2: wpa-psk, 4: shared, 8:wpa, 0x10: wpa2, 0x20: wpa-psk2
+    USHORT              EncrType;           // mandatory, 1: none, 2: wep, 4: tkip, 8: aes
+    UCHAR               Key[64];            // mandatory, Maximum 64 byte
+    USHORT              KeyLength;
+    UCHAR               MacAddr[6];         // mandatory, AP MAC address
+    UCHAR               KeyIndex;           // optional, default is 1
+    UCHAR               Rsvd[3];            // Make alignment
+}   WSC_CREDENTIAL, *PWSC_CREDENTIAL;
+
+
+// WSC configured profiles
+typedef struct  _WSC_PROFILE
+{
+#ifndef UINT
+#define UINT	unsigned long
+#endif
+    UINT           	ProfileCnt;
+    UINT		ApplyProfileIdx;  // add by johnli, fix WPS test plan 5.1.1
+    WSC_CREDENTIAL  	Profile[8];             // Support up to 8 profiles
+}   WSC_PROFILE, *PWSC_PROFILE;
+#endif
 
 #define WSC_ID_VERSION					0x104A
 #define WSC_ID_VERSION_LEN				1

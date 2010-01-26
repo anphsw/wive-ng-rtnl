@@ -73,9 +73,13 @@
   <message msgid="sysfw introduction" msgstr="You may configure the system firewall to protect AP/Router itself from attacking." />
   <message msgid="sysfw remote management title" msgstr="Remote management" />
   <message msgid="sysfw remote management head" msgstr="Remote management (via WAN)" />
-  <message msgid="sysfw remote management enable" msgstr="Allow" />
-  <message msgid="sysfw remote management disable" msgstr="Deny" />
-  <message msgid="sysfw remote management apply" msgstr="Apply" />
-  <message msgid="sysfw remote management reset" msgstr="Reset" />
+  <message msgid="sysfw allow" msgstr="Allow" />
+  <message msgid="sysfw deny" msgstr="Deny" />
+  <message msgid="sysfw wanping title" msgstr="Ping form WAN Filter" />
+  <message msgid="sysfw wanping head" msgstr="Ping form WAN Filter" />
+  <message msgid="sysfw spi title" msgstr="Stateful Packet Inspection (SPI)" />
+  <message msgid="sysfw spi head" msgstr="SPI Firewall" />
+  <message msgid="sysfw apply" msgstr="Apply" />
+  <message msgid="sysfw reset" msgstr="Reset" />
 
 </po>

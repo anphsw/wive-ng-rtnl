@@ -1,8 +1,8 @@
 <html><head><!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
+
+<meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="-1">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Ralink Wireless Security Settings</title>
 
@@ -129,6 +129,18 @@ function checkInjection(str)
 {
 	var len = str.length;
 	for (var i=0; i<str.length; i++) {
+		if ( str.charAt(i) == '\r' || str.charAt(i) == '\n'){
+				return false;
+		}else
+	        continue;
+	}
+    return true;
+}
+
+function checkStrictInjection(str)
+{
+	var len = str.length;
+	for (var i=0; i<str.length; i++) {
 		if ( str.charAt(i) == ';' || str.charAt(i) == ',' ||
 			 str.charAt(i) == '\r' || str.charAt(i) == '\n'){
 				return false;
@@ -194,11 +206,6 @@ function securityHandler() {
 			// load Access Policy for MBSSID[selected]
 			LoadAP();
 			ShowAP(defaultShownMBSSID);
-
-//			if(<% getWPSModeASP(); %> && <% isWPSConfiguredASP(); %>){
-//				alert("Info: The security settings has been assigned under active WPS functions.\nYou still could change security setting manually but the existed WPS settings would be overwritted.");
-//			}
-
 		} else {
 			alert('There was a problem with the request.');
 		}
@@ -209,7 +216,6 @@ function deleteAccessPolicyListHandler()
 {
 	window.location.reload(false);
 }
-
 
 function parseAllData(str)
 {
@@ -395,7 +401,7 @@ function check_radius()
 		alert('Please input a valid radius server port number.');
 		return false;		
 	}
-	if(checkInjection(document.security_form.RadiusServerSecret.value)==false){
+	if(checkStrictInjection(document.security_form.RadiusServerSecret.value)==false){
 		alert('The shared secret contains invalid characters.');
 		return false;		
 	}
@@ -623,7 +629,7 @@ function check_Wep(securitymode)
 				alert('Please input 5 or 13 characters of wep key2 !');
 				return false;
 			}
-			if(checkInjection(document.security_form.wep_key_1.value)== false){
+			if(checkInjection(document.security_form.wep_key_2.value)== false){
 				alert('Wep key2 contains invalid characters.');
 				return false;
 			}			
@@ -647,7 +653,7 @@ function check_Wep(securitymode)
 				alert('Please input 5 or 13 characters of wep key3 !');
 				return false;
 			}
-			if(checkInjection(document.security_form.wep_key_1.value)== false){
+			if(checkInjection(document.security_form.wep_key_3.value)== false){
 				alert('Wep key3 contains invalid characters.');
 				return false;
 			}
@@ -671,7 +677,7 @@ function check_Wep(securitymode)
 				alert('Please input 5 or 13 characters of wep key4 !');
 				return false;
 			}
-			if(checkInjection(document.security_form.wep_key_1.value)== false){
+			if(checkInjection(document.security_form.wep_key_4.value)== false){
 				alert('Wep key4 contains invalid characters.');
 				return false;
 			}			
@@ -875,7 +881,7 @@ function MBSSIDChange(selected)
 function changeSecurityPolicyTableTitle(t)
 {
 	var title = document.getElementById("sp_title");
-	title.innerHTML = title.innerHTML + "\"" + t + "\"";
+	title.innerHTML = "\"" + t + "\"";
 }
 
 function delap(mbssid, num)
@@ -890,6 +896,10 @@ function initTranslation()
 	e = document.getElementById("secureSSIDChoice");
 	e.innerHTML = _("secure ssid choice");
 
+	e = document.getElementById("securityTitle");
+	e.innerHTML = _("secure ssid title");
+	e = document.getElementById("securityIntroduction");
+	e.innerHTML = _("secure ssid introduction");
 	e = document.getElementById("sp_title");
 	e.innerHTML = _("secure security policy");
 	e = document.getElementById("secureSecureMode");
@@ -1035,6 +1045,11 @@ function onPreAuthenticationClick(type)
 </head>
 <body onload="initAll()">
 <table class="body"><tbody><tr><td>
+
+<h1 id="securityTitle">Wireless Security/Encryption Settings </h1>
+<p id="securityIntroduction">Setup the wireless security and encryption to prevent from unauthorized access and monitoring.</p>
+<hr />
+
 
 <form method="post" name="security_form" action="/goform/INICSecurity">
 

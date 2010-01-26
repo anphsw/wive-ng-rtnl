@@ -32,10 +32,15 @@
   <message msgid="basic network mode" msgstr="Network Mode" />
   <message msgid="basic ssid" msgstr="Network Name(SSID)" />
   <message msgid="basic multiple ssid" msgstr="Multiple SSID" />
+  <message msgid="basic hssid" msgstr="Hidden" />
+  <message msgid="basic isolated" msgstr="Isolated" />
   <message msgid="basic broadcast ssid" msgstr="Broadcast Network Name (SSID)" />
+  <message msgid="basic apisolated" msgstr="AP Isolation" />
+  <message msgid="basic mbssidapisolated" msgstr="MBSSID AP Isolation" />
   <message msgid="basic bssid" msgstr="BSSID" />
   <message msgid="basic frequency" msgstr="Frequency (Channel)" />
   <message msgid="basic frequency auto" msgstr="AutoSelect" />
+  <message msgid="basic rate" msgstr="Rate" />
   <message msgid="basic wds title" msgstr="Wireless Distribution System(WDS)" />
   <message msgid="basic wds mode" msgstr="WDS Mode" />
   <message msgid="basic wds phy mode" msgstr="Phy Mode" />
@@ -79,6 +84,7 @@
   <message msgid="adv pkt aggregate" msgstr="Pkt_Aggregate" />
   <message msgid="adv 80211h" msgstr="IEEE 802.11H Support" />
   <message msgid="adv 80211h disable describe" msgstr="(only in A band)" />
+  <message msgid="adv rdregion" msgstr="DFS RDRegion" />
   <message msgid="adv country code" msgstr="Country Code" />
   <message msgid="adv country code us" msgstr="US (United States)" />
   <message msgid="adv country code jp" msgstr="JP (Japan)" />
@@ -86,8 +92,9 @@
   <message msgid="adv country code tw" msgstr="TW (Taiwan)" />
   <message msgid="adv country code ie" msgstr="IE (Ireland)" />
   <message msgid="adv country code hk" msgstr="HK (Hong Kong)" />
+  <message msgid="adv carrier" msgstr="Carrier Detect" />
   <message msgid="adv wmm" msgstr="Wi-Fi Multimedia" />
-  <message msgid="adv wmm capable" msgstr="WMM/UDPXY" />
+  <message msgid="adv wmm capable" msgstr="WMM Capable" />
   <message msgid="adv apds capable" msgstr="APSD Capable" />
   <message msgid="adv dls capable" msgstr="DLS Capable" />
   <message msgid="adv wmm parameter" msgstr="WMM Parameters" />
@@ -130,8 +137,8 @@
   <message msgid="secure radius session timeout" msgstr=" Session Timeout " />
   <message msgid="secure radius idle timeout" msgstr=" Idle Timeout " />
   <message msgid="secure access policy" msgstr=" Access Policy " />
-  <message msgid="secure access policy capable" msgstr=" Capable " />
-  <message msgid="secure access policy new" msgstr="New:" />
+  <message msgid="secure access policy capable" msgstr=" Policy " />
+  <message msgid="secure access policy new" msgstr="Add a station Mac:" />
   <message msgid="secure access policy del" msgstr="Del" />
 
   <message msgid="wps title" msgstr="Wi-Fi Protected Setup" />
@@ -265,4 +272,16 @@
   <message msgid="stawps wep key index" msgstr="WEP Key Index" />
   <message msgid="stawps key" msgstr="Key" />
   <message msgid="stawps submit" msgstr=" Submit " />
+  
+  <message msgid="mesh title" msgstr="Mesh Network" />
+  <message msgid="mesh introduction" msgstr="A Mesh network is an IEEE 802 LAN comprised of IEEE 802.11 links and control elements to forward frames among the network members." />
+  <message msgid="mesh capacity" msgstr="Mesh Capacity" />
+  <message msgid="mesh settings" msgstr="Mesh Settings" />
+  <message msgid="mesh mid" msgstr="Mesh ID (MID)" />
+  <message msgid="mesh hostname" msgstr="Host Name" />
+  <message msgid="mesh autolink" msgstr="Auto Link" />
+  <message msgid="mesh manual" msgstr="Manual Mesh Link" />
+  <message msgid="mesh mpmac" msgstr="Mesh Point MAC Address" />
+  <message msgid="mesh info" msgstr="Mesh Network Infomation" />
+  <message msgid="mesh nbrmacaddr" msgstr="Neighbor MAC Address" />
 </po>

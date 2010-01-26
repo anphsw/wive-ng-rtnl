@@ -1,14 +1,15 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Wireless WMM Settings</title>
 
 <script language="JavaScript" type="text/javascript">
+Butterlate.setTextDomain("wireless");
 function CheckValue()
 {
    var APAifsn_s;
@@ -23,6 +24,22 @@ function CheckValue()
    var BSSACM_s;
    var AckPolicy_s;
 
+   if (1*document.wmm.ap_aifsn_acbe.value < 1 || document.wmm.ap_aifsn_acbe.value > 15) {
+     alert('AP AC_BE AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.ap_aifsn_acbk.value < 1 || document.wmm.ap_aifsn_acbk.value > 15) {
+     alert('AP AC_BK AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.ap_aifsn_acvi.value < 1 || document.wmm.ap_aifsn_acvi.value > 15) {
+     alert('AP AC_VI AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.ap_aifsn_acvo.value < 1 || document.wmm.ap_aifsn_acvo.value > 15) {
+     alert('AP AC_VO AIFSN out of range (1~15)!');
+     return false;
+   }
    APAifsn_s = '';
    APAifsn_s = APAifsn_s + document.wmm.ap_aifsn_acbe.value;
    APAifsn_s = APAifsn_s + ';';
@@ -131,6 +148,22 @@ function CheckValue()
    document.wmm.ap_ackpolicy_acvo.disabled = true;
    document.wmm.ap_ackpolicy_all.value = AckPolicy_s;
 
+   if (1*document.wmm.sta_aifsn_acbe.value < 1 || document.wmm.sta_aifsn_acbe.value > 15) {
+     alert('Station AC_BE AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.sta_aifsn_acbk.value < 1 || document.wmm.sta_aifsn_acbk.value > 15) {
+     alert('Station AC_BK AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.sta_aifsn_acvi.value < 1 || document.wmm.sta_aifsn_acvi.value > 15) {
+     alert('Station AC_VI AIFSN out of range (1~15)!');
+     return false;
+   }
+   if (1*document.wmm.sta_aifsn_acvo.value < 1 || document.wmm.sta_aifsn_acvo.value > 15) {
+     alert('Station AC_VO AIFSN out of range (1~15)!');
+     return false;
+   }
    BSSAifsn_s = '';
    BSSAifsn_s = BSSAifsn_s + document.wmm.sta_aifsn_acbe.value;
    BSSAifsn_s = BSSAifsn_s + ';';
@@ -216,6 +249,21 @@ function CheckValue()
    return true;
 }
 
+function initTranslation()
+{
+	var e = document.getElementById("wmmAP");
+	e.innerHTML = _("wmm ap parameter");
+	e = document.getElementById("wmmSTA");
+	e.innerHTML = _("wmm sta parameter");
+
+	e = document.getElementById("wmmApply");
+	e.value = _("wireless apply");
+	e = document.getElementById("wmmCancel");
+	e.value = _("wireless cancel");
+	e = document.getElementById("wmmClose");
+	e.value = _("wireless close");
+}
+
 function initValue()
 {
    var APAifsn    = '<% getCfg2General(1, "APAifsn"); %>';
@@ -230,14 +278,15 @@ function initValue()
    var BSSACM     = '<% getCfg2General(1, "BSSACM"); %>';
    var AckPolicy  = '<% getCfg2General(1, "AckPolicy"); %>';
 
+   initTranslation();
    if (APAifsn   == "") APAifsn = "7;3;1;1";
-   if (APCwmin   == "") APCwmin = "15;15;7;3";
-   if (APCwmax   == "") APCwmax = "1023;63;15;7";
+   if (APCwmin   == "") APCwmin = "4;4;3;2";
+   if (APCwmax   == "") APCwmax = "6;10;4;3";
    if (APTxop    == "") APTxop = "0;0;94;47";
    if (APACM     == "") APACM = "0;0;0;0";
    if (BSSAifsn  == "") BSSAifsn = "7;3;2;2";
-   if (BSSCwmin  == "") BSSCwmin = "15;15;7;3";
-   if (BSSCwmax  == "") BSSCwmax = "1023;1023;15;7";
+   if (BSSCwmin  == "") BSSCwmin = "4;4;3;2";
+   if (BSSCwmax  == "") BSSCwmax = "10;10;4;3";
    if (BSSTxop   == "") BSSTxop = "0;0;94;47";
    if (BSSACM    == "") BSSACM = "0;0;0;0";
    if (AckPolicy == "") AckPolicy = "0;0;0;0";
@@ -259,15 +308,15 @@ function initValue()
    document.wmm.ap_aifsn_acvi.value = APAifsnArray[2];
    document.wmm.ap_aifsn_acvo.value = APAifsnArray[3];
 
-   document.wmm.ap_cwmin_acbe.value = APCwminArray[0];
-   document.wmm.ap_cwmin_acbk.value = APCwminArray[1];
-   document.wmm.ap_cwmin_acvi.value = APCwminArray[2];
-   document.wmm.ap_cwmin_acvo.value = APCwminArray[3];
+   document.wmm.ap_cwmin_acbe.options.selectedIndex = 1*APCwminArray[0] - 1;
+   document.wmm.ap_cwmin_acbk.options.selectedIndex = 1*APCwminArray[1] - 1;
+   document.wmm.ap_cwmin_acvi.options.selectedIndex = 1*APCwminArray[2] - 1;
+   document.wmm.ap_cwmin_acvo.options.selectedIndex = 1*APCwminArray[3] - 1;
 
-   document.wmm.ap_cwmax_acbe.value = APCwmaxArray[0];
-   document.wmm.ap_cwmax_acbk.value = APCwmaxArray[1];
-   document.wmm.ap_cwmax_acvi.value = APCwmaxArray[2];
-   document.wmm.ap_cwmax_acvo.value = APCwmaxArray[3];
+   document.wmm.ap_cwmax_acbe.options.selectedIndex = 1*APCwmaxArray[0] - 1;
+   document.wmm.ap_cwmax_acbk.options.selectedIndex = 1*APCwmaxArray[1] - 1;
+   document.wmm.ap_cwmax_acvi.options.selectedIndex = 1*APCwmaxArray[2] - 1;
+   document.wmm.ap_cwmax_acvo.options.selectedIndex = 1*APCwmaxArray[3] - 1;
 
    document.wmm.ap_txop_acbe.value = APTxopArray[0];
    document.wmm.ap_txop_acbk.value = APTxopArray[1];
@@ -319,22 +368,22 @@ function initValue()
    document.wmm.sta_aifsn_acvi.value = BSSAifsnArray[2];
    document.wmm.sta_aifsn_acvo.value = BSSAifsnArray[3];
 
-   document.wmm.sta_cwmin_acbe.value = BSSCwminArray[0];
-   document.wmm.sta_cwmin_acbk.value = BSSCwminArray[1];
-   document.wmm.sta_cwmin_acvi.value = BSSCwminArray[2];
-   document.wmm.sta_cwmin_acvo.value = BSSCwminArray[3];
+   document.wmm.sta_cwmin_acbe.options.selectedIndex = 1*BSSCwminArray[0] - 1;
+   document.wmm.sta_cwmin_acbk.options.selectedIndex = 1*BSSCwminArray[1] - 1;
+   document.wmm.sta_cwmin_acvi.options.selectedIndex = 1*BSSCwminArray[2] - 1;
+   document.wmm.sta_cwmin_acvo.options.selectedIndex = 1*BSSCwminArray[3] - 1;
 
-   document.wmm.sta_cwmax_acbe.value = BSSCwmaxArray[0];
-   document.wmm.sta_cwmax_acbk.value = BSSCwmaxArray[1];
-   document.wmm.sta_cwmax_acvi.value = BSSCwmaxArray[2];
-   document.wmm.sta_cwmax_acvo.value = BSSCwmaxArray[3];
+   document.wmm.sta_cwmax_acbe.options.selectedIndex = 1*BSSCwmaxArray[0] - 1;
+   document.wmm.sta_cwmax_acbk.options.selectedIndex = 1*BSSCwmaxArray[1] - 1;
+   document.wmm.sta_cwmax_acvi.options.selectedIndex = 1*BSSCwmaxArray[2] - 1;
+   document.wmm.sta_cwmax_acvo.options.selectedIndex = 1*BSSCwmaxArray[3] - 1;
 
    document.wmm.sta_txop_acbe.value = BSSTxopArray[0];
    document.wmm.sta_txop_acbk.value = BSSTxopArray[1];
    document.wmm.sta_txop_acvi.value = BSSTxopArray[2];
    document.wmm.sta_txop_acvo.value = BSSTxopArray[3];
 
-  if (1*BSSACMArray[0] == 1)
+   if (1*BSSACMArray[0] == 1)
       document.wmm.sta_acm_acbe.checked = true;
    else
       document.wmm.sta_acm_acbe.checked = false;
@@ -369,7 +418,7 @@ function submit_apply()
 <form method=post name=wmm action="/goform/inicWmm">
   <table align="center" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
     <tr> 
-      <td align="center" bgcolor="#2C5EA4"colspan="7"><font color="#FFFFFF"><b>WMM Parameters of Access Point</b></font></td>
+      <td align="center" bgcolor="#2C5EA4" colspan="7"><font color="#FFFFFF" id="wmmAP"><b>WMM Parameters of Access Point</b></font></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap>&nbsp;</td>
@@ -382,12 +431,28 @@ function submit_apply()
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_BE</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmin_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmax_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acbe value="1" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acbe value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acbe size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmin_acbe" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmax_acbe" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4>15</option>
+	  <option value=5>31</option>
+	  <option value=6 selected>63</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acbe size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acbe value="1"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acbe value="1"></td>
     </tr>
     <input type=hidden name=ap_aifsn_all>
     <input type=hidden name=ap_cwmin_all>
@@ -397,36 +462,80 @@ function submit_apply()
     <input type=hidden name=ap_ackpolicy_all>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_BK</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmin_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmax_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acbk value="1" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acbk value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acbk size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmin_acbk" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmax_acbk" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4>15</option>
+	  <option value=5>31</option>
+	  <option value=6>63</option>
+	  <option value=7>127</option>
+	  <option value=8>255</option>
+	  <option value=9>511</option>
+	  <option value=10 selected>1023</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acbk size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acbk value="1"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acbk value="1"></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_VI</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmin_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmax_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acvi value="1" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acvi value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acvi size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmin_acvi" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3 selected>7</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmax_acvi" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acvi size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acvi value="1"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acvi value="1"></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_VO</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmin_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_cwmax_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acvo value="1" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acvo value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_aifsn_acvo size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmin_acvo" size="1">
+	  <option value=1>1</option>
+	  <option value=2 selected>3</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="ap_cwmax_acvo" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3 selected>7</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=ap_txop_acvo size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_acm_acvo value="1"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=ap_ackpolicy_acvo value="1"></td>
     </tr>
   </table>
   <br>
   <table align="center" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
     <tr> 
-      <td align="center" bgcolor="#2C5EA4"colspan="7"><font color="#FFFFFF"><b>WMM Parameters of Station</b></font></td>
+      <td align="center" bgcolor="#2C5EA4" colspan="7"><font color="#FFFFFF" id="wmmSTA"><b>WMM Parameters of Station</b></font></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap>&nbsp;</td>
@@ -438,11 +547,31 @@ function submit_apply()
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_BE</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmin_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmax_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acbe size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acbe value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acbe size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmin_acbe" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmax_acbe" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4>15</option>
+	  <option value=5>31</option>
+	  <option value=6>63</option>
+	  <option value=7>127</option>
+	  <option value=8>255</option>
+	  <option value=9>511</option>
+	  <option value=10 selected>1023</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acbe size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acbe value="1"></td>
     </tr>
     <input type=hidden name=sta_aifsn_all>
     <input type=hidden name=sta_cwmin_all>
@@ -451,36 +580,80 @@ function submit_apply()
     <input type=hidden name=sta_acm_all>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_BK</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmin_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmax_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acbk size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acbk value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acbk size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmin_acbk" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmax_acbk" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4>15</option>
+	  <option value=5>31</option>
+	  <option value=6>63</option>
+	  <option value=7>127</option>
+	  <option value=8>255</option>
+	  <option value=9>511</option>
+	  <option value=10 selected>1023</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acbk size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acbk value="1"></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_VI</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmin_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmax_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acvi size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acvi value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acvi size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmin_acvi" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3 selected>7</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmax_acvi" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3>7</option>
+	  <option value=4 selected>15</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acvi size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acvi value="1"></td>
     </tr>
     <tr>
       <td align="center" bgcolor="#E8F8FF" nowrap><b>AC_VO</b></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmin_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_cwmax_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acvo size=4 maxlength=4 value="" style="font-size: 9pt;"></td>
-      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acvo value="1" style="font-size: 9pt;"></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_aifsn_acvo size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmin_acvo" size="1">
+	  <option value=1>1</option>
+	  <option value=2 selected>3</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap>
+	<select name="sta_cwmax_acvo" size="1">
+	  <option value=1>1</option>
+	  <option value=2>3</option>
+	  <option value=3 selected>7</option>
+	</select>
+      </td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=text name=sta_txop_acvo size=4 maxlength=4></td>
+      <td align="center" bgcolor="#FFFFFF" nowrap><input type=checkbox name=sta_acm_acvo value="1"></td>
     </tr>
   </table>
 
   <table align="center" width = "540" border = "0" cellpadding = "2" cellspacing = "1">
     <tr align="center">
       <td>
-        <input type=button style="{width:120px;}" value="Apply" onClick="submit_apply()">&nbsp;&nbsp;
-        <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
-        <input type=button name="Close" value="Close" style="{width:120px;}" onClick="window.close()">
+        <input type=button style="{width:120px;}" value="Apply" id="wmmApply" onClick="submit_apply()">&nbsp;&nbsp;
+        <input type=reset  style="{width:120px;}" value="Cancel" id="wmmCancel"  onClick="window.location.reload()">
+        <input type=button name="Close" value="Close" id="wmmClose" style="{width:120px;}" onClick="window.close()">
       </td>
     </tr>
   </table>

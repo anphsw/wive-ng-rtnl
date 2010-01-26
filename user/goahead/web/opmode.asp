@@ -3,8 +3,6 @@
 <title>Operation Mode</title>
 <link rel="stylesheet" href="style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("main");
@@ -115,11 +113,18 @@ function initValue()
 	opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	old_mode = opmode;
 
+	var gwb = "<% getGWBuilt(); %>";
 	var apcli = "<% getWlanApcliBuilt(); %>";
 	var sta = "<% getStationBuilt(); %>";
 
 	initTranslation();
 
+	if (gwb == "0") {
+		document.getElementById("gwdt").style.visibility = "hidden";
+		document.getElementById("gwdt").style.display = "none";
+		document.getElementById("oModeGIntro").style.visibility = "hidden";
+		document.getElementById("oModeGIntro").style.display = "none";
+	}
 	if (apcli == "0") {
 		document.getElementById("apclidt").style.visibility = "hidden";
 		document.getElementById("apclidt").style.display = "none";
@@ -133,14 +138,14 @@ function initValue()
 		document.getElementById("stadd").style.display = "none";
 	}
 
-	if (opmode == "0")
-		document.opmode.opMode[0].checked = true;
-	else if (opmode == "1")
+	if (opmode == "1")
 		document.opmode.opMode[1].checked = true;
 	else if (opmode == "2")
 		document.opmode.opMode[2].checked = true;
 	else if (opmode == "3")
 		document.opmode.opMode[3].checked = true;
+	else
+		document.opmode.opMode[0].checked = true;
 	changeMode();
 }
 
@@ -165,13 +170,10 @@ function msg()
 <dl>
   <dt><input type="radio" name="opMode" id="opMode" value="0" onClick="changeMode()"><b id="oModeB">Bridge:</b></dt>
   <dd id="oModeBIntro"></dd>
-
-  <dt><input type="radio" name="opMode" id="opMode" value="1" onClick="changeMode()"><b id="oModeG">Gateway:</b></dt>
+  <dt id="gwdt"><input type="radio" name="opMode" id="opMode" value="1" onClick="changeMode()"><b id="oModeG">Gateway:</b></dt>
   <dd id="oModeGIntro"></dd>
-
-  <dt id="stadt"><input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()"> <b id="oModeE">Ethernet Converter:</b></dt>
+  <dt id="stadt"><input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()"><b id="oModeE">Ethernet Converter:</b></dt>
   <dd id="stadd"></dd>
-
   <dt id="apclidt"><input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()"><b id="oModeA">AP Client:</b></dt>
   <dd id="apclidd"></dd>
 </dl>
@@ -215,6 +217,6 @@ function msg()
 </center>
 </form>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>

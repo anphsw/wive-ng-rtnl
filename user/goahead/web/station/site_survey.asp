@@ -1,9 +1,8 @@
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
@@ -192,10 +191,9 @@ function PageInit()
     <td bgcolor="#E8F8FF" id="scanNetType">Network Type</td>
   </tr>
   <% getStaBSSIDList(); %>
-  <br />
 
   <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
-    <tr align="">
+    <tr>
       <td>
 	<input type=text name="connectedssid" size=28 value="<% getStaConnectionSSID(); %>" disabled>&nbsp;&nbsp;&nbsp;
 	<input type=button style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" disabled onClick="open_connection_page()">&nbsp;
@@ -212,7 +210,7 @@ function PageInit()
 </form>
 
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>
 

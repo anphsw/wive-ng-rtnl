@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  *	inic.c -- Intelligent NIC Settings 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: inic.c,v 1.26.4.1 2008-03-27 02:16:00 winfred Exp $
+ *	$Id: inic.c,v 1.29 2008-09-17 13:11:34 chhung Exp $
  */
 
 #include	<stdlib.h>
@@ -33,9 +17,7 @@
 
 extern int g_wsc_configured;
 
-#ifdef CONFIG_802_11_a
 static int  getInic11aChannels(int eid, webs_t wp, int argc, char_t **argv);
-#endif
 static int  getInic11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getInic11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getInicChannel(int eid, webs_t wp, int argc, char_t **argv);
@@ -51,9 +33,7 @@ static void INICDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 
 void formDefineInic(void)
 {
-#ifdef CONFIG_802_11_a
 	websAspDefine(T("getInic11aChannels"), getInic11aChannels);
-#endif
 	websAspDefine(T("getInic11bChannels"), getInic11bChannels);
 	websAspDefine(T("getInic11gChannels"), getInic11gChannels);
 	websAspDefine(T("getInicChannel"), getInicChannel);
@@ -70,7 +50,6 @@ void formDefineInic(void)
 /*
  * description: write 802.11a channels in <select> tag
  */
-#ifdef CONFIG_802_11_a
 static int getInic11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int  idx = 0, channel;
@@ -119,7 +98,7 @@ static int getInic11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-#endif
+
 /*
  * description: write 802.11b channels in <select> tag
  */
@@ -239,13 +218,13 @@ static int getInicWdsEncType(int eid, webs_t wp, int argc, char_t **argv)
 
 	if (NULL == value)
 		return websWrite(wp, T("0"));
-	else if (strcmp(value, "NONE") == 0)
+	else if (strcmp(value, "NONE;NONE;NONE;NONE") == 0)
 		return websWrite(wp, T("0"));
-	else if (strcmp(value, "WEP") == 0)
+	else if (strcmp(value, "WEP;WEP;WEP;WEP") == 0)
 		return websWrite(wp, T("1"));
-	else if (strcmp(value, "TKIP") == 0)
+	else if (strcmp(value, "TKIP;TKIP;TKIP;TKIP") == 0)
 		return websWrite(wp, T("2"));
-	else if (strcmp(value, "AES") == 0)
+	else if (strcmp(value, "AES;AES;AES;AES") == 0)
 		return websWrite(wp, T("3"));
 	else
 		return websWrite(wp, T("0"));
@@ -400,7 +379,7 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*wirelessmode;
 	char_t	*ssid, *mssid_1, *mssid_2, *mssid_3, *mssid_4, *mssid_5, *mssid_6,
 			*mssid_7, *bssid_num, *broadcastssid;
-	char_t	*sz11aChannel, *sz11bChannel, *sz11gChannel;
+	char_t	*sz11aChannel, *sz11bChannel, *sz11gChannel, *abg_rate;
 	char_t	*wds_list, *wds_mode, *wds_phy_mode, *wds_encryp_type, *wds_encryp_key;
 	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu;
 	char_t	*n_autoba, *n_badecline;
@@ -419,11 +398,10 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	mssid_7 = websGetVar(wp, T("mssid_7"), T("")); 
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
 	broadcastssid = websGetVar(wp, T("broadcastssid"), T("1")); 
-#ifdef CONFIG_802_11_a
 	sz11aChannel = websGetVar(wp, T("sz11aChannel"), T("")); 
-#endif
 	sz11bChannel = websGetVar(wp, T("sz11bChannel"), T("")); 
 	sz11gChannel = websGetVar(wp, T("sz11gChannel"), T("")); 
+	abg_rate = websGetVar(wp, T("abg_rate"), T("")); 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0")); 
 	wds_phy_mode = websGetVar(wp, T("wds_phy_mode"), T("0")); 
 	wds_encryp_type = websGetVar(wp, T("wds_encryp_type"), T("0")); 
@@ -481,7 +459,6 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RTINIC_NVRAM, "SSID1", ssid);
 
 //#WPS
-#ifdef CONFIG_RT2860V2_AP_WSC
 	{
 		char *wordlist= nvram_bufget(RTINIC_NVRAM, "WscModeOption");
 		if(wordlist){
@@ -491,7 +468,7 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 			g_wsc_configured = 1;
 		}
 	}
-#endif
+
 //#WPS
 
 	i = 2;
@@ -583,21 +560,13 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	}
 
 	//11abg Channel or AutoSelect
-#ifdef CONFIG_802_11_a
 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
-#else
-	if ((0 == strlen(sz11bChannel)) &&
-#endif
 			(0 == strlen(sz11gChannel))) {
 		nvram_commit(RTINIC_NVRAM);
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
-#ifdef CONFIG_802_11_a
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
-#else
-	if (!strncmp(sz11bChannel, "0", 2) &&
-#endif
 			!strncmp(sz11gChannel, "0", 2))
 		nvram_bufset(RTINIC_NVRAM, "AutoChannelSelect", "1");
 	else
@@ -608,6 +577,59 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RTINIC_NVRAM, "Channel", sz11bChannel);
 	if (0 != strlen(sz11gChannel))
 		nvram_bufset(RTINIC_NVRAM, "Channel", sz11gChannel);
+
+	//Rate for a, b, g
+	if (strncmp(abg_rate, "", 1)) {
+		int rate = atoi(abg_rate);
+		if (!strncmp(wirelessmode, "0", 2) || !strncmp(wirelessmode, "2", 2) || !strncmp(wirelessmode, "4", 2)) {
+			if (rate == 1 || rate == 2 || rate == 5 || rate == 11)
+				nvram_bufset(RTINIC_NVRAM, "FixedTxMode", "1"); //CCK
+			else
+				nvram_bufset(RTINIC_NVRAM, "FixedTxMode", "2"); //OFDM
+
+			if (rate == 1)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "0");
+			else if (rate == 2)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "1");
+			else if (rate == 5)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "2");
+			else if (rate == 6)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "0");
+			else if (rate == 9)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "1");
+			else if (rate == 11)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "3");
+			else if (rate == 12)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "2");
+			else if (rate == 18)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "3");
+			else if (rate == 24)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "4");
+			else if (rate == 36)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "5");
+			else if (rate == 48)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "6");
+			else if (rate == 54)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "7");
+			else
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "33");
+		}
+		else if (!strncmp(wirelessmode, "1", 2)) {
+			nvram_bufset(RTINIC_NVRAM, "FixedTxMode", "1"); //CCK
+			if (rate == 1)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "0");
+			else if (rate == 2)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "1");
+			else if (rate == 5)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "2");
+			else if (rate == 11)
+				nvram_bufset(RTINIC_NVRAM, "HT_MCS", "3");
+		}
+		else //shall not happen
+			error(E_L, E_LOG, T("wrong configurations from web UI"));
+	}
+	else
+		nvram_bufset(RTINIC_NVRAM, "FixedTxMode", "0"); //None
 
 	//WdsEnable, WdsPhyMode, WdsEncrypType, WdsKey, WdsList
 	//where WdsPhyMode - 0:CCK, 1:OFDM, 2:HTMIX, 3:GREENFIELD
@@ -653,6 +675,9 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("sz11aChannel: %s<br>\n"), sz11aChannel);
 	websWrite(wp, T("sz11bChannel: %s<br>\n"), sz11bChannel);
 	websWrite(wp, T("sz11gChannel: %s<br>\n"), sz11gChannel);
+	if (strncmp(abg_rate, "", 1)) {
+		websWrite(wp, T("abg_rate: %s<br>\n"), abg_rate);
+	}
 	websWrite(wp, T("wds_mode: %s<br>\n"), wds_mode);
 	if (strncmp(wds_mode, "0", 2)) {
 		websWrite(wp, T("wds_phy_mode: %s<br>\n"), wds_phy_mode);

@@ -1,9 +1,8 @@
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>System Management</title>
@@ -11,7 +10,21 @@
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
+var greenapb = '<% getGAPBuilt(); %>';
 var http_request = false;
+
+function style_display_on()
+{
+	if (window.ActiveXObject)
+	{ // IE
+		return "block";
+	}
+	else if (window.XMLHttpRequest)
+	{ // Mozilla, Safari,...
+		return "table-row";
+	}
+}
+
 function makeRequest(url, content) {
     http_request = false;
     if (window.XMLHttpRequest) { // Mozilla, Safari,...
@@ -285,6 +298,26 @@ function initTranslation()
 	e = document.getElementById("manNTPSyncWithHost");
 	e.value = _("man ntp sync with host");
 
+	e = document.getElementById("manGAPTitle");
+	e.innerHTML = _("man gap title");
+	e = document.getElementById("manGAPTime");
+	e.innerHTML = _("man gap time");
+	e = document.getElementById("manGAPAction");
+	e.innerHTML = _("man gap action");
+	e = document.getElementById("manGAPActionDisable1");
+	e.innerHTML = _("admin disable");
+	e = document.getElementById("manGAPActionDisable2");
+	e.innerHTML = _("admin disable");
+	e = document.getElementById("manGAPActionDisable3");
+	e.innerHTML = _("admin disable");
+	e = document.getElementById("manGAPActionDisable4");
+	e.innerHTML = _("admin disable");
+
+	e = document.getElementById("manGreenAPApply");
+	e.value = _("admin apply");
+	e = document.getElementById("manGreenAPCancle");
+	e.value = _("admin cancel");
+
 	e = document.getElementById("manDdnsSet");
 	e.innerHTML = _("man ddns setting");
 	e = document.getElementById("DdnsProvider");
@@ -313,6 +346,9 @@ function initValue()
 	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
 	var lang_zhcn = "<% getLangBuilt("zhcn"); %>";
 
+	var dateb = "<% getDATEBuilt(); %>";
+	var ddnsb = "<% getDDNSBuilt(); %>";
+
 	initTranslation();
 	lang_element.options.length = 0;
 	if (lang_en == "1")
@@ -340,6 +376,19 @@ function initValue()
 				break;
 			}
 		}
+	}
+
+	if (dateb == "1")
+	{
+		document.getElementById("div_date").style.visibility = "visible";
+		document.getElementById("div_date").style.display = style_display_on();
+		document.NTP.ntpcurrenttime.disabled = false;
+	} 
+	else
+	{
+		document.getElementById("div_date").style.visibility = "hidden";
+		document.getElementById("div_date").style.display = "none";
+		document.NTP.ntpcurrenttime.disabled = true;
 	}
 
 	if (tz == "UCT_-11")
@@ -423,18 +472,127 @@ function initValue()
 	else if (tz == "NZS_012")
 		document.NTP.time_zone.options.selectedIndex = 39;
 
-	if (ddns_provider == "none")
-		document.DDNS.DDNSProvider.options.selectedIndex = 0;
-	else if (ddns_provider == "dyndns.org")
-		document.DDNS.DDNSProvider.options.selectedIndex = 1;
-	else if (ddns_provider == "freedns.afraid.org")
-		document.DDNS.DDNSProvider.options.selectedIndex = 2;
-	else if (ddns_provider == "zoneedit.com")
-		document.DDNS.DDNSProvider.options.selectedIndex = 3;
-	else if (ddns_provider == "no-ip.com")
-		document.DDNS.DDNSProvider.options.selectedIndex = 4;
+	if (greenapb == "1")
+	{
+		document.getElementById("div_greenap").style.visibility = "visible";
+		document.getElementById("div_greenap").style.display = style_display_on();
+		document.getElementById("div_greenap_submit").style.visibility = "visible";
+		document.getElementById("div_greenap_submit").style.display = style_display_on();
+	}
+	else
+	{
+		document.getElementById("div_greenap").style.visibility = "hidden";
+		document.getElementById("div_greenap").style.display = "none";
+		document.getElementById("div_greenap_submit").style.visibility = "hidden";
+		document.getElementById("div_greenap_submit").style.display = "none";
+	}
+	set_greenap();
 
-	DDNSupdateState();
+	if (ddnsb == "1")
+	{
+		document.getElementById("div_ddns").style.visibility = "visible";
+		document.getElementById("div_ddns").style.display = style_display_on();
+		document.getElementById("div_ddns_submit").style.visibility = "visible";
+		document.getElementById("div_ddns_submit").style.display = style_display_on();
+		document.DDNS.Account.disabled = false;
+		document.DDNS.Password.disabled = false;
+		document.DDNS.DDNS.disabled = false;
+		if (ddns_provider == "none")
+			document.DDNS.DDNSProvider.options.selectedIndex = 0;
+		else if (ddns_provider == "dyndns.org")
+			document.DDNS.DDNSProvider.options.selectedIndex = 1;
+		else if (ddns_provider == "freedns.afraid.org")
+			document.DDNS.DDNSProvider.options.selectedIndex = 2;
+		else if (ddns_provider == "zoneedit.com")
+			document.DDNS.DDNSProvider.options.selectedIndex = 3;
+		else if (ddns_provider == "no-ip.com")
+			document.DDNS.DDNSProvider.options.selectedIndex = 4;
+
+		DDNSupdateState();
+	} 
+	else
+	{
+		document.getElementById("div_ddns").style.visibility = "hidden";
+		document.getElementById("div_ddns").style.display = "none";
+		document.getElementById("div_ddns_submit").style.visibility = "hidden";
+		document.getElementById("div_ddns_submit").style.display = "none";
+		document.DDNS.Account.disabled = true;
+		document.DDNS.Password.disabled = true;
+		document.DDNS.DDNS.disabled = true;
+	}
+}
+
+function set_greenap()
+{
+	var ntp_server = "<% getCfgGeneral(1, "NTPServerIP"); %>";
+
+	for(var j=1;j<=4;j++)
+	{
+	    var shour_e = eval("document.GreenAP.GAPSHour"+j);
+	    var sminute_e = eval("document.GreenAP.GAPSMinute"+j);
+	    var ehour_e = eval("document.GreenAP.GAPEHour"+j);
+	    var eminute_e = eval("document.GreenAP.GAPEMinute"+j);
+	    var action_e = eval("document.GreenAP.GAPAction"+j);
+
+	    shour_e.disabled = true;
+	    sminute_e.disabled = true;
+	    ehour_e.disabled = true;
+	    eminute_e.disabled = true;
+	    action_e.disabled = true;
+	    if (ntp_server != "" && greenapb == "1")
+	    {
+		action_e.disabled = false;
+		switch(j)
+		{
+		case 1:
+		    var action = "<% getCfgGeneral(1, "GreenAPAction1"); %>";
+		    var time = "<% getCfgGeneral(1, "GreenAPStart1"); %>";
+		    var stimeArray = time.split(" ");
+		    time = "<% getCfgGeneral(1, "GreenAPEnd1"); %>";
+		    var etimeArray = time.split(" ");
+		    break;
+		case 2:
+		    var action = "<% getCfgGeneral(1, "GreenAPAction2"); %>";
+		    var time = "<% getCfgGeneral(1, "GreenAPStart2"); %>";
+		    var stimeArray = time.split(" ");
+		    time = "<% getCfgGeneral(1, "GreenAPEnd2"); %>";
+		    var etimeArray = time.split(" ");
+		    break;
+		case 3:
+		    var action = "<% getCfgGeneral(1, "GreenAPAction3"); %>";
+		    var time = "<% getCfgGeneral(1, "GreenAPStart3"); %>";
+		    var stimeArray = time.split(" ");
+		    time = "<% getCfgGeneral(1, "GreenAPEnd3"); %>";
+		    var etimeArray = time.split(" ");
+		    break;
+		case 4:
+		    var action = "<% getCfgGeneral(1, "GreenAPAction4"); %>";
+		    var time = "<% getCfgGeneral(1, "GreenAPStart4"); %>";
+		    var stimeArray = time.split(" ");
+		    time = "<% getCfgGeneral(1, "GreenAPEnd4"); %>";
+		    var etimeArray = time.split(" ");
+		    break;
+		}
+		if (action == "Disable")
+		    action_e.options.selectedIndex = 0;
+		else if (action == "WiFiOFF")
+		    action_e.options.selectedIndex = 1;
+		else if (action == "TX25")
+		    action_e.options.selectedIndex = 2;
+		else if (action == "TX50")
+		    action_e.options.selectedIndex = 3;
+		else if (action == "TX75")
+		    action_e.options.selectedIndex = 4;
+		greenap_action_switch(j);
+		if (action != "" && action != "Disable")
+		{
+		    shour_e.options.selectedIndex = stimeArray[1];
+		    sminute_e.options.selectedIndex = stimeArray[0];
+		    ehour_e.options.selectedIndex = etimeArray[1];
+		    eminute_e.options.selectedIndex = etimeArray[0];
+		}
+	    }
+	}
 }
 
 function setLanguage()
@@ -491,6 +649,27 @@ function syncWithHost()
 	makeRequest("/goform/NTPSyncWithHost", tmp);
 }
 
+function greenap_action_switch(index)
+{
+	var shour_e = eval("document.GreenAP.GAPSHour"+index);
+	var sminute_e = eval("document.GreenAP.GAPSMinute"+index);
+	var ehour_e = eval("document.GreenAP.GAPEHour"+index);
+	var eminute_e = eval("document.GreenAP.GAPEMinute"+index);
+	var action_e = eval("document.GreenAP.GAPAction"+index);
+
+	shour_e.disabled = true;
+	sminute_e.disabled = true;
+	ehour_e.disabled = true;
+	eminute_e.disabled = true;
+
+	if (action_e.options.selectedIndex != 0)
+	{
+		shour_e.disabled = false;
+		sminute_e.disabled = false;
+		ehour_e.disabled = false;
+		eminute_e.disabled = false;
+	}
+}
 </script>
 
 </head>
@@ -500,7 +679,7 @@ function syncWithHost()
 <p id="manIntroduction">You may configure administrator account and password, NTP settings, and Dynamic DNS settings here.</p>
 <hr />
 
-<!-- ----------------- Langauge Settings ----------------- -->
+<!-- ================= Langauge Settings ================= -->
 <form method="post" name="Lang" action="/goform/setSysLang">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
@@ -525,7 +704,7 @@ function syncWithHost()
 </table>
 </form>
 
-<!-- ----------------- Adm Settings ----------------- -->
+<!-- ================= Adm Settings ================= -->
 <form method="post" name="Adm" action="/goform/setSysAdm">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
@@ -550,13 +729,13 @@ function syncWithHost()
 </table>
 </form>
 
-<!-- ----------------- NTP Settings ----------------- -->
+<!-- ================= NTP Settings ================= -->
 <form method="post" name="NTP" action="/goform/NTP">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
   <td class="title" colspan="2" id="manNTPSet">NTP Settings</td>
 </tr>
-<tr>
+<tr id="div_date">
 	<td class="head"  id="manNTPCurrentTime">Current Time</td>
 	<td>
 		<input size="24" name="ntpcurrenttime" value="<% getCurrentTimeASP(); %>" type="text" readonly="1">
@@ -634,9 +813,85 @@ function syncWithHost()
 </table>
 </form>
 
-<!-- ----------------- DDNS  ----------------- -->
+<!-- ================= GreenAP ================= -->
+<form method="post" name="GreenAP" action="/goform/GreenAP">
+<table id="div_greenap" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+  <tr>
+    <td class="title" colspan="3" id="manGAPTitle">Green AP</td>
+  </tr>
+  <tr align="center">
+    <td class="head" id="manGAPTime">Time</td>
+    <td class="head" id="manGAPAction">Action</td>
+  </tr>
+  <script language="JavaScript" type="text/javascript">
+  for(var j=1;j<=4;j++)
+  {
+	  var item = "<tr align=\"center\"><td><select name=\"GAPSHour"+j+"\">";
+	  for(var i=0;i<24;i++)
+	  {
+		  if (i < 10)
+			  item += "<option value=\""+i+"\">0"+i+"</option>";
+		  else
+			  item += "<option value=\""+i+"\">"+i+"</option>";
+	  }
+	  item += "</select>&nbsp;:&nbsp;";
+	  document.write(item);
+
+	  var item = "<select name=\"GAPSMinute"+j+"\">";
+	  for(var i=0;i<60;i++)
+	  {
+		  if (i < 10)
+			  item += "<option value=\""+i+"\">0"+i+"</option>";
+		  else
+			  item += "<option value=\""+i+"\">"+i+"</option>";
+	  }
+	  item += "</select>&nbsp;~&nbsp;";
+	  document.write(item);
+
+	  var item = "<select name=\"GAPEHour"+j+"\">";
+	  for(var i=0;i<24;i++)
+	  {
+		  if (i < 10)
+			  item += "<option value=\""+i+"\">0"+i+"</option>";
+		  else
+			  item += "<option value=\""+i+"\">"+i+"</option>";
+	  }
+	  item += "</select>&nbsp;:&nbsp;";
+	  document.write(item);
+
+	  var item = "<select name=\"GAPEMinute"+j+"\">";
+	  for(var i=0;i<60;i++)
+	  {
+		  if (i < 10)
+			  item += "<option value=\""+i+"\">0"+i+"</option>";
+		  else
+			  item += "<option value=\""+i+"\">"+i+"</option>";
+	  }
+	  item += "</select></td>";
+	  item += "<td><select name=\"GAPAction"+j+"\" onClick=\"greenap_action_switch('"+j+"')\">";
+	  item += "<option value=\"Disable\" id=\"manGAPActionDisable"+j+"\">Disable</option>";
+	  item += "<option value=\"WiFiOFF\">WiFi TxPower OFF</option>";
+	  item += "<option value=\"TX25\">WiFi TxPower 25%</option>";
+	  item += "<option value=\"TX50\">WiFi TxPower 50%</option>";
+	  item += "<option value=\"TX75\">WiFi TxPower 75%</option";
+	  item += "</select></td></tr>";
+	  document.write(item);
+  }
+  </script> 
+</table>
+<table id="div_greenap_submit" width="540" border="0" cellpadding="2" cellspacing="1">
+  <tr align="center">
+    <td>
+      <input type="submit" style="{width:120px;}" value="Apply" id="manGreenAPApply">&nbsp;&nbsp;
+      <input type="reset" style="{width:120px;}" value="Cancle" id="manGreenAPCancle" onClick="window.location.reload()">
+    </td>
+  </tr>
+</table>
+</form>
+
+<!-- ================= DDNS  ================= -->
 <form method="post" name="DDNS" action="/goform/DDNS">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table id="div_ddns" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
   <td class="title" colspan="2" id="manDdnsSet">DDNS Settings</td>
 </tr>
@@ -666,7 +921,7 @@ function syncWithHost()
 </tr>
 </tbody></table>
 
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table id="div_ddns_submit" width="540" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
@@ -677,6 +932,5 @@ function syncWithHost()
 </form>
 
 
-
-</tr></td></table>
+</td></tr></table>
 </body></html>

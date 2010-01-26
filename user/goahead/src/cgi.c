@@ -1,27 +1,11 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * cgi.c -- CGI processing (for the GoAhead Web server
  *
  * Copyright (c) GoAhead Software Inc., 1995-2000. All Rights Reserved.
  *
  * See the file "license.txt" for usage and redistribution license requirements
  *
- * $Id: cgi.c,v 1.6 2007-04-20 02:35:02 yy Exp $
+ * $Id: cgi.c,v 1.10.2.2 2009-04-07 07:28:24 chhung Exp $
  */
 
 /********************************** Description *******************************/
@@ -36,13 +20,15 @@
 
 /*********************************** Includes *********************************/
 #include	"wsIntrn.h"
+#include	<unistd.h>
+#include	<linux/reboot.h>
+#include	<sys/types.h>
+#include	<sys/wait.h>
 #ifdef UEMF
 	#include	"uemf.h"
 #else
 	#include	"basic/basicInternal.h"
 #endif
-
-#define DD printf("%u\n", __LINE__);
 
 /************************************ Locals **********************************/
 typedef struct {				/* Struct for CGI tasks which have completed */
@@ -223,10 +209,10 @@ int websCgiHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
  */
 
 	if (wp->cgiStdin == NULL) {
-		wp->cgiStdin = websGetCgiCommName();
+		wp->cgiStdin = websGetCgiCommName(wp);
 	} 
 	stdIn = wp->cgiStdin;
-	stdOut = websGetCgiCommName();
+	stdOut = websGetCgiCommName(wp);
 
 /*
  *	Now launch the process.  If not successful, do the cleanup of resources.
@@ -304,7 +290,6 @@ void websCgiGatherOutput (cgiRec *cgip)
 }
 
 
-
 /******************************************************************************/
 /*
  *	Any entry in the cgiList need to be checked to see if it has
@@ -318,9 +303,10 @@ void websCgiCleanup()
 	int		cid, nTries;
 	for (cid = 0; cid < cgiMax; cid++) {
 		if ((cgip = cgiList[cid]) != NULL) {
+			int exit_status;
 			wp = cgip->wp;
 			websCgiGatherOutput (cgip);
-			if (websCheckCgiProc(cgip->handle) == 0) {
+			if ( websCheckCgiProc(cgip->handle, &exit_status) == 0) {
 /*
  *				We get here if the CGI process has terminated.  Clean up.
  */
@@ -366,6 +352,15 @@ void websCgiCleanup()
 				bfreeSafe(B_L, cgip->envp);
 				bfreeSafe(B_L, cgip->stdOut);
 				bfreeSafe(B_L, cgip);
+
+				if(wp->has_firmware_upload_clean){
+					if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) != 0)
+						return;
+					sync();
+					//doSystem("sleep 3 && reboot &");
+					sleep(3);
+					reboot(LINUX_REBOOT_CMD_RESTART);
+				}
 			}
 		}
 	}

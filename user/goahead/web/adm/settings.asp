@@ -1,9 +1,8 @@
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <title>Settings Management</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
@@ -55,7 +54,7 @@ function PageInit()
 <p id="setmanIntroduction">You might save system settings by exporting them to a configuration file, restore them by importing the file, or reset them to factory default.</p>
 <hr />
 
-<!-- ----------------- Export ----------------- -->
+<!-- ================= Export ================= -->
 <br />
 <form method="post" name="ExportSettings" action="/cgi-bin/ExportSettings.sh">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
@@ -70,7 +69,7 @@ function PageInit()
 </form>
 <br />
 
-<!-- ----------------- Import ----------------- -->
+<!-- ================= Import ================= -->
 <form method="post" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
@@ -92,7 +91,7 @@ function PageInit()
 </form>
 <br />
 
-<!-- ----------------- Load FactoryDefaults  ----------------- -->
+<!-- ================= Load FactoryDefaults  ================= -->
 <form method="post" name="LoadDefaultSettings" action="/goform/LoadDefaultSettings">
 <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
@@ -107,5 +106,5 @@ function PageInit()
 
 
 <br>
-</tr></td></table>
+</td></tr></table>
 </body></html>

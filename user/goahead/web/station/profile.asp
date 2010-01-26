@@ -1,12 +1,11 @@
 <!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <script type="text/javascript" src="/lang/b28n.js"></script>
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <title>Station Profile</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
@@ -114,7 +113,7 @@ function PageInit()
 </form>
 
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>
 

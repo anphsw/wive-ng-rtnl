@@ -1,8 +1,6 @@
 <html><head><title>WPS </title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script language="JavaScript" type="text/javascript">
 </script>
 </head>
@@ -13,5 +11,5 @@
 
 <h1> Still under construct. </h1>
 
-</tr></td></table>
+</td></tr></table>
 </body></html>

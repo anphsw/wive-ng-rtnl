@@ -3,8 +3,6 @@
 <title>Wide Area Network (WAN) Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 var http_request = false;
@@ -73,6 +71,8 @@ function connectionTypeSwitch()
 	document.getElementById("l2tp").style.display = "none";
 	document.getElementById("pptp").style.visibility = "hidden";
 	document.getElementById("pptp").style.display = "none";
+	document.getElementById("3G").style.visibility = "hidden";
+	document.getElementById("3G").style.display = "none";
 
 	if (document.wanCfg.connectionType.options.selectedIndex == 0) {
 		document.getElementById("static").style.visibility = "visible";
@@ -85,14 +85,21 @@ function connectionTypeSwitch()
 	else if (document.wanCfg.connectionType.options.selectedIndex == 2) {
 		document.getElementById("pppoe").style.visibility = "visible";
 		document.getElementById("pppoe").style.display = "block";
+		pppoeOPModeSwitch();
 	}
 	else if (document.wanCfg.connectionType.options.selectedIndex == 3) {
 		document.getElementById("l2tp").style.visibility = "visible";
 		document.getElementById("l2tp").style.display = "block";
+		l2tpOPModeSwitch();
 	}
 	else if (document.wanCfg.connectionType.options.selectedIndex == 4) {
 		document.getElementById("pptp").style.visibility = "visible";
 		document.getElementById("pptp").style.display = "block";
+		pptpOPModeSwitch();
+	}
+	else if (document.wanCfg.connectionType.options.selectedIndex == 5) {
+		document.getElementById("3G").style.visibility = "visible";
+		document.getElementById("3G").style.display = "block";
 	}
 	else {
 		document.getElementById("static").style.visibility = "visible";
@@ -148,6 +155,40 @@ function pptpModeSwitch()
 		document.getElementById("pptpGateway").style.visibility = "hidden";
 		document.getElementById("pptpGateway").style.display = "none";
 	}
+}
+
+function pppoeOPModeSwitch()
+{
+	document.wanCfg.pppoeRedialPeriod.disabled = true;
+	document.wanCfg.pppoeIdleTime.disabled = true;
+	if (document.wanCfg.pppoeOPMode.options.selectedIndex == 0) 
+		document.wanCfg.pppoeRedialPeriod.disabled = false;
+	else if (document.wanCfg.pppoeOPMode.options.selectedIndex == 1)
+		document.wanCfg.pppoeIdleTime.disabled = false;
+}
+
+function l2tpOPModeSwitch()
+{
+	document.wanCfg.l2tpRedialPeriod.disabled = true;
+	// document.wanCfg.l2tpIdleTime.disabled = true;
+	if (document.wanCfg.l2tpOPMode.options.selectedIndex == 0) 
+		document.wanCfg.l2tpRedialPeriod.disabled = false;
+	/*
+	else if (document.wanCfg.l2tpOPMode.options.selectedIndex == 1)
+		document.wanCfg.l2tpIdleTime.disabled = false;
+	*/
+}
+
+function pptpOPModeSwitch()
+{
+	document.wanCfg.pptpRedialPeriod.disabled = true;
+	// document.wanCfg.pptpIdleTime.disabled = true;
+	if (document.wanCfg.pptpOPMode.options.selectedIndex == 0) 
+		document.wanCfg.pptpRedialPeriod.disabled = false;
+	/*
+	else if (document.wanCfg.pptpOPMode.options.selectedIndex == 1)
+		document.wanCfg.pptpIdleTime.disabled = false;
+	*/
 }
 
 function atoi(str, num)
@@ -252,19 +293,6 @@ function CheckValue()
 		if (document.wanCfg.staticSecDns.value != "")
 			if (!checkIpAddr(document.wanCfg.staticSecDns, false))
 				return false;
-		if (document.wanCfg.macCloneEnbl.options.selectedIndex == 1) {
-			var re = /[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}/;
-			if (document.wanCfg.macCloneMac.value.length == 0) {
-				alert("MAC Address should not be empty!");
-				document.wanCfg.macCloneMac.focus();
-				return false;
-			}
-			if (!re.test(document.wanCfg.macCloneMac.value)) {
-				alert("Please fill the MAC Address in correct format! (XX:XX:XX:XX:XX:XX)");
-				document.wanCfg.macCloneMac.focus();
-				return false;
-			}
-		}
 	}
 	else if (document.wanCfg.connectionType.selectedIndex == 1) { //DHCP
 	}
@@ -273,8 +301,50 @@ function CheckValue()
 			alert("Password mismatched!");
 			return false;
 		}
+		if (document.wanCfg.pppoeOPMode.options.selectedIndex == 0)
+		{
+			if (document.wanCfg.pppoeRedialPeriod.value == "")
+			{
+				alert("Please specify Redial Period");
+				document.wanCfg.pppoeRedialPeriod.focus();
+				document.wanCfg.pppoeRedialPeriod.select();
+				return false;
+			}
+		}
+		else if (document.wanCfg.pppoeOPMode.options.selectedIndex == 1);
+		{
+			if (document.wanCfg.pppoeIdleTime.value == "")
+			{
+				alert("Please specify Idle Time");
+				document.wanCfg.pppoeIdleTime.focus();
+				document.wanCfg.pppoeIdleTime.select();
+				return false;
+			}
+		}
 	}
 	else if (document.wanCfg.connectionType.selectedIndex == 3) { //L2TP
+		if (document.wanCfg.l2tpOPMode.options.selectedIndex == 0)
+		{
+			if (document.wanCfg.l2tpRedialPeriod.value == "")
+			{
+				alert("Please specify Redial Period");
+				document.wanCfg.l2tpRedialPeriod.focus();
+				document.wanCfg.l2tpRedialPeriod.select();
+				return false;
+			}
+		}
+		/*
+		else if (document.wanCfg.l2tpOPMode.options.selectedIndex == 1)
+		{
+			if (document.wanCfg.l2tpIdleTime.value == "")
+			{
+				alert("Please specify Idle Time");
+				document.wanCfg.l2tpIdleTime.focus();
+				document.wanCfg.l2tpIdleTime.select();
+				return false;
+			}
+		}
+		*/
 	}
 	else if (document.wanCfg.connectionType.selectedIndex == 4) { //PPTP
 		if (document.wanCfg.pptpPass.value != document.wanCfg.pptpPass2.value) {
@@ -291,9 +361,47 @@ function CheckValue()
 			if (!checkIpAddr(document.wanCfg.pptpGateway, false))
 				return false;
 		}
+		if (document.wanCfg.pptpOPMode.options.selectedIndex == 0)
+		{
+			if (document.wanCfg.pptpRedialPeriod.value == "")
+			{
+				alert("Please specify Redial Period");
+				document.wanCfg.pptpRedialPeriod.focus();
+				document.wanCfg.pptpRedialPeriod.select();
+				return false;
+			}
+		}
+		/*
+		else if(document.wanCfg.pptpOPMode.options.selectedIndex == 1)
+		{
+			if (document.wanCfg.pptpIdleTime.value == "")
+			{
+				alert("Please specify Idle Time");
+				document.wanCfg.pptpIdleTime.focus();
+				document.wanCfg.pptpIdleTime.select();
+				return false;
+			}
+		}
+		*/
+	}
+	else if (document.wanCfg.connectionType.selectedIndex == 5) { //3G
 	}
 	else
 		return false;
+
+	if (document.wanCfg.macCloneEnbl.options.selectedIndex == 1) {
+		var re = /[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}:[A-Fa-f0-9]{2}/;
+		if (document.wanCfg.macCloneMac.value.length == 0) {
+			alert("MAC Address should not be empty!");
+			document.wanCfg.macCloneMac.focus();
+			return false;
+		}
+		if (!re.test(document.wanCfg.macCloneMac.value)) {
+			alert("Please fill the MAC Address in correct format! (XX:XX:XX:XX:XX:XX)");
+			document.wanCfg.macCloneMac.focus();
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -343,6 +451,14 @@ function initTranslation()
 	e.innerHTML = _("inet password");
 	e = document.getElementById("wPppoePass2");
 	e.innerHTML = _("inet pass2");
+	e = document.getElementById("wPppoeOPMode");
+	e.innerHTML = _("wan protocol opmode");
+	e = document.getElementById("wPppoeKeepAlive");
+	e.innerHTML = _("wan protocol opmode keepalive");
+	e = document.getElementById("wPppoeOnDemand");
+	e.innerHTML = _("wan protocol opmode ondemand");
+	e = document.getElementById("wPppoeManual");
+	e.innerHTML = _("wan protocol opmode manual");
 
 	e = document.getElementById("wL2tpMode");
 	e.innerHTML = _("wan l2tp mode");
@@ -364,6 +480,16 @@ function initTranslation()
 	e.innerHTML = _("inet netmask");
 	e = document.getElementById("wL2tpGateway");
 	e.innerHTML = _("inet gateway");
+	e = document.getElementById("wL2tpOPMode");
+	e.innerHTML = _("wan protocol opmode");
+	e = document.getElementById("wL2tpKeepAlive");
+	e.innerHTML = _("wan protocol opmode keepalive");
+	/*
+	e = document.getElementById("wL2tpOnDemand");
+	e.innerHTML = _("wan protocol opmode ondemand");
+	*/
+	e = document.getElementById("wL2tpManual");
+	e.innerHTML = _("wan protocol opmode manual");
 
 	e = document.getElementById("wPptpMode");
 	e.innerHTML = _("wan pptp mode");
@@ -385,6 +511,21 @@ function initTranslation()
 	e.innerHTML = _("inet netmask");
 	e = document.getElementById("wPptpGateway");
 	e.innerHTML = _("inet gateway");
+	e = document.getElementById("wPptpOPMode");
+	e.innerHTML = _("wan protocol opmode");
+	e = document.getElementById("wPptpKeepAlive");
+	e.innerHTML = _("wan protocol opmode keepalive");
+	/*
+	e = document.getElementById("wPptpOnDemand");
+	e.innerHTML = _("wan protocol opmode ondemand");
+	*/
+	e = document.getElementById("wPptpManual");
+	e.innerHTML = _("wan protocol opmode manual");
+
+	e = document.getElementById("w3GMode");
+	e.innerHTML = _("wan 3G mode");
+	e = document.getElementById("w3GDev");
+	e.innerHTML = _("wan 3G modem");
 
 	e = document.getElementById("wMacClone");
 	e.innerHTML = _("wan mac clone");
@@ -415,15 +556,96 @@ function initValue()
 		document.wanCfg.connectionType.options.selectedIndex = 1;
 	}
 	else if (mode == "PPPOE") {
+		var pppoe_opmode = "<% getCfgGeneral(1, "wan_pppoe_opmode"); %>";
+		var pppoe_optime = "<% getCfgGeneral(1, "wan_pppoe_optime"); %>";
+
 		document.wanCfg.connectionType.options.selectedIndex = 2;
+		if (pppoe_opmode == "Manual")
+		{
+			document.wanCfg.pppoeOPMode.options.selectedIndex = 2;
+		}
+		else if (pppoe_opmode == "OnDemand")
+		{
+			document.wanCfg.pppoeOPMode.options.selectedIndex = 1;
+			if (pppoe_optime != "")
+				document.wanCfg.pppoeIdleTime.value = pppoe_optime;
+		}
+		else if (pppoe_opmode == "KeepAlive")
+		{
+			document.wanCfg.pppoeOPMode.options.selectedIndex = 0;
+			if (pppoe_optime != "")
+				document.wanCfg.pppoeRedialPeriod.value = pppoe_optime;
+		}
+
+		pppoeOPModeSwitch();
 	}
 	else if (mode == "L2TP") {
+		var l2tp_opmode = "<% getCfgGeneral(1, "wan_l2tp_opmode"); %>";
+		var l2tp_optime = "<% getCfgGeneral(1, "wan_l2tp_optime"); %>";
+		
 		document.wanCfg.connectionType.options.selectedIndex = 3;
+		if (l2tp_opmode == "Manual")
+		{
+			document.wanCfg.l2tpOPMode.options.selectedIndex = 2;
+		}
+		/*
+		else if (l2tp_opmode == "OnDemand")
+		{
+			document.wanCfg.l2tpOPMode.options.selectedIndex = 1;
+			if (l2tp_optime != "")
+				document.wanCfg.l2tpIdleTime.value = l2tp_optime;
+		}
+		*/
+		else if (l2tp_opmode == "KeepAlive")
+		{
+			document.wanCfg.l2tpOPMode.options.selectedIndex = 0;
+			if (l2tp_optime != "")
+				document.wanCfg.l2tpRedialPeriod.value = l2tp_optime;
+		}
+		l2tpOPModeSwitch();
 	}
 	else if (mode == "PPTP") {
+		var pptp_opmode = "<% getCfgGeneral(1, "wan_pptp_opmode"); %>";
+		var pptp_optime = "<% getCfgGeneral(1, "wan_pptp_optime"); %>";
+
 		document.wanCfg.connectionType.options.selectedIndex = 4;
 		document.wanCfg.pptpMode.options.selectedIndex = 1*pptpMode;
 		pptpModeSwitch();
+		if (pptp_opmode == "Manual")
+		{
+			document.wanCfg.pptpOPMode.options.selectedIndex = 2;
+			if (pptp_optime != "")
+				document.wanCfg.pptpIdleTime.value = pptp_optime;
+		}
+		/*
+		else if (pptp_opmode == "OnDemand")
+		{
+			document.wanCfg.pptpOPMode.options.selectedIndex = 1;
+			if (pptp_optime != "")
+				document.wanCfg.pptpIdleTime.value = pptp_optime;
+		}
+		*/
+		else if (pptp_opmode == "KeepAlive")
+		{
+			document.wanCfg.pptpOPMode.options.selectedIndex = 0;
+			if (pptp_optime != "")
+				document.wanCfg.pptpRedialPeriod.value = pptp_optime;
+		}
+		pptpOPModeSwitch();
+	}
+	else if (mode == "3G") {
+		var dev_3g = "<% getCfgGeneral(1, "wan_3g_dev"); %>";
+
+		document.wanCfg.connectionType.options.selectedIndex = 5;
+
+		if (dev_3g == "HUAWEI-E169")
+			document.wanCfg.Dev3G.options.selectedIndex = 1;
+		else if (dev_3g == "BandLuxe-C270")
+			document.wanCfg.Dev3G.options.selectedIndex = 2;
+		else if (dev_3g == "OPTION-ICON225")
+			document.wanCfg.Dev3G.options.selectedIndex = 3;
+		else
+			document.wanCfg.Dev3G.options.selectedIndex = 0;
 	}
 	else {
 		document.wanCfg.connectionType.options.selectedIndex = 0;
@@ -457,13 +679,14 @@ function initValue()
       <option value="PPPOE" id="wConnTypePppoe">PPPOE (ADSL)</option>
       <option value="L2TP" id="wConnTypeL2tp">L2TP</option>
       <option value="PPTP" id="wConnTypePptp">PPTP</option>
+      <option value="3G" id="wConnType3G">3G</option> 
     </select>
   </td>
 </tr>
 </table>
 
-<!-- ----------------- STATIC Mode ----------------- -->
-<table id="static" width="540px" border="1" cellpadding="2" cellspacing="1">
+<!-- ================= STATIC Mode ================= -->
+<table id="static" width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wStaticMode">Static Mode</td>
 </tr>
@@ -491,8 +714,8 @@ function initValue()
 </tr>
 </table>
 
-<!-- ----------------- DHCP Mode ----------------- -->
-<table id="dhcp" width="540px" border="1" cellpadding="2" cellspacing="1">
+<!-- ================= DHCP Mode ================= -->
+<table id="dhcp" width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wDhcpMode">DHCP Mode</td>
 </tr>
@@ -502,46 +725,67 @@ function initValue()
 </tr>
 </table>
 
-<!-- ----------------- PPPOE Mode ----------------- -->
-<table id="pppoe" width="540px" border="1" cellpadding="2" cellspacing="1">
+<!-- ================= PPPOE Mode ================= -->
+<table id="pppoe" width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wPppoeMode">PPPoE Mode</td>
 </tr>
 <tr>
   <td class="head" id="wPppoeUser">User Name</td>
-  <td><input name="pppoeUser" maxlength=32
+  <td><input name="pppoeUser" maxlength=32 size=32
              value="<% getCfgGeneral(1, "wan_pppoe_user"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wPppoePassword">Password</td>
-  <td><input type="password" name="pppoePass" maxlength=32
+  <td><input type="password" name="pppoePass" maxlength=32 size=32
              value="<% getCfgGeneral(1, "wan_pppoe_pass"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wPppoePass2">Verify Password</td>
-  <td><input type="password" name="pppoePass2" maxlength=32
+  <td><input type="password" name="pppoePass2" maxlength=32 size=32
              value="<% getCfgGeneral(1, "wan_pppoe_pass"); %>"></td>
+</tr>
+<tr>
+  <td class="head" rowspan="2" id="wPppoeOPMode">Operation Mode</td>
+  <td>
+    <select name="pppoeOPMode" size="1" onChange="pppoeOPModeSwitch()">
+      <option value="KeepAlive" id="wPppoeKeepAlive">Keep Alive</option>
+      <option value="OnDemand" id="wPppoeOnDemand">On Demand</option>
+      <option value="Manual" id="wPppoeManual">Manual</option>
+    </select>
+  </td>
+</tr>
+<tr>
+  <td>
+    Keep Alive Mode: Redial Period
+    <input type="text" name="pppoeRedialPeriod" maxlength="5" size="3" value="60">
+    senconds
+    <br />
+    On demand Mode:  Idle Time
+    <input type="text" name="pppoeIdleTime" maxlength="3" size="2" value="5">
+    minutes
+  </td>
 </tr>
 </table>
 
-<!-- ----------------- L2TP Mode ----------------- -->
-<table id="l2tp" width="540px" border="1" cellpadding="2" cellspacing="1">
+<!-- ================= L2TP Mode ================= -->
+<table id="l2tp" width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wL2tpMode">L2TP Mode</td>
 </tr>
 <tr>
   <td class="head" id="wL2tpServer">L2TP Server IP Address</td>
-  <td><input name="l2tpServer" maxlength="15" value="<%
+  <td><input name="l2tpServer" maxlength="15" size=15 value="<%
        getCfgGeneral(1, "wan_l2tp_server"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wL2tpUser">User Name</td>
-  <td><input name="l2tpUser" maxlength="20" value="<%
+  <td><input name="l2tpUser" maxlength="20" size=20 value="<%
        getCfgGeneral(1, "wan_l2tp_user"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wL2tpPassword">Password</td>
-  <td><input type="password" name="l2tpPass" maxlength="32" value="<%
+  <td><input type="password" name="l2tpPass" maxlength="32" size=32 value="<%
        getCfgGeneral(1, "wan_l2tp_pass"); %>"></td>
 </tr>
 <tr>
@@ -555,38 +799,63 @@ function initValue()
 </tr>
 <tr id="l2tpIp">
   <td class="head" id="wL2tpIp">IP Address</td>
-  <td><input name="l2tpIp" maxlength=15 value="<% getCfgGeneral(1, "wan_l2tp_ip"); %>"></td>
+  <td><input name="l2tpIp" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_l2tp_ip"); %>"></td>
 </tr>
 <tr id="l2tpNetmask">
   <td class="head" id="wL2tpNetmask">Subnet Mask</td>
-  <td><input name="l2tpNetmask" maxlength=15 value="<% getCfgGeneral(1, "wan_l2tp_netmask"); %>">
+  <td><input name="l2tpNetmask" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_l2tp_netmask"); %>">
   </td>
 </tr>
 <tr id="l2tpGateway">
   <td class="head" id="wL2tpGateway">Default Gateway</td>
-  <td><input name="l2tpGateway" maxlength=15 value="<% getCfgGeneral(1, "wan_l2tp_gateway"); %>">
+  <td><input name="l2tpGateway" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_l2tp_gateway"); %>">
+  </td>
+</tr>
+<tr>
+  <td class="head" rowspan="3" id="wL2tpOPMode">Operation Mode</td>
+  <td>
+    <select name="l2tpOPMode" size="1" onChange="l2tpOPModeSwitch()">
+      <option value="KeepAlive" id="wL2tpKeepAlive">Keep Alive</option>
+      <!--
+      <option value="OnDemand" id="wL2tpOnDemand">On Demand</option>
+      -->
+      <option value="Manual" id="wL2tpManual">Manual</option>
+    </select>
+  </td>
+</tr>
+<tr>
+  <td>
+    Keep Alive Mode: Redial Period
+    <input type="text" name="l2tpRedialPeriod" maxlength="5" size="3" value="60">
+    senconds
+    <!--
+    <br />
+    On demand Mode:  Idle Time
+    <input type="text" name="l2tpIdleTime" maxlength="3" size="2" value="5">
+    minutes
+    -->
   </td>
 </tr>
 </table>
 
-<!-- ----------------- PPTP Mode ----------------- -->
-<table id="pptp" width="540px" border="1" cellpadding="2" cellspacing="1">
+<!-- ================= PPTP Mode ================= -->
+<table id="pptp" width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wPptpMode">PPTP Mode</td>
 </tr>
 <tr>
   <td class="head" id="wPptpServer">PPTP Server IP Address</td>
-  <td><input name="pptpServer" maxlength="15" value="<%
+  <td><input name="pptpServer" maxlength="15" size=15 value="<%
        getCfgGeneral(1, "wan_pptp_server"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wPptpUser">User Name</td>
-  <td><input name="pptpUser" maxlength="20" value="<%
+  <td><input name="pptpUser" maxlength="20" size=20 value="<%
        getCfgGeneral(1, "wan_pptp_user"); %>"></td>
 </tr>
 <tr>
   <td class="head" id="wPptpPassword">Password</td>
-  <td><input type="password" name="pptpPass" maxlength="32" value="<%
+  <td><input type="password" name="pptpPass" maxlength="32" size=32 value="<%
        getCfgGeneral(1, "wan_pptp_pass"); %>"></td>
 </tr>
 <tr>
@@ -600,22 +869,65 @@ function initValue()
 </tr>
 <tr id="pptpIp">
   <td class="head" id="wPptpIp">IP Address</td>
-  <td><input name="pptpIp" maxlength=15 value="<% getCfgGeneral(1, "wan_pptp_ip"); %>"></td>
+  <td><input name="pptpIp" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_pptp_ip"); %>"></td>
 </tr>
 <tr id="pptpNetmask">
   <td class="head" id="wPptpNetmask">Subnet Mask</td>
-  <td><input name="pptpNetmask" maxlength=15 value="<% getCfgGeneral(1, "wan_pptp_netmask"); %>">
+  <td><input name="pptpNetmask" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_pptp_netmask"); %>">
   </td>
 </tr>
 <tr id="pptpGateway">
   <td class="head" id="wPptpGateway">Default Gateway</td>
-  <td><input name="pptpGateway" maxlength=15 value="<% getCfgGeneral(1, "wan_pptp_gateway"); %>">
+  <td><input name="pptpGateway" maxlength=15 size=15 value="<% getCfgGeneral(1, "wan_pptp_gateway"); %>">
+  </td>
+</tr>
+<tr>
+  <td class="head" rowspan="3" id="wPptpOPMode">Operation Mode</td>
+  <td>
+    <select name="pptpOPMode" size="1" onChange="pptpOPModeSwitch()">
+      <option value="KeepAlive" id="wPptpKeepAlive">Keep Alive</option>
+      <!--
+      <option value="OnDemand" id="wPptpOnDemand">On Demand</option>
+      -->
+      <option value="Manual" id="wPptpManual">Manual</option>
+    </select>
+  </td>
+</tr>
+<tr>
+  <td>
+    Keep Alive Mode: Redial Period
+    <input type="text" name="pptpRedialPeriod" maxlength="5" size="3" value="60">
+    senconds
+    <!--
+    <br />
+    On demand Mode:  Idle Time
+    <input type="text" name="pptpIdleTime" maxlength="3" size="2" value="5">
+    minutes
+    -->
+  </td>
+</tr>
+</table>
+
+<!-- =========== 3G Modular =========== -->
+<table id="3G" width="540" border="1" cellpadding="2" cellspacing="1">
+<tr>
+  <td class="title" colspan="2" id="w3GMode">3G Mode</td>
+</tr>
+<tr>
+  <td class="head" rowspan="3" id="w3GDev">USB 3G modem</td>
+  <td>
+    <select name="Dev3G" size="1">
+      <option value="MU-Q101" id="MU-Q101">NU MU-Q101</option>
+      <option value="HUAWEI-E169" id="E169">HUAWEI E169</option>
+      <option value="BandLuxe-C270" id="C270">BandLuxe C270</option>
+      <option value="OPTION-ICON225" id="ICON225">OPTION ICON 225</option>
+    </select>
   </td>
 </tr>
 </table>
 
 <!-- =========== MAC Clone =========== -->
-<table width="540px" border="1" cellpadding="2" cellspacing="1">
+<table width="540" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wMacClone">MAC Address Clone</td>
 </tr>
@@ -637,7 +949,7 @@ function initValue()
 </tr>
 </table>
 
-<table width="540px" cellpadding="2" cellspacing="1">
+<table width="540" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
     <input type=submit style="{width:120px;}" value="Apply" id="wApply">&nbsp;&nbsp;
@@ -647,7 +959,7 @@ function initValue()
 </table>
 </form>
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>
 

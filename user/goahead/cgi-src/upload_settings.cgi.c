@@ -12,8 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <linux/reboot.h>
 
 #define RFC_ERROR "RFC1867 ...."
+
+#define REFRESH_TIMEOUT		"60000"		/* 40000 = 40 secs*/
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {
@@ -140,6 +143,52 @@ void import(char *filename, int offset, int len)
     unlink(pname);
 }
 
+#define DEFAULT_LAN_IP "10.10.10.254"
+char *getLanIP(void)
+{
+	static char buf[64];
+	char *nl;
+	FILE *fp;
+
+	memset(buf, 0, sizeof(buf));
+	if( (fp = popen("nvram_get 2860 lan_ipaddr", "r")) == NULL )
+		goto error;
+
+	if(!fgets(buf, sizeof(buf), fp)){
+		pclose(fp);
+		goto error;
+	}
+
+	if(!strlen(buf)){
+		pclose(fp);
+		goto error;
+	}
+	pclose(fp);
+
+	if(nl = strchr(buf, '\n'))
+		*nl = '\0';
+
+	return buf;
+
+error:
+	fprintf(stderr, "warning, cant find lan ip\n");
+	return DEFAULT_LAN_IP;
+}
+
+void javascriptUpdate(void)
+{
+    printf("<script language=\"JavaScript\" type=\"text/javascript\">");
+    printf(" \
+function refresh_all(){	\
+  top.location.href = \"http://%s\"; \
+} \
+function update(){ \
+  self.setTimeout(\"refresh_all()\", %s);\
+}", getLanIP(), REFRESH_TIMEOUT);
+    printf("update();");
+    printf("</script>");
+}
+
 int main (int argc, char *argv[])
 {
     int file_begin, file_end;
@@ -229,7 +278,12 @@ getenv("SERVER_SOFTWARE"));
 
     import(filename, file_begin, file_end - file_begin);
 
-    printf("done</body><html>");
+    printf("done");
+    javascriptUpdate();
+    printf("</body></html>\n");
+    // system("sleep 3 && reboot &");
+    sleep(3);
+    reboot(LINUX_REBOOT_CMD_RESTART);
 err:
     free(boundary);
     exit(0);

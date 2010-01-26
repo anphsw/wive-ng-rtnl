@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -29,9 +13,11 @@
 #include "webs.h"
 #include "internet.h"
 #include "wireless.h"
-#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_AP_WSC */
+#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_STA_WSC */
+
 #include "wps.h"
 
+#define DD printf("%s(),  %d\n", __FUNCTION__, __LINE__);	fflush(stdout);
 #define AP_MODE
 #include "oid.h"
 
@@ -47,8 +33,7 @@ int g_wsc_configured = 0;							// export for wireless.c
 static int g_WscResult = 0;							// for AP only ( STA WPS don't need this)
 static int g_isEnrollee = 0;						// for AP only
 
-#ifdef CONFIG_RT2860V2_AP_WSC						// if RT2880 support Wifi - STA 
-#include "stapriv.h"
+#ifdef CONFIG_RT2860V2_STA_WSC						// if RT2880 support Wifi - STA 
 #define WPS_STA_TIMEOUT_SECS			120000				// 120 seconds
 #define WPS_STA_CATCH_CONFIGURED_TIMER	10					// 10 * 1000 microsecond = every 0.010 sec
 #define REGISTRAR_TIMER_MODE			0xdeadbeef			// okay, this is a magic number
@@ -62,6 +47,8 @@ static void WPSSTAPINEnr(webs_t wp, char_t *path, char_t *query);
 static void WPSSTAPBCEnr(webs_t wp, char_t *path, char_t *query);
 static void WPSSTAStop(webs_t wp, char_t *path, char_t *query);
 static char_t *addWPSSTAProfile(char_t *result);
+static char_t *addWPSSTAProfile2(WSC_CREDENTIAL *);
+static int getStaWscProfile(char *interface, WSC_PROFILE *wsc_profile);
 void WPSSTAEnrolleeTimerHandler(int);
 void WPSSTARegistrarTimerHandler(int);
 void freeHeaderProfileSettings(void);
@@ -75,7 +62,7 @@ extern PRT_PROFILE_SETTING headerProfileSetting;
 
 static char	*g_pAPListData = NULL;
 
-#endif	/* CONFIG_RT2860V2_AP_WSC */
+#endif	/* CONFIG_RT2860V2_STA_WSC */
 
 static void resetTimerAll(void)
 {
@@ -216,6 +203,8 @@ char *getWscStatusStr(int status)
 		return "WSC_EAP_RSP_DONE_SENT";
 	case 38:
 		return "WAIT PINCODE";
+	case 39:
+		return "WSC_START_ASSOC";
 	case 0x101:
 		return "PBC:TOO MANY AP";
 	case 0x102:
@@ -232,6 +221,8 @@ char *getWscStatusStr(int status)
 		return "EAP_REQ_WRONG_SMI";
 	case 0x108:
 		return "EAP_REQ_WRONG_VENDOR_TYPE";
+	case 0x109:
+		return "PBC_SESSION_OVERLAP";
 	default:
 		return "Unknown";
 	}
@@ -301,7 +292,7 @@ void updateWPS( webs_t wp, char_t *path, char_t *query)
 //	getWscProfile(interface, &result, sizeof(WSC_CONFIGURED_VALUE));
 	getWscProfile("ra0", &result, sizeof(WSC_CONFIGURED_VALUE));
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	//1. WPSConfigured
 	websWrite(wp, T("%d\n"), result.WscConfigured);
@@ -350,7 +341,9 @@ void WPSRestart(void)
 	char *mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
 	doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-	doSystem("service wscd stop");
+	doSystem("killall wscd 1>/dev/null 2>&1");
+	Sleep(2);
+	doSystem("killall -9 wscd 1>/dev/null 2>&1");
 
 	if(!strcmp(mode, "0" )){		//bridge 
 		// nop
@@ -365,22 +358,20 @@ void WPSRestart(void)
 		return;
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "WscModeOption");
-	doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
-	if(wordlist){
-		if (strcmp(wordlist, "0") != 0){
-			// WPS Enable
-			char lan_if_addr[16];
-			if ((getIfIp(getLanIfName(), lan_if_addr)) == -1) {
-				printf("WPSRestart error, can't get lan ip.\n");
-				return;
-			}
-			doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
-			doSystem("service wscd start");
-			doSystem("iwpriv ra0 set WscConfMode=%d", 7);
-		}else{
-			// WPS disable
-			doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
+	doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");	// WPS disable
+	if(wordlist && (strcmp(wordlist, "0") != 0)) {
+		// WPS Enable
+		char lan_if_addr[16];
+		if ((getIfIp(getLanIfName(), lan_if_addr)) == -1) {
+			printf("WPSRestart error, can't get lan ip.\n");
+			return;
 		}
+		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
+		wordlist = nvram_bufget(RT2860_NVRAM, "WscConfigured");
+		if (strcmp(wordlist, "0") == 0)
+        		doSystem("iwpriv ra0 set WscConfStatus=1");
+		doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
+		doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
 	}
 		
 	wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
@@ -391,8 +382,6 @@ void WPSRestart(void)
 
 	g_WscResult = 0;
 	g_isEnrollee = 0;
-
-	LedReset();
 }
 
 
@@ -401,9 +390,48 @@ void WPSRestart(void)
  */
 static int getPINASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	websWrite(wp, T("%d"), getAPPIN("ra0"));
+	websWrite(wp, T("%08d"), getAPPIN("ra0"));
 	return 0;
 }
+
+/*
+static int getWlanWscDevPinCodeASP(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int ioctl_sock;
+	struct iwreq iwr;
+	char *wordlist=NULL;
+	unsigned long WscPinCode = 0;
+
+	memset(&iwr, 0, sizeof(iwr));
+	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
+	iwr.u.data.pointer = (caddr_t) &WscPinCode;
+	iwr.u.data.flags = RT_OID_WSC_PIN_CODE;
+
+	ioctl_sock = socket(PF_INET, SOCK_DGRAM, 0);
+	if (ioctl_sock < 0){
+		fprintf(stderr, "ioctl sock fail!!!\n");
+		websWrite(wp, T("%s"), "00000000");
+		return 0;
+	}
+
+	if (ioctl(ioctl_sock, RT_PRIV_IOCTL, &iwr) < 0){
+		fprintf(stderr, "ioctl -> RT_PRIV_IOCTL Fail !\n");
+		websWrite(wp, T("%s"), "00000000");
+		return 0;
+	}
+
+	wordlist = nvram_get(RT2860_NVRAM, "WscPinCode");
+
+	if ((wordlist == NULL) || (strcmp(wordlist, "") == 0))
+		websWrite(wp, T("%d"), (int)WscPinCode);
+	else
+		websWrite(wp, T("%s"), wordlist);
+
+	close(ioctl_sock);
+	return 0;
+}
+*/
+
 
 /* Load from Web */
 #define LFW(x, y)	do{												\
@@ -428,38 +456,24 @@ static void STF(int index, char *flash_key, char *value)
 static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 {
 	int     wsc_enable = 0;
-//	int     wsc_proxy = 0;
-//	int     wsc_reg = 0;
 
 	LFWi(wsc_enable, WPSEnable);
-//	LFWi(wsc_proxy, wsc_proxy);
-//	LFWi(wsc_reg, wsc_reg);
+
+	resetTimerAll();
+	g_WscResult = 0;
+	LedReset();
 
 	if (wsc_enable == 0){
 		nvram_bufset(RT2860_NVRAM, "WscModeOption", "0");
 	}else{
-//		if (wsc_proxy == 0){
-//			if (wsc_reg == 0){
-//				nvram_bufset(RT2860_NVRAM, "WscModeOption", "1");
-//			}else{	/* enable+registrar =  1 + 4*/
-//				nvram_bufset(RT2860_NVRAM, "WscModeOption", "5");
-//				wsc_reg = 4;
-//			}
-//		}else{
-//			wsc_proxy = 2;
-//			if (wsc_reg == 0){	/* 1 + 2 */
-//				nvram_bufset(RT2860_NVRAM, "WscModeOption", "3");
-//			}else				/* 1+2+4 */{
 				nvram_bufset(RT2860_NVRAM, "WscModeOption", "7");
-//				wsc_reg = 4;
-//			}
-//		}
 	}
 	nvram_commit(RT2860_NVRAM);
 
 	if (wsc_enable == 0){
 		doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
-		doSystem("service wscd stop");
+		doSystem("killall wscd 1>/dev/null 2>&1");
+		doSystem("killall -9 wscd 1>/dev/null 2>&1");
 		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
 	}else{
 		char lan_if_addr[16];
@@ -469,8 +483,9 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("route add -host 239.255.255.250 dev br0");
-		doSystem("service wscd stop");
-		doSystem("service wscd start");
+		doSystem("killall wscd 1>/dev/null 2>&1");
+		doSystem("killall -9 wscd 1>/dev/null 2>&1");
+		doSystem("wscd -m 1 -a %s -i ra0 &", lan_if_addr);
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 //		doSystem("iwpriv ra0 set WscConfMode=%d", wsc_enable + wsc_proxy + wsc_reg);
 //		printf("wsc_enable:%d\nwsc_proxy:%d\nwsc_reg:%d\n",  wsc_enable ,wsc_proxy ,wsc_reg);
@@ -506,55 +521,68 @@ static int getAPMac(char *ifname, char *if_hw)
     return 0;
 }
 
+static void GenPIN(webs_t wp, char_t *path, char_t *query)
+{
+	doSystem("iwpriv ra0 set WscGenPinCode");
+
+	char new_pin[9];
+	sprintf(new_pin, "%08d", getAPPIN("ra0"));
+
+	nvram_bufset(RT2860_NVRAM, "WscVendorPinCode", new_pin);
+	nvram_commit(RT2860_NVRAM);
+	doSystem("ralink_init make_wireless_config rt2860");
+
+	websRedirect(wp, "wps/wps.asp");
+}
+
 /*
  *  AP: OOB
  */
 static void OOB(webs_t wp, char_t *path, char_t *query)
 {
-	char SSID[64], mac[32];
+        char SSID[64], mac[32];
 
-	//char lan_if_addr[32];
+        // clear timer
+        resetTimerAll();
 
-	// clear timer
-	resetTimerAll();
+        // clear WSC result indicator
+        g_WscResult = 0;
+        LedReset();
 
-	// clear WSC result indicator
-	g_WscResult = 0;
-	LedReset();
+        if(getAPMac("ra0", mac) != -1)
+                sprintf(SSID, "RalinkInitAP_%s", mac);
+        else
+                sprintf(SSID, "RalinkInitAP_unknown");
+        nvram_bufset(RT2860_NVRAM, "SSID1", SSID);
 
-	if(getAPMac("ra0", mac) != -1)
-		sprintf(SSID, "RalinkInitAP_%s", mac);
-	else
-		sprintf(SSID, "RalinkInitAP_unknown");
+        nvram_bufset(RT2860_NVRAM, "WscConfigured", "0");
 
-	nvram_bufset(RT2860_NVRAM, "WscConfigured", "0");
-	nvram_bufset(RT2860_NVRAM, "SSID1", SSID);
+        STF(RT2860_NVRAM, "AuthMode", "OPEN");
+        STF(RT2860_NVRAM, "EncrypType", "NONE");
+        /*
+        STF(RT2860_NVRAM, "DefaultKeyID", "2");
+        nvram_bufset(RT2860_NVRAM, "WPAPSK1", "12345678");
+        */
 
-	STF(RT2860_NVRAM, "AuthMode", "WPAPSK");
+        STF(RT2860_NVRAM, "IEEE8021X", "0");
 
-	STF(RT2860_NVRAM, "EncrypType", "TKIP");
-	STF(RT2860_NVRAM, "DefaultKeyID", "2");
+        /*
+         *   IMPORTANT !!!!!
+         *   5VT doesn't need it cause it will reboot after OOB reset, but RT2880 does.
+         */
+        g_wsc_configured = 0;
 
-	nvram_bufset(RT2860_NVRAM, "WPAPSK1", "12345678");
-	STF(RT2860_NVRAM, "IEEE8021X", "0");
+        nvram_commit(RT2860_NVRAM);
 
-	/*
-	 *   IMPORTANT !!!!!
-	 *   5VT doesn't need it cause it will reboot after OOB reset, but RT2880 does.
-	 */
-	g_wsc_configured = 0;
+        doSystem("iwpriv ra0 set AuthMode=OPEN");
+        doSystem("iwpriv ra0 set EncrypType=NONE");
+        doSystem("iwpriv ra0 set SSID=%s", nvram_bufget(RT2860_NVRAM, "SSID1"));
 
-	nvram_commit(RT2860_NVRAM);
+        restart8021XDaemon(RT2860_NVRAM);
 
-	doSystem("ifconfig ra0 down");
-	doSystem("ralink_init make_wireless_config rt2860");
-	doSystem("ifconfig ra0 up");
+        WPSRestart();
 
-	restart8021XDaemon(RT2860_NVRAM);
-
-	WPSRestart();
-
-	websRedirect(wp, "wps/wps.asp");
+        websRedirect(wp, "wps/wps.asp");
 }
 
 static void WPSAPTimerHandler(int signo)
@@ -577,6 +605,8 @@ static void WPSAPTimerHandler(int signo)
 	wsc_timeout_counter += WPS_AP_CATCH_CONFIGURED_TIMER;
 	if(wsc_timeout_counter > WPS_AP_TIMEOUT_SECS){
 
+#if 0
+		// keep for reference
 		// ==    Work around for "Send M7" issue	  ==
 		//if(g_wsc_configured == 1){
 		//	if( WscStatus == 1 /* Idle */){
@@ -590,6 +620,7 @@ static void WPSAPTimerHandler(int signo)
 		//		return;	// keep monitoring
 		//}
 		// ==    Work around for "Send M7" issue	  ==
+#endif
 
 		// Timeout happened.
 		// Set g_WscResult to indicate WSC process failed.
@@ -617,16 +648,19 @@ static void WPSAPTimerHandler(int signo)
 		return;
 	}
 
-	// check if PBC: "too many PBC AP"
-	if(WscStatus == 0x101)
+	// Driver 1.9 supports AP PBC Session Overlapping Detection.
+	if(WscStatus == 0x109 /* PBC_SESSION_OVERLAP */){
+		g_WscResult = -1;
+		wsc_timeout_counter = 0;
+		resetTimerAll();                
 		LedSessionOverlapDetected();
+		return;
+	}
 
 	// then check idle status
 	if(WscStatus == 1 /*Idle*/ && g_wsc_configured == 1){
 		// This means a proxy WPS AP (has got profile from other registrar)
 		// transfer registrar's profile to enrollee successfully.
-		// TODO:FIXME:  In Ralink 2880 driver 1.5 it always hangs on "Send M7"
-		//              for 1 minute when Intel STA is the external registrar.
 		wsc_timeout_counter = 0;
 		resetTimerAll();
 
@@ -652,9 +686,9 @@ static void WPSAPTimerHandler(int signo)
 			nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
 			g_wsc_configured = 1;
 
-			//STF(0, "SSID", wsc_value.WscSsid);
 			nvram_bufset(RT2860_NVRAM, "SSID1", wsc_value.WscSsid);
 			nvram_bufset(RT2860_NVRAM, "WscSSID", wsc_value.WscSsid);
+
 			if (wsc_value.WscAuthMode == 0x0001){
 				STF(0, "AuthMode", "OPEN");
 			}else if (wsc_value.WscAuthMode == 0x0002){
@@ -732,9 +766,9 @@ static void WPSAPTimerHandler(int signo)
 			STF(0, "IEEE8021X", "0");
 			nvram_commit(RT2860_NVRAM);
 
-			doSystem("ifconfig ra0 down");
-			doSystem("ralink_init make_wireless_config rt2860");
-			doSystem("ifconfig ra0 up");
+			//doSystem("ifconfig ra0 down");	// for Windows 7
+			//doSystem("ralink_init make_wireless_config rt2860");	// for Windows 7
+			//doSystem("ifconfig ra0 up");		// for Windows 7
 			restart8021XDaemon(RT2860_NVRAM);
 
 			WPSRestart();
@@ -816,7 +850,8 @@ static void WPS(webs_t wp, char_t *path, char_t *query)
 }
 
 
-#ifdef CONFIG_RT2860V2_AP_WSC
+#ifdef CONFIG_RT2860V2_STA_WSC
+
 static char_t *DevicePasswordIDTranslate(unsigned short num)
 {
 	static char_t result[32];
@@ -878,9 +913,6 @@ static char_t *RFBandTranslate(unsigned char rfband)
 	}
 	return result;
 }
-
-
-
 
 static char_t *PrimaryDeviceTypeTranslate(unsigned short category, unsigned short sub_cat)
 {
@@ -1216,7 +1248,17 @@ WSC_FAILED:
 					unsigned int* pOUI = (unsigned int*)((char*)pVarIE->data);
 					//fprintf(stderr, "pOUI=0x%08x\n", pOUI);
 					if (*pOUI != WPA_OUI_TYPE)
-						break;
+					{
+						lIELoc += pVarIE->Length;
+						lIELoc += 2;
+						pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+						if(pVarIE->Length <= 0)
+							break;
+
+						continue;
+					}
+
 					unsigned int* plGroupKey; 
 					unsigned short* pdPairKeyCount;
 					unsigned int* plPairwiseKey=NULL;
@@ -1235,8 +1277,16 @@ WSC_FAILED:
 						else if (lGroupKey == 4)
 							bAESCCMP = TRUE;
 					}
-					else
-						break;
+					else{
+						lIELoc += pVarIE->Length;
+						lIELoc += 2;
+						pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+						if(pVarIE->Length <= 0)
+							break;
+							
+						continue;
+					}
 			
 					pdPairKeyCount = (unsigned short*)((char*)plGroupKey + 4);
 					plPairwiseKey = (unsigned int*) ((char*)pdPairKeyCount + 2);
@@ -1303,8 +1353,16 @@ WSC_FAILED:
 						else if (lGroupKey == 4)
 							bAESCCMP = TRUE;
 					}
-					else
-						break;
+					else{
+						lIELoc += pVarIE->Length;
+						lIELoc += 2;
+						pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
+
+						if(pVarIE->Length <= 0)
+							break;
+							
+						continue;
+					}
 
 					pdPairKeyCount = (unsigned short*)((char*)plGroupKey + 4);
 					plPairwiseKey = (unsigned int*)((char*)pdPairKeyCount + 2);
@@ -1439,11 +1497,12 @@ WSC_FAILED:
 		}
 
 		if( TESTBIT( WSC_ID_UUID_E)){
+			int pos;
 			char uuid_str[WSC_ID_UUID_E_LEN * 2 + 1];
 			memset(uuid_str, 0, WSC_ID_UUID_E_LEN * 2 + 1);
 			strncat(extend, "UUID:", sizeof(extend));
-			for(i=0; i< WSC_ID_UUID_E_LEN; i++){
-				snprintf(uuid_str, WSC_ID_UUID_E_LEN * 2 + 1, "%s%02x", uuid_str, uuid_e[i]);
+			for(pos=0; pos< WSC_ID_UUID_E_LEN; pos++){
+				snprintf(uuid_str, WSC_ID_UUID_E_LEN * 2 + 1, "%s%02x", uuid_str, uuid_e[pos]);
 			}
 			snprintf(extend, sizeof(extend), "%s%s\\n", extend, uuid_str);
 		}
@@ -1657,9 +1716,27 @@ void WPSSTAEnrolleeTimerHandler(int signo)
 				 * get truth. 
 				 */
 				if(isWPSSuccess() || signo == REGISTRAR_TIMER_MODE){
+					WSC_PROFILE wsc_profile;
 					trace(0, T("++ WSC success\n"));
-					// add current link to station profile
-					addWPSSTAProfile(NULL);
+
+					/*
+					 * For WiFi STA WPS test plan case 5.1.1.
+					 *
+					 * We use ioctl(WSC_QUERY_PROFILE) to get possible multiple credentials,
+					 * and the addWPSSTAProfile() should be replaced with new addWPSSTAProfile2() in the future.
+					 */
+					if( getStaWscProfile("ra0", &wsc_profile) != -1){
+						if(wsc_profile.ProfileCnt != 1){
+							int i;
+							printf("Multi Credentials!!!\n");
+							for(i=0; i< wsc_profile.ProfileCnt; i++)
+								addWPSSTAProfile2(&wsc_profile.Profile[i]);
+						}else
+							addWPSSTAProfile(NULL);							
+					}else{
+						// add current link to station profile
+						addWPSSTAProfile(NULL);
+					}
 				}else{
 					doSystem("iwpriv %s wsc_stop", interface);
 				}
@@ -1682,7 +1759,7 @@ void WPSSTAEnrolleeTimerHandler(int signo)
 static void updateWPSStaStatus(webs_t wp, char_t *path, char_t *query)
 {
 	char interface[] = "ra0";
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("%s"), getWscStatusStr(getWscStatus(interface)));
     websDone(wp, 200);
 	return;
@@ -1697,7 +1774,7 @@ static void WPSSTAStop(webs_t wp, char_t *path, char_t *query)
 	resetTimerAll();
 	doSystem("iwpriv ra0 wsc_stop");
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("%s"), getWscStatusStr(getWscStatus(interface)));
     websDone(wp, 200);	
 	return;
@@ -1707,7 +1784,7 @@ static void WPSSTAGenNewPIN(webs_t wp, char_t *path, char_t *query)
 {
 	char pin[16];
 	doSystem("iwpriv ra0 wsc_gen_pincode");
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	if(!getSTAEnrolleePIN(pin))
 		websWrite(wp, T("error"));
 	else
@@ -1721,7 +1798,7 @@ static void WPSSTAGenNewPIN(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPINEnr(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPINStartEnr(query);
@@ -1735,7 +1812,7 @@ static void WPSSTAPINEnr(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPBCEnr(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPBCStartEnr();
@@ -1752,7 +1829,7 @@ static void WPSSTAPINReg(webs_t wp, char_t *path, char_t *query)
 	int pin_int;
 	char ssid[33], pin[16];
 	char_t *sp;
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	if(!query)
 		return;
@@ -1776,7 +1853,7 @@ static void WPSSTAPINReg(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPBCReg(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPBCStartReg();
@@ -1789,7 +1866,7 @@ static void WPSSTARegistrarSetupSSID(webs_t wp, char_t *path, char_t *query)
 {
 	nvram_bufset(RT2860_NVRAM, "staRegSSID", query);
 	nvram_commit(RT2860_NVRAM);
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("WPS STA Registrar settings: SSID done\n"));
 	websDone(wp, 200);
 
@@ -1799,7 +1876,7 @@ static void WPSSTARegistrarSetupKey(webs_t wp, char_t *path, char_t *query)
 {
 	nvram_bufset(RT2860_NVRAM, "staRegKey", query);
 	nvram_commit(RT2860_NVRAM);
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("WPS STA Registrar settings: Key done\n"));
 	websDone(wp, 200);
 }
@@ -1816,7 +1893,7 @@ static void WPSSTARegistrarSetupRest(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "staRegKeyType", keytype);
 	nvram_bufset(RT2860_NVRAM, "staRegKeyIndex", keyindex);
 	nvram_commit(RT2860_NVRAM);
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("WPS STA Registrar settings: rest all done\n"));
 	websDone(wp, 200);
 }
@@ -1830,7 +1907,7 @@ static void WPSSTAMode(webs_t wp, char_t *path, char_t *query)
 	else
 		return;
 	nvram_commit(RT2860_NVRAM);
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("WPS STA mode setting done\n"));
 	websDone(wp, 200);
 }
@@ -2073,6 +2150,291 @@ static int getWPSSTAModeASP(int eid, webs_t wp, int argc, char_t **argv)
 	else
 		websWrite(wp, T("%s"), tmp);
 	return 0;
+}
+
+
+/* I believe it has been defined in oid.h, but just make a sure. */
+#ifndef RT_OID_802_11_WSC_QUERY_PROFILE
+#define RT_OID_802_11_WSC_QUERY_PROFILE             0x0750
+#endif
+static int getStaWscProfile(char *interface, WSC_PROFILE *wsc_profile)
+{
+	int socket_id;
+	struct iwreq wrq;
+	unsigned int data = 0;
+	socket_id = socket(AF_INET, SOCK_DGRAM, 0);
+	strcpy(wrq.ifr_name, interface);
+	wrq.u.data.length = sizeof(WSC_PROFILE);
+	wrq.u.data.pointer = (caddr_t) wsc_profile;
+	wrq.u.data.flags = RT_OID_802_11_WSC_QUERY_PROFILE;
+	if( ioctl(socket_id, RT_PRIV_IOCTL, &wrq) == -1){
+		printf("ioctl error, getStaWscProfile:%s\n", strerror(errno));
+		close(socket_id);
+		return -1;
+	}
+	close(socket_id);
+	return 0;
+}
+
+/*
+ * for WiFi STA Test Plan Case 5.1.1
+ */
+static char_t *addWPSSTAProfile2(WSC_CREDENTIAL *wsc_cre)
+{
+	RT_PROFILE_SETTING  tmpProfileSetting;
+
+	char_t				tmp_value[512];
+	USHORT              AuthType	= wsc_cre->AuthType;           // mandatory, 1: open, 2: wpa-psk, 4: shared, 8:wpa, 0x10: wpa2, 0x20: wpa
+	USHORT              EncrType	= wsc_cre->EncrType;           // mandatory, 1: none, 2: wep, 4: tkip, 8: aes
+	UCHAR               *Key		= &wsc_cre->Key[0];            // mandatory, Maximum 64 byte
+	USHORT              KeyLength	= wsc_cre->KeyLength;
+	UCHAR               KeyIndex	= wsc_cre->KeyIndex;           // optional, default is 1
+                        
+	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
+	tmpProfileSetting.Next = NULL;
+
+	strncpy(tmpProfileSetting.SSID, wsc_cre->SSID.Ssid, 32);
+	printf("SSID1=%s\n", tmpProfileSetting.SSID);
+	SaveToFlashStr("staSSID", tmpProfileSetting.SSID);
+
+	//profile name, gen a uniq name
+	snprintf(tmp_value, 512, "WPS_%s", tmpProfileSetting.SSID);
+	strncpy(tmp_value, getStaNewProfileName(tmp_value), 512);
+	if (!tmp_value || !strlen(tmp_value)) {
+		fprintf(stderr, "Error profile name !\n");
+		return NULL;
+	}
+	strncpy((char *)tmpProfileSetting.Profile, tmp_value, 32);
+	SaveToFlashStr("staProfile", tmpProfileSetting.Profile);
+
+	//network type
+	tmpProfileSetting.NetworkType = 1;
+	SaveToFlashInt("staNetworkType", 1);
+
+	//Adhoc mode
+	tmpProfileSetting.AdhocMode = 0;
+	SaveToFlashInt("staAdhocMode", 0);
+
+	//power saving mode
+	tmpProfileSetting.PSmode = Ndis802_11PowerModeCAM;
+	SaveToFlashInt("staPSMode", Ndis802_11PowerModeCAM);
+
+	//channel
+	tmpProfileSetting.Channel = getStaChannel("ra0");
+	SaveToFlashInt("staChannel", tmpProfileSetting.Channel);
+
+	//b preamble type
+	tmpProfileSetting.PreamType = Rt802_11PreambleAuto;
+	SaveToFlashInt("staPreamType", tmpProfileSetting.PreamType);
+
+	//rts threshold value
+	tmpProfileSetting.RTSCheck = 0;
+	SaveToFlashInt("staRTSCheck", tmpProfileSetting.RTSCheck);
+	tmpProfileSetting.RTS = 2347;
+	SaveToFlashInt("staRTS", tmpProfileSetting.RTS);
+
+	//fragment threshold value
+	tmpProfileSetting.FragmentCheck = 0;
+	SaveToFlashInt("staFragmentCheck", tmpProfileSetting.FragmentCheck);
+	tmpProfileSetting.Fragment = 2346;
+	SaveToFlashInt("staFragment", tmpProfileSetting.Fragment);
+
+	// AuthMode
+	//security policy (security_infra_mode or security_adhoc_mode)
+	// get Security from .dat
+	switch(AuthType){
+	case 0x1:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeOpen;
+		break;
+	case 0x2:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeWPAPSK;
+		if(EncrType != 0x4 && EncrType != 0x8)
+			return NULL;
+		break;
+	case 0x4:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeShared;
+		if(EncrType != 0x1 && EncrType != 0x2)
+			return NULL;
+		break;
+	case 0x8:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeWPA;
+		break;
+	case 0x10:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeWPA2;
+		break;
+	case 0x20:
+		tmpProfileSetting.Authentication = Ndis802_11AuthModeWPA2PSK;		
+		if(EncrType != 0x4 && EncrType != 0x8)
+			return NULL;
+		break;
+	default:
+		return NULL;
+	}
+	SaveToFlashInt("staAuth", tmpProfileSetting.Authentication);
+
+	// Encrypt mode
+	//Encrypt
+	switch(EncrType){
+	case 0x1:	/* None */
+		tmpProfileSetting.Encryption = Ndis802_11WEPDisabled;
+		break;
+	case 0x2:	/* WEP */
+		if(KeyLength && (KeyLength != 5 && KeyLength != 13))
+			return NULL;
+		tmpProfileSetting.Encryption = Ndis802_11WEPEnabled;
+		break;
+	case 0x8:	/* AES */
+		tmpProfileSetting.Encryption = Ndis802_11Encryption3Enabled;
+		break;
+	case 0x4:	/* TKIP */
+		;
+	default:	/* default: TKIP */
+		tmpProfileSetting.Encryption = Ndis802_11Encryption2Enabled;
+		break;
+	}
+	SaveToFlashInt("staEncrypt", tmpProfileSetting.Encryption);
+	
+	//wep default key
+	tmpProfileSetting.KeyDefaultId = KeyIndex;
+	SaveToFlashInt("staKeyDefaultId", tmpProfileSetting.KeyDefaultId);
+
+#ifdef WPA_SUPPLICANT_SUPPORT
+	if(tmpProfileSetting.Authentication  == Ndis802_11AuthModeWPA ||
+		tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2){
+		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
+	}else if(tmpProfileSetting.Authentication == Ndis802_11AuthModeMax){
+		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtIEEE8021X;
+	}else
+		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
+	SaveToFlashInt("sta8021xKeyMgmt", tmpProfileSetting.KeyMgmt);
+#endif
+
+	/*
+	 *	Deal with Key
+	 */
+	switch(AuthType){
+	case 0x1:	/* Open */
+	case 0x4:	/* Shared */
+		//tmpProfileSetting.Authentication = Ndis802_11AuthModeOpen;
+		if(EncrType == 2 /* WEP */){
+			char_t hex_wep[128];
+			if(KeyLength == 5)
+				sprintf(hex_wep, "%02X%02X%02X%02X%02X", Key[0], Key[1], Key[2], Key[3], Key[4]);
+			else
+				sprintf(hex_wep, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", Key[0], Key[1], Key[2], Key[3], Key[4], Key[5], Key[6], Key[7], Key[8], Key[9], Key[10], Key[11], Key[12]);
+			switch(KeyIndex){
+			case 1:
+				SaveToFlashStr("staKey1", hex_wep);
+				SaveToFlashInt("staKey1Type", 0);
+				break;
+			case 2:
+				SaveToFlashStr("staKey2", hex_wep);
+				SaveToFlashInt("staKey2Type", 0);
+				break;
+			case 3:
+				SaveToFlashStr("staKey3", 		hex_wep);
+				SaveToFlashInt("staKey3Type", 0);
+				break;
+			case 4:
+				SaveToFlashStr("staKey4", 		hex_wep);
+				SaveToFlashInt("staKey4Type", 0);
+				break;
+			}
+		}else{
+			// clear WEP Keys
+			SaveToFlashStr("staKey1", "0");
+			SaveToFlashInt("staKey1Type", 0);
+			SaveToFlashStr("staKey2", "0");
+			SaveToFlashInt("staKey2Type", 0);
+			SaveToFlashStr("staKey3", "0");
+			SaveToFlashInt("staKey3Type", 0);
+			SaveToFlashStr("staKey4", "0");
+			SaveToFlashInt("staKey4Type", 0);
+		}
+
+		// clear WPAPSK
+		SaveToFlashStr("staWpaPsk", "0");
+		break;
+    case 0x2:	/* WPAPSK */
+	case 0x20:	/* WPAPSK2 */
+		// set WPAPSK Key
+		strncpy(tmpProfileSetting.WpaPsk, Key, 64);
+		SaveToFlashStr("staWpaPsk", tmpProfileSetting.WpaPsk);
+
+		// clear WEP Keys
+		SaveToFlashStr("staKey1", "0");
+		SaveToFlashInt("staKey1Type", 0);
+		SaveToFlashStr("staKey2", "0");
+		SaveToFlashInt("staKey2Type", 0);
+		SaveToFlashStr("staKey3", "0");
+		SaveToFlashInt("staKey3Type", 0);
+		SaveToFlashStr("staKey4", "0");
+		SaveToFlashInt("staKey4Type", 0);
+        break;
+    case 0x8:	/* WPA */
+    case 0x10:	/* WPA2 */
+    	printf("Warning,WPS WPA/WPA\n");
+        break;
+    default:
+        return NULL;
+    }
+
+	// can't find "key length" in .dat and ioctl()...
+	tmpProfileSetting.Key1Length = tmpProfileSetting.Key2Length = 
+		tmpProfileSetting.Key3Length = tmpProfileSetting.Key4Length = 0;
+	SaveToFlashInt("staKey1Length", 0);
+	SaveToFlashInt("staKey2Length", 0);
+	SaveToFlashInt("staKey3Length", 0);
+	SaveToFlashInt("staKey4Length", 0);
+
+#ifdef WPA_SUPPLICANT_SUPPORT
+	tmpProfileSetting.EAP = Rtwpa_supplicantEAPNONE;
+	SaveToFlashInt("sta8021xEAP", tmpProfileSetting.EAP);
+
+	tmpProfileSetting.Tunnel = Rtwpa_supplicantTUNNENONE;
+	SaveToFlashInt("sta8021xTunnel", tmpProfileSetting.Tunnel);
+
+	strncpy(tmpProfileSetting.Identity, "", IDENTITY_LENGTH);
+	SaveToFlashStr("sta8021xIdentity", "");
+
+	strncpy(tmpProfileSetting.Password, "", 32);
+	SaveToFlashStr("sta8021xPassword", "");
+
+	strncpy(tmpProfileSetting.ClientCert, "", CERT_PATH_LENGTH);
+	SaveToFlashStr("sta8021xClientCert", "");
+
+	strncpy(tmpProfileSetting.PrivateKey, "", PRIVATE_KEY_PATH_LENGTH);
+	SaveToFlashStr("sta8021xPrivateKey", "");
+
+	strncpy(tmpProfileSetting.PrivateKeyPassword, "", 32);
+	SaveToFlashStr("sta8021xPrivateKeyPassword", "");
+
+	strncpy(tmpProfileSetting.CACert, "", CERT_PATH_LENGTH);
+	SaveToFlashStr("sta8021xCACert", "");
+#else /* WPA_SUPPLICANT_SUPPORT */
+	SaveToFlashStr("sta8021xEAP", "7");
+	SaveToFlashStr("sta8021xTunnel", "3");
+	SaveToFlashStr("sta8021xKeyMgmt", "3");
+	SaveToFlashStr("sta8021xIdentity", "0");
+	SaveToFlashStr("sta8021xPassword", "0");
+	SaveToFlashStr("sta8021xClientCert", "0");
+	SaveToFlashStr("sta8021xPrivateKey", "0");
+	SaveToFlashStr("sta8021xPrivateKeyPassword", "0");
+	SaveToFlashStr("sta8021xCACert", "0");
+#endif /* WPA_SUPPLICANT_SUPPORT */
+
+	//write into /etc/rt61sta.ui
+	//writeProfileToFile(&tmpProfileSetting);
+
+	tmpProfileSetting.Active = 0;
+	SaveToFlashInt("staActive", tmpProfileSetting.Active);
+
+	nvram_commit(RT2860_NVRAM);
+
+	freeHeaderProfileSettings();
+	headerProfileSetting = NULL;
+
+	return NULL;
 }
 
 static char_t *addWPSSTAProfile(char_t *result)
@@ -2319,19 +2681,20 @@ static char_t *addWPSSTAProfile(char_t *result)
 	return result;
 }
 
-#endif /* CONFIG_RT2860V2_AP_WSC */
+#endif /* CONFIG_RT2860V2_STA_WSC */
 
 void formDefineWPS(void){
 	websAspDefine(T("getWPSModeASP"), getWPSModeASP);
 	websAspDefine(T("getPINASP"), getPINASP);
 
 	websFormDefine(T("WPSSetup"), WPSSetup);
+	websFormDefine(T("GenPIN"), GenPIN);
 	websFormDefine(T("OOB"), OOB);
 	websFormDefine(T("updateWPS"), updateWPS);
 	websFormDefine(T("WPS"), WPS);
 
 
-#ifdef CONFIG_RT2860V2_AP_WSC
+#ifdef CONFIG_RT2860V2_STA_WSC
 	websAspDefine(T("getStaWPSBSSIDListASP"), getStaWPSBSSIDListASP);
 	websFormDefine(T("WPSSTABSSIDListReset"), WPSSTABSSIDListReset);
 	websFormDefine(T("WPSSTAGenNewPIN"), WPSSTAGenNewPIN);
@@ -2357,5 +2720,5 @@ void formDefineWPS(void){
 	websFormDefine(T("WPSSTAPBCReg"), WPSSTAPBCReg);
 
 	websFormDefine(T("WPSSTAMode"), WPSSTAMode);
-#endif /* CONFIG_RT2860V2_AP_WSC */
+#endif /* CONFIG_RT2860V2_STA_WSC */
 }

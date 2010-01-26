@@ -1,9 +1,8 @@
 <html><head><!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
 
+<meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="-1">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Ralink Wireless Security Settings</title>
 
@@ -207,11 +206,6 @@ function securityHandler() {
 			// load Access Policy for MBSSID[selected]
 			LoadAP();
 			ShowAP(defaultShownMBSSID);
-
-//			if(<% getWPSModeASP(); %> && <% isWPSConfiguredASP(); %>){
-//				alert("Info: The security settings has been assigned under active WPS functions.\nYou still could change security setting manually but the existed WPS settings would be overwritted.");
-//			}
-
 		} else {
 			alert('There was a problem with the request.');
 		}
@@ -487,10 +481,7 @@ function securityMode(c_f)
 		document.security_form.cipher[1].disabled = false;
 
 		// deal with TKIP-AES mixed mode
-		if(security_mode == "WPAPSK" && document.security_form.cipher[2].checked)
-			document.security_form.cipher[2].checked = false;
-		// deal with TKIP-AES mixed mode
-		if(security_mode == "WPA2PSK" || security_mode == "WPAPSKWPA2PSK")
+		if(security_mode == "WPAPSK" || security_mode == "WPA2PSK" || security_mode == "WPAPSKWPA2PSK")
 			document.security_form.cipher[2].disabled = false;
 
 		document.getElementById("wpa_passphrase").style.visibility = "visible";
@@ -526,10 +517,9 @@ function securityMode(c_f)
 		document.security_form.RadiusServerSessionTimeout.disable = false;
 		document.security_form.RadiusServerIdleTimeout.disable = false;	
 
-		// deal with TKIP-AES mixed mode
-		if(security_mode == "WPA" && document.security_form.cipher[2].checked)
-			document.security_form.cipher[2].checked = false;
-		// deal with TKIP-AES mixed mode
+		if(security_mode == "WPA")
+			document.security_form.cipher[2].disabled = false;
+
 		if(security_mode == "WPA2"){
 			document.security_form.cipher[2].disabled = false;
 			document.getElementById("wpa_preAuthentication").style.visibility = "visible";
@@ -540,7 +530,6 @@ function securityMode(c_f)
 			document.security_form.PMKCachePeriod.disabled = false;
 		}
 
-		// deal with WPA1WPA2 mixed mode
 		if(security_mode == "WPA1WPA2"){
 			document.security_form.cipher[2].disabled = false;
 		}
@@ -600,7 +589,7 @@ function check_Wep(securitymode)
 	else if (defaultid == 4)
 		var keyvalue = document.security_form.wep_key_4.value;
 
-	if (keyvalue.length == 0 &&  (securitymode == "SHARED" || securitymode == "OPEN")){ // shared wep  || md5
+	if (keyvalue.length == 0 &&  (securitymode == "SHARED" || securitymode == "OPEN" || securitymode == "WEPAUTO")){ // shared wep  || md5
 		alert('Please input wep key'+defaultid+' !');
 		return false;
 	}
@@ -1310,3 +1299,4 @@ for(aptable = 0; aptable < MBSSID_MAX; aptable++){
 
 </td></tr></tbody></table>
 </body></html>
+ 

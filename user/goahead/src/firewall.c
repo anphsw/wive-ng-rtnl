@@ -1,25 +1,9 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  *	firewall.c -- Firewall Settings 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: firewall.c,v 1.18.2.2 2008-03-31 03:49:52 yy Exp $
+ *	$Id: firewall.c,v 1.29.2.1 2009-03-24 08:56:16 yy Exp $
  */
 
 /*
@@ -30,6 +14,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <dirent.h>
 #include "nvram.h"
 #include "utils.h"
 #include "webs.h"
@@ -38,9 +23,15 @@
 
 #define DD printf("---> %d\n", __LINE__);
 
+static void websSysFirewall(webs_t wp, char_t *path, char_t *query);
+
+
+char l7name[8192];						// export it for internet.c qos
+										// (The actual string is about 7200 bytes.)
+
 int getGoAHeadServerPort(void);
 
-static int isMacValid(char *str)
+int isMacValid(char *str)
 {
 	int i, len = strlen(str);
 	if(len != 17)
@@ -96,7 +87,7 @@ static int isOnlyOneSlash(char *str)
 	return count <= 1 ? 1 : 0;
 }
 
-static int isIpNetmaskValid(char *s)
+int isIpNetmaskValid(char *s)
 {
 	char str[32];
 	char *slash;
@@ -213,13 +204,20 @@ static void iptablesForwardFilterClear(void)
 	doSystem("iptables -F -t filter 1>/dev/null 2>&1");
 }
 
+/*
+static void iptablesForwardFilterFlush(void)
+{
+	doSystem("iptables -t filter -F FORWARD  1>/dev/null 2>&1");
+}
+*/
+
 static void iptablesIPPortFilterFlush(void){
-	doSystem("iptables -F %s  1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
+	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
 }
 
 static void iptablesIPPortFilterClear(void){
-	doSystem("iptables -D FORWARD -j %s  1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -F %s  1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
+	doSystem("iptables -D FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
+	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
 }
 
 static void iptablesWebContentFilterClear(void){
@@ -228,21 +226,32 @@ static void iptablesWebContentFilterClear(void){
 }
 
 static void iptablesDMZFlush(void){
-    doSystem("iptables -t nat -F %s  1>/dev/null 2>&1", DMZ_CHAIN);
+    doSystem("iptables -t nat -F %s 1>/dev/null 2>&1", DMZ_CHAIN);
 }
 
 static void iptablesPortForwardFlush(void){
-    doSystem("iptables -t nat -F %s  1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
+    doSystem("iptables -t nat -F %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
 }
 
 static void iptablesDMZClear(void){
-	doSystem("iptables -t nat -D PREROUTING -j %s  1>/dev/null 2>&1", DMZ_CHAIN);	// remove rule in PREROUTING chain
+	doSystem("iptables -t nat -D PREROUTING -j %s 1>/dev/null 2>&1", DMZ_CHAIN);	// remove rule in PREROUTING chain
 	doSystem("iptables -t nat -F %s 1>/dev/null 2>&1; iptables -t nat -X %s  1>/dev/null 2>&1", DMZ_CHAIN, DMZ_CHAIN);
 }
 
 static void iptablesPortForwardClear(void){
-	doSystem("iptables -t nat -D PREROUTING -j %s  1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
+	doSystem("iptables -t nat -D PREROUTING -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
 	doSystem("iptables -t nat -F %s  1>/dev/null 2>&1; iptables -t nat -X %s  1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
+}
+
+static void iptablesAllFilterClear(void)
+{
+	iptablesForwardFilterClear();
+	iptablesIPPortFilterClear();
+	iptablesWebContentFilterClear();
+
+	doSystem("iptables -P INPUT ACCEPT");
+	doSystem("iptables -P OUTPUT ACCEPT");
+	doSystem("iptables -P FORWARD ACCEPT");
 }
 
 static void iptablesAllNATClear(void)
@@ -251,6 +260,7 @@ static void iptablesAllNATClear(void)
 	iptablesDMZClear();
 }
 
+#if 0
 char *insert(char *subs, int index, char *str, char delimit)
 {
 	int i=0;
@@ -298,7 +308,7 @@ char *replace(char *subs, int index, char *str, char delimit)
 	free(dup);
 	return result;
 }
-
+#endif
 static int getNums(char *value, char delimit)
 {
 	char *pos = value;
@@ -314,9 +324,8 @@ static int getNums(char *value, char delimit)
 
 static void makeDMZRule(char *buf, int len, char *wan_name, char *ip_address)
 {
-	/* iptables -t nat -A PREROUTING -i br0 -j DNAT --to 5.6.7.8 */
-	snprintf(buf, len, "iptables -t nat -A %s -j DNAT -i %s -p udp --dport ! %d --to %s", DMZ_CHAIN, wan_name, getGoAHeadServerPort(), ip_address);
-	snprintf(buf, len, "iptables -t nat -A %s -j DNAT -i %s -p tcp --dport ! %d --to %s", DMZ_CHAIN, wan_name, getGoAHeadServerPort(), ip_address);
+	int rc = snprintf(buf, len, "iptables -t nat -A %s -j DNAT -i %s -p udp --dport ! %d --to %s", DMZ_CHAIN, wan_name, getGoAHeadServerPort(), ip_address);
+	snprintf(buf+rc, len, ";iptables -t nat -A %s -j DNAT -i %s -p tcp --dport ! %d --to %s", DMZ_CHAIN, wan_name,	getGoAHeadServerPort(), ip_address);
 }
 
 /*
@@ -328,9 +337,14 @@ char *dip_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
 {
 		int rc = 0;
 		char *pos = buf;
+    char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
 
 		switch(action){
 		case ACTION_DROP:
+		    if (atoi(spifw) == 0)
+			rc = snprintf(pos, len-rc, 
+				"iptables -A %s ", IPPORT_FILTER_CHAIN);
+		    else
 			rc = snprintf(pos, len-rc, 
 				"iptables -A %s -m state --state NEW,INVALID ", IPPORT_FILTER_CHAIN);
 			break;
@@ -431,6 +445,7 @@ static void iptablesRemoteManagementRun(void)
 {
 	char *rmE = nvram_bufget(RT2860_NVRAM, "RemoteManagement");
 	char *opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
+	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
 
 	if(!opmode)
 		return;
@@ -441,9 +456,24 @@ static void iptablesRemoteManagementRun(void)
 
 	if(rmE && atoi(rmE) == 1)
 		return;
-	
-	doSystem("iptables -I INPUT -i %s ! -p icmp -j DROP", getWanIfNamePPP());
-    return;
+
+	if (atoi(spifw) == 0)
+		;//doSystem("iptables -A INPUT -i %s -j ACCEPT", getWanIfNamePPP());
+	else
+		doSystem("iptables -A INPUT -i %s -m state --state RELATED,ESTABLISHED -j ACCEPT", getWanIfNamePPP());
+	if(getOnePortOnly()){
+		// make the web server to be reachable.
+		if (atoi(spifw) == 0)
+			doSystem("iptables -A INPUT -i %s -d 172.32.1.254 -p tcp --dport 80 -j ACCEPT", getWanIfNamePPP());
+		else
+			doSystem("iptables -A INPUT -i %s -m state -d 172.32.1.254 -p tcp --dport 80 --state NEW,INVALID -j ACCEPT", getWanIfNamePPP());
+	}
+	if (atoi(spifw) == 0)
+		doSystem("iptables -A INPUT -i %s -p tcp --dport 80 -j DROP", getWanIfNamePPP());
+	else
+		doSystem("iptables -A INPUT -i %s -m state -p tcp --dport 80 --state NEW,INVALID -j DROP", getWanIfNamePPP());
+
+	return;
 }
 
 static void iptablesDMZRun(void)
@@ -484,8 +514,9 @@ static void iptablesIPPortFilterRun(void)
 	char sip_1[32], sip_2[32], action_str[4];
 	char dip_1[32], dip_2[32];
     char *firewall_enable, *default_policy, *rule;
+    char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
     int mode;
-
+	
     firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
     if(!firewall_enable){
         printf("Warning: can't find \"IPPortFilterEnable\" in flash.\n");
@@ -505,6 +536,15 @@ static void iptablesIPPortFilterRun(void)
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		default_policy = "0";
+
+	if(atoi(default_policy) == 1){
+		//the default policy is drop
+	    if (atoi(spifw) == 0)
+			;//doSystem("iptables -t filter -A %s -j ACCEPT", IPPORT_FILTER_CHAIN);
+	    else
+			doSystem("iptables -t filter -A %s -m state --state RELATED,ESTABLISHED -j ACCEPT", IPPORT_FILTER_CHAIN);
+	}
+
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
         // get sip 1
         if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
@@ -689,6 +729,17 @@ static void iptablesPortForwardRun(void)
 	}
 }
 
+static void iptablesAllFilterRun(void)
+{
+	iptablesIPPortFilterRun();
+
+	iptablesWebsFilterRun();
+
+	/* system filter */
+	iptablesRemoteManagementRun();
+
+}
+
 static void iptablesAllNATRun(void)
 {
 	iptablesPortForwardRun();
@@ -869,7 +920,7 @@ static void getRulesPacketCount(webs_t wp, char_t *path, char_t *query)
 		default_policy = "0";
 	default_drop_flag = atoi(default_policy);
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n\n"));	
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 
 	result = (int *)malloc(sizeof(int) * 128);
 	if(!result)
@@ -1331,7 +1382,7 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 		sip_1 = T("any/0");
 
 	if(strlen(dip_1)){
-		if(!isIpNetmaskValid(sip_1))
+		if(!isIpNetmaskValid(dip_1))
 			return;
 	}else
     	dip_1 = T("any/0");
@@ -1615,12 +1666,18 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
     websDone(wp, 200);        
 }
 
-static void remoteManagement(webs_t wp, char_t *path, char_t *query)
+static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 {
 	char *rmE = websGetVar(wp, T("remoteManagementEnabled"), T(""));
+	char *wpfE = websGetVar(wp, T("pingFrmWANFilterEnabled"), T(""));
+	char *spifw = websGetVar(wp, T("spiFWEnabled"), T("1"));
 
 	// someone use malform page.....
 	if(!rmE || !strlen(rmE))
+		return;
+	if(!wpfE || !strlen(wpfE))
+		return;
+	if(!spifw || !strlen(spifw))
 		return;
 
 	// TODO: make a new chain instead of flushing the INPUT chain
@@ -1632,13 +1689,29 @@ static void remoteManagement(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "1");
 	}
 
+	if(atoi(wpfE) == 0){		// disable
+		nvram_bufset(RT2860_NVRAM, "WANPingFilter", "0");
+	}else{					// enable
+		nvram_bufset(RT2860_NVRAM, "WANPingFilter", "1");
+		doSystem("iptables -t filter -A INPUT -i %s -p icmp -j DROP", getWanIfNamePPP());
+	}
+
+	if(atoi(spifw) == 0){		// disable
+		nvram_bufset(RT2860_NVRAM, "SPIFWEnabled", "0");
+	}else{					// enable
+		nvram_bufset(RT2860_NVRAM, "SPIFWEnabled", "1");
+	}
 	nvram_commit(RT2860_NVRAM);
 
-	//rebuild all rules at apply push
-	firewall_init();
+	iptablesRemoteManagementRun();
+
+	iptablesIPPortFilterFlush();
+	iptablesIPPortFilterRun();
 
 	websHeader(wp);
 	websWrite(wp, T("RemoteManage: %s<br>\n"), rmE);
+	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
+	websWrite(wp, T("SPIFWEnabled: %s<br>\n"), spifw);
     websFooter(wp);
     websDone(wp, 200);        
 
@@ -1686,8 +1759,11 @@ void iptablesWebsFilterRun(void)
 	// URL filter
 	i=0;
 	while( (getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) ){
-		if(strlen(entry))
+		if(strlen(entry)){
+			if(!strncasecmp(entry, "http://", strlen("http://")))
+				strcpy(entry, entry + strlen("http://"));
 			doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset", entry);
+		}
 	}
 
 	// HOST(Keyword) filter
@@ -1895,6 +1971,93 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
     websDone(wp, 200);
 }
 
+char *getNameIntroFromPat(char *filename)
+{
+	static char result[512];
+	char buf[512], *begin, *end, *desh;
+	char path_filename[512];
+	char *rc;
+	FILE *fp;
+
+	sprintf(path_filename, "%s/%s", "/etc_ro/l7-protocols", filename);
+	if(! (fp = fopen(path_filename, "r")))
+		return NULL;
+	result[0] = '\0';
+	rc = fgets(buf, sizeof(buf), fp);
+	if(rc){
+		// find name
+		begin = buf + 2;
+		if(! ( desh = strchr(buf, '-'))){
+			printf("warning: can't find %s name.\n", filename);
+			fclose(fp);
+			return "N/A#N/A";
+		}
+		end = desh;
+		if(*(end-1) == ' ')
+			end--;
+		*end = '\0';
+		strncat(result, begin, sizeof(result));
+		strncat(result, "#", sizeof(result));
+
+		// find intro
+		if(!(end = strchr(desh+1, '\n'))){
+			printf("warning: can't find %s intro.\n", filename);
+			fclose(fp);
+			return "N/A#N/A";
+		}
+		*end = '\0';
+		strncat(result, desh + 2 , sizeof(result));
+	}else{
+		printf("warning: can't read %s intro.\n", filename);
+		fclose(fp);
+		return "N/A#N/A";
+	}
+
+	fclose(fp);
+	return result;	
+}
+
+
+void LoadLayer7FilterName(void)
+{
+	char *delim;
+	struct dirent *dir;
+	DIR *d;
+	char *intro;
+
+	l7name[0] = '\0';
+	if(!(d = opendir("/etc_ro/l7-protocols")))
+		return;
+	
+	while((dir = readdir(d))){
+		if(dir->d_name[0] == '.')
+			continue;
+		if(!(delim = strstr(dir->d_name, ".pat")) )
+			continue;
+		
+		intro = getNameIntroFromPat(dir->d_name);
+
+		*delim = '\0';
+		if(l7name[0] == '\0'){
+			strncat(l7name, dir->d_name, sizeof(l7name));
+			strncat(l7name, "#", sizeof(l7name));
+			strncat(l7name, intro, sizeof(l7name));
+		}else{
+			strncat(l7name, ";", sizeof(l7name));
+			strncat(l7name, dir->d_name, sizeof(l7name));
+			strncat(l7name, "#", sizeof(l7name));
+			strncat(l7name, intro, sizeof(l7name));
+		}
+	}
+	closedir(d);
+}
+
+static int getLayer7FiltersASP(int eid, webs_t wp, int argc, char_t **argv)
+{
+	websLongWrite(wp, l7name);
+	return 0;	
+}
+
 void formDefineFirewall(void)
 {
 	websAspDefine(T("getDefaultFirewallPolicyASP"), getDefaultFirewallPolicyASP);
@@ -1917,7 +2080,7 @@ void formDefineFirewall(void)
 	websFormDefine(T("portForward"), portForward);
 	websFormDefine(T("portForwardDelete"), portForwardDelete);
 
-	websFormDefine(T("remoteManagement"), remoteManagement);
+	websFormDefine(T("websSysFirewall"), websSysFirewall);
 
 	websFormDefine(T("webContentFilter"), webContentFilter);
 	websFormDefine(T("websURLFilterDelete"), websURLFilterDelete);
@@ -1925,26 +2088,37 @@ void formDefineFirewall(void)
 	websFormDefine(T("websHostFilter"), websHostFilter);
 	websFormDefine(T("websURLFilter"), websURLFilter);
 
+	websAspDefine(T("getLayer7FiltersASP"), getLayer7FiltersASP);
+
 	websAspDefine(T("checkIfUnderBridgeModeASP"), checkIfUnderBridgeModeASP);
 }
 
 void firewall_init(void)
 {
-	//clear filter (clear all and set defaults actions)
-	doSystem("service iptables stop");
-	doSystem("service shaper stop");
+	LoadLayer7FilterName();
 
-	////----DROP-ALL-RULES-IN-RC.D----////
-	/*iptablesForwardFilterClear();
-	iptablesIPPortFilterClear();
-	iptablesWebContentFilterClear();
-	iptablesAllNATClear();*/
+	// init filter
+	iptablesAllFilterClear();
+	// make a new chain
+	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
+	doSystem("iptables -t filter -N %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
+	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", WEB_FILTER_CHAIN);
+	doSystem("iptables -t filter -A FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
+	doSystem("iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 1>/dev/null 2>&1");
+	iptablesAllFilterRun();
 
-	//init filters and rules
-	doSystem("service iptables start");
-	doSystem("service shaper start");
-	iptablesIPPortFilterRun();
-	iptablesWebsFilterRun();
-	iptablesRemoteManagementRun();
+	// init NAT(DMZ)
+	// We use -I instead of -A here to prevent from default MASQUERADE NAT rule 
+	// being in front of us.
+	// So "port forward chain" has the highest priority in the system, and "DMZ chain" is the second one.
+	iptablesAllNATClear();
+	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 1 -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
+	doSystem("iptables -t nat -N %s 1>/dev/null 2>&1; iptables -t nat -I PREROUTING 2 -j %s 1>/dev/null 2>&1", DMZ_CHAIN, DMZ_CHAIN);
 	iptablesAllNATRun();
+}
+
+void firewall_fini(void)
+{
+	iptablesAllFilterClear();
+	iptablesAllNATClear();
 }

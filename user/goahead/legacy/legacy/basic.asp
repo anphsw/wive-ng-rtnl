@@ -1,10 +1,9 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Basic Wireless Settings</title>
 
@@ -632,7 +631,7 @@ function RadioStatusChange(rs)
         <option value=0>11b/g mixed mode</option>
         <option value=1>11b only</option>
         <option value=2>11g only</option>
-<!--        <option value=3>11a only</option> -->
+        <option value=3>11a only</option>
       </select>
     </td>
   </tr>
@@ -652,7 +651,7 @@ function RadioStatusChange(rs)
     <td class="head">BSSID</td>
     <td>&nbsp;&nbsp;<% getLegacyCurrentMac(); %></td>
   </tr>
-<!--  <tr id="div_11a_channel" name="div_11a_channel" style="visibility:visible;">
+  <tr id="div_11a_channel" name="div_11a_channel" style="visibility:visible;">
     <td class="head">Frequency (Channel)</td>
     <td>
       <select id="sz11aChannel" name="sz11aChannel" size="1">
@@ -660,7 +659,7 @@ function RadioStatusChange(rs)
 	<% getLegacy11aChannels(); %>
       </select>
     </td>
-  </tr> -->
+  </tr>
   <tr id="div_11b_channel" name="div_11b_channel" style="visibility:visible;">
     <td class="head">Frequency (Channel)</td>
     <td>
@@ -701,10 +700,8 @@ function RadioStatusChange(rs)
     <td class="head">Phy Mode</td>
     <td>
       <select name="wds_phy_mode" id="wds_phy_mode" size="1">
-	<option value=0 selected>CCK</option>
-	<option value=1>OFDM</option>
-	<option value=2>HTMIX</option>
-	<option value=3>GREENFIELD</option>
+	<option value="CCK;CCK;CCK;CCK" selected>CCK</option>
+	<!-- other modes are added by javascript -->
       </select>
     </td>
   </tr>
@@ -713,10 +710,10 @@ function RadioStatusChange(rs)
     <td class="head">EncrypType</td>
     <td>
       <select name="wds_encryp_type" id="wds_encryp_type" size="1" onchange="WdsSecurityOnChange()">
-	<option value="NONE" selected>NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
+	<option value="NONE;NONE;NONE;NONE" selected>NONE</option>
+	<option value="WEP;WEP;WEP;WEP">WEP</option>
+	<option value="TKIP;TKIP;TKIP;TKIP">TKIP</option>
+	<option value="AES;AES;AES;AES">AES</option>
       </select>
     </td>
   </tr>

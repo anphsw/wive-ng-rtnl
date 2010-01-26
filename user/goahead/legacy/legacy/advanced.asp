@@ -1,10 +1,9 @@
 <!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Advanced Wireless Settings</title>
 
@@ -496,13 +495,13 @@ function wmm_capable_enable_switch()
       <input type=radio name=pkt_aggregate value="0" checked>Disable
     </td>
   </tr>
-<!--  <tr> 
+  <tr> 
     <td class="head">IEEE 802.11H Support</td>
     <td>
       <input type=radio name=ieee_80211h value="1">Enable &nbsp;
       <input type=radio name=ieee_80211h value="0" checked>Disable <font color="#808080">(only in A band)</font>
     </td>
-  </tr> -->
+  </tr>
   <tr> 
     <td class="head">Country Code</td>
     <td>
@@ -525,7 +524,7 @@ function wmm_capable_enable_switch()
     <td class="title" colspan="2">Wi-Fi Multimedia</td>
   </tr>
   <tr> 
-    <td class="head">WMM/UDPXY</td>
+    <td class="head">WMM Capable</td>
     <td>
       <input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked>Enable &nbsp;
       <input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()">Disable

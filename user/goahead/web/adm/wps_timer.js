@@ -27,11 +27,11 @@ function StartTheTimer()
     if (secs==0)
     {
 		StopTheClock()
-//
-//		if(STATimerFlag == 0)
-//			updateWPS();
-//		else
-//			updateWPSStaStatus();
+
+		if(STATimerFlag == 0)
+			updateWPS();
+		else
+			updateWPSStaStatus();
 
 		secs = timeout
 		StartTheTimer()

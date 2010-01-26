@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  *	utils.c -- System Utilities 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: utils.c,v 1.87.2.3 2008-03-28 08:48:47 winfred Exp $
+ *	$Id: utils.c,v 1.99.2.1 2009-04-08 08:52:59 chhung Exp $
  */
 #include	<time.h>
 #include	<signal.h>
@@ -42,6 +26,10 @@
 #include	"utils.h"
 #include	"wireless.h"
 
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+extern void setFirmwarePath(void);
+#endif
+
 static int  getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgZero(int eid, webs_t wp, int argc, char_t **argv);
@@ -62,7 +50,11 @@ static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
+static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query);
+#endif
 
 /*********************************************************************
  * System Utilities
@@ -522,6 +514,7 @@ int ledWps(int gpio, int mode)
 			gpioLedSet(gpio, 3000, 1, 1, 1, 1);
 			break;
 	}
+	return 0;
 }
 
 /*
@@ -575,7 +568,11 @@ void formDefineUtilities(void)
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
+	websFormDefine(T("forceMemUpgrade"), forceMemUpgrade);
 	websFormDefine(T("setOpMode"), setOpMode);
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+	websFormDefine(T("ScanUSBFirmware"), ScanUSBFirmware);
+#endif
 }
 
 
@@ -931,7 +928,7 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getMiiInicBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined (CONFIG_RT2880_MII_INIC) || defined (CONFIG_RT2880_MII_INIC_MODULE)
+#if defined (CONFIG_INIC_MII)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1015,7 +1012,7 @@ static int getSysUptime(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RAETH_ROUTER && defined CONFIG_USER_ETHTOOL
+#if (defined (CONFIG_RAETH_ROUTER) || defined CONFIG_RT_3052_ESW) && defined (CONFIG_USER_ETHTOOL)
 	int port, rc;
 	FILE *fp;
 	char buf[1024];
@@ -1044,13 +1041,13 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 			return 0;
 		}else{
 			// get Link status
-			if(pos = strstr(buf, "Link detected: ")){
+			if((pos = strstr(buf, "Link detected: ")) != NULL){
 				pos += strlen("Link detected: ");
 				if(*pos == 'y')
 					link = '1';
 			}
 			// get speed
-			if(pos = strstr(buf, "Speed: ")){
+			if((pos = strstr(buf, "Speed: ")) != NULL){
 				pos += strlen("Speed: ");
 				if(*pos == '1' && *(pos+1) == '0' && *(pos+2) == 'M')
 					speed = 10;
@@ -1058,7 +1055,7 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 					speed = 1000;
 			}
 			// get duplex
-			if(pos = strstr(buf, "Duplex: ")){
+			if((pos = strstr(buf, "Duplex: ")) != NULL){
 				pos += strlen("Duplex: ");
 				if(*pos == 'H')
 					duplex = 'H';
@@ -1098,7 +1095,7 @@ static int isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv)
 
 void redirect_wholepage(webs_t wp, const char *url)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/html\nPragma: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/html\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("<html><head><script language=\"JavaScript\">"));
 	websWrite(wp, T("parent.location.replace(\"%s\");"), url);
 	websWrite(wp, T("</script></head></html>"));
@@ -1133,6 +1130,32 @@ int netmask_aton(const char *ip)
 	}
 	return result;
 }
+static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
+{
+	char_t *mode  = websGetVar(wp, T("ForceMemUpgradeSelect"), T("0"));
+	if(!mode)
+		return;
+	if(!strcmp(mode, "1"))
+		nvram_bufset(RT2860_NVRAM, "Force_mem_upgrade", "1");
+	else
+		nvram_bufset(RT2860_NVRAM, "Force_mem_upgrade", "0");
+	nvram_commit(RT2860_NVRAM);
+    websHeader(wp);
+    websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
+    websWrite(wp, T("mode: %s<br>\n"), mode);
+    websFooter(wp);
+    websDone(wp, 200);	
+}
+
+#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
+{
+	setFirmwarePath();
+	printf("%s enter\n", __FUNCTION__);
+
+	websRedirect(wp, "adm/upload_firmware.asp");
+}
+#endif
 
 /* goform/setOpMode */
 static void setOpMode(webs_t wp, char_t *path, char_t *query)
@@ -1260,7 +1283,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			char *lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
 
 			if(! strlen(lan_ip))
-				lan_ip = "192.168.1.1";
+				lan_ip = "10.10.10.254";
 			snprintf(redirect_url, 512, "http://%s", lan_ip);
 			redirect_wholepage(wp, redirect_url);
 			goto final;
@@ -1284,6 +1307,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			nvram_set(RTINIC_NVRAM, "InicMiiEnable", mii);
 			need_commit = 1; //force to run initInternet
 		}
+	}
+	else {
+		nvram_set(RTINIC_NVRAM, "InicMiiEnable", "0");
+		need_commit = 1; //force to run initInternet
 	}
 #endif
 

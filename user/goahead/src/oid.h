@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
  *	utils.c -- System Utilities 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *	$Id: oid.h,v 1.3 2007-07-06 05:48:19 yy Exp $
+ *	$Id: oid.h,v 1.6 2008-12-02 06:25:26 yy Exp $
  */
 
 #if WIRELESS_EXT <= 11
@@ -45,12 +29,12 @@
 #endif
 
 #define RTPRIV_IOCTL_STATISTICS			(SIOCIWFIRSTPRIV + 0x09)
-#define RTPRIV_IOCTL_ADD_PMKID_CACHE		(SIOCIWFIRSTPRIV + 0x0A)
+#define RTPRIV_IOCTL_ADD_PMKID_CACHE	(SIOCIWFIRSTPRIV + 0x0A)
 #define RTPRIV_IOCTL_RADIUS_DATA		(SIOCIWFIRSTPRIV + 0x0C)
 #define RTPRIV_IOCTL_GSITESURVEY		(SIOCIWFIRSTPRIV + 0x0D)
 #define RTPRIV_IOCTL_ADD_WPA_KEY		(SIOCIWFIRSTPRIV + 0x0E)
 #define RTPRIV_IOCTL_GET_MAC_TABLE		(SIOCIWFIRSTPRIV + 0x0F)
-#define RTPRIV_IOCTL_STATIC_WEP_COPY		(SIOCIWFIRSTPRIV + 0x10)
+#define RTPRIV_IOCTL_STATIC_WEP_COPY	(SIOCIWFIRSTPRIV + 0x10)
 #define RTPRIV_IOCTL_WSC_PROFILE		(SIOCIWFIRSTPRIV + 0x12)
 #define RT_QUERY_ATE_TXDONE_COUNT 		0x0401
 #define OID_GET_SET_TOGGLE				0x8000
@@ -147,8 +131,11 @@
 #define RT_OID_802_11_QUERY_BATABLE					0x0642
 #define RT_OID_802_11_ADD_IMME_BA					0x0643
 #define RT_OID_802_11_TEAR_IMME_BA					0x0644
+#define RT_OID_802_11_WSC_QUERY_PROFILE				0x0750
 
-
+// mesh extension OID
+#define OID_802_11_MESH_LINK_STATUS             0x0654
+#define OID_802_11_MESH_LIST                    0x0655
 
 
 

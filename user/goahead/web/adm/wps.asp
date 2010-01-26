@@ -2,8 +2,6 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 
 <script type="text/javascript" src="/adm/wps_timer.js"></script>
 <script language="JavaScript" type="text/javascript">
@@ -233,9 +231,8 @@ function pageInit(){
 <table class="body"><tr><td>
 <h1>Wi-Fi Protected Setup</h1><p> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody>
 
-<!--------------------  WPS Status  ---------------------------->
+<!-- =================  WPS Status  ================= -->
 <tr>
   <td class="title" colspan="2">WPS Status</td>
 </tr>
@@ -245,12 +242,11 @@ function pageInit(){
   <td> <span id="WPSCurrentStatus"> </span> </td>
 </tr>
 
-<form method="post" name ="SubmitOOB" action="/goform/OOB">>
+<form method="post" name ="SubmitOOB" action="/goform/OOB">
 <tr>
   <td class="head" >WPS Configured: </td>
   <td> <span id="WPSConfigured"> </span> <input type="submit" value="Reset OOB" name="submitResetOOB" align="left"></td>
 </tr>
-
 </form>
 
 <tr>
@@ -289,11 +285,10 @@ function pageInit(){
 
 
 
-<!--------------------  WPS UPNP Daemon ---------------------------->
+<!-- =================  WPS UPNP Daemon ================= -->
 <!-- 
 <form method="post" name="WPSUPNP" action="/goform/WPSUPNP">
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody>
 
 <tr>
   <td class="title" colspan="2">WPS UPnP(Registrar on Ethernet support)</td>
@@ -323,11 +318,10 @@ function pageInit(){
 <form method="post" name="WPSBegin" action="/goform/WPSBegin">
 
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody>
-<!--------------------  PIN & PBC  ---------------------------->
+<!-- =================  PIN & PBC  ================= -->
 <tr>
   <td class="title" colspan="2">WPS Setup</td>
-<tr>
+</tr>
 <tr>
   <td class="head" >Method</td>
   <td>
@@ -335,7 +329,6 @@ function pageInit(){
 		<input type=radio name=PINPBCRADIO value="0" onClick="PBCSelect()">PBC
   </td>
 </tr>
-
 
 <tr id="RegistrarSetting" >
   <td class="head" >Registrar Setting:</td>
@@ -358,13 +351,14 @@ function pageInit(){
 <tr>
   <td class="head">Press </td>
   <td>
-		<input value="Begin WPS" name="WPSBeginSubmit" onclick="return PINPBCFormCheck()" type="submit"> </form> 
+		<input value="Begin WPS" name="WPSBeginSubmit" onclick="return PINPBCFormCheck()" type="submit">
 <!--		<form method="post" name="WPSPBC" action="/goform/WPSPBC"> <input value="Begin WPS-PBC" name="WPSPBCSubmit" type="submit"> </form>   -->
   </td>
 </tr>
-
 </table>
 
+</form>
+
 <br>
-</tr></td></table>
+</td></tr></table>
 </body></html>

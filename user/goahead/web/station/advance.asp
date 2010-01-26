@@ -1,9 +1,8 @@
 <html>
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
@@ -111,8 +110,33 @@ function initTranslation()
 	e.value = _("wireless apply");
 }
 
+function initValue()
+{
+	var is3t3r = '<% is3t3r(); %>';
+	var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
+
+	if (1*is3t3r == 1) {
+		for (i = 16; i < 24; i++) {
+			document.sta_advance.n_mcs.options[i] = new Option(i, i);
+		}
+	}
+	var mcs_length = document.sta_advance.n_mcs.options.length;
+	document.sta_advance.n_mcs.options[mcs_length] = new Option("32", "32");
+	mcs_length++;
+	document.sta_advance.n_mcs.options[mcs_length] = new Option("Auto", "33");
+
+	if (1*ht_mcs <= mcs_length-1)
+		document.sta_advance.n_mcs.options.selectedIndex = ht_mcs;
+	else if (1*ht_mcs == 32)
+		document.sta_advance.n_mcs.options.selectedIndex = mcs_length-1;
+	else if (1*ht_mcs == 33)
+		document.sta_advance.n_mcs.options.selectedIndex = mcs_length;
+
+}
+
 function PageInit()
 {
+	initValue();
 	initTranslation();
 }
 </script>
@@ -263,25 +287,24 @@ function PageInit()
     <td class="head">MCS</td>
     <td>
       <select name="n_mcs" size="1">
-        <option value=0 <% var mcs = getCfgZero(0, "HT_MCS");
-                           if (mcs == "0") write("selected"); %>>0</option>
-        <option value=1 <% if (mcs == "1") write("selected"); %>>1</option>
-        <option value=2 <% if (mcs == "2") write("selected"); %>>2</option>
-        <option value=3 <% if (mcs == "3") write("selected"); %>>3</option>
-        <option value=4 <% if (mcs == "4") write("selected"); %>>4</option>
-        <option value=5 <% if (mcs == "5") write("selected"); %>>5</option>
-        <option value=6 <% if (mcs == "6") write("selected"); %>>6</option>
-        <option value=7 <% if (mcs == "7") write("selected"); %>>7</option>
-        <option value=8 <% if (mcs == "8") write("selected"); %>>8</option>
-        <option value=9 <% if (mcs == "9") write("selected"); %>>9</option>
-        <option value=10 <% if (mcs == "10") write("selected"); %>>10</option>
-        <option value=11 <% if (mcs == "11") write("selected"); %>>11</option>
-        <option value=12 <% if (mcs == "12") write("selected"); %>>12</option>
-        <option value=13 <% if (mcs == "13") write("selected"); %>>13</option>
-        <option value=14 <% if (mcs == "14") write("selected"); %>>14</option>
-        <option value=15 <% if (mcs == "15") write("selected"); %>>15</option>
-        <option value=32 <% if (mcs == "32") write("selected"); %>>32</option>
-        <option value=33 id="staadvMCSAuto" <% if (mcs == "33") write("selected"); %>>AUTO</option>
+        <option value=0>0</option>
+        <option value=1>1</option>
+        <option value=2>2</option>
+        <option value=3>3</option>
+        <option value=4>4</option>
+        <option value=5>5</option>
+        <option value=6>6</option>
+        <option value=7>7</option>
+        <option value=8>8</option>
+        <option value=9>9</option>
+        <option value=10>10</option>
+        <option value=11>11</option>
+        <option value=12>12</option>
+        <option value=13>13</option>
+        <option value=14>14</option>
+        <option value=15>15</option>
+        <option value=32>32</option>
+        <option value=33 id="staadvMCSAuto">AUTO</option>
       </select>
     </td>
   </tr>
@@ -304,6 +327,6 @@ function PageInit()
 </form>
 
 
-</tr></td></table>
+</td></tr></table>
 </body>
 </html>

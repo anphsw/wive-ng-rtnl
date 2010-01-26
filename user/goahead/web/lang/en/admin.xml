@@ -4,6 +4,7 @@
   <message msgid="admin apply" msgstr="Apply" />
   <message msgid="admin cancel" msgstr="Cancel" />
   <message msgid="admin reset" msgstr="Reset" />
+  <message msgid="admin scan" msgstr="Scan" />
 
   <message msgid="man title" msgstr="System Management" />
   <message msgid="man introduction" msgstr="You may configure administrator account and password, NTP settings, and Dynamic DNS settings here." />
@@ -39,9 +40,9 @@
   <message msgid="man ntp south africa" msgstr="(GMT+02:00) South Africa" />
   <message msgid="man ntp iraq" msgstr="(GMT+03:00) Iraq, Jordan, Kuwait" />
   <message msgid="man ntp moscow winter" msgstr="(GMT+03:00) Moscow Winter Time" />
-  <message msgid="man ntp armenia" msgstr="(GMT+04:00) ST. Petersburg, Armenia" />
-  <message msgid="man ntp pakistan" msgstr="(GMT+05:00) Ekaterinburg, Pakistan, Russia" />
-  <message msgid="man ntp bangladesh" msgstr="(GMT+06:00) Omsk, Novosibirsk Russia" />
+  <message msgid="man ntp armenia" msgstr="(GMT+04:00) Armenia" />
+  <message msgid="man ntp pakistan" msgstr="(GMT+05:00) Pakistan, Russia" />
+  <message msgid="man ntp bangladesh" msgstr="(GMT+06:00) Bangladesh, Russia" />
   <message msgid="man ntp thailand" msgstr="(GMT+07:00) Thailand, Russia" />
   <message msgid="man ntp chinacoast" msgstr="(GMT+08:00) China Coast, Hong Kong" />
   <message msgid="man ntp taipei" msgstr="(GMT+08:00) Taipei" />
@@ -58,6 +59,9 @@
   <message msgid="man ntp sync" msgstr="NTP synchronization(hours)" />
   <message msgid="man ntp current time" msgstr="Current Time" />
   <message msgid="man ntp sync with host" msgstr="Sync with host" />
+  <message msgid="man gap title" msgstr="Green AP" />
+  <message msgid="man gap time" msgstr="Duration" />
+  <message msgid="man gap action" msgstr="Action" />
   <message msgid="man ddns setting" msgstr="DDNS Settings" />
   <message msgid="man ddns provider" msgstr="Dynamic DNS Provider" />
   <message msgid="man ddns none" msgstr="None" />
@@ -66,12 +70,15 @@
   <message msgid="man ddns" msgstr="DDNS" />
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
-  <message msgid="upload introduction1" msgstr="Upgrade the WR-NL firmware to obtain new functionality. " />
+  <message msgid="upload introduction1" msgstr="Upgrade the Ralink SoC firmware to obtain new functionality. " />
   <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang up the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
   <message msgid="upload bootloader" msgstr="Update Bootloader" />
   <message msgid="upload bootloader location" msgstr="Location:" />
+  <message msgid="upload firmware from usb" msgstr="Upgrade firmware from USB" />
+  <message msgid="upload firmware force upgrade via mem" msgstr="Force upgrade firmware via mem " />
+  <message msgid="upload firmware force" msgstr="Force:" />
 
   <message msgid="setman title" msgstr="Settings Management" />
   <message msgid="setman introduction" msgstr="You might save system settings by exporting them to a configuration file, restore them by importing the file, or reset them to factory default." />
@@ -86,10 +93,10 @@
   <message msgid="setman load default" msgstr="Load Default" />
 
   <message msgid="status title" msgstr="Access Point Status" />
-  <message msgid="status introduction" msgstr="Let's take a look at the status of Ralink 2880 Platform." />
+  <message msgid="status introduction" msgstr="Let's take a look at the status of Ralink SoC Platform." />
   <message msgid="status system information" msgstr="System Info" />
   <message msgid="status sdk version" msgstr="SDK Version" />
-  <message msgid="status system time" msgstr="System Time" />
+  <message msgid="status system up time" msgstr="System Up Time" />
   <message msgid="status system platform" msgstr="System Platform" />
   <message msgid="status operate mode" msgstr="Operation Mode" />
   <message msgid="status internet config" msgstr="Internet Configurations" />
@@ -106,7 +113,7 @@
   <message msgid="status ethernet port status" msgstr="Ethernet Port Status" />
 
   <message msgid="statistic title" msgstr="Statistic" />
-  <message msgid="statistic introduction" msgstr=" Take a look at the WR-NL statistics " />
+  <message msgid="statistic introduction" msgstr=" Take a look at the Ralink SoC statistics " />
   <message msgid="statistic memory" msgstr="Memory" />
   <message msgid="statistic memory total" msgstr="Memory total: " />
   <message msgid="statistic memory left" msgstr="Memory left: " />

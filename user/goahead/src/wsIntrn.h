@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* 
  *	wsIntrn.h -- Internal GoAhead Web server header
  *
@@ -21,7 +5,7 @@
  *
  *	See the file "license.txt" for information on usage and redistribution
  *
- * $Id: wsIntrn.h,v 1.3 2007-02-01 07:41:02 winfred Exp $
+ * $Id: wsIntrn.h,v 1.3.30.1 2009-04-07 07:28:24 chhung Exp $
  */
  
 #ifndef _h_WEBS_INTERNAL
@@ -268,7 +252,7 @@ extern int 		 websFormHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
 extern int 		 websCgiHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
 					int arg, char_t *url, char_t *path, char_t *query);
 extern void		 websCgiCleanup();
-extern int		 websCheckCgiProc(int handle);
+extern int		 websCheckCgiProc(int handle, int *status);
 extern char_t	 *websGetCgiCommName();
 
 extern int		 websLaunchCgiProc(char_t *cgiPath, char_t **argp,

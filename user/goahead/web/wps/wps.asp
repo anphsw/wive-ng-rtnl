@@ -2,8 +2,6 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/adm/wps_timer.js"></script>
 <script language="JavaScript" type="text/javascript">
@@ -143,6 +141,10 @@ function PINPBCFormCheck()
 	if(	document.WPS.PINPBCRadio[0].checked){
 		// PIN
 		if(document.WPS.PIN.value != ""){
+			// Driver 1.9 supports 4 digit PIN code.
+			if( document.WPS.PIN.value.length == 4 )
+				return true;
+
 			if( ! ValidateChecksum( document.WPS.PIN.value)  ){
 				alert("PIN number validation failed\n");
 				return false;
@@ -283,7 +285,7 @@ function onPINPBCRadioClick(value)
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
 <form method="post" name ="WPSConfig" action="/goform/WPSSetup">
 <tbody>
-<!-- ------------------  WPS Config  -------------------------- -->
+<!-- ==================  WPS Config  ================== -->
 <tr>
   <td class="title" colspan="2" id="wpsConfig_text">WPS Config</td>
 </tr>
@@ -309,7 +311,7 @@ function onPINPBCRadioClick(value)
 <table id="div_wps_status" name=="div_wps_status" border="1" cellpadding="2" cellspacing="1" width="95%" style="visibility: hidden;">
 <tbody>
 
-<!--------------------  WPS Summary  -------------------------- -->
+<!-- =================  WPS Summary  ================= -->
 <tr>
   <td class="title" colspan="2" id="wpsSummary_text">WPS Summary</td>
 </tr>
@@ -350,10 +352,13 @@ function onPINPBCRadioClick(value)
   <td> <span id="WPSWPAKey"> </span> </td>
 </tr>
 
+<form method="post" name="SubmitGenPIN" action="/goform/GenPIN">
 <tr>
-  <td class="head" id="wpsAPPIN_text">AP PIN: </td>
-  <td> <% getPINASP(); %>  </td>
+  <td class="head" id="wpsAPPIN_text">AP PIN:
+  </td>
+  <td> <% getPINASP(); %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=submit value="Generate" name="GenPIN"></td>
 </tr>
+</form>
 
 <tr>
   <td colspan="2">
@@ -362,13 +367,14 @@ function onPINPBCRadioClick(value)
 	</form>
   <td>
 </tr>
+</tbody>
 </table>
 
 <br>
 
-<!-- ----------------------------    WPS    --------------------------------- -->
+<!-- ============================    WPS    ============================ -->
 <form method="post" name ="WPS" action="/goform/WPS">
-<table id="div_wps" name=="div_wps"  border="1" cellpadding="2" cellspacing="1" width="95%" style="visibility: hidden;">
+<table id="div_wps" name="div_wps"  border="1" cellpadding="2" cellspacing="1" width="95%" style="visibility: hidden;">
 <tbody>
 <tr>
   <td class="title" colspan="2" id="wpsProgress_text">WPS Progress</td>
@@ -394,12 +400,13 @@ function onPINPBCRadioClick(value)
 		<input type="submit" value="Apply" id="wpsPINApply_text" name="submitWPS" align="left" onClick="return PINPBCFormCheck();">
 	</td>
 </tr>
+</tbody>
 </table>
 </form>
 
 <br>
 
-<!-- -----------------------  WPS Info Bar -------------------------- -->
+<!-- =======================  WPS Info Bar  ======================= -->
 <table id="div_wps_info" name="div_wps_info" border="1" cellpadding="1" cellspacing="1" width="100%" style="visibility: hidden;">
 <tbody><tr><td class="title" id="wpsStatus_text">WPS Status</td></tr>
 <tr><td> 
@@ -409,5 +416,5 @@ function onPINPBCRadioClick(value)
 
 
 <br>
-</tr></td></table>
+</td></tr></table>
 </body></html>

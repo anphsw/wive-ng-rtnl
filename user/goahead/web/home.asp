@@ -1,10 +1,8 @@
 <HTML>
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
 <HEAD>
-<TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
+<TITLE>GoAhead WebServer</TITLE>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script language="JavaScript" type="text/javascript">
 function initLanguage()
 {
@@ -71,20 +69,22 @@ function initLanguage()
 		}
 	}
 }
+
+function onInit()
+{
+	initLanguage();
+	<% FirmwareUpgradePostASP(); %>
+}
+
 </script>
 </HEAD>
 
-<FRAMESET ROWS="70,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="initLanguage()"> 
+<FRAMESET COLS="180,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()"> 
 
-  <FRAME SRC="title.htm" NAME="title" FRAMEBORDER="NO" SCROLLING="NO" MARGINWIDTH="0" MARGINHEIGHT="0">
-
-  <FRAMESET COLS="250,1*"> 
- 
     <FRAME SRC="treeapp.asp" NAME="menu" MARGINWIDTH="0" MARGINHEIGHT="0" scrolling="AUTO" FRAMEBORDER="NO" >
 
     <FRAME SRC="overview.asp" NAME="view" SCROLLING="AUTO" MARGINWIDTH="0" TOPMARGIN="0" MARGINHEIGHT="0" FRAMEBORDER="NO">
 		
-  </FRAMESET>
 </FRAMESET>
 <NOFRAMES>
 <BODY BGCOLOR="#FFFFFF">
