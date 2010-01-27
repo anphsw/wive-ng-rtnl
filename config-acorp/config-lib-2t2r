@@ -158,7 +158,7 @@ DEVEL_PREFIX="$(ROOTDIR)/romfs"
 #
 # uClibc development/debugging options
 #
-CROSS_COMPILER_PREFIX="mipsel-linux-"
+CROSS_COMPILER_PREFIX="$(ROOTDIR)/toolchain/bin/mipsel-linux-"
 # DODEBUG is not set
 # DODEBUG_PT is not set
 # DOASSERTS is not set

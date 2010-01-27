@@ -1,12 +1,31 @@
 #!/bin/sh
 
-# dns proxy
 dnsp=`nvram_get 2860 dnsPEnabled`
-admID=`nvram_get 2860 Login`
 
 start() {
-if [ -f /bin/dnsmasq ]; then
+if [ -f /bin/dnsmasq ] && [ "$dnsp" = "1" ] ; then
+get_param
  echo "Starting DNSMASQ: "
+
+    in case no previous file
+	touch $fname
+
+    # backup file without nameserver part
+    sed -e '/nameserver/d' $fname > $fbak
+
+    # set primary and seconday DNS
+    if [ "$pd" != "" ]; then
+      echo "nameserver $1" > $fname
+    else # empty dns
+      rm -f $fname
+    fi
+    if [ "$sd" != "" ]; then
+      echo "nameserver $2" >> $fname
+    fi
+
+    cat $fbak >> $fname
+    rm -f $fbak
+
  if [ -f /etc/dnsmasq.conf ]; then
     /bin/dnsmasq --conf-file=/etc/dnsmasq.conf -u $admID -g $admID
  fi 
@@ -16,6 +35,14 @@ fi
 stop() {
  echo "Stopping DNSMASQ: "
   killall -q dnsmasq
+}
+
+get_param() {
+    admID=`nvram_get 2860 Login`
+    pd=`nvram_get 2860 wan_primary_dns`
+    sd=`nvram_get 2860 wan_secondary_dns`
+    fname="/etc/resolv.conf"
+    fbak="/etc/resolv_conf.bak"
 }
 
 case "$1" in

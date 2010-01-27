@@ -42,10 +42,9 @@ start() {
         pd=`nvram_get 2860 wan_primary_dns`
         sd=`nvram_get 2860 wan_secondary_dns`
         route del default
-	if [ "$gw" != "" ] || [ "$gw" != "0.0.0.0" ]; then
+	if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
     	    route add default gw $gw
 	fi 
-        config-dns.sh $pd $sd
     fi
 
 }

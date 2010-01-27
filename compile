@@ -24,15 +24,16 @@ echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./config-acorp/config-kernel-1t1r	./linux/.config
     cp -fv ./config-acorp/config-config-1t1r	./config/.config
+    cp -fv ./config-acorp/config-lib-1t1r	./lib/.config
 fi
 if [ "$MODE" = "2T2R" ] ; then
     cp -fv ./config-acorp/config-config-2t2r	./config/.config
     cp -fv ./config-acorp/config-kernel-2t2r	./linux/.config
+    cp -fv ./config-acorp/config-lib-2t2r	./lib/.config
 fi
 cp -fv ./config-acorp/config-busybox	./user/busybox/.config
 cp -fv ./config-acorp/config-config	./config/.config
 cp -fv ./config-acorp/config-cpp	./uClibc++/.config
-cp -fv ./config-acorp/config-lib	./lib/.config
 cp -fv ./config-acorp/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch
 ln -fs config/autoconf.h autoconf.h

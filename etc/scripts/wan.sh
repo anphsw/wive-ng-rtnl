@@ -65,7 +65,10 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	if [ "$gw" != "" ] || [ "$gw" != "0.0.0.0" ]; then
 	    route add default gw $gw
 	fi
-	config-dns.sh $pd $sd
+
+	service dns stop
+	service dns start
+
 elif [ "$wanmode" = "DHCP" ]; then
 	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
 elif [ "$wanmode" = "PPPOE" ]; then
