@@ -14,6 +14,8 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
+service lan stop
+service lan start
 service pass start
 service vpn-passthru start
 

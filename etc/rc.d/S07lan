@@ -2,8 +2,10 @@
 
 #get params
 . /sbin/global.sh
+. /sbin/config.sh
 
 start() {
+echo "Start network interfaces..."
  ip=`nvram_get 2860 lan_ipaddr`
  nm=`nvram_get 2860 lan_netmask`
  ip_2=`nvram_get 2860 lan2_ipaddr`
@@ -11,7 +13,44 @@ start() {
  gw=`nvram_get 2860 wan_gateway`
  opmode=`nvram_get 2860 OperationMode`
  lan2enabled=`nvram_get 2860 Lan2Enabled`
+ brset=`brctl show  | grep br0 -c`
+ vlanisconfig=`ip link show | grep @ -c`
+ brisup=`ip link show br0 up | grep -c ""`
+ lanisup=`ip link show eth2 up | grep -c ""`
 
+#-------------------PRECONFIG-----------------------------
+    if [ "$brset" = "0" ]; then
+        echo "Add bridge in the system"
+        brctl addbr br0
+    fi
+    if [ "$brisup" = "0" ]; then
+	echo "Up bridge interface"
+	ifconfig br0 up
+    fi
+    if [ "$lanisup" = "0" ]; then
+	echo "Up vlan root interface"
+	ifconfig eth2 up
+	vlanisconfig=0
+    fi
+    if [ "$vlanisconfig" != "2" ]; then
+        echo "Add vlans and config"
+	vconfig add eth2 1
+	vconfig add eth2 2
+	set_vlan_map eth2.1
+	set_vlan_map eth2.2
+    fi
+
+    echo "Set mac for WAN"
+    wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
+    if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
+        ifconfig eth2.2 hw ether $wan_mac
+    fi
+
+    #drop adresses
+    ifconfig eth2.1 0.0.0.0
+    ifconfig eth2.2 0.0.0.0
+ 
+#-------------------CONFIG--------------------------------
  ifconfig $lan_if down
  if [ "$lan_if" != "" ]; then
     ifconfig $lan_if $ip netmask $nm
@@ -41,10 +80,30 @@ start() {
 }
 
 stop() {
- echo "Stop lan!"
+echo "Stop network interfaces..."
+    ifconfig eth2.2 down > /dev/null 2>&1
+    ifconfig eth2.1 down > /dev/null 2>&1
+    vconfig rem eth2.1 > /dev/null 2>&1
+    vconfig rem eth2.2 > /dev/null 2>&1
+    ifconfig br0 down > /dev/null 2>&1
     ifconfig $lan_if down > /dev/null 2>&1
     ifconfig "br0:9" down > /dev/null 2>&1
     ifconfig "eth2:9" down > /dev/null 2>&1
+    brctl delbr br0 > /dev/null 2>&1
+}
+
+set_vlan_map()
+{
+ if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
+        echo "vlan priority tag => skb->priority mapping"
+        echo "skb->priority => vlan priority tag mapping"
+        num=0
+        for i in `seq 0 7`; do
+            vconfig set_ingress_map eth2.2 $num $num
+            vconfig set_egress_map eth2.2 $num $num
+            num=`expr $num + 1`
+        done
+ fi
 }
 
 case "$1" in
