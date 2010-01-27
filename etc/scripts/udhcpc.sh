@@ -40,13 +40,14 @@ case "$1" in
             echo adding dns $i
             echo nameserver $i >> $RESOLV_CONF
         done
-	    service dns stop
-	    service upnp stop
-	    service dns start
-	    service upnp start
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
+	    # restart needed services
+	    service dns stop
+	    service upnp stop
 	    service igmpproxy stop
+	    service dns start
+	    service upnp start
 	    service igmpproxy start
         ;;
 esac

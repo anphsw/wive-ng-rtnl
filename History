@@ -31,6 +31,7 @@
 30) Regenerate mac if drop to defaults<br>
 31) Some services start only thwn start goahead<br>
 32) Replace some code from original Ralink SDK version 3.3<br>
+33) Integrate new web gui in current sources tree <br>
 
 <br>
 <b>ToDo:</b><br>

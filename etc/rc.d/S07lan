@@ -6,52 +6,53 @@
 start() {
  ip=`nvram_get 2860 lan_ipaddr`
  nm=`nvram_get 2860 lan_netmask`
- echo "Add bridge in the system"
-    brctl addbr br0
-    ifconfig $lan_if down
-    if [ "$lan_if" != "" ]; then
-	ifconfig $lan_if $ip netmask $nm
-    else
-	ifconfig $lan_if 0.0.0.0	
-    fi
+ ip_2=`nvram_get 2860 lan2_ipaddr`
+ nm_2=`nvram_get 2860 lan2_netmask`
+ gw=`nvram_get 2860 wan_gateway`
+ opmode=`nvram_get 2860 OperationMode`
+ lan2enabled=`nvram_get 2860 Lan2Enabled`
+ brset=`brctl show  | grep br0 -c`
 
-    lan2enabled=`nvram_get 2860 Lan2Enabled`
-    if [ "$lan2enabled" = "1" ]; then
+ if [ "$brset" != "0" ]; then
+    echo "Add bridge in the system"
+    brctl addbr br0
+ fi
+
+ ifconfig $lan_if down
+ if [ "$lan_if" != "" ]; then
+    ifconfig $lan_if $ip netmask $nm
+ else
+    ifconfig $lan_if 0.0.0.0	
+ fi
+
+ if [ "$lan2enabled" = "1" ]; then
  echo "Add LAN2 iface"
-        ip_2=`nvram_get 2860 lan2_ipaddr`
-        nm_2=`nvram_get 2860 lan2_netmask`
-        if [ "$opmode" = "0" ]; then
-                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
-                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
-        elif [ "$opmode" = "1" ]; then
+        if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$opmode" = "3" ]; then
                 ifconfig "br0:9" "$ip_2" netmask "$nm_2"
                 echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
         elif [ "$opmode" = "2" ]; then
                 ifconfig "eth2:9" "$ip_2" netmask "$nm_2"
                 echo "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
-        elif [ "$opmode" = "3" ]; then
-                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
-                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
         fi
-    fi
+ fi
 
- echo "Add default gateway"
-    opmode=`nvram_get 2860 OperationMode`
-    if [ "$opmode" = "0" ]; then
-        gw=`nvram_get 2860 wan_gateway`
-        pd=`nvram_get 2860 wan_primary_dns`
-        sd=`nvram_get 2860 wan_secondary_dns`
-        route del default
-	if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-    	    route add default gw $gw
-	fi 
-    fi
+ if [ "$opmode" = "0" ]; then
+  route del default
+    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
+	echo "Add default gateway"
+	route add default gw $gw
+    fi 
+ fi
 
 }
 
 stop() {
  echo "Stop lan!"
-    ifconfig $lan_if down
+    #ifconfig "eth2.2" down
+    #ifconfig "eth2.1" down
+    #ifconfig "eth2:9" down
+    #ifconfig "eth2" down
+    ifconfig "br0" down
     ifconfig "br0:9" down
     ifconfig "eth2:9" down
 }
