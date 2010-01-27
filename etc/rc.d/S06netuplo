@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /sbin/config.sh
+. /sbin/global.sh
+
 start() {
  brset=`brctl show  | grep br0 -c`
  echo "Start loopback and bridge network interfaces..."
@@ -11,13 +14,45 @@ start() {
 	brctl addbr br0
     fi
     ifconfig br0 up
+
+    echo "Add vlans and config"
+    vconfig add eth2 1
+    vconfig add eth2 2
+    set_vlan_map eth2.1
+    set_vlan_map eth2.2
+
+    echo "Set mac for WAN"
+    wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
+    if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
+	ifconfig eth2.2 hw ether $wan_mac
+    fi
+    ifconfig eth2.1 0.0.0.0
+    ifconfig eth2.2 0.0.0.0
+
 }
 
 stop() {
  echo "Stop br0 and loopback network interfaces..."
+    vconfig rem eth2 1 > /dev/null 2>&1
+    vconfig rem eth2 2 > /dev/null 2>&1
     ifconfig br0 down > /dev/null 2>&1
     brctl delbr br0 > /dev/null 2>&1
     ifconfig lo down > /dev/null 2>&1
+    ifconfig eth2.2 down > /dev/null 2>&1
+}
+
+set_vlan_map()
+{
+ if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
+        echo "vlan priority tag => skb->priority mapping"
+        echo "skb->priority => vlan priority tag mapping"
+        num=0
+        for i in `seq 0 7`; do
+            vconfig set_ingress_map $1 $num $num
+            vconfig set_egress_map $1 $num $num
+            num=`expr $num + 1`
+        done
+ fi
 }
 
 case "$1" in

@@ -32,18 +32,18 @@ config  RT2860V2_STA_DLS
 	bool "DLS ((Direct-Link Setup) Support"
 	depends on RT2860V2_STA
 
-#config  RT2860V2_STA_MESH
-#	bool "MESH Support"
-#	depends on RT2860V2_STA
+config  RT2860V2_STA_MESH
+	bool "MESH Support"
+	depends on RT2860V2_STA
 
-#config  RT2860V2_STA_WAPI
-#        bool "WAPI Support"
-#        depends on RT2860V2_STA
+config  RT2860V2_STA_WAPI
+        bool "WAPI Support"
+        depends on RT2860V2_STA
 
-#config  RT2860V2_EXT_CHANNEL_LIST
-#        bool "Extension Channel List"
-#        depends on RT2860V2_STA
+config  RT2860V2_EXT_CHANNEL_LIST
+        bool "Extension Channel List"
+        depends on RT2860V2_STA
 
-#config  RT2860V2_SNMP
-#	bool "Net-SNMP Support"
-#	depends on RT2860V2_STA
+config  RT2860V2_SNMP
+	bool "Net-SNMP Support"
+	depends on RT2860V2_STA

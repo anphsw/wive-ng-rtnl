@@ -15,20 +15,7 @@ bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
 service pass start
-
-set_vlan_map()
-{
- if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
-	num=0
-        for i in `seq 0 7`; do
-    	    # vlan priority tag => skb->priority mapping
-    	    vconfig set_ingress_map $1 $num $num
-    	    # skb->priority => vlan priority tag mapping
-    	    vconfig set_egress_map $1 $num $num
-            num=`expr $num + 1`
-        done
- fi
-}
+service vpn-passthru start
 
 ifRaxWdsxDown()
 {
@@ -144,7 +131,6 @@ else
 	modprobe rt2860v2_ap
 fi
 
-service vpn-passthru start
 
 # INIC support
 if [ "$CONFIG_RT2880_INIC" != "" ]; then
@@ -188,19 +174,6 @@ if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
         num=`expr $num + 1`
     done
 fi
-
-	modprobe 8021q
-	vconfig add eth2 1
-	set_vlan_map eth2.1
-	vconfig add eth2 2
-	set_vlan_map eth2.2
-	ifconfig eth2.2 down > /dev/null 2>&1
-	wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
-	if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
-	    ifconfig eth2.2 hw ether $wan_mac
-	fi
-	ifconfig eth2.1 0.0.0.0
-	ifconfig eth2.2 0.0.0.0
 
 #
 # init ip address to all interfaces for different OperationMode:
@@ -285,6 +258,7 @@ elif [ "$opmode" = "2" ]; then
 	fi
 	wan.sh
 	lan.sh
+
 elif [ "$opmode" = "3" ]; then
 	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
 		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
