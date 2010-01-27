@@ -11,12 +11,6 @@ start() {
  gw=`nvram_get 2860 wan_gateway`
  opmode=`nvram_get 2860 OperationMode`
  lan2enabled=`nvram_get 2860 Lan2Enabled`
- brset=`brctl show  | grep br0 -c`
-
- if [ "$brset" != "0" ]; then
-    echo "Add bridge in the system"
-    brctl addbr br0
- fi
 
  ifconfig $lan_if down
  if [ "$lan_if" != "" ]; then
@@ -48,13 +42,9 @@ start() {
 
 stop() {
  echo "Stop lan!"
-    #ifconfig "eth2.2" down
-    #ifconfig "eth2.1" down
-    #ifconfig "eth2:9" down
-    #ifconfig "eth2" down
-    ifconfig "br0" down
-    ifconfig "br0:9" down
-    ifconfig "eth2:9" down
+    ifconfig $lan_if down > /dev/null 2>&1
+    ifconfig "br0:9" down > /dev/null 2>&1
+    ifconfig "eth2:9" down > /dev/null 2>&1
 }
 
 case "$1" in

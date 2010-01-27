@@ -18,44 +18,30 @@ service pass start
 
 set_vlan_map()
 {
-        if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
-        # vlan priority tag => skb->priority mapping
-        vconfig set_ingress_map $1 0 0
-        vconfig set_ingress_map $1 1 1
-        vconfig set_ingress_map $1 2 2
-        vconfig set_ingress_map $1 3 3
-        vconfig set_ingress_map $1 4 4
-        vconfig set_ingress_map $1 5 5
-        vconfig set_ingress_map $1 6 6
-        vconfig set_ingress_map $1 7 7
-
-        # skb->priority => vlan priority tag mapping
-        vconfig set_egress_map $1 0 0
-        vconfig set_egress_map $1 1 1
-        vconfig set_egress_map $1 2 2
-        vconfig set_egress_map $1 3 3
-        vconfig set_egress_map $1 4 4
-        vconfig set_egress_map $1 5 5
-        vconfig set_egress_map $1 6 6
-        vconfig set_egress_map $1 7 7
-        fi
+ if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
+	num=0
+        for i in `seq 0 7`; do
+    	    # vlan priority tag => skb->priority mapping
+    	    vconfig set_ingress_map $1 $num $num
+    	    # skb->priority => vlan priority tag mapping
+    	    vconfig set_egress_map $1 $num $num
+            num=`expr $num + 1`
+        done
+ fi
 }
 
 ifRaxWdsxDown()
 {
-	ifconfig ra0 down > /dev/null 2>&1
-	ifconfig ra1 down > /dev/null 2>&1
-	ifconfig ra2 down > /dev/null 2>&1
-	ifconfig ra3 down > /dev/null 2>&1
-	ifconfig ra4 down > /dev/null 2>&1
-	ifconfig ra5 down > /dev/null 2>&1
-	ifconfig ra6 down > /dev/null 2>&1
-	ifconfig ra7 down > /dev/null 2>&1
-
-	ifconfig wds0 down > /dev/null 2>&1
-	ifconfig wds1 down > /dev/null 2>&1
-	ifconfig wds2 down > /dev/null 2>&1
-	ifconfig wds3 down > /dev/null 2>&1
+	num=0
+        for i in `seq 0 7`; do
+	    ifconfig ra$num down > /dev/null 2>&1
+            num=`expr $num + 1`
+        done
+	num=0
+        for i in `seq 0 3`; do
+    	    ifconfig wds$num down > /dev/null 2>&1
+            num=`expr $num + 1`
+        done
 
 	ifconfig apcli0 down > /dev/null 2>&1
 	ifconfig mesh0 down > /dev/null 2>&1
@@ -63,173 +49,68 @@ ifRaxWdsxDown()
 
 addBr0()
 {
-	brctl addbr br0
-	brctl addif br0 ra0
+    brset=`brctl show  | grep br0 -c`
+    if [ "$brset" = "0" ]; then
+        echo "Add bridge in the system for ra0"
+        brctl addbr br0
+    fi
+    brctl addif br0 ra0
 }
 
 addMesh2Br0()
 {
-        meshenabled=`nvram_get 2860 MeshEnabled`
-        if [ "$meshenabled" = "1" ]; then
-                ifconfig mesh0 up
-                brctl addif br0 mesh0
-                meshhostname=`nvram_get 2860 MeshHostName`
-                iwpriv mesh0 set  MeshHostName="$meshhostname"
-        fi
+    meshenabled=`nvram_get 2860 MeshEnabled`
+    if [ "$meshenabled" = "1" ]; then
+        ifconfig mesh0 up
+        brctl addif br0 mesh0
+        meshhostname=`nvram_get 2860 MeshHostName`
+        iwpriv mesh0 set  MeshHostName="$meshhostname"
+    fi
 }
 
 addRax2Br0()
 {
-	if [ "$bssidnum" = "2" ]; then
-		brctl addif br0 ra1
-	elif [ "$bssidnum" = "3" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-	elif [ "$bssidnum" = "4" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-		brctl addif br0 ra3
-	elif [ "$bssidnum" = "5" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-		brctl addif br0 ra3
-		brctl addif br0 ra4
-	elif [ "$bssidnum" = "6" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-		brctl addif br0 ra3
-		brctl addif br0 ra4
-		brctl addif br0 ra5
-	elif [ "$bssidnum" = "7" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-		brctl addif br0 ra3
-		brctl addif br0 ra4
-		brctl addif br0 ra5
-		brctl addif br0 ra6
-	elif [ "$bssidnum" = "8" ]; then
-		brctl addif br0 ra1
-		brctl addif br0 ra2
-		brctl addif br0 ra3
-		brctl addif br0 ra4
-		brctl addif br0 ra5
-		brctl addif br0 ra6
-		brctl addif br0 ra7
-	fi
-}
-
-addWds2Br0()
-{
-	wds_en=`nvram_get 2860 WdsEnable`
-	if [ "$wds_en" != "0" ]; then
-		ifconfig wds0 up
-		ifconfig wds1 up
-		ifconfig wds2 up
-		ifconfig wds3 up
-		brctl addif br0 wds0
-		brctl addif br0 wds1
-		brctl addif br0 wds2
-		brctl addif br0 wds3
-	fi
+    inic_bssnum=`nvram_get inic BssidNum`
+    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
+	return
+    fi
+    num=0
+    for i in `seq 0 $bssidnum`; do
+	    ifconfig ra$num up
+	    brctl addif br0 ra$num
+            num=`expr $num + 1`
+    done
 }
 
 addRaix2Br0()
 {
-	inic_bssnum=`nvram_get inic BssidNum`
-	if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
-		return
-	fi
-	brctl addif br0 rai0
-
-	if [ "$inic_bssnum" = "2" ]; then
-		ifconfig rai1 up
-		brctl addif br0 rai1
-	elif [ "$inic_bssnum" = "3" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-	elif [ "$inic_bssnum" = "4" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		ifconfig rai3 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-		brctl addif br0 rai3
-	elif [ "$inic_bssnum" = "5" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		ifconfig rai3 up
-		ifconfig rai4 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-		brctl addif br0 rai3
-		brctl addif br0 rai4
-	elif [ "$inic_bssnum" = "6" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		ifconfig rai3 up
-		ifconfig rai4 up
-		ifconfig rai5 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-		brctl addif br0 rai3
-		brctl addif br0 rai4
-		brctl addif br0 rai5
-	elif [ "$inic_bssnum" = "7" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		ifconfig rai3 up
-		ifconfig rai4 up
-		ifconfig rai5 up
-		ifconfig rai6 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-		brctl addif br0 rai3
-		brctl addif br0 rai4
-		brctl addif br0 rai5
-		brctl addif br0 rai6
-	elif [ "$inic_bssnum" = "8" ]; then
-		ifconfig rai1 up
-		ifconfig rai2 up
-		ifconfig rai3 up
-		ifconfig rai4 up
-		ifconfig rai5 up
-		ifconfig rai6 up
-		ifconfig rai7 up
-		brctl addif br0 rai1
-		brctl addif br0 rai2
-		brctl addif br0 rai3
-		brctl addif br0 rai4
-		brctl addif br0 rai5
-		brctl addif br0 rai6
-		brctl addif br0 rai7
-	fi
+    inic_bssnum=`nvram_get inic BssidNum`
+    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
+	return
+    fi
+    num=0
+    for i in `seq 0 $inic_bssnum`; do
+	    ifconfig rai$num up
+	    brctl addif br0 rai$num
+            num=`expr $num + 1`
+    done
 }
 
-addInicWds2Br0()
+addWds2Br0()
 {
-	if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
-		return
-	fi
+    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
+	wds_en=`nvram_get 2860 WdsEnable`
+    else
 	wds_en=`nvram_get inic WdsEnable`
-	if [ "$wds_en" != "0" ]; then
-		ifconfig wdsi0 up
-		ifconfig wdsi1 up
-		ifconfig wdsi2 up
-		ifconfig wdsi3 up
-		brctl addif br0 wdsi0
-		brctl addif br0 wdsi1
-		brctl addif br0 wdsi2
-		brctl addif br0 wdsi3
-	fi
-}
-
-addRaL02Br0()
-{
-	if [ "$CONFIG_RT2561_AP" != "" ]; then
-		brctl addif br0 raL0
-	fi
+    fi
+    if [ "$wds_en" != "0" ]; then
+	num=0
+        for i in `seq 0 3`; do
+    	    ifconfig wds$num up
+	    brctl addif br0 wds$num
+            num=`expr $num + 1`
+        done
+    fi
 }
 
 # opmode adjustment:
@@ -243,18 +124,17 @@ if [ "$opmode" = "2" -a "$CONFIG_RT2860V2_STA" == "" ]; then
 	nvram_set 2860 OperationMode 1
 	opmode="1"
 fi
-
-
 if [ "$CONFIG_DWC_OTG" == "m" ]; then
     isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`
 fi
 
 ifconfig eth2 0.0.0.0
-
 ifRaxWdsxDown
+
 rmmod rt2860v2_ap > /dev/null 2>&1
 rmmod rt2860v2_sta > /dev/null 2>&1
 ralink_init make_wireless_config rt2860
+
 if [ "$stamode" = "y" ]; then
 	modprobe rt2860v2_sta
 else
@@ -263,8 +143,8 @@ else
 	fi
 	modprobe rt2860v2_ap
 fi
-vpn-passthru.sh &
 
+service vpn-passthru start
 
 # INIC support
 if [ "$CONFIG_RT2880_INIC" != "" ]; then
@@ -292,16 +172,6 @@ fi
         sleep 3
 fi
 
-# RT2561(Legacy) support
-if [ "$CONFIG_RT2561_AP" != "" ]; then
-	ifconfig raL0 down > /dev/null 2>&1
-	rmmod rt2561ap > /dev/null 2>&1
-	ralink_init make_wireless_config rt2561
-	modprobe rt2561ap
-	ifconfig raL0 up
-	sleep 3
-fi
-
 # config interface
 ifconfig ra0 0.0.0.0
 if [ "$ethconv" = "y" ]; then
@@ -310,43 +180,15 @@ fi
 if [ "$radio_off" = "1" ]; then
 	iwpriv ra0 set RadioOn=0
 fi
-if [ "$bssidnum" = "2" ]; then
-	ifconfig ra1 0.0.0.0
-elif [ "$bssidnum" = "3" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-elif [ "$bssidnum" = "4" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-	ifconfig ra3 0.0.0.0
-elif [ "$bssidnum" = "5" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-	ifconfig ra3 0.0.0.0
-	ifconfig ra4 0.0.0.0
-elif [ "$bssidnum" = "6" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-	ifconfig ra3 0.0.0.0
-	ifconfig ra4 0.0.0.0
-	ifconfig ra5 0.0.0.0
-elif [ "$bssidnum" = "7" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-	ifconfig ra3 0.0.0.0
-	ifconfig ra4 0.0.0.0
-	ifconfig ra5 0.0.0.0
-	ifconfig ra6 0.0.0.0
-elif [ "$bssidnum" = "8" ]; then
-	ifconfig ra1 0.0.0.0
-	ifconfig ra2 0.0.0.0
-	ifconfig ra3 0.0.0.0
-	ifconfig ra4 0.0.0.0
-	ifconfig ra5 0.0.0.0
-	ifconfig ra6 0.0.0.0
-	ifconfig ra7 0.0.0.0
+
+num=1;
+if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+    for i in `seq 1 $bssidnum`; do
+        ifconfig ra$num 0.0.0.0
+        num=`expr $num + 1`
+    done
 fi
-if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
+
 	modprobe 8021q
 	vconfig add eth2 1
 	set_vlan_map eth2.1
@@ -355,18 +197,10 @@ if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG
 	ifconfig eth2.2 down > /dev/null 2>&1
 	wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
 	if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
-	ifconfig eth2.2 hw ether $wan_mac
+	    ifconfig eth2.2 hw ether $wan_mac
 	fi
 	ifconfig eth2.1 0.0.0.0
 	ifconfig eth2.2 0.0.0.0
-elif [ "$CONFIG_ICPLUS_PHY" = "y" ]; then
-	#remove ip alias
-	# it seems busybox has no command to remove ip alias...
-	ifconfig eth2:1 0.0.0.0 1>&2 2>/dev/null
-fi
-
-service netuplo stop
-service netuplo start
 
 #
 # init ip address to all interfaces for different OperationMode:
@@ -400,8 +234,6 @@ if [ "$opmode" = "0" ]; then
         addWds2Br0
         addMesh2Br0
 	addRaix2Br0
-	addInicWds2Br0
-	addRaL02Br0
 	wan.sh
 	lan.sh
 
@@ -437,25 +269,11 @@ elif [ "$opmode" = "1" ]; then
 		addWds2Br0
 		addMesh2Br0
 		addRaix2Br0
-		addInicWds2Br0
-		addRaL02Br0
-	fi
-
-	# IC+ 100 PHY (one port only)
-	if [ "$CONFIG_ICPLUS_PHY" = "y" ]; then
-		echo '##### connected to one port 100 PHY #####'
-		if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-			addBr0
-			addRax2Br0
-		fi
-		addWds2Br0
-		addMesh2Br0
-
-		ifconfig eth2:1 172.32.1.254 netmask 255.255.255.0 up
 	fi
 
 	wan.sh
 	lan.sh
+
 elif [ "$opmode" = "2" ]; then
 	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 		echo "##### restore Vtss to dump switch #####"
@@ -493,8 +311,6 @@ else
                 fi
                 addWds2Br0
                 addRaix2Br0
-                addInicWds2Br0
-                addRaL02Br0
 	exit 1
 fi
 
@@ -509,17 +325,10 @@ if [ "$CONFIG_RT2880_INIC" != "" ]; then
        sleep 3
 fi
 
-# in order to use broadcast IP address in L2 management daemon
-if [ "$CONFIG_ICPLUS_PHY" = "y" ]; then
-	route add -host 255.255.255.255 dev $wan_if
-else
-	route add -host 255.255.255.255 dev $lan_if
-fi
-
+route add -host 255.255.255.255 dev $lan_if
 
 m2uenabled=`nvram_get 2860 M2UEnabled`
 if [ "$m2uenabled" = "1" ]; then
 	iwpriv ra0 set IgmpSnEnable=1
 	echo "iwpriv ra0 set IgmpSnEnable=1"
 fi
-
