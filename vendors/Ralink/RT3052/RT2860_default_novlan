@@ -182,7 +182,7 @@ RADIUS_Acct_Key=
 session_timeout_interval=0
 idle_timeout_interval=0
 staWirelessMode=9
-WAN_MAC_ADDR=0:C:43:30:52:66
+WAN_MAC_ADDR=00:0C:43:30:52:66
 
 dhcpStatic1=
 dhcpStatic2=
