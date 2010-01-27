@@ -7,6 +7,15 @@
 
 . /sbin/global.sh
 
+kill_ppp(){
+	echo "Killall ppp connections"
+	killall -q -9 config-pptp.sh
+	killall -q -9 config-l2tp.sh
+	killall -q -9 config-pppoe.sh
+	killall -q -9 pppd
+	killall -q -9 xl2tpd
+}
+
 # stop all
 killall -q udhcpc
 
@@ -150,11 +159,3 @@ else
 	exit 1
 fi
 
-kill_ppp(){
-	echo "Killall ppp connections"
-	killall -q -9 config-pptp.sh
-	killall -q -9 config-l2tp.sh
-	killall -q -9 config-pppoe.sh
-	killall -q -9 pppd
-	killall -q -9 xl2tpd
-}
