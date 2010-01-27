@@ -242,7 +242,7 @@ function list_submit(parm)
 <form method=post name=media_player action="/goform/mediaPlayer">
   <input type=hidden name=hidden_opt value="">
   <input type=hidden name=hidden_vol value="30">
-  <table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+  <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
     <tr> 
       <td class="title" rowspan="4">
         <img id="displayImg" name="displayImg" src="images/display00.gif"/>
@@ -302,7 +302,7 @@ function list_submit(parm)
 <br />
 <form method=post name=player_list action="/goform/mediaPlayerList">
   <input type=hidden name=list_opt value="">
-  <table id="div_track_list" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+  <table id="div_track_list" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
     <tr>
       <td class="title">UnSelected List</td>
       <td class="title"><br /></td>

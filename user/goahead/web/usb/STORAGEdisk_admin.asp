@@ -177,7 +177,7 @@ function open_diskrepart_window()
 <input type=hidden name=hiddenButton value="">
 <input type=hidden name=selectDirIndex value="">
 <input type=hidden name=selectPartIndex value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="4"><font id="storageShowDisk">Disk Display</font></td>
   </tr>
@@ -191,7 +191,7 @@ function open_diskrepart_window()
 dir_count = parseInt('<% getCount(1, "AllDir"); %>');
 </script>
 </table>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type="button" style="{width:80px;}" value="Add" id="storageDiskAdmAdd" onClick="open_diskadd_window()">&nbsp;&nbsp;
@@ -201,7 +201,7 @@ dir_count = parseInt('<% getCount(1, "AllDir"); %>');
 </table>
 <hr />
 <br />
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="4"><font id="storageShowPart">Partition Display</font></td>
   </tr>
@@ -215,7 +215,7 @@ dir_count = parseInt('<% getCount(1, "AllDir"); %>');
 part_count = parseInt('<% getCount(1, "AllPart"); %>');
 </script>
 </table>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type="button" style="{width:80px;}" value="Format" id="storageDiskFormat" onClick="submit_apply('format')">&nbsp;&nbsp;
@@ -225,7 +225,7 @@ part_count = parseInt('<% getCount(1, "AllPart"); %>');
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="right">
     <td>
       <input type="button" style="{width:80px;}" value="RemoveDisk" id="storageDiskRemove" onClick="submit_apply('remove')">&nbsp;&nbsp;

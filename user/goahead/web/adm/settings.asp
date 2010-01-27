@@ -57,7 +57,7 @@ function PageInit()
 <!-- ================= Export ================= -->
 <br />
 <form method="post" name="ExportSettings" action="/cgi-bin/ExportSettings.sh">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="setmanExpSet">Export Settings</td>
   </tr>
@@ -71,7 +71,7 @@ function PageInit()
 
 <!-- ================= Import ================= -->
 <form method="post" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
       <td class="title" colspan="2" id="setmanImpSet">Import Settings</td>
     </tr>
@@ -80,7 +80,7 @@ function PageInit()
       <td><input type="File" name="filename" size="20" maxlength="256"></td>
     </tr>
   </table>
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Import" id="setmanImpSetImport" onClick="return AdmFormCheck()"> &nbsp; &nbsp;
@@ -93,7 +93,7 @@ function PageInit()
 
 <!-- ================= Load FactoryDefaults  ================= -->
 <form method="post" name="LoadDefaultSettings" action="/goform/LoadDefaultSettings">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="setmanLoadFactDefault">Load Factory Defaults</td>
   </tr>

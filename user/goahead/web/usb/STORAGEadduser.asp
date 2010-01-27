@@ -231,7 +231,7 @@ function submit_apply()
 <table class="body"><tr><td>
 
 <form method=post name="storage_adduser" action="/goform/StorageAddUser">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="adduserbasic">Basic Setup</td>
   </tr>
@@ -249,7 +249,7 @@ function submit_apply()
 
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" id="adduserFtp">Ftp Setup</td>
     <td>
@@ -303,7 +303,7 @@ function submit_apply()
 <hr />
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" id="adduserSmb">Samba Setup</td>
     <td>
@@ -316,7 +316,7 @@ function submit_apply()
 <hr />
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="adduserApply" onClick="submit_apply()"> &nbsp; &nbsp;

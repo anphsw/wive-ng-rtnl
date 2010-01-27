@@ -152,7 +152,7 @@ function submit_apply(parm)
 <hr />
 
 <form method=post name=webcam action="/goform/webcamra">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="webcamSettings">Web Camera Setup</td>
   </tr>
@@ -195,7 +195,7 @@ function submit_apply(parm)
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="webcamApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;

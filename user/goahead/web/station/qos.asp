@@ -175,7 +175,7 @@ function PageInit()
 <hr />
 
 <form method="post" name="sta_qos" action="/goform/setStaQoS">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="2" id="qosConfig">Qos Configuration</td>
   </tr>
@@ -225,7 +225,7 @@ function PageInit()
   </tr>
 </table>
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td >
       <input type="button" name="WMMButton" style="{width:120px;}" value="WMM Apply" id="qosWMMApply" onClick="submit_apply(1)"> &nbsp; &nbsp;
@@ -234,7 +234,7 @@ function PageInit()
 </table>
 <br />
 
-<table div="wmm_dls_setup" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table div="wmm_dls_setup" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" id="qosDLS">Direct Link Setup</td>
   </tr>
@@ -263,7 +263,7 @@ function PageInit()
   </tr>
 </table>
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td >
       <input type="button" name="DlsSetupButton" style="{width:120px;}" value="DLS Apply" id="qosDLSAppy" onClick="submit_apply(2)"> &nbsp; &nbsp;
@@ -272,7 +272,7 @@ function PageInit()
 </table>
 <br />
 
-<table div="wmm_dls_status" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table div="wmm_dls_status" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="qosDLSStaus">DLS Status</td>
   </tr>
@@ -282,7 +282,7 @@ function PageInit()
   </tr>
   <% getStaDLSList(); %>
 </table>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td >
 <!--      <input type="button" name="MoveToDlsButton" style="{width:120px;}" value="Move To Dls Setup" onClick="Move_To_Dls()"> &nbsp; &nbsp;-->

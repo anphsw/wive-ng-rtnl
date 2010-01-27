@@ -553,7 +553,7 @@ function initValue()
 </table>
 
 <!-- ================= STATIC Mode ================= -->
-<table id="static" width="540" border="1" cellpadding="2" cellspacing="1">
+<table id="static" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wStaticMode">Static Mode</td>
 </tr>
@@ -582,7 +582,7 @@ function initValue()
 </table>
 
 <!-- ================= DHCP Mode ================= -->
-<table id="dhcp" width="540" border="1" cellpadding="2" cellspacing="1">
+<table id="dhcp" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wDhcpMode">DHCP Mode</td>
 </tr>
@@ -593,7 +593,7 @@ function initValue()
 </table>
 
 <!-- ================= PPPOE Mode ================= -->
-<table id="pppoe" width="540" border="1" cellpadding="2" cellspacing="1">
+<table id="pppoe" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wPppoeMode">PPPoE Mode</td>
 </tr>
@@ -615,7 +615,7 @@ function initValue()
 </table>
 
 <!-- ================= L2TP Mode ================= -->
-<table id="l2tp" width="540" border="1" cellpadding="2" cellspacing="1">
+<table id="l2tp" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wL2tpMode">L2TP Mode</td>
 </tr>
@@ -681,7 +681,7 @@ function initValue()
 </table>
 
 <!-- ================= PPTP Mode ================= -->
-<table id="pptp" width="540" border="1" cellpadding="2" cellspacing="1">
+<table id="pptp" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wPptpMode">PPTP Mode</td>
 </tr>
@@ -747,7 +747,7 @@ function initValue()
 </table>
 
 <!-- =========== MAC Clone =========== -->
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="wMacClone">MAC Address Clone</td>
 </tr>
@@ -769,7 +769,7 @@ function initValue()
 </tr>
 </table>
 
-<table width="540" cellpadding="2" cellspacing="1">
+<table width="90%" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
     <input type=submit style="{width:120px;}" value="Apply" id="wApply">&nbsp;&nbsp;

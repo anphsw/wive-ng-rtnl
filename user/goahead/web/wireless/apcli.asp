@@ -262,7 +262,7 @@ function CheckValue()
 <hr />
 
 <form method=post name=wireless_apcli action="/goform/wirelessApcli" onSubmit="return CheckValue()">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="3">AP Client Parameters</td>
   </tr>
@@ -350,7 +350,7 @@ function CheckValue()
   </tr>
 </table>
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp;

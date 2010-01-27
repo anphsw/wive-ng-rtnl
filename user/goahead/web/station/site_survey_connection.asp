@@ -760,7 +760,7 @@ function submit_apply()
 
 
 <form method=post name="sta_site_survey_connection" id="sta_site_survey_connection" action="/goform/setStaConnect">
-<table id="div_ssid" name="div_ssid" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_ssid" name="div_ssid" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="head" id="connectSSID">SSID</td>
     <td><input type="text" name="Ssid" id="Ssid" maxlength=32></td>
@@ -769,7 +769,7 @@ function submit_apply()
 <br />
 <hr />
 
-<table id="div_security_mode" name="div_security_mode" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_security_mode" name="div_security_mode" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="connectSecurePolicy">Security Policy</td>
   </tr>
@@ -815,7 +815,7 @@ function submit_apply()
 </table>
 <br />
 
-<table id="div_wep" name="div_wep" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wep" name="div_wep" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="3" id="connectWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
@@ -867,7 +867,7 @@ function submit_apply()
   </tr>
 </table>
 
-<table id="div_wpa" name="div_wpa" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wpa" name="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="connectWPA">WPA</td>
   </tr>
@@ -888,7 +888,7 @@ function submit_apply()
 <br />
 
 <!-- 802.1x -->
-<table id="div_8021x" name="div_8021x" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_8021x" name="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="connect1X">802.1x</td>
   </tr>
@@ -982,7 +982,7 @@ function submit_apply()
 </table>
 
 <br />
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="connectApply" onClick="submit_apply()"> &nbsp; &nbsp;

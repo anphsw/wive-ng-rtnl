@@ -40,7 +40,7 @@ function PageInit()
 <p id="aboutIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr />
 
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="2" id="aboutAbout">About</td>
   </tr>

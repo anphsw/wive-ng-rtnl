@@ -463,7 +463,7 @@ function web_refresh()
 frames among the network members.</p>
 <hr />
 <form method="post" name="wireless_mesh" action="/goform/wirelessMesh" onSubmit="return CheckValue()">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="meshMeshCapacity">Mesh Capacity</td>
   </tr>
@@ -479,7 +479,7 @@ frames among the network members.</p>
 
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" id="div_mesh_settings">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" id="div_mesh_settings">
   <tr> 
     <td class="title" colspan="2" id="meshMeshSettings">Mesh Settings</td>
   </tr>
@@ -502,7 +502,7 @@ frames among the network members.</p>
 
 <br />
 
-<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540">
+<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
   <tr>
     <td class="title" colspan="2" id="meshSecurePolicy"> Security Policy </td>
   </tr>
@@ -532,7 +532,7 @@ frames among the network members.</p>
     </td>
   </tr>
 </table>
-<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540">
+<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
   <tr> 
     <td class="title" colspan="3" id="meshSecureWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
@@ -547,7 +547,7 @@ frames among the network members.</p>
     </td>
   </tr>
 </table>
-<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540">
+<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
   <tr>
     <td class="title" colspan="2" id="meshSecreWPA">WPA</td>
   </tr>
@@ -575,7 +575,7 @@ frames among the network members.</p>
 
 <form method="post" name="mesh_manual_link" action="/goform/meshManualLink">
 <input type="hidden" name="link_action" value="">
-<table width="540" id="manual_link" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" id="manual_link" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="3" id="meshMLink">Manual Mesh Link</td>
   </tr>
@@ -592,7 +592,7 @@ frames among the network members.</p>
 
 <br />
 
-<table width="540" id="mesh_info" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" id="mesh_info" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="7">
       <font id="meshMeshInfo">Mesh Network Infomation&nbsp;&nbsp;&nbsp;</font>

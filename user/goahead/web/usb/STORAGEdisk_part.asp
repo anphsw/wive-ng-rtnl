@@ -198,7 +198,7 @@ document.write("<td>"+maxvol+" MB</td>");
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="partedApply" onClick="submit_apply()"> &nbsp; &nbsp;

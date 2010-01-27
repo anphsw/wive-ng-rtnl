@@ -254,7 +254,7 @@ function open_useredit_window()
 <input type=hidden name=selectMaxLogins value="">
 <input type=hidden name=selectMode value="">
 <input type=hidden name=selectSmb value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="4"><font id="storageAdmUser">User Management</font>
       </td>
@@ -312,7 +312,7 @@ for (var i=1;i<9;i++)
 }
 </script>
 </table>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type="button" style="{width:80px;}" name=storage_user_add value="Add" id="storageAdmUserAdd" onClick="open_useradd_window()">&nbsp;&nbsp;
@@ -321,7 +321,7 @@ for (var i=1;i<9;i++)
 </table>
 <hr />
 <br>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type="button" style="{width:80px;}" value="Apply" id="storageAdmApply" onClick="submit_apply('apply')"> 

@@ -68,7 +68,7 @@ function selectedBSSID()
 <form method=post name=sta_org_del action="/goform/setStaOrgDel">
 <input type=hidden name=selectedbssid>
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2">MPDU Aggregation</td>
   </tr>
@@ -90,7 +90,7 @@ function selectedBSSID()
 </table>
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2">Connected BSSIDs</td>
   </tr>
@@ -109,7 +109,7 @@ function selectedBSSID()
 </table>
 
 <br>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type="button" name="mpdu_apply" style="{width:120px;}" value="Apply" onClick="submit_apply();"> &nbsp; &nbsp;

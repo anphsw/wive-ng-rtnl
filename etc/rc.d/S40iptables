@@ -20,7 +20,7 @@ start() {
 	iptables -t filter -A FORWARD -j web_filter
 
 	#rules for access services from wan (DROP)
-	if [ "$RMG" = "0" ]; then
+	if [ "$RMG" = "0" ] && [ "$OperationMode" != "0" ]; then
 	echo "Drop acess from wan $wan_if"
 	    iptables -A INPUT -i $wan_if -p tcp -m state --state NEW -j DROP
     	    iptables -A INPUT -i $wan_if -p udp -j DROP
@@ -35,7 +35,7 @@ start() {
 	fi
 
 	#ping from wan
-	if [ "$WANPingFilter" = "0" ]; then
+	if [ "$WANPingFilter" = "0" ] && [ "$OperationMode" != "0" ]; then
 	echo "Drop ping from wan $wan_if"
     	    iptables -A INPUT -i $wan_if -p icmp -j DROP
     	    iptables -A INPUT -i ppp+ -p icmp -j DROP
@@ -51,12 +51,14 @@ start() {
 	    iptables -A INPUT -i br0:9 -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 	fi
 
-	#enable forward only from local network to wan/ppp
-	iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
-	iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
-        iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
-	if [ "$Lan2Enabled" = "1" ]; then
-	    iptables -A FORWARD -o br0:9 -d $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	if [ "$OperationMode" != "0" ]; then
+	    #enable forward only from local network to wan/ppp
+	    iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+		iptables -A FORWARD -o br0:9 -d $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	    fi
 	fi
 
         #add limit connection rules for local services
@@ -80,7 +82,7 @@ start() {
 			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
 
         #rules for upnp
-	if [ "$upnp" = "1" ]; then
+	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
             iptables -t nat -N MINIUPNPD
             iptables -t nat -F MINIUPNPD
             iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
@@ -90,7 +92,7 @@ start() {
         fi
         
 	#masqrade for wan interfaces
-	if [ "$NAT" = "1" ]; then
+	if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then
 	echo "Add masqrade rules"
 	    sysctl -w net.ipv4.ip_forward=1
 	    iptables -t nat -N port_forward
@@ -151,6 +153,7 @@ get_param() {
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
     wan_mode=`nvram_get 2860 wanConnectionMode`
+    OperationMode=`nvram_get 2860 OperationMode`
     upnp=`nvram_get 2860 upnpEnabled`
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     NAT=`nvram_get 2860 natEnabled`

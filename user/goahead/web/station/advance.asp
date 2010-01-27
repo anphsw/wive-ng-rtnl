@@ -151,7 +151,7 @@ function PageInit()
 <hr />
 
 <form method=post name="sta_advance" action="/goform/setStaAdvance">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="6" id="staadvConfig">Advance Configuration</td>
   </tr>
@@ -241,7 +241,7 @@ function PageInit()
 </table>
 <br />
 
-<table id="div_ht_phy_mode" name="div_ht_phy_mode" width="540" border="1" cellpadding="2" cellspacing="1" <%
+<table id="div_ht_phy_mode" name="div_ht_phy_mode" width="90%" border="1" cellpadding="2" cellspacing="1" <%
       if (wm == "0" || wm == "1" || wm == "2" || wm == "3")
         write("style=\"visibility:hidden;display:none\""); %>>
   <tr>
@@ -311,7 +311,7 @@ function PageInit()
 </table>
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td >
       <input type="button" name="radioButton" style="{width:120px;}" value=<%

@@ -82,7 +82,7 @@ function PageInit()
 <hr />
 
 <form method="post" name="sta_profile" action="/goform/setStaProfile">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr> 
     <td class="title" colspan="7" id="profList">Pofile List</td>
   </tr>
@@ -99,7 +99,7 @@ function PageInit()
 </table>
 <br />
 
-<table width="540" cellpadding="2" cellspacing="1">
+<table width="90%" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
     <input type="button" name="addProfileButton" id="profAdd" style="{width:120px;}" value="Add" onClick="open_profile_page()"> &nbsp; &nbsp;

@@ -80,7 +80,7 @@ function submit_apply()
 <table class="body"><tr><td>
 
 <form method=post name="media_adddir" action="/goform/MediaDirAdd">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="3" id="adddirPath">Access Path</td>
   </tr>
@@ -98,7 +98,7 @@ path_count = parseInt('<% getCount(1, "AllDir"); %>');
 <hr />
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="adddirApply" onClick="submit_apply()"> &nbsp; &nbsp;

@@ -176,7 +176,7 @@ function PageInit()
 <hr />
 
 <form method=post name="sta_site_survey">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="8" id="scanSiteSurvey">Site Survey</td>
   </tr>
@@ -192,7 +192,7 @@ function PageInit()
   </tr>
   <% getStaBSSIDList(); %>
 
-  <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+  <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
     <tr>
       <td>
 	<input type=text name="connectedssid" size=28 value="<% getStaConnectionSSID(); %>" disabled>&nbsp;&nbsp;&nbsp;

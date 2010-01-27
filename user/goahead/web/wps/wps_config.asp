@@ -86,7 +86,7 @@ function checkValue()
 	<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The AP supports Simple Config settings for your network.</span>
 
 	<br><br><br>
-	<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+	<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
 		<tr align="center">
 			<td><b>Wi-Fi Protected Setup</b></td>
 			<td>
@@ -99,9 +99,9 @@ function checkValue()
 		</tr>
 	</table>
 	<br>
-	<hr width="540" align="left">
+	<hr width="90%" align="left">
 	<br>
-	<table id="div_wsc_configure" name="div_wsc_configure" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+	<table id="div_wsc_configure" name="div_wsc_configure" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 	<br>
 
 		<tr> 
@@ -129,7 +129,7 @@ function checkValue()
 		</tr>
 	</table>
 	<br>
-	<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+	<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
 		<tr align="center">
 			<td>
 				<input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp; <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
@@ -143,7 +143,7 @@ function checkValue()
 <!--   ----------------- Out of box --------------------------- !!!!!  -->
 <form method=post name=wireless_simple_config_reset action=/goform/wireless_simple_config_reset>
   <br><br>
-  <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 
     <tr> 
       <td bgcolor="#2C5EA4"colspan="2"><font color="#FFFFFF"><b>Reset to Out-Of-Box Configuration</b></font></td>
@@ -158,7 +158,7 @@ function checkValue()
     </tr>
   </table>
   <br>
-  <table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+  <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
     <tr align="center">
       <td>
         <input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp; <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">

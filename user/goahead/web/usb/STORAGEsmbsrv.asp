@@ -284,7 +284,7 @@ function submit_apply(parm)
 dir_count = parseInt('<% getCount(1, "AllSmbDir"); %>');
 </script>
 </table>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Add" id="smbAdd" onClick="open_diradd_window()"> &nbsp; &nbsp;
@@ -295,7 +295,7 @@ dir_count = parseInt('<% getCount(1, "AllSmbDir"); %>');
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="smbApply" onClick="submit_apply('apply')">

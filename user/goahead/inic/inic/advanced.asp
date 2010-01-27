@@ -435,7 +435,7 @@ function wmm_capable_enable_switch()
 <hr />
 
 <form method=post name=wireless_advanced action="/goform/inicAdvanced" onSubmit="return CheckValue()">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
   </tr>
@@ -541,7 +541,7 @@ function wmm_capable_enable_switch()
 </table>
 <hr />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
   </tr>
@@ -568,7 +568,7 @@ function wmm_capable_enable_switch()
   <input type="hidden" name="rebootAP" value="0">
 </table>
 <br>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="advApply"> &nbsp; &nbsp;

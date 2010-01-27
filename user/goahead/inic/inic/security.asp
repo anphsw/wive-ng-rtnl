@@ -1055,7 +1055,7 @@ function onPreAuthenticationClick(type)
 <form method="post" name="security_form" action="/goform/INICSecurity">
 
 <!-- ---------------------  MBSSID Selection  --------------------- -->
-<table border="1" cellpadding="2" cellspacing="1" width="540">
+<table border="1" cellpadding="2" cellspacing="1" width="90%">
 <tbody><tr>
   <td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
 </tr>
@@ -1071,7 +1071,7 @@ function onPreAuthenticationClick(type)
 
 <hr />
 
-<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540">
+<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
   <tbody><tr>
 
     <td class="title" colspan="2"> <span id="sp_title">Security Policy </span></td>
@@ -1100,7 +1100,7 @@ function onPreAuthenticationClick(type)
 <br>
 
 <!-- WEP -->
-<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540" style="visibility: hidden;">
+<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
   <tbody><tr> 
     <td class="title" colspan="4" id="secureWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
@@ -1156,7 +1156,7 @@ function onPreAuthenticationClick(type)
 <!-- <br /> -->
 
 <!-- WPA -->
-<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540" style="visibility: hidden;">
+<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
 
   <tbody><tr>
     <td class="title" colspan="2" id="secreWPA">WPA</td>
@@ -1217,7 +1217,7 @@ function onPreAuthenticationClick(type)
 </tbody></table>
 
 <br>
-<table id="div_radius_server" name="div_radius_server" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="540" style="visibility: hidden;">
+<table id="div_radius_server" name="div_radius_server" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
 <tbody>
    <tr>
     <td class="title" colspan="2" id="secureRadius">Radius Server</td>
@@ -1291,7 +1291,7 @@ for(aptable = 0; aptable < MBSSID_MAX; aptable++){
 </script>
 
 <!-- <br /> -->
-<table border="0" cellpadding="2" cellspacing="1" width="540">
+<table border="0" cellpadding="2" cellspacing="1" width="90%">
   <tbody><tr align="center">
 
     <td>

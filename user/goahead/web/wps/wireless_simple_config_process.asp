@@ -67,7 +67,7 @@ function initValue()
 </script>
 </head>
 <body background="ralink-bg.gif" leftmargin="50" topmargin="25" marginwidth="0" marginheight="0" onLoad="initValue()">
-  <table id="div_wsc_process" name="div_wsc_process" width="540" border="0" cellspacing="0" cellpadding="0" vspace="0" hspace="0" bordercolor="#9BABBD">
+  <table id="div_wsc_process" name="div_wsc_process" width="90%" border="0" cellspacing="0" cellpadding="0" vspace="0" hspace="0" bordercolor="#9BABBD">
     <tr>
       <th height=250>
         <font size=4 face=Verdana>System Processing...Please wait... <p>
@@ -75,7 +75,7 @@ function initValue()
     </tr>
   </table>
 
-  <table id="div_wsc_process_info" name="div_wsc_process_info" width="540" border="0" cellspacing="0" cellpadding="0" vspace="0" hspace="0" bordercolor="#9BABBD">
+  <table id="div_wsc_process_info" name="div_wsc_process_info" width="90%" border="0" cellspacing="0" cellpadding="0" vspace="0" hspace="0" bordercolor="#9BABBD">
     <tr>
       <th height=250>
         <font size=2 face=Verdana> <% getWscStatusASP(); %> <p>

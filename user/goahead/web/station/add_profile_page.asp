@@ -946,7 +946,7 @@ function submit_apply()
 
 
 <form method=post name="profile_page" action="/goform/addStaProfile">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="addprofSysConf">System Configuration</td>
   </tr>
@@ -1007,9 +1007,9 @@ function submit_apply()
     </td>
   </tr>
 </table>
-<hr width="540" align="left">
+<hr width="90%" align="left">
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="addprofSecurePolicy">Security Policy</td>
   </tr>
@@ -1041,7 +1041,7 @@ function submit_apply()
 <br />
 
 <!-- WEP -->
-<table id="div_wep" name="div_wep" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wep" name="div_wep" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="3" id="addprofWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
@@ -1095,7 +1095,7 @@ function submit_apply()
 <br />
 
 <!-- WPA -->
-<table id="div_wpa" name="div_wpa" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wpa" name="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="addprofWPA">WPA</td>
   </tr>
@@ -1116,7 +1116,7 @@ function submit_apply()
 <br />
 
 <!-- 802.1x -->
-<table id="div_8021x" name="div_8021x" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_8021x" name="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" >802.1x</td>
   </tr>
@@ -1210,7 +1210,7 @@ function submit_apply()
 </table>
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="addprofApply" onClick="submit_apply()"> &nbsp; &nbsp;

@@ -60,7 +60,7 @@ function initValue()
 <hr />
 
 <form method=post name=usbiNIC action="/goform/USBiNIC">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="usbiNICSettings">USB iNIC Setup</td>
   </tr>
@@ -74,7 +74,7 @@ function initValue()
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="usbiNICApply"> &nbsp; &nbsp;

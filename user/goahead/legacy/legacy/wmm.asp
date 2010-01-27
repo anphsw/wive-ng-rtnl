@@ -366,7 +366,7 @@ function submit_apply()
 
 <body onLoad="initValue()">
 <form method=post name=wmm action="/goform/inicWmm">
-  <table align="center" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <table align="center" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
     <tr> 
       <td align="center" bgcolor="#2C5EA4"colspan="7"><font color="#FFFFFF"><b>WMM Parameters of Access Point</b></font></td>
     </tr>
@@ -423,7 +423,7 @@ function submit_apply()
     </tr>
   </table>
   <br>
-  <table align="center" width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+  <table align="center" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
     <tr> 
       <td align="center" bgcolor="#2C5EA4"colspan="7"><font color="#FFFFFF"><b>WMM Parameters of Station</b></font></td>
     </tr>
@@ -474,7 +474,7 @@ function submit_apply()
     </tr>
   </table>
 
-  <table align="center" width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+  <table align="center" width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
     <tr align="center">
       <td>
         <input type=button style="{width:120px;}" value="Apply" onClick="submit_apply()">&nbsp;&nbsp;

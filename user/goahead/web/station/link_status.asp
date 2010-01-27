@@ -65,7 +65,7 @@ function PageInit()
 <hr />
 
 <form method=post name="sta_link_status" action="/goform/setStaDbm">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td colspan="3" class="title" id="linkLinkStatus">Link Status</td>
   </tr>
@@ -117,7 +117,7 @@ function PageInit()
 </table>
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="linkHT">HT</td>
   </tr><% getStaHT(); %><tr>

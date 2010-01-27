@@ -207,7 +207,7 @@ dir_count = parseInt('<% getCount(1, "AllMediaDir"); %>');
 </script>
 </table>
 </center>
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Add" name="media_dir_add" id="mediaAdd" onClick="open_media_diradd_window()"> &nbsp; &nbsp;
@@ -217,7 +217,7 @@ dir_count = parseInt('<% getCount(1, "AllMediaDir"); %>');
 </table>
 <hr />
 <br />
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="mediaApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;

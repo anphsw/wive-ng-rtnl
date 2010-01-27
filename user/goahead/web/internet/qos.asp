@@ -479,7 +479,7 @@ function checkNum(str)
 
 
 <form method="post" name="QoSSetup" action="/goform/QoSSetup">
-<table border=1 bordercolor=#9BABBD width="540">
+<table border=1 bordercolor=#9BABBD width="90%">
 <tr>
 	<td class="title" colspan="2" id="QoSSetupStr">QoS Setup </td>
 </tr>
@@ -571,7 +571,7 @@ function checkNum(str)
 </form>
 
 <br>
-<table id="div_qos_group" border=1 bordercolor=#9BABBD width="540" style="visibility: hidden;">
+<table id="div_qos_group" border=1 bordercolor=#9BABBD width="90%" style="visibility: hidden;">
 <tr>
 	<td class="title" id="QoSGroupStr"> Group </td>
 	<td class="title" id="QoSGroupAttrStr"> Attribute</td>

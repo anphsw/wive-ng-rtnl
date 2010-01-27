@@ -132,7 +132,7 @@ function selectedBSSID(tmp)
 <hr />
 
 <form method=post name="sta_11n_configuration" action="/goform/setSta11nCfg">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="2" id="11nConfig">11n Configuration</td>
   </tr>
@@ -168,7 +168,7 @@ function selectedBSSID(tmp)
 </table>
 <br />
 
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type="button" style="{width:120px;}" value="Apply" id="11nApply" onClick="submit_apply()"> &nbsp; &nbsp;

@@ -87,7 +87,7 @@ function submit_form()
 
 
 <form method=post name="afattr" action="/goform/QoSAFAttribute">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 
   <input type=hidden name="af_index" id="af_index" value="">
   <tr>

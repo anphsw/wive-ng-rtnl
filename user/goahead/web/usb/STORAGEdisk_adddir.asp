@@ -97,7 +97,7 @@ function submit_apply()
 
 <form method=post name="disk_adddir" action="/goform/storageDiskAdm">
 <input type="hidden" name="hiddenButton" value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr> 
     <td class="title" id="adddirName">Directory Name</td>
     <td>
@@ -109,7 +109,7 @@ function submit_apply()
 <hr />
 <br />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="3" id="adddirPart">Partition</td>
   </tr>
@@ -127,7 +127,7 @@ part_count = parseInt('<% getCount(1, "AllPart"); %>');
 <hr />
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="adddirApply" onClick="submit_apply()"> &nbsp; &nbsp;

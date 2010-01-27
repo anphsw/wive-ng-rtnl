@@ -170,7 +170,7 @@ function submit_apply()
 
 <form method=post name="storage_edituser" action="/goform/StorageEditUser">
 <input type=hidden name=hiddenIndex value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
     <td class="head" id="edituserName">User Name</td>
     </td>
@@ -228,7 +228,7 @@ function submit_apply()
 </table>
 <br />
 
-<table width = "540" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="edituserApply" onClick="submit_apply()"> &nbsp; &nbsp;

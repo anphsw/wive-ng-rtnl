@@ -43,7 +43,7 @@ function PageInit()
 <hr />
 
 <form method=post name="sta_statistics" action="/goform/resetStaCounters">
-<table width="540" border="1" cellpadding="2" cellspacing="1">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
   <tr>
     <td class="title" colspan="2" id="statisticTx">Transmit Statistics</td>
   </tr>
@@ -76,7 +76,7 @@ function PageInit()
 <input type=hidden name=dummyData value="1">
 <br />
 
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>	
       <input type="submit" style="{width:120px;}" value="Reset Counters" id="statisticResetCounter">

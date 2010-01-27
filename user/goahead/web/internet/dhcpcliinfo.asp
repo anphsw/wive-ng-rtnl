@@ -39,7 +39,7 @@ function initValue()
 <p id="dIntroduction"></p>
 <hr />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="4" id="dClients">DHCP Clients</td>
   </tr>

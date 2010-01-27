@@ -681,7 +681,7 @@ function greenap_action_switch(index)
 
 <!-- ================= Langauge Settings ================= -->
 <form method="post" name="Lang" action="/goform/setSysLang">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="manLangSet">Language Settings</td>
   </tr>
@@ -694,7 +694,7 @@ function greenap_action_switch(index)
     </td>
   </tr>
 </table>
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="manLangApply" onClick="return setLanguage()"> &nbsp; &nbsp;
@@ -706,7 +706,7 @@ function greenap_action_switch(index)
 
 <!-- ================= Adm Settings ================= -->
 <form method="post" name="Adm" action="/goform/setSysAdm">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
   </tr>
@@ -719,7 +719,7 @@ function greenap_action_switch(index)
     <td><input type="password" name="admpass" size="16" maxlength="32" value="<% getCfgGeneral(1, "Password"); %>"></td>
   </tr>
 </table>
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="manAdmApply" onClick="return AdmFormCheck()"> &nbsp; &nbsp;
@@ -731,7 +731,7 @@ function greenap_action_switch(index)
 
 <!-- ================= NTP Settings ================= -->
 <form method="post" name="NTP" action="/goform/NTP">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
   <td class="title" colspan="2" id="manNTPSet">NTP Settings</td>
 </tr>
@@ -803,7 +803,7 @@ function greenap_action_switch(index)
 </tr>
 </tbody></table>
 
-<table width="540" border="0" cellpadding="2" cellspacing="1">
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="manNTPApply" onClick="return NTPFormCheck()"> &nbsp; &nbsp;
@@ -815,7 +815,7 @@ function greenap_action_switch(index)
 
 <!-- ================= GreenAP ================= -->
 <form method="post" name="GreenAP" action="/goform/GreenAP">
-<table id="div_greenap" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table id="div_greenap" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
     <td class="title" colspan="3" id="manGAPTitle">Green AP</td>
   </tr>
@@ -879,7 +879,7 @@ function greenap_action_switch(index)
   }
   </script> 
 </table>
-<table id="div_greenap_submit" width="540" border="0" cellpadding="2" cellspacing="1">
+<table id="div_greenap_submit" width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type="submit" style="{width:120px;}" value="Apply" id="manGreenAPApply">&nbsp;&nbsp;
@@ -891,7 +891,7 @@ function greenap_action_switch(index)
 
 <!-- ================= DDNS  ================= -->
 <form method="post" name="DDNS" action="/goform/DDNS">
-<table id="div_ddns" width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table id="div_ddns" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
   <td class="title" colspan="2" id="manDdnsSet">DDNS Settings</td>
 </tr>
@@ -921,7 +921,7 @@ function greenap_action_switch(index)
 </tr>
 </tbody></table>
 
-<table id="div_ddns_submit" width="540" border="0" cellpadding="2" cellspacing="1">
+<table id="div_ddns_submit" width="90%" border="0" cellpadding="2" cellspacing="1">
   <tr align="center">
     <td>
       <input type=submit style="{width:120px;}" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;

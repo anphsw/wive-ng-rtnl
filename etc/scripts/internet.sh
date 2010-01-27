@@ -117,9 +117,7 @@ if [ "$CONFIG_DWC_OTG" == "m" ]; then
     isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`
 fi
 
-ifconfig eth2 0.0.0.0
 ifRaxWdsxDown
-
 rmmod rt2860v2_ap > /dev/null 2>&1
 rmmod rt2860v2_sta > /dev/null 2>&1
 ralink_init make_wireless_config rt2860
@@ -213,39 +211,36 @@ if [ "$opmode" = "0" ]; then
 	lan.sh
 
 elif [ "$opmode" = "1" ]; then
-	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-		if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-			if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-				echo '##### config IC+ vlan partition (WLLLL) #####'
-				config-vlan.sh 0 WLLLL
-			else
-				echo '##### config IC+ vlan partition (LLLLW) #####'
-				config-vlan.sh 0 LLLLW
-			fi
+	if [ "$CONFIG_RAETH_ROUTER" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
+		if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+			echo '##### config vlan partition (WLLLL) #####'
+			config-vlan.sh 0 WLLLL
+		else
+			echo '##### config vlan partition (LLLLW) #####'
+			config-vlan.sh 0 LLLLW
 		fi
-		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-			echo '##### config Vtss vlan partition #####'
-			config-vlan.sh 1 1
-		fi
-		if [ "$CONFIG_RT_3052_ESW" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
-			if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-				echo '##### config RT3052 vlan partition (WLLLL) #####'
-				config-vlan.sh 2 WLLLL
-			else
-				echo '##### config RT3052 vlan partition (LLLLW) #####'
-				config-vlan.sh 2 LLLLW
-			fi
-		fi
-		addBr0
-		brctl addif br0 eth2.1
-		if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-			addRax2Br0
-		fi
-		addWds2Br0
-		addMesh2Br0
-		addRaix2Br0
 	fi
-
+	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+		echo '##### config Vtss vlan partition #####'
+		config-vlan.sh 1 1
+	fi
+	if [ "$CONFIG_RT_3052_ESW" = "y" -a "$CONFIG_LAN_WAN_SUPPORT" = "y" ]; then
+		if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+			echo '##### config RT3052 vlan partition (WLLLL) #####'
+			config-vlan.sh 2 WLLLL
+		else
+			echo '##### config RT3052 vlan partition (LLLLW) #####'
+			config-vlan.sh 2 LLLLW
+		fi
+	fi
+	addBr0
+	brctl addif br0 eth2.1
+	if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
+		addRax2Br0
+	fi
+	addWds2Br0
+	addMesh2Br0
+	addRaix2Br0
 	wan.sh
 	lan.sh
 
@@ -262,24 +257,22 @@ elif [ "$opmode" = "2" ]; then
 	lan.sh
 
 elif [ "$opmode" = "3" ]; then
-	if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-		if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-			echo "##### restore Vtss to dump switch #####"
-			config-vlan.sh 1 0
-		fi
-		if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-			echo "##### restore RT3052 to dump switch #####"
-			config-vlan.sh 2 0
-		fi
-		addBr0
-		brctl addif br0 eth2
+	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+		echo "##### restore Vtss to dump switch #####"
+		config-vlan.sh 1 0
 	fi
+	if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+		echo "##### restore RT3052 to dump switch #####"
+		config-vlan.sh 2 0
+	fi
+	addBr0
+	brctl addif br0 eth2
 	wan.sh
 	lan.sh
 else
-	echo "unknown OperationMode: $opmode"
-                                echo '##### config RT3052 vlan partition (WLLLL) #####'
-                                config-vlan.sh 2 WLLLL
+    echo "unknown OperationMode: $opmode"
+        echo '##### config RT3052 vlan partition (WLLLL) #####'
+                config-vlan.sh 2 WLLLL
                 addBr0
                 brctl addif br0 eth2.1
                 if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
