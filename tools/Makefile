@@ -13,3 +13,6 @@ clean:
 	make -C sstrip clean
 	make -C mksquash_lzma-3.2 clean
 	rm -rf ./bin
+
+mrproper:
+	echo "OK"
