@@ -6,6 +6,7 @@ find $PWD/user -name '*.o' | xargs rm -f
 find $PWD -name '*.old' | xargs rm -f
 find $PWD -name '*.log' | xargs rm -f
 find $PWD -name CVS -type d | xargs rm -rf
+rm -f .tmp*
 
 make clean -C Uboot
 make clean -C tools

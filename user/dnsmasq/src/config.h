@@ -147,6 +147,8 @@ NOTES:
 /* platform independent options- uncomment to enable */
 #define HAVE_BROKEN_RTC
 #define NO_TFTP
+#define NO_DHCP
+
 //#define NO_HAVE_DBUS
 /* #define HAVE_BROKEN_RTC */
 /* #define HAVE_DBUS */

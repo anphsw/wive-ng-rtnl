@@ -29,24 +29,6 @@ start() {
         echo "serial=""$serial" >> /etc/miniupnpd.conf.uuid
         fs save
     fi
-
-    MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
-    if [ $MAC = "0" ]; then
-    echo "First start MAC generate"
-	macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-	macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-	macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-	macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-	macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-
-    echo "Set new mac!"
-	WLAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
-    echo WLAN_MACADDR="$WLAN_MACADDR"
-	nvram_set WAN_MAC_ADDR "$WLAN_MACADDR"
-    else
-    echo "Use current mac."
-    fi
-
 }
 
 stop() {

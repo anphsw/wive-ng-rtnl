@@ -23,7 +23,9 @@
     service dnsserver stop
     service shaper stop
     service ddns stop
+    service iptables stop
 
+    service iptables start
     service ntp start
     service ddns start
     service dnsserver start

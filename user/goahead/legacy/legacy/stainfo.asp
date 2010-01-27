@@ -19,7 +19,7 @@
 <p> You could monitor stations which associated to this Legacy AP here. </p>
 <hr />
 
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="3">Wireless Network</td>
   </tr>

@@ -40,11 +40,27 @@ echo "Start network interfaces..."
 	set_vlan_map eth2.2
     fi
 
-    echo "Set mac for WAN"
-    wan_mac=`nvram_get 2860 WAN_MAC_ADDR`
-    if [ "$wan_mac" != "FF:FF:FF:FF:FF:FF" ]; then
-        ifconfig eth2.2 hw ether $wan_mac
+    MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
+    if [ $MAC = "0" ]; then
+    echo "First start MAC generate"
+        macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+        macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+        macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+        macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+        macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+
+    echo "Set new mac!"
+        WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
+        nvram_set WAN_MAC_ADDR "$WAN_MACADDR"
+        MAC=$WAN_MACADDR
+    else
+	echo "Use current mac."
+	MAC=`nvram_get WAN_MAC_ADDR`
     fi
+
+    #set mac for wan
+    echo WAN_MACADDR="$MAC"
+    ifconfig eth2.2 hw ether $MAC
 
     #drop adresses
     ifconfig eth2.1 0.0.0.0

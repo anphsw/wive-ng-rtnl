@@ -14,6 +14,19 @@ PASSWORD=`nvram_get 2860 wan_l2tp_pass`
 killall -q -9 pppd > /dev/null 2>&1
 killall -q -9 xl2tpd > /dev/null 2>&1
 
+    echo "Check for L2TP server reachable"
+    reachable=0;
+    while [ $reachable -eq 0 ]; do
+        ping -q -c 1 $SERVER
+        if [ "$?" -eq 0 ]; then
+            reachable=1
+        else
+            echo "Server unreachable wait 30 sec."
+            sleep 30
+            reachable=0;
+        fi
+    done
+
     echo "Get vpn server ip adress"
     ADDRESS=`nslookup "$SERVER" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
     if [ "$ADDRESS" != "" ]; then

@@ -610,7 +610,7 @@ function RadioStatusChange(rs)
 <hr />
 
 <form method=post name=wireless_basic action="/goform/legacyBasic" onSubmit="return CheckValue()">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2">Wireless Network</td>
   </tr>

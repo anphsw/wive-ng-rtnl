@@ -1,39 +1,16 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
 dnsp=`nvram_get 2860 dnsPEnabled`
 
 start() {
 if [ -f /bin/dnsmasq ] && [ "$dnsp" = "1" ] ; then
 get_param
  echo "Starting DNSMASQ: "
-
-    #in case no previous file
-    if [ -f $fname ]; then
-        touch $fname
-    fi
-
-    # backup file without nameserver part
-    sed -e '/nameserver/d' $fname > $fbak
-
-    # set primary and seconday DNS
-    if [ "$pd" != "" ]; then
-      echo "nameserver $pd" > $fname
-    else # empty dns
-      rm -f $fname
-    fi
-    if [ "$sd" != "" ]; then
-      echo "nameserver $sd" >> $fname
-    fi
-    # if nameservers is null add 127.0.0.1
-    if  [ "$pd" = "" ] && [ "$sd" = "" ]; then
-      echo "nameserver 127.0.0.1" > $fname
-    fi
-
-    cat $fbak >> $fname
-    rm -f $fbak
-
  if [ -f /etc/dnsmasq.conf ]; then
-    /bin/dnsmasq --conf-file=/etc/dnsmasq.conf -u $admID -g $admID
+    /bin/dnsmasq  -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if
  fi 
 fi
 }
@@ -45,8 +22,6 @@ stop() {
 
 get_param() {
     admID=`nvram_get 2860 Login`
-    pd=`nvram_get 2860 wan_primary_dns`
-    sd=`nvram_get 2860 wan_secondary_dns`
     fname="/etc/resolv.conf"
     fbak="/etc/resolv_conf.bak"
 }

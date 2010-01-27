@@ -1471,7 +1471,7 @@ function CheckValue()
 <hr />
 
 <form method=post name=wireless_basic action="/goform/inicBasic" onSubmit="return CheckValue()">
-<table width="540" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
     <td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
   </tr>

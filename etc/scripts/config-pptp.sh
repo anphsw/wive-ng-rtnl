@@ -13,7 +13,7 @@ echo > $ppp/pap-secrets
     USER=`nvram_get 2860 wan_pptp_user`
     PASSWORD=`nvram_get 2860 wan_pptp_pass`
 
-    echo "Check for server reachable"
+    echo "Check for PPTP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
         ping -q -c 1 $SERVER
