@@ -114,24 +114,22 @@ been enabled, more detailed usage information will also be available.</p>
 <h1><a name="commands">COMMANDS</a></h1>
 <p>Currently available applets include:</p>
 <pre>
-        [, [[, adduser, arp, arping, ash, awk, brctl, bunzip2, bzcat, bzip2,
-        cat, chattr, chmod, chown, chpasswd, chvt, clear, cp, crond,
-        crontab, cttyhack, cut, date, dd, depmod, df, dhcprelay, dmesg,
-        dnsdomainname, dos2unix, du, dumpleases, echo, egrep, env,
-        ether-wake, expand, expr, false, fgrep, find, free, ftpget, ftpput,
-        fuser, getty, grep, gunzip, gzip, halt, hd, head, hexdump, hostid,
-        hostname, hwclock, id, ifconfig, inetd, init, insmod, ionice, ip,
-        ipaddr, iplink, iproute, iprule, iptunnel, kill, killall, killall5,
-        klogd, length, linuxrc, ln, logger, login, logread, ls, lsmod, lzop,
-        lzopcat, md5sum, mdev, mesg, microcom, mkdir, mknod, modprobe, more,
-        mount, mv, netstat, nice, nmeter, nslookup, ntpd, openvt, passwd,
-        pidof, ping, ping6, pipe_progress, poweroff, printf, ps, pwd, rdate,
-        reboot, renice, rm, rmdir, rmmod, route, run-parts, sed, seq,
-        setconsole, sh, sleep, sort, split, stat, sum, switch_root, sync,
-        sysctl, syslogd, tail, tar, telnetd, test, time, top, touch,
-        traceroute, traceroute6, true, udhcpc, udhcpd, umount, uname,
-        unix2dos, unlzop, unzip, uptime, usleep, vconfig, vi, watch, wc,
-        wget, which, xargs, yes, zcat</pre>
+        [, [[, adduser, adjtimex, arp, arping, ash, awk, brctl, bunzip2,
+        bzcat, bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
+        crontab, cut, date, dd, depmod, df, dhcprelay, dmesg, dnsdomainname,
+        dos2unix, du, dumpleases, echo, egrep, env, ether-wake, expand,
+        expr, false, fgrep, find, free, ftpget, ftpput, fuser, grep, gunzip,
+        gzip, halt, hd, head, hexdump, hostid, hostname, id, ifconfig,
+        inetd, init, insmod, ionice, ip, ipaddr, iplink, iproute, iprule,
+        iptunnel, kill, killall, killall5, klogd, length, linuxrc, ln,
+        logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir, mknod,
+        modprobe, more, mount, mv, netstat, nice, nslookup, ntpd, passwd,
+        pidof, ping, ping6, poweroff, printf, ps, pwd, reboot, renice, rm,
+        rmdir, rmmod, route, run-parts, sed, seq, setconsole, sh, sleep,
+        sort, split, stat, sum, switch_root, sync, sysctl, syslogd, tail,
+        tar, telnetd, test, time, top, touch, traceroute, traceroute6, true,
+        udhcpc, udhcpd, umount, uname, uniq, unix2dos, unzip, uptime,
+        usleep, vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -152,6 +150,20 @@ been enabled, more detailed usage information will also be available.</p>
         -D              Don't assign a password
         -H              Don't create home directory
         -u UID          User id</pre>
+</dd>
+<dt><strong><a name="adjtimex" class="item"><strong>adjtimex</strong></a></strong></dt>
+
+<dd>
+<p>adjtimex [-q] [-o offset] [-f frequency] [-p timeconstant] [-t tick]</p>
+<p>Read and optionally set system timebase parameters. See <a href="#adjtimex"><code>adjtimex(2)</code></a>.</p>
+<p>Options:</p>
+<pre>
+        -q              Quiet
+        -o offset       Time offset, microseconds
+        -f frequency    Frequency adjust, integer kernel units (65536 is 1ppm)
+                        (positive values make clock run faster)
+        -t tick         Microseconds per tick, usually 10000
+        -p timeconstant</pre>
 </dd>
 <dt><strong><a name="arp" class="item"><strong>arp</strong></a></strong></dt>
 
@@ -322,12 +334,6 @@ symbols +-= and one or more of the letters rwxst</p>
 <pre>
         -e,--encrypted  Supplied passwords are in encrypted form
         -m,--md5        Use MD5 encryption instead of DES</pre>
-</dd>
-<dt><strong><a name="chvt" class="item"><strong>chvt</strong></a></strong></dt>
-
-<dd>
-<p>chvt N</p>
-<p>Change the foreground virtual terminal to /dev/ttyN</p>
 </dd>
 <dt><strong><a name="clear" class="item"><strong>clear</strong></a></strong></dt>
 
@@ -685,25 +691,6 @@ default EXPRESSION is '-print'</p>
         -k      Kill found processes (otherwise display PIDs)
         -SIGNAL Signal to send (default: TERM)</pre>
 </dd>
-<dt><strong><a name="getty" class="item"><strong>getty</strong></a></strong></dt>
-
-<dd>
-<p>getty [OPTIONS] BAUD_RATE TTY [TERMTYPE]</p>
-<p>Open a tty, prompt for a login name, then invoke /bin/login</p>
-<p>Options:</p>
-<pre>
-        -h              Enable hardware (RTS/CTS) flow control
-        -i              Don't display /etc/issue before running login
-        -L              Local line, don't do carrier detect
-        -m              Get baud rate from modem's CONNECT status message
-        -w              Wait for a CR or LF before sending /etc/issue
-        -n              Don't prompt the user for a login name
-        -f ISSUE_FILE   Display ISSUE_FILE instead of /etc/issue
-        -l LOGIN        Invoke LOGIN instead of /bin/login
-        -t SEC          Terminate after SEC if no username is read
-        -I INITSTR      Send INITSTR before anything else
-        -H HOST         Log HOST into the utmp file as the hostname</pre>
-</dd>
 <dt><strong><a name="grep" class="item"><strong>grep</strong></a></strong></dt>
 
 <dd>
@@ -822,20 +809,6 @@ With more than one FILE, precede each with a header giving the file name.</p>
         -d      DNS domain name
         -f      Fully qualified domain name
         -F FILE Use FILE's content as hostname</pre>
-</dd>
-<dt><strong><a name="hwclock" class="item"><strong>hwclock</strong></a></strong></dt>
-
-<dd>
-<p>hwclock [-r|--show] [-s|--hctosys] [-w|--systohc] [-l|--localtime] [-u|--utc] [-f FILE]</p>
-<p>Query and set hardware clock (RTC)</p>
-<p>Options:</p>
-<pre>
-        -r      Show hardware clock time
-        -s      Set system time from hardware clock
-        -w      Set hardware clock to system time
-        -u      Hardware clock is in UTC
-        -l      Hardware clock is in local time
-        -f FILE Use specified device (e.g. /dev/rtc2)</pre>
 </dd>
 <dt><strong><a name="id" class="item"><strong>id</strong></a></strong></dt>
 
@@ -1097,32 +1070,17 @@ iproute { add | del | change | append | replace | monitor } ROUTE
 <p>lsmod</p>
 <p>List the currently loaded kernel modules</p>
 </dd>
-<dt><strong><a name="lzop" class="item"><strong>lzop</strong></a></strong></dt>
-
-<dd>
-<p>lzop [-cfvd123456789CF] [FILE]...</p>
-<pre>
-        -c      Write to standard output
-        -f      Force
-        -v      Verbose
-        -d      Decompress
-        -F      Don't store or verify checksum
-        -C      Also write checksum of compressed block
-        -1..9   Compression level</pre>
-</dd>
-<dt><strong><a name="lzopcat" class="item"><strong>lzopcat</strong></a></strong></dt>
-
-<dd>
-<p>lzopcat [-vCF] [FILE]...</p>
-<pre>
-        -v      Verbose
-        -F      Don't store or verify checksum</pre>
-</dd>
 <dt><strong><a name="md5sum" class="item"><strong>md5sum</strong></a></strong></dt>
 
 <dd>
-<p>md5sum [OPTIONS] [FILE]...</p>
-<p>Print MD5 checksums</p>
+<p>md5sum [OPTIONS] [FILE]...
+   or: md5sum [OPTIONS] -c [FILE]</p>
+<p>Print or check MD5 checksums</p>
+<p>Options:</p>
+<pre>
+        -c      Check sums against given list
+        -s      Don't output anything, status code shows success
+        -w      Warn about improperly formatted checksum lines</pre>
 </dd>
 <dt><strong><a name="mdev" class="item"><strong>mdev</strong></a></strong></dt>
 
@@ -1142,19 +1100,6 @@ It uses /etc/mdev.conf with lines
 <p><table cellspacing="0" cellpadding="0"><tr><td>Control write access to your terminal
 <tr><td><td>y<td>Allow write access to your terminal
 <tr><td><td>n<td>Disallow write access to your terminal</table></p>
-</dd>
-<dt><strong><a name="microcom" class="item"><strong>microcom</strong></a></strong></dt>
-
-<dd>
-<p>microcom [-d DELAY] [-t TIMEOUT] [-s SPEED] [-X] TTY</p>
-<p>Copy bytes for stdin to TTY and from TTY to stdout</p>
-<p>Options:</p>
-<pre>
-        -d      Wait up to DELAY ms for TTY output before sending every
-                next byte to it
-        -t      Exit if both stdin and TTY are silent for TIMEOUT ms
-        -s      Set serial line to SPEED
-        -X      Disable special meaning of NUL and Ctrl-X from stdin</pre>
 </dd>
 <dt><strong><a name="mkdir" class="item"><strong>mkdir</strong></a></strong></dt>
 
@@ -1271,30 +1216,6 @@ or: mv [OPTIONS] SOURCE... DIRECTORY</p>
 <pre>
         -n ADJUST       Adjust priority by ADJUST</pre>
 </dd>
-<dt><strong><a name="nmeter" class="item"><strong>nmeter</strong></a></strong></dt>
-
-<dd>
-<p>nmeter format_string</p>
-<p>Monitor system in real time</p>
-<p>Format specifiers:</p>
-<pre>
- %Nc or %[cN]   Monitor CPU. N - bar size, default 10
-                (displays: S:system U:user N:niced D:iowait I:irq i:softirq)
- %[niface]      Monitor network interface 'iface'
- %m             Monitor allocated memory
- %[mf]          Monitor free memory
- %[mt]          Monitor total memory
- %s             Monitor allocated swap
- %f             Monitor number of used file descriptors
- %Ni            Monitor total/specific IRQ rate
- %x             Monitor context switch rate
- %p             Monitor forks
- %[pn]          Monitor # of processes
- %b             Monitor block io
- %Nt            Show time (with N decimal points)
- %Nd            Milliseconds between updates (default:1000)
- %r             Print &lt;cr&gt; instead of &lt;lf&gt; at EOL</pre>
-</dd>
 <dt><strong><a name="nslookup" class="item"><strong>nslookup</strong></a></strong></dt>
 
 <dd>
@@ -1316,17 +1237,6 @@ optionally using a specified DNS server</p>
         -l      Run as server on port 123
         -S PROG Run PROG after stepping time, stratum change, and every 11 mins
         -p PEER Obtain time from PEER (may be repeated)</pre>
-</dd>
-<dt><strong><a name="openvt" class="item"><strong>openvt</strong></a></strong></dt>
-
-<dd>
-<p>openvt [-c N] [-sw] [PROG [ARGS]]</p>
-<p>Start PROG on a new virtual terminal</p>
-<p>Options:</p>
-<pre>
-        -c N    Use specified VT
-        -s      Switch to the VT
-        -w      Wait for PROG to exit</pre>
 </dd>
 <dt><strong><a name="passwd" class="item"><strong>passwd</strong></a></strong></dt>
 
@@ -1415,16 +1325,6 @@ where FORMAT controls the output exactly as in C printf</p>
 <dd>
 <p>pwd</p>
 <p>Print the full filename of the current working directory</p>
-</dd>
-<dt><strong><a name="rdate" class="item"><strong>rdate</strong></a></strong></dt>
-
-<dd>
-<p>rdate [-sp] HOST</p>
-<p>Get and possibly set the system date and time from a remote HOST</p>
-<p>Options:</p>
-<pre>
-        -s      Set the system date and time (default)
-        -p      Print the date and time</pre>
 </dd>
 <dt><strong><a name="reboot" class="item"><strong>reboot</strong></a></strong></dt>
 
@@ -1714,7 +1614,7 @@ in the file. N bytes may be suffixed by k (x1024), b (x512), or m (1024^2).</p>
 <dt><strong><a name="tar" class="item"><strong>tar</strong></a></strong></dt>
 
 <dd>
-<p>tar -[cxtzmvO] [-X FILE] [-f TARFILE] [-C DIR] [FILE]...</p>
+<p>tar -[cxtmvO] [-X FILE] [-f TARFILE] [-C DIR] [FILE]...</p>
 <p>Create, extract, or list files from a tar file</p>
 <p>Options:</p>
 <pre>
@@ -1723,7 +1623,6 @@ in the file. N bytes may be suffixed by k (x1024), b (x512), or m (1024^2).</p>
         t       List
 Archive format selection:</pre>
 <pre>
-        z       Filter the archive through gzip
         m       Do not restore mtime
 File selection:</pre>
 <pre>
@@ -1905,6 +1804,20 @@ and show the status for however many processes will fit on the screen.</p>
         -p      Processor type
         -v      OS version</pre>
 </dd>
+<dt><strong><a name="uniq" class="item"><strong>uniq</strong></a></strong></dt>
+
+<dd>
+<p>uniq [-fscduw]... [INPUT [OUTPUT]]</p>
+<p>Discard duplicate lines</p>
+<p>Options:</p>
+<pre>
+        -c      Prefix lines by the number of occurrences
+        -d      Only print duplicate lines
+        -u      Only print unique lines
+        -f N    Skip first N fields
+        -s N    Skip first N chars (after any skipped fields)
+        -w N    Compare N characters in line</pre>
+</dd>
 <dt><strong><a name="unix2dos" class="item"><strong>unix2dos</strong></a></strong></dt>
 
 <dd>
@@ -1915,16 +1828,6 @@ When no file is given, use stdin/stdout.</p>
 <pre>
         -u      dos2unix
         -d      unix2dos</pre>
-</dd>
-<dt><strong><a name="unlzop" class="item"><strong>unlzop</strong></a></strong></dt>
-
-<dd>
-<p>unlzop [-cfvCF] [FILE]...</p>
-<pre>
-        -c      Write to standard output
-        -f      Force
-        -v      Verbose
-        -F      Don't store or verify checksum</pre>
 </dd>
 <dt><strong><a name="unzip" class="item"><strong>unzip</strong></a></strong></dt>
 
