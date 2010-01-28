@@ -3,7 +3,7 @@
 DOS2UNIX=NO
 FULLREBUILD=NO
 
-#----WR-NL-2M/16M---WR-NL+-4M-32M----#
+#----WR-NL-4M-16M---WR-NL+-4M-32M----#
 #MODE=1T1R
 MODE=2T2R
 #------------------------------------#
