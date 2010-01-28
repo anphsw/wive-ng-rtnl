@@ -7,7 +7,7 @@
 web_wait
 
 start() {
-if [ -f /bin/ntpclient ]; then
+if [ -f /bin/ntpd ]; then
  echo "Starting NTPD: "
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
