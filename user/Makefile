@@ -24,9 +24,9 @@ UCLINUX_BUILD_USER=1
 VEND=$(ROOTDIR)/vendors
 
 #for all cleanap
-SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe ntpclient radvd wireless_tools zebra dropbear
+SUBDIRS_APP = 802.1x dnsmasq gdbserver iproute2 mcprobe radvd wireless_tools zebra dropbear
 SUBDIRS_APP += goahead iptables miniupnp openssl-0.9.8e rt2880_app wpa_supplicant bridge-utils ethtool
-SUBDIRS_APP += igmpproxy lldt mkimage ppp strace wsc_upnp busybox flex inadyn ntp pppoe-relay udpxy xl2tpd
+SUBDIRS_APP += igmpproxy lldt mkimage ppp strace wsc_upnp busybox flex inadyn pppoe-relay udpxy xl2tpd
 
 
 #
@@ -44,9 +44,6 @@ dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
 dir_$(CONFIG_USER_STRACE_STRACE)            += strace
 dir_$(CONFIG_USER_BRCTL_BRCTL)              += bridge-utils
-dir_$(CONFIG_USER_NTPD_NTPDATE)             += ntp
-dir_$(CONFIG_USER_NTPCLIENT_NTPCLIENT)      += ntpclient
-dir_$(CONFIG_USER_NTPCLIENT_ADJTIMEX)       += ntpclient
 dir_$(CONFIG_USER_WIRELESS_TOOLS)           += wireless_tools
 dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables

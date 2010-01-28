@@ -8,7 +8,7 @@ web_wait
 
 start() {
 if [ -f /bin/ntpclient ]; then
- echo "Starting NTP: "
+ echo "Starting NTPD: "
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
@@ -28,14 +28,14 @@ if [ -f /bin/ntpclient ]; then
     date +%T -s $backup_time
 
     if [ "$srv" != "" ]; then
-	ntpclient -s -c 0 -h $srv -i $sync &
+	ntpd -d -l -p $srv &
     fi
 fi
 }
 
 stop() {
- echo "Stopping NTP: "
-    killall -q ntpclient
+ echo "Stopping NTPD: "
+    killall -q ntpd
 }
 
 case "$1" in

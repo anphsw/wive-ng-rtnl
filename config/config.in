@@ -122,8 +122,6 @@ if [ "$CONFIG_USER_WSC" = "y" ]; then
 fi
 
 bool 'mkdosfs (DOS file system utilty)'		CONFIG_USER_MKDOSFS
-bool 'ntpclient: Ntpclient'			CONFIG_USER_NTPCLIENT_NTPCLIENT
-bool 'ntpclient: Adjtimex'			CONFIG_USER_NTPCLIENT_ADJTIMEX
 bool 'openssl'					CONFIG_USER_OPENSSL
 bool 'openswan-apps'  CONFIG_USER_OPENSWAN
 if [ "$CONFIG_USER_OPENSWAN" = "y" ]; then
