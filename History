@@ -33,6 +33,8 @@
 32) Replace some code from original Ralink SDK version 3.3<br>
 33) Integrate new web gui in current sources tree <br>
 34) Static routes get from dhcp server (options 79)<br>
+35) busybox update to 1.16.0 version<br>
+36) Replace ntpclient to ntpd from new busybox<br>
 
 <br>
 <b>ToDo:</b><br>
