@@ -85,18 +85,14 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "Factory",
                 size:           MTD_FACTORY_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
         }, {
                 name:           "Kernel",
                 size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
         }, {
                 name:           "RootFS",
                 size:           MTD_ROOTFS_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND,
-#else //CONFIG_RT2880_ROOTFS_IN_RAM
-                name:           "Kernel",
-                size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
 #endif
 #ifdef CONFIG_DUAL_IMAGE

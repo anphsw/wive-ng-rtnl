@@ -128,32 +128,28 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "Factory",	/* mtdblock2 */
                 size:           MTD_FACTORY_PART_SIZE,	/* 64K */
                 offset:         MTDPART_OFS_APPEND
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
-#ifndef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
-        }, {
-                name:           "Kernel", /* mtdblock3 */
-                size:           CONFIG_MTD_KERNEL_PART_SIZ,
-                offset:         MTDPART_OFS_APPEND,
-        }, {
-                name:           "RootFS", /* mtdblock4 */
-                size:           MTD_ROOTFS_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND,
-#else /* no padding */
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) && defined(CONFIG_ROOTFS_IN_FLASH_NO_PADDING) 
         }, {
                 name:           "Kernel_RootFS", /* mtdblock3 */
                 size:           MTD_ROOTFS_PART_SIZE,
 		offset:         MTDPART_OFS_APPEND,
-#endif
-#else /* in ram */
+#else
         }, {
-                name:           "Kernel", /* mtdblock3 */
+                name:           "Kernel", 	/* mtdblock3 */
                 size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
 #endif
-	}, {
-                name:           "RW-FS",	/* mtdblock4 */
+	}, {	/* RWFS ALWAYS MTD4 !!! need for rc.scripts */
+                name:           "RW-FS",	/* mtdblock4 */ 
                 size:           MTD_RWFS_PART_SIZE,	/* 128K */
                 offset:         MTDPART_OFS_APPEND,
+
+#if  defined(CONFIG_RT2880_ROOTFS_IN_FLASH) && ! defined(CONFIG_ROOTFS_IN_FLASH_NO_PADDING)
+        }, {
+                name:           "RootFS", 	/* mtdblock5 */
+                size:           MTD_ROOTFS_PART_SIZE,
+                offset:         MTDPART_OFS_APPEND,
+#endif
 #ifdef CONFIG_DUAL_IMAGE
 	}, {
 		name:		"Kernel2", /* mtdblock5 */
