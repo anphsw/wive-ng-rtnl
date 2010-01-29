@@ -7,7 +7,7 @@
 # it under the terms of the GNU GPL v2 or later.
 
 TGZfs_size=131072
-MTDDEVICE=/dev/mtdblock5
+MTDDEVICE=/dev/mtdblock4
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
