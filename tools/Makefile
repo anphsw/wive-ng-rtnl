@@ -5,6 +5,7 @@ all :	install
 
 install :
 	mkdir bin
+	make -C mkimage
 	make -C sstrip
 	make -C mksquash_lzma-3.2 install
 

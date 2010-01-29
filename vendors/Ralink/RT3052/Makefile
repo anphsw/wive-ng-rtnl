@@ -7,7 +7,7 @@ IMAGE = $(IMAGEDIR)/$(PRODUCTID)_$(KERNEL_VER).$(FS_VER).trx
 ROMFS_DIR = $(ROOTDIR)/romfs
 
 RAMDISK_SIZE  := $(shell echo $(CONFIG_BLK_DEV_RAM_SIZE))
-MKIMAGE_DIR = $(ROOTDIR)/user/mkimage
+MKIMAGE_DIR = $(ROOTDIR)/tools/mkimage
 CUR_DIR = $(shell pwd)
 COMP = lzma
 
