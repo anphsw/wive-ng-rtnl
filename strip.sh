@@ -8,9 +8,8 @@ MODULES=`find romfs/lib/modules -type f`;
 echo --------------------------------STRIP AND SSTRIP-----------------------------
 echo "FIND FILES TO STRIP"
 NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep -v "modules" | grep -v "icon" | grep -v "rc" | grep -v ".sh" | cut -d":" -f1`
-NON_STRIPS_LIB=`find $RO_ROOT/lib -type f -print -exec file {} \; | grep "not stripped" | grep -v "modules" | cut -d":" -f1`
+NON_STRIPS_LIB=`find $RO_ROOT/lib -type f -print -exec file {} \; | grep -v "modules" | cut -d":" -f1`
 echo "STRIP LIB"
-$STRIP $RO_ROOT/lib/*.so
 if [ "$NON_STRIPS_BIN" != "" ]; then
   echo BIN: $NON_STRIPS_BIN
   $STRIP $NON_STRIPS_BIN

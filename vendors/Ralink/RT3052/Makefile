@@ -14,24 +14,23 @@ COMP = lzma
 ROMFS_DIRS = \
 	tmp \
 	bin \
-	dev dev/pts \
 	home \
+	mnt \
+	sys \
+	var \
 	etc \
-	etc_ro etc_ro/web etc_ro/ppp etc_ro/ppp/peers etc_ro/ppp/3g \
+	proc \
+	media \
+	share \
+	dev dev/pts \
+	lib lib/modules \
+	usr usr/codepages \
+	etc_ro etc_ro/web etc_ro/ppp \
+	etc_ro/ppp/peers etc_ro/ppp/3g \
 	etc_ro/ppp/plugins \
 	etc_ro/wlan etc_ro/Wireless \
 	etc_ro/Wireless/RT2860AP etc_ro/xml \
-	etc_ro/linuxigd \
-	lib lib/modules lib/ipsec lib/pppd lib/l2tp lib/l2tp/plugins\
-	mnt \
-	proc \
-	sys \
-	media \
-	share \
-	usr usr/codepages \
-	www \
-	apps \
-	var 
+	etc_ro/linuxigd
 
 clean:
 	rm -f mkimage

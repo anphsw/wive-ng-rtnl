@@ -9,7 +9,8 @@ CONNTRACKMODULELOAD="YES"
 
 start() {
  echo "Starting modules..."
-    ln -sf $moddir/modules.dep /etc/modules.dep
+    depmod
+    ln -sf /tmp/modules.dep /etc/modules.dep
  ############LOAD##ALL###MODULES###################
  if [ $FULLMODULELOAD = "YES" ]; then
     for i in $MODULES; do
