@@ -7,7 +7,9 @@
 # it under the terms of the GNU GPL v2 or later.
 
 TGZfs_size=131072
-MTDDEVICE=/dev/mtdblock4
+BLOCKS=2
+MTDDEVICE=/dev/mtdblock5
+
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
@@ -30,7 +32,7 @@ save(){
   tar cf - /etc | gzip -9 > $tmp
   if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
     echo "Write configs to flash"
-    dd if=$tmp of=$MTDDEVICE bs=64k count=2 conv=sync > /dev/null 2>&1
+    dd if=$tmp of=$MTDDEVICE bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
     echo "Config saved. OK."
   else
     echo "Error: File $tmp too big: $(get_size $tmp)k"
@@ -39,7 +41,7 @@ save(){
 }
 
 restore(){
-  dd if=/dev/urandom of=$MTDDEVICE bs=64k count=2
+  dd if=/dev/urandom of=$MTDDEVICE bs=64k count=$BLOCKS
   echo "123456789">$MTDDEVICE 
   echo "Restoring defaults..."
   reboot

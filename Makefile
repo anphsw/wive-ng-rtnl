@@ -433,7 +433,6 @@ prune: ucfront
 	@for i in `ls -d linux-* | grep -v $(LINUXDIR)`; do \
 		rm -fr $$i; \
 	done
-#$(MAKE) -C lib prune
 	$(MAKE) -C uClib prune
 	$(MAKE) -C user prune
 	$(MAKE) -C vendors prune

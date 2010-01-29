@@ -5,6 +5,7 @@ FULLREBUILD=NO
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 MODE=1T1R
+#MODE=1T1R-32
 #MODE=2T2R
 #------------------------------------#
 
@@ -23,6 +24,11 @@ make all -C tools
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./config-acorp/config-kernel-1t1r	./linux/.config
+    cp -fv ./config-acorp/config-config-1t1r	./config/.config
+    cp -fv ./config-acorp/config-lib-1t1r	./lib/.config
+fi
+if [ "$MODE" = "1T1R-32" ] ; then
+    cp -fv ./config-acorp/config-kernel-1t1r-32	./linux/.config
     cp -fv ./config-acorp/config-config-1t1r	./config/.config
     cp -fv ./config-acorp/config-lib-1t1r	./lib/.config
 fi

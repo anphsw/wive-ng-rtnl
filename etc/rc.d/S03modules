@@ -8,7 +8,7 @@ CONNTRACKMODULELOAD="YES"
 
 start() {
  echo "Starting modules.dep generate..."
-    depmod
+    #depmod
     ln -sf $moddir/modules.dep /etc/modules.dep
  ############LOAD##ALL###MODULES###################
  if [ $FULLMODULELOAD = "YES" ]; then

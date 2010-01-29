@@ -58,8 +58,8 @@ romfs.post::
 	#Squash File System
 	 rm -f $(RAMDISK)  
 	#linux2.6.x support squashfs with lzma
-ifeq	($(CONFIG_BLK_DEV_INITRD),)
-	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK)
+ifeq	($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
+	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root
 endif
 
 mkimage: $(MKIMAGE_DIR)/crc32.c $(MKIMAGE_DIR)/mkimage.c 
@@ -70,12 +70,12 @@ image: mkimage
 	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; \
 	$(ROOTDIR)/tools/bin/lzma_alone e -a1 -d$(CONFIG_LZMA_COMPRESS_LEVEL) $(KERNELZ) $(KERNELZ).$(COMP)
 
-ifeq ($(CONFIG_BLK_DEV_INITRD),)
-ifeq ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
+ifeq    ($(CONFIG_BLK_DEV_INITRD),)
+ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
 	# Original Kernel Image Size
 	@wc -c $(KERNELZ).$(COMP)
 	# Padded Kernel Image Size
-ifeq ($(findstring 0x, $(CONFIG_MTD_KERNEL_PART_SIZ)),0x)
+ifeq    ($(findstring 0x, $(CONFIG_MTD_KERNEL_PART_SIZ)),0x)
 	@SIZE=`wc -c $(KERNELZ).$(COMP) | awk '{ print $$1 }'` ; \
 	MTD_KRN_PART_SIZE=`printf "%d" $(CONFIG_MTD_KERNEL_PART_SIZ)` ; \
 	PAD=`expr $$MTD_KRN_PART_SIZE - 64 - $$SIZE` ; \
@@ -89,26 +89,26 @@ endif
 endif
 	@wc -c $(KERNELZ).$(COMP)
 	# Original RootFs Size
-	@du -sb $(ROMFSDIR)
+	  @du -sb $(ROMFSDIR)
 	# Compressed RootFs Size
-	@wc -c $(RAMDISK)
+	  @wc -c $(RAMDISK)
 	# Padded Kernel Image + Compressed Rootfs Size
-	@cat $(RAMDISK) >> $(KERNELZ).$(COMP)
-	@wc -c $(KERNELZ).$(COMP)
+	  @cat $(RAMDISK) >> $(KERNELZ).$(COMP)
+	  @wc -c $(KERNELZ).$(COMP)
 	#===========================================
 endif
 
-ifeq ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
+ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
 	@cd $(IMAGEDIR) ; \
 	ISIZE=`wc -c $(KERNELZ).$(COMP) | awk '{print $$1}'` ; \
 	RSIZE=`wc -c $(RAMDISK) | awk '{print $$1}'` ; \
 	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
 	ENTRY=`readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 -e $$ENTRY -k $$KRN_SIZE \
-	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
+	-n "Linux Kernel Image" -d $(KERNELZ).$(COMP) $(IMAGE)
 else
 	@cd $(IMAGEDIR) ;
-	ENTRY=`readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
-	-e $$ENTRY -n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
+	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
+	-n "Linux Kernel Image" -d $(KERNELZ).$(COMP) $(IMAGE)
 endif

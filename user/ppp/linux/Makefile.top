@@ -14,7 +14,7 @@ all:
 	cd chat; $(MAKE) $(MFLAGS) all
 	cd pppd/plugins; $(MAKE) $(MFLAGS) all
 	cd pppd; $(MAKE) $(MFLAGS) all
-	cd pppstats; $(MAKE) $(MFLAGS) all
+#	cd pppstats; $(MAKE) $(MFLAGS) all
 #	cd pppdump; $(MAKE) $(MFLAGS) all
 
 install: $(BINDIR) $(MANDIR)/man8 install-progs install-devel
@@ -23,7 +23,7 @@ install-progs:
 	cd chat; $(MAKE) $(MFLAGS) install
 	cd pppd/plugins; $(MAKE) $(MFLAGS) install
 	cd pppd; $(MAKE) $(MFLAGS) install
-	cd pppstats; $(MAKE) $(MFLAGS) install
+#	cd pppstats; $(MAKE) $(MFLAGS) install
 #	cd pppdump; $(MAKE) $(MFLAGS) install
 
 install-etcppp: $(ETCDIR) $(ETCDIR)/options $(ETCDIR)/pap-secrets \
@@ -58,7 +58,7 @@ clean:
 	cd chat; $(MAKE) clean
 	cd pppd/plugins; $(MAKE) clean
 	cd pppd; $(MAKE) clean
-	cd pppstats; $(MAKE) clean
+#	cd pppstats; $(MAKE) clean
 #	cd pppdump; $(MAKE) clean
 
 dist-clean:	clean
