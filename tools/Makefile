@@ -4,6 +4,7 @@ STRIP=strip
 all :	install
 
 install :
+	rm -rf ./bin
 	mkdir bin
 	make -C mkimage
 	make -C sstrip

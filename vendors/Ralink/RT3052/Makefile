@@ -105,10 +105,10 @@ ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
 	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
 	ENTRY=`readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 -e $$ENTRY -k $$KRN_SIZE \
-	-n "Linux Kernel Image" -d $(KERNELZ).$(COMP) $(IMAGE)
+	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
 else
 	@cd $(IMAGEDIR) ;
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
 	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
-	-n "Linux Kernel Image" -d $(KERNELZ).$(COMP) $(IMAGE)
+	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
 endif
