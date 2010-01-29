@@ -4,6 +4,7 @@
 # executing them in numerical order.
 
 TGZfs_size=131072
+MTDDEVICE=/dev/mtdblock5
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
@@ -15,7 +16,7 @@ echo "Init DEV particion" > /dev/console
 zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
 
 echo "Init RW particion" > /dev/console
-zcat /dev/mtdblock4 | /bin/tar xf - -C / > /dev/null 2>&1
+zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 
 if [ -f /etc/filesystem.ok ]; then
     echo "RW File system is ok - preparing ..." > /dev/console
@@ -28,7 +29,7 @@ if [ -f /etc/filesystem.ok ]; then
     tar cf - /etc | gzip -9 > $tmp
     if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
 	echo "Write configs to flash" > /dev/console
-	dd if=$tmp of=/dev/mtdblock4 bs=64k count=2 conv=sync > /dev/null 2>&1
+	dd if=$tmp of=$MTDDEVICE bs=64k count=2 conv=sync > /dev/null 2>&1
 	echo "Config saved. OK." > /dev/console
     else
 	echo "Error: File $tmp too big: $(get_size $tmp)k" > /dev/console

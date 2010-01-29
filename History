@@ -35,6 +35,9 @@
 34) Static routes get from dhcp server (options 79)<br>
 35) busybox update to 1.16.0 version<br>
 36) Replace ntpclient to ntpd from new busybox<br>
+37) Add multiple default gateway support for load balacing<br>
+38) Fix boot on 4/16 devices<br>
+39) RootFS on flash nopadding work OK<br>
 
 <br>
 <b>ToDo:</b><br>

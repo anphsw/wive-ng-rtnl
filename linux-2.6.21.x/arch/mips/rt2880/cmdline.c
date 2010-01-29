@@ -41,17 +41,7 @@
 
 #include <asm/bootinfo.h>
 
-#if defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
-#ifdef CONFIG_SYSFS
-char rt2880_cmdline[]="console=ttyS1,57600n8 root=/dev/mtdblock4";
-#else
-char rt2880_cmdline[]="console=ttyS1,57600n8 root=1f04";
-#endif
-#elif defined (CONFIG_RT2880_ROOTFS_IN_RAM)
-char rt2880_cmdline[]="console=ttyS1,57600n8 root=/dev/ram0";
-#else
-#error "RT2880 Root File System not defined"
-#endif
+char rt2880_cmdline[]=CONFIG_CMDLINE;
 
 extern int prom_argc;
 extern int *_prom_argv;

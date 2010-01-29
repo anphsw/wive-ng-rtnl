@@ -196,7 +196,8 @@ static inline int fib_lookup(const struct flowi *flp, struct fib_result *res)
 
 static inline void fib_select_default(const struct flowi *flp, struct fib_result *res)
 {
-	if (FIB_RES_GW(*res) && FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK)
+	if ((FIB_RES_GW(*res) && FIB_RES_NH(*res).nh_scope == RT_SCOPE_LINK) ||
+	    FIB_RES_NH(*res).nh_scope == RT_SCOPE_HOST)
 		ip_fib_main_table->tb_select_default(ip_fib_main_table, flp, res);
 }
 
@@ -209,6 +210,7 @@ extern int fib_lookup(struct flowi *flp, struct fib_result *res);
 extern struct fib_table *fib_new_table(u32 id);
 extern struct fib_table *fib_get_table(u32 id);
 extern void fib_select_default(const struct flowi *flp, struct fib_result *res);
+extern int fib_result_table(struct fib_result *res);
 
 #endif /* CONFIG_IP_MULTIPLE_TABLES */
 
@@ -283,5 +285,7 @@ static inline void fib_res_put(struct fib_result *res)
 extern int  fib_proc_init(void);
 extern void fib_proc_exit(void);
 #endif
+
+extern rwlock_t fib_nhflags_lock;
 
 #endif  /* _NET_FIB_H */

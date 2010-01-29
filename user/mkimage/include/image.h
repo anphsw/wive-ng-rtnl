@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * (C) Copyright 2000
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  *
@@ -142,26 +126,11 @@
 #define IH_COMP_LZMA		3	/* lzma  Compression Used	*/
 
 #define IH_MAGIC	0x27051956	/* Image Magic Number		*/
-#define IH_NMLEN		32	/* Image Name Length		*/
+#define IH_NMLEN	(32-4)		/* Image Name Length		*/
 
 /*
  * all data in network byte order (aka natural aka bigendian)
  */
-
-#define MAX_STRING 12
-#define MAX_VER 4
-
-typedef struct {
-	uint8_t major;
-	uint8_t minor; 
-} version_t;
-
-typedef struct {
-	version_t kernel;
-	version_t fs;
-	char	  productid[MAX_STRING];
-	version_t hw[MAX_VER*2];
-} TAIL;
 
 typedef struct image_header {
 	uint32_t	ih_magic;	/* Image Header Magic Number	*/
@@ -176,6 +145,7 @@ typedef struct image_header {
 	uint8_t		ih_type;	/* Image Type			*/
 	uint8_t		ih_comp;	/* Compression Type		*/
 	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
+	uint32_t	ih_ksz;		/* Kernel Part Size		*/
 } image_header_t;
 
 

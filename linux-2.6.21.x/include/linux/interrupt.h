@@ -235,16 +235,16 @@ static inline void __deprecated save_and_cli(unsigned long *x)
 
 enum
 {
-	HI_SOFTIRQ=0,
+        NET_TX_SOFTIRQ = 0,
+        NET_RX_SOFTIRQ,
+        HI_SOFTIRQ,
 	TIMER_SOFTIRQ,
-	NET_TX_SOFTIRQ,
-	NET_RX_SOFTIRQ,
-	BLOCK_SOFTIRQ,
-	TASKLET_SOFTIRQ,
+        TASKLET_SOFTIRQ,
 	SCHED_SOFTIRQ,
 #ifdef CONFIG_HIGH_RES_TIMERS
 	HRTIMER_SOFTIRQ,
 #endif
+	BLOCK_SOFTIRQ,
 };
 
 /* softirq mask and active fields moved to irq_cpustat_t in

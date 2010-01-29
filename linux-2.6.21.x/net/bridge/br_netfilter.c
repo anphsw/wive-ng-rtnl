@@ -269,6 +269,10 @@ static int br_nf_pre_routing_finish(struct sk_buff *skb)
 	struct nf_bridge_info *nf_bridge = skb->nf_bridge;
 	int err;
 
+	/* Old skb->dst is not expected, it is lost in all cases */
+	dst_release(skb->dst);
+	skb->dst = NULL;
+
 	if (nf_bridge->mask & BRNF_PKT_TYPE) {
 		skb->pkt_type = PACKET_OTHERHOST;
 		nf_bridge->mask ^= BRNF_PKT_TYPE;

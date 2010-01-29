@@ -744,7 +744,7 @@ static int noinline init_post(void)
 	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
 		printk(KERN_WARNING "Warning: unable to open an initial console.\n");
 
-#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
+//#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
 #ifdef CONFIG_PROC_FS
         if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
             printk("mount /proc file system fail!\n");
@@ -784,7 +784,7 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
-#endif
+//#endif
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);
@@ -846,15 +846,15 @@ static int __init init(void * unused)
 	 * check if there is an early userspace init.  If yes, let it do all
 	 * the work
 	 */
-
-/*	if (!ramdisk_execute_command)
-		ramdisk_execute_command = "/bin/init";
+#ifndef CONFIG_RT2880_ROOTFS_IN_RAM
+	if (!ramdisk_execute_command)
+		ramdisk_execute_command = "/linuxrc";
 
 	if (sys_access((const char __user *) ramdisk_execute_command, 0) != 0) {
 		ramdisk_execute_command = NULL;
 		prepare_namespace();
 	}
-*/
+#endif
 	/*
 	 * Ok, we have completed the initial bootup, and
 	 * we're essentially up and running. Get rid of the

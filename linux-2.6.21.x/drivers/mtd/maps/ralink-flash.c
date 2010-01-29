@@ -73,8 +73,8 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "Bootloader",  /* mtdblock0 */
                 size:           MTD_BOOT_PART_SIZE,  /* 192K */
                 offset:         0,
-        }, {
 #ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+        }, {
                 name:           "Kernel",
                 size:           CONFIG_MTD_KERNEL_PART_SIZ,
                 offset:         MTDPART_OFS_APPEND,
@@ -82,13 +82,13 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "RootFS",
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
-        }, {
 #else //CONFIG_RT2880_ROOTFS_IN_RAM
+        }, {
                 name:           "Kernel",
                 size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
-        }, {
 #endif
+        }, {
                 name:           "Config",
                 size:           0x20000,  /* 128K */
                 offset:         MTDPART_OFS_APPEND
@@ -114,7 +114,7 @@ static struct mtd_partition rt2880_partitions[] = {
 #endif 
 	}
 };
-#else //not 32M flash
+#else /* not 32M flash */
 static struct mtd_partition rt2880_partitions[] = {
         {
                 name:           "Bootloader",  /* mtdblock0 */
@@ -128,9 +128,9 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "Factory", /* mtdblock2 */
                 size:           MTD_FACTORY_PART_SIZE,  /* 64K */
                 offset:         MTDPART_OFS_APPEND
-        }, {
 #ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
 #ifndef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+        }, {
                 name:           "Kernel", /* mtdblock3 */
                 size:           CONFIG_MTD_KERNEL_PART_SIZ,
                 offset:         MTDPART_OFS_APPEND,
@@ -138,13 +138,14 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "RootFS", /* mtdblock4 */
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
-#else //no padding
+#else /* no padding */
         }, {
                 name:           "Kernel_RootFS", /* mtdblock3 */
                 size:           MTD_KERN_PART_SIZE + MTD_ROOTFS_PART_SIZE,
                 offset:         MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE,
 #endif
-#else //CONFIG_RT2880_ROOTFS_IN_RAM
+#else /* in ram */
+        }, {
                 name:           "Kernel", /* mtdblock3 */
                 size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,

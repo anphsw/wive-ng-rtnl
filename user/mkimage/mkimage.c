@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * (C) Copyright 2000-2004
  * DENX Software Engineering
  * Wolfgang Denk, wd@denx.de
@@ -185,32 +169,22 @@ int opt_comp = IH_COMP_GZIP;
 
 image_header_t header;
 image_header_t *hdr = &header;
-TAIL tail_pre;
 
 int
 main (int argc, char **argv)
 {
 	int ifd;
-	int i;
-	//int j = 0;	// tmp test
 	uint32_t checksum;
 	uint32_t addr;
 	uint32_t ep;
+	uint32_t ksz=0;
 	struct stat sbuf;
 	unsigned char *ptr;
 	char *name = "";
-	memset(&tail_pre, 0, sizeof(tail_pre));
 
 	cmdname = *argv;
 
 	addr = ep = 0;
-
-	//printf("\n## start mkimage\n");	// tmp test
-	//for(j=0; j<argc; ++j)
-	//{
-	//	printf("%s ", argv[j]);
-	//}
-	//printf("\n");
 
 	while (--argc > 0 && **++argv == '-') {
 		while (*++*argv) {
@@ -268,19 +242,15 @@ main (int argc, char **argv)
 				}
 				eflag = 1;
 				goto NXTARG;
+			case 'k':
+				if (--argc <= 0)
+					usage ();
+				ksz = (uint32_t)atoi(*++argv);
+				goto NXTARG;
 			case 'n':
 				if (--argc <= 0)
 					usage ();
 				name = *++argv;
-				goto NXTARG;
-			case 'V':
-				if ((argc-=10) < 0)
-					usage ();
-				sscanf(argv[1], "%d.%d", &tail_pre.kernel.major, &tail_pre.kernel.minor);
-				sscanf(argv[2], "%d.%d", &tail_pre.fs.major, &tail_pre.fs.minor);   
-				for(i=0; i<8; i++)
-					sscanf(argv[i+3], "%d.%d", &tail_pre.hw[i].major, &tail_pre.hw[i].minor);
-				argv+=10;
 				goto NXTARG;
 			case 'v':
 				vflag++;
@@ -319,7 +289,6 @@ NXTARG:		;
 	}
 
 	imagefile = *argv;
-	fprintf(stderr, "img file: %s\n", imagefile);
 
 	if (lflag) {
 		ifd = open(imagefile, O_RDONLY|O_BINARY);
@@ -510,14 +479,13 @@ NXTARG:		;
 	hdr->ih_load  = htonl(addr);
 	hdr->ih_ep    = htonl(ep);
 	hdr->ih_dcrc  = htonl(checksum);
+	hdr->ih_ksz   = htonl(ksz);
 	hdr->ih_os    = opt_os;
 	hdr->ih_arch  = opt_arch;
 	hdr->ih_type  = opt_type;
 	hdr->ih_comp  = opt_comp;
 
 	strncpy((char *)hdr->ih_name, name, IH_NMLEN);
-	strncpy((char *)tail_pre.productid, name, MAX_STRING);
-//	memcpy(&hdr->tail, &tail_pre, sizeof(TAIL));
 
 	checksum = crc32(0,(const char *)hdr,sizeof(image_header_t));
 
@@ -542,97 +510,6 @@ NXTARG:		;
 
 	exit (EXIT_SUCCESS);
 }
-
-#if 0
-int
-main (int argc, char **argv)
-{
-	int ifd;
-	int i;
-	uint32_t checksum;
-	struct stat sbuf;
-	unsigned char *ptr;
-
-	image_header_t header2;
-	image_header_t *hdr2 = &header2;
-
-	imagefile = *++argv;
-	fprintf(stderr, "img file: %s\n", imagefile);
-
-	ifd = open(imagefile, O_RDONLY|O_BINARY);
-
-	if (ifd < 0) {
-		fprintf (stderr, "Can't open %s: %s\n",
-			imagefile, strerror(errno));
-		exit (EXIT_FAILURE);
-	}
-
-	memset (hdr2, 0, sizeof(image_header_t));
-
-	/* We're a bit of paranoid */
-#if defined(_POSIX_SYNCHRONIZED_IO) && !defined(__sun__) && !defined(__FreeBSD__)
-	(void) fdatasync (ifd);
-#else
-	(void) fsync (ifd);
-#endif
-
-	if (fstat(ifd, &sbuf) < 0) {
-		fprintf (stderr, "Can't stat %s: %s\n",
-			imagefile, strerror(errno));
-		exit (EXIT_FAILURE);
-	}
-
-fprintf(stderr, "st_size: %x\n", sbuf.st_size);
-
-	ptr = (unsigned char *)mmap(0, sbuf.st_size,
-				    PROT_READ, MAP_SHARED, ifd, 0);
-	if (ptr == (unsigned char *)MAP_FAILED) {
-		fprintf (stderr, "Can't map %s: %s\n",
-			imagefile, strerror(errno));
-		exit (EXIT_FAILURE);
-	}
-
-	hdr = (image_header_t *)ptr;
-
-	checksum = crc32 (0,
-			  (const char *)(ptr + sizeof(image_header_t)),
-			  sbuf.st_size - sizeof(image_header_t)
-			 );
-
-	fprintf(stderr,"data crc: %X\n", checksum);
-	fprintf(stderr,"org data crc: %X\n", htonl(hdr->ih_dcrc));
-//	hdr->ih_dcrc  = htonl(checksum);
-
-	memcpy (hdr2, hdr, sizeof(image_header_t));
-	memset(&hdr2->ih_hcrc, 0, sizeof(uint32_t));
-	
-
-	checksum = crc32(0,(const char *)hdr2,sizeof(image_header_t));
-	fprintf(stderr,"header crc: %X\n", checksum);
-	fprintf(stderr,"org header crc: %X\n", htonl(hdr->ih_hcrc));
-
-//	hdr->ih_hcrc = htonl(checksum);
-
-	print_header (hdr);
-
-	(void) munmap((void *)ptr, sbuf.st_size);
-
-	/* We're a bit of paranoid */
-#if defined(_POSIX_SYNCHRONIZED_IO) && !defined(__sun__) && !defined(__FreeBSD__)
-	(void) fdatasync (ifd);
-#else
-	(void) fsync (ifd);
-#endif
-
-	if (close(ifd)) {
-		fprintf (stderr, "Read error on %s: %s\n",
-			imagefile, strerror(errno));
-		exit (EXIT_FAILURE);
-	}
-
-	exit (EXIT_SUCCESS);
-}
-#endif
 
 static void
 copy_file (int ifd, const char *datafile, int pad)
@@ -742,26 +619,18 @@ print_header (image_header_t *hdr)
 {
 	time_t timestamp;
 	uint32_t size;
-	int i;
 
 	timestamp = (time_t)ntohl(hdr->ih_time);
 	size = ntohl(hdr->ih_size);
 
 	printf ("Image Name:   %.*s\n", IH_NMLEN, hdr->ih_name);
-//	printf ("Product ID:   %.*s\n", MAX_STRING, hdr->tail.productid);
 	printf ("Created:      %s", ctime(&timestamp));
 	printf ("Image Type:   "); print_type(hdr);
 	printf ("Data Size:    %d Bytes = %.2f kB = %.2f MB\n",
 		size, (double)size / 1.024e3, (double)size / 1.048576e6 );
 	printf ("Load Address: 0x%08X\n", ntohl(hdr->ih_load));
 	printf ("Entry Point:  0x%08X\n", ntohl(hdr->ih_ep));
-
-//	printf ("Kernel Ver.:  %d.%d\n", hdr->tail.kernel.major, hdr->tail.kernel.minor);
-//	printf ("FS Ver:       %d.%d\n", hdr->tail.fs.major, hdr->tail.fs.minor);
-//	printf ("Hardware Compatible List:\n");
-
-//	for(i=0; i<8; i++)
-//		printf("	%d: %d.%d\n", i+1, hdr->tail.hw[i].major, hdr->tail.hw[i].minor);
+	printf ("Kernel Size:  0x%08X\n", ntohl(hdr->ih_ksz));
 
 	if (hdr->ih_type == IH_TYPE_MULTI || hdr->ih_type == IH_TYPE_SCRIPT) {
 		int i, ptrs;

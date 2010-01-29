@@ -1,4 +1,5 @@
 include config.arch
+include ../../../linux-2.6.21.x/drivers/mtd/maps/ralink-flash.h
 
 KERNELZ = $(IMAGEDIR)/zImage
 RAMDISK  = $(IMAGEDIR)/ramdisk
@@ -57,31 +58,21 @@ romfs.post::
 	
 	#Squash File System
 	 rm -f $(RAMDISK)  
-ifeq	($(LINUXDIR),linux-2.4.x)
-	$(CONFIG_CROSS_COMPILER_PATH)/mksquashfs_lzma-3.0 $(ROMFSDIR) $(RAMDISK)
-else
 	#linux2.6.x support squashfs with lzma
 ifeq	($(CONFIG_BLK_DEV_INITRD),)
 	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK)
 endif
-endif
-
-ifeq	($(CONFIG_BLK_DEV_INITRD),y)
-ifeq	($(LINUXDIR),linux-2.4.x)
-	gzip -9 -f $(RAMDISK)
-	cp $(RAMDISK).gz $(ROOTDIR)/$(LINUXDIR)/arch/mips/ramdisk/ramdisk.gz 2>/dev/null
-endif
-endif
-
 
 mkimage: $(MKIMAGE_DIR)/crc32.c $(MKIMAGE_DIR)/mkimage.c 
 	$(HOSTCC) $(HOST_CFLAGS) -DUSE_HOSTCC -o $@ -I$(MKIMAGE_DIR)/include $^ 
 
 image: mkimage
 	$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S $(ROOTDIR)/$(LINUXDIR)/vmlinux  $(KERNELZ)
-	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; $(ROOTDIR)/tools/bin/lzma_alone e -a1 -d$(CONFIG_LZMA_COMPRESS_LEVEL)  $(KERNELZ) $(KERNELZ).$(COMP)
+	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; \
+	$(ROOTDIR)/tools/bin/lzma_alone e -a1 -d$(CONFIG_LZMA_COMPRESS_LEVEL) $(KERNELZ) $(KERNELZ).$(COMP)
 
 ifeq	($(CONFIG_BLK_DEV_INITRD),)
+ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
 	@#============================================================
 	@# uboot hdr(64B) + mtdblock0(192KB) + mtdblock1(64KB) + 
 	@# mtdblock2(64KB) + mtdblock3 + mtdblock4 + mtdblock5
@@ -110,17 +101,12 @@ ifeq	($(CONFIG_BLK_DEV_INITRD),)
 	#      Machine selection  --->
 	#        (90000) MTD Kernel Partition Size (Unit:Bytes)
 	#=============================================================
+	@echo $(CONFIG_MTD_KERNEL_PART_SIZ)
 	# Original Kernel Image Size
 	  @wc -c $(KERNELZ).$(COMP)
 	# Padded Kernel Image Size 
-ifeq    ($(findstring 0x, $(CONFIG_MTD_KERNEL_PART_SIZ)),0x)
 	  @SIZE=`wc -c $(KERNELZ).$(COMP) | awk '{ print $$1 }'` ; \
 	   MTD_KRN_PART_SIZE=`printf "%d" $(CONFIG_MTD_KERNEL_PART_SIZ)` ; \
-           PAD=`expr $$MTD_KRN_PART_SIZE - 64 - $$SIZE` ; \
-	   dd if=/dev/zero count=1 bs=$$PAD 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
-else
-	  @SIZE=`wc -c $(KERNELZ).$(COMP) | awk '{ print $$1 }'` ; \
-	   MTD_KRN_PART_SIZE=`printf "%d" 0x$(CONFIG_MTD_KERNEL_PART_SIZ)` ; \
            PAD=`expr $$MTD_KRN_PART_SIZE - 64 - $$SIZE` ; \
 	   dd if=/dev/zero count=1 bs=$$PAD 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
 endif
@@ -135,5 +121,17 @@ endif
 	#===========================================
 endif
 
-	@cd $(IMAGEDIR) ; $(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 -e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') -n $(PRODUCTID) -V $(KERNEL_VER) $(FS_VER) $(HWL1) $(HWH1) $(HWL2) $(HWH2) $(HWL3) $(HWH3) $(HWL4) $(HWH4)  -d $(KERNELZ).$(COMP) $(IMAGE)
-
+ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
+	@cd $(IMAGEDIR) ; \
+	ISIZE=`wc -c $(KERNELZ).$(COMP) | awk '{print $$1}'` ; \
+	RSIZE=`wc -c $(RAMDISK) | awk '{print $$1}'` ; \
+	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
+	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
+	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') -k $$KRN_SIZE \
+	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE) 
+else
+	@cd $(IMAGEDIR) ; \
+	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
+	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
+	-n $(PRODUCTID)	-d $(KERNELZ).$(COMP) $(IMAGE)
+endif
