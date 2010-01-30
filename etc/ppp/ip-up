@@ -1,24 +1,26 @@
 #!/bin/sh
 
-    #replace DNS from ppp
+LOG="logger -t pppd"
+
+    $LOG "Replace DNS from pppd"
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$1
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$1
     cat /var/tmp/resolv.$1 >> /etc/resolv.conf
 
-    #corbiba hack
+    $LOG "corbiba hack"
     ip route del $5
     
-    #calculate min mtu
+    $LOG "Calculate min mtu"
     MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
 
-    #renew mss rules
+    $LOG "Renew mss rules"
     iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
     iptables -t mangle -I FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     iptables -t mangle -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
     echo $MINMTU > /tmp/ppp-mtu
 
-    #restart dns server, dyndns, ntp sync and rebuild shaper rules
+    $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
     service ntp stop
     service dnsserver stop
     service shaper stop
@@ -30,5 +32,7 @@
     service ddns start
     service dnsserver start
     service shaper start
+
+    $LOG "All is start OK"
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

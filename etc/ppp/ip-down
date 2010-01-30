@@ -1,14 +1,17 @@
 #!/bin/sh
 
-    #Flush route cache
+LOG="logger -t pppd"
+
+    $LOG "Flush route cache"
     ip route flush cache
 
-    #read min mtu
+    $LOG "Restore mtu/mru"
     MINMTU=`cat /tmp/ppp-mtu`
     iptables -t mangle -D FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     rm -f /tmp/ppp-mtu
 
+    $LOG "Restart need service and rebuild shaper rules"
     #restart dns server
     service dnsserver stop
     service dnsserver start
@@ -16,5 +19,6 @@
     #rebuild shaper rules
     service shaper stop
     service shaper start
+    $LOG "Down is OK"
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

@@ -8,6 +8,7 @@ echo "==================START-PPPOE-CLIENT======================="
 
 killall -q -9 pppd > /dev/null 2>&1
 killall -q -9 xl2tpd > /dev/null 2>&1
+LOG="logger -t vpnhelper"
 
 usage()
 {
@@ -26,12 +27,12 @@ ppp=/etc/ppp
 echo > $ppp/chap-secrets
 echo > $ppp/pap-secrets
 
-echo "Save default route to /var/tmp/dgw.ppp"
+$LOG "Save default route to /var/tmp/dgw.ppp"
 old_dgw=`route -n -e | awk '{def=$1} def=="0.0.0.0" {print $2}'`
 if [ "$old_dgw" != "0.0.0.0" ] ; then
     echo $old_dgw > /var/tmp/dgw.ppp
 fi
-echo "Remove default route"
+$LOG "Remove default route"
 ip route del default 2> /dev/null
 
 OPTFILE="file /etc/ppp/options.pppoe"
@@ -40,5 +41,6 @@ PPP_STD_OPTIONS="noipdefault noauth -detach defaultroute persist usepeerdns"
 # PPPoE invocation
 PPPOE_CMD="$3 user $1 password $2"
 
+$LOG "Start pppd"
 pppd $OPTFILE mtu 1400 mru 1400 $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD &
 

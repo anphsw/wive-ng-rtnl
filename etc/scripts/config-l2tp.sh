@@ -13,21 +13,22 @@ PASSWORD=`nvram_get 2860 wan_l2tp_pass`
 
 killall -q -9 pppd > /dev/null 2>&1
 killall -q -9 xl2tpd > /dev/null 2>&1
+LOG="logger -t vpnhelper"
 
-    echo "Check for L2TP server reachable"
+    $LOG "Check for L2TP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
         ping -q -c 1 $SERVER
         if [ "$?" -eq 0 ]; then
             reachable=1
         else
-            echo "Server unreachable wait 30 sec."
+            $LOG "Server unreachable wait 30 sec."
             sleep 30
             reachable=0;
         fi
     done
 
-    echo "Get vpn server ip adress"
+    $LOG "Get vpn server ip adress"
     ADDRESS=`nslookup "$SERVER" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
     if [ "$ADDRESS" != "" ]; then
         SERVER=$ADDRESS
@@ -35,14 +36,14 @@ killall -q -9 xl2tpd > /dev/null 2>&1
         SERVER=$SERVER
     fi
 
-    echo "Get route to vpn server."
+    $LOG "Get route to vpn server."
     ROUTE=`ip r get "$SERVER" | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
         echo "Add route to vpn server."
         ip r add $ROUTE
     fi
 
-    echo "Remove default route"
+    $LOG "Remove default route"
     ip route del default 2> /dev/null
 
     #clear all configs
@@ -83,5 +84,6 @@ killall -q -9 xl2tpd > /dev/null 2>&1
     printf "$USER * $PASSWORD" >> $ppp/chap-secrets
     printf "$USER * $PASSWORD" >> $ppp/pap-secrets
 
-    echo "Starting VPN network l2tp..."
+    $LOG "Starting VPN network l2tp..."
+    $LOG "Start xl2tpd"
     xl2tpd -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid &

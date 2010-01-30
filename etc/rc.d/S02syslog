@@ -7,8 +7,6 @@ start() {
  echo "Start syslogd"
     #log to /var/log/messages
     syslogd -b0 -s20 -l6 -S -D &
-    #log to memory buffer
-    syslogd -C10 -b0 -s20 -l6 -S -D &
 }
 
 stop() {
