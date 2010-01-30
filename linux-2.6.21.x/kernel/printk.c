@@ -653,7 +653,7 @@ static void call_console_drivers(unsigned long start, unsigned long end) {}
 /*
  * Set up a list of consoles.  Called from init/main.c
  */
-static int __init console_setup(char *str)
+int __init console_setup(char *str)
 {
 	char name[sizeof(console_cmdline[0].name)];
 	char *s, *options;
