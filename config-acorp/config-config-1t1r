@@ -51,7 +51,6 @@ CONFIG_LIB_RESOLV_FORCE=y
 #
 # Network Applications
 #
-# CONFIG_USER_BRCTL_BRCTL is not set
 # CONFIG_USER_BIGPOND is not set
 # CONFIG_USER_CTORRENT is not set
 # CONFIG_USER_DHCP6 is not set

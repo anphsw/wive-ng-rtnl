@@ -53,7 +53,6 @@ endmenu
 mainmenu_option next_comment
 comment 'Network Applications'
 
-bool 'bridge utils'				CONFIG_USER_BRCTL_BRCTL
 bool 'bigpond'					CONFIG_USER_BIGPOND
 bool 'ctorrent (lightweith BitTorrent Client)'	CONFIG_USER_CTORRENT
 if [ "$CONFIG_USER_CTORRENT" = "y" ]; then
