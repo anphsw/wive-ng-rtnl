@@ -16,6 +16,7 @@ config RALINK_GPIO_LED
 config RALINK_GDMA
 	tristate "Ralink GDMA Support"
 	default n
+
 choice
         prompt "GDMA Channel Allocation Mode"
 	depends on RALINK_GDMA

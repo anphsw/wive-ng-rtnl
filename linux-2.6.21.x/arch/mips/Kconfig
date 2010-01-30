@@ -4,10 +4,10 @@ config MIPS
 	# Horrible source of confusion.  Die, die, die ...
 	select EMBEDDED
 
+
 mainmenu "Linux/MIPS Kernel Configuration"
 
 menu "Machine selection"
-
 
 config ZONE_DMA
 	bool
@@ -19,6 +19,7 @@ config RALINK_RT2880_SHUTTLE
 	bool
 config RALINK_RT3052_MP2
 	bool
+
 choice
 	prompt "System type"
 
@@ -52,11 +53,13 @@ config RALINK_RT2880
 
 endchoice
 
+config SERIAL_CONSOLE
+        bool "Support for serial port console"
+	default y
+
 source "arch/mips/rt2880/Kconfig"
 
 
-config SERIAL_CONSOLE 
-	bool
 
 endmenu
 

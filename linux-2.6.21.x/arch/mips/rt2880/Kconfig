@@ -177,4 +177,3 @@ config  RALINK_WDG_REFRESH_INTERVAL
 config  RALINK_TIMER_DFS
         bool "Ralink DFS Timer"
         depends on RALINK_TIMER
-
