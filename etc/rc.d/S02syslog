@@ -5,7 +5,7 @@ start() {
     klogd &
 
  echo "Start syslogd"
-    syslogd -D &
+    syslogd -C10 -b0 -s20 -l6 -S -D &
 }
 
 stop() {

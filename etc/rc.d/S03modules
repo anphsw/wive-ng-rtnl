@@ -14,7 +14,8 @@ start() {
  ############LOAD##ALL###MODULES###################
  if [ $FULLMODULELOAD = "YES" ]; then
     for i in $MODULES; do
-	if [ "$i" != "rt2860v2_ap.ko" ] && [ "$i" != "rt2860v2_sta.ko" ]; then
+	if [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_ap/rt2860v2_ap.ko" ] && \
+	    [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_sta/rt2860v2_sta.ko" ]; then
 	echo $i;
 	    insmod $i > /dev/null 2>&1
 	fi
@@ -23,7 +24,8 @@ start() {
   ############CONNTRCAK###FILTERS##################
   if [ $CONNTRACKMODULELOAD = "YES" ]; then
     for i in $MODULES_IPT; do
-	if [ "$i" != "rt2860v2_ap.ko" ] && [ "$i" != "rt2860v2_sta.ko" ]; then
+	if [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_ap/rt2860v2_ap.ko" ] && \
+	    [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_sta/rt2860v2_sta.ko" ]; then
 	echo $i;
 	    insmod $i > /dev/null 2>&1
 	fi
