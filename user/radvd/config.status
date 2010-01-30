@@ -523,7 +523,7 @@ s,@AMTAR@,${SHELL} /home/terence/Belkin_F5D8235-4_v2000_20081113_SDK3200/Belkin_
 s,@am__tar@,${AMTAR} chof - "$$tardir",;t t
 s,@am__untar@,${AMTAR} xf -,;t t
 s,@CC@,/opt/buildroot-gcc342/bin/mipsel-linux-gcc,;t t
-s,@CFLAGS@,-g -O2,;t t
+s,@CFLAGS@,-g -Os,;t t
 s,@LDFLAGS@,-L../flex-2.5.33,;t t
 s,@CPPFLAGS@,,;t t
 s,@ac_ct_CC@,,;t t
