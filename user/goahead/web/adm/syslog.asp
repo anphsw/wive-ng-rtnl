@@ -110,7 +110,7 @@ function refreshlogclick()
 	<td class="title"colspan="2" id="syslogSysLog">System Log: </td>
 </tr>
 <tr><td>
-		<textarea style=font-size:9pt name="syslog" id="syslog" cols="80" rows="50" wrap="off" readonly="1">
+		<textarea style=font-size:8pt name="syslog" id="syslog" cols="80" rows="50" wrap="off" readonly="1">
 		</textarea>
 	</td>
 </tr>

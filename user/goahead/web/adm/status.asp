@@ -148,11 +148,11 @@ function PageInit()
   <td class="title" colspan="2" id="statusSysInfo">System Info</td>
 </tr>
 <tr>
-  <td class="head" id="statusSDKVersion">SDK Version</td>
+  <td class="head" id="statusSDKVersion">Firmware Version</td>
   <td><% getSdkVersion(); %> (<% getSysBuildTime(); %>)</td>
 </tr>
 <tr>
-  <td class="head" id="statusSysUpTime">System Up Time</td>
+  <td class="head" id="statusSysUpTime">System Time</td>
   <td><% getSysUptime(); %></td>
 </tr>
 <tr>

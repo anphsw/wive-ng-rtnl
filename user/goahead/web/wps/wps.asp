@@ -410,7 +410,7 @@ function onPINPBCRadioClick(value)
 <table id="div_wps_info" name="div_wps_info" border="1" cellpadding="1" cellspacing="1" width="100%" style="visibility: hidden;">
 <tbody><tr><td class="title" id="wpsStatus_text">WPS Status</td></tr>
 <tr><td> 
-<textarea name="WPSInfo" id="WPSInfo" cols="63" rows="2" wrap="off" readonly="1"></textarea>
+<textarea style=font-size:8pt name="WPSInfo" id="WPSInfo" cols="63" rows="2" wrap="off" readonly="1"></textarea>
 </td></tr>
 </tbody></table>
 

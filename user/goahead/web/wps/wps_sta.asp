@@ -664,7 +664,7 @@ function RefreshClick()
 </form>
 
 <br>
-<textarea name="APInfo" id="APInfo" cols="63" rows="5" wrap="off" readonly="1"></textarea>
+<textarea style=font-size:8pt name="APInfo" id="APInfo" cols="63" rows="5" wrap="off" readonly="1"></textarea>
 
 <input value="Refresh" id="stawpsRefresh" onclick="RefreshClick();" type="button">
 <font id="stawpsMode_txt">Mode</font>:<select name="STAWPSMode" id="STAWPSMode" size="1" onchange="STAWPSModeChange()">
@@ -732,7 +732,7 @@ function RefreshClick()
 <tbody><tr><td class="title" id="stawpsStatus">WPS Status</td></tr>
 <tr>
 	<td> 
-		<textarea name="WPSInfo" id="WPSInfo" cols="63" rows="2" wrap="off" readonly="1"></textarea>
+		<textarea style=font-size:8pt name="WPSInfo" id="WPSInfo" cols="63" rows="2" wrap="off" readonly="1"></textarea>
 	</td>
 </tr>
 </tbody>

@@ -4,9 +4,9 @@ DOS2UNIX=NO
 FULLREBUILD=NO
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
-#MODE=1T1R
+MODE=1T1R
 #MODE=1T1R-32
-MODE=2T2R
+#MODE=2T2R
 #------------------------------------#
 
 #for clear all binary

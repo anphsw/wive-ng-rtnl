@@ -4,6 +4,7 @@
 
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
+LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STARTEDPPPD=`ip link show up | grep ppp -c`
 
@@ -18,16 +19,18 @@ case "$1" in
     renew|bound)
         #no change routes if pppd is started
         if [ "$STARTEDPPPD" != "0" ]; then
-                echo "PPPD IS STARTED!!! No deleting or routers and adresses"
+                $LOG "PPPD IS STARTED!!! No new ip or routers change"
         else
+            $LOG "Renew ip adress and other parametrs from dhcp"
     	    ifconfig $interface $ip $BROADCAST $NETMASK
     	    if [ -n "$router" ] ; then
-        	echo "deleting routers"
+        	$LOG "Deleting default route"
         	while route del default gw 0.0.0.0 dev $interface ; do
             	    :
         	done
 
         	metric=0
+        	$LOG "Add default route"
         	for i in $router ; do
             	    metric=`expr $metric + 1`
             	    route add default gw $i dev $interface metric $metric
@@ -37,12 +40,14 @@ case "$1" in
 	# DNS
         echo -n > $RESOLV_CONF
         #[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+	$LOG "Renew DNS from dhcp"
         for i in $dns ; do
             echo adding dns $i
             echo nameserver $i >> $RESOLV_CONF
         done
 	# CIDR STATIC ROUTES (rfc3442)
 	[ -n "$staticroutes" ] && {
+		$LOG "Add static routes from dhcpd"
 		# This defines how many CIDR Routes can be assigned so that we do not enter
 		# an endless loop on malformed data
 		MAXstaticroutesS=24;
@@ -114,7 +119,7 @@ case "$1" in
 		done
 	}
 
-
+	    $LOG "Restart needed services"
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
 	    # restart needed services
@@ -124,6 +129,7 @@ case "$1" in
 	    service dns start
 	    service upnp start
 	    service igmpproxy start
+	    $LOG "Renew OK.."
         ;;
 esac
 

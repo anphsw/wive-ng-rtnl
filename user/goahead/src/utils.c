@@ -944,7 +944,7 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("RT2880 with IC+ MACPHY"));
 #endif
 #ifdef CONFIG_ICPLUS_PHY
-    return websWrite(wp, T("RT2880 with IC+ PHY"));
+	return websWrite(wp, T("RT2880 with IC+ PHY"));
 #endif
 #ifdef CONFIG_RT_MARVELL
 	return websWrite(wp, T("RT2880 with MARVELL"));
@@ -953,7 +953,12 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("RT2880 with Vitesse"));
 #endif
 #ifdef CONFIG_RT_3052_ESW
-	return websWrite(wp, T("RT3052 embedded switch"));
+#ifdef CONFIG_RALINK_RT3050_1T1R
+	return websWrite(wp, T("RT3050 1T1R embedded switch"));
+#endif
+#ifdef CONFIG_RALINK_RT3050_2T2R
+	return websWrite(wp, T("RT3052 2T2R embedded switch"));
+#endif
 #endif
     
 	return 0;

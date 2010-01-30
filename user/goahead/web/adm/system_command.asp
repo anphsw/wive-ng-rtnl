@@ -58,7 +58,7 @@ function setFocus()
 	<td> <input type="text" name="command" size="30" maxlength="256" > </td>
 </tr>
 <tr><td colspan=2>
-		<textarea cols="63" rows="20" wrap="off" readonly="1">
+		<textarea style=font-size:8pt cols="63" rows="20" wrap="off" readonly="1">
 <% showSystemCommandASP(); %>
         </textarea></td>
 </tr>
