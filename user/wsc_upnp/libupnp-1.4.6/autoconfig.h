@@ -82,6 +82,10 @@
 /* Define to 1 if you have the `vprintf' function. */
 #define HAVE_VPRINTF 1
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+/* #undef LT_OBJDIR */
+
 /* Define to 1 to prevent compilation of assert() */
 #define NDEBUG 1
 

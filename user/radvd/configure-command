@@ -1,1 +1,8 @@
-./configure --host=mipsel-linux CC=/opt/buildroot-gcc342/bin/mipsel-linux-gcc LDFLAGS=-L../flex-2.5.33
+#!/bin/bash
+
+ROOTDIR=`pwd`
+CONFOPTS="--host=mipsel-linux"
+CONFOPTS="$CONFOPTS --prefix=$ROOTDIR/filesystem"
+LDFLAGS=-L../flex
+export $LDFLAGS
+./configure $CONFOPTS
