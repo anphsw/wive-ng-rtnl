@@ -956,7 +956,10 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 #ifdef CONFIG_RALINK_RT3050_1T1R
 	return websWrite(wp, T("RT3050 1T1R embedded switch"));
 #endif
-#ifdef CONFIG_RALINK_RT3050_2T2R
+#ifdef CONFIG_RALINK_RT3051_1T2R
+	return websWrite(wp, T("RT3051 1T2R embedded switch"));
+#endif
+#ifdef CONFIG_RALINK_RT3052_2T2R
 	return websWrite(wp, T("RT3052 2T2R embedded switch"));
 #endif
 #endif
