@@ -5,9 +5,9 @@ include $(ROOTDIR)/vendors/config/mips/config.arch
 CONSOLE_BAUD_RATE = 57600
 
 CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
-UOPT    += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
-LOPT    += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+CFLAGS  += -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct
+UOPT    += -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct
+LOPT    += -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct
 
 MODEL_NAME		   = RT-NL
 KERNEL_VER		   = "0.1.0"

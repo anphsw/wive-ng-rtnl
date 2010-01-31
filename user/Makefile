@@ -12,7 +12,8 @@ ifndef ROOTDIR
 ROOTDIR=..
 endif
 
-CFLAGS += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+CFLAGS += -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct 
+CFLAGS += -Wpadded -Wall -Wno-unused 
 export $(CFLAGS)
 
 UCLINUX_BUILD_USER=1
