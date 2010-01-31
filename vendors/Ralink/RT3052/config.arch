@@ -4,10 +4,10 @@ include $(ROOTDIR)/vendors/config/mips/config.arch
 
 CONSOLE_BAUD_RATE = 57600
 
-CFLAGS  +=  -I$(ROOTDIR)
-CFLAGS  +=  -Os
-UOPT += -Os                  # user apps are always Os
-LOPT += -Os                  # library is alway 02
+CFLAGS  += -I$(ROOTDIR)
+CFLAGS  += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+UOPT    += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+LOPT    += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
 
 MODEL_NAME		   = RT-NL
 KERNEL_VER		   = "0.1.0"
