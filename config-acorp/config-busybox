@@ -50,7 +50,7 @@ CONFIG_FEATURE_HAVE_RPC=y
 # CONFIG_FEATURE_SHARED_BUSYBOX is not set
 CONFIG_LFS=y
 CONFIG_CROSS_COMPILER_PREFIX="../../toolchain/bin/mipsel-linux-"
-CONFIG_EXTRA_CFLAGS="-Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN"
+CONFIG_EXTRA_CFLAGS="-Os -pipe -mips32 -mtune=mips32 -s -fpack-struct"
 
 #
 # Debugging Options
