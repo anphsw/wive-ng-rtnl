@@ -12,7 +12,7 @@ ifndef ROOTDIR
 ROOTDIR=..
 endif
 
-CFLAGS += -Os -pipe -mips32 -mtune=mips32
+CFLAGS += -Os -mips32 -mtune=mips32
 CFLAGS += -Wpadded -Wall -Wno-unused 
 export $(CFLAGS)
 
