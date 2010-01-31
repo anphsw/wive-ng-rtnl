@@ -57,7 +57,7 @@
 #define	_PATH_RWHODIR	"/var/spool/rwho"
 #define	_PATH_SENDMAIL	"/usr/sbin/sendmail"
 #define	_PATH_SHELLS	"/etc/shells"
-#define	_PATH_TTY	"/dev/tty"
+#define	_PATH_TTY	"/dev/console"
 #define	_PATH_UNIX	"/boot/vmlinux"
 #define	_PATH_UTMP	"/var/run/utmp"
 #define	_PATH_VI	"/usr/bin/vi"

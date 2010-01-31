@@ -49,7 +49,9 @@
 /* Each port might have at least a v4 and a v6 address */
 #define MAX_LISTEN_ADDR (DROPBEAR_MAX_PORTS*3)
 
+/* #ifndef _PATH_TTY
 #define _PATH_TTY "/dev/console"
+#endif */
 
 #define _PATH_CP "/bin/cp"
 
