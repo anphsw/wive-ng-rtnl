@@ -48,9 +48,15 @@ romfs:
 	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_vlan
 	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
 	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_oneport
+ifdef CONFIG_RALINK_RT3050_1T1R
 	$(ROMFSINST) -e CONFIG_RALINK_RT3052AP_2T2R /etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin
+endif
+ifdef CONFIG_RALINK_RT3051_1T2R
 	$(ROMFSINST) -e CONFIG_RALINK_RT3051AP_1T2R /etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin
+endif
+ifdef CONFIG_RALINK_RT3052_2T2R
 	$(ROMFSINST) -e CONFIG_RALINK_RT3050AP_1T1R /etc_ro/wlan/RT3050_AP_1T1R_V1_0.bin
+endif
 
 romfs.post:: 
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
