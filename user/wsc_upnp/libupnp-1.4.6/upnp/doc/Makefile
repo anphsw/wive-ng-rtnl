@@ -97,7 +97,7 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missin
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct -Wall
+CFLAGS = -Os -mips32 -mtune=mips32 -Wall
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
