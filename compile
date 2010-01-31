@@ -11,7 +11,7 @@ MODE=2T2R
 #------------------------------------#
 
 echo "" > sdk_version.h
-echo "#define RT288X_SDK_VERSION $VERSIONPKG" >> sdk_version.h
+echo "#define RT288X_SDK_VERSION \"$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
 
 #for clear all binary
