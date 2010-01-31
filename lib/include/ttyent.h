@@ -34,7 +34,7 @@
 
 #include <features.h>
 
-#define	_PATH_TTYS	"/dev/console"
+#define	_PATH_TTYS	"/etc/ttys"
 
 #define	_TTYS_OFF	"off"
 #define	_TTYS_ON	"on"
