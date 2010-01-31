@@ -15,6 +15,7 @@ NAME = Nocturnal Monster Puppy
 #    (this increases performance and avoid hard-to-debug behavour);
 # o  print "Entering directory ...";
 MAKEFLAGS += -rR --no-print-directory
+MOREOPTIMIZE = -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
 
 # We are using a recursive build, so we need to do a little thinking
 # to get the ordering right.
@@ -294,10 +295,10 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE
-CFLAGS_MODULE   = $(MODFLAGS) -Os
+CFLAGS_MODULE   = $(MODFLAGS) $(MOREOPTIMIZE)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r
-CFLAGS_KERNEL	=
+CFLAGS_KERNEL	=  $(MOREOPTIMIZE)
 AFLAGS_KERNEL	=
 
 
@@ -310,7 +311,7 @@ LINUXINCLUDE    := -Iinclude \
 CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS          := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -fno-strict-aliasing -fno-common
+                   -fno-strict-aliasing -fno-common $(MOREOPTIMIZE)
 AFLAGS          := -D__ASSEMBLY__
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
