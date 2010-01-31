@@ -3,7 +3,7 @@
 ROOTDIR=`pwd`
 CONFOPTS="--host=mipsel-linux"
 CONFOPTS="$CONFOPTS --prefix=$ROOTDIR/filesystem"
-CFLAGS="-Os -pipe -mips32 -mtune=mips32 -s -fpack-struct"
+CFLAGS="-Os -mips32 -mtune=mips32"
 CPPFLAGS="-Os"
 export $CFLAGS $CPPFLAGS
 ./configure $CONFOPTS
