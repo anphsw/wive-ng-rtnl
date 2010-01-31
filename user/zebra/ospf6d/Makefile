@@ -199,7 +199,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = -Os                   -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os
+CFLAGS = -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct
 DIST_SOURCES = $(libospf6_a_SOURCES) $(ospf6d_SOURCES) \
 	$(ospf6test_SOURCES)
 DATA = $(sysconf_DATA)

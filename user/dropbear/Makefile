@@ -70,7 +70,7 @@ RANLIB=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib
 STRIP=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip
 INSTALL=install
 CPPFLAGS=
-CFLAGS=-I. -I$(srcdir) -I$(srcdir)/libtomcrypt/src/headers/ $(CPPFLAGS) -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+CFLAGS=-I. -I$(srcdir) -I$(srcdir)/libtomcrypt/src/headers/ $(CPPFLAGS) -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -s -fpack-struct
 LIBS=$(LTC) $(LTM)  -lcrypt
 LDFLAGS=-Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 

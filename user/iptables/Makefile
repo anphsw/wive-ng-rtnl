@@ -35,7 +35,8 @@ RELEASE_DIR:=/tmp
 
 #COPT_FLAGS:=-Os
 #CFLAGS:=$(COPT_FLAGS) -Wall -Wunused -I$(KERNEL_DIR)/include -Iinclude/ -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" #-g -DDEBUG #-pg # -DIPTC_DEBUG
-CFLAGS := -Wall -Wunused -I$(ROOTDIR)/linux-2.6.21.x/include -Iinclude/ -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" $(CFLAGS)
+CFLAGS := -Wall -Wunused -I$(ROOTDIR)/linux-2.6.21.x/include -Iinclude/ -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" -Os
+#$(CFLAGS)
 
 ifdef NO_SHARED_LIBS
 CFLAGS += -DNO_SHARED_LIBS=1

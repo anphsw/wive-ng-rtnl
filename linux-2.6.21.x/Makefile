@@ -15,7 +15,7 @@ NAME = Nocturnal Monster Puppy
 #    (this increases performance and avoid hard-to-debug behavour);
 # o  print "Entering directory ...";
 MAKEFLAGS += -rR --no-print-directory
-MOREOPTIMIZE = -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+MOREOPTIMIZE = -Os -pipe -mips32 -mtune=mips32
 
 # We are using a recursive build, so we need to do a little thinking
 # to get the ordering right.
