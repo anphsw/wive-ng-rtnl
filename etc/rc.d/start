@@ -11,31 +11,31 @@ get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
-echo "Prepare start init!" > /dev/console
+echo "Prepare start init!"
 export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
-echo "Init DEV particion" > /dev/console
+echo "Init DEV particion"
 zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
 
-echo "Init RW particion" > /dev/console
+echo "Init RW particion"
 zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 
 if [ -f /etc/filesystem.ok ]; then
-    echo "RW File system is ok - preparing ..." > /dev/console
+    echo "RW File system is ok - preparing ..."
   else
-    echo "File system is clear or poor." > /dev/console
+    echo "File system is clear or poor."
     zcat /rwfs.gz | tar xf - -C / >>/dev/null
     echo > /etc/filesystem.ok
-    echo "Compress config files" > /dev/console
+    echo "Compress config files"
     tmp="/tmp/tgzfs"
     tar cf - /etc | gzip -9 > $tmp
     if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
-	echo "Write configs to flash" > /dev/console
+	echo "Write configs to flash"
 	dd if=$tmp of=$MTDDEVICE bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
-	echo "Config saved. OK." > /dev/console
+	echo "Config saved. OK."
     else
-	echo "Error: File $tmp too big: $(get_size $tmp)k" > /dev/console
+	echo "Error: File $tmp too big: $(get_size $tmp)k"
     fi
      rm $tmp
 fi
 
-/etc/rc.d/rcS &
+/bin/sh /etc/rc.d/rcS &
