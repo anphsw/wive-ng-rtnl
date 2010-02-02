@@ -40,7 +40,7 @@
 
 #define	_PATH_BSHELL	"/bin/sh"
 #define	_PATH_CONSOLE	"/dev/console"
-#define	_PATH_TTY	"/dev/ttyS1"
+#define	_PATH_TTY	"/dev/tty"
 #define	_PATH_CSHELL	"/bin/csh"
 #define	_PATH_DEVDB	"/var/run/dev.db"
 #define	_PATH_DEVNULL	"/dev/null"

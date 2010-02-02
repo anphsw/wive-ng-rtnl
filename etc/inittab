@@ -1,2 +1,2 @@
-::sysinit:/bin/cttyhack /etc/rc.d/start
-ttyS1::respawn:/bin/cttyhack /bin/sh
+::sysinit:/etc/rc.d/start
+ttyS1::respawn:/bin/sh
