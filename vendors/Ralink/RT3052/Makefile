@@ -1,9 +1,11 @@
 include config.arch
 include ../../../linux-2.6.21.x/drivers/mtd/maps/ralink-flash.h
+include ../../../sdk_version.h
+include ../../../version
 
 KERNELZ = $(IMAGEDIR)/zImage
 RAMDISK  = $(IMAGEDIR)/ramdisk
-IMAGE = $(IMAGEDIR)/$(PRODUCTID)_$(KERNEL_VER).$(FS_VER).trx
+IMAGE = $(IMAGEDIR)/$(PRODUCTID)_$(RT288X_SDK_VERSION).bin
 ROMFS_DIR = $(ROOTDIR)/romfs
 
 RAMDISK_SIZE  := $(shell echo $(CONFIG_BLK_DEV_RAM_SIZE))

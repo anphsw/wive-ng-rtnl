@@ -26,7 +26,7 @@
 
 /* Default sysinit script. */
 #ifndef INIT_SCRIPT
-#define INIT_SCRIPT  "/bin/rcS"
+#define INIT_SCRIPT  "/bin/start"
 #endif
 
 /* Each type of actions can appear many times. They will be

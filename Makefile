@@ -292,6 +292,7 @@ romfs.post:
 	date +%D > $(ROMFSDIR)/etc/compile-date
 	cp -vf  $(ROOTDIR)/linux/.config $(ROMFSDIR)/etc/scripts/config.sh
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
+	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh
 	tar -cp --gzip etc > $(ROMFSDIR)/rwfs.gz
 	tar -zxvf dev.tgz

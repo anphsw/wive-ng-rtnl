@@ -2,7 +2,7 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
-VERSIONPKG="1.0.0.RU.`date +%d%m%Y`"
+VERSIONPKG="1.0.1.RU.`date +%d%m%Y`"
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 #MODE=1T1R
@@ -13,6 +13,9 @@ MODE=2T2R
 echo "" > sdk_version.h
 echo "#define RT288X_SDK_VERSION \"$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
+echo "" > version
+echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
+echo "" >> version
 
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then

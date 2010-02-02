@@ -9,6 +9,7 @@ find $PWD -name CVS -type d | xargs rm -rf
 
 rm -f .tmp*
 rm -f sdk_version.h
+rm -f version
 
 make clean -C Uboot
 make clean -C tools
