@@ -127,9 +127,9 @@ been enabled, more detailed usage information will also be available.</p>
         pidof, ping, ping6, poweroff, printf, ps, pwd, reboot, renice, rm,
         rmdir, rmmod, route, run-parts, sed, seq, setconsole, sh, sleep,
         sort, split, stat, sum, switch_root, sync, sysctl, syslogd, tail,
-        tar, telnetd, test, time, top, touch, traceroute, traceroute6, true,
-        udhcpc, udhcpd, umount, uname, uniq, unix2dos, unzip, uptime,
-        usleep, vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
+        tar, test, time, top, touch, traceroute, traceroute6, true, udhcpc,
+        udhcpd, umount, uname, uniq, unix2dos, unzip, uptime, usleep,
+        vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -1632,24 +1632,6 @@ File selection:</pre>
         X       File with names to exclude
         C       Change to DIR before operation
         v       Verbose</pre>
-</dd>
-<dt><strong><a name="telnetd" class="item"><strong>telnetd</strong></a></strong></dt>
-
-<dd>
-<p>telnetd [OPTIONS]</p>
-<p>Handle incoming telnet connections</p>
-<p>Options:</p>
-<pre>
-        -l LOGIN        Exec LOGIN on connect
-        -f ISSUE_FILE   Display ISSUE_FILE instead of /etc/issue
-        -K              Close connection as soon as login exits
-                        (normally wait until all programs close slave pty)
-        -p PORT         Port to listen on
-        -b ADDR[:PORT]  Address to bind to
-        -F              Run in foreground
-        -i              Run as inetd service
-        -w SEC          Run as inetd service in wait mode, linger time SEC
-        -S              Log to syslog (implied by -i or without -F and -w)</pre>
 </dd>
 <dt><strong><a name="test" class="item"><strong>test</strong></a></strong></dt>
 
