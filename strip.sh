@@ -1,7 +1,9 @@
 #!/bin/sh
 
 RO_ROOT=romfs
-STRIP=./toolchain/bin/mipsel-linux-strip --strip-debug --strip-unneeded
+TOOLSPREFIX=./toolchain/bin/mipsel-linux
+STRIP=$TOOLSPREFIX-strip --strip-debug --strip-unneeded
+OBJCOPY=$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded
 SSTRIP=./tools/sstrip/sstrip
 MODULES=`find romfs/lib/modules -type f`;
 
@@ -24,7 +26,7 @@ fi
 echo "STRIP MODULES"
 for i in $MODULES; do
   echo $i;
-  mips-linux-objcopy --strip-debug --strip-unneeded $i $i
+  $OBJCOPY $i $i
 done
 
 echo -----------------------------------SYNC!!-------------------------------------

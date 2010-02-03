@@ -2796,7 +2796,6 @@ config PLIP
 
 config PPP
 	tristate "PPP (point-to-point protocol) support"
-	select SLHC
 	---help---
 	  PPP (Point to Point Protocol) is a newer and better SLIP.  It serves
 	  the same purpose: sending Internet traffic over telephone (and other
@@ -3000,7 +2999,6 @@ config SLIP
 config SLIP_COMPRESSED
 	bool "CSLIP compressed headers"
 	depends on SLIP
-	select SLHC
 	---help---
 	  This protocol is faster than SLIP because it uses compression on the
 	  TCP/IP headers (not on the data itself), but it has to be supported

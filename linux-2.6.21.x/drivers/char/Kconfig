@@ -75,9 +75,9 @@ choice
 endchoice
 
 config VT
-	bool "Virtual terminal" if EMBEDDED
-	select INPUT
+	bool "Virtual terminal"
 	default y if !VIOCONS
+	select DUMMY_CONSOLE
 	---help---
 	  If you say Y here, you will get support for terminal devices with
 	  display and keyboard devices. These are called "virtual" because you
@@ -130,7 +130,7 @@ config VT_CONSOLE
 config HW_CONSOLE
 	bool
 	depends on VT && !S390 && !UML
-	default y
+	default n
 
 config VT_HW_CONSOLE_BINDING
        bool "Support for binding and unbinding console drivers"

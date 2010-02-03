@@ -155,9 +155,11 @@ sl_alloc_bufs(struct slip *sl, int mtu)
 	cbuff = kmalloc(len + 4, GFP_KERNEL);
 	if (cbuff == NULL)
 		goto err_exit;
+#ifdef CONFIG_SLHC
 	slcomp = slhc_init(16, 16);
 	if (slcomp == NULL)
 		goto err_exit;
+#endif
 #endif
 	spin_lock_bh(&sl->lock);
 	if (sl->tty == NULL) {

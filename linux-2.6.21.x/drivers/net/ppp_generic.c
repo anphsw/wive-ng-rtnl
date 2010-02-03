@@ -694,15 +694,19 @@ static int ppp_ioctl(struct inode *inode, struct file *file,
 			val2 = val >> 16;
 			val &= 0xffff;
 		}
+#ifdef CONFIG_SLHC
 		vj = slhc_init(val2+1, val+1);
 		if (vj == 0) {
 			printk(KERN_ERR "PPP: no memory (VJ compressor)\n");
 			err = -ENOMEM;
 			break;
 		}
+#endif
 		ppp_lock(ppp);
+#ifdef CONFIG_SLHC
 		if (ppp->vj != 0)
 			slhc_free(ppp->vj);
+#endif
 		ppp->vj = vj;
 		ppp_unlock(ppp);
 		err = 0;
@@ -1150,9 +1154,11 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		}
 		skb_reserve(new_skb, ppp->dev->hard_header_len - 2);
 		cp = skb->data + 2;
+#ifdef CONFIG_SLHC
 		len = slhc_compress(ppp->vj, cp, skb->len - 2,
 				    new_skb->data + 2, &cp,
 				    !(ppp->flags & SC_NO_TCP_CCID));
+#endif
 		if (cp == skb->data + 2) {
 			/* didn't compress */
 			kfree_skb(new_skb);
@@ -1166,7 +1172,11 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 			}
 			kfree_skb(skb);
 			skb = new_skb;
+#ifdef CONFIG_SLHC
 			cp = skb_put(skb, len + 2);
+#else
+			cp = skb_put(skb, 2);
+#endif
 			cp[0] = 0;
 			cp[1] = proto;
 		}
@@ -1621,8 +1631,10 @@ static void
 ppp_receive_error(struct ppp *ppp)
 {
 	++ppp->stats.rx_errors;
+#ifdef CONFIG_SLHC
 	if (ppp->vj != 0)
 		slhc_toss(ppp->vj);
+#endif
 }
 
 static void
@@ -1651,6 +1663,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	switch (proto) {
 	case PPP_VJC_COMP:
+#ifdef CONFIG_SLHC
 		/* decompress VJ compressed packets */
 		if (ppp->vj == 0 || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
@@ -1681,6 +1694,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		else if (len < skb->len)
 			skb_trim(skb, len);
 		proto = PPP_IP;
+#endif
 		break;
 
 	case PPP_VJC_UNCOMP:
@@ -1692,11 +1706,12 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		 */
 		if (!pskb_may_pull(skb, skb->len))
 			goto err;
-
+#ifdef CONFIG_SLHC
 		if (slhc_remember(ppp->vj, skb->data + 2, skb->len - 2) <= 0) {
 			printk(KERN_ERR "PPP: VJ uncompressed error\n");
 			goto err;
 		}
+#endif
 		proto = PPP_IP;
 		break;
 
@@ -2600,10 +2615,12 @@ static void ppp_destroy_interface(struct ppp *ppp)
 	}
 
 	ppp_ccp_closed(ppp);
+#ifdef CONFIG_SLHC
 	if (ppp->vj) {
 		slhc_free(ppp->vj);
 		ppp->vj = NULL;
 	}
+#endif
 	skb_queue_purge(&ppp->file.xq);
 	skb_queue_purge(&ppp->file.rq);
 #ifdef CONFIG_PPP_MULTILINK

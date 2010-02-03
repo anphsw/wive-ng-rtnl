@@ -2405,7 +2405,7 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 *	Finally, wait for transmitter to become empty
 	 *	and restore the IER
 	 */
-	wait_for_xmitr(up, BOTH_EMPTY);
+	//wait_for_xmitr(up, BOTH_EMPTY);
 	serial_out(up, UART_IER, ier);
 
 	if (locked)
@@ -2416,7 +2416,7 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 static int __init serial8250_console_setup(struct console *co, char *options)
 {
 	struct uart_port *port;
-	int baud = 9600;
+	int baud = 57600;
 	int bits = 8;
 	int parity = 'n';
 	int flow = 'n';

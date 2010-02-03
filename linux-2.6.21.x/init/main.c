@@ -741,10 +741,13 @@ static int noinline init_post(void)
 	system_state = SYSTEM_RUNNING;
 	numa_default_policy();
 
-	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
+	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
 		printk(KERN_WARNING "Warning: unable to open an initial console.\n");
 
-//#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
+
+	(void) sys_dup(0);
+	(void) sys_dup(0);
+
 #ifdef CONFIG_PROC_FS
         if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
             printk("mount /proc file system fail!\n");
@@ -784,11 +787,6 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
-//#endif
-
-	(void) sys_dup(0);
-	(void) sys_dup(0);
-
 	if (ramdisk_execute_command) {
 		run_init_process(ramdisk_execute_command);
 		printk(KERN_WARNING "Failed to execute %s\n",
@@ -806,8 +804,9 @@ static int noinline init_post(void)
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
+#ifndef CONFIG_RT2880_ROOTFS_IN_RAM
 	run_init_process("/linuxrc");
-
+#endif
 	panic("No init found.  Try passing init= option to kernel.");
 	return 0;
 }
@@ -842,14 +841,11 @@ static int __init init(void * unused)
 
 	do_basic_setup();
 
-	/*
-	 * check if there is an early userspace init.  If yes, let it do all
-	 * the work
-	 */
-#ifndef CONFIG_RT2880_ROOTFS_IN_RAM
+#ifdef CONFIG_RT2880_ROOTFS_IN_RAM
 	if (!ramdisk_execute_command)
 		ramdisk_execute_command = "/linuxrc";
-
+#endif
+#ifndef CONFIG_RT2880_ROOTFS_IN_RAM
 	if (sys_access((const char __user *) ramdisk_execute_command, 0) != 0) {
 		ramdisk_execute_command = NULL;
 		prepare_namespace();
@@ -861,5 +857,10 @@ static int __init init(void * unused)
 	 * initmem segments and start the user-mode stuff..
 	 */
 	init_post();
+
+	/*
+	 * check if there is an early userspace init.  If yes, let it do all
+	 * the work
+	 */
 	return 0;
 }

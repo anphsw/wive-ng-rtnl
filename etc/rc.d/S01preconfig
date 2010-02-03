@@ -9,6 +9,7 @@ start() {
     echo "Mount all filesystems"
     mount -a
     mount -t devpts /dev/pts /dev/pts
+    mknod /dev/ptmx c 5 2
     
     echo "Create some folders"
     mkdir -p /var/run

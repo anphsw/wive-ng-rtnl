@@ -33,11 +33,11 @@ static int __init default_rootfs(void)
 	if (err < 0)
 		goto out;
 
-	err = sys_mknod((const char __user *) "/dev/console",
+/*	err = sys_mknod((const char __user *) "/dev/console",
 			S_IFCHR | S_IRUSR | S_IWUSR,
-			new_encode_dev(MKDEV(5, 1)));
+			new_encode_dev(MKDEV(5, 1))); 
 	if (err < 0)
-		goto out;
+		goto out;                             */
 
 	err = sys_mkdir("/root", 0700);
 	if (err < 0)
