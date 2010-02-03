@@ -2,7 +2,7 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
-VERSIONPKG="1.0.1.RU.`date +%d%m%Y`"
+VERSIONPKG="1.0.2.RU.`date +%d%m%Y`"
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 #MODE=1T1R
