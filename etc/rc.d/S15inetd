@@ -7,7 +7,6 @@ echo "Starting inetd: "
         admID="Admin"
     fi
     echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
-    echo "telnet  stream  tcp     nowait  $admID    /bin/telnetd        /bin/telnetd -i"  >> /etc/inetd.conf
     /sbin/inetd
 }
 
