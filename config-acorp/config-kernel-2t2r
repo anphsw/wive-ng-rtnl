@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Thu Feb  4 02:00:02 2010
 #
 CONFIG_MIPS=y
 
@@ -588,10 +589,10 @@ CONFIG_RALINK_FLASH_API=y
 # 4MB Flash
 #
 CONFIG_FLASH_MX29LV320=y
-# CONFIG_FLASH_EN29LV320 is not set
-# CONFIG_FLASH_S29AL032X is not set
-# CONFIG_FLASH_S29GL032N is not set
-# CONFIG_FLASH_F49L320 is not set
+CONFIG_FLASH_EN29LV320=y
+CONFIG_FLASH_S29AL032X=y
+CONFIG_FLASH_S29GL032N=y
+CONFIG_FLASH_F49L320=y
 
 #
 # 8MB Flash
