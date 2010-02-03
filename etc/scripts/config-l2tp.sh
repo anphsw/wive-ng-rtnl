@@ -30,17 +30,14 @@ LOG="logger -t vpnhelper"
 
     $LOG "Get vpn server ip adress"
     NS=`nslookup "$SERVER" 2>&1`
-    if [ "$?" -eq 0 ]; then
-        RESOLVEOK=`echo "$NS" | grep -c "can't resolve"`
-	if [ "$RESOLVEOK" = "0" ]; then
-	    ADDRESS=`echo "$NS" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
-	    $LOG "Server adress is $ADDRESS"
-    	    SERVER=$ADDRESS
-        else
-	    $LOG "Not resolve adress for $SERVER st1"
-    	    SERVER=$SERVER
-	fi
-        $LOG "Not resolve adress for $SERVER st2"
+    RESOLVEOK=`echo "$NS" | grep -c "can't resolve"`
+    if [ "$RESOLVEOK" = "0" ]; then
+        ADDRESS=`echo "$NS" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
+        $LOG "Server adress is $ADDRESS"
+        SERVER=$ADDRESS
+    else
+        $LOG "Not resolve adress for $SERVER"
+        SERVER=$SERVER
     fi
 
     $LOG "Get route to vpn server."
