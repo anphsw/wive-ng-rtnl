@@ -153,11 +153,11 @@
 #include <sys/utsname.h>
 #include <sys/un.h>
 
-#define MAX_RECURSE 5
-#define REPLY_TIMEOUT 10
-#define MAX_RETRIES 3
+#define MAX_RECURSE 2
+#define REPLY_TIMEOUT 5
+#define MAX_RETRIES 2
 #define MAX_SERVERS 3
-#define MAX_SEARCH 4
+#define MAX_SEARCH 2
 
 #define MAX_ALIASES	5
 
