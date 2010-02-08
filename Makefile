@@ -382,15 +382,14 @@ clean: modules_clean
 	rm -rf $(ROOTDIR)/etc/compile-date
 
 real_clean mrproper: clean
-	-$(MAKEARCH_KERNEL) -C $(LINUXDIR) mrproper
-	-$(MAKEARCH) -C config clean
+	make -C linux mrproper
+	make -C config clean
 	rm -rf romfs config.in config.arch config.tk images
 	rm -f modules/config.tk
 	rm -rf .config .config.old .oldconfig autoconf.h
 
 distclean: mrproper
-	-$(MAKEARCH_KERNEL) -C $(LINUXDIR) distclean
-	-rm -f user/tinylogin/applet_source_list user/tinylogin/config.h
+	make -C linux distclean
 
 %_only:
 	@case "$(@)" in \
