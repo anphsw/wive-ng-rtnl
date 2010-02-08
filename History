@@ -41,6 +41,8 @@
 40) Fix resolve server ip for pptp/l2tp<br>
 41) Add support others type falsh<br>
 42) Job control fix<br>
+43) Fix some daemons crash with error build in future<br>
+44) fs save now save current date and time to rwfs<br>
 
 <br><br>
 <b>For support see:</b><br>

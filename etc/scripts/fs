@@ -27,6 +27,8 @@ load(){
 }
 
 save(){
+  echo "Save curent date and current time to rwfs"
+  date +%Y%m%d%H%M > /etc/compile-date
   echo "Compress config files"
   tmp="/tmp/tgzfs"
   tar cf - /etc | gzip -9 > $tmp

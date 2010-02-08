@@ -3,6 +3,8 @@
 start() {
  echo "Preconfigure..."
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+    
+    echo "Delete old config"
     rm -f /etc/zebra.conf
     rm -f /etc/ripd.conf
 
@@ -19,10 +21,6 @@ start() {
     mkdir -p /var/tmp
     mkdir -p /var/run/xl2tpd
 
-
-    echo "Start nvram daemon"
-    nvram_daemon &
-    
     mkdir /dev/pty
     mknod /dev/pty/m0             c       2       0
     mknod /dev/pty/m1             c       2       1
@@ -51,9 +49,17 @@ start() {
     mkdir /dev/misc
     mknod /dev/misc/rtc   c       10      135
 
-echo "Restore time to build time"
-BUILDDATE=`cat /etc/compile-date`
-date -s $BUILDDATE
+    echo "Start nvram daemon"
+    nvram_daemon &
+    
+#if compile date fille is exist
+if [ -f /etc/compile-date ]; then
+    echo "Restore time to build time or save time"
+    BUILDDATE=`cat /etc/compile-date`
+    if [ $BUILDDATE != "" ]; then
+	date -s $BUILDDATE
+    fi
+fi
 
 }
 
