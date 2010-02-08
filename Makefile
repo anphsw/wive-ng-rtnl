@@ -289,7 +289,6 @@ romfs.subdirs:
 romfs.post:
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
-	date +%D > $(ROMFSDIR)/etc/compile-date
 	cp -vf  $(ROOTDIR)/linux/.config $(ROMFSDIR)/etc/scripts/config.sh
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
@@ -301,6 +300,7 @@ romfs.post:
 	rm -fr $(ROOTDIR)/dev
 	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	./strip.sh
+	date +%m%d%H%M%Y > $(ROMFSDIR)/etc/compile-date
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 

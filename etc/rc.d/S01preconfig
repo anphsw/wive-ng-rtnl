@@ -50,6 +50,11 @@ start() {
 
     mkdir /dev/misc
     mknod /dev/misc/rtc   c       10      135
+
+echo "Restore time to build time"
+BUILDDATE=`cat /etc/compile-date`
+date -s $BUILDDATE
+
 }
 
 stop() {
