@@ -301,6 +301,7 @@ romfs.post:
 	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	./strip.sh
 	date +%m%d%H%M%Y > $(ROMFSDIR)/etc/compile-date
+	date +%m%d%H%M%Y > etc/compile-date
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 
@@ -379,6 +380,7 @@ clean: modules_clean
 	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
 	make -C uClibc++/extra/config clean
 	make -C tools clean
+	rm -rf $(ROOTDIR)/etc/compile-date
 
 real_clean mrproper: clean
 	-$(MAKEARCH_KERNEL) -C $(LINUXDIR) mrproper

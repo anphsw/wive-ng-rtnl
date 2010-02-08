@@ -5,9 +5,9 @@ FULLREBUILD=NO
 VERSIONPKG="1.0.2.RU.`date +%d%m%Y`"
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
-MODE=1T1R
+#MODE=1T1R
 #MODE=1T1R-32
-#MODE=2T2R
+MODE=2T2R
 #------------------------------------#
 
 echo "" > sdk_version.h
