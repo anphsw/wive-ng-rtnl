@@ -40,10 +40,7 @@
 39) RootFS on flash work OK<br>
 40) Fix resolve server ip for pptp/l2tp<br>
 41) Add support others type falsh<br>
-
-<br>
-<b>ToDo:</b><br>
-1) Job control fix<br>
+42) Job control fix<br>
 
 <br><br>
 <b>For support see:</b><br>
