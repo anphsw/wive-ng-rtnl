@@ -17,6 +17,9 @@ echo "" > version
 echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
 echo "" >> version
 
+#memoryzzz
+#find . -type d | grep -v "git"
+
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
 echo -------------------------------FULL-CLEAR-------------------------------
