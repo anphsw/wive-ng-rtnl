@@ -1,6 +1,9 @@
 #!/bin/sh
 
 start() {
+    if [ ! -f /etc/dropbear ]; then
+	mkdir /etc/dropbear
+    fi
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
 	echo "DSS file exist"
     else
