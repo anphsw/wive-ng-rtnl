@@ -146,12 +146,12 @@ config3052()
 	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
 		switch reg w e4 3f
 	fi
-	if [ "$1" = "LLLLW" ]; then
+	if [ "$1" = "WLLLL" ]; then
 		switch reg w 40 1001
 		switch reg w 44 1001
 		switch reg w 48 1002
 		switch reg w 70 ffff506f
-	elif [ "$1" = "WLLLL" ]; then
+	elif [ "$1" = "LLLLW" ]; then
 		switch reg w 40 1002
 		switch reg w 44 1001
 		switch reg w 48 1001

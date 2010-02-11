@@ -104,24 +104,35 @@ addWds2Br0()
 
 setLanWan()
 {
-	if [ "$CONFIG_RAETH_ROUTER" = "y" ]; then
-		if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-			echo '##### config vlan partition (WLLLL) #####'
-			config-vlan.sh 0 WLLLL
-		else
-			echo '##### config vlan partition (LLLLW) #####'
-			config-vlan.sh 0 LLLLW
-		fi
+    if [ "$CONFIG_RAETH_ROUTER" = "y" ]; then
+	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+	    echo '##### config vlan partition (WLLLL) #####'
+	    config-vlan.sh 0 WLLLL
+	else
+	    echo '##### config vlan partition (LLLLW) #####'
+	    config-vlan.sh 0 LLLLW
 	fi
-	if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-		if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-			echo '##### config RT3052 vlan partition (WLLLL) #####'
-			config-vlan.sh 2 WLLLL
-		else
-			echo '##### config RT3052 vlan partition (LLLLW) #####'
-			config-vlan.sh 2 LLLLW
-		fi
+    fi
+    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+    	    echo '##### config RT3052 vlan partition (WLLLL) #####'
+	    config-vlan.sh 2 WLLLL
+	else
+	    echo '##### config RT3052 vlan partition (LLLLW) #####'
+	    config-vlan.sh 2 LLLLW
 	fi
+    fi
+}
+
+resetLanWan()
+{
+    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+	echo "##### restore Vtss to dump switch #####"
+	config-vlan.sh 1 0
+    elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	echo "##### restore RT3052 to dump switch #####"
+	config-vlan.sh 2 0
+    fi
 }
 
 # opmode adjustment:
@@ -207,13 +218,7 @@ fi
 if [ "$opmode" = "0" ]; then
     echo "Bridge OperationMode: $opmode"
 	addBr0
-	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-		echo "##### restore Vtss to dump switch #####"
-		config-vlan.sh 1 0
-	elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-		echo "##### restore RT3052 to dump switch #####"
-		config-vlan.sh 2 0
-	fi
+	resetLanWan
 	brctl addif br0 eth2
 	if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
 		addRax2Br0
@@ -239,6 +244,7 @@ elif [ "$opmode" = "1" ]; then
 		echo '##### config Vtss vlan partition #####'
 		config-vlan.sh 1 1
 	fi
+	resetLanWan
 	setLanWan
 	addBr0
 	brctl addif br0 eth2.1
@@ -253,33 +259,20 @@ elif [ "$opmode" = "1" ]; then
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
-	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-		echo "##### restore Vtss to dump switch #####"
-		config-vlan.sh 1 0
-	fi
-	if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-		echo "##### restore RT3052 to dump switch #####"
-		config-vlan.sh 2 0
-	fi
+	resetLanWan
 	wan.sh
 	lan.sh
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
-	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-		echo "##### restore Vtss to dump switch #####"
-		config-vlan.sh 1 0
-	fi
-	if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-		echo "##### restore RT3052 to dump switch #####"
-		config-vlan.sh 2 0
-	fi
+	resetLanWan
 	addBr0
 	brctl addif br0 eth2
 	wan.sh
 	lan.sh
 else
     echo "unknown OperationMode: $opmode"
+	resetLanWan
 	setLanWan
         addBr0
         brctl addif br0 eth2.1
