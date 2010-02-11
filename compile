@@ -4,6 +4,9 @@ DOS2UNIX=NO
 FULLREBUILD=NO
 VERSIONPKG="1.0.3.RU.`date +%d%m%Y`"
 
+#----acorp--dlink--------------------#
+VENDOR=acorp
+
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 MODE=1T1R
 #MODE=1T1R-32
@@ -34,24 +37,24 @@ make all -C tools
 
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv ./config-acorp/config-kernel-1t1r	./linux/.config
-    cp -fv ./config-acorp/config-config-1t1r	./config/.config
-    cp -fv ./config-acorp/config-lib-1t1r	./lib/.config
+    cp -fv ./config-$VENDOR/config-kernel-1t1r	./linux/.config
+    cp -fv ./config-$VENDOR/config-config-1t1r	./config/.config
+    cp -fv ./config-$VENDOR/config-lib-1t1r	./lib/.config
 fi
 if [ "$MODE" = "1T1R-32" ] ; then
-    cp -fv ./config-acorp/config-kernel-1t1r-32	./linux/.config
-    cp -fv ./config-acorp/config-config-1t1r	./config/.config
-    cp -fv ./config-acorp/config-lib-1t1r	./lib/.config
+    cp -fv ./config-$VENDOR/config-kernel-1t1r-32	./linux/.config
+    cp -fv ./config-$VENDOR/config-config-1t1r	./config/.config
+    cp -fv ./config-$VENDOR/config-lib-1t1r	./lib/.config
 fi
 if [ "$MODE" = "2T2R" ] ; then
-    cp -fv ./config-acorp/config-config-2t2r	./config/.config
-    cp -fv ./config-acorp/config-kernel-2t2r	./linux/.config
-    cp -fv ./config-acorp/config-lib-2t2r	./lib/.config
+    cp -fv ./config-$VENDOR/config-config-2t2r	./config/.config
+    cp -fv ./config-$VENDOR/config-kernel-2t2r	./linux/.config
+    cp -fv ./config-$VENDOR/config-lib-2t2r	./lib/.config
 fi
-cp -fv ./config-acorp/config-busybox	./user/busybox/.config
-cp -fv ./config-acorp/config-config	./config/.config
-cp -fv ./config-acorp/config-cpp	./uClibc++/.config
-cp -fv ./config-acorp/config-all	.config
+cp -fv ./config-$VENDOR/config-busybox	./user/busybox/.config
+cp -fv ./config-$VENDOR/config-config	./config/.config
+cp -fv ./config-$VENDOR/config-cpp	./uClibc++/.config
+cp -fv ./config-$VENDOR/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch
 ln -fs config/autoconf.h autoconf.h
 
