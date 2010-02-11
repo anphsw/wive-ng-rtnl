@@ -288,9 +288,9 @@ romfs.subdirs:
 .PHONY: romfs.post
 romfs.post:
 	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
+	cat $(ROOTDIR)/$(LINUXDIR)/.config | grep -v "not set" | grep "CONFIG" > $(ROOTDIR)/etc/scripts/config.sh
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
-	cat $(ROOTDIR)/linux/.config | grep -v "not set" | grep "CONFIG" > $(ROMFSDIR)/etc/scripts/config.sh
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh
