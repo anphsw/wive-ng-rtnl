@@ -63,9 +63,9 @@ fi
 
 echo "Reinit power mode for all switch ports"
     #disable
-    config-vlan.sh 2 DDDDD
+    #config-vlan.sh 2 DDDDD
     #full 100mbit
-    config-vlan.sh 2 EEEEE
+    #config-vlan.sh 2 EEEEE
     #full 10mbit
     #config-vlan.sh 2 HHHHH
 }
