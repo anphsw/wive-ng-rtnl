@@ -9,9 +9,13 @@ VENDOR=acorp
 #VENDOR=dlink
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
-#MODE=1T1R
-#MODE=1T1R-32
-MODE=2T2R
+if [ "$1" = "" ]; then
+    #MODE=1T1R
+    #MODE=1T1R-32
+    MODE=2T2R
+else
+    MODE=$1
+fi
 
 #------------------------------------#
 echo "" > sdk_version.h

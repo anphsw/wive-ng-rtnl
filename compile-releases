@@ -1,0 +1,18 @@
+#!/bin/sh
+
+PWD=`pwd`
+
+rm -rf $PWD/releases
+mkdir -p $PWD/releases
+
+./clear
+nice -19 ./compile 2T2R
+cp -f $PWD/images/*.bin $PWD/releases
+
+./clear
+nice -19 ./compile 1T1R-32
+cp -f $PWD/images/*.bin $PWD/releases
+
+./clear
+nice -19 ./compile 1T1R
+cp -f $PWD/images/*.bin $PWD/releases

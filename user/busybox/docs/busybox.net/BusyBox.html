@@ -123,13 +123,13 @@ been enabled, more detailed usage information will also be available.</p>
         inetd, init, insmod, ionice, ip, ipaddr, iplink, iproute, iprule,
         iptunnel, kill, killall, killall5, klogd, length, linuxrc, ln,
         logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir, mknod,
-        modprobe, more, mount, mv, netstat, nice, nslookup, ntpd, passwd,
-        pidof, ping, ping6, poweroff, printf, ps, pwd, reboot, renice, rm,
-        rmdir, rmmod, route, run-parts, sed, seq, setconsole, sh, sleep,
-        sort, split, stat, sum, switch_root, sync, sysctl, syslogd, tail,
-        tar, test, time, top, touch, traceroute, traceroute6, true, udhcpc,
-        udhcpd, umount, uname, uniq, unix2dos, unzip, uptime, usleep,
-        vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
+        modprobe, more, mount, mv, nc, netstat, nice, nslookup, ntpd,
+        passwd, pidof, ping, ping6, poweroff, printf, ps, pwd, reboot,
+        renice, rm, rmdir, rmmod, route, run-parts, sed, seq, setconsole,
+        sh, sleep, sort, split, stat, sum, switch_root, sync, sysctl,
+        syslogd, tail, tar, test, time, top, touch, traceroute, traceroute6,
+        true, udhcpc, udhcpd, umount, uname, uniq, unix2dos, unzip, uptime,
+        usleep, vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -1187,6 +1187,21 @@ or: mv [OPTIONS] SOURCE... DIRECTORY</p>
 <pre>
         -f      Don't prompt before overwriting
         -i      Interactive, prompt before overwrite</pre>
+</dd>
+<dt><strong><a name="nc" class="item"><strong>nc</strong></a></strong></dt>
+
+<dd>
+<p>nc [-iN] [-wN] [-l] [-p PORT] [-f FILENAME|IPADDR PORT] [-e PROG]</p>
+<p>Open a pipe to IP:port or file</p>
+<p>Options:</p>
+<pre>
+        -e PROG Run PROG after connect
+        -i SEC  Delay interval for lines sent
+        -w SEC  Timeout for connect
+        -f FILE Use file (ala /dev/ttyS0) instead of network
+        -l      Listen mode, for inbound connects
+                (use -l twice with -e for persistent server)
+        -p PORT Local port</pre>
 </dd>
 <dt><strong><a name="netstat" class="item"><strong>netstat</strong></a></strong></dt>
 
