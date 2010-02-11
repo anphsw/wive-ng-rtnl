@@ -18,7 +18,8 @@ usage()
 	echo "  $0 1 0 - restore Vtss to no VLAN partition"
 	echo "  $0 1 1 - config Vtss with VLAN partition"
 	echo "  $0 2 0 - restore RT3052 to no VLAN partition"
-	echo "  $0 2 EEEEE - config RT3052 Enable all ports"
+	echo "  $0 2 EEEEE - config RT3052 Enable all ports 100FD"
+	echo "  $0 2 HHHHH - config RT3052 Enable all ports 10FD"
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
@@ -90,10 +91,17 @@ disable3052()
     done
 }
 
-enable3052()
+enable3052H()
 {
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x8000
+    done
+}
+
+enable3052()
+{
+    for i in `seq 0 4`; do
+	mii_mgr -s -p $i -r 0 -v 0x9000
     done
 }
 
@@ -251,6 +259,8 @@ elif [ "$1" = "2" ]; then
 		restore3052
 	elif [ "$2" = "EEEEE" ]; then
 		enable3052 
+	elif [ "$2" = "HHHHH" ]; then
+		enable3052H 
 	elif [ "$2" = "DDDDD" ]; then
 		disable3052
 	elif [ "$2" = "LLLLW" ]; then
