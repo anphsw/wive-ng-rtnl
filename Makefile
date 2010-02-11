@@ -290,7 +290,7 @@ romfs.post:
 	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
-	cp -vf  $(ROOTDIR)/linux/.config $(ROMFSDIR)/etc/scripts/config.sh
+	cat $(ROOTDIR)/linux/.config | grep -v "not set" | grep "CONFIG" > $(ROMFSDIR)/etc/scripts/config.sh
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh
