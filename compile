@@ -4,17 +4,21 @@ DOS2UNIX=NO
 FULLREBUILD=NO
 VERSIONPKG="1.0.3.RU.`date +%d%m%Y`"
 
-#----acorp--dlink--------------------#
-VENDOR=acorp
-#VENDOR=dlink
-
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 if [ "$1" = "" ]; then
+    MODE=2T2R
     #MODE=1T1R
     #MODE=1T1R-32
-    MODE=2T2R
 else
     MODE=$1
+fi
+
+#----acorp--dlink--------------------#
+if [ "$2" = "" ]; then
+    VENDOR=acorp
+    #VENDOR=dlink
+else
+    VENDOR=$2
 fi
 
 #------------------------------------#
@@ -77,3 +81,6 @@ fi
 echo ---------------------------------MAKE-ALL--------------------------------
 make
 
+echo -----------------------------------PACK----------------------------------
+mv -f images/*.bin "images/$VENDOR.$MODE.$VERSIONPKG.bin"
+zip -r images/$VENDOR.$MODE.$VERSIONPKG.bin.zip images/*.bin

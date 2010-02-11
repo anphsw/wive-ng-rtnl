@@ -2,17 +2,19 @@
 
 PWD=`pwd`
 
+MODE=acorp
+
 rm -rf $PWD/releases
 mkdir -p $PWD/releases
 
 ./clear
-nice -19 ./compile 2T2R
-cp -f $PWD/images/*.bin $PWD/releases
+nice -19 ./compile 2T2R $MODE
+cp -f $PWD/images/*.zip $PWD/releases
 
 ./clear
-nice -19 ./compile 1T1R-32
-cp -f $PWD/images/*.bin $PWD/releases
+nice -19 ./compile 1T1R-32 $MODE
+cp -f $PWD/images/*.zip $PWD/releases
 
 ./clear
-nice -19 ./compile 1T1R
-cp -f $PWD/images/*.bin $PWD/releases
+nice -19 ./compile 1T1R $MODE
+cp -f $PWD/images/*.zip $PWD/releases
