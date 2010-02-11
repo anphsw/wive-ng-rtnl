@@ -6,13 +6,14 @@ VERSIONPKG="1.0.3.RU.`date +%d%m%Y`"
 
 #----acorp--dlink--------------------#
 VENDOR=acorp
+#VENDOR=dlink
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
-MODE=1T1R
+#MODE=1T1R
 #MODE=1T1R-32
-#MODE=2T2R
-#------------------------------------#
+MODE=2T2R
 
+#------------------------------------#
 echo "" > sdk_version.h
 echo "#define RT288X_SDK_VERSION \"$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
