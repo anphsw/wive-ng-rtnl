@@ -18,11 +18,83 @@ usage()
 	echo "  $0 1 0 - restore Vtss to no VLAN partition"
 	echo "  $0 1 1 - config Vtss with VLAN partition"
 	echo "  $0 2 0 - restore RT3052 to no VLAN partition"
+	echo "  $0 2 EEEEE - config RT3052 Enable all ports"
+	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
+        echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and VLAN 1~4 at port 1~4"
+        echo "  $0 2 12345 - config RT3052 with VLAN 1~5 at port 0~4"
 	echo "  $0 2 GW - config RT3052 with WAN at Giga port"
 	echo "  $0 2 GS - config RT3052 with Giga port connecting to an external switch"
 	exit 0
+}
+
+config3052()
+{
+	switch reg w 14 405555
+	switch reg w 50 2001
+	switch reg w 98 7f3f
+	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
+		switch reg w e4 3f
+	fi
+	if [ "$1" = "WLLLL" ]; then
+		switch reg w 40 1001
+		switch reg w 44 1001
+		switch reg w 48 1002
+		switch reg w 70 ffff506f
+	elif [ "$1" = "LLLLW" ]; then
+		switch reg w 40 1002
+		switch reg w 44 1001
+		switch reg w 48 1001
+		switch reg w 70 ffff417e
+        elif [ "$1" = "W1234" ]; then
+                switch reg w 40 1005
+                switch reg w 44 3002
+                switch reg w 48 1004
+                switch reg w 70 50484442
+                switch reg w 74 ffffff41
+        elif [ "$1" = "12345" ]; then
+                switch reg w 40 2001
+                switch reg w 44 4003
+                switch reg w 48 1005
+                switch reg w 70 7e7e7e41
+                switch reg w 74 ffffff7e
+	elif [ "$1" = "GW" ]; then
+		switch reg w 40 1001
+		switch reg w 44 1001
+		switch reg w 48 2001
+		switch reg w 70 ffff605f
+	fi
+}
+
+restore3052()
+{
+        switch reg w 14 5555
+        switch reg w 40 1001
+        switch reg w 44 1001
+        switch reg w 48 1001
+        switch reg w 4c 1
+        switch reg w 50 2001
+        switch reg w 70 ffffffff
+        switch reg w 98 7f7f
+        switch reg w e4 7f
+	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
+		switch reg w e4 0
+	fi
+}
+
+disable3052()
+{
+    for i in `seq 0 4`; do
+	mii_mgr -s -p $i -r 0 -v 0x0800
+    done
+}
+
+enable3052()
+{
+    for i in `seq 0 4`; do
+	mii_mgr -s -p $i -r 0 -v 0x8000
+    done
 }
 
 config175C()
@@ -138,47 +210,6 @@ restoreVtss()
 	spicmd vtss novlan
 }
 
-config3052()
-{
-	switch reg w 14 405555
-	switch reg w 50 2001
-	switch reg w 98 7f3f
-	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
-		switch reg w e4 3f
-	fi
-	if [ "$1" = "WLLLL" ]; then
-		switch reg w 40 1001
-		switch reg w 44 1001
-		switch reg w 48 1002
-		switch reg w 70 ffff506f
-	elif [ "$1" = "LLLLW" ]; then
-		switch reg w 40 1002
-		switch reg w 44 1001
-		switch reg w 48 1001
-		switch reg w 70 ffff417e
-	elif [ "$1" = "GW" ]; then
-		switch reg w 40 1001
-		switch reg w 44 1001
-		switch reg w 48 2001
-		switch reg w 70 ffff605f
-	fi
-}
-
-restore3052()
-{
-	switch reg w 14 5555
-	switch reg w 40 1001
-	switch reg w 44 1001
-	switch reg w 48 1001
-	switch reg w 4c 1
-	switch reg w 50 2001
-	switch reg w 70 ffffffff
-	switch reg w 98 7f7f
-	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
-		switch reg w e4 0
-	fi
-}
-
 if [ "$1" = "0" ]; then
 	#isc is used to distinguish between 175C and 175D
 	isc=`mii_mgr -g -p 29 -r 31`
@@ -218,10 +249,18 @@ elif [ "$1" = "1" ]; then
 elif [ "$1" = "2" ]; then
 	if [ "$2" = "0" ]; then
 		restore3052
+	elif [ "$2" = "EEEEE" ]; then
+		enable3052 
+	elif [ "$2" = "DDDDD" ]; then
+		disable3052
 	elif [ "$2" = "LLLLW" ]; then
 		config3052 LLLLW
 	elif [ "$2" = "WLLLL" ]; then
 		config3052 WLLLL
+        elif [ "$2" = "W1234" ]; then
+                config3052 W1234
+        elif [ "$2" = "12345" ]; then
+                config3052 12345
 	elif [ "$2" = "GW" ]; then
 		config3052 GW
 	elif [ "$2" = "GS" ]; then
