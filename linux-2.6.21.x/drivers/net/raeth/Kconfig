@@ -76,7 +76,6 @@ config LAN_WAN_SUPPORT
 
 choice
         prompt "Board Layout Type"
-        depends on LAN_WAN_SUPPORT
 	default WAN_AT_P0
 
 	config  WAN_AT_P4

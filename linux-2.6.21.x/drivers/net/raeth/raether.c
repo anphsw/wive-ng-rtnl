@@ -1221,66 +1221,6 @@ void ei_xmit_housekeeping(unsigned long unused)
 #endif //CONFIG_RAETH_NAPI//
 }
 
-#if 0 //moved to scripts
-#ifdef CONFIG_WAN_AT_P4
-void config_ICPLUS_175C_eva(void)
-{
-	//MII0 doesn't strip the tag of an outgoing packet.
-	//MII0 adds a tag to an outgoing packet.
-	//Port0~4 strip the tag of an outgoing packet.
-	//Port0~4 doesn't add a tag to an outgoing packet.
-	mii_mgr_write(29, 23, 0x07c2);
-	//setup port 0, 1 vlan group
-	//mii_mgr_write(29, 19, 0x8f8f);
-	//setup port 2, 3 vlan group
-	//mii_mgr_write(29, 20, 0x8f8f);
-	//setup port 4 vlan group
-	//mii_mgr_write(29, 21, 0x8000);
-	//setup default vlan tag value port0~4
-	//force cpu port is 100F
-	mii_mgr_write(29, 22, 0x8420);
-	mii_mgr_write(29, 24, 0x1);
-	mii_mgr_write(29, 25, 0x1);
-	mii_mgr_write(29, 26, 0x1);
-	mii_mgr_write(29, 27, 0x1);
-	mii_mgr_write(29, 28, 0x2);
-
-	//for unknow mac flooding to all ports.
-	//this will make flooding to the same PVID ports
-	mii_mgr_write(30, 9, 0x1081); 
-	mii_mgr_write(30, 1, 0x2f00);
-	mii_mgr_write(30, 2, 0x0030);
-	printk("ICPLUS 175C config LAN_WAN finished (evaluation board)\n");
-}
-#endif
-
-#ifdef CONFIG_WAN_AT_P0
-void config_ICPLUS_175C_demo(void)
-{
-	//MII0 doesn't strip the tag of an outgoing packet.
-	//MII0 adds a tag to an outgoing packet.
-	//Port0~4 strip the tag of an outgoing packet.
-	//Port0~4 doesn't add a tag to an outgoing packet.
-	mii_mgr_write(29, 23, 0x07c2);
-	//force cpu port is 100F
-	mii_mgr_write(29, 22, 0x8420);
-	//set port 0 to vlan 2 (wan)
-	mii_mgr_write(29, 24, 0x2);
-	//set port 1~4 to vlan 1 (lan)
-	mii_mgr_write(29, 25, 0x1);
-	mii_mgr_write(29, 26, 0x1);
-	mii_mgr_write(29, 27, 0x1);
-	mii_mgr_write(29, 28, 0x1);
-
-	//for unknow mac flooding to all ports.
-	//this will make flooding to the same PVID ports
-	mii_mgr_write(30, 9, 0x0181); 
-	mii_mgr_write(30, 1, 0x3e00);
-	mii_mgr_write(30, 2, 0x0021);
-	printk("ICPLUS 175C config LAN_WAN finished (demo board)\n");
-}
-#endif
-#endif
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 int VirtualIF_ioctl(struct net_device * net_dev,
