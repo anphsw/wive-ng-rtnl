@@ -379,7 +379,8 @@ clean: modules_clean
 	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
 	make -C uClibc++/extra/config clean
 	make -C tools clean
-	rm -rf $(ROOTDIR)/etc/compile-date
+	rm -f $(ROOTDIR)/etc/compile-date
+	rm -f $(ROOTDIR)/etc/scripts/config.sh
 
 real_clean mrproper: clean
 	make -C linux mrproper
