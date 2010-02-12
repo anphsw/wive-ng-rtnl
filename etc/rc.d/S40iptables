@@ -174,10 +174,10 @@ get_param() {
     EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
     
     #calculate min mtu
-    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
+    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1` > /dev/null 2>&1
     
     #check ppp
-    PPPUP=`ip link show up | grep ppp0 -c`
+    PPPUP=`ip link show up | grep ppp0 -c` > /dev/null 2>&1
 }
 case "$1" in
         start)

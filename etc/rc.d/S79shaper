@@ -118,8 +118,7 @@ get_param() {
     wan_mode=`nvram_get 2860 wanConnectionMode`
     NAT=`nvram_get 2860 natEnabled`
     SEC=`nvram_get 2860 SecurityMode`
-    INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1`
-    IMQ=0
+    INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
 
     #if ppp is up shaper to ppp0 else to wan_if
     if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
@@ -137,8 +136,8 @@ get_param() {
     fi
 
     #check interfaces is up
-    WANUP=`ip link show up | grep "$wan_if" -c`
-    LANUP=`ip link show up | grep "$lan_if" -c`
+    WANUP=`ip link show up | grep "$wan_if" -c` > /dev/null 2>&1
+    LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
 }
 
 case "$1" in
