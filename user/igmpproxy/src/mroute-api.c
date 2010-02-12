@@ -214,8 +214,9 @@ int delMRoute( struct MRouteDesc *Dp )
 
     rc = setsockopt( MRouterFD, IPPROTO_IP, MRT_DEL_MFC,
 		    (void *)&CtlReq, sizeof( CtlReq ) );
-    if (rc)
-        my_log( LOG_WARNING, errno, "MRT_DEL_MFC" );
+    /* no log this, not critical warning sfstudio
+     if (rc)
+        my_log( LOG_WARNING, errno, "MRT_DEL_MFC" ); */
 
     return rc;
 }
