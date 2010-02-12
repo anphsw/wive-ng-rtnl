@@ -21,6 +21,7 @@ usage()
 	echo "  $0 2 EEEEE - config RT3052 Enable all ports 100FD"
 	echo "  $0 2 HHHHH - config RT3052 Enable all ports 10FD"
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
+	echo "  $0 2 RRRRR - config RT3052 Reset all ports"
 	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
         echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and VLAN 1~4 at port 1~4"
@@ -103,6 +104,110 @@ enable3052()
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x9000
     done
+}
+
+#  arg1:  phy address.
+link_down()
+{
+	# get original register value
+	get_mii=`mii_mgr -g -p $1 -r 0`
+	orig=`echo $get_mii | sed 's/^.....................//'`
+
+	# stupid hex value calculation.
+	pre=`echo $orig | sed 's/...$//'`
+	post=`echo $orig | sed 's/^..//'` 
+	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
+	case $num_hex in
+		"0")	rep="8"	;;
+		"1")	rep="9"	;;
+		"2")	rep="a"	;;
+		"3")	rep="b"	;;
+		"4")	rep="c"	;;
+		"5")	rep="d"	;;
+		"6")	rep="e"	;;
+		"7")	rep="f"	;;
+		# The power is already down
+		*)		echo "Warning in PHY reset script";return;;
+	esac
+	new=$pre$rep$post
+	# power down
+	mii_mgr -s -p $1 -r 0 -v $new
+}
+
+link_up()
+{
+	# get original register value
+	get_mii=`mii_mgr -g -p $1 -r 0`
+	orig=`echo $get_mii | sed 's/^.....................//'`
+
+	# stupid hex value calculation.
+	pre=`echo $orig | sed 's/...$//'`
+	post=`echo $orig | sed 's/^..//'` 
+	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
+	case $num_hex in
+		"8")	rep="0"	;;
+		"9")	rep="1"	;;
+		"a")	rep="2"	;;
+		"b")	rep="3"	;;
+		"c")	rep="4"	;;
+		"d")	rep="5"	;;
+		"e")	rep="6"	;;
+		"f")	rep="7"	;;
+		# The power is already up
+		*)		echo "Warning in PHY reset script";return;;
+	esac
+	new=$pre$rep$post
+	# power up
+	mii_mgr -s -p $1 -r 0 -v $new
+}
+
+reset_all_phys()
+{
+	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
+		return
+	fi
+
+	echo "Reset all phy port"
+	opmode=`nvram_get 2860 OperationMode`
+
+	#Ports down skip WAN port
+	if [ "$opmode" != "1" ]; then
+	    start=0
+	    end=4
+	else
+	    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+		start=0
+		end=3
+	    else
+		start=1	
+		end=4
+	    fi
+	fi
+	for i in `seq $start $end`; do
+    	    link_down $i
+	done
+
+	#force Windows clients to renew IP and update DNS server
+	if [ "$opmode" = "1" ]; then
+	    sleep 1
+        fi
+
+	#Ports up skip WAN port
+	if [ "$opmode" != "1" ]; then
+	    start=0
+	    end=4
+	else
+	    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+		start=0
+		end=3
+	    else
+		start=1	
+		end=4
+	    fi
+	fi
+	for i in `seq $start $end`; do
+    	    link_up $i
+	done
 }
 
 config175C()
@@ -263,6 +368,8 @@ elif [ "$1" = "2" ]; then
 		enable3052H 
 	elif [ "$2" = "DDDDD" ]; then
 		disable3052
+	elif [ "$2" = "RRRRR" ]; then
+		reset_all_phys
 	elif [ "$2" = "LLLLW" ]; then
 		config3052 LLLLW
 	elif [ "$2" = "WLLLL" ]; then

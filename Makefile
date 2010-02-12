@@ -6,7 +6,7 @@
 # Copyright (c) 2001, Lineo
 #
 
-VERSIONPKG = 3.2.0
+VERSIONPKG = 3.3.0
 VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
 
 ############################################################################
@@ -289,11 +289,11 @@ romfs.subdirs:
 romfs.post:
 	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
 	cat $(ROOTDIR)/$(LINUXDIR)/.config | grep -v "not set" | grep "CONFIG" > $(ROOTDIR)/etc/scripts/config.sh
+	chmod 777 $(ROOTDIR)/etc/scripts/config.sh
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
-	chmod 777  $(ROMFSDIR)/etc/scripts/config.sh
 	tar -cp --gzip etc > $(ROMFSDIR)/rwfs.gz
 	tar -zxvf dev.tgz
 	cp -vf dev.tgz $(ROMFSDIR)/dev.gz

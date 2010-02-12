@@ -70,102 +70,6 @@ config () {
   return
 }
 
-#  arg1:  phy address.
-link_down()
-{
-	# get original register value
-	get_mii=`mii_mgr -g -p $1 -r 0`
-	orig=`echo $get_mii | sed 's/^.....................//'`
-
-	# stupid hex value calculation.
-	pre=`echo $orig | sed 's/...$//'`
-	post=`echo $orig | sed 's/^..//'` 
-	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
-	case $num_hex in
-		"0")	rep="8"	;;
-		"1")	rep="9"	;;
-		"2")	rep="a"	;;
-		"3")	rep="b"	;;
-		"4")	rep="c"	;;
-		"5")	rep="d"	;;
-		"6")	rep="e"	;;
-		"7")	rep="f"	;;
-		# The power is already down
-		*)		echo "Warning in PHY reset script";return;;
-	esac
-	new=$pre$rep$post
-	# power down
-	mii_mgr -s -p $1 -r 0 -v $new
-}
-
-link_up()
-{
-	# get original register value
-	get_mii=`mii_mgr -g -p $1 -r 0`
-	orig=`echo $get_mii | sed 's/^.....................//'`
-
-	# stupid hex value calculation.
-	pre=`echo $orig | sed 's/...$//'`
-	post=`echo $orig | sed 's/^..//'` 
-	num_hex=`echo $orig | sed 's/^.//' | sed 's/..$//'`
-	case $num_hex in
-		"8")	rep="0"	;;
-		"9")	rep="1"	;;
-		"a")	rep="2"	;;
-		"b")	rep="3"	;;
-		"c")	rep="4"	;;
-		"d")	rep="5"	;;
-		"e")	rep="6"	;;
-		"f")	rep="7"	;;
-		# The power is already up
-		*)		echo "Warning in PHY reset script";return;;
-	esac
-	new=$pre$rep$post
-	# power up
-	mii_mgr -s -p $1 -r 0 -v $new
-}
-
-reset_all_phys()
-{
-	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
-		return
-	fi
-
-	echo "Reset all phy port"
-	opmode=`nvram_get 2860 OperationMode`
-
-	#Ports down skip WAN port
-	if [ "$opmode" != "1" ]; then
-	    start=0
-	    end=4
-	else
-	    start=1	
-	    end=4
-	fi
-	for i in `seq $start $end`; do
-    	    link_down $i
-	done
-
-	#force Windows clients to renew IP and update DNS server
-	if [ "$opmode" = "1" ]; then
-	    sleep 1
-        fi
-
-	#Ports up skip WAN port
-	if [ "$opmode" != "1" ]; then
-	    start=0
-	    end=4
-	else
-	    start=1	
-	    end=4
-	fi
-	for i in `seq $start $end`; do
-    	    link_up $i
-	done
-}
-
-
-
 # argv 1 is empty
 if [ "$1" = "" ]; then
   usage
@@ -198,12 +102,12 @@ case "$1" in
     rm -f $pidfile
     touch $leases
     echo "lease_file $leases" >> $fname
+    echo "Start dhcpserver"
     udhcpd -S $fname &
-	reset_all_phys $2;;
+    config-vlan.sh 2 RRRRR
+    ;;
   "-k")
     service dhcpd stop
     rm -f $pidfile ;;
   *) usage;;
 esac
-
-
