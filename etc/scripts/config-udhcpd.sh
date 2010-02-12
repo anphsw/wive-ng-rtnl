@@ -62,8 +62,6 @@ config () {
         echo "static_lease $2 $3" >> $fname
 	return
       fi
-      echo "pidfile $pidfile" >> $fbak
-      echo " " >> $fbak
       ;;
     *) return;;
   esac
@@ -132,7 +130,7 @@ reset_all_phys()
 	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
 		return
 	fi
-
+	echo "Reset all phy port"
 	opmode=`nvram_get 2860 OperationMode`
 
 	#skip WAN port
@@ -185,18 +183,15 @@ case "$1" in
   "-t") config "$1" "$2";;
   "-S") config "$1" "$2" "$3";;
   "-r")
-    if [ -e ${pidfile} ]; then
-      kill `cat $pidfile`
-    fi
+ 
+    service dhcpd stop
     rm -f $pidfile
     touch $leases
     echo "lease_file $leases" >> $fname
     udhcpd -S $fname &
 	reset_all_phys $2;;
   "-k")
-    if [ -e ${pidfile} ]; then
-      kill `cat $pidfile`
-    fi
+    service dhcpd stop
     rm -f $pidfile ;;
   *) usage;;
 esac
