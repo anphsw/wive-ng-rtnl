@@ -24,18 +24,9 @@ if [ -f /etc/filesystem.ok ]; then
   else
     echo "File system is clear or poor."
     zcat /rwfs.gz | tar xf - -C / >>/dev/null
+    echo "Restored. Save after full boot and configure."
     echo > /etc/filesystem.ok
-    echo "Compress config files"
-    tmp="/tmp/tgzfs"
-    tar cf - /etc | gzip -9 > $tmp
-    if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
-	echo "Write configs to flash"
-	dd if=$tmp of=$MTDDEVICE bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
-	echo "Config saved. OK."
-    else
-	echo "Error: File $tmp too big: $(get_size $tmp)k"
-    fi
-     rm $tmp
+    echo > /var/MODIFIED
 fi
 
 /bin/sh /etc/rc.d/rcS &

@@ -1,6 +1,8 @@
 #!/bin/sh
 
 start() {
+MODIFIED=0
+
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
 	echo "DSS file exist"
     else
@@ -8,7 +10,7 @@ start() {
         echo "If no DSS key  and generate new key"
 	mkdir -p /etc/dropbear
         dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
-	fs save
+	MODIFIED=1
     fi
 
     if [ -f /etc/miniupnpd.conf.uuid ]; then
@@ -28,7 +30,10 @@ start() {
         echo "uuid=""$outid" >> /etc/miniupnpd.conf.uuid
         serial=`hostid`
         echo "serial=""$serial" >> /etc/miniupnpd.conf.uuid
-        fs save
+	MODIFIED=1
+    fi
+    if [ $MODIFIED = "1" ]; then
+	echo > /var/MODIFIED
     fi
 }
 

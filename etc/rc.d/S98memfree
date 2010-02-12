@@ -1,6 +1,7 @@
 #!/bin/sh
 
 start() {
+
  echo "Unload unneeded modules"
     rmmod -a
 
@@ -8,6 +9,13 @@ start() {
     echo 1 /proc/sys/vm/drop_caches
     echo 2 /proc/sys/vm/drop_caches
     echo 3 /proc/sys/vm/drop_caches
+
+ #if firts boot or restore
+ if [ -f /var/MODIFIED ]; then
+    echo "Save rwfs"
+    fs save
+ fi
+
 }
 
 stop() {
