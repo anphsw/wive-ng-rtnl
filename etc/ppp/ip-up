@@ -22,6 +22,7 @@ LOG="logger -t pppd"
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
     service ntp stop
+    service upnp stop
     service dnsserver stop
     service shaper stop
     service ddns stop
@@ -32,6 +33,7 @@ LOG="logger -t pppd"
     service ddns start
     service dnsserver start
     service shaper start
+    service upnp start
 
     $LOG "All is start OK"
 
