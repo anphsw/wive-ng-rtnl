@@ -189,7 +189,7 @@ reset_all_phys()
 
 	#force Windows clients to renew IP and update DNS server
 	if [ "$opmode" = "1" ]; then
-	    sleep 1
+	    sleep 2
         fi
 
 	#Ports up skip WAN port

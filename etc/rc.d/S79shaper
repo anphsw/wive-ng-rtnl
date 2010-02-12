@@ -5,6 +5,7 @@
 
 #wait to start web and run from goahead code
 web_wait
+
 QoSEnable=`nvram_get 2860 QoSEnable`
 
 start() {

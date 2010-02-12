@@ -123,12 +123,7 @@ case "$1" in
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
 	    # restart needed services
-	    service dns stop
-	    service upnp stop
-	    service igmpproxy stop
-	    service dns start
-	    service upnp start
-	    service igmpproxy start
+	    services_restart.sh dhcp
 	    $LOG "Renew OK.."
         ;;
 esac

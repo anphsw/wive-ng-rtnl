@@ -12,20 +12,10 @@ LOG="logger -t pppd"
     rm -f /tmp/ppp-mtu
 
     $LOG "Restart need service and rebuild shaper rules"
-    #restart dns server
-    service dnsserver stop
-    service dnsserver start
-
-    #miniupnpd restart
-    service upnp stop
-    service upnp start
-    
-    #radvd restart    
-    service radvd stop
-    service radvd start
-
-    #rebuild shaper rules
     service shaper stop
+    sleep 5
+    #services reinit
+    services_restart.sh pppd
     service shaper start
 
     $LOG "Down is OK"

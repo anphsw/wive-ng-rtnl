@@ -3,6 +3,9 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 start() {
 if [ -f /bin/lld2d ]; then
  echo "Starting LLD2D: "
@@ -15,7 +18,7 @@ fi
 
 stop() {
  echo "Stopping LLD2D: "
-  killall -q lld2d
+  killall -q -9 lld2d
   rm -rf /var/run/lld2d-* > /dev/null 2>&1
 }
 

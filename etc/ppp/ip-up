@@ -21,22 +21,11 @@ LOG="logger -t pppd"
     echo $MINMTU > /tmp/ppp-mtu
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
-    service ntp stop
-    service radvd stop
-    service upnp stop
-    service dnsserver stop
     service shaper stop
-    service ddns stop
-    service iptables stop
-
-    service iptables start
-    service ntp start
-    service ddns start
-    service dnsserver start
-    service radvd start
-    service upnp start
+    sleep 10
+    #services reinit
+    services_restart.sh pppd
     service shaper start
-
     $LOG "All is start OK"
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

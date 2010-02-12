@@ -3,6 +3,9 @@
 #get params
 . /sbin/global.sh
 
+#wait to start web and run from goahead code
+web_wait
+
 dnsp=`nvram_get 2860 dnsPEnabled`
 
 start() {
@@ -18,6 +21,7 @@ fi
 stop() {
  echo "Stopping DNSMASQ: "
   killall -q -9 dnsmasq
+  rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
 }
 
 get_param() {

@@ -233,7 +233,7 @@ if [ "$opmode" = "0" ]; then
         addMesh2Br0
 	addRaix2Br0
 	wan.sh
-	lan.sh
+	services_restart.sh all
 
 elif [ "$opmode" = "1" ]; then
     echo "Gateway OperationMode: $opmode"
@@ -252,13 +252,13 @@ elif [ "$opmode" = "1" ]; then
 	addMesh2Br0
 	addRaix2Br0
 	wan.sh
-	lan.sh
+	services_restart.sh all
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
 	resetLanWan
 	wan.sh
-	lan.sh
+	services_restart.sh all
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
@@ -266,7 +266,7 @@ elif [ "$opmode" = "3" ]; then
 	addBr0
 	brctl addif br0 eth2
 	wan.sh
-	lan.sh
+	services_restart.sh all
 else
     echo "unknown OperationMode: $opmode"
 	resetLanWan
