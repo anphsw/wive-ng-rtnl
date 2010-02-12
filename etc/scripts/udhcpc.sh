@@ -119,13 +119,13 @@ case "$1" in
 		done
 	}
 
-	    $LOG "Restart needed services"
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
 	    # restart needed services
     	    if [ "$STARTEDPPPD" != "0" ]; then
                 $LOG "No need restart setvices"
     	    else
+		$LOG "Restart needed services"
 		services_restart.sh dhcp
 	    fi
 	    $LOG "Renew OK.."
