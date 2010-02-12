@@ -158,9 +158,6 @@ ralink_init make_wireless_config rt2860
 if [ "$stamode" = "y" ]; then
 	modprobe rt2860v2_sta
 else
-	if [ "$CONFIG_RT2860V2_AP_DFS" = "y" ]; then
-		modprobe rt_timer
-	fi
 	modprobe rt2860v2_ap
 fi
 
