@@ -1,14 +1,12 @@
 #!/bin/sh
 
 start() {
-    if [ ! -f /etc/dropbear ]; then
-	mkdir /etc/dropbear
-    fi
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
 	echo "DSS file exist"
     else
 	echo "Generate host key for first start"
         echo "If no DSS key  and generate new key"
+	mkdir -p /etc/dropbear
         dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
 	fs save
     fi
