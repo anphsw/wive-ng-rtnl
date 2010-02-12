@@ -19,6 +19,10 @@ LOG="logger -t pppd"
     #miniupnpd restart
     service upnp stop
     service upnp start
+    
+    #radvd restart    
+    service radvd stop
+    service radvd start
 
     #rebuild shaper rules
     service shaper stop
