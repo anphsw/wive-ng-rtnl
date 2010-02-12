@@ -130,28 +130,38 @@ reset_all_phys()
 	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
 		return
 	fi
+
 	echo "Reset all phy port"
 	opmode=`nvram_get 2860 OperationMode`
 
-	#skip WAN port
+	#Ports down skip WAN port
 	if [ "$opmode" != "1" ]; then
-		link_down 0
+	    start=0
+	    end=4
+	else
+	    start=1	
+	    end=4
 	fi
-	link_down 1
-	link_down 2
-	link_down 3
-	link_down 4
+	for i in `seq $start $end`; do
+    	    link_down $i
+	done
 
 	#force Windows clients to renew IP and update DNS server
-	sleep 1
+	if [ "$opmode" = "1" ]; then
+	    sleep 1
+        fi
 
+	#Ports up skip WAN port
 	if [ "$opmode" != "1" ]; then
-		link_up 0
+	    start=0
+	    end=4
+	else
+	    start=1	
+	    end=4
 	fi
-	link_up 1
-	link_up 2
-	link_up 3
-	link_up 4
+	for i in `seq $start $end`; do
+    	    link_up $i
+	done
 }
 
 
