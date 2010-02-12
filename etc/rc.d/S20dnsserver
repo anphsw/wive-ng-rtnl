@@ -17,7 +17,7 @@ fi
 
 stop() {
  echo "Stopping DNSMASQ: "
-  killall -q dnsmasq
+  killall -q -9 dnsmasq
 }
 
 get_param() {
