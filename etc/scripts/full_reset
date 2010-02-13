@@ -1,8 +1,0 @@
-#!/bin/sh
-
-echo "Clear and load defaults to nvram!"
-ralink_init clear inic
-ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
-
-echo "Clear rwfs and reboot. Please go smoke..."
-fs restore

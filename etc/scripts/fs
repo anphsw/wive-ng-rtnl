@@ -16,7 +16,7 @@ get_size(){
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore |" >&2
+  echo "Usage: $0 | save | load | restore | nvramreset | fullreset" >&2
   exit 1
 }
 
@@ -43,10 +43,22 @@ save(){
 }
 
 restore(){
+  echo "Clear rwfs and reboot. Please go smoke..."
   dd if=/dev/urandom of=$MTDDEVICE bs=64k count=$BLOCKS
   echo "123456789">$MTDDEVICE 
   echo "Restoring defaults..."
   reboot
+}
+
+nvramreset(){
+    echo "Clear and load defaults to nvram!"
+    ralink_init clear 2860
+    ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
+}
+
+fullreset(){
+    nvramreset
+    restore
 }
 
 main(){
@@ -62,6 +74,12 @@ main(){
       ;;
     restore)
       restore $@
+      ;;
+    nvramreset)
+      nvramreset $@
+      ;;
+    fullreset)
+      fullreset $@
       ;;
     *) 
       usage $@ 
