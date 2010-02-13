@@ -59,7 +59,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
-	doSystem("chpasswd.sh %s %s", admuser, admpass);
+	doSystem("service pass start");
 
 #ifdef USER_MANAGEMENT_SUPPORT
 	if (umGroupExists(T("adm")) == FALSE)

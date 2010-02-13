@@ -117,10 +117,7 @@ case $1 in
 		    admPW="Admin"
 		    nvram_set 2860 Password Admin
                 fi
-		echo "$admID::0:0:Adminstrator:/:/bin/sh" > /etc/passwd
-		echo "$admID:x:0:$admID" > /etc/group
-		chpasswd.sh $admID $admPW
-		chmod 777 /tmp
+		service pass start
 		if [ -e "$PART1" ]; then
 			setUser
 		fi

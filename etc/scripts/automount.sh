@@ -1,4 +1,5 @@
 #! /bin/sh
+
 if [ "$1" == "" ]; then
 echo "parameter is none" 
 exit 1
