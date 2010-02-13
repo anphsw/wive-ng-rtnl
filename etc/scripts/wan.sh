@@ -77,10 +77,6 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	    route add default gw $gw
 	fi
 
-	service dns stop
-	service resolv start
-	service dns start
-
 elif [ "$wanmode" = "DHCP" ]; then
 	#killall ppp connections
 	kill_ppp
