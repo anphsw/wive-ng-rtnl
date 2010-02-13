@@ -340,7 +340,7 @@ openssl.pc: Makefile
 Makefile: Makefile.org Configure config
 	@echo "Makefile is older than Makefile.org, Configure or config."
 	@echo "Reconfigure the source tree (via './config' or 'perl Configure'), please."
-	@false
+#	@false
 
 libclean:
 	rm -f *.map *.so *.so.* *.dll engines/*.so engines/*.dll *.a engines/*.a */lib */*/lib
