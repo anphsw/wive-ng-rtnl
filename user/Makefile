@@ -123,7 +123,9 @@ clean:
 		fi; \
 	done
 	echo "Full cleanUP"
-	@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rfd $$i/filesystem/*; done
+	@set -e; for i in $(SUBDIRS_APP); do \
+	$(MAKE) -C $$i clean; rm -rfd $$i/filesystem/*; \
+	done
 	make -C busybox mrproper
 
 prune:
