@@ -18,7 +18,7 @@
 #define PATHNAMES_H
 
 #ifndef PATH_RADVD_CONF
-#define PATH_RADVD_CONF "/etc_ro/radvd.conf"
+#define PATH_RADVD_CONF "/etc/radvd.conf"
 #endif
 
 #ifndef PATH_RADVD_PID
