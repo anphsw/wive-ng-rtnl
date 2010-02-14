@@ -22,8 +22,14 @@ else
 fi
 
 #------------------------------------#
+#WR-N for full and WR-NL for ligth HW
+if [ "$MODE" = "2T2R" ]; then
+    DEVNAME=WR-N
+else
+    DEVNAME=WR-NL
+fi
 echo "" > sdk_version.h
-echo "#define RT288X_SDK_VERSION \"$VERSIONPKG\"" >> sdk_version.h
+echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
 echo "" > version
 echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
