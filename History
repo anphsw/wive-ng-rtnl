@@ -44,6 +44,8 @@
 43) Fix some daemons crash with error build in future<br>
 44) fs save now save current date and time to rwfs<br>
 45) Fix configure esw mode and more modes add<br>
+46) Fix pppoe reconnect<br>
+47) Fix pppoe long discovery<br>
 
 <br><br>
 <b>For support see:</b><br>
