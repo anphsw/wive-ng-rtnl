@@ -594,7 +594,7 @@ discovery(PPPoEConnection *conn)
     do {
 	padiAttempts++;
 	if (padiAttempts > MAX_PADI_ATTEMPTS) {
-	    warn("Timeout waiting for PADO packets");
+	    info("Timeout waiting for PADO packets");
 	    close(conn->discoverySocket);
 	    conn->discoverySocket = -1;
 	    return;
@@ -603,14 +603,17 @@ discovery(PPPoEConnection *conn)
 	conn->discoveryState = STATE_SENT_PADI;
 	waitForPADO(conn, timeout);
 
-	timeout *= 2;
+	timeout *= 3;
+	if (timeout > 60)
+		timeout = 10;
+	
     } while (conn->discoveryState == STATE_SENT_PADI);
 
     timeout = conn->discoveryTimeout;
     do {
 	padrAttempts++;
 	if (padrAttempts > MAX_PADI_ATTEMPTS) {
-	    warn("Timeout waiting for PADS packets");
+	    info("Timeout waiting for PADS packets");
 	    close(conn->discoverySocket);
 	    conn->discoverySocket = -1;
 	    return;
@@ -618,7 +621,9 @@ discovery(PPPoEConnection *conn)
 	sendPADR(conn);
 	conn->discoveryState = STATE_SENT_PADR;
 	waitForPADS(conn, timeout);
-	timeout *= 2;
+	timeout *= 3;
+	if (timeout > 60)
+		timeout = 10;
     } while (conn->discoveryState == STATE_SENT_PADR);
 
     /* We're done. */
