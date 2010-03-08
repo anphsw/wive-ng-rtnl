@@ -52,4 +52,4 @@ echo > $ppp/pap-secrets
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
     pppd file /etc/ppp/options.pptp -detach mtu 1400 mru 1400 plugin /lib/pptp.so allow-mppe-128 \
-    pptp_server $SERVER call pptp defaultroute persist usepeerdns user $USER password $PASSWORD &
+    pptp_server $SERVER call pptp persist usepeerdns user $USER password $PASSWORD &

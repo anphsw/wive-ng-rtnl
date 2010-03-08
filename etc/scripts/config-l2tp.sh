@@ -81,7 +81,6 @@ LOG="logger -t vpnhelper"
     noproxyarp
     mtu 1400
     mru 1400
-    defaultroute
     usepeerdns
     " >> $ppp/options.l2tp
 
