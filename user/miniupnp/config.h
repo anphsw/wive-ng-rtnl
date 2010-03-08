@@ -10,7 +10,7 @@
 #define UPNP_VERSION	"20100125"
 #define USE_NETFILTER 1
 #define OS_NAME		"MandrivaLinux"
-#define OS_VERSION	"MandrivaLinux/2010.0"
+#define OS_VERSION	"MandrivaLinux/2010.1"
 #define OS_URL		"http://www.kernel.org/"
 
 /* syslog facility to be used by miniupnpd */

@@ -18,6 +18,11 @@ LOG="logger -t pppd"
     services_restart.sh pppd
     service shaper start
 
+    if [ -f /etc/ppp/ip-down-route-reload ]; then
+	chmod 777 /etc/ppp/ip-down-route-reload
+	/etc/ppp/ip-down-route-reload
+    fi
+
     $LOG "Down is OK"
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

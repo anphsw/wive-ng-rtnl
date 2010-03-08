@@ -138,7 +138,7 @@ been enabled, more detailed usage information will also be available.</p>
 <dt><strong><a name="adduser" class="item"><strong>adduser</strong></a></strong></dt>
 
 <dd>
-<p>adduser [OPTIONS] user_name</p>
+<p>adduser [OPTIONS] USER</p>
 <p>Add a user</p>
 <p>Options:</p>
 <pre>
@@ -154,26 +154,26 @@ been enabled, more detailed usage information will also be available.</p>
 <dt><strong><a name="adjtimex" class="item"><strong>adjtimex</strong></a></strong></dt>
 
 <dd>
-<p>adjtimex [-q] [-o offset] [-f frequency] [-p timeconstant] [-t tick]</p>
-<p>Read and optionally set system timebase parameters. See <a href="#adjtimex"><code>adjtimex(2)</code></a>.</p>
+<p>adjtimex [-q] [-o OFF] [-f FREQ] [-p TCONST] [-t TICK]</p>
+<p>Read and optionally set system timebase parameters. See <a href="#adjtimex"><code>adjtimex(2)</code></a></p>
 <p>Options:</p>
 <pre>
-        -q              Quiet
-        -o offset       Time offset, microseconds
-        -f frequency    Frequency adjust, integer kernel units (65536 is 1ppm)
-                        (positive values make clock run faster)
-        -t tick         Microseconds per tick, usually 10000
-        -p timeconstant</pre>
+        -q      Quiet
+        -o OFF  Time offset, microseconds
+        -f FREQ Frequency adjust, integer kernel units (65536 is 1ppm)
+                (positive values make clock run faster)
+        -t TICK Microseconds per tick, usually 10000
+        -p TCONST</pre>
 </dd>
 <dt><strong><a name="arp" class="item"><strong>arp</strong></a></strong></dt>
 
 <dd>
 <p><table cellspacing="0" cellpadding="0"><tr><td>arp 
-<tr><td>[-vn]<td>[-H type] [-i if] -a [hostname]
-<tr><td>[-v]<td>  [-i if] -d hostname [pub]
-<tr><td>[-v]<td>[-H type] [-i if] -s hostname hw_addr [temp]
-<tr><td>[-v]<td>[-H type] [-i if] -s hostname hw_addr [netmask nm] pub
-<tr><td>[-v]<td>[-H type] [-i if] -Ds hostname ifa [netmask nm] pub</table></p>
+<tr><td>[-vn]<td>[-H HWTYPE] [-i IF] -a [HOSTNAME]
+<tr><td>[-v]<td>    [-i IF] -d HOSTNAME [pub]
+<tr><td>[-v]<td>[-H HWTYPE] [-i IF] -s HOSTNAME HWADDR [temp]
+<tr><td>[-v]<td>[-H HWTYPE] [-i IF] -s HOSTNAME HWADDR [netmask MASK] pub
+<tr><td>[-v]<td>[-H HWTYPE] [-i IF] -Ds HOSTNAME IFACE [netmask MASK] pub</table></p>
 <p>Manipulate ARP cache</p>
 <p>Options:</p>
 <pre>
@@ -190,7 +190,7 @@ been enabled, more detailed usage information will also be available.</p>
 <dt><strong><a name="arping" class="item"><strong>arping</strong></a></strong></dt>
 
 <dd>
-<p>arping [-fqbDUA] [-c count] [-w timeout] [-I dev] [-s sender] target</p>
+<p>arping [-fqbDUA] [-c CNT] [-w TIMEOUT] [-I IFACE] [-s SRC_IP] DST_IP</p>
 <p>Send ARP requests/replies</p>
 <p>Options:</p>
 <pre>
@@ -201,10 +201,10 @@ been enabled, more detailed usage information will also be available.</p>
         -U              Unsolicited ARP mode, update your neighbors
         -A              ARP answer mode, update your neighbors
         -c N            Stop after sending N ARP requests
-        -w timeout      Time to wait for ARP reply, in seconds
-        -I dev          Interface to use (default eth0)
-        -s sender       Sender IP address
-        target          Target IP address</pre>
+        -w TIMEOUT      Time to wait for ARP reply, seconds
+        -I IFACE        Interface to use (default eth0)
+        -s SRC_IP       Sender IP address
+        DST_IP          Target IP address</pre>
 </dd>
 <dt><strong><a name="awk" class="item"><strong>awk</strong></a></strong></dt>
 
@@ -240,11 +240,11 @@ been enabled, more detailed usage information will also be available.</p>
 <dt><strong><a name="bunzip2" class="item"><strong>bunzip2</strong></a></strong></dt>
 
 <dd>
-<p>bunzip2 [OPTIONS] [FILE]</p>
-<p>Uncompress FILE (or standard input)</p>
+<p>bunzip2 [OPTIONS] [FILE]...</p>
+<p>Uncompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -c      Write to standard output
+        -c      Write to stdout
         -f      Force</pre>
 </dd>
 <dt><strong><a name="bzcat" class="item"><strong>bzcat</strong></a></strong></dt>
@@ -257,10 +257,10 @@ been enabled, more detailed usage information will also be available.</p>
 
 <dd>
 <p>bzip2 [OPTIONS] [FILE]...</p>
-<p>Compress FILEs (or standard input) with bzip2 algorithm.</p>
+<p>Compress FILEs (or stdin) with bzip2 algorithm</p>
 <p>Options:</p>
 <pre>
-        -c      Write to standard output
+        -c      Write to stdout
         -d      Decompress
         -f      Force
         -1..-9  Compression level</pre>
@@ -387,7 +387,7 @@ symbols +-= and one or more of the letters rwxst</p>
 
 <dd>
 <p>cut [OPTIONS] [FILE]...</p>
-<p>Print selected fields from each input FILE to standard output</p>
+<p>Print selected fields from each input FILE to stdout</p>
 <p>Options:</p>
 <pre>
         -b LIST Output only bytes from LIST
@@ -447,7 +447,7 @@ MD (x1000000), M (x1048576), GD (x1000000000) or G (x1073741824)</p>
 <dt><strong><a name="df" class="item"><strong>df</strong></a></strong></dt>
 
 <dd>
-<p>df [-Pkmhai] [-B SIZE] [FILESYSTEM...]</p>
+<p>df [-Pkmhai] [-B SIZE] [FILESYSTEM]...</p>
 <p>Print filesystem usage statistics</p>
 <p>Options:</p>
 <pre>
@@ -462,7 +462,7 @@ MD (x1000000), M (x1048576), GD (x1000000000) or G (x1073741824)</p>
 <dt><strong><a name="dhcprelay" class="item"><strong>dhcprelay</strong></a></strong></dt>
 
 <dd>
-<p>dhcprelay CLIENT_IFACE[,CLIENT_IFACE2...] SERVER_IFACE [SERVER_IP]</p>
+<p>dhcprelay CLIENT_IFACE[,CLIENT_IFACE2]... SERVER_IFACE [SERVER_IP]</p>
 <p>Relay DHCP requests between clients and server</p>
 </dd>
 <dt><strong><a name="dmesg" class="item"><strong>dmesg</strong></a></strong></dt>
@@ -521,7 +521,7 @@ Disk space is printed in units of 1024 bytes.</p>
 <dt><strong><a name="echo" class="item"><strong>echo</strong></a></strong></dt>
 
 <dd>
-<p>echo [-neE] [ARG...]</p>
+<p>echo [-neE] [ARG]...</p>
 <p>Print the specified ARGs to stdout</p>
 <p>Options:</p>
 <pre>
@@ -532,7 +532,7 @@ Disk space is printed in units of 1024 bytes.</p>
 <dt><strong><a name="env" class="item"><strong>env</strong></a></strong></dt>
 
 <dd>
-<p>env [-iu] [-] [name=value]... [PROG [ARGS]]</p>
+<p>env [-iu] [-] [name=value]... [PROG ARGS]</p>
 <p>Print the current environment or run PROG after setting up
 the specified environment</p>
 <p>Options:</p>
@@ -557,7 +557,7 @@ a hostname with a known 'ethers' entry.</p>
 
 <dd>
 <p>expand [-i] [-t N] [FILE|-]</p>
-<p>Convert tabs to spaces, writing to standard output</p>
+<p>Convert tabs to spaces, writing to stdout</p>
 <p>Options:</p>
 <pre>
         -i,--initial    Don't convert tabs after non blanks
@@ -567,7 +567,7 @@ a hostname with a known 'ethers' entry.</p>
 
 <dd>
 <p>expr EXPRESSION</p>
-<p>Print the value of EXPRESSION to standard output</p>
+<p>Print the value of EXPRESSION to stdout</p>
 <p>EXPRESSION may be:</p>
 <pre>
         ARG1 | ARG2     ARG1 if it is neither null nor 0, otherwise ARG2
@@ -607,7 +607,7 @@ of characters matched or 0.</p>
 <dt><strong><a name="find" class="item"><strong>find</strong></a></strong></dt>
 
 <dd>
-<p>find [PATH...] [EXPRESSION]</p>
+<p>find [PATH]... [EXPRESSION]</p>
 <p>Search for files. The default PATH is the current directory,
 default EXPRESSION is '-print'</p>
 <p>EXPRESSION may consist of:</p>
@@ -633,7 +633,7 @@ default EXPRESSION is '-print'</p>
         -user NAME      File is owned by user NAME (numeric user ID allowed)
         -group NAME     File belongs to group NAME (numeric group ID allowed)
         -depth          Process directory name after traversing it
-        -size N[bck]    File size is N (c:bytes,k:kbytes,b:512 bytes(def.)).
+        -size N[bck]    File size is N (c:bytes,k:kbytes,b:512 bytes(def.))
                         +/-N: file size is bigger/smaller than N
         -links N        Number of links is greater than (+N), less than (-N),
                         or exactly N
@@ -694,39 +694,39 @@ default EXPRESSION is '-print'</p>
 <dt><strong><a name="grep" class="item"><strong>grep</strong></a></strong></dt>
 
 <dd>
-<p>grep [-HhrilLnqvsoeFEABC] PATTERN [FILE]...</p>
-<p>Search for PATTERN in each FILE or standard input</p>
+<p>grep [-HhnlLoqvsriFE] [-m N] [-A/B/C N] PATTERN/-e PATTERN.../-f FILE [FILE]...</p>
+<p>Search for PATTERN in FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -H      Prefix output lines with filename where match was found
-        -h      Suppress the prefixing filename on output
-        -r      Recurse
-        -i      Ignore case distinctions
-        -l      List names of files that match
-        -L      List names of files that don't match
-        -n      Print line number with output lines
+        -H      Add 'filename:' prefix
+        -h      Do not add 'filename:' prefix
+        -n      Add 'line_no:' prefix
+        -l      Show only names of files that match
+        -L      Show only names of files that don't match
+        -c      Show only count of matching lines
+        -o      Show only the matching part of line
         -q      Quiet. Return 0 if PATTERN is found, 1 otherwise
         -v      Select non-matching lines
-        -s      Suppress file open/read error messages
-        -c      Only print count of matching lines
-        -o      Show only the part of a line that matches PATTERN
+        -s      Suppress open and read errors
+        -r      Recurse
+        -i      Ignore case
+        -F      PATTERN is a literal (not regexp)
+        -E      PATTERN is an extended regexp
         -m N    Match up to N times per file
-        -F      PATTERN is a set of newline-separated strings
-        -E      PATTERN is an extended regular expression
-        -e PTRN Pattern to match
-        -f FILE Read pattern from file
         -A N    Print N lines of trailing context
         -B N    Print N lines of leading context
-        -C N    Print N lines of output context</pre>
+        -C N    Same as '-A N -B N'
+        -e PTRN Pattern to match
+        -f FILE Read pattern from file</pre>
 </dd>
 <dt><strong><a name="gunzip" class="item"><strong>gunzip</strong></a></strong></dt>
 
 <dd>
 <p>gunzip [OPTIONS] [FILE]...</p>
-<p>Uncompress FILEs (or standard input)</p>
+<p>Uncompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -c      Write to standard output
+        -c      Write to stdout
         -f      Force
         -t      Test file integrity</pre>
 </dd>
@@ -734,10 +734,10 @@ default EXPRESSION is '-print'</p>
 
 <dd>
 <p>gzip [OPTIONS] [FILE]...</p>
-<p>Compress FILEs (or standard input)</p>
+<p>Compress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -c      Write to standard output
+        -c      Write to stdout
         -d      Decompress
         -f      Force</pre>
 </dd>
@@ -762,7 +762,7 @@ default EXPRESSION is '-print'</p>
 
 <dd>
 <p>head [OPTIONS] [FILE]...</p>
-<p>Print first 10 lines of each FILE (or standard input) to standard output.
+<p>Print first 10 lines of each FILE (or stdin) to stdout.
 With more than one FILE, precede each with a header giving the file name.</p>
 <p>Options:</p>
 <pre>
@@ -774,8 +774,8 @@ With more than one FILE, precede each with a header giving the file name.</p>
 <dt><strong><a name="hexdump" class="item"><strong>hexdump</strong></a></strong></dt>
 
 <dd>
-<p>hexdump [-bcCdefnosvxR] FILE...</p>
-<p>Display FILEs or standard input in a user specified format</p>
+<p>hexdump [-bcCdefnosvxR] [FILE]...</p>
+<p>Display FILEs (or stdin) in a user specified format</p>
 <p>Options:</p>
 <pre>
         -b              One-byte octal display
@@ -953,7 +953,7 @@ iproute { add | del | change | append | replace | monitor } ROUTE
 <dt><strong><a name="killall" class="item"><strong>killall</strong></a></strong></dt>
 
 <dd>
-<p>killall [-l] [-q] [-SIG] process-name...</p>
+<p>killall [-l] [-q] [-SIG] PROCESS_NAME...</p>
 <p>Send a signal (default: TERM) to given processes</p>
 <p>Options:</p>
 <pre>
@@ -1003,7 +1003,7 @@ iproute { add | del | change | append | replace | monitor } ROUTE
 
 <dd>
 <p>logger [OPTIONS] [MESSAGE]</p>
-<p>Write MESSAGE to the system log. If MESSAGE is omitted, log stdin.</p>
+<p>Write MESSAGE (or stdin) to syslog</p>
 <p>Options:</p>
 <pre>
         -s      Log to stderr as well as the system log
@@ -1128,7 +1128,7 @@ TYPEs include:</pre>
 <dt><strong><a name="modprobe" class="item"><strong>modprobe</strong></a></strong></dt>
 
 <dd>
-<p>modprobe [-nqrsvb] MODULE [symbol=value...]</p>
+<p>modprobe [-nqrsvb] MODULE [symbol=value]...</p>
 <p>Options:</p>
 <pre>
         -n      Dry run
@@ -1142,7 +1142,7 @@ TYPEs include:</pre>
 
 <dd>
 <p>more [FILE]...</p>
-<p>View FILE or standard input one screenful at a time</p>
+<p>View FILE (or stdin) one screenful at a time</p>
 </dd>
 <dt><strong><a name="mount" class="item"><strong>mount</strong></a></strong></dt>
 
@@ -1225,7 +1225,7 @@ or: mv [OPTIONS] SOURCE... DIRECTORY</p>
 <dt><strong><a name="nice" class="item"><strong>nice</strong></a></strong></dt>
 
 <dd>
-<p>nice [-n ADJUST] [PROG [ARGS]]</p>
+<p>nice [-n ADJUST] [PROG ARGS]</p>
 <p>Run PROG with modified scheduling priority</p>
 <p>Options:</p>
 <pre>
@@ -1269,7 +1269,7 @@ changes the password for the current user.</p>
 <dt><strong><a name="pidof" class="item"><strong>pidof</strong></a></strong></dt>
 
 <dd>
-<p>pidof [OPTIONS] [NAME...]</p>
+<p>pidof [OPTIONS] [NAME]...</p>
 <p>List PIDs of all processes with names that match NAMEs</p>
 <p>Options:</p>
 <pre>
@@ -1322,7 +1322,7 @@ changes the password for the current user.</p>
 <dt><strong><a name="printf" class="item"><strong>printf</strong></a></strong></dt>
 
 <dd>
-<p>printf FORMAT [ARGUMENT...]</p>
+<p>printf FORMAT [ARGUMENT]...</p>
 <p>Format and print ARGUMENT(s) according to FORMAT,
 where FORMAT controls the output exactly as in C printf</p>
 </dd>
@@ -1437,7 +1437,7 @@ Remaining arguments are input files (stdin if none).</p>
 <dd>
 <p>seq [-w] [-s SEP] [FIRST [INC]] LAST</p>
 <p>Print numbers from FIRST to LAST, in steps of INC.
-FIRST, INC default to 1</p>
+FIRST, INC default to 1.</p>
 <p>Options:</p>
 <pre>
         -w      Pad to last with leading zeros
@@ -1594,12 +1594,12 @@ execute NEW_INIT. PID must be 1. NEW_ROOT must be a mountpoint.</p>
 <dd>
 <p>syslogd [OPTIONS]</p>
 <p>System logging utility.
-Note that this version of syslogd ignores /etc/syslog.conf.</p>
+This version of syslogd ignores /etc/syslog.conf</p>
 <p>Options:</p>
 <pre>
         -n              Run in foreground
         -O FILE         Log to given file (default:/var/log/messages)
-        -l n            Set local log level
+        -l N            Set local log level
         -S              Smaller logging output
         -s SIZE         Max size (KB) before rotate (default:200KB, 0=off)
         -b N            N rotated logs to keep (default:1, max=99, 0=purge)
@@ -1612,7 +1612,7 @@ Note that this version of syslogd ignores /etc/syslog.conf.</p>
 
 <dd>
 <p>tail [OPTIONS] [FILE]...</p>
-<p>Print last 10 lines of each FILE (or standard input) to standard output.
+<p>Print last 10 lines of each FILE (or stdin) to stdout.
 With more than one FILE, precede each with a header giving the file name.</p>
 <p>Options:</p>
 <pre>
@@ -1658,8 +1658,8 @@ depending on logical value of EXPRESSION</p>
 <dt><strong><a name="time" class="item"><strong>time</strong></a></strong></dt>
 
 <dd>
-<p>time [OPTIONS] PROG [ARGS]</p>
-<p>Run PROG. When it finishes, its resource usage is displayed.</p>
+<p>time [OPTIONS] PROG ARGS</p>
+<p>Run PROG, display resource usage when it exits</p>
 <p>Options:</p>
 <pre>
         -v      Verbose</pre>
@@ -1670,7 +1670,7 @@ depending on logical value of EXPRESSION</p>
 <p>top [-b] [-nCOUNT] [-dSECONDS] [-m]</p>
 <p>Provide a view of process activity in real time.
 Read the status of all processes from /proc each SECONDS
-and show the status for however many processes will fit on the screen.</p>
+and display a screenful of them.</p>
 </dd>
 <dt><strong><a name="touch" class="item"><strong>touch</strong></a></strong></dt>
 
@@ -1694,7 +1694,7 @@ and show the status for however many processes will fit on the screen.</p>
         -4, -6  Force IP or IPv6 name resolution
         -F      Set the don't fragment bit
         -I      Use ICMP ECHO instead of UDP datagrams
-        -l      Display the ttl value of the returned packet
+        -l      Display the TTL value of the returned packet
         -d      Set SO_DEBUG options to socket
         -n      Print numeric addresses
         -r      Bypass routing tables, send directly to HOST
@@ -1702,7 +1702,7 @@ and show the status for however many processes will fit on the screen.</p>
         -m      Max time-to-live (max number of hops)
         -p      Base UDP port number used in probes
                 (default 33434)
-        -q      Number of probes per 'ttl' (default 3)
+        -q      Number of probes per TTL (default 3)
         -s      IP address to use as the source address
         -t      Type-of-service in probe packets (default 0)
         -w      Time in seconds to wait for a response (default 3)
@@ -1724,7 +1724,7 @@ and show the status for however many processes will fit on the screen.</p>
         -m      Max time-to-live (max number of hops)
         -p      Base UDP port number used in probes
                 (default is 33434)
-        -q      Number of probes per 'ttl' (default 3)
+        -q      Number of probes per TTL (default 3)
         -s      IP address to use as the source address
         -t      Type-of-service in probe packets (default 0)
         -w      Time in seconds to wait for a response (default 3)</pre>
@@ -1881,7 +1881,7 @@ When no file is given, use stdin/stdout.</p>
 <dt><strong><a name="watch" class="item"><strong>watch</strong></a></strong></dt>
 
 <dd>
-<p>watch [-n seconds] [-t] PROG [ARGS]</p>
+<p>watch [-n SEC] [-t] PROG ARGS</p>
 <p>Run PROG periodically</p>
 <p>Options:</p>
 <pre>
@@ -1892,8 +1892,8 @@ When no file is given, use stdin/stdout.</p>
 
 <dd>
 <p>wc [OPTIONS] [FILE]...</p>
-<p>Print line, word, and byte counts for each FILE, and a total line if
-more than one FILE is specified. With no FILE, read standard input.</p>
+<p>Print line, word, and byte counts for each FILE (or stdin),
+and a total line if more than one FILE is specified</p>
 <p>Options:</p>
 <pre>
         -c      Print the byte counts
@@ -1906,7 +1906,7 @@ more than one FILE is specified. With no FILE, read standard input.</p>
 <dd>
 <p><table cellspacing="0" cellpadding="0"><tr><td>wget [-c|--continue] [-s|--spider] [-q|--quiet] [-O|--output-document file]
 <tr><td><td>[--header 'header: value'] [-Y|--proxy on/off] [-P DIR]
-<tr><td><td>[-U|--user-agent agent] url</table></p>
+<tr><td><td>[--no-check-certificate] [-U|--user-agent agent] url</table></p>
 <p>Retrieve files via HTTP or FTP</p>
 <p>Options:</p>
 <pre>
@@ -1927,8 +1927,8 @@ more than one FILE is specified. With no FILE, read standard input.</p>
 <dt><strong><a name="xargs" class="item"><strong>xargs</strong></a></strong></dt>
 
 <dd>
-<p>xargs [OPTIONS] [PROG [ARGS]]</p>
-<p>Run PROG on every item given by standard input</p>
+<p>xargs [OPTIONS] [PROG ARGS]</p>
+<p>Run PROG on every item given by stdin</p>
 <p>Options:</p>
 <pre>
         -p      Ask user whether to run each command
