@@ -31,16 +31,18 @@ LOG="logger -t pppd"
 	    RESTORESTRING=""
 	fi
     fi
-
-    if [ -f /etc/ppp/ip-down-route-reload ]; then
+    if [ $RESTORESTRING != "" ]; then
+	$LOG "Store old default route to file. $IP_GATEWAY $DEV_GATEWAY "
+	rm -f /etc/ppp/ip-down-route-reload
+	(
+	    echo '#!/bin/sh'
+	    echo 'ip route del default'
+	    echo "$RESTORESTRING"
+	) > /etc/ppp/ip-down-route-reload
+    else
+	$LOG "No dgw stored."
 	rm -f /etc/ppp/ip-down-route-reload
     fi
-    $LOG "Store old default route to file"
-    (
-	echo '#!/bin/sh'
-	echo 'ip route del default'
-	echo "$RESTORESTRING"
-    ) > /etc/ppp/ip-down-route-reload
 
     $LOG "Replace default route to $PPP_IFACE"
     ip route del $PPP_REMOTE
