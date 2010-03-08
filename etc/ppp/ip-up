@@ -26,10 +26,10 @@ LOG="logger -t pppd"
 
     $LOG "Store old default route to file"
     (
-    echo '#!/bin/sh'
-    echo 'route del default'
-    echo "route add default gateway $GATEWAY"
-    ) >/etc/ppp/ip-down-route-reload
+	echo '#!/bin/sh'
+	echo 'route del default'
+	echo "route replace default gateway $GATEWAY"
+    ) > /etc/ppp/ip-down-route-reload
     
     $LOG "Calculate min mtu"
     MINMTU=`ip link show up | grep mtu | awk {' print $PPP_REMOTE-28 '} | sort -n -r | tail -n1`
