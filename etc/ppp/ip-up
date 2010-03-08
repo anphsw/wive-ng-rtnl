@@ -14,22 +14,38 @@ LOG="logger -t pppd"
     cat /var/tmp/resolv.$PPP_IFACE >> /etc/resolv.conf
 
     $LOG "Corbiba hack"
-    GATEWAY=`route | grep ^default | awk '{print $2}'`
-    ip route del $PPP_REMOTE
+    IP_GATEWAY=`route -n | grep ^0.0.0.0 | awk '{print $2}'`
+    DEV_GATEWAY=`route -n | grep ^0.0.0.0 | awk '{print $8}'`
+    RESTORESTRING=""
 
-    route del default
-    route replace default dev $PPP_IFACE
+    if [ $IP_GATEWAY != "0.0.0.0" ]; then
+	if [ $DEV_GATEWAY != "" ]; then
+	    RESTORESTRING="ip route replace default dev $DEV_GATEWAY via $IP_GATEWAY"
+	    else
+	    RESTORESTRING="ip route replace default via $IP_GATEWAY"
+	fi
+    else
+	if [ $DEV_GATEWAY != "" ]; then
+	    RESTORESTRING="ip route replace default dev $DEV_GATEWAY"
+	    else
+	    RESTORESTRING=""
+	fi
+    fi
 
     if [ -f /etc/ppp/ip-down-route-reload ]; then
 	rm -f /etc/ppp/ip-down-route-reload
     fi
-
     $LOG "Store old default route to file"
     (
 	echo '#!/bin/sh'
-	echo 'route del default'
-	echo "route replace default gateway $GATEWAY"
+	echo 'ip route del default'
+	echo "$RESTORESTRING"
     ) > /etc/ppp/ip-down-route-reload
+
+    $LOG "Replace default route to $PPP_IFACE"
+    ip route del $PPP_REMOTE
+    ip route del default
+    ip route replace default dev $PPP_IFACE
     
     $LOG "Calculate min mtu"
     MINMTU=`ip link show up | grep mtu | awk {' print $PPP_REMOTE-28 '} | sort -n -r | tail -n1`
