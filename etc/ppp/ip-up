@@ -12,17 +12,18 @@ LOG="logger -t pppd"
     ip route del $5
 
     route del default
-    route add default dev ppp0
+    route replace default dev ppp0
 
     if [ -f /etc/ppp/ip-down-route-reload ]; then
-	$LOG "Store old default route to file"
 	rm -f /etc/ppp/ip-down-route-reload
-	(
-	echo '#!/bin/sh'
-	echo 'route del default'
-	echo "route add default gateway $GATEWAY"
-	) >/etc/ppp/ip-down-route-reload
     fi
+
+    $LOG "Store old default route to file"
+    (
+    echo '#!/bin/sh'
+    echo 'route del default'
+    echo "route add default gateway $GATEWAY"
+    ) >/etc/ppp/ip-down-route-reload
     
     $LOG "Calculate min mtu"
     MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
