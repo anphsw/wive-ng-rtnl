@@ -1,18 +1,24 @@
 #!/bin/sh
 
+PPP_IFACE="$1"
+PPP_TTY="$2"
+PPP_SPEED="$3"
+PPP_LOCAL="$4"
+PPP_REMOTE="$5"
+PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
     $LOG "Replace DNS from pppd"
-    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$1
-    grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$1
-    cat /var/tmp/resolv.$1 >> /etc/resolv.conf
+    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
+    grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$PPP_IFACE
+    cat /var/tmp/resolv.$PPP_IFACE >> /etc/resolv.conf
 
     $LOG "Corbiba hack"
     GATEWAY=`route | grep ^default | awk '{print $2}'`
-    ip route del $5
+    ip route del $PPP_REMOTE
 
     route del default
-    route replace default dev ppp0
+    route replace default dev $PPP_IFACE
 
     if [ -f /etc/ppp/ip-down-route-reload ]; then
 	rm -f /etc/ppp/ip-down-route-reload
@@ -26,7 +32,7 @@ LOG="logger -t pppd"
     ) >/etc/ppp/ip-down-route-reload
     
     $LOG "Calculate min mtu"
-    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1`
+    MINMTU=`ip link show up | grep mtu | awk {' print $PPP_REMOTE-28 '} | sort -n -r | tail -n1`
 
     $LOG "Renew mss rules"
     iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
