@@ -13,24 +13,26 @@ LOG="logger -t pppd"
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$PPP_IFACE
     cat /var/tmp/resolv.$PPP_IFACE >> /etc/resolv.conf
 
-    $LOG "Corbiba hack"
-    GWSTRING=`ip route | grep ^default`
+    $LOG "Modify route table need for buggi nas"
 
     #Remove auto route in VPN
     ip route del $PPP_REMOTE  > /dev/null 2>&1
 
+    #Get current dgw
+    GWSTRING=`ip route | grep ^default`
+
     if [ $GWSTRING != "" ]; then
-	if [ $DEV_GATEWAY != "" ]; then
-	    RESTORESTRING="ip route replace $GWSTRING"
-	    $LOG "Store old default route to file. $GWSTRING "
-	    rm -f /etc/ppp/ip-down-route-reload
-	    (
-		echo '#!/bin/sh'
-	        echo 'ip route del default'
-		echo "$RESTORESTRING"
-	    ) > /etc/ppp/ip-down-route-reload
+        RESTORESTRING="ip route replace $GWSTRING"
+        $LOG "Store old default route to file. $GWSTRING "
+        rm -f /etc/ppp/ip-down-route-reload
+        (
+	    echo '#!/bin/sh'
+	    echo 'ip route del default'
+	    echo "$RESTORESTRING"
+	) > /etc/ppp/ip-down-route-reload
     else
 	$LOG "No dgw stored."
+	RESTORESTRING=""
 	rm -f /etc/ppp/ip-down-route-reload
     fi
 
