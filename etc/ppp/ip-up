@@ -13,7 +13,7 @@ LOG="logger -t pppd"
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$PPP_IFACE
     cat /var/tmp/resolv.$PPP_IFACE >> /etc/resolv.conf
 
-    $LOG "Modify route table need for buggi nas"
+    $LOG "Modify route table need for buggy nas"
 
     #Remove auto route in VPN
     ip route del $PPP_REMOTE  > /dev/null 2>&1
