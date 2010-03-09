@@ -15,9 +15,6 @@ LOG="logger -t pppd"
 
     $LOG "Modify route table need for buggy nas"
 
-    #Remove auto route in VPN
-    ip route del $PPP_REMOTE  > /dev/null 2>&1
-
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
 
@@ -36,6 +33,9 @@ LOG="logger -t pppd"
 	RESTORESTRING=""
 	rm -f /etc/ppp/ip-down-route-reload
     fi
+
+    #Remove auto route in VPN
+    ip route del $PPP_REMOTE  > /dev/null 2>&1
 
     $LOG "Replace default route to $PPP_IFACE"
     ip route del default > /dev/null 2>&1
