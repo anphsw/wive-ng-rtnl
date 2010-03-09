@@ -47,9 +47,6 @@ LOG="logger -t vpnhelper"
         ip r add $ROUTE
     fi
 
-    $LOG "Remove default route"
-    ip route del default 2> /dev/null
-
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf

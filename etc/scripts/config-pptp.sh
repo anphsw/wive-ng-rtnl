@@ -46,9 +46,6 @@ echo > $ppp/pap-secrets
 	ip r add $ROUTE
     fi
 
-    $LOG "Remove default route"
-    ip route del default 2> /dev/null
-
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
     pppd file /etc/ppp/options.pptp -detach mtu 1400 mru 1400 plugin /lib/pptp.so allow-mppe-128 \
