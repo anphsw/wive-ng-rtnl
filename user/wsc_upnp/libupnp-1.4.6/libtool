@@ -78,17 +78,17 @@ build_os=linux-gnu
 echo="echo"
 
 # The archiver.
-AR="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-Os -mips32 -mtune=mips32"
 
 # A language-specific compiler.
-CC="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-gcc"
+CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -97,7 +97,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -106,7 +106,7 @@ LN_S="ln -s"
 NM="nm"
 
 # A symbol stripping program
-STRIP="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -118,7 +118,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-as "
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -199,7 +199,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -224,8 +224,8 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
-striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -325,7 +325,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
@@ -7249,17 +7249,17 @@ build_os=linux-gnu
 echo="echo"
 
 # The archiver.
-AR="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-Os -mips32 -mtune=mips32"
 
 # A language-specific compiler.
-CC="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-g++ "
+CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ "
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -7268,7 +7268,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -7277,7 +7277,7 @@ LN_S="ln -s"
 NM="nm"
 
 # A symbol stripping program
-STRIP="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -7289,7 +7289,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-as "
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -7370,7 +7370,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -7392,16 +7392,16 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
-striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crti.o /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtbeginS.o"
+predep_objects="/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crti.o /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtendS.o /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crtn.o"
+postdep_objects="/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/crtendS.o /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7413,7 +7413,7 @@ postdeps="-lstdc++ -lm -lgcc -lc -lgcc"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2 -L/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc -L/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib"
+compiler_lib_search_path="-L/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2 -L/opt/Wive-RTNL/toolchain/bin/../lib/gcc -L/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib"
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7493,7 +7493,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
@@ -7554,11 +7554,11 @@ build_os=linux-gnu
 echo="echo"
 
 # The archiver.
-AR="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ar"
+AR="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 AR_FLAGS="cru"
 
 # A C compiler.
-LTCC="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-gcc"
+LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-Os -mips32 -mtune=mips32"
@@ -7573,7 +7573,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ld"
+LD="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -7582,7 +7582,7 @@ LN_S="ln -s"
 NM="nm"
 
 # A symbol stripping program
-STRIP="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip"
+STRIP="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
 MAGIC_CMD=file
@@ -7594,7 +7594,7 @@ DLLTOOL="dlltool"
 OBJDUMP="objdump"
 
 # Used on cygwin: assembler.
-AS="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-as "
+AS="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as "
 
 # The name of the directory that contains temporary libtool files.
 objdir=.libs
@@ -7675,7 +7675,7 @@ library_names_spec="\${libname}\${release}\${shared_ext}\$versuffix \${libname}\
 soname_spec="\${libname}\${release}\${shared_ext}\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-ranlib"
+RANLIB="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
@@ -7700,8 +7700,8 @@ module_cmds=""
 module_expsym_cmds=""
 
 # Commands to strip libraries.
-old_striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
-striplib="/opt/Wive-RTNL-CHINA/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
+old_striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-debug"
+striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.

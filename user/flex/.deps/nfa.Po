@@ -1,218 +1,215 @@
-nfa.o nfa.o: nfa.c flexdef.h config.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdio.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/features.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_config.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/cdefs.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/types.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/kernel_types.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/pthreadtypes.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sched.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_stdio.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/wchar.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/wchar.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/stdio_lim.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdlib.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/types.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/time.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/endian.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/endian.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/select.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/select.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigset.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/time.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/sysmacros.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/alloca.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/setjmp.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/setjmp.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/ctype.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_touplow.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/string.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/math.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/huge_val.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/mathdef.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/mathcalls.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/syslimits.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/limits.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix1_lim.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/local_lim.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/linux/limits.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix2_lim.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/unistd.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix_opt.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/confname.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/getopt.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/netinet/in.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdint.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/wordsize.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/socket.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sockaddr.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/socket.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/sockios.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/ioctl.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/in.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/byteswap.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/wait.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/signal.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/signum.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/siginfo.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigaction.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigcontext.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/sigcontext.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigstack.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigthread.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/resource.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/resource.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/waitflags.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/waitstatus.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdbool.h \
-  /opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/regex.h \
-  flexint.h
+nfa.o nfa.o: nfa.c flexdef.h config.h /opt/Wive-RTNL/lib/include/stdio.h \
+  /opt/Wive-RTNL/lib/include/features.h \
+  /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
+  /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/lib/include/bits/types.h \
+  /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
+  /opt/Wive-RTNL/lib/include/bits/wordsize.h \
+  /opt/Wive-RTNL/lib/include/bits/pthreadtypes.h \
+  /opt/Wive-RTNL/lib/include/bits/sched.h \
+  /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
+  /opt/Wive-RTNL/lib/include/wchar.h \
+  /opt/Wive-RTNL/lib/include/bits/wchar.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
+  /opt/Wive-RTNL/lib/include/stdlib.h \
+  /opt/Wive-RTNL/lib/include/sys/types.h \
+  /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+  /opt/Wive-RTNL/lib/include/bits/endian.h \
+  /opt/Wive-RTNL/lib/include/sys/select.h \
+  /opt/Wive-RTNL/lib/include/bits/select.h \
+  /opt/Wive-RTNL/lib/include/bits/sigset.h \
+  /opt/Wive-RTNL/lib/include/bits/time.h \
+  /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+  /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/setjmp.h \
+  /opt/Wive-RTNL/lib/include/bits/setjmp.h \
+  /opt/Wive-RTNL/lib/include/ctype.h \
+  /opt/Wive-RTNL/lib/include/bits/uClibc_touplow.h \
+  /opt/Wive-RTNL/lib/include/string.h /opt/Wive-RTNL/lib/include/math.h \
+  /opt/Wive-RTNL/lib/include/bits/huge_val.h \
+  /opt/Wive-RTNL/lib/include/bits/mathdef.h \
+  /opt/Wive-RTNL/lib/include/bits/mathcalls.h \
+  /opt/Wive-RTNL/lib/include/limits.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
+  /opt/Wive-RTNL/lib/include/bits/local_lim.h \
+  /opt/Wive-RTNL/lib/include/linux/limits.h \
+  /opt/Wive-RTNL/lib/include/bits/posix2_lim.h \
+  /opt/Wive-RTNL/lib/include/unistd.h \
+  /opt/Wive-RTNL/lib/include/bits/posix_opt.h \
+  /opt/Wive-RTNL/lib/include/bits/confname.h \
+  /opt/Wive-RTNL/lib/include/bits/getopt.h \
+  /opt/Wive-RTNL/lib/include/netinet/in.h \
+  /opt/Wive-RTNL/lib/include/stdint.h \
+  /opt/Wive-RTNL/lib/include/bits/socket.h \
+  /opt/Wive-RTNL/lib/include/bits/sockaddr.h \
+  /opt/Wive-RTNL/lib/include/asm/socket.h \
+  /opt/Wive-RTNL/lib/include/asm/sockios.h \
+  /opt/Wive-RTNL/lib/include/asm/ioctl.h \
+  /opt/Wive-RTNL/lib/include/bits/in.h \
+  /opt/Wive-RTNL/lib/include/bits/byteswap.h \
+  /opt/Wive-RTNL/lib/include/sys/wait.h \
+  /opt/Wive-RTNL/lib/include/signal.h \
+  /opt/Wive-RTNL/lib/include/bits/signum.h \
+  /opt/Wive-RTNL/lib/include/bits/siginfo.h \
+  /opt/Wive-RTNL/lib/include/bits/sigaction.h \
+  /opt/Wive-RTNL/lib/include/bits/sigcontext.h \
+  /opt/Wive-RTNL/lib/include/asm/sigcontext.h \
+  /opt/Wive-RTNL/lib/include/asm/sgidefs.h \
+  /opt/Wive-RTNL/lib/include/bits/sigstack.h \
+  /opt/Wive-RTNL/lib/include/bits/sigthread.h \
+  /opt/Wive-RTNL/lib/include/sys/resource.h \
+  /opt/Wive-RTNL/lib/include/bits/resource.h \
+  /opt/Wive-RTNL/lib/include/bits/waitflags.h \
+  /opt/Wive-RTNL/lib/include/bits/waitstatus.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdbool.h \
+  /opt/Wive-RTNL/lib/include/regex.h flexint.h gettext.h
 
 flexdef.h:
 
 config.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdio.h:
+/opt/Wive-RTNL/lib/include/stdio.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/features.h:
+/opt/Wive-RTNL/lib/include/features.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_config.h:
+/opt/Wive-RTNL/lib/include/bits/uClibc_config.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/cdefs.h:
+/opt/Wive-RTNL/lib/include/sys/cdefs.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/types.h:
+/opt/Wive-RTNL/lib/include/bits/types.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/kernel_types.h:
+/opt/Wive-RTNL/lib/include/bits/kernel_types.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/pthreadtypes.h:
+/opt/Wive-RTNL/lib/include/bits/wordsize.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sched.h:
+/opt/Wive-RTNL/lib/include/bits/pthreadtypes.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_stdio.h:
+/opt/Wive-RTNL/lib/include/bits/sched.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/wchar.h:
+/opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/wchar.h:
+/opt/Wive-RTNL/lib/include/wchar.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/stdio_lim.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdlib.h:
+/opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/types.h:
+/opt/Wive-RTNL/lib/include/stdlib.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/time.h:
+/opt/Wive-RTNL/lib/include/sys/types.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/endian.h:
+/opt/Wive-RTNL/lib/include/time.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/endian.h:
+/opt/Wive-RTNL/lib/include/endian.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/select.h:
+/opt/Wive-RTNL/lib/include/bits/endian.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/select.h:
+/opt/Wive-RTNL/lib/include/sys/select.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigset.h:
+/opt/Wive-RTNL/lib/include/bits/select.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/time.h:
+/opt/Wive-RTNL/lib/include/bits/sigset.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/sysmacros.h:
+/opt/Wive-RTNL/lib/include/bits/time.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/alloca.h:
+/opt/Wive-RTNL/lib/include/sys/sysmacros.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/setjmp.h:
+/opt/Wive-RTNL/lib/include/alloca.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/setjmp.h:
+/opt/Wive-RTNL/lib/include/setjmp.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/ctype.h:
+/opt/Wive-RTNL/lib/include/bits/setjmp.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/uClibc_touplow.h:
+/opt/Wive-RTNL/lib/include/ctype.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/string.h:
+/opt/Wive-RTNL/lib/include/bits/uClibc_touplow.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/math.h:
+/opt/Wive-RTNL/lib/include/string.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/huge_val.h:
+/opt/Wive-RTNL/lib/include/math.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/mathdef.h:
+/opt/Wive-RTNL/lib/include/bits/huge_val.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/mathcalls.h:
+/opt/Wive-RTNL/lib/include/bits/mathdef.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/lib/include/bits/mathcalls.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/syslimits.h:
+/opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/limits.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix1_lim.h:
+/opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/local_lim.h:
+/opt/Wive-RTNL/lib/include/bits/local_lim.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/linux/limits.h:
+/opt/Wive-RTNL/lib/include/linux/limits.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix2_lim.h:
+/opt/Wive-RTNL/lib/include/bits/posix2_lim.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/unistd.h:
+/opt/Wive-RTNL/lib/include/unistd.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/posix_opt.h:
+/opt/Wive-RTNL/lib/include/bits/posix_opt.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/confname.h:
+/opt/Wive-RTNL/lib/include/bits/confname.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/getopt.h:
+/opt/Wive-RTNL/lib/include/bits/getopt.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/netinet/in.h:
+/opt/Wive-RTNL/lib/include/netinet/in.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/stdint.h:
+/opt/Wive-RTNL/lib/include/stdint.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/wordsize.h:
+/opt/Wive-RTNL/lib/include/bits/socket.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/socket.h:
+/opt/Wive-RTNL/lib/include/bits/sockaddr.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sockaddr.h:
+/opt/Wive-RTNL/lib/include/asm/socket.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/socket.h:
+/opt/Wive-RTNL/lib/include/asm/sockios.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/sockios.h:
+/opt/Wive-RTNL/lib/include/asm/ioctl.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/ioctl.h:
+/opt/Wive-RTNL/lib/include/bits/in.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/in.h:
+/opt/Wive-RTNL/lib/include/bits/byteswap.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/byteswap.h:
+/opt/Wive-RTNL/lib/include/sys/wait.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/wait.h:
+/opt/Wive-RTNL/lib/include/signal.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/signal.h:
+/opt/Wive-RTNL/lib/include/bits/signum.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/signum.h:
+/opt/Wive-RTNL/lib/include/bits/siginfo.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/siginfo.h:
+/opt/Wive-RTNL/lib/include/bits/sigaction.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigaction.h:
+/opt/Wive-RTNL/lib/include/bits/sigcontext.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigcontext.h:
+/opt/Wive-RTNL/lib/include/asm/sigcontext.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/asm/sigcontext.h:
+/opt/Wive-RTNL/lib/include/asm/sgidefs.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigstack.h:
+/opt/Wive-RTNL/lib/include/bits/sigstack.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/sigthread.h:
+/opt/Wive-RTNL/lib/include/bits/sigthread.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/sys/resource.h:
+/opt/Wive-RTNL/lib/include/sys/resource.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/resource.h:
+/opt/Wive-RTNL/lib/include/bits/resource.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/waitflags.h:
+/opt/Wive-RTNL/lib/include/bits/waitflags.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/bits/waitstatus.h:
+/opt/Wive-RTNL/lib/include/bits/waitstatus.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdbool.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdbool.h:
 
-/opt/Wive-RTNL-CHINA/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/sys-include/regex.h:
+/opt/Wive-RTNL/lib/include/regex.h:
 
 flexint.h:
+
+gettext.h:
