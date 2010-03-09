@@ -24,7 +24,7 @@ LOG="logger -t vpnhelper"
     $LOG "Check for L2TP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
-        ping -q -c 1 $SERVER
+        ping -q -c 1 "$SERVER"
         if [ "$?" -eq 0 ]; then
             reachable=1
         else
@@ -40,17 +40,17 @@ LOG="logger -t vpnhelper"
     if [ "$RESOLVEOK" = "0" ]; then
         ADDRESS=`echo "$NS" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
         $LOG "Server adress is $ADDRESS"
-        SERVER=$ADDRESS
+        SERVER="$ADDRESS"
     else
         $LOG "Not resolve adress for $SERVER"
-        SERVER=$SERVER
+        SERVER="$SERVER"
     fi
 
     $LOG "Get route to vpn server."
     ROUTE=`ip r get "$SERVER" | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
         echo "Add route to vpn server."
-        ip r add $ROUTE
+        ip r add "$ROUTE"
     fi
 
     #clear all configs

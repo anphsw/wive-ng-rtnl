@@ -23,7 +23,7 @@ echo > $ppp/pap-secrets
     $LOG "Check for PPTP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
-        ping -q -c 1 $SERVER
+        ping -q -c 1 "$SERVER"
         if [ "$?" -eq 0 ]; then
             reachable=1
         else
@@ -39,20 +39,20 @@ echo > $ppp/pap-secrets
     if [ "$RESOLVEOK" = "0" ]; then
         ADDRESS=`echo "$NS" | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
         $LOG "Server adress is $ADDRESS"
-        SERVER=$ADDRESS
+        SERVER="$ADDRESS"
     else
         $LOG "Not resolve adress for $SERVER"
-        SERVER=$SERVER
+        SERVER="$SERVER"
     fi
 
     $LOG "Get route to vpn server."
     ROUTE=`ip r get "$SERVER" | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
 	echo "Add route to vpn server."
-	ip r add $ROUTE
+	ip r add "$ROUTE"
     fi
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
     pppd file /etc/ppp/options.pptp -detach mtu 1400 mru 1400 plugin /lib/pptp.so allow-mppe-128 \
-    pptp_server $SERVER call pptp persist usepeerdns user $USER password $PASSWORD &
+    pptp_server "$SERVER" call pptp persist usepeerdns user "$USER" password "$PASSWORD" &

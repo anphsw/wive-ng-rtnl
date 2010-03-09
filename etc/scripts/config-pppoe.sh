@@ -40,4 +40,4 @@ PPP_STD_OPTIONS="noipdefault noauth -detach persist usepeerdns"
 PPPOE_CMD="$3 user $1 password $2"
 
 $LOG "Start pppd"
-pppd $OPTFILE mtu 1400 mru 1400 $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD &
+pppd "$OPTFILE" mtu 1400 mru 1400 "$PPP_STD_OPTIONS" plugin /lib/rp-pppoe.so "$PPPOE_CMD" &
