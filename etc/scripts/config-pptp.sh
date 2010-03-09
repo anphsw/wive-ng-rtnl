@@ -1,7 +1,7 @@
 #!/bin/sh
 
-killall -q -9 pppd > /dev/null 2>&1
-killall -q -9 xl2tpd > /dev/null 2>&1
+killall -q pppd > /dev/null 2>&1
+killall -q xl2tpd > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
 if [ -f /etc/ppp/ip-down-route-reload ]; then
