@@ -26,7 +26,6 @@ LOG="logger -t pppd"
 
     if [ -f /etc/ppp/ip-down-route-reload ]; then
 	$LOG "Load old dgw from file"
-	chmod 777 /etc/ppp/ip-down-route-reload
 	/etc/ppp/ip-down-route-reload
 	rm -f /etc/ppp/ip-down-route-reload
     fi
