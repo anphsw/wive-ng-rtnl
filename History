@@ -46,6 +46,7 @@
 45) Fix configure esw mode and more modes add<br>
 46) Fix pppoe reconnect<br>
 47) Fix pppoe long discovery<br>
+48) Restore default gateway after VPN down<br>
 
 <br><br>
 <b>For support see:</b><br>
