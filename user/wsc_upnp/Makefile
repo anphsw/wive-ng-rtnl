@@ -46,7 +46,8 @@ CFLAGS += -DMULTIPLE_CARD_SUPPORT
 all: $(EXEC)
 
 $(LIBUPNP_SRC_PATH)/Makefile:
-	make -C $(LIBUPNP_SRC_PATH) -f Makefile.src TARGET_HOST=$(TARGET_HOST)
+	cd $(LIBUPNP_SRC_PATH) && ./DoConfigure.sh && cd ..
+	make -C $(LIBUPNP_SRC_PATH) -f Makefile TARGET_HOST=$(TARGET_HOST)
 
 $(EXEC): libupnp $(OBJS)
 #$(EXEC):  $(OBJS)

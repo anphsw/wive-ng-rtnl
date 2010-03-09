@@ -82,10 +82,6 @@
 /* Define to 1 if you have the `vprintf' function. */
 #define HAVE_VPRINTF 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-/* #undef LT_OBJDIR */
-
 /* Define to 1 to prevent compilation of assert() */
 #define NDEBUG 1
 
@@ -109,9 +105,6 @@
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libupnp"
-
-/* Define to the home page for this package. */
-/* #undef PACKAGE_URL */
 
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "1.4.6"

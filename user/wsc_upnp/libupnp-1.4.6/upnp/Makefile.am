@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.1.1.1 2007-07-16 03:05:29 yy Exp $
+# $Id: Makefile.am,v 1.10 2006/04/08 15:22:22 r3mi Exp $
 #
 # "Makefile.am" for "libupnp/upnp"
 #

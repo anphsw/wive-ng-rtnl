@@ -1,5 +1,5 @@
 # -*- Autoconf -*-
-# $Id: configure.ac,v 1.1.1.1 2007-07-16 03:05:29 yy Exp $
+# $Id: configure.ac,v 1.11 2006/04/09 13:59:44 r3mi Exp $
 #
 # Top-level configure.ac file for libupnp
 #
@@ -67,7 +67,7 @@ AC_CANONICAL_HOST
 AC_CONFIG_HEADERS([autoconfig.h upnp/inc/upnpconfig.h])
 #AC_SYS_LARGEFILE_SENSITIVE
 
-AC_REVISION([$Revision: 1.1.1.1 $])
+AC_REVISION([$Revision: 1.11 $])
 
 upnpmaj=`echo "$PACKAGE_VERSION" | sed 's/\..*//' `
 upnpmin=[`echo "$PACKAGE_VERSION" | sed 's/^[^.]\.// ; s/[^0-9].*$//' `]
@@ -181,7 +181,7 @@ freebsd*)
 *)
 	echo "Using non-specific system compiler settings"
 	if test x"$enable_debug" = xyes; then
-		# AC_PROG_CC already sets CFLAGS to "-g -Os" by default
+		# AC_PROG_CC already sets CFLAGS to "-g -O2" by default
 		:
 	else
 		# add optimise for size

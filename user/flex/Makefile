@@ -76,7 +76,7 @@ AMDEP_FALSE = #
 AMDEP_TRUE = 
 AMTAR = @AMTAR@
 AUTOCONF = @AUTOCONF@
-AUTOHEADER = @AUTOHEADER@
+#AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = gawk
 BISON = /usr/bin/bison
@@ -413,7 +413,7 @@ stamp-h1: $(srcdir)/conf.in $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
 
 $(srcdir)/conf.in:  $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOHEADER)
+#	cd $(top_srcdir) && $(AUTOHEADER)
 	touch $(srcdir)/conf.in
 
 distclean-hdr:

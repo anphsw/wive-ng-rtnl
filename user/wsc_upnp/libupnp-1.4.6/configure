@@ -3684,13 +3684,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -Os"
+    CFLAGS="-g -O2"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-Os"
+    CFLAGS="-O2"
   else
     CFLAGS=
   fi
@@ -6160,13 +6160,13 @@ if test "$ac_test_CXXFLAGS" = set; then
   CXXFLAGS=$ac_save_CXXFLAGS
 elif test $ac_cv_prog_cxx_g = yes; then
   if test "$GXX" = yes; then
-    CXXFLAGS="-g -Os"
+    CXXFLAGS="-g -O2"
   else
     CXXFLAGS="-g"
   fi
 else
   if test "$GXX" = yes; then
-    CXXFLAGS="-Os"
+    CXXFLAGS="-O2"
   else
     CXXFLAGS=
   fi
@@ -6823,13 +6823,13 @@ if test "$ac_test_FFLAGS" = set; then
   FFLAGS=$ac_save_FFLAGS
 elif test $ac_cv_prog_f77_g = yes; then
   if test "x$ac_cv_f77_compiler_gnu" = xyes; then
-    FFLAGS="-g -Os"
+    FFLAGS="-g -O2"
   else
     FFLAGS="-g"
   fi
 else
   if test "x$ac_cv_f77_compiler_gnu" = xyes; then
-    FFLAGS="-Os"
+    FFLAGS="-O2"
   else
     FFLAGS=
   fi
@@ -20383,7 +20383,7 @@ freebsd*)
 *)
 	echo "Using non-specific system compiler settings"
 	if test x"$enable_debug" = xyes; then
-		# AC_PROG_CC already sets CFLAGS to "-g -Os" by default
+		# AC_PROG_CC already sets CFLAGS to "-g -O2" by default
 		:
 	else
 		# add optimise for size

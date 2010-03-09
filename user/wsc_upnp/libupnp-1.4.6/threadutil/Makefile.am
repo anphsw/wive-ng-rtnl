@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.1.1.1 2007-07-16 03:05:29 yy Exp $
+# $Id: Makefile.am,v 1.2 2006/02/27 21:38:56 r3mi Exp $
 #
 # "Makefile.am" for "libupnp/threadutil"
 #
