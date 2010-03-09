@@ -10,12 +10,6 @@ killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
-if [ -f /etc/ppp/ip-down-route-reload ]; then
-    $LOG "Load old dgw from file"
-    /etc/ppp/ip-down-route-reload
-    rm -f /etc/ppp/ip-down-route-reload
-fi
-
 usage()
 {
 	echo "Usage:"

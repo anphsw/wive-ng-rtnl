@@ -12,8 +12,8 @@ kill_ppp(){
 	killall -q -9 config-pptp.sh
 	killall -q -9 config-l2tp.sh
 	killall -q -9 config-pppoe.sh
-	killall -q -9 pppd
-	killall -q -9 xl2tpd
+	killall -q pppd
+	killall -q xl2tpd
 }
 
 # stop all

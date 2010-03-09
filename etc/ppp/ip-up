@@ -21,17 +21,17 @@ LOG="logger -t pppd"
     if [ "$GWSTRING" != "" ]; then
         RESTORESTRING="ip route replace $GWSTRING"
         $LOG "Store old default route to file. $GWSTRING "
-        rm -f /etc/ppp/ip-down-route-reload
+        rm -f /tmp/ip-down-route-reload
         (
 	    echo '#!/bin/sh'
 	    echo 'ip route del default'
 	    echo "$RESTORESTRING"
-	) > /etc/ppp/ip-down-route-reload
-	chmod 777 /rwfs/ppp/ip-down-route-reload
+	) > /tmp/ip-down-route-reload
+	chmod 777 /tmp/ip-down-route-reload
     else
 	$LOG "No dgw stored."
 	RESTORESTRING=""
-	rm -f /etc/ppp/ip-down-route-reload
+	rm -f /tmp/ip-down-route-reload
     fi
 
     #Remove auto route in VPN
