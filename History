@@ -47,6 +47,7 @@
 46) Fix pppoe reconnect<br>
 47) Fix pppoe long discovery<br>
 48) Restore default gateway after VPN down<br>
+49) WPS wscd daemon now work<br>
 
 <br><br>
 <b>For support see:</b><br>
