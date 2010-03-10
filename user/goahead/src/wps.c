@@ -545,11 +545,12 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
         g_WscResult = 0;
         LedReset();
 
-        if(getAPMac("ra0", mac) != -1)
-                sprintf(SSID, "RalinkInitAP_%s", mac);
+/*        if(getAPMac("ra0", mac) != -1) do not touch SSID sfstudio
+                sprintf(SSID, "%s_%s", mac, nvram_bufget(RT2860_NVRAM, "SSID1"));
         else
-                sprintf(SSID, "RalinkInitAP_unknown");
-        nvram_bufset(RT2860_NVRAM, "SSID1", SSID);
+                sprintf(SSID, "%s_AP", nvram_bufget(RT2860_NVRAM, "SSID1"));
+
+        nvram_bufset(RT2860_NVRAM, "SSID1", SSID); */
 
         nvram_bufset(RT2860_NVRAM, "WscConfigured", "0");
 

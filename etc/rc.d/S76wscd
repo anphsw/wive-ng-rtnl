@@ -9,10 +9,15 @@ web_wait
 start() {
 if [ -f /bin/wscd ]; then
  echo "Starting WPS: "
-    lan_if_addr=`nvram_get 2860 lan_if_addr`
     wsc=`nvram_get 2860 WscModeOption`
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    opmode=`nvram_get 2860 OperationMode`
     if [ $wsc != "0" ]; then
-	wscd -m 1 -a $lan_if_add -i ra0 &
+	if [ $opmode = "0" ]; then
+	    wscd -m 1 -a $lan_ip -i ra0 -D &
+	else
+	    wscd -m 1 -i ra0 -D &
+	fi
     fi
 fi
 }
