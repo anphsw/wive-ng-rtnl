@@ -16,8 +16,14 @@ LIBOBJS = natpmp.o getgateway.o
 OBJS = $(LIBOBJS) testgetgateway.o natpmpc.o
 
 STATICLIB = libnatpmp.a
-SHAREDLIB = libnatpmp.so
-SONAME = $(SHAREDLIB).$(APIVERSION)
+ifeq ($(OS), Darwin)
+  SHAREDLIB = libnatpmp.dynlib
+  SONAME = $(basename $(SHAREDLIB)).$(APIVERSION).dylib
+  CFLAGS := -DMACOSX -D_DARWIN_C_SOURCE $(CFLAGS)
+else
+  SHAREDLIB = libnatpmp.so
+  SONAME = $(SHAREDLIB).$(APIVERSION)
+endif
 
 HEADERS = natpmp.h
 

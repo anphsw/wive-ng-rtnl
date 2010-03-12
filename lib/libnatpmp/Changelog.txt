@@ -1,9 +1,13 @@
-$Id: Changelog.txt,v 1.19 2009/12/19 14:10:09 nanard Exp $
+$Id: Changelog.txt,v 1.21 2010/02/02 18:24:43 nanard Exp $
+
+2010/02/02:
+  Fixed compilation under Mac OS X
 
 2009/12/19:
   improve and fix building under Windows.
   Project files for MS Visual Studio 2008
   More simple (and working) code for Win32.
+  More checks in the /proc/net/route parsing. Add some comments.
 
 2009/08/04:
   improving getgateway.c for windows

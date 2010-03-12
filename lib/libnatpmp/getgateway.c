@@ -1,4 +1,4 @@
-/* $Id: getgateway.c,v 1.18 2009/12/19 14:10:09 nanard Exp $ */
+/* $Id: getgateway.c,v 1.19 2009/12/19 15:20:45 nanard Exp $ */
 /* libnatpmp
  * Copyright (c) 2007-2009, Thomas BERNARD <miniupnp@free.fr>
  *
@@ -27,7 +27,8 @@
  * sysctl is the way to access such informations on BSD systems.
  * Many systems should provide route information through raw PF_ROUTE
  * sockets.
- * In MS Windows, default gateway is found by looking into the registry. */
+ * In MS Windows, default gateway is found by looking into the registry
+ * or by using GetBestRoute(). */
 #ifdef __linux__
 #define USE_PROC_NET_ROUTE
 #undef USE_SOCKET_ROUTE
@@ -113,9 +114,20 @@
 #endif
 
 #ifdef USE_PROC_NET_ROUTE
+/*
+ parse /proc/net/route which is as follow :
+
+Iface   Destination     Gateway         Flags   RefCnt  Use     Metric  Mask            MTU     Window  IRTT           
+wlan0   0001A8C0        00000000        0001    0       0       0       00FFFFFF        0       0       0              
+eth0    0000FEA9        00000000        0001    0       0       0       0000FFFF        0       0       0              
+wlan0   00000000        0101A8C0        0003    0       0       0       00000000        0       0       0              
+eth0    00000000        00000000        0001    0       0       1000    00000000        0       0       0              
+
+ One header line, and then one line by route by route table entry.
+*/
 int getdefaultgateway(in_addr_t * addr)
 {
-	long d, g;
+	unsigned long d, g;
 	char buf[256];
 	int line = 0;
 	FILE * f;
@@ -124,14 +136,15 @@ int getdefaultgateway(in_addr_t * addr)
 	if(!f)
 		return FAILED;
 	while(fgets(buf, sizeof(buf), f)) {
-		if(line > 0) {
+		if(line > 0) {	/* skip the first line */
 			p = buf;
+			/* skip the interface name */
 			while(*p && !isspace(*p))
 				p++;
 			while(*p && isspace(*p))
 				p++;
 			if(sscanf(p, "%lx%lx", &d, &g)==2) {
-				if(d == 0) { /* default */
+				if(d == 0 && g != 0) { /* default */
 					*addr = g;
 					fclose(f);
 					return SUCCESS;
@@ -302,11 +315,9 @@ LIBSPEC int getdefaultgateway(in_addr_t * addr)
 	TCHAR keyName[MAX_KEY_LENGTH];
 	DWORD keyNameLength = MAX_KEY_LENGTH;
 	TCHAR keyValue[MAX_VALUE_LENGTH];
-	//BYTE keyValue[MAX_VALUE_LENGTH];
 	DWORD keyValueLength = MAX_VALUE_LENGTH;
 	DWORD keyValueType = REG_SZ;
 	TCHAR gatewayValue[MAX_VALUE_LENGTH];
-	//BYTE gatewayValue[MAX_VALUE_LENGTH];
 	DWORD gatewayValueLength = MAX_VALUE_LENGTH;
 	DWORD gatewayValueType = REG_MULTI_SZ;
 	int done = 0;

@@ -34,7 +34,9 @@
 #define GETIFSTATS_CACHING_DURATION 2
 
 /* Uncomment the following line to enable multiple external ip support */
-/* note : Thas is EXPERIMENTAL, do not use that unless you know perfectly what you are doing */
+/* note : That is EXPERIMENTAL, do not use that unless you know perfectly what you are doing */
+/* Dynamic external ip adresses are not supported when this option is enabled.
+ * Also note that you would need to configure your .conf file accordingly. */
 /*#define MULTIPLE_EXTERNAL_IP*/
 
 /* Comment the following line to use home made daemonize() func instead
