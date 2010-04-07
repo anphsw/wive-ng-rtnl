@@ -1616,6 +1616,10 @@ static void tcp_mark_head_lost(struct sock *sk, struct tcp_sock *tp,
 {
 	struct sk_buff *skb;
 	int cnt;
+                                                                                                                             
+        //backport from 2.6.33.2 A packet is marked as lost in case packets == 0, although nothing should be done.           
+        if (packets == 0)                                                                                                    
+            return;                
 
 	BUG_TRAP(packets <= tp->packets_out);
 	if (tp->lost_skb_hint) {
