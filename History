@@ -48,6 +48,9 @@
 47) Fix pppoe long discovery<br>
 48) Restore default gateway after VPN down<br>
 49) WPS wscd daemon now work<br>
+50) Fix dhcp lease parse<br>
+35) busybox update to 1.16.1 version<br>
+51) Fix pptp/pppoe/l2tp redials
 
 <br><br>
 <b>For support see:</b><br>

@@ -79,6 +79,8 @@ LOG="logger -t vpnhelper"
     mtu 1400
     mru 1400
     usepeerdns
+    lcp-echo-failure        5                                                                                                    
+    lcp-echo-interval       10 
     " >> $ppp/options.l2tp
 
     printf "$USER * $PASSWORD" >> $ppp/chap-secrets
