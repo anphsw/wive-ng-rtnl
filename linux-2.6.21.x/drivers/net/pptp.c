@@ -31,6 +31,7 @@
 #include <linux/netfilter_ipv4.h>
 #include <linux/version.h>
 #include <linux/spinlock.h>
+#include <linux/vmalloc.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 #include <linux/tqueue.h>
@@ -592,7 +593,7 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 		}
 
 		skb->ip_summed=CHECKSUM_NONE;
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 		skb_set_network_header(skb,skb->head-skb->data);
 		#endif
 		ppp_input(&po->chan,skb);
@@ -1091,6 +1092,7 @@ static struct net_protocol net_pptp_protocol = {
 static int pptp_init_module(void)
 {
 	int err=0;
+	
 	printk(KERN_INFO "PPTP driver version " PPTP_DRIVER_VERSION "\n");
 
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
@@ -1115,21 +1117,12 @@ static int pptp_init_module(void)
 		printk(KERN_INFO "PPTP: can't register pppox_proto\n");
 		goto out_unregister_sk_proto;
 	}
-	
-	
+		
 	//assuming PAGESIZE is 4096 bytes
 	callid_bitmap=(unsigned long*)__get_free_pages(GFP_KERNEL,1);
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
-	#if (BITS_PER_LONG == 32)
-	callid_sock=(struct pppox_sock **)__get_free_pages(GFP_KERNEL,6);
-	memset(callid_sock,0,PAGE_SIZE<<6);
-	#elif (BITS_PER_LONG == 64)
-        callid_sock=(struct pppox_sock **)__get_free_pages(GFP_KERNEL,7);
-        memset(callid_sock,0,PAGE_SIZE<<7);
-        #else
-        #error unknown size of LONG
-        #endif
+	callid_sock = vmalloc(sizeof(struct pppox_sock));
 
 out:
 	return err;
@@ -1166,13 +1159,8 @@ static void pptp_exit_module(void)
 	inet_del_protocol(&net_pptp_protocol, IPPROTO_GRE);
 	#endif
 	if (callid_bitmap) free_pages((unsigned long)callid_bitmap,1);
-	if (callid_sock) {
-	    #if (BITS_PER_LONG == 32)
-	    free_pages((unsigned long)callid_sock,6);
-	    #elif (BITS_PER_LONG == 64)
-	    free_pages((unsigned long)callid_sock,7);
-	    #endif
-	}
+	if (callid_sock)
+    	    vfree(callid_sock);
 }
 
 module_init(pptp_init_module);
