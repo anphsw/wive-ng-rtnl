@@ -97,7 +97,7 @@ void call_callback(PPTP_CONN *conn, PPTP_CALL *call, enum call_state state)
                 log("Persist mode, start redial.");
                 sleep(holdoff);
         	//execl("/bin/sh", "sh", "-c", "/etc/init.d/vpnnetwork-pptp restart", (char *)0);
-        	//execl("/bin/sh", "sh", "-c", "/bin/gen_vpn.sh", (char *)0);
+        	execl("/bin/sh", "sh", "-c", "/etc/scripts/config-pptp.sh", (char *)0);
             }
 //#endif
             break;

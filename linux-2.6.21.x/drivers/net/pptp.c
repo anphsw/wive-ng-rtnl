@@ -1123,6 +1123,10 @@ static int pptp_init_module(void)
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
 	callid_sock = vmalloc(MAX_CALLID * sizeof(struct pppox_sock));
+	if (!callid_sock){
+		printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");
+		goto out_unregister_sk_proto;
+	}
 
 out:
 	return err;
