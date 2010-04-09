@@ -1122,7 +1122,7 @@ static int pptp_init_module(void)
 	callid_bitmap=(unsigned long*)__get_free_pages(GFP_KERNEL,1);
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
-	callid_sock = vmalloc(sizeof(struct pppox_sock));
+	callid_sock = vmalloc(MAX_CALLID * sizeof(struct pppox_sock));
 
 out:
 	return err;
