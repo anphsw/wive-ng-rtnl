@@ -114,7 +114,7 @@ static int pptp_start_server(void)
 }
 static int pptp_start_client(void)
 {
-	int len;
+	socklen_t len;
 	struct sockaddr_pppox src_addr,dst_addr;
 	struct hostent *hostinfo;
 

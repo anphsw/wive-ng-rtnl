@@ -26,10 +26,6 @@
 #include "vector.h"
 #include "util.h"
 
-/* Supplied by pppd if we're a plugin */
-extern int persist;
-extern int holdoff;
-
 extern struct in_addr localbind; /* from pptp.c */
 extern int call_ID;
 
@@ -91,15 +87,6 @@ void call_callback(PPTP_CONN *conn, PPTP_CALL *call, enum call_state state)
                 //if(lci->pid[0] > 1) kill(lci->pid[0], SIGTERM);
                 //if(lci->pid[1] > 1) kill(lci->pid[1], SIGTERM);
             }
-//#ifdef EMBPERSIST
-            /* redial if peer closed connect */
-            if (persist) {
-                log("Persist mode, start redial.");
-                sleep(holdoff);
-        	//execl("/bin/sh", "sh", "-c", "/etc/init.d/vpnnetwork-pptp restart", (char *)0);
-        	execl("/bin/sh", "sh", "-c", "/etc/scripts/config-pptp.sh", (char *)0);
-            }
-//#endif
             break;
         default:
             log("Unhandled call callback state [%d].", (int) state);
@@ -144,8 +131,12 @@ int callmgr_main(int argc, char **argv, char **envp)
         fatal("Invalid IP address: %s", argv[1]);
      log("IP: %s\n",inet_ntoa(inetaddr));
     /* Step 1: Open sockets. */
-    if ((inet_sock = open_inetsock(inetaddr)) < 0)
-        fatal("Could not open control connection to %s", argv[1]);
+    while ((inet_sock = open_inetsock(inetaddr)) < 0){
+        info("Could not open control connection to %s", argv[1]);
+	log("Wait 30 seconds");
+	sleep(30);
+    }
+
     log("control connection");
     if ((unix_sock = open_unixsock(inetaddr)) < 0)
         fatal("Could not open unix socket for %s", argv[1]);
@@ -233,7 +224,7 @@ int callmgr_main(int argc, char **argv, char **envp)
             lci->unix_sock = s;
             /* Give the initiator time to write the PIDs while we open
              * the call */
-            call = pptp_call_open(conn, call_ID,call_callback, phonenr, window);
+            call = pptp_call_open(conn, call_ID,call_callback, phonenr,window);
             /* Read and store the associated pids */
             read(s, &lci->pid[0], sizeof(lci->pid[0]));
             read(s, &lci->pid[1], sizeof(lci->pid[1]));

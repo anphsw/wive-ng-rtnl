@@ -593,7 +593,7 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 		}
 
 		skb->ip_summed=CHECKSUM_NONE;
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
 		skb_set_network_header(skb,skb->head-skb->data);
 		#endif
 		ppp_input(&po->chan,skb);
