@@ -11,8 +11,8 @@
 #include	<sys/ioctl.h>
 #include	<net/if.h>
 #include	<net/route.h>
-#include    <string.h>
-#include    <dirent.h>
+#include	<string.h>
+#include	<dirent.h>
 #include	"internet.h"
 #include	"nvram.h"
 #include	"webs.h"
@@ -24,7 +24,42 @@
 
 #include	"linux/autoconf.h"  //kernel config
 #include	"config/autoconf.h" //user config
-#include	"user/busybox/include/autoconf.h" //busybox config
+
+// Busybox includes
+#include	"user/busybox/include/autoconf.h" // busybox config
+
+/*** Busybox leases.h ***/
+
+//#if BB_LITTLE_ENDIAN
+static inline uint64_t hton64(uint64_t v)
+{
+        return (((uint64_t)htonl(v)) << 32) | htonl(v >> 32);
+}
+//#else
+//#define hton64(v) (v)
+//#endif
+#define ntoh64(v) hton64(v)
+
+typedef uint32_t leasetime_t;
+typedef int32_t signed_leasetime_t;
+
+struct dyn_lease {
+	/* "nip": IP in network order */
+	/* Unix time when lease expires. Kept in memory in host order.
+	 * When written to file, converted to network order
+	 * and adjusted (current time subtracted) */
+	leasetime_t expires;
+	uint32_t lease_nip;
+	/* We use lease_mac[6], since e.g. ARP probing uses
+	 * only 6 first bytes anyway. We check received dhcp packets
+	 * that their hlen == 6 and thus chaddr has only 6 significant bytes
+	 * (dhcp packet has chaddr[16], not [6])
+	 */
+	uint8_t lease_mac[6];
+	char hostname[20];
+	uint8_t pad[2];
+	/* total size is a multiply of 4 */
+} __attribute__((__packed__));
 
 #ifdef CONFIG_NET_SCHED
 #include      "qos.h"
@@ -420,36 +455,60 @@ char *getLanWanNamebyIf(char *ifname)
 static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fp;
-	struct dhcpOfferedAddr {
-		unsigned char hostname[16];
-		unsigned char mac[16];
-		unsigned long ip;
-		unsigned long expires;
-	} lease;
+	struct dyn_lease lease;
+
 	int i;
 	struct in_addr addr;
-	unsigned long expires;
-	unsigned d, h, m;
+	int64_t written_at, curr, expired_abs;
 
 	doSystem("killall -q -USR1 udhcpd");
 
 	fp = fopen("/var/udhcpd.leases", "r");
 	if (NULL == fp)
 		return websWrite(wp, T(""));
-	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease)) {
-		websWrite(wp, T("<tr><td>%-16s</td>"), lease.hostname);
-		websWrite(wp, T("<td>%02X"), lease.mac[0]);
+
+	/* Read header of dhcpleases */
+	if (fread(&written_at, 1, sizeof(written_at), fp) != sizeof(written_at))
+		return 0;
+	written_at = ntoh64(written_at);
+	curr = time(NULL);
+	if (curr < written_at)
+		written_at = curr; /* lease file from future! :) */
+	
+	/* Output leases file */
+	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease))
+	{
+		// Output structure
+		// Host
+		websWrite(wp, T("<tr><td>%s</td>"), lease.hostname);
+		// MAC
+		websWrite(wp, T("<td>%02X"), lease.lease_mac[0]);
 		for (i = 1; i < 6; i++)
-			websWrite(wp, T(":%02X"), lease.mac[i]);
-		addr.s_addr = lease.ip;
-		expires = ntohl(lease.expires);
+			websWrite(wp, T(":%02X"), lease.lease_mac[i]);
+		// IP
+		addr.s_addr = lease.lease_nip;
 		websWrite(wp, T("</td><td>%s</td><td>"), inet_ntoa(addr));
-		d = expires / (24*60*60); expires %= (24*60*60);
-		h = expires / (60*60); expires %= (60*60);
-		m = expires / 60; expires %= 60;
-		if (d) websWrite(wp, T("%u days "), d);
-		websWrite(wp, T("%02u:%02u:%02u\n"), h, m, (unsigned)expires);
+
+		// Expire Date
+		expired_abs = ntohl(lease.expires) + written_at;
+		if (expired_abs > curr)
+		{
+			leasetime_t expires = expired_abs - curr;
+			unsigned d = expires / (24*60*60);
+			expires %= (24*60*60);
+			unsigned h = expires / (60*60);
+			expires %= (60*60);
+			unsigned m = expires / 60;
+			expires %= 60;
+
+			if (d>0)
+				websWrite(wp, T("%u days "), d);
+			websWrite(wp, T("%02u:%02u:%02u</td>\n"), h, m, (unsigned)expires);
+		}
+		else
+			websWrite(wp, T("expired</td>\n"));
 	}
+
 	fclose(fp);
 	return 0;
 }
