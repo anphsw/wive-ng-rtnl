@@ -60,7 +60,7 @@ MODULE_LICENSE("GPL");
 static int log_level=0;
 static int log_packets=10;
 
-#define MAX_CALLID 65535
+#define MAX_CALLID 10
 
 static unsigned long *callid_bitmap=NULL;
 static struct pppox_sock **callid_sock=NULL;
