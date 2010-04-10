@@ -1091,7 +1091,7 @@ static struct net_protocol net_pptp_protocol = {
 
 static int pptp_init_module(void)
 {
-	int err=0;
+	int err=0, callid_sock_size=0;
 	
 	printk(KERN_INFO "PPTP driver version " PPTP_DRIVER_VERSION "\n");
 
@@ -1120,14 +1120,19 @@ static int pptp_init_module(void)
 		
 	//assuming PAGESIZE is 4096 bytes
 	callid_bitmap=(unsigned long*)__get_free_pages(GFP_KERNEL,1);
+        if (!callid_bitmap){                                                                                                 
+                printk(KERN_INFO "PPTP: can't alloc memory for callid bitmap\n");                                            
+        }                     
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
-	callid_sock = vmalloc(5000 * sizeof(struct pppox_sock));
-	if (!callid_sock){
-		printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");
-		goto out_unregister_sk_proto;
-	}
-
+        callid_sock_size=4096 * sizeof(struct pppox_sock**);                                                                 
+        callid_sock=vmalloc(callid_sock_size);                                                                               
+        if (!callid_sock){                                                                                                   
+                printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");                                              
+                goto out_unregister_sk_proto;                                                                                
+        }                                                                                                                    
+        memset(callid_sock,0,callid_sock_size);                                                                              
+                                                                  
 out:
 	return err;
 out_unregister_sk_proto:
