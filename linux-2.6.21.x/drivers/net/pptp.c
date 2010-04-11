@@ -57,8 +57,13 @@ MODULE_DESCRIPTION("Point-to-Point Tunneling Protocol for Linux");
 MODULE_AUTHOR("Kozlov D. (xeb@mail.ru)");
 MODULE_LICENSE("GPL");
 
-static int log_level=0;
+#ifdef DEBUG
+static int log_level=3;
 static int log_packets=10;
+#else
+static int log_level=0;
+static int log_packets=0;
+#endif
 
 #define MAX_CALLID 65535
 
@@ -1091,7 +1096,7 @@ static struct net_protocol net_pptp_protocol = {
 
 static int pptp_init_module(void)
 {
-	int err=0, callid_sock_size=0;
+	int err=0;
 	
 	printk(KERN_INFO "PPTP driver version " PPTP_DRIVER_VERSION "\n");
 
@@ -1120,25 +1125,23 @@ static int pptp_init_module(void)
 		
 	//assuming PAGESIZE is 4096 bytes
 	callid_bitmap=(unsigned long*)__get_free_pages(GFP_KERNEL,1);
-        if (!callid_bitmap){                                                                                                 
-                printk(KERN_INFO "PPTP: can't alloc memory for callid bitmap\n");                                            
-        }                     
+	if (!callid_bitmap){
+		printk(KERN_INFO "PPTP: can't alloc memory for callid bitmap\n");
+	}
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
-	//hard coded 32kb for call id socksize for small system fix me                                                       
-	callid_sock_size=PAGE_SIZE<<3;                                                                                       
-	callid_sock=vmalloc(callid_sock_size);                                                                               
-        if (!callid_sock){                                                                                                   
-                printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");                                              
-                goto out_unregister_sk_proto;                                                                                
-        #ifdef DEBUG                                                                                                         
-        }else{                                                                                                               
-            if (log_level>=1)                                                                                                
-                printk(KERN_INFO "PPTP: Allocated %d bytes for callid list\n", callid_sock_size);                            
-        #endif                                                                                                               
-        }                                                                                                                    
-        memset(callid_sock,0,callid_sock_size);                                                                              
-                                                                                                                               
+        callid_sock=(struct pppox_sock **)__get_free_pages(GFP_KERNEL,6);      
+	if (!callid_sock){
+		printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");
+		goto out_unregister_sk_proto;
+        #ifdef DEBUG                                                                                                 
+	}else{
+	    if (log_level>=1)  
+		printk(KERN_INFO "PPTP: Allocated %d bytes for callid list\n", sizeof(callid_sock));
+	#endif
+	}
+	memset(callid_sock,0,PAGE_SIZE<<6);
+
 out:
 	return err;
 out_unregister_sk_proto:
@@ -1173,9 +1176,10 @@ static void pptp_exit_module(void)
 	proto_unregister(&pptp_sk_proto);
 	inet_del_protocol(&net_pptp_protocol, IPPROTO_GRE);
 	#endif
-	if (callid_bitmap) free_pages((unsigned long)callid_bitmap,1);
+	if (callid_bitmap) 
+	    free_pages((unsigned long)callid_bitmap,1);
 	if (callid_sock)
-    	    vfree(callid_sock);
+	    free_pages((unsigned long)callid_sock,6);
 }
 
 module_init(pptp_init_module);
