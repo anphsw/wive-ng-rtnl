@@ -49,7 +49,7 @@
 
 #include <asm/uaccess.h>
 
-#define DEBUG
+//#define DEBUG
 
 #define PPTP_DRIVER_VERSION "0.8.4"
 
