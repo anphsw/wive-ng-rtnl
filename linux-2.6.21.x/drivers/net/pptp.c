@@ -1125,14 +1125,20 @@ static int pptp_init_module(void)
         }                     
 	memset(callid_bitmap,0,PAGE_SIZE<<1);
 
-        callid_sock_size=4096 * sizeof(struct pppox_sock**);                                                                 
-        callid_sock=vmalloc(callid_sock_size);                                                                               
+	//hard coded 32kb for call id socksize for small system fix me                                                       
+	callid_sock_size=PAGE_SIZE<<3;                                                                                       
+	callid_sock=vmalloc(callid_sock_size);                                                                               
         if (!callid_sock){                                                                                                   
                 printk(KERN_INFO "PPTP: can't alloc memory for callid list\n");                                              
                 goto out_unregister_sk_proto;                                                                                
+        #ifdef DEBUG                                                                                                         
+        }else{                                                                                                               
+            if (log_level>=1)                                                                                                
+                printk(KERN_INFO "PPTP: Allocated %d bytes for callid list\n", callid_sock_size);                            
+        #endif                                                                                                               
         }                                                                                                                    
         memset(callid_sock,0,callid_sock_size);                                                                              
-                                                                  
+                                                                                                                               
 out:
 	return err;
 out_unregister_sk_proto:
