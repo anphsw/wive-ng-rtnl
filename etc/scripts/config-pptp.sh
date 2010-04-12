@@ -31,7 +31,7 @@ echo > $ppp/pap-secrets
     NS=`nslookup $SERVER 2>&1`
     RESOLVEOK=`echo $NS | grep -c "can't resolve"`
     if [ "$RESOLVEOK" = "0" ]; then
-        ADDRESS=`echo $NS | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
+        ADDRESS=`nslookup $SERVER | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
         $LOG "Server adress is $ADDRESS"
         SERVER=$ADDRESS
     else
