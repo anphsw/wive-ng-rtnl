@@ -43,7 +43,7 @@ LOG="logger -t vpnhelper"
     $LOG "Get route to vpn server."
     ROUTE=`ip r get $SERVER | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
-        echo "Add route to vpn server."
+        $LOG "Add route to vpn server."
         ip r add $ROUTE
     fi
 
