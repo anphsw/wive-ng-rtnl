@@ -50,8 +50,8 @@ case "$1" in
 		$LOG "Add static routes from dhcpd"
 		# This defines how many CIDR Routes can be assigned so that we do not enter
 		# an endless loop on malformed data
-		MAXstaticroutesS=24;
-		while [ ${MAXstaticroutesS} -gt "0" ]; do
+		MAXSTSTICROUTES=24;
+		while [ ${MAXSTSTICROUTES} -gt "0" ]; do
 			# Format is
 			# $MASK $NW $GW
 			# $NW == AAA.BBB.CCC.DDD
@@ -111,7 +111,7 @@ case "$1" in
 
 			# Add to counter
 			let ROUTECOUNTER=$ROUTECOUNTER+1;
-			let MAXstaticroutesS=$MAXstaticroutesS-1;
+			let MAXSTSTICROUTES=$MAXSTSTICROUTES-1;
 
 			# Leave the loop if staticroutess is empty (we've parsed everything)
 			[ ! -n "$staticroutes" ] && break
