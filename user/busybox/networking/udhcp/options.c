@@ -31,6 +31,7 @@ const struct dhcp_option dhcp_options[] = {
 	{ OPTION_U8                               , 0x17 }, /* DHCP_IP_TTL        */
 	{ OPTION_U16                              , 0x1a }, /* DHCP_MTU           */
 	{ OPTION_IP                   | OPTION_REQ, 0x1c }, /* DHCP_BROADCAST     */
+	{ OPTION_IP | OPTION_LIST     | OPTION_REQ, 0x21 }, /* routes             */
 	{ OPTION_STRING                           , 0x28 }, /* nisdomain          */
 	{ OPTION_IP | OPTION_LIST                 , 0x29 }, /* nissrv             */
 	{ OPTION_IP | OPTION_LIST     | OPTION_REQ, 0x2a }, /* DHCP_NTP_SERVER    */
@@ -49,6 +50,7 @@ const struct dhcp_option dhcp_options[] = {
 	{ OPTION_STR1035 | OPTION_LIST            , 0x77 }, /* search             */
 #endif
 	{ OPTION_STATIC_ROUTES                    , 0x79 }, /* DHCP_STATIC_ROUTES */
+	{ OPTION_U8 | OPTION_LIST     | OPTION_REQ, 0xF9 }, /* msroutes           */
 	/* MSIE's "Web Proxy Autodiscovery Protocol" support */
 	{ OPTION_STRING                           , 0xfc }, /* wpad               */
 
@@ -81,6 +83,7 @@ const char dhcp_option_strings[] ALIGN1 =
 	"ipttl" "\0"       /* DHCP_IP_TTL         */
 	"mtu" "\0"         /* DHCP_MTU            */
 	"broadcast" "\0"   /* DHCP_BROADCAST      */
+	"routes" "\0"      /*                     */
 	"nisdomain" "\0"   /*                     */
 	"nissrv" "\0"      /*                     */
 	"ntpsrv" "\0"      /* DHCP_NTP_SERVER     */
@@ -99,6 +102,7 @@ const char dhcp_option_strings[] ALIGN1 =
 	"search" "\0"
 #endif
 	"staticroutes" "\0" /* DHCP_STATIC_ROUTES  */
+	"msroutes" "\0"
 	/* MSIE's "Web Proxy Autodiscovery Protocol" support */
 	"wpad" "\0"
 	;
