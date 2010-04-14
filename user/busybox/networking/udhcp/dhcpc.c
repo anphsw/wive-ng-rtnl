@@ -144,8 +144,8 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 	IF_FEATURE_UDHCP_PORT(char *str_P;)
 	llist_t *list_O = NULL;
 	int tryagain_timeout = 20;
-	int discover_timeout = 3;
-	int discover_retries = 3;
+	int discover_timeout = 10;
+	int discover_retries = 5;
 	uint32_t server_addr = server_addr; /* for compiler */
 	uint32_t requested_ip = 0;
 	uint32_t xid = 0;

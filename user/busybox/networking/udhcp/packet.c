@@ -19,11 +19,17 @@
 #include "dhcpd.h"
 #include "options.h"
 
+#define SECS	3	/* lame attempt to add secs field */
+
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
 	memset(packet, 0, sizeof(struct dhcp_packet));
 	packet->op = BOOTREQUEST; /* if client to a server */
 	switch (type) {
+	case DHCPDISCOVER:
+	case DHCPREQUEST:
+		packet->secs = htons(SECS);
+		break;
 	case DHCPOFFER:
 	case DHCPACK:
 	case DHCPNAK:
@@ -164,11 +170,6 @@ uint16_t FAST_FUNC udhcp_checksum(void *addr, int count)
 	return ~sum;
 }
 
-int udhcp_get_payload_len(struct dhcp_packet *dhcp_pkt)
-{
-	return sizeof(struct dhcp_packet) - DHCP_OPTIONS_BUFSIZE + end_option(dhcp_pkt->options) + sizeof(dhcp_pkt->options[0]);
-}
-
 /* Construct a ip/udp header for a packet, send packet */
 int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_ip, int source_port,
@@ -180,7 +181,11 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	int fd;
 	int result = -1;
 	const char *msg;
-	int p_len = udhcp_get_payload_len(dhcp_pkt);
+
+	enum {
+		IP_UPD_DHCP_SIZE = sizeof(struct ip_udp_dhcp_packet) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
+		UPD_DHCP_SIZE    = IP_UPD_DHCP_SIZE - offsetof(struct ip_udp_dhcp_packet, udp),
+	};
 
 	fd = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
 	if (fd < 0) {
@@ -190,7 +195,7 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 
 	memset(&dest, 0, sizeof(dest));
 	memset(&packet, 0, sizeof(packet));
-	memcpy(&(packet.data), dhcp_pkt, p_len);
+	packet.data = *dhcp_pkt; /* struct copy */
 
 	dest.sll_family = AF_PACKET;
 	dest.sll_protocol = htons(ETH_P_IP);
@@ -207,19 +212,24 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	packet.ip.daddr = dest_ip;
 	packet.udp.source = htons(source_port);
 	packet.udp.dest = htons(dest_port);
-	p_len += sizeof(packet.udp);
-	packet.udp.len = htons(p_len);
+	/* size, excluding IP header: */
+	packet.udp.len = htons(UPD_DHCP_SIZE);
+	/* for UDP checksumming, ip.len is set to UDP packet len */
 	packet.ip.tot_len = packet.udp.len;
-	p_len += sizeof(packet.ip);
-	packet.udp.check = udhcp_checksum(&packet, p_len);
-	packet.ip.tot_len = htons(p_len);
+	packet.udp.check = udhcp_checksum(&packet, IP_UPD_DHCP_SIZE);
+	/* but for sending, it is set to IP packet len */
+	packet.ip.tot_len = htons(IP_UPD_DHCP_SIZE);
 	packet.ip.ihl = sizeof(packet.ip) >> 2;
 	packet.ip.version = IPVERSION;
 	packet.ip.ttl = IPDEFTTL;
 	packet.ip.check = udhcp_checksum(&packet.ip, sizeof(packet.ip));
 
+	/* Currently we send full-sized DHCP packets (zero padded).
+	 * If you need to change this: last byte of the packet is
+	 * packet.data.options[end_option(packet.data.options)]
+	 */
 	udhcp_dump_packet(dhcp_pkt);
-	result = sendto(fd, &packet, p_len, 0,
+	result = sendto(fd, &packet, IP_UPD_DHCP_SIZE, 0,
 				(struct sockaddr *) &dest, sizeof(dest));
 	msg = "sendto";
  ret_close:
@@ -240,6 +250,10 @@ int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 	int fd;
 	int result = -1;
 	const char *msg;
+
+	enum {
+		DHCP_SIZE = sizeof(struct dhcp_packet) - CONFIG_UDHCPC_SLACK_FOR_BUGGY_SERVERS,
+	};
 
 	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0) {
@@ -266,8 +280,9 @@ int FAST_FUNC udhcp_send_kernel_packet(struct dhcp_packet *dhcp_pkt,
 		goto ret_close;
 	}
 
+	/* Currently we send full-sized DHCP packets (see above) */
 	udhcp_dump_packet(dhcp_pkt);
-	result = safe_write(fd, dhcp_pkt, udhcp_get_payload_len(dhcp_pkt));
+	result = safe_write(fd, dhcp_pkt, DHCP_SIZE);
 	msg = "write";
  ret_close:
 	close(fd);
