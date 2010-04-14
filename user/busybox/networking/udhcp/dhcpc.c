@@ -73,12 +73,14 @@ static void perform_renew(void)
 		change_listen_mode(LISTEN_KERNEL);
 	case RENEWING:
 	case REBINDING:
+		/* Switch to bcast receive */
+		change_listen_mode(LISTEN_RAW);
 		state = RENEW_REQUESTED;
 		break;
 	case RENEW_REQUESTED: /* impatient are we? fine, square 1 */
+		udhcp_run_script(NULL, "deconfig");
 	case REQUESTING:
 	case RELEASED:
-		change_listen_mode(LISTEN_RAW);
 		state = INIT_SELECTING;
 		break;
 	case INIT_SELECTING:
@@ -341,12 +343,6 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 		/* silence "uninitialized!" warning */
 		unsigned timestamp_before_wait = timestamp_before_wait;
 
-		/* When running on a bridge, the ifindex may have changed (e.g. if
-		 * member interfaces were added/removed or if the status of the
-		 * bridge changed).
-		 * Workaround: refresh it here before processing the next packet */
-		udhcp_read_interface(client_config.interface, &client_config.ifindex, NULL, client_config.client_mac);
-
 		//bb_error_msg("sockfd:%d, listen_mode:%d", sockfd, listen_mode);
 
 		/* Was opening raw or udp socket here
@@ -385,7 +381,7 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 
 			switch (state) {
 			case INIT_SELECTING:
-				if (!discover_retries || packet_num < discover_retries) {
+				if (packet_num < discover_retries) {
 					if (packet_num == 0)
 						xid = random_xid();
 					/* broadcast */
@@ -414,7 +410,7 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 				packet_num = 0;
 				continue;
 			case REQUESTING:
-				if (!discover_retries || packet_num < discover_retries) {
+				if (packet_num < discover_retries) {
 					/* send broadcast select packet */
 					send_select(xid, server_addr, requested_ip);
 					timeout = discover_timeout;
