@@ -83,13 +83,13 @@ LIBPAM =
 LIB_IPV6 = 
 LIB_REGEX = 
 MULTIPATH_NUM = 1
-OSPF6D = 
+OSPF6D = ospf6d
 OSPFD = ospfd
 OTHER_METHOD = 
 PACKAGE = zebra
 RANLIB = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib
 RIPD = ripd
-RIPNGD = 
+RIPNGD = ripngd
 RTREAD_METHOD = rtread_netlink.o
 RT_METHOD = rt_netlink.o
 STRIP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip
@@ -100,7 +100,7 @@ am__include = include
 am__quote = 
 install_sh = /opt/Wive-RTNL/user/zebra/install-sh
 
-SUBDIRS = lib zebra bgpd ripd  ospfd   doc
+SUBDIRS = lib zebra bgpd ripd ripngd ospfd ospf6d  doc
 
 EXTRA_DIST = aclocal.m4 SERVICES TODO REPORTING-BUGS vtysh/Makefile.in \
 	vtysh/Makefile.am update-autotools
