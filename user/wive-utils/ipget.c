@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	struct hostent *host;
 
 	if (argc < 2 || *argv[1]=='-') {
-		printf("ipget DNS name. Return ip adress or NULL if not resolved");
+		printf("ipget DNS name. Return ip adress or NULL if not resolved\n");
 		return EXIT_SUCCESS;
 	}
 
