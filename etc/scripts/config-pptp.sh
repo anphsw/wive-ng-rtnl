@@ -28,10 +28,9 @@ echo > $ppp/pap-secrets
     done
 
     $LOG "Get vpn server ip adress"
-    NS=`nslookup $SERVER 2>&1`
-    RESOLVEOK=`echo $NS | grep -c "can't resolve"`
-    if [ "$RESOLVEOK" = "0" ]; then
-        ADDRESS=`nslookup $SERVER | grep Address | tail -n1 | cut -c 12- | awk {' print $1 '}`
+    NS=`ipget $SERVER | tail -n1`
+    if [ "$NS" != "" ]; then
+        ADDRESS=$NS
         $LOG "Server adress is $ADDRESS"
         SERVER=$ADDRESS
     else

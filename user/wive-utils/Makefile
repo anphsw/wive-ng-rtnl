@@ -1,4 +1,6 @@
-UTILSLIST=mcprobe
+CC=mips-linux-gcc
+STRIP=mips-linux-strip
+UTILSLIST=ader cpu mcprobe ipget
 
 all:
 	@set -e;
@@ -17,4 +19,8 @@ install:
 	for i in $(UTILSLIST); do cp $$i ./filesystem/bin/$$i; done
 
 romfs:
-	cp -fv ./mcprobe $(ROOTDIR)/romfs/bin/mcprobe
+	rm -rfd filesystem
+	mkdir filesystem
+	mkdir filesystem/bin
+	@set -e; 
+	for i in $(UTILSLIST); do cp $$i $(ROMFSDIR)/bin/$$i; done

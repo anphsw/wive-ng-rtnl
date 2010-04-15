@@ -27,7 +27,7 @@ VEND=$(ROOTDIR)/vendors
 #for all cleanap
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox flex inadyn pppoe-relay udpxy xl2tpd
-SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 mcprobe radvd wireless_tools zebra dropbear
+SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils radvd wireless_tools zebra dropbear
 SUBDIRS_APP += openssl-0.9.8e
 
 #
@@ -64,7 +64,7 @@ dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
 dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
-dir_$(CONFIG_USER_MCPROBE)                  += mcprobe
+dir_$(CONFIG_USER_WIVE)			    += wive-utils
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 
