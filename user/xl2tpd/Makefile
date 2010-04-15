@@ -76,7 +76,6 @@ OSFLAGS+= -DUSE_KERNEL
 # the basic search path, and will over-ride some gcc-specific
 # include paths and cause problems.
 #
-#CC=mips-linux-gcc
 #OSFLAGS= -DSOLARIS
 #OSLIBS= -lnsl -lsocket
 
