@@ -226,20 +226,25 @@ int check_allrouters_membership(int sock, struct Interface *iface)
 	return(0);
 }		
 
-static int
+/* note: also called from the root context */
+int
 set_interface_var(const char *iface,
 		  const char *var, const char *name,
 		  uint32_t val)
 {
 	FILE *fp;
 	char spath[64+IFNAMSIZ];	/* XXX: magic constant */
-	snprintf(spath, sizeof(spath), var, iface);
+	if (snprintf(spath, sizeof(spath), var, iface) >= sizeof(spath))
+		return -1;
+
+	if (access(spath, F_OK) != 0)
+		return -1;
 
 	fp = fopen(spath, "w");
 	if (!fp) {
 		if (name)
-			flog(LOG_ERR, "failed to set %s (%u) for %s",
-			     name, val, iface);
+			flog(LOG_ERR, "failed to set %s (%u) for %s: %s",
+			     name, val, iface, strerror(errno));
 		return -1;
 	}
 	fprintf(fp, "%u", val);
@@ -251,6 +256,9 @@ set_interface_var(const char *iface,
 int
 set_interface_linkmtu(const char *iface, uint32_t mtu)
 {
+	if (privsep_enabled())
+		return privsep_interface_linkmtu(iface, mtu);
+
 	return set_interface_var(iface,
 				 PROC_SYS_IP6_LINKMTU, "LinkMTU",
 				 mtu);
@@ -259,6 +267,9 @@ set_interface_linkmtu(const char *iface, uint32_t mtu)
 int
 set_interface_curhlim(const char *iface, uint8_t hlim)
 {
+	if (privsep_enabled())
+		return privsep_interface_curhlim(iface, hlim);
+
 	return set_interface_var(iface,
 				 PROC_SYS_IP6_CURHLIM, "CurHopLimit",
 				 hlim);
@@ -268,6 +279,10 @@ int
 set_interface_reachtime(const char *iface, uint32_t rtime)
 {
 	int ret;
+
+	if (privsep_enabled())
+		return privsep_interface_reachtime(iface, rtime);
+
 	ret = set_interface_var(iface,
 				PROC_SYS_IP6_BASEREACHTIME_MS,
 				NULL,
@@ -276,7 +291,7 @@ set_interface_reachtime(const char *iface, uint32_t rtime)
 		ret = set_interface_var(iface,
 					PROC_SYS_IP6_BASEREACHTIME,
 					"BaseReachableTimer",
-					rtime / 1000);
+					rtime / 1000); /* sec */
 	return ret;
 }
 
@@ -284,6 +299,10 @@ int
 set_interface_retranstimer(const char *iface, uint32_t rettimer)
 {
 	int ret;
+
+	if (privsep_enabled())
+		return privsep_interface_retranstimer(iface, rettimer);
+
 	ret = set_interface_var(iface,
 				PROC_SYS_IP6_RETRANSTIMER_MS,
 				NULL,
@@ -292,7 +311,7 @@ set_interface_retranstimer(const char *iface, uint32_t rettimer)
 		ret = set_interface_var(iface,
 					PROC_SYS_IP6_RETRANSTIMER,
 					"RetransTimer",
-					rettimer / 1000);
+					rettimer / 1000 * USER_HZ); /* XXX user_hz */
 	return ret;
 }
 

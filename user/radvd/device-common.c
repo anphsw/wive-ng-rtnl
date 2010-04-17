@@ -40,7 +40,13 @@ check_device(int sock, struct Interface *iface)
                 	flog(LOG_ERR, "interface %s is not UP", iface->Name);
 		return (-1);
 	}
-	
+	if (!(ifr.ifr_flags & IFF_RUNNING))
+	{
+		if (!iface->IgnoreIfMissing)
+                	flog(LOG_ERR, "interface %s is not RUNNING", iface->Name);
+		return (-1);
+	}
+
 	if (! iface->UnicastOnly && !(ifr.ifr_flags & IFF_MULTICAST))
 	{
 		flog(LOG_WARNING, "interface %s does not support multicast",

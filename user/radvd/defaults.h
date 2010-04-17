@@ -21,8 +21,8 @@
 #include <radvd.h>
 
 /* maximum message size for incoming and outgoing RSs and RAs */
-
-#define MSG_SIZE			4096
+#define MSG_SIZE_RECV			1500
+#define MSG_SIZE_SEND			1452
 
 #define MAX2(X,Y) ( (( X ) >=  ( Y )) ? ( X ) : ( Y ))
 
@@ -52,9 +52,9 @@
 
 /* Each prefix has an associated: */
 
-#define DFLT_AdvValidLifetime		2592000 /* seconds */
+#define DFLT_AdvValidLifetime		86400 /* seconds */
 #define DFLT_AdvOnLinkFlag		1
-#define DFLT_AdvPreferredLifetime	604800 /* seconds */
+#define DFLT_AdvPreferredLifetime	14400 /* seconds */
 #define DFLT_AdvAutonomousFlag		1
 
 /* Each route has an associated: */
@@ -67,7 +67,7 @@
 #define DFLT_AdvRDNSSOpenFlag				0
 #define DFLT_AdvRDNSSLifetime(iface)			(iface)->MaxRtrAdvInterval
 
-/* Protocol (RFC2461) constants: */
+/* Protocol (RFC4861) constants: */
 
 /* Router constants: */
 
@@ -96,7 +96,7 @@
 #define MIN_RANDOM_FACTOR		(1.0/2.0)
 #define MAX_RANDOM_FACTOR		(3.0/2.0)
 
-/* MAX and MIN (RFC2461), Mobile IPv6 extensions will override if in use */
+/* MAX and MIN (RFC4861), Mobile IPv6 extensions will override if in use */
 
 #define MIN_MaxRtrAdvInterval		4
 #define MAX_MaxRtrAdvInterval		1800
@@ -108,9 +108,15 @@
 #define MAX_AdvDefaultLifetime		9000
 
 #define	MIN_AdvLinkMTU			1280
+#define	MAX_AdvLinkMTU			131072
 
+#define MIN_AdvReachableTime		100
 #define MAX_AdvReachableTime		3600000 /* 1 hour in milliseconds */
 
+#define MIN_AdvRetransTimer		10
+#define MAX_AdvRetransTimer		3600000
+
+#define MIN_AdvCurHopLimit		2
 #define MAX_AdvCurHopLimit		255
 
 #define MAX_PrefixLen			128
@@ -134,7 +140,7 @@
 #endif
 
 /* de-facto codepoint used by many implementations was '9',
-   the official IANA assignment will be '24' */
+   the official IANA assignment is '24' */
 #undef ND_OPT_ROUTE_INFORMATION
 #define  ND_OPT_ROUTE_INFORMATION	24
 

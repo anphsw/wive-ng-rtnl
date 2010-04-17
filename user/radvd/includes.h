@@ -95,4 +95,8 @@
 # include <getopt.h>
 #endif
 
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+#endif
+
 #endif /* INCLUDES_H */

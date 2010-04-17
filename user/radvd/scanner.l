@@ -35,7 +35,7 @@ addr2		{hexdigit}{1,4}(":"{hexdigit}{1,4})*"::"
 addr3		({hexdigit}{1,4}":"){7}{hexdigit}{1,4}
 addr		({addr1}|{addr2}|{addr3}|"::")
 whitespace	([ \t])+
-string		[a-z]([a-z]|{digit}|_)*([:.]{digit}+)?
+string         [a-zA-Z0-9`~!@#$%\^&*()_\-+=:\[\]<>,\.?\\]{1,15}
 %%
 
 #.*$			{/* ignore comments */}
@@ -46,6 +46,7 @@ interface		{ return T_INTERFACE; }
 prefix			{ return T_PREFIX; }
 route			{ return T_ROUTE; }
 RDNSS			{ return T_RDNSS; }
+clients			{ return T_CLIENTS; }
 
 IgnoreIfMissing		{ return T_IgnoreIfMissing; }
 AdvSendAdvert		{ return T_AdvSendAdvert; }
@@ -90,18 +91,7 @@ AdvMobRtrSupportFlag	{ return T_AdvMobRtrSupportFlag; }
 
 {addr}		{
 			static struct in6_addr addr;
-			int i;
-				
-			i = inet_pton(AF_INET6, yytext, &addr);
-
-			dlog(LOG_DEBUG, 4, "inet_pton returned %d", i);
-
-			/* BSD API draft and NRL's code don't aggree on
-			 * this. the draft specifies a return value of 1 on 
-			 * success, NRL's code returns the address length in 
-			 * bytes on success (16 for an IPv6 address)
-			 */
-			if (i < 1) {
+			if (inet_pton(AF_INET6, yytext, &addr) < 1) {
 				flog(LOG_ERR, "invalid address in %s, line %d", conf_file,
 					num_lines);
 				return T_BAD_TOKEN;
@@ -129,9 +119,9 @@ AdvMobRtrSupportFlag	{ return T_AdvMobRtrSupportFlag; }
 
 infinity	{ return INFINITY; }
 
-on			{ yylval.bool = 1; return SWITCH; }
+on			{ yylval.num = 1; return SWITCH; }
 
-off			{ yylval.bool = 0; return SWITCH; }
+off			{ yylval.num = 0; return SWITCH; }
 
 low		{ yylval.snum = -1; return SIGNEDNUMBER; }
 

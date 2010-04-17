@@ -51,7 +51,7 @@ recv_rs_ra(int sock, unsigned char *msg, struct sockaddr_in6 *addr,
 		return -1;
 	}
 
-	iov.iov_len = MSG_SIZE;
+	iov.iov_len = MSG_SIZE_RECV;
 	iov.iov_base = (caddr_t) msg;
 
 	memset(&mhdr, 0, sizeof(mhdr));

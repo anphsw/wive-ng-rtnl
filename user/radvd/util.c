@@ -63,3 +63,45 @@ check_rdnss_presence(struct AdvRDNSS *rdnss, struct in6_addr *addr)
 	}
 	return (rdnss != NULL);
 }
+
+/* Like read(), but retries in case of partial read */
+ssize_t
+readn(int fd, void *buf, size_t count)
+{
+	size_t n = 0;
+	while (count > 0) {
+		int r = read(fd, buf, count);
+		if (r < 0) {
+			if (errno == EINTR)
+				continue;
+			return r;
+		}
+		if (r == 0)
+			return n;
+		buf = (char *)buf + r;
+		count -= r;
+		n += r;
+	}
+	return n;
+}
+
+/* Like write(), but retries in case of partial write */
+ssize_t
+writen(int fd, const void *buf, size_t count)
+{
+	size_t n = 0;
+	while (count > 0) {
+		int r = write(fd, buf, count);
+		if (r < 0) {
+			if (errno == EINTR)
+				continue;
+			return r;
+		}
+		if (r == 0)
+			return n;
+		buf = (const char *)buf + r;
+		count -= r;
+		n += r;
+	}
+	return n;
+}

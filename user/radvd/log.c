@@ -65,6 +65,7 @@ log_open(int method, char *ident, char *log, int facility)
 	return 0;
 }
 
+/* note: [dfv]log() is also called from root context */
 static int
 vlog(int prio, char *format, va_list ap)
 {
@@ -72,15 +73,15 @@ vlog(int prio, char *format, va_list ap)
 	struct tm *tm;
 	time_t current;
                   
+	vsnprintf(buff, sizeof(buff), format, ap);
+
 	switch (log_method) {
 		case L_NONE:
 			break;
 		case L_SYSLOG:
-	    		vsnprintf(buff, sizeof(buff), format, ap);
 			syslog(prio, "%s", buff);
 			break;
 		case L_STDERR_SYSLOG:
-	    		vsnprintf(buff, sizeof(buff), format, ap);
 			syslog(prio, "%s", buff);
 			if (prio > LOG_ERR) /* fall through for messages with high priority */
 				break;
@@ -89,9 +90,7 @@ vlog(int prio, char *format, va_list ap)
 			tm = localtime(&current);
 			(void) strftime(tstamp, sizeof(tstamp), LOG_TIME_FORMAT, tm);
 
-			fprintf(stderr, "[%s] %s: ", tstamp, log_ident);
-	    		vfprintf(stderr, format, ap);
-    			fputs("\n", stderr);
+			fprintf(stderr, "[%s] %s: %s\n", tstamp, log_ident, buff);
     			fflush(stderr);
 			break;
 		case L_LOGFILE:
@@ -99,9 +98,7 @@ vlog(int prio, char *format, va_list ap)
 			tm = localtime(&current);
 			(void) strftime(tstamp, sizeof(tstamp), LOG_TIME_FORMAT, tm);
 
-			fprintf(log_file_fd, "[%s] %s: ", tstamp, log_ident);
-    			vfprintf(log_file_fd, format, ap);
-    			fputs("\n", log_file_fd);
+			fprintf(log_file_fd, "[%s] %s: %s\n", tstamp, log_ident, buff);
     			fflush(log_file_fd);
 			break;
 		default:
@@ -148,6 +145,7 @@ log_close(void)
 		case L_NONE:
 		case L_STDERR:
 			break;
+		case L_STDERR_SYSLOG:
 		case L_SYSLOG:
 			closelog();
 			break;

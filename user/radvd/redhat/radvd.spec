@@ -29,10 +29,11 @@ Install radvd if you are setting up IPv6 network and/or Mobile IPv6
 services.
 
 %prep
-%setup
+%setup -q
 
 %build
-export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE" 
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -fPIE" 
+export LDFLAGS='-pie -Wl,-z,relro,-z,now,-z,noexecstack,-z,nodlopen'
 %configure --with-pidfile=/var/run/radvd/radvd.pid
 make
 # make %{?_smp_mflags} 
@@ -43,7 +44,8 @@ make
 %install
 [ $RPM_BUILD_ROOT != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-%makeinstall
+make DESTDIR=$RPM_BUILD_ROOT install
+
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 mkdir -p $RPM_BUILD_ROOT%{initdir}
 mkdir -p $RPM_BUILD_ROOT/var/run/radvd
@@ -74,11 +76,11 @@ fi
 /usr/sbin/useradd -c "radvd user" -r -M -s /sbin/nologin -u %{RADVD_UID} -d / radvd 2>/dev/null || :
 
 %files
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %doc COPYRIGHT README CHANGES INTRO.html TODO
 %config(noreplace) %{_sysconfdir}/radvd.conf
 %config(noreplace) /etc/sysconfig/radvd
-%config %{initdir}/radvd
+%{initdir}/radvd
 %dir %attr(-,radvd,radvd) /var/run/radvd/
 %doc radvd.conf.example
 %{_mandir}/*/*

@@ -42,7 +42,7 @@ void print_preferences(int);
 int
 main(int argc, char *argv[])
 {
-	unsigned char msg[MSG_SIZE];
+	unsigned char msg[MSG_SIZE_RECV];
 	int c, len, hoplimit;
 	int edefs = 0;
 	struct sockaddr_in6 rcv_addr;
@@ -185,6 +185,9 @@ print_ff(unsigned char *msg, int len, struct sockaddr_in6 *addr, int hoplimit, u
 
 	if (!edefs || DFLT_AdvCurHopLimit != radvert->nd_ra_curhoplimit)
 	printf("\tAdvCurHopLimit %u;\n", radvert->nd_ra_curhoplimit);
+
+	if (!edefs || (3*DFLT_MaxRtrAdvInterval) != ntohs(radvert->nd_ra_router_lifetime))
+	printf("\tAdvDefaultLifetime %hu;\n", ntohs(radvert->nd_ra_router_lifetime));
 
 	/* Mobile IPv6 ext */
 	if (!edefs || DFLT_AdvHomeAgentFlag != (ND_RA_FLAG_HOME_AGENT == (radvert->nd_ra_flags_reserved & ND_RA_FLAG_HOME_AGENT)))

@@ -43,8 +43,10 @@ struct timer_lst {
 #define min(a,b)	(((a) < (b)) ? (a) : (b))
 
 struct AdvPrefix;
+struct Clients;
 
 #define HWADDR_MAX 16
+#define USER_HZ 100
 
 struct Interface {
 	char			Name[IFNAMSIZ];	/* interface name */
@@ -88,6 +90,7 @@ struct Interface {
 	struct AdvPrefix	*AdvPrefixList;
 	struct AdvRoute		*AdvRouteList;
 	struct AdvRDNSS		*AdvRDNSSList;
+	struct Clients		*ClientList;
 	struct timer_lst	tm;
 	time_t			last_multicast_sec;
 	suseconds_t		last_multicast_usec;
@@ -96,6 +99,11 @@ struct Interface {
 	int			HasFailed;
 
 	struct Interface	*next;
+};
+
+struct Clients {
+	struct in6_addr		Address;
+	struct Clients		*next;
 };
 
 struct AdvPrefix {
@@ -110,9 +118,10 @@ struct AdvPrefix {
 	/* Mobile IPv6 extensions */
 	int             	AdvRouterAddr;
 
-	/* 6to4 extensions */
+	/* 6to4 etc. extensions */
 	char			if6to4[IFNAMSIZ];
 	int			enabled;
+	int			AutoSelected;
 
 	struct AdvPrefix	*next;
 };
@@ -191,6 +200,7 @@ int setup_linklocal_addr(int, struct Interface *);
 int setup_allrouters_membership(int, struct Interface *);
 int check_allrouters_membership(int, struct Interface *);
 int get_v4addr(const char *, unsigned int *);
+int set_interface_var(const char *, const char *, const char *, uint32_t);
 int set_interface_linkmtu(const char *, uint32_t);
 int set_interface_curhlim(const char *, uint8_t);
 int set_interface_reachtime(const char *, uint32_t);
@@ -207,7 +217,8 @@ int check_iface(struct Interface *);
 int open_icmpv6_socket(void);
 
 /* send.c */
-void send_ra(int, struct Interface *iface, struct in6_addr *dest);
+int send_ra(int, struct Interface *iface, struct in6_addr *dest);
+int send_ra_forall(int, struct Interface *iface, struct in6_addr *dest);
 
 /* process.c */
 void process(int sock, struct Interface *, unsigned char *, int,
@@ -221,5 +232,45 @@ void mdelay(double);
 double rand_between(double, double);
 void print_addr(struct in6_addr *, char *);
 int check_rdnss_presence(struct AdvRDNSS *, struct in6_addr *);
+ssize_t readn(int fd, void *buf, size_t count);
+ssize_t writen(int fd, const void *buf, size_t count);
+
+/* privsep.c */
+int privsep_init(void);
+int privsep_enabled(void);
+int privsep_interface_linkmtu(const char *iface, uint32_t mtu);
+int privsep_interface_curhlim(const char *iface, uint32_t hlim);
+int privsep_interface_reachtime(const char *iface, uint32_t rtime);
+int privsep_interface_retranstimer(const char *iface, uint32_t rettimer);
+
+/*
+ * compat hacks in case libc and kernel get out of sync:
+ *
+ * glibc 2.4 and uClibc 0.9.29 introduce IPV6_RECVPKTINFO etc. and change IPV6_PKTINFO
+ * This is only supported in Linux kernel >= 2.6.14
+ *
+ * This is only an approximation because the kernel version that libc was compiled against
+ * could be older or newer than the one being run.  But this should not be a problem --
+ * we just keep using the old kernel interface.
+ * 
+ * these are placed here because they're needed in all of socket.c, recv.c and send.c
+ */
+#ifdef __linux__
+#  if defined IPV6_RECVHOPLIMIT || defined IPV6_RECVPKTINFO
+#    include <linux/version.h>
+#    if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,14)
+#      if defined IPV6_RECVHOPLIMIT && defined IPV6_2292HOPLIMIT
+#        undef IPV6_RECVHOPLIMIT
+#        define IPV6_RECVHOPLIMIT IPV6_2292HOPLIMIT
+#      endif
+#      if defined IPV6_RECVPKTINFO && defined IPV6_2292PKTINFO
+#        undef IPV6_RECVPKTINFO
+#        undef IPV6_PKTINFO
+#        define IPV6_RECVPKTINFO IPV6_2292PKTINFO
+#        define IPV6_PKTINFO IPV6_2292PKTINFO
+#      endif
+#    endif
+#  endif
+#endif
 
 #endif

@@ -192,7 +192,7 @@ process_rs(int sock, struct Interface *iface, unsigned char *msg, int len,
  	
 	if (iface->UnicastOnly) {
 		mdelay(delay);
-		send_ra(sock, iface, &addr->sin6_addr);
+		send_ra_forall(sock, iface, &addr->sin6_addr);
 	}
 	else if ((tv.tv_sec + tv.tv_usec / 1000000.0) - (iface->last_multicast_sec +
 	          iface->last_multicast_usec / 1000000.0) < iface->MinDelayBetweenRAs) {
@@ -205,15 +205,15 @@ process_rs(int sock, struct Interface *iface, unsigned char *msg, int len,
 	else {
 		/* no RA sent in a while, send an immediate multicast reply */
 		clear_timer(&iface->tm);
-		send_ra(sock, iface, NULL);
-		
-		next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval); 
-		set_timer(&iface->tm, next);
+		if (send_ra_forall(sock, iface, NULL) == 0) {
+			next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval); 
+			set_timer(&iface->tm, next);
+		}
 	}
 }
 
 /*
- * check router advertisements according to RFC 2461, 6.2.7
+ * check router advertisements according to RFC 4861, 6.2.7
  */
 static void
 process_ra(struct Interface *iface, unsigned char *msg, int len, 
