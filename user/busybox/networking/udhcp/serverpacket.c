@@ -62,6 +62,10 @@ static int send_packet_to_client(struct dhcp_packet *dhcp_pkt, int force_broadca
 		log1("Broadcasting packet to client");
 		ciaddr = INADDR_BROADCAST;
 		chaddr = MAC_BCAST_ADDR;
+        } else if (ntohs(dhcp_pkt->flags) & BROADCAST_FLAG) {                                                                 
+        	log1("Broadcasting packet to client (requested)");                                                
+        	ciaddr = INADDR_BROADCAST;                                                                                   
+        	chaddr = MAC_BCAST_ADDR;      
 	} else {
 		log1("Unicasting packet to client ciaddr");
 		ciaddr = dhcp_pkt->ciaddr;
