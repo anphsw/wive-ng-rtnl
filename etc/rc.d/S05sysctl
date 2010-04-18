@@ -17,7 +17,26 @@ start() {
     sysctl -w net.ipv4.tcp_wmem="4096 16384 $CORE_MEM"
     sysctl -w net.ipv4.tcp_mem="2048 2560 $IPV4_MEM"
 
-  echo "Tune with proc"
+    MEM_SIZE=`free | grep Total | awk '{ print $2/10000 }' | cut -d '.' -f1`                                                 
+    if [ $MEM_SIZE = "1" ]; then                                                                                             
+        #16mb                                                                                                                
+        CONNTRACK_MAX=2048                                                                                                   
+        let "HASHSIZE=$CONNTRACK_MAX/8"                                                                                      
+        let "ROUTEMAX=$CONNTRACK_MAX*12"                                                                                     
+    else                                                                                                                     
+        #32mb                                                                                                                
+        CONNTRACK_MAX=2304                                                                                                   
+        let "HASHSIZE=$CONNTRACK_MAX/4"                                                                                      
+        let "ROUTEMAX=$CONNTRACK_MAX*14"                                                                                     
+    fi                                                                                                                       
+    sysctl -w net.ipv4.ip_conntrack_max=$CONNTRACK_MAX                                                                       
+    sysctl -w net.ipv4.netfilter.ip_conntrack_max=$CONNTRACK_MAX                                                             
+    sysctl -w net.ipv4.route.max_size=$ROUTEMAX                                                                              
+    echo $HASHSIZE > /sys/module/ip_conntrack/parameters/hashsize                                                            
+    echo "##conntrack max:##hashsize:##route max:##"                                                                         
+    echo "##$CONNTRACK_MAX##$HASHSIZE##$ROUTEMAX##"                        
+
+    echo "Tune with proc"
     #memory
     echo 1500  > /proc/sys/vm/min_free_kbytes
     echo 128  > /proc/sys/kernel/threads-max
