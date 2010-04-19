@@ -451,7 +451,8 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 */
 
 #ifndef CONFIG_ESW_DOUBLE_VLAN_TAG
-	if (veth->h_vlan_proto != __constant_htons(ETH_P_8021Q)) {
+	if (veth->h_vlan_proto != __constant_htons(ETH_P_8021Q) || 
+		VLAN_DEV_INFO(dev)->flags & 1 /* VLAN_FLAG_REORDER_HDR */){
 #endif
 		int orig_headroom = skb_headroom(skb);
 		unsigned short veth_TCI;
