@@ -77,6 +77,9 @@ endif
 ifeq ($(CONFIG_LIB_NAT),y)
     DIRS += libnatpmp
 endif
+ifeq ($(CONFIG_LIB_FLEX),y)
+    DIRS += libflex
+endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
 all: headers pregen subdirs shared finished
@@ -133,6 +136,9 @@ ifeq ($(CONFIG_LIB_USB),y)
 endif
 ifeq ($(CONFIG_LIB_NAT),y)
 	@$(MAKE) -C libnatpmp shared
+endif
+ifeq ($(CONFIG_LIB_FLEX),y)
+	@$(MAKE) -C libflex
 endif
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 	@$(MAKE) -C libintl shared

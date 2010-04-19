@@ -1,4 +1,4 @@
-radvdump.o radvdump.o: radvdump.c ./config.h ./includes.h \
+privsep.o privsep.o: privsep.c ./config.h ./includes.h \
   /opt/Wive-RTNL/lib/include/string.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
@@ -102,7 +102,8 @@ radvdump.o radvdump.o: radvdump.c ./config.h ./includes.h \
   /opt/Wive-RTNL/lib/include/asm/types.h \
   /opt/Wive-RTNL/lib/include/net/if.h \
   /opt/Wive-RTNL/lib/include/net/if_arp.h \
-  /opt/Wive-RTNL/lib/include/getopt.h ./radvd.h ./defaults.h
+  /opt/Wive-RTNL/lib/include/getopt.h ./radvd.h ./defaults.h \
+  ./pathnames.h
 
 ./config.h:
 
@@ -321,3 +322,5 @@ radvdump.o radvdump.o: radvdump.c ./config.h ./includes.h \
 ./radvd.h:
 
 ./defaults.h:
+
+./pathnames.h:

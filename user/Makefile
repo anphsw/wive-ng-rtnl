@@ -77,6 +77,9 @@ dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
 all: config
 ifeq ($(CONFIG_USER_PPPD),y)
+	cd radvd && ./configure-command && cd ..
+endif
+ifeq ($(CONFIG_USER_PPPD),y)
 	cd ppp && ./DoConfigure.sh && make && make install && cd ..
 endif
 ifeq ($(CONFIG_USER_DROPBEAR),y)

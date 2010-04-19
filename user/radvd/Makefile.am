@@ -1,5 +1,5 @@
 #
-#   $Id: Makefile.am,v 1.7 2009/08/25 05:41:56 psavola Exp $
+#   $Id: Makefile.am,v 1.1 2010/02/08 07:43:12 masonyu Exp $
 #
 #   Authors:
 #    Lars Fenneberg		<lf@elemental.net>	 

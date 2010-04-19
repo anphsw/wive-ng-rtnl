@@ -3,6 +3,5 @@
 ROOTDIR=`pwd`
 CONFOPTS="--host=mipsel-linux"
 CONFOPTS="$CONFOPTS --prefix=$ROOTDIR/filesystem"
-LDFLAGS=-L../flex
-export $LDFLAGS
+export LDFLAGS=-L../flex -L$(ROOTDIR)/lib/libflex
 ./configure $CONFOPTS

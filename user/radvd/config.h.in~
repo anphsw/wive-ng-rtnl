@@ -6,9 +6,6 @@
 /* Define to 1 if you have the `getopt_long' function. */
 #undef HAVE_GETOPT_LONG
 
-/* Define to 1 if you have the <ifaddrs.h> header file. */
-#undef HAVE_IFADDRS_H
-
 /* whether struct in6_addr has u6_addrXX and defines s6_addrXX */
 #undef HAVE_IN6_ADDR_S6_ADDR
 
@@ -81,9 +78,6 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
-/* Define to the home page for this package. */
-#undef PACKAGE_URL
-
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
@@ -96,10 +90,6 @@
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #undef YYTEXT_POINTER
-
-/* whether compiling on Linux, glibc>=2.8 doesn't expose in6_pktinfo
-   otherwise.. */
-#undef _GNU_SOURCE
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

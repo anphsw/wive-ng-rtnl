@@ -1,1 +1,1 @@
-./device-linux.c
+device-linux.c
