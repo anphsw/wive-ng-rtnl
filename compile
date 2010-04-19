@@ -2,7 +2,7 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
-VERSIONPKG="1.0.9.RU.`date +%d%m%Y`"
+VERSIONPKG="1.0.10.RU.`date +%d%m%Y`"
 
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 if [ "$1" = "" ]; then
