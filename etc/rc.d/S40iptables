@@ -55,9 +55,27 @@ start() {
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
 	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
-	    iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
+
+	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
 		iptables -A FORWARD -o br0:9 -d $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	    fi
+	    #forward in vpn tunnel and ISP localnet alya dual access....
+	    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+		#if mode is tunel forvard in ppp+ accept
+		iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
+		#second lan
+		if [ "$Lan2Enabled" = "1" ]; then
+		    iptables -A FORWARD -o ppp+ -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+		fi
+		#if pptp or l2tp forward from localnet to over net accept
+		if [ "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+		    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
+		    #second lan
+		    if [ "$Lan2Enabled" = "1" ]; then
+			iptables -A FORWARD -o ! br0:9 -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+		    fi
+		fi
 	    fi
 	fi
 
@@ -78,7 +96,10 @@ start() {
 
 	#tune mss size for tranzit packets
 	iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-	iptables -t mangle -A FORWARD -p tcp ! -o ppp+ --tcp-flags SYN,RST SYN \
+	#only ppp need hard limit mss size
+	iptables -t mangle -A FORWARD -p tcp -i ppp+ --tcp-flags SYN,RST SYN \
+			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
+	iptables -t mangle -A FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
 			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
 
         #rules for upnp
@@ -99,7 +120,7 @@ start() {
 	    iptables -t nat -N DMZ
 	    iptables -t nat -I PREROUTING 1 -j port_forward
 	    iptables -t nat -I PREROUTING 2 -j DMZ
-	    iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
+
     	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
     	    iptables -t nat -A POSTROUTING -o br+ -s $lan_ip/$nm -j MASQUERADE
 
@@ -110,6 +131,14 @@ start() {
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -t nat -A POSTROUTING -o br+ -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	    fi
+	    #masqrade in ppp tunnels
+	    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+		iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
+		#second lan
+		if [ "$Lan2Enabled" = "1" ]; then
+    		    iptables -t nat -A POSTROUTING -o ppp+ -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		fi
 	    fi
 	fi
 	
