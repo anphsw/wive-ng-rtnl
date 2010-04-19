@@ -81,7 +81,7 @@ static inline void sched_cacheflush(void)
 {
 }
 
-static inline unsigned long __xchg_u32(volatile int * m, unsigned int val)
+static __always_inline unsigned long __xchg_u32(volatile int * m, unsigned int val)
 {
 	__u32 retval;
 
