@@ -3,6 +3,8 @@
 # $Id: Makefile.linux,v 1.70 2007/06/19 02:08:34 carlsonj Exp $
 #
 
+include $(LINUX_CONFIG)
+
 # Default installation locations
 DESTDIR = $(INSTROOT)@DESTDIR@
 BINDIR = $(DESTDIR)/sbin
@@ -62,7 +64,11 @@ MPPE=y
 NOEXT_TRAFFIC=y
 # HAS_SHADOW=y
 # USE_PAM=y
-# HAVE_INET6=y
+
+ifdef CONFIG_IPV6                                                                                                            
+ CFLAGS += -DINET6                                                                                                           
+ HAVE_INET6=y                                                                                                                
+endif    
 
 # persist for wive
 # EMBPERSIST=y
