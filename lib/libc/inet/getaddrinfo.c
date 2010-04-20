@@ -816,7 +816,10 @@ getaddrinfo (const char *name, const char *service,
 	if (hints->ai_family == g->family || hints->ai_family == AF_UNSPEC)
 	{
 	    if ((hints->ai_flags & AI_ADDRCONFIG) && !addrconfig(g->family))
+	    {
+		g++;
 		continue;
+	    }
 	    j++;
 	    if (pg == NULL || pg->gaih != g->gaih)
 	    {

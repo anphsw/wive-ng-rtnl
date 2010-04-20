@@ -1608,7 +1608,7 @@ void sethostent (int stay_open)
 int gethostent_r(struct hostent *result_buf, char *buf, size_t buflen,
 	struct hostent **result, int *h_errnop)
 {
-    int ret;
+    int ret = HOST_NOT_FOUND;
 
     LOCK;
     if (__gethostent_fp == NULL) {
