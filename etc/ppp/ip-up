@@ -14,6 +14,7 @@ Lan2Enabled=`nvram_get 2860 Lan2Enabled`
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask`   
 NAT=`nvram_get 2860 natEnabled`
+upnp=`nvram_get 2860 upnpEnabled`
 OperationMode=`nvram_get 2860 OperationMode`
 
     $LOG "Replace DNS from pppd"
@@ -67,6 +68,12 @@ OperationMode=`nvram_get 2860 OperationMode`
 	    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 	fi
     fi
+
+    if [ "$upnp" = "1" ]; then                                                            
+    	$LOG "Add rules to upnp chain for $PPP_IFACE interface"                                 
+        iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                       
+        iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD                                      
+    fi                                         
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
     service shaper stop

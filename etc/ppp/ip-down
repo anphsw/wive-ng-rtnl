@@ -12,7 +12,8 @@ lan_ip=`nvram_get 2860 lan_ipaddr`
 nm=`nvram_get 2860 lan_netmask`     
 Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
-lan2_netmask=`nvram_get 2860 lan2_netmask`   
+lan2_netmask=`nvram_get 2860 lan2_netmask` 
+upnp=`nvram_get 2860 upnpEnabled`  
 
     $LOG "Flush route cache"
     ip route flush cache
@@ -30,6 +31,9 @@ lan2_netmask=`nvram_get 2860 lan2_netmask`
     if [ "$Lan2Enabled" = "1" ]; then                                                                                        
         iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
     fi              
+
+    iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                             
+    iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD
 
     $LOG "Restart need service and rebuild shaper rules"
     service shaper stop
