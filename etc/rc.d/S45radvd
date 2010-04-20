@@ -2,58 +2,75 @@
 
 #get params
 . /sbin/global.sh
+. /sbin/config.sh
 
 #wait to start web and run from goahead code
 web_wait
 
 start() {
 if [ -f /bin/radvd ]; then
+ opmode=`nvram_get 2860 OperationMode`
+ if [ "$opmode" = "2" ]; then
+    lan_if="eth2"
+ fi
  echo "Starting radvd: "
     radvd=`nvram_get 2860 radvdEnabled`
-    ip -6 addr flush dev sit0                                                                                                   
-    ip -6 route flush dev sit0                                                                                               
+    ip -6 addr flush dev sit0
+    ip -6 route flush dev sit0
     ip -6 link set sit0 down
     echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
     if [ "$radvd" = "1" ]; then
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
-	echo "Up sit0 interface"                                                                                                 
-	ip -6 link set sit0 up                                                                                                   
-                                                                                                                             
-	echo "Add iptables rules fo ipv6"                                                                                        
-	iptables -I INPUT  -p ipv6 -j ACCEPT                                                                                     
-	iptables -I OUTPUT -p ipv6 -j ACCEPT                                                                                     
-	iptables -I FORWARD  -p ipv6 -j ACCEPT                                                                                   
-	ip6tables -A INPUT -j ACCEPT                                                                                             
-	ip6tables -A FORWARD -j ACCEPT                                                                                           
-	ip6tables -A OUTPUT -j ACCEPT                                                                                            
-	ip6tables -F                                                                                                             
-                                                                                                                             
-	echo "Starting radvd"                                                                                                    
-	radvd -s -C /etc/radvd.conf -d 1 &                                                                                      
-                                                                                                                             
-	echo "Send NS(change br0 state) to pass RFC4862"                                                                         
-	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev br0                                                                       
-	ip -6 addr add fe80::2e0:4cff:fe86:7001/64 dev br0                                                                       
-                                                                                                                             
-	echo "Set alias IP for br0 to pass RFC1981 and RFC4443"                                                                  
-	ip -6 addr add 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev br0:0                                                         
-                                                                                                                             
-	#echo "Add route sit0 interface"                                                                                         
-	#ip -6 addr add 2002:1101:101::1101:101/16 dev sit0                                                                      
-	#ip -6 route replace 2000::/3 via 2002:c058:6301::1 dev sit0                                                             
-	#ip -6 route replace 2002:1101:101:0::/64 dev br0            
+	echo "Up sit0 interface"
+	ip -6 link set sit0 up
+
+	echo "Add iptables rules fo ipv6"
+	iptables -I INPUT  -p ipv6 -j ACCEPT
+	iptables -I OUTPUT -p ipv6 -j ACCEPT
+	iptables -I FORWARD  -p ipv6 -j ACCEPT
+	ip6tables -A INPUT -j ACCEPT
+	ip6tables -A FORWARD -j ACCEPT
+	ip6tables -A OUTPUT -j ACCEPT
+	ip6tables -F
+
+	echo "Configure radvd"
+	echo > /etc/radvd.conf
+	printf "
+        interface $lan_if
+	    {
+    		AdvSendAdvert on;
+    		MinRtrAdvInterval 30;
+    		MaxRtrAdvInterval 100;
+    		prefix 3ffe:501:ffff:100::/64
+    		{
+            		AdvOnLink on;
+            		AdvAutonomous on;
+            		AdvRouterAddr off;
+    		};
+	    };
+	" >> /etc/radvd.conf
+
+	echo "Starting radvd"
+	radvd -s -C /etc/radvd.conf -d 1 &
+
+	echo "Send NS(change $lan_if state) to pass RFC4862"
+	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev $lan_if
+	ip -6 addr add fe80::2e0:4cff:fe86:7001/64 dev $lan_if
+
+	echo "Set alias IP for $lan_if to pass RFC1981 and RFC4443"
+	ip -6 addr add 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev $lan_if:0
     fi
 fi
 }
 
 stop() {
- echo  "Stop radvd daemon..."                                                                                               
-  killall radvd > /dev/null 2>&1                                                                                             
-  ip -6 route del 2000::/3 via 2002:c058:6301::1 dev sit0 > /dev/null 2>&1                                                   
-  ip -6 route del 2002:1101:101:0::/64 dev br0 > /dev/null 2>&1                                                              
-  ip -6 route flush dev sit0 > /dev/null 2>&1 
+ echo  "Stop radvd daemon..."
+  killall radvd > /dev/null 2>&1
+  ip -6 route del 2000::/3 via 2002:c058:6301::1 dev sit0 > /dev/null 2>&1
+  ip -6 route del 2002:1101:101:0::/64 dev $lan_if > /dev/null 2>&1
+  ip -6 route flush dev sit0 > /dev/null 2>&1
   ip -6 addr flush dev sit0  > /dev/null 2>&1
-  ip -6 link set sit0 down > /dev/null 2>&1          
+  ip -6 link set sit0 down > /dev/null 2>&1
   echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
 }
 

@@ -49,11 +49,11 @@
 48) Restore default gateway after VPN down<br>
 49) WPS wscd daemon now work<br>
 50) Fix dhcp lease parse<br>
-35) busybox update to 1.16.1 version<br>
-51) Fix pptp/pppoe/l2tp redials<br>
-52) Radvd up to 1.6 version<br>
-53) Masqrade for vpn move to ip-up/ip-down scripts<br>
-54) NAT to ISP local net parallel then vpn work now
+51) busybox update to 1.16.1 version<br>
+52) Fix pptp/pppoe/l2tp redials<br>
+53) Radvd up to 1.6 version<br>
+54) Masqrade for vpn move to ip-up/ip-down scripts<br>
+55) NAT to ISP local net parallel then vpn work now
 
 <br><br>
 <b>For support see:</b><br>
