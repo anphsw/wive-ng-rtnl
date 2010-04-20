@@ -106,7 +106,6 @@ elif [ "$wanmode" = "L2TP" ]; then
 	nm=`nvram_get 2860 wan_l2tp_netmask`
 	gw=`nvram_get 2860 wan_l2tp_gateway`
     	ifconfig $wan_if $ip netmask $nm up
-	service resolv start
     	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
 		route add -host $ip dev $wan_if gw $gw
     		route del default
@@ -135,7 +134,6 @@ elif [ "$wanmode" = "PPTP" ]; then
             nm=`nvram_get 2860 wan_pptp_netmask`
             gw=`nvram_get 2860 wan_pptp_gateway`
     	    ifconfig $wan_if $ip netmask $nm up
-	    service resolv start
             if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
 		route add -host $ip dev $wan_if gw $gw
     		route del default

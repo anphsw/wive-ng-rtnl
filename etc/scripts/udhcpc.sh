@@ -6,7 +6,7 @@
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
-STARTEDPPPD=`ip link show up | grep ppp -c`
+STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -38,20 +38,22 @@ case "$1" in
     	    fi
 	fi
 	# DNS
-        echo -n > $RESOLV_CONF
-        #[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
 	$LOG "Renew DNS from dhcp"
-        for i in $dns ; do
-            echo adding dns $i
-            echo nameserver $i >> $RESOLV_CONF
-        done
+	if [ "$dns" ]; then                                                                                                          
+	    rm -f $RESOLV_CONF                                                                                                          
+	    for i in $dns                                                                                                            
+    	    do                                                                                                                       
+		$LOG "DNS= $i"                                                                                                           
+		echo nameserver $i >> $RESOLV_CONF                                                                                       
+	    done                                                                                                                     
+	fi      
 	# CIDR STATIC ROUTES (rfc3442)
 	[ -n "$staticroutes" ] && {
 		$LOG "Add static routes from dhcpd"
 		# This defines how many CIDR Routes can be assigned so that we do not enter
 		# an endless loop on malformed data
-		MAXSTSTICROUTES=24;
-		while [ ${MAXSTSTICROUTES} -gt "0" ]; do
+		MAXSTATICROUTES=24;
+		while [ ${MAXSTATICROUTES} -gt "0" ]; do
 			# Format is
 			# $MASK $NW $GW
 			# $NW == AAA.BBB.CCC.DDD
@@ -111,7 +113,7 @@ case "$1" in
 
 			# Add to counter
 			let ROUTECOUNTER=$ROUTECOUNTER+1;
-			let MAXSTSTICROUTES=$MAXSTSTICROUTES-1;
+			let MAXSTATICROUTES=$MAXSTATICROUTES-1;
 
 			# Leave the loop if staticroutess is empty (we've parsed everything)
 			[ ! -n "$staticroutes" ] && break
@@ -123,7 +125,7 @@ case "$1" in
 	    killall -SIGUSR2 goahead
 	    # restart needed services
     	    if [ "$STARTEDPPPD" != "0" ]; then
-                $LOG "No need restart setvices"
+                $LOG "No need restart services"
     	    else
 		$LOG "Restart needed services"
 		services_restart.sh dhcp
@@ -133,4 +135,3 @@ case "$1" in
 esac
 
 exit 0
-

@@ -7,14 +7,14 @@
 MODE=$1
 
 # stop all
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
-    service dhcpd stop
-    service pppoe-relay stop
-fi
 service ntp stop
 service dnsserver stop
 service upnp stop
 service radvd stop
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    service dhcpd stop
+    service pppoe-relay stop
+fi
 if [ "$MODE" != "pppd" ]; then 
     service udpxy stop
     service igmpproxy stop
@@ -30,7 +30,6 @@ fi
 
 #start all
 service hostname start
-service radvd start
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
     service dhcpd start
     service pppoe-relay start
@@ -42,6 +41,6 @@ if [ "$MODE" != "pppd" ]; then
     service udpxy start
 fi
 service upnp start
-service resolv start
 service dnsserver start
+service radvd start
 service ntp start

@@ -26,7 +26,6 @@ stop() {
 get_param() {
     admID=`nvram_get 2860 Login`
     fname="/etc/resolv.conf"
-    fbak="/etc/resolv_conf.bak"
 }
 
 case "$1" in

@@ -15,9 +15,6 @@ lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
 upnp=`nvram_get 2860 upnpEnabled`  
 
-    $LOG "Flush route cache"
-    ip route flush cache
-
     $LOG "Restore mtu/mru"
     MINMTU=`cat /tmp/ppp-mtu`
     iptables -t mangle -D FORWARD -p tcp -o $PPP_IFACE --tcp-flags SYN,RST SYN \
@@ -26,27 +23,32 @@ upnp=`nvram_get 2860 upnpEnabled`
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     rm -f /tmp/ppp-mtu
     
+    $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE > /dev/null 2>&1
     if [ "$Lan2Enabled" = "1" ]; then                                                                                        
         iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
     fi              
-
     iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                             
     iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD
 
-    $LOG "Restart need service and rebuild shaper rules"
-    service shaper stop
-    sleep 5
-    #services reinit
-    services_restart.sh pppd
-    service shaper start
+    $LOG "Restore DNS from pppd"                                                                                             
+    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE               
 
     if [ -f /tmp/ip-down-route-reload ]; then
 	$LOG "Load old dgw from file"
 	/tmp/ip-down-route-reload
 	rm -f /tmp/ip-down-route-reload
     fi
+
+    $LOG "Flush route cache"
+    ip route flush cache
+
+    $LOG "Restart need service and rebuild shaper rules"
+    service shaper stop
+    services_restart.sh pppd
+    service shaper start
+
 
     $LOG "Down is OK"
 

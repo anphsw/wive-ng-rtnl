@@ -17,13 +17,7 @@ NAT=`nvram_get 2860 natEnabled`
 upnp=`nvram_get 2860 upnpEnabled`
 OperationMode=`nvram_get 2860 OperationMode`
 
-    $LOG "Replace DNS from pppd"
-    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
-    grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$PPP_IFACE
-    cat /var/tmp/resolv.$PPP_IFACE >> /etc/resolv.conf
-
     $LOG "Modify route table need for buggy nas"
-
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
 
@@ -75,10 +69,13 @@ OperationMode=`nvram_get 2860 OperationMode`
         iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD                                      
     fi                                         
 
+    $LOG "Replace DNS from pppd"
+    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
+    cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
+    cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
+
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
     service shaper stop
-    sleep 5
-    #services reinit
     services_restart.sh pppd
     service shaper start
     $LOG "All is start OK"
