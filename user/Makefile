@@ -12,6 +12,10 @@
 include ../config.arch                                                                                                       
 include $(LINUX_CONFIG) 
 
+ifndef CONFIG_IPV6                                                                                                           
+CFLAGS += DNO_IPV6                                                                                                           
+endif   
+
 ifndef ROOTDIR
 ROOTDIR=..
 endif
