@@ -684,7 +684,7 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	 * Note that skb->data[] isn't dereferenced from a u16 ptr here since
 	 * the field may be unaligned.
 	 */
-	if ((skb->data[0] == 0xff) && (skb->data[1] == 0x03))
+	if ((skb->data[0] == PPP_ALLSTATIONS) && (skb->data[1] == PPP_UI))
 		skb_pull(skb, 2);
 
 	/* Prepare skb for adding to the session's reorder_q.  Hold
@@ -927,7 +927,7 @@ static int pppol2tp_build_l2tp_header(struct pppol2tp_session *session,
 static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *m,
 			    size_t total_len)
 {
-	static unsigned char ppph[2] = { 0xff, 0x03 };
+	static unsigned char ppph[2] = { PPP_ALLSTATIONS, PPP_UI };
 	struct sock *sk = sock->sk;
 	int error = 0;
 	u8 hdr[PPPOL2TP_L2TP_HDR_SIZE_SEQ];
@@ -1073,7 +1073,7 @@ static void pppol2tp_wq_send(struct work_struct *work)
  */
 static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 {
-	static unsigned char ppph[2] = { 0xff, 0x03 };
+	static unsigned char ppph[2] = { PPP_ALLSTATIONS, PPP_UI };
  	struct sock *sk = (struct sock *) chan->private;
 	int error = 0;
 	int hdr_len;
