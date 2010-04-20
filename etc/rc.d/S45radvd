@@ -33,6 +33,20 @@ if [ -f /bin/radvd ]; then
 	ip6tables -A OUTPUT -j ACCEPT
 	ip6tables -F
 
+	echo "Tunel ipv6 in ipv4 configure and up..."
+	ipv6subnet="2000"
+	relay6to4="192.88.99.1"
+	ipv4=`ip r get $relay6to4 | awk {' print $5 '}`
+	if [ "$ipv4" != "" ]; then
+	    ipv6prefix=`echo $ipv4 | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
+	    ip tunnel add tun6to4 mode sit ttl 64 remote any local $ipv4
+	    ip link set dev tun6to4 up
+	    ip -6 addr add ${ipv6prefix}::1/16 dev tun6to4
+	    ip -6 route add 2000::/3 via ::${relay6to4} dev tun6to4 metric 1
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
+	else
+	    echo "No route to ip4v6 router..."
+	fi
 	echo "Configure radvd"
 	echo > /etc/radvd.conf
 	printf "
@@ -66,8 +80,8 @@ fi
 stop() {
  echo  "Stop radvd daemon..."
   killall radvd > /dev/null 2>&1
-  ip -6 route del 2000::/3 via 2002:c058:6301::1 dev sit0 > /dev/null 2>&1
-  ip -6 route del 2002:1101:101:0::/64 dev $lan_if > /dev/null 2>&1
+  ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     
+  ip link set dev tun6to4 down > /dev/null 2>&1
   ip -6 route flush dev sit0 > /dev/null 2>&1
   ip -6 addr flush dev sit0  > /dev/null 2>&1
   ip -6 link set sit0 down > /dev/null 2>&1
