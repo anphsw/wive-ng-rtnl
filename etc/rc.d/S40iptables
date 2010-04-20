@@ -9,6 +9,7 @@ web_wait
 start() {
  echo "Starting IPTABLES: "
  get_param
+#########################################DEFAULTRULES###################################
 	#default filters
         iptables -A INPUT -i lo+ -j ACCEPT
 	iptables -A INPUT -m state --state INVALID -j DROP
@@ -19,6 +20,7 @@ start() {
     	iptables -t filter -A FORWARD -j macipport_filter
 	iptables -t filter -A FORWARD -j web_filter
 
+###########################################SERVICES#######################################
 	#rules for access services from wan (DROP)
 	if [ "$RMG" = "0" ] && [ "$OperationMode" != "0" ]; then
 	echo "Drop acess from wan $wan_if"
@@ -48,35 +50,7 @@ start() {
 	#enable services for local network
 	iptables -A INPUT -i $lan_if -s $lan_ip/$nm -j ACCEPT
 	if [ "$Lan2Enabled" = "1" ]; then
-	    iptables -A INPUT -i br0:9 -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
-	fi
-
-	if [ "$OperationMode" != "0" ]; then
-	    #enable forward only from local network to wan/ppp
-	    iptables -A FORWARD -o $lan_if -d $lan_ip/$nm -j ACCEPT
-	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
-
-	    #second lan
-	    if [ "$Lan2Enabled" = "1" ]; then
-		iptables -A FORWARD -o br0:9 -d $lan2_ipaddr/$lan2_netmask -j ACCEPT
-	    fi
-	    #forward in vpn tunnel and ISP localnet alya dual access....
-	    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
-		#if mode is tunel forvard in ppp+ accept
-		iptables -A FORWARD -o ppp+ -s $lan_ip/$nm -j ACCEPT
-		#second lan
-		if [ "$Lan2Enabled" = "1" ]; then
-		    iptables -A FORWARD -o ppp+ -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
-		fi
-		#if pptp or l2tp forward from localnet to over net accept
-		if [ "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
-		    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
-		    #second lan
-		    if [ "$Lan2Enabled" = "1" ]; then
-			iptables -A FORWARD -o ! br0:9 -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
-		    fi
-		fi
-	    fi
+	    iptables -A INPUT -i $lan2_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 	fi
 
         #add limit connection rules for local services
@@ -94,14 +68,25 @@ start() {
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
         iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 
-	#tune mss size for tranzit packets
-	iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-	#only ppp need hard limit mss size
-	iptables -t mangle -A FORWARD -p tcp -i ppp+ --tcp-flags SYN,RST SYN \
-			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-	iptables -t mangle -A FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
-			    -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
+###########################################FORWARD#######################################
+	if [ "$OperationMode" != "0" ]; then
+            #enable forward for all interfaces
+	    sysctl -w net.ipv4.ip_forward=1
+	    #accept my packets
+	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+	    #enable forward only from local network to wan/ppp
+	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
+            iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
+	    #second lan
+	    if [ "$Lan2Enabled" = "1" ]; then
+        	iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	    fi
+	    #tune mss size for tranzit packets
+	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	fi
 
+###########################################UPNPRULES#######################################
         #rules for upnp
 	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
             iptables -t nat -N MINIUPNPD
@@ -112,33 +97,28 @@ start() {
             iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
         fi
         
+###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then
 	echo "Add masqrade rules"
-	    sysctl -w net.ipv4.ip_forward=1
 	    iptables -t nat -N port_forward
 	    iptables -t nat -N DMZ
 	    iptables -t nat -I PREROUTING 1 -j port_forward
 	    iptables -t nat -I PREROUTING 2 -j DMZ
 
-    	    iptables -t nat -A POSTROUTING -o eth+ -s $lan_ip/$nm -j MASQUERADE
-    	    iptables -t nat -A POSTROUTING -o br+ -s $lan_ip/$nm -j MASQUERADE
-
-	    #wireless
-	    iptables -t nat -A POSTROUTING -o ra+  -s $lan_ip/$nm -j MASQUERADE
+	    #for ISP localnet alya dualacess
+    	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$nm -j MASQUERADE
+	    #wireless ISP net dual dual acess....gyyy
+	    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$nm -j MASQUERADE
 	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$nm -j MASQUERADE
 	    
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -t nat -A POSTROUTING -o br+ -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-	    fi
-	    #masqrade in ppp tunnels
-	    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
-		iptables -t nat -A POSTROUTING -o ppp+ -s $lan_ip/$nm -j MASQUERADE
-		#second lan
-		if [ "$Lan2Enabled" = "1" ]; then
-    		    iptables -t nat -A POSTROUTING -o ppp+ -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		fi
+		#for ISP localnet alya dualacess
+    		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		#wireless ISP net dual dual acess....gyyy
+		iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 	    fi
 	fi
 	
@@ -199,11 +179,11 @@ get_param() {
         fi
     fi
 
+    #second lan
+    lan2_if="br0:9"
+
     #get wan IP
     EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
-    
-    #calculate min mtu
-    MINMTU=`ip link show up | grep mtu | awk {' print $5-28 '} | sort -n -r | tail -n1` > /dev/null 2>&1
     
     #check ppp
     PPPUP=`ip link show up | grep ppp0 -c` > /dev/null 2>&1

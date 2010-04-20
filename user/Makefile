@@ -8,6 +8,10 @@
 #
 # Include architecture specific build rules.
 #
+
+include ../config.arch                                                                                                       
+include $(LINUX_CONFIG) 
+
 ifndef ROOTDIR
 ROOTDIR=..
 endif

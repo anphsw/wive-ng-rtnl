@@ -41,6 +41,8 @@ echo "Start network interfaces..."
     fi
 
     MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
+    #disable set mac to acorp wthen test
+    MAC=1
     if [ $MAC = "0" ]; then
     echo "First start MAC generate"
         macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`

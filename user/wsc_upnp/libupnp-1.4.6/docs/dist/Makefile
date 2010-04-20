@@ -79,7 +79,7 @@ CPPFLAGS =
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 
+CXXFLAGS = -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -108,7 +108,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
+LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool

@@ -28,6 +28,7 @@ MACHINE			   = mips
 ARCH		           = mips
 ROOTDIR			   = /opt/Wive-RTNL
 FIRMROOT        	   = $(ROOTDIR)
+LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin

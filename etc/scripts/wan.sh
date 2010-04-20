@@ -117,7 +117,6 @@ elif [ "$wanmode" = "L2TP" ]; then
 	else
 	#dhcp
     	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
-	    sleep 5
 	fi
 	config-l2tp.sh &
 
@@ -147,7 +146,6 @@ elif [ "$wanmode" = "PPTP" ]; then
 	else
 	#dhcp
     	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS  > /dev/null 2>&1 &
-	    sleep 5
 	fi
 	config-pptp.sh &
 else

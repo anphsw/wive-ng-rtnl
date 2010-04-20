@@ -14,6 +14,8 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
+WAIT_IFUP=2
+
 service lan stop
 service lan start
 service pass start
@@ -170,7 +172,7 @@ if [ "$CONFIG_RT2880_INIC" != "" ]; then
 	modprobe rt_pci_dev
 	ifconfig rai0 up
 	RaAP&
-	sleep 3
+	sleep $WAIT_IFUP
 fi
 # INIC support
 if [ "$CONFIG_RT2880v2_INIC_MII" != "" -o "$CONFIG_RT2880v2_INIC_PCI" != "" ]; then
@@ -185,7 +187,7 @@ else
         modprobe iNIC_mii miimaster=eth2
 fi
         ifconfig rai0 up
-        sleep 3
+        sleep $WAIT_IFUP
 fi
 
 # config interface
@@ -289,7 +291,7 @@ if [ "$CONFIG_RT2880_INIC" != "" ]; then
        insmod -q rt_pci_dev
        ifconfig rai0 up
        RaAP&
-       sleep 3
+       sleep $WAIT_IFUP
 fi
 
 route add -host 255.255.255.255 dev $lan_if

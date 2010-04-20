@@ -8,6 +8,14 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
+lan_ip=`nvram_get 2860 lan_ipaddr`                                                                                       
+nm=`nvram_get 2860 lan_netmask`     
+Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
+lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
+lan2_netmask=`nvram_get 2860 lan2_netmask`   
+NAT=`nvram_get 2860 natEnabled`
+OperationMode=`nvram_get 2860 OperationMode`
+
     $LOG "Replace DNS from pppd"
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
     grep -v -f /etc/resolv.conf /etc/ppp/resolv.conf > /var/tmp/resolv.$PPP_IFACE
@@ -45,15 +53,24 @@ LOG="logger -t pppd"
     MINMTU=`ip link show up | grep mtu | awk {' print $PPP_REMOTE-28 '} | sort -n -r | tail -n1`
 
     $LOG "Renew mss rules"
-    iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-    iptables -t mangle -I FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
+    iptables -t mangle -I FORWARD -p tcp -o $PPP_IFACE --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-    iptables -t mangle -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+    iptables -t mangle -I FORWARD -p tcp -i $PPP_IFACE --tcp-flags SYN,RST SYN \
+                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     echo $MINMTU > /tmp/ppp-mtu
+
+    iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
+    if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then                                                            
+        $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
+	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
+	if [ "$Lan2Enabled" = "1" ]; then                            
+	    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	fi
+    fi
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
     service shaper stop
-    sleep 10
+    sleep 5
     #services reinit
     services_restart.sh pppd
     service shaper start

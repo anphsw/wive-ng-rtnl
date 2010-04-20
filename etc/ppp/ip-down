@@ -8,14 +8,28 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
+lan_ip=`nvram_get 2860 lan_ipaddr`                                                                                       
+nm=`nvram_get 2860 lan_netmask`     
+Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
+lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
+lan2_netmask=`nvram_get 2860 lan2_netmask`   
+
     $LOG "Flush route cache"
     ip route flush cache
 
     $LOG "Restore mtu/mru"
     MINMTU=`cat /tmp/ppp-mtu`
-    iptables -t mangle -D FORWARD -p tcp -o ppp+ --tcp-flags SYN,RST SYN \
+    iptables -t mangle -D FORWARD -p tcp -o $PPP_IFACE --tcp-flags SYN,RST SYN \
+                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
+    iptables -t mangle -D FORWARD -p tcp -i $PPP_IFACE --tcp-flags SYN,RST SYN \
                             -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
     rm -f /tmp/ppp-mtu
+    
+    iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE > /dev/null 2>&1
+    if [ "$Lan2Enabled" = "1" ]; then                                                                                        
+        iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
+    fi              
 
     $LOG "Restart need service and rebuild shaper rules"
     service shaper stop

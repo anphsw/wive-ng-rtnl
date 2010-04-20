@@ -140,7 +140,7 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/radvd/missing --run automake-1.11
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
 CCDEPMODE = depmode=gcc3
-CFLAGS = -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Wall -Wpointer-arith  -Wcast-qual -Wcast-align \
+CFLAGS = -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Wall -Wpointer-arith  -Wcast-qual -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
 
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
@@ -164,7 +164,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS = -L../flex
+LDFLAGS = -L../../lib/libflex
 LEX = flex
 LEXLIB = -lfl
 LEX_OUTPUT_ROOT = lex.yy

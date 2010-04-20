@@ -1,3 +1,5 @@
+UTILSLIST=ader cpu mcprobe ipget
+
 all:
 	@set -e;
 	for i in $(UTILSLIST); do $(CC) $$i.c -o $$i; $(STRIP) $$i; done

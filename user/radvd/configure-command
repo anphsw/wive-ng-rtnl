@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ROOTDIR=`pwd`
+APROOTDIR=`pwd`
 CONFOPTS="--host=mipsel-linux"
-CONFOPTS="$CONFOPTS --prefix=$ROOTDIR/filesystem"
-export LDFLAGS=-L../flex -L$(ROOTDIR)/lib/libflex
+CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
+export LDFLAGS=-L../../lib/libflex
 ./configure $CONFOPTS

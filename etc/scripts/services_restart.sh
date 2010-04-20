@@ -21,10 +21,14 @@ if [ "$MODE" != "pppd" ]; then
     service lld2d stop
     service stp stop
 fi
-service iptables stop
+
+#restart iptables
+if [ "$MODE" != "pppd" ]; then
+    service iptables stop
+    service iptables start
+fi
 
 #start all
-service iptables start
 service hostname start
 service radvd start
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
