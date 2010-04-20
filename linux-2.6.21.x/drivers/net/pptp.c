@@ -66,6 +66,8 @@ static int log_packets=0;
 #endif
 
 #define MAX_CALLID 65535
+#define PPP_LCP_ECHOREQ 0x09
+#define PPP_LCP_ECHOREP 0x0A
 
 static unsigned long *callid_bitmap=NULL;
 static struct pppox_sock **callid_sock=NULL;
@@ -405,8 +407,8 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 		*/
 	if ((opt->ppp_flags & SC_COMP_AC) == 0 || islcp) {
 		data=skb_push(skb,2);
-		data[0]=0xff;
-		data[1]=0x03;
+		data[0]=PPP_ALLSTATIONS;
+		data[1]=PPP_UI;
 	}
 	
 	len=skb->len;
@@ -475,13 +477,16 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	#endif
 	iph->version		=	4;
 	iph->ihl		=	sizeof(struct iphdr) >> 2;
-	iph->frag_off		=	0;//df;
+	if (ip_dont_fragment(sk, &rt->u.dst))
+		iph->frag_off	=	htons(IP_DF);
+	else
+		iph->frag_off	=	0;
 	iph->protocol		=	IPPROTO_GRE;
 	iph->tos		=	0;
 	iph->daddr		=	rt->rt_dst;
 	iph->saddr		=	rt->rt_src;
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	iph->ttl = sysctl_ip_default_ttl;
+	iph->ttl = sk->protinfo.af_inet.ttl;
 	#else
 	iph->ttl = dst_metric(&rt->u.dst, RTAX_HOPLIMIT);
 	#endif
@@ -565,12 +570,24 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 	payload=skb->data+headersize;
 	/* check for expected sequence number */
 	if ( seq < opt->seq_recv + 1 || WRAPPED(opt->seq_recv, seq) ){
+		if ( (payload[0] == PPP_ALLSTATIONS) && (payload[1] == PPP_UI) &&
+		     (PPP_PROTOCOL(payload) == PPP_LCP) &&
+		     ((payload[4] == PPP_LCP_ECHOREQ) || (payload[4] == PPP_LCP_ECHOREP)) ){
+			#ifdef DEBUG
+			if ( log_level >= 1)
+				printk(KERN_INFO"PPTP[%i]: allowing old LCP Echo packet %d (expecting %d)\n", opt->src_addr.call_id,
+							seq, opt->seq_recv + 1);
+			#endif
+			goto allow_packet;
+		}
 		#ifdef DEBUG
 		if ( log_level >= 1)
 			printk(KERN_INFO"PPTP[%i]: discarding duplicate or old packet %d (expecting %d)\n",opt->src_addr.call_id,
 							seq, opt->seq_recv + 1);
 		#endif
 	}else{
+		opt->seq_recv = seq;
+allow_packet:
 		#ifdef DEBUG
 		if ( log_level >= 3 && opt->seq_sent<=log_packets)
 			printk(KERN_INFO"PPTP[%i]: accepting packet %d size=%i (%02x %02x %02x %02x %02x %02x)\n",opt->src_addr.call_id, seq,payload_len,
@@ -581,7 +598,6 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 				*(payload +4),
 				*(payload +5));
 		#endif
-		opt->seq_recv = seq;
 
 		skb_pull(skb,headersize);
 
