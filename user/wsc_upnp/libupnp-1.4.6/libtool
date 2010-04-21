@@ -85,7 +85,7 @@ AR_FLAGS="cru"
 LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-Os -mips32 -mtune=mips32"
+LTCFLAGS="-Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
 CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
@@ -7256,7 +7256,7 @@ AR_FLAGS="cru"
 LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-Os -mips32 -mtune=mips32"
+LTCFLAGS="-Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
 CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ "
@@ -7561,7 +7561,7 @@ AR_FLAGS="cru"
 LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-Os -mips32 -mtune=mips32"
+LTCFLAGS="-Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT"
 
 # A language-specific compiler.
 CC="gfortran"
