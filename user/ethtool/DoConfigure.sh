@@ -1,5 +1,5 @@
 #!/bin/bash
 
-ROOTDIR=`pwd`
-CONFOPTS="--host=mipsel-linux --prefix=$ROOTDIR/filesystem"
+APROOTDIR=`pwd`
+CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem"
 ./configure $CONFOPTS
