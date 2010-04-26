@@ -204,6 +204,9 @@ negotiation, unless the \fIipcp\-accept\-local\fR and/or
 .B +ipv6
 Enable the IPv6CP and IPv6 protocols.
 .TP
+.B +ipv6
+Enable the IPv6CP and IPv6 protocols.
+.TP
 .B ipv6 \fI<local_interface_identifier>\fR,\fI<remote_interface_identifier>
 Set the local and/or remote 64-bit interface identifier. Either one may be
 omitted. The identifier must be specified in standard ascii notation of
@@ -478,6 +481,14 @@ parameter to those scripts.
 With this option, pppd will accept the peer's idea of our local IPv6
 interface identifier, even if the local IPv6 interface identifier
 was specified in an option.
+.TP
+.B ipv6cp\-accept\-local
+With this option, pppd will accept the peer's idea of our local IPv6
+address, even if the local IPv6 address was specified in an option.
+.TP
+.B ipv6cp\-accept\-remote
+With this option, pppd will accept the peer's idea of its (remote) IPv6
+address, even if the remote IPv6 address was specified in an option.
 .TP
 .B ipv6cp\-max\-configure \fIn
 Set the maximum number of IPv6CP configure-request transmissions to
