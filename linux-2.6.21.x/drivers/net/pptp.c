@@ -44,7 +44,6 @@
 #include <net/sock.h>
 #include <net/protocol.h>
 #include <net/ip.h>
-#include <net/icmp.h>
 #include <net/route.h>
 
 #include <asm/uaccess.h>
@@ -57,6 +56,36 @@ MODULE_DESCRIPTION("Point-to-Point Tunneling Protocol for Linux");
 MODULE_AUTHOR("Kozlov D. (xeb@mail.ru)");
 MODULE_LICENSE("GPL");
 
+/* gre header structure: -------------------------------------------- */
+
+#define PPTP_GRE_PROTO  0x880B
+#define PPTP_GRE_VER    0x1
+
+#define PPTP_GRE_FLAG_C	0x80
+#define PPTP_GRE_FLAG_R	0x40
+#define PPTP_GRE_FLAG_K	0x20
+#define PPTP_GRE_FLAG_S	0x10
+#define PPTP_GRE_FLAG_A	0x80
+
+#define PPTP_GRE_IS_C(f) ((f)&PPTP_GRE_FLAG_C)
+#define PPTP_GRE_IS_R(f) ((f)&PPTP_GRE_FLAG_R)
+#define PPTP_GRE_IS_K(f) ((f)&PPTP_GRE_FLAG_K)
+#define PPTP_GRE_IS_S(f) ((f)&PPTP_GRE_FLAG_S)
+#define PPTP_GRE_IS_A(f) ((f)&PPTP_GRE_FLAG_A)
+
+struct pptp_gre_header {
+  u_int8_t flags;		/* bitfield */
+  u_int8_t ver;			/* should be PPTP_GRE_VER (enhanced GRE) */
+  u_int16_t protocol;		/* should be PPTP_GRE_PROTO (ppp-encaps) */
+  u_int16_t payload_len;	/* size of ppp payload, not inc. gre header */
+  u_int16_t call_id;		/* peer's call_id for this session */
+  u_int32_t seq;		/* sequence number.  Present if S==1 */
+  u_int32_t ack;		/* seq number of highest packet recieved by */
+  				/*  sender in this session */
+};
+
+#define PPTP_HEADER_OVERHEAD (2+sizeof(struct pptp_gre_header))
+
 #ifdef DEBUG
 static int log_level=3;
 static int log_packets=10;
@@ -64,22 +93,28 @@ static int log_packets=10;
 static int log_level=0;
 static int log_packets=0;
 #endif
-
-#define MAX_CALLID 65535
-#define PPP_LCP_ECHOREQ 0x09
-#define PPP_LCP_ECHOREP 0x0A
-
-static unsigned long *callid_bitmap=NULL;
-static struct pppox_sock **callid_sock=NULL;
+static int mtu = PPP_MTU - PPTP_HEADER_OVERHEAD;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 MODULE_PARM(log_level,"i");
 MODULE_PARM(log_packets,"i");
+MODULE_PARM(mtu, "i");
 #else
 module_param(log_level,int,0);
 module_param(log_packets,int,0);
+module_param(mtu,int,0);
 #endif
 MODULE_PARM_DESC(log_level,"Logging level (default=0)");
+MODULE_PARM_DESC(log_packets,"Logging packets (default=0)");
+MODULE_PARM_DESC(log_mtu,"Maximum channel MTU (default=auto)");
+
+#define MAX_CALLID 65535
+#define PPP_LCP_ECHOREQ 0x09
+#define PPP_LCP_ECHOREP 0x0A
+#define MISSING_WINDOW 20
+
+static unsigned long *callid_bitmap=NULL;
+static struct pppox_sock **callid_sock=NULL;
 
 #define SC_RCV_BITS	(SC_RCV_B7_1|SC_RCV_B7_0|SC_RCV_ODDP|SC_RCV_EVNP)
 
@@ -213,39 +248,9 @@ static struct ppp_channel_ops pptp_chan_ops= {
 };
 
 
-#define MISSING_WINDOW 20
 #define WRAPPED( curseq, lastseq) \
     ((((curseq) & 0xffffff00) == 0) && \
      (((lastseq) & 0xffffff00 ) == 0xffffff00))
-
-/* gre header structure: -------------------------------------------- */
-
-#define PPTP_GRE_PROTO  0x880B
-#define PPTP_GRE_VER    0x1
-
-#define PPTP_GRE_FLAG_C	0x80
-#define PPTP_GRE_FLAG_R	0x40
-#define PPTP_GRE_FLAG_K	0x20
-#define PPTP_GRE_FLAG_S	0x10
-#define PPTP_GRE_FLAG_A	0x80
-
-#define PPTP_GRE_IS_C(f) ((f)&PPTP_GRE_FLAG_C)
-#define PPTP_GRE_IS_R(f) ((f)&PPTP_GRE_FLAG_R)
-#define PPTP_GRE_IS_K(f) ((f)&PPTP_GRE_FLAG_K)
-#define PPTP_GRE_IS_S(f) ((f)&PPTP_GRE_FLAG_S)
-#define PPTP_GRE_IS_A(f) ((f)&PPTP_GRE_FLAG_A)
-
-struct pptp_gre_header {
-  u_int8_t flags;		/* bitfield */
-  u_int8_t ver;			/* should be PPTP_GRE_VER (enhanced GRE) */
-  u_int16_t protocol;		/* should be PPTP_GRE_PROTO (ppp-encaps) */
-  u_int16_t payload_len;	/* size of ppp payload, not inc. gre header */
-  u_int16_t call_id;		/* peer's call_id for this session */
-  u_int32_t seq;		/* sequence number.  Present if S==1 */
-  u_int32_t ack;		/* seq number of highest packet recieved by */
-  				/*  sender in this session */
-};
-#define PPTP_HEADER_OVERHEAD (2+sizeof(struct pptp_gre_header))
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 static struct pppox_sock * lookup_chan(__u16 call_id, __u32 s_addr)
@@ -377,7 +382,7 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	tdev = rt->u.dst.dev;
 
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	max_headroom = ((tdev->hard_header_len+15)&~15) + sizeof(*iph)+sizeof(*hdr)+2;
+	max_headroom = tdev->hard_header_len + 16 + sizeof(*iph) + sizeof(*hdr) + 2;
 	#else
 	max_headroom = LL_RESERVED_SPACE(tdev) + sizeof(*iph)+sizeof(*hdr)+2;
 	#endif
@@ -482,7 +487,11 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	else
 		iph->frag_off	=	0;
 	iph->protocol		=	IPPROTO_GRE;
-	iph->tos		=	0;
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+	iph->tos           	= 	sk->protinfo.af_inet.tos;
+	#else
+	iph->tos                =       0;
+	#endif
 	iph->daddr		=	rt->rt_dst;
 	iph->saddr		=	rt->rt_src;
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
@@ -756,7 +765,7 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	struct pppox_sock *po = pppox_sk(sk);
 	struct pptp_opt *opt = &po->proto.pptp;
 	struct rtable *rt;     			/* Route to the other host */
-	int error=0;
+	int error=0, automtu = 0;
 
 	if (sp->sa_protocol != PX_PROTO_PPTP)
 		return -EINVAL;
@@ -829,14 +838,25 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 		sk_setup_caps(sk, &rt->u.dst);
 	}
 	#endif
+	
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	po->chan.mtu=PPP_MTU;
+	po->chan.mtu	 =	mtu;
 	#else
-	po->chan.mtu=dst_mtu(&rt->u.dst);
-	if (!po->chan.mtu) po->chan.mtu=PPP_MTU;
+	if (!dst_mtu(&rt->u.dst))
+	    automtu = mtu;
+	else {
+	     automtu=dst_mtu(&rt->u.dst) - PPTP_HEADER_OVERHEAD;
+	     if (automtu > mtu) 
+		    automtu = mtu;
+	}		
+	po->chan.mtu	 =	automtu;
 	#endif
+	#ifdef DEBUG
+	if (log_level>=1)
+		printk(KERN_INFO"PPTP: using mtu %i\n",po->chan.mtu);
+	#endif
+
 	ip_rt_put(rt);
-	po->chan.mtu-=PPTP_HEADER_OVERHEAD;
 
 	po->chan.hdrlen=2+sizeof(struct pptp_gre_header);
 	error = ppp_register_channel(&po->chan);
