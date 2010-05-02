@@ -137,7 +137,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 		iph->frag_off = htons(IP_DF);
 	else
 		iph->frag_off = 0;
-	iph->ttl      = ip_select_ttl(inet, &rt->u.dst);
+	iph->ttl      = ip_select_ttl(inet,&rt->u.dst);
 	iph->daddr    = rt->rt_dst;
 	iph->saddr    = rt->rt_src;
 	iph->protocol = sk->sk_protocol;
