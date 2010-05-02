@@ -765,7 +765,7 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	struct pppox_sock *po = pppox_sk(sk);
 	struct pptp_opt *opt = &po->proto.pptp;
 	struct rtable *rt;     			/* Route to the other host */
-	int error=0, automtu = 0;
+	int error=0, automtu = 0, chanmtu = 0;
 
 	if (sp->sa_protocol != PX_PROTO_PPTP)
 		return -EINVAL;
@@ -842,10 +842,11 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	po->chan.mtu	 =	mtu;
 	#else
-	if (!dst_mtu(&rt->u.dst))
+	chanmtu          =      dst_mtu(&rt->u.dst);
+	if (!chanmtu)
 	    automtu = mtu;
 	else {
-	     automtu=dst_mtu(&rt->u.dst) - PPTP_HEADER_OVERHEAD;
+	     automtu=chanmtu - PPTP_HEADER_OVERHEAD;
 	     if (automtu > mtu && mtu != 0 ) 
 		    automtu = mtu;
 	}		
