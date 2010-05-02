@@ -88,6 +88,13 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 
 			oldmss = (opt[i+2] << 8) | opt[i+3];
 
+                        /* Never increase MSS, even when setting it, as
+                         * doing so results in problems for hosts that rely
+                         * on MSS being set correctly.
+                         */
+                        if (oldmss <= newmss)
+                                return 0;
+
 			if (info->mss == XT_TCPMSS_CLAMP_PMTU &&
 			    oldmss <= newmss)
 				return 0;
