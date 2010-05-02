@@ -53,7 +53,16 @@
 52) Fix pptp/pppoe/l2tp redials<br>
 53) Radvd up to 1.6 version<br>
 54) Masqrade for vpn move to ip-up/ip-down scripts<br>
-55) NAT to ISP local net parallel then vpn work now
+55) NAT to ISP local net parallel then vpn work now<br>
+56) Never increase MSS, even when setting it<br>
+57) Backport small bridge patch<br>
+58) Backport sock memalloc skb size from 2.6.23.4 kernel<br>
+59) ACCEL-PPTP add module param description and mtu parametr<br>
+60) Patch to fix cut end symbol at hostname in udhcpd lease<br>
+61) Backport jhash3 patch from upstream<br>
+62) More ipv6 fixes<br>
+63) Improve pppoe perf<br>
+64) pptp module patches from wl500 project<br>
 
 <br><br>
 <b>For support see:</b><br>
