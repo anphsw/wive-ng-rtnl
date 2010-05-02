@@ -846,7 +846,7 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	    automtu = mtu;
 	else {
 	     automtu=dst_mtu(&rt->u.dst) - PPTP_HEADER_OVERHEAD;
-	     if (automtu > mtu) 
+	     if (automtu > mtu && mtu != 0 ) 
 		    automtu = mtu;
 	}		
 	po->chan.mtu	 =	automtu;
