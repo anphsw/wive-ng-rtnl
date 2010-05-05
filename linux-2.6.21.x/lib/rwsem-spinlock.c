@@ -319,7 +319,6 @@ void fastcall __downgrade_write(struct rw_semaphore *sem)
 	spin_unlock_irqrestore(&sem->wait_lock, flags);
 }
 
-EXPORT_SYMBOL(__init_rwsem);
 EXPORT_SYMBOL(__down_read);
 EXPORT_SYMBOL(__down_read_trylock);
 EXPORT_SYMBOL(__down_write_nested);
