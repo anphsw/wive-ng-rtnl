@@ -63,6 +63,7 @@
 62) More ipv6 fixes<br>
 63) Improve pppoe perf<br>
 64) pptp module patches from wl500 project<br>
+65) More user/password length to pptp/l2tp mode<br>
 
 <br><br>
 <b>For support see:</b><br>
