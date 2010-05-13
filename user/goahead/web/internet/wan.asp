@@ -626,7 +626,7 @@ function initValue()
 </tr>
 <tr>
   <td class="head" id="wL2tpUser">User Name</td>
-  <td><input name="l2tpUser" maxlength="20" size=20 value="<%
+  <td><input name="l2tpUser" maxlength="32" size=32 value="<%
        getCfgGeneral(1, "wan_l2tp_user"); %>"></td>
 </tr>
 <tr>
@@ -692,7 +692,7 @@ function initValue()
 </tr>
 <tr>
   <td class="head" id="wPptpUser">User Name</td>
-  <td><input name="pptpUser" maxlength="20" size=20 value="<%
+  <td><input name="pptpUser" maxlength="32" size=32 value="<%
        getCfgGeneral(1, "wan_pptp_user"); %>"></td>
 </tr>
 <tr>
