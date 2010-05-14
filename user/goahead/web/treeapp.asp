@@ -12,19 +12,29 @@
 <link rel="StyleSheet" href="dtree.css" type="text/css" />
 <script type="text/javascript" src="/dtree/dtree.js"></script>
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
 </head>
 
 <body bgcolor=#FFFFFF onLoad="initValue()">
-<script language="JavaScript">    
+<script language="JavaScript">
+
+function rebootRouter()
+{
+	if (confirm(_('treeapp reboot confirm')))
+		ajaxPerformRequest('cgi-bin/reboot.sh');
+}
+
 var isFimwareUpload = 0;
 Butterlate.setTextDomain("main");
 
 function initValue()
 {
 	var e = document.getElementById("openall");
-	e.innerHTML = _("treeapp openall");
+	if (e!=null)
+		e.innerHTML = _("treeapp openall");
 	e = document.getElementById("closeall");
-	e.innerHTML = _("treeapp closeall");
+	if (e!=null)
+		e.innerHTML = _("treeapp closeall");
 }
 
 function setUnderFirmwareUpload(flag){
@@ -125,6 +135,14 @@ else
 	}
 }
 
+// Services
+a.add(500, 0,   _("treeapp services"),          "javascript:go('javascript:a.oo(500);');");
+a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
+a.add(502, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
+a.add(503, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
+a.add(510, 500, _("treeapp miscellaneous"),     "javascript:go('services/misc.asp');");
+
+
 if (opmode != '0') {
 	a.add(700,   0, _("treeapp firewall"),              "javascript:a.oo(700);");
 	a.add(701, 700, _("treeapp ip/port filtering"),     "javascript:go('firewall/port_filtering.asp');");
@@ -170,7 +188,7 @@ if (syslogb == "1")
 	a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
 }
 a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
-a.add(909, 900, _("treeapp reboot"),                       "javascript:go('cgi-bin/reboot.sh');");
+a.add(909, 900, _("treeapp reboot"),                       "javascript:rebootRouter();");
 document.write(a);
 </script>
 

@@ -1,0 +1,192 @@
+diff -u -N -r miniupnpd-1.4.20100308/Changelog.txt miniupnpd-1.4.20100511/Changelog.txt
+--- miniupnpd-1.4.20100308/Changelog.txt	2010-03-08 23:13:54.000000000 +0600
++++ miniupnpd-1.4.20100511/Changelog.txt	2010-05-11 23:20:02.000000000 +0700
+@@ -1,8 +1,15 @@
+-$Id: Changelog.txt,v 1.193 2010/03/08 17:13:48 nanard Exp $
++$Id: Changelog.txt,v 1.196 2010/05/06 13:42:47 nanard Exp $
++
++2010/05/06:
++  Bugfix un CleanNATPMPRules() : see http://miniupnp.tuxfamily.org/forum/viewtopic.php?t=640
++
++2010/03/14:
++  Fixing natpmp sockets.
+ 
+ 2010/03/08:
+   Fix Makefile.linux to compile properly under Mandriva/rh/Fedora with
+-  Iptables >= 1.4.3
++    Iptables >= 1.4.3
++  Workaround for bad uptime when started with a bad time set.
+ 
+ 2010/03/07:
+   Tried to make a OpenBSD version 4.7 compatible code... still some
+diff -u -N -r miniupnpd-1.4.20100308/Makefile.linux miniupnpd-1.4.20100511/Makefile.linux
+--- miniupnpd-1.4.20100308/Makefile.linux	2010-03-08 23:13:54.000000000 +0600
++++ miniupnpd-1.4.20100511/Makefile.linux	2010-03-11 16:59:59.000000000 +0600
+@@ -1,4 +1,4 @@
+-# $Id: Makefile.linux,v 1.50 2010/03/08 17:13:49 nanard Exp $
++# $Id: Makefile.linux,v 1.51 2010/03/09 09:53:00 nanard Exp $
+ # MiniUPnP project
+ # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
+ # Author : Thomas Bernard
+@@ -66,7 +66,8 @@
+ TEST := $(shell test -f /usr/include/iptables/internal.h && grep -q "\#define IPTABLES_VERSION" /usr/include/iptables/internal.h && echo 1)
+ ifeq ($(TEST), 1)
+ CFLAGS := $(CFLAGS) -DIPTABLES_143
+-LIBS = /usr/lib/libiptc.a
++#LIBS = /usr/lib/libiptc.a
++LIBS = -liptc
+ endif 
+ endif
+ 
+diff -u -N -r miniupnpd-1.4.20100308/miniupnpd.c miniupnpd-1.4.20100511/miniupnpd.c
+--- miniupnpd-1.4.20100308/miniupnpd.c	2010-03-06 13:55:41.000000000 +0600
++++ miniupnpd-1.4.20100511/miniupnpd.c	2010-03-14 06:35:27.000000000 +0600
+@@ -1,4 +1,4 @@
+-/* $Id: miniupnpd.c,v 1.122 2010/02/15 09:56:21 nanard Exp $ */
++/* $Id: miniupnpd.c,v 1.124 2010/03/14 00:35:27 nanard Exp $ */
+ /* MiniUPnP project
+  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
+  * (c) 2006-2009 Thomas Bernard
+@@ -863,6 +863,10 @@
+ 	struct timeval checktime = {0, 0};
+ 
+ 	memset(snotify, 0, sizeof(snotify));
++#ifdef ENABLE_NATPMP
++	for(i = 0; i < MAX_LAN_ADDR; i++)
++		snatpmp[i] = -1;
++#endif
+ 	if(init(argc, argv, &v) != 0)
+ 		return 1;
+ 
+@@ -944,6 +948,11 @@
+ 	/* main loop */
+ 	while(!quitting)
+ 	{
++		/* Correct startup_time if it was set with a RTC close to 0 */
++		if((startup_time<60*60*24) && (time(NULL)>60*60*24))
++		{
++			set_startup_time(GETFLAG(SYSUPTIMEMASK));
++		} 
+ 		/* Check if we need to send SSDP NOTIFY messages and do it if
+ 		 * needed */
+ 		if(gettimeofday(&timeofday, 0) < 0)
+@@ -1221,7 +1230,7 @@
+ 		{
+ #ifdef ENABLE_NATPMP
+ 			if(GETFLAG(ENABLENATPMPMASK))
+-				SendNATPMPPublicAddressChangeNotification(snotify, n_lan_addr);
++				SendNATPMPPublicAddressChangeNotification(snatpmp/*snotify*/, n_lan_addr);
+ #endif
+ #ifdef ENABLE_EVENTS
+ 			if(GETFLAG(ENABLEUPNPMASK))
+diff -u -N -r miniupnpd-1.4.20100308/natpmp.c miniupnpd-1.4.20100511/natpmp.c
+--- miniupnpd-1.4.20100308/natpmp.c	2010-01-15 00:44:31.000000000 +0600
++++ miniupnpd-1.4.20100511/natpmp.c	2010-05-11 23:20:02.000000000 +0700
+@@ -1,6 +1,6 @@
+-/* $Id: natpmp.c,v 1.18 2010/01/14 18:44:31 nanard Exp $ */
++/* $Id: natpmp.c,v 1.20 2010/05/06 13:42:47 nanard Exp $ */
+ /* MiniUPnP project
+- * (c) 2007-2009 Thomas Bernard
++ * (c) 2007-2010 Thomas Bernard
+  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
+  * This software is subject to the conditions detailed
+  * in the LICENCE file provided within the distribution */
+@@ -275,6 +275,8 @@
+ 	}
+ }
+ 
++/* iterate through the redirection list to find those who came
++ * from NAT-PMP and select the first to expire */
+ int ScanNATPMPforExpiration()
+ {
+ 	char desc[64];
+@@ -303,16 +305,26 @@
+ 	return 0;
+ }
+ 
++/* remove the next redirection that is expired
++ */
+ int CleanExpiredNATPMP()
+ {
+ 	char desc[64];
++	unsigned timestamp;
+ 	unsigned short iport;
+ 	if(get_redirect_rule(ext_if_name, nextnatpmptoclean_eport,
+ 	                     nextnatpmptoclean_proto,
+ 	                     0, 0,
+ 	                     &iport, desc, sizeof(desc), 0, 0) < 0)
+ 		return ScanNATPMPforExpiration();
+-	/* TODO: check desc */
++	/* check desc - this is important since we keep expiration time as part
++	 * of the desc.
++	 * If the rule is renewed, timestamp and nextnatpmptoclean_timestamp 
++	 * can be different. In that case, the rule must not be removed ! */
++	if(sscanf(desc, "NAT-PMP %u", &timestamp) == 1) {
++		if(timestamp > nextnatpmptoclean_timestamp)
++			return ScanNATPMPforExpiration();
++	}
+ 	/* remove redirection then search for next one:) */
+ 	if(_upnp_delete_redir(nextnatpmptoclean_eport, nextnatpmptoclean_proto)<0)
+ 		return -1;
+@@ -351,6 +363,8 @@
+ 
+ 	for(j=0; j<n_sockets; j++)
+ 	{
++		if(sockets[j] < 0)
++			continue;
+ #ifdef MULTIPLE_EXTERNAL_IP
+ 		FillPublicAddressResponse(notif, lan_addr[j].addr.s_addr);
+ #endif
+diff -u -N -r miniupnpd-1.4.20100308/pf/obsdrdr.c miniupnpd-1.4.20100511/pf/obsdrdr.c
+--- miniupnpd-1.4.20100308/pf/obsdrdr.c	2010-03-08 00:12:54.000000000 +0600
++++ miniupnpd-1.4.20100511/pf/obsdrdr.c	2010-05-11 23:20:02.000000000 +0700
+@@ -1,4 +1,4 @@
+-/* $Id: obsdrdr.c,v 1.58 2010/03/07 18:12:48 nanard Exp $ */
++/* $Id: obsdrdr.c,v 1.59 2010/05/11 16:19:26 nanard Exp $ */
+ /* MiniUPnP project
+  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
+  * (c) 2006-2010 Thomas Bernard 
+@@ -479,7 +479,9 @@
+ 	}
+ 	memset(&pr, 0, sizeof(pr));
+ 	strlcpy(pr.anchor, anchor_name, MAXPATHLEN);
++#ifndef PF_NEWSTYLE
+ 	pr.rule.action = PF_RDR;
++#endif
+ 	if(ioctl(dev, DIOCGETRULES, &pr) < 0)
+ 	{
+ 		syslog(LOG_ERR, "ioctl(dev, DIOCGETRULES, ...): %m");
+@@ -591,7 +593,9 @@
+ 	}
+ 	memset(&pr, 0, sizeof(pr));
+ 	strlcpy(pr.anchor, anchor_name, MAXPATHLEN);
++#ifndef PF_NEWSTYLE
+ 	pr.rule.action = PF_RDR;
++#endif
+ 	if(ioctl(dev, DIOCGETRULES, &pr) < 0)
+ 	{
+ 		syslog(LOG_ERR, "ioctl(dev, DIOCGETRULES, ...): %m");
+diff -u -N -r miniupnpd-1.4.20100308/testgetifaddr.c miniupnpd-1.4.20100511/testgetifaddr.c
+--- miniupnpd-1.4.20100308/testgetifaddr.c	2008-10-09 18:28:44.000000000 +0700
++++ miniupnpd-1.4.20100511/testgetifaddr.c	2010-04-13 03:40:53.000000000 +0700
+@@ -1,10 +1,11 @@
+-/* $Id: testgetifaddr.c,v 1.1 2008/10/09 11:28:44 nanard Exp $ */
++/* $Id: testgetifaddr.c,v 1.2 2010/04/07 16:31:21 nanard Exp $ */
+ /* MiniUPnP project
+  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
+  * (c) 2006-2008 Thomas Bernard 
+  * This software is subject to the conditions detailed
+  * in the LICENCE file provided within the distribution */
+ #include <stdio.h>
++#include <syslog.h>
+ #include "getifaddr.h"
+ 
+ int main(int argc, char * * argv) {
+@@ -13,6 +14,7 @@
+ 		fprintf(stderr, "Usage:\t%s interface_name\n", argv[0]);
+ 		return 1;
+ 	}
++	openlog("testgetifaddr", LOG_CONS|LOG_PERROR, LOG_USER);
+ 	if(getifaddr(argv[1], addr, sizeof(addr)) < 0) {
+ 		fprintf(stderr, "Cannot get address for interface %s.\n", argv[1]);
+ 		return 1;

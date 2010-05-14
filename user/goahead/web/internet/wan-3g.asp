@@ -2,7 +2,7 @@
 <head>
 <title>Wide Area Network (WAN) Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 var http_request = false;
@@ -780,7 +780,7 @@ function initValue()
 </tr>
 <tr>
   <td class="head" id="wL2tpUser">User Name</td>
-  <td><input name="l2tpUser" maxlength="32" size=20 value="<%
+  <td><input name="l2tpUser" maxlength="20" size=20 value="<%
        getCfgGeneral(1, "wan_l2tp_user"); %>"></td>
 </tr>
 <tr>
@@ -850,7 +850,7 @@ function initValue()
 </tr>
 <tr>
   <td class="head" id="wPptpUser">User Name</td>
-  <td><input name="pptpUser" maxlength="32" size=20 value="<%
+  <td><input name="pptpUser" maxlength="20" size=20 value="<%
        getCfgGeneral(1, "wan_pptp_user"); %>"></td>
 </tr>
 <tr>

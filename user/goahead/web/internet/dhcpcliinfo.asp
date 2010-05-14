@@ -3,7 +3,7 @@
 <head>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>DHCP Client List</title>
 

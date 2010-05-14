@@ -65,6 +65,19 @@ did not define in the xml file if it does exist.
 var Butterlate = new Butterlation();
 window._ = function(key) { return Butterlate.gettext(key); };
 window.__ = function(key,replacements) { return Butterlate.vgettext(key,replacements); };
+window._TR = function(elementID, key)
+{
+	var e = document.getElementById(elementID);
+	if (e != null)
+		e.innerHTML = Butterlate.gettext(key);
+}
+
+window._TRV = function(elementID, key)
+{
+	var e = document.getElementById(elementID);
+	if (e != null)
+		e.value = Butterlate.gettext(key);
+}
 
 function Butterlation() {
   this.dict = new ButterDictionary();

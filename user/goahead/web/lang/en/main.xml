@@ -27,6 +27,7 @@
   <message msgid="treeapp site survey" msgstr="Site Survey" />
   <message msgid="treeapp statistics" msgstr="Statistics" />
   <message msgid="treeapp advance" msgstr="Advance" />
+  <message msgid="treeapp services" msgstr="Services" />
   <message msgid="treeapp qos" msgstr="QoS" />
   <message msgid="treeapp 11n configurations" msgstr="11n Configurations" />
   <message msgid="treeapp about" msgstr="About" />
@@ -38,6 +39,10 @@
   <message msgid="treeapp ap client" msgstr="AP Client" />
   <message msgid="treeapp station list" msgstr="Station List" />
   <message msgid="treeapp mesh settings" msgstr="Mesh Settings" />
+  <message msgid="treeapp dhcp server" msgstr="DHCP Server" />
+  <message msgid="treeapp ntp settings" msgstr="NTP Settings" />
+  <message msgid="treeapp ddns settings" msgstr="DDNS Settings" />
+  <message msgid="treeapp miscellaneous" msgstr="Miscellaneous" />
   <message msgid="treeapp firewall" msgstr="Firewall" />
   <message msgid="treeapp ip/port filtering" msgstr="MAC/IP/Port Filtering" />
   <message msgid="treeapp port forwarding" msgstr="Port Forwarding" />
@@ -52,6 +57,7 @@
   <message msgid="treeapp system log" msgstr="System Log" />
   <message msgid="treeapp sdk history" msgstr="Version History" />
   <message msgid="treeapp reboot" msgstr="Reboot you router" />
+  <message msgid="treeapp reboot confirm" msgstr="Do you really want to reboot your router?" />
   <message msgid="treeapp system firewall" msgstr="System Security" />
 
   <message msgid="treeapp usb" msgstr="USB App." />

@@ -1693,15 +1693,12 @@ static void getMyMAC(webs_t wp, char_t *path, char_t *query)
 /* goform/setLan */
 static void setLan(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*ip, *nm, *dhcp_tp, *stp_en, *lltd_en, *igmp_en, *upnp_en,
-			*radvd_en, *pppoer_en, *dnsp_en;
+	char_t	*ip, *nm;
 	char_t	*gw = NULL, *pd = NULL, *sd = NULL;
 	char_t *lan2enabled, *lan2_ip, *lan2_nm;
 #ifdef GA_HOSTNAME_SUPPORT
 	char_t	*host;
 #endif
-	char_t  *dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l;
-	char_t	*dhcp_sl1, *dhcp_sl2, *dhcp_sl3;
 	char	*opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 	char	*wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
 	char	*ctype = nvram_bufget(RT2860_NVRAM, "connectionType");
@@ -1714,30 +1711,12 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #ifdef GA_HOSTNAME_SUPPORT
 	host = websGetVar(wp, T("hostname"), T("0"));
 #endif
-	dhcp_tp = websGetVar(wp, T("lanDhcpType"), T("DISABLE"));
-	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
-	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
-	igmp_en = websGetVar(wp, T("igmpEnbl"), T("0"));
-	upnp_en = websGetVar(wp, T("upnpEnbl"), T("0"));
-	radvd_en = websGetVar(wp, T("radvdEnbl"), T("0"));
-	pppoer_en = websGetVar(wp, T("pppoeREnbl"), T("0"));
-	dnsp_en = websGetVar(wp, T("dnspEnbl"), T("0"));
-	dhcp_s = websGetVar(wp, T("dhcpStart"), T(""));
-	dhcp_e = websGetVar(wp, T("dhcpEnd"), T(""));
-	dhcp_m = websGetVar(wp, T("dhcpMask"), T(""));
-	dhcp_pd = websGetVar(wp, T("dhcpPriDns"), T(""));
-	dhcp_sd = websGetVar(wp, T("dhcpSecDns"), T(""));
-	dhcp_g = websGetVar(wp, T("dhcpGateway"), T(""));
-	dhcp_l = websGetVar(wp, T("dhcpLease"), T("86400"));
-	dhcp_sl1 = websGetVar(wp, T("dhcpStatic1"), T(""));
-	dhcp_sl2 = websGetVar(wp, T("dhcpStatic2"), T(""));
-	dhcp_sl3 = websGetVar(wp, T("dhcpStatic3"), T(""));
-
 	/*
 	 * check static ip address:
 	 * lan and wan ip should not be the same except in bridge mode
 	 */
-	if (strncmp(ctype, "STATIC", 7)) {
+	if (strncmp(ctype, "STATIC", 7))
+	{
 		if (strcmp(opmode, "0") && !strncmp(ip, wan_ip, 15)) {
 			websError(wp, 200, "IP address is identical to WAN");
 			return;
@@ -1755,7 +1734,8 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	// configure gateway and dns (WAN) at bridge mode
-	if (!strncmp(opmode, "0", 2)) {
+	if (!strncmp(opmode, "0", 2))
+	{
 		gw = websGetVar(wp, T("lanGateway"), T(""));
 		pd = websGetVar(wp, T("lanPriDns"), T(""));
 		sd = websGetVar(wp, T("lanSecDns"), T(""));
@@ -1763,6 +1743,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
 		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
+
 	nvram_bufset(RT2860_NVRAM, "lan_ipaddr", ip);
 	nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
 	nvram_bufset(RT2860_NVRAM, "Lan2Enabled", lan2enabled);
@@ -1771,43 +1752,6 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #ifdef GA_HOSTNAME_SUPPORT
 	nvram_bufset(RT2860_NVRAM, "HostName", host);
 #endif
-	if (!strncmp(dhcp_tp, "DISABLE", 8))
-		nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
-	else if (!strncmp(dhcp_tp, "SERVER", 7)) {
-		if (-1 == inet_addr(dhcp_s)) {
-			nvram_commit(RT2860_NVRAM);
-			websError(wp, 200, "invalid DHCP Start IP");
-			return;
-		}
-		nvram_bufset(RT2860_NVRAM, "dhcpStart", dhcp_s);
-		if (-1 == inet_addr(dhcp_e)) {
-			nvram_commit(RT2860_NVRAM);
-			websError(wp, 200, "invalid DHCP End IP");
-			return;
-		}
-		nvram_bufset(RT2860_NVRAM, "dhcpEnd", dhcp_e);
-		if (-1 == inet_addr(dhcp_m)) {
-			nvram_commit(RT2860_NVRAM);
-			websError(wp, 200, "invalid DHCP Subnet Mask");
-			return;
-		}
-		nvram_bufset(RT2860_NVRAM, "dhcpMask", dhcp_m);
-		nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "1");
-		nvram_bufset(RT2860_NVRAM, "dhcpPriDns", dhcp_pd);
-		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
-		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
-		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic1", dhcp_sl1);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic2", dhcp_sl2);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic3", dhcp_sl3);
-	}
-	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
-	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
-	nvram_bufset(RT2860_NVRAM, "igmpEnabled", igmp_en);
-	nvram_bufset(RT2860_NVRAM, "upnpEnabled", upnp_en);
-	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
-	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
-	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
 	nvram_commit(RT2860_NVRAM);
 
 	initInternet();
@@ -1828,24 +1772,6 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("PriDns: %s<br>\n"), pd);
 		websWrite(wp, T("SecDns: %s<br>\n"), sd);
 	}
-	websWrite(wp, T("DHCP type: %s<br>\n"), dhcp_tp);
-	if (strncmp(dhcp_tp, "DISABLE", 8)) {
-		websWrite(wp, T("--> DHCP start: %s<br>\n"), dhcp_s);
-		websWrite(wp, T("--> DHCP end: %s<br>\n"), dhcp_e);
-		websWrite(wp, T("--> DHCP mask: %s<br>\n"), dhcp_m);
-		websWrite(wp, T("--> DHCP DNS: %s %s<br>\n"), dhcp_pd, dhcp_sd);
-		websWrite(wp, T("--> DHCP gateway: %s<br>\n"), dhcp_g);
-		websWrite(wp, T("--> DHCP lease: %s<br>\n"), dhcp_l);
-		websWrite(wp, T("--> DHCP static 1: %s<br>\n"), dhcp_sl1);
-		websWrite(wp, T("--> DHCP static 2: %s<br>\n"), dhcp_sl2);
-		websWrite(wp, T("--> DHCP static 3: %s<br>\n"), dhcp_sl3);
-	}
-	websWrite(wp, T("STP enable: %s<br>\n"), stp_en);
-	websWrite(wp, T("LLTD enable: %s<br>\n"), lltd_en);
-	websWrite(wp, T("IGMP proxy enable: %s<br>\n"), igmp_en);
-	websWrite(wp, T("UPNP enable: %s<br>\n"), upnp_en);
-	websWrite(wp, T("RADVD enable: %s<br>\n"), radvd_en);
-	websWrite(wp, T("DNS proxy enable: %s<br>\n"), dnsp_en);
 	websFooter(wp);
 	websDone(wp, 200);
 }

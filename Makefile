@@ -444,4 +444,7 @@ dist-prep:
 		$(MAKEARCH) -C `dirname $$t` -f `basename $$t` $@; \
 	 done
 
+web:
+	$(MAKE) -C user web
+
 ############################################################################

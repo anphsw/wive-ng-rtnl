@@ -169,3 +169,6 @@ prune_openswan:
 	@mkdir -p $(ROOTDIR)/openswan/linux/net/ipsec
 	@mv $(ROOTDIR)/$@/* $(ROOTDIR)/openswan/linux/net/ipsec/
 	@rm -fr $(ROOTDIR)/$@
+
+web:
+	$(MAKE) -C goahead all

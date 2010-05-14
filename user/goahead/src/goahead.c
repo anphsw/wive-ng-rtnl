@@ -23,6 +23,7 @@
 #include	"nvram.h"
 #include	"ralink_gpio.h"
 #include	"internet.h"
+#include	"services.h"
 #if defined INIC_SUPPORT || defined INICv2_SUPPORT
 #include	"inic.h"
 #endif
@@ -431,6 +432,7 @@ static int initWebs(void)
  */
 	formDefineUtilities();
 	formDefineInternet();
+	formDefineServices();
 #if defined CONFIG_NET_SCHED
 	formDefineQoS();
 #endif

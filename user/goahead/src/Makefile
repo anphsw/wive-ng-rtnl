@@ -37,7 +37,7 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  security.o sym.o uemf.o url.o value.o \
 				  md5c.o um.o umui.o websda.o emfdb.o \
 				  webrom.o webs.o websuemf.o \
-				  internet.o utils.o wireless.o \
+				  internet.o services.o utils.o wireless.o \
 				  firewall.o management.o wps.o $(NAME).o
 ifneq ("$(CONFIG_RT2860V2_STA)", "")
 DEPEND_FILES += station.o
@@ -143,6 +143,8 @@ inic.o: inic.c inic.h internet.h utils.h webs.h
 legacy.o: legacy.c legacy.h internet.h utils.h webs.h 
 
 internet.o: internet.c internet.h utils.h webs.h  $(CONF_H) $(UCONF_H) $(BUSYBOXCONF_H)
+
+services.o: services.c services.h utils.h webs.h  $(CONF_H) $(UCONF_H) $(BUSYBOXCONF_H)
 
 management.o: management.c management.h webs.h $(CONF_H) $(UCONF_H) 
 

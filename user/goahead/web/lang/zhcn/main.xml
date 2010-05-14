@@ -27,6 +27,7 @@
   <message msgid="treeapp site survey" msgstr="基地台扫描" />
   <message msgid="treeapp statistics" msgstr="统计资料" />
   <message msgid="treeapp advance" msgstr="高级设置" />
+  <message msgid="treeapp services" msgstr="服务" />
   <message msgid="treeapp qos" msgstr="QoS质量服务" />
   <message msgid="treeapp 11n configurations" msgstr="11n 设置" />
   <message msgid="treeapp about" msgstr="关于" />
@@ -38,6 +39,8 @@
   <message msgid="treeapp ap client" msgstr="AP Client" />
   <message msgid="treeapp station list" msgstr="客户端列表" />
   <message msgid="treeapp mesh settings" msgstr="网状网络设置" />
+  <message msgid="treeapp dhcp server" msgstr="DHCP 服务器" />
+  <message msgid="treeapp miscellaneous" msgstr="杂项" />
   <message msgid="treeapp firewall" msgstr="防火牆" />
   <message msgid="treeapp ip/port filtering" msgstr="MAC/IP/Port 过泸" />
   <message msgid="treeapp port forwarding" msgstr="Port 转送" />

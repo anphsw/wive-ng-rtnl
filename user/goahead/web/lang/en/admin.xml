@@ -7,12 +7,14 @@
   <message msgid="admin scan" msgstr="Scan" />
 
   <message msgid="man title" msgstr="System Management" />
-  <message msgid="man introduction" msgstr="You may configure administrator account and password, NTP settings, and Dynamic DNS settings here." />
+  <message msgid="man introduction" msgstr="You may configure administrator account and password here." />
+
   <message msgid="man language setting" msgstr="Language Settings" />
   <message msgid="man select language" msgstr="Select Language" />
   <message msgid="man admin setting" msgstr="Adminstrator Settings" />
   <message msgid="man admin account" msgstr="Account" />
   <message msgid="man admin passwd" msgstr="Password" />
+
   <message msgid="man ntp setting" msgstr="NTP Settings" />
   <message msgid="man ntp timezone" msgstr="Time Zone:" />
   <message msgid="man ntp mid island" msgstr="(GMT-11:00) Midway Island, Samoa" />
@@ -62,6 +64,7 @@
   <message msgid="man gap title" msgstr="Green AP" />
   <message msgid="man gap time" msgstr="Duration" />
   <message msgid="man gap action" msgstr="Action" />
+
   <message msgid="man ddns setting" msgstr="DDNS Settings" />
   <message msgid="man ddns provider" msgstr="Dynamic DNS Provider" />
   <message msgid="man ddns none" msgstr="None" />
