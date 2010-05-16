@@ -29,7 +29,7 @@ static struct llc_sap *br_stp_sap;
 
 static int __init br_init(void)
 {
-	int err;
+	int err = 0;
 
 	br_stp_sap = llc_sap_open(LLC_SAP_BSPAN, br_stp_rcv);
 	if (!br_stp_sap) {

@@ -40,7 +40,7 @@ int br_dev_xmit(struct sk_buff *skb, struct net_device *dev)
 	skb->mac.raw = skb->data;
 	skb_pull(skb, ETH_HLEN);
 
-	if (dest[0] & 1)
+	if (is_multicast_ether_addr(dest))
 		br_flood_deliver(br, skb, 0);
 	else if ((dst = __br_fdb_get(br, dest)) != NULL)
 		br_deliver(dst->dst, skb);
@@ -76,7 +76,8 @@ static int br_dev_stop(struct net_device *dev)
 
 static int br_change_mtu(struct net_device *dev, int new_mtu)
 {
-	if (new_mtu < 68 || new_mtu > br_min_mtu(netdev_priv(dev)))
+	struct net_bridge *br = netdev_priv(dev);
+	if (new_mtu < 68 || new_mtu > br_min_mtu(br))
 		return -EINVAL;
 
 	dev->mtu = new_mtu;
