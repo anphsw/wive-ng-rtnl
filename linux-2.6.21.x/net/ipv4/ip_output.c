@@ -221,6 +221,9 @@ int ip_mc_output(struct sk_buff *skb)
 	skb->dev = dev;
 	skb->protocol = htons(ETH_P_IP);
 
+	printk("rt->rt_flags = %x mc_loop=%d\n",
+		rt->rt_flags, sk ? inet_sk(sk)->mc_loop : 0);
+
 	/*
 	 *	Multicasts are looped back for other local users
 	 */
@@ -255,10 +258,12 @@ int ip_mc_output(struct sk_buff *skb)
 	}
 
 	if (rt->rt_flags&RTCF_BROADCAST) {
+		if (!sk || inet_sk(sk)->mc_loop) {
 		struct sk_buff *newskb = skb_clone(skb, GFP_ATOMIC);
 		if (newskb)
 			NF_HOOK(PF_INET, NF_IP_POST_ROUTING, newskb, NULL,
 				newskb->dev, ip_dev_loopback_xmit);
+		}
 	}
 
 	return NF_HOOK_COND(PF_INET, NF_IP_POST_ROUTING, skb, NULL, skb->dev,
