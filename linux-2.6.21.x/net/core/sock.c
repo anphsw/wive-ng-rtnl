@@ -671,8 +671,9 @@ int sock_getsockopt(struct socket *sock, int level, int optname,
 	if(len < 0)
 		return -EINVAL;
 
-	//cleanup v variable
-	memset(&v, 0, sizeof(v));
+        //cleanup v variable                                                                                                  
+        v.val = 0;                                                                                                            
+        memset(&v, 0, sizeof(v)); 
 
 	switch(optname)
 	{
