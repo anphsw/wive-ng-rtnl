@@ -1162,7 +1162,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	/* ok, now we should be set up.. */
         p->exit_signal = (clone_flags & CLONE_THREAD) ? -1 :
                          (clone_flags & CLONE_PARENT) ? current->group_leader->exit_signal :
- 
+                         (clone_flags & CSIGNAL); 
 	p->pdeath_signal = 0;
 	p->exit_state = 0;
 
