@@ -221,8 +221,10 @@ int ip_mc_output(struct sk_buff *skb)
 	skb->dev = dev;
 	skb->protocol = htons(ETH_P_IP);
 
+#if 0 //uncoment for debug
 	printk("rt->rt_flags = %x mc_loop=%d\n",
 		rt->rt_flags, sk ? inet_sk(sk)->mc_loop : 0);
+#endif
 
 	/*
 	 *	Multicasts are looped back for other local users
