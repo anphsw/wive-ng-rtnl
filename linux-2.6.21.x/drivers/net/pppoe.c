@@ -400,11 +400,11 @@ static int pppoe_rcv(struct sk_buff *skb,
 	struct pppoe_hdr *ph;
 	struct pppox_sock *po;
 
-	if (!pskb_may_pull(skb, sizeof(struct pppoe_hdr)))
-		goto drop;
-
 	if (!(skb = skb_share_check(skb, GFP_ATOMIC)))
 		goto out;
+
+	if (!pskb_may_pull(skb, sizeof(struct pppoe_hdr)))
+		goto drop;
 
 	ph = (struct pppoe_hdr *) skb->nh.raw;
 
@@ -776,6 +776,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	struct net_device *dev;
 	char *start;
 
+	lock_sock(sk);
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED)) {
 		error = -ENOTCONN;
 		goto end;
@@ -785,8 +786,6 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	hdr.type = 1;
 	hdr.code = 0;
 	hdr.sid = po->num;
-
-	lock_sock(sk);
 
 	dev = po->pppoe_dev;
 
