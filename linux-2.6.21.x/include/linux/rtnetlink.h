@@ -349,6 +349,8 @@ enum
 #define RTAX_REORDERING RTAX_REORDERING
 	RTAX_HOPLIMIT,
 #define RTAX_HOPLIMIT RTAX_HOPLIMIT
+        RTAX_RTO_MIN,                                                                                                         
+#define RTAX_RTO_MIN RTAX_RTO_MIN 
 	RTAX_INITCWND,
 #define RTAX_INITCWND RTAX_INITCWND
 	RTAX_FEATURES,
