@@ -742,8 +742,7 @@ static int noinline init_post(void)
 	numa_default_policy();
 
 	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
-		printk(KERN_WARNING "Warning: unable to open an initial console.\n");
-
+		printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n"); 
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);
