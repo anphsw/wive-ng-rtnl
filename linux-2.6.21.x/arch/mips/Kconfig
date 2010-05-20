@@ -13,10 +13,6 @@ config ZONE_DMA
 	bool
 	default y
 
-config MIPS_FPU_EMU_STATS
-	bool "Enable/disable mips float point EMU statistic"
-	default n
-
 config RALINK_RT2880_MP
 	bool
 config RALINK_RT2880_SHUTTLE
