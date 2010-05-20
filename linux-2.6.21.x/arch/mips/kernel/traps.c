@@ -28,7 +28,6 @@
 #include <asm/cpu.h>
 #include <asm/dsp.h>
 #include <asm/fpu.h>
-#include <asm/fpu_emulator.h>
 #include <asm/mipsregs.h>
 #include <asm/mipsmtregs.h>
 #include <asm/module.h>
@@ -729,21 +728,6 @@ asmlinkage void do_tr(struct pt_regs *regs)
 		break;
 	case BRK_BUG:
 		die("Kernel bug detected", regs);
-		break;
-	case BRK_MEMU:
-		/*
-		 * Address errors may be deliberately induced by the FPU
-		 * emulator to retake control of the CPU after executing the
-		 * instruction in the delay slot of an emulated branch.
-		 *
-		 * Terminate if exception was recognized as a delay slot return
-		 * otherwise handle as normal.
-		 */
-		if (do_dsemulret(regs))
-			return;
-
-		die_if_kernel("Math emu break/trap", regs);
-		force_sig(SIGTRAP, current);
 		break;
 	default:
 		die_if_kernel("Trap instruction in kernel code", regs);
