@@ -58,7 +58,6 @@ ieee754sp ieee754sp_xcpt(ieee754sp r, const char *op, ...)
 	ax.rv.sp = r;
 	va_start(ax.ap, op);
 	ieee754_xcpt(&ax);
-	va_end(ax.ap);
 	return ax.rv.sp;
 }
 
@@ -85,7 +84,6 @@ ieee754sp ieee754sp_nanxcpt(ieee754sp r, const char *op, ...)
 	ax.rv.sp = r;
 	va_start(ax.ap, op);
 	ieee754_xcpt(&ax);
-	va_end(ax.ap);
 	return ax.rv.sp;
 }
 
@@ -149,6 +147,7 @@ ieee754sp ieee754sp_format(int sn, int xe, unsigned xm)
 
 			switch(ieee754_csr.rm) {
 			case IEEE754_RN:
+				return ieee754sp_zero(sn);
 			case IEEE754_RZ:
 				return ieee754sp_zero(sn);
 			case IEEE754_RU:      /* toward +Infinity */
