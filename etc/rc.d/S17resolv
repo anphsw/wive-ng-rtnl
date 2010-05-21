@@ -4,6 +4,9 @@ start() {
 get_param
 echo "Generate resolve: "
     #in case no previous file
+    if [ $fname = "" ]; then
+	fname = "/etc/resolv.conf"
+    if
     if [ -f $fname ]; then
         touch $fname
     fi
