@@ -1,0 +1,47 @@
+#!/bin/sh
+
+#include kernel config
+. /bin/config.sh
+
+start() {
+if [ -f /bin/mdev ] ; then
+    #create device in /dev
+    mdev -s
+    if [ -f /proc/sys/kernel/hotplug ] ; then
+	echo "Start mdev for support HOTPLUG"
+	printf "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
+		# The special characters have the meaning:
+		# @ Run after creating the device.
+		# $ Run before removing the device.
+		# * Run both after creating and before removing the device." > /etc/mdev.conf
+	if [ $CONFIG_USB_STORAGE != "" ] ; then
+		echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" > /etc/mdev.conf
+	fi
+	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+    fi
+fi
+}
+
+stop() {
+ echo "Stop mdev generate..."
+    killall -q -9 mdev
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac
