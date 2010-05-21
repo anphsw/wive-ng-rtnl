@@ -54,7 +54,6 @@ endchoice
 
 config PREEMPT_BKL
 	bool "Preempt The Big Kernel Lock"
-	depends on SMP || PREEMPT
 	default y
 	help
 	  This option reduces the latency of the kernel by making the

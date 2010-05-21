@@ -32,6 +32,8 @@ struct mips_fpu_emulator_stats {
 	unsigned int errors;
 };
 
+#ifdef CONFIG_DEBUG_FS
 extern struct mips_fpu_emulator_stats fpuemustats;
+#endif
 
 #endif /* _ASM_FPU_EMULATOR_H */
