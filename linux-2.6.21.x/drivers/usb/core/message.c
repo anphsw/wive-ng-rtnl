@@ -1416,14 +1416,14 @@ free_interfaces:
 				return ret;
 			}
 		}
-
-		i = dev->bus_mA - cp->desc.bMaxPower * 2;
-		if (i < 0)
-			dev_warn(&dev->dev, "new config #%d exceeds power "
-					"limit by %dmA\n",
-					configuration, -i);
+        if (cp) {                                                                                                             
+                i = dev->bus_mA - cp->desc.bMaxPower * 2;                                                                     
+                if (i < 0)                                                                                                    
+                        dev_warn(&dev->dev, "new config #%d exceeds power "                                                   
+                                        "limit by %dmA\n",                                                                    
+                                        configuration, -i);                                                                   
+        }  
 	}
-
 	/* Wake up the device so we can send it the Set-Config request */
 	ret = usb_autoresume_device(dev);
 	if (ret)

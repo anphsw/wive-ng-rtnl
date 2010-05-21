@@ -61,7 +61,7 @@ int __compute_return_epc(struct pt_regs *regs)
 	 * bltzal_op, bgezal_op, bltzall_op, bgezall_op.
 	 */
 	case bcond_op:
-		switch (insn.i_format.rt) {
+		switch (insn.i_format.rt & 3) {
 	 	case bltz_op:
 		case bltzl_op:
 			if ((long)regs->regs[insn.i_format.rs] < 0)
