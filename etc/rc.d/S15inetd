@@ -2,12 +2,16 @@
 
 start() {
 echo "Starting inetd: "
-    admID=`nvram_get 2860 Login`
-    if [ "$admID" = "" ]; then
-        admID="Admin"
+    if [ -f /sbin/inetd ]; then
+	admID=`nvram_get 2860 Login`
+	if [ "$admID" = "" ]; then
+    	    admID="Admin"
+	fi
+	if [ -f /bin/dropbear ]; then
+	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
+	fi
+        /sbin/inetd
     fi
-    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
-    /sbin/inetd
 }
 
 stop() {
