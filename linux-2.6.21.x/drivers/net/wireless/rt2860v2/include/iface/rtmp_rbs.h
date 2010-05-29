@@ -66,7 +66,7 @@
 
 
 #define EEPROM_SIZE					0x200
-#define NVRAM_OFFSET				0x30000
+#define NVRAM_OFFSET					0x30000
 #define RF_OFFSET					0x40000
 
 

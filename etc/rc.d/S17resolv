@@ -6,7 +6,7 @@ echo "Generate resolve: "
     #in case no previous file
     if [ $fname = "" ]; then
 	fname = "/etc/resolv.conf"
-    if
+    fi
     if [ -f $fname ]; then
         touch $fname
     fi
@@ -17,7 +17,8 @@ echo "Generate resolve: "
     # set primary and seconday DNS
     if [ "$pd" != "" ]; then
       echo "nameserver $pd" > $fname
-    else # empty dns
+    else
+      # empty dns
       rm -f $fname
     fi
     if [ "$sd" != "" ]; then
