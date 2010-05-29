@@ -1132,9 +1132,8 @@ VOID ApCliIfMonitor(
 					printk("Wireless link down & up!\n");
 //					printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //						count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
-
-					printk("flag:%d\n", flag_Reconnect);	// tmp test
 					if (flag_Reconnect > 2)
+					    // printk("flag:%d\n", flag_Reconnect);
 					    if(ApcliMonitorPid){
 						flag_Reconnect = 0;
 						printk("[w] send SIGUSR2 to ApcliMonitor pid %d\n", ApcliMonitorPid);
