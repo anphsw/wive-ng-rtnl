@@ -58,7 +58,6 @@
 #include <net/netfilter/nf_conntrack_core.h>
 
 #define NF_CONNTRACK_VERSION	"0.5.0"
-#define ASUS_QOS 1
 
 #if 0
 #define DEBUGP printk
@@ -101,7 +100,7 @@ static unsigned int nf_conntrack_next_id;
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
 #define IP_TRACK_SMALL          0x01
 #define IP_TRACK_PORT           0x02
 #define IP_TRACK_DATA           0x04
@@ -815,7 +814,7 @@ void nf_conntrack_free(struct nf_conn *conntrack)
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_free);
 
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
 #define isdigit(c) (c >= '0' && c <= '9') 
  __inline unsigned int atoi(const char *s)
 {
@@ -962,7 +961,7 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	}
 
 	write_lock_bh(&nf_conntrack_lock);
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
         /* if the qos enable and the layer 3 protocol is ipv4 */
         if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4") == 0)) {
                 conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.flag = 0;
@@ -1117,7 +1116,7 @@ resolve_normal_ct(struct sk_buff *skb,
 		if (IS_ERR(h))
 			return (void *)h;
 	}
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
         else if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4")==0)) {
 
                 switch(deal_track(h, ntohs(skb->nh.iph->tot_len))) {
@@ -1685,7 +1684,7 @@ int __init nf_conntrack_init(void)
         nf_conntrack_htable_size = 16384;
         nf_conntrack_max = nf_conntrack_htable_size / 2;
 
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
         for(ret=0; ret<65535; ret++)            //--SZ Angela 09.03 QOS Initialization
                 port_num_udp[ret]=0;
 #endif

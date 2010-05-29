@@ -4,8 +4,6 @@
 #include <linux/types.h>
 #include <linux/netfilter/nf_conntrack_tuple_common.h>
 
-#define ASUS_QOS 1
-
 /* A `tuple' is a structure containing the information to uniquely
   identify a connection.  ie. if two packets have the same tuple, they
   are in the same connection; if not, they are not.
@@ -128,7 +126,7 @@ struct ip_conntrack_tuple_hash
 
 	struct ip_conntrack_tuple tuple;
 
-#ifdef ASUS_QOS
+#ifdef CONFIG_ASUS_QOS
 	struct ip_track track;
 #endif
 };

@@ -738,5 +738,9 @@ config NETFILTER_XT_MATCH_HASHLIMIT
 	  destination address' or `500pps from any given source address'
 	  with a single rule.
 
+config ASUS_QOS
+	bool "Asus conntrack based QoS support Enable"
+	depends on NF_CONNTRACK_ENABLED
+
 endmenu
 

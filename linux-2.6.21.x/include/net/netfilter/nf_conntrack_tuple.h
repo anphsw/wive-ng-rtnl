@@ -12,8 +12,6 @@
 
 #include <linux/netfilter/nf_conntrack_tuple_common.h>
 
-//#define ASUS_QOS 1
-
 /* A `tuple' is a structure containing the information to uniquely
   identify a connection.  ie. if two packets have the same tuple, they
   are in the same connection; if not, they are not.
@@ -124,10 +122,8 @@ DEBUGP("tuple %p: %u %u " NIP6_FMT " %hu -> " NIP6_FMT " %hu\n",	    \
 #define NF_CT_DIRECTION(h)						\
 	((enum ip_conntrack_dir)(h)->tuple.dst.dir)
 
-//#ifdef ASUS_QOS
 #define NF_TRACK_MAX              6
 #define NF_TRACK_COMPARE          40
-
 #define NF_TRACK_FULL           0x01
 #define NF_TRACK_PORT           0x02
 #define NF_TRACK_DATA           0x04
@@ -141,7 +137,6 @@ struct nf_track
         u_int8_t large_packet;
         u_int8_t flag;
 };
-//#endif
 
 /* Connections have two entries in the hash table: one for each way */
 struct nf_conntrack_tuple_hash
@@ -149,9 +144,7 @@ struct nf_conntrack_tuple_hash
 	struct list_head list;
 
 	struct nf_conntrack_tuple tuple;
-//#ifdef ASUS_QOS
         struct nf_track track;
-//#endif
 };
 
 #endif /* __KERNEL__ */
