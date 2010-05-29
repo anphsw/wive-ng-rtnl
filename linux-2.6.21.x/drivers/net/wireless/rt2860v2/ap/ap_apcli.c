@@ -1133,12 +1133,15 @@ VOID ApCliIfMonitor(
 //					printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //						count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
 
-					if ((flag_Reconnect > 2) && ApcliMonitorPid)
-					{
+					printk("flag:%d\n", flag_Reconnect);	// tmp test
+					if (flag_Reconnect > 2)
+					    if(ApcliMonitorPid){
 						flag_Reconnect = 0;
-						printk("send SIGUSR2 to pid %d\n", ApcliMonitorPid);
+						printk("[w] send SIGUSR2 to ApcliMonitor pid %d\n", ApcliMonitorPid);
 						kill_proc(ApcliMonitorPid, SIGUSR2, 1);
-					}
+					    }
+					    else
+						printk("[e] ApcliMonitor nopid\n");
 				}
 				else if (flag_Reconnect && count_Alive > Link_Up_Threshold * 2)	// reset flag_Reconnect
 					flag_Reconnect = 0;
