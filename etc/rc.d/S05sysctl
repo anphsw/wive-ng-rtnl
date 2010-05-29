@@ -33,8 +33,10 @@ start() {
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     fi                                                                                                                       
     echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
-    sysctl -w net.ipv4.ip_conntrack_max=$CONNTRACK_MAX
+
     sysctl -w net.ipv4.netfilter.ip_conntrack_max=$CONNTRACK_MAX
+    sysctl -w net.netfilter.nf_conntrack_max=$CONNTRACK_MAX
+    sysctl -w net.nf_conntrack_max=$CONNTRACK_MAX
     sysctl -w net.ipv4.route.max_size=$ROUTEMAX
     sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
 
