@@ -153,6 +153,7 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 {
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct seq_file *s = data;
+	struct Scsi_Host *shost=sdev->host;
 	struct scsi_disk *sdkp;
 	//struct gendisk *gd;
 	int i;
@@ -160,7 +161,11 @@ static int proc_print_scsidevice(struct device *dev, void *data)
         sdkp=(struct scsi_disk*)dev->driver_data;	// ASUS_ADD
         //gd=sdkp->disk;					// ASUS_ADD
 
-        seq_printf(s, "Diskname: %s ", sdkp->disk->disk_name);	// ASUS_ADD
+        //seq_printf(s, "Diskname: %s ", sdkp->disk->disk_name);	// ASUS_ADD
+        if (strncmp(scsi_device_type(sdev->type), "Direct-Access", 13)==0)	// ASUS ADD
+                seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, sdkp->disk->disk_name);
+        else
+                seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, "NONE");
 
 	seq_printf(s,
 		"Host: scsi%d Channel: %02d Id: %02d Lun: %02d\n  Vendor: ",
