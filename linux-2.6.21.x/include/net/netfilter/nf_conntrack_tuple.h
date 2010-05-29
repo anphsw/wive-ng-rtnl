@@ -137,9 +137,9 @@ DEBUGP("tuple %p: %u %u " NIP6_FMT " %hu -> " NIP6_FMT " %hu\n",	    \
 
 struct nf_track
 {
-        int flag;
         u_int8_t number;
-        int length[NF_TRACK_MAX];
+        u_int8_t large_packet;
+        u_int8_t flag;
 };
 //#endif
 

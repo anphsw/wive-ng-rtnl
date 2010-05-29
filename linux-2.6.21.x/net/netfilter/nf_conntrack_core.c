@@ -102,8 +102,14 @@ DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
 #ifdef ASUS_QOS
+#define IP_TRACK_SMALL          0x01
+#define IP_TRACK_PORT           0x02
+#define IP_TRACK_DATA           0x04
+#define IP_TRACK_UDP            0x08
+
 extern int nf_track_flag;
 extern unsigned long nf_ipaddr;
+u_int8_t port_num_udp[65536];
 #endif
 
 /*
@@ -831,90 +837,88 @@ EXPORT_SYMBOL_GPL(nf_conntrack_free);
 inline int deal_track(struct nf_conntrack_tuple_hash *h, int len)
 {
         struct nf_conntrack_tuple_hash *rep_h;
-        int i, org_len =0, rep_len = 0;
+        unsigned int port=0, dport=0;
+        struct nf_conn *ct = NULL;
 
-	write_lock_bh(&nf_conntrack_lock);
-        /* Add the packet number of this connect track and record the length of the packet */
-        ++h->track.number;
-        h->track.length[(h->track.number-1) % NF_TRACK_MAX] = len;
-        if((h->track.number >NF_TRACK_MAX) && !(h->track.flag & NF_TRACK_FULL))
-                h->track.flag |= NF_TRACK_FULL;
+        // Add the packet number of this connect track and record the length of the packet 
+        h->track.number ++;
+        if(len > 512)
+        	h->track.large_packet++;
 
-        /* The download packet set the NF_TRACK_DOWN flag */
+        // The download packet set the IP_TRACK_DOWN flag
         if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-               h->track.flag |= NF_TRACK_DOWN;
-
-        /* if the destination port of this connect track is one of 80,8080,443.We return NF_TRACK_PORT */
-        if((h->track.flag & NF_TRACK_PORT) == NF_TRACK_PORT)
-	{
-		write_unlock_bh(&nf_conntrack_lock);
-		//printk("return TRACK PORT\n");	// tmp test
-                return NF_TRACK_PORT;
-	}
-
-        /* if the connect track is data connect ,we return NF_TRACK_DATA */
-        if((h->track.flag & NF_TRACK_DATA) == NF_TRACK_DATA)
-	{
-		write_unlock_bh(&nf_conntrack_lock);
-		//printk("return TRACK DATA\n");	// tmp test
-                return NF_TRACK_DATA;
-	}
-        /* if the packet number is larger than the size what we want to compare, return 0 */
-        if(h->track.number > NF_TRACK_COMPARE)
-	{
-		write_unlock_bh(&nf_conntrack_lock);
-                return 0;
-	}
-        /* we just compare datas form the ORIGINAL direction    start compare */
-        if(NF_CT_DIRECTION(h) == IP_CT_DIR_REPLY)
-                //rep_h = &h->ctrack->tuplehash[IP_CT_DIR_ORIGINAL];
-                rep_h = &nf_ct_tuplehash_to_ctrack(h)->tuplehash[IP_CT_DIR_ORIGINAL];
-        else
-                //rep_h = &h->ctrack->tuplehash[IP_CT_DIR_REPLY];
-                rep_h = &nf_ct_tuplehash_to_ctrack(h)->tuplehash[IP_CT_DIR_REPLY];
-
-        if(!rep_h)
-	{
-		write_unlock_bh(&nf_conntrack_lock);
-                return 0;
-	}
-        /* If the packet number reaches the size what we want to compare, we compare */
-        if((h->track.number == NF_TRACK_FULL) && (rep_h->track.flag & NF_TRACK_FULL)) {
-                for(i = 0; i < NF_TRACK_MAX; i++) {
-                        org_len += h->track.length[i];
-                        rep_len += rep_h->track.length[i];
-                }
-
-                /* compare for data */
-                if(org_len > 512*NF_TRACK_MAX || rep_len > 512*NF_TRACK_MAX ) {
-                        /* compare for port */
-                        if(ntohs(h->tuple.dst.u.all) == 80 ||
-                         ntohs(h->tuple.dst.u.all) == 8080 ||
-                         ntohs(h->tuple.dst.u.all) == 443 ||
-                         ntohs(h->tuple.src.u.all) == 80 ||
-                         ntohs(h->tuple.src.u.all) == 8080 ||
-                         ntohs(h->tuple.src.u.all) == 443) 
-			{
-                                h->track.flag |= NF_TRACK_PORT;
-                                rep_h->track.flag |= NF_TRACK_PORT;
-				write_unlock_bh(&nf_conntrack_lock);
-				//printk("return TRACK PORT(2)\n");	// tmp test
-                                return NF_TRACK_PORT;
-                        }
-                        h->track.flag |= NF_TRACK_DATA;
-                        rep_h->track.flag |= NF_TRACK_DATA;
-			write_unlock_bh(&nf_conntrack_lock);
-			//printk("return TRACK DATA(2)\n");	// tmp test
-                        return NF_TRACK_DATA;
-                }
+        {
+               port = h->tuple.dst.u.all;
+               dport = h->tuple.src.u.all;
         }
-        if((h->track.flag & NF_TRACK_DOWN) == NF_TRACK_DOWN)
-	{
-		write_unlock_bh(&nf_conntrack_lock);
-		//printk("return TRACK DOWN\n");	// tmp test
-                return NF_TRACK_DOWN;
-	}
-	write_unlock_bh(&nf_conntrack_lock);
+        else
+        {
+                port = h->tuple.src.u.all;
+                dport = h->tuple.dst.u.all;
+        }
+
+        // if the connect track is data connect ,we return IP_TRACK_DATA
+        if((h->track.flag & IP_TRACK_DATA) == IP_TRACK_DATA)
+                return IP_TRACK_DATA;
+
+        // if the destination port of this connect track is one of 80,8080,443.We return IP_TRACK_PORT
+        if((h->track.flag & IP_TRACK_PORT) == IP_TRACK_PORT)
+                return IP_TRACK_PORT;
+
+        if((h->track.flag & IP_TRACK_SMALL) == IP_TRACK_SMALL)
+                return IP_TRACK_SMALL;
+
+        if((h->track.flag & IP_TRACK_UDP) == IP_TRACK_UDP)
+                return IP_TRACK_UDP;
+
+        ct = nf_ct_tuplehash_to_ctrack(h);
+
+        //start compare 
+        if(NF_CT_DIRECTION(h) == IP_CT_DIR_REPLY)
+                rep_h = &ct->tuplehash[IP_CT_DIR_ORIGINAL];
+        else
+                rep_h = &ct->tuplehash[IP_CT_DIR_REPLY];
+        if(!rep_h)
+                return 0;
+
+        if(ntohs(dport) == 80 || ntohs(dport) == 8080 || ntohs(dport) == 443)
+        {
+                h->track.flag |= IP_TRACK_PORT;
+                rep_h->track.flag |= IP_TRACK_PORT;
+                return IP_TRACK_PORT;
+        }
+
+        // if the port has connections more than 30, we mark it and return IP_TRACK_UDP
+        // h->tuple.dst.protonum == 17 &&
+        if((port_num_udp[port] > 30 || port_num_udp[dport] >30))
+        {
+                h->track.flag |= IP_TRACK_UDP;
+                rep_h->track.flag |= IP_TRACK_UDP;
+                return IP_TRACK_UDP;
+        }
+
+        if(h->track.number == 250)
+        {
+                if(h->track.large_packet<70)
+                {
+                        if((rep_h->track.flag & IP_TRACK_DATA) == IP_TRACK_DATA)
+                        {
+                                h->track.flag |= IP_TRACK_DATA;
+                                return IP_TRACK_DATA;
+                        }
+                        h->track.flag |= IP_TRACK_SMALL;
+                        return IP_TRACK_SMALL;
+                }
+
+                if((rep_h->track.flag & IP_TRACK_SMALL) == IP_TRACK_SMALL)
+                {
+                        rep_h->track.flag |= IP_TRACK_DATA;
+                        rep_h->track.flag &= ~IP_TRACK_SMALL;
+                }
+                h->track.flag |= IP_TRACK_DATA;
+                return IP_TRACK_DATA;
+        }
+
         return 0;
 }
 #endif
@@ -958,6 +962,20 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	}
 
 	write_lock_bh(&nf_conntrack_lock);
+#ifdef ASUS_QOS
+        /* if the qos enable and the layer 3 protocol is ipv4 */
+        if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4") == 0)) {
+                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.flag = 0;
+                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.number =1;
+
+                if(strcmp(l4proto->name, "udp") == 0) {
+                        if(conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip == nf_ipaddr)
+                                port_num_udp[conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all]++;
+                        else
+                                port_num_udp[conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all]++;
+                }
+        }
+#endif
 	exp = find_expectation(tuple);
 
 	if (exp) {
@@ -986,15 +1004,6 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 
 	/* Overload tuple linked list to put us in unconfirmed list. */
 	list_add(&conntrack->tuplehash[IP_CT_DIR_ORIGINAL].list, &unconfirmed);
-
-#ifdef ASUS_QOS
-        if(nf_track_flag == 1)
-	{
-                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.flag = 0;
-                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.number =1;
-                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.length[0] = ntohs(skb->nh.iph->tot_len);
-        }
-#endif
 
 	write_unlock_bh(&nf_conntrack_lock);
 
@@ -1109,23 +1118,32 @@ resolve_normal_ct(struct sk_buff *skb,
 			return (void *)h;
 	}
 #ifdef ASUS_QOS
-        else if(nf_track_flag == 1) {
+        else if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4")==0)) {
 
                 switch(deal_track(h, ntohs(skb->nh.iph->tot_len))) {
-                        case NF_TRACK_DATA:
-                                if ((h->track.flag & NF_TRACK_DOWN) == NF_TRACK_DOWN)
+                        case IP_TRACK_UDP:
+                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
+                                        skb->mark = 91;
+                                else
+                                        skb->mark = 51;
+                                break;
+                        case IP_TRACK_DATA:
+                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
                                         skb->mark = 90;
                                 else
                                         skb->mark = 50;
                                 break;
-                        case NF_TRACK_PORT:
-                                if ((h->track.flag & NF_TRACK_DOWN) == NF_TRACK_DOWN)
+                        case IP_TRACK_PORT:
+                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
                                         skb->mark = 80;
                                 else
                                         skb->mark = 20;
                                 break;
-                        case NF_TRACK_DOWN:
-                                skb->mark = 70;
+                        case IP_TRACK_SMALL:
+                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
+                                        skb->mark = 70;
+                                else
+                                        skb->mark = 10;
                                 break;
                 }
         }
@@ -1666,6 +1684,11 @@ int __init nf_conntrack_init(void)
 	 /* SpeedMod: Hashtable size */
         nf_conntrack_htable_size = 16384;
         nf_conntrack_max = nf_conntrack_htable_size / 2;
+
+#ifdef ASUS_QOS
+        for(ret=0; ret<65535; ret++)            //--SZ Angela 09.03 QOS Initialization
+                port_num_udp[ret]=0;
+#endif
 
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
