@@ -15,11 +15,15 @@ start() {
         nvram_set 2860 Password Admin
     fi
 
-    #generate files
-    echo "$admID::0:0:Adminstrator:/:/bin/sh" > /etc/passwd
-    echo "$admID:x:0:$admID" > /etc/group
-    echo "nobody:x:99:99:Nobody:/:" >> /etc/passwd
-    echo "nobody:x:99:" >> /etc/group
+    #generate pass file
+    printf "$admID::0:0:Adminstrator:/:/bin/sh
+	    nobody:x:99:99:Nobody:/:
+	    " > /etc/passwd
+
+    #generate group file
+    printf "$admID:x:0:$admID
+	    nobody:x:99:
+	    " > /etc/group
 
     #set new password
     echo "$admID:$admPW" > /tmp/tmpchpw
