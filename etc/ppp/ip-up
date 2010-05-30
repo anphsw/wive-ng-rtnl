@@ -43,16 +43,6 @@ OperationMode=`nvram_get 2860 OperationMode`
     $LOG "Replace default route to $PPP_IFACE"
     ip route del default > /dev/null 2>&1
     ip route replace default dev $PPP_IFACE
-    
-    $LOG "Calculate min mtu"
-    MINMTU=`ip link show up | grep mtu | awk {' print $PPP_REMOTE-28 '} | sort -n -r | tail -n1`
-
-    $LOG "Renew mss rules"
-    iptables -t mangle -I FORWARD -p tcp -o $PPP_IFACE --tcp-flags SYN,RST SYN \
-                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-    iptables -t mangle -I FORWARD -p tcp -i $PPP_IFACE --tcp-flags SYN,RST SYN \
-                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-    echo $MINMTU > /tmp/ppp-mtu
 
     iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
     if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then                                                            

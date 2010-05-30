@@ -14,14 +14,6 @@ Lan2Enabled=`nvram_get 2860 Lan2Enabled`
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
 upnp=`nvram_get 2860 upnpEnabled`  
-
-    $LOG "Restore mtu/mru"
-    MINMTU=`cat /tmp/ppp-mtu`
-    iptables -t mangle -D FORWARD -p tcp -o $PPP_IFACE --tcp-flags SYN,RST SYN \
-                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-    iptables -t mangle -D FORWARD -p tcp -i $PPP_IFACE --tcp-flags SYN,RST SYN \
-                            -m tcpmss --mss $MINMTU:1506 -j TCPMSS --set-mss $MINMTU
-    rm -f /tmp/ppp-mtu
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1

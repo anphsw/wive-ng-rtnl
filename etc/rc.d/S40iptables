@@ -12,7 +12,6 @@ start() {
 #########################################DEFAULTRULES###################################
 	#default filters
         iptables -A INPUT -i lo+ -j ACCEPT
-	iptables -A INPUT -m state --state INVALID -j DROP
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 	iptables -t filter -N web_filter
@@ -83,7 +82,7 @@ start() {
         	iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 	    fi
 	    #tune mss size for tranzit packets
-	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	    iptables -t mangle -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	fi
 
 ###########################################UPNPRULES#######################################
