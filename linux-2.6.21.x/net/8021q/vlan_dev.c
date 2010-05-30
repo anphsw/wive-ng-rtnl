@@ -827,7 +827,6 @@ int vlan_dev_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	case SIOCETHTOOL:
 #ifdef CONFIG_ETHTOOL
 		err = dev_ethtool(&ifrr);
-#else
 #endif
 		break;
 	}

@@ -1373,7 +1373,7 @@ static struct devinet_sysctl_table {
 			.procname	= "mc_forwarding",
 			.data		= &ipv4_devconf.mc_forwarding,
 			.maxlen		= sizeof(int),
-			.mode		= 0444,
+			.mode		= 0644,
 			.proc_handler	= &proc_dointvec,
 		},
 		{

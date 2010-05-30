@@ -832,7 +832,6 @@ try_again:
                         return -EAGAIN;
                 goto try_again;
         }
-
 	copied = skb->len - sizeof(struct udphdr);
 	if (copied > len) {
 		copied = len;

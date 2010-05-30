@@ -2155,6 +2155,12 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 		if ((in_dev = __in_dev_get_rcu(dev)) != NULL) {
 			int our = ip_check_mc(in_dev, daddr, saddr,
 				skb->nh.iph->protocol);
+#ifdef CONFIG_IP_MROUTE                                                                                                                     
+                        /*patch from linux 2.4 sfstudio, for IGMPPROXY */
+                        extern struct sock *mroute_socket;
+                        if(mroute_socket)
+                                our = 1;
+#endif              
 			if (our
 #ifdef CONFIG_IP_MROUTE
 			    || (!LOCAL_MCAST(daddr) && IN_DEV_MFORWARD(in_dev))
