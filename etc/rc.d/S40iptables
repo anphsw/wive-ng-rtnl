@@ -120,7 +120,15 @@ start() {
 		iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 	    fi
 	fi
-	
+
+###########################################IGMP-RULES#######################################
+	if [ "$igmpen" = "1" ] && [ "$OperationMode" != "0" ]; then    
+	    #only eth2.2 WAN interface recived multicast
+	    iptables -I INPUT -d 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
+	    iptables -I INPUT -s 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
+	    iptables -I FORWARD -d 224.0.0.0/240.0.0.0 -j ACCEPT
+	    iptables -I FORWARD -s 224.0.0.0/240.0.0.0 -j ACCEPT	
+	fi
 }
 
 
@@ -166,6 +174,7 @@ get_param() {
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     NAT=`nvram_get 2860 natEnabled`
     RMG=`nvram_get 2860 RemoteManagement`
+    igmpen=`nvram_get 2860 igmpEnabled`
 
     #change wan if
     if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
