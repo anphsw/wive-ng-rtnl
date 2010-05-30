@@ -17,7 +17,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 fi
 if [ "$MODE" != "pppd" ]; then 
     service udpxy stop
-    service igmpproxy stop
+    service igmp_proxy stop
     service lld2d stop
     service stp stop
 fi
@@ -37,7 +37,7 @@ fi
 if [ "$MODE" != "pppd" ]; then 
     service stp start
     service lld2d start
-    service igmpproxy start
+    service igmp_proxy start
     service udpxy start
 fi
 service upnp start

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 INITDIR="/etc/init.d"
+RC_DIR="/etc/rc.d"
 
 if [ $# -eq 0 ]; then
    echo "Usage:"
@@ -10,16 +11,12 @@ fi
 
 if [ "$1" = "list" ]; then
   ls $INITDIR/
-  ls $INITDIR2/
+  ls $RC_DIR/
   exit 1;
 fi
 
 if [ -x $INITDIR/$1 ]; then
-    $INITDIR/$1 $2
-    else
-    if [ -x $INITDIR2/$1 ]; then
-        $INITDIR2/$1 $2
-	else
-        echo "No such Service: $1";
-    fi
+    $RC_DIR/*$1 $2
+else
+    echo "No such Service: $1 in $INITDIR";
 fi
