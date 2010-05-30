@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#get params
+. /sbin/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+start() {
+if [ -f /bin/igmpproxy ]; then
+    #workaround fix me later                                                                                                    
+    killall -q -9 igmpproxy
+    igmpen=`nvram_get 2860 igmpEnabled`
+    if [ "$igmpen" = "1" ]; then
+	echo "Starting IGMPPROXY: "
+	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
+        igmpproxy /etc/igmpproxy.conf &
+    fi
+fi
+}
+
+stop() {
+ echo "Stopping IGMPPROXY: "
+  killall -q igmpproxy
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac
