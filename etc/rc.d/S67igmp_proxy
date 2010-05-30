@@ -14,7 +14,7 @@ if [ -f /bin/igmpproxy ]; then
     if [ "$igmpen" = "1" ]; then
 	echo "Starting IGMPPROXY: "
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
-	route add -net 224.0.0.0/8 dev $wan_if  > /dev/null 2>&1
+	route add -net 224.0.0.0/4 dev $wan_if  > /dev/null 2>&1
         igmpproxy /etc/igmpproxy.conf &
     fi
 fi
@@ -23,7 +23,7 @@ fi
 stop() {
  echo "Stopping IGMPPROXY: "
   killall -q igmpproxy
-  route del -net 224.0.0.0/8 dev $wan_if  > /dev/null 2>&1
+  route del -net 224.0.0.0/4 dev $wan_if  > /dev/null 2>&1
 }
 
 case "$1" in

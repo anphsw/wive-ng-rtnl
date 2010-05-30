@@ -44,6 +44,9 @@ OperationMode=`nvram_get 2860 OperationMode`
     ip route del default > /dev/null 2>&1
     ip route replace default dev $PPP_IFACE
 
+    #disable multicast on ppp+ interface
+    ifconfig $PPP_IFACE -allmulti
+
     iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
     if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then                                                            
         $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
