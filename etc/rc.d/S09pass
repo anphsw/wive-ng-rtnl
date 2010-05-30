@@ -16,14 +16,10 @@ start() {
     fi
 
     #generate pass file
-    printf "$admID::0:0:Adminstrator:/:/bin/sh
-	    nobody:x:99:99:Nobody:/:
-	    " > /etc/passwd
+    printf "$admID::0:0:Adminstrator:/:/bin/sh\nnobody:x:99:99:Nobody:/:\n" > /etc/passwd
 
     #generate group file
-    printf "$admID:x:0:$admID
-	    nobody:x:99:
-	    " > /etc/group
+    printf "$admID:x:0:$admID\nnobody:x:99:\n" > /etc/group
 
     #set new password
     echo "$admID:$admPW" > /tmp/tmpchpw

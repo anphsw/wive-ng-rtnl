@@ -26,10 +26,9 @@ MODIFIED=0
             fi
             outid=$outid$id
         done
-        echo "UPNP UUID is $outid"
-        echo "uuid=""$outid" >> /etc/miniupnpd.conf.uuid
         serial=`hostid`
-        echo "serial=""$serial" >> /etc/miniupnpd.conf.uuid
+        echo "UPNP UUID is $outid , serial is $serial"
+        printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
 	MODIFIED=1
     fi
     if [ $MODIFIED = "1" ]; then
