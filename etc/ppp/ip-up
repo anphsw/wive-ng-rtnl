@@ -46,6 +46,7 @@ OperationMode=`nvram_get 2860 OperationMode`
 
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
+    ifconfig $PPP_IFACE -multicast
 
     iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
     if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then                                                            
