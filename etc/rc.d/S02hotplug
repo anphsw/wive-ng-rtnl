@@ -9,7 +9,8 @@ if [ -f /bin/mdev ] ; then
     mdev -s
     if [ -f /proc/sys/kernel/hotplug ] ; then
 	echo "Start mdev for support HOTPLUG"
-	printf "# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
+	printf "
+		# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
 		# The special characters have the meaning:
 		# @ Run after creating the device.
 		# $ Run before removing the device.
