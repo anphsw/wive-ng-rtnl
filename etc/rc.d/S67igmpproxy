@@ -22,7 +22,7 @@ if [ -f /bin/igmpproxy ]; then
 	    altnet 0.0.0.0/0
 	    phyint $lan_if downstream  ratelimit 0  threshold 1
 	    phyint ppp0 disabled
-	" >> /etc/igmpproxy.conf
+	" > /etc/igmpproxy.conf
         igmpproxy /etc/igmpproxy.conf &
     fi
 fi

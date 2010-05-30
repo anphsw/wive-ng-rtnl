@@ -62,7 +62,7 @@ if [ -f /bin/radvd ]; then
             		AdvRouterAddr off;
     		};
 	    };
-	" >> /etc/radvd.conf
+	" > /etc/radvd.conf
 
 	echo "Starting radvd"
 	radvd -s -C /etc/radvd.conf -d 1 &
