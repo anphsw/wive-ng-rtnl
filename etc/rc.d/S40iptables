@@ -122,12 +122,18 @@ start() {
 	fi
 
 ###########################################IGMP-RULES#######################################
-	if [ "$igmpen" = "1" ] && [ "$OperationMode" != "0" ]; then    
-	    #only eth2.2 WAN interface recived multicast
-	    iptables -I INPUT -d 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
-	    iptables -I INPUT -s 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
-	    iptables -I FORWARD -d 224.0.0.0/240.0.0.0 -j ACCEPT
-	    iptables -I FORWARD -s 224.0.0.0/240.0.0.0 -j ACCEPT	
+	#only eth2.2 WAN interface recived multicast
+	if [ "$OperationMode" != "0" ]; then    
+	    #INPUT needed by unpxy and igmpproxy
+	    if [ "$igmpen" = "1" ] || [ "$QOS" = "1" ]; then    
+	        iptables -I INPUT -d 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
+		iptables -I INPUT -s 224.0.0.0/240.0.0.0 -i eth2.2 -j ACCEPT
+	    fi
+	    #FORWARD rules needed only for ignpproxy.
+	    if [ "$igmpen" = "1" ]; then
+		iptables -I FORWARD -d 224.0.0.0/240.0.0.0 -j ACCEPT
+		iptables -I FORWARD -s 224.0.0.0/240.0.0.0 -j ACCEPT
+	    fi
 	fi
 }
 
@@ -175,6 +181,7 @@ get_param() {
     NAT=`nvram_get 2860 natEnabled`
     RMG=`nvram_get 2860 RemoteManagement`
     igmpen=`nvram_get 2860 igmpEnabled`
+    QOS=`nvram_get 2860 WmmCapable`
 
     #change wan if
     if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
