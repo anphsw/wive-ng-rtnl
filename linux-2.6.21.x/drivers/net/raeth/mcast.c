@@ -6,7 +6,9 @@
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/netdevice.h>
+#include <linux/etherdevice.h>
 #include <linux/if_vlan.h>
+#include <linux/if_ether.h>
 #include <asm/semaphore.h>
 
 
@@ -36,15 +38,6 @@ typedef struct {
 mcast_entry mcast_tbl[MAX_MCAST_ENTRY];
 atomic_t mcast_entry_num=ATOMIC_INIT(0);
 DECLARE_MUTEX(mtbl_lock);
-
-uint32_t inline is_multicast_pkt(uint8_t *mac)
-{
-    if(mac[0]==0x01) {
-	return 1;
-    }else{
-	return 0;
-    }
-}
 
 int32_t inline mcast_entry_get(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
 {
@@ -154,7 +147,7 @@ int32_t mcast_rx(struct sk_buff * skb)
     }
 
 
-    if(is_multicast_pkt(eth->h_dest)) {
+    if(is_multicast_ether_addr(eth->h_dest)) {
 	MCAST_PRINT("%s: %0X:%0X:%0X:%0X:%0X:%0X\n", __FUNCTION__, \
 		MAC_ARG(eth->h_dest));
 
@@ -174,11 +167,11 @@ int32_t mcast_tx(struct sk_buff *skb)
     struct vlan_ethhdr *eth = (struct vlan_ethhdr *)(skb->data);
 
 
-    if(is_multicast_pkt(eth->h_dest)) {
+    if(is_multicast_ether_addr(eth->h_dest)) {
 	MCAST_PRINT("%s: %0X:%0X:%0X:%0X:%0X:%0X\n", __FUNCTION__,\
 	       	MAC_ARG(eth->h_dest));
 
-	if(ntohs(eth->h_vlan_proto)==0x8100) {
+	if(ntohs(eth->h_vlan_proto)==ETH_P_8021Q) {
 	    mcast_entry_ins(eth->h_vlan_TCI, eth->h_source, eth->h_dest);
 	} else {
 	    mcast_entry_ins(0, eth->h_source, eth->h_dest);
