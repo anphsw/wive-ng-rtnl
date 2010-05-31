@@ -195,9 +195,8 @@ int sigUSR1Handler(int signo);
         for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
 	    printf("getIf by Ix[%d]\n", Ix);    // tmp test
 	    if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
-		printf("Dp state is UPSTREAM\n");   // tmp test
                 if(Dp->state == IF_STATE_UPSTREAM) {
-		    printf("set upStreamVif as %d\n", Ix);  // tmp test
+		    printf("Dp state is UPSTREAM, set upStreamVif as %d\n", Ix);  // tmp test
                     if(upStreamVif == -1) {
                         upStreamVif = Ix;
                     } else {
