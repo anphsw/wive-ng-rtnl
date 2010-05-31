@@ -146,7 +146,6 @@ struct IfDesc {
     short               Flags;
     short               state;
     struct SubnetList*  allowednets;
-    struct SubnetList*  allowedgroups;
     unsigned int        robustness;
     unsigned char       threshold;   /* ttl limit */
     unsigned int        ratelimit; 
