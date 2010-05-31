@@ -65,6 +65,9 @@
 64) pptp module patches from wl500 project<br>
 65) More user/password length to pptp/l2tp mode<br>
 66) More clean init.d scripts<br>
+67) Fix kernel crash on recive multicast<br>
+68) Autodetect RAM size (16-64) work now for all devices<br>
+69) UDPXY work now<br>
 
 <br><br>
 <b>For support see:</b><br>

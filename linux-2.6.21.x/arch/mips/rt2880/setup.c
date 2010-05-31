@@ -149,7 +149,7 @@ void __init rt2880_setup(void)
 extern unsigned long detect_ram_sequence[4];
 void __init plat_mem_setup(void)
 {
-  printk("DetectRAMsequence\n  MAX memory:%ld[%ld]\n  RAM after check region:%ld\n  FullviewRAM:%ld\n",
+  printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM after first pass:[%ld]\nRAM after second pass:[%ld]\nFullviewRAM:[%ld]\n",
            detect_ram_sequence[0],detect_ram_sequence[1],detect_ram_sequence[2],detect_ram_sequence[3]);
   rt2880_setup();
 }

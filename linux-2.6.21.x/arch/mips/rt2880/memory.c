@@ -44,17 +44,14 @@
 #include <asm/bootinfo.h>
 #include <asm/page.h>
 #include <asm/system.h>
-
 #include <linux/irq.h>
 #include <asm/irq_cpu.h>
+#include <asm/rt2880/prom.h>
+
+//#define DEBUG
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
-
-unsigned short totall_system_memory_detected;
 unsigned long detect_ram_sequence[4];
-
-#include <asm/rt2880/prom.h>
-//#define DEBUG
 
 enum surfboard_memtypes {
 	surfboard_dontuse,
@@ -154,71 +151,64 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 
 	return &mdesc[0];
 }
-#if 0
-static int __init prom_memtype_classify (unsigned int type)
-{
-	switch (type) {
-	case surfboard_ram:
-		return BOOT_MEM_RAM;
-	case surfboard_rom:
-		return BOOT_MEM_ROM_DATA;
-	default:
-		return BOOT_MEM_RESERVED;
-	}
-}
-#endif
 
 void __init prom_meminit(void)
 {
-
-    char *ptr;
-    unsigned long memsize;
-    unsigned long reg_mem;
-    //int cnt=1;
-    unsigned long mempos;
-    unsigned long memmeg;
-    unsigned short save_dword;
+    unsigned long mem, memsize, reg_mem, mempos, memmeg;
+    unsigned long before, offset;
     unsigned long flags;
+    unsigned short save_dword;
 
-    //struct prom_pmemblock *p;
 #ifdef DEBUG
-	struct prom_pmemblock *psave;
+    struct prom_pmemblock *psave;
 #endif
-        spin_lock_irqsave(&rtlmem_lock, flags);
-       //Maximum RAM
-       reg_mem = 32;
-       detect_ram_sequence[0] = reg_mem;
-       detect_ram_sequence[1] = reg_mem;
-       //Test to be sure in RAM capacity
-       for(memmeg=4;memmeg<reg_mem;memmeg+=4){
+       spin_lock_irqsave(&rtlmem_lock, flags);
+       //Maximum RAM for autodetect
+       reg_mem = 64;
+       //FIRST PASS RAM capacity
+       for(memmeg=8;memmeg<reg_mem;memmeg+=8){
+	    mempos = 0xa0000000L + memmeg * 0x100000;
+	    save_dword = *(volatile unsigned short *)mempos;
 
-           mempos = 0xa0000000L + memmeg * 0x100000;
+	    *(volatile unsigned short *)mempos = (unsigned short)0xABCD;
+	    if (*(volatile unsigned short *)mempos != (unsigned short)0xABCD){
+		*(volatile unsigned short *)mempos = save_dword;
+		break;
+	    }
 
-           save_dword = *(volatile unsigned short *)mempos;
+	    *(volatile unsigned short *)mempos = (unsigned short)0xDCBA;
+	    if (*(volatile unsigned short *)mempos != (unsigned short)0xDCBA){
+		*(volatile unsigned short *)mempos = save_dword;
+		break;
+	    }
+	    *(volatile unsigned short *)mempos = save_dword;
+	}
 
-           *(volatile unsigned short *)mempos = (unsigned short)0xABCD;
+       //SECOND PASS Test to be sure in RAM capacity
+       before = ((unsigned long) &prom_init) & (127 << 20);
+       offset = ((unsigned long) &prom_init) - before;
+       for (mem = before + (1 << 20); mem < (reg_mem << 20); mem += (1 << 20))
+         if (*(unsigned long *)(offset + mem) == *(unsigned long *)(prom_init))
+	 {
+    		mem -= before;
+		break;
+	 }
 
-           if (*(volatile unsigned short *)mempos != (unsigned short)0xABCD){
-               *(volatile unsigned short *)mempos = save_dword;
-               break;
-           }
-
-           *(volatile unsigned short *)mempos = (unsigned short)0xDCBA;
-
-           if (*(volatile unsigned short *)mempos != (unsigned short)0xDCBA){
-               *(volatile unsigned short *)mempos = save_dword;
-               break;
-           }
-
-           *(volatile unsigned short *)mempos = save_dword;
-       }
-
+       //Calculate and set	
        memsize = memmeg << 20;
+       detect_ram_sequence[0] = reg_mem;
+       detect_ram_sequence[1] = memsize;
 
-       detect_ram_sequence[2] = memmeg;
+       //Select smallest size from pass
+       if(mem < memsize){
+	    memsize = mem;
+	    memmeg  = mem >> 20;
+	}
+
+       detect_ram_sequence[2] = mem;
        detect_ram_sequence[3] = memsize;
+
        spin_unlock_irq(&rtlmem_lock);
-       totall_system_memory_detected = memmeg;
 
 #ifdef CONFIG_RAM_SIZE_AUTO
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
@@ -233,7 +223,6 @@ void __init prom_meminit(void)
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
 #endif
 #endif	
-	//p = prom_getmdesc();
 #ifdef DEBUG
 	prom_printf("MEMORY DESCRIPTOR dump:\n");
 	psave = p;	/* Save p */
@@ -246,18 +235,6 @@ void __init prom_meminit(void)
 	}
 	p = psave;	/* Restore p */
 
-#endif
-#if 0
-	while (p->size) {
-		long type;
-		unsigned long base, size;
-
-		type = prom_memtype_classify (p->type);
-		base = p->base;
-		size = p->size;
-		add_memory_region(base, size, type);
-                p++;
-	}
 #endif
 }
 
@@ -275,28 +252,3 @@ void __init prom_free_prom_memory(void)
                                 addr, addr + boot_mem_map.map[i].size);
         }
 }
-#if 0
-void __init
-prom_free_prom_memory (void)
-{
-	int i;
-	unsigned long freed = 0;
-	unsigned long addr;
-
-	for (i = 0; i < boot_mem_map.nr_map; i++) {
-		if (boot_mem_map.map[i].type != BOOT_MEM_ROM_DATA)
-			continue;
-
-		addr = boot_mem_map.map[i].addr;
-		while (addr < boot_mem_map.map[i].addr
-			      + boot_mem_map.map[i].size) {
-			ClearPageReserved(virt_to_page(__va(addr)));
-			set_page_count(virt_to_page(__va(addr)), 1);
-			free_page((unsigned long)__va(addr));
-			addr += PAGE_SIZE;
-			freed += PAGE_SIZE;
-		}
-	}
-	printk("Freeing prom memory: %ldkb freed\n", freed >> 10);
-}
-#endif
