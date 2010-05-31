@@ -3195,9 +3195,7 @@ int __init ip_rt_init(void)
 	rt_hash_lock_init();
 
 	ipv4_dst_ops.gc_thresh = (rt_hash_mask + 1);
-	//ip_rt_max_size = (rt_hash_mask + 1) * 16;
-	/* SpeedMod: Tuning */
-	ip_rt_max_size = (rt_hash_mask + 1) * 2;
+	ip_rt_max_size = (rt_hash_mask + 1) * 8; //normal speed and normal stability sfstudio
 
 	devinet_init();
 	ip_fib_init();
