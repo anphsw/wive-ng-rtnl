@@ -10,8 +10,13 @@ start() {
 if [ -f /bin/udpxy ]; then
  QOS=`nvram_get 2860 WmmCapable`
     if [ "$QOS" = "1" ]; then
-      echo "UDPXY start"
-	udpxy -m br0 -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
+        if [ "$wan_if" = "" ]; then                                                                                                         
+            wan_igmp_if="eth2.2"                                                                                                            
+        else                                                                                                                                
+            wan_igmp_if=$wan_if                                                                                                             
+        fi                         
+        echo "UDPXY start"
+	udpxy -m $wan_igmp_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi
 fi
 }
