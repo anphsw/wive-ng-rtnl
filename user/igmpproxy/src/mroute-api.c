@@ -106,6 +106,13 @@ void addVIF( struct IfDesc *IfDp )
     struct vifctl VifCtl;
     struct VifDesc *VifDp;
 
+    /*check if IfDp has beed added*/
+    for( VifDp = VifDescVc; VifDp < VCEP( VifDescVc ); VifDp++ ) {
+           //printf("%s: name=%s\n",__FUNCTION__,VifDp->IfDp->Name);
+           if( VifDp->IfDp  && strcmp(VifDp->IfDp->Name,IfDp->Name)==0)
+                       return VifDp - VifDescVc;
+    }                       
+
     /* search free VifDesc
      */
     for ( VifDp = VifDescVc; VifDp < VCEP( VifDescVc ); VifDp++ ) {
@@ -246,5 +253,9 @@ int getVifIx( struct IfDesc *IfDp )
     return -1;
 }
 
-
-
+unsigned long getAddrByVifIx(int ix)                                                                                                       
+{                                                                                                                                          
+       if(ix >= MAXVIFS)                                                                                                                   
+               return 0;                                                                                                                   
+       return VifDescVc[ix].IfDp->InAdr.s_addr;                                                                                            
+}   
