@@ -162,6 +162,10 @@ int addMRoute( struct MRouteDesc *Dp )
 
     /* copy the TTL vector
      */
+    if (    sizeof( CtlReq.mfcc_ttls ) != sizeof( Dp->TtlVc )                                                                              
+            || VCMC( CtlReq.mfcc_ttls ) != VCMC( Dp->TtlVc )                                                                               
+       )                                                                                                                                   
+        my_log( LOG_ERR, 0, "data types doesn't match in " __FILE__ ", source adaption needed !" );   
 
     memcpy( CtlReq.mfcc_ttls, Dp->TtlVc, sizeof( CtlReq.mfcc_ttls ) );
 
