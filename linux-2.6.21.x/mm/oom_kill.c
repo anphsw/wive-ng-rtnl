@@ -27,7 +27,7 @@
 #include <linux/signal.h>
 
 int sysctl_panic_on_oom;
-extern int mm_kill_flag;	/* ASUS_MM */
+extern int mm_kill_flag;
 /* #define DEBUG */
 
 /**
@@ -71,6 +71,12 @@ unsigned long badness(struct task_struct *p, unsigned long uptime)
 	 * After this unlock we can no longer dereference local variable `mm'
 	 */
 	task_unlock(p);
+
+	/*
+	 * swapoff can easily use up all memory, so kill those first.
+	 */
+	if (p->flags & PF_SWAPOFF)
+		return ULONG_MAX;
 
 	/*
 	 * swapoff can easily use up all memory, so kill those first.
@@ -472,9 +478,9 @@ out:
 	if (!test_thread_flag(TIF_MEMDIE))
 		schedule_timeout_uninterruptible(1);
 
-	if(ct_policy > 0)	// ASUS ADD
+	if(ct_policy > 0)
 	{
-		printk("\n[K] we got out of mem event\n");	// tmp test
+		printk("\nKill process by oom\n");
 		mm_kill_flag = 301;
 		kill_proc(1, SIGUSR1, 1);
 	}

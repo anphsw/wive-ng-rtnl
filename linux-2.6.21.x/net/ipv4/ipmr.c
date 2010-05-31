@@ -67,7 +67,8 @@
 #define CONFIG_IP_PIMSM	1
 #endif
 
-static struct sock *mroute_socket;
+//patch from 2.4 kernel for igmpproxy sfstudio
+struct sock *mroute_socket;
 
 
 /* Big lock, protecting vif table, mrt cache and mroute socket state.
