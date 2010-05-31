@@ -68,6 +68,9 @@ int enableMRouter()
 {
     int Va = 1;
 
+    if (MRouterFD != 0) // already enabled
+        return 0;
+
     if ( (MRouterFD  = socket(AF_INET, SOCK_RAW, IPPROTO_IGMP)) < 0 )
         my_log( LOG_ERR, errno, "IGMP socket open" );
 
