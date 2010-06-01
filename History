@@ -68,6 +68,7 @@
 67) Fix kernel crash on recive multicast<br>
 68) Autodetect RAM size (16-64) work now for all devices<br>
 69) UDPXY work now<br>
+70) Igmpproxy work now<br>
 
 <br><br>
 <b>For support see:</b><br>
