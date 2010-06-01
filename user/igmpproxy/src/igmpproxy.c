@@ -198,7 +198,7 @@ int sigUSR1Handler(int signo);
 
     /* create VIFs for all IP, non-loop interfaces
      */
-	log(LOG_ERR, 0, "crate VIFs for all IP\n");	// tmp test
+	my_log(LOG_ERR, 0, "crate VIFs for all IP\n");	// tmp test
     {
         unsigned Ix;
         struct IfDesc *Dp;
