@@ -134,7 +134,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TZ", tz);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ntp start");
+	doSystem("service ntp restart");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
@@ -857,7 +857,7 @@ error:
 
 void management_init(void)
 {
-	doSystem("service ntp start");
+	doSystem("service ntp restart");
 #ifdef CONFIG_USER_GOAHEAD_GreenAP
     	doSystem("greenap.sh init");
 #endif
