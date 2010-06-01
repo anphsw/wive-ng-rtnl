@@ -198,7 +198,7 @@ int sigUSR1Handler(int signo);
 
     /* create VIFs for all IP, non-loop interfaces
      */
-	my_log(LOG_ERR, 0, "crate VIFs for all IP\n");	// tmp test
+	my_log(LOG_ERR, 0, "crate VIFs for all IP.");
     {
         unsigned Ix;
         struct IfDesc *Dp;
@@ -206,10 +206,10 @@ int sigUSR1Handler(int signo);
         upStreamVif = -1;
 
         for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
-            my_log(LOG_ERR, 0, "getIf by Ix[%d]\n", Ix);
+            my_log(LOG_ERR, 0, "getIf by Ix[%d]", Ix);
             if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
                 if(Dp->state == IF_STATE_UPSTREAM) {
-		    my_log(LOG_ERR, 0, "Dp state is UPSTREAM ViF %d\n", Ix);
+		    my_log(LOG_ERR, 0, "Dp state is UPSTREAM ViF %d", Ix);
                     if(upStreamVif == -1) {
                         upStreamVif = Ix;
                     } else {
