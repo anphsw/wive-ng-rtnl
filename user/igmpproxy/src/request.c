@@ -63,6 +63,10 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         return;
     }
 
+#ifdef RT3052_SUPPORT
+        remove_member(ntohl(group), ntohl(src));
+#endif
+
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
     if(sourceVif == NULL) {
@@ -82,13 +86,25 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         my_log(LOG_DEBUG, 0, "Should insert group %s (from: %s) to route table. Vif Ix : %d",
             inetFmt(group,s1), inetFmt(src,s2), sourceVif->index);
 
-    	    // The membership report was OK... Insert it into the route table..
-    	    insertRoute(group, sourceVif->index);
-
+	// If we don't have a whitelist we insertRoute and done
+	if(sourceVif->allowedgroups == NULL)
+	{
+	    insertRoute(group, sourceVif->index);
+	    return;
+	}
+	// Check if this Request is legit on this interface
+	struct SubnetList *sn;
+	for(sn = sourceVif->allowedgroups; sn != NULL; sn = sn->next)
+	    if((group & sn->subnet_mask) == sn->subnet_addr)
+	    {
 #ifdef RT3052_SUPPORT
-	       //modify switch ports settings after route add !!! sfstudio
-               insert_multicast_ip(ntohl(group), ntohl(src));
+                insert_multicast_ip(ntohl(group), ntohl(src));
 #endif
+        	// The membership report was OK... Insert it into the route table..
+        	insertRoute(group, sourceVif->index);
+		return;
+	    }
+	my_log(LOG_INFO, 0, "The group address %s may not be requested from this interface. Ignoring.", inetFmt(group, s1));
     } else {
         // Log the state of the interface the report was recieved on.
         my_log(LOG_INFO, 0, "Mebership report was recieved on %s. Ignoring.",
@@ -113,10 +129,6 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
             inetFmt(group, s1));
         return;
     }
-
-#ifdef RT3052_SUPPORT
-       remove_member(ntohl(group), ntohl(src));
-#endif
 
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
@@ -209,19 +221,7 @@ void sendGeneralMembershipQuery() {
 			inetFmt(Dp->InAdr.s_addr,s1),
 			inetFmt(allhosts_group,s2),
 			conf->queryResponseInterval);
-	    }else{
-                my_log(LOG_DEBUG, 0,
-			"Don`t Send membership query from %s to %s. Delay: %d NOT_DOWN_IF",
-			inetFmt(Dp->InAdr.s_addr,s1),
-			inetFmt(allhosts_group,s2),
-			conf->queryResponseInterval);
             }
-	}else{
-                my_log(LOG_DEBUG, 0,
-			"Don`t Send membership query from %s to %s. Delay: %d LOOPBACK or !s_addr",
-			inetFmt(Dp->InAdr.s_addr,s1),
-			inetFmt(allhosts_group,s2),
-			conf->queryResponseInterval);
         }
     }
 
