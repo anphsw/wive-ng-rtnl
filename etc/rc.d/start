@@ -10,10 +10,9 @@ if [ $CONFIG_TMPFS != "" ] ; then
     #mount /tmp /etc in /var
     mkdir -p /var/tmpfs
     mount -o bind /var/tmpfs /tmp
-    mount -o bind /var/tmpfs /var/tmp
     #make dir for rwfs
     mkdir -p /var/rwfs
-    mount -o bind /var/tmpfs /etc
+    mount -o bind /var/rwfs /etc
 fi
 
 TGZfs_size=131072
