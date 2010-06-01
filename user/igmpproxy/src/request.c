@@ -215,13 +215,13 @@ void sendGeneralMembershipQuery() {
 			inetFmt(Dp->InAdr.s_addr,s1),
 			inetFmt(allhosts_group,s2),
 			conf->queryResponseInterval);
-	}else{
                 my_log(LOG_DEBUG, 0,
 			"Don`t Send membership query from %s to %s. Delay: %d LOOPBACK or !s_addr",
 			inetFmt(Dp->InAdr.s_addr,s1),
 			inetFmt(allhosts_group,s2),
 			conf->queryResponseInterval);
             }
+	}else{
         }
     }
 
