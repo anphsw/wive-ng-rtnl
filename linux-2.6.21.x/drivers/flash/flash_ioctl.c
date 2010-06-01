@@ -27,7 +27,6 @@ int flash_ioctl (struct inode *inode, struct file *filp,
 {
     struct flash_opt *opt=(struct flash_opt *)arg;
     unsigned char *buf;
-    unsigned int tmp;
     unsigned int start_sect=0,end_sect=0;
 
     buf=kmalloc(FLASH_MAX_RW_SIZE, GFP_KERNEL);
