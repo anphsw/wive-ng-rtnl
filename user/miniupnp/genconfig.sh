@@ -179,6 +179,13 @@ case $OS_NAME in
 		FW=ipfw
 		OS_URL=http://developer.apple.com/macosx
 		;;
+    Wifi-Router)
+		echo "#define USE_NETFILTER 1" >> ${CONFIGFILE}
+		FW=netfilter
+		OS_NAME=Wifi-Router
+		OS_VERSION=WIVE-RTN
+		OS_URL=http://sadnet.ru
+		;;
 	*)
 		echo "Unknown OS : $OS_NAME"
 		echo "Please contact the author at http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/."
