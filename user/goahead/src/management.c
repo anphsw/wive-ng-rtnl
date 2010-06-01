@@ -818,8 +818,7 @@ static char *getLog(char *filename)
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-        doSystem("service syslog stop");
-        doSystem("service syslog start");
+        doSystem("service syslog restart");
 	websRedirect(wp, "adm/syslog.asp");
 }
 #endif

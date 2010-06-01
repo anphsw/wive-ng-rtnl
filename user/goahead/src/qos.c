@@ -34,8 +34,7 @@ struct entry_s QOS_PROFILE[QOS_PROFILE_ENTRYS_MAX] = {
 
 inline void QoSRestart(void)
 {
-    doSystem("service shaper stop");
-    doSystem("service shaper start");
+    doSystem("service shaper restart");
 }
 
 inline void QoSInit(void)

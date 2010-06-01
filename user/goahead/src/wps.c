@@ -369,7 +369,7 @@ void WPSRestart(void)
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
 		doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
-		doSystem("service wscd start");
+		doSystem("service wscd restart");
 	}
 		
 	wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
@@ -480,11 +480,8 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("route add -host 239.255.255.250 dev br0");
-		doSystem("service wscd stop");
-		doSystem("service wscd start");
+		doSystem("service wscd restart");
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
-//		doSystem("iwpriv ra0 set WscConfMode=%d", wsc_enable + wsc_proxy + wsc_reg);
-//		printf("wsc_enable:%d\nwsc_proxy:%d\nwsc_reg:%d\n",  wsc_enable ,wsc_proxy ,wsc_reg);
 		printf("wsc_enable:%d\n",  7);
 	}
 	

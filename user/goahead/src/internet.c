@@ -1565,7 +1565,7 @@ inline void zebraRestart(void)
 
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service zebra start");
+	doSystem("service zebra stop");
 
 	if(!opmode||!strlen(opmode))
 		return;
