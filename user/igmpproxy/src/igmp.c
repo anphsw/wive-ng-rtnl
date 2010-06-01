@@ -27,7 +27,7 @@
 **  
 **  mrouted 3.9-beta3 - COPYRIGHT 1989 by The Board of Trustees of 
 **  Leland Stanford Junior University.
-**  - Original license can be found in the "doc/mrouted-LINCESE" file.
+**  - Original license can be found in the Stanford.txt file.
 **
 */
 /**
@@ -35,11 +35,11 @@
 *            appropriately...
 */
 
-#include "defs.h"
+#include "igmpproxy.h"
  
 // Globals                  
-uint32     allhosts_group;          /* All hosts addr in net order */
-uint32     allrouters_group;          /* All hosts addr in net order */
+uint32_t     allhosts_group;          /* All hosts addr in net order */
+uint32_t     allrouters_group;          /* All hosts addr in net order */
               
 extern int MRouterFD;
 
@@ -53,13 +53,13 @@ void initIgmp() {
     recv_buf = malloc(RECV_BUF_SIZE);
     send_buf = malloc(RECV_BUF_SIZE);
 
-    k_hdr_include(TRUE);    /* include IP header when sending */
+    k_hdr_include(true);    /* include IP header when sending */
     k_set_rcvbuf(256*1024,48*1024); /* lots of input buffering        */
     k_set_ttl(1);       /* restrict multicasts to one hop */
-    k_set_loop(FALSE);      /* disable multicast loopback     */
+    k_set_loop(false);      /* disable multicast loopback     */
 
     ip         = (struct ip *)send_buf;
-    bzero(ip, sizeof(struct ip));
+    memset(ip, 0, sizeof(struct ip));
     /*
      * Fields zeroed that aren't filled in later:
      * - IP ID (let the kernel fill it in)
@@ -67,7 +67,7 @@ void initIgmp() {
      * - Checksum (let the kernel fill it in)
      */
     ip->ip_v   = IPVERSION;
-    ip->ip_hl  = sizeof(struct ip) >> 2;
+    ip->ip_hl  = (sizeof(struct ip) + 4) >> 2; /* +4 for Router Alert option */
     ip->ip_tos = 0xc0;      /* Internet Control */
     ip->ip_ttl = MAXTTL;    /* applies to unicasts only */
     ip->ip_p   = IPPROTO_IGMP;
@@ -100,7 +100,7 @@ char *igmpPacketKind(u_int type, u_int code) {
  * packet buffer.
  */
 void acceptIgmp(int recvlen) {
-    register uint32 src, dst, group;
+    register uint32_t src, dst, group;
     struct ip *ip;
     struct igmp *igmp;
     int ipdatalen, iphdrlen, igmpdatalen;
@@ -115,7 +115,12 @@ void acceptIgmp(int recvlen) {
     src       = ip->ip_src.s_addr;
     dst       = ip->ip_dst.s_addr;
 
-    IF_DEBUG my_log(LOG_DEBUG, 0, "Got a IGMP request to process...");
+    /* filter local multicast 239.255.255.250 */
+    if (dst == htonl(0xEFFFFFFA))
+    {
+        my_log(LOG_NOTICE, 0, "The IGMP message was local multicast. Ignoring.");
+        return;
+    }
 
     /* 
      * this is most likely a message from the kernel indicating that
@@ -147,8 +152,8 @@ void acceptIgmp(int recvlen) {
             }
             
             // Activate the route.
-            IF_DEBUG my_log(LOG_DEBUG, 0, "Route activate request from %s to %s",
-                         inetFmt(src,s1), inetFmt(dst,s2));
+            my_log(LOG_DEBUG, 0, "Route activate request from %s to %s",
+		    inetFmt(src,s1), inetFmt(dst,s2));
             activateRoute(dst, src);
             
 
@@ -157,7 +162,7 @@ void acceptIgmp(int recvlen) {
     }
 
     iphdrlen  = ip->ip_hl << 2;
-    ipdatalen = ntohs(ip->ip_len) - iphdrlen;
+    ipdatalen = ip_data_len(ip);
 
     if (iphdrlen + ipdatalen != recvlen) {
         my_log(LOG_WARNING, 0,
@@ -187,10 +192,9 @@ void acceptIgmp(int recvlen) {
         return;
     
     case IGMP_V2_LEAVE_GROUP:
-	acceptLeaveMessage(src, group);
+        acceptLeaveMessage(src, group);
         return;
     
-
     case IGMP_MEMBERSHIP_QUERY:
         return;
 
@@ -208,7 +212,7 @@ void acceptIgmp(int recvlen) {
  * Construct an IGMP message in the output packet buffer.  The caller may
  * have already placed data in that buffer, of length 'datalen'.
  */
-void buildIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int datalen) {
+void buildIgmp(uint32_t src, uint32_t dst, int type, int code, uint32_t group, int datalen) {
     struct ip *ip;
     struct igmp *igmp;
     extern int curttl;
@@ -216,8 +220,7 @@ void buildIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int dat
     ip                      = (struct ip *)send_buf;
     ip->ip_src.s_addr       = src;
     ip->ip_dst.s_addr       = dst;
-    ip->ip_len              = MIN_IP_HEADER_LEN + IGMP_MINLEN + datalen;
-    ip->ip_len              = htons(ip->ip_len);
+    ip_set_len(ip, IP_HEADER_RAOPT_LEN + IGMP_MINLEN + datalen);
 
     if (IN_MULTICAST(ntohl(dst))) {
         ip->ip_ttl = curttl;
@@ -225,13 +228,20 @@ void buildIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int dat
         ip->ip_ttl = MAXTTL;
     }
 
-    igmp                    = (struct igmp *)(send_buf + MIN_IP_HEADER_LEN);
+    /* Add Router Alert option */
+    ((u_char*)send_buf+MIN_IP_HEADER_LEN)[0] = IPOPT_RA;
+    ((u_char*)send_buf+MIN_IP_HEADER_LEN)[1] = 0x04;
+    ((u_char*)send_buf+MIN_IP_HEADER_LEN)[2] = 0x00;
+    ((u_char*)send_buf+MIN_IP_HEADER_LEN)[3] = 0x00;
+
+    igmp                    = (struct igmp *)(send_buf + IP_HEADER_RAOPT_LEN);
     igmp->igmp_type         = type;
     igmp->igmp_code         = code;
     igmp->igmp_group.s_addr = group;
     igmp->igmp_cksum        = 0;
     igmp->igmp_cksum        = inetChksum((u_short *)igmp,
-                                         IGMP_MINLEN + datalen);
+                                         IP_HEADER_RAOPT_LEN + datalen);
+
 }
 
 /* 
@@ -239,7 +249,7 @@ void buildIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int dat
  * Then send the message from the interface with IP address 'src' to
  * destination 'dst'.
  */
-void sendIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int datalen) {
+void sendIgmp(uint32_t src, uint32_t dst, int type, int code, uint32_t group, int datalen) {
     struct sockaddr_in sdst;
     int setloop = 0, setigmpsource = 0;
 
@@ -250,18 +260,18 @@ void sendIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int data
         setigmpsource = 1;
         if (type != IGMP_DVMRP || dst == allhosts_group) {
             setloop = 1;
-            k_set_loop(TRUE);
+            k_set_loop(true);
         }
     }
 
-    bzero(&sdst, sizeof(sdst));
+    memset(&sdst, 0, sizeof(sdst));
     sdst.sin_family = AF_INET;
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sdst.sin_len = sizeof(sdst);
 #endif
     sdst.sin_addr.s_addr = dst;
     if (sendto(MRouterFD, send_buf,
-               MIN_IP_HEADER_LEN + IGMP_MINLEN + datalen, 0,
+               IP_HEADER_RAOPT_LEN + IGMP_MINLEN + datalen, 0,
                (struct sockaddr *)&sdst, sizeof(sdst)) < 0) {
         if (errno == ENETDOWN)
             my_log(LOG_ERR, errno, "Sender VIF was down.");
@@ -273,14 +283,13 @@ void sendIgmp(uint32 src, uint32 dst, int type, int code, uint32 group, int data
 
     if(setigmpsource) {
         if (setloop) {
-            k_set_loop(FALSE);
+            k_set_loop(false);
         }
         // Restore original...
         k_set_if(INADDR_ANY);
     }
 
-    IF_DEBUG my_log(LOG_DEBUG, 0, "SENT %s from %-15s to %s",
-        igmpPacketKind(type, code), src == INADDR_ANY ? "INADDR_ANY" :
-        inetFmt(src, s1), inetFmt(dst, s2));
+    my_log(LOG_DEBUG, 0, "SENT %s from %-15s to %s",
+	    igmpPacketKind(type, code), src == INADDR_ANY ? "INADDR_ANY" :
+	    inetFmt(src, s1), inetFmt(dst, s2));
 }
-

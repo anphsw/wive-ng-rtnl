@@ -89,8 +89,9 @@ void age_callout_queue(int elapsed_time) {
             if (_queue == NULL)
                 _queue = ptr;
             last = ptr;
-        }
+         }
     }
+
     queue = ptr;
     if (last) {
         last->next = NULL;
@@ -99,6 +100,7 @@ void age_callout_queue(int elapsed_time) {
     /* process existing events */
     for (ptr = _queue; ptr; ptr = _queue, i++) {
         _queue = _queue->next;
+        my_log(LOG_DEBUG, 0, "About to call timeout %d (#%d)", ptr->id, i);
         if (ptr->func)
              ptr->func(ptr->data);
         free(ptr);
