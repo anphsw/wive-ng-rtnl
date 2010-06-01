@@ -16,9 +16,8 @@ radio_off=`nvram_get 2860 RadioOff`
 
 WAIT_IFUP=2
 
-service lan stop
-service lan start
 service pass start
+service lan restart
 service vpn-passthru start
 
 ifRaxWdsxDown()

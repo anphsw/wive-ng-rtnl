@@ -24,8 +24,7 @@ fi
 
 #restart iptables
 if [ "$MODE" != "pppd" ]; then
-    service iptables stop
-    service iptables start
+    service iptables restart
 fi
 
 #start all

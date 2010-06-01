@@ -98,11 +98,10 @@ case "$1" in
   "-S") config "$1" "$2" "$3";;
   "-r")
  
-    service dhcpd stop
+    killall -q udhcpd
     rm -f $pidfile
     touch $leases
     echo "lease_file $leases" >> $fname
-    echo "Start dhcpserver"
     udhcpd -S $fname &
     config-vlan.sh 2 RRRRR
     ;;
