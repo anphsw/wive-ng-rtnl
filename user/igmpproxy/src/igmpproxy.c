@@ -123,6 +123,10 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         }
 
+#ifdef RT3052_SUPPORT                                                                                                                       
+               rt3052_init();                                                                                                               
+#endif 
+
 	if ( !Log2Stderr ) {
 
 	    // Only daemon goes past this line...
@@ -144,6 +148,10 @@ int main( int ArgCn, char *ArgVc[] ) {
         igmpProxyCleanUp();
 
     } while ( false );
+
+#ifdef RT3052_SUPPORT                                                                                                                       
+       rt3052_fini();                                                                                                                       
+#endif      
 
     // Inform that we are exiting.
     my_log(LOG_INFO, 0, "Shutdown complete....");

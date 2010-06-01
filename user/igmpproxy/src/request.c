@@ -82,6 +82,11 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         my_log(LOG_DEBUG, 0, "Should insert group %s (from: %s) to route table. Vif Ix : %d",
             inetFmt(group,s1), inetFmt(src,s2), sourceVif->index);
 
+#ifdef RT3052_SUPPORT                                                                                                                       
+               //modify switch ports settings after route add !!! sfstudio                                                                  
+               insert_multicast_ip(ntohl(group), ntohl(src));                                                                               
+#endif       
+
 	// If we don't have a whitelist we insertRoute and done
 	if(sourceVif->allowedgroups == NULL)
 	{
@@ -122,6 +127,10 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
             inetFmt(group, s1));
         return;
     }
+
+#ifdef RT3052_SUPPORT                                                                                                                       
+       remove_member(ntohl(group), ntohl(src));                                                                                             
+#endif   
 
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
@@ -195,6 +204,10 @@ void sendGeneralMembershipQuery() {
     struct  Config  *conf = getCommonConfig();
     struct  IfDesc  *Dp;
     int             Ix;
+
+#ifdef RT3052_SUPPORT                                                                                                                       
+    clear_all_entries_report();                                                                                                             
+#endif  
 
     // Loop through all downstream vifs...
     for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
