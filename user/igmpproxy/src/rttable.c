@@ -110,7 +110,8 @@ void initRouteTable() {
 */
 void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
     struct IfDesc*      upstrIf;
-    
+    char buff[200];
+
     // Get the upstream VIF...
     upstrIf = getIfByIx( upStreamVif );
     if(upstrIf == NULL) {
@@ -130,6 +131,10 @@ void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
             joinMcGroup( getMcGroupSock(), upstrIf, route->group );
 
             route->upstrState = ROUTESTATE_JOINED;
+            sprintf(buff,"iptables -t filter -I FORWARD -i %s -d %s -j ACCEPT 2>/dev/null\n",
+                    upstrIf->Name,  inetFmt(route->group, s2));
+            system(buff);
+
         } else {
             my_log(LOG_DEBUG, 0, "No downstream listeners for group %s. No join sent.",
                 inetFmt(route->group, s1));
@@ -146,6 +151,10 @@ void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
             leaveMcGroup( getMcGroupSock(), upstrIf, route->group );
 
             route->upstrState = ROUTESTATE_NOTJOINED;
+            sprintf(buff,"iptables -t filter -D FORWARD -i %s -d %s -j ACCEPT 2>/dev/null\n",
+                    upstrIf->Name,  inetFmt(route->group, s2));
+ 
+            system(buff);
         }
     }
 }
@@ -395,6 +404,10 @@ void ageActiveRoutes() {
     
     my_log(LOG_DEBUG, 0, "Aging routes in table.");
 
+#ifdef RT3052_SUPPORT
+       sweap_no_report_members();
+#endif
+
     // Scan all routes...
     for( croute = routing_table; croute != NULL; croute = nroute ) {
         
@@ -405,9 +418,6 @@ void ageActiveRoutes() {
         if(croute->upstrState != ROUTESTATE_CHECK_LAST_MEMBER) {
             // Only age routes if Last member probe is not active...
             internAgeRoute(croute);
-#ifdef RT3052_SUPPORT                                                                                                                       
-       sweap_no_report_members();                                                                                                           
-#endif    
         }
     }
     logRouteTable("Age active routes");
@@ -566,11 +576,12 @@ int internAgeRoute(struct RouteTable*  croute) {
 
             my_log(LOG_DEBUG, 0, "Removing group %s. Died of old age.",
                          inetFmt(croute->group,s1));
+
+#ifdef RT3052_SUPPORT
+            remove_multicast_ip(ntohl(croute->group));
+#endif
             // No activity was registered within the timelimit, so remove the route.
             removeRoute(croute);
-#ifdef RT3052_SUPPORT                                                                                                                       
-            remove_multicast_ip(ntohl(croute->group));                                                                                      
-#endif   
         }
         // Tell that the route was updated...
         result = 1;

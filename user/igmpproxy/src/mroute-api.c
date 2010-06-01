@@ -68,6 +68,9 @@ int enableMRouter()
 {
     int Va = 1;
 
+    if (MRouterFD != 0) // already enabled
+        return 0;
+
     if ( (MRouterFD  = socket(AF_INET, SOCK_RAW, IPPROTO_IGMP)) < 0 )
         my_log( LOG_ERR, errno, "IGMP socket open" );
 
@@ -102,6 +105,13 @@ void addVIF( struct IfDesc *IfDp )
 {
     struct vifctl VifCtl;
     struct VifDesc *VifDp;
+
+    /*check if IfDp has beed added*/
+    for( VifDp = VifDescVc; VifDp < VCEP( VifDescVc ); VifDp++ ) {
+           //printf("%s: name=%s\n",__FUNCTION__,VifDp->IfDp->Name);
+           if( VifDp->IfDp  && strcmp(VifDp->IfDp->Name,IfDp->Name)==0)
+                       return VifDp - VifDescVc;
+    }                       
 
     /* search free VifDesc
      */
@@ -162,6 +172,10 @@ int addMRoute( struct MRouteDesc *Dp )
 
     /* copy the TTL vector
      */
+    if (    sizeof( CtlReq.mfcc_ttls ) != sizeof( Dp->TtlVc )                                                                              
+            || VCMC( CtlReq.mfcc_ttls ) != VCMC( Dp->TtlVc )                                                                               
+       )                                                                                                                                   
+        my_log( LOG_ERR, 0, "data types doesn't match in " __FILE__ ", source adaption needed !" );   
 
     memcpy( CtlReq.mfcc_ttls, Dp->TtlVc, sizeof( CtlReq.mfcc_ttls ) );
 
@@ -214,8 +228,9 @@ int delMRoute( struct MRouteDesc *Dp )
 
     rc = setsockopt( MRouterFD, IPPROTO_IP, MRT_DEL_MFC,
 		    (void *)&CtlReq, sizeof( CtlReq ) );
-    if (rc)
-        my_log( LOG_WARNING, errno, "MRT_DEL_MFC" );
+    /* no log this, not critical warning sfstudio
+     if (rc)
+        my_log( LOG_WARNING, errno, "MRT_DEL_MFC" ); */
 
     return rc;
 }
@@ -238,5 +253,9 @@ int getVifIx( struct IfDesc *IfDp )
     return -1;
 }
 
-
-
+unsigned long getAddrByVifIx(int ix)                                                                                                       
+{                                                                                                                                          
+       if(ix >= MAXVIFS)                                                                                                                   
+               return 0;                                                                                                                   
+       return VifDescVc[ix].IfDp->InAdr.s_addr;                                                                                            
+}   

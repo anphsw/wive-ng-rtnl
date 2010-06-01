@@ -46,9 +46,6 @@ struct vifconfig {
 
     // Keep allowed nets for VIF.
     struct SubnetList*  allowednets;
-
-    // Allowed Groups
-    struct SubnetList*  allowedgroups;
     
     // Next config in list...
     struct vifconfig*   next;
@@ -205,8 +202,6 @@ void configureVifs() {
                     // Insert the configured nets...
                     vifLast->next = confPtr->allowednets;
 
-		    Dp->allowedgroups = confPtr->allowedgroups;
-
                     break;
                 }
             }
@@ -220,7 +215,7 @@ void configureVifs() {
 */
 struct vifconfig *parsePhyintToken() {
     struct vifconfig  *tmpPtr;
-    struct SubnetList **anetPtr, **agrpPtr;
+    struct SubnetList **anetPtr;
     char *token;
     short parseError = 0;
 
@@ -244,7 +239,6 @@ struct vifconfig *parsePhyintToken() {
     tmpPtr->threshold = 1;
     tmpPtr->state = IF_STATE_DOWNSTREAM;
     tmpPtr->allowednets = NULL;
-    tmpPtr->allowedgroups = NULL;
 
     // Make a copy of the token to store the IF name
     tmpPtr->name = strdup( token );
@@ -254,7 +248,6 @@ struct vifconfig *parsePhyintToken() {
 
     // Set the altnet pointer to the allowednets pointer.
     anetPtr = &tmpPtr->allowednets;
-    agrpPtr = &tmpPtr->allowedgroups; 
 
     // Parse the rest of the config..
     token = nextConfigToken();
@@ -273,20 +266,6 @@ struct vifconfig *parsePhyintToken() {
                 anetPtr = &(*anetPtr)->next;
             }
         }
-	else if(strcmp("whitelist", token)==0) {
-	    // Whitelist
-	    token = nextConfigToken();
-	    my_log(LOG_DEBUG, 0, "Config: IF: Got whitelist token %s.", token);
-	
-	    *agrpPtr = parseSubnetAddress(token);
-	    if(*agrpPtr == NULL) {
-		parseError = 1;
-		my_log(LOG_WARNING, 0, "Unable to parse subnet address.");
-		break;
-	    } else {
-		agrpPtr = &(*agrpPtr)->next;
-	    }
-	}
         else if(strcmp("upstream", token)==0) {
             // Upstream
             my_log(LOG_DEBUG, 0, "Config: IF: Got upstream token.");
@@ -333,7 +312,7 @@ struct vifconfig *parsePhyintToken() {
 
     // Clean up after a parseerror...
     if(parseError) {
-        free(tmpPtr->name);
+	free(tmpPtr->name);
         free(tmpPtr);
         tmpPtr = NULL;
     }
@@ -358,15 +337,14 @@ struct SubnetList *parseSubnetAddress(char *addrstr) {
     tmpStr = strtok(NULL, "/");
     if(tmpStr != NULL) {
         int bitcnt = atoi(tmpStr);
-        if(bitcnt < 0 || bitcnt > 32) {
+	if(bitcnt < 0 || bitcnt > 32) {
             my_log(LOG_WARNING, 0, "The bits part of the address is invalid : %d.",tmpStr);
             return NULL;
         }
 
-	if (bitcnt == 0)
-	    mask = 0;
-	else
-    	    mask <<= (32 - bitcnt);
+        if (bitcnt == 0) mask = 0;
+         else mask <<= (32 - bitcnt);
+
     }
 
     if(addr == -1) {

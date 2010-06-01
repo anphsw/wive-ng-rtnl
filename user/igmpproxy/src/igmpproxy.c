@@ -80,7 +80,10 @@ int main( int ArgCn, char *ArgVc[] ) {
             Log2Stderr = true;
             break;
         case 'v':
-            LogLevel++;
+            if (LogLevel == LOG_INFO)
+                LogLevel = LOG_DEBUG;
+            else
+                LogLevel = LOG_INFO;
             break;
         case 'h':
             fputs(Usage, stderr);
@@ -123,23 +126,10 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         }
 
-	if ( !Log2Stderr ) {
+#ifdef RT3052_SUPPORT
+               rt3052_init();
+#endif
 
-	    // Only daemon goes past this line...
-	    if (fork()) exit(0);
-
-	    // Detach daemon from terminal
-	    if ( close( 0 ) < 0 || close( 1 ) < 0 || close( 2 ) < 0
-		 || open( "/dev/null", 0 ) != 0 || dup2( 0, 1 ) < 0 || dup2( 0, 2 ) < 0
-		 || setpgrp() < 0
-	       ) {
-		my_log( LOG_ERR, errno, "failed to detach daemon" );
-	    }
-	}
-
-#ifdef RT3052_SUPPORT                                                                                                                       
-       rt3052_init();                                                                                                               
-#endif 
         // Go to the main loop.
         igmpProxyRun();
     
@@ -148,9 +138,9 @@ int main( int ArgCn, char *ArgVc[] ) {
 
     } while ( false );
 
-#ifdef RT3052_SUPPORT                                                                                                                       
-       rt3052_fini();                                                                                                                       
-#endif      
+#ifdef RT3052_SUPPORT
+       rt3052_fini();
+#endif
 
     // Inform that we are exiting.
     my_log(LOG_INFO, 0, "Shutdown complete....");
@@ -174,6 +164,15 @@ int igmpProxyInit() {
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
 
+#ifdef RT3052_SUPPORT
+int sigUSR1Handler(int signo);
+
+    sa.sa_handler = sigUSR1Handler;
+    sa.sa_flags = 0;    /* Interrupt system calls */
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGUSR1, &sa, NULL);
+#endif
+
     // Loads configuration for Physical interfaces...
     buildIfVc();    
     
@@ -188,6 +187,7 @@ int igmpProxyInit() {
 
     /* create VIFs for all IP, non-loop interfaces
      */
+	printf("crate VIFs for all IP\n");      // tmp test
     {
         unsigned Ix;
         struct IfDesc *Dp;
@@ -195,14 +195,17 @@ int igmpProxyInit() {
         upStreamVif = -1;
 
         for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
-
-            if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
+	    printf("getIf by Ix[%d]\n", Ix);    // tmp test
+	    if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
                 if(Dp->state == IF_STATE_UPSTREAM) {
+		    printf("Dp state is UPSTREAM, set upStreamVif as %d\n", Ix);  // tmp test
                     if(upStreamVif == -1) {
                         upStreamVif = Ix;
                     } else {
                         my_log(LOG_ERR, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.",
                             upStreamVif, Ix);
+                        printf("Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.",
+                            upStreamVif, Ix);  // tmp test
                     }
                 }
 

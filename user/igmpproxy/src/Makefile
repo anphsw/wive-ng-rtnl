@@ -3,11 +3,10 @@ IGMP_PROXY_OBJ= igmpproxy.o config.o confread.o request.o udpsock.o mcgroup.o rt
 		igmp.o ifvc.o callout.o kern.o syslog.o lib.o mroute-api.o
 
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
 
 ifneq ("$(CONFIG_PRODUCT)", "RT2880")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-CFLAGS+= -DRT3052_SUPPORT
+#CFLAGS+= -DRT3052_SUPPORT
 endif
 
 all: $(EXEC)
