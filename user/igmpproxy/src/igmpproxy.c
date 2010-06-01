@@ -123,10 +123,6 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         }
 
-#ifdef RT3052_SUPPORT                                                                                                                       
-               rt3052_init();                                                                                                               
-#endif 
-
 	if ( !Log2Stderr ) {
 
 	    // Only daemon goes past this line...
@@ -141,6 +137,9 @@ int main( int ArgCn, char *ArgVc[] ) {
 	    }
 	}
 
+#ifdef RT3052_SUPPORT                                                                                                                       
+       rt3052_init();                                                                                                               
+#endif 
         // Go to the main loop.
         igmpProxyRun();
     
