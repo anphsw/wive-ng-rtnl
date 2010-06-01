@@ -17,8 +17,9 @@ UPNP_VERSION=20100125
 LOG_MINIUPNPD="LOG_DAEMON"
 
 # detecting the OS name and version
-OS_NAME=`uname -s`
-OS_VERSION=`uname -r`
+OS_NAME=Wifi-Router
+OS_VERSION=WIVE-RTN
+OS_URL=http://sadnet.ru/
 
 # pfSense special case
 if [ -f /etc/platform ]; then
@@ -143,7 +144,6 @@ case $OS_NAME in
 		OS_URL=http://www.sun.com/solaris/
 		;;
 	Linux)
-		OS_URL=http://www.kernel.org/
 		KERNVERA=`echo $OS_VERSION | awk -F. '{print $1}'`
 		KERNVERB=`echo $OS_VERSION | awk -F. '{print $2}'`
 		KERNVERC=`echo $OS_VERSION | awk -F. '{print $3}'`
