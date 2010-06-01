@@ -11,7 +11,7 @@
 
 int set_usage(char *aout)
 {
-#ifndef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	int i, num;
 
 	printf("Usage example: \n");
@@ -58,7 +58,7 @@ int ra_nv_set(int argc,char **argv)
 
 int get_usage(char *aout)
 {
-#ifndef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	int i;
 
 	printf("Usage: \n");
@@ -102,7 +102,7 @@ int ra_nv_get(int argc, char *argv[])
 
 void usage(char *cmd)
 {
-#ifndef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	printf("Usage:\n");
 	printf("  %s <command> [<platform>] [<file>]\n\n", cmd);
 	printf("command:\n");

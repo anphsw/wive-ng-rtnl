@@ -353,7 +353,7 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 
 void usage(void)
 {
-#ifndef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	fprintf(stderr, "Usage: mtd [<options> ...] <command> [<arguments> ...] <device>\n\n"
 	"The device is in the format of mtdX (eg: mtd4) or its label.\n"
 	"mtd recognizes these commands:\n"

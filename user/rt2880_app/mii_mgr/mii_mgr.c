@@ -29,7 +29,7 @@
 
 void show_usage(void)
 {
-#ifndef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	printf("mii_mgr -g -p [phy number] -r [register number]\n");
 	printf("  Get: mii_mgr -g -p 3 -r 4\n\n");
 	printf("mii_mgr -s -p [phy number] -r [register number] -v [0xvalue]\n");

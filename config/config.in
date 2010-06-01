@@ -222,6 +222,7 @@ comment 'Ralink RT288x Application'
 
 bool 'RT288x Application'		CONFIG_RT2880_APP
 if [ "$CONFIG_RT2880_APP" = "y" ]; then
+bool 'Disable help for small ram '	CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 bool 'RT2880 ATE Agent'			CONFIG_RT2880_ATED
 bool 'RT2880 Register R/W'		CONFIG_RT2880_REG_RW
 bool 'RT2880 CSR Test'			CONFIG_RT2880_CSR_TEST
