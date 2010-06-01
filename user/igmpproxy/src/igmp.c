@@ -187,11 +187,11 @@ void acceptIgmp(int recvlen) {
         return;
     
     case IGMP_V2_LEAVE_GROUP:
+	acceptLeaveMessage(src, group);
         return;
     
 
     case IGMP_MEMBERSHIP_QUERY:
-        accept_membership_query(src, dst, group, igmp->igmp_code);
         return;
 
     default:
