@@ -126,7 +126,7 @@ start() {
 	if [ "$OperationMode" != "0" ]; then    
 	    #INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" = "1" ] || [ "$QOS" = "1" ]; then
-		iptables -I INPUT -p igmp -i eth2.2 -j ACCEPT
+		iptables -I INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -I INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
 		iptables -I INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
 	    fi

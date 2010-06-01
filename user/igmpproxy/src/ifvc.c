@@ -193,6 +193,7 @@ struct IfDesc *getIfByIx( unsigned Ix ) {
 *   the supplied IP adress. The IP must match a interfaces
 *   subnet, or any configured allowed subnet on a interface.
 */
+#indef RT3052_SUPPORT
 struct IfDesc *getIfByAddress( uint32_t ipaddr ) {
 
     struct IfDesc *Dp, *_Dp = NULL;
@@ -215,6 +216,27 @@ struct IfDesc *getIfByAddress( uint32_t ipaddr ) {
     }
     return _Dp;
 }
+#else
+struct IfDesc *getIfByAddress( uint32_t ipaddr ) {
+
+    struct IfDesc       *Dp, *_Dp = NULL;
+    struct SubnetList   *currsubnet;
+
+    for ( Dp = IfDescVc; Dp < IfDescEp; Dp++ ) {
+        // Loop through all registered allowed nets of the VIF...
+        for(currsubnet = Dp->allowednets; currsubnet != NULL; currsubnet = currsubnet->next) {
+            // Check if the ip falls in under the subnet....
+            if((currsubnet->subnet_addr & currsubnet->subnet_mask) == 0) {
+                _Dp = Dp; // fallback to wildcard
+            } else
+            if((ipaddr & currsubnet->subnet_mask) == currsubnet->subnet_addr) {
+                return Dp;
+            }
+        }
+    }
+    return _Dp;
+}
+#endif
 
 
 /**

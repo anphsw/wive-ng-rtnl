@@ -10,8 +10,8 @@
 #define UPNP_VERSION	"20100125"
 #define USE_NETFILTER 1
 #define OS_NAME		"Wifi-Router"
-#define OS_VERSION	"WIVE-RTN"
-#define OS_URL		"http://sadnet.ru/"
+#define OS_VERSION	"Wifi-Router/WIVE-RTN"
+#define OS_URL		"http://sadnet.ru"
 
 /* syslog facility to be used by miniupnpd */
 #define LOG_MINIUPNPD		 LOG_DAEMON
