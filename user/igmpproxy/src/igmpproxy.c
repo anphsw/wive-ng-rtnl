@@ -159,7 +159,38 @@ int main( int ArgCn, char *ArgVc[] ) {
     exit(0);
 }
 
+/* create VIFs for all IP, non-loop interfaces */
+void igmpCreateVIFs() {
 
+    unsigned Ix;
+    struct IfDesc *Dp;
+    int vifcount = 0;
+    upStreamVif = -1;
+
+    my_log(LOG_DEBUG, 0, "Create VIFs for all interfaces");
+    
+    for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
+	my_log(LOG_DEBUG, 0, "getIf by Ix[%d]\n", Ix);
+    	    if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
+                if(Dp->state == IF_STATE_UPSTREAM) {
+		    my_log(LOG_DEBUG, 0, "Dp state is UPSTREAM ViF %d\n", Ix);
+                    if(upStreamVif == -1) {
+                        upStreamVif = Ix;
+                    } else {
+                        my_log(LOG_DEBUG, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.",
+                            upStreamVif, Ix);
+                    }
+                }
+                addVIF( Dp );
+                vifcount++;
+            }
+
+        // If there is only one VIF, or no defined upstream VIF, we send an error.
+        if(vifcount < 2 || upStreamVif < 0) {
+            my_log(LOG_ERR, 0, "There must be at least 2 Vif's where one is upstream.");
+        }
+    }  
+}
 
 /**
 *   Handles the initial startup of the daemon.
@@ -196,44 +227,14 @@ int sigUSR1Handler(int signo);
     default: my_log( LOG_ERR, Err, "MRT_INIT failed" );
     }
 
-    /* create VIFs for all IP, non-loop interfaces
-     */
-	my_log(LOG_DEBUG, 0, "Create VIFs for all interfaces");
-        unsigned Ix;
-        struct IfDesc *Dp;
-        int     vifcount = 0;
-        upStreamVif = -1;
-
-        for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
-            my_log(LOG_DEBUG, 0, "getIf by Ix[%d]\n", Ix);
-            if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ) {
-                if(Dp->state == IF_STATE_UPSTREAM) {
-		    my_log(LOG_DEBUG, 0, "Dp state is UPSTREAM ViF %d\n", Ix);
-                    if(upStreamVif == -1) {
-                        upStreamVif = Ix;
-                    } else {
-                        my_log(LOG_DEBUG, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.",
-                            upStreamVif, Ix);
-                    }
-                }
-
-                addVIF( Dp );
-                vifcount++;
-            }
-
-        // If there is only one VIF, or no defined upstream VIF, we send an error.
-        if(vifcount < 2 || upStreamVif < 0) {
-            my_log(LOG_ERR, 0, "There must be at least 2 Vif's where one is upstream.");
-        }
-    }  
-    
+    //Create ViFs
+    igmpCreateVIFs();
     // Initialize IGMP
     initIgmp();
     // Initialize Routing table
     initRouteTable();
     // Initialize timer
     callout_init();
-
 
     return 1;
 }
