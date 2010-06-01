@@ -271,7 +271,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ddns start");
+	doSystem("service ddns restart");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -861,7 +861,7 @@ void management_init(void)
 #ifdef CONFIG_USER_GOAHEAD_GreenAP
     	doSystem("greenap.sh init");
 #endif
-	doSystem("service ddns start");
+	doSystem("service ddns restart");
 	WPSRestart();
 }
 
