@@ -69,6 +69,7 @@
 68) Autodetect RAM size (16-64) work now for all devices<br>
 69) UDPXY work now<br>
 70) Igmpproxy work now<br>
+71) Use TMPFS instead RAMFS. Save memory and increase speed<br>
 
 <br><br>
 <b>For support see:</b><br>

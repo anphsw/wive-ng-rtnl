@@ -765,7 +765,33 @@ static int noinline init_post(void)
             else
             printk("mount /sys file system ok!\n");
 #endif
-#ifdef CONFIG_RAMFS
+#ifdef CONFIG_TMPFS
+        if (sys_mount("tmpfs", "/dev", "tmpfs", 0, NULL) < 0)
+            printk("mount /dev file system fail!\n");
+            else
+            printk("mount /dev file system ok!\n");
+
+        if (sys_mount("tmpfs", "/var", "tmpfs", 0, NULL) < 0)
+            printk("mount /var file system fail!\n");
+            else
+            printk("mount /var file system ok!\n");
+
+/*        if (sys_mount("tmpfs", "/tmp", "tmpfs", 0, NULL) < 0)
+            printk("mount /tmp file system fail!\n");
+            else
+            printk("mount /tmp file system ok!\n");
+
+        if (sys_mount("tmpfs", "/etc", "tmpfs", 0, NULL) < 0)
+            printk("mount /etc file system fail!\n");
+            else
+            printk("mount /etc file system ok!\n");
+*/
+#elif CONFIG_RAMFS
+        if (sys_mount("ramfs", "/dev", "ramfs", 0, NULL) < 0)
+            printk("mount /dev file system fail!\n");
+            else
+            printk("mount /dev file system ok!\n");
+
         if (sys_mount("ramfs", "/var", "ramfs", 0, NULL) < 0)
             printk("mount /var file system fail!\n");
             else
@@ -775,11 +801,6 @@ static int noinline init_post(void)
             printk("mount /tmp file system fail!\n");
             else
             printk("mount /tmp file system ok!\n");
-
-        if (sys_mount("ramfs", "/dev", "ramfs", 0, NULL) < 0)
-            printk("mount /dev file system fail!\n");
-            else
-            printk("mount /dev file system ok!\n");
 
         if (sys_mount("ramfs", "/etc", "ramfs", 0, NULL) < 0)
             printk("mount /etc file system fail!\n");
