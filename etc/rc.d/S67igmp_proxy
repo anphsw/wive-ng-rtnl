@@ -18,11 +18,13 @@ if [ -f /bin/igmpproxy ]; then
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
 	sysctl -w net.ipv4.conf.all.mc_forwarding=1
 	sysctl -w net.ipv4.conf.default.mc_forwarding=1
+	sysctl -w net.ipv4.igmp_max_memberships=30
 	route add -net 224.0.0.0/4 dev $wan_if  > /dev/null 2>&1
         igmpproxy /etc/igmpproxy.conf &
     else
 	sysctl -w net.ipv4.conf.all.mc_forwarding=0
 	sysctl -w net.ipv4.conf.default.mc_forwarding=0
+	sysctl -w net.ipv4.igmp_max_memberships=3
     fi
 fi
 }
@@ -33,6 +35,7 @@ stop() {
     route del -net 224.0.0.0/4 dev $wan_if  > /dev/null 2>&1
     sysctl -w net.ipv4.conf.all.mc_forwarding=0
     sysctl -w net.ipv4.conf.default.mc_forwarding=0
+    sysctl -w net.ipv4.igmp_max_memberships=3
 }
 
 case "$1" in
