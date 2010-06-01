@@ -474,7 +474,7 @@ static void ndisc_send_na(struct net_device *dev, struct neighbour *neigh,
 
 	skb = sock_alloc_send_skb(sk,
 				  (MAX_HEADER + sizeof(struct ipv6hdr) +
-				   len + LL_RESERVED_SPACE(dev)),
+				   len + LL_ALLOCATED_SPACE(dev)),
 				  1, &err);
 
 	if (skb == NULL) {
@@ -1462,7 +1462,7 @@ void ndisc_send_redirect(struct sk_buff *skb, struct neighbour *neigh,
 
 	buff = sock_alloc_send_skb(sk,
 				   (MAX_HEADER + sizeof(struct ipv6hdr) +
-				    len + LL_RESERVED_SPACE(dev)),
+				    len + LL_ALLOCATED_SPACE(dev)),
 				   1, &err);
 	if (buff == NULL) {
 		ND_PRINTK0(KERN_ERR
@@ -1713,7 +1713,7 @@ static int ndisc_ifinfo_sysctl_strategy(ctl_table *ctl, int __user *name,
 
 #endif
 
-int __init ndisc_init(struct net_proto_family *ops)
+int __init ndisc_init(void)
 {
 	struct ipv6_pinfo *np;
 	struct sock *sk;

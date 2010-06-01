@@ -16,6 +16,7 @@
 #ifndef _LINUX_IGMP_H
 #define _LINUX_IGMP_H
 
+#include <linux/types.h>
 #include <asm/byteorder.h>
 
 /*
@@ -129,6 +130,23 @@ struct igmpv3_query {
 #include <linux/skbuff.h>
 #include <linux/timer.h>
 #include <linux/in.h>
+
+static inline struct igmphdr *igmp_hdr(const struct sk_buff *skb)
+{
+	return (struct igmphdr *)skb->h.raw;
+}
+
+static inline struct igmpv3_report *
+			igmpv3_report_hdr(const struct sk_buff *skb)
+{
+	return (struct igmpv3_report *)skb->h.raw;
+}
+
+static inline struct igmpv3_query *
+			igmpv3_query_hdr(const struct sk_buff *skb)
+{
+	return (struct igmpv3_query *)skb->h.raw;
+}
 
 extern int sysctl_igmp_max_memberships;
 extern int sysctl_igmp_max_msf;

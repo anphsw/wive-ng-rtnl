@@ -2455,7 +2455,7 @@ struct proto tcp_prot = {
 #endif
 };
 
-void __init tcp_v4_init(struct net_proto_family *ops)
+void __init tcp_v4_init(void)
 {
 	if (inet_csk_ctl_sock_create(&tcp_socket, PF_INET, SOCK_RAW,
 				     IPPROTO_TCP) < 0)
