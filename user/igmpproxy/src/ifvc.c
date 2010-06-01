@@ -193,7 +193,7 @@ struct IfDesc *getIfByIx( unsigned Ix ) {
 *   the supplied IP adress. The IP must match a interfaces
 *   subnet, or any configured allowed subnet on a interface.
 */
-#indef RT3052_SUPPORT
+#ifndef RT3052_SUPPORT
 struct IfDesc *getIfByAddress( uint32_t ipaddr ) {
 
     struct IfDesc *Dp, *_Dp = NULL;
