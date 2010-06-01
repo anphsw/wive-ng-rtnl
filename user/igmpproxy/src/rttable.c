@@ -395,10 +395,6 @@ void ageActiveRoutes() {
     
     my_log(LOG_DEBUG, 0, "Aging routes in table.");
 
-#ifdef RT3052_SUPPORT                                                                                                                       
-       sweap_no_report_members();                                                                                                           
-#endif    
-
     // Scan all routes...
     for( croute = routing_table; croute != NULL; croute = nroute ) {
         
@@ -409,6 +405,9 @@ void ageActiveRoutes() {
         if(croute->upstrState != ROUTESTATE_CHECK_LAST_MEMBER) {
             // Only age routes if Last member probe is not active...
             internAgeRoute(croute);
+#ifdef RT3052_SUPPORT                                                                                                                       
+       sweap_no_report_members();                                                                                                           
+#endif    
         }
     }
     logRouteTable("Age active routes");
@@ -567,13 +566,11 @@ int internAgeRoute(struct RouteTable*  croute) {
 
             my_log(LOG_DEBUG, 0, "Removing group %s. Died of old age.",
                          inetFmt(croute->group,s1));
-
+            // No activity was registered within the timelimit, so remove the route.
+            removeRoute(croute);
 #ifdef RT3052_SUPPORT                                                                                                                       
             remove_multicast_ip(ntohl(croute->group));                                                                                      
 #endif   
-
-            // No activity was registered within the timelimit, so remove the route.
-            removeRoute(croute);
         }
         // Tell that the route was updated...
         result = 1;

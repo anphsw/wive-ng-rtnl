@@ -82,11 +82,6 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         my_log(LOG_DEBUG, 0, "Should insert group %s (from: %s) to route table. Vif Ix : %d",
             inetFmt(group,s1), inetFmt(src,s2), sourceVif->index);
 
-#ifdef RT3052_SUPPORT                                                                                                                       
-               //modify switch ports settings after route add !!! sfstudio                                                                  
-               insert_multicast_ip(ntohl(group), ntohl(src));                                                                               
-#endif       
-
 	// If we don't have a whitelist we insertRoute and done
 	if(sourceVif->allowedgroups == NULL)
 	{
@@ -100,6 +95,10 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
 	    {
         	// The membership report was OK... Insert it into the route table..
         	insertRoute(group, sourceVif->index);
+#ifdef RT3052_SUPPORT                                                                                                                       
+               //modify switch ports settings after route add !!! sfstudio                                                                  
+               insert_multicast_ip(ntohl(group), ntohl(src));                                                                               
+#endif       
 		return;
 	    }
 	my_log(LOG_INFO, 0, "The group address %s may not be requested from this interface. Ignoring.", inetFmt(group, s1));
@@ -128,9 +127,6 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
         return;
     }
 
-#ifdef RT3052_SUPPORT                                                                                                                       
-       remove_member(ntohl(group), ntohl(src));                                                                                             
-#endif   
 
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
@@ -154,6 +150,9 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
         gvDesc->vifAddr = sourceVif->InAdr.s_addr;
         gvDesc->started = 0;
 
+#ifdef RT3052_SUPPORT                                                                                                                       
+       remove_member(ntohl(group), ntohl(src));                                                                                             
+#endif   
         sendGroupSpecificMemberQuery(gvDesc);
 
     } else {
