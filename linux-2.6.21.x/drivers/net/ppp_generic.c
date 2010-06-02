@@ -561,7 +561,9 @@ static int ppp_ioctl(struct inode *inode, struct file *file,
 	struct ppp_idle idle;
 	struct npioctl npi;
 	int unit, cflags;
+#ifdef CONFIG_SLHC
 	struct slcompress *vj;
+#endif
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;
 
@@ -706,8 +708,8 @@ static int ppp_ioctl(struct inode *inode, struct file *file,
 #ifdef CONFIG_SLHC
 		if (ppp->vj != 0)
 			slhc_free(ppp->vj);
-#endif
 		ppp->vj = vj;
+#endif
 		ppp_unlock(ppp);
 		err = 0;
 		break;
@@ -1105,7 +1107,9 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	//int proto = PPP_PROTO(skb);
 	unsigned int proto = PPP_PROTO(skb);
 	struct sk_buff *new_skb;
+#ifdef CONFIG_SLHC
 	int len;
+#endif
 	unsigned char *cp;
 
 	//printk("[KS]\n");	// tmp test
@@ -1640,9 +1644,11 @@ ppp_receive_error(struct ppp *ppp)
 static void
 ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 {
+#ifdef CONFIG_SLHC
 	struct sk_buff *ns;
-	//int proto, len, npi;
-	int len, npi;
+	int len;
+#endif
+	int npi;
 	unsigned int proto;
 
 	//printk("[K] ppp recv nonmp frame\n");	// tmp test
