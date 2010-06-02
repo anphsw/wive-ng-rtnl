@@ -261,7 +261,7 @@ static void fixup_use_atmel_lock(struct mtd_info *mtd, void *param)
 {
 	mtd->lock = cfi_atmel_lock;
 	mtd->unlock = cfi_atmel_unlock;
-	mtd->flags |= MTD_STUPID_LOCK;
+	mtd->flags |= MTD_POWERUP_LOCK;
 }
 
 static void fixup_s29gl064n_sectors(struct mtd_info *mtd, void *param)
@@ -1600,7 +1600,7 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 			chip->erase_suspended = 0;
 		}
 
-		if (chip_ready(map, adr)) {
+		if (chip_good(map, adr, map_word_ff(map))) {
 
 		    /* We have to make sure sector erease is successful because
 		     * Spansion will report wrong status - FIXME */ 
@@ -1696,7 +1696,7 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			chip->erase_suspended = 0;
 		}
 
-		if (chip_ready(map, adr)) {
+		if (chip_good(map, adr, map_word_ff(map))) {
 		   
 		    /* We have to make sure sector erease is successful because
 		     * Spansion will report wrong status - FIXME */ 
