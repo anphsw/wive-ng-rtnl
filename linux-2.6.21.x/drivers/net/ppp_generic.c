@@ -703,14 +703,12 @@ static int ppp_ioctl(struct inode *inode, struct file *file,
 			err = -ENOMEM;
 			break;
 		}
-#endif
 		ppp_lock(ppp);
-#ifdef CONFIG_SLHC
 		if (ppp->vj != 0)
 			slhc_free(ppp->vj);
 		ppp->vj = vj;
-#endif
 		ppp_unlock(ppp);
+#endif
 		err = 0;
 		break;
 
