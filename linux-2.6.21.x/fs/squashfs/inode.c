@@ -36,10 +36,10 @@
 #include <linux/sqlzma.h>
 #include <linux/sqmagic.h>
 
-#undef KeepPreemptive
-#if defined(CONFIG_PREEMPT) && !defined(UnsquashNoPreempt)
+//#undef KeepPreemptive
+//#if defined(CONFIG_PREEMPT) && !defined(UnsquashNoPreempt)
 #define KeepPreemptive
-#endif
+//#endif
 
 struct sqlzma {
 #ifdef KeepPreemptive

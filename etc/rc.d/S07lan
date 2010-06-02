@@ -69,6 +69,7 @@ echo "Start network interfaces..."
     ip addr flush dev eth2.2
     ip -6 addr flush dev eth2.1
     ip -6 addr flush dev eth2.2
+    ip link set eth2.1 up
  
 #-------------------CONFIG--------------------------------
   ip link set $lan_if down
