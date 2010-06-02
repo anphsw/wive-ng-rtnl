@@ -595,21 +595,21 @@ int device_add(struct device *dev)
 	}
 
 	if (dev->class) {
-		sysfs_create_link(&dev->kobj, &dev->class->subsys.kset.kobj,
+		error = sysfs_create_link(&dev->kobj, &dev->class->subsys.kset.kobj,
 				  "subsystem");
 		/* If this is not a "fake" compatible device, then create the
 		 * symlink from the class to the device. */
 		if (dev->kobj.parent != &dev->class->subsys.kset.kobj)
-			sysfs_create_link(&dev->class->subsys.kset.kobj,
+			error = sysfs_create_link(&dev->class->subsys.kset.kobj,
 					  &dev->kobj, dev->bus_id);
 		if (parent) {
-			sysfs_create_link(&dev->kobj, &dev->parent->kobj,
+			error = sysfs_create_link(&dev->kobj, &dev->parent->kobj,
 							"device");
 #ifdef CONFIG_SYSFS_DEPRECATED
 			class_name = make_class_name(dev->class->name,
 							&dev->kobj);
 			if (class_name)
-				sysfs_create_link(&dev->parent->kobj,
+				error = sysfs_create_link(&dev->parent->kobj,
 						  &dev->kobj, class_name);
 #endif
 		}
@@ -1069,7 +1069,7 @@ int device_rename(struct device *dev, char *new_name)
 	if (dev->class) {
 		sysfs_remove_link(&dev->class->subsys.kset.kobj,
 				  old_symlink_name);
-		sysfs_create_link(&dev->class->subsys.kset.kobj, &dev->kobj,
+		error = sysfs_create_link(&dev->class->subsys.kset.kobj, &dev->kobj,
 				  dev->bus_id);
 	}
 	put_device(dev);
