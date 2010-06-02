@@ -46,7 +46,7 @@ ifeq ($(TC_CONFIG_ATM),y)
   TCSO += q_atm.so
 endif
 
-LDLIBS += -L. -ltc -lm -ldl
+LDLIBS += -L. -ltc -lm -ldl -L../../lib/libflex
 
 LDFLAGS += -Wl,-export-dynamic
 
