@@ -60,9 +60,11 @@ IS_WIVE=`nvram_get IS_WIVE`
 if [ $IS_WIVE = "YES" ]; then
     echo "Normal boot no need reset"
 else
-    fs nvramreset
+    echo "Clear and load defaults to nvram!"
+    ralink_init clear 2860
+    ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
     nvram_set IS_WIVE YES
-    fs restore
+    reboot
 fi
     
 #if compile date fille is exist
