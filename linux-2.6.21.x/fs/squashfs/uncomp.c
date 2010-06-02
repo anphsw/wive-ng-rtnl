@@ -105,7 +105,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 	      struct sized_buf *dst)
 {
-	int err, by_lzma = 0;
+	int err = 0, by_lzma = 0;
 	if (un->un_lzma && is_lzma(*src->buf)) {
 		by_lzma = 1;
 		un->un_cmbuf = src->buf;
