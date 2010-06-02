@@ -64,7 +64,9 @@ else
     ralink_init clear 2860
     ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
     nvram_set IS_WIVE YES
-    reboot
+    echo "Restart nvram_daemon and boot"
+    killall -q nvram_daemon
+    nvram_daemon &
 fi
     
 #if compile date fille is exist
