@@ -1,5 +1,8 @@
 #!/bin/sh
 
+ROOTDIR=`pwd`
+export ROOTDIR=$ROOTDIR
+
 echo "Clean temporary files..."
 find $PWD -name 'config.log' | xargs rm -f
 find $PWD/user -name '*.o' | xargs rm -f
@@ -13,5 +16,6 @@ rm -f version
 
 make clean -C Uboot
 make clean -C tools
+make clean -C user
 make clean
 make mrproper

@@ -1049,6 +1049,9 @@ clean: archclean $(clean-dirs)
 		-o -name '.*.d' -o -name '.*.tmp' -o -name '*.mod.c' \
 		-o -name '*.symtypes' \) \
 		-type f -print | xargs rm -f
+	rm -f vm*                                                                                                                           
+	rm -f packbin*    
+	rm -f linux*    
 
 # mrproper - Delete all generated files, including .config
 #
