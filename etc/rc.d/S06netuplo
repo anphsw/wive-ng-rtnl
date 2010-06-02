@@ -2,7 +2,10 @@
 
 start() {
  echo "Start loopback interface..."
-    ip link set lo 127.0.0.1 up
+    ip link set lo up
+    ip addr flush dev lo
+    ip addr add 127.0.0.0/8 dev lo
+    ip addr add ::1/128 dev lo
     ip route add 127.0.0.0/8 dev lo
     ip route add 127.0.0.0/8 dev lo table default
 }
