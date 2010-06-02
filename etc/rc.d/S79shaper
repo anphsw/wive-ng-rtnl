@@ -85,8 +85,8 @@ get_param
 	    echo "-----------------IMQ-FULL-------------------------"
 	    modprobe imq > /dev/null 2>&1
 	    modprobe ipt_IMQ > /dev/null 2>&1
-	    ifconfig imq0 up > /dev/null 2>&1
-	    ifconfig imq1 up > /dev/null 2>&1
+	    ip link set imq0 up > /dev/null 2>&1
+	    ip link set imq1 up > /dev/null 2>&1
     fi
 else
 	    echo "----------------QOS-DISABLED----------------------"
@@ -105,8 +105,8 @@ stop() {
     tc qdisc del dev $wan_if ingress > /dev/null 2>&1
     tc qdisc del dev $lan_if root  > /dev/null 2>&1
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
-    ifconfig imq0 down > /dev/null 2>&1
-    ifconfig imq1 down > /dev/null 2>&1
+    ip link set imq0 down > /dev/null 2>&1
+    ip link set imq1 down > /dev/null 2>&1
     rmmod imq > /dev/null 2>&1
     rmmod ipt_IMQ > /dev/null 2>&1
 

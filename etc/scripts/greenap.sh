@@ -4,8 +4,8 @@ setGreenAP()
 	end=`nvram_get 2860 GreenAPEnd1`
 	action=`nvram_get 2860 GreenAPAction1`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
+		echo "$start * * * ip link set ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ip link set ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
 		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
 		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
@@ -20,8 +20,8 @@ setGreenAP()
 	end=`nvram_get 2860 GreenAPEnd2`
 	action=`nvram_get 2860 GreenAPAction2`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
+		echo "$start * * * ip link set ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ip link set ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
 		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
 		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
@@ -36,8 +36,8 @@ setGreenAP()
 	end=`nvram_get 2860 GreenAPEnd3`
 	action=`nvram_get 2860 GreenAPAction3`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
+		echo "$start * * * ip link set ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ip link set ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
 		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
 		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
@@ -52,8 +52,8 @@ setGreenAP()
 	end=`nvram_get 2860 GreenAPEnd4`
 	action=`nvram_get 2860 GreenAPAction4`
 	if [ "$action" = "WiFiOFF" ]; then
-		echo "$start * * * ifconfig ra0 down" >> /etc/crontabs/admin
-		echo "$end * * * ifconfig ra0 up" >> /etc/crontabs/admin
+		echo "$start * * * ip link set ra0 down" >> /etc/crontabs/admin
+		echo "$end * * * ip link set ra0 up" >> /etc/crontabs/admin
 	elif [ "$action" = "TX25" ]; then
 		echo "$start * * * greenap.sh txpower 25" >> /etc/crontabs/admin
 		echo "$end * * * greenap.sh txpower normal" >> /etc/crontabs/admin
@@ -135,13 +135,13 @@ case $1 in
 	"txpower")
 		if [ "$2" = "normal" ]; then
 			ralink_init gen 2860
-			ifconfig ra0 down
-			ifconfig ra0 up
+			ip link set ra0 down
+			ip link set ra0 up
 		else
 			cat /etc/Wireless/RT2860/RT2860.dat | sed '/TxPower/d' > /etc/Wireless/RT2860/RT2860.dat
 			echo "TxPower=$2" >> /etc/Wireless/RT2860/RT2860.dat
-			ifconfig ra0 down
-			ifconfig ra0 up
+			ip link set ra0 down
+			ip link set ra0 up
 		fi
 		;;
 esac

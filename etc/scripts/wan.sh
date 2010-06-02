@@ -39,14 +39,14 @@ clone_en=`nvram_get 2860 macCloneEnabled`
 clone_mac=`nvram_get 2860 macCloneMac`
 #MAC Clone: bridge mode doesn't support MAC Clone
 if [ "$opmode" != "0" -a "$clone_en" = "1" ]; then
-	ifconfig $wan_if down > /dev/null 2>&1
+	ip link set $wan_if down > /dev/null 2>&1
         if [ "$opmode" = "2" ]; then
                 rmmod rt2860v2_sta
                 insmod rt2860v2_sta mac=$clone_mac
         else
                 ifconfig $wan_if hw ether $clone_mac
         fi
-	ifconfig $wan_if up
+	ip link set $wan_if up
 fi
 
 if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then

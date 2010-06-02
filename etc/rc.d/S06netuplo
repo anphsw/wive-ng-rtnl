@@ -2,14 +2,14 @@
 
 start() {
  echo "Start loopback interface..."
-    ifconfig lo 127.0.0.1 up
+    ip link set lo 127.0.0.1 up
     ip route add 127.0.0.0/8 dev lo
     ip route add 127.0.0.0/8 dev lo table default
 }
 
 stop() {
  echo "Stop br0 and loopback interfaces..."
-    ifconfig lo down > /dev/null 2>&1
+    ip link set lo down > /dev/null 2>&1
 }
 
 case "$1" in

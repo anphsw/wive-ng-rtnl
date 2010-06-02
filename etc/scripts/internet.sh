@@ -24,17 +24,17 @@ ifRaxWdsxDown()
 {
 	num=0
         for i in `seq 0 7`; do
-	    ifconfig ra$num down > /dev/null 2>&1
+	    ip link set ra$num down > /dev/null 2>&1
             num=`expr $num + 1`
         done
 	num=0
         for i in `seq 0 3`; do
-    	    ifconfig wds$num down > /dev/null 2>&1
+    	    ip link set wds$num down > /dev/null 2>&1
             num=`expr $num + 1`
         done
 
-	ifconfig apcli0 down > /dev/null 2>&1
-	ifconfig mesh0 down > /dev/null 2>&1
+	ip link set apcli0 down > /dev/null 2>&1
+	ip link set mesh0 down > /dev/null 2>&1
 }
 
 addBr0()
@@ -51,7 +51,7 @@ addMesh2Br0()
 {
     meshenabled=`nvram_get 2860 MeshEnabled`
     if [ "$meshenabled" = "1" ]; then
-        ifconfig mesh0 up
+        ip link set mesh0 up
         brctl addif br0 mesh0
         meshhostname=`nvram_get 2860 MeshHostName`
         iwpriv mesh0 set  MeshHostName="$meshhostname"
@@ -66,7 +66,7 @@ addRax2Br0()
     fi
     num=0
     for i in `seq 0 $bssidnum`; do
-	    ifconfig ra$num up
+	    ip link set ra$num up
 	    brctl addif br0 ra$num
             num=`expr $num + 1`
     done
@@ -80,7 +80,7 @@ addRaix2Br0()
     fi
     num=0
     for i in `seq 0 $inic_bssnum`; do
-	    ifconfig rai$num up
+	    ip link set rai$num up
 	    brctl addif br0 rai$num
             num=`expr $num + 1`
     done
@@ -96,7 +96,7 @@ addWds2Br0()
     if [ "$wds_en" != "0" ]; then
 	num=0
         for i in `seq 0 3`; do
-    	    ifconfig wds$num up
+    	    ip link set wds$num up
 	    brctl addif br0 wds$num
             num=`expr $num + 1`
         done
@@ -165,18 +165,18 @@ fi
 
 # INIC support
 if [ "$CONFIG_RT2880_INIC" != "" ]; then
-	ifconfig rai0 down > /dev/null 2>&1
+	ip link set rai0 down > /dev/null 2>&1
 	rmmod rt_pci_dev > /dev/null 2>&1
 	ralink_init make_wireless_config inic
 	modprobe rt_pci_dev
-	ifconfig rai0 up
+	ip link set rai0 up
 	RaAP&
 	sleep $WAIT_IFUP
 fi
 # INIC support
 if [ "$CONFIG_RT2880v2_INIC_MII" != "" -o "$CONFIG_RT2880v2_INIC_PCI" != "" ]; then
         iNIC_Mii_en=`nvram_get inic InicMiiEnable`
-        ifconfig rai0 down > /dev/null 2>&1
+        ip link set rai0 down > /dev/null 2>&1
         rmmod iNIC_pci > /dev/null 2>&1
         rmmod iNIC_mii > /dev/null 2>&1
         ralink_init make_wireless_config inic
@@ -185,12 +185,15 @@ if [ "$iNIC_Mii_en" != "1" ]; then
 else
         modprobe iNIC_mii miimaster=eth2
 fi
-        ifconfig rai0 up
+        ip link set rai0 up
         sleep $WAIT_IFUP
 fi
 
 # config interface
-ifconfig ra0 0.0.0.0
+ip addr flush dev ra0
+ip -6 addr flush dev ra0
+ip link set ra0 up
+
 if [ "$ethconv" = "y" ]; then
 	iwpriv ra0 set EthConvertMode=dongle
 fi
@@ -201,7 +204,9 @@ fi
 num=1;
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
     for i in `seq 1 $bssidnum`; do
-        ifconfig ra$num 0.0.0.0
+	ip addr flush dev ra$num                                                                                                                       
+	ip -6 addr flush dev ra$num                                                                                                                    
+	ip link set ra$num up 
         num=`expr $num + 1`
     done
 fi
@@ -224,10 +229,10 @@ if [ "$opmode" = "0" ]; then
         #start mii iNIC after network interface is working
         iNIC_Mii_en=`nvram_get inic InicMiiEnable`
         if [ "$iNIC_Mii_en" == "1" ]; then
-             ifconfig rai0 down
+             ip link set rai0 down
              rmmod iNIC_mii
              insmod -q iNIC_mii miimaster=eth2
-             ifconfig rai0 up
+             ip link set rai0 up
         fi
  
         addWds2Br0
@@ -284,11 +289,11 @@ fi
 
 # INIC support
 if [ "$CONFIG_RT2880_INIC" != "" ]; then
-       ifconfig rai0 down
+       ip link set rai0 down
        rmmod rt_pci_dev
        ralink_init make_wireless_config inic
        insmod -q rt_pci_dev
-       ifconfig rai0 up
+       ip link set rai0 up
        RaAP&
        sleep $WAIT_IFUP
 fi

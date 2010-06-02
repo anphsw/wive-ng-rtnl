@@ -13,7 +13,9 @@ STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
 
 case "$1" in
     deconfig)
-        /sbin/ifconfig $interface 0.0.0.0
+        ip addr flush dev $interface
+        ip -6 addr flush dev $interface
+	ip link set $interface up
         ;;
 
     renew|bound)

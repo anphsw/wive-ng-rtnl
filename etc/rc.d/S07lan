@@ -25,11 +25,11 @@ echo "Start network interfaces..."
     fi
     if [ "$brisup" = "0" ]; then
 	echo "Up bridge interface"
-	ifconfig br0 up
+	ip link set br0 up
     fi
     if [ "$lanisup" = "0" ]; then
 	echo "Up vlan root interface"
-	ifconfig eth2 up
+	ip link set eth2 up
 	vlanisconfig=0
     fi
     if [ "$vlanisconfig" != "2" ]; then
@@ -65,11 +65,13 @@ echo "Start network interfaces..."
     ifconfig eth2.2 hw ether $MAC
 
     #drop adresses
-    ifconfig eth2.1 0.0.0.0
-    ifconfig eth2.2 0.0.0.0
+    ip addr flush dev eth2.1
+    ip addr flush dev eth2.2
+    ip -6 addr flush dev eth2.1
+    ip -6 addr flush dev eth2.2
  
 #-------------------CONFIG--------------------------------
- ifconfig $lan_if down
+  ip link set $lan_if down
  #-------------------LAN1----------------
  echo "Add LAN1 iface"
  if [ "$opmode" = "2" ]; then
@@ -109,14 +111,14 @@ echo "Start network interfaces..."
 
 stop() {
 echo "Stop network interfaces..."
-    ifconfig eth2.2 down > /dev/null 2>&1
-    ifconfig eth2.1 down > /dev/null 2>&1
+    ip link set eth2.2 down > /dev/null 2>&1
+    ip link set eth2.1 down > /dev/null 2>&1
     vconfig rem eth2.1 > /dev/null 2>&1
     vconfig rem eth2.2 > /dev/null 2>&1
-    ifconfig br0 down > /dev/null 2>&1
-    ifconfig $lan_if down > /dev/null 2>&1
-    ifconfig "br0:9" down > /dev/null 2>&1
-    ifconfig "eth2:9" down > /dev/null 2>&1
+    ip link set br0 down > /dev/null 2>&1
+    ip link set $lan_if down > /dev/null 2>&1
+    ip link set "br0:9" down > /dev/null 2>&1
+    ip link set "eth2:9" down > /dev/null 2>&1
     brctl delbr br0 > /dev/null 2>&1
 }
 
