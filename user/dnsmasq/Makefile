@@ -47,6 +47,7 @@ dnsmasq :
 clean :
 	rm -f *~ $(SRC)/*.mo contrib/*/*~ */*~ $(SRC)/*.pot 
 	rm -f $(SRC)/*.o $(SRC)/dnsmasq.a $(SRC)/dnsmasq core */core
+	rm -rf filesystem
 
 install : all install-common
 
