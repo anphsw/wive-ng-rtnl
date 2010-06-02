@@ -194,3 +194,4 @@ dnsPEnabled=1
 M2UEnabled=1
 macCloneEnabled=0
 RemoteManagement=0
+IS_WIVE=YES
