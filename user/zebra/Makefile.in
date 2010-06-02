@@ -391,6 +391,7 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
+	rm -rf filesystem
 
 clean-am: clean-generic mostlyclean-am
 
