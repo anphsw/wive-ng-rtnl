@@ -4,35 +4,11 @@ modtest=`uname -r`
 moddir=/lib/modules/$modtest
 MODULES=`find /lib/modules -type f`;
 MODULES_IPT=$MODULES/kernel/net/ipv4/netfilter
-FULLMODULELOAD="NO"
-CONNTRACKMODULELOAD="YES"
 
 start() {
  echo "Starting modules..."
     depmod -a -n >  /tmp/modules.dep
     ln -sf /tmp/modules.dep /etc/modules.dep
- ############LOAD##ALL###MODULES###################
- if [ $FULLMODULELOAD = "YES" ]; then
-    for i in $MODULES; do
-	if [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_ap/rt2860v2_ap.ko" ] && \
-	    [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_sta/rt2860v2_sta.ko" ]; then
-	echo $i;
-	    insmod $i > /dev/null 2>&1
-	fi
-    done
- else
-  ############CONNTRCAK###FILTERS##################
-  if [ $CONNTRACKMODULELOAD = "YES" ]; then
-    for i in $MODULES_IPT; do
-	if [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_ap/rt2860v2_ap.ko" ] && \
-	    [ "$i" != "/lib/modules/2.6.21.7/kernel/drivers/net/wireless/rt2860v2_sta/rt2860v2_sta.ko" ]; then
-	echo $i;
-	    insmod $i > /dev/null 2>&1
-	fi
-    done
-  fi
-  ##################################################
- fi
 }
 
 stop() {
