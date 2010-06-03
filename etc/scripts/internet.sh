@@ -58,41 +58,9 @@ addMesh2Br0()
     fi
 }
 
-addRax2Br0()
-{
-    inic_bssnum=`nvram_get inic BssidNum`
-    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
-	return
-    fi
-    num=0
-    for i in `seq 0 $bssidnum`; do
-	    ip link set ra$num up
-	    brctl addif br0 ra$num
-            num=`expr $num + 1`
-    done
-}
-
-addRaix2Br0()
-{
-    inic_bssnum=`nvram_get inic BssidNum`
-    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
-	return
-    fi
-    num=0
-    for i in `seq 0 $inic_bssnum`; do
-	    ip link set rai$num up
-	    brctl addif br0 rai$num
-            num=`expr $num + 1`
-    done
-}
-
 addWds2Br0()
 {
-    if [ "$CONFIG_RT2880_INIC" == "" -a "$CONFIG_RT2880v2_INIC_MII" == "" -a "$CONFIG_RT2880v2_INIC_PCI" == "" ]; then
-	wds_en=`nvram_get 2860 WdsEnable`
-    else
-	wds_en=`nvram_get inic WdsEnable`
-    fi
+    wds_en=`nvram_get 2860 WdsEnable`
     if [ "$wds_en" != "0" ]; then
 	num=0
         for i in `seq 0 3`; do
@@ -162,33 +130,6 @@ else
 	modprobe rt2860v2_ap
 fi
 
-
-# INIC support
-if [ "$CONFIG_RT2880_INIC" != "" ]; then
-	ip link set rai0 down > /dev/null 2>&1
-	rmmod rt_pci_dev > /dev/null 2>&1
-	ralink_init make_wireless_config inic
-	modprobe rt_pci_dev
-	ip link set rai0 up
-	RaAP&
-	sleep $WAIT_IFUP
-fi
-# INIC support
-if [ "$CONFIG_RT2880v2_INIC_MII" != "" -o "$CONFIG_RT2880v2_INIC_PCI" != "" ]; then
-        iNIC_Mii_en=`nvram_get inic InicMiiEnable`
-        ip link set rai0 down > /dev/null 2>&1
-        rmmod iNIC_pci > /dev/null 2>&1
-        rmmod iNIC_mii > /dev/null 2>&1
-        ralink_init make_wireless_config inic
-if [ "$iNIC_Mii_en" != "1" ]; then
-        modprobe iNIC_pci mode=ap
-else
-        modprobe iNIC_mii miimaster=eth2
-fi
-        ip link set rai0 up
-        sleep $WAIT_IFUP
-fi
-
 # config interface
 ip addr flush dev ra0
 ip -6 addr flush dev ra0
@@ -201,8 +142,8 @@ if [ "$radio_off" = "1" ]; then
 	iwpriv ra0 set RadioOn=0
 fi
 
-num=1;
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+num=1;
     for i in `seq 1 $bssidnum`; do
 	ip addr flush dev ra$num                                                                                                                       
 	ip -6 addr flush dev ra$num                                                                                                                    
@@ -223,9 +164,7 @@ if [ "$opmode" = "0" ]; then
 	addBr0
 	resetLanWan
 	brctl addif br0 eth2
-	if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-		addRax2Br0
-	fi
+
         #start mii iNIC after network interface is working
         iNIC_Mii_en=`nvram_get inic InicMiiEnable`
         if [ "$iNIC_Mii_en" == "1" ]; then
@@ -237,7 +176,6 @@ if [ "$opmode" = "0" ]; then
  
         addWds2Br0
         addMesh2Br0
-	addRaix2Br0
 	wan.sh
 	services_restart.sh all
 
@@ -251,12 +189,8 @@ elif [ "$opmode" = "1" ]; then
 	setLanWan
 	addBr0
 	brctl addif br0 eth2.1
-	if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-		addRax2Br0
-	fi
 	addWds2Br0
 	addMesh2Br0
-	addRaix2Br0
 	wan.sh
 	services_restart.sh all
 
@@ -279,29 +213,14 @@ else
 	setLanWan
         addBr0
         brctl addif br0 eth2.1
-        if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-                addRax2Br0
-        fi
         addWds2Br0
-        addRaix2Br0
 	exit 1
 fi
-
-# INIC support
-if [ "$CONFIG_RT2880_INIC" != "" ]; then
-       ip link set rai0 down
-       rmmod rt_pci_dev
-       ralink_init make_wireless_config inic
-       insmod -q rt_pci_dev
-       ip link set rai0 up
-       RaAP&
-       sleep $WAIT_IFUP
-fi
-
-route add -host 255.255.255.255 dev $lan_if
 
 m2uenabled=`nvram_get 2860 M2UEnabled`
 if [ "$m2uenabled" = "1" ]; then
 	iwpriv ra0 set IgmpSnEnable=1
 	echo "iwpriv ra0 set IgmpSnEnable=1"
 fi
+
+route add -host 255.255.255.255 dev $lan_if
