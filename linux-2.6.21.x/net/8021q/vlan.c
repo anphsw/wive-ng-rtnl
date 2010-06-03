@@ -198,6 +198,34 @@ static void vlan_group_free(struct vlan_group *grp)
 	kfree(grp);
 }
 
+static struct vlan_group *vlan_group_alloc(int ifindex)
+{
+	struct vlan_group *grp;
+	unsigned int size;
+	unsigned int i;
+
+	grp = kzalloc(sizeof(struct vlan_group), GFP_KERNEL);
+	if (!grp)
+		return NULL;
+
+	size = sizeof(struct net_device *) * VLAN_GROUP_ARRAY_PART_LEN;
+
+	for (i = 0; i < VLAN_GROUP_ARRAY_SPLIT_PARTS; i++) {
+		grp->vlan_devices_arrays[i] = kzalloc(size, GFP_KERNEL);
+		if (!grp->vlan_devices_arrays[i])
+			goto err;
+	}
+
+	grp->real_dev_ifindex = ifindex;
+	hlist_add_head_rcu(&grp->hlist,
+			   &vlan_group_hash[vlan_grp_hashfn(ifindex)]);
+	return grp;
+
+err:
+	vlan_group_free(grp);
+	return NULL;
+}
+
 static void vlan_rcu_free(struct rcu_head *rcu)
 {
 	vlan_group_free(container_of(rcu, struct vlan_group, rcu));
@@ -382,11 +410,10 @@ static struct lock_class_key vlan_netdev_xmit_lock_key;
 static struct net_device *register_vlan_device(const char *eth_IF_name,
 					       unsigned short VLAN_ID)
 {
-	struct vlan_group *grp;
+	struct vlan_group *grp, *ngrp = NULL;
 	struct net_device *new_dev;
 	struct net_device *real_dev; /* the ethernet device */
 	char name[IFNAMSIZ];
-	int i;
 
 #ifdef VLAN_DEBUG
 	printk(VLAN_DBG "%s: if_name -:%s:-	vid: %i\n",
@@ -527,9 +554,15 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	printk(VLAN_DBG "About to go find the group for idx: %i\n",
 	       real_dev->ifindex);
 #endif
+	grp = __vlan_find_group(real_dev->ifindex);
+	if (!grp) {
+		ngrp = grp = vlan_group_alloc(real_dev->ifindex);
+		if (!grp)
+			goto out_free_newdev;
+	}
 
 	if (register_netdevice(new_dev))
-		goto out_free_newdev;
+		goto out_free_group;
 
 	lockdep_set_class(&new_dev->_xmit_lock, &vlan_netdev_xmit_lock_key);
 
@@ -540,34 +573,8 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	/* So, got the sucker initialized, now lets place
 	 * it into our local structure.
 	 */
-	grp = __vlan_find_group(real_dev->ifindex);
-
-	/* Note, we are running under the RTNL semaphore
-	 * so it cannot "appear" on us.
-	 */
-	if (!grp) { /* need to add a new group */
-		grp = kzalloc(sizeof(struct vlan_group), GFP_KERNEL);
-		if (!grp)
-			goto out_free_unregister;
-
-		for (i=0; i < VLAN_GROUP_ARRAY_SPLIT_PARTS; i++) {
-			grp->vlan_devices_arrays[i] = kzalloc(
-				sizeof(struct net_device *)*VLAN_GROUP_ARRAY_PART_LEN,
-				GFP_KERNEL);
-
-			if (!grp->vlan_devices_arrays[i])
-				goto out_free_arrays;
-		}
-
-		/* printk(KERN_ALERT "VLAN REGISTER:  Allocated new group.\n"); */
-		grp->real_dev_ifindex = real_dev->ifindex;
-
-		hlist_add_head_rcu(&grp->hlist,
-				   &vlan_group_hash[vlan_grp_hashfn(real_dev->ifindex)]);
-
-		if (real_dev->features & NETIF_F_HW_VLAN_RX)
-			real_dev->vlan_rx_register(real_dev, grp);
-	}
+	if (ngrp && real_dev->features & NETIF_F_HW_VLAN_RX)
+		real_dev->vlan_rx_register(real_dev, ngrp);
 
 	vlan_group_set_device(grp, VLAN_ID, new_dev);
 
@@ -586,12 +593,9 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 #endif
 	return new_dev;
 
-out_free_arrays:
-	vlan_group_free(grp);
-
-out_free_unregister:
-	unregister_netdev(new_dev);
-	goto out_unlock;
+out_free_group:
+	if (ngrp)
+		vlan_group_free(ngrp);
 
 out_free_newdev:
 	free_netdev(new_dev);
