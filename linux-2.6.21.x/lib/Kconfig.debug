@@ -11,7 +11,7 @@ config PRINTK_TIME
 
 config ENABLE_MUST_CHECK
 	bool "Enable __must_check logic"
-	default y
+	default n
 	help
 	  Enable the __must_check logic in the kernel build.  Disable this to
 	  suppress the "warning: ignoring return value of 'foo', declared with
@@ -89,10 +89,7 @@ config DEBUG_SHIRQ
 config LOG_BUF_SHIFT
 	int "Kernel log buffer size (16 => 64KB, 17 => 128KB)" if DEBUG_KERNEL
 	range 12 21
-	default 17 if S390 || LOCKDEP
-	default 16 if X86_NUMAQ || IA64
-	default 15 if SMP
-	default 14
+	default 12
 	help
 	  Select kernel log buffer size as a power of 2.
 	  Defaults and Examples:
