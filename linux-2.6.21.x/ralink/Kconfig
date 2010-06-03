@@ -38,36 +38,11 @@ endchoice
 
 source "drivers/net/wireless/rt2860v2_ap/Kconfig"
 source "drivers/net/wireless/rt2860v2_sta/Kconfig"
-#source "drivers/net/wireless/iNIC/Kconfig"
-#source "drivers/net/wireless/iNIC_RT305x/Kconfig"
-
-#config INIC_USB
-#bool
-#default y if RT305x_INIC_USB
-
-#config INIC_MII
-#bool
-#default y if RT2880v2_INIC_MII || RT305x_INIC_MII
-
-#config INIC_PCI
-#bool
-#default y if RT2880v2_INIC_PCI
 
 #######
 # USB
 #######
 source "drivers/usb/dwc_otg/Kconfig"
-
-#choice
-#prompt "Ralink NAT Type"
-	
-#config  RA_NAT_NONE
-#bool "None"
-#config  RA_NAT_HW
-#bool "Hardware"
-#endchoice
-
-#source "net/nat/hw_nat/Kconfig"
 
 endmenu
 
