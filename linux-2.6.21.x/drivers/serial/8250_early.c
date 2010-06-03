@@ -98,7 +98,7 @@ static void __init early_uart_write(struct console *console, const char *s, unsi
 
 static unsigned int __init probe_baud(struct uart_port *port)
 {
-	unsigned char lcr, dll, dlm;
+	unsigned char lcr="", dll="", dlm="";
 	unsigned int quot;
 
 	lcr = serial_in(port, UART_LCR);
