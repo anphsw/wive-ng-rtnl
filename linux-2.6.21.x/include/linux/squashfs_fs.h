@@ -39,7 +39,9 @@
 #define SQUASHFS_MAJOR			3
 #define SQUASHFS_MINOR			0
 #define SQUASHFS_MAGIC			0x73717368
+#define SQUASHFS_MAGIC_LZMA             0x71736873
 #define SQUASHFS_MAGIC_SWAP		0x68737173
+#define SQUASHFS_MAGIC_LZMA_SWAP        0x73687371
 #define SQUASHFS_START			0
 
 /* size of metadata (inode and directory) blocks */
@@ -346,7 +348,7 @@ struct squashfs_dir_entry {
 	unsigned int		offset:13;
 	unsigned int		type:3;
 	unsigned int		size:8;
-	int			inode_number:16;
+	signed   int		inode_number:16;
 	char			name[0];
 } __attribute__ ((packed));
 

@@ -18,9 +18,7 @@
 #include <linux/mtd/map.h>
 #include <linux/mtd/partitions.h>
 #include <asm/io.h>
-
 #include <linux/squashfs_fs.h>
-#include <linux/sqmagic.h>
 
 #ifndef CONFIG_MTD_PARTITIONS
 #error "MTD partition should be selected !!"

@@ -31,10 +31,9 @@
 #include <linux/vfs.h>
 #include <linux/vmalloc.h>
 #include <linux/smp_lock.h>
+#include <linux/sqlzma.h>
 
 #include "squashfs.h"
-#include <linux/sqlzma.h>
-#include <linux/sqmagic.h>
 
 //#undef KeepPreemptive
 //#if defined(CONFIG_PREEMPT) && !defined(UnsquashNoPreempt)

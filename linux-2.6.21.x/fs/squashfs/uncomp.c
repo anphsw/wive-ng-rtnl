@@ -40,7 +40,7 @@
 
 static int LzmaUncompress(struct sqlzma_un *un)
 {
-	int err, i, ret;
+	int err=0, i, ret;
 	SizeT outSize, inProcessed, outProcessed, srclen;
 	/* it's about 24-80 bytes structure, if int is 32-bit */
 	CLzmaDecoderState state;
@@ -91,12 +91,12 @@ static int LzmaUncompress(struct sqlzma_un *un)
 	/* Decompress */
 	err = LzmaDecode(&state, src, srclen, &inProcessed, dst, outSize,
 			 &outProcessed);
-	if (err)
+	if (unlikely(err))
 		err = -EINVAL;
 
  out:
 #ifndef __KERNEL__
-	if (err)
+	if (unlikely(err))
 		fprintf(stderr, "err %d\n", err);
 #endif
 	return err;
@@ -105,7 +105,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 	      struct sized_buf *dst)
 {
-	int err = 0, by_lzma = 0;
+	int err=0, by_lzma = 1;
 	if (un->un_lzma && is_lzma(*src->buf)) {
 		by_lzma = 1;
 		un->un_cmbuf = src->buf;
@@ -130,7 +130,7 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 		err = 0;
 
  out:
-	if (err) {
+	if (unlikely(err)) {
 #ifdef __KERNEL__
 		WARN_ON_ONCE(1);
 #else
@@ -152,7 +152,7 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 
 int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 {
-	int err;
+	int err=0;
 
 	err = -ENOMEM;
 	un->un_lzma = do_lzma;
