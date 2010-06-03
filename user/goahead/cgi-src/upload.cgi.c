@@ -335,7 +335,7 @@ getenv("SERVER_SOFTWARE"));
       }
       boundary_len = line_end - line_begin;
       boundary = getMemInFile(filename, line_begin, boundary_len);
-  //  printf("boundary:%s\n", boundary);
+      //  printf("boundary:%s\n", boundary);
 
       // sth like this..
       // Content-Disposition: form-data; name="filename"; filename="\\192.168.3.171\tftpboot\a.out"
@@ -403,11 +403,9 @@ getenv("SERVER_SOFTWARE"));
      * write the current linux version into flash.
      */
     write_flash_kernel_version(filename, file_begin);
-//#if 0
 #ifdef CONFIG_RT2880_DRAM_8M
     system("killall goahead");
 #endif
-
     // flash write
     if( mtd_write_firmware(filename, file_begin, file_end - file_begin) == -1){
         printf("mtd_write fatal error! The corrupted image has ruined the flash!!");
@@ -419,8 +417,6 @@ getenv("SERVER_SOFTWARE"));
 #else
 #error "no upload support defined!"
 #endif
-
-//#if 0
 #ifdef CONFIG_RT2880_DRAM_8M
     system("sleep 3 && reboot &");
 #endif

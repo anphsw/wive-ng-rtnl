@@ -133,11 +133,8 @@ mtd_open(const char *mtd, int flags)
 	if ((fp = fopen("/proc/mtd", "r"))) {
 		while (fgets(dev, sizeof(dev), fp)) {
 			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, mtd)) {
-				snprintf(dev, sizeof(dev), "/dev/mtd/%d", i);
-				if ((ret=open(dev, flags))<0) {
-					snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
-					ret=open(dev, flags);
-				}
+				    snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
+				    ret=open(dev, flags);
 				fclose(fp);
 				return ret;
 			}
@@ -472,7 +469,7 @@ int main (int argc, char **argv)
 		}
 	
 		if (!mtd_check(device)) {
-			fprintf(stderr, "Can't open device for writing!\n");
+			fprintf(stderr, "Can't open device for writing: %s!\n", device);
 			exit(1);
 		}
 	} else {

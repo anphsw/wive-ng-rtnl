@@ -30,8 +30,6 @@ unload_ra0()
 {
 	ip link set ra0 down > /dev/null 2>&1
 	ip link set eth2.2 down > /dev/null 2>&1
-	rmmod rt2860v2_ap > /dev/null 2>&1
-	rmmod rt2860v2_sta > /dev/null 2>&1
 }
 
 unload_ra0br0()
@@ -56,6 +54,16 @@ unload_ra0br0()
 	else
 		unload_ra0
 	fi
+}
+
+unload_modules()
+{
+	echo "Unload modules"
+	rmmod cifs > /dev/null 2>&1
+	rmmod ipt_IMQ > /dev/null 2>&1
+	rmmod imq > /dev/null 2>&1 
+	rmmod rt2860v2_ap > /dev/null 2>&1
+	rmmod rt2860v2_sta > /dev/null 2>&1
 }
 
 # unload apps
@@ -85,3 +93,6 @@ else
 	unload_ra0br0 $br0_mirror
 	exit 1
 fi
+
+#unload modules
+unload_modules
