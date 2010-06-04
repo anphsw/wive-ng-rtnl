@@ -48,17 +48,6 @@ romfs:
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
 
-#firmware install
-ifeq    ($(CONFIG_RALINK_RT3050_1T1R),y)
-	$(ROMFSINST) /etc_ro/wlan/RT3050_AP_1T1R_V1_0.bin
-endif
-ifeq    ($(CONFIG_RALINK_RT3051_1T2R),y)
-	$(ROMFSINST) /etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin
-endif
-ifeq    ($(CONFIG_RALINK_RT3052_2T2R),y)
-	$(ROMFSINST) /etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin
-endif
-
 romfs.post:: 
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
 	#Squash File System

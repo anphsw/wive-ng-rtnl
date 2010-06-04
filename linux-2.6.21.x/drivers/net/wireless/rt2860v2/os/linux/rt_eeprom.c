@@ -28,13 +28,13 @@
 #include <rt_config.h>
 
 #if defined(CONFIG_RALINK_RT3052)
-#define EEPROM_DEFAULT_PATH                     "/etc_ro/wlan/RT3052_AP_2T2R_V1_0.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/default/RT3052_AP_2T2R_V1_0.bin"
 #else
 
 #if defined(CONFIG_RT2860V2_AP_2850) || defined(CONFIG_RT2860V2_STA_2850)
-#define EEPROM_DEFAULT_PATH                     "/etc_ro/wlan/RT2880_RT2850_AP_2T3R_V1_5.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2850_AP_2T3R_V1_5.bin"
 #else // RFIC 2820
-#define EEPROM_DEFAULT_PATH                     "/etc_ro/wlan/RT2880_RT2820_AP_2T3R_V1_5.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2820_AP_2T3R_V1_5.bin"
 #endif
 
 #endif
