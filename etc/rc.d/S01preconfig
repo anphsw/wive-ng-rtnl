@@ -52,9 +52,6 @@ start() {
     #modify permissions
     chmod 777 /tmp
 
-    echo "Start nvram daemon"
-    nvram_daemon &
-
 #check firmwave update or clean burn
 IS_WIVE=`nvram_get IS_WIVE`
 if [ $IS_WIVE = "YES" ]; then
@@ -62,13 +59,14 @@ if [ $IS_WIVE = "YES" ]; then
 else
     echo "Clear and load defaults to nvram!"
     ralink_init clear 2860
-    ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
+    ralink_init renew 2860 /etc/default/RT2860_default_novlan
     ralink_init make_wireless_config 2860
     nvram_set IS_WIVE YES
-    echo "Restart nvram_daemon and boot"
-    killall -q nvram_daemon
-    nvram_daemon &
+    echo "Reset OK... boot..."
 fi
+
+echo "Start nvram daemon"
+nvram_daemon &
     
 #if compile date fille is exist
 if [ -f /etc/compile-date ]; then

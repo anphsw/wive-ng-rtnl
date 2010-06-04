@@ -28,25 +28,25 @@ void loadDefault(int chip_id)
     case 2860:
 	system("ralink_init clear 2860");
 #if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
-	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+	system("ralink_init renew 2860 /etc/default/RT2860_default_novlan");
 #elif defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE 
-	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
+	system("ralink_init renew 2860 /etc/default/RT2860_default_vlan");
 #elif defined(CONFIG_ICPLUS_PHY)
-	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
+	system("ralink_init renew 2860 /etc/default/RT2860_default_oneport");
 #else
-	system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+	system("ralink_init renew 2860 /etc/default/RT2860_default_novlan");
 #endif
 	break;
     case 2880:
 	system("ralink_init clear inic");
 #if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
-	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+	system("ralink_init renew inic /etc/default/RT2860_default_novlan");
 #elif defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
-	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
+	system("ralink_init renew inic /etc/default/RT2860_default_vlan");
 #elif defined(CONFIG_ICPLUS_PHY)
-	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_oneport");
+	system("ralink_init renew inic /etc/default/RT2860_default_oneport");
 #else
-	system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_novlan");
+	system("ralink_init renew inic /etc/default/RT2860_default_novlan");
 #endif
 	break;
     case 2561: 

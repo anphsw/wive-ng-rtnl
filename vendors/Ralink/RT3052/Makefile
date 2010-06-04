@@ -47,9 +47,6 @@ romfs:
 	$(ROMFSINST) -s ../bin /usr/sbin
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
-	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_vlan
-	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_novlan
-	$(ROMFSINST) /etc_ro/Wireless/RT2860AP/RT2860_default_oneport
 
 #firmware install
 ifeq    ($(CONFIG_RALINK_RT3050_1T1R),y)
