@@ -10,8 +10,8 @@ start() {
 
 stop() {
  echo "Stop goahead"
-    killall -q -9 goahead
-    killall -q -9 nvram_daemon
+    killall -q goahead
+    killall -q nvram_daemon
 }
 
 case "$1" in

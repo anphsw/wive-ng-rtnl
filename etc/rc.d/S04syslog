@@ -11,8 +11,8 @@ start() {
 
 stop() {
  echo "Stop syslog and klog"
-    killall -q -9 klogd
-    killall -q -9 syslogd
+    killall -q klogd
+    killall -q syslogd
     rm -f /var/log/messages > /dev/null 2>&1
 }
 

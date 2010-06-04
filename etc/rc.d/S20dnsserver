@@ -9,7 +9,7 @@ start() {
 if [ -f /bin/dnsmasq ] && [ "$dnsp" = "1" ] ; then
 get_param
  #workaround fix me later
- killall -q -9 dnsmasq
+ killall -q dnsmasq
  echo "Starting DNSMASQ: "
  if [ -f /etc/dnsmasq.conf ]; then
     /bin/dnsmasq  -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if
@@ -19,7 +19,7 @@ fi
 
 stop() {
  echo "Stopping DNSMASQ: "
-  killall -q -9 dnsmasq
+  killall -q dnsmasq
   rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
 }
 

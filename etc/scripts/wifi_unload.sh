@@ -80,19 +80,17 @@ done
 # unload wifi driver
 if [ "$is_ra0_in_br0" == "" ]; then
 	unload_ra0
+	unload_modules
 	exit 1
 else
 	if [ "$is_usb0_in_br0" != "" ]; then
 		exit 1
 	fi
-
 	if [ "$is_eth21_in_br0" != "" ]; then
 		br0_mirror=eth2.1
 	fi
-
 	unload_ra0br0 $br0_mirror
+	unload_modules
 	exit 1
 fi
 
-#unload modules
-unload_modules

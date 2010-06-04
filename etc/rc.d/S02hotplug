@@ -25,7 +25,7 @@ fi
 
 stop() {
  echo "Stop mdev generate..."
-    killall -q -9 mdev
+    killall -q mdev
 }
 
 case "$1" in

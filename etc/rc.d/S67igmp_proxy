@@ -9,7 +9,7 @@ web_wait
 start() {
 if [ -f /bin/igmpproxy ]; then
     #workaround fix me later                                                                                                    
-    killall -q -9 igmpproxy
+    killall -q igmpproxy
     igmpen=`nvram_get 2860 igmpEnabled`
     OperationMode=`nvram_get 2860 OperationMode`
     #if igmpproxy enable and mode not full bridge
