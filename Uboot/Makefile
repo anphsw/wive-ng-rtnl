@@ -44,7 +44,7 @@ VENDOR=
 TOPDIR	:= $(shell if [ "$$PWD" != "" ]; then echo $$PWD; else pwd; fi)
 export	TOPDIR
 
-CONFIG_CROSS_COMPILER_PATH ?= /opt/buildroot-gcc342/bin
+CONFIG_CROSS_COMPILER_PATH ?= /opt/Wive-RTNL/toolchain/bin
 
 ifeq (include/config.mk,$(wildcard include/config.mk))
 # load ARCH, BOARD, and CPU configuration
