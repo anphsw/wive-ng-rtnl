@@ -90,7 +90,8 @@ elif [ "$wanmode" = "PPPOE" ]; then
 
 	#killall ppp connections
 	kill_ppp
-
+	#up WAN interface
+	ip link set eth2.2 up
 	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
 
 elif [ "$wanmode" = "L2TP" ]; then
