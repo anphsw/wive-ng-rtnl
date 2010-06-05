@@ -151,10 +151,10 @@ INT Set_LedCfg_Proc(
 {
 	INT loop;
 	PCHAR thisChar;
-	long polarity;
-	long ledOnTime;
-	long ledOffTime;
-	long slowBlkTime;
+	long polarity=0;
+	long ledOnTime=0;
+	long ledOffTime=0;
+	long slowBlkTime=0;
 	
 	loop = 0;
 
@@ -195,8 +195,8 @@ INT Set_LedCheck_Proc(
 {
 	INT loop;
 	PCHAR thisChar;
-	long ledSel;
-	long ledMode;
+	long ledSel=0;
+	long ledMode=0;
 
 	loop = 0;
 	while ((thisChar = strsep((char **)&arg, "-")) != NULL)

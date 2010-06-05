@@ -488,8 +488,8 @@ void __init softirq_init(void)
 
 static int ksoftirqd(void * __bind_cpu)
 {
-        set_user_nice(current, 19);
         struct sched_param param = { .sched_priority = MAX_RT_PRIO/4-1 };
+        set_user_nice(current, 19);
         printk("softirq RT prio: %d.\n", param.sched_priority);
         sys_sched_setscheduler(current->pid, SCHED_FIFO, &param);
 

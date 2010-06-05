@@ -723,13 +723,13 @@ static void rtmp_read_ap_client_from_file(
 	PSTRING		macptr;
 	INT			i=0, j=0, idx;
 	UCHAR		macAddress[MAC_ADDR_LEN];
-	UCHAR		keyMaterial[40];
+	//UCHAR		keyMaterial[40];
 	PAPCLI_STRUCT   pApCliEntry = NULL;
 	ULONG		KeyIdx;
 	STRING		tok_str[16];
 	ULONG		KeyType[MAX_APCLI_NUM];
 	ULONG		KeyLen;
-	UCHAR		CipherAlg = CIPHER_WEP64;
+	//UCHAR		CipherAlg = CIPHER_WEP64;
 
 	//ApCliEnable
 	if(RTMPGetKeyParameter("ApCliEnable", tmpbuf, 128, buffer, TRUE))
@@ -1427,7 +1427,7 @@ static int rtmp_parse_wpapsk_buffer_from_file(IN  PRTMP_ADAPTER pAd,IN  PSTRING 
 {
 	PSTRING		tmpbuf = buffer;
 	INT			i = BSSIdx;
-	UCHAR		keyMaterial[40];
+	//UCHAR		keyMaterial[40];
 	ULONG		len = strlen(tmpbuf);
 	int         ret = 0;
 

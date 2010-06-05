@@ -3127,6 +3127,9 @@ VOID	WscInitRegistrarPair(
 	IN  PWSC_CTRL           pWscControl,
 	IN  UCHAR				apidx)
 {
+#ifdef CONFIG_AP_SUPPORT
+	char tmpstr[17];
+#endif
 	INT		idx;
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscInitRegistrarPair\n"));
@@ -3182,7 +3185,6 @@ VOID	WscInitRegistrarPair(
 	
 	// 8. Serial Number
 #ifdef CONFIG_AP_SUPPORT
-	char tmpstr[17];
 	sprintf(tmpstr, "%02x:%02x:%02x:%02x:%02x:%02x",pAdapter->ApCfg.MBSSID[apidx].Bssid[0],
 							pAdapter->ApCfg.MBSSID[apidx].Bssid[1],
 							pAdapter->ApCfg.MBSSID[apidx].Bssid[2],

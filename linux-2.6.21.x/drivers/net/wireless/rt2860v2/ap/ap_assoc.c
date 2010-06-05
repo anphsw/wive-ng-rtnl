@@ -563,7 +563,7 @@ VOID ap_cmm_peer_assoc_req_action(
 	if (StatusCode == MLME_SUCCESS)
 	{
 #ifdef IAPP_SUPPORT
-		PFRAME_802_11 Fr = (PFRAME_802_11)Elem->Msg;
+		//PFRAME_802_11 Fr = (PFRAME_802_11)Elem->Msg;
 		POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 		/* send association ok message to IAPPD */

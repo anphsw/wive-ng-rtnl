@@ -2220,7 +2220,7 @@ ulong nf_ipaddr = 0;
 asmlinkage int sys_track_flag(int __user *flag, unsigned long __user *addr)
 {
         int err;
-        int in_flag;
+        int in_flag=0;
 
         err = get_user(in_flag, flag);
 

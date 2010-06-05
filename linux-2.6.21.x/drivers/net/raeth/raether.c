@@ -471,6 +471,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 	unsigned int	length = 0;
 	unsigned long	RxProcessed;
 	int bReschedule = 0;
+#if !defined(CONFIG_RA_NAT_NONE) 
+	unsigned long flags;
+#endif
 	END_DEVICE* 	ei_local = netdev_priv(dev);
 
 	RxProcessed = 0;
@@ -556,7 +559,6 @@ static int rt2880_eth_recv(struct net_device* dev)
  * ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
  */
-	 unsigned long flags;
          if(ra_sw_nat_hook_rx!= NULL)
          {
 	   spin_lock_irqsave(&ei_local->page_lock, flags);

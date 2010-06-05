@@ -824,24 +824,24 @@ static struct { PSTRING name; INT (*set_proc)(PRTMP_ADAPTER pAdapter, PSTRING ar
 	{"AvgRssiReq",					Set_AvgRssiReq_Proc},
 	{"RadarGPIO",					Set_RadarGPIO_Proc},
 	{"RadarLog",					Set_RadarLog_Proc},
-	{"BlockCh",						Set_BlockCh_Proc},
+	{"BlockCh",					Set_BlockCh_Proc},
 	{"ChRemain",					Set_ChRemain_Proc},
-	{"R1",							Set_R1_Proc},
-	{"R2",							Set_R2_Proc},
-	{"R3",							Set_R3_Proc},
-	{"R4",							Set_R4_Proc},
+	{"R1",						Set_R1_Proc},
+	{"R2",						Set_R2_Proc},
+	{"R3",						Set_R3_Proc},
+	{"R4",						Set_R4_Proc},
 #endif // DFS_DEBUG //
 
 #ifdef NEW_DFS
 	{"RadarStart",					Set_RadarStart_Proc},
 	{"RadarStop",					Set_RadarStop_Proc},
-	{"RadarT1",						Set_RadarSetTbl1_Proc},
-	{"RadarT2",						Set_RadarSetTbl2_Proc},
+	{"RadarT1",					Set_RadarSetTbl1_Proc},
+	{"RadarT2",					Set_RadarSetTbl2_Proc},
 	{"Fcc5Thrd",					Set_Fcc5Thrd_Proc},
 	{"ChBusyThrd",					Set_ChBusyThrd_Proc},
 	{"RssiThrd",					Set_RssiThrd_Proc},
 	{"PollTime",					Set_PollTime_Proc},
-	{"CEPrint",						Set_CEPrint_Proc},
+	{"CEPrint",					Set_CEPrint_Proc},
 
 	{"BusyIdleThres",				Set_BusyIdleThres_Proc},
 	{"BusyIdleRatio",				Set_BusyIdleRatio_Proc},
@@ -849,10 +849,10 @@ static struct { PSTRING name; INT (*set_proc)(PRTMP_ADAPTER pAdapter, PSTRING ar
 #ifdef DFS_DEBUG
 	{"CEPrintDebug",				Set_CEPrintDebug_Proc},
 #endif
-	{"Ch0LErr",						Set_Ch0LErr_Proc},
+	{"Ch0LErr",					Set_Ch0LErr_Proc},
 	{"PeriodErr",					Set_PeriodErr_Proc},
 	{"MaxPeriod",					Set_MaxPeriod_Proc},
-	{"Ch0HErr",						Set_Ch0HErr_Proc},
+	{"Ch0HErr",					Set_Ch0HErr_Proc},
 	{"Ch1Shift",					Set_Ch1Shift_Proc},
 	{"Ch2Shift",					Set_Ch2Shift_Proc},
 	
@@ -1437,7 +1437,7 @@ INT RTMPAPQueryInformation(
     POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
     STRING	driverVersion[8];
 
-#if DBG || WSC_AP_SUPPORT
+#if defined(DBG) || defined(WSC_AP_SUPPORT)
 	UCHAR	apidx = pObj->ioctl_if;
 #endif
 #ifdef WSC_AP_SUPPORT
@@ -4018,7 +4018,7 @@ INT	Set_AP_WPAPSK_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
-	UCHAR       keyMaterial[40];
+	//UCHAR       keyMaterial[40];
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
 	UCHAR	apidx = pObj->ioctl_if;
 	INT	retval;
@@ -4593,7 +4593,7 @@ INT	Show_Sat_Proc(
 	printk("FrameDuplicateCount = %d\n", pAd->WlanCounters.FrameDuplicateCount.u.LowPart);
 	printk("ReceivedFragmentCount = %d\n", pAd->WlanCounters.ReceivedFragmentCount.u.LowPart);
 	printk("MulticastReceivedFrameCount = %d\n", pAd->WlanCounters.MulticastReceivedFrameCount.u.LowPart);
-#if DBG 		
+#ifdef DBG 		
 	printk("RealFcsErrCount = %d\n", pAd->RalinkCounters.RealFcsErrCount.u.LowPart);
 #else
 	printk("FCSErrorCount = %d\n", pAd->WlanCounters.FCSErrorCount.u.LowPart);
@@ -6316,7 +6316,7 @@ INT Set_ApCli_Ssid_Proc(
 	UCHAR ifIndex;
 	BOOLEAN apcliEn;
 	INT success = FALSE;
-	UCHAR keyMaterial[40];
+	//UCHAR keyMaterial[40];
 	UCHAR PskKey[100];
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
@@ -6987,8 +6987,10 @@ INT	Set_WscStatus_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
+#ifdef DBG
     POS_COOKIE  pObj = (POS_COOKIE) pAd->OS_Cookie;
     UCHAR	    apidx = pObj->ioctl_if;
+#endif
     
 	DBGPRINT(RT_DEBUG_TRACE, ("IF(ra%d) Set_WscStatus_Proc::(WscStatus=%d)\n", apidx, pAd->ApCfg.MBSSID[apidx].WscControl.WscStatus));
 	return TRUE;

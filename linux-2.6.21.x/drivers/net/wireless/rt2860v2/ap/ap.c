@@ -2368,7 +2368,7 @@ VOID EnableAPMIMOPS(
 {
 	UCHAR	BBPR3=0,BBPR1=0,RFValue=0;
 	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
-	UINT32 	macdata=0;
+	//UINT32 	macdata=0;
 
 #ifdef RT305x
 		
@@ -2399,7 +2399,7 @@ VOID DisableAPMIMOPS(
 {
 		UCHAR	BBPR3=0,BBPR1=0,RFValue=0;
 		ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
-		UINT32 	macdata=0;
+		//UINT32 	macdata=0;
 
 #ifdef RT305x
 		pAd->CommonCfg.bBlockAntDivforGreenAP=FALSE;
