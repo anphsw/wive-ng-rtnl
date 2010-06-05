@@ -1,18 +1,42 @@
 #!/bin/sh
 
-modtest=`uname -r`
-moddir=/lib/modules/$modtest
-MODULES=`find /lib/modules -type f`;
-MODULES_IPT=$MODULES/kernel/net/ipv4/netfilter
+#get params                                                                                                                                 
+. /sbin/global.sh                                                                                                                           
 
+opmode=`nvram_get 2860 OperationMode`                                                                                                                                            
 start() {
- echo "Starting modules..."
-    depmod -a -n >  /tmp/modules.dep
-    ln -sf /tmp/modules.dep /etc/modules.dep
+    #if goahead not started
+    if [ ! -f /tmp/webrun ]; then
+	echo "Start modules.dep generate..."
+	depmod -a -n >  /tmp/modules.dep
+	ln -sf /tmp/modules.dep /etc/modules.dep
+    else
+	echo "Load wifi module..."
+	clone_en=`nvram_get 2860 macCloneEnabled`                                                                                                   
+	clone_mac=`nvram_get 2860 macCloneMac`    
+	ralink_init make_wireless_config rt2860
+	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ]; then
+	    echo "Macclone mode. Mac is $clone_mac"
+	    modprobe rt2860v2_sta mac=$clone_mac
+	else
+	    echo "Normal mode. Sta mode $stamode"
+	    if [ "$stamode" = "y" ]; then                                                                                                               
+    		modprobe rt2860v2_sta                                                                                                               
+	    else                                                                                                                                        
+    		modprobe rt2860v2_ap                                                                                                                
+	    fi    
+	fi
+    fi
 }
 
 stop() {
- echo "Stop modules.dep generate..."
+    if [ ! -f /tmp/webrun ]; then
+        echo "Stop modules.dep generate..."
+    else
+        echo "Unload wifi module..."
+	rmmod rt2860v2_ap > /dev/null 2>&1                                                                                                          
+	rmmod rt2860v2_sta > /dev/null 2>&1 
+    fi
 }
 
 case "$1" in

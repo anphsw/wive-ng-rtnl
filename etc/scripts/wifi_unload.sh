@@ -62,8 +62,8 @@ unload_modules()
 	rmmod cifs > /dev/null 2>&1
 	rmmod ipt_IMQ > /dev/null 2>&1
 	rmmod imq > /dev/null 2>&1 
-	rmmod rt2860v2_ap > /dev/null 2>&1
-	rmmod rt2860v2_sta > /dev/null 2>&1
+	#unload wifi modules
+	service modules stop
 }
 
 # unload apps

@@ -120,15 +120,9 @@ if [ "$CONFIG_DWC_OTG" == "m" ]; then
 fi
 
 ifRaxWdsxDown
-rmmod rt2860v2_ap > /dev/null 2>&1
-rmmod rt2860v2_sta > /dev/null 2>&1
-ralink_init make_wireless_config rt2860
 
-if [ "$stamode" = "y" ]; then
-	modprobe rt2860v2_sta
-else
-	modprobe rt2860v2_ap
-fi
+#reload wifi modules
+service modules restart
 
 # config interface
 ip addr flush dev ra0
@@ -164,16 +158,6 @@ if [ "$opmode" = "0" ]; then
 	addBr0
 	resetLanWan
 	brctl addif br0 eth2
-
-        #start mii iNIC after network interface is working
-        iNIC_Mii_en=`nvram_get inic InicMiiEnable`
-        if [ "$iNIC_Mii_en" == "1" ]; then
-             ip link set rai0 down
-             rmmod iNIC_mii
-             insmod -q iNIC_mii miimaster=eth2
-             ip link set rai0 up
-        fi
- 
         addWds2Br0
         addMesh2Br0
 	wan.sh

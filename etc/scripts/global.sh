@@ -12,6 +12,7 @@ web_wait(){
 # WAN interface name -> $wan_if
 getWanIfName()
 {
+	opmode=`nvram_get 2860 OperationMode`
 	wan_mode=`nvram_get 2860 wanConnectionMode`
 	if [ "$opmode" = "0" ]; then
 		wan_if="br0"
