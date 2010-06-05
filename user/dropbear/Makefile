@@ -10,7 +10,7 @@
 # Hopefully that seems intuitive.
 
 ifndef PROGRAMS
-	PROGRAMS=dropbear dropbearkey
+	PROGRAMS=dropbear dropbearkey scp
 endif
 #	 dbclient dropbearconvert
 
