@@ -7,7 +7,7 @@
   <message msgid="admin scan" msgstr="Scan" />
 
   <message msgid="man title" msgstr="System Management" />
-  <message msgid="man introduction" msgstr="You may configure administrator account and password here." />
+  <message msgid="man introduction" msgstr="Here you can configure your administrator account and password." />
 
   <message msgid="man language setting" msgstr="Language Settings" />
   <message msgid="man select language" msgstr="Select Language" />
@@ -74,7 +74,7 @@
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
   <message msgid="upload introduction1" msgstr="Upgrade the WR-NL firmware to obtain new functionality. " />
-  <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang up the system." />
+  <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
   <message msgid="upload bootloader" msgstr="Update Bootloader" />
@@ -84,7 +84,7 @@
   <message msgid="upload firmware force" msgstr="Force:" />
 
   <message msgid="setman title" msgstr="Settings Management" />
-  <message msgid="setman introduction" msgstr="You might save system settings by exporting them to a configuration file, restore them by importing the file, or reset them to factory default." />
+  <message msgid="setman introduction" msgstr="You can save system settings by exporting them to a configuration file, restore them by importing the file, or reset them to factory default." />
   <message msgid="setman export setting" msgstr="Export Settings" />
   <message msgid="setman export setting button" msgstr="Export Button" />
   <message msgid="setman export setting export" msgstr="Export" />

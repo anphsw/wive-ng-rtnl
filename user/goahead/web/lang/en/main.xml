@@ -56,7 +56,7 @@
   <message msgid="treeapp system command" msgstr="System Command" />
   <message msgid="treeapp system log" msgstr="System Log" />
   <message msgid="treeapp sdk history" msgstr="Version History" />
-  <message msgid="treeapp reboot" msgstr="Reboot you router" />
+  <message msgid="treeapp reboot" msgstr="Reboot your router" />
   <message msgid="treeapp reboot confirm" msgstr="Do you really want to reboot your router?" />
   <message msgid="treeapp system firewall" msgstr="System Security" />
 
@@ -72,7 +72,7 @@
   <message msgid="treeapp usbinic" msgstr="USB iNIC" />
   
   <message msgid="opmode title" msgstr="Operation Mode Configuration" />
-  <message msgid="opmode introduction" msgstr="You may configure the operation mode suitable for you environment." />
+  <message msgid="opmode introduction" msgstr="You can configure the operation mode suitable for your environment." />
   <message msgid="opmode mode b" msgstr="Bridge:" />
   <message msgid="opmode mode b intro" msgstr="All ethernet and wireless interfaces are bridged into a single bridge interface." />
   <message msgid="opmode mode g" msgstr="Gateway:" />

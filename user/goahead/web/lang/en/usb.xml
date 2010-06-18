@@ -44,7 +44,7 @@
   <message msgid="smb server netbios" msgstr="NetBIOS Name" />
   <message msgid="smb server dirlist" msgstr="Sharing Directory List" />
   <message msgid="smb server dirname" msgstr="Directory Name" />
-  <message msgid="smb server allowuser" msgstr="Allowes Users" />
+  <message msgid="smb server allowuser" msgstr="Allowed Users" />
   <message msgid="smb adddir name" msgstr="Directory Name" />
   <message msgid="smb adddir accessusers" msgstr="Access User" />
   

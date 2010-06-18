@@ -7,14 +7,14 @@
   <message msgid="firewall no" msgstr=" No." />
   <message msgid="firewall protocol" msgstr="Protocol" />
   <message msgid="firewall comment" msgstr="Comment" />
-  <message msgid="firewall default drop" msgstr="Others would be dropped" />
-  <message msgid="firewall default accept" msgstr="Others would be accepted" />
+  <message msgid="firewall default drop" msgstr="Others will be dropped" />
+  <message msgid="firewall default accept" msgstr="Others will be accepted" />
 
   <message msgid="port title" msgstr="MAC/IP/Port Filtering Settings " />
-  <message msgid="port introduction" msgstr=" You may setup firewall rules to protect your network from virus,worm and malicious activity on the Internet." />
+  <message msgid="port introduction" msgstr=" You can set up firewall rules to protect your network from viruses, worms and other malicious activity on the Internet." />
   <message msgid="port basic setting" msgstr="Basic Settings" />
   <message msgid="port basic filter" msgstr="MAC/IP/Port Filtering" />
-  <message msgid="port basic default policy" msgstr="Default Policy -- The packet that don't match with any rules would be:" />
+  <message msgid="port basic default policy" msgstr="Default Policy -- Packets that don't match any rules will be:" />
   <message msgid="port basic default policy accepted" msgstr="Accepted." />
   <message msgid="port basic default policy dropped" msgstr="Dropped." />
   <message msgid="port filter setting" msgstr="MAC/IP/Port Filter Settings" />
@@ -25,26 +25,26 @@
   <message msgid="port filter action" msgstr="Action" />
   <message msgid="port filter action drop" msgstr="Drop" />
   <message msgid="port filter action accept" msgstr="Accept" />
-  <message msgid="port current filter" msgstr="Current MAC/IP/Port filtering rules in system: " />
+  <message msgid="port current filter" msgstr="Current MAC/IP/Port filtering rules in the system: " />
   <message msgid="port filter source port range" msgstr="Source Port Range" />
   <message msgid="port filter dest port range" msgstr="Dest Port Range" />
   <message msgid="port filter packetcount" msgstr="Pkt Cnt" />
 
   <message msgid="forward title" msgstr="Virtual Server  Settings " />
-  <message msgid="forward introduction" msgstr=" You may setup Virtual Servers to provide services on Internet." />
+  <message msgid="forward introduction" msgstr=" You can set up Virtual Servers to provide services on the Internet." />
   <message msgid="forward virtual server" msgstr="Virtual Server Settings" />
   <message msgid="forward virtual server setting" msgstr="Virtual Server Settings" />
   <message msgid="forward virtual server ipaddr" msgstr="IP Address" />
   <message msgid="forward virtual server port range" msgstr="Port Range" />
-  <message msgid="forward current virtual server" msgstr="Current Virtual Servers in system: " />
+  <message msgid="forward current virtual server" msgstr="Current Virtual Servers in the system: " />
 
   <message msgid="dmz title" msgstr=" DMZ Settings " />
-  <message msgid="dmz introduction" msgstr=" You may setup a De-militarized Zone(DMZ) to separate internal network and Internet." />
+  <message msgid="dmz introduction" msgstr=" You can set up a De-Militarized Zone (DMZ) to separate your internal network and the Internet." />
   <message msgid="dmz setting" msgstr="DMZ Settings" />
   <message msgid="dmz ipaddr" msgstr="DMZ IP Address" />
 
   <message msgid="content filter title" msgstr="Content Filter Settings" />
-  <message msgid="content filter introduction" msgstr="You can setup Content Filter to restrict the improper content access." />
+  <message msgid="content filter introduction" msgstr="You can set up Content Filter to restrict access to unwanted content." />
   <message msgid="content filter webs content filter" msgstr="Webs Content Filter" />
   <message msgid="content filter webs content filter filter" msgstr="Filters:" />
   <message msgid="content filter webs content filter apply" msgstr="Apply" />
@@ -70,13 +70,13 @@
   <message msgid="content filter webs host fitler reset" msgstr="Reset" />
 
   <message msgid="sysfw title" msgstr="System Security Settings" />
-  <message msgid="sysfw introduction" msgstr="You may configure the system firewall to protect AP/Router itself from attacking." />
+  <message msgid="sysfw introduction" msgstr="You can configure the system firewall to protect AP/Router itself from attacks." />
   <message msgid="sysfw remote management title" msgstr="Remote management" />
   <message msgid="sysfw remote management head" msgstr="Remote management (via WAN)" />
   <message msgid="sysfw allow" msgstr="Allow" />
   <message msgid="sysfw deny" msgstr="Deny" />
-  <message msgid="sysfw wanping title" msgstr="Ping form WAN Filter" />
-  <message msgid="sysfw wanping head" msgstr="Ping form WAN Filter" />
+  <message msgid="sysfw wanping title" msgstr="Ping from WAN Filter" />
+  <message msgid="sysfw wanping head" msgstr="Ping from WAN Filter" />
   <message msgid="sysfw spi title" msgstr="Stateful Packet Inspection (SPI)" />
   <message msgid="sysfw spi head" msgstr="SPI Firewall" />
   <message msgid="sysfw apply" msgstr="Apply" />
