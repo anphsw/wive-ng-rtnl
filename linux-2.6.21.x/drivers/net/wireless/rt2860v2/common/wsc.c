@@ -3326,7 +3326,11 @@ VOID	WscInitRegistrarPair(
 /* ASUS EXT by Jiahao */
 	char pid_tmpstr[12];
 	memset(pid_tmpstr, 0, 12);
+#ifdef CONFIG_ASUS_EXT
 	sprintf(pid_tmpstr, "%s", nvram_get("productid"));
+#else
+	sprintf(pid_tmpstr, "%s", "WR-NL");
+#endif
 	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, pid_tmpstr, strlen(pid_tmpstr));
 /* ASUS EXT by Jiahao */
 	
@@ -5591,6 +5595,7 @@ VOID	WscWriteSsidToDatFile(
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
@@ -5601,6 +5606,7 @@ VOID	WscWriteSsidToDatFile(
 					nvram_set("wl_ssid2", tmpstr);
 				}
 /* ASUS EXT by Jiahao */
+#endif
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5612,6 +5618,7 @@ VOID	WscWriteSsidToDatFile(
 			offset = strlen(pTempStr);
 			NdisMoveMemory(pTempStr + offset, pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 			printk("Current SSID=%s\n", pCredential->SSID.Ssid);
 			nvram_set("sta_ssid", pCredential->SSID.Ssid);
 			nvram_set("wl_ssid", pCredential->SSID.Ssid);
@@ -5629,6 +5636,7 @@ VOID	WscWriteSsidToDatFile(
 			printk("AP BSSID=%s\n", tmpstr);
 			nvram_set("sta_bssid", tmpstr);
 /* ASUS EXT by Jiahao */
+#endif
 		}
 #endif // CONFIG_STA_SUPPORT //
 	}
@@ -5648,6 +5656,7 @@ VOID	WscWriteSsidToDatFile(
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
@@ -5658,6 +5667,7 @@ VOID	WscWriteSsidToDatFile(
 					nvram_set("wl_ssid2", tmpstr);
 				}
 /* ASUS EXT by Jiahao */
+#endif
 			}
 			NdisZeroMemory(item_str, 10);
 		}
@@ -5703,6 +5713,7 @@ VOID	WscWriteWpaPskToDatFile(
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 				if (apidx == 0)
 				{
 					memset(tmpstr, 0x0, 128);
@@ -5711,6 +5722,7 @@ VOID	WscWriteWpaPskToDatFile(
 					nvram_set("wl_wpa_psk", tmpstr);
 				}
 /* ASUS EXT by Jiahao */
+#endif
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5725,12 +5737,14 @@ VOID	WscWriteWpaPskToDatFile(
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 				memset(tmpstr, 0x0, 128);
 				memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 				printk("Current WPA-PSK=%s\n", tmpstr);
 				nvram_set("sta_wpa_psk", tmpstr);
 				nvram_set("wl_wpa_psk", tmpstr);
 /* ASUS EXT by Jiahao */
+#endif
 			}
 		}
 #endif // CONFIG_STA_SUPPORT //
@@ -5752,6 +5766,7 @@ VOID	WscWriteWpaPskToDatFile(
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 				if (apidx == 0)
 				{
 					memset(tmpstr, 0x0, 128);
@@ -5760,6 +5775,7 @@ VOID	WscWriteWpaPskToDatFile(
 					nvram_set("wl_wpa_psk", tmpstr);
 				}
 /* ASUS EXT by Jiahao */
+#endif
 			}
 			NdisZeroMemory(item_str, 10);
 		}
@@ -7700,6 +7716,7 @@ void    WscWriteConfToDatFile(
 								{
 									sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 									printk("Current AuthMode=%s\n", RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
 
 									if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "OPEN") == 0))
@@ -7745,6 +7762,7 @@ void    WscWriteConfToDatFile(
 */
 									}
 /* ASUS EXT by Jiahao */
+#endif
 								}
 								else
 									sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
@@ -7759,6 +7777,7 @@ void    WscWriteConfToDatFile(
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetAuthTypeStr(auth_flag));
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 						printk("Current AuthMode=%s\n", WscGetAuthTypeStr(auth_flag));
 
 						if ((strcmp(WscGetAuthTypeStr(auth_flag), "OPEN") == 0))
@@ -7800,6 +7819,7 @@ void    WscWriteConfToDatFile(
 							nvram_set("wl_wpa_mode", "2");
 						}
 /* ASUS EXT by Jiahao */
+#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -7817,6 +7837,7 @@ void    WscWriteConfToDatFile(
 								sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 								printk("Current EncrypType=%s\n", RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
 
 								if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "NONE") == 0))
@@ -7840,6 +7861,7 @@ void    WscWriteConfToDatFile(
 									nvram_set("wl_crypto", "tkip+aes");
 								}
 /* ASUS EXT by Jiahao */
+#endif
 							}
 							else
 								sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
@@ -7853,6 +7875,7 @@ void    WscWriteConfToDatFile(
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetEncryTypeStr(encrypt_flag));
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 						printk("Current EncrypType=%s\n", WscGetEncryTypeStr(encrypt_flag));
 
 						if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "NONE") == 0))
@@ -7878,6 +7901,7 @@ void    WscWriteConfToDatFile(
 							nvram_set("wl_crypto", "aes");
 						}
 /* ASUS EXT by Jiahao */
+#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}    
@@ -7939,12 +7963,14 @@ void    WscWriteConfToDatFile(
 							{
 								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 							printk("Current DefaultKeyID=%d\n", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
 
 							memset(tmpstr, 0x0, 128);
 							sprintf(tmpstr, "%d", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
    					               	nvram_set("wl_key", tmpstr);
 /* ASUS EXT by Jiahao */
+#endif
 							}
 							else
 								sprintf(pTempStr, "%s;%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
@@ -7956,6 +7982,7 @@ void    WscWriteConfToDatFile(
 					{
 						sprintf(pTempStr, "%s%d", pTempStr, pAd->StaCfg.DefaultKeyId+1);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 						printk("Current DefaultKeyID=%d\n", pAd->StaCfg.DefaultKeyId+1);
 
 						memset(tmpstr, 0x0, 128);
@@ -7963,6 +7990,7 @@ void    WscWriteConfToDatFile(
 						nvram_set("sta_key", tmpstr);
 						nvram_set("wl_key", tmpstr);
 /* ASUS EXT by Jiahao */
+#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -8009,6 +8037,7 @@ void    WscWriteConfToDatFile(
 								sprintf(pTempStr, "%s;", pTempStr);
 						}
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 						if (apidx == 0)
 						{
 							pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
@@ -8019,6 +8048,7 @@ void    WscWriteConfToDatFile(
 								nvram_set("wl_wep_x", "2");
 						}
 /* ASUS EXT by Jiahao */
+#endif
 					}
 				}
 				else if ((strncmp(pTempStr, WepKeyName, strlen(WepKeyFormatName)) == 0) &&
@@ -8045,6 +8075,7 @@ void    WscWriteConfToDatFile(
 								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
 							}
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 							if (apidx == 0)
 							{
 								int ii;
@@ -8097,6 +8128,7 @@ void    WscWriteConfToDatFile(
 								}
 							}
 /* ASUS EXT by Jiahao */
+#endif
 						}
 					}
 				}
@@ -8116,6 +8148,7 @@ void    WscWriteConfToDatFile(
 							sprintf(pTempStr, "%s0", WepKeyFormatName); // Hex
 					}
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 					if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
 					{
 						nvram_set("sta_wep_x", "1");
@@ -8127,6 +8160,7 @@ void    WscWriteConfToDatFile(
 						nvram_set("wl_wep_x", "2");
 					}
 /* ASUS EXT by Jiahao */
+#endif
 				}
 				else if (rtstrstr(pTempStr, (PSTRING) WepKeyName) &&  (pAd->OpMode == OPMODE_STA))
 				{
@@ -8141,6 +8175,7 @@ void    WscWriteConfToDatFile(
 								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 								int ii;
 								if (pCredentail->KeyLength == 5 || pCredentail->KeyLength == 13)
 								{
@@ -8204,6 +8239,7 @@ void    WscWriteConfToDatFile(
 									printk("Wep Key Type:HEX\n");
 								}
 /* ASUS EXT by Jiahao */
+#endif
 							}
 					}
 				}
@@ -8219,12 +8255,14 @@ void    WscWriteConfToDatFile(
 		}
 		RtmpOSFileClose(file_w);
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 #ifdef CONFIG_AP_SUPPORT
 		nvram_set("wsc_config_state", "1");
 #endif
 		nvram_commit();
 #ifdef CONFIG_AP_SUPPORT
 		nvram_set("x_Setting", "1");
+#endif
 #endif
 /* ASUS EXT by Jiahao */
 	}
