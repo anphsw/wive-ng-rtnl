@@ -37,8 +37,10 @@
 #include <net/iw_handler.h>
 #endif // LINUX //
 
-#define ASUS_NVRAM		/* ASUS EXT by Jiahao */
-#include <nvram/bcmnvram.h>	/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT                                                                                                                     
+#define ASUS_NVRAM                                                                                                                         
+#include <nvram/bcmnvram.h>                                                                                                                
+#endif               
 
 #define WSC_UPNP_MSG_TIMEOUT			(150 * OS_HZ)
 #define RTMP_WSC_NLMSG_SIGNATURE_LEN	8
