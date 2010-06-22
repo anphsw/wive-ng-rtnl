@@ -182,7 +182,34 @@ typedef	struct	PACKED _RXD_STRUC{
 }	RXD_STRUC, *PRXD_STRUC, RT28XX_RXD_STRUC, *PRT28XX_RXD_STRUC;
 #endif
 
+#ifdef BIG_ENDIAN
+typedef union _TX_ATTENUATION_CTRL_STRUC
+{
+	struct
+	{
+		ULONG	Reserve1:20;
+		ULONG	PCIE_PHY_TX_ATTEN_EN:1;
+		ULONG	PCIE_PHY_TX_ATTEN_VALUE:3;
+		ULONG	Reserve2:7;
+		ULONG	RF_ISOLATION_ENABLE:1;
+	} field;
 
+	ULONG	word;
+} TX_ATTENUATION_CTRL_STRUC, *PTX_ATTENUATION_CTRL_STRUC;
+#else
+typedef union _TX_ATTENUATION_CTRL_STRUC {
+	struct
+	{
+		ULONG	RF_ISOLATION_ENABLE:1;
+		ULONG	Reserve2:7;
+		ULONG	PCIE_PHY_TX_ATTEN_VALUE:3;
+		ULONG	PCIE_PHY_TX_ATTEN_EN:1;
+		ULONG	Reserve1:20;		
+	} field;
+	
+	ULONG	word;
+} TX_ATTENUATION_CTRL_STRUC, *PTX_ATTENUATION_CTRL_STRUC;
+#endif
 /* ----------------- EEPROM Related MACRO ----------------- */
 
 // 8051 firmware image for RT2860 - base address = 0x4000
@@ -292,28 +319,6 @@ typedef	struct	PACKED _RXD_STRUC{
 #endif // CONFIG_AP_SUPPORT //
 // end johnli
 
-// remove Pair-wise key material from ASIC
-#define RTMP_STA_ENTRY_KEY_DEL(pAd, BssIdx, Wcid)	\
-	AsicRemovePairwiseKeyEntry(pAd, BssIdx, (UCHAR)Wcid);
-
-// add Client security information into ASIC WCID table and IVEIV table
-#define RTMP_STA_SECURITY_INFO_ADD(pAd, apidx, KeyID, pEntry)		\
-	RTMPAddWcidAttributeEntry(pAd, apidx, KeyID, 			\
-							pAd->SharedKey[apidx][KeyID].CipherAlg, pEntry);
-
-#define RTMP_SECURITY_KEY_ADD(pAd, apidx, KeyID, pEntry)		\
-	{	/* update pairwise key information to ASIC Shared Key Table */	\
-		AsicAddSharedKeyEntry(pAd, apidx, KeyID,					\
-						  pAd->SharedKey[apidx][KeyID].CipherAlg,		\
-						  pAd->SharedKey[apidx][KeyID].Key,				\
-						  pAd->SharedKey[apidx][KeyID].TxMic,			\
-						  pAd->SharedKey[apidx][KeyID].RxMic);			\
-		/* update ASIC WCID attribute table and IVEIV table */			\
-		RTMPAddWcidAttributeEntry(pAd, apidx, KeyID,					\
-						  pAd->SharedKey[apidx][KeyID].CipherAlg,		\
-						  pEntry); }
-
-
 // Insert the BA bitmap to ASIC for the Wcid entry
 #define RTMP_ADD_BA_SESSION_TO_ASIC(_pAd, _Aid, _TID)	\
 		do{					\
@@ -416,6 +421,38 @@ typedef	struct	PACKED _RXD_STRUC{
 
 #define RTMP_MLME_RADIO_OFF(pAd) \
     RT28xxPciMlmeRadioOFF(pAd);
+
+/* ----------------- Security Related MACRO ----------------- */
+
+/* Set Asic WCID Attribute table */
+#define RTMP_SET_WCID_SEC_INFO(_pAd, _BssIdx, _KeyIdx, _CipherAlg, _Wcid, _KeyTabFlag)	\
+	RTMPSetWcidSecurityInfo(_pAd, _BssIdx, _KeyIdx, _CipherAlg, _Wcid, _KeyTabFlag)
+
+/* Set Asic WCID IV/EIV table */
+#define RTMP_ASIC_WCID_IVEIV_TABLE(_pAd, _Wcid, _uIV, _uEIV)	\
+	AsicUpdateWCIDIVEIV(_pAd, _Wcid, _uIV, _uEIV)
+
+/* Set Asic WCID Attribute table (offset:0x6800) */
+#define RTMP_ASIC_WCID_ATTR_TABLE(_pAd, _BssIdx, _KeyIdx, _CipherAlg, _Wcid, _KeyTabFlag)\
+	AsicUpdateWcidAttributeEntry(_pAd, _BssIdx, _KeyIdx, _CipherAlg, _Wcid, _KeyTabFlag)
+
+/* Set Asic Pairwise key table */
+#define RTMP_ASIC_PAIRWISE_KEY_TABLE(_pAd, _WCID, _pCipherKey)	\
+	AsicAddPairwiseKeyEntry(_pAd, _WCID, _pCipherKey)
+
+/* Set Asic Shared key table */
+#define RTMP_ASIC_SHARED_KEY_TABLE(_pAd, _BssIndex, _KeyIdx, _pCipherKey) \
+	AsicAddSharedKeyEntry(_pAd, _BssIndex, _KeyIdx, _pCipherKey)
+
+#ifdef CONFIG_STA_SUPPORT
+/* Set Port Secured */
+#define RTMP_SET_PORT_SECURED(_pAd) 										\
+	STA_PORT_SECURED(_pAd);
+#endif // CONFIG_STA_SUPPORT //
+
+/* Remove Pairwise Key table */
+#define RTMP_REMOVE_PAIRWISE_KEY_ENTRY(_pAd, _Wcid)\
+	AsicRemovePairwiseKeyEntry(_pAd, _Wcid)
 
 #endif //__MAC_PCI_H__ //
 

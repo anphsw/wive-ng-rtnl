@@ -85,7 +85,7 @@ VOID APScanTimeout(
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)FunctionContext;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("AP SYNC - Scan Timeout \n"));
-	MlmeEnqueue(pAd, AP_SYNC_STATE_MACHINE, APMT2_SCAN_TIMEOUT, 0, NULL);
+	MlmeEnqueue(pAd, AP_SYNC_STATE_MACHINE, APMT2_SCAN_TIMEOUT, 0, NULL, 0);
 	RTMP_MLME_HANDLER(pAd);
 }
 
@@ -155,7 +155,7 @@ VOID APPeerProbeReqAction(
 	if (pAd->WdsTab.Mode == WDS_BRIDGE_MODE)
 		return;
 
-	if (! APPeerProbeReqSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, Ssid, &SsidLen))
+	if (! PeerProbeReqSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, Ssid, &SsidLen))
 		return;
 
 	for(apidx=0; apidx<pAd->ApCfg.BssidNum; apidx++)
@@ -240,7 +240,8 @@ VOID APPeerProbeReqAction(
 		}
 
 #ifdef DOT11_N_SUPPORT
-		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
+		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable))
 		{
 			ULONG TmpLen;
 			UCHAR	HtLen, AddHtLen, NewExtLen;
@@ -379,6 +380,7 @@ VOID APPeerProbeReqAction(
 	 	// P802.11n_D3.03
 	 	// 7.3.2.60 Overlapping BSS Scan Parameters IE
 	 	if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable) &&
 			(pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == 1))
 	 	{
 			OVERLAP_BSS_SCAN_IE  OverlapScanParam;
@@ -408,7 +410,8 @@ VOID APPeerProbeReqAction(
 		// P802.11n_D1.10
 		// 7.3.2.27 Extended Capabilities IE
 		// HT Information Exchange Support
-		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
+		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable))
 		{
 			ULONG TmpLen;
 			UCHAR ExtCapIe[3] = {IE_EXT_CAPABILITY, 1, 0x01};
@@ -417,7 +420,7 @@ VOID APPeerProbeReqAction(
 
 			NdisZeroMemory(&extCapInfo, sizeof(EXT_CAP_INFO_ELEMENT));
 			extCapInfo.BssCoexistMgmtSupport = 1;
-			NdisMoveMemory(&ExtCapIe[3], &extCapInfo, 1);
+			NdisMoveMemory(&ExtCapIe[2], &extCapInfo, 1);
 #endif // DOT11N_DRAFT3 //
 			MakeOutgoingFrame(pOutBuffer+FrameLen, &TmpLen,
 								3,                  ExtCapIe,
@@ -530,7 +533,8 @@ VOID APPeerProbeReqAction(
 		}// Country IE -
 
 #ifdef DOT11_N_SUPPORT
-		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
+		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable))
 		{
 			ULONG TmpLen;
 			UCHAR	HtLen, AddHtLen;//, NewExtLen;
@@ -607,30 +611,30 @@ VOID APPeerProbeReqAction(
 		}
 #endif // DOT11_N_SUPPORT //
 
+
 #ifdef WSC_AP_SUPPORT
-	/* for windows 7 logo test */
-	if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE) &&
-			(pAd->ApCfg.MBSSID[apidx].IEEE8021X == FALSE) && 
-			(pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
-	{
-		/*
-		   Non-WPS Windows XP and Vista PCs are unable to determine if a WEP enalbed network is static key based 
-		   or 802.1X based. If the legacy station gets an EAP-Rquest/Identity from the AP, it assume the WEP
-		   network is 802.1X enabled & will prompt the user for 802.1X credentials. If the legacy station doesn't
-		   receive anything after sending an EAPOL-Start, it will assume the WEP network is static key based and
-		   prompt user for the WEP key. <<from "WPS and Static Key WEP Networks">>
-		   A WPS enabled AP should include this IE in the beacon when the AP is hosting a static WEP key network.  
-		   The IE would be 7 bytes long with the Extended Capability field set to 0 (all bits zero)
-http://msdn.microsoft.com/library/default.asp?url=/library/en-us/randz/protocol/securing_public_wi-fi_hotspots.asp
-*/
-		ULONG TempLen1 = 0;
-		UCHAR PROVISION_SERVICE_IE[7] = {0xDD, 0x05, 0x00, 0x50, 0xF2, 0x05, 0x00};
-		MakeOutgoingFrame(pOutBuffer+FrameLen,        &TempLen1,
-				7,                            PROVISION_SERVICE_IE,
-				END_OF_ARGS);
-		FrameLen += TempLen1;
-	}
-	/* end of for windows 7 logo test */
+		/* for windows 7 logo test */
+		if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE) &&
+				(pAd->ApCfg.MBSSID[apidx].IEEE8021X == FALSE) && 
+				(pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
+		{
+			/*
+				Non-WPS Windows XP and Vista PCs are unable to determine if a WEP enalbed network is static key based 
+				or 802.1X based. If the legacy station gets an EAP-Rquest/Identity from the AP, it assume the WEP
+				network is 802.1X enabled & will prompt the user for 802.1X credentials. If the legacy station doesn't
+				receive anything after sending an EAPOL-Start, it will assume the WEP network is static key based and
+				prompt user for the WEP key. <<from "WPS and Static Key WEP Networks">>
+				A WPS enabled AP should include this IE in the beacon when the AP is hosting a static WEP key network.  
+				The IE would be 7 bytes long with the Extended Capability field set to 0 (all bits zero)
+				http://msdn.microsoft.com/library/default.asp?url=/library/en-us/randz/protocol/securing_public_wi-fi_hotspots.asp
+			*/
+			ULONG TempLen1 = 0;
+			UCHAR PROVISION_SERVICE_IE[7] = {0xDD, 0x05, 0x00, 0x50, 0xF2, 0x05, 0x00};
+			MakeOutgoingFrame(pOutBuffer+FrameLen,        &TempLen1,
+								7,                            PROVISION_SERVICE_IE,
+								END_OF_ARGS);
+			FrameLen += TempLen1;
+	    }
 
         // add Simple Config Information Element
         if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode > WSC_DISABLE) && (pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.ValueLen))
@@ -644,7 +648,9 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/randz/protocol/
 #endif // WSC_AP_SUPPORT //
 
 
-		// 802.11n 11.1.3.2.2 active scanning. sending probe response with MCS rate is
+		// 802.11n 11.1.3.2.2 active scanning. sending probe response with MCS rate is		
+		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
+		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);
 	}
@@ -853,7 +859,7 @@ VOID APPeerBeaconAction(
 
 			pEntry = &pAd->MacTab.Content[Elem->Wcid];
 			
-			if (pEntry && pEntry->ValidAsApCli && (pEntry->MatchAPCLITabIdx < MAX_APCLI_NUM))
+			if (pEntry && IS_ENTRY_APCLI(pEntry) && (pEntry->MatchAPCLITabIdx < MAX_APCLI_NUM))
 				pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].ApCliRcvBeaconTime = pAd->Mlme.Now32;
 		}
 #endif // APCLI_SUPPORT //
@@ -927,10 +933,10 @@ VOID APPeerBeaconAction(
 __End_Of_APPeerBeaconAction:
 	if (Channel == pAd->ApCfg.AutoChannel_Channel)
 	{
-		AutoChBssInsertEntry(pAd, Bssid, Ssid, SsidLen, Channel, NewExtChannelOffset, RealRssi);
+		if (AutoChBssSearchWithSSID(pAd, Bssid, (PUCHAR)Ssid, SsidLen, Channel) == BSS_NOT_FOUND)
+			pAd->ApCfg.ApCnt++;
 
-		if ((RealRssi + pAd->BbpRssiToDbmDelta) > pAd->ApCfg.AutoChannel_MaxRssi)
-			pAd->ApCfg.AutoChannel_MaxRssi = RealRssi + pAd->BbpRssiToDbmDelta;
+		AutoChBssInsertEntry(pAd, Bssid, Ssid, SsidLen, Channel, NewExtChannelOffset, RealRssi);
 	}
 
 }
@@ -1173,7 +1179,7 @@ VOID ApSiteSurvey(
     ScanReq.BssType = BSS_ANY;
     ScanReq.ScanType = ScanType;
     
-    MlmeEnqueue(pAd, AP_SYNC_STATE_MACHINE, APMT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq);
+    MlmeEnqueue(pAd, AP_SYNC_STATE_MACHINE, APMT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq, 0);
     RTMP_MLME_HANDLER(pAd);
 }
 

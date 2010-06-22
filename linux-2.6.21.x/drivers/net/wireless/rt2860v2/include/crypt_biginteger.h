@@ -62,7 +62,7 @@ VOID BigInteger_Free (
 
 VOID BigInteger_AllocSize (
     IN PBIG_INTEGER *pBI,
-    IN UINT Length);
+    IN INT Length);
 
 VOID BigInteger_ClearHighBits (
     IN PBIG_INTEGER pBI);

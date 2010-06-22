@@ -85,7 +85,7 @@ Note:
     None
 ========================================================================
 */
-VOID _SHA1_Init (
+VOID RT_SHA1_Init (
     IN  SHA1_CTX_STRUC *pSHA_CTX)
 {
     NdisMoveMemory(pSHA_CTX->HashValue, SHA1_DefaultHashValue, 
@@ -93,7 +93,7 @@ VOID _SHA1_Init (
     NdisZeroMemory(pSHA_CTX->Block, SHA1_BLOCK_SIZE);
     pSHA_CTX->MessageLen = 0;
     pSHA_CTX->BlockLen   = 0;
-} /* End of SHA1_Init */
+} /* End of RT_SHA1_Init */
 
 
 /*
@@ -291,7 +291,7 @@ VOID RT_SHA1 (
     SHA1_CTX_STRUC sha_ctx;
 
     NdisZeroMemory(&sha_ctx, sizeof(SHA1_CTX_STRUC));
-    _SHA1_Init(&sha_ctx);
+    RT_SHA1_Init(&sha_ctx);
     SHA1_Append(&sha_ctx, Message, MessageLen);
     SHA1_End(&sha_ctx, DigestMessage);
 } /* End of RT_SHA1 */

@@ -190,7 +190,7 @@ static inline BOOLEAN ValidWdsEntry(
 		}
 
 		pMacEntry = &pAd->MacTab.Content[pAd->WdsTab.WdsEntry[WdsIndex].MacTabMatchWCID];
-		if (pMacEntry->ValidAsWDS != TRUE)
+		if (!IS_ENTRY_WDS(pMacEntry))
 		{
 			result = FALSE;
 			break;

@@ -47,25 +47,36 @@
   *
   ************************************************************************/
 #if defined(CONFIG_RALINK_RT3050_1T1R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/default/RT3050_AP_1T1R_V1_0.bin"
+#ifdef CONFIG_RALINK_RT3350
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT3350_AP_1T1R_V1_0.bin"
+#else
+#define EEPROM_DEFAULT_FILE_PATH		    "/etc_ro/wlan/RT3050_AP_1T1R_V1_0.bin"
+#endif // CONFIG_RALINK_RT3350 //
 #elif defined(CONFIG_RALINK_RT3051_1T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/default/RT3051_AP_1T2R_V1_0.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT3051_AP_1T2R_V1_0.bin"
 #elif defined(CONFIG_RALINK_RT3052_2T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/default/RT3052_AP_2T2R_V1_1.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT3052_AP_2T2R_V1_1.bin"
+#elif defined(CONFIG_RALINK_RT3883_3T3R)
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT3883_AP_3T3R_V0_1.bin"
+#elif defined(CONFIG_RALINK_RT3662_2T2R)
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT3662_AP_2T2R_V0_0.bin"
 #elif defined(CONFIG_RT2860V2_2850)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/default/RT2880_RT2850_AP_2T3R_V1_6.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT2880_RT2850_AP_2T3R_V1_6.bin"
 #else // RFIC 2820
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/default/RT2880_RT2820_AP_2T3R_V1_6.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/wlan/RT2880_RT2820_AP_2T3R_V1_6.bin"
 #endif
 
-#if defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
+#if defined (CONFIG_RT2880_FLASH_32M)
 #define MTD_NUM_FACTORY 5
 #else
 #define MTD_NUM_FACTORY 2
 #endif
 
-
+#ifdef CONFIG_RALINK_RT3883
+#define EEPROM_SIZE					0x400
+#else
 #define EEPROM_SIZE					0x200
+#endif // CONFIG_RALINK_RT3883 //
 #define NVRAM_OFFSET					0x30000
 #define RF_OFFSET					0x40000
 
@@ -92,51 +103,14 @@ extern void request_tmr_service(int, void *, void *);
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#ifndef SA_SHIRQ
 #define SA_SHIRQ IRQF_SHARED
 #endif
-
-#ifdef PCI_MSI_SUPPORT
-#define RTMP_MSI_ENABLE(_pAd) \
-{ 	POS_COOKIE _pObj = (POS_COOKIE)(_pAd->OS_Cookie); \
-	(_pAd)->HaveMsi =	pci_enable_msi(_pObj->pci_dev) == 0 ? TRUE : FALSE; }
-
-#define RTMP_MSI_DISABLE(_pAd) \
-{ 	POS_COOKIE _pObj = (POS_COOKIE)(_pAd->OS_Cookie); \
-	if (_pAd->HaveMsi == TRUE) \
-		pci_disable_msi(_pObj->pci_dev); \
-	_pAd->HaveMsi = FALSE;	}
-#else
-#define RTMP_MSI_ENABLE(_pAd)
-#define RTMP_MSI_DISABLE(_pAd)
-#endif // PCI_MSI_SUPPORT //
-
-
-#define RTMP_IRQ_REQUEST(net_dev)							\
-{	PRTMP_ADAPTER _pAd = (PRTMP_ADAPTER)((net_dev)->priv);	\
-	POS_COOKIE _pObj = (POS_COOKIE)(_pAd->OS_Cookie);		\
-	RTMP_MSI_ENABLE(_pAd);									\
-	if ((retval = request_irq(net_dev->irq, 		\
-							rt2860_interrupt, SA_INTERRUPT,		\
-							(net_dev)->name, (net_dev)))) {	\
-		DBGPRINT(RT_DEBUG_ERROR, ("request_irq  error(%d)\n", retval));	\
-	return retval; } }
-
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-#define RTMP_IRQ_RELEASE(net_dev)								\
-{	PRTMP_ADAPTER _pAd = (PRTMP_ADAPTER)((net_dev)->priv);		\
-	synchronize_irq(net_dev->irq);						\
-	free_irq(net_dev->irq, (net_dev));					\
-	RTMP_MSI_DISABLE(_pAd); }
-#else
-#define RTMP_IRQ_RELEASE(net_dev)								\
-{	PRTMP_ADAPTER _pAd = (PRTMP_ADAPTER)((net_dev)->priv);		\
-	free_irq(net_dev->irq, (net_dev));					\
-	RTMP_MSI_DISABLE(_pAd); }
 #endif
 
 #endif // LINUX //
 
+#define CMDTHREAD_CHAN_RESCAN                      0x0D730101	// cmd
 
 #endif // __RTMP_RBUS_H__ //
 

@@ -49,6 +49,7 @@
 #define IPV6_NEXT_HEADER_TCP			0x06
 #define IPV6_NEXT_HEADER_UDP			0x11
 #define IPV6_NEXT_HEADER_ICMPV6			0x3a
+#define IPV6_NEXT_HEADER_PIM			0x67
 
 // ICMPv6 msg type definition
 #define ICMPV6_MSG_TYPE_ROUTER_SOLICITATION			0x85 // 133

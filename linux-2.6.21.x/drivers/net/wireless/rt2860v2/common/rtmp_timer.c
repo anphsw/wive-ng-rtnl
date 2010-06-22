@@ -76,13 +76,14 @@ BUILD_TIMER_FUNCTION(DisassocTimeout);
 BUILD_TIMER_FUNCTION(LinkDownExec);
 BUILD_TIMER_FUNCTION(StaQuickResponeForRateUpExec);
 BUILD_TIMER_FUNCTION(WpaDisassocApAndBlockAssoc);
-#ifdef RTMP_MAC_PCI
+#ifdef PCIE_PS_SUPPORT
 BUILD_TIMER_FUNCTION(PsPollWakeExec);
 BUILD_TIMER_FUNCTION(RadioOnExec);
-#endif // RTMP_MAC_PCI //
+#endif // PCIE_PS_SUPPORT //
 #ifdef QOS_DLS_SUPPORT
 BUILD_TIMER_FUNCTION(DlsTimeoutAction);
 #endif // QOS_DLS_SUPPORT //
+
 
 
 #endif // CONFIG_STA_SUPPORT //
@@ -97,6 +98,10 @@ BUILD_TIMER_FUNCTION(WscPBCTimeOutAction);
 BUILD_TIMER_FUNCTION(WscScanTimeOutAction);
 BUILD_TIMER_FUNCTION(WscProfileRetryTimeout);
 #endif // CONFIG_STA_SUPPORT //
+#ifdef WSC_LED_SUPPORT
+BUILD_TIMER_FUNCTION(WscLEDTimer);
+BUILD_TIMER_FUNCTION(WscSkipTurnOffLEDTimer);
+#endif // WSC_LED_SUPPORT //
 #endif // WSC_INCLUDED //
 
 
@@ -109,6 +114,18 @@ extern void LedCtrlMain(
 BUILD_TIMER_FUNCTION(LedCtrlMain);
 #endif
 
+#ifdef WMM_ACM_SUPPORT
+BUILD_TIMER_FUNCTION(ACMP_TR_TC_ReqCheck);
+BUILD_TIMER_FUNCTION(ACMP_TR_STM_Check);
+BUILD_TIMER_FUNCTION(ACMP_TR_TC_General);
+BUILD_TIMER_FUNCTION(ACMP_CMD_Timer_Data_Simulation);
+#endif // WMM_ACM_SUPPORT //
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef TXBF_SUPPORT
+BUILD_TIMER_FUNCTION(eTxBfProbeTimerExec);
+#endif // TXBF_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
 
 #ifdef RTMP_TIMER_TASK_SUPPORT
 static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)

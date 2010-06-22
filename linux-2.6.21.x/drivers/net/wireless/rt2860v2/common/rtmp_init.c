@@ -28,44 +28,112 @@
 #include	"rt_config.h"
 
 UCHAR    BIT8[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-char*   CipherName[] = {"none","wep64","wep128","TKIP","AES","CKIP64","CKIP128"};
+char*   CipherName[] = {"none","wep64","wep128","TKIP","AES","CKIP64","CKIP128","CKIP152","SMS4"};
 
 //
 // BBP register initialization set
 //
 REG_PAIR   BBPRegTable[] = {
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	{BBP_R4,		0x50}, // 2883 need to 
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 #ifdef RT305x
 	{BBP_R31,		0x08},		//gary recommend for ACE
 #endif // RT305x //
+
+#if defined (CONFIG_RALINK_RT3883)
+	{BBP_R47,		0x07},	// 5b ADC is used to measure chip temp through PTAT voltage
+#endif // CONFIG_RALINK_RT3883 //
+
+// turn on find AGC cause QA have Rx problem 2009-10-26 in 3883
+#if defined(CONFIG_RALINK_RT2883)
+	{BBP_R65,		0x6C},		// fix rssi issue and add Fine AGC
+#else
 	{BBP_R65,		0x2C},		// fix rssi issue
+#endif // CONFIG_RALINK_RT2883 //
 	{BBP_R66,		0x38},	// Also set this default value to pAd->BbpTuning.R66CurrentValue at initial
 	{BBP_R69,		0x12},
 	{BBP_R70,		0xa},	// BBP_R70 will change to 0x8 in ApStartUp and LinkUp for rt2860C, otherwise value is 0xa
 	{BBP_R73,		0x10},
 #ifdef RT305x
 	{BBP_R78,		0x0E},
-	{BBP_R80,		0x08}, // requested by Gary for high power
+	{BBP_R80,		0x08},	// requested by Gary for high power
 #endif // RT305x //
 	{BBP_R81,		0x37},
 	{BBP_R82,		0x62},
 	{BBP_R83,		0x6A},
 	{BBP_R84,		0x99},	// 0x19 is for rt2860E and after. This is for extension channel overlapping IOT. 0x99 is for rt2860D and before
+#ifdef CONFIG_RALINK_RT3883
+	{BBP_R86,		0x46},	// for peak throughput, Henry 2009-12-23
+	{BBP_R88,		0x90},	// for rt3883 middle range, Henry 2009-12-31
+#else
 	{BBP_R86,		0x00},	// middle range issue, Rory @2008-01-28 	
+#endif
 	{BBP_R91,		0x04},	// middle range issue, Rory @2008-01-28
+#ifdef CONFIG_RALINK_RT3883
+	{BBP_R92,		0x02},	//improve 10~20Mbps peak throughput, requested by Henry 2009-11-26
+#else
 	{BBP_R92,		0x00},	// middle range issue, Rory @2008-01-28
+#endif // CONFIG_RALINK_RT3883 //
+
 #ifdef RT305x
-	{BBP_R103,  	0xC0}, 	
+	{BBP_R103,		0xC0}, 	
+#elif defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	{BBP_R103,		0xC0}, 	
 #else
 	{BBP_R103,		0x00}, 	// near range high-power issue, requested from Gary @2008-0528
 #endif // RT305x //
 #ifdef RTMP_RBUS_SUPPORT
-	{BBP_R105,		0x01},	// 0x05 is for rt2860E to turn on FEQ control. It is safe for rt2860D and before, because Bit 7:2 are reserved in rt2860D and before.
+#if defined (CONFIG_RALINK_RT2883)
+	//{BBP_R105,		0x04},	// RT2883 default is 0x4
+	{BBP_R105,		0xbc},	// Initialized R105 to enable saving of Explicit and Implicit profiles
+	{BBP_R137,		0x0a},	// RT2883 default is 0x4
+
+	{BBP_R179,		0x02},	// Set ITxBF timeout to 0x9C40=1000msec
+	{BBP_R180,		0x00},
+	{BBP_R182,		0x40},
+	{BBP_R180,		0x01},
+	{BBP_R182,		0x9C},
+
+#elif defined (CONFIG_RALINK_RT3883)
+	{BBP_R104,		0x92},	//improve 10~20Mbps peak throughput, requested by Henry 2009-11-26
+	{BBP_R105,		0x04},	// RT2883 default is 0x4
+	{BBP_R120,		0x50},	// for long range -2db, Gary 2010-01-22
+	{BBP_R137,		0x0F},  // julian suggest make the RF output more stable
+	{BBP_R163,		0xBC},	// Enable saving of Explicit and Implicit profiles
+
+	{BBP_R179,		0x02},	// Set ITxBF timeout to 0x9C40=1000msec
+	{BBP_R180,		0x00},
+	{BBP_R182,		0x40},
+	{BBP_R180,		0x01},
+	{BBP_R182,		0x9C},
+	{BBP_R179,		0x00},
+
+	{BBP_R142,		0x04},	// Reprogram the inband interface to put right values in RXWI
+	{BBP_R143,		0x3b},
+	{BBP_R142,		0x06},
+	{BBP_R143,		0xA0},
+	{BBP_R142,		0x07},
+	{BBP_R143,		0xA1},
+	{BBP_R142,		0x08},
+	{BBP_R143,		0xA2},
+
+#elif defined (CONFIG_RALINK_RT3350)
+	{BBP_R105,		0x04},
+#else
+	{BBP_R105,		0x01},/*kurtis:0x01 ori*/// 0x05 is for rt2860E to turn on FEQ control. It is safe for rt2860D and before, because Bit 7:2 are reserved in rt2860D and before.
+#endif
 #else
 	{BBP_R105,		0x05},	// 0x05 is for rt2860E to turn on FEQ control. It is safe for rt2860D and before, because Bit 7:2 are reserved in rt2860D and before.
 #endif
+
+#ifdef CONFIG_RALINK_RT3883
+	{BBP_R106,  	0x05},
+#else
 #ifdef DOT11_N_SUPPORT
 	{BBP_R106,  	0x35},  // improve throughput unstable issue in short GI	
 #endif
+#endif // CONFIG_RALINK_RT3883 //
 };
 #define	NUM_BBP_REG_PARMS	(sizeof(BBPRegTable) / sizeof(REG_PAIR))
 
@@ -75,7 +143,12 @@ REG_PAIR   BBPRegTable[] = {
 //
 
 RTMP_REG_PAIR	MACRegTable[] =	{
-#if defined(HW_BEACON_OFFSET) && (HW_BEACON_OFFSET == 0x200)
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+	{BCN_OFFSET0,			0x18100800}, /* if (BCNx_OFFSET > 0x7F) SHR_MSEL = 0 else SHR_MSEL = 1 */
+	{BCN_OFFSET1,			0x38302820}, /* if (BCNx_OFFSET > 0x7F) SHR_MSEL = 0 else SHR_MSEL = 1 */
+	{BCN_OFFSET2,			0x58504840}, /* if (BCNx_OFFSET > 0x7F) SHR_MSEL = 0 else SHR_MSEL = 1 */
+	{BCN_OFFSET3,			0x78706860}, /* if (BCNx_OFFSET > 0x7F) SHR_MSEL = 0 else SHR_MSEL = 1 */
+#elif defined(HW_BEACON_OFFSET) && (HW_BEACON_OFFSET == 0x200)
 	{BCN_OFFSET0,			0xf8f0e8e0}, /* 0x3800(e0), 0x3A00(e8), 0x3C00(f0), 0x3E00(f8), 512B for each beacon */
 	{BCN_OFFSET1,			0x6f77d0c8}, /* 0x3200(c8), 0x3400(d0), 0x1DC0(77), 0x1BC0(6f), 512B for each beacon */
 #elif defined(HW_BEACON_OFFSET) && (HW_BEACON_OFFSET == 0x100)
@@ -95,7 +168,19 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 	//{TX_SW_CFG0,		0x40a06}, // Gary,2006-08-23 
 	{TX_SW_CFG0,		0x400},   // Gary,2008-05-21 0x0 for CWC test , 2008-06-19 0x400 for rf reason
 	{TX_SW_CFG1,		0x0}, 	  // Gary,2008-06-18 
-	{TX_SW_CFG2,		0x1f}, 	  // Bruce, CwC IOT issue
+	{TX_SW_CFG2,		0x30}, 	  // Bruce, CwC IOT issue
+#elif defined (CONFIG_RALINK_RT2883)
+	{TX_SW_CFG0,		0x0},     // Gary,2008-12-15 for Intel 5300 (FIXME)
+	{TX_SW_CFG1,		0x0},     // Gary,2008-12-15 for Intel 5300 (FIXME)
+	{TX_SW_CFG2,		0x40000}, // Gary,2008-12-15 for Intel 5300 (FIXME)
+	{TX_TXBF_CFG_0,		0x8000FC21},	// Force MCS0 for sounding response
+	{TX_TXBF_CFG_3,		0x00009c40},	// ETxBF Timeout = 1 sec = 0x9c40*(25 usec)
+#elif defined (CONFIG_RALINK_RT3883)
+	{TX_SW_CFG0,		0x402},   // Gary,2009-9-21
+	{TX_SW_CFG1,		0x0},     // FIXME
+	{TX_SW_CFG2,		0x40000}, // FIXME
+	{TX_TXBF_CFG_0,		0x8000FC21},	// Force MCS0 for sounding response
+	{TX_TXBF_CFG_3,		0x00009c40},	// ETxBF Timeout = 1 sec = 0x9c40*(25 usec)
 #else //original source code
 	{TX_SW_CFG0,		0x0}, 		// Gary,2008-05-21 for CWC test 
 	{TX_SW_CFG1,		0x80606}, // Gary,2006-08-23 
@@ -151,6 +236,10 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 //	{TBTT_SYNC_CFG,			0x00422000},	// TBTT_ADJUST(7:0) == 0	
 //	{TBTT_SYNC_CFG,			0x00012000},	// TBTT_ADJUST(7:0) == 0	
 //#endif // CONFIG_AP_SUPPORT //
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	{TX_FBK_CFG_3S_0,		0x12111008},	// default value
+	{TX_FBK_CFG_3S_1,		0x16151413},	// default value
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 	{TXOP_HLDR_ET, 			0x00000002},
 
 	/* Jerry comments 2008/01/16: we use SIFS = 10us in CCK defaultly, but it seems that 10us
@@ -169,6 +258,10 @@ RTMP_REG_PAIR	APMACRegTable[] =	{
 	{WMM_TXOP0_CFG,		0x00100020},
 	{WMM_TXOP1_CFG,		0x002F0038},
 	{TBTT_SYNC_CFG,		0x00012000},
+#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+	{TX_CHAIN_ADDR0_L,	0xFFFFFFFF},	// Broadcast frames are in stream mode
+	{TX_CHAIN_ADDR0_H,	0xFFFFF},
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 };
 #endif // CONFIG_AP_SUPPORT //
 
@@ -240,7 +333,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 			break;
 		}
 		pAd->BeaconBuf = pBeaconBuf;
-		DBGPRINT(RT_DEBUG_OFF, ("\n\n=== pAd = %p, size = %d ===\n\n", pAd, (UINT32)sizeof(RTMP_ADAPTER)));
 
 
 		// Init spin locks
@@ -258,6 +350,10 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 
 		NdisAllocateSpinLock(&pAd->irq_lock);
 
+#ifdef WMM_ACM_SUPPORT
+		NdisAllocateSpinLock(&pAd->AcmTspecSemLock);
+		NdisAllocateSpinLock(&pAd->AcmTspecIrqLock);
+#endif // WMM_ACM_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
@@ -271,11 +367,10 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 	
 	*ppAdapter = pAd;
 
-	DBGPRINT_S(Status, ("<-- RTMPAllocAdapterBlock, Status=%x\n", Status));
 	return Status;
 }
 
-
+#if !defined (CONFIG_RALINK_RT2883) && !defined (CONFIG_RALINK_RT3883)
 /*
 	========================================================================
 	
@@ -685,6 +780,7 @@ VOID	RTMPReadChannelPwr(
 	
 
 }
+#endif
 
 /*
 	========================================================================
@@ -719,7 +815,6 @@ NDIS_STATUS	NICReadRegParameters(
 	return Status;
 }
 
-
 /*
 	========================================================================
 	
@@ -749,6 +844,9 @@ VOID	NICReadEEPROMParameters(
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
+	USHORT  Addr01,Addr23,Addr45 ;
+	MAC_DW0_STRUC csr2;
+	MAC_DW1_STRUC csr3;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> NICReadEEPROMParameters\n"));	
 
@@ -769,29 +867,35 @@ VOID	NICReadEEPROMParameters(
 		pAd->EEPROMAddressNum = 8;     // 93C86
 	DBGPRINT(RT_DEBUG_TRACE, ("--> EEPROMAddressNum = %d\n", pAd->EEPROMAddressNum ));
 
-	// RT2860 MAC no longer auto load MAC address from E2PROM. Driver has to intialize
-	// MAC address registers according to E2PROM setting
-	if (mac_addr == NULL ||
-		strlen((PSTRING) mac_addr) != 17 || 
-		mac_addr[2] != ':'  || mac_addr[5] != ':'  || mac_addr[8] != ':' ||
-		mac_addr[11] != ':' || mac_addr[14] != ':')
-	{
-		USHORT  Addr01,Addr23,Addr45 ;
+	/* Read MAC setting from EEPROM and record as permanent MAC address */
+	DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
 
-		RT28xx_EEPROM_READ16(pAd, 0x04, Addr01);
-		RT28xx_EEPROM_READ16(pAd, 0x06, Addr23);
-		RT28xx_EEPROM_READ16(pAd, 0x08, Addr45);
+	RT28xx_EEPROM_READ16(pAd, 0x04, Addr01);
+	RT28xx_EEPROM_READ16(pAd, 0x06, Addr23);
+	RT28xx_EEPROM_READ16(pAd, 0x08, Addr45);
 
-		pAd->PermanentAddress[0] = (UCHAR)(Addr01 & 0xff);
-		pAd->PermanentAddress[1] = (UCHAR)(Addr01 >> 8);
-		pAd->PermanentAddress[2] = (UCHAR)(Addr23 & 0xff);
-		pAd->PermanentAddress[3] = (UCHAR)(Addr23 >> 8);
-		pAd->PermanentAddress[4] = (UCHAR)(Addr45 & 0xff);
-		pAd->PermanentAddress[5] = (UCHAR)(Addr45 >> 8);
+	pAd->PermanentAddress[0] = (UCHAR)(Addr01 & 0xff);
+	pAd->PermanentAddress[1] = (UCHAR)(Addr01 >> 8);
+	pAd->PermanentAddress[2] = (UCHAR)(Addr23 & 0xff);
+	pAd->PermanentAddress[3] = (UCHAR)(Addr23 >> 8);
+	pAd->PermanentAddress[4] = (UCHAR)(Addr45 & 0xff);
+	pAd->PermanentAddress[5] = (UCHAR)(Addr45 >> 8);
 
-		DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
+	//more conveninet to test mbssid, so ap's bssid &0xf1
+	if (pAd->PermanentAddress[0] == 0xff)
+		pAd->PermanentAddress[0] = RandomByte(pAd)&0xf8;
+			
+	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
+								PRINT_MAC(pAd->PermanentAddress)));
+
+	/* Assign the actually working MAC Address */
+	if (pAd->bLocalAdminMAC)
+	{		
+		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Configuration file(.dat). \n"));
 	}
-	else
+	else if (mac_addr && 
+			 strlen((PSTRING)mac_addr) == 17 &&
+			 (strcmp(mac_addr, "00:00:00:00:00:00") != 0))
 	{
 		INT		j;
 		PSTRING	macptr;
@@ -800,49 +904,43 @@ VOID	NICReadEEPROMParameters(
 
 		for (j=0; j<MAC_ADDR_LEN; j++)
 		{
-			AtoH(macptr, &pAd->PermanentAddress[j], 1);
+			AtoH(macptr, &pAd->CurrentAddress[j], 1);
 			macptr=macptr+3;
 		}	
 		
-		DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from module parameter \n"));
+		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
-	
-	
+	else
 	{
-		//more conveninet to test mbssid, so ap's bssid &0xf1
-		if (pAd->PermanentAddress[0] == 0xff)
-			pAd->PermanentAddress[0] = RandomByte(pAd)&0xf8;
-		
-		//if (pAd->PermanentAddress[5] == 0xff)
-		//	pAd->PermanentAddress[5] = RandomByte(pAd)&0xf8;
-			
-		DBGPRINT_RAW(RT_DEBUG_TRACE,("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
-			pAd->PermanentAddress[0], pAd->PermanentAddress[1], 
-			pAd->PermanentAddress[2], pAd->PermanentAddress[3], 
-			pAd->PermanentAddress[4], pAd->PermanentAddress[5]));
-		if (pAd->bLocalAdminMAC == FALSE)
-		{
-			MAC_DW0_STRUC csr2;
-			MAC_DW1_STRUC csr3;
-			COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
-			csr2.field.Byte0 = pAd->CurrentAddress[0];
-			csr2.field.Byte1 = pAd->CurrentAddress[1];
-			csr2.field.Byte2 = pAd->CurrentAddress[2];
-			csr2.field.Byte3 = pAd->CurrentAddress[3];
-			RTMP_IO_WRITE32(pAd, MAC_ADDR_DW0, csr2.word);
-			csr3.word = 0;
-			csr3.field.Byte4 = pAd->CurrentAddress[4];
-			csr3.field.Byte5 = pAd->CurrentAddress[5];
-			csr3.field.U2MeMask = 0xff;
-			RTMP_IO_WRITE32(pAd, MAC_ADDR_DW1, csr3.word);
-			DBGPRINT_RAW(RT_DEBUG_TRACE,("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
-							PRINT_MAC(pAd->PermanentAddress)));
-		}
-	}   
+		COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
+		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from EEPROM. \n"));
+	}
 
+	/* Set the current MAC to ASIC */	
+	csr2.field.Byte0 = pAd->CurrentAddress[0];
+	csr2.field.Byte1 = pAd->CurrentAddress[1];
+	csr2.field.Byte2 = pAd->CurrentAddress[2];
+	csr2.field.Byte3 = pAd->CurrentAddress[3];
+	RTMP_IO_WRITE32(pAd, MAC_ADDR_DW0, csr2.word);
+	csr3.word = 0;
+	csr3.field.Byte4 = pAd->CurrentAddress[4];
+	csr3.field.Byte5 = pAd->CurrentAddress[5];
+	csr3.field.U2MeMask = 0xff;
+	RTMP_IO_WRITE32(pAd, MAC_ADDR_DW1, csr3.word);
+	DBGPRINT_RAW(RT_DEBUG_TRACE,("Current MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
+					PRINT_MAC(pAd->CurrentAddress)));
+					
 	// if not return early. cause fail at emulation.
 	// Init the channel number for TX channel power	
-	RTMPReadChannelPwr(pAd);
+#if defined (CONFIG_RALINK_RT3883)
+	if (IS_RT3883(pAd))
+		RTMPRT3883ReadChannelPwr(pAd);
+#elif defined (CONFIG_RALINK_RT2883)
+	if (IS_RT2883(pAd))
+		RTMPRT2883ReadChannelPwr(pAd);
+#else
+        RTMPReadChannelPwr(pAd);
+#endif
 
 	// if E2PROM version mismatch with driver's expectation, then skip
 	// all subsequent E2RPOM retieval and set a system error bit to notify GUI
@@ -879,7 +977,9 @@ VOID	NICReadEEPROMParameters(
 	RT28xx_EEPROM_READ16(pAd, EEPROM_NIC2_OFFSET, value);
 	pAd->EEPROMDefaultValue[1] = value;
 
-	RT28xx_EEPROM_READ16(pAd, 0x38, value);	// Country Region
+	//RT28xx_EEPROM_READ16(pAd, 0x38, value);	// Country Region
+	RT28xx_EEPROM_READ16(pAd, EEPROM_COUNTRY_REGION, value);	// Country Region
+
 	pAd->EEPROMDefaultValue[2] = value;
 
 	for(i = 0; i < 8; i++)
@@ -897,11 +997,23 @@ VOID	NICReadEEPROMParameters(
 	{
 		{
 
-			Antenna.word = 0;
-			Antenna.field.RfIcType = RFIC_2820;
-			Antenna.field.TxPath = 1;
-			Antenna.field.RxPath = 2;
-			DBGPRINT(RT_DEBUG_WARN, ("E2PROM error, hard code as 0x%04x\n", Antenna.word));
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+		Antenna.word = 0;
+#if defined (CONFIG_RALINK_RT2883)
+		Antenna.field.RfIcType = RFIC_2853;
+#elif defined (CONFIG_RALINK_RT3883)
+		Antenna.field.RfIcType = RFIC_3853;
+#endif
+		Antenna.field.TxPath = 3;
+		Antenna.field.RxPath = 3;
+		DBGPRINT(RT_DEBUG_WARN, ("E2PROM error, hard code as 0x%04x\n", Antenna.word));
+#else
+		Antenna.word = 0;
+		Antenna.field.RfIcType = RFIC_2820;
+		Antenna.field.TxPath = 1;
+		Antenna.field.RxPath = 2;
+		DBGPRINT(RT_DEBUG_WARN, ("E2PROM error, hard code as 0x%04x\n", Antenna.word));
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 		}
 	}
 
@@ -913,7 +1025,8 @@ VOID	NICReadEEPROMParameters(
 	{
 		pAd->CommonCfg.RxStream = Antenna.field.RxPath;
 	
-		if ((pAd->MACVersion < RALINK_2883_VERSION) &&
+		if ((pAd->MACVersion != RALINK_3883_VERSION) &&
+			(pAd->MACVersion != RALINK_2883_VERSION) &&
 			(pAd->CommonCfg.RxStream > 2))
 		{
 			// only 2 Rx streams for RT2860 series
@@ -933,9 +1046,11 @@ VOID	NICReadEEPROMParameters(
 #ifdef WSC_INCLUDED
 	/* WSC hardware push button function 0811 */
 // TODO: Shiang, Need to check about the gpio value, it seems has issue in RT2880/RT3052 board.
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+//	if ((pAd->MACVersion == 0x28600100) || (pAd->MACVersion == 0x28700100))
+//	WSC_HDR_BTN_MR_HDR_SUPPORT_SET(pAd, NicConfig2.field.EnableWPSPBC);
+/* ASUS EXT by Jiahao */
         WSC_HDR_BTN_MR_HDR_SUPPORT_SET(pAd, 0);
-#endif /* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 #endif // WSC_INCLUDED //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -977,6 +1092,12 @@ VOID	NICReadEEPROMParameters(
 	pAd->Mlme.RealRxPath = (UCHAR) Antenna.field.RxPath;
 	pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
 
+#ifdef CONFIG_STA_SUPPORT
+#ifdef RTMP_MAC_PCI
+		sprintf((PSTRING) pAd->nickname, "RT2860STA");
+#endif // RTMP_MAC_PCI //
+#endif // CONFIG_STA_SUPPORT //
+
 #ifdef RTMP_RF_RW_SUPPORT
 	RtmpChipOpsRFHook(pAd);
 #endif // RTMP_RF_RW_SUPPORT //
@@ -987,7 +1108,9 @@ VOID	NICReadEEPROMParameters(
 	//
 	if ((Antenna.field.RfIcType != RFIC_2850)
 		&& (Antenna.field.RfIcType != RFIC_2750)
-		&& (Antenna.field.RfIcType != RFIC_3052))
+		&& (Antenna.field.RfIcType != RFIC_3052)
+		&& (Antenna.field.RfIcType != RFIC_2853)
+		&& (Antenna.field.RfIcType != RFIC_3853))
 	{
 		if ((pAd->CommonCfg.PhyMode == PHY_11ABG_MIXED) || 
 			(pAd->CommonCfg.PhyMode == PHY_11A))
@@ -1008,19 +1131,19 @@ VOID	NICReadEEPROMParameters(
 		   ex: 0x00 0x15 0x25 0x45 0x88 0xA0 0xB5 0xD0 0xF0
 		   TssiPlusBoundaryG [4] [3] [2] [1] [0] (smaller) +
 		   TssiMinusBoundaryG[0] [1] [2] [3] [4] (larger) */
-		RT28xx_EEPROM_READ16(pAd, 0x6E, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TSSI_BOUND1, Power.word);
 		pAd->TssiMinusBoundaryG[4] = Power.field.Byte0;
 		pAd->TssiMinusBoundaryG[3] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0x70, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TSSI_BOUND2, Power.word);
 		pAd->TssiMinusBoundaryG[2] = Power.field.Byte0;
 		pAd->TssiMinusBoundaryG[1] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0x72, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TSSI_BOUND3, Power.word);
 		pAd->TssiRefG   = Power.field.Byte0; /* reference value [0] */
 		pAd->TssiPlusBoundaryG[1] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0x74, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TSSI_BOUND4, Power.word);
 		pAd->TssiPlusBoundaryG[2] = Power.field.Byte0;
 		pAd->TssiPlusBoundaryG[3] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0x76, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TSSI_BOUND5, Power.word);
 		pAd->TssiPlusBoundaryG[4] = Power.field.Byte0;
 		pAd->TxAgcStepG = Power.field.Byte1;    
 		pAd->TxAgcCompensateG = 0;
@@ -1039,19 +1162,19 @@ VOID	NICReadEEPROMParameters(
 	}	
 	// 1. 11a
 	{
-		RT28xx_EEPROM_READ16(pAd, 0xD4, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TSSI_BOUND1, Power.word);
 		pAd->TssiMinusBoundaryA[4] = Power.field.Byte0;
 		pAd->TssiMinusBoundaryA[3] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0xD6, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TSSI_BOUND2, Power.word);
 		pAd->TssiMinusBoundaryA[2] = Power.field.Byte0;
 		pAd->TssiMinusBoundaryA[1] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0xD8, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TSSI_BOUND3, Power.word);
 		pAd->TssiRefA   = Power.field.Byte0;
 		pAd->TssiPlusBoundaryA[1] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0xDA, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TSSI_BOUND4, Power.word);
 		pAd->TssiPlusBoundaryA[2] = Power.field.Byte0;
 		pAd->TssiPlusBoundaryA[3] = Power.field.Byte1;
-		RT28xx_EEPROM_READ16(pAd, 0xDC, Power.word);
+		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TSSI_BOUND5, Power.word);
 		pAd->TssiPlusBoundaryA[4] = Power.field.Byte0;
 		pAd->TxAgcStepA = Power.field.Byte1;    
 		pAd->TxAgcCompensateA = 0;
@@ -1076,6 +1199,16 @@ VOID	NICReadEEPROMParameters(
 		pAd->RfFreqOffset = (ULONG) (value & 0x00FF);
 	else
 		pAd->RfFreqOffset = 0;
+
+	if (pAd->RfFreqDelta & 0x10)
+	{
+		pAd->RfFreqOffset = (pAd->RfFreqOffset >= pAd->RfFreqDelta)? (pAd->RfFreqOffset - (pAd->RfFreqDelta & 0xf)) : 0;
+	}
+	else
+	{
+		pAd->RfFreqOffset = ((pAd->RfFreqOffset + pAd->RfFreqDelta) < 0x40)? (pAd->RfFreqOffset + (pAd->RfFreqDelta & 0xf)) : 0x3f;
+	}
+
 	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM: RF FreqOffset=0x%lx \n", pAd->RfFreqOffset));
 
 	//CountryRegion byte offset (38h)
@@ -1127,6 +1260,13 @@ VOID	NICReadEEPROMParameters(
 	pAd->ARssiOffset2 = value & 0x00ff;
 	pAd->ALNAGain2 = (value >> 8);
 
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	RT28xx_EEPROM_READ16(pAd, EEPROM_LNA_OFFSET2, value);
+	pAd->ALNAGain1 = value & 0x00ff;
+	pAd->ALNAGain2 = (value >> 8);
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+
+
 	if (((UCHAR)pAd->ALNAGain1 == 0xFF) || (pAd->ALNAGain1 == 0x00))
 		pAd->ALNAGain1 = pAd->ALNAGain0;
 	if (((UCHAR)pAd->ALNAGain2 == 0xFF) || (pAd->ALNAGain2 == 0x00))
@@ -1148,8 +1288,8 @@ VOID	NICReadEEPROMParameters(
 	//
 	// Get LED Setting.
 	//
-	RT28xx_EEPROM_READ16(pAd, 0x3a, value);
-	pAd->LedCntl.word = (value&0xff00) >> 8;
+	RT28xx_EEPROM_READ16(pAd, EEPROM_FREQ_OFFSET, value);
+	pAd->LedCntl.word = (value>>8);
 	RT28xx_EEPROM_READ16(pAd, EEPROM_LED1_OFFSET, value);
 	pAd->Led1 = value;
 	RT28xx_EEPROM_READ16(pAd, EEPROM_LED2_OFFSET, value);
@@ -1157,11 +1297,95 @@ VOID	NICReadEEPROMParameters(
 	RT28xx_EEPROM_READ16(pAd, EEPROM_LED3_OFFSET, value);
 	pAd->Led3 = value;
 		
+#if defined (CONFIG_RALINK_RT3883)
+	if (IS_RT3883(pAd))
+		RTMPRT3883ReadTxPwrPerRate(pAd);
+#elif defined (CONFIG_RALINK_RT2883)
+	if (IS_RT2883(pAd))
+		RTMPRT2883ReadTxPwrPerRate(pAd);
+#else
 	RTMPReadTxPwrPerRate(pAd);
+#endif
 
 #ifdef SINGLE_SKU
 	RT28xx_EEPROM_READ16(pAd, EEPROM_DEFINE_MAX_TXPWR, pAd->CommonCfg.DefineMaxTxPwr);
+	if (pAd->CommonCfg.DefineMaxTxPwr <= 0x50 && pAd->CommonCfg.AntGain > 0 && pAd->CommonCfg.BandedgeDelta >= 0)
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("Single SKU Mode is enabled\n"));
+		pAd->CommonCfg.bSKUMode = TRUE;
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("Single SKU Mode is disabled\n"));
+		pAd->CommonCfg.bSKUMode = FALSE;
+	}
 #endif // SINGLE_SKU //
+
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	{
+		UCHAR BbpValue;
+		
+		// select Rx chain 0
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &BbpValue);
+		BbpValue &= ~0x60;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1a0, value);
+		BbpValue = (UCHAR) (value & 0xff);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, BbpValue);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1a2, value);
+		BbpValue = (UCHAR) (value & 0xff);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, BbpValue);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, BbpValue);
+
+
+		// select Rx chain 1
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &BbpValue);
+		BbpValue &= ~0x60;
+		BbpValue |= 0x20;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1a4, value);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1a6, value);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, BbpValue);
+
+
+		// select Rx chain 2
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &BbpValue);
+		BbpValue &= ~0x60;
+		BbpValue |= 0x40;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1a8, value);
+		BbpValue = (UCHAR) (value & 0xff);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, BbpValue);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, BbpValue);
+
+		RT28xx_EEPROM_READ16(pAd, 0x1aa, value);
+		BbpValue = (UCHAR) (value & 0xff);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, BbpValue);
+		BbpValue = (UCHAR) (value >> 8);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, BbpValue);
+
+	}
+#ifdef TXBF_SUPPORT
+	// Read ITxBF compensation parameters from EEPROM
+	for (i=0; i<6; i++) {
+		RT28xx_EEPROM_READ16(pAd, EEPROM_ITXBF_CAL_RX0+2*i, value);
+		pAd->EEPROMITxBFCalParams[i] = value;
+	}
+#endif // TXBF_SUPPORT //
+
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- NICReadEEPROMParameters\n"));
@@ -1197,6 +1421,9 @@ VOID	NICInitAsicFromEEPROM(
 //	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
 	UCHAR	BBPR3 = 0;
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	UCHAR	bbpValue;
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("--> NICInitAsicFromEEPROM\n"));
 	for(i = 3; i < NUM_EEPROM_BBP_PARMS; i++)
@@ -1292,7 +1519,11 @@ VOID	NICInitAsicFromEEPROM(
 		{
 			RTMPSetLED(pAd, LED_RADIO_ON);
 #ifdef RTMP_MAC_PCI
-			AsicSendCommandToMcu(pAd, 0x30, 0xff, 0xff, 0x02);
+
+			AsicSendCommandToMcu(pAd, 0x30, PowerRadioOffCID, 0xff, 0x02);
+			AsicCheckCommanOk(pAd, PowerRadioOffCID);
+
+			//AsicSendCommandToMcu(pAd, 0x30, 0xff, 0xff, 0x02);
 			AsicSendCommandToMcu(pAd, 0x31, PowerWakeCID, 0x00, 0x00);
 			// 2-1. wait command ok.
 			AsicCheckCommanOk(pAd, PowerWakeCID);
@@ -1350,6 +1581,46 @@ VOID	NICInitAsicFromEEPROM(
 #endif // CONFIG_STA_SUPPORT //
 
 
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	// Set ITxBF compensation parameters if they are not all the uninitialized value 0xFFFF
+
+#ifdef TXBF_SUPPORT	
+	if ((pAd->EEPROMITxBFCalParams[0] & pAd->EEPROMITxBFCalParams[1] & pAd->EEPROMITxBFCalParams[2] &
+		pAd->EEPROMITxBFCalParams[3] & pAd->EEPROMITxBFCalParams[4] & pAd->EEPROMITxBFCalParams[5]) != 0xFFFF) {
+		
+		// Select Ant0 
+		BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &bbpValue);
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, (bbpValue & ~0x60));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, (pAd->EEPROMITxBFCalParams[0] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, (pAd->EEPROMITxBFCalParams[0] >> 8));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, (pAd->EEPROMITxBFCalParams[1] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, (pAd->EEPROMITxBFCalParams[1] >> 8));
+		
+		// Select Ant1 
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, (bbpValue & ~0x60) | 0x20);
+		//BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, (pAd->EEPROMITxBFCalParams[2] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, (pAd->EEPROMITxBFCalParams[2] >> 8));
+		//BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, (pAd->EEPROMITxBFCalParams[3] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, (pAd->EEPROMITxBFCalParams[3] >> 8));
+		
+		// Select Ant2
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, (bbpValue & ~0x60) | 0x40);
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, (pAd->EEPROMITxBFCalParams[4] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R175, (pAd->EEPROMITxBFCalParams[4] >> 8));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, (pAd->EEPROMITxBFCalParams[5] & 0xFF));
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R177, (pAd->EEPROMITxBFCalParams[5] >> 8));
+		
+		// Enable Phase Compensation
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R173, 0x3C);
+
+		// Restore R27
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, bbpValue);
+	}
+	else
+		printk("EEPROM TxBF is not set\n");
+#endif // TXBF_SUPPORT //
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+
 	DBGPRINT(RT_DEBUG_TRACE, ("TxPath = %d, RxPath = %d, RFIC=%d, Polar+LED mode=%x\n", 
 				pAd->Antenna.field.TxPath, pAd->Antenna.field.RxPath, 
 				pAd->RfIcType, pAd->LedCntl.word));
@@ -1385,7 +1656,10 @@ NDIS_STATUS	NICInitializeAdapter(
 	DELAY_INT_CFG_STRUC	IntCfg;
 #endif // RTMP_MAC_PCI //
 //	INT_MASK_CSR_STRUC		IntMask;
-	ULONG	i =0, j=0;
+	ULONG	i =0;
+#ifndef RTMP_RBUS_SUPPORT
+	ULONG	j=0;
+#endif
 	AC_TXOP_CSR0_STRUC	csr0;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> NICInitializeAdapter\n"));
@@ -1416,6 +1690,16 @@ retry:
 	pAd->BeaconOffset[5] = HW_BEACON_BASE5;
 	pAd->BeaconOffset[6] = HW_BEACON_BASE6;
 	pAd->BeaconOffset[7] = HW_BEACON_BASE7;
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+	pAd->BeaconOffset[8] = HW_BEACON_BASE8;
+	pAd->BeaconOffset[9] = HW_BEACON_BASE9;
+	pAd->BeaconOffset[10] = HW_BEACON_BASE10;
+	pAd->BeaconOffset[11] = HW_BEACON_BASE11;
+	pAd->BeaconOffset[12] = HW_BEACON_BASE12;
+	pAd->BeaconOffset[13] = HW_BEACON_BASE13;
+	pAd->BeaconOffset[14] = HW_BEACON_BASE14;
+	pAd->BeaconOffset[15] = HW_BEACON_BASE15;
+#endif
 	
 	//
 	// write all shared Ring's base address into ASIC
@@ -1432,11 +1716,13 @@ retry:
 	// Initialze ASIC for TX & Rx operation
 	if (NICInitializeAsic(pAd , bHardReset) != NDIS_STATUS_SUCCESS)
 	{
+#ifndef RTMP_RBUS_SUPPORT
 		if (j++ == 0)
 		{
 			NICLoadFirmware(pAd);
 			goto retry;
 		}
+#endif
 		return NDIS_STATUS_FAILURE;
 	}
 
@@ -1628,6 +1914,9 @@ NDIS_STATUS	NICInitializeAsic(
 		}
 	}
 #endif // CONFIG_STA_SUPPORT //
+
+
+
 #endif // RTMP_MAC_PCI //
 
 
@@ -1651,8 +1940,16 @@ NDIS_STATUS	NICInitializeAsic(
 	// PCI and USB are not the same because PCI driver needs to wait for PCI bus ready
 	RTMP_IO_WRITE32(pAd, H2M_BBP_AGENT, 0);	// initialize BBP R/W access agent
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_CSR, 0);
+
+#ifdef RTMP_MAC_PCI
+	//2008/11/28:KH add to fix the dead rf frequency offset bug<--
+	AsicSendCommandToMcu(pAd, 0x72, 0, 0, 0);
+	//2008/11/28:KH add to fix the dead rf frequency offset bug-->
+#endif // RTMP_MAC_PCI //
+
 	RTMPusecDelay(1000);
 
+#if !defined(CONFIG_RT2883_FPGA) && !defined(CONFIG_RT3883_FPGA) && !defined(CONFIG_RT3352_FPGA)
 	// Read BBP register, make sure BBP is up and running before write new data
 	Index = 0;
 	do 
@@ -1670,6 +1967,42 @@ NDIS_STATUS	NICInitializeAsic(
 	{
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBPRegTable[Index].Register, BBPRegTable[Index].Value);
 	}
+#endif
+
+
+
+
+
+#ifdef RT305x
+	if ((pAd->CommonCfg.CN >> 16) == 0x3333)
+	{
+		UINT8 BBPValue = 0;
+		
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R104, &BBPValue);
+		BBPValue |= 0x80;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R104, BBPValue);
+
+#ifndef CONFIG_RALINK_RT3350
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R105, &BBPValue);
+		BBPValue &= 0x07;
+		BBPValue |= 0x38;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R105, BBPValue);
+#else //3350  disable re-mode
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R105, &BBPValue);
+		BBPValue &= 0x07;
+		BBPValue |= 0x30;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R105, BBPValue);
+
+#endif
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R106, 0x46);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R113, 0x0d);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R114, 0x64);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R115, 0x34);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R116, 0x67);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R117, 0x37);
+
+	}	
+#endif
 
 #ifdef RTMP_MAC_PCI
 	// TODO: shiang, check MACVersion, currently, rbus-based chip use this.
@@ -1690,6 +2023,7 @@ NDIS_STATUS	NICInitializeAsic(
 	}
 #endif // RTMP_MAC_PCI //
 
+#if !defined(CONFIG_RT2883_FPGA) && !defined(CONFIG_RT3883_FPGA)
 	// for rt2860E and after, init BBP_R84 with 0x19. This is for extension channel overlapping IOT.
 	// RT3090 should not program BBP R84 to 0x19, otherwise TX will block.
 	if (((pAd->MACVersion & 0xffff) != 0x0101) && (!IS_RT30xx(pAd)))
@@ -1701,14 +2035,19 @@ NDIS_STATUS	NICInitializeAsic(
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R69, 0x16);
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R73, 0x12);
 	}
+#endif
 	
-	if (pAd->MACVersion >= RALINK_2880MP2_VERSION && pAd->MACVersion < RALINK_3070_VERSION) // 3*3
+	if ((pAd->MACVersion == RALINK_3883_VERSION) || ((pAd->MACVersion >= RALINK_2880MP2_VERSION) && (pAd->MACVersion < RALINK_3070_VERSION))) // 3*3
 	{
 		// enlarge MAX_LEN_CFG
 		UINT32 csr;
 		RTMP_IO_READ32(pAd, MAX_LEN_CFG, &csr);
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+		csr |= 0x3fff; // fix me
+#else
 		csr &= 0xFFF;
 		csr |= 0x2000;
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 		RTMP_IO_WRITE32(pAd, MAX_LEN_CFG, csr);
 	}
 
@@ -1759,13 +2098,13 @@ NDIS_STATUS	NICInitializeAsic(
 	if (bHardReset == TRUE)
 	{
 		// clear all on-chip BEACON frame space			
+		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM);
 		for (apidx = 0; apidx < HW_BEACON_MAX_COUNT; apidx++)
 		{
 			for (i = 0; i < HW_BEACON_OFFSET>>2; i+=4)
 				RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[apidx] + i, 0x00); 
-#ifdef CONFIG_AP_SUPPORT
-#endif // CONFIG_AP_SUPPORT //
 		}
+		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM);
 	}
 	
 
@@ -1844,6 +2183,61 @@ BOOLEAN	NICCheckForHang(
 	return (FALSE);
 }
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef RTMP_MAC_PCI
+/*
+	========================================================================
+	
+	Routine Description:
+		In the case, Client may be silent left without sending DeAuth or DeAssoc.
+		AP'll continue retry packets for the client since AP doesn't know the STA
+		is gone. To Minimum affection of exist traffic is disable retransmition for
+		all those packet relative to the STA.
+		So decide to change ack required setting of all packet in TX ring
+		to "no ACK" requirement for specific Client.
+
+	Arguments:
+		Adapter						Pointer to our adapter
+
+	Return Value:
+		None
+
+	IRQL = DISPATCH_LEVEL
+	
+	========================================================================
+*/
+static VOID ClearTxRingClientAck(
+	IN PRTMP_ADAPTER pAd,
+	IN MAC_TABLE_ENTRY *pEntry)
+
+{
+	INT index;
+	USHORT TxIdx;
+	PRTMP_TX_RING pTxRing;
+	PTXD_STRUC pTxD;
+	PTXWI_STRUC pTxWI;
+
+	if (!pAd || !pEntry)
+		return;
+
+	for (index = 3; index >= 0; index--)
+	{
+		pTxRing = &pAd->TxRing[index];
+		for (TxIdx = 0; TxIdx < TX_RING_SIZE; TxIdx++)
+		{
+			pTxD = (PTXD_STRUC) pTxRing->Cell[TxIdx].AllocVa;
+			if (!pTxD->DMADONE)
+			{
+				 pTxWI = (PTXWI_STRUC) pTxRing->Cell[TxIdx].DmaBuf.AllocVa;
+				 if (pTxWI->WirelessCliID == pEntry->Aid)
+					pTxWI->ACK = FALSE;
+			}
+		}
+	}
+}
+#endif // RTMP_MAC_PCI //
+#endif // CONFIG_AP_SUPPORT //
+
 VOID NICUpdateFifoStaCounters(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -1911,15 +2305,74 @@ VOID NICUpdateFifoStaCounters(
 
 			pEntry->DebugFIFOCount++;
 
-#ifdef DOT11_N_SUPPORT
-			if (StaFifo.field.TxBF) // 3*3
+#ifdef TXBF_SUPPORT
+			if ((StaFifo.field.eTxBF) || (StaFifo.field.iTxBF))
 				pEntry->TxBFCount++;
-#endif // DOT11_N_SUPPORT //
+
+			// Update statistics
+			{
+			int succMCS = (StaFifo.field.SuccessRate & 0x7F);
+			int origMCS = pid;
+
+			if (succMCS==32)
+				origMCS = 32;
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+			if (succMCS>origMCS && pEntry->HTCapability.MCSSet[2]==0xff)
+				origMCS += 16;
+#endif
+#ifdef INCLUDE_DEBUG_QUEUE
+			// Log unusual cases
+			if ((pAd->CommonCfg.DebugFlags & DBF_UNUSED0400) &&
+				(succMCS>origMCS || (origMCS-succMCS)>1) ) {
+				dbQueueEnqueue(0x73, (UCHAR *)(&StaFifo.word));
+			}
+#endif
+			if (succMCS>origMCS)
+				origMCS = succMCS+1;
+
+			// MCS16 falls back to MCS8
+			if (origMCS>=16 && succMCS<=8)
+				succMCS += 8;
+
+			if (StaFifo.field.eTxBF) {
+				if (StaFifo.field.TxSuccess)
+					pEntry->TxBFCounters.ETxSuccessCount++;
+				else
+					pEntry->TxBFCounters.ETxFailCount++;
+				pEntry->TxBFCounters.ETxRetryCount += origMCS-succMCS;
+			}
+			else if (StaFifo.field.iTxBF) {
+				if (StaFifo.field.TxSuccess)
+					pEntry->TxBFCounters.ITxSuccessCount++;
+				else
+					pEntry->TxBFCounters.ITxFailCount++;
+				pEntry->TxBFCounters.ITxRetryCount += origMCS-succMCS;
+			}
+			else {
+				if (StaFifo.field.TxSuccess)
+					pEntry->TxBFCounters.TxSuccessCount++;
+				else
+					pEntry->TxBFCounters.TxFailCount++;
+				pEntry->TxBFCounters.TxRetryCount += origMCS-succMCS;
+			}
+			}
+#endif // TXBF_SUPPORT
+						
+#ifdef INCLUDE_DEBUG_QUEUE
+		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFIFO) {
+			dbQueueEnqueue(0x73, (UCHAR *)(&StaFifo.word));
+		}
+#endif
 
 #ifdef UAPSD_AP_SUPPORT
 			UAPSD_SP_AUE_Handle(pAd, pEntry, StaFifo.field.TxSuccess);
 #endif // UAPSD_AP_SUPPORT //
  
+#ifdef CONFIG_STA_SUPPORT
+			if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
+				continue;
+#endif // CONFIG_STA_SUPPORT //
+
 			if (!StaFifo.field.TxSuccess)
 			{
 				pEntry->FIFOCount++;
@@ -1932,6 +2385,19 @@ VOID NICUpdateFifoStaCounters(
 					pEntry->NoBADataCountDown = 64;
 #endif // DOT11_N_SUPPORT //
 
+//#ifdef CONFIG_STA_SUPPORT
+//#ifdef DOT11Z_TDLS_SUPPORT
+//					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+//					{
+//						if(IS_ENTRY_TDLS(pEntry))
+//							TDLS_LinkTearDown(pAd);
+//					}
+//#endif // DOT11Z_TDLS_SUPPORT //
+//#endif // CONFIG_STA_SUPPORT //
+
+					// Update the continuous transmission counter.
+					pEntry->ContinueTxFailCnt++;
+
 					if(pEntry->PsMode == PWR_ACTIVE)
 					{
 #ifdef DOT11_N_SUPPORT					
@@ -1942,12 +2408,12 @@ VOID NICUpdateFifoStaCounters(
 						}
 #endif // DOT11_N_SUPPORT //
 
-						// Update the continuous transmission counter except PS mode
-						pEntry->ContinueTxFailCnt++;
+
+
 
 #ifdef WDS_SUPPORT
 						// fix WDS Jam issue
-						if((pEntry->ValidAsWDS == TRUE)
+						if(IS_ENTRY_WDS(pEntry)
 							&& (pEntry->LockEntryTx == FALSE)
 							&& (pEntry->ContinueTxFailCnt >= pAd->ApCfg.EntryLifeCheck))
 						{ 
@@ -1959,16 +2425,17 @@ VOID NICUpdateFifoStaCounters(
 						}
 #endif // WDS_SUPPORT //
 					}
-					else
-					{    
-						// Clear the FIFOCount when sta in Power Save mode. Basically we assume 
-						//     this tx error happened due to sta just go to sleep.
-						pEntry->FIFOCount = 0;
-						pEntry->ContinueTxFailCnt = 0;
-					}
+
 					//pEntry->FIFOCount = 0;
 				}
 				//pEntry->bSendBAR = TRUE;
+#ifdef CONFIG_AP_SUPPORT
+#ifdef RTMP_MAC_PCI
+			// if Tx fail >= 20, then clear TXWI ack in Tx Ring
+			if (pEntry->ContinueTxFailCnt >= pAd->ApCfg.EntryLifeCheck)
+				ClearTxRingClientAck(pAd, pEntry);	
+#endif // RTMP_MAC_PCI //				
+#endif // CONFIG_AP_SUPPORT //
 			}
 			else
 			{
@@ -1987,12 +2454,28 @@ VOID NICUpdateFifoStaCounters(
 				// update NoDataIdleCount when sucessful send packet to STA.
 				pEntry->NoDataIdleCount = 0;
 				pEntry->ContinueTxFailCnt = 0;
+
+#ifdef TXBF_SUPPORT
+				if (StaFifo.field.eTxBF)
+					pEntry->DebugTxBFCount++;
+				else
+					pEntry->DebugTxNormalCount++;
+#endif // TXBF_SUPPORT //
+
 #ifdef WDS_SUPPORT
 				pEntry->LockEntryTx = FALSE;
 #endif // WDS_SUPPORT //
 			}
 
 			succMCS = StaFifo.field.SuccessRate & 0x7F;
+
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+			if (pEntry->HTCapability.MCSSet[2] == 0xff)
+			{
+				if (succMCS > pid)
+					pid = pid + 16;
+			}
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 
 			reTry = pid - succMCS;
 
@@ -2013,18 +2496,33 @@ VOID NICUpdateFifoStaCounters(
 				pEntry->TXMCSFailed[pid]++;
 			}
 
+
+#if defined(NEW_RATE_ADAPT_SUPPORT)
+			reTry = (pid%8)-(succMCS%8)+(pid>>3)-(succMCS>>3);
+#endif
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+			if (pEntry->HTCapability.MCSSet[2] == 0xff)
+				reTry = (pid % 3) - (succMCS % 3) + (pid >> 3) - (succMCS >> 3);
+                        else
+                        {
+#endif
 			if (reTry > 0)
 			{
+#if !defined(NEW_RATE_ADAPT_SUPPORT)
 				if ((pid >= 12) && succMCS <=7)
 				{
 					reTry -= 4;
 				} 
+#endif
 				pEntry->OneSecTxRetryOkCount += reTry;
 			}
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+			}
+#endif
 
 			i++;
 			// ASIC store 16 stack
-		} while ( i < (2*TX_RING_SIZE) );
+		} while ( i < (TX_RING_SIZE<<1) );
 
 }
 
@@ -2057,6 +2555,7 @@ VOID NICUpdateRawCounters(
 	TX_STA_CNT0_STRUC 	 TxStaCnt0;
 	TX_STA_CNT1_STRUC	 StaTx1;
 	TX_STA_CNT2_STRUC	 StaTx2;
+#ifdef STATS_COUNT_SUPPORT
 	TX_AGG_CNT_STRUC	TxAggCnt;
 	TX_AGG_CNT0_STRUC	TxAggCnt0;
 	TX_AGG_CNT1_STRUC	TxAggCnt1;
@@ -2066,10 +2565,17 @@ VOID NICUpdateRawCounters(
 	TX_AGG_CNT5_STRUC	TxAggCnt5;
 	TX_AGG_CNT6_STRUC	TxAggCnt6;
 	TX_AGG_CNT7_STRUC	TxAggCnt7;
+#endif // STATS_COUNT_SUPPORT //
 	COUNTER_RALINK		*pRalinkCounters;
 
 
 	pRalinkCounters = &pAd->RalinkCounters;
+
+#ifdef RALINK_ATE
+	// In ATE mode the QA Tool will read RX statistics counters 
+	if (!ATE_ON(pAd))
+	{
+#endif
 
 	RTMP_IO_READ32(pAd, RX_STA_CNT0, &RxStaCnt0.word);
 	RTMP_IO_READ32(pAd, RX_STA_CNT2, &RxStaCnt2.word);
@@ -2087,11 +2593,13 @@ VOID NICUpdateRawCounters(
 		pAd->RalinkCounters.OneSecFalseCCACnt += RxStaCnt1.field.FalseCca;
 	}
 
+#ifdef STATS_COUNT_SUPPORT
 	// Update FCS counters
 	OldValue= pAd->WlanCounters.FCSErrorCount.u.LowPart;
 	pAd->WlanCounters.FCSErrorCount.u.LowPart += (RxStaCnt0.field.CrcErr); // >> 7);
 	if (pAd->WlanCounters.FCSErrorCount.u.LowPart < OldValue)
 		pAd->WlanCounters.FCSErrorCount.u.HighPart++;
+#endif // STATS_COUNT_SUPPORT //
 
 	// Add FCS error count to private counters
 	pRalinkCounters->OneSecRxFcsErrCnt += RxStaCnt0.field.CrcErr;
@@ -2102,12 +2610,17 @@ VOID NICUpdateRawCounters(
 
 	// Update Duplicate Rcv check
 	pRalinkCounters->DuplicateRcv += RxStaCnt2.field.RxDupliCount;
+#ifdef STATS_COUNT_SUPPORT
 	pAd->WlanCounters.FrameDuplicateCount.u.LowPart += RxStaCnt2.field.RxDupliCount;
+#endif // STATS_COUNT_SUPPORT //
 	// Update RX Overflow counter
 	pAd->Counters8023.RxNoBuffer += (RxStaCnt2.field.RxFifoOverflowCount);
 	
 	//pAd->RalinkCounters.RxCount = 0;
 
+#ifdef RALINK_ATE
+	}
+#endif
 	
 	//if (!OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED) || 
 	//	(OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED) && (pAd->MacTab.Size != 1)))
@@ -2121,13 +2634,17 @@ VOID NICUpdateRawCounters(
 	pRalinkCounters->OneSecTxRetryOkCount += StaTx1.field.TxRetransmit;
 	pRalinkCounters->OneSecTxNoRetryOkCount += StaTx1.field.TxSuccess;
 	pRalinkCounters->OneSecTxFailCount += TxStaCnt0.field.TxFailCount;
+
+#ifdef STATS_COUNT_SUPPORT
 	pAd->WlanCounters.TransmittedFragmentCount.u.LowPart += StaTx1.field.TxSuccess;
 	pAd->WlanCounters.RetryCount.u.LowPart += StaTx1.field.TxRetransmit;
 	pAd->WlanCounters.FailedCount.u.LowPart += TxStaCnt0.field.TxFailCount;
+#endif // STATS_COUNT_SUPPORT //
 	}
 
 
 	//if (pAd->bStaFifoTest == TRUE)
+#ifdef STATS_COUNT_SUPPORT
 	{
 		RTMP_IO_READ32(pAd, TX_AGG_CNT, &TxAggCnt.word);
 	RTMP_IO_READ32(pAd, TX_AGG_CNT0, &TxAggCnt0.word);
@@ -2163,16 +2680,16 @@ VOID NICUpdateRawCounters(
 
 		// Calculate the transmitted A-MPDU count
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += TxAggCnt0.field.AggSize1Count;
-		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt0.field.AggSize2Count / 2);
+		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt0.field.AggSize2Count >> 1);
 
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt1.field.AggSize3Count / 3);
-		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt1.field.AggSize4Count / 4);
+		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt1.field.AggSize4Count >> 2);
 
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt2.field.AggSize5Count / 5);
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt2.field.AggSize6Count / 6);
 
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt3.field.AggSize7Count / 7);
-		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt3.field.AggSize8Count / 8);
+		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt3.field.AggSize8Count >> 3);
 
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt4.field.AggSize9Count / 9);
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt4.field.AggSize10Count / 10);
@@ -2184,8 +2701,9 @@ VOID NICUpdateRawCounters(
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt6.field.AggSize14Count / 14);
 
 		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt7.field.AggSize15Count / 15);
-		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt7.field.AggSize16Count / 16);				
+		pRalinkCounters->TransmittedAMPDUCount.u.LowPart += (TxAggCnt7.field.AggSize16Count >> 4);	
 	}
+#endif // STATS_COUNT_SUPPORT //			
 
 #ifdef DBG_DIAGNOSE
 	{
@@ -2290,6 +2808,8 @@ VOID	NICResetFromError(
 
 	NICInitializeAdapter(pAd, FALSE);	
 	NICInitAsicFromEEPROM(pAd);
+
+	AsicBBPAdjust(pAd);
 
 	// Switch to current channel, since during reset process, the connection should remains on.	
 	AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
@@ -2507,10 +3027,11 @@ VOID	UserCfgInit(
 	UINT i, j;
 #endif // CONFIG_AP_SUPPORT //
 //	EDCA_PARM DefaultEdcaParm;
-    UINT key_index, bss_index;
+	UINT key_index, bss_index;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> UserCfgInit\n"));    
 	 
+
 	//
 	//  part I. intialize common configuration
 	//
@@ -2524,6 +3045,7 @@ VOID	UserCfgInit(
 		}
 	}
 
+	pAd->bLocalAdminMAC = FALSE;
 	pAd->EepromAccess = FALSE;
 	
 	pAd->Antenna.word = 0; 
@@ -2563,7 +3085,12 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.RadarDetect.CSPeriod = 10;
 	pAd->CommonCfg.RadarDetect.CSCount = 0;
 	pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
+	pAd->CommonCfg.bDFSIndoor = 1;
 	
+#ifdef CONFIG_RALINK_RT3052
+	RTMP_SYS_IO_READ32(0xb000000c, &pAd->CommonCfg.CID);
+	RTMP_SYS_IO_READ32(0xb0000000, &pAd->CommonCfg.CN);
+#endif
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef DFS_SUPPORT
@@ -2574,36 +3101,61 @@ VOID	UserCfgInit(
 
 #endif // RTMP_RBUS_SUPPORT //
 #ifdef NEW_DFS
-	pAd->CommonCfg.DeltaDelay = 0x3;
-	pAd->CommonCfg.ChEnable = 0xf;
-	pAd->CommonCfg.RadarReEnable = 1;
-	pAd->CommonCfg.PollTime = 0;
-	RTMP_DFS_IO_READ32(0xa030000c, &pAd->CommonCfg.CID);
-	pAd->CommonCfg.NewDfsDebug = 0;
-	//pAd->CommonCfg.NewDfsDebug |= RADAR_DONT_SWITCH; // neew to remove this for formal test
+#ifdef RT2880
+	RTMP_SYS_IO_READ32(0xa030000c, &pAd->CommonCfg.CID);
+#endif
 	pAd->CommonCfg.fcc_5_threshold = 1000;
 	pAd->CommonCfg.fcc_5_idx = 0;
 	pAd->CommonCfg.fcc_5_last_idx = 0;
 #endif // NEW_DFS //
 
-#ifdef DFS_DEBUG
 	pAd->CommonCfg.McuRadarDebug = 0;
-	pAd->CommonCfg.ChRemain = 0;
-#endif // DFS_DEBUG //
+
+	if ((pAd->MACVersion == 0x28720200) && (pAd->CommonCfg.CID == 0x200))
+		pAd->CommonCfg.dfs_func = 1;
+	else if (pAd->MACVersion <= 0x28720200)
+		pAd->CommonCfg.dfs_func = 0;
+	else
+		pAd->CommonCfg.dfs_func = 2;
+
+	pAd->CommonCfg.DeltaDelay = 0x3;
+	pAd->CommonCfg.ChEnable = 0xf;
+	pAd->CommonCfg.RadarReEnable = 1;
+	pAd->CommonCfg.PollTime = 1;
+	pAd->CommonCfg.DfsRssiHigh = -30;
+	pAd->CommonCfg.DfsRssiLow = -90;
+
+
+#ifdef DFS_2_SUPPORT
+	pAd->CommonCfg.RadarEventExpire[3] = 0x99999999;
+	pAd->CommonCfg.Symmetric_Round = 1;
+	pAd->CommonCfg.VGA_Mask = 45;
+	pAd->CommonCfg.Packet_End_Mask = 45;
+	pAd->CommonCfg.Rx_PE_Mask = 45;
+	pAd->CommonCfg.PollTime = 3;
+#endif // DFS_2_SUPPORT //
+
 #endif // DFS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
-
-
-
-#ifdef RT305x
 #ifdef CARRIER_DETECTION_SUPPORT
+	pAd->CommonCfg.carrier_func = 0;
+	
+#ifdef TONE_RADAR_DETECT_SUPPORT
+#ifdef CONFIG_RALINK_RT3052
+	pAd->CommonCfg.carrier_func = 1;
+#endif
+
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	pAd->CommonCfg.carrier_func = 2;
+#endif
+
 	pAd->CommonCfg.CarrierDetect.delta = CARRIER_DETECT_DELTA;
 	pAd->CommonCfg.CarrierDetect.div_flag = CARRIER_DETECT_DIV_FLAG;
 	pAd->CommonCfg.CarrierDetect.criteria = CARRIER_DETECT_CRITIRIA;
 	pAd->CommonCfg.CarrierDetect.threshold = CARRIER_DETECT_THRESHOLD;
+#endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
-#endif // RT305x //
 
 	pAd->CommonCfg.RadarDetect.ChMovingTime = 65;
 #ifdef MERGE_ARCH_TEAM
@@ -2653,10 +3205,11 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.bExtChannelSwitchAnnouncement = 1;
 	pAd->CommonCfg.bHTProtect = 1;
 	pAd->CommonCfg.bMIMOPSEnable = TRUE;
-	//2008/11/05:KH add to support Antenna power-saving of AP<--
-	pAd->CommonCfg.bGreenAPEnable=FALSE;
-	pAd->CommonCfg.bBlockAntDivforGreenAP=FALSE;
-	//2008/11/05:KH add to support Antenna power-saving of AP-->
+#ifdef GREENAP_SUPPORT
+	pAd->ApCfg.bGreenAPEnable=FALSE;
+	pAd->ApCfg.bBlockAntDivforGreenAP = FALSE;
+	pAd->ApCfg.bGreenAPIsOn= FALSE;
+#endif // GREENAP_SUPPORT //
 	pAd->CommonCfg.bBADecline = FALSE;
 	pAd->CommonCfg.bDisableReordering = FALSE;
 
@@ -2682,11 +3235,23 @@ VOID	UserCfgInit(
 
 	pAd->CommonCfg.BeaconPeriod = 100;     // in mSec
 
-#ifdef WAPI_SUPPORT
-	pAd->CommonCfg.wapi_usk_rekey_method = REKEY_METHOD_DISABLE;
-	pAd->CommonCfg.wapi_msk_rekey_method = REKEY_METHOD_DISABLE;
-	pAd->CommonCfg.wapi_msk_rekey_cnt = 0;
-#endif // WAPI_SUPPORT //
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	pAd->CommonCfg.PreAntSwitch = 0;
+	pAd->CommonCfg.StreamMode = 1;
+	pAd->CommonCfg.PhyRateLimit = 0;
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+	pAd->CommonCfg.DebugFlags = 0;
+
+
+#ifdef CONFIG_RALINK_RT3883
+	pAd->CommonCfg.VCORecalibrationThreshold = DEFAULT_VCO_RECALIBRATION_THRESHOLD;
+	pAd->RefreshTssi = 1;
+#endif // CONFIG_RALINK_RT3883 //
+
+#ifdef MCAST_RATE_SPECIFIC
+	pAd->CommonCfg.MCastPhyMode.word
+	= pAd->MacTab.Content[MCAST_WCID].HTPhyMode.word;
+#endif // MCAST_RATE_SPECIFIC //
 
 	//
 	// part II. intialize STA specific configuration
@@ -2734,6 +3299,21 @@ VOID	UserCfgInit(
 #ifdef EXT_BUILD_CHANNEL_LIST
 	pAd->StaCfg.IEEE80211dClientMode = Rt802_11_D_None;
 #endif // EXT_BUILD_CHANNEL_LIST //
+
+#ifdef RTMP_MAC_PCI
+
+pAd->brt30xxBanMcuCmd = FALSE;
+pAd->StaCfg.PSControl.field.EnableNewPS=FALSE;
+
+#ifdef PCIE_PS_SUPPORT
+pAd->StaCfg.PSControl.field.EnableNewPS=TRUE;
+pAd->b3090ESpecialChip = FALSE;
+//The value of PowerMode could be 1 or 3. Level 3 could save more power than Level 1. 
+pAd->StaCfg.PSControl.field.rt30xxPowerMode=3;
+pAd->StaCfg.PSControl.field.rt30xxForceASPMTest=0;
+pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
+#endif // PCIE_PS_SUPPORT //
+#endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
 
 	// global variables mXXXX used in MAC protocol state machines
@@ -2775,19 +3355,11 @@ VOID	UserCfgInit(
 			pAd->StaCfg.LastScanTime -= (10 * OS_HZ);
 		
 		NdisZeroMemory(pAd->nickname, IW_ESSID_MAX_SIZE+1);
-#ifdef RTMP_MAC_PCI
-		sprintf((PSTRING) pAd->nickname, "RT2860STA");
-#endif // RTMP_MAC_PCI //
+
+
+
 		RTMPInitTimer(pAd, &pAd->StaCfg.WpaDisassocAndBlockAssocTimer, GET_TIMER_FUNCTION(WpaDisassocApAndBlockAssoc), pAd, FALSE);
-#ifdef WPA_SUPPLICANT_SUPPORT
-		pAd->StaCfg.IEEE8021X = FALSE;
-		pAd->StaCfg.IEEE8021x_required_keys = FALSE;
-		pAd->StaCfg.WpaSupplicantUP = WPA_SUPPLICANT_DISABLE;
-		pAd->StaCfg.bRSN_IE_FromWpaSupplicant = FALSE;
-#ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-		pAd->StaCfg.WpaSupplicantUP = WPA_SUPPLICANT_ENABLE;
-#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
-#endif // WPA_SUPPLICANT_SUPPORT //
+
 
 #ifdef WSC_STA_SUPPORT
 		{
@@ -2816,7 +3388,7 @@ VOID	UserCfgInit(
 		pWscControl->EntryIfIdx = BSS0;
 		pWscControl->pAd = pAd;
 		pWscControl->WscDriverAutoConnect = TRUE;
-		pAd->WriteWscCfgToDatFile = FALSE;
+		pAd->WriteWscCfgToDatFile = 0xFF;
 		pWscControl->WscRejectSamePinFromEnrollee = FALSE;
 		pWscControl->WpsApBand = PREFERRED_WPS_AP_PHY_TYPE_AUTO_SELECTION;
 		}
@@ -2851,6 +3423,7 @@ VOID	UserCfgInit(
 		{
 			pAd->ApCfg.MBSSID[j].AuthMode = Ndis802_11AuthModeOpen;
 			pAd->ApCfg.MBSSID[j].WepStatus = Ndis802_11EncryptionDisabled;
+			pAd->ApCfg.MBSSID[j].GroupKeyWepStatus = Ndis802_11EncryptionDisabled;
 			pAd->ApCfg.MBSSID[j].DefaultKeyId = 0;
 			pAd->ApCfg.MBSSID[j].WpaMixPairCipher = MIX_CIPHER_NOTUSE;
 
@@ -2861,7 +3434,9 @@ VOID	UserCfgInit(
 			pAd->ApCfg.MBSSID[j].PMKCachePeriod = (10 * 60 * OS_HZ); // unit : tick(default: 10 minute)
 			NdisZeroMemory(&pAd->ApCfg.MBSSID[j].PMKIDCache, sizeof(NDIS_AP_802_11_PMKID));
 
+			/* dot1x related per BSS */
 			pAd->ApCfg.MBSSID[j].radius_srv_num = 0;
+			pAd->ApCfg.MBSSID[j].NasIdLen = 0;
 
 			/* VLAN related */
         		pAd->ApCfg.MBSSID[j].VLAN_VID = 0;
@@ -2884,6 +3459,8 @@ VOID	UserCfgInit(
 
 				*/
 				pWscControl = &pAd->ApCfg.MBSSID[j].WscControl;
+				NdisZeroMemory(&pWscControl->RegData, sizeof(WSC_REG_DATA));
+				NdisZeroMemory(&pWscControl->WscStaPbcProbeInfo, sizeof(WSC_STA_PBC_PROBE_INFO));
 				pWscControl->WscMode = 1;
 				pWscControl->WscConfStatus = 1;
 				pWscControl->WscConfigMethods= 0x0084;
@@ -2901,8 +3478,7 @@ VOID	UserCfgInit(
 				pWscControl->WscEnrolleePinCode = 0;
 				pWscControl->WscSelReg = 0;
 				pWscControl->WscUseUPnP = 0;
-				NdisZeroMemory(&pAd->ApCfg.MBSSID[j].WscControl.RegData, sizeof(WSC_REG_DATA));
-				NdisZeroMemory(&pAd->ApCfg.MBSSID[j].WscControl.WscStaPbcProbeInfo, sizeof(WSC_STA_PBC_PROBE_INFO));
+				pWscControl->bWCNTest = FALSE;
 				pWscControl->WscKeyASCII = 0; /* default, 0 (64 Hex) */
 				
 				/*
@@ -2910,6 +3486,9 @@ VOID	UserCfgInit(
 				*/
 				for (idx = 0; idx < 192; idx++)
 					pWscControl->RegData.EnrolleeRandom[idx] = RandomByte(pAd);
+
+				NdisZeroMemory(&pWscControl->WscDefaultSsid, sizeof(NDIS_802_11_SSID));
+
 			}
 #endif // WSC_AP_SUPPORT //        
 
@@ -2920,6 +3499,8 @@ VOID	UserCfgInit(
 		pAd->ApCfg.DtimPeriod = DEFAULT_DTIM_PERIOD;
 
 		pAd->ApCfg.ErpIeContent = 0;
+
+		pAd->ApCfg.StaIdleTimeout = MAC_TABLE_AGEOUT_TIME;
 
 #ifdef IDS_SUPPORT
 		// Default disable IDS threshold and reset all IDS counters
@@ -2939,7 +3520,8 @@ VOID	UserCfgInit(
 #endif // WDS_SUPPORT
 
 #ifdef WSC_AP_SUPPORT
-		pAd->WriteWscCfgToDatFile = FALSE;
+		pAd->WriteWscCfgToDatFile = 0xFF;
+		pAd->WriteWscCfgToAr9DatFile = FALSE;
 #endif // WSC_AP_SUPPORT //
 
 #ifdef APCLI_SUPPORT
@@ -2952,18 +3534,6 @@ VOID	UserCfgInit(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef ETH_CONVERT_SUPPORT
-	if (pAd->OpMode == OPMODE_STA)
-	{
-		NdisZeroMemory(pAd->EthConvert.EthCloneMac, MAC_ADDR_LEN);
-		pAd->EthConvert.ECMode = ETH_CONVERT_MODE_DISABLE;
-		pAd->EthConvert.CloneMacVaild = FALSE;
-		//pAd->EthConvert.nodeCount = 0;
-		NdisZeroMemory(pAd->EthConvert.SSIDStr, MAX_LEN_OF_SSID);
-		pAd->EthConvert.SSIDStrLen = 0;
-		pAd->EthConvert.macAutoLearn = FALSE;
-	}
-#endif // ETH_CONVERT_SUPPORT //
 
 	//
 	// part IV. others
@@ -2998,9 +3568,14 @@ VOID	UserCfgInit(
 #ifdef RALINK_ATE
 	NdisZeroMemory(&pAd->ate, sizeof(ATE_INFO));
 	pAd->ate.Mode = ATE_STOP;
+#ifdef CONFIG_RALINK_RT3350
+	pAd->ate.PABias = 0;
+#endif // CONFIG_RALINK_RT3350  //
 	pAd->ate.TxCount = 200;/* to exceed TX_RING_SIZE ... */
 	pAd->ate.TxDoneCount = 0;
 	pAd->ate.RFFreqOffset = 0;
+	pAd->ate.Payload = 0xA5;//peter	
+	pAd->ate.IPG = 0;//peter	
 	pAd->ate.TxLength = 1024;
 	pAd->ate.TxWI.ShortGI = 0;// LONG GI : 800 ns
 	pAd->ate.TxWI.PHYMODE = MODE_CCK;
@@ -3008,14 +3583,49 @@ VOID	UserCfgInit(
 	pAd->ate.TxWI.BW = BW_20;
 	pAd->ate.Channel = 1;
 	pAd->ate.QID = QID_AC_BE;
+
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	/* For stream mode in 3T/3R ++ */
+	/* use broadcast address as default value */
+	pAd->ate.Addr1[0] = 0xFF;
+	pAd->ate.Addr1[1] = 0xFF;
+	pAd->ate.Addr1[2] = 0xFF;
+	pAd->ate.Addr1[3] = 0xFF;
+	pAd->ate.Addr1[4] = 0xFF;
+	pAd->ate.Addr1[5] = 0xFF;
+
+
+	pAd->ate.Addr2[0] = 0x00;
+	pAd->ate.Addr2[1] = 0x11;
+	pAd->ate.Addr2[2] = 0x22;
+	pAd->ate.Addr2[3] = 0xAA;
+	pAd->ate.Addr2[4] = 0xBB;
+	pAd->ate.Addr2[5] = 0xCC;
+
+	NdisMoveMemory(pAd->ate.Addr3, pAd->ate.Addr2, ETH_LENGTH_OF_ADDRESS);
+
+	{		
+		UINT32 data;
+
+		data = 0xFFFFFFFF;
+		RTMP_IO_WRITE32(pAd, 0x1044, data); 
+		RTMP_IO_READ32(pAd, 0x1048, &data); 
+
+		data = data | 0x0000FFFF;
+		RTMP_IO_WRITE32(pAd, 0x1048, data); 
+	}
+	/* For stream mode in 3T/3R -- */
+#else
 	pAd->ate.Addr1[0] = 0x00;
 	pAd->ate.Addr1[1] = 0x11;
 	pAd->ate.Addr1[2] = 0x22;
 	pAd->ate.Addr1[3] = 0xAA;
 	pAd->ate.Addr1[4] = 0xBB;
 	pAd->ate.Addr1[5] = 0xCC;
+
 	NdisMoveMemory(pAd->ate.Addr2, pAd->ate.Addr1, ETH_LENGTH_OF_ADDRESS);
 	NdisMoveMemory(pAd->ate.Addr3, pAd->ate.Addr1, ETH_LENGTH_OF_ADDRESS);
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 	pAd->ate.bRxFER = 0;
 	pAd->ate.bQATxStart = FALSE;
 	pAd->ate.bQARxStart = FALSE;
@@ -3031,11 +3641,6 @@ VOID	UserCfgInit(
 #endif // RALINK_28xx_QA //
 #endif // RALINK_ATE //
 
-#ifdef MESH_SUPPORT
-	pAd->MeshTab.AuthMode = Ndis802_11AuthModeOpen;	
-	pAd->MeshTab.WepStatus = Ndis802_11EncryptionDisabled;
-	pAd->MeshTab.DefaultKeyId = 0;
-#endif // MESH_SUPPORT //
 
 	pAd->CommonCfg.bWiFiTest = FALSE;
 #ifdef RTMP_MAC_PCI
@@ -3046,7 +3651,37 @@ VOID	UserCfgInit(
 	pAd->ApCfg.EntryLifeCheck = MAC_ENTRY_LIFE_CHECK_CNT;
 
 #endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+#ifdef PCIE_PS_SUPPORT
 
+RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
+#endif // PCIE_PS_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //
+#ifdef ANT_DIVERSITY_SUPPORT
+		if ( pAd->CommonCfg.bRxAntDiversity == ANT_FIX_ANT2)
+		{
+			pAd->RxAnt.Pair1PrimaryRxAnt = 1;
+			pAd->RxAnt.Pair1SecondaryRxAnt = 0;
+		}
+		else // Default
+		{
+			pAd->RxAnt.Pair1PrimaryRxAnt = 0;
+			pAd->RxAnt.Pair1SecondaryRxAnt = 1;
+		}
+		pAd->RxAnt.EvaluatePeriod = 0;
+		pAd->RxAnt.RcvPktNumWhenEvaluate = 0;
+#ifdef CONFIG_STA_SUPPORT
+		pAd->RxAnt.Pair1AvgRssi[0] = pAd->RxAnt.Pair1AvgRssi[1] = 0;
+#endif // CONFIG_STA_SUPPORT //
+#ifdef CONFIG_AP_SUPPORT
+		pAd->RxAnt.Pair1AvgRssiGroup1[0] = pAd->RxAnt.Pair1AvgRssiGroup1[1] = 0;
+		pAd->RxAnt.Pair1AvgRssiGroup2[0] = pAd->RxAnt.Pair1AvgRssiGroup2[1] = 0;
+#endif // CONFIG_AP_SUPPORT //
+#endif // AP_ANTENNA_DIVERSITY_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
+#endif // CONFIG_STA_SUPPORT //
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- UserCfgInit\n"));
 }
 
@@ -3134,9 +3769,7 @@ VOID	RTMPInitTimer(
 	pTimer->State      = FALSE;
 	pTimer->cookie = (ULONG) pData;
 
-#ifdef RTMP_TIMER_TASK_SUPPORT
 	pTimer->pAd = pAd;
-#endif // RTMP_TIMER_TASK_SUPPORT //
 
 	RTMP_OS_Init_Timer(pAd, &pTimer->TimerObj,	pTimerFunc, (PVOID) pTimer);	
 }
@@ -3166,6 +3799,15 @@ VOID	RTMPSetTimer(
 {
 	if (pTimer->Valid)
 	{
+		RTMP_ADAPTER *pAd;
+		
+		pAd = (RTMP_ADAPTER *)pTimer->pAd;
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS))
+		{
+			DBGPRINT_ERR(("RTMPSetTimer failed, Halt in Progress!\n"));
+			return;
+		}
+		
 		pTimer->TimerValue = Value;
 		pTimer->State      = FALSE;
 		if (pTimer->PeriodicType == TRUE)
@@ -3181,7 +3823,7 @@ VOID	RTMPSetTimer(
 	}
 	else
 	{
-	//	DBGPRINT_ERR(("RTMPSetTimer failed, Timer hasn't been initialize!\n"));
+		DBGPRINT_ERR(("RTMPSetTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
 
@@ -3226,7 +3868,7 @@ VOID	RTMPModTimer(
 	}
 	else
 	{
-//		DBGPRINT_ERR(("RTMPModTimer failed, Timer hasn't been initialize!\n"));
+		DBGPRINT_ERR(("RTMPModTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
 
@@ -3274,7 +3916,7 @@ VOID	RTMPCancelTimer(
 	}
 	else
 	{
-//		DBGPRINT_ERR(("RTMPCancelTimer failed, Timer hasn't been initialize!\n"));
+		DBGPRINT_ERR(("RTMPCancelTimer failed, Timer hasn't been initialize!\n"));
 	}
 }
 
@@ -3306,6 +3948,19 @@ VOID RTMPSetLED(
 	//ULONG			data;
 	UCHAR			HighByte = 0;
 	UCHAR			LowByte;
+#ifdef WSC_INCLUDED
+#ifdef WSC_LED_SUPPORT
+	PWSC_CTRL		pWscControl = NULL;
+
+#ifdef CONFIG_AP_SUPPORT
+	pWscControl = &pAd->ApCfg.MBSSID[MAIN_MBSSID].WscControl;
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	pWscControl = &pAd->StaCfg.WscControl;
+#endif // CONFIG_STA_SUPPORT //
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_INCLUDED //
+	BOOLEAN 		bIgnored = FALSE;
 
 #ifdef RALINK_ATE
 	/*
@@ -3339,7 +3994,7 @@ VOID RTMPSetLED(
 			AsicSendCommandToMcu(pAd, 0x50, 0xff, LowByte, HighByte);
 			break;
 		case LED_HALT: 
-			LowByte = 1; //always use LED firmware to control LED
+			LowByte = 0; // Driver sets MAC register and MAC controls LED
 		case LED_RADIO_OFF:
 			HighByte = 0;
 			AsicSendCommandToMcu(pAd, 0x50, 0xff, LowByte, HighByte);
@@ -3358,6 +4013,195 @@ VOID RTMPSetLED(
 			break;
 #ifdef RALINK_ATE
 #endif // RALINK_ATE //
+#ifdef WSC_INCLUDED
+#ifdef WSC_LED_SUPPORT
+		case LED_WPS_IN_PROCESS:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_IN_PROCESS;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_IN_PROCESS;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_IN_PROCESS\n", __FUNCTION__));				
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_ERROR:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				// In the case of LED mode 9, the error LED should be turned on only after WPS walk time expiration.
+				if ((pWscControl->bWPSWalkTimeExpiration == FALSE) && 
+					 ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9))
+				{
+					// do nothing.
+				}
+				else
+				{
+					HighByte = LINK_STATUS_WPS_ERROR;
+					AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				}
+		
+				pWscControl->WscLEDMode = LED_WPS_ERROR;
+				pWscControl->WscLastWarningLEDMode = LED_WPS_ERROR;
+				
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_ERROR\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_SESSION_OVERLAP_DETECTED:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_SESSION_OVERLAP_DETECTED;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_SESSION_OVERLAP_DETECTED;
+				pWscControl->WscLastWarningLEDMode = LED_WPS_SESSION_OVERLAP_DETECTED;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SESSION_OVERLAP_DETECTED\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_SUCCESS:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				if (((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_7) || 
+					((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_11) || 
+					((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_12))
+				{
+					// In the WPS LED mode 7, 11 and 12, the blue LED would last 300 seconds regardless of the AP's security settings.
+					HighByte = LINK_STATUS_WPS_SUCCESS_WITH_SECURITY;
+					AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+					pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+		
+					// Turn off the WPS successful LED pattern after 300 seconds.
+					RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT);
+					
+					DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS (LINK_STATUS_WPS_SUCCESS_WITH_SECURITY)\n", __FUNCTION__));
+				}
+				else if ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_8) // The WPS LED mode 8
+				{
+					if (WscAPHasSecuritySetting(pAd, pWscControl)) // The WPS AP has the security setting.
+					{
+						HighByte = LINK_STATUS_WPS_SUCCESS_WITH_SECURITY;
+						AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+						pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+		
+						// Turn off the WPS successful LED pattern after 300 seconds.
+						RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT);
+						
+						DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS (LINK_STATUS_WPS_SUCCESS_WITH_SECURITY)\n", __FUNCTION__));
+					}
+					else // The WPS AP does not have the secuirty setting.
+					{
+						HighByte = LINK_STATUS_WPS_SUCCESS_WITHOUT_SECURITY;
+						AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+						pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+		
+						// Turn off the WPS successful LED pattern after 300 seconds.
+						RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT);
+						
+						DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS (LINK_STATUS_WPS_SUCCESS_WITHOUT_SECURITY)\n", __FUNCTION__));
+					}
+				}
+				else if ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) // The WPS LED mode 9.
+				{
+					// Always turn on the WPS blue LED for 300 seconds.
+					HighByte = LINK_STATUS_WPS_BLUE_LED;
+					AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+					pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+		
+					// Turn off the WPS successful LED pattern after 300 seconds.
+					RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT);
+					
+					DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS (LINK_STATUS_WPS_BLUE_LED)\n", __FUNCTION__));
+				}
+				else
+				{
+					DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS (Incorrect LED mode = %d)\n", 
+						__FUNCTION__, (pAd->LedCntl.field.LedMode & LED_MODE)));
+					ASSERT(FALSE);
+				}
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_TURN_LED_OFF:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_TURN_LED_OFF;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_TURN_LED_OFF;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_TURN_ON_BLUE_LED:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_BLUE_LED;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_ON_BLUE_LED\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_NORMAL_CONNECTION_WITHOUT_SECURITY:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_NORMAL_CONNECTION_WITHOUT_SECURITY;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LINK_STATUS_NORMAL_CONNECTION_WITHOUT_SECURITY\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_NORMAL_CONNECTION_WITH_SECURITY:
+			if (WscSupportWPSLEDMode(pAd))
+			{
+				HighByte = LINK_STATUS_NORMAL_CONNECTION_WITH_SECURITY;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				pWscControl->WscLEDMode = LED_WPS_SUCCESS;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LINK_STATUS_NORMAL_CONNECTION_WITH_SECURITY\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		//WPS LED Mode 10
+		case LED_WPS_MODE10_TURN_ON:
+			if(WscSupportWPSLEDMode10(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_MODE10_TURN_ON;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_MODE10_TURN_ON\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_MODE10_FLASH:
+			if(WscSupportWPSLEDMode10(pAd))
+			{	
+				HighByte = LINK_STATUS_WPS_MODE10_FLASH;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_MODE10_FLASH\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+		case LED_WPS_MODE10_TURN_OFF:
+			if(WscSupportWPSLEDMode10(pAd))
+			{
+				HighByte = LINK_STATUS_WPS_MODE10_TURN_OFF;
+				AsicSendCommandToMcu(pAd, MCU_SET_WPS_LED_MODE, 0xff, LowByte, HighByte);
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_MODE10_TURN_OFF\n", __FUNCTION__));
+			}
+			else
+				bIgnored = TRUE;
+			break;
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_INCLUDED //
 		default:
 			DBGPRINT(RT_DEBUG_WARN, ("RTMPSetLED::Unknown Status %d\n", Status));
 			break;
@@ -3367,7 +4211,7 @@ VOID RTMPSetLED(
 	// Keep LED status for LED SiteSurvey mode.
 	// After SiteSurvey, we will set the LED mode to previous status.
 	//
-	if ((Status != LED_ON_SITE_SURVEY) && (Status != LED_POWER_UP))
+	if ((Status != LED_ON_SITE_SURVEY) && (Status != LED_POWER_UP) && (bIgnored == FALSE))
 		pAd->LedStatus = Status;
     
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPSetLED::Mode=%d,HighByte=0x%02x,LowByte=0x%02x\n", pAd->LedCntl.field.LedMode, HighByte, LowByte));
@@ -3406,14 +4250,8 @@ VOID RTMPSetSignalLED(
 {
 	UCHAR		nLed = 0;
 
-	//
-	// if not Signal Stregth, then do nothing.
-	//
-	if (pAd->LedCntl.field.LedMode != LED_MODE_SIGNAL_STREGTH)
+	if (pAd->LedCntl.field.LedMode == LED_MODE_SIGNAL_STREGTH)
 	{
-		return;
-	}
-
 	if (Dbm <= -90)
 		nLed = 0;
 	else if (Dbm <= -81)
@@ -3436,6 +4274,97 @@ VOID RTMPSetSignalLED(
 		pAd->LedIndicatorStrength = nLed;
 	}
 }
+}
+
+#ifdef WSC_STA_SUPPORT
+#ifdef WSC_LED_SUPPORT
+//
+// LED indication for normal connection start.
+//
+VOID
+LEDConnectionStart(
+	IN PRTMP_ADAPTER pAd)
+{
+	// LED indication.
+	//if (pAd->StaCfg.WscControl.bWPSSession == FALSE)
+	//if (pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE && pAd->StaCfg.WscControl.bWscTrigger)
+	if (pAd->StaCfg.WscControl.WscConfMode == WSC_DISABLE)
+	{
+		if ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) // LED mode 9.
+		{
+			UCHAR WPSLEDStatus = 0;
+			
+			// The AP uses OPEN-NONE.
+			if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeOpen) && (pAd->StaCfg.WepStatus == Ndis802_11WEPDisabled))
+			{
+				WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+			}
+			else // The AP uses an encryption algorithm.
+			{
+				WPSLEDStatus = LED_WPS_IN_PROCESS;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_IN_PROCESS\n", __FUNCTION__));
+			}
+		}
+	}
+}
+
+
+//
+// LED indication for normal connection completion.
+//
+VOID
+LEDConnectionCompletion(
+	IN PRTMP_ADAPTER pAd, 
+	IN BOOLEAN bSuccess)
+{
+	// LED indication.
+	//if (pAd->StaCfg.WscControl.bWPSSession == FALSE)
+	if (pAd->StaCfg.WscControl.WscConfMode == WSC_DISABLE)
+	{
+		if ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) // LED mode 9.
+		{
+			UCHAR WPSLEDStatus = 0;
+			
+			if (bSuccess == TRUE) // Successful connenction.
+			{				
+				// The AP uses OPEN-NONE.
+				if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeOpen) && (pAd->StaCfg.WepStatus == Ndis802_11WEPDisabled))
+				{
+					WPSLEDStatus = LED_NORMAL_CONNECTION_WITHOUT_SECURITY;
+#ifdef RTMP_MAC_PCI
+					RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+					DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_NORMAL_CONNECTION_WITHOUT_SECURITY\n", __FUNCTION__));
+				}
+				else // The AP uses an encryption algorithm.
+				{
+					WPSLEDStatus = LED_NORMAL_CONNECTION_WITH_SECURITY;
+#ifdef RTMP_MAC_PCI
+					RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+					DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_NORMAL_CONNECTION_WITH_SECURITY\n", __FUNCTION__));
+				}
+			}
+			else // Connection failure.
+			{
+				WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+			}
+		}
+	}
+}
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_STA_SUPPORT //
 
 /*
 	========================================================================
@@ -3517,7 +4446,7 @@ int rt28xx_init(
 
 
 #ifdef CONFIG_STA_SUPPORT
-#ifdef RTMP_MAC_PCI
+#ifdef PCIE_PS_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
     	// If dirver doesn't wake up firmware here,
@@ -3533,7 +4462,7 @@ int rt28xx_init(
         	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_DOZE);
     	}
 	}
-#endif // RTMP_MAC_PCI //
+#endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 
 
@@ -3569,6 +4498,16 @@ int rt28xx_init(
 	DBGPRINT(RT_DEBUG_TRACE, ("MAC_CSR0  [ Ver:Rev=0x%08x]\n", pAd->MACVersion));
 
 #ifdef RTMP_MAC_PCI
+#if defined(RT3090) || defined(RT3592) || defined(RT3390)
+	/*Iverson patch PCIE L1 issue to make sure that driver can be read,write ,BBP and RF register  at pcie L.1 level */
+	if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd))&&pAd->infType==RTMP_DEV_INF_PCIE)
+	{
+		RTMP_IO_READ32(pAd, AUX_CTRL, &MacCsr0);
+		MacCsr0 |= 0x402;
+		RTMP_IO_WRITE32(pAd, AUX_CTRL, MacCsr0);
+		DBGPRINT(RT_DEBUG_TRACE, ("AUX_CTRL = 0x%x\n", MacCsr0));
+	}
+#endif // RT3090 //
 
 	// To fix driver disable/enable hang issue when radio off
 	RTMP_IO_WRITE32(pAd, PWR_PIN_CFG, 0x2);
@@ -3620,6 +4559,7 @@ int rt28xx_init(
 		goto err2;
 	}
 
+
 	// Initialize pAd->StaCfg, pAd->ApCfg, pAd->CommonCfg to manufacture default
 	//
 	UserCfgInit(pAd);
@@ -3641,10 +4581,6 @@ int rt28xx_init(
 	initblockQueueTab(pAd);
 #endif // BLOCK_NET_IF //
 
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-		NdisAllocateSpinLock(&pAd->MacTabLock);
-#endif // CONFIG_STA_SUPPORT //
 
 	MeasureReqTabInit(pAd);
 	TpcReqTabInit(pAd);
@@ -3666,11 +4602,9 @@ int rt28xx_init(
 	DBGPRINT(RT_DEBUG_OFF, ("1. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		DBGPRINT_ERR(("NICReadRegParameters failed, Status[=0x%08x]\n",Status));
+		DBGPRINT_ERR(("RTMPReadParametersHook failed, Status[=0x%08x]\n",Status));
 		goto err4;
 	}
-
-
 
 #ifdef DOT11_N_SUPPORT
    	//Init Ba Capability parameters.
@@ -3697,20 +4631,6 @@ int rt28xx_init(
 	// We should read EEPROM for all cases.  rt2860b
 	NICReadEEPROMParameters(pAd, (PUCHAR)pDefaultMac);	
 #ifdef CONFIG_STA_SUPPORT
-#ifdef ETH_CONVERT_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	{
-		extern UCHAR ZERO_MAC_ADDR[MAC_ADDR_LEN];
-
-		if ( NdisEqualMemory(&pAd->EthConvert.EthCloneMac[0], &ZERO_MAC_ADDR[0], MAC_ADDR_LEN))
-		{
-			NdisMoveMemory(&pAd->EthConvert.EthCloneMac[0], &pAd->CurrentAddress[0], MAC_ADDR_LEN);
-			DBGPRINT(RT_DEBUG_OFF, ("Read EEPROM, EthCloneMac is %02x:%02x:%02x:%02x:%02x:%02x!\n",
-					pAd->EthConvert.EthCloneMac[0], pAd->EthConvert.EthCloneMac[1], pAd->EthConvert.EthCloneMac[2], 
-					pAd->EthConvert.EthCloneMac[3], pAd->EthConvert.EthCloneMac[4], pAd->EthConvert.EthCloneMac[5]));
-		}
-	}
-#endif // ETH_CONVERT_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_OFF, ("3. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
@@ -3718,12 +4638,48 @@ int rt28xx_init(
 	NICInitAsicFromEEPROM(pAd); //rt2860b
 	
 	// Set PHY to appropriate mode
+#ifdef CONFIG_STA_SUPPORT
+#ifdef DOT11_N_SUPPORT
+	if ((pAd->OpMode == OPMODE_STA) &&
+		(pAd->CommonCfg.HT_DisallowTKIP == TRUE) &&
+		(pAd->StaCfg.BssType == BSS_ADHOC) &&
+		(pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+		((pAd->StaCfg.WepStatus == Ndis802_11WEPEnabled) ||
+		 (pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled)))
+	{
+		ULONG tmpPhymode = PHY_11ABGN_MIXED;
+		
+		switch(pAd->CommonCfg.PhyMode)
+		{
+			case PHY_11ABGN_MIXED:
+			case PHY_11AGN_MIXED:
+				tmpPhymode = PHY_11ABG_MIXED;
+				break;					
+			case PHY_11N_2_4G:
+			case PHY_11GN_MIXED:
+				tmpPhymode = PHY_11G;
+				break;
+			case PHY_11AN_MIXED:
+			case PHY_11N_5G:
+				tmpPhymode = PHY_11A;
+				break;
+			case PHY_11BGN_MIXED:
+				tmpPhymode = PHY_11BG_MIXED;
+				break;
+		}
+		RTMPSetPhyMode(pAd, tmpPhymode);
+	}
+	else
+#endif // DOT11_N_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //
+	{
 	TmpPhy = pAd->CommonCfg.PhyMode;
 	pAd->CommonCfg.PhyMode = 0xff;
 	RTMPSetPhyMode(pAd, TmpPhy);
 #ifdef DOT11_N_SUPPORT
 	SetCommonHT(pAd);
 #endif // DOT11_N_SUPPORT //
+	}
 
 	// No valid channels.
 	if (pAd->ChannelListNum == 0)
@@ -3737,6 +4693,7 @@ int rt28xx_init(
            pAd->CommonCfg.HtCapability.MCSSet[1], pAd->CommonCfg.HtCapability.MCSSet[2],
            pAd->CommonCfg.HtCapability.MCSSet[3], pAd->CommonCfg.HtCapability.MCSSet[4]));
 #endif // DOT11_N_SUPPORT //
+
 
 #ifdef RTMP_RF_RW_SUPPORT
 	//Init RT30xx RFRegisters after read RFIC type from EEPROM
@@ -3810,7 +4767,7 @@ int rt28xx_init(
 				DBGPRINT(RT_DEBUG_ERROR, ("SYNC - BBP R4 to 20MHz.l\n"));
 
 				// Now we can receive the beacon and do the listen beacon
-				pAd->CommonCfg.Channel = AP_AUTO_CH_SEL(pAd, TRUE);
+				pAd->CommonCfg.Channel = RandomChannel(pAd);
 			}
 
 #ifdef DOT11_N_SUPPORT
@@ -3840,12 +4797,19 @@ int rt28xx_init(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 		INT apidx;
+#ifdef HOSTAPD_SUPPORT
+		if (pAd->ApCfg.Hostapd == TRUE)
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("WPS is control by hostapd now.\n"));
+		}
+		else
+#endif //HOSTAPD_SUPPORT//
 		for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
 		{
 			PWSC_CTRL pWscControl;
 			pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
 			DBGPRINT(RT_DEBUG_TRACE, ("Generate UUID for apidx(%d)\n", apidx));
-			WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], apidx);
+			WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], apidx, FALSE);
 			WscInit(pAd, FALSE, apidx);
 			if (pWscControl->WscEnrolleePinCode == 0)
 				pWscControl->WscEnrolleePinCode = WscGeneratePinCode(pAd, FALSE, apidx);
@@ -3857,7 +4821,7 @@ int rt28xx_init(
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
 		PWSC_CTRL pWscControl = &pAd->StaCfg.WscControl;
-		WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], 0);
+		WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], 0, FALSE);
 		WscInit(pAd, BSS0);
 		if (pWscControl->WscEnrolleePinCode == 0)
 			pWscControl->WscEnrolleePinCode = WscGeneratePinCode(pAd, BSS0);
@@ -3892,9 +4856,6 @@ int rt28xx_init(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef MESH_SUPPORT
-	RTMP_Mesh_Init(pAd, pAd->net_dev, pHostName);
-#endif // MESH_SUPPORT //	
 
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 	RT3XXX_AntDiversity_Init(pAd);
@@ -3907,27 +4868,225 @@ int rt28xx_init(
 #ifdef MAT_SUPPORT
 		MATEngineInit(pAd);
 #endif // MAT_SUPPORT //
+
+#ifdef CLIENT_WDS
+	CliWds_ProxyTabInit(pAd);
+#endif // CLIENT_WDS //
 	}
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-#ifdef WPA_SUPPLICANT_SUPPORT
-#ifndef NATIVE_WPA_SUPPLICANT_SUPPORT
-		// send wireless event to wpa_supplicant for infroming interface up.
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_INTERFACE_UP, NULL, NULL, 0);
-#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
-#endif // WPA_SUPPLICANT_SUPPORT //
 
-#ifdef ETH_CONVERT_SUPPORT
-		MATEngineInit(pAd);
-#endif // ETH_CONVERT_SUPPORT //
 	}
 #endif // CONFIG_STA_SUPPORT //
 
+#ifdef WMM_ACM_SUPPORT
+#ifdef CONFIG_AP_SUPPORT
+	ACMP_Init(pAd,
+			pAd->CommonCfg.APEdcaParm.bACM[0],
+			pAd->CommonCfg.APEdcaParm.bACM[1],
+			pAd->CommonCfg.APEdcaParm.bACM[2],
+			pAd->CommonCfg.APEdcaParm.bACM[3], 0);
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	ACMP_Init(pAd);
+#endif // CONFIG_STA_SUPPORT //
+#endif // WMM_ACM_SUPPORT //
 
 
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{
+		if (IS_RT2883(pAd) || IS_RT3883(pAd))
+		{
+			RTMP_IO_WRITE32(pAd, TX_FBK_CFG_3S_0, 0x12111008);
+			RTMP_IO_WRITE32(pAd, TX_FBK_CFG_3S_1, 0x16151413);
+		}
+	}
+
+	// Init static Stream Mode
+	if (pAd->CommonCfg.StreamMode == 2) // Static
+	{
+		ULONG streamWord;
+		// Enable Stream mode for first three entries in MAC table
+		if (pAd->Antenna.field.TxPath==3)
+			streamWord = 0xF0000;
+		else if (pAd->Antenna.field.TxPath==2)
+			streamWord = 0x30000;
+		else
+			streamWord = 0x00000;
+
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR0_L, (ULONG)(pAd->CommonCfg.StreamModeMac[0][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][1] << 8)  | 
+						(ULONG)(pAd->CommonCfg.StreamModeMac[0][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][3] << 24));
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR0_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[0][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][5] << 8));
+		
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR1_L, (ULONG)(pAd->CommonCfg.StreamModeMac[1][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][1] << 8)  | 
+					(ULONG)(pAd->CommonCfg.StreamModeMac[1][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][3] << 24));
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR1_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[1][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][5] << 8));
+
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR2_L, (ULONG)(pAd->CommonCfg.StreamModeMac[2][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][1] << 8)  | 
+					(ULONG)(pAd->CommonCfg.StreamModeMac[2][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][3] << 24));
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR2_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[2][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][5] << 8));
+
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR3_L, (ULONG)(pAd->CommonCfg.StreamModeMac[3][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][1] << 8)  | 
+					(ULONG)(pAd->CommonCfg.StreamModeMac[3][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][3] << 24));
+		RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR3_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[3][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][5] << 8));
+
+	}
+
+#endif // CONFIG_AP_SUPPORT //
+
+	if (pAd->CommonCfg.FineAGC)
+	{
+		UINT8 BBPValue = 0;
+		BBP_IO_READ8_BY_REG_ID(pAd, BBP_R65, &BBPValue);
+		BBPValue |= 0x40; // turn on fine AGC
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R65, BBPValue);
+	}
+	else
+	{
+		UINT8 BBPValue = 0;
+		BBP_IO_READ8_BY_REG_ID(pAd, BBP_R65, &BBPValue);
+		BBPValue &= ~0x40; // turn off fine AGC
+		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R65, BBPValue);
+	}
+	
+
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+	
+#ifdef TXBF_SUPPORT
+	if (pAd->CommonCfg.ITxBfTimeout)
+	{
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0x02);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 0);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, pAd->CommonCfg.ITxBfTimeout & 0xFF);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 1);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, (pAd->CommonCfg.ITxBfTimeout>>8) & 0xFF);
+	}
+
+	if (pAd->CommonCfg.ETxBfTimeout)
+	{
+		RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_3, pAd->CommonCfg.ETxBfTimeout);
+	}
+#endif // TXBF_SUPPORT //
+
+
+#ifdef CONFIG_RALINK_RT3350
+	if(1)
+	{
+		USHORT i;
+	        USHORT value;
+		UCHAR  rf_offset;
+		UCHAR  rf_value;
+
+		RT28xx_EEPROM_READ16(pAd, 0x120, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+		
+		if(rf_offset == 0xff)
+		        rf_offset = RF_R09;
+		if(rf_value == 0xff)
+			rf_value = 0x01;
+
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+		
+		RT28xx_EEPROM_READ16(pAd, 0x122, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+
+		if(rf_offset == 0xff)
+		        rf_offset = RF_R19;
+		if(rf_value == 0xff)
+			rf_value = 0xcc;
+
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+	}
+
+	if(pAd->CommonCfg.PhyMode == PHY_11B)
+	{
+		USHORT i;
+	        USHORT value;
+		UCHAR  rf_offset;
+		UCHAR  rf_value;
+
+		RT28xx_EEPROM_READ16(pAd, 0x126, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+
+		if(rf_offset == 0xff)
+		    rf_offset = RF_R21;
+		if(rf_value == 0xff)
+		    rf_value = 0x4F;
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+	
+		RT28xx_EEPROM_READ16(pAd, 0x12a, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+
+		if(rf_offset == 0xff)
+		    rf_offset = RF_R29;
+		if(rf_value == 0xff)
+		    rf_value = 0x07;
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+	
+
+		// set RF_R24
+		if(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40)
+		{    
+			value = 0x3F;
+		}
+		else
+		{
+			value = 0x1F;
+		}
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R24, (UCHAR)value);
+
+
+	}
+	else
+	{
+		USHORT i;
+	        USHORT value;
+		UCHAR  rf_offset;
+		UCHAR  rf_value;
+
+		RT28xx_EEPROM_READ16(pAd, 0x124, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+
+		if(rf_offset == 0xff)
+		    rf_offset = RF_R21;
+		if(rf_value == 0xff)
+		    rf_value = 0x6F;
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+	
+		RT28xx_EEPROM_READ16(pAd, 0x128, value);
+		rf_value = value & 0x00FF;
+                rf_offset = (value & 0xFF00) >> 8;
+
+		if(rf_offset == 0xff)
+		    rf_offset = RF_R29;
+		if(rf_value == 0xff)
+		    rf_value = 0x07;
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, rf_offset, (UCHAR)rf_value);
+	
+		// set RF_R24
+		if(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40)
+		{    
+			value = 0x28;
+		}
+		else
+		{
+			value = 0x18;
+		}
+		ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R24, (UCHAR)value);
+
+	}
+
+#endif
 	DBGPRINT_S(Status, ("<==== rt28xx_init, Status=%x\n", Status));
 
 	return TRUE;
@@ -3976,6 +5135,7 @@ static INT RtmpChipOpsRegister(
 	{
 #ifdef RTMP_PCI_SUPPORT
 		case RTMP_DEV_INF_PCI:
+		case RTMP_DEV_INF_PCIE:
 			pChipOps->loadFirmware = RtmpAsicLoadFirmware;
 			pChipOps->eraseFirmware = RtmpAsicEraseFirmware;
 			pChipOps->sendCommandToMcu = RtmpAsicSendCommandToMcu;
@@ -4008,12 +5168,12 @@ INT RtmpRaDevCtrlInit(
 	
 #ifdef CONFIG_STA_SUPPORT
 	pAd->OpMode = OPMODE_STA;
-	DBGPRINT(RT_DEBUG_TRACE, ("STA Driver version-%s\n", STA_DRIVER_VERSION));
+	printk("STA Driver version-%s\n", STA_DRIVER_VERSION);
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	pAd->OpMode = OPMODE_AP;
-	DBGPRINT(RT_DEBUG_TRACE, ("AP Driver version-%s\n", AP_DRIVER_VERSION));
+	printk("AP Driver version-%s\n", AP_DRIVER_VERSION);
 #endif // CONFIG_AP_SUPPORT //
 
 
@@ -4068,13 +5228,6 @@ PNET_DEV get_netdev_from_bssid(
 	PNET_DEV dev_p = NULL;
 
 	
-#ifdef MESH_SUPPORT
-	if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_MESH)
-	{
-		dev_p = pAd->MeshTab.dev;
-	} 
-	else
-#endif // MESH_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{

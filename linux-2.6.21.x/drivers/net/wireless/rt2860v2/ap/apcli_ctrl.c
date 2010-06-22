@@ -25,95 +25,69 @@
 	--------	----------		----------------------------------------------
 	Fonchi		2006-06-23      modified for rt61-APClinent
 */
+#ifdef APCLI_SUPPORT
+
 #include "rt_config.h"
 
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 UINT count_DeAssoc;
-#endif/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 
 static VOID ApCliCtrlJoinReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlJoinReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlProbeRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAuthRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAuth2RspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAuthReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAuth2ReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlDeAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlAssocReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlDisconnectReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlPeerDeAssocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlDeAssocAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliCtrlDeAuthAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 /*
     ==========================================================================
@@ -127,45 +101,48 @@ static VOID ApCliCtrlDeAuthAction(
  */
 VOID ApCliCtrlStateMachineInit(
 	IN PRTMP_ADAPTER pAd,
-	IN STATE_MACHINE_EX *Sm,
-	OUT STATE_MACHINE_FUNC_EX Trans[])
+	IN STATE_MACHINE *Sm,
+	OUT STATE_MACHINE_FUNC Trans[])
 {
 	UCHAR i;
 
-	StateMachineInitEx(Sm, (STATE_MACHINE_FUNC_EX*)Trans, APCLI_MAX_CTRL_STATE, APCLI_MAX_CTRL_MSG, (STATE_MACHINE_FUNC_EX)DropEx, APCLI_CTRL_DISCONNECTED, APCLI_CTRL_MACHINE_BASE);
+	StateMachineInit(Sm, (STATE_MACHINE_FUNC*)Trans,
+		APCLI_MAX_CTRL_STATE, APCLI_MAX_CTRL_MSG,
+		(STATE_MACHINE_FUNC)Drop, APCLI_CTRL_DISCONNECTED,
+		APCLI_CTRL_MACHINE_BASE);
 
 	// disconnected state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_DISCONNECTED, APCLI_CTRL_JOIN_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlJoinReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_DISCONNECTED, APCLI_CTRL_JOIN_REQ, (STATE_MACHINE_FUNC)ApCliCtrlJoinReqAction);
 
 	// probe state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_PROBE_RSP, (STATE_MACHINE_FUNC_EX)ApCliCtrlProbeRspAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_JOIN_REQ_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliCtrlJoinReqTimeoutAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlDisconnectReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_PROBE_RSP, (STATE_MACHINE_FUNC)ApCliCtrlProbeRspAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_JOIN_REQ_TIMEOUT, (STATE_MACHINE_FUNC)ApCliCtrlJoinReqTimeoutAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_PROBE, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlDisconnectReqAction);
 
 	// auth state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_AUTH_RSP, (STATE_MACHINE_FUNC_EX)ApCliCtrlAuthRspAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_AUTH_REQ_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliCtrlAuthReqTimeoutAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlDisconnectReqAction);
- 	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlPeerDeAssocReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_AUTH_RSP, (STATE_MACHINE_FUNC)ApCliCtrlAuthRspAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_AUTH_REQ_TIMEOUT, (STATE_MACHINE_FUNC)ApCliCtrlAuthReqTimeoutAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlDisconnectReqAction);
+ 	StateMachineSetAction(Sm, APCLI_CTRL_AUTH, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlPeerDeAssocReqAction);
 
 	// auth2 state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_AUTH_RSP, (STATE_MACHINE_FUNC_EX)ApCliCtrlAuth2RspAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_AUTH_REQ_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliCtrlAuth2ReqTimeoutAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlDisconnectReqAction);
- 	StateMachineSetActionEx(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlPeerDeAssocReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_AUTH_RSP, (STATE_MACHINE_FUNC)ApCliCtrlAuth2RspAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_AUTH_REQ_TIMEOUT, (STATE_MACHINE_FUNC)ApCliCtrlAuth2ReqTimeoutAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlDisconnectReqAction);
+ 	StateMachineSetAction(Sm, APCLI_CTRL_AUTH_2, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlPeerDeAssocReqAction);
 
 	// assoc state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_ASSOC_RSP, (STATE_MACHINE_FUNC_EX)ApCliCtrlAssocRspAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_ASSOC_REQ_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliCtrlAssocReqTimeoutAction);
-	StateMachineSetActionEx(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlDeAssocAction);
- 	StateMachineSetActionEx(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlPeerDeAssocReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_ASSOC_RSP, (STATE_MACHINE_FUNC)ApCliCtrlAssocRspAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_ASSOC_REQ_TIMEOUT, (STATE_MACHINE_FUNC)ApCliCtrlAssocReqTimeoutAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlDeAssocAction);
+ 	StateMachineSetAction(Sm, APCLI_CTRL_ASSOC, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlPeerDeAssocReqAction);
 
 	// deassoc state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_DEASSOC, APCLI_CTRL_DEASSOC_RSP, (STATE_MACHINE_FUNC_EX)ApCliCtrlDeAssocRspAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_DEASSOC, APCLI_CTRL_DEASSOC_RSP, (STATE_MACHINE_FUNC)ApCliCtrlDeAssocRspAction);
 
 	// connected state
-	StateMachineSetActionEx(Sm, APCLI_CTRL_CONNECTED, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlDeAuthAction);
- 	StateMachineSetActionEx(Sm, APCLI_CTRL_CONNECTED, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC_EX)ApCliCtrlPeerDeAssocReqAction);
+	StateMachineSetAction(Sm, APCLI_CTRL_CONNECTED, APCLI_CTRL_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlDeAuthAction);
+ 	StateMachineSetAction(Sm, APCLI_CTRL_CONNECTED, APCLI_CTRL_PEER_DISCONNECT_REQ, (STATE_MACHINE_FUNC)ApCliCtrlPeerDeAssocReqAction);
 
 	for (i = 0; i < MAX_APCLI_NUM; i++)
 		pAd->ApCfg.ApCliTab[i].CtrlCurrState = APCLI_CTRL_DISCONNECTED;
@@ -182,12 +159,12 @@ VOID ApCliCtrlStateMachineInit(
  */
 static VOID ApCliCtrlJoinReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	APCLI_MLME_JOIN_REQ_STRUCT JoinReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Start Probe Req.\n", __FUNCTION__));
 	if (ifIndex >= MAX_APCLI_NUM)
@@ -226,7 +203,7 @@ static VOID ApCliCtrlJoinReqAction(
 
 	*pCurrState = APCLI_CTRL_PROBE;
 
-	MlmeEnqueueEx(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_MLME_PROBE_REQ,
+	MlmeEnqueue(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_MLME_PROBE_REQ,
 		sizeof(APCLI_MLME_JOIN_REQ_STRUCT), &JoinReq, ifIndex);
 
 	return;
@@ -240,12 +217,13 @@ static VOID ApCliCtrlJoinReqAction(
  */
 static VOID ApCliCtrlJoinReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	APCLI_MLME_JOIN_REQ_STRUCT JoinReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Probe Req Timeout.\n", __FUNCTION__));
 
@@ -255,10 +233,10 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
 	if (ApScanRunning(pAd) == TRUE)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		return;
 	}
 
@@ -295,7 +273,7 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Probe Ssid=%s, Bssid=%02x:%02x:%02x:%02x:%02x:%02x\n",
 		__FUNCTION__, JoinReq.Ssid, JoinReq.Bssid[0], JoinReq.Bssid[1], JoinReq.Bssid[2],
 		JoinReq.Bssid[3], JoinReq.Bssid[4], JoinReq.Bssid[5]));
-	MlmeEnqueueEx(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_MLME_PROBE_REQ,
+	MlmeEnqueue(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_MLME_PROBE_REQ,
 		sizeof(APCLI_MLME_JOIN_REQ_STRUCT), &JoinReq, ifIndex);
 
 	return;
@@ -309,14 +287,15 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
  */
 static VOID ApCliCtrlProbeRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	APCLI_CTRL_MSG_STRUCT *Info = (APCLI_CTRL_MSG_STRUCT *)(Elem->Msg);
 	USHORT Status = Info->Status;
 	PAPCLI_STRUCT pApCliEntry;
 	MLME_AUTH_REQ_STRUCT AuthReq;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -353,16 +332,16 @@ static VOID ApCliCtrlProbeRspAction(
 		}
 
 		AuthReq.Timeout = AUTH_TIMEOUT;
-		MlmeEnqueueEx(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
+		MlmeEnqueue(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
 			sizeof(MLME_AUTH_REQ_STRUCT), &AuthReq, ifIndex);
 	} else
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Probe respond fail.\n", __FUNCTION__));
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -376,15 +355,16 @@ static VOID ApCliCtrlProbeRspAction(
  */
 static VOID ApCliCtrlAuthRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	APCLI_CTRL_MSG_STRUCT *Info = (APCLI_CTRL_MSG_STRUCT *)(Elem->Msg);
 	USHORT Status = Info->Status;
 	MLME_ASSOC_REQ_STRUCT  AssocReq;
 	MLME_AUTH_REQ_STRUCT AuthReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -399,7 +379,7 @@ static VOID ApCliCtrlAuthRspAction(
 
 		AssocParmFill(pAd, &AssocReq, pAd->MlmeAux.Bssid, pAd->MlmeAux.CapabilityInfo,
 			ASSOC_TIMEOUT, /*pAd->PortCfg.DefaultListenCount*/5);
-		MlmeEnqueueEx(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ,
+		MlmeEnqueue(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ,
 			sizeof(MLME_ASSOC_REQ_STRUCT), &AssocReq, ifIndex);
 	} 
 	else
@@ -415,7 +395,7 @@ static VOID ApCliCtrlAuthRspAction(
 			COPY_MAC_ADDR(AuthReq.Addr, pAd->MlmeAux.Bssid);
 			AuthReq.Alg = Ndis802_11AuthModeOpen;
 			AuthReq.Timeout = AUTH_TIMEOUT;
-			MlmeEnqueueEx(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
+			MlmeEnqueue(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
 			sizeof(MLME_AUTH_REQ_STRUCT), &AuthReq, ifIndex);
 		} else
 		{
@@ -423,10 +403,10 @@ static VOID ApCliCtrlAuthRspAction(
 			NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 			pApCliEntry->AuthReqCnt = 0;
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "0");
 			nvram_set("sta_authorized", "0");
-#endif			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 		}
 	}
 
@@ -441,14 +421,15 @@ static VOID ApCliCtrlAuthRspAction(
  */
 static VOID ApCliCtrlAuth2RspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	APCLI_CTRL_MSG_STRUCT *Info = (APCLI_CTRL_MSG_STRUCT *)(Elem->Msg);
 	USHORT Status = Info->Status;
 	MLME_ASSOC_REQ_STRUCT  AssocReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -463,17 +444,13 @@ static VOID ApCliCtrlAuth2RspAction(
 
 		AssocParmFill(pAd, &AssocReq, pAd->MlmeAux.Bssid, pAd->MlmeAux.CapabilityInfo,
 			ASSOC_TIMEOUT, /*pAd->PortCfg.DefaultListenCount*/5);
-		MlmeEnqueueEx(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ, 
+		MlmeEnqueue(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ, 
 			sizeof(MLME_ASSOC_REQ_STRUCT), &AssocReq, ifIndex);
 	} else
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Sta Auth Rsp Failure.\n", __FUNCTION__));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -487,12 +464,13 @@ static VOID ApCliCtrlAuth2RspAction(
  */
 static VOID ApCliCtrlAuthReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	MLME_AUTH_REQ_STRUCT AuthReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Auth Req Timeout.\n", __FUNCTION__));
 
@@ -506,10 +484,10 @@ static VOID ApCliCtrlAuthReqTimeoutAction(
 	if (pApCliEntry->AuthReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -524,7 +502,7 @@ static VOID ApCliCtrlAuthReqTimeoutAction(
 	COPY_MAC_ADDR(AuthReq.Addr, pAd->MlmeAux.Bssid);
 	AuthReq.Alg = pAd->MlmeAux.Alg; //Ndis802_11AuthModeOpen;
 	AuthReq.Timeout = AUTH_TIMEOUT;
-	MlmeEnqueueEx(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
+	MlmeEnqueue(pAd, APCLI_AUTH_STATE_MACHINE, APCLI_MT2_MLME_AUTH_REQ,
 		sizeof(MLME_AUTH_REQ_STRUCT), &AuthReq, ifIndex);
 
 	return;
@@ -538,9 +516,7 @@ static VOID ApCliCtrlAuthReqTimeoutAction(
  */
 static VOID ApCliCtrlAuth2ReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	return;
 }
@@ -553,13 +529,14 @@ static VOID ApCliCtrlAuth2ReqTimeoutAction(
  */
 static VOID ApCliCtrlAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
 	APCLI_CTRL_MSG_STRUCT *Info = (APCLI_CTRL_MSG_STRUCT *)(Elem->Msg);
 	USHORT Status = Info->Status;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -572,19 +549,19 @@ static VOID ApCliCtrlAssocRspAction(
 		if (ApCliLinkUp(pAd, ifIndex))
 		{
 			*pCurrState = APCLI_CTRL_CONNECTED;
-#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "1");
-#endif			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 		}
 		else
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Insert Remote AP to MacTable failed.\n", __FUNCTION__,  ifIndex));
 			// Reset the apcli interface as disconnected and Invalid.
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			nvram_set("sta_connected", "0");
 			nvram_set("sta_authorized", "0");
-#endif			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			pApCliEntry->Valid = FALSE;
 		}
 	}
@@ -593,10 +570,10 @@ static VOID ApCliCtrlAssocRspAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Receive Assoc Rsp Failure.\n", __FUNCTION__,  ifIndex));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 
 		// set the apcli interface be valid.
 		pApCliEntry->Valid = FALSE;
@@ -613,13 +590,14 @@ static VOID ApCliCtrlAssocRspAction(
  */
 static VOID ApCliCtrlDeAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
 	APCLI_CTRL_MSG_STRUCT *Info = (APCLI_CTRL_MSG_STRUCT *)(Elem->Msg);
 	USHORT Status = Info->Status;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -637,10 +615,10 @@ static VOID ApCliCtrlDeAssocRspAction(
 		ApCliLinkDown(pAd, ifIndex);
 	
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-#endif	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -653,12 +631,13 @@ static VOID ApCliCtrlDeAssocRspAction(
  */
 static VOID ApCliCtrlAssocReqTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	MLME_ASSOC_REQ_STRUCT  AssocReq;
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Assoc Req Timeout.\n", __FUNCTION__));
 
@@ -672,10 +651,10 @@ static VOID ApCliCtrlAssocReqTimeoutAction(
 	if (pApCliEntry->AssocReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 		nvram_set("sta_connected", "0");
 		nvram_set("sta_authorized", "0");
-#endif		/* ASUS EXT by Jiahao */		
+		/* ASUS EXT by Jiahao */
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -689,7 +668,7 @@ static VOID ApCliCtrlAssocReqTimeoutAction(
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Retry Association Req.\n", __FUNCTION__));
 	AssocParmFill(pAd, &AssocReq, pAd->MlmeAux.Bssid, pAd->MlmeAux.CapabilityInfo,
 		ASSOC_TIMEOUT, /*pAd->PortCfg.DefaultListenCount*/5);
-	MlmeEnqueueEx(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ, 
+	MlmeEnqueue(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_ASSOC_REQ, 
 		sizeof(MLME_ASSOC_REQ_STRUCT), &AssocReq, ifIndex);
 
 	return;
@@ -703,11 +682,12 @@ static VOID ApCliCtrlAssocReqTimeoutAction(
  */
 static VOID ApCliCtrlDisconnectReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request disconnect.\n", __FUNCTION__));
 
@@ -728,10 +708,10 @@ static VOID ApCliCtrlDisconnectReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-#endif	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -744,24 +724,26 @@ static VOID ApCliCtrlDisconnectReqAction(
  */
 static VOID ApCliCtrlPeerDeAssocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Peer DeAssoc Req.\n", __FUNCTION__));
 
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+	if (ifIndex >= MAX_APCLI_NUM)
+		return;
+
+/* ASUS EXT by Jiahao */
 	count_DeAssoc = (count_DeAssoc % 65535) + 1;
+//	if (pAd->ApCfg.ApCliTab[ifIndex].AuthMode <= Ndis802_11AuthModeAutoSwitch || count_DeAssoc > 1)
 	{
 		nvram_set("sta_authorized", "0");
 		printk("Peer DeAssoc Req: %d\n", count_DeAssoc);
 	}
-#endif/* ASUS EXT by Jiahao */
-
-	if (ifIndex >= MAX_APCLI_NUM)
-		return;
+/* ASUS EXT by Jiahao */
 
 	pApCliEntry = &pAd->ApCfg.ApCliTab[ifIndex];
 	if (pApCliEntry->Valid)
@@ -777,9 +759,9 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
-#endif	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 
 	return;
 }
@@ -792,12 +774,13 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
  */
 static VOID ApCliCtrlDeAssocAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
 	MLME_DISASSOC_REQ_STRUCT DisassocReq;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request Disconnect.\n", __FUNCTION__));
 
@@ -807,7 +790,7 @@ static VOID ApCliCtrlDeAssocAction(
 	pApCliEntry = &pAd->ApCfg.ApCliTab[ifIndex];
 
 	DisassocParmFill(pAd, &DisassocReq, pAd->MlmeAux.Bssid, REASON_DISASSOC_STA_LEAVING);
-	MlmeEnqueueEx(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_DISASSOC_REQ,
+	MlmeEnqueue(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_MLME_DISASSOC_REQ,
 		sizeof(MLME_DISASSOC_REQ_STRUCT), &DisassocReq, ifIndex);
 
 	if (pApCliEntry->Valid)
@@ -836,12 +819,13 @@ static VOID ApCliCtrlDeAssocAction(
  */
 static VOID ApCliCtrlDeAuthAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	PAPCLI_STRUCT pApCliEntry;
 	MLME_DEAUTH_REQ_STRUCT	DeAuthFrame;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request Disconnect.\n", __FUNCTION__));
 
@@ -854,7 +838,7 @@ static VOID ApCliCtrlDeAuthAction(
 	DeAuthFrame.Reason = (USHORT)REASON_DEAUTH_STA_LEAVING;
 	COPY_MAC_ADDR(DeAuthFrame.Addr, pAd->MlmeAux.Bssid);
 	
-	MlmeEnqueueEx(pAd, 
+	MlmeEnqueue(pAd, 
 				  APCLI_AUTH_STATE_MACHINE, 
 				  APCLI_MT2_MLME_DEAUTH_REQ, 
 				  sizeof(MLME_DEAUTH_REQ_STRUCT),
@@ -874,10 +858,13 @@ static VOID ApCliCtrlDeAuthAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 	nvram_set("sta_connected", "0");
 	nvram_set("sta_authorized", "0");
-#endif	/* ASUS EXT by Jiahao */
+	/* ASUS EXT by Jiahao */
 
 	return;
 }
+
+#endif // APCLI_SUPPORT //
+

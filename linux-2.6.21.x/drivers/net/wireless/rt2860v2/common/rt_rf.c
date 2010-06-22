@@ -30,6 +30,7 @@
 #include "rt_config.h"
 
 
+
 #ifdef RTMP_RF_RW_SUPPORT
 /*
 	========================================================================
@@ -164,13 +165,22 @@ VOID RtmpChipOpsRFHook(
 	/* We depends on RfICType and MACVersion to assign the corresponding operation callbacks. */
 #ifdef RT305x
 	if ((pAd->MACVersion == 0x28720200) && 
-		((pAd->RfIcType == RFIC_3020) || (pAd->RfIcType == RFIC_3021) || (pAd->RfIcType == RFIC_3022)))
+		((pAd->RfIcType == RFIC_3320) || (pAd->RfIcType == RFIC_3020) || (pAd->RfIcType == RFIC_3021) || (pAd->RfIcType == RFIC_3022)))
 	{
 		pChipOps->pRFRegTable = RT305x_RFRegTable;
 		pChipOps->AsicRfInit = NICInitRT305xRFRegisters;
 	}
 #endif // RT305x //
-
+#ifdef CONFIG_RALINK_RT3883
+        if (IS_RT3883(pAd) && (pAd->infType == RTMP_DEV_INF_RBUS))
+        {
+		pChipOps->pRFRegTable = RT3883_RFRegTable;
+		pChipOps->AsicRfInit = NICInitRT3883RFRegisters;
+		pChipOps->AsicHaltAction = RT3883HaltAction;
+		pChipOps->AsicRfTurnOff = RT3883LoadRFSleepModeSetup;
+		pChipOps->AsicReverseRfFromSleepMode = RT3883ReverseRFSleepModeSetup;
+	}
+#endif // CONFIG_RALINK_RT3883 //
 }
 
 #endif // RTMP_RF_RW_SUPPORT //

@@ -70,41 +70,37 @@ BOOLEAN isValidApCliIf(
 //
 VOID ApCliCtrlStateMachineInit(
 	IN PRTMP_ADAPTER pAd,
-	IN STATE_MACHINE_EX *Sm,
-	OUT STATE_MACHINE_FUNC_EX Trans[]);
+	IN STATE_MACHINE *Sm,
+	OUT STATE_MACHINE_FUNC Trans[]);
 
 //
 // Private routines in apcli_sync.c
 //
 VOID ApCliSyncStateMachineInit(
     IN PRTMP_ADAPTER pAd, 
-    IN STATE_MACHINE_EX *Sm, 
-    OUT STATE_MACHINE_FUNC_EX Trans[]);
+    IN STATE_MACHINE *Sm, 
+    OUT STATE_MACHINE_FUNC Trans[]);
 
 //
 // Private routines in apcli_auth.c
 //
 VOID ApCliAuthStateMachineInit(
     IN PRTMP_ADAPTER pAd, 
-    IN STATE_MACHINE_EX *Sm, 
-    OUT STATE_MACHINE_FUNC_EX Trans[]);
+    IN STATE_MACHINE *Sm, 
+    OUT STATE_MACHINE_FUNC Trans[]);
 
 //
 // Private routines in apcli_assoc.c
 //
 VOID ApCliAssocStateMachineInit(
     IN PRTMP_ADAPTER pAd, 
-    IN STATE_MACHINE_EX *Sm, 
-    OUT STATE_MACHINE_FUNC_EX Trans[]);
+    IN STATE_MACHINE *Sm, 
+    OUT STATE_MACHINE_FUNC Trans[]);
 
 MAC_TABLE_ENTRY *ApCliTableLookUpByWcid(
 	IN PRTMP_ADAPTER pAd,
 	IN UCHAR wcid,
 	IN PUCHAR pAddrs);
-
-MAC_TABLE_ENTRY *ApCliTableLookUp(
-	IN PRTMP_ADAPTER pAd,
-	IN PUCHAR pAddr);
 
 
 BOOLEAN ApCliAllowToSendPacket(
@@ -132,9 +128,9 @@ VOID RT28xx_ApCli_Remove(
 VOID RT28xx_ApCli_Remove(
 	IN PRTMP_ADAPTER ad_p);
 
-SHORT ApCliIfLookUp(
+INT ApCliIfLookUp(
 	IN PRTMP_ADAPTER pAd,
-	IN VOID *Msg);
+	IN PUCHAR pAddr);
 
 INT ApCli_VirtualIF_Open(
 	IN	PNET_DEV	dev_p);
@@ -254,12 +250,11 @@ BOOLEAN  ApCliHandleRxBroadcastFrame(
 	IN  MAC_TABLE_ENTRY *pEntry,
 	IN	UCHAR			FromWhichBSSID);
 
-VOID APCliUpdatePairwiseKeyTable(
+VOID APCliInstallPairwiseKey(
 	IN  PRTMP_ADAPTER   pAd,
-	IN	UCHAR			*KeyRsc,
 	IN  MAC_TABLE_ENTRY *pEntry);
 
-BOOLEAN APCliUpdateSharedKeyTable(
+BOOLEAN APCliInstallSharedKey(
 	IN  PRTMP_ADAPTER   pAd,
 	IN  PUCHAR          pKey,
 	IN  UCHAR           KeyLen,

@@ -40,22 +40,21 @@
 
 #include "oid.h"
 #include "mlme.h"
-#include "wpa.h"
 #include "crypt_md5.h"
 #include "crypt_sha2.h"
 #include "crypt_hmac.h"
+#include "crypt_aes.h"
+#include "crypt_arc4.h"
+#include "rtmp_cmd.h"
 #include "rtmp.h"
 #include "ap.h"
+#include "wpa.h"
 #include "dfs.h"
 #include "chlist.h"
 #include "spectrum.h"
-
+#ifdef CONFIG_AP_SUPPORT
 #include "ap_autoChSel.h"
-
-#ifdef MLME_EX
-#include	"mlme_ex_def.h"
-#include	"mlme_ex.h"
-#endif // MLME_EX //
+#endif // CONFIG_AP_SUPPORT //
 
 #include "eeprom.h"
 #if defined(RTMP_PCI_SUPPORT) || defined(RTMP_USB_SUPPORT)
@@ -90,12 +89,19 @@
 
 #include "ap_ids.h"
 #include "ap_cfg.h"
+
+#ifdef CLIENT_WDS
+#include "client_wds.h"
+#endif // CLIENT_WDS //
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef MAT_SUPPORT
 #include "mat.h"
 #endif // MAT_SUPPORT //
 
+#ifdef WMM_ACM_SUPPORT
+#include	"acm_extr.h"
+#endif // WMM_ACM_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef WSC_STA_SUPPORT
@@ -117,7 +123,7 @@
 
 #ifdef RALINK_28xx_QA
 #ifndef RALINK_ATE
-#error "For supporting QA GUI, please set HAS_ATE=y and HAS_28xx_QA=y."
+#error "For supporting QA GUI, please set HAS_ATE=y and HAS_QA_SUPPORT=y."
 #endif // RALINK_ATE //
 #endif // RALINK_28xx_QA //
 
@@ -125,6 +131,7 @@
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 #include "ap_diversity.h"
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
+
 
 
 
@@ -139,11 +146,6 @@
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
-#ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-#ifndef WPA_SUPPLICANT_SUPPORT
-#error "Build for being controlled by NetworkManager or wext, please set HAS_WPA_SUPPLICANT=y and HAS_NATIVE_WPA_SUPPLICANT_SUPPORT=y"
-#endif // WPA_SUPPLICANT_SUPPORT //
-#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 
 #endif // CONFIG_STA_SUPPORT //
 
@@ -153,9 +155,6 @@
 //#define OLD_AES_ALGORITHM //Change to old aes algorithm
 #include "crypt_biginteger.h"
 #include "crypt_dh.h"
-#include "crypt_aes.h"
-#include "dh_key.h"
-#include "evp_enc.h"
 #include "wsc.h"
 #include "wsc_tlv.h"
 #endif // WSC_INCLUDED //
@@ -167,5 +166,11 @@
 
 
 
+#ifdef WORKQUEUE_BH
+#include <linux/workqueue.h>
+#endif // WORKQUEUE_BH /
+
+
 #endif	// __RT_CONFIG_H__
+
 

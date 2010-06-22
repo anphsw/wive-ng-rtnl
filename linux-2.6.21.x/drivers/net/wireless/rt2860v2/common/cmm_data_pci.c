@@ -547,10 +547,13 @@ NDIS_STATUS RTMPCheckRxError(
 	// Drop ToDs promiscous frame, it is opened due to CCX 2 channel load statistics
 	if (pHeader != NULL)
 	{
-		if (pHeader->FC.ToDs)
+#ifndef CLIENT_WDS
+		if (pHeader->FC.ToDs
+			)
 		{
 			return(NDIS_STATUS_FAILURE);
 		}
+#endif // CLIENT_WDS //
 	}
 
 	// Drop not U2M frames, cant's drop here because we will drop beacon in this case
@@ -586,12 +589,6 @@ NDIS_STATUS RTMPCheckRxError(
 		if (pRxD->CipherErr == 2)
 		{			
 			pWpaKey = &pAd->SharedKey[BSS0][pRxWI->KeyIndex];
-#ifdef WPA_SUPPLICANT_SUPPORT                                    
-            if (pAd->StaCfg.WpaSupplicantUP)
-                WpaSendMicFailureToWpaSupplicant(pAd, 
-                                   (pWpaKey->Type == PAIRWISEKEY) ? TRUE:FALSE);
-            else
-#endif // WPA_SUPPLICANT_SUPPORT //                             
 			    RTMPReportMicError(pAd, pWpaKey);
 
             if (((pRxD->CipherErr & 2) == 2) && pAd->CommonCfg.bWirelessEvent && INFRA_ON(pAd))
@@ -681,7 +678,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 				RTMPFrameEndianChange(pAd, (PUCHAR)pHeader80211, DIR_WRITE, FALSE);
 #endif
 
-				if  ((pAd->ate.bQATxStart == TRUE) && (pAd->ate.Mode & ATE_TXFRAME) && (pAd->ate.TxDoneCount < pAd->ate.TxCount))
+				if ((pAd->ate.bQATxStart == TRUE) && (pAd->ate.Mode & ATE_TXFRAME) && (pAd->ate.TxDoneCount < pAd->ate.TxCount))
 				{
 					pAd->RalinkCounters.TransmittedByteCount +=  (pTxD->SDLen1 + pTxD->SDLen0);
 					pAd->RalinkCounters.OneSecTransmittedByteCount += (pTxD->SDLen1 + pTxD->SDLen0);
@@ -699,11 +696,14 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 					// Tx status enters idle mode.
 					pAd->ate.TxStatus = 0;
 				}
-				else if (!(pAd->ate.Mode & ATE_TXFRAME))
+				else if (!(pAd->ate.Mode & ATE_TXFRAME) && (pAd->ate.TxDoneCount < pAd->ate.TxCount))// peter debug
 				{
 					/* not complete sending yet, but someone press the Stop TX botton */
-					DBGPRINT(RT_DEBUG_ERROR,("not complete sending yet, but someone pressed the Stop TX bottom\n"));
-					DBGPRINT(RT_DEBUG_ERROR,("pAd->ate.Mode = 0x%02x\n", pAd->ate.Mode));
+					DBGPRINT(RT_DEBUG_TRACE,("Not complete sending yet, but someone pressed the Stop TX bottom\n"));
+					DBGPRINT(RT_DEBUG_TRACE,("pAd->ate.Mode = 0x%02x\n", pAd->ate.Mode));
+					DBGPRINT(RT_DEBUG_TRACE,("pAd->ate.TxCount = %d\n", pAd->ate.TxCount));
+					DBGPRINT(RT_DEBUG_TRACE,("pAd->ate.TxDoneCount = %d\n", pAd->ate.TxDoneCount));	
+					
 				}
 				else
 				{
@@ -726,7 +726,25 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 
 		// static rate also need NICUpdateFifoStaCounters() function.
 		//if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED))
+#ifdef VENDOR_FEATURE1_SUPPORT
+		/*
+			Note:
+
+			Can not take off the NICUpdateFifoStaCounters(); Or the
+			FIFO overflow rate will be high, i.e. > 3%
+			(see the rate by "iwpriv ra0 show stainfo")
+
+			Based on different platform, try to find the best value to
+			replace '4' here (overflow rate target is about 0%).
+		*/
+		if (++pAd->FifoUpdateRx >= 4)
+		{
 			NICUpdateFifoStaCounters(pAd);
+			pAd->FifoUpdateRx = 0;
+		}
+#else
+		NICUpdateFifoStaCounters(pAd);
+#endif // VENDOR_FEATURE1_SUPPORT //
 
 		/* Note : If (pAd->ate.bQATxStart == TRUE), we will never reach here. */
 		FREE++;
@@ -794,6 +812,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 		}
 
 		pAd->RalinkCounters.TransmittedByteCount +=  (pTxD->SDLen1 + pTxD->SDLen0);
+		pAd->RalinkCounters.OneSecTransmittedByteCount += (pTxD->SDLen1 + pTxD->SDLen0);
 		pAd->RalinkCounters.OneSecDmaDoneCount[QueIdx] ++;
 		INC_RING_INDEX(pTxRing->TxSwFreeIdx, TX_RING_SIZE);
 		/* get tx_tdx_idx again */
@@ -976,6 +995,22 @@ VOID	RTMPHandleMgmtRingDmaDoneInterrupt(
 		}
 #endif // UAPSD_AP_SUPPORT //
 
+#ifdef WMM_ACM_SUPPORT
+		{
+		    HEADER_802_11  *pHeader;
+
+			/* handle Power Save ADDTS Response */
+			pHeader = (HEADER_802_11 *)(LMR_FRAME_GET());
+
+			if ((pHeader->FC.Type == BTYPE_MGMT) &&
+				(pHeader->FC.SubType == SUBTYPE_ACTION))
+			{
+				ACMP_PsRspDeltsSentOutHandle(pAd,
+									MacTableLookup(pAd, pHeader->Addr1),
+									((UCHAR *)pHeader)+sizeof(HEADER_802_11));
+			}
+		}
+#endif // WMM_ACM_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
 		if (pPacket)
@@ -1002,6 +1037,17 @@ VOID	RTMPHandleMgmtRingDmaDoneInterrupt(
 	NdisReleaseSpinLock(&pAd->MgmtRingLock);
 
 #ifdef CONFIG_STA_SUPPORT
+#ifdef WMM_ACM_SUPPORT
+        /* return power save right if possible, ex:
+			0. sta enter PS mode;
+			1. sta enters ACTIVE mode;
+			2. sta sends ADDTS request frame;
+			3. sta receives ADDTS response frame;
+			4. sta enter PS mode; (ACMP_StaPsCtrlRightReturn) */
+		if (ACMR_IS_ENABLED(pAd))
+	        ACMP_StaPsCtrlRightReturn(pAd);
+		/* End of if */
+#endif // WMM_ACM_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 }
 
@@ -1027,7 +1073,11 @@ VOID	RTMPHandleTBTTInterrupt(
 	{
 		ReSyncBeaconTime(pAd);
 
+#ifdef WORKQUEUE_BH	
+		schedule_work(&pObj->tbtt_work);
+#else
 		tasklet_hi_schedule(&pObj->tbtt_task);
+#endif // WORKQUEUE_BH //
 
 #ifdef DFS_SUPPORT
 		if ((pAd->CommonCfg.Channel > 14)
@@ -1045,7 +1095,7 @@ VOID	RTMPHandleTBTTInterrupt(
 #else
 				APStop(pAd);
 				APStartUp(pAd);
-#endif
+#endif // NEW_DFS //
 			}
 		}
 #endif // DFS_SUPPORT //
@@ -1145,7 +1195,11 @@ VOID RTMPHandleMcuInterrupt(
 		// pulse radar signal Int.
 		if (McuIntSrc & 0x40)
 		{
+#ifdef WORKQUEUE_BH
+			schedule_work(&pObj->pulse_radar_detect_work);
+#else
 			tasklet_hi_schedule(&pObj->pulse_radar_detect_task);
+#endif // WORKQUEUE_BH //
 		}
 
 		// width radar signal Int.
@@ -1153,7 +1207,11 @@ VOID RTMPHandleMcuInterrupt(
 				|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W56))
 			&& (McuIntSrc & 0x80))
 		{
+#ifdef WORKQUEUE_BH
+			schedule_work(&pObj->width_radar_detect_work);
+#else
 			tasklet_hi_schedule(&pObj->width_radar_detect_task);
+#endif // WORKQUEUE_BH //
 		}
 
 		// long pulse radar signal detection.
@@ -1162,7 +1220,11 @@ VOID RTMPHandleMcuInterrupt(
 				|| (JapRadarType(pAd) == JAP_W56))
 		&& (McuIntSrc & 0x10))
 		{
+#ifdef WORKQUEUE_BH
+			schedule_work(&pObj->width_radar_detect_work);
+#else
 			tasklet_hi_schedule(&pObj->width_radar_detect_task);
+#endif // WORKQUEUE_BH //
 		}
 	}
 #endif // DFS_SUPPORT //
@@ -1171,8 +1233,11 @@ VOID RTMPHandleMcuInterrupt(
 		&& (McuIntSrc & 0x04))
 	{
 		POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
-		
+#ifdef WORKQUEUE_BH
+		schedule_work(&pObj->carrier_sense_work);
+#else		
 		tasklet_hi_schedule(&pObj->carrier_sense_task);
+#endif // WORKQUEUE_BH //
 	}
 #endif // CARRIER_DETECTION_SUPPORT //
 }
@@ -1311,6 +1376,7 @@ PNDIS_PACKET GetPacketFromRxRing(
 	PVOID					AllocVa;
 	NDIS_PHYSICAL_ADDRESS	AllocPa;
 	BOOLEAN					bReschedule = FALSE;
+	RTMP_DMACB				*pRxCell;
 
 	RTMP_SEM_LOCK(&pAd->RxRingLock);
 
@@ -1334,14 +1400,16 @@ PNDIS_PACKET GetPacketFromRxRing(
 
 	}
 
+	pRxCell = &pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx];
+
 #ifdef RT_BIG_ENDIAN
-	pDestRxD = (PRXD_STRUC) pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].AllocVa;
+	pDestRxD = (PRXD_STRUC) pRxCell->AllocVa;
 	RxD = *pDestRxD;
 	pRxD = &RxD;
 	RTMPDescriptorEndianChange((PUCHAR)pRxD, TYPE_RXD);
 #else
 	// Point to Rx indexed rx ring descriptor
-	pRxD = (PRXD_STRUC) pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].AllocVa;
+	pRxD = (PRXD_STRUC) pRxCell->AllocVa;
 #endif
 
 	if (pRxD->DDONE == 0)
@@ -1361,14 +1429,14 @@ PNDIS_PACKET GetPacketFromRxRing(
 	if (pNewPacket)
 	{
 		// unmap the rx buffer
-		PCI_UNMAP_SINGLE(pAd, pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].DmaBuf.AllocPa,
-					 pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].DmaBuf.AllocSize, PCI_DMA_FROMDEVICE);
-		pRxPacket = pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].pNdisPacket;
+		PCI_UNMAP_SINGLE(pAd, pRxCell->DmaBuf.AllocPa,
+					 pRxCell->DmaBuf.AllocSize, PCI_DMA_FROMDEVICE);
+		pRxPacket = pRxCell->pNdisPacket;
 
-		pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].DmaBuf.AllocSize	= RX_BUFFER_AGGRESIZE;
-		pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].pNdisPacket		= (PNDIS_PACKET) pNewPacket;
-		pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].DmaBuf.AllocVa	= AllocVa;
-		pAd->RxRing.Cell[pAd->RxRing.RxSwReadIdx].DmaBuf.AllocPa	= AllocPa;
+		pRxCell->DmaBuf.AllocSize	= RX_BUFFER_AGGRESIZE;
+		pRxCell->pNdisPacket		= (PNDIS_PACKET) pNewPacket;
+		pRxCell->DmaBuf.AllocVa	= AllocVa;
+		pRxCell->DmaBuf.AllocPa	= AllocPa;
 		/* update SDP0 to new buffer of rx packet */
 		pRxD->SDP0 = AllocPa;
 	}

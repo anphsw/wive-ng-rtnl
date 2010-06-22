@@ -33,6 +33,11 @@ static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd, 
 	IN MLME_QUEUE_ELEM *Elem);
 
+#ifdef WMM_ACM_SUPPORT
+VOID PeerWMMAction(
+	IN PRTMP_ADAPTER pAd,
+	IN MLME_QUEUE_ELEM *Elem);
+#endif // WMM_ACM_SUPPORT //
 
 /*  
     ==========================================================================
@@ -81,9 +86,15 @@ VOID ActionStateMachineInit(
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_DLS_CATE, (STATE_MACHINE_FUNC)MlmeDLSAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_ACT_INVALID, (STATE_MACHINE_FUNC)MlmeInvalidAction);
 
+#ifdef WMM_ACM_SUPPORT
+	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_RESV_15, (STATE_MACHINE_FUNC)MlmeInvalidAction);
+	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_RESV_16, (STATE_MACHINE_FUNC)MlmeInvalidAction);
+	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_WMM, (STATE_MACHINE_FUNC)PeerWMMAction);
+#endif // WMM_ACM_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 #endif // CONFIG_AP_SUPPORT //
+
 }
 
 #ifdef DOT11_N_SUPPORT
@@ -132,7 +143,7 @@ VOID MlmeADDBAAction(
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
 #ifdef APCLI_SUPPORT
-			if (pAd->MacTab.Content[pInfo->Wcid].ValidAsApCli)
+			if (IS_ENTRY_APCLI(&pAd->MacTab.Content[pInfo->Wcid]))
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].MatchAPCLITabIdx;
 				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pInfo->pAddr);		
@@ -148,16 +159,14 @@ VOID MlmeADDBAAction(
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
-			if (ADHOC_ON(pAd))
-				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
-			else
+			if (ADHOC_ON(pAd)
 #ifdef QOS_DLS_SUPPORT
-			if (pAd->MacTab.Content[pInfo->Wcid].ValidAsDls)
+				|| (IS_ENTRY_DLS(&pAd->MacTab.Content[pInfo->Wcid]))
+#endif // QOS_DLS_SUPPORT //
+				)
 				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
 			else
-#endif // QOS_DLS_SUPPORT //
-			ActHeaderInit(pAd, &Frame.Hdr, pAd->CommonCfg.Bssid, pAd->CurrentAddress, pInfo->pAddr);
-
+				ActHeaderInit(pAd, &Frame.Hdr, pAd->CommonCfg.Bssid, pAd->CurrentAddress, pInfo->pAddr);
 		}
 #endif // CONFIG_STA_SUPPORT // 
 
@@ -243,7 +252,7 @@ VOID MlmeDELBAAction(
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
 #ifdef APCLI_SUPPORT
-			if (pAd->MacTab.Content[pInfo->Wcid].ValidAsApCli)
+			if (IS_ENTRY_APCLI(&pAd->MacTab.Content[pInfo->Wcid]))
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].MatchAPCLITabIdx;
 				BarHeaderInit(pAd, &FrameBar, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress);
@@ -282,7 +291,7 @@ VOID MlmeDELBAAction(
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
 #ifdef APCLI_SUPPORT
-			if (pAd->MacTab.Content[pInfo->Wcid].ValidAsApCli)
+			if (IS_ENTRY_APCLI(&pAd->MacTab.Content[pInfo->Wcid]))
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].MatchAPCLITabIdx;
 				ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pAd->MacTab.Content[pInfo->Wcid].Addr);		
@@ -298,15 +307,14 @@ VOID MlmeDELBAAction(
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
-			if (ADHOC_ON(pAd))
-				ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
-			else
+			if (ADHOC_ON(pAd)
 #ifdef QOS_DLS_SUPPORT
-			if (pAd->MacTab.Content[pInfo->Wcid].ValidAsDls)
+				|| (IS_ENTRY_DLS(&pAd->MacTab.Content[pInfo->Wcid]))
+#endif // QOS_DLS_SUPPORT //
+				)
 				ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
 			else
-#endif // QOS_DLS_SUPPORT //
-			ActHeaderInit(pAd, &Frame.Hdr,  pAd->CommonCfg.Bssid, pAd->CurrentAddress, pAd->MacTab.Content[pInfo->Wcid].Addr);
+				ActHeaderInit(pAd, &Frame.Hdr,  pAd->CommonCfg.Bssid, pAd->CurrentAddress, pAd->MacTab.Content[pInfo->Wcid].Addr);
 		}
 #endif // CONFIG_STA_SUPPORT //
 		Frame.Category = CATEGORY_BA;
@@ -398,6 +406,33 @@ VOID PeerDLSAction(
 }
 #endif // QOS_DLS_SUPPORT //
 
+#ifdef WMM_ACM_SUPPORT
+VOID PeerWMMAction(
+	IN PRTMP_ADAPTER pAd,
+	IN MLME_QUEUE_ELEM *Elem)
+{
+	MAC_TABLE_ENTRY	*pEntry;
+#ifdef CONFIG_AP_SUPPORT
+	PFRAME_802_11 Fr = (PFRAME_802_11)Elem->Msg;
+	UCHAR Addr2[MAC_ADDR_LEN];
+
+	COPY_MAC_ADDR(Addr2, &Fr->Hdr.Addr2);
+	pEntry = MacTableLookup(pAd, Addr2);
+//	if (pEntry == NULL)
+//		return; // entry can be NULL when this is a bw ann frame
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	pEntry = &pAd->MacTab.Content[BSSID_WCID];
+#endif // CONFIG_STA_SUPPORT //
+
+	DBGPRINT(RT_DEBUG_TRACE,
+				("11e_msg> Receive a action frame from a device!\n"));
+
+	ACMP_ManagementHandle(pAd, pEntry, ACMR_SUBTYPE_ACTION,
+						Elem->Msg, Elem->MsgLen, 1000000);
+}
+#endif // WMM_ACM_SUPPORT //
 
 
 #ifdef DOT11_N_SUPPORT
@@ -517,7 +552,7 @@ VOID StaPublicAction(
 		pAd->CommonCfg.BSSCoexist2040.field.BSS20WidthReq = 0;
 		// Fill out stuff for scan request
 		ScanParmFill(pAd, &ScanReq, ZeroSsid, 0, BSS_ANY, SCAN_2040_BSS_COEXIST);
-		MlmeEnqueue(pAd, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq);
+		MlmeEnqueue(pAd, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq, 0);
 		pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_LIST_SCAN;
 	}
 }
@@ -720,12 +755,12 @@ VOID ChannelSwitchAction(
 #endif // COC_SUPPORT
 				// Secondary above.
 				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
-
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
 			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, MACValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
+
 #ifdef COC_SUPPORT
 			if (pAd->CoC_sleep == 0)
 #endif // COC_SUPPORT
@@ -745,7 +780,6 @@ VOID ChannelSwitchAction(
 #endif // COC_SUPPORT
 				// Secondary below.
 				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
-
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
 			MACValue |= 0x1;
@@ -817,6 +851,13 @@ VOID PeerPublicAction(
 				}
 				//hex_dump("IntolerantReport ", (PUCHAR)pIntolerantReport, sizeof(BSS_2040_INTOLERANT_CH_REPORT));
 				
+				if(pAd->CommonCfg.bForty_Mhz_Intolerant == TRUE)
+				{
+					DBGPRINT(RT_DEBUG_TRACE, ("bForty_Mhz_Intolerant=%d, ignore this action!!\n", 
+								pAd->CommonCfg.bForty_Mhz_Intolerant));
+					break;
+				}
+
 				pBssCoexistIe = (BSS_2040_COEXIST_IE *)(&pCoexistInfo->BssCoexistIe);
 #ifdef CONFIG_AP_SUPPORT
 				IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -835,6 +876,8 @@ VOID PeerPublicAction(
 					{
 						int i;
 						UCHAR *ptr;
+						INT retVal;
+						BSS_COEX_CH_RANGE coexChRange;
 
 						ptr = pIntolerantReport->ChList;
 						bNeedFallBack = TRUE;
@@ -846,8 +889,35 @@ VOID PeerPublicAction(
 						}
 						DBGPRINT(RT_DEBUG_TRACE, ("\n"));
 						
-						pBssCoexistIe->field.Intolerant40 = 1;
-						pBssCoexistIe->field.BSS20WidthReq = 1;
+						retVal = GetBssCoexEffectedChRange(pAd, &coexChRange);
+						if (retVal == TRUE)
+						{
+							ptr = pIntolerantReport->ChList;
+							bNeedFallBack = FALSE;
+							DBGPRINT(RT_DEBUG_TRACE, ("Check IntolerantReport Channel List in our effectedChList(%d~%d)\n",
+										pAd->ChannelList[coexChRange.effectChStart].Channel,
+										pAd->ChannelList[coexChRange.effectChEnd].Channel));
+							for(i =0 ; i < (pIntolerantReport->Len -1); i++, ptr++)
+							{
+								UCHAR chEntry;
+
+								chEntry = *ptr;
+								if (chEntry >= pAd->ChannelList[coexChRange.effectChStart].Channel && 
+										chEntry <= pAd->ChannelList[coexChRange.effectChEnd].Channel)
+								{
+									DBGPRINT(RT_DEBUG_TRACE, ("Found Intolerant channel in effect range=%d!\n", *ptr));
+									bNeedFallBack = TRUE;
+									break;
+								}
+							}
+							DBGPRINT(RT_DEBUG_TRACE, ("After CoexChRange Check, bNeedFallBack=%d!\n", bNeedFallBack));
+						}
+
+						if (bNeedFallBack)
+						{
+							pBssCoexistIe->field.Intolerant40 = 1;
+							pBssCoexistIe->field.BSS20WidthReq = 1;
+						}
 					}
 
 					if (bNeedFallBack)
@@ -923,6 +993,8 @@ VOID PeerRMAction(
 	IN MLME_QUEUE_ELEM *Elem) 
 
 {
+#ifdef CONFIG_AP_SUPPORT
+#endif // CONFIG_AP_SUPPORT //
 	return;
 }
 
@@ -960,7 +1032,7 @@ static VOID respond_ht_information_exchange_action(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT
-		if (pAd->MacTab.Content[Elem->Wcid].ValidAsApCli)
+		if (IS_ENTRY_APCLI(&pAd->MacTab.Content[Elem->Wcid]))
 		{
 			apidx = pAd->MacTab.Content[Elem->Wcid].MatchAPCLITabIdx;
 			ActHeaderInit(pAd, &HTINFOframe.Hdr, pAddr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pAddr);		
@@ -1212,7 +1284,7 @@ VOID SendRefreshBAR(
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 			{
 #ifdef APCLI_SUPPORT
-				if (pEntry->ValidAsApCli)		
+				if (IS_ENTRY_APCLI(pEntry))		
 					BarHeaderInit(pAd, &FrameBar, pEntry->Addr, pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].CurrentAddress);			
 				else
 #endif // APCLI_SUPPORT //

@@ -260,6 +260,7 @@ BOOLEAN PeerAssocRspSanity(
 
     ==========================================================================
  */
+/*
 BOOLEAN PeerProbeReqSanity(
     IN PRTMP_ADAPTER pAd, 
     IN VOID *Msg, 
@@ -302,6 +303,7 @@ BOOLEAN PeerProbeReqSanity(
 
     return TRUE;
 }
+*/
 
 /* 
     ==========================================================================

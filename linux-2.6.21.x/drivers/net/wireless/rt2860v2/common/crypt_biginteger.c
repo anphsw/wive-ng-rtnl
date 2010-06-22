@@ -206,11 +206,11 @@ VOID BigInteger_Free (
 
 VOID BigInteger_AllocSize (
     IN PBIG_INTEGER *pBI,
-    IN UINT Length)
+    IN INT Length)
 {
     UINT ArrayLength = 0;
 
-    if (Length == 0)
+    if (Length <= 0)
         return;
 
     if (*pBI == NULL)
@@ -258,6 +258,8 @@ VOID BigInteger_ClearHighBits (
             ShiftIndex--;
             value = UINT32_GETBYTE(pBI->pIntegerArray[BIArrayIndex], ShiftIndex);
     	} /* End of while */	
+    } else {
+    	BIArrayIndex = 0;
     } /* End of if */
 
     if ((BIArrayIndex == -1) && (ShiftIndex == -1)) {
@@ -987,6 +989,16 @@ VOID BigInteger_Montgomery_ExpMod (
     /* Calculate the bits of P and E, the highest bit is 1 */
     BigInteger_BitsOfBI(pBI_P, &Bits_Of_P);    
 
+    if ((pBI_G->IntegerLength == 1) && (pBI_G->pIntegerArray[0] == 0)) {
+        BigInteger_Bin2BI(Value_0, 1, pBI_Result);
+        goto memory_free;
+    } /* End of if */
+
+    if ((pBI_G->IntegerLength == 1) && (pBI_G->pIntegerArray[0] == 1)) {
+        BigInteger_Div(pBI_G, pBI_P, &pBI_Temp1, pBI_Result);
+        goto memory_free;
+    } /* End of if */
+
     if ((pBI_E->IntegerLength == 1) && (pBI_E->pIntegerArray[0] == 1)) {
         BigInteger_Div(pBI_G, pBI_P, &pBI_Temp1, pBI_Result);
         goto memory_free;
@@ -1026,11 +1038,11 @@ VOID BigInteger_Montgomery_ExpMod (
             AllocLength = pBI_P->IntegerLength;
         } /* End of if */
         pRValue = (UINT8 *) kmalloc(sizeof(UINT8)*AllocLength, GFP_ATOMIC);
-		if (pRValue == NULL)
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("%s():Alloc memory failed\n", __FUNCTION__));
-			goto memory_free;
-		}
+	if (pRValue == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s():Alloc memory failed\n", __FUNCTION__));
+		goto memory_free;
+	}
         NdisZeroMemory(pRValue, sizeof(UINT8)*AllocLength);
         pRValue[0] = (UINT8) (1 << (Bits_Of_P & 0x7));
         BigInteger_Bin2BI(pRValue, AllocLength , &pBI_R);

@@ -39,11 +39,12 @@
 #define MLD_V1_LISTENER_DONE		132
 #define MLD_V2_LISTERNER_REPORT		143
 
-#define IGMPMAC_TB_ENTRY_AGEOUT_TIME 120 * OS_HZ
+#define IGMPMAC_TB_ENTRY_AGEOUT_TIME (120 * OS_HZ)
 
-#define MULTICAST_ADDR_HASH_INDEX(Addr)      (MAC_ADDR_HASH(Addr) % (MAX_LEN_OF_MULTICAST_FILTER_HASH_TABLE))
+#define MULTICAST_ADDR_HASH_INDEX(Addr)      (MAC_ADDR_HASH(Addr) & (MAX_LEN_OF_MULTICAST_FILTER_HASH_TABLE - 1))
 
 #define IS_MULTICAST_MAC_ADDR(Addr)			((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) != 0xff))
+#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)	((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) == 0x33))
 #define IS_BROADCAST_MAC_ADDR(Addr)			((((Addr[0]) & 0xff) == 0xff))
 
 VOID MulticastFilterTableInit(
@@ -87,6 +88,10 @@ BOOLEAN isMldPkt(
 	OUT UINT8 *pProtoType,
 	OUT PUCHAR *pMldHeader);
 
+BOOLEAN IPv6MulticastFilterExcluded(
+	IN PUCHAR pDstMacAddr,
+	IN PUCHAR pIpHeader);
+
 VOID MLDSnooping(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pDstMacAddr,
@@ -127,7 +132,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pSrcBufVA,
 	IN PNDIS_PACKET pPacket,
-	IN UCHAR apidx,
+	IN UCHAR FromWhichBSSID,
 	OUT BOOLEAN *pInIgmpGroup,
 	OUT PMULTICAST_FILTER_TABLE_ENTRY *ppGroupEntry);
 
@@ -135,7 +140,8 @@ NDIS_STATUS IgmpPktClone(
 	IN PRTMP_ADAPTER pAd,
 	IN PNDIS_PACKET pPacket,
 	IN UCHAR QueIdx,
-	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry);
+	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
+	IN UINT8 UserPriority);
 
 #endif /* __RTMP_IGMP_SNOOP_H__ */
 

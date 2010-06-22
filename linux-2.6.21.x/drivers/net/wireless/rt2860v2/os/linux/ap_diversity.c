@@ -57,7 +57,7 @@ IMPLEMENT_PROC_ENTRY(AD_EV_RSSI_DIFF, 0, 256)
 atomic_t	AD_SW_RSSI_DIFF	=  ATOMIC_INIT(3);	/* db */
 IMPLEMENT_PROC_ENTRY(AD_SW_RSSI_DIFF, 0, 256)
 
-atomic_t	AD_FORCE_RESCAN_ROUND	=  ATOMIC_INIT(4);	/* round */
+atomic_t	AD_FORCE_RESCAN_ROUND	=  ATOMIC_INIT(5);	/* round */
 IMPLEMENT_PROC_ENTRY(AD_FORCE_RESCAN_ROUND, 0, 256)
 
 atomic_t	AD_FORCE_ANTENNA	=  ATOMIC_INIT(-1);	/* -1, 0, 1, 2, write only*/
@@ -75,7 +75,7 @@ IMPLEMENT_PROC_ENTRY(BBP_RSSI_RANGE_MIN, -255, 0)
 atomic_t	BBP_RSSI_SAMPLE_COUNT	=  ATOMIC_INIT(20);	/* times */
 IMPLEMENT_PROC_ENTRY(BBP_RSSI_SAMPLE_COUNT, 1, 256)
 
-atomic_t	BBP_RSSI_SAMPLE_INTERVAL=  ATOMIC_INIT(0);	/* ms */
+atomic_t	BBP_RSSI_SAMPLE_INTERVAL=  ATOMIC_INIT(10);	/* ms */
 IMPLEMENT_PROC_ENTRY(BBP_RSSI_SAMPLE_INTERVAL, 10, 1024)
 
 atomic_t	RXWI_RSSI_RANGE_MAX	=  ATOMIC_INIT(-14);	/* db */
@@ -246,7 +246,7 @@ INT AntDiversity_RXWIRead(
 	for (i=0; i< MAX_LEN_OF_MAC_TABLE; i++)
 	{
 		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[i];
-		if ((pEntry->ValidAsCLI || pEntry->ValidAsApCli) && (pEntry->Sst == SST_ASSOC))
+		if ((IS_ENTRY_CLIENT(pEntry) || IS_ENTRY_APCLI(pEntry)) && (pEntry->Sst == SST_ASSOC))
 		{
 
 			switch(Ant){
@@ -331,13 +331,14 @@ INT AntDiversity_RXWIRead(
 #define GPIO_REVERSE			1
 #define ANT0_GPIO			3
 #define ANT2_GPIO			5
+#define GPIO_REG_BIT		1
 static VOID AntSwitch(INT ant)
 {
 	UINT32 data;
 
 	/* Set SPI to GPIO mode */
 	data = inw(RALINK_REG_GPIOMODE);
-	data |= RALINK_GPIO(1);
+	data |= RALINK_GPIO(GPIO_REG_BIT);
 	outw(RALINK_REG_GPIOMODE, data);
 
 	/* set direction*/

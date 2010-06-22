@@ -23,7 +23,7 @@
 #include "rt_config.h"
 
 
-
+#ifdef QOS_DLS_SUPPORT
 
 /*
 ========================================================================
@@ -333,5 +333,7 @@ VOID APPeerDlsTearDownAction(
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 	kfree(pOutBuffer);
 }
+
+#endif // QOS_DLS_SUPPORT //
 
 /* End of ap_dls.c */

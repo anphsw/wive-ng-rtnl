@@ -18,15 +18,20 @@
     AES
 
     Abstract:
+    RFC 3394: Advanced Encryption Standard (AES) Key Wrap Algorithm    
+    RFC 3601: Counter with CBC-MAC (CCM)
+    RFC 4493: The AES-CMAC Algorithm
     FIPS PUBS 197: ADVANCED ENCRYPTION STANDARD (AES)
     NIST 800-38A: Recommendation for Block Cipher Modes of Operation
+    NIST 800-38C: The CCM Mode for Authentication and Confidentiality 
     
     Revision History:
     Who         When            What
     --------    ----------      ------------------------------------------
+    Eddy        2009/05/19      Create AES-Key Wrap
+    Eddy        2009/04/20      Create AES-CMAC, AES-CCM    
     Eddy        2009/01/19      Create AES-128, AES-192, AES-256, AES-CBC
 ***************************************************************************/
-
 #ifndef __CRYPT_AES_H__
 #define __CRYPT_AES_H__
 
@@ -96,5 +101,75 @@ VOID AES_CBC_Decrypt (
     OUT UINT8 PlainText[],
     INOUT UINT *PlainTextLength);
 
+/* AES-CMAC operations */
+VOID AES_CMAC_GenerateSubKey (
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    OUT UINT8 SubKey1[],
+    OUT UINT8 SubKey2[]);
+
+VOID AES_CMAC (
+    IN UINT8 PlainText[],
+    IN UINT PlainTextLength,
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    OUT UINT8 MACText[],
+    INOUT UINT *MACTextLength);
+
+/* AES Counter with CBC-MAC operations */
+VOID AES_CCM_MAC (
+    IN UINT8 Payload[],
+    IN UINT  PayloadLength,
+    IN UINT8 Key[],
+    IN UINT  KeyLength,
+    IN UINT8 Nonce[],
+    IN UINT  NonceLength,
+    IN UINT8 AAD[],
+    IN UINT  AADLength,
+    IN UINT  MACLength,
+    OUT UINT8 MACText[]);
+
+INT AES_CCM_Encrypt (
+    IN UINT8 PlainText[],
+    IN UINT  PlainTextLength,
+    IN UINT8 Key[],
+    IN UINT  KeyLength,
+    IN UINT8 Nonce[],
+    IN UINT  NonceLength,
+    IN UINT8 AAD[],
+    IN UINT  AADLength,
+    IN UINT  MACLength,
+    OUT UINT8 CipherText[],
+    INOUT UINT *CipherTextLength);
+
+INT AES_CCM_Decrypt (
+    IN UINT8 CipherText[],
+    IN UINT  CipherTextLength,
+    IN UINT8 Key[],
+    IN UINT  KeyLength,
+    IN UINT8 Nonce[],
+    IN UINT  NonceLength,
+    IN UINT8 AAD[],
+    IN UINT  AADLength,
+    IN UINT  MACLength,
+    OUT UINT8 PlainText[],
+    INOUT UINT *PlainTextLength);
+
+/* AES key wrap operations */
+INT AES_Key_Wrap (
+    IN UINT8 PlainText[],
+    IN UINT  PlainTextLength,
+    IN UINT8 Key[],
+    IN UINT  KeyLength,
+    OUT UINT8 CipherText[],
+    OUT UINT *CipherTextLength);
+        
+INT AES_Key_Unwrap (
+    IN UINT8 CipherText[],
+    IN UINT  CipherTextLength,
+    IN UINT8 Key[],
+    IN UINT  KeyLength,
+    OUT UINT8 PlainText [],
+    OUT UINT *PlainTextLength);
 #endif /* __CRYPT_AES_H__ */
 

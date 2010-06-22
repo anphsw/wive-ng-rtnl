@@ -109,26 +109,28 @@ VOID PeerDeauthAction(
     IN PRTMP_ADAPTER pAd, 
     IN PMLME_QUEUE_ELEM Elem) 
 {
+	UCHAR       Addr1[MAC_ADDR_LEN];
     UCHAR       Addr2[MAC_ADDR_LEN];
+	UCHAR       Addr3[MAC_ADDR_LEN];
     USHORT      Reason;
 
-    if (PeerDeauthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Reason)) 
+    if (PeerDeauthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr1, Addr2, Addr3, &Reason)) 
     {
         if (INFRA_ON(pAd)
+			&& (MAC_ADDR_EQUAL(Addr1, pAd->CurrentAddress) || MAC_ADDR_EQUAL(Addr1, BROADCAST_ADDR))
 			&& MAC_ADDR_EQUAL(Addr2, pAd->CommonCfg.Bssid)
+			&& MAC_ADDR_EQUAL(Addr3, pAd->CommonCfg.Bssid)
 			)
         {
             DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from our AP (Reason=%d)\n", Reason));
 
 
-#ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-		RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
-#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
             
 
 			// send wireless event - for deauthentication
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 
+
 
             LinkDown(pAd, TRUE);
         }

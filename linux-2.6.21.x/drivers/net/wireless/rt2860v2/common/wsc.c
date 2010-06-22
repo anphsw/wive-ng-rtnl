@@ -28,23 +28,27 @@
 	Snowpin Lee 07-04-19        Do modifications and Add APIs for STA
 	Snowpin Lee 07-05-17        Do modifications and Add APIs for AP Client
 */
-#include    "rt_config.h"
-#include    "wsc_tlv.h"
 
+#include    "rt_config.h"
+
+#ifdef WSC_INCLUDED
+#include    "wsc_tlv.h"
 #ifdef LINUX
 #include <net/iw_handler.h>
 #endif // LINUX //
 
-#ifdef CONFIG_ASUS_EXT
-#define ASUS_NVRAM		
-#include <nvram/bcmnvram.h>	
-#endif
+#define ASUS_NVRAM		/* ASUS EXT by Jiahao */
+#include <nvram/bcmnvram.h>	/* ASUS EXT by Jiahao */
 
 #define WSC_UPNP_MSG_TIMEOUT			(150 * OS_HZ)
 #define RTMP_WSC_NLMSG_SIGNATURE_LEN	8
 
 #ifndef PF_NOFREEZE
 #define PF_NOFREEZE  0
+#endif
+
+#ifndef LEN_PTK_KCK
+#define LEN_PTK_KCK 16
 #endif
 
 char WSC_MSG_SIGNATURE[]={"RAWSCMSG"};
@@ -165,25 +169,44 @@ VOID WscLinkDown(
 	Note:
 		Actually, to IOT with JumpStart, we fix the first 10 bytes of UUID string!!!!
 */
-INT WscGenerateUUID(RTMP_ADAPTER *pAd, UCHAR *uuidHexStr, UCHAR *uuidAscStr, int apIdx)
+INT WscGenerateUUID(
+	RTMP_ADAPTER	*pAd, 
+	UCHAR 			*uuidHexStr, 
+	UCHAR 			*uuidAscStr, 
+	int 			apIdx,
+	BOOLEAN			bUseCurrentTime)
 {
 	
 	WSC_UUID_T uuid_t;
 	unsigned long long uuid_time;
 	int i;
 	UINT16 clkSeq;
-	char uuidTmpStr[UUID_LEN_STR+2];
+	char uuidTmpStr[UUID_LEN_STR+2];	
 	
 // for fixed UUID -  YYHuang 07/10/09
 #define FIXED_UUID
 	
 	// Get the current time.
-	uuid_time = 2860; //xtime.tv_sec; 	// Well, we fix this to make JumpStart  happy!
+	if (bUseCurrentTime)
+	{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		uuid_time = xtime.tv_sec;
+#else
+		struct timespec sysTime = current_kernel_time();
+		uuid_time = sysTime.tv_sec;
+#endif
+	}
+	else
+		uuid_time = 2860; //xtime.tv_sec; 	// Well, we fix this to make JumpStart  happy!
+
+
 	uuid_time *= 10000000;
 	uuid_time += 0x01b21dd213814000LL;
+
 #ifdef FIXED_UUID
     uuid_time  = 0x2880288028802880LL;
 #endif
+
 	
 	uuid_t.timeLow = (UINT32)uuid_time & 0xFFFFFFFF;
 	uuid_t.timeMid = (UINT16)((uuid_time >>32) & 0xFFFF);
@@ -192,9 +215,11 @@ INT WscGenerateUUID(RTMP_ADAPTER *pAd, UCHAR *uuidHexStr, UCHAR *uuidAscStr, int
 
 	// Get the clock sequence.
 	clkSeq = (UINT16)(0x0601/*jiffies*/ & 0xFFFF);		// Again, we fix this to make JumpStart happy!
+
 #ifdef FIXED_UUID
 	clkSeq = (UINT16)0x2880;
 #endif
+
 	uuid_t.clockSeqLow = clkSeq & 0xFF;
 	uuid_t.clockSeqHi_Var = (clkSeq & 0x3F00) >> 8;
 	uuid_t.clockSeqHi_Var |= 0x80;
@@ -290,6 +315,10 @@ VOID    WscStateMachineInit(
 #ifdef OLD_DH_KEY
 			WSC_VMALLOC_KEY_MEM(pWScControl->pPubKeyMem, pWScControl->pSecKeyMem, 15*MAX_NN_DIGITS+1);
 #endif //OLD_DH_KEY
+#ifdef WSC_LED_SUPPORT
+			WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscLEDTimer, pWScControl->WscLEDTimerRunning, WscLEDTimer);
+			WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscSkipTurnOffLEDTimer, pWScControl->WscSkipTurnOffLEDTimerRunning, WscSkipTurnOffLEDTimer);
+#endif // WSC_LED_SUPPORT //
 		}
 
 #ifdef APCLI_SUPPORT
@@ -308,6 +337,10 @@ VOID    WscStateMachineInit(
 #ifdef OLD_DH_KEY
 			WSC_VMALLOC_KEY_MEM(pWScControl->pPubKeyMem, pWScControl->pSecKeyMem, 15*MAX_NN_DIGITS+1);
 #endif //OLD_DH_KEY
+#ifdef WSC_LED_SUPPORT
+			WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscLEDTimer, pWScControl->WscLEDTimerRunning, WscLEDTimer);
+			WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscSkipTurnOffLEDTimer, pWScControl->WscSkipTurnOffLEDTimerRunning, WscSkipTurnOffLEDTimer);
+#endif // WSC_LED_SUPPORT //
 		}
 #endif // APCLI_SUPPORT //
 	}
@@ -333,6 +366,10 @@ VOID    WscStateMachineInit(
 #ifdef OLD_DH_KEY
 		WSC_VMALLOC_KEY_MEM(pWScControl->pPubKeyMem, pWScControl->pSecKeyMem, 15*MAX_NN_DIGITS+1);
 #endif //OLD_DH_KEY    
+#ifdef WSC_LED_SUPPORT
+		WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscLEDTimer, pWScControl->WscLEDTimerRunning, WscLEDTimer);
+		WSC_TIMER_INIT(pAdapter, pWScControl, &pWScControl->WscSkipTurnOffLEDTimer, pWScControl->WscSkipTurnOffLEDTimerRunning, WscSkipTurnOffLEDTimer);
+#endif // WSC_LED_SUPPORT //
 	}
 #endif // CONFIG_STA_SUPPORT //
 }
@@ -647,7 +684,7 @@ VOID WscEAPAction(
 			pEntry = MacTableLookup(pAdapter, MacAddr);
 			if (pEntry)
 			{
-				if (pEntry->ValidAsCLI && pEntry->apidx >= pAdapter->ApCfg.BssidNum)
+				if (IS_ENTRY_CLIENT(pEntry) && pEntry->apidx >= pAdapter->ApCfg.BssidNum)
 				{
 					DBGPRINT(RT_DEBUG_TRACE, ("WscEAPAction: Unknow apidex(=%d).\n", pEntry->apidx));
 					DBGPRINT(RT_DEBUG_TRACE, ("<----- WscEAPAction\n"));
@@ -665,7 +702,7 @@ VOID WscEAPAction(
 				DBGPRINT(RT_DEBUG_TRACE, ("<----- WscEAPAction\n"));
 				return;
 			}
-			if (pEntry->ValidAsCLI)
+			if (IS_ENTRY_CLIENT(pEntry))
 			{
 				if ((MsgType == WSC_MSG_EAP_REG_RSP_ID) || (MsgType == WSC_MSG_EAP_ENR_RSP_ID))
 				{
@@ -681,7 +718,7 @@ VOID WscEAPAction(
 			}
 #ifdef APCLI_SUPPORT
 			// for ap-client packets 
-			if (pEntry->ValidAsApCli)
+			if (IS_ENTRY_APCLI(pEntry))
 				pWscControl = &pAdapter->ApCfg.ApCliTab[apidx].WscControl;
 			else
 #endif // APCLI_SUPPORT //
@@ -795,7 +832,7 @@ VOID WscEAPAction(
 				// Change the state to next one
 				pWscControl->WscState = WSC_STATE_WAIT_M1;
 				// send EAP WSC_START
-				if (pEntry->ValidAsCLI)
+				if (IS_ENTRY_CLIENT(pEntry))
 					WscSendMessage(pAdapter, WSC_OPCODE_START, NULL, 0, pWscControl, AP_MODE);
 			}
 		}
@@ -877,7 +914,7 @@ VOID WscEAPAction(
 			{
 				pWscControl->WscConfMode = WSC_DISABLE;
 				// Bring apcli interface down first
-				if(pEntry->ValidAsApCli && pAdapter->ApCfg.ApCliTab[pEntry->apidx].Enable == TRUE )
+				if(IS_ENTRY_APCLI(pEntry) && pAdapter->ApCfg.ApCliTab[pEntry->apidx].Enable == TRUE )
 				{
 					pAdapter->ApCfg.ApCliTab[pEntry->apidx].Enable = FALSE;
 					ApCliIfDown(pAdapter);
@@ -923,7 +960,8 @@ VOID WscEAPAction(
 		UINT32 rv = 0;
 
 		if ((pWscControl->WscConfMode & WSC_REGISTRAR) != 0 &&
-			pWscControl->bWscTrigger)
+			(pWscControl->bWscTrigger
+			 ))
 		{
 			pWscControl->WscActionMode = WSC_REGISTRAR;
 			// If Message is from EAP, but UPnP Registrar is in progress now, ignore EAP_M1
@@ -940,7 +978,9 @@ VOID WscEAPAction(
 #ifdef CONFIG_AP_SUPPORT
 		if (((pWscControl->WscConfMode & WSC_PROXY) != 0) && (!bUPnPMsg) && (pAdapter->OpMode == OPMODE_AP))
 		{
-			if (pWscControl->bWscTrigger && (pWscControl->WscState >= WSC_STATE_WAIT_M3))
+			if ((pWscControl->bWscTrigger
+				 )
+				&& (pWscControl->WscState >= WSC_STATE_WAIT_M3))
 				;
 			else
 			{
@@ -974,7 +1014,8 @@ VOID WscEAPAction(
 	{
         BOOLEAN bNonceMatch = WscCheckNonce(pAdapter, Elem, TRUE, pWscControl);
 		if (((pWscControl->WscConfMode & WSC_REGISTRAR) != 0) &&
-			pWscControl->bWscTrigger &&
+			(pWscControl->bWscTrigger 
+			 ) &&
               bNonceMatch)
 		{
 			// If Message is from EAP, but UPnP Registrar is in progress now, ignore EAP Messages
@@ -1016,9 +1057,16 @@ VOID WscEAPAction(
 			MsgType == WSC_MSG_M8)
 	{
         BOOLEAN bNonceMatch = WscCheckNonce(pAdapter, Elem, FALSE, pWscControl);
+	BOOLEAN bGoWPS = FALSE;
+
+	if ((pAdapter->OpMode == OPMODE_AP) ||
+			((pAdapter->OpMode == OPMODE_STA) && 
+			 (pWscControl->bWscTrigger
+			 )))
+		bGoWPS = TRUE;
 		
 		if (((pWscControl->WscConfMode & WSC_ENROLLEE) != 0) &&              
-			((pAdapter->OpMode == OPMODE_AP) || ((pAdapter->OpMode == OPMODE_STA) && pWscControl->bWscTrigger)) &&               
+			bGoWPS &&
 			bNonceMatch)		
 		{
 			pWscControl->WscActionMode = WSC_ENROLLEE;
@@ -1124,9 +1172,6 @@ VOID WscEAPAction(
 				// bWscTrigger should be set FALSE, otherwise Proxy will send NACK to enrollee.
 				pWscControl->bWscTrigger = FALSE;
 				pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
-#ifdef CONFIG_ASUS_EXT
-				nvram_set("stop_wps_led", "1");	
-#endif
 				if (pAdapter->CommonCfg.bWirelessEvent)
 					RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_SUCCESS, &pWscControl->EntryAddr[0], pWscControl->EntryIfIdx, 0);			
 			}
@@ -1218,6 +1263,7 @@ VOID WscEapEnrolleeAction(
 	bUPnPMsg = Elem->MsgType == WSC_EAPOL_UPNP_MSG ? TRUE : FALSE;
 	OpCode = bUPnPMsg ? WSC_OPCODE_UPNP_MASK : 0;
 	bssIdx = 0;
+	int idx;
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
@@ -1313,6 +1359,7 @@ VOID WscEapEnrolleeAction(
             	    pWscControl->RegData.Pke, (UINT *) &DH_Len);
 #endif
 				pWscControl->RegData.ReComputePke = 0;
+
 			}
 
 			OpCode |= WSC_OPCODE_MSG;
@@ -1323,7 +1370,7 @@ VOID WscEapEnrolleeAction(
 #ifdef CONFIG_AP_SUPPORT
 				IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
 				{
-					if (pEntry->ValidAsCLI)
+					if (IS_ENTRY_CLIENT(pEntry))
 						WscDelWPARetryTimer(pAdapter);
 				}
 #endif // CONFIG_AP_SUPPORT //
@@ -1461,7 +1508,7 @@ VOID WscEapEnrolleeAction(
 						// Change the state to next one
 #ifdef APCLI_SUPPORT
 						// Ap Client only supports Inband(EAP)-Enrollee.
-						if (!bUPnPMsg && pEntry->ValidAsApCli)
+						if (!bUPnPMsg && IS_ENTRY_APCLI(pEntry))
 							pWscControl->WscState = WSC_STATE_WAIT_EAPFAIL;
 						else
 #endif // APCLI_SUPPORT //
@@ -1493,10 +1540,7 @@ VOID WscEapEnrolleeAction(
 				pWscControl->WscStatus = STATUS_WSC_EAP_RAP_RSP_ACK;
 				// Send out EAP-Fail
 				WscSendEapFail(pAdapter, pWscControl);
-				pWscControl->WscState = WSC_STATE_CONFIGURED;
-#ifdef CONFIG_ASUS_EXT
-				nvram_set("stop_wps_led", "1");	
-#endif
+				pWscControl->WscState = WSC_STATE_CONFIGURED;                
 				pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 			}
 			break;
@@ -1514,9 +1558,6 @@ VOID WscEapEnrolleeAction(
 			pWscControl->EapMsgRunning = FALSE;
 			//pWscControl->EntryIfIdx = WSC_INIT_ENTRY_APIDX;
 			pWscControl->WscState = WSC_STATE_CONFIGURED;
-#ifdef CONFIG_ASUS_EXT
-			nvram_set("stop_wps_led", "1");	
-#endif
 			pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 			if(pWscUPnPInfo->bUPnPMsgTimerRunning == TRUE)
 			{
@@ -1550,7 +1591,7 @@ VOID WscEapEnrolleeAction(
 #ifdef CONFIG_AP_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
 			{
-				if (pEntry->ValidAsApCli)
+				if (IS_ENTRY_APCLI(pEntry))
 					WscSendMessage(pAdapter, OpCode, WscData, DataLen, pWscControl, AP_CLIENT_MODE);
 				else
 					WscSendMessage(pAdapter, OpCode, WscData, DataLen, pWscControl, AP_MODE);
@@ -1634,9 +1675,9 @@ Done:
 #ifdef CONFIG_AP_SUPPORT
 	if  (pAdapter->OpMode == OPMODE_AP)
 	{
-		if (  ((bUPnPMsg || (pEntry && pEntry->ValidAsCLI)) && pWscControl->WscState == WSC_STATE_CONFIGURED) 
+		if (((bUPnPMsg || (pEntry && IS_ENTRY_CLIENT(pEntry))) && pWscControl->WscState == WSC_STATE_CONFIGURED) 
 #ifdef APCLI_SUPPORT        
-			||((!bUPnPMsg && pEntry && pEntry->ValidAsApCli) && (pWscControl->WscState == WSC_STATE_WAIT_EAPFAIL || pWscControl->WscState == WSC_STATE_CONFIGURED))
+			||((!bUPnPMsg && pEntry && IS_ENTRY_APCLI(pEntry)) && (pWscControl->WscState == WSC_STATE_WAIT_EAPFAIL || pWscControl->WscState == WSC_STATE_CONFIGURED))
 #endif // APCLI_SUPPORT //        
 		)
 		{
@@ -1657,6 +1698,10 @@ Done:
 
 	if (rv == 1)
 	{
+#ifdef WSC_LED_SUPPORT
+		UCHAR WPSLEDStatus;
+#endif // WSC_LED_SUPPORT //
+
 		pWscControl->bWscTrigger = FALSE;
         pWscControl->RegData.ReComputePke = 1;
 		RTMPCancelTimer(&pWscControl->EapolTimer, &Cancelled);
@@ -1665,12 +1710,13 @@ Done:
 			pWscControl->Wsc2MinsTimerRunning = FALSE;
 			RTMPCancelTimer(&pWscControl->Wsc2MinsTimer, &Cancelled);
 		}
-		if (pWscControl->WscConfStatus == WSC_SCSTATE_UNCONFIGURED)
+		if ((pWscControl->WscConfStatus == WSC_SCSTATE_UNCONFIGURED)
+#ifdef CONFIG_AP_SUPPORT
+			|| (pWscControl->bWCNTest == TRUE)
+#endif // CONFIG_AP_SUPPORT //
+			)
 		{
-			pAdapter->WriteWscCfgToDatFile = TRUE;
-#ifdef CONFIG_ASUS_EXT
-			nvram_set("stop_wps_led", "1");	
-#endif
+			pAdapter->WriteWscCfgToDatFile = pWscControl->EntryIfIdx;
 			pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 			pWscControl->WscConfStatus = WSC_SCSTATE_CONFIGURED;
 			pWscControl->WscMode = 1;
@@ -1682,7 +1728,7 @@ Done:
 			{
 				pWscControl->RegData.SelfInfo.ScState = pWscControl->WscConfStatus;
 #ifdef APCLI_SUPPORT
-				if (!bUPnPMsg && pEntry && pEntry->ValidAsApCli)
+				if (!bUPnPMsg && pEntry && IS_ENTRY_APCLI(pEntry))
 				{
 					WscWriteConfToApCliCfg(pAdapter, pWscControl, TRUE);
 				}
@@ -1695,7 +1741,7 @@ Done:
 #endif // CONFIG_STA_SUPPORT //
 										TRUE);
 
-				if (bUPnPMsg || (pEntry && pEntry->ValidAsCLI))
+				if (bUPnPMsg || (pEntry && IS_ENTRY_CLIENT(pEntry)))
 				{
 #ifdef KTHREAD_SUPPORT
 					WAKE_UP(&(pAdapter->wscCfgWriteTask));
@@ -1704,7 +1750,7 @@ Done:
 #endif
 				}
 
-				if (bUPnPMsg || (pEntry && pEntry->ValidAsCLI))
+				if (bUPnPMsg || (pEntry && IS_ENTRY_CLIENT(pEntry)))
 				{
 					WscBuildBeaconIE(pAdapter, WSC_SCSTATE_CONFIGURED, FALSE, 0, 0, pWscControl->EntryIfIdx);
 					WscBuildProbeRespIE(pAdapter, WSC_MSGTYPE_AP_WLAN_MGR, WSC_SCSTATE_CONFIGURED, FALSE, 0, 0, pWscControl->EntryIfIdx);
@@ -1739,6 +1785,13 @@ Done:
 #endif // CONFIG_STA_SUPPORT //
 
 		}
+#ifdef WSC_LED_SUPPORT
+		// The protocol is finished.
+		WPSLEDStatus = LED_WPS_SUCCESS;
+#ifdef RTMP_MAC_PCI
+		RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
 	}
 }
 
@@ -2082,9 +2135,6 @@ VOID WscEapRegistrarAction(
 						// Some WPS AP expects to receive WSC_NACK when AP is configured
 						OpCode |= WSC_OPCODE_NACK;
 						DataLen = BuildMessageNACK(pAdapter, pWscControl, WscData);
-#ifdef CONFIG_ASUS_EXT
-						nvram_set("stop_wps_led", "1");	
-#endif
 						pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 						pWscControl->WscState = WSC_STATE_CONFIGURED;
 						pWscControl->EapMsgRunning = FALSE;
@@ -2104,9 +2154,6 @@ VOID WscEapRegistrarAction(
 					pWscControl->WscStatus = STATUS_WSC_EAP_RAP_RSP_DONE_SENT;
 					// Send EAP-Fail
 					WscSendEapFail(pAdapter, pWscControl);
-#ifdef CONFIG_ASUS_EXT
-					nvram_set("stop_wps_led", "1");	
-#endif
 					pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 				if (pAdapter->CommonCfg.bWirelessEvent)
 					RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_SUCCESS, &pWscControl->EntryAddr[0], pWscControl->EntryIfIdx, 0);				
@@ -2120,9 +2167,6 @@ VOID WscEapRegistrarAction(
 				{
 					OpCode |= WSC_OPCODE_ACK;
 					DataLen = BuildMessageACK(pAdapter, pWscControl, WscData);
-#ifdef CONFIG_ASUS_EXT
-					nvram_set("stop_wps_led", "1");	
-#endif
 					pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 				if (pAdapter->CommonCfg.bWirelessEvent)
 					RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_SUCCESS, &pWscControl->EntryAddr[0], pWscControl->EntryIfIdx, 0);				
@@ -2244,6 +2288,10 @@ Fail:
 
 	if (pWscControl->WscState == WSC_STATE_CONFIGURED)
 	{
+#ifdef WSC_LED_SUPPORT
+		UCHAR WPSLEDStatus;
+#endif // WSC_LED_SUPPORT //
+
 		pWscControl->bWscTrigger = FALSE;
 		if (pWscControl->Wsc2MinsTimerRunning)
 		{
@@ -2283,7 +2331,7 @@ Fail:
 			(0))
 		{
 			pWscControl->WscConfStatus = WSC_SCSTATE_CONFIGURED;
-			pAdapter->WriteWscCfgToDatFile = TRUE;
+			pAdapter->WriteWscCfgToDatFile = pWscControl->EntryIfIdx;
 #ifdef CONFIG_AP_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
 			{
@@ -2320,6 +2368,13 @@ Fail:
 			pWscControl->WscConfMode = WSC_DISABLE;
 		}
 #endif // CONFIG_STA_SUPPORT //
+#ifdef WSC_LED_SUPPORT
+		// The protocol is finished.
+		WPSLEDStatus = LED_WPS_SUCCESS;
+#ifdef RTMP_MAC_PCI
+		RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
 		pWscControl->WscPinCode = 0;
 		pWscControl->WscMode = 1;
 		RTMPCancelTimer(&pWscControl->EapolTimer, &Cancelled);
@@ -2346,7 +2401,7 @@ VOID WscEnqueueEapolStart(
 								pEntry->Addr[0], pEntry->Addr[1], pEntry->Addr[2],
     							pEntry->Addr[3], pEntry->Addr[4], pEntry->Addr[5]));
 
-        MlmeEnqueue(pAd, WSC_STATE_MACHINE, WSC_EAPOL_START_MSG, 6, &pEntry->Addr);
+        MlmeEnqueue(pAd, WSC_STATE_MACHINE, WSC_EAPOL_START_MSG, 6, &pEntry->Addr, 0);
 	}				
 }
 #endif // CONFIG_AP_SUPPORT //
@@ -2360,12 +2415,7 @@ VOID WscTimeOutProcess(
     INT         WscMode;
 
     if (nWscState == WSC_STATE_WAIT_ACK)
-    {
         pWscControl->WscState = WSC_STATE_CONFIGURED;
-#ifdef CONFIG_ASUS_EXT
-        nvram_set("stop_wps_led", "1");	
-#endif
-    }
     else if (nWscState == WSC_STATE_WAIT_RESP_ID)
         pWscControl->WscState = WSC_STATE_OFF;
     else if (nWscState == WSC_STATE_RX_M2D)
@@ -2375,13 +2425,13 @@ VOID WscTimeOutProcess(
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
-			if (pEntry && pEntry->ValidAsCLI)
+			if (pEntry && IS_ENTRY_CLIENT(pEntry))
 			{
 				WscSendEapFail(pAd, pWscControl);
-				MlmeEnqueue(pAd, WSC_STATE_MACHINE, WSC_EAPOL_START_MSG, 6, &pEntry->Addr);		
+				MlmeEnqueue(pAd, WSC_STATE_MACHINE, WSC_EAPOL_START_MSG, 6, &pEntry->Addr, 0);		
 			}
 #ifdef APCLI_SUPPORT
-			if (pEntry && pEntry->ValidAsApCli)
+			if (pEntry && IS_ENTRY_APCLI(pEntry))
 			{
 				WscApCliLinkDown(pAd, pWscControl);
 			}
@@ -2404,9 +2454,6 @@ VOID WscTimeOutProcess(
     else if (nWscState == WSC_STATE_WAIT_EAPFAIL)
     {
         pWscControl->WscState = WSC_STATE_OFF;
-#ifdef CONFIG_ASUS_EXT
-        nvram_set("stop_wps_led", "1");	
-#endif
 		pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
         pWscControl->WscConfMode = WSC_DISABLE;
     }
@@ -2437,7 +2484,7 @@ VOID WscTimeOutProcess(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 		pEntry->bWscCapable = FALSE;
-		if (pEntry->ValidAsCLI &&
+		if (IS_ENTRY_CLIENT(pEntry) &&
 			(pWscControl->WscState > WSC_STATE_CONFIGURED))
 		{
 			WscSendEapFail(pAd, pWscControl);
@@ -2445,7 +2492,7 @@ VOID WscTimeOutProcess(
 			WscBuildProbeRespIE(pAd, WSC_MSGTYPE_AP_WLAN_MGR, pWscControl->WscConfStatus, FALSE, WscMode, pWscControl->WscConfigMethods, pEntry->apidx);
 		}
 #ifdef APCLI_SUPPORT
-		if (pEntry && pEntry->ValidAsApCli)
+		if (pEntry && IS_ENTRY_APCLI(pEntry))
 		{
 			WscApCliLinkDown(pAd, pWscControl);
 		}
@@ -2531,7 +2578,7 @@ VOID WscEAPOLTimeOutAction(
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
-		if (pEntry->ValidAsCLI && pWscControl->WscState <= WSC_STATE_CONFIGURED )
+		if (IS_ENTRY_CLIENT(pEntry) && pWscControl->WscState <= WSC_STATE_CONFIGURED )
 		{
 			// A timer in the AP should cause to be disconnected after 5 seconds if a 
 			// valid EAP-Rsp/Identity indicating WPS is not received.
@@ -2591,9 +2638,9 @@ VOID WscEAPOLTimeOutAction(
 #ifdef CONFIG_AP_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 					{
-						if (pEntry->ValidAsCLI)
+						if (IS_ENTRY_CLIENT(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_MODE);
-						else if (pEntry->ValidAsApCli)
+						else if (IS_ENTRY_APCLI(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_CLIENT_MODE);
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -2677,9 +2724,9 @@ VOID WscEAPOLTimeOutAction(
 #ifdef CONFIG_AP_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 					{
-						if (pEntry->ValidAsCLI)
+						if (IS_ENTRY_CLIENT(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_MODE);
-						else if (pEntry->ValidAsApCli)
+						else if (IS_ENTRY_APCLI(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_CLIENT_MODE);
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -2728,9 +2775,9 @@ VOID WscEAPOLTimeOutAction(
 #ifdef CONFIG_AP_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 					{
-						if (pEntry->ValidAsCLI)
+						if (IS_ENTRY_CLIENT(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_MODE);
-						else if (pEntry->ValidAsApCli)
+						else if (IS_ENTRY_APCLI(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_CLIENT_MODE);
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -2779,9 +2826,9 @@ VOID WscEAPOLTimeOutAction(
 #ifdef CONFIG_AP_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 					{
-						if (pEntry->ValidAsCLI)
+						if (IS_ENTRY_CLIENT(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_MODE);
-						else if (pEntry->ValidAsApCli)
+						else if (IS_ENTRY_APCLI(pEntry))
 							WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, pWscControl->RegData.LastTx.Data, pWscControl->RegData.LastTx.Length, pWscControl, AP_CLIENT_MODE);
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -2828,7 +2875,7 @@ VOID WscEAPOLTimeOutAction(
 		{
 			if (WscData &&
 				pWscControl->WscActionMode == WSC_ENROLLEE && 
-				pEntry->ValidAsCLI)
+				IS_ENTRY_CLIENT(pEntry))
 			{
 				DataLen = BuildMessageDONE(pWscControl->pAd, pWscControl, WscData);
 				WscSendMessage(pWscControl->pAd, WSC_OPCODE_MSG, WscData, DataLen, pWscControl, AP_MODE);
@@ -2878,6 +2925,12 @@ VOID Wsc2MinsTimeOutAction(
 		pAd =  (PRTMP_ADAPTER)pWscControl->pAd;
 		DBGPRINT(RT_DEBUG_TRACE, ("Wsc2MinsTimerRunning is %s\n", 
 		pWscControl->Wsc2MinsTimerRunning ? "TRUE, reset WscState to WSC_STATE_OFF":"FALSE"));
+
+#ifdef WSC_LED_SUPPORT
+		// 120 seconds WPS walk time expiration.
+		pWscControl->bWPSWalkTimeExpiration = TRUE;
+#endif // WSC_LED_SUPPORT //
+
 		if (pWscControl->Wsc2MinsTimerRunning)
 		{
 			pWscControl->bWscTrigger = FALSE;
@@ -2930,6 +2983,99 @@ VOID Wsc2MinsTimeOutAction(
 #endif // CONFIG_STA_SUPPORT //		
 		}
 	}
+
+#ifdef WSC_LED_SUPPORT
+	// if link is up, there shall be nothing wrong
+	// perhaps we will set another flag to do it
+	if ((OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED)) && 
+		(pWscControl->WscState == WSC_STATE_OFF) &&
+		(pWscControl->WscStatus == STATUS_WSC_CONFIGURED))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("WscConnectTimeout --> Connection OK\n"));
+	}
+	else
+	{
+		UCHAR WPSLEDStatus;
+		
+		pWscControl->WscStatus = STATUS_WSC_FAIL; 
+		pWscControl->WscState = WSC_STATE_OFF;
+
+		// WPS LED mode 7, 8, 11 or 12.
+		if (((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_7) || 
+			((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_8) || 
+			((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_11) || 
+		    ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_12))
+		{
+			pWscControl->bSkipWPSTurnOffLED = FALSE;
+			
+			// Turn off the WPS LED modoe due to the maximum WPS processing time is expired (120 seconds).
+			WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+			RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+		}
+		else if ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) // WPS LED mode 9.
+		{	
+			if (pWscControl->WscMode == WSC_PIN_MODE) // PIN method.
+			{
+				// The NIC using PIN method fails to finish the WPS handshaking within 120 seconds.
+				WPSLEDStatus = LED_WPS_ERROR;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+
+				// Turn off the WPS LED after 15 seconds.
+				RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_WPS_FAIL_LED_PATTERN_TIMEOUT);
+
+				// The Ralink UI would make RT_OID_DISCONNECT_REQUEST request while it receive STATUS_WSC_EAP_FAILED.
+				// Allow the NIC to turn off the WPS LED after WSC_WPS_SKIP_TURN_OFF_LED_TIMEOUT seconds.
+				pWscControl->bSkipWPSTurnOffLED = TRUE;
+				RTMPSetTimer(&pWscControl->WscSkipTurnOffLEDTimer, WSC_WPS_SKIP_TURN_OFF_LED_TIMEOUT);
+				
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: The NIC using PIN method fails to finish the WPS handshaking within 120 seconds.\n", __FUNCTION__));
+			}
+			else if (pWscControl->WscMode == WSC_PBC_MODE) // PBC method.
+			{
+				switch (pWscControl->WscLastWarningLEDMode) // Based on last WPS warning LED mode.
+				{
+					case 0:
+					case LED_WPS_ERROR:
+						// Failed to find any partner.
+						WPSLEDStatus = LED_WPS_ERROR;
+#ifdef RTMP_MAC_PCI
+						RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+
+						// Turn off the WPS LED after 15 seconds.
+						RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_WPS_FAIL_LED_PATTERN_TIMEOUT);
+
+						// The Ralink UI would make RT_OID_DISCONNECT_REQUEST request while it receive STATUS_WSC_EAP_FAILED.
+						// Allow the NIC to turn off the WPS LED after WSC_WPS_SKIP_TURN_OFF_LED_TIMEOUT seconds.
+						pWscControl->bSkipWPSTurnOffLED = TRUE;
+						RTMPSetTimer(&pWscControl->WscSkipTurnOffLEDTimer, WSC_WPS_SKIP_TURN_OFF_LED_TIMEOUT);
+						
+						DBGPRINT(RT_DEBUG_TRACE, ("%s: Last WPS LED status is LED_WPS_ERROR.\n", __FUNCTION__));
+						break;
+
+					default:
+						// do nothing.
+						break;
+				}
+			}
+			else
+			{
+				// do nothing.
+			}
+		}
+		else
+		{
+			// do nothing.
+		}
+		
+		DBGPRINT(RT_DEBUG_TRACE, ("WscConnectTimeout --> Fail to connect\n"));
+	}
+#endif // WSC_LED_SUPPORT //
+
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- Wsc2MinsTimeOutAction\n"));
 }
 
@@ -3036,7 +3182,7 @@ out:
 		FALSE		No appropriate message type
 	
 	Note:
-		All these constants are defined in wpa.h
+		All these constants are defined in wsc.h
 		For supplicant, there is only EAPOL Key message avaliable
 		
 	========================================================================
@@ -3127,9 +3273,6 @@ VOID	WscInitRegistrarPair(
 	IN  PWSC_CTRL           pWscControl,
 	IN  UCHAR				apidx)
 {
-#ifdef CONFIG_AP_SUPPORT
-	char tmpstr[17];
-#endif
 	INT		idx;
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscInitRegistrarPair\n"));
@@ -3178,24 +3321,30 @@ VOID	WscInitRegistrarPair(
 	
 	// 7. Model Number
 //	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, WSC_MODEL_NUMBER, sizeof(WSC_MODEL_NUMBER));
-#ifdef CONFIG_ASUS_EXT
-	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, nvram_get("wsc_model_number"), strlen(nvram_get("wsc_model_number")));
-#endif
-
+/* ASUS EXT by Jiahao */
+	char pid_tmpstr[12];
+	memset(pid_tmpstr, 0, 12);
+	sprintf(pid_tmpstr, "%s", nvram_get("productid"));
+	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, pid_tmpstr, strlen(pid_tmpstr));
+/* ASUS EXT by Jiahao */
 	
 	// 8. Serial Number
+//	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, WSC_MODEL_SERIAL, sizeof(WSC_MODEL_SERIAL));
+/* ASUS EXT by Jiahao */
 #ifdef CONFIG_AP_SUPPORT
-	sprintf(tmpstr, "%02x:%02x:%02x:%02x:%02x:%02x",pAdapter->ApCfg.MBSSID[apidx].Bssid[0],
-							pAdapter->ApCfg.MBSSID[apidx].Bssid[1],
-							pAdapter->ApCfg.MBSSID[apidx].Bssid[2],
-							pAdapter->ApCfg.MBSSID[apidx].Bssid[3],
-							pAdapter->ApCfg.MBSSID[apidx].Bssid[4],
-							pAdapter->ApCfg.MBSSID[apidx].Bssid[5]);
+	char tmpstr[17];
+	sprintf(tmpstr, "%02x:%02x:%02x:%02x:%02x:%02x", pAdapter->ApCfg.MBSSID[apidx].Bssid[0],
+							 pAdapter->ApCfg.MBSSID[apidx].Bssid[1],
+							 pAdapter->ApCfg.MBSSID[apidx].Bssid[2],
+							 pAdapter->ApCfg.MBSSID[apidx].Bssid[3],
+							 pAdapter->ApCfg.MBSSID[apidx].Bssid[4],
+							 pAdapter->ApCfg.MBSSID[apidx].Bssid[5]);
 	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, tmpstr, 17);
 #else
 	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, WSC_MODEL_SERIAL, sizeof(WSC_MODEL_SERIAL));
 #endif
-	
+/* ASUS EXT by Jiahao */
+
 	// 9. Authentication Type Flags
 	// Open(=1), WPAPSK(=2),Shared(=4), WPA2PSK(=20),WPA(=8),WPA2(=10)
 	// (0x01 | 0x02 | 0x04 | 0x20 | 0x08 | 0x10) = 0x3F
@@ -4100,7 +4249,19 @@ VOID WscBuildBeaconIE(
 	PUCHAR			pData;
 	INT				Len = 0, templen = 0;
     USHORT          tempVal = 0;
-	PWSC_REG_DATA	pReg = (PWSC_REG_DATA) &pAd->ApCfg.MBSSID[apidx].WscControl.RegData;
+	PWSC_CTRL		pWpsCtrl = NULL;
+	PWSC_REG_DATA	pReg = NULL;
+
+#ifdef CONFIG_AP_SUPPORT
+	if (pAd->OpMode == OPMODE_AP)
+		pWpsCtrl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	if (pAd->OpMode == OPMODE_STA)
+		pWpsCtrl = &pAd->StaCfg.WscControl;
+#endif // CONFIG_STA_SUPPORT //
+
+	pReg = &pWpsCtrl->RegData;
  
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscBuildBeaconIE\n"));
 	// WSC IE HEader
@@ -4143,30 +4304,53 @@ VOID WscBuildBeaconIE(
 	}
 
 	// 6. UUID last 6 bytes use MAC
-	templen = AppendWSCTLV(WSC_ID_UUID_E, pData, &pAd->ApCfg.MBSSID[apidx].WscControl.Wsc_Uuid_E[0], 0);
+	templen = AppendWSCTLV(WSC_ID_UUID_E, pData, &pWpsCtrl->Wsc_Uuid_E[0], 0);
 	pData += templen;
 	Len   += templen;
 
 	// 7. RF Bands
-	//templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&pReg->RegistrarInfo.RfBand, 0);
-	//pData += templen;
-	//Len   += templen;
-	if ((pAd->CommonCfg.PhyMode == PHY_11A) 
+	if (pAd->OpMode == OPMODE_AP)
+	{
+		if ((pAd->CommonCfg.PhyMode == PHY_11A) 
 #ifdef DOT11_N_SUPPORT
-		|| (pAd->CommonCfg.PhyMode == PHY_11AN_MIXED)
+				|| (pAd->CommonCfg.PhyMode == PHY_11AN_MIXED)
 #endif // DOT11_N_SUPPORT //
-	)
-		tempVal = 2;
+		   )
+			tempVal = 2;
+		else
+			tempVal = 1;
+	}
 	else
-		tempVal = 1;
+	{
+		if (pAd->CommonCfg.Channel > 14)
+			tempVal = 2;
+		else
+			tempVal = 1;
+	}
+
 	templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&tempVal, 0);
 	pData += templen;
 	Len   += templen;
 
+
 	ieHdr.length = ieHdr.length + Len;
-	memcpy(pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value, &ieHdr, sizeof(WSC_IE_HEADER));
-	memcpy(pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value + sizeof(WSC_IE_HEADER), Data, Len);
-	pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+#ifdef CONFIG_AP_SUPPORT
+	if (pAd->OpMode == OPMODE_AP)
+	{
+		memcpy(pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value, &ieHdr, sizeof(WSC_IE_HEADER));
+		memcpy(pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value + sizeof(WSC_IE_HEADER), Data, Len);
+		pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+	}
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	if (pAd->OpMode == OPMODE_STA)
+	{
+		memcpy(pAd->StaCfg.WpsIEBeacon.Value, &ieHdr, sizeof(WSC_IE_HEADER));
+		memcpy(pAd->StaCfg.WpsIEBeacon.Value + sizeof(WSC_IE_HEADER), Data, Len);
+		pAd->StaCfg.WpsIEBeacon.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+	}
+#endif // CONFIG_STA_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- WscBuildBeaconIE\n"));
 }
@@ -4185,7 +4369,19 @@ VOID WscBuildProbeRespIE(
 	PUCHAR			pData;
 	INT				Len = 0, templen = 0;
 	USHORT			tempVal = 0;
-    PWSC_REG_DATA	pReg = (PWSC_REG_DATA) &pAd->ApCfg.MBSSID[apidx].WscControl.RegData;
+	PWSC_CTRL		pWpsCtrl = NULL;
+	PWSC_REG_DATA	pReg = NULL;
+
+#ifdef CONFIG_AP_SUPPORT
+	if (pAd->OpMode == OPMODE_AP)
+		pWpsCtrl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	if (pAd->OpMode == OPMODE_STA)
+		pWpsCtrl = &pAd->StaCfg.WscControl;
+#endif // CONFIG_STA_SUPPORT //
+
+	pReg = &pWpsCtrl->RegData;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscBuildProbeRespIE\n"));
 
@@ -4234,8 +4430,7 @@ VOID WscBuildProbeRespIE(
    	Len   += templen;
 
 	// 7. UUID last 6 bytes use MAC
-	//templen = AppendWSCTLV(WSC_ID_UUID_E, pData, pReg->RegistrarInfo.Uuid, 0);
-	templen = AppendWSCTLV(WSC_ID_UUID_E, pData, &pAd->ApCfg.MBSSID[apidx].WscControl.Wsc_Uuid_E[0], 0);
+	templen = AppendWSCTLV(WSC_ID_UUID_E, pData, &pWpsCtrl->Wsc_Uuid_E[0], 0);
 	pData += templen;
 	Len   += templen;
 
@@ -4275,32 +4470,104 @@ VOID WscBuildProbeRespIE(
 	Len   += templen;
 
 	// 14. Config Methods
-	//tempVal = htons(0x008a);
-	//tempVal = htons(0x0084);
-	tempVal = htons(pAd->ApCfg.MBSSID[apidx].WscControl.WscConfigMethods);
+	tempVal = htons(pWpsCtrl->WscConfigMethods);
 	templen = AppendWSCTLV(WSC_ID_CONFIG_METHODS, pData, (UINT8 *)&tempVal, 0);
 	pData += templen;
 	Len   += templen;
 
 	// 15. RF Bands
-	if ((pAd->CommonCfg.PhyMode == PHY_11A) 
+	if (pAd->OpMode == OPMODE_AP)
+	{
+		if ((pAd->CommonCfg.PhyMode == PHY_11A) 
 #ifdef DOT11_N_SUPPORT
-		|| (pAd->CommonCfg.PhyMode == PHY_11AN_MIXED)
+				|| (pAd->CommonCfg.PhyMode == PHY_11AN_MIXED)
 #endif // DOT11_N_SUPPORT //
-	)
-		tempVal = 2;
+		   )
+			tempVal = 2;
+		else
+			tempVal = 1;
+	}
 	else
-		tempVal = 1;
+	{
+		if (pAd->CommonCfg.Channel > 14)
+			tempVal = 2;
+		else
+			tempVal = 1;
+	}
     templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&tempVal, 0);
 	pData += templen;
 	Len   += templen;
+
      
 	ieHdr.length = ieHdr.length + Len;
-	memcpy(pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.Value, &ieHdr, sizeof(WSC_IE_HEADER));
-	memcpy(pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.Value + sizeof(WSC_IE_HEADER), Data, Len);
-	pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+
+#ifdef CONFIG_AP_SUPPORT
+	if (pAd->OpMode == OPMODE_AP)
+	{
+		memcpy(pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.Value, &ieHdr, sizeof(WSC_IE_HEADER));
+		memcpy(pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.Value + sizeof(WSC_IE_HEADER), Data, Len);
+		pAd->ApCfg.MBSSID[apidx].WscIEProbeResp.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+	}
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	if (pAd->OpMode == OPMODE_STA)
+	{
+		memcpy(pAd->StaCfg.WpsIEProbeResp.Value, &ieHdr, sizeof(WSC_IE_HEADER));
+		memcpy(pAd->StaCfg.WpsIEProbeResp.Value + sizeof(WSC_IE_HEADER), Data, Len);
+		pAd->StaCfg.WpsIEProbeResp.ValueLen = sizeof(WSC_IE_HEADER) + Len;
+	}
+#endif // CONFIG_STA_SUPPORT //
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- WscBuildProbeRespIE\n"));
+}
+#endif 
+
+#ifdef CONFIG_AP_SUPPORT
+VOID WscBuildAssocRespIE(
+	IN	PRTMP_ADAPTER	pAd,
+	IN  UCHAR 			ApIdx,
+	IN  UCHAR			Reason,
+	OUT	PUCHAR			pOutBuf,
+	OUT	PUCHAR			pIeLen)
+{
+	WSC_IE_HEADER 	ieHdr;
+	UCHAR 			Data[512] = {0};
+	PUCHAR			pData;
+	INT				Len = 0, templen = 0;
+	UINT8			tempVal = 0;
+    PWSC_REG_DATA	pReg = (PWSC_REG_DATA) &pAd->ApCfg.MBSSID[ApIdx].WscControl.RegData;
+
+	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscBuildAssocRespIE\n"));
+
+	// WSC IE Header
+	ieHdr.elemId = 221;
+	ieHdr.length = 4;
+	ieHdr.oui[0] = 0x00; ieHdr.oui[1] = 0x50;
+    ieHdr.oui[2] = 0xF2; ieHdr.oui[3] = 0x04;
+
+	pData = (PUCHAR) &Data[0];
+	Len = 0;
+	
+	// Version
+	templen = AppendWSCTLV(WSC_ID_VERSION, pData, &pReg->SelfInfo.Version, 0);
+	pData += templen;
+	Len   += templen;
+
+	// Request Type
+	tempVal = WSC_MSGTYPE_AP_WLAN_MGR;
+	templen = AppendWSCTLV(WSC_ID_RESP_TYPE, pData, (UINT8 *)&tempVal, 0);
+	pData += templen;
+	Len   += templen;
+
+     
+	ieHdr.length = ieHdr.length + Len;
+	NdisMoveMemory(pOutBuf, &ieHdr, sizeof(WSC_IE_HEADER));
+	NdisMoveMemory(pOutBuf + sizeof(WSC_IE_HEADER), Data, Len);
+	*pIeLen = sizeof(WSC_IE_HEADER) + Len;
+
+	DBGPRINT(RT_DEBUG_TRACE, ("<----- WscBuildAssocRespIE\n"));
 }
 
 VOID WscSelectedRegistrar(
@@ -4586,7 +4853,7 @@ VOID WscProfileRetryTimeout(
 			else
 				pWscControl->WscProfile.ApplyProfileIdx = 0;
 			WscWriteConfToPortCfg(pAdapter, pWscControl, &pWscControl->WscProfile.Profile[pWscControl->WscProfile.ApplyProfileIdx], TRUE);
-			pAdapter->WriteWscCfgToDatFile = TRUE;
+			pAdapter->WriteWscCfgToDatFile = pWscControl->EntryIfIdx;
 #ifdef KTHREAD_SUPPORT
 			WAKE_UP(&(pAdapter->wscCfgWriteTask));
 #else
@@ -4711,11 +4978,11 @@ VOID  WscInformFromWPA(
         pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EapolTimerRunning = FALSE;
         pEntry->bWscCapable = FALSE;
         pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.WscState = WSC_STATE_CONFIGURED;
-#ifdef CONFIG_ASUS_EXT
-        nvram_set("stop_wps_led", "1");	
-#endif
+
+        DBGPRINT(RT_DEBUG_TRACE, ("Reset EntryIfIdx to %d\n", WSC_INIT_ENTRY_APIDX));
     }
-#endif
+
+    DBGPRINT(RT_DEBUG_TRACE, ("<----- WscInformFromWPA\n"));
 }
 
 VOID WscDelWPARetryTimer(
@@ -4727,9 +4994,7 @@ VOID WscDelWPARetryTimer(
 
     DBGPRINT(RT_DEBUG_TRACE, ("<----- WscDelWPARetryTimer\n"));
     
-#ifndef CONFIG_RT2860V2_STA_WSC
     pEntry = MacTableLookup(pAd, pAd->ApCfg.MBSSID[apidx].WscControl.EntryAddr);
-#endif
     
     if (pEntry)
     {
@@ -4739,6 +5004,7 @@ VOID WscDelWPARetryTimer(
 
     DBGPRINT(RT_DEBUG_TRACE, ("<----- WscDelWPARetryTimer\n"));
 }
+#endif // CONFIG_AP_SUPPORT //
 
 VOID WscStop(
 	IN	PRTMP_ADAPTER	pAd,
@@ -4749,6 +5015,9 @@ VOID WscStop(
 {
 	PWSC_UPNP_NODE_INFO pWscUPnPInfo;
     BOOLEAN Cancelled;
+#ifdef WSC_LED_SUPPORT
+	UCHAR WPSLEDStatus;
+#endif // WSC_LED_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT	
 	MAC_TABLE_ENTRY  *pEntry;
@@ -4843,6 +5112,26 @@ VOID WscStop(
 		NdisMoveMemory(&pAd->MlmeAux.AutoReconnectSsid[0], &pAd->MlmeAux.Ssid[0], pAd->MlmeAux.SsidLen);
 	}
 #endif // CONFIG_STA_SUPPORT //
+
+#ifdef WSC_LED_SUPPORT
+	if (pWscControl->WscLEDTimerRunning)
+	{
+		pWscControl->WscLEDTimerRunning = FALSE;
+		RTMPCancelTimer(&pWscControl->WscLEDTimer, &Cancelled);
+	}
+	if (pWscControl->WscSkipTurnOffLEDTimerRunning)
+	{
+		pWscControl->WscSkipTurnOffLEDTimerRunning = FALSE;
+		RTMPCancelTimer(&pWscControl->WscSkipTurnOffLEDTimer, &Cancelled);
+	}
+	// Reset the WPS walk time.
+	pWscControl->bWPSWalkTimeExpiration = FALSE;
+
+	WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+	RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -5195,6 +5484,10 @@ void    WscWriteConfToPortCfg(
 			pWscControl->WpaPskLen = (INT)pCredential->KeyLength;
 			NdisZeroMemory(pWscControl->WpaPsk, 64);
 			NdisMoveMemory(pWscControl->WpaPsk, pCredential->Key, pWscControl->WpaPskLen);
+			// Copy SSID
+			NdisZeroMemory(pAd->ApCfg.MBSSID[CurApIdx].Ssid, MAX_LEN_OF_SSID);
+			NdisMoveMemory(pAd->ApCfg.MBSSID[CurApIdx].Ssid, pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
+			pAd->ApCfg.MBSSID[CurApIdx].SsidLen = pCredential->SSID.SsidLength;
 			/*
 				Hex Key 
 			*/
@@ -5219,15 +5512,18 @@ void    WscWriteConfToPortCfg(
 #ifdef CONFIG_STA_SUPPORT	
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		pWscControl->WscProfileRetryTimerRunning = TRUE;
-		RTMPSetTimer(&pWscControl->WscProfileRetryTimer, WSC_PROFILE_RETRY_TIME_OUT);
+		if (pWscControl->WscProfile.ProfileCnt > 1)
+		{
+			pWscControl->WscProfileRetryTimerRunning = TRUE;
+			RTMPSetTimer(&pWscControl->WscProfileRetryTimer, WSC_PROFILE_RETRY_TIME_OUT);
+		}
 	}
 #endif // CONFIG_STA_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- ra%d - WscWriteConfToPortCfg\n", CurApIdx));
 }
 
-void char_to_ascii(char *output, char *input)
+void char_to_ascii(char *output, char *input)	/* ASUS EXT by Jiahao */
 {
 	int i;
 	char tmp[10];
@@ -5268,9 +5564,8 @@ VOID	WscWriteSsidToDatFile(
 #endif // CONFIG_AP_SUPPORT //
 	INT		offset = 0;
 
-#ifdef CONFIG_ASUS_EXT
-	char tmpstr[128];	
-#endif
+	char tmpstr[128];	/* ASUS EXT by Jiahao */
+
 	if (bNewFormat == FALSE)
 	{		
 		NdisZeroMemory(pTempStr, 512);
@@ -5293,8 +5588,7 @@ VOID	WscWriteSsidToDatFile(
 				}
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
 
-#ifdef CONFIG_ASUS_EXT
-
+/* ASUS EXT by Jiahao */
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
@@ -5304,8 +5598,7 @@ VOID	WscWriteSsidToDatFile(
 					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
 					nvram_set("wl_ssid2", tmpstr);
 				}
-#endif
-
+/* ASUS EXT by Jiahao */
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5316,8 +5609,7 @@ VOID	WscWriteSsidToDatFile(
 			NdisMoveMemory(pTempStr, "SSID=", strlen("SSID="));
 			offset = strlen(pTempStr);
 			NdisMoveMemory(pTempStr + offset, pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
-#ifdef CONFIG_ASUS_EXT
-
+/* ASUS EXT by Jiahao */
 			printk("Current SSID=%s\n", pCredential->SSID.Ssid);
 			nvram_set("sta_ssid", pCredential->SSID.Ssid);
 			nvram_set("wl_ssid", pCredential->SSID.Ssid);
@@ -5334,8 +5626,7 @@ VOID	WscWriteSsidToDatFile(
 				pCredential->MacAddr[5]);
 			printk("AP BSSID=%s\n", tmpstr);
 			nvram_set("sta_bssid", tmpstr);
-#endif
-
+/* ASUS EXT by Jiahao */
 		}
 #endif // CONFIG_STA_SUPPORT //
 	}
@@ -5354,7 +5645,7 @@ VOID	WscWriteSsidToDatFile(
 				NdisMoveMemory(pTempStr + offset, "=", 1);
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
@@ -5364,7 +5655,7 @@ VOID	WscWriteSsidToDatFile(
 					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
 					nvram_set("wl_ssid2", tmpstr);
 				}
-#endif
+/* ASUS EXT by Jiahao */
 			}
 			NdisZeroMemory(item_str, 10);
 		}
@@ -5384,9 +5675,7 @@ VOID	WscWriteWpaPskToDatFile(
 	PWSC_CTRL		pWscControl;
 	INT				offset = 0;
 
-#ifdef CONFIG_ASUS_EXT
-	char tmpstr[128];	
-#endif
+	char tmpstr[128];	/* ASUS EXT by Jiahao */
 
 	if (bNewFormat == FALSE)
 	{		
@@ -5411,7 +5700,7 @@ VOID	WscWriteWpaPskToDatFile(
 				}
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 				if (apidx == 0)
 				{
 					memset(tmpstr, 0x0, 128);
@@ -5419,7 +5708,7 @@ VOID	WscWriteWpaPskToDatFile(
 					printk("Current WPA-PSK=%s\n", tmpstr);
 					nvram_set("wl_wpa_psk", tmpstr);
 				}
-#endif
+/* ASUS EXT by Jiahao */
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5432,13 +5721,14 @@ VOID	WscWriteWpaPskToDatFile(
 			{
 				offset = strlen(pTempStr);				
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-#ifdef CONFIG_ASUS_EXT
+
+/* ASUS EXT by Jiahao */
 				memset(tmpstr, 0x0, 128);
 				memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 				printk("Current WPA-PSK=%s\n", tmpstr);
 				nvram_set("sta_wpa_psk", tmpstr);
 				nvram_set("wl_wpa_psk", tmpstr);
-#endif
+/* ASUS EXT by Jiahao */
 			}
 		}
 #endif // CONFIG_STA_SUPPORT //
@@ -5459,7 +5749,7 @@ VOID	WscWriteWpaPskToDatFile(
 				NdisMoveMemory(pTempStr + offset, "=", 1);
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 				if (apidx == 0)
 				{
 					memset(tmpstr, 0x0, 128);
@@ -5467,14 +5757,13 @@ VOID	WscWriteWpaPskToDatFile(
 					printk("Current WPA-PSK=%s\n", tmpstr);
 					nvram_set("wl_wpa_psk", tmpstr);
 				}
-#endif
+/* ASUS EXT by Jiahao */
 			}
 			NdisZeroMemory(item_str, 10);
 		}
 	}
 #endif // CONFIG_AP_SUPPORT //
 }
-
 
 BOOLEAN WscCheckNonce(
 	IN	PRTMP_ADAPTER	pAdapter, 
@@ -5683,7 +5972,7 @@ INT	WscSetAuthMode(
 
 		for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 		{
-			if (pAd->MacTab.Content[i].ValidAsCLI)
+			if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]))
 			{
 				pAd->MacTab.Content[i].PortSecured  = WPA_802_1X_PORT_NOT_SECURED;
 			}
@@ -5715,12 +6004,6 @@ INT	WscSetAuthMode(
 			pAd->StaCfg.AuthMode = Ndis802_11AuthModeWPANone;
 		else if ((strcmp(arg, "WPA2PSK") == 0) || (strcmp(arg, "wpa2psk") == 0))
 			pAd->StaCfg.AuthMode = Ndis802_11AuthModeWPA2PSK;    
-#ifdef WPA_SUPPLICANT_SUPPORT
-		else if ((strcmp(arg, "WPA") == 0) || (strcmp(arg, "wpa") == 0))
-			pAd->StaCfg.AuthMode = Ndis802_11AuthModeWPA;    
-		else if ((strcmp(arg, "WPA2") == 0) || (strcmp(arg, "wpa2") == 0))
-			pAd->StaCfg.AuthMode = Ndis802_11AuthModeWPA2;
-#endif // WPA_SUPPLICANT_SUPPORT //
 		else
 			return FALSE;  
 
@@ -5831,12 +6114,6 @@ USHORT WscGetAuthTypeFromStr(
         return WSC_AUTHTYPE_WPAPSK;
     else if ((strcmp(arg, "WPA2PSK") == 0) || (strcmp(arg, "wpa2psk") == 0))
         return WSC_AUTHTYPE_WPA2PSK;
-#ifdef WPA_SUPPLICANT_SUPPORT
-    else if ((strcmp(arg, "WPA") == 0) || (strcmp(arg, "wpa") == 0))
-        return WSC_AUTHTYPE_WPA;
-    else if ((strcmp(arg, "WPA2") == 0) || (strcmp(arg, "wpa2") == 0))
-        return WSC_AUTHTYPE_WPA2;
-#endif // WPA_SUPPLICANT_SUPPORT //
     else
         return 0;
 }
@@ -5952,6 +6229,9 @@ VOID	WscScanExec(
 {
 	MLME_SCAN_REQ_STRUCT	ScanReq;
 //	UCHAR					ZeroSsid[32];
+#ifdef WSC_LED_SUPPORT
+	UCHAR WPSLEDStatus;
+#endif // WSC_LED_SUPPORT //
 
 	// Prevent infinite loop if conncet time out didn't stop the repeat scan
 	if ((pAdapter->StaCfg.WscControl.WscStatus == STATUS_WSC_FAIL) ||
@@ -5969,10 +6249,17 @@ VOID	WscScanExec(
 
 	pAdapter->StaCfg.WscControl.WscStatus = STATUS_WSC_SCAN_AP;
 
+#ifdef WSC_LED_SUPPORT
+	// The protocol is connecting to a partner.
+	WPSLEDStatus = LED_WPS_IN_PROCESS;
+#ifdef RTMP_MAC_PCI
+	RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
 	// Prepare Scan parameters and enqueue the MLME command
 //	NdisZeroMemory(ZeroSsid, 32);
 	ScanParmFill(pAdapter, &ScanReq, "", 0, BSS_ANY, SCAN_WSC_ACTIVE);
-	MlmeEnqueue(pAdapter, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq);
+	MlmeEnqueue(pAdapter, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq, 0);
 	pAdapter->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_LIST_SCAN;
 }
 
@@ -6001,6 +6288,10 @@ BOOLEAN	WscPBCExec(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN  BOOLEAN			bFromM2) 
 {
+#ifdef WSC_LED_SUPPORT
+	UCHAR WPSLEDStatus;
+#endif // WSC_LED_SUPPORT //
+
 	DBGPRINT(RT_DEBUG_OFF, ("-----> WscPBCExec !!!\n"));
 	
 	// 1. Search the qualified SSID from current SSID list
@@ -6012,9 +6303,36 @@ BOOLEAN	WscPBCExec(
 		// Set WSC state to WSC_FAIL
 		pAdapter->StaCfg.WscControl.WscState = WSC_STATE_FAIL;
 		if (pAdapter->StaCfg.WscControl.WscPBCBssCount== 0)
+		{
 			pAdapter->StaCfg.WscControl.WscStatus = STATUS_WSC_PBC_NO_AP;
+#ifdef WSC_LED_SUPPORT
+			// Failed to find any partner.
+			WPSLEDStatus = LED_WPS_ERROR;
+#ifdef RTMP_MAC_PCI
+			RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
+		}
 		else
+		{
 			pAdapter->StaCfg.WscControl.WscStatus = STATUS_WSC_PBC_TOO_MANY_AP;			
+			
+#ifdef WSC_LED_SUPPORT
+			if ((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) // WPS LED mode 9.
+			{
+				// In case of the WPS LED mode 9, the UI would abort the connection attempt by making the RT_OID_802_11_WSC_SET_WPS_STATE_MACHINE_TERMINATION request.
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: Skip the WPS session overlap detected LED indication.\n", __FUNCTION__));
+			}
+			else // Other LED mode.
+			{
+				// Session overlap detected.
+				WPSLEDStatus = LED_WPS_SESSION_OVERLAP_DETECTED;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+			}
+#endif // WSC_LED_SUPPORT //
+		}
 		DBGPRINT(RT_DEBUG_OFF, ("WscPBCExec --> AP list is %d, wait for next time\n", pAdapter->StaCfg.WscControl.WscPBCBssCount));
 		
 		// 2.1. Set 10 second timer to invoke another scan
@@ -6044,12 +6362,20 @@ BOOLEAN	WscPBCExec(
 	pAdapter->StaCfg.WscControl.WscState = WSC_STATE_START;
 	pAdapter->StaCfg.WscControl.WscStatus = STATUS_WSC_START_ASSOC;
 
+#ifdef WSC_LED_SUPPORT
+	// The protocol is connecting to a partner.
+	WPSLEDStatus = LED_WPS_IN_PROCESS;
+#ifdef RTMP_MAC_PCI
+	RTMPSetLED(pAdapter, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
+
 	// 5. Enqueue BSSID connection command
 	MlmeEnqueue(pAdapter, 
 				MLME_CNTL_STATE_MACHINE, 
 				OID_802_11_BSSID, 
 				sizeof(NDIS_802_11_MAC_ADDRESS),
-				(VOID *)&pAdapter->StaCfg.WscControl.WscBssid[0]);
+				(VOID *)&pAdapter->StaCfg.WscControl.WscBssid[0], 0);
 
 	DBGPRINT(RT_DEBUG_OFF, ("<----- WscPBCExec !!!\n"));
 	return TRUE;
@@ -6145,7 +6471,13 @@ VOID WscPBCBssTableSort(
 				if (be2cpu16(pWscIE->Type) == WSC_ID_DEVICE_PWD_ID)
 				{
 					// Found device password ID
+#ifdef WINBOND
+					//The Winbond's platform will fail to retrive 2-bytes data, if use the original
+					//be2cpu16<--
+					DevicePasswordID = WINBON_GET16((PUCHAR)&pWscIE->Data[0]);
+#else
 					DevicePasswordID = be2cpu16(*((USHORT *) &pWscIE->Data[0]));
+#endif // WINBOND //
 					DBGPRINT(RT_DEBUG_TRACE, ("WscPBCBssTableSort : DevicePasswordID = 0x%04x\n", DevicePasswordID));
 					if (DevicePasswordID == DEV_PASS_ID_PBC)	// Check for PBC value
 					{
@@ -6458,8 +6790,18 @@ VOID	WscCreateProfileFromCfg(
 		if (OpMode == AP_MODE)
 		{
 			NdisMoveMemory(pCredential->MacAddr, pAdapter->ApCfg.MBSSID[apidx].Bssid, 6);
-			NdisMoveMemory(pCredential->SSID.Ssid, pAdapter->ApCfg.MBSSID[apidx].Ssid, pAdapter->ApCfg.MBSSID[apidx].SsidLen);
-			pCredential->SSID.SsidLength = pAdapter->ApCfg.MBSSID[apidx].SsidLen;
+			if ((pWscControl->WscConfStatus == WSC_SCSTATE_UNCONFIGURED) &&
+				(pWscControl->WscDefaultSsid.SsidLength > 0) &&
+				(pWscControl->WscDefaultSsid.SsidLength < 33))
+			{
+				NdisMoveMemory(pCredential->SSID.Ssid, pWscControl->WscDefaultSsid.Ssid, pWscControl->WscDefaultSsid.SsidLength);
+				pCredential->SSID.SsidLength = pWscControl->WscDefaultSsid.SsidLength;
+			}
+			else
+			{
+				NdisMoveMemory(pCredential->SSID.Ssid, pAdapter->ApCfg.MBSSID[apidx].Ssid, pAdapter->ApCfg.MBSSID[apidx].SsidLen);
+				pCredential->SSID.SsidLength = pAdapter->ApCfg.MBSSID[apidx].SsidLen;
+			}
 		}
 #ifdef APCLI_SUPPORT    
 		else if (OpMode == AP_CLIENT_MODE)
@@ -6657,13 +6999,13 @@ VOID   WpsApSmProcess(
 		NdisMoveMemory(Elem->Msg, MacAddr, MAC_ADDR_LEN);
 		NdisMoveMemory(Elem->Msg+6, pData, Elem->MsgLen);
 		
-		StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+		StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
 	}
     else if (pEntry && (Elem->MsgType == WSC_EAPOL_PACKET_MSG) && 
 			 (
-			     (pEntry->ValidAsCLI && MAC_ADDR_EQUAL(pHeader->Addr2, pAd->ApCfg.MBSSID[apidx].WscControl.EntryAddr))
+			     (IS_ENTRY_CLIENT(pEntry) && MAC_ADDR_EQUAL(pHeader->Addr2, pAd->ApCfg.MBSSID[apidx].WscControl.EntryAddr))
 #ifdef APCLI_SUPPORT
-			   ||(pEntry->ValidAsApCli && MAC_ADDR_EQUAL(pHeader->Addr2, pAd->ApCfg.ApCliTab[apidx].WscControl.EntryAddr))
+			   ||(IS_ENTRY_APCLI(pEntry) && MAC_ADDR_EQUAL(pHeader->Addr2, pAd->ApCfg.ApCliTab[apidx].WscControl.EntryAddr))
 #endif // APCLI_SUPPORT //
 			 )
 			)
@@ -6676,7 +7018,7 @@ VOID   WpsApSmProcess(
     	pData += sizeof(IEEE8021X_FRAME) + sizeof(EAP_FRAME);
 
 #ifdef APCLI_SUPPORT
-        if (pEntry->ValidAsApCli)
+        if (IS_ENTRY_APCLI(pEntry))
         {
             pAd->ApCfg.ApCliTab[apidx].WscControl.lastId = pEapFrame->Id;
             if (pEapFrame->Code == EAP_CODE_FAIL)
@@ -6685,7 +7027,7 @@ VOID   WpsApSmProcess(
                 NdisMoveMemory(Elem->Msg, pHeader->Addr2, MAC_ADDR_LEN);
                 NdisMoveMemory(Elem->Msg+6, fail_data, strlen(fail_data));
                 Elem->MsgLen = strlen(fail_data);
-                StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+                StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
                 return;
             }
             else if ((pEapFrame->Code == EAP_CODE_REQ) && (pEapFrame->Type == EAP_TYPE_ID))
@@ -6694,7 +7036,7 @@ VOID   WpsApSmProcess(
                 NdisMoveMemory(Elem->Msg, pHeader->Addr2, MAC_ADDR_LEN);
                 NdisMoveMemory(Elem->Msg+6, id_data, strlen(id_data));
                 Elem->MsgLen = strlen(id_data);
-                StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+                StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
                 return;
             }
         }
@@ -6707,7 +7049,7 @@ VOID   WpsApSmProcess(
         
         Elem->MsgLen -= (LENGTH_802_11 + LENGTH_802_1_H + sizeof(IEEE8021X_FRAME) + sizeof(EAP_FRAME));
         NdisMoveMemory(Elem->Msg, pHeader->Addr2, MAC_ADDR_LEN);
-        if ((pEntry->ValidAsCLI) &&
+        if (IS_ENTRY_CLIENT(pEntry) &&
             (pEapFrame->Code == EAP_CODE_RSP) && 
             (pEapFrame->Type == EAP_TYPE_ID))
         { 
@@ -6729,7 +7071,7 @@ VOID   WpsApSmProcess(
             if (WscCheckWSCHeader(pAd, (PUCHAR) pData))
             {
 #ifdef APCLI_SUPPORT
-                if ((pEntry->ValidAsApCli) &&
+                if (IS_ENTRY_APCLI(pEntry) &&
                     (pEapFrame->Code == EAP_CODE_REQ) && 
                     (pEapFrame->Type == EAP_TYPE_WSC))
                 {
@@ -6762,10 +7104,10 @@ VOID   WpsApSmProcess(
                 return;
             }
         }
-        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
     }
     else if (Elem->MsgType == WSC_EAPOL_START_MSG)
-        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
 }
 
 #define WSC_SINGLE_TRIGGER_APPNAME  "goahead"
@@ -6778,11 +7120,7 @@ INT	WscGetConfWithoutTrigger(
 	INT                 WscMode;
 	INT                 IsAPConfigured;
 	PWSC_UPNP_NODE_INFO pWscUPnPNodeInfo;
-#ifdef CONFIG_ASUS_EXT
-    INT	                idx;
-#endif
 	UCHAR		apIdx;
-
 
 /* +++  added by YYHuang@Ralink, 08/03/12 */
 //
@@ -6802,6 +7140,7 @@ INT	WscGetConfWithoutTrigger(
         read_unlock(&tasklist_lock);
     }
 /* ---  added by YYHuang@Ralink, 08/03/12 */
+
 
 	// TODO: Is it possible ApCli call this fucntion??
 	apIdx = pWscControl->EntryIfIdx;
@@ -6870,7 +7209,7 @@ VOID   WpsStaSmProcess(
 		else
 			NdisMoveMemory(Elem->Msg, pData, Elem->MsgLen);
 		
-		StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+		StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
 	}
     else if (Elem->MsgType == WSC_EAPOL_PACKET_MSG)
     {   // WSC_STATE_MACHINE can service only one station at one time
@@ -6930,7 +7269,7 @@ VOID   WpsStaSmProcess(
             NdisMoveMemory(Elem->Msg, fail_data, strlen(fail_data));
             Elem->MsgLen = strlen(fail_data);
         }
-        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem);
+        StateMachinePerformAction(pAd, &pAd->Mlme.WscMachine, Elem, pAd->Mlme.WscMachine.CurrState);
     }
 }
 #endif // CONFIG_STA_SUPPORT //
@@ -6954,7 +7293,7 @@ VOID WscSendNACK(
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
     {
-        if (pEntry->ValidAsApCli)
+        if (IS_ENTRY_APCLI(pEntry))
             WscSendMessage(pAdapter, WSC_OPCODE_NACK, pWscData, DataLen, pWscControl, AP_CLIENT_MODE);
         else
             WscSendMessage(pAdapter, WSC_OPCODE_NACK, pWscData, DataLen, pWscControl, AP_MODE);
@@ -6985,7 +7324,7 @@ VOID WscLinkDown(
 		DBGPRINT(RT_DEBUG_TRACE, ("WscLinkDown(): Disassociate with current WPS AP...\n"));
 		DisassocParmFill(pAd, &DisassocReq, pAd->CommonCfg.Bssid, REASON_DISASSOC_STA_LEAVING);
 		MlmeEnqueue(pAd, ASSOC_STATE_MACHINE, MT2_MLME_DISASSOC_REQ, 
-					sizeof(MLME_DISASSOC_REQ_STRUCT), &DisassocReq);
+					sizeof(MLME_DISASSOC_REQ_STRUCT), &DisassocReq, 0);
 		pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_DISASSOC;
 		pAd->MlmeAux.CurrReqIsFromNdis = TRUE;
 		RTMP_MLME_HANDLER(pAd);
@@ -6994,17 +7333,27 @@ VOID WscLinkDown(
 	
 	if (pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE)
 	{		
+#ifdef WSC_LED_SUPPORT
+		UCHAR WPSLEDStatus;
+
+		// The protocol is connecting to a partner.
+		WPSLEDStatus = LED_WPS_IN_PROCESS;
+#ifdef RTMP_MAC_PCI
+		RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+#endif // WSC_LED_SUPPORT //
 		pAd->StaCfg.WscControl.WscState = WSC_STATE_START;
 	}
 	else
 	{
 		pAd->bConfigChanged = TRUE;
 		pAd->StaCfg.WscControl.bWscTrigger = FALSE;
+		BssTableDeleteEntry(&pAd->ScanTab, pAd->CommonCfg.Bssid, pAd->CommonCfg.Channel);
 		MlmeEnqueue(pAd, 
 					MLME_CNTL_STATE_MACHINE, 
 					OID_802_11_BSSID,
 					MAC_ADDR_LEN,
-					pAd->MlmeAux.Bssid);
+					pAd->MlmeAux.Bssid, 0);
 
 		RTMP_MLME_HANDLER(pAd);
 	}
@@ -7161,7 +7510,7 @@ VOID WscPBC_DPID_FromSTA(
 				if (NdisEqualMemory(pMacAddr, pWscControl->WscStaPbcProbeInfo.StaMacAddr[tab_idx], MAC_ADDR_LEN))
 				{
 					Index = -1;
-					pWscControl->WscStaPbcProbeInfo.ReciveTime[Index] = now;
+					pWscControl->WscStaPbcProbeInfo.ReciveTime[tab_idx] = now;
 					break;
 				}
 			}
@@ -7206,7 +7555,7 @@ void    WscWriteConfToDatFile(
 	PSTRING			pTempStr = 0;
 #ifdef CONFIG_AP_SUPPORT
 	INT				index = 0;
-	UCHAR			apidx = MAIN_MBSSID;
+	UCHAR			apidx = pAd->WriteWscCfgToDatFile;
 #endif // CONFIG_AP_SUPPORT //
 	PWSC_CTRL		pWscControl = NULL;
 	PWSC_CREDENTIAL	pCredentail = NULL;
@@ -7214,15 +7563,18 @@ void    WscWriteConfToDatFile(
 	STRING			WepKeyFormatName[10] = {0};
 	INT				tempStrLen = 0;
 
-#ifdef CONFIG_ASUS_EXT
-	char tmpstr[128];	
-#endif
+	char tmpstr[128];	/* ASUS EXT by Jiahao */
 
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscWriteConfToDatFile\n"));
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
+		if (apidx > pAd->ApCfg.BssidNum)
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("<----- WscWriteConfToDatFile (wrong apidx = %d)\n", apidx));
+			return;
+		}
 		pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
 #ifdef RTMP_RBUS_SUPPORT
 		if (pAd->infType == RTMP_DEV_INF_RBUS)
@@ -7231,8 +7583,8 @@ void    WscWriteConfToDatFile(
 #endif // RTMP_RBUS_SUPPORT //
 			fileName = AP_PROFILE_PATH;
 
-		sprintf((PSTRING) WepKeyName, "Key%dStr1=", pAd->ApCfg.MBSSID[MAIN_MBSSID].DefaultKeyId+1);
-		sprintf((PSTRING) WepKeyFormatName, "Key%dType=", pAd->ApCfg.MBSSID[MAIN_MBSSID].DefaultKeyId+1);
+		sprintf((PSTRING) WepKeyName, "Key%dStr%d=", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1, apidx+1);
+		sprintf((PSTRING) WepKeyFormatName, "Key%dType=", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
 	}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -7345,7 +7697,7 @@ void    WscWriteConfToDatFile(
 								if (index == 0)
 								{
 									sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 									printk("Current AuthMode=%s\n", RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
 
 									if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "OPEN") == 0))
@@ -7390,7 +7742,7 @@ void    WscWriteConfToDatFile(
 										nvram_set("wl_crypto", "tkip+aes");
 */
 									}
-#endif
+/* ASUS EXT by Jiahao */
 								}
 								else
 									sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
@@ -7403,7 +7755,8 @@ void    WscWriteConfToDatFile(
 					{
 						USHORT auth_flag = WscGetAuthType(pAd->StaCfg.AuthMode);
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetAuthTypeStr(auth_flag));
-#ifdef CONFIG_ASUS_EXT
+
+/* ASUS EXT by Jiahao */
 						printk("Current AuthMode=%s\n", WscGetAuthTypeStr(auth_flag));
 
 						if ((strcmp(WscGetAuthTypeStr(auth_flag), "OPEN") == 0))
@@ -7444,7 +7797,7 @@ void    WscWriteConfToDatFile(
 							nvram_set("wl_auth_mode", "wpa");
 							nvram_set("wl_wpa_mode", "2");
 						}
-#endif
+/* ASUS EXT by Jiahao */
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -7460,57 +7813,31 @@ void    WscWriteConfToDatFile(
 							if (index == 0)
 							{
 								sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
-#ifdef CONFIG_ASUS_EXT
+
+/* ASUS EXT by Jiahao */
 								printk("Current EncrypType=%s\n", RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
 
 								if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "NONE") == 0))
 									nvram_set("wl_wep_x", "0");
 								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "WEP") == 0))
 								{
-//									nvram_set("wl_wep_x", "2");
-//									nvram_set("wl_key_type", "0");
 								}
 								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "TKIP") == 0))
 								{
-/*
-									if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPA2PSK") == 0))
-									{
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "tkip+aes");
-										nvram_set("wl_wpa_mode", "0");
-									}
-									else
-*/
-									{
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "tkip");
-									}
+									nvram_set("wl_wep_x", "0");
+									nvram_set("wl_crypto", "tkip");
 								}
 								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "AES") == 0))
 								{
-/*
-									if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPAPSK") == 0))
-									{
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "tkip+aes");
-										nvram_set("wl_wpa_mode", "0");
-									}
-									else
-*/
-									{
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "aes");
-									}
+									nvram_set("wl_wep_x", "0");
+									nvram_set("wl_crypto", "aes");
 								}
 								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "TKIPAES") == 0))
 								{
 									nvram_set("wl_wep_x", "0");
 									nvram_set("wl_crypto", "tkip+aes");
-/*									
-									nvram_set("wl_wpa_mode", "0");
-*/
 								}
-#endif
+/* ASUS EXT by Jiahao */
 							}
 							else
 								sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
@@ -7522,7 +7849,8 @@ void    WscWriteConfToDatFile(
 					{
 						USHORT encrypt_flag = WscGetEncryType(pAd->StaCfg.WepStatus);
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetEncryTypeStr(encrypt_flag));
-#ifdef CONFIG_ASUS_EXT
+
+/* ASUS EXT by Jiahao */
 						printk("Current EncrypType=%s\n", WscGetEncryTypeStr(encrypt_flag));
 
 						if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "NONE") == 0))
@@ -7547,7 +7875,7 @@ void    WscWriteConfToDatFile(
 							nvram_set("wl_wep_x", "0");
 							nvram_set("wl_crypto", "aes");
 						}
-#endif
+/* ASUS EXT by Jiahao */
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}    
@@ -7570,10 +7898,7 @@ void    WscWriteConfToDatFile(
 						{
 							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
 							if (index == 0)
-							{
 								sprintf(pTempStr, "%s%d", pTempStr, pWscControl->WscConfMode);
-								printk("Current WscConfMode=%d\n", pWscControl->WscConfMode);		
-							}
 							else
 								sprintf(pTempStr, "%s;%d", pTempStr, pWscControl->WscConfMode);
 						}
@@ -7590,10 +7915,7 @@ void    WscWriteConfToDatFile(
 						{
 							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
 							if (index == 0)
-							{
 								sprintf(pTempStr, "%s%d", pTempStr, pWscControl->WscConfStatus);
-								printk("Current WscConfStatus=%d\n", pWscControl->WscConfStatus);	
-							}
 							else
 								sprintf(pTempStr, "%s;%d", pTempStr, pWscControl->WscConfStatus);
 						}
@@ -7611,20 +7933,19 @@ void    WscWriteConfToDatFile(
 					{
 						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
 						{
-							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
 							if (index == 0)
 							{
-								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
-#ifdef CONFIG_ASUS_EXT
+								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
+/* ASUS EXT by Jiahao */
 							printk("Current DefaultKeyID=%d\n", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
 
 							memset(tmpstr, 0x0, 128);
 							sprintf(tmpstr, "%d", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
    					               	nvram_set("wl_key", tmpstr);
-#endif
+/* ASUS EXT by Jiahao */
 							}
 							else
-								sprintf(pTempStr, "%s;%d", pTempStr, pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
+								sprintf(pTempStr, "%s;%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
 						}
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -7632,150 +7953,157 @@ void    WscWriteConfToDatFile(
 					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 					{
 						sprintf(pTempStr, "%s%d", pTempStr, pAd->StaCfg.DefaultKeyId+1);
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 						printk("Current DefaultKeyID=%d\n", pAd->StaCfg.DefaultKeyId+1);
 
 						memset(tmpstr, 0x0, 128);
 						sprintf(tmpstr, "%d", pAd->StaCfg.DefaultKeyId+1);
 						nvram_set("sta_key", tmpstr);
 						nvram_set("wl_key", tmpstr);
-#endif
+/* ASUS EXT by Jiahao */
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
 #ifdef CONFIG_AP_SUPPORT
-					else if (pAd->OpMode == OPMODE_AP)
+				else if ((strncmp(pTempStr, WepKeyFormatName, strlen(WepKeyFormatName)) == 0) &&
+						 (pAd->OpMode == OPMODE_AP))
+				{
+					pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+					if (pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled)
 					{
-						for (index = 1; index <= 4; index++)
+						UCHAR idx = 0, KeyType[8] = {0}, *ptr;
+
+						ptr = rtstrstr(pTempStr, "=");
+						KeyType[0] = simple_strtoul(ptr+1,NULL, 10);
+						for (idx = 1; idx < 4; idx++)
 						{
-							sprintf(WepKeyFormatName, "Key%dType=", index);
-							if (rtstrstr(pTempStr, WepKeyFormatName))
-							{
-								NdisZeroMemory(pTempStr, 512);
-								NdisMoveMemory(pTempStr, WepKeyFormatName, strlen(WepKeyFormatName));
-								for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-								{
-									if (pAd->ApCfg.MBSSID[MAIN_MBSSID].WepStatus == Ndis802_11WEPEnabled)  
-									{
-										pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
-										if ((pCredentail->KeyLength == 5) ||
-											(pCredentail->KeyLength == 13))
-											sprintf(pTempStr, "%s1", pTempStr); /* ASCII */
-										else
-											sprintf(pTempStr, "%s0", pTempStr); /* Hex */
-#ifdef CONFIG_ASUS_EXT
-										if (apidx == 0)
-										{
-											if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
-												nvram_set("wl_wep_x", "1");
-											else
-												nvram_set("wl_wep_x", "2");
-										}
-#endif
-									}
-									if (apidx < (pAd->ApCfg.BssidNum - 1))
-										sprintf(pTempStr, "%s;", pTempStr);
-								}
+							ptr = rtstrstr(ptr, ";");
+							if (ptr == NULL) {
+								break;
+							} else {
+								ptr = ptr+1;
 							}
 
-							sprintf(WepKeyName, "Key%dStr=", index);
-							if (rtstrstr(pTempStr, WepKeyName))
-							{
-								NdisZeroMemory(pTempStr, 512);
-								NdisMoveMemory(pTempStr, WepKeyName, strlen(WepKeyName));
-								tempStrLen = strlen(pTempStr);
-								for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-								{
-									pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
-									if (pCredentail->KeyLength)
-									{
-										NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
-										tempStrLen = strlen(pTempStr);
-#ifdef CONFIG_ASUS_EXT
-										if (apidx == 0 && pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled)
-										{
-											int ii;
-											if (pCredentail->KeyLength == 5 || pCredentail->KeyLength == 13)
-											{
-												int flag_hex=0;
-												for (ii=0; ii<pCredentail->KeyLength; ii++)
-													if (pCredentail->Key[ii]<32 || pCredentail->Key[ii]>126)
-													{
-														flag_hex=1;
-														break;
-													}
+							if ((ptr != NULL) ||
+									(*ptr == '0') ||
+									(*ptr == '1'))
+								KeyType[idx] = simple_strtoul(ptr,NULL, 10);
+						}
 
-												if (flag_hex)
-												{
-                	        					        			memset(tmpstr, 0x0, 128);
-						                                			for (ii=0; ii<pCredentail->KeyLength; ii++)
-														sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
-													nvram_set("wl_key_type", "0");
-													nvram_set("wl_key1", tmpstr);
-													nvram_set("wl_key2", tmpstr);
-													nvram_set("wl_key3", tmpstr);
-													nvram_set("wl_key4", tmpstr);
-													printk("Don't try to fool me with non-ASCII chars!\n");
-													printk("Wep Key:%s\n", tmpstr);
-													printk("Wep Key Type:HEX\n");
-												}
-												else
-												{
-													nvram_set("wl_key_type", "1");
-													nvram_set("wl_key1", pCredentail->Key);
-													nvram_set("wl_key2", pCredentail->Key);
-													nvram_set("wl_key3", pCredentail->Key);
-													nvram_set("wl_key4", pCredentail->Key);
-													printk("Wep Key:%s\n", pCredentail->Key);
-													printk("Wep Key Type:ASCII\n");
-												}
-											}
-											else
-											{
-                        				        				memset(tmpstr, 0x0, 128);
-												memcpy(tmpstr, pCredentail->Key, pCredentail->KeyLength);       // ASUS add
-# if 0
-				                                				for (ii=0; ii<pCredentail->KeyLength; ii++)
-													sprintf(tmpstr, "%s%02X", tmpstr, pCredentail->Key[ii]);
-#endif
-												nvram_set("wl_key_type", "0");
-												nvram_set("wl_key1", tmpstr);
-												nvram_set("wl_key2", tmpstr);
-												nvram_set("wl_key3", tmpstr);
-												nvram_set("wl_key4", tmpstr);
-												printk("Wep Key:%s\n", tmpstr);
-												printk("Wep Key Type:HEX\n");
-											}
-										}
-#endif
-									}
-									if (apidx < (pAd->ApCfg.BssidNum - 1))
-										NdisMoveMemory(pTempStr + tempStrLen, ";", 1);
-									tempStrLen += 1;
-								}
+						NdisZeroMemory(pTempStr, 512);
+						NdisMoveMemory(pTempStr, WepKeyFormatName, strlen(WepKeyFormatName));
+						for (idx = 0; idx < pAd->ApCfg.BssidNum; idx++)
+						{
+							if (idx == apidx)  
+							{
+								sprintf(pTempStr, "%s0", pTempStr);
 							}
-							
-							for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-							{								
-								sprintf(WepKeyName, "Key%dStr%d=", index, (apidx + 1));								
-								if (rtstrstr(pTempStr, WepKeyName) &&
-									(pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
+							else
+							{
+								sprintf(pTempStr, "%s%d", pTempStr, KeyType[idx]);
+							}
+
+							if (apidx < (pAd->ApCfg.BssidNum - 1))
+								sprintf(pTempStr, "%s;", pTempStr);
+						}
+/* ASUS EXT by Jiahao */
+						if (apidx == 0)
+						{
+							pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+
+							if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
+								nvram_set("wl_wep_x", "1");
+							else
+								nvram_set("wl_wep_x", "2");
+						}
+/* ASUS EXT by Jiahao */
+					}
+				}
+				else if ((strncmp(pTempStr, WepKeyName, strlen(WepKeyFormatName)) == 0) &&
+						 (pAd->OpMode == OPMODE_AP))
+				{
+					pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+					if (pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled)
+					{
+						NdisZeroMemory(pTempStr, 512);
+						NdisMoveMemory(pTempStr, WepKeyName, strlen(WepKeyName));
+						tempStrLen = strlen(pTempStr);
+						if (pCredentail->KeyLength)
+						{
+							if ((pCredentail->KeyLength == 5) ||
+									(pCredentail->KeyLength == 13))
+							{
+								int jjj=0;
+								for (jjj=0; jjj<pCredentail->KeyLength; jjj++)
+									sprintf(pTempStr, "%s%02x", pTempStr, pCredentail->Key[jjj]);
+							}
+							else if ((pCredentail->KeyLength == 10) ||
+									(pCredentail->KeyLength == 26))
+							{
+								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
+							}
+/* ASUS EXT by Jiahao */
+							if (apidx == 0)
+							{
+								int ii;
+								if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 13))
 								{
-									NdisZeroMemory(pTempStr, 512);
-									NdisMoveMemory(pTempStr, WepKeyName, strlen(WepKeyName));
-									tempStrLen = strlen(pTempStr);
-									pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
-									NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
+									int flag_hex=0;
+									for (ii=0; ii<pCredentail->KeyLength; ii++)
+										if (pCredentail->Key[ii]<32 || pCredentail->Key[ii]>126)
+										{
+											flag_hex=1;
+											break;
+										}
+		
+									if (flag_hex)
+									{
+						        			memset(tmpstr, 0x0, 128);
+			                                			for (ii=0; ii<pCredentail->KeyLength; ii++)
+											sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
+										nvram_set("wl_key_type", "0");
+										nvram_set("wl_key1", tmpstr);
+										nvram_set("wl_key2", tmpstr);
+										nvram_set("wl_key3", tmpstr);
+										nvram_set("wl_key4", tmpstr);
+										printk("Don't try to fool me with non-ASCII chars!\n");
+										printk("Wep Key:%s\n", tmpstr);
+										printk("Wep Key Type:HEX\n");
+									}
+									else
+									{
+										nvram_set("wl_key_type", "1");
+										nvram_set("wl_key1", pCredentail->Key);
+										nvram_set("wl_key2", pCredentail->Key);
+										nvram_set("wl_key3", pCredentail->Key);
+										nvram_set("wl_key4", pCredentail->Key);
+										printk("Wep Key:%s\n", pCredentail->Key);
+										printk("Wep Key Type:ASCII\n");
+									}
+								}
+								else
+								{
+									memset(tmpstr, 0x0, 128);
+									memcpy(tmpstr, pCredentail->Key, pCredentail->KeyLength);
+									nvram_set("wl_key_type", "0");
+									nvram_set("wl_key1", tmpstr);
+									nvram_set("wl_key2", tmpstr);
+									nvram_set("wl_key3", tmpstr);
+									nvram_set("wl_key4", tmpstr);
+									printk("Wep Key:%s\n", tmpstr);
+									printk("Wep Key Type:HEX\n");
 								}
 							}
+/* ASUS EXT by Jiahao */
 						}
 					}
+				}
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 				else if (rtstrstr(pTempStr, (PSTRING) WepKeyFormatName) &&  (pAd->OpMode == OPMODE_STA))
 				{
-						pCredentail = &pAd->StaCfg.WscControl.WscProfile.Profile[0];
+						pCredentail = &pWscControl->WscProfile.Profile[pWscControl->WscProfile.ApplyProfileIdx];
 					if (pAd->StaCfg.WepStatus == Ndis802_11WEPEnabled)                           
 					{
 						NdisZeroMemory(pTempStr, 512);
@@ -7784,23 +8112,23 @@ void    WscWriteConfToDatFile(
 							sprintf(pTempStr, "%s1", WepKeyFormatName); // ASCII
 						else
 							sprintf(pTempStr, "%s0", WepKeyFormatName); // Hex
-#ifdef CONFIG_ASUS_EXT
-						if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
-						{
-							nvram_set("sta_wep_x", "1");
-							nvram_set("wl_wep_x", "1");
-						}
-						else
-						{
-							nvram_set("sta_wep_x", "2");
-							nvram_set("wl_wep_x", "2");
-						}
-#endif
 					}
+/* ASUS EXT by Jiahao */
+					if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
+					{
+						nvram_set("sta_wep_x", "1");
+						nvram_set("wl_wep_x", "1");
+					}
+					else
+					{
+						nvram_set("sta_wep_x", "2");
+						nvram_set("wl_wep_x", "2");
+					}
+/* ASUS EXT by Jiahao */
 				}
 				else if (rtstrstr(pTempStr, (PSTRING) WepKeyName) &&  (pAd->OpMode == OPMODE_STA))
 				{
-						pCredentail = &pAd->StaCfg.WscControl.WscProfile.Profile[0];
+						pCredentail = &pWscControl->WscProfile.Profile[pWscControl->WscProfile.ApplyProfileIdx];
 					if (pAd->StaCfg.WepStatus == Ndis802_11WEPEnabled)                           
 					{
 						NdisZeroMemory(pTempStr, 512);
@@ -7809,7 +8137,8 @@ void    WscWriteConfToDatFile(
 							if (pCredentail->KeyLength)
 							{
 								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
-#ifdef CONFIG_ASUS_EXT
+
+/* ASUS EXT by Jiahao */
 								int ii;
 								if (pCredentail->KeyLength == 5 || pCredentail->KeyLength == 13)
 								{
@@ -7872,7 +8201,7 @@ void    WscWriteConfToDatFile(
 									printk("Wep Key:%s\n", pCredentail->Key);
 									printk("Wep Key Type:HEX\n");
 								}
-#endif
+/* ASUS EXT by Jiahao */
 							}
 					}
 				}
@@ -7887,7 +8216,7 @@ void    WscWriteConfToDatFile(
 			}
 		}
 		RtmpOSFileClose(file_w);
-#ifdef CONFIG_ASUS_EXT
+/* ASUS EXT by Jiahao */
 #ifdef CONFIG_AP_SUPPORT
 		nvram_set("wsc_config_state", "1");
 #endif
@@ -7895,7 +8224,7 @@ void    WscWriteConfToDatFile(
 #ifdef CONFIG_AP_SUPPORT
 		nvram_set("x_Setting", "1");
 #endif
-#endif
+/* ASUS EXT by Jiahao */
 	}
 
 WriteErr:   
@@ -7913,7 +8242,326 @@ out:
 	return;
 }
 
+#ifdef CONFIG_AP_SUPPORT
+void    WscWriteConfToAR9File(
+    IN  PRTMP_ADAPTER pAd)
+{
+	PCHAR			cfgData = 0;
+	PSTRING			fileName = NULL;
+	RTMP_OS_FD		file_w;
+	RTMP_OS_FS_INFO		osFSInfo;
+	INT			offset = 0;
+	INT			datoffset = 0;
+	PSTRING			pTempStr = 0;
+	PSTRING			pDatStr = 0;
+#ifdef CONFIG_AP_SUPPORT
+	INT				index = 0;
+	UCHAR			apidx = MAIN_MBSSID;
+#endif // CONFIG_AP_SUPPORT //
+	PWSC_CTRL		pWscControl = NULL;
+	PWSC_CREDENTIAL	pCredentail = NULL;
+	STRING			WepKeyName[10] = {0};
+	STRING			WepKeyFormatName[10] = {0};
+	INT				tempStrLen = 0;
+	STRING	item_str[10] = {0};
 
+	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscWriteConfToAR9File\n"));
+
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{
+		pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+			fileName = "/var/wps_profile.dat";
+
+		sprintf((PSTRING) WepKeyName, "Key%dStr1=", pAd->ApCfg.MBSSID[MAIN_MBSSID].DefaultKeyId+1);
+		sprintf((PSTRING) WepKeyFormatName, "Key%dType=", pAd->ApCfg.MBSSID[MAIN_MBSSID].DefaultKeyId+1);
+	}
+#endif // CONFIG_AP_SUPPORT //
+
+
+	RtmpOSFSInfoChange(&osFSInfo, TRUE);
+	file_w = RtmpOSFileOpen(fileName, O_WRONLY|O_CREAT, 0);
+	if (IS_FILE_OPEN_ERR(file_w)) 
+	{
+		goto WriteFileOpenErr;
+	}
+	else 
+	{
+		pTempStr = kmalloc(512, MEM_ALLOC_FLAG);
+		if (!pTempStr)
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("pTempStr kmalloc fail. (512)\n"));
+			RtmpOSFileClose(file_w);
+			goto WriteErr;
+		}
+		pDatStr = kmalloc(4096, MEM_ALLOC_FLAG);
+		if (!pDatStr)
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("pDatStr kmalloc fail. (4096)\n"));
+			RtmpOSFileClose(file_w);
+			goto WriteErr;
+		}
+			
+		//for (;;)
+		{
+			NdisZeroMemory(pTempStr, 512);
+			NdisZeroMemory(pDatStr, 4096);
+			{
+				{
+					NdisZeroMemory(item_str, 10);
+					for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+					{
+						sprintf(item_str, "SSID%d", (apidx + 1));
+						{
+							NdisMoveMemory(pTempStr, item_str, strlen(item_str));
+							offset = strlen(pTempStr);
+							NdisMoveMemory(pTempStr + offset, "=", 1);
+							offset += 1;
+							NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
+							offset += pAd->ApCfg.MBSSID[apidx].SsidLen;
+							NdisMoveMemory(pTempStr + offset, "\n", 1);
+							offset += 1;
+						}
+						NdisZeroMemory(item_str, 10);
+					}
+				}
+				NdisMoveMemory(pDatStr,pTempStr,offset);
+				datoffset += offset;
+				
+				{
+					offset=0;
+					NdisZeroMemory(pTempStr, 512);
+					sprintf(pTempStr, "AuthMode=");
+#ifdef CONFIG_AP_SUPPORT
+					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+					{
+						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
+						{
+							if (pAd->ApCfg.MBSSID[index].SsidLen)
+							{
+								if (index == 0)
+									sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
+								else
+									sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
+							}
+						}
+						sprintf(pTempStr, "%s\n", pTempStr);
+						offset=strlen(pTempStr);
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+					}
+#endif // CONFIG_AP_SUPPORT //
+				}
+
+				{
+					offset=0;
+					NdisZeroMemory(pTempStr, 512);
+					sprintf(pTempStr, "EncrypType=");
+#ifdef CONFIG_AP_SUPPORT
+					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+					{
+						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
+						{
+							if (index == 0)
+								sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
+							else
+								sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
+						}
+						sprintf(pTempStr, "%s\n", pTempStr);
+						offset=strlen(pTempStr);
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+					}
+#endif // CONFIG_AP_SUPPORT //
+				}    
+
+				{
+					offset=0;
+					NdisZeroMemory(pTempStr, 512);
+					NdisZeroMemory(item_str, 10);
+						for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+						{
+							sprintf(item_str, "WPAPSK%d", (apidx + 1));
+							//if (rtstrstr(pTempStr, item_str))
+							{
+								pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+								NdisMoveMemory(pTempStr, item_str, strlen(item_str));
+								offset = strlen(pTempStr);
+								NdisMoveMemory(pTempStr + offset, "=", 1);
+								offset += 1;
+								NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
+								offset += pWscControl->WpaPskLen;
+								NdisMoveMemory(pTempStr + offset, "\n", 1);
+								offset += 1;
+							}
+							NdisZeroMemory(item_str, 10);
+						}
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+				}
+
+				{
+						offset=0;
+						NdisZeroMemory(pTempStr, 512);
+						sprintf(pTempStr, "WscConfMode=");
+#ifdef CONFIG_AP_SUPPORT
+						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
+						{
+							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
+							if (index == 0)
+								sprintf(pTempStr, "%s%d", pTempStr, pWscControl->WscConfMode);
+							else
+								sprintf(pTempStr, "%s;%d", pTempStr, pWscControl->WscConfMode);
+						}
+						sprintf(pTempStr, "%s\n", pTempStr);
+						offset=strlen(pTempStr);
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+#endif // CONFIG_AP_SUPPORT //
+				}
+
+				{
+						offset=0;
+						NdisZeroMemory(pTempStr, 512);
+						sprintf(pTempStr, "WscConfStatus=");
+#ifdef CONFIG_AP_SUPPORT
+						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
+						{
+							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
+							if (index == 0)
+								sprintf(pTempStr, "%s%d", pTempStr, pWscControl->WscConfStatus);
+							else
+								sprintf(pTempStr, "%s;%d", pTempStr, pWscControl->WscConfStatus);
+						}
+						sprintf(pTempStr, "%s\n", pTempStr);
+						offset=strlen(pTempStr);
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+#endif // CONFIG_AP_SUPPORT //
+				}
+
+				{
+					offset=0;
+					NdisZeroMemory(pTempStr, 512);
+					sprintf(pTempStr, "DefaultKeyID=");
+#ifdef CONFIG_AP_SUPPORT
+					IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+					{
+						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
+						{
+							pWscControl = &pAd->ApCfg.MBSSID[index].WscControl;
+							if (index == 0)
+								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
+							else
+								sprintf(pTempStr, "%s;%d", pTempStr, pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
+						}
+						sprintf(pTempStr, "%s\n", pTempStr);
+						offset=strlen(pTempStr);
+						NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+						datoffset += offset;
+					}
+
+#endif // CONFIG_AP_SUPPORT //
+				}
+#ifdef CONFIG_AP_SUPPORT
+					if (pAd->OpMode == OPMODE_AP)
+					{
+						for (index = 1; index <= 4; index++)
+						{
+							sprintf(WepKeyFormatName, "Key%dType=", index);
+							//if (rtstrstr(pTempStr, WepKeyFormatName))
+							{
+								NdisZeroMemory(pTempStr, 512);
+								offset=0;
+								NdisMoveMemory(pTempStr, WepKeyFormatName, strlen(WepKeyFormatName));
+								for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+								{
+									if (pAd->ApCfg.MBSSID[MAIN_MBSSID].WepStatus == Ndis802_11WEPEnabled)  
+									{
+										pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+										if ((pCredentail->KeyLength == 5) ||
+											(pCredentail->KeyLength == 13))
+											sprintf(pTempStr, "%s1", pTempStr); /* ASCII */
+										else
+											sprintf(pTempStr, "%s0", pTempStr); /* Hex */
+									}
+									if (apidx < (pAd->ApCfg.BssidNum - 1))
+										sprintf(pTempStr, "%s;", pTempStr);
+								}
+								sprintf(pTempStr, "%s\n", pTempStr);
+								offset=strlen(pTempStr);
+								NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+								datoffset += offset;
+							}
+
+							sprintf(WepKeyName, "Key%dStr=", index);
+							//if (rtstrstr(pTempStr, WepKeyName))
+							{
+								NdisZeroMemory(pTempStr, 512);
+								offset=0;
+								NdisMoveMemory(pTempStr, WepKeyName, strlen(WepKeyName));
+								tempStrLen = strlen(pTempStr);
+								for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+								{
+									pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+									if (pCredentail->KeyLength)
+									{
+										NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
+										tempStrLen = strlen(pTempStr);
+									}
+									if (apidx < (pAd->ApCfg.BssidNum - 1))
+										NdisMoveMemory(pTempStr + tempStrLen, ";", 1);
+									tempStrLen += 1;
+								}
+								sprintf(pTempStr, "%s\n", pTempStr);
+								offset=strlen(pTempStr);
+								NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+								datoffset += offset;
+							}
+							
+							for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+							{								
+								sprintf(WepKeyName, "Key%dStr%d=", index, (apidx + 1));								
+								if ((pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
+								{
+									NdisZeroMemory(pTempStr, 512);
+									NdisMoveMemory(pTempStr, WepKeyName, strlen(WepKeyName));
+									tempStrLen = strlen(pTempStr);
+									pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
+									NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
+									NdisMoveMemory(pTempStr + tempStrLen+pCredentail->KeyLength, "\n", 1);
+								}
+								offset=tempStrLen+pCredentail->KeyLength+1;
+								NdisMoveMemory(pDatStr+datoffset,pTempStr,offset);
+								datoffset += offset;
+							}
+						}
+					}
+#endif // CONFIG_AP_SUPPORT //
+				RtmpOSFileWrite(file_w, pDatStr, datoffset);
+				//RtmpOSFileWrite(file_w, "\n", 1);
+			}
+		}
+		RtmpOSFileClose(file_w);
+	}
+
+WriteErr:   
+	if (pTempStr)
+		kfree(pTempStr);
+	if (pDatStr)
+		kfree(pDatStr);
+
+WriteFileOpenErr:    
+	if (cfgData)
+		kfree(cfgData);
+
+	RtmpOSFSInfoChange(&osFSInfo, FALSE);
+
+
+	DBGPRINT(RT_DEBUG_TRACE, ("<----- WscWriteConfToAR9File\n"));
+	return;
+}
+#endif//CONFIG_AP_SUPPORT//
 static INT write_dat_file_thread (
     IN void *Context)
 {
@@ -7928,6 +8576,7 @@ static INT write_dat_file_thread (
 
 	while (!pTask->task_killed)
 	{
+		RTMPusecDelay(2000);
 #ifdef KTHREAD_SUPPORT
 		RTMP_WAIT_EVENT_INTERRUPTIBLE(pAd, pTask);
 #else
@@ -7946,10 +8595,13 @@ static INT write_dat_file_thread (
 			break;
 
 
-		if (pAd->WriteWscCfgToDatFile)
+		if (pAd->WriteWscCfgToDatFile != 0xFF)
 		{
 			WscWriteConfToDatFile(pAd);
-			pAd->WriteWscCfgToDatFile = FALSE;
+#ifdef CONFIG_AP_SUPPORT
+			//WscWriteConfToAR9File(pAd);
+#endif//CONFIG_AP_SUPPORT//
+			pAd->WriteWscCfgToDatFile = 0xFF;
 		}
 	}
 
@@ -8130,6 +8782,225 @@ VOID WSC_HDR_BTN_CheckHandler(
 		}
 
 		pAd->CommonCfg.WscHdrPshBtnCheckCount ++;
-	}else
+	}
+	else
+	{
+		/* the button is released */
 		pAd->CommonCfg.WscHdrPshBtnCheckCount = 0;		
+	}
 }
+
+#ifdef WSC_LED_SUPPORT
+//
+// Support WPS LED mode (mode 7, mode 8 and mode 9).
+// Ref: User Feedback (page 80, WPS specification 1.0)
+//
+BOOLEAN WscSupportWPSLEDMode(
+	IN PRTMP_ADAPTER pAdapter)
+{
+	if (((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_7) || 
+	    ((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_8) || 
+	    ((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9) || 
+	    ((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_11) ||
+	    ((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_12))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("%s: Support WPS LED mode (The WPS LED mode = %d).\n", 
+			__FUNCTION__, (pAdapter->LedCntl.field.LedMode & LED_MODE)));
+		return TRUE; // Support WPS LED mode.
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("%s: Not support WPS LED mode (The WPS LED mode = %d).\n", 
+			__FUNCTION__, (pAdapter->LedCntl.field.LedMode & LED_MODE)));
+		return FALSE; // Not support WPS LED mode.
+	}
+}
+
+BOOLEAN WscSupportWPSLEDMode10(
+	IN PRTMP_ADAPTER pAdapter)
+{
+	if (((pAdapter->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_10)){
+		DBGPRINT(RT_DEBUG_TRACE, ("%s: Support WPS LED mode (The WPS LED mode = %d).\n", 
+			__FUNCTION__, (pAdapter->LedCntl.field.LedMode & LED_MODE)));	
+		return TRUE; //Support WPS LED mode 10.
+	} 
+	else
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("%s: Not support WPS LED mode (The WPS LED mode = %d).\n", 
+			__FUNCTION__, (pAdapter->LedCntl.field.LedMode & LED_MODE)));
+		return FALSE; // Not support WPS LED mode 10.
+	}
+}
+
+//
+// Whether the WPS AP has security setting or not.
+// Note that this function is valid only after the WPS handshaking.
+//
+BOOLEAN WscAPHasSecuritySetting(
+	IN PRTMP_ADAPTER pAdapter,
+	IN PWSC_CTRL     pWscControl)
+{
+	BOOLEAN bAPHasSecuritySetting = FALSE;
+	UCHAR	currentIdx = MAIN_MBSSID;
+	
+#ifdef CONFIG_AP_SUPPORT
+	currentIdx = (pWscControl->EntryIfIdx & 0x0F);
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	currentIdx = pWscControl->WscProfile.ApplyProfileIdx;
+#endif // CONFIG_STA_SUPPORT //
+
+	switch (pWscControl->WscProfile.Profile[currentIdx].EncrType)
+	{
+		case WSC_ENCRTYPE_NONE:
+		{
+			bAPHasSecuritySetting = FALSE;
+			break;
+		}
+
+		case WSC_ENCRTYPE_WEP:
+		case WSC_ENCRTYPE_TKIP:
+		case (WSC_ENCRTYPE_TKIP | WSC_ENCRTYPE_AES):
+		case WSC_ENCRTYPE_AES:
+		{
+			bAPHasSecuritySetting = TRUE;
+			break;
+		}
+
+		default:
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("%s: Incorrect encryption types (%d)\n", 
+				__FUNCTION__, pWscControl->WscProfile.Profile[currentIdx].EncrType));
+			ASSERT(FALSE);
+			break;
+		}
+	}
+
+	DBGPRINT(RT_DEBUG_TRACE, ("%s: WSC Entryption Type = %d\n", 
+		__FUNCTION__, pWscControl->WscProfile.Profile[currentIdx].EncrType));
+
+	return bAPHasSecuritySetting;
+}
+
+//
+// After the NIC connects with a WPS AP or not, 
+// the WscLEDTimer timer controls the LED behavior according to LED mode.
+//
+VOID WscLEDTimer(
+	IN PVOID	SystemSpecific1, 
+	IN PVOID	FunctionContext, 
+	IN PVOID	SystemSpecific2, 
+	IN PVOID	SystemSpecific3) 
+{
+	PWSC_CTRL pWscControl = (PWSC_CTRL)FunctionContext;
+	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)pWscControl->pAd;
+	UCHAR WPSLEDStatus;
+
+	// WPS LED mode 7, 8, 11 and 12.
+	if (((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_7) || 
+	    ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_8) || 
+	    ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_11) ||
+	    ((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_12))
+	{
+		WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+		RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+		DBGPRINT(RT_DEBUG_TRACE, ("%s: Turn off the WPS successful LED pattern.\n", __FUNCTION__));
+	}
+	else if (((pAd->LedCntl.field.LedMode & LED_MODE) == WPS_LED_MODE_9)) // WPS LED mode 9.
+	{
+		switch (pWscControl->WscLEDMode) // Last WPS LED state.
+		{
+			// Turn off the blue LED after 300 seconds.
+			case LED_WPS_SUCCESS:
+				// Turn off the WPS LED for one second.
+				WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+
+				// Turn on/off the WPS success LED according to AP's encryption algorithm after one second.
+				RTMPSetTimer(&pWscControl->WscLEDTimer, WSC_WPS_TURN_OFF_LED_TIMEOUT);
+				pWscControl->WscLEDTimerRunning = TRUE;
+
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SUCCESS => LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+				break;
+
+			// After turn off the blue LED for one second.
+			// AP uses an encryption algorithm:
+			// a) YES: Turn on the blue LED.
+			// b) NO: Turn off the blue LED.
+			case LED_WPS_TURN_LED_OFF:
+				if ((pWscControl->WscState == WSC_STATE_OFF) && 
+				     (pWscControl->WscStatus == STATUS_WSC_CONFIGURED))
+				{
+					if (WscAPHasSecuritySetting(pAd, pWscControl) == TRUE) // The NIC connects with an AP using an encryption algorithm.
+					{
+						// Turn WPS success LED.
+						WPSLEDStatus = LED_WPS_TURN_ON_BLUE_LED;
+#ifdef RTMP_MAC_PCI
+						RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+						DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_LED_OFF => LED_WPS_TURN_ON_BLUE_LED\n", __FUNCTION__));
+					}
+					else // The NIC connects with an AP using OPEN-NONE.
+					{
+						// Turn off the WPS LED.
+						WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+						RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+						DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_TURN_LED_OFF => LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+					}
+				}
+				break;
+				
+			// Turn off the amber LED after 15 seconds.
+			case LED_WPS_ERROR:
+				// Turn off the WPS LED.
+				WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_ERROR/LED_WPS_SESSION_OVERLAP_DETECTED => LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+				break;
+
+			// Turn off the amber LED after ~3 seconds.
+			case LED_WPS_SESSION_OVERLAP_DETECTED:
+				// Turn off the WPS LED.
+				WPSLEDStatus = LED_WPS_TURN_LED_OFF;
+#ifdef RTMP_MAC_PCI
+				RTMPSetLED(pAd, WPSLEDStatus);
+#endif // RTMP_MAC_PCI //
+				DBGPRINT(RT_DEBUG_TRACE, ("%s: LED_WPS_SESSION_OVERLAP_DETECTED => LED_WPS_TURN_LED_OFF\n", __FUNCTION__));
+				break;
+
+			default:
+				// do nothing.
+				break;
+		}
+	}
+	else
+	{
+		// do nothing.
+	}	
+}
+
+VOID WscSkipTurnOffLEDTimer(
+	IN PVOID	SystemSpecific1, 
+	IN PVOID	FunctionContext, 
+	IN PVOID	SystemSpecific2, 
+	IN PVOID	SystemSpecific3) 
+{
+	PWSC_CTRL pWscControl = (PWSC_CTRL)FunctionContext;
+
+	// Allow the NIC to turn off the WPS LED again.
+	pWscControl->bSkipWPSTurnOffLED = FALSE;
+	
+	DBGPRINT(RT_DEBUG_TRACE, ("%s: Allow the NIC to turn off the WPS LED again.\n", __FUNCTION__));
+}
+
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_INCLUDED //
+

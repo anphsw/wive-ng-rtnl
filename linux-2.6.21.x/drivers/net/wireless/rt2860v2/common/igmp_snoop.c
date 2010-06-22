@@ -1,8 +1,16 @@
-
+#ifdef IGMP_SNOOP_SUPPORT
 
 #include "rt_config.h"
 #include "ipv6.h"
 #include "igmp_snoop.h"
+
+UINT16 IPv6MulticastFilterExclued[] =
+{
+	IPV6_NEXT_HEADER_ICMPV6,	/* ICMPv6. */
+	IPV6_NEXT_HEADER_PIM,		/* PIM. */
+};
+#define IPV6_MULTICAST_FILTER_EXCLUED_SIZE  \
+	(sizeof(IPv6MulticastFilterExclued) / sizeof(UINT16))
 
 static inline void initFreeEntryList(
 	IN PMULTICAST_FILTER_TABLE pMulticastFilterTable,
@@ -658,13 +666,14 @@ static VOID DeleteIgmpMember(
 	pCurEntry = (PMEMBER_ENTRY)pList->pHead;
 	while (pCurEntry)
 	{
+		PMEMBER_ENTRY pCurEntryNext = pCurEntry->pNext;
 		if(MAC_ADDR_EQUAL(pMemberAddr, pCurEntry->Addr))
 		{
 			delEntryList(pList, (PLIST_ENTRY)pCurEntry);
 			FreeGrpMemberEntry(pMulticastFilterTable, pCurEntry);
 			break;
 		}
-		pCurEntry = pCurEntry->pNext;
+		pCurEntry = pCurEntryNext;
 	}
 
 	return;
@@ -742,18 +751,11 @@ INT Set_IgmpSn_Enable_Proc(
 	IN PSTRING arg)
 {
 	UINT Enable;
-	POS_COOKIE pObj;
-	UCHAR ifIndex;
-	PNET_DEV pDev;
-	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
-	ifIndex = pObj->ioctl_if;
 
-	pDev = (ifIndex == MAIN_MBSSID) ? (pAd->net_dev) : (pAd->ApCfg.MBSSID[ifIndex].MSSIDDev);
 	Enable = (UINT) simple_strtol(arg, 0, 10);
 
-	pAd->ApCfg.MBSSID[ifIndex].IgmpSnoopEnable = (BOOLEAN)(Enable == 0 ? 0 : 1);
-	DBGPRINT(RT_DEBUG_TRACE, ("%s::(%s) %s\n", __FUNCTION__, RTMP_OS_NETDEV_GET_DEVNAME(pDev), Enable == TRUE ? "Enable IGMP Snooping":"Disable IGMP Snooping"));
+	pAd->ApCfg.IgmpSnoopEnable = (BOOLEAN)(Enable == 0 ? FALSE : TRUE);
+	DBGPRINT(RT_DEBUG_TRACE, ("%s:: %s\n", __FUNCTION__, Enable == TRUE ? "Enable IGMP Snooping":"Disable IGMP Snooping"));
 
 	return TRUE;
 }
@@ -944,23 +946,17 @@ void rtmp_read_igmp_snoop_from_file(
 	PSTRING tmpbuf,
 	PSTRING buffer)
 {
-	PSTRING		macptr;						
-	INT			i=0;
-
 	//IgmpSnEnable
 	if(RTMPGetKeyParameter("IgmpSnEnable", tmpbuf, 128, buffer, TRUE))
 	{
-		for (i = 0, macptr = rstrtok(tmpbuf,";"); (macptr && i < pAd->ApCfg.BssidNum); macptr = rstrtok(NULL,";"), i++)
-		{
-			if ((strncmp(macptr, "0", 1) == 0))
-				pAd->ApCfg.MBSSID[i].IgmpSnoopEnable = FALSE;
-			else if ((strncmp(macptr, "1", 1) == 0))
-				pAd->ApCfg.MBSSID[i].IgmpSnoopEnable = TRUE;
+		if ((strncmp(tmpbuf, "0", 1) == 0))
+			pAd->ApCfg.IgmpSnoopEnable = FALSE;
+		else if ((strncmp(tmpbuf, "1", 1) == 0))
+			pAd->ApCfg.IgmpSnoopEnable = TRUE;
 	        else
-				pAd->ApCfg.MBSSID[i].IgmpSnoopEnable = FALSE;
+			pAd->ApCfg.IgmpSnoopEnable = FALSE;
 
-			DBGPRINT(RT_DEBUG_TRACE, ("MBSSID[%d].Enable=%d\n", i, pAd->ApCfg.MBSSID[i].IgmpSnoopEnable));
-	    }
+		DBGPRINT(RT_DEBUG_TRACE, (" IGMP Snooping Enable=%d\n", pAd->ApCfg.IgmpSnoopEnable));
 	}
 }
 
@@ -968,7 +964,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pSrcBufVA,
 	IN PNDIS_PACKET pPacket,
-	IN UCHAR apidx,
+	IN UCHAR FromWhichBSSID,
 	OUT BOOLEAN *pInIgmpGroup,
 	OUT PMULTICAST_FILTER_TABLE_ENTRY *ppGroupEntry)
 {
@@ -978,7 +974,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 		PUCHAR pIpHeader = pSrcBufVA + 12;
 
 		if(ntohs(*((UINT16 *)(pIpHeader))) == ETH_P_IPV6)
-			IgmpMldPkt = isMldPkt(pSrcBufVA, pIpHeader, NULL, NULL);
+			IgmpMldPkt = IPv6MulticastFilterExcluded(pSrcBufVA, pIpHeader);
 		else
 			IgmpMldPkt = isIgmpPkt(pSrcBufVA, pIpHeader);
 
@@ -987,7 +983,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 			*ppGroupEntry = NULL;
 		}
 		else if ((*ppGroupEntry = MulticastFilterTableLookup(pAd->pMulticastFilterTable, pSrcBufVA,
-									pAd->ApCfg.MBSSID[apidx].MSSIDDev)) == NULL)
+									get_netdev_from_bssid(pAd, FromWhichBSSID))) == NULL)
 		{
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 			return NDIS_STATUS_FAILURE;
@@ -1002,7 +998,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 
 		ConvertMulticastIP2MAC(pDstIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
 		if ((*ppGroupEntry = MulticastFilterTableLookup(pAd->pMulticastFilterTable, pGroupMacAddr,
-								pAd->ApCfg.MBSSID[apidx].MSSIDDev)) != NULL)
+								get_netdev_from_bssid(pAd, FromWhichBSSID))) != NULL)
 		{
 			*pInIgmpGroup = TRUE;
 		}
@@ -1014,7 +1010,8 @@ NDIS_STATUS IgmpPktClone(
 	IN PRTMP_ADAPTER pAd,
 	IN PNDIS_PACKET pPacket,
 	IN UCHAR QueIdx,
-	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry)
+	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
+	IN UINT8 UserPriority)
 {
 	PNDIS_PACKET pSkbClone = NULL;
 	PMEMBER_ENTRY pMemberEntry = (PMEMBER_ENTRY)pGroupEntry->MemberList.pHead;
@@ -1032,9 +1029,10 @@ NDIS_STATUS IgmpPktClone(
 
 		if (pMacEntry && (Sst == SST_ASSOC) && (PsMode != PWR_SAVE))
 		{
-		pSkbClone = skb_clone(RTPKT_TO_OSPKT(pPacket), MEM_ALLOC_FLAG);
-		if(pSkbClone)
-		{
+//			pSkbClone = skb_clone(RTPKT_TO_OSPKT(pPacket), MEM_ALLOC_FLAG);
+			OS_PKT_CLONE(pAd, pPacket, pSkbClone, MEM_ALLOC_FLAG);
+			if(pSkbClone)
+			{
 				RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)Aid);
 				// Pkt type must set to PKTSRC_NDIS.
 				// It cause of the deason that APHardTransmit()
@@ -1062,6 +1060,10 @@ NDIS_STATUS IgmpPktClone(
 				InsertTailQueueAc(pAd, pMacEntry, &pAd->TxSwQueue[QueIdx], PACKET_TO_QUEUE_ENTRY(pSkbClone));
 				RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
 			}
+
+#ifdef DOT11_N_SUPPORT
+			RTMP_BASetup(pAd, pMacEntry, UserPriority);
+#endif // DOT11_N_SUPPORT //
 		}
 		pMemberEntry = pMemberEntry->pNext;
 	}
@@ -1135,6 +1137,48 @@ BOOLEAN isMldPkt(
 			}
 		}
 	}while(FALSE);
+
+	return result;
+}
+
+BOOLEAN IPv6MulticastFilterExcluded(
+	IN PUCHAR pDstMacAddr,
+	IN PUCHAR pIpHeader)
+{
+	BOOLEAN result = FALSE;
+	UINT16 IpProtocol = ntohs(*((UINT16 *)(pIpHeader)));
+	INT idx;
+	UINT8 nextProtocol;
+
+	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
+		return FALSE;
+
+	if(IpProtocol != ETH_P_IPV6)
+		return FALSE;
+
+	// skip protocol (2 Bytes).
+	pIpHeader += 2;
+	do
+	{
+		PRT_IPV6_HDR pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
+		UINT32 offset = IPV6_HDR_LEN;
+
+		nextProtocol = pIpv6Hdr->nextHdr;
+		while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
+		{
+			if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
+				break;
+		}
+	} while(FALSE);
+
+	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
+	{
+		if (nextProtocol == IPv6MulticastFilterExclued[idx])
+		{
+			result = TRUE;
+			break;
+		}
+	}
 
 	return result;
 }
@@ -1332,3 +1376,5 @@ VOID MLDSnooping(
 	return;
 }
 
+
+#endif // IGMP_SNOOP_SUPPORT //

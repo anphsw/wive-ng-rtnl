@@ -28,6 +28,9 @@
 #include "rtmp.h"
 #include <linux/wireless.h>
 
+#ifdef WSC_AP_SUPPORT
+extern VOID RTMPIoctlSetWSCOOB(IN PRTMP_ADAPTER pAd);
+#endif
 
 struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_SET, 
@@ -41,25 +44,33 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_GSITESURVEY,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_site_survey"}, 
-{ RTPRIV_IOCTL_GET_MAC_TABLE,
+  { RTPRIV_IOCTL_GET_AR9_SHOW,
+  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
+  "ar9_show"}, 
+  { RTPRIV_IOCTL_SET_WSCOOB,
+  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
+  "set_wsc_oob"}, 
+{ RTPRIV_IOCTL_GET_MAC_TABLE2,		// modified by Red@Ralink, 2009/09/30
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_mac_table"}, 
-#if defined(CONFIG_ASUS_EXT) || defined(DBG)
+{ RTPRIV_IOCTL_E2P,
+  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
+  "e2p"},
+//#ifdef DBG
+#if 1		// by Jiahao for ASUS ATE
 { RTPRIV_IOCTL_BBP,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "bbp"},
 { RTPRIV_IOCTL_MAC,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "mac"},
-{ RTPRIV_IOCTL_E2P,
-  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
-  "e2p"},
 #ifdef RTMP_RF_RW_SUPPORT
 { RTPRIV_IOCTL_RF,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "rf"},
 #endif // RTMP_RF_RW_SUPPORT //
-#endif // DBG //	// by Jiahao for ASUS ATE
+//#endif // DBG //
+#endif		// by Jiahao for ASUS ATE
 
 #ifdef WSC_AP_SUPPORT
 { RTPRIV_IOCTL_WSC_PROFILE,
@@ -100,7 +111,7 @@ INT rt28xx_ap_ioctl(
 	POS_COOKIE		pObj;
 	UCHAR			apidx=0;
 
-	pAd = net_dev->priv;
+	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	if (pAd == NULL)
@@ -113,9 +124,9 @@ INT rt28xx_ap_ioctl(
     //+ patch for SnapGear Request even the interface is down
     if(cmd== SIOCGIWNAME){
 	    DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWNAME\n"));
-#ifdef RTMP_MAC_PCI
-	    strcpy(wrq->u.name, "RT2860 SoftAP");
-#endif // RTMP_MAC_PCI //
+
+		strcpy(wrq->u.name, "RTWIFI SoftAP");
+
 	    return Status;
     }//- patch for SnapGear
 	
@@ -167,7 +178,7 @@ INT rt28xx_ap_ioctl(
 	    }
 	    else    // ioctl command from I/F(ra0)
 	    {
-	    	pAd= net_dev->priv;
+			GET_PAD_FROM_NET_DEV(pAd, net_dev);	
     	    pObj->ioctl_if = MAIN_MBSSID;
 //	        DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find I/F and use default: cmd = 0x%08x\n", cmd));
 	    }
@@ -379,12 +390,21 @@ INT rt28xx_ap_ioctl(
 			break;
 		case SIOCGIWRANGE:	//Get range of parameters
 		    {
-		        struct iw_range range;
+				struct iw_range range;
 				UINT32 len;
 
-                        memset(&range, 0, sizeof(range));
-	                range.we_version_compiled = WIRELESS_EXT;
-	                range.we_version_source = 14;
+				memset(&range, 0, sizeof(range));
+				range.we_version_compiled = WIRELESS_EXT;
+				range.we_version_source = 14;
+
+				/*
+					what is correct max? This was not
+					documented exactly. At least
+					69 has been observed.
+				*/
+				range.max_qual.qual = 100;
+				range.max_qual.level = 0; /* dB */
+				range.max_qual.noise = 0; /* dB */
 				len = copy_to_user(wrq->u.data.pointer, &range, sizeof(range));
 		    }
 		    break;
@@ -397,6 +417,56 @@ INT rt28xx_ap_ioctl(
 				Status = RTMPAPQueryInformation(pAd, wrq, (INT)subcmd);
 			break;
 		
+#ifdef HOSTAPD_SUPPORT
+		case SIOCSIWGENIE:
+
+			if(wrq->u.data.length > 20 && MAX_LEN_OF_RSNIE > wrq->u.data.length && wrq->u.data.pointer)
+			{
+				UCHAR RSNIE_Len[2];
+				UCHAR RSNIe[2];
+				int offset_next_ie=0;
+
+				DBGPRINT(RT_DEBUG_TRACE,("ioctl SIOCSIWGENIE pAd->IoctlIF=%d\n",pAd->IoctlIF));
+
+				RSNIe[0]=*(UINT8 *)wrq->u.data.pointer;
+				if(IE_WPA != RSNIe[0] && IE_RSN != RSNIe[0] )
+				{
+					DBGPRINT(RT_DEBUG_TRACE,("IE %02x != 0x30/0xdd\n",RSNIe[0]));
+					Status = -EINVAL;
+					break;
+				}
+				RSNIE_Len[0]=*((UINT8 *)wrq->u.data.pointer + 1);
+				if(wrq->u.data.length != RSNIE_Len[0]+2)
+				{
+					DBGPRINT(RT_DEBUG_TRACE,("IE use WPA1 WPA2\n"));
+					NdisZeroMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[1], MAX_LEN_OF_RSNIE);
+					RSNIe[1]=*(UINT8 *)wrq->u.data.pointer;
+					RSNIE_Len[1]=*((UINT8 *)wrq->u.data.pointer + 1);
+					DBGPRINT(RT_DEBUG_TRACE,( "IE1 %02x %02x\n",RSNIe[1],RSNIE_Len[1]));
+					pAd->ApCfg.MBSSID[pAd->IoctlIF].RSNIE_Len[1] = RSNIE_Len[1];
+					NdisMoveMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[1], (UCHAR *)(wrq->u.data.pointer)+2, RSNIE_Len[1]);
+					offset_next_ie=RSNIE_Len[1]+2;
+				}
+				else
+					DBGPRINT(RT_DEBUG_TRACE,("IE use only %02x\n",RSNIe[0]));
+
+				NdisZeroMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[0], MAX_LEN_OF_RSNIE);
+				RSNIe[0]=*(((UINT8 *)wrq->u.data.pointer)+offset_next_ie);
+				RSNIE_Len[0]=*(((UINT8 *)wrq->u.data.pointer) + offset_next_ie + 1);
+				if(IE_WPA != RSNIe[0] && IE_RSN != RSNIe[0] )
+				{
+					Status = -EINVAL;
+					break;
+				}
+				pAd->ApCfg.MBSSID[pAd->IoctlIF].RSNIE_Len[0] = RSNIE_Len[0];
+				NdisMoveMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[0], ((UCHAR *)(wrq->u.data.pointer))+2+offset_next_ie, RSNIE_Len[0]);
+				APMakeAllBssBeacon(pAd);
+				APUpdateAllBeaconFrame(pAd);
+
+			}
+			break;
+#endif //HOSTAPD_SUPPORT//
+
 		case SIOCGIWPRIV:
 			if (wrq->u.data.pointer) 
 			{
@@ -420,10 +490,26 @@ INT rt28xx_ap_ioctl(
 					Status = RTMPAPPrivIoctlShow(pAd, wrq);
 			}
 			break;		    
-
+		case RTPRIV_IOCTL_GET_AR9_SHOW:
+			{
+				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
+					Status = RTMPAPPrivIoctlAR9Show(pAd, wrq);
+			}	
+		    break;
+#ifdef WSC_AP_SUPPORT
+		case RTPRIV_IOCTL_SET_WSCOOB:
+			RTMPIoctlSetWSCOOB(pAd);
+		    break;
+#endif//WSC_AP_SUPPORT//
+/* modified by Red@Ralink, 2009/09/30 */
 		case RTPRIV_IOCTL_GET_MAC_TABLE:
+			RTMPIoctlGetMacTableStaInfo(pAd,wrq);
+		    break;
+
+		case RTPRIV_IOCTL_GET_MAC_TABLE2:
 			RTMPIoctlGetMacTable(pAd,wrq);
 		    break;
+/* end of modification */
 
 		case RTPRIV_IOCTL_GSITESURVEY:
 			RTMPIoctlGetSiteSurvey(pAd,wrq);
@@ -433,21 +519,6 @@ INT rt28xx_ap_ioctl(
 			RTMPIoctlStatistics(pAd, wrq);
 			break;
 
-		case RTPRIV_IOCTL_RADIUS_DATA:
-		    RTMPIoctlRadiusData(pAd, wrq);
-		    break;
-
-		case RTPRIV_IOCTL_ADD_WPA_KEY:
-		    RTMPIoctlAddWPAKey(pAd, wrq);
-		    break;
-
-		case RTPRIV_IOCTL_ADD_PMKID_CACHE:
-		    RTMPIoctlAddPMKIDCache(pAd, wrq);
-		    break;
-
-		case RTPRIV_IOCTL_STATIC_WEP_COPY:
-		    RTMPIoctlStaticWepCopy(pAd, wrq);
-		    break;
 #ifdef WSC_AP_SUPPORT
 		case RTPRIV_IOCTL_WSC_PROFILE:
 		    RTMPIoctlWscProfile(pAd, wrq);
@@ -458,7 +529,12 @@ INT rt28xx_ap_ioctl(
 		    RTMPIoctlQueryBaTable(pAd, wrq);
 		    break;
 #endif // DOT11_N_SUPPORT //
-#if defined(CONFIG_ASUS_EXT) || defined(DBG)
+		case RTPRIV_IOCTL_E2P:
+			RTMPAPIoctlE2PROM(pAd, wrq);
+			break;
+
+//#ifdef DBG
+#if 1		// by Jiahao for ASUS ATE
 		case RTPRIV_IOCTL_BBP:
 			RTMPAPIoctlBBP(pAd, wrq);
 			break;
@@ -467,16 +543,14 @@ INT rt28xx_ap_ioctl(
 			RTMPAPIoctlMAC(pAd, wrq);
 			break;
 
-		case RTPRIV_IOCTL_E2P:
-			RTMPAPIoctlE2PROM(pAd, wrq);
-			break;
-
 #ifdef RTMP_RF_RW_SUPPORT
 		case RTPRIV_IOCTL_RF:
 			RTMPAPIoctlRF(pAd, wrq);
 			break;
-#endif // RTMP_RF_RW_SUPPORT //
-#endif // DBG //	// by Jiahao for ASUS ATE
+//#endif // RTMP_RF_RW_SUPPORT //
+#endif		// by Jiahao for ASUS ATE
+
+#endif // DBG //
 
 		default:
 //			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd));

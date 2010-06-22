@@ -87,21 +87,15 @@ INT RT_CfgSetCountryRegion(
 	IN PSTRING			arg,
 	IN INT				band)
 {
-	LONG region, regionMax;
+	LONG region;
 	UCHAR *pCountryRegion;
 	
 	region = simple_strtol(arg, 0, 10);
 
 	if (band == BAND_24G)
-	{
 		pCountryRegion = &pAd->CommonCfg.CountryRegion;
-		regionMax = REGION_MAXIMUM_BG_BAND;
-	}
 	else
-	{
 		pCountryRegion = &pAd->CommonCfg.CountryRegionForABand;
-		regionMax = REGION_MAXIMUM_A_BAND;
-	}
 	
 	// TODO: Is it neccesay for following check???
 	// Country can be set only when EEPROM not programmed
@@ -111,13 +105,12 @@ INT RT_CfgSetCountryRegion(
 		return FALSE;
 	}
 
-	if((region >= 0) && (region <= REGION_MAXIMUM_BG_BAND))
+	if((region >= 0) && 
+	   (((band == BAND_24G) && ((region <= REGION_MAXIMUM_BG_BAND) || (region == REGION_31_BG_BAND))) || 
+	    ((band == BAND_5G) && (region <= REGION_MAXIMUM_A_BAND) ))
+	  )
 	{
 		*pCountryRegion= (UCHAR) region;
-	}
-	else if ((region == REGION_31_BG_BAND) && (band == BAND_24G))
-	{
-		*pCountryRegion = (UCHAR) region;
 	}
 	else
 	{
@@ -158,7 +151,6 @@ INT RT_CfgSetWirelessMode(
 	}
 	
 	return FALSE;
-	
 }
 
 
@@ -231,7 +223,7 @@ INT	RT_CfgSetWepKey(
 
 	pSharedKey->CipherAlg = ((KeyLen % 5) ? CIPHER_WEP128 : CIPHER_WEP64);
 	DBGPRINT(RT_DEBUG_TRACE, ("RT_CfgSetWepKey:(KeyIdx=%d,type=%s, Alg=%s)\n", 
-						keyIdx, (bKeyIsHex == FALSE ? "Ascii" : "Hex"), CipherName[CipherAlg]));
+				keyIdx, (bKeyIsHex == FALSE ? "Ascii" : "Hex"), CipherName[pSharedKey->CipherAlg]));
 
 	return TRUE;
 }
@@ -285,6 +277,105 @@ INT RT_CfgSetWPAPSKKey(
 	return TRUE;
 }
 
+INT	RT_CfgSetFixedTxPhyMode(
+	IN	PSTRING			arg)
+{
+	INT		fix_tx_mode = FIXED_TXMODE_HT;
+	UINT32	value;
+
+	if (strcmp(arg, "OFDM") == 0 || strcmp(arg, "ofdm") == 0)
+	{
+		fix_tx_mode = FIXED_TXMODE_OFDM;
+	}	
+	else if (strcmp(arg, "CCK") == 0 || strcmp(arg, "cck") == 0)
+	{
+	    fix_tx_mode = FIXED_TXMODE_CCK;
+	}
+	else if (strcmp(arg, "HT") == 0 || strcmp(arg, "ht") == 0)
+	{
+	    fix_tx_mode = FIXED_TXMODE_HT;
+	}
+	else
+	{
+		value = simple_strtol(arg, 0, 10);
+		// 1 : CCK
+		// 2 : OFDM
+		// otherwise : HT
+		if (value == FIXED_TXMODE_CCK || value == FIXED_TXMODE_OFDM)
+			fix_tx_mode = value;	
+		else
+			fix_tx_mode = FIXED_TXMODE_HT;
+	}
+
+	return fix_tx_mode;
+					
+}	
+
+INT	RT_CfgSetMacAddress(
+	IN 	PRTMP_ADAPTER 	pAd,
+	IN	PSTRING			arg)
+{
+	INT	i, mac_len;
+	
+	/* Mac address acceptable format 01:02:03:04:05:06 length 17 */
+	mac_len = strlen(arg);
+	if(mac_len != 17)  
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : invalid length (%d)\n", __FUNCTION__, mac_len));
+		return FALSE;
+	}
+
+	if(strcmp(arg, "00:00:00:00:00:00") == 0)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : invalid mac setting \n", __FUNCTION__));
+		return FALSE;
+	}
+
+	for (i = 0; i < MAC_ADDR_LEN; i++)
+	{
+		AtoH(arg, &pAd->CurrentAddress[i], 1);
+		arg = arg + 3;
+	}	
+
+	pAd->bLocalAdminMAC = TRUE;
+	return TRUE;
+}
+
+INT	RT_CfgSetTxMCSProc(
+	IN	PSTRING			arg,
+	OUT	BOOLEAN			*pAutoRate)
+{
+	INT	Value = simple_strtol(arg, 0, 10);
+	INT	TxMcs;
+	
+	if ((Value >= 0 && Value <= 23) || (Value == 32)) // 3*3
+	{
+		TxMcs = Value;
+		*pAutoRate = FALSE;
+	}
+	else
+	{		
+		TxMcs = MCS_AUTO;
+		*pAutoRate = TRUE;
+	}
+
+	return TxMcs;
+
+}
+
+INT	RT_CfgSetAutoFallBack(
+	IN 	PRTMP_ADAPTER 	pAd,
+	IN	PSTRING			arg)
+{
+	TX_RTY_CFG_STRUC	tx_rty_cfg;
+	UCHAR				AutoFallBack = (UCHAR)simple_strtol(arg, 0, 10);
+
+	RTMP_IO_READ32(pAd, TX_RTY_CFG, &tx_rty_cfg.word);
+	tx_rty_cfg.field.TxautoFBEnable = (AutoFallBack) ? 1 : 0;
+	RTMP_IO_WRITE32(pAd, TX_RTY_CFG, tx_rty_cfg.word);	
+	DBGPRINT(RT_DEBUG_TRACE, ("RT_CfgSetAutoFallBack::(tx_rty_cfg=0x%x)\n", tx_rty_cfg.word));
+	return TRUE;
+}
 
 #ifdef WSC_INCLUDED
 INT	RT_CfgSetWscPinCode(

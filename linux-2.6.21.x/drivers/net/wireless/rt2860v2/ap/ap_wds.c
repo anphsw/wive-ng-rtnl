@@ -33,6 +33,9 @@
 #include "rt_config.h"
 
 
+static struct net_device_stats *RT28xx_get_wds_ether_stats(
+    IN  struct net_device *net_dev);
+
 #define VAILD_KEY_INDEX( _X ) ((((_X) >= 0) && ((_X) < 4)) ? (TRUE) : (FALSE))
 
 
@@ -49,7 +52,12 @@ INT WdsVirtualIFSendPackets(
 
 	pAd = (PRTMP_ADAPTER) RTMP_OS_NETDEV_GET_PRIV(dev);
 
-
+	if (pAd->CommonCfg.RadarDetect.RDMode == RD_SILENCE_MODE)
+	{
+		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+		return 0;
+	}
+	
 #ifdef RALINK_ATE
 	if (ATE_ON(pAd))
 	{
@@ -263,7 +271,7 @@ BOOLEAN MacTableDeleteWDSEntry(
 /*
 ================================================================
 Description : because WDS and CLI share the same WCID table in ASIC. 
-WDS entry also insert to pAd->MacTab.content[].  Such is marked as ValidAsWDS = TRUE.
+WDS entry also insert to pAd->MacTab.content[].
 Also fills the pairwise key.
 Because front MAX_AID_BA entries have direct mapping to BAEntry, which is only used as CLI. So we insert WDS
 from index MAX_AID_BA.
@@ -400,7 +408,6 @@ MAC_TABLE_ENTRY *MacTableInsertWDSEntry(
 			pAd->WdsTab.WdsEntry[WdsTabIdx].MacTabMatchWCID = (UCHAR)pEntry->Aid;
 			pEntry->MatchWDSTabIdx = WdsTabIdx;
 
-			//AsicAddKeyEntry(pAd, pEntry->Aid, BSS0, 0, &pAd->WdsTab.Wpa_key, TRUE, TRUE);
 			AsicUpdateWdsEncryption(pAd, pEntry->Aid);
 
 			DBGPRINT(RT_DEBUG_TRACE, ("MacTableInsertWDSEntry - allocate entry #%d, Total= %d\n",WdsTabIdx, pAd->MacTab.Size));
@@ -435,7 +442,7 @@ MAC_TABLE_ENTRY *WdsTableLookupByWcid(
 		pCurEntry = &pAd->MacTab.Content[wcid];
 
 		WdsIndex = 0xff;
-		if ((pCurEntry) && (pCurEntry->ValidAsWDS == TRUE))
+		if ((pCurEntry) && IS_ENTRY_WDS(pCurEntry))
 		{
 			WdsIndex = pCurEntry->MatchWDSTabIdx;
 		}
@@ -477,7 +484,7 @@ MAC_TABLE_ENTRY *WdsTableLookup(
 
 	while (pEntry)
 	{
-		if ((pEntry->ValidAsWDS == TRUE) && MAC_ADDR_EQUAL(pEntry->Addr, pAddr))
+		if (IS_ENTRY_WDS(pEntry) && MAC_ADDR_EQUAL(pEntry->Addr, pAddr))
 		{
 			if(bResetIdelCount)
 				pEntry->NoDataIdleCount = 0;
@@ -547,7 +554,7 @@ VOID WdsTableMaintenance(
 		UCHAR wcid = pAd->WdsTab.WdsEntry[idx].MacTabMatchWCID;
 		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[wcid];
 
-		if(pEntry->ValidAsWDS != TRUE)
+		if(!IS_ENTRY_WDS(pEntry))
 			continue;
 
 		NdisAcquireSpinLock(&pAd->WdsTabLock);
@@ -601,7 +608,10 @@ VOID RT28xx_WDS_Init(
 					PRINT_MAC(pWdsEntry->Addr)));
 		}
 
+		NdisZeroMemory(&pAd->WdsTab.WdsEntry[index].WdsCounter, sizeof(WDS_COUNTER));
 		RTMP_OS_NETDEV_SET_PRIV(pWdsNetDev, pAd);
+		pAd->WdsTab.WdsEntry[index].PhyMode = 0xff;
+		pAd->WdsTab.WdsEntry[index].dev = pWdsNetDev;
 		NdisZeroMemory((PUCHAR)&netDevOpHook, sizeof(RTMP_OS_NETDEV_OP_HOOK));
 		netDevOpHook.open = WdsVirtualIF_open;
 		netDevOpHook.stop = WdsVirtualIF_close;
@@ -609,6 +619,7 @@ VOID RT28xx_WDS_Init(
 		netDevOpHook.ioctl = WdsVirtualIF_ioctl;
 		netDevOpHook.priv_flags = INT_WDS; /* we are virtual interface */
 		netDevOpHook.needProtcted = TRUE;
+		netDevOpHook.get_stats = RT28xx_get_wds_ether_stats;
 		NdisMoveMemory(&netDevOpHook.devAddr[0], RTMP_OS_NETDEV_GET_PHYADDR(net_dev), MAC_ADDR_LEN);
 		DBGPRINT(RT_DEBUG_TRACE, ("The new WDS interface MAC = %02X:%02X:%02X:%02X:%02X:%02X\n", 
 					PRINT_MAC(netDevOpHook.devAddr)));
@@ -702,7 +713,7 @@ VOID AsicUpdateWdsEncryption(
 		if (pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].Valid != TRUE)
 			break;
 
-		if (pEntry->ValidAsWDS != TRUE)
+		if (!IS_ENTRY_WDS(pEntry))
 			break;
 
 		WdsIdex = pEntry->MatchWDSTabIdx;
@@ -721,22 +732,20 @@ VOID AsicUpdateWdsEncryption(
 			if (!VAILD_KEY_INDEX(DefaultKeyId))
 				break;
 
-
-#ifdef RTMP_MAC_PCI
-			AsicAddPairwiseKeyEntry(
+			/* Update key into Asic Pairwise key table */
+			RTMP_ASIC_PAIRWISE_KEY_TABLE(
 				pAd,
-				pEntry->Addr,
 				pEntry->Aid,
 				&pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsKey);
 
-			// update WCID attribute table and IVEIV table for this entry
-			RTMPAddWcidAttributeEntry(
+			/* update WCID attribute table and IVEIV table for this entry */
+			RTMP_SET_WCID_SEC_INFO(
 				pAd, 
 				MAIN_MBSSID + MIN_NET_DEVICE_FOR_WDS,
 				DefaultKeyId, 
 				pAd->WdsTab.WdsEntry[pEntry->MatchWDSTabIdx].WdsKey.CipherAlg,
-				pEntry);
-#endif // RTMP_MAC_PCI //
+				pEntry->Aid, 
+				PAIRWISEKEY);
 		}
 	} while (FALSE);
 
@@ -773,7 +782,7 @@ VOID WdsPeerBeaconProc(
 		default:  MaxSupportedRate = RATE_11;   break;
 	}
 
-	if (pEntry && pEntry->ValidAsWDS)
+	if (pEntry && IS_ENTRY_WDS(pEntry))
 	{
 		pEntry->MaxSupportedRate = min(pAd->CommonCfg.MaxTxRate, MaxSupportedRate);
 		pEntry->RateLen = MaxSupportedRateLen;
@@ -968,13 +977,11 @@ INT	Show_WdsTable_Proc(
 
 	for(i = 0; i < MAX_WDS_ENTRY; i++)
 	{					
-#ifdef CONFIG_IS_ASUS
 		DBGPRINT(RT_DEBUG_OFF, ("IF/WDS%d-%02x:%02x:%02x:%02x:%02x:%02x(%s) ,%s, KeyId=%d\n", i, 
 								PRINT_MAC(pAd->WdsTab.WdsEntry[i].PeerWdsAddr), 
 								pAd->WdsTab.WdsEntry[i].Valid == 1 ? "Valid" : "Invalid",
 								GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus), 
 								pAd->WdsTab.WdsEntry[i].KeyIdx));
-#endif
 
 		if (pAd->WdsTab.WdsEntry[i].WdsKey.KeyLen > 0)
 			hex_dump("Wds Key", pAd->WdsTab.WdsEntry[i].WdsKey.Key, pAd->WdsTab.WdsEntry[i].WdsKey.KeyLen);
@@ -1000,7 +1007,7 @@ INT	Show_WdsTable_Proc(
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
 		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[i];
-		if (pEntry->ValidAsWDS)
+		if (IS_ENTRY_WDS(pEntry))
 		{
 			DBGPRINT(RT_DEBUG_OFF, ("%02X:%02X:%02X:%02X:%02X:%02X  ", PRINT_MAC(pEntry->Addr)));
 			DBGPRINT(RT_DEBUG_OFF,("%-4d", (int)pEntry->MatchWDSTabIdx));
@@ -1032,6 +1039,7 @@ VOID rtmp_read_wds_from_file(
 	UCHAR		macAddress[MAC_ADDR_LEN];
 	UCHAR	    keyMaterial[40];	
 	UCHAR		KeyLen, CipherAlg = CIPHER_NONE, KeyIdx;
+	PRT_802_11_WDS_ENTRY pWdsEntry;
 		
 	//WdsPhyMode
 	if (RTMPGetKeyParameter("WdsPhyMode", tmpbuf, MAX_PARAM_BUFFER_SIZE, buffer, TRUE))
@@ -1094,9 +1102,8 @@ VOID rtmp_read_wds_from_file(
 	            pAd->WdsTab.WdsEntry[i].WepStatus = Ndis802_11Encryption3Enabled;
 	        else
 	            pAd->WdsTab.WdsEntry[i].WepStatus = Ndis802_11WEPDisabled;
-#ifdef CONFIG_IS_ASUS
+
 	        DBGPRINT(RT_DEBUG_TRACE, ("WdsEncrypType[%d]=%d(%s)\n", i, pAd->WdsTab.WdsEntry[i].WepStatus, GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus)));
-#endif
 	    }
 		
 		// Previous WDS only supports single encryption type.
@@ -1106,9 +1113,7 @@ VOID rtmp_read_wds_from_file(
 			for (j = 1; j < MAX_WDS_ENTRY; j++)
 			{
 				pAd->WdsTab.WdsEntry[j].WepStatus = pAd->WdsTab.WdsEntry[0].WepStatus;	
-#ifdef CONFIG_IS_ASUS
 				DBGPRINT(RT_DEBUG_TRACE, ("@WdsEncrypType[%d]=%d(%s)\n", j, pAd->WdsTab.WdsEntry[i].WepStatus, GetEncryptType(pAd->WdsTab.WdsEntry[i].WepStatus)));	
-#endif
 			}
 		}
 			
@@ -1254,6 +1259,42 @@ VOID rtmp_read_wds_from_file(
 		}				
 	}
 	
+	// WdsTxMode
+	if (RTMPGetKeyParameter("WdsTxMode", tmpbuf, 25, buffer, TRUE))
+	{
+		for (i = 0, macptr = rstrtok(tmpbuf,";"); (macptr && i < MAX_WDS_ENTRY); macptr = rstrtok(NULL,";"), i++)
+		{
+			pWdsEntry = &pAd->WdsTab.WdsEntry[i];
+
+			pWdsEntry->DesiredTransmitSetting.field.FixedTxMode = 
+										RT_CfgSetFixedTxPhyMode(macptr);
+			DBGPRINT(RT_DEBUG_TRACE, ("I/F(wds%d) Tx Mode = %d\n", i,
+											pWdsEntry->DesiredTransmitSetting.field.FixedTxMode));					
+		}	
+	}
+
+	// WdsTxMcs
+	if (RTMPGetKeyParameter("WdsTxMcs", tmpbuf, 50, buffer, TRUE))
+	{
+		for (i = 0, macptr = rstrtok(tmpbuf,";"); (macptr && i < MAX_WDS_ENTRY); macptr = rstrtok(NULL,";"), i++)
+		{
+			pWdsEntry = &pAd->WdsTab.WdsEntry[i];
+
+			pWdsEntry->DesiredTransmitSetting.field.MCS = 
+					RT_CfgSetTxMCSProc(macptr, &pWdsEntry->bAutoTxRateSwitch);
+
+			if (pWdsEntry->DesiredTransmitSetting.field.MCS == MCS_AUTO)
+			{
+				DBGPRINT(RT_DEBUG_TRACE, ("I/F(wds%d) Tx MCS = AUTO\n", i));
+			}
+			else
+			{
+				DBGPRINT(RT_DEBUG_TRACE, ("I/F(wds%d) Tx MCS = %d\n", i, 
+									pWdsEntry->DesiredTransmitSetting.field.MCS));
+			}
+		}	
+	}
+	
 	//WdsEnable
 	if(RTMPGetKeyParameter("WdsEnable", tmpbuf, 10, buffer, TRUE))
 	{						
@@ -1332,4 +1373,95 @@ VOID WdsPrepareWepKeyFromMainBss(
 
 }
 
+
+/*
+    ========================================================================
+
+    Routine Description:
+        return ethernet statistics counter
+
+    Arguments:
+        net_dev                     Pointer to net_device
+
+    Return Value:
+        net_device_stats*
+
+    Note:
+
+    ========================================================================
+*/
+static struct net_device_stats *RT28xx_get_wds_ether_stats(
+    IN  struct net_device *net_dev)
+{
+    RTMP_ADAPTER *pAd = NULL;
+	INT WDS_apidx = 0,index;
+
+	if (net_dev) {
+		GET_PAD_FROM_NET_DEV(pAd, net_dev);
+	}
+
+	if (net_dev->priv_flags == INT_WDS)
+	{
+		if (pAd)
+		{
+			//struct net_device_stats	stats;
+			for(index = 0; index < MAX_WDS_ENTRY; index++)
+			{
+				if (pAd->WdsTab.WdsEntry[index].dev == net_dev)
+				{
+					WDS_apidx = index;
+
+					break;
+				}
+				
+				if(index == MAX_WDS_ENTRY)
+				{
+					DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find wds I/F\n"));
+					return NULL;
+				}
+			}
+
+			pAd->stats.rx_packets = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedFragmentCount.QuadPart;
+			pAd->stats.tx_packets = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedFragmentCount.QuadPart;
+
+			pAd->stats.rx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedByteCount;
+			pAd->stats.tx_bytes = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedByteCount;
+
+			pAd->stats.rx_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxErrors;
+			pAd->stats.tx_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TxErrors;
+
+			pAd->stats.rx_dropped = 0;
+			pAd->stats.tx_dropped = 0;
+
+	  		pAd->stats.multicast = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.MulticastReceivedFrameCount.QuadPart;   // multicast packets received
+	  		pAd->stats.collisions = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.OneCollision + pAd->WdsTab.WdsEntry[index].WdsCounter.MoreCollisions;  // Collision packets
+	  
+	  		pAd->stats.rx_length_errors = 0;
+	  		pAd->stats.rx_over_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxNoBuffer;                   // receiver ring buff overflow
+	  		pAd->stats.rx_crc_errors = 0;//pAd->WlanCounters.FCSErrorCount;     // recved pkt with crc error
+	  		pAd->stats.rx_frame_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RcvAlignmentErrors;          // recv'd frame alignment error
+	  		pAd->stats.rx_fifo_errors = pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxNoBuffer;                   // recv'r fifo overrun
+	  		pAd->stats.rx_missed_errors = 0;                                            // receiver missed packet
+	  
+	  		    // detailed tx_errors
+	  		pAd->stats.tx_aborted_errors = 0;
+	  		pAd->stats.tx_carrier_errors = 0;
+	  		pAd->stats.tx_fifo_errors = 0;
+	  		pAd->stats.tx_heartbeat_errors = 0;
+	  		pAd->stats.tx_window_errors = 0;
+	  
+	  		    // for cslip etc
+	  		pAd->stats.rx_compressed = 0;
+	  		pAd->stats.tx_compressed = 0;
+
+			return &pAd->stats;
+		}
+		else
+			return NULL;
+	}
+	else
+
+    		return NULL;
+}
 #endif // WDS_SUPPORT //
+

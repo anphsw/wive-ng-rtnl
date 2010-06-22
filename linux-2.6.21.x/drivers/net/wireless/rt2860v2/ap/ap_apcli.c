@@ -51,7 +51,6 @@
 
 #include "rt_config.h"
 
-#ifdef CONFIG_ASUS_EXT
 /* ASUS EXT by Jiahao */
 #define Link_Up_Threshold 3
 extern UINT count_DeAssoc;
@@ -59,7 +58,7 @@ UINT count_Alive;
 UINT flag_Reconnect;
 extern UINT ApcliMonitorPid;
 /* ASUS EXT by Jiahao */
-#endif
+
 /* --------------------------------- Public -------------------------------- */
 /*
 ========================================================================
@@ -287,7 +286,7 @@ INT ApCli_VirtualIF_Close(
 			// send disconnect-req to sta State Machine.
 			if (pAd->ApCfg.ApCliTab[ifIndex].Enable)
 			{
-				MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, ifIndex);
+				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, ifIndex);
 				RTMP_MLME_HANDLER(pAd);
 				DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startdown.\n", __FUNCTION__, ifIndex));
 			}
@@ -423,22 +422,18 @@ INT ApCli_VirtualIF_Ioctl(
 } /* End of ApCli_VirtualIF_Ioctl */
 
 
-SHORT ApCliIfLookUp(
+INT ApCliIfLookUp(
 	IN PRTMP_ADAPTER pAd,
-	IN VOID *Msg)
+	IN PUCHAR pAddr)
 {
 	SHORT i;
 	SHORT ifIndex = -1;
-	PFRAME_802_11 pFrame = (PFRAME_802_11)Msg;
 
 	do
 	{
 		for(i = 0; i < MAX_APCLI_NUM; i++)
 		{
-			//if(pAd->ApCliTab[i].Enable == FALSE)
-			//	continue;
-
-			if(	MAC_ADDR_EQUAL(pAd->ApCfg.ApCliTab[i].CurrentAddress, pFrame->Hdr.Addr1))
+			if(	MAC_ADDR_EQUAL(pAd->ApCfg.ApCliTab[i].CurrentAddress, pAddr))
 			{
 				ifIndex = i;
 				DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCliIfIndex = %d\n", __FUNCTION__, ifIndex));
@@ -458,10 +453,6 @@ BOOLEAN isValidApCliIf(
 	else
 		return FALSE;
 }
-
-// The MacTableDeleteApCliEntry is integrated into ap.c::MacTableDeleteEntry
-// The MacTableInsertApCliEntry is integrated into cmm_data.c::MacTableInsertEntry
-// The ApCliTableLookUp 		is integrated into cmm_data.c::MacTableLookup
 
 /*! \brief init the management mac frame header
  *  \param p_hdr mac header
@@ -567,6 +558,10 @@ BOOLEAN ApCliCheckHt(
 			break;
 	}
 
+	/* Record the RxMcs of AP */
+	NdisMoveMemory(pApCliEntry->RxMcsSet, pHtCapability->MCSSet, 16);
+
+
 	/*
 	if (pAd->Antenna.field.TxPath == 2)	// 2: 2Tx   1: 1Tx
 	{
@@ -598,7 +593,7 @@ BOOLEAN ApCliCheckHt(
 		pAd->MlmeAux.HtCapability.ExtHtCapInfo.RDGSupport = pHtCapability->ExtHtCapInfo.RDGSupport;
 	}
 	
-	COPY_AP_HTSETTINGS_FROM_BEACON(pAd, pHtCapability);
+	//COPY_AP_HTSETTINGS_FROM_BEACON(pAd, pHtCapability);
 	return TRUE;
 }
 #endif // DOT11_N_SUPPORT //
@@ -632,12 +627,10 @@ BOOLEAN ApCliLinkUp(
 	{
 		if (ifIndex < MAX_APCLI_NUM)
 		{
-#ifdef CONFIG_IS_ASUS
 			DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK UP - IF(apcli%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", 
 										ifIndex, 
 										pAd->ApCfg.ApCliTab[ifIndex].AuthMode, GetAuthMode(pAd->ApCfg.ApCliTab[ifIndex].AuthMode),
 										pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus)));			
-#endif
 		}
 		else
 		{
@@ -754,38 +747,38 @@ BOOLEAN ApCliLinkUp(
 			// If WEP is enabled, add paiewise and shared key
 			if (pApCliEntry->WepStatus == Ndis802_11WEPEnabled)
 			{			
-				PUCHAR	Key; 			
-				UCHAR 	CipherAlg, idx, BssIdx;
+				PCIPHER_KEY pKey; 			
+				INT 		idx, BssIdx;
 
 				BssIdx = pAd->ApCfg.BssidNum + MAX_MESH_NUM + ifIndex;
 			
 				for (idx=0; idx < SHARE_KEY_NUM; idx++)
 				{
-					CipherAlg = pApCliEntry->SharedKey[idx].CipherAlg;
-    					Key = pApCliEntry->SharedKey[idx].Key;
+					pKey = &pApCliEntry->SharedKey[idx];
 										
-					if (pApCliEntry->SharedKey[idx].KeyLen > 0)
+					if (pKey->KeyLen > 0)
 					{
 						// Set key material and cipherAlg to Asic
-	    					AsicAddSharedKeyEntry(pAd, 
-	    									  BssIdx, 
-	    									  idx, 
-	    									  CipherAlg, 
-	    									  Key, 
-	    									  NULL, 
-	    									  NULL);	
+						RTMP_ASIC_SHARED_KEY_TABLE(pAd, 
+	    									  		BssIdx, 
+	    									  		idx, 
+		    										pKey);	
 
-#ifdef RTMP_MAC_PCI
 						if (idx == pApCliEntry->DefaultKeyId)
 						{						
-							// Assign pairwise key info
-							RTMPAddWcidAttributeEntry(pAd, 
-													 (BssIdx + MIN_NET_DEVICE_FOR_APCLI), 
-													 idx, 
-													 CipherAlg, 
-													 pMacEntry);
+							INT	cnt;
+					
+							/* Generate 3-bytes IV randomly for software encryption using */						
+					    	for(cnt = 0; cnt < LEN_WEP_TSC; cnt++)
+								pKey->TxTsc[cnt] = RandomByte(pAd); 
+					
+							RTMP_SET_WCID_SEC_INFO(pAd, 
+												BssIdx, 
+												idx, 
+												pKey->CipherAlg, 
+												pMacEntry->Aid, 
+												SHAREDKEYTABLE);
 						}
-#endif // RTMP_MAC_PCI //
 					}	
 				}    		   		  		   					
 			}
@@ -892,6 +885,7 @@ BOOLEAN ApCliLinkUp(
 			}				
 
 			NdisMoveMemory(&pMacEntry->HTCapability, &pAd->MlmeAux.HtCapability, sizeof(HT_CAPABILITY_IE));
+			NdisMoveMemory(pMacEntry->HTCapability.MCSSet, pApCliEntry->RxMcsSet, 16);
 #endif // DOT11_N_SUPPORT //
 
 			pMacEntry->HTPhyMode.word = pMacEntry->MaxHTPhyMode.word;
@@ -905,10 +899,15 @@ BOOLEAN ApCliLinkUp(
 			}
 			else
 			{
+				PUCHAR pTable;
+				UCHAR TableSize = 0;
+
 				pMacEntry->bAutoTxRateSwitch = TRUE;
+				APMlmeSelectTxRateTable(pAd, pMacEntry, &pTable, &TableSize, &pMacEntry->CurrTxRateIndex);
 			}
 			
-			AsicSetEdcaParm(pAd, &pAd->CommonCfg.APEdcaParm);
+			// It had been set in APStartUp. Don't set again.
+			//AsicSetEdcaParm(pAd, &pAd->CommonCfg.APEdcaParm);
 			
 			// set this entry WMM capable or not
 			if ((pAd->MlmeAux.APEdcaParm.bValid)
@@ -1027,15 +1026,15 @@ VOID ApCliIfUp(
 			&& (pApCliEntry->Enable == TRUE)
 			&& (pApCliEntry->Valid == FALSE))
 		{
-#ifdef CONFIG_ASUS_EXT			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			count_Alive=0;
 			count_DeAssoc=0;
 			flag_Reconnect = (flag_Reconnect % 65535) + 1;
 //			printk("ApCliIfUp(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //				count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
-#endif			/* ASUS EXT by Jiahao */
+			/* ASUS EXT by Jiahao */
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startup.\n", __FUNCTION__, ifIndex));
-			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
+			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
 		}
 	}
 
@@ -1061,7 +1060,7 @@ VOID ApCliIfDown(
 		if (!(pApCliEntry->Enable))
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startdown.\n", __FUNCTION__, ifIndex));
-			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, ifIndex);
+			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, ifIndex);
 		}
 #ifdef WSC_AP_SUPPORT
 		WscStop(pAd, TRUE, &pApCliEntry->WscControl);
@@ -1098,49 +1097,47 @@ VOID ApCliIfMonitor(
 	for(index = 0; index < MAX_APCLI_NUM; index++)
 	{
 		pApCliEntry = &pAd->ApCfg.ApCliTab[index];
-/*
+#if 0
 		if ((pApCliEntry->Valid == TRUE)
 			&& (RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: IF(apcli%d) - no Beancon is received from root-AP.\n", index));
 			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: Reconnect the Root-Ap again.\n"));
-			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
+			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
 			RTMP_MLME_HANDLER(pAd);
 		}
-*/
-#ifdef CONFIG_ASUS_EXT		/* ASUS EXT by Jiahao */
+#endif
+		/* ASUS EXT by Jiahao */
 		if ((pApCliEntry->Valid == TRUE))
 		{
 			if ((RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
 			{
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: IF(apcli%d) - no Beancon is received from root-AP.\n", index));
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: Reconnect the Root-Ap again.\n"));
+
 				count_Alive=0;
 				count_DeAssoc=0;
 				flag_Reconnect = (flag_Reconnect % 65535) + 1;
-
 //				printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //					count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
 
-				MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
+				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
 				RTMP_MLME_HANDLER(pAd);
 			}
 			else
 			{
 				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc && !strcmp(nvram_get("sta_connected"), "1"))
 				{
-					printk("Wireless link down & up!\n");
+					printk("Wireless Driver: link down & up!\n");
 //					printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
 //						count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
-					if (flag_Reconnect > 2)
-					    // printk("flag:%d\n", flag_Reconnect);
-					    if(ApcliMonitorPid){
+
+					if ((flag_Reconnect > 2) && ApcliMonitorPid)
+					{
 						flag_Reconnect = 0;
-						printk("[w] send SIGUSR2 to ApcliMonitor pid %d\n", ApcliMonitorPid);
+						printk("Wireless Driver: send SIGUSR2 to PID %d\n", ApcliMonitorPid);
 						kill_proc(ApcliMonitorPid, SIGUSR2, 1);
-					    }
-					    else
-						printk("[e] ApcliMonitor nopid\n");
+					}
 				}
 				else if (flag_Reconnect && count_Alive > Link_Up_Threshold * 2)	// reset flag_Reconnect
 					flag_Reconnect = 0;
@@ -1149,7 +1146,7 @@ VOID ApCliIfMonitor(
 					count_Alive = Link_Up_Threshold * 2;
 			}
 		}
-#endif		/* ASUS EXT by Jiahao */
+		/* ASUS EXT by Jiahao */
 	}
 
 	return;
@@ -1187,7 +1184,7 @@ BOOLEAN ApCliMsgTypeSubst(
 #ifdef WSC_AP_SUPPORT    
         //WSC EAPOL PACKET        
         pEntry = MacTableLookup(pAd, pFrame->Hdr.Addr2);
-        if (pEntry && (pEntry->ValidAsApCli) && pAd->ApCfg.ApCliTab[pEntry->apidx].WscControl.WscConfMode == WSC_ENROLLEE)
+        if (pEntry && IS_ENTRY_APCLI(pEntry) && pAd->ApCfg.ApCliTab[pEntry->apidx].WscControl.WscConfMode == WSC_ENROLLEE)
         {
             *Machine = WSC_STATE_MACHINE;
             EAPType = *((UCHAR*)pFrame + LENGTH_802_11 + LENGTH_802_1_H + 1);
@@ -1480,7 +1477,7 @@ MAC_TABLE_ENTRY *ApCliTableLookUpByWcid(
 		pCurEntry = &pAd->MacTab.Content[wcid];
 
 		ApCliIndex = 0xff;
-		if ((pCurEntry) && (pCurEntry->ValidAsApCli== TRUE))
+		if ((pCurEntry) && IS_ENTRY_APCLI(pCurEntry))
 		{
 			ApCliIndex = pCurEntry->MatchAPCLITabIdx;
 		}
@@ -1539,7 +1536,7 @@ static inline BOOLEAN ValidApCliEntry(
 		}
 	
 		pMacEntry = &pAd->MacTab.Content[pApCliEntry->MacTabWCID];
-		if (pMacEntry->ValidAsApCli != TRUE)
+		if (!IS_ENTRY_APCLI(pMacEntry))
 		{
 			result = FALSE;
 			break;
@@ -1626,7 +1623,7 @@ BOOLEAN 	ApCliValidateRSNIE(
 	pVIE = (PUCHAR) pEid_ptr;
 	len	 = eid_len;
 
-	if (len > MAX_LEN_OF_RSNIE || len <= MIN_LEN_OF_RSNIE)
+	if (len >= MAX_LEN_OF_RSNIE || len <= MIN_LEN_OF_RSNIE)
 		return FALSE;
 
 	if (pAd->ApCfg.ApCliTab[idx].AuthMode < Ndis802_11AuthModeWPA)
@@ -1784,12 +1781,11 @@ BOOLEAN 	ApCliValidateRSNIE(
 				// Check the Pair & Group, if different, turn on mixed mode flag
 				if (WPA.GroupCipher != WPA.PairCipher)
 					WPA.bMixMode = TRUE;
-#ifdef CONFIG_IS_ASUS
+
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliValidateRSNIE - RSN-WPA1 PairWiseCipher(%s), GroupCipher(%s), AuthMode(%s)\n",
 											((WPA.bMixMode) ? "Mix" : GetEncryptType(WPA.PairCipher)), 
 											GetEncryptType(WPA.GroupCipher),
 											GetAuthMode(WPA_AuthMode)));
-#endif
 
 				Sanity |= 0x1;
 				break; // End of case IE_WPA //
@@ -1921,12 +1917,10 @@ BOOLEAN 	ApCliValidateRSNIE(
 				// Check the Pair & Group, if different, turn on mixed mode flag
 				if (WPA2.GroupCipher != WPA2.PairCipher)
 					WPA2.bMixMode = TRUE;
-#ifdef CONFIG_IS_ASUS
 
 				DBGPRINT(RT_DEBUG_TRACE, ("ApCliValidateRSNIE - RSN-WPA2 PairWiseCipher(%s), GroupCipher(%s), AuthMode(%s)\n",
 									(WPA2.bMixMode ? "Mix" : GetEncryptType(WPA2.PairCipher)), GetEncryptType(WPA2.GroupCipher),
 									GetAuthMode(WPA2_AuthMode)));
-#endif
 
 				Sanity |= 0x2;
 				break; // End of case IE_RSN //
@@ -2095,87 +2089,50 @@ BOOLEAN  ApCliHandleRxBroadcastFrame(
 		return FALSE;	// give up this frame
 					
 							
+	/* skip the 802.11 header */
+	pRxBlk->pData += LENGTH_802_11;
+	pRxBlk->DataSize -= LENGTH_802_11;
+
 	// Use software to decrypt the encrypted frame.
 	// Because this received frame isn't my BSS frame, Asic passed to driver without decrypting it.
 	// If receiving an "encrypted" unicast packet(its WEP bit as 1) and doesn't match my BSSID, it 
 	// pass to driver with "Decrypted" marked as 0 in RxD.
 	if ((pRxD->MyBss == 0) && (pRxD->Decrypted == 0) && (pHeader->FC.Wep == 1)) 
 	{											
-		if (RTMPSoftDecryptBroadCastData(pAd, pRxBlk, pApCliEntry->GroupCipher, pApCliEntry->SharedKey) == NDIS_STATUS_FAILURE)
-        {
-				return FALSE;  // give up this frame
+		if (RTMPSoftDecryptionAction(pAd, 
+									 (PUCHAR)pHeader, 0, 
+									 &pApCliEntry->SharedKey[pRxWI->KeyIndex], 
+									 pRxBlk->pData, 
+									 &(pRxBlk->DataSize)) == NDIS_STATUS_FAILURE)			
+		{						
+			return FALSE;  // give up this frame
 		}
 	}
-							
-		
-	pRxBlk->pData += LENGTH_802_11;
-	pRxBlk->DataSize = (USHORT)pRxWI->MPDUtotalByteCount - LENGTH_802_11;
-
-	// remove the 2 extra QOS CNTL bytes
-	if (pHeader->FC.SubType & 0x08)
-	{						
-		pRxBlk->pData += 2;
-		pRxBlk->DataSize -= 2;
-	}
-
-	// L2PAD bit on will pad 2 bytes at LLC 
-	if (pRxD->L2PAD)
-	{
-		pRxBlk->pData += 2;	
-	}
-					
+	pRxD->MyBss = 1;				
 	Indicate_Legacy_Packet(pAd, pRxBlk, FromWhichBSSID);								
 
 	return TRUE;
 }
 
 
-VOID APCliUpdatePairwiseKeyTable(
+VOID APCliInstallPairwiseKey(
 	IN  PRTMP_ADAPTER   pAd,
-	IN	UCHAR			*KeyRsc,
 	IN  MAC_TABLE_ENTRY *pEntry)
 {
 	UCHAR	IfIdx;
+	UINT8	BssIdx;
 
 	IfIdx = pEntry->MatchAPCLITabIdx;
+	BssIdx = pAd->ApCfg.BssidNum + MAX_MESH_NUM + IfIdx;
 
-	// Update PTK
-	// Prepare pair-wise key information into shared key table
-	NdisZeroMemory(&pEntry->PairwiseKey, sizeof(CIPHER_KEY));   
-	pEntry->PairwiseKey.KeyLen = LEN_TKIP_EK;
-    NdisMoveMemory(pEntry->PairwiseKey.Key, &pEntry->PTK[32], LEN_TKIP_EK);
-    NdisMoveMemory(pEntry->PairwiseKey.RxTsc, KeyRsc, 6);
-    
-    // Prepare Pairwise key - Select RxMic and TxMic based on supplicant
-    NdisMoveMemory(pEntry->PairwiseKey.RxMic, &pEntry->PTK[48], LEN_TKIP_RXMICK);
-    NdisMoveMemory(pEntry->PairwiseKey.TxMic, &pEntry->PTK[48+LEN_TKIP_RXMICK], LEN_TKIP_TXMICK);
-	
-	// Prepare Pairwise key - CipherAlg
-	pEntry->PairwiseKey.CipherAlg = CIPHER_NONE;
-	if (pAd->ApCfg.ApCliTab[IfIdx].PairCipher == Ndis802_11Encryption2Enabled)
-		pEntry->PairwiseKey.CipherAlg = CIPHER_TKIP;
-	else if (pAd->ApCfg.ApCliTab[IfIdx].PairCipher == Ndis802_11Encryption3Enabled)
-		pEntry->PairwiseKey.CipherAlg = CIPHER_AES;
-	
-	// Add Pair-wise key to Asic
-    AsicAddPairwiseKeyEntry(
-    		pAd, 
-            pEntry->Addr, 
-            (UCHAR)pEntry->Aid, 
-            &pEntry->PairwiseKey);
-
-	// update WCID attribute table and IVEIV table for this entry
-	RTMPAddWcidAttributeEntry(
-			pAd, 
-			(pAd->ApCfg.BssidNum + IfIdx + MIN_NET_DEVICE_FOR_APCLI), 
-			0, 
-			pEntry->PairwiseKey.CipherAlg,
-			pEntry);
-		
+	WPAInstallPairwiseKey(pAd, 
+						  BssIdx, 
+						  pEntry, 
+						  FALSE);	
 }
 
 
-BOOLEAN APCliUpdateSharedKeyTable(
+BOOLEAN APCliInstallSharedKey(
 	IN  PRTMP_ADAPTER   pAd,
 	IN  PUCHAR          pKey,
 	IN  UCHAR           KeyLen,
@@ -2185,25 +2142,27 @@ BOOLEAN APCliUpdateSharedKeyTable(
 	UCHAR	IfIdx;
 	UCHAR	GTK_len = 0;
 
-	if (!pEntry || pEntry->ValidAsApCli == FALSE)
+	if (!pEntry || !IS_ENTRY_APCLI(pEntry))
 	{
-		DBGPRINT(RT_DEBUG_ERROR, ("APCliUpdateSharedKeyTable : This Entry doesn't exist!!! \n"));		
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : This Entry doesn't exist!!! \n", __FUNCTION__));		
 		return FALSE;
 	}
 
 	IfIdx = pEntry->MatchAPCLITabIdx;
 
-	if (pAd->ApCfg.ApCliTab[IfIdx].GroupCipher == Ndis802_11Encryption2Enabled && KeyLen >= TKIP_GTK_LENGTH)
+	if (pAd->ApCfg.ApCliTab[IfIdx].GroupCipher == Ndis802_11Encryption2Enabled && KeyLen >= LEN_TKIP_GTK)
 	{
-		GTK_len = TKIP_GTK_LENGTH;
+		GTK_len = LEN_TKIP_GTK;
 	}
-	else if (pAd->ApCfg.ApCliTab[IfIdx].GroupCipher == Ndis802_11Encryption3Enabled && KeyLen >= LEN_AES_KEY)
+	else if (pAd->ApCfg.ApCliTab[IfIdx].GroupCipher == Ndis802_11Encryption3Enabled && 
+			 KeyLen >= LEN_AES_GTK)
 	{
-		GTK_len = LEN_AES_KEY;
+		GTK_len = LEN_AES_GTK;
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_ERROR, ("APCliUpdateSharedKeyTable : GTK is invalid (GroupCipher=%d, DataLen=%d) !!! \n", pAd->ApCfg.ApCliTab[IfIdx].GroupCipher, KeyLen));		
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : GTK is invalid (GroupCipher=%d, DataLen=%d) !!! \n", 
+								__FUNCTION__, pAd->ApCfg.ApCliTab[IfIdx].GroupCipher, KeyLen));		
 		return FALSE;
 	}
 
@@ -2215,11 +2174,11 @@ BOOLEAN APCliUpdateSharedKeyTable(
 	// Update shared key table
 	NdisZeroMemory(&pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx], sizeof(CIPHER_KEY));  
 	pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].KeyLen = GTK_len;
-	NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].Key, pKey, LEN_TKIP_EK);
-	if (GTK_len == TKIP_GTK_LENGTH)
+	NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].Key, pKey, LEN_TK);
+	if (GTK_len == LEN_TKIP_GTK)
 	{
-		NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].RxMic, pKey + 16, LEN_TKIP_RXMICK);
-		NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].TxMic, pKey + 24, LEN_TKIP_TXMICK);
+		NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].RxMic, pKey + 16, LEN_TKIP_MIC);
+		NdisMoveMemory(pAd->ApCfg.ApCliTab[IfIdx].SharedKey[DefaultKeyIdx].TxMic, pKey + 24, LEN_TKIP_MIC);
 	}
 
 	// Update Shared Key CipherAlg
@@ -2233,3 +2192,4 @@ BOOLEAN APCliUpdateSharedKeyTable(
 }
 
 #endif // APCLI_SUPPORT //
+

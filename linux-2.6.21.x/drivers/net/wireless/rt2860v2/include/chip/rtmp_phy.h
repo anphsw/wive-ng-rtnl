@@ -65,7 +65,40 @@
 #define RF_R29			29
 #define RF_R30			30
 #define RF_R31			31
-
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+#define RF_R32			32
+#define RF_R33			33
+#define RF_R34			34
+#define RF_R35			35
+#define RF_R36			36
+#define RF_R37			37
+#define RF_R38			38
+#define RF_R39			39
+#define RF_R40			40
+#define RF_R41			41
+#define RF_R42			42
+#define RF_R43			43
+#define RF_R44			44
+#define RF_R45			45
+#define RF_R46			46
+#define RF_R47			47
+#define RF_R48			48
+#define RF_R49			49
+#define RF_R50			50
+#define RF_R51			51
+#define RF_R52			52
+#define RF_R53			53
+#define RF_R54			54
+#define RF_R55			55
+#define RF_R56			56
+#define RF_R57			57
+#define RF_R58			58
+#define RF_R59			59
+#define RF_R60			60
+#define RF_R61			61
+#define RF_R62			62
+#define RF_R63			63
+#endif // CONFIG_RALINK_RT3883 //
 
 // value domain of pAd->RfIcType
 #define RFIC_2820                   1       // 2.4G 2T3R
@@ -77,6 +110,11 @@
 #define RFIC_3021                   7       // 2.4G 1T2R
 #define RFIC_3022                   8       // 2.4G 2T2R
 #define RFIC_3052                   9       // 2.4G/5G 2T2R
+#define RFIC_2853		    10	    // 2.4G.5G 3T3R
+#define RFIC_3320                   11      // 2.4G 1T1R with PA (RT3350/RT3370/RT3390)
+#define RFIC_3322                   12      // 2.4G 2T2R with PA (RT3352/RT3371/RT3372/RT3391/RT3392)
+#define RFIC_3053                   13      // 2.4G/5G 3T3R (RT3883/RT3563/RT3573/RT3593/RT3662)
+#define RFIC_3853                   13      // 2.4G/5G 3T3R (RT3883/RT3563/RT3573/RT3593/RT3662)
 
 /*
 	BBP sections
@@ -99,6 +137,7 @@
 #define BBP_R26			26
 #define BBP_R27			27
 #define BBP_R31			31
+#define BBP_R47			47
 #define BBP_R49			49 //TSSI
 #define BBP_R50			50
 #define BBP_R51			51
@@ -124,12 +163,16 @@
 #define BBP_R83			83
 #define BBP_R84			84
 #define BBP_R86			86
+#define BBP_R88			88
 #define BBP_R91			91
 #define BBP_R92			92
 #define BBP_R94			94 // Tx Gain Control
 #define BBP_R103		103
+#define BBP_R104		104
 #define BBP_R105		105
 #define BBP_R106		106
+#define BBP_R109		109
+#define BBP_R110		110
 #define BBP_R113		113
 #define BBP_R114		114
 #define BBP_R115		115
@@ -141,13 +184,49 @@
 #define BBP_R121		121
 #define BBP_R122		122
 #define BBP_R123		123
+#define BBP_R126		126
+#define BBP_R127		127
+#define BBP_R137		137
+#define BBP_R140		140
+#define BBP_R141		141
+#define BBP_R142		142
+#define BBP_R143		143
+#define BBP_R163		163 // RT3883 Tx BF control
+#define BBP_R164		164
+#define BBP_R173		173
+#define BBP_R174		174
+#define BBP_R175		175
+#define BBP_R176		176
+#define BBP_R177		177
+#define BBP_R179		179
+#define BBP_R180		180
+#define BBP_R181		181
+#define BBP_R182		182
+#define BBP_R184		184
+#define BBP_R185		185
+#define BBP_R187		187
+#define BBP_R188		188
+#define BBP_R189		189
+#define BBP_R190		190
+#define BBP_R191		191
 
+#if defined(CONFIG_RALINK_RT2883)
+#define BBP_REG_BF		BBP_R105
+#define BBP_REG_SNR0	BBP_R189
+#define BBP_REG_SNR1	BBP_R190
+#define BBP_REG_SNR2	BBP_R191
+#elif defined(CONFIG_RALINK_RT3883)
+#define BBP_REG_BF		BBP_R163
+#define BBP_REG_SNR0	BBP_R160
+#define BBP_REG_SNR1	BBP_R161
+#define BBP_REG_SNR2	BBP_R162
+#endif
 
 #define BBPR94_DEFAULT	0x06 // Add 1 value will gain 1db
 
 
 #ifdef MERGE_ARCH_TEAM
-	#define MAX_BBP_ID	200
+	#define MAX_BBP_ID	255
 	#define MAX_BBP_MSG_SIZE	4096
 #else
 	#define MAX_BBP_ID	136
@@ -194,6 +273,10 @@
 			RTMP_IO_WRITE32((_A), RF_CSR_CFG0, (_V));          \
     		}                                               \
     	}								\
+    if ((_A)->ShowRf)					\
+    {									\
+    	printk("RF:%x\n", _V);			\
+	}									\
 }
 #endif // RTMP_MAC_PCI //
 
@@ -214,6 +297,96 @@
 	_pV: data pointer used to save the value of queried bbp register.
 	_bViaMCU: if we need access the bbp via the MCU.
 */
+#ifdef RELASE_INCLUDE
+/*
+	The RTMP_PCIE_PS_L3_BBP_IO_READ8 is used to support PCIE power-saving solution3.
+	"brc =AsicSendCommandToMcu" is used to avoid any muc command is executed during
+	RF_OFF command.
+*/
+#endif // RELASE_INCLUDE //
+
+	
+#ifdef CONFIG_STA_SUPPORT
+#define IS_SUPPORT_PCIE_PS_L3(_pAd) (((_pAd)->OpMode == OPMODE_STA) &&\
+	(IS_RT3090((_pAd)) || IS_RT3572((_pAd)) || IS_RT3390((_pAd))) && \
+	((_pAd)->StaCfg.PSControl.field.rt30xxPowerMode == 3)&& \
+	((_pAd)->StaCfg.PSControl.field.EnableNewPS == TRUE)) 
+	
+#define RTMP_PCIE_PS_L3_BBP_IO_READ8(_pAd, _bbpID, _pV, _bViaMCU)			\
+	do{															\
+	BBP_CSR_CFG_STRUC	BbpCsr;									\
+	int					_busyCnt, _secCnt, _regID;					\
+	BOOLEAN					brc;									\
+	_regID = ((_bViaMCU) == TRUE ? H2M_BBP_AGENT : BBP_CSR_CFG);	\
+	BbpCsr.field.Busy = IDLE;										\
+	if (((_pAd)->bPCIclkOff == FALSE)								\
+		&& ((_pAd)->brt30xxBanMcuCmd == FALSE))					\
+	{															\
+		for (_busyCnt=0; _busyCnt<MAX_BUSY_COUNT; _busyCnt++)	\
+		{														\
+			RTMP_IO_READ32(_pAd, _regID, &BbpCsr.word);			\
+			if (BbpCsr.field.Busy == BUSY)                 					\
+				continue;                                               				\
+			BbpCsr.word = 0;										\
+			BbpCsr.field.fRead = 1;									\
+			BbpCsr.field.BBP_RW_MODE = 1;							\
+			BbpCsr.field.Busy = 1;									\
+			BbpCsr.field.RegNum = _bbpID;                       			\
+			RTMP_IO_WRITE32(_pAd, _regID, BbpCsr.word);			\
+			if ((_bViaMCU) == TRUE)								\
+			{													\
+				brc =AsicSendCommandToMcu(_pAd, 0x80, 0xff, 0x0, 0x0); \
+				RTMPusecDelay(1000);							\
+			}							\
+	               if (brc == TRUE) 										\
+			{                                                 								\
+				for (_secCnt=0; _secCnt<MAX_BUSY_COUNT; _secCnt++)       	\
+				{														\
+					RTMP_IO_READ32(_pAd, _regID, &BbpCsr.word); 	\
+					if (BbpCsr.field.Busy == IDLE)							\
+						break;											\
+				}														\
+				if ((BbpCsr.field.Busy == IDLE) &&							\
+				(BbpCsr.field.RegNum == _bbpID))                					\
+				{																\
+					*(_pV) = (UCHAR)BbpCsr.field.Value;							\
+					break;														\
+				}																\
+			}																\
+			else 																\
+			{																\
+				BbpCsr.field.Busy = 0;											\
+				RTMP_IO_WRITE32(_pAd, _regID, BbpCsr.word);				\
+			}																\
+		}																	\
+	}	\
+	else 										\
+	{																	\
+			DBGPRINT_ERR(("RTMP_PCIE_PS_L3_BBP_IO_READ8(viaMCU=%d) read R%d fail\n", (_bViaMCU), _bbpID));      \
+			*(_pV) = (_pAd)->BbpWriteLatch[_bbpID];               \
+	              if ((_bViaMCU) == TRUE)				\
+			{									\
+				RTMP_IO_READ32(_pAd, _regID, &BbpCsr.word);				\
+				BbpCsr.field.Busy = 0;                         						 \
+				RTMP_IO_WRITE32(_pAd, _regID, BbpCsr.word);				\
+			}															\
+	}																	\
+	if ((BbpCsr.field.Busy == BUSY) || ((_pAd)->bPCIclkOff == TRUE))				\
+	{																	\
+	                DBGPRINT_ERR(("RTMP_PCIE_PS_L3_BBP_IO_READ8(viaMCU=%d) read R%d fail(reason:clk=%d,busy=%x)\n", (_bViaMCU), _bbpID,(_pAd)->bPCIclkOff ,BbpCsr.field.Busy));      \
+			*(_pV) = (_pAd)->BbpWriteLatch[_bbpID];               \
+			if ((_bViaMCU) == TRUE)				\
+			{									\
+				RTMP_IO_READ32(_pAd, _regID, &BbpCsr.word);				\
+				BbpCsr.field.Busy = 0;                          \
+				RTMP_IO_WRITE32(_pAd, _regID, BbpCsr.word);				\
+			}				\
+	}																	\
+}while(0)
+#else
+#define IS_SUPPORT_PCIE_PS_L3(_pAd) FALSE
+#define RTMP_PCIE_PS_L3_BBP_IO_READ8(_pAd, _bbpID, _pV, _bViaMCU)
+#endif // CONFIG_STA_SUPPORT //
 #define RTMP_BBP_IO_READ8(_pAd, _bbpID, _pV, _bViaMCU)			\
 	do{															\
 		BBP_CSR_CFG_STRUC  BbpCsr;								\
@@ -280,6 +453,9 @@
 			if ((_A)->infType == RTMP_DEV_INF_RBUS)			\
 				RTMP_BBP_IO_READ8((_A), (_I), (_pV), FALSE);	\
 			else												\
+				if(IS_SUPPORT_PCIE_PS_L3((_A)))				\
+					RTMP_PCIE_PS_L3_BBP_IO_READ8((_A), (_I), (_pV), TRUE);	\
+				else												\
 				RTMP_BBP_IO_READ8((_A), (_I), (_pV), TRUE);	\
 		}													\
 	}while(0)
@@ -292,15 +468,75 @@
 	_pV: data used to save the value of queried bbp register.
 	_bViaMCU: if we need access the bbp via the MCU.
 */
+#ifdef CONFIG_STA_SUPPORT
+#define RTMP_PCIE_PS_L3_BBP_IO_WRITE8(_pAd, _bbpID, _pV, _bViaMCU)			\
+	do{															\
+		BBP_CSR_CFG_STRUC  BbpCsr;                            			 	\
+		int             _busyCnt=0, _regID;                               				\
+		BOOLEAN					brc;								\
+		_regID = ((_bViaMCU) == TRUE ? H2M_BBP_AGENT : BBP_CSR_CFG);	\
+			if (((_pAd)->bPCIclkOff == FALSE)	\
+			&& ((_pAd)->brt30xxBanMcuCmd == FALSE))	\
+			{																	\
+				if (_pAd->AccessBBPFailCount > 20)									\
+				{																	\
+					AsicResetBBPAgent(_pAd);				\
+					_pAd->AccessBBPFailCount = 0;											\
+				}		\
+				for (_busyCnt=0; _busyCnt<MAX_BUSY_COUNT; _busyCnt++)  \
+				{                                                  						 \
+					RTMP_IO_READ32((_pAd), _regID, &BbpCsr.word);     \
+					if (BbpCsr.field.Busy == BUSY)                  \
+						continue;                                   \
+					BbpCsr.word = 0;                                \
+					BbpCsr.field.fRead = 0;                         \
+					BbpCsr.field.BBP_RW_MODE = 1;                         \
+					BbpCsr.field.Busy = 1;                          \
+					BbpCsr.field.Value = _pV;                        \
+					BbpCsr.field.RegNum = _bbpID;                       \
+					RTMP_IO_WRITE32((_pAd), _regID, BbpCsr.word);     \
+					if ((_bViaMCU) == TRUE)									\
+					{														\
+						brc =AsicSendCommandToMcu(_pAd, 0x80, 0xff, 0x0, 0x0);		\
+						if ((_pAd)->OpMode == OPMODE_AP)						\
+							RTMPusecDelay(1000);							\
+					}														\
+					if (brc == TRUE) 											\
+					{														\
+						(_pAd)->BbpWriteLatch[_bbpID] = _pV;                   		\
+					}														\
+					else 													\
+					{														\
+						BbpCsr.field.Busy = 0;									\
+						RTMP_IO_WRITE32(_pAd, _regID, BbpCsr.word);	\
+					}								\
+					break;													\
+				}  	\
+			}		\
+			else 										\
+			{																	\
+			DBGPRINT_ERR(("  brt30xxBanMcuCmd = %d. Write BBP %d \n",  (_pAd)->brt30xxBanMcuCmd, (_regID)));	\
+			}																	\
+		if ((_busyCnt == MAX_BUSY_COUNT) || ((_pAd)->bPCIclkOff == TRUE))			\
+			{																	\
+				if (_busyCnt == MAX_BUSY_COUNT)					\
+				(_pAd)->AccessBBPFailCount++;					\
+				DBGPRINT_ERR(("BBP write R%d=0x%x fail. BusyCnt= %d.bPCIclkOff = %d. \n", _regID, BbpCsr.word, _busyCnt, (_pAd)->bPCIclkOff ));	\
+			}																	\
+	}while(0)
+#else
+#define RTMP_PCIE_PS_L3_BBP_IO_WRITE8(_pAd, _bbpID, _pV, _bViaMCU)
+#endif // CONFIG_STA_SUPPORT //
+
 #define RTMP_BBP_IO_WRITE8(_pAd, _bbpID, _pV, _bViaMCU)			\
 	do{															\
 		BBP_CSR_CFG_STRUC  BbpCsr;                             \
-		int             _busyCnt, _regID;                               			\
+		int             _busyCnt=0, _regID;                               			\
 																\
 		_regID = ((_bViaMCU) == TRUE ? H2M_BBP_AGENT : BBP_CSR_CFG);	\
 		for (_busyCnt=0; _busyCnt<MAX_BUSY_COUNT; _busyCnt++)  \
 		{                                                   \
-			RTMP_IO_READ32((_pAd), BBP_CSR_CFG, &BbpCsr.word);     \
+			RTMP_IO_READ32((_pAd), _regID, &BbpCsr.word);     \
 			if (BbpCsr.field.Busy == BUSY)                  \
 				continue;                                   \
 			BbpCsr.word = 0;                                \
@@ -309,7 +545,7 @@
 			BbpCsr.field.Busy = 1;                          \
 			BbpCsr.field.Value = _pV;                        \
 			BbpCsr.field.RegNum = _bbpID;                       \
-			RTMP_IO_WRITE32((_pAd), BBP_CSR_CFG, BbpCsr.word);     \
+			RTMP_IO_WRITE32((_pAd), _regID, BbpCsr.word);     \
 			if ((_bViaMCU) == TRUE)									\
 			{														\
 				AsicSendCommandToMcu(_pAd, 0x80, 0xff, 0x0, 0x0);		\
@@ -350,9 +586,43 @@
 			if ((_A)->infType == RTMP_DEV_INF_RBUS)			\
 				RTMP_BBP_IO_WRITE8((_A), (_I), (_pV), FALSE);	\
 			else												\
+				if(IS_SUPPORT_PCIE_PS_L3((_A)))				\
+					RTMP_PCIE_PS_L3_BBP_IO_WRITE8((_A), (_I), (_pV), TRUE);	\
+				else												\
 				RTMP_BBP_IO_WRITE8((_A), (_I), (_pV), TRUE);	\
 		}													\
 	}while(0)
+
+
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+
+#define RTMP_DFS_IO_READ8(_A, _I, _V)                   \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
+	BBP_IO_READ8_BY_REG_ID(_A, BBP_R141, _V);           \
+}
+
+#define RTMP_DFS_IO_WRITE8(_A, _I, _V)                  \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R141, _V);          \
+}
+
+#define RTMP_CARRIER_IO_READ8(_A, _I, _V)               \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
+	BBP_IO_READ8_BY_REG_ID(_A, BBP_R185, _V);           \
+}
+#define RTMP_CARRIER_IO_WRITE8(_A, _I, _V)              \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R185, _V);          \
+}
+
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+
+
+
 	
 #endif // RTMP_MAC_PCI //
 

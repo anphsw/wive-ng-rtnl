@@ -47,11 +47,17 @@ static USHORT EE_FLASH_ID_LIST[]={
 #endif // RT2880 //
 #ifdef RT2883
 	0x2883,
+	0x2880,
 #endif // RT2883 //
+#ifdef RT3883
+	0x3662,
+	0x3883,
+#endif // RT3883 //
 #ifdef RT305x
 	0x3052,
 	0x3051,
 	0x3050,
+	0x3350,
 #endif // RT305x //
 };
 
@@ -299,9 +305,7 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
-#if 0
 	UCHAR *eepromBuf;
-#endif
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));
 	

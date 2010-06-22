@@ -26,6 +26,8 @@
 	Fonchi		2006-06-23      modified for rt61-APClinent
 */
 
+#ifdef APCLI_SUPPORT
+
 #include "rt_config.h"
 
 static VOID ApCliProbeTimeout(
@@ -36,27 +38,19 @@ static VOID ApCliProbeTimeout(
 
 static VOID ApCliMlmeProbeReqAction(
 	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliPeerProbeRspAtJoinAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliProbeTimeoutAtJoinAction(
 	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliInvalidStateWhenJoin(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliEnqueueProbeRequest(
 	IN PRTMP_ADAPTER pAd,
@@ -79,20 +73,23 @@ BUILD_TIMER_FUNCTION(ApCliProbeTimeout);
  */
 VOID ApCliSyncStateMachineInit(
 	IN PRTMP_ADAPTER pAd,
-	IN STATE_MACHINE_EX *Sm,
-	OUT STATE_MACHINE_FUNC_EX Trans[])
+	IN STATE_MACHINE *Sm,
+	OUT STATE_MACHINE_FUNC Trans[])
 {
 	UCHAR i;
 
-	StateMachineInitEx(Sm, (STATE_MACHINE_FUNC_EX*)Trans, APCLI_MAX_SYNC_STATE, APCLI_MAX_SYNC_MSG, (STATE_MACHINE_FUNC_EX)DropEx, APCLI_SYNC_IDLE, APCLI_SYNC_MACHINE_BASE);
+	StateMachineInit(Sm, (STATE_MACHINE_FUNC*)Trans,
+		APCLI_MAX_SYNC_STATE, APCLI_MAX_SYNC_MSG,
+		(STATE_MACHINE_FUNC)Drop, APCLI_SYNC_IDLE,
+		APCLI_SYNC_MACHINE_BASE);
 
 	// column 1
-	StateMachineSetActionEx(Sm, APCLI_SYNC_IDLE, APCLI_MT2_MLME_PROBE_REQ, (STATE_MACHINE_FUNC_EX)ApCliMlmeProbeReqAction);
+	StateMachineSetAction(Sm, APCLI_SYNC_IDLE, APCLI_MT2_MLME_PROBE_REQ, (STATE_MACHINE_FUNC)ApCliMlmeProbeReqAction);
 
 	//column 2
-	StateMachineSetActionEx(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_MLME_PROBE_REQ, (STATE_MACHINE_FUNC_EX)ApCliInvalidStateWhenJoin);
-	StateMachineSetActionEx(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_PEER_PROBE_RSP, (STATE_MACHINE_FUNC_EX)ApCliPeerProbeRspAtJoinAction);
-	StateMachineSetActionEx(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_PROBE_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliProbeTimeoutAtJoinAction);
+	StateMachineSetAction(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_MLME_PROBE_REQ, (STATE_MACHINE_FUNC)ApCliInvalidStateWhenJoin);
+	StateMachineSetAction(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_PEER_PROBE_RSP, (STATE_MACHINE_FUNC)ApCliPeerProbeRspAtJoinAction);
+	StateMachineSetAction(Sm, APCLI_JOIN_WAIT_PROBE_RSP, APCLI_MT2_PROBE_TIMEOUT, (STATE_MACHINE_FUNC)ApCliProbeTimeoutAtJoinAction);
 
 	// timer init
 	RTMPInitTimer(pAd, &pAd->MlmeAux.ProbeTimer, GET_TIMER_FUNCTION(ApCliProbeTimeout), pAd, FALSE);
@@ -119,7 +116,7 @@ static VOID ApCliProbeTimeout(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("ApCli_SYNC - ProbeReqTimeout\n"));
 
-	MlmeEnqueueEx(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_PROBE_TIMEOUT, 0, NULL, 0);
+	MlmeEnqueue(pAd, APCLI_SYNC_STATE_MACHINE, APCLI_MT2_PROBE_TIMEOUT, 0, NULL, 0);
 	RTMP_MLME_HANDLER(pAd);
 
 	return;
@@ -133,12 +130,13 @@ static VOID ApCliProbeTimeout(
  */
 static VOID ApCliMlmeProbeReqAction(
 	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex)
+	IN MLME_QUEUE_ELEM *Elem)
 {
 	BOOLEAN Cancelled;
 	APCLI_MLME_JOIN_REQ_STRUCT *Info = (APCLI_MLME_JOIN_REQ_STRUCT *)(Elem->Msg);
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("ApCli SYNC - ApCliMlmeProbeReqAction(Ssid %s)\n", Info->Ssid));
 
@@ -169,9 +167,7 @@ static VOID ApCliMlmeProbeReqAction(
  */
 static VOID ApCliPeerProbeRspAtJoinAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	UCHAR Bssid[MAC_ADDR_LEN], Addr2[MAC_ADDR_LEN];
 	UCHAR Ssid[MAX_LEN_OF_SSID], SsidLen, BssType, Channel, MessageToMe, 
@@ -206,6 +202,9 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 #ifdef CONFIG_STA_SUPPORT
 	UCHAR	pPreNHtCapabilityLen = 0;
 #endif // CONFIG_STA_SUPPORT //
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
+
 
 	// Init Variable IE structure
 	pVIE = (PNDIS_802_11_VARIABLE_IEs) VarIE;
@@ -383,7 +382,9 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 
 #ifdef DOT11_N_SUPPORT
 			// filter out un-supported ht rates
-			if ((HtCapabilityLen > 0) && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
+			if ((HtCapabilityLen > 0) && 
+				(pApCliEntry->DesiredHtPhyInfo.bHtEnable) &&
+				(pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 			{
 				RTMPZeroMemory(&pAd->MlmeAux.HtCapability, SIZE_HT_CAP_IE);
 				pAd->MlmeAux.NewExtChannelOffset = NewExtChannelOffset;
@@ -448,7 +449,7 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 				*pCurrState = APCLI_SYNC_IDLE;
 
 				ApCliCtrlMsg.Status = MLME_SUCCESS;
-				MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
+				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
 					sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 			}
 		}
@@ -461,11 +462,12 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 
 static VOID ApCliProbeTimeoutAtJoinAction(
 	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
+
 
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_SYNC - ProbeTimeoutAtJoinAction\n"));
 	*pCurrState = SYNC_IDLE;
@@ -476,11 +478,11 @@ static VOID ApCliProbeTimeoutAtJoinAction(
 	if(!MAC_ADDR_EQUAL(pAd->MlmeAux.Bssid, ZERO_MAC_ADDR))
 	{
 		ApCliCtrlMsg.Status = MLME_SUCCESS;
-		MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
+		MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
 			sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 	} else
 	{
-		MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ_TIMEOUT, 0, NULL, ifIndex);
+		MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ_TIMEOUT, 0, NULL, ifIndex);
 	}
 
 	return;
@@ -493,14 +495,15 @@ static VOID ApCliProbeTimeoutAtJoinAction(
  */
 static VOID ApCliInvalidStateWhenJoin(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
+
 
 	ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
-	MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
+	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_AYNC - ApCliInvalidStateWhenJoin(state=%ld). Reset SYNC machine\n", *pCurrState));
@@ -566,4 +569,6 @@ static VOID ApCliEnqueueProbeRequest(
 
 	return;
 }
+
+#endif // APCLI_SUPPORT //
 

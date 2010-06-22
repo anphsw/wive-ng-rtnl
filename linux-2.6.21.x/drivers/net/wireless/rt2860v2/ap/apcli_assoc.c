@@ -26,6 +26,9 @@
 	--------	----------		----------------------------------------------
 	Fonchi		2006-6-23		modified for rt61-APClinent
 */
+
+#ifdef APCLI_SUPPORT
+
 #include "rt_config.h"
 
 static VOID ApCliAssocTimeout(
@@ -36,45 +39,31 @@ static VOID ApCliAssocTimeout(
 
 static VOID ApCliMlmeAssocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliMlmeDisassocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliPeerAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliPeerDisassocAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliAssocTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliInvalidStateWhenAssoc(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliInvalidStateWhenDisassociate(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex);
+	IN MLME_QUEUE_ELEM *Elem);
 
 static VOID ApCliAssocPostProc(
 	IN PRTMP_ADAPTER pAd, 
@@ -105,24 +94,27 @@ BUILD_TIMER_FUNCTION(ApCliAssocTimeout);
  */
 VOID ApCliAssocStateMachineInit(
 	IN	PRTMP_ADAPTER	pAd, 
-	IN  STATE_MACHINE_EX *S, 
-	OUT STATE_MACHINE_FUNC_EX Trans[]) 
+	IN  STATE_MACHINE *S, 
+	OUT STATE_MACHINE_FUNC Trans[]) 
 {
 	UCHAR i;
 
-	StateMachineInitEx(S, (STATE_MACHINE_FUNC_EX*)Trans, APCLI_MAX_ASSOC_STATE, APCLI_MAX_ASSOC_MSG, (STATE_MACHINE_FUNC_EX)DropEx, APCLI_ASSOC_IDLE, APCLI_ASSOC_MACHINE_BASE);
+	StateMachineInit(S, (STATE_MACHINE_FUNC*)Trans,
+		APCLI_MAX_ASSOC_STATE, APCLI_MAX_ASSOC_MSG,
+		(STATE_MACHINE_FUNC)Drop, APCLI_ASSOC_IDLE,
+		APCLI_ASSOC_MACHINE_BASE);
 
 	// first column
-	StateMachineSetActionEx(S, APCLI_ASSOC_IDLE, APCLI_MT2_MLME_ASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliMlmeAssocReqAction);
-	StateMachineSetActionEx(S, APCLI_ASSOC_IDLE, APCLI_MT2_MLME_DISASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliMlmeDisassocReqAction);
-	StateMachineSetActionEx(S, APCLI_ASSOC_IDLE, APCLI_MT2_PEER_DISASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliPeerDisassocAction);
+	StateMachineSetAction(S, APCLI_ASSOC_IDLE, APCLI_MT2_MLME_ASSOC_REQ, (STATE_MACHINE_FUNC)ApCliMlmeAssocReqAction);
+	StateMachineSetAction(S, APCLI_ASSOC_IDLE, APCLI_MT2_MLME_DISASSOC_REQ, (STATE_MACHINE_FUNC)ApCliMlmeDisassocReqAction);
+	StateMachineSetAction(S, APCLI_ASSOC_IDLE, APCLI_MT2_PEER_DISASSOC_REQ, (STATE_MACHINE_FUNC)ApCliPeerDisassocAction);
    
 	// second column
-	StateMachineSetActionEx(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_MLME_ASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliInvalidStateWhenAssoc);
-	StateMachineSetActionEx(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_MLME_DISASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliInvalidStateWhenDisassociate);
-	StateMachineSetActionEx(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_PEER_DISASSOC_REQ, (STATE_MACHINE_FUNC_EX)ApCliPeerDisassocAction);
-	StateMachineSetActionEx(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_PEER_ASSOC_RSP, (STATE_MACHINE_FUNC_EX)ApCliPeerAssocRspAction);
-	StateMachineSetActionEx(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_ASSOC_TIMEOUT, (STATE_MACHINE_FUNC_EX)ApCliAssocTimeoutAction);
+	StateMachineSetAction(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_MLME_ASSOC_REQ, (STATE_MACHINE_FUNC)ApCliInvalidStateWhenAssoc);
+	StateMachineSetAction(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_MLME_DISASSOC_REQ, (STATE_MACHINE_FUNC)ApCliInvalidStateWhenDisassociate);
+	StateMachineSetAction(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_PEER_DISASSOC_REQ, (STATE_MACHINE_FUNC)ApCliPeerDisassocAction);
+	StateMachineSetAction(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_PEER_ASSOC_RSP, (STATE_MACHINE_FUNC)ApCliPeerAssocRspAction);
+	StateMachineSetAction(S, APCLI_ASSOC_WAIT_RSP, APCLI_MT2_ASSOC_TIMEOUT, (STATE_MACHINE_FUNC)ApCliAssocTimeoutAction);
 
 	// timer init
 	RTMPInitTimer(pAd, &pAd->MlmeAux.ApCliAssocTimer, GET_TIMER_FUNCTION(ApCliAssocTimeout), pAd, FALSE);
@@ -152,7 +144,7 @@ static VOID ApCliAssocTimeout(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_ASSOC - enqueue APCLI_MT2_ASSOC_TIMEOUT \n"));
 
-	MlmeEnqueueEx(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_ASSOC_TIMEOUT, 0, NULL, 0);
+	MlmeEnqueue(pAd, APCLI_ASSOC_STATE_MACHINE, APCLI_MT2_ASSOC_TIMEOUT, 0, NULL, 0);
 	RTMP_MLME_HANDLER(pAd);
 
 	return;
@@ -180,10 +172,7 @@ static VOID ApCliAssocTimeout(
  */
 static VOID ApCliMlmeAssocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
-	
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	NDIS_STATUS		 NStatus;
 	BOOLEAN          Cancelled;
@@ -200,6 +189,9 @@ static VOID ApCliMlmeAssocReqAction(
 	UCHAR            SupRateIe = IE_SUPP_RATES;
 	UCHAR            ExtRateIe = IE_EXT_SUPP_RATES;
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
+
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -210,7 +202,7 @@ static VOID ApCliMlmeAssocReqAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("APCLI_ASSOC - Block Auth request durning WPA block period!\n"));
 		*pCurrState = APCLI_ASSOC_IDLE;
 		ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
-		MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+		MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 			sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 	}
 	else if(MlmeAssocReqSanity(pAd, Elem->Msg, Elem->MsgLen, ApAddr, &CapabilityInfo, &Timeout, &ListenIntv))
@@ -225,7 +217,7 @@ static VOID ApCliMlmeAssocReqAction(
 			*pCurrState = APCLI_ASSOC_IDLE;
 
 			ApCliCtrlMsg.Status = MLME_FAIL_NO_RESOURCE;
-			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 				sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 
 			return;
@@ -398,7 +390,7 @@ static VOID ApCliMlmeAssocReqAction(
 		*pCurrState = APCLI_ASSOC_IDLE;
 
 		ApCliCtrlMsg.Status = MLME_INVALID_FORMAT;
-		MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+		MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 			sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 	}
 
@@ -415,9 +407,7 @@ static VOID ApCliMlmeAssocReqAction(
  */
 static VOID ApCliMlmeDisassocReqAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	PMLME_DISASSOC_REQ_STRUCT pDisassocReq;
 	HEADER_802_11         DisassocHdr;
@@ -425,6 +415,9 @@ static VOID ApCliMlmeDisassocReqAction(
 	ULONG                 FrameLen = 0;
 	NDIS_STATUS           NStatus;
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
+
 
 	// skip sanity check
 	pDisassocReq = (PMLME_DISASSOC_REQ_STRUCT)(Elem->Msg);
@@ -437,7 +430,7 @@ static VOID ApCliMlmeDisassocReqAction(
 		*pCurrState = APCLI_ASSOC_IDLE;
 
 		ApCliCtrlMsg.Status = MLME_FAIL_NO_RESOURCE;
-		MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
+		MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
 			sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 		return;
 	}
@@ -467,7 +460,7 @@ static VOID ApCliMlmeDisassocReqAction(
     *pCurrState = APCLI_ASSOC_IDLE;
 
 	ApCliCtrlMsg.Status = MLME_SUCCESS;
-	MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
+	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 
 	return;
@@ -484,9 +477,7 @@ static VOID ApCliMlmeDisassocReqAction(
  */
 static VOID ApCliPeerAssocRspAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	BOOLEAN				Cancelled;
 	USHORT				CapabilityInfo, Status, Aid;
@@ -501,6 +492,9 @@ static VOID ApCliPeerAssocRspAction(
 	UCHAR				HtCapabilityLen;
 	UCHAR				AddHtInfoLen;
 	UCHAR				NewExtChannelOffset = 0xff;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
+
 
 	if (ApCliPeerAssocRspSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &CapabilityInfo, &Status, &Aid, SupRate, &SupRateLen, ExtRate, &ExtRateLen, 
 		&HtCapability, &AddHtInfo, &HtCapabilityLen,&AddHtInfoLen,&NewExtChannelOffset, &EdcaParm, &CkipFlag))
@@ -517,13 +511,13 @@ static VOID ApCliPeerAssocRspAction(
 					ExtRate, ExtRateLen, &EdcaParm, &HtCapability, HtCapabilityLen, &AddHtInfo);  	
 
 				ApCliCtrlMsg.Status = MLME_SUCCESS;
-				MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 					sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 			}
 			else
 			{
 				ApCliCtrlMsg.Status = Status;
-				MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 					sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 			}
 
@@ -548,12 +542,12 @@ static VOID ApCliPeerAssocRspAction(
  */
 static VOID ApCliPeerDisassocAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	UCHAR         Addr2[MAC_ADDR_LEN];
 	USHORT        Reason;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
 
 	if(PeerDisassocSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Reason))
 	{
@@ -561,7 +555,7 @@ static VOID ApCliPeerDisassocAction(
 		{
 			*pCurrState = APCLI_ASSOC_IDLE;
 
-			MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PEER_DISCONNECT_REQ, 0, NULL, ifIndex);
+			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PEER_DISCONNECT_REQ, 0, NULL, ifIndex);
 
         }
     }
@@ -581,31 +575,32 @@ static VOID ApCliPeerDisassocAction(
  */
 static VOID ApCliAssocTimeoutAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
+
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_ASSOC - ApCliAssocTimeoutAction\n"));
 	*pCurrState = APCLI_ASSOC_IDLE;
 
-	MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_REQ_TIMEOUT, 0, NULL, ifIndex);
+	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_REQ_TIMEOUT, 0, NULL, ifIndex);
 
 	return;
 }
 
 static VOID ApCliInvalidStateWhenAssoc(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_ASSOC - ApCliInvalidStateWhenAssoc(state=%ld), reset APCLI_ASSOC state machine\n", *pCurrState));
 	*pCurrState = APCLI_ASSOC_IDLE;
 
 	ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
-	MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
+	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_ASSOC_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 
 	return;
@@ -613,17 +608,17 @@ static VOID ApCliInvalidStateWhenAssoc(
 
 static VOID ApCliInvalidStateWhenDisassociate(
 	IN PRTMP_ADAPTER pAd, 
-	IN MLME_QUEUE_ELEM *Elem,
-	OUT PULONG pCurrState,
-	IN USHORT ifIndex) 
+	IN MLME_QUEUE_ELEM *Elem) 
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
+	USHORT ifIndex = (USHORT)(Elem->Priv);
+	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].AssocCurrState;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("APCLI_ASSOC - InvalidStateWhenApCliDisassoc(state=%ld), reset APCLI_ASSOC state machine\n", *pCurrState));
 	*pCurrState = APCLI_ASSOC_IDLE;
 
 	ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
-	MlmeEnqueueEx(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
+	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DEASSOC_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
 
 	return;
@@ -675,4 +670,6 @@ static VOID ApCliAssocPostProc(
 #endif // DOT11_N_SUPPORT //
 
 }
+
+#endif // APCLI_SUPPORT //
 

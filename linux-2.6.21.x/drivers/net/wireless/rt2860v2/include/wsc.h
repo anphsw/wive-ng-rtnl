@@ -51,21 +51,14 @@
 		if ((__pAd)->WscHdrPshBtnFlag) WSC_HDR_BTN_CheckHandler(__pAd);
 
 /* bit3: WPS PBC function is controlled through GPIO[3] */
-/* currently only for RT2860 & RT2870 */
 #define WSC_HDR_BTN_MR_PRESS_FLG_GET(__pAd, __FlgIsPressed)				\
 	{																	\
 		UINT32 __gpio_value;											\
-		if (((__pAd->MACVersion & 0xFFFF0000) == 0x28600000) ||			\
-			((__pAd->MACVersion & 0xFFFF0000) == 0x28700000))			\
-		{																\
-			RTMP_IO_READ32(__pAd, GPIO_CTRL_CFG, (&__gpio_value));		\
-			if (__gpio_value & WSC_HDR_BTN_GPIO_3)						\
-				__FlgIsPressed = 0;										\
-			else														\
-				__FlgIsPressed = 1;										\
-		}																\
-		else															\
+		RTMP_IO_READ32(__pAd, GPIO_CTRL_CFG, (&__gpio_value));			\
+		if (__gpio_value & WSC_HDR_BTN_GPIO_3)							\
 			__FlgIsPressed = 0;											\
+		else															\
+			__FlgIsPressed = 1;											\
 	}
 // WSC HDR PSH BTN FUNC //
 
@@ -280,18 +273,36 @@
 #define WSC_SCSTATE_UNCONFIGURED	0x01
 #define WSC_SCSTATE_CONFIGURED		0x02
 
-#define AP_WSC_DEVICE_NAME              "Wireless Router RTNL"
-#define AP_WSC_MODEL_NAME               "Wireless Router"
-#define WSC_MANUFACTURE         "OSS"
+// Common definition
+#if 0
+#define	WSC_MANUFACTURE		"Ralink Technology, Corp."
 #ifdef CONFIG_AP_SUPPORT
+#define	AP_WSC_MODEL_NAME		"Ralink Wireless Access Point"
+#define	AP_WSC_DEVICE_NAME		"RalinkAPS"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
-#define STA_WSC_MODEL_NAME              "Wireless Station"
-#define STA_WSC_DEVICE_NAME             "Wireless Station RTNL"
-#define WSC_DEVICE_NAME_R       "EX-Registrar"
+#define	STA_WSC_MODEL_NAME		"Ralink Wireless Linux Client"
+#define	STA_WSC_DEVICE_NAME		"RalinkLinuxClient"
+#define	WSC_DEVICE_NAME_R	"Ralink EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
-#define WSC_MODEL_NUMBER        "RTNL"
+#define	WSC_MODEL_NUMBER	"RT2860"
 #define	WSC_MODEL_SERIAL	"12345678"
+#endif
+
+/*ASUS EXT by Jiahao */
+#define	WSC_MANUFACTURE		"ASUSTek Computer Inc."
+#ifdef CONFIG_AP_SUPPORT
+#define	AP_WSC_MODEL_NAME		"Wireless WPS Router"
+#define	AP_WSC_DEVICE_NAME		"ASUS Wireless WPS Router"
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+#define	STA_WSC_MODEL_NAME		"Wireless WPS Station"
+#define	STA_WSC_DEVICE_NAME		"ASUS Wireless WPS Station"
+#define	WSC_DEVICE_NAME_R	"ASUS EX-Registrar"
+#endif // CONFIG_STA_SUPPORT //
+#define	WSC_MODEL_NUMBER	"RT-N13U.B1"
+#define	WSC_MODEL_SERIAL	"00000000"
+/*ASUS EXT by Jiahao */
 
 // Time-Out, param for timer func, count by micro-sec, not ticks
 #define WSC_EAPOL_START_TIME_OUT    2000 
@@ -305,6 +316,12 @@
 #ifdef CONFIG_STA_SUPPORT
 #define	WSC_PROFILE_RETRY_TIME_OUT	10000
 #endif // CONFIG_STA_SUPPORT //
+#ifdef WSC_LED_SUPPORT
+#define WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT		300000		// 300 seconds
+#define WSC_WPS_FAIL_LED_PATTERN_TIMEOUT		15000		// 15 seconds.
+#define WSC_WPS_SKIP_TURN_OFF_LED_TIMEOUT		2500			// 2.5 seconds.
+#define WSC_WPS_TURN_OFF_LED_TIMEOUT			1000			// 1 second.
+#endif // WSC_LED_SUPPORT //
 
 #define WSC_INIT_ENTRY_APIDX        0xFF
 #define WSC_MAX_DATA_LEN            1024
@@ -330,13 +347,6 @@ typedef struct _WSC_UUID_T{
 	UCHAR  clockSeqLow;
 	UCHAR  node[6];
 }WSC_UUID_T;
-
-// 802.1x authentication format
-typedef	struct	_IEEE8021X_FRAME	{
-	UCHAR	Version;					// 1.0
-	UCHAR	Type;						// 0 = EAP Packet
-	USHORT	Length;
-}	IEEE8021X_FRAME, *PIEEE8021X_FRAME;
 
 // EAP frame format
 typedef	struct PACKED	_EAP_FRAME	{
@@ -509,6 +519,7 @@ typedef struct _WSC_STA_PBC_PROBE_INFO {
 } WSC_STA_PBC_PROBE_INFO;
 #endif // CONFIG_AP_SUPPORT //
 
+
 // WSC control block
 typedef	struct	_WSC_CTRL
 {
@@ -560,6 +571,19 @@ typedef	struct	_WSC_CTRL
 	BOOLEAN                 WscProfileRetryTimerRunning;
 	RALINK_TIMER_STRUCT		WscProfileRetryTimer;
 #endif // CONFIG_STA_SUPPORT //
+#ifdef WSC_LED_SUPPORT
+	ULONG					WscLEDMode; // WPS LED mode: LED_WPS_XXX definitions.
+	ULONG					WscLastWarningLEDMode; // LED_WPS_ERROR or LED_WPS_SESSION_OVERLAP_DETECTED
+	BOOLEAN 				bSkipWPSTurnOffLED; // Skip the WPS turn off LED command.
+	BOOLEAN 				WscLEDTimerRunning;
+	RALINK_TIMER_STRUCT 	WscLEDTimer;
+	BOOLEAN 				WscSkipTurnOffLEDTimerRunning;
+	RALINK_TIMER_STRUCT 	WscSkipTurnOffLEDTimer;
+	// This variable is TRUE after the 120 seconds WPS walk time expiration.
+	// Note that in the case of LED mode 9, the error LED should be turned on only after WPS walk time expiration 
+	// if the NIC cannot find any WPS PBC-enabled APs in the last scanning result.
+	BOOLEAN 				bWPSWalkTimeExpiration;
+#endif // WSC_LED_SUPPORT //
     UCHAR               WpaPsk[64];
     INT                 WpaPskLen;
     BOOLEAN             bWscTrigger;        // TRUE: AP-Enrollee & AP-Registrar work, FALSE: AP-Enrollee & AP-Registrar stop working
@@ -572,6 +596,8 @@ typedef	struct	_WSC_CTRL
 	BOOLEAN					WscPBCOverlap;
 	WSC_STA_PBC_PROBE_INFO	WscStaPbcProbeInfo;
 	INT						WscKeyASCII; 		//WscKeyASCII (0:Hex, 1:ASCII(random length), others: ASCII length(8~63, default 8))
+	NDIS_802_11_SSID	    WscDefaultSsid;		// Default WPS SSID after WPS process complete with Enrollee when AP is un-configured Registrar.
+	BOOLEAN					bWCNTest;
 #endif // CONFIG_AP_SUPPORT //
 	INT					WscActionMode;
 	UCHAR                   Wsc_Uuid_E[UUID_LEN_HEX];

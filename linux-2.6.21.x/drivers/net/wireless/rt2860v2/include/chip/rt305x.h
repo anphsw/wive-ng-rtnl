@@ -51,6 +51,15 @@
 extern REG_PAIR   RT305x_RFRegTable[];
 
 
+
+#ifdef CARRIER_DETECTION_SUPPORT
+#define CARRIER_1_SUPPORT
+#ifndef TONE_RADAR_DETECT_SUPPORT
+#define TONE_RADAR_DETECT_SUPPORT
+#endif
+#endif
+
+
 //
 // Device ID & Vendor ID, these values should match EEPROM value
 //

@@ -26,7 +26,10 @@
 	Paul Lin	06-08-08		Initial
 	JuemingChen 06-10-30        Do modifications and Add APIs for AP
 */
+
 #include "rt_config.h"
+
+#ifdef WSC_INCLUDED
 #include "wsc_tlv.h"
 #ifdef CONFIG_CRYPTO_HMACXXX
 #include <linux/crypto.h>
@@ -122,7 +125,7 @@ static WSC_TLV_0B wsc_tlv_0b[]=
 	/*Total Networks*/					{0x1046, 1},				//WSC_ID_TOT_NETWORKS
 	/*UUID-E*/							{0x1047, 16},				//WSC_ID_UUID_E
 	/*UUID-R*/							{0x1048, 16},				//WSC_ID_UUID_R
-	{0,0},															//WSC_ID_VENDOR_EXT
+	/*WPS Vendor Extension*/			{0x1049, 0x400},			//WSC_ID_VENDOR_EXT
 	/*Version*/							{0x104A, 1},				//WSC_ID_VERSION
 	/*X.509 Certificate Request*/		{0x104B, 0xff},				//WSC_ID_X509_CERT_REQ
 	/*X.509 Certificate*/				{0x104C, 0xff},				//WSC_ID_X509_CERT
@@ -179,9 +182,9 @@ int AppendWSCTLV(USHORT index, OUT UCHAR * obuf, IN UCHAR * ibuf, IN USHORT varl
 {
 	USHORT len, dataLen;
 
-    dataLen = ((USHORT)0 < varlen && (USHORT)255 >= varlen) ? varlen : wsc_tlv_0b[WSC_TLV_ENT(index)].len;
+    dataLen = ( varlen != (USHORT)0 ) ? varlen : wsc_tlv_0b[WSC_TLV_ENT(index)].len;
 
-	memcpy(obuf, &wsc_tlv_0b[WSC_TLV_ENT(index)], 2);	
+	memcpy(obuf, &wsc_tlv_0b[WSC_TLV_ENT(index)], 2);
     len = cpu2be16(dataLen);
 	memcpy(obuf + 2, &len, 2);
 	if (dataLen != 0)
@@ -427,10 +430,13 @@ static VOID	WscProcessCredential(
 				break;
 				
 			case WSC_ID_MAC_ADDR:
-				if (RTMPCompareMemory(pData, pAdapter->MlmeAux.Bssid, MAC_ADDR_LEN) == 0)
-					RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pData, MAC_ADDR_LEN);
-				else
+#ifdef CONFIG_STA_SUPPORT
+				if ((pAdapter->OpMode == OPMODE_STA) &&
+					(RTMPCompareMemory(pData, pAdapter->MlmeAux.Bssid, MAC_ADDR_LEN) != 0))
 					RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pAdapter->MlmeAux.Bssid, MAC_ADDR_LEN);
+				else
+#endif // CONFIG_STA_SUPPORT //
+					RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pData, MAC_ADDR_LEN);
 				break;
 				
 			case WSC_ID_KEY_WRAP_AUTH:
@@ -651,6 +657,7 @@ int BuildMessageM1(
 	pData += templen;
 	Len   += templen;
 
+
     // Fixed WCN vista logo 2 registrar test item issue.
     // Also prevent that WCN GetDeviceInfo disturbs EAP processing.
 	if (pWscControl->WscUPnPNodeInfo.bUPnPMsgTimerRunning ||
@@ -702,6 +709,7 @@ int BuildMessageM2(
 	UCHAR				DHKey[32], KDK[32], KdkInput[38], KdfKey[80];
 	INT					DH_Len;
 	INT				    HmacLen = 0;
+	int idx;
 
 	pReg = (PWSC_REG_DATA) &pWscControl->RegData;
 
@@ -727,6 +735,14 @@ int BuildMessageM2(
 	templen = AppendWSCTLV(WSC_ID_MSG_TYPE, pData, TB, 0);
 	pData += templen;
 	Len   += templen;
+
+	/* fixed config Windows 7 issue */
+	// Enrollee Nonce, first generate and save to Wsc Control Block
+	for (idx = 0; idx < 16; idx++)
+	{
+		pReg->SelfNonce[idx] = RandomByte(pAdapter);
+        pReg->RegistrarNonce[idx] = pReg->SelfNonce[idx];
+	}
 
 	// 3. Enrollee Nonce, 16 bytes
 	templen = AppendWSCTLV(WSC_ID_ENROLLEE_NONCE, pData, pReg->EnrolleeNonce, 0);
@@ -915,7 +931,9 @@ int BuildMessageM2D(
 	Len   += templen;
 
 	// 4. Registrar Nonce, 16 bytes
-	templen = AppendWSCTLV(WSC_ID_REGISTRAR_NONCE, pData, pReg->RegistrarNonce, 0);
+	/* fixed bug */
+	templen = AppendWSCTLV(WSC_ID_REGISTRAR_NONCE, pData, pReg->SelfNonce, 0);
+	//templen = AppendWSCTLV(WSC_ID_REGISTRAR_NONCE, pData, pReg->RegistrarNonce, 0);
 	pData += templen;
 	Len   += templen;
 
@@ -2096,10 +2114,12 @@ int ProcessMessageM1(
 				if(WSC_DEVICEPWDID_DEFAULT == get_unaligned((PUSHORT) pData))//*(PUSHORT) pData)
 					{
 						DBGPRINT(RT_DEBUG_TRACE, ("Rx WPS           DPID PIN\n"));
+						pWscControl->RegData.SelfInfo.DevPwdId = cpu2be16(DEV_PASS_ID_PIN);
 					}
 				else if(WSC_DEVICEPWDID_PUSH_BTN == get_unaligned((PUSHORT) pData))//*(PUSHORT) pData)
 					{
 						DBGPRINT(RT_DEBUG_TRACE, ("Rx WPS           DPID PBC\n"));
+						pWscControl->RegData.SelfInfo.DevPwdId = cpu2be16(DEV_PASS_ID_PBC);
 					}
 				else
 					{
@@ -2112,6 +2132,7 @@ int ProcessMessageM1(
 				pReg->PeerInfo.OsVersion = get_unaligned((PULONG) pData);//*((PULONG) pData);
 				FieldCheck[(WSC_TLV_BYTE2(WSC_ID_OS_VERSION))] ^= (1 << WSC_TLV_BYTE1(WSC_ID_OS_VERSION));
 				break;
+
 
 			default:
 				DBGPRINT(RT_DEBUG_TRACE, ("ProcessMessageM1 --> Unknown IE 0x%04x\n", WscType));
@@ -2881,7 +2902,7 @@ int ProcessMessageM4(
 	if (RTMPCompareMemory(pReg->RHash1, RHash, 32) != 0)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("ProcessMessageM4 --> RHash1 not matched\n"));
-		ret = WSC_ERROR_DEV_PWD_AUTH_FAIL;	// for Win7: UPnP Configuration with first half of the PIN incorrect
+		ret = WSC_ERROR_DEV_PWD_AUTH_FAIL;
 		goto out;
 	}
 	
@@ -3234,7 +3255,7 @@ int ProcessMessageM6(
 	if (RTMPCompareMemory(pReg->RHash2, RHash, 32) != 0)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("ProcessMessageM6 --> RHash2 not matched\n"));
-        ret = WSC_ERROR_DEV_PWD_AUTH_FAIL;	// for Win7: UPnP Configuration with second half of the PIN incorrect
+        ret = WSC_ERROR_DEV_PWD_AUTH_FAIL;		
         goto out;
 	}
 	
@@ -3567,3 +3588,5 @@ int ProcessMessageM8(
 	return ret;
 }
 
+
+#endif // WSC_INCLUDED //

@@ -13,7 +13,6 @@
  ***************************************************************************/
 
 #include "crypt_hmac.h"
-#include "crypt_sha2.h"
 
 
 #ifdef HMAC_SHA1_SUPPORT
@@ -71,7 +70,7 @@ VOID HMAC_SHA1 (
         K0[index] ^= 0x36;
         /* End of for */
 
-    _SHA1_Init(&sha_ctx1);
+    RT_SHA1_Init(&sha_ctx1);
     /* H(K0^ipad) */
     SHA1_Append(&sha_ctx1, K0, sizeof(K0));
     /* H((K0^ipad)||text) */
@@ -84,7 +83,7 @@ VOID HMAC_SHA1 (
         K0[index] ^= 0x36^0x5c;
         /* End of for */
 
-    _SHA1_Init(&sha_ctx2);
+    RT_SHA1_Init(&sha_ctx2);
     /* H(K0^opad) */
     SHA1_Append(&sha_ctx2, K0, sizeof(K0));
     /* H( (K0^opad) || H((K0^ipad)||text) ) */

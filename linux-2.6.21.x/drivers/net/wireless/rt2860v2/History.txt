@@ -1,13 +1,59 @@
+[V2.3.0.0]
+	1.	WMM ACM AP/STA support. (Pass WiFi Test Plan v0.30)
+	2.	Add HAS_STATS_COUNT compile option.
+	3.	Provide some 802.1x parameter support(Quiet-period, idle-timeout, NAD-ID).
+	4.	Fix issue : The Tx date rate can't be fixed in B/G PHY mode.
+	5.	QLOAD: Add status information display function. "qload show" & QloadClr.
+	6.	QLOAD: Add channel busy alarm and a command thread in PCI/USB driver.
+	7.	It supports the MAC assignment from configuration file(.dat).
+	8.	Fix issue : No packet is delivered from AP when PsMode from PS to ACTIVE.
+	9.	Fast Power Save : Use Null frame with PM=0 to get buffered packet, not PS-Poll.
+	10.	miniupnpd supported.
+	11. AP-Client and WDS support fixed rate.
+	12.	Support GreenAP.
+	13. Support Single SKU.
+	14.	Fix issue : RT3062/RT3562 can't enable/disable Radio.
+	15.	Discard IgmpSn enable setting per BSSID and change it to as global setting.
+
+[V2.2.0.0]
+	1. 	New generation schema for multiple OS porting
+	2. 	New chip support for RT3572
+	3.	New chip support for RT3062/RT3562
+	4.	Restrict the encryption type in HT mode.
+	5.	Support 802.1x reauthentication mechanism.
+	6.	Limit the STA connection count per BSS.
+	7.	Some variables support MBSS setting.
+	8.	Support WDS entry life check function.
+	9.	Support Mesh Air link time.
+	10.	Support Mesh Link Metric report action.
+	11.	Support Dot11K RRM for all testing cases of voice-enterprise testing event.
+	12.	Performance Tune.
+
+[V2.1.1.0]
+	1.  fix eFuse bug on big-endian platform
+	2.  fix WMM problem for RT3071/72 
+	3.  fix one bug for ATE TX power handling and ATE frequency offset bug.
+	4.  fix mesh crash issue
+	5.  fix RT307x AMPDU throughput bug after interface down/up
+	6.  update RT307x new firmware.
+
+[V2.1.0.0]
+	1.  Support new chips RT3070/71/72, RT3090/91/92.
+	2.  Fix bugs: fix WMM, Mesh, WDS, AP Client and DLS problems for Amazon SE platform
+	3.  Fix bug: memory leakage problem when interface up/down.
+	4.  Support eFuse.    
+
 [V2.0.0.0]
 	1.	Added Global Country Domain supported.
 	2.	Fix bug: suspend/resume error when ra0 down, rax up
 	3.	Add new UAPSD SP counting mechanism.
-	4.	Fix bug: Ikanos WDS, AP Client, Mess interface get problem.
+	4.	Fix bug: Ikanos WDS, AP Client, Mesh interface get problem.
 	5.	Add new WSC hardware push button function for PCI & USB.
-	6.	Added a function allow user to sepcific Tx rate for Mcast packets.
+	6.	Added a function allow user to specific Tx rate for Mcast packets.
 	7.	Migrate Mesh supporting to Draft-2.0.
 	8.	Support WAPI functionality
 	9.	Modify the priority of BAR transmission to solve the connection issue with Intel 4965 11n STA.
+	10.	Fix RT2870 USB suspend/resume.
 
 [V1.9.0.0]
 	1.	Replace iwpriv cmd "AccessControlList" by "ACLAddEntry" and "ACLClearAll"
@@ -88,7 +134,7 @@
 	4. Added DFS support.
 	5. Added Carrier-Sense suppport.
 	6. Fixed a bug about dissection issue in profile.
-	7. Fixed CountryRegion and channel map, when profile's channel have not on channel list.
+    7. Fixed CountryRegion and channel map, when profile's channel have not on channel list.
 	8. Fixed 802.1x Authentication problem with 1x-WEP/WPA(2)-Enterprise when WPS is enabled.
 	9. Fix bug : Once the radio is off and on, the beacon frames disappear. 
 
@@ -112,8 +158,8 @@
 	3. merge in plugfest code
 	4. Support Ap-Client function
 	5. Add new parameter "bWiFiTest" for WPA & WMM WiFi-Test.
-	6. Add the setting of Japan filter coefficients for ATE.
-	7. Fix bug for channel have not update when auto channel select was true. 
+    6. Add the setting of Japan filter coefficients for ATE.
+    7. Fix bug for channel have not update when auto channel select was true. 
 
 [V1.2.1.0]
 	1. add protect for RTMP_IRQ_LOCK to avoid in spin_lock_irqsave call spin_lock_bh cause kernel waring messages.

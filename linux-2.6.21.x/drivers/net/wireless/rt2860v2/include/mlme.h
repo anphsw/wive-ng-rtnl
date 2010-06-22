@@ -151,9 +151,9 @@ extern UINT32 CW_MAX_IN_BITS;
 //#define BSS_TABLE_EMPTY(x)             ((x).BssNr == 0)
 #define MAC_ADDR_IS_GROUP(Addr)       (((Addr[0]) & 0x01))
 #define MAC_ADDR_HASH(Addr)            (Addr[0] ^ Addr[1] ^ Addr[2] ^ Addr[3] ^ Addr[4] ^ Addr[5])
-#define MAC_ADDR_HASH_INDEX(Addr)      (MAC_ADDR_HASH(Addr) % HASH_TABLE_SIZE)
+#define MAC_ADDR_HASH_INDEX(Addr)      (MAC_ADDR_HASH(Addr) & (HASH_TABLE_SIZE - 1))
 #define TID_MAC_HASH(Addr,TID)            (TID^Addr[0] ^ Addr[1] ^ Addr[2] ^ Addr[3] ^ Addr[4] ^ Addr[5])
-#define TID_MAC_HASH_INDEX(Addr,TID)      (TID_MAC_HASH(Addr,TID) % HASH_TABLE_SIZE)
+#define TID_MAC_HASH_INDEX(Addr,TID)      (TID_MAC_HASH(Addr,TID) & (HASH_TABLE_SIZE - 1))
 
 // LED Control
 // assoiation ON. one LED ON. another blinking when TX, OFF when idle
@@ -217,6 +217,36 @@ if (((__pEntry)) != NULL) \
 	(__pEntry)->OneSecTxFailCount = 0; \
 	(__pEntry)->OneSecTxNoRetryOkCount = 0; \
 }
+
+
+//added ys
+//added for rate adaptation by ys
+//#define NEW_RATE_ADAPT_SUPPORT//3T3R always use the new rate adaptation algorithm, regardless whether this is defined
+#define USE_GREATER_UP_MCS //rate(upMcs)> rate(thisMcs) if this is defined. otherwise, rate(upMcs)>= rate(thisMcs); meaningful when (NEW_RATE_ADAPT_SUPPORT is supported) or 3T3R
+#define PER_THRD_ADJ 1
+#define RA_PER_LOW_THRD 8
+#define FEW_PKTS_CNT_THRD 1
+
+//#define MRQ_FORCE_TX//regardless the capability of the station
+#define ETXBF_EN_COND 0//this value can be set by iwpriv ra0 set ETxBfEnCond=?
+// 0:no etxbf, 
+// 1:etxbf update periodically, 
+// 2:etxbf updated if mcs changes in RateSwitchingAdapt() or APQuickResponeForRateUpExecAdapt(). 
+// 3:auto-selection: if mfb changes or timer expires, then send sounding packets <----not finished yet!!!
+// note: when = 1 or 3, NO_SNDG_CNT_THRD controls the frequency to update the matrix(ETXBF_EN_COND=1) or activate the whole bf evaluation process(not defined)
+
+#define MSI_TOGGLE_BF 6
+#define TOGGLE_BF_PKTS 5// the number of packets with inverted BF status
+#define READY_FOR_SNDG0 0//jump to WAIT_SNDG_FB0 when channel change or periodically
+#define WAIT_SNDG_FB0 1//jump to WAIT_SNDG_FB1 when bf report0 is received
+#define WAIT_SNDG_FB1 2
+#define WAIT_MFB 3
+#define WAIT_USELESS_RSP 4
+#define WAIT_BEST_SNDG 5
+#define NO_SNDG_CNT_THRD 0//send sndg packet if there is no sounding for (NO_SNDG_CNT_THRD+1)*500msec. If this =0, bf matrix is updated at each call of APMlmeDynamicTxRateSwitchingAdapt()
+//rate adaptation end
+
+
 
 //
 // 802.11 frame formats
@@ -984,6 +1014,15 @@ typedef struct PACKED {
 #endif /* !RT_BIG_ENDIAN */
 } QBSS_STA_INFO_PARM, *PQBSS_STA_INFO_PARM;
 
+typedef struct {
+	QBSS_STA_INFO_PARM	QosInfo;
+	UCHAR	Rsv;
+	UCHAR	Q_AC_BE[4];
+	UCHAR	Q_AC_BK[4];
+	UCHAR	Q_AC_VI[4];
+	UCHAR	Q_AC_VO[4];
+} QBSS_STA_EDCA_PARM, *PQBSS_STA_EDCA_PARM;
+
 // QBSS Info field in QAP's Beacon/ProbeRsp
 typedef struct PACKED {
 #ifdef RT_BIG_ENDIAN
@@ -1097,10 +1136,11 @@ typedef struct {
 
 
 typedef struct _MLME_QUEUE_ELEM {
+	UCHAR             Msg[MGMT_DMA_BUFFER_SIZE];	// move here to fix the bug of alignment for ARM CPU
     ULONG             Machine;
     ULONG             MsgType;
     ULONG             MsgLen;
-    UCHAR             Msg[MGMT_DMA_BUFFER_SIZE];
+    //UCHAR           Msg[MGMT_DMA_BUFFER_SIZE];	// move above to fix the bug of alignment for ARM CPU
     LARGE_INTEGER     TimeStamp;
     UCHAR             Rssi0;
     UCHAR             Rssi1;
@@ -1109,9 +1149,7 @@ typedef struct _MLME_QUEUE_ELEM {
     UCHAR             Channel;
     UCHAR             Wcid;
     BOOLEAN           Occupied;
-#ifdef MLME_EX
-	USHORT            Idx;
-#endif // MLME_EX //
+	ULONG             Priv;
 } MLME_QUEUE_ELEM, *PMLME_QUEUE_ELEM;
 
 typedef struct _MLME_QUEUE {
@@ -1324,6 +1362,36 @@ typedef struct PACKED _RTMP_TX_RATE_SWITCH
 	UCHAR   TrainDown;
 } RRTMP_TX_RATE_SWITCH, *PRTMP_TX_RATE_SWITCH;
 
+
+typedef struct  _RTMP_TX_RATE_SWITCH_3S
+{
+	UCHAR   ItemNo;
+#ifdef RT_BIG_ENDIAN
+	UCHAR	Rsv2:2;
+	UCHAR	Mode:2;
+	UCHAR	Rsv1:1;	
+	UCHAR	BW:1;
+	UCHAR	ShortGI:1;
+	UCHAR	STBC:1;
+#else
+	UCHAR	STBC:1;
+	UCHAR	ShortGI:1;
+	UCHAR	BW:1;
+	UCHAR	Rsv1:1;
+	UCHAR	Mode:2;
+	UCHAR	Rsv2:2;
+#endif	
+	UCHAR   CurrMCS;
+	UCHAR   TrainUp;
+	UCHAR   TrainDown;
+	UCHAR	downMcs;
+	UCHAR	upMcs3;
+	UCHAR	upMcs2;
+	UCHAR	upMcs1;
+	UCHAR	dataRate;
+} RRTMP_TX_RATE_SWITCH_3S, *PRTMP_TX_RATE_SWITCH_3S;
+
+
 // ========================== AP mlme.h ===============================
 #define TBTT_PRELOAD_TIME       384        // usec. LomgPreamble + 24-byte at 1Mbps
 #define DEFAULT_DTIM_PERIOD     1
@@ -1333,7 +1401,10 @@ typedef struct PACKED _RTMP_TX_RATE_SWITCH
 //#define TX_WEIGHTING                     40
 //#define RX_WEIGHTING                     60
 
-#define MAC_TABLE_AGEOUT_TIME			60			// unit: sec
+//#define MAC_TABLE_AGEOUT_TIME			60			// unit: sec
+#define MAC_TABLE_AGEOUT_TIME			300			// unit: sec
+#define MAC_TABLE_MIN_AGEOUT_TIME		60			// unit: sec
+
 #define MAC_TABLE_ASSOC_TIMEOUT			5			// unit: sec
 #define MAC_TABLE_FULL(Tab)				((Tab).size == MAX_LEN_OF_MAC_TABLE)
 
@@ -1355,36 +1426,6 @@ typedef enum _AuthState {
     AS_AUTHENTICATING   // STA is waiting for AUTH seq#3 using SHARED KEY
 } AUTH_STATE;
 
-//for-wpa value domain of pMacEntry->WpaState  802.1i D3   p.114
-typedef enum _ApWpaState {
-    AS_NOTUSE,              // 0
-    AS_DISCONNECT,          // 1
-    AS_DISCONNECTED,        // 2
-    AS_INITIALIZE,          // 3
-    AS_AUTHENTICATION,      // 4
-    AS_AUTHENTICATION2,     // 5
-    AS_INITPMK,             // 6
-    AS_INITPSK,             // 7
-    AS_PTKSTART,            // 8
-    AS_PTKINIT_NEGOTIATING, // 9
-    AS_PTKINITDONE,         // 10
-    AS_UPDATEKEYS,          // 11
-    AS_INTEGRITY_FAILURE,   // 12
-    AS_KEYUPDATE,           // 13
-} AP_WPA_STATE;
-
-// for-wpa value domain of pMacEntry->WpaState  802.1i D3   p.114
-typedef enum _GTKState {
-    REKEY_NEGOTIATING,
-    REKEY_ESTABLISHED,
-    KEYERROR,
-} GTK_STATE;
-
-//  for-wpa  value domain of pMacEntry->WpaState  802.1i D3   p.114
-typedef enum _WpaGTKState {
-    SETKEYS,
-    SETKEYS_DONE,
-} WPA_GTK_STATE;
 // ====================== end of AP mlme.h ============================
 
 

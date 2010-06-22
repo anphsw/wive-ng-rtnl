@@ -40,7 +40,6 @@ module_init(rt2880_module_init);
 module_exit(rt2880_module_exit);
 
 
-
 int rt2880_module_init(VOID)
 {
 	struct  net_device		*net_dev;
@@ -113,9 +112,12 @@ int rt2880_module_init(VOID)
 	// due to we didn't have any hook point when do module remove, we use this static as our hook point.
 	rt2880_dev = net_dev;
 	
+	//wl_proc_init();
+
 	DBGPRINT(RT_DEBUG_TRACE, ("%s: at CSR addr 0x%1x, IRQ %d. \n", net_dev->name, (ULONG)csr_addr, net_dev->irq));
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2880_probe\n"));
+
 
 	return 0;
 
@@ -152,7 +154,7 @@ VOID rt2880_module_exit(VOID)
 		RTMPCancelTimer(&LedCheckTimer, &Cancelled);
 		CheckTimerEbl=0;
 	}
-#endif // (WLAN_LED) //
+#endif // WLAN_LED //
 
 		RtmpPhyNetDevExit(pAd, net_dev);
 
@@ -165,6 +167,8 @@ VOID rt2880_module_exit(VOID)
 	
 	// Free the root net_device.
 	RtmpOSNetDevFree(net_dev);
-	
+
+
+	//wl_proc_exit();
 }
 

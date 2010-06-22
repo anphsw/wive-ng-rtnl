@@ -56,6 +56,9 @@
 
 #define RTMP_FLASH_BASE_ADDR	0xbfc00000
 
+#ifdef DFS_SUPPORT
+#define DFS_1_SUPPORT
+#endif
 
 //
 // Device ID & Vendor ID, these values should match EEPROM value

@@ -139,9 +139,9 @@ typedef struct __TX_PWR_CFG
 		{MODE_OFDM, 4, 1, 4, 0x000000f0},
 		{MODE_OFDM, 5, 1, 0, 0x0000000f},
 		{MODE_OFDM, 6, 1, 12, 0x0000f000},
-		{MODE_OFDM, 7, 1, 8, 0x00000f00},
-
-		{MODE_HTMIX, 0, 1, 20, 0x00f00000},
+		{MODE_OFDM, 7, 1, 8, 0x00000f00}
+#ifdef DOT11_N_SUPPORT
+		,{MODE_HTMIX, 0, 1, 20, 0x00f00000},
 		{MODE_HTMIX, 1, 1, 16, 0x000f0000},
 		{MODE_HTMIX, 2, 1, 28, 0xf0000000},
 		{MODE_HTMIX, 3, 1, 24, 0x0f000000},
@@ -157,6 +157,7 @@ typedef struct __TX_PWR_CFG
 		{MODE_HTMIX, 13, 3, 0, 0x0000000f},
 		{MODE_HTMIX, 14, 3, 12, 0x0000f000},
 		{MODE_HTMIX, 15, 3, 8, 0x00000f00}
+#endif // DOT11_N_SUPPORT //
 	};
 #define MAX_TXPWR_TAB_SIZE (sizeof(TxPwrCfg) / sizeof(TX_PWR_CFG))
 
@@ -762,6 +763,7 @@ VOID InsertChannelRepIE(
 	UINT8 Len;
 	UINT8 IEId = IE_AP_CHANNEL_REPORT;
 	PUCHAR pChListPtr = NULL;
+	PDOT11_CHANNEL_SET pChannelSet = NULL;
 
 	Len = 1;
 	if (strncmp(pCountry, "US", 2) == 0)
@@ -772,9 +774,7 @@ VOID InsertChannelRepIE(
 						__FUNCTION__, RegulatoryClass));
 			return;
 		}
-
-		Len += USARegulatoryInfo[RegulatoryClass].ChannelSet.NumberOfChannels;
-		pChListPtr = USARegulatoryInfo[RegulatoryClass].ChannelSet.ChannelList;
+		pChannelSet = &USARegulatoryInfo[RegulatoryClass].ChannelSet;
 	}
 	else if (strncmp(pCountry, "JP", 2) == 0)
 	{
@@ -785,8 +785,7 @@ VOID InsertChannelRepIE(
 			return;
 		}
 
-		Len += JapanRegulatoryInfo[RegulatoryClass].ChannelSet.NumberOfChannels;
-		pChListPtr = JapanRegulatoryInfo[RegulatoryClass].ChannelSet.ChannelList;
+		pChannelSet = &JapanRegulatoryInfo[RegulatoryClass].ChannelSet;
 	}
 	else
 	{
@@ -795,15 +794,28 @@ VOID InsertChannelRepIE(
 		return;
 	}
 
-	MakeOutgoingFrame(pFrameBuf,	&TempLen,
-					1,				&IEId,
-					1,				&Len,
-					1,				&RegulatoryClass,
-					Len -1,			pChListPtr,
-					END_OF_ARGS);
+	/* no match channel set. */
+	if (pChannelSet == NULL)
+		return;
 
-	*pFrameLen = *pFrameLen + TempLen;
+	/* empty channel set. */
+	if (pChannelSet->NumberOfChannels == 0)
+		return;
 
+	Len += pChannelSet->NumberOfChannels;
+	pChListPtr = pChannelSet->ChannelList;
+
+	if (Len > 1)
+	{
+		MakeOutgoingFrame(pFrameBuf,	&TempLen,
+						1,				&IEId,
+						1,				&Len,
+						1,				&RegulatoryClass,
+						Len -1,			pChListPtr,
+						END_OF_ARGS);
+
+		*pFrameLen = *pFrameLen + TempLen;
+	}
 	return;
 }
 
@@ -2171,7 +2183,7 @@ INT Set_MeasureReq_Proc(
 	MakeMeasurementReqFrame(pAd, pOutBuffer, &FrameLen,
 		sizeof(MEASURE_REQ_INFO), CATEGORY_RM, RM_BASIC,
 		MeasureReqToken, MeasureReqMode.word,
-		MeasureReqType, 0);
+		MeasureReqType, 1);
 
 	MeasureReq.ChNum = MeasureCh;
 	MeasureReq.MeasureStartTime = cpu2le64(MeasureStartTime);
@@ -2324,26 +2336,34 @@ VOID RguClass_BuildBcnChList(
 	OUT PUCHAR pBuf,
 	OUT	PULONG pBufLen)
 {
+	INT loop;
 	ULONG TmpLen;
 	PDOT11_REGULATORY_INFORMATION pRguClassRegion;
 	PDOT11_CHANNEL_SET pChList;
 
-	pRguClassRegion = GetRugClassRegion(
-						(PSTRING)pAd->CommonCfg.CountryCode,
-						pAd->CommonCfg.RegulatoryClass);
+	for (loop = 0 ;loop < MAX_NUM_OF_REGULATORY_CLASS; loop++)
+	{
+		if (pAd->CommonCfg.RegulatoryClass[loop] == 0)
+			break;
 
-	pChList = &pRguClassRegion->ChannelSet;
+		pRguClassRegion = GetRugClassRegion(
+							(PSTRING)pAd->CommonCfg.CountryCode,
+							pAd->CommonCfg.RegulatoryClass[loop]);
 
-	if (pRguClassRegion == NULL)
-		return;
+		pChList = &pRguClassRegion->ChannelSet;
 
-	MakeOutgoingFrame(pBuf + *pBufLen,		&TmpLen,
-						1,                 	&pChList->ChannelList[0],
-						1,                 	&pChList->NumberOfChannels,
-						1,                 	&pChList->MaxTxPwr,
-						END_OF_ARGS);
+		if (pRguClassRegion == NULL)
+			return;
 
-	*pBufLen += TmpLen;
+		MakeOutgoingFrame(pBuf + *pBufLen,		&TmpLen,
+							1,                 	&pChList->ChannelList[0],
+							1,                 	&pChList->NumberOfChannels,
+							1,                 	&pChList->MaxTxPwr,
+							END_OF_ARGS);
+
+		*pBufLen += TmpLen;
+	}
+
 	return;
 }
 #endif // CONFIG_AP_SUPPORT //

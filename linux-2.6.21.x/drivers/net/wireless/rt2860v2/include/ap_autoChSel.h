@@ -30,6 +30,13 @@
 #endif
 
 
+ULONG AutoChBssSearchWithSSID(
+	IN PRTMP_ADAPTER pAd,
+	IN PUCHAR Bssid,
+	IN PUCHAR pSsid,
+	IN UCHAR SsidLen,
+	IN UCHAR Channel);
+
 ULONG AutoChBssInsertEntry(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pBssid,
@@ -49,6 +56,9 @@ void AutoChBssTableDestroy(
 	IN PRTMP_ADAPTER pAd);
 
 void ChannelInfoDestroy(
+	IN PRTMP_ADAPTER pAd);
+
+UCHAR RandomChannel(
 	IN PRTMP_ADAPTER pAd);
 
 UCHAR New_APAutoSelectChannel(

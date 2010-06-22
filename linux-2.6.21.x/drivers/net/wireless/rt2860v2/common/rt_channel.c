@@ -359,7 +359,8 @@ CH_REGION ChRegion[] =
 			"FR",
 			CE,
 			{
-				{ 1,   13,  20, BOTH, FALSE},	// 2.4 G, ch 1~13
+				{ 1,   13,  10, IDOR, FALSE},	// 2.4 G, ch 1~13
+				{ 1,   13,	20, ODOR, FALSE},	// 2.4 G, ch 1~13
 				{ 36,  4,   23, IDOR, FALSE},	// 5G, ch 36~48
 				{ 52,  4,   23, IDOR, TRUE},	// 5G, ch 52~64
 				{ 0},							// end
@@ -875,7 +876,7 @@ CH_REGION ChRegion[] =
 			CE,
 			{
 				{ 1,   13,  20, BOTH, FALSE},	// 2.4 G, ch 1~11
-				{ 36,   4,  23, IDOR, FALSE},	// 5G, ch 52~64
+				{ 36,   4,  23, IDOR, FALSE},	// 5G, ch 36~48
 				{ 52,   4,  23, IDOR, TRUE},	// 5G, ch 52~64
 				{ 100, 11,  30, BOTH, TRUE},	// 5G, ch 100~140
 				{ 0},							// end
@@ -902,10 +903,10 @@ CH_REGION ChRegion[] =
 
 		{	// United_States
 			"US",
-			CE,
+			FCC,
 			{
 				{ 1,   11,  30, BOTH, FALSE},	// 2.4 G, ch 1~11
-				{ 36,   4,  17, IDOR, FALSE},	// 5G, ch 52~64
+				{ 36,   4,  17, IDOR, FALSE},	// 5G, ch 36~48
 				{ 52,   4,  24, BOTH, TRUE},	// 5G, ch 52~64
 				{ 100, 11,  30, BOTH, TRUE},	// 5G, ch 100~140
 				{ 149,  5,  30, BOTH, FALSE},	// 5G, ch 149~165
@@ -927,11 +928,11 @@ CH_REGION ChRegion[] =
 			"",
 			CE,
 			{
-				{ 1,   11,  20, BOTH, FALSE},	// 2.4 G, ch 1~11
-				{ 36,   4,  20, BOTH, FALSE},	// 5G, ch 52~64
-				{ 52,   4,  20, BOTH, FALSE},	// 5G, ch 52~64
-				{ 100, 11,  20, BOTH, FALSE},	// 5G, ch 100~140
-				{ 149,  5,  20, BOTH, FALSE},	// 5G, ch 149~165
+				{ 1,   14,  255, BOTH, FALSE},	// 2.4 G, ch 1~14
+				{ 36,   4,  255, BOTH, FALSE},	// 5G, ch 36~48
+				{ 52,   4,  255, BOTH, FALSE},	// 5G, ch 52~64
+				{ 100, 11,  255, BOTH, FALSE},	// 5G, ch 100~140
+				{ 149,  5,  255, BOTH, FALSE},	// 5G, ch 149~165
 				{ 0},							// end
 			}
 		},
@@ -953,7 +954,6 @@ static PCH_REGION GetChRegion(
 		}
 		loop++;
 	}
-
 	if (pChRegion == NULL)
 		pChRegion = &ChRegion[loop];
 	return pChRegion;
@@ -989,7 +989,8 @@ static UCHAR FillChList(
 	IN PRTMP_ADAPTER pAd,
 	IN PCH_DESP pChDesp,
 	IN UCHAR Offset, 
-	IN UCHAR increment)
+	IN UCHAR increment,
+	IN UCHAR regulatoryDomain)
 {
 	INT i, j, l;
 	UCHAR channel;
@@ -998,12 +999,29 @@ static UCHAR FillChList(
 	for (i = 0; i < pChDesp->NumOfCh; i++)
 	{
 		channel = pChDesp->FirstChannel + i * increment;
+
+		if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 1))
+		{
+			if((channel >= 116) && (channel <=128))
+				continue;
+		}
+		else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 0))
+		{
+			if((channel >= 100) && (channel <= 140))
+				continue;
+		}			
+
+
+
 		for (l=0; l<MAX_NUM_OF_CHANNELS; l++)
 		{
 			if (channel == pAd->TxPower[l].Channel)
 			{
 				pAd->ChannelList[j].Power = pAd->TxPower[l].Power;
 				pAd->ChannelList[j].Power2 = pAd->TxPower[l].Power2;
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+				pAd->ChannelList[j].Power3 = pAd->TxPower[l].Power3;
+#endif
 				break;
 			}
 		}
@@ -1013,6 +1031,7 @@ static UCHAR FillChList(
 		pAd->ChannelList[j].Channel = pChDesp->FirstChannel + i * increment;
 		pAd->ChannelList[j].MaxTxPwr = pChDesp->MaxTxPwr;
 		pAd->ChannelList[j].DfsReq = pChDesp->DfsReq;
+		pAd->ChannelList[j].RegulatoryDomain = regulatoryDomain;
 		j++;
 	}
 	pAd->ChannelListNum = j;
@@ -1031,6 +1050,7 @@ static inline VOID CreateChList(
 	PCH_DESP pChDesp;
 	UCHAR ChType;
 	UCHAR increment;
+	UCHAR regulatoryDomain;
 
 	if (pChRegion == NULL)
 		return;
@@ -1061,7 +1081,8 @@ static inline VOID CreateChList(
                 increment = 4;
             else
                 increment = 1;
-			offset = FillChList(pAd, pChDesp, offset, increment);
+			regulatoryDomain = pChRegion->DfsType;
+			offset = FillChList(pAd, pChDesp, offset, increment, regulatoryDomain);
         }
 	}
 }
@@ -1272,6 +1293,31 @@ UINT8 GetCuntryMaxTxPwr(
 
 	if (i == pAd->ChannelListNum)
 		return 0xff;
+#ifdef SINGLE_SKU
+	if (pAd->CommonCfg.bSKUMode == TRUE)
+	{
+		if (pAd->ChannelList[i].RegulatoryDomain == FCC)
+		{
+			/* FCC should maintain 20/40 Bandwidth, and without antenna gain */
+			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40))
+				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.BandedgeDelta);
+			else
+				return pAd->ChannelList[i].MaxTxPwr;
+		}
+		else if (pAd->ChannelList[i].RegulatoryDomain == CE)
+		{
+#ifdef DOT11_N_SUPPORT
+			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+				(pAd->CommonCfg.TxStream == 2))
+#endif // DOT11_N_SUPPORT //
+				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain - 3); // If 2Tx case, antenna gain will increase 3dBm
+			else
+				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain);
+		}
+		else ;
+	}
 	else
+#endif // SINGLE_SKU //
 		return pAd->ChannelList[i].MaxTxPwr;
 }

@@ -84,9 +84,11 @@ VOID BuildChannelList(
 	IN PRTMP_ADAPTER pAd)
 {
 	UCHAR i, j, index=0, num=0;
-	PUCHAR	pChannelList = NULL;
+	UCHAR	ChannelList[30];
+	PUCHAR  pChannelListTemp = NULL;
 
 	NdisZeroMemory(pAd->ChannelList, MAX_NUM_OF_CHANNELS * sizeof(CHANNEL_TX_POWER));
+//	NdisZeroMemory(pAd->CommonCfg.RadarChannelList, MAX_NUM_OF_RADAR_CHANNELS * sizeof(UCHAR));
 
 	// if not 11a-only mode, channel list starts from 2.4Ghz band
 	if ((pAd->CommonCfg.PhyMode != PHY_11A) 
@@ -151,67 +153,67 @@ VOID BuildChannelList(
 		{
 			case REGION_0_A_BAND:
 				num = sizeof(A_BAND_REGION_0_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_0_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_0_CHANNEL_LIST;
 				break;
 			case REGION_1_A_BAND:
 				num = sizeof(A_BAND_REGION_1_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_1_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_1_CHANNEL_LIST;
 				break;
 			case REGION_2_A_BAND:
 				num = sizeof(A_BAND_REGION_2_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_2_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_2_CHANNEL_LIST;
 				break;
 			case REGION_3_A_BAND:
 				num = sizeof(A_BAND_REGION_3_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_3_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_3_CHANNEL_LIST;
 				break;
 			case REGION_4_A_BAND:
 				num = sizeof(A_BAND_REGION_4_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_4_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_4_CHANNEL_LIST;
 				break;
 			case REGION_5_A_BAND:
 				num = sizeof(A_BAND_REGION_5_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_5_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_5_CHANNEL_LIST;
 				break;
 			case REGION_6_A_BAND:
 				num = sizeof(A_BAND_REGION_6_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_6_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_6_CHANNEL_LIST;
 				break;
 			case REGION_7_A_BAND:
 				num = sizeof(A_BAND_REGION_7_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_7_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_7_CHANNEL_LIST;
 				break;
 			case REGION_8_A_BAND:
 				num = sizeof(A_BAND_REGION_8_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_8_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_8_CHANNEL_LIST;
 				break;
 			case REGION_9_A_BAND:
 				num = sizeof(A_BAND_REGION_9_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_9_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_9_CHANNEL_LIST;
 				break;
 			case REGION_10_A_BAND:
 				num = sizeof(A_BAND_REGION_10_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_10_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_10_CHANNEL_LIST;
 				break;
 			case REGION_11_A_BAND:
 				num = sizeof(A_BAND_REGION_11_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_11_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_11_CHANNEL_LIST;
 				break;	
 			case REGION_12_A_BAND:
 				num = sizeof(A_BAND_REGION_12_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_12_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_12_CHANNEL_LIST;
 				break;
 			case REGION_13_A_BAND:
 				num = sizeof(A_BAND_REGION_13_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_13_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_13_CHANNEL_LIST;
 				break;
 			case REGION_14_A_BAND:
 				num = sizeof(A_BAND_REGION_14_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_14_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_14_CHANNEL_LIST;
 				break;
 			case REGION_15_A_BAND:
 				num = sizeof(A_BAND_REGION_15_CHANNEL_LIST)/sizeof(UCHAR);
-				pChannelList = A_BAND_REGION_15_CHANNEL_LIST;
+				pChannelListTemp = A_BAND_REGION_15_CHANNEL_LIST;
 				break;
 			default:            // Error. should never happen
 				DBGPRINT(RT_DEBUG_WARN,("countryregion=%d not support", pAd->CommonCfg.CountryRegionForABand));
@@ -220,17 +222,45 @@ VOID BuildChannelList(
 
 		if (num != 0)
 		{
-			UCHAR RadarCh[15]={52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140};
+			UCHAR RadarCh[MAX_NUM_OF_RADAR_CHANNELS]={52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140};
+			UCHAR q = 0;
+
 			for (i=0; i<num; i++)
+			{
+				 if((pAd->CommonCfg.bIEEE80211H == 0) || ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion != FCC)))
+                                {
+                                        ChannelList[q] = pChannelListTemp[i];
+                                        q++;
+                                }
+                                else if((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 1))
+                                {
+                                        if((pChannelListTemp[i] < 116) || (pChannelListTemp[i] > 128))
+                                        {
+                                                ChannelList[q] = pChannelListTemp[i];
+                                                q++;
+                                        }
+                                }
+                                else if((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 0))
+                                {
+                                        if((pChannelListTemp[i] < 100) || (pChannelListTemp[i] > 140) )
+                                        {
+                                                ChannelList[q] = pChannelListTemp[i];
+                                                q++;
+                                        }
+                                }
+			}
+
+			num = q;
+			for(i=0; i<num; i++)
 			{
 				for (j=0; j<MAX_NUM_OF_CHANNELS; j++)
 				{
-					if (pChannelList[i] == pAd->TxPower[j].Channel)
+					if (ChannelList[i] == pAd->TxPower[j].Channel)
 						NdisMoveMemory(&pAd->ChannelList[index+i], &pAd->TxPower[j], sizeof(CHANNEL_TX_POWER));
-					}
+				}
 				for (j=0; j<15; j++)
 				{
-					if (pChannelList[i] == RadarCh[j])
+					if (ChannelList[i] == RadarCh[j])
 						pAd->ChannelList[index+i].DfsReq = TRUE;
 				}
 				pAd->ChannelList[index+i].MaxTxPwr = 20;
@@ -415,7 +445,7 @@ VOID ScanNextChannel(
 	{
 		if ((pAd->CommonCfg.BBPCurrentBW == BW_40)
 #ifdef CONFIG_STA_SUPPORT
-			&& (INFRA_ON(pAd)
+			&& (INFRA_ON(pAd) || ADHOC_ON(pAd)
 				|| (pAd->OpMode == OPMODE_AP))
 #endif // CONFIG_STA_SUPPORT //
 			)
@@ -424,10 +454,7 @@ VOID ScanNextChannel(
 			AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue &= (~0x18);
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 0)
-#endif // COC_SUPPORT
-				BBPValue |= 0x10;
+			BBPValue |= 0x10;
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			DBGPRINT(RT_DEBUG_TRACE, ("SYNC - End of SCAN, restore to 40MHz channel %d, Total BSS[%02d]\n",pAd->CommonCfg.CentralChannel, pAd->ScanTab.BssNr));
 		}
@@ -441,6 +468,19 @@ VOID ScanNextChannel(
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
+
+			/*
+				If all peer Ad-hoc clients leave, driver would do LinkDown and LinkUp.
+				In LinkUp, CommonCfg.Ssid would copy SSID from MlmeAux. 
+				To prevent SSID is zero or wrong in Beacon, need to recover MlmeAux.SSID here.
+			*/
+			if (ADHOC_ON(pAd))
+			{
+				NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
+				pAd->MlmeAux.SsidLen = pAd->CommonCfg.SsidLen;
+				NdisMoveMemory(pAd->MlmeAux.Ssid, pAd->CommonCfg.Ssid, pAd->CommonCfg.SsidLen);
+			}
+		
 			//
 			// To prevent data lost.
 			// Send an NULL data with turned PSM bit on to current associated AP before SCAN progress.
@@ -459,7 +499,7 @@ VOID ScanNextChannel(
 
 					// Send using priority queue
 					MiniportMMRequest(pAd, 0, pOutBuffer, sizeof(HEADER_802_11));
-					DBGPRINT(RT_DEBUG_TRACE, ("MlmeScanReqAction -- Send PSM Data frame\n"));
+					DBGPRINT(RT_DEBUG_TRACE, ("ScanNextChannel -- Send PSM Data frame\n"));
 					MlmeFreeMemory(pAd, pOutBuffer);
 					RTMPusecDelay(5000);
 				}
@@ -467,7 +507,7 @@ VOID ScanNextChannel(
 
 			pAd->Mlme.SyncMachine.CurrState = SYNC_IDLE;
 			Status = MLME_SUCCESS;
-			MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_SCAN_CONF, 2, &Status);
+			MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_SCAN_CONF, 2, &Status, 0);
 		}
 #endif // CONFIG_STA_SUPPORT //
 
@@ -483,7 +523,7 @@ VOID ScanNextChannel(
 		}
 #endif // CONFIG_AP_SUPPORT //
 
-		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS);
+
 	} 
 	else 
 	{
@@ -570,7 +610,7 @@ VOID ScanNextChannel(
 				{
 					pAd->Mlme.SyncMachine.CurrState = SYNC_IDLE;
 					Status = MLME_FAIL_NO_RESOURCE;
-					MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_SCAN_CONF, 2, &Status);
+					MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_SCAN_CONF, 2, &Status, 0);
 				}
 #endif // CONFIG_STA_SUPPORT //
 
@@ -597,7 +637,7 @@ VOID ScanNextChannel(
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-			MgtMacHeaderInit(pAd, &Hdr80211, SUBTYPE_PROBE_REQ, 0, BROADCAST_ADDR, BROADCAST_ADDR);
+				MgtMacHeaderInit(pAd, &Hdr80211, SUBTYPE_PROBE_REQ, 0, BROADCAST_ADDR, BROADCAST_ADDR);
 #endif // CONFIG_STA_SUPPORT //
 
 
@@ -736,6 +776,33 @@ VOID ScanNextChannel(
 #endif // WSC_STA_SUPPORT //
 
 			MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
+
+#ifdef CONFIG_STA_SUPPORT
+			IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+			{
+				//
+				// To prevent data lost.
+				// Send an NULL data with turned PSM bit on to current associated AP when SCAN in the channel where
+				//  associated AP located.
+				//
+				if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) && 
+					(INFRA_ON(pAd)) &&
+					(pAd->CommonCfg.Channel == pAd->MlmeAux.Channel))
+				{
+					NdisZeroMemory(pOutBuffer, MGMT_DMA_BUFFER_SIZE);
+					pHdr80211 = (PHEADER_802_11) pOutBuffer;
+					MgtMacHeaderInit(pAd, pHdr80211, SUBTYPE_NULL_FUNC, 1, pAd->CommonCfg.Bssid, pAd->CommonCfg.Bssid);
+					pHdr80211->Duration = 0;
+					pHdr80211->FC.Type = BTYPE_DATA;
+					pHdr80211->FC.PwrMgmt = PWR_ACTIVE;
+
+					// Send using priority queue
+					MiniportMMRequest(pAd, 0, pOutBuffer, sizeof(HEADER_802_11));
+					DBGPRINT(RT_DEBUG_TRACE, ("ScanNextChannel():Send PWA NullData frame to notify the associated AP!\n"));
+				}
+			}
+#endif // CONFIG_STA_SUPPORT //
+
 			MlmeFreeMemory(pAd, pOutBuffer);
 		}
 

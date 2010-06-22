@@ -28,13 +28,6 @@
 #ifndef _AP_DIVERSITY_H_
 #define _AP_DIVERSITY_H_
 
-#ifdef CONFIG_RALINK_GPIO_LED
-#error	"=============================================="
-#error	"= Antenna Diversity can't coexist with       ="
-#error  "= "Ralink SoC GPIO LED" support              ="
-#error	"=============================================="
-#endif
-
 #include "rtmp.h"
 
 #define ADDBGPRINT(format,args...)	do{if(atomic_read(&DEBUG_VERBOSE_MODE))	printk( format, ##args);}while(0)

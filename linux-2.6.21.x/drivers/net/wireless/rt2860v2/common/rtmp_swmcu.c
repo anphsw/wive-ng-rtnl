@@ -35,7 +35,7 @@ extern unsigned char   LinkStatus;
 extern unsigned char   SignalStrength;
 extern unsigned char   GPIOPolarity;
 extern ULED_PARAMETER LedParameter;
-#endif // (WLAN_LED) //
+#endif // WLAN_LED //
 
 // for 2880-SW-MCU
 #ifdef CONFIG_AP_SUPPORT
@@ -143,7 +143,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 			Temp = ((UINT16)Arg1 << 8) | (UINT16)Arg0;
 			NdisMoveMemory(&LedParameter.LedPolarityCfg, &Temp, 2);
 			break;
-#endif // (WLAN_LED) //
+#endif // WLAN_LED //
 
 	// 2880-SW-MCU
 #ifdef CONFIG_AP_SUPPORT
@@ -181,10 +181,10 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
-						request_tmr_service(1, &TimerCB, pAd);
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
+					request_tmr_service(1, &TimerCB, pAd);
 				}
 				else
 				{
@@ -234,10 +234,10 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
-						request_tmr_service(1, &TimerCB, pAd);
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
+					request_tmr_service(1, &TimerCB, pAd);
 				}
 				else
 				{
@@ -263,13 +263,6 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarProtection = 1;
 						MCURadarDetect(pAd);
-
-#ifdef DFS_DEBUG
-						if (pAd->CommonCfg.McuRadarDebug & RADAR_LOG)
-						{
-							DFS_Debug(0x12, pAd);
-						}
-#endif // DFS_DEBUG //
 						pAd->CommonCfg.McuRadarEvent |= RADAR_EVENT_CTS_CARRIER_SENT;
 						pAd->CommonCfg.McuRadarProtection = 0;
 					}
@@ -280,12 +273,6 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarProtection = 1;
 						MCURadarDetect(pAd);
-#ifdef DFS_DEBUG
-						if (pAd->CommonCfg.McuRadarDebug & RADAR_LOG)
-						{
-							DFS_Debug(0x2, pAd);
-						}
-#endif // DFS_DEBUG //
 						pAd->CommonCfg.McuRadarEvent |= RADAR_EVENT_CTS_SENT;
 						pAd->CommonCfg.McuRadarProtection = 0;
 					}

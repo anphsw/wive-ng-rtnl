@@ -38,6 +38,8 @@ INT RtmpChipOpsEepromHook(
 	{
 #ifdef RTMP_PCI_SUPPORT
 		case RTMP_DEV_INF_PCI:
+		case RTMP_DEV_INF_PCIE:
+
 			pChipOps->eeinit = NULL;
 			pChipOps->eeread = rtmp_ee_prom_read16;
 			pChipOps->eewrite = rtmp_ee_prom_write16;

@@ -28,11 +28,12 @@
 */
 #include "rt_config.h"
 
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 extern UINT count_DeAssoc;
-#endif/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 
 // WPA OUI
+UCHAR		OUI_WPA[3]				= {0x00, 0x50, 0xF2};
 UCHAR		OUI_WPA_NONE_AKM[4]		= {0x00, 0x50, 0xF2, 0x00};
 UCHAR       OUI_WPA_VERSION[4]      = {0x00, 0x50, 0xF2, 0x01};
 UCHAR       OUI_WPA_WEP40[4]      = {0x00, 0x50, 0xF2, 0x01};
@@ -42,12 +43,14 @@ UCHAR       OUI_WPA_WEP104[4]      = {0x00, 0x50, 0xF2, 0x05};
 UCHAR       OUI_WPA_8021X_AKM[4]	= {0x00, 0x50, 0xF2, 0x01};
 UCHAR       OUI_WPA_PSK_AKM[4]      = {0x00, 0x50, 0xF2, 0x02};
 // WPA2 OUI
+UCHAR		OUI_WPA2[3]				= {0x00, 0x0F, 0xAC};
 UCHAR       OUI_WPA2_WEP40[4]   = {0x00, 0x0F, 0xAC, 0x01};
 UCHAR       OUI_WPA2_TKIP[4]        = {0x00, 0x0F, 0xAC, 0x02};
 UCHAR       OUI_WPA2_CCMP[4]        = {0x00, 0x0F, 0xAC, 0x04};
 UCHAR       OUI_WPA2_8021X_AKM[4]   = {0x00, 0x0F, 0xAC, 0x01};
 UCHAR       OUI_WPA2_PSK_AKM[4]   	= {0x00, 0x0F, 0xAC, 0x02};
 UCHAR       OUI_WPA2_WEP104[4]   = {0x00, 0x0F, 0xAC, 0x05};
+
 
 
 
@@ -227,7 +230,6 @@ VOID WpaEAPOLKeyAction(
 	NdisZeroMemory((PUCHAR)&peerKeyInfo, sizeof(peerKeyInfo));
 	NdisMoveMemory((PUCHAR)&peerKeyInfo, (PUCHAR)&pEapol_packet->KeyDesc.KeyInfo, sizeof(KEY_INFO));
 
-	hex_dump("Received Eapol frame", (unsigned char *)pEapol_packet, (Elem->MsgLen - LENGTH_802_11 - LENGTH_802_1_H));
 
 	*((USHORT *)&peerKeyInfo) = cpu2le16(*((USHORT *)&peerKeyInfo));
 
@@ -235,7 +237,7 @@ VOID WpaEAPOLKeyAction(
     {
         pEntry = MacTableLookup(pAd, pHeader->Addr2);
 
-		if (!pEntry || ((!pEntry->ValidAsCLI) && (!pEntry->ValidAsApCli)))		
+		if (!pEntry || (!IS_ENTRY_CLIENT(pEntry) && !IS_ENTRY_APCLI(pEntry)))		
             break;
 
 		if (pEntry->AuthMode < Ndis802_11AuthModeWPA)
@@ -252,14 +254,14 @@ VOID WpaEAPOLKeyAction(
 
 		// The value 1 shall be used for all EAPOL-Key frames to and from a STA when 
 		// neither the group nor pairwise ciphers are CCMP for Key Descriptor 1.
-		if ((pEntry->WepStatus == Ndis802_11Encryption2Enabled) && (peerKeyInfo.KeyDescVer != DESC_TYPE_TKIP))
+		if ((pEntry->WepStatus == Ndis802_11Encryption2Enabled) && (peerKeyInfo.KeyDescVer != KEY_DESC_TKIP))
         {
 	        DBGPRINT(RT_DEBUG_ERROR, ("Key descripter version not match(TKIP) \n"));
     	    break;
     	}	
 		// The value 2 shall be used for all EAPOL-Key frames to and from a STA when 
 		// either the pairwise or the group cipher is AES-CCMP for Key Descriptor 2.
-    	else if ((pEntry->WepStatus == Ndis802_11Encryption3Enabled) && (peerKeyInfo.KeyDescVer != DESC_TYPE_AES))
+    	else if ((pEntry->WepStatus == Ndis802_11Encryption3Enabled) && (peerKeyInfo.KeyDescVer != KEY_DESC_AES))
     	{
         	DBGPRINT(RT_DEBUG_ERROR, ("Key descripter version not match(AES) \n"));
         	break;
@@ -376,49 +378,23 @@ VOID WpaEAPOLKeyAction(
 	                // Need to check KeyType for groupkey or pairwise key update, refer to 8021i P.114, 
 	                if (peerKeyInfo.KeyType == GROUPKEY)
 	                {
-	                    DBGPRINT(RT_DEBUG_TRACE, ("REQUEST=1, ERROR=0, update group key\n"));
-						
-						GenRandom(pAd, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].GNonce);
-						pAd->ApCfg.MBSSID[apidx].DefaultKeyId = (pAd->ApCfg.MBSSID[apidx].DefaultKeyId == 1) ? 2 : 1;   
-
-						// Update group key to Asic
-						{
-							WpaDeriveGTK(pAd->ApCfg.MBSSID[apidx].GMK, (UCHAR*)pAd->ApCfg.MBSSID[apidx].GNonce, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].GTK, TKIP_GTK_LENGTH);
-	        				pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].KeyLen = LEN_TKIP_EK;
-					        NdisMoveMemory(pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].Key, pAd->ApCfg.MBSSID[apidx].GTK, LEN_TKIP_EK);
-				    	    NdisMoveMemory(pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].TxMic, &pAd->ApCfg.MBSSID[apidx].GTK[16], LEN_TKIP_TXMICK);
-	        				NdisMoveMemory(pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].RxMic, &pAd->ApCfg.MBSSID[apidx].GTK[24], LEN_TKIP_RXMICK);            
-
-				        	if (pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus == Ndis802_11Encryption2Enabled)
-	            				pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].CipherAlg = CIPHER_TKIP;
-					        else if (pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus == Ndis802_11Encryption3Enabled)
-	    	    			    pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].CipherAlg = CIPHER_AES;
-				        	else
-	            				pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].CipherAlg = CIPHER_NONE;
+						UINT8		Wcid;
+						PMULTISSID_STRUCT	pMbssEntry;
 	            
-				        	// install Group Key to MAC ASIC
-		        			AsicAddSharedKeyEntry(
-				    	    					    pAd, 
-						        				    apidx, 
-									            	pAd->ApCfg.MBSSID[apidx].DefaultKeyId, 
-										            pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].CipherAlg, 
-									    	        pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].Key, 
-									        	    pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].TxMic, 
-									            	pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].RxMic);
+	                    DBGPRINT(RT_DEBUG_TRACE, ("REQUEST=1, ERROR=0, update group key\n"));
 	        
-							// update Group key information to ASIC
-							RTMPAddWcidAttributeEntry(
-													pAd, 
-													apidx, 
-													pAd->ApCfg.MBSSID[apidx].DefaultKeyId, 
-													pAd->SharedKey[apidx][pAd->ApCfg.MBSSID[apidx].DefaultKeyId].CipherAlg,
-													NULL);
+						pMbssEntry = &pAd->ApCfg.MBSSID[apidx];
 			
-				    	}
+						GenRandom(pAd, pMbssEntry->Bssid, pMbssEntry->GNonce);
+						pMbssEntry->DefaultKeyId = (pMbssEntry->DefaultKeyId == 1) ? 2 : 1;   
+						WpaDeriveGTK(pMbssEntry->GMK, 
+									 pMbssEntry->GNonce, 
+									 pMbssEntry->Bssid, 
+									 pMbssEntry->GTK, LEN_TKIP_GTK);
 	                    
 						for (i = 0; i < MAX_LEN_OF_MAC_TABLE; i++)
 	                    {
-	                    	if ((pAd->MacTab.Content[i].ValidAsCLI == TRUE) 
+	                    	if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]) 
 								&& (pAd->MacTab.Content[i].WpaState == AS_PTKINITDONE)
 								&& (pAd->MacTab.Content[i].apidx == apidx))
 	                    	{
@@ -428,6 +404,18 @@ VOID WpaEAPOLKeyAction(
 								RTMPModTimer(&pAd->MacTab.Content[i].RetryTimer, PEER_MSG3_RETRY_EXEC_INTV);
 	                    	}
 	                	}
+
+						/* Get a specific WCID to record this MBSS key attribute */
+						GET_GroupKey_WCID(Wcid, apidx);
+
+						WPAInstallSharedKey(pAd, 
+											pMbssEntry->GroupKeyWepStatus, 
+											apidx, 
+											pMbssEntry->DefaultKeyId, 
+											Wcid, 
+											TRUE, 
+											pMbssEntry->GTK);
+
 	                }
 	                else
 	                {
@@ -436,7 +424,7 @@ VOID WpaEAPOLKeyAction(
 						NdisZeroMemory(&pEntry->PairwiseKey, sizeof(CIPHER_KEY));  
 						
 						// clear this entry as no-security mode
-						AsicRemovePairwiseKeyEntry(pAd, pEntry->apidx, pEntry->Aid); 
+						AsicRemovePairwiseKeyEntry(pAd, pEntry->Aid); 
 
 	                    pEntry->Sst = SST_ASSOC;
 	                    if (pEntry->AuthMode == Ndis802_11AuthModeWPA || pEntry->AuthMode == Ndis802_11AuthModeWPA2)
@@ -479,7 +467,7 @@ VOID WpaEAPOLKeyAction(
 	
 	========================================================================
 */
-VOID    RTMPToWirelessSta(
+VOID RTMPToWirelessSta(
     IN  PRTMP_ADAPTER   	pAd,
     IN  PMAC_TABLE_ENTRY 	pEntry,
     IN  PUCHAR          	pHeader802_3,
@@ -491,7 +479,8 @@ VOID    RTMPToWirelessSta(
     PNDIS_PACKET    pPacket;
     NDIS_STATUS     Status;
 
-	if ((!pEntry) || ((!pEntry->ValidAsCLI) && (!pEntry->ValidAsApCli)))
+	if ((!pEntry) || (!IS_ENTRY_CLIENT(pEntry) && !IS_ENTRY_APCLI(pEntry)
+	))
 		return;
 	
     do {
@@ -507,7 +496,7 @@ VOID    RTMPToWirelessSta(
 				RTMP_SET_PACKET_CLEAR_EAP_FRAME(pPacket, 0);	
 #ifdef CONFIG_AP_SUPPORT		
 #ifdef APCLI_SUPPORT
-		if (pEntry->ValidAsApCli)
+		if (IS_ENTRY_APCLI(pEntry))
 		{				
 			RTMP_SET_PACKET_SOURCE(pPacket, PKTSRC_NDIS);
 			RTMP_SET_PACKET_MOREDATA(pPacket, FALSE);
@@ -567,6 +556,195 @@ VOID    RTMPToWirelessSta(
 /*
     ==========================================================================
     Description:
+        Check the validity of the received EAPoL frame
+    Return:
+        TRUE if all parameters are OK, 
+        FALSE otherwise
+    ==========================================================================
+ */
+BOOLEAN PeerWpaMessageSanity(
+    IN 	PRTMP_ADAPTER 		pAd, 
+    IN 	PEAPOL_PACKET 		pMsg, 
+    IN 	ULONG 				MsgLen, 
+    IN 	UCHAR				MsgType,
+    IN 	MAC_TABLE_ENTRY  	*pEntry)
+{
+	UCHAR			mic[LEN_KEY_DESC_MIC], digest[80], KEYDATA[MAX_LEN_OF_RSNIE];
+	BOOLEAN			bReplayDiff = FALSE;
+	BOOLEAN			bWPA2 = FALSE;
+	KEY_INFO		EapolKeyInfo;	
+	UCHAR			GroupKeyIndex = 0;
+	
+	
+	NdisZeroMemory(mic, sizeof(mic));
+	NdisZeroMemory(digest, sizeof(digest));
+	NdisZeroMemory(KEYDATA, sizeof(KEYDATA));
+	NdisZeroMemory((PUCHAR)&EapolKeyInfo, sizeof(EapolKeyInfo));
+	
+	NdisMoveMemory((PUCHAR)&EapolKeyInfo, (PUCHAR)&pMsg->KeyDesc.KeyInfo, sizeof(KEY_INFO));
+
+	*((USHORT *)&EapolKeyInfo) = cpu2le16(*((USHORT *)&EapolKeyInfo));
+
+	// Choose WPA2 or not
+	if ((pEntry->AuthMode == Ndis802_11AuthModeWPA2) || (pEntry->AuthMode == Ndis802_11AuthModeWPA2PSK))
+		bWPA2 = TRUE;
+
+	// 0. Check MsgType
+	if ((MsgType > EAPOL_GROUP_MSG_2) || (MsgType < EAPOL_PAIR_MSG_1))
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("The message type is invalid(%d)! \n", MsgType));
+		return FALSE;
+	}
+				
+	// 1. Replay counter check	
+ 	if (MsgType == EAPOL_PAIR_MSG_1 || MsgType == EAPOL_PAIR_MSG_3 || MsgType == EAPOL_GROUP_MSG_1)	// For supplicant
+    {
+    	// First validate replay counter, only accept message with larger replay counter.
+		// Let equal pass, some AP start with all zero replay counter
+		UCHAR	ZeroReplay[LEN_KEY_DESC_REPLAY];
+		
+        NdisZeroMemory(ZeroReplay, LEN_KEY_DESC_REPLAY);
+		if ((RTMPCompareMemory(pMsg->KeyDesc.ReplayCounter, pEntry->R_Counter, LEN_KEY_DESC_REPLAY) != 1) &&
+			(RTMPCompareMemory(pMsg->KeyDesc.ReplayCounter, ZeroReplay, LEN_KEY_DESC_REPLAY) != 0))
+    	{
+			bReplayDiff = TRUE;
+    	}						
+ 	}
+	else if (MsgType == EAPOL_PAIR_MSG_2 || MsgType == EAPOL_PAIR_MSG_4 || MsgType == EAPOL_GROUP_MSG_2)	// For authenticator
+	{
+		// check Replay Counter coresponds to MSG from authenticator, otherwise discard
+    	if (!NdisEqualMemory(pMsg->KeyDesc.ReplayCounter, pEntry->R_Counter, LEN_KEY_DESC_REPLAY))
+    	{	
+			bReplayDiff = TRUE;	        
+    	}
+	}
+
+	// Replay Counter different condition
+	if (bReplayDiff)
+	{
+		// send wireless event - for replay counter different
+		if (pAd->CommonCfg.bWirelessEvent)
+			RTMPSendWirelessEvent(pAd, IW_REPLAY_COUNTER_DIFF_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
+
+		if (MsgType < EAPOL_GROUP_MSG_1)
+		{
+           	DBGPRINT(RT_DEBUG_ERROR, ("Replay Counter Different in pairwise msg %d of 4-way handshake!\n", MsgType));
+		}
+		else
+		{
+			DBGPRINT(RT_DEBUG_ERROR, ("Replay Counter Different in group msg %d of 2-way handshake!\n", (MsgType - EAPOL_PAIR_MSG_4)));
+		}
+		
+		hex_dump("Receive replay counter ", pMsg->KeyDesc.ReplayCounter, LEN_KEY_DESC_REPLAY);
+		hex_dump("Current replay counter ", pEntry->R_Counter, LEN_KEY_DESC_REPLAY);	
+        return FALSE;
+	}
+
+	// 2. Verify MIC except Pairwise Msg1
+	if (MsgType != EAPOL_PAIR_MSG_1)
+	{
+		UCHAR			rcvd_mic[LEN_KEY_DESC_MIC];
+
+		// Record the received MIC for check later
+		NdisMoveMemory(rcvd_mic, pMsg->KeyDesc.KeyMic, LEN_KEY_DESC_MIC);
+		NdisZeroMemory(pMsg->KeyDesc.KeyMic, LEN_KEY_DESC_MIC);
+							
+        if (EapolKeyInfo.KeyDescVer == KEY_DESC_TKIP)	// TKIP
+        {	
+            HMAC_MD5(pEntry->PTK, LEN_PTK_KCK, (PUCHAR)pMsg, MsgLen, mic, MD5_DIGEST_SIZE);
+        }
+        else if (EapolKeyInfo.KeyDescVer == KEY_DESC_AES)	// AES        
+        {                        
+            HMAC_SHA1(pEntry->PTK, LEN_PTK_KCK, (PUCHAR)pMsg, MsgLen, digest, SHA1_DIGEST_SIZE);
+            NdisMoveMemory(mic, digest, LEN_KEY_DESC_MIC);
+        }
+	
+        if (!NdisEqualMemory(rcvd_mic, mic, LEN_KEY_DESC_MIC))
+        {
+			// send wireless event - for MIC different
+			if (pAd->CommonCfg.bWirelessEvent)
+				RTMPSendWirelessEvent(pAd, IW_MIC_DIFF_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
+
+			if (MsgType < EAPOL_GROUP_MSG_1)
+			{
+            	DBGPRINT(RT_DEBUG_ERROR, ("MIC Different in pairwise msg %d of 4-way handshake!\n", MsgType));
+			}
+			else
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("MIC Different in group msg %d of 2-way handshake!\n", (MsgType - EAPOL_PAIR_MSG_4)));
+			}
+	
+			hex_dump("Received MIC", rcvd_mic, LEN_KEY_DESC_MIC);
+			hex_dump("Desired  MIC", mic, LEN_KEY_DESC_MIC);
+
+			return FALSE;
+        }        
+	}
+
+	// 1. Decrypt the Key Data field if GTK is included.
+	// 2. Extract the context of the Key Data field if it exist.	 
+	// The field in pairwise_msg_2_WPA1(WPA2) & pairwise_msg_3_WPA1 is clear.
+	// The field in group_msg_1_WPA1(WPA2) & pairwise_msg_3_WPA2 is encrypted.
+	if (CONV_ARRARY_TO_UINT16(pMsg->KeyDesc.KeyDataLen) > 0)
+	{		
+		// Decrypt this field		
+		if ((MsgType == EAPOL_PAIR_MSG_3 && bWPA2) || (MsgType == EAPOL_GROUP_MSG_1))
+		{					
+			if(
+				(EapolKeyInfo.KeyDescVer == KEY_DESC_AES))
+			{
+				UINT aes_unwrap_len;
+				
+				// AES 
+				AES_Key_Unwrap(pMsg->KeyDesc.KeyData, 
+									CONV_ARRARY_TO_UINT16(pMsg->KeyDesc.KeyDataLen),
+							   &pEntry->PTK[LEN_PTK_KCK], LEN_PTK_KEK, 
+							   KEYDATA, &aes_unwrap_len);
+				SET_UINT16_TO_ARRARY(pMsg->KeyDesc.KeyDataLen, aes_unwrap_len);
+			} 
+			else	  
+			{
+				TKIP_GTK_KEY_UNWRAP(&pEntry->PTK[LEN_PTK_KCK], 
+									pMsg->KeyDesc.KeyIv,									
+									pMsg->KeyDesc.KeyData, 
+									CONV_ARRARY_TO_UINT16(pMsg->KeyDesc.KeyDataLen),
+									KEYDATA);
+			}	
+
+			if (!bWPA2 && (MsgType == EAPOL_GROUP_MSG_1))
+				GroupKeyIndex = EapolKeyInfo.KeyIndex;
+			
+		}
+		else if ((MsgType == EAPOL_PAIR_MSG_2) || (MsgType == EAPOL_PAIR_MSG_3 && !bWPA2))
+		{					
+			NdisMoveMemory(KEYDATA, pMsg->KeyDesc.KeyData, CONV_ARRARY_TO_UINT16(pMsg->KeyDesc.KeyDataLen));			     
+		}
+		else
+		{
+			
+			return TRUE;
+		}
+
+		// Parse Key Data field to 
+		// 1. verify RSN IE for pairwise_msg_2_WPA1(WPA2) ,pairwise_msg_3_WPA1(WPA2)
+		// 2. verify KDE format for pairwise_msg_3_WPA2, group_msg_1_WPA2
+		// 3. update shared key for pairwise_msg_3_WPA2, group_msg_1_WPA1(WPA2)
+		if (!RTMPParseEapolKeyData(pAd, KEYDATA, 
+								  CONV_ARRARY_TO_UINT16(pMsg->KeyDesc.KeyDataLen), 
+								  GroupKeyIndex, MsgType, bWPA2, pEntry))
+		{
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+	
+}
+
+
+/*
+    ==========================================================================
+    Description:
         This is a function to initilize 4-way handshake
         
     Return:
@@ -579,7 +757,8 @@ VOID WPAStart4WayHS(
     IN ULONG			TimeInterval) 
 {
     UCHAR           Header802_3[14];
-    EAPOL_PACKET 	EAPOLPKT;	
+	UCHAR   		*mpool;
+    PEAPOL_PACKET	pEapolFrame;
 	PUINT8			pBssid = NULL;
 	UCHAR			group_cipher = Ndis802_11WEPDisabled;
 #ifdef CONFIG_AP_SUPPORT
@@ -597,7 +776,7 @@ VOID WPAStart4WayHS(
 #ifdef CONFIG_AP_SUPPORT	
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{			
-        if ((!pEntry) || (!pEntry->ValidAsCLI))
+        if ((!pEntry) || !IS_ENTRY_CLIENT(pEntry))
         {
 			DBGPRINT(RT_DEBUG_ERROR, ("[ERROR]WPAStart4WayHS : The entry doesn't exist.\n"));		
 			return;
@@ -648,9 +827,19 @@ VOID WPAStart4WayHS(
 	// Randomly generate ANonce		
 	GenRandom(pAd, (UCHAR *)pBssid, pEntry->ANonce);	
 
+	// Allocate memory for output
+	os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+	if (mpool == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+        return;
+    }
+
+	pEapolFrame = (PEAPOL_PACKET)mpool;
+	NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+	
 	// Construct EAPoL message - Pairwise Msg 1
 	// EAPOL-Key(0,0,1,0,P,0,0,ANonce,0,DataKD_M1)		
-	NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
 	ConstructEapolMsg(pEntry,
 					  group_cipher,
 					  EAPOL_PAIR_MSG_1,
@@ -660,33 +849,33 @@ VOID WPAStart4WayHS(
 					  NULL,					// GTK
 					  NULL,					// RSNIE
 					  0,					// RSNIE length	
-					  &EAPOLPKT);
+					  pEapolFrame);
 
 #ifdef CONFIG_AP_SUPPORT
 	// If PMKID match in WPA2-enterprise mode, fill PMKID into Key data field and update PMK here	
 	if ((pEntry->AuthMode == Ndis802_11AuthModeWPA2) && (pEntry->PMKID_CacheIdx != ENTRY_NOT_FOUND))
 	{
 			// Fill in value for KDE 
-		EAPOLPKT.KeyDesc.KeyData[0] = 0xDD;
-        EAPOLPKT.KeyDesc.KeyData[2] = 0x00;
-        EAPOLPKT.KeyDesc.KeyData[3] = 0x0F;
-        EAPOLPKT.KeyDesc.KeyData[4] = 0xAC;
-        EAPOLPKT.KeyDesc.KeyData[5] = 0x04;
+		pEapolFrame->KeyDesc.KeyData[0] = 0xDD;
+        pEapolFrame->KeyDesc.KeyData[2] = 0x00;
+        pEapolFrame->KeyDesc.KeyData[3] = 0x0F;
+        pEapolFrame->KeyDesc.KeyData[4] = 0xAC;
+        pEapolFrame->KeyDesc.KeyData[5] = 0x04;
 
-		NdisMoveMemory(&EAPOLPKT.KeyDesc.KeyData[6], &pAd->ApCfg.MBSSID[apidx].PMKIDCache.BSSIDInfo[pEntry->PMKID_CacheIdx].PMKID, LEN_PMKID);
+		NdisMoveMemory(&pEapolFrame->KeyDesc.KeyData[6], &pAd->ApCfg.MBSSID[apidx].PMKIDCache.BSSIDInfo[pEntry->PMKID_CacheIdx].PMKID, LEN_PMKID);
     	NdisMoveMemory(&pAd->ApCfg.MBSSID[apidx].PMK, &pAd->ApCfg.MBSSID[apidx].PMKIDCache.BSSIDInfo[pEntry->PMKID_CacheIdx].PMK, PMK_LEN);
     		
-    	EAPOLPKT.KeyDesc.KeyData[1] = 0x14;// 4+LEN_PMKID
-    	INC_UINT16_TO_ARRARY(EAPOLPKT.KeyDesc.KeyDataLen, 6 + LEN_PMKID);    			
-    	INC_UINT16_TO_ARRARY(EAPOLPKT.Body_Len, 6 + LEN_PMKID);
+    	pEapolFrame->KeyDesc.KeyData[1] = 0x14;// 4+LEN_PMKID
+    	INC_UINT16_TO_ARRARY(pEapolFrame->KeyDesc.KeyDataLen, 6 + LEN_PMKID);    			
+    	INC_UINT16_TO_ARRARY(pEapolFrame->Body_Len, 6 + LEN_PMKID);
 	}
 #endif // CONFIG_AP_SUPPORT //
 		
 	// Make outgoing frame
     MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pBssid, EAPOL);            
     RTMPToWirelessSta(pAd, pEntry, Header802_3, 
-					  LENGTH_802_3, (PUCHAR)&EAPOLPKT, 
-					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, 
+					  LENGTH_802_3, (PUCHAR)pEapolFrame, 
+					  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, 
 					  (pEntry->PortSecured == WPA_802_1X_PORT_SECURED) ? FALSE : TRUE);
 
 	// Trigger Retry Timer
@@ -694,6 +883,8 @@ VOID WPAStart4WayHS(
 
 	// Update State
     pEntry->WpaState = AS_PTKSTART;
+
+	os_free_mem(NULL, mpool);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== WPAStart4WayHS: send Msg1 of 4-way \n"));
         
@@ -725,7 +916,8 @@ VOID PeerPairMsg1Action(
 	UCHAR               Header802_3[14];
 	PEAPOL_PACKET		pMsg1;
 	UINT            	MsgLen;	
-	EAPOL_PACKET		EAPOLPKT;
+	UCHAR   			*mpool;
+    PEAPOL_PACKET		pEapolFrame;
 	PUINT8				pCurrentAddr = NULL;
 	PUINT8				pmk_ptr = NULL;
 	UCHAR				group_cipher = Ndis802_11WEPDisabled;
@@ -734,17 +926,17 @@ VOID PeerPairMsg1Action(
 	   
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg1Action \n"));
 
-	if ((!pEntry) || ((!pEntry->ValidAsCLI) && (!pEntry->ValidAsApCli)))
+	if ((!pEntry) || (!IS_ENTRY_CLIENT(pEntry) && !IS_ENTRY_APCLI(pEntry)))
 		return;
 
-    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + sizeof(KEY_DESCRIPTER) - MAX_LEN_OF_RSNIE - 2))
+    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + MIN_LEN_OF_EAPOL_KEY_MSG))
         return;
 	
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT
-		if (pEntry->ValidAsApCli)
+		if (IS_ENTRY_APCLI(pEntry))
 		{
 			UINT				IfIndex = 0;
 			
@@ -807,9 +999,19 @@ VOID PeerPairMsg1Action(
 	// Update WpaState
 	pEntry->WpaState = AS_PTKINIT_NEGOTIATING;
 
+	// Allocate memory for output
+	os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+	if (mpool == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+        return;
+    }
+
+	pEapolFrame = (PEAPOL_PACKET)mpool;
+	NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+
 	// Construct EAPoL message - Pairwise Msg 2
 	//  EAPOL-Key(0,1,0,0,P,0,0,SNonce,MIC,DataKD_M2)
-	NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
 	ConstructEapolMsg(pEntry,
 					  group_cipher,
 					  EAPOL_PAIR_MSG_2,  
@@ -819,14 +1021,16 @@ VOID PeerPairMsg1Action(
 					  NULL,				// GTK
 					  (UCHAR *)rsnie_ptr,
 					  rsnie_len,
-					  &EAPOLPKT);
+					  pEapolFrame);
 
 	// Make outgoing frame
 	MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pCurrentAddr, EAPOL);	
 	
 	RTMPToWirelessSta(pAd, pEntry, 
-					  Header802_3, sizeof(Header802_3), (PUCHAR)&EAPOLPKT, 
-					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, TRUE);
+					  Header802_3, sizeof(Header802_3), (PUCHAR)pEapolFrame, 
+					  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, TRUE);
+
+	os_free_mem(NULL, mpool);
 		
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg1Action: send Msg2 of 4-way \n"));
 }	
@@ -847,7 +1051,8 @@ VOID PeerPairMsg2Action(
 	UCHAR				PTK[80];
     BOOLEAN             Cancelled;
     PHEADER_802_11      pHeader;
-	EAPOL_PACKET        EAPOLPKT;	
+	UCHAR   			*mpool;
+	PEAPOL_PACKET		pEapolFrame;
 	PEAPOL_PACKET       pMsg2;
 	UINT            	MsgLen;
     UCHAR               Header802_3[LENGTH_802_3];
@@ -865,10 +1070,10 @@ VOID PeerPairMsg2Action(
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg2Action \n"));
 
-    if ((!pEntry) || (!pEntry->ValidAsCLI))
+    if ((!pEntry) || !IS_ENTRY_CLIENT(pEntry))
         return;
         
-    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + sizeof(KEY_DESCRIPTER) - MAX_LEN_OF_RSNIE - 2))
+    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + MIN_LEN_OF_EAPOL_KEY_MSG))
         return;
 
     // check Entry in valid State
@@ -945,6 +1150,17 @@ VOID PeerPairMsg2Action(
 
     do
     {
+		// Allocate memory for input
+		os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+		if (mpool == NULL)
+	    {
+	        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+	        return;
+	    }
+
+		pEapolFrame = (PEAPOL_PACKET)mpool;
+		NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+	    
         // delete retry timer
 		RTMPCancelTimer(&pEntry->RetryTimer, &Cancelled);
 
@@ -955,7 +1171,6 @@ VOID PeerPairMsg2Action(
 		ADD_ONE_To_64BIT_VAR(pEntry->R_Counter);
 
 		// Construct EAPoL message - Pairwise Msg 3
-		NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
 		ConstructEapolMsg(pEntry,
 						  group_cipher,
 						  EAPOL_PAIR_MSG_3,
@@ -965,13 +1180,13 @@ VOID PeerPairMsg2Action(
 						  (UCHAR *)gtk_ptr,
 						  (UCHAR *)rsnie_ptr,
 						  rsnie_len,
-						  &EAPOLPKT);
+						  pEapolFrame);
             
         // Make outgoing frame
         MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pBssid, EAPOL);            
         RTMPToWirelessSta(pAd, pEntry, Header802_3, LENGTH_802_3, 
-						  (PUCHAR)&EAPOLPKT, 
-						  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, 
+						  (PUCHAR)pEapolFrame, 
+						  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, 
 						  (pEntry->PortSecured == WPA_802_1X_PORT_SECURED) ? FALSE : TRUE);
 
         pEntry->ReTryCounter = PEER_MSG3_RETRY_TIMER_CTR;
@@ -979,6 +1194,9 @@ VOID PeerPairMsg2Action(
         
 		// Update State
         pEntry->WpaState = AS_PTKINIT_NEGOTIATING;
+		
+		os_free_mem(NULL, mpool);
+	
     }while(FALSE);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg2Action: send Msg3 of 4-way \n"));
@@ -1008,7 +1226,8 @@ VOID PeerPairMsg3Action(
 {
 	PHEADER_802_11		pHeader;
 	UCHAR               Header802_3[14];
-	EAPOL_PACKET		EAPOLPKT;
+	UCHAR				*mpool;
+	PEAPOL_PACKET		pEapolFrame;
 	PEAPOL_PACKET		pMsg3;
 	UINT            	MsgLen;				
 	PUINT8				pCurrentAddr = NULL;
@@ -1016,17 +1235,17 @@ VOID PeerPairMsg3Action(
 	   
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg3Action \n"));
 	
-	if ((!pEntry) || ((!pEntry->ValidAsCLI) && (!pEntry->ValidAsApCli)))
+	if ((!pEntry) || (!IS_ENTRY_CLIENT(pEntry) && !IS_ENTRY_APCLI(pEntry)))
 		return;
 
-    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + sizeof(KEY_DESCRIPTER) - MAX_LEN_OF_RSNIE - 2))
+    if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + MIN_LEN_OF_EAPOL_KEY_MSG))
 		return;
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT
-		if (pEntry->ValidAsApCli)
+		if (IS_ENTRY_APCLI(pEntry))
 		{
 			UINT				IfIndex = 0;
 		
@@ -1068,8 +1287,18 @@ VOID PeerPairMsg3Action(
 		return;
 	}
 
+	// Allocate memory for output
+	os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+	if (mpool == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+        return;
+    }
+
+	pEapolFrame = (PEAPOL_PACKET)mpool;
+	NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+
 	// Construct EAPoL message - Pairwise Msg 4
-	NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
 	ConstructEapolMsg(pEntry,
 					  group_cipher,
 					  EAPOL_PAIR_MSG_4,  
@@ -1079,7 +1308,7 @@ VOID PeerPairMsg3Action(
 					  NULL,					// GTK not used in message 4
 					  NULL,					// RSN IE not used in message 4
 					  0,
-					  &EAPOLPKT);
+					  pEapolFrame);
 
 	// Update WpaState
 	pEntry->WpaState = AS_PTKINITDONE;	 	
@@ -1089,58 +1318,20 @@ VOID PeerPairMsg3Action(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT	
-		if (pEntry->ValidAsApCli)	
-		 	APCliUpdatePairwiseKeyTable(pAd, pMsg3->KeyDesc.KeyRsc, pEntry);
+		if (IS_ENTRY_APCLI(pEntry))	
+		 	APCliInstallPairwiseKey(pAd, pEntry);
 #endif // APCLI_SUPPORT //
 	}
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		PCIPHER_KEY pSharedKey;
-
-		pSharedKey = &pAd->SharedKey[BSS0][0];
-
 		NdisMoveMemory(pAd->StaCfg.PTK, pEntry->PTK, LEN_PTK);
-		
-		// Prepare pair-wise key information into shared key table
-		NdisZeroMemory(pSharedKey, sizeof(CIPHER_KEY));  
-		pSharedKey->KeyLen = LEN_TKIP_EK;
-	    NdisMoveMemory(pSharedKey->Key, &pAd->StaCfg.PTK[32], LEN_TKIP_EK);
-		NdisMoveMemory(pSharedKey->RxMic, &pAd->StaCfg.PTK[48], LEN_TKIP_RXMICK);
-		NdisMoveMemory(pSharedKey->TxMic, &pAd->StaCfg.PTK[48+LEN_TKIP_RXMICK], LEN_TKIP_TXMICK);            
-
-		// Decide its ChiperAlg
-		if (pAd->StaCfg.PairCipher == Ndis802_11Encryption2Enabled)
-			pSharedKey->CipherAlg = CIPHER_TKIP;
-		else if (pAd->StaCfg.PairCipher == Ndis802_11Encryption3Enabled)
-			pSharedKey->CipherAlg = CIPHER_AES;
-		else
-			pSharedKey->CipherAlg = CIPHER_NONE;
-
-		// Update these related information to MAC_TABLE_ENTRY
-		pEntry = &pAd->MacTab.Content[BSSID_WCID];
-		NdisMoveMemory(pEntry->PairwiseKey.Key, &pAd->StaCfg.PTK[32], LEN_TKIP_EK);
-		NdisMoveMemory(pEntry->PairwiseKey.RxMic, &pAd->StaCfg.PTK[48], LEN_TKIP_RXMICK);
-		NdisMoveMemory(pEntry->PairwiseKey.TxMic, &pAd->StaCfg.PTK[48+LEN_TKIP_RXMICK], LEN_TKIP_TXMICK);            
-		pEntry->PairwiseKey.CipherAlg = pSharedKey->CipherAlg;
-		
-		// Update pairwise key information to ASIC Shared Key Table	   
-		AsicAddSharedKeyEntry(pAd, 
+		WPAInstallPairwiseKey(pAd, 
 							  BSS0, 
-							  0, 
-							  pSharedKey->CipherAlg,
-							  pSharedKey->Key,
-							  pSharedKey->TxMic, 
-							  pSharedKey->RxMic);
-
-		// Update ASIC WCID attribute table and IVEIV table
-		RTMPAddWcidAttributeEntry(pAd, 
-								  BSS0, 
-								  0, 
-								  pSharedKey->CipherAlg, 
-								  pEntry);
-
+							  pEntry, 
+							  FALSE);
+		NdisMoveMemory(&pAd->SharedKey[BSS0][0], &pEntry->PairwiseKey, sizeof(CIPHER_KEY));
 	}
 #endif // CONFIG_STA_SUPPORT //
 
@@ -1156,12 +1347,10 @@ VOID PeerPairMsg3Action(
 	    // Indicate Connected for GUI
 	    pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
-#ifdef CONFIG_IS_ASUS
 		DBGPRINT(RT_DEBUG_TRACE, ("PeerPairMsg3Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
 									GetAuthMode(pEntry->AuthMode),
 									GetEncryptType(pEntry->WepStatus),
 									GetEncryptType(group_cipher)));
-#endif
 	}
 	else
 	{	
@@ -1169,12 +1358,7 @@ VOID PeerPairMsg3Action(
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
 #ifdef APCLI_SUPPORT	
-			// Patch issue with gateway AP
-			// In WPA mode, AP doesn't send out message 1 of group-key HS.
-			// So, Supplicant shall maintain a timeout action to disconnect 
-			// this link.
-			// Todo - Does it need to apply to STA ?
-			if (pEntry->ValidAsApCli)	
+			if (IS_ENTRY_APCLI(pEntry))	
 			 	RTMPSetTimer(&pEntry->RetryTimer, PEER_GROUP_KEY_UPDATE_INIV);
 #endif // APCLI_SUPPORT //
 		}
@@ -1185,11 +1369,14 @@ VOID PeerPairMsg3Action(
 	MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pCurrentAddr, EAPOL);	
 	RTMPToWirelessSta(pAd, pEntry, 
 					  Header802_3, sizeof(Header802_3), 
-					  (PUCHAR)&EAPOLPKT, 
-					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, TRUE);
+					  (PUCHAR)pEapolFrame, 
+					  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, TRUE);
+
+	os_free_mem(NULL, mpool);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg3Action: send Msg4 of 4-way \n"));
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+
+/* ASUS EXT by Jiahao */
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "1");
@@ -1200,7 +1387,7 @@ VOID PeerPairMsg3Action(
 	printk("PeerPairMsg3Action(), set sta_authorized as 1, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
 #endif
-#endif/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 }
 
 /*
@@ -1220,18 +1407,16 @@ VOID PeerPairMsg4Action(
     PHEADER_802_11      pHeader;
     UINT            	MsgLen;
     BOOLEAN             Cancelled;
-#ifdef CONFIG_AP_SUPPORT
-    UCHAR		group_cipher = Ndis802_11WEPDisabled;
-#endif
+	UCHAR				group_cipher = Ndis802_11WEPDisabled;
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg4Action\n"));
 
     do
     {
-        if ((!pEntry) || (!pEntry->ValidAsCLI))
+        if ((!pEntry) || !IS_ENTRY_CLIENT(pEntry))
             break;
 		
-        if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + sizeof(KEY_DESCRIPTER) - MAX_LEN_OF_RSNIE - 2 ) )
+        if (Elem->MsgLen < (LENGTH_802_11 + LENGTH_802_1_H + LENGTH_EAPOL_H + MIN_LEN_OF_EAPOL_KEY_MSG ) )
             break;
 
         if (pEntry->WpaState < AS_PTKINIT_NEGOTIATING)
@@ -1262,42 +1447,10 @@ VOID PeerPairMsg4Action(
 		if (PeerWpaMessageSanity(pAd, pMsg4, MsgLen, EAPOL_PAIR_MSG_4, pEntry) == FALSE)
 			break;
 
-        // 3. uses the MLME.SETKEYS.request to configure PTK into MAC
-        NdisZeroMemory(&pEntry->PairwiseKey, sizeof(CIPHER_KEY));   
-
-		// reset IVEIV in Asic 
-		AsicUpdateWCIDIVEIV(pAd, pEntry->Aid, 1, 0);
-
-        pEntry->PairwiseKey.KeyLen = LEN_TKIP_EK;
-        NdisMoveMemory(pEntry->PairwiseKey.Key, &pEntry->PTK[32], LEN_TKIP_EK);
-        NdisMoveMemory(pEntry->PairwiseKey.RxMic, &pEntry->PTK[TKIP_AP_RXMICK_OFFSET], LEN_TKIP_RXMICK);
-        NdisMoveMemory(pEntry->PairwiseKey.TxMic, &pEntry->PTK[TKIP_AP_TXMICK_OFFSET], LEN_TKIP_TXMICK);
-
-		// Set pairwise key to Asic
-        {
-            pEntry->PairwiseKey.CipherAlg = CIPHER_NONE;
-            if (pEntry->WepStatus == Ndis802_11Encryption2Enabled)
-                pEntry->PairwiseKey.CipherAlg = CIPHER_TKIP;
-            else if (pEntry->WepStatus == Ndis802_11Encryption3Enabled)
-                pEntry->PairwiseKey.CipherAlg = CIPHER_AES;
-
-			// Add Pair-wise key to Asic
-            AsicAddPairwiseKeyEntry(
-                pAd, 
-                pEntry->Addr, 
-                (UCHAR)pEntry->Aid, 
-                &pEntry->PairwiseKey);
-
-			// update WCID attribute table and IVEIV table for this entry
-			RTMPAddWcidAttributeEntry(
-				pAd, 
-				pEntry->apidx, 
-				0, 
-				pEntry->PairwiseKey.CipherAlg,
-				pEntry);
-        }
+        /* 3. Install pairwise key */
+		WPAInstallPairwiseKey(pAd, pEntry->apidx, pEntry, TRUE);
         
-        // 4. upgrade state
+        /* 4. upgrade state */
         pEntry->PrivacyFilter = Ndis802_11PrivFilterAcceptAll;
         pEntry->WpaState = AS_PTKINITDONE;
 		pEntry->PortSecured = WPA_802_1X_PORT_SECURED;
@@ -1332,13 +1485,12 @@ VOID PeerPairMsg4Action(
 			// send wireless event - for set key done WPA2
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-#ifdef CONFIG_IS_ASUS	 
+	 
 	        DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 									pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 									pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 									group_cipher, 
 									GetEncryptType(group_cipher)));
-#endif
 		}
 		else
 		{
@@ -1366,7 +1518,8 @@ VOID WPAStart2WayGroupHS(
 {
     UCHAR               Header802_3[14];
 	UCHAR   			TxTsc[6]; 
-    EAPOL_PACKET    	EAPOLPKT;	
+	UCHAR   			*mpool;
+	PEAPOL_PACKET		pEapolFrame;
 	UCHAR				group_cipher = Ndis802_11WEPDisabled;	
 	UCHAR				default_key = 0;
 	PUINT8				gnonce_ptr = NULL;
@@ -1375,7 +1528,7 @@ VOID WPAStart2WayGroupHS(
     
 	DBGPRINT(RT_DEBUG_TRACE, ("===> WPAStart2WayGroupHS\n"));
 
-    if ((!pEntry) || (!pEntry->ValidAsCLI))
+    if ((!pEntry) || !IS_ENTRY_CLIENT(pEntry))
         return;
 
 #ifdef CONFIG_AP_SUPPORT
@@ -1399,34 +1552,40 @@ VOID WPAStart2WayGroupHS(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-    do
+	// Allocate memory for output
+	os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+	if (mpool == NULL)
     {
-        // Increment replay counter by 1
-		ADD_ONE_To_64BIT_VAR(pEntry->R_Counter);
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+        return;
+    }
+
+	pEapolFrame = (PEAPOL_PACKET)mpool;
+	NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+
+    // Increment replay counter by 1
+	ADD_ONE_To_64BIT_VAR(pEntry->R_Counter);
 		
-		// Construct EAPoL message - Group Msg 1
-		NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
-		ConstructEapolMsg(pEntry,
-						  group_cipher, 
-						  EAPOL_GROUP_MSG_1,
-						  default_key,
-						  (UCHAR *)gnonce_ptr,
-						  TxTsc,
-						  (UCHAR *)gtk_ptr,
-						  NULL,
-						  0,
-						  &EAPOLPKT);
+	// Construct EAPoL message - Group Msg 1
+	ConstructEapolMsg(pEntry,
+					  group_cipher, 
+					  EAPOL_GROUP_MSG_1,
+					  default_key,
+					  (UCHAR *)gnonce_ptr,
+					  TxTsc,
+					  (UCHAR *)gtk_ptr,
+					  NULL,
+					  0,
+				  	  pEapolFrame);
 
-		// Make outgoing frame
-        MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pBssid, EAPOL);            
-        RTMPToWirelessSta(pAd, pEntry, 
-						  Header802_3, LENGTH_802_3, 
-						  (PUCHAR)&EAPOLPKT, 
-						  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, FALSE);
+	// Make outgoing frame
+    MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pBssid, EAPOL);            
+    RTMPToWirelessSta(pAd, pEntry, 
+					  Header802_3, LENGTH_802_3, 
+					  (PUCHAR)pEapolFrame, 
+					  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, FALSE);
 
-
-
-    }while (FALSE);
+	os_free_mem(NULL, mpool);
 
     DBGPRINT(RT_DEBUG_TRACE, ("<=== WPAStart2WayGroupHS : send out Group Message 1 \n"));
         
@@ -1456,7 +1615,8 @@ VOID	PeerGroupMsg1Action(
     IN MLME_QUEUE_ELEM  *Elem) 
 {
     UCHAR               Header802_3[14];
-	EAPOL_PACKET		EAPOLPKT;
+	UCHAR				*mpool;
+	PEAPOL_PACKET		pEapolFrame;
 	PEAPOL_PACKET		pGroup;
 	UINT            	MsgLen;
 	BOOLEAN             Cancelled;
@@ -1466,14 +1626,14 @@ VOID	PeerGroupMsg1Action(
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerGroupMsg1Action \n"));
 
-	if ((!pEntry) || ((!pEntry->ValidAsCLI) && (!pEntry->ValidAsApCli)))
+	if ((!pEntry) || (!IS_ENTRY_CLIENT(pEntry) && !IS_ENTRY_APCLI(pEntry)))
         return;
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT
-		if (pEntry->ValidAsApCli)
+		if (IS_ENTRY_APCLI(pEntry))
 		{
 			UINT				IfIndex = 0;
 		
@@ -1512,8 +1672,19 @@ VOID	PeerGroupMsg1Action(
 	// Save Replay counter, it will use to construct message 2
 	NdisMoveMemory(pEntry->R_Counter, pGroup->KeyDesc.ReplayCounter, LEN_KEY_DESC_REPLAY);	
 
+	// Allocate memory for output
+	os_alloc_mem(NULL, (PUCHAR *)&mpool, TX_EAPOL_BUFFER);
+	if (mpool == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
+        return;
+    }
+
+	pEapolFrame = (PEAPOL_PACKET)mpool;
+	NdisZeroMemory(pEapolFrame, TX_EAPOL_BUFFER);
+
+
 	// Construct EAPoL message - Group Msg 2
-	NdisZeroMemory(&EAPOLPKT, sizeof(EAPOL_PACKET));
 	ConstructEapolMsg(pEntry,
 					  group_cipher,
 					  EAPOL_GROUP_MSG_2,  
@@ -1523,7 +1694,7 @@ VOID	PeerGroupMsg1Action(
 					  NULL,					// GTK not used
 					  NULL,					// RSN IE not used
 					  0,
-					  &EAPOLPKT);
+					  pEapolFrame);
 					
     // open 802.1x port control and privacy filter
 	pEntry->PortSecured = WPA_802_1X_PORT_SECURED;
@@ -1534,21 +1705,36 @@ VOID	PeerGroupMsg1Action(
     // Indicate Connected for GUI
     pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
-#ifdef CONFIG_IS_ASUS	
+	
 	DBGPRINT(RT_DEBUG_TRACE, ("PeerGroupMsg1Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
 									GetAuthMode(pEntry->AuthMode),
 									GetEncryptType(pEntry->WepStatus),
 									GetEncryptType(group_cipher)));
-#endif		
+		
 	// init header and Fill Packet and send Msg 2 to authenticator	
 	MAKE_802_3_HEADER(Header802_3, pEntry->Addr, pCurrentAddr, EAPOL);	
+	
+#ifdef CONFIG_STA_SUPPORT
+	if ((pAd->OpMode == OPMODE_STA) && INFRA_ON(pAd) && 
+		OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) &&
+		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS) &&
+		(pAd->MlmeAux.Channel == pAd->CommonCfg.Channel))
+	{
+		/* Now stop the scanning and need to send the rekey packet out */
+		pAd->MlmeAux.Channel = 0;
+	}
+#endif // CONFIG_STA_SUPPORT //
+
 	RTMPToWirelessSta(pAd, pEntry, 
 					  Header802_3, sizeof(Header802_3), 
-					  (PUCHAR)&EAPOLPKT, 
-					  CONV_ARRARY_TO_UINT16(EAPOLPKT.Body_Len) + 4, FALSE);
+					  (PUCHAR)pEapolFrame, 
+					  CONV_ARRARY_TO_UINT16(pEapolFrame->Body_Len) + 4, FALSE);
 
-	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerGroupMsg1Action: sned group message 2\n"));
-#ifdef CONFIG_ASUS_EXT/* ASUS EXT by Jiahao */
+	os_free_mem(NULL, mpool);
+
+	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerGroupMsg1Action: send group message 2\n"));
+
+/* ASUS EXT by Jiahao */
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "2");
@@ -1559,7 +1745,7 @@ VOID	PeerGroupMsg1Action(
 	printk("PeerGroupMsg1Action(), set sta_authorized as 2, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
 #endif
-#endif/* ASUS EXT by Jiahao */
+/* ASUS EXT by Jiahao */
 }	
 
 /*
@@ -1578,23 +1764,23 @@ VOID PeerGroupMsg2Action(
     UINT            	Len;
     PUCHAR          	pData;
     BOOLEAN         	Cancelled;
-    PEAPOL_PACKET       pMsg2;	
-#ifdef CONFIG_AP_SUPPORT
-    UCHAR		group_cipher = Ndis802_11WEPDisabled;	
-#endif
+	PEAPOL_PACKET       pMsg2;	
+	UCHAR				group_cipher = Ndis802_11WEPDisabled;	
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerGroupMsg2Action \n"));
 
+    if ((!pEntry) || !IS_ENTRY_CLIENT(pEntry))
+        return;
+            
+    if (MsgLen < (LENGTH_802_1_H + LENGTH_EAPOL_H + MIN_LEN_OF_EAPOL_KEY_MSG))
+        return;
+            
+    if (pEntry->WpaState != AS_PTKINITDONE)
+        return;
+
+
     do
     {
-        if ((!pEntry) || (!pEntry->ValidAsCLI))
-            break;
-            
-        if (MsgLen < (LENGTH_802_1_H + LENGTH_EAPOL_H + sizeof(KEY_DESCRIPTER) - MAX_LEN_OF_RSNIE - 2))
-            break;
-            
-        if (pEntry->WpaState != AS_PTKINITDONE)
-            break;
 
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -1628,24 +1814,22 @@ VOID PeerGroupMsg2Action(
 			// send wireless event - for set key done WPA2
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-#ifdef CONFIG_IS_ASUS
+
 			DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-#endif
 		}
 		else
 		{
 			// send wireless event - for set key done WPA
 			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA1_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-#ifdef CONFIG_IS_ASUS
+
         	DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA1, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-#endif
 		}	
     }while(FALSE);  
 }
@@ -1667,7 +1851,7 @@ VOID PeerGroupMsg2Action(
 	IRQL = DISPATCH_LEVEL
 	
 	Note:
-		All these constants are defined in wpa.h
+		All these constants are defined in wpa_cmm.h
 		For supplicant, there is only EAPOL Key message avaliable
 		
 	========================================================================
@@ -1698,6 +1882,43 @@ BOOLEAN	WpaMsgTypeSubst(
 	}	
 	return TRUE;
 }
+
+/**
+ * inc_iv_byte - Increment arbitrary length byte array
+ * @counter: Pointer to byte array
+ * @len: Length of the counter in bytes
+ *
+ * This function increments the least byte of the counter by one and continues
+ * rolling over to more significant bytes if the byte was incremented from
+ * 0xff to 0x00.
+ */
+void inc_iv_byte(UCHAR *iv, UINT len, UINT cnt)
+{
+	int 	pos = 0;
+	int 	carry = 0;
+	UCHAR	pre_iv;
+
+	while (pos < len)
+	{
+		pre_iv = iv[pos];
+	
+		if (carry == 1)
+			iv[pos] ++;
+		else
+			iv[pos] += cnt;
+		
+		if (iv[pos] > pre_iv)
+			break;	
+		
+		carry = 1;
+		pos++;
+	}
+
+	if (pos >= len)
+		DBGPRINT(RT_DEBUG_WARN, ("!!! inc_iv_byte overflow !!!\n"));	
+}
+
+
 
 /*
 	========================================================================
@@ -1831,6 +2052,130 @@ int PasswordHash(PSTRING password, PUCHAR ssid, INT ssidlength, PUCHAR output)
     return 1; 
 }
 
+/*
+	========================================================================
+	
+	Routine Description:
+		The key derivation function(KDF) is defined in IEEE 802.11r/D9.0, 8.5.1.5.2
+
+	Arguments:
+
+	Return Value:
+
+	Note:
+		Output ¡ö KDF-Length (K, label, Context) where
+		Input:    K, a 256-bit key derivation key
+				  label, a string identifying the purpose of the keys derived using this KDF
+				  Context, a bit string that provides context to identify the derived key
+				  Length, the length of the derived key in bits
+		Output: a Length-bit derived key
+
+		result ¡ö ""
+		iterations ¡ö (Length+255)/256 
+		do i = 1 to iterations
+			result ¡ö result || HMAC-SHA256(K, i || label || Context || Length)
+		od
+		return first Length bits of result, and securely delete all unused bits
+
+		In this algorithm, i and Length are encoded as 16-bit unsigned integers.
+
+	========================================================================
+*/
+VOID	KDF(
+	IN	PUINT8	key,
+	IN	INT		key_len,
+	IN	PUINT8	label,
+	IN	INT		label_len,
+	IN	PUINT8	data,
+	IN	INT		data_len,
+	OUT	PUINT8	output,
+	IN	USHORT	len)
+{
+	USHORT	i;
+    UCHAR   *input;
+	INT		currentindex = 0;
+	INT		total_len;
+	UINT	len_in_bits = (len << 3);
+
+	os_alloc_mem(NULL, (PUCHAR *)&input, 1024);
+	
+    if (input == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR, ("!!!KDF: no memory!!!\n"));
+        return;
+    } /* End of if */
+
+	NdisZeroMemory(input, 1024);
+	
+	// Initial concatenated value (i || label || Context || Length)
+	// concatenate 16-bit unsigned integer, its initial value is 1.	
+	input[0] = 1;
+	input[1] = 0;	
+	total_len = 2;
+
+	// concatenate a prefix string
+	NdisMoveMemory(&input[total_len], label, label_len);
+	total_len += label_len;
+
+	// concatenate the context
+	NdisMoveMemory(&input[total_len], data, data_len);
+	total_len += data_len;
+
+	// concatenate the length in bits (16-bit unsigned integer)
+	input[total_len] = (len_in_bits & 0xFF);
+	input[total_len + 1] = (len_in_bits & 0xFF00) >> 8;	
+	total_len += 2;
+	 
+	for	(i = 1;	i <= ((len_in_bits + 255) / 256); i++)
+	{
+		// HMAC-SHA256 derives output 
+		HMAC_SHA256((UCHAR *)key, key_len, input, total_len, (UCHAR *)&output[currentindex], 32);		
+
+		currentindex +=	32; // next concatenation location
+		input[0]++;			// increment octet count
+
+	}			
+    os_free_mem(NULL, input);
+}
+
+/*
+	========================================================================
+	
+	Routine Description:
+
+	Arguments:
+		
+	Return Value:
+		
+	Note:
+		
+	========================================================================
+*/
+VOID RTMPDerivePMKID(
+	IN	PUINT8			pAaddr,
+	IN	PUINT8			pSpaddr,
+	IN	PUINT8			pKey,
+	IN	PUINT8			pAkm_oui,
+	OUT	PUINT8			pPMKID)
+{
+	UCHAR	digest[80], text_buf[20];
+	UINT8	text_len;
+			
+	// Concatenate the text for PMKID calculation
+	NdisMoveMemory(&text_buf[0], "PMK Name", 8);	
+	NdisMoveMemory(&text_buf[8], pAaddr, MAC_ADDR_LEN);
+	NdisMoveMemory(&text_buf[14], pSpaddr, MAC_ADDR_LEN);
+	text_len = 20;
+
+	{
+		HMAC_SHA1(pKey, PMK_LEN, text_buf, text_len, digest, SHA1_DIGEST_SIZE);
+	}
+
+	/* Truncate the first 128-bit of output result */
+	NdisMoveMemory(pPMKID, digest, LEN_PMKID);
+
+}
+
 
 
 /*
@@ -1916,7 +2261,7 @@ VOID WpaDerivePTK(
 	hex_dump("concatenation=", concatenation, 76);
 
 	// Use PRF to generate PTK
-	PRF(PMK, LEN_MASTER_KEY, Prefix, 22, concatenation, 76, output, len);
+	PRF(PMK, LEN_PMK, Prefix, 22, concatenation, 76, output, len);
 
 }
 
@@ -2291,7 +2636,9 @@ static VOID RTMPMakeRsnIeCap(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 		if (apidx < pAd->ApCfg.BssidNum)		
+		{
         	pRSN_Cap->field.PreAuth = (pAd->ApCfg.MBSSID[apidx].PreAuth == TRUE) ? 1 : 0;
+		}
 	}
 #endif // CONFIG_AP_SUPPORT //			        
 					 
@@ -2417,14 +2764,6 @@ VOID RTMPMakeRSNIE(
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
-#ifdef WPA_SUPPLICANT_SUPPORT
-			if (pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE)
-			{
-				if (AuthMode < Ndis802_11AuthModeWPA)
-					return;
-			}
-			else
-#endif // WPA_SUPPLICANT_SUPPORT //
 			{
 				// Support WPAPSK or WPA2PSK in STA-Infra mode
 				// Support WPANone in STA-Adhoc mode
@@ -2543,6 +2882,7 @@ BOOLEAN RTMPCheckWPAframe(
     }
 	// Skip 2-bytes EAPoL type 
     if (NdisEqualMemory(EAPOL, pData, 2)) 
+//	if (*(UINT16 *)EAPOL == *(UINT16 *)pData)
     {
         pData += 2;         
     }
@@ -2787,7 +3127,7 @@ BOOLEAN RTMPParseEapolKeyData(
 
 			// Get GTK length - refer to IEEE 802.11i-2004 p.82
 			GTKLEN = pKDE->Len -6;
-			if (GTKLEN < LEN_AES_KEY)
+			if (GTKLEN < LEN_AES_TK)
 			{
 				DBGPRINT(RT_DEBUG_ERROR, ("ERROR: GTK Key length is too short (%d) \n", GTKLEN));
         		return FALSE;
@@ -2823,10 +3163,10 @@ BOOLEAN RTMPParseEapolKeyData(
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 #ifdef APCLI_SUPPORT		
-		if (pEntry->ValidAsApCli)
+		if (IS_ENTRY_APCLI(pEntry))
 		{
 			// Set Group key material, TxMic and RxMic for AP-Client
-			if (!APCliUpdateSharedKeyTable(pAd, pMyKeyData, KeyDataLength, DefaultIdx, pEntry))
+			if (!APCliInstallSharedKey(pAd, pMyKeyData, KeyDataLength, DefaultIdx, pEntry))
 			{		
 				return FALSE;
 			}
@@ -2838,48 +3178,17 @@ BOOLEAN RTMPParseEapolKeyData(
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{			
-		PCIPHER_KEY pSharedKey;
-	
 		// set key material, TxMic and RxMic		
 		NdisMoveMemory(pAd->StaCfg.GTK, pMyKeyData, 32);
 		pAd->StaCfg.DefaultKeyId = DefaultIdx;
 
-		pSharedKey = &pAd->SharedKey[BSS0][pAd->StaCfg.DefaultKeyId];
-
-		// Prepare pair-wise key information into shared key table
-		NdisZeroMemory(pSharedKey, sizeof(CIPHER_KEY));  
-		pSharedKey->KeyLen = LEN_TKIP_EK;
-		NdisMoveMemory(pSharedKey->Key, pAd->StaCfg.GTK, LEN_TKIP_EK);
-		NdisMoveMemory(pSharedKey->RxMic, &pAd->StaCfg.GTK[16], LEN_TKIP_RXMICK);
-		NdisMoveMemory(pSharedKey->TxMic, &pAd->StaCfg.GTK[24], LEN_TKIP_TXMICK);
-
-		// Update Shared Key CipherAlg
-		pSharedKey->CipherAlg = CIPHER_NONE;
-		if (pAd->StaCfg.GroupCipher == Ndis802_11Encryption2Enabled)
-			pSharedKey->CipherAlg = CIPHER_TKIP;
-		else if (pAd->StaCfg.GroupCipher == Ndis802_11Encryption3Enabled)
-			pSharedKey->CipherAlg = CIPHER_AES;
-		else if (pAd->StaCfg.GroupCipher == Ndis802_11GroupWEP40Enabled)
-			pSharedKey->CipherAlg = CIPHER_WEP64;
-		else if (pAd->StaCfg.GroupCipher == Ndis802_11GroupWEP104Enabled)
-			pSharedKey->CipherAlg = CIPHER_WEP128;
-
-
-		// Update group key information to ASIC Shared Key Table	   
-		AsicAddSharedKeyEntry(pAd, 
-							  BSS0, 
-							  pAd->StaCfg.DefaultKeyId, 
-							  pSharedKey->CipherAlg,
-							  pSharedKey->Key,
-							  pSharedKey->TxMic, 
-							  pSharedKey->RxMic);
-
-		// Update ASIC WCID attribute table and IVEIV table
-		RTMPAddWcidAttributeEntry(pAd, 
-								  BSS0, 
-								  pAd->StaCfg.DefaultKeyId, 
-								  pSharedKey->CipherAlg, 
-								  NULL);
+		WPAInstallSharedKey(pAd, 
+							pAd->StaCfg.GroupCipher, 
+							BSS0, 
+							pAd->StaCfg.DefaultKeyId, 
+							MCAST_WCID, 
+							FALSE, 
+							pAd->StaCfg.GTK);
 	}
 #endif // CONFIG_STA_SUPPORT //
 
@@ -2961,7 +3270,7 @@ VOID	ConstructEapolMsg(
     pMsg->ProType = EAPOLKey;
 
 	// Default 95 bytes, the EAPoL-Key descriptor exclude Key-data field
-	SET_UINT16_TO_ARRARY(pMsg->Body_Len, LEN_EAPOL_KEY_MSG);
+	SET_UINT16_TO_ARRARY(pMsg->Body_Len, MIN_LEN_OF_EAPOL_KEY_MSG);
 
 	// Fill in EAPoL descriptor
 	if (bWPA2)
@@ -2972,9 +3281,9 @@ VOID	ConstructEapolMsg(
 	// Key Descriptor Version (bits 0-2) specifies the key descriptor version type
 	{
 		// Fill in Key information, refer to IEEE Std 802.11i-2004 page 78 
-		// When either the pairwise or the group cipher is AES, the DESC_TYPE_AES(2) shall be used.
+		// When either the pairwise or the group cipher is AES, the KEY_DESC_AES shall be used.
 		KeyDescVer = (((pEntry->WepStatus == Ndis802_11Encryption3Enabled) || 
-		        		(GroupKeyWepStatus == Ndis802_11Encryption3Enabled)) ? (DESC_TYPE_AES) : (DESC_TYPE_TKIP));
+		        		(GroupKeyWepStatus == Ndis802_11Encryption3Enabled)) ? (KEY_DESC_AES) : (KEY_DESC_TKIP));
 	}
 
 	pMsg->KeyDesc.KeyInfo.KeyDescVer = KeyDescVer;
@@ -3014,16 +3323,24 @@ VOID	ConstructEapolMsg(
 	*(USHORT *)(&pMsg->KeyDesc.KeyInfo) = cpu2le16(*(USHORT *)(&pMsg->KeyDesc.KeyInfo));
 
 	// Fill in Key Length
+	if (bWPA2)
+	{
+		// In WPA2 mode, the field indicates the length of pairwise key cipher, 
+		// so only pairwise_msg_1 and pairwise_msg_3 need to fill. 
+		if ((MsgType == EAPOL_PAIR_MSG_1) || (MsgType == EAPOL_PAIR_MSG_3))
+			pMsg->KeyDesc.KeyLength[1] = ((pEntry->WepStatus == Ndis802_11Encryption2Enabled) ? LEN_TKIP_TK : LEN_AES_TK);
+	}
+	else if (!bWPA2)
 	{
 		if (MsgType >= EAPOL_GROUP_MSG_1)
 		{
 			// the length of group key cipher
-			pMsg->KeyDesc.KeyLength[1] = ((GroupKeyWepStatus == Ndis802_11Encryption2Enabled) ? TKIP_GTK_LENGTH : LEN_AES_KEY);
+			pMsg->KeyDesc.KeyLength[1] = ((GroupKeyWepStatus == Ndis802_11Encryption2Enabled) ? LEN_TKIP_GTK : LEN_AES_GTK);
 		}
 		else
 		{
 			// the length of pairwise key cipher
-			pMsg->KeyDesc.KeyLength[1] = ((pEntry->WepStatus == Ndis802_11Encryption2Enabled) ? LEN_TKIP_KEY : LEN_AES_KEY);			
+			pMsg->KeyDesc.KeyLength[1] = ((pEntry->WepStatus == Ndis802_11Encryption2Enabled) ? LEN_TKIP_TK : LEN_AES_TK);			
 		}				
 	}			
 	
@@ -3106,11 +3423,9 @@ VOID	ConstructEapolKeyData(
 	IN	UCHAR			RSNIE_LEN,
 	OUT PEAPOL_PACKET   pMsg)
 {
-	UCHAR		*mpool, *Key_Data, *Rc4GTK;  
-	UCHAR       ekey[(LEN_KEY_DESC_IV+LEN_EAP_EK)];   
-	UINT16		data_offset;
+	UCHAR		*mpool, *Key_Data, *eGTK;  	  
+	ULONG		data_offset;
 	BOOLEAN		bWPA2Capable = FALSE;
-	PRTMP_ADAPTER	pAd = pEntry->pAd;
 	BOOLEAN		GTK_Included = FALSE;
 
 	// Choose WPA2 or not
@@ -3129,10 +3444,10 @@ VOID	ConstructEapolKeyData(
     if (mpool == NULL)
 		return;
         
-	/* Rc4GTK Len = 512 */
-	Rc4GTK = (UCHAR *) ROUND_UP(mpool, 4);
+	/* eGTK Len = 512 */
+	eGTK = (UCHAR *) ROUND_UP(mpool, 4);
 	/* Key_Data Len = 512 */
-	Key_Data = (UCHAR *) ROUND_UP(Rc4GTK + 512, 4);
+	Key_Data = (UCHAR *) ROUND_UP(eGTK + 512, 4);
 
 	NdisZeroMemory(Key_Data, 512);
 	SET_UINT16_TO_ARRARY(pMsg->KeyDesc.KeyDataLen, 0);
@@ -3146,7 +3461,7 @@ VOID	ConstructEapolKeyData(
 
 
 		RTMPInsertRSNIE(&Key_Data[data_offset], 
-						(PULONG)&data_offset,
+						&data_offset,
 						RSNIE, 
 						RSNIE_LEN, 
 						pmkid_ptr, 
@@ -3189,13 +3504,13 @@ VOID	ConstructEapolKeyData(
 		// Fill in GTK 
 		if (GroupKeyWepStatus == Ndis802_11Encryption3Enabled)
 		{			
-			NdisMoveMemory(&Key_Data[data_offset], GTK, LEN_AES_KEY);
-			data_offset += LEN_AES_KEY;
+			NdisMoveMemory(&Key_Data[data_offset], GTK, LEN_AES_GTK);
+			data_offset += LEN_AES_GTK;
 		}
 		else
 		{			
-			NdisMoveMemory(&Key_Data[data_offset], GTK, TKIP_GTK_LENGTH);
-			data_offset += TKIP_GTK_LENGTH;
+			NdisMoveMemory(&Key_Data[data_offset], GTK, LEN_TKIP_GTK);
+			data_offset += LEN_TKIP_GTK;
 		}
 
 		GTK_Included = TRUE;
@@ -3209,10 +3524,11 @@ VOID	ConstructEapolKeyData(
 		//hex_dump("GTK_Included", Key_Data, data_offset);
 	
 		if (
-			(keyDescVer == DESC_TYPE_AES))
+			(keyDescVer == KEY_DESC_AES))
 		{
 			UCHAR 	remainder = 0;
 			UCHAR	pad_len = 0;			
+			UINT	wrap_len;
 
 			// Key Descriptor Version 2 or 3: AES key wrap, defined in IETF RFC 3394, 
 			// shall be used to encrypt the Key Data field using the KEK field from 
@@ -3234,28 +3550,22 @@ VOID	ConstructEapolKeyData(
 				data_offset += pad_len;
 			}
 		
-			AES_GTK_KEY_WRAP(&pEntry->PTK[16], Key_Data, data_offset, Rc4GTK);
-            // AES wrap function will grow 8 bytes in length
-            data_offset += 8;            				
+			AES_Key_Wrap(Key_Data, data_offset, 
+						 &pEntry->PTK[LEN_PTK_KCK], LEN_PTK_KEK, 
+						 eGTK, &wrap_len);	
+			data_offset = wrap_len;
+			
 		}
 		else
 		{
-			/*	Key Descriptor Version 1: ARC4 is used to encrypt the Key Data field 
-				using the KEK field from the derived PTK. */
-		
-			// PREPARE Encrypted  "Key DATA" field.  (Encrypt GTK with RC4, usinf PTK[16]->[31] as Key, IV-field as IV)
-			// put TxTsc in Key RSC field
-			pAd->PrivateInfo.FCSCRC32 = PPPINITFCS32;   //Init crc32.
-
-			// ekey is the contanetion of IV-field, and PTK[16]->PTK[31]
-			NdisMoveMemory(ekey, pMsg->KeyDesc.KeyIv, LEN_KEY_DESC_IV);
-			NdisMoveMemory(&ekey[LEN_KEY_DESC_IV], &pEntry->PTK[16], LEN_EAP_EK);
-			ARCFOUR_INIT(&pAd->PrivateInfo.WEPCONTEXT, ekey, sizeof(ekey));  //INIT SBOX, KEYLEN+3(IV)
-			pAd->PrivateInfo.FCSCRC32 = RTMP_CALC_FCS32(pAd->PrivateInfo.FCSCRC32, Key_Data, data_offset);
-			WPAARCFOUR_ENCRYPT(&pAd->PrivateInfo.WEPCONTEXT, Rc4GTK, Key_Data, data_offset);  
+			TKIP_GTK_KEY_WRAP(&pEntry->PTK[LEN_PTK_KCK], 
+								pMsg->KeyDesc.KeyIv,									
+								Key_Data, 
+								data_offset,
+								eGTK);
 		}
 
-		NdisMoveMemory(pMsg->KeyDesc.KeyData, Rc4GTK, data_offset);
+		NdisMoveMemory(pMsg->KeyDesc.KeyData, eGTK, data_offset);
 	}
 	else
 	{
@@ -3313,20 +3623,96 @@ static VOID	CalculateMIC(
 	NdisZeroMemory(mic, sizeof(mic));
 			
 	// Calculate MIC
-    if (KeyDescVer == DESC_TYPE_AES)
+    if (KeyDescVer == KEY_DESC_AES)
  	{
-		HMAC_SHA1(PTK, LEN_EAP_MICK, OutBuffer,  FrameLen, digest, SHA1_DIGEST_SIZE);
+		HMAC_SHA1(PTK, LEN_PTK_KCK, OutBuffer,  FrameLen, digest, SHA1_DIGEST_SIZE);
 		NdisMoveMemory(mic, digest, LEN_KEY_DESC_MIC);
 	}
 	else
 	{
-		HMAC_MD5(PTK,  LEN_EAP_MICK, OutBuffer, FrameLen, mic, MD5_DIGEST_SIZE);
+		HMAC_MD5(PTK, LEN_PTK_KCK, OutBuffer, FrameLen, mic, MD5_DIGEST_SIZE);
 	}
 
 	// store the calculated MIC
 	NdisMoveMemory(pMsg->KeyDesc.KeyMic, mic, LEN_KEY_DESC_MIC);
 
 	os_free_mem(NULL, OutBuffer);
+}
+
+UCHAR	RTMPExtractKeyIdxFromIVHdr(	
+	IN	PUCHAR			pIV,
+	IN	UINT8			CipherAlg)
+{
+	UCHAR	keyIdx = 0xFF;
+
+	/* extract the key index from IV header */
+	switch (CipherAlg)
+	{
+		case Ndis802_11Encryption1Enabled:
+		case Ndis802_11Encryption2Enabled:
+		case Ndis802_11Encryption3Enabled:
+			keyIdx = (*(pIV + 3) & 0xc0) >> 6;
+			break;
+
+	}
+
+	return keyIdx;
+
+}
+
+PCIPHER_KEY RTMPSwCipherKeySelection(
+	IN 	PRTMP_ADAPTER 		pAd,
+	IN	PUCHAR				pIV,
+	IN	RX_BLK				*pRxBlk,
+	IN	PMAC_TABLE_ENTRY 	pEntry)
+{
+	PCIPHER_KEY			pKey = NULL;	
+	UCHAR				keyIdx = 0;
+	UINT8				CipherAlg = Ndis802_11EncryptionDisabled;
+	PRT28XX_RXD_STRUC	pRxD = &(pRxBlk->RxD);	
+
+	if ((pEntry == NULL) ||
+		(RX_BLK_TEST_FLAG(pRxBlk, fRX_APCLI)) || 
+		(RX_BLK_TEST_FLAG(pRxBlk, fRX_WDS)) ||
+		(RX_BLK_TEST_FLAG(pRxBlk, fRX_MESH)))
+		return NULL;
+
+	if (pRxD->U2M)
+	{
+		CipherAlg = pEntry->WepStatus;
+	}
+	else
+	{
+#ifdef CONFIG_STA_SUPPORT
+		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+		{				
+			CipherAlg = pAd->StaCfg.GroupCipher;
+		}	
+#endif // CONFIG_STA_SUPPORT //		
+	}
+
+	if ((keyIdx = RTMPExtractKeyIdxFromIVHdr(pIV, CipherAlg)) > 3)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : Invalid key index(%d) !!!\n", 
+								  __FUNCTION__, keyIdx));
+		return NULL;
+	}
+
+	if (CipherAlg == Ndis802_11Encryption1Enabled)
+	{
+		pKey = &pAd->SharedKey[pEntry->apidx][keyIdx];
+	}
+	else if ((CipherAlg == Ndis802_11Encryption2Enabled) ||
+  			 (CipherAlg == Ndis802_11Encryption3Enabled))
+	{
+		if (pRxD->U2M)
+			pKey = &pEntry->PairwiseKey;
+		else
+			pKey = &pAd->SharedKey[pEntry->apidx][keyIdx];
+	}
+
+	return pKey;
+	
 }
 
 /*
@@ -3345,76 +3731,124 @@ static VOID	CalculateMIC(
 		
 	========================================================================
 */
-NDIS_STATUS	RTMPSoftDecryptBroadCastData(
-	IN	PRTMP_ADAPTER					pAd,
-	IN	RX_BLK							*pRxBlk,
-	IN  NDIS_802_11_ENCRYPTION_STATUS 	GroupCipher,
-	IN  PCIPHER_KEY						pShard_key)
+NDIS_STATUS	RTMPSoftDecryptionAction(
+	IN	PRTMP_ADAPTER		pAd,
+	IN 		PUCHAR			pHdr,
+	IN 		UCHAR    		UserPriority,
+	IN 		PCIPHER_KEY		pKey,
+	INOUT 	PUCHAR			pData,
+	INOUT 	UINT16			*DataByteCnt)
 {		
-	PRXWI_STRUC			pRxWI = pRxBlk->pRxWI;	
-
-	
-
-	// handle WEP decryption
-	if (GroupCipher == Ndis802_11Encryption1Enabled)
+	switch (pKey->CipherAlg)
     {    	        	        
-		if (RTMPSoftDecryptWEP(pAd, pRxBlk->pData, pRxWI->MPDUtotalByteCount, pShard_key))
-		{
+		case CIPHER_WEP64:
+		case CIPHER_WEP128:
+			/* handle WEP decryption */
+			if (RTMPSoftDecryptWEP(pAd, pKey, pData, &(*DataByteCnt)) == FALSE)		
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("ERROR : SW decrypt WEP data fails.\n"));	
+				// give up this frame
+				return NDIS_STATUS_FAILURE; 
+			}        											
+			break;
 			
-			//Minus IV[4] & ICV[4]
-			pRxWI->MPDUtotalByteCount -= 8;  
-		}
-		else
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("ERROR : Software decrypt WEP data fails.\n"));	
-			// give up this frame
-			return NDIS_STATUS_FAILURE; 
-		}        											
-	}
-	// handle TKIP decryption
-	else if (GroupCipher == Ndis802_11Encryption2Enabled)
-	{	
-		if (RTMPSoftDecryptTKIP(pAd, pRxBlk->pData, pRxWI->MPDUtotalByteCount, 0, pShard_key))
-		{
+		case CIPHER_TKIP:
+			/* handle TKIP decryption */
+			if (RTMPSoftDecryptTKIP(pAd, pHdr, UserPriority, 
+								pKey, pData, &(*DataByteCnt)) == FALSE)
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("ERROR : SW decrypt TKIP data fails.\n"));
+				// give up this frame
+				return NDIS_STATUS_FAILURE; 
+			}        											
+			break;
 			
-			//Minus 8 bytes MIC, 8 bytes IV/EIV, 4 bytes ICV
-			pRxWI->MPDUtotalByteCount -= 20;  
-		}
-        else
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("ERROR : RTMPSoftDecryptTKIP Failed\n"));
-			// give up this frame
-			return NDIS_STATUS_FAILURE; 
-        }
-	}
-	// handle AES decryption
-	else if (GroupCipher == Ndis802_11Encryption3Enabled)
-	{
-		if (RTMPSoftDecryptAES(pAd, pRxBlk->pData, pRxWI->MPDUtotalByteCount , pShard_key))
-		{							
-			
-			//8 bytes MIC, 8 bytes IV/EIV (CCMP Header)
-			pRxWI->MPDUtotalByteCount -= 16;  
-		}
-		else
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("ERROR : RTMPSoftDecryptAES Failed\n"));
+		case CIPHER_AES:
+			/* handle AES decryption */
+			if (RTMPSoftDecryptCCMP(pAd, pHdr, pKey, pData, &(*DataByteCnt)) == FALSE)
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("ERROR : SW decrypt AES data fails.\n"));
+				// give up this frame
+				return NDIS_STATUS_FAILURE; 
+        	}
+			break;
+		default:
 			// give up this frame
 			return NDIS_STATUS_FAILURE;  
-		}
-	}
-	else
-	{
-		// give up this frame
-		return NDIS_STATUS_FAILURE;  
+			break;			
 	}	
 
 	return NDIS_STATUS_SUCCESS;
 		
 }
 
+VOID RTMPSoftConstructIVHdr(
+	IN	UCHAR			CipherAlg,
+	IN	UCHAR			key_id,
+	IN	PUCHAR			pTxIv,
+	OUT PUCHAR 			pHdrIv,
+	OUT	UINT8			*hdr_iv_len)
+{
+	*hdr_iv_len = 0;
 
-PUINT8	GetSuiteFromRSNIE(
+	if ((CipherAlg == CIPHER_WEP64) || (CipherAlg == CIPHER_WEP128))
+	{
+		/* Construct and insert 4-bytes WEP IV header to MPDU header */
+		RTMPConstructWEPIVHdr(key_id, pTxIv, pHdrIv);
+		*hdr_iv_len = LEN_WEP_IV_HDR;	
+	}
+	else if (CipherAlg == CIPHER_TKIP)
+		;
+	else if (CipherAlg == CIPHER_AES)
+	{
+		/* Construct and insert 8-bytes CCMP header to MPDU header */
+		RTMPConstructCCMPHdr(key_id, pTxIv, pHdrIv);	
+		*hdr_iv_len = LEN_CCMP_HDR;
+	}
+
+}
+
+VOID RTMPSoftEncryptionAction(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			CipherAlg,
+	IN	PUCHAR			pHdr,
+	IN	PUCHAR			pSrcBufData,
+	IN	UINT32			SrcBufLen,
+	IN	UCHAR			KeyIdx,
+	IN	PCIPHER_KEY		pKey,
+	OUT	UINT8			*ext_len)
+{
+	*ext_len = 0;
+
+	if ((CipherAlg == CIPHER_WEP64) || (CipherAlg == CIPHER_WEP128))
+	{
+		// Encrypt the MPDU data by software
+		RTMPSoftEncryptWEP(pAd, 
+						   pKey->TxTsc, 
+						   pKey, 
+						   pSrcBufData, 
+						   SrcBufLen);
+				
+		*ext_len = LEN_ICV;	
+	}
+	else if (CipherAlg == CIPHER_TKIP)
+		;
+	else if (CipherAlg == CIPHER_AES)
+	{						
+		// Encrypt the MPDU data by software
+		RTMPSoftEncryptCCMP(pAd, 
+							pHdr,
+							pKey->TxTsc, 
+							pKey->Key, 
+							pSrcBufData, 
+							SrcBufLen);
+				
+		*ext_len = LEN_CCMP_MIC;
+	}
+
+}
+
+PUINT8	ExtractSuiteFromRSNIE(
 		IN 	PUINT8	rsnie,
 		IN 	UINT	rsnie_len,
 		IN	UINT8	type,
@@ -3424,16 +3858,11 @@ PUINT8	GetSuiteFromRSNIE(
 	INT			len;
 	PUINT8		pBuf;
 	INT			offset = 0;
-	PRSNIE_AUTH	pAkm;
-	UINT16		acount;
-	BOOLEAN		isWPA2 = FALSE;
 
 	pEid = (PEID_STRUCT)rsnie;
 	len = rsnie_len - 2;	// exclude IE and length
 	pBuf = (PUINT8)&pEid->Octet[0];
 	
-
-
 	// set default value
 	*count = 0;
 
@@ -3441,30 +3870,35 @@ PUINT8	GetSuiteFromRSNIE(
 	if ((len <= 0) || (pEid->Len != len))
 	{
 		DBGPRINT_ERR(("%s : The length is invalid\n", __FUNCTION__));
-		return NULL;
+		goto out;
 	}
 	
 	// Check WPA or WPA2
 	if (pEid->Eid == IE_WPA)
 	{
-		PRSNIE	pRsnie = (PRSNIE)pBuf;
-		UINT16 ucount;
-
+		/* Check the length */
 		if (len < sizeof(RSNIE))
 		{
-			DBGPRINT_ERR(("%s : The length is too short for WPA\n", __FUNCTION__));
-			return NULL;
+			DBGPRINT(RT_DEBUG_ERROR, ("%s : The length is too short for WPA\n", __FUNCTION__));
+			goto out;
 		}
-
-		// Get the count of pairwise cipher
-		ucount = cpu2le16(pRsnie->ucount);
-		if (ucount > 2)
+		else
 		{
-			DBGPRINT_ERR(("%s : The count(%d) of pairwise cipher is invlaid\n",
-											__FUNCTION__, ucount));
-			return NULL;
-		}
+			PRSNIE	pRsnie;
+			UINT16 	u_cnt;
 
+			pRsnie = (PRSNIE)pBuf;
+			u_cnt = cpu2le16(pRsnie->ucount);
+			offset = sizeof(RSNIE) + (LEN_OUI_SUITE * (u_cnt - 1));
+
+			if (len < offset)
+		{
+				DBGPRINT(RT_DEBUG_ERROR, ("%s : The expected lenght(%d) exceed the remaining length(%d) for WPA-RSN \n",
+											__FUNCTION__, offset, len));
+				goto out;
+		}
+			else
+			{
 		// Get the group cipher
 		if (type == GROUP_SUITE)
 		{
@@ -3475,117 +3909,164 @@ PUINT8	GetSuiteFromRSNIE(
 		else if (type == PAIRWISE_SUITE)
 		{			
 			DBGPRINT(RT_DEBUG_TRACE, ("%s : The count of pairwise cipher is %d\n",
-										__FUNCTION__, ucount));
-			*count = ucount;			
+												__FUNCTION__, u_cnt));
+						*count = u_cnt;			
 			return pRsnie->ucast[0].oui;
 		}
-		
-		offset = sizeof(RSNIE) + (4 * (ucount - 1));
-		
+			}			
+		}
 	}
 	else if (pEid->Eid == IE_RSN)
 	{
-		PRSNIE2	pRsnie = (PRSNIE2)pBuf;
-		UINT16 ucount;
-
-		isWPA2 = TRUE;
-		
 		if (len < sizeof(RSNIE2))
 		{
-			DBGPRINT_ERR(("%s : The length is too short for WPA2\n", __FUNCTION__));
-			return NULL;
+			DBGPRINT(RT_DEBUG_ERROR, ("%s : The length is too short for WPA2\n", __FUNCTION__));
+			goto out;
 		}
-
-		// Get the count of pairwise cipher
-		ucount = cpu2le16(pRsnie->ucount);
-		if (ucount > 2)
+		else
 		{
-			DBGPRINT_ERR(("%s : The count(%d) of pairwise cipher is invlaid\n",
-											__FUNCTION__, ucount));
-			return NULL;
-		}
+			PRSNIE2	pRsnie2;
+			UINT16 	u_cnt;
 
+			pRsnie2 = (PRSNIE2)pBuf;
+			u_cnt = cpu2le16(pRsnie2->ucount);
+			offset = sizeof(RSNIE2) + (LEN_OUI_SUITE * (u_cnt - 1));
+
+			if (len < offset)
+		{
+				DBGPRINT(RT_DEBUG_ERROR, ("%s : The expected lenght(%d) exceed the remaining length(%d) for WPA2-RSN \n",
+											__FUNCTION__, offset, len));
+				goto out;
+		}
+			else
+			{
 		// Get the group cipher
 		if (type == GROUP_SUITE)
 		{
 			*count = 1;
-			return pRsnie->mcast;
+					return pRsnie2->mcast;
 		}
 		// Get the pairwise cipher suite
 		else if (type == PAIRWISE_SUITE)
 		{			
 			DBGPRINT(RT_DEBUG_TRACE, ("%s : The count of pairwise cipher is %d\n",
-										__FUNCTION__, ucount));
-			*count = ucount;			
-			return pRsnie->ucast[0].oui;
+										__FUNCTION__, u_cnt));
+					*count = u_cnt;			
+					return pRsnie2->ucast[0].oui;
+				}
+			}
 		}
-		
-		offset = sizeof(RSNIE2) + (4 * (ucount - 1));
-		
 	}
 	else
 	{
-		DBGPRINT_ERR(("%s : Unknown IE (%d)\n", __FUNCTION__, pEid->Eid));
-		return NULL;
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : Unknown IE (%d)\n", __FUNCTION__, pEid->Eid));
+		goto out;
 	}
 
 	// skip group cipher and pairwise cipher suite	
 	pBuf += offset;
 	len -= offset;
 
+	/* Ready to extract the AKM information and its count */
 	if (len < sizeof(RSNIE_AUTH))
 	{
-		DBGPRINT_ERR(("%s : The length of RSNIE is too short\n", __FUNCTION__));
-		return NULL;
+		DBGPRINT_ERR(("%s : The length of AKM of RSN is too short\n", __FUNCTION__));
+		goto out;
 	}
-
-	// pointer to AKM count
-	pAkm = (PRSNIE_AUTH)pBuf;
-
-	// Get the count of pairwise cipher
-	acount = cpu2le16(pAkm->acount);
-	if (acount > 2)
+	else
 	{
-		DBGPRINT_ERR(("%s : The count(%d) of AKM is invlaid\n",
-										__FUNCTION__, acount));
-		return NULL;
-	}
+		PRSNIE_AUTH	pAkm;
+		UINT16 		a_cnt;
 
-	// Get the AKM suite
+		/* pointer to AKM count */
+	pAkm = (PRSNIE_AUTH)pBuf;
+		a_cnt = cpu2le16(pAkm->acount);
+		offset = sizeof(RSNIE_AUTH) + (LEN_OUI_SUITE * (a_cnt - 1));
+
+		if (len < offset)
+	{
+			DBGPRINT(RT_DEBUG_ERROR, ("%s : The expected lenght(%d) exceed the remaining length(%d) for AKM \n",
+										__FUNCTION__, offset, len));
+			goto out;
+	}
+		else
+		{
+			/* Get the AKM suite */
 	if (type == AKM_SUITE)
 	{			
 		DBGPRINT(RT_DEBUG_TRACE, ("%s : The count of AKM is %d\n",
-									__FUNCTION__, acount));
-		*count = acount;			
+											__FUNCTION__, a_cnt));
+				*count = a_cnt;			
 		return pAkm->auth[0].oui;
 	}
-	offset = sizeof(RSNIE_AUTH) + (4 * (acount - 1));
+		}
+	}
 
+	/* For WPA1, the remaining shall be ignored. */
+	if (pEid->Eid == IE_WPA)
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("%s : The remaining shall be ignored in WPA mode\n",
+									__FUNCTION__));
+		goto out;
+	}
+
+	/* skip the AKM capability */
 	pBuf += offset;
 	len -= offset;
 
-	// The remaining length must larger than (RSN-Capability(2) + PMKID-Count(2) + PMKID(16~))
-	if (len >= (sizeof(RSN_CAPABILITIES) + 2 + LEN_PMKID))
+	/* skip RSN capability (2-bytes) */
+	if (len >= sizeof(RSN_CAPABILITIES))
 	{
-		// Skip RSN capability and PMKID-Count
-		pBuf += (sizeof(RSN_CAPABILITIES) + 2);
-		len -= (sizeof(RSN_CAPABILITIES) + 2);
+		offset = sizeof(RSN_CAPABILITIES);
+	pBuf += offset;
+	len -= offset;
+	}
+	else
+	{
+		//DBGPRINT(RT_DEBUG_TRACE, ("%s : No enough space for RSN-Cap\n", __FUNCTION__));
+		goto out;
+	}
+
+	/* Ready to extract PMKIDList and its count */
+	if (len < sizeof(RSNIE_PMKID))
+	{
+		//DBGPRINT(RT_DEBUG_TRACE, ("%s : No enough space to extract PMKID-List\n", __FUNCTION__));
+		goto out;
+	}
+	else
+	{
+		UINT16			p_cnt;
+		PRSNIE_PMKID 	pRsnPmkid;
+
+		pRsnPmkid = (PRSNIE_PMKID)pBuf;
+		p_cnt = cpu2le16(pRsnPmkid->pcount);
+		offset = sizeof(RSNIE_PMKID) + (LEN_PMKID * (p_cnt - 1));
+
+		/* sanity check about the length of PMKID-List field */
+		if (len < offset)
+		{
+			DBGPRINT(RT_DEBUG_ERROR, ("%s : The expected lenght(%d) exceed the remaining length(%d) in PMKID-field \n",
+										__FUNCTION__, offset, len));
+			goto out;
+		}
 
 		// Get PMKID 
 		if (type == PMKID_LIST)
 		{
-			*count = 1;			
-			return pBuf;
-		}		
+			*count = p_cnt;			
+			return pRsnPmkid->pmkid[0].list;
+		}	
+		else
+		{
+			/* skip the PMKID field */
+			pBuf += offset;
+			len -= offset;
+		}
 	}
-	else
-	{
-		DBGPRINT_ERR(("%s : it can't get any more information beyond AKM \n", __FUNCTION__));
-		return NULL;
-	}	
 
+
+out:
 	*count = 0;	
-	//DBGPRINT_ERR(("%s : The type(%d) doesn't support \n", __FUNCTION__, type));
 	return NULL;
 	
 }	
@@ -3600,25 +4081,25 @@ VOID WpaShowAllsuite(
 	hex_dump("RSNIE", rsnie, rsnie_len);
 	
 	// group cipher
-	if ((pSuite = GetSuiteFromRSNIE(rsnie, rsnie_len, GROUP_SUITE, &count)) != NULL)
+	if ((pSuite = ExtractSuiteFromRSNIE(rsnie, rsnie_len, GROUP_SUITE, &count)) != NULL)
 	{			
 		hex_dump("group cipher", pSuite, 4*count);
 	}
 
 	// pairwise cipher
-	if ((pSuite = GetSuiteFromRSNIE(rsnie, rsnie_len, PAIRWISE_SUITE, &count)) != NULL)
+	if ((pSuite = ExtractSuiteFromRSNIE(rsnie, rsnie_len, PAIRWISE_SUITE, &count)) != NULL)
 	{			
 		hex_dump("pairwise cipher", pSuite, 4*count);
 	}
 
 	// AKM
-	if ((pSuite = GetSuiteFromRSNIE(rsnie, rsnie_len, AKM_SUITE, &count)) != NULL)
+	if ((pSuite = ExtractSuiteFromRSNIE(rsnie, rsnie_len, AKM_SUITE, &count)) != NULL)
 	{			
 		hex_dump("AKM suite", pSuite, 4*count);
 	}
 
 	// PMKID
-	if ((pSuite = GetSuiteFromRSNIE(rsnie, rsnie_len, PMKID_LIST, &count)) != NULL)
+	if ((pSuite = ExtractSuiteFromRSNIE(rsnie, rsnie_len, PMKID_LIST, &count)) != NULL)
 	{			
 		hex_dump("PMKID", pSuite, LEN_PMKID);
 	}
@@ -3653,7 +4134,7 @@ VOID RTMPInsertRSNIE(
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_WARN, ("%s : The length is PMKID-List is invalid (%d), so don't insert it.\n",
+		DBGPRINT(RT_DEBUG_TRACE, ("%s : The length is PMKID-List is invalid (%d), so don't insert it.\n",
 									__FUNCTION__, pmkid_len));
 	}
 
@@ -3697,4 +4178,193 @@ VOID RTMPInsertRSNIE(
 	return; 
 }
 
+
+VOID WPAInstallPairwiseKey(
+	PRTMP_ADAPTER		pAd,
+	UINT8				BssIdx,
+	PMAC_TABLE_ENTRY	pEntry,
+	BOOLEAN				bAE)
+{
+    NdisZeroMemory(&pEntry->PairwiseKey, sizeof(CIPHER_KEY));   
+
+	/* Assign the pairwise cipher algorithm	*/
+    if (pEntry->WepStatus == Ndis802_11Encryption2Enabled)
+        pEntry->PairwiseKey.CipherAlg = CIPHER_TKIP;
+    else if (pEntry->WepStatus == Ndis802_11Encryption3Enabled)
+        pEntry->PairwiseKey.CipherAlg = CIPHER_AES;
+	else
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : fails (wcid-%d)\n", 
+										__FUNCTION__, pEntry->Aid));	
+		return;
+	}	
+
+	/* Assign key material and its length */
+    pEntry->PairwiseKey.KeyLen = LEN_TK;
+    NdisMoveMemory(pEntry->PairwiseKey.Key, &pEntry->PTK[OFFSET_OF_PTK_TK], LEN_TK);
+	if (pEntry->PairwiseKey.CipherAlg == CIPHER_TKIP)
+	{
+		if (bAE)
+		{
+		    NdisMoveMemory(pEntry->PairwiseKey.TxMic, &pEntry->PTK[OFFSET_OF_AP_TKIP_TX_MIC], LEN_TKIP_MIC);
+		    NdisMoveMemory(pEntry->PairwiseKey.RxMic, &pEntry->PTK[OFFSET_OF_AP_TKIP_RX_MIC], LEN_TKIP_MIC);
+		}
+		else
+		{
+		    NdisMoveMemory(pEntry->PairwiseKey.TxMic, &pEntry->PTK[OFFSET_OF_STA_TKIP_TX_MIC], LEN_TKIP_MIC);
+		    NdisMoveMemory(pEntry->PairwiseKey.RxMic, &pEntry->PTK[OFFSET_OF_STA_TKIP_RX_MIC], LEN_TKIP_MIC);
+		}
+	}
+
+#ifdef SOFT_ENCRYPT
+	if (CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SOFTWARE_ENCRYPT))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("===> SW_ENC ON(wcid=%d) \n", pEntry->Aid));
+		NdisZeroMemory(pEntry->PairwiseKey.TxTsc, LEN_WPA_TSC);
+		NdisZeroMemory(pEntry->PairwiseKey.RxTsc, LEN_WPA_TSC);		
+	}	
+	else
+#endif // SOFT_ENCRYPT //		
+	{
+		/* Add Pair-wise key to Asic */
+	    AsicAddPairwiseKeyEntry(
+	        pAd, 
+	        (UCHAR)pEntry->Aid, 
+	        &pEntry->PairwiseKey);
+
+		RTMPSetWcidSecurityInfo(pAd, 
+								BssIdx, 
+								0, 
+								pEntry->PairwiseKey.CipherAlg,
+								(UCHAR)pEntry->Aid, 
+								PAIRWISEKEYTABLE);		
+	}
+	
+}
+
+VOID WPAInstallSharedKey(
+	PRTMP_ADAPTER		pAd,
+	UINT8				GroupCipher,
+	UINT8				BssIdx,
+	UINT8				KeyIdx,
+	UINT8				Wcid,
+	BOOLEAN				bAE,
+	PUINT8				pGtk)
+{
+	PCIPHER_KEY 	pSharedKey;
+	
+	if (BssIdx >= MAX_MBSSID_NUM)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : The BSS-index(%d) is out of range for MBSSID link. \n", 
+									__FUNCTION__, BssIdx));	
+		return;
+	}
+
+	pSharedKey = &pAd->SharedKey[BssIdx][KeyIdx];
+	NdisZeroMemory(pSharedKey, sizeof(CIPHER_KEY));
+	
+	if (GroupCipher == Ndis802_11Encryption2Enabled)
+		pSharedKey->CipherAlg = CIPHER_TKIP;
+	else if (GroupCipher == Ndis802_11Encryption3Enabled)
+		pSharedKey->CipherAlg = CIPHER_AES;
+	else
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : fails (IF/ra%d) \n", 
+										__FUNCTION__, BssIdx));	
+		return;
+	}
+			
+	pSharedKey->KeyLen = LEN_TK;
+	NdisMoveMemory(pSharedKey->Key, pGtk, LEN_TK);
+	if (pSharedKey->CipherAlg == CIPHER_TKIP)
+	{
+		if (bAE)
+		{
+			NdisMoveMemory(pSharedKey->TxMic, pGtk + 16, LEN_TKIP_MIC);
+			NdisMoveMemory(pSharedKey->RxMic, pGtk + 24, LEN_TKIP_MIC);            
+		}
+		else
+		{
+			NdisMoveMemory(pSharedKey->TxMic, pGtk + 24, LEN_TKIP_MIC);
+			NdisMoveMemory(pSharedKey->RxMic, pGtk + 16, LEN_TKIP_MIC);            
+		}
+	}
+    
+	/* Update group key table(0x6C00) and group key mode(0x7000) */
+    AsicAddSharedKeyEntry(
+				pAd, 
+				BssIdx, 
+				KeyIdx, 
+				pSharedKey);
+
+	/* When Wcid isn't zero, it means that this is a Authenticator Role. 
+	   Only Authenticator entity needs to set HW IE/EIV table (0x6000)
+	   and WCID attribute table (0x6800) for group key. */
+	if (Wcid != 0)
+	{	
+		RTMPSetWcidSecurityInfo(pAd, 
+								BssIdx, 
+								KeyIdx, 
+								pSharedKey->CipherAlg,
+								Wcid, 
+								SHAREDKEYTABLE);
+	}
+}
+
+VOID RTMPSetWcidSecurityInfo(
+	PRTMP_ADAPTER		pAd,
+	UINT8				BssIdx,
+	UINT8				KeyIdx,
+	UINT8				CipherAlg,
+	UINT8				Wcid,
+	UINT8				KeyTabFlag)
+{
+	UINT32			IV = 0;
+	UINT8			IV_KEYID = 0;
+	
+	/* Prepare initial IV value */
+	if (CipherAlg == CIPHER_WEP64 || CipherAlg == CIPHER_WEP128)
+	{
+		INT	i;	
+		UCHAR	TxTsc[LEN_WEP_TSC];
+
+		/* Generate 3-bytes IV randomly for encryption using */						
+		for(i = 0; i < LEN_WEP_TSC; i++)
+			TxTsc[i] = RandomByte(pAd);
+
+		/* Update HW IVEIV table */
+		IV_KEYID = (KeyIdx << 6);
+		IV = (IV_KEYID << 24) | 
+			 (TxTsc[2] << 16) |
+			 (TxTsc[1] << 8) |
+			 (TxTsc[0]);	
+	}
+	else if (CipherAlg == CIPHER_TKIP || CipherAlg == CIPHER_AES)
+	{
+		/* Set IVEIV as 1 in Asic -
+		In IEEE 802.11-2007 8.3.3.4.3 described :
+		The PN shall be implemented as a 48-bit monotonically incrementing
+		non-negative integer, initialized to 1 when the corresponding 
+		temporal key is initialized or refreshed. */	
+		IV_KEYID = (KeyIdx << 6) | 0x20;
+		IV = (IV_KEYID << 24) | 1;
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : Unsupport cipher Alg (%d) for Wcid-%d \n", 
+										__FUNCTION__, CipherAlg, Wcid));
+		return;
+	}
+	/* Update WCID IV/EIV table */
+	AsicUpdateWCIDIVEIV(pAd, Wcid, IV, 0);
+		
+	/* Update WCID attribute entry */
+	AsicUpdateWcidAttributeEntry(pAd, 
+							BssIdx, 
+							KeyIdx, 
+							CipherAlg,
+							Wcid,
+							KeyTabFlag);
+
+}
 

@@ -309,7 +309,7 @@ BOOLEAN PeerAssocReqCmmSanity(
                     break;                          
                 }
                 
-                if ((eid_ptr->Len <= MAX_LEN_OF_RSNIE) && (eid_ptr->Len > MIN_LEN_OF_RSNIE))
+                if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len > MIN_LEN_OF_RSNIE))
                 {
                     if (!pEntry)
                         return FALSE;
@@ -471,6 +471,7 @@ BOOLEAN APPeerAuthSanity(
         TRUE if all parameters are OK, FALSE otherwise
     ==========================================================================
  */
+/*
 BOOLEAN APPeerProbeReqSanity(
     IN PRTMP_ADAPTER pAd, 
     IN VOID *Msg, 
@@ -537,7 +538,7 @@ BOOLEAN APPeerProbeReqSanity(
     					WSC_IE_PROBREQ_DATA	*pprobreq = NULL;
 						WSC_IE				*pWscIE;
 						PUCHAR				pData = NULL;
-						UCHAR				Len = 0;
+						INT					Len = 0;
 						USHORT				DevicePasswordID;
 						PWSC_CTRL			pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
 
@@ -611,6 +612,7 @@ BOOLEAN APPeerProbeReqSanity(
 
     return TRUE;
 }
+*/
 
 
 /* 

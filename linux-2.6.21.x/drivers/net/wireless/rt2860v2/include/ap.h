@@ -46,6 +46,10 @@ BOOLEAN APBridgeToWirelessSta(
     IN  UINT            DataLen,
     IN  ULONG           fromwdsidx);
 
+VOID RTMP_BASetup(
+	IN PRTMP_ADAPTER pAd,
+	IN PMAC_TABLE_ENTRY pMacEntry,
+	IN UINT8 UserPriority);
 
 VOID	APSendPackets(
 	IN	NDIS_HANDLE		MiniportAdapterContext,
@@ -176,9 +180,12 @@ VOID APCls2errAction(
 
 // ap_connect.c
 
+#ifdef CONFIG_AP_SUPPORT
 BOOLEAN BeaconTransmitRequired(
 	IN PRTMP_ADAPTER	pAd,
-	IN INT				apidx);
+	IN INT				apidx,
+	IN MULTISSID_STRUCT *pMbss);
+#endif // CONFIG_AP_SUPPORT //
 
 VOID APMakeBssBeacon(
     IN  PRTMP_ADAPTER   pAd,
@@ -257,6 +264,11 @@ BOOLEAN ApScanRunning(
 #ifdef DOT11N_DRAFT3
 VOID APOverlappingBSSScan(
 	IN RTMP_ADAPTER *pAd);
+
+INT GetBssCoexEffectedChRange(
+		IN RTMP_ADAPTER *pAd,
+		IN BSS_COEX_CH_RANGE *pCoexChRange);
+
 #endif // DOT11N_DRAFT3 //
 
 // ap_wpa.c
@@ -269,6 +281,9 @@ VOID WpaStateMachineInit(
 VOID APMlmePeriodicExec(
     IN  PRTMP_ADAPTER   pAd);
 
+VOID APMlmeSelectRateSwitchTable11N3SReplacement(
+    IN PUCHAR               *ppTable);
+
 VOID APMlmeSelectTxRateTable(
 	IN PRTMP_ADAPTER		pAd,
 	IN PMAC_TABLE_ENTRY		pEntry,
@@ -280,6 +295,36 @@ VOID APMlmeSetTxRate(
 	IN PRTMP_ADAPTER		pAd,
 	IN PMAC_TABLE_ENTRY		pEntry,
 	IN PRTMP_TX_RATE_SWITCH	pTxRate);
+
+
+VOID txSndgSameMcs(
+	IN PRTMP_ADAPTER pAd, 
+	IN MAC_TABLE_ENTRY * pEntry, 
+//	IN RX_BLK * pRxBlk, 
+	IN UCHAR smoothMfb);
+
+VOID txSndgOtherGroup(	
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+
+VOID txMrqInvTxBF(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+
+VOID chooseBestMethod(	
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry,
+	IN	UCHAR			mfb);
+
+VOID rxBestSndg(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+
+
+//VOID Trigger_Sounding_Packet(
+//	IN PRTMP_ADAPTER pAd, 
+//	IN UCHAR SngType, 
+//	IN MAC_TABLE_ENTRY * pEntry);
 
 VOID APMlmeDynamicTxRateSwitching(
     IN PRTMP_ADAPTER pAd);
@@ -296,11 +341,13 @@ BOOLEAN APMsgTypeSubst(
     OUT INT *Machine, 
     OUT INT *MsgType);
 
-VOID APQuickResponeForRateUpExec(
-    IN PVOID SystemSpecific1, 
-    IN PVOID FunctionContext, 
-    IN PVOID SystemSpecific2, 
-    IN PVOID SystemSpecific3);
+VOID APMlmeDynamicTxRateSwitchingAdapt(
+    IN PRTMP_ADAPTER pAd,
+    IN ULONG idx);
+
+VOID APQuickResponeForRateUpExecAdapt(
+    IN PRTMP_ADAPTER pAd,
+    IN ULONG idx);
 
 
 VOID RTMPSetPiggyBack(
@@ -474,6 +521,7 @@ BOOLEAN APPeerAuthSanity(
     OUT CHAR *ChlgText
 	);
 
+/*
 BOOLEAN APPeerProbeReqSanity(
     IN PRTMP_ADAPTER pAd, 
     IN VOID *Msg, 
@@ -481,6 +529,7 @@ BOOLEAN APPeerProbeReqSanity(
     OUT PUCHAR pAddr2,
     OUT CHAR Ssid[], 
     OUT UCHAR *SsidLen);
+*/
 
 BOOLEAN APPeerBeaconAndProbeRspSanity(
     IN PRTMP_ADAPTER pAd, 
@@ -500,5 +549,26 @@ BOOLEAN APPeerBeaconAndProbeRspSanity(
     OUT BOOLEAN *ExtendedRateIeExist,
     OUT UCHAR *Erp);
 
+/* ap_cfg.h */
+INT	Set_OwnIPAddr_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_EAPIfName_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_PreAuthIfName_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+#ifdef DOT11_N_SUPPORT
+#ifdef GREENAP_SUPPORT
+VOID EnableAPMIMOPS(
+    IN PRTMP_ADAPTER pAd);
+
+VOID DisableAPMIMOPS(
+    IN PRTMP_ADAPTER pAd);
+#endif // GREENAP_SUPPORT //
+#endif // DOT11_N_SUPPORT //
 #endif  // __AP_H__
 

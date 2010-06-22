@@ -6,7 +6,11 @@
 #define ate_print printk
 #define ATEDBGPRINT DBGPRINT
 #ifdef RTMP_MAC_PCI
-#define EEPROM_SIZE								0x200
+#ifdef CONFIG_RALINK_RT3883
+#define EEPROM_SIZE						0x400
+#else
+#define EEPROM_SIZE						0x200
+#endif
 #ifdef CONFIG_AP_SUPPORT
 #define EEPROM_BIN_FILE_NAME  "/etc/Wireless/RT2860AP/e2p.bin"
 #endif // CONFIG_AP_SUPPORT //
@@ -20,7 +24,11 @@
 #define ATE_ON(_p)              (((_p)->ate.Mode) != ATE_STOP)
 
 #ifdef RTMP_MAC_PCI
-#define ATE_BBP_IO_READ8_BY_REG_ID(_A, _I, _pV)        \
+NTSTATUS	ATE_RT3562WriteBBPR66(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			Value);
+
+#define ATEPCIReadBBPRegister(_A, _I, _pV)        \
 {                                                       \
     BBP_CSR_CFG_STRUC  BbpCsr;                             \
     int             j, k;                               \
@@ -57,7 +65,7 @@
     }                                                   \
 }
 
-#define ATE_BBP_IO_WRITE8_BY_REG_ID(_A, _I, _V)        \
+#define ATEPCIWriteBBPRegister(_A, _I, _V)        \
 {                                                       \
     BBP_CSR_CFG_STRUC  BbpCsr;                             \
     int             BusyCnt;                            \
@@ -81,14 +89,18 @@
         ATEDBGPRINT(RT_DEBUG_ERROR, ("BBP write R%d fail\n", _I));     \
     }                                                   \
 }
+
+#define ATE_BBP_IO_READ8_BY_REG_ID(_A, _I, _pV)		ATEPCIReadBBPRegister(_A, _I, _pV)
+
+#define ATE_BBP_IO_WRITE8_BY_REG_ID(_A, _I, _V)		ATEPCIWriteBBPRegister(_A, _I, _V)
+
 #endif // RTMP_MAC_PCI //
 
-
-
-#ifdef RT305x
+#ifdef RTMP_RF_RW_SUPPORT
 #define ATE_RF_IO_READ8_BY_REG_ID(_A, _I, _pV)     RT30xxReadRFRegister(_A, _I, _pV)
-#define ATE_RF_IO_WRITE8_BY_REG_ID(_A, _I, _V)      RT30xxWriteRFRegister(_A, _I, _V)
-#endif // RT305x //
+#define ATE_RF_IO_WRITE8_BY_REG_ID(_A, _I, _V)     RT30xxWriteRFRegister(_A, _I, _V)
+#endif // RTMP_RF_RW_SUPPORT //
+
 
 VOID rt_ee_read_all(
 	IN  PRTMP_ADAPTER   pAd,
@@ -126,6 +138,12 @@ INT	Set_ATE_TX_POWER1_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
 
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+INT	Set_ATE_TX_POWER2_Proc(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	PSTRING			arg);
+#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+
 INT	Set_ATE_TX_Antenna_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
@@ -134,6 +152,11 @@ INT	Set_ATE_RX_Antenna_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
 	
+#ifdef CONFIG_RALINK_RT3350
+INT	Set_ATE_PA_Bias_Proc(//peter
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+#endif // CONFIG_RALINK_RT3350 //
 INT	Set_ATE_TX_FREQOFFSET_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
@@ -195,6 +218,13 @@ INT Set_ATE_Read_E2P_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
+INT	Set_ATE_IPG_Proc(//peter
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT Set_ATE_Payload_Proc(//peter
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING         arg);
 
 INT	Set_ATE_Show_Proc(
 	IN	PRTMP_ADAPTER	pAd, 

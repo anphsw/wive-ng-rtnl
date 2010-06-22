@@ -76,7 +76,8 @@
 //#define PACKED
 
 #define RALINK_2883_VERSION		((UINT32)0x28830300)
-#define RALINK_2880MP2_VERSION	((UINT32)0x28720200)
+#define RALINK_3883_VERSION		((UINT32)0x38830400)
+#define RALINK_2880MP2_VERSION		((UINT32)0x28720200)
 #define RALINK_3070_VERSION		((UINT32)0x30700200)
 
 #define MAX_RX_PKT_LEN	1520
@@ -86,14 +87,22 @@
 //
 
 #ifdef RTMP_MAC_PCI
+#ifdef MEMORY_OPTIMIZATION
+#define TX_RING_SIZE            64
+#define MGMT_RING_SIZE          32
+#define RX_RING_SIZE            64
+#else
 #define TX_RING_SIZE            64 //64
 #define MGMT_RING_SIZE          128
 #define RX_RING_SIZE            128 //64
+#endif
 #define MAX_TX_PROCESS          TX_RING_SIZE //8
 #define MAX_DMA_DONE_PROCESS    TX_RING_SIZE
 #define MAX_TX_DONE_PROCESS     TX_RING_SIZE //8
 #define LOCAL_TXBUF_SIZE        2
 #endif // RTMP_MAC_PCI //
+
+#define PCI_VIRT_TO_PHYS(__Addr)	(((UINT32)(__Addr)) & 0x0FFFFFFF)
 
 
 #ifdef MULTIPLE_CARD_SUPPORT
@@ -101,20 +110,38 @@
 #define MAX_NUM_OF_MULTIPLE_CARD		32
 #endif // MULTIPLE_CARD_SUPPORT //
 
+#ifdef MEMORY_OPTIMIZATION
+#define MAX_RX_PROCESS          32
+#else
 #define MAX_RX_PROCESS          128 //64 //32
+#endif
 #define NUM_OF_LOCAL_TXBUF      2
 #define TXD_SIZE                16
 #define TXWI_SIZE               16
 #define RXD_SIZE               	16
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+#define RXWI_SIZE             	20
+#else
 #define RXWI_SIZE             	16
+#endif
+
 // TXINFO_SIZE + TXWI_SIZE + 802.11 Header Size + AMSDU sub frame header
 #define TX_DMA_1ST_BUFFER_SIZE  96    // only the 1st physical buffer is pre-allocated
 #define MGMT_DMA_BUFFER_SIZE    1536 //2048
+#ifdef MEMORY_OPTIMIZATION
+#define RX_BUFFER_AGGRESIZE     3840 //2048 //2400 //3904 //3968 //4096 //2048 //4096
+#define RX_BUFFER_NORMSIZE      3840 //2048 //2400 //3904 //3968 //4096 //2048 //4096
+#else
 #define RX_BUFFER_AGGRESIZE     3840 //3904 //3968 //4096 //2048 //4096
 #define RX_BUFFER_NORMSIZE      3840 //3904 //3968 //4096 //2048 //4096
+#endif
 #define TX_BUFFER_NORMSIZE		RX_BUFFER_NORMSIZE
 #define MAX_FRAME_SIZE          2346                    // Maximum 802.11 frame size
+#ifdef MEMORY_OPTIMIZATION
+#define MAX_AGGREGATION_SIZE    3840 //2048 //3904 //3968 //4096
+#else
 #define MAX_AGGREGATION_SIZE    3840 //3904 //3968 //4096
+#endif
 #define MAX_NUM_OF_TUPLE_CACHE  2
 #define MAX_MCAST_LIST_SIZE     32
 #define MAX_LEN_OF_VENDOR_DESC  64
@@ -151,7 +178,11 @@
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef IGMP_SNOOP_SUPPORT
+#ifdef MEMORY_OPTIMIZATION
+#define MAX_LEN_OF_MULTICAST_FILTER_TABLE 16
+#else
 #define MAX_LEN_OF_MULTICAST_FILTER_TABLE 64
+#endif
 #define MAX_LEN_OF_MULTICAST_FILTER_HASH_TABLE ((MAX_LEN_OF_MULTICAST_FILTER_TABLE) * 2)
 #define FREE_MEMBER_POOL_SIZE 64
 #endif // IGMP_SNOOP_SUPPORT //
@@ -231,6 +262,24 @@
 #define fOP_STATUS_WAKEUP_NOW               0x00008000
 #define fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE       0x00020000
 
+//
+//  RTMP_ADAPTER PSFlags : related to advanced power save.
+//
+// Indicate whether driver can go to sleep mode from now. This flag is useful AFTER link up
+#define fRTMP_PS_CAN_GO_SLEEP          0x00000001
+// Indicate whether driver has issue a LinkControl command to PCIe L1
+#define fRTMP_PS_SET_PCI_CLK_OFF_COMMAND          0x00000002
+// Indicate driver should disable kick off hardware to send packets from now.
+#define fRTMP_PS_DISABLE_TX         0x00000004
+// Indicate driver should IMMEDIATELY fo to sleep after receiving AP's beacon in which  doesn't indicate unicate nor multicast packets for me
+//. This flag is used ONLY in RTMPHandleRxDoneInterrupt routine.
+#define fRTMP_PS_GO_TO_SLEEP_NOW         0x00000008
+#define fRTMP_PS_TOGGLE_L1		0x00000010	// Use Toggle L1 mechanism for rt28xx PCIe
+#if defined(RT3090) || defined(RT3592) || defined(RT3390)
+#define WAKE_MCU_CMD				0x31
+#define SLEEP_MCU_CMD					0x30
+#define RFOFF_MCU_CMD				0x35
+#endif // defined(RT3090) || defined(RT3592) || defined(RT3390) //
 #ifdef DOT11N_DRAFT3
 #define fOP_STATUS_SCAN_2040               	    0x00040000
 #endif // DOT11N_DRAFT3 //
@@ -262,7 +311,7 @@
 #ifdef DOT11N_DRAFT3
 #define fCLIENT_STATUS_BSSCOEXIST_CAPABLE	0x00001000
 #endif // DOT11N_DRAFT3 //
-
+#define fCLIENT_STATUS_SOFTWARE_ENCRYPT		0x00002000	/* Indicate the client encrypt/decrypt by software */
 #define fCLIENT_STATUS_RALINK_CHIPSET		0x00100000
 //
 //  STA configuration flags
@@ -348,7 +397,12 @@
 #define MAX_MBSSID_NUM				1
 #ifdef MBSS_SUPPORT
 #undef	MAX_MBSSID_NUM
-#define MAX_MBSSID_NUM				(8 - MAX_MESH_NUM - MAX_APCLI_NUM)
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+#define HW_BEACON_MAX_COUNT			16
+#else
+#define HW_BEACON_MAX_COUNT			8
+#endif
+#define MAX_MBSSID_NUM				(HW_BEACON_MAX_COUNT - MAX_MESH_NUM - MAX_APCLI_NUM)
 #endif // MBSS_SUPPORT //
 
 /* sanity check for apidx */
@@ -418,10 +472,11 @@
 #define MAX_NUM_OF_11JCHANNELS             20      // 14 channels @2.4G +  12@UNII + 4 @MMAC + 11 @HiperLAN2 + 7 @Japan + 1 as NULL termination
 #define MAX_LEN_OF_SSID                 32
 #define CIPHER_TEXT_LEN                 128
-#define HASH_TABLE_SIZE                 256
+#define HASH_TABLE_SIZE                 256  /* Size of hash tab must be power of 2. */
 #define MAX_VIE_LEN                     1024   // New for WPA cipher suite variable IE sizes.
 #define MAX_SUPPORT_MCS             32    
-
+#define MAX_NUM_OF_BBP_LATCH             140
+#define MAX_NUM_OF_RADAR_CHANNELS        15
 //============================================================
 // ASIC WCID Table definition.
 //============================================================
@@ -454,8 +509,13 @@
 #define MAX_AID_BA                    4
 #define MAX_LEN_OF_BA_REC_TABLE          ((NUM_OF_TID * MAX_LEN_OF_MAC_TABLE)/2)//   (NUM_OF_TID*MAX_AID_BA + 32)	 //Block ACK recipient 
 #define MAX_LEN_OF_BA_ORI_TABLE          ((NUM_OF_TID * MAX_LEN_OF_MAC_TABLE)/2)//   (NUM_OF_TID*MAX_AID_BA + 32)   // Block ACK originator
+#ifdef MEMORY_OPTIMIZATION
+#define MAX_LEN_OF_BSS_TABLE             1
+#define MAX_REORDERING_MPDU_NUM			 256
+#else
 #define MAX_LEN_OF_BSS_TABLE             64
 #define MAX_REORDERING_MPDU_NUM			 512
+#endif
 
 // key related definitions
 #define SHARE_KEY_NUM                   4
@@ -523,6 +583,8 @@
 #define REASON_QOS_REQUEST_TIMEOUT        39
 #define REASON_QOS_CIPHER_NOT_SUPPORT     45
 
+#define REASON_FT_INVALID_FTIE				55
+
 // Status code definitions
 #define MLME_SUCCESS                    0
 #define MLME_UNSPECIFY_FAIL             1
@@ -543,9 +605,12 @@
 #define MLME_QOS_UNSPECIFY                32
 #define MLME_REQUEST_DECLINED             37
 #define MLME_REQUEST_WITH_INVALID_PARAM   38
+#define MLME_INVALID_INFORMATION_ELEMENT  40
 #define MLME_INVALID_GROUP_CIPHER   	  41
 #define MLME_INVALID_PAIRWISE_CIPHER   	  42
 #define MLME_INVALID_AKMP   			  43
+#define MLME_NOT_SUPPORT_RSN_VERSION	  44
+#define	MLME_INVALID_RSN_CAPABILITIES	  45
 #define MLME_DLS_NOT_ALLOW_IN_QBSS        48
 #define MLME_DEST_STA_NOT_IN_QBSS         49
 #define MLME_DEST_STA_IS_NOT_A_QSTA       50
@@ -600,7 +665,7 @@
 // For 802.11n D3.03
 //#define IE_NEW_EXT_CHA_OFFSET             62    // 802.11n d1. New extension channel offset elemet
 #define IE_SECONDARY_CH_OFFSET		62	// 802.11n D3.03	Secondary Channel Offset element
-#define IE_WAPI							68		// WAPI information element
+#define IE_WAPI							68		// WAPI information element. Same as Bss Ac Access Dealy Element.
 #define IE_2040_BSS_COEXIST               72    // 802.11n D3.0.3
 #define IE_2040_BSS_INTOLERANT_REPORT     73    // 802.11n D3.03
 #define IE_OVERLAPBSS_SCAN_PARM           74    // 802.11n D3.03
@@ -732,7 +797,8 @@
 
 #define ACT_MACHINE_BASE              0
 
-//Those PEER_xx_CATE number is based on real Categary value in IEEE spec. Please don'es modify it by your self.
+/* Those PEER_xx_CATE number is based on real Categary value in IEEE spec. 
+   Please doesn't modify it by yourself. */
 //Category 
 #define MT2_PEER_SPECTRUM_CATE              0
 #define MT2_PEER_QOS_CATE              1
@@ -742,17 +808,32 @@
 #define MT2_PEER_RM_CATE             5
 /* "FT_CATEGORY_BSS_TRANSITION equal to 6" is defined file of "dot11r_ft.h" */
 #define MT2_PEER_HT_CATE             7	//	7.4.7
-#define MAX_PEER_CATE_MSG                   7
+#define MT2_PEER_PMF_CATE				8	/* defined in IEEE 802.11w-D8.0 7.3.1.11*/
+#define MT2_PEER_RESV_9					9
+#define MT2_PEER_RESV_10				10
+#define MT2_PEER_RESV_11				11
+#define MT2_PEER_RESV_12				12
+#define MT2_PEER_RESV_13				13
+#define MT2_PEER_RESV_14				14
+#define MT2_PEER_RESV_15				15
+#define MT2_PEER_RESV_16				16
+/*
+	In WMM spec v1.1. the category must be 17
+	(see Table 7 Management Action Frame Fields)
+*/
+#define MT2_PEER_WMM					17
+#define MAX_IEEE_STD_CATE				17	/* Indicate the maximum category code defined in IEEE-802.11-Std */
+#define MAX_PEER_CATE_MSG				MAX_IEEE_STD_CATE
 
+#define MT2_MLME_ADD_BA_CATE            (MAX_IEEE_STD_CATE + 1)
+#define MT2_MLME_ORI_DELBA_CATE         (MAX_IEEE_STD_CATE + 2)
+#define MT2_MLME_REC_DELBA_CATE         (MAX_IEEE_STD_CATE + 3)
+#define MT2_MLME_QOS_CATE              	(MAX_IEEE_STD_CATE + 4)
+#define MT2_MLME_DLS_CATE             	(MAX_IEEE_STD_CATE + 5)
+#define MT2_ACT_INVALID             	(MAX_IEEE_STD_CATE + 6)
 
-#define MT2_MLME_ADD_BA_CATE             8
-#define MT2_MLME_ORI_DELBA_CATE             9
-#define MT2_MLME_REC_DELBA_CATE             10
-#define MT2_MLME_QOS_CATE              11
-#define MT2_MLME_DLS_CATE             12
-#define MT2_ACT_INVALID             13
+#define MAX_ACT_MSG                   	(MAX_IEEE_STD_CATE + 7)
 
-#define MAX_ACT_MSG                   14
 
 
 //Category field
@@ -763,7 +844,7 @@
 #define CATEGORY_PUBLIC		4
 #define CATEGORY_RM			5
 #define CATEGORY_HT			7
-
+#define CATEGORY_PMF			8	/* defined in IEEE 802.11w-D8.0 7.3.1.11*/
 
 // DLS Action frame definition
 #define ACTION_DLS_REQUEST			0
@@ -939,22 +1020,6 @@
 #define AP_MAX_SYNC_MSG                 6
 
 #define AP_SYNC_FUNC_SIZE               (AP_MAX_SYNC_STATE * AP_MAX_SYNC_MSG)
-
-//
-// Common WPA state machine: states, events, total function #
-//
-#define WPA_PTK                      0
-#define MAX_WPA_PTK_STATE            1
-
-#define WPA_MACHINE_BASE             0
-#define MT2_EAPPacket                0
-#define MT2_EAPOLStart               1
-#define MT2_EAPOLLogoff              2
-#define MT2_EAPOLKey                 3
-#define MT2_EAPOLASFAlert            4
-#define MAX_WPA_MSG                  5
-
-#define WPA_FUNC_SIZE                (MAX_WPA_PTK_STATE * MAX_WPA_MSG)
 
 #ifdef APCLI_SUPPORT
 //ApCli authentication state machine
@@ -1293,7 +1358,7 @@
 #define REGION_15_A_BAND                  15       // 149, 153, 157, 161, 165, 169, 173
 #define REGION_MAXIMUM_A_BAND             15
 
-// pTxD->CipherAlg
+/* The security mode definition in MAC register */
 #define CIPHER_NONE                 0
 #define CIPHER_WEP64                1
 #define CIPHER_WEP128               2
@@ -1301,7 +1366,7 @@
 #define CIPHER_AES                  4
 #define CIPHER_CKIP64               5
 #define CIPHER_CKIP128              6
-#define CIPHER_TKIP_NO_MIC          7       // MIC appended by driver: not a valid value in hardware key table
+#define CIPHER_CKIP152          	7
 #define CIPHER_SMS4					8
 
 
@@ -1314,10 +1379,73 @@
 #define LED_WPS                     5
 #define LED_ON_SITE_SURVEY          6
 #define LED_POWER_UP                7
+
+#ifdef WSC_INCLUDED
+#ifdef WSC_LED_SUPPORT
+//  MCU command.
+#define MCU_SET_WPS_LED_MODE				0x55 // Set WPS LED mode (based on WPS specification V1.0).
+#define MCU_SET_ANT_DIVERSITY				0x73
+
+// WPS LED status (for LED mode = 7 only)
+#define LED_WPS_IN_PROCESS				8  // The protocol is searching for a partner, connecting, or exchanging network parameters.
+#define LED_WPS_ERROR					9  // Some error occurred which was not related to security, such as failed to find any partner or protocol prematurely aborted.
+#define LED_WPS_SESSION_OVERLAP_DETECTED		10 // The Protocol detected overlapping operation (more than one Registrar in PBC mode): could be a security risk.
+#define LED_WPS_SUCCESS					11 // The protocol is finished: no uncorrectable errors occured. Normally after guard time period.
+#define LED_WPS_TURN_LED_OFF				12 // Turn the WPS LEDs off.
+#define LED_WPS_TURN_ON_BLUE_LED					13 // Turn on the WPS blue LED.
+#define LED_NORMAL_CONNECTION_WITHOUT_SECURITY	14 // Successful connection with an AP using OPEN-NONE.
+#define LED_NORMAL_CONNECTION_WITH_SECURITY		15 // Successful connection with an AP using an encryption algorithm.
+
+// WPS LED mode (for LED mode = 7 and 8 only)
+#define LINK_STATUS_WPS_IN_PROCESS			0x00 // The protocol is searching for a partner, connecting, or exchanging network parameters.
+#define LINK_STATUS_WPS_SUCCESS_WITH_SECURITY		0x01 // The protocol is finished (with security): no uncorrectable errors occured. Normally after guard time period.
+#define LINK_STATUS_WPS_ERROR				0x02 // Some error occurred which was not related to security, such as failed to find any partner or protocol prematurely aborted.
+#define LINK_STATUS_WPS_SESSION_OVERLAP_DETECTED	0x03 // The Protocol detected overlapping operation (more than one Registrar in PBC mode): could be a security risk.
+#define LINK_STATUS_WPS_TURN_LED_OFF			0x04 // Turn the WPS LEDs off.
+#define LINK_STATUS_WPS_SUCCESS_WITHOUT_SECURITY	0X05 // The protocol is finished (without security): no uncorrectable errors occured. Normally after guard time period.
+#define LINK_STATUS_NORMAL_CONNECTION_WITHOUT_SECURITY	0x06 // Successful connection with an AP using OPEN-NONE.
+#define LINK_STATUS_NORMAL_CONNECTION_WITH_SECURITY		0x0E // Successful connection with an AP using an encryption algorithm.
+#define LINK_STATUS_WPS_BLUE_LED							0x01 // WPS blue LED.
+
+//WPS LED mode (for LED mode = 10 only)
+#define LED_WPS_MODE10_TURN_ON			16 	// For Dlink WPS LED, turn the WPS LED on
+#define LED_WPS_MODE10_FLASH				17	// For Dlink WPS LED, let the WPS LED flash
+#define LED_WPS_MODE10_TURN_OFF			18	// For Dlink WPS LED, turn the WPS LED off
+
+#define LINK_STATUS_WPS_MODE10_TURN_ON		0x00	//Use only on Dlink WPS LED (mode 10), turn the WPS LED on.
+#define LINK_STATUS_WPS_MODE10_FLASH			0x01	//Use only on Dlink WPS LED (mode 10), let the WPS LED flash, three times persecond.
+#define LINK_STATUS_WPS_MODE10_TURN_OFF		0x02	//Use only on Dlink WPS LED (mode 10), turn the WPS LED off.
+
+//
+// LED mode
+// EEPROM location: 0x3Bh
+//
+#define LED_MODE 0x7F
+
+//
+// WPS LED mode.
+//
+#define WPS_LED_MODE_7 0x07
+#define WPS_LED_MODE_8 0x08
+#define WPS_LED_MODE_9 0x09
+#define WPS_LED_MODE_10	0x0a
+#define WPS_LED_MODE_12	0x0c
+//
+// Chungwa Telecom (WPS LED and SD/HD LEDs) use WPS LED mode #11 and it is based on mode #7
+//
+// GPIO #1: WPS LED
+// GPIO #2: SD (Standard Definition) LED
+// GPIO #4: HD (High Definition) LED
+//
+#define WPS_LED_MODE_11	0x0b
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_INCLUDED //
+
 // value domain of pAd->LedCntl.LedMode and E2PROM
 #define LED_MODE_DEFAULT            0
 #define LED_MODE_TWO_LED			1
-#define LED_MODE_SIGNAL_STREGTH		8  // EEPROM define =8
+//#define LED_MODE_SIGNAL_STREGTH		8  // EEPROM define =8
+#define LED_MODE_SIGNAL_STREGTH		0x40 // EEPROM define = 64
 
 // RC4 init value, used fro WEP & TKIP
 #define PPPINITFCS32                0xffffffff   /* Initial FCS value */
@@ -1345,6 +1473,8 @@
 #define MAX_BARECI_SESSION   16
 #endif // CONFIG_AP_SUPPORT //
 
+#define DEFAULT_VCO_RECALIBRATION_THRESHOLD	1
+
 // definition of Recipient or Originator
 #define I_RECIPIENT                  TRUE
 #define I_ORIGINATOR                   FALSE
@@ -1352,7 +1482,7 @@
 #define DEFAULT_BBP_TX_POWER        0
 #define DEFAULT_RF_TX_POWER         5
 
-#define MAX_INI_BUFFER_SIZE		4096
+#define MAX_INI_BUFFER_SIZE		8192
 #define MAX_PARAM_BUFFER_SIZE		(2048) // enough for ACL (18*64)
 											//18 : the length of Mac address acceptable format "01:02:03:04:05:06;")
 											//64 : MAX_NUM_OF_ACL_LIST
@@ -1417,6 +1547,34 @@
 #define INT_APCLI			0x0400
 #define INT_MESH			0x0500
 
+#define ENTRY_NONE			0
+#define ENTRY_CLIENT		(0x1)
+#define ENTRY_WDS			(0x1 << 1)
+#define ENTRY_APCLI			(0x1 << 2)
+#define ENTRY_MESH			(0x1 << 3)
+#define ENTRY_DLS			(0x1 << 4)
+#define ENTRY_TDLS			(0x1 << 5)
+/* Used to indicate that the Client support WDS function. */
+#define ENTRY_CLI_WDS		(0x1 << 6)
+
+#define IS_ENTRY_NONE(_x)		((_x)->EntryType == ENTRY_NONE)
+#define IS_ENTRY_CLIENT(_x)		((_x)->EntryType & ENTRY_CLIENT)
+#define IS_ENTRY_WDS(_x)		((_x)->EntryType & ENTRY_WDS)
+#define IS_ENTRY_APCLI(_x)		((_x)->EntryType & ENTRY_APCLI)
+#define IS_ENTRY_MESH(_x)		((_x)->EntryType & ENTRY_MESH)
+#define IS_ENTRY_DLS(_x)		((_x)->EntryType & ENTRY_DLS)
+#define IS_ENTRY_TDLS(_x)		((_x)->EntryType & ENTRY_TDLS)
+#define IS_ENTRY_CLIWDS(_x)		((_x)->EntryType & ENTRY_CLI_WDS)
+
+#define SET_ENTRY_NONE(_x)		((_x)->EntryType = ENTRY_NONE)
+#define SET_ENTRY_CLIENT(_x)	((_x)->EntryType |= ENTRY_CLIENT)
+#define SET_ENTRY_WDS(_x)		((_x)->EntryType |= ENTRY_WDS)
+#define SET_ENTRY_APCLI(_x)		((_x)->EntryType |= ENTRY_APCLI)
+#define SET_ENTRY_MESH(_x)		((_x)->EntryType |= ENTRY_MESH)
+#define SET_ENTRY_DLS(_x)		((_x)->EntryType |= ENTRY_DLS)
+#define SET_ENTRY_TDLS(_x)		((_x)->EntryType |= ENTRY_TDLS)
+#define SET_ENTRY_CLIWDS(_x)	((_x)->EntryType |= ENTRY_CLI_WDS)
+
 #define INF_MAIN_DEV_NAME		"ra"
 #define INF_MBSSID_DEV_NAME		"ra"
 #define INF_WDS_DEV_NAME		"wds"
@@ -1474,8 +1632,12 @@
 #define IW_STA_LINKDOWN_EVENT_FLAG					0x0210
 #define IW_SCAN_COMPLETED_EVENT_FLAG				0x0211
 #define IW_SCAN_ENQUEUE_FAIL_EVENT_FLAG				0x0212
+#define IW_CHANNEL_CHANGE_EVENT_FLAG				0x0213
+#define IW_STA_MODE_EVENT_FLAG						0x0214
+#define IW_MAC_FILTER_LIST_EVENT_FLAG				0x0215
+#define IW_AUTH_REJECT_CHALLENGE_FAILURE			0x0216
 // if add new system event flag, please upadte the IW_SYS_EVENT_FLAG_END
-#define	IW_SYS_EVENT_FLAG_END                       0x0212
+#define	IW_SYS_EVENT_FLAG_END                       0x0216
 #define	IW_SYS_EVENT_TYPE_NUM						(IW_SYS_EVENT_FLAG_END - IW_SYS_EVENT_FLAG_START + 1)
 // For system event - end 
 
@@ -1564,6 +1726,22 @@
 #define WPA_SUPPLICANT_DISABLE				0
 #define WPA_SUPPLICANT_ENABLE				1
 #define	WPA_SUPPLICANT_ENABLE_WITH_WEB_UI	2
+
+// definition for Antenna Diversity flag
+#ifdef ANT_DIVERSITY_SUPPORT
+enum ANT_DIVERSITY_TYPE {
+    ANT_DIVERSITY_DISABLE = 0,
+    ANT_DIVERSITY_ENABLE = 1,
+    ANT_FIX_ANT1 = 2,
+    ANT_FIX_ANT2 = 3
+};
+#endif // ANT_DIVERSITY_SUPPORT //
+
+#ifdef TXBF_SUPPORT
+#define SNDG_TYPE_DISABLE	0
+#define SNDG_TYPE_SOUNGING	1
+#define SNDG_TYPE_NDP		2
+#endif // TXBF_SUPPORT //
 
 // Endian byte swapping codes
 #define SWAP16(x) \

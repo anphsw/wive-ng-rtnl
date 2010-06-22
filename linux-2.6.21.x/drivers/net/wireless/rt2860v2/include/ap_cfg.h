@@ -12,6 +12,10 @@ INT RTMPAPPrivIoctlShow(
 	IN RTMP_ADAPTER *pAd, 
 	IN struct iwreq *pIoctlCmdStr);
 
+INT RTMPAPPrivIoctlAR9Show(
+	IN RTMP_ADAPTER *pAd, 
+	IN struct iwreq *pIoctlCmdStr);
+
 INT RTMPAPSetInformation(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	OUT	struct iwreq	*rq,
@@ -26,20 +30,35 @@ VOID RTMPIoctlStatistics(
 	IN PRTMP_ADAPTER pAd, 
 	IN struct iwreq *wrq);
 
+/* +++ added by Red@Ralink, 2009/09/30 */
+VOID RTMPIoctlGetMacTableStaInfo(
+	IN PRTMP_ADAPTER pAd, 
+	IN struct iwreq *wrq);
+/* ++ end of addition */
+
 VOID RTMPIoctlGetMacTable(
 	IN PRTMP_ADAPTER pAd, 
 	IN struct iwreq *wrq);
 
-#if defined(CONFIG_ASUS_EXT) || defined(DBG)
+VOID RTMPIoctlGetSTAT2(
+	IN PRTMP_ADAPTER pAd, 
+	IN struct iwreq *wrq);
+
+VOID RTMPIoctlGetRadioDynInfo(
+	IN PRTMP_ADAPTER pAd, 
+	IN struct iwreq *wrq);
+
+VOID RTMPAPIoctlE2PROM(
+    IN  PRTMP_ADAPTER   pAdapter,
+    IN  struct iwreq    *wrq);
+
+//#ifdef DBG
+#if 1		// by Jiahao for ASUS ATE
 VOID RTMPAPIoctlBBP(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
 
 VOID RTMPAPIoctlMAC(
-    IN  PRTMP_ADAPTER   pAdapter,
-    IN  struct iwreq    *wrq);
-
-VOID RTMPAPIoctlE2PROM(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
 
@@ -49,7 +68,8 @@ VOID RTMPAPIoctlRF(
 	IN	struct iwreq	*wrq);
 #endif // RTMP_RF_RW_SUPPORT //
 
-#endif // DBG //	// by Jiahao for ASUS ATE
+//#endif // DBG //
+#endif		// by Jiahao for ASUS ATE
 
 VOID RT28XX_IOCTL_MaxRateGet(
 	IN	RTMP_ADAPTER			*pAd,
@@ -58,6 +78,26 @@ VOID RT28XX_IOCTL_MaxRateGet(
 
 #ifdef WSC_AP_SUPPORT
 VOID RTMPIoctlWscProfile(
+	IN PRTMP_ADAPTER pAdapter, 
+	IN struct iwreq *wrq);
+
+VOID RTMPIoctlWscProfile(
+	IN PRTMP_ADAPTER pAdapter, 
+	IN struct iwreq *wrq);
+//add by woody
+VOID RTMPIoctlWscPINCode(
+	IN PRTMP_ADAPTER pAdapter, 
+	IN struct iwreq *wrq);
+
+VOID RTMPIoctlWscStatus(
+	IN PRTMP_ADAPTER pAdapter, 
+	IN struct iwreq *wrq);
+
+VOID RTMPIoctlGetWscDynInfo(
+	IN PRTMP_ADAPTER pAdapter, 
+	IN struct iwreq *wrq);
+
+VOID RTMPIoctlGetWscRegsDynInfo(
 	IN PRTMP_ADAPTER pAdapter, 
 	IN struct iwreq *wrq);
 #endif // WSC_AP_SUPPORT //
@@ -83,6 +123,19 @@ VOID RTMPIoctlAddWPAKey(
 VOID RTMPIoctlAddPMKIDCache(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	struct iwreq	*wrq);
+
+VOID RTMPIoctlSetIdleTimeout(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	struct iwreq	*wrq);
+
+INT	ApCfg_Set_MaxStaNum_Proc(
+	IN PRTMP_ADAPTER 	pAd,
+	IN INT				apidx,
+	IN PSTRING 			arg);
+
+INT	ApCfg_Set_IdleTimeout_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
 
 #endif // __AP_CFG_H__ //
 

@@ -50,7 +50,7 @@ typedef struct _SHA1_CTX_STRUC {
     UINT   BlockLen;
 } SHA1_CTX_STRUC, *PSHA1_CTX_STRUC;
 
-VOID _SHA1_Init (
+VOID RT_SHA1_Init (
     IN  SHA1_CTX_STRUC *pSHA_CTX);
 VOID SHA1_Hash (
     IN  SHA1_CTX_STRUC *pSHA_CTX);

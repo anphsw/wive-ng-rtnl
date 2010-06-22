@@ -63,9 +63,9 @@ typedef struct  _RALINK_TIMER_STRUCT    {
 	BOOLEAN				Repeat;         // True if periodic timer
 	ULONG				TimerValue;     // Timer value in milliseconds
 	ULONG				cookie;			// os specific object
+	void					*pAd;
 #ifdef RTMP_TIMER_TASK_SUPPORT
 	RTMP_TIMER_TASK_HANDLE	handle;
-	void					*pAd;
 #endif // RTMP_TIMER_TASK_SUPPORT //
 }RALINK_TIMER_STRUCT, *PRALINK_TIMER_STRUCT;
 
@@ -133,6 +133,14 @@ DECLARE_TIMER_FUNCTION(WPARetryExec);
 DECLARE_TIMER_FUNCTION(EnqueueStartForPSKExec);
 DECLARE_TIMER_FUNCTION(APScanTimeout);
 DECLARE_TIMER_FUNCTION(APQuickResponeForRateUpExec);
+DECLARE_TIMER_FUNCTION(APQuickResponeForRateUpExecAdapt);
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef TXBF_SUPPORT
+DECLARE_TIMER_FUNCTION(eTxBfProbeTimerExec);
+#endif // TXBF_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
+
 #ifdef IDS_SUPPORT
 DECLARE_TIMER_FUNCTION(RTMPIdsPeriodicExec);
 #endif // IDS_SUPPORT //
@@ -157,9 +165,10 @@ DECLARE_TIMER_FUNCTION(WscPBCTimeOutAction);
 DECLARE_TIMER_FUNCTION(WscScanTimeOutAction);
 DECLARE_TIMER_FUNCTION(WscProfileRetryTimeout);
 #endif // WSC_STA_SUPPORT //
+#ifdef RTMP_PCI_SUPPORT
 DECLARE_TIMER_FUNCTION(PsPollWakeExec);
 DECLARE_TIMER_FUNCTION(RadioOnExec);
-
+#endif // RTMP_PCI_SUPPORT //
 #ifdef QOS_DLS_SUPPORT
 DECLARE_TIMER_FUNCTION(DlsTimeoutAction);
 #endif // QOS_DLS_SUPPORT //
@@ -173,14 +182,23 @@ DECLARE_TIMER_FUNCTION(WscEAPOLTimeOutAction);
 DECLARE_TIMER_FUNCTION(Wsc2MinsTimeOutAction);
 DECLARE_TIMER_FUNCTION(WscUPnPMsgTimeOutAction);
 DECLARE_TIMER_FUNCTION(WscUPnPM2DTimeOutAction);
-#endif
+#ifdef WSC_LED_SUPPORT
+DECLARE_TIMER_FUNCTION(WscLEDTimer);
+DECLARE_TIMER_FUNCTION(WscSkipTurnOffLEDTimer);
+#endif // WSC_LED_SUPPORT //
+#endif // WSC_INCLUDED //
 
 
-#if defined(WLAN_LED)
+#if defined (WLAN_LED)
 DECLARE_TIMER_FUNCTION(LedCtrlMain);
-#endif
+#endif // WLAN_LED //
 
-
+#ifdef WMM_ACM_SUPPORT
+DECLARE_TIMER_FUNCTION(ACMP_TR_TC_ReqCheck);
+DECLARE_TIMER_FUNCTION(ACMP_TR_STM_Check);
+DECLARE_TIMER_FUNCTION(ACMP_TR_TC_General);
+DECLARE_TIMER_FUNCTION(ACMP_CMD_Timer_Data_Simulation);
+#endif // WMM_ACM_SUPPORT //
 
 #endif // __RTMP_TIMER_H__ //
 

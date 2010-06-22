@@ -215,7 +215,7 @@ static VOID APPeerAuthReqAtIdleAction(
 	} /* End of if */
 
 	pEntry = MacTableLookup(pAd, Addr2);
-	if (pEntry && pEntry->ValidAsCLI)
+	if (pEntry && IS_ENTRY_CLIENT(pEntry))
 	{
 		if (!RTMPEqualMemory(Addr1, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid, MAC_ADDR_LEN))
 		{					
@@ -253,6 +253,9 @@ static VOID APPeerAuthReqAtIdleAction(
 		// If this STA exists, delete it.
 		if (pEntry)
 			MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
+		
+        if (pAd->CommonCfg.bWirelessEvent)
+			RTMPSendWirelessEvent(pAd, IW_MAC_FILTER_LIST_EVENT_FLAG, Addr2, apidx, 0);
 		DBGPRINT(RT_DEBUG_TRACE, ("Failed in ACL checking => send an AUTH seq#2 with Status code = %d\n", MLME_UNSPECIFY_FAIL));
 		return;
     }
@@ -265,9 +268,8 @@ static VOID APPeerAuthReqAtIdleAction(
 
 		if (pEntry)
 		{
-#ifdef RTMP_MAC_PCI
 			// If legacy WEP is used, set pair-wise cipherAlg into WCID attribute table for this entry
-			if (pEntry->ValidAsCLI && pEntry->WepStatus == Ndis802_11WEPEnabled)
+			if (IS_ENTRY_CLIENT(pEntry) && pEntry->WepStatus == Ndis802_11WEPEnabled)
 			{
 				UCHAR KeyIdx = 0;
 				UCHAR CipherAlg = 0;
@@ -275,14 +277,13 @@ static VOID APPeerAuthReqAtIdleAction(
 				KeyIdx	= pAd->ApCfg.MBSSID[pEntry->apidx].DefaultKeyId;					
 				CipherAlg 	= pAd->SharedKey[pEntry->apidx][KeyIdx].CipherAlg;
 
-				RTMPAddWcidAttributeEntry(
-							pAd, 
-							pEntry->apidx, 
-							KeyIdx, 
-							CipherAlg, 
-							pEntry);
+				RTMP_SET_WCID_SEC_INFO(pAd, 
+									pEntry->apidx, 
+									KeyIdx, 
+									CipherAlg, 
+									pEntry->Aid, 
+									SHAREDKEYTABLE);
 			}
-#endif // RTMP_MAC_PCI //
 			
 			pEntry->AuthState = AS_AUTH_OPEN;
 			pEntry->Sst = SST_AUTH; // what if it already in SST_ASSOC ???????
@@ -300,9 +301,8 @@ static VOID APPeerAuthReqAtIdleAction(
 
 		if (pEntry)
 		{
-#ifdef RTMP_MAC_PCI
 			// If legacy WEP is used, set pair-wise cipherAlg into WCID attribute table for this entry
-			if (pEntry->ValidAsCLI && pEntry->WepStatus == Ndis802_11WEPEnabled)
+			if (IS_ENTRY_CLIENT(pEntry) && pEntry->WepStatus == Ndis802_11WEPEnabled)
 			{
 				UCHAR KeyIdx = 0;
 				UCHAR CipherAlg = 0;
@@ -310,14 +310,13 @@ static VOID APPeerAuthReqAtIdleAction(
 				KeyIdx	= pAd->ApCfg.MBSSID[pEntry->apidx].DefaultKeyId;					
 				CipherAlg 	= pAd->SharedKey[pEntry->apidx][KeyIdx].CipherAlg;
 
-				RTMPAddWcidAttributeEntry(
-											pAd, 
-											pEntry->apidx, 
-											KeyIdx, 
-											CipherAlg, 
-											pEntry);
+				RTMP_SET_WCID_SEC_INFO(pAd, 
+									pEntry->apidx, 
+									KeyIdx, 
+									CipherAlg, 
+									pEntry->Aid, 
+									SHAREDKEYTABLE);
 			}
-#endif // RTMP_MAC_PCI //
 
 			pEntry->AuthState = AS_AUTHENTICATING;
 			pEntry->Sst = SST_NOT_AUTH; // what if it already in SST_ASSOC ???????
@@ -409,7 +408,7 @@ static VOID APPeerAuthConfirmAction(
 	}
 
 	pEntry = &pAd->MacTab.Content[Elem->Wcid];
-	if (pEntry && pEntry->ValidAsCLI)
+	if (pEntry && IS_ENTRY_CLIENT(pEntry))
 	{
 		if (!RTMPEqualMemory(Addr1, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid, MAC_ADDR_LEN))
 		{
@@ -447,6 +446,10 @@ static VOID APPeerAuthConfirmAction(
 		} 
 		else 
 		{
+			// send wireless event - Authentication rejected because of challenge failure
+			if (pAd->CommonCfg.bWirelessEvent)
+				RTMPSendWirelessEvent(pAd, IW_AUTH_REJECT_CHALLENGE_FAILURE, pEntry->Addr, 0, 0);  
+		
 			// fail - wep bit is not set or challenge text is not equal
 			APPeerAuthSimpleRspGenAndSend(pAd, pRcvHdr, Alg, Seq + 1, MLME_REJ_CHALLENGE_FAILURE);
 			MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
@@ -496,7 +499,7 @@ VOID APCls2errAction(
       pEntry = &(pAd->MacTab.Content[Wcid]);
 	}
 
-    if (pEntry && pEntry->ValidAsCLI)
+    if (pEntry && IS_ENTRY_CLIENT(pEntry))
     {
         //ApLogEvent(pAd, pAddr, EVENT_DISASSOCIATED);
         MacTableDeleteEntry(pAd, pEntry->Aid, pHeader->Addr2);

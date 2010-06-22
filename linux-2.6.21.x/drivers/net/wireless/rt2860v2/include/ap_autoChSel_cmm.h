@@ -28,8 +28,8 @@
 typedef struct {
 	ULONG dirtyness[MAX_NUM_OF_CHANNELS+1];
 	ULONG max_rssi[MAX_NUM_OF_CHANNELS+1];
-	ULONG total_rssi[MAX_NUM_OF_CHANNELS+1];
 	UINT32 FalseCCA[MAX_NUM_OF_CHANNELS+1];
+	UINT32 chanbusytime[MAX_NUM_OF_CHANNELS+1]; /* QLOAD ALARM */
 } CHANNELINFO, *PCHANNELINFO;
 
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
 	CHAR Ssid[MAX_LEN_OF_SSID];
 	UCHAR Channel;
 	UCHAR ExtChOffset;
-	UCHAR Rssi;
+	CHAR Rssi;
 } BSSENTRY, *PBSSENTRY;
 
 typedef struct {

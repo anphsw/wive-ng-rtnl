@@ -344,7 +344,7 @@ void SetLinkStatus(IN PRTMP_ADAPTER pAd)
 	if(CheckTimerEbl==0)
 	{
 		memset(&LedCheckTimer, 0, sizeof(RALINK_TIMER_STRUCT));
-		RTMPInitTimer(pAd, &LedCheckTimer, GET_TIMER_FUNCTION(LedCtrlMain), pAd, FALSE);
+		RTMPInitTimer(pAd, &LedCheckTimer, GET_TIMER_FUNCTION(LedCtrlMain), pAd, TRUE);
 		RTMPSetTimer(&LedCheckTimer, LED_CHECK_INTERVAL);
 
 		CheckTimerEbl=1;
@@ -369,9 +369,10 @@ void LedCtrlMain(
 
 	switch(LedParameter.LedMode)
 	{
+#if 0 //MAC LED is always controlled by LED firmware, so we can ignore this case.
 		case 0:		// Hardware controlled mode. Just ignore it.
-			CheckTimerEbl = 0;
 			return;
+#endif
 		case 0x40:	// In addition to mode 0, set signal strength LED
 			ChgSignalStrengthLed(pAd);
 		default:
@@ -385,7 +386,6 @@ void LedCtrlMain(
 		LedBlinkTimer = 0xff;
 		
 
-	RTMPSetTimer(&LedCheckTimer, LED_CHECK_INTERVAL);
 }
 
 
@@ -416,6 +416,8 @@ void ChgMacLedCfg(
 {
 	LED_CFG_T LedCfgBuf;
 	BYTE DataTxActivity, BeaconTxActivity;
+	extern ULONG WlanLed;
+
 
 	/* 
 	** MCU_INT_STA (offset: 0x0414)
@@ -508,7 +510,12 @@ void ChgMacLedCfg(
 		LedCfgBuf.field.R_LED_MODE =
 			CurrentLedCfg.field.LedAPolarity ? 3 : 0;	/* dark mode. */
 
-	RTMP_IO_WRITE32(pAd, MAC_LED_CFG, LedCfgBuf.word);
+	if ( (WlanLed == 0) ||
+		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF)) {
+	    RTMP_IO_WRITE32(pAd, MAC_LED_CFG, 0);
+	} else {
+	    RTMP_IO_WRITE32(pAd, MAC_LED_CFG, LedCfgBuf.word);
+	}
 
 	return;
 }
