@@ -290,17 +290,17 @@
 #endif
 
 /*ASUS EXT by Jiahao */
-#define	WSC_MANUFACTURE		"ASUSTek Computer Inc."
+#define	WSC_MANUFACTURE		"OSS."
 #ifdef CONFIG_AP_SUPPORT
 #define	AP_WSC_MODEL_NAME		"Wireless WPS Router"
-#define	AP_WSC_DEVICE_NAME		"ASUS Wireless WPS Router"
+#define	AP_WSC_DEVICE_NAME		"Wireless WPS Router"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
 #define	STA_WSC_MODEL_NAME		"Wireless WPS Station"
-#define	STA_WSC_DEVICE_NAME		"ASUS Wireless WPS Station"
-#define	WSC_DEVICE_NAME_R	"ASUS EX-Registrar"
+#define	STA_WSC_DEVICE_NAME		"Wireless WPS Station"
+#define	WSC_DEVICE_NAME_R	"EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
-#define	WSC_MODEL_NUMBER	"RT-N13U.B1"
+#define	WSC_MODEL_NUMBER	"RT-NL"
 #define	WSC_MODEL_SERIAL	"00000000"
 /*ASUS EXT by Jiahao */
 
