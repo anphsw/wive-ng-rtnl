@@ -1030,8 +1030,7 @@ VOID ApCliIfUp(
 			count_Alive=0;
 			count_DeAssoc=0;
 			flag_Reconnect = (flag_Reconnect % 65535) + 1;
-//			printk("ApCliIfUp(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
-//				count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
+
 			/* ASUS EXT by Jiahao */
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startup.\n", __FUNCTION__, ifIndex));
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
@@ -1107,6 +1106,7 @@ VOID ApCliIfMonitor(
 			RTMP_MLME_HANDLER(pAd);
 		}
 #endif
+#ifdef CONFIG_ASUS_EXT
 		/* ASUS EXT by Jiahao */
 		if ((pApCliEntry->Valid == TRUE))
 		{
@@ -1118,9 +1118,6 @@ VOID ApCliIfMonitor(
 				count_Alive=0;
 				count_DeAssoc=0;
 				flag_Reconnect = (flag_Reconnect % 65535) + 1;
-//				printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
-//					count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
-
 				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
 				RTMP_MLME_HANDLER(pAd);
 			}
@@ -1129,8 +1126,6 @@ VOID ApCliIfMonitor(
 				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc && !strcmp(nvram_get("sta_connected"), "1"))
 				{
 					printk("Wireless Driver: link down & up!\n");
-//					printk("ApCliIfMonitor(), count_Alive: %d, count_DeAssoc: %d, flag_Reconnect: %d, sta_connected: %s, sta_authorized: %s\n",
-//						count_Alive, count_DeAssoc, flag_Reconnect, nvram_get("sta_connected"), nvram_get("sta_authorized"));
 
 					if ((flag_Reconnect > 2) && ApcliMonitorPid)
 					{
@@ -1147,6 +1142,7 @@ VOID ApCliIfMonitor(
 			}
 		}
 		/* ASUS EXT by Jiahao */
+#endif
 	}
 
 	return;
