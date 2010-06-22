@@ -1377,6 +1377,7 @@ VOID PeerPairMsg3Action(
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg3Action: send Msg4 of 4-way \n"));
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT 
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "1");
@@ -1386,6 +1387,7 @@ VOID PeerPairMsg3Action(
 	if (IfIdx < MAX_APCLI_NUM)
 	printk("PeerPairMsg3Action(), set sta_authorized as 1, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
+#endif
 #endif
 /* ASUS EXT by Jiahao */
 }
@@ -1735,6 +1737,7 @@ VOID	PeerGroupMsg1Action(
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerGroupMsg1Action: send group message 2\n"));
 
 /* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT 
 #ifdef APCLI_SUPPORT
 	count_DeAssoc = 0;
 	nvram_set("sta_authorized", "2");
@@ -1744,6 +1747,7 @@ VOID	PeerGroupMsg1Action(
 	if (IfIdx < MAX_APCLI_NUM)
 	printk("PeerGroupMsg1Action(), set sta_authorized as 2, AuthMode %s, connected: %s\n", GetAuthMode(pAd->ApCfg.ApCliTab[IfIdx].AuthMode), nvram_get("sta_connected"));
 */
+#endif
 #endif
 /* ASUS EXT by Jiahao */
 }	
