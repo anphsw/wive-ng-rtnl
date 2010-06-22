@@ -74,6 +74,7 @@
 73) LZMA crash fix<br>
 74) Mtdblock crash and memory leak fix<br>
 75) Remove cifs. User ssh scp instead<br>
+76) Update wifi driver to 2.3.0.0 version from Ralink<br>
 
 <br><br>
 <b>For support see:</b><br>
