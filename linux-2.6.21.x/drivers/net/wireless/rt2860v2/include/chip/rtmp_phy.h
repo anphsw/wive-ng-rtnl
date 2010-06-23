@@ -602,12 +602,6 @@
 	BBP_IO_READ8_BY_REG_ID(_A, BBP_R141, _V);           \
 }
 
-#define RTMP_DFS_IO_WRITE8(_A, _I, _V)                  \
-{                                                       \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R141, _V);          \
-}
-
 #define RTMP_CARRIER_IO_READ8(_A, _I, _V)               \
 {                                                       \
 	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
@@ -621,8 +615,11 @@
 
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 
-
-
+#define RTMP_DFS_IO_WRITE8(_A, _I, _V)                  \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R141, _V);          \
+}
 	
 #endif // RTMP_MAC_PCI //
 

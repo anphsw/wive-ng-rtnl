@@ -890,7 +890,7 @@ static void dfs_sw_init(PRTMP_ADAPTER pAd);
 
 #define CE_STAGGERED_RADAR_DECLARE_THRES	2
 
-#ifdef DFS_1_SUPPORT 
+#if defined(DFS_1_SUPPORT) || defined(DFS_SUPPORT)
 
 typedef struct _NewDFSProgParam
 {
@@ -4754,7 +4754,7 @@ void 	modify_table1(PRTMP_ADAPTER pAd, ULONG idx, ULONG value)
 	{
 		y = idx & 0x1;
 		x = (idx - 40) >> 1;
-		
+#ifdef DFS_1_SUPPORT		
 		if (y)
 		{
 			pDFS2Table->entry[x].BLow = (ULONG)value;
@@ -4763,6 +4763,7 @@ void 	modify_table1(PRTMP_ADAPTER pAd, ULONG idx, ULONG value)
 		{
 			pDFS2Table->entry[x-1].BHigh = (ULONG)value;
 		}
+#endif
 		
 	}
 	else if (idx == 49)
@@ -4796,9 +4797,13 @@ void 	modify_table1(PRTMP_ADAPTER pAd, ULONG idx, ULONG value)
 		(x*10+7), (unsigned int)pDFS2Table->entry[x].EpsilonW, 
 		(x*10+8), (unsigned int)pDFS2Table->entry[x].TLow, 
 		(x*10+9), (unsigned int)pDFS2Table->entry[x].THigh, 
+#ifdef DFS_1_SUPPORT
 		(x*10+10), (unsigned int)pDFS2Table->entry[x].EpsilonT,
 		(2*x+41), (unsigned int)pDFS2Table->entry[x].BLow, 
 		(2*x+42), (unsigned int)pDFS2Table->entry[x].BHigh);
+#else
+		(x*10+10), (unsigned int)pDFS2Table->entry[x].EpsilonT);
+#endif
 	}
 	
 	printk("Symmetric_Round(49) = %d\n", pAd->CommonCfg.Symmetric_Round);
