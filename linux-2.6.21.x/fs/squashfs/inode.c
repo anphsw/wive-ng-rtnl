@@ -204,8 +204,7 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 {
 	struct squashfs_sb_info *msblk = s->s_fs_info;
 	struct squashfs_super_block *sblk = &msblk->sblk;
-	struct buffer_head *bh[((SQUASHFS_FILE_MAX_SIZE - 1) >>
-			msblk->devblksize_log2) + 2];
+	struct buffer_head *bh[((SQUASHFS_FILE_MAX_SIZE - 1) >> msblk->devblksize_log2) + 2];
 	unsigned int offset = index & ((1 << msblk->devblksize_log2) - 1);
 	unsigned int cur_index = index >> msblk->devblksize_log2;
 	int bytes, avail_bytes, b = 0, k = 0;
