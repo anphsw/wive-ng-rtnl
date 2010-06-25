@@ -36,6 +36,9 @@ upnp=`nvram_get 2860 upnpEnabled`
     $LOG "Flush route cache"
     ip route flush cache
 
+    $LOG "Cleanup conntrack table"
+    echo 0 > cleannat
+
     $LOG "Restart need service and rebuild shaper rules"
     service shaper stop
     services_restart.sh pppd

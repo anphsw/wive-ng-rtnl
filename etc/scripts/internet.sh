@@ -208,3 +208,4 @@ if [ "$m2uenabled" = "1" ]; then
 fi
 
 route add -host 255.255.255.255 dev $lan_if
+echo 0 > cleannat

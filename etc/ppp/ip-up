@@ -17,6 +17,10 @@ NAT=`nvram_get 2860 natEnabled`
 upnp=`nvram_get 2860 upnpEnabled`
 OperationMode=`nvram_get 2860 OperationMode`
 
+    
+    $LOG "Cleanup conntrack table"
+    echo 0 > cleannat
+
     $LOG "Modify route table need for buggy nas"
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
