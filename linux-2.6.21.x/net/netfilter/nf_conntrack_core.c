@@ -65,9 +65,11 @@
 #define DEBUGP(format, args...)
 #endif
 
-DEFINE_RWLOCK(nf_conntrack_lock);
+#include <linux/netfilter_ipv4/lockhelp.h>
+DECLARE_RWLOCK(nf_conntrack_lock);
 EXPORT_SYMBOL_GPL(nf_conntrack_lock);
 
+static void death_by_timeout(unsigned long ul_conntrack);
 /* nf_conntrack_standalone needs this */
 atomic_t nf_conntrack_count = ATOMIC_INIT(0);
 EXPORT_SYMBOL_GPL(nf_conntrack_count);
@@ -332,6 +334,118 @@ nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
 }
 EXPORT_SYMBOL_GPL(nf_ct_invert_tuple);
 
+/*
+	2008.0609
+	pronets leo modify here , for port trigger issue.
+	conntrack will keep the session, after nacking the port fail, must clean to pass cd router test.
+*/
+int early_drop_all(u_int32_t dstip,u_int32_t srcip)
+{
+	/* Traverse backwards: gives us oldest, which is roughly LRU */
+	struct nf_conntrack_tuple_hash *h=NULL;
+	struct nf_conn *ct = NULL, *tmp=NULL;
+	int dropped = 0;
+	int bucket=0;
+	//DEBUGP("%s_%d:dstip=%08x.nf_conntrack_htable_size=%d\n",__FUNCTION__,__LINE__,dstip,nf_conntrack_htable_size);
+	read_lock_bh(&nf_conntrack_lock);
+
+
+	for (; bucket < nf_conntrack_htable_size; (bucket)++) {
+		list_for_each_entry(h, &nf_conntrack_hash[bucket], list) {
+			tmp = nf_ct_tuplehash_to_ctrack(h);
+			//DEBUGP("%s_%d:h->tuple.src.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
+			//DEBUGP("%s_%d:h->tuple.dst.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
+			//DEBUGP("%s_%d: dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
+			//DEBUGP("%s_%d: srcip=%08x.\n",__FUNCTION__,__LINE__,srcip);
+			if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
+				//if((h->tuple.src.u3.ip==dstip)||(h->tuple.dst.u3.ip==dstip))
+				if(h->tuple.dst.u3.ip==dstip)
+				{
+					ct = tmp;
+					atomic_inc(&ct->ct_general.use);
+					DEBUGP("%s_%d:found dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
+					//DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
+					//DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
+					//DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
+					break;
+				}
+			}
+		}
+	}
+
+/*	list_for_each_entry(h, &nf_conntrack_hash[0], list) {
+		DEBUGP("%s_%d:hash=%p.\n",__FUNCTION__,__LINE__,h);
+		tmp = nf_ct_tuplehash_to_ctrack(h);
+		DEBUGP("%s_%d:h->tuple.src.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
+
+		if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
+			if(h->tuple.dst.u3.ip==dstip) 	
+			{
+				ct = tmp;
+				atomic_inc(&ct->ct_general.use);
+				DEBUGP("%s_%d:found dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
+				DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
+				DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
+				DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
+				break;
+			}
+		}
+	}
+*/
+	read_unlock_bh(&nf_conntrack_lock);
+
+	if (!ct)
+		return dropped;
+
+	if (del_timer(&ct->timeout)) {
+		death_by_timeout((unsigned long)ct);
+		dropped = 1;
+		NF_CT_STAT_INC_ATOMIC(early_drop);
+	}
+	nf_ct_put(ct);
+	return dropped;
+	/* Traverse backwards: gives us oldest, which is roughly LRU */
+/*
+	struct nf_conntrack_tuple_hash *h;
+	int dropped = 0;
+	int hnumber=0;
+	read_lock_bh(&nf_conntrack_lock);
+	DEBUGP("%s_%d:.\n",__FUNCTION__,__LINE__);
+
+
+	for (hnumber=0; hnumber < nf_conntrack_htable_size; hnumber++) {
+		h = LIST_FIND_B(&nf_conntrack_hash[hnumber], unreplied, struct nf_conntrack_tuple_hash *);
+		//DEBUGP("%s_%d:hnumber=%d.\n",__FUNCTION__,__LINE__,hnumber);
+		if (h)
+		{
+
+			if(h->tuple.dst.ip==dstip) 	{
+		
+			DEBUGP("%s_%d:dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
+			DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.ip);
+			DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.ip);
+
+			DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
+				break;
+			}
+		}
+	}
+
+	if (h)
+		atomic_inc(&h->ctrack->ct_general.use);
+	read_unlock_bh(&nf_conntrack_lock);
+
+	if (!h)
+		return dropped;
+
+	if (del_timer(&h->ctrack->timeout)) {
+		death_by_timeout((unsigned long)h->ctrack);
+		dropped = 1;
+	}
+	ip_conntrack_put(h->ctrack);
+	return dropped;
+*/
+}
 static void
 clean_from_lists(struct nf_conn *ct)
 {
@@ -347,6 +461,7 @@ static void
 destroy_conntrack(struct nf_conntrack *nfct)
 {
 	struct nf_conn *ct = (struct nf_conn *)nfct;
+	struct nf_conn_help *help = nfct_help(ct);
 	struct nf_conntrack_l3proto *l3proto;
 	struct nf_conntrack_l4proto *l4proto;
 	typeof(nf_conntrack_destroyed) destroyed;
@@ -357,6 +472,9 @@ destroy_conntrack(struct nf_conntrack *nfct)
 
 	nf_conntrack_event(IPCT_DESTROY, ct);
 	set_bit(IPS_DYING_BIT, &ct->status);
+
+	if (help && help->helper && help->helper->destroy)
+		help->helper->destroy(ct);
 
 	/* To make sure we don't get any weird locking issues here:
 	 * destroy_conntrack() MUST NOT be called with a write lock
@@ -411,10 +529,6 @@ destroy_conntrack(struct nf_conntrack *nfct)
 static void death_by_timeout(unsigned long ul_conntrack)
 {
 	struct nf_conn *ct = (void *)ul_conntrack;
-	struct nf_conn_help *help = nfct_help(ct);
-
-	if (help && help->helper && help->helper->destroy)
-		help->helper->destroy(ct);
 
 	write_lock_bh(&nf_conntrack_lock);
 	/* Inside lock so preempt is disabled on module removal path.
@@ -1525,6 +1639,20 @@ static int kill_all(struct nf_conn *i, void *data)
 {
 	return 1;
 }
+void ip_conntrack_flush(void)
+{
+	nf_ct_iterate_cleanup(kill_all, NULL);
+}
+void ip_ct_record_cleanup(void)
+{
+i_see_dead_people1:
+	ip_conntrack_flush();
+	if(atomic_read(&nf_conntrack_count)>1){
+		schedule();
+	goto i_see_dead_people1;
+	}
+}
+EXPORT_SYMBOL(ip_ct_record_cleanup);
 
 static void free_conntrack_hash(struct list_head *hash, int vmalloced, int size)
 {
