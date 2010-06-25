@@ -213,7 +213,7 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 
 	new_entry = (struct group *)malloc(sizeof(struct group));
 	if(!new_entry){
-		log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+		my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
 		return NULL;
 	}
 	printf("%s, %s\n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1));
@@ -254,13 +254,13 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	HOOK_CHECK;
 	entry = find_entry(m_ip_addr);
 	if(!entry){
-		log(LOG_WARNING, 0, "*** RT3052: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
+		my_log(LOG_WARNING, 0, "*** RT3052: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
 	pos = entry->members;
 	if(!pos){
-		log(LOG_WARNING, 0, "*** RT3052: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
+		my_log(LOG_WARNING, 0, "*** RT3052: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
@@ -283,9 +283,9 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	if(del)
 		free(del);
 	else{
-		log(LOG_WARNING, 0, "************************************************");
-		log(LOG_WARNING, 0, "*** RT3052: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
-		log(LOG_WARNING, 0, "************************************************");
+		my_log(LOG_WARNING, 0, "************************************************");
+		my_log(LOG_WARNING, 0, "*** RT3052: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
+		my_log(LOG_WARNING, 0, "************************************************");
 	}
 	update_group_port_map(entry);
 	return;
@@ -300,7 +300,7 @@ static void insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_add
 	if(entry->members != NULL){
 		struct group_member *member = lookup_member(entry, m_ip_addr, u_ip_addr);
 		if(member){
-			// log(LOG_DEBUG, 0, "*** RT3052: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
+			// my_log(LOG_DEBUG, 0, "*** RT3052: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
 
 			/* check if port changed */
 			unsigned char port_num;
@@ -320,7 +320,7 @@ static void insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_add
 	/* create a new member */
 	new_member = (struct group_member *)malloc(sizeof(struct group_member));
 	if(!new_member){
-			log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+			my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
 			return;
 	}
 	tmp.s_addr				= htonl(u_ip_addr);
@@ -354,7 +354,7 @@ void sweap_no_report_members(void)
 				craft_mip |= ((unsigned long)(pos->a2) << 16) ;
 				craft_mip |= ((unsigned long)(pos->a3) << 24) ;
 				
-				//log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
+				//my_log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
 				remove_member( ntohl(craft_mip), member->ip_addr);
 			}
 
@@ -404,7 +404,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 	HOOK_CHECK;
 	if(!entry){
 		// This entry isn't in the list.
-		log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(m_ip_addr, s1));
+		my_log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(m_ip_addr, s1));
 		return;
 	}
 
@@ -427,7 +427,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 
 	if(!found_flag){
 		/* this shouldn't happen */
-		log(LOG_WARNING, 0, "*** RT3052: can't find grou entry [%s].", inetFmt(m_ip_addr, s1));
+		my_log(LOG_WARNING, 0, "*** RT3052: can't find grou entry [%s].", inetFmt(m_ip_addr, s1));
 		return;
 	}
 	
@@ -466,9 +466,9 @@ static void update_group_port_map(struct group *entry)
 	while(pos){
 		if(pos->port_num == -1){
 			// can't find which port it's in, so opens all ports for it.
-			log(LOG_WARNING, 0, "****************************************");
-			log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
-			log(LOG_WARNING, 0, "****************************************");
+			my_log(LOG_WARNING, 0, "****************************************");
+			my_log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
+			my_log(LOG_WARNING, 0, "****************************************");
 			new_portmap =  (0x5f & ~(WANPORT)); // All Lan ports
 			break;
 		}else{
@@ -540,7 +540,7 @@ static void sync_internal_mac_table(void *argu)
 		reg_read(REG_ESW_TABLE_STATUS0, &value);
 		if (value & 0x1) { //search_rdy
 			if ((value & 0x70) == 0) {
-				log(LOG_WARNING, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
+				my_log(LOG_WARNING, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
 				reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 				continue;
 			}
@@ -555,14 +555,14 @@ static void sync_internal_mac_table(void *argu)
 			internal_mac_table[i].port_map = (value & 0x0007f000) >> 12 ;
 
 			if (value & 0x2) {
-				log(LOG_WARNING, 0, "*** RT3052: end of table. %d", i);
+				my_log(LOG_WARNING, 0, "*** RT3052: end of table. %d", i);
 				internal_mac_table[i+1].mac1 = END_OF_MAC_TABLE;
 				return;
 			}
 			reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 			i++;
 		}else if (value & 0x2) { //at_table_end
-			//log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready). %d", i);
+			//my_log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready). %d", i);
 			internal_mac_table[i].mac1 = END_OF_MAC_TABLE;
 			return;
 		}else
@@ -656,7 +656,7 @@ static int arpLookUp(char *ip, char *arp)
 	char buf[256];
 	FILE *fp = fopen("/proc/net/arp", "r");
 	if(!fp){
-		log(LOG_ERR, 0, "*** RT3052: no proc fs!");
+		my_log(LOG_ERR, 0, "*** RT3052: no proc fs!");
 		return -1;
 	}
 
@@ -710,7 +710,7 @@ static inline wait_switch_done(void)
 		usleep(1000);
 	}
 	if (i == 20)
-		log(LOG_WARNING, 0, "*** RT3052: timeout.");
+		my_log(LOG_WARNING, 0, "*** RT3052: timeout.");
 }
 
 
@@ -838,7 +838,7 @@ static int portLookUpByMac(char *mac)
 			case 0x10:
 				return 4;
 			default:
-				log(LOG_WARNING, 0, "No/Multi ports found");
+				my_log(LOG_WARNING, 0, "No/Multi ports found");
 				return -1;
 			}
 		}
@@ -878,7 +878,7 @@ static void sendUDP(char *ip)
 	user_addr.sin_addr.s_addr = inet_addr(ip);
 
 	if((socket_fd = socket(AF_INET,SOCK_DGRAM, 0)) == -1) {
-		log(LOG_WARNING, 0, "*** RT3052: socket error");
+		my_log(LOG_WARNING, 0, "*** RT3052: socket error");
 		return;
 	}
 	strcpy(buf, "arp please");
