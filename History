@@ -75,6 +75,8 @@
 74) Mtdblock crash and memory leak fix<br>
 75) Remove cifs. User ssh scp instead<br>
 76) Update wifi driver to 2.3.0.0 version from Ralink<br>
+77) More fix build enviroment<br>
+78) Bridge code fixup and more fast<br>
 
 <br><br>
 <b>For support see:</b><br>
