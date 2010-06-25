@@ -5,7 +5,7 @@ TOOLSPREFIX=./toolchain/bin/mipsel-linux
 STRIP="$TOOLSPREFIX-strip --strip-debug --strip-unneeded"
 OBJCOPY="$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded"
 SSTRIP=./tools/sstrip/sstrip
-MODULES=`find romfs/lib/modules -type f`;
+MODULES=`find romfs/lib/modules -type f | grep ".ko"`;
 
 echo --------------------------------STRIP AND SSTRIP-----------------------------
 echo "FIND FILES TO STRIP"
@@ -25,8 +25,8 @@ if [ "$NON_STRIPS_LIB" != "" ]; then
 fi
 echo "STRIP MODULES"
 for i in $MODULES; do
-  echo $i;
-  $OBJCOPY $i $i
+    echo $i;
+    $OBJCOPY $i $i
 done
 
 echo -----------------------------------SYNC!!-------------------------------------
