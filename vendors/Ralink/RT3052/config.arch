@@ -1,7 +1,5 @@
 .EXPORT_ALL_VARIABLES:
 
-include $(ROOTDIR)/vendors/config/mips/config.arch
-
 CONSOLE_BAUD_RATE = 57600
 
 MODEL_NAME		   = RT-NL
@@ -22,6 +20,8 @@ CONFIG_NOUSB		   = y
 MACHINE			   = mips
 ARCH		           = mips
 ROOTDIR			   = /opt/Wive-RTNL
+include $(ROOTDIR)/vendors/config/mips/config.arch
+
 FIRMROOT        	   = $(ROOTDIR)
 LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
