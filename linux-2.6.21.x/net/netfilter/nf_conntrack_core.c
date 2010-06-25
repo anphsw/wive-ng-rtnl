@@ -373,25 +373,6 @@ int early_drop_all(u_int32_t dstip,u_int32_t srcip)
 		}
 	}
 
-/*	list_for_each_entry(h, &nf_conntrack_hash[0], list) {
-		DEBUGP("%s_%d:hash=%p.\n",__FUNCTION__,__LINE__,h);
-		tmp = nf_ct_tuplehash_to_ctrack(h);
-		DEBUGP("%s_%d:h->tuple.src.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
-
-		if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
-			if(h->tuple.dst.u3.ip==dstip) 	
-			{
-				ct = tmp;
-				atomic_inc(&ct->ct_general.use);
-				DEBUGP("%s_%d:found dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
-				DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
-				DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
-				DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
-				break;
-			}
-		}
-	}
-*/
 	read_unlock_bh(&nf_conntrack_lock);
 
 	if (!ct)
@@ -404,48 +385,8 @@ int early_drop_all(u_int32_t dstip,u_int32_t srcip)
 	}
 	nf_ct_put(ct);
 	return dropped;
-	/* Traverse backwards: gives us oldest, which is roughly LRU */
-/*
-	struct nf_conntrack_tuple_hash *h;
-	int dropped = 0;
-	int hnumber=0;
-	read_lock_bh(&nf_conntrack_lock);
-	DEBUGP("%s_%d:.\n",__FUNCTION__,__LINE__);
-
-
-	for (hnumber=0; hnumber < nf_conntrack_htable_size; hnumber++) {
-		h = LIST_FIND_B(&nf_conntrack_hash[hnumber], unreplied, struct nf_conntrack_tuple_hash *);
-		//DEBUGP("%s_%d:hnumber=%d.\n",__FUNCTION__,__LINE__,hnumber);
-		if (h)
-		{
-
-			if(h->tuple.dst.ip==dstip) 	{
-		
-			DEBUGP("%s_%d:dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
-			DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.ip);
-			DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.ip);
-
-			DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
-				break;
-			}
-		}
-	}
-
-	if (h)
-		atomic_inc(&h->ctrack->ct_general.use);
-	read_unlock_bh(&nf_conntrack_lock);
-
-	if (!h)
-		return dropped;
-
-	if (del_timer(&h->ctrack->timeout)) {
-		death_by_timeout((unsigned long)h->ctrack);
-		dropped = 1;
-	}
-	ip_conntrack_put(h->ctrack);
-	return dropped;
-*/
 }
+
 static void
 clean_from_lists(struct nf_conn *ct)
 {
@@ -799,32 +740,7 @@ int drop_target(struct nf_conntrack_tuple_hash* h)
 	else
 		return 0;
 }
-/*
-static void wanduck_drop(void)
-{
-	unsigned int i;
-	struct nf_conntrack_tuple_hash *h;
-	struct nf_conn *ct = NULL;
 
-	read_lock_bh(&nf_conntrack_lock);
-	for (i = 0; i < nf_conntrack_htable_size; i++) 
-	{
-		list_for_each_entry_reverse(h, &nf_conntrack_hash[i], list) 
-		{
-			ct = nf_ct_tuplehash_to_ctrack(h);
-			if(drop_target(h))
-			{
-				printk("[nf] drop nf\n");	// tmp test
-        			if (del_timer(&ct->timeout)) {
-                			death_by_timeout((unsigned long)ct);
-        			}
-        			nf_ct_put(ct);
-			}
-		}
-	}
-	read_unlock_bh(&nf_conntrack_lock);
-}
-*/
 static struct nf_conn *
 __nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 		     const struct nf_conntrack_tuple *repl,
@@ -1144,6 +1060,9 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple tuple;
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+	struct iphdr *iph=(struct iphdr *)skb->nh.raw;
+#endif
 
 	if (!nf_ct_get_tuple(skb, (unsigned int)(skb->nh.raw - skb->data),
 			     dataoff, l3num, protonum, &tuple, l3proto,
@@ -1156,8 +1075,6 @@ resolve_normal_ct(struct sk_buff *skb,
 	//printk("track flag is %x, nf ipaddr is %x\n", nf_track_flag, nf_ipaddr);	// tmp test
 	/* look for tuple match */
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
-	struct iphdr *iph=(struct iphdr *)skb->nh.raw;
-
         /*
          * Based on NAT treatments of UDP in RFC3489:
          *
@@ -1299,17 +1216,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	int set_reply = 0;
 	int ret;
 
-	//printk("[nf_conntrack_in], track_flag:%d, pf:%d, hooknum:%d\n", nf_track_flag, pf, hooknum);	// tmp test
-/*
-	if(nf_track_flag == 100)
-	{
-		printk("\n**mission destroy the nf_conntrack\n");	// tmp test
-		wanduck_drop();
-		nf_conntrack_flush();
-		printk("\n**mission complete\n");	// tmp test
-		nf_track_flag = 0;
-	}
-*/
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
 		NF_CT_STAT_INC_ATOMIC(ignore);
@@ -1487,31 +1393,12 @@ EXPORT_SYMBOL_GPL(__nf_ct_refresh_acct);
 void wanduck_ct_refresh(struct nf_conn *ct,
                           unsigned long extra_jiffies)
 {
-        int event = 0;
-
 	if((!drop_target(&ct->tuplehash[IP_CT_DIR_ORIGINAL])) && (!drop_target(&ct->tuplehash[IP_CT_DIR_REPLY])))
 		return;
 
-	//printk("catch dp=%d, sp=%d\n", ntohs(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all), ntohs(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all));	// tmp test
         write_lock_bh(&nf_conntrack_lock);
 
-        //if (!nf_ct_is_confirmed(ct)) {
-                ct->timeout.expires = extra_jiffies;
-        //        event = IPCT_REFRESH;
-        //} else {
-        //        unsigned long newtime = jiffies + extra_jiffies;
-
-        //        if (newtime - ct->timeout.expires >= HZ
-        //            && del_timer(&ct->timeout)) {
-        //                ct->timeout.expires = newtime;
-        //                add_timer(&ct->timeout);
-        //                event = IPCT_REFRESH;
-        //        }
-        //}
         write_unlock_bh(&nf_conntrack_lock);
-
-        //if (event)
-        //        nf_conntrack_event_cache2(event, ct);
 }
 EXPORT_SYMBOL_GPL(wanduck_ct_refresh);
 
