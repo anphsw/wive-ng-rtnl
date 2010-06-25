@@ -133,8 +133,9 @@ extern void br_dev_setup(struct net_device *dev);
 extern int br_dev_xmit(struct sk_buff *skb, struct net_device *dev);
 
 /* br_fdb.c */
-extern void br_fdb_init(void);
+extern int br_fdb_init(void);
 extern void br_fdb_fini(void);
+extern void br_fdb_flush(struct net_bridge *br);
 extern void br_fdb_changeaddr(struct net_bridge_port *p,
 			      const unsigned char *newaddr);
 extern void br_fdb_cleanup(unsigned long arg);
@@ -182,7 +183,8 @@ extern void br_features_recompute(struct net_bridge *br);
 
 /* br_input.c */
 extern int br_handle_frame_finish(struct sk_buff *skb);
-extern int br_handle_frame(struct net_bridge_port *p, struct sk_buff **pskb);
+extern struct sk_buff *br_handle_frame(struct net_bridge_port *p,
+				       struct sk_buff *skb);
 
 /* br_ioctl.c */
 extern int br_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
