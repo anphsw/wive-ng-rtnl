@@ -58,14 +58,6 @@ choice
 	prompt "Netfilter connection tracking support"
 	depends on NF_CONNTRACK_ENABLED
 
-config USER_CLEAN_NAT
-        default y
-        bool "Clean NAT session driver."
-        depends on NF_CONNTRACK_ENABLED
-        ---help---
-          Pronets add the clean nat module.
-          If unsure, say M.
-
 config NF_CONNTRACK_SUPPORT
 	bool "Layer 3 Independent Connection tracking"
 	help
@@ -749,6 +741,14 @@ config NETFILTER_XT_MATCH_HASHLIMIT
 config ASUS_QOS
 	bool "Asus conntrack based QoS support Enable"
 	depends on NF_CONNTRACK_ENABLED
+
+config USER_CLEAN_NAT
+        default y
+        bool "Clean NAT session driver."
+        depends on NF_CONNTRACK_ENABLED
+        ---help---
+          Pronets add the clean nat module.
+          If unsure, say M.
 
 endmenu
 
