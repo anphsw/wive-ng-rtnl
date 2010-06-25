@@ -19,7 +19,7 @@ OperationMode=`nvram_get 2860 OperationMode`
 
     
     $LOG "Cleanup conntrack table"
-    echo 0 > cleannat
+    echo 0 > /proc/cleannat
 
     $LOG "Modify route table need for buggy nas"
     #Get current dgw
