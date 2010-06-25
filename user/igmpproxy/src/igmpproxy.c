@@ -43,7 +43,8 @@ static const char Usage[] =
 "\n" 
 "   -h   Display this help screen\n"
 "   -d   Run in debug mode. Output all messages on stderr\n"
-"   -w   Wan at port 0/4\n"
+"   -s   Eanble managment switch mode RT305x for multicast\n"
+"   -w   Wan at port 0/4. Only in switch management mode\n"
 "   -v   Be verbose. Give twice to see even debug messages.\n"
 "\n"
 PACKAGE_STRING "\n"
@@ -72,14 +73,17 @@ int         upStreamVif;
 */    
 int main( int ArgCn, char *ArgVc[] ) {
 
-    int c;
+    int c, sw = 0;
     WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "vdwh")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "vdswh")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
+            break;
+        case 's':
+	    sw = 1;
             break;
         case 'w':
 	    WanPort = 0x10;
@@ -129,7 +133,8 @@ int main( int ArgCn, char *ArgVc[] ) {
         }
 
 #ifdef RT3052_SUPPORT
-        rt3052_init();
+	if (sw)
+    	    rt3052_init();
 #endif
 
 	if ( !Log2Stderr ) {
@@ -155,7 +160,8 @@ int main( int ArgCn, char *ArgVc[] ) {
     } while ( false );
 
 #ifdef RT3052_SUPPORT
-        rt3052_fini();
+	if (sw)
+    	    rt3052_fini();
 #endif
 
     // Inform that we are exiting.

@@ -22,9 +22,9 @@ if [ -f /bin/igmpproxy ]; then
 	sysctl -w net.ipv4.igmp_max_memberships=30
 	route add -net 224.0.0.0/4 dev $wan_if  > /dev/null 2>&1
 	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-    	    igmpproxy /etc/igmpproxy.conf &
+    	    igmpproxy -s /etc/igmpproxy.conf &
 	else
-    	    igmpproxy -w /etc/igmpproxy.conf &
+    	    igmpproxy -sw /etc/igmpproxy.conf &
 	fi
     else
 	sysctl -w net.ipv4.conf.all.mc_forwarding=0
