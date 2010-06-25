@@ -15,8 +15,6 @@ HWH3			   = "0.0"
 HWL4			   = "0.0"
 HWH4			   = "0.0"
 
-CONFIG_NOUSB		   = y
-
 MACHINE			   = mips
 ARCH		           = mips
 ROOTDIR			   = /opt/Wive-RTNL
