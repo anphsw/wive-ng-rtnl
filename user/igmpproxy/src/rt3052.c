@@ -1,28 +1,7 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
- *   Status :  hold due to timeout/leave issue.
- */
-
-
-/*
  *  This implementation is for RT3052 Switch.
  *
- *  We maintain a IGMP group list:
+ *  We maintain an IGMP group list:
  *
  *				group[ 01:00:5E:00:00:02 ]
  *				group[ 01:00:5E:00:00:05 ]
@@ -36,10 +15,22 @@
  *
  *  By steping the IP address list, we can know the ports which the IGMP group is interesting in.
  *
- *  A mirror of rt3052 internal mac table is created in memory to increase performance. The time 
+ *  A mirror of rt3052 internal mac table is created in memory to improve performance. The time 
  *  interval of sync is 10 secs.
  *
  */
+
+/*
+ *  History:
+ *
+ *	1) Add an entry for igmp query on WAN
+ *  2) Broadcast the multicast packets which not matched.
+ *  3) Delay mac table deletion.
+ *	4) Don't follow igmpproxy to remove an invalid (unknown destination) group entry
+ *  5) "no wan port" condition.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -47,6 +38,8 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
+
+#include "linux/autoconf.h"
 
 #include "defs.h"
 
@@ -76,7 +69,18 @@
 #define IP_MULTICAST_A1(a0, a1)		(((a0 & 0x1) << 7) | a1)
 #define HOOK_CHECK					if(!(hook_value & 0x3FF)) return;
 
-#define DD printf("%s %d\n", __FUNCTION__, __LINE__);
+
+#if defined (CONFIG_WAN_AT_P0)
+#define WANPORT			0x1			/* 0000001 */
+#elif defined (CONFIG_WAN_AT_P4)
+#define WANPORT			0x10		/* 0010000 */
+#else
+#define WANPORT			0x0			/* no wan port */
+#endif
+
+/* delay mac table deletion */
+#define DELETED				1
+#define ZEROED				2
 
 typedef struct rt3052_esw_reg {
 	unsigned int off;
@@ -110,7 +114,7 @@ struct mac_table{
 
 // function prototype
 static void update_group_port_map(struct group *entry);
-static void updateMacTable(struct group *entry);
+static void updateMacTable(struct group *entry, int delay_deleted);
 static int	portLookUpByIP(char *ip);
 static inline int reg_read(int offset, int *value);
 static inline int reg_write(int offset, int value);
@@ -209,7 +213,7 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 
 	new_entry = (struct group *)malloc(sizeof(struct group));
 	if(!new_entry){
-		my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+		log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
 		return NULL;
 	}
 	printf("%s, %s\n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1));
@@ -250,13 +254,13 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	HOOK_CHECK;
 	entry = find_entry(m_ip_addr);
 	if(!entry){
-		my_log(LOG_WARNING, 0, "*** RT3052: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** RT3052: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
 	pos = entry->members;
 	if(!pos){
-		my_log(LOG_WARNING, 0, "*** RT3052: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** RT3052: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
@@ -279,9 +283,9 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	if(del)
 		free(del);
 	else{
-		my_log(LOG_WARNING, 0, "************************************************");
-		my_log(LOG_WARNING, 0, "*** RT3052: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
-		my_log(LOG_WARNING, 0, "************************************************");
+		log(LOG_WARNING, 0, "************************************************");
+		log(LOG_WARNING, 0, "*** RT3052: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
+		log(LOG_WARNING, 0, "************************************************");
 	}
 	update_group_port_map(entry);
 	return;
@@ -296,7 +300,7 @@ static void insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_add
 	if(entry->members != NULL){
 		struct group_member *member = lookup_member(entry, m_ip_addr, u_ip_addr);
 		if(member){
-			// my_log(LOG_DEBUG, 0, "*** RT3052: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
+			// log(LOG_DEBUG, 0, "*** RT3052: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
 
 			/* check if port changed */
 			unsigned char port_num;
@@ -316,7 +320,7 @@ static void insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_add
 	/* create a new member */
 	new_member = (struct group_member *)malloc(sizeof(struct group_member));
 	if(!new_member){
-			my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+			log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
 			return;
 	}
 	tmp.s_addr				= htonl(u_ip_addr);
@@ -350,7 +354,7 @@ void sweap_no_report_members(void)
 				craft_mip |= ((unsigned long)(pos->a2) << 16) ;
 				craft_mip |= ((unsigned long)(pos->a3) << 24) ;
 				
-				//my_log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
+				//log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
 				remove_member( ntohl(craft_mip), member->ip_addr);
 			}
 
@@ -400,7 +404,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 	HOOK_CHECK;
 	if(!entry){
 		// This entry isn't in the list.
-		my_log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(m_ip_addr, s1));
+		log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(m_ip_addr, s1));
 		return;
 	}
 
@@ -423,13 +427,13 @@ void remove_multicast_ip(uint32 m_ip_addr)
 
 	if(!found_flag){
 		/* this shouldn't happen */
-		my_log(LOG_WARNING, 0, "*** RT3052: can't find grou entry [%s].", inetFmt(m_ip_addr, s1));
+		log(LOG_WARNING, 0, "*** RT3052: can't find grou entry [%s].", inetFmt(m_ip_addr, s1));
 		return;
 	}
 	
 	/* clear mac table */
 	entry->port_map = 0x0;
-	updateMacTable(entry);
+	updateMacTable(entry, DELETED);
 
 	// free all members memory.
 	remove_all_members(entry);
@@ -448,7 +452,7 @@ void remove_all_groups(void)
 		del = pos;
 		pos = pos->next;
 		del->port_map = 0x0;
-		updateMacTable(del);
+		updateMacTable(del, DELETED);
 		remove_all_members(del);
 		free(del);
 	}
@@ -462,10 +466,10 @@ static void update_group_port_map(struct group *entry)
 	while(pos){
 		if(pos->port_num == -1){
 			// can't find which port it's in, so opens all ports for it.
-			my_log(LOG_WARNING, 0, "****************************************");
-			my_log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
-			my_log(LOG_WARNING, 0, "****************************************");
-			new_portmap =  0x5e; // 0101 1110
+			log(LOG_WARNING, 0, "****************************************");
+			log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
+			log(LOG_WARNING, 0, "****************************************");
+			new_portmap =  (0x5f & ~(WANPORT)); // All Lan ports
 			break;
 		}else{
 			new_portmap = new_portmap | (0x1 << pos->port_num);
@@ -474,7 +478,7 @@ static void update_group_port_map(struct group *entry)
 	}
 	if(entry->port_map != new_portmap){
 		entry->port_map = new_portmap;
-		updateMacTable(entry);
+		updateMacTable(entry, ZEROED);
 	}
 }
 
@@ -502,10 +506,10 @@ static void create_all_hosts_rule(void)
 		.a1 = 0x00,
 		.a2 = 0x00,
 		.a3 = 0x01,
-		.port_map	= 0x5e,
+		.port_map = (0x5f & ~(WANPORT)),	/* All LAN ports */
 		.next 		= NULL
 	};
-	updateMacTable(&entry);
+	updateMacTable(&entry, ZEROED);
 }
 
 static void destory_all_hosts_rule()
@@ -517,7 +521,7 @@ static void destory_all_hosts_rule()
 		.port_map = 0x0,
 		.next = NULL
 	};
-	updateMacTable(&entry);
+	updateMacTable(&entry, DELETED);
 }
 
 /*
@@ -527,6 +531,8 @@ static void sync_internal_mac_table(void *argu)
 {
 	unsigned int value, mac1, mac2, i = 0;
 
+	HOOK_CHECK;
+
 	timer_setTimer(INTERNAL_SYNC_TIMEOUT, sync_internal_mac_table, NULL);
 
 	reg_write(REG_ESW_TABLE_SEARCH, 0x1);
@@ -534,7 +540,7 @@ static void sync_internal_mac_table(void *argu)
 		reg_read(REG_ESW_TABLE_STATUS0, &value);
 		if (value & 0x1) { //search_rdy
 			if ((value & 0x70) == 0) {
-				my_log(LOG_WARNING, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
+				log(LOG_WARNING, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
 				reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 				continue;
 			}
@@ -549,14 +555,14 @@ static void sync_internal_mac_table(void *argu)
 			internal_mac_table[i].port_map = (value & 0x0007f000) >> 12 ;
 
 			if (value & 0x2) {
-				my_log(LOG_WARNING, 0, "*** RT3052: end of table. %d", i);
+				log(LOG_WARNING, 0, "*** RT3052: end of table. %d", i);
 				internal_mac_table[i+1].mac1 = END_OF_MAC_TABLE;
 				return;
 			}
 			reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 			i++;
 		}else if (value & 0x2) { //at_table_end
-			//my_log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready). %d", i);
+			//log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready). %d", i);
 			internal_mac_table[i].mac1 = END_OF_MAC_TABLE;
 			return;
 		}else
@@ -568,47 +574,6 @@ static void sync_internal_mac_table(void *argu)
 
 #define READ	0
 #define WRITE	1
-void rt3052_init(void)
-{
-	/*
-	 *  handle RT3052 registers
-	 */
-	unsigned int value, value2, value3;
-	value = rareg(READ, 0x10000000, 0);
-	value2= rareg(READ, 0x10000004, 0);
-	if((value & 0x30335452) && (value2 & 0x00003235)){
-		value3= (rareg(READ, 0x1000000C, 0) & 0x00003FF);
-		hook_value = ((value3 & 0x0000FFFF) < 0x103) ? 0: value3 & 0x000000FF;
-		if(hook_value > 0x107)
-			hook_value |= 0x2000;
-	}else{
-		hook_value = value2 && 0x0000FFFF;
-	}
-	rareg(WRITE, 0x1000000c, hook_value);
-	HOOK_CHECK;
-	/* 1011009c */
-	value = rareg(READ, 0x1011009c, 0);
-	value = value | 0x08000000;
-	rareg(WRITE, 0x1011009c, value);
-	/* 10110014 */
-	value = rareg(READ, 0x10110014, 0);
-	value = value | 0x00800000;
-	rareg(WRITE, 0x10110014, value);
-
-	esw_fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (esw_fd < 0) {
-		perror("socket");
-		exit(0);
-	}
-
-	strncpy(ifr.ifr_name, "eth2", 5);
-	ifr.ifr_data = (char *)&reg;
-
-	/* add 224.0.0.1( 01:00:5e:00:00:01) to mac table */
-	create_all_hosts_rule();
-	sync_internal_mac_table(NULL);
-}
-
 void rt3052_fini(void)
 {
 	/*
@@ -618,9 +583,9 @@ void rt3052_fini(void)
 	unsigned int value;
 
 	HOOK_CHECK;
-	value = rareg(READ, 0x1011009c, 0);
-	value = value & 0xF7FFFFFF;
-	rareg(WRITE, 0x1011009c, value);
+	//value = rareg(READ, 0x1011009c, 0);
+	//value = value & 0xF7FFFFFF;
+	//rareg(WRITE, 0x1011009c, value);
 	/* 10110014 */
 	value = rareg(READ, 0x10110014, 0);
 	value = value & 0xFF7FFFFF;
@@ -636,12 +601,62 @@ void rt3052_fini(void)
 		close(esw_fd);
 }
 
+void rt3052_init(void)
+{
+	/*
+	 *  handle RT3052 registers
+	 */
+	unsigned int value, value2, value3;
+	value = rareg(READ, 0x10000000, 0);
+	value2= rareg(READ, 0x10000004, 0);
+	if((value & 0x30335452) && (value2 & 0x00003235)){
+		value3= (rareg(READ, 0x1000000C, 0) & 0x000003FF);
+		if( (value == 0x33335452)  && (value2 & 0x000003FF) ){
+			hook_value = value2 & 0x000003FF;
+		}else
+			hook_value = ((value3 & 0x0000FFFF) < 0x103) ? 0: value3 & 0x000000FF;
+
+		if(hook_value > 0x107)
+			hook_value |= 0x2000;
+	}else{
+		hook_value = value2 && 0x0000FFFF;
+	}
+	rareg(WRITE, 0x1000000c, hook_value);
+	HOOK_CHECK;
+
+	/* 1011009c */
+	value = rareg(READ, 0x1011009c, 0);
+	//value = value | 0x08000000;
+	value = value & 0xE7FFFFFF;
+	rareg(WRITE, 0x1011009c, value);
+
+	/* 10110014 */
+	value = rareg(READ, 0x10110014, 0);
+	value = value | 0x00800000;
+	rareg(WRITE, 0x10110014, value);
+
+	esw_fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (esw_fd < 0) {
+		perror("socket");
+		rt3052_fini();
+		exit(0);
+	}
+
+	strncpy(ifr.ifr_name, "eth2", 5);
+	ifr.ifr_data = (char *)&reg;
+
+	/* add 224.0.0.1( 01:00:5e:00:00:01) to mac table */
+	create_all_hosts_rule();
+	sync_internal_mac_table(NULL);
+}
+
+
 static int arpLookUp(char *ip, char *arp)
 {
 	char buf[256];
 	FILE *fp = fopen("/proc/net/arp", "r");
 	if(!fp){
-		my_log(LOG_ERR, 0, "*** RT3052: no proc fs!");
+		log(LOG_ERR, 0, "*** RT3052: no proc fs!");
 		return -1;
 	}
 
@@ -683,10 +698,26 @@ static inline int reg_write(int offset, int value)
     return 0;
 }
 
+static inline wait_switch_done(void)
+{
+	int i, value;
+	for (i = 0; i < 20; i++) {
+		reg_read(REG_ESW_WT_MAC_AD0, &value);
+		if (value & 0x2) {	//w_mac_done
+			//printf("done.\n");
+			break;
+		}
+		usleep(1000);
+	}
+	if (i == 20)
+		log(LOG_WARNING, 0, "*** RT3052: timeout.");
+}
+
+
 /*
  * ripped from user/rt2880/switch/switch.c
  */
-static void updateMacTable(struct group *entry)
+static void updateMacTable(struct group *entry, int delay_delete)
 {
 	int i, value;
 	char wholestr[13];
@@ -707,7 +738,7 @@ static void updateMacTable(struct group *entry)
 	value = 0;
 	if(entry->port_map){
 		/*
-		 * force all mulicast addresses to bind with the MAC.
+		 * force all mulicast addresses to bind with CPU.
 		 */
 		value = value | (0x1 << 18);
 
@@ -716,21 +747,65 @@ static void updateMacTable(struct group *entry)
 		 */
 		value = value | (entry->port_map) << 12;
 		value += (7 << 4); //w_age_field
-	}
+		value += 1;				//w_mac_cmd
+		reg_write(REG_ESW_WT_MAC_AD0, value);
+		wait_switch_done();
 
-	value += 1;				//w_mac_cmd
-	reg_write(REG_ESW_WT_MAC_AD0, value);
-
-	for (i = 0; i < 20; i++) {
-		reg_read(REG_ESW_WT_MAC_AD0, &value);
-		if (value & 0x2) {	//w_mac_done
-			//printf("done.\n");
-			return;
+		/*
+		 * new an additional entry for IGMP Inquery/Report on WAN.
+		 */
+		if(WANPORT){
+			value = (WANPORT << 12);
+			value |= (1 << 18);
+			value |= (7 << 4);		//w_age_field
+			value |= (1 << 7);		//w_index
+			value |= 1;				//w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_AD0, value);
+			wait_switch_done();
 		}
-		usleep(1000);
+	}else{
+		if(delay_delete == ZEROED){
+			/*
+			 * Can't delete this entry too early.
+			 *
+			 * Because multicast packets from WAN may still come even receiver on LAN has left, and
+			 * at the same time the kernel routing rule is not yet deleted by igmpproxy.
+			 *
+			 * If we delete mac entry earier than deleting routing rule (by igmpproxy),
+			 * these packets would be forwarded to "br0" and then flood on eth2.1(vlan1) due to our 
+			 * default policy -- "Broadcast if not found". So we may see flooding packets on
+			 * LAN until the kernel routing rule is deleted.
+			 *
+			 * So we keep the mac entry alive to avoid the our default policy until the igmp group
+			 * is actually eliminated.
+			 */
+
+			/*
+			 * zero the entry
+			 */
+			value |= (7 << 4);		//w_age_field, keep it alive
+			value |= 1;				//w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_AD0, value);
+			wait_switch_done();
+		}else if (delay_delete == DELETED){
+			/*
+			 * delete the entry
+			 */
+			value |= 1;				//w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_AD0, value);
+			wait_switch_done();
+
+			/*
+			 * delete the additional entry on WAN.
+			 */
+			value = 0;
+			value |= (1 << 7);		//w_index
+			value |= 1;				//w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_AD0, value);
+			wait_switch_done();
+		}
 	}
-	if (i == 20)
-		my_log(LOG_WARNING, 0, "*** RT3052: timeout.");
+
 }
 
 static int portLookUpByMac(char *mac)
@@ -738,8 +813,8 @@ static int portLookUpByMac(char *mac)
 	unsigned int  mac1, mac2, i = 0, mac_iter;
 	char mac_entry1[16], mac_entry2[16];
 
-	memset(mac_entry1, 0, 16);
-	memset(mac_entry2, 0, 16);
+	memset(mac_entry1, 0, sizeof(mac_entry1));
+	memset(mac_entry2, 0, sizeof(mac_entry2));
 
 	strncpy(mac_entry1, mac, 8);
 	strncpy(mac_entry2, &mac[8], 4);
@@ -753,7 +828,7 @@ static int portLookUpByMac(char *mac)
 			internal_mac_table[i].mac2 == mac2){
 			switch( internal_mac_table[i].port_map ){
 			case 0x1:
-				return 0;	// WAN port
+				return 0;
 			case 0x2:
 				return 1;
 			case 0x4:
@@ -763,7 +838,7 @@ static int portLookUpByMac(char *mac)
 			case 0x10:
 				return 4;
 			default:
-				my_log(LOG_WARNING, 0, "No/Multi ports found");
+				log(LOG_WARNING, 0, "No/Multi ports found");
 				return -1;
 			}
 		}
@@ -772,78 +847,6 @@ static int portLookUpByMac(char *mac)
 	}
 	return -1;
 }
-
-#if 0
-/*
- * ripped from user/rt2880/switch/switch.c
- */
-static int portLookUpByMac(char *mac)
-{
-	unsigned int value, mac1, mac2, try_count = 0;
-	char mac_entry[16];
-	int port = -1;
-
-	reg_write(REG_ESW_TABLE_SEARCH, 0x1);
-	while(try_count < 0x3fe) {
-		reg_read(REG_ESW_TABLE_STATUS0, &value);
-		if (value & 0x1) { //search_rdy
-
-			try_count++;
-
-			if ((value & 0x70) == 0) {
-				my_log(LOG_ERR, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
-				return -1;
-			}
-
-			// read mac 1
-			reg_read(REG_ESW_TABLE_STATUS2, &mac1);
-
-			// skip multicast entries to speed up.
-			unsigned char *ptr = (unsigned char *)&mac1;
-			if( *(ptr+3) == 0x01 &&
-				*(ptr+2) == 0x00 &&
-				*(ptr+1) == 0x5E){
-				reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address				
-				continue;
-			}
-
-			// read mac2
-			reg_read(REG_ESW_TABLE_STATUS1, &mac2);
-
-			sprintf(mac_entry, "%08X%04X", mac1, (mac2 & 0xffff));
-			if(! strcasecmp(mac_entry, mac) ){
-				port = (value & 0x0007f000) >> 12 ;
-				switch(port){
-				case 0x2:
-					return 1;
-				case 0x4:
-					return 2;
-				case 0x8:
-					return 3;
-				case 0x10:
-					return 4;
-				case 0x1:
-					return 0;	// WAN port
-				default:
-					my_log(LOG_WARNING, 0, "*** RT3052: No/Multi port found.");
-					return -1;
-				}
-			}
-			if (value & 0x2) {
-				/* my_log(LOG_WARNING, 0, "*** RT3052: end of table. %d", try_count); */
-				return -1;
-			}
-			reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
-		}else if (value & 0x2) { //at_table_end
-			my_log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready).");
-			return -1;
-		}else
-			usleep(1000);
-	}
-
-	return -1;
-}
-#endif
 
 static void strip_mac(char *mac)
 {
@@ -875,7 +878,7 @@ static void sendUDP(char *ip)
 	user_addr.sin_addr.s_addr = inet_addr(ip);
 
 	if((socket_fd = socket(AF_INET,SOCK_DGRAM, 0)) == -1) {
-		my_log(LOG_WARNING, 0, "*** RT3052: socket error");
+		log(LOG_WARNING, 0, "*** RT3052: socket error");
 		return;
 	}
 	strcpy(buf, "arp please");
@@ -886,9 +889,11 @@ static void sendUDP(char *ip)
 }
 
 /*
- * Unfortunately IGMP packets from linux raw socket layer don't have layer2 header, we
- * can get its mac address from ARP table. If there is no entry in the table then we send a dummy
- * udp packet to target, and wait its ARP reply.
+ * Unfortunately IGMP packets from linux raw socket layer don't have layer2 header, but we
+ * can get the mac address from ARP table. If no matched entry found in the table, then we send a dummy
+ * udp packet to target, and wait for its ARP reply.
+ *
+ * Hope we won't cause target's IDS alarm.
  */
 static int portLookUpByIP(char *ip)
 {
@@ -911,4 +916,5 @@ void sigUSR1Handler(int signo)
 	dump_entry();
 	dump_table();
 }
+
 

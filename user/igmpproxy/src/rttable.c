@@ -568,11 +568,16 @@ int internAgeRoute(struct RouteTable*  croute) {
             my_log(LOG_DEBUG, 0, "Removing group %s. Died of old age.",
                          inetFmt(croute->group,s1));
 
-#ifdef RT3052_SUPPORT
-            remove_multicast_ip(ntohl(croute->group));
-#endif
             // No activity was registered within the timelimit, so remove the route.
             removeRoute(croute);
+#ifdef RT3052_SUPPORT
+                       /*
+                        *  Avoid to remove a "pre-allocate" routing rule created by igmpproxy.
+                        *  "vifBits == 0" means the dest IF is still unknown.
+                        */
+                       if(croute->vifBits > 0)
+                               remove_multicast_ip(ntohl(croute->group));
+#endif
         }
         // Tell that the route was updated...
         result = 1;
