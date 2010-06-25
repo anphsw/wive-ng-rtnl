@@ -101,6 +101,8 @@ extern char		s4[];
 //  Lib function prototypes.
 //#################################################################################
 
+extern uint32_t WanPort;              // Wan port number
+
 /* syslog.c
  */
 extern bool Log2Stderr;           // Log to stderr instead of to syslog

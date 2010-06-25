@@ -43,6 +43,7 @@ static const char Usage[] =
 "\n" 
 "   -h   Display this help screen\n"
 "   -d   Run in debug mode. Output all messages on stderr\n"
+"   -w   Wan at port 0/4\n"
 "   -v   Be verbose. Give twice to see even debug messages.\n"
 "\n"
 PACKAGE_STRING "\n"
@@ -72,12 +73,16 @@ int         upStreamVif;
 int main( int ArgCn, char *ArgVc[] ) {
 
     int c;
+    WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "vdh")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "vdwh")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
+            break;
+        case 'w':
+	    WanPort = 0x10;
             break;
         case 'v':
             LogLevel++;

@@ -69,18 +69,11 @@
 #define IP_MULTICAST_A1(a0, a1)		(((a0 & 0x1) << 7) | a1)
 #define HOOK_CHECK					if(!(hook_value & 0x3FF)) return;
 
-
-#if defined (CONFIG_WAN_AT_P0)
-#define WANPORT			0x1			/* 0000001 */
-#elif defined (CONFIG_WAN_AT_P4)
-#define WANPORT			0x10		/* 0010000 */
-#else
-#define WANPORT			0x0			/* no wan port */
-#endif
-
 /* delay mac table deletion */
 #define DELETED				1
 #define ZEROED				2
+
+uint32_t WanPort = 0x1;
 
 typedef struct rt3052_esw_reg {
 	unsigned int off;
@@ -469,7 +462,7 @@ static void update_group_port_map(struct group *entry)
 			my_log(LOG_WARNING, 0, "****************************************");
 			my_log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
 			my_log(LOG_WARNING, 0, "****************************************");
-			new_portmap =  (0x5f & ~(WANPORT)); // All Lan ports
+			new_portmap =  (0x5f & ~(WanPort)); // All Lan ports
 			break;
 		}else{
 			new_portmap = new_portmap | (0x1 << pos->port_num);
@@ -506,7 +499,7 @@ static void create_all_hosts_rule(void)
 		.a1 = 0x00,
 		.a2 = 0x00,
 		.a3 = 0x01,
-		.port_map = (0x5f & ~(WANPORT)),	/* All LAN ports */
+		.port_map = (0x5f & ~(WanPort)),	/* All LAN ports */
 		.next 		= NULL
 	};
 	updateMacTable(&entry, ZEROED);
@@ -607,6 +600,7 @@ void rt3052_init(void)
 	 *  handle RT3052 registers
 	 */
 	unsigned int value, value2, value3;
+
 	value = rareg(READ, 0x10000000, 0);
 	value2= rareg(READ, 0x10000004, 0);
 	if((value & 0x30335452) && (value2 & 0x00003235)){
@@ -754,8 +748,8 @@ static void updateMacTable(struct group *entry, int delay_delete)
 		/*
 		 * new an additional entry for IGMP Inquery/Report on WAN.
 		 */
-		if(WANPORT){
-			value = (WANPORT << 12);
+		if(WanPort){
+			value = (WanPort << 12);
 			value |= (1 << 18);
 			value |= (7 << 4);		//w_age_field
 			value |= (1 << 7);		//w_index

@@ -7,7 +7,7 @@ CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
 
 ifneq ("$(CONFIG_PRODUCT)", "RT2880")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-#CFLAGS+= -DRT3052_SUPPORT
+CFLAGS+= -DRT3052_SUPPORT
 endif
 
 all: $(EXEC)
