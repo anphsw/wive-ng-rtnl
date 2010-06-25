@@ -72,7 +72,6 @@ if [ "$MODE" = "2T2R" ] ; then
     cp -fv ./config-$VENDOR/config-lib-2t2r	./lib/.config
 fi
 cp -fv ./config-$VENDOR/config-busybox	./user/busybox/.config
-cp -fv ./config-$VENDOR/config-config	./config/.config
 cp -fv ./config-$VENDOR/config-cpp	./uClibc++/.config
 cp -fv ./config-$VENDOR/config-all	.config
 ln -fs vendors/Ralink/RT3052/config.arch config.arch
