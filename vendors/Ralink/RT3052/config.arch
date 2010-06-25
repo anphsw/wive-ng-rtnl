@@ -4,11 +4,6 @@ include $(ROOTDIR)/vendors/config/mips/config.arch
 
 CONSOLE_BAUD_RATE = 57600
 
-CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += -Os -pipe -mips32 -mtune=mips32
-UOPT    += -Os -pipe -mips32 -mtune=mips32
-LOPT    += -Os -pipe -mips32 -mtune=mips32
-
 MODEL_NAME		   = RT-NL
 KERNEL_VER		   = "0.1.0"
 FS_VER			   = "0.0"
@@ -32,4 +27,8 @@ LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
-#STRIP			   = $(FIRMROOT)/tools/sstrip/sstrip
+
+CFLAGS  += -I$(ROOTDIR)
+CFLAGS  += -Os -pipe -mips32 -mtune=mips32
+UOPT    += -Os -pipe -mips32 -mtune=mips32
+LOPT    += -Os -pipe -mips32 -mtune=mips32
