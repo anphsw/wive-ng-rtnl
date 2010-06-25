@@ -69,7 +69,7 @@ echo "fi"
 # echo "comment 'Configuration Overrides'"
 
 cat <<!EOF
-string 'Cross Compiler Path' 			CONFIG_CROSS_COMPILER_PATH $(ROOTDIR)toolchain/bin
+string 'Cross Compiler Path' 			CONFIG_CROSS_COMPILER_PATH `pwd`/toolchain/bin
 comment ' '
 bool 'Default all settings (lose changes)'	CONFIG_DEFAULTS_OVERRIDE
 bool 'Customize Kernel Settings'		CONFIG_DEFAULTS_KERNEL
