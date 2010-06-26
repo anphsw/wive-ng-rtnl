@@ -87,7 +87,7 @@ endchoice
 
 config	ESW_DOUBLE_VLAN_TAG
 	bool
-	default y if RT_3052_ESW
+	default n if RT_3052_ESW
 
 config RAETH_RT3052_P5
         bool "Port 5 Support"
