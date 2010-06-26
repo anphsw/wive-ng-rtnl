@@ -148,23 +148,23 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 {
 	unsigned int a, b;
 
-#if defined (CONFIG_NAT_FCONE) /* Full Cone */
-	a = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all),
-		   tuple->dst.u.all); // dst ip, dst port
-	b = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all),
-		   tuple->dst.protonum); //dst ip, & dst ip protocol
-#elif defined (CONFIG_NAT_RCONE) /* Restricted Cone */
-	a = jhash((void *)tuple->src.u3.all, sizeof(tuple->src.u3.all), //src ip
-		   (tuple->src.l3num << 16) | tuple->dst.protonum);
-	b = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all), //dst ip & dst port
-		  (tuple->dst.u.all << 16) | tuple->dst.protonum);
+	a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all),
+#if defined (CONFIG_NAT_FCONE)
+		tuple->dst.u.all); // dst ip, dst port
+#elif defined (CONFIG_NAT_RCONE)
+		(tuple->src.l3num << 16) | tuple->dst.protonum);
 #else /* CONFIG_NAT_LINUX */
-	a = jhash((void *)tuple->src.u3.all, sizeof(tuple->src.u3.all),
-		  ((tuple->src.l3num) << 16) | tuple->dst.protonum);
-	b = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all),
-			(tuple->src.u.all << 16) | tuple->dst.u.all);
+		((tuple->src.l3num) << 16) | tuple->dst.protonum);
 #endif
 
+	b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all),
+#if defined (CONFIG_NAT_FCONE)
+		tuple->dst.protonum); //dst ip, & dst ip protocol
+#elif defined (CONFIG_NAT_RCONE)
+		(tuple->dst.u.all << 16) | tuple->dst.protonum);
+#else /* CONFIG_NAT_LINUX */
+		(tuple->src.u.all << 16) | tuple->dst.u.all);
+#endif
 	//return jhash_2words(a, b, rnd) % size;
 	/* SpeedMod: Change modulo to AND */
 	return jhash_2words(a, b, rnd) & (size-1);
