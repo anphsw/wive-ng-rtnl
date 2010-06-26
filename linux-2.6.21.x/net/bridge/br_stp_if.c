@@ -186,7 +186,7 @@ void br_stp_recalculate_bridge_id(struct net_bridge *br)
                  * following code, to let the bridge interface use the
                  * MAC address of the first added interface.
                  */
-#if 0
+#ifdef CONFIG_BRIDGE_MAC_AUTO
 		if (addr == br_mac_zero ||
 		    memcmp(p->dev->dev_addr, addr, ETH_ALEN) < 0)
 #endif

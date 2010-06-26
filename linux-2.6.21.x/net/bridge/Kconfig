@@ -43,6 +43,12 @@ config BRIDGE_FORWARD_CTRL
 
 	  and echo 1 to re-enable it:
 	  echo 1 > /proc/net/br_forward_br0
+
+config BRIDGE_MAC_AUTO
+        bool "Set mac to bridge automaticaly"
+        depends on BRIDGE
+        ---help---
+
 config BRIDGE_PORT_FORWARD
 	bool "Port forwarding Control"
 	depends on BRIDGE
