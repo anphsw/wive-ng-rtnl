@@ -16,9 +16,9 @@
 #define NUM_TX_RINGS 	4
 #endif
 
-#define NUM_RX_DESC        256
-#define NUM_TX_DESC    	   256
-#define NUM_RX_MAX_PROCESS 32
+#define NUM_RX_DESC        256  //256 maximum
+#define NUM_TX_DESC    	   256  //256 maximum
+#define NUM_RX_MAX_PROCESS 32   //64 maximum for RT3052 + 32Mb RAM
 
 #define DEV_NAME        "eth2"
 #define RA2882_ENET0	RA2882ETH_BASE
