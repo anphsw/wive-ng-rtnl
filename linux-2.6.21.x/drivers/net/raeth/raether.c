@@ -1015,7 +1015,7 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 	}
 
 #ifndef CONFIG_RAETH_JUMBOFRAME
-	if ( new_mtu > 1500 ) {
+	if ( new_mtu > MAX_RX_LENGTH ) {
 		spin_unlock_irqrestore(&ei_local->page_lock, flags);
 		return -EINVAL;
 	}
@@ -1602,6 +1602,17 @@ int __init ra2882eth_init(void)
 	dev->base_addr = RA2882_ENET0;	
 
 	dev->init =  rather_probe;
+
+///////////////WORKAROUD INIT////////////
+	dev->mtu  = MAX_RX_LENGTH;
+#if defined (CONFIG_RAETH_ROUTER)
+	dev->weight = 32;
+#elif defined (CONFIG_RT_3052_ESW)
+	dev->weight = 32;
+#else
+	dev->weight = 128;
+#endif
+//////////////////////////////////////////
 
 	/* net_device structure Init */
 	hard_init(dev);
