@@ -302,6 +302,47 @@ static int old_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	case BRCTL_GET_FDB_ENTRIES:
 		return get_fdb_entries(br, (void __user *)args[1],
 				       args[2], args[3]);
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        case 103:
+        {
+                struct net_bridge_port *p;
+
+                if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
+                if (args[2] == 0) {
+                        p->bandwidth = 0;
+                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth all\n",
+                                        p->br->dev->name, p->port_no, p->dev->name );
+                del_timer(&p->bwctrl_timer);
+                } else {
+                        p->bandwidth = args[2] * 1000 / 8;
+                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth %dkbps\n",
+                                         p->br->dev->name, p->port_no, p->dev->name,
+                                        (unsigned int)args[2]);
+
+                mod_timer(&p->bwctrl_timer, jiffies+1*HZ);
+                }
+                return 0;
+        }
+#endif
+
+#ifdef CONFIG_BRIDGE_PORT_FORWARD
+		case 104:
+		{
+				struct net_bridge_port *p;
+				if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
+				if (args[2] == 0) {
+						p->port_forwarding = 0;
+						printk(KERN_INFO "%s: port %i(%s) forwarding is disabled!\n",
+                                        p->br->dev->name, p->port_no, p->dev->name );
+				} else {
+						p->port_forwarding = 1;
+						printk(KERN_INFO "%s: port %i(%s) forwarding is enabled!\n",
+                                        p->br->dev->name, p->port_no, p->dev->name );
+				}
+				return 0;
+		}
+#endif
+
 	}
 
 	return -EOPNOTSUPP;

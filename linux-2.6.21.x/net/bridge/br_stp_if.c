@@ -40,6 +40,13 @@ void br_init_port(struct net_bridge_port *p)
 	p->state = BR_STATE_BLOCKING;
 	p->topology_change_ack = 0;
 	p->config_pending = 0;
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        p->accumulation = 0;
+#endif
+#ifdef CONFIG_BRIDGE_PORT_FORWARD
+		p->port_forwarding = 1;
+#endif
+
 }
 
 /* called under bridge lock */
@@ -108,6 +115,10 @@ void br_stp_disable_port(struct net_bridge_port *p)
 	p->state = BR_STATE_DISABLED;
 	p->topology_change_ack = 0;
 	p->config_pending = 0;
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        p->accumulation = 0;
+        del_timer(&p->bwctrl_timer);
+#endif
 
 	del_timer(&p->message_age_timer);
 	del_timer(&p->forward_delay_timer);
@@ -169,8 +180,16 @@ void br_stp_recalculate_bridge_id(struct net_bridge *br)
 		return;
 
 	list_for_each_entry(p, &br->port_list, list) {
+                /*
+                 * The preferred address should be control by system.
+                 * I don't like the original designed, so I mark the
+                 * following code, to let the bridge interface use the
+                 * MAC address of the first added interface.
+                 */
+#if 0
 		if (addr == br_mac_zero ||
 		    memcmp(p->dev->dev_addr, addr, ETH_ALEN) < 0)
+#endif
 			addr = p->dev->dev_addr;
 
 	}
