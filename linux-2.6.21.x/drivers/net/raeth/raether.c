@@ -69,7 +69,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 #ifdef CONFIG_RAETH_JUMBOFRAME
 #define	MAX_RX_LENGTH	4096
 #else
-#define	MAX_RX_LENGTH	1500
+#define	MAX_RX_LENGTH	1600
 #endif
 
 static struct sk_buff		*netrx_skbuf[NUM_RX_DESC];
