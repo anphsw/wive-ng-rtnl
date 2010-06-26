@@ -15,32 +15,10 @@
 #else
 #define NUM_TX_RINGS 	4
 #endif
-#ifdef MEMORY_OPTIMIZATION
-#ifdef CONFIG_RAETH_ROUTER
-#define NUM_RX_DESC     128
-#define NUM_TX_DESC    	128
-#elif CONFIG_RT_3052_ESW
-#define NUM_RX_DESC     64
-#define NUM_TX_DESC     64
-#else
-#define NUM_RX_DESC     128
-#define NUM_TX_DESC     128
-#endif
-//#define NUM_RX_MAX_PROCESS 32
-#define NUM_RX_MAX_PROCESS 64
-#else
-#if defined (CONFIG_RAETH_ROUTER)
-#define NUM_RX_DESC     256
-#define NUM_TX_DESC    	256
-#elif defined (CONFIG_RT_3052_ESW)
-#define NUM_RX_DESC     256
-#define NUM_TX_DESC     256
-#else
-#define NUM_RX_DESC     256
-#define NUM_TX_DESC     256
-#endif
-#define NUM_RX_MAX_PROCESS 16
-#endif
+
+#define NUM_RX_DESC        256
+#define NUM_TX_DESC    	   256
+#define NUM_RX_MAX_PROCESS 32
 
 #define DEV_NAME        "eth2"
 #define RA2882_ENET0	RA2882ETH_BASE
