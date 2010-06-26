@@ -19,9 +19,6 @@
 #include <linux/skbuff.h>
 #include <linux/if_vlan.h>
 #include <linux/netfilter_bridge.h>
-#ifdef CONFIG_SOFTWARE_TURBO 
-#include <linux/hw_tcpip.h>
-#endif
 #include "br_private.h"
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 #include <linux/in.h>
@@ -83,20 +80,7 @@ int br_forward_finish(struct sk_buff *skb)
 
 static void __br_deliver(const struct net_bridge_port *to, struct sk_buff *skb)
 {
-#ifdef CONFIG_SOFTWARE_TURBO 
-		struct net_device *indev;
-		indev = skb->dev;
-#endif
 	skb->dev = to->dev;
-
-#ifdef CONFIG_SOFTWARE_TURBO 
-		if(skb->nfct)
-		{
-				struct ip_conntrack *ct=(struct ip_conntrack *)skb->nfct;
-				if(ct->sw!=NULL && hw_tcpip && hw_tcpip->sw_refresh_out_dev)
-						hw_tcpip->sw_refresh_out_dev(ct->sw, indev, to->dev);
-		}
-#endif
 	NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_OUT, skb, NULL, skb->dev,
 			br_forward_finish);
 }
