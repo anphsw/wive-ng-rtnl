@@ -36,9 +36,7 @@ config3052()
 	switch reg w 14 405555
 	switch reg w 50 2001
 	switch reg w 98 7f3f
-	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
 		switch reg w e4 3f
-	fi
 	if [ "$1" = "WLLLL" ]; then
 		switch reg w 40 1001
 		switch reg w 44 1001
@@ -80,9 +78,7 @@ restore3052()
         switch reg w 70 ffffffff
         switch reg w 98 7f7f
         switch reg w e4 7f
-	if [ "$CONFIG_ESW_DOUBLE_VLAN_TAG" == "y" ]; then
-		switch reg w e4 0
-	fi
+	switch reg w e4 0
 }
 
 disable3052()
