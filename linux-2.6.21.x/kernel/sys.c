@@ -2243,8 +2243,6 @@ asmlinkage int sys_track_flag(int __user *flag, unsigned long __user *addr)
 	if(in_flag != 500)
         	err = get_user(nf_ipaddr, addr);
 
-        printk("[k] track_flag=%d, clean_flag=%d, mm_flag=%d, ipaddr=%x\n", nf_track_flag, nf_clean_flag, mm_kill_flag, nf_ipaddr);       // tmp test
-
         return err ? -EFAULT : 0;
 }
 

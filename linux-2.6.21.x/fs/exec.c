@@ -607,7 +607,7 @@ static int de_thread(struct task_struct *tsk)
 	 */
 	read_lock(&tasklist_lock);
 	spin_lock_irq(lock);
-	if (sig->flags & SIGNAL_GROUP_EXIT) {
+	if (signal_group_exit(sig)) {
 		/*
 		 * Another group action in progress, just
 		 * return so that the signal is processed.
@@ -626,6 +626,7 @@ static int de_thread(struct task_struct *tsk)
 	if (unlikely(tsk->group_leader == child_reaper(tsk)))
 		tsk->nsproxy->pid_ns->child_reaper = tsk;
 
+	sig->group_exit_task = tsk;
 	zap_other_threads(tsk);
 	read_unlock(&tasklist_lock);
 
@@ -650,7 +651,6 @@ static int de_thread(struct task_struct *tsk)
 	}
 	while (atomic_read(&sig->count) > count) {
 		sig->group_exit_task = tsk;
-		sig->notify_count = count;
 		__set_current_state(TASK_UNINTERRUPTIBLE);
 		spin_unlock_irq(lock);
 		schedule();
@@ -720,12 +720,6 @@ static int de_thread(struct task_struct *tsk)
 
 		write_unlock_irq(&tasklist_lock);
         }
-
-	/*
-	 * There may be one thread left which is just exiting,
-	 * but it's safe to stop telling the group to kill themselves.
-	 */
-	sig->flags = 0;
 
 no_thread_group:
 	exit_itimers(sig);
@@ -1393,7 +1387,7 @@ static inline int zap_threads(struct task_struct *tsk, struct mm_struct *mm,
 	int err = -EAGAIN;
 
 	spin_lock_irq(&tsk->sighand->siglock);
-	if (!(tsk->signal->flags & SIGNAL_GROUP_EXIT)) {
+	if (!signal_group_exit(tsk->signal)) {
 		tsk->signal->group_exit_code = exit_code;
 		zap_process(tsk);
 		err = 0;
