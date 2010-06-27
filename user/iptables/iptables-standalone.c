@@ -81,7 +81,6 @@ main(int argc, char *argv[])
 		ret = iptc_commit(&handle);
 
 	if (!ret){
-		printf("return fail: ret=%d\n", ret);	// tmp test
 		fprintf(stderr, "iptables: %s\n",
 			iptc_strerror(errno));
 	}
