@@ -27,7 +27,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
-MODULE_DESCRIPTION("iptables REDIRECT target module");
+MODULE_DESCRIPTION("Xtables: Connection redirection to localhost");
 
 #if 0
 #define DEBUGP printk

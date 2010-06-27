@@ -21,7 +21,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
-MODULE_DESCRIPTION("iptables match for matching number of pkts/bytes per connection");
+MODULE_DESCRIPTION("Xtables: Number of packets/bytes per connection matching");
 MODULE_ALIAS("ipt_connbytes");
 
 /* 64bit divisor, dividend and result. dynamic precision */

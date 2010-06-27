@@ -31,7 +31,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
-MODULE_DESCRIPTION("iptables REJECT target module");
+MODULE_DESCRIPTION("Xtables: packet \"rejection\" target for IPv4");
 
 #if 0
 #define DEBUGP printk

@@ -25,7 +25,7 @@
 #include <linux/netfilter_ipv6/ip6_tables.h>
 
 MODULE_AUTHOR("Jan Rekorajski <baggins@pld.org.pl>");
-MODULE_DESCRIPTION("IP6 tables LOG target module");
+MODULE_DESCRIPTION("Xtables: IPv6 packet logging to syslog");
 MODULE_LICENSE("GPL");
 
 struct in_device;

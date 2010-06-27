@@ -20,7 +20,7 @@
 #include <linux/netfilter_ipv4/ipt_ecn.h>
 
 MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
-MODULE_DESCRIPTION("iptables ECN matching module");
+MODULE_DESCRIPTION("Xtables: Explicit Congestion Notification (ECN) flag match for IPv4");
 MODULE_LICENSE("GPL");
 
 static inline int match_ip(const struct sk_buff *skb,

@@ -15,7 +15,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>");
-MODULE_DESCRIPTION("iptables arbitrary IP range match module");
+MODULE_DESCRIPTION("Xtables: arbitrary IPv4 range matching");
 
 #if 0
 #define DEBUGP printk

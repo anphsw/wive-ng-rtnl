@@ -17,7 +17,7 @@
 #include <linux/netfilter/x_tables.h>
 
 MODULE_AUTHOR("Patrick McHardy <kaber@trash.net>");
-MODULE_DESCRIPTION("Xtables IPsec policy matching module");
+MODULE_DESCRIPTION("Xtables: IPsec policy match");
 MODULE_LICENSE("GPL");
 
 static inline int

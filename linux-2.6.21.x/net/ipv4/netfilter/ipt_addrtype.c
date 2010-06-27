@@ -20,7 +20,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Patrick McHardy <kaber@trash.net>");
-MODULE_DESCRIPTION("iptables addrtype match");
+MODULE_DESCRIPTION("Xtables: address type match for IPv4");
 
 static inline int match_type(__be32 addr, u_int16_t mask)
 {

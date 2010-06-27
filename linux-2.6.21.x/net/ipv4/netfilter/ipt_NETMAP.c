@@ -25,7 +25,7 @@
 #define MODULENAME "NETMAP"
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Svenning Soerensen <svenning@post5.tele.dk>");
-MODULE_DESCRIPTION("iptables 1:1 NAT mapping of IP networks target");
+MODULE_DESCRIPTION("Xtables: 1:1 NAT mapping of IPv4 subnets");
 
 #if 0
 #define DEBUGP printk

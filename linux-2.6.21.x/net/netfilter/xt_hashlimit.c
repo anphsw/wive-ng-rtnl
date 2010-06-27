@@ -30,7 +30,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
-MODULE_DESCRIPTION("iptables match for limiting per hash-bucket");
+MODULE_DESCRIPTION("Xtables: per hash-bucket rate-limit match");
 MODULE_ALIAS("ipt_hashlimit");
 MODULE_ALIAS("ip6t_hashlimit");
 

@@ -25,7 +25,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
-MODULE_DESCRIPTION("iptables syslog logging module");
+MODULE_DESCRIPTION("Xtables: IPv4 packet logging to syslog");
 
 #if 0
 #define DEBUGP printk
