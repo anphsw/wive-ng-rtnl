@@ -51,7 +51,7 @@ void loadDefault(int chip_id)
 	break;
     case 2561: 
 	system("ralink_init clear 2561");
-	system("ralink_init renew 2561 /etc_ro/Wireless/RT61AP/RT2561_default");
+	system("ralink_init renew 2561 /etc/default/RT2561_default");
 	break;
     default:
 	printf("%s:Wrong chip id\n",__FUNCTION__);

@@ -30,23 +30,23 @@
 #if defined(CONFIG_RALINK_RT3052)
 
 #if defined(CONFIG_RALINK_RT3050_1T1R)
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT3050_AP_1T1R_V1_0.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT3050_AP_1T1R_V1_0.bin"
 #elif defined(CONFIG_RALINK_RT3051_1T2R)
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT3051_AP_1T2R_V1_0.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT3051_AP_1T2R_V1_0.bin"
 #elif defined(CONFIG_RALINK_RT3052_2T2R)
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT3052_AP_2T2R_V1_1.bin"                                                      
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT3052_AP_2T2R_V1_1.bin"                                                      
 #elif defined(CONFIG_RT2860V2_2850)
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2850_AP_2T3R_V1_6.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT2880_RT2850_AP_2T3R_V1_6.bin"
 #else // RFIC 2820
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2820_AP_2T3R_V1_6.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT2880_RT2820_AP_2T3R_V1_6.bin"
 #endif
 
 #else
 
 #if defined(CONFIG_RT2860V2_AP_2850) || defined(CONFIG_RT2860V2_STA_2850)
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2850_AP_2T3R_V1_5.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT2880_RT2850_AP_2T3R_V1_5.bin"
 #else // RFIC 2820
-#define EEPROM_DEFAULT_PATH                     "/etc/default/RT2880_RT2820_AP_2T3R_V1_5.bin"
+#define EEPROM_DEFAULT_PATH                     "/etc/Wireless/RT2880_RT2820_AP_2T3R_V1_5.bin"
 #endif
 
 #endif //RT3052
