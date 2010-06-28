@@ -216,21 +216,21 @@ function CheckValue()
 </tr>
 
 <tr>
-  <td class="head" id="lDhcpType">DHCP Type</td>
+  <td class="head" id="lDhcpType">DHCP Server</td>
   <td>
     <select name="lanDhcpType" size="1" onChange="dhcpTypeSwitch();">
-      <option value="DISABLE" id="lDhcpTypeD">Disable</option>
-      <option value="SERVER" id="lDhcpTypeS">Server</option>
+      <option value="DISABLE" id="lDhcpTypeD">Disabled</option>
+      <option value="SERVER" id="lDhcpTypeS">Enabled</option>
     </select>
   </td>
 </tr>
 <tr id="start">
-  <td class="head" id="lDhcpStart" align="right">DHCP Start IP</td>
+  <td class="head" id="lDhcpStart" align="right">DHCP Pool Start IP</td>
   <td><input name="dhcpStart" maxlength="15"
              value="<% getCfgGeneral(1, "dhcpStart"); %>"></td>
 </tr>
 <tr id="end">
-  <td class="head" id="lDhcpEnd" align="right">DHCP End IP</td>
+  <td class="head" id="lDhcpEnd" align="right">DHCP Pool End IP</td>
   <td><input name="dhcpEnd" maxlength="15"
              value="<% getCfgGeneral(1, "dhcpEnd"); %>"></td>
 </tr>
@@ -255,7 +255,7 @@ function CheckValue()
              value="<% getCfgGeneral(1, "dhcpGateway"); %>"></td>
 </tr>
 <tr id="lease">
-  <td class="head" id="lDhcpLease" align="right">DHCP Lease Time</td>
+  <td class="head" id="lDhcpLease" align="right">DHCP Lease Time (in seconds)</td>
   <td><input name="dhcpLease" maxlength="8"
              value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
 </tr>

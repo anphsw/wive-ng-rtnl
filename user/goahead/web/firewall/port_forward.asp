@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Virtual Settings</title>
+<title>Port Forwarding Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 <script type="text/javascript" src="/lang/b28n.js"></script>
@@ -274,19 +274,19 @@ function updateState()
                          <!--     body      -->
 <body onload="updateState()">
 <table class="body"><tr><td>
-<h1 id="forwardTitle">Virtual Server  Settings </h1>
+<h1 id="forwardTitle">Port Forwarding Settings </h1>
 <% checkIfUnderBridgeModeASP(); %>
-<p id="forwardIntroduction"> You may setup Virtual Servers to provide services on Internet.</p>
+<p id="forwardIntroduction"> You may setup port forwarding to provide services on Internet.</p>
 <hr />
 
 <form method=post name="portForward" action=/goform/portForward>
 <table width="400" border="1" cellpadding="2" cellspacing="1">
 <tr>
-  <td class="title" colspan="2" id="forwardVirtualSrv">Virtual Server Settings</td>
+  <td class="title" colspan="2" id="forwardVirtualSrv">Port Forwarding Settings</td>
 </tr>
 <tr>
 	<td class="head" id="forwardVirtualSrvSet">
-		Virtual Server Settings
+		Port Forwarding Settings
 	</td>
 	<td>
 	<select onChange="updateState()" name="portForwardEnabled" size="1">
@@ -353,7 +353,7 @@ function updateState()
 
 <table width="400" border="1" cellpadding="2" cellspacing="1">	
 	<tr>
-		<td class="title" colspan="5" id="forwardCurrentVirtualSrv">Current Virtual Servers in system: </td>
+		<td class="title" colspan="5" id="forwardCurrentVirtualSrv">Current port forwarding setup: </td>
 	</tr>
 
 	<tr>
