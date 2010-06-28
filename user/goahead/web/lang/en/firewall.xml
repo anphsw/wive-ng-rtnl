@@ -30,13 +30,13 @@
   <message msgid="port filter dest port range" msgstr="Dest Port Range" />
   <message msgid="port filter packetcount" msgstr="Pkt Cnt" />
 
-  <message msgid="forward title" msgstr="Virtual Server  Settings " />
-  <message msgid="forward introduction" msgstr=" You can set up Virtual Servers to provide services on the Internet." />
-  <message msgid="forward virtual server" msgstr="Virtual Server Settings" />
-  <message msgid="forward virtual server setting" msgstr="Virtual Server Settings" />
+  <message msgid="forward title" msgstr="Port Forwarding  Settings " />
+  <message msgid="forward introduction" msgstr=" You can set up port forwarding to provide services on the Internet." />
+  <message msgid="forward virtual server" msgstr="Port Forwarding Settings" />
+  <message msgid="forward virtual server setting" msgstr="Port Forwarding Settings" />
   <message msgid="forward virtual server ipaddr" msgstr="IP Address" />
   <message msgid="forward virtual server port range" msgstr="Port Range" />
-  <message msgid="forward current virtual server" msgstr="Current Virtual Servers in the system: " />
+  <message msgid="forward current virtual server" msgstr="Current port forwarding setup: " />
 
   <message msgid="dmz title" msgstr=" DMZ Settings " />
   <message msgid="dmz introduction" msgstr=" You can set up a De-Militarized Zone (DMZ) to separate your internal network and the Internet." />
