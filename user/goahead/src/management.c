@@ -102,47 +102,52 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
  */
 static void NTP(webs_t wp, char_t *path, char_t *query)
 {
-	char *tz, *ntpServer, *ntpSync;
+	char *tz, *ntpServer, *ntpSync, *ntpEnabled;
 
 	tz = websGetVar(wp, T("time_zone"), T(""));
 	ntpServer = websGetVar(wp, T("NTPServerIP"), T(""));
 	ntpSync = websGetVar(wp, T("NTPSync"), T(""));
+	ntpEnabled = websGetVar(wp, T("ntp_enabled"), T("off"));
 
-	if(!tz || !ntpServer || !ntpSync)
-		return;
+	if (strcmp(ntpEnabled, "on")==0)
+	{
+		if ((strlen(tz)>0) && (!checkSemicolon(tz)))
+		{
+			if (strlen(ntpServer)==0)
+			{
+				// user choose to make  NTP server disable
+				nvram_bufset(RT2860_NVRAM, "NTPServerIP", "");
+				nvram_bufset(RT2860_NVRAM, "NTPSync", "");
+			}
+			else
+			{
+				if ((!checkSemicolon(ntpServer)) && (strlen(ntpSync)>0) && (atoi(ntpSync)<=300))
+				{
+					nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
+					nvram_bufset(RT2860_NVRAM, "NTPSync", ntpSync);
+				}
+			}
 
-	if(!strlen(tz))
-		return;
-
-	if(checkSemicolon(tz))
-		return;
-
-	if(!strlen(ntpServer)){
-		// user choose to make  NTP server disable
-		nvram_bufset(RT2860_NVRAM, "NTPServerIP", "");
-		nvram_bufset(RT2860_NVRAM, "NTPSync", "");
-	}else{
-		if(checkSemicolon(ntpServer))
-			return;
-		if(!strlen(ntpSync))
-			return;
-		if(atoi(ntpSync) > 300)
-			return;
-		nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
-		nvram_bufset(RT2860_NVRAM, "NTPSync", ntpSync);
+			nvram_bufset(RT2860_NVRAM, "TZ", tz);
+		}
 	}
-	nvram_bufset(RT2860_NVRAM, "TZ", tz);
+	
+	nvram_bufset(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ntp restart");
+	if (strcmp(ntpEnabled, "on")==0)
+		doSystem("service ntp start");
+	else
+		doSystem("service ntp stop");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
+	websWrite(wp, T("NTPEnabled: %s<br>\n"), ntpEnabled);
 	websWrite(wp, T("NTPserver: %s<br>\n"), ntpServer);
 	websWrite(wp, T("TZ: %s<br>\n"), tz);
 	websWrite(wp, T("NTPSync: %s<br>\n"), ntpSync);
 	websFooter(wp);
-	websDone(wp, 200);        
+	websDone(wp, 200);
 }
 
 #ifdef CONFIG_DATE
@@ -234,7 +239,7 @@ static void GreenAP(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("GreenAPEnd4: %s %s<br>\n"), eminute4, ehour4);
 	websWrite(wp, T("GreenAPAction4: %s<br>\n"), action4);
 	websFooter(wp);
-	websDone(wp, 200);        
+	websDone(wp, 200);
 }
 #endif
 
@@ -271,7 +276,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ddns restart");
+	doSystem("service ddns start");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -370,24 +375,29 @@ static long long getIfStatistic(char *interface, int type)
 	int skip_line = 2;
 	char buf[1024], *field, *semiColon = NULL;
 	FILE *fp = fopen(PROC_IF_STATISTIC, "r");
-	if(!fp){
+
+	if(!fp)
+	{
 		printf("no proc?\n");
 		return -1;
 	}
 
-	while(fgets(buf, 1024, fp)){
+	while (fgets(buf, 1024, fp))
+	{
 		char *ifname;
-		if(skip_line != 0){
+		if (skip_line != 0)
+		{
 			skip_line--;
 			continue;
 		}
-		if(! (semiColon = strchr(buf, ':'))  )
+		if ( !(semiColon = strchr(buf, ':')))
 			continue;
 		*semiColon = '\0';
 		ifname = buf;
 		ifname = strip_space(ifname);
 
-		if(!strcmp(ifname, interface)){
+		if (!strcmp(ifname, interface))
+		{
 			found_flag = 1;
 			break;
 		}
@@ -430,20 +440,25 @@ int getIfStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	int skip_line = 2;
 	char *interface, *type, *field, *semiColon = NULL;
 	char buf[1024], result[32];
+	
 	FILE *fp = fopen(PROC_IF_STATISTIC, "r");
-	if(!fp){
+	if(!fp)
+	{
 		websWrite(wp, T("no proc?\n"));
 		return -1;
 	}
 
-    if(ejArgs(argc, argv, T("%s %s"), &interface, &type) != 2){
+	if (ejArgs(argc, argv, T("%s %s"), &interface, &type) != 2)
+	{
 		websWrite(wp, T("Wrong argument.\n"));
-        return -1;
-    }
+		return -1;
+	}
 
-	while(fgets(buf, 1024, fp)){
+	while (fgets(buf, 1024, fp))
+	{
 		char *ifname;
-		if(skip_line != 0){
+		if(skip_line != 0)
+		{
 			skip_line--;
 			continue;
 		}
@@ -590,33 +605,44 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	while(fgets(buf, 1024, fp)){
+	while (fgets(buf, 1024, fp))
+	{
 		char *ifname, *semiColon;
 		long long if_rc;
-		if(skip_line != 0){
+		if (skip_line != 0)
+		{
 			skip_line--;
 			continue;
 		}
-		if(! (semiColon = strchr(buf, ':'))  )
+		if (!(semiColon = strchr(buf, ':')))
 			continue;
 		*semiColon = '\0';
 
 		ifname = buf;
 		ifname = strip_space(ifname);
+		
+		// Filter 'lo' interface
+		if (strcmp(ifname, "lo")==0)
+			continue;
 
 		/* try to get statistics data */
-		if(getIfStatistic(ifname, RXPACKET) >= 0){
+		if (getIfStatistic(ifname, RXPACKET) >= 0)
+		{
 			/* a success try */
-			if(first_time_flag){
+			if (first_time_flag)
+			{
 				pos = snprintf(result+rc, 1024-rc, "\"%s\"", ifname);
 				rc += pos;
 				first_time_flag = 0;
-			}else{
+			}
+			else
+			{
 				pos = snprintf(result+rc, 1024-rc, ",\"%s\"", ifname);
 				rc += pos;
 			}
 
-		}else	/* failed and just skip */
+		}
+		else	/* failed and just skip */
 			continue;
 
 		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, RXPACKET));
@@ -631,7 +657,7 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	fclose(fp);
 
 	websWrite(wp, T("%s"), result);
-    return 0;
+	return 0;
 }
 
 
@@ -644,7 +670,8 @@ int getMemTotalASP(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	while(fgets(buf, 1024, fp)){
+	while(fgets(buf, 1024, fp))
+	{
 		if(! (semiColon = strchr(buf, ':'))  )
 			continue;
 		*semiColon = '\0';
@@ -818,7 +845,7 @@ static char *getLog(char *filename)
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-        doSystem("service syslog restart");
+	doSystem("service syslog restart");
 	websRedirect(wp, "adm/syslog.asp");
 }
 #endif

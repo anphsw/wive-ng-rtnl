@@ -16,3 +16,15 @@ function enableTextField(field)
 	else
 		field.onfocus = field.oldOnFocus;
 }
+
+function style_display_on()
+{
+	if (window.ActiveXObject) // IE
+	{
+		return "block";
+	}
+	else if (window.XMLHttpRequest) // Mozilla, Safari...
+	{
+		return "table-row";
+	}
+}

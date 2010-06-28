@@ -1621,32 +1621,20 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	websHeader(wp);
 	websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
 	websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
-    websFooter(wp);
-    websDone(wp, 200);        
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 {
-	char *rmE = websGetVar(wp, T("remoteManagementEnabled"), T(""));
 	char *wpfE = websGetVar(wp, T("pingFrmWANFilterEnabled"), T(""));
-	char *spifw = websGetVar(wp, T("spiFWEnabled"), T("1"));
 
 	// someone use malform page.....
-	if(!rmE || !strlen(rmE))
-		return;
 	if(!wpfE || !strlen(wpfE))
-		return;
-	if(!spifw || !strlen(spifw))
 		return;
 
 	// TODO: make a new chain instead of flushing the INPUT chain
 	doSystem("iptables -t filter -F INPUT");
-
-	if(atoi(rmE) == 0){		// disable
-		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "0");
-	}else{					// enable
-		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "1");
-	}
 
 	if(atoi(wpfE) == 0){		// disable
 		nvram_bufset(RT2860_NVRAM, "WANPingFilter", "0");
@@ -1655,11 +1643,6 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 		doSystem("iptables -t filter -A INPUT -i %s -p icmp -j DROP", getWanIfNamePPP());
 	}
 
-	if(atoi(spifw) == 0){		// disable
-		nvram_bufset(RT2860_NVRAM, "SPIFWEnabled", "0");
-	}else{					// enable
-		nvram_bufset(RT2860_NVRAM, "SPIFWEnabled", "1");
-	}
 	nvram_commit(RT2860_NVRAM);
 
 	iptablesRemoteManagementRun();
@@ -1668,12 +1651,9 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	iptablesIPPortFilterRun();
 
 	websHeader(wp);
-	websWrite(wp, T("RemoteManage: %s<br>\n"), rmE);
 	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
-	websWrite(wp, T("SPIFWEnabled: %s<br>\n"), spifw);
-    websFooter(wp);
-    websDone(wp, 200);        
-
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 

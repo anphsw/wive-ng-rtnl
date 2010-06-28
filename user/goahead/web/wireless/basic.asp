@@ -6,6 +6,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Basic Wireless Settings</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -1511,82 +1512,72 @@ function RadioStatusChange(rs)
       -->
     </td>
   </tr>
-  <input type="hidden" name="bssid_num" value="1">
-  <tr> 
-    <td class="head" id="basicSSID">Network Name(SSID)</td>
-    <td>
-      <input type=text name=ssid size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID1"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID0">Hidden</font>
-      <input type=checkbox name=hssid value="0">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID0">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="0">
-    </td>
-  </tr>
-  <tr id="div_hssid1"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID1">Multiple SSID</font>1</td>
-    <td>
-      <input type=text name=mssid_1 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID2"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID1">Hidden</font>
-      <input type=checkbox name=hssid value="1">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID1">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="1">
-    </td>
-  </tr>
-  <tr id="div_hssid2"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID2">Multiple SSID</font>2</td>
-    <td>
-      <input type=text name=mssid_2 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID3"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID2">Hidden</font>
-      <input type=checkbox name=hssid value="2">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID2">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="2">
-    </td>
-  </tr>
-  <tr id="div_hssid3"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID3">Multiple SSID</font>3</td>
-    <td><input type=text name=mssid_3 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID4"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID3">Hidden</font>
-      <input type=checkbox name=hssid value="3">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID3">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="3">
-    </td>
-  </tr>
-  <tr id="div_hssid4"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID4">Multiple SSID</font>4</td>
-    <td><input type=text name=mssid_4 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID5"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID4">Hidden</font>
-      <input type=checkbox name=hssid value="4">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID4">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="4">
-    </td>
-  </tr>
-  <tr id="div_hssid5"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID5">Multiple SSID</font>5</td>
-    <td><input type=text name=mssid_5 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID6"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID5">Hidden</font>
-      <input type=checkbox name=hssid value="5">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID5">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="5">
-    </td>
-  </tr>
-  <tr id="div_hssid6"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID6">Multiple SSID</font>6</td>
-    <td><input type=text name=mssid_6 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID7"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID6">Hidden</font>
-      <input type=checkbox name=hssid value="6">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID6">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="6">
-    </td>
-  </tr>
-  <tr id="div_hssid7"> 
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID7">Multiple SSID</font>7</td>
-    <td><input type=text name=mssid_7 size=20 maxlength=32 value="<% getCfgGeneral(1, "SSID8"); %>">
-      &nbsp;&nbsp;<font id="basicHSSID7">Hidden</font>
-      <input type=checkbox name=hssid value="7">
-      &nbsp;&nbsp;<font id="basicIsolatedSSID7">Isolated</font>
-      <input type=checkbox name=isolated_ssid value="7">
-    </td>
-  </tr>
+<input type="hidden" name="bssid_num" value="1">
+
+<tr> 
+	<td class="head" id="basicSSID">Network Name(SSID)</td>
+	<td>
+		<input class="normal" type="text" name="ssid" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
+		<font id="basicHSSID0">Hidden</font><input type="checkbox" name="hssid" value="0">&nbsp;
+		<font id="basicIsolatedSSID0">Isolated</font><input type="checkbox" name="isolated_ssid" value="0">
+	</td>
+</tr>
+<tr id="div_hssid1"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID1">Multiple SSID</font>1</td>
+	<td>
+		<input class="normal" name="mssid_1" maxlength="32" value="<% getCfgGeneral(1, "SSID2"); %>">
+		<font id="basicHSSID1">Hidden</font><input type=checkbox name=hssid value="1">&nbsp;
+		<font id="basicIsolatedSSID1">Isolated</font><input type="checkbox" name="isolated_ssid" value="1">
+	</td>
+</tr>
+<tr id="div_hssid2"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID2">Multiple SSID</font>2</td>
+	<td>
+		<input class="normal" type="text" name="mssid_2" maxlength="32" value="<% getCfgGeneral(1, "SSID3"); %>">
+		<font id="basicHSSID2">Hidden</font><input type="checkbox" name="hssid" value="2">&nbsp;
+		<font id="basicIsolatedSSID2">Isolated</font><input type="checkbox" name="isolated_ssid" value="2">
+	</td>
+</tr>
+<tr id="div_hssid3"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID3">Multiple SSID</font>3</td>
+	<td>
+		<input class="normal" type="text" name="mssid_3" maxlength="32" value="<% getCfgGeneral(1, "SSID4"); %>">
+		<font id="basicHSSID3">Hidden</font><input type="checkbox" name="hssid" value="3">&nbsp;
+		<font id="basicIsolatedSSID3">Isolated</font><input type="checkbox" name="isolated_ssid" value="3">
+	</td>
+</tr>
+<tr id="div_hssid4"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID4">Multiple SSID</font>4</td>
+	<td>
+		<input class="normal" type="text" name="mssid_4" maxlength="32" value="<% getCfgGeneral(1, "SSID5"); %>">
+		<font id="basicHSSID4">Hidden</font><input type="checkbox" name="hssid" value="4">&nbsp;
+		<font id="basicIsolatedSSID4">Isolated</font><input type="checkbox" name="isolated_ssid" value="4">
+	</td>
+</tr>
+<tr id="div_hssid5"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID5">Multiple SSID</font>5</td>
+	<td>
+		<input class="normal" type="text" name="mssid_5" maxlength="32" value="<% getCfgGeneral(1, "SSID6"); %>">
+		<font id="basicHSSID5">Hidden</font><input type="checkbox" name="hssid" value="5">&nbsp;
+		<font id="basicIsolatedSSID5">Isolated</font><input type="checkbox" name="isolated_ssid" value="5">
+	</td>
+</tr>
+<tr id="div_hssid6"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID6">Multiple SSID</font>6</td>
+	<td>
+		<input class="normal" type="text" name="mssid_6" maxlength="32" value="<% getCfgGeneral(1, "SSID7"); %>">
+		<font id="basicHSSID6">Hidden</font><input type="checkbox" name="hssid" value="6">&nbsp;
+		<font id="basicIsolatedSSID6">Isolated</font><input type=checkbox name=isolated_ssid value="6">
+	</td>
+</tr>
+<tr id="div_hssid7"> 
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID7">Multiple SSID</font>7</td>
+	<td>
+		<input class="normal" type="text" name="mssid_7" maxlength="32" value="<% getCfgGeneral(1, "SSID8"); %>">
+		<font id="basicHSSID7">Hidden</font><input type="checkbox" name="hssid" value="7">&nbsp;
+		<font id="basicIsolatedSSID7">Isolated</font><input type="checkbox" name="isolated_ssid" value="7">
+	</td>
+</tr>
   <tr> 
     <td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
     <td>

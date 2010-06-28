@@ -94,6 +94,7 @@ function initValue()
 	var radvdb = "<% getRadvdBuilt(); %>";
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
+	var rmtHTTP = "<% getCfgGeneral(1, "RemoteManagement"); %>";
 
 	initTranslation();
 
@@ -105,6 +106,7 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
+	form.rmtHTTP.checked = (rmtHTTP == "1");
 
 	if (lltdb == "0")
 	{
@@ -226,6 +228,12 @@ function CheckValue()
 		<option value="0" id="lDnspD">Disable</option>
 		<option value="1" id="lDnspE">Enable</option>
 	</select>
+</td>
+<tr>
+<tr>
+<td class="head" id="nRemAcc">Remote Management (via WAN)</td>
+<td>
+	<input type="checkbox" name="rmtHTTP">&nbsp;HTTP&nbsp;
 </td>
 </tr>
 </table>

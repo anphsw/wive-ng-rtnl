@@ -237,7 +237,7 @@ function formBootloaderCheck()
 
 function initTranslation()
 {
-	var e = document.getElementById("uploadTitle");
+/*	var e = document.getElementById("uploadTitle");
 	e.innerHTML = _("upload title");
 	e = document.getElementById("uploadIntroduction1");
 	e.innerHTML = _("upload introduction1");
@@ -272,13 +272,15 @@ function initTranslation()
 	e = document.getElementById("Force");
 	e.innerHTML = _("upload firmware force");
 	e = document.getElementById("ForceMemUpgradeSubmit");
-	e.value = _("admin apply");
+	e.value = _("admin apply");*/
 }
 
-function pageInit(){
+function pageInit()
+{
 	initTranslation();
 
-	if(isStorageBuilt){		
+	if(isStorageBuilt)
+	{
 		makeRequest("/goform/storageGetFirmwarePath", "n/a");
 		InitializeTimer();
 	}
@@ -288,115 +290,99 @@ function pageInit(){
 	else
 		document.ForceMemUpgrade.ForceMemUpgradeSelect.options.selectedIndex = 0;
 
-    document.UploadFirmware.UploadFirmwareSubmit.disabled = false;
-    if (storageb == "1")
-    {
-	    document.getElementById("uploadFWUSBTable").style.visibility = "visible";
-	    document.getElementById("uploadFWUSBTable").style.display = style_display_on();
-	    document.getElementById("uploadFWUSBSubmit").style.visibility = "visible";
-	    document.getElementById("uploadFWUSBSubmit").style.display = style_display_on();
-	    document.getElementById("div_memupgrade").style.visibility = "visible";
-	    document.getElementById("div_memupgrade").style.display = style_display_on();
-	    document.getElementById("ForceMemUpgradeSubmit").style.visibility = "visible";
-	    document.getElementById("ForceMemUpgradeSubmit").style.display = style_display_on();
-	    document.ForceMemUpgrade.ForceMemUpgradeSubmit.disabled = false;
-    }
-    else
-    {
-	    document.getElementById("uploadFWUSBTable").style.visibility = "hidden";
-	    document.getElementById("uploadFWUSBTable").style.display = "none";
-	    document.getElementById("uploadFWUSBSubmit").style.visibility = "hidden";
-	    document.getElementById("uploadFWUSBSubmit").style.display = "none";
-	    document.getElementById("div_memupgrade").style.visibility = "hidden";
-	    document.getElementById("div_memupgrade").style.display = "none";
-	    document.getElementById("ForceMemUpgradeSubmit").style.visibility = "hidden";
-	    document.getElementById("ForceMemUpgradeSubmit").style.display = "none";
-	    document.ForceMemUpgrade.ForceMemUpgradeSubmit.disabled = true;
-    }
-    document.UploadBootloader.UploadBootloaderSubmit.disabled = false;
+	document.UploadFirmware.UploadFirmwareSubmit.disabled = false;
+	if (storageb == "1")
+	{
+		document.getElementById("uploadFWUSBTable").style.visibility = "visible";
+		document.getElementById("uploadFWUSBTable").style.display = style_display_on();
+		document.getElementById("uploadFWUSBSubmit").style.visibility = "visible";
+		document.getElementById("uploadFWUSBSubmit").style.display = style_display_on();
+		document.getElementById("div_memupgrade").style.visibility = "visible";
+		document.getElementById("div_memupgrade").style.display = style_display_on();
+		document.getElementById("ForceMemUpgradeSubmit").style.visibility = "visible";
+		document.getElementById("ForceMemUpgradeSubmit").style.display = style_display_on();
+		document.ForceMemUpgrade.ForceMemUpgradeSubmit.disabled = false;
+	}
+	else
+	{
+		document.getElementById("uploadFWUSBTable").style.visibility = "hidden";
+		document.getElementById("uploadFWUSBTable").style.display = "none";
+		document.getElementById("uploadFWUSBSubmit").style.visibility = "hidden";
+		document.getElementById("uploadFWUSBSubmit").style.display = "none";
+		document.getElementById("div_memupgrade").style.visibility = "hidden";
+		document.getElementById("div_memupgrade").style.display = "none";
+		document.getElementById("ForceMemUpgradeSubmit").style.visibility = "hidden";
+		document.getElementById("ForceMemUpgradeSubmit").style.display = "none";
+		document.ForceMemUpgrade.ForceMemUpgradeSubmit.disabled = true;
+	}
+	document.UploadBootloader.UploadBootloaderSubmit.disabled = false;
 
 //	document.UploadFirmware.filename.disabled = false;
 	document.getElementById("loading").style.display="none";
-
-
 }
-</script></head><body onLoad="pageInit()">
+</script></head><body onLoad="pageInit();">
 <table class="body"><tbody><tr><td>
-<h1 id="uploadTitle">Upgrade Firmware</h1>
-<p><font id="uploadIntroduction1">Upgrade the WR-NL firmware to obtain new functionality. </font><font id="uploadIntroduction2" color="#ff0000">It takes about 1 minute to upload &amp; upgrade flash and be patient please. Caution! A corrupted image will hang up the system.</font> </p>
+<h1 id="uploadTitle">Upgrade Firmware &amp; Bootloader</h1>
+<p>
+	<font id="uploadIntroduction1">Upgrade the WR-NL firmware to obtain new functionality.</font>
+	<font id="uploadIntroduction2" color="#ff0000">It takes about 1 minute to upload &amp; upgrade flash and be patient please. Caution! A corrupted image will hang up the system.</font>
+</p>
 
 <!-- ----------------- Upload firmware Settings ----------------- -->
-<form method="post" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data">
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody><tr>
-  <td class="title" colspan="2" id="uploadFW">Update Firmware</td>
+<table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr>
+	<td colspan="2" class="title">Update Firmware / Bootloader</td>
 </tr>
 <tr>
-  <td class="head" id="uploadFWLocation">Location:</td>
-	<td> <input name="filename" size="20" maxlength="256" type="file"> </td>
+	<td class="head" id="uploadFWLocation">Firmware update:</td>
+	<td class="value">
+	<form method="POST" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data" onSubmit="return uploadFirmwareCheck();" >
+		<input name="filename" size="20" maxlength="256" type="file">
+		<input value="Update" id="uploadFWApply" name="UploadFirmwareSubmit" type="submit">
+	</form>
+	</td>
 </tr>
-</tbody></table>
-<input value="Apply" id="uploadFWApply" name="UploadFirmwareSubmit" type="submit" onClick="return uploadFirmwareCheck();"> &nbsp;&nbsp;
-</form>
-
-<form method="get" name="UploadFirmwareUSB" action="/cgi-bin/usb_upgrade.cgi">
-<table id="uploadFWUSBTable" name="uploadFWUSBTable" border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody><tr>
-  <td class="title" colspan="2" id="uploadFWFromUSB">Update Firmware From USB Disk</td>
-</tr>
-<tr>
-  <td class="head" id="uploadFWUSBLocation">Location:</td>
-  <td>
-	<select name="firmware_path" size="1">
+<tr id="uploadFWUSBTable">
+	<td class="head">USB Firmware update:</td>
+	<td class="value">
+	<form method="GET" name="UploadFirmwareUSB" action="/cgi-bin/usb_upgrade.cgi" onsubmit="return uploadFirmwareUSBCheck();" >
+		<select name="firmware_path" size="1">
 		<!-- ....Javascript will update these options.... -->
-	</select>                        
-  </td>
-</tr>
-</tbody></table>
-<table border="0" id="uploadFWUSBSubmit" name="uploadFWUSBSubmit">
-  <tr>
-    <td>
-      <input value="Apply" id="uploadFWUSBApply" name="UploadFirmwareUSBSubmit" type="submit" onClick="return uploadFirmwareUSBCheck()">
-    </td>
-</form>
-<form method="get" name="ScanUSBFirmware" action="/goform/ScanUSBFirmware">
-    <td>
-  <input value="Scan" id="uploadFWUSBScan" name="UploadFirmwareUSBScan" type="submit"> &nbsp;&nbsp;
-    </td>
-</form>
-  </tr>
-</table>
-
-<form method="post" name="UploadBootloader" action="/cgi-bin/upload_bootloader.cgi" enctype="multipart/form-data">
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody><tr>
-  <td class="title" colspan="2" id="uploadBoot">Update Bootloader</td>
+		</select>
+		<input value="Upload" id="uploadFWUSBApply" name="UploadFirmwareUSBSubmit" type="submit">
+	</form>
+	</td>
 </tr>
 <tr>
-  <td class="head" id="uploadBootLocation">Location:</td>
-	<td> <input name="filename" size="20" maxlength="256" type="file"> </td>
+	<td class="head">Scan USB Firmware:</td>
+	<td class="value">
+	<form method="GET" name="ScanUSBFirmware" action="/goform/ScanUSBFirmware">
+		<input value="Scan" id="uploadFWUSBScan" name="UploadFirmwareUSBScan" type="submit">
+	</form>
+	</td>
 </tr>
-</tbody></table>
-<input value="Apply" id="uploadBootApply" name="UploadBootloaderSubmit" onclick="return formBootloaderCheck();" type="submit"> &nbsp;&nbsp;
-</form>
-
-<form method="post" name="ForceMemUpgrade" action="/goform/forceMemUpgrade">
-<table border="1" id="div_memupgrade" cellpadding="2" cellspacing="1" width="95%">
-<tbody><tr>
-	<td class="title" colspan="2" id="ForceUpgradeViaMem">Force upgrade via memory</td>
-</tr>
-<tr>
-	<td class="head" id="Force">Force:</td>
-	<td>
+<tr id="div_memupgrade">
+	<td class="head" id="Force">Force memory upgrade:</td>
+	<td class="value">
+	<form method="Post" name="ForceMemUpgrade" action="/goform/forceMemUpgrade">
 		<select name="ForceMemUpgradeSelect" size="1">
 			<option value="0">No</option>
 			<option value="1">Yes</option>
-		</select>                        
+		</select>
+		<input value="Apply" id="ForceMemUpgradeSubmit" name="ForceMemUpgradeSubmit" type="submit">
+	</form>
 	</td>
 </tr>
-</tbody></table>
-<input value="Apply" id="ForceMemUpgradeSubmit" name="ForceMemUpgradeSubmit" type="submit"> &nbsp;&nbsp;
-</form>
+<tr>
+	<td class="head" id="uploadBootLocation">Location:</td>
+	<td class="value">
+	<form method="POST" name="UploadBootloader" action="/cgi-bin/upload_bootloader.cgi" enctype="multipart/form-data" onSubmit="return formBootloaderCheck();" >
+		<input name="filename" size="20" maxlength="256" type="file">
+		<input value="Upload" id="uploadBootApply" name="UploadBootloaderSubmit" type="submit">
+	</form>
+	</td>
+</tr>
+</table>
 
 <br>
 </td></tr></tbody></table>

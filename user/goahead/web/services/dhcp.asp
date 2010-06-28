@@ -2,6 +2,7 @@
 <head>
 <title>Internet Services Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
@@ -13,6 +14,61 @@ Butterlate.setTextDomain("services");
 var secs;
 var timerID = null;
 var timerRunning = false;
+
+var dhcpList=
+[
+	<% getDhcpStaticList(); %>
+];
+
+function genTable(disabled)
+{
+	disabled = (disabled) ? ' disabled="disabled"' : '';
+
+	var table = '<table class="small" style="width: 100%"><tr><th style="text-align: left;">MAC address</th><th style="text-align: left;">IP address</th><th>Action</th></tr>';
+	for (var i=0; i<dhcpList.length; i++)
+	{
+		var row = dhcpList[i];
+		table += '<tr><td>' + row[0] + '</td>';
+		table += '<td>' + row[1] + '</td>';
+		table += '<td style="text-align: center;"><a style="color: #ff0000;" title="Delete record" href="javascript:deleteIPItem(' + i + ');"' + disabled + '><b>[x]</b></a></td></tr>';
+	}
+	table += '<tr><td><input class="normal" value="" name="dhcpStaticMAC"' + disabled + '></td>';
+	table += '<td><input class="normal" value="" name="dhcpStaticIP"' + disabled + '></td>';
+	table += '<td style="text-align: center;"><input type="button" class="short" title="Add record" value="Add" onclick="addIPItem(this.form);"' + disabled + '></td></tr>';
+	table += '</table>';
+	
+	var elem = document.getElementById("dhcpStaticIPList");
+	if (elem!=null)
+		elem.innerHTML = table;
+}
+
+function genIPTableData(form)
+{
+	var values = "";
+	for (var i=0; i<dhcpList.length; i++)
+		values += dhcpList[i][0] + ' ' + dhcpList[i][1] + "\n";
+	form.dhcpAssignIP.value = values;
+}
+
+function addIPItem(form)
+{
+	if (!validateMAC(form.dhcpStaticMAC.value, true))
+		return;
+	if (!validateIP(form.dhcpStaticIP, true))
+		return;
+	var row = [ form.dhcpStaticMAC.value, form.dhcpStaticIP.value ];
+	dhcpList[dhcpList.length] = row;
+	genTable();
+}
+
+function deleteIPItem(index)
+{
+	if ((index>=0) && (index < dhcpList.length))
+	{
+		dhcpList.splice(index, 1);
+		genTable();
+	}
+}
 
 function StartTheTimer()
 {
@@ -52,12 +108,14 @@ function dhcpTypeSwitch()
 	form.dhcpSecDns.disabled = dhcp_off;
 	form.dhcpGateway.disabled = dhcp_off;
 	form.dhcpLease.disabled = dhcp_off;
-	form.dhcpStatic1Mac.disabled = dhcp_off;
+/*	form.dhcpStatic1Mac.disabled = dhcp_off;
 	form.dhcpStatic1Ip.disabled = dhcp_off;
 	form.dhcpStatic2Mac.disabled = dhcp_off;
 	form.dhcpStatic2Ip.disabled = dhcp_off;
 	form.dhcpStatic3Mac.disabled = dhcp_off;
-	form.dhcpStatic3Ip.disabled = dhcp_off;
+	form.dhcpStatic3Ip.disabled = dhcp_off;*/
+	
+	genTable(dhcp_off);
 }
 
 function initTranslation()
@@ -76,9 +134,6 @@ function initTranslation()
 	_TR("lDhcpSecDns", "inet sec dns");
 	_TR("lDhcpGateway", "inet gateway");
 	_TR("lDhcpLease", "lan dhcp lease");
-	_TR("lDhcpStatic1", "lan dhcp static");
-	_TR("lDhcpStatic2", "lan dhcp static");
-	_TR("lDhcpStatic3", "lan dhcp static");
 	
 	_TRV("lApply", "inet apply");
 	_TRV("lCancel", "inet cancel");
@@ -101,24 +156,24 @@ function CheckValue()
 	
 	if (form.lanDhcpType.options.selectedIndex == 1)
 	{
-		if (!validateIP(form.dhcpStart.value, true))
+		if (!validateIP(form.dhcpStart, true))
 		{
 			form.dhcpStart.focus();
 			return false;
 		}
-		if (!validateIP(form.dhcpEnd.value, true))
+		if (!validateIP(form.dhcpEnd, true))
 		{
 			form.dhcpEnd.focus();
 			return false;
 		}
-		if (!validateIP(form.dhcpMask.value, true))
+		if (!validateIP(form.dhcpMask, true))
 		{
 			form.dhcpMask.focus();
 			return false;
 		}
 		if (form.dhcpPriDns.value != "")
 		{
-			if (!validateIP(form.dhcpPriDns.value, true))
+			if (!validateIP(form.dhcpPriDns, true))
 			{
 				form.dhcpPriDns.focus();
 				return false;
@@ -126,59 +181,19 @@ function CheckValue()
 		}
 		if (form.dhcpSecDns.value != "")
 		{
-			if (!validateIP(form.dhcpSecDns.value, true))
+			if (!validateIP(form.dhcpSecDns, true))
 			{
 				form.dhcpSecDns.focus();
 				return false;
 			}
 		}
-		if (!validateIP(form.dhcpGateway.value, true))
+		if (!validateIP(form.dhcpGateway, true))
 		{
 			form.dhcpGateway.focus();
 			return false;
 		}
-		if (form.dhcpStatic1Mac.value != "")
-		{
-			if (!validateMAC(form.dhcpStatic1Mac.value))
-			{
-				form.dhcpStatic1Mac.focus();
-				return false;
-			}
-			if (!validateIP(form.dhcpStatic1Ip.value, true))
-			{
-				form.dhcpStatic1Ip.focus();
-				return false;
-			}
-			form.dhcpStatic1.value = form.dhcpStatic1Mac.value + ';' + form.dhcpStatic1Ip.value;
-		}
-		if (form.dhcpStatic2Mac.value != "")
-		{
-			if (!validateMAC(form.dhcpStatic2Mac.value))
-			{
-				form.dhcpStatic2Mac.focus();
-				return false;
-			}
-			if (!validateIP(form.dhcpStatic2Ip.value, true))
-			{
-				form.dhcpStatic2Ip.focus();
-				return false;
-			}
-			form.dhcpStatic2.value = form.dhcpStatic2Mac.value + ';' + form.dhcpStatic2Ip.value;
-		}
-		if (form.dhcpStatic3Mac.value != "")
-		{
-			if (!validateMAC(form.dhcpStatic3Mac.value))
-			{
-				form.dhcpStatic3Mac.focus();
-				return false;
-			}
-			if (!validateIP(form.dhcpStatic3Ip.value, true))
-			{
-				form.dhcpStatic3Ip.focus();
-				return false;
-			}
-			form.dhcpStatic3.value = form.dhcpStatic3Mac.value + ';' + form.dhcpStatic3Ip.value;
-		}
+		
+		genIPTableData(form);
 	}
 	
 	return true;
@@ -192,9 +207,9 @@ function CheckValue()
 
 <h1 id="lTitle"></h1>
 <p id="lIntroduction"></p>
-<hr />
+<hr>
 
-<form method=post name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue()">
+<form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue()">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="lSetup">DHCP Server Setup</td>
@@ -244,39 +259,21 @@ function CheckValue()
   <td><input name="dhcpLease" maxlength="8"
              value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
 </tr>
-<tr id="staticlease1">
-  <td class="head" id="lDhcpStatic1" align="right">Statically Assigned</td>
-  <td><input type="hidden" name="dhcpStatic1" value="">
-      MAC: <input name="dhcpStatic1Mac" maxlength=17
-             value="<% getCfgNthGeneral(1, "dhcpStatic1", 0); %>"><br />
-      IP: <input name="dhcpStatic1Ip" maxlength=15
-             value="<% getCfgNthGeneral(1, "dhcpStatic1", 1); %>"></td>
+<tr>
+  <td class="title" colspan="2">Static IP address assignment table:</td>
 </tr>
-<tr id="staticlease2">
-  <td class="head" id="lDhcpStatic2" align="right">Statically Assigned</td>
-  <td><input type="hidden" name="dhcpStatic2" value="">
-      MAC: <input name="dhcpStatic2Mac" maxlength=17
-             value="<% getCfgNthGeneral(1, "dhcpStatic2", 0); %>"><br />
-      IP: <input name="dhcpStatic2Ip" maxlength=15
-             value="<% getCfgNthGeneral(1, "dhcpStatic2", 1); %>"></td>
+<tr>
+  <td colspan="2" id="dhcpStaticIPList"></td>
 </tr>
-<tr id="staticlease3">
-  <td class="head" id="lDhcpStatic3" align="right">Statically Assigned</td>
-  <td><input type="hidden" name="dhcpStatic3" value="">
-      MAC: <input name="dhcpStatic3Mac" maxlength=17
-             value="<% getCfgNthGeneral(1, "dhcpStatic3", 0); %>"><br />
-      IP: <input name="dhcpStatic3Ip" maxlength=15
-             value="<% getCfgNthGeneral(1, "dhcpStatic3", 1); %>"></td>
-</tr>
-
 </table>
 
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
-  <td>
-    <input type=submit style="{width:120px;}" value="Apply" id="lApply"  onClick="TimeoutReload(20)">&nbsp;&nbsp;
-    <input type=reset  style="{width:120px;}" value="Cancel" id="lCancel" onClick="window.location.reload()">
-  </td>
+<td>
+	<input type="hidden" name="dhcpAssignIP" value="">
+	<input type="submit" style="{width:120px;}" value="Apply" id="lApply"  onClick="TimeoutReload(20)">&nbsp;&nbsp;
+	<input type="reset"  style="{width:120px;}" value="Cancel" id="lCancel" onClick="window.location.reload()">
+</td>
 </tr>
 </table>
 </form>
@@ -284,4 +281,3 @@ function CheckValue()
 </td></tr></table>
 </body>
 </html>
-

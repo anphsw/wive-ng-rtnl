@@ -1,0 +1,575 @@
+<html><head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="PRAGMA" content="NO-CACHE">
+<title>PPTP tunnel setup</title>
+<link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+<script type="text/javascript" src="/js/share.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+
+<script language="javascript">
+var pptpResetRoutingTable =
+[
+	<% vpnInitRoutingTable(); %>
+];
+
+var pptpServerIP = '<% getCfgGeneral(1, "vpnServer"); %>';
+var pptpRoutingTable = [];
+var currentRoute = undefined;
+</script>
+
+<script language="javascript">
+function rememberRoutingTable(form)
+{
+	var table = "";
+	for (var i=0; i<pptpRoutingTable.length; i++)
+		table += pptpRoutingTable[i].join(" ") + "\n";
+	
+	form.pptp_routing_table.value = table;
+}
+
+function resetRoutingTable(form)
+{
+	pptpRoutingTable = [];
+	for (var i=0; i< pptpResetRoutingTable.length; i++)
+		pptpRoutingTable[i] = pptpResetRoutingTable[i];
+}
+
+function showHint(key)
+{
+	var row = document.getElementById("pptp_hint_row");
+	var form = document.formVPNSetup;
+	var text = '<div class="hint"><font color="#0000ff"><b>HINT:</b></font>&nbsp;';
+	var show = true;
+	
+	if (key=='pptp_enabled')
+		text += 'Enable Virtual Private Network support.';
+	else if (key=='pptp_vpn_status')
+		text += 'This indicator shows current state of VPN connection.';
+	else if (form.pptp_enabled.checked)
+	{
+		if (key=='pptp_user')
+			text += 'Specify user name given by your network provider.';
+		else if (key=='pptp_password')
+			text += 'Specify password given by your network provider.';
+		else if (key=='pptp_pppoe_iface')
+			text += 'Select available interface for PPPoE.';
+		else if (key=='pptp_server')
+		{
+			if (form.pptp_type.value == '0') // PPPoE
+				text += 'Specify Access Concentrator name for PPPoE connection. If no Access Concentrator name is set system will try to connect to first available Access Concentrator.';
+			else if ((form.pptp_type.value == '1') || (form.pptp_type.value == '2')) // PPTP client, L2TP client
+				text += 'Specify host address (IP address or domain name) of VPN server.';
+			else if (form.pptp_type.value == '3') // L2TP server
+				text += 'Use the following IP as VPN server own IP address in your VPN network.';
+			else if ((form.pptp_type.value == '4') || (form.pptp_type.value == '5')) // GSM/CDMA
+				text += 'Specify Access Point Name given by network provider. If no Access Point Name is specified it will be taken from modem default settings.';
+		}
+		else if (key=='pptp_range')
+			text += 'Specify range of IP addresses given to clients by VPN server in <b>L2TP server</b> mode.';
+		else if (key=='pptp_mtu')
+			text += 'Specify Maximum Transfer Unit/Maximum Recieve Unit size in octets.';
+		else if (key=='pptp_mppe')
+			text += 'Enable automatic Microsoft Point-to-Point Encryption (MPPE) mode for VPN.';
+		else if (key=='pptp_dgw')
+		{
+			text += 'Manage default gateway replacing in routing table.</p><p class="val">';
+			if (form.pptp_dgw.value == '0')
+				text += '<b>Disabled</b> means that no default gateway will be written to routing table.';
+			else if (form.pptp_dgw.value == '1')
+				text += '<b>Enabled</b> means that default gateway will be replaced by gateway given by network provider.';
+			else if (form.pptp_dgw.value == '2')
+				text += '<b>Multiple</b> means that default gateway will be added to existing gateway but with metric 10.';
+			text += '</p>';
+		}
+		else if (key=='pptp_peerdns')
+			text += 'Allow to get DNS adress from VPN server and write to /etv/ppp/resolv.conf.';
+		else if (key=='pptp_debug')
+			text += 'Allow debug mode for VPN connections.';
+		else if (key=='pptp_nat')
+			text += 'Add Network Address Translation to new VPN connection.';
+		else if (key=='pptp_type')
+		{
+			text += 'Specify PPTP mode.<p class="val">';
+			
+			if (form.pptp_type.value == "0")
+				text += '<b>PPPoE</b> (see RFC #2516) means encapsulating Point-to-Point Protocol (PPP) frames ' +
+					'inside Ethernet frames. It is used mainly with DSL services where individual ' +
+					'users connect to the DSL modem over Ethernet and in plain Metro Ethernet networks.';
+			else if (form.pptp_type.value == "1")
+				text += '<b>PPTP</b> (see RFC #2637) means a method for implementing virtual private networks. ' +
+					'PPTP uses a control channel over TCP and a GRE tunnel operating to encapsulate ' +
+					'PPP packets.';
+			else if ((form.pptp_type.value == "2") || (form.pptp_type.value == "3"))
+			{
+				text += '<b>L2TP</b> (see RFC #2661) means a tunneling protocol used to support virtual private networks. ' +
+					'It does not provide any encryption or confidentiality by itself; it relies on an ' +
+					'encryption protocol that it passes within the tunnel to provide privacy.</p><p class="val">';
+				if (form.pptp_type.value == "2")
+					text += '<b>L2TP client</b> means a connection to remote L2TP server.';
+				else
+				text += '<b>L2TP server</b> means a connection from remote machines to L2TP server on this router.';
+			}
+			else if (form.pptp_type.value == "4")
+				text += '<b>Modem GPRS</b> means connection to Internet via GPRS/EDGE in GSM mobile networks.';
+			else if (form.pptp_type.value == "5")
+				text += '<b>Modem CDMA</b> means connection to Internet via UMTS in CDMA mobile networks.';
+			text += '</p>';
+		}
+		else if (key=='pptp_routing')
+			text += 'Enable this option to add additional routes when VPN connection is established.';
+		else if (form.pptp_routing_enabled.checked)
+		{
+			if (key=='pptp_route_attrs')
+				text += "Route attributes: \n" +
+					'<p class="val"><b>Network</b> means network address to add to routing table</p>' +
+					'<p class="val"><b>Netmask</b> means network mask to add to routing table</p>' +
+					'<p class="val"><b>Metric</b> means a metric (priority) assigned to route</p>' +
+					'<p class="val"><b>Interface</b> describes interface to pass packets for specified network</p>' +
+					'<p class="val"><b>Gateway</b> can declare IP address of gateway to pass packets</p>';
+			else if (key=='pptp_route_net')
+				text += 'Specify network address.';
+			else if (key=='pptp_route_mask')
+				text += 'Specify network mask.';
+			else if (key=='pptp_route_via')
+				text += 'Specify gateway IP address to use (optional feature).';
+			else if (key=='pptp_route_metric')
+				text += 'Specify metric for route.';
+			else if (key=='pptp_route_iface')
+				text += 'Specify interface to associate with network.';
+			else if (key=='pptp_add_route')
+				text += 'Add new route to routing table.';
+			else if (key=='pptp_del_route')
+				text += "Remove route from list: \n<p class=\"val\">\"" + getRouteName(currentRoute) + '"</p>';
+			else if (key=='pptp_show_route')
+				text += "Add route on success VPN connection: \n<p class=\"val\">\"" + getRouteName(currentRoute) + '"</p>';
+			else
+				show = false;
+		}
+		else
+			show = false;
+	}
+	else
+		show = false;
+	
+	if (show)
+	{
+		text += '</div>';
+		row.innerHTML = text;
+	}
+}
+
+function showRoutingHint(key, route)
+{
+	currentRoute = route;
+	showHint(key);
+}
+
+function hideHint(ctl)
+{
+	var row = document.getElementById("pptp_hint_row");
+	row.innerHTML = '';
+}
+
+function vpnSwitchClick(form)
+{
+	var dis = !form.pptp_enabled.checked;
+
+	form.pptp_server.disabled       = dis;
+	form.pptp_range.disabled        = dis;
+	form.pptp_user.disabled         = dis;
+	form.pptp_pass.disabled         = dis;
+	form.pptp_mtu.disabled          = dis;
+	form.pptp_mppe.disabled         = dis;
+	form.pptp_peerdns.disabled      = dis;
+	form.pptp_debug.disabled        = dis;
+	form.pptp_nat.disabled          = dis;
+	form.pptp_dgw.disabled          = dis;
+	form.pptp_mtu_type.disabled     = dis;
+	form.pptp_pppoe_iface.disabled  = dis;
+	form.pptp_type.disabled         = dis;
+	form.pptp_routing_enabled.disabled = dis;
+	
+	routingSwitchClick(form);
+}
+
+function addRouteClick(form)
+{
+	var via = (form.pptp_route_via.value.match(/^(\s|\*)*$/)) ? '*' : form.pptp_route_via.value;
+	var row = [ form.pptp_route_net.value, form.pptp_route_mask.value, form.pptp_route_metric.value,
+			form.pptp_route_iface.value, via ];
+	
+	if (!validateIP(form.pptp_route_net, 1))
+		return;
+	if (!validateIPMask(form.pptp_route_mask, 1))
+		return;
+	if ((via!='*') && (!validateIP(form.pptp_route_via, 1)))
+		return;
+	
+	if (!checkDigitRange(form.pptp_route_metric.value, 0, 1500))
+	{
+		alert("Metric must be between 0 and 1500");
+		return;
+	}
+
+	pptpRoutingTable[pptpRoutingTable.length] = row;
+	
+	form.pptp_route_net.value = '';
+	form.pptp_route_mask.value = '';
+	form.pptp_route_iface.value = '';
+	form.pptp_route_metric.value = '0';
+	form.pptp_route_via.value = '';
+
+	routingSwitchClick(form);
+}
+
+function getRouteName(route)
+{
+	var row = pptpRoutingTable[route];
+	var name = 'network ' + row[0] + ', netmask ' + row[1] + ', metric ' + row[2];
+	if (row[3] != '*')
+		name += ' via interface ' + row[3];
+	if (row[4] != '*')
+		name += ' via gateway ' + row[4];
+	return name;
+}
+
+function delRouteClick(form, route)
+{
+	if (form.pptp_enabled.checked)
+	{
+		if (confirm("Do you want to delete: \n \"" + getRouteName(route) + "\"?"))
+		{
+			pptpRoutingTable.splice(route, 1);
+			routingSwitchClick(form);
+		}
+	}
+}
+
+function genRoutingTable(form)
+{
+	var pptp_routing_table = document.getElementById("pptp_routing_table");
+
+	var table = '<table class="small"><tr onmouseover="showHint(\'pptp_route_attrs\');" onmouseout="hideHint(\'pptp_route_attrs\');" >' +
+		'<th>Destination IP</th><th>Mask</th><th style="text-align: center;">Metric</th>' + 
+		'<th style="text-align: center;">Interface</th><th>Gateway</th><th style="text-align: center;">Actions</th>' +
+		'</tr>';
+	
+	var disabled = (form.pptp_enabled.checked) ? '' : 'disabled="disabled"';
+	
+	for (var i=0; i < pptpRoutingTable.length; i++)
+	{
+		var row = pptpRoutingTable[i];
+		table += '<tr>';
+		for (var j=0; j<row.length; j++)
+		{
+			var align = ((j==2) || (j==3) || (j==5)) ? 'align="center"' : '';
+			table += '<td ' + align + ' onmouseover="showRoutingHint(\'pptp_show_route\',' + i + ');" '
+			table += 'onmouseout="hideHint(\'pptp_show_route\');" >' + row[j] + '</td>';
+		}
+		table += '<td align="center"><a onclick="delRouteClick(' + form.name +',' + i + ');" style="cursor: pointer; color: red;" ';
+		table += 'onmouseover="showRoutingHint(\'pptp_del_route\',' + i + ');" onmouseout="hideHint(\'pptp_del_route\');">[X]</a></td></tr>';
+	}
+	
+	// Add new route row
+	table += '<tr>';
+	table += '<td align="center"><input name="pptp_route_net" style="width: 110px;" onmouseover="showHint(\'pptp_route_net\');" onmouseout="hideHint(\'pptp_route_net\');" ' + disabled +'></td>';
+	table += '<td align="center"><input name="pptp_route_mask" style="width: 110px;" onmouseover="showHint(\'pptp_route_mask\');" onmouseout="hideHint(\'pptp_route_mask\');" ' + disabled +'></td>';
+	table += '<td align="center"><input name="pptp_route_metric" style="width: 50px;" value="0" onmouseover="showHint(\'pptp_route_metric\');" onmouseout="hideHint(\'pptp_route_metric\');" ' + disabled +'></td>';
+	table += '<td align="center"><select name="pptp_route_iface" class="half" onmouseover="showHint(\'pptp_route_iface\');" onmouseout="hideHint(\'pptp_route_iface\');" ' + disabled + '>'+
+		'<% vpnRouteIfaceList(); %>';
+	table += '<td align="center"><input name="pptp_route_via" style="width: 110px;" onmouseover="showHint(\'pptp_route_via\');" onmouseout="hideHint(\'pptp_route_via\');" ' + disabled +'></td>';
+	table += '<td align="center"><input type="button" value="Add" onclick="addRouteClick(this.form);" onmouseover="showHint(\'pptp_add_route\');" onmouseout="hideHint(\'pptp_add_route\');" ' + disabled +'></td>';
+	table += '<tr>';
+
+	table += '</table>';
+	pptp_routing_table.innerHTML = table;
+}
+
+function routingSwitchClick(form)
+{
+	var pptp_routing_row = document.getElementById("pptp_routing_row");
+	if (form.pptp_routing_enabled.checked)
+	{
+		genRoutingTable(form);
+		pptp_routing_row.style.display='';
+		return;
+	}
+	
+	pptp_routing_row.style.display='none';
+}
+
+function mtuChange(form)
+{
+	var pptp_mtu_select = document.getElementById("pptp_mtu_select");
+	var pptp_mtu_field  = document.getElementById("pptp_mtu_field");
+	
+	if (form.pptp_mtu_type.value == '1')
+	{
+		pptp_mtu_field.style.display = '';
+		pptp_mtu_select.setAttribute("class", "half");
+		pptp_mtu_field.setAttribute("class", "half");
+	}
+	else
+	{
+		pptp_mtu_select.setAttribute("class", "mid");
+		pptp_mtu_field.style.display = 'none';
+		form.pptp_mtu.value = form.pptp_mtu_type.value;
+	}
+}
+
+function bodyOnLoad(form)
+{
+	initializeForm(form);
+	resetRoutingTable(form);
+	
+	/* Check if option was set */
+	var pptp_mtu_select = document.getElementById('pptp_mtu_select');
+	for (var i=0; i < pptp_mtu_select.options.length; i++)
+		if (form.pptp_mtu_type.options[i].value == form.pptp_mtu.value)
+		{
+			form.pptp_mtu_type.value = form.pptp_mtu_select.options[i].value;
+			break;
+		}
+
+	vpnSwitchClick(form);
+	selectType(form);
+	mtuChange(form);
+	
+	showVPNStatus();
+}
+
+function selectType(form)
+{
+	var pppoe_row = document.getElementById("pptp_type_pppoe");
+	var l2tp_row  = document.getElementById("pptp_l2tp_range");
+	var pptp_server_col = document.getElementById("pptp_server_col");
+	var mppe_row  = document.getElementById("pptp_mppe_row");
+
+	pppoe_row.style.display = (form.pptp_type.value == '0') ? '' : 'none';
+	mppe_row.style.display = (form.pptp_type.value == '3') ? 'none' : '';
+	l2tp_row.style.display  = (form.pptp_type.value == '3') ? '' : 'none';
+
+	var pptp_server = 'Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name';
+	if (form.pptp_type.value == '0') // PPPoE
+		pptp_server = '<acronym title="Access Concentrator">AC</acronym> name';
+	else if ((form.pptp_type.value == '1') || (form.pptp_type.value == '2')) // PPTP client, L2TP client
+		pptp_server = 'Host, <acronym title="Internet Protocol">IP</acronym> or <acronym title="Domain Name System">DNS</acronym> name';
+	else if (form.pptp_type.value == '3') // L2TP server
+		pptp_server = 'VPN Local <acronym title="Internet Protocol">IP</acronym>';
+	else if ((form.pptp_type.value == '4') || (form.pptp_type.value == '5'))
+		pptp_server = '<acronym title="Access Point Name">APN</acronym> name'; // GSM/CDMA
+	
+	if ((form.pptp_type.value == '1') || (form.pptp_type.value == '2') || (form.pptp_type.value == '3'))
+		form.pptp_server.value = pptpServerIP;
+	else
+		form.pptp_server.value = '';
+	
+	pptp_server_col.innerHTML = '<b>' + pptp_server + ':</b>';
+}
+
+function resetClick(form)
+{
+	form.reset();
+	bodyOnLoad(form);
+	return true;
+}
+
+function submitClick(form)
+{
+	if (form.pptp_user.value.match(/[\s\$]/))
+	{
+		alert("User name can not contain spaces or dollar ('$') sign!");
+		return false;
+	}
+	
+	if (form.pptp_pass.value.match(/[\s\$]/))
+	{
+		alert("Password can not contain spaces or dollar ('$') sign!");
+		return false;
+	}
+	
+
+	rememberRoutingTable(form); // Remember routing table
+
+	return true;
+}
+
+function initializeForm(form)
+{
+	var vpnEnabled = '<% getCfgGeneral(1, "vpnEnabled"); %>';
+	var pptpType   = '<% getCfgGeneral(1, "vpnType"); %>';
+	var routingOn  = '<% getCfgGeneral(1, "vpnRoutingEnabled"); %>';
+	var mppe       = '<% getCfgGeneral(1, "vpnMPPE"); %>';
+	var peerdns    = '<% getCfgGeneral(1, "vpnPeerDNS"); %>';
+	var debug      = '<% getCfgGeneral(1, "vpnDebug"); %>';
+	var nat        = '<% getCfgGeneral(1, "vpnNAT"); %>';
+	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
+
+	form.pptp_enabled.checked = (vpnEnabled == 'on');
+	form.pptp_routing_enabled.checked = (routingOn == 'on');
+	form.pptp_mppe.checked    = (mppe == 'on');
+	form.pptp_peerdns.checked = (peerdns == 'on');
+	form.pptp_debug.checked   = (debug == 'on');
+	form.pptp_nat.checked     = (nat == 'on');
+	form.pptp_type.value      = pptpType;
+	form.pptp_dgw.value       = dgw;
+}
+
+function showVPNStatus()
+{
+	ajaxLoadElement("vpn_status_col", "/internet/vpn_status.asp");
+	setTimeout('showVPNStatus();', 5000);
+}
+
+</script>
+</head>
+
+<body onload="bodyOnLoad(document.formVPNSetup)">
+<table class="body">
+<tr><td>
+<h1>Virtual Private Network and USB modem setup</h1>
+This page is used to configure the <acronym title="Virtual Private Network">VPN</acronym>
+tunnel and GSM/CDMA modems on your Router.
+
+<form action="/goform/formVPNSetup" method="POST" name="formVPNSetup">
+<table width="500" border="0" cellpadding="0" cellspacing="4">
+	<tr>
+		<td colspan="2"><hr></td>
+	</tr>
+	<tr>
+		<td onMouseOver="showHint('pptp_enabled')" onMouseOut="hideHint('pptp_enabled')" >
+			<input name="pptp_enabled" onclick="vpnSwitchClick(this.form)" type="checkbox">
+			<b>Enable <acronym title="Virtual Private Network">VPN</acronym></b>
+		</td>
+		<td onMouseOver="showHint('pptp_vpn_status')" onMouseOut="hideHint('pptp_vpn_status')" id="vpn_status_col">
+			<!-- <% vpnShowVPNStatus(); %> -->
+		</td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_type')" onMouseOut="hideHint('pptp_type')" >
+		<td width="50%">
+			<b><acronym title="Point-to-Point Protocol">PPP</acronym> Mode:</b>
+		</td>
+		<td width="50%">
+			<select disabled="disabled" name="pptp_type" onChange="selectType(this.form);" class="mid" >
+				<option value="0" selected="selected">PPPoE client</option>
+				<option value="1">PPTP  client</option>
+				<option value="2">L2TP  client</option>
+				<option value="3">L2TP  server</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="pptp_type_pppoe" style="display: none;" onMouseOver="showHint('pptp_pppoe_iface')" onMouseOut="hideHint('pptp_pppoe_iface')">
+		<td width="50%"><b>PPPoE interface:</b></td>
+		<td width="50%">
+			<select disabled="disabled" name="pptp_pppoe_iface" class="mid" >
+				<% vpnIfaceList(); %>
+			</select>
+		</td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_server')" onMouseOut="hideHint('pptp_server')">
+		<td width="50%" id="pptp_server_col">
+			<b>Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name:</b>
+		</td>
+		<td width="50%"><input name="pptp_server" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
+	</tr>
+	<tr id="pptp_l2tp_range" onMouseOver="showHint('pptp_range')" onMouseOut="hideHint('pptp_range')" style="display: none;" >
+		<td width="50%"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>
+		<td width="50%"><input name="pptp_range" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnRange"); %>" disabled="disabled" type="text"></td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_user')" onMouseOut="hideHint('pptp_user')" >
+		<td width="50%"><b>User name:</b></td>
+		<td width="50%"><input name="pptp_user" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnUser"); %>" disabled="disabled" type="text"></td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_password')" onMouseOut="hideHint('pptp_password')" >
+		<td width="50%"><b>Password:</b></td>
+		<td width="50%"><input name="pptp_pass" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnPassword"); %>" disabled="disabled" type="password"></td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_mtu')" onMouseOut="hideHint('pptp_mtu')" >
+		<td width="50%"><b><acronym title="Maximum Transfer Unit">MTU</acronym>/<acronym title="Maximum Recieve Unit">MRU:</acronym></b></td>
+		<td width="50%">
+			<input id="pptp_mtu_field" name="pptp_mtu" maxlength="4" disabled="disabled" type="text" class="half" style="display:none; " value="<% getCfgGeneral(1, "vpnMTU"); %>" >
+			<select id="pptp_mtu_select" disabled="disabled" name="pptp_mtu_type" onChange="mtuChange(this.form);" class="mid" >
+				<option value="AUTO">AUTO</option>
+				<option value="1" selected="selected">Custom</option>
+				<option value="1500">1500</option>
+				<option value="1492">1492</option>
+				<option value="1440">1440</option>
+				<option value="1400">1400</option>
+				<option value="1300">1300</option>
+				<option value="1200">1200</option>
+				<option value="1100">1100</option>
+				<option value="1000">1000</option>
+			</select>
+		</td>
+	</tr>
+	<tr onMouseOver="showHint('pptp_dgw')" onMouseOut="hideHint('pptp_dgw')" >
+		<td width="50%" >
+			<b>Default gateway:</b>
+		</td>
+		<td width="50%">
+			<select disabled="disabled" name="pptp_dgw" class="mid" class="mid" >
+				<option value="0" selected="selected">Disabled</option>
+				<option value="1">Enabled</option>
+			</select>
+		</td>
+	</tr>
+
+</table>
+
+<table width="500" border="0" cellpadding="0" cellspacing="4">
+	<tr onmouseover="showHint('pptp_routing')" onmouseout="hideHint('pptp_routing')">
+		<td colspan="2">
+			<input name="pptp_routing_enabled" onclick="routingSwitchClick(this.form);" type="checkbox">
+			<b>Enable routing</b>
+		</td>
+	</tr>
+	<tr id="pptp_routing_row" style="display: none;">
+		<td colspan="2" id="pptp_routing_table">
+		</td>
+	</tr>
+</table>
+
+<table width="500" border="0" cellpadding="0" cellspacing="4">
+	<tr id="pptp_mppe_row">
+		<td width="50%" onMouseOver="showHint('pptp_mppe')" onMouseOut="hideHint('pptp_mppe')" >
+			<input disabled="disabled" name="pptp_mppe" type="checkbox">
+			<b>Allow <acronym title="Microsoft Point-to-Point Encryption">MPPE</acronym></b>
+		</td>
+		<td width="50%" onMouseOver="showHint('pptp_peerdns')" onMouseOut="hideHint('pptp_peerdns')" >
+			<input disabled="disabled" name="pptp_peerdns" type="checkbox">
+			<b>Peer <acronym title="Domain Name Server">DNS</acronym></b>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" onMouseOver="showHint('pptp_debug')" onMouseOut="hideHint('pptp_debug')" >
+			<input disabled="disabled" name="pptp_debug" type="checkbox">
+			<b>Allow debug</b>
+		</td>
+		<td width="50%" onMouseOver="showHint('pptp_nat')" onMouseOut="hideHint('pptp_nat')" >
+			<input disabled="disabled" name="pptp_nat" type="checkbox">
+			<b>Enable <acronym title="Network Address Translation">NAT</acronym></b>
+		</td>
+	</tr>
+	<tr height="32px"></tr>
+	<tr>
+		<td colspan="2">
+			<input name="pptp_routing_table" type="hidden">
+			<input value="/internet/vpn.asp" name="submit-url" type="hidden">
+			<input style="none" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
+			<input style="none" value="Reset" name="reset_button" onclick="resetClick(this.form);" type="button">
+		</td>
+	</tr>
+</table>
+</form>
+
+<div id="pptp_hint_row">
+</div>
+
+</td>
+</tr>
+</table>
+
+</body></html>

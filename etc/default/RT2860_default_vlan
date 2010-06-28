@@ -184,6 +184,20 @@ idle_timeout_interval=0
 staWirelessMode=9
 WAN_MAC_ADDR=00:0C:43:30:52:66
 
+vpnEnabled=off
+vpnType=0
+vpnRoutingEnabled=off
+vpnMPPE=off
+vpnPeerDNS=off
+vpnDebug=off
+vpnNAT=off
+vpnServer=192.168.200.1
+vpnRange=192.168.200.2-192.168.200.254
+vpnUser=vpn_user
+vpnPassword=vpn_password
+vpnMTU=AUTO
+vpnDGW=0
+
 dhcpStatic1=
 dhcpStatic2=
 dhcpStatic3=

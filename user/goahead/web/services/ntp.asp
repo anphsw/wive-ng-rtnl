@@ -28,23 +28,26 @@ function NTPFormCheck()
 {
 	var form = document.NTP;
 	
-	if ((form.NTPServerIP.value != "") && (form.NTPSync.value == ""))
+	if (form.ntp_enabled.checked)
 	{
-		alert("Please specify a value for the interval of synchronization.");
-		form.NTPSync.focus();
-		return false;
-	}
-	if (validateNum(form.NTPSync.value, false) == 0)
-	{
-		alert("Invalid NTP synchronization value.");
-		form.NTPSync.focus();
-		return false;
-	}
-	if (parseAtoi(form.NTPSync.value, 1) > 300)
-	{
-		alert("The synchronization value is too big.(1~300)");
-		form.NTPSync.focus();
-		return false;
+		if ((form.NTPServerIP.value != "") && (form.NTPSync.value == ""))
+		{
+			alert("Please specify a value for the interval of synchronization.");
+			form.NTPSync.focus();
+			return false;
+		}
+		if (validateNum(form.NTPSync.value, false) == 0)
+		{
+			alert("Invalid NTP synchronization value.");
+			form.NTPSync.focus();
+			return false;
+		}
+		if (parseAtoi(form.NTPSync.value, 1) > 300)
+		{
+			alert("The synchronization value is too big.(1~300)");
+			form.NTPSync.focus();
+			return false;
+		}
 	}
 	
 	return true;
@@ -57,49 +60,6 @@ function initTranslation()
 
 	_TR("manNTPSet", "man ntp setting");
 	_TR("manNTPTimeZone", "man ntp timezone");
-
-/*
-	_TR("manNTPMidIsland", "man ntp mid island");
-	_TR("manNTPHawaii", "man ntp hawaii");
-	_TR("manNTPAlaska", "man ntp alaska");
-	_TR("manNTPPacific", "man ntp pacific");
-	_TR("manNTPMountain", "man ntp mountain");
-	_TR("manNTPArizona", "man ntp arizona");
-	_TR("manNTPCentral", "man ntp central");
-	_TR("manNTPMidUS", "man ntp mid us");
-	_TR("manNTPIndianaEast", "man ntp indiana east");
-	_TR("manNTPEastern", "man ntp eastern");
-	_TR("manNTPAtlantic", "man ntp atlantic");
-	_TR("manNTPBolivia", "man ntp bolivia");
-	_TR("manNTPGuyana", "man ntp guyana");
-	_TR("manNTPBrazilEast", "man ntp brazil east");
-	_TR("manNTPMidAtlantic", "man ntp mid atlantic");
-	_TR("manNTPAzoresIslands", "man ntp azores islands");
-	_TR("manNTPGambia", "man ntp gambia");
-	_TR("manNTPEngland", "man ntp england");
-	_TR("manNTPCzechRepublic", "man ntp czech republic");
-	_TR("manNTPGermany", "man ntp germany");
-	_TR("manNTPTunisia", "man ntp tunisia");
-	_TR("manNTPGreece", "man ntp greece");
-	_TR("manNTPSouthAfrica", "man ntp south africa");
-	_TR("manNTPIraq", "man ntp iraq");
-	_TR("manNTPMoscowWinter", "man ntp moscow winter");
-	_TR("manNTPArmenia", "man ntp armenia");
-	_TR("manNTPPakistan", "man ntp pakistan");
-	_TR("manNTPBangladesh", "man ntp bangladesh");
-	_TR("manNTPThailand", "man ntp thailand");
-	_TR("manNTPChinaCoast", "man ntp chinacoast");
-	_TR("manNTPTaipei", "man ntp taipei");
-	_TR("manNTPSingapore", "man ntp singapore");
-	_TR("manNTPAustraliaWA", "man ntp australia wa");
-	_TR("manNTPJapan", "man ntp japan");
-	_TR("manNTPKorean", "man ntp korean");
-	_TR("manNTPGuam", "man ntp guam");
-	_TR("manNTPAustraliaQLD", "man ntp australia qld");
-	_TR("manNTPSolomonIslands", "man ntp solomon islands");
-	_TR("manNTPFiji", "man ntp fiji");
-	_TR("manNTPNewZealand", "man ntp newzealand");
-*/
 
 	_TR("manNTPServer", "man ntp server");
 	_TR("manNTPSync", "man ntp sync");
@@ -114,6 +74,7 @@ function initValue()
 {
 	var tz = "<% getCfgGeneral(1, "TZ"); %>";
 	var dateb = "<% getDATEBuilt(); %>";
+	var ena = "<% getCfgGeneral(1, "NTPEnabled"); %>";
 	var form = document.NTP;
 
 	initTranslation();
@@ -131,101 +92,10 @@ function initValue()
 		form.ntpcurrenttime.disabled = true;
 	}
 
-//	form.time_zone.options.value = tz;
+	form.ntp_enabled.checked = ena == "on";
+	ntpChange(form);
 
-	for (var i=0; i<form.time_zone.length; i++)
-	{
-		if (form.time_zone.options[i].value == tz)
-		{
-			form.time_zone.selectedIndex = i;
-			return;
-		}
-	}
-	
-	form.time_zone.options.selectedIndex = 0;
-	
-/*
-	if (tz == "UCT_-11")
-		options.selectedIndex = 0;
-	else if (tz == "UCT_-10")
-		options.selectedIndex = 1;
-	else if (tz == "NAS_-09")
-		options.selectedIndex = 2;
-	else if (tz == "PST_-08")
-		options.selectedIndex = 3;
-	else if (tz == "MST_-07")
-		options.selectedIndex = 4;
-	else if (tz == "MST_-07")
-		options.selectedIndex = 5;
-	else if (tz == "CST_-06")
-		options.selectedIndex = 6;
-	else if (tz == "UCT_-06")
-		options.selectedIndex = 7;
-	else if (tz == "UCT_-05")
-		options.selectedIndex = 8;
-	else if (tz == "EST_-05")
-		options.selectedIndex = 9;
-	else if (tz == "AST_-04")
-		options.selectedIndex = 10;
-	else if (tz == "UCT_-04")
-		options.selectedIndex = 11;
-	else if (tz == "UCT_-03")
-		options.selectedIndex = 12;
-	else if (tz == "EBS_-03")
-		options.selectedIndex = 13;
-	else if (tz == "NOR_-02")
-		options.selectedIndex = 14;
-	else if (tz == "EUT_-01")
-		options.selectedIndex = 15;
-	else if (tz == "UCT_000")
-		options.selectedIndex = 16;
-	else if (tz == "GMT_000")
-		options.selectedIndex = 17;
-	else if (tz == "MET_001")
-		options.selectedIndex = 18;
-	else if (tz == "MEZ_001")
-		options.selectedIndex = 19;
-	else if (tz == "UCT_001")
-		options.selectedIndex = 20;
-	else if (tz == "EET_002")
-		options.selectedIndex = 21;
-	else if (tz == "SAS_002")
-		options.selectedIndex = 22;
-	else if (tz == "IST_003")
-		options.selectedIndex = 23;
-	else if (tz == "MSK_003")
-		options.selectedIndex = 24;
-	else if (tz == "UCT_004")
-		options.selectedIndex = 25;
-	else if (tz == "UCT_005")
-		options.selectedIndex = 26;
-	else if (tz == "UCT_006")
-		options.selectedIndex = 27;
-	else if (tz == "UCT_007")
-		options.selectedIndex = 28;
-	else if (tz == "CST_008")
-		options.selectedIndex = 29;
-	else if (tz == "CCT_008")
-		options.selectedIndex = 30;
-	else if (tz == "SST_008")
-		options.selectedIndex = 31;
-	else if (tz == "AWS_008")
-		options.selectedIndex = 32;
-	else if (tz == "JST_009")
-		options.selectedIndex = 33;
-	else if (tz == "KST_009")
-		options.selectedIndex = 34;
-	else if (tz == "UCT_010")
-		options.selectedIndex = 35;
-	else if (tz == "AES_010")
-		options.selectedIndex = 36;
-	else if (tz == "UCT_011")
-		options.selectedIndex = 37;
-	else if (tz == "UCT_012")
-		options.selectedIndex = 38;
-	else if (tz == "NZS_012")
-		options.selectedIndex = 39;
-	*/
+	form.time_zone.value = tz;
 }
 
 function syncWithHost()
@@ -275,6 +145,16 @@ function syncWithHost()
 	ajaxPostRequest("/goform/NTPSyncWithHost", tmp, true);
 }
 
+function ntpChange(form)
+{
+	var dis = ! form.ntp_enabled.checked;
+	form.ntpcurrenttime.disabled = dis;
+	form.manNTPSyncWithHost.disabled = dis;
+	form.time_zone.disabled = dis;
+	form.NTPServerIP.disabled = dis;
+	form.NTPSync.disabled = dis;
+}
+
 </script>
 
 </head>
@@ -285,13 +165,19 @@ function syncWithHost()
 <hr />
 
 <!-- ================= NTP Settings ================= -->
-<form method="post" name="NTP" action="/goform/NTP" onsubmit="return NTPFormCheck();" >
+<form method="POST" name="NTP" action="/goform/NTP" onsubmit="return NTPFormCheck();" >
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
 	<td class="title" colspan="2" id="manNTPSet">NTP Settings</td>
 </tr>
+<tr id="ntp_enabled_row">
+	<td class="head">Enable</td>
+	<td>
+		<input type="checkbox" onchange="ntpChange(this.form);" name="ntp_enabled">&nbsp;Enable NTP synchronization
+	</td>
+</tr>
 <tr id="div_date">
-	<td class="head"  id="manNTPCurrentTime">Current Time</td>
+	<td class="head" id="manNTPCurrentTime">Current Time</td>
 	<td>
 		<input size="24" name="ntpcurrenttime" value="<% getCurrentTimeASP(); %>" type="text" readonly="1">
 		<input type="button" value="Sync with host" id="manNTPSyncWithHost" name="manNTPSyncWithHost" onClick="syncWithHost()">
@@ -382,8 +268,9 @@ function syncWithHost()
 <table width="90%" border="0" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td>
-		<input type=submit style="{width:120px;}" value="Apply" id="manNTPApply"> &nbsp;&nbsp;
-		<input type=reset  style="{width:120px;}" value="Cancel"id="manNTPCancel" onclick="window.location.reload()">
+		<input type="hidden" value="shit" name="stub_shit">
+		<input type=submit style="{width:120px;}" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
+		<input type=reset  style="{width:120px;}" value="Cancel" id="manNTPCancel" onclick="window.location.reload()">
 	</td>
 </tr>
 </table>

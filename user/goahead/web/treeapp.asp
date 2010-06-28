@@ -84,18 +84,20 @@ if (opmode != '0') {
 	a.add(301, 300, _("treeapp wan"),                   "javascript:go('internet/wan.asp');");
 }
 a.add(302, 300, _("treeapp lan"),                   "javascript:go('internet/lan.asp');");
+a.add(303, 300, _("treeapp vpn"),                   "javascript:go('internet/vpn.asp');");
+
 if (dhcpen == "1") {
-	a.add(303, 300, _("treeapp dhcp clients"),          "javascript:go('internet/dhcpcliinfo.asp');");
+	a.add(304, 300, _("treeapp dhcp clients"),          "javascript:go('internet/dhcpcliinfo.asp');");
 }
 //if (vpnen == "1") {
-//	a.add(304, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
+//	a.add(305, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
 //}
 if (opmode != '0') {
-	a.add(305, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
+	a.add(306, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
 }
 
 if (swqos == '1') {
-	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
+	a.add(307, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
 }
 
 if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')

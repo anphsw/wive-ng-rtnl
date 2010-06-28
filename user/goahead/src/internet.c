@@ -17,6 +17,7 @@
 #include	"nvram.h"
 #include	"webs.h"
 #include	"utils.h"
+#include	"procps.h"
 #include 	"firewall.h"
 #include	"management.h"
 #include	"station.h"
@@ -27,6 +28,18 @@
 
 // Busybox includes
 #include	"user/busybox/include/autoconf.h" // busybox config
+
+#define _PATH_PROCNET_DEV      "/proc/net/dev"
+#define _PATH_VPN_RT           "/etc/network"
+#define _PATH_VPN_RT_FILE      _PATH_VPN_RT "/routes_ppp"
+#define _PATH_VPN_RT_SCRIPT    _PATH_VPN_RT "/routes_ppp_replace"
+
+/*** VPN statuses ***/
+typedef struct vpn_status_t
+{
+	const char_t *status;
+	long          color;
+} vpn_status_t;
 
 /*** Busybox leases.h ***/
 
@@ -64,6 +77,12 @@ struct dyn_lease {
 #ifdef CONFIG_NET_SCHED
 #include      "qos.h"
 #endif
+
+static int vpnInitRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
+static int vpnRouteIfaceList(int eid, webs_t wp, int argc, char_t **argv);
+static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv);
+static void formVPNSetup(webs_t wp, char_t *path, char_t *query);
 
 static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -166,6 +185,12 @@ void formDefineInternet(void) {
 	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
 	websAspDefine(T("getSysLogBuilt"), getSysLogBuilt);
 	websAspDefine(T("getETHTOOLBuilt"), getETHTOOLBuilt);
+
+	websAspDefine(T("vpnInitRoutingTable"), vpnInitRoutingTable);
+	websAspDefine(T("vpnRouteIfaceList"), vpnRouteIfaceList);
+	websAspDefine(T("vpnShowVPNStatus"), vpnShowVPNStatus);
+	websAspDefine(T("vpnIfaceList"), vpnIfaceList);
+	websFormDefine(T("formVPNSetup"), formVPNSetup);
 }
 
 /*
@@ -448,6 +473,393 @@ char *getLanWanNamebyIf(char *ifname)
 	return ifname;
 }
 
+typedef struct vpn_fetch_t
+{
+	const char *web_param;
+	const char *nvram_param;
+	int is_switch;
+} vpn_fetch_t;
+
+const vpn_fetch_t pptp_args[] =
+{
+	{ T("pptp_server"),             "vpnServer",            0 },
+	{ T("pptp_range"),              "vpnRange",             0 },
+	{ T("pptp_user"),               "vpnUser",              0 },
+	{ T("pptp_pass"),               "vpnPassword",          0 },
+	{ T("pptp_mtu"),                "vpnMTU",               0 },
+	{ T("pptp_type"),               "vpnType",              0 },
+	{ T("pptp_mppe"),               "vpnMPPE",              1 },
+	{ T("pptp_dgw"),                "vpnDGW",               0 },
+	{ T("pptp_peerdns"),            "vpnPeerDNS",           1 },
+	{ T("pptp_debug"),              "vpnDebug",             1 },
+	{ T("pptp_nat"),                "vpnNAT",               1 },
+	{ T("pptp_pppoe_iface"),        "vpnInterface",         0 },
+	{ T("pptp_routing_enabled"),    "vpnRoutingEnabled",    1 },
+	{ NULL, 0, 0 } // Terminator
+};
+
+/*
+ * VPN statuses
+ */
+const vpn_status_t pptp_statuses[] =
+{
+
+	{ "disabled",     0x808080        },
+	{ "offline",      0xff0000        },
+	{ "connecting",   0xff8000        },
+	{ "online",       0x00ff00        }
+};
+
+/*
+ * Read routing table and output it to web form
+ */
+static int vpnInitRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE *fd;
+	char line[256];
+	char ip[32], netmask[32], iface[32], gateway[32];
+	long metric;
+	int args, first = 1;
+	
+	if ((fd = fopen(_PATH_VPN_RT_FILE, "r")) != NULL)
+	{
+		// Output routing table
+		while (fgets(line, 255, fd)!=NULL)
+		{
+			// Read routing line
+			args = sscanf(line,
+				"%s %s %ld %s %s",    // IP, netmask, metric, iface, gateway
+				ip, netmask, &metric, iface, gateway);
+
+			if (args >= 5)
+			{
+				if (!first)
+					websWrite(wp, T(",\n"));
+				else
+					first = 0;
+
+				websWrite(wp, T("\t[ '%s', '%s', '%d', '%s', '%s' ]"),
+					ip, netmask, metric, iface, gateway );
+			}
+		}
+		
+		fclose(fd);
+	}
+	
+	return 0;
+}
+
+/*
+ * List interfaces to make available routes
+ */
+static int vpnRouteIfaceList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
+	
+	if (fd != NULL)
+	{
+		char_t curr_if[32];
+		char_t line[256];
+		
+		// Add "*" virtual iface
+		websWrite(wp, T("<option value=\"*\">*</option>"));
+		
+		// Read all ifaces and check match
+		while (fgets(line, 255, fd)!=NULL)
+		{
+			if (sscanf(line, " %[a-zA-Z0-9]", curr_if)==1)
+			{
+				// filer only "brXX" && "vcXX" && "pppXXX" ifaces
+				int found = strncmp(curr_if, "br", 2)==0;
+				if (!found)
+					found = strncmp(curr_if, "vc", 2)==0;
+				if (!found)
+					found = strncmp(curr_if, "ppp", 3)==0;
+				if (found)
+				{
+					// Write iface to output if it was found
+					websWrite(wp, T("<option value=\"%s\">%s</option>"),
+						curr_if, curr_if
+					);
+				}
+			}
+		}
+		
+		// Add "ppp+" virtual iface
+		websWrite(wp, T("<option value=\"ppp+\">ppp+</option>"));
+		
+		fclose(fd);
+	}
+	else
+	{
+		fprintf(stderr, "Warning: cannot open %s (%s).\n",
+			_PATH_PROCNET_DEV, strerror(errno));
+	}
+	
+	return 0;
+}
+
+/*
+ * Show PPTP VPN status
+ */
+static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int status = 0; // Status is 'disabled'
+
+	// Get value
+	char *pptp_enabled = nvram_bufget(RT2860_NVRAM, "vpnEnabled");
+	if ((pptp_enabled==NULL) || (pptp_enabled[0]=='\0'))
+		pptp_enabled = "off";
+	
+	// Do not perform other checks if VPN is turned off
+	if (strcmp(pptp_enabled, "on")==0)
+	{
+		// Status is at least 'offline' now
+		status++;
+		
+		// Try to find pppd or xl2tpd
+		int found = procps_count("pppd");
+		if (found==0)
+			found = procps_count("xl2tpd");
+		
+		if (found>0)
+		{
+			// Now status is at least 'connecting'
+			status++;
+			
+			// Try to search for 'pppXX' device
+			FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
+			
+			if (fd != NULL)
+			{
+				int ppp_id;
+				char_t line[256];
+				
+				// Read all ifaces and check match
+				while (fgets(line, 255, fd)!=NULL)
+				{
+					// Filter only 'pppXX'
+					if (sscanf(line, " ppp%d", &ppp_id)==1)
+					{
+						// Check if ppp interface has number at least 8
+						if (ppp_id >= 8)
+						{
+							status++; // Status is set to 'connected'
+							break; // Do not search more
+						}
+					}
+				}
+				
+				fclose(fd);
+			}
+			else
+			{
+				fprintf(stderr, "Warning: cannot open %s (%s).\n",
+					_PATH_PROCNET_DEV, strerror(errno));
+			}
+		}
+		else if (found<0)
+		{
+			fprintf(stderr, "Warning: cannot serach process 'pppd' or 'xl2tpd': %s\n",
+					strerror(-found));
+		}
+	} // strcmp
+	
+	// Now write status
+	const vpn_status_t *st = &pptp_statuses[status];
+	websWrite(wp, T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
+			st->color, st->status);
+	return 0;
+}
+
+/*
+ * List interfaces for VPN
+ */
+static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
+	
+	if (fd != NULL)
+	{
+		char_t iface[32], curr_if[32];
+		char_t line[256];
+		
+		// Fetch VPN interface
+		char *rrs  = nvram_bufget(RT2860_NVRAM, "vpnInterface");
+		if (rrs!=NULL)
+			strcpy(iface, rrs);
+		else
+			iface[0] = '\0';
+		if (strlen(iface)<=0)
+			strcpy(iface, "br0");
+		
+		// Read all ifaces and check match
+		while (fgets(line, 255, fd)!=NULL)
+		{
+			if (sscanf(line, " %[a-zA-Z0-9]", curr_if)==1)
+			{
+				// filer only "brXX" && "vcXX" ifaces
+				int found = strncmp(curr_if, "br", 2)==0;
+				if (!found)
+					found = strncmp(curr_if, "vc", 2)==0;
+				if (found)
+				{
+					// Write iface to output if it was found
+					websWrite(wp, T("<option value=\"%s\" %s>%s</option>\n"),
+						curr_if,
+						(strcmp(curr_if, iface)==0) ? "selected=\"selected\"" : "",
+						curr_if
+					);
+				}
+			}
+		}
+		
+		fclose(fd);
+	}
+	else
+	{
+		fprintf(stderr, "Warning: cannot open %s (%s).\n",
+			_PATH_PROCNET_DEV, strerror(errno));
+	}
+	
+	return 0;
+}
+
+void vpnStoreRouting(const char *rt_config)
+{
+	// Create directory without check
+	mkdir(_PATH_VPN_RT, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+	// Open file
+	FILE *fd = fopen(_PATH_VPN_RT_FILE, "w+");
+	
+	if (fd != NULL)
+	{
+		// Output routing table to file
+		fputs(rt_config, fd);
+		fseek(fd, 0, SEEK_SET);
+		
+		// Now read line-by-line and generate script
+		FILE *scr = fopen(_PATH_VPN_RT_SCRIPT, "w");
+		
+		if (scr != NULL)
+		{
+			char line[256];
+			char ip[32], netmask[32], iface[32], gateway[32];
+			long metric;
+			int args;
+			
+			fputs("#!/bin/sh\n\n", scr);
+			
+			// Read routing table from file line-by-line and generate script
+			while (fgets(line, 255, fd) != NULL)
+			{
+				// Read routing line
+				args = sscanf(line,
+					"%s %s %ld %s %s",    // IP, netmask, metric, iface, gateway
+					ip, netmask, &metric, iface, gateway);
+				
+				if (args >= 5)
+				{
+					fprintf(scr, "/bin/ip route $2 %s/%s", ip, netmask);
+					if (strcmp(iface, "*")!=0)
+					{
+						if (strcmp(iface, "ppp+")!=0)
+							fprintf(scr, " dev %s", iface);
+						else
+							fputs(" dev $1", scr);
+					}
+					fprintf(scr, " metric %ld", metric);
+					if (strcmp(gateway, "*")!=0)
+						fprintf(scr, " via %s", gateway);
+					fputc('\n', scr); // And end-of-line
+				}
+			}
+			
+			fclose(scr);
+		}
+		
+		fclose(fd);
+		
+		// Call rwfs to store data
+		system("fs save");
+	}
+	else
+		printf("Failed to open file %s\n", _PATH_VPN_RT_FILE);
+}
+
+void formVPNSetup(webs_t wp, char_t *path, char_t *query)
+{
+	char_t  *pptp_enabled, *submitUrl;
+
+	pptp_enabled = websGetVar(wp, T("pptp_enabled"), T(""));
+	if (pptp_enabled[0] == '\0')
+		pptp_enabled="off";
+
+	//kill tunnels
+	printf("Kill tunnels\n");
+	system("/bin/killall -9 xl2tpd");
+	system("/bin/killall -9 pppd");
+	system("/bin/killall -9 vpnhelper.sh");
+	
+	// Do not set other params if VPN is turned off
+	if (strcmp(pptp_enabled, "on")==0)
+	{
+		char_t *str;
+		
+		const vpn_fetch_t *fetch = pptp_args;
+		while (fetch->web_param != NULL)
+		{
+			// Get variable
+			str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
+			if (fetch->is_switch) // Check if need update a switch
+			{
+				if (str[0]=='\0')
+					str = "off";
+			}
+			
+			if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
+				printf("Set %s nvram error!", fetch->nvram_param);
+			
+			printf("%s value : %s\n", fetch->nvram_param, str);
+			fetch++;
+		}
+		
+		// Check if routing table is enabled
+		char *pptp_rt_enabled = websGetVar(wp, T("pptp_routing_enabled"), T(""));
+		if (pptp_rt_enabled[0] == '\0')
+			pptp_rt_enabled="off";
+		
+		// Routing table is enabled, store it
+		if (strcmp(pptp_rt_enabled, "on") == 0)
+		{
+			char *pptp_rt = websGetVar(wp, T("pptp_routing_table"), T(""));
+			
+			if (pptp_rt != NULL)
+				vpnStoreRouting(pptp_rt);
+		}
+	}
+	
+	// Now store VPN_ENABLED flag
+	if (nvram_bufset(RT2860_NVRAM, "vpnEnabled", (void *)pptp_enabled)==0)
+	{
+		printf("pptp_enabled value : %s\n", pptp_enabled);
+		printf("Calling vpn helper...\n");
+		system("/bin/service start_vpn start &");
+	}
+	else
+		printf("Set vpnEnabled error!\n");
+
+	// Commit nvram
+	nvram_commit(RT2860_NVRAM);
+	
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl[0])
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}
+
 
 /*
  * description: write DHCP client list
@@ -503,10 +915,11 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 
 			if (d>0)
 				websWrite(wp, T("%u days "), d);
-			websWrite(wp, T("%02u:%02u:%02u</td>\n"), h, m, (unsigned)expires);
+			websWrite(wp, T("%02u:%02u:%02u</td>"), h, m, (unsigned)expires);
 		}
 		else
-			websWrite(wp, T("expired</td>\n"));
+			websWrite(wp, T("expired</td>"));
+		websWrite(wp, "</tr>\n");
 	}
 
 	fclose(fp);
@@ -1565,7 +1978,7 @@ inline void zebraRestart(void)
 
 	char *RIPEnable = nvram_bufget(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service zebra stop");
+	doSystem("service zebra start");
 
 	if(!opmode||!strlen(opmode))
 		return;
@@ -1806,9 +2219,9 @@ static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
 static void setWan(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*ctype;
-	char_t	*ip, *nm, *gw, *pd, *sd;
+	char_t	*ip, *nm, *gw;
 	char_t	*eth, *user, *pass;
-	char_t	*clone_en, *clone_mac;
+	char_t	*clone_en, *clone_mac, *nat_enable;
 	char_t  *pptp_srv, *pptp_mode;
 	char_t  *l2tp_srv, *l2tp_mode;
 #ifdef CONFIG_USER_3G
@@ -1818,7 +2231,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_bufget(RT2860_NVRAM, "Lan2Enabled");
 
-	ctype = ip = nm = gw = pd = sd = eth = user = pass = 
+	ctype = ip = nm = gw = eth = user = pass = 
 		clone_en = clone_mac = pptp_srv = pptp_mode = l2tp_srv = l2tp_mode =
 		NULL;
 
@@ -1828,8 +2241,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		ip = websGetVar(wp, T("staticIp"), T(""));
 		nm = websGetVar(wp, T("staticNetmask"), T("0"));
 		gw = websGetVar(wp, T("staticGateway"), T(""));
-		pd = websGetVar(wp, T("staticPriDns"), T(""));
-		sd = websGetVar(wp, T("staticSecDns"), T(""));
 
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
 		if (-1 == inet_addr(ip)) {
@@ -1870,8 +2281,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
 		}
 		nvram_bufset(RT2860_NVRAM, "wan_gateway", gw);
-		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
-		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
 	else if (!strncmp(ctype, "DHCP", 5)) {
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
@@ -1964,6 +2373,24 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 		return;
 	}
+	
+	// Primary/Seconfary DNS set
+	if ((strncmp(ctype, "STATIC", 7) == 0) || (strncmp(ctype, "DHCP", 5) == 0))
+	{
+		const char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
+		const char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
+		const char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
+		
+		printf("st_en = %s, pd = %s, sd = %s\n", st_en, pd, sd);
+		
+		nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
+		
+		if (strcmp(st_en, "on") == 0)
+		{
+			nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
+			nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
+		}
+	}
 
 	// mac clone
 	clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
@@ -1972,6 +2399,12 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	if (!strncmp(clone_en, "1", 2))
 		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
 	nvram_commit(RT2860_NVRAM);
+	
+	// nat
+	nat_enable = websGetVar(wp, T("natEnable"), T("off"));
+	if (strcmp(nat_enable, "on") != 0)
+		nat_enable = "off";
+	nvram_bufset(RT2860_NVRAM, "wan_nat_enable", nat_enable);
 
 	initInternet();
 
@@ -1982,8 +2415,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("IP Address: %s<br>\n"), ip);
 		websWrite(wp, T("Subnet Mask: %s<br>\n"), nm);
 		websWrite(wp, T("Default Gateway: %s<br>\n"), gw);
-		websWrite(wp, T("Primary DNS: %s<br>\n"), pd);
-		websWrite(wp, T("Secondary DNS: %s<br>\n"), sd);
 	}
 	else if (!strncmp(ctype, "DHCP", 5)) {
 	}

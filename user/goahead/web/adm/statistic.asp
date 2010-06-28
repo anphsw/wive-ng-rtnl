@@ -129,9 +129,9 @@ function formCheck()
 
 <script type="text/javascript">
 var i;
-var a = new Array();
-a = [<% getAllNICStatisticASP(); %>];
-for(i=0; i<a.length; i+=5){
+var a = [<% getAllNICStatisticASP(); %>];
+for(i=0; i<a.length; i+=5)
+{
 	// name
 	document.write("<tr> <td class=head> Name </td><td class=head>");
 	document.write(a[i]);

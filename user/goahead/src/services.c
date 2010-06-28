@@ -23,21 +23,121 @@
 #include	"linux/autoconf.h"  //kernel config
 #include	"config/autoconf.h" //user config
 
+#define _PATH_DHCP_ALIAS_FILE "/etc/dhcpd_static.conf"
+
 static void setDhcp(webs_t wp, char_t *path, char_t *query);
 static void setMiscServices(webs_t wp, char_t *path, char_t *query);
+static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv);
 
 void formDefineServices(void)
 {
 	websFormDefine(T("setDhcp"), setDhcp);
 	websFormDefine(T("setMiscServices"), setMiscServices);
+	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
+}
+
+/*
+ * Output static DHCP list for javascript
+ */
+/*static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	// Get values
+	const char *dhcp = nvram_bufget(RT2860_NVRAM, "dhcpStatic1");
+	if (dhcp==NULL)
+		return 0;
+	
+	// Parse data
+	const char *tok = strstr(dhcp, " ");
+	char ip[64], mac[64];
+	int first = 1;
+	
+	// Parse token-by-token
+	while (tok != NULL)
+	{
+		if (first)
+			first = 0;
+		else
+			websWrite(wp, T(",\n"));
+		
+		// Get IP
+		strncpy(mac, dhcp, (size_t)(tok-dhcp));
+		mac[(size_t)(tok-dhcp)] = '\0';
+		dhcp = strstr(tok, ";"); // Find next dhcp
+		if (dhcp==NULL)
+			dhcp = &tok[strlen(tok)];
+		
+		// Get MAC
+		strncpy(ip, tok+1, (size_t)(dhcp-tok-1));
+		ip[(size_t)(dhcp-tok-1)] = '\0';
+		tok = strstr(dhcp, " "); // Next ip token
+		
+		// Output value
+		websWrite(wp, T("[ '%s', '%s' ]"), ip, mac);
+		++dhcp; // Skip ';'
+	}
+	
+	websWrite(wp, T("\n"));
+	
+	return 0;
+}*/
+
+static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	// Get values
+	FILE *fd = fopen(_PATH_DHCP_ALIAS_FILE, "r");
+	
+	if (fd != NULL)
+	{
+		char line[256];
+		char ip[64], mac[64];
+		int args, first = 1;
+		
+		while (fgets(line, 255, fd) != NULL)
+		{
+			// Read routing line
+			args = sscanf(line, "%s %s", ip, mac);
+
+			if (args >= 2)
+			{
+				if (!first)
+					websWrite(wp, T(",\n"));
+				else
+					first = 0;
+
+				websWrite(wp, T("\t[ '%s', '%s' ]"), ip, mac );
+			}
+		}
+	}
+	
+	websWrite(wp, T("\n"));
+	
+	return 0;
+}
+
+void dhcpStoreAliases(const char *dhcp_config)
+{
+	// Open file
+	FILE *fd = fopen(_PATH_DHCP_ALIAS_FILE, "w+");
+	
+	if (fd != NULL)
+	{
+		// Output routing table to file
+		fwrite(dhcp_config, strlen(dhcp_config), 1, fd);
+		fclose(fd);
+		
+		// Call rwfs to store data
+		system("fs save");
+	}
+	else
+		printf("Failed to open file %s\n", _PATH_DHCP_ALIAS_FILE);
 }
 
 /* goform/setDhcp */
 static void setDhcp(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*dhcp_tp;
-	char_t  *dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l;
-	char_t	*dhcp_sl1, *dhcp_sl2, *dhcp_sl3;
+	char_t	*dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l;
+	char_t	*static_leases;
 
 	dhcp_tp = websGetVar(wp, T("lanDhcpType"), T("DISABLE"));
 	dhcp_s = websGetVar(wp, T("dhcpStart"), T(""));
@@ -47,9 +147,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	dhcp_sd = websGetVar(wp, T("dhcpSecDns"), T(""));
 	dhcp_g = websGetVar(wp, T("dhcpGateway"), T(""));
 	dhcp_l = websGetVar(wp, T("dhcpLease"), T("86400"));
-	dhcp_sl1 = websGetVar(wp, T("dhcpStatic1"), T(""));
-	dhcp_sl2 = websGetVar(wp, T("dhcpStatic2"), T(""));
-	dhcp_sl3 = websGetVar(wp, T("dhcpStatic3"), T(""));
+	static_leases = websGetVar(wp, T("dhcpAssignIP"), T(""));
 
 	// configure gateway and dns (WAN) at bridge mode
 	if (strncmp(dhcp_tp, "DISABLE", 8)==0)
@@ -82,9 +180,8 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
 		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
 		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic1", dhcp_sl1);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic2", dhcp_sl2);
-		nvram_bufset(RT2860_NVRAM, "dhcpStatic3", dhcp_sl3);
+		dhcpStoreAliases(static_leases);
+//		nvram_bufset(RT2860_NVRAM, "dhcpStatic1", static_leases);
 	}
 	
 	// Commit settings
@@ -97,7 +194,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 /* goform/setMiscServices */
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en, *pppoer_en, *dnsp_en;
+	char_t	*stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en, *pppoer_en, *dnsp_en, *rmt_http;
 
 	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
 	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
@@ -106,6 +203,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	radvd_en = websGetVar(wp, T("radvdEnbl"), T("0"));
 	pppoer_en = websGetVar(wp, T("pppoeREnbl"), T("0"));
 	dnsp_en = websGetVar(wp, T("dnspEnbl"), T("0"));
+	rmt_http = websGetVar(wp, T("rmtHTTP"), T("off"));
 
 	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
 	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
@@ -114,6 +212,11 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
 	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
 	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
+	
+	if (strcmp(rmt_http, "on")==0)		// enable
+		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "1");
+	else					// disable
+		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "0");
 
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);
