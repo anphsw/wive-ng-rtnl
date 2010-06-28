@@ -93,9 +93,7 @@ typedef struct _RTMP_ADAPTER		*PRTMP_ADAPTER;
 
 typedef struct _RTMP_CHIP_OP_ RTMP_CHIP_OP;
 
-
 //#define DBG		1
-
 //#define DBG_DIAGNOSE		1
 
 #define INCLUDE_DEBUG_QUEUE // remove "//" to enable Debug Queue
@@ -8112,14 +8110,16 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	struct iwreq	*wrq);
 
+#ifdef CONFIG_ASUS_EXT
 #ifdef RALINK_ATE
-VOID RTMPIoctlGetATESHOW(	// by Jiahao for ASUS ATE
+VOID RTMPIoctlGetATESHOW(
 	IN      PRTMP_ADAPTER   pAdapter,
 	IN      struct iwreq    *wrq);
 
-VOID RTMPIoctlGetATEHELP(	// by Jiahao for ASUS ATE
+VOID RTMPIoctlGetATEHELP(
 	IN      PRTMP_ADAPTER   pAdapter,
 	IN      struct iwreq    *wrq);
+#endif
 #endif
 
 #ifdef CONFIG_AP_SUPPORT

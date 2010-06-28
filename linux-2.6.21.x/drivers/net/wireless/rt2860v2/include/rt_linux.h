@@ -445,7 +445,6 @@ typedef struct _RT2870_TIMER_QUEUE_
 }RT2870_TIMER_QUEUE;
 #endif // RT2870 //
 
-
 //#define DBG	1
 
 //

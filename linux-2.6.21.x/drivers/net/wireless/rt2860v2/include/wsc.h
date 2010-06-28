@@ -274,35 +274,18 @@
 #define WSC_SCSTATE_CONFIGURED		0x02
 
 // Common definition
-#if 0
-#define	WSC_MANUFACTURE		"Ralink Technology, Corp."
-#ifdef CONFIG_AP_SUPPORT
-#define	AP_WSC_MODEL_NAME		"Ralink Wireless Access Point"
-#define	AP_WSC_DEVICE_NAME		"RalinkAPS"
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-#define	STA_WSC_MODEL_NAME		"Ralink Wireless Linux Client"
-#define	STA_WSC_DEVICE_NAME		"RalinkLinuxClient"
-#define	WSC_DEVICE_NAME_R	"Ralink EX-Registrar"
-#endif // CONFIG_STA_SUPPORT //
-#define	WSC_MODEL_NUMBER	"RT2860"
-#define	WSC_MODEL_SERIAL	"12345678"
-#endif
-
-/*ASUS EXT by Jiahao */
 #define	WSC_MANUFACTURE		"OSS."
 #ifdef CONFIG_AP_SUPPORT
-#define	AP_WSC_MODEL_NAME		"Wireless WPS Router"
-#define	AP_WSC_DEVICE_NAME		"Wireless WPS Router"
+#define	AP_WSC_MODEL_NAME	"Wireless WPS Router"
+#define	AP_WSC_DEVICE_NAME	"Wireless WPS Router"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
-#define	STA_WSC_MODEL_NAME		"Wireless WPS Station"
-#define	STA_WSC_DEVICE_NAME		"Wireless WPS Station"
+#define	STA_WSC_MODEL_NAME	"Wireless WPS Station"
+#define	STA_WSC_DEVICE_NAME	"Wireless WPS Station"
 #define	WSC_DEVICE_NAME_R	"EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
 #define	WSC_MODEL_NUMBER	"RT-NL"
 #define	WSC_MODEL_SERIAL	"00000000"
-/*ASUS EXT by Jiahao */
 
 // Time-Out, param for timer func, count by micro-sec, not ticks
 #define WSC_EAPOL_START_TIME_OUT    2000 

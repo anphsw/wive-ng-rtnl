@@ -2070,7 +2070,7 @@ NDIS_STATUS	RTMPSetProfileParameters(
 	ULONG					RtsThresh;
 	ULONG					FragThresh;
 	PSTRING					macptr;							
-	INT						i = 0, retval, k;
+	INT					i = 0, retval, k;
 	tmpbuf = kmalloc(MAX_PARAM_BUFFER_SIZE, MEM_ALLOC_FLAG);
 	if(tmpbuf == NULL)
 		return NDIS_STATUS_FAILURE;

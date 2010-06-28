@@ -843,18 +843,12 @@ typedef struct _NDIS_802_11_CAPABILITY
 #define RT_PRIV_IOCTL							(SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
 #define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
 
-//#ifdef DBG
-#if 1			// by Jiahao for ASUS ATE
 #define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
 #define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
-
 #ifdef RTMP_RF_RW_SUPPORT
 #define RTPRIV_IOCTL_RF                             (SIOCIWFIRSTPRIV + 0x13)  // edit by johnli, fix read rf register problem
 #endif // RTMP_RF_RW_SUPPORT //
-
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
-//#endif // DBG //
-#endif			// by Jiahao for ASUS ATE
 
 #ifdef RALINK_ATE
 #ifdef RALINK_28xx_QA
@@ -871,9 +865,11 @@ typedef struct _NDIS_802_11_CAPABILITY
 
 #define RTPRIV_IOCTL_SHOW							(SIOCIWFIRSTPRIV + 0x11)
 
+#ifdef CONFIG_ASUS_EXT
 #ifdef RALINK_ATE
-#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)    // by Jiahao for ASUS ATE
-#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)    // by Jiahao for ASUS ATE
+#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)
+#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)
+#endif
 #endif
 
 enum {    
@@ -931,8 +927,7 @@ enum {
 #define RT_PRIV_IOCTL								(SIOCIWFIRSTPRIV + 0x01)
 #define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
 				
-//#ifdef DBG
-#if 1			// by Jiahao for ASUS ATE
+#ifdef CONFIG_ASUS_EXT
 #define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
 #define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
 
@@ -946,9 +941,8 @@ enum {
 #define RTPRIV_IOCTL_FLAG_UI			0x0001	// Notidy this private cmd send by UI.
 #define RTPRIV_IOCTL_FLAG_NODUMPMSG	0x0002	// Notify driver cannot dump msg to stdio/stdout when run this private ioctl cmd
 #define RTPRIV_IOCTL_FLAG_NOSPACE		0x0004	// Notify driver didn't need copy msg to caller due to the caller didn't reserve space for this cmd
+#endif
 
-//#endif // DBG //
-#endif			// by Jiahao for ASUS ATE
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
 
 #ifdef RALINK_ATE
@@ -972,9 +966,11 @@ enum {
 #define RTPRIV_IOCTL_GET_AR9_SHOW   (SIOCIWFIRSTPRIV + 0x17)
 #define RTPRIV_IOCTL_SET_WSCOOB	(SIOCIWFIRSTPRIV + 0x19)
 
+#ifdef CONFIG_ASUS_EXT
 #ifdef RALINK_ATE
-#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)    // by Jiahao for ASUS ATE
-#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)    // by Jiahao for ASUS ATE
+#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)
+#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)
+#endif
 #endif
 
 #endif // CONFIG_AP_SUPPORT //

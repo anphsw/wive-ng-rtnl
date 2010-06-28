@@ -2508,7 +2508,7 @@ Arguments:
     Note:
     ==========================================================================
 */
-#if 0
+#ifndef CONFIG_ASUS_EXT
 PSTRING GetEncryptType(CHAR enc)
 {
     if(enc == Ndis802_11WEPDisabled)
@@ -2526,7 +2526,8 @@ PSTRING GetEncryptType(CHAR enc)
 }
 #endif
 
-PSTRING GetEncryptType(CHAR enc)	// ASUS EXT by Jiahao
+#ifdef CONFIG_ASUS_EXT
+PSTRING GetEncryptType(CHAR enc)
 {
     if(enc == Ndis802_11WEPDisabled)
         return "NONE";
@@ -2537,13 +2538,13 @@ PSTRING GetEncryptType(CHAR enc)	// ASUS EXT by Jiahao
     if(enc == Ndis802_11Encryption3Enabled)
     	return "AES";
     if(enc == Ndis802_11Encryption4Enabled)
-//	return "TKIPAES";
 	return "AES";
     else
 	return "Unknown";
 }
+#endif
 
-#if 0
+#ifndef CONFIG_ASUS_EXT
 PSTRING GetAuthMode(CHAR auth)
 {
     if(auth == Ndis802_11AuthModeOpen)
@@ -2571,7 +2572,8 @@ PSTRING GetAuthMode(CHAR auth)
 }
 #endif
 
-PSTRING GetAuthMode(CHAR auth)		// ASUS EXT by Jiahao
+#ifdef CONFIG_ASUS_EXT
+PSTRING GetAuthMode(CHAR auth)
 {
     if(auth == Ndis802_11AuthModeOpen)
     	return "OPEN";
@@ -2603,6 +2605,7 @@ PSTRING GetAuthMode(CHAR auth)		// ASUS EXT by Jiahao
 
 	return "Unknown";
 }		
+#endif
 
 /* 
     ==========================================================================
@@ -2623,7 +2626,7 @@ PSTRING GetAuthMode(CHAR auth)		// ASUS EXT by Jiahao
     ==========================================================================
 */
 //#define	LINE_LEN	(4+33+20+23+9+7+7+3)	// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType
-#define	LINE_LEN	(3+33+18+9+16+9+8+3+3)	// Channel+SSID+Bssid+WepStatus+AuthMode+Signal+WiressMode+NetworkType+ExtCh	// ASUS EXT by Jiahao for httpd hook
+#define	LINE_LEN	(3+33+18+9+16+9+8+3+3)	// Channel+SSID+Bssid+WepStatus+AuthMode+Signal+WiressMode+NetworkType+ExtCh
 #ifdef CONFIG_STA_SUPPORT
 #ifdef WSC_STA_SUPPORT
 #define	WPS_LINE_LEN	(4+5)	// WPS+DPID
@@ -2637,28 +2640,29 @@ VOID	RTMPCommSiteSurveyData(
 	UINT        Rssi_Quality = 0;
 	NDIS_802_11_NETWORK_TYPE    wireless_mode;
 	CHAR		Ssid[MAX_LEN_OF_SSID +1];
+#ifdef CONFIG_ASUS_EXT
 	STRING		SecurityStr[32] = {0};
+#endif
 	NDIS_802_11_ENCRYPTION_STATUS	ap_cipher = Ndis802_11EncryptionDisabled;
 	NDIS_802_11_AUTHENTICATION_MODE	ap_auth_mode = Ndis802_11AuthModeOpen;
 
 	memset(Ssid, 0 ,(MAX_LEN_OF_SSID +1));
-
+#ifdef CONFIG_ASUS_EXT
 		//Channel
-//		sprintf(msg+strlen(msg),"%-4d", pBss->Channel);
-		sprintf(msg+strlen(msg),"%-3d", pBss->Channel);			// ASUS EXT by Jiahao for httpd hook
+		sprintf(msg+strlen(msg),"%-3d", pBss->Channel);
 		//SSID
 		memcpy(Ssid, pBss->Ssid, pBss->SsidLen);
 		Ssid[pBss->SsidLen] = '\0';
 		sprintf(msg+strlen(msg),"%-33s", Ssid);      
 		//BSSID
-//		sprintf(msg+strlen(msg),"%02x:%02x:%02x:%02x:%02x:%02x   ", 
-		sprintf(msg+strlen(msg),"%02X:%02X:%02X:%02X:%02X:%02X ",	// ASUS EXT by Jiahao for httpd hook
+		sprintf(msg+strlen(msg),"%02X:%02X:%02X:%02X:%02X:%02X ",
 			pBss->Bssid[0], 
 			pBss->Bssid[1],
 			pBss->Bssid[2], 
 			pBss->Bssid[3], 
 			pBss->Bssid[4], 
 			pBss->Bssid[5]);
+#endif
 	
 	//Security
 	if ((Ndis802_11AuthModeWPA <= pBss->AuthMode) &&
@@ -2735,32 +2739,28 @@ VOID	RTMPCommSiteSurveyData(
 					 (pBss->WPA.PairCipherAux == Ndis802_11WEPDisabled))
 				ap_cipher = pBss->WPA.PairCipher;
 		}
-
-//		sprintf(SecurityStr, "%s/%s", GetAuthMode((CHAR)ap_auth_mode), GetEncryptType((CHAR)ap_cipher));		
-		sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));	// ASUS EXT by Jiahao for httpd hook
-		sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));	// ASUS EXT by Jiahao for httpd hook
+#ifdef CONFIG_ASUS_EXT
+		sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));
+		sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));
+#endif
 	}			
+#ifdef CONFIG_ASUS_EXT
 	else
 	{
 		ap_auth_mode = pBss->AuthMode;
 		ap_cipher = pBss->WepStatus;		
 		if (ap_cipher == Ndis802_11WEPDisabled)
-//			sprintf(SecurityStr, "NONE");
-			sprintf(SecurityStr, "NONE     Open System");	// ASUS EXT by Jiahao for httpd hook
+			sprintf(SecurityStr, "NONE     Open System");
 		else if (ap_cipher == Ndis802_11WEPEnabled)
-//			sprintf(SecurityStr, "WEP");
-			sprintf(SecurityStr, "WEP      Unknown");	// ASUS EXT by Jiahao for httpd hook
+			sprintf(SecurityStr, "WEP      Unknown");
 		else
 		{
-//			sprintf(SecurityStr, "%s/%s", GetAuthMode((CHAR)ap_auth_mode), GetEncryptType((CHAR)ap_cipher));
-			sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));	// ASUS EXT by Jiahao for httpd hook
-			sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));	// ASUS EXT by Jiahao for httpd hook
+			sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));
+			sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));
 		}
 	}
-	
-//	sprintf(msg+strlen(msg), "%-23s", SecurityStr);
-	sprintf(msg+strlen(msg), "%-25s", SecurityStr);			// ASUS EXT by Jiahao for httpd hook
-
+	sprintf(msg+strlen(msg), "%-25s", SecurityStr);
+#endif
 		// Rssi
 		Rssi = (INT)pBss->Rssi;
 		if (Rssi >= -50)
@@ -2774,26 +2774,22 @@ VOID	RTMPCommSiteSurveyData(
 		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
 		// Wireless Mode
 		wireless_mode = NetworkTypeInUseSanity(pBss);
+#ifdef CONFIG_ASUS_EXT
 		if (wireless_mode == Ndis802_11FH ||
 			wireless_mode == Ndis802_11DS)
-//			sprintf(msg+strlen(msg),"%-7s", "11b");
-			sprintf(msg+strlen(msg),"%-8s", "11b");		// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "11b");
 		else if (wireless_mode == Ndis802_11OFDM5)
-//			sprintf(msg+strlen(msg),"%-7s", "11a");
-			sprintf(msg+strlen(msg),"%-8s", "11a");		// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "11a");
 		else if (wireless_mode == Ndis802_11OFDM5_N)
-//			sprintf(msg+strlen(msg),"%-7s", "11a/n");
-			sprintf(msg+strlen(msg),"%-8s", "11a/n");	// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "11a/n");
 		else if (wireless_mode == Ndis802_11OFDM24)
-//			sprintf(msg+strlen(msg),"%-7s", "11b/g");
-			sprintf(msg+strlen(msg),"%-8s", "11b/g");	// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "11b/g");
 		else if (wireless_mode == Ndis802_11OFDM24_N)
-//			sprintf(msg+strlen(msg),"%-7s", "11b/g/n");
-			sprintf(msg+strlen(msg),"%-8s", "11b/g/n");	// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "11b/g/n");
 		else
-//			sprintf(msg+strlen(msg),"%-7s", "unknow");
-			sprintf(msg+strlen(msg),"%-8s", "unknown");	// ASUS EXT by Jiahao for httpd hook
-#if 0									// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-8s", "unknown");
+#endif
+#ifndef CONFIG_ASUS_EXT
 		// Ext Channel						// use Central Channel instead
 		if (pBss->AddHtInfoLen > 0)
 		{
@@ -2809,17 +2805,15 @@ VOID	RTMPCommSiteSurveyData(
 			sprintf(msg+strlen(msg),"%-7s", " NONE");
 		}
 #endif	
+#ifdef CONFIG_ASUS_EXT
 		//Network Type		
 		if (pBss->BssType == BSS_ADHOC)
-//			sprintf(msg+strlen(msg),"%-3s", " Ad");
-			sprintf(msg+strlen(msg),"%-3s", "Ad ");		// ASUS EXT by Jiahao for httpd hook
+			sprintf(msg+strlen(msg),"%-3s", "Ad ");
 		else
-//			sprintf(msg+strlen(msg),"%-3s", " In");
-			sprintf(msg+strlen(msg),"%-3s", "In ");		// ASUS EXT by Jiahao for httpd hook
-
+			sprintf(msg+strlen(msg),"%-3s", "In ");
 		//Central Channel
-		sprintf(msg+strlen(msg),"%-2d", pBss->CentralChannel);	// ASUS EXT by Jiahao for httpd hook
-
+		sprintf(msg+strlen(msg),"%-2d", pBss->CentralChannel);
+#endif
         sprintf(msg+strlen(msg),"\n");
 	
 	return;
@@ -2854,8 +2848,10 @@ VOID RTMPIoctlGetSiteSurvey(
 	sprintf(msg,"%s","\n");
 //	sprintf(msg+strlen(msg),"%-4s%-33s%-20s%-23s%-9s%-7s%-7s%-3s\n",
 //	    "Ch", "SSID", "BSSID", "Security", "Siganl(%)", "W-Mode", " ExtCH"," NT");
-	sprintf(msg+strlen(msg),"%-3s%-33s%-18s%-9s%-16s%-9s%-8s%-2s%-3s\n",	// ASUS EXT by Jiahao for httpd hook
+#ifdef ASUS_EXT
+	sprintf(msg+strlen(msg),"%-3s%-33s%-18s%-9s%-16s%-9s%-8s%-2s%-3s\n",
 	    "Ch", "SSID", "BSSID", "Enc", "Auth", "Siganl(%)", "W-Mode", "NT", " CC");
+#endif
 	
 #ifdef CONFIG_STA_SUPPORT
 #ifdef WSC_STA_SUPPORT
@@ -2965,7 +2961,7 @@ VOID RTMPIoctlGetMacTableStaInfo(
 /* +++ end of addition */
 
 #ifdef RALINK_ATE
-VOID RTMPIoctlGetATESHOW(		// by Jiahao for ASUS ATE
+VOID RTMPIoctlGetATESHOW(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	struct iwreq	*wrq)
 {
@@ -3019,7 +3015,8 @@ VOID RTMPIoctlGetATESHOW(		// by Jiahao for ASUS ATE
 	os_free_mem(NULL, (PUCHAR)msg);
 }
 
-VOID RTMPIoctlGetATEHELP(		// by Jiahao for ASUS ATE
+#ifdef ASUS_EXT
+VOID RTMPIoctlGetATEHELP(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	struct iwreq	*wrq)
 {
@@ -3098,6 +3095,7 @@ VOID RTMPIoctlGetATEHELP(		// by Jiahao for ASUS ATE
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPIoctlGetATEHELP - wrq->u.data.length = %d\n", wrq->u.data.length));
 	os_free_mem(NULL, (PUCHAR)msg);
 }
+#endif
 #endif
 
 VOID RTMPIoctlGetMacTable(

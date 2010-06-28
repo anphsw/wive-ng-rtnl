@@ -50,14 +50,13 @@
 #ifdef APCLI_SUPPORT
 
 #include "rt_config.h"
-
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 #define Link_Up_Threshold 3
 extern UINT count_DeAssoc;
 UINT count_Alive;
 UINT flag_Reconnect;
 extern UINT ApcliMonitorPid;
-/* ASUS EXT by Jiahao */
+#endif
 
 /* --------------------------------- Public -------------------------------- */
 /*
@@ -1026,12 +1025,11 @@ VOID ApCliIfUp(
 			&& (pApCliEntry->Enable == TRUE)
 			&& (pApCliEntry->Valid == FALSE))
 		{
-			/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 			count_Alive=0;
 			count_DeAssoc=0;
 			flag_Reconnect = (flag_Reconnect % 65535) + 1;
-
-			/* ASUS EXT by Jiahao */
+#endif
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startup.\n", __FUNCTION__, ifIndex));
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
 		}
@@ -1107,7 +1105,6 @@ VOID ApCliIfMonitor(
 		}
 #endif
 #ifdef CONFIG_ASUS_EXT
-		/* ASUS EXT by Jiahao */
 		if ((pApCliEntry->Valid == TRUE))
 		{
 			if ((RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
@@ -1141,7 +1138,6 @@ VOID ApCliIfMonitor(
 					count_Alive = Link_Up_Threshold * 2;
 			}
 		}
-		/* ASUS EXT by Jiahao */
 #endif
 	}
 

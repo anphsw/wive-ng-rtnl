@@ -1048,9 +1048,9 @@ VOID	NICReadEEPROMParameters(
 // TODO: Shiang, Need to check about the gpio value, it seems has issue in RT2880/RT3052 board.
 //	if ((pAd->MACVersion == 0x28600100) || (pAd->MACVersion == 0x28700100))
 //	WSC_HDR_BTN_MR_HDR_SUPPORT_SET(pAd, NicConfig2.field.EnableWPSPBC);
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
         WSC_HDR_BTN_MR_HDR_SUPPORT_SET(pAd, 0);
-/* ASUS EXT by Jiahao */
+#endif
 #endif // WSC_INCLUDED //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -1665,7 +1665,9 @@ NDIS_STATUS	NICInitializeAdapter(
 	DBGPRINT(RT_DEBUG_TRACE, ("--> NICInitializeAdapter\n"));
 	
 	// 3. Set DMA global configuration except TX_DMA_EN and RX_DMA_EN bits:
+#ifndef RTMP_RBUS_SUPPORT
 retry:
+#endif
 	i = 0;
 	do
 	{

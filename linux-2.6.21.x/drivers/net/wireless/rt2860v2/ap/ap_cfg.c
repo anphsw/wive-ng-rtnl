@@ -26,12 +26,11 @@
 
 
 #include "rt_config.h"
-
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 UINT ApcliMonitorPid = 0;
 extern UINT count_Alive;
 extern UINT flag_Reconnect;
-/* ASUS EXT by Jiahao */
+#endif
 
 #define A_BAND_REGION_0				0
 #define A_BAND_REGION_1				1
@@ -531,13 +530,11 @@ INT	Set_ACLClearAll_Proc(
 INT	Set_RadioOn_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PSTRING			arg);
-
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 INT	Set_ApcliMonitorPid_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PUCHAR			arg);
-/* ASUS EXT by Jiahao */
-
+#endif
 INT Set_SiteSurvey_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
@@ -873,9 +870,9 @@ static struct {
 	{"ACLClearAll",					Set_ACLClearAll_Proc},
 	{"WPAPSK",					Set_AP_WPAPSK_Proc},
 	{"RadioOn",					Set_RadioOn_Proc},
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 	{"ApcliMonitorPid",				Set_ApcliMonitorPid_Proc},
-/* ASUS EXT by Jiahao */
+#endif
 	{"SiteSurvey",					Set_SiteSurvey_Proc},
 	{"ResetCounter",				Set_ResetStatCounter_Proc},
 	{"DisConnectSta",				Set_DisConnectSta_Proc},
@@ -5287,8 +5284,7 @@ INT	Set_RadioOn_Proc(
 	return TRUE;
 }
 
-
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 INT	Set_ApcliMonitorPid_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PUCHAR			arg)
@@ -5298,7 +5294,7 @@ INT	Set_ApcliMonitorPid_Proc(
 	
 	return TRUE;
 }
-/* ASUS EXT by Jiahao */
+#endif
 
 /* 
     ==========================================================================
@@ -6574,7 +6570,7 @@ VOID RTMPIoctlSetIdleTimeout(
 }
 
 //#ifdef DBG
-#if 1		// by Jiahao for ASUS ATE
+#ifdef CONFIG_ASUS_EXT
 /* 
     ==========================================================================
     Description:
@@ -7430,8 +7426,7 @@ done:
     if (wrq->u.data.flags != RT_OID_802_11_HARDWARE_REGISTER)	
 	DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlE2PROM\n"));
 }
-//#endif //#ifdef DBG
-#endif		// by Jiahao for ASUS ATE
+#endif
 
 
 /* 
@@ -7673,21 +7668,17 @@ INT Set_ApCli_Enable_Proc(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("I/F(apcli%d) Set_ApCli_Enable_Proc::(enable = %d)\n", ifIndex, pAd->ApCfg.ApCliTab[ifIndex].Enable));
 
-/* ASUS EXT by Jiahao */
+#ifdef CONFIG_ASUS_EXT
 	if (Enable > 0)
 	{
 		flag_Reconnect = (flag_Reconnect % 65535) + 1;
-//		printk("set flag_Reconnect = 1 in Set_ApCli_Enable_Proc()\n");
 	}
 	else
 	{
 		count_Alive = 0;
-//		printk("set count_Alive = 0 in Set_ApCli_Enable_Proc()\n");
 	}
-/* ASUS EXT by Jiahao */
-
+#endif
 	ApCliIfDown(pAd);
-
 	return TRUE;
 }
 

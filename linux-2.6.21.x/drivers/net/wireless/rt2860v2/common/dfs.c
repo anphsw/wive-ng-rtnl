@@ -1505,8 +1505,9 @@ static ULONG cd_idx=0;
 void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd)
 {
 	UINT32 value, delta;
+#ifdef CARRIER_2_SUPPORT
 	UCHAR bbp;
-
+#endif
 	
 	RTMP_IO_READ32(pAd, PBF_LIFE_TIMER, &value);
 	RTMP_IO_READ32(pAd, CH_IDLE_STA, &pAd->CommonCfg.CarrierDetect.idle_time);

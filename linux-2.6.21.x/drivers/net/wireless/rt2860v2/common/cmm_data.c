@@ -2520,11 +2520,9 @@ MAC_TABLE_ENTRY *MacTableInsertEntry(
 	UCHAR HashIdx;
 	int i, FirstWcid;
 	MAC_TABLE_ENTRY *pEntry = NULL, *pCurrEntry;
-//	USHORT	offset;
-//	ULONG	addr;
+#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
 	ULONG streamWord;
-	
-
+#endif
 	// if FULL, return
 	if (pAd->MacTab.Size >= MAX_LEN_OF_MAC_TABLE)
 		return NULL;

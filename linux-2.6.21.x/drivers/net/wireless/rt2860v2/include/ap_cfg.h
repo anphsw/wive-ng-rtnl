@@ -53,7 +53,7 @@ VOID RTMPAPIoctlE2PROM(
     IN  struct iwreq    *wrq);
 
 //#ifdef DBG
-#if 1		// by Jiahao for ASUS ATE
+#ifdef CONFIG_ASUS_EXT
 VOID RTMPAPIoctlBBP(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
@@ -67,9 +67,7 @@ VOID RTMPAPIoctlRF(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq);
 #endif // RTMP_RF_RW_SUPPORT //
-
-//#endif // DBG //
-#endif		// by Jiahao for ASUS ATE
+#endif
 
 VOID RT28XX_IOCTL_MaxRateGet(
 	IN	RTMP_ADAPTER			*pAd,
