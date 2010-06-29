@@ -30,8 +30,7 @@ ROMFS_DIRS = \
 	etc_ro etc_ro/web etc_ro/ppp \
 	etc_ro/ppp/peers etc_ro/ppp/3g \
 	etc_ro/ppp/plugins \
-	etc_ro/wlan etc_ro/Wireless \
-	etc_ro/Wireless/RT2860AP etc_ro/xml \
+	etc_ro/wlan etc_ro/xml \
 	etc_ro/linuxigd
 
 clean:
