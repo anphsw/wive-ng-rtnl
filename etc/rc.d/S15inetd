@@ -8,7 +8,7 @@ echo "Starting inetd: "
     	    admID="Admin"
 	fi
 	if [ -f /bin/dropbear ]; then
-	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i" > /etc/inetd.conf
+	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i -K60 -I360 -m" > /etc/inetd.conf
 	fi
         /sbin/inetd
     fi
