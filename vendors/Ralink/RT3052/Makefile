@@ -27,11 +27,8 @@ ROMFS_DIRS = \
 	dev dev/pts \
 	lib lib/modules \
 	usr usr/codepages \
-	etc_ro etc_ro/web etc_ro/ppp \
-	etc_ro/ppp/peers etc_ro/ppp/3g \
-	etc_ro/ppp/plugins \
-	etc_ro/wlan etc_ro/xml \
-	etc_ro/linuxigd
+	etc_ro etc_ro/web \
+	etc_ro/xml
 
 clean:
 	rm -f mkimage
