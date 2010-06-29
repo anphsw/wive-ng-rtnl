@@ -793,14 +793,14 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
 	system("ralink_init clear 2860");
-        system("ralink_init renew 2860 /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
+        system("ralink_init renew 2860 /etc/Wireless/RT2860_default_vlan");
 #if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI)
 	system("ralink_init clear inic");
-        system("ralink_init renew inic /etc_ro/Wireless/RT2860AP/RT2860_default_vlan");
+        system("ralink_init renew inic /etc/Wireless/RT2860_default_vlan");
 #endif
 #if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	system("ralink_init clear 2561");
-        system("ralink_init renew 2561 /etc_ro/Wireless/RT61AP/RT2561_default");
+        system("ralink_init renew 2561 /etc/Wireless/RT2561_default");
 #endif
 	
 	system("fs restore");
