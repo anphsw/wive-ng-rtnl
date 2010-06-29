@@ -101,7 +101,9 @@ typedef union  _HTTRANSMIT_SETTING {
 		unsigned short  BW:1;           //channel bandwidth 20MHz or 40 MHz
 		unsigned short  ShortGI:1;
 		unsigned short  STBC:2;         //SPACE
-		unsigned short  rsv:3;
+    		unsigned short  eTxBF:1;                                                                                                            
+    		unsigned short	rsv:1;                                                                                                              
+    		unsigned short	iTxBF:1;                                                                                                            
 		unsigned short  MODE:2;         // 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
 	} field;
 	unsigned short  word;
@@ -223,6 +225,8 @@ typedef enum _NDIS_802_11_NETWORK_TYPE
 	Ndis802_11OFDM5,
 	Ndis802_11OFDM24,
 	Ndis802_11Automode,
+	Ndis802_11OFDM5_N,                                                                                                                      
+	Ndis802_11OFDM24_N,                                                                                                                     
 	Ndis802_11NetworkTypeMax    // not a real type, defined as an upper bound
 } NDIS_802_11_NETWORK_TYPE, *PNDIS_802_11_NETWORK_TYPE;
 
@@ -231,6 +235,7 @@ typedef enum _NDIS_802_11_NETWORK_INFRASTRUCTURE
 	Ndis802_11IBSS,
 	Ndis802_11Infrastructure,
 	Ndis802_11AutoUnknown,
+	Ndis802_11Monitor,
 	Ndis802_11InfrastructureMax         // Not a real value, defined as upper bound
 } NDIS_802_11_NETWORK_INFRASTRUCTURE, *PNDIS_802_11_NETWORK_INFRASTRUCTURE;
 
@@ -315,11 +320,12 @@ typedef enum _RT_802_11_PHY_MODE {
 	PHY_11ABG_MIXED,
 	PHY_11G,
 	PHY_11ABGN_MIXED,   // both band   5
-	PHY_11N,            //    6
+        PHY_11N_2_4G,       // 11n-only with 2.4G band      6                                                                           
 	PHY_11GN_MIXED,     // 2.4G band      7
 	PHY_11AN_MIXED,     // 5G  band       8
 	PHY_11BGN_MIXED,    // if check 802.11b.      9
 	PHY_11AGN_MIXED,    // if check 802.11b.      10
+        PHY_11N_5G,         // 11n-only with 5G band                11
 } RT_802_11_PHY_MODE;
 
 typedef struct {
@@ -359,6 +365,8 @@ typedef enum _NDIS_802_11_AUTHENTICATION_MODE
 	Ndis802_11AuthModeWPANone,
 	Ndis802_11AuthModeWPA2,
 	Ndis802_11AuthModeWPA2PSK,
+        Ndis802_11AuthModeWPA1WPA2,
+        Ndis802_11AuthModeWPA1PSKWPA2PSK,
 	Ndis802_11AuthModeMax               // Not a real mode, defined as upper bound
 } NDIS_802_11_AUTHENTICATION_MODE, *PNDIS_802_11_AUTHENTICATION_MODE;
 
@@ -376,6 +384,11 @@ typedef enum _NDIS_802_11_WEP_STATUS
 	Ndis802_11Encryption2KeyAbsent,
 	Ndis802_11Encryption3Enabled,
 	Ndis802_11Encryption3KeyAbsent
+        Ndis802_11Encryption4Enabled,       // TKIP or AES mix                                                                                  
+	Ndis802_11Encryption4KeyAbsent,                                                                                                         
+	Ndis802_11GroupWEP40Enabled,                                                                                                            
+        Ndis802_11GroupWEP104Enabled,                  
+
 } NDIS_802_11_WEP_STATUS, *PNDIS_802_11_WEP_STATUS,
   NDIS_802_11_ENCRYPTION_STATUS, *PNDIS_802_11_ENCRYPTION_STATUS;
 
@@ -384,6 +397,7 @@ typedef enum _NDIS_802_11_POWER_MODE
 	Ndis802_11PowerModeCAM,
 	Ndis802_11PowerModeMAX_PSP,
 	Ndis802_11PowerModeFast_PSP,
+	Ndis802_11PowerModeLegacy_PSP,
 	Ndis802_11PowerModeMax      // not a real mode, defined as an upper bound
 } NDIS_802_11_POWER_MODE, *PNDIS_802_11_POWER_MODE;
 
@@ -495,7 +509,7 @@ typedef struct _NDIS_802_11_REMOVE_KEY
 // Key mapping keys require a BSSID
 typedef struct _NDIS_802_11_KEY
 {
-    unsigned int        Length;             // Length of this structure
+	unsigned int        Length;             // Length of this structure
 	unsigned int        KeyIndex;
 	unsigned int        KeyLength;          // length of key in bytes
 	unsigned char       BSSID[6];
