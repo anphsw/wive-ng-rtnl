@@ -4886,7 +4886,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
 
 	//set 11n ht phy mode
-	if (wireless_mode >= PHY_11N) {
+	if (wireless_mode >= PHY_11N_2_4G) {
 		OID_BACAP_STRUC    BACap;
 		OID_SET_HT_PHYMODE phymode;
 
@@ -5040,7 +5040,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 				break;
 		}
 	}
-	if (wireless_mode < PHY_11N)
+	if (wireless_mode < PHY_11N_2_4G)
 		OidSetInformation(OID_802_11_DESIRED_RATES, s, "ra0", &aryRates, sizeof(NDIS_802_11_RATES));
 
 	OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
