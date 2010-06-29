@@ -383,11 +383,11 @@ typedef enum _NDIS_802_11_WEP_STATUS
 	Ndis802_11Encryption2Enabled,
 	Ndis802_11Encryption2KeyAbsent,
 	Ndis802_11Encryption3Enabled,
-	Ndis802_11Encryption3KeyAbsent
+	Ndis802_11Encryption3KeyAbsent,
         Ndis802_11Encryption4Enabled,       // TKIP or AES mix                                                                                  
 	Ndis802_11Encryption4KeyAbsent,                                                                                                         
 	Ndis802_11GroupWEP40Enabled,                                                                                                            
-        Ndis802_11GroupWEP104Enabled,                  
+        Ndis802_11GroupWEP104Enabled                  
 
 } NDIS_802_11_WEP_STATUS, *PNDIS_802_11_WEP_STATUS,
   NDIS_802_11_ENCRYPTION_STATUS, *PNDIS_802_11_ENCRYPTION_STATUS;
