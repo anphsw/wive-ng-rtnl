@@ -796,11 +796,14 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	if (pptp_enabled[0] == '\0')
 		pptp_enabled="off";
 
-	//kill tunnels
+	//kill tunnels firt sigterm second sigkill
 	printf("Kill tunnels\n");
-	system("/bin/killall -9 xl2tpd");
-	system("/bin/killall -9 pppd");
-	system("/bin/killall -9 vpnhelper.sh");
+	system("/bin/killall -q xl2tpd");
+	system("/bin/killall -q pppd");
+	system("/bin/killall -q vpnhelper.sh");
+	system("/bin/killall -q -9 xl2tpd");
+	system("/bin/killall -q -9 pppd");
+	system("/bin/killall -q -9 vpnhelper.sh");
 	
 	// Do not set other params if VPN is turned off
 	if (strcmp(pptp_enabled, "on")==0)

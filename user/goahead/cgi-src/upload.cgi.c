@@ -404,7 +404,7 @@ getenv("SERVER_SOFTWARE"));
      */
     write_flash_kernel_version(filename, file_begin);
 #ifdef CONFIG_RT2880_DRAM_8M
-    system("killall goahead");
+    system("killall -q goahead");
 #endif
     // flash write
     if( mtd_write_firmware(filename, file_begin, file_end - file_begin) == -1){

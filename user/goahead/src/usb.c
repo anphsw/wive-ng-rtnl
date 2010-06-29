@@ -903,7 +903,7 @@ static void webcamra(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	// setup device
-	doSystem("killall uvc_stream");
+	doSystem("killall -q uvc_stream");
 	if (0 == strcmp(enable, "1"))
 	{
 		doSystem("uvc_stream -r %s -f %s -p %s -b", 
@@ -934,7 +934,7 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	// setup device
-	doSystem("killall p910nd");
+	doSystem("killall -q p910nd");
 	if (0 == strcmp(enable, "1"))
 	{
 		doSystem("p910nd -b -f /dev/lp0");
@@ -992,7 +992,7 @@ int initUSB(void)
 #if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
 	printf("UVC init\n");
 	char *webcamebl = nvram_bufget(RT2860_NVRAM, "WebCamEnabled");
-	doSystem("killall uvc_stream");
+	doSystem("killall -q uvc_stream");
 	if (0 == strcmp(webcamebl, "1"))
 	{
 	printf("UVC start\n");
@@ -1005,7 +1005,7 @@ int initUSB(void)
 #if defined CONFIG_USB && defined CONFIG_USER_P910ND
 	printf("P910ND init\n");
 	char *printersrvebl = nvram_bufget(RT2860_NVRAM, "PrinterSrvEnabled");
-	doSystem("killall p910nd");
+	doSystem("killall -q p910nd");
 	if (0 == strcmp(printersrvebl, "1"))
 	{
 	printf("P910ND start\n");

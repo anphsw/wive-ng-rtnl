@@ -106,7 +106,7 @@ static void mediaPlayer(webs_t wp, char_t *path, char_t *query)
 		if (strcmp(service_mode, "0") == 0)
 		{
 			target = websGetVar(wp, T("inet_radio"), T(""));
-			doSystem("killall mplayer");
+			doSystem("killall -q mplayer");
 			doSystem("mplayer -cache 256 %s &", target);
 		}
 		else if (strcmp(service_mode, "1") == 0)
@@ -117,12 +117,12 @@ static void mediaPlayer(webs_t wp, char_t *path, char_t *query)
 			target = websGetVar(wp, T("play_list"), T(""));
 			if (strcmp(option, "random") == 0)
 			{
-				doSystem("killall mplayer");
+				doSystem("killall -q mplayer");
 				doSystem("mplayer -shuffle -playlist %s &", "/media/sda1/track.txt");
 			}
 			else
 			{
-				doSystem("killall mplayer");
+				doSystem("killall -q mplayer");
 				doSystem("mplayer -playlist %s &", "/media/sda1/track.txt");
 			}
 			strcpy(media_state.option, option);
@@ -130,7 +130,7 @@ static void mediaPlayer(webs_t wp, char_t *path, char_t *query)
 		else if (strcmp(service_mode, "2") == 0)
 		{
 			target = websGetVar(wp, T("radio_url"), T(""));
-			doSystem("killall mplayer");
+			doSystem("killall -q mplayer");
 			doSystem("mplayer %s &", target);
 		}
 		strcpy(media_state.operate, opt);
@@ -144,7 +144,7 @@ static void mediaPlayer(webs_t wp, char_t *path, char_t *query)
 		memset(&media_state.service_mode, 0, sizeof(media_state.service_mode));
 		memset(&media_state.option, 0, sizeof(media_state.option));
 		memset(&media_state.target, 0, sizeof(media_state.target));
-		doSystem("killall mplayer");
+		doSystem("killall -q mplayer");
 		strcpy(media_state.operate, opt);
 	}
 	websRedirect(wp, "media/player.asp");
