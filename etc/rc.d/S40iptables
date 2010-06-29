@@ -141,7 +141,6 @@ start() {
 
 stop() {
  echo "Stopping IPTABLES: "
- get_param
 	iptables -F > /dev/null 2>&1
 	iptables -t nat -F > /dev/null 2>&1
         iptables -t filter -F > /dev/null 2>&1
@@ -199,7 +198,7 @@ get_param() {
     lan2_if="br0:9"
 
     #get wan IP
-    EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
+    EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
     
     #check ppp
     PPPUP=`ip link show up | grep ppp0 -c` > /dev/null 2>&1
