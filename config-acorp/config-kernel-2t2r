@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Sun Jun 27 00:11:49 2010
+# Tue Jun 29 11:13:04 2010
 #
 CONFIG_MIPS=y
 
@@ -1259,6 +1259,7 @@ CONFIG_HAS_IOPORT=y
 CONFIG_RAETH=y
 CONFIG_RAETH_NAPI=y
 # CONFIG_RA_HW_NAT is not set
+# CONFIG_RA_SW_NAT is not set
 CONFIG_RAETH_CHECKSUM_OFFLOAD=y
 # CONFIG_RAETH_QOS is not set
 # CONFIG_RAETH_ROUTER is not set

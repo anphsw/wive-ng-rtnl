@@ -1550,3 +1550,11 @@ void __init trap_init(void)
 	flush_icache_range(ebase, ebase + 0x400);
 	flush_tlb_handlers();
 }
+
+#ifdef CONFIG_BUG
+void __out_of_line_bug(void)
+{
+        BUG();
+}
+EXPORT_SYMBOL(__out_of_line_bug);
+#endif

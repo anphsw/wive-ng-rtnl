@@ -1946,5 +1946,4 @@ unsigned long msleep_interruptible(unsigned int msecs)
 		timeout = schedule_timeout_interruptible(timeout);
 	return jiffies_to_msecs(timeout);
 }
-
 EXPORT_SYMBOL(msleep_interruptible);

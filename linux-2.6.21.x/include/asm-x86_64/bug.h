@@ -26,6 +26,7 @@
 #endif
 
 void out_of_line_bug(void);
+void __out_of_line_bug(void);
 #else
 static inline void out_of_line_bug(void) { }
 #endif

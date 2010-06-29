@@ -12,6 +12,10 @@ config RA_HW_NAT
         bool "Use HARDWARE NAT"
         depends on RAETH
 
+config RA_SW_NAT
+        bool "Use SOFTWARE NAT"
+        depends on RAETH
+
 config RAETH_JUMBOFRAME
         bool "Jumbo Frame up to 4K bytes"
         depends on RAETH && !RALINK_RT3052
