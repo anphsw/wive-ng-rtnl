@@ -33,7 +33,7 @@ else
    HOSTNAME="$HOSTNAME_SYS"
 fi
 
-UDHCPCOPTS="-r -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O staticroutes &"
+UDHCPCOPTS="-r -S -R -T 10 -A 30 -b -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O staticroutes -f &"
 
 opmode=`nvram_get 2860 OperationMode`
 clone_en=`nvram_get 2860 macCloneEnabled`
