@@ -1,10 +1,8 @@
 #!/bin/sh
-#
-# $Id: config-l2tp.sh,v 1.5 2008-08-21 09:42:47 chhung Exp $
-#
-# usage: config-l2tp.sh <mode> <mode_params> <server> <user> <password>
-#
 
+#################################################################
+#
+#
 echo "==================START-L2TP-CLIENT======================="
 
 SERVER=`nvram_get 2860 vpnServer`
