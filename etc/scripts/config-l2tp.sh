@@ -56,6 +56,12 @@ LOG="logger -t vpnhelper"
 	PEERDNS=
     fi
 
+    if [ "$MPPE" = "on" ] ; then
+        MPPE=allow-mppe-128
+        else
+        MPPE=
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -87,6 +93,7 @@ LOG="logger -t vpnhelper"
     noproxyarp
     mtu $MTU
     mru $MTU
+    $MPPE
     $PEERDNS
     lcp-echo-failure        5                                                                                                    
     lcp-echo-interval       10 

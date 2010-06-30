@@ -37,6 +37,12 @@ else
     PEERDNS=
 fi
 
+if [ "$MPPE" = "on" ] ; then
+    MPPE=allow-mppe-128
+else
+    MPPE=
+fi 
+
 #clear all configs
 ppp=/etc/ppp
 echo > $ppp/chap-secrets
@@ -49,5 +55,5 @@ PPP_STD_OPTIONS="noipdefault noauth -detach persist $PEERDNS"
 PPPOE_CMD="$3 user $1 password $2"
 
 $LOG "Start pppd"
-FULLOPT="$OPTFILE mtu $MTU mru $MTU $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
+FULLOPT="$OPTFILE mtu $MTU mru $MTU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &
