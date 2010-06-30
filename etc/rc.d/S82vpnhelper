@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
 #wait to start web and run from goahead code
 web_wait
 
@@ -7,7 +10,7 @@ start() {
  echo "Start vpnhelper"
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     vpnType=`nvram_get 2860 vpnType`
-    if [ $vpnEnabled = "on"]; then
+    if [ $vpnEnabled = "on" ]; then
       if [ $vpnType = "0" ]; then
 	echo "PPPOE calling..."
 	/etc/scripts/config-pppoe.sh &
