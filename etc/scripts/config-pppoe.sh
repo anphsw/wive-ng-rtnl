@@ -43,6 +43,12 @@ else
     MPPE=
 fi 
 
+if [ "$DEBUG" = "on" ] ; then
+    DEBUG="debug"
+else
+    DEBUG=""
+fi
+
 #clear all configs
 ppp=/etc/ppp
 echo > $ppp/chap-secrets
@@ -50,7 +56,7 @@ echo > $ppp/pap-secrets
 
 OPTFILE="file /etc/ppp/options.pppoe"
 # Standard PPP options we always use
-PPP_STD_OPTIONS="noipdefault noauth -detach persist $PEERDNS"
+PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 # PPPoE invocation
 PPPOE_CMD="$3 user $1 password $2"
 

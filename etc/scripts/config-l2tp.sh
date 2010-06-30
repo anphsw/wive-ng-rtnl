@@ -62,6 +62,12 @@ LOG="logger -t vpnhelper"
         MPPE=
     fi
 
+    if [ "$DEBUG" = "on" ] ; then
+        DEBUG="-D"
+    else
+        DEBUG=""
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -104,4 +110,5 @@ LOG="logger -t vpnhelper"
 
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
-    xl2tpd -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid &
+    FULLOPTS="$DEBUG -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
+    xl2tpd $FULLOPTS &
