@@ -43,6 +43,14 @@ else
     MPPE=
 fi 
 
+if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ] ; then
+    MTU=""
+    MRU=""
+else
+    MRU="mru $MTU"
+    MTU="mtu $MTU"
+fi
+
 if [ "$DEBUG" = "on" ] ; then
     DEBUG="debug"
 else
@@ -61,5 +69,5 @@ PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 PPPOE_CMD="$3 $SERVER user $1 password $2"
 
 $LOG "Start pppd"
-FULLOPT="$OPTFILE mtu $MTU mru $MTU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
+FULLOPT="$OPTFILE mtu $MTU mru $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &

@@ -68,6 +68,14 @@ LOG="logger -t vpnhelper"
         DEBUG=""
     fi
 
+    if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ] ; then
+        MTU=""
+        MRU=""
+        else
+        MRU="mru $MTU"
+        MTU="mtu $MTU"
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -98,7 +106,7 @@ LOG="logger -t vpnhelper"
     noipx
     noproxyarp
     mtu $MTU
-    mru $MTU
+    mru $MRU
     $MPPE
     $PEERDNS
     lcp-echo-failure        5                                                                                                    
