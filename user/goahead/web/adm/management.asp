@@ -168,7 +168,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 <!-- ================= Firmware ================= -->
 <table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr>
-	<td colspan="2" class="title">Update Firmware / Bootloader</td>
+	<td colspan="2" class="title">Firmware update</td>
 </tr>
 <tr>
 	<td class="head" id="uploadFWLocation">Firmware update:</td>
