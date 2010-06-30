@@ -18,10 +18,6 @@ ppp=/etc/ppp
 echo > $ppp/chap-secrets
 echo > $ppp/pap-secrets
 
-    SERVER=`nvram_get 2860 wan_pptp_server`
-    USER=`nvram_get 2860 wan_pptp_user`
-    PASSWORD=`nvram_get 2860 wan_pptp_pass`
-
     $LOG "Check for PPTP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do

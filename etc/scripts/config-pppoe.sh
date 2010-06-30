@@ -58,7 +58,7 @@ OPTFILE="file /etc/ppp/options.pppoe"
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 # PPPoE invocation
-PPPOE_CMD="$3 user $1 password $2"
+PPPOE_CMD="$3 $SERVER user $1 password $2"
 
 $LOG "Start pppd"
 FULLOPT="$OPTFILE mtu $MTU mru $MTU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
