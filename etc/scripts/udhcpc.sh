@@ -20,11 +20,13 @@ case "$1" in
 
     renew|bound)
 	#no change routes if pppd is started
-    if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/$ip ]; then
+    if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/is_up/$ip ]; then
             $LOG "PPPD is start or no change parametrs. No renew needed."
     else
 	    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
             ifconfig $interface $ip $BROADCAST $NETMASK
+	    rm -rf /var/tmp/is_up
+	    mkdir -p /var/tmp/is_up
 	    echo $ip $NETMASK > /var/tmp/$ip
     	    if [ -n "$router" ] ; then
         	$LOG "Deleting default route"
