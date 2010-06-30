@@ -134,12 +134,12 @@ function CheckValue()
 		document.lanCfg.hostname.select();
 		return false;
 	}
-	if (!validateIP(form.lanIp.value, true))
+	if (!validateIP(form.lanIp, true))
 	{
 		form.lanIp.focus();
 		return false;
 	}
-	if (!validateIP(form.lanNetmask.value, true))
+	if (!validateIP(form.lanNetmask, true))
 	{
 		form.lanNetmask.focus();
 		return false;

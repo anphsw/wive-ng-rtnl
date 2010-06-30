@@ -5,10 +5,18 @@
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>System Management</title>
 
 <script language="JavaScript" type="text/javascript">
+
 Butterlate.setTextDomain("admin");
+
+function SubmitForm(message, form)
+{
+	if (confirm(message))
+		form.submit();
+}
 
 function AdmFormCheck()
 {
@@ -25,35 +33,6 @@ function AdmFormCheck()
 	return true;
 }
 
-function initTranslation()
-{
-	var e = document.getElementById("manTitle");
-	e.innerHTML = _("man title");
-	e = document.getElementById("manIntroduction");
-	e.innerHTML = _("man introduction");
-
-	e = document.getElementById("manLangApply");
-	e.value = _("admin apply");
-	e = document.getElementById("manLangCancel");
-	e.value = _("admin cancel");
-
-	e = document.getElementById("manLangSet");
-	e.innerHTML = _("man language setting");
-	e = document.getElementById("manSelectLang");
-	e.innerHTML = _("man select language");
-	e = document.getElementById("manAdmSet");
-	e.innerHTML = _("man admin setting");
-	e = document.getElementById("manAdmAccount");
-	e.innerHTML = _("man admin account");
-	e = document.getElementById("manAdmPasswd");
-	e.innerHTML = _("man admin passwd");
-
-	e = document.getElementById("manAdmApply");
-	e.value = _("admin apply");
-	e = document.getElementById("manAdmCancel");
-	e.value = _("admin cancel");
-}
-
 function initValue()
 {
 	var lang_element = document.getElementById("langSelection");
@@ -61,7 +40,6 @@ function initValue()
 	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
 	var lang_zhcn = "<% getLangBuilt("zhcn"); %>";
 
-	initTranslation();
 	lang_element.options.length = 0;
 	if (lang_en == "1")
 		lang_element.options[lang_element.length] = new Option('English', 'en');
@@ -91,6 +69,9 @@ function initValue()
 			}
 		}
 	}
+	
+	// Firmware
+	document.getElementById("loading").style.display="none";
 }
 
 function setLanguage()
@@ -100,64 +81,142 @@ function setLanguage()
 	return true;
 }
 
+var _singleton = false;
+function uploadFirmwareCheck()
+{
+	if (document.UploadFirmware.filename.value == "")
+	{
+		alert("Firmware Upgrade: Please specify a file.");
+		return false;
+	}
+	
+	if (!confirm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?'))
+		return false;
+	
+	if (_singleton)
+		return false;
+	
+	//StopTheClock();
+	var form = document.UploadFirmware;
+	form.UploadFirmwareSubmit.disabled = true;
+	document.getElementById("loading").style.display="";
+	document.getElementById("staticControls").style.display="none";
+	document.getElementById("staticText").style.display="none";
+	parent.menu.setUnderFirmwareUpload(1);
+	_singleton = true;
+	return true;
+}
+
 </script>
 
 </head>
-<body onload="initValue()">
-<table class="body"><tr><td>
-<h1 id="manTitle">System Management</h1>
-<p id="manIntroduction">You may configure administrator account and password, NTP settings, and Dynamic DNS settings here.</p>
-<hr />
+<body onload="initValue();">
+<table class="body" style="width:600px;"><tr><td>
+<h1>System Management</h1>
+<div id="staticText">
+<p>You may select language and configure administrator account and password here.</p>
+<p>You may also upgrade the WR-NL firmware to obtain new functionality.
+It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
+<p style="color: #ff0000;">Caution! A corrupted image will hang up the system.</p>
+</div>
+
+<p id="loading" style="display: none; color: #ff0000; font-size: 16px;">
+	Uploading firmware <br><br> Please be patient and don't remove usb device if it presented...
+</p>
+
+<div id="staticControls">
+<hr>
 
 <!-- ================= Langauge Settings ================= -->
-<form method="post" name="Lang" action="/goform/setSysLang">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="manLangSet">Language Settings</td>
-  </tr>
-  <tr>
-    <td class="head" id="manSelectLang">Select Language</td>
-    <td>
-      <select name="langSelection" id="langSelection">
-        <!-- added by initValue -->
-      </select>
-    </td>
-  </tr>
+<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<tr>
+	<td class="title" colspan="2" id="manLangSet">Language Settings</td>
+</tr>
+<tr>
+	<td class="head" id="manSelectLang">Select Language</td><td>
+		<form method="POST" name="Lang" action="/goform/setSysLang">
+			<select name="langSelection" id="langSelection">
+			<!-- added by initValue -->
+			</select>
+			<input type="submit" class="half" value="Apply" id="manLangApply" onClick="return setLanguage();"> &nbsp; &nbsp;
+		</form>
+	</td>
+</tr>
 </table>
-<table width="90%" border="0" cellpadding="2" cellspacing="1">
-  <tr align="center">
-    <td>
-      <input type=submit style="{width:120px;}" value="Apply" id="manLangApply" onClick="return setLanguage()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="manLangCancel" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>
 
 <!-- ================= Adm Settings ================= -->
 <form method="post" name="Adm" action="/goform/setSysAdm">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
-  </tr>
-  <tr>
-    <td class="head" id="manAdmAccount">Account</td>
-    <td><input type="text" name="admuser" size="16" maxlength="16" value="<% getCfgGeneral(1, "Login"); %>"></td>
-  </tr>
-  <tr>
-    <td class="head" id="manAdmPasswd">Password</td>
-    <td><input type="password" name="admpass" size="16" maxlength="32" value="<% getCfgGeneral(1, "Password"); %>"></td>
-  </tr>
-</table>
-<table width="90%" border="0" cellpadding="2" cellspacing="1">
-  <tr align="center">
-    <td>
-      <input type=submit style="{width:120px;}" value="Apply" id="manAdmApply" onClick="return AdmFormCheck()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="manAdmCancel" onClick="window.location.reload()">
-    </td>
-  </tr>
+<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<tr>
+	<td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
+</tr>
+<tr>
+	<td class="head">Login</td>
+	<td><input type="text" name="admuser" size="16" maxlength="16" value="<% getCfgGeneral(1, "Login"); %>"></td>
+</tr>
+<tr>
+	<td class="head" id="manAdmPasswd">Password</td>
+	<td><input type="password" name="admpass" size="16" maxlength="32" value="<% getCfgGeneral(1, "Password"); %>"></td>
+</tr>
+<tr enter">
+	<td class="head">Apply new login/password</td>
+	<td><input type="submit" class="half" value="Apply" id="manAdmApply" onClick="return AdmFormCheck();"></td>
+</tr>
 </table>
 </form>
+
+<!-- ================= Firmware ================= -->
+<table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr>
+	<td colspan="2" class="title">Update Firmware / Bootloader</td>
+</tr>
+<tr>
+	<td class="head" id="uploadFWLocation">Firmware update:</td>
+	<td class="value">
+	<form method="POST" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data" onSubmit="return uploadFirmwareCheck();" >
+		<input name="filename" size="20" maxlength="256" type="file">
+		<input value="Update" class="half" id="uploadFWApply" name="UploadFirmwareSubmit" type="submit">
+	</form>
+	</td>
+</tr>
+</table>
+
+<!-- ----------------- Settings management ----------------- -->
+<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<tr>
+	<td class="title" colspan="2">Router Settings Management</td>
+</tr>
+<tr>
+	<td class="head" id="setmanExpSetButton">Backup Settings to file</td>
+	<td>
+		<form method="GET" name="ExportSettings" action="/cgi-bin/ExportSettings.sh" 
+			onsubmit="return confirm('Do you want to export settings to file?');" >
+			<input type="submit" value="Backup" id="setmanExpSetExport" name="Export" class="half">
+		</form>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="setmanImpSetFileLocation">Load settings from file</td>
+	<td>
+		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data"
+			onsubmit="return confirm('Proceed importing settings?');" >
+			<input type="file" name="filename" maxlength="256">
+			<input type="button" value="Load" id="setmanImpSetImport" class="half" onClick="">
+		</form>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="setmanImpSetFileLocation">Reset to factory defaults</td>
+	<td>
+		<form method="POST" name="LoadDefaultSettings" action="/goform/LoadDefaultSettings"
+			onsubmit="return confirm('All settings will be reset to factory defaults. Really proceed?');">
+			<input type="submit" value="Reset" id="setmanLoadDefault" name="LoadDefault" class="half">
+			<input type="hidden" value="stub" >
+		</form>
+	</td>
+</tr>
+</table>
+<div>
 
 </td></tr></table>
 </body></html>

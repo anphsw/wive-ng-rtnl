@@ -180,8 +180,6 @@ if (usbb == "1")
 
 a.add(900,   0, _("treeapp administration"),        "javascript:a.oo(900);");
 a.add(901, 900, _("treeapp management"),            "javascript:go('adm/management.asp');");
-a.add(902, 900, _("treeapp upload firmware"),       "javascript:go('adm/upload_firmware.asp');");
-a.add(903, 900, _("treeapp settings management"),   "javascript:go('adm/settings.asp');");
 a.add(904, 900, _("treeapp status"),                "javascript:go('adm/status.asp');");
 a.add(905, 900, _("treeapp statistics"),            "javascript:go('adm/statistic.asp');");
 a.add(906, 900, _("treeapp system command"),        "javascript:go('adm/system_command.asp');");

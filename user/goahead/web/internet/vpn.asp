@@ -430,9 +430,11 @@ function showVPNStatus()
 <body onload="bodyOnLoad(document.formVPNSetup)">
 <table class="body">
 <tr><td>
-<h1>Virtual Private Network and USB modem setup</h1>
+<h1>Virtual Private Network setup</h1>
+<p>
 This page is used to configure the <acronym title="Virtual Private Network">VPN</acronym>
-tunnel and GSM/CDMA modems on your Router.
+tunnel on your Router.
+</p>
 
 <form action="/goform/formVPNSetup" method="POST" name="formVPNSetup">
 <table width="500" border="0" cellpadding="0" cellspacing="4">
