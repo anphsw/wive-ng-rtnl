@@ -18,7 +18,7 @@ WAIT_IFUP=2
 
 service pass start
 service lan restart
-service vpn-passthru start
+service vpn-passthru restart
 
 ifRaxWdsxDown()
 {
