@@ -8,3 +8,5 @@
 /user/wsc_upnp/libupnp-1.4.6/threadutil/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/doc/Makefile
+/etc/compile-date
+/etc/scripts/config.sh
