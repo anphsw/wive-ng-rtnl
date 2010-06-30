@@ -167,7 +167,6 @@ session_timeout_interval=0
 idle_timeout_interval=0
 staWirelessMode=9
 WAN_MAC_ADDR=00:0C:43:30:52:66
-
 dhcpStatic1=
 dhcpStatic2=
 dhcpStatic3=
@@ -178,7 +177,6 @@ dnsPEnabled=1
 M2UEnabled=1
 macCloneEnabled=0
 RemoteManagement=0
-
 vpnEnabled=off
 vpnType=0
 vpnRoutingEnabled=off
@@ -192,6 +190,5 @@ vpnUser=vpn_user
 vpnPassword=vpn_password
 vpnMTU=AUTO
 vpnDGW=1
-
 IS_WIVE=YES
 CHECKMAC=YES
