@@ -46,7 +46,7 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     ip route del $PPP_REMOTE  > /dev/null 2>&1
 
     #Replace default route to ppp tunnel
-    if [ "$DGW" = "on" ]; then
+    if [ "$DGW" = "1" ]; then
 	$LOG "Replace default route to $PPP_IFACE"
 	ip route del default > /dev/null 2>&1
 	ip route replace default dev $PPP_IFACE
