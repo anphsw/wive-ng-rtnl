@@ -103,6 +103,8 @@ typedef struct _NDIS_802_11_KEY
     u8            addr[6];
     u32           KeyIndex;           
     u32           KeyLength;          // length of key in bytes
+    unsigned long BSSID;
+    unsigned long KeyRSC;
     u8            KeyMaterial[64];     // variable length depending on above field
 } NDIS_802_11_KEY, *PNDIS_802_11_KEY;
 
@@ -118,9 +120,9 @@ typedef struct PACKED _RADIUS_SRV_INFO {
 
 typedef struct PACKED _RADIUS_KEY_INFO
 {
-	unsigned char		radius_srv_num;			
-	RADIUS_SRV_INFO		radius_srv_info[MAX_RADIUS_SRV_NUM];	
-	unsigned char		ieee8021xWEP;		 // dynamic WEP
+    unsigned char	radius_srv_num;			
+    RADIUS_SRV_INFO	radius_srv_info[MAX_RADIUS_SRV_NUM];	
+    unsigned char	ieee8021xWEP;		 // dynamic WEP
     unsigned char       key_index;           
     unsigned char       key_length;          // length of key in bytes
     unsigned char       key_material[13];    
@@ -131,14 +133,14 @@ typedef struct PACKED _RADIUS_CONF
 {
     unsigned int       	Length;             // Length of this structure    
     unsigned char		mbss_num;			// indicate multiple BSS number 
-	unsigned int		own_ip_addr;	
-	unsigned int		retry_interval;
-	unsigned int		session_timeout_interval;
-	unsigned char		EAPifname[8][IFNAMSIZ];
-	unsigned char		EAPifname_len[8];
-	unsigned char 		PreAuthifname[8][IFNAMSIZ];
-	unsigned char		PreAuthifname_len[8];
-	RADIUS_KEY_INFO		RadiusInfo[MAX_MBSSID_NUM];
+    unsigned int		own_ip_addr;	
+    unsigned int		retry_interval;
+    unsigned int		session_timeout_interval;
+    unsigned char		EAPifname[8][IFNAMSIZ];
+    unsigned char		EAPifname_len[8];
+    unsigned char 		PreAuthifname[8][IFNAMSIZ];
+    unsigned char		PreAuthifname_len[8];
+    RADIUS_KEY_INFO		RadiusInfo[MAX_MBSSID_NUM];
 } RADIUS_CONF, *PRADIUS_CONF;
 
 void ieee802_1x_new_station(rtapd *apd, struct sta_info *sta);
