@@ -19,12 +19,13 @@ case "$1" in
         ;;
 
     renew|bound)
-        #no change routes if pppd is started
-        if [ "$STARTEDPPPD" != "0" ]; then
-                $LOG "PPPD IS STARTED!!! No new ip or routers change"
-        else
-            $LOG "Renew ip adress and other parametrs from dhcp"
-    	    ifconfig $interface $ip $BROADCAST $NETMASK
+	#no change routes if pppd is started
+    if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/$ip ]; then
+            $LOG "PPPD is start or no change parametrs. No renew needed."
+    else
+	    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
+            ifconfig $interface $ip $BROADCAST $NETMASK
+	    echo $ip $NETMASK > /var/tmp/$ip
     	    if [ -n "$router" ] ; then
         	$LOG "Deleting default route"
         	while route del default gw 0.0.0.0 dev $interface ; do
@@ -38,7 +39,6 @@ case "$1" in
             	    route add default gw $i dev $interface metric $metric
         	done
     	    fi
-	fi
 	# DNS
 	$LOG "Renew DNS from dhcp"
 	if [ "$dns" ]; then                                                                                                          
@@ -122,16 +122,11 @@ case "$1" in
 
 		done
 	}
-
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
-	    # restart needed services
-    	    if [ "$STARTEDPPPD" != "0" ]; then
-                $LOG "No need restart services"
-    	    else
-		$LOG "Restart needed services"
-		services_restart.sh dhcp
-	    fi
+    	    $LOG "Restart needed services"
+	    services_restart.sh dhcp
+    fi
 	    $LOG "Renew OK.."
         ;;
 esac
