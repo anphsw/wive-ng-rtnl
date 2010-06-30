@@ -7,8 +7,6 @@ MTU=`nvram_get 2860 vpnMTU`
 MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
-IFACE=`nvram_get 2860 vpnInterface`
-ROUTE=`nvram_get 2860 vpnRoutingEnabled`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1

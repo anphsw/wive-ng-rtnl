@@ -14,6 +14,7 @@ Lan2Enabled=`nvram_get 2860 Lan2Enabled`
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
 upnp=`nvram_get 2860 upnpEnabled`  
+VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
@@ -26,6 +27,11 @@ upnp=`nvram_get 2860 upnpEnabled`
 
     $LOG "Restore DNS from pppd"                                                                                             
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE               
+
+    if [ -f /etc/routes_ppp_replace ]; then
+	$LOG "Delete user routes"
+	/etc/routes_ppp_replace $PPP_IFACE del > /dev/null 2>&1
+    fi
 
     if [ -f /tmp/ip-down-route-reload ]; then
 	$LOG "Load old dgw from file"

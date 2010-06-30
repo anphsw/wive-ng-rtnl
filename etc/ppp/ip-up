@@ -17,6 +17,7 @@ upnp=`nvram_get 2860 upnpEnabled`
 OperationMode=`nvram_get 2860 OperationMode`
 NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
+VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     
     $LOG "Cleanup conntrack table"
     echo 0 > /proc/cleannat
@@ -56,6 +57,15 @@ DGW=`nvram_get 2860 vpnDGW`
     ifconfig $PPP_IFACE -multicast
 
     iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
+
+    #user route add                                                                                                                             
+    if [ "$VPN_ROUTING_ENABLED" = "on" ] ; then
+        $LOG "Add user routes from ip-up for $PPP_IFACE"
+	chmod 777 /etc/routes_ppp_replace
+        /etc/routes_ppp_replace $PPP_IFACE replace
+    fi
+
+    #NAT in vpn
     if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
         $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
 	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
