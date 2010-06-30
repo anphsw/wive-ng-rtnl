@@ -30,7 +30,7 @@
 #include	"user/busybox/include/autoconf.h" // busybox config
 
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
-#define _PATH_VPN_RT           "/etc/network"
+#define _PATH_VPN_RT           "/etc"
 #define _PATH_VPN_RT_FILE      _PATH_VPN_RT "/routes_ppp"
 #define _PATH_VPN_RT_SCRIPT    _PATH_VPN_RT "/routes_ppp_replace"
 
