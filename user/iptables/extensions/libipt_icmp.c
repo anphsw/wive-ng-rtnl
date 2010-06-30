@@ -205,11 +205,15 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 
 	switch (c) {
 	case '1':
+		if (*flags == 1)
+			exit_error(PARAMETER_PROBLEM,
+				   "icmp match: only use --icmp-type once!");
 		check_inverse(optarg, &invert, &optind, 0);
 		parse_icmp(argv[optind-1], &icmpinfo->type, 
 			   icmpinfo->code);
 		if (invert)
 			icmpinfo->invflags |= IPT_ICMP_INV;
+		*flags = 1;
 		break;
 
 	default:
@@ -293,7 +297,7 @@ static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 	}
 }
 
-/* Final check; we don't care. */
+/* Final check; we don't care. We can pass 0xFF to match any type */
 static void final_check(unsigned int flags)
 {
 }

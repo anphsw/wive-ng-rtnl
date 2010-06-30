@@ -25,8 +25,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <iptables.h>
-#include <linux/netfilter_ipv4/ip_conntrack.h>
-#include <linux/netfilter_ipv4/ip_conntrack_tuple.h>
+#include <linux/netfilter/nf_conntrack_common.h>
 /* For 64bit kernel / 32bit userspace */
 #include "../include/linux/netfilter_ipv4/ipt_conntrack.h"
 
@@ -75,7 +74,6 @@ static struct option opts[] = {
 static int
 parse_state(const char *state, size_t strlen, struct ipt_conntrack_info *sinfo)
 {
-	//printf("parse state [%s]\n", state);	// tmp test
 	if (strncasecmp(state, "INVALID", strlen) == 0)
 		sinfo->statemask |= IPT_CONNTRACK_STATE_INVALID;
 	else if (strncasecmp(state, "NEW", strlen) == 0)
@@ -99,7 +97,6 @@ static void
 parse_states(const char *arg, struct ipt_conntrack_info *sinfo)
 {
 	const char *comma;
-	//printf("parse state s [%s]\n", arg);	// tmp test
 
 	while ((comma = strchr(arg, ',')) != NULL) {
 		if (comma == arg || !parse_state(arg, comma-arg, sinfo))
@@ -114,7 +111,6 @@ parse_states(const char *arg, struct ipt_conntrack_info *sinfo)
 static int
 parse_status(const char *status, size_t strlen, struct ipt_conntrack_info *sinfo)
 {
-	//printf("parse stat us [%s]\n", status);	// tmp test
 	if (strncasecmp(status, "NONE", strlen) == 0)
 		sinfo->statusmask |= 0;
 	else if (strncasecmp(status, "EXPECTED", strlen) == 0)
@@ -136,7 +132,6 @@ static void
 parse_statuses(const char *arg, struct ipt_conntrack_info *sinfo)
 {
 	const char *comma;
-	//printf("parse state es [%s]\n", arg);	// tmp test
 
 	while ((comma = strchr(arg, ',')) != NULL) {
 		if (comma == arg || !parse_status(arg, comma-arg, sinfo))
@@ -153,7 +148,6 @@ static unsigned long long
 parse_expire(const char *s)
 {
 	unsigned long long len;
-	//printf("parse expire [%s]\n", s);	// tmp test
 	
 	if (string_to_number_ll(s, 0, 0, &len) == -1)
 		exit_error(PARAMETER_PROBLEM, "expire value invalid: `%s'\n", s);
@@ -165,7 +159,6 @@ static unsigned long
 parse_expire(const char *s)
 {
 	unsigned int len;
-	//printf("parse expire [%s]\n", s);	// tmp test
 	
 	if (string_to_number(s, 0, 0, &len) == -1)
 		exit_error(PARAMETER_PROBLEM, "expire value invalid: `%s'\n", s);
@@ -180,7 +173,6 @@ parse_expires(const char *s, struct ipt_conntrack_info *sinfo)
 {
 	char *buffer;
 	char *cp;
-	//printf("parse expire s [%s]\n", s);	// tmp test
 
 	buffer = strdup(s);
 	if ((cp = strchr(buffer, ':')) == NULL)
@@ -218,8 +210,6 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 	unsigned int naddrs = 0;
 	struct in_addr *addrs = NULL;
 
-
-	//printf("parse [%d]\n", c);	// tmp test
 	switch (c) {
 	case '1':
 		check_inverse(optarg, &invert, &optind, 0);

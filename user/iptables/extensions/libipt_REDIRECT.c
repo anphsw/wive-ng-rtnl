@@ -22,7 +22,10 @@
 #include <getopt.h>
 #include <iptables.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ip_nat_rule.h>
+#include <linux/netfilter/nf_nat.h>
+
+#define IPT_REDIRECT_OPT_DEST	0x01
+#define IPT_REDIRECT_OPT_RANDOM	0x02
 
 /* Function which prints out usage message. */
 static void
@@ -37,6 +40,7 @@ IPTABLES_VERSION);
 
 static struct option opts[] = {
 	{ "to-ports", 1, 0, '1' },
+	{ "random", 0, 0, '2' },
 	{ 0 }
 };
 
@@ -59,6 +63,9 @@ parse_ports(const char *arg, struct ip_nat_multi_range *mr)
 	int port;
 
 	mr->range[0].flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
+
+	if (strchr(arg, '.'))
+		exit_error(PARAMETER_PROBLEM, "IP address not permitted\n");
 
 	port = atoi(arg);
 	if (port == 0 || port > 65535)
@@ -114,6 +121,17 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 				   "Unexpected `!' after --to-ports");
 
 		parse_ports(optarg, mr);
+		if (*flags & IPT_REDIRECT_OPT_RANDOM)
+			mr->range[0].flags |= IP_NAT_RANGE_PROTO_RANDOM;
+		*flags |= IPT_REDIRECT_OPT_DEST;
+		return 1;
+
+	case '2':
+		if (*flags & IPT_REDIRECT_OPT_DEST) {
+			mr->range[0].flags |= IP_NAT_RANGE_PROTO_RANDOM;
+			*flags |= IPT_REDIRECT_OPT_RANDOM;
+		} else
+			*flags |= IPT_REDIRECT_OPT_RANDOM;
 		return 1;
 
 	default:
@@ -142,6 +160,8 @@ print(const struct ipt_ip *ip,
 		if (r->max.tcp.port != r->min.tcp.port)
 			printf("-%hu", ntohs(r->max.tcp.port));
 		printf(" ");
+		if (mr->range[0].flags & IP_NAT_RANGE_PROTO_RANDOM)
+			printf("random ");
 	}
 }
 
@@ -159,6 +179,8 @@ save(const struct ipt_ip *ip, const struct ipt_entry_target *target)
 		if (r->max.tcp.port != r->min.tcp.port)
 			printf("-%hu", ntohs(r->max.tcp.port));
 		printf(" ");
+		if (mr->range[0].flags & IP_NAT_RANGE_PROTO_RANDOM)
+			printf("--random ");
 	}
 }
 

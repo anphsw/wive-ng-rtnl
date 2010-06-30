@@ -143,7 +143,7 @@ static void print_ip(char *prefix, const struct in6_addr *ip, const struct in6_a
 	char buf[51];
 	int l = ipv6_prefix_length(mask);
 
-	if (!mask && !ip)
+	if (l == 0 && !invert)
 		return;
 
 	printf("%s %s%s",
@@ -332,7 +332,11 @@ static int do_output(const char *tablename)
  * :Chain name POLICY packets bytes
  * rule
  */
+#ifdef IPTABLES_MULTI
+int ip6tables_save_main(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	const char *tablename = NULL;
 	int c;
@@ -369,7 +373,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (optind < argc) {
-		fprintf(stderr, "Unknown arguments found on commandline");
+		fprintf(stderr, "Unknown arguments found on commandline\n");
 		exit(1);
 	}
 

@@ -34,7 +34,6 @@
 #include <errno.h>
 
 #include <iptables.h>
-#include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ipt_set.h>
 #include "libipt_set.h"
 
@@ -128,7 +127,7 @@ print_match(const char *prefix, const struct ipt_set_info *info)
 
 	get_set_byid(setname, info->index);
 	printf("%s%s %s", 
-	       (info->flags[0] & IPSET_MATCH_INV) ? "!" : "",
+	       (info->flags[0] & IPSET_MATCH_INV) ? "! " : "",
 	       prefix,
 	       setname); 
 	for (i = 0; i < IP_SET_MAX_BINDINGS; i++) {

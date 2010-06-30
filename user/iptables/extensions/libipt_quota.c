@@ -19,6 +19,7 @@
  *
  * Sam Johnston <samj@samj.net>
  */
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -106,7 +107,7 @@ struct iptables_match quota = {
 	.name		= "quota",
 	.version	= IPTABLES_VERSION,
 	.size		= IPT_ALIGN(sizeof (struct ipt_quota_info)),
-	.userspacesize	= IPT_ALIGN(sizeof (struct ipt_quota_info)),
+	.userspacesize	= offsetof(struct ipt_quota_info, quota),
 	.help		= &help,
 	.parse		= &parse,
 	.final_check	= &final_check,

@@ -78,19 +78,19 @@ ip6tc_handle_t create_handle(const char *tablename, const char* modprobe)
 
 	if (!handle) {
 		/* try to insmod the module if iptc_init failed */
-		ip6tables_insmod("ip6_tables", modprobe);
+		ip6tables_insmod("ip6_tables", modprobe, 0);
 		handle = ip6tc_init(tablename);
 	}
 
 	if (!handle) {
-		exit_error(PARAMETER_PROBLEM, "%s: unable to initialize"
+		exit_error(PARAMETER_PROBLEM, "%s: unable to initialize "
 			"table '%s'\n", program_name, tablename);
 		exit(1);
 	}
 	return handle;
 }
 
-int parse_counters(char *string, struct ip6t_counters *ctr)
+static int parse_counters(char *string, struct ip6t_counters *ctr)
 {
 	return (sscanf(string, "[%llu:%llu]", (unsigned long long *)&ctr->pcnt, (unsigned long long *)&ctr->bcnt) == 2);
 }
@@ -118,7 +118,11 @@ static void free_argv(void) {
 		free(newargv[i]);
 }
 
+#ifdef IPTABLES_MULTI
+int ip6tables_restore_main(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	ip6tc_handle_t handle = NULL;
 	char buffer[10240];
@@ -170,13 +174,13 @@ int main(int argc, char *argv[])
 	if (optind == argc - 1) {
 		in = fopen(argv[optind], "r");
 		if (!in) {
-			fprintf(stderr, "Can't open %s: %s", argv[optind],
+			fprintf(stderr, "Can't open %s: %s\n", argv[optind],
 				strerror(errno));
 			exit(1);
 		}
 	}
 	else if (optind < argc) {
-		fprintf(stderr, "Unknown arguments found on commandline");
+		fprintf(stderr, "Unknown arguments found on commandline\n");
 		exit(1);
 	}
 	else in = stdin;
@@ -282,7 +286,10 @@ int main(int argc, char *argv[])
 					char *ctrs;
 					ctrs = strtok(NULL, " \t\n");
 
-					parse_counters(ctrs, &count);
+					if (!ctrs || !parse_counters(ctrs, &count))
+						exit_error(PARAMETER_PROBLEM,
+							  "invalid policy counters "
+							  "for chain '%s'\n", chain);
 
 				} else {
 					memset(&count, 0, 

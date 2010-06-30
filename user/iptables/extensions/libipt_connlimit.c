@@ -1,20 +1,4 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/* Shared library add-on to iptables to add connection limit support. */
+/* Shared library add-on to iptables to add state tracking support. */
 #include <stdio.h>
 #include <netdb.h>
 #include <string.h>
@@ -42,6 +26,14 @@ static struct option opts[] = {
 	{0}
 };
 
+/* Initialize the match. */
+static void
+init(struct ipt_entry_match *m, unsigned int *nfcache)
+{
+	/* Can't cache this */
+	*nfcache |= NFC_UNKNOWN;
+}
+
 /* Function which parses command options; returns true if it
    ate an option */
 static int
@@ -51,7 +43,6 @@ parse(int c, char **argv, int invert, unsigned int *flags,
       struct ipt_entry_match **match)
 {
 	struct ipt_connlimit_info *info = (struct ipt_connlimit_info*)(*match)->data;
-	int i;
 
 	if (0 == (*flags & 2)) {
 		/* set default mask unless we've already seen a mask option */
@@ -67,15 +58,7 @@ parse(int c, char **argv, int invert, unsigned int *flags,
 		break;
 
 	case '2':
-		i = atoi(argv[optind-1]);
-		if ((i < 0) || (i > 32))
-			exit_error(PARAMETER_PROBLEM,
-				"--connlimit-mask must be between 0 and 32");
-
-		if (i == 0)
-			info->mask = 0;
-		else
-			info->mask = htonl(0xFFFFFFFF << (32 - i));
+		info->mask = htonl(0xFFFFFFFF << (32 - atoi(argv[optind-1])));
 		*flags |= 2;
 		break;
 
@@ -130,16 +113,17 @@ static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 }
 
 static struct iptables_match connlimit = {
-	.name		= "connlimit",
-	.version	= IPTABLES_VERSION,
-	.size		= IPT_ALIGN(sizeof(struct ipt_connlimit_info)),
-	.userspacesize 	= offsetof(struct ipt_connlimit_info,data),
-	.help		= help,
-	.parse 		= parse,
-	.final_check	= final_check,
-	.print		= print,
-	.save		= save,
-	.extra_opts	= opts
+	name:		"connlimit",
+	version:	IPTABLES_VERSION,
+	size:		IPT_ALIGN(sizeof(struct ipt_connlimit_info)),
+	userspacesize:	offsetof(struct ipt_connlimit_info,data),
+	help:		help,
+	init:		init,
+	parse:		parse,
+	final_check:	final_check,
+	print:		print,
+	save: 		save,
+	extra_opts:	opts
 };
 
 void _init(void)
