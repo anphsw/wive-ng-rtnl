@@ -13,10 +13,10 @@ nm=`nvram_get 2860 lan_netmask`
 Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask`   
-NAT=`nvram_get 2860 natEnabled`
 upnp=`nvram_get 2860 upnpEnabled`
 OperationMode=`nvram_get 2860 OperationMode`
-
+NAT=`nvram_get 2860 vpnNAT`
+DGW=`nvram_get 2860 vpnDGW`
     
     $LOG "Cleanup conntrack table"
     echo 0 > /proc/cleannat
@@ -44,16 +44,19 @@ OperationMode=`nvram_get 2860 OperationMode`
     #Remove auto route in VPN
     ip route del $PPP_REMOTE  > /dev/null 2>&1
 
-    $LOG "Replace default route to $PPP_IFACE"
-    ip route del default > /dev/null 2>&1
-    ip route replace default dev $PPP_IFACE
+    #Replace default route to ppp tunnel
+    if [ "$DGW" = "on" ]; then
+	$LOG "Replace default route to $PPP_IFACE"
+	ip route del default > /dev/null 2>&1
+	ip route replace default dev $PPP_IFACE
+    fi
 
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
     ifconfig $PPP_IFACE -multicast
 
     iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
-    if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then                                                            
+    if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
         $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
 	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
 	if [ "$Lan2Enabled" = "1" ]; then                            

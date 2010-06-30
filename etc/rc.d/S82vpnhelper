@@ -1,0 +1,57 @@
+#!/bin/sh
+
+#wait to start web and run from goahead code
+web_wait
+
+start() {
+ echo "Start vpnhelper"
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
+    vpnType=`nvram_get 2860 vpnType`
+    if [ $vpnEnabled = "on"]; then
+      if [ $vpnType = "0" ]; then
+	echo "PPPOE calling..."
+	/etc/scripts/config-pppoe.sh &
+      fi
+      if [ $vpnType = "1" ]; then
+	echo "PPTP calling..."
+	/etc/scripts/config-pptp.sh &
+      fi
+      if [ $vpnType = "2" ]; then
+	echo "L2TP calling..."
+	/etc/scripts/config-l2tp.sh &
+      fi
+    fi
+}
+
+stop() {
+ echo "Stop vpnhelper"
+    killall -q config-pppoe.sh
+    killall -q config-l2tp.sh
+    killall -q config-pptp.sh
+    killall -q -9 config-pppoe.sh
+    killall -q -9 config-l2tp.sh
+    killall -q -9 config-pptp.sh
+    killall -q xl2tpd
+    killall -q -9 xl2tpd
+    killall -q pppd
+    killall -q -9 pppd
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

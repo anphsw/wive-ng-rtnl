@@ -1,5 +1,15 @@
 #!/bin/sh
 
+SERVER=`nvram_get 2860 vpnServer`
+USER=`nvram_get 2860 vpnUser`
+PASSWORD=`nvram_get 2860 vpnPassword`
+MTU=`nvram_get 2860 vpnMTU`
+MPPE=`nvram_get 2860 vpnMPPE`
+PEERDNS=`nvram_get 2860 vpnPeerDNS`
+DEBUG=`nvram_get 2860 vpnDebug`
+IFACE=`nvram_get 2860 vpnInterface`
+ROUTE=`nvram_get 2860 vpnRoutingEnabled`
+
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
 LOG="logger -t vpnhelper"
@@ -45,9 +55,15 @@ echo > $ppp/pap-secrets
 	ip r add $ROUTE
     fi
 
+    if [ "$PEERDNS" = "on" ]; then
+	PEERDNS=usepeerdns
+    else
+	PEERDNS=
+    fi
+
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file /etc/ppp/options.pptp -detach mtu 1400 mru 1400 plugin"
-    PLUGOPT="/lib/pptp.so allow-mppe-128 pptp_server $SERVER call pptp persist usepeerdns user $USER password $PASSWORD"
+    PPPDOPT="file /etc/ppp/options.pptp -detach mtu $MTU mru $MTU plugin"
+    PLUGOPT="/lib/pptp.so allow-mppe-128 pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &

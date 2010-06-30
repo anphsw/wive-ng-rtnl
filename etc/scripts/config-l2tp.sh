@@ -7,9 +7,15 @@
 
 echo "==================START-L2TP-CLIENT======================="
 
-SERVER=`nvram_get 2860 wan_l2tp_server`
-USER=`nvram_get 2860 wan_l2tp_user`
-PASSWORD=`nvram_get 2860 wan_l2tp_pass`
+SERVER=`nvram_get 2860 vpnServer`
+USER=`nvram_get 2860 vpnUser`
+PASSWORD=`nvram_get 2860 vpnPassword`
+MTU=`nvram_get 2860 vpnMTU`
+MPPE=`nvram_get 2860 vpnMPPE`
+PEERDNS=`nvram_get 2860 vpnPeerDNS`
+DEBUG=`nvram_get 2860 vpnDebug`
+IFACE=`nvram_get 2860 vpnInterface`
+ROUTING=`nvram_get 2860 vpnRoutingEnabled`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -46,6 +52,12 @@ LOG="logger -t vpnhelper"
         ip r add $ROUTE
     fi
 
+    if [ "$PEERDNS" = "on" ]; then
+	PEERDNS=usepeerdns
+    else
+	PEERDNS=
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -75,9 +87,9 @@ LOG="logger -t vpnhelper"
     refuse-eap
     noipx
     noproxyarp
-    mtu 1400
-    mru 1400
-    usepeerdns
+    mtu $MTU
+    mru $MTU
+    $PEERDNS
     lcp-echo-failure        5                                                                                                    
     lcp-echo-interval       10 
     " >> $ppp/options.l2tp
