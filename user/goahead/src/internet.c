@@ -480,28 +480,28 @@ typedef struct vpn_fetch_t
 	int is_switch;
 } vpn_fetch_t;
 
-const vpn_fetch_t pptp_args[] =
+const vpn_fetch_t vpn_args[] =
 {
-	{ T("pptp_server"),             "vpnServer",            0 },
-	{ T("pptp_range"),              "vpnRange",             0 },
-	{ T("pptp_user"),               "vpnUser",              0 },
-	{ T("pptp_pass"),               "vpnPassword",          0 },
-	{ T("pptp_mtu"),                "vpnMTU",               0 },
-	{ T("pptp_type"),               "vpnType",              0 },
-	{ T("pptp_mppe"),               "vpnMPPE",              1 },
-	{ T("pptp_dgw"),                "vpnDGW",               0 },
-	{ T("pptp_peerdns"),            "vpnPeerDNS",           1 },
-	{ T("pptp_debug"),              "vpnDebug",             1 },
-	{ T("pptp_nat"),                "vpnNAT",               1 },
-	{ T("pptp_pppoe_iface"),        "vpnInterface",         0 },
-	{ T("pptp_routing_enabled"),    "vpnRoutingEnabled",    1 },
+	{ T("vpn_server"),             "vpnServer",            0 },
+	{ T("vpn_range"),              "vpnRange",             0 },
+	{ T("vpn_user"),               "vpnUser",              0 },
+	{ T("vpn_pass"),               "vpnPassword",          0 },
+	{ T("vpn_mtu"),                "vpnMTU",               0 },
+	{ T("vpn_type"),               "vpnType",              0 },
+	{ T("vpn_mppe"),               "vpnMPPE",              1 },
+	{ T("vpn_dgw"),                "vpnDGW",               0 },
+	{ T("vpn_peerdns"),            "vpnPeerDNS",           1 },
+	{ T("vpn_debug"),              "vpnDebug",             1 },
+	{ T("vpn_nat"),                "vpnNAT",               1 },
+	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
+	{ T("vpn_routing_enabled"),    "vpnRoutingEnabled",    1 },
 	{ NULL, 0, 0 } // Terminator
 };
 
 /*
  * VPN statuses
  */
-const vpn_status_t pptp_statuses[] =
+const vpn_status_t vpn_statuses[] =
 {
 
 	{ "disabled",     0x808080        },
@@ -607,12 +607,12 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 	int status = 0; // Status is 'disabled'
 
 	// Get value
-	char *pptp_enabled = nvram_bufget(RT2860_NVRAM, "vpnEnabled");
-	if ((pptp_enabled==NULL) || (pptp_enabled[0]=='\0'))
-		pptp_enabled = "off";
+	char *vpn_enabled = nvram_bufget(RT2860_NVRAM, "vpnEnabled");
+	if ((vpn_enabled==NULL) || (vpn_enabled[0]=='\0'))
+		vpn_enabled = "off";
 	
 	// Do not perform other checks if VPN is turned off
-	if (strcmp(pptp_enabled, "on")==0)
+	if (strcmp(vpn_enabled, "on")==0)
 	{
 		// Status is at least 'offline' now
 		status++;
@@ -666,7 +666,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 	} // strcmp
 	
 	// Now write status
-	const vpn_status_t *st = &pptp_statuses[status];
+	const vpn_status_t *st = &vpn_statuses[status];
 	websWrite(wp, T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
 			st->color, st->status);
 	return 0;
@@ -790,11 +790,11 @@ void vpnStoreRouting(const char *rt_config)
 
 void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 {
-	char_t  *pptp_enabled, *submitUrl;
+	char_t  *vpn_enabled, *submitUrl;
 
-	pptp_enabled = websGetVar(wp, T("pptp_enabled"), T(""));
-	if (pptp_enabled[0] == '\0')
-		pptp_enabled="off";
+	vpn_enabled = websGetVar(wp, T("vpn_enabled"), T(""));
+	if (vpn_enabled[0] == '\0')
+		vpn_enabled="off";
 
 	//kill tunnels firt sigterm second sigkill
 	printf("Kill tunnels\n");
@@ -806,11 +806,11 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	system("/bin/killall -q -9 vpnhelper.sh");
 	
 	// Do not set other params if VPN is turned off
-	if (strcmp(pptp_enabled, "on")==0)
+	if (strcmp(vpn_enabled, "on")==0)
 	{
 		char_t *str;
 		
-		const vpn_fetch_t *fetch = pptp_args;
+		const vpn_fetch_t *fetch = vpn_args;
 		while (fetch->web_param != NULL)
 		{
 			// Get variable
@@ -829,26 +829,26 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 		}
 		
 		// Check if routing table is enabled
-		char *pptp_rt_enabled = websGetVar(wp, T("pptp_routing_enabled"), T(""));
-		if (pptp_rt_enabled[0] == '\0')
-			pptp_rt_enabled="off";
+		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T(""));
+		if (vpn_rt_enabled[0] == '\0')
+			vpn_rt_enabled="off";
 		
 		// Routing table is enabled, store it
-		if (strcmp(pptp_rt_enabled, "on") == 0)
+		if (strcmp(vpn_rt_enabled, "on") == 0)
 		{
-			char *pptp_rt = websGetVar(wp, T("pptp_routing_table"), T(""));
+			char *vpn_rt = websGetVar(wp, T("vpn_routing_table"), T(""));
 			
-			if (pptp_rt != NULL)
-				vpnStoreRouting(pptp_rt);
+			if (vpn_rt != NULL)
+				vpnStoreRouting(vpn_rt);
 		}
 	}
 	
 	// Now store VPN_ENABLED flag
-	if (nvram_bufset(RT2860_NVRAM, "vpnEnabled", (void *)pptp_enabled)==0)
+	if (nvram_bufset(RT2860_NVRAM, "vpnEnabled", (void *)vpn_enabled)==0)
 	{
-		printf("pptp_enabled value : %s\n", pptp_enabled);
+		printf("vpn_enabled value : %s\n", vpn_enabled);
 		printf("Calling vpn helper...\n");
-		system("/bin/service start_vpn start &");
+		system("service vpnhelper restart &");
 	}
 	else
 		printf("Set vpnEnabled error!\n");
@@ -2195,15 +2195,15 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 /* goform/setVpnPaThru */
 static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*l2tp_pt, *ipsec_pt, *pptp_pt;
+	char_t	*l2tp_pt, *ipsec_pt, *vpn_pt;
 
 	l2tp_pt = websGetVar(wp, T("l2tpPT"), T("0"));
 	ipsec_pt = websGetVar(wp, T("ipsecPT"), T("0"));
-	pptp_pt = websGetVar(wp, T("pptpPT"), T("0"));
+	vpn_pt = websGetVar(wp, T("pptpPT"), T("0"));
 	
 	nvram_bufset(RT2860_NVRAM, "l2tpPassThru", l2tp_pt);
 	nvram_bufset(RT2860_NVRAM, "ipsecPassThru", ipsec_pt);
-	nvram_bufset(RT2860_NVRAM, "pptpPassThru", pptp_pt);
+	nvram_bufset(RT2860_NVRAM, "pptpPassThru", vpn_pt);
 	nvram_commit(RT2860_NVRAM);
 
 	doSystem("service vpn-passthru start");
@@ -2213,7 +2213,7 @@ static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("<h3>VPN Pass Through</h3><br>\n"));
 	websWrite(wp, T("l2tp: %s<br>\n"), l2tp_pt);
 	websWrite(wp, T("ipsec: %s<br>\n"), ipsec_pt);
-	websWrite(wp, T("pptp: %s<br>\n"), pptp_pt);
+	websWrite(wp, T("pptp: %s<br>\n"), vpn_pt);
 	websFooter(wp);
 	websDone(wp, 200);
 }
@@ -2225,7 +2225,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t	*ip, *nm, *gw;
 	char_t	*eth, *user, *pass;
 	char_t	*clone_en, *clone_mac, *nat_enable;
-	char_t  *pptp_srv, *pptp_mode;
+	char_t  *vpn_srv, *vpn_mode;
 	char_t  *l2tp_srv, *l2tp_mode;
 #ifdef CONFIG_USER_3G
 	char_t	*usb3g_dev;
@@ -2235,7 +2235,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*lan2enabled = nvram_bufget(RT2860_NVRAM, "Lan2Enabled");
 
 	ctype = ip = nm = gw = eth = user = pass = 
-		clone_en = clone_mac = pptp_srv = pptp_mode = l2tp_srv = l2tp_mode =
+		clone_en = clone_mac = vpn_srv = vpn_mode = l2tp_srv = l2tp_mode =
 		NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
@@ -2333,32 +2333,32 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	else if (!strncmp(ctype, "PPTP", 5)) {
-		char_t *pptp_opmode, *pptp_optime;
+		char_t *vpn_opmode, *vpn_optime;
 
-		pptp_srv = websGetVar(wp, T("pptpServer"), T(""));
+		vpn_srv = websGetVar(wp, T("pptpServer"), T(""));
 		user = websGetVar(wp, T("pptpUser"), T(""));
 		pass = websGetVar(wp, T("pptpPass"), T(""));
-		pptp_mode = websGetVar(wp, T("pptpMode"), T("0"));
+		vpn_mode = websGetVar(wp, T("pptpMode"), T("0"));
 		ip = websGetVar(wp, T("pptpIp"), T(""));
 		nm = websGetVar(wp, T("pptpNetmask"), T(""));
 		gw = websGetVar(wp, T("pptpGateway"), T(""));
-		pptp_opmode = websGetVar(wp, T("pptpOPMode"), T(""));
-		if (0 == strcmp(pptp_opmode, "OnDemand"))
-			pptp_optime = websGetVar(wp, T("pptpIdleTime"), T(""));
+		vpn_opmode = websGetVar(wp, T("pptpOPMode"), T(""));
+		if (0 == strcmp(vpn_opmode, "OnDemand"))
+			vpn_optime = websGetVar(wp, T("pptpIdleTime"), T(""));
 		else
-			pptp_optime = websGetVar(wp, T("pptpRedialPeriod"), T(""));
+			vpn_optime = websGetVar(wp, T("pptpRedialPeriod"), T(""));
 
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_server", pptp_srv);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_user", user);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_pass", pass);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_mode", pptp_mode);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_opmode", pptp_opmode);
-		nvram_bufset(RT2860_NVRAM, "wan_pptp_optime", pptp_optime);
-		if (!strncmp(pptp_mode, "0", 2)) {
-			nvram_bufset(RT2860_NVRAM, "wan_pptp_ip", ip);
-			nvram_bufset(RT2860_NVRAM, "wan_pptp_netmask", nm);
-			nvram_bufset(RT2860_NVRAM, "wan_pptp_gateway", gw);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_server", vpn_srv);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_user", user);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_pass", pass);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_mode", vpn_mode);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_opmode", vpn_opmode);
+		nvram_bufset(RT2860_NVRAM, "wan_vpn_optime", vpn_optime);
+		if (!strncmp(vpn_mode, "0", 2)) {
+			nvram_bufset(RT2860_NVRAM, "wan_vpn_ip", ip);
+			nvram_bufset(RT2860_NVRAM, "wan_vpn_netmask", nm);
+			nvram_bufset(RT2860_NVRAM, "wan_vpn_gateway", gw);
 		}
 	}
 #ifdef CONFIG_USER_3G
@@ -2437,11 +2437,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	else if (!strncmp(ctype, "PPTP", 5)) {
-		websWrite(wp, T("PPTP Server IP Address: %s<br>\n"), pptp_srv);
+		websWrite(wp, T("PPTP Server IP Address: %s<br>\n"), vpn_srv);
 		websWrite(wp, T("User Account: %s<br>\n"), user);
 		websWrite(wp, T("Password: %s<br>\n"), pass);
-		websWrite(wp, T("Address Mode: %s<br>\n"), pptp_mode);
-		if (!strncmp(pptp_mode, "0", 2)) {
+		websWrite(wp, T("Address Mode: %s<br>\n"), vpn_mode);
+		if (!strncmp(vpn_mode, "0", 2)) {
 			websWrite(wp, T("IP: %s<br>\n"), ip);
 			websWrite(wp, T("Netmask: %s<br>\n"), nm);
 			websWrite(wp, T("Gateway: %s<br>\n"), gw);
