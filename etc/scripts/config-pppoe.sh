@@ -56,5 +56,5 @@ PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 PPPOE_CMD="$IFACE $SERVER user $USER password $PASSWORD"
 
 $LOG "Start pppd"
-FULLOPT="$OPTFILE mtu $MTU mru $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
+FULLOPT="$OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &

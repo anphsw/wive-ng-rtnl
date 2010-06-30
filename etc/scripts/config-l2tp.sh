@@ -103,8 +103,8 @@ LOG="logger -t vpnhelper"
     refuse-eap
     noipx
     noproxyarp
-    mtu $MTU
-    mru $MRU
+    $MTU
+    $MRU
     $MPPE
     $PEERDNS
     lcp-echo-failure        5                                                                                                    

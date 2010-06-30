@@ -77,7 +77,7 @@ echo > $ppp/pap-secrets
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file /etc/ppp/options.pptp -detach $DEBUG mtu $MTU mru $MRU $MPPE plugin"
+    PPPDOPT="file /etc/ppp/options.pptp -detach $DEBUG $MTU $MRU $MPPE plugin"
     PLUGOPT="/lib/pptp.so allow-mppe-128 pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
