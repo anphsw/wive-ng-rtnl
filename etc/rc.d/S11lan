@@ -108,6 +108,10 @@ echo "Start network interfaces..."
 	route add default gw $gw
     fi 
  fi
+
+ #-------------ADD-ROUTE-2-BCAST-----------
+ ip route replace 255.255.255.255 dev $lan_if
+
 }
 
 stop() {

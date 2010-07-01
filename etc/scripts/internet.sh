@@ -221,6 +221,3 @@ else
         addWds2Br0
 	exit 1
 fi
-
-ip route replace 255.255.255.255 dev $lan_if
-
