@@ -120,6 +120,11 @@ fi
 
 ifRaxWdsxDown
 
+#clear conntrack tables
+if [ "$MODE" != "wifionly" ]; then
+    echo 0 > /proc/cleannat
+fi
+
 #reload wifi modules
 service modules restart
 
@@ -133,6 +138,13 @@ if [ "$ethconv" = "y" ]; then
 fi
 if [ "$radio_off" = "1" ]; then
 	iwpriv ra0 set RadioOn=0
+fi
+if [ "$MODE" != "wifionly" ]; then
+    m2uenabled=`nvram_get 2860 M2UEnabled`
+    if [ "$m2uenabled" = "1" ]; then
+	iwpriv ra0 set IgmpSnEnable=1
+	echo "iwpriv ra0 set IgmpSnEnable=1"
+    fi
 fi
 
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
@@ -210,11 +222,5 @@ else
 	exit 1
 fi
 
-m2uenabled=`nvram_get 2860 M2UEnabled`
-if [ "$m2uenabled" = "1" ]; then
-	iwpriv ra0 set IgmpSnEnable=1
-	echo "iwpriv ra0 set IgmpSnEnable=1"
-fi
+ip route replace 255.255.255.255 dev $lan_if
 
-route add -host 255.255.255.255 dev $lan_if
-echo 0 > /proc/cleannat
