@@ -7,6 +7,7 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
+STATICDNS=`nvram_get 2860 wan_static_dns`
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -33,7 +34,6 @@ case "$1" in
         	while route del default gw 0.0.0.0 dev $interface ; do
             	    :
         	done
-
         	metric=0
         	$LOG "Add default route"
         	for i in $router ; do
@@ -43,13 +43,23 @@ case "$1" in
     	    fi
 	# DNS
 	$LOG "Renew DNS from dhcp"
-	if [ "$dns" ]; then                                                                                                          
+	if [ "$dns" ]; then 
+	    count=0                                                                                                         
 	    rm -f $RESOLV_CONF                                                                                                          
-	    for i in $dns                                                                                                            
-    	    do                                                                                                                       
-		$LOG "DNS= $i"                                                                                                           
-		echo nameserver $i >> $RESOLV_CONF                                                                                       
-	    done                                                                                                                     
+	    for i in $dns
+    	    do
+		$LOG "DNS= $i"
+		echo nameserver $i >> $RESOLV_CONF
+		if [ "$STATICDNS" != "on" ]; then
+		    if [ "$count" = "0" ]; then
+			nvram_set 2860 wan_primary_dns $i
+		    fi
+		    if [ "$count" = "1" ]; then
+			nvram_set 2860 wan_secondary_dns $i
+		    fi
+		    let "count=$count+1"
+		fi
+	    done
 	fi      
 	# CIDR STATIC ROUTES (rfc3442)
 	[ -n "$staticroutes" ] && {
