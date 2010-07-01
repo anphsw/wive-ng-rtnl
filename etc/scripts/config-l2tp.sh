@@ -78,8 +78,6 @@ LOG="logger -t vpnhelper"
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
     echo > $ppp/options.l2tp
-    echo > $ppp/chap-secrets
-    echo > $ppp/connect-errors
 
     printf "[global]
     access control = yes

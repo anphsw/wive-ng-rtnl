@@ -13,10 +13,6 @@ killall -q xl2tpd > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
 echo "==================START-PPTP-CLIENT======================="
-#clear all configs
-ppp=/etc/ppp
-echo > $ppp/chap-secrets
-echo > $ppp/pap-secrets
 
     $LOG "Check for PPTP server reachable"
     reachable=0;

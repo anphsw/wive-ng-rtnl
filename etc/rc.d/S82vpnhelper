@@ -11,6 +11,17 @@ start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     vpnType=`nvram_get 2860 vpnType`
     if [ $vpnEnabled = "on" ]; then
+      USER=`nvram_get 2860 vpnUser`
+      PASSWORD=`nvram_get 2860 vpnPassword`
+      #clear all configs and generate new
+      ppp=/etc/ppp                                                                                                                                
+      echo > $ppp/chap-secrets                                                                                                                    
+      echo > $ppp/pap-secrets                                                                                                                     
+      echo > $ppp/connect-errors 
+      echo "$USER * $PASSWORD *" > $ppp/chap-secrets
+      echo "$USER * $PASSWORD *" > $ppp/pap-secrets
+    
+      #call to vpn
       if [ $vpnType = "0" ]; then
 	echo "PPPOE calling..."
 	/etc/scripts/config-pppoe.sh &

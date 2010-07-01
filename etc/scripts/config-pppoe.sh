@@ -44,11 +44,6 @@ else
     DEBUG=""
 fi
 
-#clear all configs
-ppp=/etc/ppp
-echo > $ppp/chap-secrets
-echo > $ppp/pap-secrets
-
 OPTFILE="file /etc/ppp/options.pppoe"
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
