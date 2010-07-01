@@ -2035,11 +2035,11 @@ void formDefineFirewall(void)
 void firewall_init(void)
 {
 	////----DROP-ALL-RULES-IN-RC.D----////
-        doSystem("service iptables stop");
+        doSystem("service iptables stop &");
 
 	////----SET-RULES----------------////
 	LoadLayer7FilterName();
-        doSystem("service iptables start");
+        doSystem("service iptables start &");
         iptablesIPPortFilterRun();
         iptablesWebsFilterRun();
         iptablesRemoteManagementRun();

@@ -188,7 +188,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	// Restart DHCP service
-	doSystem("service dhcpd restart");
+	doSystem("service dhcpd restart &");
 }
 
 /* goform/setMiscServices */

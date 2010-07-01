@@ -59,7 +59,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
-	doSystem("service pass start");
+	doSystem("service pass start &");
 
 #ifdef USER_MANAGEMENT_SUPPORT
 	if (umGroupExists(T("adm")) == FALSE)
@@ -136,9 +136,9 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	if (strcmp(ntpEnabled, "on")==0)
-		doSystem("service ntp start");
+		doSystem("service ntp start &");
 	else
-		doSystem("service ntp stop");
+		doSystem("service ntp stop &");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>NTP Settings</h2><br>\n"));
@@ -276,7 +276,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service ddns start");
+	doSystem("service ddns start &");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
@@ -845,7 +845,7 @@ static char *getLog(char *filename)
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("service syslog restart");
+	doSystem("service syslog restart &");
 	websRedirect(wp, "adm/syslog.asp");
 }
 #endif
@@ -883,11 +883,11 @@ error:
 
 void management_init(void)
 {
-	doSystem("service ntp restart");
+	doSystem("service ntp restart &");
 #ifdef CONFIG_USER_GOAHEAD_GreenAP
-    	doSystem("greenap.sh init");
+    	doSystem("greenap.sh init &");
 #endif
-	doSystem("service ddns restart");
+	doSystem("service ddns restart &");
 	WPSRestart();
 }
 

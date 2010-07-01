@@ -5211,7 +5211,7 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") && !strcmp("1", nvram_get(RT2860_NVRAM, "ethConver"))))
 	{
-		doSystem("service wan restart");
+		doSystem("service wan restart &");
 	}
 }
 
