@@ -8,11 +8,11 @@ web_wait
 
 start() {
 if [ -f /bin/miniupnpd ]; then
- echo "Start upnp "
  get_param
     if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$vpnEnabled" = "on" ]; then
 	EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
         if [ "$upnp" = "1" ] && [ "$EXTIP" != "" ]; then
+	  echo "Start upnp "
 	    echo "External IP = $EXTIP"
             route add -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 

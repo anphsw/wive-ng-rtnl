@@ -1,8 +1,8 @@
 #!/bin/sh
 
 start() {
-echo "Starting inetd: "
     if [ -f /sbin/inetd ]; then
+      echo "Starting inetd: "
 	admID=`nvram_get 2860 Login`
 	if [ "$admID" = "" ]; then
     	    admID="Admin"

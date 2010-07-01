@@ -8,9 +8,9 @@ web_wait
 
 start() {
 if [ -f /bin/lld2d ]; then
- echo "Starting LLD2D: "
     lltd=`nvram_get 2860 lltdEnabled`
     if [ "$lltd" = "1" ]; then
+	echo "Starting LLD2D: "
         lld2d $lan_if
     fi
 fi

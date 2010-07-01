@@ -7,10 +7,9 @@
 web_wait
 
 start() {
-	echo "Start dhcpserver "
 	dhcp=`nvram_get 2860 dhcpEnabled`
-	
 	if [ "$dhcp" = "1" ]; then
+	    echo "Start dhcpserver "
 		start=`nvram_get 2860 dhcpStart`
 		end=`nvram_get 2860 dhcpEnd`
 		mask=`nvram_get 2860 dhcpMask`

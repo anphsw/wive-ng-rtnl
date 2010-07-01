@@ -7,12 +7,11 @@
 web_wait
 
 start() {
-if [ -f /bin/ntpd ]; then
- echo "Starting NTPD: "
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
 
+    echo "Set timezone: "
     backup_time=`date +%T`
     sync=`expr $sync \* 3600`
 
@@ -27,10 +26,10 @@ if [ -f /bin/ntpd ]; then
     rm -rf /etc/tmpTZ2
     date +%T -s $backup_time
 
-    if [ "$srv" != "" ]; then
+    if [ "$srv" != "" ] || [ -f /bin/ntpd ]; then
+	echo "Starting NTPD: "
 	ntpd -d -l -p $srv &
     fi
-fi
 }
 
 stop() {
