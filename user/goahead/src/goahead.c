@@ -65,9 +65,9 @@ void	formDefineUserMgmt(void);
 
 static char_t		*rootWeb = T("/etc_ro/web");		/* Root web directory */
 static char_t		*password = T("");				/* Security password */
-static int			port = 80;						/* Server port */
-static int			retries = 5;					/* Server port retries */
-static int			finished;						/* Finished flag */
+static int		port = 80;						/* Server port */
+static int		retries = 5;					/* Server port retries */
+static int		finished;						/* Finished flag */
 static char_t		*gopid = T("/var/run/goahead.pid");	/* pid file */
 
 /****************************** Forward Declarations **************************/
@@ -75,7 +75,7 @@ static char_t		*gopid = T("/var/run/goahead.pid");	/* pid file */
 static int	writeGoPid(void);
 static int 	initSystem(void);
 static int 	initWebs(void);
-static int  websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
+static int	websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
 				int arg, char_t *url, char_t *path, char_t *query);
 extern void defaultErrorHandler(int etype, char_t *msg);
 extern void defaultTraceHandler(int level, char_t *buf);
