@@ -16,9 +16,6 @@ radio_off=`nvram_get 2860 RadioOff`
 
 MODE=$1 #restart mode
 
-service pass start
-service lan restart
-
 ifRaxWdsxDown()
 {
 	num=0
@@ -103,9 +100,11 @@ resetLanWan()
     fi
 }
 
+
 # opmode adjustment:
 #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
 #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
+
 if [ "$opmode" = "3" -a "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
 	nvram_set 2860 OperationMode 1
 	opmode="1"
@@ -132,6 +131,9 @@ service modules restart
 ip addr flush dev ra0
 ip -6 addr flush dev ra0
 ip link set ra0 up
+
+#restart lan interfaces
+service lan restart
 
 if [ "$ethconv" = "y" ]; then
 	iwpriv ra0 set EthConvertMode=dongle
