@@ -25,7 +25,6 @@ fi
 #restart iptables
 if [ "$MODE" != "pppd" ]; then
     service iptables restart
-    (sleep 10 && service vpnhelper restart) &
 fi
 
 #start all
