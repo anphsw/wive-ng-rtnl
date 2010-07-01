@@ -13,7 +13,7 @@ web_wait(){
 getWanIfName()
 {
 	opmode=`nvram_get 2860 OperationMode`
-	wan_mode=`nvram_get 2860 wanConnectionMode`
+	vpnEnabled=`nvram_get 2860 vpnEnabled`
 	if [ "$opmode" = "0" ]; then
 		wan_if="br0"
 	elif [ "$opmode" = "1" ]; then
@@ -28,7 +28,7 @@ getWanIfName()
 		wan_if="apcli0"
 	fi
 
-	if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+	if [ "$vpnEnabled" = "on"  ]; then
 		wan_ppp_if="ppp0"
 	else
 		wan_ppp_if=$wan_if
