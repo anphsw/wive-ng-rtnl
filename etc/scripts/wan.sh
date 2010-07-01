@@ -1,34 +1,35 @@
 #!/bin/sh
-#
-# $Id: wan.sh,v 1.18 2009-02-09 13:29:37 michael Exp $
-#
-# usage: wan.sh
-#
 
 . /sbin/global.sh
 
-# stop all
-killall -q udhcpc
-
-#workaround fix me!!!
-if [ "$wan_if" = "" ]; then
-    wan_if="eth2.2"
-fi
-
+#set variable
 HOSTNAME_SYS=`hostname`
 HOSTNAME_NVRAM=`nvram_get 2860 HostName`
+UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O staticroutes -f &"
 
+#get parametrs
+opmode=`nvram_get 2860 OperationMode`
+wanmode=`nvram_get 2860 wanConnectionMode`
+
+clone_en=`nvram_get 2860 macCloneEnabled`
+clone_mac=`nvram_get 2860 macCloneMac`
+
+# stop dhcp client
+killall -q udhcpc
+killall -q -9 udhcpc
+
+#need hostname
 if [ "$HOSTNAME_NVRAM" != "" ]; then
    HOSTNAME="$HOSTNAME_NVRAM"
 else
    HOSTNAME="$HOSTNAME_SYS"
 fi
 
-UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O staticroutes -f &"
+#workaround fix me!!!
+if [ "$wan_if" = "" ]; then
+    wan_if="eth2.2"
+fi
 
-opmode=`nvram_get 2860 OperationMode`
-clone_en=`nvram_get 2860 macCloneEnabled`
-clone_mac=`nvram_get 2860 macCloneMac`
 #MAC Clone: bridge mode doesn't support MAC Clone
 if [ "$opmode" != "0" -a "$clone_en" = "1" ]; then
 	ip link set $wan_if down > /dev/null 2>&1
@@ -74,6 +75,7 @@ else
 	exit 1
 fi
 
+#check pppd or xl2tpd started
 PPP_STARTED=`pidof pppd`
 XL2TPD_STARTED=`pidof xl2tpd`
 

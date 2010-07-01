@@ -83,7 +83,6 @@ getStaMode()
 }
 
 opmode=`nvram_get 2860 OperationMode`
-wanmode=`nvram_get 2860 wanConnectionMode`
 ethconv="n"
 stamode="n"
 wan_if="br0"
