@@ -158,7 +158,7 @@ if [ "$opmode" = "0" ]; then
 	brctl addif br0 eth2
         addWds2Br0
         addMesh2Br0
-	wan.sh
+	service wan restart
 	services_restart.sh all
 
 elif [ "$opmode" = "1" ]; then
@@ -173,13 +173,13 @@ elif [ "$opmode" = "1" ]; then
 	brctl addif br0 eth2.1
 	addWds2Br0
 	addMesh2Br0
-	wan.sh
+	service wan restart
 	services_restart.sh all
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
 	resetLanWan
-	wan.sh
+	service wan restart
 	services_restart.sh all
 
 elif [ "$opmode" = "3" ]; then
@@ -187,7 +187,7 @@ elif [ "$opmode" = "3" ]; then
 	resetLanWan
 	addBr0
 	brctl addif br0 eth2
-	wan.sh
+	service wan restart
 	services_restart.sh all
 else
     echo "unknown OperationMode: $opmode"

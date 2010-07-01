@@ -5207,11 +5207,11 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 
 	Connection_flag = 1;
 
-	//restart wan.sh if needed
+	//restart wan service if needed
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") && !strcmp("1", nvram_get(RT2860_NVRAM, "ethConver"))))
 	{
-		doSystem("wan.sh");
+		doSystem("service wan restart");
 	}
 }
 

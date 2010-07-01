@@ -2206,8 +2206,6 @@ static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "pptpPassThru", vpn_pt);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("service vpn-passthru start");
-
 	//debug print
 	websHeader(wp);
 	websWrite(wp, T("<h3>VPN Pass Through</h3><br>\n"));
