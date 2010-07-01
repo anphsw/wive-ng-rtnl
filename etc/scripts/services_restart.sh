@@ -11,7 +11,7 @@ service ntp stop
 service dnsserver stop
 service upnp stop
 service radvd stop
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
     service pppoe-relay stop
 fi
@@ -28,7 +28,7 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 #start all
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
     service pppoe-relay start
 fi
