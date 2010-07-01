@@ -14,9 +14,10 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
+MODE=$1 #restart mode
+
 service pass start
 service lan restart
-service vpn-passthru restart
 
 ifRaxWdsxDown()
 {
@@ -154,7 +155,9 @@ fi
 if [ "$opmode" = "0" ]; then
     echo "Bridge OperationMode: $opmode"
 	addBr0
+    if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
+    fi
 	brctl addif br0 eth2
         addWds2Br0
         addMesh2Br0
@@ -167,8 +170,10 @@ elif [ "$opmode" = "1" ]; then
 		echo '##### config Vtss vlan partition #####'
 		config-vlan.sh 1 1
 	fi
+    if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
 	setLanWan
+    fi
 	addBr0
 	brctl addif br0 eth2.1
 	addWds2Br0
@@ -178,21 +183,27 @@ elif [ "$opmode" = "1" ]; then
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
+    if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
+    fi
 	service wan restart
 	services_restart.sh all
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
+    if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
+    fi
 	addBr0
 	brctl addif br0 eth2
 	service wan restart
 	services_restart.sh all
 else
     echo "unknown OperationMode: $opmode"
+    if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
 	setLanWan
+    fi
         addBr0
         brctl addif br0 eth2.1
         addWds2Br0
