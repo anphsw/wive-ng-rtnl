@@ -30,5 +30,5 @@ nobsdcomp
 nodeflate
 
 # LCP Control
-lcp-echo-failure        5
-lcp-echo-interval       10
+lcp-echo-failure        10
+lcp-echo-interval       5

@@ -105,8 +105,8 @@ LOG="logger -t vpnhelper"
     $MRU
     $MPPE
     $PEERDNS
-    lcp-echo-failure        5                                                                                                    
-    lcp-echo-interval       10 
+    lcp-echo-failure        10
+    lcp-echo-interval       5 
     " >> $ppp/options.l2tp
 
     printf "$USER * $PASSWORD" >> $ppp/chap-secrets
