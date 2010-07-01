@@ -47,6 +47,6 @@ service ntp start
 PPP_STARTED=`pidof pppd`
 XL2TPD_STARTED=`pidof xl2tpd`
 
-if [ "PPP_STARTED" = "" ] && [ "XL2TPD_STARTED" = "" ]
+if [ "PPP_STARTED" = "" ] && [ "XL2TPD_STARTED" = "" ] && [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     (sleep 10 && service vpnhelper restart) &
 fi
