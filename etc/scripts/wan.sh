@@ -73,3 +73,10 @@ else
 	echo "wan.sh: unknown wan connection type: $wanmode"
 	exit 1
 fi
+
+PPP_STARTED=`pidof pppd`
+XL2TPD_STARTED=`pidof xl2tpd`
+
+if [ "PPP_STARTED" = "" ] && [ "XL2TPD_STARTED" = "" ]; then
+    (sleep 10 && service vpnhelper restart) &
+fi
