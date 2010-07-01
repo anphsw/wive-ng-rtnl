@@ -9,7 +9,7 @@ MODIFIED=0
 	echo "Generate host key for first start"
         echo "If no DSS key  and generate new key"
 	mkdir -p /etc/dropbear
-        dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
+        (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key && fs save) &
 	MODIFIED=1
     fi
 
