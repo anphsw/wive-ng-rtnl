@@ -44,13 +44,13 @@ case "$1" in
 	# DNS
 	$LOG "Renew DNS from dhcp"
 	if [ "$dns" ]; then 
+	 if [ "$STATICDNS" != "on" ]; then
 	    count=0                                                                                                         
 	    rm -f $RESOLV_CONF                                                                                                          
 	    for i in $dns
     	    do
 		$LOG "DNS= $i"
 		echo nameserver $i >> $RESOLV_CONF
-		if [ "$STATICDNS" != "on" ]; then
 		    if [ "$count" = "0" ]; then
 			nvram_set 2860 wan_primary_dns $i
 		    fi
@@ -58,8 +58,8 @@ case "$1" in
 			nvram_set 2860 wan_secondary_dns $i
 		    fi
 		    let "count=$count+1"
-		fi
 	    done
+	 fi
 	fi      
 	# CIDR STATIC ROUTES (rfc3442)
 	[ -n "$staticroutes" ] && {
