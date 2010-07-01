@@ -174,7 +174,6 @@ get_param() {
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
-    wan_mode=`nvram_get 2860 wanConnectionMode`
     OperationMode=`nvram_get 2860 OperationMode`
     upnp=`nvram_get 2860 upnpEnabled`
     WANPingFilter=`nvram_get 2860 WANPingFilter`
@@ -182,9 +181,10 @@ get_param() {
     RMG=`nvram_get 2860 RemoteManagement`
     igmpen=`nvram_get 2860 igmpEnabled`
     QOS=`nvram_get 2860 WmmCapable`
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
 
     #change wan if
-    if [ "$wan_mode" = "PPPOE" -o  "$wan_mode" = "L2TP" -o "$wan_mode" = "PPTP"  ]; then
+    if [ "$vpnEnabled" = "on"  ]; then
         wan_upnp_if="ppp0"
     else
         if [ "$wan_if" = "" ]; then
