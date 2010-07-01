@@ -24,6 +24,8 @@ start() {
     # stop dhcp client
     killall -q udhcpc
     killall -q -9 udhcpc
+    #remove marker
+    rm -rf /var/tmp/is_up
 
     #need hostname
     if [ "$HOSTNAME_NVRAM" != "" ]; then
