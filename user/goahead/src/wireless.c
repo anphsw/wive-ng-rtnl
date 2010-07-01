@@ -837,7 +837,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		doSystem("reboot");
 #endif
 	// restart wireless network
-        doSystem("internet.sh wifionly");
+        doSystem("internet.sh wifionly &");
 
 	//debug print
 	websHeader(wp);
@@ -974,7 +974,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 
 	nvram_commit(RT2860_NVRAM);
 	// restart wireless network
-        doSystem("internet.sh wifionly");
+        doSystem("internet.sh wifionly &");
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	if (!strncmp(m2u_enable, "1", 2))
@@ -1041,7 +1041,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	// restart wireless network
-        doSystem("internet.sh wifionly");
+        doSystem("internet.sh wifionly &");
 
 	//debug print
 	websHeader(wp);
@@ -1099,7 +1099,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	// restart wireless network                                                                                                         
-        doSystem("internet.sh wifionly");
+        doSystem("internet.sh wifionly &");
 
 	//debug print
 	websHeader(wp);
@@ -1853,7 +1853,7 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	
 	// restart wireless network
-	doSystem("internet.sh wifionly");
+	doSystem("internet.sh wifionly &");
 
 	// debug print
 	websHeader(wp);
