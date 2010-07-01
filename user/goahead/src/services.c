@@ -221,5 +221,6 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);
 
-	initInternet();
+	//restart some services instead full reload
+	doSystem("services_restart.sh misc");
 }
