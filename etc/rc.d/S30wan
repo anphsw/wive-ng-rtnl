@@ -21,11 +21,12 @@ start() {
     clone_en=`nvram_get 2860 macCloneEnabled`
     clone_mac=`nvram_get 2860 macCloneMac`
 
-    # stop dhcp client
+    #stop dhcp client
     killall -q udhcpc
     killall -q -9 udhcpc
-    #remove marker
-    rm -rf /var/tmp/is_up
+
+    #set force renew marker
+    echo 1 > /var/tmp/is_up/force_renew
 
     #need hostname
     if [ "$HOSTNAME_NVRAM" != "" ]; then

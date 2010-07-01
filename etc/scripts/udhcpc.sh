@@ -20,6 +20,11 @@ case "$1" in
         ;;
 
     renew|bound)
+    #force renew if needed
+    if [ -f /var/tmp/is_up/force_renew ]; then
+	STARTEDPPPD=0
+	rm -rf /var/tmp/is_up
+    fi
     #no change routes if pppd is started
     if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/is_up/$ip ]; then
             $LOG "PPPD is start or no change parametrs. No renew needed."
