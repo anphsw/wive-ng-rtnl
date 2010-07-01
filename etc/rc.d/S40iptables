@@ -136,6 +136,21 @@ start() {
 		iptables -I FORWARD -s 224.0.0.0/4 -j ACCEPT
 	    fi
 	fi
+###########################################VPN-RULES##########################################
+	if [ "$vpnEnabled" = "on"  ]; then
+	    if [ "$vpnType" = "1"  ]; then
+		iptables -I INPUT -p gre -j ACCEPT
+		iptables -I INPUT -p tcp --sport 1723 -j ACCEPT
+		iptables -I INPUT -p tcp --dport 1723 -j ACCEPT
+	    elif [ "$vpnType" = "2"  ];
+		iptables -I INPUT -p udp --sport 500 -j ACCEPT
+		iptables -I INPUT -p udp --dport 500 -j ACCEPT
+		iptables -I INPUT -p udp --sport 1701 -j ACCEPT
+		iptables -I INPUT -p udp --dport 1701 -j ACCEPT
+		iptables -I INPUT -p udp --sport 4500 -j ACCEPT
+		iptables -I INPUT -p udp --dport 4500 -j ACCEPT
+	    fi
+	fi
 }
 
 
@@ -182,6 +197,7 @@ get_param() {
     igmpen=`nvram_get 2860 igmpEnabled`
     QOS=`nvram_get 2860 WmmCapable`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
+    vpnType=`nvram_get 2860 vpnType`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then
