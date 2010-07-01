@@ -173,6 +173,7 @@ if [ "$opmode" = "0" ]; then
 	resetLanWan
     fi
 	brctl addif br0 eth2
+	brctl addif br0 eth2.1
         addWds2Br0
         addMesh2Br0
 	service wan restart
