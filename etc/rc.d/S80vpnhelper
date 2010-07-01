@@ -6,13 +6,16 @@
 #wait to start web and run from goahead code
 web_wait
 
+
 start() {
- echo "Start vpnhelper"
     vpnEnabled=`nvram_get 2860 vpnEnabled`
-    vpnType=`nvram_get 2860 vpnType`
     if [ $vpnEnabled = "on" ]; then
+     echo "Start vpnhelper"
+      #get param
+      vpnType=`nvram_get 2860 vpnType`
       USER=`nvram_get 2860 vpnUser`
       PASSWORD=`nvram_get 2860 vpnPassword`
+
       #clear all configs and generate new
       ppp=/etc/ppp                                                                                                                                
       echo > $ppp/chap-secrets                                                                                                                    
@@ -20,6 +23,7 @@ start() {
       echo > $ppp/connect-errors 
       echo "$USER * $PASSWORD *" > $ppp/chap-secrets
       echo "$USER * $PASSWORD *" > $ppp/pap-secrets
+
     
       #call to vpn
       if [ $vpnType = "0" ]; then

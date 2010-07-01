@@ -43,3 +43,10 @@ service upnp start
 service dnsserver start
 service radvd start
 service ntp start
+
+PPP_STARTED=`pidof pppd`
+XL2TPD_STARTED=`pidof xl2tpd`
+
+if [ "PPP_STARTED" = "" ] && [ "XL2TPD_STARTED" = "" ]
+    (sleep 10 && service vpnhelper restart) &
+fi
