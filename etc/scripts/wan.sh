@@ -77,6 +77,6 @@ fi
 PPP_STARTED=`pidof pppd`
 XL2TPD_STARTED=`pidof xl2tpd`
 
-if [ "PPP_STARTED" = "" ] && [ "XL2TPD_STARTED" = "" ]; then
-    (sleep 10 && service vpnhelper restart) &
+if [ "$PPP_STARTED" = "" ] && [ "$XL2TPD_STARTED" = "" ]; then
+    (sleep 20 && service vpnhelper restart) &
 fi
