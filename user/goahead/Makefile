@@ -9,30 +9,29 @@ all:
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)
 ifeq ("$(CONFIG_USER_WAN_SIMPLE)", "y")
-	mv $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan_simple.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
+	mv -f $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan_simple.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
 endif
 ifeq ("$(CONFIG_USER_3G)", "y")
-	mv $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
+	mv -f $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
+else
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp
 endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")
-	rm $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp
 endif
 endif
 ifeq ("$(CONFIG_RT2860V2_AP_WDS)", "")
-	rm $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/wds.asp
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/wds.asp
 endif
 ifeq ("$(CONFIG_RT2860V2_STA)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/station
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/wps/wps_sta.asp
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wps/wps_sta.asp
 endif
 
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
 else
-ifeq ("$(CONFIG_USER_STORAGE)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
-endif
 ifeq ("$(CONFIG_USER_USHARE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USHARE*
 endif
@@ -42,6 +41,10 @@ endif
 ifeq ("$(CONFIG_USER_P910ND)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/P910ND*
 endif
+endif
+ifeq ("$(CONFIG_USER_STORAGE)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
 endif
 
 ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "")
