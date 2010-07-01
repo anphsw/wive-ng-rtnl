@@ -42,8 +42,8 @@ case "$1" in
         	done
     	    fi
 	# DNS
-	if [ "$dns" ]; then 
-	 if [ "$STATICDNS" != "on" ]; then
+	if [ "$STATICDNS" != "on" ]; then
+	 if [ "$dns" ]; then 
 	    $LOG "Renew DNS from dhcp"
 	    count=0                                                                                                         
 	    rm -f $RESOLV_CONF                                                                                                          
