@@ -78,5 +78,9 @@ PPP_STARTED=`pidof pppd`
 XL2TPD_STARTED=`pidof xl2tpd`
 
 if [ "$PPP_STARTED" = "" ] && [ "$XL2TPD_STARTED" = "" ]; then
-    (sleep 20 && service vpnhelper restart) &
+    if [ "$wanmode" = "DHCP" ]; then
+        (sleep 30 && service vpnhelper restart) &
+    else
+        (sleep 15 && service vpnhelper restart) &
+    fi
 fi
