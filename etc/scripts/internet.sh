@@ -14,8 +14,6 @@ nat_en=`nvram_get 2860 natEnabled`
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
 
-WAIT_IFUP=2
-
 service pass start
 service lan restart
 service vpn-passthru restart

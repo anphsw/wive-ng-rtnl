@@ -17,11 +17,7 @@ getWanIfName()
 	if [ "$opmode" = "0" ]; then
 		wan_if="br0"
 	elif [ "$opmode" = "1" ]; then
-		if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-			wan_if="eth2.2"
-		else
-			wan_if="eth2"
-		fi
+		wan_if="eth2.2"
 	elif [ "$opmode" = "2" ]; then
 		wan_if="ra0"
 	elif [ "$opmode" = "3" ]; then
@@ -40,23 +36,9 @@ getLanIfName()
 {
 	bssidnum=`nvram_get 2860 BssidNum`
 
-	if [ "$opmode" = "0" ]; then
-		lan_if="br0"
-	elif [ "$opmode" = "1" ]; then
-		if [ "$CONFIG_RAETH_ROUTER" = "y" -o "$CONFIG_MAC_TO_MAC_MODE" = "y" -o "$CONFIG_RT_3052_ESW" = "y" ]; then
-			lan_if="br0"
-		elif [ "$CONFIG_ICPLUS_PHY" = "y" ]; then 
-			if [ "$CONFIG_RT2860V2_AP_MBSS" = "y" -a "$bssidnum" != "1" ]; then
-				lan_if="br0"
-			else
-				lan_if="ra0"
-			fi
-		else
-			lan_if="ra0"
-		fi
-	elif [ "$opmode" = "2" ]; then
+	if [ "$opmode" = "2" ]; then
 		lan_if="eth2"
-	elif [ "$opmode" = "3" ]; then
+	else
 		lan_if="br0"
 	fi
 }
@@ -65,7 +47,7 @@ getLanIfName()
 getEthConv()
 {
 	ec=`nvram_get 2860 ethConvert`
-	if [ "$opmode" = "0" -a "$CONFIG_RT2860V2_STA_DPB" = "y" -a "$ec" = "1" ]; then
+	if [ "$opmode" = "0" ] && [ "$ec" = "1" ]; then
 		ethconv="y"
 	else
 		ethconv="n"
@@ -95,7 +77,6 @@ getStaMode
 
 # debug
 #echo "opmode=$opmode"
-#echo "wanmode=$wanmode"
 #echo "ethconv=$ethconv"
 #echo "stamode=$stamode"
 #echo "wan_if=$wan_if"
