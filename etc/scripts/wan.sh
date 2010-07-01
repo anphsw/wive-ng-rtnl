@@ -7,15 +7,6 @@
 
 . /sbin/global.sh
 
-kill_ppp(){
-	echo "Killall ppp connections"
-	killall -q -9 config-pptp.sh
-	killall -q -9 config-l2tp.sh
-	killall -q -9 config-pppoe.sh
-	killall -q pppd
-	killall -q xl2tpd
-}
-
 # stop all
 killall -q udhcpc
 
@@ -58,8 +49,6 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	pd=`nvram_get 2860 wan_primary_dns`
 	sd=`nvram_get 2860 wan_secondary_dns`
 	
-	#killall ppp connections
-	kill_ppp
 	#lan and wan ip should not be the same except in bridge mode
 	if [ "$opmode" != "0" ]; then
 		lan_ip=`nvram_get 2860 lan_ipaddr`
@@ -79,78 +68,8 @@ if [ "$wanmode" = "STATIC" -o "$opmode" = "0" ]; then
 	fi
 
 elif [ "$wanmode" = "DHCP" ]; then
-	#killall ppp connections
-	kill_ppp
 	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
-elif [ "$wanmode" = "PPPOE" ]; then
-	u=`nvram_get 2860 wan_pppoe_user`
-	pw=`nvram_get 2860 wan_pppoe_pass`
-	pppoe_opmode=`nvram_get 2860 wan_pppoe_opmode`
-	pppoe_optime=`nvram_get 2860 wan_pppoe_optime`
-
-	#killall ppp connections
-	kill_ppp
-	#up WAN interface
-	ip link set eth2.2 up > /dev/null 2>&1 &
-	ip link set $wan_if up > /dev/null 2>&1 &
-	config-pppoe.sh $u $pw $wan_if $pppoe_opmode $pppoe_optime &
-
-elif [ "$wanmode" = "L2TP" ]; then
-	mode=`nvram_get 2860 wan_l2tp_mode`
-	l2tp_opmode=`nvram_get 2860 wan_l2tp_opmode`
-	l2tp_optime=`nvram_get 2860 wan_l2tp_optime`
-
-	#killall ppp connections
-	kill_ppp
-
-        if [ "$mode" = "0" ]; then
-	#static
-    	ip=`nvram_get 2860 wan_l2tp_ip`
-	nm=`nvram_get 2860 wan_l2tp_netmask`
-	gw=`nvram_get 2860 wan_l2tp_gateway`
-    	ifconfig $wan_if $ip netmask $nm up
-    	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-		route add -host $ip dev $wan_if gw $gw
-    		route del default
-    		route add default gw $gw
-    	    else
-		route add -host $ip dev $wan_if
-	    fi
-	else
-	#dhcp
-    	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
-	fi
-	config-l2tp.sh &
-
-elif [ "$wanmode" = "PPTP" ]; then
-        srv=`nvram_get 2860 wan_pptp_server`
-        mode=`nvram_get 2860 wan_pptp_mode`
-        pptp_opmode=`nvram_get 2860 wan_pptp_opmode`
-        pptp_optime=`nvram_get 2860 wan_pptp_optime`
-
-	#killall ppp connections
-	kill_ppp
-
-        if [ "$mode" = "0" ]; then
-	#static
-            ip=`nvram_get 2860 wan_pptp_ip`
-            nm=`nvram_get 2860 wan_pptp_netmask`
-            gw=`nvram_get 2860 wan_pptp_gateway`
-    	    ifconfig $wan_if $ip netmask $nm up
-            if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-		route add -host $ip dev $wan_if gw $gw
-    		route del default
-        	route add default gw $gw
-    	    else
-		route add -host $ip dev $wan_if
-	    fi
-	else
-	#dhcp
-    	    udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS  > /dev/null 2>&1 &
-	fi
-	config-pptp.sh &
 else
 	echo "wan.sh: unknown wan connection type: $wanmode"
 	exit 1
 fi
-
