@@ -19,9 +19,7 @@ if [ "$MODE" != "pppd" ]; then
     service udpxy stop
     service igmp_proxy stop
     service lld2d stop
-    if [ "$MODE" != "misc" ]; then
-	service stp stop
-    fi
+    service stp stop
 fi
 
 #restart iptables
@@ -35,9 +33,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then
     service pppoe-relay start
 fi
 if [ "$MODE" != "pppd" ]; then 
-    if [ "$MODE" != "misc" ]; then
-	service stp start
-    fi
+    service stp start
     service lld2d start
     service igmp_proxy start
     service udpxy start
