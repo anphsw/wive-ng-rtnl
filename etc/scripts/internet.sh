@@ -170,8 +170,8 @@ if [ "$opmode" = "0" ]; then
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
     fi
+	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
-	brctl addif br0 eth2.1
         addWds2Br0
         addMesh2Br0
 
