@@ -150,12 +150,10 @@ if [ "$MODE" != "wifionly" ]; then
 fi
 
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-num=1;
     for i in `seq 1 $bssidnum`; do
-	ip addr flush dev ra$num                                                                                                                       
-	ip -6 addr flush dev ra$num                                                                                                                    
-	ip link set ra$num up 
-        num=`expr $num + 1`
+	ip addr flush dev ra$i
+	ip -6 addr flush dev ra$i
+	ip link set ra$i up 
     done
 fi
 
@@ -176,15 +174,13 @@ if [ "$opmode" = "0" ]; then
 	brctl addif br0 eth2.1
         addWds2Br0
         addMesh2Br0
-	service wan restart
-	services_restart.sh all
 
 elif [ "$opmode" = "1" ]; then
     echo "Gateway OperationMode: $opmode"
-	if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-		echo '##### config Vtss vlan partition #####'
-		config-vlan.sh 1 1
-	fi
+    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+	echo '##### config Vtss vlan partition #####'
+    	config-vlan.sh 1 1
+    fi
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
 	setLanWan
@@ -193,16 +189,12 @@ elif [ "$opmode" = "1" ]; then
 	brctl addif br0 eth2.1
 	addWds2Br0
 	addMesh2Br0
-	service wan restart
-	services_restart.sh all
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
     fi
-	service wan restart
-	services_restart.sh all
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
@@ -211,8 +203,6 @@ elif [ "$opmode" = "3" ]; then
     fi
 	addBr0
 	brctl addif br0 eth2
-	service wan restart
-	services_restart.sh all
 else
     echo "unknown OperationMode: $opmode"
     if [ "$MODE" != "wifionly" ]; then
@@ -224,3 +214,7 @@ else
         addWds2Br0
 	exit 1
 fi
+
+#reconfigure wan and services restart
+service wan restart
+services_restart.sh all
