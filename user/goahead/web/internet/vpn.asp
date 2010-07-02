@@ -15,7 +15,9 @@ var pptpResetRoutingTable =
 	<% vpnInitRoutingTable(); %>
 ];
 
-var pptpServerIP = '<% getCfgGeneral(1, "vpnServer"); %>';
+var pptpType     = '<% getCfgGeneral(1, "vpnType"); %>';
+var pptpServerIP = (pptpType != '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
+var pptpACName   = (pptpType == '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
 var pptpRoutingTable = [];
 var currentRoute = undefined;
 </script>
@@ -365,7 +367,7 @@ function selectType(form)
 	if ((form.vpn_type.value == '1') || (form.vpn_type.value == '2') || (form.vpn_type.value == '3'))
 		form.vpn_server.value = pptpServerIP;
 	else
-		form.vpn_server.value = '';
+		form.vpn_server.value = pptpACName;
 	
 	vpn_server_col.innerHTML = '<b>' + vpn_server + ':</b>';
 }

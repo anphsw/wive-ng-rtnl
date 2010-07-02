@@ -71,18 +71,11 @@ function connectionTypeSwitch()
 {
 	document.getElementById("static").style.visibility = "hidden";
 	document.getElementById("static").style.display = "none";
-	document.getElementById("dhcp").style.visibility = "hidden";
-	document.getElementById("dhcp").style.display = "none";
 
 	if (document.wanCfg.connectionType.options.selectedIndex == 0)
 	{
 		document.getElementById("static").style.visibility = "visible";
 		document.getElementById("static").style.display = "block";
-	}
-	else if (document.wanCfg.connectionType.options.selectedIndex == 1)
-	{
-		document.getElementById("dhcp").style.visibility = "visible";
-		document.getElementById("dhcp").style.display = "block";
 	}
 	else
 	{
@@ -114,9 +107,6 @@ function CheckValue()
 				return false;
 		}
 	}
-	else if (document.wanCfg.connectionType.selectedIndex == 1) // DHCP
-	{
-	}
 	else
 		return false;
 	return true;
@@ -130,9 +120,6 @@ function initTranslation()
 	_TR("wConnectionType", "wan connection type");
 	_TR("wConnTypeStatic", "wan connection type static");
 	_TR("wConnTypeDhcp", "wan connection type dhcp");
-	_TR("wConnTypePppoe", "wan connection type pppoe");
-	_TR("wConnTypeL2tp", "wan connection type l2tp");
-	_TR("wConnTypePptp", "wan connection type pptp");
 
 	_TR("wStaticMode", "wan static mode");
 	_TR("wStaticIp", "inet ip");
@@ -158,7 +145,8 @@ function initValue()
 	var mode = "<% getCfgGeneral(1, "wanConnectionMode"); %>";
 	var pptpMode = <% getCfgZero(1, "wan_pptp_mode"); %>;
 	var clone = <% getCfgZero(1, "macCloneEnabled"); %>;
-	var nat = <% getCfgZero(1, "wan_nat_enable"); %>;
+	var nat = "<% getCfgZero(1, "wan_nat_enable"); %>";
+	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
 	var form = document.wanCfg;
 
 	initTranslation();
@@ -169,6 +157,7 @@ function initValue()
 	else
 		form.connectionType.options.selectedIndex = 0;
 	form.natEnable.checked = (nat == "on");
+	form.wStaticDnsEnable.checked = (static_dns == "on");
 
 	connectionTypeSwitch();
 
@@ -177,7 +166,18 @@ function initValue()
 	else
 		form.macCloneEnbl.options.selectedIndex = 0;
 	macCloneSwitch();
+	dnsSwitchClick(form);
 }
+
+function dnsSwitchClick(form)
+{
+	var visible = (form.wStaticDnsEnable.checked) ? '' : 'none';
+	var row = document.getElementById("priDNSrow");
+	row.style.display = visible;
+	row = document.getElementById("secDNSrow");
+	row.style.display = visible;
+}
+
 </script>
 </head>
 
@@ -221,26 +221,6 @@ function initValue()
 	<td><input name="staticGateway" maxlength="15" value="<% getWanGateway(); %>">
 </td>
 </tr>
-<tr>
-	<td class="head" id="wStaticPriDns">Primary DNS Server</td>
-	<td><input name="staticPriDns" maxlength="15" value="<% getDns(1); %>"></td>
-</tr>
-<tr>
-	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
-	<td><input name="staticSecDns" maxlength="15" value="<% getDns(2); %>"></td>
-</tr>
-</table>
-<br>
-
-<!-- ================= DHCP Mode ================= -->
-<table id="dhcp" width="90%" border="1" cellpadding="2" cellspacing="1">
-<tr>
-	<td class="title" colspan="2" id="wDhcpMode">DHCP Mode</td>
-</tr>
-<tr>
-	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
-	<td><input type=text name="hostname" size=28 maxlength=32 value=""></td>
-</tr>
 </table>
 <br>
 
@@ -250,13 +230,29 @@ function initValue()
 	<td class="title" colspan="2">Additional Options</td>
 </tr>
 <tr>
+	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
+	<td><input type="text" name="hostname" size="28" maxlength="32" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+</tr>
+<tr>
+	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>
+	<td><input name="wStaticDnsEnable" type="checkbox" onclick="dnsSwitchClick(this.form);" ></td>
+</tr>
+<tr id="priDNSrow" style="display:none;" >
+	<td class="head" id="wStaticPriDns">Primary DNS Server</td>
+	<td><input name="staticPriDns" maxlength="15" value="<% getDns(1); %>"></td>
+</tr>
+<tr id="secDNSrow" style="display:none;" >
+	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
+	<td><input name="staticSecDns" maxlength="15" value="<% getDns(2); %>"></td>
+</tr>
+<tr>
 	<td class="head" id="wMacAddressClone">Enable NAT</td>
-	<td><input name="natEnable" type="checkbox" /></td>
+	<td><input name="natEnable" type="checkbox"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">MAC Clone</td>
 	<td>
-		<select name="macCloneEnbl" size="1" onChange="macCloneSwitch()">
+		<select name="macCloneEnbl" size="1" onChange="macCloneSwitch();">
 			<option value="0" id="wMacCloneD">Disable</option>
 			<option value="1" id="wMacCloneE">Enable</option>
 		</select>

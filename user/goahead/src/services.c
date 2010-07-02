@@ -36,51 +36,6 @@ void formDefineServices(void)
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
 }
 
-/*
- * Output static DHCP list for javascript
- */
-/*static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
-{
-	// Get values
-	const char *dhcp = nvram_bufget(RT2860_NVRAM, "dhcpStatic1");
-	if (dhcp==NULL)
-		return 0;
-	
-	// Parse data
-	const char *tok = strstr(dhcp, " ");
-	char ip[64], mac[64];
-	int first = 1;
-	
-	// Parse token-by-token
-	while (tok != NULL)
-	{
-		if (first)
-			first = 0;
-		else
-			websWrite(wp, T(",\n"));
-		
-		// Get IP
-		strncpy(mac, dhcp, (size_t)(tok-dhcp));
-		mac[(size_t)(tok-dhcp)] = '\0';
-		dhcp = strstr(tok, ";"); // Find next dhcp
-		if (dhcp==NULL)
-			dhcp = &tok[strlen(tok)];
-		
-		// Get MAC
-		strncpy(ip, tok+1, (size_t)(dhcp-tok-1));
-		ip[(size_t)(dhcp-tok-1)] = '\0';
-		tok = strstr(dhcp, " "); // Next ip token
-		
-		// Output value
-		websWrite(wp, T("[ '%s', '%s' ]"), ip, mac);
-		++dhcp; // Skip ';'
-	}
-	
-	websWrite(wp, T("\n"));
-	
-	return 0;
-}*/
-
 static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	// Get values
@@ -194,7 +149,8 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 /* goform/setMiscServices */
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en, *pppoer_en, *dnsp_en, *rmt_http;
+	char_t  *stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en;
+	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh;
 
 	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
 	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
@@ -204,6 +160,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	pppoer_en = websGetVar(wp, T("pppoeREnbl"), T("0"));
 	dnsp_en = websGetVar(wp, T("dnspEnbl"), T("0"));
 	rmt_http = websGetVar(wp, T("rmtHTTP"), T("off"));
+	rmt_ssh = websGetVar(wp, T("rmtSSH"), T("off"));
 
 	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
 	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
@@ -217,6 +174,11 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "1");
 	else					// disable
 		nvram_bufset(RT2860_NVRAM, "RemoteManagement", "0");
+	
+	if (strcmp(rmt_ssh, "on")==0)		// enable
+		nvram_bufset(RT2860_NVRAM, "RemoteSSH", "1");
+	else					// disable
+		nvram_bufset(RT2860_NVRAM, "RemoteSSH", "0");
 
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);

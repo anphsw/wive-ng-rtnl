@@ -672,9 +672,17 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
+const char *vpn_ifaces[] =
+{
+	"LAN",
+	"WAN",
+	NULL // Terminator
+};
+
 /*
  * List interfaces for VPN
  */
+/*
 static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
@@ -720,6 +728,35 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 	{
 		fprintf(stderr, "Warning: cannot open %s (%s).\n",
 			_PATH_PROCNET_DEV, strerror(errno));
+	}
+	
+	return 0;
+}
+*/
+
+static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char_t iface[32];
+	const char **line;
+	
+	// Fetch VPN interface
+	char *rrs  = nvram_bufget(RT2860_NVRAM, "vpnInterface");
+	if (rrs!=NULL)
+		strcpy(iface, rrs);
+	else
+		iface[0] = '\0';
+	if (strlen(iface)<=0)
+		strcpy(iface, "LAN");
+		
+	// Read all ifaces and check match
+	for (line = vpn_ifaces; *line != NULL; line++)
+	{
+		// Write iface to output if it was found
+		websWrite(wp, T("<option value=\"%s\"%s>%s</option>\n"),
+			*line,
+			(strcmp(*line, iface)==0) ? " selected=\"selected\"" : "",
+			*line
+		);
 	}
 	
 	return 0;
@@ -2237,7 +2274,8 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
-	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0")) {
+	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
+	{
 		//always treat bridge mode having static wan connection
 		ip = websGetVar(wp, T("staticIp"), T(""));
 		nm = websGetVar(wp, T("staticNetmask"), T("0"));
@@ -2283,90 +2321,10 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		}
 		nvram_bufset(RT2860_NVRAM, "wan_gateway", gw);
 	}
-	else if (!strncmp(ctype, "DHCP", 5)) {
+	else if (!strncmp(ctype, "DHCP", 5))
+	{
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
 	}
-	else if (!strncmp(ctype, "PPPOE", 6)) {
-		char_t *pppoe_opmode, *pppoe_optime;
-
-		user = websGetVar(wp, T("pppoeUser"), T(""));
-		pass = websGetVar(wp, T("pppoePass"), T(""));
-		pppoe_opmode = websGetVar(wp, T("pppoeOPMode"), T(""));
-		if (0 == strcmp(pppoe_opmode, "OnDemand"))
-			pppoe_optime = websGetVar(wp, T("pppoeIdleTime"), T(""));
-		else 
-			pppoe_optime = websGetVar(wp, T("pppoeRedialPeriod"), T(""));
-		nvram_bufset(RT2860_NVRAM, "wan_pppoe_user", user);
-		nvram_bufset(RT2860_NVRAM, "wan_pppoe_pass", pass);
-		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
-		nvram_bufset(RT2860_NVRAM, "wan_pppoe_opmode", pppoe_opmode);
-		nvram_bufset(RT2860_NVRAM, "wan_pppoe_optime", pppoe_optime);
-	}
-	else if (!strncmp(ctype, "L2TP", 5)) {
-		char_t *l2tp_opmode, *l2tp_optime;
-
-		l2tp_srv = websGetVar(wp, T("l2tpServer"), T(""));
-		user = websGetVar(wp, T("l2tpUser"), T(""));
-		pass = websGetVar(wp, T("l2tpPass"), T(""));
-		l2tp_mode = websGetVar(wp, T("l2tpMode"), T("0"));
-		ip = websGetVar(wp, T("l2tpIp"), T(""));
-		nm = websGetVar(wp, T("l2tpNetmask"), T(""));
-		gw = websGetVar(wp, T("l2tpGateway"), T(""));
-		l2tp_opmode = websGetVar(wp, T("l2tpOPMode"), T(""));
-		if (0 == strcmp(l2tp_opmode, "OnDemand"))
-			l2tp_optime = websGetVar(wp, T("l2tpIdleTime"), T(""));
-		else
-			l2tp_optime = websGetVar(wp, T("l2tpRedialPeriod"), T(""));
-		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_server", l2tp_srv);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_user", user);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_pass", pass);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_mode", l2tp_mode);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_opmode", l2tp_opmode);
-		nvram_bufset(RT2860_NVRAM, "wan_l2tp_optime", l2tp_optime);
-		if (!strncmp(l2tp_mode, "0", 2)) {
-			nvram_bufset(RT2860_NVRAM, "wan_l2tp_ip", ip);
-			nvram_bufset(RT2860_NVRAM, "wan_l2tp_netmask", nm);
-			nvram_bufset(RT2860_NVRAM, "wan_l2tp_gateway", gw);
-		}
-	}
-	else if (!strncmp(ctype, "PPTP", 5)) {
-		char_t *vpn_opmode, *vpn_optime;
-
-		vpn_srv = websGetVar(wp, T("pptpServer"), T(""));
-		user = websGetVar(wp, T("pptpUser"), T(""));
-		pass = websGetVar(wp, T("pptpPass"), T(""));
-		vpn_mode = websGetVar(wp, T("pptpMode"), T("0"));
-		ip = websGetVar(wp, T("pptpIp"), T(""));
-		nm = websGetVar(wp, T("pptpNetmask"), T(""));
-		gw = websGetVar(wp, T("pptpGateway"), T(""));
-		vpn_opmode = websGetVar(wp, T("pptpOPMode"), T(""));
-		if (0 == strcmp(vpn_opmode, "OnDemand"))
-			vpn_optime = websGetVar(wp, T("pptpIdleTime"), T(""));
-		else
-			vpn_optime = websGetVar(wp, T("pptpRedialPeriod"), T(""));
-
-		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_server", vpn_srv);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_user", user);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_pass", pass);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_mode", vpn_mode);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_opmode", vpn_opmode);
-		nvram_bufset(RT2860_NVRAM, "wan_vpn_optime", vpn_optime);
-		if (!strncmp(vpn_mode, "0", 2)) {
-			nvram_bufset(RT2860_NVRAM, "wan_vpn_ip", ip);
-			nvram_bufset(RT2860_NVRAM, "wan_vpn_netmask", nm);
-			nvram_bufset(RT2860_NVRAM, "wan_vpn_gateway", gw);
-		}
-	}
-#ifdef CONFIG_USER_3G
-	else if (!strncmp(ctype, "3G", 3)) {
-		usb3g_dev = websGetVar(wp, T("Dev3G"), T(""));
-
-		nvram_bufset(RT2860_NVRAM, "wan_3g_dev", usb3g_dev);
-		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
-	}
-#endif
 	else {
 		websHeader(wp);
 		websWrite(wp, T("<h2>Unknown Connection Type: %s</h2><br>\n"), ctype);
@@ -2376,21 +2334,20 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 	
 	// Primary/Seconfary DNS set
-	if ((strncmp(ctype, "STATIC", 7) == 0) || (strncmp(ctype, "DHCP", 5) == 0))
+	char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
+	char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
+	char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
+	char_t *host = websGetVar(wp, T("hostname"), T(""));
+	
+	printf("st_en = %s, pd = %s, sd = %s, hostname=%s\n", st_en, pd, sd, host);
+	
+	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
+	nvram_bufset(RT2860_NVRAM, "wanHostName", host);
+	
+	if (strcmp(st_en, "on") == 0)
 	{
-		const char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
-		const char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
-		const char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
-		
-		printf("st_en = %s, pd = %s, sd = %s\n", st_en, pd, sd);
-		
-		nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
-		
-		if (strcmp(st_en, "on") == 0)
-		{
-			nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
-			nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
-		}
+		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
+		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
 
 	// mac clone
@@ -2412,44 +2369,15 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	// debug print
 	websHeader(wp);
 	websWrite(wp, T("<h2>Mode: %s</h2><br>\n"), ctype);
-	if (!strncmp(ctype, "STATIC", 7)) {
+	if (!strncmp(ctype, "STATIC", 7))
+	{
 		websWrite(wp, T("IP Address: %s<br>\n"), ip);
 		websWrite(wp, T("Subnet Mask: %s<br>\n"), nm);
 		websWrite(wp, T("Default Gateway: %s<br>\n"), gw);
 	}
-	else if (!strncmp(ctype, "DHCP", 5)) {
+	else if (!strncmp(ctype, "DHCP", 5))
+	{
 	}
-	else if (!strncmp(ctype, "PPPOE", 6)) {
-		websWrite(wp, T("User Name: %s<br>\n"), user);
-		websWrite(wp, T("Password: %s<br>\n"), pass);
-	}
-	else if (!strncmp(ctype, "L2TP", 5)) {
-		websWrite(wp, T("L2TP Server IP Address: %s<br>\n"), l2tp_srv);
-		websWrite(wp, T("User Account: %s<br>\n"), user);
-		websWrite(wp, T("Password: %s<br>\n"), pass);
-		websWrite(wp, T("Address Mode: %s<br>\n"), l2tp_mode);
-		if (!strncmp(l2tp_mode, "0", 2)) {
-			websWrite(wp, T("IP: %s<br>\n"), ip);
-			websWrite(wp, T("Netmask: %s<br>\n"), nm);
-			websWrite(wp, T("Gateway: %s<br>\n"), gw);
-		}
-	}
-	else if (!strncmp(ctype, "PPTP", 5)) {
-		websWrite(wp, T("PPTP Server IP Address: %s<br>\n"), vpn_srv);
-		websWrite(wp, T("User Account: %s<br>\n"), user);
-		websWrite(wp, T("Password: %s<br>\n"), pass);
-		websWrite(wp, T("Address Mode: %s<br>\n"), vpn_mode);
-		if (!strncmp(vpn_mode, "0", 2)) {
-			websWrite(wp, T("IP: %s<br>\n"), ip);
-			websWrite(wp, T("Netmask: %s<br>\n"), nm);
-			websWrite(wp, T("Gateway: %s<br>\n"), gw);
-		}
-	}
-#ifdef CONFIG_USER_3G
-	else if (!strncmp(ctype, "3G", 3)) {
-		websWrite(wp, T("3G device: %s<br>\n"), usb3g_dev);
-	}
-#endif
 
 	websWrite(wp, T("MAC Clone Enable: %s<br>\n"), clone_en);
 	if (!strncmp(clone_en, "1", 2))

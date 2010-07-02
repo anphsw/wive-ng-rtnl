@@ -71,18 +71,11 @@ function connectionTypeSwitch()
 {
 	document.getElementById("static").style.visibility = "hidden";
 	document.getElementById("static").style.display = "none";
-	document.getElementById("dhcp").style.visibility = "hidden";
-	document.getElementById("dhcp").style.display = "none";
 
 	if (document.wanCfg.connectionType.options.selectedIndex == 0)
 	{
 		document.getElementById("static").style.visibility = "visible";
 		document.getElementById("static").style.display = "block";
-	}
-	else if (document.wanCfg.connectionType.options.selectedIndex == 1)
-	{
-		document.getElementById("dhcp").style.visibility = "visible";
-		document.getElementById("dhcp").style.display = "block";
 	}
 	else
 	{
@@ -114,9 +107,6 @@ function CheckValue()
 				return false;
 		}
 	}
-	else if (document.wanCfg.connectionType.selectedIndex == 1) // DHCP
-	{
-	}
 	else
 		return false;
 	return true;
@@ -130,9 +120,6 @@ function initTranslation()
 	_TR("wConnectionType", "wan connection type");
 	_TR("wConnTypeStatic", "wan connection type static");
 	_TR("wConnTypeDhcp", "wan connection type dhcp");
-	_TR("wConnTypePppoe", "wan connection type pppoe");
-	_TR("wConnTypeL2tp", "wan connection type l2tp");
-	_TR("wConnTypePptp", "wan connection type pptp");
 
 	_TR("wStaticMode", "wan static mode");
 	_TR("wStaticIp", "inet ip");
@@ -237,22 +224,14 @@ function dnsSwitchClick(form)
 </table>
 <br>
 
-<!-- ================= DHCP Mode ================= -->
-<table id="dhcp" width="90%" border="1" cellpadding="2" cellspacing="1">
-<tr>
-	<td class="title" colspan="2" id="wDhcpMode">DHCP Mode</td>
-</tr>
-<tr>
-	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
-	<td><input type=text name="hostname" size=28 maxlength=32 value=""></td>
-</tr>
-</table>
-<br>
-
 <!-- =========== MAC Clone =========== -->
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2">Additional Options</td>
+</tr>
+<tr>
+	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
+	<td><input type="text" name="hostname" size="28" maxlength="32" value="<% getCfgGeneral(1, "HostName"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>

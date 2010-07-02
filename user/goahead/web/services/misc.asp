@@ -95,6 +95,7 @@ function initValue()
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
 	var rmtHTTP = "<% getCfgGeneral(1, "RemoteManagement"); %>";
+	var rmtSSH = "<% getCfgGeneral(1, "RemoteSSH"); %>";
 
 	initTranslation();
 
@@ -107,6 +108,7 @@ function initValue()
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
 	form.rmtHTTP.checked = (rmtHTTP == "1");
+	form.rmtSSH.checked = (rmtSSH == "1");
 
 	if (lltdb == "0")
 	{
@@ -234,6 +236,7 @@ function CheckValue()
 <td class="head" id="nRemAcc">Remote Management (via WAN)</td>
 <td>
 	<input type="checkbox" name="rmtHTTP">&nbsp;HTTP&nbsp;
+	<input type="checkbox" name="rmtSSH">&nbsp;SSH&nbsp;
 </td>
 </tr>
 </table>

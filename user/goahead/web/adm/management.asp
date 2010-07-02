@@ -145,7 +145,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 </table>
 
 <!-- ================= Adm Settings ================= -->
-<form method="post" name="Adm" action="/goform/setSysAdm">
+<form method="POST" name="Adm" action="/goform/setSysAdm">
 <table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
@@ -166,7 +166,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 </form>
 
 <!-- ================= Firmware ================= -->
-<table border="1" cellpadding="2" cellspacing="1" width="100%">
+<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tr>
 	<td colspan="2" class="title">Firmware update</td>
 </tr>
@@ -201,7 +201,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data"
 			onsubmit="return confirm('Proceed importing settings?');" >
 			<input type="file" name="filename" maxlength="256">
-			<input type="button" value="Load" id="setmanImpSetImport" class="half" onClick="">
+			<input type="submit" value="Load" id="setmanImpSetImport" class="half">
 		</form>
 	</td>
 </tr>
