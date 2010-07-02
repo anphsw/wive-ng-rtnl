@@ -824,20 +824,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
 	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
-
 	nvram_commit(RT2860_NVRAM);
-#if CONFIG_RT2860V2_AP == CONFIG_MIPS
-	/* this is a workaround:
-	 *  when AP is built as kernel
-	 *  if more ssids are created, driver won't exe RT28xx_MBSS_Init again
-	 *  therefore, we reboot to make it available
-	 *  (PS. CONFIG_MIPS would be "y")
-	 */
-	if (new_bssid_num > old_bssid_num)
-		doSystem("reboot");
-#endif
-	// restart wireless network
-        doSystem("internet.sh wifionly &");
 
 	//debug print
 	websHeader(wp);
@@ -871,6 +858,20 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("rx_stream: %s<br>\n"), rx_stream);
 	websFooter(wp);
 	websDone(wp, 200);
+
+#if CONFIG_RT2860V2_AP == CONFIG_MIPS
+	/* this is a workaround:
+	 *  when AP is built as kernel
+	 *  if more ssids are created, driver won't exe RT28xx_MBSS_Init again
+	 *  therefore, we reboot to make it available
+	 *  (PS. CONFIG_MIPS would be "y")
+	 */
+	if (new_bssid_num > old_bssid_num)
+		doSystem("reboot");
+#endif
+	// restart wireless network
+        doSystem("internet.sh wifionly &");
+
 }
 
 /* goform/wirelessAdvanced */
