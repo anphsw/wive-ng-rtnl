@@ -1,8 +1,7 @@
 #include "upload.cgi.h"
 #include <unistd.h>
 #include <linux/reboot.h>
-
-#define REFRESH_TIMEOUT		"40000"		/* 40000 = 40 secs*/
+#include "../options.h"
 
 /*
  *  taken from "mkimage -l" with few modified....
@@ -120,7 +119,6 @@ int check(char *imagefile, int offset, int len, char *err_msg)
  * I'm too lazy to use popen() instead of system()....
  * ( note:  static buffer used)
  */
-#define DEFAULT_LAN_IP "192.168.1.1"
 char *getLanIP(void)
 {
 	static char buf[64];

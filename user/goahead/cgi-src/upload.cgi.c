@@ -1,8 +1,5 @@
 #include "upload.cgi.h"
-
-#define REFRESH_TIMEOUT		"80000"		/* 80000 = 80 secs*/
-
-#define RFC_ERROR "RFC1867 error"
+#include "../options.h"
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {
@@ -24,8 +21,6 @@ void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte
     return NULL;
 }
 
-#define MEM_SIZE	1024
-#define MEM_HALF	512
 int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 {
 	int pos = 0, rc;
@@ -248,7 +243,6 @@ int getIfIp(char *ifname, char *if_addr)
  * I'm too lazy to use popen() instead of system()....
  * ( note:  static buffer used)
  */
-#define DEFAULT_LAN_IP "192.168.1.1"
 char *getLanIP(void)
 {
 	static char buf[64];

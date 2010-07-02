@@ -25,6 +25,7 @@
 #include	"internet.h"
 #include	"utils.h"
 #include	"wireless.h"
+#include	"../options.h"
 
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 extern void setFirmwarePath(void);
@@ -1291,7 +1292,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			char *lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
 
 			if(! strlen(lan_ip))
-				lan_ip = "192.168.1.1";
+				lan_ip = "DEFAULT_LAN_IP";
 			snprintf(redirect_url, 512, "http://%s", lan_ip);
 			redirect_wholepage(wp, redirect_url);
 			goto final;

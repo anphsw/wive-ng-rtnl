@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <wait.h>
-
+#include "../options.h"
 #include "include/linux/autoconf.h"		/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
                                         /*   CONFIG_RT2880_ROOTFS_IN_FLASH */
                                         /*   CONFIG_RT2880_ROOTFS_IN_RAM   */
@@ -25,8 +25,6 @@
  *  Uboot image header format
  *  (ripped from mkimage.c/image.h)
  */
-#define IH_MAGIC    0x27051956
-#define IH_NMLEN    32
 typedef struct image_header {
     uint32_t    ih_magic;   /* Image Header Magic Number    */
     uint32_t    ih_hcrc;    /* Image Header CRC Checksum    */
@@ -45,27 +43,6 @@ typedef struct image_header {
 
 inline void write_flash_kernel_version(char *file, int offset)
 {
-#if 0
-	unsigned char buf[128];
-	char cmd[128];
-	image_header_t *hdr;
-	FILE *fp = fopen(file, "r");
-	if(!fp){
-		fprintf(stderr, "%s error\n", __FILE__);
-		return;
-	}
-
-	fseek(fp, offset, SEEK_SET);
-	if( fread(buf, 1, sizeof(buf), fp) != sizeof(buf))
-		return;
-	fclose(fp);
-	hdr = (image_header_t *)buf;
-	hdr->ih_name[IH_NMLEN] = '\0';
-	fprintf(stderr, "hdr->name = %s\n", hdr->ih_name);
-
-	sprintf(cmd, "nvram_set 2860 Expect_Firmware \"%s\"", hdr->ih_name);
-	system(cmd);
-#endif
 	char cmd[512];
 	char buf[512];
 	FILE *fp = fopen("/proc/version", "r");

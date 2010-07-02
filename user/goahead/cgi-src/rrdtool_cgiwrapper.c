@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#define RRDTOOL_PATH	"/bin/rrdtool"
+#include "../options.h"
 
 #define DD printf("%d\n", __LINE__); fflush(stdout);
 
@@ -252,7 +251,7 @@ int main(void)
     if(!c)
         return 0;
 
-    if(!isFileExisted(RRDTOOL_PATH)){
+    if(!isFileExisted(RRDTOOL)){
         printf("no_rrdtool");
         return 0;
     }
@@ -284,7 +283,7 @@ int main(void)
         goto end;
     }
 
-    snprintf(cmd, 1024, "%s graph /var/anything %s -w %d -s %d", RRDTOOL_PATH, lines, x_p, time(NULL)+offset );
+    snprintf(cmd, 1024, "%s graph /var/anything %s -w %d -s %d", RRDTOOL, lines, x_p, time(NULL)+offset );
     system(cmd);
     system("ls / > /var/wow");
 

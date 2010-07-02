@@ -7,11 +7,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-
-#define CPU_MEM_RRD	"/var/cpu_mem.rrd"
-
-#define SAMPLE		2
-#define RRDTOOL		"/bin/rrdtool"
+#include "../options.h"
 
 #define u_int64_t unsigned long long
 

@@ -17,6 +17,7 @@
 #include 	"utils.h"
 #include 	"internet.h"
 #include	"config/autoconf.h" //user config
+#include 	"../options.h"
 #if defined CONFIG_RALINKAPP_MPLAYER
 #include	"media.h"
 #endif
@@ -64,9 +65,6 @@ static void USBiNIC(webs_t wp, char_t *path, char_t *query);
 
 #define USB_STORAGE_PATH    "/media"
 #define USB_STORAGE_SIGN    "/media/sd"
-#define MIN_SPACE_FOR_FIRMWARE			(1024 * 1024 * 8)// minimum space for firmware upload
-#define MIN_FIRMWARE_SIZE				(1048576)		// minium firmware size(1MB)
-#define IH_MAGIC			0x27051956					// firmware magic number in header
 
 #define DEBUG(x) do{fprintf(stderr, #x); \
 					fprintf(stderr, ": %s\n", x); \

@@ -13,10 +13,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <linux/reboot.h>
-
-#define RFC_ERROR "RFC1867 ...."
-
-#define REFRESH_TIMEOUT		"60000"		/* 40000 = 40 secs*/
+#include "../options.h"
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {
@@ -38,8 +35,6 @@ void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte
     return NULL;
 }
 
-#define MEM_SIZE	1024
-#define MEM_HALT	512
 int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 {
 	int pos = 0, rc;
@@ -143,7 +138,6 @@ void import(char *filename, int offset, int len)
     unlink(pname);
 }
 
-#define DEFAULT_LAN_IP "192.168.1.1"
 char *getLanIP(void)
 {
 	static char buf[64];
