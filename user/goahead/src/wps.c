@@ -340,7 +340,7 @@ void WPSRestart(void)
 	char *wordlist;
 	char *mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
-	doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
+	doSystem("ip route del 239.255.255.250 1>/dev/null 2>&1");
 	doSystem("service wscd stop &");
 
 	if(!strcmp(mode, "0" )){		//bridge 
@@ -368,7 +368,7 @@ void WPSRestart(void)
 		wordlist = nvram_bufget(RT2860_NVRAM, "WscConfigured");
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
-		doSystem("route add -host 239.255.255.250 dev br0 1>/dev/null 2>&1");
+		doSystem("ip route add 239.255.255.250 dev br0 1>/dev/null 2>&1");
 		doSystem("service wscd restart &");
 	}
 		
