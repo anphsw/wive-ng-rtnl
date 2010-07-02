@@ -75,11 +75,18 @@ start() {
 		ip=`nvram_get 2860 lan_ipaddr`
 		nm=`nvram_get 2860 lan_netmask`
 	fi
+
+	#wan interface up and default gateway
 	ifconfig $wan_if $ip netmask $nm
-	route del default
-	if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-	    route add default gw $gw
-	fi
+	if [ "$opmode" != "0" ]; then
+	    #route mode
+	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
+		ip route replace default via $gw
+	    fi
+	else
+	    #if bridge mode dgw on dev br0 set
+    	    ip route replace default dev $wan_if
+        fi
 
     elif [ "$wanmode" = "DHCP" ]; then
 	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
@@ -87,6 +94,7 @@ start() {
 	echo "wan service: unknown wan connection type: $wanmode"
 	exit 1
     fi
+
 
     #check pppd or xl2tpd started
     PPP_STARTED=`pidof pppd`
