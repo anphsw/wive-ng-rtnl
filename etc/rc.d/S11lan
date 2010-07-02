@@ -101,17 +101,17 @@ echo "Start network interfaces..."
  fi
 
  #-------------------DGW-----------------
- if [ "$opmode" = "0" ]; then
-  route del default
+ if [ "$opmode" != "0" ]; then
     if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-	echo "Add default gateway"
-	route add default gw $gw
+	echo "Add default gateway in router mode via $gw"
+	ip route replace default via $gw
+	ip route replace 255.255.255.255 dev $lan_if
     fi 
+ else
+    echo "Add default gateway in bridge mode via br0"
+    ip route replace default dev br0
+    ip route replace 255.255.255.255 dev br0
  fi
-
- #-------------ADD-ROUTE-2-BCAST-----------
- ip route replace 255.255.255.255 dev $lan_if
-
 }
 
 stop() {
