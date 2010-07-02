@@ -14,7 +14,7 @@ if [ -f /bin/miniupnpd ]; then
         if [ "$upnp" = "1" ] && [ "$EXTIP" != "" ]; then
 	  echo "Start upnp "
 	    echo "External IP = $EXTIP"
-            route add -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if
+	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
             miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $ip &
@@ -26,7 +26,7 @@ fi
 stop() {
  echo "Stop upnp "
     killall -q miniupnpd
-    route del -net 239.0.0.0 netmask 255.0.0.0 dev $lan_if > /dev/null 2>&1
+    ip route del 239.0.0.0/8 dev $lan_if > /dev/null 2>&1
 }
 
 get_param() {
