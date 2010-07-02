@@ -57,7 +57,7 @@ getEthConv()
 # station driver loaded -> $stamode "y"
 getStaMode()
 {
-	if [ "$opmode" = "2" -o "$ethconv" = "y" ]; then
+	if [ "$opmode" = "2" ] || [ "$ethconv" = "y" ]; then
 		stamode="y"
 	else
 		stamode="n"

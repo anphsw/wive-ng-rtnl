@@ -27,7 +27,7 @@ start() {
 		config-udhcpd.sh -i $lan_if
 		config-udhcpd.sh -m $mask
 
-		if [ "$pd" != "" -o "$sd" != "" ]; then
+		if [ "$pd" != "" ] || [ "$sd" != "" ]; then
 			config-udhcpd.sh -d $pd $sd
 		fi
 		if [ "$gw" != "" ]; then

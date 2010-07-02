@@ -5,7 +5,7 @@
 
 start() {
  echo "Config br-stp: "
-    if [ "$wan_if" = "br0" -o "$lan_if" = "br0" ]; then
+    if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
         stp=`nvram_get 2860 stpEnabled`
         if [ "$stp" = "1" ]; then
                 brctl setfd br0 15

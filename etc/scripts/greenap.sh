@@ -73,25 +73,25 @@ case $1 in
 		rm -f /etc/crontabs/admin
 		cronebl="0"
 		action=`nvram_get 2860 GreenAPAction1`
-		if [ "$action" != "Disable" -a "$action" != "" ]; then
+		if [ "$action" != "Disable" ] && [ "$action" != "" ]; then
 			start=`nvram_get 2860 GreenAPStart1`
 			cronebl="1"
 			greenap.sh setchk $start
 		fi
 		action=`nvram_get 2860 GreenAPAction2`
-		if [ "$action" != "Disable" -a "$action" != "" ]; then
+		if [ "$action" != "Disable" ] && [ "$action" != "" ]; then
 			start=`nvram_get 2860 GreenAPStart2`
 			cronebl="1"
 			greenap.sh setchk $start
 		fi
 		action=`nvram_get 2860 GreenAPAction3`
-		if [ "$action" != "Disable" -a "$action" != "" ]; then
+		if [ "$action" != "Disable" ] && [ "$action" != "" ]; then
 			start=`nvram_get 2860 GreenAPStart3`
 			cronebl="1"
 			greenap.sh setchk $start
 		fi
 		action=`nvram_get 2860 GreenAPAction4`
-		if [ "$action" != "Disable" -a "$action" != "" ]; then
+		if [ "$action" != "Disable" ] && [ "$action" != "" ]; then
 			start=`nvram_get 2860 GreenAPStart4`
 			cronebl="1"
 			greenap.sh setchk $start

@@ -159,7 +159,7 @@ link_up()
 
 reset_all_phys()
 {
-	if [ "$CONFIG_RAETH_ROUTER" != "y" -a "$CONFIG_RT_3052_ESW" != "y" ]; then
+	if [ "$CONFIG_RAETH_ROUTER" != "y" ] && [ "$CONFIG_RT_3052_ESW" != "y" ]; then
 		return
 	fi
 

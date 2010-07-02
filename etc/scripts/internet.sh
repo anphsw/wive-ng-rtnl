@@ -105,11 +105,11 @@ resetLanWan()
 #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
 #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
 
-if [ "$opmode" = "3" -a "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
+if [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
 	nvram_set 2860 OperationMode 1
 	opmode="1"
 fi
-if [ "$opmode" = "2" -a "$CONFIG_RT2860V2_STA" == "" ]; then
+if [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
 	nvram_set 2860 OperationMode 1
 	opmode="1"
 fi

@@ -62,7 +62,7 @@ setFtp()
 		do
 			user=`nvram_get 2860 "User$index"`
 			ftpuser=`nvram_get 2860 "FtpUser$index"`
-			if [ "$user" -a "$ftpuser" = "1" ]; then
+			if [ "$user" ] && [ "$ftpuser" = "1" ]; then
 				pw=`nvram_get 2860 "UserPasswd$index"`
 				max=`nvram_get 2860 "FtpMaxLogins$index"`
 				mode=`nvram_get 2860 "FtpMode$index"`
@@ -89,7 +89,7 @@ setSmb()
 		do
 			user=`nvram_get 2860 "User$index"`
 			smbuser=`nvram_get 2860 "SmbUser$index"`
-			if [ "$user" -a "$smbuser" = "1" ]; then
+			if [ "$user" ] && [ "$smbuser" = "1" ]; then
 				pw=`nvram_get 2860 "UserPasswd$index"`
 				smbpasswd -a "$user" "$pw"
 				echo "smbpasswd -a "$user" "$pw""
