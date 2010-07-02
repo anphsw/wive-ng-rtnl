@@ -12,6 +12,17 @@
 #include <asm/uaccess.h>
 #include <linux/gfp.h>
 
+/*                                                                                                                                          
+ * Bits in mapping->flags.  The lower __GFP_BITS_SHIFT bits are the page
+ * allocation mode flags.
+ */
+enum mapping_flags {
+        AS_EIO          = __GFP_BITS_SHIFT + 0, /* IO error on async write */
+        AS_ENOSPC       = __GFP_BITS_SHIFT + 1, /* ENOSPC on async write */
+        AS_MM_ALL_LOCKS = __GFP_BITS_SHIFT + 2, /* under mm_take_all_locks() */
+        AS_UNEVICTABLE  = __GFP_BITS_SHIFT + 3, /* e.g., ramdisk, SHM_LOCK */
+};
+
 /*
  * Bits in mapping->flags.  The lower __GFP_BITS_SHIFT bits are the page
  * allocation mode flags.
