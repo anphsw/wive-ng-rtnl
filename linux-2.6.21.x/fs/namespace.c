@@ -1877,3 +1877,8 @@ void __put_mnt_ns(struct mnt_namespace *ns)
 	release_mounts(&umount_list);
 	kfree(ns);
 }
+
+void save_mount_options(struct super_block *sb, char *options)
+{
+}                                                                                                                                           
+EXPORT_SYMBOL(save_mount_options);
