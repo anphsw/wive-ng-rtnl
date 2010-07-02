@@ -3,7 +3,7 @@
 #define RFC_ERROR 		"RFC1867 ...."
 #define REFRESH_TIMEOUT         "80000"         /* 80000 = 80 secs*/
 #define MEM_SIZE        	1024
-#define MEM_HALT        	512
+#define MEM_HALF        	512
 
 ///////////////MONITORING OPTIONS/////////////
 #define CPU_MEM_RRD     	"/var/cpu_mem.rrd"

@@ -41,7 +41,7 @@ int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 	FILE *fp;
 	unsigned char mem[MEM_SIZE];
 
-	if(str_len > MEM_HALT)
+	if(str_len > MEM_HALF)
 		return -1;
 	if(offset <0)
 		return -1;
@@ -62,7 +62,7 @@ int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 		}
 
 		if(rc == MEM_SIZE){
-			pos += MEM_HALT;	// 8
+			pos += MEM_HALF;	// 8
 		}else
 			break;
 		
