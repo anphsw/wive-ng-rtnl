@@ -976,16 +976,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	// restart wireless network
         doSystem("internet.sh wifionly &");
 
-#ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
-	if (!strncmp(m2u_enable, "1", 2))
-		doSystem("iwpriv ra0 set IgmpSnEnable=1");
-	else
-		doSystem("iwpriv ra0 set IgmpSnEnable=0");
-#endif
-
-	//debug print
-	websHeader(wp);
-	websWrite(wp, T("bg_protection: %s<br>\n"), bg_protection);
+    //debug print
+    websHeader(wp);
+    websWrite(wp, T("bg_protection: %s<br>\n"), bg_protection);
     //websWrite(wp, T("basic_rate: %s<br>\n"), basic_rate);
     websWrite(wp, T("beacon: %s<br>\n"), beacon);
     websWrite(wp, T("dtim: %s<br>\n"), dtim);
