@@ -1199,13 +1199,13 @@ void restart8021XDaemon(int nvram)
 	if(nvram == RT2860_NVRAM) {
 		doSystem("killall -q rt2860apd");
 		doSystem("killall -q -9 rt2860apd");
-	}else{ if(nvram == RTINIC_NVRAM) {
+	}else if(nvram == RTINIC_NVRAM) {
 		doSystem("killall -q rtinicapd");
 		doSystem("killall -q -9 rtinicapd");
-	}else{ if(nvram == RT2561_NVRAM){
+	}else if(nvram == RT2561_NVRAM) {
 		doSystem("killall -q rt61apd");
 		doSystem("killall -q -9 rt61apd");
-	}
+		}
 	
 	/*
 	 * In fact we only support mbssid[0] to use 802.1x radius settings.
