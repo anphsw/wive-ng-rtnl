@@ -974,8 +974,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	}
 
 	nvram_commit(RT2860_NVRAM);
-	// restart wireless network
-        doSystem("internet.sh wifionly &");
 
     //debug print
     websHeader(wp);
@@ -1000,8 +998,11 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
     websWrite(wp, T("m2u_enable: %s<br>\n"), m2u_enable);
 #endif
-	websFooter(wp);
-	websDone(wp, 200);
+    websFooter(wp);
+    websDone(wp, 200);
+
+    // restart wireless network
+    doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessWds */
@@ -1092,9 +1093,6 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "ApCliKey4Str", key4);
 	nvram_commit(RT2860_NVRAM);
 
-	// restart wireless network                                                                                                         
-        doSystem("internet.sh wifionly &");
-
 	//debug print
 	websHeader(wp);
 	websWrite(wp, T("ssid: %s<br>\n"), ssid);
@@ -1114,6 +1112,9 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	}
 	websFooter(wp);
 	websDone(wp, 200);
+
+	// restart wireless network                                                                                                         
+        doSystem("internet.sh wifionly &");
 }
 
 void WPSRestart(void);
@@ -1163,12 +1164,6 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("ifconfig ra0 down");
-	doSystem("ralink_init make_wireless_config rt2860");
-	doSystem("ifconfig ra0 up");
-	//after ra0 down&up we must restore WPS status
-	WPSRestart();
-
 	websHeader(wp);
 	websWrite(wp, T("ap_aifsn_all: %s<br>\n"), ap_aifsn_all);
 	websWrite(wp, T("ap_cwmin_all: %s<br>\n"), ap_cwmin_all);
@@ -1183,6 +1178,12 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("sta_acm_all: %s<br>\n"), sta_acm_all);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	doSystem("ifconfig ra0 down");
+	doSystem("ralink_init make_wireless_config rt2860");
+	doSystem("ifconfig ra0 up");
+	//after ra0 down&up we must restore WPS status
+	WPSRestart();
 }
 
 void restart8021XDaemon(int nvram)
@@ -1195,12 +1196,16 @@ void restart8021XDaemon(int nvram)
 		return;
 	num = atoi(num_s);
 
-	if(nvram == RT2860_NVRAM)
+	if(nvram == RT2860_NVRAM) {
 		doSystem("killall -q rt2860apd");
-	else if(nvram == RTINIC_NVRAM)
+		doSystem("killall -q -9 rt2860apd");
+	}else{ if(nvram == RTINIC_NVRAM) {
 		doSystem("killall -q rtinicapd");
-	else if(nvram == RT2561_NVRAM)
+		doSystem("killall -q -9 rtinicapd");
+	}else{ if(nvram == RT2561_NVRAM){
 		doSystem("killall -q rt61apd");
+		doSystem("killall -q -9 rt61apd");
+	}
 	
 	/*
 	 * In fact we only support mbssid[0] to use 802.1x radius settings.
@@ -1845,10 +1850,6 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "MeshWPAKEY", wpakey);
 
 	nvram_commit(RT2860_NVRAM);
-	
-	// restart wireless network
-	doSystem("internet.sh wifionly &");
-
 	// debug print
 	websHeader(wp);
 	websWrite(wp, T("MeshEnable: %s<br>\n"), meshenable);
@@ -1863,6 +1864,9 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("passphrase: %s<br>\n"), wpakey);
 	websFooter(wp);
 	websDone(wp, 200);
+	
+	// restart wireless network
+	doSystem("internet.sh wifionly &");
 }
 
 /* goform/meshManualLink */
