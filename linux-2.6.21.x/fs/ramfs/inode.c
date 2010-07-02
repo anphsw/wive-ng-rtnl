@@ -220,8 +220,6 @@ static int ramfs_fill_super(struct super_block * sb, void * data, int silent)
 	struct dentry *root;
 	int err;
 
-	save_mount_options(sb, data);
-
 	fsi = kzalloc(sizeof(struct ramfs_fs_info), GFP_KERNEL);
 	sb->s_fs_info = fsi;
 	if (!fsi) {
