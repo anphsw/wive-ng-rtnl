@@ -8,11 +8,14 @@ source "drivers/net/rt_rdm/Kconfig"
 #############
 # Wire
 #############
+menu "Ethernet Ralink RT3xx/RT28xx wire driver."
 source "drivers/net/raeth/Kconfig"
+endmenu
 
 #############
 # Wireless
 #############
+menu "Platform config for  Ralink RT3xx/RT28xx."
 config  ASUS_EXT
 	bool 
 	default n
@@ -35,13 +38,22 @@ choice
         config  RALINK_RT3052_2T2R
         bool "RT3052-2T2R"
 endchoice
+endmenu
 
+#menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
 #source "drivers/net/wireless/rt2860v2_ap/Kconfig"
+#endmenu
+#menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
 #source "drivers/net/wireless/rt2860v2_sta/Kconfig"
+#endmenu
 
 # split driver in one dir
+menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
 source "drivers/net/wireless/rt2860v2/rt2860v2_ap/Kconfig"
+endmenu
+menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
 source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
+endmenu
 
 #######
 # USB
