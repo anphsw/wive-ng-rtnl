@@ -2,7 +2,7 @@
 
 start() {
 get_param
-if [ ! -f /tmp/webrun ] || [ "$static" = "on"] ; then
+if [ ! -f /tmp/webrun ] || [ "$static" = "on" ] ; then
  echo "Generate resolve: "
     #in case no previous file
     if [ $fname = "" ]; then

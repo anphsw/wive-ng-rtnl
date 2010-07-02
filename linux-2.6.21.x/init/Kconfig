@@ -562,14 +562,6 @@ config MEMPOOL
 	  will somewhat decrease code size, but with a higher risk of
 	  deadlock under some loads.
 
-config AIO
-	default y
-	bool "Enable AIO support" if TINY
-	help
-	  This option enables POSIX async IO which may be used by
-	  some high performance threaded applications. Disabling
-	  this option saves about 5k.
-
 config XATTR
 	default y
 	bool "Enable filesystem extended attribute support" if TINY
