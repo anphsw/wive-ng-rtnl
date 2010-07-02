@@ -2,7 +2,8 @@
 
 start() {
 get_param
-echo "Generate resolve: "
+if [ ! -f /tmp/webrun ] || [ "$static" = "on"] ; then
+ echo "Generate resolve: "
     #in case no previous file
     if [ $fname = "" ]; then
 	fname = "/etc/resolv.conf"
@@ -31,6 +32,7 @@ echo "Generate resolve: "
 
     cat $fbak >> $fname
     rm -f $fbak
+fi
 }
 
 stop() {
@@ -38,7 +40,7 @@ stop() {
 }
 
 get_param() {
-    admID=`nvram_get 2860 Login`
+    static=`nvram_get 2860 wan_static_dns`
     pd=`nvram_get 2860 wan_primary_dns`
     sd=`nvram_get 2860 wan_secondary_dns`
     fname="/etc/resolv.conf"

@@ -28,6 +28,7 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 #start all
+service resolv start
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
     service pppoe-relay start
