@@ -230,4 +230,9 @@ static inline void fault_in_pages_readable(const char __user *uaddr, int size)
 	}
 }
 
+static inline void mapping_set_unevictable(struct address_space *mapping)
+{
+        set_bit(AS_UNEVICTABLE, &mapping->flags);
+}
+
 #endif /* _LINUX_PAGEMAP_H */
