@@ -44,7 +44,7 @@ start() {
     fi
 
     #MAC Clone: bridge mode doesn't support MAC Clone
-    if [ "$opmode" != "0" -a "$clone_en" = "1" ]; then
+    if [ "$opmode" != "0" ] && [ "$clone_en" = "1" ]; then
 	ip link set $wan_if down > /dev/null 2>&1
         if [ "$opmode" = "2" ]; then
 		#reload wifi modules
