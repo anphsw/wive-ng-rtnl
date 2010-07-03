@@ -911,7 +911,7 @@ extern unsigned char *__pskb_pull_tail(struct sk_buff *skb, int delta);
 static inline unsigned char *__pskb_pull(struct sk_buff *skb, unsigned int len)
 {
 	if (len > skb_headlen(skb) &&
-	    !__pskb_pull_tail(skb, len-skb_headlen(skb)))
+	    !__pskb_pull_tail(skb, len - skb_headlen(skb)))
 		return NULL;
 	skb->len -= len;
 	return skb->data += len;
@@ -928,7 +928,7 @@ static inline int pskb_may_pull(struct sk_buff *skb, unsigned int len)
 		return 1;
 	if (unlikely(len > skb->len))
 		return 0;
-	return __pskb_pull_tail(skb, len-skb_headlen(skb)) != NULL;
+	return __pskb_pull_tail(skb, len - skb_headlen(skb)) != NULL;
 }
 
 /**
@@ -1221,7 +1221,7 @@ static inline int skb_padto(struct sk_buff *skb, unsigned int len)
 	unsigned int size = skb->len;
 	if (likely(size >= len))
 		return 0;
-	return skb_pad(skb, len-size);
+	return skb_pad(skb, len - size);
 }
 
 static inline int skb_add_data(struct sk_buff *skb,
