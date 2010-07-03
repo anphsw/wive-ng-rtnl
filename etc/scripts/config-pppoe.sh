@@ -27,6 +27,12 @@ if [ "$IFACE" = "WAN" ]; then
     elif [ "$opmode" = "3" ]; then
 	IFACE=apcli0
     fi
+elif [ "$IFACE" = "LAN" ]; then
+    if [ "$opmode" = "2" ]; then
+	IFACE=eth2
+    else
+	IFACE=br0
+    fi
 else
     IFACE=br0
 fi
