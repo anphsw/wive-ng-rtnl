@@ -43,16 +43,12 @@ typedef struct vpn_status_t
 
 /*** Busybox leases.h ***/
 
-//#if BB_LITTLE_ENDIAN
 static inline uint64_t hton64(uint64_t v)
 {
         return (((uint64_t)htonl(v)) << 32) | htonl(v >> 32);
 }
-//#else
-//#define hton64(v) (v)
-//#endif
-#define ntoh64(v) hton64(v)
 
+#define ntoh64(v) hton64(v)
 typedef uint32_t leasetime_t;
 typedef int32_t signed_leasetime_t;
 
@@ -127,7 +123,6 @@ static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv);
 static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
 static void setLan(webs_t wp, char_t *path, char_t *query);
-static void setVpnPaThru(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void addRouting(webs_t wp, char_t *path, char_t *query);
@@ -173,7 +168,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getPrinterSrvBuilt"), getPrinterSrvBuilt);
 	websAspDefine(T("getUSBiNICBuilt"), getUSBiNICBuilt);
 	websFormDefine(T("setLan"), setLan);
-	websFormDefine(T("setVpnPaThru"), setVpnPaThru);
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("addRouting"), addRouting);
@@ -279,7 +273,6 @@ int getIfIp(char *ifname, char *if_addr)
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
 	if (ioctl(skfd, SIOCGIFADDR, &ifr) < 0) {
 		close(skfd);
-		//error(E_L, E_LOG, T("getIfIp: ioctl SIOCGIFADDR error for %s"), ifname);
 		return -1;
 	}
 	strcpy(if_addr, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
@@ -335,7 +328,6 @@ int getIfNetmask(char *ifname, char *if_net)
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
 	if (ioctl(skfd, SIOCGIFNETMASK, &ifr) < 0) {
 		close(skfd);
-		//error(E_L, E_LOG, T("getIfNetmask: ioctl SIOCGIFNETMASK error for %s\n"), ifname);
 		return -1;
 	}
 	strcpy(if_net, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
@@ -678,61 +670,6 @@ const char *vpn_ifaces[] =
 	"WAN",
 	NULL // Terminator
 };
-
-/*
- * List interfaces for VPN
- */
-/*
-static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
-	
-	if (fd != NULL)
-	{
-		char_t iface[32], curr_if[32];
-		char_t line[256];
-		
-		// Fetch VPN interface
-		char *rrs  = nvram_bufget(RT2860_NVRAM, "vpnInterface");
-		if (rrs!=NULL)
-			strcpy(iface, rrs);
-		else
-			iface[0] = '\0';
-		if (strlen(iface)<=0)
-			strcpy(iface, "br0");
-		
-		// Read all ifaces and check match
-		while (fgets(line, 255, fd)!=NULL)
-		{
-			if (sscanf(line, " %[a-zA-Z0-9]", curr_if)==1)
-			{
-				// filer only "brXX" && "vcXX" ifaces
-				int found = strncmp(curr_if, "br", 2)==0;
-				if (!found)
-					found = strncmp(curr_if, "vc", 2)==0;
-				if (found)
-				{
-					// Write iface to output if it was found
-					websWrite(wp, T("<option value=\"%s\" %s>%s</option>\n"),
-						curr_if,
-						(strcmp(curr_if, iface)==0) ? "selected=\"selected\"" : "",
-						curr_if
-					);
-				}
-			}
-		}
-		
-		fclose(fd);
-	}
-	else
-	{
-		fprintf(stderr, "Warning: cannot open %s (%s).\n",
-			_PATH_PROCNET_DEV, strerror(errno));
-	}
-	
-	return 0;
-}
-*/
 
 static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 {
@@ -1627,14 +1564,6 @@ void staticRoutingInit(void)
 		if(strcmp(gw, "0.0.0.0"))
 			sprintf(cmd, "%s gw %s", cmd, gw);
 
-		//interface
-//		if (!strcmp(interface, "WAN")){
-//			true_interface = getWanIfName();
-//		}else if (!gstrcmp(interface, "Custom")){
-//			true_interface = custom_interface;
-//		}else	// LAN & unknown
-//			true_interface = getLanIfName();
-
 		sprintf(cmd, "%s dev %s ", cmd, true_interface);
 
 		strcat(cmd, "2>&1 ");
@@ -2229,30 +2158,6 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	doSystem("internet.sh lanonly");
 }
 
-/* goform/setVpnPaThru */
-static void setVpnPaThru(webs_t wp, char_t *path, char_t *query)
-{
-	char_t	*l2tp_pt, *ipsec_pt, *vpn_pt;
-
-	l2tp_pt = websGetVar(wp, T("l2tpPT"), T("0"));
-	ipsec_pt = websGetVar(wp, T("ipsecPT"), T("0"));
-	vpn_pt = websGetVar(wp, T("pptpPT"), T("0"));
-	
-	nvram_bufset(RT2860_NVRAM, "l2tpPassThru", l2tp_pt);
-	nvram_bufset(RT2860_NVRAM, "ipsecPassThru", ipsec_pt);
-	nvram_bufset(RT2860_NVRAM, "pptpPassThru", vpn_pt);
-	nvram_commit(RT2860_NVRAM);
-
-	//debug print
-	websHeader(wp);
-	websWrite(wp, T("<h3>VPN Pass Through</h3><br>\n"));
-	websWrite(wp, T("l2tp: %s<br>\n"), l2tp_pt);
-	websWrite(wp, T("ipsec: %s<br>\n"), ipsec_pt);
-	websWrite(wp, T("pptp: %s<br>\n"), vpn_pt);
-	websFooter(wp);
-	websDone(wp, 200);
-}
-
 /* goform/setWan */
 static void setWan(webs_t wp, char_t *path, char_t *query)
 {
@@ -2391,4 +2296,3 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 
 	initInternet();
 }
-
