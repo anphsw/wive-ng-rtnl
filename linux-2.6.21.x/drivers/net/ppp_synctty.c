@@ -594,8 +594,7 @@ ppp_sync_txmunge(struct syncppp *ap, struct sk_buff *skb)
 				return NULL;
 			}
 			skb_reserve(npkt,2);
-			skb_copy_from_linear_data(skb,
-				      skb_put(npkt, skb->len), skb->len);
+			memcpy(skb_put(npkt,skb->len), skb->data, skb->len);
 			kfree_skb(skb);
 			skb = npkt;
 		}
