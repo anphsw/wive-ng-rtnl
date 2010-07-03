@@ -257,7 +257,7 @@ found_match:
 }
 
 static struct ts_config *fsm_init(const void *pattern, unsigned int len,
-				     gfp_t gfp_mask)
+				    gfp_t gfp_mask, int flags)
 {
 	int i, err = -EINVAL;
 	struct ts_config *conf;
@@ -267,6 +267,9 @@ static struct ts_config *fsm_init(const void *pattern, unsigned int len,
 	size_t priv_size = sizeof(*fsm) + len;
 
 	if (len  % sizeof(struct ts_fsm_token) || ntokens < 1)
+		goto errout;
+
+	if (flags & TS_IGNORECASE)
 		goto errout;
 
 	for (i = 0; i < ntokens; i++) {

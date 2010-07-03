@@ -140,7 +140,8 @@ struct pppoe_hdr {
 
 #ifdef __KERNEL__
 #include <linux/skbuff.h>
-
+#define skb_network_header(skb) (skb->nh.raw)
+#define skb_network_header_len(skb) (skb->h.raw - skb->nh.raw)
 static inline struct pppoe_hdr *pppoe_hdr(const struct sk_buff *skb)
 {
 	return (struct pppoe_hdr *)skb_network_header(skb);

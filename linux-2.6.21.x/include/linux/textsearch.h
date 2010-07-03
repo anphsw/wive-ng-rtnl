@@ -16,6 +16,7 @@ struct ts_config;
  * TS_AUTOLOAD - Automatically load textsearch modules when needed
  */
 #define TS_AUTOLOAD	1
+#define TS_IGNORECASE   2 /* Searches string case insensitively */
 
 /**
  * struct ts_state - search state
