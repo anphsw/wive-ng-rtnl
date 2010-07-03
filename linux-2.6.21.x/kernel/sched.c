@@ -2322,7 +2322,7 @@ find_busiest_group(struct sched_domain *sd, int this_cpu,
 
 			rq = cpu_rq(i);
 
-			if (*sd_idle && !idle_cpu(i))
+			if (*sd_idle && rq->nr_running)
 				*sd_idle = 0;
 
 			/* Bias balancing toward cpus of our domain */
@@ -2344,9 +2344,11 @@ find_busiest_group(struct sched_domain *sd, int this_cpu,
 		/*
 		 * First idle cpu or the first cpu(busiest) in this sched group
 		 * is eligible for doing load balancing at this and above
-		 * domains.
+		 * domains. In the newly idle case, we will allow all the cpu's
+		 * to do the newly idle load balance.
 		 */
-		if (local_group && balance_cpu != this_cpu && balance) {
+		if (idle != CPU_NEWLY_IDLE && local_group &&
+		    balance_cpu != this_cpu && balance) {
 			*balance = 0;
 			goto ret;
 		}
@@ -6818,12 +6820,13 @@ EXPORT_SYMBOL(__might_sleep);
 void normalize_rt_tasks(void)
 {
 	struct prio_array *array;
-	struct task_struct *p;
+	struct task_struct *g, *p;
 	unsigned long flags;
 	struct rq *rq;
 
 	read_lock_irq(&tasklist_lock);
-	for_each_process(p) {
+
+	do_each_thread(g, p) {
 		if (!rt_task(p))
 			continue;
 
@@ -6841,7 +6844,8 @@ void normalize_rt_tasks(void)
 
 		__task_rq_unlock(rq);
 		spin_unlock_irqrestore(&p->pi_lock, flags);
-	}
+	} while_each_thread(g, p);
+
 	read_unlock_irq(&tasklist_lock);
 }
 
