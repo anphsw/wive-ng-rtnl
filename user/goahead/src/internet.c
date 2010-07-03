@@ -2207,8 +2207,6 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #endif
 	nvram_commit(RT2860_NVRAM);
 
-	initInternet();
-
 	//debug print
 	websHeader(wp);
 	websWrite(wp, T("<h3>LAN Interface Setup</h3><br>\n"));
@@ -2227,6 +2225,8 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	}
 	websFooter(wp);
 	websDone(wp, 200);
+
+	doSystem("internet.sh lanonly");
 }
 
 /* goform/setVpnPaThru */
@@ -2370,8 +2370,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	
 	nvram_commit(RT2860_NVRAM);
 
-	initInternet();
-
 	// debug print
 	websHeader(wp);
 	websWrite(wp, T("<h2>Mode: %s</h2><br>\n"), ctype);
@@ -2390,5 +2388,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("MAC Address: %s<br>\n"), clone_mac);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	doSystem("internet.sh lanonly");
 }
 
