@@ -218,3 +218,7 @@ fi
 #reconfigure wan and services restart
 service wan restart
 services_restart.sh all
+
+if [ "$MODE" = "lanonly" ]; then
+    service shaper restart
+fi
