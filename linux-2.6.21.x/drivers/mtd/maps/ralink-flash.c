@@ -207,8 +207,7 @@ int __init rt2880_mtd_init(void)
 #endif
 
 	for (i = 0; i < NUM_FLASH_BANKS; i++) {
-		printk(KERN_NOTICE "ralink flash device: 0x%x at 0x%x\n",
-				ralink_map[i].size, ralink_map[i].phys);
+		printk(KERN_NOTICE "ralink flash device: 0x%x at 0x%x\n",  (unsigned int)ralink_map[i].size, ralink_map[i].phys);
 
 		ralink_map[i].virt = ioremap_nocache(ralink_map[i].phys, ralink_map[i].size);
 		if (!ralink_map[i].virt) {
