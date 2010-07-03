@@ -98,13 +98,14 @@ start() {
         
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
-	if [ "$NAT" = "1" ]  && [ "$OperationMode" != "0" ]; then
+	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	echo "Add masqrade rules"
 	    iptables -t nat -N port_forward
 	    iptables -t nat -N DMZ
 	    iptables -t nat -I PREROUTING 1 -j port_forward
 	    iptables -t nat -I PREROUTING 2 -j DMZ
 
+	 if [ "$OperationMode" != "0" ]; then
 	    #for ISP localnet alya dualacess
     	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
@@ -119,6 +120,7 @@ start() {
 		iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 	    fi
+	 fi
 	fi
 
 ###########################################IGMP-RULES#######################################
@@ -198,6 +200,7 @@ get_param() {
     QOS=`nvram_get 2860 WmmCapable`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     vpnType=`nvram_get 2860 vpnType`
+    vpnNAT=`nvram_get 2860 vpnNAT`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then
