@@ -2342,7 +2342,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	printf("st_en = %s, pd = %s, sd = %s, hostname=%s\n", st_en, pd, sd, host);
 	
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
-	nvram_bufset(RT2860_NVRAM, "wanHostName", host);
+	nvram_bufset(RT2860_NVRAM, "HostName", host);
 	
 	if (strcmp(st_en, "on") == 0)
 	{
