@@ -2361,11 +2361,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	printf("opmode = %s\n");
 	if (strcmp(opmode, "0") != 0)
 	{
-		nat_enable = websGetVar(wp, T("natEnable"), T("off"));
+		nat_enable = websGetVar(wp, T("natEnabled"), T("off"));
 		printf("nat_enable = %s\n", nat_enable);
 		nat_enable = (strcmp(nat_enable, "on") == 0) ? "1" : "0";
 		printf("nat_enable = %s\n", nat_enable);
-		nvram_bufset(RT2860_NVRAM, "natEnable", nat_enable);
+		nvram_bufset(RT2860_NVRAM, "natEnabled", nat_enable);
 	}
 	
 	nvram_commit(RT2860_NVRAM);
