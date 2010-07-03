@@ -121,37 +121,40 @@ if [ "$MODE" != "wifionly" ]; then
     echo 0 > /proc/cleannat
 fi
 
-#reload wifi modules
-service modules restart
+if [ "$MODE" != "lanonly" ]; then
+    #reload wifi modules
+    service modules restart
+fi
 
-# config interface
-ip addr flush dev ra0
-ip -6 addr flush dev ra0
-ip link set ra0 up
+    # config interface
+    ip addr flush dev ra0
+    ip -6 addr flush dev ra0
+    ip link set ra0 up
 
 #restart lan interfaces
 service lan restart
 
-if [ "$ethconv" = "y" ]; then
+if [ "$MODE" != "lanonly" ]; then
+    if [ "$ethconv" = "y" ]; then
 	iwpriv ra0 set EthConvertMode=dongle
-fi
-if [ "$radio_off" = "1" ]; then
-	iwpriv ra0 set RadioOn=0
-fi
-if [ "$MODE" != "wifionly" ]; then
-    m2uenabled=`nvram_get 2860 M2UEnabled`
-    if [ "$m2uenabled" = "1" ]; then
-	iwpriv ra0 set IgmpSnEnable=1
-	echo "iwpriv ra0 set IgmpSnEnable=1"
     fi
-fi
-
-if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-    for i in `seq 1 $bssidnum`; do
-	ip addr flush dev ra$i
-	ip -6 addr flush dev ra$i
-	ip link set ra$i up 
-    done
+    if [ "$radio_off" = "1" ]; then
+	iwpriv ra0 set RadioOn=0
+    fi
+    if [ "$MODE" != "wifionly" ]; then
+	m2uenabled=`nvram_get 2860 M2UEnabled`
+	if [ "$m2uenabled" = "1" ]; then
+	    iwpriv ra0 set IgmpSnEnable=1
+	    echo "iwpriv ra0 set IgmpSnEnable=1"
+        fi
+    fi
+    if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	for i in `seq 1 $bssidnum`; do
+	    ip addr flush dev ra$i
+	    ip -6 addr flush dev ra$i
+	    ip link set ra$i up 
+	done
+    fi
 fi
 
 #
