@@ -27,7 +27,6 @@
 #include <linux/profile.h>
 #include <linux/mount.h>
 #include <linux/proc_fs.h>
-#include <linux/kthread.h>
 #include <linux/mempolicy.h>
 #include <linux/taskstats_kern.h>
 #include <linux/delayacct.h>
@@ -256,25 +255,26 @@ static int has_stopped_jobs(struct pid *pgrp)
 }
 
 /**
- * reparent_to_kthreadd - Reparent the calling kernel thread to kthreadd
+ * reparent_to_init - Reparent the calling kernel thread to the init task of the pid space that the thread belongs to.
  *
  * If a kernel thread is launched as a result of a system call, or if
- * it ever exits, it should generally reparent itself to kthreadd so it
- * isn't in the way of other processes and is correctly cleaned up on exit.
+ * it ever exits, it should generally reparent itself to init so that
+ * it is correctly cleaned up on exit.
  *
  * The various task state such as scheduling policy and priority may have
  * been inherited from a user process, so we reset them to sane values here.
  *
- * NOTE that reparent_to_kthreadd() gives the caller full capabilities.
+ * NOTE that reparent_to_init() gives the caller full capabilities.
  */
-static void reparent_to_kthreadd(void)
+static void reparent_to_init(void)
 {
 	write_lock_irq(&tasklist_lock);
 
 	ptrace_unlink(current);
 	/* Reparent to init */
 	remove_parent(current);
-	current->real_parent = current->parent = kthreadd_task;
+	current->parent = child_reaper(current);
+	current->real_parent = child_reaper(current);
 	add_parent(current);
 
 	/* Set the exit signal to SIGCHLD so we signal init on exit */
@@ -401,7 +401,7 @@ void daemonize(const char *name, ...)
 	current->files = init_task.files;
 	atomic_inc(&current->files->count);
 
-	reparent_to_kthreadd();
+	reparent_to_init();
 }
 
 EXPORT_SYMBOL(daemonize);
@@ -751,8 +751,11 @@ static void exit_notify(struct task_struct *tsk)
 		read_lock(&tasklist_lock);
 		spin_lock_irq(&tsk->sighand->siglock);
 		for (t = next_thread(tsk); t != tsk; t = next_thread(t))
-			if (!signal_pending(t) && !(t->flags & PF_EXITING))
-				recalc_sigpending_and_wake(t);
+			if (!signal_pending(t) && !(t->flags & PF_EXITING)) {
+				recalc_sigpending_tsk(t);
+				if (signal_pending(t))
+					signal_wake_up(t, 0);
+			}
 		spin_unlock_irq(&tsk->sighand->siglock);
 		read_unlock(&tasklist_lock);
 	}
