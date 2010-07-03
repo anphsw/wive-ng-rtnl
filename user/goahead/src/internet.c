@@ -2389,6 +2389,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);
 
-	doSystem("internet.sh lanonly");
+	initInternet();
 }
 
