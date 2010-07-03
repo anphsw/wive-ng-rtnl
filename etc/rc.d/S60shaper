@@ -116,8 +116,6 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     nm=`nvram_get 2860 lan_netmask`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
-    NAT=`nvram_get 2860 natEnabled`
-    SEC=`nvram_get 2860 SecurityMode`
     INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
 
     #if ppp is up shaper to ppp0 else to wan_if
