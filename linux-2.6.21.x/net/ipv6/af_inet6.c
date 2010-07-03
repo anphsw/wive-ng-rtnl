@@ -830,9 +830,11 @@ static int __init inet6_init(void)
 	err = ndisc_init();
 	if (err)
 		goto ndisc_fail;
+/*	Don`t use igmp6
 	err = igmp6_init();
 	if (err)
 		goto igmp_fail;
+*/
 	err = ipv6_netfilter_init();
 	if (err)
 		goto netfilter_fail;
@@ -902,7 +904,9 @@ proc_raw6_fail:
 	ipv6_netfilter_fini();
 netfilter_fail:
 	igmp6_cleanup();
+/* Don`t use igmp6
 igmp_fail:
+*/
 	ndisc_cleanup();
 ndisc_fail:
 	icmpv6_cleanup();

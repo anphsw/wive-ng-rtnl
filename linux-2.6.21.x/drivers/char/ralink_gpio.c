@@ -593,7 +593,7 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 struct irqaction ralink_gpio_irqaction = {
 	.handler = ralink_gpio_irq_handler,
 	.flags = SA_INTERRUPT,
-	.mask = 0,
+	//.mask = 0,
 	.name = "ralink_gpio",
 };
 
