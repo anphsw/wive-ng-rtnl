@@ -30,6 +30,19 @@ if [ "$IFACE" = "WAN" ]; then
 else
     IFACE=br0
 fi
+
+IN_BR=`brctl show | grep $IFACE -c`
+if [ "$IFACE" != "br0" ] && [ "$IN_BR" = "1" ]; then
+    PPPOE_IFACE="br0"
+    $LOG "$PPPOE_IFACE in bridge. Set pppoe interface to br0"
+fi
+
+if [ "$SERVER" != "" ] ; then
+    SERVER="rp_pppoe_ac $SERVER"
+else
+    SERVER=""
+fi
+
 if [ "$PEERDNS" = "on" ]; then
     PEERDNS=usepeerdns
 else
