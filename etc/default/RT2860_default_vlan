@@ -184,6 +184,7 @@ vpnMPPE=off
 vpnPeerDNS=on
 vpnDebug=off
 vpnNAT=on
+vpnInterface=WAN
 vpnServer=192.168.200.1
 vpnRange=192.168.200.2-192.168.200.254
 vpnUser=vpn_user
