@@ -12,29 +12,37 @@ Butterlate.setTextDomain("internet");
 
 function macCloneMacFillSubmit()
 {
-    http_request = false;
-    if (window.XMLHttpRequest) { // Mozilla, Safari,...
-        http_request = new XMLHttpRequest();
-        if (http_request.overrideMimeType) {
-            http_request.overrideMimeType('text/xml');
-        }
-    } else if (window.ActiveXObject) { // IE
-        try {
-            http_request = new ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-            try {
-            http_request = new ActiveXObject("Microsoft.XMLHTTP");
-            } catch (e) {}
-        }
-    }
-    if (!http_request) {
-        alert('Cannot create an XMLHTTP instance');
-        return false;
-    }
-    http_request.onreadystatechange = doFillMyMAC;
+	http_request = false;
+	if (window.XMLHttpRequest) // Mozilla, Safari,...
+	{
+		http_request = new XMLHttpRequest();
+		if (http_request.overrideMimeType)
+			http_request.overrideMimeType('text/xml');
+	}
+	else if (window.ActiveXObject) // IE
+	{
+		try
+		{
+			http_request = new ActiveXObject("Msxml2.XMLHTTP");
+		}
+		catch (e)
+		{
+			try
+			{
+				http_request = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch (e) {}
+		}
+	}
 
-    http_request.open('POST', '/goform/getMyMAC', true);
-    http_request.send('n\a');
+	if (!http_request)
+	{
+		alert('Cannot create an XMLHTTP instance');
+		return false;
+	}
+
+	http_request.onreadystatechange = doFillMyMAC;
+	http_request.open('POST', '/goform/getMyMAC', true);
+	http_request.send('n\a');
 }
 
 function doFillMyMAC()
@@ -69,19 +77,8 @@ function macCloneSwitch()
 
 function connectionTypeSwitch()
 {
-	document.getElementById("static").style.visibility = "hidden";
-	document.getElementById("static").style.display = "none";
-
-	if (document.wanCfg.connectionType.options.selectedIndex == 0)
-	{
-		document.getElementById("static").style.visibility = "visible";
-		document.getElementById("static").style.display = "block";
-	}
-	else
-	{
-		document.getElementById("static").style.visibility = "visible";
-		document.getElementById("static").style.display = "block";
-	}
+	var staticTable = document.getElementById("staticDHCP");
+	staticTable.style.display    = (document.wanCfg.connectionType.value == "STATIC") ? "" : "none";
 }
 
 function CheckValue()
@@ -107,8 +104,7 @@ function CheckValue()
 				return false;
 		}
 	}
-	else
-		return false;
+	
 	return true;
 }
 
@@ -145,10 +141,16 @@ function initValue()
 	var mode = "<% getCfgGeneral(1, "wanConnectionMode"); %>";
 	var pptpMode = <% getCfgZero(1, "wan_pptp_mode"); %>;
 	var clone = <% getCfgZero(1, "macCloneEnabled"); %>;
-	var nat = "<% getCfgZero(1, "wan_nat_enable"); %>";
+	var nat = "<% getCfgZero(1, "natEnable"); %>";
+	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
 	var form = document.wanCfg;
-
+	
+	form.natEnable.checked = (nat == "1");
+	var element = document.getElementById("natRowDisplay");
+	if (element!=null)
+		element.style.display = (opmode != "0") ? "" : "none";
+	
 	initTranslation();
 	if (mode == "STATIC")
 		form.connectionType.options.selectedIndex = 0;
@@ -156,11 +158,10 @@ function initValue()
 		form.connectionType.options.selectedIndex = 1;
 	else
 		form.connectionType.options.selectedIndex = 0;
-	form.natEnable.checked = (nat == "on");
 	form.wStaticDnsEnable.checked = (static_dns == "on");
-
+	
 	connectionTypeSwitch();
-
+	
 	if (clone == 1)
 		form.macCloneEnbl.options.selectedIndex = 1;
 	else
@@ -187,14 +188,14 @@ function dnsSwitchClick(form)
 
 <h1 id="wTitle"></h1>
 <p id="wIntroduction"></p>
-<hr />
+<hr>
 
 <form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue();">
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td>
-		<select name="connectionType" size="1" onChange="connectionTypeSwitch();">
+		<select name="connectionType" onChange="connectionTypeSwitch();">
 			<option value="STATIC" id="wConnTypeStatic">Static Mode (fixed IP)</option>
 			<option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
 		</select>
@@ -203,7 +204,7 @@ function dnsSwitchClick(form)
 </table>
 
 <!-- ================= STATIC Mode ================= -->
-<table id="static" width="90%" border="1" cellpadding="2" cellspacing="1">
+<table id="staticDHCP" width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2" id="wStaticMode">Static Mode</td>
 </tr>
@@ -245,7 +246,7 @@ function dnsSwitchClick(form)
 	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
 	<td><input name="staticSecDns" maxlength="15" value="<% getDns(2); %>"></td>
 </tr>
-<tr>
+<tr id="natRowDisplay">
 	<td class="head" id="wMacAddressClone">Enable NAT</td>
 	<td><input name="natEnable" type="checkbox"></td>
 </tr>
@@ -271,8 +272,8 @@ function dnsSwitchClick(form)
 <table width="90%" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td>
-		<input type=submit style="{width:120px;}" value="Apply" id="wApply">&nbsp;&nbsp;
-		<input type=reset  style="{width:120px;}" value="Cancel" id="wCancel" onClick="window.location.reload();">
+		<input type="submit" class="half" value="Apply" id="wApply">&nbsp;&nbsp;
+		<input type="reset" class="half" value="Cancel" id="wCancel" onClick="window.location.reload();">
 	</td>
 </tr>
 </table>

@@ -642,7 +642,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 					if (sscanf(line, " ppp%d", &ppp_id)==1)
 					{
 						// Check if ppp interface has number at least 8
-						if (ppp_id >= 8)
+						if ((ppp_id >= 0) && (ppp_id <= 8))
 						{
 							status++; // Status is set to 'connected'
 							break; // Do not search more
@@ -2356,13 +2356,19 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
 	if (!strncmp(clone_en, "1", 2))
 		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
-	nvram_commit(RT2860_NVRAM);
+
+	// NAT
+	printf("opmode = %s\n");
+	if (strcmp(opmode, "0") != 0)
+	{
+		nat_enable = websGetVar(wp, T("natEnable"), T("off"));
+		printf("nat_enable = %s\n", nat_enable);
+		nat_enable = (strcmp(nat_enable, "on") == 0) ? "1" : "0";
+		printf("nat_enable = %s\n", nat_enable);
+		nvram_bufset(RT2860_NVRAM, "natEnable", nat_enable);
+	}
 	
-	// nat
-	nat_enable = websGetVar(wp, T("natEnable"), T("off"));
-	if (strcmp(nat_enable, "on") != 0)
-		nat_enable = "off";
-	nvram_bufset(RT2860_NVRAM, "wan_nat_enable", nat_enable);
+	nvram_commit(RT2860_NVRAM);
 
 	initInternet();
 

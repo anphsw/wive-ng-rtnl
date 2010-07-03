@@ -1169,9 +1169,8 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 /* goform/setOpMode */
 static void setOpMode(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*mode, *nat_en;
+	char_t	*mode;
 	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
-	char	*old_nat = nvram_bufget(RT2860_NVRAM, "natEnabled");
 	int		need_commit = 0;
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
 #else
@@ -1185,7 +1184,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #endif
 
 	mode = websGetVar(wp, T("opMode"), T("0")); 
-	nat_en = websGetVar(wp, T("natEnbl"), T("0"));
 
 	if (!strncmp(old_mode, "0", 2)) {
 	}
@@ -1275,11 +1273,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		need_commit = 1;
 	}
 
-	if (strncmp(nat_en, old_nat, 2)) {
-		nvram_bufset(RT2860_NVRAM, "natEnabled", nat_en);
-		need_commit = 1;
-	}
-
 	// For 100PHY  ( Ethernet Convertor with one port only)
 	// If this is one port only board(IC+ PHY) then redirect
 	// the user browser to our alias ip address.
@@ -1326,12 +1319,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	websHeader(wp);
 	websWrite(wp, T("<h2>Operation Mode</h2>\n"));
 	websWrite(wp, T("mode: %s<br>\n"), mode);
-	if (strncmp(mode, "0", 2))
-		websWrite(wp, T("NAT enabled: %s<br>\n"), nat_en);
-#ifdef CONFIG_RT2860V2_STA_DPB
-	else
-		websWrite(wp, T("DPB station: %s<br>\n"), econv);
-#endif
 #if defined INIC_SUPPORT || defined INICv2_SUPPORT
 	websWrite(wp, T("INIC MII mode: %s<br>\n"), mii);
 #endif

@@ -12,7 +12,6 @@ var old_mode;
 
 function changeMode()
 {
-	var nat_en = "<% getCfgZero(1, "natEnabled"); %>";
 	var dpbsta = "<% getDpbSta(); %>";
 	var ec_en = "<% getCfgZero(1, "ethConvert"); %>";
 	var mii_built = "<% getMiiInicBuilt(); %>"
@@ -21,9 +20,6 @@ function changeMode()
 	document.getElementById("eth_conv").style.visibility = "hidden";
 	document.getElementById("eth_conv").style.display = "none";
 	document.getElementById("eth_conv").style.disable = true;
-	document.getElementById("nat").style.visibility = "hidden";
-	document.getElementById("nat").style.display = "none";
-	document.getElementById("nat").style.disable = true;
 	document.getElementById("miiInic").style.visibility = "hidden";
 	document.getElementById("miiInic").style.display = "none";
 	document.getElementById("miiInic").style.disable = true;
@@ -49,63 +45,32 @@ function changeMode()
 	}
 	else if (document.opmode.opMode[1].checked || document.opmode.opMode[3].checked) {
 		opmode = 1;
-		document.getElementById("nat").style.visibility = "visible";
-		document.getElementById("nat").style.display = "block";
-		document.getElementById("nat").style.disable = false;
-		if (nat_en == "1") {
-			document.opmode.natEnbl.options.selectedIndex = 1;
-		}
 	}
 	else if (document.opmode.opMode[2].checked) {
 		opmode = 2;
-		//keep the nat table hidden, and always enable NAT
-		document.getElementById("nat").style.disable = false;
-		document.opmode.natEnbl.options.selectedIndex = 1;
 	}
 }
 
 function initTranslation()
 {
-	var e = document.getElementById("oTitle");
-	e.innerHTML = _("opmode title");
-	e = document.getElementById("oIntroduction");
-	e.innerHTML = _("opmode introduction");
+	_TR("oTitle", "opmode title");
+	_TR("oIntroduction", "opmode introduction");
 
-	e = document.getElementById("oModeB");
-	e.innerHTML = _("opmode mode b");
-	e = document.getElementById("oModeBIntro");
-	e.innerHTML = _("opmode mode b intro");
-	e = document.getElementById("oModeG");
-	e.innerHTML = _("opmode mode g");
-	e = document.getElementById("oModeGIntro");
-	e.innerHTML = _("opmode mode g intro");
-	e = document.getElementById("oModeE");
-	e.innerHTML = _("opmode mode e");
-	e = document.getElementById("stadd");
-	e.innerHTML = _("opmode mode e intro");
-	e = document.getElementById("oModeA");
-	e.innerHTML = _("opmode mode a");
-	e = document.getElementById("apclidd");
-	e.innerHTML = _("opmode mode a intro");
+	_TR("oModeB", "opmode mode b");
+	_TR("oModeBIntro", "opmode mode b intro");
+	_TR("oModeG", "opmode mode g");
+	_TR("oModeGIntro", "opmode mode g intro");
+	_TR("oModeE", "opmode mode e");
+	_TR("stadd", "opmode mode e intro");
+	_TR("oModeA", "opmode mode a");
+	_TR("apclidd", "opmode mode a intro");
 
-	e = document.getElementById("oNat");
-	e.innerHTML = _("opmode nat");
-	e = document.getElementById("oNatD");
-	e.innerHTML = _("main disable");
-	e = document.getElementById("oNatE");
-	e.innerHTML = _("main enable");
+	_TR("oEthConv", "opmode eth conv");
+	_TR("oEthConvD", "main disable");
+	_TR("oEthConvE", "main enable");
 
-	e = document.getElementById("oEthConv");
-	e.innerHTML = _("opmode eth conv");
-	e = document.getElementById("oEthConvD");
-	e.innerHTML = _("main disable");
-	e = document.getElementById("oEthConvE");
-	e.innerHTML = _("main enable");
-
-	e = document.getElementById("oApply");
-	e.value = _("main apply");
-	e = document.getElementById("oCancel");
-	e.value = _("main cancel");
+	_TRV("oApply", "main apply");
+	_TRV("oCancel", "main cancel");
 }
 
 function initValue()
@@ -177,17 +142,6 @@ function msg()
   <dt id="apclidt"><input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()"><b id="oModeA">AP Client:</b></dt>
   <dd id="apclidd"></dd>
 </dl>
-<table id="nat" border="0" cellpadding="2" cellspacing="1">
-<tr>
-  <td id="oNat">NAT Enabled:<td>
-  <td>
-    <select id="natEnbl" name="natEnbl" size="1">
-      <option value="0" id="oNatD">Disable</option>
-      <option value="1" id="oNatE">Enable</option>
-    </select>
-  </td>
-</tr>
-</table>
 <table id="eth_conv" border="0" cellpadding="2" cellspacing="1">
 <tr>
   <td id="oEthConv">Ethernet Converter Enabled:<td>
