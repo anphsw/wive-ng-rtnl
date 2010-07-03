@@ -13,11 +13,23 @@ MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 IFACE=`nvram_get 2860 vpnInterface`
+opmode=`nvram_get 2860 OperationMode`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
+if [ "$IFACE" = "WAN" ]; then
+    if [ "$opmode" = "1" ]; then
+	IFACE=eth2.2
+    elif [ "$opmode" = "1" ]; then
+	IFACE=ra0
+    elif [ "$opmode" = "3" ]; then
+	IFACE=apcli0
+    fi
+else
+    IFACE=br0
+fi
 if [ "$PEERDNS" = "on" ]; then
     PEERDNS=usepeerdns
 else
@@ -50,6 +62,6 @@ PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 # PPPoE invocation
 PPPOE_CMD="$IFACE $SERVER user $USER password $PASSWORD"
 
-$LOG "Start pppd"
+$LOG "Start pppd at $IFACE to $SERVER mode PPPOE"
 FULLOPT="$OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &
