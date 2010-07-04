@@ -41,8 +41,6 @@
 # define INIT_TRACE_IRQFLAGS
 #endif
 
-#ifdef CONFIG_TRACE_IRQFLAGS_SUPPORT
-
 #include <asm/irqflags.h>
 
 #define local_irq_enable() \
@@ -62,18 +60,7 @@
 			raw_local_irq_restore(flags);		\
 		}						\
 	} while (0)
-#else /* !CONFIG_TRACE_IRQFLAGS_SUPPORT */
-/*
- * The local_irq_*() APIs are equal to the raw_local_irq*()
- * if !TRACE_IRQFLAGS.
- */
-# define raw_local_irq_disable()	local_irq_disable()
-# define raw_local_irq_enable()		local_irq_enable()
-# define raw_local_irq_save(flags)	local_irq_save(flags)
-# define raw_local_irq_restore(flags)	local_irq_restore(flags)
-#endif /* CONFIG_TRACE_IRQFLAGS_SUPPORT */
 
-#ifdef CONFIG_TRACE_IRQFLAGS_SUPPORT
 #define safe_halt()						\
 	do {							\
 		trace_hardirqs_on();				\
@@ -91,6 +78,4 @@
 })
 
 #define irqs_disabled_flags(flags)	raw_irqs_disabled_flags(flags)
-#endif		/* CONFIG_X86 */
-
 #endif
