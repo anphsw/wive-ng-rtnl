@@ -79,6 +79,7 @@ fi
 
 stop() {
  echo  "Stop radvd daemon..."
+if [ -f /bin/radvd ] && [ $CONFIG_IPV6 != "" ]; then
   killall radvd > /dev/null 2>&1
   ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     
   ip link set dev tun6to4 down > /dev/null 2>&1
@@ -86,6 +87,7 @@ stop() {
   ip -6 addr flush dev sit0  > /dev/null 2>&1
   ip -6 link set sit0 down > /dev/null 2>&1
   echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+fi
 }
 
 case "$1" in
