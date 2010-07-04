@@ -5,8 +5,9 @@
 # usage: internet.sh
 #
 
-. /sbin/config.sh
-. /sbin/global.sh
+#include kernel config                                                                                                                      
+. /bin/config.sh
+. /bin/global.sh
 
 bssidnum=`nvram_get 2860 BssidNum`
 radio_off=`nvram_get 2860 RadioOff`
@@ -128,7 +129,9 @@ fi
 
     # config interface
     ip addr flush dev ra0
+if [ $CONFIG_IPV6 != "" ] ; then
     ip -6 addr flush dev ra0
+fi
     ip link set ra0 up
 
 #restart lan interfaces

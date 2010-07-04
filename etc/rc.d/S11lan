@@ -67,8 +67,10 @@ echo "Start network interfaces..."
     #drop adresses
     ip addr flush dev eth2.1
     ip addr flush dev eth2.2
+if [ $CONFIG_IPV6 != "" ] ; then
     ip -6 addr flush dev eth2.1
     ip -6 addr flush dev eth2.2
+fi
     ip link set eth2.1 up
  
 #-------------------CONFIG--------------------------------

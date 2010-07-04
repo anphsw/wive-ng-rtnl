@@ -2,6 +2,9 @@
 
 # udhcpc script edited by Tim Riker <Tim@Rikers.org>
 
+#include kernel config                                                                                                                      
+. /bin/config.sh
+
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
 LOG="logger -t udhcpc"
@@ -15,7 +18,9 @@ STATICDNS=`nvram_get 2860 wan_static_dns`
 case "$1" in
     deconfig)
         ip addr flush dev $interface
+if [ $CONFIG_IPV6 != "" ] ; then
         ip -6 addr flush dev $interface
+fi
 	ip link set $interface up
         ;;
 

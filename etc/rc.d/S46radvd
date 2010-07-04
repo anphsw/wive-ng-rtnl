@@ -8,7 +8,7 @@
 web_wait
 
 start() {
-if [ -f /bin/radvd ]; then
+if [ -f /bin/radvd ] && [ $CONFIG_IPV6 != "" ]; then
  opmode=`nvram_get 2860 OperationMode`
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
