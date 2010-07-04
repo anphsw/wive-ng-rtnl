@@ -77,9 +77,6 @@ if [ "$CONFIG_USER_SAMBA" = "y" ]; then
 	define_bool CONFIG_USER_GOAHEAD_HOSTNAME y
 	define_bool CONFIG_LIB_NSL_FORCE y
 fi
-if [ "$CONFIG_USER_SAMBA" = "n" ]; then
-	define_bool CONFIG_USER_GOAHEAD_HOSTNAME n
-fi
 bool 'go-ahead webserver'			CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable IPv6 support'		CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable SSL support'			CONFIG_USER_GOAHEAD_SSL $CONFIG_USER_GOAHEAD_HTTPD

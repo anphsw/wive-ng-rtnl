@@ -114,7 +114,7 @@ config INET6_XFRM_TUNNEL
 
 config INET6_TUNNEL
 	bool
-	default y
+	default n
 
 config INET6_XFRM_MODE_TRANSPORT
 	tristate "IPv6: IPsec transport mode"
