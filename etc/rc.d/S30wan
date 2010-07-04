@@ -36,8 +36,6 @@ start() {
 	HOSTNAME="Wive-RTNL"
     fi
 
-    /bin/hostname $HOSTNAME
-
     #workaround fix me!!!
     if [ "$wan_if" = "" ]; then
 	wan_if="eth2.2"
@@ -89,6 +87,11 @@ start() {
 	echo "wan service: unknown wan connection type: $wanmode"
 	exit 1
     fi
+
+    /bin/hostname $HOSTNAME
+    echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
+    echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts
+    echo "$ip		$HOSTNAME.lo" >> /etc/hosts
 
 
     #check pppd or xl2tpd started
