@@ -270,12 +270,11 @@ static void skb_release_data(struct sk_buff *skb)
 /*
  *	Free an skbuff by memory without cleaning the state.
  */
-void kfree_skbmem(struct sk_buff *skb)
+static void kfree_skbmem(struct sk_buff *skb)
 {
 	struct sk_buff *other;
 	atomic_t *fclone_ref;
 
-	skb_release_data(skb);
 	switch (skb->fclone) {
 	case SKB_FCLONE_UNAVAILABLE:
 		kmem_cache_free(skbuff_head_cache, skb);
@@ -302,16 +301,8 @@ void kfree_skbmem(struct sk_buff *skb)
 	};
 }
 
-/**
- *	__kfree_skb - private function
- *	@skb: buffer
- *
- *	Free an sk_buff. Release anything attached to the buffer.
- *	Clean the state. This is an internal helper function. Users should
- *	always call kfree_skb
- */
-
-void __kfree_skb(struct sk_buff *skb)
+/* Free everything but the sk_buff shell. */
+static void skb_release_all(struct sk_buff *skb)
 {
 	dst_release(skb->dst);
 #ifdef CONFIG_XFRM
@@ -337,7 +328,21 @@ void __kfree_skb(struct sk_buff *skb)
 	skb->tc_verd = 0;
 #endif
 #endif
+	skb_release_data(skb);
+}
 
+/**
+ *	__kfree_skb - private function
+ *	@skb: buffer
+ *
+ *	Free an sk_buff. Release anything attached to the buffer.
+ *	Clean the state. This is an internal helper function. Users should
+ *	always call kfree_skb
+ */
+
+void __kfree_skb(struct sk_buff *skb)
+{
+	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
 
@@ -459,6 +464,13 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	skb->cloned = 1;
 
 	return n;
+#undef C
+}
+
+struct sk_buff *skb_morph(struct sk_buff *dst, struct sk_buff *src)
+{
+	skb_release_all(dst);
+        return skb_clone(dst, src);
 }
 
 static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
@@ -581,7 +593,9 @@ struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 	/*
 	 *	Allocate the copy buffer
 	 */
-	struct sk_buff *n = alloc_skb(skb->end - skb->head, gfp_mask);
+	struct sk_buff *n;
+
+        n = alloc_skb(skb->end - skb->head, gfp_mask);                                                                                      
 
 	if (!n)
 		goto out;
@@ -642,6 +656,8 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	u8 *data;
 	int size = nhead + (skb->end - skb->head) + ntail;
 	long off;
+
+	BUG_ON(nhead < 0);
 
 	if (skb_shared(skb))
 		BUG();
@@ -2022,6 +2038,7 @@ EXPORT_SYMBOL(__netdev_alloc_skb);
 EXPORT_SYMBOL(pskb_copy);
 EXPORT_SYMBOL(pskb_expand_head);
 EXPORT_SYMBOL(skb_checksum);
+EXPORT_SYMBOL(skb_morph);
 EXPORT_SYMBOL(skb_clone);
 EXPORT_SYMBOL(skb_clone_fraglist);
 EXPORT_SYMBOL(skb_copy);
