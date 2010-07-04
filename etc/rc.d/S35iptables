@@ -105,7 +105,7 @@ start() {
 	    iptables -t nat -I PREROUTING 1 -j port_forward
 	    iptables -t nat -I PREROUTING 2 -j DMZ
 
-	 if [ "$OperationMode" != "0" ]; then
+	 if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
 	    #for ISP localnet alya dualacess
     	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
