@@ -14,16 +14,15 @@
   <message msgid="treeapp router" msgstr="Router" />
   <message msgid="treeapp operation mode" msgstr="Operation Mode" />
   <message msgid="treeapp internet settings" msgstr="Internet Settings" />
-  <message msgid="treeapp wan" msgstr="WAN" />
-  <message msgid="treeapp lan" msgstr="LAN" />
+  <message msgid="treeapp wan" msgstr="WAN setup" />
+  <message msgid="treeapp lan" msgstr="LAN setup" />
+  <message msgid="treeapp vpn" msgstr="VPN setup" />
+  <message msgid="treeapp routing" msgstr="Routing" />
   <message msgid="treeapp dhcp clients" msgstr="DHCP clients" />
-  <message msgid="treeapp vpn passthrough" msgstr="VPN Passthrough" />
-  <message msgid="treeapp routing" msgstr="Advanced Routing" />
   <message msgid="treeapp wireless settings" msgstr="Wireless Settings" />
   <message msgid="treeapp inic settings" msgstr="I-NIC Settings" />
   <message msgid="treeapp legacy settings" msgstr="Legacy Settings" />
   <message msgid="treeapp profile" msgstr="Profile" />
-  <message msgid="treeapp vpn" msgstr="VPN client" />
   <message msgid="treeapp link status" msgstr="Link Status" />
   <message msgid="treeapp site survey" msgstr="Site Survey" />
   <message msgid="treeapp statistics" msgstr="Statistics" />
