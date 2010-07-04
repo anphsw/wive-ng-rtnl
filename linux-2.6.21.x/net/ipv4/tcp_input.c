@@ -2331,7 +2331,7 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 		 * connection startup slow start one packet too
 		 * quickly.  This is severely frowned upon behavior.
 		 */
-		if (!(scb->flags & TCPCB_FLAG_SYN)) {
+		if (!(scb->flags & TCPHDR_SYN)) {
 			acked |= FLAG_DATA_ACKED;
 			++pkts_acked;
 		} else {

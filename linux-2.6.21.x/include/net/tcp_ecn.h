@@ -22,9 +22,9 @@ static inline void TCP_ECN_queue_cwr(struct tcp_sock *tp)
 static inline void TCP_ECN_send_synack(struct tcp_sock *tp,
 				       struct sk_buff *skb)
 {
-	TCP_SKB_CB(skb)->flags &= ~TCPCB_FLAG_CWR;
+	TCP_SKB_CB(skb)->flags &= ~TCPHDR_CWR;
 	if (!(tp->ecn_flags&TCP_ECN_OK))
-		TCP_SKB_CB(skb)->flags &= ~TCPCB_FLAG_ECE;
+		TCP_SKB_CB(skb)->flags &= ~TCPHDR_ECE;
 }
 
 static inline void TCP_ECN_send_syn(struct sock *sk, struct sk_buff *skb)
@@ -33,7 +33,7 @@ static inline void TCP_ECN_send_syn(struct sock *sk, struct sk_buff *skb)
 
 	tp->ecn_flags = 0;
 	if (sysctl_tcp_ecn) {
-		TCP_SKB_CB(skb)->flags |= TCPCB_FLAG_ECE|TCPCB_FLAG_CWR;
+		TCP_SKB_CB(skb)->flags |= TCPHDR_ECE|TCPHDR_CWR;
 		tp->ecn_flags = TCP_ECN_OK;
 	}
 }

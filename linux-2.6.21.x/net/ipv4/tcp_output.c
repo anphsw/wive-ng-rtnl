@@ -431,7 +431,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it, 
 #define SYSCTL_FLAG_SACK	0x4
 
 	sysctl_flags = 0;
-	if (unlikely(tcb->flags & TCPCB_FLAG_SYN)) {
+	if (unlikely(tcb->flags & TCPHDR_SYN)) {
 		tcp_header_size = sizeof(struct tcphdr) + TCPOLEN_MSS;
 		if(sysctl_tcp_timestamps) {
 			tcp_header_size += TCPOLEN_TSTAMP_ALIGNED;
@@ -480,7 +480,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it, 
 	*(((__be16 *)th) + 6)	= htons(((tcp_header_size >> 2) << 12) |
 					tcb->flags);
 
-	if (unlikely(tcb->flags & TCPCB_FLAG_SYN)) {
+	if (unlikely(tcb->flags & TCPHDR_SYN)) {
 		/* RFC1323: The window in SYN & SYN/ACK segments
 		 * is never scaled.
 		 */
@@ -497,7 +497,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it, 
 		th->urg			= 1;
 	}
 
-	if (unlikely(tcb->flags & TCPCB_FLAG_SYN)) {
+	if (unlikely(tcb->flags & TCPHDR_SYN)) {
 		tcp_syn_build_options((__be32 *)(th + 1),
 				      tcp_advertise_mss(sk),
 				      (sysctl_flags & SYSCTL_FLAG_TSTAMPS),
@@ -535,7 +535,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it, 
 
 	icsk->icsk_af_ops->send_check(sk, skb->len, skb);
 
-	if (likely(tcb->flags & TCPCB_FLAG_ACK))
+	if (likely(tcb->flags & TCPHDR_ACK))
 		tcp_event_ack_sent(sk, tcp_skb_pcount(skb));
 
 	if (skb->len != tcp_header_size)
@@ -640,7 +640,7 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 
 	/* PSH and FIN should only be set in the second packet. */
 	flags = TCP_SKB_CB(skb)->flags;
-	TCP_SKB_CB(skb)->flags = flags & ~(TCPCB_FLAG_FIN|TCPCB_FLAG_PSH);
+	TCP_SKB_CB(skb)->flags = flags & ~(TCPHDR_FIN|TCPHDR_PSH);
 	TCP_SKB_CB(buff)->flags = flags;
 	TCP_SKB_CB(buff)->sacked = TCP_SKB_CB(skb)->sacked;
 	TCP_SKB_CB(skb)->sacked &= ~TCPCB_AT_TAIL;
@@ -970,8 +970,7 @@ static inline unsigned int tcp_cwnd_test(struct tcp_sock *tp, struct sk_buff *sk
 	u32 in_flight, cwnd;
 
 	/* Don't be strict about the congestion window for the final FIN.  */
-	if ((TCP_SKB_CB(skb)->flags & TCPCB_FLAG_FIN) &&
-	    tcp_skb_pcount(skb) == 1)
+	if ((TCP_SKB_CB(skb)->flags & TCPHDR_FIN) && tcp_skb_pcount(skb) == 1)
 		return 1;
 
 	in_flight = tcp_packets_in_flight(tp);
@@ -1040,7 +1039,7 @@ static inline int tcp_nagle_test(struct tcp_sock *tp, struct sk_buff *skb,
 
 	/* Don't use the nagle rule for urgent data (or for the final FIN).  */
 	if (tp->urg_mode ||
-	    (TCP_SKB_CB(skb)->flags & TCPCB_FLAG_FIN))
+	    (TCP_SKB_CB(skb)->flags & TCPHDR_FIN))
 		return 1;
 
 	if (!tcp_nagle_check(tp, skb, cur_mss, nonagle))
@@ -1133,7 +1132,7 @@ static int tso_fragment(struct sock *sk, struct sk_buff *skb, unsigned int len, 
 
 	/* PSH and FIN should only be set in the second packet. */
 	flags = TCP_SKB_CB(skb)->flags;
-	TCP_SKB_CB(skb)->flags = flags & ~(TCPCB_FLAG_FIN|TCPCB_FLAG_PSH);
+	TCP_SKB_CB(skb)->flags = flags & ~(TCPHDR_FIN|TCPHDR_PSH);
 	TCP_SKB_CB(buff)->flags = flags;
 
 	/* This packet was never sent out yet, so no SACK bits. */
@@ -1164,7 +1163,7 @@ static int tcp_tso_should_defer(struct sock *sk, struct sk_buff *skb)
 	const struct inet_connection_sock *icsk = inet_csk(sk);
 	u32 send_win, cong_win, limit, in_flight;
 
-	if (TCP_SKB_CB(skb)->flags & TCPCB_FLAG_FIN)
+	if (TCP_SKB_CB(skb)->flags & TCPHDR_FIN)
 		goto send_now;
 
 	if (icsk->icsk_ca_state != TCP_CA_Open)
@@ -1291,7 +1290,7 @@ static int tcp_mtu_probe(struct sock *sk)
 
 	TCP_SKB_CB(nskb)->seq = TCP_SKB_CB(skb)->seq;
 	TCP_SKB_CB(nskb)->end_seq = TCP_SKB_CB(skb)->seq + probe_size;
-	TCP_SKB_CB(nskb)->flags = TCPCB_FLAG_ACK;
+	TCP_SKB_CB(nskb)->flags = TCPHDR_ACK;
 	TCP_SKB_CB(nskb)->sacked = 0;
 	nskb->csum = 0;
 	nskb->ip_summed = skb->ip_summed;
@@ -1315,7 +1314,7 @@ static int tcp_mtu_probe(struct sock *sk)
 			sk_stream_free_skb(sk, skb);
 		} else {
 			TCP_SKB_CB(nskb)->flags |= TCP_SKB_CB(skb)->flags &
-						   ~(TCPCB_FLAG_FIN|TCPCB_FLAG_PSH);
+						   ~(TCPHDR_FIN|TCPHDR_PSH);
 			if (!skb_shinfo(skb)->nr_frags) {
 				skb_pull(skb, copy);
 				if (skb->ip_summed != CHECKSUM_PARTIAL)
@@ -1799,7 +1798,7 @@ int tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 	}
 
 	/* Collapse two adjacent packets if worthwhile and we can. */
-	if(!(TCP_SKB_CB(skb)->flags & TCPCB_FLAG_SYN) &&
+	if(!(TCP_SKB_CB(skb)->flags & TCPHDR_SYN) &&
 	   (skb->len < (cur_mss >> 1)) &&
 	   (skb->next != sk->sk_send_head) &&
 	   (skb->next != (struct sk_buff *)&sk->sk_write_queue) &&
@@ -1813,7 +1812,7 @@ int tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 	 * since it is cheap to do so and saves bytes on the network.
 	 */
 	if(skb->len > 0 &&
-	   (TCP_SKB_CB(skb)->flags & TCPCB_FLAG_FIN) &&
+	   (TCP_SKB_CB(skb)->flags & TCPHDR_FIN) &&
 	   tp->snd_una == (TCP_SKB_CB(skb)->end_seq - 1)) {
 		if (!pskb_trim(skb, 0)) {
 			TCP_SKB_CB(skb)->seq = TCP_SKB_CB(skb)->end_seq - 1;
@@ -2007,7 +2006,7 @@ void tcp_send_fin(struct sock *sk)
 	mss_now = tcp_current_mss(sk, 1);
 
 	if (sk->sk_send_head != NULL) {
-		TCP_SKB_CB(skb)->flags |= TCPCB_FLAG_FIN;
+		TCP_SKB_CB(skb)->flags |= TCPHDR_FIN;
 		TCP_SKB_CB(skb)->end_seq++;
 		tp->write_seq++;
 	} else {
@@ -2022,7 +2021,7 @@ void tcp_send_fin(struct sock *sk)
 		/* Reserve space for headers and prepare control bits. */
 		skb_reserve(skb, MAX_TCP_HEADER);
 		skb->csum = 0;
-		TCP_SKB_CB(skb)->flags = (TCPCB_FLAG_ACK | TCPCB_FLAG_FIN);
+		TCP_SKB_CB(skb)->flags = (TCPHDR_ACK | TCPHDR_FIN);
 		TCP_SKB_CB(skb)->sacked = 0;
 		skb_shinfo(skb)->gso_segs = 1;
 		skb_shinfo(skb)->gso_size = 0;
@@ -2055,7 +2054,7 @@ void tcp_send_active_reset(struct sock *sk, gfp_t priority)
 	/* Reserve space for headers and prepare control bits. */
 	skb_reserve(skb, MAX_TCP_HEADER);
 	skb->csum = 0;
-	TCP_SKB_CB(skb)->flags = (TCPCB_FLAG_ACK | TCPCB_FLAG_RST);
+	TCP_SKB_CB(skb)->flags = (TCPHDR_ACK | TCPHDR_RST);
 	TCP_SKB_CB(skb)->sacked = 0;
 	skb_shinfo(skb)->gso_segs = 1;
 	skb_shinfo(skb)->gso_size = 0;
@@ -2079,11 +2078,11 @@ int tcp_send_synack(struct sock *sk)
 	struct sk_buff* skb;
 
 	skb = skb_peek(&sk->sk_write_queue);
-	if (skb == NULL || !(TCP_SKB_CB(skb)->flags&TCPCB_FLAG_SYN)) {
+	if (skb == NULL || !(TCP_SKB_CB(skb)->flags&TCPHDR_SYN)) {
 		printk(KERN_DEBUG "tcp_send_synack: wrong queue state\n");
 		return -EFAULT;
 	}
-	if (!(TCP_SKB_CB(skb)->flags&TCPCB_FLAG_ACK)) {
+	if (!(TCP_SKB_CB(skb)->flags&TCPHDR_ACK)) {
 		if (skb_cloned(skb)) {
 			struct sk_buff *nskb = skb_copy(skb, GFP_ATOMIC);
 			if (nskb == NULL)
@@ -2096,7 +2095,7 @@ int tcp_send_synack(struct sock *sk)
 			skb = nskb;
 		}
 
-		TCP_SKB_CB(skb)->flags |= TCPCB_FLAG_ACK;
+		TCP_SKB_CB(skb)->flags |= TCPHDR_ACK;
 		TCP_ECN_send_synack(tcp_sk(sk), skb);
 	}
 	TCP_SKB_CB(skb)->when = tcp_time_stamp;
@@ -2277,7 +2276,7 @@ int tcp_connect(struct sock *sk)
 	/* Reserve space for headers. */
 	skb_reserve(buff, MAX_TCP_HEADER);
 
-	TCP_SKB_CB(buff)->flags = TCPCB_FLAG_SYN;
+	TCP_SKB_CB(buff)->flags = TCPHDR_SYN;
 	TCP_ECN_send_syn(sk, buff);
 	TCP_SKB_CB(buff)->sacked = 0;
 	skb_shinfo(buff)->gso_segs = 1;
@@ -2388,7 +2387,7 @@ void tcp_send_ack(struct sock *sk)
 		/* Reserve space for headers and prepare control bits. */
 		skb_reserve(buff, MAX_TCP_HEADER);
 		buff->csum = 0;
-		TCP_SKB_CB(buff)->flags = TCPCB_FLAG_ACK;
+		TCP_SKB_CB(buff)->flags = TCPHDR_ACK;
 		TCP_SKB_CB(buff)->sacked = 0;
 		skb_shinfo(buff)->gso_segs = 1;
 		skb_shinfo(buff)->gso_size = 0;
@@ -2425,7 +2424,7 @@ static int tcp_xmit_probe_skb(struct sock *sk, int urgent)
 	/* Reserve space for headers and set control bits. */
 	skb_reserve(skb, MAX_TCP_HEADER);
 	skb->csum = 0;
-	TCP_SKB_CB(skb)->flags = TCPCB_FLAG_ACK;
+	TCP_SKB_CB(skb)->flags = TCPHDR_ACK;
 	TCP_SKB_CB(skb)->sacked = urgent;
 	skb_shinfo(skb)->gso_segs = 1;
 	skb_shinfo(skb)->gso_size = 0;
@@ -2463,13 +2462,13 @@ int tcp_write_wakeup(struct sock *sk)
 			if (seg_size < TCP_SKB_CB(skb)->end_seq - TCP_SKB_CB(skb)->seq ||
 			    skb->len > mss) {
 				seg_size = min(seg_size, mss);
-				TCP_SKB_CB(skb)->flags |= TCPCB_FLAG_PSH;
+				TCP_SKB_CB(skb)->flags |= TCPHDR_PSH;
 				if (tcp_fragment(sk, skb, seg_size, mss))
 					return -1;
 			} else if (!tcp_skb_pcount(skb))
 				tcp_set_skb_tso_segs(sk, skb, mss);
 
-			TCP_SKB_CB(skb)->flags |= TCPCB_FLAG_PSH;
+			TCP_SKB_CB(skb)->flags |= TCPHDR_PSH;
 			TCP_SKB_CB(skb)->when = tcp_time_stamp;
 			err = tcp_transmit_skb(sk, skb, 1, GFP_ATOMIC);
 			if (!err) {
