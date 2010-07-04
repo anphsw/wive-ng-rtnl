@@ -245,6 +245,11 @@ struct sockaddr_in {
 #include <asm/byteorder.h> 
 
 #ifdef __KERNEL__
+static inline bool ipv4_is_loopback(__be32 addr)                                                                                            
+{                                                                                                                                           
+        return (addr & htonl(0xff000000)) == htonl(0x7f000000);                                                                             
+}   
+
 /* Some random defines to make it easier in the kernel.. */
 #define LOOPBACK(x)	(((x) & htonl(0xff000000)) == htonl(0x7f000000))
 #define MULTICAST(x)	(((x) & htonl(0xf0000000)) == htonl(0xe0000000))

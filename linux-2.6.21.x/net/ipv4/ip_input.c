@@ -400,7 +400,7 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 	 *
 	 *	1.	Length at least the size of an ip header
 	 *	2.	Version of 4
-	 *	3.	Checksums correctly. [Speed optimisation for later, skip loopback checksums]
+	 *	3.	Checksums correctly. [Speed optimisation: skip loopback checksums]
 	 *	4.	Doesn't have a bogus length
 	 */
 
@@ -412,8 +412,9 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 
 	iph = skb->nh.iph;
 
-	if (unlikely(ip_fast_csum((u8 *)iph, iph->ihl)))
-		goto inhdr_error;
+	if (!ipv4_is_loopback(iph->daddr))
+		if (unlikely(ip_fast_csum((u8 *)iph, iph->ihl)))
+			goto inhdr_error;
 
 	len = ntohs(iph->tot_len);
 	if (skb->len < len || len < (iph->ihl*4))
