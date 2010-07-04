@@ -59,7 +59,7 @@ struct rtable
 	struct flowi		fl;
 
 	struct in_device	*idev;
-	
+
 	unsigned		rt_flags;
 	__u16			rt_type;
 	__u16			rt_multipath_alg;
