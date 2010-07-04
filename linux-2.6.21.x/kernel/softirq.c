@@ -100,7 +100,9 @@ EXPORT_SYMBOL(local_bh_disable);
 
 void __local_bh_enable(void)
 {
+#ifdef CONFIG_TRACE_IRQFLAGS_SUPPORT
 	WARN_ON_ONCE(in_irq());
+#endif
 
 	/*
 	 * softirqs should never be enabled by __local_bh_enable(),
