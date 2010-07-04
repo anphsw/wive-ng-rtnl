@@ -100,7 +100,7 @@ DEBUGP("tuple %p: %u %u.%u.%u.%u:%hu -> %u.%u.%u.%u:%hu\n",	\
 /* If we're the first tuple, it's the original dir. */
 #define DIRECTION(h) ((enum ip_conntrack_dir)(h)->tuple.dst.dir)
 
-#ifdef ASUS QOS
+#ifdef CONFIG_ASUS_QOS
 #define IP_TRACK_MAX              10
 #define IP_TRACK_COMPARE          40
 

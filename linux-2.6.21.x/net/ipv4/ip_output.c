@@ -160,7 +160,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 
 EXPORT_SYMBOL_GPL(ip_build_and_send_pkt);
 
-static inline int ip_finish_output2(struct sk_buff *skb)
+inline int ip_finish_output2(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct net_device *dev = dst->dev;
@@ -191,6 +191,7 @@ static inline int ip_finish_output2(struct sk_buff *skb)
 	kfree_skb(skb);
 	return -EINVAL;
 }
+EXPORT_SYMBOL_GPL(ip_finish_output2);
 
 static inline int ip_finish_output(struct sk_buff *skb)
 {
