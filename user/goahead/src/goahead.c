@@ -320,7 +320,7 @@ int setDefault(void)
 static int initWebs(void)
 {
 	struct in_addr	intaddr;
-#ifdef GA_HOSTNAME_SUPPORT
+#if 0
 	struct hostent	*hp;
 	char			host[128];
 #else
@@ -353,7 +353,7 @@ static int initWebs(void)
 		error(E_L, E_LOG, T("gohead.c: Warning: empty administrator account or password"));
 #endif
 
-#ifdef GA_HOSTNAME_SUPPORT
+#if 0
 /*
  *	Define the local Ip address, host name, default home page and the 
  *	root web directory.
@@ -396,7 +396,7 @@ static int initWebs(void)
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
-#ifdef GA_HOSTNAME_SUPPORT
+#if 0
 	ascToUni(wbuf, host, min(strlen(host) + 1, sizeof(wbuf)));
 #else
 	//use ip address (already in wbuf) as host
