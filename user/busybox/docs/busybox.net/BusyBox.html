@@ -124,12 +124,12 @@ been enabled, more detailed usage information will also be available.</p>
         iptunnel, kill, killall, killall5, klogd, length, linuxrc, ln,
         logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir, mknod,
         modprobe, more, mount, mv, nc, netstat, nice, nslookup, ntpd,
-        passwd, pidof, ping, ping6, poweroff, printf, ps, pwd, reboot,
-        renice, rm, rmdir, rmmod, route, run-parts, sed, seq, setconsole,
-        sh, sleep, sort, split, stat, sum, switch_root, sync, sysctl,
-        syslogd, tail, tar, test, time, top, touch, traceroute, traceroute6,
-        true, udhcpc, udhcpd, umount, uname, uniq, unix2dos, unzip, uptime,
-        usleep, vconfig, vi, watch, wc, wget, which, xargs, yes, zcat</pre>
+        passwd, pidof, ping, poweroff, printf, ps, pwd, reboot, renice, rm,
+        rmdir, rmmod, route, run-parts, sed, seq, setconsole, sh, sleep,
+        sort, split, stat, sum, switch_root, sync, sysctl, syslogd, tail,
+        tar, test, time, top, touch, traceroute, true, udhcpc, udhcpd,
+        umount, uname, uniq, unix2dos, unzip, uptime, usleep, vconfig, vi,
+        watch, wc, wget, which, xargs, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -830,8 +830,6 @@ With more than one FILE, precede each with a header giving the file name.</p>
 <p>Configure a network interface</p>
 <p>Options:</p>
 <pre>
-        [add ADDRESS[/PREFIXLEN]]
-        [del ADDRESS[/PREFIXLEN]]
         [[-]broadcast [ADDRESS]] [[-]pointopoint [ADDRESS]]
         [netmask ADDRESS] [dstaddr ADDRESS]
         [hw ether ADDRESS] [metric NN] [mtu NN]
@@ -1295,19 +1293,6 @@ changes the password for the current user.</p>
         -q              Quiet, only displays output at start
                         and when finished</pre>
 </dd>
-<dt><strong><a name="ping6" class="item"><strong>ping6</strong></a></strong></dt>
-
-<dd>
-<p>ping6 [OPTIONS] HOST</p>
-<p>Send ICMP ECHO_REQUEST packets to network hosts</p>
-<p>Options:</p>
-<pre>
-        -c CNT          Send only CNT pings
-        -s SIZE         Send SIZE data bytes in packets (default:56)
-        -I IFACE/IP     Use interface or IP address as source
-        -q              Quiet, only displays output at start
-                        and when finished</pre>
-</dd>
 <dt><strong><a name="poweroff" class="item"><strong>poweroff</strong></a></strong></dt>
 
 <dd>
@@ -1405,7 +1390,7 @@ where FORMAT controls the output exactly as in C printf</p>
 <pre>
         -n      Don't resolve names
         -e      Display other/more information
-        -A inet{6}      Select address family</pre>
+        -A inet Select address family</pre>
 </dd>
 <dt><strong><a name="run_parts" class="item"><strong>run-parts</strong></a></strong></dt>
 
@@ -1685,13 +1670,12 @@ and display a screenful of them.</p>
 <dt><strong><a name="traceroute" class="item"><strong>traceroute</strong></a></strong></dt>
 
 <dd>
-<p><table cellspacing="0" cellpadding="0"><tr><td>traceroute [-46FIldnrv] [-f 1ST_TTL] [-m MAXTTL] [-p PORT] [-q PROBES]
+<p><table cellspacing="0" cellpadding="0"><tr><td>traceroute [-FIldnrv] [-f 1ST_TTL] [-m MAXTTL] [-p PORT] [-q PROBES]
 <tr><td><td>[-s SRC_IP] [-t TOS] [-w WAIT_SEC] [-g GATEWAY] [-i IFACE]
 <tr><td><td>[-z PAUSE_MSEC] HOST [BYTES]</table></p>
 <p>Trace the route to HOST</p>
 <p>Options:</p>
 <pre>
-        -4, -6  Force IP or IPv6 name resolution
         -F      Set the don't fragment bit
         -I      Use ICMP ECHO instead of UDP datagrams
         -l      Display the TTL value of the returned packet
@@ -1707,27 +1691,6 @@ and display a screenful of them.</p>
         -t      Type-of-service in probe packets (default 0)
         -w      Time in seconds to wait for a response (default 3)
         -g      Loose source route gateway (8 max)</pre>
-</dd>
-<dt><strong><a name="traceroute6" class="item"><strong>traceroute6</strong></a></strong></dt>
-
-<dd>
-<p><table cellspacing="0" cellpadding="0"><tr><td>traceroute6 [-dnrv] [-m MAXTTL] [-p PORT] [-q PROBES]
-<tr><td><td>[-s SRC_IP] [-t TOS] [-w WAIT_SEC] [-i IFACE]
-<tr><td><td>HOST [BYTES]</table></p>
-<p>Trace the route to HOST</p>
-<p>Options:</p>
-<pre>
-        -d      Set SO_DEBUG options to socket
-        -n      Print numeric addresses
-        -r      Bypass routing tables, send directly to HOST
-        -v      Verbose
-        -m      Max time-to-live (max number of hops)
-        -p      Base UDP port number used in probes
-                (default is 33434)
-        -q      Number of probes per TTL (default 3)
-        -s      IP address to use as the source address
-        -t      Type-of-service in probe packets (default 0)
-        -w      Time in seconds to wait for a response (default 3)</pre>
 </dd>
 <dt><strong><a name="true" class="item"><strong>true</strong></a></strong></dt>
 

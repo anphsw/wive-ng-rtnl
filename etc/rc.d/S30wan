@@ -53,11 +53,11 @@ start() {
 	ip link set $wan_if up
     fi
 
+    ip=`nvram_get 2860 wan_ipaddr`
+    nm=`nvram_get 2860 wan_netmask`
+    lan_ip=`nvram_get 2860 lan_ipaddr`
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then
 	if [ "$opmode" != "0" ]; then
-	    ip=`nvram_get 2860 wan_ipaddr`
-	    nm=`nvram_get 2860 wan_netmask`
-	    lan_ip=`nvram_get 2860 lan_ipaddr`
 	    #lan and wan ip should not be the same except in bridge mode
 	    if [ "$ip" = "$lan_ip" ]; then
 		echo "wan service: warning: WAN's IP address is set identical to LAN"
