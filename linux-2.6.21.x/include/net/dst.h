@@ -114,6 +114,12 @@ dst_metric(const struct dst_entry *dst, int metric)
 	return dst->metrics[metric-1];
 }
 
+static inline u32                                                                                                                          
+dst_feature(const struct dst_entry *dst, u32 feature)                                                                                      
+{                                                                                                                                          
+       return dst_metric(dst, RTAX_FEATURES) & feature;                                                                                    
+}                                                                                                                                          
+
 static inline u32 dst_mtu(const struct dst_entry *dst)
 {
 	u32 mtu = dst_metric(dst, RTAX_MTU);
@@ -139,7 +145,7 @@ static inline void set_dst_metric_rtt(struct dst_entry *dst, int metric,
 static inline u32
 dst_allfrag(const struct dst_entry *dst)
 {
-	int ret = dst_metric(dst, RTAX_FEATURES) & RTAX_FEATURE_ALLFRAG;
+	int ret = dst_feature(dst,  RTAX_FEATURE_ALLFRAG);
 	/* Yes, _exactly_. This is paranoia. */
 	barrier();
 	return ret;
@@ -153,9 +159,21 @@ dst_metric_locked(struct dst_entry *dst, int metric)
 
 static inline void dst_hold(struct dst_entry * dst)
 {
+        /*
+         * If your kernel compilation stops here, please check
+         * __pad_to_align_refcnt declaration in struct dst_entry
+         */
+        BUILD_BUG_ON(offsetof(struct dst_entry, __refcnt) & 63);
 	atomic_inc(&dst->__refcnt);
 }
 
+static inline void dst_use(struct dst_entry *dst, unsigned long time)
+{
+        dst_hold(dst);
+        dst->__use++;
+        dst->lastuse = time;
+}
+  
 static inline
 struct dst_entry * dst_clone(struct dst_entry * dst)
 {
@@ -214,7 +232,8 @@ static inline void dst_confirm(struct dst_entry *dst)
 		neigh_confirm(dst->neighbour);
 }
 
-static inline void dst_negative_advice(struct dst_entry **dst_p)
+static inline void dst_negative_advice(struct dst_entry **dst_p,
+                                       struct sock *sk)
 {
 	struct dst_entry * dst = *dst_p;
 	if (dst && dst->ops->negative_advice)

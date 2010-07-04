@@ -41,7 +41,7 @@ MODULE_LICENSE("GPL");
 #define TIMEOUTS                    /* Compile connection timeout support */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS /* Static timeout */
 //#define OPTIMISE_FOR_LONG_CONNECTIONS /* Timeout refreshed */
-#define ALG_COMPATIBLE              /* Consult Conntrack database for ALG */
+//#define ALG_COMPATIBLE              /* Consult Conntrack database for ALG */
 #define NO_XLR8_RELATED 0          /*Should Related connections be xlr8ed?*/
 
 
@@ -379,11 +379,11 @@ out:
 
 /* Hash table add */
 
-static inline int hash_table_add (PacketInfo *pre, PacketInfo *post)
+static inline int hash_table_add (PacketInfo *pre, PacketInfo *post, struct sk_buff *skb)
 {
 
-	struct hash_table *set_hash;
-	int ret = 0;
+    struct hash_table *set_hash;
+    int ret = 0;
     uint32_t key ;
     MATCH_TYPE matchType;
 
@@ -616,6 +616,7 @@ conntrack_hook_pre_early(unsigned int hooknum, struct sk_buff **pskb,
     struct hash_table *nat;
     MATCH_TYPE matchType;
     uint32_t key;
+
     /* Cannot remove this or gives kernel panic 
      * XXX: Maybe we can write a trafficSelectEarly that is quick 
      */
@@ -679,7 +680,7 @@ conntrack_hook_post(unsigned int hooknum, struct sk_buff **pskb,
         info_from_skb_mark_get ((*pskb),&pre);
         skb_to_info(*pskb, &post);
         if(ALG_IS_REGD(*pskb) == 0)
-            hash_table_add(pre,&post);
+            hash_table_add(pre,&post,(*pskb));
         else
             DEBUGP(KERN_CRIT "ALG test failed - not adding\n");
         }

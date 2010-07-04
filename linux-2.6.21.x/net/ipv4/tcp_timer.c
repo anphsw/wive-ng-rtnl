@@ -126,7 +126,7 @@ static int tcp_write_timeout(struct sock *sk)
 
 	if ((1 << sk->sk_state) & (TCPF_SYN_SENT | TCPF_SYN_RECV)) {
 		if (icsk->icsk_retransmits)
-			dst_negative_advice(&sk->sk_dst_cache);
+			dst_negative_advice(&sk->sk_dst_cache, sk);
 		retry_until = icsk->icsk_syn_retries ? : sysctl_tcp_syn_retries;
 	} else {
 		if (icsk->icsk_retransmits >= sysctl_tcp_retries1) {
@@ -144,7 +144,7 @@ static int tcp_write_timeout(struct sock *sk)
 				}
 			}
 
-			dst_negative_advice(&sk->sk_dst_cache);
+			dst_negative_advice(&sk->sk_dst_cache, sk);
 		}
 
 		retry_until = sysctl_tcp_retries2;
