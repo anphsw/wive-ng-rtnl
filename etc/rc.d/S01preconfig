@@ -54,7 +54,7 @@ start() {
 
 #check firmwave update or clean burn
 IS_WIVE=`nvram_get IS_WIVE`
-if [ $IS_WIVE = "YES" ]; then
+if [ "$IS_WIVE" = "YES" ]; then
     echo "Normal boot no need reset"
 else
     echo "Clear and load defaults to nvram!"

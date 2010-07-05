@@ -5,7 +5,7 @@ get_param
 if [ ! -f /tmp/webrun ] || [ "$static" = "on" ] ; then
  echo "Generate resolve: "
     #in case no previous file
-    if [ $fname = "" ]; then
+    if [ "$fname" = "" ]; then
 	fname = "/etc/resolv.conf"
     fi
     if [ -f $fname ]; then

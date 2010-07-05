@@ -21,7 +21,7 @@ MODIFIED=0
         for i in `seq 1 36`; do
             id=`cat /dev/urandom | hexdump | head -1 | cut -c9`
             num=`expr $num + 1`
-            if [ $num = "9" ] || [ $num = "19" ] || [ $num = "24" ]; then
+            if [ "$num" = "9" ] || [ "$num" = "19" ] || [ "$num" = "24" ]; then
 	        id="-"
             fi
             outid=$outid$id
@@ -31,7 +31,7 @@ MODIFIED=0
         printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
 	MODIFIED=1
     fi
-    if [ $MODIFIED = "1" ]; then
+    if [ "$MODIFIED" = "1" ]; then
 	echo > /var/MODIFIED
     fi
 }

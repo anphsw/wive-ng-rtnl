@@ -9,7 +9,7 @@ web_wait
 
 start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`
-    if [ $vpnEnabled = "on" ]; then
+    if [ "$vpnEnabled" = "on" ]; then
      echo "Start vpnhelper"
       #get param
       vpnType=`nvram_get 2860 vpnType`
@@ -26,15 +26,15 @@ start() {
 
     
       #call to vpn
-      if [ $vpnType = "0" ]; then
+      if [ "$vpnType" = "0" ]; then
 	echo "PPPOE calling..."
 	(sleep 5 && /etc/scripts/config-pppoe.sh) &
       fi
-      if [ $vpnType = "1" ]; then
+      if [ "$vpnType" = "1" ]; then
 	echo "PPTP calling..."
 	(sleep 5 && /etc/scripts/config-pptp.sh) &
       fi
-      if [ $vpnType = "2" ]; then
+      if [ "$vpnType" = "2" ]; then
 	echo "L2TP calling..."
 	(sleep 5 && /etc/scripts/config-l2tp.sh) &
       fi

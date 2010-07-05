@@ -8,7 +8,7 @@
 web_wait
 
 start() {
-if [ -f /bin/radvd ] && [ $CONFIG_IPV6 != "" ]; then
+if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
  opmode=`nvram_get 2860 OperationMode`
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
@@ -79,7 +79,7 @@ fi
 
 stop() {
  echo  "Stop radvd daemon..."
-if [ -f /bin/radvd ] && [ $CONFIG_IPV6 != "" ]; then
+if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
   killall radvd > /dev/null 2>&1
   ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     
   ip link set dev tun6to4 down > /dev/null 2>&1

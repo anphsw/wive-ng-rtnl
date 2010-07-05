@@ -6,7 +6,7 @@
 #include kernel config                                                                                                                      
 . /bin/config.sh    
 
-if [ $CONFIG_TMPFS != "" ] ; then
+if [ "$CONFIG_TMPFS" != "" ] ; then
     #mount /tmp /etc in /var
     mkdir -p /var/tmpfs
     mount -o bind /var/tmpfs /tmp
