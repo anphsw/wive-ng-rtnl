@@ -4298,7 +4298,7 @@ INT	Set_AP_WmmCapable_Proc(
 #ifdef RTL865X_FAST_PATH	
 	if (!isFastPathCapable(pAd)) {
 		rtlairgo_fast_tx_unregister();
-		rtl865x_extDev_unregisterUcastTxDev(pAd->net_dev);		
+		fastpath_extDev_unregisterUcastTxDev(pAd->net_dev);		
 	}
 #endif
 

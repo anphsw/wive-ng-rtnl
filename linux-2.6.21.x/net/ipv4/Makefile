@@ -35,7 +35,6 @@ obj-$(CONFIG_IP_ROUTE_MULTIPATH_RR) += multipath_rr.o
 obj-$(CONFIG_IP_ROUTE_MULTIPATH_RANDOM) += multipath_random.o
 obj-$(CONFIG_IP_ROUTE_MULTIPATH_WRANDOM) += multipath_wrandom.o
 obj-$(CONFIG_IP_ROUTE_MULTIPATH_DRR) += multipath_drr.o
-obj-$(CONFIG_NETFILTER)	+= netfilter.o netfilter/
 obj-$(CONFIG_IP_VS) += ipvs/
 obj-$(CONFIG_INET_DIAG) += inet_diag.o 
 obj-$(CONFIG_IP_ROUTE_MULTIPATH_CACHED) += multipath.o
@@ -55,3 +54,7 @@ obj-$(CONFIG_NETLABEL) += cipso_ipv4.o
 
 obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
 		      xfrm4_output.o
+
+obj-$(CONFIG_NETFILTER) += netfilter.o netfilter/
+obj-$(CONFIG_NF_CONNTRACK_ENABLED)	+= netfilter/
+obj-$(CONFIG_CONNTRACK_FAST_PATH) += fastpath/

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#include kernel config
+. /bin/config.sh
+
 PPP_IFACE="$1"
 PPP_TTY="$2"
 PPP_SPEED="$3"
@@ -42,8 +45,10 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     $LOG "Flush route cache"
     ip route flush cache
 
-    $LOG "Cleanup conntrack table"
-    echo 0 > /proc/cleannat
+    if [ "$CONFIG_NF_CONNTRACK_SUPPORT" = "y" ]; then
+	$LOG "Cleanup conntrack table"
+	echo 0 > /proc/cleannat
+    fi
 
     $LOG "Restart need service and rebuild shaper rules"
     service shaper stop

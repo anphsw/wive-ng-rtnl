@@ -1766,7 +1766,6 @@ static inline int __mkroute_input(struct sk_buff *skb,
 		}
 	}
 
-
 	rth = dst_alloc(&ipv4_dst_ops);
 	if (!rth) {
 		err = -ENOBUFS;
@@ -1792,7 +1791,7 @@ static inline int __mkroute_input(struct sk_buff *skb,
 	rth->fl.fl4_lsrc	= lsrc;
 	rth->rt_gateway	= daddr;
 	rth->rt_iif 	=
-		rth->fl.iif	= in_dev->dev->ifindex;
+	rth->fl.iif	= in_dev->dev->ifindex;
 	rth->u.dst.dev	= (out_dev)->dev;
 	dev_hold(rth->u.dst.dev);
 	rth->idev	= in_dev_get(rth->u.dst.dev);

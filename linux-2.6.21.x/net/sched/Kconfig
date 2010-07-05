@@ -191,7 +191,6 @@ config NET_SCH_SFQ
 
 config NET_SCH_ESFQ
 	tristate "Enhanced Stochastic Fairness Queueing (ESFQ)"
-	depends on NF_CONNTRACK
 	---help---
 	  Say Y here if you want to use the Enhanced Stochastic Fairness
 	  Queueing (ESFQ) packet scheduling algorithm for some of your network

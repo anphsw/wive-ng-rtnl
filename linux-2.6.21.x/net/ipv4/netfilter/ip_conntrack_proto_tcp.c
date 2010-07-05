@@ -1005,11 +1005,14 @@ static int tcp_packet(struct ip_conntrack *conntrack,
 		break;
 	}
 
+#ifndef CONFIG_CONNTRACK_FAST_PATH
+        // skip sanity check if we are using fastpath, andrew 2008/02/27
 	if (!tcp_in_window(&conntrack->proto.tcp, dir, index,
 			   skb, iph, th)) {
 		write_unlock_bh(&tcp_lock);
 		return -NF_ACCEPT;
 	}
+#endif
     in_window:
 	/* From now on we have got in-window packets */
 	conntrack->proto.tcp.last_index = index;

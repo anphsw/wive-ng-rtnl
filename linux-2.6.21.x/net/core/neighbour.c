@@ -33,8 +33,12 @@
 #include <linux/rtnetlink.h>
 #include <linux/random.h>
 #include <linux/string.h>
+#include <linux/if_ether.h>
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+#include "../ipv4/fastpath/fastpath_core.h"
+#endif
 
-#define NEIGH_DEBUG 1
+#define NEIGH_DEBUG 0
 
 #define NEIGH_PRINTK(x...) printk(x)
 #define NEIGH_NOPRINTK(x...) do { ; } while(0)
@@ -206,8 +210,14 @@ static void neigh_flush_dev(struct neigh_table *tbl, struct net_device *dev)
 				 */
 				skb_queue_purge(&n->arp_queue);
 				n->output = neigh_blackhole;
-				if (n->nud_state & NUD_VALID)
+                                if (n->nud_state & NUD_VALID){
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+                                       if(FastPath_Enabled()) {
+                                       fastpath_delArp(*(u32*)n->primary_key);
+                                       }                                                                                                   
+#endif 
 					n->nud_state = NUD_NOARP;
+				}
 				else
 					n->nud_state = NUD_NONE;
 				NEIGH_PRINTK2("neigh %p is stray.\n", n);
@@ -675,6 +685,11 @@ static void neigh_periodic_timer(unsigned long arg)
 		     time_after(now, n->used + n->parms->gc_staletime))) {
 			*np = n->next;
 			n->dead = 1;
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+                               if (FastPath_Enabled() && (state & NUD_VALID)) {
+                                       fastpath_delArp(*(u32*)n->primary_key);
+                               }
+#endif
 			write_unlock(&n->lock);
 			if (n->parms->neigh_cleanup)
 				n->parms->neigh_cleanup(n);
@@ -787,6 +802,12 @@ static void neigh_timer_handler(unsigned long arg)
 	    atomic_read(&neigh->probes) >= neigh_max_probes(neigh)) {
 		struct sk_buff *skb;
 
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+		if (FastPath_Enabled() && (neigh->nud_state & NUD_VALID)) {
+			fastpath_delArp(*(u32*)neigh->primary_key);
+		}
+#endif
+
 		neigh->nud_state = NUD_FAILED;
 		neigh->updated = jiffies;
 		notify = 1;
@@ -834,6 +855,15 @@ out:
 	if (notify && neigh->parms->app_probes)
 		neigh_app_notify(neigh);
 #endif
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+	if (FastPath_Enabled()) {
+	if ((neigh->nud_state & NUD_VALID) && !(state & NUD_VALID)) {
+		fastpath_addArp(*(u32*)neigh->primary_key, (ether_t*)neigh->ha, ARP_NONE);
+	} else if ((state & NUD_VALID) && !(neigh->nud_state & NUD_VALID)) {
+		fastpath_delArp(*(u32*)neigh->primary_key);
+	}
+	}
+#endif
 	neigh_release(neigh);
 }
 
@@ -853,11 +883,23 @@ int __neigh_event_send(struct neighbour *neigh, struct sk_buff *skb)
 	if (!(neigh->nud_state & (NUD_STALE | NUD_INCOMPLETE))) {
 		if (neigh->parms->mcast_probes + neigh->parms->app_probes) {
 			atomic_set(&neigh->probes, neigh->parms->ucast_probes);
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+				if (FastPath_Enabled() && (neigh->nud_state & NUD_VALID)) {
+					fastpath_delArp(*(u32*)neigh->primary_key);
+				}
+#endif
 			neigh->nud_state     = NUD_INCOMPLETE;
 			neigh->updated = jiffies;
 			neigh_hold(neigh);
 			neigh_add_timer(neigh, now + 1);
 		} else {
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+				if (FastPath_Enabled()) {
+				if (neigh->nud_state & NUD_VALID) {
+					fastpath_delArp(*(u32*)neigh->primary_key);
+				}
+				}
+#endif
 			neigh->nud_state = NUD_FAILED;
 			neigh->updated = jiffies;
 			write_unlock_bh(&neigh->lock);
@@ -1023,6 +1065,13 @@ int neigh_update(struct neighbour *neigh, const u8 *lladdr, u8 new,
 	}
 
 	if (lladdr != neigh->ha) {
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+		if (FastPath_Enabled()) {
+		if (old & NUD_VALID) {
+			fastpath_modifyArp(*(u32*)neigh->primary_key, (ether_t*)lladdr, ARP_NONE);
+		}
+		}
+#endif
 		memcpy(&neigh->ha, lladdr, dev->addr_len);
 		neigh_update_hhs(neigh);
 		if (!(new & NUD_CONNECTED))
@@ -1066,6 +1115,16 @@ out:
 #ifdef CONFIG_ARPD
 	if (notify && neigh->parms->app_probes)
 		neigh_app_notify(neigh);
+#endif
+	NEIGH_PRINTK2("%s(%d): neigh %p is connected\n", __FUNCTION__, __LINE__, neigh);
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+	if (FastPath_Enabled()) {
+	if ((neigh->nud_state & NUD_VALID) && !(old & NUD_VALID)) {
+		fastpath_addArp(*(u32*)neigh->primary_key, (ether_t*)neigh->ha, ARP_NONE);
+	} else if ((old & NUD_VALID) && !(neigh->nud_state & NUD_VALID)) {
+		fastpath_delArp(*(u32*)neigh->primary_key);
+	}
+	}
 #endif
 	return err;
 }

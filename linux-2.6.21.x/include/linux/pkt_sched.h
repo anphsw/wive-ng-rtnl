@@ -152,6 +152,7 @@ struct tc_sfq_qopt
 
 /* ESFQ section */
 
+#ifdef CONFIG_NF_CONNTRACK_SUPPORT
 enum
 {
         /* traditional */
@@ -166,6 +167,20 @@ enum
 	TCA_SFQ_HASH_CTREPLSRC,
 	TCA_SFQ_HASH_CTNATCHG,
 };
+#else
+enum
+{
+        /* traditional */
+        TCA_SFQ_HASH_CLASSIC,
+        TCA_SFQ_HASH_DST,
+        TCA_SFQ_HASH_SRC,
+        TCA_SFQ_HASH_FWMARK,
+        /* direct */
+        TCA_SFQ_HASH_DSTDIR,
+        TCA_SFQ_HASH_SRCDIR,
+        TCA_SFQ_HASH_FWMARKDIR,
+};
+#endif
 
 struct tc_esfq_qopt
 {

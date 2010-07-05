@@ -951,7 +951,6 @@ static int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
 	return ei_start_xmit(skb, dev, 1);
 }
 
-
 int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 #if defined(CONFIG_RT_3052_ESW)

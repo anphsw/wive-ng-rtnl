@@ -345,7 +345,6 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
 			goto drop;
 		}
 	}
-
 #ifdef CONFIG_NET_CLS_ROUTE
 	if (unlikely(skb->dst->tclassid)) {
 		struct ip_rt_acct *st = ip_rt_acct + 256*smp_processor_id();

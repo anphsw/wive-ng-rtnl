@@ -65,6 +65,10 @@
 #define DEBUGP(format, args...)
 #endif
 
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+#include "../ipv4/fastpath/fastpath_core.h"
+#endif
+
 #include <linux/netfilter_ipv4/lockhelp.h>
 DECLARE_RWLOCK(nf_conntrack_lock);
 EXPORT_SYMBOL_GPL(nf_conntrack_lock);

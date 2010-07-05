@@ -44,6 +44,9 @@
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 #include <linux/netfilter_ipv4/ip_conntrack_helper.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+#include "../fastpath/fastpath_core.h"
+#endif
 
 #define IP_CONNTRACK_VERSION	"2.4"
 
@@ -316,7 +319,7 @@ destroy_conntrack(struct nf_conntrack *nfct)
 {
 	struct ip_conntrack *ct = (struct ip_conntrack *)nfct;
 	struct ip_conntrack_protocol *proto;
-	typeof(ip_conntrack_destroyed) destroyed;
+	struct ip_conntrack_helper *helper;
 
 	DEBUGP("destroy_conntrack(%p)\n", ct);
 	IP_NF_ASSERT(atomic_read(&nfct->use) == 0);
@@ -324,6 +327,10 @@ destroy_conntrack(struct nf_conntrack *nfct)
 
 	ip_conntrack_event(IPCT_DESTROY, ct);
 	set_bit(IPS_DYING_BIT, &ct->status);
+
+	helper = ct->helper;
+	if (helper && helper->destroy)
+		helper->destroy(ct);
 
 	/* To make sure we don't get any weird locking issues here:
 	 * destroy_conntrack() MUST NOT be called with a write lock
@@ -333,11 +340,19 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	if (proto && proto->destroy)
 		proto->destroy(ct);
 
-	destroyed = rcu_dereference(ip_conntrack_destroyed);
-	if (destroyed)
-		destroyed(ct);
+#ifdef	CONFIG_CONNTRACK_FAST_PATH
+	if (FastPath_Enabled()) {
+	if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
+		if ( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP ) {
+			fastpath_delNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple);
+		}
+	}	
+	}
+#endif
 
-	rcu_read_unlock();
+	if (ip_conntrack_destroyed)
+		ip_conntrack_destroyed(ct);
 
 	write_lock_bh(&ip_conntrack_lock);
 	/* Expectations will have been removed in clean_from_lists,
@@ -345,6 +360,13 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 * before connection is in the list, so we need to clean here,
 	 * too. */
 	ip_ct_remove_expectations(ct);
+
+	#if defined(CONFIG_IP_NF_MATCH_LAYER7) || defined(CONFIG_IP_NF_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto)
+		kfree(ct->layer7.app_proto);
+	if(ct->layer7.app_data)
+		kfree(ct->layer7.app_data);
+	#endif
 
 	/* We overload first tuple to link into unconfirmed list. */
 	if (!is_confirmed(ct)) {
@@ -365,11 +387,6 @@ destroy_conntrack(struct nf_conntrack *nfct)
 static void death_by_timeout(unsigned long ul_conntrack)
 {
 	struct ip_conntrack *ct = (void *)ul_conntrack;
-	struct ip_conntrack_helper *helper;
-
-	helper = ct->helper;
-	if (helper && helper->destroy)
-		helper->destroy(ct);
 
 	write_lock_bh(&ip_conntrack_lock);
 	/* Inside lock so preempt is disabled on module removal path.
@@ -538,6 +555,7 @@ __ip_conntrack_confirm(struct sk_buff **pskb)
 	list_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list);
 
 	__ip_conntrack_hash_insert(ct, hash, repl_hash);
+
 	/* Timer relative to confirmation time, not original
 	   setting time, otherwise we'd get timer wrap in
 	   weird delay cases. */
@@ -606,7 +624,7 @@ static int early_drop(struct list_head *chain)
 	if (del_timer(&ct->timeout)) {
 		death_by_timeout((unsigned long)ct);
 		dropped = 1;
-		CONNTRACK_STAT_INC_ATOMIC(early_drop);
+		CONNTRACK_STAT_INC(early_drop);
 	}
 	ip_conntrack_put(ct);
 	return dropped;
@@ -672,7 +690,7 @@ ip_conntrack_proto_find_get(u_int8_t protocol)
 			p = &ip_conntrack_generic_protocol;
 	}
 	rcu_read_unlock();
-
+	
 	return p;
 }
 
@@ -933,10 +951,14 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 	struct ip_conntrack_protocol *proto;
 	int set_reply = 0;
 	int ret;
+#ifdef CONFIG_CONNTRACK_FAST_PATH	
+        int first_reply=0;
+#endif	
+
 
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
-		CONNTRACK_STAT_INC_ATOMIC(ignore);
+		CONNTRACK_STAT_INC(ignore);
 		return NF_ACCEPT;
 	}
 
@@ -949,43 +971,27 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 		return NF_DROP;
 	}
 
-/* Doesn't cover locally-generated broadcast, so not worth it. */
-#if 0
-	/* Ignore broadcast: no `connection'. */
-	if ((*pskb)->pkt_type == PACKET_BROADCAST) {
-		printk("Broadcast packet!\n");
-		return NF_ACCEPT;
-	} else if (((*pskb)->nh.iph->daddr & htonl(0x000000FF))
-		   == htonl(0x000000FF)) {
-		printk("Should bcast: %u.%u.%u.%u->%u.%u.%u.%u (sk=%p, ptype=%u)\n",
-		       NIPQUAD((*pskb)->nh.iph->saddr),
-		       NIPQUAD((*pskb)->nh.iph->daddr),
-		       (*pskb)->sk, (*pskb)->pkt_type);
-	}
-#endif
-
-	/* rcu_read_lock()ed by nf_hook_slow */
 	proto = __ip_conntrack_proto_find((*pskb)->nh.iph->protocol);
 
 	/* It may be an special packet, error, unclean...
 	 * inverse of the return code tells to the netfilter
 	 * core what to do with the packet. */
-	if (proto->error != NULL
+	if (proto->error != NULL 
 	    && (ret = proto->error(*pskb, &ctinfo, hooknum)) <= 0) {
-		CONNTRACK_STAT_INC_ATOMIC(error);
-		CONNTRACK_STAT_INC_ATOMIC(invalid);
+		CONNTRACK_STAT_INC(error);
+		CONNTRACK_STAT_INC(invalid);
 		return -ret;
 	}
 
 	if (!(ct = resolve_normal_ct(*pskb, proto,&set_reply,hooknum,&ctinfo))) {
 		/* Not valid part of a connection */
-		CONNTRACK_STAT_INC_ATOMIC(invalid);
+		CONNTRACK_STAT_INC(invalid);
 		return NF_ACCEPT;
 	}
 
 	if (IS_ERR(ct)) {
 		/* Too stressed to deal. */
-		CONNTRACK_STAT_INC_ATOMIC(drop);
+		CONNTRACK_STAT_INC(drop);
 		return NF_DROP;
 	}
 
@@ -997,12 +1003,36 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 		 * the netfilter core what to do*/
 		nf_conntrack_put((*pskb)->nfct);
 		(*pskb)->nfct = NULL;
-		CONNTRACK_STAT_INC_ATOMIC(invalid);
+		CONNTRACK_STAT_INC(invalid);
 		return -ret;
 	}
 
-	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+	if (set_reply && !test_bit(IPS_SEEN_REPLY_BIT, &ct->status)){
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+                first_reply=1;
+#endif
+		//ip_conntrack_event_cache(IPCT_STATUS, *pskb);
+        }
+
+#ifdef	CONFIG_CONNTRACK_FAST_PATH
+	if (FastPath_Enabled()) {
+	//cathy
+	//info = &ct->nat.info;
+	//helper = info->helper;
+	if (!ct->helper &&  set_reply && first_reply) {
+		if( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP ) {
+			//printk("napt add !!\n");
+			fastpath_addNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple, NP_NONE);
+		}
+	}	/* IPS_SEEN_REPLY_BIT up */
+	}
+#endif
+
+	if (set_reply && !test_bit(IPS_SEEN_REPLY_BIT, &ct->status)){
+		test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status) ;
 		ip_conntrack_event_cache(IPCT_STATUS, *pskb);
+        }
 
 	return ret;
 }
@@ -1010,15 +1040,8 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 int invert_tuplepr(struct ip_conntrack_tuple *inverse,
 		   const struct ip_conntrack_tuple *orig)
 {
-	struct ip_conntrack_protocol *proto;
-	int ret;
-
-	rcu_read_lock();
-	proto = __ip_conntrack_proto_find(orig->dst.protonum);
-	ret = ip_ct_invert_tuple(inverse, orig, proto);
-	rcu_read_unlock();
-
-	return ret;
+	return ip_ct_invert_tuple(inverse, orig, 
+				  __ip_conntrack_proto_find(orig->dst.protonum));
 }
 
 /* Would two expected things clash? */
@@ -1026,7 +1049,7 @@ static inline int expect_clash(const struct ip_conntrack_expect *a,
 			       const struct ip_conntrack_expect *b)
 {
 	/* Part covered by intersection of masks must be unequal,
-	   otherwise they clash */
+           otherwise they clash */
 	struct ip_conntrack_tuple intersect_mask
 		= { { a->mask.src.ip & b->mask.src.ip,
 		      { a->mask.src.u.all & b->mask.src.u.all } },
@@ -1064,7 +1087,7 @@ void ip_conntrack_unexpect_related(struct ip_conntrack_expect *exp)
 }
 
 /* We don't increase the master conntrack refcount for non-fulfilled
- * conntracks. During the conntrack destruction, the expectations are
+ * conntracks. During the conntrack destruction, the expectations are 
  * always killed before the conntrack itself */
 struct ip_conntrack_expect *ip_conntrack_expect_alloc(struct ip_conntrack *me)
 {
@@ -1153,7 +1176,7 @@ int ip_conntrack_expect_related(struct ip_conntrack_expect *expect)
 	}
 
 	/* Will be over limit? */
-	if (expect->master->helper->max_expected &&
+	if (expect->master->helper->max_expected && 
 	    expect->master->expecting >= expect->master->helper->max_expected)
 		evict_oldest_expect(expect->master);
 
@@ -1162,7 +1185,7 @@ int ip_conntrack_expect_related(struct ip_conntrack_expect *expect)
 	ret = 0;
 out:
 	write_unlock_bh(&ip_conntrack_lock);
-	return ret;
+ 	return ret;
 }
 
 /* Alter reply tuple (maybe alter helper).  This is for NAT, and is
@@ -1210,7 +1233,7 @@ static inline void unhelp(struct ip_conntrack_tuple_hash *i,
 			  const struct ip_conntrack_helper *me)
 {
 	if (tuplehash_to_ctrack(i)->helper == me) {
-		ip_conntrack_event(IPCT_HELPER, tuplehash_to_ctrack(i));
+ 		ip_conntrack_event(IPCT_HELPER, tuplehash_to_ctrack(i));
 		tuplehash_to_ctrack(i)->helper = NULL;
 	}
 }
@@ -1246,8 +1269,8 @@ void ip_conntrack_helper_unregister(struct ip_conntrack_helper *me)
 }
 
 /* Refresh conntrack for this many jiffies and do accounting if do_acct is 1 */
-void __ip_ct_refresh_acct(struct ip_conntrack *ct,
-			enum ip_conntrack_info ctinfo,
+void __ip_ct_refresh_acct(struct ip_conntrack *ct, 
+		        enum ip_conntrack_info ctinfo,
 			const struct sk_buff *skb,
 			unsigned long extra_jiffies,
 			int do_acct)
@@ -1281,7 +1304,7 @@ void __ip_ct_refresh_acct(struct ip_conntrack *ct,
 #ifdef CONFIG_IP_NF_CT_ACCT
 	if (do_acct) {
 		ct->counters[CTINFO2DIR(ctinfo)].packets++;
-		ct->counters[CTINFO2DIR(ctinfo)].bytes +=
+		ct->counters[CTINFO2DIR(ctinfo)].bytes += 
 						ntohs(skb->nh.iph->tot_len);
 		if ((ct->counters[CTINFO2DIR(ctinfo)].packets & 0x80000000)
 		    || (ct->counters[CTINFO2DIR(ctinfo)].bytes & 0x80000000))
@@ -1352,7 +1375,7 @@ static void ip_conntrack_attach(struct sk_buff *nskb, struct sk_buff *skb)
 
 	/* This ICMP is in reverse direction to the packet which caused it */
 	ct = ip_conntrack_get(skb, &ctinfo);
-
+	
 	if (CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL)
 		ctinfo = IP_CT_RELATED + IP_CT_IS_REPLY;
 	else
@@ -1383,7 +1406,7 @@ get_next_corpse(int (*iter)(struct ip_conntrack *i, void *data),
 	list_for_each_entry(h, &unconfirmed, list) {
 		ct = tuplehash_to_ctrack(h);
 		if (iter(ct, data))
-			set_bit(IPS_DYING_BIT, &ct->status);
+			goto found;
 	}
 	write_unlock_bh(&ip_conntrack_lock);
 	return NULL;
@@ -1405,7 +1428,6 @@ ip_ct_iterate_cleanup(int (*iter)(struct ip_conntrack *i, void *), void *data)
 		if (del_timer(&ct->timeout))
 			death_by_timeout((unsigned long)ct);
 		/* ... else the timer will get him soon. */
-
 		ip_conntrack_put(ct);
 	}
 }
@@ -1420,7 +1442,7 @@ getorigdst(struct sock *sk, int optval, void __user *user, int *len)
 	struct inet_sock *inet = inet_sk(sk);
 	struct ip_conntrack_tuple_hash *h;
 	struct ip_conntrack_tuple tuple;
-
+	
 	IP_CT_TUPLE_U_BLANK(&tuple);
 	tuple.src.ip = inet->rcv_saddr;
 	tuple.src.u.tcp.port = inet->sport;
@@ -1488,7 +1510,7 @@ static void free_conntrack_hash(struct list_head *hash, int vmalloced,int size)
 	if (vmalloced)
 		vfree(hash);
 	else
-		free_pages((unsigned long)hash,
+		free_pages((unsigned long)hash, 
 			   get_order(sizeof(struct list_head) * size));
 }
 
@@ -1496,11 +1518,11 @@ static void free_conntrack_hash(struct list_head *hash, int vmalloced,int size)
    supposed to kill the mall. */
 void ip_conntrack_cleanup(void)
 {
-	rcu_assign_pointer(ip_ct_attach, NULL);
+	ip_ct_attach = NULL;
 
 	/* This makes sure all current packets have passed through
-	   netfilter framework.  Roll on, two-stage module
-	   delete... */
+           netfilter framework.  Roll on, two-stage module
+           delete... */
 	synchronize_net();
 
 	ip_ct_event_cache_flush();
@@ -1649,15 +1671,15 @@ int __init ip_conntrack_init(void)
 	/* Don't NEED lock here, but good form anyway. */
 	write_lock_bh(&ip_conntrack_lock);
 	for (i = 0; i < MAX_IP_CT_PROTO; i++)
-		rcu_assign_pointer(ip_ct_protos[i], &ip_conntrack_generic_protocol);
+		ip_ct_protos[i] = &ip_conntrack_generic_protocol;
 	/* Sew in builtin protocols. */
-	rcu_assign_pointer(ip_ct_protos[IPPROTO_TCP], &ip_conntrack_protocol_tcp);
-	rcu_assign_pointer(ip_ct_protos[IPPROTO_UDP], &ip_conntrack_protocol_udp);
-	rcu_assign_pointer(ip_ct_protos[IPPROTO_ICMP], &ip_conntrack_protocol_icmp);
+	ip_ct_protos[IPPROTO_TCP] = &ip_conntrack_protocol_tcp;
+	ip_ct_protos[IPPROTO_UDP] = &ip_conntrack_protocol_udp;
+	ip_ct_protos[IPPROTO_ICMP] = &ip_conntrack_protocol_icmp;
 	write_unlock_bh(&ip_conntrack_lock);
 
 	/* For use by ipt_REJECT */
-	rcu_assign_pointer(ip_ct_attach, ip_conntrack_attach);
+	ip_ct_attach = ip_conntrack_attach;
 
 	/* Set up fake conntrack:
 	    - to never be deleted, not in any hashes */

@@ -208,7 +208,7 @@ static inline int ip_finish_output(struct sk_buff *skb)
 		return ip_finish_output2(skb);
 }
 
-int ip_mc_output(struct sk_buff *skb)
+inline int ip_mc_output(struct sk_buff *skb)
 {
 	struct sock *sk = skb->sk;
 	struct rtable *rt = (struct rtable*)skb->dst;
@@ -274,7 +274,7 @@ int ip_mc_output(struct sk_buff *skb)
 			    !(IPCB(skb)->flags & IPSKB_REROUTED));
 }
 
-int ip_output(struct sk_buff *skb)
+inline int ip_output(struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dst->dev;
 

@@ -1,6 +1,9 @@
 #
 # IP configuration
 #
+config CONNTRACK_FAST_PATH
+        bool "IP: netfilter fast-path"
+
 config IP_MULTICAST
 	bool "IP: multicasting"
 	help
