@@ -1190,12 +1190,14 @@ register_match6(struct ip6tables_match *me)
 
 	old = find_match(me->name, DURING_LOAD, NULL);
 	if (old) {
+#if 0
 		if (old->revision == me->revision) {
 			fprintf(stderr,
 				"%s: match `%s' already registered.\n",
 				program_name, me->name);
 			exit(1);
 		}
+#endif	
 
 		/* Now we have two (or more) options, check compatibility. */
 		if (compatible_match_revision(old->name, old->revision)
@@ -1210,7 +1212,6 @@ register_match6(struct ip6tables_match *me)
 		for (i = &ip6tables_matches; *i!=old; i = &(*i)->next);
 		*i = old->next;
 	}
-	
 	if (me->size != IP6T_ALIGN(me->size)) {
 		fprintf(stderr, "%s: match `%s' has invalid size %u.\n",
 			program_name, me->name, (unsigned int)me->size);
@@ -1235,11 +1236,13 @@ register_target6(struct ip6tables_target *me)
 		exit(1);
 	}
 
+#if 0
 	if (find_target(me->name, DURING_LOAD)) {
 		fprintf(stderr, "%s: target `%s' already registered.\n",
 			program_name, me->name);
 		exit(1);
 	}
+#endif
 
 	if (me->size != IP6T_ALIGN(me->size)) {
 		fprintf(stderr, "%s: target `%s' has invalid size %u.\n",
