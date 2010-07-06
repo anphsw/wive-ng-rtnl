@@ -189,7 +189,6 @@ INT	RT_CfgSetWepKey(
 {
 	INT				KeyLen;
 	INT				i;
-	UCHAR			CipherAlg = CIPHER_NONE;
 	BOOLEAN			bKeyIsHex = FALSE;
 
 	// TODO: Shall we do memset for the original key info??

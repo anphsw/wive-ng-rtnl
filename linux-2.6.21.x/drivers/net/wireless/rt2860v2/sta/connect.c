@@ -1989,8 +1989,9 @@ VOID LinkDown(
 {
 	UCHAR			    i, ByteValue = 0;
 
+#ifdef PCIE_PS_SUPPORT
 	BOOLEAN		Cancelled;
-
+#endif
 	// Do nothing if monitor mode is on
 	if (MONITOR_ON(pAd))
 		return;
@@ -2000,9 +2001,6 @@ VOID LinkDown(
 	if (ATE_ON(pAd))
 		return;
 #endif // RALINK_ATE //    
-	//RTMP_CLEAR_PSFLAG(pAd, fRTMP_PS_GO_TO_SLEEP_NOW);
-	//Comment the codes, beasue the line 2291 call the same function.
-	//RTMPCancelTimer(&pAd->Mlme.PsPollTimer,		&Cancelled);
 	// Not allow go to sleep within linkdown function.
 #ifdef PCIE_PS_SUPPORT
 	RTMP_CLEAR_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
@@ -2024,7 +2022,6 @@ VOID LinkDown(
 
     if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE))
     {
-	    BOOLEAN Cancelled;
         pAd->Mlme.bPsPollTimerRunning = FALSE;
         RTMPCancelTimer(&pAd->Mlme.PsPollTimer,	&Cancelled);
     }

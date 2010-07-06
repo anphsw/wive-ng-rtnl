@@ -6099,7 +6099,7 @@ ACM_BANDWIDTH_INFO BwInfo, *pInfo;
 			if (pAd == NULL)									
 			{													
 				//printk("err> __pAd == NULL!\n");				
-				return;											
+				return 0;
 			}
 
 			/* display */

@@ -88,7 +88,7 @@ USHORT rtmp_ee_flash_read(
 	return (*pValue);
 }
 
-
+extern void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b);
 VOID rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 {
 	if (init_flag)
@@ -302,36 +302,11 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 	return NDIS_STATUS_SUCCESS;
 }
 
-
+extern void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b);
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
-	UCHAR *eepromBuf;
-
-	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));
-	
+	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));	
 	RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
-	
-#if 0
-	os_alloc_mem(pAd, &eepromBuf, EEPROM_SIZE);
-	if (eepromBuf != NULL)
-	{	
-		NdisZeroMemory(eepromBuf, EEPROM_SIZE);
-		NdisMoveMemory(eepromBuf, EeBuffer, EEPROM_SIZE);
-		RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
-		init_flag = 1;
-		nv_ee_start = EeBuffer;
-		if (validFlashEepromID(pAd) == FALSE)
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("The EEPROM in Flash are wrong, use default\n"));
-			NdisMoveMemory(EeBuffer, eepromBuf, EEPROM_SIZE);
-		}
-		/* Set it back for latter initialize. */
-		init_flag = 0;
-		nv_ee_start = 0;
-		os_free_mem(pAd, eepromBuf);
-	}
-#endif
 
 	return rtmp_ee_flash_init(pAd, EeBuffer);
-
 }

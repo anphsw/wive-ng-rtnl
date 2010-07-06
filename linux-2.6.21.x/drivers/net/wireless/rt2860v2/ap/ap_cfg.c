@@ -3263,10 +3263,9 @@ INT	Set_RadarShow_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
-	int i;
-
 #ifdef DFS_SUPPORT
 #ifdef NEW_DFS
+	int i;
 	if (pAd->CommonCfg.dfs_func >= 1)
 	{
 		printk("DFSUseTasklet = %d\n", pAd->CommonCfg.use_tasklet);
@@ -5436,11 +5435,11 @@ INT	Show_ChannelList_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {	
-	UCHAR i, j;
+	UCHAR i;
 
 	printk("\n");	
 	printk("Channel List Number = %d\n", pAd->ChannelListNum);
-	if((pAd->ChannelListNum != 0) && (pAd->ChannelListNum != NULL))
+	if(!pAd->ChannelListNum)
 	{
 		printk("Channel List::");
 		for(i=0; i<pAd->ChannelListNum; i++)
@@ -9194,7 +9193,6 @@ INT	Set_DisConnectSta_Proc(
 	UCHAR					macAddr[MAC_ADDR_LEN];
 	PSTRING					value;
 	INT						i;
-	UCHAR HashIdx;
 	MAC_TABLE_ENTRY *pEntry = NULL;
 
 	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17

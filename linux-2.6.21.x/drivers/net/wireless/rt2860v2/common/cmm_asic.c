@@ -956,8 +956,8 @@ VOID AsicSwitchChannel(
 	UCHAR 	RFValue;
 #if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
 	CHAR    TxPwer3 = 0;
-#endif
 	int i;
+#endif
 #ifdef CONFIG_AP_SUPPORT
 	/* clear all statistics count for QBSS Load */
 	QBSS_LoadStatusClear(pAd);

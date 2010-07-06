@@ -28,7 +28,7 @@
 
 
 #include	"rt_config.h"
-#include "led.h"
+#include 	"led.h"
 
 #if defined (WLAN_LED)
 extern unsigned char   LinkStatus;
@@ -45,7 +45,10 @@ extern void TimerCB(PRTMP_ADAPTER pAd);
 #endif // CONFIG_AP_SUPPORT //
 
 
-
+#ifdef CARRIER_DETECTION_SUPPORT
+extern void unregister_tmr_service(void);
+extern void request_tmr_service(int, void *, void *);
+#endif
 VOID RtmpAsicSendCommandToSwMcu(
 	IN RTMP_ADAPTER *pAd, 
 	IN UCHAR Command, 

@@ -171,7 +171,6 @@ VOID MlmeScanReqAction(
 	BOOLEAN        TimerCancelled;
 	ULONG		   Now;
 	USHORT         Status;
-	PHEADER_802_11 pHdr80211;
 	PUCHAR         pOutBuffer = NULL;	
 	NDIS_STATUS    NStatus;
 

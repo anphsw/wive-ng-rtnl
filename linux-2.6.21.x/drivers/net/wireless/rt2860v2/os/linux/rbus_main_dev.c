@@ -112,12 +112,7 @@ int rt2880_module_init(VOID)
 	// due to we didn't have any hook point when do module remove, we use this static as our hook point.
 	rt2880_dev = net_dev;
 	
-	//wl_proc_init();
-
-	DBGPRINT(RT_DEBUG_TRACE, ("%s: at CSR addr 0x%1x, IRQ %d. \n", net_dev->name, (ULONG)csr_addr, net_dev->irq));
-
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2880_probe\n"));
-
 
 	return 0;
 

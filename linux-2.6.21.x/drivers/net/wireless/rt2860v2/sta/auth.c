@@ -141,19 +141,18 @@ VOID PeerAuthRspAtSeq2Action(
 {
     UCHAR         Addr2[MAC_ADDR_LEN];
     USHORT        Seq, Status, RemoteStatus, Alg;
-	UCHAR		  iv_hdr[4];
+    UCHAR		  iv_hdr[4];
     UCHAR         ChlgText[CIPHER_TEXT_LEN];
     UCHAR         CyperChlgText[CIPHER_TEXT_LEN + 8 + 8];
-	ULONG		  c_len = 0;
-    UCHAR         Element[2];
+    ULONG		  c_len = 0;
     HEADER_802_11 AuthHdr;
     BOOLEAN       TimerCancelled;
     PUCHAR        pOutBuffer = NULL;
     NDIS_STATUS   NStatus;
     ULONG         FrameLen = 0;
     USHORT        Status2;
-	UCHAR		  ChallengeIe = IE_CHALLENGE_TEXT;
-	UCHAR		  len_challengeText = CIPHER_TEXT_LEN;
+    UCHAR		  ChallengeIe = IE_CHALLENGE_TEXT;
+    UCHAR		  len_challengeText = CIPHER_TEXT_LEN;
 
     if (PeerAuthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Alg, &Seq, &Status, (PCHAR)ChlgText)) 
     {

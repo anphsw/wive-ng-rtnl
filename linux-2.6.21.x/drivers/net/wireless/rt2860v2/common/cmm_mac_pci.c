@@ -974,7 +974,9 @@ VOID RT28xxPciStaAsicSleepThenAutoWakeup(
 	IN PRTMP_ADAPTER pAd, 
 	IN USHORT TbttNumToNextWakeUp) 
 {
+#ifdef PCIE_PS_SUPPORT
 	BOOLEAN brc;
+#endif
 	
 	if (pAd->StaCfg.bRadio == FALSE)
 	{
@@ -1197,11 +1199,11 @@ BOOLEAN RT28xxPciAsicRadioOn(
 	IN PRTMP_ADAPTER pAd,
 	IN UCHAR     Level)
 {
-    //WPDMA_GLO_CFG_STRUC	DmaCfg;
 #ifdef CONFIG_STA_SUPPORT    
+#ifdef PCIE_PS_SUPPORT
 	BOOLEAN				Cancelled;   
+#endif
 #endif // CONFIG_STA_SUPPORT //
-    //UINT32			    MACValue;
 
 	if (pAd->OpMode == OPMODE_AP && Level==DOT11POWERSAVE)
 		return FALSE;
@@ -1653,8 +1655,6 @@ VOID RT28xxPciMlmeRadioOn(
 VOID RT28xxPciMlmeRadioOFF(
 	IN PRTMP_ADAPTER pAd)
 {
-	BOOLEAN brc=TRUE;
-    
     if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF))
     	return;
     
@@ -1730,14 +1730,6 @@ VOID RT28xxPciMlmeRadioOFF(
         //==========================================    
         // Clean up old bss table   
         BssTableInit(&pAd->ScanTab);
-		
-        /*
-        if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE))
-        {
-            RTMPSetTimer(&pAd->Mlme.RadioOnOffTimer, 10);
-            return;
-        }
-        */
     }
 #endif // CONFIG_STA_SUPPORT //
 	// Set LED.Move to here for fixing LED bug. This flag must be called after LinkDown
@@ -1757,55 +1749,5 @@ if (pAd->OpMode == OPMODE_STA&&
 else 
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
-{
-
-/*
-		brc=RT28xxPciAsicRadioOff(pAd, GUIRADIO_OFF, 0);
-	
-	if (brc==FALSE)
-	{
-		DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
-	} */
 }
-/*
-		// Disable Tx/Rx DMA
-		RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);	   // disable DMA 
-		GloCfg.field.EnableTxDMA = 0;
-		GloCfg.field.EnableRxDMA = 0;
-		RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);	   // abort all TX rings
-
-		
-		// MAC_SYS_CTRL => value = 0x0 => 40mA
-		RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0);
-		
-		// PWR_PIN_CFG => value = 0x0 => 40mA
-		RTMP_IO_WRITE32(pAd, PWR_PIN_CFG, 0);
-		
-		// TX_PIN_CFG => value = 0x0 => 20mA
-		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, 0);
-
-		if (pAd->CommonCfg.BBPCurrentBW == BW_40)
-		{	
-			// Must using 40MHz.
-			AsicTurnOffRFClk(pAd, pAd->CommonCfg.CentralChannel);
-		}
-		else
-		{	
-			// Must using 20MHz.
-			AsicTurnOffRFClk(pAd, pAd->CommonCfg.Channel);
-		}
-
-		// Waiting for DMA idle
-		i = 0;
-		do
-		{
-			RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);
-			if ((GloCfg.field.TxDMABusy == 0) && (GloCfg.field.RxDMABusy == 0))
-				break;
-			
-			RTMPusecDelay(1000);
-		}while (i++ < 100);
-*/
-}
-
 #endif // RTMP_MAC_PCI //

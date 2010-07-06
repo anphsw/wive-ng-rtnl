@@ -2070,7 +2070,10 @@ NDIS_STATUS	RTMPSetProfileParameters(
 	ULONG					RtsThresh;
 	ULONG					FragThresh;
 	PSTRING					macptr;							
-	INT					i = 0, retval, k;
+	INT					i = 0, retval;
+#ifdef NEW_DFS
+	INT					k;
+#endif
 	tmpbuf = kmalloc(MAX_PARAM_BUFFER_SIZE, MEM_ALLOC_FLAG);
 	if(tmpbuf == NULL)
 		return NDIS_STATUS_FAILURE;
@@ -2097,8 +2100,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 			retval = RT_CfgSetCountryRegion(pAd, tmpbuf, BAND_5G);
 			DBGPRINT(RT_DEBUG_TRACE, ("CountryRegionABand=%d\n", pAd->CommonCfg.CountryRegionForABand));
 		}
-#ifdef RTMP_EFUSE_SUPPORT
-#endif // RTMP_EFUSE_SUPPORT //
 		//CountryCode
 		if(RTMPGetKeyParameter("CountryCode", tmpbuf, 25, pBuffer, TRUE))
 		{

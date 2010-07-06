@@ -1071,12 +1071,12 @@ VOID AP_AMPDU_Frame_Tx(
 {
 	HEADER_802_11	*pHeader_802_11;
 	PUCHAR			pHeaderBufPtr;
-//	UCHAR			QueIdx = pTxBlk->QueIdx;
 	USHORT			FreeNumber;
 	MAC_TABLE_ENTRY	*pMacEntry;
 	PQUEUE_ENTRY	pQEntry;
-	BOOLEAN			bHTCPlus = FALSE;
-	
+#ifdef TXBF_SUPPORT 
+	BOOLEAN		bHTCPlus = FALSE;
+#endif	
 	ASSERT(pTxBlk);
 
 	pQEntry = RemoveHeadQueue(&pTxBlk->TxPacketList);

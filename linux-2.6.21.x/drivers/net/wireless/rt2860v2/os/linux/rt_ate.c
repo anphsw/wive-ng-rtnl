@@ -5370,8 +5370,10 @@ VOID ATEAsicSwitchChannel(
 	RTMP_RF_REGS *RFRegTable = NULL;
 	UCHAR Channel = 0;
 #ifdef RTMP_RF_RW_SUPPORT
+#ifdef RT3883
 	/* added to prevent RF register reading error */
 	UCHAR RFValue = 0, RFValue2 = 0;
+#endif
 #endif // RTMP_RF_RW_SUPPORT //
 
 #if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
@@ -5419,18 +5421,11 @@ VOID ATEAsicSwitchChannel(
 				ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R08, FreqItems3883[index].N);
 				ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R09, FreqItems3883[index].K);
 		
-#if 0
-				ATE_RF_IO_READ8_BY_REG_ID(pAd, RF_R11, &RFValue);
-				RFValue &= 0xF0;
-				RFValue |= (FreqItems3883[index].R & 0x0F);				
-				ATE_RF_IO_WRITE8_BY_REG_ID(pAd, RF_R11, RFValue);
-#else
 				if  (Channel <= 14)
 					RFValue = 0x46;
 				else
 					RFValue = 0x48;
 				RT30xxWriteRFRegister(pAd, RF_R11, (UCHAR)RFValue);
-#endif
 
 				if  (Channel <= 14)
 					RFValue = 0x4E;
@@ -7627,11 +7622,15 @@ VOID CalNoiseLevel(PRTMP_ADAPTER pAd, UCHAR channel, INT32 RSSI[3][10])
 	INT32		RSSI0, RSSI1, RSSI2;
  	CHAR		Rssi0Offset, Rssi1Offset, Rssi2Offset;
 	UCHAR		BbpR50Rssi0 = 0, BbpR51Rssi1 = 0, BbpR52Rssi2 = 0;
-	UCHAR		Org_BBP66value = 0, Org_BBP69value = 0, Org_BBP70value = 0, data = 0, byteValue = 0;
+	UCHAR		Org_BBP66value = 0, Org_BBP69value = 0, Org_BBP70value = 0, data = 0;
 	USHORT		LNA_Gain = 0;
 	INT32       j = 0;
 	UCHAR		Org_Channel = pAd->ate.Channel;
 	USHORT	    GainValue = 0, OffsetValue = 0;
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)// peter : need to check it
+		if (IS_RT2883(pAd) || IS_RT3883(pAd))
+	UCHAR		byteValue = 0;
+#endif
 
 	ATE_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R66, &Org_BBP66value);
 	ATE_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R69, &Org_BBP69value);	

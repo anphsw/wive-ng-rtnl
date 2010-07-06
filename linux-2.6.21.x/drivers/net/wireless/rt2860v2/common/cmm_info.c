@@ -2918,7 +2918,7 @@ VOID RTMPIoctlGetMacTableStaInfo(
 {
 	INT i;
 	RT_802_11_MAC_TABLE MacTab;
-	char *msg;
+	RT_802_11_MAC_TABLE *p;
 
 	MacTab.Num = 0;
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
@@ -2951,7 +2951,7 @@ VOID RTMPIoctlGetMacTableStaInfo(
 		}
 	}
 
-	RT_802_11_MAC_TABLE *p = wrq->u.data.pointer;
+	p = wrq->u.data.pointer;
 	wrq->u.data.length = sizeof(RT_802_11_MAC_TABLE);
 	if (copy_to_user(wrq->u.data.pointer, &MacTab, wrq->u.data.length))
 	{
@@ -2966,7 +2966,6 @@ VOID RTMPIoctlGetATESHOW(
 	IN	struct iwreq	*wrq)
 {
 	CHAR		*msg;
-	INT 		i=0;	 
 	INT 		Status=0;
 
 	os_alloc_mem(NULL, (PUCHAR *)&msg, sizeof(CHAR)*(1024));

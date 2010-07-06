@@ -1112,7 +1112,6 @@ NDIS_STATUS STASendPacket(
 	UCHAR			QueIdx, UserPriority;
 	MAC_TABLE_ENTRY *pEntry = NULL;
 	unsigned int 	IrqFlags;
-	UCHAR			FlgIsIP = 0;
 	UCHAR			Rate;
 	
 	// Prepare packet information structure for buffer descriptor 

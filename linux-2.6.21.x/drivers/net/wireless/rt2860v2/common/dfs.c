@@ -112,6 +112,7 @@ static void ToneRadarProgram(PRTMP_ADAPTER pAd);
 static void ToneRadarEnable(PRTMP_ADAPTER pAd);
 #endif // TONE_RADAR_DETECT_SUPPORT //
 
+
 #ifdef DFS_SUPPORT
 /*
 	========================================================================

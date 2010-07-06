@@ -29,10 +29,8 @@
 // Radar detection and carrier detection for 2880-SW-MCU
 
 #if defined(DFS_SUPPORT) || defined(CARRIER_DETECTION_SUPPORT)
-
 static void TimerCB_Radar(PRTMP_ADAPTER pAd);
 static void TimerCB_Carrier(PRTMP_ADAPTER pAd);
-
 #ifdef NEW_DFS
 static VOID NewTimerCB_Radar(PRTMP_ADAPTER pAd);
 #endif // NEW_DFS //
@@ -54,7 +52,6 @@ void TimerCB(unsigned long data)
 	}
 	else
 #endif // NEW_DFS //
-
 
 	if (pAd->CommonCfg.McuRadarCmd & RADAR_DETECTION)
 		TimerCB_Radar(pAd);

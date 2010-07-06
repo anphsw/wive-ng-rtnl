@@ -1675,7 +1675,7 @@ NDIS_STATUS RTMPSendSTAKeyRequest(
 	if (mpool == NULL)
     {
         DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
-        return;
+        return 0;
     }
 
 	// Zero message body
@@ -1805,7 +1805,7 @@ NDIS_STATUS RTMPSendSTAKeyHandShake(
 	if (mpool == NULL)
     {
         DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
-        return;
+        return 0;
     }
 
 	// Zero message body
