@@ -56,7 +56,8 @@ ATTRIB_NORET void cpu_idle(void)
 
 			smtc_idle_loop_hook();
 #endif
-			if (cpu_wait)
+
+                        if (cpu_wait)
 				(*cpu_wait)();
 		}
 		preempt_enable_no_resched();

@@ -745,7 +745,7 @@ config ASUS_QOS
 config USER_CLEAN_NAT
         default y
         bool "Clean NAT session driver."
-        depends on NF_CONNTRACK_ENABLED
+        depends on IP_NF_CONNTRACK
         ---help---
           Pronets add the clean nat module.
           If unsure, say M.

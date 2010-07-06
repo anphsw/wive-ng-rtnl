@@ -118,7 +118,7 @@ fi
 ifRaxWdsxDown
 
 #clear conntrack tables
-if [ "$MODE" != "wifionly" ] && [ "$CONFIG_NF_CONNTRACK_SUPPORT" = "y" ]; then
+if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
 
