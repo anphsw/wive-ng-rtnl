@@ -627,6 +627,7 @@ static void rt_check_expire(struct work_struct *work)
 	static unsigned int rover;
 	unsigned int i = rover, goal;
 	struct rtable *rth, **rthp;
+	unsigned long now = jiffies;
 	u64 mult;
 
 	mult = ((u64)ip_rt_gc_interval) << rt_hash_log;
@@ -647,7 +648,7 @@ static void rt_check_expire(struct work_struct *work)
 		while ((rth = *rthp) != NULL) {
 			if (rth->u.dst.expires) {
 				/* Entry is expired even if it is in use */
-				if (time_before_eq(jiffies, rth->u.dst.expires)) {
+				if (time_before_eq(now, rth->u.dst.expires)) {
 					tmo >>= 1;
 					rthp = &rth->u.dst.rt_next;
 					continue;
@@ -677,6 +678,10 @@ static void rt_check_expire(struct work_struct *work)
 #endif /* CONFIG_IP_ROUTE_MULTIPATH_CACHED */
 		}
 		spin_unlock_bh(rt_hash_lock_addr(i));
+
+                /* Fallback loop breaker. */
+                if (time_after(jiffies, now))
+                        break;
 	}
 	rover = i;
 	schedule_delayed_work(&expires_work, ip_rt_gc_interval);
