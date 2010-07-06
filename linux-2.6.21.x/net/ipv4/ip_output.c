@@ -1004,6 +1004,11 @@ alloc_new_skb:
 					frag = &skb_shinfo(skb)->frags[i];
 				}
 			} else if (i < MAX_SKB_FRAGS) {
+                                if (atomic_read(&sk->sk_wmem_alloc) + PAGE_SIZE                                                             
+                                    > 2 * sk->sk_sndbuf) {                                                                                  
+                                        err = -ENOBUFS;                                                                                     
+                                        goto error;                                                                                         
+                                }
 				if (copy > PAGE_SIZE)
 					copy = PAGE_SIZE;
 				page = alloc_pages(sk->sk_allocation, 0);
