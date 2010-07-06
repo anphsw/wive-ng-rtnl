@@ -5439,7 +5439,7 @@ INT	Show_ChannelList_Proc(
 
 	printk("\n");	
 	printk("Channel List Number = %d\n", pAd->ChannelListNum);
-	if(!pAd->ChannelListNum)
+	if(pAd->ChannelListNum)
 	{
 		printk("Channel List::");
 		for(i=0; i<pAd->ChannelListNum; i++)
