@@ -4,34 +4,24 @@
 
 # objects for the standalone - connection tracking / NAT
 ip_conntrack-objs	:= ip_conntrack_standalone.o ip_conntrack_core.o ip_conntrack_proto_generic.o ip_conntrack_proto_tcp.o ip_conntrack_proto_udp.o ip_conntrack_proto_icmp.o
-# objects for l3 independent conntrack
-nf_conntrack_ipv4-objs  :=  nf_conntrack_l3proto_ipv4.o nf_conntrack_proto_icmp.o
-ifeq ($(CONFIG_NF_CONNTRACK_PROC_COMPAT),y)
-ifeq ($(CONFIG_PROC_FS),y)
-nf_conntrack_ipv4-objs	+= nf_conntrack_l3proto_ipv4_compat.o
-endif
-endif
-
-ip_nat-objs	:= ip_nat_core.o ip_nat_helper.o ip_nat_proto_unknown.o ip_nat_proto_tcp.o ip_nat_proto_udp.o ip_nat_proto_icmp.o
-nf_nat-objs	:= nf_nat_core.o nf_nat_helper.o nf_nat_proto_unknown.o nf_nat_proto_tcp.o nf_nat_proto_udp.o nf_nat_proto_icmp.o
-ifneq ($(CONFIG_NF_NAT),)
-iptable_nat-objs	:= nf_nat_rule.o nf_nat_standalone.o
-else
+ip_nat-objs		:= ip_nat_core.o ip_nat_helper.o ip_nat_proto_unknown.o ip_nat_proto_tcp.o ip_nat_proto_udp.o ip_nat_proto_icmp.o
 iptable_nat-objs	:= ip_nat_rule.o ip_nat_standalone.o
-endif
 
 ip_conntrack_pptp-objs	:= ip_conntrack_helper_pptp.o ip_conntrack_proto_gre.o
 ip_nat_pptp-objs	:= ip_nat_helper_pptp.o ip_nat_proto_gre.o
 
-ip_conntrack_h323-objs := ip_conntrack_helper_h323.o ../../netfilter/nf_conntrack_h323_asn1.o
+ip_conntrack_h323-objs := ip_conntrack_helper_h323.o ip_conntrack_helper_h323_asn1.o
 ip_nat_h323-objs := ip_nat_helper_h323.o
+
+#connlimit support
+obj-$(CONFIG_IP_NF_MATCH_TOS) += ipt_tos.o
+obj-$(CONFIG_IP_NF_MATCH_CONNLIMIT) += ipt_connlimit.o
 
 # connection tracking
 obj-$(CONFIG_IP_NF_CONNTRACK) += ip_conntrack.o
 obj-$(CONFIG_NF_CONNTRACK_IPV4) += nf_conntrack_ipv4.o
 
 obj-$(CONFIG_IP_NF_NAT) += ip_nat.o
-obj-$(CONFIG_NF_NAT) += nf_nat.o
 
 # conntrack netlink interface
 obj-$(CONFIG_IP_NF_CONNTRACK_NETLINK) += ip_conntrack_netlink.o
@@ -41,12 +31,6 @@ obj-$(CONFIG_IP_NF_CONNTRACK_NETLINK) += ip_conntrack_netlink.o
 obj-$(CONFIG_IP_NF_CT_PROTO_SCTP) += ip_conntrack_proto_sctp.o
 
 # connection tracking helpers
-
-# rtsp protocol support
-obj-$(CONFIG_IP_NF_RTSP) += ip_conntrack_rtsp.o
-obj-$(CONFIG_IP_NF_NAT_RTSP) += ip_nat_rtsp.o
-
-obj-$(CONFIG_IP_NF_QUAKE3) += ip_conntrack_quake3.o
 obj-$(CONFIG_IP_NF_H323) += ip_conntrack_h323.o
 obj-$(CONFIG_IP_NF_PPTP) += ip_conntrack_pptp.o
 obj-$(CONFIG_IP_NF_AMANDA) += ip_conntrack_amanda.o
@@ -55,30 +39,17 @@ obj-$(CONFIG_IP_NF_FTP) += ip_conntrack_ftp.o
 obj-$(CONFIG_IP_NF_IRC) += ip_conntrack_irc.o
 obj-$(CONFIG_IP_NF_SIP) += ip_conntrack_sip.o
 obj-$(CONFIG_IP_NF_NETBIOS_NS) += ip_conntrack_netbios_ns.o
-
-# NAT helpers (ip_conntrack)
+obj-$(CONFIG_IP_NF_RTSP)  += ip_conntrack_rtsp.o
+obj-$(CONFIG_IP_NF_L2TP)  += ip_conntrack_l2tp.o
+# NAT helpers 
 obj-$(CONFIG_IP_NF_NAT_H323) += ip_nat_h323.o
 obj-$(CONFIG_IP_NF_NAT_PPTP) += ip_nat_pptp.o
 obj-$(CONFIG_IP_NF_NAT_AMANDA) += ip_nat_amanda.o
 obj-$(CONFIG_IP_NF_NAT_TFTP) += ip_nat_tftp.o
 obj-$(CONFIG_IP_NF_NAT_FTP) += ip_nat_ftp.o
 obj-$(CONFIG_IP_NF_NAT_IRC) += ip_nat_irc.o
-obj-$(CONFIG_IP_NF_NAT_QUAKE3) += ip_nat_quake3.o
 obj-$(CONFIG_IP_NF_NAT_SIP) += ip_nat_sip.o
-
-# NAT helpers (nf_conntrack)
-obj-$(CONFIG_NF_NAT_AMANDA) += nf_nat_amanda.o
-obj-$(CONFIG_NF_NAT_FTP) += nf_nat_ftp.o
-obj-$(CONFIG_NF_NAT_H323) += nf_nat_h323.o
-obj-$(CONFIG_NF_NAT_IRC) += nf_nat_irc.o
-obj-$(CONFIG_NF_NAT_PPTP) += nf_nat_pptp.o
-obj-$(CONFIG_NF_NAT_SIP) += nf_nat_sip.o
-obj-$(CONFIG_NF_NAT_SNMP_BASIC) += nf_nat_snmp_basic.o
-obj-$(CONFIG_NF_NAT_TFTP) += nf_nat_tftp.o
-
-# NAT protocols (nf_nat)
-obj-$(CONFIG_NF_NAT_PROTO_GRE) += nf_nat_proto_gre.o
-
+obj-$(CONFIG_IP_NF_NAT_RTSP)  += ip_nat_rtsp.o
 # generic IP tables 
 obj-$(CONFIG_IP_NF_IPTABLES) += ip_tables.o
 
@@ -86,13 +57,15 @@ obj-$(CONFIG_IP_NF_IPTABLES) += ip_tables.o
 obj-$(CONFIG_IP_NF_FILTER) += iptable_filter.o
 obj-$(CONFIG_IP_NF_MANGLE) += iptable_mangle.o
 obj-$(CONFIG_IP_NF_NAT) += iptable_nat.o
-obj-$(CONFIG_NF_NAT) += iptable_nat.o
 obj-$(CONFIG_IP_NF_RAW) += iptable_raw.o
 
 # matches
+obj-$(CONFIG_IP_NF_MATCH_HASHLIMIT) += ipt_hashlimit.o
+obj-$(CONFIG_IP_NF_MATCH_SET) += ipt_set.o
 obj-$(CONFIG_IP_NF_MATCH_IPRANGE) += ipt_iprange.o
 obj-$(CONFIG_IP_NF_MATCH_OWNER) += ipt_owner.o
 obj-$(CONFIG_IP_NF_MATCH_TOS) += ipt_tos.o
+obj-$(CONFIG_IP_NF_MATCH_ACCOUNT) += ipt_account.o
 obj-$(CONFIG_IP_NF_MATCH_RECENT) += ipt_recent.o
 obj-$(CONFIG_IP_NF_MATCH_ECN) += ipt_ecn.o
 obj-$(CONFIG_IP_NF_MATCH_AH) += ipt_ah.o
@@ -106,23 +79,44 @@ obj-$(CONFIG_IP_NF_TARGET_ECN) += ipt_ECN.o
 obj-$(CONFIG_IP_NF_TARGET_IMQ) += ipt_IMQ.o
 obj-$(CONFIG_IP_NF_TARGET_MASQUERADE) += ipt_MASQUERADE.o
 obj-$(CONFIG_IP_NF_TARGET_REDIRECT) += ipt_REDIRECT.o
-obj-$(CONFIG_IP_NF_TARGET_AUTOFW) += ipt_autofw.o
 obj-$(CONFIG_IP_NF_TARGET_NETMAP) += ipt_NETMAP.o
 obj-$(CONFIG_IP_NF_TARGET_SAME) += ipt_SAME.o
 obj-$(CONFIG_IP_NF_NAT_SNMP_BASIC) += ip_nat_snmp_basic.o
 obj-$(CONFIG_IP_NF_TARGET_LOG) += ipt_LOG.o
 obj-$(CONFIG_IP_NF_TARGET_ULOG) += ipt_ULOG.o
+obj-$(CONFIG_IP_NF_TARGET_SET) += ipt_SET.o
+
+# sets
+obj-$(CONFIG_IP_NF_SET) += ip_set.o
+obj-$(CONFIG_IP_NF_SET_IPMAP) += ip_set_ipmap.o
+obj-$(CONFIG_IP_NF_SET_PORTMAP) += ip_set_portmap.o
+obj-$(CONFIG_IP_NF_SET_MACIPMAP) += ip_set_macipmap.o
+obj-$(CONFIG_IP_NF_SET_IPHASH) += ip_set_iphash.o
+obj-$(CONFIG_IP_NF_SET_NETHASH) += ip_set_nethash.o
+obj-$(CONFIG_IP_NF_SET_IPTREE) += ip_set_iptree.o
+
 obj-$(CONFIG_IP_NF_TARGET_CLUSTERIP) += ipt_CLUSTERIP.o
 obj-$(CONFIG_IP_NF_TARGET_TTL) += ipt_TTL.o
+#add by ramen
+obj-$(CONFIG_IP_NF_TARGET_TRIGGER) += ipt_TRIGGER.o
 
 # generic ARP tables
 obj-$(CONFIG_IP_NF_ARPTABLES) += arp_tables.o
 obj-$(CONFIG_IP_NF_ARP_MANGLE) += arpt_mangle.o
+
+obj-$(CONFIG_IP_NF_IP2P) += ipt_ipp2p.o
 
 # just filtering instance of ARP tables for now
 obj-$(CONFIG_IP_NF_ARPFILTER) += arptable_filter.o
 
 obj-$(CONFIG_IP_NF_QUEUE) += ip_queue.o
 
-obj-$(CONFIG_IP_NF_MATCH_STATE) += ipt_state.o
-obj-$(CONFIG_IP_NF_MATCH_CONNLIMIT) += ipt_connlimit.o
+# objects for l3 independent conntrack
+nf_conntrack_ipv4-objs  :=  nf_conntrack_l3proto_ipv4.o nf_conntrack_proto_icmp.o
+
+# l3 independent conntrack
+obj-$(CONFIG_NF_CONNTRACK_IPV4) += nf_conntrack_ipv4.o
+
+#ipt_accaunt
+obj-$(CONFIG_IP_NF_TARGET_REJECT) += ipt_REJECT.o
+obj-$(CONFIG_IP_NF_TARGET_ACCOUNT) += ipt_ACCOUNT.o

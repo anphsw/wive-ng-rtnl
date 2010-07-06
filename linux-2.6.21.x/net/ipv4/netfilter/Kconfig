@@ -6,8 +6,8 @@ menu "IP: Netfilter Configuration"
 	depends on INET && NETFILTER
 
 config NF_CONNTRACK_IPV4
-	tristate "IPv4 connection tracking support (required for NAT)"
-	depends on NF_CONNTRACK
+	tristate "IPv4 support for new connection tracking (EXPERIMENTAL)"
+	depends on EXPERIMENTAL && NF_CONNTRACK
 	---help---
 	  Connection tracking keeps a record of what packets have passed
 	  through your machine, in order to figure out how they are related
@@ -19,18 +19,21 @@ config NF_CONNTRACK_IPV4
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
-config NF_CONNTRACK_PROC_COMPAT
-	bool "proc/sysctl compatibility with old connection tracking"
-	depends on NF_CONNTRACK_IPV4
-	default y
-	help
-	  This option enables /proc and sysctl compatibility with the old
-	  layer 3 dependant connection tracking. This is needed to keep
-	  old programs that have not been adapted to the new names working.
-
-	  If unsure, say Y.
-
 # connection tracking, helpers and protocols
+config IP_NF_CONNTRACK
+	tristate "Connection tracking (required for masq/NAT)"
+	---help---
+	  Connection tracking keeps a record of what packets have passed
+	  through your machine, in order to figure out how they are related
+	  into connections.
+
+	  This is required to do Masquerading or other kinds of Network
+	  Address Translation (except for Fast NAT).  It can also be used to
+	  enhance packet filtering (see `Connection state match support'
+	  below).
+
+	  To compile it as a module, choose M here.  If unsure, say N.
+
 config IP_NF_CT_ACCT
 	bool "Connection tracking flow accounting"
 	depends on IP_NF_CONNTRACK
@@ -163,6 +166,12 @@ config IP_NF_AMANDA
 
 	  To compile it as a module, choose M here.  If unsure, say Y.
 
+config IP_NF_L2TP
+	tristate 'L2TP protocol conntrack support'
+	depends on IP_NF_CONNTRACK
+	help
+	  This module adds support for L2TP connection tracking.
+
 config IP_NF_PPTP
 	tristate  'PPTP protocol support'
 	depends on IP_NF_CONNTRACK
@@ -211,7 +220,12 @@ config IP_NF_SIP
 	  tracking/NATing firewall.
 
 	  To compile it as a module, choose M here.  If unsure, say Y.
-
+config IP_NF_RTSP
+    tristate "RTSP protocol support(EXPERIMENTAL)"
+    depends on IP_NF_CONNTRACK && EXPERIMENTAL
+    help
+      support the rtsp protocol
+    
 config IP_NF_QUEUE
 	tristate "IP Userspace queueing via NETLINK (OBSOLETE)"
 	help
@@ -226,7 +240,7 @@ config IP_NF_QUEUE
 
 config IP_NF_IPTABLES
 	tristate "IP tables support (required for filtering/masq/NAT)"
-	select NETFILTER_XTABLES
+	depends on NETFILTER_XTABLES
 	help
 	  iptables is a general, extensible packet identification framework.
 	  The packet filtering and full NAT (masquerading, port forwarding,
@@ -245,26 +259,11 @@ config IP_NF_MATCH_IPRANGE
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
-config IP_NF_MATCH_CONNLIMIT
-        tristate  'Connections/IP limit match support'
-        depends on IP_NF_IPTABLES
-        help
-          This match allows you to restrict the number of parallel TCP
-          connections to a server per client IP address (or address block).
-
-          If you want to compile it as a module, say M here and read
-          Documentation/modules.txt.  If unsure, say `N'.
-
-config IP_NF_TARGET_IMQ
-       tristate "IMQ target support"
-       depends on IP_NF_MANGLE
-       help
-         This option adds a `IMQ' target which is used to specify if and
-         to which IMQ device packets should get enqueued/dequeued.
-
-         For more information visit: http://www.linuximq.net/
-
-         To compile it as a module, choose M here.  If unsure, say N.
+config IP_NF_MATCH_LAYER7_DEBUG
+	bool "Layer 7 debugging output"
+	depends on IP_NF_MATCH_LAYER7
+	help
+	  Say Y to get lots of debugging output.
 
 config IP_NF_MATCH_TOS
 	tristate "TOS match support"
@@ -272,6 +271,15 @@ config IP_NF_MATCH_TOS
 	help
 	  TOS matching allows you to match packets based on the Type Of
 	  Service fields of the IP packet.
+
+	  To compile it as a module, choose M here.  If unsure, say N.
+
+config IP_NF_MATCH_ACCOUNT
+	tristate "account match support"
+	depends on IP_NF_IPTABLES
+	help
+	  This match is used for gathering traffic statistics for particular
+	  netblock.
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
@@ -333,6 +341,30 @@ config IP_NF_MATCH_ADDRTYPE
 	  If you want to compile it as a module, say M here and read
 	  <file:Documentation/modules.txt>.  If unsure, say `N'.
 
+config IP_NF_MATCH_HASHLIMIT
+	tristate  'hashlimit match support'
+	depends on IP_NF_IPTABLES
+	help
+	  This option adds a new iptables `hashlimit' match.  
+
+	  As opposed to `limit', this match dynamically creates a hash table
+	  of limit buckets, based on your selection of source/destination
+	  ip addresses and/or ports.
+
+	  It enables you to express policies like `10kpps for any given
+	  destination IP' or `500pps from any given source IP'  with a single
+	  IPtables rule.
+
+config IP_NF_MATCH_CONNLIMIT
+        tristate  'Connections/IP limit match support'
+        depends on IP_NF_IPTABLES
+        help
+          This match allows you to restrict the number of parallel TCP
+    	  connections to a server per client IP address (or address block).
+                        
+          If you want to compile it as a module, say M here and read
+          Documentation/modules.txt.  If unsure, say `N'.
+
 # `filter', generic and specific targets
 config IP_NF_FILTER
 	tristate "Packet filtering"
@@ -382,7 +414,7 @@ config IP_NF_TARGET_ULOG
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
-# NAT + specific targets: ip_conntrack
+# NAT + specific targets
 config IP_NF_NAT
 	tristate "Full NAT"
 	depends on IP_NF_IPTABLES && IP_NF_CONNTRACK
@@ -393,30 +425,14 @@ config IP_NF_NAT
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
-# NAT + specific targets: nf_conntrack
-config NF_NAT
-	tristate "Full NAT"
-	depends on IP_NF_IPTABLES && NF_CONNTRACK_IPV4
-	help
-	  The Full NAT option allows masquerading, port forwarding and other
-	  forms of full Network Address Port Translation.  It is controlled by
-	  the `nat' table in iptables: see the man page for iptables(8).
-
-	  To compile it as a module, choose M here.  If unsure, say N.
-
 config IP_NF_NAT_NEEDED
 	bool
-	depends on IP_NF_NAT
-	default y
-
-config NF_NAT_NEEDED
-	bool
-	depends on NF_NAT
+	depends on IP_NF_NAT != n
 	default y
 
 config IP_NF_TARGET_MASQUERADE
 	tristate "MASQUERADE target support"
-	depends on (NF_NAT || IP_NF_NAT)
+	depends on IP_NF_NAT
 	help
 	  Masquerading is a special case of NAT: all outgoing connections are
 	  changed to seem to come from a particular interface's address, and
@@ -428,7 +444,7 @@ config IP_NF_TARGET_MASQUERADE
 
 config IP_NF_TARGET_REDIRECT
 	tristate "REDIRECT target support"
-	depends on (NF_NAT || IP_NF_NAT)
+	depends on IP_NF_NAT
 	help
 	  REDIRECT is a special case of NAT: all incoming connections are
 	  mapped onto the incoming interface's address, causing the packets to
@@ -437,17 +453,9 @@ config IP_NF_TARGET_REDIRECT
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
-config IP_NF_TARGET_AUTOFW
-        tristate "autofw target support"
-        depends on (NF_NAT || IP_NF_NAT)
-        help
-          autofw is a special case of NAT
-
-          To compile it as a module, choose M here.  If unsure, say N.
-
 config IP_NF_TARGET_NETMAP
 	tristate "NETMAP target support"
-	depends on (NF_NAT || IP_NF_NAT)
+	depends on IP_NF_NAT
 	help
 	  NETMAP is an implementation of static 1:1 NAT mapping of network
 	  addresses. It maps the network address part, while keeping the host
@@ -458,7 +466,7 @@ config IP_NF_TARGET_NETMAP
 
 config IP_NF_TARGET_SAME
 	tristate "SAME target support"
-	depends on (NF_NAT || IP_NF_NAT)
+	depends on IP_NF_NAT
 	help
 	  This option adds a `SAME' target, which works like the standard SNAT
 	  target, but attempts to give clients the same IP for all connections.
@@ -479,42 +487,14 @@ config IP_NF_NAT_SNMP_BASIC
 	  This is the "basic" form of SNMP-ALG, as described in RFC 2962
 
 	  To compile it as a module, choose M here.  If unsure, say N.
-
-config NF_NAT_SNMP_BASIC
-	tristate "Basic SNMP-ALG support (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && NF_NAT
-	---help---
-
-	  This module implements an Application Layer Gateway (ALG) for
-	  SNMP payloads.  In conjunction with NAT, it allows a network
-	  management system to access multiple private networks with
-	  conflicting addresses.  It works by modifying IP addresses
-	  inside SNMP payloads to match IP-layer NAT mapping.
-
-	  This is the "basic" form of SNMP-ALG, as described in RFC 2962
+config IP_NF_TARGET_TRIGGER
+	tristate "trigger target support"
+	depends on IP_NF_NAT
+	help
+	  This option adds a `trigger' target, which works like the standard DNAT
+	  target..
 
 	  To compile it as a module, choose M here.  If unsure, say N.
-
-# If they want FTP, set to $CONFIG_IP_NF_NAT (m or y),
-# or $CONFIG_IP_NF_FTP (m or y), whichever is weaker.
-# From kconfig-language.txt:
-#
-#           <expr> '&&' <expr>                   (6)
-#
-# (6) Returns the result of min(/expr/, /expr/).
-config NF_NAT_PROTO_GRE
-	tristate
-	depends on NF_NAT && NF_CT_PROTO_GRE
-
-config IP_NF_NAT_FTP
-	tristate
-	depends on IP_NF_IPTABLES && IP_NF_CONNTRACK && IP_NF_NAT
-	default IP_NF_NAT && IP_NF_FTP
-
-config NF_NAT_FTP
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_FTP
 
 config IP_NF_NAT_IRC
 	tristate
@@ -522,10 +502,13 @@ config IP_NF_NAT_IRC
 	default IP_NF_NAT if IP_NF_IRC=y
 	default m if IP_NF_IRC=m
 
-config NF_NAT_IRC
+# If they want FTP, set to $CONFIG_IP_NF_NAT (m or y), 
+# or $CONFIG_IP_NF_FTP (m or y), whichever is weaker.  Argh.
+config IP_NF_NAT_FTP
 	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_IRC
+	depends on IP_NF_IPTABLES!=n && IP_NF_CONNTRACK!=n && IP_NF_NAT!=n
+	default IP_NF_NAT if IP_NF_FTP=y
+	default m if IP_NF_FTP=m
 
 config IP_NF_NAT_TFTP
 	tristate
@@ -533,21 +516,11 @@ config IP_NF_NAT_TFTP
 	default IP_NF_NAT if IP_NF_TFTP=y
 	default m if IP_NF_TFTP=m
 
-config NF_NAT_TFTP
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_TFTP
-
 config IP_NF_NAT_AMANDA
 	tristate
 	depends on IP_NF_IPTABLES!=n && IP_NF_CONNTRACK!=n && IP_NF_NAT!=n
 	default IP_NF_NAT if IP_NF_AMANDA=y
 	default m if IP_NF_AMANDA=m
-
-config NF_NAT_AMANDA
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_AMANDA
 
 config IP_NF_NAT_PPTP
 	tristate
@@ -555,34 +528,24 @@ config IP_NF_NAT_PPTP
 	default IP_NF_NAT if IP_NF_PPTP=y
 	default m if IP_NF_PPTP=m
 
-config NF_NAT_PPTP
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_PPTP
-	select NF_NAT_PROTO_GRE
-
 config IP_NF_NAT_H323
 	tristate
 	depends on IP_NF_IPTABLES!=n && IP_NF_CONNTRACK!=n && IP_NF_NAT!=n
 	default IP_NF_NAT if IP_NF_H323=y
 	default m if IP_NF_H323=m
 
-config NF_NAT_H323
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_H323
-
 config IP_NF_NAT_SIP
 	tristate
 	depends on IP_NF_IPTABLES!=n && IP_NF_CONNTRACK!=n && IP_NF_NAT!=n
 	default IP_NF_NAT if IP_NF_SIP=y
 	default m if IP_NF_SIP=m
-
-config NF_NAT_SIP
-	tristate
-	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
-	default NF_NAT && NF_CONNTRACK_SIP
-
+    
+config IP_NF_NAT_RTSP
+	tristate 'RTSP protocol NAT support'
+	depends on IP_NF_IPTABLES!=n && IP_NF_CONNTRACK!=n && IP_NF_NAT!=n	
+	default IP_NF_NAT if IP_NF_RTSP=y
+	default m if IP_NF_RTSP=m
+    
 # mangle + specific targets
 config IP_NF_MANGLE
 	tristate "Packet mangling"
@@ -593,6 +556,17 @@ config IP_NF_MANGLE
 	  which can effect how the packet is routed.
 
 	  To compile it as a module, choose M here.  If unsure, say N.
+
+config IP_NF_TARGET_IMQ
+       tristate "IMQ target support"
+       depends on IP_NF_MANGLE
+       help
+         This option adds a `IMQ' target which is used to specify if and
+         to which IMQ device packets should get enqueued/dequeued.
+
+	 For more information visit: http://www.linuximq.net/
+
+         To compile it as a module, choose M here.  If unsure, say N.
 
 config IP_NF_TARGET_TOS
 	tristate "TOS target support"
@@ -635,9 +609,7 @@ config IP_NF_TARGET_TTL
 config IP_NF_TARGET_CLUSTERIP
 	tristate "CLUSTERIP target support (EXPERIMENTAL)"
 	depends on IP_NF_MANGLE && EXPERIMENTAL
-	depends on IP_NF_CONNTRACK || NF_CONNTRACK_IPV4
-	select IP_NF_CONNTRACK_MARK if IP_NF_CONNTRACK
-	select NF_CONNTRACK_MARK if NF_CONNTRACK_IPV4
+	depends on (IP_NF_CONNTRACK && IP_NF_CONNTRACK_MARK) || (NF_CONNTRACK_MARK && NF_CONNTRACK_IPV4)
 	help
 	  The CLUSTERIP target allows you to build load-balancing clusters of
 	  network servers without having a dedicated load-balancing
@@ -660,7 +632,7 @@ config IP_NF_RAW
 # ARP tables
 config IP_NF_ARPTABLES
 	tristate "ARP tables support"
-	select NETFILTER_XTABLES
+	depends on NETFILTER_XTABLES
 	help
 	  arptables is a general, extensible packet identification framework.
 	  The ARP packet filtering and mangling (manipulation)subsystems
@@ -686,39 +658,29 @@ config IP_NF_ARP_MANGLE
 	  Allows altering the ARP packet payload: source and destination
 	  hardware and network addresses.
 
-config IP_NF_NAT_QUAKE3
-	tristate
-	depends on IP_NF_CONNTRACK!=n && IP_NF_NAT !=n
-	default IP_NF_NAT if IP_NF_QUAKE3=y
-	default m if IP_NF_QUAKE3=m
+config IP_NF_IP2P
+	tristate "p2p traffic detection"
 
-config IP_NF_QUAKE3
-	tristate "Quake3 protocol support"
-	depends on IP_NF_CONNTRACK
-	help
-	  Quake III Arena  connection tracking helper. This module allows for a
-	  stricter firewall rulebase if one only allows traffic to a master
-	  server. Connections to Quake III server IP addresses and ports returned
-	  by the master server will be tracked automatically.
-	
-	  If you want to compile it as a module, say M here and read
-	  <file:Documentation/modules.txt>.  If unsure, say `Y'.
+config IP_NF_TARGET_ACCOUNT
+        tristate "ACCOUNT target support"
+        depends on IP_NF_IPTABLES
+        ---help---
+          The ACCOUNT target is a high performance accounting system for local networks.
+          It takes two parameters: --addr network/netmask and --tname NAME.
 
-config IP_NF_NAT_RTSP
-	tristate
-	depends on IP_NF_CONNTRACK!=n && IP_NF_NAT!=n
-	default IP_NF_NAT if IP_NF_RTSP=y
-	default m if IP_NF_RTSP=m
+          --addr is the subnet which is accounted for
+          --tname is the table name where the information is stored
 
-config IP_NF_RTSP
-	tristate  'RTSP protocol support'
-	depends on IP_NF_CONNTRACK
-	help
-	  Support the RTSP protocol.  This allows UDP transports to be setup
-	  properly, including RTP and RDT.
-	
-	  If you want to compile it as a module, say 'M' here and read
-	  Documentation/modules.txt.  If unsure, say 'Y'.
+          The data can be queried later using the libipt_ACCOUNT userspace library
+          or by the "iptaccount" tool which is part of the libipt_ACCOUNT package.
 
+          A special subnet is "0.0.0.0/0": All data is stored in the src_bytes
+          and src_packets structure of slot "0". This is useful if you want
+          to account the overall traffic to/from your internet provider.
+
+          For more information go to:
+          http://www.intra2net.com/de/produkte/opensource/ipt_account/
+
+          To compile it as a module, choose M here.  If unsure, say N.
 endmenu
 
