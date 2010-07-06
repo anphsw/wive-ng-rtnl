@@ -1502,26 +1502,26 @@ VOID AsicSwitchChannel(
 						pAd->LatchRfRegs.R4 = R4;
 
 						// Set RF value 1's set R3[bit2] = [0]
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R1);
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R2);
-						RTMP_RF_IO_WRITE32(pAd, (pAd->LatchRfRegs.R3 & (~0x04)));
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R4);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R1);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R2);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)(pAd->LatchRfRegs.R3 & (~0x04)));
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R4);
 
 						RTMPusecDelay(200);
 
 						// Set RF value 2's set R3[bit2] = [1]
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R1);
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R2);
-						RTMP_RF_IO_WRITE32(pAd, (pAd->LatchRfRegs.R3 | 0x04));
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R4);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R1);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R2);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)(pAd->LatchRfRegs.R3 | 0x04));
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R4);
 
 						RTMPusecDelay(200);
 
 						// Set RF value 3's set R3[bit2] = [0]
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R1);
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R2);
-						RTMP_RF_IO_WRITE32(pAd, (pAd->LatchRfRegs.R3 & (~0x04)));
-						RTMP_RF_IO_WRITE32(pAd, pAd->LatchRfRegs.R4);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R1);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R2);
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)(pAd->LatchRfRegs.R3 & (~0x04)));
+						RTMP_RF_IO_WRITE32(pAd,(UINT32)pAd->LatchRfRegs.R4);
 
 						break;
 					}
