@@ -22,11 +22,6 @@ NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 
-    if [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then    
-	$LOG "Cleanup conntrack table"
-	echo 0 > /proc/cleannat
-    fi
-
     $LOG "Modify route table need for buggy nas"
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
