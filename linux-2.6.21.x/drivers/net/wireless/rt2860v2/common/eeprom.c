@@ -32,8 +32,9 @@ INT RtmpChipOpsEepromHook(
 	IN RTMP_ADAPTER *pAd,
 	IN INT			infType)
 {
-	RTMP_CHIP_OP	*pChipOps = &pAd->chipOps;
+	RTMP_CHIP_OP	*pChipOps;
 
+	pChipOps = &pAd->chipOps;
 	switch(infType) 
 	{
 #ifdef RTMP_PCI_SUPPORT
@@ -48,8 +49,8 @@ INT RtmpChipOpsEepromHook(
 
 #ifdef RTMP_RBUS_SUPPORT
 		case RTMP_DEV_INF_RBUS:
-			pChipOps->eeinit = rtmp_nv_init;
-			pChipOps->eeread = rtmp_ee_flash_read;
+			pChipOps->eeinit  = rtmp_nv_init;
+			pChipOps->eeread  = rtmp_ee_flash_read;
 			pChipOps->eewrite = rtmp_ee_flash_write;
 			pChipOps->loadFirmware = NULL;
 			break;

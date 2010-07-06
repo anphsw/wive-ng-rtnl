@@ -2756,18 +2756,18 @@ VOID MlmeDynamicTxRateSwitching(
 	ULONG					i, AccuTxTotalCnt = 0, TxTotalCnt;
 	ULONG					TxErrorRatio = 0;
 	BOOLEAN					bTxRateChanged = FALSE, bUpgradeQuality = FALSE;
-	PRTMP_TX_RATE_SWITCH	pCurrTxRate, pNextTxRate = NULL;
+	PRTMP_TX_RATE_SWITCH			pCurrTxRate, pNextTxRate = NULL;
 	PUCHAR					pTable;
 	UCHAR					TableSize = 0;
 	UCHAR					InitTxRateIdx = 0, TrainUp, TrainDown;
 	CHAR					Rssi, RssiOffset = 0;
-	TX_STA_CNT1_STRUC		StaTx1;
-	TX_STA_CNT0_STRUC		TxStaCnt0;
+	TX_STA_CNT1_STRUC			StaTx1;
+	TX_STA_CNT0_STRUC			TxStaCnt0;
 	ULONG					TxRetransmit = 0, TxSuccess = 0, TxFailCount = 0;
-	MAC_TABLE_ENTRY			*pEntry;
+	MAC_TABLE_ENTRY				*pEntry;
 	RSSI_SAMPLE				*pRssi = &pAd->StaCfg.RssiSample;
 	UCHAR					tmpTxRate = 0;
-	PRTMP_TX_RATE_SWITCH	pTempTxRate = NULL;
+	PRTMP_TX_RATE_SWITCH			pTempTxRate = NULL;
 
 #ifdef RALINK_ATE
 	if (ATE_ON(pAd))

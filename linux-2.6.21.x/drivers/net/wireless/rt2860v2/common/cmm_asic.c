@@ -2064,7 +2064,7 @@ VOID AsicAdjustSingleSkuTxPower(
 #endif // RTMP_MAC_PCI //
 		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
 {
-		return;
+	return;
 }
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		Rssi = RTMPMaxRssi(pAd, 
@@ -2443,7 +2443,7 @@ VOID AsicAdjustTxPower(
 #endif // SINGLE_SKU //
 
 	/* Get Tx Rate Offset Table which from eeprom 0xDEh ~ 0xEFh */
-	AsicGetTxPowerOffset(pAd, &TxPwr);
+	AsicGetTxPowerOffset(pAd, TxPwr);
 	/* Get temperature compensation Delta Power Value */
 	AsicGetAutoAgcOffset(pAd, &DeltaPwr, &TxAgcCompensate, &BbpR49);
 
