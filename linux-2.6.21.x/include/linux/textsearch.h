@@ -42,7 +42,7 @@ struct ts_state
 struct ts_ops
 {
 	const char		*name;
-	struct ts_config *	(*init)(const void *, unsigned int, gfp_t);
+	struct ts_config *	(*init)(const void *, unsigned int, gfp_t, int);
 	unsigned int		(*find)(struct ts_config *,
 					struct ts_state *);
 	void			(*destroy)(struct ts_config *);
@@ -55,12 +55,14 @@ struct ts_ops
 /**
  * struct ts_config - search configuration
  * @ops: operations of chosen algorithm
+ * @flags: flags
  * @get_next_block: callback to fetch the next block to search in
  * @finish: callback to finalize a search
  */
 struct ts_config
 {
 	struct ts_ops		*ops;
+	int 			flags;
 
 	/**
 	 * get_next_block - fetch next block of data
@@ -165,11 +167,10 @@ static inline struct ts_config *alloc_ts_config(size_t payload,
 {
 	struct ts_config *conf;
 
-	conf = kmalloc(TS_PRIV_ALIGN(sizeof(*conf)) + payload, gfp_mask);
+	conf = kzalloc(TS_PRIV_ALIGN(sizeof(*conf)) + payload, gfp_mask);
 	if (conf == NULL)
 		return ERR_PTR(-ENOMEM);
 
-	memset(conf, 0, TS_PRIV_ALIGN(sizeof(*conf)) + payload);
 	return conf;
 }
 
