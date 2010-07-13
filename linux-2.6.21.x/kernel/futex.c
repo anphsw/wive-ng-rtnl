@@ -1515,6 +1515,7 @@ pi_faulted:
 		ret = futex_handle_fault((unsigned long)uaddr, attempt);
 		if (ret)
 			goto out;
+		uval = 0;
 		goto retry_unlocked;
 	}
 	up_read(&current->mm->mmap_sem);
