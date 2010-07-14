@@ -337,16 +337,19 @@
 #define __NR_ioprio_set			(__NR_Linux + 314)
 #define __NR_ioprio_get			(__NR_Linux + 315)
 #define __NR_track_flag                 (__NR_Linux + 316)              /* ASUS QOS */
+#define __NR_set_mbss_nolan		(__NR_Linux + 317)		/* Jiahao for MBSSID */
+#define __NR_set_mbss_nowan		(__NR_Linux + 318)		/* Jiahao for MBSSID */
+#define __NR_set_mbss_prio		(__NR_Linux + 319)		/* Jiahao for MBSSID */
 
 /*
  * Offset of the last Linux o32 flavoured syscall
  */
-#define __NR_Linux_syscalls		316
+#define __NR_Linux_syscalls		319				/* Jiahao for MBSSID */
 
 #endif /* _MIPS_SIM == _MIPS_SIM_ABI32 */
 
 #define __NR_O32_Linux			4000
-#define __NR_O32_Linux_syscalls		316
+#define __NR_O32_Linux_syscalls		319				/* Jiahao for MBSSID */
 
 #if _MIPS_SIM == _MIPS_SIM_ABI64
 

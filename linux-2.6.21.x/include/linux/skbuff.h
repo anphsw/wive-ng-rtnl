@@ -325,6 +325,7 @@ struct sk_buff {
 				*data,
 				*tail,
 				*end;
+	unsigned char		wl_idx;		/* Jiahao for MBSSID */
 };
 
 #ifdef __KERNEL__

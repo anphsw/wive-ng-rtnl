@@ -115,6 +115,10 @@ EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 extern int nf_track_flag;
 extern unsigned long nf_ipaddr;
 u_int8_t port_num_udp[65536];
+
+extern unsigned char mbss_prio_1;	//SZ-Angela Add for MBSSID
+extern unsigned char mbss_prio_2;
+extern unsigned char mbss_prio_3;
 #endif
 
 /*
@@ -1180,6 +1184,24 @@ resolve_normal_ct(struct sk_buff *skb,
                                         skb->mark = 10;
                                 break;
                 }
+
+		switch(skb->wl_idx)	//SZ-Angela Add for MBSSID
+		{
+			case 2:
+				if(mbss_prio_1 == 0)
+					skb->mark = 60;
+				break;
+			case 4:
+				if(mbss_prio_2 == 0)
+					skb->mark = 60;
+				break;
+			case 8:
+				if(mbss_prio_3 == 0)
+					skb->mark = 60;
+				break;
+			default:
+				break;
+		}
         }
 #endif
 	ct = nf_ct_tuplehash_to_ctrack(h);
