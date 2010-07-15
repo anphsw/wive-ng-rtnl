@@ -16,7 +16,7 @@
 ############################################################################
 
 ifndef CONSOLE_BAUD_RATE
-  CONSOLE_BAUD_RATE = 115200
+  CONSOLE_BAUD_RATE = 57600
 endif
 
 ifeq ($(ROOTDIR)/modules,$(wildcard $(ROOTDIR)/modules))
@@ -48,10 +48,8 @@ endif
 ENDIAN        ?= little
 MACHINE       = mips
 ARCH          = mips
-#CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mips_4KCle-
 CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
 CROSS         = $(CROSS_COMPILE)
-#CONFIGURE_HOST = $(CONFIG_CROSS_COMPILER_PATH)/mips_4KCle-
 CONFIGURE_HOST = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
 
 CC        = $(CROSS_COMPILE)gcc $(CPUFLAGS)
@@ -83,7 +81,7 @@ ifdef UCLINUX_BUILD_LIB
   ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
   else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O2) -fomit-frame-pointer
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer
   endif
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
@@ -125,12 +123,7 @@ ifdef CONFIG_LIB_LIBSTDC_PLUS_FORCE
 	LDFLAGS  += -L$(ROOTDIR)/uClibc++/src
 endif
 
-#	CFLAGS  += -nostdinc -I$(ROOTDIR)/include -I$(ROOTDIR)/include/include
-#	CFLAGS  += -fno-builtin
-#	CFLAGS  += $(CPUFLAGS)
-#	CFLAGS	+= -nostdlib
 	CXXFLAGS = $(CFLAGS) $(INCCXX)
-#Wstrict-prototypes -Wshadow -Os -fomit-frame-pointer 
 
   ifeq ($(findstring glibc,$(LIBCDIR)),glibc)
 	CRTI     = -nostartfiles $(ROOTDIR)/lib/crt1.o \
