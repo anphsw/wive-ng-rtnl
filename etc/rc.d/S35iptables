@@ -153,13 +153,13 @@ start() {
 	#only eth2.2 WAN interface recived multicast
 	if [ "$OperationMode" != "0" ]; then    
 	    #INPUT needed by unpxy and igmpproxy
-	    if [ "$igmpen" = "1" ] || [ "$QOS" = "1" ]; then
+	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
 		iptables -I INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -I INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
 		iptables -I INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
 	    fi
 	    #FORWARD rules needed only for ignpproxy.
-	    if [ "$igmpen" = "1" ]; then
+	    if [ "$igmpen" != "0" ]; then
 		iptables -I FORWARD -d 224.0.0.0/4 -j ACCEPT
 		iptables -I FORWARD -s 224.0.0.0/4 -j ACCEPT
 	    fi
@@ -169,7 +169,6 @@ start() {
 	    if [ "$vpnType" = "1"  ]; then
 		iptables -I INPUT -p gre -j ACCEPT
 		iptables -I INPUT -p tcp --sport 1723 -j ACCEPT
-		iptables -I INPUT -p tcp --dport 1723 -j ACCEPT
 	    elif [ "$vpnType" = "2"  ]; then
 		iptables -I INPUT -p udp --sport 500 -j ACCEPT
 		iptables -I INPUT -p udp --dport 500 -j ACCEPT
@@ -222,7 +221,6 @@ get_param() {
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     NAT=`nvram_get 2860 natEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`
-    QOS=`nvram_get 2860 WmmCapable`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     vpnType=`nvram_get 2860 vpnType`
     vpnNAT=`nvram_get 2860 vpnNAT`
