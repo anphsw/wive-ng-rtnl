@@ -80,14 +80,14 @@ start() {
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
 		echo "Drop ping from wan $wan_if"
-    		iptables -A INPUT -i $wan_if -p icmp -j DROP
-    		iptables -A INPUT -i ppp+ -p icmp -j DROP
+    		iptables -A servicelimit -i $wan_if -p icmp -j DROP
+    		iptables -A servicelimit -i ppp+ -p icmp -j DROP
 	    fi
 	else
 	    echo "Allow ping from wan $wan_if"
-	    iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
-	    iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 	fi
+	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
+	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
     
 
 ###########################################FORWARD#######################################
