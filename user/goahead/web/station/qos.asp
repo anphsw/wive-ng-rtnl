@@ -236,7 +236,7 @@ function PageInit()
 
 <table div="wmm_dls_setup" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
   <tr>
-    <td class="title" id="qosDLS">Direct Link Setup</td>
+    <td class="title" id="qosDLS" colspan="2">Direct Link Setup</td>
   </tr>
   <tr>
     <td class="head" id="qosDLSMac">MAC Address</td>

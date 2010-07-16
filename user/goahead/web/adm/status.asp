@@ -173,15 +173,15 @@ function PageInit()
 </tr>
 <tr>
   <td class="head" id="statusWANIPAddr">WAN IP Address</td>
-  <td><% getWanIp(); %></td>
+  <td><% getWanIp(); %>&nbsp;</td>
 </tr>
 <tr>
   <td class="head" id="statusSubnetMask">Subnet Mask</td>
-  <td><% getWanNetmask(); %></td>
+  <td><% getWanNetmask(); %>&nbsp;</td>
 </tr>
 <tr>
   <td class="head" id="statusDefaultGW">Default Gateway</td>
-  <td><% getWanGateway(); %></td>
+  <td><% getWanGateway(); %>&nbsp;</td>
 </tr>
 <tr>
   <td class="head" id="statusPrimaryDNS">Primary Domain Name Server</td>

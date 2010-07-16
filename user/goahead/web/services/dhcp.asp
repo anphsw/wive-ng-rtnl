@@ -108,12 +108,6 @@ function dhcpTypeSwitch()
 	form.dhcpSecDns.disabled = dhcp_off;
 	form.dhcpGateway.disabled = dhcp_off;
 	form.dhcpLease.disabled = dhcp_off;
-/*	form.dhcpStatic1Mac.disabled = dhcp_off;
-	form.dhcpStatic1Ip.disabled = dhcp_off;
-	form.dhcpStatic2Mac.disabled = dhcp_off;
-	form.dhcpStatic2Ip.disabled = dhcp_off;
-	form.dhcpStatic3Mac.disabled = dhcp_off;
-	form.dhcpStatic3Ip.disabled = dhcp_off;*/
 	
 	genTable(dhcp_off);
 }
@@ -134,6 +128,12 @@ function initTranslation()
 	_TR("lDhcpSecDns", "inet sec dns");
 	_TR("lDhcpGateway", "inet gateway");
 	_TR("lDhcpLease", "lan dhcp lease");
+	
+	_TR("dClients", "dhcp clients");
+	_TR("dHostname", "inet hostname");
+	_TR("dMac", "inet mac");
+	_TR("dIp", "inet ip");
+	_TR("dExpr", "dhcp expire");
 	
 	_TRV("lApply", "inet apply");
 	_TRV("lCancel", "inet cancel");
@@ -209,7 +209,21 @@ function CheckValue()
 <p id="lIntroduction"></p>
 <hr>
 
+<table width="95%" border="1" cellspacing="1" cellpadding="2">
+<tr>
+	<td class="title" colspan="4" id="dClients">DHCP Clients</td>
+</tr>
+<tr style="background-color: #E8F8FF">
+	<td id="dHostname">Hostname</td>
+	<td id="dMac">MAC Address</td>
+	<td id="dIp">IP Address</td>
+	<td id="dExpr">Expires in</td>
+</tr>
+	<% getDhcpCliList(); %>
+</table>
+
 <form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue()">
+
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="lSetup">DHCP Server Setup</td>

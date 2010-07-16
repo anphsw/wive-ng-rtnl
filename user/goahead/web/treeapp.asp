@@ -53,7 +53,6 @@ function refresh(){
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
-var dhcpen = '<% getCfgZero(1, "dhcpEnabled"); %>';
 var dpbsta = '<% getDpbSta(); %>';
 var vpnen = '<% getVPNBuilt(); %>';
 var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
@@ -80,22 +79,23 @@ a.config.useCookies=false;
 a.add(000,  -1, _("treeapp router"),                "javascript:go('overview.asp');");
 a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
 a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
-if (opmode != '0') {
-	a.add(301, 300, _("treeapp wan"),                   "javascript:go('internet/wan.asp');");
-}
-a.add(302, 300, _("treeapp lan"),                   "javascript:go('internet/lan.asp');");
+
+a.add(301, 300, _("treeapp lan"),                   "javascript:go('internet/lan.asp');");
+
+if (opmode != '0')
+	a.add(302, 300, _("treeapp wan"),                   "javascript:go('internet/wan.asp');");
+
 a.add(303, 300, _("treeapp vpn"),                   "javascript:go('internet/vpn.asp');");
 
-if (dhcpen == "1") {
-	a.add(304, 300, _("treeapp dhcp clients"),          "javascript:go('internet/dhcpcliinfo.asp');");
-}
-if (opmode != '0') {
-	a.add(306, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
-}
+if (opmode != '0')
+	a.add(304, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
 
-if (swqos == '1') {
-	a.add(307, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
-}
+//if (vpnen == "1") {
+//	a.add(305, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
+//}
+
+if (swqos == '1')
+	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
 
 if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
 {

@@ -2,6 +2,7 @@
 <head>
 <title>Internet Services Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
@@ -94,8 +95,6 @@ function initValue()
 	var radvdb = "<% getRadvdBuilt(); %>";
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
-	var rmtHTTP = "<% getCfgGeneral(1, "RemoteManagement"); %>";
-	var rmtSSH = "<% getCfgGeneral(1, "RemoteSSH"); %>";
 
 	initTranslation();
 
@@ -107,8 +106,10 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
-	form.rmtHTTP.checked = (rmtHTTP == "1");
-	form.rmtSSH.checked = (rmtSSH == "1");
+	form.rmtHTTP.value = "<% getCfgGeneral(1, "RemoteManagement"); %>";
+	form.rmtSSH.value = "<% getCfgGeneral(1, "RemoteSSH"); %>";
+	form.dnsMode.value = "<% getCfgGeneral(1, "DNSMode"); %>";
+	form.udpxyMode.value = "<% getCfgGeneral(1, "UDPXYMode"); %>";
 
 	if (lltdb == "0")
 	{
@@ -172,7 +173,7 @@ function CheckValue()
 <tr>
 <td class="head" id="lStp">802.1d Spanning Tree</td>
 <td>
-	<select name="stpEnbl" size="1">
+	<select name="stpEnbl" size="1" class="half">
 		<option value="0" id="lStpD">Disable</option>
 		<option value="1" id="lStpE">Enable</option>
 	</select>
@@ -181,7 +182,7 @@ function CheckValue()
 <tr id="lltd">
 <td class="head" id="lLltd">LLTD</td>
 <td>
-	<select name="lltdEnbl" size="1">
+	<select name="lltdEnbl" size="1" class="half">
 		<option value="0" id="lLltdD">Disable</option>
 		<option value="1" id="lLltdE">Enable</option>
 	</select>
@@ -190,7 +191,7 @@ function CheckValue()
 <tr id="igmpProxy">
 <td class="head" id="lIgmpp">IGMP proxy</td>
 <td>
-	<select name="igmpEnbl" size="1">
+	<select name="igmpEnbl" size="1" class="half">
 		<option value="0" id="lIgmppD">Disable</option>
 		<option value="1" id="lIgmppE">Enable</option>
 	</select>
@@ -199,7 +200,7 @@ function CheckValue()
 <tr id="upnp">
 <td class="head" id="lUpnp">UPNP</td>
 <td>
-	<select name="upnpEnbl" size="1">
+	<select name="upnpEnbl" size="1" class="half">
 		<option value="0" id="lUpnpD">Disable</option>
 		<option value="1" id="lUpnpE">Enable</option>
 	</select>
@@ -208,7 +209,7 @@ function CheckValue()
 <tr id="radvd">
 <td class="head" id="lRadvd">Router Advertisement</td>
 <td>
-	<select name="radvdEnbl" size="1">
+	<select name="radvdEnbl" size="1" class="half">
 		<option value="0" id="lRadvdD">Disable</option>
 		<option value="1" id="lRadvdE">Enable</option>
 	</select>
@@ -217,7 +218,7 @@ function CheckValue()
 <tr id="pppoerelay">
 <td class="head" id="lPppoer">PPPOE relay</td>
 <td>
-	<select name="pppoeREnbl" size="1">
+	<select name="pppoeREnbl" size="1" class="half">
 		<option value="0" id="lPppoerD">Disable</option>
 		<option value="1" id="lPppoerE">Enable</option>
 	</select>
@@ -226,17 +227,50 @@ function CheckValue()
 <tr id="dnsproxy">
 <td class="head" id="lDnsp">DNS proxy</td>
 <td>
-	<select name="dnspEnbl" size="1">
+	<select name="dnspEnbl" size="1" class="half">
 		<option value="0" id="lDnspD">Disable</option>
 		<option value="1" id="lDnspE">Enable</option>
 	</select>
 </td>
+</tr>
 <tr>
-<tr>
-<td class="head" id="nRemAcc">Remote Management (via WAN)</td>
+<td class="head">HTTP Remote Management</td>
 <td>
-	<input type="checkbox" name="rmtHTTP">&nbsp;HTTP&nbsp;
-	<input type="checkbox" name="rmtSSH">&nbsp;SSH&nbsp;
+	<select name="rmtHTTP" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">SSH Remote Management</td>
+<td>
+	<select name="rmtSSH" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">DNS</td>
+<td>
+	<select name="dnsMode" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">UDPXY</td>
+<td>
+	<select name="udpxyMode" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
 </td>
 </tr>
 </table>
@@ -244,8 +278,8 @@ function CheckValue()
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
 <td>
-	<input type=submit style="{width:120px;}" value="Apply" id="lApply"  onClick="TimeoutReload(20)">&nbsp;&nbsp;
-	<input type=reset  style="{width:120px;}" value="Cancel" id="lCancel" onClick="window.location.reload()">
+	<input type="submit" class="normal" value="Apply"  id="lApply"  onClick="TimeoutReload(20)">&nbsp;
+	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload()">
 </td>
 </tr>
 </table>

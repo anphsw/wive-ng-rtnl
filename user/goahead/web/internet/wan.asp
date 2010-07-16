@@ -141,12 +141,12 @@ function initValue()
 	var mode = "<% getCfgGeneral(1, "wanConnectionMode"); %>";
 	var pptpMode = <% getCfgZero(1, "wan_pptp_mode"); %>;
 	var clone = <% getCfgZero(1, "macCloneEnabled"); %>;
-	var nat = "<% getCfgZero(1, "natEnabled"); %>";
+	var nat = "<% getCfgZero(1, "natEnable"); %>";
 	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
 	var form = document.wanCfg;
 	
-	form.natEnabled.checked = (nat == "1");
+	form.natEnable.checked = (nat == "1");
 	var element = document.getElementById("natRowDisplay");
 	if (element!=null)
 		element.style.display = (opmode != "0") ? "" : "none";
@@ -248,7 +248,7 @@ function dnsSwitchClick(form)
 </tr>
 <tr id="natRowDisplay">
 	<td class="head" id="wMacAddressClone">Enable NAT</td>
-	<td><input name="natEnabled" type="checkbox"></td>
+	<td><input name="natEnable" type="checkbox"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">MAC Clone</td>
