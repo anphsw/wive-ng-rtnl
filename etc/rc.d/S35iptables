@@ -20,32 +20,6 @@ start() {
 	iptables -t filter -A FORWARD -j web_filter
 
 ###########################################SERVICES#######################################
-	#rules for access services from wan (DROP)
-	if [ "$RMG" = "0" ] && [ "$OperationMode" != "0" ]; then
-	echo "Drop acess from wan $wan_if"
-	    iptables -A INPUT -i $wan_if -p tcp -m state --state NEW -j DROP
-    	    iptables -A INPUT -i $wan_if -p udp -j DROP
-	    iptables -A INPUT -i ppp+ -p tcp -m state --state NEW -j DROP
-    	    iptables -A INPUT -i ppp+ -p udp -j DROP
-	else
-	echo "Allow acess from wan $wan_if"
-	    iptables -A INPUT -i $wan_if -m state --state NEW -j RETURN
-    	    iptables -A INPUT -i $wan_if ! -p icmp -j RETURN
-	    iptables -A INPUT -i ppp+ -m state --state NEW -j RETURN
-    	    iptables -A INPUT -i ppp+ ! -p icmp -j RETURN
-	fi
-
-	#ping from wan
-	if [ "$WANPingFilter" = "0" ] && [ "$OperationMode" != "0" ]; then
-	echo "Drop ping from wan $wan_if"
-    	    iptables -A INPUT -i $wan_if -p icmp -j DROP
-    	    iptables -A INPUT -i ppp+ -p icmp -j DROP
-	else
-	echo "Allow ping from wan $wan_if"
-    	    iptables -A INPUT -i $wan_if -p icmp -j RETURN
-    	    iptables -A INPUT -i ppp+ -p icmp -j RETURN
-	fi
-    
         #add limit connection rules for local services
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
@@ -55,7 +29,9 @@ start() {
 	if [ "$RemoteManagement" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
-    		iptables -A servicelimit -i $wan_if -p tcp --dport 80 -j DROP
+		if [ "$OperationMode" != "0" ]; then
+    		    iptables -A servicelimit -i $wan_if -p tcp --dport 80 -j DROP
+		fi
     		iptables -A servicelimit -i $lan_if -p tcp --dport 80 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan_if2 -p tcp --dport 80 -j ACCEPT
@@ -70,7 +46,9 @@ start() {
 	if [ "$RemoteSSH" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 22 -m connlimit --connlimit-above 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
-    		iptables -A servicelimit -i $wan_if -p tcp --dport 22 -j DROP
+		if [ "$OperationMode" != "0" ]; then
+    		    iptables -A servicelimit -i $wan_if -p tcp --dport 22 -j DROP
+		fi
     		iptables -A servicelimit -i $lan_if -p tcp --dport 22 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan_if2 -p tcp --dport 22 -j ACCEPT
@@ -85,7 +63,9 @@ start() {
 	if [ "$UDPXY" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 81 -m connlimit --connlimit-above 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
-    		iptables -A servicelimit -i $wan_if -p tcp --dport 81 -j DROP
+		if [ "$OperationMode" != "0" ]; then
+    		    iptables -A servicelimit -i $wan_if -p tcp --dport 81 -j DROP
+		fi
     		iptables -A servicelimit -i $lan_if -p tcp --dport 81 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan_if2 -p tcp --dport 81 -j ACCEPT
@@ -97,8 +77,18 @@ start() {
     	    iptables -A servicelimit -p tcp --dport 81 -j DROP
 	fi
         #icmp limit
-	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
-        iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
+	if [ "$WANPingFilter" = "0" ]; then
+	    if [ "$OperationMode" != "0" ]; then
+		echo "Drop ping from wan $wan_if"
+    		iptables -A INPUT -i $wan_if -p icmp -j DROP
+    		iptables -A INPUT -i ppp+ -p icmp -j DROP
+	    fi
+	else
+	    echo "Allow ping from wan $wan_if"
+	    iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
+	    iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
+	fi
+    
 
 ###########################################FORWARD#######################################
 	if [ "$OperationMode" != "0" ]; then
@@ -228,7 +218,6 @@ get_param() {
     upnp=`nvram_get 2860 upnpEnabled`
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     NAT=`nvram_get 2860 natEnabled`
-    RMG=`nvram_get 2860 RemoteManagement`
     igmpen=`nvram_get 2860 igmpEnabled`
     QOS=`nvram_get 2860 WmmCapable`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
