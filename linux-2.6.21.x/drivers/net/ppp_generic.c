@@ -498,7 +498,7 @@ static unsigned int ppp_poll(struct file *file, poll_table *wait)
 		return 0;
 	poll_wait(file, &pf->rwait, wait);
 	mask = POLLOUT | POLLWRNORM;
-	if (skb_peek(&pf->rq) != 0)
+	if (skb_peek(&pf->rq))
 		mask |= POLLIN | POLLRDNORM;
 	if (pf->dead)
 		mask |= POLLHUP;
