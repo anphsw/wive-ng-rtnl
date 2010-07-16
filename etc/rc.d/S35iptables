@@ -46,12 +46,6 @@ start() {
     	    iptables -A INPUT -i ppp+ -p icmp -j RETURN
 	fi
     
-	#enable services for local network
-	iptables -A INPUT -i $lan_if -s $lan_ip/$nm -j ACCEPT
-	if [ "$Lan2Enabled" = "1" ]; then
-	    iptables -A INPUT -i $lan2_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
-	fi
-
         #add limit connection rules for local services
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
