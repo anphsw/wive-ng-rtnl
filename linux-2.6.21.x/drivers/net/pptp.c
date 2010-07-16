@@ -405,7 +405,7 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 
 	/* compress protocol field */
 	if ((opt->ppp_flags & SC_COMP_PROT) && data[0]==0 && !islcp)
-		skb_pull_inline(skb,1);
+		skb_pull(skb,1);
 
 	/*
 		* Put in the address/control bytes if necessary
@@ -608,13 +608,13 @@ allow_packet:
 				*(payload +5));
 		#endif
 
-		skb_pull_inline(skb,headersize);
+		skb_pull(skb,headersize);
 
 		if (payload[0] == PPP_ALLSTATIONS && payload[1] == PPP_UI){
 			/* chop off address/control */
 			if (skb->len < 3)
 				goto drop;
-			skb_pull_inline(skb,2);
+			skb_pull(skb,2);
 		}
 
 		if ((*skb->data) & 1){
