@@ -51,10 +51,12 @@ int32_t mcast_rx(struct sk_buff * skb);
 int32_t mcast_tx(struct sk_buff * skb);
 #endif
 
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 #ifdef RA_MTD_RW_BY_NUM
 int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 #else
 int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
+#endif
 #endif
 
 /* gmac driver feature set config */
@@ -1130,13 +1132,13 @@ int __init rather_probe(struct net_device *dev)
                 netrx_skbuf[i] = NULL;
         }	// kmalloc
 	
-	//Get mac0 address from flash
+//Get mac0 address from flash
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 #ifdef RA_MTD_RW_BY_NUM
 	i = ra_mtd_read(2, GMAC0_OFFSET, 6, addr.sa_data);
 #else
 	i = ra_mtd_read_nm("Factory", GMAC0_OFFSET, 6, addr.sa_data);
 #endif
-
 	//If reading mtd failed or mac0 is empty, generate a mac address
 	if (i < 0 || memcmp(addr.sa_data, zero, 6) == 0) {
 		unsigned char mac_addr01234[5] = {0x00, 0x0C, 0x43, 0x28, 0x80};
@@ -1146,6 +1148,7 @@ int __init rather_probe(struct net_device *dev)
 	}
 
 	ei_set_mac_addr(dev, &addr);
+#endif /* CONFIG_RAETH_READ_MAC_FROM_MTD */
 	spin_lock_init(&ei_local->page_lock);	
 	ether_setup(dev);
 	ra2880_setup_dev_fptable(dev);

@@ -17,18 +17,15 @@ echo "Start network interfaces..."
  vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
  brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
  lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
+ CHECKMAC=`nvram_get CHECKMAC`
+ MAC=`nvram_get WAN_MAC_ADDR`
+ LANMAC=`nvram_get LAN_MAC_ADDR`
 
-#-------------------PRECONFIG-----------------------------
- #add bridge in system
- if [ "$brset" = "0" ]; then
-    echo "Add bridge in the system"
-    brctl addbr br0
- fi
-   CHECKMAC=`nvram_get CHECKMAC`
+#-------------------CHECK_MAC-----------------------------
     if [ $CHECKMAC = "YES" ]; then
-      MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
-      LANMAC=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
- 	if [ $MAC = "0" ] || [ $LANMAC = "0" ]; then
+     MAC_TEST=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
+     LANMAC_TEST=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
+ 	if [ $MAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
 	    echo "First start MAC generate"
     	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
     	    macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
@@ -44,38 +41,39 @@ echo "Start network interfaces..."
     	    nvram_set LAN_MAC_ADDR "$LAN_MACADDR"
     	    MAC=$WAN_MACADDR
     	    LANMAC=$LAN_MACADDR
-	else
-	    echo "Use current mac."
-	    MAC=`nvram_get WAN_MAC_ADDR`
-	    LANMAC=`nvram_get LAN_MAC_ADDR`
 	fi
     fi
 
-    #set mac for LAN
-    echo "-==LAN_MACADDR $LANMAC==-"
-    ifconfig eth2   hw ether $LANMAC
-    ifconfig br0    hw ether $LANMAC
-
+#-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
-	echo "Up bridge interface"
+	if [ "$brset" = "0" ]; then
+	    echo "-==Add bridge in the system==-"
+	    brctl addbr br0
+        fi
+	echo "-==BR0_MACADDR $LANMAC==-"
+	ifconfig br0 hw ether $LANMAC
+	echo "-==Up bridge interface==-"
 	ip link set br0 up
     fi
     if [ "$lanisup" = "0" ]; then
-	echo "Up vlan root interface"
+	echo "-==ETH2_MACADDR $LANMAC==-"
+	ifconfig eth2 hw ether $LANMAC
+	echo "-==Up vlan root interface==-"
 	ip link set eth2 up
 	vlanisconfig=0
     fi
     if [ "$vlanisconfig" != "2" ]; then
-        echo "Add vlans and config"
+        echo "-==Add vlans and config==-"
 	vconfig add eth2 1
 	vconfig add eth2 2
+	echo "-==ETH2.1_MACADDR $LANMAC==-"
+	ifconfig eth2.1 hw ether $LANMAC
+	echo "-==ETH2.2_MACADDR $MAC==-"
+	ifconfig eth2.2 hw ether $MAC
+        echo "-==Set vlanmap for 2.1 and 2.2 interfaces==-"
 	set_vlan_map eth2.1
 	set_vlan_map eth2.2
     fi
-
-    #set mac for wan
-    echo "-==WAN_MACADDR $MAC==-"
-    ifconfig eth2.2 hw ether $MAC
 
     #drop adresses
     ip addr flush dev eth2.1

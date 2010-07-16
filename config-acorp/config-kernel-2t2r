@@ -1191,6 +1191,7 @@ CONFIG_HAS_IOPORT=y
 # Ethernet Ralink RT3xx/RT28xx wire driver.
 #
 CONFIG_RAETH=y
+# CONFIG_RAETH_READ_MAC_FROM_MTD is not set
 CONFIG_RAETH_NAPI=y
 # CONFIG_RA_HW_NAT is not set
 # CONFIG_RA_SW_NAT is not set

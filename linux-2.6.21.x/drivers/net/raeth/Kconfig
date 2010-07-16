@@ -4,6 +4,10 @@ config RAETH
           This driver supports Ralink gigabit ethernet family of
           adapters.
 
+config RAETH_READ_MAC_FROM_MTD
+        bool "Read mac adress from mtdflash at boot time"
+        depends on RAETH
+
 config RAETH_NAPI
         bool "Use Rx Polling (NAPI)"
         depends on RAETH
