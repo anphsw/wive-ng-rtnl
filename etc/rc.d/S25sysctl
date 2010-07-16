@@ -7,9 +7,10 @@ start() {
   echo "Tune network stack and memory usadge fo small memory devices"
     # tcp buff size
     MAX_MEM=`free | grep Total | awk '{ print ($4-1228)*1024 }'`
-    CMAX_MEM=`echo $MAX_MEM | awk '{ print ($1)/2 }' | cut -d '.' -f1`
-    CORE_MEM=`echo $MAX_MEM | awk '{ print ($1)/4 }' | cut -d '.' -f1`
-    IPV4_MEM=`echo $MAX_MEM | awk '{ print ($1)/6 }' | cut -d '.' -f1`
+    let "CMAX_MEM=$MAX_MEM/4"
+    let "CORE_MEM=$MAX_MEM/5"
+    let "IPV4_MEM=$MAX_MEM/6"
+
     # set sysctl
     sysctl -w net.core.rmem_max=$CMAX_MEM
     sysctl -w net.core.wmem_max=$CMAX_MEM
