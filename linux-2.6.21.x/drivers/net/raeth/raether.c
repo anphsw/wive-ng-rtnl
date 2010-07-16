@@ -462,9 +462,9 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 
 #ifdef CONFIG_RAETH_NAPI
-static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
+static inline int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
 #else
-static int rt2880_eth_recv(struct net_device* dev)
+static inline int rt2880_eth_recv(struct net_device* dev)
 #endif
 {
 	struct sk_buff	*skb, *rx_skb;
@@ -834,7 +834,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 }
 #endif
 
-static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
+static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
 	unsigned long flags;
@@ -946,7 +946,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	return 0;	
 }
 
-static int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
+static inline int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
 {
 	return ei_start_xmit(skb, dev, 1);
 }
@@ -1161,7 +1161,7 @@ int __init rather_probe(struct net_device *dev)
 	return 0;
 }
 
-void ei_xmit_housekeeping(unsigned long unused)
+void inline ei_xmit_housekeeping(unsigned long unused)
 {
     struct net_device *dev = dev_raether;
     END_DEVICE *ei_local = netdev_priv(dev);
@@ -1254,7 +1254,7 @@ int VirtualIF_close(struct net_device * dev)
     return 0;
 }
 
-int VirtualIFSendPackets(struct sk_buff * pSkb,
+inline int VirtualIFSendPackets(struct sk_buff * pSkb,
 			 struct net_device * dev)
 {
     PSEUDO_ADAPTER *pPesueoAd = dev->priv;
