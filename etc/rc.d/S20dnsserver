@@ -6,7 +6,7 @@
 dnsp=`nvram_get 2860 dnsPEnabled`
 
 start() {
-if [ -f /bin/dnsmasq ] && [ "$dnsp" = "1" ] ; then
+if [ -f /bin/dnsmasq ] && [ "$dnsp" != "0" ] ; then
 get_param
  #workaround fix me later
  killall -q dnsmasq
