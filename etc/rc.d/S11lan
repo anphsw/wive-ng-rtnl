@@ -19,10 +19,43 @@ echo "Start network interfaces..."
  lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 
 #-------------------PRECONFIG-----------------------------
-    if [ "$brset" = "0" ]; then
-        echo "Add bridge in the system"
-        brctl addbr br0
+ #add bridge in system
+ if [ "$brset" = "0" ]; then
+    echo "Add bridge in the system"
+    brctl addbr br0
+ fi
+   CHECKMAC=`nvram_get CHECKMAC`
+    if [ $CHECKMAC = "YES" ]; then
+      MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
+      LANMAC=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
+ 	if [ $MAC = "0" ] || [ $LANMAC = "0" ]; then
+	    echo "First start MAC generate"
+    	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	    macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc6=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+
+	    echo "Set new mac!"
+    	    WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
+    	    LAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc6"
+    	    nvram_set WAN_MAC_ADDR "$WAN_MACADDR"
+    	    nvram_set LAN_MAC_ADDR "$LAN_MACADDR"
+    	    MAC=$WAN_MACADDR
+    	    LANMAC=$LAN_MACADDR
+	else
+	    echo "Use current mac."
+	    MAC=`nvram_get WAN_MAC_ADDR`
+	    LANMAC=`nvram_get LAN_MAC_ADDR`
+	fi
     fi
+
+    #set mac for LAN
+    echo "-==LAN_MACADDR $LANMAC==-"
+    ifconfig eth2   hw ether $LANMAC
+    ifconfig br0    hw ether $LANMAC
+
     if [ "$brisup" = "0" ]; then
 	echo "Up bridge interface"
 	ip link set br0 up
@@ -40,28 +73,8 @@ echo "Start network interfaces..."
 	set_vlan_map eth2.2
     fi
 
-    MAC=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
-    CHECKMAC=`nvram_get CHECKMAC`
-    #disable set mac to acorp wthen test
-    if [ $MAC = "0" ] && [ $CHECKMAC = "YES" ]; then
-    echo "First start MAC generate"
-        macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-        macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-        macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-        macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-        macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
-
-    echo "Set new mac!"
-        WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
-        nvram_set WAN_MAC_ADDR "$WAN_MACADDR"
-        MAC=$WAN_MACADDR
-    else
-	echo "Use current mac."
-	MAC=`nvram_get WAN_MAC_ADDR`
-    fi
-
     #set mac for wan
-    echo WAN_MACADDR="$MAC"
+    echo "-==WAN_MACADDR $MAC==-"
     ifconfig eth2.2 hw ether $MAC
 
     #drop adresses

@@ -167,6 +167,7 @@ session_timeout_interval=0
 idle_timeout_interval=0
 staWirelessMode=9
 WAN_MAC_ADDR=00:0C:43:30:52:66
+LAN_MAC_ADDR=00:0C:43:30:52:67
 dhcpStatic1=
 dhcpStatic2=
 dhcpStatic3=
