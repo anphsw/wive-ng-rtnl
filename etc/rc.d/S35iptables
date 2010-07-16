@@ -53,12 +53,25 @@ start() {
 	fi
 
         #add limit connection rules for local services
-	iptables -N servicelimit
-        iptables -F servicelimit
-        iptables -A INPUT -j servicelimit
+	iptables -N servicelimit > /dev/null 2>&1
+        iptables -F servicelimit > /dev/null 2>&1
+        iptables -A INPUT -j servicelimit > /dev/null 2>&1
 
 	#web limit
-        iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
+	if [ "$RemoteManagement" != "0" ]; then
+    	    iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
+	    if [ "$RemoteManagement" = "1" ]; then
+    		iptables -A servicelimit -i $wan_if -p tcp --dport 80 -j DROP
+    		iptables -A servicelimit -i $lan_if -p tcp --dport 80 -j ACCEPT
+	     if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan_if2 -p tcp --dport 80 -j ACCEPT
+	     fi
+	    elif [ "$RemoteManagement" = "2" ]; then
+    		iptables -A servicelimit -p tcp --dport 80 -j ACCEPT
+	    fi
+	else	    
+    	    iptables -A servicelimit -p tcp --dport 80 -j DROP
+	fi
 	#ssh limit
 	if [ "$RemoteSSH" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 22 -m connlimit --connlimit-above 4 -j REJECT
@@ -229,6 +242,7 @@ get_param() {
     vpnNAT=`nvram_get 2860 vpnNAT`
     UDPXY=`nvram_get 2860 UDPXYMode`
     RemoteSSH=`nvram_get 2860 RemoteSSH`
+    RemoteManagement=`nvram_get 2860 RemoteManagement`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then
