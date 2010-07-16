@@ -695,13 +695,13 @@ static int ppp_ioctl(struct inode *inode, struct file *file,
 		}
 #ifdef CONFIG_SLHC
 		vj = slhc_init(val2+1, val+1);
-		if (vj == 0) {
+		if (!vj) {
 			printk(KERN_ERR "PPP: no memory (VJ compressor)\n");
 			err = -ENOMEM;
 			break;
 		}
 		ppp_lock(ppp);
-		if (ppp->vj != 0)
+		if (ppp->vj)
 			slhc_free(ppp->vj);
 		ppp->vj = vj;
 		ppp_unlock(ppp);
@@ -1594,7 +1594,7 @@ ppp_receive_error(struct ppp *ppp)
 {
 	++ppp->stats.rx_errors;
 #ifdef CONFIG_SLHC
-	if (ppp->vj != 0)
+	if (ppp->vj)
 		slhc_toss(ppp->vj);
 #endif
 }
@@ -2433,7 +2433,7 @@ ppp_get_stats(struct ppp *ppp, struct ppp_stats *st)
 	st->p.ppp_opackets = ppp->stats.tx_packets;
 	st->p.ppp_oerrors = ppp->stats.tx_errors;
 	st->p.ppp_obytes = ppp->stats.tx_bytes;
-	if (vj == 0)
+	if (!vj)
 		return;
 	st->vj.vjs_packets = vj->sls_o_compressed + vj->sls_o_uncompressed;
 	st->vj.vjs_compressed = vj->sls_o_compressed;
