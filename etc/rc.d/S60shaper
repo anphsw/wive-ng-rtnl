@@ -88,8 +88,6 @@ get_param
 	    ip link set imq0 up > /dev/null 2>&1
 	    ip link set imq1 up > /dev/null 2>&1
     fi
-else
-	    echo "----------------QOS-DISABLED----------------------"
 fi
 }
 
