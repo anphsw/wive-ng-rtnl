@@ -1,4 +1,5 @@
 <b>Changes:</b><br>
+<b>1.0.x</b><br>
 1) Fix configs scripts for support bash >=4 and change product name<br>
 2) Kernel version up to 2.6.21.7<br>
 3) Redesign filesystem. Busybox up to 1.15.3<br>
@@ -77,8 +78,15 @@
 76) Update wifi driver to 2.3.0.0 version from Ralink<br>
 77) More fix build enviroment<br>
 78) Bridge code fixup and more fast<br>
-79) New WebUI based on goahead<br>
-
+<br>
+<b>1.1.x</b><br>
+1) New WebUI based on goahead<br>
+2) New wifi driver, correct work with broadcom wifi based adapters, WMM, etc...<br>
+3) Set of corrections in a kernel (netfiler/routing/ipv6)<br>
+4) Rewrite logic in init.d for speedup<br>
+5) Add simple software conntrack fastpath<br>
+6) Cleannat module support for clear conntrack table<br>
+7) More connrack helpers and protocol support<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
