@@ -552,6 +552,9 @@ int ip_conntrack_checksum __read_mostly = 1;
 
 /* From ip_conntrack_core.c */
 extern int ip_conntrack_max;
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+extern int ip_conntrack_reserved;
+#endif
 extern unsigned int ip_conntrack_htable_size;
 
 /* From ip_conntrack_proto_tcp.c */
@@ -756,6 +759,16 @@ static ctl_table ip_ct_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+	{
+		.ctl_name	= NET_IPV4_NF_CONNTRACK_RESERVED,
+		.procname	= "ip_conntrack_reserved",
+		.data		= &ip_conntrack_reserved,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
 	{ .ctl_name = 0 }
 };
 

@@ -51,3 +51,8 @@ EXPORT_SYMBOL(csum_partial_copy_nocheck);
 EXPORT_SYMBOL(__csum_partial_copy_user);
 
 EXPORT_SYMBOL(invalid_pte_table);
+
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+extern int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax );
+EXPORT_SYMBOL(dropWhenNatTableFull_Ptr);
+#endif

@@ -20,6 +20,9 @@
 #include <linux/types.h>
 #include <linux/icmp.h>
 #include <linux/ip.h>
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+#include <linux/tcp.h>
+#endif
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/module.h>
@@ -67,6 +70,11 @@ struct ip_conntrack_protocol *ip_ct_protos[MAX_IP_CT_PROTO] __read_mostly;
 static LIST_HEAD(helpers);
 unsigned int ip_conntrack_htable_size __read_mostly = 0;
 int ip_conntrack_max __read_mostly;
+#if HAS_IP_CONNTRACK_NAT_SESSION_RESERVATION
+int ip_conntrack_reserved __read_mostly;
+int ip_conntrack_max_reserved;
+int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax);
+#endif
 struct list_head *ip_conntrack_hash __read_mostly;
 static struct kmem_cache *ip_conntrack_cachep __read_mostly;
 static struct kmem_cache *ip_conntrack_expect_cachep __read_mostly;
@@ -903,8 +911,25 @@ resolve_normal_ct(struct sk_buff *skb,
 #else //CONFIG_NAT_LINUX
 	h = ip_conntrack_find_get(&tuple, NULL);
 #endif
+
 	if (!h) {
-		h = init_conntrack(&tuple, proto, skb);
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+        //printk("[k] ip_conntrack_count %d ip_conntrack_max %d,max0 %d\n", ip_conntrack_count, ip_conntrack_max,ip_conntrack_reserved);
+        if (dropWhenNatTableFull_Ptr)
+        {
+            if (atomic_read(&ip_conntrack_count)> ip_conntrack_reserved)
+            {
+               //printk("[k] NAT sessions full!\n");
+               if (dropWhenNatTableFull_Ptr(skb,atomic_read(&ip_conntrack_count),ip_conntrack_max))
+	       {       
+                    //printk("[k] Session drop!\n");
+                    return NULL;
+               }
+	    }
+        }
+#endif    
+            
+   	    h = init_conntrack(&tuple, proto, skb);
 		if (!h)
 			return NULL;
 		if (IS_ERR(h))
@@ -1632,12 +1657,25 @@ int __init ip_conntrack_init(void)
 		if (ip_conntrack_htable_size < 16)
 			ip_conntrack_htable_size = 16;
 	}
-	ip_conntrack_max = 8 * ip_conntrack_htable_size;
+	
 
-	printk("ip_conntrack version %s (%u buckets, %d max)"
-	       " - %Zd bytes per conntrack\n", IP_CONNTRACK_VERSION,
-	       ip_conntrack_htable_size, ip_conntrack_max,
-	       sizeof(struct ip_conntrack));
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+    ip_conntrack_max_reserved = 200;
+    ip_conntrack_max = 8 * ip_conntrack_htable_size;
+    ip_conntrack_reserved = ip_conntrack_max - ip_conntrack_max_reserved;
+
+        printk("ip_conntrack version %s (%u buckets, %d max %d max0 %d reserved)"
+               " - %Zd bytes per conntrack\n", IP_CONNTRACK_VERSION,
+               ip_conntrack_htable_size, ip_conntrack_max, ip_conntrack_reserved, ip_conntrack_max_reserved,
+               sizeof(struct ip_conntrack));
+#else
+    ip_conntrack_max = 8 * ip_conntrack_htable_size;
+
+        printk("ip_conntrack version %s (%u buckets, %d max)"
+               " - %Zd bytes per conntrack\n", IP_CONNTRACK_VERSION,
+               ip_conntrack_htable_size, ip_conntrack_max,
+               sizeof(struct ip_conntrack));
+#endif
 
 	ret = nf_register_sockopt(&so_getorigdst);
 	if (ret != 0) {
