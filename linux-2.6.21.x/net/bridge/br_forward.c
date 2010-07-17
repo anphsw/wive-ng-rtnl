@@ -182,10 +182,12 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
 {
 	struct net_bridge_port *p;
 	struct net_bridge_port *prev;
-
+#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+	struct ethhdr *dest;
+	int i;
+#endif
 	if (clone) {
-		struct sk_buff *skb2;
-
+	    struct sk_buff *skb2;
 		if ((skb2 = skb_clone(skb, GFP_ATOMIC)) == NULL) {
 			br->statistics.tx_dropped++;
 			return;
@@ -215,7 +217,6 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
 					groupIdx = search_group_IP( &p->port_igmpp_table, skb->nh.iph->daddr);
 					if (groupIdx >=0){
 						/* skb_copy for each host*/
-						int i;
 						for(i=0; i<HOSTLIST_NUMBER; i++){	
 							if (p->port_igmpp_table.group_list[groupIdx].host_list[i].used ==1){
 								if ((skb2 = skb_copy(skb, GFP_ATOMIC)) == NULL) {
@@ -223,7 +224,7 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
 									kfree_skb(skb);
 									return;
 								}
-								struct ethhdr * dest = eth_hdr(skb2);
+								dest = eth_hdr(skb2);
 								copy_mac( dest->h_dest, p->port_igmpp_table.group_list[groupIdx].host_list[i].mac_addr);
 								if (should_deliver(p, skb2))
 									__packet_hook(p, skb2);
