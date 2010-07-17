@@ -7,7 +7,6 @@
 #include <linux/stat.h>
 #include <asm/errno.h>
 #include <linux/proc_fs.h>
-#define MOD_VERSION 1.0
 #ifdef CONFIG_IP_NF_CONNTRACK
 #ifdef CONFIG_NF_CONNTRACK_SUPPORT
 extern void ip_ct_record_cleanup();
@@ -23,14 +22,14 @@ static int proc_dbg_write(struct file *file, const char *buffer, unsigned long c
 	    #else
 	    ip_conntrack_flush();
 	    #endif
-	    printk("clean nat conn: clean all of the connection track\n");
+	    printk("clean_nat_conn: clean all of the connection track\n");
 	}
 	return count;
 }
 static int proc_dbg_read(char *page, char **start, off_t off, int count, int *eof, void *data)
 {
 
-	printk("Prones Clean NAT session module version:%s\n",	MOD_VERSION);
+	printk("Clean NAT session module load.\n");
 	return 0;
 }
 static void dbg_exit(void)
