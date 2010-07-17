@@ -2,6 +2,7 @@
 <head>
 <title>Local Area Network (LAN) Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
@@ -80,23 +81,11 @@ function initValue()
 
 	initTranslation();
 
-	if (lan2 == "1")
-	{
-		var lan2_ip = '<% getCfgGeneral(1, "lan2_ipaddr"); %>';
-		var lan2_nm = '<% getCfgGeneral(1, "lan2_netmask"); %>';
-
-		form.lan2enabled[0].checked = true;
-		form.lan2Ip.disabled = false;
-		form.lan2Ip.value = lan2_ip;
-		form.lan2Netmask.disabled = false;
-		form.lan2Netmask.value = lan2_nm;
-	}
-	else
-	{
-		form.lan2enabled[1].checked = true;
-		form.lan2Ip.disabled = true;
-		form.lan2Netmask.disabled = true;
-	}
+	// Lan2
+	form.lan2Ip.value = '<% getCfgGeneral(1, "lan2_ipaddr"); %>';
+	form.lan2Netmask.value = '<% getCfgGeneral(1, "lan2_netmask"); %>';
+	form.lan2enabled.value = (lan2 == "1") ? "1" : "0";
+	lan2_enable_switch(form);
 
 	//gateway, dns only allow to configure at bridge mode
 	if (opmode != "0")
@@ -108,19 +97,6 @@ function initValue()
 		document.getElementById("brSecDns").style.visibility = "hidden";
 		document.getElementById("brSecDns").style.display = "none";
 	}
-
-	/* ppp0 is not a disabled interface anymore..
-	if (wan == "PPPOE" || wan == "L2TP" || wan == "PPTP")
-	{
-		document.getElementById("igmpProxy").style.visibility = "hidden";
-		document.getElementById("igmpProxy").style.display = "none";
-	}
-	else
-	{
-		document.getElementById("igmpProxy").style.visibility = "visible";
-		document.getElementById("igmpProxy").style.display = display_on();
-	}
-	*/
 }
 
 function CheckValue()
@@ -160,10 +136,9 @@ function CheckValue()
 	return true;
 }
 
-function lan2_enable_switch()
+function lan2_enable_switch(form)
 {
-	var form = document.lanCfg;
-	var lan2_dis = !form.lan2enabled[1].checked;
+	var lan2_dis = (form.lan2enabled.value != "1");
 	
 	form.lan2Ip.disabled = lan2_dis;
 	form.lan2Netmask.disabled = lan2_dis;
@@ -180,7 +155,7 @@ function lan2_enable_switch()
 <p id="lIntroduction"></p>
 <hr />
 
-<form method=post name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
+<form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
@@ -201,8 +176,10 @@ function lan2_enable_switch()
 <tr>
   <td class="head" id="lLan2">LAN2</td>
   <td>
-    <input type="radio" name="lan2enabled" value="1" onclick="lan2_enable_switch();"><font id="lLan2Enable">Enable</font>&nbsp;
-    <input type="radio" name="lan2enabled" value="0" onclick="lan2_enable_switch();" checked><font id="lLan2Disable">Disable</font>
+	<select name="lan2enabled" onchange="lan2_enable_switch(this.form);" class="half">
+		<option value="1">Enabled</option>
+		<option value="0">Disabled</option>
+	</select>
   </td>
 </tr>
 <tr>
@@ -234,8 +211,8 @@ function lan2_enable_switch()
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
-    <input type="submit" style="{width:120px;}" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
-    <input type="reset"  style="{width:120px;}" value="Cancel" id="lCancel" onClick="window.location.reload();">
+    <input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
+    <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
   </td>
 </tr>
 </table>

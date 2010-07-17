@@ -150,7 +150,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
 	char_t  *stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en;
-	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh;
+	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh, *udpxy_mode;
 
 	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
 	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
@@ -161,6 +161,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	dnsp_en = websGetVar(wp, T("dnspEnbl"), T("0"));
 	rmt_http = websGetVar(wp, T("rmtHTTP"), T("0"));
 	rmt_ssh = websGetVar(wp, T("rmtSSH"), T("0"));
+	udpxy_mode = websGetVar(wp, T("udpxyMode"), T("0"));
 
 	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
 	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
@@ -168,12 +169,14 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "upnpEnabled", upnp_en);
 	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
 	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
+
 	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
-	
 	nvram_bufset(RT2860_NVRAM, "RemoteManagement", rmt_http);
 	nvram_bufset(RT2860_NVRAM, "RemoteSSH", rmt_ssh);
-	nvram_bufset(RT2860_NVRAM, "DNSMode", rmt_http);
-	nvram_bufset(RT2860_NVRAM, "UDPXYMode", rmt_ssh);
+	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
+	
+	printf("dnsPEnabled = %s, RemoteManagement = %s, RemoteSSH = %s, UDPXYMode = %s\n",
+			dnsp_en, rmt_http, rmt_ssh, udpxy_mode);
 
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);

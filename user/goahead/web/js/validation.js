@@ -1,3 +1,9 @@
+function defaultNumber(value, deflt)
+{
+	var re = /^\d+$/;
+	return (re.test(value)) ? value : deflt;
+}
+
 function validateNum(str, floating)
 {
 	var re = (floating) ? /^\d+(?:\.\d+)$/ : /^\d+$/;

@@ -6,6 +6,7 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
@@ -106,10 +107,10 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
-	form.rmtHTTP.value = "<% getCfgGeneral(1, "RemoteManagement"); %>";
-	form.rmtSSH.value = "<% getCfgGeneral(1, "RemoteSSH"); %>";
-	form.dnsMode.value = "<% getCfgGeneral(1, "DNSMode"); %>";
-	form.udpxyMode.value = "<% getCfgGeneral(1, "UDPXYMode"); %>";
+
+	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
+	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
+	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 
 	if (lltdb == "0")
 	{
@@ -227,9 +228,9 @@ function CheckValue()
 <tr id="dnsproxy">
 <td class="head" id="lDnsp">DNS proxy</td>
 <td>
-	<select name="dnspEnbl" size="1" class="half">
-		<option value="0" id="lDnspD">Disable</option>
-		<option value="1" id="lDnspE">Enable</option>
+	<select name="dnspEnbl" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
 	</select>
 </td>
 </tr>
@@ -247,16 +248,6 @@ function CheckValue()
 <td class="head">SSH Remote Management</td>
 <td>
 	<select name="rmtSSH" class="half">
-		<option value="0">Disable</option>
-		<option value="1">LAN</option>
-		<option value="2">LAN &amp; WAN</option>
-	</select>
-</td>
-</tr>
-<tr>
-<td class="head">DNS</td>
-<td>
-	<select name="dnsMode" class="half">
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
 		<option value="2">LAN &amp; WAN</option>
