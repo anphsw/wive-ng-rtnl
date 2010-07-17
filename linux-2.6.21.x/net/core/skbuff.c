@@ -2029,11 +2029,6 @@ void __init skb_init(void)
 						NULL, NULL);
 }
 
-#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
-extern int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax );
-EXPORT_SYMBOL(dropWhenNatTableFull_Ptr);
-#endif
-
 EXPORT_SYMBOL(___pskb_trim);
 EXPORT_SYMBOL(__kfree_skb);
 EXPORT_SYMBOL(kfree_skb);

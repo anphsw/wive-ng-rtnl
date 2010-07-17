@@ -74,6 +74,7 @@ int ip_conntrack_max __read_mostly;
 int ip_conntrack_reserved __read_mostly;
 int ip_conntrack_max_reserved;
 int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax);
+EXPORT_SYMBOL(dropWhenNatTableFull_Ptr);
 #endif
 struct list_head *ip_conntrack_hash __read_mostly;
 static struct kmem_cache *ip_conntrack_cachep __read_mostly;
@@ -916,9 +917,9 @@ resolve_normal_ct(struct sk_buff *skb,
 	    DEBUGP("conntrack: ip_conntrack_count %d ip_conntrack_max %d, reserved  %d\n", 
 				ip_conntrack_count, ip_conntrack_max,ip_conntrack_reserved);
 
-    	    if ((dropWhenNatTableFull_Ptr) && (atomic_read(&ip_conntrack_count)> ip_conntrack_reserved)) {
+    	    if ((dropWhenNatTableFull_Ptr) && (atomic_read(&ip_conntrack_count) > ip_conntrack_reserved)) {
                DEBUGP("conntrack: Reserved NAT sessions full!\n");
-               if (dropWhenNatTableFull_Ptr(skb,atomic_read(&ip_conntrack_count),ip_conntrack_max)) {       
+               if (dropWhenNatTableFull_Ptr(skb,atomic_read(&ip_conntrack_count), ip_conntrack_max)) {       
 		    if (net_ratelimit())
 				printk(KERN_WARNING "conntrack: All NAT sessions full. Drop current session!\n");
                     return NULL;
