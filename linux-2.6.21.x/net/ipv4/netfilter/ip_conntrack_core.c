@@ -70,7 +70,7 @@ struct ip_conntrack_protocol *ip_ct_protos[MAX_IP_CT_PROTO] __read_mostly;
 static LIST_HEAD(helpers);
 unsigned int ip_conntrack_htable_size __read_mostly = 0;
 int ip_conntrack_max __read_mostly;
-#if HAS_IP_CONNTRACK_NAT_SESSION_RESERVATION
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
 int ip_conntrack_reserved __read_mostly;
 int ip_conntrack_max_reserved;
 int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax);
