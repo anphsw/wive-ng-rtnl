@@ -1301,19 +1301,13 @@ add_counter_to_entry(struct ipt_entry *e,
 {
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
         struct ipt_entry_target *f=ipt_get_target(e);
-/*
+
         if(strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
-		memset(wan_name,0,sizeof(wan_name));
-                memcpy(wan_name,e->ip.outiface, strlen(e->ip.outiface));
-                printk("ip_table: set wan_name=%s\n",wan_name);
-        }
-*/
-        if(strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {     // 1017 ham
                 if((strcmp(e->ip.outiface, "eth2.2") == 0) || (strncmp(e->ip.outiface, "ppp", 3) == 0))
                 {
                         memset(wan_name, 0, sizeof(wan_name));
                         memcpy(wan_name,e->ip.outiface, strlen(e->ip.outiface));
-//                        printk("ip_table: set wan_name=%s\n",wan_name);
+			//printk("ip_table: set wan_name=%s\n",wan_name);
                 }
         }
 #endif
@@ -2238,7 +2232,7 @@ static int __init ip_tables_init(void)
 #elif defined (CONFIG_NAT_RCONE)
 	printk("Type=Restricted Cone\n");
 #else
-	printk("Type=Linux\n");
+	printk("Type=Linux native\n");
 #endif
 
 	return 0;
