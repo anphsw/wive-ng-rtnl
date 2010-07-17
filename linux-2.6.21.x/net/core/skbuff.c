@@ -470,7 +470,7 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 struct sk_buff *skb_morph(struct sk_buff *dst, struct sk_buff *src)
 {
 	skb_release_all(dst);
-        return skb_clone(dst, src);
+        return skb_clone(dst, GFP_ATOMIC);
 }
 
 static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
@@ -2028,6 +2028,11 @@ void __init skb_init(void)
 						SLAB_HWCACHE_ALIGN|SLAB_PANIC,
 						NULL, NULL);
 }
+
+#ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
+extern int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax );
+EXPORT_SYMBOL(dropWhenNatTableFull_Ptr);
+#endif
 
 EXPORT_SYMBOL(___pskb_trim);
 EXPORT_SYMBOL(__kfree_skb);

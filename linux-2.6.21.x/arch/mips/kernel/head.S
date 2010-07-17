@@ -149,13 +149,14 @@ EXPORT(_stext)
 	__INIT
 
 NESTED(kernel_entry, 16, sp)			# kernel entry point
-
+#ifndef CONFIG_RALINK_RT3052_MP2
 	kernel_entry_setup			# cpu specific setup
 
 	setup_c0_status_pri
 
 	ARC64_TWIDDLE_PC
 
+#endif
 #ifdef CONFIG_MIPS_MT_SMTC
 	/*
 	 * In SMTC kernel, "CLI" is thread-specific, in TCStatus.
