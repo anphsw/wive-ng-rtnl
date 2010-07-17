@@ -286,8 +286,8 @@ static uint8_t * hex2dec(char *ch)
 /* Called under bridge lock */
 static int add_MAC_2_pool(struct port_igmpp_table_t *pt, int gIdx, int mIdx, unsigned char* mac_addr)
 {
-	pt->group_list[gIdx].host_list[mIdx].used =1;
 	int i;
+	pt->group_list[gIdx].host_list[mIdx].used =1;
 	for (i=0; i<6; i++)
 		pt->group_list[gIdx].host_list[mIdx].mac_addr[i] = *(mac_addr+i);
 	return 0;
@@ -317,8 +317,8 @@ static int add_GROUP(struct port_igmpp_table_t *pt, int gIdx, uint32_t ip_addr)
 /* Called under bridge lock */
 static int remove_MAC_from_pool(struct port_igmpp_table_t *pt, int gIdx, int mIdx)
 {
-	pt->group_list[gIdx].host_list[mIdx].used = 0;
 	int i;
+	pt->group_list[gIdx].host_list[mIdx].used = 0;
 	for (i=0; i<6; i++)
 		pt->group_list[gIdx].host_list[mIdx].mac_addr[i] = 0;
 	return 0;
@@ -359,22 +359,21 @@ static int check_GROUP_is_empty_and_remove(struct port_igmpp_table_t *pt, int gI
 static int proc_read_br_igmpp (char *buf, char **start, off_t offset,
 		int len, int *eof, void *data)
 {
-	int count =0;
+	int i,j,k,count =0;
 	struct net_bridge *br = (struct net_bridge *) data;
+	struct net_bridge_port *p;
 
 	spin_lock_bh(&br->lock); // bridge lock
 	printk( "**************************************\n");
 	printk( "* bridge name: %s\n",br->dev->name);
 	printk( "* br_igmpp_table_enable-> %d\n",atomic_read(&br->br_igmpp_table_enable));
 	printk( "**************************************\n");
-	struct net_bridge_port *p ;
 	list_for_each_entry_rcu(p, &br->port_list, list) {
 		printk( "* <%d> port name : %s\n", p->port_no, p->dev->name);
 		printk( "* <%d> table size: %u x %u\n", p->port_no, GROUPLIST_NUMBER, HOSTLIST_NUMBER );
 		printk( "* <%d> wireless_interface -> %d\n", p->port_no, atomic_read(&p->wireless_interface) );
 		printk( "* <%d> port_igmpp_table -> %d\n", p->port_no, p->port_igmpp_table.enable );
 		printk( "* <%d> ===============================\n", p->port_no);
-		int i,j,k;
 		for( i=0; i<GROUPLIST_NUMBER; i++){
 			if(p->port_igmpp_table.group_list[i].used == 1){
 				uint32_t ip32_addr = p->port_igmpp_table.group_list[i].ip_addr;
@@ -406,13 +405,13 @@ static void split_IP(uint32_t *ip32_addr, char * token)
 	char **pIP = &token;
 	char *ipField_char[4];
 	uint8_t ipField_int[4];
+	uint8_t *ip8_addr;
 	int i;
 	for (i=0; i<4; ++i)
 	{
 		ipField_char[i] = strsep(pIP, ipDelim);
 		ipField_int[i] = (uint8_t) simple_strtoul( ipField_char[i], NULL, 10);
 	}
-	uint8_t *ip8_addr;
 	trans_32to8(ip32_addr, &ip8_addr);	
 	for (i =0; i<4; ++i)
 		*(ip8_addr+i) = ipField_int[i];
@@ -423,13 +422,12 @@ static void split_MAC(unsigned char * mac_addr, char * token)
 	char *macDelim = MAC_DELIM;
 	char **pMAC = &token;
 	char * macField_char[6];
-	int i;
+	char temp[2];
+	int i,j;
 	for (i=0; i<6; ++i)
 	{
 		macField_char[i] = strsep(pMAC, macDelim);
-		int j;
 		/* copy each char byte and convert to dec number */
-		char temp[2];
 		for(j=0; j<2; ++j) { 
 			memcpy(&temp[j],macField_char[i]+j, sizeof(char));
 			hex2dec(&temp[j]);
@@ -633,12 +631,11 @@ static struct net_bridge_port * search_device(struct net_bridge * br, char* name
 static int get_MAC(unsigned char * mac_addr, struct net_bridge *br, uint32_t ip_addr)
 {
 	struct br_mac_table_t *tlist;
-	int find = -1;
+	int i,find = -1;
 
 	list_for_each_entry(tlist,&(br->br_mac_table.list), list){
 		if ( tlist->ip_addr == ip_addr){
 			find = 0;
-			int i;
 			for (i =0; i<6; i++)
 				mac_addr[i] = tlist->mac_addr[i];
 			break;
@@ -652,11 +649,12 @@ static int get_MAC(unsigned char * mac_addr, struct net_bridge *br, uint32_t ip_
 /* called under bridge lock */
 static void table_all_enable(struct net_bridge *br)
 {
+	struct net_bridge_port *p;
+
 	/* set bridge */
 	atomic_set(&br->br_igmpp_table_enable, 1);
 
 	/* set each port */
-	struct net_bridge_port *p;
 	list_for_each_entry(p, &br->port_list, list) {
 
 		/* always clean table and unset all wireless identifier */
@@ -671,11 +669,12 @@ static void table_all_enable(struct net_bridge *br)
 /* called under bridge lock */
 static void table_all_disable(struct net_bridge *br)
 {
+	struct net_bridge_port *p;
+
 	/* set bridge */
 	atomic_set(&br->br_igmpp_table_enable, 0);
 
 	/* set each port */
-	struct net_bridge_port *p;
 	list_for_each_entry(p, &br->port_list, list) {
 
 		/* always clean table and unset all wireless identifier */
@@ -715,6 +714,14 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		unsigned long count, void *data)
 {
 	int len;
+	char *pmesg, *msgDelim, *action_token, *action;
+	unsigned char mac_addr[6];
+	struct net_bridge *br;
+	struct net_bridge_port *p;
+	struct net_bridge_fdb_entry *hit_fdb_entry;
+	uint32_t grp_ip32_addr;
+	uint32_t host_ip32_addr;
+
 	if(count > MESSAGE_LENGTH) {len = MESSAGE_LENGTH;}
 	else {len = count; }
 	char message[len];
@@ -727,13 +734,12 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 	 * token[1] => multicast group IP address 
 	 * token[2] => MAC address of host IP  
 	 */
-	char *msgDelim = MESSAGE_DELIM;
-	char *pmesg = message ;
-	char *action_token, *action;
+	msgDelim = MESSAGE_DELIM;
+	pmesg = message;
 
 	action_token = strsep(&pmesg, msgDelim);
 
-	struct net_bridge *br = (struct net_bridge *) data;
+	br = (struct net_bridge *) data;
 
 	/* ============================  enable each port's port_igmpp_table ====================*/
 	/* NOTE: Each port_igmpp_table will be clean.								 			 */
@@ -799,7 +805,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		for(i=0; i<2; ++i) 
 			token[i] = strsep(&pmesg, msgDelim);
 		/* split multicast group IP address */
-		uint32_t grp_ip32_addr;
 		if (check_str(token[0], 0) == 0 )
 			split_IP(&grp_ip32_addr,token[0]);
 		else{
@@ -810,9 +815,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		}
 
 		/* Judge address of Host either IP adress or MAC address */
-		unsigned char mac_addr[6];
-		uint32_t host_ip32_addr;
-
 		spin_lock_bh(&br->lock); // bridge lock
 
 		if (atomic_read(&br->br_mac_table_enable) == 1 ){
@@ -854,7 +856,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		/********** add - END of processing input string **********/
 
 		/* searching bridge_fdb_entry */
-		struct net_bridge_fdb_entry *hit_fdb_entry;
 		hit_fdb_entry = br_fdb_get(br, mac_addr); 
 		/* NOTE: The effect of successful called br_fdb_get() also takes lock bridge and reference counts. */
 
@@ -875,7 +876,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 				/* make sure there's only one record existed */
 				printk(KERN_INFO "[BR_IGMPP_PROC]-> checking and clean all other port_igmpp_table ... \n");
 				#endif
-				struct net_bridge_port *p;
 				list_for_each_entry(p, &br->port_list, list) {
 					if(hit_fdb_entry->dst->port_no != p->port_no){
 						table_remove(&p->port_igmpp_table, grp_ip32_addr, mac_addr);
@@ -919,7 +919,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		for(i=0; i<2; ++i) 
 			token[i] = strsep(&pmesg, msgDelim);
 		/* split multicast group IP address */
-		uint32_t grp_ip32_addr;
 		if (check_str(token[0], 0) == 0 )
 			split_IP(&grp_ip32_addr,token[0]);
 		else{
@@ -930,9 +929,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		}
 	
 		/* Judge address of Host either IP adress or MAC address */
-		unsigned char mac_addr[6];
-		uint32_t host_ip32_addr;
-
 		spin_lock_bh(&br->lock); // bridge lock
 
 		if (atomic_read(&br->br_mac_table_enable) == 1 ){
@@ -974,7 +970,6 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		/********** remove - END of processing input string **********/
 
 		/* searching bridge_fdb_entry */
-		struct net_bridge_fdb_entry *hit_fdb_entry;
 		hit_fdb_entry = br_fdb_get(br, mac_addr);
 		/* NOTE: The effect of successful called br_fdb_get() also takes lock bridge and reference counts. */
 
@@ -1060,6 +1055,9 @@ static int proc_write_br_mac (struct file *file, const char *buf,
 {
 
 	int len;
+	char *action;
+	struct net_bridge *br;
+
 	if(count > MESSAGE_LENGTH) {len = MESSAGE_LENGTH;}
 	else {len = count; }
 	char message[len];
@@ -1067,9 +1065,7 @@ static int proc_write_br_mac (struct file *file, const char *buf,
 		return -EFAULT;
 	message[len-1] = '\0';
 
-	char *action;
-	struct net_bridge *br = (struct net_bridge *) data;
-
+	br = (struct net_bridge *) data;
 	spin_lock_bh(&br->lock); // bridge lock
 
 	/* ============================  enable br_mac_table ===================*/
@@ -1117,7 +1113,9 @@ static struct net_device *new_bridge_dev(const char *name)
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
     char proc_name[32];
 #endif
-
+#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+	char igmpp_proc_name[32];
+#endif
 	dev = alloc_netdev(sizeof(struct net_bridge), name,
 			   br_dev_setup);
 
@@ -1157,7 +1155,6 @@ static struct net_device *new_bridge_dev(const char *name)
     br->br_proc->write_proc = proc_write_br_forward;
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	char igmpp_proc_name[32];
 	snprintf(igmpp_proc_name, sizeof(igmpp_proc_name), "net/br_igmpp_%s", name);
 	br->br_igmpp_proc = create_proc_entry (igmpp_proc_name, 0, 0);
 	if (br->br_igmpp_proc == NULL)
@@ -1279,7 +1276,9 @@ int br_del_bridge(const char *name)
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
     char proc_name[32];
 #endif
-
+#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+	char igmpp_proc_name[32];
+#endif
 	rtnl_lock();
 	dev = __dev_get_by_name(name);
 	if (dev == NULL)
@@ -1304,7 +1303,6 @@ int br_del_bridge(const char *name)
 	remove_proc_entry(proc_name, 0);
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	char igmpp_proc_name[32];
 	snprintf(igmpp_proc_name, sizeof(igmpp_proc_name), "net/br_igmpp_%s", name);
 	remove_proc_entry(igmpp_proc_name, 0);
 
