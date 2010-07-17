@@ -911,24 +911,20 @@ resolve_normal_ct(struct sk_buff *skb,
 #else //CONFIG_NAT_LINUX
 	h = ip_conntrack_find_get(&tuple, NULL);
 #endif
-
 	if (!h) {
 #ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
-        //printk("[k] ip_conntrack_count %d ip_conntrack_max %d,max0 %d\n", ip_conntrack_count, ip_conntrack_max,ip_conntrack_reserved);
-        if (dropWhenNatTableFull_Ptr)
-        {
-            if (atomic_read(&ip_conntrack_count)> ip_conntrack_reserved)
-            {
-               //printk("[k] NAT sessions full!\n");
-               if (dropWhenNatTableFull_Ptr(skb,atomic_read(&ip_conntrack_count),ip_conntrack_max))
-	       {       
-                    //printk("[k] Session drop!\n");
+	    DEBUGP("conntrack: ip_conntrack_count %d ip_conntrack_max %d, reserved  %d\n", 
+				ip_conntrack_count, ip_conntrack_max,ip_conntrack_reserved);
+
+    	    if ((dropWhenNatTableFull_Ptr) && (atomic_read(&ip_conntrack_count)> ip_conntrack_reserved)) {
+               DEBUGP("conntrack: Reserved NAT sessions full!\n");
+               if (dropWhenNatTableFull_Ptr(skb,atomic_read(&ip_conntrack_count),ip_conntrack_max)) {       
+		    if (net_ratelimit())
+				printk(KERN_WARNING "conntrack: All NAT sessions full. Drop current session!\n");
                     return NULL;
                }
-	    }
-        }
+    	    }
 #endif    
-            
    	    h = init_conntrack(&tuple, proto, skb);
 		if (!h)
 			return NULL;
