@@ -1272,7 +1272,7 @@ static int help(struct sk_buff **pskb,
 
 static struct ip_conntrack_helper snmp_helper = {
 	.max_expected = 0,
-	.timeout = 180,
+	.timeout = 150,
 	.me = THIS_MODULE,
 	.help = help,
 	.name = "snmp",

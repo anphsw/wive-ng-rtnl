@@ -17,8 +17,8 @@
 #include <linux/netfilter_ipv4.h>
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 
-unsigned int ip_ct_udp_timeout __read_mostly = 30*HZ;
-unsigned int ip_ct_udp_timeout_stream __read_mostly = 180*HZ;
+unsigned int ip_ct_udp_timeout __read_mostly = 20*HZ;
+unsigned int ip_ct_udp_timeout_stream __read_mostly = 150*HZ;
 
 static int udp_pkt_to_tuple(const struct sk_buff *skb,
 			     unsigned int dataoff,
