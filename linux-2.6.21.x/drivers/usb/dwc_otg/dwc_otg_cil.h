@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_cil.h $
- * $Revision: 1.2 $
- * $Date: 2008-11-21 05:39:15 $
+ * $Revision: 1.3 $
+ * $Date: 2009-03-16 06:27:15 $
  * $Change: 1099526 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -505,7 +505,7 @@ typedef struct dwc_otg_core_params
 	 * Note: The FPGA configuration supports a maximum of 12 host channels.
 	 */
 	int32_t host_channels;
-#define dwc_param_host_channels_default 12
+#define dwc_param_host_channels_default 16
 
 	/** The number of endpoints in addition to EP0 available for device 
 	 * mode operations. 

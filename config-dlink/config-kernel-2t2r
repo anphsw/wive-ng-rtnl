@@ -1216,9 +1216,9 @@ CONFIG_WAN_AT_P0=y
 # Platform config for  Ralink RT3xx/RT28xx.
 #
 # CONFIG_ASUS_EXT is not set
-CONFIG_RALINK_RT3050_1T1R=y
+# CONFIG_RALINK_RT3050_1T1R is not set
 # CONFIG_RALINK_RT3051_1T2R is not set
-# CONFIG_RALINK_RT3052_2T2R is not set
+CONFIG_RALINK_RT3052_2T2R=y
 
 #
 # AP MODE Ralink RT3xx/RT28xx wireless driver.

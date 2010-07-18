@@ -163,3 +163,4 @@ void __init init_IRQ(void)
 	}
 #endif
 }
+EXPORT_SYMBOL(irq_desc);

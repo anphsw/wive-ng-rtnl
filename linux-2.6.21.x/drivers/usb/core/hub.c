@@ -23,6 +23,7 @@
 #include <linux/kthread.h>
 #include <linux/mutex.h>
 #include <linux/freezer.h>
+#include <linux/sysctl.h>
 
 #include <asm/semaphore.h>
 #include <asm/uaccess.h>
@@ -31,6 +32,24 @@
 #include "usb.h"
 #include "hcd.h"
 #include "hub.h"
+#include "gconfig.h"
+#ifdef ENABLE_HOT_PLUG_RESET
+extern void ralink_reset(int reset_pin);
+extern int usb_hotplug_flag;
+enum
+{
+    USB_PLUG_RESET   = 1<<0,
+    USB_UNPLUG_RESET = 1<<1,
+};
+#endif
+
+#if HAS_USB_STATUS_LED
+#define GPIO_USB_STATUS_LED 9
+#endif
+
+#ifdef CONFIG_SYSCTL
+int force_logical_disconnect = 0;
+#endif
 
 struct usb_hub {
 	struct device		*intfdev;	/* the "interface" device */
@@ -1186,7 +1205,10 @@ void usb_disconnect(struct usb_device **pdev)
 		pr_debug ("%s nodev\n", __FUNCTION__);
 		return;
 	}
-
+#ifdef ENABLE_HOT_PLUG_RESET
+		if(usb_hotplug_flag&USB_UNPLUG_RESET)
+		   ralink_reset(7);
+#endif	
 	/* mark the device as inactive, so any further urb submissions for
 	 * this device (and any of its children) will fail immediately.
 	 * this quiesces everyting except pending urbs.
@@ -2105,7 +2127,24 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	unsigned		delay = HUB_SHORT_RESET_TIME;
 	enum usb_device_speed	oldspeed = udev->speed;
 	char 			*speed, *type;
+#ifdef ENABLE_HOT_PLUG_RESET
+		if(usb_hotplug_flag&USB_PLUG_RESET)
+		   ralink_reset(7);
+#endif
 
+#if FOR_IODATA
+	/* handle by sysconfd */
+#else
+#ifdef CONFIG_RALINK_GPIO
+#if HAS_USB_STATUS_LED_STYLE_1
+    /* turn off USB LED */
+	ralink_gpio_control(GPIO_USB_STATUS_LED,1);
+#else
+    /* turn on USB LED */
+	ralink_gpio_control(GPIO_USB_STATUS_LED,0);
+#endif
+#endif
+#endif
 	/* root hub ports have a slightly longer reset period
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
@@ -2430,7 +2469,10 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	if (hdev->bus->is_b_host)
 		portchange &= ~USB_PORT_STAT_C_CONNECTION;
 #endif
-
+#ifdef CONFIG_RALINK_GPIO
+    /* turn off USB LED */
+	ralink_gpio_control(GPIO_USB_STATUS_LED,1);
+#endif
 	if (portchange & USB_PORT_STAT_C_CONNECTION) {
 		status = hub_port_debounce(hub, port1);
 		if (status < 0 && printk_ratelimit()) {
@@ -2845,6 +2887,46 @@ static struct usb_driver hub_driver = {
 	.supports_autosuspend =	1,
 };
 
+#ifdef CONFIG_SYSCTL
+/* Place files in /proc/sys/dev/usb */
+static ctl_table usb_table[] = {
+	{
+		.ctl_name	= DEV_USB_FORCE_LOGICAL_DISCONNECT,
+		.procname	= "force_logical_disconnect",
+		.data		= &force_logical_disconnect, 
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{ .ctl_name = 0 }
+};
+
+static ctl_table usb_usb_table[] = {
+	{
+		.ctl_name	= DEV_USB,
+		.procname	= "usb",
+		.maxlen		= 0,
+		.mode		= 0555,
+		.child		= usb_table,
+	},
+	{ .ctl_name = 0 }
+};
+
+/* Make sure that /proc/sys/dev is there */
+static ctl_table usb_root_table[] = {
+	{
+		.ctl_name	= CTL_DEV,
+		.procname	= "dev",
+		.maxlen		= 0,
+		.mode		= 0555,
+		.child		= usb_usb_table,
+	},
+	{ .ctl_name = 0 }
+};
+static struct ctl_table_header *usb_sysctl_header;
+
+#endif /* CONFIG_SYSCTL */
+
 int usb_hub_init(void)
 {
 	if (usb_register(&hub_driver) < 0) {
@@ -2852,6 +2934,9 @@ int usb_hub_init(void)
 			usbcore_name);
 		return -1;
 	}
+#ifdef CONFIG_SYSCTL
+	usb_sysctl_header = register_sysctl_table(usb_root_table);
+#endif
 
 	khubd_task = kthread_run(hub_thread, NULL, "khubd");
 	if (!IS_ERR(khubd_task))
@@ -2867,6 +2952,11 @@ int usb_hub_init(void)
 void usb_hub_cleanup(void)
 {
 	kthread_stop(khubd_task);
+
+#ifdef CONFIG_SYSCTL
+	if (usb_sysctl_header)
+		unregister_sysctl_table(usb_sysctl_header);
+#endif
 
 	/*
 	 * Hub resources are freed for us by usb_deregister. It calls
@@ -3024,6 +3114,11 @@ int usb_reset_device(struct usb_device *udev)
 	}
 
 done:
+	if (force_logical_disconnect) {
+		//printk(KERN_DEBUG "force logical disconnect port %d\n", port1);
+		hub_port_logical_disconnect(parent_hub, port1);
+		force_logical_disconnect = 0;
+	}
 	return 0;
  
 re_enumerate:

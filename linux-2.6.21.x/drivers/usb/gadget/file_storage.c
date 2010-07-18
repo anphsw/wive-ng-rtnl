@@ -276,8 +276,8 @@ MODULE_LICENSE("Dual BSD/GPL");
  *
  * DO NOT REUSE THESE IDs with any other driver!!  Ever!!
  * Instead:  allocate your own, using normal USB-IF procedures. */
-#define DRIVER_VENDOR_ID	0x053f	// Synopsys
-#define DRIVER_PRODUCT_ID	0x0000	// Linux-USB File-backed Storage Gadget
+#define DRIVER_VENDOR_ID	0x0525	// NetChip
+#define DRIVER_PRODUCT_ID	0xa4a5	// Linux-USB File-backed Storage Gadget
 
 
 /*
@@ -296,11 +296,11 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 #ifdef DEBUG
 #define DBG(fsg,fmt,args...) \
-	xprintk(fsg , KERN_ERR , fmt , ## args)
+	xprintk(fsg , KERN_DEBUG , fmt , ## args)
 #define LDBG(lun,fmt,args...) \
-	yprintk(lun , KERN_ERR , fmt , ## args)
+	yprintk(lun , KERN_DEBUG , fmt , ## args)
 #define MDBG(fmt,args...) \
-	printk(KERN_ERR DRIVER_NAME ": " fmt , ## args)
+	printk(KERN_DEBUG DRIVER_NAME ": " fmt , ## args)
 #else
 #define DBG(fsg,fmt,args...) \
 	do { } while (0)
@@ -356,7 +356,6 @@ static struct {
 
 	int		removable;
 	int		can_stall;
-	int		cdrom; 
 
 	char		*transport_parm;
 	char		*protocol_parm;
@@ -375,7 +374,6 @@ static struct {
 	.protocol_parm		= "SCSI",
 	.removable		= 0,
 	.can_stall		= 1,
-	.cdrom			= 0,
 	.vendor			= DRIVER_VENDOR_ID,
 	.product		= DRIVER_PRODUCT_ID,
 	.release		= 0xffff,	// Use controller chip type
@@ -399,8 +397,6 @@ MODULE_PARM_DESC(removable, "true to simulate removable media");
 module_param_named(stall, mod_data.can_stall, bool, S_IRUGO);
 MODULE_PARM_DESC(stall, "false to prevent bulk stalls");
 
-module_param_named(cdrom, mod_data.cdrom, bool, S_IRUGO);
-MODULE_PARM_DESC(cdrom, "true to emulate cdrom instead of disk");
 
 /* In the non-TEST version, only the module parameters listed above
  * are available. */
@@ -429,10 +425,6 @@ MODULE_PARM_DESC(buflen, "I/O buffer size");
 
 
 /*-------------------------------------------------------------------------*/
-
-/* SCSI device types */ 
-#define TYPE_DISK 0x00 
-#define TYPE_CDROM 0x05 
 
 /* USB protocol value = the transport method */
 #define USB_PR_CBI	0x00		// Control/Bulk/Interrupt
@@ -510,8 +502,6 @@ struct interrupt_data {
 #define SC_READ_12			0xa8
 #define SC_READ_CAPACITY		0x25
 #define SC_READ_FORMAT_CAPACITIES	0x23
-#define SC_READ_HEADER 0x44 
-#define SC_READ_TOC 0x43 
 #define SC_RELEASE			0x17
 #define SC_REQUEST_SENSE		0x03
 #define SC_RESERVE			0x16
@@ -573,7 +563,6 @@ struct lun {
 	struct file	*filp;
 	loff_t		file_length;
 	loff_t		num_sectors;
-	loff_t		min_sectors; 
 
 	unsigned int	ro : 1;
 	unsigned int	prevent_medium_removal : 1;
@@ -892,8 +881,8 @@ config_desc = {
 	.bNumInterfaces =	1,
 	.bConfigurationValue =	CONFIG_VALUE,
 	.iConfiguration =	STRING_CONFIG,
-	.bmAttributes =		USB_CONFIG_ATT_ONE  | USB_CONFIG_ATT_SELFPOWER,
-	.bMaxPower =		0,	// self-powered
+	.bmAttributes =		USB_CONFIG_ATT_ONE | USB_CONFIG_ATT_SELFPOWER,
+	.bMaxPower =		1,	// self-powered
 };
 
 static struct usb_otg_descriptor
@@ -2071,27 +2060,24 @@ static int do_inquiry(struct fsg_dev *fsg, struct fsg_buffhd *bh)
 	u8	*buf = (u8 *) bh->buf;
 
 	static char vendor_id[] = "Linux   ";
-	static char product_disk_id[] = "File-Stor Gadget"; 
-	static char product_cdrom_id[] = "File-CD Gadget "; 
+	static char product_id[] = "File-Stor Gadget";
 
 	if (!fsg->curlun) {		// Unsupported LUNs are okay
 		fsg->bad_lun_okay = 1;
 		memset(buf, 0, 36);
 		buf[0] = 0x7f;		// Unsupported, no device-type
-		buf[4] = 31; // Additional length 
 		return 36;
 	}
 
-	memset(buf, 0, 8);
-	buf[0] = (mod_data.cdrom ? TYPE_CDROM : TYPE_DISK); 
+	memset(buf, 0, 8);	// Non-removable, direct-access device
 	if (mod_data.removable)
 		buf[1] = 0x80;
 	buf[2] = 2;		// ANSI SCSI level 2
 	buf[3] = 2;		// SCSI-2 INQUIRY data format
 	buf[4] = 31;		// Additional length
 				// No special options
-
-	sprintf(buf + 8, "%-8s%-16s%04x", vendor_id, (mod_data.cdrom ? product_cdrom_id : product_disk_id), mod_data.release);
+	sprintf(buf + 8, "%-8s%-16s%04x", vendor_id, product_id,
+			mod_data.release);
 	return 36;
 }
 
@@ -2167,75 +2153,6 @@ static int do_read_capacity(struct fsg_dev *fsg, struct fsg_buffhd *bh)
 	put_be32(&buf[4], 512);				// Block length
 	return 8;
 }
-
-
-static void store_cdrom_address(u8 *dest, int msf, u32 addr) 
-{ 
-	if (msf) {
-		/* Convert to Minutes-Seconds-Frames */ 
-		addr >>= 2; /* Convert to 2048-byte frames */ 
-		addr += 2*75; /* Lead-in occupies 2 seconds */ 
-		dest[3] = addr % 75; /* Frames */ 
-		addr /= 75; 
-		dest[2] = addr % 60; /* Seconds */
-		addr /= 60; 
-		dest[1] = addr; /* Minutes */ 
-		dest[0] = 0; /* Reserved */ 
-	} else { 
-		/* Absolute sector */ 
-		put_be32(dest, addr); 
-	} 
-} 
-
-static int do_read_header(struct fsg_dev *fsg, struct fsg_buffhd *bh) 
-{
-	struct lun *curlun = fsg->curlun; 
-	int msf = fsg->cmnd[1] & 0x02; 
-	u32 lba = get_be32(&fsg->cmnd[2]); 
-	u8 *buf = (u8 *) bh->buf; 
-	
-	if ((fsg->cmnd[1] & ~0x02) != 0) { /* Mask away MSF */ 
-		curlun->sense_data = SS_INVALID_FIELD_IN_CDB; 
-		return -EINVAL; 
-	} 
-	
-	if (lba >= curlun->num_sectors) { 
-		curlun->sense_data = SS_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE; 
-		return -EINVAL; 
-	} 
-	
-	memset(buf, 0, 8); 
-	buf[0] = 0x01; /* 2048 bytes of user data, rest is EC */ 
-	store_cdrom_address(&buf[4], msf, lba); 
-	return 8; 
-}
-
-static int do_read_toc(struct fsg_dev *fsg, struct fsg_buffhd *bh) 
-{
-	struct lun *curlun = fsg->curlun; 
-	int msf = fsg->cmnd[1] & 0x02; 
-	int start_track = fsg->cmnd[6]; 
-	u8 *buf = (u8 *) bh->buf;
-	if ((fsg->cmnd[1] & ~0x02) != 0 || /* Mask away MSF */ start_track > 1){ 
-		curlun->sense_data = SS_INVALID_FIELD_IN_CDB; 
-		return -EINVAL; 
-	} 
-	memset(buf, 0, 20); 
-	buf[1] = (20-2); /* TOC data length */ 
-	buf[2] = 1; /* First track number */ 
-	buf[3] = 1; /* Last track number */ 
-	buf[5] = 0x16; /* Data track, copying allowed */ 
-	buf[6] = 0x01; /* Only track is number 1 */ 
-	store_cdrom_address(&buf[8], msf, 0); 
-	
-	buf[13] = 0x16; /* Lead-out track is data */ 
-	buf[14] = 0xAA; /* Lead-out track number */ 
-	store_cdrom_address(&buf[16], msf, curlun->num_sectors); 
-	
-	return 20; 
-} 
-
-
 
 
 static int do_mode_sense(struct fsg_dev *fsg, struct fsg_buffhd *bh)
@@ -2582,7 +2499,7 @@ static int finish_reply(struct fsg_dev *fsg)
 				start_transfer(fsg, fsg->bulk_in, bh->inreq,
 						&bh->inreq_busy, &bh->state);
 				fsg->next_buffhd_to_fill = bh->next;
-//				rc = halt_bulk_in_endpoint(fsg);
+				rc = halt_bulk_in_endpoint(fsg);
 			} else
 				rc = pad_with_zeros(fsg);
 		}
@@ -2946,22 +2863,6 @@ static int do_scsi_command(struct fsg_dev *fsg)
 			reply = do_read_capacity(fsg, bh);
 		break;
 
-	case SC_READ_HEADER: 
-		if (!mod_data.cdrom) 
-			goto unknown_cmnd; 
-		fsg->data_size_from_cmnd = get_be16(&fsg->cmnd[7]); 
-		if ((reply = check_command(fsg, 10, DATA_DIR_TO_HOST, (3<<7) | (0x1f<<1), 1, "READ HEADER")) == 0) 
-			reply = do_read_header(fsg, bh); 
-		break;
-	
-	case SC_READ_TOC: 
-		if (!mod_data.cdrom) 
-			goto unknown_cmnd; 
-		fsg->data_size_from_cmnd = get_be16(&fsg->cmnd[7]); 
-		if ((reply = check_command(fsg, 10, DATA_DIR_TO_HOST, (7<<6) | (1<<1), 1, "READ TOC")) == 0)
-			reply = do_read_toc(fsg, bh); 
-			break;
-
 	case SC_READ_FORMAT_CAPACITIES:
 		fsg->data_size_from_cmnd = get_be16(&fsg->cmnd[7]);
 		if ((reply = check_command(fsg, 10, DATA_DIR_TO_HOST,
@@ -3047,7 +2948,6 @@ static int do_scsi_command(struct fsg_dev *fsg)
 		// Fall through
 
 	default:
-unknown_cmnd: 
 		fsg->data_size_from_cmnd = 0;
 		sprintf(unknown, "Unknown x%02x", fsg->cmnd[0]);
 		if ((reply = check_command(fsg, fsg->cmnd_size,
@@ -3102,9 +3002,6 @@ static int received_cbw(struct fsg_dev *fsg, struct fsg_buffhd *bh)
 			set_bit(CLEAR_BULK_HALTS, &fsg->atomic_bitflags);
 		fsg_set_halt(fsg, fsg->bulk_out);
 		halt_bulk_in_endpoint(fsg);
-		fsg->bulk_in->ops->set_halt(fsg->bulk_in, 3);
-		fsg_set_halt(fsg, fsg->bulk_out);
-		fsg->bulk_out->ops->set_halt(fsg->bulk_out, 3);
 		return -EINVAL;
 	}
 
@@ -3118,10 +3015,8 @@ static int received_cbw(struct fsg_dev *fsg, struct fsg_buffhd *bh)
 		/* We can do anything we want here, so let's stall the
 		 * bulk pipes if we are allowed to. */
 		if (mod_data.can_stall) {
-			halt_bulk_in_endpoint(fsg);
-			fsg->bulk_in->ops->set_halt(fsg->bulk_in, 3);
 			fsg_set_halt(fsg, fsg->bulk_out);
-			fsg->bulk_out->ops->set_halt(fsg->bulk_out, 3);
+			halt_bulk_in_endpoint(fsg);
 		}
 		return -EINVAL;
 	}
@@ -3474,8 +3369,8 @@ static void handle_exception(struct fsg_dev *fsg)
 		 * requires this.) */
 		if (test_and_clear_bit(CLEAR_BULK_HALTS,
 				&fsg->atomic_bitflags)) {
-		fsg->bulk_out->ops->set_halt(fsg->bulk_out, 2);
-		fsg->bulk_in->ops->set_halt(fsg->bulk_in, 2);
+			usb_ep_clear_halt(fsg->bulk_in);
+			usb_ep_clear_halt(fsg->bulk_out);
 		}
 
 		if (transport_is_bbb()) {
@@ -3504,7 +3399,7 @@ static void handle_exception(struct fsg_dev *fsg)
 
 	case FSG_STATE_CONFIG_CHANGE:
 		rc = do_set_config(fsg, new_config);
-		if (fsg->ep0_req_tag != exception_req_tag) 
+		if (fsg->ep0_req_tag != exception_req_tag)
 			break;
 		if (rc != 0)			// STALL on errors
 			fsg_set_halt(fsg, fsg->ep0);
@@ -3514,7 +3409,7 @@ static void handle_exception(struct fsg_dev *fsg)
 
 	case FSG_STATE_DISCONNECT:
 		fsync_all(fsg);
- 		do_set_config(fsg, 0);		// Unconfigured state
+		do_set_config(fsg, 0);		// Unconfigured state
 		break;
 
 	case FSG_STATE_EXIT:
@@ -3546,9 +3441,6 @@ static int fsg_main_thread(void *fsg_)
 	 * that expects a __user pointer and it will work okay. */
 	set_fs(get_ds());
 
-	/* Setting this thread high priority */
-	set_user_nice(current, -20);
-	
 	/* The main loop */
 	while (fsg->state != FSG_STATE_TERMINATED) {
 		if (exception_in_progress(fsg) || signal_pending(current)) {
@@ -3615,7 +3507,6 @@ static int open_backing_file(struct lun *curlun, const char *filename)
 	struct inode			*inode = NULL;
 	loff_t				size;
 	loff_t				num_sectors;
-	loff_t				min_sectors; 
 
 	/* R/W if we can, R/O if we must */
 	ro = curlun->ro;
@@ -3659,20 +3550,8 @@ static int open_backing_file(struct lun *curlun, const char *filename)
 		rc = (int) size;
 		goto out;
 	}
-
-	num_sectors = size >> 9; // File size in 512-byte blocks 
-	min_sectors = 1; 
-	if (mod_data.cdrom) { 
-		num_sectors &= ~3; // Reduce to a multiple of 2048 
-		min_sectors = 300*4; // Smallest track is 300 frames 
-		if (num_sectors >= 256*60*75*4) { 
-			num_sectors = (256*60*75 - 1) * 4; 
-			LINFO(curlun, "file too big: %s\n", filename); 
-			LINFO(curlun, "using only first %d blocks\n", (int) num_sectors); 
-		}
-	} 
-	if (num_sectors < min_sectors) { 
-
+	num_sectors = size >> 9;	// File size in 512-byte sectors
+	if (num_sectors == 0) {
 		LINFO(curlun, "file too small: %s\n", filename);
 		rc = -ETOOSMALL;
 		goto out;
@@ -3898,13 +3777,6 @@ static int __init check_parameters(struct fsg_dev *fsg)
 			gcnum = usb_gadget_controller_number(fsg->gadget);
 		if (gcnum >= 0)
 			mod_data.release = 0x0300 + gcnum;
-                else if (gadget_is_dwc_otg(fsg->gadget)) {
-			mod_data.release = __constant_cpu_to_le16 (0x0200);
-                        mod_data.vendor  = __constant_cpu_to_le16 (0x053f);
-                        if (mod_data.product == DRIVER_PRODUCT_ID) {
-                                mod_data.product  = __constant_cpu_to_le16 (0x0000);
-                        }
-                }
 		else {
 			WARN(fsg, "controller '%s' not recognized\n",
 				fsg->gadget->name);
@@ -3987,12 +3859,9 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 		goto out;
 
 	if (mod_data.removable) {	// Enable the store_xxx attributes
-		dev_attr_file.attr.mode = 0644; 
+		dev_attr_ro.attr.mode = dev_attr_file.attr.mode = 0644;
+		dev_attr_ro.store = store_ro;
 		dev_attr_file.store = store_file;
-		if (!mod_data.cdrom) { 
-			dev_attr_ro.attr.mode = 0644; 
-			dev_attr_ro.store = store_ro;
-		} 
 	}
 
 	/* Find out how many LUNs there should be */
@@ -4017,8 +3886,6 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 	for (i = 0; i < fsg->nluns; ++i) {
 		curlun = &fsg->luns[i];
 		curlun->ro = mod_data.ro[i];
-		if (mod_data.cdrom)
-			curlun->ro = 1; 
 		curlun->dev.release = lun_release;
 		curlun->dev.parent = &gadget->dev;
 		curlun->dev.driver = &fsg_driver.driver;
@@ -4098,7 +3965,8 @@ static int __init fsg_bind(struct usb_gadget *gadget)
 #endif
 
 	if (gadget->is_otg) {
-		otg_desc.bmAttributes |= USB_OTG_HNP;
+		otg_desc.bmAttributes |= USB_OTG_HNP,
+		config_desc.bmAttributes |= USB_CONFIG_ATT_WAKEUP;
 	}
 
 	rc = -ENOMEM;

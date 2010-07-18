@@ -62,11 +62,6 @@ config USB_SERIAL_AIRCABLE
 	    To compile this driver as a module, choose M here: the module
 	    will be called aircable.
 
-config USB_SERIAL_HSO
-	tristate "USB driver for Option High Speed Mobile Devices"
-	depends on USB_SERIAL
-	help
-
 config USB_SERIAL_AIRPRIME
 	tristate "USB AirPrime CDMA Wireless Driver"
 	depends on USB_SERIAL
@@ -574,6 +569,7 @@ config USB_EZUSB
 	bool
 	depends on USB_SERIAL_KEYSPAN_PDA || USB_SERIAL_XIRCOM || USB_SERIAL_KEYSPAN || USB_SERIAL_WHITEHEAT
 	default y
+
 
 endmenu
 

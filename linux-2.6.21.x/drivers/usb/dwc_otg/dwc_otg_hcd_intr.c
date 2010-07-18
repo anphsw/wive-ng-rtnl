@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_intr.c $
- * $Revision: 1.6.2.1 $
- * $Date: 2009-04-22 03:48:22 $
+ * $Revision: 1.7 $
+ * $Date: 2009-03-09 08:04:24 $
  * $Change: 1117667 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -37,6 +37,8 @@
 #include "dwc_otg_driver.h"
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
+
+#include "gconfig.h"
 
 /** @file
  * This file contains the implementation of the HCD Interrupt handlers.
@@ -1040,6 +1042,17 @@ static int32_t handle_hc_xfercomp_intr(dwc_otg_hcd_t *hcd,
 		break;
 	case PIPE_INTERRUPT:
 		DWC_DEBUGPL(DBG_HCDV, "  Interrupt transfer complete\n");
+#if DWC_OTG_HAS_SILEX_PATCH
+		urb_xfer_done = update_urb_state_xfer_comp(hc, hc_regs, urb, qtd);
+		if (urb_xfer_done) {
+			dwc_otg_hcd_complete_urb(hcd, urb, urb->status);
+			halt_status = DWC_OTG_HC_XFER_URB_COMPLETE;
+		} else {
+			halt_status = DWC_OTG_HC_XFER_COMPLETE;
+		}
+ 		save_data_toggle(hc, hc_regs, qtd);
+		complete_periodic_xfer(hcd, hc, hc_regs, qtd, halt_status);
+#else
 		update_urb_state_xfer_comp(hc, hc_regs, urb, qtd);
 
 		/*
@@ -1050,6 +1063,7 @@ static int32_t handle_hc_xfercomp_intr(dwc_otg_hcd_t *hcd,
 		save_data_toggle(hc, hc_regs, qtd);
 		complete_periodic_xfer(hcd, hc, hc_regs, qtd,
 				       DWC_OTG_HC_XFER_URB_COMPLETE);
+#endif
 		break;
 	case PIPE_ISOCHRONOUS:
 		DWC_DEBUGPL(DBG_HCDV,  "  Isochronous transfer complete\n");
@@ -1657,13 +1671,16 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t *hcd,
 		if (hc->speed == DWC_OTG_EP_SPEED_HIGH && !hc->ep_is_in &&
 		    (hc->ep_type == DWC_OTG_EP_TYPE_CONTROL ||
 		     hc->ep_type == DWC_OTG_EP_TYPE_BULK)) {
-			printk(KERN_DEBUG "OUT NAK enhancement enabled\n");
+			//20090415 NOT Show
+			//printk(KERN_DEBUG "OUT NAK enhancement enabled\n");
 			out_nak_enh = 1;
 		} else {
-			printk(KERN_DEBUG "OUT NAK enhancement disabled, not HS Ctrl/Bulk OUT EP\n");
+			//20090415 NOT Show
+			//printk(KERN_DEBUG "OUT NAK enhancement disabled, not HS Ctrl/Bulk OUT EP\n");
 		}
 	} else {
-		printk(KERN_DEBUG "OUT NAK enhancement disabled, no core support\n");
+		//20090415 NOT Show
+		//printk(KERN_DEBUG "OUT NAK enhancement disabled, no core support\n");
 	}
 
 	if (hc->halt_status == DWC_OTG_HC_XFER_URB_DEQUEUE ||

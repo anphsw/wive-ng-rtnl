@@ -127,6 +127,10 @@ void dwc_otg_hcd_qh_init(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, struct urb *urb)
 	char *speed, *type;
 	memset (qh, 0, sizeof (dwc_otg_qh_t));
 
+	/* ralink 2010-03-19 usb patch for MAC issue */
+    if(urb && urb->dev)
+        usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
+
 	/* Initialize QH */
 	switch (usb_pipetype(urb->pipe)) {
 	case PIPE_CONTROL:
@@ -147,6 +151,23 @@ void dwc_otg_hcd_qh_init(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, struct urb *urb)
 
 	qh->data_toggle = DWC_OTG_HC_PID_DATA0;
 	qh->maxp = usb_maxpacket(urb->dev, urb->pipe, !(usb_pipein(urb->pipe)));
+#if 0 /* marklin 20090310 : patch from mobiletechnika */
+	/* Special hook for SQN11x0 */
+	if( (qh->ep_type == USB_ENDPOINT_XFER_BULK)
+		&& (urb->dev->speed == USB_SPEED_HIGH) ) {
+		struct usb_device_descriptor *desc = &urb->dev->descriptor;
+		if (desc->idVendor == 0x148e && 
+			(desc->idProduct == 0x0900 || desc->idProduct == 0x0A00) ) {
+			if( 256 < dwc_max_packet(qh->maxp) ){
+				qh->maxp&= ~0x07FF;
+				qh->maxp|= 256;
+			}
+			printk("SQN pathed qh->maxp= 0x%x,maxp= 0x%x,%s\n",qh->maxp
+					,usb_maxpacket(urb->dev, urb->pipe, !(usb_pipein(urb->pipe)))
+					,qh->ep_is_in?"in":"out");
+		}
+	}
+#endif
 	INIT_LIST_HEAD(&qh->qtd_list);
 	INIT_LIST_HEAD(&qh->qh_list_entry);
 	qh->channel = NULL;

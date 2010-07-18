@@ -247,14 +247,6 @@ config USB_GADGET_DUALSPEED
 	  Means that gadget drivers should include extra descriptors
 	  and code to handle dual-speed controllers.
 
-config USB_GADGET_SNPS_DWC_OTG
-	boolean "Synopsys Driver for DWC_otg Controller"
-	depends on USB && EXPERIMENTAL
-	select USB_OTG
-	select USB_GADGET_DUALSPEED
-	help
-	   Selects the Synopsys Driver for the DWC_otg Controller.
-
 #
 # USB Gadget Drivers
 #

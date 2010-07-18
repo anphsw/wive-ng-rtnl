@@ -22,7 +22,6 @@ g_midi-objs			:= gmidi.o usbstring.o config.o epautoconf.o
 gadgetfs-objs			:= inode.o
 g_file_storage-objs		:= file_storage.o usbstring.o config.o \
 					epautoconf.o
-g_ram_storage-objs		:= ram_storage.o usbstring.o config.o epautoconf.o
 
 ifeq ($(CONFIG_USB_ETH_RNDIS),y)
 	g_ether-objs		+= rndis.o

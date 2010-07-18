@@ -95,12 +95,13 @@ static int choose_configuration(struct usb_device *udev)
 		 * accepted.
 		 */
 
+#if CONFIG_USB_HAS_OVER_CURRETN_CHECK
 		/* Rule out configs that draw too much bus current */
 		if (c->desc.bMaxPower * 2 > udev->bus_mA) {
 			insufficient_power++;
 			continue;
 		}
-
+#endif
 		/* When the first config's first interface is one of Microsoft's
 		 * pet nonstandard Ethernet-over-USB protocols, ignore it unless
 		 * this kernel has enabled the necessary host side driver.

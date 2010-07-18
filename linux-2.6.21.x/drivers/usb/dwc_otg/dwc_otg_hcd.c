@@ -2128,6 +2128,15 @@ static void assign_and_init_hc(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh)
 	 */
 	hc->do_ping = qh->ping_state;
 	hc->ep_is_in = (usb_pipein(urb->pipe) != 0);
+
+	/* ralink 2010-03-19 usb patch for MAC issue */
+    if(urb && urb->dev){
+        if(! usb_gettoggle(urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe))){
+            usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
+            qh->data_toggle = DWC_OTG_HC_PID_DATA0;
+        }
+    }
+
 	hc->data_pid_start = qh->data_toggle;
 	hc->multi_count = 1;
 
