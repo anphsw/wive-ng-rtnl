@@ -221,8 +221,8 @@ static void (* r4k_blast_icache_page_indexed)(unsigned long addr);
 
 static void __init r4k_blast_icache_page_indexed_setup(void)
 {
-	unsigned long ic_lsize = cpu_icache_line_size();
 #if !defined(CONFIG_RALINK_RT3052)
+	unsigned long ic_lsize = cpu_icache_line_size();
 	if (ic_lsize == 0)
 		r4k_blast_icache_page_indexed = (void *)cache_noop;
 	else if (ic_lsize == 16)
@@ -248,8 +248,8 @@ static void (* r4k_blast_icache)(void);
 
 static void __init r4k_blast_icache_setup(void)
 {
-	unsigned long ic_lsize = cpu_icache_line_size();
 #if !defined(CONFIG_RALINK_RT3052)
+	unsigned long ic_lsize = cpu_icache_line_size();
 	if (ic_lsize == 0)
 		r4k_blast_icache = (void *)cache_noop;
 	else if (ic_lsize == 16)
@@ -988,6 +988,7 @@ static void __init probe_pcache(void)
  * executes in KSEG1 space or else you will crash and burn badly.  You have
  * been warned.
  */
+#if !defined(CONFIG_RALINK_RT3052)
 static int __init probe_scache(void)
 {
 	extern unsigned long stext;
@@ -1045,6 +1046,7 @@ static int __init probe_scache(void)
 
 	return 1;
 }
+#endif
 
 extern int r5k_sc_init(void);
 extern int rm7k_sc_init(void);
@@ -1053,7 +1055,9 @@ extern int mips_sc_init(void);
 static void __init setup_scache(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
+#if !defined(CONFIG_RALINK_RT3052)
 	unsigned int config = read_c0_config();
+#endif
 	int sc_present = 0;
 
 	/*

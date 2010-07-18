@@ -1119,9 +1119,10 @@ int __init rather_probe(struct net_device *dev)
 	int i;
         unsigned int regValue = 0;
         END_DEVICE *ei_local = netdev_priv(dev);
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 	struct sockaddr addr;
 	unsigned char zero[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-
+#endif
 	dev->base_addr = RA2882ETH_BASE;
         regValue |= FE_RESET_BIT;
         sysRegWrite(FE_RESET, regValue);

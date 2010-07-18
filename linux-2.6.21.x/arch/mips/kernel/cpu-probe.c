@@ -31,6 +31,7 @@
  */
 void (*cpu_wait)(void) = NULL;
 
+#if 0
 static void r3081_wait(void)
 {
 	unsigned long cfg = read_c0_conf();
@@ -44,6 +45,7 @@ static void r39xx_wait(void)
 		write_c0_conf(read_c0_conf() | TX39_CONF_HALT);
 	local_irq_enable();
 }
+#endif
 
 /*
  * There is a race when WAIT instruction executed with interrupt
@@ -65,6 +67,7 @@ static void r4k_wait(void)
  * interrupt is requested" restriction in the MIPS32/MIPS64 architecture makes
  * using this version a gamble.
  */
+#if 0
 static void r4k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -74,6 +77,7 @@ static void r4k_wait_irqoff(void)
 			"	.set	mips0		\n");
 	local_irq_enable();
 }
+#endif
 
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
