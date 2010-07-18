@@ -67,7 +67,7 @@ static struct map_info ralink_map[] = {
 };
 #endif
 
-#if defined(CONFIG_RALINK_RT3052_MP) || defined(CONFIG_RALINK_RT3052_MP2)
+#if defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
 static struct mtd_partition rt2880_partitions[] = {
         {
                 name:           "Bootloader",  /* mtdblock0 */
