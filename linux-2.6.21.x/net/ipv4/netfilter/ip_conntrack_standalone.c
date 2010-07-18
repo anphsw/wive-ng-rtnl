@@ -33,6 +33,10 @@
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
 #include <linux/netfilter_ipv4/ip_conntrack_helper.h>
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../nat/hw_nat/ra_nat.h"
+#endif
+
 #if 0
 #define DEBUGP printk
 #else
@@ -419,14 +423,7 @@ static unsigned int ip_conntrack_help(unsigned int hooknum,
 	if (ct && ct->helper && ctinfo != IP_CT_RELATED + IP_CT_IS_REPLY) {
 		unsigned int ret;
 
-#if defined(CONFIG_RA_SW_NAT) || defined(CONFIG_RA_SW_NAT_MODULE)
-#include "../../nat/sw_nat/ra_nat.h"
-            if( (skb_headroom(*pskb) >=4)  && (FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_NUM) ) {
-                FOE_HASH_NUM(*pskb) |= FOE_ALG_FLAGS;
-            }
-
-#elif  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../../nat/hw_nat/ra_nat.h"
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
             if( (skb_headroom(*pskb) >=4)  &&
                     ((FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_PCI) ||
                      (FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_WLAN) ||
@@ -922,11 +919,14 @@ static void __exit ip_conntrack_standalone_fini(void)
 module_init(ip_conntrack_standalone_init);
 module_exit(ip_conntrack_standalone_fini);
 
+#ifdef CONFIG_IP_NF_CONNTRACK_SUPPORT
 /* Some modules need us, but don't depend directly on any symbol.
    They should call this. */
 void need_conntrack(void)
 {
 }
+EXPORT_SYMBOL(need_conntrack);
+#endif
 
 #ifdef CONFIG_IP_NF_CONNTRACK_EVENTS
 EXPORT_SYMBOL_GPL(ip_conntrack_chain);
@@ -942,7 +942,6 @@ EXPORT_SYMBOL(ip_ct_get_tuple);
 EXPORT_SYMBOL(invert_tuplepr);
 EXPORT_SYMBOL(ip_conntrack_alter_reply);
 EXPORT_SYMBOL(ip_conntrack_destroyed);
-EXPORT_SYMBOL(need_conntrack);
 EXPORT_SYMBOL(ip_conntrack_helper_register);
 EXPORT_SYMBOL(ip_conntrack_helper_unregister);
 EXPORT_SYMBOL(ip_ct_iterate_cleanup);
@@ -968,7 +967,6 @@ EXPORT_SYMBOL_GPL(ip_conntrack_find_get);
 EXPORT_SYMBOL(ip_conntrack_tcp_update);
 #endif
 
-EXPORT_SYMBOL_GPL(ip_conntrack_flush);
 EXPORT_SYMBOL_GPL(__ip_conntrack_find);
 
 EXPORT_SYMBOL_GPL(ip_conntrack_alloc);

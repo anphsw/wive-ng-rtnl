@@ -913,6 +913,7 @@ static int tcp_packet(struct ip_conntrack *conntrack,
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	/* ra_sw_nat_hook_rx() will be hooked if hw_nat is enabled. */
 	if (ra_sw_nat_hook_rx) {
+	    printk("conntrack hw_nat====start_rx\n");
 		for (index = 0; index < FOE_ENTRY_MAX_EXP; index++) {
 			if ((ntohs(th->dest) == PpeFoeExp[index].port &&
 			     ntohl(iph->daddr) == PpeFoeExp[index].ip) ||

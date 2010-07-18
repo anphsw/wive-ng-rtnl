@@ -1234,7 +1234,6 @@ static int32_t PpeInitMod(void)
 
     /* Initialize PPE related register */
     PpeEngStart();
-
     /* Register RX/TX hook point */
     ra_sw_nat_hook_tx = PpeTxHandler;
     ra_sw_nat_hook_rx = PpeRxHandler;

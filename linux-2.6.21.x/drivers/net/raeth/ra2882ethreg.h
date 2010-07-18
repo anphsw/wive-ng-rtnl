@@ -71,8 +71,6 @@ typedef struct _PSEUDO_ADAPTER {
 #else
 #if defined(CONFIG_RALINK_RT2880_SHUTTLE)
 #define RA2882ETH_BASE  (0xA0310000)
-#elif defined(CONFIG_RALINK_RT2880_MP) 
-#define RA2882ETH_BASE  (0xA0400000)
 #else
 #error Please Choice Chip Version (Shuttle/MP)
 #endif

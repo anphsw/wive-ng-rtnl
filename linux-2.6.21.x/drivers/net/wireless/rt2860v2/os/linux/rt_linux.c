@@ -884,20 +884,19 @@ void announce_802_3_packet(
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
 		unsigned int flags;
-		
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
+
 		if(ra_sw_nat_hook_rx(pRxPkt)) 
-		{
 			netif_rx(pRxPkt);
-		}
+
 		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
 	else 
- #endif
+#endif
  
- #endif // RTMP_RBUS_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT
 #ifdef BG_FT_SUPPORT

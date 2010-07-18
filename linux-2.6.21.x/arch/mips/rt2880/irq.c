@@ -233,8 +233,7 @@ void surfboard_hw0_irqdispatch(void)
 	 * bit[1] TIMER0 Timer 0 Interrupt Status after Mask
 	 */
 #ifdef CONFIG_RALINK_TIMER
-#if defined (CONFIG_RALINK_RT2880_SHUTTLE) || \
-    defined (CONFIG_RALINK_RT2880_MP)
+#if defined (CONFIG_RALINK_RT2880_SHUTTLE)
 	if (irq == 0) {
 #else
 	if (irq == 1) {
@@ -243,8 +242,7 @@ void surfboard_hw0_irqdispatch(void)
 	}
 #endif
 
-#if defined (CONFIG_RALINK_RT2880_SHUTTLE) ||   \
-    defined (CONFIG_RALINK_RT2880_MP)
+#if defined (CONFIG_RALINK_RT2880_SHUTTLE)
 	if (irq == 3) {
 #ifdef CONFIG_RALINK_GPIO 
 		/* cause gpio registered irq 7 (see rt2880gpio_init_irq()) */

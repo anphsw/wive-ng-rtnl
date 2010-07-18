@@ -563,6 +563,7 @@ static inline int rt2880_eth_recv(struct net_device* dev)
  */
          if(ra_sw_nat_hook_rx!= NULL)
          {
+	    printk("LAN hw_nat====start_rx\n");
 	   spin_lock_irqsave(&ei_local->page_lock, flags);
            if(ra_sw_nat_hook_rx(rx_skb)) {
 #if defined(CONFIG_RALINK_RT3052_MP) || defined(CONFIG_RALINK_RT3052_MP2)

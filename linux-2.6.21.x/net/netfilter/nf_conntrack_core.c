@@ -65,6 +65,9 @@
 #define DEBUGP(format, args...)
 #endif
 
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#endif
 #ifdef CONFIG_CONNTRACK_FAST_PATH
 #include "../ipv4/fastpath/fastpath_core.h"
 #endif
@@ -1295,16 +1298,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		return -ret;
 	}
 
-	
-#if defined(CONFIG_RA_SW_NAT) || defined(CONFIG_RA_SW_NAT_MODULE)
-#include "../nat/sw_nat/ra_nat.h"
-	if (nfct_help(ct)->helper) {
-            if( (skb_headroom(*pskb) >=4)  && (FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_NUM) ) {
-                FOE_HASH_NUM(*pskb) |= FOE_CONNTRACKING_FLAGS;
-            }
-	}
-#elif  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../nat/hw_nat/ra_nat.h"
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (nfct_help(ct)->helper) {
             if( (skb_headroom(*pskb) >=4)  &&
                     ((FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_PCI) ||
@@ -1552,10 +1546,15 @@ static int kill_all(struct nf_conn *i, void *data)
 {
 	return 1;
 }
+
+#ifdef CONFIG_NF_CONNTRACK_SUPPORT
 void ip_conntrack_flush(void)
 {
 	nf_ct_iterate_cleanup(kill_all, NULL);
 }
+EXPORT_SYMBOL_GPL(ip_conntrack_flush);
+#endif
+
 void ip_ct_record_cleanup(void)
 {
 i_see_dead_people1:

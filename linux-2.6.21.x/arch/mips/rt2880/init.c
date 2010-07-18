@@ -181,19 +181,6 @@ void prom_init_sysclk(void)
 	case 3:
 		mips_cpu_feq = (280000000);
 		break;
-#elif defined (CONFIG_RALINK_RT2880_MP)
-	case 0:
-		mips_cpu_feq = (250000000);
-		break;
-	case 1:
-		mips_cpu_feq = (266666666);
-		break;
-	case 2:
-		mips_cpu_feq = (280000000);
-		break;
-	case 3:
-		mips_cpu_feq = (300000000);
-		break;
 #elif defined (CONFIG_RALINK_RT2883) 
 	case 0:
 		mips_cpu_feq = (380*1000*1000);

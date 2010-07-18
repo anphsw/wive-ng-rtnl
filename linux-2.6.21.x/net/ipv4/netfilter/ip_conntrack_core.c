@@ -47,6 +47,9 @@
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 #include <linux/netfilter_ipv4/ip_conntrack_helper.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../nat/hw_nat/ra_nat.h"
+#endif
 #ifdef CONFIG_CONNTRACK_FAST_PATH
 #include "../fastpath/fastpath_core.h"
 #endif
@@ -1542,10 +1545,13 @@ static int kill_all(struct ip_conntrack *i, void *data)
 	return 1;
 }
 
+#ifdef CONFIG_IP_NF_CONNTRACK_SUPPORT
 void ip_conntrack_flush(void)
 {
 	ip_ct_iterate_cleanup(kill_all, NULL);
 }
+EXPORT_SYMBOL_GPL(ip_conntrack_flush);
+#endif
 
 static void free_conntrack_hash(struct list_head *hash, int vmalloced,int size)
 {

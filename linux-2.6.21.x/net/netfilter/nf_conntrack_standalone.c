@@ -490,9 +490,11 @@ static void __exit nf_conntrack_standalone_fini(void)
 module_init(nf_conntrack_standalone_init);
 module_exit(nf_conntrack_standalone_fini);
 
+#ifdef CONFIG_NF_CONNTRACK_SUPPORT
 /* Some modules need us, but don't depend directly on any symbol.
    They should call this. */
 void need_conntrack(void)
 {
 }
 EXPORT_SYMBOL_GPL(need_conntrack);
+#endif

@@ -39,11 +39,12 @@
 
 #define NAT_DEBUG
 
-#ifdef NAT_DEBUG
-#define NAT_PRINT(fmt, args...) printk(KERN_INFO fmt, ## args)
-#else
-#define NAT_PRINT(fmt, args...) { }
-#endif
+//#ifdef NAT_DEBUG
+//#define NAT_PRINT(fmt, args...) printk(KERN_INFO fmt, ## args)
+#define NAT_PRINT(fmt, args...) printk(fmt, ## args)
+//#else
+//#define NAT_PRINT(fmt, args...) { }
+//#endif
 
 enum L2RuleDir {
     OTHERS=0,

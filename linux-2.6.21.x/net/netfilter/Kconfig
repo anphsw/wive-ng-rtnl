@@ -87,8 +87,7 @@ config NF_CONNTRACK
 
 config IP_NF_CONNTRACK
 	tristate
-	default m if IP_NF_CONNTRACK_SUPPORT && NF_CONNTRACK_ENABLED=m
-	default y if IP_NF_CONNTRACK_SUPPORT && NF_CONNTRACK_ENABLED=y
+	default y if IP_NF_CONNTRACK_SUPPORT
 
 config NF_CT_ACCT
 	bool "Connection tracking flow accounting"

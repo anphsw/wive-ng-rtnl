@@ -44,9 +44,6 @@
 #else
 #if defined(CONFIG_RALINK_RT2880_SHUTTLE)
 #define RTMP_MAC_CSR_ADDR 0xA0600000
-#elif defined (CONFIG_RALINK_RT2880_MP) 
-#define RTMP_MAC_CSR_ADDR 0xA0480000
-#else
 #error Please Choice Chip Version (Shuttle/MP)
 #endif
 #endif

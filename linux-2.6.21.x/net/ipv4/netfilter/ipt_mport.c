@@ -10,7 +10,7 @@
 
 MODULE_LICENSE("GPL");
 
-#if 1
+#if 0
 #define duprintf(format, args...) printk(format , ## args)
 #else
 #define duprintf(format, args...)
