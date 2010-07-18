@@ -633,9 +633,7 @@ static int spidrv_init(void)
     }
 #endif
     //use normal(SPI) mode instead of GPIO mode
-#ifdef CONFIG_RALINK_RT2880
-    RT2880_REG(RALINK_REG_GPIOMODE) &= ~(1 << 2);
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
     RT2880_REG(RALINK_REG_GPIOMODE) &= ~(1 << 1);
 #else
 #error Ralink Chip not defined

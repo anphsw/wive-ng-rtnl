@@ -19,11 +19,6 @@ menu "Platform config for  Ralink RT3xx/RT28xx."
 config  ASUS_EXT
 	bool 
 	default n
-
-config  RT2860V2_2850
-        bool "Dual Band"
-        depends on RALINK_RT2880
-
 choice
         prompt "RF Type"
         depends on RALINK_RT3052

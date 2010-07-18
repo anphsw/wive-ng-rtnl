@@ -326,8 +326,7 @@ static unsigned int serial_in(struct uart_8250_port *up, int offset)
 			return readb(up->port.membase + offset);
 
 	default:
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
+#if defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052)
 		return (*(int*)(up->port.iobase + offset));
 #else
@@ -415,8 +414,7 @@ static inline void _serial_dl_write(struct uart_8250_port *up, int value)
 	serial_outp(up, UART_DLM, value >> 8 & 0xff);
 }
 
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
+#if defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052)
 /* Ralink haven't got a standard divisor latch */
 static int serial_dl_read(struct uart_8250_port *up)

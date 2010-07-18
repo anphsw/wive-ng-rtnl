@@ -386,9 +386,7 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 		}
 	}
 	//always turn the power LED on
-#ifdef CONFIG_RALINK_RT2880
-	__LED_ON(12);
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
 	__LED_ON(9);
 #endif
 	*(volatile u32 *)(RALINK_REG_PIODATA) = ralink_gpio_led_value;

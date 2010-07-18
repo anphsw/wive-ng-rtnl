@@ -158,13 +158,6 @@ libs-$(CONFIG_SIBYTE_CFE)	+= arch/mips/sibyte/cfe/
 #
 
 #
-# Ralink RT2880 board
-#
-core-$(CONFIG_RALINK_RT2880)	+= arch/mips/rt2880/
-cflags-$(CONFIG_RALINK_RT2880)	+= -Iinclude/asm-mips/rt2880
-load-$(CONFIG_RALINK_RT2880)	+= 0x88000000
-
-#
 # Ralink RT2883 board
 #
 core-$(CONFIG_RALINK_RT2883)	+= arch/mips/rt2880/

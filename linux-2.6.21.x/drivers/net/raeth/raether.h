@@ -10,12 +10,7 @@
 #define RX_RING_BASE	((int)(ESRAM_BASE + 0x7000))
 #define TX_RING_BASE	((int)(ESRAM_BASE + 0x7800))
 
-#if defined(CONFIG_RALINK_RT2880)
-#define NUM_TX_RINGS 	1
-#else
-#define NUM_TX_RINGS 	4
-#endif
-
+#define NUM_TX_RINGS 	   4
 #define NUM_RX_DESC        256  //256 maximum
 #define NUM_TX_DESC    	   256  //256 maximum
 #define NUM_RX_MAX_PROCESS 32   //64 maximum for RT3052 + 32Mb RAM

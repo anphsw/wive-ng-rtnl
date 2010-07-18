@@ -67,21 +67,6 @@ extern u32 mips_cpu_feq;
 
 #define ALLINTS (IE_IRQ0 | IE_IRQ1 | IE_IRQ2 | IE_IRQ3 | IE_IRQ4 | IE_IRQ5)
 
-/*
-#if defined(CONFIG_RALINK_RT2880)
-static char display_string[] = "      LINUX ON RALINK RT2880 SOC     ";
-#elif defined (CONFIG_RALINK_RT2883)
-static char display_string[] = "      LINUX ON RALINK RT2883 SOC     ";
-#elif defined (CONFIG_RALINK_RT3052)
-static char display_string[] = "      LINUX ON RALINK RT3052 SOC     ";
-#endif
-static unsigned int display_count = 0;
-#define MAX_DISPLAY_COUNT (sizeof(display_string) - 8)
-
-static unsigned int timer_tick_count=0;
-
-*/
-
 static inline void ack_r4ktimer(unsigned int newval)
 {
 	write_c0_compare(newval);

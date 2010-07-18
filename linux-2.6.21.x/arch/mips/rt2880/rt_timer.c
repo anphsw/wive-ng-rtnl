@@ -80,20 +80,7 @@ void set_wdg_timer_ebl(unsigned int timer, unsigned int ebl)
 
     //timer1 used for watchdog timer
 #if defined (CONFIG_RALINK_TIMER_WDG_RESET_OUTPUT)
-
-#if defined (CONFIG_RALINK_RT2880)
-    if(timer==TMR1CTL) {
-	result=sysRegRead(CLKCFG);            
-
-	if(ebl==1){
-	    result |= (1<<9); /* SRAM_CS_N is used as wdg reset */
-	}else {
-	    result &= ~(1<<9); /* SRAM_CS_N is used as normal func */
-	}
-
-	sysRegWrite(CLKCFG,result);
-    }
-#elif defined (CONFIG_RALINK_RT3052_MP2) || defined(CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT3052_MP2) || defined(CONFIG_RALINK_RT2883)
     if(timer==TMR1CTL) {
 	//the last 4bits in SYSCFG are write only
 	result=sysRegRead(SYSCFG);                                                                                    

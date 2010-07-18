@@ -233,31 +233,13 @@ void surfboard_hw0_irqdispatch(void)
 	 * bit[1] TIMER0 Timer 0 Interrupt Status after Mask
 	 */
 #ifdef CONFIG_RALINK_TIMER
-#if defined (CONFIG_RALINK_RT2880_SHUTTLE)
-	if (irq == 0) {
-#else
-	if (irq == 1) {
-#endif
+	if (irq == 1)
 		irq = SURFBOARDINT_TIMER0;
-	}
 #endif
-
-#if defined (CONFIG_RALINK_RT2880_SHUTTLE)
-	if (irq == 3) {
-#ifdef CONFIG_RALINK_GPIO 
-		/* cause gpio registered irq 7 (see rt2880gpio_init_irq()) */
-		irq = SURFBOARDINT_GPIO;
-		printk("surfboard_hw0_irqdispatch(): INT #7...\n");
-#else
-		printk("surfboard_hw0_irqdispatch(): External INT #3... surfboard discard!\n");
-#endif
-	}
-#else
 	/* ILL_ACC */ 
 	if (irq == 3) {
 		irq = SURFBOARDINT_ILL_ACC;
 	}
-#endif
 #if defined (CONFIG_RALINK_PCM) || defined (CONFIG_RALINK_PCM_MODULE)
 	/* PCM */ 
 	if (irq == 4) {
