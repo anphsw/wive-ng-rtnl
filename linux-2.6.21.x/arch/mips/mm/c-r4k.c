@@ -138,7 +138,7 @@ static void __init r4k_blast_dcache_setup(void)
 		)
 #define CACHE32_UNROLL32_ALIGN	JUMP_TO_ALIGN(10) /* 32 * 32 = 1024 */
 #define CACHE32_UNROLL32_ALIGN2	JUMP_TO_ALIGN(11)
-
+#if !defined(CONFIG_RALINK_RT3052)
 static inline void blast_r4600_v1_icache32(void)
 {
 	unsigned long flags;
@@ -199,7 +199,7 @@ static inline void tx49_blast_icache32_page_indexed(unsigned long page)
 		for (addr = start; addr < end; addr += 0x400 * 2)
 			cache32_unroll32(addr|ws,Index_Invalidate_I);
 }
-
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 static void (* r4k_blast_icache_page)(unsigned long addr);
 
 static void __init r4k_blast_icache_page_setup(void)
@@ -222,7 +222,7 @@ static void (* r4k_blast_icache_page_indexed)(unsigned long addr);
 static void __init r4k_blast_icache_page_indexed_setup(void)
 {
 	unsigned long ic_lsize = cpu_icache_line_size();
-
+#if !defined(CONFIG_RALINK_RT3052)
 	if (ic_lsize == 0)
 		r4k_blast_icache_page_indexed = (void *)cache_noop;
 	else if (ic_lsize == 16)
@@ -239,6 +239,9 @@ static void __init r4k_blast_icache_page_indexed_setup(void)
 				blast_icache32_page_indexed;
 	} else if (ic_lsize == 64)
 		r4k_blast_icache_page_indexed = blast_icache64_page_indexed;
+#else
+	r4k_blast_icache_page_indexed =blast_icache32_page_indexed;
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 }
 
 static void (* r4k_blast_icache)(void);
@@ -246,7 +249,7 @@ static void (* r4k_blast_icache)(void);
 static void __init r4k_blast_icache_setup(void)
 {
 	unsigned long ic_lsize = cpu_icache_line_size();
-
+#if !defined(CONFIG_RALINK_RT3052)
 	if (ic_lsize == 0)
 		r4k_blast_icache = (void *)cache_noop;
 	else if (ic_lsize == 16)
@@ -260,6 +263,9 @@ static void __init r4k_blast_icache_setup(void)
 			r4k_blast_icache = blast_icache32;
 	} else if (ic_lsize == 64)
 		r4k_blast_icache = blast_icache64;
+#else
+	r4k_blast_icache = blast_icache32;
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 }
 
 static void (* r4k_blast_scache_page)(unsigned long addr);
@@ -656,7 +662,7 @@ static void r4k_flush_icache_all(void)
 	if (cpu_has_vtag_icache)
 		r4k_blast_icache();
 }
-
+#if !defined(CONFIG_RALINK_RT3052)
 static inline void rm7k_erratum31(void)
 {
 	const unsigned long ic_lsize = 32;
@@ -688,7 +694,7 @@ static inline void rm7k_erratum31(void)
 			: "r" (addr), "i" (Index_Store_Tag_I), "i" (Fill));
 	}
 }
-
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 static char *way_string[] __initdata = { NULL, "direct mapped", "2-way",
 	"3-way", "4-way", "5-way", "6-way", "7-way", "8-way"
 };
@@ -702,6 +708,7 @@ static void __init probe_pcache(void)
 	unsigned int lsize;
 
 	switch (c->cputype) {
+#if !defined(CONFIG_RALINK_RT3052)
 	case CPU_R4600:			/* QED style two way caches? */
 	case CPU_R4700:
 	case CPU_R5000:
@@ -847,7 +854,10 @@ static void __init probe_pcache(void)
 #endif
 		c->options |= MIPS_CPU_PREFETCH;
 		break;
-
+#else
+	case CPU_UNKNOWN:
+		break;
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 	default:
 		if (!(config & MIPS_CONF_M))
 			panic("Don't know how to probe P-caches on this cpu.");
@@ -1052,6 +1062,7 @@ static void __init setup_scache(void)
 	 * Linux memory managment.
 	 */
 	switch (c->cputype) {
+#if !defined(CONFIG_RALINK_RT3052)
 	case CPU_R4000SC:
 	case CPU_R4000MC:
 	case CPU_R4400SC:
@@ -1084,7 +1095,10 @@ static void __init setup_scache(void)
 		rm7k_sc_init();
 #endif
 		return;
-
+#else
+	case CPU_UNKNOWN:
+		return;
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 	default:
 		if (c->isa_level == MIPS_CPU_ISA_M32R1 ||
 		    c->isa_level == MIPS_CPU_ISA_M32R2 ||
@@ -1119,9 +1133,10 @@ static void __init setup_scache(void)
 
 	c->options |= MIPS_CPU_INCLUSIVE_CACHES;
 }
-
+#if !defined(CONFIG_RALINK_RT3052)
 void au1x00_fixup_config_od(void)
 {
+
 	/*
 	 * c0_config.od (bit 19) was write only (and read as 0)
 	 * on the early revisions of Alchemy SOCs.  It disables the bus
@@ -1144,7 +1159,7 @@ void au1x00_fixup_config_od(void)
 		break;
 	}
 }
-
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 static void __init coherency_setup(void)
 {
 	change_c0_config(CONF_CM_CMASK, CONF_CM_DEFAULT);
@@ -1157,6 +1172,7 @@ static void __init coherency_setup(void)
 	 * silly idea of putting something else there ...
 	 */
 	switch (current_cpu_data.cputype) {
+#if !defined(CONFIG_RALINK_RT3052)
 	case CPU_R4000PC:
 	case CPU_R4000SC:
 	case CPU_R4000MC:
@@ -1174,6 +1190,10 @@ static void __init coherency_setup(void)
 	case CPU_AU1500: /* rev. AB */
 		au1x00_fixup_config_od();
 		break;
+#else
+	case CPU_UNKNOWN:
+		break;
+#endif /* !defined(CONFIG_RALINK_RT3052) */
 	}
 }
 
