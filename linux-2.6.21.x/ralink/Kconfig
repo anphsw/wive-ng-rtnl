@@ -55,6 +55,10 @@ menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
 source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
 endmenu
 
+menu "Ralink RT3xx/RT28xx Hardware nat support."
+source "net/nat/hw_nat/Kconfig"
+endmenu
+
 #######
 # USB
 #######

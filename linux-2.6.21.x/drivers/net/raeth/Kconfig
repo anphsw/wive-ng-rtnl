@@ -12,14 +12,6 @@ config RAETH_NAPI
         bool "Use Rx Polling (NAPI)"
         depends on RAETH
 
-config RA_HW_NAT
-        bool "Use HARDWARE NAT"
-        depends on RAETH
-
-config RA_SW_NAT
-        bool "Use SOFTWARE NAT"
-        depends on RAETH
-
 config RA_NAT_NONE
         bool "Disable NAT acceleration"
         depends on RAETH

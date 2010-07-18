@@ -58,5 +58,4 @@ obj-y                           += nat/foe_hook/
 endif
 
 obj-$(CONFIG_RA_HW_NAT)           += nat/hw_nat/
-obj-$(CONFIG_RA_SW_NAT)           += nat/sw_nat/
 obj-$(CONFIG_EXPRESS_NAT)         += nat/expressnat/
