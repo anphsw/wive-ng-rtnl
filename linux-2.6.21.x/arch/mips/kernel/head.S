@@ -150,12 +150,13 @@ EXPORT(_stext)
 
 NESTED(kernel_entry, 16, sp)			# kernel entry point
 #ifndef CONFIG_RALINK_RT3052_MP2
+#ifndef CONFIG_RALINK_RT3052
 	kernel_entry_setup			# cpu specific setup
 
 	setup_c0_status_pri
 
 	ARC64_TWIDDLE_PC
-
+#endif
 #endif
 #ifdef CONFIG_MIPS_MT_SMTC
 	/*

@@ -106,17 +106,7 @@ uint32_t max_flash_size=0;
 */
 uint32_t logic2phy(uint32_t addr)
 {
-#if defined (CONFIG_RT2880_FLASH_8M)
-	if (addr >= 0x400000)
-		return (FL_BASE - 0x400000 + addr);
-	else
-		return (FL_BASE + 0x400000 + addr);
-#elif defined (CONFIG_RT2880_FLASH_16M)
-	if (addr >= 0x400000)
-		return (FL_BASE - 0x400000 + addr);
-	else
-		return (FL_BASE + 0xc00000 + addr);
-#elif defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
+#ifdef CONFIG_RALINK_RT3052_MP2
 	if (addr >= 0x1000000)
 		return (FL_BASE - 0x5000000 + addr); //0xC0000000 remaps to 0xBB000000
 	else
@@ -465,7 +455,7 @@ int32_t FlashSectAddr(uint32_t sector_num)
 	    offset += flsh_entry->sector[i].count * flsh_entry->sector[i].size;
 	    sector_num -= flsh_entry->sector[i].count;
 	}else {
-#if defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
+#ifdef CONFIG_RALINK_RT3052_MP2
 	    if (sector_num >= 128) {
 		offset += ((sector_num-128) * flsh_entry->sector[i].size);
 		return (0xBB000000 + offset);
@@ -503,7 +493,7 @@ int32_t FlashSectNum(uint32_t sector_addr)
     uint32_t offset=FL_BASE;
     uint16_t sector_num=0;
    
-#if defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
+#ifdef CONFIG_RALINK_RT3052_MP2
     if (sector_addr < 0xBC000000 && sector_addr >= 0xBB000000) {
 	sector_addr += 0x4000000; //0xbb --> 0xbf
 	sector_num = 128;
