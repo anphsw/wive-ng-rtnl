@@ -1,0 +1,208 @@
+config  RA_HW_NAT
+        tristate "Ralink HW NAT"
+
+choice
+        prompt "Binding Method"
+	depends on RA_HW_NAT
+	default RA_HW_NAT_MANUAL_BIND
+
+config  RA_HW_NAT_AUTO_BIND
+        bool "Auto"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_SEMIAUTO_BIND
+        bool "Semi-Auto"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_MANUAL_BIND
+        bool "Manual"
+	depends on RA_HW_NAT
+
+endchoice
+
+
+config  RA_HW_NAT_BINDING_THRESHOLD
+        int "Binding Threshold (Unit:Packet Per Second)"
+	depends on RA_HW_NAT
+	default 30
+
+config  RA_HW_NAT_QURT_LMT
+        int "Max entries allowed build when FreeEntries>3/4 (MUST <16384)"
+	depends on RA_HW_NAT
+	default 100
+
+config  RA_HW_NAT_HALF_LMT
+        int "Max entries allowed build when FreeEntries>1/2 (MUST <16384)"
+	depends on RA_HW_NAT
+	default 50
+
+
+config  RA_HW_NAT_FULL_LMT
+        int "Max entries allowed build when FreeEntries<1/2 (MUST <16384)"
+	depends on RA_HW_NAT
+	default 25
+
+choice
+        prompt "Foe Table Size"
+	depends on RA_HW_NAT
+	default RA_HW_NAT_TBL_4K
+
+config  RA_HW_NAT_TBL_1K
+        bool "1K"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_TBL_2K
+        bool "2K"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_TBL_4K
+        bool "4K"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_TBL_8K
+        bool "8K"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_TBL_16K
+        bool "16K"
+	depends on RA_HW_NAT
+	
+endchoice
+
+
+choice
+	prompt "Hash Algorithm"
+	depends on RA_HW_NAT
+	default RA_HW_NAT_HASH1
+	
+config  RA_HW_NAT_HASH0
+        bool "Hash0-Simple"
+	depends on RA_HW_NAT
+
+config  RA_HW_NAT_HASH1
+        bool "Hash1-Complex"
+	depends on RA_HW_NAT
+
+endchoice
+
+
+config  RA_HW_NAT_PRE_ACL_SIZE
+        int "Pre ACL Table Size"
+	depends on RA_HW_NAT
+	default 112
+
+config  RA_HW_NAT_PRE_MTR_SIZE
+        int "Pre Meter Table Size"
+	depends on RA_HW_NAT
+	default 100
+
+config  RA_HW_NAT_PRE_AC_SIZE
+        int "Pre AC Table Size"
+	depends on RA_HW_NAT
+	default 100
+
+config  RA_HW_NAT_POST_MTR_SIZE
+        int "Post Meter Table Size"
+	depends on RA_HW_NAT
+	default 100
+
+config  RA_HW_NAT_POST_AC_SIZE
+        int "Post AC Table Size"
+	depends on RA_HW_NAT
+	default 100
+
+
+config  RA_HW_NAT_TCP_KA
+        int "TCP KeepAlive Interval(Unit:1Sec)"
+	depends on RA_HW_NAT_TBL_1K
+	default 5
+
+config  RA_HW_NAT_UDP_KA
+        int "UDP KeepAlive Interval(Unit:1Sec)"
+	depends on RA_HW_NAT_TBL_1K
+	default 5
+
+config  RA_HW_NAT_TCP_KA
+        int "TCP KeepAlive Interval(Unit:2Sec)"
+	depends on RA_HW_NAT_TBL_2K
+	default 3
+
+config  RA_HW_NAT_UDP_KA
+        int "UDP KeepAlive Interval(Unit:2Sec)"
+	depends on RA_HW_NAT_TBL_2K
+	default 3
+
+config  RA_HW_NAT_TCP_KA
+        int "TCP KeepAlive Interval(Unit:4Sec)"
+	depends on RA_HW_NAT_TBL_4K
+	default 1
+
+config  RA_HW_NAT_UDP_KA
+        int "UDP KeepAlive Interval(Unit:4Sec)"
+	depends on RA_HW_NAT_TBL_4K
+	default 1
+
+config  RA_HW_NAT_TCP_KA
+        int "TCP KeepAlive Interval(Unit:8Sec)"
+	depends on RA_HW_NAT_TBL_8K
+	default 1
+
+config  RA_HW_NAT_UDP_KA
+        int "UDP KeepAlive Interval(Unit:8Sec)"
+	depends on RA_HW_NAT_TBL_8K
+	default 1
+
+config  RA_HW_NAT_TCP_KA
+        int "TCP KeepAlive Interval(Unit:16Sec)"
+	depends on RA_HW_NAT_TBL_16K
+	default 1
+
+config  RA_HW_NAT_UDP_KA
+        int "UDP KeepAlive Interval(Unit:16Sec)"
+	depends on RA_HW_NAT_TBL_16K
+	default 1
+
+config  RA_HW_NAT_UNB_MNP
+        int "Min threshold for unbind state(Pkt count)"
+	depends on RA_HW_NAT
+	default 1000
+
+config  RA_HW_NAT_ACL_DLTA
+        int "Life time of ACL link to FOE entry(Unit:1Sec)"
+	depends on RA_HW_NAT
+	default 3
+
+config  RA_HW_NAT_UNB_DLTA
+        int "Life time of Unbind entry (Unit:1Sec)"
+	depends on RA_HW_NAT
+	default 3
+
+config  RA_HW_NAT_UDP_DLTA
+        int "Life time of Bind UDP entry (Unit:1Sec)"
+	depends on RA_HW_NAT
+	default 5
+
+config  RA_HW_NAT_TCP_DLTA
+        int "Life time of Bind TCP entry (Unit:1Sec)"
+	depends on RA_HW_NAT
+	default 5
+
+config  RA_HW_NAT_FIN_DLTA
+        int "Life time of Bind FIN entry (Unit:1Sec)"
+	depends on RA_HW_NAT
+	default 5
+	
+config  RA_HW_NAT_WLAN_NAME
+        string "WLAN"
+	depends on RA_HW_NAT
+	default "ra0"
+
+config  RA_HW_NAT_PCI_NAME
+        string "PCI"
+	depends on RA_HW_NAT
+	default "eth0"
+
+config  RA_HW_NAT_GMAC_NAME
+        string "GMAC"
+	depends on RA_HW_NAT
+	default "eth2"
