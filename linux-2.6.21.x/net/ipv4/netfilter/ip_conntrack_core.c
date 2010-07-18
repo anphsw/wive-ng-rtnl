@@ -828,6 +828,8 @@ init_conntrack(struct ip_conntrack_tuple *tuple,
 	return &conntrack->tuplehash[IP_CT_DIR_ORIGINAL];
 }
 
+struct net_device *wan_dev;
+
 /* On success, returns conntrack ptr, sets skb->nfct and ctinfo */
 static inline struct ip_conntrack *
 resolve_normal_ct(struct sk_buff *skb,
@@ -902,9 +904,17 @@ resolve_normal_ct(struct sk_buff *skb,
          *             Restricted Cone=dst_ip/port & proto & src_ip
          *
          */
+
+/* Check wan device's point instead of string compares wan device's name. */                                                
+#if 0
 	if( (skb->dev!=NULL) && /* CASE III */
 		(strcmp(skb->dev->name, wan_name)==0) &&
 		(iph->protocol==IPPROTO_UDP)) {
+#else
+       if( (skb->dev!=NULL) && /* CASE III */
+               (wan_dev!=NULL) && (skb->dev==wan_dev) &&
+               (iph->protocol==IPPROTO_UDP)) {
+#endif
 	    h = ip_cone_conntrack_find_get(&tuple, NULL);
 	}else{ /* CASE I.II.IV */
 	    h = ip_conntrack_find_get(&tuple, NULL);
