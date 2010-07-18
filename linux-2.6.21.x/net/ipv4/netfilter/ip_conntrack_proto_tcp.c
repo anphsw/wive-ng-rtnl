@@ -34,6 +34,15 @@
 #include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 
+#include "gconfig.h"
+
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#include "../../nat/hw_nat/ra_nat.h"
+#include "../../nat/hw_nat/frame_engine.h"
+struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP];
+extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb); 
+#endif
+
 #if 0
 #define DEBUGP printk
 #define DEBUGP_VARS
@@ -903,6 +912,23 @@ static int tcp_packet(struct ip_conntrack *conntrack,
 				sizeof(_tcph), &_tcph);
 	BUG_ON(th == NULL);
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	/* ra_sw_nat_hook_rx() will be hooked if hw_nat is enabled. */
+	if (ra_sw_nat_hook_rx) {
+		for (index = 0; index < FOE_ENTRY_MAX_EXP; index++) {
+			if ((ntohs(th->dest) == PpeFoeExp[index].port &&
+			     ntohl(iph->daddr) == PpeFoeExp[index].ip) ||
+			    (ntohs(th->source) == PpeFoeExp[index].port &&
+			     ntohl(iph->saddr) == PpeFoeExp[index].ip)) {
+				DEBUGP("hwnat-exp: %u.%u.%u.%u:%u\n",
+					NIPQUAD(PpeFoeExp[index].ip),
+					PpeFoeExp[index].port);
+				FOE_ALG_RXIF(skb) = 1;
+			}
+		}
+	}
+#endif
+
 	write_lock_bh(&tcp_lock);
 	old_state = conntrack->proto.tcp.state;
 	dir = CTINFO2DIR(ctinfo);
@@ -1169,3 +1195,7 @@ struct ip_conntrack_protocol ip_conntrack_protocol_tcp =
 	.nfattr_to_tuple	= ip_ct_port_nfattr_to_tuple,
 #endif
 };
+
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+EXPORT_SYMBOL(PpeFoeExp);
+#endif
