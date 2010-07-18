@@ -577,7 +577,7 @@ __set_irq_handler(unsigned int irq, irq_flow_handler_t handle, int is_chained,
 		desc->status &= ~IRQ_DISABLED;
 		desc->status |= IRQ_NOREQUEST | IRQ_NOPROBE;
 		desc->depth = 0;
-		desc->chip->unmask(irq);
+		//desc->chip->unmask(irq);
 	}
 	spin_unlock_irqrestore(&desc->lock, flags);
 }
@@ -597,3 +597,5 @@ set_irq_chip_and_handler_name(unsigned int irq, struct irq_chip *chip,
 	set_irq_chip(irq, chip);
 	__set_irq_handler(irq, handle, 0, name);
 }
+EXPORT_SYMBOL(handle_simple_irq);
+EXPORT_SYMBOL(__set_irq_handler);

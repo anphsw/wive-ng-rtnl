@@ -416,3 +416,4 @@ void __init pidmap_init(void)
 					__alignof__(struct pid),
 					SLAB_PANIC, NULL, NULL);
 }
+EXPORT_SYMBOL(pid_task);

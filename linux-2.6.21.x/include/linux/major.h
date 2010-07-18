@@ -166,4 +166,7 @@
 
 #define VIOTAPE_MAJOR		230
 
+#define OLEDDEV_MAJOR   234
+#define BSFDEV_MAJOR    235
+
 #endif
