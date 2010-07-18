@@ -165,6 +165,8 @@ enum
 	KERN_MAX_LOCK_DEPTH=74,
 	KERN_NMI_WATCHDOG=75, /* int: enable/disable nmi watchdog */
 	KERN_PANIC_ON_NMI=76, /* int: whether we will panic on an unrecovered */
+ 	KERN_OOM_EMBEDDED=77,
+ 	KERN_OOM_EMBEDDED_RECONFIGURE=78,
 };
 
 
@@ -844,6 +846,12 @@ enum {
 	DEV_MAC_HID=5,
 	DEV_SCSI=6,
 	DEV_IPMI=7,
+	DEV_USB=8,
+};
+
+/* /proc/sys/dev/usb */
+enum {
+	DEV_USB_FORCE_LOGICAL_DISCONNECT=1
 };
 
 /* /proc/sys/dev/cdrom */

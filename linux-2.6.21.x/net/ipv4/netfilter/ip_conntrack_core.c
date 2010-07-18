@@ -73,8 +73,10 @@ int ip_conntrack_max __read_mostly;
 #ifdef CONFIG_IP_CONNTRACK_NAT_SESSION_RESERVATION
 int ip_conntrack_reserved __read_mostly;
 int ip_conntrack_max_reserved;
+int (*newConntrackDropSelect_Ptr)(u_int8_t protonum, u_int16_t tcp_port, u_int16_t udp_port);
 int (*dropWhenNatTableFull_Ptr)(struct sk_buff *skb, int natSession, int natSessionMax);
 EXPORT_SYMBOL(dropWhenNatTableFull_Ptr);
+EXPORT_SYMBOL(newConntrackDropSelect_Ptr);
 #endif
 struct list_head *ip_conntrack_hash __read_mostly;
 static struct kmem_cache *ip_conntrack_cachep __read_mostly;
@@ -618,6 +620,14 @@ static int early_drop(struct list_head *chain)
 
 	read_lock_bh(&ip_conntrack_lock);
 	list_for_each_entry_reverse(h, chain, list) {
+#ifdef CONFIG_NEW_CONNTRACK_DROP_SELECT                                                                                                    
+               if(newConntrackDropSelect_Ptr) {                                                                                                                           
+            	    /* If TCP or UDP port match special ports (like 80, 23, 22, 21...), We think this session is important.             
+            	    So we prefer to drop another...  */                                                                                         
+            	    if(newConntrackDropSelect_Ptr(h->tuple.dst.protonum, h->tuple.dst.u.tcp.port, h->tuple.dst.u.udp.port))             
+            		    continue;                                                                                                                  
+               }                                                                                                                           
+#endif
 		tmp = tuplehash_to_ctrack(h);
 		if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
 			ct = tmp;

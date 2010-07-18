@@ -152,6 +152,37 @@ config MIGRATION
 	  example on NUMA systems to put pages nearer to the processors accessing
 	  the page.
 
+
+#
+# support for EMBEDDED specific OOM
+#
+config OOM_EMBEDDED
+	bool "Deterministic OOM"
+	def_bool n
+	depends on SYSCTL
+	help
+	  Allows a deterministic usage of the OOM Killer.
+	  You have to set the /proc/sys/kernel/oom_rank_threshold to enable
+	  the threshold. Each process will have to set its own oom_ranking
+	  file to a determined value.
+	  The OOM killer will never kill process with oom_ranking < oom_rank_threshold.
+	  A configuration manager process can monitor the system by reading
+	  /proc/sys/kernel/oom_reconfigure_wanted.
+
+	  Say yes if you want to have a deterministic OOM. Mostly wanted by RTE or embedded systems.
+
+config OOM_EMBEDDED_REBOOT
+	bool "Deterministic OOM force reboot"
+	def_bool y
+	depends on SYSCTL
+	help
+	  Saying yes here if you prefer to force a reboot instead of panic
+	  in case of an OOM.
+	  note that panic+panic_timeout would do a screen print and call
+	  the crash handler, if you have one.
+	  This option wont do it, saving possibilities to hang on a production
+	  system.
+
 config RESOURCES_64BIT
 	bool "64 bit Memory and IO resources (EXPERIMENTAL)" if (!64BIT && EXPERIMENTAL)
 	default 64BIT

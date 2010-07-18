@@ -120,6 +120,9 @@
 #include <linux/err.h>
 #include <linux/ctype.h>
 
+int config_raeth_mcast=1;
+EXPORT_SYMBOL(config_raeth_mcast);
+
 /*
  *	The list of packet types we will receive (as opposed to discard)
  *	and the routines to invoke.

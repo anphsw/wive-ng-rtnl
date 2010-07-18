@@ -134,7 +134,8 @@
  */
  
 #define SIOCDEVPRIVATE	0x89F0	/* to 89FF */
-
+#define SIOCGMIILINK	0x89FE    /* marklin 20080821 : Read MII PHY link status.	*/
+#define SIOCGADDINTERFACE 0x89FF  /* marklin 20080821 : Add interface to wanLanPassThroughHandler */
 /*
  *	These 16 ioctl calls are protocol private
  */

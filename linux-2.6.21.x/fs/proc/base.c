@@ -653,6 +653,58 @@ static const struct file_operations proc_mem_operations = {
 	.open		= mem_open,
 };
 
+#ifdef CONFIG_OOM_EMBEDDED
+static ssize_t oom_ranking_read(struct file *file, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	struct task_struct *task = get_proc_task(file->f_dentry->d_inode);
+	char buffer[8];
+	size_t len;
+	int oom_ranking = task->oomranking;
+	loff_t __ppos = *ppos;
+
+	len = sprintf(buffer, "%i\n", oom_ranking);
+	if (__ppos >= len)
+		return 0;
+	if (count > len-__ppos)
+		count = len-__ppos;
+	if (copy_to_user(buf, buffer + __ppos, count))
+		return -EFAULT;
+	*ppos = __ppos + count;
+	return count;
+}
+
+static ssize_t oom_ranking_write(struct file *file, const char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	struct task_struct *task = get_proc_task(file->f_dentry->d_inode);
+	char buffer[8], *end;
+	int oom_ranking;
+
+	if (!capable(CAP_SYS_RESOURCE))
+		return -EPERM;
+	memset(buffer, 0, 8);
+	if (count > 6)
+		count = 6;
+	if (copy_from_user(buffer, buf, count))
+		return -EFAULT;
+	oom_ranking = simple_strtol(buffer, &end, 0);
+	if (*end == '\n')
+		end++;
+	task->oomranking = oom_ranking;
+	if (end - buffer == 0)
+		return -EIO;
+	return end - buffer;
+}
+
+static struct file_operations proc_oom_ranking_operations = {
+	.read		= oom_ranking_read,
+	.write		= oom_ranking_write,
+};
+#endif
+ 
+ 
+
 static ssize_t oom_adjust_read(struct file *file, char __user *buf,
 				size_t count, loff_t *ppos)
 {
@@ -1867,6 +1919,9 @@ static struct pid_entry tgid_base_stuff[] = {
 #endif
 	INF("oom_score",  S_IRUGO, oom_score),
 	REG("oom_adj",    S_IRUGO|S_IWUSR, oom_adjust),
+#ifdef CONFIG_OOM_EMBEDDED
+	REG("oom_rank", S_IFREG|S_IRUGO|S_IWUSR,oom_ranking),
+#endif
 #ifdef CONFIG_AUDITSYSCALL
 	REG("loginuid",   S_IWUSR|S_IRUGO, loginuid),
 #endif
@@ -2148,6 +2203,9 @@ static struct pid_entry tid_base_stuff[] = {
 #endif
 	INF("oom_score", S_IRUGO, oom_score),
 	REG("oom_adj",   S_IRUGO|S_IWUSR, oom_adjust),
+#ifdef CONFIG_OOM_EMBEDDED
+	REG("oom_rank", S_IFREG|S_IRUGO|S_IWUSR,oom_ranking),
+#endif
 #ifdef CONFIG_AUDITSYSCALL
 	REG("loginuid",  S_IWUSR|S_IRUGO, loginuid),
 #endif

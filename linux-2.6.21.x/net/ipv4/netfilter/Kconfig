@@ -38,6 +38,10 @@ config IP_CONNTRACK_NAT_SESSION_RESERVATION
 	bool "Support ip conntrack nat session resveration"
 	depends on IP_NF_CONNTRACK
 
+config NEW_CONNTRACK_DROP_SELECT
+	bool "Selected drop nat conntrack table rules"
+	depends on IP_CONNTRACK_NAT_SESSION_RESERVATION
+
 config IP_NF_CT_ACCT
 	bool "Connection tracking flow accounting"
 	depends on IP_NF_CONNTRACK

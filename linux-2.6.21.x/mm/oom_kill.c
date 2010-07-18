@@ -27,6 +27,10 @@
 #include <linux/signal.h>
 
 int sysctl_panic_on_oom;
+#ifdef CONFIG_OOM_EMBEDDED
+       int oom_reconfigure_wanted = 0;
+       int     oom_rank_threshold = 0;
+#endif
 extern int mm_kill_flag;
 /* #define DEBUG */
 
@@ -263,7 +267,10 @@ static struct task_struct *select_bad_process(unsigned long *ppoints)
 
 		if (p->oomkilladj == OOM_DISABLE)
 			continue;
-
+#ifdef CONFIG_OOM_EMBEDDED
+		if (p->oomranking < oom_rank_threshold )
+			continue;
+#endif
 		points = badness(p, uptime.tv_sec);
 		if (points > *ppoints || !chosen) {
 			chosen = p;
@@ -458,6 +465,9 @@ retry:
 		if (!p) {
 			read_unlock(&tasklist_lock);
 			cpuset_unlock();
+#ifdef CONFIG_OOM_EMBEDDED_REBOOT
+			emergency_restart();
+#endif
 			panic("Out of memory and no killable processes...\n");
 		}
 
@@ -468,6 +478,9 @@ retry:
 	}
 
 out:
+#ifdef CONFIG_OOM_EMBEDDED
+	oom_reconfigure_wanted++;
+#endif
 	read_unlock(&tasklist_lock);
 	cpuset_unlock();
 

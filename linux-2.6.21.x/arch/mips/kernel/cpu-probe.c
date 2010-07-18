@@ -115,8 +115,17 @@ static inline void check_wait(void)
 		printk("Wait instruction disabled.\n");
 		return;
 	}
-
-	switch (c->cputype) {
+#if 1 /* cfho, we only consider AR71xx */
+        switch (c->cputype) {
+        case CPU_24K:
+                cpu_wait = r4k_wait;
+                printk("set cpu_wait to r4k_wait\n");
+                break;
+        default:
+                break;
+        }
+#else
+        switch (c->cputype) {
 	case CPU_R3081:
 	case CPU_R3081E:
 		cpu_wait = r3081_wait;
@@ -163,6 +172,7 @@ static inline void check_wait(void)
 	default:
 		break;
 	}
+#endif
 }
 
 void __init check_bugs32(void)
@@ -718,8 +728,19 @@ __init void cpu_probe(void)
 	c->processor_id	= PRID_IMP_UNKNOWN;
 	c->fpu_id	= FPIR_IMP_NONE;
 	c->cputype	= CPU_UNKNOWN;
-
+        
 	c->processor_id = read_c0_prid();
+
+#if 1 /* cfho 2009-1020, we only probe MIPs CPU without FPU */
+        switch (c->processor_id & 0xff0000) {
+        case PRID_COMP_MIPS:
+                cpu_probe_mips(c);
+                break;
+        default:
+                c->cputype = CPU_UNKNOWN;
+        }
+
+#else        
 	switch (c->processor_id & 0xff0000) {
 	case PRID_COMP_LEGACY:
 		cpu_probe_legacy(c);
@@ -753,6 +774,7 @@ __init void cpu_probe(void)
 				c->ases |= MIPS_ASE_MIPS3D;
 		}
 	}
+#endif
 }
 
 __init void cpu_report(void)

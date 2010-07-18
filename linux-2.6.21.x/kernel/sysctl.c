@@ -76,6 +76,10 @@ extern int pid_max_min, pid_max_max;
 extern int sysctl_drop_caches;
 extern int percpu_pagelist_fraction;
 extern int compat_log;
+#ifdef CONFIG_OOM_EMBEDDED
+extern int oom_rank_threshold;
+extern int oom_reconfigure_wanted;
+#endif
 
 /* this is needed for the proc_dointvec_minmax for [fs_]overflow UID and GID */
 static int maxolduid = 65535;
@@ -328,6 +332,24 @@ static ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dostring,
 		.strategy	= &sysctl_string,
+	},
+#endif
+#ifdef CONFIG_OOM_EMBEDDED
+	{
+		.ctl_name	= KERN_OOM_EMBEDDED_RECONFIGURE,
+		.procname	= "oom_reconfigure_wanted",
+		.data		= &oom_reconfigure_wanted,
+		.maxlen		= sizeof (int),
+		.mode		= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.ctl_name	= KERN_OOM_EMBEDDED,
+		.procname	= "oom_rank_threshold",
+		.data		= &oom_rank_threshold,
+		.maxlen		= sizeof (int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
 	},
 #endif
 #if defined(CONFIG_HOTPLUG) && defined(CONFIG_NET)
