@@ -8,7 +8,7 @@ src/genlib/net/libupnp_la-sock.lo src/genlib/net/libupnp_la-sock.o:  \
   /opt/Wive-RTNL/lib/include/bits/errno.h \
   /opt/Wive-RTNL/lib/include/bits/errno_values.h \
   /opt/Wive-RTNL/lib/include/time.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/time.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_clk_tck.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
@@ -21,13 +21,13 @@ src/genlib/net/libupnp_la-sock.lo src/genlib/net/libupnp_la-sock.o:  \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ../ixml/inc/ixml.h \
   ../upnp/inc/upnpconfig.h /opt/Wive-RTNL/lib/include/netinet/in.h \
   /opt/Wive-RTNL/lib/include/stdint.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -75,7 +75,7 @@ src/genlib/net/libupnp_la-sock.lo src/genlib/net/libupnp_la-sock.o:  \
 
 /opt/Wive-RTNL/lib/include/time.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/time.h:
 
@@ -107,7 +107,7 @@ src/genlib/net/libupnp_la-sock.lo src/genlib/net/libupnp_la-sock.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
@@ -123,7 +123,7 @@ src/genlib/net/libupnp_la-sock.lo src/genlib/net/libupnp_la-sock.o:  \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 

@@ -1,11 +1,11 @@
 src/iasnprintf.lo src/iasnprintf.o: src/iasnprintf.c \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/assert.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/malloc.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -17,7 +17,7 @@ src/iasnprintf.lo src/iasnprintf.o: src/iasnprintf.c \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ./inc/iasnprintf.h
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/assert.h:
 
@@ -29,7 +29,7 @@ src/iasnprintf.lo src/iasnprintf.o: src/iasnprintf.c \
 
 /opt/Wive-RTNL/lib/include/malloc.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/stdio.h:
 

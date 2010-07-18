@@ -30,7 +30,7 @@ MODULE_ALIAS("ipt_CONNMARK");
 
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_CONNMARK.h>
-//#include <net/netfilter/nf_conntrack_compat.h>
+#include <net/netfilter/nf_conntrack_compat.h>
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 #include <net/netfilter/nf_conntrack_ecache.h>
 #endif

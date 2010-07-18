@@ -1,5 +1,5 @@
-This is standards.info, produced by makeinfo version 4.8 from
-/home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/binutils-2.16.91.0.7/etc/standards.texi.
+This is standards.info, produced by makeinfo version 4.7 from
+.././etc/standards.texi.
 
 START-INFO-DIR-ENTRY
 * Standards: (standards).        GNU coding standards.
@@ -1611,7 +1611,7 @@ meanings, so we can update the table.
      `-q' in Make.
 
 `quiet'
-     Used in many programs to inhibit the usual output.  *Note_* every
+     Used in many programs to inhibit the usual output.  *Note:* every
      program accepting `--quiet' should accept `--silent' as a synonym.
 
 `quiet-unshar'
@@ -1723,7 +1723,7 @@ meanings, so we can update the table.
      `-T' in `cat'.
 
 `silent'
-     Used in many programs to inhibit the usual output.  *Note_* every
+     Used in many programs to inhibit the usual output.  *Note:* every
      program accepting `--silent' should accept `--quiet' as a synonym.
 
 `size'
@@ -4863,68 +4863,68 @@ Index
 
 
 Tag Table:
-Node: Top780
-Node: Preface1480
-Node: Legal Issues3700
-Node: Reading Non-Free Code4164
-Node: Contributions5892
-Node: Trademarks8046
-Node: Design Advice9109
-Node: Source Language9693
-Node: Compatibility11705
-Node: Using Extensions13333
-Node: Standard C14909
-Node: Conditional Compilation17312
-Node: Program Behavior18611
-Node: Semantics19530
-Node: Libraries24223
-Node: Errors25468
-Node: User Interfaces27249
-Node: Graphical Interfaces28854
-Node: Command-Line Interfaces29889
-Node: Option Table35960
-Node: Memory Usage50969
-Node: File Usage51994
-Node: Writing C52742
-Node: Formatting53592
-Node: Comments57655
-Node: Syntactic Conventions60957
-Node: Names64369
-Node: System Portability66578
-Node: CPU Portability68963
-Node: System Functions72219
-Node: Internationalization77416
-Node: Mmap80569
-Node: Documentation81279
-Node: GNU Manuals82384
-Node: Doc Strings and Manuals87441
-Node: Manual Structure Details88994
-Node: License for Manuals90412
-Node: Manual Credits91386
-Node: Printed Manuals91779
-Node: NEWS File92465
-Node: Change Logs93143
-Node: Change Log Concepts93897
-Node: Style of Change Logs95761
-Node: Simple Changes97796
-Node: Conditional Changes99040
-Node: Indicating the Part Changed100462
-Node: Man Pages100989
-Node: Reading other Manuals102613
-Node: Managing Releases103404
-Node: Configuration104167
-Node: Makefile Conventions111072
-Node: Makefile Basics111878
-Node: Utilities in Makefiles115052
-Node: Command Variables117197
-Node: Directory Variables120774
-Node: Standard Targets131668
-Ref: Standard Targets-Footnote-1142908
-Node: Install Command Categories143008
-Node: Releases147590
-Node: References151678
-Node: Copying This Manual153963
-Node: GNU Free Documentation License154199
-Node: Index173900
+Node: Top696
+Node: Preface1396
+Node: Legal Issues3616
+Node: Reading Non-Free Code4080
+Node: Contributions5808
+Node: Trademarks7962
+Node: Design Advice9025
+Node: Source Language9609
+Node: Compatibility11621
+Node: Using Extensions13249
+Node: Standard C14825
+Node: Conditional Compilation17228
+Node: Program Behavior18527
+Node: Semantics19446
+Node: Libraries24139
+Node: Errors25384
+Node: User Interfaces27165
+Node: Graphical Interfaces28770
+Node: Command-Line Interfaces29805
+Node: Option Table35876
+Node: Memory Usage50885
+Node: File Usage51910
+Node: Writing C52658
+Node: Formatting53508
+Node: Comments57571
+Node: Syntactic Conventions60873
+Node: Names64285
+Node: System Portability66494
+Node: CPU Portability68879
+Node: System Functions72135
+Node: Internationalization77332
+Node: Mmap80485
+Node: Documentation81195
+Node: GNU Manuals82300
+Node: Doc Strings and Manuals87357
+Node: Manual Structure Details88910
+Node: License for Manuals90328
+Node: Manual Credits91302
+Node: Printed Manuals91695
+Node: NEWS File92381
+Node: Change Logs93059
+Node: Change Log Concepts93813
+Node: Style of Change Logs95677
+Node: Simple Changes97712
+Node: Conditional Changes98956
+Node: Indicating the Part Changed100378
+Node: Man Pages100905
+Node: Reading other Manuals102529
+Node: Managing Releases103320
+Node: Configuration104083
+Node: Makefile Conventions110988
+Node: Makefile Basics111794
+Node: Utilities in Makefiles114968
+Node: Command Variables117113
+Node: Directory Variables120690
+Node: Standard Targets131584
+Ref: Standard Targets-Footnote-1142824
+Node: Install Command Categories142924
+Node: Releases147506
+Node: References151594
+Node: Copying This Manual153879
+Node: GNU Free Documentation License154115
+Node: Index173816
 
 End Tag Table

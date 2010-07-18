@@ -31,7 +31,7 @@ SUBMITTER=net
 GNATS_ADDR=gcc-gnats@gcc.gnu.org
 
 # The default release for this host.
-DEFAULT_RELEASE="3.4.2"
+DEFAULT_RELEASE="3.4.6"
 
 # The default organization.
 DEFAULT_ORGANIZATION=
@@ -346,7 +346,7 @@ build: i386-pc-linux-gnu
 target: mipsel-unknown-linux-uclibc
 __EOF__
       cat >> $file << \__EOF__
-configured with: /home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/gcc-3.4.2/configure --prefix=/home/winfred/RT288x_SDK/toolchain/buildroot-gdb --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c,c++ --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --enable-multilib --enable-sjlj-exceptions : (reconfigured) /home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/gcc-3.4.2/configure --prefix=/home/winfred/RT288x_SDK/toolchain/buildroot-gdb --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c,c++ --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --enable-multilib --enable-sjlj-exceptions
+configured with: /opt/buildroot-mipsel-r18398/toolchain_build_mipsel_nofpu/gcc-3.4.6/configure --prefix=/opt/buildroot-gcc346 --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --disable-multilib --with-float=soft --enable-sjlj-exceptions : (reconfigured) /opt/buildroot-mipsel-r18398/toolchain_build_mipsel_nofpu/gcc-3.4.6/configure --prefix=/opt/buildroot-gcc346 --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --disable-multilib --with-float=soft --enable-sjlj-exceptions : (reconfigured) /opt/buildroot-mipsel-r18398/toolchain_build_mipsel_nofpu/gcc-3.4.6/configure --prefix=/opt/buildroot-gcc346 --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --disable-multilib --with-float=soft --enable-sjlj-exceptions : (reconfigured) /opt/buildroot-mipsel-r18398/toolchain_build_mipsel_nofpu/gcc-3.4.6/configure --prefix=/opt/buildroot-gcc346 --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --disable-multilib --with-float=soft --enable-sjlj-exceptions
 __EOF__
       cat >> $file << __EOF__
 >Description:

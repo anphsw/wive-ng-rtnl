@@ -3,7 +3,8 @@ OUTPUT_FORMAT("elf64-tradlittlemips", "elf64-tradbigmips",
 	      "elf64-tradlittlemips")
 OUTPUT_ARCH(mips)
 ENTRY(__start)
-SEARCH_DIR("/home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib");
+/* Do we need any of these for elf?
+   __DYNAMIC = 0;    */
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
@@ -24,8 +25,8 @@ SECTIONS
   .rela.fini      : { *(.rela.fini) }
   .rel.rodata     : { *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*) }
   .rela.rodata    : { *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*) }
-  .rel.data.rel.ro   : { *(.rel.data.rel.ro* .rel.gnu.linkonce.d.rel.ro.*) }
-  .rela.data.rel.ro   : { *(.rela.data.rel.ro* .rela.gnu.linkonce.d.rel.ro.*) }
+  .rel.data.rel.ro   : { *(.rel.data.rel.ro*) }
+  .rela.data.rel.ro   : { *(.rel.data.rel.ro*) }
   .rel.data       : { *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*) }
   .rela.data      : { *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*) }
   .rel.tdata	  : { *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*) }
@@ -75,30 +76,24 @@ SECTIONS
   .rodata1        : { *(.rodata1) }
   .eh_frame_hdr : { *(.eh_frame_hdr) }
   .eh_frame       : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-  .gcc_except_table   : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table   : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
   . = ALIGN(0x100000) + (. & (0x100000 - 1));
   /* Exception handling  */
   .eh_frame       : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-  .gcc_except_table   : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table   : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
   /* Thread Local Storage sections  */
   .tdata	  : { *(.tdata .tdata.* .gnu.linkonce.td.*) }
   .tbss		  : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
-  .preinit_array     :
-  {
-    KEEP (*(.preinit_array))
-  }
-  .init_array     :
-  {
-     KEEP (*(SORT(.init_array.*)))
-     KEEP (*(.init_array))
-  }
-  .fini_array     :
-  {
-    KEEP (*(.fini_array))
-    KEEP (*(SORT(.fini_array.*)))
-  }
+  /* Ensure the __preinit_array_start label is properly aligned.  We
+     could instead move the label definition inside the section, but
+     the linker would then create the section even if it turns out to
+     be empty, which isn't pretty.  */
+  . = ALIGN(64 / 8);
+  .preinit_array     : { KEEP (*(.preinit_array)) }
+  .init_array     : { KEEP (*(.init_array)) }
+  .fini_array     : { KEEP (*(.fini_array)) }
   .ctors          :
   {
     /* gcc uses crtbegin.o to find the start of
@@ -112,7 +107,7 @@ SECTIONS
        is in.  */
     KEEP (*crtbegin*.o(.ctors))
     /* We don't want to include the .ctor section from
-       the crtend.o file until after the sorted ctors.
+       from the crtend.o file until after the sorted ctors.
        The .ctor section from the crtend file contains the
        end of ctors marker and it must be last */
     KEEP (*(EXCLUDE_FILE (*crtend*.o ) .ctors))
@@ -127,7 +122,7 @@ SECTIONS
     KEEP (*(.dtors))
   }
   .jcr            : { KEEP (*(.jcr)) }
-  .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*) }
+  .data.rel.ro : { *(.data.rel.ro.local) *(.data.rel.ro*) }
   .data           :
   {
     _fdata = . ;
@@ -150,15 +145,20 @@ SECTIONS
   .lit8           : { *(.lit8) }
   .lit4           : { *(.lit4) }
   .srdata         : { *(.srdata) }
-  _edata = .; PROVIDE (edata = .);
+  _edata = .;
+  PROVIDE (edata = .);
   __bss_start = .;
   _fbss = .;
   .sbss           :
   {
+    PROVIDE (__sbss_start = .);
+    PROVIDE (___sbss_start = .);
     *(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)
     *(.dynsbss)
     *(.sbss .sbss.* .gnu.linkonce.sb.*)
     *(.scommon)
+    PROVIDE (__sbss_end = .);
+    PROVIDE (___sbss_end = .);
   }
   .bss            :
   {
@@ -167,14 +167,12 @@ SECTIONS
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
-      .bss section disappears because there are no input sections.
-      FIXME: Why do we need it? When there is no .bss section, we don't
-      pad the .data section.  */
-   . = ALIGN(. != 0 ? 64 / 8 : 1);
+      .bss section disappears because there are no input sections.  */
+   . = ALIGN(64 / 8);
   }
   . = ALIGN(64 / 8);
-  . = ALIGN(64 / 8);
-  _end = .; PROVIDE (end = .);
+  _end = .;
+  PROVIDE (end = .);
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
   .stabstr       0 : { *(.stabstr) }

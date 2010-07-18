@@ -1,5 +1,5 @@
-This is configure.info, produced by makeinfo version 4.8 from
-/home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/binutils-2.16.91.0.7/etc/configure.texi.
+This is configure.info, produced by makeinfo version 4.7 from
+.././etc/configure.texi.
 
 INFO-DIR-SECTION GNU admin
 START-INFO-DIR-ENTRY
@@ -2708,64 +2708,64 @@ Index
 
 
 Tag Table:
-Node: Top1062
-Node: Introduction1590
-Node: Goals2672
-Node: Tools3396
-Node: History4390
-Node: Building7388
-Node: Getting Started10483
-Node: Write configure.in10996
-Node: Write Makefile.am18247
-Node: Write acconfig.h21424
-Node: Generate files22961
-Node: Getting Started Example24927
-Node: Getting Started Example 125682
-Node: Getting Started Example 227603
-Node: Getting Started Example 330598
-Node: Generate Files in Example32962
-Node: Files34052
-Node: Developer Files34663
-Node: Developer Files Picture35043
-Node: Written Developer Files36331
-Node: Generated Developer Files38883
-Node: Build Files42027
-Node: Build Files Picture42688
-Node: Build Files Description43452
-Node: Support Files45458
-Node: Configuration Names48340
-Node: Configuration Name Definition48840
-Node: Using Configuration Names51163
-Node: Cross Compilation Tools53133
-Node: Cross Compilation Concepts53824
-Node: Host and Target54792
-Node: Using the Host Type56293
-Node: Specifying the Target57642
-Node: Using the Target Type58431
-Node: Cross Tools in the Cygnus Tree61862
-Node: Host and Target Libraries62919
-Node: Target Library Configure Scripts66668
-Node: Make Targets in Cygnus Tree69760
-Node: Target libiberty71108
-Node: Canadian Cross72495
-Node: Canadian Cross Example73336
-Node: Canadian Cross Concepts74455
-Node: Build Cross Host Tools75967
-Node: Build and Host Options76919
-Node: CCross not in Cygnus Tree78705
-Node: CCross in Cygnus Tree79683
-Node: Standard Cygnus CCross80104
-Node: Cross Cygnus CCross81468
-Node: Supporting Canadian Cross84268
-Node: CCross in Configure84883
-Node: CCross in Make88051
-Node: Cygnus Configure89654
-Node: Cygnus Configure Basics90489
-Node: Cygnus Configure in C++ Libraries95167
-Node: Multilibs96174
-Node: Multilibs in gcc97219
-Node: Multilibs in Target Libraries98297
-Node: FAQ102488
-Node: Index106588
+Node: Top978
+Node: Introduction1506
+Node: Goals2588
+Node: Tools3312
+Node: History4306
+Node: Building7304
+Node: Getting Started10399
+Node: Write configure.in10912
+Node: Write Makefile.am18163
+Node: Write acconfig.h21340
+Node: Generate files22877
+Node: Getting Started Example24843
+Node: Getting Started Example 125598
+Node: Getting Started Example 227519
+Node: Getting Started Example 330514
+Node: Generate Files in Example32878
+Node: Files33968
+Node: Developer Files34579
+Node: Developer Files Picture34959
+Node: Written Developer Files36247
+Node: Generated Developer Files38799
+Node: Build Files41943
+Node: Build Files Picture42604
+Node: Build Files Description43368
+Node: Support Files45374
+Node: Configuration Names48256
+Node: Configuration Name Definition48756
+Node: Using Configuration Names51079
+Node: Cross Compilation Tools53049
+Node: Cross Compilation Concepts53740
+Node: Host and Target54708
+Node: Using the Host Type56209
+Node: Specifying the Target57558
+Node: Using the Target Type58347
+Node: Cross Tools in the Cygnus Tree61778
+Node: Host and Target Libraries62835
+Node: Target Library Configure Scripts66584
+Node: Make Targets in Cygnus Tree69676
+Node: Target libiberty71024
+Node: Canadian Cross72411
+Node: Canadian Cross Example73252
+Node: Canadian Cross Concepts74371
+Node: Build Cross Host Tools75883
+Node: Build and Host Options76835
+Node: CCross not in Cygnus Tree78621
+Node: CCross in Cygnus Tree79599
+Node: Standard Cygnus CCross80020
+Node: Cross Cygnus CCross81384
+Node: Supporting Canadian Cross84184
+Node: CCross in Configure84799
+Node: CCross in Make87967
+Node: Cygnus Configure89570
+Node: Cygnus Configure Basics90405
+Node: Cygnus Configure in C++ Libraries95083
+Node: Multilibs96090
+Node: Multilibs in gcc97135
+Node: Multilibs in Target Libraries98213
+Node: FAQ102404
+Node: Index106504
 
 End Tag Table

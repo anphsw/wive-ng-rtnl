@@ -6,7 +6,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/string.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h \
   /opt/Wive-RTNL/lib/include/ctype.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -15,14 +15,14 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/bits/sched.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_touplow.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix2_lim.h \
   /opt/Wive-RTNL/lib/include/bits/xopen_lim.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h \
   ./src/inc/strintmap.h /opt/Wive-RTNL/lib/include/stdlib.h \
   /opt/Wive-RTNL/lib/include/bits/waitflags.h \
   /opt/Wive-RTNL/lib/include/bits/waitstatus.h \
@@ -93,7 +93,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/string.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/ctype.h:
 
@@ -111,7 +111,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -125,7 +125,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h:
 
 ./src/inc/strintmap.h:
 

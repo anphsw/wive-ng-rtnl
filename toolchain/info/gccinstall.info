@@ -1,5 +1,5 @@
-This is doc/gccinstall.info, produced by makeinfo version 4.7 from
-/home/mitchell/gcc-3.4.2/gcc-3.4.2/gcc/doc/install.texi.
+This is doc/gccinstall.info, produced by makeinfo version 4.8 from
+/home/gdr/build/gcc-3.4.6/gcc-3.4.6/gcc/doc/install.texi.
 
    Copyright (C) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
@@ -915,9 +915,9 @@ option.
      categories of checks available are `misc', `tree', `gc', `rtl',
      `rtlflag', `fold', `gcac' and `valgrind'.  The check `valgrind'
      requires the external `valgrind' simulator, available from
-     `http://valgrind.kde.org/'.  The default when LIST is not
-     specified is `misc,tree,gc,rtlflag'; the checks `rtl', `gcac' and
-     `valgrind' are very expensive.
+     `http://valgrind.org/'.  The default when LIST is not specified is
+     `misc,tree,gc,rtlflag'; the checks `rtl', `gcac' and `valgrind'
+     are very expensive.
 
 `--enable-coverage'
 `--enable-coverage=LEVEL'
@@ -1720,8 +1720,6 @@ makers.
 
    * SCO OpenServer/Unixware.
 
-   * Sinix/Reliant Unix--Siemens.
-
    * Solaris 2 (SPARC, Intel)--Sunfreeware.
 
    * SGI--SGI Freeware.
@@ -1906,7 +1904,7 @@ Options: (gcc)AVR Options, for the list of supported MCU types.
    Further installation notes and other useful information about AVR
 tools can also be obtained from:
 
-   * http://www.openavr.org
+   * http://www.nongnu.org/avr/
 
    * http://home.overta.ru/users/denisc/
 
@@ -2332,8 +2330,8 @@ ia64-*-linux
 IA-64 processor (also known as IPF, or Itanium Processor Family)
 running GNU/Linux.
 
-   If you are using the optional libunwind library, then you must use
-libunwind 0.96 or later.
+   If you are using the installed system libunwind library with
+`--with-system-libunwind', then you must use libunwind 0.98 or later.
 
    None of the following versions of GCC has an ABI that is compatible
 with any of the other versions in this list, with the exception that
@@ -2354,6 +2352,8 @@ the option `--with-gnu-as' may be necessary.
    The GCC libunwind library has not been ported to HPUX. This means
 that for GCC versions 3.2.3 and earlier, `--enable-libunwind-exceptions'
 is required to build GCC. For GCC 3.3 and later, this is the default.
+For gcc 3.4.3 and later, `--enable-libunwind-exceptions' is removed and
+the system libunwind library will always be used.
 
 *-ibm-aix*
 ==========
@@ -2588,6 +2588,14 @@ later, and use the `--with-gnu-as' and `--with-gnu-ld' `configure'
 options when configuring GCC.  You need to use GNU `ar' and `nm', also
 distributed with GNU binutils.
 
+   Some users have reported that `/bin/sh' will hang during bootstrap.
+This problem can be avoided by running the commands:
+
+        % CONFIG_SHELL=/bin/ksh
+        % export CONFIG_SHELL
+
+   before starting the build.
+
 mips-sgi-irix6
 ==============
 
@@ -2668,8 +2676,8 @@ PowerPC running Darwin (Mac OS X kernel).
    Pre-installed versions of Mac OS X may not include any developer
 tools, meaning that you will not be able to build GCC from source.  Tool
 binaries are available at
-`http://developer.apple.com/tools/compilers.html' (free registration
-required).
+`http://developer.apple.com/darwin/projects/compiler/' (free
+registration required).
 
    The default stack limit of 512K is too small, which may cause
 compiles to fail with 'Bus error'.  Set the stack larger, for instance
@@ -2688,10 +2696,10 @@ powerpc-*-elf, powerpc-*-sysv4
 
 PowerPC system in big endian mode, running System V.4.
 
-powerpc-*-linux-gnu*
-====================
+powerpc*-*-linux-gnu*
+=====================
 
-You will need binutils 2.13.90.0.10 or newer for a working GCC.
+You will need binutils 2.15 or newer for a working GCC.
 
 powerpc-*-netbsd*
 =================
@@ -2780,8 +2788,19 @@ if you have `/usr/xpg4/bin' in your `PATH', we recommend that you place
 `/usr/bin' before `/usr/xpg4/bin' for the duration of the build.
 
    All releases of GNU binutils prior to 2.11.2 have known bugs on this
-platform.  We recommend the use of GNU binutils 2.11.2 or the vendor
-tools (Sun `as', Sun `ld').
+platform.  We recommend the use of GNU binutils 2.11.2 or later, or the
+vendor tools (Sun `as', Sun `ld').  Note that your mileage may vary if
+you use a combination of the GNU tools and the Sun tools: while the
+combination GNU `as' + Sun `ld' should reasonably work, the reverse
+combination Sun `as' + GNU `ld' is known to cause memory corruption at
+runtime in some cases for C++ programs.
+
+   The stock GNU binutils 2.15 release is broken on this platform
+because of a single bug.  It has been fixed on the 2.15 branch in the
+CVS repository.  You can obtain a working version by checking out the
+binutils-2_15-branch from the CVS repository or applying the patch
+`http://sources.redhat.com/ml/binutils-cvs/2004-09/msg00036.html' to the
+release.
 
    Sun bug 4296832 turns up when compiling X11 headers with GCC 2.95 or
 newer: `g++' will complain that types are missing.  These headers assume
@@ -2796,6 +2815,17 @@ defined by C89).
 106248-42 or newer for Intel), Solaris 7 (108376-21 or newer for SPARC,
 108377-20 for Intel), and Solaris 8 (108652-24 or newer for SPARC,
 108653-22 for Intel) that fix this bug.
+
+   Sun bug 4927647 sometimes causes random spurious testsuite failures
+related to missing diagnostic output.  This bug doesn't affect GCC
+itself, rather it is a kernel bug triggered by the `expect' program
+which is used only by the GCC testsuite driver.  When the bug causes
+the `expect' program to miss anticipated output, extra testsuite
+failures appear.
+
+   There are patches for Solaris 8 (117350-12 or newer for SPARC,
+117351-12 or newer for Intel) and Solaris 9 (117171-11 or newer for
+SPARC, 117172-11 or newer for Intel) that address this problem.
 
 sparc-sun-solaris2*
 ===================
@@ -2841,14 +2871,19 @@ by the Sun compiler.  This is Sun bug 4974440.  This is fixed with
 patch 112760-07.
 
    GCC 3.4 changed the default debugging format from STABS to DWARF-2
-for 32-bit code on Solaris 7 and later.  If you are using the Sun
-assembler, this change apparently runs afoul of Sun bug 4910101, for
-which (as of 2004-05-23) there is no fix.  A symptom of the problem is
-that you cannot compile C++ programs like `groff' 1.19.1 without
-getting messages like `ld: warning: relocation error: R_SPARC_UA32 ...
-external symbolic relocation against non-allocatable section
-.debug_info; cannot be processed at runtime: relocation ignored'.  To
-work around this problem, compile with `-gstabs+' instead of plain `-g'.
+for 32-bit code on Solaris 7 and later.  If you use the Sun assembler,
+this change apparently runs afoul of Sun bug 4910101 (which is
+referenced as a x86-only problem by Sun, probably because they do not
+use DWARF-2).  A symptom of the problem is that you cannot compile C++
+programs like `groff' 1.19.1 without getting messages similar to the
+following:
+
+     ld: warning: relocation error: R_SPARC_UA32: ...
+       external symbolic relocation against non-allocatable section
+       .debug_info cannot be processed at runtime: relocation ignored.
+
+   To work around this problem, compile with `-gstabs+' instead of
+plain `-g'.
 
 sparc-sun-solaris2.7
 ====================
@@ -3028,9 +3063,6 @@ OS/2
 GCC does not currently support OS/2.  However, Andrew Zabolotny has been
 working on a generic OS/2 port with pgcc.  The current code can be found
 at http://www.goof.com/pcg/os2/.
-
-   An older copy of GCC 2.8.1 is included with the EMX tools available
-at ftp://ftp.leo.org/pub/comp/os/os2/leo/devtools/emx+gcc/.
 
 Older systems
 =============
@@ -3704,87 +3736,87 @@ Concept Index
 
 
 Tag Table:
-Node: Top1896
-Node: Installing GCC2454
-Node: Prerequisites3969
-Node: Downloading the source10039
-Node: Configuration11665
-Ref: with-gnu-as24726
-Ref: with-as25998
-Ref: with-gnu-ld27003
-Node: Building48042
-Node: Testing59018
-Node: Final install66904
-Node: Binaries71611
-Node: Specific73426
-Ref: alpha*-*-*73713
-Ref: alpha*-dec-osf*74202
-Ref: alphaev5-cray-unicosmk*77779
-Ref: arc-*-elf78726
-Ref: arm-*-elf78826
-Ref: xscale-*-*78847
-Ref: arm-*-coff79083
-Ref: arm-*-aout79285
-Ref: avr79407
-Ref: c4x80087
-Ref: cris80685
-Ref: dos81667
-Ref: dsp16xx81990
-Ref: *-*-freebsd*82057
-Ref: h8300-hms84440
-Ref: hppa*-hp-hpux*84792
-Ref: hppa*-hp-hpux1086115
-Ref: hppa*-hp-hpux1186771
-Ref: i370-*-*93632
-Ref: *-*-linux-gnu93769
-Ref: ix86-*-linux*aout93961
-Ref: ix86-*-linux*94120
-Ref: ix86-*-sco3.2v5*94861
-Ref: ix86-*-udk97030
-Ref: ia64-*-linux98394
-Ref: ia64-*-hpux*99125
-Ref: *-ibm-aix*99554
-Ref: ip2k-*-elf105224
-Ref: iq2000-*-elf105455
-Ref: m32r-*-elf105595
-Ref: m6811-elf105697
-Ref: m6812-elf105847
-Ref: m68k-hp-hpux105997
-Ref: mips-*-*107736
-Ref: mips-sgi-irix5108878
-Ref: mips-sgi-irix6109628
-Ref: powerpc*-*-*112449
-Ref: powerpc-*-darwin*112594
-Ref: powerpc-*-elf113539
-Ref: powerpc-*-linux-gnu*113658
-Ref: powerpc-*-netbsd*113766
-Ref: powerpc-*-eabisim113962
-Ref: powerpc-*-eabi114088
-Ref: powerpcle-*-elf114164
-Ref: powerpcle-*-eabisim114294
-Ref: powerpcle-*-eabi114427
-Ref: s390-*-linux*114510
-Ref: s390x-*-linux*114582
-Ref: s390x-ibm-tpf*114669
-Ref: *-*-solaris2*114800
-Ref: sparc-sun-solaris2*117177
-Ref: sparc-sun-solaris2.7119820
-Ref: sparc-*-linux*121890
-Ref: sparc64-*-solaris2*122115
-Ref: sparcv9-*-solaris2*122491
-Ref: #*-*-sysv*122576
-Ref: vax-dec-ultrix123537
-Ref: *-*-vxworks*123689
-Ref: x86_64-*-*125211
-Ref: xtensa-*-elf125539
-Ref: xtensa-*-linux*126208
-Ref: windows126546
-Ref: os2126870
-Ref: older127193
-Ref: elf_targets129318
-Node: Old129576
-Node: Configurations132713
-Node: GNU Free Documentation License136695
-Node: Concept Index159101
+Node: Top1897
+Node: Installing GCC2455
+Node: Prerequisites3970
+Node: Downloading the source10040
+Node: Configuration11666
+Ref: with-gnu-as24727
+Ref: with-as25999
+Ref: with-gnu-ld27004
+Node: Building48039
+Node: Testing59015
+Node: Final install66901
+Node: Binaries71608
+Node: Specific73388
+Ref: alpha-x-x73675
+Ref: alpha-dec-osf74164
+Ref: alphaev5-cray-unicosmk77741
+Ref: arc-x-elf78688
+Ref: arm-x-elf78788
+Ref: xscale-x-x78809
+Ref: arm-x-coff79045
+Ref: arm-x-aout79247
+Ref: avr79369
+Ref: c4x80053
+Ref: cris80651
+Ref: dos81633
+Ref: dsp16xx81956
+Ref: x-x-freebsd82023
+Ref: h8300-hms84406
+Ref: hppa-hp-hpux84758
+Ref: hppa-hp-hpux1086081
+Ref: hppa-hp-hpux1186737
+Ref: i370-x-x93598
+Ref: x-x-linux-gnu93735
+Ref: ix86-x-linuxaout93927
+Ref: ix86-x-linux94086
+Ref: ix86-x-sco32v594827
+Ref: ix86-x-udk96996
+Ref: ia64-x-linux98360
+Ref: ia64-x-hpux99130
+Ref: x-ibm-aix99681
+Ref: ip2k-x-elf105351
+Ref: iq2000-x-elf105582
+Ref: m32r-x-elf105722
+Ref: m6811-elf105824
+Ref: m6812-elf105974
+Ref: m68k-hp-hpux106124
+Ref: mips-x-x107863
+Ref: mips-sgi-irix5109005
+Ref: mips-sgi-irix6109974
+Ref: powerpc-x-x112795
+Ref: powerpc-x-darwin112940
+Ref: powerpc-x-elf113890
+Ref: powerpc-x-linux-gnu114009
+Ref: powerpc-x-netbsd114111
+Ref: powerpc-x-eabisim114307
+Ref: powerpc-x-eabi114433
+Ref: powerpcle-x-elf114509
+Ref: powerpcle-x-eabisim114639
+Ref: powerpcle-x-eabi114772
+Ref: s390-x-linux114855
+Ref: s390x-x-linux114927
+Ref: s390x-ibm-tpf115014
+Ref: x-x-solaris2115145
+Ref: sparc-sun-solaris2118728
+Ref: sparc-sun-solaris27121454
+Ref: sparc-x-linux123524
+Ref: sparc64-x-solaris2123749
+Ref: sparcv9-x-solaris2124125
+Ref: x-x-sysv124210
+Ref: vax-dec-ultrix125171
+Ref: x-x-vxworks125323
+Ref: x86-64-x-x126845
+Ref: xtensa-x-elf127173
+Ref: xtensa-x-linux127842
+Ref: windows128180
+Ref: os2128504
+Ref: older128695
+Ref: elf130820
+Node: Old131078
+Node: Configurations134215
+Node: GNU Free Documentation License138197
+Node: Concept Index160603
 
 End Tag Table

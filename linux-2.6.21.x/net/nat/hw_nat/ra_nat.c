@@ -75,7 +75,7 @@ extern struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP];
 struct FoeEntry    *PpeFoeBase;
 dma_addr_t	    PpePhyFoeBase;
 struct net_device  *DstPort[MAX_IF_NUM];
-uint32_t	    DebugLevel=1;
+uint32_t	    DebugLevel=0;
 uint32_t	    ChipVer=0;
 uint32_t	    ChipId=0;
 
