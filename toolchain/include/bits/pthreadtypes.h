@@ -94,7 +94,7 @@ typedef struct
 typedef int pthread_once_t;
 
 
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K
+#ifdef __USE_UNIX98
 /* Read-write locks.  */
 typedef struct _pthread_rwlock_t
 {

@@ -5,7 +5,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/bits/posix_opt.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
   /opt/Wive-RTNL/lib/include/bits/pthreadtypes.h \
@@ -16,7 +16,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
   /opt/Wive-RTNL/lib/include/stdlib.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
@@ -50,7 +50,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
   /opt/Wive-RTNL/lib/include/sys/time.h \
   /opt/Wive-RTNL/lib/include/sys/param.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -132,7 +132,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
 
 /opt/Wive-RTNL/lib/include/bits/types.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/kernel_types.h:
 
@@ -154,7 +154,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
 
 /opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
@@ -226,7 +226,7 @@ ospf6_spf.o: ospf6_spf.c ../lib/zebra.h ../config.h \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 

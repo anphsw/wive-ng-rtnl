@@ -8,7 +8,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/bits/fcntl.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
   /opt/Wive-RTNL/lib/include/bits/pthreadtypes.h \
@@ -34,7 +34,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -59,7 +59,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ../ixml/inc/ixml.h \
   /opt/Wive-RTNL/lib/include/assert.h ../upnp/inc/upnpconfig.h \
   ../ixml/inc/ixml.h ./src/inc/miniserver.h ./src/inc/sock.h \
@@ -103,7 +103,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/types.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stddef.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/kernel_types.h:
 
@@ -159,7 +159,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/limits.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -211,7 +211,7 @@ src/gena/libupnp_la-gena_ctrlpt.lo src/gena/libupnp_la-gena_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.6/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 

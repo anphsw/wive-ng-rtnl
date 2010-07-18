@@ -25,11 +25,11 @@
 ..
 .\" Set up some character translations and predefined strings.  \*(-- will
 .\" give an unbreakable dash, \*(PI will give pi, \*(L" will give a left
-.\" double quote, and \*(R" will give a right double quote.  | will give a
-.\" real vertical bar.  \*(C+ will give a nicer C++.  Capital omega is used to
-.\" do unbreakable dashes and therefore won't be available.  \*(C` and \*(C'
-.\" expand to `' in nroff, nothing in troff, for use with C<>.
-.tr \(*W-|\(bv\*(Tr
+.\" double quote, and \*(R" will give a right double quote.  \*(C+ will
+.\" give a nicer C++.  Capital omega is used to do unbreakable dashes and
+.\" therefore won't be available.  \*(C` and \*(C' expand to `' in nroff,
+.\" nothing in troff, for use with C<>.
+.tr \(*W-
 .ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
 .ie n \{\
 .    ds -- \(*W-
@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GCC 1"
-.TH GCC 1 "2008-11-18" "gcc-3.4.6" "GNU"
+.TH GCC 1 "2008-08-13" "gcc-3.4.2" "GNU"
 .SH "NAME"
 gcc \- GNU project C and C++ compiler
 .SH "SYNOPSIS"
@@ -217,7 +217,7 @@ in the following sections.
 \&\-Weffc++  \-Wno\-deprecated 
 \&\-Wno\-non\-template\-friend  \-Wold\-style\-cast 
 \&\-Woverloaded\-virtual  \-Wno\-pmf\-conversions 
-\&\-Wsign\-promo\fR
+\&\-Wsign\-promo  \-Wsynth\fR
 .IP "\fIObjective-C Language Options\fR" 4
 .IX Item "Objective-C Language Options"
 \&\fB\-fconstant\-string\-class=\fR\fIclass-name\fR 
@@ -444,7 +444,7 @@ in the following sections.
 \&\-mpowerpc\-gfxopt  \-mno\-powerpc\-gfxopt 
 \&\-mnew\-mnemonics  \-mold\-mnemonics 
 \&\-mfull\-toc   \-mminimal\-toc  \-mno\-fp\-in\-toc  \-mno\-sum\-in\-toc 
-\&\-m64  \-m32  \-mxl\-compat  \-mno\-xl\-compat  \-mpe 
+\&\-m64  \-m32  \-mxl\-call  \-mno\-xl\-call  \-mpe 
 \&\-malign\-power  \-malign\-natural 
 \&\-msoft\-float  \-mhard\-float  \-mmultiple  \-mno\-multiple 
 \&\-mstring  \-mno\-string  \-mupdate  \-mno\-update 
@@ -628,11 +628,8 @@ in the following sections.
 \&\-mconstant\-gp  \-mauto\-pic  \-minline\-float\-divide\-min\-latency 
 \&\-minline\-float\-divide\-max\-throughput 
 \&\-minline\-int\-divide\-min\-latency 
-\&\-minline\-int\-divide\-max\-throughput  
-\&\-minline\-sqrt\-min\-latency \-minline\-sqrt\-max\-throughput 
-\&\-mno\-dwarf2\-asm \-mearly\-stop\-bits 
-\&\-mfixed\-range=\fR\fIregister-range\fR \fB\-mtls\-size=\fR\fItls-size\fR 
-\&\fB\-mtune=\fR\fIcpu-type\fR \fB\-mt \-pthread \-milp32 \-mlp64\fR
+\&\-minline\-int\-divide\-max\-throughput  \-mno\-dwarf2\-asm 
+\&\-mfixed\-range=\fR\fIregister-range\fR
 .Sp
 \&\fID30V Options\fR
 \&\fB\-mextmem  \-mextmemory  \-monchip  \-mno\-asm\-optimize 
@@ -812,12 +809,12 @@ name suffix).  This option applies to all following input files until
 the next \fB\-x\fR option.  Possible values for \fIlanguage\fR are:
 .Sp
 .Vb 8
-\&        c  c-header  cpp-output
-\&        c++  c++-header  c++-cpp-output
-\&        objective-c  objective-c-header  objc-cpp-output
-\&        assembler  assembler-with-cpp
+\&        c  c\-header  cpp\-output
+\&        c++  c++\-header  c++\-cpp\-output
+\&        objective\-c  objective\-c\-header  objc\-cpp\-output
+\&        assembler  assembler\-with\-cpp
 \&        ada
-\&        f77  f77-cpp-input  ratfor
+\&        f77  f77\-cpp\-input  ratfor
 \&        java
 \&        treelang
 .Ve
@@ -1197,7 +1194,7 @@ regardless of what language your program is in.  For example, you
 might compile a file \f(CW\*(C`firstClass.C\*(C'\fR like this:
 .PP
 .Vb 1
-\&        g++ -g -frepo -O -c firstClass.C
+\&        g++ \-g \-frepo \-O \-c firstClass.C
 .Ve
 .PP
 In this example, only \fB\-frepo\fR is an option meant
@@ -1575,7 +1572,7 @@ like:
 .Sp
 .Vb 2
 \&        B* b;
-\&        b->f();
+\&        b\->f();
 .Ve
 .Sp
 will fail to compile.
@@ -1589,6 +1586,10 @@ Warn when overload resolution chooses a promotion from unsigned or
 enumerated type to a signed type, over a conversion to an unsigned type of
 the same size.  Previous versions of G++ would try to preserve
 unsignedness, but the standard mandates the current behavior.
+.IP "\fB\-Wsynth\fR (\*(C+ only)" 4
+.IX Item "-Wsynth ( only)"
+Warn when G++'s synthesis behavior does not match that of cfront.  For
+instance:
 .Sp
 .Vb 4
 \&        struct A {
@@ -1618,7 +1619,7 @@ options regardless of what language your program is in.  For example,
 you might compile a file \f(CW\*(C`some_class.m\*(C'\fR like this:
 .PP
 .Vb 1
-\&        gcc -g -fgnu-runtime -O -c some_class.m
+\&        gcc \-g \-fgnu\-runtime \-O \-c some_class.m
 .Ve
 .PP
 In this example, \fB\-fgnu\-runtime\fR is an option meant only for
@@ -3210,7 +3211,7 @@ This is useful when you use \fB\-nostdlib\fR or \fB\-nodefaultlibs\fR
 but you do want to link with \fIlibgcc.a\fR.  You can do
 .Sp
 .Vb 1
-\&        gcc -nostdlib <files>... `gcc -print-libgcc-file-name`
+\&        gcc \-nostdlib <files>... `gcc \-print\-libgcc\-file\-name`
 .Ve
 .IP "\fB\-print\-search\-dirs\fR" 4
 .IX Item "-print-search-dirs"
@@ -3334,8 +3335,7 @@ invoking \fB\-O2\fR on programs that use computed gotos.
 .IX Item "-O3"
 Optimize yet more.  \fB\-O3\fR turns on all optimizations specified by
 \&\fB\-O2\fR and also turns on the \fB\-finline\-functions\fR,
-\&\fB\-fweb\fR, \fB\-frename\-registers\fR and \fB\-funswitch\-loops\fR
-options.
+\&\fB\-fweb\fR and \fB\-frename\-registers\fR options.
 .IP "\fB\-O0\fR" 4
 .IX Item "-O0"
 Do not optimize.  This is the default.
@@ -3449,13 +3449,13 @@ as follows:
 .RS 4
 .Sp
 .Vb 8
-\& @item max-inline-insns-single
+\& @item max\-inline\-insns\-single
 \&  is set to I<n>/2.
-\& @item max-inline-insns-auto
+\& @item max\-inline\-insns\-auto
 \&  is set to I<n>/2.
-\& @item min-inline-insns
+\& @item min\-inline\-insns
 \&  is set to 130 or I<n>/4, whichever is smaller.
-\& @item max-inline-insns-rtl
+\& @item max\-inline\-insns\-rtl
 \&  is set to I<n>.
 .Ve
 .RE
@@ -3831,8 +3831,8 @@ Enabled at levels \fB\-O2\fR, \fB\-O3\fR.
 .IX Item "-freorder-functions"
 Reorder basic blocks in the compiled function in order to reduce number of
 taken branches and improve code locality. This is implemented by using special
-subsections \f(CW\*(C`.text.hot\*(C'\fR for most frequently executed functions and
-\&\f(CW\*(C`.text.unlikely\*(C'\fR for unlikely executed functions.  Reordering is done by
+subsections \f(CW\*(C`text.hot\*(C'\fR for most frequently executed functions and
+\&\f(CW\*(C`text.unlikely\*(C'\fR for unlikely executed functions.  Reordering is done by
 the linker so object file format must support named sections and linker must
 place them in a reasonable way.
 .Sp
@@ -4432,11 +4432,6 @@ order to make tracer effective.
 .IP "\fBmax-cse-path-length\fR" 4
 .IX Item "max-cse-path-length"
 Maximum number of basic blocks on path that cse considers.
-.IP "\fBmax-last-value-rtl\fR" 4
-.IX Item "max-last-value-rtl"
-The maximum size measured as number of RTLs that can be recorded in an
-expression in combiner for a pseudo register as last known value of that
-register.  The default is 10000.
 .IP "\fBggc-min-expand\fR" 4
 .IX Item "ggc-min-expand"
 \&\s-1GCC\s0 uses a garbage collector to manage its own memory allocation.  This
@@ -5053,7 +5048,7 @@ finding out what is predefined in your version of the preprocessor.
 Assuming you have no file \fIfoo.h\fR, the command
 .Sp
 .Vb 1
-\&        touch foo.h; cpp -dM foo.h
+\&        touch foo.h; cpp \-dM foo.h
 .Ve
 .Sp
 will show all the predefined macros.
@@ -5120,7 +5115,7 @@ standard-conforming modes it converts them.  See the \fB\-std\fR and
 The nine trigraphs and their replacements are
 .Sp
 .Vb 2
-\&        Trigraph:       ??(  ??)  ??<  ??>  ??=  ??/  ??'  ??!  ??-
+\&        Trigraph:       ??(  ??)  ??<  ??>  ??=  ??/  ??'  ??!  ??\-
 \&        Replacement:      [    ]    {    }    #    \e    ^    |    ~
 .Ve
 .IP "\fB\-remap\fR" 4
@@ -5839,7 +5834,7 @@ These \fB\-m\fR options are supported on the \s-1SPARC:\s0
 .PD
 Specify \fB\-mapp\-regs\fR to generate output using the global registers
 2 through 4, which the \s-1SPARC\s0 \s-1SVR4\s0 \s-1ABI\s0 reserves for applications.  This
-is the default, except on Solaris.
+is the default.
 .Sp
 To be fully \s-1SVR4\s0 \s-1ABI\s0 compliant at the cost of some performance loss,
 specify \fB\-mno\-app\-regs\fR.  You should compile libraries and system
@@ -6063,7 +6058,7 @@ on \s-1SPARC\-V9\s0 processors in 64\-bit environments:
 .IP "\fB\-mlittle\-endian\fR" 4
 .IX Item "-mlittle-endian"
 Generate code for a processor running in little-endian mode. It is only
-available for a few configurations and most notably not on Solaris and Linux.
+available for a few configurations and most notably not on Solaris.
 .IP "\fB\-m32\fR" 4
 .IX Item "-m32"
 .PD 0
@@ -6358,7 +6353,7 @@ preceding the function prologue.  The generated code is similar to this:
 \&                 .ascii "arm_poke_function_name", 0
 \&                 .align
 \&             t1
-\&                 .word 0xff000000 + (t1 - t0)
+\&                 .word 0xff000000 + (t1 \- t0)
 \&             arm_poke_function_name
 \&                 mov     ip, sp
 \&                 stmfd   sp!, {fp, ip, lr, pc}
@@ -6627,7 +6622,7 @@ Supported values for \fIcpu_type\fR are \fB401\fR, \fB403\fR,
 \&\fB601\fR, \fB602\fR, \fB603\fR, \fB603e\fR, \fB604\fR,
 \&\fB604e\fR, \fB620\fR, \fB630\fR, \fB740\fR, \fB7400\fR,
 \&\fB7450\fR, \fB750\fR, \fB801\fR, \fB821\fR, \fB823\fR,
-\&\fB860\fR, \fB970\fR, \fB8540\fR, \fBcommon\fR, \fBec603e\fR, \fBG3\fR,
+\&\fB860\fR, \fB970\fR, \fBcommon\fR, \fBec603e\fR, \fBG3\fR,
 \&\fBG4\fR, \fBG5\fR, \fBpower\fR, \fBpower2\fR, \fBpower3\fR,
 \&\fBpower4\fR, \fBpower5\fR, \fBpowerpc\fR, \fBpowerpc64\fR,
 \&\fBrios\fR, \fBrios1\fR, \fBrios2\fR, \fBrsc\fR, and \fBrs64a\fR.
@@ -6760,19 +6755,15 @@ Enable 64\-bit \s-1AIX\s0 \s-1ABI\s0 and calling convention: 64\-bit pointers, 6
 Specifying \fB\-maix64\fR implies \fB\-mpowerpc64\fR and
 \&\fB\-mpowerpc\fR, while \fB\-maix32\fR disables the 64\-bit \s-1ABI\s0 and
 implies \fB\-mno\-powerpc64\fR.  \s-1GCC\s0 defaults to \fB\-maix32\fR.
-.IP "\fB\-mxl\-compat\fR" 4
-.IX Item "-mxl-compat"
+.IP "\fB\-mxl\-call\fR" 4
+.IX Item "-mxl-call"
 .PD 0
-.IP "\fB\-mno\-xl\-compat\fR" 4
-.IX Item "-mno-xl-compat"
+.IP "\fB\-mno\-xl\-call\fR" 4
+.IX Item "-mno-xl-call"
 .PD
-Produce code that conforms more closely to \s-1IBM\s0 \s-1XLC\s0 semantics when using
-AIX-compatible \s-1ABI\s0.  Pass floating-point arguments to prototyped
-functions beyond the register save area (\s-1RSA\s0) on the stack in addition
-to argument FPRs.  Do not assume that most significant double in 128
-bit long double value is properly rounded when comparing values.
-.Sp
-The \s-1AIX\s0 calling convention was extended but not initially documented to
+On \s-1AIX\s0, pass floating-point arguments to prototyped functions beyond the
+register save area (\s-1RSA\s0) on the stack in addition to argument FPRs.  The
+\&\s-1AIX\s0 calling convention was extended but not initially documented to
 handle an obscure K&R C case of calling a function that takes the
 address of its arguments with fewer arguments than declared.  \s-1AIX\s0 \s-1XL\s0
 compilers access floating point arguments which do not fit in the
@@ -8226,8 +8217,7 @@ have any affect on which ld is called, it only changes what parameters
 are passed to that ld.  The ld that is called is determined by the
 \&\fB\-\-with\-ld\fR configure option, \s-1GCC\s0's program search path, and
 finally by the user's \fB\s-1PATH\s0\fR.  The linker used by \s-1GCC\s0 can be printed
-using \fBwhich `gcc \-print\-prog\-name=ld`\fR.  This option is only available
-on the 64 bit HP-UX \s-1GCC\s0, i.e. configured with \fBhppa*64*\-*\-hpux*\fR.
+using \fBwhich `gcc \-print\-prog\-name=ld`\fR.
 .IP "\fB\-mhp\-ld\fR" 4
 .IX Item "-mhp-ld"
 Use \s-1HP\s0 ld specific options.  This passes \fB\-b\fR to ld when building
@@ -8238,8 +8228,7 @@ which ld is called, it only changes what parameters are passed to that
 ld.  The ld that is called is determined by the \fB\-\-with\-ld\fR
 configure option, \s-1GCC\s0's program search path, and finally by the user's
 \&\fB\s-1PATH\s0\fR.  The linker used by \s-1GCC\s0 can be printed using \fBwhich
-`gcc \-print\-prog\-name=ld`\fR.  This option is only available on the 64 bit
-HP-UX \s-1GCC\s0, i.e. configured with \fBhppa*64*\-*\-hpux*\fR.
+`gcc \-print\-prog\-name=ld`\fR.
 .IP "\fB\-mlong\-calls\fR" 4
 .IX Item "-mlong-calls"
 Generate code that uses long call sequences.  This ensures that a call
@@ -9492,14 +9481,6 @@ using the minimum latency algorithm.
 .IX Item "-minline-int-divide-max-throughput"
 Generate code for inline divides of integer values
 using the maximum throughput algorithm.
-.IP "\fB\-minline\-sqrt\-min\-latency\fR" 4
-.IX Item "-minline-sqrt-min-latency"
-Generate code for inline square roots
-using the minimum latency algorithm.
-.IP "\fB\-minline\-sqrt\-max\-throughput\fR" 4
-.IX Item "-minline-sqrt-max-throughput"
-Generate code for inline square roots
-using the maximum throughput algorithm.
 .IP "\fB\-mno\-dwarf2\-asm\fR" 4
 .IX Item "-mno-dwarf2-asm"
 .PD 0
@@ -9508,6 +9489,13 @@ using the maximum throughput algorithm.
 .PD
 Don't (or do) generate assembler code for the \s-1DWARF2\s0 line number debugging
 info.  This may be useful when not using the \s-1GNU\s0 assembler.
+.IP "\fB\-mfixed\-range=\fR\fIregister-range\fR" 4
+.IX Item "-mfixed-range=register-range"
+Generate code treating the given register range as fixed registers.
+A fixed register is one that the register allocator can not use.  This is
+useful when compiling kernel code.  A register range is specified as
+two registers separated by a dash.  Multiple register ranges can be
+specified separated by a comma.
 .IP "\fB\-mearly\-stop\-bits\fR" 4
 .IX Item "-mearly-stop-bits"
 .PD 0
@@ -9517,41 +9505,6 @@ info.  This may be useful when not using the \s-1GNU\s0 assembler.
 Allow stop bits to be placed earlier than immediately preceding the
 instruction that triggered the stop bit.  This can improve instruction
 scheduling, but does not always do so.
-.IP "\fB\-mfixed\-range=\fR\fIregister-range\fR" 4
-.IX Item "-mfixed-range=register-range"
-Generate code treating the given register range as fixed registers.
-A fixed register is one that the register allocator can not use.  This is
-useful when compiling kernel code.  A register range is specified as
-two registers separated by a dash.  Multiple register ranges can be
-specified separated by a comma.
-.IP "\fB\-mtls\-size=\fR\fItls-size\fR" 4
-.IX Item "-mtls-size=tls-size"
-Specify bit size of immediate \s-1TLS\s0 offsets.  Valid values are 14, 22, and
-64.
-.IP "\fB\-mtune=\fR\fIcpu-type\fR" 4
-.IX Item "-mtune=cpu-type"
-Tune the instruction scheduling for a particular \s-1CPU\s0, Valid values are
-itanium, itanium1, merced, itanium2, and mckinley.
-.IP "\fB\-mt\fR" 4
-.IX Item "-mt"
-.PD 0
-.IP "\fB\-pthread\fR" 4
-.IX Item "-pthread"
-.PD
-Add support for multithreading using the \s-1POSIX\s0 threads library.  This
-option sets flags for both the preprocessor and linker.  It does
-not affect the thread safety of object code produced by the compiler or
-that of libraries supplied with it.  These are HP-UX specific flags.
-.IP "\fB\-milp32\fR" 4
-.IX Item "-milp32"
-.PD 0
-.IP "\fB\-mlp64\fR" 4
-.IX Item "-mlp64"
-.PD
-Generate code for a 32\-bit or 64\-bit environment.
-The 32\-bit environment sets int, long and pointer to 32 bits.
-The 64\-bit environment sets int to 32 bits and long and pointer
-to 64 bits.  These are HP-UX specific flags.
 .PP
 \fID30V Options\fR
 .IX Subsection "D30V Options"
@@ -10613,8 +10566,8 @@ localization information that allow \s-1GCC\s0 to work with different
 national conventions.  \s-1GCC\s0 inspects the locale categories
 \&\fB\s-1LC_CTYPE\s0\fR and \fB\s-1LC_MESSAGES\s0\fR if it has been configured to do
 so.  These locale categories can be set to any value supported by your
-installation.  A typical value is \fBen_GB.UTF\-8\fR for English in the United
-Kingdom encoded in \s-1UTF\-8\s0.
+installation.  A typical value is \fBen_UK\fR for English in the United
+Kingdom.
 .Sp
 The \fB\s-1LC_CTYPE\s0\fR environment variable specifies character
 classification.  \s-1GCC\s0 uses it to determine the character boundaries in
@@ -10791,7 +10744,7 @@ for contributors to \s-1GCC\s0.
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
 Copyright (c) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 .PP
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.2 or

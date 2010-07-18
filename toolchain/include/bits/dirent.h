@@ -19,17 +19,15 @@
 #ifndef _DIRENT_H
 # error "Never use <bits/dirent.h> directly; include <dirent.h> instead."
 #endif
-#include <errno.h>
-#include <sys/syscall.h>
 
 struct dirent
   {
-#if defined(__USE_FILE_OFFSET64) && defined(__NR_getdents64)
-    __ino64_t d_ino;
-    __off64_t d_off;
-#else
+#ifndef __USE_FILE_OFFSET64
     __ino_t d_ino;
     __off_t d_off;
+#else
+    __ino64_t d_ino;
+    __off64_t d_off;
 #endif
     unsigned short int d_reclen;
     unsigned char d_type;
@@ -39,14 +37,8 @@ struct dirent
 #ifdef __USE_LARGEFILE64
 struct dirent64
   {
-#ifdef __NR_getdents64
     __ino64_t d_ino;
     __off64_t d_off;
-#else
-    /* dirent64 is the same as dirent.  */
-    __ino_t d_ino;
-    __off_t d_off;
-#endif
     unsigned short int d_reclen;
     unsigned char d_type;
     char d_name[256];		/* We must not include limits.h! */

@@ -24,6 +24,9 @@
 #include <signal.h>
 #include <bits/pthreadtypes.h>
 #include <bits/initspin.h>
+#ifdef _LIBC
+#include <bits/uClibc_pthread.h>
+#endif
 
 
 __BEGIN_DECLS
@@ -43,7 +46,7 @@ __BEGIN_DECLS
 
 #define PTHREAD_COND_INITIALIZER {__LOCK_INITIALIZER, 0}
 
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K
+#ifdef __USE_UNIX98
 # define PTHREAD_RWLOCK_INITIALIZER \
   { __LOCK_INITIALIZER, 0, NULL, NULL, NULL,				      \
     PTHREAD_RWLOCK_DEFAULT_NP, PTHREAD_PROCESS_PRIVATE }
@@ -107,7 +110,7 @@ enum
 #define PTHREAD_PROCESS_SHARED	PTHREAD_PROCESS_SHARED
 };
 
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K
+#ifdef __USE_UNIX98
 enum
 {
   PTHREAD_RWLOCK_PREFER_READER_NP,
@@ -160,7 +163,7 @@ enum
 /* Create a thread with given attributes ATTR (or default attributes
    if ATTR is NULL), and call function START_ROUTINE with given
    arguments ARG.  */
-extern int pthread_create (pthread_t *__restrict __threadp,
+extern int pthread_create (pthread_t *__restrict __thread_id,
 			   __const pthread_attr_t *__restrict __attr,
 			   void *(*__start_routine) (void *),
 			   void *__restrict __arg) __THROW;
@@ -172,12 +175,13 @@ extern pthread_t pthread_self (void) __THROW;
 extern int pthread_equal (pthread_t __thread1, pthread_t __thread2) __THROW;
 
 /* Terminate calling thread.  */
-extern void pthread_exit (void *__retval) __attribute__ ((__noreturn__));
+extern void pthread_exit (void *__retval)
+     __THROW __attribute__ ((__noreturn__));
 
 /* Make calling thread wait for termination of the thread TH.  The
    exit status of the thread is stored in *THREAD_RETURN, if THREAD_RETURN
    is not NULL.  */
-extern int pthread_join (pthread_t __th, void **__thread_return);
+extern int pthread_join (pthread_t __th, void **__thread_return) __THROW;
 
 /* Indicate that the thread TH is never to be joined with PTHREAD_JOIN.
    The resources of TH will therefore be freed immediately when it
@@ -264,6 +268,9 @@ extern int pthread_attr_getstackaddr (__const pthread_attr_t *__restrict
 				      __attr, void **__restrict __stackaddr)
      __THROW;
 
+#if 0
+/* Not yet implemented in uClibc! */
+
 #ifdef __USE_XOPEN2K
 /* The following two interfaces are intended to replace the last two.  They
    require setting the address as well as the size since only setting the
@@ -275,6 +282,7 @@ extern int pthread_attr_setstack (pthread_attr_t *__attr, void *__stackaddr,
 extern int pthread_attr_getstack (__const pthread_attr_t *__restrict __attr,
 				  void **__restrict __stackaddr,
 				  size_t *__restrict __stacksize) __THROW;
+#endif
 #endif
 
 /* Add information about the minimum stack size needed for the thread
@@ -292,9 +300,7 @@ extern int pthread_attr_getstacksize (__const pthread_attr_t *__restrict
 /* Not yet implemented in uClibc! */
 
 #ifdef __USE_GNU
-/* Initialize thread attribute *ATTR with attributes corresponding to the
-   already running thread TH.  It shall be called on unitialized ATTR
-   and destroyed with pthread_attr_destroy when no longer needed.  */
+/* Get thread attributes corresponding to the already running thread TH.  */
 extern int pthread_getattr_np (pthread_t __th, pthread_attr_t *__attr) __THROW;
 #endif
 #endif
@@ -319,6 +325,18 @@ extern int pthread_getconcurrency (void) __THROW;
 
 /* Set new concurrency level to LEVEL.  */
 extern int pthread_setconcurrency (int __level) __THROW;
+#endif
+
+#if 0
+/* Not yet implemented in uClibc! */
+
+#ifdef __USE_GNU
+/* Yield the processor to another thread or process.
+   This function is similar to the POSIX `sched_yield' function but
+   might be differently implemented in the case of a m-on-n thread
+   implementation.  */
+extern int pthread_yield (void) __THROW;
+#endif
 #endif
 
 /* Functions for mutex handling.  */
@@ -400,7 +418,7 @@ extern int pthread_cond_broadcast (pthread_cond_t *__cond) __THROW;
 /* Wait for condition variable COND to be signaled or broadcast.
    MUTEX is assumed to be locked before.  */
 extern int pthread_cond_wait (pthread_cond_t *__restrict __cond,
-			      pthread_mutex_t *__restrict __mutex);
+			      pthread_mutex_t *__restrict __mutex) __THROW;
 
 /* Wait for condition variable COND to be signaled or broadcast until
    ABSTIME.  MUTEX is assumed to be locked before.  ABSTIME is an
@@ -409,7 +427,7 @@ extern int pthread_cond_wait (pthread_cond_t *__restrict __cond,
 extern int pthread_cond_timedwait (pthread_cond_t *__restrict __cond,
 				   pthread_mutex_t *__restrict __mutex,
 				   __const struct timespec *__restrict
-				   __abstime);
+				   __abstime) __THROW;
 
 /* Functions for handling condition variable attributes.  */
 
@@ -429,7 +447,7 @@ extern int pthread_condattr_setpshared (pthread_condattr_t *__attr,
 					int __pshared) __THROW;
 
 
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K
+#ifdef __USE_UNIX98
 /* Functions for handling read-write locks.  */
 
 /* Initialize read-write lock RWLOCK using attributes ATTR, or use
@@ -447,25 +465,27 @@ extern int pthread_rwlock_rdlock (pthread_rwlock_t *__rwlock) __THROW;
 /* Try to acquire read lock for RWLOCK.  */
 extern int pthread_rwlock_tryrdlock (pthread_rwlock_t *__rwlock) __THROW;
 
-# ifdef __USE_XOPEN2K
-/* Try to acquire read lock for RWLOCK or return after specfied time.  */
-extern int pthread_rwlock_timedrdlock (pthread_rwlock_t *__restrict __rwlock,
-				       __const struct timespec *__restrict
-				       __abstime) __THROW;
-# endif
-
 /* Acquire write lock for RWLOCK.  */
 extern int pthread_rwlock_wrlock (pthread_rwlock_t *__rwlock) __THROW;
 
 /* Try to acquire write lock for RWLOCK.  */
 extern int pthread_rwlock_trywrlock (pthread_rwlock_t *__rwlock) __THROW;
 
-# ifdef __USE_XOPEN2K
+#if 0
+/* Not yet implemented in uClibc! */
+
+#ifdef __USE_XOPEN2K
+/* Try to acquire read lock for RWLOCK or return after specfied time.  */
+extern int pthread_rwlock_timedrdlock (pthread_rwlock_t *__restrict __rwlock,
+				       __const struct timespec *__restrict
+				       __abstime) __THROW;
 /* Try to acquire write lock for RWLOCK or return after specfied time.  */
 extern int pthread_rwlock_timedwrlock (pthread_rwlock_t *__restrict __rwlock,
 				       __const struct timespec *__restrict
 				       __abstime) __THROW;
-# endif
+#endif
+#endif
+
 
 /* Unlock RWLOCK.  */
 extern int pthread_rwlock_unlock (pthread_rwlock_t *__rwlock) __THROW;
@@ -573,31 +593,28 @@ extern void *pthread_getspecific (pthread_key_t __key) __THROW;
 /* Guarantee that the initialization function INIT_ROUTINE will be called
    only once, even if pthread_once is executed several times with the
    same ONCE_CONTROL argument. ONCE_CONTROL must point to a static or
-   extern variable initialized to PTHREAD_ONCE_INIT.
-
-   The initialization functions might throw exception which is why
-   this function is not marked with __THROW.  */
+   extern variable initialized to PTHREAD_ONCE_INIT.  */
 extern int pthread_once (pthread_once_t *__once_control,
-			 void (*__init_routine) (void));
+			 void (*__init_routine) (void)) __THROW;
 
 
 /* Functions for handling cancellation.  */
 
 /* Set cancelability state of current thread to STATE, returning old
    state in *OLDSTATE if OLDSTATE is not NULL.  */
-extern int pthread_setcancelstate (int __state, int *__oldstate);
+extern int pthread_setcancelstate (int __state, int *__oldstate) __THROW;
 
 /* Set cancellation state of current thread to TYPE, returning the old
    type in *OLDTYPE if OLDTYPE is not NULL.  */
-extern int pthread_setcanceltype (int __type, int *__oldtype);
+extern int pthread_setcanceltype (int __type, int *__oldtype) __THROW;
 
 /* Cancel THREAD immediately or at the next possibility.  */
-extern int pthread_cancel (pthread_t __cancelthread);
+extern int pthread_cancel (pthread_t __thread_id) __THROW;
 
 /* Test for pending cancellation for the current thread and terminate
    the thread as per pthread_exit(PTHREAD_CANCELED) if it has been
    cancelled.  */
-extern void pthread_testcancel (void);
+extern void pthread_testcancel (void) __THROW;
 
 
 /* Install a cleanup handler: ROUTINE will be called with arguments ARG

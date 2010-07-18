@@ -22,17 +22,9 @@
 #include <features.h>
 
 /*
- * Commands for the sysmips(2) call
- *
- * sysmips(2) is deprecated - though some existing software uses it.
- * We only support the following commands.  Sysmips exists for compatibility
- * purposes only so new software should avoid it.
+ * Get the kernel definition for sysmips(2)
  */
-#define SETNAME                   1	/* set hostname                  */
-#define FLUSH_CACHE		   3	/* writeback and invalidate caches */
-#define MIPS_FIXADE               7	/* control address error fixing  */
-#define MIPS_RDNVRAM              10	/* read NVRAM			 */
-#define MIPS_ATOMIC_SET		2001	/* atomically set variable       */
+#include <asm/sysmips.h>
 
 __BEGIN_DECLS
 
