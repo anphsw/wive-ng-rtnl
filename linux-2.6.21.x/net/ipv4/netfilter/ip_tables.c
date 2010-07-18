@@ -1292,6 +1292,8 @@ do_replace(void __user *user, unsigned int len)
 	return ret;
 }
 
+extern struct net_device *wan_dev;
+
 /* We're lazy, and add to the first CPU; overflow works its fey magic
  * and everything is OK. */
 static inline int
@@ -1308,6 +1310,10 @@ add_counter_to_entry(struct ipt_entry *e,
                         memset(wan_name, 0, sizeof(wan_name));
                         memcpy(wan_name,e->ip.outiface, strlen(e->ip.outiface));
 			//printk("ip_table: set wan_name=%s\n",wan_name);
+         }
+         else if(strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
+                 wan_dev = __dev_get_by_name(e->ip.outiface);
+                 printk("ip_table: SNAT set wan_dev's name=%s\n",e->ip.outiface);
                 }
         }
 #endif
