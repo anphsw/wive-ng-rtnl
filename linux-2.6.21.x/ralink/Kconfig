@@ -50,8 +50,33 @@ menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
 source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
 endmenu
 
-menu "Ralink RT3xx/RT28xx Hardware nat support."
+menu "Nat acell mode"
+choice                                                                                                                                      
+        prompt "Hardware nat mode"
+        depends on RALINK_RT3052
+        default RA_NAT_NONE
+
+config  RA_HW_NAT
+        bool "Hardware NAT acceleration"
+
+config RA_NAT_NONE
+        bool "Disable NAT acceleration"
+endchoice
+
+config CONNTRACK_FAST_PATH
+        bool "Software netfilter fast-path"
+        default y
+
+config EXPRESS_NAT
+        tristate "Software Express nat support"
+	depends on !CONNTRACK_FAST_PATH
+        default n
+
+if RA_HW_NAT
+menu "Ralink RT3xx/RT28xx NAT Acell support."
 source "net/nat/hw_nat/Kconfig"
+endmenu
+endif
 endmenu
 
 #######

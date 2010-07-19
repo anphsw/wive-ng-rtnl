@@ -1,6 +1,3 @@
-config  RA_HW_NAT
-        tristate "Ralink HW NAT"
-
 choice
         prompt "Binding Method"
 	depends on RA_HW_NAT
@@ -84,7 +81,6 @@ config  RA_HW_NAT_HASH1
 	depends on RA_HW_NAT
 
 endchoice
-
 
 config  RA_HW_NAT_PRE_ACL_SIZE
         int "Pre ACL Table Size"

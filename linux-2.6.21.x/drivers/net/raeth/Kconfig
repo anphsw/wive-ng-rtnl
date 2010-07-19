@@ -12,13 +12,6 @@ config RAETH_NAPI
         bool "Use Rx Polling (NAPI)"
         depends on RAETH
 
-config RA_NAT_NONE
-        bool "Disable NAT acceleration"
-        depends on RAETH
-
-config EXPRESS_NAT
-        tristate "Express nat support"
-
 config RAETH_JUMBOFRAME
         bool "Jumbo Frame up to 4K bytes"
         depends on RAETH && !RALINK_RT3052

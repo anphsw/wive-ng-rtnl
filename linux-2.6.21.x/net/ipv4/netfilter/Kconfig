@@ -248,7 +248,7 @@ config IP_NF_NAT_RTSP
 	default m if IP_NF_RTSP=m
 
 config IP_NF_RTSP
-	tristate  ' RTSP protocol support'
+	tristate 'RTSP protocol support'
 	depends on IP_NF_CONNTRACK
 	help
 	Support the RTSP protocol.  This allows UDP transports to be setup
