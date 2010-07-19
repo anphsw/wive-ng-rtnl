@@ -285,8 +285,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     struct ethhdr *eth=NULL;
 
     uint16_t eth_type=0;
+    uint32_t pppoe_gap=0, vlan_gap=0;
 
     struct FoeEntry *foe_entry;
+    struct iphdr *iph = NULL;
 
     foe_entry=&PpeFoeBase[FOE_ENTRY_NUM(skb)];
     eth_type=ntohs(skb->protocol);
@@ -295,7 +297,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
         FoeDumpPkt(skb);
     }
 
-#if 0 /* 2009-0722 Mook: disable WLAN hardware nat */
+#ifdef CONFIG_RA_SHW_WLAN  /* 2009-0722 Mook: disable WLAN hardware nat */
     if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
 			    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
 
@@ -317,7 +319,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    int32_t hash_index;
 	    uint32_t current_time;
 	    struct FoePriKey key;
-	    
+	    struct vlan_hdr *vh;
+	    struct tcphdr *th;
+	    struct udphdr *uh;
+
 	    if(eth_type==ETH_P_8021Q) {
 		    vlan_gap = VLAN_HLEN;
 		    vh = (struct vlan_hdr *) skb->data;
@@ -337,7 +342,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    iph = (struct iphdr *) (skb->data + vlan_gap + pppoe_gap);
 	    key.sip=ntohl(iph->saddr);
 	    key.dip=ntohl(iph->daddr);
-
 	    if(iph->protocol==IPPROTO_TCP) {
 		    th = (struct tcphdr *) ((uint8_t *) iph + iph->ihl * 4);
 		    key.sport=ntohs(th->source);
@@ -469,9 +473,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	     * At this time, we fill out DMAC=My_Mac, SMAC=new_DMAC to workaround this problem.
 	     *
 	     */
-            struct iphdr *iph = NULL;
-            uint32_t pppoe_gap=0;
-            uint32_t vlan_gap=0;
 
 	    eth=(struct ethhdr *)(skb->data-ETH_HLEN);
 	    FoeGetMacInfo(eth->h_dest, foe_entry->smac_hi);
@@ -1126,7 +1127,7 @@ static void PpeSetDstPort(uint32_t Ebl)
     if(Ebl) {
 	DstPort[DP_PCI]=dev_get_by_name(CONFIG_RA_HW_NAT_PCI_NAME); /* PCI Slot */
 	DstPort[DP_GMAC]=dev_get_by_name(CONFIG_RA_HW_NAT_GMAC_NAME); /* GMAC */
-#if 0
+#ifdef CONFIG_RA_SHW_WLAN
 	DstPort[DP_WLAN]=dev_get_by_name(CONFIG_RA_HW_NAT_WLAN_NAME);   /* WLAN */
 #endif
     }else {
@@ -1136,7 +1137,7 @@ static void PpeSetDstPort(uint32_t Ebl)
 	if(DstPort[DP_GMAC]!=NULL) {
 	    dev_put(DstPort[DP_GMAC]);
 	}
-#if 0
+#ifdef CONFIG_RA_SHW_WLAN
 	if(DstPort[DP_WLAN]!=NULL) {
 	    dev_put(DstPort[DP_WLAN]);
 	}
