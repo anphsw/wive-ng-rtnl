@@ -2,10 +2,9 @@
 #include <linux/modversions.h>
 #endif
 #include <linux/module.h>
-#include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/version.h>
-//#include <linux/netfilter_ipv4/ipt_ipp2p.h>
-#include "ipt_ipp2p.h"
+#include <linux/netfilter_ipv4/ip_tables.h>
+#include <linux/netfilter_ipv4/ipt_ipp2p.h>
 #include <net/tcp.h>
 #include <net/udp.h>
 
@@ -716,39 +715,47 @@ static struct {
     int packet_len;
     int (*function_name) (unsigned char *, int);
 } udp_list[] = {
-    {IPP2P_KAZAA,SHORT_HAND_IPP2P,14, &udp_search_kazaa},
-    {IPP2P_BIT,SHORT_HAND_IPP2P,23, &udp_search_bit},
-    {IPP2P_GNU,SHORT_HAND_IPP2P,11, &udp_search_gnu},
-    {IPP2P_EDK,SHORT_HAND_IPP2P,9, &udp_search_edk},
-    {IPP2P_DC,SHORT_HAND_IPP2P,12, &udp_search_directconnect},    
-    {0,0,0,NULL}
+    { IPP2P_KAZAA, SHORT_HAND_IPP2P, 14, &udp_search_kazaa},
+    { IPP2P_BIT,   SHORT_HAND_IPP2P, 23, &udp_search_bit},
+    { IPP2P_GNU,   SHORT_HAND_IPP2P, 11, &udp_search_gnu},
+    { IPP2P_EDK,   SHORT_HAND_IPP2P,  9, &udp_search_edk},
+    { IPP2P_DC,    SHORT_HAND_IPP2P, 12, &udp_search_directconnect},    
+    { 0, 0, 0, NULL }
 };
 
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+static bool
+#else
 static int
+#endif
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
-      const struct xt_match  *mymatch,
-      const void *matchinfo,
-      int offset,
-      unsigned int myprotoff,
-#else
-      const void *matchinfo,
-      int offset,
+      const struct xt_match *match,
 #endif
-
+      const void *matchinfo,
+      int offset,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
       const void *hdr,
       u_int16_t datalen,
 #endif
-
-      int *hotdrop)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
+      unsigned int protoff,
+#endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+      bool *hotdrop)
+#else
+      bool *hotdrop)
+#endif
 {
     const struct ipt_p2p_info *info = matchinfo;
     unsigned char  *haystack;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+    struct iphdr *ip = ip_hdr(skb);
+#else
     struct iphdr *ip = skb->nh.iph;
+#endif
     int p2p_result = 0, i = 0;
 //    int head_len;
     int hlen = ntohs(ip->tot_len)-(ip->ihl*4);	/*hlen = packet-data length*/
@@ -820,21 +827,25 @@ match(const struct sk_buff *skb,
     }
 }
 
-
-
-static int
-checkentry(const char *tablename,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
-           const void *ip, 
-           const struct xt_match *mymatch,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+static bool
 #else
-           const struct ipt_ip *ip,
+static int
 #endif
-	   void *matchinfo,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21)
-	   unsigned int matchsize,
+checkentry(const char *tablename,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
+            const void *ip,
+#else
+            const struct ipt_ip *ip,
 #endif
-	   unsigned int hook_mask)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
+            const struct xt_match *match,
+#endif
+	    void *matchinfo,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+	    unsigned int matchsize,
+#endif
+	    unsigned int hook_mask)
 {
         /* Must specify -p tcp */
 /*    if (ip->proto != IPPROTO_TCP || (ip->invflags & IPT_INV_PROTO)) {
@@ -845,34 +856,29 @@ checkentry(const char *tablename,
 }
 									    
 
-// TODO: find out what this structure is for (scheme taken
-// from kernel sources)
-// content seems to have a length of 8 bytes 
-// (at least on my x86 machine)
-struct ipp2p_match_info {
-	long int dunno_what_this_is_for;
-	long int i_also_dunno_what_this_is_for;
-};
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+static struct xt_match ipp2p_match = {
+#else
 static struct ipt_match ipp2p_match = { 
+#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	{ NULL, NULL }, 
 	"ipp2p", 
-	&match, 
-	&checkentry, 
+	&ipp2p_match, 
+	&ipp2p_checkentry, 
 	NULL, 
 	THIS_MODULE
 #endif
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,17))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 	.name		= "ipp2p",
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+	.family		= AF_INET,
+#endif
 	.match		= &match,
-	.checkentry	= &checkentry,
-	.me		= THIS_MODULE,
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
-	.name		= "ipp2p",
-	.match		= &match,
-	.family         = AF_INET,
-	.matchsize      = sizeof(struct ipp2p_match_info),
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
+	.matchsize	= sizeof(struct ipt_p2p_info),
+#endif
 	.checkentry	= &checkentry,
 	.me		= THIS_MODULE,
 #endif

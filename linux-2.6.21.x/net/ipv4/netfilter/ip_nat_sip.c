@@ -201,15 +201,21 @@ static unsigned int mangle_sdp(struct sk_buff **pskb,
 
 	dataoff = (*pskb)->nh.iph->ihl*4 + sizeof(struct udphdr);
 
-	/* Mangle owner and contact info. */
-	bufflen = sprintf(buffer, "%u.%u.%u.%u", NIPQUAD(newip));
-	if (!mangle_sip_packet(pskb, ctinfo, ct, &dptr, (*pskb)->len - dataoff,
-			       buffer, bufflen, POS_OWNER))
-		return 0;
-
-	if (!mangle_sip_packet(pskb, ctinfo, ct, &dptr, (*pskb)->len - dataoff,
-			       buffer, bufflen, POS_CONNECTION))
-		return 0;
+	/*Adam Lee: 2009-07-08 The destination of RTP packets is not as same as SIP packets sometimes (ex. P2P mode).
+	Therefore, it is incorrect to use the source IP address of incoming SIP response as the 
+	destination IP of RTP packets. We do not need to modify the SDP Connection and SDP Owner info of those SIP responses. */
+	if (CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) 
+	{
+		/* Mangle owner and contact info. */
+		bufflen = sprintf(buffer, "%u.%u.%u.%u", NIPQUAD(newip));
+		if (!mangle_sip_packet(pskb, ctinfo, ct, &dptr, (*pskb)->len - dataoff,
+					buffer, bufflen, POS_OWNER))
+			return 0;
+	
+		if (!mangle_sip_packet(pskb, ctinfo, ct, &dptr, (*pskb)->len - dataoff,
+					buffer, bufflen, POS_CONNECTION))
+			return 0;
+	}
 
 	/* Mangle media port. */
 	bufflen = sprintf(buffer, "%u", port);

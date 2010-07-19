@@ -841,7 +841,7 @@ init_conntrack(struct ip_conntrack_tuple *tuple,
 	return &conntrack->tuplehash[IP_CT_DIR_ORIGINAL];
 }
 
-struct net_device *wan_dev;
+extern struct net_device *wan_dev;
 
 /* On success, returns conntrack ptr, sets skb->nfct and ctinfo */
 static inline struct ip_conntrack *

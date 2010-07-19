@@ -5,7 +5,6 @@
 #ifndef _NF_CONNTRACK_ECACHE_H
 #define _NF_CONNTRACK_ECACHE_H
 #include <net/netfilter/nf_conntrack.h>
-
 #include <linux/notifier.h>
 #include <linux/interrupt.h>
 #include <net/netfilter/nf_conntrack_expect.h>

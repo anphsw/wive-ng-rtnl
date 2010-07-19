@@ -752,6 +752,7 @@ int decode_choice(bitstr_t * bs, field_t * f, char *base, int level)
 }
 
 /****************************************************************************/
+#ifdef CONFIG_NF_CONNTRACK_IPV4
 int DecodeRasMessage(unsigned char *buf, size_t sz, RasMessage * ras)
 {
 	static field_t ras_message = {
@@ -766,7 +767,7 @@ int DecodeRasMessage(unsigned char *buf, size_t sz, RasMessage * ras)
 
 	return decode_choice(&bs, &ras_message, (char *) ras, 0);
 }
-
+#endif
 /****************************************************************************/
 static int DecodeH323_UserInformation(unsigned char *buf, unsigned char *beg,
 				      size_t sz, H323_UserInformation * uuie)
@@ -786,6 +787,7 @@ static int DecodeH323_UserInformation(unsigned char *buf, unsigned char *beg,
 }
 
 /****************************************************************************/
+#ifdef CONFIG_NF_CONNTRACK_IPV4
 int DecodeMultimediaSystemControlMessage(unsigned char *buf, size_t sz,
 					 MultimediaSystemControlMessage *
 					 mscm)
@@ -803,7 +805,6 @@ int DecodeMultimediaSystemControlMessage(unsigned char *buf, size_t sz,
 	return decode_choice(&bs, &multimediasystemcontrolmessage,
 			     (char *) mscm, 0);
 }
-
 /****************************************************************************/
 int DecodeQ931(unsigned char *buf, size_t sz, Q931 * q931)
 {
@@ -872,3 +873,4 @@ int DecodeQ931(unsigned char *buf, size_t sz, Q931 * q931)
 
 	return H323_ERROR_BOUND;
 }
+#endif

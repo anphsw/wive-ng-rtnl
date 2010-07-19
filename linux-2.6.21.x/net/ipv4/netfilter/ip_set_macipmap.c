@@ -5,7 +5,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  
  */
 
 /* Kernel module implementing an IP set type: the macipmap type */
@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/ip.h>
 #include <linux/skbuff.h>
+#include <linux/version.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ip_set.h>
 #include <linux/errno.h>
@@ -29,7 +30,7 @@ static int
 testip(struct ip_set *set, const void *data, size_t size, ip_set_ip_t *hash_ip)
 {
 	struct ip_set_macipmap *map = (struct ip_set_macipmap *) set->data;
-	struct ip_set_macip *table = (struct ip_set_macip *) map->members;
+	struct ip_set_macip *table = (struct ip_set_macip *) map->members;	
 	struct ip_set_req_macipmap *req = (struct ip_set_req_macipmap *) data;
 
 	if (size != sizeof(struct ip_set_req_macipmap)) {
@@ -44,7 +45,7 @@ testip(struct ip_set *set, const void *data, size_t size, ip_set_ip_t *hash_ip)
 
 	*hash_ip = req->ip;
 	DP("set: %s, ip:%u.%u.%u.%u, %u.%u.%u.%u",
-	   set->name, HIPQUAD(req->ip), HIPQUAD(*hash_ip));
+	   set->name, HIPQUAD(req->ip), HIPQUAD(*hash_ip));		
 	if (test_bit(IPSET_MACIP_ISSET,
 		     (void *) &table[req->ip - map->first_ip].flags)) {
 		return (memcmp(req->ethernet,
@@ -56,34 +57,44 @@ testip(struct ip_set *set, const void *data, size_t size, ip_set_ip_t *hash_ip)
 }
 
 static int
-testip_kernel(struct ip_set *set, const struct sk_buff *skb,
-	      u_int32_t flags, ip_set_ip_t *hash_ip)
+testip_kernel(struct ip_set *set, 
+	      const struct sk_buff *skb,
+	      ip_set_ip_t *hash_ip,
+	      const u_int32_t *flags,
+	      unsigned char index)
 {
 	struct ip_set_macipmap *map =
 	    (struct ip_set_macipmap *) set->data;
 	struct ip_set_macip *table =
 	    (struct ip_set_macip *) map->members;
 	ip_set_ip_t ip;
-
-	ip = ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-				     : skb->nh.iph->daddr);
-	DP("flag: %s src: %u.%u.%u.%u dst: %u.%u.%u.%u",
-	   flags & IPSET_SRC ? "SRC" : "DST",
-	   NIPQUAD(skb->nh.iph->saddr),
-	   NIPQUAD(skb->nh.iph->daddr));
+	
+	ip = ntohl(flags[index] & IPSET_SRC
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+			? ip_hdr(skb)->saddr 
+			: ip_hdr(skb)->daddr);
+#else
+			? skb->nh.iph->saddr
+			: skb->nh.iph->daddr);
+#endif
 
 	if (ip < map->first_ip || ip > map->last_ip)
 		return 0;
 
-	*hash_ip = ip;
+	*hash_ip = ip;	
 	DP("set: %s, ip:%u.%u.%u.%u, %u.%u.%u.%u",
-	   set->name, HIPQUAD(ip), HIPQUAD(*hash_ip));
+	   set->name, HIPQUAD(ip), HIPQUAD(*hash_ip));		
 	if (test_bit(IPSET_MACIP_ISSET,
 	    (void *) &table[ip - map->first_ip].flags)) {
 		/* Is mac pointer valid?
 		 * If so, compare... */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+		return (skb_mac_header(skb) >= skb->head
+			&& (skb_mac_header(skb) + ETH_HLEN) <= skb->data
+#else
 		return (skb->mac.raw >= skb->head
 			&& (skb->mac.raw + ETH_HLEN) <= skb->data
+#endif
 			&& (memcmp(eth_hdr(skb)->h_source,
 				   &table[ip - map->first_ip].ethernet,
 				   ETH_ALEN) == 0));
@@ -94,7 +105,7 @@ testip_kernel(struct ip_set *set, const struct sk_buff *skb,
 
 /* returns 0 on success */
 static inline int
-__addip(struct ip_set *set,
+__addip(struct ip_set *set, 
 	ip_set_ip_t ip, unsigned char *ethernet, ip_set_ip_t *hash_ip)
 {
 	struct ip_set_macipmap *map =
@@ -104,7 +115,7 @@ __addip(struct ip_set *set,
 
 	if (ip < map->first_ip || ip > map->last_ip)
 		return -ERANGE;
-	if (test_and_set_bit(IPSET_MACIP_ISSET,
+	if (test_and_set_bit(IPSET_MACIP_ISSET, 
 			     (void *) &table[ip - map->first_ip].flags))
 		return -EEXIST;
 
@@ -131,16 +142,30 @@ addip(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-addip_kernel(struct ip_set *set, const struct sk_buff *skb,
-	     u_int32_t flags, ip_set_ip_t *hash_ip)
+addip_kernel(struct ip_set *set, 
+	     const struct sk_buff *skb,
+	     ip_set_ip_t *hash_ip,
+	     const u_int32_t *flags,
+	     unsigned char index)
 {
 	ip_set_ip_t ip;
+	
+	ip = ntohl(flags[index] & IPSET_SRC
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+			? ip_hdr(skb)->saddr 
+			: ip_hdr(skb)->daddr);
+#else
+			? skb->nh.iph->saddr
+			: skb->nh.iph->daddr);
+#endif
 
-	ip = ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-				     : skb->nh.iph->daddr);
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	if (!(skb_mac_header(skb) >= skb->head
+	      && (skb_mac_header(skb) + ETH_HLEN) <= skb->data))
+#else
 	if (!(skb->mac.raw >= skb->head
 	      && (skb->mac.raw + ETH_HLEN) <= skb->data))
+#endif
 		return -EINVAL;
 
 	return __addip(set, ip, eth_hdr(skb)->h_source, hash_ip);
@@ -156,7 +181,7 @@ __delip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 
 	if (ip < map->first_ip || ip > map->last_ip)
 		return -ERANGE;
-	if (!test_and_clear_bit(IPSET_MACIP_ISSET,
+	if (!test_and_clear_bit(IPSET_MACIP_ISSET, 
 				(void *)&table[ip - map->first_ip].flags))
 		return -EEXIST;
 
@@ -182,23 +207,32 @@ delip(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-delip_kernel(struct ip_set *set, const struct sk_buff *skb,
-	     u_int32_t flags, ip_set_ip_t *hash_ip)
+delip_kernel(struct ip_set *set,
+	     const struct sk_buff *skb,
+	     ip_set_ip_t *hash_ip,
+	     const u_int32_t *flags,
+	     unsigned char index)
 {
 	return __delip(set,
-		       ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-					       : skb->nh.iph->daddr),
+		       ntohl(flags[index] & IPSET_SRC 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+				? ip_hdr(skb)->saddr 
+				: ip_hdr(skb)->daddr),
+#else
+		       		? skb->nh.iph->saddr 
+				: skb->nh.iph->daddr),
+#endif
 		       hash_ip);
 }
 
-static inline size_t members_size(ip_set_id_t from, ip_set_id_t to)
+static inline size_t members_size(ip_set_ip_t from, ip_set_ip_t to)
 {
 	return (size_t)((to - from + 1) * sizeof(struct ip_set_macip));
 }
 
 static int create(struct ip_set *set, const void *data, size_t size)
 {
-	int newbytes;
+	size_t newbytes;
 	struct ip_set_req_macipmap_create *req =
 	    (struct ip_set_req_macipmap_create *) data;
 	struct ip_set_macipmap *map;
@@ -220,7 +254,7 @@ static int create(struct ip_set *set, const void *data, size_t size)
 
 	if (req->to - req->from > MAX_RANGE) {
 		ip_set_printk("range too big (max %d addresses)",
-			       MAX_RANGE);
+			       MAX_RANGE+1);
 		return -ENOEXEC;
 	}
 
@@ -235,13 +269,14 @@ static int create(struct ip_set *set, const void *data, size_t size)
 	map->last_ip = req->to;
 	newbytes = members_size(map->first_ip, map->last_ip);
 	map->members = ip_set_malloc(newbytes);
+	DP("members: %u %p", newbytes, map->members);
 	if (!map->members) {
 		DP("out of memory for %d bytes", newbytes);
 		kfree(map);
 		return -ENOMEM;
 	}
 	memset(map->members, 0, newbytes);
-
+	
 	set->data = map;
 	return 0;
 }
@@ -284,6 +319,7 @@ static int list_members_size(const struct ip_set *set)
 	struct ip_set_macipmap *map =
 	    (struct ip_set_macipmap *) set->data;
 
+	DP("%u", members_size(map->first_ip, map->last_ip));
 	return members_size(map->first_ip, map->last_ip);
 }
 
@@ -294,12 +330,13 @@ static void list_members(const struct ip_set *set, void *data)
 
 	int bytes = members_size(map->first_ip, map->last_ip);
 
+	DP("members: %u %p", bytes, map->members);
 	memcpy(data, map->members, bytes);
 }
 
 static struct ip_set_type ip_set_macipmap = {
 	.typename		= SETTYPE_NAME,
-	.typecode		= IPSET_TYPE_IP,
+	.features		= IPSET_TYPE_IP | IPSET_DATA_SINGLE,
 	.protocol_version	= IP_SET_PROTOCOL_VERSION,
 	.create			= &create,
 	.destroy		= &destroy,
@@ -322,17 +359,17 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>");
 MODULE_DESCRIPTION("macipmap type of IP sets");
 
-static int __init init(void)
+static int __init ip_set_macipmap_init(void)
 {
-	init_max_malloc_size();
+	init_max_page_size();
 	return ip_set_register_set_type(&ip_set_macipmap);
 }
 
-static void __exit fini(void)
+static void __exit ip_set_macipmap_fini(void)
 {
 	/* FIXME: possible race with ip_set_create() */
 	ip_set_unregister_set_type(&ip_set_macipmap);
 }
 
-module_init(init);
-module_exit(fini);
+module_init(ip_set_macipmap_init);
+module_exit(ip_set_macipmap_fini);

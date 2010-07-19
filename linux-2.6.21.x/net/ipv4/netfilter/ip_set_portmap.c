@@ -2,7 +2,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  
  */
 
 /* Kernel module implementing a port set type as a bitmap */
@@ -12,6 +12,7 @@
 #include <linux/tcp.h>
 #include <linux/udp.h>
 #include <linux/skbuff.h>
+#include <linux/version.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ip_set.h>
 #include <linux/errno.h>
@@ -27,21 +28,28 @@
 static inline ip_set_ip_t
 get_port(const struct sk_buff *skb, u_int32_t flags)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	struct iphdr *iph = ip_hdr(skb);
+#else
 	struct iphdr *iph = skb->nh.iph;
+#endif
 	u_int16_t offset = ntohs(iph->frag_off) & IP_OFFSET;
-
 	switch (iph->protocol) {
 	case IPPROTO_TCP: {
 		struct tcphdr tcph;
-
+		
 		/* See comments at tcp_match in ip_tables.c */
 		if (offset)
 			return INVALID_PORT;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+		if (skb_copy_bits(skb, ip_hdr(skb)->ihl*4, &tcph, sizeof(tcph)) < 0)
+#else
 		if (skb_copy_bits(skb, skb->nh.iph->ihl*4, &tcph, sizeof(tcph)) < 0)
+#endif
 			/* No choice either */
 			return INVALID_PORT;
-
+	     	
 	     	return ntohs(flags & IPSET_SRC ?
 			     tcph.source : tcph.dest);
 	    }
@@ -51,10 +59,14 @@ get_port(const struct sk_buff *skb, u_int32_t flags)
 		if (offset)
 			return INVALID_PORT;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+		if (skb_copy_bits(skb, ip_hdr(skb)->ihl*4, &udph, sizeof(udph)) < 0)
+#else
 		if (skb_copy_bits(skb, skb->nh.iph->ihl*4, &udph, sizeof(udph)) < 0)
+#endif
 			/* No choice either */
 			return INVALID_PORT;
-
+	     	
 	     	return ntohs(flags & IPSET_SRC ?
 			     udph.source : udph.dest);
 	    }
@@ -70,7 +82,7 @@ __testport(struct ip_set *set, ip_set_ip_t port, ip_set_ip_t *hash_port)
 
 	if (port < map->first_port || port > map->last_port)
 		return -ERANGE;
-
+		
 	*hash_port = port;
 	DP("set: %s, port:%u, %u", set->name, port, *hash_port);
 	return !!test_bit(port - map->first_port, map->members);
@@ -80,7 +92,7 @@ static int
 testport(struct ip_set *set, const void *data, size_t size,
          ip_set_ip_t *hash_port)
 {
-	struct ip_set_req_portmap *req =
+	struct ip_set_req_portmap *req = 
 	    (struct ip_set_req_portmap *) data;
 
 	if (size != sizeof(struct ip_set_req_portmap)) {
@@ -93,18 +105,21 @@ testport(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-testport_kernel(struct ip_set *set, const struct sk_buff *skb,
-		u_int32_t flags, ip_set_ip_t *hash_port)
+testport_kernel(struct ip_set *set, 
+	        const struct sk_buff *skb,
+	        ip_set_ip_t *hash_port,
+	        const u_int32_t *flags,
+	        unsigned char index)
 {
 	int res;
-	ip_set_ip_t port = get_port(skb, flags);
+	ip_set_ip_t port = get_port(skb, flags[index]);
 
-	DP("flag %s port %u", flags & IPSET_SRC ? "SRC" : "DST", port);
+	DP("flag %s port %u", flags[index] & IPSET_SRC ? "SRC" : "DST", port);	
 	if (port == INVALID_PORT)
-		return 0;
+		return 0;	
 
 	res =  __testport(set, port, hash_port);
-
+	
 	return (res < 0 ? 0 : res);
 }
 
@@ -117,7 +132,7 @@ __addport(struct ip_set *set, ip_set_ip_t port, ip_set_ip_t *hash_port)
 		return -ERANGE;
 	if (test_and_set_bit(port - map->first_port, map->members))
 		return -EEXIST;
-
+		
 	*hash_port = port;
 	DP("port %u", port);
 	return 0;
@@ -127,7 +142,7 @@ static int
 addport(struct ip_set *set, const void *data, size_t size,
         ip_set_ip_t *hash_port)
 {
-	struct ip_set_req_portmap *req =
+	struct ip_set_req_portmap *req = 
 	    (struct ip_set_req_portmap *) data;
 
 	if (size != sizeof(struct ip_set_req_portmap)) {
@@ -140,11 +155,14 @@ addport(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-addport_kernel(struct ip_set *set, const struct sk_buff *skb,
-	       u_int32_t flags, ip_set_ip_t *hash_port)
+addport_kernel(struct ip_set *set, 
+	       const struct sk_buff *skb,
+	       ip_set_ip_t *hash_port,
+	       const u_int32_t *flags,
+	       unsigned char index)
 {
-	ip_set_ip_t port = get_port(skb, flags);
-
+	ip_set_ip_t port = get_port(skb, flags[index]);
+	
 	if (port == INVALID_PORT)
 		return -EINVAL;
 
@@ -160,7 +178,7 @@ __delport(struct ip_set *set, ip_set_ip_t port, ip_set_ip_t *hash_port)
 		return -ERANGE;
 	if (!test_and_clear_bit(port - map->first_port, map->members))
 		return -EEXIST;
-
+		
 	*hash_port = port;
 	DP("port %u", port);
 	return 0;
@@ -183,11 +201,14 @@ delport(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-delport_kernel(struct ip_set *set, const struct sk_buff *skb,
-	       u_int32_t flags, ip_set_ip_t *hash_port)
+delport_kernel(struct ip_set *set, 
+	       const struct sk_buff *skb,
+	       ip_set_ip_t *hash_port,
+	       const u_int32_t *flags,
+	       unsigned char index)
 {
-	ip_set_ip_t port = get_port(skb, flags);
-
+	ip_set_ip_t port = get_port(skb, flags[index]);
+	
 	if (port == INVALID_PORT)
 		return -EINVAL;
 
@@ -217,7 +238,7 @@ static int create(struct ip_set *set, const void *data, size_t size)
 
 	if (req->to - req->from > MAX_RANGE) {
 		ip_set_printk("range too big (max %d ports)",
-			       MAX_RANGE);
+			       MAX_RANGE+1);
 		return -ENOEXEC;
 	}
 
@@ -287,7 +308,7 @@ static void list_members(const struct ip_set *set, void *data)
 
 static struct ip_set_type ip_set_portmap = {
 	.typename		= SETTYPE_NAME,
-	.typecode		= IPSET_TYPE_PORT,
+	.features		= IPSET_TYPE_PORT | IPSET_DATA_SINGLE,
 	.protocol_version	= IP_SET_PROTOCOL_VERSION,
 	.create			= &create,
 	.destroy		= &destroy,
@@ -310,16 +331,16 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>");
 MODULE_DESCRIPTION("portmap type of IP sets");
 
-static int __init init(void)
+static int __init ip_set_portmap_init(void)
 {
 	return ip_set_register_set_type(&ip_set_portmap);
 }
 
-static void __exit fini(void)
+static void __exit ip_set_portmap_fini(void)
 {
 	/* FIXME: possible race with ip_set_create() */
 	ip_set_unregister_set_type(&ip_set_portmap);
 }
 
-module_init(init);
-module_exit(fini);
+module_init(ip_set_portmap_init);
+module_exit(ip_set_portmap_fini);

@@ -21,6 +21,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
 
@@ -40,10 +41,10 @@ module_param_array(ports, int, &ports_c, 0400);
 MODULE_PARM_DESC(ports, "port numbers of Quake III master servers");
 
 static char quake3_buffer[65536];
-static DEFINE_SPINLOCK(quake3_buffer_lock);
+static DECLARE_LOCK(quake3_buffer_lock);
 
 static unsigned int (*ip_nat_quake3_hook)(struct ip_conntrack_expect *exp);
-
+EXPORT_SYMBOL(ip_nat_quake3_hook);
 /* Quake3 master server reply will add > 100 expectations per reply packet; when
    doing lots of printk's, klogd may not be able to read /proc/kmsg fast enough */
 #if 0 
@@ -89,7 +90,7 @@ static int quake3_help(struct sk_buff **pskb,
 	if (dataoff >= (*pskb)->len)
 		return NF_ACCEPT;
 
-	spin_lock_bh(&quake3_buffer_lock);
+	LOCK_BH(&quake3_buffer_lock);
 	qb_ptr = skb_header_pointer(*pskb, dataoff,
 				    (*pskb)->len - dataoff, quake3_buffer);
 	BUG_ON(qb_ptr == NULL);
@@ -109,8 +110,11 @@ static int quake3_help(struct sk_buff **pskb,
 			       "%u/%u %u.%u.%u.%u:%u\n", i, ntohs(uh->len),
 			       NIPQUAD(*ip), ntohs(*port));
 #endif
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) /* marklin 20080817 */
+			exp = ip_conntrack_expect_alloc();
+#else
 			exp = ip_conntrack_expect_alloc(ct);
+#endif
 			if (!exp) { 
 				ret = NF_DROP;
 				goto out;
@@ -131,7 +135,11 @@ static int quake3_help(struct sk_buff **pskb,
 			if (ip_nat_quake3_hook) 
 				ret = ip_nat_quake3_hook(exp);
 			else if (ip_conntrack_expect_related(exp) != 0) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) /* marklin 20080817 */
+				ip_conntrack_expect_free(exp);
+#else
 				ip_conntrack_expect_put(exp);
+#endif
 				ret = NF_DROP;
 			}
 			goto out;
@@ -139,8 +147,6 @@ static int quake3_help(struct sk_buff **pskb,
 	}
 	
 out:
-	spin_unlock_bh(&quake3_buffer_lock);
-
 	return ret;
 }
 

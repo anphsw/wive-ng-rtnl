@@ -11,7 +11,6 @@
  *   matching modules. 
  */
 
-
 #include <linux/types.h>
 #include <linux/ip.h>
 #include <linux/tcp.h>
@@ -24,29 +23,28 @@
 #include <net/protocol.h>
 #include <net/checksum.h>
 
+#include <linux/netfilter/x_tables.h>
+
 #include <linux/netfilter_ipv4.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ip_conntrack.h>
+//#include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
 #include <linux/netfilter_ipv4/ip_conntrack_tuple.h>
 #include <linux/netfilter_ipv4/ip_autofw.h>
 #include <linux/netfilter_ipv4/lockhelp.h>
+#ifdef CONFIG_NF_NAT_NEEDED
+#include <net/netfilter/nf_nat_rule.h>
+#else
 #include <linux/netfilter_ipv4/ip_nat_rule.h>
+#endif
 #include <linux/netfilter_ipv4/ipt_TRIGGER.h>
-#include <linux/netfilter_ipv4/ip_nat.h>
-
-#include <linux/netfilter_ipv4/ip_nat_rule.h>
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
-MODULE_DESCRIPTION("iptables trigger target module");
 
 /* This rwlock protects the main hash table, protocol/helper/expected
  *    registrations, conntrack timers*/
-//#define ASSERT_READ_LOCK(x) MUST_BE_READ_LOCKED(&ip_conntrack_lock)
-//#define ASSERT_WRITE_LOCK(x) MUST_BE_WRITE_LOCKED(&ip_conntrack_lock)
-#define ASSERT_READ_LOCK(x) 
-#define ASSERT_WRITE_LOCK(x) 
+
+#define ASSERT_READ_LOCK(x) MUST_BE_READ_LOCKED(&ip_conntrack_lock)
+#define ASSERT_WRITE_LOCK(x) MUST_BE_WRITE_LOCKED(&ip_conntrack_lock)
+
 #include <linux/netfilter_ipv4/listhelp.h>
 
 #if 0
@@ -54,6 +52,11 @@ MODULE_DESCRIPTION("iptables trigger target module");
 #else
 #define DEBUGP(format, args...)
 #endif
+
+//#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+#define ipt_register_target      xt_register_target
+#define ipt_unregister_target    xt_unregister_target
+//#endif
 
 struct ipt_trigger {
 	struct list_head list;		/* Trigger list */
@@ -68,6 +71,7 @@ struct ipt_trigger {
 
 LIST_HEAD(trigger_list);
 //DECLARE_LOCK(ip_trigger_lock);
+//DEFINE_RWLOCK(ip_conntrack_lock);
 
 static void trigger_refresh(struct ipt_trigger *trig, unsigned long extra_jiffies)
 {
@@ -88,7 +92,7 @@ static void __del_trigger(struct ipt_trigger *trig)
 {
     DEBUGP("%s: \n", __FUNCTION__);
     IP_NF_ASSERT(trig);
-    ASSERT_WRITE_LOCK(&ip_conntrack_lock);
+    MUST_BE_WRITE_LOCKED(&ip_conntrack_lock);
 
      /* delete from 'trigger_list' */
     list_del(&trig->list);
@@ -111,6 +115,15 @@ add_new_trigger(struct ipt_trigger *trig)
     struct ipt_trigger *new;
 
     DEBUGP("!!!!!!!!!!!! %s !!!!!!!!!!!\n", __FUNCTION__);
+#if 0 // debug
+    DEBUGP("srcip = %x\n", trig->srcip );
+    DEBUGP("dstip = %x\n", trig->dstip );
+    DEBUGP("mproto = %d\n", trig->mproto );
+    DEBUGP("rproto = %d\n", trig->rproto );
+    DEBUGP("mports = %d:%d\n", trig->ports.mport[0],  trig->ports.mport[1]);
+    DEBUGP("rports = %d:%d\n", trig->ports.rport[0],  trig->ports.rport[1] );
+    DEBUGP("reply = %x\n\n", trig->reply );
+#endif
     write_lock_bh(&ip_conntrack_lock);
     new = (struct ipt_trigger *)
 	kmalloc(sizeof(struct ipt_trigger), GFP_ATOMIC);
@@ -138,16 +151,65 @@ add_new_trigger(struct ipt_trigger *trig)
 
     return 0;
 }
+#if 0 /* John Chang, add to prevent allocate useless memory */
 
-static inline int trigger_out_matched(const struct ipt_trigger *i,
-	const u_int16_t proto, const u_int16_t dport)
+enum
 {
-    DEBUGP("%s: i=%p, proto= %d, dport=%d.\n", __FUNCTION__, i, proto, dport);
-    DEBUGP("%s: Got one, mproto= %d, mport[0..1]=%d, %d.\n", __FUNCTION__, 
-	    i->mproto, i->ports.mport[0], i->ports.mport[1]);
+    IPT_TRIGGER_STATUS_INIT  = 0x1,
+    IPT_TRIGGER_STATUS_MATCH = 0x10,
+    IPT_TRIGGER_STATUS_NONE  = 0x100,
+};
 
-    return ((i->mproto == proto) && (i->ports.mport[0] <= dport) 
-	    && (i->ports.mport[1] >= dport));
+
+static inline int trigger_add_matched(const struct ipt_trigger *i,
+    const u_int16_t proto, const u_int16_t dport, const struct ipt_trigger_info *info, u_int16_t *status)
+{
+    
+    DEBUGP("!!!!!!!!!!!! %s[%d] !!!!!!!!!!!\n\n", __FUNCTION__,__LINE__);
+     DEBUGP("%s: i=%p, proto= %d, dport=%d.\n", __FUNCTION__, i, proto, dport);
+    DEBUGP("%s: Got one, mproto= %d, mport[0..1]=%d, %d.\n", __FUNCTION__, 
+        i->mproto, i->ports.mport[0], i->ports.mport[1]); 
+
+        if(IPT_TRIGGER_STATUS_INIT == *status)
+            *status = IPT_TRIGGER_STATUS_NONE;
+
+#if 0
+        /* check outgoing trigger porto and ports */
+        if((i->mproto == proto) && 
+           (i->ports.mport[0] <= dport) && 
+           (i->ports.mport[1] >= dport))
+           {
+               *status|=IPT_TRIGGER_STATUS_MATCH;
+           }
+#endif
+
+        /* check new trigger porto and ports */
+        if(((0==info->proto)||(info->proto == proto)) && 
+           (info->ports.mport[0] <= dport) && 
+           (info->ports.mport[1] >= dport))
+           {
+               *status|=IPT_TRIGGER_STATUS_MATCH;
+           }
+           
+    return 0;
+}
+#endif
+        
+static inline int trigger_out_matched(const struct ipt_trigger *i,
+	const u_int16_t proto, const u_int16_t dport, const struct ipt_trigger_info *info)
+{
+	int ret;
+    /* DEBUGP("%s: i=%p, proto= %d, dport=%d.\n", __FUNCTION__, i, proto, dport);
+    DEBUGP("%s: Got one, mproto= %d, mport[0..1]=%d, %d.\n", __FUNCTION__, 
+	    i->mproto, i->ports.mport[0], i->ports.mport[1]); */
+
+    ret = ((i->mproto == proto) && (i->ports.mport[0] <= dport) && (i->ports.mport[1] >= dport));
+
+    /* We should confirm targinfo == i, sometimes one mport map into many rports  */
+    ret = ret && (info->ports.mport[0] == i->ports.mport[0]) && (info->ports.mport[1] == i->ports.mport[1]) && 
+		(info->ports.rport[0] == i->ports.rport[0]) && (info->ports.rport[1] == i->ports.rport[1]);
+
+	return ret;
 }
 
 static unsigned int
@@ -164,8 +226,8 @@ trigger_out(struct sk_buff **pskb,
 
     DEBUGP("############# %s ############\n", __FUNCTION__);
     /* Check if the trigger range has already existed in 'trigger_list'. */
-
-    found = LIST_FIND(&trigger_list, trigger_out_matched, struct ipt_trigger *, iph->protocol, ntohs(tcph->dest));
+    found = LIST_FIND(&trigger_list, trigger_out_matched,
+	    struct ipt_trigger *, iph->protocol, ntohs(tcph->dest), info);
 
     if (found) {
 	/* Yeah, it exists. We need to update(delay) the destroying timer. */
@@ -176,16 +238,29 @@ trigger_out(struct sk_buff **pskb,
 	    found->srcip = iph->saddr;
     }
     else {
-	/* Create new trigger */
-	memset(&trig, 0, sizeof(trig));
-	trig.srcip = iph->saddr;
-	trig.mproto = iph->protocol;
-	trig.rproto = info->proto;
-	memcpy(&trig.ports, &info->ports, sizeof(struct ipt_trigger_ports));
-	add_new_trigger(&trig);	/* Add the new 'trig' to list 'trigger_list'. */
-	DEBUGP("new trigger:srcip=%d.%d.%d.%d mproto=%d rproto=%d mport[%d-%d] rport[%d-%d]\n",
-		NIPQUAD(trig.srcip),trig.mproto,trig.rproto,trig.ports.mport[0],trig.ports.mport[1],
-		trig.ports.rport[0],trig.ports.rport[1]);
+#if 0   /* John Chang, add to prevent allocate useless memory */
+        DEBUGP("############# %s[%d] ############\n", __FUNCTION__, __LINE__);
+
+        int status = IPT_TRIGGER_STATUS_INIT;
+        
+        LIST_FIND(&trigger_list, trigger_add_matched,
+            int, iph->protocol, ntohs(tcph->dest), info, &status);
+            
+        if((IPT_TRIGGER_STATUS_INIT&status)||(IPT_TRIGGER_STATUS_MATCH&status))
+#elif 1 /* We should confirm targinfo == i, sometimes one mport map into many rports  */
+        if(((0==info->proto) || (info->proto == iph->protocol)) && 
+		   (info->ports.mport[0] <= ntohs(tcph->dest)) && (info->ports.mport[1] >= ntohs(tcph->dest)))
+#endif
+        {
+	    /* Create new trigger */
+            memset(&trig, 0, sizeof(trig));
+            trig.srcip = iph->saddr;     /* Outgoing source address */
+            trig.mproto = iph->protocol; /* Trigger protocol */
+            /* Norkay, 2009-03-03 we allow TCP & UDP Related protocol. And select rule in other line. */
+	        trig.rproto = 0;   /* Related protocol */
+            memcpy(&trig.ports, &info->ports, sizeof(struct ipt_trigger_ports));  /* Trigger and Related protocol */
+            add_new_trigger(&trig);	     /* Add the new 'trig' to list 'trigger_list'. */
+        }
     }
 
     return IPT_CONTINUE;	/* We don't block any packet. */
@@ -194,9 +269,9 @@ trigger_out(struct sk_buff **pskb,
 static inline int trigger_in_matched(const struct ipt_trigger *i,
 	const u_int16_t proto, const u_int16_t dport)
 {
-    DEBUGP("%s: i=%p, proto= %d, dport=%d.\n", __FUNCTION__, i, proto, dport);
+    /* DEBUGP("%s: i=%p, proto= %d, dport=%d.\n", __FUNCTION__, i, proto, dport);
     DEBUGP("%s: Got one, rproto= %d, rport[0..1]=%d, %d.\n", __FUNCTION__, 
-	    i->rproto, i->ports.rport[0], i->ports.rport[1]);
+	    i->rproto, i->ports.rport[0], i->ports.rport[1]); */
     u_int16_t rproto = i->rproto;
 
     if (!rproto)
@@ -216,10 +291,9 @@ trigger_in(struct sk_buff **pskb,
     struct ipt_trigger *found;
     const struct iphdr *iph = (*pskb)->nh.iph;
     struct tcphdr *tcph = (void *)iph + iph->ihl*4;	/* Might be TCP, UDP */
-
     /* Check if the trigger-ed range has already existed in 'trigger_list'. */
     found = LIST_FIND(&trigger_list, trigger_in_matched,
-	 struct ipt_trigger *, iph->protocol, ntohs(tcph->dest));
+	    struct ipt_trigger *, iph->protocol, ntohs(tcph->dest));
     if (found) {
 	DEBUGP("############# %s ############\n", __FUNCTION__);
 	/* Yeah, it exists. We need to update(delay) the destroying timer. */
@@ -243,7 +317,7 @@ trigger_dnat(struct sk_buff **pskb,
     struct tcphdr *tcph = (void *)iph + iph->ihl*4;	/* Might be TCP, UDP */
     struct ip_conntrack *ct;
     enum ip_conntrack_info ctinfo;
-    struct ip_nat_range newrange;
+    struct ip_nat_multi_range_compat newrange;
 
     IP_NF_ASSERT(hooknum == NF_IP_PRE_ROUTING);
     /* Check if the trigger-ed range has already existed in 'trigger_list'. */
@@ -258,19 +332,18 @@ trigger_dnat(struct sk_buff **pskb,
     ct = ip_conntrack_get(*pskb, &ctinfo);
     IP_NF_ASSERT(ct && (ctinfo == IP_CT_NEW));
 
-    DEBUGP("%s: hooknum=%d got ", __FUNCTION__,hooknum);
+    DEBUGP("%s: got ", __FUNCTION__);
     DUMP_TUPLE(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple);
 
     /* Alter the destination of imcoming packet. */
-    newrange = ((struct ip_nat_range)
-	    {   IP_NAT_RANGE_MAP_IPS,
+    newrange = ((struct ip_nat_multi_range_compat)
+	    { 1, { { IP_NAT_RANGE_MAP_IPS,
 	             found->srcip, found->srcip,
 	             { 0 }, { 0 }
-	            });
-//add by ramen to let the packet through our modem 2008/03/06
-	(*pskb)->nfctinfo=IP_CT_RELATED;
+	           } } });
+
     /* Hand modified range to generic setup. */
-    return ip_nat_setup_info(ct, &newrange, hooknum);
+    return ip_nat_setup_info(ct, &newrange.range[0], hooknum);
 }
 
 static unsigned int
@@ -284,9 +357,11 @@ trigger_target(struct sk_buff **pskb,
     const struct ipt_trigger_info *info = targinfo;
     const struct iphdr *iph = (*pskb)->nh.iph;
 
-    DEBUGP("%s: type = %s\n", __FUNCTION__, 
+    DEBUGP("[TRIGGER]%s: \n", __FUNCTION__);
+
+    /* DEBUGP("%s: type = %s\n", __FUNCTION__, 
 	    (info->type == IPT_TRIGGER_DNAT) ? "dnat" :
-	    (info->type == IPT_TRIGGER_IN) ? "in" : "out"); 
+	    (info->type == IPT_TRIGGER_IN) ? "in" : "out"); */
 
     /* The Port-trigger only supports TCP and UDP. */
     if ((iph->protocol != IPPROTO_TCP) && (iph->protocol != IPPROTO_UDP))
@@ -301,25 +376,23 @@ trigger_target(struct sk_buff **pskb,
 
     return IPT_CONTINUE;
 }
-
 static int
 trigger_check(const char *tablename,
-	       const void *e,
-	       const struct xt_target *target,
-	       void *targinfo,
+	   const void *e_void,
+	      const struct xt_target *target,
+              void *targinfo,
 	       unsigned int hook_mask)
 {
+	const struct ipt_entry *e = (struct ipt_entry*)e_void;
 	const struct ipt_trigger_info *info = targinfo;
 	struct list_head *cur_item, *tmp_item;
 
+    DEBUGP("[TRIGGER]%s: \n", __FUNCTION__);
+    
 	if ((strcmp(tablename, "mangle") == 0)) {
 		DEBUGP("trigger_check: bad table `%s'.\n", tablename);
 		return 0;
 	}
-	/*if (targinfosize != IPT_ALIGN(sizeof(*info))) {
-		DEBUGP("trigger_check: size %u.\n", targinfosize);
-		return 0;
-	}*/
 	if (hook_mask & ~((1 << NF_IP_PRE_ROUTING) | (1 << NF_IP_FORWARD))) {
 		DEBUGP("trigger_check: bad hooks %x.\n", hook_mask);
 		return 0;
@@ -349,25 +422,41 @@ trigger_check(const char *tablename,
 	return 1;
 }
 
-static struct ipt_target trigger_reg = {
-	.name		= "TRIGGER",
-	.target		= trigger_target,
+
+static struct xt_target redirect_reg = { 
+	.name 		= "TRIGGER",
+	.family		= AF_INET,
+	.target 	= trigger_target, 
 	.targetsize	= sizeof(struct ipt_trigger_info),
-	.table		= "nat",
-	.hooks		= (1 << NF_IP_PRE_ROUTING) | (1 << NF_IP_LOCAL_OUT),
-	.checkentry	= trigger_check,
-	.me		= THIS_MODULE,
+	/*.table		= "nat",*/
+	/*.hooks		= (1 << NF_IP_LOCAL_IN) | (1 << NF_IP_FORWARD) | (1 << NF_IP_LOCAL_OUT),*/
+	.checkentry 	= trigger_check,
+	.me 		= THIS_MODULE,
 };
-static int __init ipt_trigger_init(void)
+/*
+static struct xt_target ipt_reject_reg = {
+	.name		= "REJECT",
+	.family		= AF_INET,
+	.target		= reject,
+	.targetsize	= sizeof(struct ipt_reject_info),
+	.table		= "filter",
+	.hooks		= (1 << NF_IP_LOCAL_IN) | (1 << NF_IP_FORWARD) |
+			  (1 << NF_IP_LOCAL_OUT),
+	.checkentry	= check,
+	.me		= THIS_MODULE,
+};*/
+
+static int __init init(void)
 {
-	return ipt_register_target(&trigger_reg);
+    DEBUGP("[TRIGGER]%s: \n", __FUNCTION__);
+	return ipt_register_target(&redirect_reg);
 }
 
-static void __exit ipt_trigger_fini(void)
+static void __exit fini(void)
 {
-	ipt_unregister_target(&trigger_reg);
+    DEBUGP("[TRIGGER]%s: \n", __FUNCTION__);
+	ipt_unregister_target(&redirect_reg);
 }
 
-module_init(ipt_trigger_init);
-module_exit(ipt_trigger_fini);
-
+module_init(init);
+module_exit(fini);

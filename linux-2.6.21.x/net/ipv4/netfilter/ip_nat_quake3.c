@@ -39,6 +39,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
@@ -73,7 +74,11 @@ quake3_nat_help(struct ip_conntrack_expect *exp)
 	//exp->dir = !dir;
 
 	if (ip_conntrack_expect_related(exp) != 0) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) /* marklin 20080817 */
 		ip_conntrack_expect_free(exp);
+#else
+		ip_conntrack_expect_put(exp);
+#endif
 		return NF_DROP;
 	}
 

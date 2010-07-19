@@ -1292,7 +1292,7 @@ do_replace(void __user *user, unsigned int len)
 	return ret;
 }
 
-extern struct net_device *wan_dev;
+struct net_device *wan_dev;
 
 /* We're lazy, and add to the first CPU; overflow works its fey magic
  * and everything is OK. */
@@ -1301,6 +1301,7 @@ add_counter_to_entry(struct ipt_entry *e,
 		     const struct xt_counters addme[],
 		     unsigned int *i)
 {
+
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
         struct ipt_entry_target *f=ipt_get_target(e);
 

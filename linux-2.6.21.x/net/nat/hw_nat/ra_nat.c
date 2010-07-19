@@ -30,7 +30,7 @@
  *
  */
 
-#define DO_PRINTK 1
+//#define DO_PRINTK 1
 
 #include <linux/config.h>
 #include <linux/version.h>
@@ -70,7 +70,6 @@
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 extern struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP];
-
 
 struct FoeEntry    *PpeFoeBase;
 dma_addr_t	    PpePhyFoeBase;
@@ -296,7 +295,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
         FoeDumpPkt(skb);
     }
 
-#if 1 /* 2009-0722 Mook: disable WLAN hardware nat */
+#if 0 /* 2009-0722 Mook: disable WLAN hardware nat */
     if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
 			    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
 

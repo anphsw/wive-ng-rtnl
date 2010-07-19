@@ -2,11 +2,12 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  
  */
 
 /* Kernel module implementing an IP set type: the iptree type */
 
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/ip.h>
 #include <linux/skbuff.h>
@@ -19,23 +20,46 @@
 #include <asm/bitops.h>
 #include <linux/spinlock.h>
 
+/* Backward compatibility */
+#ifndef __nocast
+#define __nocast
+#endif
+
 #include <linux/netfilter_ipv4/ip_set_iptree.h>
+
+static int limit = MAX_RANGE;
 
 /* Garbage collection interval in seconds: */
 #define IPTREE_GC_TIME		5*60
-/* Sleep so many milliseconds before trying again
- * to delete the gc timer at destroying a set */
+/* Sleep so many milliseconds before trying again 
+ * to delete the gc timer at destroying/flushing a set */ 
 #define IPTREE_DESTROY_SLEEP	100
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+static struct kmem_cache *branch_cachep;
+static struct kmem_cache *leaf_cachep;
+#else
 static kmem_cache_t *branch_cachep;
 static kmem_cache_t *leaf_cachep;
+#endif
 
+#if defined(__LITTLE_ENDIAN)
 #define ABCD(a,b,c,d,addrp) do {		\
 	a = ((unsigned char *)addrp)[3];	\
 	b = ((unsigned char *)addrp)[2];	\
 	c = ((unsigned char *)addrp)[1];	\
 	d = ((unsigned char *)addrp)[0];	\
 } while (0)
+#elif defined(__BIG_ENDIAN)
+#define ABCD(a,b,c,d,addrp) do {		\
+	a = ((unsigned char *)addrp)[0];	\
+	b = ((unsigned char *)addrp)[1];	\
+	c = ((unsigned char *)addrp)[2];	\
+	d = ((unsigned char *)addrp)[3];	\
+} while (0)
+#else
+#error "Please fix asm/byteorder.h"
+#endif /* __LITTLE_ENDIAN */
 
 #define TESTIP_WALK(map, elem, branch) do {	\
 	if ((map)->tree[elem]) {		\
@@ -53,6 +77,9 @@ __testip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 	struct ip_set_iptreed *dtree;
 	unsigned char a,b,c,d;
 
+	if (!ip)
+		return -ERANGE;
+	
 	*hash_ip = ip;
 	ABCD(a, b, c, d, hash_ip);
 	DP("%u %u %u %u timeout %u", a, b, c, d, map->timeout);
@@ -60,15 +87,16 @@ __testip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 	TESTIP_WALK(btree, b, ctree);
 	TESTIP_WALK(ctree, c, dtree);
 	DP("%lu %lu", dtree->expires[d], jiffies);
-	return !!(map->timeout ? (time_after(dtree->expires[d], jiffies))
-			       : dtree->expires[d]);
+	return dtree->expires[d]
+	       && (!map->timeout
+		   || time_after(dtree->expires[d], jiffies));
 }
 
 static int
 testip(struct ip_set *set, const void *data, size_t size,
        ip_set_ip_t *hash_ip)
 {
-	struct ip_set_req_iptree *req =
+	struct ip_set_req_iptree *req = 
 	    (struct ip_set_req_iptree *) data;
 
 	if (size != sizeof(struct ip_set_req_iptree)) {
@@ -81,21 +109,33 @@ testip(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-testip_kernel(struct ip_set *set,
+testip_kernel(struct ip_set *set, 
 	      const struct sk_buff *skb,
-	      u_int32_t flags,
-	      ip_set_ip_t *hash_ip)
+	      ip_set_ip_t *hash_ip,
+	      const u_int32_t *flags,
+	      unsigned char index)
 {
 	int res;
-
+	
 	DP("flag: %s src: %u.%u.%u.%u dst: %u.%u.%u.%u",
-	   flags & IPSET_SRC ? "SRC" : "DST",
+	   flags[index] & IPSET_SRC ? "SRC" : "DST",
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	   NIPQUAD(ip_hdr(skb)->saddr),
+	   NIPQUAD(ip_hdr(skb)->daddr));
+#else
 	   NIPQUAD(skb->nh.iph->saddr),
 	   NIPQUAD(skb->nh.iph->daddr));
+#endif
 
 	res =  __testip(set,
-			ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-						: skb->nh.iph->daddr),
+			ntohl(flags[index] & IPSET_SRC 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+				? ip_hdr(skb)->saddr 
+				: ip_hdr(skb)->daddr),
+#else
+				? skb->nh.iph->saddr 
+				: skb->nh.iph->daddr),
+#endif
 			hash_ip);
 	return (res < 0 ? 0 : res);
 }
@@ -106,14 +146,14 @@ testip_kernel(struct ip_set *set,
 		branch = (map)->tree[elem];			\
 	} else {						\
 		branch = (type *)				\
-			kmem_cache_alloc(cachep, GFP_KERNEL);	\
+			kmem_cache_alloc(cachep, GFP_ATOMIC);	\
 		if (branch == NULL)				\
 			return -ENOMEM;				\
 		memset(branch, 0, sizeof(*branch));		\
 		(map)->tree[elem] = branch;			\
 		DP("alloc %u", elem);				\
 	}							\
-} while (0)
+} while (0)	
 
 static inline int
 __addip(struct ip_set *set, ip_set_ip_t ip, unsigned int timeout,
@@ -125,7 +165,12 @@ __addip(struct ip_set *set, ip_set_ip_t ip, unsigned int timeout,
 	struct ip_set_iptreed *dtree;
 	unsigned char a,b,c,d;
 	int ret = 0;
-
+	
+	if (!ip || map->elements >= limit)
+		/* We could call the garbage collector
+		 * but it's probably overkill */
+		return -ERANGE;
+	
 	*hash_ip = ip;
 	ABCD(a, b, c, d, hash_ip);
 	DP("%u %u %u %u timeout %u", a, b, c, d, timeout);
@@ -136,7 +181,12 @@ __addip(struct ip_set *set, ip_set_ip_t ip, unsigned int timeout,
 	    && (!map->timeout || time_after(dtree->expires[d], jiffies)))
 	    	ret = -EEXIST;
 	dtree->expires[d] = map->timeout ? (timeout * HZ + jiffies) : 1;
+	/* Lottery: I won! */
+	if (dtree->expires[d] == 0)
+		dtree->expires[d] = 1;
 	DP("%u %lu", d, dtree->expires[d]);
+	if (ret == 0)
+		map->elements++;
 	return ret;
 }
 
@@ -145,7 +195,7 @@ addip(struct ip_set *set, const void *data, size_t size,
       ip_set_ip_t *hash_ip)
 {
 	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
-	struct ip_set_req_iptree *req =
+	struct ip_set_req_iptree *req = 
 		(struct ip_set_req_iptree *) data;
 
 	if (size != sizeof(struct ip_set_req_iptree)) {
@@ -161,14 +211,23 @@ addip(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-addip_kernel(struct ip_set *set, const struct sk_buff *skb,
-	     u_int32_t flags, ip_set_ip_t *hash_ip)
+addip_kernel(struct ip_set *set, 
+	     const struct sk_buff *skb,
+	     ip_set_ip_t *hash_ip,
+	     const u_int32_t *flags,
+	     unsigned char index)
 {
 	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
 
 	return __addip(set,
-		       ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-					       : skb->nh.iph->daddr),
+		       ntohl(flags[index] & IPSET_SRC 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+				? ip_hdr(skb)->saddr 
+				: ip_hdr(skb)->daddr),
+#else
+		       		? skb->nh.iph->saddr 
+				: skb->nh.iph->daddr),
+#endif
 		       map->timeout,
 		       hash_ip);
 }
@@ -180,7 +239,7 @@ addip_kernel(struct ip_set *set, const struct sk_buff *skb,
 		return -EEXIST;			\
 } while (0)
 
-static inline int
+static inline int 
 __delip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 {
 	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
@@ -188,7 +247,10 @@ __delip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 	struct ip_set_iptreec *ctree;
 	struct ip_set_iptreed *dtree;
 	unsigned char a,b,c,d;
-
+	
+	if (!ip)
+		return -ERANGE;
+		
 	*hash_ip = ip;
 	ABCD(a, b, c, d, hash_ip);
 	DELIP_WALK(map, a, btree);
@@ -197,6 +259,7 @@ __delip(struct ip_set *set, ip_set_ip_t ip, ip_set_ip_t *hash_ip)
 
 	if (dtree->expires[d]) {
 		dtree->expires[d] = 0;
+		map->elements--;
 		return 0;
 	}
 	return -EEXIST;
@@ -219,17 +282,26 @@ delip(struct ip_set *set, const void *data, size_t size,
 }
 
 static int
-delip_kernel(struct ip_set *set, const struct sk_buff *skb,
-	     u_int32_t flags, ip_set_ip_t *hash_ip)
+delip_kernel(struct ip_set *set, 
+	     const struct sk_buff *skb,
+	     ip_set_ip_t *hash_ip,
+	     const u_int32_t *flags,
+	     unsigned char index)
 {
 	return __delip(set,
-		       ntohl(flags & IPSET_SRC ? skb->nh.iph->saddr
-					       : skb->nh.iph->daddr),
+		       ntohl(flags[index] & IPSET_SRC 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+				? ip_hdr(skb)->saddr 
+				: ip_hdr(skb)->daddr),
+#else
+		       		? skb->nh.iph->saddr 
+				: skb->nh.iph->daddr),
+#endif
 		       hash_ip);
 }
 
 #define LOOP_WALK_BEGIN(map, i, branch) \
-	for (i = 0; i < 255; i++) {	\
+	for (i = 0; i < 256; i++) {	\
 		if (!(map)->tree[i])	\
 			continue;	\
 		branch = (map)->tree[i]
@@ -243,7 +315,7 @@ static void ip_tree_gc(unsigned long ul_set)
 	struct ip_set_iptreeb *btree;
 	struct ip_set_iptreec *ctree;
 	struct ip_set_iptreed *dtree;
-	unsigned char a,b,c,d;
+	unsigned int a,b,c,d;
 	unsigned char i,j,k;
 
 	i = j = k = 0;
@@ -252,15 +324,16 @@ static void ip_tree_gc(unsigned long ul_set)
 	LOOP_WALK_BEGIN(map, a, btree);
 	LOOP_WALK_BEGIN(btree, b, ctree);
 	LOOP_WALK_BEGIN(ctree, c, dtree);
-	for (d = 0; d < 255; d++) {
+	for (d = 0; d < 256; d++) {
 		if (dtree->expires[d]) {
 			DP("gc: %u %u %u %u: expires %lu jiffies %lu",
 			    a, b, c, d,
 			    dtree->expires[d], jiffies);
 			if (map->timeout
-			    && time_before(dtree->expires[d], jiffies))
+			    && time_before(dtree->expires[d], jiffies)) {
 			    	dtree->expires[d] = 0;
-			else
+			    	map->elements--;
+			} else
 				k = 1;
 		}
 	}
@@ -300,7 +373,22 @@ static void ip_tree_gc(unsigned long ul_set)
 	}
 	LOOP_WALK_END;
 	write_unlock_bh(&set->lock);
+	
+	map->gc.expires = jiffies + map->gc_interval * HZ;
+	add_timer(&map->gc);
+}
 
+static inline void init_gc_timer(struct ip_set *set)
+{
+	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
+
+	/* Even if there is no timeout for the entries,
+	 * we still have to call gc because delete
+	 * do not clean up empty branches */
+	map->gc_interval = IPTREE_GC_TIME;
+	init_timer(&map->gc);
+	map->gc.data = (unsigned long) set;
+	map->gc.function = ip_tree_gc;
 	map->gc.expires = jiffies + map->gc_interval * HZ;
 	add_timer(&map->gc);
 }
@@ -326,17 +414,10 @@ static int create(struct ip_set *set, const void *data, size_t size)
 	}
 	memset(map, 0, sizeof(*map));
 	map->timeout = req->timeout;
+	map->elements = 0;
 	set->data = map;
 
-	/* If there is no timeout for the entries,
-	 * we still have to call gc because delete
-	 * do not clean up empty branches */
-	map->gc_interval = IPTREE_GC_TIME;
-	init_timer(&map->gc);
-	map->gc.data = (unsigned long) set;
-	map->gc.function = ip_tree_gc;
-	map->gc.expires = jiffies + map->gc_interval * HZ;
-	add_timer(&map->gc);
+	init_gc_timer(set);
 
 	return 0;
 }
@@ -357,12 +438,14 @@ static void __flush(struct ip_set_iptree *map)
 	LOOP_WALK_END;
 	kmem_cache_free(branch_cachep, btree);
 	LOOP_WALK_END;
+	map->elements = 0;
 }
 
 static void destroy(struct ip_set *set)
 {
 	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
 
+	/* gc might be running */
 	while (!del_timer(&map->gc))
 		msleep(IPTREE_DESTROY_SLEEP);
 	__flush(map);
@@ -374,10 +457,15 @@ static void flush(struct ip_set *set)
 {
 	struct ip_set_iptree *map = (struct ip_set_iptree *) set->data;
 	unsigned int timeout = map->timeout;
-
+	
+	/* gc might be running */
+	while (!del_timer(&map->gc))
+		msleep(IPTREE_DESTROY_SLEEP);
 	__flush(map);
 	memset(map, 0, sizeof(*map));
 	map->timeout = timeout;
+
+	init_gc_timer(set);
 }
 
 static void list_header(const struct ip_set *set, void *data)
@@ -395,13 +483,13 @@ static int list_members_size(const struct ip_set *set)
 	struct ip_set_iptreeb *btree;
 	struct ip_set_iptreec *ctree;
 	struct ip_set_iptreed *dtree;
-	unsigned char a,b,c,d;
+	unsigned int a,b,c,d;
 	unsigned int count = 0;
 
 	LOOP_WALK_BEGIN(map, a, btree);
 	LOOP_WALK_BEGIN(btree, b, ctree);
 	LOOP_WALK_BEGIN(ctree, c, dtree);
-	for (d = 0; d < 255; d++) {
+	for (d = 0; d < 256; d++) {
 		if (dtree->expires[d]
 		    && (!map->timeout || time_after(dtree->expires[d], jiffies)))
 		    	count++;
@@ -420,19 +508,19 @@ static void list_members(const struct ip_set *set, void *data)
 	struct ip_set_iptreeb *btree;
 	struct ip_set_iptreec *ctree;
 	struct ip_set_iptreed *dtree;
-	unsigned char a,b,c,d;
+	unsigned int a,b,c,d;
 	size_t offset = 0;
 	struct ip_set_req_iptree *entry;
 
 	LOOP_WALK_BEGIN(map, a, btree);
 	LOOP_WALK_BEGIN(btree, b, ctree);
 	LOOP_WALK_BEGIN(ctree, c, dtree);
-	for (d = 0; d < 255; d++) {
+	for (d = 0; d < 256; d++) {
 		if (dtree->expires[d]
 		    && (!map->timeout || time_after(dtree->expires[d], jiffies))) {
 		    	entry = (struct ip_set_req_iptree *)(data + offset);
 		    	entry->ip = ((a << 24) | (b << 16) | (c << 8) | d);
-		    	entry->timeout = !map->timeout ? 0
+		    	entry->timeout = !map->timeout ? 0 
 				: (dtree->expires[d] - jiffies)/HZ;
 			offset += sizeof(struct ip_set_req_iptree);
 		}
@@ -444,7 +532,7 @@ static void list_members(const struct ip_set *set, void *data)
 
 static struct ip_set_type ip_set_iptree = {
 	.typename		= SETTYPE_NAME,
-	.typecode		= IPSET_TYPE_IP,
+	.features		= IPSET_TYPE_IP | IPSET_DATA_SINGLE,
 	.protocol_version	= IP_SET_PROTOCOL_VERSION,
 	.create			= &create,
 	.destroy		= &destroy,
@@ -466,22 +554,36 @@ static struct ip_set_type ip_set_iptree = {
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>");
 MODULE_DESCRIPTION("iptree type of IP sets");
+module_param(limit, int, 0600);
+MODULE_PARM_DESC(limit, "maximal number of elements stored in the sets");
 
-static int __init init(void)
+static int __init ip_set_iptree_init(void)
 {
 	int ret;
-
+	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+	branch_cachep = kmem_cache_create("ip_set_iptreeb",
+				sizeof(struct ip_set_iptreeb),
+				0, 0, NULL);
+#else
 	branch_cachep = kmem_cache_create("ip_set_iptreeb",
 				sizeof(struct ip_set_iptreeb),
 				0, 0, NULL, NULL);
+#endif
 	if (!branch_cachep) {
 		printk(KERN_ERR "Unable to create ip_set_iptreeb slab cache\n");
 		ret = -ENOMEM;
 		goto out;
 	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+	leaf_cachep = kmem_cache_create("ip_set_iptreed",
+				sizeof(struct ip_set_iptreed),
+				0, 0, NULL);
+#else
 	leaf_cachep = kmem_cache_create("ip_set_iptreed",
 				sizeof(struct ip_set_iptreed),
 				0, 0, NULL, NULL);
+#endif
 	if (!leaf_cachep) {
 		printk(KERN_ERR "Unable to create ip_set_iptreed slab cache\n");
 		ret = -ENOMEM;
@@ -492,13 +594,13 @@ static int __init init(void)
 		goto out;
 
 	kmem_cache_destroy(leaf_cachep);
-    free_branch:
+    free_branch:	
 	kmem_cache_destroy(branch_cachep);
     out:
 	return ret;
 }
 
-static void __exit fini(void)
+static void __exit ip_set_iptree_fini(void)
 {
 	/* FIXME: possible race with ip_set_create() */
 	ip_set_unregister_set_type(&ip_set_iptree);
@@ -506,5 +608,5 @@ static void __exit fini(void)
 	kmem_cache_destroy(branch_cachep);
 }
 
-module_init(init);
-module_exit(fini);
+module_init(ip_set_iptree_init);
+module_exit(ip_set_iptree_fini);

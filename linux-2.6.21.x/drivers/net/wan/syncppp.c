@@ -264,8 +264,6 @@ static void sppp_input (struct net_device *dev, struct sk_buff *skb)
 					h->address, h->control, ntohs (h->protocol));
 			goto drop;
 		}
-		//printk(" ***[K_s] recv frame [%x]***\n", ntohs (h->protocol));	// tmp test
-
 		switch (ntohs (h->protocol)) {
 		default:
 			if (sp->lcp.state == LCP_STATE_OPENED)
@@ -349,7 +347,6 @@ invalid:
 		printk (KERN_WARNING "%s: invalid input packet <0x%x 0x%x 0x%x>\n",
 			dev->name, h->address, h->control, ntohs (h->protocol));
 drop:
-	printk("[K_s] drop packet\n");	// tmp test
 	kfree_skb(skb);
 done:
 	spin_unlock_irqrestore(&sp->lock, flags);
@@ -408,7 +405,6 @@ static void sppp_keepalive (unsigned long dummy)
 	struct sppp *sp;
 	unsigned long flags;
 
-	printk("[K] send keepalive\n");	// tmp test
 	spin_lock_irqsave(&spppq_lock, flags);
 
 	for (sp=spppq; sp; sp=sp->pp_next) 
@@ -809,7 +805,6 @@ static void sppp_cp_send (struct sppp *sp, u16 proto, u8 type,
 	if (skb==NULL)
 		return;
 
-	printk(" ***[K_s] send frame [%x]***\n", protocol);	// tmp test
 	skb_reserve(skb,dev->hard_header_len);
 	
 	h = (struct ppp_header *)skb_put(skb, sizeof(struct ppp_header));
@@ -1237,7 +1232,6 @@ static void sppp_ipcp_input (struct sppp *sp, struct sk_buff *skb)
 	switch (h->type) {
 	default:
 		/* Unknown packet type -- send Code-Reject packet. */
-		printk("[K] unknown type, send Reject\n");	// tmp test
 		sppp_cp_send (sp, PPP_IPCP, IPCP_CODE_REJ, ++sp->pp_seq, len, h);
 		break;
 	case IPCP_CONF_REQ:

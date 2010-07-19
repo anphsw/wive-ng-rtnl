@@ -15,9 +15,14 @@
 
 #include <linux/module.h>
 #include <linux/skbuff.h>
+#include <linux/version.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_time.h>
 #include <linux/time.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#error Please use the xt_time match
+#endif
 
 MODULE_AUTHOR("Fabrice MARIE <fabrice@netfilter.org>");
 MODULE_DESCRIPTION("Match arrival timestamp/date");
@@ -46,51 +51,62 @@ static int
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
-      const struct xt_match *match, 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
+      const struct xt_match *match,
+#endif
       const void *matchinfo,
       int offset,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
       unsigned int protoff,
+#endif
       int *hotdrop)
 {
-	/* FIXME: This is due to the transation error of do_match()
-	 *        , but it doesn't occur at 2.4.x kernel.
-	 */
 	const struct ipt_time_info *info = matchinfo;   /* match info for rule */
-
 	struct tm currenttime;                          /* time human readable */
 	u_int8_t days_of_week[7] = {64, 32, 16, 8, 4, 2, 1};
 	u_int16_t packet_time;
-	struct timeval kerneltimeval;
-	time_t packet_local_time;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	struct timeval tv;
+#endif
 
-	/* if kerneltime=1, we don't read the skb->timestamp but kernel time instead */
-	if (info->kerneltime)
-	{
-		do_gettimeofday(&kerneltimeval);
-		packet_local_time = kerneltimeval.tv_sec;
-	}
-	else{
-		/* We might not have a timestamp, get one */
-		if (skb->tstamp.off_sec == 0)
-			__net_timestamp((struct sk_buff *)skb);
-		packet_local_time = skb->tstamp.off_sec;
-	}
+	/* We might not have a timestamp, get one */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	if (skb->tstamp.tv64 == 0)
+#else
+	if (skb->tstamp.off_sec == 0)
+#endif
+		__net_timestamp((struct sk_buff *)skb);
 
 	/* First we make sure we are in the date start-stop boundaries */
-	//if ((packet_local_time < info->date_start) || (packet_local_time > info->date_stop))
-	//	return 0; /* We are outside the date boundaries */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	tv = ktime_to_timeval(skb->tstamp);
+	if ((tv.tv_sec < info->date_start) || (tv.tv_sec > info->date_stop))
+#else
+	if ((skb->tstamp.off_sec < info->date_start) || (skb->tstamp.off_sec > info->date_stop))
+#endif
+		return 0; /* We are outside the date boundaries */
 
 	/* Transform the timestamp of the packet, in a human readable form */
-	localtime(/*&*/packet_local_time, &currenttime);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	localtime(tv.tv_sec, &currenttime);
+#else
+	localtime(skb->tstamp.off_sec, &currenttime);
+#endif
+
 
 	/* check if we match this timestamp, we start by the days... */
 	if ((days_of_week[currenttime.tm_wday] & info->days_match) != days_of_week[currenttime.tm_wday])
 		return 0; /* the day doesn't match */
 
-	/* ... check the time now */
+	/* ... check the time now, both vesions: "start < stop" and "start > stop" (midnight cross) */
 	packet_time = (currenttime.tm_hour * 60) + currenttime.tm_min;
-	if ((packet_time < info->time_start) || (packet_time > info->time_stop))
-		return 0;
+	if (info->time_start < info->time_stop) {
+		if ((packet_time < info->time_start) || (packet_time > info->time_stop))
+			return 0;
+	} else {
+		if ((packet_time < info->time_start) && (packet_time > info->time_stop))
+			return 0;
+	}
 
 	/* here we match ! */
 	return 1;
@@ -98,65 +114,73 @@ match(const struct sk_buff *skb,
 
 static int
 checkentry(const char *tablename,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
            const void *ip,
-           const struct xt_match *match, 
+#else
+           const struct ipt_ip *ip,
+#endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
+            const struct xt_match *match,
+#endif
            void *matchinfo,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+           unsigned int matchsize,
+#endif
            unsigned int hook_mask)
 {
-	/* FIXME: This is due to the transation error of check_match()
-	 *        , but it doesn't occur at 2.4.x kernel.
-	 */
 	struct ipt_time_info *info = matchinfo;   /* match info for rule */
-	/* First, check that we are in the correct hooks */
-	if (hook_mask
-            & ~((1 << NF_IP_PRE_ROUTING) | (1 << NF_IP_LOCAL_IN) | (1 << NF_IP_FORWARD) | (1 << NF_IP_LOCAL_OUT)))
-	{
-		printk("ipt_time: error, only valid for PRE_ROUTING, LOCAL_IN, FORWARD and OUTPUT)\n");
-		return 0;
-	}
-	/* we use the kerneltime if we are in forward or output */
-	info->kerneltime = 1;
-	if (hook_mask & ~((1 << NF_IP_FORWARD) | (1 << NF_IP_LOCAL_OUT))) 
-		/* we use the skb time */
-		info->kerneltime = 0;
 
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,17)
 	/* Check the size */
-/*
-	if (matchsize != IPT_ALIGN(sizeof(struct ipt_time_info))){
-		printk(KERN_WARNING "ipt_time: matchsize[%d] < size of struct ipt_time_info[%d]\n", matchsize, IPT_ALIGN(sizeof(struct ipt_time_info)));
+	if (matchsize != IPT_ALIGN(sizeof(struct ipt_time_info)))
 		return 0;
-	}
-*/
+#endif
+
 	/* Now check the coherence of the data ... */
 	if ((info->time_start > 1439) ||        /* 23*60+59 = 1439*/
 	    (info->time_stop  > 1439))
 	{
-		printk(KERN_WARNING "ipt_time: invalid argument\n");
+		printk(KERN_WARNING "ipt_time: invalid argument - start or stop time greater than 23:59h\n");
 		return 0;
 	}
 
 	return 1;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 static struct xt_match time_match = {
+#else
+static struct ipt_match time_match = {
+#endif
 	.name		= "time",
-	.family = AF_INET, 
-	.match		= match,
-	.checkentry	= checkentry,
-	.me		= THIS_MODULE,
-	.matchsize	= sizeof(struct ipt_time_info)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+	.family		= AF_INET,
+#endif
+	.match		= &match,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
+	.matchsize      = sizeof(struct ipt_time_info),
+#endif
+	.checkentry	= &checkentry,
+	.me = THIS_MODULE
 };
 
 static int __init init(void)
 {
 	printk("ipt_time loading\n");
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	return xt_register_match(&time_match);
+#else
+	return ipt_register_match(&time_match);
+#endif
 }
 
 static void __exit fini(void)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	xt_unregister_match(&time_match);
+#else
+	ipt_unregister_match(&time_match);
+#endif
 	printk("ipt_time unloaded\n");
 }
 

@@ -109,7 +109,7 @@ static unsigned int ip_nat_sip(struct sk_buff **pskb,
 	dataoff = (*pskb)->nh.iph->ihl*4 + sizeof(struct udphdr);
 	datalen = (*pskb)->len - dataoff;
 	if (datalen < sizeof("SIP/2.0") - 1)
-		return NF_ACCEPT;
+		return NF_DROP;
 
 	addr_map_init(ct, &map);
 
@@ -221,29 +221,6 @@ static unsigned int mangle_sdp(struct sk_buff **pskb,
 	return mangle_content_len(pskb, ctinfo, ct, dptr);
 }
 
-static void ip_nat_sdp_expect(struct nf_conn *ct,
-			      struct nf_conntrack_expect *exp)
-{
-	struct nf_nat_range range;
-
-	/* This must be a fresh one. */
-	BUG_ON(ct->status & IPS_NAT_DONE_MASK);
-
-	/* For DST manip, map port here to where it's expected. */
-	range.flags = (IP_NAT_RANGE_MAP_IPS | IP_NAT_RANGE_PROTO_SPECIFIED);
-	range.min = range.max = exp->saved_proto;
-	range.min_ip = range.max_ip = exp->saved_ip;
-	/* hook doesn't matter, but it has to do destination manip */
-	nf_nat_setup_info(ct, &range, NF_IP_PRE_ROUTING);
-
-	/* Change src to where master sends to */
-	range.flags = IP_NAT_RANGE_MAP_IPS;
-	range.min_ip = range.max_ip
-		= ct->master->tuplehash[!exp->dir].tuple.dst.u3.ip;
-	/* hook doesn't matter, but it has to do source manip */
-	nf_nat_setup_info(ct, &range, NF_IP_POST_ROUTING);
-}
-
 /* So, this packet has hit the connection tracking matching code.
    Mangle it, and change the expectation to match the new version. */
 static unsigned int ip_nat_sdp(struct sk_buff **pskb,
@@ -259,20 +236,15 @@ static unsigned int ip_nat_sdp(struct sk_buff **pskb,
 	DEBUGP("ip_nat_sdp():\n");
 
 	/* Connection will come from reply */
-	if (ct->tuplehash[dir].tuple.src.u3.ip ==
-	    ct->tuplehash[!dir].tuple.dst.u3.ip)
-		newip = exp->tuple.dst.u3.ip;
-	else
-		newip = ct->tuplehash[!dir].tuple.dst.u3.ip;
+	newip = ct->tuplehash[!dir].tuple.dst.u3.ip;
 
-	exp->saved_ip = exp->tuple.dst.u3.ip;
 	exp->tuple.dst.u3.ip = newip;
 	exp->saved_proto.udp.port = exp->tuple.dst.u.udp.port;
 	exp->dir = !dir;
 
 	/* When you see the packet, we need to NAT it the same as the
 	   this one. */
-	exp->expectfn = ip_nat_sdp_expect;
+	exp->expectfn = nf_nat_follow_master;
 
 	/* Try to get same port: if not, try to change it. */
 	for (port = ntohs(exp->saved_proto.udp.port); port != 0; port++) {
