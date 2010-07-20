@@ -1625,7 +1625,9 @@ static void tcp_mark_head_lost(struct sock *sk,
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct sk_buff *skb;
-	int cnt;
+	int cnt, oldcnt;
+	int err;
+	unsigned int mss;
                                                                                                                              
         //backport from 2.6.33.2 A packet is marked as lost in case packets == 0, although nothing should be done.           
         if (packets == 0)                                                                                                    
@@ -1645,10 +1647,27 @@ static void tcp_mark_head_lost(struct sock *sk,
 		/* this is not the most efficient way to do this... */
 		tp->lost_skb_hint = skb;
 		tp->lost_cnt_hint = cnt;
-		cnt += tcp_skb_pcount(skb);
-		if (cnt > packets || after(TCP_SKB_CB(skb)->end_seq, high_seq))
+
+		if (after(TCP_SKB_CB(skb)->end_seq, tp->high_seq))
 			break;
-		if (!(TCP_SKB_CB(skb)->sacked&TCPCB_TAGBITS)) {
+
+		oldcnt = cnt;
+ 		if (IsFack(tp) || IsReno(tp) ||
+ 		    (TCP_SKB_CB(skb)->sacked & TCPCB_SACKED_ACKED))
+			cnt += tcp_skb_pcount(skb);
+
+		if (cnt > packets) {
+			if (tp->rx_opt.sack_ok || (oldcnt >= packets))
+				break;
+
+			mss = skb_shinfo(skb)->gso_size;
+			err = tcp_fragment(sk, skb, (packets - oldcnt) * mss, mss);
+			if (err < 0)
+				break;
+			cnt = packets;
+		}
+
+		if (!(TCP_SKB_CB(skb)->sacked & (TCPCB_SACKED_ACKED|TCPCB_LOST))) {
 			TCP_SKB_CB(skb)->sacked |= TCPCB_LOST;
 			tp->lost_out += tcp_skb_pcount(skb);
 
@@ -1695,7 +1714,7 @@ static void tcp_update_scoreboard(struct sock *sk)
 			if (!tcp_skb_timedout(sk, skb))
 				break;
 
-			if (!(TCP_SKB_CB(skb)->sacked&TCPCB_TAGBITS)) {
+			if (!(TCP_SKB_CB(skb)->sacked & (TCPCB_SACKED_ACKED|TCPCB_LOST))) {
 				TCP_SKB_CB(skb)->sacked |= TCPCB_LOST;
 				tp->lost_out += tcp_skb_pcount(skb);
 
