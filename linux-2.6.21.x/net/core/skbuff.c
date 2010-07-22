@@ -1562,7 +1562,7 @@ static inline void skb_split_inside_header(struct sk_buff *skb,
 {
 	int i;
 
-	memcpy(skb_put(skb1, pos - len), skb->data + len, pos - len);
+	skb_copy_from_linear_data_offset(skb, len, skb_put(skb1, pos - len), pos - len);
 
 	/* And move data appendix as is. */
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
@@ -1952,7 +1952,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		nskb->mac.raw = nskb->data;
 		nskb->nh.raw = nskb->data + skb->mac_len;
 		nskb->h.raw = nskb->nh.raw + (skb->h.raw - skb->nh.raw);
-		memcpy(skb_put(nskb, doffset), skb->data, doffset);
+		skb_copy_from_linear_data(skb, skb_put(nskb, doffset), doffset);
 
 		if (!sg) {
 			nskb->csum = skb_copy_and_csum_bits(skb, offset,
@@ -1966,7 +1966,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 
 		nskb->ip_summed = CHECKSUM_PARTIAL;
 		nskb->csum = skb->csum;
-		memcpy(skb_put(nskb, hsize), skb->data + offset, hsize);
+		skb_copy_from_linear_data_offset(skb, offset, skb_put(nskb, hsize), hsize);
 
 		while (pos < offset + len) {
 			BUG_ON(i >= nfrags);
