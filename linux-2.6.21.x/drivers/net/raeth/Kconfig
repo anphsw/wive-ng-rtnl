@@ -116,3 +116,4 @@ config  MAC_TO_GIGAPHY_MODE_ADDR
 config RAETH_GMAC2
 	bool "Pseudo GMAC2 support"
 	depends on RAETH
+	default n
