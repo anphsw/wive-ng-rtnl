@@ -378,7 +378,6 @@ static irqreturn_t uhci_irq(struct usb_hcd *hcd)
 {
 	struct uhci_hcd *uhci = hcd_to_uhci(hcd);
 	unsigned short status;
-	unsigned long flags;
 
 	/*
 	 * Read the interrupt status, and write it back to clear the
@@ -398,7 +397,7 @@ static irqreturn_t uhci_irq(struct usb_hcd *hcd)
 			dev_err(uhci_dev(uhci), "host controller process "
 					"error, something bad happened!\n");
 		if (status & USBSTS_HCH) {
-			spin_lock_irqsave(&uhci->lock, flags);
+			spin_lock(&uhci->lock);
 			if (uhci->rh_state >= UHCI_RH_RUNNING) {
 				dev_err(uhci_dev(uhci),
 					"host controller halted, "
@@ -415,16 +414,16 @@ static irqreturn_t uhci_irq(struct usb_hcd *hcd)
 				 * pending unlinks */
 				mod_timer(&hcd->rh_timer, jiffies);
 			}
-			spin_unlock_irqrestore(&uhci->lock, flags);
+			spin_unlock(&uhci->lock);
 		}
 	}
 
 	if (status & USBSTS_RD)
 		usb_hcd_poll_rh_status(hcd);
 	else {
-		spin_lock_irqsave(&uhci->lock, flags);
+		spin_lock(&uhci->lock);
 		uhci_scan_schedule(uhci);
-		spin_unlock_irqrestore(&uhci->lock, flags);
+		spin_unlock(&uhci->lock);
 	}
 
 	return IRQ_HANDLED;
@@ -718,7 +717,20 @@ static int uhci_rh_suspend(struct usb_hcd *hcd)
 	spin_lock_irq(&uhci->lock);
 	if (!test_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags))
 		rc = -ESHUTDOWN;
-	else if (!uhci->dead)
+	else if (uhci->dead)
+		;		/* Dead controllers tell no tales */
+
+	/* Once the controller is stopped, port resumes that are already
+	 * in progress won't complete.  Hence if remote wakeup is enabled
+	 * for the root hub and any ports are in the middle of a resume or
+	 * remote wakeup, we must fail the suspend.
+	 */
+	else if (hcd->self.root_hub->do_remote_wakeup &&
+			uhci->resuming_ports) {
+		dev_dbg(uhci_dev(uhci), "suspend failed because a port "
+				"is resuming\n");
+		rc = -EBUSY;
+	} else
 		suspend_rh(uhci, UHCI_RH_SUSPENDED);
 	spin_unlock_irq(&uhci->lock);
 	return rc;

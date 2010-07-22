@@ -38,8 +38,6 @@
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
 
-#include "gconfig.h"
-
 /** @file
  * This file contains the implementation of the HCD Interrupt handlers.
  */

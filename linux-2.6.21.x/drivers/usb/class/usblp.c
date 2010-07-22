@@ -1466,10 +1466,6 @@ static int usblp_probe(struct usb_interface *intf,
 	/* get device id */
 	if (proc_get_usblpid(usblp) < 0) 
 		info("proc:get usblpid error!!");
-
-	/*usb_plug_flag = PRT_PLUG_ON;        // ASUS PLUG	*/
-	set_usb_plug_flag(PRT_PLUG_ON);
-	kill_proc(1, SIGTTIN, 1);	/* ASUS_HOTPLUG */
 outpan:
 	// End PaN 
 
@@ -1685,10 +1681,6 @@ static void usblp_disconnect(struct usb_interface *intf)
 	if (!usblp->used)
 		usblp_cleanup (usblp);
 	mutex_unlock (&usblp_mutex);
-
-	/*usb_plug_flag = PRT_PLUG_OFF;        // ASUS PLUG	*/
-	set_usb_plug_flag(PRT_PLUG_OFF);
-	kill_proc(1, SIGTTIN, 1);	/* ASUS_HOTPLUG */
 }
 
 static int usblp_suspend (struct usb_interface *intf, pm_message_t message)

@@ -569,7 +569,7 @@ static int get_transport(struct us_data *us)
 
 	case US_PR_CBI:
 		us->transport_name = "Control/Bulk/Interrupt";
-		us->transport = usb_stor_CBI_transport;
+		us->transport = usb_stor_CB_transport;
 		us->transport_reset = usb_stor_CB_reset;
 		us->max_lun = 7;
 		break;
@@ -971,6 +971,10 @@ static int storage_probe(struct usb_interface *intf,
 		return -ENOMEM;
 	}
 
+	/*
+	 * Allow 16-byte CDBs and thus > 2TB
+	 */
+	host->max_cmd_len = 16;
 	us = host_to_us(host);
 	memset(us, 0, sizeof(struct us_data));
 	mutex_init(&(us->dev_mutex));
@@ -1039,11 +1043,6 @@ static int storage_probe(struct usb_interface *intf,
 	scsi_host_get(us_to_host(us));
 	atomic_inc(&total_threads);
 	wake_up_process(th);
-
-	usb_plug_flag = PLUG_ON;	// ASUS PLUG
-	//printk("[K] send rc SIGTTIN\n");	// tmp test
-	kill_proc(1, SIGTTIN, 1);
-
 	return 0;
 
 	/* We come here if there are any problems */

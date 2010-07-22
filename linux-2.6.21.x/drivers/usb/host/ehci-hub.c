@@ -41,8 +41,25 @@ static int ehci_bus_suspend (struct usb_hcd *hcd)
 	if (time_before (jiffies, ehci->next_statechange))
 		msleep(5);
 
-	port = HCS_N_PORTS (ehci->hcs_params);
 	spin_lock_irq (&ehci->lock);
+
+	/* Once the controller is stopped, port resumes that are already
+	 * in progress won't complete.  Hence if remote wakeup is enabled
+	 * for the root hub and any ports are in the middle of a resume or
+	 * remote wakeup, we must fail the suspend.
+	 */
+	if (hcd->self.root_hub->do_remote_wakeup) {
+		port = HCS_N_PORTS(ehci->hcs_params);
+		while (port--) {
+			if (ehci->reset_done[port] != 0) {
+				spin_unlock_irq(&ehci->lock);
+				ehci_dbg(ehci, "suspend failed because "
+						"port %d is resuming\n",
+						port + 1);
+				return -EBUSY;
+			}
+		}
+	}
 
 	/* stop schedules, clean any completed work */
 	if (HC_IS_RUNNING(hcd->state)) {
@@ -552,8 +569,23 @@ static int ehci_hub_control (
 			status |= 1 << USB_PORT_FEAT_C_CONNECTION;
 		if (temp & PORT_PEC)
 			status |= 1 << USB_PORT_FEAT_C_ENABLE;
-		if ((temp & PORT_OCC) && !ignore_oc)
+
+		if ((temp & PORT_OCC) && !ignore_oc){
 			status |= 1 << USB_PORT_FEAT_C_OVER_CURRENT;
+
+			/*
+			 * Hubs should disable port power on over-current.
+			 * However, not all EHCI implementations do this
+			 * automatically, even if they _do_ support per-port
+			 * power switching; they're allowed to just limit the
+			 * current.  khubd will turn the power back on.
+			 */
+			if (HCS_PPC (ehci->hcs_params)){
+				ehci_writel(ehci,
+					temp & ~(PORT_RWC_BITS | PORT_POWER),
+					status_reg);
+			}
+		}
 
 		/* whoever resumes must GetPortStatus to complete it!! */
 		if (temp & PORT_RESUME) {
@@ -605,7 +637,7 @@ static int ehci_hub_control (
 			 * this bit; seems too long to spin routinely...
 			 */
 			retval = handshake(ehci, status_reg,
-					PORT_RESET, 0, 750);
+					PORT_RESET, 0, 1000);
 			if (retval != 0) {
 				ehci_err (ehci, "port %d reset error %d\n",
 					wIndex + 1, retval);

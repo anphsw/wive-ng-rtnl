@@ -32,7 +32,7 @@
 #include "usb.h"
 #include "hcd.h"
 #include "hub.h"
-#include "gconfig.h"
+
 #ifdef ENABLE_HOT_PLUG_RESET
 extern void ralink_reset(int reset_pin);
 extern int usb_hotplug_flag;
@@ -41,10 +41,6 @@ enum
     USB_PLUG_RESET   = 1<<0,
     USB_UNPLUG_RESET = 1<<1,
 };
-#endif
-
-#if HAS_USB_STATUS_LED
-#define GPIO_USB_STATUS_LED 9
 #endif
 
 #ifdef CONFIG_SYSCTL
@@ -2131,20 +2127,6 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 		if(usb_hotplug_flag&USB_PLUG_RESET)
 		   ralink_reset(7);
 #endif
-
-#if FOR_IODATA
-	/* handle by sysconfd */
-#else
-#ifdef CONFIG_RALINK_GPIO
-#if HAS_USB_STATUS_LED_STYLE_1
-    /* turn off USB LED */
-	ralink_gpio_control(GPIO_USB_STATUS_LED,1);
-#else
-    /* turn on USB LED */
-	ralink_gpio_control(GPIO_USB_STATUS_LED,0);
-#endif
-#endif
-#endif
 	/* root hub ports have a slightly longer reset period
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
@@ -2469,10 +2451,6 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	if (hdev->bus->is_b_host)
 		portchange &= ~USB_PORT_STAT_C_CONNECTION;
 #endif
-#ifdef CONFIG_RALINK_GPIO
-    /* turn off USB LED */
-	ralink_gpio_control(GPIO_USB_STATUS_LED,1);
-#endif
 	if (portchange & USB_PORT_STAT_C_CONNECTION) {
 		status = hub_port_debounce(hub, port1);
 		if (status < 0 && printk_ratelimit()) {
@@ -2774,6 +2752,9 @@ static void hub_events(void)
 				clear_port_feature(hdev, i,
 					USB_PORT_FEAT_C_SUSPEND);
 				if (hdev->children[i-1]) {
+					/* TRSMRCY = 10 msec */
+					msleep(10);
+
 					ret = remote_wakeup(hdev->
 							children[i-1]);
 					if (ret < 0)

@@ -81,8 +81,6 @@
 #include "dwc_otg_pcd.h"
 #include "dwc_otg_hcd.h"
 
-#include "gconfig.h"
-
 #define DWC_DRIVER_VERSION	"2.72a 24-JUN-2008"
 #define DWC_DRIVER_DESC		"HS OTG USB Controller driver"
 
@@ -859,17 +857,6 @@ static int __init dwc_otg_driver_init(void)
 	int error;
 	
 	*(unsigned long *)(KSEG1ADDR(RALINK_USB_OTG_BASE+0xE00)) = 0x0; //Enable USB Port
-#ifdef CONFIG_RALINK_GPIO
-#if defined(USB_POWER_GPIO)
-	ralink_gpio_control(USB_POWER_GPIO,1); // turn on 5V
-#elif HAS_USB_GPIO18
-	ralink_gpio_control(18,1); // turn on 5V
-#elif HAS_USB_GPIO12
-	ralink_gpio_control(12,1); // turn on 5V
-#else
-	ralink_gpio_control(6,1); // turn on 5V
-#endif
-#endif
 	lmdev = kzalloc(sizeof(struct lm_device), GFP_KERNEL);
 	if (!lmdev)
 	{
@@ -911,17 +898,6 @@ static void __exit dwc_otg_driver_cleanup(void)
 	driver_remove_file(&dwc_otg_driver.drv, &driver_attr_version);
 
 	lm_driver_unregister(&dwc_otg_driver);
-#ifdef CONFIG_RALINK_GPIO
-#if defined(USB_POWER_GPIO)
-	ralink_gpio_control(USB_POWER_GPIO,0); // turn off 5V
-#elif HAS_USB_GPIO18
-	ralink_gpio_control(18,0); // turn off 5V
-#elif HAS_USB_GPIO12
-	ralink_gpio_control(12,0); // turn off 5V
-#else
-	ralink_gpio_control(6,0); // turn off 5V
-#endif
-#endif
 	*(unsigned long *)(KSEG1ADDR(RALINK_USB_OTG_BASE+0xE00)) = 0xF; //Disable USB Port
 	printk(KERN_INFO "%s module removed\n", dwc_driver_name);
 }

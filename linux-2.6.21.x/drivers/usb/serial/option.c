@@ -688,8 +688,6 @@ static void option_set_termios(struct usb_serial_port *port,
 {
 	dbg("%s", __func__);
 	/* Doesn't support option setting */
-	if (port->tty && port->tty->termios)
-		tty_termios_copy_hw(port->tty->termios, old_termios);
 	option_send_setup(port);
 }
 
