@@ -371,17 +371,31 @@ relink:
 	find user prop vendors -type f -name '*.gdb' | sed 's/^\(.*\)\.gdb/\1 \1.gdb/' | xargs rm -f
 
 clean: modules_clean
-	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
+	echo "Clean temporary files..."
 	rm -rf $(ROMFSDIR)/*
-	rm -f $(IMAGEDIR)/*
-	rm -f config.tk
-	rm -f $(LINUXDIR)/linux
 	rm -rf $(LINUXDIR)/net/ipsec/alg/libaes $(LINUXDIR)/net/ipsec/alg/perlasm
+	rm -f $(IMAGEDIR)/*
+	rm -f $(LINUXDIR)/linux
 	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
-	make -C uClibc++/extra/config clean
-	make -C tools clean
 	rm -f $(ROOTDIR)/etc/compile-date
 	rm -f $(ROOTDIR)/etc/scripts/config.sh
+	rm -f config.tk
+	rm -f .tmp*
+	rm -f sdk_version.h
+	rm -f version
+	find $PWD -name 'config.log' | xargs rm -f
+	find $PWD/user -name '*.o' | xargs rm -f
+	find $PWD -name '*.old' | xargs rm -f
+	find $PWD -name '*.log' | xargs rm -f
+	find $PWD -name CVS -type d | xargs rm -rf
+	echo "Clean subtargets..."
+	touch config.arch
+	touch linux/.config
+	touch .config
+	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
+	make clean -C uClibc++/extra/config
+	make clean -C Uboot
+	make clean -C tools
 
 real_clean mrproper: clean
 	make -C linux mrproper

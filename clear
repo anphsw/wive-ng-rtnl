@@ -3,19 +3,7 @@
 ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
 
-echo "Clean temporary files..."
-find $PWD -name 'config.log' | xargs rm -f
-find $PWD/user -name '*.o' | xargs rm -f
-find $PWD -name '*.old' | xargs rm -f
-find $PWD -name '*.log' | xargs rm -f
-find $PWD -name CVS -type d | xargs rm -rf
-
-rm -f .tmp*
-rm -f sdk_version.h
-rm -f version
-
-make clean -C Uboot
-make clean -C tools
-make clean -C user
+echo "-------------CLEAN-ALL---------------"
 make clean
+echo "--------------MRPROPER---------------"
 make mrproper
