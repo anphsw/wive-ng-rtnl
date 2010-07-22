@@ -5211,11 +5211,10 @@ INT RTMPSetInformation(
 				DBGPRINT(RT_DEBUG_TRACE, ("WSC::RT_OID_WSC_EAPMSG, wrq->u.data.length=%d!\n", wrq->u.data.length));
 			
 				msgLen = wrq->u.data.length;				
-				if((pUPnPMsg = kmalloc(msgLen, GFP_KERNEL)) == NULL)
+				if((pUPnPMsg = kzalloc(msgLen, GFP_KERNEL)) == NULL)
 					Status = -EINVAL;
 				else
 				{
-					memset(pUPnPMsg, 0, msgLen);
 					retVal = copy_from_user(pUPnPMsg, wrq->u.data.pointer, msgLen);
 					
 					msgHdr = (RTMP_WSC_U2KMSG_HDR *)pUPnPMsg;

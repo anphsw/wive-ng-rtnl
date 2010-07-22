@@ -1330,12 +1330,11 @@ VOID WscEapEnrolleeAction(
 		}
 	}
 
-	if( (WscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
+	if( (WscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("WscData Allocate failed!\n"));
 		goto Fail;
 	}
-	memset(WscData, 0, WSC_MAX_DATA_LEN);
 
 	switch (MsgType)
 	{
@@ -1832,12 +1831,11 @@ VOID WscEapApProxyAction(
 		goto Fail;
 	}
 
-	if ((WscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
+	if ((WscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("WscData Allocate failed!\n"));
 		goto Fail;
 	}
-	memset(WscData, 0, WSC_MAX_DATA_LEN);
 
     /* Base on state doing the Msg, State change diagram */
     if (Elem->MsgType == WSC_EAPOL_UPNP_MSG)
@@ -2018,12 +2016,11 @@ VOID WscEapRegistrarAction(
 
 	}
 
-	if( (WscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
+	if( (WscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("WscData Allocate failed!\n"));
 		goto Fail;
 	}
-	memset(WscData, 0, WSC_MAX_DATA_LEN);
 	
 	// Base on state doing the Msg, State change diagram
 	switch (MsgType)
@@ -2573,8 +2570,7 @@ VOID WscEAPOLTimeOutAction(
         return;
     }
 
-    if ((WscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC))!= NULL)
-        memset(WscData, 0, WSC_MAX_DATA_LEN);
+    WscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC);
 
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -3810,10 +3806,8 @@ VOID WscUPnPErrHandle(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("Into WscUPnPErrHandle, send WSC_OPCODE_UPNP_CTRL with eventID=0x%x!\n", eventID));
 
-	if( (pWscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) != NULL)
-	{
-		memset(pWscData, 0, WSC_MAX_DATA_LEN);
-	
+	if( (pWscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) != NULL)
+	{	
 		dataLen = BuildMessageNACK(pAd, pWscControl, pWscData);
 		WscSendUPnPMessage(pAd, pWscControl->EntryIfIdx, 
 								WSC_OPCODE_UPNP_DATA, WSC_UPNP_DATA_SUB_NORMAL, 
@@ -7294,12 +7288,11 @@ VOID WscSendNACK(
     PUCHAR  pWscData = NULL;
     BOOLEAN Cancelled;
 
-	if( (pWscData = kmalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
+	if( (pWscData = kzalloc(WSC_MAX_DATA_LEN, GFP_ATOMIC)) == NULL)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("WscSendNACK:: WscData Allocate failed!\n"));
 		return;
 	}
-	memset(pWscData, 0, WSC_MAX_DATA_LEN);
     DataLen = BuildMessageNACK(pAdapter, pWscControl, pWscData);            
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)

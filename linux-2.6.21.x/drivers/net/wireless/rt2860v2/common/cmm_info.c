@@ -3265,13 +3265,12 @@ VOID RTMPIoctlGetSTAT2(
 	INT apidx;
 
 
-	msg = kmalloc(sizeof(CHAR)*(pAd->ApCfg.BssidNum*(14*128)), MEM_ALLOC_FLAG);
+	msg = kzalloc(sizeof(CHAR)*(pAd->ApCfg.BssidNum*(14*128)), MEM_ALLOC_FLAG);
 	if (msg == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s():Alloc memory failed\n", __FUNCTION__));
 		return;
 	}
-	memset(msg, 0 ,pAd->ApCfg.BssidNum*(14*128));
 	sprintf(msg,"%s","\n");
 	
 	for (apidx=0; apidx<pAd->ApCfg.BssidNum; apidx++)
@@ -3315,13 +3314,12 @@ VOID RTMPIoctlGetRadioDynInfo(
 	INT status,bandwidth,ShortGI;
 	
 
-	msg = kmalloc(sizeof(CHAR)*(4096), MEM_ALLOC_FLAG);
+	msg = kzalloc(sizeof(CHAR)*(4096), MEM_ALLOC_FLAG);
 	if (msg == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s():Alloc memory failed\n", __FUNCTION__));
 		return;
 	}
-	memset(msg, 0 ,4096);
 	sprintf(msg,"%s","\n");
 	
 

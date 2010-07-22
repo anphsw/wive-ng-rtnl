@@ -1689,12 +1689,11 @@ BOOLEAN PeerProbeReqSanity(
 					{
 
 						bufLen = sizeof(WSC_IE_PROBREQ_DATA) + eid_len;
-						pBuf = kmalloc(bufLen, MEM_ALLOC_FLAG);
+						pBuf = kzalloc(bufLen, MEM_ALLOC_FLAG);
 						if(pBuf == NULL)
 							break;
 
 						//Send WSC probe req to UPnP
-						memset(pBuf, 0 ,  bufLen);
 						pprobreq = (WSC_IE_PROBREQ_DATA*)pBuf;
 						if (32 >= *SsidLen)	//Well, I think that it must be TRUE!
 						{

@@ -1012,11 +1012,9 @@ VOID RTMPSendWirelessEvent(
 	}	
  
 	//Allocate memory and copy the msg.
-	if((pBuf = kmalloc(IW_CUSTOM_MAX_LEN, GFP_ATOMIC)) != NULL)
+	if((pBuf = kzalloc(IW_CUSTOM_MAX_LEN, GFP_ATOMIC)) != NULL)
 	{
 		//Prepare the payload 
-		memset(pBuf, 0, IW_CUSTOM_MAX_LEN);
-
 		pBufPtr = pBuf;		
 
 		if (pAddr)
@@ -1715,15 +1713,13 @@ struct net_device *alloc_netdev(
     /* ensure 32-byte alignment of the private area */
     alloc_size = sizeof (*dev) + sizeof_priv + 31;
 
-    dev = (struct net_device *) kmalloc(alloc_size, GFP_KERNEL);
+    dev = (struct net_device *) kzalloc(alloc_size, GFP_KERNEL);
     if (dev == NULL)
     {
         DBGPRINT(RT_DEBUG_ERROR,
 				("alloc_netdev: Unable to allocate device memory.\n"));
         return NULL;
     }
-
-    memset(dev, 0, alloc_size);
 
     if (sizeof_priv)
         dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
