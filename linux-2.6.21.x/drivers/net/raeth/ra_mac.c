@@ -170,11 +170,8 @@ static void mdio_write(struct net_device *dev, int phy_id, int location, int val
  */
 void hard_init(struct net_device *dev)
 {
-	END_DEVICE *ei_local = kmalloc(sizeof(END_DEVICE), GFP_KERNEL);
-	MAC_INFO *macinfo = kmalloc(sizeof(MAC_INFO), GFP_KERNEL);
-
-	memset(ei_local, 0 , sizeof(END_DEVICE));
-	memset(macinfo, 0 , sizeof(MAC_INFO));
+	END_DEVICE *ei_local = kzalloc(sizeof(END_DEVICE), GFP_KERNEL);
+	MAC_INFO *macinfo = kzalloc(sizeof(MAC_INFO), GFP_KERNEL);
 
 	macinfo->ivec = dev->irq;
 	
