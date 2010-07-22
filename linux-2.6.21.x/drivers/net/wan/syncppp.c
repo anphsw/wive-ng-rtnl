@@ -289,7 +289,7 @@ static void sppp_input (struct net_device *dev, struct sk_buff *skb)
 				if(sp->pp_flags&PP_DEBUG)
 					printk(KERN_DEBUG "Yow an IP frame.\n");
 				skb->protocol=htons(ETH_P_IP);
-				netif_rx(skb);
+				netif_receive_skb(skb);
 				dev->last_rx = jiffies;
 				goto done;
 			}
@@ -299,7 +299,7 @@ static void sppp_input (struct net_device *dev, struct sk_buff *skb)
 			/* IPX IPXCP not implemented yet */
 			if (sp->lcp.state == LCP_STATE_OPENED) {
 				skb->protocol=htons(ETH_P_IPX);
-				netif_rx(skb);
+				netif_receive_skb(skb);
 				dev->last_rx = jiffies;
 				goto done;
 			}
@@ -326,14 +326,14 @@ static void sppp_input (struct net_device *dev, struct sk_buff *skb)
 #ifdef CONFIG_INET
 		case ETH_P_IP:
 			skb->protocol=htons(ETH_P_IP);
-			netif_rx(skb);
+			netif_receive_skb(skb);
 			dev->last_rx = jiffies;
 			goto done;
 #endif
 #ifdef CONFIG_IPX
 		case ETH_P_IPX:
 			skb->protocol=htons(ETH_P_IPX);
-			netif_rx(skb);
+			netif_receive_skb(skb);
 			dev->last_rx = jiffies;
 			goto done;
 #endif
