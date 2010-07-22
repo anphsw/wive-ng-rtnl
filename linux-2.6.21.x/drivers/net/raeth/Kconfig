@@ -112,3 +112,7 @@ config  MAC_TO_GIGAPHY_MODE_ADDR
 	default 0x0 if RT3052_FPGA
 	default 0x1F if !RT3052_FPGA
         depends on GIGAPHY || P5_MAC_TO_PHY_MODE
+
+config RAETH_GMAC2
+	bool "Pseudo GMAC2 support"
+	depends on RAETH

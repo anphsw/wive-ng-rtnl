@@ -892,10 +892,9 @@ static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int
 		dma_cache_wback_inv((unsigned long)skb->data, 16);
 	}
 	else
-		dma_cache_wback_inv((unsigned long)skb->data, skb->len);
-#else
-	dma_cache_wback_inv((unsigned long)skb->data, skb->len);
 #endif
+	    dma_cache_wback_inv((unsigned long)skb->data, skb->len);
+
 #ifdef CONFIG_RALINK_VISTA_BASIC
 	veth = (struct vlan_ethhdr *)(skb->data);
 	if (is_switch_175c && veth->h_vlan_proto == __constant_htons(ETH_P_8021Q)) {
@@ -1315,10 +1314,10 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 	    }
 	}
 
-	//Get mac2 address from flash
+//Get mac2 address from flash
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 	mac_addr = (unsigned char *)GMAC2_ADDR;
 	memcpy(addr.sa_data, mac_addr, 6); 
-
 	//If mac2 is empty, random generate mac address
 	if (memcmp(addr.sa_data, zero, 6) == 0) //mac2 address is empty
 	{
@@ -1327,7 +1326,7 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 	  memcpy(addr.sa_data, mac_addr01234, 5);
           addr.sa_data[5] = net_random()&0xFF;
 	}
-
+#endif
 	ei_set_mac2_addr(dev, &addr);
 	ether_setup(dev);
 	pPseudoAd = dev->priv;
