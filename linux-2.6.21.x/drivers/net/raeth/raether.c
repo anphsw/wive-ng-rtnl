@@ -546,7 +546,7 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 		
 		/* We have to check the free memory size is big enough 
 		 * before pass the packet to cpu*/
-		skb = __dev_alloc_skb(MAX_RX_LENGTH + 2, GFP_DMA | GFP_ATOMIC);
+		skb = alloc_skb_fclone(MAX_RX_LENGTH + 2 +  NET_SKB_PAD, GFP_DMA | GFP_ATOMIC);
 		if (skb == NULL)
 		{
 			printk(KERN_ERR "skb not available...\n");
@@ -554,7 +554,7 @@ static inline int rt2880_eth_recv(struct net_device* dev)
                         bReschedule = 1;
 			break;
 		}
-		skb_reserve(skb, 2);
+		skb_reserve(skb, NET_SKB_PAD + 2);
 
 #if !defined(CONFIG_RA_NAT_NONE) 
 /* bruce+
@@ -1385,10 +1385,10 @@ int ei_open(struct net_device *dev)
         /* receiving packet buffer allocation - NUM_RX_DESC x MAX_RX_LENGTH */
         for ( i = 0; i < NUM_RX_DESC; i++)
         {
-                netrx_skbuf[i] = dev_alloc_skb(MAX_RX_LENGTH+2);
+                netrx_skbuf[i] = alloc_skb_fclone(MAX_RX_LENGTH + 2 + NET_SKB_PAD, GFP_ATOMIC);
                 if (netrx_skbuf[i] == NULL )
                         printk("rx skbuff buffer allocation failed!");
-		skb_reserve(netrx_skbuf[i], 2);
+		skb_reserve(netrx_skbuf[i], NET_SKB_PAD + 2);
         }       // kmalloc
 
 	spin_lock_irqsave(&(ei_local->page_lock), flags);
