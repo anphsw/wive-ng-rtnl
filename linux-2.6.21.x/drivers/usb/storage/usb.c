@@ -111,7 +111,6 @@ static unsigned int delay_use = 5;
 module_param(delay_use, uint, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(delay_use, "seconds to delay before using a new device");
 
-extern int usb_plug_flag;
 #define PLUG_ON		10
 #define PLUG_OFF	11
 
@@ -1057,19 +1056,11 @@ static void storage_disconnect(struct usb_interface *intf)
 {
 	struct us_data *us = usb_get_intfdata(intf);
 
-	usb_plug_flag = PLUG_OFF;
 	US_DEBUGP("storage_disconnect() called\n");
 	quiesce_and_remove_host(us);
 	release_everything(us);
 	kill_proc(1, SIGTTIN, 1);
 }
-
-void set_usb_plug_flag(int val)
-{
-	usb_plug_flag = val;
-}
-
-EXPORT_SYMBOL(set_usb_plug_flag);
 
 /***********************************************************************
  * Initialization and registration

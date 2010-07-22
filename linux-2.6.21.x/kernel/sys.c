@@ -2213,7 +2213,6 @@ asmlinkage long sys_getcpu(unsigned __user *cpup, unsigned __user *nodep,
 int nf_track_flag = 0;
 int nf_clean_flag = 0;
 int mm_kill_flag = 0;
-int usb_plug_flag = 0;
 ulong nf_ipaddr = 0;
 
 
@@ -2230,8 +2229,6 @@ asmlinkage int sys_track_flag(int __user *flag, unsigned long __user *addr)
 		if(mm_kill_flag == 301)
 			mm_kill_flag = 0;
 	}
-	else if(in_flag == 501)	// get usb flag
-		err = put_user(usb_plug_flag, flag);
         else if((in_flag==0) || (in_flag==1))	// set nf track flag
                 nf_track_flag = in_flag;
         else if(in_flag == 100)			// set wanduck flag

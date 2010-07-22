@@ -103,7 +103,6 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 //extern int usblp_p;
 // END PaN
 
-//extern int usb_plug_flag;
 #define PRT_PLUG_ON         12
 #define PRT_PLUG_OFF        13
 
@@ -123,7 +122,6 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 #define LPWRITEADDR     0x0614  /* write address to printer */
 #define LPREADDATA      0x0615  /* read data from pinter */
 #define LPREADADDR      0x0616  /* read address from pinter */
-#define DEVICE_ID_SIZE	1024
 /*******************************************************/
 
 /* ioctls: */
@@ -394,7 +392,7 @@ static int proc_get_usblpid(struct usblp *usblp)
 	prn_info= &prn_info_tmp; // Added by JYWeng 20031212:
 
 	
-	err = usblp_get_id(usblp, 0, usblp->device_id_string, DEVICE_ID_SIZE - 1);
+	err = usblp_get_id(usblp, 0, usblp->device_id_string, USBLP_DEVICE_ID_SIZE - 1);
 	
 	if (err < 0) {
 		dbg ("usblp%d: error = %d reading IEEE-1284 Device ID string",
@@ -405,10 +403,10 @@ static int proc_get_usblpid(struct usblp *usblp)
 	}
 
 	length = (usblp->device_id_string[0] << 8) + usblp->device_id_string[1]; /* big-endian */
-	if (length < DEVICE_ID_SIZE)
+	if (length < USBLP_DEVICE_ID_SIZE)
 		usblp->device_id_string[length] = '\0';
 	else
-		usblp->device_id_string[DEVICE_ID_SIZE - 1] = '\0';
+		usblp->device_id_string[USBLP_DEVICE_ID_SIZE - 1] = '\0';
 
 	dbg ("usblp%d Device ID string [%d]='%s'",
 		usblp->minor, length, &usblp->device_id_string[2]);
@@ -855,7 +853,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		switch (cmd) {
 			/*=================================================================================== PaN */
 			case LPGETID: /* get the DEVICE_ID string */
-				err = usblp_get_id(usblp, 0, usblp->device_id_string, DEVICE_ID_SIZE - 1);
+				err = usblp_get_id(usblp, 0, usblp->device_id_string, USBLP_DEVICE_ID_SIZE - 1);
 				if (err < 0) {
 					dbg ("usblp%d: error = %d reading IEEE-1284 Device ID string",
 						usblp->minor, err);
@@ -865,10 +863,10 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 				}
 
 				length = (usblp->device_id_string[0] << 8) + usblp->device_id_string[1]; /* big-endian */
-				if (length < DEVICE_ID_SIZE)
+				if (length < USBLP_DEVICE_ID_SIZE)
 					usblp->device_id_string[length] = '\0';
 				else
-					usblp->device_id_string[DEVICE_ID_SIZE - 1] = '\0';
+					usblp->device_id_string[USBLP_DEVICE_ID_SIZE - 1] = '\0';
 
 				dbg ("usblp%d Device ID string [%d/max %d]='%s'",
 					usblp->minor, length, cmd, &usblp->device_id_string[2]);
