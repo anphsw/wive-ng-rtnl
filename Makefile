@@ -361,6 +361,7 @@ dep:
 
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) dep
 
+.PHONY: tools
 tools:
 	make -C tools
 

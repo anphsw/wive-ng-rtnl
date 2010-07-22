@@ -59,10 +59,6 @@ fi
 rm -rfv romfs/*
 rm -rfv images/*
 
-echo -------------------------------MAKE-TOOLS-------------------------------
-
-make all -C tools
-
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./config-$VENDOR/config-kernel-1t1r$IPV6	./linux/.config
