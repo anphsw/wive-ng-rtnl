@@ -47,9 +47,6 @@ echo "" > version
 echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
 echo "" >> version
 
-#memoryzzz
-#find . -type d | grep -v "git"
-
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
 echo -------------------------------FULL-CLEAR-------------------------------
@@ -84,16 +81,15 @@ ln -fs vendors/Ralink/RT3052/config.arch config.arch
 ln -fs config/autoconf.h autoconf.h
 #######################################################################
 
-echo -------------------------------MAKE-OLDCONFIGS---------------------------
-
-make oldconfig
-make dep
-
 #for wantusoid`s like.
 if [ "$DOS2UNIX" = "YES" ] ; then
 echo ---------------------------------DOS2UNIX--------------------------------
     find -type f -exec dos2unix -U -b {} \;
 fi
+
+echo -------------------------------MAKE-OLDCONFIGS---------------------------
+make oldconfig
+make dep
 
 echo ---------------------------------MAKE-ALL--------------------------------
 make
