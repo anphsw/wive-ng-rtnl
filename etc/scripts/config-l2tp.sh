@@ -42,10 +42,10 @@ LOG="logger -t vpnhelper"
     fi
 
     $LOG "Get route to vpn server."
-    ROUTE=`ip r get $SERVER | grep dev | cut -f -3 -d " "`
+    ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
         $LOG "Add route to vpn server."
-        ip r add $ROUTE
+        ip route add $ROUTE
     fi
 
     if [ "$PEERDNS" = "on" ]; then

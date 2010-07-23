@@ -36,7 +36,7 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
 	echo "Tunel ipv6 in ipv4 configure and up..."
 	ipv6subnet="2000"
 	relay6to4="192.88.99.1"
-	ipv4=`ip r get $relay6to4 | awk {' print $5 '}`
+	ipv4=`ip route get $relay6to4 | awk {' print $5 '}`
 	if [ "$ipv4" != "" ]; then
 	    ipv6prefix=`echo $ipv4 | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    ip tunnel add tun6to4 mode sit ttl 64 remote any local $ipv4

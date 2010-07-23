@@ -28,7 +28,7 @@ start() {
 
     if [ "$srv" != "" ] || [ -f /bin/ntpd ]; then
 	echo "Starting NTPD: "
-	ntpd -d -l -p $srv &
+	ntpd -d -p $srv &
     fi
 }
 
