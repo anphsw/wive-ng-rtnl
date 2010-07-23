@@ -45,7 +45,9 @@
 #include <linux/stddef.h>
 #include <linux/device.h>
 #include <linux/mutex.h>
+#ifdef CONFIG_SLHC
 #include <net/slhc_vj.h>
+#endif
 #include <asm/atomic.h>
 
 #define PPP_VERSION	"2.4.2"
@@ -108,7 +110,9 @@ struct ppp {
 	unsigned int	xstate;		/* transmit state bits 68 */
 	unsigned int	rstate;		/* receive state bits 6c */
 	int		debug;		/* debug flags 70 */
+#ifdef CONFIG_SLHC
 	struct slcompress *vj;		/* state for VJ header compression */
+#endif
 	enum NPmode	npmode[NUM_NP];	/* what to do with each net proto 78 */
 	struct sk_buff	*xmit_pending;	/* a packet ready to go out 88 */
 	struct compressor *xcomp;	/* transmit packet compressor 8c */
@@ -1084,13 +1088,12 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
 static void
 ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 {
-	//int proto = PPP_PROTO(skb);
 	unsigned int proto = PPP_PROTO(skb);
-	struct sk_buff *new_skb;
 #ifdef CONFIG_SLHC
+	struct sk_buff *new_skb;
 	int len;
-#endif
 	unsigned char *cp;
+#endif
 
 	if (proto < 0x8000) {
 #ifdef CONFIG_PPP_FILTER
@@ -1123,6 +1126,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	switch (proto) {
 	case PPP_IP:
+#ifdef CONFIG_SLHC
 		if (ppp->vj == 0 || (ppp->flags & SC_COMP_TCP) == 0)
 			break;
 		/* try to do VJ TCP header compression */
@@ -1134,11 +1138,9 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		}
 		skb_reserve(new_skb, ppp->dev->hard_header_len - 2);
 		cp = skb->data + 2;
-#ifdef CONFIG_SLHC
 		len = slhc_compress(ppp->vj, cp, skb->len - 2,
 				    new_skb->data + 2, &cp,
 				    !(ppp->flags & SC_NO_TCP_CCID));
-#endif
 		if (cp == skb->data + 2) {
 			/* didn't compress */
 			kfree_skb(new_skb);
@@ -1152,14 +1154,11 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 			}
 			kfree_skb(skb);
 			skb = new_skb;
-#ifdef CONFIG_SLHC
 			cp = skb_put(skb, len + 2);
-#else
-			cp = skb_put(skb, 2);
-#endif
 			cp[0] = 0;
 			cp[1] = proto;
 		}
+#endif
 		break;
 
 	case PPP_CCP:
@@ -1659,6 +1658,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		break;
 
 	case PPP_VJC_UNCOMP:
+#ifdef CONFIG_SLHC
 		if (ppp->vj == 0 || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
 
@@ -1667,13 +1667,12 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		 */
 		if (!pskb_may_pull(skb, skb->len))
 			goto err;
-#ifdef CONFIG_SLHC
 		if (slhc_remember(ppp->vj, skb->data + 2, skb->len - 2) <= 0) {
 			printk(KERN_ERR "PPP: VJ uncompressed error\n");
 			goto err;
 		}
-#endif
 		proto = PPP_IP;
+#endif
 		break;
 
 	case PPP_CCP:
@@ -2423,8 +2422,9 @@ find_compressor(int type)
 static void
 ppp_get_stats(struct ppp *ppp, struct ppp_stats *st)
 {
+#ifdef CONFIG_SLHC
 	struct slcompress *vj = ppp->vj;
-
+#endif
 	memset(st, 0, sizeof(*st));
 	st->p.ppp_ipackets = ppp->stats.rx_packets;
 	st->p.ppp_ierrors = ppp->stats.rx_errors;
@@ -2432,6 +2432,7 @@ ppp_get_stats(struct ppp *ppp, struct ppp_stats *st)
 	st->p.ppp_opackets = ppp->stats.tx_packets;
 	st->p.ppp_oerrors = ppp->stats.tx_errors;
 	st->p.ppp_obytes = ppp->stats.tx_bytes;
+#ifdef CONFIG_SLHC
 	if (!vj)
 		return;
 	st->vj.vjs_packets = vj->sls_o_compressed + vj->sls_o_uncompressed;
@@ -2442,6 +2443,9 @@ ppp_get_stats(struct ppp *ppp, struct ppp_stats *st)
 	st->vj.vjs_tossed = vj->sls_i_tossed;
 	st->vj.vjs_uncompressedin = vj->sls_i_uncompressed;
 	st->vj.vjs_compressedin = vj->sls_i_compressed;
+#else
+    return;
+#endif
 }
 
 /*
