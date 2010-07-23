@@ -2608,9 +2608,6 @@ static void ppp_destroy_interface(struct ppp *ppp)
 	if (ppp->xmit_pending)
 		kfree_skb(ppp->xmit_pending);
 
-	if (ppp->xmit_pending)
-		kfree_skb(ppp->xmit_pending);
-
 	kfree(ppp);
 }
 
