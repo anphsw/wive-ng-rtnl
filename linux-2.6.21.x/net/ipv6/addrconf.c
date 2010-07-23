@@ -3166,7 +3166,6 @@ static int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
 
 	s_idx = cb->args[0];
 	s_ip_idx = ip_idx = cb->args[1];
-	read_lock(&dev_base_lock);
 
 	for (dev = dev_base, idx = 0; dev; dev = dev->next, idx++) {
 		if (idx < s_idx)
@@ -3228,7 +3227,6 @@ done:
 		read_unlock_bh(&idev->lock);
 		in6_dev_put(idev);
 	}
-	read_unlock(&dev_base_lock);
 	cb->args[0] = idx;
 	cb->args[1] = ip_idx;
 	return skb->len;

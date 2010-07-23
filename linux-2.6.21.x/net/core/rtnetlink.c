@@ -291,7 +291,7 @@ static void copy_rtnl_link_stats(struct rtnl_link_stats *a,
 	a->tx_compressed = b->tx_compressed;
 };
 
-static inline size_t if_nlmsg_size(int iwbuflen)
+static inline size_t if_nlmsg_size(void)
 {
 	return NLMSG_ALIGN(sizeof(struct ifinfomsg))
 	       + nla_total_size(IFNAMSIZ) /* IFLA_IFNAME */
@@ -306,13 +306,12 @@ static inline size_t if_nlmsg_size(int iwbuflen)
 	       + nla_total_size(4) /* IFLA_LINK */
 	       + nla_total_size(4) /* IFLA_MASTER */
 	       + nla_total_size(1) /* IFLA_OPERSTATE */
-	       + nla_total_size(1) /* IFLA_LINKMODE */
-	       + nla_total_size(iwbuflen);
+	       + nla_total_size(1); /* IFLA_LINKMODE */
 }
 
 static int rtnl_fill_ifinfo(struct sk_buff *skb, struct net_device *dev,
-			    void *iwbuf, int iwbuflen, int type, u32 pid,
-			    u32 seq, u32 change, unsigned int flags)
+			    int type, u32 pid, u32 seq, u32 change,
+			    unsigned int flags)
 {
 	struct ifinfomsg *ifm;
 	struct nlmsghdr *nlh;
@@ -377,9 +376,6 @@ static int rtnl_fill_ifinfo(struct sk_buff *skb, struct net_device *dev,
 		}
 	}
 
-	if (iwbuf)
-		NLA_PUT(skb, IFLA_WIRELESS, iwbuflen, iwbuf);
-
 	return nlmsg_end(skb, nlh);
 
 nla_put_failure:
@@ -393,16 +389,14 @@ static int rtnl_dump_ifinfo(struct sk_buff *skb, struct netlink_callback *cb)
 	int s_idx = cb->args[0];
 	struct net_device *dev;
 
-	read_lock(&dev_base_lock);
 	for (dev=dev_base, idx=0; dev; dev = dev->next, idx++) {
 		if (idx < s_idx)
 			continue;
-		if (rtnl_fill_ifinfo(skb, dev, NULL, 0, RTM_NEWLINK,
+		if (rtnl_fill_ifinfo(skb, dev, RTM_NEWLINK,
 				     NETLINK_CB(cb->skb).pid,
 				     cb->nlh->nlmsg_seq, 0, NLM_F_MULTI) <= 0)
 			break;
 	}
-	read_unlock(&dev_base_lock);
 	cb->args[0] = idx;
 
 	return skb->len;
@@ -418,11 +412,151 @@ static struct nla_policy ifla_policy[IFLA_MAX+1] __read_mostly = {
 	[IFLA_LINKMODE]		= { .type = NLA_U8 },
 };
 
+static int do_setlink(struct net_device *dev, struct ifinfomsg *ifm,
+		      struct nlattr **tb, char *ifname)
+{
+	int modified = 0, send_addr_notify = 0;
+	int err;
+
+	if (tb[IFLA_MAP]) {
+		struct rtnl_link_ifmap *u_map;
+		struct ifmap k_map;
+
+		if (!dev->set_config) {
+			err = -EOPNOTSUPP;
+			goto errout;
+		}
+
+		if (!netif_device_present(dev)) {
+			err = -ENODEV;
+			goto errout;
+		}
+
+		u_map = nla_data(tb[IFLA_MAP]);
+		k_map.mem_start = (unsigned long) u_map->mem_start;
+		k_map.mem_end = (unsigned long) u_map->mem_end;
+		k_map.base_addr = (unsigned short) u_map->base_addr;
+		k_map.irq = (unsigned char) u_map->irq;
+		k_map.dma = (unsigned char) u_map->dma;
+		k_map.port = (unsigned char) u_map->port;
+
+		err = dev->set_config(dev, &k_map);
+		if (err < 0)
+			goto errout;
+
+		modified = 1;
+	}
+
+	if (tb[IFLA_ADDRESS]) {
+		struct sockaddr *sa;
+		int len;
+
+		if (!dev->set_mac_address) {
+			err = -EOPNOTSUPP;
+			goto errout;
+		}
+
+		if (!netif_device_present(dev)) {
+			err = -ENODEV;
+			goto errout;
+		}
+
+		len = sizeof(sa_family_t) + dev->addr_len;
+		sa = kmalloc(len, GFP_KERNEL);
+		if (!sa) {
+			err = -ENOMEM;
+			goto errout;
+		}
+		sa->sa_family = dev->type;
+		memcpy(sa->sa_data, nla_data(tb[IFLA_ADDRESS]),
+		       dev->addr_len);
+		err = dev->set_mac_address(dev, sa);
+		kfree(sa);
+		if (err)
+			goto errout;
+		send_addr_notify = 1;
+		modified = 1;
+	}
+
+	if (tb[IFLA_MTU]) {
+		err = dev_set_mtu(dev, nla_get_u32(tb[IFLA_MTU]));
+		if (err < 0)
+			goto errout;
+		modified = 1;
+	}
+
+	/*
+	 * Interface selected by interface index but interface
+	 * name provided implies that a name change has been
+	 * requested.
+	 */
+	if (ifm->ifi_index > 0 && ifname[0]) {
+		err = dev_change_name(dev, ifname);
+		if (err < 0)
+			goto errout;
+		modified = 1;
+	}
+
+#ifdef CONFIG_NET_WIRELESS_RTNETLINK
+	if (tb[IFLA_WIRELESS]) {
+		/* Call Wireless Extensions.
+		 * Various stuff checked in there... */
+		err = wireless_rtnetlink_set(dev, nla_data(tb[IFLA_WIRELESS]),
+					     nla_len(tb[IFLA_WIRELESS]));
+		if (err < 0)
+			goto errout;
+	}
+#endif	/* CONFIG_NET_WIRELESS_RTNETLINK */
+
+	if (tb[IFLA_BROADCAST]) {
+		nla_memcpy(dev->broadcast, tb[IFLA_BROADCAST], dev->addr_len);
+		send_addr_notify = 1;
+	}
+
+	if (ifm->ifi_flags || ifm->ifi_change) {
+		unsigned int flags = ifm->ifi_flags;
+
+		/* bugwards compatibility: ifi_change == 0 is treated as ~0 */
+		if (ifm->ifi_change)
+			flags = (flags & ifm->ifi_change) |
+				(dev->flags & ~ifm->ifi_change);
+		dev_change_flags(dev, flags);
+	}
+
+	if (tb[IFLA_TXQLEN])
+		dev->tx_queue_len = nla_get_u32(tb[IFLA_TXQLEN]);
+
+	if (tb[IFLA_WEIGHT])
+		dev->weight = nla_get_u32(tb[IFLA_WEIGHT]);
+
+	if (tb[IFLA_OPERSTATE])
+		set_operstate(dev, nla_get_u8(tb[IFLA_OPERSTATE]));
+
+	if (tb[IFLA_LINKMODE]) {
+		write_lock_bh(&dev_base_lock);
+		dev->link_mode = nla_get_u8(tb[IFLA_LINKMODE]);
+		write_unlock_bh(&dev_base_lock);
+	}
+
+	err = 0;
+
+errout:
+	if (err < 0 && modified && net_ratelimit())
+		printk(KERN_WARNING "A link change request failed with "
+		       "some changes comitted already. Interface %s may "
+		       "have been left with an inconsistent configuration, "
+		       "please check.\n", dev->name);
+
+	if (send_addr_notify)
+		call_netdevice_notifiers(NETDEV_CHANGEADDR, dev);
+	return err;
+}
+
 static int rtnl_setlink(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 {
 	struct ifinfomsg *ifm;
 	struct net_device *dev;
-	int err, send_addr_notify = 0, modified = 0;
+	int err;
 	struct nlattr *tb[IFLA_MAX+1];
 	char ifname[IFNAMSIZ];
 
@@ -437,7 +571,7 @@ static int rtnl_setlink(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 
 	err = -EINVAL;
 	ifm = nlmsg_data(nlh);
-	if (ifm->ifi_index >= 0)
+	if (ifm->ifi_index > 0)
 		dev = dev_get_by_index(ifm->ifi_index);
 	else if (tb[IFLA_IFNAME])
 		dev = dev_get_by_name(ifname);
@@ -457,132 +591,8 @@ static int rtnl_setlink(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 	    nla_len(tb[IFLA_BROADCAST]) < dev->addr_len)
 		goto errout_dev;
 
-	if (tb[IFLA_MAP]) {
-		struct rtnl_link_ifmap *u_map;
-		struct ifmap k_map;
-
-		if (!dev->set_config) {
-			err = -EOPNOTSUPP;
-			goto errout_dev;
-		}
-
-		if (!netif_device_present(dev)) {
-			err = -ENODEV;
-			goto errout_dev;
-		}
-
-		u_map = nla_data(tb[IFLA_MAP]);
-		k_map.mem_start = (unsigned long) u_map->mem_start;
-		k_map.mem_end = (unsigned long) u_map->mem_end;
-		k_map.base_addr = (unsigned short) u_map->base_addr;
-		k_map.irq = (unsigned char) u_map->irq;
-		k_map.dma = (unsigned char) u_map->dma;
-		k_map.port = (unsigned char) u_map->port;
-
-		err = dev->set_config(dev, &k_map);
-		if (err < 0)
-			goto errout_dev;
-
-		modified = 1;
-	}
-
-	if (tb[IFLA_ADDRESS]) {
-		struct sockaddr *sa;
-		int len;
-
-		if (!dev->set_mac_address) {
-			err = -EOPNOTSUPP;
-			goto errout_dev;
-		}
-
-		if (!netif_device_present(dev)) {
-			err = -ENODEV;
-			goto errout_dev;
-		}
-
-		len = sizeof(sa_family_t) + dev->addr_len;
-		sa = kmalloc(len, GFP_KERNEL);
-		if (!sa) {
-			err = -ENOMEM;
-			goto errout_dev;
-		}
-		sa->sa_family = dev->type;
-		memcpy(sa->sa_data, nla_data(tb[IFLA_ADDRESS]),
-		       dev->addr_len);
-		err = dev->set_mac_address(dev, sa);
-		kfree(sa);
-		if (err)
-			goto errout_dev;
-		send_addr_notify = 1;
-		modified = 1;
-	}
-
-	if (tb[IFLA_MTU]) {
-		err = dev_set_mtu(dev, nla_get_u32(tb[IFLA_MTU]));
-		if (err < 0)
-			goto errout_dev;
-		modified = 1;
-	}
-
-	/*
-	 * Interface selected by interface index but interface
-	 * name provided implies that a name change has been
-	 * requested.
-	 */
-	if (ifm->ifi_index >= 0 && ifname[0]) {
-		err = dev_change_name(dev, ifname);
-		if (err < 0)
-			goto errout_dev;
-		modified = 1;
-	}
-
-#ifdef CONFIG_NET_WIRELESS_RTNETLINK
-	if (tb[IFLA_WIRELESS]) {
-		/* Call Wireless Extensions.
-		 * Various stuff checked in there... */
-		err = wireless_rtnetlink_set(dev, nla_data(tb[IFLA_WIRELESS]),
-					     nla_len(tb[IFLA_WIRELESS]));
-		if (err < 0)
-			goto errout_dev;
-	}
-#endif	/* CONFIG_NET_WIRELESS_RTNETLINK */
-
-	if (tb[IFLA_BROADCAST]) {
-		nla_memcpy(dev->broadcast, tb[IFLA_BROADCAST], dev->addr_len);
-		send_addr_notify = 1;
-	}
-
-
-	if (ifm->ifi_flags)
-		dev_change_flags(dev, ifm->ifi_flags);
-
-	if (tb[IFLA_TXQLEN])
-		dev->tx_queue_len = nla_get_u32(tb[IFLA_TXQLEN]);
-
-	if (tb[IFLA_WEIGHT])
-		dev->weight = nla_get_u32(tb[IFLA_WEIGHT]);
-
-	if (tb[IFLA_OPERSTATE])
-		set_operstate(dev, nla_get_u8(tb[IFLA_OPERSTATE]));
-
-	if (tb[IFLA_LINKMODE]) {
-		write_lock_bh(&dev_base_lock);
-		dev->link_mode = nla_get_u8(tb[IFLA_LINKMODE]);
-		write_unlock_bh(&dev_base_lock);
-	}
-
-	err = 0;
-
+	err = do_setlink(dev, ifm, tb, ifname);
 errout_dev:
-	if (err < 0 && modified && net_ratelimit())
-		printk(KERN_WARNING "A link change request failed with "
-		       "some changes comitted already. Interface %s may "
-		       "have been left with an inconsistent configuration, "
-		       "please check.\n", dev->name);
-
-	if (send_addr_notify)
-		call_netdevice_notifiers(NETDEV_CHANGEADDR, dev);
-
 	dev_put(dev);
 errout:
 	return err;
@@ -594,8 +604,6 @@ static int rtnl_getlink(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg)
 	struct nlattr *tb[IFLA_MAX+1];
 	struct net_device *dev = NULL;
 	struct sk_buff *nskb;
-	char *iw_buf = NULL, *iw = NULL;
-	int iw_buf_len = 0;
 	int err;
 
 	err = nlmsg_parse(nlh, sizeof(*ifm), tb, IFLA_MAX, ifla_policy);
@@ -603,37 +611,21 @@ static int rtnl_getlink(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg)
 		return err;
 
 	ifm = nlmsg_data(nlh);
-	if (ifm->ifi_index >= 0) {
+	if (ifm->ifi_index > 0) {
 		dev = dev_get_by_index(ifm->ifi_index);
 		if (dev == NULL)
 			return -ENODEV;
 	} else
 		return -EINVAL;
 
-
-#ifdef CONFIG_NET_WIRELESS_RTNETLINK
-	if (tb[IFLA_WIRELESS]) {
-		/* Call Wireless Extensions. We need to know the size before
-		 * we can alloc. Various stuff checked in there... */
-		err = wireless_rtnetlink_get(dev, nla_data(tb[IFLA_WIRELESS]),
-					     nla_len(tb[IFLA_WIRELESS]),
-					     &iw_buf, &iw_buf_len);
-		if (err < 0)
-			goto errout;
-
-		/* Payload is at an offset in buffer */
-		iw = iw_buf + IW_EV_POINT_OFF;
-	}
-#endif	/* CONFIG_NET_WIRELESS_RTNETLINK */
-
-	nskb = nlmsg_new(if_nlmsg_size(iw_buf_len), GFP_KERNEL);
+	nskb = nlmsg_new(if_nlmsg_size(), GFP_KERNEL);
 	if (nskb == NULL) {
 		err = -ENOBUFS;
 		goto errout;
 	}
 
-	err = rtnl_fill_ifinfo(nskb, dev, iw, iw_buf_len, RTM_NEWLINK,
-			       NETLINK_CB(skb).pid, nlh->nlmsg_seq, 0, 0);
+	err = rtnl_fill_ifinfo(nskb, dev, RTM_NEWLINK, NETLINK_CB(skb).pid,
+			       nlh->nlmsg_seq, 0, 0);
 	if (err < 0) {
 		/* -EMSGSIZE implies BUG in if_nlmsg_size */
 		WARN_ON(err == -EMSGSIZE);
@@ -642,7 +634,6 @@ static int rtnl_getlink(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg)
 	}
 	err = rtnl_unicast(nskb, NETLINK_CB(skb).pid);
 errout:
-	kfree(iw_buf);
 	dev_put(dev);
 
 	return err;
@@ -677,11 +668,11 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 	struct sk_buff *skb;
 	int err = -ENOBUFS;
 
-	skb = nlmsg_new(if_nlmsg_size(0), GFP_KERNEL);
+	skb = nlmsg_new(if_nlmsg_size(), GFP_KERNEL);
 	if (skb == NULL)
 		goto errout;
 
-	err = rtnl_fill_ifinfo(skb, dev, NULL, 0, type, 0, 0, change, 0);
+	err = rtnl_fill_ifinfo(skb, dev, type, 0, 0, change, 0);
 	if (err < 0) {
 		/* -EMSGSIZE implies BUG in if_nlmsg_size() */
 		WARN_ON(err == -EMSGSIZE);
