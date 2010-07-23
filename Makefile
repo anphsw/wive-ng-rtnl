@@ -391,11 +391,11 @@ clean: modules_clean
 	make clean -C uClibc++/extra/config
 	make clean -C Uboot
 	make clean -C tools
-	find $PWD -name 'config.log' | xargs rm -f
-	find $PWD/user -name '*.o' | xargs rm -f
-	find $PWD -name '*.old' | xargs rm -f
-	find $PWD -name '*.log' | xargs rm -f
-	find $PWD -name CVS -type d | xargs rm -rf
+	find $(ROOTDIR) -name 'config.log' | xargs rm -f
+	find $(ROOTDIR)/user -name '*.o' | xargs rm -f
+	find $(ROOTDIR) -name '*.old' | xargs rm -f
+	find $(ROOTDIR) -name '*.log' | xargs rm -f
+	find $(ROOTDIR) -name CVS -type d | xargs rm -rf
 
 real_clean mrproper: clean
 	make -C linux mrproper
