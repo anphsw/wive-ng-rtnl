@@ -156,10 +156,11 @@ static int loopback_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* it's OK to use __get_cpu_var() because BHs are off */
 	lb_stats = &__get_cpu_var(pcpu_lstats);
 	lb_stats->bytes += skb->len;
+	lb_stats->packets++;
 
-        if (likely(netif_rx(skb) == NET_RX_SUCCESS))
-                lb_stats->packets++;
-    return 0;
+	netif_receive_skb(skb);
+
+	return 0;
 }
 
 static struct net_device_stats loopback_stats;
