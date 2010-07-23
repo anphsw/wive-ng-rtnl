@@ -158,7 +158,7 @@ static int loopback_xmit(struct sk_buff *skb, struct net_device *dev)
 	lb_stats->bytes += skb->len;
 	lb_stats->packets++;
 
-	netif_receive_skb(skb);
+	netif_rx(skb);
 
 	return 0;
 }

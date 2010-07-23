@@ -312,12 +312,14 @@ static void skb_release_all(struct sk_buff *skb)
 		WARN_ON(in_irq());
 		skb->destructor(skb);
 	}
-#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+#ifdef CONFIG_NETFILTER
 	nf_conntrack_put(skb->nfct);
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	nf_conntrack_put_reasm(skb->nfct_reasm);
 #endif
 #ifdef CONFIG_BRIDGE_NETFILTER
 	nf_bridge_put(skb->nf_bridge);
+#endif
 #endif
 /* XXX: IS this still necessary? - JHS */
 #ifdef CONFIG_NET_SCHED
@@ -997,7 +999,8 @@ unsigned char *__pskb_pull_tail(struct sk_buff *skb, int delta)
 					insp = list;
 				}
 				if (!pskb_pull(list, eat)) {
-					kfree_skb(clone);
+					if (clone)
+						kfree_skb(clone);
 					return NULL;
 				}
 				break;
@@ -1562,7 +1565,7 @@ static inline void skb_split_inside_header(struct sk_buff *skb,
 {
 	int i;
 
-	skb_copy_from_linear_data_offset(skb, len, skb_put(skb1, pos - len), pos - len);
+	memcpy(skb_put(skb1, pos - len), skb->data + len, pos - len);
 
 	/* And move data appendix as is. */
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
@@ -1952,7 +1955,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		nskb->mac.raw = nskb->data;
 		nskb->nh.raw = nskb->data + skb->mac_len;
 		nskb->h.raw = nskb->nh.raw + (skb->h.raw - skb->nh.raw);
-		skb_copy_from_linear_data(skb, skb_put(nskb, doffset), doffset);
+		memcpy(skb_put(nskb, doffset), skb->data, doffset);
 
 		if (!sg) {
 			nskb->csum = skb_copy_and_csum_bits(skb, offset,
@@ -1966,7 +1969,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 
 		nskb->ip_summed = CHECKSUM_PARTIAL;
 		nskb->csum = skb->csum;
-		skb_copy_from_linear_data_offset(skb, offset, skb_put(nskb, hsize), hsize);
+		memcpy(skb_put(nskb, hsize), skb->data + offset, hsize);
 
 		while (pos < offset + len) {
 			BUG_ON(i >= nfrags);
