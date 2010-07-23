@@ -30,7 +30,7 @@ struct globals {
 #endif
 	smallint chunked;         /* chunked transfer encoding */
 	smallint got_clen;        /* got content-length: from server  */
-};
+} FIX_ALIASING;
 #define G (*(struct globals*)&bb_common_bufsiz1)
 struct BUG_G_too_big {
 	char BUG_G_too_big[sizeof(G) <= COMMON_BUFSIZE ? 1 : -1];
@@ -50,12 +50,12 @@ static void progress_meter(int flag)
 	}
 
 	bb_progress_update(&G.pmt, G.curfile, G.beg_range, G.transferred,
-			   G.chunked ? 0 : G.content_len + G.beg_range);
+			   G.chunked ? 0 : G.beg_range + G.transferred + G.content_len);
 
 	if (flag == 0) {
 		/* last call to progress_meter */
 		alarm(0);
-		fputc('\n', stderr);
+		bb_putchar_stderr('\n');
 		G.transferred = 0;
 	} else {
 		if (flag == -1) { /* first call to progress_meter */
@@ -282,8 +282,10 @@ static char *gethdr(char *buf, size_t bufsiz, FILE *fp /*, int *istrunc*/)
 		return NULL;
 
 	/* convert the header name to lower case */
-	for (s = buf; isalnum(*s) || *s == '-' || *s == '.'; ++s)
-		*s = tolower(*s);
+	for (s = buf; isalnum(*s) || *s == '-' || *s == '.'; ++s) {
+		/* tolower for "A-Z", no-op for "0-9a-z-." */
+		*s = (*s | 0x20);
+	}
 
 	/* verify we are at the end of the header name */
 	if (*s != ':')
@@ -543,7 +545,7 @@ int wget_main(int argc UNUSED_PARAM, char **argv)
 		// "tries\0"            Required_argument "t"
 		// "timeout\0"          Required_argument "T"
 		/* Ignored (we always use PASV): */
-		"passive-ftp\0"      No_argument       "\xfd"
+		"passive-ftp\0"      No_argument       "\xff"
 		"header\0"           Required_argument "\xfe"
 		"post-data\0"        Required_argument "\xfd"
 		/* Ignored (we don't do ssl) */

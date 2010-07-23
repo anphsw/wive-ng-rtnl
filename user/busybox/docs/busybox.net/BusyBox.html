@@ -114,22 +114,22 @@ been enabled, more detailed usage information will also be available.</p>
 <h1><a name="commands">COMMANDS</a></h1>
 <p>Currently available applets include:</p>
 <pre>
-        [, [[, adduser, adjtimex, arp, arping, ash, awk, brctl, bunzip2,
-        bzcat, bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
-        crontab, cut, date, dd, depmod, df, dhcprelay, dmesg, dnsdomainname,
-        dos2unix, du, dumpleases, echo, egrep, env, ether-wake, expand,
-        expr, false, fgrep, find, free, ftpget, ftpput, fuser, grep, gunzip,
-        gzip, halt, hd, head, hexdump, hostid, hostname, id, ifconfig,
-        inetd, init, insmod, ionice, ip, ipaddr, iplink, iproute, iprule,
-        iptunnel, kill, killall, killall5, klogd, length, linuxrc, ln,
-        logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir, mknod,
-        modprobe, more, mount, mv, nc, netstat, nice, nslookup, ntpd,
-        passwd, pidof, ping, poweroff, printf, ps, pwd, reboot, renice, rm,
-        rmdir, rmmod, route, run-parts, sed, seq, setconsole, sh, sleep,
-        sort, split, stat, sum, switch_root, sync, sysctl, syslogd, tail,
-        tar, test, time, top, touch, traceroute, true, udhcpc, udhcpd,
-        umount, uname, uniq, unix2dos, unzip, uptime, usleep, vconfig, vi,
-        watch, wc, wget, which, xargs, yes, zcat</pre>
+        [, [[, adduser, arp, arping, ash, awk, bash, brctl, bunzip2, bzcat,
+        bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
+        crontab, cut, date, dd, deluser, depmod, df, dhcprelay, dmesg,
+        dnsdomainname, du, dumpleases, echo, egrep, env, ether-wake, expand,
+        expr, false, fgrep, find, flock, free, ftpget, ftpput, fuser, grep,
+        gunzip, gzip, halt, hd, head, hexdump, hostid, hostname, id,
+        ifconfig, inetd, init, insmod, ionice, ip, ipaddr, iplink, iproute,
+        iprule, iptunnel, kill, killall, killall5, klogd, length, linuxrc,
+        ln, logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir,
+        mknod, modinfo, modprobe, more, mount, mv, netstat, nice, nslookup,
+        ntpd, passwd, pgrep, pidof, ping, poweroff, printf, ps, pwd, rdate,
+        reboot, renice, rev, rm, rmdir, rmmod, route, run-parts, sed, seq,
+        sh, sleep, sort, split, stat, sum, switch_root, sync, sysctl,
+        syslogd, tail, tar, test, time, top, touch, traceroute, true,
+        udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig, vi,
+        watch, wc, wget, which, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -150,20 +150,6 @@ been enabled, more detailed usage information will also be available.</p>
         -D              Don't assign a password
         -H              Don't create home directory
         -u UID          User id</pre>
-</dd>
-<dt><strong><a name="adjtimex" class="item"><strong>adjtimex</strong></a></strong></dt>
-
-<dd>
-<p>adjtimex [-q] [-o OFF] [-f FREQ] [-p TCONST] [-t TICK]</p>
-<p>Read and optionally set system timebase parameters. See <a href="#adjtimex"><code>adjtimex(2)</code></a></p>
-<p>Options:</p>
-<pre>
-        -q      Quiet
-        -o OFF  Time offset, microseconds
-        -f FREQ Frequency adjust, integer kernel units (65536 is 1ppm)
-                (positive values make clock run faster)
-        -t TICK Microseconds per tick, usually 10000
-        -p TCONST</pre>
 </dd>
 <dt><strong><a name="arp" class="item"><strong>arp</strong></a></strong></dt>
 
@@ -235,13 +221,13 @@ been enabled, more detailed usage information will also be available.</p>
         setpathcost BRIDGE COST         Set path cost
         setportprio BRIDGE PRIO         Set port priority
         setbridgeprio BRIDGE PRIO       Set bridge priority
-        stp BRIDGE [1|0]                STP on/off</pre>
+        stp BRIDGE [1/yes/on|0/no/off]  STP on/off</pre>
 </dd>
 <dt><strong><a name="bunzip2" class="item"><strong>bunzip2</strong></a></strong></dt>
 
 <dd>
 <p>bunzip2 [OPTIONS] [FILE]...</p>
-<p>Uncompress FILEs (or stdin)</p>
+<p>Decompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
         -c      Write to stdout
@@ -251,7 +237,7 @@ been enabled, more detailed usage information will also be available.</p>
 
 <dd>
 <p>bzcat FILE</p>
-<p>Uncompress to stdout</p>
+<p>Decompress to stdout</p>
 </dd>
 <dt><strong><a name="bzip2" class="item"><strong>bzip2</strong></a></strong></dt>
 
@@ -260,19 +246,16 @@ been enabled, more detailed usage information will also be available.</p>
 <p>Compress FILEs (or stdin) with bzip2 algorithm</p>
 <p>Options:</p>
 <pre>
-        -c      Write to stdout
+        -1..9   Compression level
         -d      Decompress
-        -f      Force
-        -1..-9  Compression level</pre>
+        -c      Write to stdout
+        -f      Force</pre>
 </dd>
 <dt><strong><a name="cat" class="item"><strong>cat</strong></a></strong></dt>
 
 <dd>
-<p>cat [-u] [FILE]...</p>
+<p>cat [FILE]...</p>
 <p>Concatenate FILEs and print them to stdout</p>
-<p>Options:</p>
-<pre>
-        -u      Use unbuffered i/o (ignored)</pre>
 </dd>
 <dt><strong><a name="chattr" class="item"><strong>chattr</strong></a></strong></dt>
 
@@ -354,7 +337,7 @@ symbols +-= and one or more of the letters rwxst</p>
         -L      Follow all symlinks
         -H      Follow symlinks on command line
         -p      Preserve file attributes if possible
-        -f      Force overwrite
+        -f      Overwrite
         -i      Prompt before overwrite
         -l,-s   Create (sym)links</pre>
 </dd>
@@ -444,6 +427,12 @@ symbols +-= and one or more of the letters rwxst</p>
 <p>Numbers may be suffixed by c (x1), w (x2), b (x512), kD (x1000), k (x1024),
 MD (x1000000), M (x1048576), GD (x1000000000) or G (x1073741824)</p>
 </dd>
+<dt><strong><a name="deluser" class="item"><strong>deluser</strong></a></strong></dt>
+
+<dd>
+<p>deluser USER</p>
+<p>Delete USER from the system</p>
+</dd>
 <dt><strong><a name="df" class="item"><strong>df</strong></a></strong></dt>
 
 <dd>
@@ -476,17 +465,6 @@ MD (x1000000), M (x1048576), GD (x1000000000) or G (x1073741824)</p>
         -n LEVEL        Set console logging level
         -s SIZE         Buffer size</pre>
 </dd>
-<dt><strong><a name="dos2unix" class="item"><strong>dos2unix</strong></a></strong></dt>
-
-<dd>
-<p>dos2unix [OPTIONS] [FILE]</p>
-<p>Convert FILE in-place from DOS to Unix format.
-When no file is given, use stdin/stdout.</p>
-<p>Options:</p>
-<pre>
-        -u      dos2unix
-        -d      unix2dos</pre>
-</dd>
 <dt><strong><a name="du" class="item"><strong>du</strong></a></strong></dt>
 
 <dd>
@@ -514,9 +492,9 @@ Disk space is printed in units of 1024 bytes.</p>
 <p>Display DHCP leases granted by udhcpd</p>
 <p>Options:</p>
 <pre>
-        -f,--file=FILE  Leases file to load
-        -r,--remaining  Interpret lease times as time remaining
-        -a,--absolute   Interpret lease times as expire time</pre>
+        -f,--file=FILE  Lease file
+        -r,--remaining  Show remaining time
+        -a,--absolute   Show expiration time</pre>
 </dd>
 <dt><strong><a name="echo" class="item"><strong>echo</strong></a></strong></dt>
 
@@ -526,8 +504,8 @@ Disk space is printed in units of 1024 bytes.</p>
 <p>Options:</p>
 <pre>
         -n      Suppress trailing newline
-        -e      Interpret backslash-escaped characters (i.e., \t=tab)
-        -E      Disable interpretation of backslash-escaped characters</pre>
+        -e      Interpret backslash escapes (i.e., \t=tab)
+        -E      Don't interpret backslash escapes (default)</pre>
 </dd>
 <dt><strong><a name="env" class="item"><strong>env</strong></a></strong></dt>
 
@@ -556,7 +534,7 @@ a hostname with a known 'ethers' entry.</p>
 <dt><strong><a name="expand" class="item"><strong>expand</strong></a></strong></dt>
 
 <dd>
-<p>expand [-i] [-t N] [FILE|-]</p>
+<p>expand [-i] [-t N] [FILE]...</p>
 <p>Convert tabs to spaces, writing to stdout</p>
 <p>Options:</p>
 <pre>
@@ -646,6 +624,18 @@ default EXPRESSION is '-print'</p>
         -delete         Delete files, turns on -depth option
         (EXPR)          Group an expression</pre>
 </dd>
+<dt><strong><a name="flock" class="item"><strong>flock</strong></a></strong></dt>
+
+<dd>
+<p>flock [-sxun] FD|{FILE [-c] PROG ARGS}</p>
+<p>[Un]lock file descriptor, or lock FILE, run PROG</p>
+<p>Options:</p>
+<pre>
+        -s      Shared lock
+        -x      Exclusive lock (default)
+        -u      Unlock FD
+        -n      Fail rather than wait</pre>
+</dd>
 <dt><strong><a name="free" class="item"><strong>free</strong></a></strong></dt>
 
 <dd>
@@ -687,14 +677,14 @@ default EXPRESSION is '-print'</p>
         -m      Find processes which use same fs as FILEs
         -4      Search only IPv4 space
         -6      Search only IPv6 space
-        -s      Silent: just exit with 0 if any processes are found
-        -k      Kill found processes (otherwise display PIDs)
-        -SIGNAL Signal to send (default: TERM)</pre>
+        -s      Don't display PIDs
+        -k      Kill found processes
+        -SIGNAL Signal to send (default: KILL)</pre>
 </dd>
 <dt><strong><a name="grep" class="item"><strong>grep</strong></a></strong></dt>
 
 <dd>
-<p>grep [-HhnlLoqvsriFE] [-m N] [-A/B/C N] PATTERN/-e PATTERN.../-f FILE [FILE]...</p>
+<p>grep [-HhnlLoqvsriwFE] [-m N] [-A/B/C N] PATTERN/-e PATTERN.../-f FILE [FILE]...</p>
 <p>Search for PATTERN in FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
@@ -710,6 +700,7 @@ default EXPRESSION is '-print'</p>
         -s      Suppress open and read errors
         -r      Recurse
         -i      Ignore case
+        -w      Match whole words only
         -F      PATTERN is a literal (not regexp)
         -E      PATTERN is an extended regexp
         -m N    Match up to N times per file
@@ -723,7 +714,7 @@ default EXPRESSION is '-print'</p>
 
 <dd>
 <p>gunzip [OPTIONS] [FILE]...</p>
-<p>Uncompress FILEs (or stdin)</p>
+<p>Decompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
         -c      Write to stdout
@@ -737,8 +728,8 @@ default EXPRESSION is '-print'</p>
 <p>Compress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -c      Write to stdout
         -d      Decompress
+        -c      Write to stdout
         -f      Force</pre>
 </dd>
 <dt><strong><a name="halt" class="item"><strong>halt</strong></a></strong></dt>
@@ -763,13 +754,14 @@ default EXPRESSION is '-print'</p>
 <dd>
 <p>head [OPTIONS] [FILE]...</p>
 <p>Print first 10 lines of each FILE (or stdin) to stdout.
-With more than one FILE, precede each with a header giving the file name.</p>
+With more than one FILE, precede each with a filename header.</p>
 <p>Options:</p>
 <pre>
-        -n N    Print first N lines instead of first 10
-        -c N    Output the first N bytes
-        -q      Never output headers giving file names
-        -v      Always output headers giving file names</pre>
+        -n N[kbm]       Print first N lines
+        -c N[kbm]       Print first N bytes
+        -q              Never print headers
+        -v              Always print headers</pre>
+<p>N may be suffixed by k (x1024), b (x512), or m (x1024^2).</p>
 </dd>
 <dt><strong><a name="hexdump" class="item"><strong>hexdump</strong></a></strong></dt>
 
@@ -867,7 +859,7 @@ With more than one FILE, precede each with a header giving the file name.</p>
 
 <dd>
 <p>ionice [-c 1-3] [-n 0-7] [-p PID] [PROG]</p>
-<p>Change I/O scheduling class and priority</p>
+<p>Change I/O priority and class</p>
 <p>Options:</p>
 <pre>
         -c      Class. 1:realtime 2:best-effort 3:idle
@@ -1123,17 +1115,31 @@ TYPEs include:</pre>
         c or u: Make a character device
         p:      Make a named pipe (MAJOR and MINOR are ignored)</pre>
 </dd>
+<dt><strong><a name="modinfo" class="item"><strong>modinfo</strong></a></strong></dt>
+
+<dd>
+<p>modinfo [-adlp0] [-F keyword] MODULE</p>
+<p>Options:</p>
+<pre>
+        -a              Shortcut for '-F author'
+        -d              Shortcut for '-F description'
+        -l              Shortcut for '-F license'
+        -p              Shortcut for '-F parm'
+        -F keyword      Keyword to look for
+        -0              Separate output with NULs</pre>
+</dd>
 <dt><strong><a name="modprobe" class="item"><strong>modprobe</strong></a></strong></dt>
 
 <dd>
-<p>modprobe [-nqrsvb] MODULE [symbol=value]...</p>
+<p>modprobe [-alrqvsb] MODULE [symbol=value]...</p>
 <p>Options:</p>
 <pre>
-        -n      Dry run
+        -a      Load multiple MODULEs
+        -l      List (MODULE is a pattern)
+        -r      Remove MODULE (stacks) or do autoclean
         -q      Quiet
-        -r      Remove module (stacks) or do autoclean
-        -s      Report via syslog instead of stderr
         -v      Verbose
+        -s      Log to syslog
         -b      Apply blacklist to module names too</pre>
 </dd>
 <dt><strong><a name="more" class="item"><strong>more</strong></a></strong></dt>
@@ -1186,21 +1192,6 @@ or: mv [OPTIONS] SOURCE... DIRECTORY</p>
         -f      Don't prompt before overwriting
         -i      Interactive, prompt before overwrite</pre>
 </dd>
-<dt><strong><a name="nc" class="item"><strong>nc</strong></a></strong></dt>
-
-<dd>
-<p>nc [-iN] [-wN] [-l] [-p PORT] [-f FILENAME|IPADDR PORT] [-e PROG]</p>
-<p>Open a pipe to IP:port or file</p>
-<p>Options:</p>
-<pre>
-        -e PROG Run PROG after connect
-        -i SEC  Delay interval for lines sent
-        -w SEC  Timeout for connect
-        -f FILE Use file (ala /dev/ttyS0) instead of network
-        -l      Listen mode, for inbound connects
-                (use -l twice with -e for persistent server)
-        -p PORT Local port</pre>
-</dd>
 <dt><strong><a name="netstat" class="item"><strong>netstat</strong></a></strong></dt>
 
 <dd>
@@ -1224,7 +1215,7 @@ or: mv [OPTIONS] SOURCE... DIRECTORY</p>
 
 <dd>
 <p>nice [-n ADJUST] [PROG ARGS]</p>
-<p>Run PROG with modified scheduling priority</p>
+<p>Change scheduling priority, run PROG</p>
 <p>Options:</p>
 <pre>
         -n ADJUST       Adjust priority by ADJUST</pre>
@@ -1264,6 +1255,22 @@ changes the password for the current user.</p>
         -l      Lock (disable) account
         -u      Unlock (re-enable) account</pre>
 </dd>
+<dt><strong><a name="pgrep" class="item"><strong>pgrep</strong></a></strong></dt>
+
+<dd>
+<p>pgrep [-flnovx] [-s SID|-P PPID|PATTERN]</p>
+<p>Display process(es) selected by regex PATTERN</p>
+<p>Options:</p>
+<pre>
+        -l      Show command name too
+        -f      Match against entire command line
+        -n      Show the newest process only
+        -o      Show the oldest process only
+        -v      Negate the match
+        -x      Match whole name (not substring)
+        -s      Match session ID (0 for current)
+        -P      Match parent process ID</pre>
+</dd>
 <dt><strong><a name="pidof" class="item"><strong>pidof</strong></a></strong></dt>
 
 <dd>
@@ -1301,7 +1308,7 @@ changes the password for the current user.</p>
 <p>Options:</p>
 <pre>
         -d      Delay interval for halting
-        -n      No call to sync()
+        -n      Do not sync
         -f      Force power off (don't go through init)</pre>
 </dd>
 <dt><strong><a name="printf" class="item"><strong>printf</strong></a></strong></dt>
@@ -1315,7 +1322,7 @@ where FORMAT controls the output exactly as in C printf</p>
 
 <dd>
 <p>ps</p>
-<p>Report process status</p>
+<p>Show list of processes</p>
 <p>Options:</p>
 <pre>
         w       Wide output</pre>
@@ -1325,6 +1332,16 @@ where FORMAT controls the output exactly as in C printf</p>
 <dd>
 <p>pwd</p>
 <p>Print the full filename of the current working directory</p>
+</dd>
+<dt><strong><a name="rdate" class="item"><strong>rdate</strong></a></strong></dt>
+
+<dd>
+<p>rdate [-sp] HOST</p>
+<p>Get and possibly set the system date and time from a remote HOST</p>
+<p>Options:</p>
+<pre>
+        -s      Set the system date and time (default)
+        -p      Print the date and time</pre>
 </dd>
 <dt><strong><a name="reboot" class="item"><strong>reboot</strong></a></strong></dt>
 
@@ -1341,13 +1358,19 @@ where FORMAT controls the output exactly as in C printf</p>
 
 <dd>
 <p>renice {{-n INCREMENT} | PRIORITY} [[-p | -g | -u] ID...]</p>
-<p>Change priority of running processes</p>
+<p>Change scheduling priority for a running process</p>
 <p>Options:</p>
 <pre>
         -n      Adjust current nice value (smaller is faster)
         -p      Process id(s) (default)
         -g      Process group id(s)
         -u      Process user name(s) and/or id(s)</pre>
+</dd>
+<dt><strong><a name="rev" class="item"><strong>rev</strong></a></strong></dt>
+
+<dd>
+<p>rev [FILE]...</p>
+<p>Reverse lines of FILE</p>
 </dd>
 <dt><strong><a name="rm" class="item"><strong>rm</strong></a></strong></dt>
 
@@ -1427,15 +1450,6 @@ FIRST, INC default to 1.</p>
 <pre>
         -w      Pad to last with leading zeros
         -s SEP  String separator</pre>
-</dd>
-<dt><strong><a name="setconsole" class="item"><strong>setconsole</strong></a></strong></dt>
-
-<dd>
-<p>setconsole [-r|--reset] [DEVICE]</p>
-<p>Redirect system console output to DEVICE (default: /dev/tty)</p>
-<p>Options:</p>
-<pre>
-        -r      Reset output to /dev/console</pre>
 </dd>
 <dt><strong><a name="sleep" class="item"><strong>sleep</strong></a></strong></dt>
 
@@ -1598,40 +1612,40 @@ This version of syslogd ignores /etc/syslog.conf</p>
 <dd>
 <p>tail [OPTIONS] [FILE]...</p>
 <p>Print last 10 lines of each FILE (or stdin) to stdout.
-With more than one FILE, precede each with a header giving the file name.</p>
+With more than one FILE, precede each with a filename header.</p>
 <p>Options:</p>
 <pre>
-        -c N[kbm]       Output last N bytes
-        -n N[kbm]       Print last N lines instead of last 10
-        -f              Output data as the file grows
-        -q              Never output headers giving file names
-        -s SEC          Wait SEC seconds between reads with -f
-        -v              Always output headers giving file names</pre>
-<p>If the first character of N (bytes or lines) is a '+', output begins with
-the Nth item from the start of each file, otherwise, print the last N items
-in the file. N bytes may be suffixed by k (x1024), b (x512), or m (1024^2).</p>
+        -f              Print data as file grows
+        -s SECONDS      Wait SECONDS between reads with -f
+        -n N[kbm]       Print last N lines
+        -c N[kbm]       Print last N bytes
+        -q              Never print headers
+        -v              Always print headers</pre>
+<p>N may be suffixed by k (x1024), b (x512), or m (x1024^2).
+If N starts with a '+', output begins with the Nth item from the start
+of each file, not from the end.</p>
 </dd>
 <dt><strong><a name="tar" class="item"><strong>tar</strong></a></strong></dt>
 
 <dd>
 <p>tar -[cxtmvO] [-X FILE] [-f TARFILE] [-C DIR] [FILE]...</p>
 <p>Create, extract, or list files from a tar file</p>
-<p>Options:</p>
+<p>Operation:</p>
 <pre>
         c       Create
         x       Extract
         t       List
-Archive format selection:</pre>
+Options:</pre>
 <pre>
-        m       Do not restore mtime
-File selection:</pre>
-<pre>
-        f       Name of TARFILE or &quot;-&quot; for stdin
+        f       Name of TARFILE ('-' for stdin/out)
+        C       Change to DIR before operation
+        v       Verbose
         O       Extract to stdout
+        h       Follow symlinks
+        m       Don't restore mtime
         exclude File to exclude
         X       File with names to exclude
-        C       Change to DIR before operation
-        v       Verbose</pre>
+        T       File with names to include</pre>
 </dd>
 <dt><strong><a name="test" class="item"><strong>test</strong></a></strong></dt>
 
@@ -1701,30 +1715,32 @@ and display a screenful of them.</p>
 <dt><strong><a name="udhcpc" class="item"><strong>udhcpc</strong></a></strong></dt>
 
 <dd>
-<p><table cellspacing="0" cellpadding="0"><tr><td>udhcpc [-Cfbnqtvo] [-c CID] [-V VCLS] [-H HOSTNAME] [-i INTERFACE]
-<tr><td><td>[-p pidfile] [-r IP] [-s script] [-O dhcp-option]... [-P N]</table></p>
+<p><table cellspacing="0" cellpadding="0"><tr><td>udhcpc [-fbnqvoCR] [-i IFACE] [-r IP] [-s PROG] [-p PIDFILE]
+<tr><td><td>[-H HOSTNAME] [-c CID] [-V VENDOR] [-O DHCP_OPT]... [-P N]</table></p>
 <pre>
-        -V,--vendorclass=CLASSID        Vendor class identifier
-        -i,--interface=INTERFACE        Interface to use (default eth0)
-        -H,-h,--hostname=HOSTNAME       Client hostname
-        -c,--clientid=CLIENTID  Client identifier
-        -C,--clientid-none      Suppress default client identifier
-        -p,--pidfile=FILE       Create pidfile
-        -r,--request=IP         IP address to request
-        -s,--script=FILE        Run FILE at DHCP events (default /etc/scripts/udhcpc.sh)
-        -t,--retries=N          Send up to N discover packets
-        -T,--timeout=N          Pause between packets (default 3 seconds)
-        -A,--tryagain=N         Wait N seconds (default 20) after failure
-        -O,--request-option=OPT Request DHCP option OPT (cumulative)
-        -o,--no-default-options Don't request any options (unless -O is also given)
-        -f,--foreground Run in foreground
-        -b,--background Background if lease is not immediately obtained
-        -S,--syslog     Log to syslog too
-        -n,--now        Exit with failure if lease is not immediately obtained
-        -q,--quit       Quit after obtaining lease
-        -R,--release    Release IP on quit
-        -P,--client-port N  Use port N instead of default 68
-        -a,--arping     Use arping to validate offered address</pre>
+        -i,--interface IFACE    Interface to use (default eth0)
+        -p,--pidfile FILE       Create pidfile
+        -r,--request IP         IP address to request
+        -s,--script PROG        Run PROG at DHCP events (default /etc/scripts/udhcpc.sh)
+        -t,--retries N          Send up to N discover packets
+        -T,--timeout N          Pause between packets (default 3 seconds)
+        -A,--tryagain N         Wait N seconds after failure (default 20)
+        -f,--foreground         Run in foreground
+        -b,--background         Background if lease is not obtained
+        -S,--syslog             Log to syslog too
+        -n,--now                Exit if lease is not obtained
+        -q,--quit               Exit after obtaining lease
+        -R,--release            Release IP on exit
+        -P,--client-port N      Use port N (default 68)
+        -a,--arping             Use arping to validate offered address
+        -O,--request-option OPT Request DHCP option OPT (cumulative)
+        -o,--no-default-options Don't request any options (unless -O is given)
+        -x OPT:VAL              Include option OPT in sent packets (cumulative)
+        -F,--fqdn NAME          Ask server to update DNS mapping for NAME
+        -H,-h,--hostname NAME   Send NAME as client hostname (default none)
+        -V,--vendorclass VENDOR Vendor identifier (default 'udhcp VERSION')
+        -c,--clientid CLIENTID  Client identifier (default own MAC)
+        -C,--clientid-none      Don't send client identifier</pre>
 </dd>
 <dt><strong><a name="udhcpd" class="item"><strong>udhcpd</strong></a></strong></dt>
 
@@ -1734,7 +1750,7 @@ and display a screenful of them.</p>
 <pre>
         -f      Run in foreground
         -S      Log to syslog too
-        -P N    Use port N instead of default 67</pre>
+        -P N    Use port N (default 67)</pre>
 </dd>
 <dt><strong><a name="umount" class="item"><strong>umount</strong></a></strong></dt>
 
@@ -1767,7 +1783,7 @@ and display a screenful of them.</p>
 <dt><strong><a name="uniq" class="item"><strong>uniq</strong></a></strong></dt>
 
 <dd>
-<p>uniq [-fscduw]... [INPUT [OUTPUT]]</p>
+<p>uniq [-cdu][-f,s,w N] [INPUT [OUTPUT]]</p>
 <p>Discard duplicate lines</p>
 <p>Options:</p>
 <pre>
@@ -1777,32 +1793,6 @@ and display a screenful of them.</p>
         -f N    Skip first N fields
         -s N    Skip first N chars (after any skipped fields)
         -w N    Compare N characters in line</pre>
-</dd>
-<dt><strong><a name="unix2dos" class="item"><strong>unix2dos</strong></a></strong></dt>
-
-<dd>
-<p>unix2dos [OPTIONS] [FILE]</p>
-<p>Convert FILE in-place from Unix to DOS format.
-When no file is given, use stdin/stdout.</p>
-<p>Options:</p>
-<pre>
-        -u      dos2unix
-        -d      unix2dos</pre>
-</dd>
-<dt><strong><a name="unzip" class="item"><strong>unzip</strong></a></strong></dt>
-
-<dd>
-<p>unzip [-opts[modifiers]] file[.zip] [list] [-x xlist] [-d exdir]</p>
-<p>Extract files from ZIP archives</p>
-<p>Options:</p>
-<pre>
-        -l      List archive contents (with -q for short form)
-        -n      Never overwrite existing files (default)
-        -o      Overwrite files without prompting
-        -p      Send output to stdout
-        -q      Quiet
-        -x      Exclude these files
-        -d      Extract files into this directory</pre>
 </dd>
 <dt><strong><a name="uptime" class="item"><strong>uptime</strong></a></strong></dt>
 
@@ -1867,9 +1857,9 @@ and a total line if more than one FILE is specified</p>
 <dt><strong><a name="wget" class="item"><strong>wget</strong></a></strong></dt>
 
 <dd>
-<p><table cellspacing="0" cellpadding="0"><tr><td>wget [-c|--continue] [-s|--spider] [-q|--quiet] [-O|--output-document file]
+<p><table cellspacing="0" cellpadding="0"><tr><td>wget [-c|--continue] [-s|--spider] [-q|--quiet] [-O|--output-document FILE]
 <tr><td><td>[--header 'header: value'] [-Y|--proxy on/off] [-P DIR]
-<tr><td><td>[--no-check-certificate] [-U|--user-agent agent] url</table></p>
+<tr><td><td>[--no-check-certificate] [-U|--user-agent AGENT] URL</table></p>
 <p>Retrieve files via HTTP or FTP</p>
 <p>Options:</p>
 <pre>
@@ -1877,8 +1867,8 @@ and a total line if more than one FILE is specified</p>
         -c      Continue retrieval of aborted transfer
         -q      Quiet
         -P      Set directory prefix to DIR
-        -O      Save to filename ('-' for stdout)
-        -U      Adjust 'User-Agent' field
+        -O FILE Save to FILE ('-' for stdout)
+        -U STR  Use STR for User-Agent header
         -Y      Use proxy ('on' or 'off')</pre>
 </dd>
 <dt><strong><a name="which" class="item"><strong>which</strong></a></strong></dt>
@@ -1887,33 +1877,17 @@ and a total line if more than one FILE is specified</p>
 <p>which [COMMAND]...</p>
 <p>Locate a COMMAND</p>
 </dd>
-<dt><strong><a name="xargs" class="item"><strong>xargs</strong></a></strong></dt>
-
-<dd>
-<p>xargs [OPTIONS] [PROG ARGS]</p>
-<p>Run PROG on every item given by stdin</p>
-<p>Options:</p>
-<pre>
-        -p      Ask user whether to run each command
-        -r      Don't run command if input is empty
-        -0      Input is separated by NUL characters
-        -t      Print the command on stderr before execution
-        -e[STR] STR stops input processing
-        -n N    Pass no more than N args to PROG
-        -s N    Pass command line of no more than N bytes
-        -x      Exit if size is exceeded</pre>
-</dd>
 <dt><strong><a name="yes" class="item"><strong>yes</strong></a></strong></dt>
 
 <dd>
-<p>yes [OPTIONS] [STRING]</p>
+<p>yes [STRING]</p>
 <p>Repeatedly output a line with STRING, or 'y'</p>
 </dd>
 <dt><strong><a name="zcat" class="item"><strong>zcat</strong></a></strong></dt>
 
 <dd>
 <p>zcat FILE</p>
-<p>Uncompress to stdout</p>
+<p>Decompress to stdout</p>
 </dd>
 </dl>
 <p>

@@ -15,6 +15,9 @@
 #include <sys/reboot.h>
 #include <sys/resource.h>
 #include <linux/vt.h>
+#if ENABLE_FEATURE_UTMP
+# include <utmp.h> /* DEAD_PROCESS */
+#endif
 
 
 /* Was a CONFIG_xxx option. A lot of people were building
@@ -416,6 +419,7 @@ static struct init_action *mark_terminated(pid_t pid)
 				return a;
 			}
 		}
+		update_utmp(pid, DEAD_PROCESS, /*tty_name:*/ NULL, /*username:*/ NULL, /*hostname:*/ NULL);
 	}
 	return NULL;
 }
@@ -457,11 +461,8 @@ static void run_actions(int action_type)
 			/* Only run stuff with pid == 0. If pid != 0,
 			 * it is already running
 			 */
-			if (a->pid == 0) {
-				if (a->terminal[0] && access(a->terminal, R_OK | W_OK))
-					continue;
+			if (a->pid == 0)
 				a->pid = run(a);
-			}
 		}
 	}
 }
@@ -568,9 +569,7 @@ static void parse_inittab(void)
 			goto bad_entry;
 		/* turn .*TTY -> /dev/TTY */
 		if (tty[0]) {
-			if (strncmp(tty, "/dev/", 5) == 0)
-				tty += 5;
-			tty = concat_path_file("/dev/", tty);
+			tty = concat_path_file("/dev/", skip_dev_pfx(tty));
 		}
 		new_init_action(1 << action, token[3], tty);
 		if (tty[0])
