@@ -87,6 +87,11 @@
 5) Add simple software conntrack fastpath<br>
 6) Cleannat module support for clear conntrack table<br>
 7) More connrack helpers and protocol support<br>
+8) Kernel backport fixes from stable tree<br>
+9) Busybox update to 1.17.x tree<br>
+10) Some scrits rewrite for speedup<br>
+11) Remove hldc and vj support for pppd<br>
+12) ppp connection optimization in kernel<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
