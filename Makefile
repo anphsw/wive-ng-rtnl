@@ -383,11 +383,6 @@ clean: modules_clean
 	rm -f .tmp*
 	rm -f sdk_version.h
 	rm -f version
-	find $PWD -name 'config.log' | xargs rm -f
-	find $PWD/user -name '*.o' | xargs rm -f
-	find $PWD -name '*.old' | xargs rm -f
-	find $PWD -name '*.log' | xargs rm -f
-	find $PWD -name CVS -type d | xargs rm -rf
 	echo "Clean subtargets..."
 	touch config.arch
 	touch linux/.config
@@ -396,6 +391,11 @@ clean: modules_clean
 	make clean -C uClibc++/extra/config
 	make clean -C Uboot
 	make clean -C tools
+	find $PWD -name 'config.log' | xargs rm -f
+	find $PWD/user -name '*.o' | xargs rm -f
+	find $PWD -name '*.old' | xargs rm -f
+	find $PWD -name '*.log' | xargs rm -f
+	find $PWD -name CVS -type d | xargs rm -rf
 
 real_clean mrproper: clean
 	make -C linux mrproper
