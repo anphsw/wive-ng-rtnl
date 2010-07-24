@@ -879,7 +879,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*ieee_80211h, *wmm_capable, *apsd_capable, *dls_capable, *countrycode;
+			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
 	char_t	*m2u_enable, *rd_region, *carrier_detect;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
@@ -896,7 +896,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	short_slot = websGetVar(wp, T("short_slot"), T("0"));
 	tx_burst = websGetVar(wp, T("tx_burst"), T("0"));
 	pkt_aggregate = websGetVar(wp, T("pkt_aggregate"), T("0"));
-	ieee_80211h = websGetVar(wp, T("ieee_80211h"), T("0"));
 	rd_region = websGetVar(wp, T("rd_region"), T(""));
 	carrier_detect = websGetVar(wp, T("carrier_detect"), T("0"));
 	wmm_capable = websGetVar(wp, T("wmm_capable"), T("0"));
@@ -923,7 +922,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "ShortSlot", short_slot);
 	nvram_bufset(RT2860_NVRAM, "TxBurst", tx_burst);
 	nvram_bufset(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
-	nvram_bufset(RT2860_NVRAM, "IEEE80211H", ieee_80211h);
 	nvram_bufset(RT2860_NVRAM, "RDRegion", rd_region);
 	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
 	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
@@ -988,7 +986,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
     websWrite(wp, T("short_slot: %s<br>\n"), short_slot);
     websWrite(wp, T("tx_burst: %s<br>\n"), tx_burst);
     websWrite(wp, T("pkt_aggregate: %s<br>\n"), pkt_aggregate);
-    websWrite(wp, T("ieee_80211h: %s<br>\n"), ieee_80211h);
     websWrite(wp, T("rd_region: %s<br>\n"), rd_region);
     websWrite(wp, T("carrier_detect: %s<br>\n"), carrier_detect);
     websWrite(wp, T("wmm_capable: %s<br>\n"), wmm_capable);

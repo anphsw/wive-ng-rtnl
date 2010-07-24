@@ -2164,9 +2164,9 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t	*ctype;
 	char_t	*ip, *nm, *gw;
 	char_t	*eth, *user, *pass;
-	char_t	*clone_en, *clone_mac, *nat_enable;
-	char_t  *vpn_srv, *vpn_mode;
-	char_t  *l2tp_srv, *l2tp_mode;
+	char_t	*nat_enable;
+	char_t	*vpn_srv, *vpn_mode;
+	char_t	*l2tp_srv, *l2tp_mode;
 #ifdef CONFIG_USER_3G
 	char_t	*usb3g_dev;
 #endif
@@ -2175,7 +2175,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*lan2enabled = nvram_bufget(RT2860_NVRAM, "Lan2Enabled");
 
 	ctype = ip = nm = gw = eth = user = pass = 
-		clone_en = clone_mac = vpn_srv = vpn_mode = l2tp_srv = l2tp_mode =
+		vpn_srv = vpn_mode = l2tp_srv = l2tp_mode =
 		NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
@@ -2255,13 +2255,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
 
-	// mac clone
-	clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
-	clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
-	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
-	if (!strncmp(clone_en, "1", 2))
-		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
-
 	// NAT
 	printf("opmode = %s\n");
 	if (strcmp(opmode, "0") != 0)
@@ -2288,9 +2281,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	{
 	}
 
-	websWrite(wp, T("MAC Clone Enable: %s<br>\n"), clone_en);
-	if (!strncmp(clone_en, "1", 2))
-		websWrite(wp, T("MAC Address: %s<br>\n"), clone_mac);
 	websFooter(wp);
 	websDone(wp, 200);
 

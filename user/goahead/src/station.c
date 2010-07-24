@@ -4846,6 +4846,13 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	mcs = websGetVar(wp, T("n_mcs"), T("0"));
 	rf = websGetVar(wp, T("radiohiddenButton"), T("2"));
 
+	// mac clone
+	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
+	char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
+	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
+	if (!strncmp(clone_en, "1", 2))
+		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
+
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	radio_status = atoi(rf);

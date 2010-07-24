@@ -10,71 +10,6 @@
 var http_request = false;
 Butterlate.setTextDomain("internet");
 
-function macCloneMacFillSubmit()
-{
-	http_request = false;
-	if (window.XMLHttpRequest) // Mozilla, Safari,...
-	{
-		http_request = new XMLHttpRequest();
-		if (http_request.overrideMimeType)
-			http_request.overrideMimeType('text/xml');
-	}
-	else if (window.ActiveXObject) // IE
-	{
-		try
-		{
-			http_request = new ActiveXObject("Msxml2.XMLHTTP");
-		}
-		catch (e)
-		{
-			try
-			{
-				http_request = new ActiveXObject("Microsoft.XMLHTTP");
-			} catch (e) {}
-		}
-	}
-
-	if (!http_request)
-	{
-		alert('Cannot create an XMLHTTP instance');
-		return false;
-	}
-
-	http_request.onreadystatechange = doFillMyMAC;
-	http_request.open('POST', '/goform/getMyMAC', true);
-	http_request.send('n\a');
-}
-
-function doFillMyMAC()
-{
-	if (http_request.readyState == 4)
-	{
-		if (http_request.status == 200)
-		{
-			document.getElementById("macCloneMac").value = http_request.responseText;
-		}
-		else
-		{
-			alert("Can\'t get the mac address.");
-		}
-	}
-}
-
-
-function macCloneSwitch()
-{
-	if (document.wanCfg.macCloneEnbl.options.selectedIndex == 1)
-	{
-		document.getElementById("macCloneMacRow").style.visibility = "visible";
-		document.getElementById("macCloneMacRow").style.display = style_display_on();
-	}
-	else
-	{
-		document.getElementById("macCloneMacRow").style.visibility = "hidden";
-		document.getElementById("macCloneMacRow").style.display = "none";
-	}
-}
-
 function connectionTypeSwitch()
 {
 	var staticTable = document.getElementById("staticDHCP");
@@ -127,11 +62,6 @@ function initTranslation()
 	_TR("wDhcpMode", "wan dhcp mode");
 	_TR("wDhcpHost", "inet hostname");
 
-	_TR("wMacClone", "wan mac clone");
-	_TR("wMacCloneD", "inet disable");
-	_TR("wMacCloneE", "inet enable");
-	_TR("wMacCloneAddr", "inet mac");
-
 	_TRV("wApply", "inet apply");
 	_TRV("wCancel", "inet cancel");
 }
@@ -140,7 +70,6 @@ function initValue()
 {
 	var mode = "<% getCfgGeneral(1, "wanConnectionMode"); %>";
 	var pptpMode = <% getCfgZero(1, "wan_pptp_mode"); %>;
-	var clone = <% getCfgZero(1, "macCloneEnabled"); %>;
 	var nat = "<% getCfgZero(1, "natEnabled"); %>";
 	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
@@ -162,11 +91,6 @@ function initValue()
 	
 	connectionTypeSwitch();
 	
-	if (clone == 1)
-		form.macCloneEnbl.options.selectedIndex = 1;
-	else
-		form.macCloneEnbl.options.selectedIndex = 0;
-	macCloneSwitch();
 	dnsSwitchClick(form);
 }
 
@@ -225,7 +149,6 @@ function dnsSwitchClick(form)
 </table>
 <br>
 
-<!-- =========== MAC Clone =========== -->
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2">Additional Options</td>
@@ -249,22 +172,6 @@ function dnsSwitchClick(form)
 <tr id="natRowDisplay">
 	<td class="head" id="wMacAddressClone">Enable NAT</td>
 	<td><input name="natEnabled" type="checkbox"></td>
-</tr>
-<tr>
-	<td class="head" id="wMacAddressClone">MAC Clone</td>
-	<td>
-		<select name="macCloneEnbl" size="1" onChange="macCloneSwitch();">
-			<option value="0" id="wMacCloneD">Disable</option>
-			<option value="1" id="wMacCloneE">Enable</option>
-		</select>
-	</td>
-</tr>
-<tr id="macCloneMacRow">
-	<td class="head" id="wMacCloneAddr">MAC Address</td>
-	<td>
-		<input name="macCloneMac" id="macCloneMac" maxlength="17" value="<% getCfgGeneral(1, "macCloneMac"); %>">
-		<input type="button" name="macCloneMacFill" id="macCloneMacFill" value="Fill my MAC" onclick="macCloneMacFillSubmit();" >
-	</td>
 </tr>
 </table>
 <br>
