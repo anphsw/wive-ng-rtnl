@@ -17,7 +17,7 @@
  * 	- Unification of {ip,ip6}_tables into x_tables
  * 	- Removed tcp and udp code, since it's not ipv6 specific
  */
-
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/capability.h>
 #include <linux/in.h>
 #include <linux/skbuff.h>
@@ -656,12 +656,14 @@ check_entry_size_and_hooks(struct ip6t_entry *e,
 	for (h = 0; h < NF_IP6_NUMHOOKS; h++) {
 		if ((unsigned char *)e - base == hook_entries[h])
 			newinfo->hook_entry[h] = hook_entries[h];
-		if ((unsigned char *)e - base == underflows[h])
+		if ((unsigned char *)e - base == underflows[h]) {
+			if (!unconditional(&e->ipv6)) {
+				duprintf("Underflows must be unconditional\n");
+				return -EINVAL;
+			}
 			newinfo->underflow[h] = underflows[h];
+		}
 	}
-
-	/* FIXME: underflows must be unconditional, standard verdicts
-	   < 0 (not IP6T_RETURN). --RR */
 
 	/* Clear counters and comefrom */
 	e->counters = ((struct xt_counters) { 0, 0 });

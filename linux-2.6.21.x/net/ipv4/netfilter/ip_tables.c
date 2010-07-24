@@ -14,6 +14,7 @@
  * 08 Oct 2005 Harald Welte <lafore@netfilter.org>
  * 	- Generalize into "x_tables" layer and "{ip,ip6,arp}_tables"
  */
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/cache.h>
 #include <linux/capability.h>
 #include <linux/skbuff.h>
@@ -669,12 +670,14 @@ check_entry_size_and_hooks(struct ipt_entry *e,
 	for (h = 0; h < NF_IP_NUMHOOKS; h++) {
 		if ((unsigned char *)e - base == hook_entries[h])
 			newinfo->hook_entry[h] = hook_entries[h];
-		if ((unsigned char *)e - base == underflows[h])
+		if ((unsigned char *)e - base == underflows[h]) {
+			if (!unconditional(&e->ip)) {
+				duprintf("Underflows must be unconditional\n");
+				return -EINVAL;
+			}
 			newinfo->underflow[h] = underflows[h];
+		}
 	}
-
-	/* FIXME: underflows must be unconditional, standard verdicts
-	   < 0 (not IPT_RETURN). --RR */
 
 	/* Clear counters and comefrom */
 	e->counters = ((struct xt_counters) { 0, 0 });
