@@ -68,6 +68,9 @@ source "net/netlabel/Kconfig"
 
 endif # if INET
 
+config NET_SFHASH
+	bool "Use SuperFast hash w3 instead jhash_w3"
+
 config NETWORK_SECMARK
 	bool "Security Marking"
 	help

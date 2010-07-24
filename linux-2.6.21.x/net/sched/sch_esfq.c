@@ -50,6 +50,7 @@
 #include <net/sock.h>
 #include <net/pkt_sched.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <net/netfilter/nf_conntrack.h>
 
 /*	Stochastic Fairness Queuing algorithm.
@@ -126,9 +127,15 @@ static __inline__ unsigned esfq_jhash_2words(struct esfq_sched_data *q, u32 a, u
 	return jhash_2words(a, b, q->perturbation) & (q->hash_divisor-1);
 }
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 static __inline__ unsigned esfq_jhash_3words(struct esfq_sched_data *q, u32 a, u32 b, u32 c)
 {
-	return jhash_3words(a, b, c, q->perturbation) & (q->hash_divisor-1);
+	return HASH_3WORDS(a, b, c, q->perturbation) & (q->hash_divisor-1);
 }
 
 static unsigned esfq_hash(struct esfq_sched_data *q, struct sk_buff *skb)

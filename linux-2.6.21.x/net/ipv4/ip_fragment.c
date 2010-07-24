@@ -33,6 +33,7 @@
 #include <linux/icmp.h>
 #include <linux/netdevice.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/random.h>
 #include <net/sock.h>
 #include <net/ip.h>
@@ -123,9 +124,15 @@ static __inline__ void ipq_unlink(struct ipq *ipq)
 	write_unlock(&ipfrag_lock);
 }
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 static unsigned int ipqhashfn(__be16 id, __be32 saddr, __be32 daddr, u8 prot)
 {
-	return jhash_3words((__force u32)id << 16 | prot,
+	return HASH_3WORDS((__force u32)id << 16 | prot,
 			    (__force u32)saddr, (__force u32)daddr,
 			    ipfrag_hash_rnd) & (IPQ_HASHSZ - 1);
 }

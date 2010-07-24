@@ -36,6 +36,7 @@
 #include <linux/slab.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/err.h>
 #include <linux/percpu.h>
 #include <linux/moduleparam.h>
@@ -162,21 +163,27 @@ DEFINE_PER_CPU(struct ip_conntrack_stat, ip_conntrack_stat);
 static int ip_conntrack_hash_rnd_initted;
 static unsigned int ip_conntrack_hash_rnd;
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 static u_int32_t __hash_conntrack(const struct ip_conntrack_tuple *tuple,
 			    unsigned int size, unsigned int rnd)
 {
 #if defined (CONFIG_NAT_FCONE) /* Full Cone */
-        return (jhash_3words((__force u32)tuple->dst.ip,
+        return (HASH_3WORDS((__force u32)tuple->dst.ip,
                              ((__force u32)tuple->dst.protonum),
                              (tuple->dst.u.all),
                              ip_conntrack_hash_rnd) % ip_conntrack_htable_size);
 #elif defined (CONFIG_NAT_RCONE) /* Restricted Cone */
-        return (jhash_3words((__force u32)tuple->src.ip,
+        return (HASH_3WORDS((__force u32)tuple->src.ip,
                              ((__force u32)tuple->dst.ip ^ tuple->dst.protonum),
                              (tuple->dst.u.all),
                              ip_conntrack_hash_rnd) % ip_conntrack_htable_size);
 #else /* CONFIG_NAT_LINUX */
-	return (jhash_3words((__force u32)tuple->src.ip,
+	return (HASH_3WORDS((__force u32)tuple->src.ip,
 			     ((__force u32)tuple->dst.ip ^ tuple->dst.protonum),
 			     (tuple->src.u.all | (tuple->dst.u.all << 16)),
 			     rnd) % size);

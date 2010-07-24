@@ -25,6 +25,8 @@
  * any bugs present are surely my fault.  -DaveM
  */
 
+#include <linux/sfhash.h>
+
 /* NOTE: Arguments are modified. */
 #define __jhash_mix(a, b, c) \
 { \
@@ -135,14 +137,20 @@ static inline __u32 jhash_3words(__u32 a, __u32 b, __u32 c, __u32 initval)
 	return c;
 }
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 static inline __u32 jhash_2words(__u32 a, __u32 b, __u32 initval)
 {
-	return jhash_3words(a, b, 0, initval);
+	return HASH_3WORDS(a, b, 0, initval);
 }
 
 static inline __u32 jhash_1word(__u32 a, __u32 initval)
 {
-	return jhash_3words(a, 0, 0, initval);
+	return HASH_3WORDS(a, 0, 0, initval);
 }
 
 #endif /* _LINUX_IPSET_JHASH_H */

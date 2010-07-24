@@ -20,6 +20,7 @@
 #include <linux/ipv6.h>
 #include <linux/types.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <net/inet_sock.h>
 
@@ -27,13 +28,19 @@
 
 struct inet_hashinfo;
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 /* I have no idea if this is a good hash for v6 or not. -DaveM */
 static inline unsigned int inet6_ehashfn(const struct in6_addr *laddr, const u16 lport,
 				const struct in6_addr *faddr, const __be16 fport)
 {
 	u32 ports = (lport ^ (__force u16)fport);
 
-	return jhash_3words((__force u32)laddr->s6_addr32[3],
+	return HASH_3WORDS((__force u32)laddr->s6_addr32[3],
 			    (__force u32)faddr->s6_addr32[3],
 			    ports, inet_ehash_secret);
 }

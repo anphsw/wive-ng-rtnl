@@ -33,6 +33,7 @@
 #include <linux/proc_fs.h>		/* for proc_net_* */
 #include <linux/seq_file.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/random.h>
 
 #include <net/ip_vs.h>
@@ -111,13 +112,18 @@ static inline void ct_write_unlock_bh(unsigned key)
 	write_unlock_bh(&__ip_vs_conntbl_lock_array[key&CT_LOCKARRAY_MASK].l);
 }
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
 
 /*
  *	Returns hash value for IPVS connection entry
  */
 static unsigned int ip_vs_conn_hashkey(unsigned proto, __be32 addr, __be16 port)
 {
-	return jhash_3words((__force u32)addr, (__force u32)port, proto, ip_vs_conn_rnd)
+	return HASH_3WORDS((__force u32)addr, (__force u32)port, proto, ip_vs_conn_rnd)
 		& IP_VS_CONN_TAB_MASK;
 }
 

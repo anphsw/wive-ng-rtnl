@@ -26,6 +26,7 @@
 #include <linux/spinlock.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/proc_fs.h>

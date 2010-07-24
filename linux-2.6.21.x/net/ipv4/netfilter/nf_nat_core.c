@@ -20,6 +20,7 @@
 #include <linux/icmp.h>
 #include <linux/udp.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <linux/netfilter_ipv4.h>
 #include <net/netfilter/nf_conntrack.h>
@@ -78,12 +79,18 @@ nf_nat_proto_put(struct nf_nat_protocol *p)
 }
 EXPORT_SYMBOL_GPL(nf_nat_proto_put);
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 /* We keep an extra hash for each conntrack, for fast searching. */
 static inline unsigned int
 hash_by_src(const struct nf_conntrack_tuple *tuple)
 {
         /* Original src, to ensure we map it consistently if poss. */
-        hash = jhash_3words((__force u32)tuple->src.u3.ip,
+        hash = HASH_3WORDS((__force u32)tuple->src.u3.ip,
                             (__force u32)tuple->src.u.all,
                             tuple->dst.protonum, 0);
         return ((u64)hash * nf_nat_htable_size) >> 32;

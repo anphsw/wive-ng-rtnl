@@ -21,6 +21,7 @@
 #include <linux/icmp.h>
 #include <linux/udp.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
@@ -75,6 +76,12 @@ ip_nat_proto_put(struct ip_nat_protocol *p)
 }
 EXPORT_SYMBOL_GPL(ip_nat_proto_put);
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 /* We keep an extra hash for each conntrack, for fast searching. */
 static inline unsigned int
 hash_by_src(const struct ip_conntrack_tuple *tuple)
@@ -82,7 +89,7 @@ hash_by_src(const struct ip_conntrack_tuple *tuple)
         unsigned int hash;
 
         /* Original src, to ensure we map it consistently if poss. */
-        hash = jhash_3words((__force u32)tuple->src.ip,
+        hash = HASH_3WORDS((__force u32)tuple->src.ip,
                             (__force u32)tuple->src.u.all,
                             tuple->dst.protonum, 0);
         return ((u64)hash * ip_nat_htable_size) >> 32;
