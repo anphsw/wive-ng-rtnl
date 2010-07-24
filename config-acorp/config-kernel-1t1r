@@ -109,10 +109,6 @@ CONFIG_GENERIC_HARDIRQS=y
 CONFIG_GENERIC_IRQ_PROBE=y
 CONFIG_CPU_SUPPORTS_HIGHMEM=y
 CONFIG_ARCH_FLATMEM_ENABLE=y
-CONFIG_SELECT_MEMORY_MODEL=y
-CONFIG_FLATMEM_MANUAL=y
-# CONFIG_DISCONTIGMEM_MANUAL is not set
-# CONFIG_SPARSEMEM_MANUAL is not set
 CONFIG_FLATMEM=y
 CONFIG_FLAT_NODE_MEM_MAP=y
 # CONFIG_SPARSEMEM_STATIC is not set
@@ -134,7 +130,6 @@ CONFIG_PREEMPT_NONE=y
 # CONFIG_PREEMPT_VOLUNTARY is not set
 # CONFIG_PREEMPT is not set
 CONFIG_PREEMPT_BKL=y
-# CONFIG_KEXEC is not set
 CONFIG_LOCKDEP_SUPPORT=y
 CONFIG_STACKTRACE_SUPPORT=y
 CONFIG_DEFCONFIG_LIST="/lib/modules/$UNAME_RELEASE/.config"
@@ -142,8 +137,8 @@ CONFIG_DEFCONFIG_LIST="/lib/modules/$UNAME_RELEASE/.config"
 #
 # Code maturity level options
 #
-CONFIG_EXPERIMENTAL=y
-CONFIG_BROKEN_ON_SMP=y
+# CONFIG_EXPERIMENTAL is not set
+# CONFIG_BROKEN_ON_SMP is not set
 CONFIG_INIT_ENV_ARG_LIMIT=32
 
 #
@@ -155,7 +150,6 @@ CONFIG_LOCALVERSION=""
 CONFIG_SYSVIPC=y
 # CONFIG_IPC_NS is not set
 CONFIG_SYSVIPC_SYSCTL=y
-# CONFIG_POSIX_MQUEUE is not set
 # CONFIG_BSD_PROCESS_ACCT is not set
 # CONFIG_TASKSTATS is not set
 # CONFIG_UTS_NS is not set
@@ -282,7 +276,6 @@ CONFIG_IP_FIB_HASH=y
 CONFIG_IP_MROUTE=y
 # CONFIG_IP_PIMSM_V1 is not set
 # CONFIG_IP_PIMSM_V2 is not set
-# CONFIG_ARPD is not set
 CONFIG_SYN_COOKIES=y
 # CONFIG_INET_AH is not set
 # CONFIG_INET_ESP is not set
@@ -296,7 +289,6 @@ CONFIG_SYN_COOKIES=y
 # CONFIG_TCP_CONG_ADVANCED is not set
 CONFIG_TCP_CONG_CUBIC=y
 CONFIG_DEFAULT_TCP_CONG="cubic"
-# CONFIG_TCP_MD5SIG is not set
 
 #
 # IP: Virtual Server Configuration
@@ -345,7 +337,6 @@ CONFIG_NETFILTER_XT_MATCH_MULTIPORT=y
 # CONFIG_NETFILTER_XT_MATCH_PKTTYPE is not set
 # CONFIG_NETFILTER_XT_MATCH_QUOTA is not set
 # CONFIG_NETFILTER_XT_MATCH_REALM is not set
-# CONFIG_NETFILTER_XT_MATCH_SCTP is not set
 CONFIG_NETFILTER_XT_MATCH_STATE=y
 # CONFIG_NETFILTER_XT_MATCH_STATISTIC is not set
 CONFIG_NETFILTER_XT_MATCH_STRING=m
@@ -362,7 +353,6 @@ CONFIG_USER_CLEAN_NAT=y
 # CONFIG_IP_NF_CT_ACCT is not set
 CONFIG_IP_NF_CONNTRACK_MARK=y
 # CONFIG_IP_NF_CONNTRACK_EVENTS is not set
-# CONFIG_IP_NF_CT_PROTO_SCTP is not set
 CONFIG_IP_NF_FTP=y
 # CONFIG_IP_NF_IRC is not set
 # CONFIG_IP_NF_NETBIOS_NS is not set
@@ -403,7 +393,6 @@ CONFIG_IP_NF_TARGET_IMQ=m
 CONFIG_IP_NF_TARGET_TOS=m
 # CONFIG_IP_NF_TARGET_ECN is not set
 CONFIG_IP_NF_TARGET_TTL=m
-# CONFIG_IP_NF_TARGET_CLUSTERIP is not set
 # CONFIG_IP_NF_RAW is not set
 # CONFIG_IP_NF_ARPTABLES is not set
 # CONFIG_IP_NF_MATCH_TIME is not set
@@ -425,22 +414,6 @@ CONFIG_NEW_CONNTRACK_DROP_SELECT=y
 # Bridge: Netfilter Configuration
 #
 # CONFIG_BRIDGE_NF_EBTABLES is not set
-
-#
-# DCCP Configuration (EXPERIMENTAL)
-#
-# CONFIG_IP_DCCP is not set
-
-#
-# SCTP Configuration (EXPERIMENTAL)
-#
-# CONFIG_IP_SCTP is not set
-
-#
-# TIPC Configuration (EXPERIMENTAL)
-#
-# CONFIG_TIPC is not set
-# CONFIG_ATM is not set
 CONFIG_BRIDGE=y
 CONFIG_BRIDGE_FORWARD_CTRL=y
 CONFIG_BRIDGE_MAC_AUTO=y
@@ -454,10 +427,6 @@ CONFIG_LLC=y
 # CONFIG_LLC2 is not set
 # CONFIG_IPX is not set
 # CONFIG_ATALK is not set
-# CONFIG_X25 is not set
-# CONFIG_LAPB is not set
-# CONFIG_ECONET is not set
-# CONFIG_WAN_ROUTER is not set
 
 #
 # QoS and/or fair queueing
@@ -686,21 +655,11 @@ CONFIG_MTD_BLOCK2MTD=y
 #
 
 #
-# ATA/ATAPI/MFM/RLL support
-#
-# CONFIG_IDE is not set
-
-#
 # SCSI device support
 #
 # CONFIG_RAID_ATTRS is not set
 # CONFIG_SCSI is not set
 # CONFIG_SCSI_NETLINK is not set
-
-#
-# Serial ATA (prod) and Parallel ATA (experimental) drivers
-#
-# CONFIG_ATA is not set
 
 #
 # Multi-device support (RAID and LVM)
@@ -788,8 +747,6 @@ CONFIG_PPPOE=y
 CONFIG_PPPOL2TP=y
 CONFIG_PPTP=y
 # CONFIG_SLIP is not set
-# CONFIG_SHAPER is not set
-# CONFIG_NETCONSOLE is not set
 # CONFIG_NETPOLL is not set
 # CONFIG_NET_POLL_CONTROLLER is not set
 
@@ -869,7 +826,6 @@ CONFIG_GEN_RTC_X=y
 #
 # TPM devices
 #
-# CONFIG_TCG_TPM is not set
 
 #
 # I2C support
@@ -886,12 +842,6 @@ CONFIG_GEN_RTC_X=y
 # Dallas's 1-wire bus
 #
 # CONFIG_W1 is not set
-
-#
-# Hardware Monitoring support
-#
-# CONFIG_HWMON is not set
-# CONFIG_HWMON_VID is not set
 
 #
 # Multifunction device drivers
@@ -1017,7 +967,6 @@ CONFIG_RTC_INTF_DEV_UIE_EMUL=y
 # CONFIG_JFS_FS is not set
 # CONFIG_FS_POSIX_ACL is not set
 # CONFIG_XFS_FS is not set
-# CONFIG_GFS2_FS is not set
 # CONFIG_OCFS2_FS is not set
 # CONFIG_MINIX_FS is not set
 # CONFIG_ROMFS_FS is not set
@@ -1057,13 +1006,7 @@ CONFIG_CONFIGFS_FS=y
 #
 # Miscellaneous filesystems
 #
-# CONFIG_ADFS_FS is not set
-# CONFIG_AFFS_FS is not set
-# CONFIG_HFS_FS is not set
 # CONFIG_HFSPLUS_FS is not set
-# CONFIG_BEFS_FS is not set
-# CONFIG_BFS_FS is not set
-# CONFIG_EFS_FS is not set
 # CONFIG_JFFS2_FS is not set
 # CONFIG_CRAMFS is not set
 CONFIG_SQUASHFS=y
@@ -1085,8 +1028,6 @@ CONFIG_SQUASHFS_VMALLOC=y
 # CONFIG_CIFS is not set
 # CONFIG_NCP_FS is not set
 # CONFIG_CODA_FS is not set
-# CONFIG_AFS_FS is not set
-# CONFIG_9P_FS is not set
 
 #
 # Partition Types
@@ -1098,11 +1039,6 @@ CONFIG_MSDOS_PARTITION=y
 # Native Language Support
 #
 # CONFIG_NLS is not set
-
-#
-# Distributed Lock Manager
-#
-# CONFIG_DLM is not set
 
 #
 # Profiling support
@@ -1138,7 +1074,6 @@ CONFIG_CRYPTO_ALGAPI=y
 CONFIG_CRYPTO_BLKCIPHER=y
 CONFIG_CRYPTO_MANAGER=y
 # CONFIG_CRYPTO_HMAC is not set
-# CONFIG_CRYPTO_XCBC is not set
 # CONFIG_CRYPTO_NULL is not set
 # CONFIG_CRYPTO_MD4 is not set
 CONFIG_CRYPTO_MD5=y
@@ -1147,11 +1082,9 @@ CONFIG_CRYPTO_SHA1=y
 # CONFIG_CRYPTO_SHA512 is not set
 # CONFIG_CRYPTO_WP512 is not set
 # CONFIG_CRYPTO_TGR192 is not set
-# CONFIG_CRYPTO_GF128MUL is not set
 CONFIG_CRYPTO_ECB=y
 # CONFIG_CRYPTO_CBC is not set
 # CONFIG_CRYPTO_PCBC is not set
-# CONFIG_CRYPTO_LRW is not set
 # CONFIG_CRYPTO_DES is not set
 # CONFIG_CRYPTO_FCRYPT is not set
 # CONFIG_CRYPTO_BLOWFISH is not set
@@ -1279,14 +1212,4 @@ CONFIG_RT2860V2_STA_INTELLIGENT_RATE_ADAPTION=y
 # CONFIG_RA_HW_NAT is not set
 CONFIG_RA_NAT_NONE=y
 CONFIG_CONNTRACK_FAST_PATH=y
-# CONFIG_RA_HW_NAT_AUTO_BIND is not set
-# CONFIG_RA_HW_NAT_SEMIAUTO_BIND is not set
-# CONFIG_RA_HW_NAT_MANUAL_BIND is not set
-# CONFIG_RA_HW_NAT_TBL_1K is not set
-# CONFIG_RA_HW_NAT_TBL_2K is not set
-# CONFIG_RA_HW_NAT_TBL_4K is not set
-# CONFIG_RA_HW_NAT_TBL_8K is not set
-# CONFIG_RA_HW_NAT_TBL_16K is not set
-# CONFIG_RA_HW_NAT_HASH0 is not set
-# CONFIG_RA_HW_NAT_HASH1 is not set
 # CONFIG_DWC_OTG is not set
