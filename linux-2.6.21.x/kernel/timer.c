@@ -588,7 +588,7 @@ static inline void __run_timers(tvec_base_t *base)
 			void (*fn)(unsigned long);
 			unsigned long data;
 
-			timer = list_entry(head->next,struct timer_list,entry);
+			timer = list_first_entry(head, struct timer_list,entry);
  			fn = timer->function;
  			data = timer->data;
 
@@ -1654,7 +1654,7 @@ static void migrate_timer_list(tvec_base_t *new_base, struct list_head *head)
 	struct timer_list *timer;
 
 	while (!list_empty(head)) {
-		timer = list_entry(head->next, struct timer_list, entry);
+		timer = list_first_entry(head, struct timer_list, entry);
 		detach_timer(timer, 0);
 		timer->base = new_base;
 		internal_add_timer(new_base, timer);
