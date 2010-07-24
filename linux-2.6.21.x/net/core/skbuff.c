@@ -1902,7 +1902,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 	struct sk_buff *segs = NULL;
 	struct sk_buff *tail = NULL;
 	unsigned int mss = skb_shinfo(skb)->gso_size;
-	unsigned int doffset = skb->data - skb->mac.raw;
+	unsigned int doffset = skb->data - skb_mac_header(skb);
 	unsigned int offset = doffset;
 	unsigned int headroom;
 	unsigned int len;
@@ -1952,7 +1952,7 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		nskb->mac_len = skb->mac_len;
 
 		skb_reserve(nskb, headroom);
-		nskb->mac.raw = nskb->data;
+		skb_reset_mac_header(nskb);
 		nskb->nh.raw = nskb->data + skb->mac_len;
 		nskb->h.raw = nskb->nh.raw + (skb->h.raw - skb->nh.raw);
 		memcpy(skb_put(nskb, doffset), skb->data, doffset);

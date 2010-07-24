@@ -805,7 +805,8 @@ static void ndisc_recv_ns(struct sk_buff *skb)
 			if (!dad)
 				goto out;
 			if (dev->type == ARPHRD_IEEE802_TR) {
-				unsigned char *sadr = skb->mac.raw;
+                                        const unsigned char *sadr;
+                                        sadr = skb_mac_header(skb);
 				if (((sadr[8] ^ dev->dev_addr[0]) & 0x7f) == 0 &&
 				    sadr[9] == dev->dev_addr[1] &&
 				    sadr[10] == dev->dev_addr[2] &&

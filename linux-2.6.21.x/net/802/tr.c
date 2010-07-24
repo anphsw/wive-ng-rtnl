@@ -193,7 +193,7 @@ __be16 tr_type_trans(struct sk_buff *skb, struct net_device *dev)
 	struct trllc *trllc;
 	unsigned riflen=0;
 
-	skb->mac.raw = skb->data;
+	skb_reset_mac_header(skb);
 
 	if(trh->saddr[0] & TR_RII)
 		riflen = (ntohs(trh->rcf) & TR_RCF_LEN_MASK) >> 8;

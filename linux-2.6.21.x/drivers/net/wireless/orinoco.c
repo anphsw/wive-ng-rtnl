@@ -689,7 +689,7 @@ static void orinoco_stat_gather(struct net_device *dev,
 	/* Note : gcc will optimise the whole section away if
 	 * WIRELESS_SPY is not defined... - Jean II */
 	if (SPY_NUMBER(priv)) {
-		orinoco_spy_gather(dev, skb->mac.raw + ETH_ALEN,
+		orinoco_spy_gather(dev, skb_mac_header(skb) + ETH_ALEN,
 				   desc->signal, desc->silence);
 	}
 }
@@ -770,7 +770,7 @@ static void orinoco_rx_monitor(struct net_device *dev, u16 rxfid,
 
 	/* Copy the 802.11 header to the skb */
 	memcpy(skb_put(skb, hdrlen), &(desc->frame_ctl), hdrlen);
-	skb->mac.raw = skb->data;
+	skb_reset_mac_header(skb);
 
 	/* If any, copy the data from the card to the skb */
 	if (datalen > 0) {

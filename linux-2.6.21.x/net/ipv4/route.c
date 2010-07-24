@@ -1703,9 +1703,9 @@ static void ip_handle_martian_source(struct net_device *dev,
 		printk(KERN_WARNING "martian source %u.%u.%u.%u from "
 			"%u.%u.%u.%u, on dev %s\n",
 			NIPQUAD(daddr), NIPQUAD(saddr), dev->name);
-		if (dev->hard_header_len && skb->mac.raw) {
+		if (dev->hard_header_len && skb_mac_header_was_set(skb)) {
 			int i;
-			unsigned char *p = skb->mac.raw;
+			const unsigned char *p = skb_mac_header(skb);
 			printk(KERN_WARNING "ll header: ");
 			for (i = 0; i < dev->hard_header_len; i++, p++) {
 				printk("%02x", *p);
@@ -2790,7 +2790,8 @@ int inet_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void *arg)
 	/* Reserve room for dummy headers, this skb can pass
 	   through good chunk of routing engine.
 	 */
-	skb->mac.raw = skb->nh.raw = skb->data;
+	skb_reset_mac_header(skb);
+	skb->nh.raw = skb->data;
 
 	/* Bugfix: need to give ip_route_input enough of an IP header to not gag. */
 	skb->nh.iph->protocol = IPPROTO_ICMP;

@@ -132,7 +132,7 @@ __be16 hippi_type_trans(struct sk_buff *skb, struct net_device *dev)
 	 * This is actually wrong ... question is if we really should
 	 * set the raw address here.
 	 */
-	 skb->mac.raw = skb->data;
+	 skb_reset_mac_header(skb);
 	 skb_pull(skb, HIPPI_HLEN);
 
 	/*

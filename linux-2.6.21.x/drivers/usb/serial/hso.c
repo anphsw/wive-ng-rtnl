@@ -110,13 +110,6 @@
 #if (!HAVE_RFKILL)
 #define SIOCSETRADIO   (SIOCDEVPRIVATE+4)
 #endif
-
-#if  (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 22))
-static inline void skb_reset_mac_header(struct sk_buff *skb)
-{
-	skb->mac.raw = skb->data;
-}
-#endif
 #ifdef CONFIG_HSO_AUTOPM
 #define sCONFIG_HSO_AUTOPM "CONFIG_HSO_AUTOPM "
 #else
