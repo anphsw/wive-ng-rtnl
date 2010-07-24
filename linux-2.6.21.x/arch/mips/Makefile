@@ -18,14 +18,14 @@ cflags-y :=
 # Select the object file format to substitute into the linker script.
 #
 ifdef CONFIG_CPU_LITTLE_ENDIAN
-32bit-tool-prefix	= mipsel-linux-
+32bit-tool-prefix	= ../toolchain/bin/mipsel-linux-
 64bit-tool-prefix	= mips64el-linux-
 32bit-bfd		= elf32-tradlittlemips
 64bit-bfd		= elf64-tradlittlemips
 32bit-emul		= elf32ltsmip
 64bit-emul		= elf64ltsmip
 else
-32bit-tool-prefix	= mips-linux-
+32bit-tool-prefix	= ../toolchain/bin/mips-linux-
 64bit-tool-prefix	= mips64-linux-
 32bit-bfd		= elf32-tradbigmips
 64bit-bfd		= elf64-tradbigmips
