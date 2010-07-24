@@ -79,9 +79,13 @@ EXPORT_SYMBOL_GPL(ip_nat_proto_put);
 static inline unsigned int
 hash_by_src(const struct ip_conntrack_tuple *tuple)
 {
-	/* Original src, to ensure we map it consistently if poss. */
-	return jhash_3words((__force u32)tuple->src.ip, tuple->src.u.all,
-			    tuple->dst.protonum, 0) % ip_nat_htable_size;
+        unsigned int hash;
+
+        /* Original src, to ensure we map it consistently if poss. */
+        hash = jhash_3words((__force u32)tuple->src.ip,
+                            (__force u32)tuple->src.u.all,
+                            tuple->dst.protonum, 0);
+        return ((u64)hash * ip_nat_htable_size) >> 32;
 }
 
 /* Noone using conntrack by the time this called. */
@@ -193,7 +197,7 @@ find_best_ips_proto(struct ip_conntrack_tuple *tuple,
 {
 	__be32 *var_ipp;
 	/* Host order */
-	u_int32_t minip, maxip, j;
+	u_int32_t minip=0, maxip=0, j;
 
 	/* No IP mapping?  Do nothing. */
 	if (!(range->flags & IP_NAT_RANGE_MAP_IPS))
@@ -218,8 +222,10 @@ find_best_ips_proto(struct ip_conntrack_tuple *tuple,
 	 * like this), even across reboots. */
 	minip = ntohl(range->min_ip);
 	maxip = ntohl(range->max_ip);
-	j = jhash_2words((__force u32)tuple->src.ip, (__force u32)tuple->dst.ip, 0);
-	*var_ipp = htonl(minip + j % (maxip - minip + 1));
+        j = jhash_2words((__force u32)tuple->src.ip,
+                         (__force u32)tuple->dst.ip, 0);
+        j = ((u64)j * (maxip - minip + 1)) >> 32;
+        *var_ipp = htonl(minip + j);
 }
 
 /* Manipulate the tuple into the range given.  For NF_IP_POST_ROUTING,
