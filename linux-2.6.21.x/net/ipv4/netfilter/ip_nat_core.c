@@ -273,8 +273,8 @@ get_unique_tuple(struct ip_conntrack_tuple *tuple,
 	/* Only bother mapping if it's not already in range and unique */
 	if (!(range->flags & IP_NAT_RANGE_PROTO_RANDOM) &&
 	    (!(range->flags & IP_NAT_RANGE_PROTO_SPECIFIED) ||
-	     || proto->in_range(tuple, maniptype, &range->min, &range->max))
-	    && !ip_nat_used_tuple(tuple, conntrack))
+		proto->in_range(tuple, maniptype, &range->min, &range->max)) &&
+		!ip_nat_used_tuple(tuple, conntrack))
 		goto out;
 
 	/* Last change: get protocol to try to obtain unique tuple. */
@@ -344,7 +344,7 @@ ip_nat_setup_info(struct ip_conntrack *conntrack,
 EXPORT_SYMBOL(ip_nat_setup_info);
 
 /* Returns true if succeeded. */
-static int
+static inline int
 manip_pkt(u_int16_t proto,
 	  struct sk_buff **pskb,
 	  unsigned int iphdroff,
@@ -379,7 +379,7 @@ manip_pkt(u_int16_t proto,
 }
 
 /* Do packet manipulations according to ip_nat_setup_info. */
-unsigned int ip_nat_packet(struct ip_conntrack *ct,
+inline unsigned int ip_nat_packet(struct ip_conntrack *ct,
 			   enum ip_conntrack_info ctinfo,
 			   unsigned int hooknum,
 			   struct sk_buff **pskb)
@@ -579,7 +579,7 @@ EXPORT_SYMBOL_GPL(ip_nat_port_nfattr_to_range);
 EXPORT_SYMBOL_GPL(ip_nat_port_range_to_nfattr);
 #endif
 
-unsigned int
+inline unsigned int
 ip_nat_route_input(unsigned int hooknum,
 		struct sk_buff **pskb,
 		const struct net_device *in,
@@ -594,22 +594,15 @@ ip_nat_route_input(unsigned int hooknum,
 	unsigned long statusbit;
 	__be32 saddr;
 
-	if (!(conn = ip_conntrack_get(skb, &ctinfo)))
+	if (!(conn = ip_conntrack_get(skb, &ctinfo)) || !(conn->status & IPS_NAT_DONE_MASK))
 		return NF_ACCEPT;
 
-	if (!(conn->status & IPS_NAT_DONE_MASK))
-		return NF_ACCEPT;
 	dir = CTINFO2DIR(ctinfo);
 	statusbit = IPS_SRC_NAT;
 	if (dir == IP_CT_DIR_REPLY)
 		statusbit ^= IPS_NAT_MASK;
-	if (!(conn->status & statusbit))
-		return NF_ACCEPT;
 
-	if (skb->dst)
-		return NF_ACCEPT;
-
-	if (skb->len < sizeof(struct iphdr))
+	if (!(conn->status & statusbit) || (skb->dst) || (skb->len < sizeof(struct iphdr)))
 		return NF_ACCEPT;
 
 	/* use daddr in other direction as masquerade address (lsrc) */
@@ -618,8 +611,7 @@ ip_nat_route_input(unsigned int hooknum,
 	if (saddr == iph->saddr)
 		return NF_ACCEPT;
 
-	if (ip_route_input_lookup(skb, iph->daddr, iph->saddr, iph->tos,
-	    skb->dev, saddr))
+	if (ip_route_input_lookup(skb, iph->daddr, iph->saddr, iph->tos, skb->dev, saddr))
 		return NF_DROP;
 
 	return NF_ACCEPT;
