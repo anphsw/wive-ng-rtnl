@@ -270,14 +270,9 @@ get_unique_tuple(struct ip_conntrack_tuple *tuple,
 	rcu_read_lock();
 	proto = __ip_nat_proto_find(orig_tuple->dst.protonum);
 
-	/* Change protocol info to have some randomization */
-	if (range->flags & IP_NAT_RANGE_PROTO_RANDOM) {
-		proto->unique_tuple(tuple, range, maniptype, conntrack);
-		goto out;
-	}
-
 	/* Only bother mapping if it's not already in range and unique */
-	if ((!(range->flags & IP_NAT_RANGE_PROTO_SPECIFIED)
+	if (!(range->flags & IP_NAT_RANGE_PROTO_RANDOM) &&
+	    (!(range->flags & IP_NAT_RANGE_PROTO_SPECIFIED) ||
 	     || proto->in_range(tuple, maniptype, &range->min, &range->max))
 	    && !ip_nat_used_tuple(tuple, conntrack))
 		goto out;
