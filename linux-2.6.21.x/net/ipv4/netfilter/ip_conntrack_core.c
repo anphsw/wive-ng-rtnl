@@ -1729,15 +1729,12 @@ int __init ip_conntrack_init(void)
 		goto err_free_conntrack_slab;
 	}
 
-	/* Don't NEED lock here, but good form anyway. */
-	write_lock_bh(&ip_conntrack_lock);
 	for (i = 0; i < MAX_IP_CT_PROTO; i++)
 		ip_ct_protos[i] = &ip_conntrack_generic_protocol;
 	/* Sew in builtin protocols. */
 	ip_ct_protos[IPPROTO_TCP] = &ip_conntrack_protocol_tcp;
 	ip_ct_protos[IPPROTO_UDP] = &ip_conntrack_protocol_udp;
 	ip_ct_protos[IPPROTO_ICMP] = &ip_conntrack_protocol_icmp;
-	write_unlock_bh(&ip_conntrack_lock);
 
 	/* For use by ipt_REJECT */
 	ip_ct_attach = ip_conntrack_attach;

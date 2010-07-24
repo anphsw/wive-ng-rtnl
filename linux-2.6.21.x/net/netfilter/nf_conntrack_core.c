@@ -1759,11 +1759,8 @@ int __init nf_conntrack_init(void)
 	if (ret < 0)
 		goto out_free_expect_slab;
 
-	/* Don't NEED lock here, but good form anyway. */
-	write_lock_bh(&nf_conntrack_lock);
 	for (i = 0; i < AF_MAX; i++)
 		nf_ct_l3protos[i] = &nf_conntrack_l3proto_generic;
-	write_unlock_bh(&nf_conntrack_lock);
 
 	/* For use by REJECT target */
 	rcu_assign_pointer(ip_ct_attach, __nf_conntrack_attach);
