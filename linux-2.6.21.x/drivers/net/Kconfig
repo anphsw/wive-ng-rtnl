@@ -2825,8 +2825,8 @@ config PPP
 	  The module will be called ppp_generic.
 
 config PPP_MULTILINK
-	bool "PPP multilink support (EXPERIMENTAL)"
-	depends on PPP && EXPERIMENTAL
+	bool "PPP multilink support"
+	depends on PPP
 	help
 	  PPP multilink is a protocol (defined in RFC 1990) which allows you
 	  to combine several (logical or physical) lines into one logical PPP
@@ -2909,8 +2909,8 @@ config PPP_BSDCOMP
 	  modules once you have said "make modules". If unsure, say N.
 
 config PPP_MPPE
-       tristate "PPP MPPE compression (encryption) (EXPERIMENTAL)"
-       depends on PPP && EXPERIMENTAL
+       tristate "PPP MPPE compression (encryption)"
+       depends on PPP
        select CRYPTO
        select CRYPTO_SHA1
        select CRYPTO_ARC4
@@ -2923,8 +2923,8 @@ config PPP_MPPE
 	 configuring PPTP clients and servers to utilize this method.
 
 config PPPOE
-	tristate "PPP over Ethernet (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && PPP
+	tristate "PPP over Ethernet"
+	depends on PPP
 	help
 	  Support for PPP over Ethernet.
 
@@ -2944,8 +2944,8 @@ config PPPOATM
 	  changes its encapsulation unilaterally.
 
 config PPPOL2TP
-        tristate "PPP over L2TP (EXPERIMENTAL)"
-        depends on EXPERIMENTAL && PPP && INET
+        tristate "PPP over L2TP"
+        depends on PPP && INET
         help
           Support for PPP-over-L2TP socket family. L2TP is a protocol
           used by ISPs and enterprises to tunnel PPP traffic over UDP
@@ -2957,8 +2957,8 @@ config PPPOL2TP
           (http://openl2tp.sourceforge.net/).
 
 config PPTP
-        tristate "PPTP (Point-to-Point Tunneling Protocol) (EXPERIMENTAL)"
-        depends on EXPERIMENTAL && PPP
+        tristate "PPTP (Point-to-Point Tunneling Protocol)"
+        depends on PPP
         help
           Support for Microsoft Point-to-Point Tunneling Protocol.
  

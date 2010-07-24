@@ -18,8 +18,8 @@ config PCI_MSI
 	   If you don't know what to do here, say N.
 
 config PCI_MULTITHREAD_PROBE
-	bool "PCI Multi-threaded probe (EXPERIMENTAL)"
-	depends on PCI && EXPERIMENTAL && BROKEN
+	bool "PCI Multi-threaded probe"
+	depends on PCI
 	help
 	  Say Y here if you want the PCI core to spawn a new thread for
 	  every PCI device that is probed.  This can cause a huge

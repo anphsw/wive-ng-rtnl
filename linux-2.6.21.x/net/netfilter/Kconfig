@@ -6,10 +6,10 @@ choice
         default NAT_LINUX
 
         config  NAT_FCONE
-        bool "Full_Cone (EXPERIMENTAL)"
+        bool "Full_Cone"
 
         config  NAT_RCONE
-        bool "Restricted_Cone (EXPERIMENTAL)"
+        bool "Restricted_Cone"
 
         config  NAT_LINUX
         bool "Linux"
@@ -123,7 +123,7 @@ config NF_CONNTRACK_SECMARK
 	  If unsure, say 'N'.
 
 config NF_CONNTRACK_EVENTS
-	bool "Connection tracking events (EXPERIMENTAL)"
+	bool "Connection tracking events"
 	depends on NF_CONNTRACK
 	help
 	  If this option is enabled, the connection tracking code will
@@ -177,7 +177,7 @@ config NF_CONNTRACK_FTP
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_CONNTRACK_H323
-	tristate "H.323 protocol support (EXPERIMENTAL)"
+	tristate "H.323 protocol support"
 	depends on NF_CONNTRACK && (IPV6 || IPV6=n)
 	help
 	  H.323 is a VoIP signalling protocol from ITU-T. As one of the most
@@ -211,7 +211,7 @@ config NF_CONNTRACK_IRC
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_CONNTRACK_NETBIOS_NS
-	tristate "NetBIOS name service protocol support (EXPERIMENTAL)"
+	tristate "NetBIOS name service protocol support"
 	depends on NF_CONNTRACK
 	help
 	  NetBIOS name service requests are sent as broadcast messages from an
@@ -249,8 +249,8 @@ config NF_CONNTRACK_PPTP
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_CONNTRACK_SANE
-	tristate "SANE protocol support (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && NF_CONNTRACK
+	tristate "SANE protocol support"
+	depends on NF_CONNTRACK
 	help
 	  SANE is a protocol for remote access to scanners as implemented
 	  by the 'saned' daemon. Like FTP, it uses separate control and
@@ -262,7 +262,7 @@ config NF_CONNTRACK_SANE
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_CONNTRACK_SIP
-	tristate "SIP protocol support (EXPERIMENTAL)"
+	tristate "SIP protocol support"
 	depends on NF_CONNTRACK
 	help
 	  SIP is an application-layer control protocol that can establish,
@@ -285,8 +285,8 @@ config NF_CONNTRACK_TFTP
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_CT_NETLINK
-	tristate 'Connection tracking netlink interface (EXPERIMENTAL)'
-	depends on EXPERIMENTAL && NF_CONNTRACK && NETFILTER_NETLINK
+	tristate 'Connection tracking netlink interface'
+	depends on NF_CONNTRACK && NETFILTER_NETLINK
 	depends on NF_CONNTRACK!=y || NETFILTER_NETLINK!=m
 	depends on NF_NAT=n || NF_NAT
 	help

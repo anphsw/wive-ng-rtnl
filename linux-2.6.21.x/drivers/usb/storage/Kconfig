@@ -33,7 +33,7 @@ config USB_STORAGE_DEBUG
 
 config USB_STORAGE_DATAFAB
 	bool "Datafab Compact Flash Reader support (EXPERIMENTAL)"
-	depends on USB_STORAGE && EXPERIMENTAL
+	depends on USB_STORAGE
 	help
 	  Support for certain Datafab CompactFlash readers.
 	  Datafab has a web page at <http://www.datafabusa.com/>.

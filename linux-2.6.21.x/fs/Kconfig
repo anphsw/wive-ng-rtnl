@@ -137,8 +137,7 @@ config EXT3_FS_SECURITY
 	  extended attributes for file security labels, say N.
 
 config EXT4DEV_FS
-	tristate "Ext4dev/ext4 extended fs support development (EXPERIMENTAL)"
-	depends on EXPERIMENTAL
+	tristate "Ext4dev/ext4 extended fs support development"
 	select JBD2
 	help
 	  Ext4dev is a predecessor filesystem of the next generation
@@ -921,7 +920,7 @@ config PROC_KCORE
 config PROC_VMCORE
         bool "/proc/vmcore support (EXPERIMENTAL)"
         depends on PROC_FS && EXPERIMENTAL && CRASH_DUMP
-	default y
+	default n
         help
         Exports the dump image of crashed kernel in ELF format.
 
@@ -1021,8 +1020,8 @@ config RAMFS
 	  ramfs.
 
 config CONFIGFS_FS
-	tristate "Userspace-driven configuration filesystem (EXPERIMENTAL)"
-	depends on SYSFS && EXPERIMENTAL
+	tristate "Userspace-driven configuration filesystem"
+	depends on SYSFS
 	help
 	  configfs is a ram-based filesystem that provides the converse
 	  of sysfs's functionality. Where sysfs is a filesystem-based
@@ -1233,8 +1232,8 @@ config JFFS2_FS_WRITEBUFFER
 	    - DataFlash
 
 config JFFS2_SUMMARY
-	bool "JFFS2 summary support (EXPERIMENTAL)"
-	depends on JFFS2_FS && EXPERIMENTAL
+	bool "JFFS2 summary support"
+	depends on JFFS2_FS
 	default n
 	help
 	  This feature makes it possible to use summary information
@@ -1650,8 +1649,8 @@ config NFS_V3_ACL
 	  If unsure, say N.
 
 config NFS_V4
-	bool "Provide NFSv4 client support (EXPERIMENTAL)"
-	depends on NFS_FS && EXPERIMENTAL
+	bool "Provide NFSv4 client support"
+	depends on NFS_FS
 	select RPCSEC_GSS_KRB5
 	help
 	  Say Y here if you want your NFS client to be able to speak the newer
@@ -1742,8 +1741,8 @@ config NFSD_V3_ACL
 	  CONFIG_NFS_V3_ACL option.  If unsure, say N.
 
 config NFSD_V4
-	bool "Provide NFSv4 server support (EXPERIMENTAL)"
-	depends on NFSD_V3 && EXPERIMENTAL
+	bool "Provide NFSv4 server support"
+	depends on NFSD_V3
 	help
 	  If you would like to include the NFSv4 server as well as the NFSv2
 	  and NFSv3 servers, say Y here.  This feature is experimental, and
@@ -1999,8 +1998,8 @@ config CIFS_DEBUG2
 	   cifs problems.  If unsure, say N.
 	   
 config CIFS_EXPERIMENTAL
-	  bool "CIFS Experimental Features (EXPERIMENTAL)"
-	  depends on CIFS && EXPERIMENTAL
+	  bool "CIFS Experimental Features"
+	  depends on CIFS
 	  help
 	    Enables cifs features under testing. These features are
 	    experimental and currently include DFS support and directory 

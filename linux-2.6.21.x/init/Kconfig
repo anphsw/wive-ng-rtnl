@@ -39,6 +39,7 @@ config EXPERIMENTAL
 	  cause the configurator to present you with fewer choices. If
 	  you say Y here, you will be offered the choice of using features or
 	  drivers that are currently considered to be in the alpha-test phase.
+	default n
 
 config BROKEN
 	bool
@@ -46,7 +47,7 @@ config BROKEN
 config BROKEN_ON_SMP
 	bool
 	depends on BROKEN || !SMP
-	default y
+	default n
 
 config LOCK_KERNEL
 	bool
@@ -333,7 +334,6 @@ config LZMA_COMPRESS_LEVEL
 config CC_OPTIMIZE_FOR_SIZE
 	bool "Optimize for size (Look out for broken compilers!)"
 	default y
-	depends on ARM || H8300 || EXPERIMENTAL
 	help
 	  Enabling this option will pass "-Os" instead of "-O2" to gcc
 	  resulting in a smaller kernel.
@@ -710,7 +710,7 @@ config MODULE_UNLOAD
 
 config MODULE_FORCE_UNLOAD
 	bool "Forced module unloading"
-	depends on MODULE_UNLOAD && EXPERIMENTAL
+	depends on MODULE_UNLOAD
 	help
 	  This option allows you to force a module to unload, even if the
 	  kernel believes it is unsafe: the kernel will remove the module

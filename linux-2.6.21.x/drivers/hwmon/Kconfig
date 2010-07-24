@@ -3,6 +3,7 @@
 #
 
 menu "Hardware Monitoring support"
+	depends EXPERIMENTAL
 
 config HWMON
 	tristate "Hardware Monitoring support"

@@ -65,8 +65,8 @@ config IP_NF_CONNTRACK_SECMARK
 	  If unsure, say 'N'.
 
 config IP_NF_CONNTRACK_EVENTS
-	bool "Connection tracking events (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && IP_NF_CONNTRACK
+	bool "Connection tracking events"
+	depends on IP_NF_CONNTRACK
 	help
 	  If this option is enabled, the connection tracking code will
 	  provide a notifier chain that can be used by other kernel code
@@ -75,8 +75,8 @@ config IP_NF_CONNTRACK_EVENTS
 	  IF unsure, say `N'.
 
 config IP_NF_CONNTRACK_NETLINK
-	tristate 'Connection tracking netlink interface (EXPERIMENTAL)'
-	depends on EXPERIMENTAL && IP_NF_CONNTRACK && NETFILTER_NETLINK
+	tristate 'Connection tracking netlink interface'
+	depends on IP_NF_CONNTRACK && NETFILTER_NETLINK
 	depends on IP_NF_CONNTRACK!=y || NETFILTER_NETLINK!=m
 	depends on IP_NF_NAT=n || IP_NF_NAT
 	help
@@ -119,8 +119,8 @@ config IP_NF_IRC
 	  To compile it as a module, choose M here.  If unsure, say Y.
 
 config IP_NF_NETBIOS_NS
-	tristate "NetBIOS name service protocol support (EXPERIMENTAL)"
-	depends on IP_NF_CONNTRACK && EXPERIMENTAL
+	tristate "NetBIOS name service protocol support"
+	depends on IP_NF_CONNTRACK
 	help
 	  NetBIOS name service requests are sent as broadcast messages from an
 	  unprivileged port and responded to with unicast messages to the
@@ -187,8 +187,8 @@ config IP_NF_PPTP
 	  Documentation/modules.txt.  If unsure, say `N'.
 
 config IP_NF_H323
-	tristate  'H.323 protocol support (EXPERIMENTAL)'
-	depends on IP_NF_CONNTRACK && EXPERIMENTAL
+	tristate  'H.323 protocol support'
+	depends on IP_NF_CONNTRACK
 	help
 	  H.323 is a VoIP signalling protocol from ITU-T. As one of the most
 	  important VoIP protocols, it is widely used by voice hardware and
@@ -207,8 +207,8 @@ config IP_NF_H323
 	  Documentation/modules.txt.  If unsure, say 'N'.
 
 config IP_NF_SIP
-	tristate "SIP protocol support (EXPERIMENTAL)"
-	depends on IP_NF_CONNTRACK && EXPERIMENTAL
+	tristate "SIP protocol support"
+	depends on IP_NF_CONNTRACK
 	help
 	  SIP is an application-layer control protocol that can establish,
 	  modify, and terminate multimedia sessions (conferences) such as
@@ -467,8 +467,8 @@ config IP_NF_TARGET_SAME
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config IP_NF_NAT_SNMP_BASIC
-	tristate "Basic SNMP-ALG support (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && IP_NF_NAT
+	tristate "Basic SNMP-ALG support"
+	depends on IP_NF_NAT
 	---help---
 
 	  This module implements an Application Layer Gateway (ALG) for
@@ -482,8 +482,8 @@ config IP_NF_NAT_SNMP_BASIC
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config NF_NAT_SNMP_BASIC
-	tristate "Basic SNMP-ALG support (EXPERIMENTAL)"
-	depends on EXPERIMENTAL && NF_NAT
+	tristate "Basic SNMP-ALG support"
+	depends on NF_NAT
 	---help---
 
 	  This module implements an Application Layer Gateway (ALG) for

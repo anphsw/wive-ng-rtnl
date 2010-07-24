@@ -3,6 +3,7 @@
 #
 
 menu "Serial ATA (prod) and Parallel ATA (experimental) drivers"
+	depends on EXPERIMENTAL
 
 config ATA
 	tristate "ATA device support"

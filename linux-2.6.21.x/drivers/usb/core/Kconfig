@@ -34,8 +34,8 @@ config USB_DEVICEFS
 	  Most users want to say Y here.
 
 config USB_DYNAMIC_MINORS
-	bool "Dynamic USB minor allocation (EXPERIMENTAL)"
-	depends on USB && EXPERIMENTAL
+	bool "Dynamic USB minor allocation"
+	depends on USB
 	help
 	  If you say Y here, the USB subsystem will use dynamic minor
 	  allocation for any device that uses the USB major number.
@@ -62,7 +62,7 @@ config USB_SUSPEND
 
 config USB_OTG
 	bool
-	depends on USB && EXPERIMENTAL
+	depends on USB
 	select USB_SUSPEND
 	default n
 

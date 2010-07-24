@@ -50,8 +50,8 @@ config IPV6_ROUTER_PREF
 	  If unsure, say N.
 
 config IPV6_ROUTE_INFO
-	bool "IPv6: Route Information (RFC 4191) support (EXPERIMENTAL)"
-	depends on IPV6_ROUTER_PREF && EXPERIMENTAL
+	bool "IPv6: Route Information (RFC 4191) support"
+	depends on IPV6_ROUTER_PREF
 	---help---
 	  This is experimental support of Route Information.
 
@@ -147,8 +147,8 @@ config INET6_XFRM_MODE_BEET
 	  If unsure, say Y.
 
 config INET6_XFRM_MODE_ROUTEOPTIMIZATION
-	tristate "IPv6: MIPv6 route optimization mode (EXPERIMENTAL)"
-	depends on IPV6 && EXPERIMENTAL
+	tristate "IPv6: MIPv6 route optimization mode"
+	depends on IPV6
 	select XFRM
 	---help---
 	  Support for MIPv6 route optimization mode.
@@ -179,7 +179,7 @@ config IPV6_TUNNEL
 
 config IPV6_MULTIPLE_TABLES
 	bool "IPv6: Multiple Routing Tables"
-	depends on IPV6 && EXPERIMENTAL
+	depends on IPV6
 	select FIB_RULES
 	---help---
 	  Support multiple routing tables.

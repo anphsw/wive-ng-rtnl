@@ -21,8 +21,8 @@ config USB_SERIAL
 	  module will be called usbserial.
 
 config USB_SERIAL_CONSOLE
-	bool "USB Serial Console device support (EXPERIMENTAL)"
-	depends on USB_SERIAL=y && EXPERIMENTAL
+	bool "USB Serial Console device support"
+	depends on USB_SERIAL=y
 	---help---
 	  If you say Y here, it will be possible to use a USB to serial
 	  converter port as the system console (the system console is the
@@ -54,8 +54,8 @@ config USB_SERIAL_GENERIC
 	  properly.
 
 config USB_SERIAL_AIRCABLE
-	tristate "USB AIRcable Bluetooth Dongle Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB AIRcable Bluetooth Dongle Driver"
+	depends on USB_SERIAL
 	help
 	    Say Y here if you want to use USB AIRcable Bluetooth Dongle.
 
@@ -72,8 +72,8 @@ config USB_SERIAL_AIRPRIME
 	  module will be called airprime.
 
 config USB_SERIAL_ARK3116
-	tristate "USB ARK Micro 3116 USB Serial Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB ARK Micro 3116 USB Serial Driver"
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to use a ARK Micro 3116 USB to Serial
 	  device.
@@ -119,7 +119,7 @@ config USB_SERIAL_DIGI_ACCELEPORT
 
 config USB_SERIAL_CP2101
 	tristate "USB CP2101 UART Bridge Controller"
-	depends on USB_SERIAL && EXPERIMENTAL
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to use a CP2101/CP2102 based USB to RS232
 	  converter.
@@ -129,7 +129,7 @@ config USB_SERIAL_CP2101
 
 config USB_SERIAL_CYPRESS_M8
 	tristate "USB Cypress M8 USB Serial Driver"
-	depends on USB_SERIAL && EXPERIMENTAL
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to use a device that contains the Cypress
 	  USB to Serial microcontroller, such as the DeLorme Earthmate GPS.
@@ -155,8 +155,8 @@ config USB_SERIAL_EMPEG
 	  module will be called empeg.
 
 config USB_SERIAL_FTDI_SIO
-	tristate "USB FTDI Single Port Serial Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB FTDI Single Port Serial Driver"
+	depends on USB_SERIAL
 	---help---
 	  Say Y here if you want to use a FTDI SIO single port USB to serial
 	  converter device. The implementation I have is called the USC-1000.
@@ -202,8 +202,8 @@ config USB_SERIAL_IPAQ
 	  module will be called ipaq.
 
 config USB_SERIAL_IR
-	tristate "USB IR Dongle Serial Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB IR Dongle Serial Driver"
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to enable simple serial support for USB IrDA
 	  devices.  This is useful if you do not want to use the full IrDA
@@ -263,8 +263,8 @@ config USB_SERIAL_GARMIN
          module will be called garmin_gps.
 
 config USB_SERIAL_IPW
-        tristate "USB IPWireless (3G UMTS TDD) Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+        tristate "USB IPWireless (3G UMTS TDD) Driver"
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to use a IPWireless USB modem such as
 	  the ones supplied by Axity3G/Sentech South Africa.
@@ -376,8 +376,8 @@ config USB_SERIAL_KEYSPAN_USA49WLC
 	  Say Y here to include firmware for the USA-49WLC converter.
 
 config USB_SERIAL_KLSI
-	tristate "USB KL5KUSB105 (Palmconnect) Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB KL5KUSB105 (Palmconnect) Driver"
+	depends on USB_SERIAL
 	---help---
 	  Say Y here if you want to use a KL5KUSB105 - based single port
 	  serial adapter. The most widely known -- and currently the only
@@ -474,8 +474,8 @@ config USB_SERIAL_HP4X
           module will be called hp4x.
 
 config USB_SERIAL_SAFE
-	tristate "USB Safe Serial (Encapsulated) Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB Safe Serial (Encapsulated) Driver"
+	depends on USB_SERIAL
 
 config USB_SERIAL_SAFE_PADDED
 	bool "USB Secure Encapsulated Driver - Padded"
@@ -503,8 +503,8 @@ config USB_SERIAL_TI
 	  module will be called ti_usb_3410_5052.
 
 config USB_SERIAL_CYBERJACK
-	tristate "USB REINER SCT cyberJack pinpad/e-com chipcard reader (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB REINER SCT cyberJack pinpad/e-com chipcard reader"
+	depends on USB_SERIAL
 	---help---
 	  Say Y here if you want to use a cyberJack pinpad/e-com USB chipcard
 	  reader. This is an interface to ISO 7816 compatible contactbased
@@ -546,8 +546,8 @@ config USB_SERIAL_OPTION
 	  it might be accessible via the FTDI_SIO driver.
 
 config USB_SERIAL_OMNINET
-	tristate "USB ZyXEL omni.net LCD Plus Driver (EXPERIMENTAL)"
-	depends on USB_SERIAL && EXPERIMENTAL
+	tristate "USB ZyXEL omni.net LCD Plus Driver"
+	depends on USB_SERIAL
 	help
 	  Say Y here if you want to use a ZyXEL omni.net LCD ISDN TA.
 

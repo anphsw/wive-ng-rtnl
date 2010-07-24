@@ -206,8 +206,8 @@ config USB_AT91
 	default USB_GADGET
 
 config USB_GADGET_DUMMY_HCD
-	boolean "Dummy HCD (DEVELOPMENT)"
-	depends on (USB=y || (USB=m && USB_GADGET=m)) && EXPERIMENTAL
+	boolean "Dummy HCD"
+	depends on (USB=y || (USB=m && USB_GADGET=m))
 	select USB_GADGET_DUALSPEED
 	help
 	  This host controller driver emulates USB, looping all data transfer
@@ -273,8 +273,7 @@ choice
 # this first set of drivers all depend on bulk-capable hardware.
 
 config USB_ZERO
-	tristate "Gadget Zero (DEVELOPMENT)"
-	depends on EXPERIMENTAL
+	tristate "Gadget Zero"
 	help
 	  Gadget Zero is a two-configuration device.  It either sinks and
 	  sources bulk data; or it loops back a configurable number of
@@ -338,8 +337,8 @@ config USB_ETH
 	  dynamically linked module called "g_ether".
 
 config USB_ETH_RNDIS
-	bool "RNDIS support (EXPERIMENTAL)"
-	depends on USB_ETH && EXPERIMENTAL
+	bool "RNDIS support"
+	depends on USB_ETH
 	default y
 	help
 	   Microsoft Windows XP bundles the "Remote NDIS" (RNDIS) protocol,
