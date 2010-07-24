@@ -447,7 +447,7 @@ int ip_nat_icmp_reply_translation(struct ip_conntrack *ct,
 	   confused... --RR */
 	if (inside->icmp.type == ICMP_REDIRECT) {
 		/* If NAT isn't finished, assume it and drop. */
-		if ((ct->status & IPS_NAT_DONE_MASK) != IPS_NAT_DONE_MASK)
+		if (!ct || ((ct->status & IPS_NAT_DONE_MASK) != IPS_NAT_DONE_MASK))
 			return 0;
 
 		if (ct->status & IPS_NAT_MASK)
