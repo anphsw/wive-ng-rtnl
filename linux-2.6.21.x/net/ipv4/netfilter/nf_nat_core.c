@@ -82,9 +82,11 @@ EXPORT_SYMBOL_GPL(nf_nat_proto_put);
 static inline unsigned int
 hash_by_src(const struct nf_conntrack_tuple *tuple)
 {
-	/* Original src, to ensure we map it consistently if poss. */
-	return jhash_3words((__force u32)tuple->src.u3.ip, tuple->src.u.all,
-			    tuple->dst.protonum, 0) % nf_nat_htable_size;
+        /* Original src, to ensure we map it consistently if poss. */
+        hash = jhash_3words((__force u32)tuple->src.u3.ip,
+                            (__force u32)tuple->src.u.all,
+                            tuple->dst.protonum, 0);
+        return ((u64)hash * nf_nat_htable_size) >> 32;
 }
 
 /* Noone using conntrack by the time this called. */
