@@ -82,6 +82,7 @@ cflags-y			+= -G 0 -mno-abicalls -fno-pic -pipe
 ifndef CONFIG_RALINK_RT3052
 cflags-y			+= -msoft-float
 endif
+cflags-y			+= -ffast-math -mno-long-calls -msplit-addresses
 LDFLAGS_vmlinux			+= -G 0 -static -n -nostdlib
 MODFLAGS			+= -mlong-calls
 
