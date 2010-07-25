@@ -29,7 +29,7 @@
 
 /* Default sysinit script. */
 #ifndef INIT_SCRIPT
-#define INIT_SCRIPT  "/bin/start"
+#define INIT_SCRIPT  CONFIG_INIT_SCRIPT
 #endif
 
 /* Each type of actions can appear many times. They will be

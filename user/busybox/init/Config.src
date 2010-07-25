@@ -14,6 +14,11 @@ config INIT
 	help
 	  init is the first program run when the system boots.
 
+config INIT_SCRIPT
+	depends on INIT
+        string "Use init script instead."
+        default "/etc/init.d/rcS"
+
 config FEATURE_USE_INITTAB
 	bool "Support reading an inittab file"
 	default y
