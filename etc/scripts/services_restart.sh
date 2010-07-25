@@ -23,10 +23,7 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 #restart iptables
-if [ "$MODE" != "pppd" ]; then
-    service iptables restart
-fi
-
+service iptables restart
 #start all
 service resolv start
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 

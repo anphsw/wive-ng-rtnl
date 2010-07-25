@@ -576,7 +576,10 @@ static int tcp_in_window(struct ip_ct_tcp *state,
 {
 	struct ip_ct_tcp_state *sender = &state->seen[dir];
 	struct ip_ct_tcp_state *receiver = &state->seen[!dir];
-	__u32 seq, ack, sack, end, win, swin;
+	__u32 seq, ack, sack, end, win;
+#if defined (CONFIG_RA_NAT_NONE)
+	__u32 swin;
+#endif
 	int res;
 
 	/*

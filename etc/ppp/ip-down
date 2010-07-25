@@ -16,17 +16,13 @@ nm=`nvram_get 2860 lan_netmask`
 Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
-upnp=`nvram_get 2860 upnpEnabled`  
-VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE > /dev/null 2>&1
-    if [ "$Lan2Enabled" = "1" ]; then                                                                                        
-        iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
-    fi              
-    iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                             
-    iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
+    iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
+    iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
 
     $LOG "Restore DNS from pppd"                                                                                             
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE               
@@ -50,12 +46,13 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 	echo 0 > /proc/cleannat
     fi
 
-    $LOG "Restart need service and rebuild shaper rules"
-    service shaper stop
+    $LOG "Restart need service and rebuild shaper and iptables rules"
     services_restart.sh pppd
-    service shaper start
+    service shaper restart
 
-
-    $LOG "Down is OK"
-
+#run scrips from /etc/ppp/ip-down.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
+if [ -d /etc/ppp/ip-down.d/ -a -x /bin/run-parts ]; then
+    /bin/run-parts /etc/ppp/ip-down.d/
+fi
+$LOG "Down is OK"

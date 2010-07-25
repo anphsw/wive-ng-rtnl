@@ -127,9 +127,14 @@ start() {
 	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	echo "Add masqrade rules"
 	    iptables -t nat -N port_forward
-	    iptables -t nat -N DMZ
-	    iptables -t nat -I PREROUTING 1 -j port_forward
-	    iptables -t nat -I PREROUTING 2 -j DMZ
+	    iptables -t nat -I PREROUTING 2 -j port_forward
+	    #######################DMZ##################################
+	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
+		iptables -t nat -N DMZ
+		iptables -t nat -I PREROUTING 1 -j DMZ
+		echo "DMZ enabled for $DMZIPAddress"
+		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
+	    fi
 
 	 if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
 	    #for ISP localnet alya dualacess
@@ -227,6 +232,8 @@ get_param() {
     UDPXY=`nvram_get 2860 UDPXYMode`
     RemoteSSH=`nvram_get 2860 RemoteSSH`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
+    DMZEnable=`nvram_get 2860 DMZEnable`
+    DMZIPAddress=`nvram_get 2860 DMZIPAddress`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then

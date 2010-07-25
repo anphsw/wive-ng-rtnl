@@ -65,30 +65,35 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
         /etc/routes_ppp_replace $PPP_IFACE replace
     fi
 
-    #NAT in vpn
-    if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
-        $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
-	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
-	if [ "$Lan2Enabled" = "1" ]; then                            
-	    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-	fi
-    fi
-
-    if [ "$upnp" = "1" ]; then                                                            
-    	$LOG "Add rules to upnp chain for $PPP_IFACE interface"                                 
-        iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                       
-        iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD                                      
-    fi                                         
-
     $LOG "Replace DNS from pppd"
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
     cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
 
-    $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper rules"
-    service shaper stop
+    $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
     services_restart.sh pppd
-    service shaper start
-    $LOG "All is start OK"
 
+    #NAT in vpn
+    if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
+        $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
+	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
+	#lan2
+	if [ "$Lan2Enabled" = "1" ]; then                            
+	    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	fi
+	#rules for upnp
+	if [ "$upnp" = "1" ]; then                                                            
+    	    $LOG "Add rules to upnp chain for $PPP_IFACE interface"                                 
+    	    iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                       
+    	    iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD                                      
+        fi                                         
+    fi
+
+    service shaper restart
+
+#run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
+if [ -d /etc/ppp/ip-up.d/ -a -x /bin/run-parts ]; then
+    /bin/run-parts /etc/ppp/ip-up.d/
+fi
+$LOG "All is start OK"

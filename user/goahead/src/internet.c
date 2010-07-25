@@ -2052,7 +2052,7 @@ int initInternet(void)
 	AntennaDiversityInit();
 #endif
 
-	firewall_init();
+	firewall_rebuild();
 	management_init();
 	RoutingInit();
 #ifdef CONFIG_NET_SCHED

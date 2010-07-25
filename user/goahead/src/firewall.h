@@ -38,6 +38,6 @@ void iptablesFilterClear(void);
 void iptablesFilterRun(char *rule);
 void iptablesWebsFilterRun(void);
 void formDefineFirewall(void);
-void firewall_init(void);
+void firewall_rebuild(void);
 int isIpNetmaskValid(char *s);	// export for QoS
 int isMacValid(char *);			// export for QoS

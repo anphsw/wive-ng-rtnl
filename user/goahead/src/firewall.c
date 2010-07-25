@@ -218,17 +218,8 @@ static void iptablesWebContentFilterClear(void){
 	doSystem("iptables -F %s  1>/dev/null 2>&1", WEB_FILTER_CHAIN);
 }
 
-static void iptablesDMZFlush(void){
-    doSystem("iptables -t nat -F %s 1>/dev/null 2>&1", DMZ_CHAIN);
-}
-
 static void iptablesPortForwardFlush(void){
     doSystem("iptables -t nat -F %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
-}
-
-static void iptablesDMZClear(void){
-	doSystem("iptables -t nat -D PREROUTING -j %s 1>/dev/null 2>&1", DMZ_CHAIN);	// remove rule in PREROUTING chain
-	doSystem("iptables -t nat -F %s 1>/dev/null 2>&1; iptables -t nat -X %s  1>/dev/null 2>&1", DMZ_CHAIN, DMZ_CHAIN);
 }
 
 static void iptablesPortForwardClear(void){
@@ -239,7 +230,6 @@ static void iptablesPortForwardClear(void){
 static void iptablesAllNATClear(void)
 {
 	iptablesPortForwardClear();
-	iptablesDMZClear();
 }
 
 #if 0
@@ -302,12 +292,6 @@ static int getNums(char *value, char delimit)
 		count++;
 	}
 	return count;
-}
-
-static void makeDMZRule(char *buf, int len, char *wan_name, char *ip_address)
-{
-	int rc = snprintf(buf, len, "iptables -t nat -A %s -j DNAT -i %s -p udp --dport ! %d --to %s", DMZ_CHAIN, wan_name, getGoAHeadServerPort(), ip_address);
-	snprintf(buf+rc, len, ";iptables -t nat -A %s -j DNAT -i %s -p tcp --dport ! %d --to %s", DMZ_CHAIN, wan_name,	getGoAHeadServerPort(), ip_address);
 }
 
 /*
@@ -439,31 +423,6 @@ static void iptablesRemoteManagementRun(void)
 	if(rmE && atoi(rmE) == 1)
 		return;
 
-	return;
-}
-
-static void iptablesDMZRun(void)
-{
-//	char wan_ip[16];
-	char cmd[1024], *ip_address;
-	char *dmz_enable = nvram_bufget(RT2860_NVRAM, "DMZEnable");
-	if(!dmz_enable){
-		printf("Warning: can't find \"DMZEnable\" in flash\n");
-		return;
-	}
-	if(!atoi(dmz_enable))
-		return;
-
-	ip_address = nvram_bufget(RT2860_NVRAM, "DMZIPAddress");
-	if(!ip_address){
-		printf("Warning: can't find \"DMZIPAddress\" in flash\n");
-		return;
-	}
-
-//	if ( getIfIp(getWanIfNamePPP(), wan_ip) == -1)
-//       return;
-	makeDMZRule(cmd, sizeof(cmd), getWanIfNamePPP(), ip_address);
-	doSystem(cmd);
 	return;
 }
 
@@ -685,24 +644,6 @@ static void iptablesPortForwardRun(void)
 				continue;
 		}
 	}
-}
-
-static void iptablesAllFilterRun(void)
-{
-	iptablesIPPortFilterRun();
-
-	iptablesWebsFilterRun();
-
-        //rebuild all rules at apply push
-        firewall_init();
-
-
-}
-
-static void iptablesAllNATRun(void)
-{
-	iptablesPortForwardRun();
-	iptablesDMZRun();
 }
 
 inline int getRuleNums(char *rules){
@@ -1185,7 +1126,6 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t name_buf[16];
 	char_t *value;
 	int *deleArray;
-//	char *firewall_enable;
 
     char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
     if(!rules || !strlen(rules) )
@@ -1605,7 +1545,6 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	if(atoi(dmzE) && !isIpValid(ip_address))	// enable && invalid mac address
 		return;
 
-	iptablesDMZFlush();
 	if(atoi(dmzE) == 0){		// disable
 		nvram_set(RT2860_NVRAM, "DMZEnable", "0");
 	}else{					// enable
@@ -1616,13 +1555,12 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	}
 
 	nvram_commit(RT2860_NVRAM);
-	iptablesDMZRun();
-
 	websHeader(wp);
 	websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
 	websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
 	websFooter(wp);
 	websDone(wp, 200);
+	firewall_rebuild();
 }
 
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
@@ -2032,17 +1970,15 @@ void formDefineFirewall(void)
 	websAspDefine(T("checkIfUnderBridgeModeASP"), checkIfUnderBridgeModeASP);
 }
 
-void firewall_init(void)
+void firewall_rebuild(void)
 {
-	////----DROP-ALL-RULES-IN-RC.D----////
-        doSystem("service iptables stop &");
-
 	////----SET-RULES----------------////
+	//no backgroudn it!!!!
+        doSystem("service iptables restart");
+	///-----Load L7 filters rules----////
 	LoadLayer7FilterName();
-        doSystem("service iptables start &");
         iptablesIPPortFilterRun();
         iptablesWebsFilterRun();
         iptablesRemoteManagementRun();
-        iptablesAllNATRun();
-
+	iptablesPortForwardRun();
 }
