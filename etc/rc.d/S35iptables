@@ -134,6 +134,7 @@ start() {
 		iptables -t nat -I PREROUTING 1 -j DMZ
 		echo "DMZ enabled for $DMZIPAddress"
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
+		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
 
 	 if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
