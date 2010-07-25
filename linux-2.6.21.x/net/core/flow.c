@@ -351,11 +351,7 @@ static int __init flow_cache_init(void)
 					sizeof(struct flow_cache_entry),
 					0, SLAB_HWCACHE_ALIGN|SLAB_PANIC,
 					NULL, NULL);
-#ifdef CONFIG_NET_SMALL
-	flow_hash_shift = 3;
-#else
 	flow_hash_shift = 10;
-#endif
 	flow_lwm = 2 * flow_hash_size;
 	flow_hwm = 4 * flow_hash_size;
 

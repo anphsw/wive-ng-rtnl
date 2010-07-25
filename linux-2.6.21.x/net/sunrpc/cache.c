@@ -516,13 +516,8 @@ void cache_purge(struct cache_detail *detail)
  * it to be revisited when cache info is available
  */
 
-#ifdef CONFIG_NET_SMALL
-#define	DFR_HASHSIZE	(512/sizeof(struct list_head))
-#else
 #define	DFR_HASHSIZE	(PAGE_SIZE/sizeof(struct list_head))
-#endif
 #define	DFR_HASH(item)	((((long)item)>>4 ^ (((long)item)>>13)) % DFR_HASHSIZE)
-
 #define	DFR_MAX	300	/* ??? */
 
 static DEFINE_SPINLOCK(cache_defer_lock);

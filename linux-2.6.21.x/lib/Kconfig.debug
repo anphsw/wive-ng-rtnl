@@ -367,7 +367,6 @@ config FRAME_POINTER
 
 config FORCED_INLINING
 	bool "Force gcc to inline functions marked 'inline'"
-	depends on DEBUG_KERNEL
 	default y
 	help
 	  This option determines if the kernel forces gcc to inline the functions

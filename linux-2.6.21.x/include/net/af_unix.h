@@ -10,11 +10,7 @@ extern void unix_inflight(struct file *fp);
 extern void unix_notinflight(struct file *fp);
 extern void unix_gc(void);
 
-#ifdef CONFIG_NET_SMALL
-#define UNIX_HASH_SIZE	16
-#else
 #define UNIX_HASH_SIZE	256
-#endif
 
 extern struct hlist_head unix_socket_table[UNIX_HASH_SIZE + 1];
 extern spinlock_t unix_table_lock;

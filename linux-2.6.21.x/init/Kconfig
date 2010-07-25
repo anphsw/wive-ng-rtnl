@@ -522,19 +522,6 @@ menuconfig TINY
           environments which can tolerate a "non-standard" tiny kernel.
           Only use this if you really know what you are doing.
 
-config NET_SMALL
-	default n
-	bool "Enable various size reductions for networking" if TINY
-	help
-	  This reduces the size of miscellaneous networking data structures.
-	  Currently a placeholder.
-
-config LINUXTINY_DO_UNINLINE
-	bool "un-inline several functions for smaller kernel size" if TINY
-	default n
-	help
-	  Un-inline some function for smaller kernel size.
-
 config PANIC
 	default y
 	bool "Enable panic reporting code" if TINY

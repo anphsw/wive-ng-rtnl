@@ -29,12 +29,7 @@
 #include <linux/ipv6.h>
 #endif
 
-#ifdef CONFIG_NET_SMALL
-#define MAX_INET_PROTOS 32
-#else
 #define MAX_INET_PROTOS	256		/* Must be a power of 2		*/
-#endif
-
 
 /* This is used to register protocols. */
 struct net_protocol {
