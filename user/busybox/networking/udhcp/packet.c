@@ -171,11 +171,6 @@ uint16_t FAST_FUNC udhcp_checksum(void *addr, int count)
 	return ~sum;
 }
 
-int udhcp_get_payload_len(struct dhcp_packet *dhcp_pkt)
-{
-	return sizeof(struct dhcp_packet) - DHCP_OPTIONS_BUFSIZE + end_option(dhcp_pkt->options) + sizeof(dhcp_pkt->options[0]);
-}
-
 /* Construct a ip/udp header for a packet, send packet */
 int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 		uint32_t source_nip, int source_port,
