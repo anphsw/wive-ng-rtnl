@@ -25,6 +25,7 @@ LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
+KERNEL_CROSS_COMPILE       = $(TOOLCHAINDIR)/kernel/bin/mipsel-kernel-linux-gnu-
 
 CFLAGS  += -I$(ROOTDIR)
 CFLAGS  += -Os -pipe -mips32 -mtune=mips32

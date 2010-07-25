@@ -5152,7 +5152,7 @@ INT	Set_ATE_IPG_Proc(//peter
 
 	ASSERT(value > 0);
 
-    if (0 < value < 256)
+    if (( value > 0 ) && ( value  < 256))
     {               
         RTMP_IO_READ32(pAd, EDCA_AC0_CFG, &data);
         data &= 0x0;

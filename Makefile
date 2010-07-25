@@ -71,7 +71,7 @@ endif
 endif
 
 # May use a different compiler for the kernel
-KERNEL_CROSS_COMPILE ?= $(CROSS_COMPILE)
+KERNEL_CROSS_COMPILE ?= $(KERNEL_CROSS_COMPILE)
 ifneq ($(SUBARCH),)
 # Using UML, so make the kernel and non-kernel with different ARCHs
 MAKEARCH = $(MAKE) ARCH=$(SUBARCH) CROSS_COMPILE=$(CROSS_COMPILE)

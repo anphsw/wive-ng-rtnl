@@ -321,20 +321,17 @@ extern unsigned long __cmpxchg_u64_unsupported_on_32bit_kernels(
 #define __cmpxchg_u64 __cmpxchg_u64_unsupported_on_32bit_kernels
 #endif
 
-/* This function doesn't exist, so you'll get a linker error
-   if something tries to do an invalid cmpxchg().  */
-extern void __cmpxchg_called_with_bad_pointer(void);
-
 static inline unsigned long __cmpxchg(volatile void * ptr, unsigned long old,
 	unsigned long new, int size)
 {
 	switch (size) {
 	case 4:
 		return __cmpxchg_u32(ptr, old, new);
+#ifdef CONFIG_64BIT
 	case 8:
 		return __cmpxchg_u64(ptr, old, new);
+#endif
 	}
-	__cmpxchg_called_with_bad_pointer();
 	return old;
 }
 
