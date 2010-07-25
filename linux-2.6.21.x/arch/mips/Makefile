@@ -79,7 +79,9 @@ endif
 # crossformat linking we rely on the elf2ecoff tool for format conversion.
 #
 cflags-y			+= -G 0 -mno-abicalls -fno-pic -pipe
+ifndef CONFIG_RALINK_RT3052
 cflags-y			+= -msoft-float
+endif
 LDFLAGS_vmlinux			+= -G 0 -static -n -nostdlib
 MODFLAGS			+= -mlong-calls
 
