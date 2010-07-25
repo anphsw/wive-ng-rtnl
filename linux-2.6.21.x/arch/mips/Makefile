@@ -79,14 +79,11 @@ endif
 # crossformat linking we rely on the elf2ecoff tool for format conversion.
 #
 cflags-y			+= -G 0 -mno-abicalls -fno-pic -pipe
-ifndef CONFIG_RALINK_RT3052
 cflags-y			+= -msoft-float
-endif
-cflags-y			+= -ffast-math -mno-long-calls -msplit-addresses
+cflags-y 			+= -ftree-loop-im -fforce-addr
+cflags-y 			+= -ffreestanding -ffast-math
 LDFLAGS_vmlinux			+= -G 0 -static -n -nostdlib
-MODFLAGS			+= -mlong-calls
-
-cflags-y += -ffreestanding
+MODFLAGS			+= -mno-long-calls
 
 #
 # We explicitly add the endianness specifier if needed, this allows
@@ -108,8 +105,7 @@ cflags-$(CONFIG_CPU_LITTLE_ENDIAN)	+= $(shell $(CC) -dumpmachine |grep -q 'mips.
 
 cflags-$(CONFIG_CPU_HAS_SMARTMIPS)	+= $(call cc-option,-msmartmips)
 
-cflags-$(CONFIG_SB1XXX_CORELIS)	+= $(call cc-option,-mno-sched-prolog) \
-				   -fno-omit-frame-pointer
+cflags-$(CONFIG_SB1XXX_CORELIS)	+= $(call cc-option,-mno-sched-prolog) -fno-omit-frame-pointer
 
 #
 # CPU-dependent compiler/assembler options for optimization.
