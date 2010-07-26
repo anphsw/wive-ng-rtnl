@@ -72,6 +72,7 @@ unload_modules()
 	done
 	#unload wifi modules
 	service modules stop
+	rmmod -a
 }
 
 # unload apps
