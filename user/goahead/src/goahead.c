@@ -320,12 +320,7 @@ int setDefault(void)
 static int initWebs(void)
 {
 	struct in_addr	intaddr;
-#if 0
-	struct hostent	*hp;
-	char			host[128];
-#else
 	char			*lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
-#endif
 	char			webdir[128];
 	char			*cp;
 	char_t			wbuf[128];
@@ -353,22 +348,6 @@ static int initWebs(void)
 		error(E_L, E_LOG, T("gohead.c: Warning: empty administrator account or password"));
 #endif
 
-#if 0
-/*
- *	Define the local Ip address, host name, default home page and the 
- *	root web directory.
- */
-	if (gethostname(host, sizeof(host)) < 0) {
-		error(E_L, E_LOG, T("gohead.c: Can't get hostname"));
-		return -1;
-	}
-	if ((hp = gethostbyname(host)) == NULL) {
-		error(E_L, E_LOG, T("gohead.c: Can't get host address"));
-		return -1;
-	}
-	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-		(size_t) hp->h_length);
-#else
 /*
  * get ip address from nvram configuration (we executed initInternet)
  */
@@ -382,7 +361,6 @@ static int initWebs(void)
 				lan_ip);
 		return -1;
 	}
-#endif
 
 /*
  *	Set rootWeb as the root web. Modify this to suit your needs
@@ -396,11 +374,7 @@ static int initWebs(void)
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
-#if 0
-	ascToUni(wbuf, host, min(strlen(host) + 1, sizeof(wbuf)));
-#else
 	//use ip address (already in wbuf) as host
-#endif
 	websSetHost(wbuf);
 
 /*
