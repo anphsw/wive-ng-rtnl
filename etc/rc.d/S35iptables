@@ -13,9 +13,7 @@ start() {
 #########################################DEFAULTRULES###################################
 	#default filters
 	$LOG "Set default filters"
-        iptables -A INPUT -i lo+ -j ACCEPT
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
 	iptables -t filter -N web_filter
 	iptables -t filter -N macipport_filter
     	iptables -t filter -A FORWARD -j macipport_filter
