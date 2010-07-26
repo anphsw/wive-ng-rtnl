@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* Code to save the iptables state, in human readable-form. */
 /* (C) 1999 by Paul 'Rusty' Russell <rusty@rustcorp.com.au> and
  * (C) 2000-2002 by Harald Welte <laforge@gnumonks.org>
@@ -27,10 +11,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <netinet/in.h>
-#ifndef NO_SHARED_LIBS
 #include <dlfcn.h>
-#endif
 #include <time.h>
 #include <netdb.h>
 #include "libiptc/libiptc.h"

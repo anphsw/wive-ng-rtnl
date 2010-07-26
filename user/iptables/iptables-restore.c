@@ -1,26 +1,10 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* Code to restore the iptables state, from file by iptables-save. 
  * (C) 2000-2002 by Harald Welte <laforge@gnumonks.org>
  * based on previous code from Rusty Russell <rusty@linuxcare.com.au>
  *
  * This code is distributed under the terms of GNU GPL v2
  *
- * $Id: iptables-restore.c,v 1.1.1.1 2006-10-13 02:43:20 steven Exp $
+ * $Id: iptables-restore.c 6828 2007-05-10 15:00:39Z /C=EU/ST=EU/CN=Patrick McHardy/emailAddress=kaber@trash.net $
  */
 
 #include <getopt.h>
@@ -370,15 +354,13 @@ main(int argc, char *argv[])
 			
 			for (curchar = parsestart; *curchar; curchar++) {
 				char param_buffer[1024];
-				if (*curchar == '\\' && *(curchar+1) == '"') {
-					if (quote_open) {
-						memmove(curchar, curchar+1,
-							strlen(curchar+1));
-						continue;
-					}
-				}
+
 				if (*curchar == '"') {
-					if (quote_open) {
+					/* quote_open cannot be true if there
+					 * was no previous character.  Thus, 
+					 * curchar-1 has to be within bounds */
+					if (quote_open && 
+					    *(curchar-1) != '\\') {
 						quote_open = 0;
 						*curchar = ' ';
 					} else if (!quote_open) {

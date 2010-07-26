@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 /* Code to take an iptables-style command line and do it. */
 
 /*
@@ -47,9 +31,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef NO_SHARED_LIBS
 #include <dlfcn.h>
-#endif
 #include <ctype.h>
 #include <stdarg.h>
 #include <limits.h>
@@ -64,10 +46,6 @@
 #endif
 #ifndef FALSE
 #define FALSE 0
-#endif
-
-#if defined(__UC_LIBC__) || defined(__UCLIBC__)
-	#define strtoull strtoul
 #endif
 
 #ifndef PROC_SYS_MODPROBE
@@ -1084,7 +1062,6 @@ find_target(const char *name, enum ipt_tryload tryload)
 {
 	struct iptables_target *ptr;
 
-	//printf("[iptables] find target:%s(%d)\n", name, tryload);	// tmp test
 	/* Standard target? */
 	if (strcmp(name, "") == 0
 	    || strcmp(name, IPTC_LABEL_ACCEPT) == 0
@@ -1250,6 +1227,7 @@ register_match(struct iptables_match *me)
 		for (i = &iptables_matches; *i!=old; i = &(*i)->next);
 		*i = old->next;
 	}
+
 	if (me->size != IPT_ALIGN(me->size)) {
 		fprintf(stderr, "%s: match `%s' has invalid size %u.\n",
 			program_name, me->name, (unsigned int)me->size);
@@ -1699,10 +1677,6 @@ for_each_chain(int (*fn)(const ipt_chainlabel, int, iptc_handle_t *),
 	chain = iptc_first_chain(handle);
 	while (chain) {
 		chaincount++;
-		if (!isalpha(chain[0])) {
-			printf("Chains are corrupt!. chain=[%s]", chain);
-			exit(1);
-		}
 		chain = iptc_next_chain(handle);
         }
 
@@ -1858,28 +1832,22 @@ int iptables_insmod(const char *modname, const char *modprobe, int quiet)
 		modprobe = buf;
 	}
 
-	argv[0] = (char *)modprobe;
-	argv[1] = (char *)modname;
-               if (quiet) {
-                       argv[2] = "-q";
-                       argv[3] = NULL;
-               } else {
-                       argv[2] = NULL;
-                       argv[3] = NULL;
-               }
-
-#if __uClinux__
-	switch (vfork()) {
-#else
 	switch (fork()) {
-#endif
 	case 0:
+		argv[0] = (char *)modprobe;
+		argv[1] = (char *)modname;
+		if (quiet) {
+			argv[2] = "-q";
+			argv[3] = NULL;
+		} else {
+			argv[2] = NULL;
+			argv[3] = NULL;
+		}
 		execv(argv[0], argv);
 
 		/* not usually reached */
-		_exit(1);
+		exit(1);
 	case -1:
-		free(buf);
 		return -1;
 
 	default: /* parent */
@@ -2000,7 +1968,6 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 	char *protocol = NULL;
 	int proto_used = 0;
 
-	//printf("do command\n");	// tmp test
 	memset(&fw, 0, sizeof(fw));
 
 	/* re-set optind to 0 in case do_command gets called
@@ -2009,19 +1976,12 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 
 	/* clear mflags in case do_command gets called a second time
 	 * (we clear the global list of all matches for security)*/
-	for (m = iptables_matches; m; m = m->next) {
+	for (m = iptables_matches; m; m = m->next)
 		m->mflags = 0;
-#ifdef NO_SHARED_LIBS
-		m->loaded = 0;
-#endif
-	}
 
 	for (t = iptables_targets; t; t = t->next) {
 		t->tflags = 0;
 		t->used = 0;
-#ifdef NO_SHARED_LIBS
-		t->loaded = 0;
-#endif
 	}
 
 	/* Suppress error messages: we may add new options if we
@@ -2576,38 +2536,32 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 
 	switch (command) {
 	case CMD_APPEND:
-		//printf("cmd append\n");	// tmp test
 		ret = append_entry(chain, e,
 				   nsaddrs, saddrs, ndaddrs, daddrs,
 				   options&OPT_VERBOSE,
 				   handle);
 		break;
 	case CMD_DELETE:
-		//printf("cmd delete\n");	// tmp test
 		ret = delete_entry(chain, e,
 				   nsaddrs, saddrs, ndaddrs, daddrs,
 				   options&OPT_VERBOSE,
 				   handle, matches);
 		break;
 	case CMD_DELETE_NUM:
-		//printf("cmd delete num\n");	// tmp test
 		ret = iptc_delete_num_entry(chain, rulenum - 1, handle);
 		break;
 	case CMD_REPLACE:
-		//printf("cmd replace\n");	// tmp test
 		ret = replace_entry(chain, e, rulenum - 1,
 				    saddrs, daddrs, options&OPT_VERBOSE,
 				    handle);
 		break;
 	case CMD_INSERT:
-		//printf("cmd insert\n");	// tmp test
 		ret = insert_entry(chain, e, rulenum - 1,
 				   nsaddrs, saddrs, ndaddrs, daddrs,
 				   options&OPT_VERBOSE,
 				   handle);
 		break;
 	case CMD_LIST:
-		//printf("cmd list\n");	// tmp test
 		ret = list_entries(chain,
 				   options&OPT_VERBOSE,
 				   options&OPT_NUMERIC,
@@ -2616,15 +2570,12 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 				   handle);
 		break;
 	case CMD_FLUSH:
-		//printf("cmd flush\n");	// tmp test
 		ret = flush_entries(chain, options&OPT_VERBOSE, handle);
 		break;
 	case CMD_ZERO:
-		//printf("cmd zerp\n");	// tmp test
 		ret = zero_entries(chain, options&OPT_VERBOSE, handle);
 		break;
 	case CMD_LIST|CMD_ZERO:
-		//printf("cmd list or zero\n");	// tmp test
 		ret = list_entries(chain,
 				   options&OPT_VERBOSE,
 				   options&OPT_NUMERIC,
@@ -2636,32 +2587,25 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 					   options&OPT_VERBOSE, handle);
 		break;
 	case CMD_NEW_CHAIN:
-		//printf("cmd new chain\n");	// tmp test
 		ret = iptc_create_chain(chain, handle);
 		break;
 	case CMD_DELETE_CHAIN:
-		//printf("cmd delete chain\n");	// tmp test
 		ret = delete_chain(chain, options&OPT_VERBOSE, handle);
 		break;
 	case CMD_RENAME_CHAIN:
-		//printf("cmd rename chain\n");	// tmp test
 		ret = iptc_rename_chain(chain, newname,	handle);
 		break;
 	case CMD_SET_POLICY:
-		//printf("cmd set policy\n");	// tmp test
 		ret = iptc_set_policy(chain, policy, NULL, handle);
 		break;
 	default:
 		/* We should never reach this... */
-		//printf("cmd unknown\n");	// tmp test
 		exit_tryhelp(2);
 	}
 
 	if (verbose > 1)
 		dump_entries(*handle);
 
-	//printf("dump entries:\n");	// tmp test
-	//dump_entries(*handle);	// tmp test
 	clear_rule_matches(&matches);
 
 	if (e != NULL) {
