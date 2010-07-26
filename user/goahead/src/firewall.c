@@ -407,37 +407,18 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		rc = snprintf(pos, len-rc, "--to %s ", ip_address);
 }
 
-static void iptablesRemoteManagementRun(void)
-{
-	char *rmE = nvram_bufget(RT2860_NVRAM, "RemoteManagement");
-	char *opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
-	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
-
-	if(!opmode)
-		return;
-
-	// "Gateway mode" only
-	if(strcmp(opmode , "1"))
-		return;
-
-	if(rmE && atoi(rmE) == 1)
-		return;
-
-	return;
-}
-
 static void iptablesIPPortFilterRun(void)
 {
-	int i=0;
-	char rec[256];
-	char cmd[1024];
-	int sprf_int, sprt_int, proto, action;
-	int dprf_int, dprt_int;
-	char sprf[8], sprt[8], protocol[8];
-	char dprf[8], dprt[8];
-	char mac_address[32];
-	char sip_1[32], sip_2[32], action_str[4];
-	char dip_1[32], dip_2[32];
+    int i=0;
+    char rec[256];
+    char cmd[1024];
+    int sprf_int, sprt_int, proto, action;
+    int dprf_int, dprt_int;
+    char sprf[8], sprt[8], protocol[8];
+    char dprf[8], dprt[8];
+    char mac_address[32];
+    char sip_1[32], sip_2[32], action_str[4];
+    char dip_1[32], dip_2[32];
     char *firewall_enable, *default_policy, *rule;
     char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
     int mode;
@@ -471,13 +452,6 @@ static void iptablesIPPortFilterRun(void)
 			continue;
 		}
 
-		// we dont support ip range yet.
-        // get sip 2
-        //if((getNthValueSafe(1, rec, ',', sip_2, sizeof(sip_2)) == -1))
-        //	continue;
-		//if(!isIpValid(sip_2))
-		//	continue;
-
 		// get source port range "from"
 		if((getNthValueSafe(2, rec, ',', sprf, sizeof(sprf)) == -1)){
 			continue;
@@ -492,19 +466,12 @@ static void iptablesIPPortFilterRun(void)
 			continue;
 
 		// Destination Part
-        // get dip 1
 		if((getNthValueSafe(4, rec, ',', dip_1, sizeof(dip_1)) == -1)){
 			continue;
 		}
 		if(!isIpNetmaskValid(dip_1)){
 			continue;
 		}
-		// we dont support ip range yet
-        // get sip 2
-        //if((getNthValueSafe(5, rec, ',', dip_2, sizeof(dip_2)) == -1))
-        //    continue;
-        //if(!isIpValid(dip_2))
-        //    continue;
 
 		// get source port range "from"
 		if((getNthValueSafe(6, rec, ',', dprf, sizeof(dprf)) == -1)){
@@ -1571,27 +1538,14 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	if(!wpfE || !strlen(wpfE))
 		return;
 
-	// TODO: make a new chain instead of flushing the INPUT chain
-	doSystem("iptables -t filter -F INPUT");
-
-	if(atoi(wpfE) == 0){		// disable
-		nvram_bufset(RT2860_NVRAM, "WANPingFilter", "0");
-	}else{					// enable
-		nvram_bufset(RT2860_NVRAM, "WANPingFilter", "1");
-		doSystem("iptables -t filter -A INPUT -i %s -p icmp -j DROP", getWanIfNamePPP());
-	}
-
 	nvram_commit(RT2860_NVRAM);
-
-	iptablesRemoteManagementRun();
-
-	iptablesIPPortFilterFlush();
-	iptablesIPPortFilterRun();
-
 	websHeader(wp);
 	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	iptablesIPPortFilterFlush();
+	iptablesIPPortFilterRun();
 }
 
 
@@ -1958,7 +1912,6 @@ void formDefineFirewall(void)
 	websFormDefine(T("portForwardDelete"), portForwardDelete);
 
 	websFormDefine(T("websSysFirewall"), websSysFirewall);
-
 	websFormDefine(T("webContentFilter"), webContentFilter);
 	websFormDefine(T("websURLFilterDelete"), websURLFilterDelete);
 	websFormDefine(T("websHostFilterDelete"), websHostFilterDelete);
@@ -1979,6 +1932,5 @@ void firewall_rebuild(void)
 	LoadLayer7FilterName();
         iptablesIPPortFilterRun();
         iptablesWebsFilterRun();
-        iptablesRemoteManagementRun();
 	iptablesPortForwardRun();
 }
