@@ -1,20 +1,4 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/* Library which manipulates firewall rules.  Version $Revision: 1.1.1.1 $ */
+/* Library which manipulates firewall rules.  Version $Revision: 6665 $ */
 
 /* Architecture of firewall rules is as follows:
  *
@@ -42,7 +26,6 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <errno.h>	// tmp test
 
 #include "linux_list.h"
 
@@ -172,7 +155,6 @@ static struct chain_head *iptcc_alloc_chain_head(const char *name, int hooknum)
 static struct rule_head *iptcc_alloc_rule(struct chain_head *c, unsigned int size)
 {
 	struct rule_head *r = malloc(sizeof(*r)+size);
-	//printf("A [%s] alloc rule %d(%d)\n", c->name, sizeof(*r)+size, size);	// tmp test	++
 	if (!r)
 		return NULL;
 	memset(r, 0, sizeof(*r));
@@ -697,7 +679,7 @@ static int iptcc_compile_chain_offsets(TC_HANDLE_T h, struct chain_head *c,
 	struct rule_head *r;
 
 	c->head_offset = *offset;
-	//printf("%s: chain_head %u, offset=%u\n", c->name, *num, *offset);	// tmp test ++
+	DEBUGP("%s: chain_head %u, offset=%u\n", c->name, *num, *offset);
 
 	if (!iptcc_is_builtin(c))  {
 		/* Chain has header */
@@ -707,14 +689,15 @@ static int iptcc_compile_chain_offsets(TC_HANDLE_T h, struct chain_head *c,
 	}
 
 	list_for_each_entry(r, &c->rules, list) {
-		//printf("rule %u, offset=%u, index=%u\n", *num, *offset, *num);	// tmp test  ++
+		DEBUGP("rule %u, offset=%u, index=%u\n", *num, *offset, *num);
 		r->offset = *offset;
 		r->index = *num;
 		*offset += r->size;
 		(*num)++;
 	}
 
-	//printf("%s; chain_foot %u, offset=%u, index=%u\n", c->name, *num, *offset, *num);	// tmp test ++
+	DEBUGP("%s; chain_foot %u, offset=%u, index=%u\n", c->name, *num, 
+		*offset, *num);
 	c->foot_offset = *offset;
 	c->foot_index = *num;
 	*offset += sizeof(STRUCT_ENTRY)
@@ -731,23 +714,17 @@ static int iptcc_compile_table_prep(TC_HANDLE_T h, unsigned int *size)
 	unsigned int offset = 0, num = 0;
 	int ret = 0;
 
-	//printf("\n---- iptcc_compile_table_prep \n");	// tmp test ++
 	/* First pass: calculate offset for every rule */
 	list_for_each_entry(c, &h->chains, list) {
-		//printf("\n1. offset is %d\n", offset);	// tmp test ++
 		ret = iptcc_compile_chain_offsets(h, c, &offset, &num);
 		if (ret < 0)
 			return ret;
 	}
 
-	//printf("2. offset is %d\n", offset);	// tmp test ++
 	/* Append one error rule at end of chain */
 	num++;
 	offset += sizeof(STRUCT_ENTRY)
 		  + ALIGN(sizeof(struct ipt_error_target));
-	
-	//printf("3. ipt error target size is %d, after ALIGN is %d\n", sizeof(struct ipt_error_target), ALIGN(sizeof(struct ipt_error_target)));	// tmp test
-	//printf("4. offset is %d, num is %d\n", offset, num);	// tmp test	++
 
 	/* ruleset size is now in offset */
 	*size = offset;
@@ -824,7 +801,6 @@ TC_INIT(const char *tablename)
 	unsigned int tmp;
 	socklen_t s;
 
-	//printf("iptc init [%s]\n", tablename);	// tmp test	++
 	iptc_fn = TC_INIT;
 
 	if (strlen(tablename) >= TABLE_MAXNAMELEN) {
@@ -1141,18 +1117,14 @@ const char *standard_target_map(int verdict)
 		case -NF_QUEUE-1:
 			return LABEL_QUEUE;
 			break;
-		//case -1742798842:	// 1002 add
-		//	printf("new defined target\n");
-		//	return LABEL_RETURN;
 		default:
-			if(verdict != -1742798842)
-				fprintf(stderr, "err: %d not a valid target, pass it anyway\n", verdict);
-			//abort();	// 1002 disable
+			fprintf(stderr, "ERROR: %d not a valid target)\n",
+				verdict);
+			abort();
 			break;
 	}
 	/* not reached */
-	return LABEL_RETURN;	// 1002 edit
-	//return NULL;
+	return NULL;
 }
 
 /* Returns a pointer to the target name of this position. */
@@ -1181,8 +1153,6 @@ const char *TC_GET_TARGET(const STRUCT_ENTRY *ce,
 		case IPTCC_R_MODULE:
 			return GET_TARGET(e)->u.user.name;
 			break;
-		default:
-			printf("@ no matched rule head type\n");	// test
 	}
 	return NULL;
 }
@@ -1429,7 +1399,6 @@ TC_APPEND_ENTRY(const IPT_CHAINLABEL chain,
 		return 0;
 	}
 
-	//printf("[%s] append entry (%d)\n", c->name, e->next_offset);	// tmp test	++
 	if (!(r = iptcc_alloc_rule(c, e->next_offset))) {
 		DEBUGP("unable to allocate rule for chain `%s'\n", chain);
 		errno = ENOMEM;
@@ -2079,9 +2048,6 @@ TC_COMMIT(TC_HANDLE_T *handle)
 		goto out_zero;
 	}
 
-	//printf("STRUCT_REPLACE size =%d\n", sizeof(STRUCT_REPLACE));	// tmp test ++
-	//printf("repl size =%d, new size=%d, total=%d\n", sizeof(*repl), new_size, sizeof(*repl) + new_size);	// tmp test ++
-
 	repl = malloc(sizeof(*repl) + new_size);
 	if (!repl) {
 		errno = ENOMEM;
@@ -2122,8 +2088,11 @@ TC_COMMIT(TC_HANDLE_T *handle)
 		repl->num_entries, repl->size, repl->num_counters);
 
 	ret = iptcc_compile_table(*handle, repl);
-	if (ret < 0)
+	if (ret < 0) {
+		errno = ret;
 		goto out_free_newcounters;
+	}
+
 
 #ifdef IPTC_DEBUG2
 	{
@@ -2136,7 +2105,6 @@ TC_COMMIT(TC_HANDLE_T *handle)
 	}
 #endif
 
-	//printf("TC COMMIT set socket opt\n");	// tmp test ++
 	ret = setsockopt(sockfd, TC_IPPROTO, SO_SET_REPLACE, repl,
 			 sizeof(*repl) + repl->size);
 	if (ret < 0)
@@ -2231,10 +2199,8 @@ TC_COMMIT(TC_HANDLE_T *handle)
 
 	ret = setsockopt(sockfd, TC_IPPROTO, SO_SET_ADD_COUNTERS,
 			 newcounters, counterlen);
-	if (ret < 0) {
-		//errno = ret;
+	if (ret < 0)
 		goto out_free_newcounters;
-	}
 
 	free(repl->counters);
 	free(repl);
