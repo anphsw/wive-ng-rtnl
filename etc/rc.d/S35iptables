@@ -21,6 +21,24 @@ start() {
     	iptables -t filter -A FORWARD -j macipport_filter
 	iptables -t filter -A FORWARD -j web_filter
 
+###########################################IGMP-RULES#######################################
+	#only eth2.2 WAN interface recived multicast
+	if [ "$OperationMode" != "0" ]; then    
+	    #INPUT needed by unpxy and igmpproxy
+	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+		$LOG "Set igmp input rules"
+		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
+	        iptables -A INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
+		iptables -A INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
+	    fi
+	    #FORWARD rules needed only for igmpproxy.
+	    if [ "$igmpen" != "0" ]; then
+		$LOG "Set igmp forward rules"
+		iptables -A FORWARD -d 224.0.0.0/4 -j ACCEPT
+		iptables -A FORWARD -s 224.0.0.0/4 -j ACCEPT
+	    fi
+	fi
+
 ###########################################SERVICES#######################################
 	$LOG "Service limit set"
         #add limit connection rules for local services
@@ -98,15 +116,15 @@ start() {
 	if [ "$vpnEnabled" = "on"  ]; then
 	    $LOG "Add vpnfilter rules"
 	    if [ "$vpnType" = "1"  ]; then
-		iptables -I servicelimit -p gre -j ACCEPT
-		iptables -I servicelimit -p tcp --sport 1723 -j ACCEPT
+		iptables -A servicelimit -p gre -j ACCEPT
+		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
 	    elif [ "$vpnType" = "2"  ]; then
-		iptables -I servicelimit -p udp --sport 500 -j ACCEPT
-		iptables -I servicelimit -p udp --dport 500 -j ACCEPT
-		iptables -I servicelimit -p udp --sport 1701 -j ACCEPT
-		iptables -I servicelimit -p udp --dport 1701 -j ACCEPT
-		iptables -I servicelimit -p udp --sport 4500 -j ACCEPT
-		iptables -I servicelimit -p udp --dport 4500 -j ACCEPT
+		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
+		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
+		iptables -A servicelimit -p udp --sport 1701 -j ACCEPT
+		iptables -A servicelimit -p udp --dport 1701 -j ACCEPT
+		iptables -A servicelimit -p udp --sport 4500 -j ACCEPT
+		iptables -A servicelimit -p udp --dport 4500 -j ACCEPT
 	    fi
 	fi
 ###########################################FORWARD#######################################
@@ -116,6 +134,8 @@ start() {
 	    sysctl -w net.ipv4.ip_forward=1
 	    #accept my packets
 	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+	    #tune mss size for tranzit packets
+	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
 	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
@@ -124,31 +144,18 @@ start() {
 	    if [ "$Lan2Enabled" = "1" ]; then
         	iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 	    fi
-	    #tune mss size for tranzit packets
-	    iptables -t mangle -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	fi
 
-###########################################UPNPRULES#######################################
-        #rules for upnp
-	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
-            iptables -t nat -N MINIUPNPD
-            iptables -t nat -F MINIUPNPD
-            iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
-            iptables -t filter -N MINIUPNPD
-            iptables -t filter -F MINIUPNPD
-            iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
-        fi
-        
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
 	    iptables -t nat -N port_forward
-	    iptables -t nat -I PREROUTING -j port_forward
+	    iptables -t nat -A PREROUTING -j port_forward
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
-		iptables -t nat -I PREROUTING -j DMZ
+		iptables -t nat -A PREROUTING -j DMZ
 		$LOG "DMZ enabled for $DMZIPAddress"
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
@@ -172,23 +179,16 @@ start() {
 	 fi
 	fi
 
-###########################################IGMP-RULES#######################################
-	#only eth2.2 WAN interface recived multicast
-	if [ "$OperationMode" != "0" ]; then    
-	    #INPUT needed by unpxy and igmpproxy
-	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
-		$LOG "Set igmp input rules"
-		iptables -I INPUT -p igmp -i $lan_if -j ACCEPT
-	        iptables -I INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
-		iptables -I INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
-	    fi
-	    #FORWARD rules needed only for ignpproxy.
-	    if [ "$igmpen" != "0" ]; then
-		$LOG "Set igmp forward rules"
-		iptables -I FORWARD -d 224.0.0.0/4 -j ACCEPT
-		iptables -I FORWARD -s 224.0.0.0/4 -j ACCEPT
-	    fi
-	fi
+###########################################UPNPRULES#######################################
+        #rules for upnp
+	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
+            iptables -t nat -N MINIUPNPD
+            iptables -t nat -F MINIUPNPD
+            iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
+            iptables -t filter -N MINIUPNPD
+            iptables -t filter -F MINIUPNPD
+            iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
+        fi
 }
 
 
