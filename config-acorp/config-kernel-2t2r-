@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Mon Jul 26 20:04:10 2010
+# Sun Jul 25 05:49:27 2010
 #
 CONFIG_MIPS=y
 
@@ -734,17 +734,17 @@ CONFIG_NET_WIRELESS_RTNETLINK=y
 # Wan interfaces
 #
 # CONFIG_WAN is not set
-CONFIG_PPP=m
+CONFIG_PPP=y
 # CONFIG_PPP_MULTILINK is not set
 # CONFIG_PPP_FILTER is not set
 # CONFIG_PPP_ASYNC is not set
 # CONFIG_PPP_SYNC_TTY is not set
 # CONFIG_PPP_DEFLATE is not set
 # CONFIG_PPP_BSDCOMP is not set
-CONFIG_PPP_MPPE=m
-CONFIG_PPPOE=m
-CONFIG_PPPOL2TP=m
-CONFIG_PPTP=m
+CONFIG_PPP_MPPE=y
+CONFIG_PPPOE=y
+CONFIG_PPPOL2TP=y
+CONFIG_PPTP=y
 # CONFIG_SLIP is not set
 # CONFIG_NETPOLL is not set
 # CONFIG_NET_POLL_CONTROLLER is not set

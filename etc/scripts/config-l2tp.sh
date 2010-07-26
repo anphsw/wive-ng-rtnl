@@ -15,6 +15,11 @@ DEBUG=`nvram_get 2860 vpnDebug`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
+
+modprobe ppp_generic > /dev/null 2>&1
+modprobe pppox > /dev/null 2>&1
+modprobe pppol2tp > /dev/null 2>&1
+
 LOG="logger -t vpnhelper"
 
     $LOG "Check for L2TP server reachable"
@@ -55,6 +60,7 @@ LOG="logger -t vpnhelper"
     fi
 
     if [ "$MPPE" = "on" ] ; then
+	modprobe ppp_mppe > /dev/null 2>&1
         MPPE=allow-mppe-128
         else
         MPPE=

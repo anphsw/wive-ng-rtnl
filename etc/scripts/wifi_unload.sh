@@ -17,7 +17,11 @@
 . /sbin/global.sh
 
 kill_apps="udhcpd udhcpc syslogd klogd zebra ripd wscd rt2860apd rt61apd inadyn \
-iwevent stupid-ftpd smbd ated ntpclient lld2d igmpproxy dnsmasq telnetd pppd xl2tpd"
+	    iwevent stupid-ftpd smbd ated ntpclient lld2d igmpproxy dnsmasq telnetd pppd xl2tpd"
+
+rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq cls_u32 ipt_TTL ipt_IMQ ipt_tos \
+	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \
+	    ts_fsm ts_kmp ts_bm"
 
 bssidnum=`nvram_get 2860 BssidNum`
 is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
@@ -59,9 +63,13 @@ unload_ra0br0()
 unload_modules()
 {
 	echo "Unload modules"
-	rmmod cifs > /dev/null 2>&1
-	rmmod ipt_IMQ > /dev/null 2>&1
-	rmmod imq > /dev/null 2>&1 
+	# unload modules all unused
+	rmmod -a
+	# all others
+	for mod in $rmmod_mod
+	do
+	    rmmod $mod > /dev/null 2>&1
+	done
 	#unload wifi modules
 	service modules stop
 }
@@ -93,4 +101,3 @@ else
 	unload_modules
 	exit 1
 fi
-

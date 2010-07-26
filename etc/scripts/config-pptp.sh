@@ -10,6 +10,11 @@ DEBUG=`nvram_get 2860 vpnDebug`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
+
+modprobe ppp_generic > /dev/null 2>&1
+modprobe pppox > /dev/null 2>&1
+modprobe pptp > /dev/null 2>&1
+
 LOG="logger -t vpnhelper"
 
 echo "==================START-PPTP-CLIENT======================="
@@ -52,6 +57,7 @@ echo "==================START-PPTP-CLIENT======================="
     fi
 
     if [ "$MPPE" = "on" ] ; then
+	modprobe ppp_mppe > /dev/null 2>&1
         MPPE=allow-mppe-128
         else
         MPPE=
