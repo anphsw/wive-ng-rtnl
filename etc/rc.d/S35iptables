@@ -148,7 +148,7 @@ start() {
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
-		iptables -t nat -I PREROUTING 1 -j DMZ
+		iptables -t nat -I PREROUTING -j DMZ
 		$LOG "DMZ enabled for $DMZIPAddress"
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
