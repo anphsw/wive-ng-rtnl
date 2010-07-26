@@ -50,7 +50,6 @@ OPTIONALS+=$(patsubst %,IPv6:%,$(PF6_EXT_SLIB_OPTS))
 
 ifdef NO_SHARED_LIBS
 # Only build matches/targets for the current kernel config
--include $(KERNEL_DIR)/.config
 lower=$(shell echo $(1) | tr [:upper:] [:lower:])
 upper=$(shell echo $(1) | tr [:lower:] [:upper:])
 TEST_CONFIG_VAL=$(patsubst $(3)_%,%,$(filter $(3)_%,$(foreach i,$(1),$(CONFIG_$(2)_$(i))_$(i))))
@@ -70,14 +69,12 @@ PF6_EXT_SLIB:=$(PF6_EXT_SLIB_BASE)
 PF6_EXT_SLIB+=$(call lower,$(call TEST_CONFIG,$(PF6_EXT_SLIB_CONFIG),IP6_NF,MATCH))
 PF6_EXT_SLIB+=$(call TEST_CONFIG,$(PF6_EXT_SLIB_CONFIG),IP6_NF,TARGET)
 
-ifneq ($(CONFIG_IP_NF_NAT)$(CONFIG_IP_NF_NAT_MODULE),)
 PF_EXT_SLIB+=SNAT DNAT
-endif
 ifneq ($(CONFIG_IP_NF_MATCH_AH_ESP)$(CONFIG_IP_NF_MATCH_AH_ESP_MODULE),)
 PF_EXT_SLIB+=ah esp
 endif
 PF_EXT_SLIB+=authd
-PF_EXT_SLIB+=autofw	# 1001 add
+PF_EXT_SLIB+=autofw
 #PF_EXT_SLIB+=NETMAP	# 1102 add
 PF_EXT_SLIB+=DNAT
 
