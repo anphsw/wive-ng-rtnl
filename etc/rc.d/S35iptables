@@ -94,8 +94,21 @@ start() {
 	fi
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
-    
-
+###########################################VPN-RULES##########################################
+	if [ "$vpnEnabled" = "on"  ]; then
+	    $LOG "Add vpnfilter rules"
+	    if [ "$vpnType" = "1"  ]; then
+		iptables -I servicelimit -p gre -j ACCEPT
+		iptables -I servicelimit -p tcp --sport 1723 -j ACCEPT
+	    elif [ "$vpnType" = "2"  ]; then
+		iptables -I servicelimit -p udp --sport 500 -j ACCEPT
+		iptables -I servicelimit -p udp --dport 500 -j ACCEPT
+		iptables -I servicelimit -p udp --sport 1701 -j ACCEPT
+		iptables -I servicelimit -p udp --dport 1701 -j ACCEPT
+		iptables -I servicelimit -p udp --sport 4500 -j ACCEPT
+		iptables -I servicelimit -p udp --dport 4500 -j ACCEPT
+	    fi
+	fi
 ###########################################FORWARD#######################################
 	if [ "$OperationMode" != "0" ]; then
 	    $LOG "Set forward rules"
@@ -174,21 +187,6 @@ start() {
 		$LOG "Set igmp forward rules"
 		iptables -I FORWARD -d 224.0.0.0/4 -j ACCEPT
 		iptables -I FORWARD -s 224.0.0.0/4 -j ACCEPT
-	    fi
-	fi
-###########################################VPN-RULES##########################################
-	if [ "$vpnEnabled" = "on"  ]; then
-	    $LOG "Add vpnfilter rules"
-	    if [ "$vpnType" = "1"  ]; then
-		iptables -I INPUT -p gre -j ACCEPT
-		iptables -I INPUT -p tcp --sport 1723 -j ACCEPT
-	    elif [ "$vpnType" = "2"  ]; then
-		iptables -I INPUT -p udp --sport 500 -j ACCEPT
-		iptables -I INPUT -p udp --dport 500 -j ACCEPT
-		iptables -I INPUT -p udp --sport 1701 -j ACCEPT
-		iptables -I INPUT -p udp --dport 1701 -j ACCEPT
-		iptables -I INPUT -p udp --sport 4500 -j ACCEPT
-		iptables -I INPUT -p udp --dport 4500 -j ACCEPT
 	    fi
 	fi
 }
