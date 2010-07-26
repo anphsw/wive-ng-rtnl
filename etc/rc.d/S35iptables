@@ -8,9 +8,11 @@ web_wait
 
 start() {
  echo "Starting IPTABLES: "
+ $LOG="echo IPTABLES: "
  get_param
 #########################################DEFAULTRULES###################################
 	#default filters
+	$LOG "Set default filters"
         iptables -A INPUT -i lo+ -j ACCEPT
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
@@ -20,6 +22,7 @@ start() {
 	iptables -t filter -A FORWARD -j web_filter
 
 ###########################################SERVICES#######################################
+	$LOG "Service limit set"
         #add limit connection rules for local services
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
@@ -82,12 +85,12 @@ start() {
         #icmp limit
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
-		echo "Drop ping from wan $wan_if"
+		$LOG "Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp -j DROP
     		iptables -A servicelimit -i ppp+ -p icmp -j DROP
 	    fi
 	else
-	    echo "Allow ping from wan $wan_if"
+	    $LOG "Allow ping from wan $wan_if"
 	fi
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j RETURN
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
@@ -95,6 +98,7 @@ start() {
 
 ###########################################FORWARD#######################################
 	if [ "$OperationMode" != "0" ]; then
+	    $LOG "Set forward rules"
             #enable forward for all interfaces
 	    sysctl -w net.ipv4.ip_forward=1
 	    #accept my packets
@@ -125,14 +129,14 @@ start() {
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
-	echo "Add masqrade rules"
+	    $LOG "Add masqrade rules"
 	    iptables -t nat -N port_forward
 	    iptables -t nat -I PREROUTING 2 -j port_forward
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
 		iptables -t nat -I PREROUTING 1 -j DMZ
-		echo "DMZ enabled for $DMZIPAddress"
+		$LOG "DMZ enabled for $DMZIPAddress"
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
@@ -160,18 +164,21 @@ start() {
 	if [ "$OperationMode" != "0" ]; then    
 	    #INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+		$LOG "Set igmp input rules"
 		iptables -I INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -I INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
 		iptables -I INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
 	    fi
 	    #FORWARD rules needed only for ignpproxy.
 	    if [ "$igmpen" != "0" ]; then
+		$LOG "Set igmp forward rules"
 		iptables -I FORWARD -d 224.0.0.0/4 -j ACCEPT
 		iptables -I FORWARD -s 224.0.0.0/4 -j ACCEPT
 	    fi
 	fi
 ###########################################VPN-RULES##########################################
 	if [ "$vpnEnabled" = "on"  ]; then
+	    $LOG "Add vpnfilter rules"
 	    if [ "$vpnType" = "1"  ]; then
 		iptables -I INPUT -p gre -j ACCEPT
 		iptables -I INPUT -p tcp --sport 1723 -j ACCEPT
