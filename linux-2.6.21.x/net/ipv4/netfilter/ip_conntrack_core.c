@@ -169,7 +169,7 @@ static unsigned int ip_conntrack_hash_rnd;
 #define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
 #endif
 
-static u_int32_t __hash_conntrack(const struct ip_conntrack_tuple *tuple,
+static inline u_int32_t __hash_conntrack(const struct ip_conntrack_tuple *tuple,
 			    unsigned int size, unsigned int rnd)
 {
 #if defined (CONFIG_NAT_FCONE) /* Full Cone */

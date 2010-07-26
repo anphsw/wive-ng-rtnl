@@ -121,7 +121,7 @@ static inline void ct_write_unlock_bh(unsigned key)
 /*
  *	Returns hash value for IPVS connection entry
  */
-static unsigned int ip_vs_conn_hashkey(unsigned proto, __be32 addr, __be16 port)
+static inline unsigned int ip_vs_conn_hashkey(unsigned proto, __be32 addr, __be16 port)
 {
 	return HASH_3WORDS((__force u32)addr, (__force u32)port, proto, ip_vs_conn_rnd)
 		& IP_VS_CONN_TAB_MASK;

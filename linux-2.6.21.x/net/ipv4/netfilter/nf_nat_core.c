@@ -128,7 +128,7 @@ EXPORT_SYMBOL(nf_nat_used_tuple);
 
 /* If we source map this tuple so reply looks like reply_tuple, will
  * that meet the constraints of range. */
-static int
+static inline int
 in_range(const struct nf_conntrack_tuple *tuple,
 	 const struct nf_nat_range *range)
 {

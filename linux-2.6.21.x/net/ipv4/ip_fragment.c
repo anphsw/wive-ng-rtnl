@@ -130,7 +130,7 @@ static __inline__ void ipq_unlink(struct ipq *ipq)
 #define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
 #endif
 
-static unsigned int ipqhashfn(__be16 id, __be32 saddr, __be32 daddr, u8 prot)
+static inline unsigned int ipqhashfn(__be16 id, __be32 saddr, __be32 daddr, u8 prot)
 {
 	return HASH_3WORDS((__force u32)id << 16 | prot,
 			    (__force u32)saddr, (__force u32)daddr,
