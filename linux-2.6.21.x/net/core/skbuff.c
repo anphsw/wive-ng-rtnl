@@ -154,6 +154,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb = kmem_cache_alloc_node(cache, gfp_mask & ~__GFP_DMA, node);
 	if (!skb)
 		goto out;
+	prefetchw(skb);
 
 	/* Get the DATA. Size must match skb_add_mtu(). */
 	size = SKB_DATA_ALIGN(size);
@@ -161,6 +162,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 			gfp_mask, node);
 	if (!data)
 		goto nodata;
+	prefetchw(skb);
 
 	memset(skb, 0, offsetof(struct sk_buff, truesize));
 	skb->truesize = size + sizeof(struct sk_buff);
@@ -171,13 +173,8 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->end  = data + size;
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
+	memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
 	atomic_set(&shinfo->dataref, 1);
-	shinfo->nr_frags  = 0;
-	shinfo->gso_size = 0;
-	shinfo->gso_segs = 0;
-	shinfo->gso_type = 0;
-	shinfo->ip6_frag_id = 0;
-	shinfo->frag_list = NULL;
 
 	if (fclone) {
 		struct sk_buff *child = skb + 1;
