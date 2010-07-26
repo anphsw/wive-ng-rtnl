@@ -131,7 +131,7 @@ start() {
 	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
 	    iptables -t nat -N port_forward
-	    iptables -t nat -I PREROUTING 2 -j port_forward
+	    iptables -t nat -I PREROUTING -j port_forward
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
