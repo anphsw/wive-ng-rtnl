@@ -9,7 +9,7 @@ web_wait
 start() {
 if [ -f /bin/udpxy ]; then
  UDPXY=`nvram_get 2860 UDPXYMode`
-    if [ "$UDPXY" != "0" ]; then
+    if [ "$UDPXY" != "0" ] && [ "$UDPXY" != "" ]; then
         if [ "$wan_if" = "" ]; then                                                                                                         
             wan_igmp_if="eth2.2"                                                                                                            
         else                                                                                                                                
