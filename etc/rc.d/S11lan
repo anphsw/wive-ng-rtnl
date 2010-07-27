@@ -22,7 +22,8 @@ echo "Start network interfaces..."
  LANMAC=`nvram_get LAN_MAC_ADDR`
 
 #-------------------CHECK_MAC-----------------------------
-    if [ $CHECKMAC = "YES" ]; then
+    #if check mac in nvram set to not NO and web not start
+    if [ $CHECKMAC != "NO" ] && [ ! -f /tmp/webrun ]; then
      MAC_TEST=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
      LANMAC_TEST=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
  	if [ $MAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
