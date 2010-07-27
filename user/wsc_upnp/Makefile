@@ -50,8 +50,6 @@ $(LIBUPNP_SRC_PATH)/Makefile:
 	make -C $(LIBUPNP_SRC_PATH) -f Makefile TARGET_HOST=$(TARGET_HOST)
 
 $(EXEC): libupnp $(OBJS)
-#$(EXEC):  $(OBJS)
-#	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)  $(INCLUDE_LIBS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)  $(INCLUDE_LIBS)
 	$(STRIP) -s $(EXEC)
 
@@ -79,6 +77,5 @@ cleanall: clean
 
 romfs:
 	$(ROMFSINST) wscd /bin/wscd
-	$(ROMFSINST) xml/WFADeviceDesc.xml /etc_ro/xml/WFADeviceDesc.xml
-	$(ROMFSINST) xml/WFAWLANConfigSCPD.xml /etc_ro/xml/WFAWLANConfigSCPD.xml
-
+	$(ROMFSINST) xml/WFADeviceDesc.xml /xml/WFADeviceDesc.xml
+	$(ROMFSINST) xml/WFAWLANConfigSCPD.xml /xml/WFAWLANConfigSCPD.xml

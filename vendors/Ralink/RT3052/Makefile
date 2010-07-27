@@ -13,22 +13,11 @@ MKIMAGE_DIR = $(ROOTDIR)/tools/mkimage
 CUR_DIR = $(shell pwd)
 COMP = lzma
 
-ROMFS_DIRS = \
-	tmp \
-	bin \
-	home \
-	mnt \
-	sys \
-	var \
-	etc \
-	proc \
+ROMFS_DIRS = dev dev/pts sys proc tmp bin home mnt var etc web usr lib xml \
+	lib/modules  usr/codepages \
+	etc_ro \
 	media \
-	share \
-	dev dev/pts \
-	lib lib/modules \
-	usr usr/codepages \
-	etc_ro etc_ro/web \
-	etc_ro/xml
+	share
 
 clean:
 	rm -f mkimage
@@ -50,7 +39,6 @@ romfs.post::
 	 rm -f $(RAMDISK)  
 	#linux2.6.x support squashfs with lzma
 ifeq	($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
-#	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root -no-fragments
 	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root
 endif
 

@@ -1,7 +1,7 @@
 .EXPORT_ALL_VARIABLES:
 
 DIRS = src cgi-src 
-ROOT_DIRECTORY = /etc_ro/web
+ROOT_DIRECTORY = /web
 
 all:
 	for i in $(DIRS) ; do make -C $$i $@ || exit $?; done

@@ -81,7 +81,7 @@ extern unsigned char HostMacAddr[MAC_ADDR_LEN];	// Used to save the MAC address 
 #define DEFAULT_PID_FILE_PATH		"/var/run/wscd.pid"
 
 #define USE_XML_TEMPLATE
-#define DEFAULT_WEB_ROOT_DIR	"/etc_ro/xml/"
+#define DEFAULT_WEB_ROOT_DIR	"/xml/"
 #define DEFAULT_DESC_FILE_NAME	"WFADeviceDesc.xml"
 
 

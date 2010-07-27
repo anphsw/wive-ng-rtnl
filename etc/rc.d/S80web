@@ -3,8 +3,12 @@
 start() {
  echo "Start goahead"
     killall -q nvram_daemon
-    echo > /tmp/webrun
+    echo "Copy web pages to tmpfs"
+    mkdir -p /tmp/web
+    cp -rpf /web/* /tmp/web
+    echo "Run goahead"
     /bin/goahead &
+    echo > /tmp/webrun
     sleep 10
 }
 
