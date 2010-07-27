@@ -64,7 +64,7 @@ else
 	ralink_init renew 2860 /etc/default/RT2860_default_novlan
 	ralink_init make_wireless_config 2860
 	ralink_init gen 2860
-	nvram_set IS_WIVE YES
+	nvram_set 2860 IS_WIVE YES
 	fs save
 	echo "Reset OK... boot..."
     fi

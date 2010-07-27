@@ -38,8 +38,8 @@ echo "Start network interfaces..."
 	    echo "Set new mac!"
     	    WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
     	    LAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc6"
-    	    nvram_set WAN_MAC_ADDR "$WAN_MACADDR"
-    	    nvram_set LAN_MAC_ADDR "$LAN_MACADDR"
+    	    nvram_set 2860 WAN_MAC_ADDR "$WAN_MACADDR"
+    	    nvram_set 2860 LAN_MAC_ADDR "$LAN_MACADDR"
     	    MAC=$WAN_MACADDR
     	    LANMAC=$LAN_MACADDR
 	fi
