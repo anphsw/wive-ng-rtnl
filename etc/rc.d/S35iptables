@@ -32,8 +32,8 @@ start() {
 	    #FORWARD rules needed only for igmpproxy.
 	    if [ "$igmpen" != "0" ]; then
 		$LOG "Set igmp forward rules"
-		iptables -A FORWARD -d 224.0.0.0/4 -j ACCEPT
-		iptables -A FORWARD -s 224.0.0.0/4 -j ACCEPT
+		iptables -A FORWARD -d 224.0.0.0/4 -o eth2.2 -j ACCEPT
+		iptables -A FORWARD -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
 	    fi
 	fi
 

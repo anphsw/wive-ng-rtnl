@@ -92,7 +92,11 @@ static int ip_conntrack_vmalloc __read_mostly;
 
 static unsigned int ip_conntrack_next_id;
 static unsigned int ip_conntrack_expect_next_id;
+
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 extern char wan_name[IFNAMSIZ];
+extern struct net_device *wan_dev;
+#endif
 
 #ifdef CONFIG_IP_NF_CONNTRACK_EVENTS
 ATOMIC_NOTIFIER_HEAD(ip_conntrack_chain);

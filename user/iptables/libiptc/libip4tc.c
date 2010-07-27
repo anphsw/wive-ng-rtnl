@@ -342,7 +342,7 @@ static void
 do_check(TC_HANDLE_T h, unsigned int line)
 {
 	unsigned int i, n;
-	unsigned int user_offset; /* Offset of first user chain */
+	unsigned int user_offset=0; /* Offset of first user chain */
 	int was_return;
 
 	assert(h->changed == 0 || h->changed == 1);

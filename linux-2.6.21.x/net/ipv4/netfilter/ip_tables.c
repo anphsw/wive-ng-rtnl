@@ -14,7 +14,6 @@
  * 08 Oct 2005 Harald Welte <lafore@netfilter.org>
  * 	- Generalize into "x_tables" layer and "{ip,ip6,arp}_tables"
  */
-#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/cache.h>
 #include <linux/capability.h>
 #include <linux/skbuff.h>
@@ -44,6 +43,7 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 unsigned char wan_name[IFNAMSIZ];
+struct net_device *wan_dev;
 #endif
 
 #ifdef DEBUG_IP_FIREWALL
@@ -84,25 +84,6 @@ do {								\
 
    Hence the start of any table is given by get_table() below.  */
 
-static unsigned long ifname_compare(const char *_a, const char *_b,
-				    const unsigned char *_mask)
-{
-	const unsigned long *a = (const unsigned long *)_a;
-	const unsigned long *b = (const unsigned long *)_b;
-	const unsigned long *mask = (const unsigned long *)_mask;
-	unsigned long ret;
-
-	ret = (a[0] ^ b[0]) & mask[0];
-	if (IFNAMSIZ > sizeof(unsigned long))
-		ret |= (a[1] ^ b[1]) & mask[1];
-	if (IFNAMSIZ > 2 * sizeof(unsigned long))
-		ret |= (a[2] ^ b[2]) & mask[2];
-	if (IFNAMSIZ > 3 * sizeof(unsigned long))
-		ret |= (a[3] ^ b[3]) & mask[3];
-	BUILD_BUG_ON(IFNAMSIZ > 4 * sizeof(unsigned long));
-	return ret;
-}
-
 /* Returns whether matches rule or not. */
 static inline int
 ip_packet_match(const struct iphdr *ip,
@@ -111,6 +92,7 @@ ip_packet_match(const struct iphdr *ip,
 		const struct ipt_ip *ipinfo,
 		int isfrag)
 {
+	size_t i;
 	unsigned long ret;
 
 #define FWINV(bool,invflg) ((bool) ^ !!(ipinfo->invflags & invflg))
@@ -134,7 +116,12 @@ ip_packet_match(const struct iphdr *ip,
 		return 0;
 	}
 
-	ret = ifname_compare(indev, ipinfo->iniface, ipinfo->iniface_mask);
+	/* Look for ifname matches; this should unroll nicely. */
+	for (i = 0, ret = 0; i < IFNAMSIZ/sizeof(unsigned long); i++) {
+		ret |= (((const unsigned long *)indev)[i]
+			^ ((const unsigned long *)ipinfo->iniface)[i])
+			& ((const unsigned long *)ipinfo->iniface_mask)[i];
+	}
 
 	if (FWINV(ret != 0, IPT_INV_VIA_IN)) {
 		dprintf("VIA in mismatch (%s vs %s).%s\n",
@@ -143,7 +130,11 @@ ip_packet_match(const struct iphdr *ip,
 		return 0;
 	}
 
-	ret = ifname_compare(outdev, ipinfo->outiface, ipinfo->outiface_mask);
+	for (i = 0, ret = 0; i < IFNAMSIZ/sizeof(unsigned long); i++) {
+		ret |= (((const unsigned long *)outdev)[i]
+			^ ((const unsigned long *)ipinfo->outiface)[i])
+			& ((const unsigned long *)ipinfo->outiface_mask)[i];
+	}
 
 	if (FWINV(ret != 0, IPT_INV_VIA_OUT)) {
 		dprintf("VIA out mismatch (%s vs %s).%s\n",
@@ -382,9 +373,6 @@ mark_source_chains(struct xt_table_info *newinfo,
 {
 	unsigned int hook;
 
-	/* keep track of where we have been: */
-	unsigned char *been = vmalloc(newinfo->size);
-
 	/* No recursion; use packet counter to save back ptrs (reset
 	   to 0 as we leave), and comefrom to save source hook bitmask */
 	for (hook = 0; hook < NF_IP_NUMHOOKS; hook++) {
@@ -397,7 +385,6 @@ mark_source_chains(struct xt_table_info *newinfo,
 
 		/* Set initial back pointer. */
 		e->counters.pcnt = pos;
-		memset(been, 0, newinfo->size);
 
 		for (;;) {
 			struct ipt_standard_target *t
@@ -407,7 +394,6 @@ mark_source_chains(struct xt_table_info *newinfo,
 			if (e->comefrom & (1 << NF_IP_NUMHOOKS)) {
 				printk("iptables: loop hook %u pos %u %08X.\n",
 				       hook, pos, e->comefrom);
-				vfree(been);
 				return 0;
 			}
 			e->comefrom
@@ -461,13 +447,10 @@ mark_source_chains(struct xt_table_info *newinfo,
 				pos += size;
 			} else {
 				int newpos = t->verdict;
-				if ( (pos < 0 || pos >= newinfo->size
-				      || !been[pos]) 
-				    && strcmp(t->target.u.user.name,
+
+				if (strcmp(t->target.u.user.name,
 					   IPT_STANDARD_TARGET) == 0
 				    && newpos >= 0) {
-					if (pos >= 0 && pos < newinfo->size)
-						been[pos]++;
 					if (newpos > newinfo->size -
 						sizeof(struct ipt_entry)) {
 						duprintf("mark_source_chains: "
@@ -491,7 +474,6 @@ mark_source_chains(struct xt_table_info *newinfo,
 		next:
 		duprintf("Finished chain %u\n", hook);
 	}
-	vfree(been);
 	return 1;
 }
 
@@ -670,14 +652,12 @@ check_entry_size_and_hooks(struct ipt_entry *e,
 	for (h = 0; h < NF_IP_NUMHOOKS; h++) {
 		if ((unsigned char *)e - base == hook_entries[h])
 			newinfo->hook_entry[h] = hook_entries[h];
-		if ((unsigned char *)e - base == underflows[h]) {
-			if (!unconditional(&e->ip)) {
-				duprintf("Underflows must be unconditional\n");
-				return -EINVAL;
-			}
+		if ((unsigned char *)e - base == underflows[h])
 			newinfo->underflow[h] = underflows[h];
-		}
 	}
+
+	/* FIXME: underflows must be unconditional, standard verdicts
+	   < 0 (not IPT_RETURN). --RR */
 
 	/* Clear counters and comefrom */
 	e->counters = ((struct xt_counters) { 0, 0 });
@@ -1295,8 +1275,6 @@ do_replace(void __user *user, unsigned int len)
 	return ret;
 }
 
-struct net_device *wan_dev;
-
 /* We're lazy, and add to the first CPU; overflow works its fey magic
  * and everything is OK. */
 static inline int
@@ -1306,7 +1284,10 @@ add_counter_to_entry(struct ipt_entry *e,
 {
 
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
-        struct ipt_entry_target *f=ipt_get_target(e);
+	struct ipt_entry_target *f;
+
+	wan_dev = __dev_get_by_name("eth2.2");
+	f = ipt_get_target(e);
 
         if(strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
                 if((strcmp(e->ip.outiface, "eth2.2") == 0) || (strncmp(e->ip.outiface, "ppp", 3) == 0))
