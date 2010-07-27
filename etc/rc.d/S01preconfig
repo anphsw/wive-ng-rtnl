@@ -57,14 +57,17 @@ IS_WIVE=`nvram_get IS_WIVE`
 if [ "$IS_WIVE" = "YES" ]; then
     echo "Normal boot no need reset"
 else
-    echo "Clear and load defaults to nvram!"
-    ralink_init clear 2860
-    ralink_init renew 2860 /etc/default/RT2860_default_novlan
-    ralink_init make_wireless_config 2860
-    ralink_init gen 2860
-    nvram_set IS_WIVE YES
-    fs save
-    echo "Reset OK... boot..."
+    #if web not start
+    if [ ! -f /tmp/webrun ]; then
+	echo "Clear and load defaults to nvram!"
+	ralink_init clear 2860
+	ralink_init renew 2860 /etc/default/RT2860_default_novlan
+	ralink_init make_wireless_config 2860
+	ralink_init gen 2860
+	nvram_set IS_WIVE YES
+	fs save
+	echo "Reset OK... boot..."
+    fi
 fi
 
 echo "Start nvram daemon"
