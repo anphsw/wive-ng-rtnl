@@ -21,15 +21,13 @@ static	devfs_handle_t devfs_handle;
 
 int	flash_major =  200;
 
-
 int flash_ioctl (struct inode *inode, struct file *filp,
                      unsigned int cmd, unsigned long arg)
 {
     struct flash_opt *opt=(struct flash_opt *)arg;
     unsigned char *buf;
     unsigned int start_sect=0,end_sect=0;
-
-    buf=kmalloc(FLASH_MAX_RW_SIZE, GFP_KERNEL);
+    buf=kzalloc(FLASH_MAX_RW_SIZE, GFP_KERNEL);
 
     switch(cmd) 
     {
@@ -40,7 +38,6 @@ int flash_ioctl (struct inode *inode, struct file *filp,
 	copy_to_user((char *)opt->dest,buf, opt->bytes);
 	break;
     case FLASH_IOCTL_WRITE:
-	copy_from_user( buf, (char *)opt->src, opt->bytes);
 	if(FlashWrite((unsigned short *)buf, (unsigned short *)opt->dest, opt->bytes)<0){
 	    opt->result = OUT_OF_SCOPE;
 	}

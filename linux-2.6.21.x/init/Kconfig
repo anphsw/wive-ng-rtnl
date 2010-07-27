@@ -95,7 +95,7 @@ config LOCALVERSION_AUTO
 config SWAP
 	bool "Support for paging of anonymous memory (swap)"
 	depends on MMU && BLOCK
-	default y
+	default n
 	help
 	  This option allows you to choose whether you want to have support
 	  for so called swap devices or swap files in your kernel that are
@@ -550,7 +550,7 @@ config MEMPOOL
 	  deadlock under some loads.
 
 config XATTR
-	default y
+	default n
 	bool "Enable filesystem extended attribute support" if TINY
 	help
 	  This enables the filesystem extended attribute syscalls.
@@ -602,9 +602,9 @@ config IGMP
 config MAX_SWAPFILES_SHIFT
 	int "Number of swap files log2 (0 => 1, 5 => 32)" if TINY
 	range 0 5
-	default 5
+	default 0
 	help
-	  Select the maximum number of swapfiles (5 for default).
+	  Select the maximum number of swapfiles (0 for default).
 
 config NR_LDISCS
 	int "Number of tty line disciplines (1~16)" if TINY
@@ -650,10 +650,6 @@ endmenu		# General setup
 config RT_MUTEXES
 	boolean
 	select PLIST
-
-config TINY_SHMEM
-	default !SHMEM
-	bool
 
 config BASE_SMALL
 	int

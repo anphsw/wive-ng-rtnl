@@ -1435,6 +1435,12 @@ config SQUASHFS_VMALLOC
 
 	  If unsure, say N.
 
+config SQUASHFS_NOERROR
+	bool "Disable uncompress error and oops. Very bad idea..."
+	depends on SQUASHFS
+	default n
+
+
 config VXFS_FS
 	tristate "FreeVxFS file system support (VERITAS VxFS(TM) compatible)"
 	depends on BLOCK

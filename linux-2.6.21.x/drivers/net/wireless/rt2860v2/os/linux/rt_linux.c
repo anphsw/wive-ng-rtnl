@@ -1,6 +1,5 @@
 #include "rt_config.h"
 
-
 //ULONG	RTDebugLevel =  RT_DEBUG_TRACE;
 ULONG	RTDebugLevel =  RT_DEBUG_ERROR;
 
@@ -221,7 +220,7 @@ void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b)
 #else
 	ra_mtd_read_nm("Factory", 0, (size_t)b, p);
 #endif
-#endif // CONFIG_RALINK_FLASH_API //
+#endif
 }
 
 void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
@@ -234,7 +233,7 @@ void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
 #else
 	ra_mtd_write_nm("Factory", 0, (size_t)b, p);
 #endif
-#endif // CONFIG_RALINK_FLASH_API //
+#endif
 }
 #endif // RTMP_RBUS_SUPPORT //
 

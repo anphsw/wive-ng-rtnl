@@ -130,23 +130,14 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 		err = 0;
 
  out:
+//this is very bad.... Fix me later!!!
+#ifndef CONFIG_SQUASHFS_NOERROR
 	if (unlikely(err)) {
 #ifdef __KERNEL__
 		WARN_ON_ONCE(1);
-#else
-		char a[64] = "ZLIB ";
-		if (by_lzma) {
-			strcpy(a, "LZMA ");
-#ifdef _REENTRANT
-			strerror_r(err, a + 5, sizeof(a) - 5);
-#else
-			strncat(a, strerror(err), sizeof(a) - 5);
-#endif
-		} else
-			strncat(a, zError(err), sizeof(a) - 5);
-		fprintf(stderr, "%s: %.*s\n", __func__, sizeof(a), a);
 #endif
 	}
+#endif
 	return err;
 }
 

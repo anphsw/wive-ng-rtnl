@@ -35,10 +35,7 @@
 
 #include "squashfs.h"
 
-//#undef KeepPreemptive
-//#if defined(CONFIG_PREEMPT) && !defined(UnsquashNoPreempt)
-#define KeepPreemptive
-//#endif
+#undef KeepPreemptive
 
 struct sqlzma {
 #ifdef KeepPreemptive
@@ -322,10 +319,12 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 #else
 		put_cpu_var(sqlzma);
 #endif
+#ifndef CONFIG_SQUASHFS_NOERROR
 		if (unlikely(zlib_err)) {
 			dpri("zlib_err %d\n", zlib_err);
-			goto release_mutex;
+			goto block_release;
 		}
+#endif
 	} else {
 		int i;
 
@@ -352,15 +351,14 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 				 ? 3 : 2));
 	return bytes;
 
-release_mutex:
-	//mutex_unlock(&msblk->read_data_mutex);
-
 block_release:
 	for (; k < b; k++)
 		brelse(bh[k]);
 
 read_failure:
+#ifndef CONFIG_SQUASHFS_NOERROR
 	ERROR("sb_bread failed reading block 0x%x\n", cur_index);
+#endif
 	return 0;
 }
 
