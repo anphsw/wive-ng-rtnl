@@ -65,7 +65,7 @@ config  RT2860V2_AP_DFS
 
 config  RT2860V2_AP_CARRIER
 	bool "Carrier Detect"
-	depends on RT2860V2_AP
+	depends on RT2860V2_AP && !RALINK_RT3052
 	select RALINK_TIMER_DFS
 
 config  RT2860V2_AP_DLS
@@ -74,7 +74,7 @@ config  RT2860V2_AP_DLS
 
 config  RT2860V2_AP_IDS
 	bool "IDS (Intrusion Detection System) Support"
-	depends on RT2860V2_AP
+	depends on RT2860V2_AP && !RALINK_RT3052
 
 config  RT2860V2_AP_MESH
 	bool "MESH Support"
@@ -102,7 +102,7 @@ config  RT2860V2_AP_MEMORY_OPTIMIZATION
 
 config  RT2860V2_AP_VIDEO_TURBINE
 	bool "Video Turbine support"
-	depends on RT2860V2_AP
+	depends on RT2860V2_AP && !RALINK_RT3052
 
 config  RT2860V2_80211N_DRAFT3
 	bool "802.11n Draft3"

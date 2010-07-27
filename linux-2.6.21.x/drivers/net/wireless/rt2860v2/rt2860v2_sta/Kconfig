@@ -20,7 +20,7 @@ config  RT2860V2_STA_LED
 
 config  RT2860V2_STA_IDS
         bool "IDS (Intrusion Detection System) Support"
-        depends on RT2860V2_STA
+        depends on RT2860V2_STA && !RALINK_RT3052
 
 config  RT2860V2_STA_WSC
 	bool "WSC (WiFi Simple Config)"
@@ -28,7 +28,7 @@ config  RT2860V2_STA_WSC
 
 config  RT2860V2_STA_CARRIER
 	bool "Carrier Sense Support"
-	depends on RT2860V2_STA
+	depends on RT2860V2_STA && !RALINK_RT3052
 	select RALINK_TIMER_DFS
 
 config  RT2860V2_STA_DLS
@@ -49,7 +49,7 @@ config  RT2860V2_STA_WAPI
 
 config  RT2860V2_STA_VIDEO_TURBINE
 	bool "Video Turbine support"
-	depends on RT2860V2_STA
+	depends on RT2860V2_STA && !RALINK_RT3052
 
 config  RT2860V2_STA_INTELLIGENT_RATE_ADAPTION
 	bool "Intelligent Rate Adaption"
