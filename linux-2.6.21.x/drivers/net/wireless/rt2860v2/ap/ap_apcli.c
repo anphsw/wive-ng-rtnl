@@ -1120,7 +1120,11 @@ VOID ApCliIfMonitor(
 			}
 			else
 			{
+#ifdef CONFIG_ASUS_EXT
 				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc && !strcmp(nvram_get("sta_connected"), "1"))
+#else
+				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc)
+#endif
 				{
 					printk("Wireless Driver: link down & up!\n");
 
