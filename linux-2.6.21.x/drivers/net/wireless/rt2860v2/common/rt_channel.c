@@ -1236,12 +1236,6 @@ VOID N_ChannelCheck(
 			}
 		}
 	}
-
-#ifdef CONFIG_AP_SUPPORT
-#ifdef DOT11N_DRAFT3
-#endif // DOT11N_DRAFT3 //
-#endif // CONFIG_AP_SUPPORT //
-
 }
 
 
