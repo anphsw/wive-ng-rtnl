@@ -2040,7 +2040,6 @@ typedef struct _COMMON_CONFIG {
 	BOOLEAN				PSPXlink;  // 0: Disable. 1: Enable
 
 #ifdef RTMP_RBUS_SUPPORT
-
 	ULONG CID;
 	ULONG CN;
 	UCHAR dfs_func;
@@ -3317,7 +3316,6 @@ struct _RTMP_ADAPTER
 	// resource for software backlog queues
 	NDIS_SPIN_LOCK          page_lock;                  // for nat speedup by bruce
 #endif // RTMP_RBUS_SUPPORT //
-
 
 /*****************************************************************************************/
 /*      Both PCI/USB related parameters                                                  							  */

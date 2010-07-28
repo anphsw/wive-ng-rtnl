@@ -80,8 +80,6 @@
 #define NVRAM_OFFSET					0x30000
 #define RF_OFFSET					0x40000
 
-
-
 #ifdef LINUX
 /*************************************************************************
   *
@@ -101,7 +99,6 @@ extern void request_tmr_service(int, void *, void *);
 
 #endif // DFS_SUPPORT //
 
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #ifndef SA_SHIRQ
 #define SA_SHIRQ IRQF_SHARED
@@ -113,4 +110,3 @@ extern void request_tmr_service(int, void *, void *);
 #define CMDTHREAD_CHAN_RESCAN                      0x0D730101	// cmd
 
 #endif // __RTMP_RBUS_H__ //
-

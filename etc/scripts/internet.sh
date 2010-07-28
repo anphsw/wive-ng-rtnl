@@ -134,6 +134,14 @@ if [ $CONFIG_IPV6 != "" ] ; then
 fi
     ip link set ra0 up
 
+    #preconfigure wifi for 40Mhz workaround                                                                                               
+    HT_BW=`nvram_get 2860 HT_BW`
+    HT_GI=`nvram_get 2860 HT_GI`
+    HT_PROTECT=`nvram_get 2860 HT_PROTECT`
+    iwpriv ra0 set HtBw=$HT_BW
+    iwpriv ra0 set HtGi=$HT_GI
+    iwpriv ra0 set HtProtect=$HT_PROTECT
+
 #restart lan interfaces
 service lan restart
 

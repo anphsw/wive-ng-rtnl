@@ -12,10 +12,10 @@
 #define EEPROM_SIZE						0x200
 #endif
 #ifdef CONFIG_AP_SUPPORT
-#define EEPROM_BIN_FILE_NAME 	"/etc/Wireless/RT2860AP/e2p.bin"
+#define EEPROM_BIN_FILE_NAME 	"/etc/Wireless/RT2860/e2p.bin"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
-#define EEPROM_BIN_FILE_NAME 	"/etc/Wireless/RT2860STA/e2p.bin"
+#define EEPROM_BIN_FILE_NAME 	"/etc/Wireless/RT2860/e2p.bin"
 #endif // CONFIG_STA_SUPPORT //
 #endif // RTMP_MAC_PCI //
 #endif // LINUX //
