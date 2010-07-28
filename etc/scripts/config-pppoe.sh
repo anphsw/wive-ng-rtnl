@@ -20,7 +20,7 @@ killall -q xl2tpd > /dev/null 2>&1
 
 modprobe ppp_generic > /dev/null 2>&1
 modprobe pppox > /dev/null 2>&1
-modprobe pppol2tp > /dev/null 2>&1
+modprobe pppoe > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
 
