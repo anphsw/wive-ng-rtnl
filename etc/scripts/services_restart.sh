@@ -20,12 +20,12 @@ if [ "$MODE" != "pppd" ]; then
     service igmp_proxy stop
     service lld2d stop
     service stp stop
+    service resolv start
 fi
 
 #restart iptables
 service iptables restart
 #start all
-service resolv start
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
     service pppoe-relay start
