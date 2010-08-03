@@ -65,7 +65,6 @@ char *pptp_server = NULL;
 char *pptp_client = NULL;
 char *pptp_phone = NULL;
 int pptp_sock=-1;
-int pptp_timeout=100000;
 struct in_addr localbind = { .s_addr = INADDR_NONE };
 
 static int callmgr_sock;
@@ -86,8 +85,6 @@ static option_t Options[] =
       "PPTP socket" },
     { "pptp_phone", o_string, &pptp_phone,
       "PPTP Phone number" },
-    { "pptp_timeout", o_int, &pptp_timeout,
-      "timeout for waiting reordered packets and acks"},
     { NULL }
 };
 
