@@ -275,8 +275,6 @@ static inline struct sk_buff *__vlan_put_tag(struct sk_buff *skb, unsigned short
 	veth->h_vlan_TCI = htons(tag);
 
 	skb->protocol = __constant_htons(ETH_P_8021Q);
-	skb->mac.raw -= VLAN_HLEN;
-	skb->nh.raw -= VLAN_HLEN;
 
 	return skb;
 }
