@@ -50,7 +50,7 @@ LOG="logger -t vpnhelper"
     ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
     if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
         $LOG "Add route to vpn server."
-        ip route add $ROUTE
+        ip route replace $ROUTE
     fi
 
     if [ "$PEERDNS" = "on" ]; then

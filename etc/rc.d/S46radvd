@@ -42,7 +42,7 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
 	    ip tunnel add tun6to4 mode sit ttl 64 remote any local $ipv4
 	    ip link set dev tun6to4 up
 	    ip -6 addr add ${ipv6prefix}::1/16 dev tun6to4
-	    ip -6 route add 2000::/3 via ::${relay6to4} dev tun6to4 metric 1
+	    ip -6 route replace 2000::/3 via ::${relay6to4} dev tun6to4 metric 1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
 	else
 	    echo "No route to ip4v6 router..."

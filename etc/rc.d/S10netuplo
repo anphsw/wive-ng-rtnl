@@ -14,8 +14,8 @@ fi
 if [ "$CONFIG_IPV6" != "" ] ; then
     ip -6 addr add ::1/128 dev lo
 fi
-    ip route add 127.0.0.0/8 dev lo
-    ip route add 127.0.0.0/8 dev lo table default
+    ip route replace 127.0.0.0/8 dev lo
+    ip route replace 127.0.0.0/8 dev lo table default
 }
 
 stop() {
