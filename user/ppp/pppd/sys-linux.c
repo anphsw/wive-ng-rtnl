@@ -675,8 +675,6 @@ static int make_ppp_unit()
 			error("Couldn't rename %s to %s", ifr.ifr_name, ifr.ifr_newname);
 			close(ppp_dev_fd);
 			ppp_dev_fd = -1;
-		} else {
-			info("Renamed %s to %s", ifr.ifr_name, ifr.ifr_newname);
 		}
 	}
 
@@ -1717,6 +1715,7 @@ int sifdefaultroute (int unit, u_int32_t ouraddr, u_int32_t gateway, bool replac
 	SIN_ADDR(rt.rt_genmask) = 0L;
     }
 
+    rt.rt_dev = ifname;
     rt.rt_flags = RTF_UP;
     if (ioctl(sock_fd, SIOCADDRT, &rt) < 0) {
 	if (!ok_error(errno))
