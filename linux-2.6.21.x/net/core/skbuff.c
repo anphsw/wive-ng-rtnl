@@ -162,7 +162,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 			gfp_mask, node);
 	if (!data)
 		goto nodata;
-	prefetchw(skb);
+	prefetchw(data + size);
 
 	memset(skb, 0, offsetof(struct sk_buff, truesize));
 	skb->truesize = size + sizeof(struct sk_buff);
