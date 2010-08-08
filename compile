@@ -2,7 +2,7 @@
 
 DOS2UNIX=NO
 FULLREBUILD=NO
-VERSIONPKG="1.1.3.RU.`date +%d%m%Y`"
+VERSIONPKG="1.1.4.RU.`date +%d%m%Y`"
 
 #---Set_env_ROOTDIR_to_current_dir---#
 ROOTDIR=`pwd`                                                                                                                               
@@ -23,14 +23,6 @@ if [ "$2" = "" ]; then
     #VENDOR=dlink
 else
     VENDOR=$2
-fi
-
-#----IPV6 SUPPORT--------------------#
-if [ "$3" = "ipv6" ]; then
-    IPV6=
-    IPV6="-ipv6"
-else
-    IPV6=
 fi
 
 #------------------------------------#
@@ -58,21 +50,21 @@ rm -rfv images/*
 
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv ./config-$VENDOR/config-kernel-1t1r$IPV6	./linux/.config
-    cp -fv ./config-$VENDOR/config-config-1t1r$IPV6	./config/.config
+    cp -fv ./config-$VENDOR/config-kernel-1t1r	./linux/.config
+    cp -fv ./config-$VENDOR/config-config-1t1r	./config/.config
 fi
 if [ "$MODE" = "1T1R-32" ] ; then
-    cp -fv ./config-$VENDOR/config-kernel-1t1r-32$IPV6	./linux/.config
-    cp -fv ./config-$VENDOR/config-config-1t1r$IPV6	./config/.config
+    cp -fv ./config-$VENDOR/config-kernel-1t1r-32	./linux/.config
+    cp -fv ./config-$VENDOR/config-config-1t1r		./config/.config
 fi
 if [ "$MODE" = "2T2R" ] ; then
-    cp -fv ./config-$VENDOR/config-config-2t2r$IPV6	./config/.config
-    cp -fv ./config-$VENDOR/config-kernel-2t2r$IPV6	./linux/.config
+    cp -fv ./config-$VENDOR/config-config-2t2r	./config/.config
+    cp -fv ./config-$VENDOR/config-kernel-2t2r	./linux/.config
 fi
 
 #######################################################################
-cp -fv ./config-$VENDOR/config-busybox$IPV6	./user/busybox/.config
-cp -fv ./config-$VENDOR/config-lib$IPV6		./lib/.config
+cp -fv ./config-$VENDOR/config-busybox	./user/busybox/.config
+cp -fv ./config-$VENDOR/config-lib	./lib/.config
 #######################################################################
 cp -fv ./config-$VENDOR/config-cpp		./uClibc++/.config
 cp -fv ./config-$VENDOR/config-all		.config
