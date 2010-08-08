@@ -89,6 +89,8 @@ EXPORT_SYMBOL_GPL(nf_nat_proto_put);
 static inline unsigned int
 hash_by_src(const struct nf_conntrack_tuple *tuple)
 {
+	unsigned int hash;
+
         /* Original src, to ensure we map it consistently if poss. */
         hash = HASH_3WORDS((__force u32)tuple->src.u3.ip,
                             (__force u32)tuple->src.u.all,
@@ -389,6 +391,18 @@ manip_pkt(u_int16_t proto,
 	}
 	return 1;
 }
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+int
+bcm_manip_pkt(u_int16_t proto,
+	  struct sk_buff **pskb,
+	  unsigned int iphdroff,
+	  const struct nf_conntrack_tuple *target,
+	  enum nf_nat_manip_type maniptype)
+{
+	return manip_pkt(proto, pskb, iphdroff, target, maniptype);
+}
+#endif
 
 /* Do packet manipulations according to nf_nat_setup_info. */
 unsigned int nf_nat_packet(struct nf_conn *ct,

@@ -72,6 +72,13 @@ config EXPRESS_NAT
 	depends on !CONNTRACK_FAST_PATH
         default n
 
+config BCM_NAT
+        tristate "Broadcom fast NAT support"
+        depends on NF_CONNTRACK && NF_NAT
+        help
+                This helps packets pass through netfilter faster when a packet
+                is an established or reply traffic.
+
 if RA_HW_NAT
 menu "Ralink RT3xx/RT28xx NAT Acell support."
 source "net/nat/hw_nat/Kconfig"

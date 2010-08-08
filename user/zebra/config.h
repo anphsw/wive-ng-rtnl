@@ -47,7 +47,7 @@
 #define HAVE_IF_NAMETOINDEX 1
 
 /* in6addr global variables e.g. in6addr_loopback */
-#define HAVE_IN6ADDR_GLOBAL 
+/* #undef HAVE_IN6ADDR_GLOBAL */
 
 /* in6_aliasreq */
 /* #undef HAVE_IN6_ALIASREQ */
@@ -71,7 +71,7 @@
 #define HAVE_INTTYPES_H 1
 
 /* IPv6 */
-#define HAVE_IPV6 1
+/* #undef HAVE_IPV6 */
 
 /* IRDP */
 /* #undef HAVE_IRDP */
@@ -179,7 +179,7 @@
 #define HAVE_PROC_NET_DEV 
 
 /* /proc/net/if_inet6 */
-#define HAVE_PROC_NET_IF_INET6 
+/* #undef HAVE_PROC_NET_IF_INET6 */
 
 /* rt_addrinfo */
 /* #undef HAVE_RT_ADDRINFO */
@@ -194,7 +194,7 @@
 /* #undef HAVE_SETPROCTITLE */
 
 /* scope id */
-#define HAVE_SIN6_SCOPE_ID 
+/* #undef HAVE_SIN6_SCOPE_ID */
 
 /* sin_len */
 /* #undef HAVE_SIN_LEN */
@@ -284,7 +284,7 @@
 /* #undef KAME */
 
 /* Linux IPv6 */
-#define LINUX_IPV6 
+/* #undef LINUX_IPV6 */
 
 /* NRL */
 /* #undef NRL */

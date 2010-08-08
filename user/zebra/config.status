@@ -549,9 +549,9 @@ s,@LIB_IPV6@,,;t t
 s,@ZEBRA@,zebra,;t t
 s,@BGPD@,bgpd,;t t
 s,@RIPD@,ripd,;t t
-s,@RIPNGD@,ripngd,;t t
+s,@RIPNGD@,,;t t
 s,@OSPFD@,ospfd,;t t
-s,@OSPF6D@,ospf6d,;t t
+s,@OSPF6D@,,;t t
 s,@VTYSH@,,;t t
 s,@INCLUDES@,,;t t
 s,@CURSES@,,;t t
@@ -918,17 +918,12 @@ ${ac_dA}HAVE_IF_NAMETOINDEX${ac_dB}HAVE_IF_NAMETOINDEX${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_IF_INDEXTONAME${ac_dB}HAVE_IF_INDEXTONAME${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_NETLINK${ac_dB}HAVE_NETLINK${ac_dC}${ac_dD}
 ${ac_dA}HAVE_PROC_NET_DEV${ac_dB}HAVE_PROC_NET_DEV${ac_dC}${ac_dD}
-${ac_dA}HAVE_PROC_NET_IF_INET6${ac_dB}HAVE_PROC_NET_IF_INET6${ac_dC}${ac_dD}
 ${ac_dA}HAVE_GETADDRINFO${ac_dB}HAVE_GETADDRINFO${ac_dC}1${ac_dD}
-${ac_dA}HAVE_IPV6${ac_dB}HAVE_IPV6${ac_dC}1${ac_dD}
-${ac_dA}LINUX_IPV6${ac_dB}LINUX_IPV6${ac_dC}${ac_dD}
 ${ac_dA}HAVE_INET_NTOP${ac_dB}HAVE_INET_NTOP${ac_dC}${ac_dD}
 ${ac_dA}HAVE_INET_PTON${ac_dB}HAVE_INET_PTON${ac_dC}${ac_dD}
 ${ac_dA}HAVE_LIBCRYPT${ac_dB}HAVE_LIBCRYPT${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_LIBM${ac_dB}HAVE_LIBM${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_GNU_REGEX${ac_dB}HAVE_GNU_REGEX${ac_dC}${ac_dD}
-${ac_dA}HAVE_SIN6_SCOPE_ID${ac_dB}HAVE_SIN6_SCOPE_ID${ac_dC}${ac_dD}
-${ac_dA}HAVE_IN6ADDR_GLOBAL${ac_dB}HAVE_IN6ADDR_GLOBAL${ac_dC}${ac_dD}
 ${ac_dA}HAVE_SOCKLEN_T${ac_dB}HAVE_SOCKLEN_T${ac_dC}${ac_dD}
 ${ac_dA}HAVE_INPKTINFO${ac_dB}HAVE_INPKTINFO${ac_dC}${ac_dD}
 ${ac_dA}HAVE_RUSAGE${ac_dB}HAVE_RUSAGE${ac_dC}${ac_dD}
@@ -1002,17 +997,12 @@ ${ac_uA}HAVE_IF_NAMETOINDEX${ac_uB}HAVE_IF_NAMETOINDEX${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_IF_INDEXTONAME${ac_uB}HAVE_IF_INDEXTONAME${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_NETLINK${ac_uB}HAVE_NETLINK${ac_uC}${ac_uD}
 ${ac_uA}HAVE_PROC_NET_DEV${ac_uB}HAVE_PROC_NET_DEV${ac_uC}${ac_uD}
-${ac_uA}HAVE_PROC_NET_IF_INET6${ac_uB}HAVE_PROC_NET_IF_INET6${ac_uC}${ac_uD}
 ${ac_uA}HAVE_GETADDRINFO${ac_uB}HAVE_GETADDRINFO${ac_uC}1${ac_uD}
-${ac_uA}HAVE_IPV6${ac_uB}HAVE_IPV6${ac_uC}1${ac_uD}
-${ac_uA}LINUX_IPV6${ac_uB}LINUX_IPV6${ac_uC}${ac_uD}
 ${ac_uA}HAVE_INET_NTOP${ac_uB}HAVE_INET_NTOP${ac_uC}${ac_uD}
 ${ac_uA}HAVE_INET_PTON${ac_uB}HAVE_INET_PTON${ac_uC}${ac_uD}
 ${ac_uA}HAVE_LIBCRYPT${ac_uB}HAVE_LIBCRYPT${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_LIBM${ac_uB}HAVE_LIBM${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_GNU_REGEX${ac_uB}HAVE_GNU_REGEX${ac_uC}${ac_uD}
-${ac_uA}HAVE_SIN6_SCOPE_ID${ac_uB}HAVE_SIN6_SCOPE_ID${ac_uC}${ac_uD}
-${ac_uA}HAVE_IN6ADDR_GLOBAL${ac_uB}HAVE_IN6ADDR_GLOBAL${ac_uC}${ac_uD}
 ${ac_uA}HAVE_SOCKLEN_T${ac_uB}HAVE_SOCKLEN_T${ac_uC}${ac_uD}
 ${ac_uA}HAVE_INPKTINFO${ac_uB}HAVE_INPKTINFO${ac_uC}${ac_uD}
 ${ac_uA}HAVE_RUSAGE${ac_uB}HAVE_RUSAGE${ac_uC}${ac_uD}
