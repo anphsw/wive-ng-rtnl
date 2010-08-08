@@ -464,6 +464,11 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
 		if (cfg->fc_nlflags & NLM_F_REPLACE) {
 			struct fib_info *fi_drop;
 			u8 state;
+		    //if route exists not need replace. return without error code
+		    if (fi->fib_treeref > 1){
+			    fib_release_info(fi);
+			    return 0;
+		    }
 #ifdef CONFIG_CONNTRACK_FAST_PATH
                      if (FastPath_Enabled()){
                                fastpath_modifyRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type); 
