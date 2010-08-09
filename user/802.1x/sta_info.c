@@ -51,7 +51,6 @@ struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int so
 
 		DBGPRINT(RT_DEBUG_TRACE,"Create a new STA(in %s%d)\n", apd->prefix_wlan_name, s->ApIdx);
 
-		s->SockNum = sock;
 		memcpy(s->addr, sa, ETH_ALEN);
 		s->next = apd->sta_list;
 		apd->sta_list = s;

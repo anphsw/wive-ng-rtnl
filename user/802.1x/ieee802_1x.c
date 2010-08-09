@@ -64,7 +64,7 @@ static void ieee802_1x_send(rtapd *rtapd, struct sta_info *sta, u8 type, u8 *dat
 	//If (ethertype==ETH_P_PRE_AUTH), this means the packet is to or from ehternet socket(WPA2, pre-auth)
 	if (sta->ethertype == ETH_P_PRE_AUTH)
 	{
-		if (send(sta->SockNum/*rtapd->eth_sock*/, buf, len, 0) < 0)
+		if (send(rtapd->eth_sock, buf, len, 0) < 0)
 			perror("send[WPA2 pre-auth]");
 		DBGPRINT(RT_DEBUG_INFO,"ieee802_1x_send::WPA2, pre-auth, len=%d\n", len);
 	}
