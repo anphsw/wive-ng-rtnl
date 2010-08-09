@@ -5,27 +5,34 @@
 #include "stapriv.h"
 #endif
 
-#ifdef CONFIG_RALINK_RT2880
+/*#ifdef CONFIG_RALINK_RT2880
 #define WPS_AP_PBC_LED_GPIO     13   // 0 ~ 24( or disable this feature by undefine it)
+#elif defined CONFIG_RALINK_RT3883
+#define WPS_AP_PBC_LED_GPIO     0   // 0 ~ 24( or disable this feature by undefine it)
 #else
 #define WPS_AP_PBC_LED_GPIO     14   // 0 ~ 24( or disable this feature by undefine it)
-#endif
+#endif*/
 
-#ifdef WPS_AP_PBC_LED_GPIO
 #include "utils.h"
-#define LedReset()                  {ledWps(WPS_AP_PBC_LED_GPIO, WPS_LED_RESET);}
-#define LedInProgress()             {ledWps(WPS_AP_PBC_LED_GPIO, WPS_LED_PROGRESS);}
-#define LedError()                  {ledWps(WPS_AP_PBC_LED_GPIO, WPS_LED_ERROR);}
-#define LedSessionOverlapDetected() {ledWps(WPS_AP_PBC_LED_GPIO, WPS_LED_SESSION_OVERLAP);}
-#define LedSuccess()                {ledWps(WPS_AP_PBC_LED_GPIO, WPS_LED_SUCCESS);}
+
+//Ricky Cao: I create an item on the kernel configuration of menuconfig for PCBA identify
+//           This is used to create definition for the code to do something for specific PCBA.
+//			 This item is created in linux-2.6.21.x/arch/mips/rt2880/Kconfig.
+#if defined CONFIG_UMEDIA_WRT393L //Ricky Cao: set the GPIO pin for WPS LED of WRT-393L
+	//Ricky Cao: WRT-393L only has one LED for indicate WPS status.
+	#define WPS_LED_ORANGE	9
+	#define WPS_LED_GREEN	9
 #else
-#define LedReset()
-#define LedInProgress()
-#define LedError()
-#define LedSessionOverlapDetected()
-#define LedSuccess()
+/*Salim:Orange for failure, Green for success*/
+#define WPS_LED_ORANGE	11
+#define WPS_LED_GREEN	14
 #endif
 
+#define LedReset()                  {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET);}
+#define LedInProgress()             {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_PROGRESS);}
+#define LedError()                  {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_ORANGE, WPS_LED_ERROR);}
+#define LedSessionOverlapDetected() {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_ORANGE, WPS_LED_SESSION_OVERLAP);}
+#define LedSuccess()                {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_SUCCESS);}
 
 void WPSRestart(void);
 void formDefineWPS(void);
@@ -115,7 +122,20 @@ typedef struct  _WSC_PROFILE
 #define WSC_ID_PRIMARY_DEVICE_TYPE_LEN	8
 #define WSC_ID_PRIMARY_DEVICE_TYPE_BEACON	0x00000100
 
+#if defined (CONFIG_RTDEV_MII) || defined (CONFIG_RTDEV_USB) || defined (CONFIG_RTDEV_PCI)
+void formDefineRaixWPS(void);
+unsigned int getAPPIN(char *interface);
+int isSafeForShell(char *str);
+int getWscProfile(char *interface, WSC_CONFIGURED_VALUE *data, int len);
+void getWPSAuthMode(WSC_CONFIGURED_VALUE *result, char *ret_str);
+void getWPSEncrypType(WSC_CONFIGURED_VALUE *result, char *ret_str);
+int getWscStatus(char *interface);
+char *getWscStatusStr(int status);
+int getAPMac(char *ifname, char *if_hw);
 
+void RaixWPSRestart();
+#endif
 
 #endif /* __WPS__H_ */
 
+void resetTimerAll(void);

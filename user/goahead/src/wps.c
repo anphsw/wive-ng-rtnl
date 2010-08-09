@@ -368,7 +368,7 @@ void WPSRestart(void)
 		wordlist = nvram_bufget(RT2860_NVRAM, "WscConfigured");
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
-		doSystem("ip route add 239.255.255.250 dev br0 1>/dev/null 2>&1");
+		doSystem("ip route replace 239.255.255.250 dev br0 1>/dev/null 2>&1");
 		doSystem("service wscd restart &");
 	}
 		
@@ -479,7 +479,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 			return;
 		}
 
-		doSystem("route add -host 239.255.255.250 dev br0");
+		doSystem("ip route replace 239.255.255.250 dev br0");
 		doSystem("service wscd restart &");
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 		printf("wsc_enable:%d\n",  7);

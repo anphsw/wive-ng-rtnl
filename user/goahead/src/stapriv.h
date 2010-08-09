@@ -13,6 +13,9 @@
 #define NDIS_802_11_LENGTH_RATES        8
 #define NDIS_802_11_LENGTH_RATES_EX     16
 
+#define NdisMediaStateConnected                 1
+#define NdisMediaStateDisconnected              0
+
 // BW
 #define BW_20       0
 #define BW_40       1
@@ -524,5 +527,9 @@ typedef struct _NDIS_802_11_WEP                                                 
 	unsigned char       KeyMaterial[1];// variable length depending on above field
 } NDIS_802_11_WEP, *PNDIS_802_11_WEP;
 
-
-
+typedef struct _NDIS_802_11_PASSPHRASE
+{
+       unsigned int          KeyLength;          // length of key in bytes
+       unsigned char         BSSID[6];
+       unsigned char         KeyMaterial[1];     // variable length depending on above field
+} NDIS_802_11_PASSPHRASE, *PNDIS_802_11_PASSPHRASE;
