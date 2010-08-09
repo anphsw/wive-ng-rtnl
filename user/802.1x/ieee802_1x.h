@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #ifndef IEEE802_1X_H
 #define IEEE802_1X_H
 
@@ -28,7 +12,6 @@ struct ieee802_1x_hdr {
 } __attribute__ ((packed));
 
 #define LENGTH_8021X_HDR        4
-#define MAC_ADDR_LEN			6
 
 #define EAPOL_VERSION		1
 #define EAPOL_VERSION_2		2    //for WPA2(pre-auth)
@@ -96,6 +79,12 @@ enum { EAP_TYPE_IDENTITY = 1,
        EAP_TYPE_PEAP = 25 /* draft-josefsson-pppext-eap-tls-eap-06.txt */,
 };
 
+typedef	enum	_Dot1xInternalCmd
+{
+	DOT1X_DISCONNECT_ENTRY, 			
+	DOT1X_RELOAD_CONFIG,
+}	DOT1X_INTERNAL_CMD;
+
 // Key mapping keys require a BSSID
 typedef struct _NDIS_802_11_KEY
 {
@@ -103,8 +92,6 @@ typedef struct _NDIS_802_11_KEY
     u8            addr[6];
     u32           KeyIndex;           
     u32           KeyLength;          // length of key in bytes
-    unsigned long BSSID;
-    unsigned long KeyRSC;
     u8            KeyMaterial[64];     // variable length depending on above field
 } NDIS_802_11_KEY, *PNDIS_802_11_KEY;
 
@@ -118,30 +105,39 @@ typedef struct PACKED _RADIUS_SRV_INFO {
 	unsigned char		radius_key_len;
 } RADIUS_SRV_INFO, *PRADIUS_SRV_INFO;
 
-typedef struct PACKED _RADIUS_KEY_INFO
+typedef struct PACKED _DOT1X_BSS_INFO
 {
-    unsigned char	radius_srv_num;			
-    RADIUS_SRV_INFO	radius_srv_info[MAX_RADIUS_SRV_NUM];	
-    unsigned char	ieee8021xWEP;		 // dynamic WEP
+	unsigned char		radius_srv_num;			
+	RADIUS_SRV_INFO		radius_srv_info[MAX_RADIUS_SRV_NUM];	
+	unsigned char		ieee8021xWEP;		 // dynamic WEP
     unsigned char       key_index;           
     unsigned char       key_length;          // length of key in bytes
     unsigned char       key_material[13];    
-} RADIUS_KEY_INFO, *PRADIUS_KEY_INFO;
+	unsigned char		nasId[IFNAMSIZ];
+	unsigned char		nasId_len;
+} DOT1X_BSS_INFO, *PDOT1X_BSS_INFO;
 
 // It's used by 802.1x daemon to require relative configuration
-typedef struct PACKED _RADIUS_CONF
+typedef struct PACKED _DOT1X_CMM_CONF
 {
     unsigned int       	Length;             // Length of this structure    
     unsigned char		mbss_num;			// indicate multiple BSS number 
-    unsigned int		own_ip_addr;	
-    unsigned int		retry_interval;
-    unsigned int		session_timeout_interval;
-    unsigned char		EAPifname[8][IFNAMSIZ];
-    unsigned char		EAPifname_len[8];
-    unsigned char 		PreAuthifname[8][IFNAMSIZ];
-    unsigned char		PreAuthifname_len[8];
-    RADIUS_KEY_INFO		RadiusInfo[MAX_MBSSID_NUM];
-} RADIUS_CONF, *PRADIUS_CONF;
+	unsigned int		own_ip_addr;	
+	unsigned int		retry_interval;
+	unsigned int		session_timeout_interval;
+	unsigned int		quiet_interval;
+	unsigned char		EAPifname[MAX_MBSSID_NUM][IFNAMSIZ];
+	unsigned char		EAPifname_len[MAX_MBSSID_NUM];
+	unsigned char 		PreAuthifname[MAX_MBSSID_NUM][IFNAMSIZ];
+	unsigned char		PreAuthifname_len[MAX_MBSSID_NUM];
+	DOT1X_BSS_INFO		Dot1xBssInfo[MAX_MBSSID_NUM];
+} DOT1X_CMM_CONF, *PDOT1X_CMM_CONF;
+
+typedef struct PACKED _DOT1X_IDLE_TIMEOUT
+{
+	unsigned char			StaAddr[MAC_ADDR_LEN];			
+	unsigned int			idle_timeout;
+} DOT1X_IDLE_TIMEOUT, *PDOT1X_IDLE_TIMEOUT;
 
 void ieee802_1x_new_station(rtapd *apd, struct sta_info *sta);
 void ieee802_1x_free_station(struct sta_info *sta);

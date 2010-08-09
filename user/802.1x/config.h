@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -55,15 +39,28 @@ struct rtapd_config {
 	int num_auth_servers;
 #endif
 	
-	char EAPifname[IFNAMSIZ];
-	char PreAuthifname[IFNAMSIZ];
+	int	 num_eap_if;
+	char eap_if_name[MAX_MBSSID_NUM][IFNAMSIZ];
+
+	int	 num_preauth_if;
+	char preauth_if_name[MAX_MBSSID_NUM][IFNAMSIZ];
 
 	int radius_retry_primary_interval;
 
-#define HOSTAPD_AUTH_OPEN BIT(0)
-#define HOSTAPD_AUTH_SHARED_KEY BIT(1)
 	int session_timeout_set;
 	int session_timeout_interval;
+
+	/* The initialization value used for the quietWhile timer. 
+	   Its default value is 60 s; it can be set by management 
+	   to any value in the range from 0 to 65535 s. 
+
+	   NOTE 1 - The Authenticator may increase the value of quietPeriod 
+	   per Port to ignore authorization failures for longer periods 
+	   of time after a number of authorization failures have occurred.*/	
+	int 	quiet_interval;
+
+	u8		nasId[MAX_MBSSID_NUM][32];
+	int		nasId_len[MAX_MBSSID_NUM];
 };
 
 

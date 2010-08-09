@@ -1,35 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. See README and COPYING for
- * more details.
-
-	Module Name:
-	eapol_sm.c
-
-	Revision History:
-	Who         When          What
-	--------    ----------    ----------------------------------------------
-	Jan, Lee    Dec --2003    modified
-
-*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,7 +6,7 @@
 #include <string.h>
 #include <sys/socket.h>
 
-#include "rt2860apd.h"
+#include "rtdot1x.h"
 #include "ieee802_1x.h"
 #include "eapol_sm.h"
 #include "eloop.h"
@@ -568,7 +536,7 @@ eapol_sm_alloc(rtapd *rtapd, struct sta_info *sta)
 
 	/* Set default values for state machine constants */
 	sm->auth_pae.state = AUTH_PAE_INITIALIZE;
-	sm->auth_pae.quietPeriod = AUTH_PAE_DEFAULT_quietPeriod;
+	sm->auth_pae.quietPeriod = rtapd->conf->quiet_interval;
 	sm->auth_pae.initialEAPMsg = AUTH_PAE_DEFAULT_initialEAPMsg;
 	sm->auth_pae.reAuthMax = AUTH_PAE_DEFAULT_reAuthMax;
 	sm->auth_pae.txPeriod = AUTH_PAE_DEFAULT_txPeriod;

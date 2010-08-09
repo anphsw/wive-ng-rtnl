@@ -1,35 +1,4 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. See README and COPYING for
- * more details.
 
-	Module Name:
-	sta_info.c
-
-	Revision History:
-	Who 		When		  What
-	--------	----------	  ----------------------------------------------
-	Jan, Lee	Dec --2003	  modified
-
-*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,13 +10,13 @@
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
 #include <linux/wireless.h>
 
-#include "rt2860apd.h"
+#include "rtdot1x.h"
 #include "sta_info.h"
 #include "eloop.h"
 #include "ieee802_1x.h"
 #include "radius.h"
 
-struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int stop)
+struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int sock)
 {
 	struct sta_info *s;
 
@@ -57,12 +26,6 @@ struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int st
 	
 	if (s == NULL)
 	{
-		if(stop)
-		{
-			DBGPRINT(RT_DEBUG_INFO, "Receive discard-notification form wireless driver, but no this STA.\n");
-			return NULL;
-		}
-
 		if (apd->num_sta >= MAX_STA_COUNT)
 		{
 			/* FIX: might try to remove some old STAs first? */
@@ -88,6 +51,7 @@ struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int st
 
 		DBGPRINT(RT_DEBUG_TRACE,"Create a new STA(in %s%d)\n", apd->prefix_wlan_name, s->ApIdx);
 
+		s->SockNum = sock;
 		memcpy(s->addr, sa, ETH_ALEN);
 		s->next = apd->sta_list;
 		apd->sta_list = s;
@@ -98,13 +62,6 @@ struct sta_info* Ap_get_sta(rtapd *apd, u8 *sa, u8 *apidx, u16 ethertype, int st
 	}
 	else
 	{
-		if(stop)
-		{
-			DBGPRINT(RT_DEBUG_TRACE,"Receive discard-notification form wireless driver and remove this station.\n");
-			
-			Ap_free_sta(apd, s);	
-			return NULL;	
-		}	
 		DBGPRINT(RT_DEBUG_TRACE,"A STA has existed(in %s%d)\n", apd->prefix_wlan_name, s->ApIdx);
 	}	
 	
@@ -246,7 +203,10 @@ void Ap_handle_session_timer(void *eloop_ctx, void *timeout_ctx)
 	memcpy(hdr3->sAddr, apd->own_addr[sta->ApIdx], ETH_ALEN);
 	// send deauth
 	DBGPRINT(RT_DEBUG_TRACE,"AP_HANDLE_SESSION_TIMER : Send Deauth \n");	  
-	if (RT_ioctl(apd->ioctl_sock, RTPRIV_IOCTL_RADIUS_DATA, buf, len, apd->prefix_wlan_name, sta->ApIdx, 0))
+	if (RT_ioctl(apd->ioctl_sock, 
+				 RT_PRIV_IOCTL, buf, len, 
+				 apd->prefix_wlan_name, sta->ApIdx, 
+				 RT_OID_802_DOT1X_RADIUS_DATA))
 	{
 		DBGPRINT(RT_DEBUG_ERROR," ioctl \n");
 		return;
