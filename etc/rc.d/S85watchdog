@@ -1,0 +1,31 @@
+#!/bin/sh
+
+start() {
+ echo "Start watchdog"
+    nice --19 watchdog -T 180 -t 10 -F /dev/watchdog  > /dev/null 2>&1 &
+}
+
+stop() {
+ echo "Stop watchdog"
+    killall -q watchdog
+    killall -q -9 watchdog
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

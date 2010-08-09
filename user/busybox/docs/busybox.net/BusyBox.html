@@ -129,7 +129,7 @@ been enabled, more detailed usage information will also be available.</p>
         sh, sleep, sort, split, stat, sum, switch_root, sync, sysctl,
         syslogd, tail, tar, test, time, top, touch, traceroute, true,
         udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig, vi,
-        watch, wc, wget, which, yes, zcat</pre>
+        watch, watchdog, wc, wget, which, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -1840,6 +1840,18 @@ and display a screenful of them.</p>
 <pre>
         -n      Loop period in seconds (default 2)
         -t      Don't print header</pre>
+</dd>
+<dt><strong><a name="watchdog" class="item"><strong>watchdog</strong></a></strong></dt>
+
+<dd>
+<p>watchdog [-t N[ms]] [-T N[ms]] [-F] DEV</p>
+<p>Periodically write to watchdog device DEV</p>
+<p>Options:</p>
+<pre>
+        -T N    Reboot after N seconds if not reset (default 60)
+        -t N    Reset every N seconds (default 30)
+        -F      Run in foreground</pre>
+<p>Use 500ms to specify period in milliseconds</p>
 </dd>
 <dt><strong><a name="wc" class="item"><strong>wc</strong></a></strong></dt>
 

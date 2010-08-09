@@ -18,7 +18,7 @@ static int WdgLoadValue;
 extern u32 get_surfboard_sysclk(void);
 
 
-#define WATCHDOG_TIMEOUT 30		/* 30 sec default timeout */
+#define WATCHDOG_TIMEOUT 120		/* 120 sec default timeout */
 
 
 #ifdef CONFIG_WATCHDOG_NOWAYOUT
