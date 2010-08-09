@@ -94,6 +94,8 @@
 12) ppp connection optimization in kernel<br>
 13) DMZ must works<br>
 14) Sync from 3.4.0.1 RalinkSDK from trandnet TEW-691GR GPL code<br>
+15) libnvram fix crash on reliad settings and some leaks<br>
+16) Fix freeze in 802.11n mode change in EthernetConverterMode<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
