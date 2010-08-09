@@ -23,7 +23,7 @@ typedef struct cache_environment_s {
 	char *value;
 } cache_t;
 
-#define MAX_CACHE_ENTRY 300
+#define MAX_CACHE_ENTRY 500
 typedef struct block_s {
 	char *name;
 	env_t env;			//env block
@@ -36,9 +36,9 @@ typedef struct block_s {
 } block_t;
 
 #ifdef CONFIG_DUAL_IMAGE
-#define FLASH_BLOCK_NUM	4
+#define FLASH_BLOCK_NUM	5
 #else
-#define FLASH_BLOCK_NUM	3
+#define FLASH_BLOCK_NUM	4
 #endif
 
 static block_t fb[FLASH_BLOCK_NUM] =
@@ -54,19 +54,25 @@ static block_t fb[FLASH_BLOCK_NUM] =
 	{
 		.name = "2860",
 		.flash_offset =  0x2000,
-		.flash_max_len = ENV_BLK_SIZE,
+		.flash_max_len = ENV_BLK_SIZE*4,
 		.valid = 0
 	},
 	{
-		.name = "inic",
+		.name = "rtdev",
 		.flash_offset = 0x6000,
-		.flash_max_len = ENV_BLK_SIZE,
+		.flash_max_len = ENV_BLK_SIZE*2,
 		.valid = 0
 	},
 	{
-		.name = "2561",
+		.name = "cert",
+		.flash_offset = 0x8000,
+		.flash_max_len = ENV_BLK_SIZE*2,
+		.valid = 0
+	},
+	{
+		.name = "wapi",
 		.flash_offset = 0xa000,
-		.flash_max_len = ENV_BLK_SIZE,
+		.flash_max_len = ENV_BLK_SIZE*5,
 		.valid = 0
 	}
 };
@@ -216,10 +222,10 @@ int nvram_set(int index, char *name, char *value)
 	return nvram_commit(index);
 }
 
-char *nvram_bufget(int index, char *name)
+char const *nvram_bufget(int index, char *name)
 {
 	int idx;
-	static char *ret;
+	static char const *ret;
 
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
@@ -229,7 +235,10 @@ char *nvram_bufget(int index, char *name)
 	if (-1 != idx) {
 		if (fb[index].cache[idx].value) {
 			//duplicate the value in case caller modify it
+			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
+			//                   but if we return value directly, it will cause many other crash or delete value to nvram error.
 			ret = strdup(fb[index].cache[idx].value);
+			//ret = fb[index].cache[idx].value;
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
 			return ret;
 		}
@@ -317,7 +326,7 @@ int nvram_commit(int index)
 		if (!fb[index].cache[i].name || !fb[index].cache[i].value)
 			break;
 		l = strlen(fb[index].cache[i].name) + strlen(fb[index].cache[i].value) + 2;
-		if (p - fb[index].env.data + 2 >= ENV_BLK_SIZE) {
+		if (p - fb[index].env.data + 2 >= fb[index].flash_max_len) {
 			LIBNV_ERROR("ENV_BLK_SIZE 0x%x is not enough!", ENV_BLK_SIZE);
 			FREE(fb[index].env.data);
 			return -1;

@@ -1,4 +1,4 @@
-#define ENV_BLK_SIZE 0x4000
+#define ENV_BLK_SIZE 0x1000
 
 #ifdef CONFIG_DUAL_IMAGE
 #define ENV_UBOOT_SIZE 0x1000
