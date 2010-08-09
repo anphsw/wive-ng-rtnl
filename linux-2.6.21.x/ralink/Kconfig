@@ -16,12 +16,9 @@ endmenu
 # Wireless
 #############
 menu "Platform config for  Ralink RT3xx/RT28xx."
-config  ASUS_EXT
-	bool 
-	default n
 choice
         prompt "RF Type"
-        depends on RALINK_RT3052
+        depends on RALINK_RT3052 || RALINK_RT3352
         default RALINK_RT3052_2T2R
 
         config  RALINK_RT3050_1T1R
@@ -33,14 +30,17 @@ choice
         config  RALINK_RT3052_2T2R
         bool "RT3052-2T2R"
 endchoice
-endmenu
+choice
+	prompt "RF Type"
+	depends on RALINK_RT3883
 
-#menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
-#source "drivers/net/wireless/rt2860v2_ap/Kconfig"
-#endmenu
-#menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
-#source "drivers/net/wireless/rt2860v2_sta/Kconfig"
-#endmenu
+	config  RALINK_RT3662_2T2R
+	bool "2T3R (RT3662)"
+
+	config  RALINK_RT3883_3T3R
+	bool "3T3R (RT3883)"
+endchoice
+endmenu
 
 # split driver in one dir
 menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
@@ -86,10 +86,30 @@ endmenu
 endif
 endmenu
 
+config RTDEV_USB
+bool
+default y if RT305x_INIC_USB || RT3572_AP
+
+config RTDEV_MII
+bool
+default y if RT2880v2_INIC_MII || RT305x_INIC_MII
+
+config RTDEV_PCI
+bool
+default y if RT2880v2_INIC_PCI || RT3090_AP
+
 #######
 # USB
 #######
 source "drivers/usb/dwc_otg/Kconfig"
 
-endmenu
+config RT3XXX_EHCI_OHCI
+	bool "Ralink USB EHCI/OHCI controller support"
+        depends on (RALINK_RT3883 || RALINK_RT3352)
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
 
+config  ASUS_EXT
+	bool 
+	default n
+endmenu

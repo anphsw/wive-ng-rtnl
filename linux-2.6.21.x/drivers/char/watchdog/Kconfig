@@ -593,6 +593,24 @@ config RALINK_WATCHDOG
 	  timer expired and no process has written to /dev/watchdog during
 	  that time.
 
+config  RALINK_TIMER
+	tristate 'Ralink WatchDog' 
+        depends on RALINK_WATCHDOG
+
+config  RALINK_TIMER_WDG
+        bool "Ralink WatchDog Timer"
+        depends on RALINK_TIMER
+
+config  RALINK_WDG_TIMER
+        int "WatchDog Timer (Unit:1Sec, Max=30Sec)"
+        default 10
+        depends on RALINK_TIMER_WDG
+
+config  RALINK_WDG_REFRESH_INTERVAL
+        int "WatchDog Refresh Interval (Unit:1Sec, Max=30Sec)"
+        default 4
+        depends on RALINK_TIMER_WDG
+
 config  RALINK_TIMER_WDG_RESET_OUTPUT
         bool "Ralink WatchDog Reset Output"
         depends on RALINK_WATCHDOG
