@@ -21,9 +21,6 @@ bool 'Build libnsl'		CONFIG_LIB_NSL_FORCE
 bool 'Build libutil'		CONFIG_LIB_UTIL_FORCE
 bool 'Build libresolv'		CONFIG_LIB_RESOLV_FORCE
 bool 'Build librt'		CONFIG_LIB_RT_FORCE
-
-comment 'Build options'
-bool '802.11a support'		CONFIG_802_11_a
 endmenu
 
 #############################################################################

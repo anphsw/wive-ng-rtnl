@@ -30,11 +30,6 @@ CONFIG_LIB_RESOLV_FORCE=y
 # CONFIG_LIB_RT_FORCE is not set
 
 #
-# Build options
-#
-CONFIG_802_11_a=y
-
-#
 # MTD utils
 #
 # CONFIG_USER_MTDUTILS is not set
