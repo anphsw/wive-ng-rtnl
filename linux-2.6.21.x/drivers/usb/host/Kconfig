@@ -29,6 +29,11 @@ config USB_EHCI_HCD
 	  To compile this driver as a module, choose M here: the
 	  module will be called ehci-hcd.
 
+config RT3XXX_EHCI
+	bool "Ralink EHCI HCD support"
+	depends on USB_EHCI_HCD
+	default y
+
 config USB_EHCI_SPLIT_ISO
 	bool "Full speed ISO transactions"
 	depends on USB_EHCI_HCD
@@ -101,6 +106,11 @@ config USB_OHCI_HCD
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called ohci-hcd.
+
+config RT3XXX_OHCI
+	bool "Ralink OHCI HCD support"
+	depends on USB_OHCI_HCD
+	default y
 
 config USB_OHCI_HCD_PPC_SOC
 	bool "OHCI support for on-chip PPC USB controller"

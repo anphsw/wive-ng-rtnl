@@ -39,15 +39,30 @@
 /*
  * DEFINITIONS AND MACROS
  */
+#define MOD_VERSION 			"0.4"
+
+#if defined (CONFIG_RALINK_RT3052)
 #define MAX_GDMA_CHANNEL		8
-#define MOD_VERSION 			"0.3"
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+#define MAX_GDMA_CHANNEL		16
+#else
+#error Please Choose System Type
+#endif
+
+
 #define RALINK_GDMA_CTRL_BASE		(RALINK_GDMA_BASE)
+#if defined (CONFIG_RALINK_RT3052)
 #define RALINK_GDMAISTS			(RALINK_GDMA_BASE + 0x80)
-#define RALINK_GDMASSTS			(RALINK_GDMA_BASE + 0x84)
 #define RALINK_GDMAGCT			(RALINK_GDMA_BASE + 0x88)
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+#define RALINK_GDMA_UNMASKINT		(RALINK_GDMA_BASE + 0x200)
+#define RALINK_GDMA_DONEINT		(RALINK_GDMA_BASE + 0x204)
+#define RALINK_GDMA_GCT			(RALINK_GDMA_BASE + 0x220)
+#endif
 
 #define GDMA_READ_REG(addr) 		le32_to_cpu(*(volatile u32 *)(addr))
 #define GDMA_WRITE_REG(addr, val)  	*((volatile uint32_t *)(addr)) = cpu_to_le32(val)
+#define GET_GDMA_IP_VER			(GDMA_READ_REG(RALINK_GDMA_GCT) & 0x6) >> 1 //GDMA_GCT[2:1]
 
 #define RALINK_IRQ_ADDR                 RALINK_INTCL_BASE
 #define RALINK_REG_INTENA               (RALINK_IRQ_ADDR + 0x34)
@@ -65,24 +80,43 @@
 #define GDMA_CTRL_REG1(ch)		(GDMA_CTRL_REG(ch) + 4)
 
 //GDMA Interrupt Status Register
-#define TX_DONE_INT_STATUS_OFFSET	0
-#define UMASK_INT_STATUS_OFFSET		16
+#if defined (CONFIG_RALINK_RT3052)
+#define UNMASK_INT_STATUS(ch)           (ch+16)
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+#define UNMASK_INT_STATUS(ch)           (ch)
+#endif
+#define TXDONE_INT_STATUS(ch)           (ch)
 
-//Control Reg1
-#define CH_UNMASK_INTEBL_OFFSET		4
-#define NEXT_UNMASK_CH_OFFSET		1
-#define CH_MASK_OFFSET			0
-
-//Control Reg
+//Control Reg0
 #define MODE_SEL_OFFSET			0
 #define CH_EBL_OFFSET			1
-#define INT_EBL_OFFSET			2
+#define CH_DONEINT_EBL_OFFSET		2
 #define BRST_SIZE_OFFSET		3
 #define DST_BRST_MODE_OFFSET		6
 #define SRC_BRST_MODE_OFFSET		7
+#define TRANS_CNT_OFFSET		16
+
+//Control Reg1
+#if defined (CONFIG_RALINK_RT3052)
+#define CH_UNMASKINT_EBL_OFFSET		4
+#define NEXT_UNMASK_CH_OFFSET		1
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+#define CH_UNMASKINT_EBL_OFFSET		1
+#define NEXT_UNMASK_CH_OFFSET		3
+#endif
+#define COHERENT_INT_EBL_OFFSET		2
+#define CH_MASK_OFFSET			0
+
+
+#if defined (CONFIG_RALINK_RT3052)
+//Control Reg0
 #define DST_DMA_REQ_OFFSET		8
 #define SRC_DMA_REQ_OFFSET		12
-#define TRANS_CNT_OFFSET		16
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+//Control Reg1
+#define DST_DMA_REQ_OFFSET		8
+#define SRC_DMA_REQ_OFFSET		16
+#endif
 
 #define GDMA_PCM0_RX0			0
 #define GDMA_PCM0_RX1			1
@@ -96,6 +130,8 @@
 
 #define GDMA_I2S_TX0			4
 #define GDMA_I2S_TX1			5
+#define GDMA_I2S_RX0			6
+#define GDMA_I2S_RX1			7
 
 //#define GDMA_DEBUG
 #ifdef GDMA_DEBUG
@@ -122,15 +158,41 @@ enum GdmaBusterSize {
 };
 
 enum GdmaDmaReqNum {
+#if defined (CONFIG_RALINK_RT3052)
 	DMA_REQ0=0,
-	DMA_NAND_FLASH_REQ=1,
-	DMA_I2S_REQ=2,
+	DMA_NAND_REQ=1,
+	DMA_I2S_TX_REQ=2,
 	DMA_PCM_RX0_REQ=3,
 	DMA_PCM_RX1_REQ=4,
 	DMA_PCM_TX0_REQ=5,
 	DMA_PCM_TX1_REQ=6,
-	DMA_REQ7=7,
+	DMA_REG7=7,
 	DMA_MEM_REQ=8
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+	DMA_REQ0=0,
+	DMA_NAND_REQ=1,
+	DMA_I2S_TX_REQ=2,
+	DMA_I2S_RX_REQ=3,
+	DMA_PCM_RX0_REQ=4,
+	DMA_PCM_RX1_REQ=5,
+	DMA_PCM_TX0_REQ=6,
+	DMA_PCM_TX1_REQ=7,
+	DMA_CODEC0_REQ8=8,
+	DMA_CODEC1_REQ9=9,
+	DMA_REQ10=10,
+	DMA_REQ11=11,
+	DMA_REQ12=12,
+	DMA_REQ13=13,
+	DMA_REQ14=14,
+	DMA_REQ15=15,
+#if defined (CONFIG_RALINK_RT3883)
+	DMA_MEM_REQ=16
+#elif defined (CONFIG_RALINK_RT3352)
+	DMA_MEM_REQ=32
+#endif
+#else
+#error Please Choose System Type
+#endif
 };
 
 
@@ -140,16 +202,16 @@ typedef struct {
 	uint32_t Dst;
 	uint16_t TransCount;
 	uint8_t  SoftMode;
-	uint8_t  ChUnMaskIntEbl;
 	uint8_t  NextUnMaskCh;
 	uint8_t  ChMask;
+	uint8_t  CoherentIntEbl;
 	uint32_t  ChNum;
 	enum GdmaDmaReqNum SrcReqNum;
 	enum GdmaDmaReqNum DstReqNum;
 	enum GdmaBusterMode SrcBurstMode;
 	enum GdmaBusterMode DstBurstMode;
 	enum GdmaBusterSize BurstSize;
-	void (*TxDoneCallback)(uint32_t);
+	void (*DoneIntCallback)(uint32_t);
 	void (*UnMaskIntCallback)(uint32_t);
 } GdmaReqEntry;
 
@@ -157,19 +219,23 @@ typedef struct {
  * EXPORT FUNCTION
  */
 int GdmaI2sTx(uint32_t Src, uint32_t Dst, uint8_t TxNo, uint16_t TransCount,
-		void (*TxDoneCallback)(uint32_t data), 
+		void (*DoneIntCallback)(uint32_t data), 
+		void (*UnMaskIntCallback)(uint32_t data));
+
+int GdmaI2sRx(uint32_t Src, uint32_t Dst, uint8_t RxNo, uint16_t TransCount,
+		void (*DoneIntCallback)(uint32_t data), 
 		void (*UnMaskIntCallback)(uint32_t data));
 
 int GdmaPcmRx(uint32_t Src, uint32_t Dst, uint8_t PcmNo, uint8_t RxNo, uint16_t TransCount,
-		void (*TxDoneCallback)(uint32_t data), 
+		void (*DoneIntCallback)(uint32_t data), 
 		void (*UnMaskIntCallback)(uint32_t data));
 
 int GdmaPcmTx(uint32_t Src, uint32_t Dst, uint8_t PcmNo, uint8_t TxNo, uint16_t TransCount,
-		void (*TxDoneCallback)(uint32_t data), 
+		void (*DoneIntCallback)(uint32_t data), 
 		void (*UnMaskIntCallback)(uint32_t data));
 
 int GdmaMem2Mem(uint32_t Src, uint32_t Dst, uint16_t TransCount, 
-		void (*TxDoneCallback)(uint32_t data)); 
+		void (*DoneIntCallback)(uint32_t data)); 
 
 int GdmaMaskChannel(uint32_t ChNum);
 

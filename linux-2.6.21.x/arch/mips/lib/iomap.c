@@ -24,7 +24,7 @@
  * implementation and should do their own copy.
  */
 
-#define PIO_MASK	0x0ffffUL
+#define PIO_MASK	0xffffffffUL
 
 unsigned int ioread8(void __iomem *addr)
 {

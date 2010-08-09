@@ -30,6 +30,13 @@ config BRIDGE
 	  will be called bridge.
 
 	  If unsure, say N.
+
+config BRIDGE_2WAYS_FDB
+	bool "2-Ways Forwarding DataBase"
+	depends on BRIDGE
+	---help---
+	  prevent ARP flooding attack (memory protection code)
+
 config BRIDGE_FORWARD_CTRL
 	bool "Forwarding Control"
 	depends on BRIDGE

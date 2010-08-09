@@ -39,10 +39,19 @@
 #define	RT2880_I2C_READ_STR		"read"	/* I2C read operation */
 #define	RT2880_I2C_WRITE_STR		"write"	/* I2C read operation */
 
-#define RT2880_I2C_READ        3
-#define RT2880_I2C_WRITE       5
+#define RT2880_I2C_READ		3
+#define RT2880_I2C_WRITE		5
+#define RT2880_I2C_SET_ADDR		7
 
-#define I2C_DEV_NAME	"i2cM0"
+#define RT2880_I2C_INIT_RTL_NOCLONE     8
+#define RT2880_I2C_INIT_RTL_CLONE       9
+#define RT2880_I2C_VIEW_ARL_TABLE       10
+#define RT2880_I2C_SETREG               11
+#define RT2880_I2C_GETREG               12
+
+
+#define I2C_DEV_NAME			"i2cM0"
+#define MAC_ADDR_SIZE   6
 
 typedef struct i2c_write_data {
 	unsigned long address;
@@ -50,15 +59,18 @@ typedef struct i2c_write_data {
 	unsigned long size;
 } I2C_WRITE;
 
+typedef struct i2c_wr_reg {
+	unsigned int reg;
+	unsigned long value;
+} I2C_REG_WR;
+
 
 /*---------------------------------------------------------------------*/
 /* Symbol & Macro Definitions                                          */
 /*---------------------------------------------------------------------*/
 
-#define	RT2880_REG(x)						(*((volatile u32 *)(x)))
+#define	RT2880_REG(x)			(*((volatile u32 *)(x)))
 #define	RT2880_RSTCTRL_REG		(RALINK_SYSCTL_BASE+0x34)
-
-#define RSTCTRL_I2C_RESET		RALINK_I2C_RST
 
 #define RT2880_I2C_REG_BASE		(RALINK_I2C_BASE)
 #define RT2880_I2C_CONFIG_REG		(RT2880_I2C_REG_BASE+0x00)
@@ -71,13 +83,11 @@ typedef struct i2c_write_data {
 #define RT2880_I2C_STARTXFR_REG		(RT2880_I2C_REG_BASE+0x1C)
 #define RT2880_I2C_BYTECNT_REG		(RT2880_I2C_REG_BASE+0x20)
 
-
 /* I2C_CFG register bit field */
 #define I2C_CFG_ADDRLEN_8				(7<<5)	/* 8 bits */
 #define I2C_CFG_DEVADLEN_7				(6<<2)	/* 7 bits */
 #define I2C_CFG_ADDRDIS					(1<<1)	/* disable address transmission*/
 #define I2C_CFG_DEVADDIS				(1<<0)	/* disable evice address transmission */
-
 
 #define IS_BUSY		(RT2880_REG(RT2880_I2C_STATUS_REG) & 0x01)
 #define IS_SDOEMPTY	(RT2880_REG(RT2880_I2C_STATUS_REG) & 0x02)
@@ -105,7 +115,7 @@ typedef struct i2c_write_data {
 #endif 
 
 
-#define i2c_busy_loop 	(CLKDIV_VALUE*30)
+#define i2c_busy_loop		(CLKDIV_VALUE*30)
 #define max_ee_busy_loop	(CLKDIV_VALUE*25)
 						  
 
@@ -144,10 +154,9 @@ typedef struct i2c_write_data {
 #define WRITE_CMD	0x00
 
 
-#define I2C_CFG_DEFAULT			(I2C_CFG_ADDRLEN_8  | \
-								 I2C_CFG_DEVADLEN_7 | \
-								 I2C_CFG_ADDRDIS)
-
+#define I2C_CFG_DEFAULT		(I2C_CFG_ADDRLEN_8 | \
+		I2C_CFG_DEVADLEN_7 | \
+		I2C_CFG_ADDRDIS)
 
 #define ATMEL_ADDR		(0xA0>>1)
 #define WM8751_ADDR		(0x36>>1)

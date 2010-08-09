@@ -790,8 +790,10 @@ static void release_channel(dwc_otg_hcd_t *hcd,
 		 */
 		goto cleanup;
 	case DWC_OTG_HC_XFER_NO_HALT_STATUS:
-		DWC_ERROR("%s: No halt_status, channel %d\n", __func__, hc->hc_num);
-		free_qtd = 0;
+		DWC_DEBUGPL(DBG_HCDV, "%s: No halt_status, channel %d\n", __func__, hc->hc_num);
+		free_qtd = 1;
+		qtd->urb->status = -EPROTO;
+		dwc_otg_hcd_complete_urb(hcd, qtd->urb, -EPROTO);
 		break;
 	default:
 		free_qtd = 0;
@@ -825,10 +827,19 @@ static void release_channel(dwc_otg_hcd_t *hcd,
 	}
 
 	/* Try to queue more transfers now that there's a free channel. */
+#ifdef FAST_TRANSACTION
 	tr_type = dwc_otg_hcd_select_transactions(hcd);
 	if (tr_type != DWC_OTG_TRANSACTION_NONE) {
 		dwc_otg_hcd_queue_transactions(hcd, tr_type);
 	}
+#else
+	if (halt_status != DWC_OTG_HC_XFER_NAK) {
+		tr_type = dwc_otg_hcd_select_transactions(hcd);
+		if (tr_type != DWC_OTG_TRANSACTION_NONE) {
+			dwc_otg_hcd_queue_transactions(hcd, tr_type);
+		}
+	}
+#endif
 }
 
 /**
@@ -1770,7 +1781,8 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t *hcd,
 #endif
 				halt_channel(hcd, hc, qtd, DWC_OTG_HC_XFER_PERIODIC_INCOMPLETE);
 			} else {
-				DWC_ERROR("%s: Channel %d, DMA Mode -- ChHltd set, but reason "
+				halt_channel(hcd, hc, qtd, DWC_OTG_HC_XFER_NO_HALT_STATUS);
+				printk(KERN_DEBUG "%s: Channel %d, DMA Mode -- ChHltd set, but reason "
 					  "for halting is unknown, hcint 0x%08x, intsts 0x%08x\n",
 					  __func__, hc->hc_num, hcint.d32,
 					  dwc_read_reg32(&hcd->core_if->core_global_regs->gintsts));

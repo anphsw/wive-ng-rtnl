@@ -49,11 +49,13 @@ static void mips_machine_power_off(void);
 static void mips_machine_restart(char *command)
 {
 	*(volatile unsigned int*)(SOFTRES_REG) = GORESET;
+	*(volatile unsigned int*)(SOFTRES_REG) = 0;
 }
 
 static void mips_machine_halt(void)
 {
 	*(volatile unsigned int*)(SOFTRES_REG) = GORESET;
+	*(volatile unsigned int*)(SOFTRES_REG) = 0;
 }
 
 static void mips_machine_power_off(void)

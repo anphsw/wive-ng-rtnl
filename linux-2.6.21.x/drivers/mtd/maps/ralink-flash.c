@@ -28,7 +28,7 @@
 #define WINDOW_SIZE		CONFIG_MTD_PHYSMAP_LEN
 #define NUM_FLASH_BANKS		1
 #else
-#define WINDOW_ADDR_0		CPHYSADDR(ONFIG_MTD_PHYSMAP_START)
+#define WINDOW_ADDR_0		CPHYSADDR(CONFIG_MTD_PHYSMAP_START)
 #define WINDOW_ADDR_1		CPHYSADDR(0xBB000000)
 #define WINDOW_SIZE		(CONFIG_MTD_PHYSMAP_LEN / 2)
 #define NUM_FLASH_BANKS		2
@@ -67,7 +67,7 @@ static struct map_info ralink_map[] = {
 };
 #endif
 
-#if defined (CONFIG_RT2880_FLASH_32M) && defined (CONFIG_RALINK_RT3052_MP2)
+#if defined (CONFIG_RT2880_FLASH_32M)
 static struct mtd_partition rt2880_partitions[] = {
         {
                 name:           "Bootloader",  /* mtdblock0 */
@@ -272,7 +272,7 @@ static void __exit rt2880_mtd_cleanup(void)
 #endif
 }
 
-module_init(rt2880_mtd_init);
+rootfs_initcall(rt2880_mtd_init);
 module_exit(rt2880_mtd_cleanup);
 
 MODULE_AUTHOR("Steven Liu <steven_liu@ralinktech.com.tw>");

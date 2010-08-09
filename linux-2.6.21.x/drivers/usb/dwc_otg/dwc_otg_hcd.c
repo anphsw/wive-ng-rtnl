@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.c $
- * $Revision: 1.4 $
- * $Date: 2008-11-21 05:39:15 $
+ * $Revision: 1.5 $
+ * $Date: 2009-06-16 05:39:10 $
  * $Change: 1064940 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -949,7 +949,7 @@ int dwc_otg_hcd_urb_enqueue(struct usb_hcd *hcd,
 		return -ENODEV;
 	}
 
-	qtd = dwc_otg_hcd_qtd_create(urb);
+	qtd = dwc_otg_hcd_qtd_create(urb, mem_flags);
 	if (qtd == NULL) {
 		DWC_ERROR("DWC OTG HCD URB Enqueue failed creating QTD\n");
 		return -ENOMEM;

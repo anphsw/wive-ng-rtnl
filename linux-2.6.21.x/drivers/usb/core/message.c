@@ -1368,6 +1368,9 @@ int usb_set_configuration(struct usb_device *dev, int configuration)
 	struct usb_host_config *cp = NULL;
 	struct usb_interface **new_interfaces = NULL;
 	int n, nintf;
+#if 0
+	int shout_out_for_no_silent_failure = 1; /* USB-IF Embedded Host Compliance Plan */
+#endif 
 
 	if (configuration == -1)
 		configuration = 0;
@@ -1516,7 +1519,17 @@ free_interfaces:
 			continue;
 		}
 		usb_create_sysfs_intf_files (intf);
+#if 0
+		if (intf->dev.is_registered == 1 && intf->dev.driver)
+			shout_out_for_no_silent_failure = 0;
+#endif
 	}
+
+#if 0 
+	/* USB-IF Embedded Host Compliance Plan */
+	if (shout_out_for_no_silent_failure == 1) 
+		printk(KERN_EMERG "\n\nDevice not supported!\nVendor=%x ProdID=%x\nManufacturer=%s Product=%s\n\n", dev->descriptor.idVendor, dev->descriptor.idProduct, dev->manufacturer ? dev->manufacturer : "", dev->product ? dev->product : "");
+#endif
 
 	usb_autosuspend_device(dev);
 	return 0;

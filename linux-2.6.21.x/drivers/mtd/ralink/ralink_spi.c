@@ -57,6 +57,12 @@ static struct mtd_partition rt2880_partitions[] = {
                 name:           "RootFS",
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+        }, {
+                name:           "Kernel_RootFS",
+                size:           MTD_KERN_PART_SIZE + MTD_ROOTFS_PART_SIZE,
+                offset:         MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE,
+#endif
 #else //CONFIG_RT2880_ROOTFS_IN_RAM
         }, {
                 name:           "Kernel",
@@ -80,30 +86,31 @@ static struct mtd_partition rt2880_partitions[] = {
 
 
 
-/*********************************************************************************
+/******************************************************************************
  * SPI FLASH elementray definition and function
- **********************************************************************************/
+ ******************************************************************************/
 
 #define FLASH_PAGESIZE		256
+#define MX_4B_MODE			/* MXIC 4 Byte Mode */
 
 /* Flash opcodes. */
-#define	OPCODE_WREN		6	/* Write enable */
-#define	OPCODE_RDSR		5	/* Read status register */
-#define	OPCODE_WRSR		1	/* Write status register */
-#define	OPCODE_READ		3	/* Read data bytes */
-#define	OPCODE_PP		2	/* Page program */
-#define	OPCODE_SE		0xd8	/* Sector erase */
-#define	OPCODE_RES		0xab	/* Read Electronic Signature */
-#define	OPCODE_RDID		0x9f	/* Read JEDEC ID */
+#define OPCODE_WREN		6	/* Write enable */
+#define OPCODE_RDSR		5	/* Read status register */
+#define OPCODE_WRSR		1	/* Write status register */
+#define OPCODE_READ		3	/* Read data bytes */
+#define OPCODE_PP		2	/* Page program */
+#define OPCODE_SE		0xD8	/* Sector erase */
+#define OPCODE_RES		0xAB	/* Read Electronic Signature */
+#define OPCODE_RDID		0x9F	/* Read JEDEC ID */
 
 /* Status Register bits. */
-#define	SR_WIP			1	/* Write in progress */
-#define	SR_WEL			2	/* Write enable latch */
-#define	SR_BP0			4	/* Block protect 0 */
-#define	SR_BP1			8	/* Block protect 1 */
-#define	SR_BP2			0x10	/* Block protect 2 */
-#define	SR_EPE			0x20	/* Erase/Program error */
-#define	SR_SRWD			0x80	/* SR write protect */
+#define SR_WIP			1	/* Write in progress */
+#define SR_WEL			2	/* Write enable latch */
+#define SR_BP0			4	/* Block protect 0 */
+#define SR_BP1			8	/* Block protect 1 */
+#define SR_BP2			0x10	/* Block protect 2 */
+#define SR_EPE			0x20	/* Erase/Program error */
+#define SR_SRWD			0x80	/* SR write protect */
 
 
 static unsigned int spi_wait_nsec = 0;
@@ -149,14 +156,13 @@ u32 ra_outl(u32 addr, u32 val)
 #define ra_or(addr, o_value)  ra_aor(addr, -1, o_value)
 
 
-int spic_busy_wait(void)
+static int spic_busy_wait(void)
 {
-
 	do {
 		if ((ra_inl(RT2880_SPISTAT_REG) & 0x01) == 0)
 			return 0;
-	} while(spi_wait_nsec >> 1);
-		
+	} while (spi_wait_nsec >> 1);
+
 	printk("%s: fail \n", __func__);
 	return -1;
 }
@@ -165,29 +171,31 @@ int spic_busy_wait(void)
 #define SPIC_WRITE_BYTES (1<<1)
 
 /*
- * @cmd: command and address 
+ * @cmd: command and address
  * @n_cmd: size of command, in bytes
- * @buf: buffer into which data will be read/wroten
+ * @buf: buffer into which data will be read/written
  * @n_buf: size of buffer, in bytes
  * @flag: tag as READ/WRITE
  *
  * @return: if write_onlu, -1 means write fail, or return writing counter.
  * @return: if read, -1 means read fail, or return reading counter.
  */
-int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
-{	
+static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
+{
 	int retval = -1;
 
 	ra_dbg("cmd(%x): %x %x %x %x , buf:%x len:%x, flag:%s \n",
-	       n_cmd, cmd[0], cmd[1], cmd[2], cmd[3], (buf)?(*buf):0, n_buf, (flag==SPIC_READ_BYTES)?"read":"write");
+			n_cmd, cmd[0], cmd[1], cmd[2], cmd[3],
+			(buf)? (*buf) : 0, n_buf,
+			(flag == SPIC_READ_BYTES)? "read" : "write");
 	
 	// assert CS and we are already CLK normal high
-	ra_and (RT2880_SPICTL_REG, ~(SPICTL_SPIENA_HIGH));
+	ra_and(RT2880_SPICTL_REG, ~(SPICTL_SPIENA_HIGH));
 
-	//write command
-	for (retval=0; retval<n_cmd; retval++) {
-		ra_outl ( RT2880_SPIDATA_REG, cmd[retval]);
-		ra_or (RT2880_SPICTL_REG, SPICTL_STARTWR);
+	// write command
+	for (retval = 0; retval < n_cmd; retval++) {
+		ra_outl(RT2880_SPIDATA_REG, cmd[retval]);
+		ra_or(RT2880_SPICTL_REG, SPICTL_STARTWR);
 		if (spic_busy_wait()) {
 			retval = -1;
 			goto end_trans;
@@ -196,18 +204,18 @@ int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 
 	// read / write  data
 	if (flag & SPIC_READ_BYTES) {
-		for (retval=0; retval<n_buf; retval++) {
-			ra_or (RT2880_SPICTL_REG, SPICTL_STARTRD);
+		for (retval = 0; retval < n_buf; retval++) {
+			ra_or(RT2880_SPICTL_REG, SPICTL_STARTRD);
 			if (spic_busy_wait())
 				goto end_trans;
 			buf[retval] = (u8) ra_inl(RT2880_SPIDATA_REG);
 		}
 
 	}
-	if (flag & SPIC_WRITE_BYTES) {
-		for (retval=0; retval<n_buf; retval++) {
-			ra_outl (RT2880_SPIDATA_REG, buf[retval]);
-			ra_or (RT2880_SPICTL_REG, SPICTL_STARTWR);
+	else if (flag & SPIC_WRITE_BYTES) {
+		for (retval = 0; retval < n_buf; retval++) {
+			ra_outl(RT2880_SPIDATA_REG, buf[retval]);
+			ra_or(RT2880_SPICTL_REG, SPICTL_STARTWR);
 			if (spic_busy_wait())
 				goto end_trans;
 		}
@@ -216,36 +224,16 @@ int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 end_trans:
 	// de-assert CS and
 	ra_or (RT2880_SPICTL_REG, (SPICTL_SPIENA_HIGH));
-	
+
 	return retval;
 }
 
-/**
- * spi_write_then_read - SPI synchronous write followed by read
- * @txbuf: data to be written (need not be dma-safe)
- * @n_tx: size of txbuf, in bytes
- * @rxbuf: buffer into which data will be read
- * @n_rx: size of rxbuf, in bytes (need not be dma-safe)
- *
- * @return: if write_onlu, -1 means write fail, or return writing counter.
- * @return: if read, -1 means read fail, or return reading counter.
- *
- * This performs a half duplex MicroWire style transaction with the
- * device, sending txbuf and then reading rxbuf.  
- * This call may only be used from a context that may sleep.
- *
- * Parameters to this routine are always copied using a small buffer;
- * performance-sensitive or bulk transfer code should instead use
- * spi_{async,sync}() calls with dma-safe buffers.
- * 
- * -- copied from drivers/spi.c
- */
-int spic_read(const u8 *cmd, size_t n_cmd, u8 *rxbuf, size_t n_rx)
+static int spic_read(const u8 *cmd, size_t n_cmd, u8 *rxbuf, size_t n_rx)
 {
 	return spic_transfer(cmd, n_cmd, rxbuf, n_rx, SPIC_READ_BYTES);
 }
 
-int spic_write(const u8 *cmd, size_t n_cmd, const u8 *txbuf, size_t n_tx)
+static int spic_write(const u8 *cmd, size_t n_cmd, const u8 *txbuf, size_t n_tx)
 {
 	return spic_transfer(cmd, n_cmd, (u8 *)txbuf, n_tx, SPIC_WRITE_BYTES);
 }
@@ -256,8 +244,9 @@ int spic_init(void)
 	ra_and(RALINK_REG_GPIOMODE, ~(1 << 1)); //use normal(SPI) mode instead of GPIO mode
 
 	/* reset spi block */
-	ra_outl(RT2880_RSTCTRL_REG, RSTCTRL_SPI_RESET);
+	ra_or(RT2880_RSTCTRL_REG, RSTCTRL_SPI_RESET);
 	udelay(1);
+	ra_and(RT2880_RSTCTRL_REG, ~RSTCTRL_SPI_RESET);
 
 	// FIXME, clk_div should depend on spi-flash. 
 	// mode 0 (SPICLKPOL = 0) & (RXCLKEDGE_FALLING = 0)
@@ -280,17 +269,29 @@ struct chip_info {
 	char		*name;
 	u8		id;
 	u32		jedec_id;
-	unsigned	sector_size;
-	unsigned	n_sectors;
+	unsigned long	sector_size;
+	unsigned int	n_sectors;
+	char		addr4b;
 };
 
 static struct chip_info chips_data [] = {
 	/* REVISIT: fill in JEDEC ids, for parts that have them */
-	{ "at25df321", 	0x1f, 0x47000000, 64 * 1024, 64 },	//0
-	{ "fl016a1f", 	0x01, 0x02140000, 64 * 1024, 32 },	//1
-	{ "mx25l3205d", 0xc2, 0x20160000, 64 * 1024, 64 },	//2
-	{ "Sfl128p", 	0x01, 0x20180301, 64 * 1024, 256 },	//3
-	{ "Sfl128p", 	0x01, 0x20180300, 256 * 1024, 64 },	//4
+	{ "AT25DF321",		0x1f, 0x47000000, 64 * 1024, 64,  0 },
+	{ "AT26DF161",		0x1f, 0x46000000, 64 * 1024, 32,  0 },
+	{ "FL016AIF",		0x01, 0x02140000, 64 * 1024, 32,  0 },
+	{ "FL064AIF",		0x01, 0x02160000, 64 * 1024, 128, 0 },
+	{ "MX25L1605D",		0xc2, 0x2015c220, 64 * 1024, 32,  0 },
+	{ "MX25L3205D",		0xc2, 0x2016c220, 64 * 1024, 64,  0 },
+	{ "MX25L6405D",		0xc2, 0x2017c220, 64 * 1024, 128, 0 },
+	{ "MX25L12805D",	0xc2, 0x2018c220, 64 * 1024, 256, 0 },
+#ifdef MX_4B_MODE 
+	{ "MX25L25635E",	0xc2, 0x2019c220, 64 * 1024, 512, 1 },
+#endif
+	{ "S25FL128P",		0x01, 0x20180301, 64 * 1024, 256, 0 },
+	{ "S25FL129P",		0x01, 0x20184D01, 64 * 1024, 256, 0 },
+	{ "S25FL032P",		0x01, 0x02154D00, 64 * 1024, 64,  0 },
+	{ "S25FL064P",		0x01, 0x02164D00, 64 * 1024, 128, 0 },
+	{ "EN25F16",		0x1c, 0x31151c31, 64 * 1024, 32,  0 },
 };
 
 
@@ -298,7 +299,7 @@ struct flash_info {
 	struct semaphore	lock;
 	struct mtd_info		mtd;
 	struct chip_info	*chip;
-	u8			command[4];
+	u8			command[5];
 };
 
 struct flash_info *flash;
@@ -306,25 +307,18 @@ struct flash_info *flash;
 /****************************************************************************/
 
 
-static int raspi_read_deviceid(u8 *rxbuf, int n_rx)
+static int raspi_read_devid(u8 *rxbuf, int n_rx)
 {
 	u8 code = OPCODE_RDID;
 	int retval;
 
 	retval = spic_read(&code, 1, rxbuf, n_rx);
-
 	if (retval != n_rx) {
-		printk("%s: ret: %x \n", __func__, retval);
+		printk("%s: ret: %x\n", __func__, retval);
 		return retval;
 	}
-
 	return retval;
-	
 }
-
-/*
- * Internal helper functions
- */
 
 /*
  * Read the status register, returning its value in the location
@@ -336,7 +330,7 @@ static int raspi_read_sr(u8 *val)
 
 	retval = spic_read(&code, 1, val, 1);
 	if (retval != 1) {
-		printk("%s: ret: %x \n", __func__, retval);
+		printk("%s: ret: %x\n", __func__, retval);
 		return -EIO;
 	}
 	return 0;
@@ -357,6 +351,25 @@ static int raspi_write_sr(u8 *val)
 	}
 	return 0;
 }
+
+#ifdef MX_4B_MODE
+static int raspi_4byte_mode(int enable)
+{
+	ssize_t retval;
+	u8 code;
+
+	if (enable)
+		code = 0xB7; /* EN4B, enter 4-byte mode */
+	else
+		code = 0xE9; /* EX4B, exit 4-byte mode */
+	retval = spic_read(&code, 1, 0, 0);
+	if (retval != 0) {
+		printk("%s: ret: %x\n", __func__, retval);
+		return -1;
+	}
+	return 0;
+}
+#endif
 
 /*
  * Set write enable latch with Write Enable command.
@@ -382,7 +395,7 @@ static inline int raspi_unprotect(void)
 		return -1;
 	}
 
-	if ((sr & SR_BP0) == SR_BP0) {
+	if ((sr & (SR_BP0 | SR_BP1 | SR_BP2)) != 0) {
 		sr = 0;
 		raspi_write_sr(&sr);
 	}
@@ -395,12 +408,11 @@ static inline int raspi_unprotect(void)
 static int raspi_wait_ready(int sleep_ms)
 {
 	int count;
-	int sr;
-	
-	int timeout = sleep_ms * HZ / 1000;
+	int sr = 0;
 
+	/*int timeout = sleep_ms * HZ / 1000;
 	while (timeout) 
-		timeout = schedule_timeout (timeout);
+		timeout = schedule_timeout (timeout);*/
 
 	/* one chip guarantees max 5 msec wait here after page writes,
 	 * but potentially three seconds (!) after page erase.
@@ -416,7 +428,7 @@ static int raspi_wait_ready(int sleep_ms)
 		/* REVISIT sometimes sleeping would be best */
 	}
 
-	printk("%s: read_sr fail :%x\n", __func__, sr);
+	printk("%s: read_sr fail: %x\n", __func__, sr);
 	return -EIO;
 }
 
@@ -438,14 +450,27 @@ static int raspi_erase_sector(u32 offset)
 	raspi_write_enable();
 	raspi_unprotect();
 
+#ifdef MX_4B_MODE
+	if (flash->chip->addr4b) {
+		raspi_4byte_mode(1);
+		flash->command[0] = OPCODE_SE;
+		flash->command[1] = offset >> 24;
+		flash->command[2] = offset >> 16;
+		flash->command[3] = offset >> 8;
+		flash->command[4] = offset;
+		spic_write(flash->command, 5, 0 , 0);
+		raspi_4byte_mode(0);
+		return 0;
+	}
+#endif
+
 	/* Set up command buffer. */
 	flash->command[0] = OPCODE_SE;
 	flash->command[1] = offset >> 16;
 	flash->command[2] = offset >> 8;
 	flash->command[3] = offset;
 
-	spic_write(flash->command, sizeof(flash->command), 0 , 0);
-
+	spic_write(flash->command, 4, 0 , 0);
 	return 0;
 }
 
@@ -456,6 +481,7 @@ int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 
 	/*  */
 	while (len > 0) {
+		/* FIXME: 4b mode ? */
 		/* write the next page to flash */
 		flash->command[0] = (set == 0)? 0x39 : 0x36;
 		flash->command[1] = to >> 16;
@@ -513,7 +539,7 @@ static int ramtd_erase(struct mtd_info *mtd, struct erase_info *instr)
   	down(&flash->lock);
 
 	/* now erase those sectors */
-	while (len) {
+	while (len > 0) {
 		if (raspi_erase_sector(addr)) {
 			instr->state = MTD_ERASE_FAILED;
 			up(&flash->lock);
@@ -543,7 +569,7 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 	//printk("%s: from:%llx len:%x\n", __func__, from, len);
 	/* sanity checks */
-	if (!len)
+	if (len == 0)
 		return 0;
 
 	if (from + len > flash->mtd.size)
@@ -562,15 +588,28 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 		return -EIO;
 	}
 
-	/* NOTE:  OPCODE_FAST_READ (if available) is faster... */
+	/* NOTE: OPCODE_FAST_READ (if available) is faster... */
 
 	/* Set up the write data buffer. */
 	flash->command[0] = OPCODE_READ;
-	flash->command[1] = from >> 16;
-	flash->command[2] = from >> 8;
-	flash->command[3] = from;
-
-	readlen = spic_read(flash->command, 4, buf, len);
+#ifdef MX_4B_MODE
+	if (flash->chip->addr4b) {
+		raspi_4byte_mode(1);
+		flash->command[1] = from >> 24;
+		flash->command[2] = from >> 16;
+		flash->command[3] = from >> 8;
+		flash->command[4] = from;
+		readlen = spic_read(flash->command, 5, buf, len);
+		raspi_4byte_mode(0);
+	}
+	else
+#endif
+	{
+		flash->command[1] = from >> 16;
+		flash->command[2] = from >> 8;
+		flash->command[3] = from;
+		readlen = spic_read(flash->command, 4, buf, len);
+	}
   	up(&flash->lock);
 
 	if (retlen) 
@@ -581,7 +620,6 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 	return 0;
 }
-
 
 inline int ramtd_lock (struct mtd_info *mtd, loff_t to, size_t len)
 {
@@ -616,7 +654,6 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 	if (to + len > flash->mtd.size)
 		return -EINVAL;
 
-
   	down(&flash->lock);
 
 	/* Wait until finished previous write command. */
@@ -629,29 +666,58 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	/* Set up the opcode in the write buffer. */
 	flash->command[0] = OPCODE_PP;
-	flash->command[1] = to >> 16;
-	flash->command[2] = to >> 8;
-	flash->command[3] = to;
+#ifdef MX_4B_MODE
+	if (flash->chip->addr4b) {
+		flash->command[1] = to >> 24;
+		flash->command[2] = to >> 16;
+		flash->command[3] = to >> 8;
+		flash->command[4] = to;
+	}
+	else
+#endif
+	{
+		flash->command[1] = to >> 16;
+		flash->command[2] = to >> 8;
+		flash->command[3] = to;
+	}
 
 	/* what page do we start with? */
 	page_offset = to % FLASH_PAGESIZE;
 
+#ifdef MX_4B_MODE
+	raspi_4byte_mode(1);
+#endif
 	/* write everything in PAGESIZE chunks */
 	while (len > 0) {
 		page_size = min_t(size_t, len, FLASH_PAGESIZE-page_offset);
 		page_offset = 0;
 
 		/* write the next page to flash */
-		flash->command[1] = to >> 16;
-		flash->command[2] = to >> 8;
-		flash->command[3] = to;
+#ifdef MX_4B_MODE
+		if (flash->chip->addr4b) {
+			flash->command[1] = to >> 24;
+			flash->command[2] = to >> 16;
+			flash->command[3] = to >> 8;
+			flash->command[4] = to;
+		}
+		else
+#endif
+		{
+			flash->command[1] = to >> 16;
+			flash->command[2] = to >> 8;
+			flash->command[3] = to;
+		}
 
 		raspi_wait_ready(3);
-			
 		raspi_write_enable();
 		raspi_unprotect();
 
-		retval = spic_write(flash->command, 4, buf, page_size);
+#ifdef MX_4B_MODE
+		if (flash->chip->addr4b)
+			retval = spic_write(flash->command, 5, buf, page_size);
+		else
+#endif
+			retval = spic_write(flash->command, 4, buf, page_size);
 		//printk("%s : to:%llx page_size:%x ret:%x\n", __func__, to, page_size, retval);
 
 		if (retval > 0) {
@@ -662,16 +728,18 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 				up(&flash->lock);
 				printk("%s: retval:%x return:%x page_size:%x \n", 
 				       __func__, retval, retval, page_size);
-
 				return -EIO;
 			}
 		}
-			
+
 		len -= page_size;
 		to += page_size;
 		buf += page_size;
 	}
 
+#ifdef MX_4B_MODE
+	raspi_4byte_mode(0);
+#endif
 
 	up(&flash->lock);
 
@@ -691,7 +759,7 @@ struct chip_info *chip_prob(void)
 	u32 jedec, weight;
 	int i;
 
-	raspi_read_deviceid(buf, 5);
+	raspi_read_devid(buf, 5);
 	jedec = (u32)((u32)(buf[1] << 24) | ((u32)buf[2] << 16) | ((u32)buf[3] <<8) | (u32)buf[4]);
 
 	printk("deice id : %x %x %x %x %x (%x)\n", buf[0], buf[1], buf[2], buf[3], buf[4], jedec);
@@ -711,6 +779,7 @@ struct chip_info *chip_prob(void)
 			}
 		}
 	}
+	printk("Warning: un-recognized chip ID, please update SPI driver!\n");
 
 	return match;
 }
@@ -725,6 +794,13 @@ static int __devinit raspi_prob(void)
 {
 	struct chip_info		*chip;
 	unsigned			i;
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+	loff_t offs;
+	struct __image_header {
+		uint8_t unused[60];
+		uint32_t ih_ksz;
+	} hdr;
+#endif
 	
 	chip = chip_prob();
 	
@@ -768,6 +844,16 @@ static int __devinit raspi_prob(void)
 				flash->mtd.eraseregions[i].erasesize / 1024,
 				flash->mtd.eraseregions[i].numblocks);
 
+#if defined (CONFIG_RT2880_ROOTFS_IN_FLASH) && defined (CONFIG_ROOTFS_IN_FLASH_NO_PADDING)
+	offs = MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE;
+	ramtd_read(NULL, offs, sizeof(hdr), (size_t *)&i, (u_char *)(&hdr));
+	if (hdr.ih_ksz != 0) {
+		rt2880_partitions[4].size = ntohl(hdr.ih_ksz);
+		rt2880_partitions[5].size = IMAGE1_SIZE - (MTD_BOOT_PART_SIZE +
+				MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE +
+				ntohl(hdr.ih_ksz));
+	}
+#endif
 	return add_mtd_partitions(&flash->mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 }
 
@@ -788,7 +874,7 @@ int raspi_init(void)
 }
 
 
-module_init(raspi_init);
+rootfs_initcall(raspi_init);
 module_exit(raspi_remove);
 
 MODULE_LICENSE("GPL");

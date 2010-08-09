@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg_ipmate/linux/drivers/dwc_otg_hcd_queue.c $
- * $Revision: 1.5 $
- * $Date: 2008-12-15 06:51:32 $
+ * $Revision: 1.6 $
+ * $Date: 2009-06-16 05:39:48 $
  * $Change: 537387 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -51,6 +51,7 @@
 #include <asm/rt2880/lm.h>
 //#include <asm/arch/irqs.h>
 #include <linux/dma-mapping.h>
+#include <linux/version.h>
 
 #include "dwc_otg_driver.h"
 #include "dwc_otg_hcd.h"
@@ -615,11 +616,15 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, int sched_n
  * pointing to each other so each pair should have a unique correlation.
  *
  * @return Returns pointer to the newly allocated QTD, or NULL on error. */
-dwc_otg_qtd_t *dwc_otg_hcd_qtd_create (struct urb *urb)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+dwc_otg_qtd_t *dwc_otg_hcd_qtd_create (struct urb *urb, int mem_flags)
+#else
+dwc_otg_qtd_t *dwc_otg_hcd_qtd_create (struct urb *urb, gfp_t mem_flags)
+#endif
 {
 	dwc_otg_qtd_t *qtd;
 
-	qtd = dwc_otg_hcd_qtd_alloc ();
+	qtd = dwc_otg_hcd_qtd_alloc (mem_flags);
 	if (qtd == NULL) {
 		return NULL;
 	}

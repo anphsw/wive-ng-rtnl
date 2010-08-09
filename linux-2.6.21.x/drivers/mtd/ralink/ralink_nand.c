@@ -40,8 +40,11 @@
 #include <linux/delay.h>
 #include <linux/sched.h>
 #include "ralink_nand.h"
+#include "../maps/ralink-flash.h"
 
 #endif// !defined (__UBOOT__)
+
+#define READ_STATUS_RETRY	1000
 
 struct mtd_info *ranfc_mtd = NULL;
 
@@ -169,14 +172,14 @@ static int nfc_all_reset(void)
 
 	CLEAR_INT_STATUS();
 
-	retry = 100;
+	retry = READ_STATUS_RETRY;
 	while ((ra_inl(NFC_INT_ST) & 0x02) != 0x02 && retry--);
 	if (retry <= 0) {
 		printk("nfc_all_reset: clean buffer fail \n");
 		return -1;
 	}
 
-	retry = 100;
+	retry = READ_STATUS_RETRY;
 	while ((ra_inl(NFC_STATUS) & 0x1) != 0x0 && retry--) { //fixme, controller is busy ?
 		udelay(1);
 	}
@@ -212,7 +215,7 @@ static int _nfc_read_status(char *status)
 	 * 3. SUGGESTION: call nfc_read_status() from nfc_wait_ready(),
 	 * that is aware about caller (in sementics) and has snooze plused nfc ND_DONE.
 	 */
-	retry = 1000; 
+	retry = READ_STATUS_RETRY; 
 	do {
 		nfc_st = ra_inl(NFC_STATUS);
 		int_st = ra_inl(NFC_INT_ST);
@@ -289,7 +292,7 @@ static int _ra_nand_pull_data(char *buf, int len, int use_gdma)
 	}
 
 	//fixme: retry count size?
-	retry = 1000;
+	retry = READ_STATUS_RETRY;
 	// no gdma
 	while (len > 0) {
 		int int_st = ra_inl(NFC_INT_ST);
@@ -851,8 +854,8 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 	if ((flags & (FLAG_VERIFY | FLAG_ECC_EN)) == (FLAG_VERIFY | FLAG_ECC_EN)) {
 		status = nfc_ecc_verify(ra, buf, page, FL_READING);	
 		if (status != 0) {
-			printk("%s: fail, buf:%x, page:%x, flag:%x,   \n", 
-			       __func__, buf, page, flags);
+			printk("%s: fail, buf:%x, page:%x, flag:%x\n", 
+			       __func__, (unsigned int)buf, page, flags);
 			return -EBADMSG;
 		}
 	}
@@ -1371,7 +1374,7 @@ static int nand_do_write_ops(struct ra_nand_chip *ra, loff_t to,
 	int pagemask = (pagesize -1);
 	int oobsize = 1<<ra->oob_shift;
 	loff_t addr = to;
-	int i = 0;
+	//int i = 0; //for ra_dbg only
 
 	ra_dbg("%s: to:%x, ops data:%p, oob:%p datalen:%x ooblen:%x, ooboffs:%x oobmode:%x \n", 
 	       __func__, (unsigned int)to, data, oob, datalen, ooblen, ops->ooboffs, ops->mode);
@@ -1495,7 +1498,7 @@ static int nand_do_read_ops(struct ra_nand_chip *ra, loff_t from,
 	int pagesize = (1<<ra->page_shift);
 	int pagemask = (pagesize -1);
 	loff_t addr = from;
-	int i = 0;
+	//int i = 0; //for ra_dbg only
 
 	ra_dbg("%s: addr:%x, ops data:%p, oob:%p datalen:%x ooblen:%x, ooboffs:%x \n", 
 	       __func__, (unsigned int)addr, data, oob, datalen, ooblen, ops->ooboffs);
@@ -1806,6 +1809,13 @@ int __devinit ra_nand_init(void)
 {
 	struct ra_nand_chip *ra;
 	int alloc_size, bbt_size, buffers_size;
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+	loff_t offs;
+	struct __image_header {
+		uint8_t unused[60];
+		uint32_t ih_ksz;
+	} hdr;
+#endif
 	
 #define ALIGNE_16(a) (((unsigned long)(a)+15) & ~15)
 	buffers_size = ALIGNE_16((1<<CONFIG_PAGE_SIZE_BIT) + (1<<CONFIG_OOBSIZE_PER_PAGE_BIT)); //ra->buffers
@@ -1852,6 +1862,7 @@ int __devinit ra_nand_init(void)
 		ra->sandbox_page = nand_bbt_find_sandbox(ra);
 	}
 #endif
+	ra_outl(NFC_CTRL, ra_inl(NFC_CTRL) | 0x01); //set wp to high
 	nfc_all_reset();
 
 	ranfc_mtd->type		= MTD_NANDFLASH;
@@ -1895,6 +1906,16 @@ int __devinit ra_nand_init(void)
 	printk("%s: alloc %x, at %p , btt(%p, %x), ranfc_mtd:%p\n", 
 	       __func__ , alloc_size, ra, ra->bbt, bbt_size, ranfc_mtd);
 
+#if defined (CONFIG_RT2880_ROOTFS_IN_FLASH) && defined (CONFIG_ROOTFS_IN_FLASH_NO_PADDING)
+	offs = MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE;
+	ramtd_nand_read(ranfc_mtd, offs, sizeof(hdr), (size_t *)&i, (u_char *)(&hdr));
+	if (hdr.ih_ksz != 0) {
+		rt2880_partitions[4].size = ntohl(hdr.ih_ksz);
+		rt2880_partitions[5].size = IMAGE1_SIZE - (MTD_BOOT_PART_SIZE +
+				MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE +
+				ntohl(hdr.ih_ksz));
+	}
+#endif
 	/* Register the partitions */
 	add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 
@@ -1922,7 +1943,7 @@ static void __devexit ra_nand_remove(void)
 }
 
 #if !defined (__UBOOT__) 
-module_init(ra_nand_init);
+rootfs_initcall(ra_nand_init);
 module_exit(ra_nand_remove);
 
 MODULE_LICENSE("GPL");

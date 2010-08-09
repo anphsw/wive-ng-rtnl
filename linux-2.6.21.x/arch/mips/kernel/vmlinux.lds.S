@@ -135,6 +135,10 @@ SECTIONS
   .bss : {
     *(.bss)
     *(COMMON)
+    *(.cod0)
+    *(.cod1)
+    *(.dec0)
+    *(.dec1)
   }
   __bss_stop = .;
 

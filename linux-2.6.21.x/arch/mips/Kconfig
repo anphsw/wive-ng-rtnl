@@ -30,7 +30,7 @@ config RALINK_RT2880
          Ralink evaluation board based on RT2880
 
  config RALINK_RT3052
-        bool "Ralink RT3052 board"
+        bool "Ralink RT305x/RT3350 board"
 	select DMA_NONCOHERENT
 	select IRQ_CPU
 	select SWAP_IO_SPACE
@@ -1225,6 +1225,7 @@ config PCI_DOMAINS
 	depends on PCI
 
 source "drivers/pci/Kconfig"
+source "drivers/pci/pcie/Kconfig" 
 
 #
 # ISA support is now enabled via select.  Too many systems still have the one

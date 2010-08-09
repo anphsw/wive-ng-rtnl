@@ -938,6 +938,11 @@ MODULE_LICENSE ("GPL");
 #define	PLATFORM_DRIVER		ehci_hcd_au1xxx_driver
 #endif
 
+#if defined (CONFIG_RT3XXX_EHCI) || defined (CONFIG_RT3XXX_EHCI_MODULE)
+#include "ehci-rt3xxx.c"
+#define PLATFORM_DRIVER     rt3xxx_ehci_driver
+#endif
+
 #ifdef CONFIG_PPC_PS3
 #include "ehci-ps3.c"
 #define	PS3_SYSTEM_BUS_DRIVER	ps3_ehci_sb_driver

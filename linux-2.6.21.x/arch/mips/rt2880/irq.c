@@ -28,9 +28,10 @@
  *
  **************************************************************************
  * May 2007 Bruce Chang
- *
  * Initial Release
  *
+ * May 2009 Bruce Chang
+ * support RT2880/RT2883 PCIe
  *
  *
  **************************************************************************
@@ -232,7 +233,7 @@ void surfboard_hw0_irqdispatch(void)
 	 * bit[2] WDTIMER Timer 1 Interrupt Status after Mask
 	 * bit[1] TIMER0 Timer 0 Interrupt Status after Mask
 	 */
-#ifdef CONFIG_RALINK_TIMER
+#ifdef CONFIG_RALINK_TIMER_DFS
 	if (irq == 1)
 		irq = SURFBOARDINT_TIMER0;
 #endif
@@ -315,8 +316,10 @@ void __init arch_init_irq(void)
 
 void rt2880_irqdispatch(void)
 {
-#if 1
-	unsigned long mips_cp0_status, mips_cp0_cause, irq_x, irq, i, pci_status=0;
+	unsigned long mips_cp0_status, mips_cp0_cause, irq_x, irq, i;
+#if defined(CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883) 
+	unsigned long pci_status=0;
+#endif
 
 	mips_cp0_cause = read_32bit_cp0_register(CP0_CAUSE);
 	mips_cp0_status = read_32bit_cp0_register(CP0_STATUS);
@@ -338,7 +341,7 @@ void rt2880_irqdispatch(void)
 	   }
 	   */
 	/* from high to low priority */
-	irq = 5;
+	irq = 4;
 	pci_order^=1;
 
 #ifdef CONFIG_RAETH_ROUTER
@@ -349,39 +352,51 @@ void rt2880_irqdispatch(void)
 	//	do_IRQ(irq, regs);
 #endif
 
-	for (i = 0; i< 6; i++) {
-		if(irq_x & 0x20)
+	for (i = 0; i< 5; i++) {
+		if(irq_x & 0x10)
 		{
+#ifdef CONFIG_RALINK_RT3883
+			clear_c0_status(0x7c00);
+#else
 			disable_rt2880_cp_int(1<<(irq+10));
+#endif
 			if(irq > 2)
 				do_IRQ(irq);
 			else if(irq == 2){
-			 //disable_rt2880_cp_int(CAUSEF_IP4);
-/*FIXME*/
-#if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT2880_ASIC)
+#if defined (CONFIG_RALINK_RT2883)
+				do_IRQ(2);
+#elif defined (CONFIG_RALINK_RT3883)
+			 	pci_status = RALINK_PCI_PCIINT_ADDR;
+				if(pci_status &0x100000){
+					do_IRQ(16);
+				}else if(pci_status &0x40000){
+					do_IRQ(2);
+				}else{
+					do_IRQ(15);
+				}
+
+#elif defined (CONFIG_RALINK_RT3052)
+
+#elif defined (CONFIG_RALINK_RT3352)
+
+#else // 2880
+
+#if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT3883)
 			 pci_status = RALINK_PCI_PCIINT_ADDR;
 #endif
 			 if(pci_order ==0) { 
-#if defined(CONFIG_RT2880_ASIC) || \
-	defined (CONFIG_RT2883_ASIC) || \
-	defined (CONFIG_RT3052_ASIC) 
+#if defined(CONFIG_RT2880_ASIC) 
 				if(pci_status &0x40000)
-#elif defined(CONFIG_RT2880_FPGA) || \
-	defined (CONFIG_RT2883_FPGA) || \
-	defined(CONFIG_RT3052_FPGA)
+#elif defined(CONFIG_RT2880_FPGA) 
 				if(pci_status &0x80000)
 #endif
 					do_IRQ(2);
 				else // if(pci_status & 0x40000)
 					do_IRQ(15);
 			 } else {
-#if defined(CONFIG_RT2880_ASIC)  || \
-	defined (CONFIG_RT2883_ASIC) || \
-	defined (CONFIG_RT3052_ASIC)
+#if defined(CONFIG_RT2880_ASIC)  
 				if(pci_status &0x80000)
-#elif defined(CONFIG_RT2880_FPGA) || \
-	defined (CONFIG_RT2883_FPGA) || \
-	defined(CONFIG_RT3052_FPGA)
+#elif defined(CONFIG_RT2880_FPGA) 
 				if(pci_status &0x40000)
 #endif
 					do_IRQ(15);
@@ -389,62 +404,20 @@ void rt2880_irqdispatch(void)
 					do_IRQ(2);
 			 }
 
-			 //enable_rt2880_cp_int(CAUSEF_IP4);
+#endif //CONFIG_RALINK_RT2883//
 			}
 			else {
 				surfboard_hw0_irqdispatch();
 			}
+#ifdef CONFIG_RALINK_RT3883
+			set_c0_status(0x7c00);
+#else
 			enable_rt2880_cp_int(1<<(irq+10));
+#endif
 		}
 		irq--;
 		irq_x <<= 1;
 	}
-#else
-	unsigned long int_status, int_cause;
-	u32 ill_acc_val;
-	
-	int_cause = read_32bit_cp0_register(CP0_CAUSE);
-	ill_acc_val = RALINK_SDRAM_ILL_ACC_ADDR;
-			
-	if(ill_acc_val != 0)
-	{
-		printk("\n RALINK_SDRAM_ILL_ACC_ADDR=[0x%08X]\n",ill_acc_val);
-		ill_acc_val = RALINK_SDRAM_ILL_ACC_TYPE;
-		RALINK_SDRAM_ILL_ACC_ADDR = 0xFFFFFFFF;
-		printk("\n RALINK_SDRAM_ILL_ACC_TYPE=[0x%08X]\n",ill_acc_val);
-			
-		//surfboard_hw0_icregs->irq0Status = 0;
-		//surfboard_hw0_icregs->irq1Status = 0;
-		return;
-				
-	}
-
-	if ((int_cause & CAUSEF_IP2))
-	{
-		
-		surfboard_hw0_irqdispatch();	
-	}	
-	else
-	{
-
-		if(( int_cause & CAUSEF_IP5 ))
-			do_IRQ(3); /* dispatch gmac irq here */	
-		else if(( int_cause & CAUSEF_IP4 ))
-		{//PCI slot
-			int_status = RALINK_PCI_PCIRAW_ADDR;
-			RALINK_PCI_PCIRAW_ADDR = 0xFFFFFFFF;
-
-			if(RALINK_PCI_PCIRAW_FAIL_STATUS & int_status)
-			{
-				printk("\n PCI fail status occur!! Status=[0x%08X] \n",int_status);
-				return;
-			}
-			
-			if((int_status & 0x000C0000))
-				do_IRQ(2); /* dispatch gmac irq here */		
-		}
-	}	
-#endif
 	
 	return;
 }

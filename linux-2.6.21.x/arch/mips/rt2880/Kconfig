@@ -41,6 +41,9 @@ config RT2880_DRAM_32M
 config RT2880_DRAM_64M
        bool "64M"
 
+config RT2880_DRAM_128M
+       bool "128M"
+
 endchoice
 
 
@@ -50,12 +53,15 @@ choice
 
 config MTD_NOR_RALINK
        bool "NOR"
+       depends on  !RALINK_RT3352
 
 config MTD_SPI_RALINK
        bool "SPI"
+       depends on  !RALINK_RT2880
 
 config MTD_NAND_RALINK
        bool "NAND"
+       depends on  !RALINK_RT3352 && !RALINK_RT2880
 
 endchoice
 
@@ -79,17 +85,13 @@ config RT2880_FLASH_16M
 
 endchoice
 
-config  RT2880_FLASH_32M
-        bool "Flash Size 32MB Support"
-	depends on RALINK_RT3052_MP2
-	select MTD_CONCAT if RT2880_FLASH_32M
-
 config  RALINK_RAM_SIZE
 	int 
 	default 8 if RT2880_DRAM_8M
 	default 16 if RT2880_DRAM_16M
 	default 32 if RT2880_DRAM_32M
 	default 64 if RT2880_DRAM_64M
+	default 128 if RT2880_DRAM_128M
 
 config MTD_PHYSMAP_START
        hex 
@@ -131,7 +133,7 @@ config BLK_DEV_RAM_SIZE
 	default 8192
 	depends on RT2880_ROOTFS_IN_RAM
 
-config	INITRAMFS_LZMA
+config	LZMARAMFS
 	bool "Compress ramdisk by lzma instead of gzip"
 	depends on RT2880_ROOTFS_IN_RAM
 

@@ -415,6 +415,8 @@ uart_get_divisor(struct uart_port *port, unsigned int baud)
 	else
 		quot = (port->uartclk + (8 * baud)) / (16 * baud);
 #if 	defined (CONFIG_RALINK_RT2883) || \
+	defined (CONFIG_RALINK_RT3883) || \
+	defined (CONFIG_RALINK_RT3352) || \
 	defined (CONFIG_RALINK_RT3052)
 	quot = port->custom_divisor;
 #endif

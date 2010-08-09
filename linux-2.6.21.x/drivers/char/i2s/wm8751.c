@@ -5,7 +5,7 @@
  *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
  *   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
  *                     \/            \/     \/    \/            \/
- * $Id: wm8751.c,v 1.6 2008-11-13 12:19:02 qwert Exp $
+ * $Id: wm8751.c,v 1.7 2009-08-11 10:54:17 qwert Exp $
  *
  * Driver for WM8751 audio codec
  *
@@ -30,21 +30,9 @@
 #include <linux/kernel.h>
 #include <linux/interrupt.h>
 #include <linux/fs.h>
-#include "audiohw.h"
+#include "wm8751.h"
 #include "i2s_ctrl.h"
 
-const struct sound_settings_info audiohw_settings[] = {
-    [SOUND_VOLUME]        = {"dB", 0,  1, -74,   6, -25},
-#ifdef USE_ADAPTIVE_BASS
-    [SOUND_BASS]          = {"",   0,  1,   0,  15,   0},
-#else
-    [SOUND_BASS]          = {"dB", 1, 15, -60,  90,   0},
-#endif
-    [SOUND_TREBLE]        = {"dB", 1, 15, -60,  90,   0},
-    [SOUND_BALANCE]       = {"%",  0,  1,-100, 100,   0},
-    [SOUND_CHANNELS]      = {"",   0,  1,   0,   5,   0},
-    [SOUND_STEREO_WIDTH]  = {"%",  0,  5,   0, 250, 100},
-};
 
 /* Flags used in combination with settings */
 
@@ -110,7 +98,7 @@ static int adaptivebass2hw(int value)
 #endif
 
 /* Reset and power up the WM8751 */
-void audiohw_preinit(void)
+void audiohw_preinit()
 {
     /*
      * 1. Switch on power supplies.
@@ -124,27 +112,12 @@ void audiohw_preinit(void)
      /* 2. Enable Vmid and VREF. */
     wmcodec_write(PWRMGMT1, PWRMGMT1_VREF | PWRMGMT1_VMIDSEL_5K);
 
-    /* BCLKINV=0(Dont invert BCLK) MS=1(Enable Master) LRSWAP=0 LRP=0 */
-    /* IWL=00(16 bit) FORMAT=10(I2S format) */
-#ifdef CONFIG_I2S_MS_MODE 
-	MSG("WM8751 slave.....\n");
-	wmcodec_write(AINTFCE, AINTFCE_WL_16 |
-                  AINTFCE_FORMAT_I2S);
-#else
-	MSG("WM8751 master.....\n");
-#if (defined (FPGA_BOARD_RT2883)) || (defined (FPGA_BOARD_RT3052))	                      
-    wmcodec_write(AINTFCE, AINTFCE_MS | AINTFCE_WL_16 |
-                  AINTFCE_FORMAT_I2S | AINTFCE_BCLKINV);
-#else    
-    wmcodec_write(AINTFCE, AINTFCE_MS | AINTFCE_WL_16 |
-                  AINTFCE_FORMAT_I2S);
-#endif   	
-   	/* AINTFCE_BCLKINV on or off depend on trying result */
-#endif                  
+   
+  
 }
 
 /* Enable DACs and audio output after a short delay */
-void audiohw_postinit(void)
+void audiohw_postinit(int bSlave, int Aout)
 {
 	int i;
     /* From app notes: allow Vref to stabilize to reduce clicks */
@@ -166,6 +139,21 @@ void audiohw_postinit(void)
 
     wmcodec_write(LEFTMIX1, LEFTMIX1_LD2LO | LEFTMIX1_LI2LO_DEFAULT);
     wmcodec_write(RIGHTMIX2, RIGHTMIX2_RD2RO | RIGHTMIX2_RI2RO_DEFAULT);
+
+	 /* BCLKINV=0(Dont invert BCLK) MS=1(Enable Master) LRSWAP=0 LRP=0 */
+    /* IWL=00(16 bit) FORMAT=10(I2S format) */
+	if(bSlave)
+	{ 
+		MSG("WM8751 slave.....\n");
+		wmcodec_write(AINTFCE, AINTFCE_WL_16 | AINTFCE_FORMAT_I2S);
+	}	
+	else
+	{
+		MSG("WM8751 master.....\n");
+  		/* AINTFCE_BCLKINV on or off depend on trying result */
+    	wmcodec_write(AINTFCE, AINTFCE_MS | AINTFCE_WL_16 | AINTFCE_FORMAT_I2S);	
+   	}
+
 
     audiohw_mute(false);
 }

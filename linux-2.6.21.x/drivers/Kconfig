@@ -2,9 +2,8 @@
 
 menu "Device Drivers"
 
-#added by Steven
-source "drivers/flash/Kconfig"
-#--
+#use MTD instead
+#source "drivers/flash/Kconfig"
 
 source "drivers/base/Kconfig"
 

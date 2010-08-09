@@ -33,6 +33,10 @@
 #include <asm/sections.h>
 #include <asm/time.h>
 
+#ifdef CONFIG_RALINK_EXTERNAL_TIMER
+#include <asm/rt2880/rt_mmap.h>
+#endif
+
 /*
  * The integer part of the number of usecs per jiffy is taken from tick,
  * but the fractional part is not recorded, so we calculate it using the
@@ -71,7 +75,11 @@ int (*rtc_mips_set_mmss)(unsigned long);
 static unsigned long cycles_per_jiffy __read_mostly;
 
 /* expirelo is the count value for next CPU timer interrupt */
+#ifdef RALINK_16BIT_COUNT_CMP
+static unsigned short expirelo;
+#else
 static unsigned int expirelo;
+#endif
 
 
 /*
@@ -92,8 +100,13 @@ static cycle_t null_hpt_read(void)
  */
 static void c0_timer_ack(void)
 {
+#ifdef RALINK_16BIT_COUNT_CMP
+	unsigned short count;
+#else
 	unsigned int count;
+#endif
 
+#ifndef CONFIG_RALINK_EXTERNAL_TIMER
 	/* Ack this timer interrupt and set the next one.  */
 	expirelo += cycles_per_jiffy;
 	write_c0_compare(expirelo);
@@ -104,6 +117,30 @@ static void c0_timer_ack(void)
 		expirelo = count + cycles_per_jiffy;
 		write_c0_compare(expirelo);
 	}
+#else
+	expirelo += cycles_per_jiffy;
+#ifdef RALINK_16BIT_COUNT_CMP
+	(*((volatile u32 *)(RALINK_COMPARE))) &= 0xffff0000;
+	(*((volatile u32 *)(RALINK_COMPARE))) |= expirelo;
+#else
+	(*((volatile u32 *)(RALINK_COMPARE))) = expirelo;
+#endif
+
+#ifdef RALINK_16BIT_COUNT_CMP
+	while ((((count = (*((volatile u32 *)(RALINK_COUNT)))) - expirelo) & 0xffff) < 0x7fff) {
+#else
+	while (((count = (*((volatile u32 *)(RALINK_COUNT)))) - expirelo) < 0x7fffffff) {
+#endif
+		/* missed_timer_count++; */
+		expirelo = count + cycles_per_jiffy;
+#ifdef RALINK_16BIT_COUNT_CMP
+		(*((volatile u32 *)(RALINK_COMPARE))) &= 0xfff;
+		(*((volatile u32 *)(RALINK_COMPARE))) |= expirelo;
+#else
+		(*((volatile u32 *)(RALINK_COMPARE))) = expirelo;
+#endif
+	}
+#endif
 }
 
 /*
@@ -111,14 +148,33 @@ static void c0_timer_ack(void)
  */
 static cycle_t c0_hpt_read(void)
 {
+#ifndef CONFIG_RALINK_EXTERNAL_TIMER
 	return read_c0_count();
+#else
+#ifdef RALINK_16BIT_COUNT_CMP
+	return ((*((volatile u32 *)(RALINK_COUNT))) & 0xffff);
+#else
+	return (*((volatile u32 *)(RALINK_COUNT)));
+#endif
+#endif
 }
 
 /* For use both as a high precision timer and an interrupt source.  */
 static void __init c0_hpt_timer_init(void)
 {
+#ifndef CONFIG_RALINK_EXTERNAL_TIMER
 	expirelo = read_c0_count() + cycles_per_jiffy;
 	write_c0_compare(expirelo);
+#else
+#ifdef RALINK_16BIT_COUNT_CMP
+	expirelo = ((*((volatile u32 *)(RALINK_COUNT))) & 0xffff) + cycles_per_jiffy;
+	(*((volatile u32 *)(RALINK_COMPARE))) &= 0xffff0000;
+	(*((volatile u32 *)(RALINK_COMPARE))) |= expirelo;
+#else
+	expirelo = (*((volatile u32 *)(RALINK_COUNT))) + cycles_per_jiffy;
+	(*((volatile u32 *)(RALINK_COMPARE))) = expirelo;
+#endif
+#endif
 }
 
 int (*mips_timer_state)(void);
@@ -306,7 +362,11 @@ static unsigned int __init calibrate_hpt(void)
 
 struct clocksource clocksource_mips = {
 	.name		= "MIPS",
+#ifdef RALINK_16BIT_COUNT_CMP
+	.mask		= 0xffff,
+#else
 	.mask		= 0xffffffff,
+#endif
 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
 };
 

@@ -44,6 +44,8 @@
 
 MODULE_LICENSE("GPL");
 
+extern unsigned int nf_conntrack_clear; //Ricky CAO: Added for user space program to notify netfilter to clear connection track table
+
 #ifdef CONFIG_PROC_FS
 int
 print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,
@@ -407,6 +409,16 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
+	//Ricky CAO: Below is added for user space program to notify netfilter to clear connection track table
+	{
+		.ctl_name	= NET_NF_CONNTRACK_FLUSH,
+		.procname	= "nf_conntrack_flush",
+		.data		= &nf_conntrack_clear,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	}, 
+	//Ricky CAO: Above is added for user space program to notify netfilter to clear connection track table
 	{ .ctl_name = 0 }
 };
 

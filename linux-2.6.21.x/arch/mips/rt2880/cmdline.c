@@ -66,16 +66,20 @@ void  __init prom_init_cmdline(void)
 
 	cp = &(arcs_cmdline[0]);
 
-	strcpy(cp, rt2880_cmdline);
-	cp += strlen(rt2880_cmdline);
-	*cp++ = ' ';
-
+#ifdef CONFIG_UBOOT_CMDLINE
 	while(actr < prom_argc) {
 	    strcpy(cp, prom_argv(actr));
 	    cp += strlen(prom_argv(actr));
 	    *cp++ = ' ';
 	    actr++;
 	}
+#else
+	strcpy(cp, rt2880_cmdline);
+	cp += strlen(rt2880_cmdline);
+	*cp++ = ' ';
+#endif
+
+
 	if (cp != &(arcs_cmdline[0])) /* get rid of trailing space */
 	    --cp;
 	*cp = '\0';

@@ -23,10 +23,16 @@ choice
 	default GDMA_EVERYBODY
 
 	config GDMA_PCM_ONLY
-	        bool "All for PCM0/PCM1"
+	        bool "PCM/Others"
+		---help---
+		   RT305x/RT3350/RT2883=>Ch0-Ch7:PCM0/PCM1 
+		   RT3352/RT3883=>Ch0-Ch7:PCM0/PCM1, Ch8-Ch15:others
 	
 	config GDMA_PCM_I2S_OTHERS
-	        bool "4Ch for PCM0 / 2Ch for I2S / 2Ch for Everybody"
+	        bool "PCM/I2S/Others"
+		---help---
+		   RT305x/RT3350/RT2883=>4Ch:PCM0 / 2Ch:I2S / 2Ch:Others
+		   RT3352/RT3883=>4Ch:PCM0 / 2Ch:I2S_Tx / 2Ch:I2S_Rx / 8Ch:Others
 
 	config GDMA_EVERYBODY
 	        bool "All for Everybody"
@@ -47,7 +53,87 @@ config RALINK_I2C
 config RALINK_PCM
 	tristate "Ralink PCM Support"
 	default n
-		
+
+config RALINK_PCM_SPICH
+	int "PCM use SPI CH"
+	depends on RALINK_PCM
+	range 0 1
+	default "0"
+	---help---
+	PCM use SPI channel number.
+config RALINK_PCMRST_GPIO
+        int "PCM SLIC Reset pin map to GPIO Number"
+        depends on RALINK_PCM
+        range 0 95
+        default "0"
+        ---help---
+        Apply a gpio pin for SLIC RST.
+
+config RALINK_PCMCHNUM
+	int "PCM Total Channel Number Supported"
+	depends on RALINK_PCM
+	range 1 2
+	default "1"
+	---help---
+	Input PCM total channel number that we want to support. 
+
+
+config RALINK_PCMINCLK
+        bool "PCM Clock Dividor Source From SoC Internal"
+	depends on RALINK_PCM
+	depends on RALINK_RT3052
+	default y
+	---help---
+	Select PCM clock dividor source from SoC internal or external OSC.
+
+config RALINK_PCMDIV
+	int "PCM Clock Dividor Value"
+	depends on RALINK_PCM
+	depends on RALINK_RT3052
+	range 0 63
+	default "60"
+	---help---
+	Set PCM clock dividor value based on SoC internal clock (15.625Mhz) or external OSC (eg. 12.288Mhz).
+
+config RALINK_PCMINTDIV
+        int "PCM Clock Dividor Interger Part Value"
+        depends on RALINK_PCM
+        depends on RALINK_RT3352 || RALINK_RT3883
+	range 0 1024
+	default "78"
+	---help---
+	Set PCM clock dividor interger part value based on SoC internal clock (40Mhz).
+
+
+config RALINK_PCMCOMPDIV
+        int "PCM Clock Dividor Fraction Part Value"
+	depends on RALINK_PCM
+	depends on RALINK_RT3352 || RALINK_RT3883
+	range 0 512
+	default "16"
+	---help---
+	Set PCM clock dividor fraction part value based on SoC internal clock (40Mhz).
+
+config RALINK_PCMSLOTMODE
+	int "PCM slot mode"
+	depends on RALINK_PCM
+	range 0 5
+	default "0"
+	---help---
+	PCM slot mode : 0 for 4 slots, 1 for 8 slots, 2 for 16 slots, 3 for 32 slots, 4 for 64 slots, and 5 for 128 slots.
+
+choice 
+	prompt "UARTF_SHARE_MODE Setting"
+	depends on RALINK_PCM
+	default RALINK_PCMGPIO
+	
+	config RALINK_PCMGPIO
+		bool "PCM+GPIO mode"
+	config RALINK_PCMUARTF
+		bool "PCM+UARTF mode"
+	config RALINK_PCMI2S
+		bool "PCM+I2S mode"
+endchoice
 config RALINK_I2S
 	tristate "Ralink I2S Support"
 	select RALINK_I2C
@@ -57,10 +143,12 @@ config RALINK_I2S
 config I2S_IN_CLK
         bool "Use Internal Reference Clock"
 	depends on RALINK_I2S
+	depends on RALINK_RT3052
 	default n
 config I2S_MS_MODE
         bool "Ralink SoC as I2S Master Device"
 	depends on RALINK_I2S
+        depends on RALINK_RT3352	
 	default n
 choice
         prompt "Audio Codec MCLK Setting"

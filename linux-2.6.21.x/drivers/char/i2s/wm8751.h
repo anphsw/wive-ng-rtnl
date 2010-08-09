@@ -5,7 +5,7 @@
  *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
  *   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
  *                     \/            \/     \/    \/            \/
- * $Id: wm8751.h,v 1.1 2008-01-16 12:33:10 qwert Exp $
+ * $Id: wm8751.h,v 1.2 2009-08-11 10:53:19 qwert Exp $
  *
  * Copyright (C) 2005 by Dave Chapman
  *
@@ -28,15 +28,6 @@
 #define VOLUME_MIN -730
 #define VOLUME_MAX  60
 
-extern int tenthdb2master(int db);
-
-extern void audiohw_preinit(void);
-extern void audiohw_enable_output(bool enable);
-extern int  audiohw_set_master_vol(int vol_l, int vol_r);
-extern int  audiohw_set_lineout_vol(int vol_l, int vol_r);
-extern void audiohw_set_bass(int value);
-extern void audiohw_set_treble(int value);
-extern void audiohw_set_frequency(int fsel);
 
 /* Register addresses and bits */
 #define OUTPUT_MUTED                0x2f
@@ -151,7 +142,7 @@ extern void audiohw_set_frequency(int fsel);
 #define PWRMGMT2_DACL               (1 << 8)
 
 #define ADDITIONAL3                 0x1b
-#define ADDITIONAL3_ADCLRM          ((x) & (0x3 << 7))
+#define ADDITIONAL3_ADCLRM(x)       ((x) & (0x3 << 7))
 #define ADDITIONAL3_HPFLREN         (1 << 5)
 #define ADDITIONAL3_VROI            (1 << 6)
 
@@ -202,5 +193,13 @@ extern void audiohw_set_frequency(int fsel);
 
 #define MONOOUT                     0x2a
 #define MONOOUT_MOZC                (1 << 7)
+
+/* codec API */
+void audiohw_preinit();
+void audiohw_postinit(int bSlave, int Aout);
+void audiohw_close(void);
+void audiohw_set_frequency(int fsel);
+void audiohw_set_MCLK(unsigned int bUsb);
+void audiohw_mute(bool mute);
 
 #endif /* _WM8751_H */

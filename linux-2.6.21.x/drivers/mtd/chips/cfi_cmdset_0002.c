@@ -19,7 +19,7 @@
  *
  * This code is GPL
  *
- * $Id: cfi_cmdset_0002.c,v 1.10.2.1 2009-03-18 09:19:56 steven Exp $
+ * $Id: cfi_cmdset_0002.c,v 1.12 2009-09-30 12:28:54 steven Exp $
  *
  */
 
@@ -502,10 +502,11 @@ static struct mtd_info *cfi_amdstd_setup(struct mtd_info *mtd)
 			mtd->erasesize = ersize;
 		}
 		for (j=0; j<cfi->numchips; j++) {
-			/* 
-			 * patch for Numonyx Flash
-			 * -> send reset command first by Steven
-			 */
+
+		       /*
+			*  we should write the reset command twice then device can return to read state
+			*  if enter CFI query in Autoselect mode.
+			*/
 			chip=&cfi->chips[j];
 			map_write( map, CMD(0xF0), chip->start);
 
@@ -564,6 +565,22 @@ static int __xipram chip_ready(struct map_info *map, unsigned long addr)
 
 	d = map_read(map, addr);
 	t = map_read(map, addr);
+
+	return map_word_equal(map, d, t);
+}
+
+/*
+ * Ralink Soc flash controller issue two CE and OE for single read action.
+ * In order to get correct status bit, we need to use rt_chip_ready instead.
+ * by Steven
+ */
+static int __xipram rt_chip_ready(struct map_info *map, unsigned long addr)
+{
+	map_word o, d, t;
+
+        o.x[0] = __raw_readl(map->virt + addr);
+	d.x[0]=o.x[0] & 0xFFFF; //get low 16bits
+	t.x[0]= (o.x[0] >> 16); //get high 16bits
 
 	return map_word_equal(map, d, t);
 }
@@ -1578,7 +1595,7 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, map->size,
-				chip->erase_time*500);
+				chip->erase_time);
 
 	timeo = jiffies + (HZ*20);
 
@@ -1674,7 +1691,7 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, len,
-				chip->erase_time*500);
+				chip->erase_time);
 
 	timeo = jiffies + (HZ*20);
 

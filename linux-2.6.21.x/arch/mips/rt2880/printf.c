@@ -89,7 +89,7 @@ void __init prom_setup_printf(int tty_no)
 		uart_base = RALINK_UART_BASE;
 }
 
-static spinlock_t con_lock = SPIN_LOCK_UNLOCKED;
+static DEFINE_SPINLOCK(con_lock);
 
 static char buf[1024];
 
@@ -103,7 +103,7 @@ void __init prom_printf(char *fmt, ...)
 
 	int putPromChar(char);
 
-	spin_lock_irqsave(con_lock, flags);
+	spin_lock_irqsave(&con_lock, flags);
 	va_start(args, fmt);
 	l = vsprintf(buf, fmt, args); /* hopefully i < sizeof(buf) */
 	va_end(args);
@@ -116,5 +116,5 @@ void __init prom_printf(char *fmt, ...)
 			putPromChar('\r');
 		putPromChar(*p);
 	}
-	spin_unlock_irqrestore(con_lock, flags);
+	spin_unlock_irqrestore(&con_lock, flags);
 }

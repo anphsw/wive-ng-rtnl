@@ -407,8 +407,7 @@ SQSH_EXTERN int squashfs_get_cached_block(struct super_block *s, char *buffer,
 			if (msblk->block_cache[i].block ==
 							SQUASHFS_INVALID_BLK) {
 				if (!(msblk->block_cache[i].data =
-						kmalloc(SQUASHFS_METADATA_SIZE,
-						GFP_KERNEL))) {
+						vmalloc(SQUASHFS_METADATA_SIZE))) {
 					ERROR("Failed to allocate cache"
 							"block\n");
 					mutex_unlock(&msblk->block_cache_mutex);
@@ -426,7 +425,7 @@ SQSH_EXTERN int squashfs_get_cached_block(struct super_block *s, char *buffer,
 						block, offset);
 				mutex_lock(&msblk->block_cache_mutex);
 				msblk->block_cache[i].block = SQUASHFS_INVALID_BLK;
-				kfree(msblk->block_cache[i].data);
+				vfree(msblk->block_cache[i].data);
 				wake_up(&msblk->waitq);
 				mutex_unlock(&msblk->block_cache_mutex);
 				goto out;
@@ -1028,7 +1027,7 @@ static int read_inode_lookup_table(struct super_block *s)
 	TRACE("In read_inode_lookup_table, length %d\n", length);
 
 	/* Allocate inode lookup table */
-	if (!(msblk->inode_lookup_table = kmalloc(length, GFP_KERNEL))) {
+	if (!(msblk->inode_lookup_table = vmalloc(length))) {
 		ERROR("Failed to allocate inode lookup table\n");
 		return 0;
 	}
@@ -1065,7 +1064,7 @@ static int read_fragment_index_table(struct super_block *s)
 		return 1;
 
 	/* Allocate fragment index table */
-	if (!(msblk->fragment_index = kmalloc(length, GFP_KERNEL))) {
+	if (!(msblk->fragment_index = vmalloc(length))) {
 		ERROR("Failed to allocate fragment index table\n");
 		return 0;
 	}
@@ -1140,8 +1139,7 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 	TRACE("Entered squashfs_read_superblock\n");
 
 	err = -ENOMEM;
-	if (!(s->s_fs_info = kmalloc(sizeof(struct squashfs_sb_info),
-						GFP_KERNEL))) {
+	if (!(s->s_fs_info = vmalloc(sizeof(struct squashfs_sb_info)))) {
 		ERROR("Failed to allocate superblock\n");
 		goto failure;
 	}
@@ -1246,8 +1244,8 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 
 	/* Init inode_table block pointer array */
 	err = -ENOMEM;
-	if (!(msblk->block_cache = kmalloc(sizeof(struct squashfs_cache) *
-					SQUASHFS_CACHED_BLKS, GFP_KERNEL))) {
+	if (!(msblk->block_cache = vmalloc(sizeof(struct squashfs_cache) *
+					SQUASHFS_CACHED_BLKS))) {
 		ERROR("Failed to allocate block cache\n");
 		goto *label;
 	}
@@ -1259,15 +1257,15 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 	msblk->next_cache = 0;
 
 	/* Allocate read_page block */
-	if (!(msblk->read_page = kmalloc(sblk->block_size, GFP_KERNEL))) {
+	if (!(msblk->read_page = vmalloc(sblk->block_size))) {
 		ERROR("Failed to allocate read_page block\n");
 		goto *label;
 	}
 	label = &&out_read_page;
 
 	/* Allocate uid and gid tables */
-	if (!(msblk->uid = kmalloc((sblk->no_uids + sblk->no_guids) *
-					sizeof(unsigned int), GFP_KERNEL))) {
+	if (!(msblk->uid = vmalloc((sblk->no_uids + sblk->no_guids) *
+					sizeof(unsigned int)))) {
 		ERROR("Failed to allocate uid/gid table\n");
 		goto *label;
 	}
@@ -1303,8 +1301,8 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 		goto allocate_root;
 
 	err = -ENOMEM;
-	if (!(msblk->fragment = kmalloc(sizeof(struct squashfs_fragment_cache) *
-				SQUASHFS_CACHED_FRAGMENTS, GFP_KERNEL))) {
+	if (!(msblk->fragment = vmalloc(sizeof(struct squashfs_fragment_cache) *
+				SQUASHFS_CACHED_FRAGMENTS))) {
 		ERROR("Failed to allocate fragment block cache\n");
 		goto *label;
 	}
@@ -1351,19 +1349,19 @@ allocate_root:
 	return 0;
 
 failed_mount:
-	kfree(msblk->inode_lookup_table);
-	kfree(msblk->fragment_index);
-	kfree(msblk->fragment_index_2);
+	vfree(msblk->inode_lookup_table);
+	vfree(msblk->fragment_index);
+	vfree(msblk->fragment_index_2);
  out_fragment:
-	kfree(msblk->fragment);
+	vfree(msblk->fragment);
  out_uid:
-	kfree(msblk->uid);
+	vfree(msblk->uid);
  out_read_page:
-	kfree(msblk->read_page);
+	vfree(msblk->read_page);
  out_block_cache:
-	kfree(msblk->block_cache);
+	vfree(msblk->block_cache);
  out_fsinfo:
-	kfree(s->s_fs_info);
+	vfree(s->s_fs_info);
 	s->s_fs_info = NULL;
  failure:
 	return err;
@@ -1481,8 +1479,8 @@ struct meta_index *empty_meta_index(struct inode *inode, int offset, int skip)
 	TRACE("empty_meta_index: offset %d, skip %d\n", offset, skip);
 
 	if(msblk->meta_index == NULL) {
-		if (!(msblk->meta_index = kmalloc(sizeof(struct meta_index) *
-					SQUASHFS_META_NUMBER, GFP_KERNEL))) {
+		if (!(msblk->meta_index = vmalloc(sizeof(struct meta_index) *
+					SQUASHFS_META_NUMBER))) {
 			ERROR("Failed to allocate meta_index\n");
 			goto failed;
 		}
@@ -1723,7 +1721,7 @@ static int squashfs_readpage(struct file *file, struct page *page)
 					page->index,
 					SQUASHFS_I(inode)->start_block);
 
-	if (!(block_list = kmalloc(SIZE, GFP_KERNEL))) {
+	if (!(block_list = vmalloc(SIZE))) {
 		ERROR("Failed to allocate block_list\n");
 		goto skip_read;
 	}
@@ -1805,7 +1803,7 @@ skip_page:
 	else
 		release_cached_fragment(msblk, fragment);
 
-	kfree(block_list);
+	vfree(block_list);
 	return 0;
 
 skip_read:
@@ -1816,7 +1814,7 @@ skip_read:
 	SetPageUptodate(page);
 	unlock_page(page);
 
-	kfree(block_list);
+	vfree(block_list);
 	return 0;
 }
 
@@ -1841,7 +1839,7 @@ static int squashfs_readpage4K(struct file *file, struct page *page)
 		goto skip_read;
 	}
 
-	if (!(block_list = kmalloc(SIZE, GFP_KERNEL))) {
+	if (!(block_list = vmalloc(SIZE))) {
 		ERROR("Failed to allocate block_list\n");
 		goto skip_read;
 	}
@@ -1893,7 +1891,7 @@ skip_read:
 	SetPageUptodate(page);
 	unlock_page(page);
 
-	kfree(block_list);
+	vfree(block_list);
 	return 0;
 }
 
@@ -1962,8 +1960,8 @@ static int get_dir_index_using_name(struct super_block *s, long long
 
 	TRACE("Entered get_dir_index_using_name, i_count %d\n", i_count);
 
-	if (!(str = kmalloc(sizeof(struct squashfs_dir_index) +
-		(SQUASHFS_NAME_LEN + 1) * 2, GFP_KERNEL))) {
+	if (!(str = vmalloc(sizeof(struct squashfs_dir_index) +
+		(SQUASHFS_NAME_LEN + 1) * 2))) {
 		ERROR("Failed to allocate squashfs_dir_index\n");
 		goto failure;
 	}
@@ -2000,7 +1998,7 @@ static int get_dir_index_using_name(struct super_block *s, long long
 	}
 
 	*next_offset = (length + *next_offset) % SQUASHFS_METADATA_SIZE;
-	kfree(str);
+	vfree(str);
 failure:
 	return length + 3;
 }
@@ -2020,8 +2018,8 @@ static int squashfs_readdir(struct file *file, void *dirent, filldir_t filldir)
 
 	TRACE("Entered squashfs_readdir [%llx:%x]\n", next_block, next_offset);
 
-	if (!(dire = kmalloc(sizeof(struct squashfs_dir_entry) +
-		SQUASHFS_NAME_LEN + 1, GFP_KERNEL))) {
+	if (!(dire = vmalloc(sizeof(struct squashfs_dir_entry) +
+		SQUASHFS_NAME_LEN + 1))) {
 		ERROR("Failed to allocate squashfs_dir_entry\n");
 		goto finish;
 	}
@@ -2135,13 +2133,13 @@ static int squashfs_readdir(struct file *file, void *dirent, filldir_t filldir)
 	}
 
 finish:
-	kfree(dire);
+	vfree(dire);
 	return 0;
 
 failed_read:
 	ERROR("Unable to read directory block [%llx:%x]\n", next_block,
 		next_offset);
-	kfree(dire);
+	vfree(dire);
 	return 0;
 }
 
@@ -2163,8 +2161,8 @@ static struct dentry *squashfs_lookup(struct inode *i, struct dentry *dentry,
 
 	TRACE("Entered squashfs_lookup [%llx:%x]\n", next_block, next_offset);
 
-	if (!(dire = kmalloc(sizeof(struct squashfs_dir_entry) +
-		SQUASHFS_NAME_LEN + 1, GFP_KERNEL))) {
+	if (!(dire = vmalloc(sizeof(struct squashfs_dir_entry) +
+		SQUASHFS_NAME_LEN + 1))) {
 		ERROR("Failed to allocate squashfs_dir_entry\n");
 		goto exit_lookup;
 	}
@@ -2247,7 +2245,7 @@ static struct dentry *squashfs_lookup(struct inode *i, struct dentry *dentry,
 	}
 
 exit_lookup:
-	kfree(dire);
+	vfree(dire);
 	if (inode)
 		return d_splice_alias(inode, dentry);
 	d_add(dentry, inode);
@@ -2277,18 +2275,18 @@ static void squashfs_put_super(struct super_block *s)
 			for (i = 0; i < SQUASHFS_CACHED_BLKS; i++)
 				if (sbi->block_cache[i].block !=
 							SQUASHFS_INVALID_BLK)
-					kfree(sbi->block_cache[i].data);
+					vfree(sbi->block_cache[i].data);
 		if (sbi->fragment)
 			for (i = 0; i < SQUASHFS_CACHED_FRAGMENTS; i++) 
 				SQUASHFS_FREE(sbi->fragment[i].data);
-		kfree(sbi->fragment);
-		kfree(sbi->block_cache);
-		kfree(sbi->read_page);
-		kfree(sbi->uid);
-		kfree(sbi->fragment_index);
-		kfree(sbi->fragment_index_2);
-		kfree(sbi->meta_index);
-		kfree(s->s_fs_info);
+		vfree(sbi->fragment);
+		vfree(sbi->block_cache);
+		vfree(sbi->read_page);
+		vfree(sbi->uid);
+		vfree(sbi->fragment_index);
+		vfree(sbi->fragment_index_2);
+		vfree(sbi->meta_index);
+		vfree(s->s_fs_info);
 		s->s_fs_info = NULL;
 	}
 }
@@ -2315,7 +2313,7 @@ static void free_sqlzma(void)
 			mutex_destroy(&p->mtx);
 #endif
 			sqlzma_fin(&p->un);
-			kfree(p);
+			vfree(p);
 		}
 	}
 }
@@ -2331,7 +2329,7 @@ static int __init init_squashfs_fs(void)
 	for_each_online_cpu(cpu) {
 		dpri("%d: %p\n", cpu, per_cpu(sqlzma, cpu));
 		err = -ENOMEM;
-		p = kmalloc(sizeof(struct sqlzma), GFP_KERNEL);
+		p = vmalloc(sizeof(struct sqlzma));
 		if (p) {
 #ifdef KeepPreemptive
 			mutex_init(&p->mtx);

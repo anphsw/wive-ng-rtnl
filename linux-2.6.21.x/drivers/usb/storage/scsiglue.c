@@ -1,7 +1,7 @@
 /* Driver for USB Mass Storage compliant devices
  * SCSI layer glue code
  *
- * $Id: scsiglue.c,v 1.3 2008-07-03 07:03:45 kaiker Exp $
+ * $Id: scsiglue.c,v 1.4 2009-09-28 12:57:43 yy Exp $
  *
  * Current development and maintenance by:
  *   (c) 1999-2002 Matthew Dharm (mdharm-usb@one-eyed-alien.net)
@@ -473,9 +473,12 @@ struct scsi_host_template usb_stor_host_template = {
 	/* lots of sg segments can be handled */
 	.sg_tablesize =			SG_ALL,
 
+#ifdef CONFIG_DWC_OTG
 	/* limit the total size of a transfer to 120 KB ,kaiker_240*/
 	.max_sectors =                  1024,
-
+#else
+	.max_sectors =                  240,
+#endif
 	/* merge commands... this seems to help performance, but
 	 * periodically someone should test to see which setting is more
 	 * optimal.

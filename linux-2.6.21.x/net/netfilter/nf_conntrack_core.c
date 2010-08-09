@@ -104,11 +104,18 @@ unsigned int nf_ct_log_invalid __read_mostly;
 LIST_HEAD(unconfirmed);
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 extern char wan_name[IFNAMSIZ];
+//2010.06.01 Joan.Huang
+//Fix on NAT type is Address Restricted Cone but behavior is port restricted cone when WAN type is PPPoE, PPTP and L2TP.
+extern char wan_ppp[IFNAMSIZ];
+
 #endif
 
 static int nf_conntrack_vmalloc __read_mostly;
 
 static unsigned int nf_conntrack_next_id;
+
+//Ricky CAO: Below veriable is added for user space program to notify netfilter to clear connection track table
+unsigned int nf_conntrack_clear = 0;
 
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
@@ -526,6 +533,15 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 	struct nf_conntrack_tuple_hash *h;
 	unsigned int hash = hash_conntrack(tuple);
 
+	//Ricky CAO: Below is added for user space program to clear connection track table
+	//			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+    	if(nf_conntrack_clear){
+		nf_conntrack_clear=0;
+		nf_conntrack_flush();
+		printk("Clear connection track table\n");
+    	}
+    	//Ricky CAO: Above is added for user space program to clear connection track table
+
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
 		if (nf_ct_tuplehash_to_ctrack(h) != ignored_conntrack &&
 		    nf_ct_tuple_equal(tuple, &h->tuple)) {
@@ -585,6 +601,15 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
         const struct nf_conn *ignored_conntrack)
 {
     struct nf_conntrack_tuple_hash *h;
+
+    //Ricky CAO: Below is added for user space program to clear connection track table
+    //			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+    if(nf_conntrack_clear){
+    	nf_conntrack_clear=0;
+	nf_conntrack_flush();
+	printk("Clear connection track table\n");
+    }
+    //Ricky CAO: Above is added for user space program to clear connection track table
 
     read_lock_bh(&nf_conntrack_lock);
     h = __nf_cone_conntrack_find(tuple, ignored_conntrack);
@@ -1026,6 +1051,7 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	if (!l4proto->new(conntrack, skb, dataoff)) {
 		nf_conntrack_free(conntrack);
 		DEBUGP("init conntrack: can't track with proto module\n");
+		DEBUGP("l4proto name = %s\n", l4proto->name);
 		return NULL;
 	}
 

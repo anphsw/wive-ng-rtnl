@@ -586,6 +586,17 @@ config WDT_RM9K_GPI
 	  To compile this driver as a module, choose M here: the
 	  module will be called rm9k_wdt.
 
+config RALINK_WATCHDOG
+	tristate "Ralink APSoC Hardware Watchdog"
+	depends on WATCHDOG
+	help
+	  timer expired and no process has written to /dev/watchdog during
+	  that time.
+
+config  RALINK_TIMER_WDG_RESET_OUTPUT
+        bool "Ralink WatchDog Reset Output"
+        depends on RALINK_WATCHDOG
+
 # S390 Architecture
 
 config ZVM_WATCHDOG

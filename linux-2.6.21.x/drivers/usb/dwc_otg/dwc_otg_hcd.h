@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.h $
- * $Revision: 1.3 $
- * $Date: 2008-12-15 06:51:32 $
+ * $Revision: 1.4 $
+ * $Date: 2009-06-16 05:39:34 $
  * $Change: 1064918 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -36,6 +36,7 @@
 
 #include <linux/list.h>
 #include <linux/usb.h>
+#include <linux/version.h>
 #include <../drivers/usb/core/hcd.h>
 
 struct lm_device;
@@ -503,15 +504,23 @@ static inline dwc_otg_qh_t *dwc_otg_hcd_qh_alloc(void)
 	return (dwc_otg_qh_t *) kmalloc(sizeof(dwc_otg_qh_t), GFP_KERNEL);
 }
 
-extern dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(struct urb *urb);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+extern dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(struct urb *urb, int mem_flags);
+#else
+extern dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(struct urb *urb, gfp_t mem_flags);
+#endif
 extern void dwc_otg_hcd_qtd_init(dwc_otg_qtd_t *qtd, struct urb *urb);
 extern int dwc_otg_hcd_qtd_add(dwc_otg_qtd_t *qtd, dwc_otg_hcd_t *dwc_otg_hcd);
 
 /** Allocates memory for a QTD structure.
  * @return Returns the memory allocate or NULL on error. */
-static inline dwc_otg_qtd_t *dwc_otg_hcd_qtd_alloc(void)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+static inline dwc_otg_qtd_t *dwc_otg_hcd_qtd_alloc(int mem_flags)
+#else
+static inline dwc_otg_qtd_t *dwc_otg_hcd_qtd_alloc(gfp_t mem_flags)
+#endif
 {
-	return (dwc_otg_qtd_t *) kmalloc(sizeof(dwc_otg_qtd_t), GFP_KERNEL);
+	return (dwc_otg_qtd_t *) kmalloc(sizeof(dwc_otg_qtd_t), mem_flags);
 }
 
 /** Frees the memory for a QTD structure.  QTD should already be removed from

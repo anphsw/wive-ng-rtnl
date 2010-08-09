@@ -448,7 +448,7 @@ static void dbg_dump(int line_count, const char *func_name, unsigned char *buf,
 
 /* module parameters */
 static int debug;
-static int tty_major;
+static int tty_major = 245;
 static int disable_net;
 
 /* driver info */

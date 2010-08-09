@@ -5,7 +5,7 @@
  *	Authors:
  *	Lennert Buytenhek		<buytenh@gnu.org>
  *
- *	$Id: br_fdb.c,v 1.1.1.1 2007-05-25 06:50:00 bruce Exp $
+ *	$Id: br_fdb.c,v 1.2 2009-05-20 06:53:35 steven Exp $
  *
  *	This program is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -311,6 +311,20 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 					       int is_local)
 {
 	struct net_bridge_fdb_entry *fdb;
+
+#if defined(CONFIG_BRIDGE_2WAYS_FDB)
+#define MAX_FDB_ENTRY	2
+
+	struct hlist_node *h;
+	int mac_count=0;
+
+	//prevent ARP flooding attack (memory protection code)
+	hlist_for_each_entry_rcu(fdb, h, head, hlist) {
+	    if(++mac_count > MAX_FDB_ENTRY) {
+		return NULL;
+	    }
+	}
+#endif
 
 	fdb = kmem_cache_alloc(br_fdb_cache, GFP_ATOMIC);
 	if (fdb) {

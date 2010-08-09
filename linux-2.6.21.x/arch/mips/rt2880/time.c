@@ -67,11 +67,6 @@ extern u32 mips_cpu_feq;
 
 #define ALLINTS (IE_IRQ0 | IE_IRQ1 | IE_IRQ2 | IE_IRQ3 | IE_IRQ4 | IE_IRQ5)
 
-static inline void ack_r4ktimer(unsigned int newval)
-{
-	write_c0_compare(newval);
-}
-
 void mips_timer_interrupt(void)
 {
 	/*
@@ -108,7 +103,15 @@ void __init mips_time_init(void)
 
 	local_irq_save(flags);
 
+#ifndef CONFIG_RALINK_EXTERNAL_TIMER
 	mips_hpt_frequency = mips_cpu_feq/2;
+#else
+  #ifdef CONFIG_RT3352_FPGA
+	mips_hpt_frequency = 10000000;
+  #else
+	mips_hpt_frequency = 40000000;
+  #endif
+#endif
 
 	printk("calculating r4koff... ");
 	r4k_offset = cal_r4koff();
@@ -138,19 +141,28 @@ void __init plat_timer_setup(struct irqaction *irq)
 void __init mips_timer_setup(struct irqaction *irq)
 #endif
 {
+#ifdef CONFIG_RALINK_EXTERNAL_TIMER
+	u32 reg;
+#endif
 	/* we are using the cpu counter for timer interrupts */
 	//irq->handler = no_action;     /* we use our own handler */
 	setup_irq(RALINK_CPU_TIMER_IRQ, irq);
 
         /* to generate the first timer interrupt */
+#ifndef CONFIG_RALINK_EXTERNAL_TIMER
 	r4k_cur = (read_c0_count() + r4k_offset);
 	write_c0_compare(r4k_cur);
+#else
+	r4k_cur = ((*((volatile u32 *)(RALINK_COUNT))) + r4k_offset);
+	(*((volatile u32 *)(RALINK_COMPARE))) = r4k_cur;
+	(*((volatile u32 *)(RALINK_MCNT_CFG))) = 3;
+#endif
 	set_c0_status(ALLINTS);
 }
 
 u32 get_surfboard_sysclk(void) 
 {
-    return surfboard_sysclk;
+	return surfboard_sysclk;
 }
 
 EXPORT_SYMBOL(get_surfboard_sysclk);

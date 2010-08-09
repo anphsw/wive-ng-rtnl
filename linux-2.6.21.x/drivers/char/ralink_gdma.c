@@ -30,6 +30,17 @@
  *
  ***************************************************************************
  *
+  Module Name:
+  ralink_gdma.c
+
+  Abstract:
+
+  Revision History:
+  Who         When            What
+  --------    ----------      ----------------------------------------------
+  Name        Date            Modification logs
+  Steven Liu  2009-03-24      Support RT3883
+ *
  */
  
 #include <linux/init.h>
@@ -46,6 +57,7 @@
 #include "ralink_gdma.h"
 
 /*
+ * RT305x:
  * Ch0 : Pcm0_Rx0 | Pcm0_Rx0 | ALL
  * Ch1 : Pcm0_Rx1 | Pcm0_Rx1 | ALL
  * Ch2 : Pcm0_Tx0 | Pcm0_Tx0 | ALL
@@ -55,11 +67,29 @@
  * Ch6 : Pcm1_Tx0 |  ALL     | ALL
  * Ch7 : Pcm1_Tx1 |  ALL     | ALL
  *
+ * RT3883:
+ * Ch0  : Pcm0_Rx0 | Pcm0_Rx0 | ALL
+ * Ch1  : Pcm0_Rx1 | Pcm0_Rx1 | ALL
+ * Ch2  : Pcm0_Tx0 | Pcm0_Tx0 | ALL
+ * Ch3  : Pcm0_Tx1 | Pcm0_Tx1 | ALL
+ * Ch4  : Pcm1_Rx0 | I2S_Tx0  | ALL
+ * Ch5  : Pcm1_Rx1 | I2S_Tx1  | ALL
+ * Ch6  : Pcm1_Tx0 | I2S_Rx0  | ALL
+ * Ch7  : Pcm1_Tx1 | I2S_Rx1  | ALL
+ * Ch8  : ALL	   |  ALL     | ALL
+ * Ch9  : ALL	   |  ALL     | ALL
+ * Ch10 : ALL	   |  ALL     | ALL
+ * Ch11 : ALL	   |  ALL     | ALL
+ * Ch12 : ALL	   |  ALL     | ALL
+ * Ch13 : ALL	   |  ALL     | ALL
+ * Ch14 : ALL	   |  ALL     | ALL
+ * Ch15 : ALL	   |  ALL     | ALL
+ *
  */
 
 spinlock_t  gdma_lock;
 spinlock_t  gdma_int_lock;
-void (*GdmaTxDoneCallback[MAX_GDMA_CHANNEL])(uint32_t);
+void (*GdmaDoneIntCallback[MAX_GDMA_CHANNEL])(uint32_t);
 void (*GdmaUnMaskIntCallback[MAX_GDMA_CHANNEL])(uint32_t);
 
 
@@ -75,17 +105,27 @@ int _GdmaGetFreeCh(uint32_t *ChNum)
     unsigned long flags;
     uint32_t Data=0;
     uint32_t Ch=0;
+#if defined (CONFIG_GDMA_DEBUG)
+    static uint32_t Ch_RR=0;
+#endif
 
     spin_lock_irqsave(&gdma_lock, flags);
 
 #if defined (CONFIG_GDMA_PCM_ONLY)
-    for(Ch=MAX_GDMA_CHANNEL; Ch<MAX_GDMA_CHANNEL;Ch++)  //no channel
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    for(Ch=8; Ch<MAX_GDMA_CHANNEL;Ch++)  //channel 8~max_channel
+#else
+    for(Ch=MAX_GDMA_CHANNEL; Ch<MAX_GDMA_CHANNEL;Ch++)  //no free channel
+#endif
 #elif defined (CONFIG_GDMA_PCM_I2S_OTHERS)
-    for(Ch=6; Ch<MAX_GDMA_CHANNEL;Ch++)  //last 2 channels
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    for(Ch=8; Ch<MAX_GDMA_CHANNEL;Ch++)  //channel 8~max_channel
+#else
+    for(Ch=6; Ch<MAX_GDMA_CHANNEL;Ch++)  //channel 6~max_channel
+#endif
 #elif defined (CONFIG_GDMA_EVERYBODY)
     for(Ch=0; Ch<MAX_GDMA_CHANNEL;Ch++)  //all channel
 #elif defined (CONFIG_GDMA_DEBUG)
-    static uint32_t Ch_RR=0;
     for(Ch=(Ch_RR++)%MAX_GDMA_CHANNEL; Ch<MAX_GDMA_CHANNEL;Ch++)  //round robin
 #endif
     {
@@ -206,10 +246,16 @@ int _GdmaReqEntryIns(GdmaReqEntry *NewEntry)
     GDMA_PRINT(" Hardware/Software Mode = %s\n", NewEntry->SoftMode ?
 	    "Soft" : "Hw");
     GDMA_PRINT("== << GDMA Control Reg1 (Channel=%d) >> =\n", NewEntry->ChNum);
-    GDMA_PRINT("Channel Unmasked Int=%s\n", NewEntry->ChUnMaskIntEbl ? 
+    GDMA_PRINT("Channel Done Interrput=%s\n", (NewEntry->DoneIntCallback!=NULL) ? 
 	    "Enable" : "Disable");
-    GDMA_PRINT("Next Unmasked =%d\n", NewEntry->NextUnMaskCh);
-    GDMA_PRINT("Ch Mask=%d\n", NewEntry->ChMask);
+    GDMA_PRINT("Channel Unmasked Int=%s\n", (NewEntry->UnMaskIntCallback!=NULL) ? 
+	    "Enable" : "Disable");
+#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3883)
+    GDMA_PRINT("Coherent Interrupt =%s\n", (NewEntry->CoherentIntEbl==1)?
+	    "Enable" : "Disable");
+#endif
+    GDMA_PRINT("Next Unmasked Channel=%d\n", NewEntry->NextUnMaskCh);
+    GDMA_PRINT("Channel Mask=%d\n", NewEntry->ChMask);
     GDMA_PRINT("========================================\n");
 
     GDMA_WRITE_REG(GDMA_SRC_REG(NewEntry->ChNum), NewEntry->Src);
@@ -220,28 +266,37 @@ int _GdmaReqEntryIns(GdmaReqEntry *NewEntry)
     GDMA_PRINT("DstAddr: Write %0X to %X\n", \
 	    NewEntry->Dst, GDMA_DST_REG(NewEntry->ChNum));
 
-    Data = ( NewEntry->ChUnMaskIntEbl << CH_UNMASK_INTEBL_OFFSET); 
-    Data |= ( (NewEntry->NextUnMaskCh&0x7) << NEXT_UNMASK_CH_OFFSET); 
+    Data |= ( (NewEntry->NextUnMaskCh) << NEXT_UNMASK_CH_OFFSET); 
     Data |= ( NewEntry->ChMask << CH_MASK_OFFSET); 
+#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3883)
+    Data |= ( NewEntry->CoherentIntEbl << COHERENT_INT_EBL_OFFSET); 
+#endif
 
     if(NewEntry->UnMaskIntCallback!=NULL) {
-	Data |= (0x01<<CH_UNMASK_INTEBL_OFFSET); 
+	Data |= (0x01<<CH_UNMASKINT_EBL_OFFSET); 
 	GdmaUnMaskIntCallback[NewEntry->ChNum] = NewEntry->UnMaskIntCallback;
     }
 
-    GDMA_WRITE_REG(GDMA_CTRL_REG1(NewEntry->ChNum), Data);
-    GDMA_PRINT("CTRL1: Write %0X to %X\n", Data, GDMA_CTRL_REG1(NewEntry->ChNum));
-
-    Data = ((NewEntry->TransCount) << TRANS_CNT_OFFSET); 
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
     Data |= (NewEntry->SrcReqNum << SRC_DMA_REQ_OFFSET); 
     Data |= (NewEntry->DstReqNum << DST_DMA_REQ_OFFSET); 
+#endif
+
+    GDMA_WRITE_REG(GDMA_CTRL_REG1(NewEntry->ChNum), Data);
+    GDMA_PRINT("CTRL1: Write %08X to %8X\n", Data, GDMA_CTRL_REG1(NewEntry->ChNum));
+
+    Data = ((NewEntry->TransCount) << TRANS_CNT_OFFSET); 
+#if defined (CONFIG_RALINK_RT3052)
+    Data |= (NewEntry->SrcReqNum << SRC_DMA_REQ_OFFSET); 
+    Data |= (NewEntry->DstReqNum << DST_DMA_REQ_OFFSET); 
+#endif
     Data |= (NewEntry->SrcBurstMode << SRC_BRST_MODE_OFFSET); 
     Data |= (NewEntry->DstBurstMode << DST_BRST_MODE_OFFSET); 
     Data |= (NewEntry->BurstSize << BRST_SIZE_OFFSET); 
 
-    if(NewEntry->TxDoneCallback!=NULL) {
-	Data |= (0x01<<INT_EBL_OFFSET); 
-	GdmaTxDoneCallback[NewEntry->ChNum] = NewEntry->TxDoneCallback;
+    if(NewEntry->DoneIntCallback!=NULL) {
+	Data |= (0x01<<CH_DONEINT_EBL_OFFSET); 
+	GdmaDoneIntCallback[NewEntry->ChNum] = NewEntry->DoneIntCallback;
     }
 
     if(NewEntry->SoftMode) {
@@ -251,16 +306,23 @@ int _GdmaReqEntryIns(GdmaReqEntry *NewEntry)
 
     Data |= (0x01<<CH_EBL_OFFSET); 
     GDMA_WRITE_REG(GDMA_CTRL_REG(NewEntry->ChNum), Data);
-    GDMA_PRINT("CTRL: Write %0X to %X\n", Data, GDMA_CTRL_REG(NewEntry->ChNum));
+    GDMA_PRINT("CTRL: Write %08X to %8X\n", Data, GDMA_CTRL_REG(NewEntry->ChNum));
 
     //if there is no interrupt handler, this function will 
     //return 1 until GDMA done.
-    if(NewEntry->TxDoneCallback==NULL) { 
+    if(NewEntry->DoneIntCallback==NULL) { 
 	//wait for GDMA processing done
+#if defined (CONFIG_RALINK_RT3052)	
 	while((GDMA_READ_REG(RALINK_GDMAISTS) & 
 		    (0x1<<NewEntry->ChNum))==0); 
 	//write 1 clear
 	GDMA_WRITE_REG(RALINK_GDMAISTS, 1<< NewEntry->ChNum); 
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+	while((GDMA_READ_REG(RALINK_GDMA_DONEINT) & 
+		    (0x1<<NewEntry->ChNum))==0); 
+	//write 1 clear
+	GDMA_WRITE_REG(RALINK_GDMA_DONEINT, 1<< NewEntry->ChNum); 
+#endif
     }
 
     return 1;
@@ -275,7 +337,7 @@ int _GdmaReqEntryIns(GdmaReqEntry *NewEntry)
  * @param  *Dst    	destination address
  * @param  TxNo    	I2S Tx number 
  * @param  TransCount  	data length
- * @param  *TxDoneCallback  callback function when transcation is done
+ * @param  *DoneIntCallback  callback function when transcation is done
  * @param  *UnMaskIntCallback  callback func when ch mask field is incorrect
  * @retval 1  	   	success
  * @retval 0  	   	fail
@@ -285,7 +347,7 @@ int GdmaI2sTx(
 	uint32_t Dst, 
 	uint8_t TxNo,
 	uint16_t TransCount,
-	void (*TxDoneCallback)(uint32_t data),
+	void (*DoneIntCallback)(uint32_t data),
 	void (*UnMaskIntCallback)(uint32_t data)
 	)
 {
@@ -298,13 +360,13 @@ int GdmaI2sTx(
     Entry.DstBurstMode=FIX_MODE;
     Entry.BurstSize=BUSTER_SIZE_4B; 
     Entry.SrcReqNum=DMA_MEM_REQ;
-    Entry.DstReqNum=DMA_I2S_REQ;
-    Entry.TxDoneCallback=TxDoneCallback;
+    Entry.DstReqNum=DMA_I2S_TX_REQ;
+    Entry.DoneIntCallback=DoneIntCallback;
     Entry.UnMaskIntCallback=UnMaskIntCallback;
     Entry.SoftMode=0;
-    Entry.ChUnMaskIntEbl=0;
     Entry.ChMask=1;
-
+    Entry.CoherentIntEbl=0;
+   
     if(TxNo==0) { //TX0
 	//enable chain feature
 	Entry.ChNum=GDMA_I2S_TX0;
@@ -322,6 +384,63 @@ int GdmaI2sTx(
 
 }
 
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+/**
+ * @brief Start GDMA transaction for receiving data to I2S
+ *
+ * @param  *Src   	source address
+ * @param  *Dst    	destination address
+ * @param  TxNo    	I2S Tx number 
+ * @param  TransCount  	data length
+ * @param  *DoneIntCallback  callback function when transcation is done
+ * @param  *UnMaskIntCallback  callback func when ch mask field is incorrect
+ * @retval 1  	   	success
+ * @retval 0  	   	fail
+ */
+int GdmaI2sRx(
+	uint32_t Src, 
+	uint32_t Dst, 
+	uint8_t RxNo,
+	uint16_t TransCount,
+	void (*DoneIntCallback)(uint32_t data),
+	void (*UnMaskIntCallback)(uint32_t data)
+	)
+{
+    GdmaReqEntry Entry;
+
+    Entry.Src= (Src & 0x1FFFFFFF);
+    Entry.Dst= (Dst & 0x1FFFFFFF);
+    Entry.TransCount = TransCount;
+    Entry.SrcBurstMode=FIX_MODE;
+    Entry.DstBurstMode=INC_MODE;
+    Entry.BurstSize=BUSTER_SIZE_4B; 
+    Entry.SrcReqNum=DMA_I2S_RX_REQ;
+    Entry.DstReqNum=DMA_MEM_REQ;
+    Entry.DoneIntCallback=DoneIntCallback;
+    Entry.UnMaskIntCallback=UnMaskIntCallback;
+    Entry.SoftMode=0;
+    Entry.ChMask=1;
+    Entry.CoherentIntEbl=1;
+    
+    if(RxNo==0) { //RX0
+	//enable chain feature
+	Entry.ChNum=GDMA_I2S_RX0;
+	Entry.NextUnMaskCh=GDMA_I2S_RX1;
+    }else if(RxNo==1) { //RX1
+	//enable chain feature
+	Entry.ChNum=GDMA_I2S_RX1;
+	Entry.NextUnMaskCh=GDMA_I2S_RX0;
+    }else {
+	GDMA_PRINT("I2S Rx Number %x is invalid\n", RxNo);
+	return 0;
+    }
+
+    return _GdmaReqEntryIns(&Entry);
+
+}
+
+EXPORT_SYMBOL(GdmaI2sRx);
+#endif
 
 /**
  * @brief Start GDMA transaction for receiving data from PCM
@@ -331,7 +450,7 @@ int GdmaI2sTx(
  * @param  TransCount   data length
  * @param  PcmNo    	PCM channel
  * @param  RxNo    	PCM Rx number 
- * @param  *TxDoneCallback  callback function when transcation is done
+ * @param  *DoneIntCallback  callback function when transcation is done
  * @param  *UnMaskIntCallback  callback func when ch mask field is incorrect
  * @retval 1  	   	success
  * @retval 0  	   	fail
@@ -342,7 +461,7 @@ int GdmaPcmRx(
 	uint8_t PcmNo,
 	uint8_t RxNo,
 	uint16_t TransCount, 
-	void (*TxDoneCallback)(uint32_t data),
+	void (*DoneIntCallback)(uint32_t data),
 	void (*UnMaskIntCallback)(uint32_t data)
 	)
 {
@@ -355,11 +474,11 @@ int GdmaPcmRx(
     Entry.DstBurstMode=INC_MODE;
     Entry.BurstSize=BUSTER_SIZE_4B; 
     Entry.DstReqNum=DMA_MEM_REQ; 
-    Entry.TxDoneCallback=TxDoneCallback;
+    Entry.DoneIntCallback=DoneIntCallback;
     Entry.UnMaskIntCallback=UnMaskIntCallback;
     Entry.SoftMode=0;
-    Entry.ChUnMaskIntEbl=0;
     Entry.ChMask=1;
+    Entry.CoherentIntEbl=1;
 
     if(PcmNo==0){//PCM0
 	Entry.SrcReqNum=DMA_PCM_RX0_REQ;
@@ -407,7 +526,7 @@ int GdmaPcmRx(
  * @param  TransCount	    data length
  * @param  PcmNo	    PCM channel
  * @param  TxNo		    PCM Tx number 
- * @param  *TxDoneCallback  callback func when transcation is done
+ * @param  *DoneIntCallback  callback func when transcation is done
  * @param  *UnMaskIntCallback  callback func when ch mask field is incorrect
  * @retval 1		    success
  * @retval 0		    fail
@@ -418,7 +537,7 @@ int GdmaPcmTx(
 	uint8_t PcmNo,
 	uint8_t TxNo,
 	uint16_t TransCount, 
-	void (*TxDoneCallback)(uint32_t data),
+	void (*DoneIntCallback)(uint32_t data),
 	void (*UnMaskIntCallback)(uint32_t data)
 	)
 {
@@ -431,11 +550,11 @@ int GdmaPcmTx(
     Entry.DstBurstMode=FIX_MODE;
     Entry.BurstSize=BUSTER_SIZE_4B; 
     Entry.SrcReqNum=DMA_MEM_REQ; 
-    Entry.TxDoneCallback=TxDoneCallback;
+    Entry.DoneIntCallback=DoneIntCallback;
     Entry.UnMaskIntCallback=UnMaskIntCallback;
     Entry.SoftMode=0; //Hardware Mode
-    Entry.ChUnMaskIntEbl=0;
     Entry.ChMask=1;
+    Entry.CoherentIntEbl=0;
 
     if(PcmNo==0){//PCM0
 	Entry.DstReqNum=DMA_PCM_TX0_REQ;
@@ -480,7 +599,7 @@ int GdmaPcmTx(
  * @param  *Src		    source address
  * @param  *Dst		    destination address
  * @param  TransCount	    data length
- * @param  *TxDoneCallback  callback function when transcation is done
+ * @param  *DoneIntCallback  callback function when transcation is done
  * @retval 1		    success
  * @retval 0		    fail
  */
@@ -488,7 +607,7 @@ int GdmaMem2Mem(
 	uint32_t Src, 
 	uint32_t Dst, 
 	uint16_t TransCount,
-	void (*TxDoneCallback)(uint32_t data)
+	void (*DoneIntCallback)(uint32_t data)
 	)
 
 {
@@ -502,11 +621,11 @@ int GdmaMem2Mem(
     Entry.BurstSize=BUSTER_SIZE_32B; 
     Entry.SrcReqNum=DMA_MEM_REQ; 
     Entry.DstReqNum=DMA_MEM_REQ; 
-    Entry.TxDoneCallback=TxDoneCallback;
+    Entry.DoneIntCallback=DoneIntCallback;
     Entry.UnMaskIntCallback=NULL;
     Entry.SoftMode=1;
-    Entry.ChUnMaskIntEbl=0;
     Entry.ChMask=0;
+    Entry.CoherentIntEbl=1;
 
     //No reserved channel for Memory to Memory GDMA,
     //get free channel on demand
@@ -543,40 +662,54 @@ irqreturn_t GdmaIrqHandler(
 
     u32 Ch=0;
     u32 flags;
-    u32 GdmaStatus=GDMA_READ_REG(RALINK_GDMAISTS);
+#if defined (CONFIG_RALINK_RT3052)	
+    u32 GdmaUnMaskStatus=GDMA_READ_REG(RALINK_GDMAISTS) & 0xFF0000;
+    u32 GdmaDoneStatus=GDMA_READ_REG(RALINK_GDMAISTS) & 0xFF;
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    u32 GdmaUnMaskStatus=GDMA_READ_REG(RALINK_GDMA_UNMASKINT);
+    u32 GdmaDoneStatus=GDMA_READ_REG(RALINK_GDMA_DONEINT);
+#endif
 
-    GDMA_PRINT("Rcv Gdma Interrupt=%x\n",GdmaStatus);
+
+    //GDMA_PRINT("========================================\n");
+    //GDMA_PRINT("GdmaUnMask Interrupt=%x\n",GdmaUnMaskStatus);
+    //GDMA_PRINT("GdmaDone Interrupt=%x\n",GdmaDoneStatus);
+    //GDMA_PRINT("========================================\n");
 
     spin_lock_irqsave(&gdma_int_lock, flags);
     
     //UnMask error
     for(Ch=0;Ch<MAX_GDMA_CHANNEL;Ch++) {
-	
-	if(GdmaStatus & (0x1 << (Ch+UMASK_INT_STATUS_OFFSET)) ) {
-	    if(GdmaUnMaskIntCallback[Ch] != NULL) {
-		//write 1 clear
-		GDMA_WRITE_REG(RALINK_GDMAISTS, 
-			1<< (Ch + UMASK_INT_STATUS_OFFSET)); 
 
+	if(GdmaUnMaskStatus & (0x1 << (UNMASK_INT_STATUS(Ch))) ) {
+	    if(GdmaUnMaskIntCallback[Ch] != NULL) {
 		GdmaUnMaskIntCallback[Ch](Ch); 
 	    }
 	}
      }	
-     
+  
+    //write 1 clear
+#if defined (CONFIG_RALINK_RT3052)	
+    GDMA_WRITE_REG(RALINK_GDMAISTS, GdmaUnMaskStatus); 
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    GDMA_WRITE_REG(RALINK_GDMA_UNMASKINT, GdmaUnMaskStatus); 
+#endif
+
      //processing done
      for(Ch=0;Ch<MAX_GDMA_CHANNEL;Ch++) {
-	if(GdmaStatus & (0x1<<Ch)) {
-	    if(GdmaTxDoneCallback[Ch] != NULL) {
-		//write 1 clear
-		GDMA_WRITE_REG(RALINK_GDMAISTS, 
-			1<< (Ch + TX_DONE_INT_STATUS_OFFSET)); 
-
-		GdmaTxDoneCallback[Ch](Ch); 
+	if(GdmaDoneStatus & (0x1<<Ch)) {
+	    if(GdmaDoneIntCallback[Ch] != NULL) {
+		GdmaDoneIntCallback[Ch](Ch); 
 	    }
 	}
-      
-	
     }
+
+    //write 1 clear
+#if defined (CONFIG_RALINK_RT3052)	
+     GDMA_WRITE_REG(RALINK_GDMAISTS, GdmaDoneStatus); 
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+     GDMA_WRITE_REG(RALINK_GDMA_DONEINT, GdmaDoneStatus); 
+#endif
     spin_unlock_irqrestore(&gdma_int_lock, flags);
 
     return IRQ_HANDLED;
@@ -587,7 +720,10 @@ static int RalinkGdmaInit(void)
 {
 
     uint32_t Ret=0;
-    GDMA_PRINT("Enable Ralink GDMA Controller Module\n");
+    printk("Enable Ralink GDMA Controller Module \n");
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    printk("GDMA IP Version=%d\n", GET_GDMA_IP_VER);
+#endif
 
     Ret = request_irq(SURFBOARDINT_DMA, GdmaIrqHandler, \
 	    SA_INTERRUPT, "Ralink_DMA", NULL);
@@ -601,7 +737,13 @@ static int RalinkGdmaInit(void)
     GDMA_WRITE_REG(RALINK_REG_INTENA, RALINK_INTCTL_DMA);
 
     //Channel0~Channel7 are round-robin
+#if defined (CONFIG_RALINK_RT3052)
     GDMA_WRITE_REG(RALINK_GDMAGCT, 0x01);
+#elif defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
+    GDMA_WRITE_REG(RALINK_GDMA_GCT, 0x01);
+#else
+#error Please Choose System Type
+#endif
 
     return 0;
 }
@@ -609,7 +751,7 @@ static int RalinkGdmaInit(void)
 static void __exit RalinkGdmaExit(void)
 {
 
-    GDMA_PRINT("Disable Ralink GDMA Controller Module\n");
+    printk("Disable Ralink GDMA Controller Module\n");
 
     //Disable GDMA interrupt
     GDMA_WRITE_REG(RALINK_REG_INTDIS, RALINK_INTCTL_DMA);
@@ -619,6 +761,7 @@ static void __exit RalinkGdmaExit(void)
 
 module_init(RalinkGdmaInit);
 module_exit(RalinkGdmaExit);
+
 
 EXPORT_SYMBOL(GdmaI2sTx);
 EXPORT_SYMBOL(GdmaPcmRx);

@@ -1,7 +1,7 @@
 /*
    Common Flash Interface probe code.
    (C) 2000 Red Hat. GPL'd.
-   $Id: cfi_probe.c,v 1.3 2008-10-07 09:20:03 steven Exp $
+   $Id: cfi_probe.c,v 1.4 2009-08-12 08:36:25 chhung Exp $
 */
 
 #include <linux/module.h>
@@ -461,7 +461,7 @@ static void __exit cfi_probe_exit(void)
 	unregister_mtd_chip_driver(&cfi_chipdrv);
 }
 
-module_init(cfi_probe_init);
+fs_initcall(cfi_probe_init);
 module_exit(cfi_probe_exit);
 
 MODULE_LICENSE("GPL");

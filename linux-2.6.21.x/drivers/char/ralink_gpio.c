@@ -54,17 +54,32 @@ static  devfs_handle_t devfs_handle;
 #define NAME			"ralink_gpio"
 #define RALINK_GPIO_DEVNAME	"gpio"
 int ralink_gpio_major = 252;
-u32 ralink_gpio_intp = 0;
 int ralink_gpio_irqnum = 0;
+u32 ralink_gpio_intp = 0;
 u32 ralink_gpio_edge = 0;
+#ifdef RALINK_GPIO_HAS_5124
+u32 ralink_gpio3924_intp = 0;
+u32 ralink_gpio3924_edge = 0;
+u32 ralink_gpio5140_intp = 0;
+u32 ralink_gpio5140_edge = 0;
+#endif
 ralink_gpio_reg_info ralink_gpio_info[RALINK_GPIO_NUMBER];
 extern unsigned long volatile jiffies;
+
 #ifdef CONFIG_RALINK_GPIO_LED
 #define RALINK_LED_DEBUG 0
 #define RALINK_GPIO_LED_FREQ (HZ/10)
 struct timer_list ralink_gpio_led_timer;
 ralink_gpio_led_info ralink_gpio_led_data[RALINK_GPIO_NUMBER];
-u32 ralink_gpio_led_value = 0;
+
+u32 ra_gpio_led_set = 0;
+u32 ra_gpio_led_clr = 0;
+#ifdef RALINK_GPIO_HAS_5124
+u32 ra_gpio3924_led_set = 0;
+u32 ra_gpio3924_led_clr = 0;
+u32 ra_gpio5140_led_set = 0;
+u32 ra_gpio5140_led_clr = 0;
+#endif
 struct ralink_gpio_led_status_t {
 	int ticks;
 	unsigned int ons;
@@ -79,6 +94,77 @@ MODULE_AUTHOR("Winfred Lu <winfred_lu@ralinktech.com.tw>");
 MODULE_LICENSE("GPL");
 ralink_gpio_reg_info info;
 
+
+int ralink_gpio_led_set(ralink_gpio_led_info led)
+{
+#ifdef CONFIG_RALINK_GPIO_LED
+	unsigned long tmp;
+	if (0 <= led.gpio && led.gpio < RALINK_GPIO_NUMBER) {
+		if (led.on > RALINK_GPIO_LED_INFINITY)
+			led.on = RALINK_GPIO_LED_INFINITY;
+		if (led.off > RALINK_GPIO_LED_INFINITY)
+			led.off = RALINK_GPIO_LED_INFINITY;
+		if (led.blinks > RALINK_GPIO_LED_INFINITY)
+			led.blinks = RALINK_GPIO_LED_INFINITY;
+		if (led.rests > RALINK_GPIO_LED_INFINITY)
+			led.rests = RALINK_GPIO_LED_INFINITY;
+		if (led.times > RALINK_GPIO_LED_INFINITY)
+			led.times = RALINK_GPIO_LED_INFINITY;
+		if (led.on == 0 && led.off == 0 && led.blinks == 0 &&
+				led.rests == 0) {
+			ralink_gpio_led_data[led.gpio].gpio = -1; //stop it
+			return 0;
+		}
+		//register led data
+		ralink_gpio_led_data[led.gpio].gpio = led.gpio;
+		ralink_gpio_led_data[led.gpio].on = (led.on == 0)? 1 : led.on;
+		ralink_gpio_led_data[led.gpio].off = (led.off == 0)? 1 : led.off;
+		ralink_gpio_led_data[led.gpio].blinks = (led.blinks == 0)? 1 : led.blinks;
+		ralink_gpio_led_data[led.gpio].rests = (led.rests == 0)? 1 : led.rests;
+		ralink_gpio_led_data[led.gpio].times = (led.times == 0)? 1 : led.times;
+
+		//clear previous led status
+		ralink_gpio_led_stat[led.gpio].ticks = -1;
+		ralink_gpio_led_stat[led.gpio].ons = 0;
+		ralink_gpio_led_stat[led.gpio].offs = 0;
+		ralink_gpio_led_stat[led.gpio].resting = 0;
+		ralink_gpio_led_stat[led.gpio].times = 0;
+
+		//set gpio direction to 'out'
+		if (led.gpio <= 23) {
+			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
+			tmp |= RALINK_GPIO(led.gpio);
+			*(volatile u32 *)(RALINK_REG_PIODIR) = tmp;
+		}
+#ifdef RALINK_GPIO_HAS_5124
+		else if (led.gpio <= 39) {
+			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924DIR));
+			tmp |= RALINK_GPIO(led.gpio-24);
+			*(volatile u32 *)(RALINK_REG_PIO3924DIR) = tmp;
+		}
+		else {
+			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140DIR));
+			tmp |= RALINK_GPIO(led.gpio-40);
+			*(volatile u32 *)(RALINK_REG_PIO5140DIR) = tmp;
+		}
+#endif
+#if RALINK_LED_DEBUG
+		printk("dir_%x gpio_%d - %d %d %d %d %d\n", tmp,
+				led.gpio, led.on, led.off, led.blinks,
+				led.rests, led.times);
+#endif
+	}
+	else {
+		printk(KERN_ERR NAME ": gpio(%d) out of range\n", led.gpio);
+		return -1;
+	}
+	return 0;
+#else
+	printk(KERN_ERR NAME ": gpio led support not built\n");
+	return -1;
+#endif
+}
+EXPORT_SYMBOL(ralink_gpio_led_set);
 
 int ralink_gpio_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		unsigned long arg)
@@ -169,64 +255,98 @@ int ralink_gpio_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		copy_from_user(&info, (ralink_gpio_reg_info *)arg, sizeof(info));
 		if (0 <= info.irq && info.irq < RALINK_GPIO_NUMBER) {
 			ralink_gpio_info[info.irq].pid = info.pid;
-			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIORENA));
-			tmp |= (0x1 << info.irq);
-			*(volatile u32 *)(RALINK_REG_PIORENA) = cpu_to_le32(tmp);
-			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIOFENA));
-			tmp |= (0x1 << info.irq);
-			*(volatile u32 *)(RALINK_REG_PIOFENA) = cpu_to_le32(tmp);
+			if (info.irq <= 23) {
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIORENA));
+				tmp |= (0x1 << info.irq);
+				*(volatile u32 *)(RALINK_REG_PIORENA) = cpu_to_le32(tmp);
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIOFENA));
+				tmp |= (0x1 << info.irq);
+				*(volatile u32 *)(RALINK_REG_PIOFENA) = cpu_to_le32(tmp);
+			}
+#ifdef RALINK_GPIO_HAS_5124
+			else if (info.irq <= 39) {
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924RENA));
+				tmp |= (0x1 << (info.irq-24));
+				*(volatile u32 *)(RALINK_REG_PIO3924RENA) = cpu_to_le32(tmp);
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924FENA));
+				tmp |= (0x1 << (info.irq-24));
+				*(volatile u32 *)(RALINK_REG_PIO3924FENA) = cpu_to_le32(tmp);
+			}
+			else {
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140RENA));
+				tmp |= (0x1 << (info.irq-40));
+				*(volatile u32 *)(RALINK_REG_PIO5140RENA) = cpu_to_le32(tmp);
+				tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140FENA));
+				tmp |= (0x1 << (info.irq-40));
+				*(volatile u32 *)(RALINK_REG_PIO5140FENA) = cpu_to_le32(tmp);
+			}
+#endif
 		}
 		else
 			printk(KERN_ERR NAME ": irq number(%d) out of range\n",
 					info.irq);
 		break;
+
+#ifdef RALINK_GPIO_HAS_5124
+	case RALINK_GPIO3924_SET_DIR:
+		*(volatile u32 *)(RALINK_REG_PIO3924DIR) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO3924_SET_DIR_IN:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924DIR));
+		tmp &= ~cpu_to_le32(arg);
+		*(volatile u32 *)(RALINK_REG_PIO3924DIR) = tmp;
+		break;
+	case RALINK_GPIO3924_SET_DIR_OUT:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924DIR));
+		tmp |= cpu_to_le32(arg);
+		*(volatile u32 *)(RALINK_REG_PIO3924DIR) = tmp;
+		break;
+	case RALINK_GPIO3924_READ:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924DATA));
+		put_user(tmp, (int __user *)arg);
+		break;
+	case RALINK_GPIO3924_WRITE:
+		*(volatile u32 *)(RALINK_REG_PIO3924DATA) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO3924_SET:
+		*(volatile u32 *)(RALINK_REG_PIO3924SET) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO3924_CLEAR:
+		*(volatile u32 *)(RALINK_REG_PIO3924SET) = cpu_to_le32(arg);
+		break;
+
+	case RALINK_GPIO5140_SET_DIR:
+		*(volatile u32 *)(RALINK_REG_PIO5140DIR) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO5140_SET_DIR_IN:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140DIR));
+		tmp &= ~cpu_to_le32(arg);
+		*(volatile u32 *)(RALINK_REG_PIO5140DIR) = tmp;
+		break;
+	case RALINK_GPIO5140_SET_DIR_OUT:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140DIR));
+		tmp |= cpu_to_le32(arg);
+		*(volatile u32 *)(RALINK_REG_PIO5140DIR) = tmp;
+		break;
+	case RALINK_GPIO5140_READ:
+		tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140DATA));
+		put_user(tmp, (int __user *)arg);
+		break;
+	case RALINK_GPIO5140_WRITE:
+		*(volatile u32 *)(RALINK_REG_PIO5140DATA) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO5140_SET:
+		*(volatile u32 *)(RALINK_REG_PIO5140SET) = cpu_to_le32(arg);
+		break;
+	case RALINK_GPIO5140_CLEAR:
+		*(volatile u32 *)(RALINK_REG_PIO5140SET) = cpu_to_le32(arg);
+		break;
+#endif
+
 	case RALINK_GPIO_LED_SET:
 #ifdef CONFIG_RALINK_GPIO_LED
 		copy_from_user(&led, (ralink_gpio_led_info *)arg, sizeof(led));
-		if (0 <= led.gpio && led.gpio < RALINK_GPIO_NUMBER) {
-			if (led.on > RALINK_GPIO_LED_INFINITY)
-				led.on = RALINK_GPIO_LED_INFINITY;
-			if (led.off > RALINK_GPIO_LED_INFINITY)
-				led.off = RALINK_GPIO_LED_INFINITY;
-			if (led.blinks > RALINK_GPIO_LED_INFINITY)
-				led.blinks = RALINK_GPIO_LED_INFINITY;
-			if (led.rests > RALINK_GPIO_LED_INFINITY)
-				led.rests = RALINK_GPIO_LED_INFINITY;
-			if (led.times > RALINK_GPIO_LED_INFINITY)
-				led.times = RALINK_GPIO_LED_INFINITY;
-			if (led.on == 0 && led.off == 0 && led.blinks == 0 &&
-					led.rests == 0) {
-				ralink_gpio_led_data[led.gpio].gpio = -1; //stop it
-				break;
-			}
-			//register led data
-			ralink_gpio_led_data[led.gpio].gpio = led.gpio;
-			ralink_gpio_led_data[led.gpio].on = led.on;
-			ralink_gpio_led_data[led.gpio].off = led.off;
-			ralink_gpio_led_data[led.gpio].blinks = led.blinks;
-			ralink_gpio_led_data[led.gpio].rests = led.rests;
-			ralink_gpio_led_data[led.gpio].times = led.times;
-
-			//clear previous led status
-			ralink_gpio_led_stat[led.gpio].ticks = -1;
-			ralink_gpio_led_stat[led.gpio].ons = 0;
-			ralink_gpio_led_stat[led.gpio].offs = 0;
-			ralink_gpio_led_stat[led.gpio].resting = 0;
-			ralink_gpio_led_stat[led.gpio].times = 0;
-
-			//set gpio direction to 'out'
-			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
-			tmp |= RALINK_GPIO(led.gpio);
-			*(volatile u32 *)(RALINK_REG_PIODIR) = tmp;
-#if RALINK_LED_DEBUG
-			printk("dir_%x gpio_%d - %d %d %d %d %d\n", tmp,
-					led.gpio, led.on, led.off, led.blinks,
-					led.rests, led.times);
-#endif
-		}
-		else
-			printk(KERN_ERR NAME ": gpio number(%d) out of range\n",
-					led.gpio);
+		ralink_gpio_led_set(led);
 #else
 		printk(KERN_ERR NAME ": gpio led support not built\n");
 #endif
@@ -268,11 +388,19 @@ struct file_operations ralink_gpio_fops =
 #ifdef CONFIG_RALINK_GPIO_LED
 
 #if RALINK_GPIO_LED_LOW_ACT
-#define __LED_ON(gpio) ralink_gpio_led_value &= ~RALINK_GPIO(gpio);
-#define __LED_OFF(gpio) ralink_gpio_led_value |= RALINK_GPIO(gpio);
+#define __LED_ON(gpio)      ra_gpio_led_clr |= RALINK_GPIO(gpio);
+#define __LED_OFF(gpio)     ra_gpio_led_set |= RALINK_GPIO(gpio);
+#define __LED3924_ON(gpio)  ra_gpio3924_led_clr |= RALINK_GPIO((gpio-24));
+#define __LED3924_OFF(gpio) ra_gpio3924_led_set |= RALINK_GPIO((gpio-24));
+#define __LED5140_ON(gpio)  ra_gpio5140_led_clr |= RALINK_GPIO((gpio-40));
+#define __LED5140_OFF(gpio) ra_gpio5140_led_set |= RALINK_GPIO((gpio-40));
 #else
-#define __LED_ON(gpio) ralink_gpio_led_value |= RALINK_GPIO(gpio);
-#define __LED_OFF(gpio) ralink_gpio_led_value &= ~RALINK_GPIO(gpio);
+#define __LED_ON(gpio)      ra_gpio_led_set |= RALINK_GPIO(gpio);
+#define __LED_OFF(gpio)     ra_gpio_led_clr |= RALINK_GPIO(gpio);
+#define __LED3924_ON(gpio)  ra_gpio3924_led_set |= RALINK_GPIO((gpio-24));
+#define __LED3924_OFF(gpio) ra_gpio3924_led_clr |= RALINK_GPIO((gpio-24));
+#define __LED5140_ON(gpio)  ra_gpio5140_led_set |= RALINK_GPIO((gpio-40));
+#define __LED5140_OFF(gpio) ra_gpio5140_led_clr |= RALINK_GPIO((gpio-40));
 #endif
 
 static void ralink_gpio_led_do_timer(unsigned long unused)
@@ -280,7 +408,7 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 	int i;
 	unsigned int x;
 
-	for (i = 0; i < RALINK_GPIO_NUMBER; i++) {
+	for (i = 0; i < 24; i++) {
 		ralink_gpio_led_stat[i].ticks++;
 		if (ralink_gpio_led_data[i].gpio == -1) //-1 means unused
 			continue;
@@ -385,13 +513,260 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 #endif
 		}
 	}
+
+#ifdef RALINK_GPIO_HAS_5124
+	for (i = 24; i < 40; i++) {
+		ralink_gpio_led_stat[i].ticks++;
+		if (ralink_gpio_led_data[i].gpio == -1) //-1 means unused
+			continue;
+		if (ralink_gpio_led_data[i].on == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].off == 0) { //always on
+			__LED3924_ON(i);
+			continue;
+		}
+		if (ralink_gpio_led_data[i].off == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].on == 0 ||
+				ralink_gpio_led_data[i].blinks == 0 ||
+				ralink_gpio_led_data[i].times == 0) { //always off
+			__LED3924_OFF(i);
+			continue;
+		}
+
+		//led turn on or off
+		if (ralink_gpio_led_data[i].blinks == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == 0) { //always blinking
+			x = ralink_gpio_led_stat[i].ticks % (ralink_gpio_led_data[i].on
+					+ ralink_gpio_led_data[i].off);
+		}
+		else {
+			unsigned int a, b, c, d, o, t;
+			a = ralink_gpio_led_data[i].blinks / 2;
+			b = ralink_gpio_led_data[i].rests / 2;
+			c = ralink_gpio_led_data[i].blinks % 2;
+			d = ralink_gpio_led_data[i].rests % 2;
+			o = ralink_gpio_led_data[i].on + ralink_gpio_led_data[i].off;
+			//t = blinking ticks
+			t = a * o + ralink_gpio_led_data[i].on * c;
+			//x = ticks % (blinking ticks + resting ticks)
+			x = ralink_gpio_led_stat[i].ticks %
+				(t + b * o + ralink_gpio_led_data[i].on * d);
+			//starts from 0 at resting cycles
+			if (x >= t)
+				x -= t;
+			x %= o;
+		}
+		if (x < ralink_gpio_led_data[i].on) {
+			__LED3924_ON(i);
+			if (ralink_gpio_led_stat[i].ticks && x == 0)
+				ralink_gpio_led_stat[i].offs++;
+#if RALINK_LED_DEBUG
+			printk("t%d gpio%d on,", ralink_gpio_led_stat[i].ticks, i);
+#endif
+		}
+		else {
+			__LED3924_OFF(i);
+			if (x == ralink_gpio_led_data[i].on)
+				ralink_gpio_led_stat[i].ons++;
+#if RALINK_LED_DEBUG
+			printk("t%d gpio%d off,", ralink_gpio_led_stat[i].ticks, i);
+#endif
+		}
+
+		//blinking or resting
+		if (ralink_gpio_led_data[i].blinks == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == 0) { //always blinking
+			continue;
+		}
+		else {
+			x = ralink_gpio_led_stat[i].ons + ralink_gpio_led_stat[i].offs;
+			if (!ralink_gpio_led_stat[i].resting) {
+				if (x == ralink_gpio_led_data[i].blinks) {
+					ralink_gpio_led_stat[i].resting = 1;
+					ralink_gpio_led_stat[i].ons = 0;
+					ralink_gpio_led_stat[i].offs = 0;
+					ralink_gpio_led_stat[i].times++;
+				}
+			}
+			else {
+				if (x == ralink_gpio_led_data[i].rests) {
+					ralink_gpio_led_stat[i].resting = 0;
+					ralink_gpio_led_stat[i].ons = 0;
+					ralink_gpio_led_stat[i].offs = 0;
+				}
+			}
+		}
+		if (ralink_gpio_led_stat[i].resting) {
+			__LED3924_OFF(i);
+#if RALINK_LED_DEBUG
+			printk("resting,");
+		} else {
+			printk("blinking,");
+#endif
+		}
+
+		//number of times
+		if (ralink_gpio_led_data[i].times != RALINK_GPIO_LED_INFINITY)
+		{
+			if (ralink_gpio_led_stat[i].times ==
+					ralink_gpio_led_data[i].times) {
+				__LED3924_OFF(i);
+				ralink_gpio_led_data[i].gpio = -1; //stop
+			}
+#if RALINK_LED_DEBUG
+			printk("T%d\n", ralink_gpio_led_stat[i].times);
+		} else {
+			printk("T@\n");
+#endif
+		}
+	}
+
+	for (i = 40; i < 52; i++) {
+		ralink_gpio_led_stat[i].ticks++;
+		if (ralink_gpio_led_data[i].gpio == -1) //-1 means unused
+			continue;
+		if (ralink_gpio_led_data[i].on == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].off == 0) { //always on
+			__LED5140_ON(i);
+			continue;
+		}
+		if (ralink_gpio_led_data[i].off == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].on == 0 ||
+				ralink_gpio_led_data[i].blinks == 0 ||
+				ralink_gpio_led_data[i].times == 0) { //always off
+			__LED5140_OFF(i);
+			continue;
+		}
+
+		//led turn on or off
+		if (ralink_gpio_led_data[i].blinks == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == 0) { //always blinking
+			x = ralink_gpio_led_stat[i].ticks % (ralink_gpio_led_data[i].on
+					+ ralink_gpio_led_data[i].off);
+		}
+		else {
+			unsigned int a, b, c, d, o, t;
+			a = ralink_gpio_led_data[i].blinks / 2;
+			b = ralink_gpio_led_data[i].rests / 2;
+			c = ralink_gpio_led_data[i].blinks % 2;
+			d = ralink_gpio_led_data[i].rests % 2;
+			o = ralink_gpio_led_data[i].on + ralink_gpio_led_data[i].off;
+			//t = blinking ticks
+			t = a * o + ralink_gpio_led_data[i].on * c;
+			//x = ticks % (blinking ticks + resting ticks)
+			x = ralink_gpio_led_stat[i].ticks %
+				(t + b * o + ralink_gpio_led_data[i].on * d);
+			//starts from 0 at resting cycles
+			if (x >= t)
+				x -= t;
+			x %= o;
+		}
+		if (x < ralink_gpio_led_data[i].on) {
+			__LED5140_ON(i);
+			if (ralink_gpio_led_stat[i].ticks && x == 0)
+				ralink_gpio_led_stat[i].offs++;
+#if RALINK_LED_DEBUG
+			printk("t%d gpio%d on,", ralink_gpio_led_stat[i].ticks, i);
+#endif
+		}
+		else {
+			__LED5140_OFF(i);
+			if (x == ralink_gpio_led_data[i].on)
+				ralink_gpio_led_stat[i].ons++;
+#if RALINK_LED_DEBUG
+			printk("t%d gpio%d off,", ralink_gpio_led_stat[i].ticks, i);
+#endif
+		}
+
+		//blinking or resting
+		if (ralink_gpio_led_data[i].blinks == RALINK_GPIO_LED_INFINITY ||
+				ralink_gpio_led_data[i].rests == 0) { //always blinking
+			continue;
+		}
+		else {
+			x = ralink_gpio_led_stat[i].ons + ralink_gpio_led_stat[i].offs;
+			if (!ralink_gpio_led_stat[i].resting) {
+				if (x == ralink_gpio_led_data[i].blinks) {
+					ralink_gpio_led_stat[i].resting = 1;
+					ralink_gpio_led_stat[i].ons = 0;
+					ralink_gpio_led_stat[i].offs = 0;
+					ralink_gpio_led_stat[i].times++;
+				}
+			}
+			else {
+				if (x == ralink_gpio_led_data[i].rests) {
+					ralink_gpio_led_stat[i].resting = 0;
+					ralink_gpio_led_stat[i].ons = 0;
+					ralink_gpio_led_stat[i].offs = 0;
+				}
+			}
+		}
+		if (ralink_gpio_led_stat[i].resting) {
+			__LED5140_OFF(i);
+#if RALINK_LED_DEBUG
+			printk("resting,");
+		} else {
+			printk("blinking,");
+#endif
+		}
+
+		//number of times
+		if (ralink_gpio_led_data[i].times != RALINK_GPIO_LED_INFINITY)
+		{
+			if (ralink_gpio_led_stat[i].times ==
+					ralink_gpio_led_data[i].times) {
+				__LED5140_OFF(i);
+				ralink_gpio_led_data[i].gpio = -1; //stop
+			}
+#if RALINK_LED_DEBUG
+			printk("T%d\n", ralink_gpio_led_stat[i].times);
+		} else {
+			printk("T@\n");
+#endif
+		}
+	}
+#endif
+
 	//always turn the power LED on
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#ifdef CONFIG_RALINK_RT2880
+	__LED_ON(12);
+#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
 	__LED_ON(9);
 #endif
-	*(volatile u32 *)(RALINK_REG_PIODATA) = ralink_gpio_led_value;
+
+#if RALINK_GPIO_LED_LOW_ACT
+	*(volatile u32 *)(RALINK_REG_PIORESET) = ra_gpio_led_clr;
+	*(volatile u32 *)(RALINK_REG_PIOSET) = ra_gpio_led_set;
+#ifdef RALINK_GPIO_HAS_5124
+	*(volatile u32 *)(RALINK_REG_PIO3924RESET) = ra_gpio3924_led_clr;
+	*(volatile u32 *)(RALINK_REG_PIO3924SET) = ra_gpio3924_led_set;
+	*(volatile u32 *)(RALINK_REG_PIO5140RESET) = ra_gpio5140_led_clr;
+	*(volatile u32 *)(RALINK_REG_PIO5140SET) = ra_gpio5140_led_set;
+#endif
+#else // RALINK_GPIO_LED_LOW_ACT //
+	*(volatile u32 *)(RALINK_REG_PIOSET) = ra_gpio_led_set;
+	*(volatile u32 *)(RALINK_REG_PIORESET) = ra_gpio_led_clr;
+#ifdef RALINK_GPIO_HAS_5124
+	*(volatile u32 *)(RALINK_REG_PIO3924SET) = ra_gpio3924_led_set;
+	*(volatile u32 *)(RALINK_REG_PIO3924RESET) = ra_gpio3924_led_clr;
+	*(volatile u32 *)(RALINK_REG_PIO5140SET) = ra_gpio5140_led_set;
+	*(volatile u32 *)(RALINK_REG_PIO5140RESET) = ra_gpio5140_led_clr;
+#endif
+#endif // RALINK_GPIO_LED_LOW_ACT //
+
 #if RALINK_LED_DEBUG
-	printk("led_value= %x\n", ralink_gpio_led_value);
+	printk("led_set= %x, led_clr= %x\n", ra_gpio_led_set, ra_gpio_led_clr);
+#ifdef RALINK_GPIO_HAS_5124
+	printk("led3924_set= %x, led3924_clr= %x\n", ra_gpio3924_led_set, ra_gpio3924_led_clr);
+	printk("led5140_set= %x, led5140_clr= %x\n", ra_gpio5140_led_set, ra_gpio5140_led_set);
+#endif
+#endif
+
+	ra_gpio_led_set = ra_gpio_led_clr = 0;
+#ifdef RALINK_GPIO_HAS_5124
+	ra_gpio3924_led_set = ra_gpio3924_led_clr = 0;
+	ra_gpio5140_led_set = ra_gpio5140_led_clr = 0;
 #endif
 
 	init_timer(&ralink_gpio_led_timer);
@@ -403,14 +778,21 @@ void ralink_gpio_led_init_timer(void)
 {
 	int i;
 
-	for (i = 0; i < RALINK_GPIO_NUMBER; i++) {
+	for (i = 0; i < RALINK_GPIO_NUMBER; i++)
 		ralink_gpio_led_data[i].gpio = -1; //-1 means unused
 #if RALINK_GPIO_LED_LOW_ACT
-		ralink_gpio_led_value |= RALINK_GPIO(i);
-#else
-		ralink_gpio_led_value &= ~RALINK_GPIO(i);
+	ra_gpio_led_set = 0xffffff;
+#ifdef RALINK_GPIO_HAS_5124
+	ra_gpio3924_led_set = 0xffff;
+	ra_gpio5140_led_set = 0xfff;
 #endif
-	}
+#else
+	ra_gpio_led_clr = 0xffffff;
+#ifdef RALINK_GPIO_HAS_5124
+	ra_gpio3924_led_clr = 0xffff;
+	ra_gpio5140_led_clr = 0xffff;
+#endif
+#endif
 
 	init_timer(&ralink_gpio_led_timer);
 	ralink_gpio_led_timer.function = ralink_gpio_led_do_timer;
@@ -449,11 +831,59 @@ int __init ralink_gpio_init(void)
 
 	//config these pins to gpio mode
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
 	gpiomode &= ~0x1C;  //clear bit[2:4]UARTF_SHARE_MODE
 #endif
 	gpiomode |= RALINK_GPIOMODE_DFT;
+//Ricky Cao: Below is for WRT-393L need GPIO9 and GPIO10 be used, so configure them to GPIO mode
+#ifdef CONFIG_UMEDIA_WRT393L
+	gpiomode &= ~(0xC);
+#endif
+//Ricky Cao: Above is for WRT-393L need GPIO9 and GPIO10 be used, so configure them to GPIO mode
+	//printk("====== GPIO Mode: 0x%0X ======\n", gpiomode); //Ricky Cao: for debug
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
+
+//Ricky Cao: I create an item on the kernel configuration of menuconfig for PCBA identify
+//           This is used to create definition for the code to do something for specific PCBA.
+//			 This item is created in linux-2.6.21.x/arch/mips/rt2880/Kconfig.
+//Ricky Cao: Below is added for WRT-393L
+#ifdef CONFIG_UMEDIA_WRT393L
+	u32 tmp=0;
+
+	//Ricky Cao: Below is for debug
+	/*tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
+	printk("====== DIR for GPIO 0~24: 0x%0X ======\n", tmp);
+	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODATA));
+	printk("====== DATA for GPIO 0~24: 0x%0X ======\n", tmp);*/
+	//Ricky Cao: Above is for debug
+
+	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
+	//Ricky Cao: GPIO0, GPIO3 and GPIO10 are for RF Switch, WPS button and Reset button separately, 
+	//           so configure these GPIO pins to INPUT.
+	//			 And GPIO9 is for WPS LED, so configure it to OUTPUT.
+	tmp &= ~1;
+	tmp &= ~(1<<3);
+	tmp &= ~(1<<10);
+	tmp |= (1<<9);
+	*(volatile u32 *)(RALINK_REG_PIODIR) = cpu_to_le32(tmp);
+	
+	//Ricky Cao: Below is for debug
+	/*tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
+	printk("====== DIR for GPIO 0~24: 0x%0X ======\n", tmp);
+	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODATA));
+	printk("====== DATA for GPIO 0~24: 0x%0X ======\n", tmp);*/
+	//Ricky Cao: Above is for debug
+#endif
+//Ricky Cao: Above is added for WRT-393L
+
+#ifdef CONFIG_UMEDIA_WAP356L
+	u32 tmp=0;
+
+	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
+	tmp &= ~1; //set GPIO 0 to 0 (input) for WPS button
+	tmp &= ~(1<<10); //set GPIO 10 to 0 (input) for Reset button
+	*(volatile u32 *)(RALINK_REG_PIODIR) = cpu_to_le32(tmp);
+#endif
 
 	//enable gpio interrupt
 	*(volatile u32 *)(RALINK_REG_INTENA) = cpu_to_le32(RALINK_INTCTL_PIO);
@@ -462,12 +892,11 @@ int __init ralink_gpio_init(void)
 		ralink_gpio_info[i].pid = 0;
 	}
 
-#ifndef CONFIG_ASUS_EXT
 #ifdef CONFIG_RALINK_GPIO_LED
-	ralink_gpio_led_init_timer();	// ASUS disable
-#endif
+	ralink_gpio_led_init_timer();
 #endif
 	printk("Ralink gpio driver initialized\n");
+	printk("Number of GPIO=%d\n",RALINK_GPIO_NUMBER);
 	return 0;
 }
 
@@ -536,6 +965,16 @@ void ralink_gpio_save_clear_intp(void)
 	ralink_gpio_edge = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIOEDGE));
 	*(volatile u32 *)(RALINK_REG_PIOINT) = cpu_to_le32(0x00FFFFFF);
 	*(volatile u32 *)(RALINK_REG_PIOEDGE) = cpu_to_le32(0x00FFFFFF);
+#ifdef RALINK_GPIO_HAS_5124
+	ralink_gpio3924_intp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924INT));
+	ralink_gpio3924_edge = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924EDGE));
+	*(volatile u32 *)(RALINK_REG_PIO3924INT) = cpu_to_le32(0x0000FFFF);
+	*(volatile u32 *)(RALINK_REG_PIO3924EDGE) = cpu_to_le32(0x0000FFFF);
+	ralink_gpio5140_intp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140INT));
+	ralink_gpio5140_edge = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140EDGE));
+	*(volatile u32 *)(RALINK_REG_PIO5140INT) = cpu_to_le32(0x00000FFF);
+	*(volatile u32 *)(RALINK_REG_PIO5140EDGE) = cpu_to_le32(0x00000FFF);
+#endif
 }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
@@ -554,13 +993,13 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 
 	ralink_gpio_save_clear_intp();
 	now = jiffies;
-	for (i = 0; i < RALINK_GPIO_NUMBER; i++) {
+	for (i = 0; i < 24; i++) {
 		if (! (ralink_gpio_intp & (1 << i)))
 			continue;
 		ralink_gpio_irqnum = i;
 		if (ralink_gpio_edge & (1 << i)) { //rising edge
 			if (record[i].rising != 0 && time_before_eq(now,
-						record[i].rising + 30L)) {
+						record[i].rising + 40L)) {
 				/*
 				 * If the interrupt comes in a short period,
 				 * it might be floating. We ignore it.
@@ -583,15 +1022,61 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 		}
 		break;
 	}
+#ifdef RALINK_GPIO_HAS_5124
+	for (i = 24; i < 40; i++) {
+		if (! (ralink_gpio3924_intp & (1 << (i - 24))))
+			continue;
+		ralink_gpio_irqnum = i;
+		if (ralink_gpio3924_edge & (1 << (i - 24))) {
+			if (record[i].rising != 0 && time_before_eq(now,
+						record[i].rising + 40L)) {
+			}
+			else {
+				record[i].rising = now;
+				if (time_before(now, record[i].falling + 200L)) {
+					ralink_gpio_notify_user(1);
+				}
+				else {
+					ralink_gpio_notify_user(2);
+				}
+			}
+		}
+		else {
+			record[i].falling = now;
+		}
+		break;
+	}
+	for (i = 40; i < 52; i++) {
+		if (! (ralink_gpio5140_intp & (1 << (i - 40))))
+			continue;
+		ralink_gpio_irqnum = i;
+		if (ralink_gpio5140_edge & (1 << (i - 40))) {
+			if (record[i].rising != 0 && time_before_eq(now,
+						record[i].rising + 40L)) {
+			}
+			else {
+				record[i].rising = now;
+				if (time_before(now, record[i].falling + 200L)) {
+					ralink_gpio_notify_user(1);
+				}
+				else {
+					ralink_gpio_notify_user(2);
+				}
+			}
+		}
+		else {
+			record[i].falling = now;
+		}
+		break;
+	}
+#endif
 
 	return IRQ_HANDLED;
-
 }
 
 struct irqaction ralink_gpio_irqaction = {
 	.handler = ralink_gpio_irq_handler,
 	.flags = SA_INTERRUPT,
-	//.mask = 0,
 	.name = "ralink_gpio",
 };
 

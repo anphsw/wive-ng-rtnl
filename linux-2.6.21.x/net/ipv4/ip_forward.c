@@ -5,7 +5,7 @@
  *
  *		The IP forwarding functionality.
  *
- * Version:	$Id: ip_forward.c,v 1.4 2009-02-24 08:17:06 steven Exp $
+ * Version:	$Id: ip_forward.c,v 1.5 2009-07-23 02:48:21 kurtis Exp $
  *
  * Authors:	see ip.c
  *
@@ -120,12 +120,16 @@ int ip_forward(struct sk_buff *skb)
 	if (rt->rt_flags&RTCF_DOREDIRECT && !opt->srr && !skb->sp)
 		ip_rt_send_redirect(skb);
 
-	/* We should keep skb->priority value if iph->tos=0
-	 * for port-based QoS (by Steven)
+	/*
+	 * 1.In general case, we use DSCP to stand for different priority not tos.
+	 * 2.To make sure vlan priority is the same in rx/tx packet
+	 * FIXME - Steven
 	 */
+#if !defined (CONFIG_RA_NAT_HW)
 	if(iph->tos != 0) {
 	    skb->priority = rt_tos2priority(iph->tos);
 	}
+#endif
 
 	return NF_HOOK(PF_INET, NF_IP_FORWARD, skb, skb->dev, rt->u.dst.dev,
 		       ip_forward_finish);

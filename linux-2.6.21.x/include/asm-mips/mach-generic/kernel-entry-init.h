@@ -13,7 +13,7 @@
  * arch/mips/mach-xxx/kernel-entry-init.h when necessary.
  */
 .macro	kernel_entry_setup
-#if 1
+#if 0
 /* FIXME */
 
 	# Initialize the register file

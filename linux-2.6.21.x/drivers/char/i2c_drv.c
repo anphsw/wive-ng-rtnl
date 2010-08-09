@@ -71,11 +71,9 @@ void i2c_master_init(void)
 {
 	u32 i;
 	/* reset i2c block */
-	i = RT2880_REG(RT2880_RSTCTRL_REG) | RSTCTRL_I2C_RESET;
-    RT2880_REG(RT2880_RSTCTRL_REG) = i;
-
-    // force to clear i2c reset bit for RT2883.
-    RT2880_REG(RT2880_RSTCTRL_REG) = i & ~(RSTCTRL_I2C_RESET);
+	i = RT2880_REG(RT2880_RSTCTRL_REG) | RALINK_I2C_RST;
+	RT2880_REG(RT2880_RSTCTRL_REG) = i;
+	RT2880_REG(RT2880_RSTCTRL_REG) = i & ~(RALINK_I2C_RST);
 
 	for(i = 0; i < 50000; i++);
 	// udelay(500);
@@ -232,6 +230,7 @@ static void i2c_read(u8 *data, u32 nbytes)
 		i++;
 	};
 }
+
 static inline void random_read_block(u32 address, u8 *data)
 {
 	/* change page */
@@ -240,7 +239,7 @@ static inline void random_read_block(u32 address, u8 *data)
 		
 		page = ((address >> 8) & 0x7) << 1;
 		/* device id always 0 */
-		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (0xA0|page) >> 1;
+		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (i2cdrv_addr | (page>>1));
 	}
 
    	/* dummy write */
@@ -258,7 +257,7 @@ static inline u8 random_read_one_byte(u32 address)
 		
 		page = ((address >> 8) & 0x7) << 1;
 		/* device id always 0 */
-		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (0xA0|page) >> 1;
+		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (i2cdrv_addr | (page>>1));
 	}
 
 
@@ -296,8 +295,6 @@ void i2c_eeprom_read_one(u32 address, u8 *data, u32 nbytes)
 	}
 }
 
-
-
 static inline void random_write_block(u32 address, u8 *data)
 {
 	int i;
@@ -307,7 +304,7 @@ static inline void random_write_block(u32 address, u8 *data)
 		
 		page = ((address >> 8) & 0x7) << 1;
 		/* device id always 0 */
-		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (0xA0|page) >> 1;
+		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (i2cdrv_addr | (page>>1));
 	}
 
 
@@ -325,7 +322,7 @@ static inline void random_write_one_byte(u32 address, u8 *data)
 		
 		page = ((address >> 8) & 0x7) << 1;
 		/* device id always 0 */
-		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (0xA0|page) >> 1;
+		RT2880_REG(RT2880_I2C_DEVADDR_REG) = (i2cdrv_addr | (page>>1));
 	}
 
 	i2c_write(address, data, 1);
@@ -352,28 +349,47 @@ void i2c_eeprom_write(u32 address, u8 *data, u32 nbytes)
 	}
 }
 
-
-
 void i2c_read_config(char *data, unsigned int len)
 {
 	i2c_master_init();
 	i2c_eeprom_read(0, data, len);
 }
 
-int i2cdrv_ioctl (struct inode *inode, struct file *filp, \
+typedef unsigned int uint32;
+unsigned char cloneMac[6];
+unsigned int enClone;
+static uint32 addedMacToLUTFlag = 0;
+
+
+//for raether drivers use ,when raether receive mac clone packet user.
+int i2cdrv_addARL()
+{
+		uint32 cloneport;
+		 if(!addedMacToLUTFlag )
+		  {
+			cloneport = searchARLEntry(cloneMac);
+			if(cloneport) {
+				modifyARLPort(cloneMac,cloneport);
+				addedMacToLUTFlag=1;
+				printk("Added %02X:%02X:%02X:%02X:%02X:%02X to ARL, port=%d\n",
+				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);				
+			}	
+		}
+		return 0;
+}
+
+int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
                      unsigned int cmd, unsigned long arg)
 {
-	unsigned char w_byte[4];
-	int i;
-	unsigned int address, size;
+	//unsigned char w_byte[4];
+	unsigned int address, size, cloneport, reg;
 	unsigned long value;
 	I2C_WRITE *i2c_write;
-
+	I2C_REG_WR *i2c_wr;
 
 	switch (cmd) {
 	case RT2880_I2C_READ:
 		value = 0; address = 0;
-
 		address = (unsigned int)arg;
 		i2c_master_init();
 		i2c_eeprom_read(address, (unsigned char*)&value, 4);
@@ -404,6 +420,44 @@ int i2cdrv_ioctl (struct inode *inode, struct file *filp, \
 		}
 #endif
 		break;
+	case RT2880_I2C_SET_ADDR:
+		i2cdrv_addr = (unsigned long)arg;
+		break;
+	case RT2880_I2C_SETREG:
+		i2c_wr = (I2C_REG_WR*) arg;
+		reg = i2c_wr->reg;
+		value = i2c_wr->value;
+
+		ARL_WRITE(reg, value);
+		break;
+
+	case RT2880_I2C_GETREG:
+		reg = (unsigned int) arg;
+		ARL_READ(reg);
+		break;
+
+	case RT2880_I2C_INIT_RTL_NOCLONE:		    //mac clone disable
+		memcpy(&cloneMac, arg, sizeof(cloneMac));
+		enClone = 0;	
+		if( cloneport = searchARLEntry(cloneMac)){
+			deleteARLEntry(cloneMac);
+			printk("[RT2880_I2C_INIT_RTL_NOCLONE]Delete %02X:%02X:%02X:%02X:%02X:%02X from LUT , port is %d\n",
+				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);								
+			addedMacToLUTFlag = 0;	
+		}	
+		break;
+
+	case RT2880_I2C_INIT_RTL_CLONE:	       //mac eclone enable ,init public variable setting
+		printk("RT2880_I2C_INIT_RTL_CLONE\n");
+		memcpy(&cloneMac,arg,sizeof(cloneMac));
+		modifyARLPort(cloneMac, 1); 
+		addedMacToLUTFlag = 0;
+		enClone = 1;
+		break;
+	case RT2880_I2C_VIEW_ARL_TABLE:
+		 printk("RT2880_I2C_VIEW_ARL_TABLE\n");
+		 displayARLTable();
+		 break;
 	default :
 		printk("i2c_drv: command format error\n");
 	}
@@ -412,49 +466,49 @@ int i2cdrv_ioctl (struct inode *inode, struct file *filp, \
 }
 
 struct file_operations i2cdrv_fops = {
-    ioctl:      i2cdrv_ioctl,
+	ioctl:	i2cdrv_ioctl,
 };
 
 static int i2cdrv_init(void)
 {
+	/* configure i2c to normal mode */
+	RT2880_REG(RALINK_SYSCTL_BASE + 0x60) &= ~1;
 
 #ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(i2cdrv_major, I2C_DEV_NAME , &i2cdrv_fops)) {
-	printk(KERN_WARNING " i2cdrv: can't create device node\n");
-	return -EIO;
-    }
+	if(devfs_register_chrdev(i2cdrv_major, I2C_DEV_NAME , &i2cdrv_fops)) {
+		printk(KERN_WARNING " i2cdrv: can't create device node\n");
+		return -EIO;
+	}
 
-    devfs_handle = devfs_register(NULL, I2C_DEV_NAME, DEVFS_FL_DEFAULT, i2cdrv_major, 0, \
-				S_IFCHR | S_IRUGO | S_IWUGO, &i2cdrv_fops, NULL);
+	devfs_handle = devfs_register(NULL, I2C_DEV_NAME, DEVFS_FL_DEFAULT, i2cdrv_major, 0, \
+			S_IFCHR | S_IRUGO | S_IWUGO, &i2cdrv_fops, NULL);
 #else
-    int result=0;
-    result = register_chrdev(i2cdrv_major, I2C_DEV_NAME, &i2cdrv_fops);
-    if (result < 0) {
-        printk(KERN_WARNING "i2c_drv: can't get major %d\n",i2cdrv_major);
-        return result;
-    }
+	int result=0;
+	result = register_chrdev(i2cdrv_major, I2C_DEV_NAME, &i2cdrv_fops);
+	if (result < 0) {
+		printk(KERN_WARNING "i2c_drv: can't get major %d\n",i2cdrv_major);
+		return result;
+	}
 
-    if (i2cdrv_major == 0) {
-			i2cdrv_major = result; /* dynamic */
-    }
+	if (i2cdrv_major == 0) {
+		i2cdrv_major = result; /* dynamic */
+	}
 #endif
 
-    printk("i2cdrv_major = %d\n", i2cdrv_major);
-    return 0;
-
+	printk("i2cdrv_major = %d\n", i2cdrv_major);
+	return 0;
 }
-
 
 
 static void i2cdrv_exit(void)
 {
-    printk("i2c_drv exit\n");
+	printk("i2c_drv exit\n");
 
 #ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
-    devfs_unregister(devfs_handle);
+	devfs_unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
+	devfs_unregister(devfs_handle);
 #else
-    unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
+	unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
 #endif
 
 }
