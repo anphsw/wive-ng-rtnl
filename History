@@ -93,6 +93,7 @@
 11) Remove hldc and vj support for pppd<br>
 12) ppp connection optimization in kernel<br>
 13) DMZ must works<br>
+14) Sync from 3.4.0.1 RalinkSDK from trandnet TEW-691GR GPL code<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
