@@ -12,6 +12,7 @@ MTU=`nvram_get 2860 vpnMTU`
 MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
+opmode=`nvram_get 2860 OperationMode`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -48,9 +49,22 @@ LOG="logger -t vpnhelper"
 
     $LOG "Get route to vpn server."
     ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
-    if [ "$ROUTE" != "" ] || [ "$ROUTE" != "0.0.0.0" ]; then
-        $LOG "Add route to vpn server."
+    if [ "$ROUTE" != "" ]; then
+        $LOG "Add route to vpn server $ROUTE."
         ip route replace $ROUTE
+    fi
+    if [ "$opmode" = "0" ]; then
+	    $LOG "Add route to $SERVER via br0"
+    	    ip route replace $SERVER dev br0
+        elif [ "$opmode" = "1" ]; then
+	    $LOG "Add route to $SERVER via eth2.2"
+    	    ip route replace $SERVER dev eth2.2
+        elif [ "$opmode" = "2" ]; then
+	    $LOG "Add route to $SERVER via ra0"
+    	    ip route replace $SERVER dev ra0
+        elif [ "$opmode" = "3" ]; then
+	    $LOG "Add route to $SERVER via apcli0"
+    	    ip route replace $SERVER dev apcli0
     fi
 
     if [ "$PEERDNS" = "on" ]; then
