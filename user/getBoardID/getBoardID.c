@@ -30,7 +30,7 @@
 #include "nvram.h"
 #include "flash_ioctl.h"
 
-#define NUM_INFO 5
+#define NUM_INFO 6 //count of mtdparts
 //define DEBUG
 
 struct mtd_info {
@@ -46,7 +46,7 @@ int init_info(void)
 {
 	FILE *fp;
 	char line[128];
-	int i, sz, esz, nm[12];
+	int i=0, sz, esz, nm[12];
 
 	memset(info, 0, sizeof(info));
 	if ((fp = fopen("/proc/mtd", "r"))) {
