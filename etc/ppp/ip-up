@@ -50,7 +50,7 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     if [ "$DGW" = "1" ]; then
 	$LOG "Replace default route to $PPP_IFACE"
 	ip route del default > /dev/null 2>&1
-	ip route replace default dev $PPP_IFACE
+	ip route replace default metric 10 dev $PPP_IFACE
     fi
 
     #disable multicast on ppp+ interface
