@@ -54,20 +54,20 @@ ifeq    ($(CONFIG_BLK_DEV_INITRD),)
 ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
 	# Original Kernel Image Size
 	@wc -c $(KERNELZ).$(COMP)
-	# Padded Kernel Image Size
 ifeq    ($(findstring 0x, $(CONFIG_MTD_KERNEL_PART_SIZ)),0x)
 	@SIZE=`wc -c $(KERNELZ).$(COMP) | awk '{ print $$1 }'` ; \
 	MTD_KRN_PART_SIZE=`printf "%d" $(CONFIG_MTD_KERNEL_PART_SIZ)` ; \
 	PAD=`expr $$MTD_KRN_PART_SIZE - 64 - $$SIZE` ; \
-	dd if=/dev/zero count=1 bs=$$PAD 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
+	dd if=/dev/zero count=1 bs=$$PAD conv=sync 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
 else
 	@SIZE=`wc -c $(KERNELZ).$(COMP) | awk '{ print $$1 }'` ; \
 	MTD_KRN_PART_SIZE=`printf "%d" 0x$(CONFIG_MTD_KERNEL_PART_SIZ)` ; \
 	PAD=`expr $$MTD_KRN_PART_SIZE - 64 - $$SIZE` ; \
-	dd if=/dev/zero count=1 bs=$$PAD 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
+	dd if=/dev/zero count=1 bs=$$PAD conv=sync 2> /dev/null | tr \\000 \\377 >> $(KERNELZ).$(COMP)
 endif
+	# Padded Kernel Image Size
+	  @wc -c $(KERNELZ).$(COMP)
 endif
-	@wc -c $(KERNELZ).$(COMP)
 	# Original RootFs Size
 	  @du -sb $(ROMFSDIR)
 	# Compressed RootFs Size
@@ -77,9 +77,9 @@ endif
 	  @wc -c $(KERNELZ).$(COMP)
 	#===========================================
 endif
-
+	# Pack final image and write headers
+	@cd $(IMAGEDIR) ;
 ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
-	@cd $(IMAGEDIR) ; \
 	ISIZE=`wc -c $(KERNELZ).$(COMP) | awk '{print $$1}'` ; \
 	RSIZE=`wc -c $(RAMDISK) | awk '{print $$1}'` ; \
 	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
@@ -87,7 +87,6 @@ ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 -e $$ENTRY -k $$KRN_SIZE \
 	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
 else
-	@cd $(IMAGEDIR) ;
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
 	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
 	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
