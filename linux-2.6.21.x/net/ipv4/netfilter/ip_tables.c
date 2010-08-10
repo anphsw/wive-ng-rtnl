@@ -43,6 +43,7 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 unsigned char wan_name[IFNAMSIZ];
+unsigned char wan_ppp[IFNAMSIZ];
 struct net_device *wan_dev;
 #endif
 
@@ -1294,6 +1295,8 @@ add_counter_to_entry(struct ipt_entry *e,
                 {
                         memset(wan_name, 0, sizeof(wan_name));
                         memcpy(wan_name,e->ip.outiface, strlen(e->ip.outiface));
+			memset(wan_ppp,0,sizeof(wan_ppp));
+			memcpy(wan_ppp,"ppp0", sizeof("ppp0"));
 			//printk("ip_table: set wan_name=%s\n",wan_name);
          }
          else if(strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {

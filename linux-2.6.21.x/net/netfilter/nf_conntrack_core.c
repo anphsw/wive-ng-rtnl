@@ -104,17 +104,11 @@ unsigned int nf_ct_log_invalid __read_mostly;
 LIST_HEAD(unconfirmed);
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 extern char wan_name[IFNAMSIZ];
-//2010.06.01 Joan.Huang
-//Fix on NAT type is Address Restricted Cone but behavior is port restricted cone when WAN type is PPPoE, PPTP and L2TP.
 extern char wan_ppp[IFNAMSIZ];
-
 #endif
 
 static int nf_conntrack_vmalloc __read_mostly;
-
 static unsigned int nf_conntrack_next_id;
-
-//Ricky CAO: Below veriable is added for user space program to notify netfilter to clear connection track table
 unsigned int nf_conntrack_clear = 0;
 
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
@@ -1195,8 +1189,8 @@ resolve_normal_ct(struct sk_buff *skb,
          *
          */
 	if( (skb->dev!=NULL) && (iph!=NULL) && /* CASE III */
-		(strcmp(skb->dev->name, wan_name)==0) &&
-		(iph->protocol==IPPROTO_UDP)) {
+		( (strcmp(skb->dev->name, wan_name)==0) ||(strcmp(skb->dev->name, wan_ppp)==0) ) &&
+		(iph->protocol == IPPROTO_UDP)) {
 	    h = nf_cone_conntrack_find_get(&tuple, NULL);
         }else{ /* CASE I.II.IV */
             h = nf_conntrack_find_get(&tuple, NULL);
