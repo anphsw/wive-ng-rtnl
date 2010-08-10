@@ -69,6 +69,10 @@ static struct mtd_partition rt2880_partitions[] = {
                 size:           MTD_KERN_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
 #endif
+        }, {
+                name:           "RW-FS",        /* mtdblock4/5 */
+                size:           MTD_RWFS_PART_SIZE,     /* 128K */
+                offset:         MTDPART_OFS_APPEND,
 #ifdef CONFIG_DUAL_IMAGE
         }, {
                 name:           "Kernel2",
