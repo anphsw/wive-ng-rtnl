@@ -359,7 +359,7 @@ static int _ra_nand_push_data(char *buf, int len, int use_gdma)
 
 
 	// no gdma
-	retry = 528;
+	retry = READ_STATUS_RETRY;
 	while(len > 0) {
 		int int_st = ra_inl(NFC_INT_ST);
 		if (int_st & INT_ST_TX_BUF_RDY) {
