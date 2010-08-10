@@ -91,6 +91,10 @@ echo "Reinit power mode for all switch ports" #workaroud for dir
     #config-vlan.sh 2 HHHHH
     #reset all phy and auto negotinate now
     config-vlan.sh 2 RRRRR
+
+echo "Get BOARDID and save /var/boardid"
+    getBoardID
+
 }
 
 stop() {
