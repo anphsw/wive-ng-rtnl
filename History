@@ -78,6 +78,8 @@
 76) Update wifi driver to 2.3.0.0 version from Ralink<br>
 77) More fix build enviroment<br>
 78) Bridge code fixup and more fast<br>
+79) ppp use metric 10 for dgw replace<br>
+80) add more workaround for buggy nas<br>
 <br>
 <b>1.1.x</b><br>
 1) New WebUI based on goahead<br>
