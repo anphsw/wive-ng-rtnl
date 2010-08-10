@@ -73,6 +73,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 #else
 #define	MAX_RX_LENGTH	1600
 #endif
+#define DEFAULT_MTU 1500
 
 static struct sk_buff		*netrx_skbuf[NUM_RX_DESC];
 static struct net_device	*dev_raether;
@@ -1015,7 +1016,7 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 	}
 
 #ifndef CONFIG_RAETH_JUMBOFRAME
-	if ( new_mtu > MAX_RX_LENGTH ) {
+	if ( new_mtu > DEFAULT_MTU ) {
 		spin_unlock_irqrestore(&ei_local->page_lock, flags);
 		return -EINVAL;
 	}
@@ -1037,7 +1038,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->get_stats		= ra_get_stats;
 	dev->set_mac_address	= ei_set_mac_addr;
 	dev->change_mtu		= ei_change_mtu;
-	dev->mtu		= MAX_RX_LENGTH;
+	dev->mtu		= DEFAULT_MTU;
 
 #ifdef CONFIG_RAETH_NAPI
         dev->poll = &raeth_clean;
@@ -1606,7 +1607,7 @@ int __init ra2882eth_init(void)
 	dev->init =  rather_probe;
 
 ///////////////WORKAROUD INIT////////////
-	dev->mtu  = MAX_RX_LENGTH;
+	dev->mtu  = DEFAULT_MTU;
 #if defined (CONFIG_RAETH_ROUTER)
 	dev->weight = 32;
 #elif defined (CONFIG_RT_3052_ESW)
