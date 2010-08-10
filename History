@@ -78,8 +78,6 @@
 76) Update wifi driver to 2.3.0.0 version from Ralink<br>
 77) More fix build enviroment<br>
 78) Bridge code fixup and more fast<br>
-79) ppp use metric 10 for dgw replace<br>
-80) add more workaround for buggy nas<br>
 <br>
 <b>1.1.x</b><br>
 1) New WebUI based on goahead<br>
@@ -98,6 +96,8 @@
 14) Sync from 3.4.0.1 RalinkSDK from trandnet TEW-691GR GPL code<br>
 15) libnvram fix crash on reliad settings and some leaks<br>
 16) Fix freeze in 802.11n mode change in EthernetConverterMode<br>
+17) ppp use metric 10 for dgw replace<br>
+18) add more workaround for buggy nas<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
