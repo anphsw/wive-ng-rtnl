@@ -44,6 +44,7 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 
     #Remove auto route in VPN
     ip route del $PPP_REMOTE  > /dev/null 2>&1
+    ip route del dev $PPP_IFACE  > /dev/null 2>&1
 
     #Replace default route to ppp tunnel
     if [ "$DGW" = "1" ]; then
