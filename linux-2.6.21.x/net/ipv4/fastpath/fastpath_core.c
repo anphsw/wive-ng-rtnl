@@ -594,8 +594,7 @@ fastpath_addNaptConnection(struct ip_conntrack_tuple ori_tuple,
 }
 
 enum LR_RESULT  
-fastpath_delNaptConnection (struct ip_conntrack_tuple ori_tuple,
-		struct ip_conntrack_tuple reply_tuple)
+fastpath_delNaptConnection (struct ip_conntrack_tuple ori_tuple, struct ip_conntrack_tuple reply_tuple)
 {
 	__u32 hash;
 	struct Napt_List_Entry *ep;

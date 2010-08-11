@@ -50,6 +50,12 @@
 #include <linux/ip.h>
 #include <linux/in.h>
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#endif
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+#include "../ipv4/fastpath/fastpath_core.h"
+#endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #include <net/ip.h>
 #endif
@@ -67,13 +73,6 @@
 #define DEBUGP printk
 #else
 #define DEBUGP(format, args...)
-#endif
-
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../nat/hw_nat/ra_nat.h"
-#endif
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-#include "../ipv4/fastpath/fastpath_core.h"
 #endif
 
 #include <linux/netfilter_ipv4/lockhelp.h>
@@ -1300,7 +1299,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	struct nf_conn_nat *nat;
 	struct nf_conn_help *help;
 #endif
-
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+        int first_reply=0;
+#endif
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
 		NF_CT_STAT_INC_ATOMIC(ignore);
@@ -1402,6 +1403,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
+#ifdef CONFIG_CONNTRACK_FAST_PATH
+            first_reply=1;
+#endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 		if (pf == PF_INET && hooknum == NF_IP_LOCAL_OUT)
 			nat->info.nat_type |= BCM_FASTNAT_DENY;

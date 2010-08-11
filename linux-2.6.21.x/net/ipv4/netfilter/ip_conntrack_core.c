@@ -367,12 +367,9 @@ destroy_conntrack(struct nf_conntrack *nfct)
 
 #ifdef	CONFIG_CONNTRACK_FAST_PATH
 	if (FastPath_Enabled()) {
-	if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
-		if ( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP ) {
-			fastpath_delNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple);
-		}
-	}	
+	    if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+		if ( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP )
+			fastpath_delNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple, ct->tuplehash[IP_CT_DIR_REPLY].tuple);
 	}
 #endif
 
@@ -1067,21 +1064,13 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 #ifdef CONFIG_CONNTRACK_FAST_PATH
                 first_reply=1;
 #endif
-		//ip_conntrack_event_cache(IPCT_STATUS, *pskb);
         }
 
 #ifdef	CONFIG_CONNTRACK_FAST_PATH
 	if (FastPath_Enabled()) {
-	//cathy
-	//info = &ct->nat.info;
-	//helper = info->helper;
-	if (!ct->helper &&  set_reply && first_reply) {
-		if( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP ) {
-			//printk("napt add !!\n");
-			fastpath_addNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple, NP_NONE);
-		}
-	}	/* IPS_SEEN_REPLY_BIT up */
+	    if (!ct->helper &&  set_reply && first_reply)
+		if( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP )
+			fastpath_addNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple, ct->tuplehash[IP_CT_DIR_REPLY].tuple, NP_NONE);
 	}
 #endif
 

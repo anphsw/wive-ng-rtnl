@@ -474,9 +474,8 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
 			    return 0;
 		    }
 #ifdef CONFIG_CONNTRACK_FAST_PATH
-                     if (FastPath_Enabled()){
-                               fastpath_modifyRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type); 
-                     }                                                                                                                     
+                    if (FastPath_Enabled())
+                           fastpath_modifyRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type); 
 #endif
 			write_lock_bh(&fib_hash_lock);
 			fi_drop = fa->fa_info;
@@ -682,7 +681,6 @@ static int fn_flush_list(struct fn_zone *fz, int idx)
 #ifdef CONFIG_CONNTRACK_FAST_PATH
 				fastpath_delRoute(f->fn_key, fz->fz_mask);
 #endif	
-
 				write_lock_bh(&fib_hash_lock);
 				list_del(&fa->fa_list);
 				if (list_empty(&f->fn_alias)) {
