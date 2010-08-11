@@ -140,8 +140,6 @@ struct pppoe_hdr {
 
 #ifdef __KERNEL__
 #include <linux/skbuff.h>
-#define skb_network_header(skb) (skb->nh.raw)
-#define skb_network_header_len(skb) (skb->h.raw - skb->nh.raw)
 static inline struct pppoe_hdr *pppoe_hdr(const struct sk_buff *skb)
 {
 	return (struct pppoe_hdr *)skb_network_header(skb);
@@ -175,7 +173,6 @@ struct pptp_opt {
 #define PPTP_FLAG_PROC 1
 
 #include <net/sock.h>
-
 struct pppox_sock {
 	/* struct sock must be the first member of pppox_sock */
 	struct sock		sk;
@@ -227,5 +224,4 @@ enum {
 };
 
 #endif /* __KERNEL__ */
-
 #endif /* !(__LINUX_IF_PPPOX_H) */

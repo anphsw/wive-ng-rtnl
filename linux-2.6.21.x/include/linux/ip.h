@@ -106,12 +106,6 @@ struct iphdr {
 
 #ifdef __KERNEL__
 #include <linux/skbuff.h>
-
-static inline struct iphdr *ip_hdr(const struct sk_buff *skb)
-{
-        return skb->nh.iph;
-}
-
 #endif
 
 struct ip_auth_hdr {

@@ -18,7 +18,6 @@
 #include <linux/compiler.h>
 #include <linux/time.h>
 #include <linux/cache.h>
-
 #include <asm/atomic.h>
 #include <asm/types.h>
 #include <linux/spinlock.h>
@@ -27,6 +26,7 @@
 #include <net/checksum.h>
 #include <linux/rcupdate.h>
 #include <linux/dmaengine.h>
+#include <linux/compat_skbuff.h>
 
 #define HAVE_ALLOC_SKB		/* For the drivers to know */
 #define HAVE_ALIGNABLE_SKB	/* Ditto 8)		   */
@@ -1464,6 +1464,11 @@ static inline unsigned int skb_checksum_complete(struct sk_buff *skb)
 {
 	return skb->ip_summed != CHECKSUM_UNNECESSARY &&
 		__skb_checksum_complete(skb);
+}
+
+static inline struct iphdr *ip_hdr(const struct sk_buff *skb)
+{
+        return skb->nh.iph;
 }
 
 #ifdef CONFIG_NETFILTER
