@@ -19,7 +19,7 @@ modprobe pppol2tp > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
 get_vpn_ip() {
-    $LOG "Get vpn server ip adress"
+    $LOG "Get vpn server $SERVERNM ip adress"
     NS=`ipget $SERVERNM | tail -n1`
     if [ "$NS" != "" ]; then
         SERVER=$NS
