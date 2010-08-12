@@ -14,9 +14,16 @@ start() {
 	#default filters
 	$LOG "Set default filters"
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	if [ "$IPPortFilterEnable" = "1" ]; then    
+	    iptables -t filter -N macipport_filter
+    	    iptables -t filter -A FORWARD -j macipport_filter
+	    if [ "$DefaultFirewallPolicy" = "1" ]; then
+		iptables -t filter -A macipport_filter -j DROP
+	    else
+		iptables -t filter -A macipport_filter -j ACCEPT
+	    fi
+	fi
 	iptables -t filter -N web_filter
-	iptables -t filter -N macipport_filter
-    	iptables -t filter -A FORWARD -j macipport_filter
 	iptables -t filter -A FORWARD -j web_filter
 
 ###########################################IGMP-RULES#######################################
@@ -244,6 +251,7 @@ get_param() {
     RemoteManagement=`nvram_get 2860 RemoteManagement`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
+    DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then

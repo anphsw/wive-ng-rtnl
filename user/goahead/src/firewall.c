@@ -202,23 +202,8 @@ static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv
 /*
  * hide the possible "error/warn" message when deleting a non-exist chain.
  */
-static void iptablesForwardFilterClear(void)
-{
-	doSystem("iptables -F -t filter 1>/dev/null 2>&1");
-}
-
 static void iptablesIPPortFilterFlush(void){
 	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-}
-
-static void iptablesIPPortFilterClear(void){
-	doSystem("iptables -D FORWARD -j %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-}
-
-static void iptablesWebContentFilterClear(void){
-	doSystem("iptables -D FORWARD -j %s  1>/dev/null 2>&1", WEB_FILTER_CHAIN);
-	doSystem("iptables -F %s  1>/dev/null 2>&1", WEB_FILTER_CHAIN);
 }
 
 static int getNums(char *value, char delimit)
@@ -433,46 +418,23 @@ static void iptablesIPPortFilterRun(void)
 		proto = atoi(protocol);
 
 		// get action
-        if((getNthValueSafe(9, rec, ',', action_str, sizeof(action_str)) == -1)){
-            continue;
-        }
-        action = atoi(action_str);
+    		if((getNthValueSafe(9, rec, ',', action_str, sizeof(action_str)) == -1)){
+        		continue;
+    		}
+    		action = atoi(action_str);
 
-        // getNthValueSafe(10) is "comment".
+    		// get mac address
+    		if((getNthValueSafe(11, rec, ',', mac_address, sizeof(mac_address)) == -1))
+        	    continue;
 
-        // get mac address
-        if((getNthValueSafe(11, rec, ',', mac_address, sizeof(mac_address)) == -1))
-            continue;
 		if(strlen(mac_address)){
-	        if(!isMacValid(mac_address))
+	    	    if(!isMacValid(mac_address))
 	        	continue;
 		}
 
-        //TODO:
-		// supposed to do validation here but  we didn't do it because code size.
-/*
-# iptables example
-# iptables -t nat -A POSTROUTING -o eth0  -s 10.10.10.0/24 -j MASQUERADE
-# iptables -A FORWARD -m physdev --physdev-in ra0 --physdev-out eth2 -m state --state ESTABLISHED,RELATED -j ACCEPT
-# iptables -A FORWARD -m physdev --physdev-in eth0 --physdev-out eth2 -j DROP
-# iptables -A FORWARD -i eth0 -o eth2 -j DROP
-# iptables -A FORWARD -p tcp --dport 139 -j DROP
-# iptables -A FORWARD -i eth0 -o eth2 -m state --state NEW,INVALID -p tcp --dport 80 -j DROP
-*/
 		makeIPPortFilterRule(cmd, sizeof(cmd), mac_address, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action);
 		doSystem(cmd);
 	}
-
-
-	switch(atoi(default_policy)){
-	case 0:
-		doSystem("iptables -t filter -A %s -j ACCEPT", IPPORT_FILTER_CHAIN);
-		break;
-	case 1:
-		doSystem("iptables -t filter -A %s -j DROP", IPPORT_FILTER_CHAIN);
-		break;
-	}
-
 }
 
 static void iptablesPortForwardBuildScript(void)
