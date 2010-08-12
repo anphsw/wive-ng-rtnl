@@ -98,6 +98,7 @@
 16) Fix freeze in 802.11n mode change in EthernetConverterMode<br>
 17) ppp use metric 10 for dgw replace<br>
 18) add more workaround for buggy nas<br>
+19) Portforward work now<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

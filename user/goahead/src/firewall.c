@@ -21,6 +21,9 @@
 #include "firewall.h"
 #include "internet.h"
 
+#define _PATH_PFW           "/etc"
+#define _PATH_PFW_FILE      _PATH_PFW "/portforward"
+
 #define DD printf("---> %d\n", __LINE__);
 
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query);
@@ -218,69 +221,6 @@ static void iptablesWebContentFilterClear(void){
 	doSystem("iptables -F %s  1>/dev/null 2>&1", WEB_FILTER_CHAIN);
 }
 
-static void iptablesPortForwardFlush(void){
-    doSystem("iptables -t nat -F %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
-}
-
-static void iptablesPortForwardClear(void){
-	doSystem("iptables -t nat -D PREROUTING -j %s 1>/dev/null 2>&1", PORT_FORWARD_CHAIN);
-	doSystem("iptables -t nat -F %s  1>/dev/null 2>&1; iptables -t nat -X %s  1>/dev/null 2>&1", PORT_FORWARD_CHAIN, PORT_FORWARD_CHAIN);
-}
-
-static void iptablesAllNATClear(void)
-{
-	iptablesPortForwardClear();
-}
-
-#if 0
-char *insert(char *subs, int index, char *str, char delimit)
-{
-	int i=0;
-	char *begin, *end;
-	char *result = (char *)calloc(1, sizeof(char ) * (strlen(str) + strlen(subs) + 1 + 1));
-
-	begin = str;
-	end = strchr(str, delimit);
-	while(end){
-		if(i == index)
-			break;
-		begin = end;
-		end = strchr(begin+1, delimit);
-		i++;
-	}
-	if(begin == str){
-		if(strlen(str) == 0){
-			strcpy(result, subs);
-		}else{
-			if(index == 0){
-				sprintf(result, "%s%c%s", subs, delimit, str);
-			}else{
-				sprintf(result, "%s%c%s", str, delimit, subs);
-			}
-		}
-	}else if(end == NULL && i != index){
-		sprintf(result, "%s%c%s", str, delimit, subs);
-	}else{
-		strncpy(result, str, begin - str);
-		sprintf(result, "%s%c", result, delimit);
-		strcat(result, subs);
-		strcat(result, begin);
-	}
-	return result;
-}
-
-char *replace(char *subs, int index, char *str, char delimit)
-{
-	int del[1];
-	char *result;
-	char *dup = strdup(str);
-	del[0] = index;
-	deleteNthValueMulti(del, 1, dup, delimit);
-	result = insert(subs, index, dup, delimit);
-	free(dup);
-	return result;
-}
-#endif
 static int getNums(char *value, char delimit)
 {
 	char *pos = value;
@@ -383,8 +323,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		int rc = 0;
 		char *pos = buf;
 
-		rc = snprintf(pos, len-rc, 
-			"iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_CHAIN, wan_name);
+		rc = snprintf(pos, len-rc, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_CHAIN, wan_name);
 		pos = pos + rc;
 
 		// write protocol type
@@ -404,7 +343,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		pos = pos + rc;
 
 		// write remote ip
-		rc = snprintf(pos, len-rc, "--to %s ", ip_address);
+		rc = snprintf(pos, len-rc, "--to %s \n", ip_address);
 }
 
 static void iptablesIPPortFilterRun(void)
@@ -536,17 +475,14 @@ static void iptablesIPPortFilterRun(void)
 
 }
 
-static void iptablesPortForwardRun(void)
+static void iptablesPortForwardBuildScript(void)
 {
-	int i=0;
-	char rec[256];
-	char cmd[1024];
-	char wan_name[16];
-
-	int prf_int, prt_int, proto;
-	char ip_address[32], prf[8], prt[8], protocol[8];
-
+    char rec[256];
+    char cmd[1024];
+    char wan_name[16];
+    char ip_address[32], prf[8], prt[8], protocol[8];
     char *firewall_enable, *rule;
+    int i=0,prf_int, prt_int, proto;
 
     firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
     if(!firewall_enable){
@@ -560,12 +496,16 @@ static void iptablesPortForwardRun(void)
             return ;
         }
     }else
-		return;
+	return;
 
-//  if ( getIfIp(getWanIfNamePPP(), wan_ip) == -1)
-//      return;
-	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
+    //get wan name
+    strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
 
+    //Generate portforward script file
+    FILE *fd = fopen(_PATH_PFW_FILE, "w");
+
+    if (fd != NULL) {
+	fputs("#!/bin/sh\n\n", fd);
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
 		// get ip address
 		if((getNthValueSafe(0, rec, ',', ip_address, sizeof(ip_address)) == -1)){
@@ -594,23 +534,26 @@ static void iptablesPortForwardRun(void)
 		// get protocol
 		if((getNthValueSafe(3, rec, ',', protocol, sizeof(protocol)) == -1))
 			continue;
-		proto = atoi(protocol);
-		switch(proto){
-			case PROTO_TCP:
-			case PROTO_UDP:
+		    proto = atoi(protocol);
+			switch(proto){
+			    case PROTO_TCP:
+			    case PROTO_UDP:
 				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, proto, prf_int, prt_int);
-				doSystem(cmd);
+				fputs(cmd, fd);
 				break;
-			case PROTO_TCP_UDP:
+			    case PROTO_TCP_UDP:
 				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, PROTO_TCP, prf_int, prt_int);
-				doSystem(cmd);
+				fputs(cmd, fd);
 				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, PROTO_UDP, prf_int, prt_int);
-				doSystem(cmd);
+				fputs(cmd, fd);
 				break;
-			default:
+			    default:
 				continue;
-		}
+			}
 	}
+     //close file
+     fclose(fd);
+    }
 }
 
 inline int getRuleNums(char *rules){
@@ -1180,26 +1123,27 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "PortForwardRules", rules);
 	nvram_commit(RT2860_NVRAM);
 
+	websHeader(wp);
+	websWrite(wp, T("s<br>\n") );
+	websWrite(wp, T("fromPort: <br>\n"));
+	websWrite(wp, T("toPort: <br>\n"));
+        websWrite(wp, T("protocol: <br>\n"));
+	websWrite(wp, T("comment: <br>\n"));
+        websFooter(wp);
+        websDone(wp, 200);
+
 	// restart iptables if it is running
 	firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
 	if(firewall_enable){
 		if(atoi(firewall_enable)){
-			// call iptables
-			iptablesPortForwardFlush();
-			iptablesPortForwardRun();
+		    //generate and save rules
+		    iptablesPortForwardBuildScript();
+		    // Call iptables
+		    firewall_rebuild();
 		}
 	}
 
-    websHeader(wp);
-    websWrite(wp, T("s<br>\n") );
-    websWrite(wp, T("fromPort: <br>\n"));
-    websWrite(wp, T("toPort: <br>\n"));
-    websWrite(wp, T("protocol: <br>\n"));
-    websWrite(wp, T("comment: <br>\n"));
-    websFooter(wp);
-    websDone(wp, 200);
-
-	return;
+    return;
 }
 
 
@@ -1364,15 +1308,14 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 
 	if(!atoi(pfe)){
 		nvram_set(RT2860_NVRAM, "PortForwardEnable", "0");
-		iptablesPortForwardFlush();		//disable
 		//no chainge in rules
 		goto end;
 	}
 
 	if(!strlen(ip_address) && !strlen(prf) && !strlen(prt) && !strlen(comment)){	// user choose nothing but press "apply" only
 		nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
-		iptablesPortForwardFlush();
-		iptablesPortForwardRun();
+		//generate and save rules
+		iptablesPortForwardBuildScript();
 		// no change in rules
 		goto end;
 	}
@@ -1428,9 +1371,6 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "PortForwardRules", rule);
 	nvram_commit(RT2860_NVRAM);
 
-	iptablesPortForwardFlush();
-	// call iptables
-	iptablesPortForwardRun();
 
 end:
 	websHeader(wp);
@@ -1441,8 +1381,15 @@ end:
 	websWrite(wp, T("protocol: %s<br>\n"), protocol);
 	websWrite(wp, T("comment: %s<br>\n"), comment);
 
-    websFooter(wp);
-    websDone(wp, 200);        
+	websFooter(wp);
+        websDone(wp, 200);        
+
+        //generate and save rules
+        iptablesPortForwardBuildScript();
+        // Call rwfs to store data                                                                                              
+        doSystem("fs save &");
+        // call iptables
+        firewall_rebuild();
 }
 
 
@@ -1932,5 +1879,4 @@ void firewall_rebuild(void)
 	LoadLayer7FilterName();
         iptablesIPPortFilterRun();
         iptablesWebsFilterRun();
-	iptablesPortForwardRun();
 }

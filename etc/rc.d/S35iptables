@@ -148,8 +148,13 @@ start() {
 	#masqrade for wan interfaces
 	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
-	    iptables -t nat -N port_forward
-	    iptables -t nat -A PREROUTING -j port_forward
+	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
+		$LOG "Add portforward rules"
+		iptables -t nat -N port_forward
+		iptables -t nat -A PREROUTING -j port_forward
+		chmod 777 /etc/portforward
+		/etc/portforward
+	    fi
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
@@ -159,7 +164,7 @@ start() {
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
 
-	 if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
+	  if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
 	    #for ISP localnet alya dualacess
     	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
@@ -228,6 +233,7 @@ get_param() {
     OperationMode=`nvram_get 2860 OperationMode`
     upnp=`nvram_get 2860 upnpEnabled`
     WANPingFilter=`nvram_get 2860 WANPingFilter`
+    PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     NAT=`nvram_get 2860 natEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`
     vpnEnabled=`nvram_get 2860 vpnEnabled`

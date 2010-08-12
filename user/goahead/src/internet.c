@@ -756,7 +756,7 @@ void vpnStoreRouting(const char *rt_config)
 		fclose(fd);
 		
 		// Call rwfs to store data
-		system("fs save");
+		system("fs save &");
 	}
 	else
 		printf("Failed to open file %s\n", _PATH_VPN_RT_FILE);

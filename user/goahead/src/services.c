@@ -62,6 +62,8 @@ static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
 				websWrite(wp, T("\t[ '%s', '%s' ]"), ip, mac );
 			}
 		}
+	    //close file
+	    fclose(fd);
 	}
 	
 	websWrite(wp, T("\n"));
@@ -81,7 +83,7 @@ void dhcpStoreAliases(const char *dhcp_config)
 		fclose(fd);
 		
 		// Call rwfs to store data
-		system("fs save");
+		system("fs save &");
 	}
 	else
 		printf("Failed to open file %s\n", _PATH_DHCP_ALIAS_FILE);
