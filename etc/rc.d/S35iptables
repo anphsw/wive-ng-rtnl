@@ -15,11 +15,14 @@ start() {
 	$LOG "Set default filters"
 	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 	if [ "$IPPortFilterEnable" = "1" ]; then    
+	    $LOG "Set macipport_filter rules"
 	    iptables -t filter -N macipport_filter
     	    iptables -t filter -A FORWARD -j macipport_filter
 	    if [ "$DefaultFirewallPolicy" = "1" ]; then
+		$LOG "Default policy macipport_filter DROP"
 		iptables -t filter -A macipport_filter -j DROP
 	    else
+		$LOG "Default policy macipport_filter ACCETP"
 		iptables -t filter -A macipport_filter -j ACCEPT
 	    fi
 	fi
