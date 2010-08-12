@@ -23,12 +23,9 @@ DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 
     $LOG "Modify route table need for buggy nas"
-    #Remove auto route in VPN and dgw
+    #Remove auto route in VPN
     ip route del $PPP_REMOTE  > /dev/null 2>&1
     ip route del dev $PPP_IFACE  > /dev/null 2>&1
-    if [ "$DGW" = "1" ]; then
-	ip route del default > /dev/null 2>&1
-    fi
 
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
@@ -47,6 +44,11 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 	$LOG "No dgw stored."
 	RESTORESTRING=""
 	rm -f /tmp/ip-down-route-reload
+    fi
+
+    #Remove DGW
+    if [ "$DGW" = "1" ]; then
+	ip route del default > /dev/null 2>&1
     fi
 
     #disable multicast on ppp+ interface
