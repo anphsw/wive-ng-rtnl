@@ -23,7 +23,7 @@ get_vpn_ip() {
     NS=`ipget $SERVERNM | tail -n1`
     if [ "$NS" != "" ]; then
         SERVER=$NS
-        $LOG "Server adress is $ADDRESS"
+        $LOG "Server adress is $SERVER"
     else
         SERVER=$SERVERNM
         $LOG "Not resolve adress for $SERVER"
