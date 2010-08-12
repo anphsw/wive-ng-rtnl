@@ -18,6 +18,18 @@ modprobe pptp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
 
+get_vpn_ip() {
+    $LOG "Get vpn server ip adress"
+    NS=`ipget $SERVERNM | tail -n1`
+    if [ "$NS" != "" ]; then
+        SERVER=$NS
+        $LOG "Server adress is $ADDRESS"
+    else
+        SERVER=$SERVERNM
+        $LOG "Not resolve adress for $SERVER"
+    fi
+}
+
 echo "==================START-PPTP-CLIENT======================="
     get_vpn_ip
     reachable=0;
@@ -92,14 +104,3 @@ echo "==================START-PPTP-CLIENT======================="
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
 
-get_vpn_ip() {
-    $LOG "Get vpn server ip adress"
-    NS=`ipget $SERVERNM | tail -n1`
-    if [ "$NS" != "" ]; then
-        SERVER=$NS
-        $LOG "Server adress is $ADDRESS"
-    else
-        SERVER=$SERVERNM
-        $LOG "Not resolve adress for $SERVER"
-    fi
-}

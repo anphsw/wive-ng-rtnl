@@ -22,6 +22,19 @@ modprobe pppox > /dev/null 2>&1
 modprobe pppol2tp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
+get_vpn_ip() {
+    $LOG "Get vpn server ip adress"
+    NS=`ipget $SERVERNM | tail -n1`
+    if [ "$NS" != "" ]; then
+        SERVER=$NS
+        $LOG "Server adress is $SERVER"
+    else
+        SERVER=$SERVERNM
+        $LOG "Not resolve adress for $SERVER"
+    fi
+}
+
+echo "==================START-L2TP-CLIENT======================="
     get_vpn_ip
     reachable=0;
     while [ $reachable -eq 0 ]; do
@@ -132,14 +145,3 @@ LOG="logger -t vpnhelper"
     FULLOPTS="$DEBUG -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
     xl2tpd $FULLOPTS &
 
-get_vpn_ip() {
-    $LOG "Get vpn server ip adress"
-    NS=`ipget $SERVERNM | tail -n1`
-    if [ "$NS" != "" ]; then
-        SERVER=$NS
-        $LOG "Server adress is $SERVER"
-    else
-        SERVER=$SERVERNM
-        $LOG "Not resolve adress for $SERVER"
-    fi
-}
