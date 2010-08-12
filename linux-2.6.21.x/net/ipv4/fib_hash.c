@@ -457,26 +457,50 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
 	 * and we need to allocate a new one of those as well.
 	 */
 
-	if (fa && fa->fa_tos == tos &&
-	    fa->fa_info->fib_priority == fi->fib_priority) {
-		struct fib_alias *fa_orig;
-
-		err = -EEXIST;
-		if (cfg->fc_nlflags & NLM_F_EXCL)
-			goto out;
+	 if (fa && fa->fa_tos == tos &&
+	     fa->fa_info->fib_priority == fi->fib_priority) {
+	 	struct fib_alias *fa_first, *fa_match;
+          
+	 	err = -EEXIST;
+	 	if (cfg->fc_nlflags & NLM_F_EXCL)
+	 		goto out;
+               
+                /* We have 2 goals:
+                 * 1. Find exact match for type, scope, fib_info to avoid
+                 * duplicate routes
+                 * 2. Find next 'fa' (or head), NLM_F_APPEND inserts before it
+                 */
+                fa_match = NULL;
+                fa_first = fa;
+                fa = list_entry(fa->fa_list.prev, struct fib_alias, fa_list);
+                list_for_each_entry_continue(fa, &f->fn_alias, fa_list) {
+                        if (fa->fa_tos != tos)
+                                break;
+                        if (fa->fa_info->fib_priority != fi->fib_priority)
+                                break;
+                        if (fa->fa_type == cfg->fc_type &&
+                           fa->fa_scope == cfg->fc_scope &&
+                           fa->fa_info == fi) {
+                                fa_match = fa;
+                                break;
+                        }
+                }
 
 		if (cfg->fc_nlflags & NLM_F_REPLACE) {
 			struct fib_info *fi_drop;
 			u8 state;
-		    //if route exists not need replace. return without error code
-		    if (fi->fib_treeref > 1){
-			    fib_release_info(fi);
-			    return 0;
-		    }
+
+                        fa = fa_first;                                                                                                      
+                        if (fa_match) {                                                                                                     
+                                if (fa == fa_match)                                                                                         
+                                        err = 0;                                                                                            
+                                goto out;                                                                                                   
+                       }
 #ifdef CONFIG_CONNTRACK_FAST_PATH
                     if (FastPath_Enabled())
                            fastpath_modifyRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type); 
 #endif
+
 			write_lock_bh(&fib_hash_lock);
 			fi_drop = fa->fa_info;
 			fa->fa_info = fi;
@@ -498,20 +522,11 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
 		 * uses the same scope, type, and nexthop
 		 * information.
 		 */
-		fa_orig = fa;
-		fa = list_entry(fa->fa_list.prev, struct fib_alias, fa_list);
-		list_for_each_entry_continue(fa, &f->fn_alias, fa_list) {
-			if (fa->fa_tos != tos)
-				break;
-			if (fa->fa_info->fib_priority != fi->fib_priority)
-				break;
-			if (fa->fa_type == cfg->fc_type &&
-			    fa->fa_scope == cfg->fc_scope &&
-			    fa->fa_info == fi)
-				goto out;
-		}
+		if (fa_match)
+			goto out;
+
 		if (!(cfg->fc_nlflags & NLM_F_APPEND))
-			fa = fa_orig;
+			fa = fa_first;
 	}
 
 #ifdef CONFIG_CONNTRACK_FAST_PATH
