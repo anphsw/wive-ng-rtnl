@@ -50,18 +50,23 @@ echo "==================START-PPTP-CLIENT======================="
 	$LOG "Add route to vpn server $ROUTE"
 	ip route replace $ROUTE
     fi
+    if [ -f /etc/default.gw ]; then
+	newdgw="via `cat /etc/default.gw`"
+    else
+	newdgw=""
+    fi
     if [ "$opmode" = "0" ]; then
 	    $LOG "Add route to $SERVER via br0"
-    	    ip route replace $SERVER dev br0
+    	    ip route replace $SERVER dev br0 $newdgw
         elif [ "$opmode" = "1" ]; then
 	    $LOG "Add route to $SERVER via eth2.2"
-    	    ip route replace $SERVER dev eth2.2
+    	    ip route replace $SERVER dev eth2.2 $newdgw
         elif [ "$opmode" = "2" ]; then
 	    $LOG "Add route to $SERVER via ra0"
-    	    ip route replace $SERVER dev ra0
+    	    ip route replace $SERVER dev ra0 $newdgw
         elif [ "$opmode" = "3" ]; then
 	    $LOG "Add route to $SERVER via apcli0"
-    	    ip route replace $SERVER dev apcli0
+    	    ip route replace $SERVER dev apcli0 $newdgw
     fi
 
     if [ "$PEERDNS" = "on" ]; then

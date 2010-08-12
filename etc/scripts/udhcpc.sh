@@ -51,6 +51,7 @@ fi
         	for i in $router ; do
             	    metric=`expr $metric + 1`
             	    route add default gw $i dev $interface metric $metric
+		    echo $i > /etc/default.gw
         	done
     	    fi
 	# DNS
