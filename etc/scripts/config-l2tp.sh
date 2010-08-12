@@ -5,7 +5,7 @@
 #
 echo "==================START-L2TP-CLIENT======================="
 
-SERVER=`nvram_get 2860 vpnServer`
+SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
 MTU=`nvram_get 2860 vpnMTU`
@@ -22,7 +22,7 @@ modprobe pppox > /dev/null 2>&1
 modprobe pppol2tp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
-
+    get_vpn_ip
     $LOG "Check for L2TP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
@@ -32,20 +32,10 @@ LOG="logger -t vpnhelper"
         else
             $LOG "Server unreachable wait 30 sec."
             sleep 30
+	    get_vpn_ip
             reachable=0;
         fi
     done
-
-    $LOG "Get vpn server ip adress"
-    NS=`ipget $SERVER | tail -n1`
-    if [ "$NS" != "" ]; then
-        ADDRESS=$NS
-        $LOG "Server adress is $ADDRESS"
-        SERVER=$ADDRESS
-    else
-        $LOG "Not resolve adress for $SERVER"
-        SERVER=$SERVER
-    fi
 
     $LOG "Get route to vpn server."
     ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
@@ -141,3 +131,16 @@ LOG="logger -t vpnhelper"
     $LOG "Start xl2tpd"
     FULLOPTS="$DEBUG -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
     xl2tpd $FULLOPTS &
+
+get_vpn_ip() {
+    $LOG "Get vpn server ip adress"
+    NS=`ipget $SERVERNM | tail -n1`
+    if [ "$NS" != "" ]; then
+        ADDRESS=$NS
+        $LOG "Server adress is $ADDRESS"
+        SERVER=$ADDRESS
+    else
+        $LOG "Not resolve adress for $SERVER"
+        SERVER=$SERVERNM
+    fi
+}

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SERVER=`nvram_get 2860 vpnServer`
+SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
 MTU=`nvram_get 2860 vpnMTU`
@@ -19,7 +19,7 @@ modprobe pptp > /dev/null 2>&1
 LOG="logger -t vpnhelper"
 
 echo "==================START-PPTP-CLIENT======================="
-
+    get_vpn_ip
     $LOG "Check for PPTP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
@@ -29,20 +29,10 @@ echo "==================START-PPTP-CLIENT======================="
         else
             $LOG "Server unreachable wait 30 sec."
             sleep 30
+	    get_vpn_ip
             reachable=0;
         fi
     done
-
-    $LOG "Get vpn server ip adress"
-    NS=`ipget $SERVER | tail -n1`
-    if [ "$NS" != "" ]; then
-        ADDRESS=$NS
-        $LOG "Server adress is $ADDRESS"
-        SERVER=$ADDRESS
-    else
-        $LOG "Not resolve adress for $SERVER"
-        SERVER=$SERVER
-    fi
 
     $LOG "Get route to vpn server."
     ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
@@ -101,3 +91,16 @@ echo "==================START-PPTP-CLIENT======================="
     PLUGOPT="/lib/pptp.so allow-mppe-128 pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
+
+get_vpn_ip() {
+    $LOG "Get vpn server ip adress"
+    NS=`ipget $SERVERNM | tail -n1`
+    if [ "$NS" != "" ]; then
+        ADDRESS=$NS
+        $LOG "Server adress is $ADDRESS"
+        SERVER=$ADDRESS
+    else
+        $LOG "Not resolve adress for $SERVER"
+        SERVER=$SERVERNM
+    fi
+}
