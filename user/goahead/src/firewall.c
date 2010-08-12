@@ -23,6 +23,7 @@
 
 #define _PATH_PFW           "/etc"
 #define _PATH_PFW_FILE      _PATH_PFW "/portforward"
+#define _PATH_MACIP_FILE    _PATH_PFW "/macipfilter"
 
 #define DD printf("---> %d\n", __LINE__);
 
@@ -199,13 +200,6 @@ static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv
 	return -1;
 }
 
-/*
- * hide the possible "error/warn" message when deleting a non-exist chain.
- */
-static void iptablesIPPortFilterFlush(void){
-	doSystem("iptables -F %s 1>/dev/null 2>&1", IPPORT_FILTER_CHAIN);
-}
-
 static int getNums(char *value, char delimit)
 {
 	char *pos = value;
@@ -295,10 +289,10 @@ char *dip_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
 
 		switch(action){
 		case ACTION_DROP:			// 1 == ENABLE--DROP mode
-			rc = snprintf(pos, len-rc, "-j DROP");
+			rc = snprintf(pos, len-rc, "-j DROP \n");
 			break;
 		case ACTION_ACCEPT:			// 2 == ENABLE--ACCEPT mode
-			rc = snprintf(pos, len-rc, "-j ACCEPT");
+			rc = snprintf(pos, len-rc, "-j ACCEPT \n");
 			break;
 		}
 }
@@ -331,7 +325,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		rc = snprintf(pos, len-rc, "--to %s \n", ip_address);
 }
 
-static void iptablesIPPortFilterRun(void)
+static void iptablesIPPortFilterBuildScript(void)
 {
     int i=0;
     char rec[256];
@@ -367,10 +361,15 @@ static void iptablesIPPortFilterRun(void)
 	if(!default_policy)
 		default_policy = "0";
 
-	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
-        // get sip 1
-        if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
-			continue;
+	//Generate portforward script file
+	FILE *fd = fopen(_PATH_MACIP_FILE, "w");
+	if (fd != NULL) {
+	    fputs("#!/bin/sh\n\n", fd);
+    	    while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
+
+	        // get sip 1
+    		if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
+		    	continue;
 		}
 		if(!isIpNetmaskValid(sip_1)){
 			continue;
@@ -433,8 +432,11 @@ static void iptablesIPPortFilterRun(void)
 		}
 
 		makeIPPortFilterRule(cmd, sizeof(cmd), mac_address, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action);
-		doSystem(cmd);
-	}
+		fputs(cmd, fd);
+	    }
+	//close file
+	fclose(fd);
+      }
 }
 
 static void iptablesPortForwardBuildScript(void)
@@ -1030,9 +1032,6 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rules);
 	nvram_commit(RT2860_NVRAM);
 
-	iptablesIPPortFilterFlush();
-	iptablesIPPortFilterRun();
-
     websHeader(wp);
     websWrite(wp, T("s<br>\n") );
     websWrite(wp, T("fromPort: <br>\n"));
@@ -1042,7 +1041,14 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
     websFooter(wp);
     websDone(wp, 200);
 
-	return;
+    //generate and save rules
+    iptablesIPPortFilterBuildScript();
+    // Call rwfs to store data                                                                                              
+    doSystem("fs save &");
+    // call iptables
+    firewall_rebuild();
+    
+ return;
 }
 
 static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
@@ -1226,8 +1232,6 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);
 	nvram_commit(RT2860_NVRAM);
 
-	iptablesIPPortFilterFlush();
-	iptablesIPPortFilterRun();
 
 	websHeader(wp);
 	websWrite(wp, T("mac: %s<br>\n"), mac_address);	
@@ -1243,10 +1247,15 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("action: %s<br>\n"), action_str);
 	websWrite(wp, T("comment: %s<br>\n"), comment);
 
-    websFooter(wp);
-    websDone(wp, 200);        
+	websFooter(wp);
+	websDone(wp, 200);        
+        //generate and save rules
+	iptablesIPPortFilterBuildScript();
+        // Call rwfs to store data                                                                                              
+        doSystem("fs save &");
+        // call iptables
+        firewall_rebuild();
     return;
-	
 }
 
 
@@ -1354,23 +1363,6 @@ end:
         firewall_rebuild();
 }
 
-
-static void iptablesBasicSetting(void)
-{
-	char *firewall_enable;
-
-	firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
-
-	// flush  ipport   filter   chain
-    iptablesIPPortFilterFlush();
-
-	if(!firewall_enable || !atoi(firewall_enable))
-		return;
-    iptablesIPPortFilterRun();
-
-	return;
-}
-
 static void BasicSettings(webs_t wp, char_t *path, char_t *query)
 {
 	char *default_policy, *firewall_enable;
@@ -1398,12 +1390,14 @@ static void BasicSettings(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_commit(RT2860_NVRAM);
 
-	iptablesBasicSetting();
-
 	websHeader(wp);
 	websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
-    websFooter(wp);
-    websDone(wp, 200);        
+	websFooter(wp);
+	websDone(wp, 200);        
+
+	if(firewall_enable && atoi(firewall_enable))
+	    iptablesIPPortFilterBuildScript();
+
 }
 
 static void DMZ(webs_t wp, char_t *path, char_t *query)
@@ -1452,9 +1446,7 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
 	websFooter(wp);
 	websDone(wp, 200);
-
-	iptablesIPPortFilterFlush();
-	iptablesIPPortFilterRun();
+	iptablesIPPortFilterBuildScript();
 }
 
 
@@ -1839,6 +1831,5 @@ void firewall_rebuild(void)
         doSystem("service iptables restart");
 	///-----Load L7 filters rules----////
 	LoadLayer7FilterName();
-        iptablesIPPortFilterRun();
         iptablesWebsFilterRun();
 }
