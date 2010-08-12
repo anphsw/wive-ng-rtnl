@@ -58,19 +58,19 @@ LOG="logger -t vpnhelper"
     else
 	newdgw=""
     fi
+    DEV="eth2.2"
     if [ "$opmode" = "0" ]; then
-	    $LOG "Add route to $SERVER via br0"
-    	    ip route replace $SERVER dev br0 $newdgw
+	    DEV="br0"
         elif [ "$opmode" = "1" ]; then
-	    $LOG "Add route to $SERVER via eth2.2"
-    	    ip route replace $SERVER dev eth2.2 $newdgw
+	    DEV="br0"
         elif [ "$opmode" = "2" ]; then
-	    $LOG "Add route to $SERVER via ra0"
-    	    ip route replace $SERVER dev ra0 $newdgw
+	    DEV="ra0"
         elif [ "$opmode" = "3" ]; then
-	    $LOG "Add route to $SERVER via apcli0"
-    	    ip route replace $SERVER dev apcli0 $newdgw
+	    DEV="apcli0"
     fi
+
+    $LOG "Add route to $SERVER $newdgw over $DEV"
+    ip route replace $SERVER dev $DEV $newdgw
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns
