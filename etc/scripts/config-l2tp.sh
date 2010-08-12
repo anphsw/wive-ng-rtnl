@@ -47,11 +47,6 @@ echo "==================START-L2TP-CLIENT======================="
     done
 
     $LOG "Get route to vpn server."
-    ROUTE=`ip route get $SERVER | grep dev | cut -f -3 -d " "`
-    if [ "$ROUTE" != "" ]; then
-        $LOG "Add route to vpn server $ROUTE."
-        ip route replace $ROUTE
-    fi
     if [ -f /etc/default.gw ]; then
 	newdgw="via `cat /etc/default.gw`"
     else
@@ -69,7 +64,11 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     $LOG "Add route to $SERVER $newdgw over $DEV"
-    ip route replace $SERVER dev $DEV $newdgw metric 0
+    if [ "$newdgw" != "" ]; then
+	ip route replace $SERVER $newdgw metric 0
+    else
+	ip route replace $SERVER dev $DEV metric 0
+    fi
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns
