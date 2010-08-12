@@ -51,7 +51,10 @@ fi
         	for i in $router ; do
             	    metric=`expr $metric + 1`
             	    route add default gw $i dev $interface metric $metric
-		    echo $i > /etc/default.gw
+		    #save first dgw with metric=1 to use in corbina hack
+		    if [ "$metric" = "1" ]; then
+			echo $i > /etc/default.gw
+		    fi
         	done
     	    fi
 	# DNS
