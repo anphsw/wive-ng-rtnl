@@ -23,6 +23,13 @@ DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 
     $LOG "Modify route table need for buggy nas"
+    #Remove auto route in VPN and dgw
+    ip route del $PPP_REMOTE  > /dev/null 2>&1
+    ip route del dev $PPP_IFACE  > /dev/null 2>&1
+    if [ "$DGW" = "1" ]; then
+	ip route del default > /dev/null 2>&1
+    fi
+
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
 
@@ -42,22 +49,20 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 	rm -f /tmp/ip-down-route-reload
     fi
 
-    #Remove auto route in VPN
-    ip route del $PPP_REMOTE  > /dev/null 2>&1
-    ip route del dev $PPP_IFACE  > /dev/null 2>&1
-
-    #Replace default route to ppp tunnel
-    if [ "$DGW" = "1" ]; then
-	$LOG "Replace default route to $PPP_IFACE"
-	ip route del default > /dev/null 2>&1
-	ip route replace default metric 10 dev $PPP_IFACE
-    fi
-
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
     ifconfig $PPP_IFACE -multicast
 
-    iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
+    $LOG "Replace DNS from pppd"
+    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
+    cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
+    cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
+
+    #Replace default route to ppp tunnel
+    if [ "$DGW" = "1" ]; then
+	$LOG "Replace default route to $PPP_IFACE"
+	ip route replace default metric 10 dev $PPP_IFACE
+    fi
 
     #user route add                                                                                                                             
     if [ "$VPN_ROUTING_ENABLED" = "on" ] ; then
@@ -66,13 +71,11 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
         /etc/routes_ppp_replace $PPP_IFACE replace
     fi
 
-    $LOG "Replace DNS from pppd"
-    cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
-    cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
-    cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
-
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
     services_restart.sh pppd
+
+    #this always after route mod
+    iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
 
     #NAT in vpn
     if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
