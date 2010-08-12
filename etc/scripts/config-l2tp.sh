@@ -23,9 +23,9 @@ modprobe pppol2tp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
     get_vpn_ip
-    $LOG "Check for L2TP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
+	$LOG "Check for L2TP server $SERVER reachable"
         ping -q -c 1 $SERVER
         if [ "$?" -eq 0 ]; then
             reachable=1

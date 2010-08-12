@@ -20,9 +20,9 @@ LOG="logger -t vpnhelper"
 
 echo "==================START-PPTP-CLIENT======================="
     get_vpn_ip
-    $LOG "Check for PPTP server reachable"
     reachable=0;
     while [ $reachable -eq 0 ]; do
+	$LOG "Check for PPTP server $SERVER reachable"
         ping -q -c 1 $SERVER
         if [ "$?" -eq 0 ]; then
             reachable=1
