@@ -1,10 +1,5 @@
 #!/bin/sh
 
-#################################################################
-#
-#
-echo "==================START-L2TP-CLIENT======================="
-
 SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
@@ -22,6 +17,7 @@ modprobe pppox > /dev/null 2>&1
 modprobe pppol2tp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
+
 get_vpn_ip() {
     $LOG "Get vpn server ip adress"
     NS=`ipget $SERVERNM | tail -n1`
@@ -144,4 +140,3 @@ echo "==================START-L2TP-CLIENT======================="
     $LOG "Start xl2tpd"
     FULLOPTS="$DEBUG -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
     xl2tpd $FULLOPTS &
-

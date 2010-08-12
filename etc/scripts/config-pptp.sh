@@ -103,4 +103,3 @@ echo "==================START-PPTP-CLIENT======================="
     PLUGOPT="/lib/pptp.so allow-mppe-128 pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
-

@@ -1,10 +1,5 @@
 #!/bin/sh
 
-##################################################################
-#
-#
-echo "==================START-PPPOE-CLIENT======================="
-
 SERVER=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
@@ -23,6 +18,8 @@ modprobe pppox > /dev/null 2>&1
 modprobe pppoe > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
+
+echo "==================START-PPPOE-CLIENT======================="
 
 if [ "$IFACE" = "WAN" ]; then
     if [ "$opmode" = "1" ]; then
