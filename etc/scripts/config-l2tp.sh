@@ -69,7 +69,7 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     $LOG "Add route to $SERVER $newdgw over $DEV"
-    ip route replace $SERVER dev $DEV $newdgw
+    ip route replace $SERVER dev $DEV $newdgw metric 0
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns
