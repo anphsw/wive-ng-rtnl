@@ -30,7 +30,7 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
 
-    if [ "$GWSTRING" != "" ]; then
+    if [ "$GWSTRING" != "" ] && [ "$DGW" = "1" ]; then
         RESTORESTRING="ip route replace $GWSTRING"
         $LOG "Store old default route to file. $GWSTRING "
         rm -f /tmp/ip-down-route-reload
@@ -40,16 +40,14 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 	    echo "$RESTORESTRING"
 	) > /tmp/ip-down-route-reload
 	chmod 777 /tmp/ip-down-route-reload
+	$LOG "Remove DGW"
+	ip route del default > /dev/null 2>&1
     else
 	$LOG "No dgw stored."
 	RESTORESTRING=""
 	rm -f /tmp/ip-down-route-reload
     fi
 
-    #Remove DGW
-    if [ "$DGW" = "1" ]; then
-	ip route del default > /dev/null 2>&1
-    fi
 
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
