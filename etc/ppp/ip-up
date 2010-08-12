@@ -21,15 +21,18 @@ OperationMode=`nvram_get 2860 OperationMode`
 NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
+vpnType=`nvram_get 2860 vpnType`
+vpnServerIP=`nvram_get 2860 vpnServerIP`
 
-    $LOG "Modify route table need for buggy nas"
-    #Remove auto route in VPN
-    ip route del $PPP_REMOTE  > /dev/null 2>&1
-    ip route del dev $PPP_IFACE  > /dev/null 2>&1
+    if [ "$vpnType" != 0 ]; then
+	$LOG "Modify route table need for buggy nas"
+	#Remove auto route in VPN
+	ip route del $PPP_REMOTE  > /dev/null 2>&1
+        ip route del dev $PPP_IFACE  > /dev/null 2>&1
+    fi
 
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
-
     if [ "$GWSTRING" != "" ] && [ "$DGW" = "1" ]; then
         RESTORESTRING="ip route replace $GWSTRING"
         $LOG "Store old default route to file. $GWSTRING "
@@ -57,6 +60,13 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
     cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
+
+    if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /etc/default.gw ]; then
+	$LOG "Replace route to vpn...."
+	newdgw="via `cat /etc/default.gw`"
+	ip route del $vpnServerIP > /dev/null 2>&1
+	ip route add $vpnServerIP $newdgw
+    fi
 
     #Replace default route to ppp tunnel
     if [ "$DGW" = "1" ]; then

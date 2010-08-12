@@ -46,6 +46,9 @@ echo "==================START-PPTP-CLIENT======================="
         fi
     done
 
+    #store server IP
+    nvram_set 2860 vpnServerIP $SERVER
+
     $LOG "Get route to vpn server."
     if [ -f /etc/default.gw ]; then
 	newdgw="via `cat /etc/default.gw`"

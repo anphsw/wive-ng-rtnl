@@ -45,6 +45,9 @@ echo "==================START-L2TP-CLIENT======================="
             reachable=0;
         fi
     done
+    
+    #store server IP
+    nvram_set 2860 vpnServerIP $SERVER
 
     $LOG "Get route to vpn server."
     if [ -f /etc/default.gw ]; then
