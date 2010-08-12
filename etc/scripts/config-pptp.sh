@@ -96,11 +96,10 @@ get_vpn_ip() {
     $LOG "Get vpn server ip adress"
     NS=`ipget $SERVERNM | tail -n1`
     if [ "$NS" != "" ]; then
-        ADDRESS=$NS
+        SERVER=$NS
         $LOG "Server adress is $ADDRESS"
-        SERVER=$ADDRESS
     else
-        $LOG "Not resolve adress for $SERVER"
         SERVER=$SERVERNM
+        $LOG "Not resolve adress for $SERVER"
     fi
 }
