@@ -61,7 +61,7 @@ echo "==================START-L2TP-CLIENT======================="
     if [ "$opmode" = "0" ]; then
 	    DEV="br0"
         elif [ "$opmode" = "1" ]; then
-	    DEV="br0"
+	    DEV="eth2.2"
         elif [ "$opmode" = "2" ]; then
 	    DEV="ra0"
         elif [ "$opmode" = "3" ]; then
