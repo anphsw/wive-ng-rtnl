@@ -625,6 +625,7 @@ static int rm_from_queue(unsigned long mask, struct sigpending *s)
 
 /*
  * Bad permissions for sending the signal
+ * - the caller must hold the RCU read lock
  */
 static int check_kill_permission(int sig, struct siginfo *info,
 				 struct task_struct *t)
@@ -1084,12 +1085,17 @@ struct sighand_struct *lock_task_sighand(struct task_struct *tsk, unsigned long 
 	return sighand;
 }
 
+/*
+  * send signal info to all the members of a group
+  */
 int group_send_sig_info(int sig, struct siginfo *info, struct task_struct *p)
 {
 	unsigned long flags;
 	int ret;
 
+	rcu_read_lock();
 	ret = check_kill_permission(sig, info, p);
+	rcu_read_unlock();
 
 	if (!ret && sig) {
 		ret = -ESRCH;
