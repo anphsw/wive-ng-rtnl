@@ -61,8 +61,9 @@ vpnServerIP=`nvram_get 2860 vpnServerIP`
     cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
 
+    #Route to VPN server over WAN select
     if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /etc/default.gw ]; then
-	$LOG "Replace route to vpn...."
+	$LOG "Replace route to wan...."
 	newdgw="via `cat /etc/default.gw`"
 	ip route del $vpnServerIP > /dev/null 2>&1
 	ip route add $vpnServerIP $newdgw
