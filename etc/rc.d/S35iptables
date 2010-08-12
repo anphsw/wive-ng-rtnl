@@ -255,6 +255,7 @@ get_param() {
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
     DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
+    IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then
