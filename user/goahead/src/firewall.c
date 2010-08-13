@@ -97,25 +97,23 @@ int isIpNetmaskValid(char *s)
 	char *slash;
 	struct in_addr addr;    // for examination
 
-	if(!s || !strlen(s)){
+	if (!s || !strlen(s))
 		return 0;
-	}
 
 	strncpy(str, s, sizeof(str));
 
-    if( (!strcmp("any", str)) || (!strcmp("any/0", str)))
-        return 1;
+	if( (!strcmp("any", str)) || (!strcmp("any/0", str)))
+		return 1;
 
-	if (!isAllNumAndSlash(str)){
+	if (!isAllNumAndSlash(str))
 		return 0;
-	}
 
-	if(!isOnlyOneSlash(str)){
+	if (!isOnlyOneSlash(str))
 		return 0;
-	}
 
 	slash = strchr(str, '/');
-	if(slash){
+	if (slash)
+	{
 		int mask;
 
 		*slash = '\0';
@@ -134,18 +132,19 @@ int isIpNetmaskValid(char *s)
 		}
 	}
 
-	if(! (inet_aton(str, &addr))){
-        printf("isIpNetmaskValid(): %s is not a valid IP address.\n", str);
-        return 0;
-    }
-    return 1;
+	if (! (inet_aton(str, &addr)))
+	{
+		printf("isIpNetmaskValid(): %s is not a valid IP address.\n", str);
+		return 0;
+	}
+	return 1;
 }
 
 static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	char *dmze = nvram_bufget(RT2860_NVRAM, "DMZEnable");
-	if(dmze)
+	const char *dmze = nvram_bufget(RT2860_NVRAM, "DMZEnable");
+	if (dmze)
 		value = atoi(dmze);
 	else
 		value = 0;
@@ -157,13 +156,13 @@ static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 			websWrite(wp, T(" "));
 		return 0;
 	}
-	return -1;        
+	return -1;
 }
 
-static int  getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
+static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	char *pfe = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
+	const char *pfe = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -183,7 +182,7 @@ static int  getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	char *pfe = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
+	const char *pfe = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -216,138 +215,158 @@ static int getNums(char *value, char delimit)
 /*
  *
  */
-static void makeIPPortFilterRule(char *buf, int len, char *mac_address,
+static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_address,
 char *sip_1, char *sip_2, int sprf_int, int sprt_int, 
 char *dip_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
 {
-		int rc = 0;
-		char *pos = buf;
-    char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
+	int rc = 0;
+	char *pos = buf;
+	const char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
 
-		switch(action){
+	switch(action)
+	{
 		case ACTION_DROP:
-		    if (atoi(spifw) == 0)
-			rc = snprintf(pos, len-rc, 
-				"iptables -A %s ", IPPORT_FILTER_CHAIN);
-		    else
-			rc = snprintf(pos, len-rc, 
-				"iptables -A %s -m state --state NEW,INVALID ", IPPORT_FILTER_CHAIN);
+			if (atoi(spifw) == 0)
+				rc = snprintf(pos, len-rc, "iptables -A %s ", IPPORT_FILTER_CHAIN);
+			else
+				rc = snprintf(pos, len-rc, "iptables -A %s -m state --state NEW,INVALID ", IPPORT_FILTER_CHAIN);
 			break;
 		case ACTION_ACCEPT:
 			rc = snprintf(pos, len-rc, 
 				"iptables -A %s ", IPPORT_FILTER_CHAIN);
 			break;
-		}
+	}
+	pos = pos + rc;
+	
+	if (iface != NULL)
+	{
+		rc = snprintf(pos, len-rc, "-i %s ", iface);
 		pos = pos + rc;
+	}
 
-		// write mac address
-		if(mac_address && strlen(mac_address)){
-			rc = snprintf(pos, len-rc, "-m mac --mac-source %s ", mac_address);
-			pos = pos+rc;
-		}
-
-		// write source ip
-		rc = snprintf(pos, len-rc, "-s %s ", sip_1);
+	// write mac address
+	if(mac_address && strlen(mac_address))
+	{
+		rc = snprintf(pos, len-rc, "-m mac --mac-source %s ", mac_address);
 		pos = pos+rc;
-		
-		// write dest ip
-		rc = snprintf(pos, len-rc, "-d %s ", dip_1);
-		pos = pos+rc;
+	}
 
-		// write protocol type
-		if(proto == PROTO_NONE){
-			rc = snprintf(pos, len-rc, " ");
-			pos = pos + rc;
-		}else if(proto == PROTO_ICMP){
-			rc = snprintf(pos, len-rc, "-p icmp ");
-			pos = pos + rc;
-		}else{
-			if(proto == PROTO_TCP)
-				rc = snprintf(pos, len-rc, "-p tcp ");
-			else if (proto == PROTO_UDP)
-				rc = snprintf(pos, len-rc, "-p udp ");
-			pos = pos + rc;
+	// write source ip
+	rc = snprintf(pos, len-rc, "-s %s ", sip_1);
+	pos = pos+rc;
+	
+	// write dest ip
+	rc = snprintf(pos, len-rc, "-d %s ", dip_1);
+	pos = pos+rc;
 
-			// write source port
-			if(sprf_int){
-				if(sprt_int)
-					rc = snprintf(pos, len-rc, "--sport %d:%d ", sprf_int, sprt_int);
-				else
-					rc = snprintf(pos, len-rc, "--sport %d ", sprf_int);
-				pos = pos+rc;
-			}
-
-			// write dest port
-			if(dprf_int){
-				if(dprt_int)
-					rc = snprintf(pos, len-rc, "--dport %d:%d ", dprf_int, dprt_int);
-				else
-					rc = snprintf(pos, len-rc, "--dport %d ", dprf_int);
-				pos = pos+rc;
-			}
-		}
-
-		switch(action){
-		case ACTION_DROP:			// 1 == ENABLE--DROP mode
-			rc = snprintf(pos, len-rc, "-j DROP \n");
-			break;
-		case ACTION_ACCEPT:			// 2 == ENABLE--ACCEPT mode
-			rc = snprintf(pos, len-rc, "-j ACCEPT \n");
-			break;
-		}
-}
-
-static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int)
-{
-		int rc = 0;
-		char *pos = buf;
-
-		rc = snprintf(pos, len-rc, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_CHAIN, wan_name);
+	// write protocol type
+	if (proto == PROTO_NONE)
+	{
+		rc = snprintf(pos, len-rc, " ");
 		pos = pos + rc;
-
-		// write protocol type
+	}
+	else if(proto == PROTO_ICMP)
+	{
+		rc = snprintf(pos, len-rc, "-p icmp ");
+		pos = pos + rc;
+	}
+	else
+	{
 		if(proto == PROTO_TCP)
 			rc = snprintf(pos, len-rc, "-p tcp ");
 		else if (proto == PROTO_UDP)
 			rc = snprintf(pos, len-rc, "-p udp ");
-		else if (proto == PROTO_TCP_UDP)
-			rc = snprintf(pos, len-rc, " ");
 		pos = pos + rc;
 
-		// write port
-		if(prt_int != 0)
-			rc = snprintf(pos, len-rc, "--dport %d:%d ", prf_int, prt_int);
-		else
-			rc = snprintf(pos, len-rc, "--dport %d ", prf_int);
-		pos = pos + rc;
+		// write source port
+		if(sprf_int)
+		{
+			if(sprt_int)
+				rc = snprintf(pos, len-rc, "--sport %d:%d ", sprf_int, sprt_int);
+			else
+				rc = snprintf(pos, len-rc, "--sport %d ", sprf_int);
+			pos = pos+rc;
+		}
 
-		// write remote ip
-		rc = snprintf(pos, len-rc, "--to %s \n", ip_address);
+		// write dest port
+		if (dprf_int)
+		{
+			if(dprt_int)
+				rc = snprintf(pos, len-rc, "--dport %d:%d ", dprf_int, dprt_int);
+			else
+				rc = snprintf(pos, len-rc, "--dport %d ", dprf_int);
+			pos = pos+rc;
+		}
+	}
+
+	switch(action)
+	{
+		case ACTION_DROP:			// 1 == ENABLE--DROP mode
+			rc = snprintf(pos, len-rc, "-j DROP");
+			break;
+		case ACTION_ACCEPT:			// 2 == ENABLE--ACCEPT mode
+			rc = snprintf(pos, len-rc, "-j ACCEPT");
+			break;
+	}
+	
+	pos = pos + rc;
+	rc = snprintf(pos, len-rc, "\n");
+}
+
+static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int)
+{
+	int rc = 0;
+	char *pos = buf;
+
+	rc = snprintf(pos, len-rc, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_CHAIN, wan_name);
+	pos = pos + rc;
+
+	// write protocol type
+	if(proto == PROTO_TCP)
+		rc = snprintf(pos, len-rc, "-p tcp ");
+	else if (proto == PROTO_UDP)
+		rc = snprintf(pos, len-rc, "-p udp ");
+	else if (proto == PROTO_TCP_UDP)
+		rc = snprintf(pos, len-rc, " ");
+	pos = pos + rc;
+
+	// write port
+	if(prt_int != 0)
+		rc = snprintf(pos, len-rc, "--dport %d:%d ", prf_int, prt_int);
+	else
+		rc = snprintf(pos, len-rc, "--dport %d ", prf_int);
+	pos = pos + rc;
+
+	// write remote ip
+	rc = snprintf(pos, len-rc, "--to %s \n", ip_address);
 }
 
 static void iptablesIPPortFilterBuildScript(void)
 {
-    int i=0;
-    char rec[256];
-    char cmd[1024];
-    int sprf_int, sprt_int, proto, action;
-    int dprf_int, dprt_int;
-    char sprf[8], sprt[8], protocol[8];
-    char dprf[8], dprt[8];
-    char mac_address[32];
-    char sip_1[32], sip_2[32], action_str[4];
-    char dip_1[32], dip_2[32];
-    char *firewall_enable, *default_policy, *rule;
-    char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
-    int mode;
+	int i=0;
+	char rec[256];
+	char cmd[1024];
+	int sprf_int, sprt_int, proto, action;
+	int dprf_int, dprt_int;
+	char sprf[8], sprt[8], protocol[8], iface[8];
+	char dprf[8], dprt[8], wan_name[16];
+	char mac_address[32];
+	char sip_1[32], sip_2[32], action_str[4];
+	char dip_1[32], dip_2[32];
+	char *firewall_enable, *default_policy, *rule, *c_if;
+	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
+	int mode;
 	
-    firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
-    if(!firewall_enable){
-        printf("Warning: can't find \"IPPortFilterEnable\" in flash.\n");
-        return;
-    }
-    mode = atoi(firewall_enable);
-    if(!mode)
+	printf("iptablesIPPortFilterBuildScript\n");
+	
+	firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
+	if (!firewall_enable)
+	{
+		printf("Warning: can't find \"IPPortFilterEnable\" in flash.\n");
+		return;
+	}
+	mode = atoi(firewall_enable);
+	if(!mode)
 		return;
 
 	rule = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
@@ -360,167 +379,216 @@ static void iptablesIPPortFilterBuildScript(void)
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		default_policy = "0";
+	
+	// get wan name
+	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
 
 	//Generate portforward script file
 	FILE *fd = fopen(_PATH_MACIP_FILE, "w");
-	if (fd != NULL) {
-	    fputs("#!/bin/sh\n\n", fd);
-    	    while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
+	if (fd != NULL)
+	{
+		printf("iptablesIPPortFilterBuildScript opened file\n");
+		
+		fputs("#!/bin/sh\n\n", fd);
+		
+		while ( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
+		{
+			// get interface
+			if ((getNthValueSafe(0, rec, ',', iface, sizeof(iface)) == -1))
+				continue;
 
-	        // get sip 1
-    		if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
-		    	continue;
+			// get sip 1
+			if ((getNthValueSafe(1, rec, ',', sip_1, sizeof(sip_1)) == -1))
+				continue;
+
+			if (!isIpNetmaskValid(sip_1))
+				continue;
+
+			// get source port range "from"
+			if ((getNthValueSafe(3, rec, ',', sprf, sizeof(sprf)) == -1))
+				continue;
+
+			if ((sprf_int = atoi(sprf)) > 65535)
+				continue;
+
+			// get dest port range "to"
+			if ((getNthValueSafe(4, rec, ',', sprt, sizeof(sprt)) == -1))
+				continue;
+
+			if( (sprt_int = atoi(sprt)) > 65535)
+				continue;
+
+			// Destination Part
+			if ((getNthValueSafe(5, rec, ',', dip_1, sizeof(dip_1)) == -1))
+				continue;
+
+			if (!isIpNetmaskValid(dip_1))
+				continue;
+
+			// get source port range "from"
+			if ((getNthValueSafe(7, rec, ',', dprf, sizeof(dprf)) == -1))
+				continue;
+
+			if( (dprf_int = atoi(dprf)) > 65535)
+				continue;
+
+			// get dest port range "to"
+			if ((getNthValueSafe(8, rec, ',', dprt, sizeof(dprt)) == -1))
+				continue;
+
+			if ((dprt_int = atoi(dprt)) > 65535)
+				continue;
+
+			// get protocol
+			if ((getNthValueSafe(9, rec, ',', protocol, sizeof(protocol)) == -1))
+				continue;
+			proto = atoi(protocol);
+
+			// get action
+			if ((getNthValueSafe(10, rec, ',', action_str, sizeof(action_str)) == -1))
+				continue;
+
+			action = atoi(action_str);
+
+			// get mac address
+			if ((getNthValueSafe(12, rec, ',', mac_address, sizeof(mac_address)) == -1))
+				continue;
+
+			if (strlen(mac_address))
+			{
+				if (!isMacValid(mac_address))
+					continue;
+			}
+			
+			if (strcmp(iface, "LAN")==0)
+				c_if = "br0";
+			else if (strcmp(iface, "VPN")==0)
+				c_if = "ppp+";
+			else
+				c_if = wan_name;
+
+			makeIPPortFilterRule(cmd, sizeof(cmd), c_if, mac_address, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action);
+			fputs(cmd, fd);
 		}
-		if(!isIpNetmaskValid(sip_1)){
-			continue;
-		}
 
-		// get source port range "from"
-		if((getNthValueSafe(2, rec, ',', sprf, sizeof(sprf)) == -1)){
-			continue;
-		}
-		if( (sprf_int = atoi(sprf)) > 65535)
-			continue;
-		// get dest port range "to"
-		if((getNthValueSafe(3, rec, ',', sprt, sizeof(sprt)) == -1)){
-			continue;
-		}
-		if( (sprt_int = atoi(sprt)) > 65535)
-			continue;
-
-		// Destination Part
-		if((getNthValueSafe(4, rec, ',', dip_1, sizeof(dip_1)) == -1)){
-			continue;
-		}
-		if(!isIpNetmaskValid(dip_1)){
-			continue;
-		}
-
-		// get source port range "from"
-		if((getNthValueSafe(6, rec, ',', dprf, sizeof(dprf)) == -1)){
-			continue;
-		}
-		if( (dprf_int = atoi(dprf)) > 65535)
-			continue;
-
-		// get dest port range "to"
-		if((getNthValueSafe(7, rec, ',', dprt, sizeof(dprt)) == -1)){
-			continue;
-		}
-		if( (dprt_int = atoi(dprt)) > 65535)
-			continue;
-
-
-		// get protocol
-		if((getNthValueSafe(8, rec, ',', protocol, sizeof(protocol)) == -1))
-			continue;
-		proto = atoi(protocol);
-
-		// get action
-    		if((getNthValueSafe(9, rec, ',', action_str, sizeof(action_str)) == -1)){
-        		continue;
-    		}
-    		action = atoi(action_str);
-
-    		// get mac address
-    		if((getNthValueSafe(11, rec, ',', mac_address, sizeof(mac_address)) == -1))
-        	    continue;
-
-		if(strlen(mac_address)){
-	    	    if(!isMacValid(mac_address))
-	        	continue;
-		}
-
-		makeIPPortFilterRule(cmd, sizeof(cmd), mac_address, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action);
-		fputs(cmd, fd);
-	    }
-	//close file
-	fclose(fd);
-      }
+		//close file
+		fclose(fd);
+	}
 }
 
 static void iptablesPortForwardBuildScript(void)
 {
-    char rec[256];
-    char cmd[1024];
-    char wan_name[16];
-    char ip_address[32], prf[8], prt[8], protocol[8];
-    char *firewall_enable, *rule;
-    int i=0,prf_int, prt_int, proto;
+	char rec[256];
+	char cmd[1024];
+	char wan_name[16];
+	char ip_address[32], prf[8], prt[8], protocol[8], iface[8];
+	char *firewall_enable, *rule, *c_if;
+	int i=0,prf_int, prt_int, proto;
 
-    firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
-    if(!firewall_enable){
-        printf("Warning: can't find \"PortForwardEnable\" in flash\n");
-        return;
-    }
-    if(atoi(firewall_enable)){
-        rule = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
-        if(!rule){
-            printf("Warning: can't find \"PortForwardRules\" in flash\n");
-            return ;
-        }
-    }else
-	return;
+	firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
+	if(!firewall_enable)
+	{
+		printf("Warning: can't find \"PortForwardEnable\" in flash\n");
+		return;
+	}
 
-    //get wan name
-    strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
-
-    //Generate portforward script file
-    FILE *fd = fopen(_PATH_PFW_FILE, "w");
-
-    if (fd != NULL) {
-	fputs("#!/bin/sh\n\n", fd);
-	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) ){
-		// get ip address
-		if((getNthValueSafe(0, rec, ',', ip_address, sizeof(ip_address)) == -1)){
-			printf("prf = %s\n", prf);	
-			continue;
+	if(atoi(firewall_enable))
+	{
+		rule = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+		if(!rule)
+		{
+			printf("Warning: can't find \"PortForwardRules\" in flash\n");
+			return;
 		}
-		if(!isIpValid(ip_address))
-			continue;
+	}
+	else
+		return;
 
-		// get port range "from"
-		if((getNthValueSafe(1, rec, ',', prf, sizeof(prf)) == -1)){
-			printf("prf = %s\n", prf);	
-			continue;
-		}
-		if( (prf_int = atoi(prf)) == 0 || prf_int > 65535)
-			continue;
+	// get wan name
+	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
 
-		// get port range "to"
-		if((getNthValueSafe(2, rec, ',', prt, sizeof(prt)) == -1)){
-			printf("prt = %s\n", prt);	
-			continue;
-		}
-		if( (prt_int = atoi(prt)) > 65535)
-			continue;
+	// Generate portforward script file
+	FILE *fd = fopen(_PATH_PFW_FILE, "w");
 
-		// get protocol
-		if((getNthValueSafe(3, rec, ',', protocol, sizeof(protocol)) == -1))
-			continue;
-		    proto = atoi(protocol);
-			switch(proto){
-			    case PROTO_TCP:
-			    case PROTO_UDP:
-				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, proto, prf_int, prt_int);
-				fputs(cmd, fd);
-				break;
-			    case PROTO_TCP_UDP:
-				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, PROTO_TCP, prf_int, prt_int);
-				fputs(cmd, fd);
-				makePortForwardRule(cmd, sizeof(cmd), wan_name, ip_address, PROTO_UDP, prf_int, prt_int);
-				fputs(cmd, fd);
-				break;
-			    default:
+	if (fd != NULL)
+	{
+		fputs("#!/bin/sh\n\n", fd);
+
+		while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
+		{
+			// get interface
+			if ((getNthValueSafe(0, rec, ',', iface, sizeof(iface)) == -1))
+			{
+				printf("iface = %s\n", iface);
 				continue;
 			}
+			
+			// get ip address
+			if ((getNthValueSafe(1, rec, ',', ip_address, sizeof(ip_address)) == -1))
+			{
+				fprintf(fd, "ip_addr = %s\n", prf);
+				continue;
+			}
+			if (!isIpValid(ip_address))
+				continue;
+
+			// get port range "from"
+			if ((getNthValueSafe(2, rec, ',', prf, sizeof(prf)) == -1))
+			{
+				fprintf(fd, "prf = %s\n", prf);
+				continue;
+			}
+			if( (prf_int = atoi(prf)) == 0 || prf_int > 65535)
+				continue;
+
+			// get port range "to"
+			if ((getNthValueSafe(3, rec, ',', prt, sizeof(prt)) == -1))
+			{
+				printf("prt = %s\n", prt);
+				continue;
+			}
+			if ((prt_int = atoi(prt)) > 65535)
+				continue;
+
+			// get protocol
+			if ((getNthValueSafe(4, rec, ',', protocol, sizeof(protocol)) == -1))
+				continue;
+			
+			// Patch interface
+			if (strcmp(iface, "LAN")==0)
+				c_if = "br0";
+			else if (strcmp(iface, "VPN")==0)
+				c_if = "ppp+";
+			else
+				c_if = wan_name;
+			
+			proto = atoi(protocol);
+			switch(proto)
+			{
+				case PROTO_TCP:
+				case PROTO_UDP:
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int);
+					fputs(cmd, fd);
+					break;
+				
+				case PROTO_TCP_UDP:
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_TCP, prf_int, prt_int);
+					fputs(cmd, fd);
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int);
+					fputs(cmd, fd);
+					break;
+				default:
+					continue;
+			}
+		}
+		
+		//close file
+		fclose(fd);
 	}
-     //close file
-     fclose(fd);
-    }
 }
 
-inline int getRuleNums(char *rules){
+inline int getRuleNums(char *rules)
+{
 	return getNums(rules, ';');
 }
 
@@ -540,7 +608,7 @@ static int getDefaultFirewallPolicyASP(int eid, webs_t wp, int argc, char_t **ar
 
 	if(default_policy == value )
 		websWrite(wp, T(" selected "));
-	return 0;	
+	return 0;
 }
 
 static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv)
@@ -558,11 +626,14 @@ static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv
  */
 static int getPortForwardRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-    char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
-	if(!rules || !strlen(rules) ){
+	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+	
+	if (!rules || !strlen(rules))
+	{
 		websWrite(wp, T("0"));
 		return 0;
 	}
+
 	websWrite(wp, T("%d"), getRuleNums(rules));
 	return 0;
 }
@@ -572,8 +643,10 @@ static int getPortForwardRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv
  */
 static int getIPPortRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-    char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
-	if(!rules || !strlen(rules) ){
+	char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	
+	if(!rules || !strlen(rules) )
+	{
 		websWrite(wp, T("0"));
 		return 0;
 	}
@@ -589,8 +662,9 @@ static int showPortForwardRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int i=0;
 	int prf_int, prt_int, proto;
-	char ip_address[32], prf[8], prt[8], comment[16], protocol[8];
+	char ip_address[32], prf[8], prt[8], comment[16], protocol[8], interface[8];
 	char rec[128];
+
 	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
 	if(!rules)
 		return 0;
@@ -600,37 +674,40 @@ static int showPortForwardRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	/* format is :
 	 * [ip],[port_from],[port_to],[protocol],[comment],;
 	 */
-	while(getNthValueSafe(i++, rules, ';', rec, sizeof(rec)) != -1 ){
+	while (getNthValueSafe(i++, rules, ';', rec, sizeof(rec)) != -1 )
+	{
+		// get interface
+		if ((getNthValueSafe(0, rec, ',', interface, sizeof(interface)) == -1))
+			continue;
+		
 		// get ip address
-		if((getNthValueSafe(0, rec, ',', ip_address, sizeof(ip_address)) == -1)){
+		if ((getNthValueSafe(1, rec, ',', ip_address, sizeof(ip_address)) == -1))
 			continue;
-		}
-		if(!isIpValid(ip_address)){
+
+		if(!isIpValid(ip_address))
 			continue;
-		}
 
 		// get port range "from"
-		if((getNthValueSafe(1, rec, ',', prf, sizeof(prf)) == -1)){
+		if((getNthValueSafe(2, rec, ',', prf, sizeof(prf)) == -1))
 			continue;
-		}
-		if( (prf_int = atoi(prf)) == 0 || prf_int > 65535){
+
+		if( (prf_int = atoi(prf)) == 0 || prf_int > 65535)
 			continue;
-		}
 
 		// get port range "to"
-		if((getNthValueSafe(2, rec, ',', prt, sizeof(prt)) == -1)){
+		if((getNthValueSafe(3, rec, ',', prt, sizeof(prt)) == -1))
 			continue;
-		}
-		if( (prt_int = atoi(prt)) > 65535){
+
+		if( (prt_int = atoi(prt)) > 65535)
 			continue;
-		}
 
 		// get protocol
-		if((getNthValueSafe(3, rec, ',', protocol, sizeof(protocol)) == -1)){
+		if ((getNthValueSafe(4, rec, ',', protocol, sizeof(protocol)) == -1))
 			continue;
-		}
+
 		proto = atoi(protocol);
-		switch(proto){
+		switch(proto)
+		{
 			case PROTO_TCP:
 			case PROTO_UDP:
 			case PROTO_TCP_UDP:
@@ -639,44 +716,48 @@ static int showPortForwardRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 				continue;
 		}
 
-		if((getNthValueSafe(4, rec, ',', comment, sizeof(comment)) == -1)){
+		if ((getNthValueSafe(5, rec, ',', comment, sizeof(comment)) == -1))
 			continue;
-		}
 
 		websWrite(wp, T("<tr>\n"));
 		// output No.
-		websWrite(wp, T("<td> %d&nbsp; <input type=\"checkbox\" name=\"delRule%d\"> </td>"), i, i-1 );
+		websWrite(wp, T("<td>%d&nbsp;<input type=\"checkbox\" name=\"delRule%d\"></td>"), i, i-1 );
 
 		// output IP address
-		websWrite(wp, T("<td align=center> %s </td>"), ip_address);
+		websWrite(wp, T("<td align=\"center\">%s</td>"), ip_address);
+		
+		// Interface
+		websWrite(wp, T("<td align=\"center\">%s</td>"), interface);
 
 		// output Port Range
 		if(prt_int)
-			websWrite(wp, T("<td align=center> %d - %d </td>"), prf_int, prt_int);
+			websWrite(wp, T("<td align=\"center\">%d&nbsp;-&nbsp;%d</td>"), prf_int, prt_int);
 		else
-			websWrite(wp, T("<td align=center> %d </td>"), prf_int);
+			websWrite(wp, T("<td align=\"center\">%d</td>"), prf_int);
 
 		// output Protocol
-        switch(proto){
-            case PROTO_TCP:
-				websWrite(wp, T("<td align=center> TCP </td>"));
+		switch (proto)
+		{
+			case PROTO_TCP:
+				websWrite(wp, T("<td align=\"center\">TCP</td>"));
 				break;
-            case PROTO_UDP:
-				websWrite(wp, T("<td align=center> UDP </td>"));
+			case PROTO_UDP:
+				websWrite(wp, T("<td align=\"center\">UDP</td>"));
 				break;
-            case PROTO_TCP_UDP:
-				websWrite(wp, T("<td align=center> TCP + UDP </td>"));
+			case PROTO_TCP_UDP:
+				websWrite(wp, T("<td align=\"center\">TCP + UDP</td>"));
 				break;
 		}
 
 		// output Comment
 		if(strlen(comment))
-			websWrite(wp, T("<td align=center> %s</td>"), comment);
+			websWrite(wp, T("<td align=\"center\">%s</td>"), comment);
 		else
-			websWrite(wp, T("<td align=center> &nbsp; </td>"));
+			websWrite(wp, T("<td align=\"center\">&nbsp;</td>"));
 		websWrite(wp, T("</tr>\n"));
-	}	  
-	return 0;	
+	}
+	
+	return 0;
 }
 
 static void getRulesPacketCount(webs_t wp, char_t *path, char_t *query)
@@ -701,19 +782,23 @@ static void getRulesPacketCount(webs_t wp, char_t *path, char_t *query)
 		goto error;
 
 	fp = popen("iptables -t filter -L -v", "r");
-	if(!fp){
+	if(!fp)
+	{
 		free(result);
 		goto error;
 	}
 
-	while(fgets(buf, 1024, fp) && index < 128){
-		if(step_in_chains){
+	while(fgets(buf, 1024, fp) && index < 128)
+	{
+		if (step_in_chains)
+		{
 			if(buf[0] == '\n')
 				break;
 			if(buf[0] == ' ' && buf[1] == 'p' && buf[2] == 'k' && buf[3] == 't' )
 				continue;
 			// Skip the first one rule if default policy is drop.
-			if(default_drop_flag){
+			if(default_drop_flag)
+			{
 				default_drop_flag = 0;
 				continue;
 			}
@@ -747,7 +832,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	int sprf_int, sprt_int, proto;
 	char mac_address[32];
 	char sip_1[32], sip_2[32], sprf[8], sprt[8], comment[16], protocol[8], action[4];
-	char dip_1[32], dip_2[32], dprf[8], dprt[8];
+	char dip_1[32], dip_2[32], dprf[8], dprt[8], iface[8];
 	int dprf_int, dprt_int;
 	char rec[256];
 	char *default_policy;
@@ -755,88 +840,110 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	if(!rules)
 		return 0;
 
-    default_policy = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
-    // add the default policy to the end of FORWARD chain
-    if(!default_policy)
+	default_policy = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
+	// add the default policy to the end of FORWARD chain
+	if(!default_policy)
 		return 0;
 	if(!strlen(default_policy))
 		return 0;
 
 	i=0;
-	while(getNthValueSafe(i, rules, ';', rec, sizeof(rec)) != -1 && strlen(rec)){
+	while(getNthValueSafe(i, rules, ';', rec, sizeof(rec)) != -1 && strlen(rec))
+	{
 		printf("i=%d, rec=%s, strlen(rec)=%d\n", i, rec, strlen(rec));
-		// get ip 1
-        if((getNthValueSafe(0, rec, ',', sip_1, sizeof(sip_1)) == -1)){
+		
+		// Get interface
+		if ((getNthValueSafe(0, rec, ',', iface, sizeof(iface)) == -1))
+		{
 			i++;
 			continue;
 		}
-        if(!isIpNetmaskValid(sip_1)){
+		
+		// get ip 1
+		if ((getNthValueSafe(1, rec, ',', sip_1, sizeof(sip_1)) == -1))
+		{
+			i++;
+			continue;
+		}
+		if (!isIpNetmaskValid(sip_1))
+		{
 			i++;
 			continue;
 		}
 		// translate "any/0" to "any" for readable reason
-		if( !strcmp(sip_1, "any/0"))
+		if (!strcmp(sip_1, "any/0"))
 			strcpy(sip_1, "-");
 
 		// get ip 2
-        // get ip address
-        if((getNthValueSafe(1, rec, ',', sip_2, sizeof(sip_2)) == -1)){
+		// get ip address
+		if ((getNthValueSafe(2, rec, ',', sip_2, sizeof(sip_2)) == -1))
+		{
 			i++;
 			continue;
 		}
 		// dont verify cause we dont have ip range support
 		//if(!isIpValid(sip_2))
-        //    continue;
+		//	continue;
 
 		// get port range "from"
-		if((getNthValueSafe(2, rec, ',', sprf, sizeof(sprf)) == -1)){
+		if ((getNthValueSafe(3, rec, ',', sprf, sizeof(sprf)) == -1))
+		{
 			i++;
 			continue;
 		}
-		if( (sprf_int = atoi(sprf)) > 65535){
+		if ((sprf_int = atoi(sprf)) > 65535)
+		{
 			i++;
 			continue;
 		}
 
 		// get port range "to"
-		if((getNthValueSafe(3, rec, ',', sprt, sizeof(sprt)) == -1)){
+		if ((getNthValueSafe(4, rec, ',', sprt, sizeof(sprt)) == -1))
+		{
 			i++;
 			continue;
 		}
-		if( (sprt_int = atoi(sprt)) > 65535){
+		if ((sprt_int = atoi(sprt)) > 65535)
+		{
 			i++;
 			continue;
 		}
 
 		// get ip 1
-        if((getNthValueSafe(4, rec, ',', dip_1, sizeof(dip_1)) == -1)){
-			i++;
-            continue;
-		}
-        if(!isIpNetmaskValid(dip_1)){
-			i++;
-            continue;
-		}
-		// translate "any/0" to "any" for readable reason
-		if( !strcmp(dip_1, "any/0"))
-			strcpy(dip_1, "-");
-		
-		// get ip 2
-        if((getNthValueSafe(5, rec, ',', dip_2, sizeof(dip_2)) == -1)){
-			i++;
-            continue;
-		}
-		// dont verify cause we dont have ip range support
-		//if(!isIpValid(dip_2))
-        //    continue;
-
-		// get protocol
-		if((getNthValueSafe(8, rec, ',', protocol, sizeof(protocol)) == -1)){
+		if ((getNthValueSafe(5, rec, ',', dip_1, sizeof(dip_1)) == -1))
+		{
 			i++;
 			continue;
 		}
+		if (!isIpNetmaskValid(dip_1))
+		{
+			i++;
+			continue;
+		}
+		// translate "any/0" to "any" for readable reason
+		if (!strcmp(dip_1, "any/0"))
+			strcpy(dip_1, "-");
+		
+		// get ip 2
+		if ((getNthValueSafe(6, rec, ',', dip_2, sizeof(dip_2)) == -1))
+		{
+			i++;
+			continue;
+		}
+		// dont verify cause we dont have ip range support
+		//if(!isIpValid(dip_2))
+		//	continue;
+
+		// get protocol
+		if ((getNthValueSafe(9, rec, ',', protocol, sizeof(protocol)) == -1))
+		{
+			i++;
+			continue;
+		}
+		
 		proto = atoi(protocol);
-		switch(proto){
+		switch(proto)
+		{
 			case PROTO_TCP:
 			case PROTO_UDP:
 			case PROTO_NONE:
@@ -847,43 +954,49 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get port range "from"
-		if((getNthValueSafe(6, rec, ',', dprf, sizeof(dprf)) == -1)){
+		if ((getNthValueSafe(7, rec, ',', dprf, sizeof(dprf)) == -1))
+		{
 			i++;
 			continue;
 		}
-		if( (dprf_int = atoi(dprf)) > 65535){
+		if ((dprf_int = atoi(dprf)) > 65535)
+		{
 			i++;
 			continue;
 		}
 
 		// get port range "to"
-		if((getNthValueSafe(7, rec, ',', dprt, sizeof(dprt)) == -1)){
+		if ((getNthValueSafe(8, rec, ',', dprt, sizeof(dprt)) == -1))
+		{
 			i++;
 			continue;
 		}
-		if( (dprt_int = atoi(dprt)) > 65535){
+		if ( (dprt_int = atoi(dprt)) > 65535)
+		{
 			i++;
 			continue;
 		}
 
 		// get action
-		if((getNthValueSafe(9, rec, ',', action, sizeof(action)) == -1)){
+		if ((getNthValueSafe(10, rec, ',', action, sizeof(action)) == -1)){
 			i++;
 			continue;
 		}
 
 		// get comment
-		if((getNthValueSafe(10, rec, ',', comment, sizeof(comment)) == -1)){
+		if ((getNthValueSafe(11, rec, ',', comment, sizeof(comment)) == -1))
+		{
 			i++;
 			continue;
 		}
 
 		// get mac address
-		if((getNthValueSafe(11, rec, ',', mac_address, sizeof(mac_address)) == -1)){
+		if ((getNthValueSafe(12, rec, ',', mac_address, sizeof(mac_address)) == -1))
+		{
 			i++;
 			continue;
 		}
-		if(!strlen(mac_address))
+		if (!strlen(mac_address))
 			gstrcpy(mac_address, T("-"));
 
 		websWrite(wp, T("<tr>\n"));
@@ -891,95 +1004,100 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, T("<td> %d&nbsp; <input type=\"checkbox\" name=\"delRule%d\"> </td>"), i+1, i );
 
 		// output Mac address
-		websWrite(wp, T("<td align=center> %s </td>"), mac_address);
+		websWrite(wp, T("<td align=\"center\"> %s </td>"), mac_address);
+		
+		// output Interface
+		websWrite(wp, T("<td align=\"center\"> %s </td>"), iface);
 
 		// output DIP
-		websWrite(wp, T("<td align=center> %s </td>"), dip_1);
+		websWrite(wp, T("<td align=\"center\"> %s </td>"), dip_1);
 		// we dont support ip range 
 		// websWrite(wp, T("<td align=center> %s-%s </td>"), ip_1, ip_2);
 
 		// output SIP
-		websWrite(wp, T("<td align=center> %s </td>"), sip_1);
+		websWrite(wp, T("<td align=\"center\"> %s </td>"), sip_1);
 		// we dont support ip range 
 		// websWrite(wp, T("<td align=center> %s-%s </td>"), ip_1, ip_2);
 
 		// output Protocol
-        switch(proto){
-            case PROTO_TCP:
-				websWrite(wp, T("<td align=center> TCP </td>"));
+		switch(proto)
+		{
+			case PROTO_TCP:
+				websWrite(wp, T("<td align=\"center\"> TCP </td>"));
 				break;
-            case PROTO_UDP:
-				websWrite(wp, T("<td align=center> UDP </td>"));
+			case PROTO_UDP:
+				websWrite(wp, T("<td align=\"center\"> UDP </td>"));
 				break;
-            case PROTO_ICMP:
-				websWrite(wp, T("<td align=center> ICMP </td>"));
+			case PROTO_ICMP:
+				websWrite(wp, T("<td align=\"center\"> ICMP </td>"));
 				break;
-            case PROTO_NONE:
-				websWrite(wp, T("<td align=center> - </td>"));
+			case PROTO_NONE:
+				websWrite(wp, T("<td align=\"center\"> - </td>"));
 				break;
 		}
 
 		// output dest Port Range
 		if(dprt_int)
-			websWrite(wp, T("<td align=center> %d - %d </td>"), dprf_int, dprt_int);
-		else{
+			websWrite(wp, T("<td align=\"center\"> %d - %d </td>"), dprf_int, dprt_int);
+		else
+		{
 			// we re-descript the port number here because 
 			// "any" word is more meanful than "0"
-			if(!dprf_int){
-				websWrite(wp, T("<td align=center> - </td>"), dprf_int);
-			}else{
-				websWrite(wp, T("<td align=center> %d </td>"), dprf_int);
-			}
+			if (!dprf_int)
+				websWrite(wp, T("<td align=\"center\"> - </td>"), dprf_int);
+			else
+				websWrite(wp, T("<td align=\"center\"> %d </td>"), dprf_int);
 		}
 
 		// output Source Port Range
-		if(sprt_int)
-			websWrite(wp, T("<td align=center> %d - %d </td>"), sprf_int, sprt_int);
-		else{
+		if (sprt_int)
+			websWrite(wp, T("<td align=\"center\"> %d - %d </td>"), sprf_int, sprt_int);
+		else
+		{
 			// we re-descript the port number here because 
 			// "any" word is more meanful than "0"
-			if(!sprf_int){
-				websWrite(wp, T("<td align=center> - </td>"), sprf_int);
-			}else{
-				websWrite(wp, T("<td align=center> %d </td>"), sprf_int);
-			}
+			if (!sprf_int)
+				websWrite(wp, T("<td align=\"center\"> - </td>"), sprf_int);
+			else
+				websWrite(wp, T("<td align=\"center\"> %d </td>"), sprf_int);
 		}
 
-
 		// output action
-        switch(atoi(action)){
-            case ACTION_DROP:
-				websWrite(wp, T("<td align=center id=portFilterActionDrop%d> Drop </td>"), i);
+		switch(atoi(action))
+		{
+			case ACTION_DROP:
+				websWrite(wp, T("<td align=\"center\" id=\"portFilterActionDrop%d\"> Drop </td>"), i);
 				break;
-            case ACTION_ACCEPT:
-				websWrite(wp, T("<td align=center id=portFilterActionAccept%d> Accept </td>"), i);
+			case ACTION_ACCEPT:
+				websWrite(wp, T("<td align=\"center\" id=\"portFilterActionAccept%d\"> Accept </td>"), i);
 				break;
 		}
 
 		// output Comment
 		if(strlen(comment))
-			websWrite(wp, T("<td align=center> %s</td>"), comment);
+			websWrite(wp, T("<td align=\"center\"> %s</td>"), comment);
 		else
-			websWrite(wp, T("<td align=center> &nbsp; </td>"));
+			websWrite(wp, T("<td align=\"center\"> &nbsp; </td>"));
 
 		// output the id of "packet count"
-		websWrite(wp, T("<td align=center id=pktCnt%d>-</td>"), i);
+		websWrite(wp, T("<td align=\"center\" id=\"pktCnt\"%d>-</td>"), i);
 
 		websWrite(wp, T("</tr>\n"));
 
 		i++;
-	}	  
+	}
 
-	switch(atoi(default_policy)){
+	switch(atoi(default_policy))
+	{
 		case 0:
-			websWrite(wp, T("<tr><td align=center colspan=9 id=portCurrentFilterDefaultAccept> Others would be accepted.</td><td align=center id=pktCnt%d>-</td></tr>"), i);
+			websWrite(wp, T("<tr><td align=\"center\" colspan=\"10\" id=\"portCurrentFilterDefaultAccept\"> Others would be accepted.</td><td align=\"center\" id=\"pktCnt%d\">-</td></tr>"), i);
 			break;
 		case 1:
-			websWrite(wp, T("<tr><td align=center colspan=9 id=portCurrentFilterDefaultDrop> Others would be dropped.</td><td align=center id=pktCnt%d>-</td></tr>"), i);
+			websWrite(wp, T("<tr><td align=\"center\" colspan=\"10\" id=\"portCurrentFilterDefaultDrop\"> Others would be dropped.</td><td align=\"center\" id=\"pktCnt%d\">-</td></tr>"), i);
 			break;
 	}
 
-	return 0;	
+	return 0;
 }
 
 static int showDMZIPAddressASP(int eid, webs_t wp, int argc, char_t **argv)
@@ -991,7 +1109,7 @@ static int showDMZIPAddressASP(int eid, webs_t wp, int argc, char_t **argv)
 		return 0;
 
 	websWrite(wp, T("%s"), DMZIPAddress);
-	return 0;	
+	return 0;
 }
 
 static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
@@ -1001,9 +1119,9 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-    char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
-    if(!rules || !strlen(rules) )
-        return;
+	char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	if (!rules || !strlen(rules))
+		return;
 
 	rule_count = getRuleNums(rules);
 	if(!rule_count)
@@ -1011,18 +1129,19 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 
 	deleArray = (int *)malloc(rule_count * sizeof(int));
 
-	for(i=0, j=0; i< rule_count; i++){
+	for (i=0, j=0; i< rule_count; i++)
+	{
 		snprintf(name_buf, 16, "delRule%d", i);
 		value = websGetVar(wp, name_buf, NULL);
-		if(value){
+		if (value)
 			deleArray[j++] = i;
-		}
 	}
-	if(!j){
-	    websHeader(wp);
-	    websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
-	    websFooter(wp);
-	    websDone(wp, 200);		
+	if(!j)
+	{
+		websHeader(wp);
+		websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
+		websFooter(wp);
+		websDone(wp, 200);
 		return;
 	}
 
@@ -1032,23 +1151,23 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rules);
 	nvram_commit(RT2860_NVRAM);
 
-    websHeader(wp);
-    websWrite(wp, T("s<br>\n") );
-    websWrite(wp, T("fromPort: <br>\n"));
-    websWrite(wp, T("toPort: <br>\n"));
-    websWrite(wp, T("protocol: <br>\n"));
-    websWrite(wp, T("comment: <br>\n"));
-    websFooter(wp);
-    websDone(wp, 200);
+	websHeader(wp);
+	websWrite(wp, T("s<br>\n") );
+	websWrite(wp, T("fromPort: <br>\n"));
+	websWrite(wp, T("toPort: <br>\n"));
+	websWrite(wp, T("protocol: <br>\n"));
+	websWrite(wp, T("comment: <br>\n"));
+	websFooter(wp);
+	websDone(wp, 200);
 
-    //generate and save rules
-    iptablesIPPortFilterBuildScript();
-    // Call rwfs to store data                                                                                              
-    doSystem("fs save &");
-    // call iptables
-    firewall_rebuild();
-    
- return;
+	//generate and save rules
+	iptablesIPPortFilterBuildScript();
+	// Call rwfs to store data
+	doSystem("fs save &");
+	// call iptables
+	firewall_rebuild();
+
+	return;
 }
 
 static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
@@ -1059,9 +1178,9 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	int *deleArray;
 	char *firewall_enable;
 
-    char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
-    if(!rules || !strlen(rules) )
-        return;
+	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+	if(!rules || !strlen(rules) )
+		return;
 
 	rule_count = getRuleNums(rules);
 	if(!rule_count)
@@ -1069,21 +1188,22 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 
 	deleArray = (int *)malloc(rule_count * sizeof(int));
 
-	for(i=0, j=0; i< rule_count; i++){
+	for (i=0, j=0; i< rule_count; i++)
+	{
 		snprintf(name_buf, 16, "delRule%d", i);
 		value = websGetVar(wp, T(name_buf), NULL);
-		if(value){
+		if (value)
 			deleArray[j++] = i;
-		}
 	}
 
-    if(!j){
-        websHeader(wp);
-        websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
-        websFooter(wp);
-        websDone(wp, 200);
-        return;
-    }
+	if (!j)
+	{
+		websHeader(wp);
+		websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
+		websFooter(wp);
+		websDone(wp, 200);
+		return;
+	}
 
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
@@ -1095,23 +1215,26 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("s<br>\n") );
 	websWrite(wp, T("fromPort: <br>\n"));
 	websWrite(wp, T("toPort: <br>\n"));
-        websWrite(wp, T("protocol: <br>\n"));
+	websWrite(wp, T("protocol: <br>\n"));
 	websWrite(wp, T("comment: <br>\n"));
-        websFooter(wp);
-        websDone(wp, 200);
+	websFooter(wp);
+	websDone(wp, 200);
 
 	// restart iptables if it is running
 	firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
-	if(firewall_enable){
-		if(atoi(firewall_enable)){
-		    //generate and save rules
-		    iptablesPortForwardBuildScript();
-		    // Call iptables
-		    firewall_rebuild();
+
+	if (firewall_enable)
+	{
+		if (atoi(firewall_enable))
+		{
+			//generate and save rules
+			iptablesPortForwardBuildScript();
+			// Call iptables
+			firewall_rebuild();
 		}
 	}
 
-    return;
+	return;
 }
 
 
@@ -1120,7 +1243,7 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	char rule[8192];
 	char *mac_address;
 	char *sip_1, *sip_2, *sprf, *sprt, *protocol, *action_str, *comment;
-	char *dip_1, *dip_2, *dprf, *dprt;
+	char *dip_1, *dip_2, *dprf, *dprt, *iface;
 	char *IPPortFilterRules;
 	
 	int sprf_int, sprt_int, dprf_int, dprt_int, proto, action;
@@ -1140,16 +1263,18 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	protocol = websGetVar(wp, T("protocol"), T(""));
 	action_str = websGetVar(wp, T("action"), T(""));
 	comment = websGetVar(wp, T("comment"), T(""));
+	iface = websGetVar(wp, T("fltIface"), T(""));
 
-	if(!mac_address || !sip_1 || !dip_1 || !sprf || !dprf)
+	if(!mac_address || !sip_1 || !dip_1 || !sprf || !dprf || !iface)
 		return;
 
-	if(!strlen(mac_address) && !strlen(sip_1) && !strlen(dip_1) && !strlen(sprf) && !strlen(dprf))
+	if(!strlen(mac_address) && !strlen(sip_1) && !strlen(dip_1) && !strlen(sprf) && !strlen(dprf) && !strlen(iface))
 		return;
 
 	// we dont trust user input.....
-	if(strlen(mac_address)){
-		if(!isMacValid(mac_address))
+	if(strlen(mac_address))
+	{
+		if (!isMacValid(mac_address))
 			return;
 	}
 
@@ -1159,15 +1284,17 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	}else
 		sip_1 = T("any/0");
 
-	if(strlen(dip_1)){
+	if(strlen(dip_1))
+	{
 		if(!isIpNetmaskValid(dip_1))
 			return;
-	}else
-    	dip_1 = T("any/0");
+	}
+	else
+		dip_1 = T("any/0");
 
 	sip_2 = dip_2 = "0";
 
-	if(! strcmp(protocol, T("TCP")))
+	if (!strcmp(protocol, T("TCP")))
 		proto = PROTO_TCP;
 	else if( !strcmp(protocol, T("UDP")))
 		proto = PROTO_UDP;
@@ -1178,69 +1305,72 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	else
 		return;
 
-	if(!strlen(sprf) || proto == PROTO_NONE || proto == PROTO_ICMP){
+	if (!strlen(sprf) || proto == PROTO_NONE || proto == PROTO_ICMP)
 		sprf_int = 0;
-	}else{
+	else
+	{
 		sprf_int = atoi(sprf);
-		if(sprf_int == 0 || sprf_int > 65535)
+		if (sprf_int == 0 || sprf_int > 65535)
 			return;
 	}
 
-	if(!strlen(sprt) || proto == PROTO_NONE || proto == PROTO_ICMP){
+	if (!strlen(sprt) || proto == PROTO_NONE || proto == PROTO_ICMP)
 		sprt_int = 0;
-	}else{
+	else
+	{
 		sprt_int = atoi(sprt);
 		if(sprt_int ==0 || sprt_int > 65535)
 			return;
 	}
 
-	if(!strlen(dprf) || proto == PROTO_NONE || proto == PROTO_ICMP){
+	if(!strlen(dprf) || proto == PROTO_NONE || proto == PROTO_ICMP)
 		dprf_int = 0;
-	}else{
+	else
+	{
 		dprf_int = atoi(dprf);
-		if(dprf_int ==0 || dprf_int > 65535)
+		if (dprf_int ==0 || dprf_int > 65535)
 			return;
 	}
 
-	if(!strlen(dprt) || proto == PROTO_NONE || proto == PROTO_ICMP){
+	if (!strlen(dprt) || proto == PROTO_NONE || proto == PROTO_ICMP)
 		dprt_int = 0;
-	}else{
+	else
+	{
 		dprt_int = atoi(dprt);
 		if(dprt_int ==0 || dprt_int > 65535)
 			return;
 	}
 
-	if(! (strcmp(action_str, T("Accept"))))
+	if (!(strcmp(action_str, T("Accept"))))
 		action = ACTION_ACCEPT;
-	else if(! (strcmp(action_str, T("Drop"))))
+	else if (!(strcmp(action_str, T("Drop"))))
 		action = ACTION_DROP;
 	else
 		return;
 
-	if(strlen(comment) > 32)
+	if (strlen(comment) > 32)
 		return;
 	// i know you will try to break our box... ;) 
-	if(strchr(comment, ';') || strchr(comment, ','))
+	if (strchr(comment, ';') || strchr(comment, ','))
 		return;
 
-	if(   ( IPPortFilterRules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules")) && strlen(IPPortFilterRules)){
-		snprintf(rule, sizeof(rule), "%s;%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", IPPortFilterRules, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
-	}else{
-		snprintf(rule, sizeof(rule), "%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
-	}
+	if (( IPPortFilterRules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules")) && strlen(IPPortFilterRules))
+		snprintf(rule, sizeof(rule), "%s;%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", IPPortFilterRules, iface, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
+	else
+		snprintf(rule, sizeof(rule), "%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", iface, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);
 	nvram_commit(RT2860_NVRAM);
 
-
 	websHeader(wp);
-	websWrite(wp, T("mac: %s<br>\n"), mac_address);	
-	websWrite(wp, T("sip1: %s<br>\n"), sip_1);	
-	websWrite(wp, T("sip2: %s<br>\n"), sip_2);	
+	websWrite(wp, T("mac: %s<br>\n"), mac_address);
+	websWrite(wp, T("iface: %s<br>\n"), iface);
+	websWrite(wp, T("sip1: %s<br>\n"), sip_1);
+	websWrite(wp, T("sip2: %s<br>\n"), sip_2);
 	websWrite(wp, T("sFromPort: %s<br>\n"), sprf);
 	websWrite(wp, T("sToPort: %s<br>\n"), sprt);
-	websWrite(wp, T("dip1: %s<br>\n"), dip_1);	
-	websWrite(wp, T("dip2: %s<br>\n"), dip_2);	
+	websWrite(wp, T("dip1: %s<br>\n"), dip_1);
+	websWrite(wp, T("dip2: %s<br>\n"), dip_2);
 	websWrite(wp, T("dFromPort: %s<br>\n"), dprf);
 	websWrite(wp, T("dToPort: %s<br>\n"), dprt);
 	websWrite(wp, T("protocol: %s<br>\n"), protocol);
@@ -1248,21 +1378,20 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("comment: %s<br>\n"), comment);
 
 	websFooter(wp);
-	websDone(wp, 200);        
-        //generate and save rules
+	websDone(wp, 200);
+	
+	// generate and save rules
 	iptablesIPPortFilterBuildScript();
-        // Call rwfs to store data                                                                                              
-        doSystem("fs save &");
-        // call iptables
-        firewall_rebuild();
-    return;
+	// Call rwfs to store data
+	doSystem("fs save &");
+	// call iptables
+	firewall_rebuild();
 }
-
 
 static void portForward(webs_t wp, char_t *path, char_t *query)
 {
 	char rule[8192];
-	char *ip_address, *pfe, *prf, *prt, *protocol, *comment;
+	char *ip_address, *pfe, *prf, *prt, *protocol, *comment, *iface;
 	char *PortForwardRules;
 
 	int prf_int, prt_int, proto;
@@ -1273,17 +1402,21 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	prt = websGetVar(wp, T("toPort"), T(""));
 	protocol = websGetVar(wp, T("protocol"), T(""));
 	comment = websGetVar(wp, T("comment"), T(""));
+	iface = websGetVar(wp, T("fwdIface"), T(""));
 
-	if(!pfe && !strlen(pfe))
+	if (!pfe && !strlen(pfe))
 		return;
 
-	if(!atoi(pfe)){
+	if (!atoi(pfe))
+	{
 		nvram_set(RT2860_NVRAM, "PortForwardEnable", "0");
 		//no chainge in rules
 		goto end;
 	}
 
-	if(!strlen(ip_address) && !strlen(prf) && !strlen(prt) && !strlen(comment)){	// user choose nothing but press "apply" only
+	// user choose nothing but press "apply" only
+	if (!strlen(ip_address) && !strlen(prf) && !strlen(prt) && !strlen(comment) && !strlen(iface))
+	{
 		nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
 		//generate and save rules
 		iptablesPortForwardBuildScript();
@@ -1291,31 +1424,33 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 		goto end;
 	}
 
-	if(!ip_address && !strlen(ip_address))
+	if (!ip_address && !strlen(ip_address))
 		return;
-	if(!isIpValid(ip_address))
+	if (!isIpValid(ip_address))
 		return;
 
 	// we dont trust user input.....
-	if(!prf && !strlen(prf))
+	if (!prf && !strlen(prf))
 		return;
-	if(!(prf_int = atoi(prf)) )
+	if (!(prf_int = atoi(prf)))
 		return;
-	if(prf_int > 65535)
+	if (prf_int > 65535)
 		return;
 
 	if(!prt)
 		return;
-	if(strlen(prt)){
+	
+	if (strlen(prt))
+	{
 		if( !(prt_int = atoi(prt)) )
 			return;
 		if(prt_int < prf_int)
 			return;
 		if(prt_int > 65535)
 			return;
-	}else{
-		prt_int = 0;
 	}
+	else
+		prt_int = 0;
 
 	if(! strcmp(protocol, "TCP"))
 		proto = PROTO_TCP;
@@ -1324,6 +1459,9 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	else if( !strcmp(protocol, "TCP&UDP"))
 		proto = PROTO_TCP_UDP;
 	else
+		return;
+	
+	if ((strcmp(iface, "LAN")!=0) && (strcmp(iface, "WAN")!=0) && (strcmp(iface, "VPN")!=0))
 		return;
 
 	if(strlen(comment) > 32)
@@ -1334,14 +1472,13 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 
 	nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
 
-	if(( PortForwardRules = nvram_bufget(RT2860_NVRAM, "PortForwardRules")) && strlen( PortForwardRules) )
-		snprintf(rule, sizeof(rule), "%s;%s,%d,%d,%d,%s",  PortForwardRules, ip_address, prf_int, prt_int, proto, comment);
+	if ((PortForwardRules = nvram_bufget(RT2860_NVRAM, "PortForwardRules")) && strlen( PortForwardRules))
+		snprintf(rule, sizeof(rule), "%s;%s,%s,%d,%d,%d,%s",  PortForwardRules, iface, ip_address, prf_int, prt_int, proto, comment);
 	else
-		snprintf(rule, sizeof(rule), "%s,%d,%d,%d,%s", ip_address, prf_int, prt_int, proto, comment);
+		snprintf(rule, sizeof(rule), "%s,%s,%d,%d,%d,%s", iface, ip_address, prf_int, prt_int, proto, comment);
 
 	nvram_set(RT2860_NVRAM, "PortForwardRules", rule);
 	nvram_commit(RT2860_NVRAM);
-
 
 end:
 	websHeader(wp);
@@ -1353,14 +1490,14 @@ end:
 	websWrite(wp, T("comment: %s<br>\n"), comment);
 
 	websFooter(wp);
-        websDone(wp, 200);        
+	websDone(wp, 200);
 
-        //generate and save rules
-        iptablesPortForwardBuildScript();
-        // Call rwfs to store data                                                                                              
-        doSystem("fs save &");
-        // call iptables
-        firewall_rebuild();
+	// generate and save rules
+	iptablesPortForwardBuildScript();
+	// Call rwfs to store data
+	doSystem("fs save &");
+	// call iptables
+	firewall_rebuild();
 }
 
 static void BasicSettings(webs_t wp, char_t *path, char_t *query)
@@ -1393,11 +1530,16 @@ static void BasicSettings(webs_t wp, char_t *path, char_t *query)
 	websHeader(wp);
 	websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
 	websFooter(wp);
-	websDone(wp, 200);        
+	websDone(wp, 200);
 
-	if(firewall_enable && atoi(firewall_enable))
-	    iptablesIPPortFilterBuildScript();
-
+	if (firewall_enable && atoi(firewall_enable))
+	{
+		iptablesIPPortFilterBuildScript();
+		// Call rwfs to store data
+		doSystem("fs save &");
+		// call iptables
+		firewall_rebuild();
+	}
 }
 
 static void DMZ(webs_t wp, char_t *path, char_t *query)
@@ -1446,7 +1588,12 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
 	websFooter(wp);
 	websDone(wp, 200);
+
 	iptablesIPPortFilterBuildScript();
+	// Call rwfs to store data
+	doSystem("fs save &");
+	// call iptables
+	firewall_rebuild();
 }
 
 
@@ -1480,7 +1627,8 @@ void iptablesWebsFilterRun(void)
 	if(!strcmp(proxy, "1"))
 		content_filter += BLK_PROXY;
 
-	if(content_filter){
+	if (content_filter)
+	{
 		// Why only 3 ports are inspected?(This idea is from CyberTAN source code)
 		// TODO: use layer7 to inspect HTTP
 		doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset", content_filter);
@@ -1490,8 +1638,10 @@ void iptablesWebsFilterRun(void)
 
 	// URL filter
 	i=0;
-	while( (getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) ){
-		if(strlen(entry)){
+	while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) )
+	{
+		if (strlen(entry))
+		{
 			if(!strncasecmp(entry, "http://", strlen("http://")))
 				strcpy(entry, entry + strlen("http://"));
 			doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset", entry);
@@ -1500,7 +1650,8 @@ void iptablesWebsFilterRun(void)
 
 	// HOST(Keyword) filter
 	i=0;
-	while( (getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1) ){
+	while ( (getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1) )
+	{
 		if(strlen(entry))
 			doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset", entry);
 	}
@@ -1516,9 +1667,9 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-    char *rules = nvram_bufget(RT2860_NVRAM, "websURLFilters");
-    if(!rules || !strlen(rules) )
-        return;
+	char *rules = nvram_bufget(RT2860_NVRAM, "websURLFilters");
+	if(!rules || !strlen(rules) )
+		return;
 
 	rule_count = getRuleNums(rules);
 	if(!rule_count)
@@ -1526,18 +1677,19 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 
 	deleArray = (int *)malloc(rule_count * sizeof(int));
 
-	for(i=0, j=0; i< rule_count; i++){
+	for (i=0, j=0; i< rule_count; i++)
+	{
 		snprintf(name_buf, 16, "DR%d", i);
 		value = websGetVar(wp, name_buf, NULL);
-		if(value){
+		if (value)
 			deleArray[j++] = i;
-		}
 	}
-	if(!j){
-	    websHeader(wp);
-	    websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
-	    websFooter(wp);
-	    websDone(wp, 200);		
+	if (!j)
+	{
+		websHeader(wp);
+		websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
+		websFooter(wp);
+		websDone(wp, 200);
 		return;
 	}
 
@@ -1550,10 +1702,10 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
 	iptablesWebsFilterRun();
 
-    websHeader(wp);
-    websWrite(wp, T("Delete : success<br>\n") );
-    websFooter(wp);
-    websDone(wp, 200);
+	websHeader(wp);
+	websWrite(wp, T("Delete : success<br>\n") );
+	websFooter(wp);
+	websDone(wp, 200);
 
 	return;
 }
@@ -1565,9 +1717,9 @@ static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-    char *rules = nvram_bufget(RT2860_NVRAM, "websHostFilters");
-    if(!rules || !strlen(rules) )
-        return;
+	char *rules = nvram_bufget(RT2860_NVRAM, "websHostFilters");
+	if(!rules || !strlen(rules) )
+		return;
 
 	rule_count = getRuleNums(rules);
 	if(!rule_count)
@@ -1599,10 +1751,10 @@ static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
 	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
 	iptablesWebsFilterRun();
 
-    websHeader(wp);
-    websWrite(wp, T("Delete : success<br>\n") );
-    websFooter(wp);
-    websDone(wp, 200);
+	websHeader(wp);
+	websWrite(wp, T("Delete : success<br>\n") );
+	websFooter(wp);
+	websDone(wp, 200);
 
 	return;
 }
@@ -1632,8 +1784,8 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("Java: %s<br>\n"),   atoi(java) ? "enable" : "disable");
 	websWrite(wp, T("Activex: %s<br>\n"), atoi(activex) ? "enable" : "disable");
 	websWrite(wp, T("Cookies: %s<br>\n"), atoi(cookies) ? "enable" : "disable");
-    websFooter(wp);
-    websDone(wp, 200);
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 static void websURLFilter(webs_t wp, char_t *path, char_t *query)
@@ -1648,7 +1800,8 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 
 	if(!urlfilters || !strlen(urlfilters))
 		nvram_bufset(RT2860_NVRAM, "websURLFilters", rule);
-	else{
+	else
+	{
 		if(! (new_urlfilters = (char *)malloc(sizeof(char) * (strlen(urlfilters)+strlen(rule)+1))))
 			return;
 		new_urlfilters[0] = '\0';
@@ -1663,11 +1816,10 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
 	iptablesWebsFilterRun();
 
-    websHeader(wp);
-    websWrite(wp, T("add URL filter: %s<br>\n"), rule);
-    websFooter(wp);
-    websDone(wp, 200);
-
+	websHeader(wp);
+	websWrite(wp, T("add URL filter: %s<br>\n"), rule);
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 static void websHostFilter(webs_t wp, char_t *path, char_t *query)
@@ -1697,10 +1849,10 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
 	iptablesWebsFilterRun();
 
-    websHeader(wp);
-    websWrite(wp, T("add Host filter: %s<br>\n"), rule);
-    websFooter(wp);
-    websDone(wp, 200);
+	websHeader(wp);
+	websWrite(wp, T("add Host filter: %s<br>\n"), rule);
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 char *getNameIntroFromPat(char *filename)
@@ -1716,7 +1868,8 @@ char *getNameIntroFromPat(char *filename)
 		return NULL;
 	result[0] = '\0';
 	rc = fgets(buf, sizeof(buf), fp);
-	if(rc){
+	if (rc)
+	{
 		// find name
 		begin = buf + 2;
 		if(! ( desh = strchr(buf, '-'))){
@@ -1739,14 +1892,16 @@ char *getNameIntroFromPat(char *filename)
 		}
 		*end = '\0';
 		strncat(result, desh + 2 , sizeof(result));
-	}else{
+	}
+	else
+	{
 		printf("warning: can't read %s intro.\n", filename);
 		fclose(fp);
 		return "N/A#N/A";
 	}
 
 	fclose(fp);
-	return result;	
+	return result;
 }
 
 
@@ -1761,7 +1916,8 @@ void LoadLayer7FilterName(void)
 	if(!(d = opendir("/etc_ro/l7-protocols")))
 		return;
 	
-	while((dir = readdir(d))){
+	while ((dir = readdir(d)))
+	{
 		if(dir->d_name[0] == '.')
 			continue;
 		if(!(delim = strstr(dir->d_name, ".pat")) )
@@ -1787,7 +1943,7 @@ void LoadLayer7FilterName(void)
 static int getLayer7FiltersASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	websLongWrite(wp, l7name);
-	return 0;	
+	return 0;
 }
 
 void formDefineFirewall(void)
@@ -1828,8 +1984,8 @@ void firewall_rebuild(void)
 {
 	////----SET-RULES----------------////
 	//no backgroudn it!!!!
-        doSystem("service iptables restart");
+	doSystem("service iptables restart");
 	///-----Load L7 filters rules----////
 	LoadLayer7FilterName();
-        iptablesWebsFilterRun();
+	iptablesWebsFilterRun();
 }
