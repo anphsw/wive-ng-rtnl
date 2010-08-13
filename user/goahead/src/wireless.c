@@ -226,36 +226,11 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
 	channel = (channel_s == NULL)? 0 : atoi(channel_s);	
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "JP") == 0) ||
-			(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
-			(strcmp(value, "TW") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {
-		for (idx = 0; idx < 11; idx++)
-			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
-					(idx+1 == channel)? "selected" : "", 2412+5*idx,
-					"MHz (Channel ", idx+1, ")</option>");
+	for (idx = 0; idx < 14; idx++)
+		websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1, 
+			(idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
 	}
 
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "JP") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "FR") == 0) ||
-			(strcmp(value, "IE") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {
-		for (idx = 11; idx < 13; idx++)
-			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
-					(idx+1 == channel)? "selected" : "", 2412+5*idx,
-					"MHz (Channel ", idx+1, ")</option>");
-	}
-//Tim Wang, never need to show channel 14	
-#if 0
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "JP") == 0)) {
-		return websWrite(wp,
-				T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),
-				(14 == channel)? "selected" : "");
-	}
-#endif	
 	return 0;
 }
 
