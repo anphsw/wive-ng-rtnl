@@ -47,8 +47,8 @@ fi
             	    :
         	done
         	metric=0
-        	$LOG "Add default route"
         	for i in $router ; do
+        	    $LOG "Add default route $i dev $interface metric $metric"
             	    route add default gw $i dev $interface metric $metric
 		    #save first dgw with metric=1 to use in corbina hack
 		    if [ "$metric" = "0" ]; then
