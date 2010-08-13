@@ -395,8 +395,11 @@ int	umAddUser(char_t *user, char_t *pass, char_t *group,
 		return UM_ERR_BAD_NAME;
 	}
 
-	if (!umCheckName(pass)) {
-		return UM_ERR_BAD_PASSWORD;
+	if (strcmp(pass, ""))
+	{
+		if (!umCheckName(pass)) {
+			return UM_ERR_BAD_PASSWORD;
+		}
 	}
 
 /*
