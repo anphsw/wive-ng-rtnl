@@ -12,7 +12,7 @@ start() {
 
     #set variable
     HOSTNAME_NVRAM=`nvram_get 2860 HostName`
-    UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O staticroutes -f &"
+    UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O routes staticroutes msroutes -f &"
 
     #get parametrs
     opmode=`nvram_get 2860 OperationMode`
