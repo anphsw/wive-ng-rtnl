@@ -595,8 +595,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else //bg,bgn,n
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "15");
 
-	if (!strncmp(wirelessmode, "8", 2) || !strncmp(wirelessmode, "9", 2))
-		is_n = 1;
+        if (atoi(wirelessmode) >= 6)
+                is_n = 1;
 
 	//SSID, Multiple SSID
 	if (0 == strlen(ssid)) {
