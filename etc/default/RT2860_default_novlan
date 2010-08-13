@@ -196,3 +196,4 @@ vpnMTU=AUTO
 vpnDGW=1
 IS_WIVE=YES
 CHECKMAC=YES
+WatchdogEnabled=1

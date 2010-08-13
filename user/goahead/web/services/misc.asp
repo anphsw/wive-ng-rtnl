@@ -111,6 +111,7 @@ function initValue()
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
+	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 
 	if (lltdb == "0")
 	{
@@ -261,6 +262,15 @@ function CheckValue()
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
 		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Watchdog</td>
+<td>
+	<select name="watchdogEnable" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
 	</select>
 </td>
 </tr>

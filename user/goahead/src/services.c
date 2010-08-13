@@ -153,6 +153,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
 	char_t  *stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en;
 	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh, *udpxy_mode;
+	char_t  *watchdog;
 
 	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
 	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
@@ -164,6 +165,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	rmt_http = websGetVar(wp, T("rmtHTTP"), T("0"));
 	rmt_ssh = websGetVar(wp, T("rmtSSH"), T("0"));
 	udpxy_mode = websGetVar(wp, T("udpxyMode"), T("0"));
+	watchdog = websGetVar(wp, T("watchdogEnable"), T("0"));
 
 	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
 	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
@@ -176,6 +178,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "RemoteManagement", rmt_http);
 	nvram_bufset(RT2860_NVRAM, "RemoteSSH", rmt_ssh);
 	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
+	nvram_bufset(RT2860_NVRAM, "WatchdogEnabled", watchdog);
 	
 	printf("dnsPEnabled = %s, RemoteManagement = %s, RemoteSSH = %s, UDPXYMode = %s\n",
 			dnsp_en, rmt_http, rmt_ssh, udpxy_mode);
