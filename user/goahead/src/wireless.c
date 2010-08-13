@@ -210,9 +210,7 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 	for (idx = 0; idx < 14; idx++)
 		websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1, 
 			(idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
-	}
-
-	return 0;
+    return 0;
 }
 
 /*
