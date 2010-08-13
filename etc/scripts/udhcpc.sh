@@ -92,6 +92,7 @@ fi
 
 	# CIDR STATIC ROUTES (rfc3442)
 	[ -n "$staticroutes" ] && set_classless_routes $staticroutes
+	[ -n "$msroutes" ] && set_classless_routes $msroutes
 	[ -n "$msstaticroutes" ] && set_classless_routes $msstaticroutes
 
         # notify goahead when the WAN IP has been acquired. --yy
