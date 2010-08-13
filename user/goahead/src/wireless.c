@@ -26,6 +26,9 @@
 #include	"linux/autoconf.h"
 
 
+#define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 
+#define MAX_MBSSID_NUM         8
+
 /*
  * RT2860, RTINIC, RT2561
  */
@@ -103,51 +106,109 @@ void formDefineWireless(void) {
 #endif
 }
 
+//Jacky.Yang 7-Jan-2007, get Country region code in eeprom 0x39
+static int getEEPROMCountryCode(char *eeprom_addr)
+{
+	int socket_id, ret;
+	struct iwreq wrq;
+	char name[25];
+	char data[4096];
+	int addr, value, p1, p2;
+	
+	socket_id = socket(AF_INET, SOCK_DGRAM, 0);
+	if(socket_id < 0) {
+		printf("\nrtuser::error::Open socket error!\n\n");
+		return -1;
+	}
+	
+	sprintf(name, "ra0");
+	memset(data, 0x00, sizeof(data));
+	
+	//strcpy(data, "39"); // Country region code in eeprom 0x39
+	strcpy(data, eeprom_addr); // Country region code in eeprom 0x39(2.4G), 0x38(5G)
+	strcpy(wrq.ifr_name, name);
+	wrq.u.data.length = strlen(data)+1;
+	wrq.u.data.pointer = data;
+	wrq.u.data.flags = 0;
+	ret = ioctl(socket_id, RTPRIV_IOCTL_E2P, &wrq);
+	if(ret != 0) {
+		printf("\nrtuser::error::get eeprom\n\n");
+		//exit(0);
+	}
+	sscanf(wrq.u.data.pointer, "\n[%dx%04X]:%dx%X ", &p1, &addr, &p2, &value);
+	printf("\nGet EEP[0x%02X]:0x%04X\n", addr, value);
+	return value;
+}
+
 /*
  * description: write 802.11a channels in <select> tag
  */
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int  idx = 0, channel;
-	char *value = nvram_bufget(RT2860_NVRAM,"CountryCode");
-	char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+	int  idx = 0, channel, returnEEPROMValue=0;
+	const char *value = nvram_bufget(RT2860_NVRAM,"CountryCode");
+	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+	char *RemoveDFSChannel = nvram_bufget(RT2860_NVRAM, "RemoveDFSChannel");
 
-	channel = (channel_s == NULL)? 0 : atoi(channel_s);
+//Tom.Hung 2010-5-17, RT3883 is use 0x3F for 5G Country Region Code.
+#ifdef CONFIG_RALINK_RT3883
+	returnEEPROMValue = getEEPROMCountryCode("3F");
+#else
+	returnEEPROMValue = getEEPROMCountryCode("38");
+#endif
+	/*channel = (channel_s == NULL)? 0 : atoi(channel_s);
 	if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "FR") == 0) ||
 			(strcmp(value, "IE") == 0) || (strcmp(value, "JP") == 0) ||
-			(strcmp(value, "HK") == 0)) {
+			(strcmp(value, "HK") == 0)) {*/
+	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
+		((returnEEPROMValue & 0x00FF) == 0x06) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:36~48
+	{
 		for (idx = 0; idx < 4; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
 					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
+	//Jacky.Yang 1-Jun-2008, Remove DFS channel:52~64, channel:100~140
+	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "FR") == 0) ||
 			(strcmp(value, "IE") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "HK") == 0)) {
+			(strcmp(value, "HK") == 0)) {*/
+if (atoi(RemoveDFSChannel) == 1)
+{
+	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
+		((returnEEPROMValue & 0x00FF) == 0x03) || ((returnEEPROMValue & 0x00FF) == 0x07) || ((returnEEPROMValue & 0x00FF) == 0x08)) // EEPROM 0x38, channel:52~64
+	{
 		for (idx = 4; idx < 8; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
 					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-	if ((value == NULL) || (strcmp(value, "") == 0)) {
+	//if ((value == NULL) || (strcmp(value, "") == 0)) {
+	if (((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:100~140
+	{
 		for (idx = 16; idx < 27; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
 				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
+}//if (atoi(RemoveDFSChannel) == 0)
+	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {
+			(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {*/
+	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x03) || ((returnEEPROMValue & 0x00FF) == 0x04) || 
+		((returnEEPROMValue & 0x00FF) == 0x05) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:149~161
+	{
 		for (idx = 28; idx < 32; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
 					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
 					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
 	}
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
+	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {
+			(strcmp(value, "HK") == 0)) {*/
+	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x04) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:165
+	{
 		return websWrite(wp,
 				T("<option value=165 %s>5825MHz (Channel 165)</option>\n"),
 				(165 == channel)? "selected" : "");
@@ -161,10 +222,10 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int idx = 0, channel;
-	char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
-	char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+	const char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
+	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
-	channel = (channel_s == NULL)? 0 : atoi(channel_s);
+	channel = (channel_s == NULL)? 0 : atoi(channel_s);	
 	if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "JP") == 0) ||
 			(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
@@ -186,13 +247,15 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 					(idx+1 == channel)? "selected" : "", 2412+5*idx,
 					"MHz (Channel ", idx+1, ")</option>");
 	}
-
+//Tim Wang, never need to show channel 14	
+#if 0
 	if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "JP") == 0)) {
 		return websWrite(wp,
 				T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),
 				(14 == channel)? "selected" : "");
 	}
+#endif	
 	return 0;
 }
 
@@ -201,36 +264,49 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int idx = 0, channel;
-	char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
-	char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+	int idx = 0, channel, returnEEPROMValue=0;
+	const char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
+	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
 	channel = (channel_s == NULL)? 0 : atoi(channel_s);
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
+
+//Tom.Hung 2010-5-17, RT3883 is use 0x3E for 2.4G Country Region Code.
+#ifdef CONFIG_RALINK_RT3883
+	returnEEPROMValue = getEEPROMCountryCode("3E");
+#else
+	returnEEPROMValue = getEEPROMCountryCode("39");
+#endif
+
+	//Jacky.Yang 24-Jan-2008, Control FCC or CE useing eeprom value to check.
+	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
 			(strcmp(value, "US") == 0) || (strcmp(value, "JP") == 0) ||
 			(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
 			(strcmp(value, "TW") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {
+			(strcmp(value, "HK") == 0)) {*/
 		for (idx = 0; idx < 11; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
 					(idx+1 == channel)? "selected" : "", 2412+5*idx,
 					"MHz (Channel ", idx+1, ")</option>");
-	}                                                                           
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "JP") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
-			(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {
-		for (idx = 11; idx < 13; idx++)
-			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
-					(idx+1 == channel)? "selected" : "", 2412+5*idx,
-					"MHz (Channel ", idx+1, ")</option>");
-	}
+	//}
+	if ((returnEEPROMValue & 0x00FF) == 0x01) // EEPROM 0x39, 01:channel 1~11, other:channel 1~13 or 1~14
+	{
+		/*if ((value == NULL) || (strcmp(value, "") == 0) ||
+				(strcmp(value, "JP") == 0) || (strcmp(value, "TW") == 0) ||
+				(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
+				(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {*/
+			for (idx = 11; idx < 13; idx++)
+				websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
+						(idx+1 == channel)? "selected" : "", 2412+5*idx,
+						"MHz (Channel ", idx+1, ")</option>");
+		//}
 
-	if ((value == NULL) || (strcmp(value, "") == 0)) {
-		return websWrite(wp,
-				T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),
-				(14 == channel)? "selected" : "");
+		/*if ((value == NULL) || (strcmp(value, "") == 0)) {
+			return websWrite(wp,
+					T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),
+					(14 == channel)? "selected" : "");
+		}*/
 	}
+	
 	return 0;
 }
 
@@ -1443,8 +1519,9 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 	char str[32];
 	char ap_list[2048];
 
-	if(mbssid > 8 || mbssid < 0)
+	if(mbssid > 8 || mbssid < 0) {
 		return -1;
+	}
 
 	sprintf(str, "apselect_%d", mbssid);	// UI on web page
 	apselect = websGetVar(wp, str, T(""));
@@ -1458,8 +1535,9 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 
 	sprintf(str, "newap_text_%d", mbssid);
 	newap_list = websGetVar(wp, str, T(""));
-	if(!newap_list)
+	if(!newap_list) {
 		return -1;
+	}
 	if(!gstrlen(newap_list))
 		return 0;
 	sprintf(str, "AccessControlList%d", mbssid);
@@ -1969,7 +2047,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 
 static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_RALINK_RT2883
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
 		websWrite(wp, T("1"));
 #else
 		websWrite(wp, T("0"));	
@@ -1986,10 +2064,10 @@ static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-#ifdef CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY
+#ifdef CONFIG_RT2860V2_RT3XXX_ANTENNA_DIVERSITY
 void AntennaDiversityInit(void)
 {
-	char *mode = nvram_bufget(RT2860_NVRAM, "AntennaDiversity");
+	const char *mode = nvram_bufget(RT2860_NVRAM, "AntennaDiversity");
 
 	if(!gstrcmp(mode, "Disable")){						// Disable
 		doSystem("echo 0 > /proc/AntDiv/AD_RUN");
@@ -2038,7 +2116,7 @@ static void getAntenna(webs_t wp, char_t *path, char_t *query)
 	char buf[32];
 	FILE *fp = fopen("/proc/AntDiv/AD_CHOSEN_ANTENNA", "r");
 	if(!fp){
-		strcmp(buf, "err");
+		strcpy(buf, "not support\n");
 	}else{
 		fgets(buf, 32, fp);
 		fclose(fp);
