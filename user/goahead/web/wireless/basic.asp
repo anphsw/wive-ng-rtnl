@@ -1490,12 +1490,11 @@ function RadioStatusChange(rs)
     <td class="head" id="basicNetMode">Network Mode</td>
     <td>
       <select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange()">
+        <option value=0>11b/g mixed mode</option>
         <option value=1>11b only</option>
         <option value=4>11g only</option>
-	<option value=6>11n only</option>
-        <option value=0>11b/g mixed mode</option>
-	<option value=7>11g/n mixed mode</option>
         <option value=9>11b/g/n mixed mode</option>
+	<option value=6>11n only(2.4G)</option>
       </select>
       <!--
       <select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange()">
