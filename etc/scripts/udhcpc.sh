@@ -18,7 +18,7 @@ STATICDNS=`nvram_get 2860 wan_static_dns`
 case "$1" in
     deconfig)
         ip addr flush dev $interface
-if [ $CONFIG_IPV6 != "" ] ; then
+if [ "$CONFIG_IPV6" != "" ] ; then
         ip -6 addr flush dev $interface
 fi
 	ip link set $interface up

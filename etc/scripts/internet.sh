@@ -129,7 +129,7 @@ fi
 
     # config interface
     ip addr flush dev ra0
-if [ $CONFIG_IPV6 != "" ] ; then
+if [ "$CONFIG_IPV6" != "" ] ; then
     ip -6 addr flush dev ra0
 fi
     ip link set ra0 up
