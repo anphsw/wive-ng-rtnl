@@ -694,7 +694,7 @@ raeth_clean(struct net_device *netdev, int *budget)
         /* if no Tx and not enough Rx work done, exit the polling mode */
         if(( (work_done < work_to_do)) || !netif_running(netdev)) {
                 netif_rx_complete(netdev);
-		atomic_dec_and_test(&ei_local->irq_sem);
+		atomic_dec(&ei_local->irq_sem);
 
 		sysRegWrite(FE_INT_STATUS, FE_INT_ALL);		// ack all fe interrupts
     		reg_int_mask=sysRegRead(FE_INT_ENABLE);

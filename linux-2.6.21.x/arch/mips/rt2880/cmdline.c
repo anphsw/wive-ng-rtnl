@@ -62,7 +62,9 @@ char * __init prom_getcmdline(void)
 void  __init prom_init_cmdline(void)
 {
 	char *cp;
+#ifdef CONFIG_UBOOT_CMDLINE
 	int actr=1; /* Always ignore argv[0] */
+#endif
 
 	cp = &(arcs_cmdline[0]);
 

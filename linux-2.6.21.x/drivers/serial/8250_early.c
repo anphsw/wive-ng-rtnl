@@ -98,7 +98,13 @@ static void __init early_uart_write(struct console *console, const char *s, unsi
 
 static unsigned int __init probe_baud(struct uart_port *port)
 {
-	unsigned int lcr, dll=0, dlm=0;
+	unsigned int lcr;
+#if !defined (CONFIG_RALINK_RT2883) && \
+    !defined (CONFIG_RALINK_RT3883) && \
+    !defined (CONFIG_RALINK_RT3352) && \
+    !defined (CONFIG_RALINK_RT3052)
+	unsigned int dll=0, dlm=0;
+#endif
 	unsigned int quot;
 
 	lcr = serial_in(port, UART_LCR);

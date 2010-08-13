@@ -3777,7 +3777,7 @@ void kfree(const void *objp)
 	kfree_debugcheck(objp);
 	c = virt_to_cache(objp);
 	debug_check_no_locks_freed(objp, obj_size(c));
-	__cache_free(c, (void *)objp);
+	__cache_free(c, (void*)objp);
 	local_irq_restore(flags);
 }
 EXPORT_SYMBOL(kfree);
