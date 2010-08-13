@@ -178,6 +178,18 @@ PAIR_CHANNEL_FREQ_ENTRY ChannelFreqTable[] = {
 	{153,   5765000},
 	{157,   5785000},
 	{161,   5805000},
+	{165,	5825000},
+	{167,	5835000},
+	{169,	5845000},
+	{171,	5855000},
+	{173,	5865000},
+	{184,	4920000},
+	{188,	4940000},
+	{192,	4960000},
+	{196,	4980000},
+	{208,	5040000},	/* Japan, means J08 */
+	{212,	5060000},	/* Japan, means J12 */
+	{216,	5080000},	/* Japan, means J16 */
 };
 int G_nChanFreqCount = sizeof (ChannelFreqTable) / sizeof(PAIR_CHANNEL_FREQ_ENTRY);
 
@@ -303,7 +315,7 @@ unsigned int ConvertRssiToSignalQuality(long RSSI)
  */
 static int getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *p = NULL;
+	const char *p = NULL;
 	unsigned int country_region_bg = 0, country_region_a = 0;
 	long country_region = 0;
 
@@ -323,15 +335,15 @@ static int getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char tmp[256];
+	char tmp[1024];
 	memset(tmp, 0x00, sizeof(tmp));
 	if (headerProfileSetting != NULL) {
 		currentProfileSetting = headerProfileSetting;
-		snprintf(tmp, 256, "%s", currentProfileSetting->Profile);
+		snprintf(tmp, 1024, "%s", currentProfileSetting->Profile);
 		do {
 			currentProfileSetting = currentProfileSetting->Next;
 			if (currentProfileSetting != NULL)
-				snprintf(tmp, 256, "%s;%s", tmp, currentProfileSetting->Profile);
+				snprintf(tmp, 1024, "%s;%s", tmp, currentProfileSetting->Profile);
 		} while (currentProfileSetting != NULL );
 		return websWrite(wp, tmp);
 	}
@@ -1071,6 +1083,9 @@ static char bGetHTTxRateByBW_GI_MCS(int nBW, int nGI, int nMCS, double* dRate)
 		return 0;
 	}
 
+	if (nMCS == 32)
+		nMCS = 25;
+
 	if (nBW == BW_20 && nGI == GI_800)
 		*dRate = HTTxRate20_800[nMCS];
 	else if (nBW == BW_20 && nGI == GI_400)
@@ -1101,16 +1116,16 @@ static void DisplayLastTxRxRateFor11n(int s, int nID, double* fLastTxRxRate)
 	switch(HTSetting.field.MODE)
 	{
 		case 0:
-			if (/*HTSetting.field.MCS >=0 &&*/ HTSetting.field.MCS<=3)
+			if (HTSetting.field.MCS >=0 && HTSetting.field.MCS<=3)
 				*fLastTxRxRate = b_mode[HTSetting.field.MCS];
-			else if (/*HTSetting.field.MCS >=8 &&*/ HTSetting.field.MCS<=11)
+			else if (HTSetting.field.MCS >=8 && HTSetting.field.MCS<=11)
 				*fLastTxRxRate = b_mode[HTSetting.field.MCS-8];
 			else
 				*fLastTxRxRate = 0;
 
 			break;
 		case 1:
-			if (/*(HTSetting.field.MCS >= 0) &&*/ (HTSetting.field.MCS < 8))
+			if ((HTSetting.field.MCS >= 0) && (HTSetting.field.MCS < 8))
 				*fLastTxRxRate = g_Rate[HTSetting.field.MCS];
 			else
 				*fLastTxRxRate = 0;
@@ -2517,7 +2532,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 			}
 		}
 		if (lFreq != Configuration.DSConfig) {
-			Configuration.DSConfig = lFreq;
+			Configuration.DSConfig = lFreq/1000;
 			ret = OidSetInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(Configuration));
 			if (ret < 0)
 				error(E_L, E_LOG, T("Set OID_802_11_CONFIGURATION has error=%d"),ret);
@@ -2525,14 +2540,6 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	}
 
 	//step 2: Security mode
-	//step 2.1, remove key before set authentication mode that be make sure the key is empty.
-
-	//wep key
-	for (i=0 ; i<4; i++) {
-		removeKey.KeyIndex = i;
-		ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-	}
-
     ret = OidSetInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &tmp_auth, sizeof(tmp_auth));
 	if (ret < 0)
 		error(E_L, E_LOG, T("Set OID_802_11_AUTHENTICATION_MODE has error =%d, auth=%d"), ret, tmp_auth);
@@ -2540,7 +2547,6 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
     ret = OidSetInformation(OID_802_11_ENCRYPTION_STATUS, s, "ra0", &tmp_encry, sizeof(tmp_encry));
 	if (ret < 0)
 		error(E_L, E_LOG, T("Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d"), ret, tmp_encry);
-
 
 	if (tmp_encry == Ndis802_11WEPEnabled) {
 		//----------------------------------------------------------//
@@ -2556,9 +2562,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 			ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
 			if (ret < 0)
 				error(E_L, E_LOG, T("Set OID_802_11_REMOVE_KEY has error =%d"), ret);
-		}
-		else
-		{
+		} else if (strcmp(tmp_key1, "0")) {
 			if (nKeyLen == 10)
 				nKeyLen = 5;
 			else if (nKeyLen == 26)
@@ -2597,9 +2601,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
             for (j = 0; j < 6; j++)
                 removeKey.BSSID[j] = 0xff;
             OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        }
-        else
-        {
+        } else if (strcmp(tmp_key2, "0")) {
             if (nKeyLen == 10)
                 nKeyLen = 5;
             else if (nKeyLen == 26)
@@ -2637,9 +2639,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
             for(j = 0; j < 6; j++)
                 removeKey.BSSID[j] = 0xff;
             OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        }
-        else
-        {
+        } else if (strcmp(tmp_key3, "0")) {
             if (nKeyLen == 10)
                 nKeyLen = 5;
             else if (nKeyLen == 26)
@@ -2676,9 +2676,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
             for(j = 0; j < 6; j++)
                 removeKey.BSSID[j] = 0xff;
             OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        }
-        else
-        {
+        } else if (strcmp(tmp_key4, "0")) {
             if (nKeyLen == 10)
                 nKeyLen = 5;
             else if (nKeyLen == 26)
@@ -2698,7 +2696,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
             else if (strlen(tmp_key4) == 10)
                 AtoH(tmp_key4, pWepKey->KeyMaterial, 5);
             else if (strlen(tmp_key4) == 13)
-                memcpy(pWepKey->KeyMaterial, tmp_key3, 13);
+                memcpy(pWepKey->KeyMaterial, tmp_key4, 13);
             else if (strlen(tmp_key4) == 26)
                 AtoH(tmp_key4, pWepKey->KeyMaterial, 13);
 
