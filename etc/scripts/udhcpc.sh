@@ -150,6 +150,56 @@ fi
 
 		done
 	}
+	if [ ! -z "$msroutes" ]; then
+	    set $msroutes
+	    while true; do
+	    	case "$1" in
+	        0)
+	        $LOG "DO NOT set default route in this script"
+	        shift 5
+	        continue
+	        ;;
+	        1|2|3|4|5|6|7|8)
+	        route="$2.0.0.0/$1"
+	        shift 2
+	        ;;
+	        9|10|11|12|13|14|15|16)
+	        route="$2.$3.0.0/$1"
+	        shift 3 
+	        ;;
+	        17|18|19|20|21|22|23|24)
+	        route="$2.$3.$4.0/$1"
+	        shift 4
+	        ;;
+	        25|26|27|28|29|30|31|32)
+	        route="$2.$3.$4.$5/$1"
+	        shift 5
+	        ;;
+	        "")
+	        break
+	        ;;
+	        *)
+	        $LOG "strange bitmask - $1, skipping"
+	        shift 5
+	        continue
+	        ;;
+	        esac
+
+	        router="$1.$2.$3.$4" 
+	        shift 4
+
+	        case "$router" in
+	        0.0.0.0)
+	        $LOG "set route to $route via interface $interface"
+	        ip route replace $route dev $interface
+	        ;;
+	        *)
+	        $LOG "set route to $route via $router"
+	        ip route replace $route via $router
+	        ;;
+	        esac
+	    done 
+	fi
 	    # notify goahead when the WAN IP has been acquired. --yy
 	    killall -SIGUSR2 goahead
     	    $LOG "Restart needed services"
