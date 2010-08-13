@@ -36,10 +36,7 @@ static int default_shown_mbssid[3]  = {0,0,0};
 
 extern int g_wsc_configured;
 
-#ifndef CONFIG_RALINK_RT3052
 static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
-#endif
-
 static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -74,9 +71,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
 #endif
 
 void formDefineWireless(void) {
-#ifndef CONFIG_RALINK_RT3052
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
-#endif
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
 	websAspDefine(T("getWlanApcliBuilt"), getWlanApcliBuilt);
@@ -150,9 +145,9 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 /*
  * description: write 802.11a channels in <select> tag
  */
-#ifndef CONFIG_RALINK_RT3052
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
+#ifndef CONFIG_RALINK_RT3052
 	int  idx = 0, channel, returnEEPROMValue=0;
 	const char *value = nvram_bufget(RT2860_NVRAM,"CountryCode");
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
@@ -203,23 +198,24 @@ if (atoi(RemoveDFSChannel) == 1)
 				T("<option value=165 %s>5825MHz (Channel 165)</option>\n"),
 				(165 == channel)? "selected" : "");
 	}
+#endif
 	return 0;
 }
-#endif
 
 /*
  * description: write 802.11b channels in <select> tag
  */
 static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int idx = 0, channel;
-	char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+    int idx = 0, channel;
+    char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
-	channel = (channel_s == NULL)? 0 : atoi(channel_s);	
-	for (idx = 0; idx < 14; idx++)
-		websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1, 
-			(idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
-    return 0;
+    channel = (channel_s == NULL)? 0 : atoi(channel_s);	
+    for (idx = 0; idx < 13; idx++)
+	websWrite(wp, T("%s%d %s>%d%s%d%s"),
+		 "<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
+
+ return websWrite(wp, T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),(14 == channel)? "selected" : "");
 }
 
 /*
@@ -227,17 +223,16 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int idx = 0, channel;
-	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+    int idx = 0, channel;
+    const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
-	channel = (channel_s == NULL)? 0 : atoi(channel_s);
+    channel = (channel_s == NULL)? 0 : atoi(channel_s);
 
-	for (idx = 0; idx < 14; idx++)
-			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
-					(idx+1 == channel)? "selected" : "", 2412+5*idx,
-					"MHz (Channel ", idx+1, ")</option>");
+    for (idx = 0; idx < 13; idx++)
+	websWrite(wp, T("%s%d %s>%d%s%d%s"), 
+		"<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
 	
-	return 0;
+ return websWrite(wp, T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),(14 == channel)? "selected" : "");
 }
 
 static int getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv)
