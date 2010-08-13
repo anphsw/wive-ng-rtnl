@@ -623,7 +623,7 @@ static int getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_bufget(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -657,7 +657,7 @@ static int getCfgZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_bufget(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -687,7 +687,7 @@ static int getCfgNthZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_bufget(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -721,7 +721,7 @@ static int getCfg2General(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RTINIC_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -751,7 +751,7 @@ static int getCfg2NthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RTINIC_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -785,7 +785,7 @@ static int getCfg2Zero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RTINIC_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -815,7 +815,7 @@ static int getCfg2NthZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RTINIC_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -849,7 +849,7 @@ static int getCfg3General(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RT2561_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -877,7 +877,7 @@ static int getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args"));
 	}
-	value = nvram_bufget(RT2561_NVRAM, field);
+	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
