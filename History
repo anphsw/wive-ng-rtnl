@@ -101,6 +101,7 @@
 19) Portforward work now<br>
 20) MAC/IP/PORT filterd work now<br>
 21) pptp/l2tp now work with new corbina bras<br>
+22) Get staticroutes and msstatic routes from dhcp server work now<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
