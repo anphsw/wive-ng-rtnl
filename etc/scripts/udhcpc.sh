@@ -65,7 +65,7 @@ fi
 	    $LOG "Renew DNS from dhcp"
 	    count=0                                                                                                         
 	    rm -f $RESOLV_CONF                                                                                                          
-	    for i in $dns do
+	    for i in $dns ; do
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
 	        if [ "$count" = "0" ]; then
