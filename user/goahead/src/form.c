@@ -5,7 +5,7 @@
  *
  * See the file "license.txt" for usage and redistribution license requirements
  *
- * $Id: form.c,v 1.4 2007-02-01 07:41:01 winfred Exp $
+ * $Id: form.c,v 1.4.34.1 2010-02-03 11:11:48 chhung Exp $
  */
 
 /********************************** Description *******************************/
@@ -155,7 +155,7 @@ void websHeader(webs_t wp)
 	websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\"\
 				type=\"text/css\">"));
 	websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html;\
-				charset=iso-8859-1\">"));
+				charset=utf-8\">"));
 	websWrite(wp, T("</head>\n<body>\n"));
 }
 
