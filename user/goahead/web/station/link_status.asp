@@ -44,9 +44,7 @@ function initTranslation()
 
 	e = document.getElementById("linkHT");
 	e.innerHTML = _("link ht");
-	e = document.getElementById("linkSNR0");
-	e.innerHTML = _("link snr");
-	e = document.getElementById("linkSNR1");
+	e = document.getElementById("linkSNR");
 	e.innerHTML = _("link snr");
 }
 
@@ -121,12 +119,8 @@ function PageInit()
   <tr>
     <td class="title" colspan="2" id="linkHT">HT</td>
   </tr><% getStaHT(); %><tr>
-    <td class="head"><font id="linkSNR0">SNR</font>0</td>
-    <td><% getStaSNR0(); %></td>
-  </tr>
-  <tr>
-    <td class="head"><font id="linkSNR1">SNR</font>1</td>
-    <td><% getStaSNR1(); %></td>
+    <td class="head"><font id="linkSNR">SNR</font>0</td>
+    <td><% getStaSNR(); %></td>
   </tr>
 </table>
 <input type=hidden name=dummyData value="1">

@@ -4,7 +4,7 @@
  *
  *  Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- *  $Id: station.c,v 1.44 2008-12-17 12:33:48 yy Exp $
+ *  $Id: station.c,v 1.67.2.2 2010-03-04 09:13:33 chhung Exp $
  */
 
 #include	<sys/ioctl.h>
@@ -12,6 +12,7 @@
 #include	<asm/types.h>
 #include	<linux/if.h>
 #include	<linux/wireless.h>
+#include	<dirent.h>
 #include	"webs.h"
 #include	"oid.h"
 #include	"stapriv.h"
@@ -19,41 +20,46 @@
 #include	"utils.h"
 #include	"internet.h"
 
-static int getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaDbm(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaDLSList(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaExtraInfo(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaHT(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaLinkChannel(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaLinkQuality(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaMacAddr(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaProfileData(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaRadioStatus(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaTxThroughput(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSignalStrength(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSignalStrength_1(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSignalStrength_2(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSNR0(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSNR1(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaStatsRxCRCErr(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaStatsRxDup(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaStatsRxOk(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaStatsRxNoBuf(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaStatsTx(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv);
+#define Ndis802_11AuthMode8021x 20
+
+static int	getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv);
+static int getKeyCertList(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaDbm(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaDLSList(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaExtraInfo(int eid, webs_t wp, int argc, char_t **argv);
+static int	getLinkingMode(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaHT(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaLinkChannel(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaLinkQuality(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaMacAddr(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaProfile(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaProfileData(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaRadioStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaTxThroughput(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaSignalStrength(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaSignalStrength_1(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaSignalStrength_2(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaSNR(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaStatsRxCRCErr(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaStatsRxDup(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaStatsRxOk(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaStatsRxNoBuf(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaStatsTx(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv);
 
 static void addStaProfile(webs_t wp, char_t *path, char_t *query);
 static void editStaProfile(webs_t wp, char_t *path, char_t *query);
@@ -69,6 +75,9 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query);
 
 void formDefineStation(void)
 {
+	websAspDefine(T("getWPASupplicantBuilt"), getWPASupplicantBuilt);
+	websAspDefine(T("getCACLCertList"), getCACLCertList);
+	websAspDefine(T("getKeyCertList"), getKeyCertList);
 	websAspDefine(T("getStaAdhocChannel"), getStaAdhocChannel);
 	websAspDefine(T("getStaAllProfileName"), getStaAllProfileName);
 	websAspDefine(T("getStaBSSIDList"), getStaBSSIDList);
@@ -78,6 +87,7 @@ void formDefineStation(void)
 	websAspDefine(T("getStaDLSList"), getStaDLSList);
 	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
 	websAspDefine(T("getStaExtraInfo"), getStaExtraInfo);
+	websAspDefine(T("getLinkingMode"), getLinkingMode);
 	websAspDefine(T("getStaHT"), getStaHT);
 	websAspDefine(T("getStaLinkChannel"), getStaLinkChannel);
 	websAspDefine(T("getStaLinkQuality"), getStaLinkQuality);
@@ -95,8 +105,7 @@ void formDefineStation(void)
 	websAspDefine(T("getStaSignalStrength"), getStaSignalStrength);
 	websAspDefine(T("getStaSignalStrength_1"), getStaSignalStrength_1);
 	websAspDefine(T("getStaSignalStrength_2"), getStaSignalStrength_2);
-	websAspDefine(T("getStaSNR0"), getStaSNR0);
-	websAspDefine(T("getStaSNR1"), getStaSNR1);
+	websAspDefine(T("getStaSNR"), getStaSNR);
 	websAspDefine(T("getStaStatsRxCRCErr"), getStaStatsRxCRCErr);
 	websAspDefine(T("getStaStatsRxDup"), getStaStatsRxDup);
 	websAspDefine(T("getStaStatsRxOk"), getStaStatsRxOk);
@@ -121,8 +130,8 @@ void formDefineStation(void)
 
 PRT_PROFILE_SETTING selectedProfileSetting = NULL, headerProfileSetting = NULL, currentProfileSetting = NULL;
 
-unsigned char   Connection_flag=0, Active_flag=0, nConfig_flag=0;
-unsigned int    m_nSigQua = 0;
+unsigned char   Active_flag=0, nConfig_flag=0;
+unsigned int    m_nSigQua[3] = {0,0,0};
 unsigned long   m_lTxCount = 0;
 unsigned long   m_lRxCount = 0;
 unsigned long   m_lChannelQuality = 0;
@@ -130,10 +139,9 @@ char    G_bRadio = 1; //TRUE
 char    G_bdBm_ischeck = 0; //false
 char    G_staProfileNum = 0;
 NDIS_802_11_SSID        G_SSID;
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-char    WpaSupplicant_flag = FALSE;
-#endif
+unsigned char			G_Bssid[6];
+int        G_ConnectStatus = NdisMediaStateDisconnected;
+unsigned char WpaSupplicant_flag = FALSE;
 
 PAIR_CHANNEL_FREQ_ENTRY ChannelFreqTable[] = {
 	//channel Frequency
@@ -356,22 +364,28 @@ static int getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int                         s, ret, retry;
-	unsigned int                lBufLen = 65536; // 64K
+	int                         s, ret, retry=1;
+	unsigned int                lBufLen = 4096, we_version=16; // 64K
 	PNDIS_802_11_BSSID_LIST_EX	pBssidList;
 	PNDIS_WLAN_BSSID_EX  		pBssid;
-	unsigned int                ConnectStatus = 0;
+	unsigned int                ConnectStatus = NdisMediaStateDisconnected;
 	unsigned char               BssidQuery[6];
+	NDIS_802_11_SSID            SSIDQuery;
+	int							QueryCount=0, EAGAIN_Count=0;
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(65536);  //64k
-	memset(pBssidList, 0x00, sizeof(char)*65536);
+	pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(65536*2);  //64k
+	memset(pBssidList, 0x00, sizeof(char)*65536*2);
 
 	//step 1
-	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0) {
-		websError(wp, 500, "Query OID_GEN_MEDIA_CONNECT_STATUS failed!");
-		free(pBssidList); close(s);
-		return -1;
+	while(ConnectStatus != NdisMediaStateConnected && QueryCount < 3) {
+		if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0) {
+			websError(wp, 500, "Query OID_GEN_MEDIA_CONNECT_STATUS failed!");
+			free(pBssidList); close(s);
+			return -1;
+		}
+		sleep(2);
+		QueryCount++;
 	}
 
 	//step 2
@@ -381,9 +395,11 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	if (ConnectStatus == 1 && G_bRadio) {
+	if (ConnectStatus == NdisMediaStateConnected && G_bRadio) {
 		memset(&BssidQuery, 0x00, sizeof(BssidQuery));
 		OidQueryInformation(OID_802_11_BSSID, s, "ra0", &BssidQuery, sizeof(BssidQuery));
+		memset(&SSIDQuery, 0x00, sizeof(SSIDQuery));
+		OidQueryInformation(OID_802_11_SSID, s, "ra0", &SSIDQuery, sizeof(SSIDQuery));
 	}
 
 	//step 3
@@ -396,28 +412,102 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	Sleep(2);
 
 	//step 4
-	for (retry = 0; retry < 5; retry++) {
+	ret = OidQueryInformation(RT_OID_WE_VERSION_COMPILED, s, "ra0", &we_version, sizeof(we_version));
+	if (ret< 0)
+	{
+		websError(wp, 500, "Query RT_OID_WE_VERSION_COMPILED error! return=%d", ret);
+		close(s);
+		return -1;
+	}
+	if(we_version >= 17)
+		lBufLen=8192;
+	else
+		lBufLen=4096;
+
+	ret = -1;
+	retry = 1;
+	while (ret < 0) {
 		ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-		if (ret < 0) {
-			if (retry < 4) {
-				Sleep(1);
-				continue;
+#if 1
+		if (errno == EAGAIN) {
+			sleep(1);
+			// fprintf(stderr, "errno == EAGAIN\n");
+			EAGAIN_Count++;
+			if(EAGAIN_Count>25) {
+				websError(wp, 500, "Query OID_802_11_BSSID_LIST error! errno == EAGAIN");
+				free(pBssidList);
+				close(s);
+				return -1;
 			}
+			else
+				continue;
+		} else if (errno == E2BIG) {
+			//fprintf(stderr, "errno == E2BIG\n");
+			lBufLen = lBufLen + 4096*retry;
+			if (lBufLen < 65536) {
+				retry++;
+				// fprintf(stderr,"lBufLen=%d\n",lBufLen);
+				continue;
+			} else {
+				websError(wp, 500, "Query OID_802_11_BSSID_LIST error! E2BIG");
+				free(pBssidList);
+				close(s);
+				return -1;
+			}
+		}
+		else if( ret != 0 ) {
 			websError(wp, 500, "Query OID_802_11_BSSID_LIST error! return=%d", ret);
-			free(pBssidList); close(s);
+			free(pBssidList);
+			close(s);
 			return -1;
 		}
-		break;
+#else
+		switch(errno) {
+			case EAGAIN:
+					do {
+						sleep(1);
+						ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
+						retry++;
+					} while((errno == EAGAIN) && (ret < 0) && (retry < 5));
+					break;
+
+			case E2BIG:
+					do {
+						lBufLen = lBufLen + 4096*retry;
+						free(pBssidList);
+						pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(lBufLen);
+						ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
+						t++;
+					} while((errno == E2BIG) && (ret <0) && (retry < 10));
+			default:
+					if (ret < 0) {
+						websError(wp, 500, "Query OID_802_11_BSSID_LIST error! return=%d", ret);
+						close(s);
+						return;
+					}
+					else
+						break;
+		}
+#endif
 	}
-	{
+	if ( pBssidList->NumberOfItems == 0) {
+		websError(wp, 500, "Bssid List number is 0!\n");
+		close(s);
+		return -1;
+	} else {
 		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID], tmpRSSI[16], tmpChannel[16], tmpAuth[32], tmpEncry[20], tmpNetworkType[24], tmpImg[40];
-		unsigned char tmpSSIDII[NDIS_802_11_LENGTH_SSID];
+		unsigned char tmpSSIDII[NDIS_802_11_LENGTH_SSID+1];
+		/*
+		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID*4], tmpRSSI[60], tmpChannel[16], tmpAuth[32], tmpEncry[52], tmpNetworkType[24], tmpImg[40];
+		unsigned char tmpSSIDII[(NDIS_802_11_LENGTH_SSID+1)*4];
+		*/
 		int i=0, j=0;
 		unsigned int nSigQua;
 		int nChannel = 1;
 		unsigned char radiocheck[8];
-		
+
 		pBssid = (PNDIS_WLAN_BSSID_EX) pBssidList->Bssid;
+		G_ConnectStatus = NdisMediaStateDisconnected;
 		for (i = 0; i < pBssidList->NumberOfItems; i++)
 		{
 			memset(radiocheck, 0x00, sizeof(radiocheck));
@@ -463,8 +553,8 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				pBssid->MacAddress[3], pBssid->MacAddress[4], pBssid->MacAddress[5]);
 
 			nSigQua = ConvertRssiToSignalQuality(pBssid->Rssi);
-
        		sprintf((char *)tmpRSSI,"<td>%d%%</td>", nSigQua);
+
 			nChannel = -1;	
 			for(j = 0; j < G_nChanFreqCount; j++)
 			{
@@ -496,6 +586,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			unsigned char bWPA2NONE = FALSE;
 			unsigned char bCCKM = FALSE; // CCKM for Cisco, add by candy 2006.11.24
 
+
 			if ((pBssid->Length > sizeof(NDIS_WLAN_BSSID)) && (pBssid->IELength > sizeof(NDIS_802_11_FIXED_IEs)))
 			{
 				unsigned int lIELoc = 0;
@@ -507,9 +598,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				{
 					if ((pVarIE->ElementID == 221) && (pVarIE->Length >= 16))
 					{
-						//UINT* pOUI = (UINT*)((char*)pVarIE + 2);
 						unsigned int* pOUI = (unsigned int*)((char*)pVarIE->data);
-						//fprintf(stderr, "pOUI=0x%08x\n", pOUI);
 						if (*pOUI != WPA_OUI_TYPE)
 						{
 							lIELoc += pVarIE->Length;
@@ -672,7 +761,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 							plAuthenKey++;
 						}
 					}
-			
 					lIELoc += pVarIE->Length;
 					lIELoc += 2;
 					pVarIE = (PNDIS_802_11_VARIABLE_IEs)((char*)pVarIE + pVarIE->Length + 2);
@@ -730,7 +818,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			sprintf((char *)tmpEncry, "<td>%s</td>", strEncry);
 
 			strcpy((char *)tmpSSIDII, pBssid->Ssid.Ssid);
-			ConverterStringToDisplay((char *)tmpSSIDII);
 			if (strlen(G_SSID.Ssid)>0 && strcmp(pBssid->Ssid.Ssid, G_SSID.Ssid) == 0)
 				strcpy(radiocheck, "checked");
 			else
@@ -751,7 +838,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	unsigned char BssidQuery[6];
 	int s;
 
@@ -759,7 +845,7 @@ static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
 
 	//fprintf(stderr, "-->ssi_getStaConnectedBSSID()\n");
 	//step 1
-	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0) {
+	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &G_ConnectStatus, sizeof(G_ConnectStatus)) < 0) {
 		websError(wp, 500, "Query OID_GEN_MEDIA_CONNECT_STATUS error!");
 		close(s);
 		return -1;
@@ -772,7 +858,7 @@ static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	if (ConnectStatus == 0 && G_bRadio) {
+	if (G_ConnectStatus == NdisMediaStateConnected && G_bRadio) {
 		memset(&BssidQuery, 0x00, sizeof(BssidQuery));
 		OidQueryInformation(OID_802_11_BSSID, s, "ra0", &BssidQuery, sizeof(BssidQuery));
 		websWrite(wp, "<tr><td><input type=checkbox name=mac onClick=selectedBSSID(\'%02X%02X%02X%02X%02X%02X\')> %02X:%02X:%02X:%02X:%02X:%02X</td></tr>",
@@ -789,7 +875,7 @@ static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int  ConnectStatus = 0;
+	int  ConnectStatus = NdisMediaStateDisconnected;
 	NDIS_802_11_SSID  SsidQuery;
 	unsigned char     BssidQuery[6];
 	char              strSSID[NDIS_802_11_LENGTH_SSID + 1];
@@ -811,7 +897,7 @@ static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	if (ConnectStatus == 1 && G_bRadio) {
+	if (ConnectStatus == NdisMediaStateConnected && G_bRadio) {
 		memset(&SsidQuery, 0x00, sizeof(SsidQuery));
 		OidQueryInformation(OID_802_11_SSID, s, "ra0", &SsidQuery, sizeof(SsidQuery));
 
@@ -827,14 +913,14 @@ static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv)
 			memcpy(strSSID, SsidQuery.Ssid, SsidQuery.SsidLength);
 			websWrite(wp, "Connected <--> %s", strSSID);
 		}
-		Connection_flag = 1;
+		G_ConnectStatus = NdisMediaStateConnected;
 	}
 	else if (G_bRadio) {
 		websWrite(wp, "Disconnected");
-		Connection_flag = 0;
+		G_ConnectStatus = NdisMediaStateDisconnected;
 	}
 	else {
-		Connection_flag = 0;
+		G_ConnectStatus = NdisMediaStateDisconnected;
 		websWrite(wp, "Radio Off");
 	}
 	close(s);
@@ -846,24 +932,22 @@ static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaDLSList(int eid, webs_t wp, int argc, char_t **argv)
 {
-	RT_802_11_DLS dls[MAX_NUM_OF_DLS_ENTRY];
-	int s, i, j;
-	char tmpmac[20], tmp[144*MAX_NUM_OF_DLS_ENTRY];
+	RT_802_11_DLS_INFO dls_info;
+	int s, i;
+	char tmpmac[20];
 
 	memset(tmpmac, 0x00, sizeof(tmpmac));
-	memset(tmp, 0x00, sizeof(tmp));
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls, sizeof(dls));
-	for (i=0, j=1 ; i<MAX_NUM_OF_DLS_ENTRY ; i++) {
-		if (dls[i].Valid == 1 && dls[i].Status == DLS_FINISH) {
+	OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls_info, sizeof(dls_info));
+	for (i=0; i<MAX_NUM_OF_DLS_ENTRY; i++) {
+		if (dls_info.Entry[i].Valid == 1 && dls_info.Entry[i].Status == DLS_FINISH) {
 			sprintf(tmpmac, "%02x-%02x-%02x-%02x-%02x-%02x",
-					dls[i].MacAddr[0], dls[i].MacAddr[1], dls[i].MacAddr[2],
-					dls[i].MacAddr[3], dls[i].MacAddr[4], dls[i].MacAddr[5]);
-			websWrite(wp, "<tr><td><input type=radio name=selected_dls value=%d>%s</td><td>%i</td></tr>",
-					j, tmpmac, dls[i].TimeOut);
-			j++;
+					dls_info.Entry[i].MacAddr[0], dls_info.Entry[i].MacAddr[1], dls_info.Entry[i].MacAddr[2],
+					dls_info.Entry[i].MacAddr[3], dls_info.Entry[i].MacAddr[4], dls_info.Entry[i].MacAddr[5]);
+			websWrite(wp, "<tr><td><input type=radio name=selected_dls value=%d>%s</td><td>%d</td></tr>",
+					  i+1, tmpmac, dls_info.Entry[i].TimeOut);
 		}
 	}
 	close(s);
@@ -943,6 +1027,20 @@ static int getStaExtraInfo(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
+static int getLinkingMode(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int s = socket(AF_INET, SOCK_DGRAM, 0);
+	HTTRANSMIT_SETTING HTSetting;
+
+	memset(&HTSetting, 0x00, sizeof(HTTRANSMIT_SETTING));
+	OidQueryInformation(RT_OID_802_11_QUERY_LAST_TX_RATE, s, "ra0", &HTSetting, sizeof(HTTRANSMIT_SETTING));
+	if (HTSetting.field.MODE > 1) {		// 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
+		return websWrite(wp, T("0"));
+	} else {
+		return websWrite(wp, T("1"));
+	}
+}
+
 /*
  * description: write station HT transmit
  */
@@ -950,35 +1048,48 @@ static int getStaHT(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int s;
 	HTTRANSMIT_SETTING HTSetting;
-	HTTRANSMIT_SETTING tmpHT;
 	char tmp[8], tmpBW[72], tmpGI[72], tmpSTBC[72], tmpMCS[72];
 
+	if (G_ConnectStatus == NdisMediaStateDisconnected)
+	{
+		sprintf((char *)tmpBW, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
+		sprintf((char *)tmpGI, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
+		sprintf((char *)tmpSTBC,"<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
+		sprintf((char *)tmpMCS, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
+		return websWrite(wp,"%s %s %s %s", tmpBW, tmpGI, tmpSTBC, tmpMCS);
+	}
+
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	OidQueryInformation(RT_OID_802_11_QUERY_LAST_TX_RATE, s, "ra0", &tmpHT, sizeof(HTTRANSMIT_SETTING));
+	memset(&HTSetting, 0x00, sizeof(HTTRANSMIT_SETTING));
+	OidQueryInformation(RT_OID_802_11_QUERY_LAST_TX_RATE, s, "ra0", &HTSetting, sizeof(HTTRANSMIT_SETTING));
 	close(s);
 
-	memset(&HTSetting, 0x00, sizeof(HTTRANSMIT_SETTING));
-	memcpy(&HTSetting, &tmpHT, sizeof(HTTRANSMIT_SETTING));
+	if(HTSetting.field.MODE > 1) {		// 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
+		if (HTSetting.field.BW == 0)
+			strcpy(tmp, "20");
+		else
+			strcpy(tmp, "40");
+		snprintf(tmpBW, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >%s</td></tr>", tmp);
 
-	if (HTSetting.field.BW == 0)
-		strcpy(tmp, "20");
-	else
-		strcpy(tmp, "40");
-	snprintf(tmpBW, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >%s</td></tr>", tmp);
+		if (HTSetting.field.ShortGI == 0)
+			strcpy(tmp, "long");
+		else
+			strcpy(tmp, "short");
+		snprintf(tmpGI, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >%s</td></tr>", tmp);
 
-	if (HTSetting.field.ShortGI == 0)
-		strcpy(tmp, "long");
-	else
-		strcpy(tmp, "short");
-	snprintf(tmpGI, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >%s</td></tr>", tmp);
+		if (HTSetting.field.STBC == 0)
+			strcpy(tmp, "none");
+		else
+			strcpy(tmp, "used");
+		snprintf(tmpSTBC, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >%s</td></tr>", tmp);
 
-	if (HTSetting.field.STBC == 0)
-		strcpy(tmp, "none");
-	else
-		strcpy(tmp, "used");
-	snprintf(tmpSTBC, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >%s</td></tr>", tmp);
-
-	snprintf(tmpMCS, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >%d</td></tr>", HTSetting.field.MCS);
+		snprintf(tmpMCS, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >%d</td></tr>", HTSetting.field.MCS);
+	} else {
+		sprintf((char *)tmpBW, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
+		sprintf((char *)tmpGI, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
+		sprintf((char *)tmpSTBC,"<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
+		sprintf((char *)tmpMCS, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
+	}
 
 	return websWrite(wp,"%s %s %s %s", tmpBW, tmpGI, tmpSTBC, tmpMCS);
 }
@@ -988,20 +1099,18 @@ static int getStaHT(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaLinkChannel(int eid, webs_t wp, int argc, char_t **argv)
 {
-	unsigned int ConnectStatus = 0;
 	NDIS_802_11_CONFIGURATION Configuration;
 	RT_802_11_LINK_STATUS     LinkStatus;
-	int s, ret, i;
+	HTTRANSMIT_SETTING HTSetting;
+	int s, i;
 	int nChannel = -1;
 	int Japan_channel = 200;
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	ret = OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ret < 0 || ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "&nbsp;");
 	}
+
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	// Current Channel
 	OidQueryInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(NDIS_802_11_CONFIGURATION));
@@ -1014,17 +1123,32 @@ static int getStaLinkChannel(int eid, webs_t wp, int argc, char_t **argv)
 
 	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(&LinkStatus));
 
-	if (nChannel == -1)
-		websWrite(wp, "error!");
-	else if (nChannel == (Japan_channel + 8))
-		websWrite(wp, "J8 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
-	else if (nChannel == (Japan_channel + 12))
-		websWrite(wp, "J12 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
-	else if (nChannel == (Japan_channel + 16))
-		websWrite(wp, "J16 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
-	else
-		websWrite(wp, "%u <--> %ld KHz ; Central Channel: %ld", nChannel, Configuration.DSConfig, LinkStatus.CentralChannel);
+	memset(&HTSetting, 0x00, sizeof(HTTRANSMIT_SETTING));
+	OidQueryInformation(RT_OID_802_11_QUERY_LAST_TX_RATE, s, "ra0", &HTSetting, sizeof(HTTRANSMIT_SETTING));
 	close(s);
+
+	if (nChannel == -1) {
+		websWrite(wp, "error!");
+	} else if (HTSetting.field.MODE > 1) {		// 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
+		if (nChannel == (Japan_channel + 8))
+			websWrite(wp, "J8 <--> %ld KHz", Configuration.DSConfig);
+		else if (nChannel == (Japan_channel + 12))
+			websWrite(wp, "J12 <--> %ld KHz", Configuration.DSConfig);
+		else if (nChannel == (Japan_channel + 16))
+			websWrite(wp, "J16 <--> %ld KHz", Configuration.DSConfig);
+		else
+			websWrite(wp, "%u <--> %ld KHz", nChannel, Configuration.DSConfig);
+	} else {
+		if (nChannel == (Japan_channel + 8))
+			websWrite(wp, "J8 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
+		else if (nChannel == (Japan_channel + 12))
+			websWrite(wp, "J12 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
+		else if (nChannel == (Japan_channel + 16))
+			websWrite(wp, "J16 <--> %ld KHz ; Central Channel: %ld", Configuration.DSConfig, LinkStatus.CentralChannel);
+		else
+			websWrite(wp, "%u <--> %ld KHz ; Central Channel: %ld", nChannel, Configuration.DSConfig, LinkStatus.CentralChannel);
+	}
+
 	return 0;
 }
 
@@ -1033,18 +1157,14 @@ static int getStaLinkChannel(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaLinkQuality(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	RT_802_11_LINK_STATUS LinkStatus;
 	int s;
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0%%");
 	}
 
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	// Get Link Status Info from driver
 	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(RT_802_11_LINK_STATUS));
 
@@ -1071,10 +1191,14 @@ static int getStaLinkQuality(int eid, webs_t wp, int argc, char_t **argv)
 static char bGetHTTxRateByBW_GI_MCS(int nBW, int nGI, int nMCS, double* dRate)
 {
 	//fprintf(stderr, "bGetHTTxRateByBW_GI_MCS()\n");
-	double HTTxRate20_800[16]={6.5, 13.0, 19.5, 26.0, 39.0, 52.0, 58.5, 65.0, 13.0, 26.0, 39.0, 52.0, 78.0, 104.0, 117.0, 130.0};
-	double HTTxRate20_400[16]={7.2, 14.4, 21.7, 28.9, 43.3, 57.8, 65.0, 72.2, 14.444, 28.889, 43.333, 57.778, 86.667, 115.556, 130.000, 144.444};
-	double HTTxRate40_800[18]={13.5, 27.0, 40.5, 54.0, 81.0, 108.0, 121.5, 135.0, 27.0, 54.0, 81.0, 108.0, 162.0, 216.0, 243.0, 270.0, 6.0, 39.0};
-	double HTTxRate40_400[18]={15.0, 30.0, 45.0, 60.0, 90.0, 120.0, 135.0, 30.0, 60.0, 90.0, 120.0, 180.0, 240.0, 270.0, 300.0, 6.7, 43.3};
+	double HTTxRate20_800[24]={6.5, 13.0, 19.5, 26.0, 39.0, 52.0, 58.5, 65.0, 13.0, 26.0, 39.0, 52.0, 78.0, 104.0, 117.0, 130.0,
+								19.5, 39.0, 58.5, 78.0, 117.0, 156.0, 175.5, 195.0};
+	double HTTxRate20_400[24]={7.2, 14.4, 21.7, 28.9, 43.3, 57.8, 65.0, 72.2, 14.444, 28.889, 43.333, 57.778, 86.667, 115.556, 130.000, 144.444,
+								21.7, 43.3, 65.0, 86.7, 130.0, 173.3, 195.0, 216.7};
+	double HTTxRate40_800[25]={13.5, 27.0, 40.5, 54.0, 81.0, 108.0, 121.5, 135.0, 27.0, 54.0, 81.0, 108.0, 162.0, 216.0, 243.0, 270.0,
+								40.5, 81.0, 121.5, 162.0, 243.0, 324.0, 364.5, 405.0, 6.0};
+	double HTTxRate40_400[25]={15.0, 30.0, 45.0, 60.0, 90.0, 120.0, 135.0, 150.0, 30.0, 60.0, 90.0, 120.0, 180.0, 240.0, 270.0, 300.0,
+								45.0, 90.0, 135.0, 180.0, 270.0, 360.0, 405.0, 450.0, 6.7};
 
 	// no TxRate for (BW = 20, GI = 400, MCS = 32) & (BW = 20, GI = 400, MCS = 32)
 	if (((nBW == BW_20) && (nGI == GI_400) && (nMCS == 32)) ||
@@ -1152,18 +1276,15 @@ static void DisplayLastTxRxRateFor11n(int s, int nID, double* fLastTxRxRate)
  */
 static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	int s;
 	char tmp[8];
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0");
 	}
-
+	
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	double fLastRxRate = 1;
 	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_RX_RATE, &fLastRxRate);
 	snprintf(tmp, 8, "%.1f", fLastRxRate);
@@ -1178,16 +1299,15 @@ static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	int s, ret;
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	ret = OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
+	ret = OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &G_ConnectStatus, sizeof(G_ConnectStatus));
 	if (ret < 0 ) {
 		return websWrite(wp, "Disconnected");
 	}
 
-	if (ConnectStatus == 1) {
+	if (G_ConnectStatus == NdisMediaStateConnected) {
 		NDIS_802_11_SSID SSID;
 		unsigned char Bssid[6];
 
@@ -1200,9 +1320,7 @@ static int getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv)
 		SSID.Ssid[SSID.SsidLength] = 0;
 		websWrite(wp, "%s <--> %02X-%02X-%02X-%02X-%02X-%02X", SSID.Ssid,
 				Bssid[0], Bssid[1], Bssid[2], Bssid[3], Bssid[4], Bssid[5]);
-	}
-	else {
-		char G_bRadio;
+	} else {
 		if (OidQueryInformation(RT_OID_802_11_RADIO, s, "ra0", &G_bRadio, sizeof(G_bRadio)) < 0) {
 			websWrite(wp, "error!");
 			close(s);
@@ -1228,16 +1346,13 @@ static int getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	int s;
-	s = socket(AF_INET, SOCK_DGRAM, 0);
 	char tmp[8];
 
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0");
 	}
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	double fLastTxRate = 1;
 	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_TX_RATE, &fLastTxRate);
 	snprintf(tmp, 8, "%.1f", fLastTxRate);
@@ -1307,19 +1422,16 @@ static int getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	unsigned char lNoise; // this value is (ULONG) in Ndis driver (NOTICE!!!)
 	int nNoiseDbm;
 	int nNoisePercent;
 	int s;
-	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0%%");
 	}
 
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	// Noise Level
 	// Get Noise Level From Driver
 	OidQueryInformation(RT_OID_802_11_QUERY_NOISE_LEVEL, s, "ra0", &lNoise, sizeof(lNoise));
@@ -1363,12 +1475,12 @@ int initStaProfile(void)
 {
 	PRT_PROFILE_SETTING nextProfileSetting;
 	char tmp_buffer[512];
-	char *wordlist = NULL;
+	const char *wordlist = NULL;
 	char *tok = NULL;
 	int i;
 
-	//fprintf(stderr, "kathy -- init_StaProfile()\n");
-	Connection_flag = 0;
+	// fprintf(stderr, "kathy -- init_StaProfile()\n");
+	G_ConnectStatus = NdisMediaStateDisconnected;
 
 	//staProfile
 	bzero(tmp_buffer, sizeof(tmp_buffer));
@@ -1389,7 +1501,7 @@ int initStaProfile(void)
 	for (i = 0, tok = strtok(tmp_buffer,";") ; tok ;  i++) {
 		//profile
 		sprintf((char *)currentProfileSetting->Profile, "%s", tok);
-		//fprintf(stderr, "i=%d, Profile=%s, tok=%s\n", i,currentProfileSetting->Profile, tok);
+		// fprintf(stderr, "i=%d, Profile=%s, tok=%s\n", i,currentProfileSetting->Profile, tok);
 		tok = strtok(NULL,";");
 
 		if (tok != NULL && currentProfileSetting->Next == NULL) {
@@ -1433,7 +1545,7 @@ int initStaProfile(void)
 	sprintf(tmp_buffer, "%s", wordlist);
 	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->NetworkType = atoi(tok);
-		//fprintf(stderr, "i=%d, NetworkType=%d\n", i,currentProfileSetting->NetworkType);
+		// fprintf(stderr, "i=%d, NetworkType=%d\n", i,currentProfileSetting->NetworkType);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	}
@@ -2241,6 +2353,43 @@ int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned c
 	return 1; 
 }
 
+static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef WPA_SUPPLICANT_SUPPORT
+	char *caclcert_file = (char *) nvram_get(CERT_NVRAM, "CACLCertFile");
+
+	if (strlen(caclcert_file) > 0)
+		websWrite(wp, T("<option value=\"%s\">%s</option>"), caclcert_file, caclcert_file);
+	else
+#endif
+		websWrite(wp, T("<option value=\"\"></option>"));
+	
+	return 0;
+}
+
+static int getKeyCertList(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef WPA_SUPPLICANT_SUPPORT
+	char *keycert_file = (char *) nvram_get(CERT_NVRAM, "KeyCertFile");
+
+	if (strlen(keycert_file) > 0)
+		websWrite(wp, T("<option value=\"%s\">%s</option>"), keycert_file, keycert_file);
+	else
+#endif
+		websWrite(wp, T("<option value=\"\"></option>"));
+	
+	return 0;
+}
+
+static int getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef WPA_SUPPLICANT_SUPPORT
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
 #ifdef WPA_SUPPLICANT_SUPPORT
 static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_802_11_AUTHENTICATION_MODE auth, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, int keyidx, char* wepkey)
 {
@@ -2249,13 +2398,15 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 	unsigned char wpa_supplicant_support = 2, ieee8021x_support = 1;
 	NDIS_802_11_SSID Ssid;
 
+	system("killall wpa_supplicant");
+	sleep(1);
 	//fprintf(stderr, "exec_WPASupplicant()\n");
 	memset(&Ssid, 0x00, sizeof(NDIS_802_11_SSID));
 	strcpy((char *)Ssid.Ssid ,ssid);
 	Ssid.SsidLength = strlen(ssid);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (auth == Ndis802_11AuthModeMax)
+	if (auth == Ndis802_11AuthMode8021x)
 		auth = Ndis802_11AuthModeOpen;
 
 	if (keymgmt == Rtwpa_supplicantKeyMgmtNONE)
@@ -2264,36 +2415,52 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 		ieee8021x_support = 0;
 
 		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0)
+		if (ret < 0) {
 			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
+			close(s);
+			return;
+		}
 
 		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));
-		if (ret < 0)
+		if (ret < 0) {
 			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
+			fprintf(stderr, "Please check the driver configuration whether support WAP_SUPPORT!!");
+			close(s);
+			return;
+		}
 	}
 	else
 	{
 		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0)
+		if (ret < 0) {
 			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
+			close(s);
+			return;
+		}
 
 		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));
-		if (ret < 0)
+		if (ret < 0) {
 			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
-	}
-
-	if (WpaSupplicant_flag) {
-			doSystem("wpa_cli reconfigure");
+			fprintf(stderr, "Please check the driver configuration whether support WAP_SUPPORT!!");
+			close(s);
+			return;
+		}
 	}
 
 	ret = OidSetInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &auth, sizeof(auth));
-	if (ret < 0)
+	if (ret < 0) {
 		fprintf(stderr, "Set OID_802_11_AUTHENTICATION_MODE has error =%d, auth=%d\n", ret, auth);
+		close(s);
+		return;
+	}
 
 	// encryp mode
 	ret = OidSetInformation(OID_802_11_ENCRYPTION_STATUS, s, "ra0", &encryp, sizeof(encryp));
-	if (ret < 0)
+	if (ret < 0) {
 		fprintf(stderr, "Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d\n", ret, encryp);
+		close(s);
+		return;
+	}
 
 	if (encryp == Ndis802_11WEPEnabled)
 	{
@@ -2327,7 +2494,7 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 			pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
 			pWepKey->Length = lBufLen;
 			pWepKey->KeyLength = nKeyLen;
-			pWepKey->KeyIndex = 0;
+			pWepKey->KeyIndex = keyidx;
 
 			if (keyidx == 1)
 				pWepKey->KeyIndex |= 0x80000000;
@@ -2347,16 +2514,24 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 	}
 
 	// set ssid for associate
-	ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID));
-	if (ret < 0)
+	if (OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID)) < 0) {
 		fprintf(stderr, "Set OID_802_11_SSID has error =%d, pSsid->Ssid=%s\n", ret, Ssid.Ssid);
+		close(s);
+		return;
+	}
+
+	/*
+	if (OidSetInformation(OID_802_11_BSSID, s, "ra0", &bssid, 6) < 0) {
+		error(E_L, E_LOG, T("Set OID_802_11_BSSID has error."));
+		close(s);
+		return;
+	}
+	*/
 
 	close(s);
 
-	if (WpaSupplicant_flag == FALSE) {
-		doSystem("wpa_supplicant -B -ira0 -c/etc/wpa_supplicant.conf -Dralink -d");
-		WpaSupplicant_flag = TRUE;
-	}
+	doSystem("wpa_supplicant -B -ira0 -bbr0 -c/etc/wpa_supplicant.conf -Dralink -d");
+	WpaSupplicant_flag = TRUE;
 }
 
 static void conf_WPASupplicant(char* ssid, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, RT_WPA_SUPPLICANT_EAP eap, char* identity, char* password, char* cacert, char* clientcert, char* privatekey, char* privatekeypassword, char* wepkey, int keyidx, NDIS_802_11_WEP_STATUS encryp, RT_WPA_SUPPLICANT_TUNNEL tunnel, NDIS_802_11_AUTHENTICATION_MODE auth)
@@ -2488,20 +2663,46 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	NDIS_802_11_REMOVE_KEY		removeKey;
 	PNDIS_802_11_KEY			pKey = NULL;
 	PNDIS_802_11_WEP			pWepKey = NULL;
+	PNDIS_802_11_PASSPHRASE		pPassPhrase = NULL;
+	unsigned long               PassphraseBufLen;
 	unsigned long				lBufLen;
 	unsigned char				keyMaterial[40];
-	NDIS_802_11_TX_POWER_LEVEL	lTransPower = MAX_TX_POWER_LEVEL;
 	NDIS_802_11_CONFIGURATION	Configuration;
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if (WpaSupplicant_flag) {
-		char Null[1]="";
-		conf_WPASupplicant((char *)pSsid->Ssid,  Rtwpa_supplicantKeyMgmtNONE, 0, Null, Null, Null, Null, Null, Null, Null, 0, Ndis802_11WEPDisabled, 0, Ndis802_11AuthModeOpen);
-	}
-#endif
+	unsigned long				CurrentWirelessMode;
 
 	//fprintf(stderr, "sta_connection()\n");
 	s = socket(AF_INET, SOCK_DGRAM, 0);
+
+	if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 ) {
+		error(E_L, E_LOG, T("Query OID_802_11_QUERY_WirelessMode error!"));
+		close(s);
+		return;
+	}
+	if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled) {
+		if(CurrentWirelessMode > 4) {
+			system("iwpriv ra0 set WirelessMode=3");
+			sleep(2);
+		}
+	} else {
+		if(CurrentWirelessMode < 5) {
+			system("iwpriv ra0 set WirelessMode=5");
+			sleep(2);
+		}
+	}
+
+	if (WpaSupplicant_flag == TRUE)
+	{
+		int wpa_supplicant_support = 0 ,ieee8021x_support = 0;
+
+		doSystem("killall wpa_supplicant");
+		sleep(2);
+		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
+		if (ret < 0)
+			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
+		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));                                           if (ret < 0)
+			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
+		WpaSupplicant_flag = FALSE;
+	}
 
 	//step 0: OID_802_11_INFRASTRUCTURE_MODE
 	ret = OidSetInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &tmp_networktype, sizeof(int));
@@ -2509,13 +2710,13 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 		error(E_L, E_LOG, T("Set OID_802_11_INFRASTRUCTURE_MODE has error =%d, networktype=%d"), ret, tmp_networktype);
 
 	//step 1:
-	OidSetInformation(OID_802_11_TX_POWER_LEVEL, s, "ra0", &lTransPower, sizeof(NDIS_802_11_TX_POWER_LEVEL));
+	if (!tmp_rtscheck)
+		tmp_rts = 2347;
+	OidSetInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &tmp_rts, sizeof(NDIS_802_11_RTS_THRESHOLD));
 
-	if (tmp_rtscheck)
-		OidSetInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &tmp_rts, sizeof(NDIS_802_11_RTS_THRESHOLD));
-
-	if (tmp_fragmentcheck)
-		OidSetInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &selectedProfileSetting->Fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
+	if (!tmp_fragmentcheck)
+		tmp_fragment = 2346;
+	OidSetInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &selectedProfileSetting->Fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
 
 	if (tmp_networktype == Ndis802_11Infrastructure) {
 		OidSetInformation(OID_802_11_POWER_MODE, s, "ra0", &tmp_psmode, sizeof(NDIS_802_11_POWER_MODE));
@@ -2704,8 +2905,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 			free(pWepKey);
         }
 	}
-	else if (tmp_auth == Ndis802_11AuthModeWPAPSK || tmp_auth == Ndis802_11AuthModeWPA2PSK || tmp_auth == Ndis802_11AuthModeWPANone)
-	{
+	else if (tmp_auth == Ndis802_11AuthModeWPAPSK || tmp_auth == Ndis802_11AuthModeWPA2PSK || tmp_auth == Ndis802_11AuthModeWPANone) {
         nKeyLen = 32;
 		lBufLen = (sizeof(NDIS_802_11_KEY) + nKeyLen - 1);
 		// Allocate Resouce
@@ -2722,12 +2922,17 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 			PasswordHash(tmp_wpapsk, pSsid->Ssid, pSsid->SsidLength, keyMaterial);
 			memcpy(pKey->KeyMaterial, keyMaterial, 32);
 		}
+		PassphraseBufLen = sizeof(NDIS_802_11_PASSPHRASE) + strlen(tmp_wpapsk) - 1;
+		pPassPhrase=(PNDIS_802_11_PASSPHRASE)malloc(PassphraseBufLen);
+		pPassPhrase->KeyLength = strlen(tmp_wpapsk);
+		memcpy(pPassPhrase->KeyMaterial, tmp_wpapsk, pPassPhrase->KeyLength);
+		OidSetInformation(OID_802_11_SET_PASSPHRASE, s, "ra0", pPassPhrase, PassphraseBufLen);
 		OidSetInformation(RT_OID_802_11_ADD_WPA, s, "ra0", pKey, pKey->Length);
 		free(pKey);
 	}
 
 	//step 3: SSID
-	if ( tmp_networktype == Ndis802_11IBSS ) // Ad hoc use SSID
+	if (tmp_networktype == Ndis802_11IBSS ) // Ad hoc use SSID
 	{
 		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", pSsid, sizeof(NDIS_802_11_SSID));
 		if (ret < 0)
@@ -2743,18 +2948,21 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 		else
 			memcpy(&G_SSID, pSsid, sizeof(NDIS_802_11_SSID));
 
-		/*if (Bssid != NULL)
+		/*
+		ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", &Bssid, 6);
+		if (ret < 0) {
+			error(E_L, E_LOG, "Set OID_802_11_BSSID has error =%d, \n", ret);
+		} else 
+		*/
 		{
-			error(E_L, E_LOG, "Bssid=%2X-%2X-%2X-%2X-%2X-%2X\n", Bssid[0], Bssid[1], Bssid[2], Bssid[3], Bssid[4], Bssid[5]);
-			ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", &Bssid, sizeof(NDIS_802_11_MAC_ADDRESS));
-			if (ret < 0)
-				error(E_L, E_LOG, "Set OID_802_11_BSSID has error =%d, \n", ret);
-			else
-			memcpy(G_Bssid, Bssid, sizeof(Bssid));
-		}*/
+			memcpy(G_Bssid, Bssid, 6);
+		}
 		Sleep(1);
 	}
+
 	close(s);
+
+	initInternet();		// restart wan.sh if needed (renew dhcp, pppoe etc)
 }
 
 /*
@@ -2777,7 +2985,8 @@ void initStaConnection(void)
 
 	strcpy((char *)Ssid.Ssid ,(char *)p->SSID);
 	Ssid.SsidLength = p->SsidLen;
-	sta_connection(p->NetworkType, p->Authentication, p->Encryption, p->KeyDefaultId, &Ssid, NULL, (char *)p->WpaPsk, (char *)p->Key1, (char *)p->Key2, (char *)p->Key3, (char *)p->Key4, p->PreamType, p->RTSCheck, p->RTS, p->FragmentCheck, p->Fragment, p->PSmode, p->Channel);
+	unsigned char Bssid[6];
+	sta_connection(p->NetworkType, p->Authentication, p->Encryption, p->KeyDefaultId, &Ssid, Bssid, (char *)p->WpaPsk, (char *)p->Key1, (char *)p->Key2, (char *)p->Key3, (char *)p->Key4, p->PreamType, p->RTSCheck, p->RTS, p->FragmentCheck, p->Fragment, p->PSmode, p->Channel);
 }
 
 /*
@@ -2885,6 +3094,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				strcpy(tmp_key3, (char *)currentProfileSetting->Key3);
 				strcpy(tmp_key4, (char *)currentProfileSetting->Key4);
 
+	unsigned char Bssid[6];
 #ifdef WPA_SUPPLICANT_SUPPORT
 				if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
 						currentProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
@@ -2904,7 +3114,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				}
 				else
 #endif
-					sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, NULL, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
+					sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
 
 				/*NDIS_802_11_SSID SSID;
 				  memset(&SSID, 0x00, sizeof(SSID));
@@ -3138,19 +3348,15 @@ static int getStaRadioStatus(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	RT_802_11_LINK_STATUS LinkStatus;
 	int s;
 	char tmp[8];
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0");
 	}
 
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	// Get Link Status Info from driver
 	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(RT_802_11_LINK_STATUS));
 
@@ -3171,19 +3377,15 @@ static int getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaTxThroughput(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int ConnectStatus = 0;
 	RT_802_11_LINK_STATUS LinkStatus;
 	int s;
 	char tmp[8];
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		return websWrite(wp, "0");
 	}
 
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	// Get Link Status Info from driver
 	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(RT_802_11_LINK_STATUS));
 
@@ -3199,42 +3401,39 @@ static int getStaTxThroughput(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-static int getRSSI(webs_t wp, int oid)
+static int getRSSI(webs_t wp, int antenna)
 {
-	int ConnectStatus = 0;
 	RT_802_11_LINK_STATUS LinkStatus;
 	int s;
 	unsigned int nSigQua;
 	long RSSI;
+	int oid[3] = {RT_OID_802_11_RSSI, RT_OID_802_11_RSSI_1, RT_OID_802_11_RSSI_2};
 
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus));
-	if (ConnectStatus == 0) {
-		close(s);
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
 		websWrite(wp, "0%%");
 		return 0;
 	}
 
+	s = socket(AF_INET, SOCK_DGRAM, 0);
 	// Get Link Status Info from driver
 	OidQueryInformation(RT_OID_802_11_QUERY_LINK_STATUS, s, "ra0", &LinkStatus, sizeof(RT_802_11_LINK_STATUS));
 
 	// Signal Strength
 
 	// Get Rssi Value from driver
-	OidQueryInformation(oid, s, "ra0", &RSSI, sizeof(RSSI));
+	OidQueryInformation(oid[antenna], s, "ra0", &RSSI, sizeof(RSSI));
 
 	if (RSSI > 20 || RSSI < -200)
 		return websWrite(wp, "None");
 
 	// Use convert formula to getSignal Quality
 	nSigQua = ConvertRssiToSignalQuality(RSSI);
-	if (m_nSigQua !=0)
-		nSigQua = (unsigned int)((m_nSigQua + nSigQua) / 2.0 + 0.5);
+	if (m_nSigQua[antenna] != 0)
+		nSigQua = (unsigned int)((m_nSigQua[antenna] + nSigQua) / 2.0 + 0.5);
 
 	close(s);
 
-	m_nSigQua = nSigQua;
+	m_nSigQua[antenna] = nSigQua;
 	if (nSigQua > 70) {
 		if (G_bdBm_ischeck == 1) { //checked
 			return websWrite(wp, "Good &nbsp;&nbsp;&nbsp;&nbsp; %ld dBm", RSSI);
@@ -3266,7 +3465,7 @@ static int getRSSI(webs_t wp, int oid)
  */
 static int getStaSignalStrength(int eid, webs_t wp, int argc, char_t **argv)
 {
-	return getRSSI(wp, RT_OID_802_11_RSSI);
+	return getRSSI(wp, 0);
 }
 
 /*
@@ -3274,7 +3473,7 @@ static int getStaSignalStrength(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaSignalStrength_1(int eid, webs_t wp, int argc, char_t **argv)
 {
-	return getRSSI(wp, RT_OID_802_11_RSSI_1);
+	return getRSSI(wp, 1);
 }
 
 /*
@@ -3282,45 +3481,40 @@ static int getStaSignalStrength_1(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaSignalStrength_2(int eid, webs_t wp, int argc, char_t **argv)
 {
-	return getRSSI(wp, RT_OID_802_11_RSSI_2);
+	return getRSSI(wp, 2);
 }
 
 /*
  * description: write station SNR
  */
-static int getStaSNR0(int eid, webs_t wp, int argc, char_t **argv)
+static int getStaSNR(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int s;
-	unsigned long SNR0;
+	int s, n, ret;
+	unsigned long SNR;
+
+	if (ejArgs(argc, argv, T("%d"), &n) < 1) {
+		return websWrite(wp, T("Insufficient args\n"));
+	}
+	if (G_ConnectStatus == NdisMediaStateDisconnected) {
+		return  websWrite(wp, "n/a");
+	}
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	OidQueryInformation(RT_OID_802_11_SNR_0, s, "ra0", &SNR0, sizeof(SNR0));
+	if (n == 0)
+		ret = OidQueryInformation(RT_OID_802_11_SNR_0, s, "ra0", &SNR, sizeof(SNR));
+	else if (n == 1)
+		ret = OidQueryInformation(RT_OID_802_11_SNR_1, s, "ra0", &SNR, sizeof(SNR));
+	else if (n == 2)
+		ret = OidQueryInformation(RT_OID_802_11_SNR_2, s, "ra0", &SNR, sizeof(SNR));
+	else
+		ret = -1;
 	close(s);
 
-	//fprintf(stderr, "SNR0=%ld\n", SNR0);
-	if (SNR0 != 44)
-		return websWrite(wp, "%ld", SNR0);
-	else
+	//fprintf(stderr, "SNR%d = %ld\n", n, SNR);
+	if (ret < 0)
 		return websWrite(wp, "n/a");
-}
-
-/*
- * description: write station SNR
- */
-static int getStaSNR1(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int s;
-	unsigned long SNR1;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	OidQueryInformation(RT_OID_802_11_SNR_1, s, "ra0", &SNR1, sizeof(SNR1));
-	close(s);
-
-	//fprintf(stderr, "SNR1=%ld\n", SNR1);
-	if (SNR1 != 44)
-		return websWrite(wp, "%ld", SNR1);
 	else
-		return websWrite(wp, "n/a");
+		return websWrite(wp, "%ld", SNR);
 }
 
 /*
@@ -3497,7 +3691,7 @@ static int getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *mode_s = nvram_bufget(RT2860_NVRAM, "WirelessMode");
+	const char *mode_s = nvram_bufget(RT2860_NVRAM, "WirelessMode");
 	int mode;
 	int bSuppA = myGetSuppAMode();
 
@@ -3531,7 +3725,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	RT_PROFILE_SETTING  tmpProfileSetting;
 	int  securitymode=-1;
 	char tmp_buffer[512];
-	char *wordlist = NULL;
+	const char *wordlist = NULL;
 	char_t *value;
 	
 	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
@@ -4002,6 +4196,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	freeHeaderProfileSettings();
 	headerProfileSetting = NULL;
+	initStaProfile();
 }
 
 static void writeProfileToNvram()
@@ -4683,9 +4878,9 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 
 		value = websGetVar(wp, T("cert_private_key_password"), T(""));
 		if (strcmp(value, "") != 0)
-			strcpy((char *)selectedProfileSetting->PrivatePassword, value);
+			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, value);
 		else
-			strcpy((char *)selectedProfileSetting->PrivatePassword, "0");
+			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, "0");
 	}
 	else {
 		strcpy((char *)selectedProfileSetting->ClientCert, "0");
@@ -4719,6 +4914,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 		strcpy((char *)Ssid.Ssid ,(char *)selectedProfileSetting->SSID);
 		Ssid.SsidLength = selectedProfileSetting->SsidLen;
 
+		unsigned char Bssid[6];
 #ifdef WPA_SUPPLICANT_SUPPORT
 		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
 			selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
@@ -4738,7 +4934,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 		}
 		else
 #endif
-		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, NULL, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
+		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, Bssid, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
 
 		Active_flag = 1;
 		Sleep(1);
@@ -4748,7 +4944,6 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	writeProfileToNvram();
 
 	selectedProfileSetting = NULL;
-	initInternet(); //restart internet (renew dhcp, pppoe etc)
 }
 
 /*
@@ -4844,12 +5039,12 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	mcs = websGetVar(wp, T("n_mcs"), T("0"));
 	rf = websGetVar(wp, T("radiohiddenButton"), T("2"));
 
-	// mac clone
-	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
-	char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
-	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
-	if (!strncmp(clone_en, "1", 2))
-		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
+        // mac clone
+        char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
+        char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
+        nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
+        if (!strncmp(clone_en, "1", 2))
+               nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -4861,9 +5056,18 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 			if (ret < 0)
 				error(E_L, E_LOG, T("Set OID_802_11_BSSID_LIST_SCAN error = %d"), ret);
 			Sleep(3);
-			ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &G_SSID, sizeof(NDIS_802_11_SSID));
-			if (ret < 0)
-				error(E_L, E_LOG, T("Set OID_802_11_SSID error = %d"), ret);
+			if (G_SSID.SsidLength > 0) {
+				ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &G_SSID, sizeof(NDIS_802_11_SSID));
+				if (ret < 0)
+					error(E_L, E_LOG, T("Set OID_802_11_SSID error = %d"), ret);
+			} 
+			/*
+			else {
+				ret = OidSetInformation(OID_802_11_BSSID, s, "ra", &G_Bssid, 6);
+				if (ret < 0)
+					error(E_L, E_LOG, T("Set OID_802_11_BSSID error = %d"), ret);
+			}
+			*/
 		}
 		websRedirect(wp, "station/advance.asp");
 		return;
@@ -4891,17 +5095,15 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
 
 	//set 11n ht phy mode
-	if (wireless_mode >= PHY_11N_2_4G) {
+	if (wireless_mode >= PHY_11ABGN_MIXED) {
 		OID_BACAP_STRUC    BACap;
 		OID_SET_HT_PHYMODE phymode;
 
-		phymode.PhyMode = atoi(w_mode);
-		phymode.ExtOffset = 0; //ht_extchannel;
+		phymode.PhyMode = wireless_mode;
 		phymode.HtMode = atoi(ht);
 		phymode.TransmitNo = 2; //Now always use 2
 		phymode.BW = atoi(bw);
 		phymode.SHORTGI = atoi(gi);
-		phymode.STBC = 0; //ht_stbc;
 		phymode.MCS = atoi(mcs);
 
 		ret = OidSetInformation(RT_OID_802_11_SET_HT_PHYMODE, s, "ra0", &phymode, sizeof(phymode));
@@ -4933,6 +5135,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	configStation.EnableTxBurst = tx_burst;
 	configStation.UseBGProtection = atoi(bg_prot);
 	configStation.UseShortSlotTime = short_slot_time;
+	configStation.AdhocMode = wireless_mode;
 
 	OidSetInformation(RT_OID_802_11_STA_CONFIG, s, "ra0", &configStation, sizeof(configStation));
 
@@ -5045,17 +5248,13 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 				break;
 		}
 	}
-	if (wireless_mode < PHY_11N_2_4G)
+	if (wireless_mode < PHY_11ABGN_MIXED)
 		OidSetInformation(OID_802_11_DESIRED_RATES, s, "ra0", &aryRates, sizeof(NDIS_802_11_RATES));
 
 	OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
 	close(s);
 
-	doSystem("ifconfig ra0 down");
-	doSystem("ralink_init make_wireless_config 2860");
-	doSystem("ifconfig ra0 up");
-
-	initInternet(); //restart internet (renew dhcp, pppoe etc)
+	initInternet(); //renew dhcp, pppoe etc
 	websRedirect(wp,"station/advance.asp");
 	return;
 }
@@ -5070,9 +5269,8 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 #ifdef WPA_SUPPLICANT_SUPPORT
 	int  tmp_keymgmt = Rtwpa_supplicantKeyMgmtNONE, tmp_eap = Rtwpa_supplicantEAPNONE, tmp_tunnel = Rtwpa_supplicantTUNNENONE;
 	char_t *tmp_identity, *tmp_cacert, *tmp_clientcert, *tmp_privatekey, *tmp_privatekeypassword, *tmp_password;
-#endif
+#endif 
 	char_t *value;
-	char *opmode;
 
 	tmp_auth  = Ndis802_11AuthModeOpen;
 	tmp_encry = Ndis802_11WEPDisabled;
@@ -5090,12 +5288,11 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("security_adhoc_mode"), T(""));
 	if (strcmp(value, "") != 0)
 		tmp_auth = atoi(value);
-
 #ifdef WPA_SUPPLICANT_SUPPORT
 	//key management
 	if (tmp_auth == Ndis802_11AuthModeWPA || tmp_auth == Ndis802_11AuthModeWPA2)
 		tmp_keymgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	else if (tmp_auth == Ndis802_11AuthModeMax) //802.1x
+	else if (tmp_auth == Ndis802_11AuthMode8021x) //802.1x
 		tmp_keymgmt= Rtwpa_supplicantKeyMgmtIEEE8021X;
 	else 
 		tmp_keymgmt = Rtwpa_supplicantKeyMgmtNONE;
@@ -5133,28 +5330,28 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 	//eap
-	value = websGatVar(wp, T("cert_auth_type_from_1x"), T(""));
+	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
 	if (strcmp(value, "") != 0)
 		tmp_eap = (RT_WPA_SUPPLICANT_EAP)atoi(value);
-	value = websGatVar(wp, T("cert_auth_type_from_wpa"), T(""));
+	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
 	if (strcmp(value, "") != 0)
 		tmp_eap = (RT_WPA_SUPPLICANT_EAP)atoi(value);
 
 	//tunnel
-	value = websGatVar(wp, T("cert_tunnel_auth_peap"), T(""));
+	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
 	if (strcmp(value, "") != 0)
 		tmp_tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
-	value = websGatVar(wp, T("cert_tunnel_auth_ttls"), T(""));
+	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
 	if (strcmp(value, "") != 0)
 		tmp_tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
 
 	//certificate
-	tmp_identity = websGatVar(wp, T("cert_id"), T(""));
-	tmp_password = websGatVar(wp, T("cert_password"), T(""));
-	tmp_clientcert = websGatVar(wp, T("cert_client_cert_path"), T(""));
-	tmp_privatekey = websGatVar(wp, T("cert_private_key_path"), T(""));
-	tmp_privatekeypassword = websGatVar(wp, T("cert_private_key_password"), T(""));
-	tmp_cacert = websGatVar(wp, T("cert_ca_cert_path"), T(""));
+	tmp_identity = websGetVar(wp, T("cert_id"), T(""));
+	tmp_password = websGetVar(wp, T("cert_password"), T(""));
+	tmp_clientcert = websGetVar(wp, T("cert_client_cert_path"), T(""));
+	tmp_privatekey = websGetVar(wp, T("cert_private_key_path"), T(""));
+	tmp_privatekeypassword = websGetVar(wp, T("cert_private_key_password"), T(""));
+	tmp_cacert = websGetVar(wp, T("cert_ca_cert_path"), T(""));
 #endif
 
 	//encryp
@@ -5177,7 +5374,12 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 	NDIS_802_11_POWER_MODE                  tmp_psmode = Ndis802_11PowerModeCAM;
 	NDIS_802_11_SSID						SSID;
 	unsigned char							Bssid[6];
+	int										s = socket(AF_INET, SOCK_DGRAM, 0);
 
+	OidQueryInformation(RT_OID_802_11_PREAMBLE, s, "ra0", &tmp_preamtype, sizeof(RT_802_11_PREAMBLE));
+	OidQueryInformation(OID_802_11_POWER_MODE, s, "ra0", &tmp_psmode, sizeof(NDIS_802_11_POWER_MODE));
+	OidQueryInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &tmp_rts, sizeof(NDIS_802_11_RTS_THRESHOLD));
+	OidQueryInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &tmp_fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
 	// Set SSID
 	memset(&SSID, 0x00, sizeof(NDIS_802_11_SSID));
 	SSID.SsidLength = strlen(tmp_ssid);
@@ -5191,7 +5393,7 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 #ifdef WPA_SUPPLICANT_SUPPORT
 	if (tmp_auth == Ndis802_11AuthModeWPA ||
 			tmp_auth == Ndis802_11AuthModeWPA2 ||
-			tmp_auth == Ndis802_11AuthModeMax )//802.1x
+			tmp_auth == Ndis802_11AuthMode8021x )//802.1x
 	{
 		char tmp_key[27];
 		if (tmp_defaultkeyid == 1) // 1~4
@@ -5204,20 +5406,43 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 			strcpy(tmp_key, tmp_key4);
 
 		tmp_defaultkeyid -=1;
+
+		unsigned long CurrentWirelessMode;
+		if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 )
+		{
+			websError(wp, 500, "Query OID_802_11_QUERY_WirelessMode error!");
+			close(s);
+			return;
+		}
+
+		if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled)
+		{
+			if(CurrentWirelessMode > 4)
+			{
+
+				system("iwpriv ra0 set WirelessMode=3");
+				sleep(2);
+			}
+		}
+		else
+		{
+			if(CurrentWirelessMode < 5)
+			{
+
+				system("iwpriv ra0 set WirelessMode=5");
+				sleep(2);
+			}
+		}
+
 		conf_WPASupplicant(tmp_ssid, tmp_keymgmt, tmp_eap, tmp_identity, tmp_password, tmp_cacert, tmp_clientcert, tmp_privatekey, tmp_privatekeypassword, tmp_key, tmp_defaultkeyid, tmp_encry, tmp_tunnel, tmp_auth);
 	}
 	else
 #endif
 		sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, 0, tmp_rts, 0, tmp_fragment, tmp_psmode, 0);  //tmp_channel 0 is auto.
 
-	Connection_flag = 1;
-
-	//restart wan service if needed
-	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
-	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") && !strcmp("1", nvram_get(RT2860_NVRAM, "ethConver"))))
-	{
-		doSystem("service wan restart &");
-	}
+#if defined CONFIG_USB
+	initUSB();
+#endif
 }
 
 /*
@@ -5399,11 +5624,12 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 			fprintf(stderr, "Set OID_802_11_INFRASTRUCTURE_MODE has error =%d, networktype=%d\n", ret, tmp_networktype);
 		close(s);
 
+		unsigned char Bssid[6];
 		//activate
 #ifdef WPA_SUPPLICANT_SUPPORT				
 		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
 				selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
-				selectedProfileSetting->Authentication == Ndis802_11AuthModeMax )//802.1x
+				selectedProfileSetting->Authentication == Ndis802_11AuthMode8021x )//802.1x
 		{
 			char tmp_key[27];
 			if (tmp_defaultkeyid == 1) // 1~4
@@ -5419,7 +5645,7 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 		}
 		else
 #endif
-			sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, NULL, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
+			sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
 
 		// Set SSID
 		/*memset(&SSID, 0x00, sizeof(NDIS_802_11_SSID));
@@ -5427,6 +5653,9 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 		  memcpy(SSID.Ssid, (const void *)selectedProfileSetting->SSID, selectedProfileSetting->SsidLen);
 		  */
 		Active_flag = 1;
+#if defined CONFIG_USB
+		initUSB();
+#endif
 	}
 	else {
 		error(E_L, E_LOG, T("hiddenButton(%s) is invalid"), value);
@@ -5512,7 +5741,7 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 	else if (!strncmp(button, "1", 2)) {
 		unsigned long apsd;
 		NDIS_802_11_SSID Ssid;
-		int wmm_en, ps_en, acbe, acbk, acvi, acvo, dls_en;
+		int wmm_en, ps_en, acbe, acbk, acvi, acvo;
 		char apsdac[8];
 
 		wmm_en = websCompareVar(wp, T("wmm_enable"), T("on"));
@@ -5521,7 +5750,6 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 		acbk = websCompareVar(wp, T("wmm_ps_mode_acbk"), T("on"));
 		acvi = websCompareVar(wp, T("wmm_ps_mode_acvi"), T("on"));
 		acvo = websCompareVar(wp, T("wmm_ps_mode_acvo"), T("on"));
-		dls_en = websCompareVar(wp, T("wmm_dls_enable"), T("on"));
 
 		nvram_bufset(RT2860_NVRAM, "WmmCapable", wmm_en? "1":"0");
 		nvram_bufset(RT2860_NVRAM, "APSDCapable", ps_en? "1":"0");
@@ -5530,7 +5758,6 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 		strncat(apsdac, acvi? "1":"0", 2);
 		strncat(apsdac, acvo? "1":"0", 2);
 		nvram_bufset(RT2860_NVRAM, "APSDAC", apsdac);
-		nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_en? "1":"0");
 		nvram_commit(RT2860_NVRAM);
 
 		if (wmm_en) {
@@ -5554,7 +5781,6 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 			apsd &= 0x0000007E;  //set apsd bit be zero (xxxxxxx0)
 
 		OidSetInformation(RT_OID_802_11_SET_APSD_SETTING, s, "ra0", &apsd, sizeof(apsd));
-		OidSetInformation(RT_OID_802_11_SET_DLS, s, "ra0", &dls_en, sizeof(unsigned long));
 		OidSetInformation(RT_OID_802_11_SET_WMM, s, "ra0", &wmm_en, sizeof(wmm_en));
 
 		OidQueryInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(Ssid));
@@ -5563,10 +5789,12 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 		OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(Ssid));
 	}
 	else if (!strncmp(button, "2", 2)) {
+		int dls_en;
 		char_t *mac0, *mac1, *mac2, *mac3, *mac4, *mac5;
-		RT_802_11_DLS dls;
+		RT_802_11_DLS_UI dls;
 		unsigned char mac[6];
 
+		dls_en = websCompareVar(wp, T("wmm_dls_enable"), T("on"));
 		mac0 = websGetVar(wp, T("mac0"), T("0"));
 		mac1 = websGetVar(wp, T("mac1"), T("1"));
 		mac2 = websGetVar(wp, T("mac2"), T("2"));
@@ -5602,24 +5830,29 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 				return;
 			}
 		}
+		nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_en? "1":"0");
 
 		dls.Valid = 1;
+		OidSetInformation(RT_OID_802_11_SET_DLS, s, "ra0", &dls_en, sizeof(unsigned long));
 		OidSetInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls, sizeof(dls));
 	}
 	else if (!strncmp(button, "3", 2)) {
-		RT_802_11_DLS dls[MAX_NUM_OF_DLS_ENTRY];
+		RT_802_11_DLS_INFO dls_info;
 		int s_dls;
+
 
 		s_dls = atoi(websGetVar(wp, T("selected_dls"), T("0")));
 		if (s_dls != 0) {
-			OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls, sizeof(dls));
-			if (dls[s_dls - 1].Valid == 1) {
-				dls[s_dls - 1].Valid = 0;
-				OidSetInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls, sizeof(dls));
+			OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls_info, sizeof(dls_info));
+			if (dls_info.Entry[s_dls-1].Valid == 1) {
+				dls_info.Entry[s_dls-1].Valid = 0;
+				dls_info.Entry[s_dls-1].Status = DLS_NONE;
+				OidSetInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls_info.Entry[s_dls-1], sizeof(RT_802_11_DLS_UI));
 			}
 		}
 	}
 	close(s);
+	sleep(1);
 	websRedirect(wp, "station/qos.asp");
 }
 

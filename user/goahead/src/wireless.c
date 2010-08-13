@@ -36,7 +36,10 @@ static int default_shown_mbssid[3]  = {0,0,0};
 
 extern int g_wsc_configured;
 
+#ifndef CONFIG_RALINK_RT3052
 static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
+#endif
+
 static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -71,7 +74,9 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
 #endif
 
 void formDefineWireless(void) {
+#ifndef CONFIG_RALINK_RT3052
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
+#endif
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
 	websAspDefine(T("getWlanApcliBuilt"), getWlanApcliBuilt);
@@ -107,6 +112,7 @@ void formDefineWireless(void) {
 }
 
 //Jacky.Yang 7-Jan-2007, get Country region code in eeprom 0x39
+#ifndef CONFIG_RALINK_RT3052
 static int getEEPROMCountryCode(char *eeprom_addr)
 {
 	int socket_id, ret;
@@ -139,10 +145,12 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 	printf("\nGet EEP[0x%02X]:0x%04X\n", addr, value);
 	return value;
 }
+#endif
 
 /*
  * description: write 802.11a channels in <select> tag
  */
+#ifndef CONFIG_RALINK_RT3052
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int  idx = 0, channel, returnEEPROMValue=0;
@@ -197,6 +205,7 @@ if (atoi(RemoveDFSChannel) == 1)
 	}
 	return 0;
 }
+#endif
 
 /*
  * description: write 802.11b channels in <select> tag
@@ -218,7 +227,7 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int idx = 0, channel, returnEEPROMValue=0;
+	int idx = 0, channel;
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
 	channel = (channel_s == NULL)? 0 : atoi(channel_s);

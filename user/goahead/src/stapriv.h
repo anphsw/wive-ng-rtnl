@@ -4,7 +4,7 @@
  *
  * Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- * $Id: stapriv.h,v 1.13 2007-07-26 11:22:24 yy Exp $
+ * $Id: stapriv.h,v 1.15.2.1 2010-02-26 06:42:02 chhung Exp $
  */
 
 #include "linux/autoconf.h"
@@ -12,6 +12,9 @@
 #define NDIS_802_11_LENGTH_SSID         32
 #define NDIS_802_11_LENGTH_RATES        8
 #define NDIS_802_11_LENGTH_RATES_EX     16
+
+#define NdisMediaStateConnected                 1
+#define NdisMediaStateDisconnected              0
 
 #define NdisMediaStateConnected                 1
 #define NdisMediaStateDisconnected              0
@@ -267,7 +270,7 @@ typedef struct PACKED _NDIS_WLAN_BSSID_EX
 	unsigned char                       MacAddress[6];      // BSSID
 	unsigned char                       Reserved[2];
 	NDIS_802_11_SSID                    Ssid;               // SSID
-	unsigned int                        Privacy;            // WEP encryption requirement
+	unsigned long                       Privacy;            // WEP encryption requirement
 	NDIS_802_11_RSSI                    Rssi;               // receive signal
                                                             // strength in dBm
 	NDIS_802_11_NETWORK_TYPE            NetworkTypeInUse;
@@ -345,18 +348,24 @@ typedef struct {
 
 #define MAX_NUM_OF_DLS_ENTRY        4
 // structure for DLS
-typedef struct _RT_802_11_DLS {
+typedef struct _RT_802_11_DLS_UI {
 	unsigned short      TimeOut;        // unit: second , set by UI
 	unsigned short      CountDownTimer; // unit: second , used by driver only
 	unsigned char       MacAddr[6];     // set by UI
 	unsigned char       Status;         // 0: none, 1: wait STAkey, 2: finish DLS setup, set by driver only
 	unsigned char       Valid;          // 1: valid, 0: invalid, set by UI, use to setup or tear down DLS link
-} RT_802_11_DLS, *PRT_802_11_DLS;
+} RT_802_11_DLS_UI, *PRT_802_11_DLS;
+
+typedef struct _RT_802_11_DLS_INFO {
+	RT_802_11_DLS_UI        Entry[MAX_NUM_OF_DLS_ENTRY];
+	unsigned char           num;
+} RT_802_11_DLS_INFO, *PRT_802_11_DLS_INFO;
 
 typedef enum _RT_802_11_DLS_MODE {
 	DLS_NONE,
 	DLS_WAIT_KEY,
-	DLS_FINISH                                                                                                                                               } RT_802_11_DLS_MODE;
+	DLS_FINISH
+} RT_802_11_DLS_MODE;
 
 typedef enum _NDIS_802_11_AUTHENTICATION_MODE
 {
