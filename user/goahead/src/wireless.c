@@ -150,17 +150,11 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 	char *RemoveDFSChannel = nvram_bufget(RT2860_NVRAM, "RemoveDFSChannel");
 
-//Tom.Hung 2010-5-17, RT3883 is use 0x3F for 5G Country Region Code.
 #ifdef CONFIG_RALINK_RT3883
 	returnEEPROMValue = getEEPROMCountryCode("3F");
 #else
 	returnEEPROMValue = getEEPROMCountryCode("38");
 #endif
-	/*channel = (channel_s == NULL)? 0 : atoi(channel_s);
-	if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "FR") == 0) ||
-			(strcmp(value, "IE") == 0) || (strcmp(value, "JP") == 0) ||
-			(strcmp(value, "HK") == 0)) {*/
 	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
 		((returnEEPROMValue & 0x00FF) == 0x06) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:36~48
 	{
@@ -169,11 +163,6 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-	//Jacky.Yang 1-Jun-2008, Remove DFS channel:52~64, channel:100~140
-	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "FR") == 0) ||
-			(strcmp(value, "IE") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "HK") == 0)) {*/
 if (atoi(RemoveDFSChannel) == 1)
 {
 	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
@@ -184,7 +173,6 @@ if (atoi(RemoveDFSChannel) == 1)
 					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-	//if ((value == NULL) || (strcmp(value, "") == 0)) {
 	if (((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:100~140
 	{
 		for (idx = 16; idx < 27; idx++)
@@ -192,10 +180,7 @@ if (atoi(RemoveDFSChannel) == 1)
 				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
 	}
-}//if (atoi(RemoveDFSChannel) == 0)
-	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "TW") == 0) ||
-			(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {*/
+}
 	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x03) || ((returnEEPROMValue & 0x00FF) == 0x04) || 
 		((returnEEPROMValue & 0x00FF) == 0x05) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:149~161
 	{
@@ -204,9 +189,6 @@ if (atoi(RemoveDFSChannel) == 1)
 					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
 					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
 	}
-	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {*/
 	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x04) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:165
 	{
 		return websWrite(wp,
@@ -222,8 +204,7 @@ if (atoi(RemoveDFSChannel) == 1)
 static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int idx = 0, channel;
-	const char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
-	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
+	char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
 	channel = (channel_s == NULL)? 0 : atoi(channel_s);	
 	for (idx = 0; idx < 14; idx++)
@@ -240,47 +221,14 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int idx = 0, channel, returnEEPROMValue=0;
-	const char *value = nvram_bufget(RT2860_NVRAM, "CountryCode");
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
 	channel = (channel_s == NULL)? 0 : atoi(channel_s);
 
-//Tom.Hung 2010-5-17, RT3883 is use 0x3E for 2.4G Country Region Code.
-#ifdef CONFIG_RALINK_RT3883
-	returnEEPROMValue = getEEPROMCountryCode("3E");
-#else
-	returnEEPROMValue = getEEPROMCountryCode("39");
-#endif
-
-	//Jacky.Yang 24-Jan-2008, Control FCC or CE useing eeprom value to check.
-	/*if ((value == NULL) || (strcmp(value, "") == 0) ||
-			(strcmp(value, "US") == 0) || (strcmp(value, "JP") == 0) ||
-			(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
-			(strcmp(value, "TW") == 0) || (strcmp(value, "CN") == 0) ||
-			(strcmp(value, "HK") == 0)) {*/
-		for (idx = 0; idx < 11; idx++)
+	for (idx = 0; idx < 14; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
 					(idx+1 == channel)? "selected" : "", 2412+5*idx,
 					"MHz (Channel ", idx+1, ")</option>");
-	//}
-	if ((returnEEPROMValue & 0x00FF) == 0x01) // EEPROM 0x39, 01:channel 1~11, other:channel 1~13 or 1~14
-	{
-		/*if ((value == NULL) || (strcmp(value, "") == 0) ||
-				(strcmp(value, "JP") == 0) || (strcmp(value, "TW") == 0) ||
-				(strcmp(value, "FR") == 0) || (strcmp(value, "IE") == 0) ||
-				(strcmp(value, "CN") == 0) || (strcmp(value, "HK") == 0)) {*/
-			for (idx = 11; idx < 13; idx++)
-				websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", idx+1,
-						(idx+1 == channel)? "selected" : "", 2412+5*idx,
-						"MHz (Channel ", idx+1, ")</option>");
-		//}
-
-		/*if ((value == NULL) || (strcmp(value, "") == 0)) {
-			return websWrite(wp,
-					T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),
-					(14 == channel)? "selected" : "");
-		}*/
-	}
 	
 	return 0;
 }
