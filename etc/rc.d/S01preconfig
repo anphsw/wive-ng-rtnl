@@ -77,7 +77,7 @@ nvram_daemon &
 if [ -f /etc/compile-date ]; then
     echo "Restore time to build time or save time"
     BUILDDATE=`cat /etc/compile-date`
-    if [ $BUILDDATE != "" ]; then
+    if [ "$BUILDDATE" != "" ]; then
 	date -s $BUILDDATE
     fi
 fi
