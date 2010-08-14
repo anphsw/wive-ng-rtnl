@@ -82,28 +82,29 @@ vpnServerIP=`nvram_get 2860 vpnServerIP`
         /etc/routes_ppp_replace $PPP_IFACE replace
     fi
 
-    $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
-    services_restart.sh pppd
+    #########################GENERATE VPN NETFILTER SCRIPT########################################################################
+    ##########################This always after route mod ########################################################################
 
-    #this always after route mod
-    iptables -A FORWARD -o $PPP_IFACE -j ACCEPT
-
+    echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
-    if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then                                                            
-        $LOG "Add masqrade rules to $PPP_IFACE interface"                                 
-	iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE
+    if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then
+	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE" >> /etc/ppp_firewall
 	#lan2
-	if [ "$Lan2Enabled" = "1" ]; then                            
-	    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	if [ "$Lan2Enabled" = "1" ]; then
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
 	fi
 	#rules for upnp
 	if [ "$upnp" = "1" ]; then                                                            
-    	    $LOG "Add rules to upnp chain for $PPP_IFACE interface"                                 
-    	    iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD                                                       
-    	    iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD                                      
+    	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
+    	    echo "iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
         fi                                         
     fi
+    chmod 777 /etc/ppp_firewall
 
+    #########################CALL SERVICE HELPER##################################################################################
+
+    $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
+    services_restart.sh pppd
     service shaper restart
 
 #run scrips from /etc/ppp/ip-up.d/

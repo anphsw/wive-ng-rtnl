@@ -25,6 +25,7 @@ fi
 
 #restart iptables
 service iptables restart
+
 #start all
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start

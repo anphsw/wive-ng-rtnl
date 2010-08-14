@@ -195,7 +195,6 @@ start() {
 	    fi
 	 fi
 	fi
-
 ###########################################UPNPRULES#######################################
         #rules for upnp
 	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
@@ -206,6 +205,13 @@ start() {
             iptables -t filter -F MINIUPNPD
             iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
         fi
+############################################VPNRULES#######################################
+	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on"  ]; then
+	    $LOG "Call to add VPN netfilter rules"
+	    /etc/ppp_firewall
+	fi
+############################################ENDRULES#######################################
+	$LOG "Iptables rules add OK..."
 }
 
 
