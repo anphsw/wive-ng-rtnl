@@ -246,12 +246,8 @@ extern int br_dev_queue_push_xmit(struct sk_buff *skb);
 extern void br_forward(struct net_bridge_port *to,
 		struct sk_buff *skb);
 extern int br_forward_finish(struct sk_buff *skb);
-extern void br_flood_deliver(struct net_bridge *br,
-		      struct sk_buff *skb,
-		      int clone);
-extern void br_flood_forward(struct net_bridge *br,
-		      struct sk_buff *skb,
-		      int clone);
+extern void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb);
+extern void br_flood_forward(struct net_bridge *br, struct sk_buff *skb);
 
 extern int SSID1_to_SSID2(unsigned char *deva, unsigned char *devb);	/* Jiahao for MBSSID */
 

@@ -176,7 +176,7 @@ static void copy_mac(unsigned char* to, unsigned char * from)
 #endif
 
 /* called under bridge lock */
-static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
+static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	void (*__packet_hook)(const struct net_bridge_port *p,
 			      struct sk_buff *skb))
 {
@@ -185,17 +185,7 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	struct ethhdr *dest;
 	int i;
-#endif
-	if (clone) {
-	    struct sk_buff *skb2;
-		if ((skb2 = skb_clone(skb, GFP_ATOMIC)) == NULL) {
-			br->statistics.tx_dropped++;
-			return;
-		}
 
-		skb = skb2;
-	}
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	if(atomic_read(&br->br_igmpp_table_enable) == 1){
 		list_for_each_entry_rcu(p, &br->port_list, list) {
 			struct sk_buff *skb2;
@@ -313,13 +303,13 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb, int clone,
 
 
 /* called with rcu_read_lock */
-void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb, int clone)
+void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb)
 {
-	br_flood(br, skb, clone, __br_deliver);
+	br_flood(br, skb, __br_deliver);
 }
 
 /* called under bridge lock */
-void br_flood_forward(struct net_bridge *br, struct sk_buff *skb, int clone)
+void br_flood_forward(struct net_bridge *br, struct sk_buff *skb)
 {
-	br_flood(br, skb, clone, __br_forward);
+	br_flood(br, skb, __br_forward);
 }
