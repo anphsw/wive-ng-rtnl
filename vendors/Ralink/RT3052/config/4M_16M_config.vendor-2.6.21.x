@@ -164,4 +164,4 @@ CONFIG_RT2880_NETWORK_MAP=y
 #
 # Windows Rally Program
 #
-CONFIG_LLDT=y
+CONFIG_USER_LLTD=y

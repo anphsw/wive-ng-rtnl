@@ -259,6 +259,6 @@ endmenu
 
 mainmenu_option next_comment
 comment 'Windows Rally Program'
-bool 'Link Layer Topology Discovery Protocol'		CONFIG_LLDT
+bool 'Link Layer Topology Discovery Protocol'		CONFIG_USER_LLTD
 endmenu
 

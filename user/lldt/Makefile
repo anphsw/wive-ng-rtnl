@@ -11,8 +11,8 @@ depend:
 	$(CC) $(CFLAGS) -M $(DCFILES) >.depend
 
 romfs:
-	$(ROMFSINST) -e CONFIG_LLDT       /bin/lld2d
-	$(ROMFSINST) -e CONFIG_LLDT       /bin/icon.ico
-	$(ROMFSINST) -e CONFIG_LLDT       /bin/icon.large.ico
+	$(ROMFSINST) -e CONFIG_USER_LLTD       /bin/lld2d
+	$(ROMFSINST) -e CONFIG_USER_LLTD       /bin/icon.ico
+	$(ROMFSINST) -e CONFIG_USER_LLTD       /bin/icon.large.ico
 
 -include .depend

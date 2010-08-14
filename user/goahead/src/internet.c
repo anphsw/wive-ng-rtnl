@@ -1247,7 +1247,7 @@ static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_LLTD && defined CONFIG_RT2860V2_AP_LLTD
+#ifdef CONFIG_USER_LLTD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
