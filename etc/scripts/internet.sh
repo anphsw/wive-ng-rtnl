@@ -9,9 +9,6 @@
 . /bin/config.sh
 . /bin/global.sh
 
-bssidnum=`nvram_get 2860 BssidNum`
-radio_off=`nvram_get 2860 RadioOff`
-
 MODE=$1 #restart mode
 
 ifRaxWdsxDown()
@@ -43,8 +40,6 @@ addMesh2Br0()
     if [ "$meshenabled" = "1" ]; then
         ip link set mesh0 up
         brctl addif br0 mesh0
-        meshhostname=`nvram_get 2860 MeshHostName`
-        iwpriv mesh0 set  MeshHostName="$meshhostname"
     fi
 }
 
@@ -79,6 +74,17 @@ setLanWan()
 	    config-vlan.sh 2 LLLLW
 	fi
     fi
+}
+
+addMBSSID()
+{
+if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+    for i in `seq 1 $bssidnum`; do
+        ip addr flush dev ra$i
+        ip -6 addr flush dev ra$i
+        ip link set ra$i up
+    done
+fi
 }
 
 resetLanWan()
@@ -116,50 +122,32 @@ if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
 
+#link wifi down first
+ip link set ra0 down
+
 if [ "$MODE" != "lanonly" ]; then
     #reload wifi modules
     service modules restart
 fi
 
-    # config interface
-    ip addr flush dev ra0
+#link wifi up second
+ip link set ra0 up
+
+#flush adresses
+ip addr flush dev ra0
 if [ "$CONFIG_IPV6" != "" ] ; then
     ip -6 addr flush dev ra0
 fi
-    ip link set ra0 up
-
-    #preconfigure wifi for 40Mhz workaround                                                                                               
-    HT_BW=`nvram_get 2860 HT_BW`
-    HT_GI=`nvram_get 2860 HT_GI`
-    HT_PROTECT=`nvram_get 2860 HT_PROTECT`
-    iwpriv ra0 set HtBw=$HT_BW
-    iwpriv ra0 set HtGi=$HT_GI
-    iwpriv ra0 set HtProtect=$HT_PROTECT
 
 #restart lan interfaces
 service lan restart
 
-if [ "$MODE" != "lanonly" ]; then
-    if [ "$ethconv" = "y" ]; then
-	iwpriv ra0 set EthConvertMode=dongle
-    fi
-    if [ "$radio_off" = "1" ]; then
-	iwpriv ra0 set RadioOn=0
-    fi
-    if [ "$MODE" != "wifionly" ]; then
-	m2uenabled=`nvram_get 2860 M2UEnabled`
-	if [ "$m2uenabled" = "1" ]; then
-	    iwpriv ra0 set IgmpSnEnable=1
-	    echo "iwpriv ra0 set IgmpSnEnable=1"
-        fi
-    fi
-    if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	for i in `seq 1 $bssidnum`; do
-	    ip addr flush dev ra$i
-	    ip -6 addr flush dev ra$i
-	    ip link set ra$i up 
-	done
-    fi
+#always after br0 is create
+addMBSSID
+
+if [ "$MODE" != "lanonly" ]; then 
+    #preconfigure wifi and 40Mhz workaround
+    /etc/scripts/wifi.sh $MODE
 fi
 
 #
