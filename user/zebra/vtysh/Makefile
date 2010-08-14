@@ -68,7 +68,7 @@ PATH_SEPARATOR = :
 AMTAR = ${SHELL} /opt/Wive-RTNL/user/zebra/missing --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AWK = gawk
-BGPD = bgpd
+BGPD = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CURSES = 
@@ -85,7 +85,7 @@ LIB_IPV6 =
 LIB_REGEX = 
 MULTIPATH_NUM = 1
 OSPF6D = 
-OSPFD = ospfd
+OSPFD = 
 OTHER_METHOD = 
 PACKAGE = zebra
 RANLIB = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib
@@ -102,7 +102,7 @@ am__quote =
 install_sh = /opt/Wive-RTNL/user/zebra/install-sh
 DEFS = -DHAVE_CONFIG_H -DSYSCONFDIR=\"$(sysconfdir)/\"
 
-LIBS = -lm -lcrypt    
+LIBS = -lm -lcrypt   
 
 bin_PROGRAMS = vtysh
 

@@ -68,7 +68,7 @@ PATH_SEPARATOR = :
 AMTAR = ${SHELL} /opt/Wive-RTNL/user/zebra/missing --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AWK = gawk
-BGPD = bgpd
+BGPD = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CURSES = 
@@ -84,7 +84,7 @@ LIB_IPV6 =
 LIB_REGEX = 
 MULTIPATH_NUM = 1
 OSPF6D = 
-OSPFD = ospfd
+OSPFD = 
 OTHER_METHOD = 
 PACKAGE = zebra
 RANLIB = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib
@@ -100,7 +100,7 @@ am__include = include
 am__quote = 
 install_sh = /opt/Wive-RTNL/user/zebra/install-sh
 
-SUBDIRS = lib zebra bgpd ripd  ospfd   doc
+SUBDIRS = lib zebra  ripd     doc
 
 EXTRA_DIST = aclocal.m4 SERVICES TODO REPORTING-BUGS vtysh/Makefile.in \
 	vtysh/Makefile.am update-autotools
