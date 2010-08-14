@@ -166,11 +166,8 @@ reset_all_phys()
 	echo "Reset all phy port"
 	opmode=`nvram_get 2860 OperationMode`
 
-	#Ports down skip WAN port
-	if [ "$opmode" != "1" ]; then
-	    start=0
-	    end=4
-	else
+	if [ "$opmode" = "1" ]; then
+	    #Ports down skip WAN port
 	    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
 		start=0
 		end=3
@@ -178,29 +175,23 @@ reset_all_phys()
 		start=1	
 		end=4
 	    fi
+	else
+	    #All ports down
+	    start=0
+	    end=4
 	fi
+
+	#disable ports
 	for i in `seq $start $end`; do
     	    link_down $i
 	done
 
-	#force Windows clients to renew IP and update DNS server
 	if [ "$opmode" = "1" ]; then
-	    sleep 3
-        fi
-
-	#Ports up skip WAN port
-	if [ "$opmode" != "1" ]; then
-	    start=0
-	    end=4
-	else
-	    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-		start=0
-		end=3
-	    else
-		start=1	
-		end=4
-	    fi
+	  #force Windows clients to renew IP and update DNS server
+	  sleep 2
 	fi
+
+	#enable ports
 	for i in `seq $start $end`; do
     	    link_up $i
 	done
