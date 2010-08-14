@@ -98,6 +98,14 @@ resetLanWan()
     fi
 }
 
+ra0flushadress()
+{
+    #flush adresses
+    ip addr flush dev ra0
+    if [ "$CONFIG_IPV6" != "" ] ; then
+	ip -6 addr flush dev ra0
+    fi
+}
 
 # opmode adjustment:
 #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
@@ -122,7 +130,8 @@ if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
 
-#link wifi down first
+echo "link wifi down first"
+ra0flushadress
 ip link set ra0 down
 
 if [ "$MODE" != "lanonly" ]; then
@@ -130,14 +139,9 @@ if [ "$MODE" != "lanonly" ]; then
     service modules restart
 fi
 
-#link wifi up second
+echo "link wifi up second"
 ip link set ra0 up
-
-#flush adresses
-ip addr flush dev ra0
-if [ "$CONFIG_IPV6" != "" ] ; then
-    ip -6 addr flush dev ra0
-fi
+ra0flushadress
 
 #restart lan interfaces
 service lan restart
