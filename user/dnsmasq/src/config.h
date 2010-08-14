@@ -148,8 +148,8 @@ NOTES:
 #define HAVE_BROKEN_RTC
 #define NO_TFTP
 #define NO_DHCP
+#define NO_HAVE_DBUS
 
-//#define NO_HAVE_DBUS
 /* #define HAVE_BROKEN_RTC */
 /* #define HAVE_DBUS */
 
