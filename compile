@@ -60,9 +60,9 @@ if [ "$MODE" = "2T2R" ] ; then
 fi
 
 #######################################################################
-    cp -fv ./config-$VENDOR/config-config ./config/.config
-cp -fv ./config-$VENDOR/config-busybox	  ./user/busybox/.config
-cp -fv ./config-$VENDOR/config-lib	  ./lib/.config
+cp -fv ./config-$VENDOR/config-config	./config/.config
+cp -fv ./config-$VENDOR/config-busybox	./user/busybox/.config
+cp -fv ./config-$VENDOR/config-lib	./lib/.config
 #######################################################################
 cp -fv ./config-$VENDOR/config-cpp		./uClibc++/.config
 cp -fv ./config-$VENDOR/config-all		.config
