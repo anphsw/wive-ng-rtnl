@@ -5,6 +5,7 @@
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Basic Wireless Settings</title>
 
@@ -47,45 +48,44 @@ function checkHex(str){
 function checkInjection(str)
 {
 	var len = str.length;
-	for (var i=0; i<str.length; i++) {
+	for (var i=0; i<str.length; i++)
+	{
 		if ( str.charAt(i) == '\r' || str.charAt(i) == '\n')
 		{
-				return false;
+			return false;
 		}
 		else
 			continue;
 	}
-    return true;
+	return true;
 }
 
 function hiddenBasicWeb()
 {
-	document.wireless_mesh.MeshID.disabled = true;
-	document.wireless_mesh.HostName.disabled = true;
-	document.wireless_mesh.AutoLinkEnable.disabled = true;
-	document.getElementById("div_mesh_settings").style.visibility = "hidden";
-	document.getElementById("div_mesh_settings").style.display = "none";
-	document.getElementById("manual_link").style.visibility = "hidden";
-	document.getElementById("manual_link").style.display = "none";
+	var mesh = document.wireless_mesh;
+	mesh.MeshID.disabled = true;
+	mesh.HostName.disabled = true;
+	mesh.AutoLinkEnable.disabled = true;
 	document.mesh_manual_link.mpmac.disabled = true;
+
+	hideElement("div_mesh_settings");
+	hideElement("manual_link");
 }
 
 function hiddenSecureWeb()
 {
-	document.getElementById("div_open_secure_mode").style.visibility = "hidden";
-	document.getElementById("div_open_secure_mode").style.display = "none";
-	document.wireless_mesh.open_encrypt_type.disabled= true;
-	document.getElementById("div_wpa_algorithms").style.visibility = "hidden";
-	document.getElementById("div_wpa_algorithms").style.display = "none";
-	document.wireless_mesh.wpa_cipher[0].disabled = true;
-	document.wireless_mesh.wpa_cipher[1].disabled = true;
-	document.getElementById("div_wep").style.visibility = "hidden";
-	document.getElementById("div_wep").style.display = "none";
-	document.wireless_mesh.wep_key.disabled = true;
-	document.wireless_mesh.wep_select.disabled = true;
-	document.getElementById("div_wpa").style.visibility = "hidden";
-	document.getElementById("div_wpa").style.display = "none";
-	document.wireless_mesh.passphrase.disabled = true;
+	hideElement("div_open_secure_mode");
+	hideElement("div_wpa_algorithms");
+	hideElement("div_wep");
+	hideElement("div_wpaa");
+
+	var mesh = document.wireless_mesh;
+	mesh.open_encrypt_type.disabled= true;
+	mesh.wpa_cipher[0].disabled = true;
+	mesh.wpa_cipher[1].disabled = true;
+	mesh.wep_key.disabled       = true;
+	mesh.wep_select.disabled    = true;
+	mesh.passphrase.disabled    = true;
 }
 
 function initTranslation()

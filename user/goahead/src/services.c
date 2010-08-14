@@ -138,7 +138,6 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
 		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
 		dhcpStoreAliases(static_leases);
-//		nvram_bufset(RT2860_NVRAM, "dhcpStatic1", static_leases);
 	}
 	
 	// Commit settings

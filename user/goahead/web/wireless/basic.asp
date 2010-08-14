@@ -3,8 +3,9 @@
 <head>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Basic Wireless Settings</title>
@@ -12,15 +13,12 @@
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
-var PhyMode  = '<% getCfgZero(1, "WirelessMode"); %>';
-var HiddenSSID  = '<% getCfgZero(1, "HideSSID"); %>';
-var APIsolated = '<% getCfgZero(1, "NoForwarding"); %>';
+
 var mbssidapisolated = '<% getCfgZero(1, "NoForwardingBTNBSSID"); %>';
 var channel_index  = '<% getWlanChannel(); %>';
 var fxtxmode = '<% getCfgGeneral(1, "FixedTxMode"); %>';
 var countrycode = '<% getCfgGeneral(1, "CountryCode"); %>';
 var ht_mode = '<% getCfgZero(1, "HT_OpMode"); %>';
-var ht_bw = '<% getCfgZero(1, "HT_BW"); %>';
 var ht_gi = '<% getCfgZero(1, "HT_GI"); %>';
 var ht_stbc = '<% getCfgZero(1, "HT_STBC"); %>';
 var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
@@ -103,19 +101,6 @@ HT5GExtCh[18] = new Array(1, "5765MHz (Channel 153)"); // channel 149's extensio
 HT5GExtCh[19] = new Array(0, "5745MHz (Channel 149)"); // channel 153's extension channel
 HT5GExtCh[20] = new Array(1, "5805MHz (Channel 161)"); // channel 157's extension channel
 HT5GExtCh[21] = new Array(0, "5785MHz (Channel 157)"); // channel 161's extension channel
-
-
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
 
 function insertChannelOption(vChannel, band)
 {
@@ -326,31 +311,29 @@ function ChannelOnChange()
 
 function Channel_BandWidth_onClick()
 {
-	var w_mode = document.wireless_basic.wirelessmode.options.selectedIndex;
+	var form_basic = document.wireless_basic;
+	var w_mode = form_basic.wirelessmode.options.selectedIndex;
 
-	if (document.wireless_basic.n_bandwidth[0].checked == true)
+	if (form_basic.n_bandwidth[0].checked == true)
 	{
-		document.getElementById("extension_channel").style.visibility = "hidden";
-		document.getElementById("extension_channel").style.display = "none";
-		document.wireless_basic.n_extcha.disabled = true;
+		hideElement("extension_channel");
+		form_basic.n_extcha.disabled = true;
 		if ((1*w_mode == 6) || (1*w_mode == 7))
 			Check5GBandChannelException();
 	}
 	else
 	{
-		document.getElementById("extension_channel").style.visibility = "visible";
-		document.getElementById("extension_channel").style.display = style_display_on();
-		document.wireless_basic.n_extcha.disabled = false;
+		showElementEx("extension_channel", style_display_on());
+		form_basic.n_extcha.disabled = false;
 
 		if ((1*w_mode == 6) || (1*w_mode == 7))
 		{
 			Check5GBandChannelException();
 
-			if (document.wireless_basic.sz11aChannel.options.selectedIndex == 0)
+			if (form_basic.sz11aChannel.options.selectedIndex == 0)
 			{
-				document.getElementById("extension_channel").style.visibility = "hidden";
-				document.getElementById("extension_channel").style.display = "none";
-				document.wireless_basic.n_extcha.disabled = true;
+				hideElement("extension_channel");
+				form_basic.n_extcha.disabled = true;
 			}
 		}
 	}
@@ -358,14 +341,15 @@ function Channel_BandWidth_onClick()
 
 function Check5GBandChannelException()
 {
-	var w_mode = document.wireless_basic.wirelessmode.options.selectedIndex;
+	var form_basic = document.wireless_basic;
+	var w_mode = form_basic.wirelessmode.options.selectedIndex;
 
 	if ((1*w_mode == 6) || (1*w_mode == 7))
 	{
-		var x = document.getElementById("sz11aChannel")
-		var current_length = document.wireless_basic.sz11aChannel.options.length;
-		var current_index = document.wireless_basic.sz11aChannel.options.selectedIndex;
-		var current_channel = document.wireless_basic.sz11aChannel.value;
+		var x                   = document.getElementById("sz11aChannel")
+		var current_length      = form_basic.sz11aChannel.options.length;
+		var current_index       = form_basic.sz11aChannel.options.selectedIndex;
+		var current_channel     = form_basic.sz11aChannel.value;
 		 
 		if (1*current_index == 0)
 		{
@@ -409,11 +393,11 @@ function Check5GBandChannelException()
 
 			if ((1*current_channel == 140) || (1*current_channel == 165))
 			{
-				document.wireless_basic.sz11aChannel.options.selectedIndex = (1*current_index) -1;
+				form_basic.sz11aChannel.options.selectedIndex = (1*current_index) -1;
 			}
 			else
 			{
-				document.wireless_basic.sz11aChannel.options.selectedIndex = (1*current_index);
+				form_basic.sz11aChannel.options.selectedIndex = (1*current_index);
 			}
 		}
 		else
@@ -451,14 +435,14 @@ function Check5GBandChannelException()
 					insertChannelOption(165, 5);
 			}
 
-			document.wireless_basic.sz11aChannel.options.selectedIndex = (1*current_index);
+			form_basic.sz11aChannel.options.selectedIndex = (1*current_index);
 		}
 	}
 	else if (1*w_mode == 5)
 	{
 		var x = document.getElementById("sz11aChannel")
-		var current_length = document.wireless_basic.sz11aChannel.options.length;
-		var current_index = document.wireless_basic.sz11aChannel.options.selectedIndex;
+		var current_length = form_basic.sz11aChannel.options.length;
+		var current_index = form_basic.sz11aChannel.options.selectedIndex;
 
 		for (ch_idx = current_length - 1; ch_idx > 0; ch_idx--)
 		{
@@ -498,161 +482,91 @@ function Check5GBandChannelException()
 				insertChannelOption(165, 5);
 		}
 
-		document.wireless_basic.sz11aChannel.options.selectedIndex = (1*current_index);
+		form_basic.sz11aChannel.options.selectedIndex = (1*current_index);
 	}
 }
 
 function initTranslation()
 {
-	var e = document.getElementById("basicTitle");
-	e.innerHTML = _("basic title");
-	e = document.getElementById("basicIntroduction");
-	e.innerHTML = _("basic introduction");
+	_TR("basicTitle", "basic title");
+	_TR("basicIntroduction", "basic introduction");
 
-	e = document.getElementById("basicWirelessNet");
-	e.innerHTML = _("basic wireless network");
-	e = document.getElementById("basicRadioButton");
-	e.innerHTML = _("basic radio button");
-	e = document.getElementById("basicNetMode");
-	e.innerHTML = _("basic network mode");
-	e = document.getElementById("basicSSID");
-	e.innerHTML = _("basic ssid");
-	e = document.getElementById("basicHSSID0");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID1");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID2");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID3");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID4");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID5");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID6");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicHSSID7");
-	e.innerHTML = _("basic hssid");
-	e = document.getElementById("basicMSSID1");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID2");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID3");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID4");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID5");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID6");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicMSSID7");
-	e.innerHTML = _("basic multiple ssid");
-	e = document.getElementById("basicBroadcastSSIDEnable");
-	e.innerHTML = _("wireless enable");
-	e = document.getElementById("basicBroadcastSSIDDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("basicBroadcastSSID");
-	e.innerHTML = _("basic broadcast ssid");
-	e = document.getElementById("basicApIsolatedEnable");
-	e.innerHTML = _("wireless enable");
-	e = document.getElementById("basicApIsolatedDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("basicApIsolated");
-	e.innerHTML = _("basic apisolated");
-	e = document.getElementById("basicIsolatedSSID0");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID1");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID2");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID3");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID4");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID5");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID6");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicIsolatedSSID7");
-	e.innerHTML = _("basic isolated");
-	e = document.getElementById("basicMBSSIDApIsolatedEnable");
-	e.innerHTML = _("wireless enable");
-	e = document.getElementById("basicMBSSIDApIsolatedDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("basicMBSSIDApIsolated");
-	e.innerHTML = _("basic mbssidapisolated");
-	e = document.getElementById("basicBSSID");
-	e.innerHTML = _("basic bssid");
-	e = document.getElementById("basicFreqA");
-	e.innerHTML = _("basic frequency");
-	e = document.getElementById("basicFreqAAuto");
-	e.innerHTML = _("basic frequency auto");
-	e = document.getElementById("basicFreqB");
-	e.innerHTML = _("basic frequency");
-	e = document.getElementById("basicFreqBAuto");
-	e.innerHTML = _("basic frequency auto");
-	e = document.getElementById("basicFreqG");
-	e.innerHTML = _("basic frequency");
-	e = document.getElementById("basicFreqGAuto");
-	e.innerHTML = _("basic frequency auto");
-	e = document.getElementById("basicRate");
-	e.innerHTML = _("basic rate");
+	_TR("basicWirelessNet", "basic wireless network");
+	_TR("basicRadioButton", "basic radio button");
+	_TR("basicNetMode", "basic network mode");
+	_TR("basicSSID", "basic ssid");
+	_TR("basicHSSID0", "basic hssid");
+	_TR("basicHSSID1", "basic hssid");
+	_TR("basicHSSID2", "basic hssid");
+	_TR("basicHSSID3", "basic hssid");
+	_TR("basicHSSID4", "basic hssid");
+	_TR("basicHSSID5", "basic hssid");
+	_TR("basicHSSID6", "basic hssid");
+	_TR("basicHSSID7", "basic hssid");
+	_TR("basicMSSID1", "basic multiple ssid");
+	_TR("basicMSSID2", "basic multiple ssid");
+	_TR("basicMSSID3", "basic multiple ssid");
+	_TR("basicMSSID4", "basic multiple ssid");
+	_TR("basicMSSID5", "basic multiple ssid");
+	_TR("basicMSSID6", "basic multiple ssid");
+	_TR("basicMSSID7", "basic multiple ssid");
+	_TR("basicBroadcastSSIDEnable", "wireless enable");
+	_TR("basicBroadcastSSIDDisable", "wireless disable");
+	_TR("basicBroadcastSSID", "basic broadcast ssid");
+	_TR("basicApIsolatedEnable", "wireless enable");
+	_TR("basicApIsolatedDisable", "wireless disable");
+	_TR("basicApIsolated", "basic apisolated");
+	_TR("basicIsolatedSSID0", "basic isolated");
+	_TR("basicIsolatedSSID1", "basic isolated");
+	_TR("basicIsolatedSSID2", "basic isolated");
+	_TR("basicIsolatedSSID3", "basic isolated");
+	_TR("basicIsolatedSSID4", "basic isolated");
+	_TR("basicIsolatedSSID5", "basic isolated");
+	_TR("basicIsolatedSSID6", "basic isolated");
+	_TR("basicIsolatedSSID7", "basic isolated");
+	_TR("basicMBSSIDApIsolatedEnable", "wireless enable");
+	_TR("basicMBSSIDApIsolatedDisable", "wireless disable");
+	_TR("basicMBSSIDApIsolated", "basic mbssidapisolated");
+	_TR("basicBSSID", "basic bssid");
+	_TR("basicFreqA", "basic frequency");
+	_TR("basicFreqAAuto", "basic frequency auto");
+	_TR("basicFreqB", "basic frequency");
+	_TR("basicFreqBAuto", "basic frequency auto");
+	_TR("basicFreqG", "basic frequency");
+	_TR("basicFreqGAuto", "basic frequency auto");
+	_TR("basicRate", "basic rate");
 
-	e = document.getElementById("basicHTPhyMode");
-	e.innerHTML = _("basic ht phy mode");
-	e = document.getElementById("basicHTOPMode");
-	e.innerHTML = _("basic ht op mode");
-      	e = document.getElementById("basicHTMixed");
-	e.innerHTML = _("basic ht op mixed");
-    	e = document.getElementById("basicHTChannelBW");
-	e.innerHTML = _("basic ht channel bandwidth");
-    	e = document.getElementById("basicHTGI");
-	e.innerHTML = _("basic ht guard interval");
-      	e = document.getElementById("basicHTLongGI");
-	e.innerHTML = _("wireless long");
-      	e = document.getElementById("basicHTAutoGI");
-	e.innerHTML = _("wireless auto");
-    	e = document.getElementById("basicHTAutoMCS");
-	e.innerHTML = _("wireless auto");
-    	e = document.getElementById("basicHTRDG");
-	e.innerHTML = _("basic ht rdg");
-    	e = document.getElementById("basicHTRDGDisable");
-	e.innerHTML = _("wireless disable");
-    	e = document.getElementById("basicHTRDGEnable");
-	e.innerHTML = _("wireless enable");
-    	e = document.getElementById("basicHTExtChannel");
-	e.innerHTML = _("basic ht extension channel");
-    	e = document.getElementById("basicHTAMSDU");
-	e.innerHTML = _("basic ht amsdu");
-    	e = document.getElementById("basicHTAMSDUDisable");
-	e.innerHTML = _("wireless disable");
-    	e = document.getElementById("basicHTAMSDUEnable");
-	e.innerHTML = _("wireless enable");
-    	e = document.getElementById("basicHTAddBA");
-	e.innerHTML = _("basic ht addba");
-    	e = document.getElementById("basicHTAddBADisable");
-	e.innerHTML = _("wireless disable");
-    	e = document.getElementById("basicHTAddBAEnable");
-	e.innerHTML = _("wireless enable");
-    	e = document.getElementById("basicHTDelBA");
-	e.innerHTML = _("basic ht delba");
-    	e = document.getElementById("basicHTDelBADisable");
-	e.innerHTML = _("wireless disable");
-    	e = document.getElementById("basicHTDelBAEnable");
-	e.innerHTML = _("wireless enable");
+	_TR("basicHTPhyMode", "basic ht phy mode");
+	_TR("basicHTOPMode", "basic ht op mode");
+	_TR("basicHTMixed", "basic ht op mixed");
+	_TR("basicHTChannelBW", "basic ht channel bandwidth");
+	_TR("basicHTGI", "basic ht guard interval");
+	_TR("basicHTLongGI", "wireless long");
+	_TR("basicHTAutoGI", "wireless auto");
+	_TR("basicHTAutoMCS", "wireless auto");
+	_TR("basicHTRDG", "basic ht rdg");
+	_TR("basicHTRDGDisable", "wireless disable");
+	_TR("basicHTRDGEnable", "wireless enable");
+	_TR("basicHTExtChannel", "basic ht extension channel");
+	_TR("basicHTAMSDU", "basic ht amsdu");
+	_TR("basicHTAMSDUDisable", "wireless disable");
+	_TR("basicHTAMSDUEnable", "wireless enable");
+	_TR("basicHTAddBA", "basic ht addba");
+	_TR("basicHTAddBADisable", "wireless disable");
+	_TR("basicHTAddBAEnable", "wireless enable");
+	_TR("basicHTDelBA", "basic ht delba");
+	_TR("basicHTDelBADisable", "wireless disable");
+	_TR("basicHTDelBAEnable", "wireless enable");
 
-    	e = document.getElementById("basicOther");
-	e.innerHTML = _("basic other");
-    	e = document.getElementById("basicHTTxStream");
-	e.innerHTML = _("basic ht txstream");
-    	e = document.getElementById("basicHTRxStream");
-	e.innerHTML = _("basic ht rxstream");
+	_TR("basicOther", "basic other");
+	_TR("basicHTTxStream", "basic ht txstream");
+	_TR("basicHTRxStream", "basic ht rxstream");
 
-	e = document.getElementById("basicApply");
-	e.value = _("wireless apply");
-	e = document.getElementById("basicCancel");
-	e.value = _("wireless cancel");
+	_TRV("basicApply", "wireless apply");
+	_TRV("basicCancel", "wireless cancel");
 }
+
+
 
 function initValue()
 {
@@ -660,184 +574,139 @@ function initValue()
 	var HiddenSSIDArray;
 	var channel_11a_index;
 	var current_channel_length;
-	var radio_off = '<% getCfgZero(1, "RadioOff"); %>';
-	var mssidb = "<% getMBSSIDBuilt(); %>";
+	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
 
 	initTranslation();
 	if (countrycode == '')
 		countrycode = 'NONE';
+	
+	var form                  = document.wireless_basic;
+	form.wirelessmode.value   = "<% getCfgZero(1, "WirelessMode"); %>";
+	form.radioButton.value    = (radio_off == "1") ? "RADIO ON" : "RADIO OFF";
 
-	document.getElementById("div_11a_channel").style.visibility = "hidden";
-	document.getElementById("div_11a_channel").style.display = "none";
-	document.wireless_basic.sz11aChannel.disabled = true;
-	document.getElementById("div_11b_channel").style.visibility = "hidden";
-	document.getElementById("div_11b_channel").style.display = "none";
-	document.wireless_basic.sz11bChannel.disabled = true;
-	document.getElementById("div_11g_channel").style.visibility = "hidden";
-	document.getElementById("div_11g_channel").style.display = "none";
-	document.wireless_basic.sz11gChannel.disabled = true;
-	document.getElementById("div_11n").style.display = "none";
-	document.wireless_basic.n_mode.disabled = true;
-	document.wireless_basic.n_bandwidth.disabled = true;
-	document.wireless_basic.n_rdg.disabled = true;
-	document.wireless_basic.n_gi.disabled = true;
-	document.wireless_basic.n_mcs.disabled = true;
-	//document.getElementById("div_11n_plugfest").style.display = "none";
-	//document.wireless_basic.f_40mhz.disabled = true;
+	var wmode = form.wirelessmode.value;
 
-	PhyMode = 1*PhyMode;
+	// Hide & disable elements
+	hideElement("div_11a_channel");
+	hideElement("div_11b_channel");
+	hideElement("div_11g_channel");
+	hideElement("div_abg_rate");
+	hideElement("div_11n");
 
-	if ((PhyMode >= 8) || (PhyMode == 6))
+	form.sz11aChannel.disabled = true;
+	form.sz11bChannel.disabled = true;
+	form.sz11gChannel.disabled = true;
+	form.abg_rate.disabled = true;
+	form.n_mode.disabled = true;
+	form.n_bandwidth.disabled = true;
+	form.n_rdg.disabled = true;
+	form.n_gi.disabled = true;
+	form.n_mcs.disabled = true;
+	
+	hideElement("div_mbssidapisolated");
+	form.mbssidapisolated.disabled = true;
+	
+	// Wireless mode
+	if ((wmode*1) >= 6)
 	{
-		if (window.ActiveXObject) // IE
-			document.getElementById("div_11n").style.display = "block";
-		else if (window.XMLHttpRequest)  // Mozilla, Safari,...
-			document.getElementById("div_11n").style.display = "table";
-		document.wireless_basic.n_mode.disabled = false;
-		document.wireless_basic.n_bandwidth.disabled = false;
-		document.wireless_basic.n_rdg.disabled = false;
-		document.wireless_basic.n_gi.disabled = false;
-		document.wireless_basic.n_mcs.disabled = false;
-		//document.getElementById("div_11n_plugfest").style.display = "block";
-		//document.wireless_basic.f_40mhz.disabled = false;
+		showElement("div_11n");
+		form.n_mode.disabled = false;
+		form.n_bandwidth.disabled = false;
+		form.n_rdg.disabled = false;
+		form.n_gi.disabled = false;
+		form.n_mcs.disabled = false;
 	}
-
+	
 	var rfic = '<% getCfgGeneral(1, "RFICType"); %>';
 	if ((rfic == "2") || (rfic == "4"))
 	{
-		document.wireless_basic.wirelessmode.options[5] = new Option("11a only", "2");
-                document.wireless_basic.wirelessmode.options[6] = new Option("11a/n mixed mode", "8");
-                document.wireless_basic.wirelessmode.options[7] = new Option("11n only(5G)", "11");
+		index = form.wirelessmode.options.length;
+		form.wirelessmode.options[index++] = new Option("11a only", "2");
+		form.wirelessmode.options[index++] = new Option("11a/n mixed mode", "8");
+		form.wirelessmode.options[index++] = new Option("11n only(5G)", "11");
 	}
-	if ((PhyMode == 0) || (PhyMode == 4) || (PhyMode == 9) || (PhyMode == 6))
+	
+	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode=="7"))
 	{
-		if (PhyMode == 0)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 0;
-		else if (PhyMode == 4)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 2;
-		else if (PhyMode == 9)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 3;
-		else if (PhyMode == 6)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 4;
-
-		document.getElementById("div_11g_channel").style.visibility = "visible";
-		document.getElementById("div_11g_channel").style.display = style_display_on();
-		document.wireless_basic.sz11gChannel.disabled = false;
+		form.sz11gChannel.disabled = false;
+		showElementEx("div_11g_channel", style_display_on());
 	}
-	else if (PhyMode == 1)
+	else if (wmode == "1")
 	{
-		document.wireless_basic.wirelessmode.options.selectedIndex = 1;
-		document.getElementById("div_11b_channel").style.visibility = "visible";
-		document.getElementById("div_11b_channel").style.display = style_display_on();
-		document.wireless_basic.sz11bChannel.disabled = false;
+		form.sz11bChannel.disabled = false;
+		showElementEx("div_11b_channel", style_display_on());
 	}
-	else if ((PhyMode == 2) || (PhyMode == 8) || (PhyMode == 11))
+	else if ((wmode == "2") || (wmode == "8") || (wmode == "11"))
 	{
-		if (PhyMode == 2)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 5;
-		else if (PhyMode == 8)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 6;
-		else if (PhyMode == 11)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 7;
-		document.getElementById("div_11a_channel").style.visibility = "visible";
-		document.getElementById("div_11a_channel").style.display = style_display_on();
-		document.wireless_basic.sz11aChannel.disabled = false;
+		form.sz11aChannel.disabled = false;
+		showElementEx("div_11a_channel", style_display_on());
 	}
-
-	for (i=1;i<8;i++)
+	
+	for (i=1; i<8; i++)
 	{
-		var ssid = eval("document.wireless_basic.mssid_"+i+".disabled");
-		var div = eval("document.getElementById(\"div_hssid"+i+"\").style");
-
-		div.visibility = "hidden";
-		div.display = "none";
-		ssid = true;
-		document.wireless_basic.hssid[i].disabled = true;
+		hideElement("div_hssid" + i);
+		form.elements["mssid_" + i].disabled = true;
+		form.hssid[i].disabled = true;
 	}
+	
+	var mssidb      = "<% getMBSSIDBuilt(); %>";
 	if (mssidb == "1")
 	{
-		for (i=1;i<8;i++)
+		for (i=1; i<8; i++)
 		{
-			var ssid = eval("document.wireless_basic.mssid_"+i+".disabled");
-			var div = eval("document.getElementById(\"div_hssid"+i+"\").style");
-
-			div.visibility = "visible";
-			div.display = style_display_on();
-			ssid = false;
-			document.wireless_basic.hssid[i].disabled = false;
+			showElementEx("div_hssid" + i, style_display_on());
+			form.elements["mssid_" + i].disabled = false;
+			form.hssid[i].disabled = false;
 		}
 	}
-
-	if (HiddenSSID.indexOf("0") >= 0)
-	{
-		document.wireless_basic.broadcastssid[0].checked = true;
-	}
-	else
-	{
-		document.wireless_basic.broadcastssid[1].checked = true;
-	}
+	
+	var HiddenSSID  = '<% getCfgZero(1, "HideSSID"); %>';
 	var HiddenSSIDArray = HiddenSSID.split(";");
-	for (i=0;i<8;i++)
-	{
-		if (HiddenSSIDArray[i] == "1")
-			document.wireless_basic.hssid[i].checked = true;
-		else
-			document.wireless_basic.hssid[i].checked = false;
-	}
 
-	if (APIsolated.indexOf("1") >= 0)
-	{
-		document.wireless_basic.apisolated[0].checked = true;
-	}
-	else
-	{
-		document.wireless_basic.apisolated[1].checked = true;
-	}
+	form.broadcastssid[ (HiddenSSID.indexOf("0") >= 0) ? 1 : 0 ].checked = true;
+	for (i=0; i<8; i++)
+		form.hssid[i].checked = (HiddenSSIDArray[i] == "1");
+
+	var APIsolated = '<% getCfgZero(1, "NoForwarding"); %>';
 	var APIsolatedArray = APIsolated.split(";");
-	for (i=0;i<8;i++)
-	{
-		if (APIsolatedArray[i] == "1")
-			document.wireless_basic.isolated_ssid[i].checked = true;
-		else
-			document.wireless_basic.isolated_ssid[i].checked = false;
-	}
 
+	form.apisolated[ (APIsolated.indexOf("1") >= 0) ? 1 : 0 ].checked = true;
+	for (i=0; i<8; i++)
+		form.isolated_ssid[i].checked = (APIsolatedArray[i] == "1");
+	
+	var ht_bw = '<% getCfgZero(1, "HT_BW"); %>';
 	if (1*ht_bw == 0)
 	{
-		document.wireless_basic.n_bandwidth[0].checked = true;
-		document.getElementById("extension_channel").style.visibility = "hidden";
-		document.getElementById("extension_channel").style.display = "none";
-		document.wireless_basic.n_extcha.disabled = true;
+		form.n_bandwidth[0].checked = true;
+		form.n_extcha.disabled      = true;
+		hideElement("extension_channel");
 	}
 	else
 	{
-		document.wireless_basic.n_bandwidth[1].checked = true;
-		document.getElementById("extension_channel").style.visibility = "visible";
-		document.getElementById("extension_channel").style.display = style_display_on();
-		document.wireless_basic.n_extcha.disabled = false;
+		form.n_bandwidth[1].checked = true;
+		form.n_extcha.disabled      = false;
+		showElementEx("extension_channel", style_display_on());
 	}
-
+	
 	channel_index = 1*channel_index;
 
-	if ((PhyMode == 0) || (PhyMode == 4) || (PhyMode == 9) || (PhyMode == 6))
+	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6"))
 	{
-		document.wireless_basic.sz11gChannel.options.selectedIndex = channel_index;
-
-		current_channel_length = document.wireless_basic.sz11gChannel.options.length;
+		form.sz11gChannel.options.selectedIndex = channel_index;
+		current_channel_length = form.sz11gChannel.options.length;
 
 		if ((channel_index + 1) > current_channel_length)
-			document.wireless_basic.sz11gChannel.options.selectedIndex = 0;
+			form.sz11gChannel.options.selectedIndex = 0;
 	}
-	else if (PhyMode == 1)
+	else if (wmode == "1")
 	{
-		document.wireless_basic.sz11bChannel.options.selectedIndex = channel_index;
-
-		current_channel_length = document.wireless_basic.sz11bChannel.options.length;
+		form.sz11bChannel.options.selectedIndex = channel_index;
+		current_channel_length = form.sz11bChannel.options.length;
 
 		if ((channel_index + 1) > current_channel_length)
-			document.wireless_basic.sz11bChannel.options.selectedIndex = 0;
+			form.sz11bChannel.options.selectedIndex = 0;
 	}
-	else if ((PhyMode == 2) || (PhyMode == 8) || (PhyMode == 11))
+	else if ((wmode == "2") || (wmode == "8") || (wmode == "11"))
 	{
 		if (countrycode == 'NONE')
 		{
@@ -940,481 +809,299 @@ function initValue()
 		Check5GBandChannelException();
 
 		if (channel_index > 0)
-			document.wireless_basic.sz11aChannel.options.selectedIndex = channel_11a_index;
+			form.sz11aChannel.options.selectedIndex = channel_11a_index;
 		else
-			document.wireless_basic.sz11aChannel.options.selectedIndex = channel_index;
+			form.sz11aChannel.options.selectedIndex = channel_index;
 	}
+	
+	show_abg_rate(form);
 
-	//ABG Rate
-	if ((PhyMode == 0) || (PhyMode == 2) || (PhyMode == 4))
-	{
-		ht_mcs = 1*ht_mcs;
-		document.wireless_basic.abg_rate.options.length = 0;
-		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
-		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
-		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
-		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
-		document.wireless_basic.abg_rate.options[4] = new Option("6 Mbps", "6");
-		document.wireless_basic.abg_rate.options[5] = new Option("9 Mbps", "9");
-		document.wireless_basic.abg_rate.options[6] = new Option("11 Mbps", "11");
-		document.wireless_basic.abg_rate.options[7] = new Option("12 Mbps", "12");
-		document.wireless_basic.abg_rate.options[8] = new Option("18 Mbps", "18");
-		document.wireless_basic.abg_rate.options[9] = new Option("24 Mbps", "24");
-		document.wireless_basic.abg_rate.options[10] = new Option("36 Mbps", "36");
-		document.wireless_basic.abg_rate.options[11] = new Option("48 Mbps", "48");
-		document.wireless_basic.abg_rate.options[12] = new Option("54 Mbps", "54");
-		if (fxtxmode == "CCK" || fxtxmode == "cck") {
-			if (ht_mcs == 0)
-				document.wireless_basic.abg_rate.options.selectedIndex = 1;
-			else if (ht_mcs == 1)
-				document.wireless_basic.abg_rate.options.selectedIndex = 2;
-			else if (ht_mcs == 2)
-				document.wireless_basic.abg_rate.options.selectedIndex = 3;
-			else if (ht_mcs == 3)
-				document.wireless_basic.abg_rate.options.selectedIndex = 6;
-			else
-				document.wireless_basic.abg_rate.options.selectedIndex = 0;
-		}
-		else {
-			if (ht_mcs == 0)
-				document.wireless_basic.abg_rate.options.selectedIndex = 4;
-			else if (ht_mcs == 1)
-				document.wireless_basic.abg_rate.options.selectedIndex = 5;
-			else if (ht_mcs == 2)
-				document.wireless_basic.abg_rate.options.selectedIndex = 7;
-			else if (ht_mcs == 3)
-				document.wireless_basic.abg_rate.options.selectedIndex = 8;
-			else if (ht_mcs == 4)
-				document.wireless_basic.abg_rate.options.selectedIndex = 9;
-			else if (ht_mcs == 5)
-				document.wireless_basic.abg_rate.options.selectedIndex = 10;
-			else if (ht_mcs == 6)
-				document.wireless_basic.abg_rate.options.selectedIndex = 11;
-			else if (ht_mcs == 7)
-				document.wireless_basic.abg_rate.options.selectedIndex = 12;
-			else
-				document.wireless_basic.abg_rate.options.selectedIndex = 0;
-		}
-	}
-	else if (PhyMode == 1)
-	{
-		ht_mcs = 1*ht_mcs;
-		document.wireless_basic.abg_rate.options.length = 0;
-		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
-		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
-		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
-		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
-		document.wireless_basic.abg_rate.options[4] = new Option("11 Mbps", "11");
-		if (ht_mcs == 0)
-			document.wireless_basic.abg_rate.options.selectedIndex = 1;
-		else if (ht_mcs == 1)
-			document.wireless_basic.abg_rate.options.selectedIndex = 2;
-		else if (ht_mcs == 2)
-			document.wireless_basic.abg_rate.options.selectedIndex = 3;
-		else if (ht_mcs == 3)
-			document.wireless_basic.abg_rate.options.selectedIndex = 4;
-		else
-			document.wireless_basic.abg_rate.options.selectedIndex = 0;
-	}
-	else
-	{
-		document.getElementById("div_abg_rate").style.visibility = "hidden";
-		document.getElementById("div_abg_rate").style.display = "none";
-		document.wireless_basic.abg_rate.disabled = true;
-	}
-
-	document.getElementById("div_mbssidapisolated").style.visibility = "hidden";
-	document.getElementById("div_mbssidapisolated").style.display = "none";
-	document.wireless_basic.mbssidapisolated.disabled = true;
 	if (mssidb == "1")
 	{
-		document.getElementById("div_mbssidapisolated").style.visibility = "visible";
-		document.getElementById("div_mbssidapisolated").style.display = style_display_on();
-		document.wireless_basic.mbssidapisolated.disabled = false;
-		if (mbssidapisolated == "1")
-			document.wireless_basic.mbssidapisolated[0].checked = true;
-		else
-			document.wireless_basic.mbssidapisolated[1].checked = true;
+		showElementEx("div_mbssidapisolated", style_display_on());
+		form.mbssidapisolated.disabled = false;
+		form.mbssidapisolated[ (mbssidapisolated == "1") ? 1 : 0 ].checked = true;
 	}
-
+	
 	insertExtChannelOption();
 
-	if (1*ht_mode == 0)
-	{
-		document.wireless_basic.n_mode[0].checked = true;
-	}
-	else if (1*ht_mode == 1)
-	{
-		document.wireless_basic.n_mode[1].checked = true;
-	}
+	if (ht_mode == "1")
+		form.n_mode[1].checked = true;
+	else if (ht_mode == "2")
+		form.n_mode[2].checked = true;
+	else
+		form.n_mode[0].checked = true;
 
-	else if (1*ht_mode == 2)
-	{
-		document.wireless_basic.n_mode[2].checked = true;
-	}
+	if (ht_gi == "1")
+		form.n_gi[1].checked = true;
+	else if (ht_gi == "2")
+		form.n_gi[2].checked = true;
+	else
+		form.n_gi[0].checked = true;
 
-	if (1*ht_gi == 0)
+	if (is3t3r == "1")
 	{
-		document.wireless_basic.n_gi[0].checked = true;
+		for (i = 16; i < 24; i++)
+			form.n_mcs.options[i] = new Option(i, i);
 	}
-	else if (1*ht_gi == 1)
+	
+	var mcs_length = form.n_mcs.options.length;
+	if (1*is3t3r == 1)
 	{
-		document.wireless_basic.n_gi[1].checked = true;
-	}
-	else if (1*ht_gi == 2)
-	{
-		document.wireless_basic.n_gi[2].checked = true;
-	}
-
-	if (1*is3t3r == 1) {
-		for (i = 16; i < 24; i++) {
-			document.wireless_basic.n_mcs.options[i] = new Option(i, i);
-		}
-	}
-	var mcs_length = document.wireless_basic.n_mcs.options.length;
-	if (1*is3t3r == 1) {
-		document.wireless_basic.n_mcs.options[mcs_length] = new Option("32", "32");
+		form.n_mcs.options[mcs_length] = new Option("32", "32");
 		mcs_length++;
-		document.wireless_basic.n_mcs.options[mcs_length] = new Option("Auto", "33");
+		form.n_mcs.options[mcs_length] = new Option("Auto", "33");
 	}
 
 	if (1*ht_mcs <= mcs_length-1)
-		document.wireless_basic.n_mcs.options.selectedIndex = ht_mcs;
+		form.n_mcs.options.selectedIndex = ht_mcs;
 	else if (1*ht_mcs == 32)
-		document.wireless_basic.n_mcs.options.selectedIndex = mcs_length-2;
+		form.n_mcs.options.selectedIndex = mcs_length-2;
 	else if (1*ht_mcs == 33)
-		document.wireless_basic.n_mcs.options.selectedIndex = mcs_length-1;
+		form.n_mcs.options.selectedIndex = mcs_length-1;
 
-	if (1*ht_rdg == 0)
-		document.wireless_basic.n_rdg[0].checked = true;
-	else
-		document.wireless_basic.n_rdg[1].checked = true;
+	form.n_rdg[0].checked = (ht_rdg == "0");
 
-	var option_length = document.wireless_basic.n_extcha.options.length;
+	var option_length = form.n_extcha.options.length;
 
 	if (1*ht_extcha == 0)
 	{
 		if (option_length > 1)
-			document.wireless_basic.n_extcha.options.selectedIndex = 0;
+			form.n_extcha.options.selectedIndex = 0;
 	}
 	else if (1*ht_extcha == 1)
 	{
 		if (option_length > 1)
-			document.wireless_basic.n_extcha.options.selectedIndex = 1;
+			form.n_extcha.options.selectedIndex = 1;
 	}
 	else
 	{
-		document.wireless_basic.n_extcha.options.selectedIndex = 0;
+		form.n_extcha.options.selectedIndex = 0;
 	}
-
-	if ((1*PhyMode == 8) || (1*PhyMode == 11))
+	
+	if ((wmode == "8") || (wmode == "11"))
 	{
-		if (document.wireless_basic.sz11aChannel.options.selectedIndex == 0)
+		if (form.sz11aChannel.options.selectedIndex == 0)
 		{
-			document.getElementById("extension_channel").style.visibility = "hidden";
-			document.getElementById("extension_channel").style.display = "none";
-			document.wireless_basic.n_extcha.disabled = true;
+			hideElement("extension_channel");
+			form.n_extcha.disabled = true;
 		}
 	}
-	else if ((1*PhyMode == 9) || (1*PhyMode == 6))
+	else if ((wmode == "9") || (wmode == "6"))
 	{
-		if (document.wireless_basic.sz11gChannel.options.selectedIndex == 0)
+		if (form.sz11gChannel.options.selectedIndex == 0)
 		{
-			document.getElementById("extension_channel").style.visibility = "hidden";
-			document.getElementById("extension_channel").style.display = "none";
-			document.wireless_basic.n_extcha.disabled = true;
+			hideElement("extension_channel");
+			form.n_extcha.disabled = true;
 		}
 	}
+	
+	form.n_amsdu [ (ht_amsdu ==  "0") ? 0 : 1 ].checked = true;
+	form.n_autoba[ (ht_autoba == "0") ? 0 : 1 ].checked = true;
+	form.n_badecline[ (ht_badecline == "0") ? 0 : 1].checked = true;
 
-	if (1*ht_amsdu == 0)
-		document.wireless_basic.n_amsdu[0].checked = true;
-	else
-		document.wireless_basic.n_amsdu[1].checked = true;
+	if (apcli_include == "1")
+		form.mssid_7.disabled = true;
 
-	if (1*ht_autoba == 0)
-		document.wireless_basic.n_autoba[0].checked = true;
-	else
-		document.wireless_basic.n_autoba[1].checked = true;
-
-	if (1*ht_badecline == 0)
-		document.wireless_basic.n_badecline[0].checked = true;
-	else
-		document.wireless_basic.n_badecline[1].checked = true;
-
-	//if (1*ht_f_40mhz == 0)
-		//document.wireless_basic.f_40mhz[0].checked = true;
-	//else
-		//document.wireless_basic.f_40mhz[1].checked = true;
-
-	/*
-	if (1*wifi_optimum == 0)
-		document.wireless_basic.wifi_opt[0].checked = true;
-	else
-		document.wireless_basic.wifi_opt[1].checked = true;
-	*/
-
-	if (1*apcli_include == 1)
+	if (is3t3r == "1")
 	{
-		document.wireless_basic.mssid_7.disabled = true;
+		form.rx_stream.options[2] = new Option("3", "3");
+		form.tx_stream.options[2] = new Option("3", "3");
 	}
 
-	if (1*is3t3r == 1) {
-		document.wireless_basic.rx_stream.options[2] = new Option("3", "3");
-		document.wireless_basic.tx_stream.options[2] = new Option("3", "3");
-	}
 	var txpath = '<% getCfgGeneral(1, "TXPath"); %>';
 	var rxpath = '<% getCfgGeneral(1, "RXPath"); %>';
 	if (txpath == "1")
 	{
-		document.getElementById("div_HtTx2Stream").style.visibility = "hidden";
-		document.getElementById("div_HtTx2Stream").style.display = "none";
+		hideElement("div_HtTx2Stream");
 		tx_stream_idx = 1;
 	}
 	else
-	{
-		document.getElementById("div_HtTx2Stream").style.visibility = "visible";
-		document.getElementById("div_HtTx2Stream").style.display = style_display_on();
-	}
+		showElementEx("div_HtTx2Stream", style_display_on());
+
 	if (rxpath == "1")
 	{
-		document.getElementById("div_HtRx2Stream").style.visibility = "hidden";
-		document.getElementById("div_HtRx2Stream").style.display = "none";
+		hideElement("div_HtRx2Stream");
 		rx_stream_idx = 1;
 	}
 	else
 	{
-		document.getElementById("div_HtRx2Stream").style.visibility = "visible";
-		document.getElementById("div_HtRx2Stream").style.display = style_display_on();
+		showElementEx("div_HtRx2Stream", style_display_on());
 	}
-	document.wireless_basic.rx_stream.options.selectedIndex = rx_stream_idx - 1;
-	document.wireless_basic.tx_stream.options.selectedIndex = tx_stream_idx - 1;
-
-	if (1*radio_off == 1)
-		document.wireless_basic.radioButton.value = "RADIO ON";
-	else
-		document.wireless_basic.radioButton.value = "RADIO OFF";
+	form.rx_stream.options.selectedIndex = rx_stream_idx - 1;
+	form.tx_stream.options.selectedIndex = tx_stream_idx - 1;
 }
 
-function wirelessModeChange()
+function show_abg_rate(form)
 {
-	var wmode;
-   
-	document.getElementById("div_11a_channel").style.visibility = "hidden";
-	document.getElementById("div_11a_channel").style.display = "none";
-	document.wireless_basic.sz11aChannel.disabled = true;
-	document.getElementById("div_11b_channel").style.visibility = "hidden";
-	document.getElementById("div_11b_channel").style.display = "none";
-	document.wireless_basic.sz11bChannel.disabled = true;
-	document.getElementById("div_11g_channel").style.visibility = "hidden";
-	document.getElementById("div_11g_channel").style.display = "none";
-	document.wireless_basic.sz11gChannel.disabled = true;
-	document.getElementById("div_abg_rate").style.visibility = "hidden";
-	document.getElementById("div_abg_rate").style.display = "none";
-	document.wireless_basic.abg_rate.disabled = true;
-	document.getElementById("div_11n").style.display = "none";
-	document.wireless_basic.n_mode.disabled = true;
-	document.wireless_basic.n_bandwidth.disabled = true;
-	document.wireless_basic.n_rdg.disabled = true;
-	document.wireless_basic.n_gi.disabled = true;
-	document.wireless_basic.n_mcs.disabled = true;
-	//document.getElementById("div_11n_plugfest").style.display = "none";
-	//document.wireless_basic.f_40mhz.disabled = true;
+	var wmode = form.wirelessmode.value;
 
-	wmode = document.wireless_basic.wirelessmode.options.selectedIndex;
-
-	wmode = 1*wmode;
-	if (wmode == 0)
-	{
-		document.wireless_basic.wirelessmode.options.selectedIndex = 0;
-		document.getElementById("div_11g_channel").style.visibility = "visible";
-		document.getElementById("div_11g_channel").style.display = style_display_on();
-		document.wireless_basic.sz11gChannel.disabled = false;
-	}
-	else if (wmode == 1)
-	{
-		document.wireless_basic.wirelessmode.options.selectedIndex = 1;
-		document.getElementById("div_11b_channel").style.visibility = "visible";
-		document.getElementById("div_11b_channel").style.display = style_display_on();
-		document.wireless_basic.sz11bChannel.disabled = false;
-	}
-	else if (wmode == 2)
-	{
-		document.wireless_basic.wirelessmode.options.selectedIndex = 2;
-		document.getElementById("div_11g_channel").style.visibility = "visible";
-		document.getElementById("div_11g_channel").style.display = style_display_on();
-		document.wireless_basic.sz11gChannel.disabled = false;
-	}
-	else if (wmode == 5)
-	{
-		document.wireless_basic.wirelessmode.options.selectedIndex = 5;
-		document.getElementById("div_11a_channel").style.visibility = "visible";
-		document.getElementById("div_11a_channel").style.display = style_display_on();
-		document.wireless_basic.sz11aChannel.disabled = false;
-
-		Check5GBandChannelException();
-	}
-	else if ((wmode == 6) || (wmode == 7))
-	{
-		if (wmode == 7)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 7;
-		else
-			document.wireless_basic.wirelessmode.options.selectedIndex = 6;
-		document.getElementById("div_11a_channel").style.visibility = "visible";
-		document.getElementById("div_11a_channel").style.display = style_display_on();
-		document.wireless_basic.sz11aChannel.disabled = false;
-		if (window.ActiveXObject) // IE
-			document.getElementById("div_11n").style.display = "block";
-		else if (window.XMLHttpRequest)  // Mozilla, Safari,...
-			document.getElementById("div_11n").style.display = "table";
-		document.wireless_basic.n_mode.disabled = false;
-		document.wireless_basic.n_bandwidth.disabled = false;
-		document.wireless_basic.n_rdg.disabled = false;
-		document.wireless_basic.n_gi.disabled = false;
-		document.wireless_basic.n_mcs.disabled = false;
-		//document.getElementById("div_11n_plugfest").style.display = "block";
-		//document.wireless_basic.f_40mhz.disabled = false;
-
-		Check5GBandChannelException();
-
-		if (document.wireless_basic.sz11aChannel.options.selectedIndex == 0)
-		{
-			document.getElementById("extension_channel").style.visibility = "hidden";
-			document.getElementById("extension_channel").style.display = "none";
-			document.wireless_basic.n_extcha.disabled = true;
-		}
-
-		insertExtChannelOption();
-	}
-	else if ((wmode == 3) || (wmode == 4))
-	{
-		if (wmode == 4)
-			document.wireless_basic.wirelessmode.options.selectedIndex = 4;
-		else
-			document.wireless_basic.wirelessmode.options.selectedIndex = 3;
-		document.getElementById("div_11g_channel").style.visibility = "visible";
-		document.getElementById("div_11g_channel").style.display = style_display_on();
-		document.wireless_basic.sz11gChannel.disabled = false;
-		if (window.ActiveXObject) // IE
-			document.getElementById("div_11n").style.display = "block";
-		else if (window.XMLHttpRequest)  // Mozilla, Safari,...
-			document.getElementById("div_11n").style.display = "table";
-		document.wireless_basic.n_mode.disabled = false;
-		document.wireless_basic.n_bandwidth.disabled = false;
-		document.wireless_basic.n_rdg.disabled = false;
-		document.wireless_basic.n_gi.disabled = false;
-		document.wireless_basic.n_mcs.disabled = false;
-		//document.getElementById("div_11n_plugfest").style.display = "block";
-		//document.wireless_basic.f_40mhz.disabled = false;
-
-		if (document.wireless_basic.sz11gChannel.options.selectedIndex == 0)
-		{
-			document.getElementById("extension_channel").style.visibility = "hidden";
-			document.getElementById("extension_channel").style.display = "none";
-			document.wireless_basic.n_extcha.disabled = true;
-		}
-
-		insertExtChannelOption();
-	}
+	hideElement("div_abg_rate");
+	form.abg_rate.disabled = true;
 
 	//ABG Rate
-	if ((wmode == 0) || (wmode == 2) || (wmode == 5))
+	if ((wmode == "0") || (wmode == "2") || (wmode == "4"))
 	{
 		ht_mcs = 1*ht_mcs;
-		document.wireless_basic.abg_rate.options.length = 0;
-		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
-		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
-		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
-		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
-		document.wireless_basic.abg_rate.options[4] = new Option("6 Mbps", "6");
-		document.wireless_basic.abg_rate.options[5] = new Option("9 Mbps", "9");
-		document.wireless_basic.abg_rate.options[6] = new Option("11 Mbps", "11");
-		document.wireless_basic.abg_rate.options[7] = new Option("12 Mbps", "12");
-		document.wireless_basic.abg_rate.options[8] = new Option("18 Mbps", "18");
-		document.wireless_basic.abg_rate.options[9] = new Option("24 Mbps", "24");
-		document.wireless_basic.abg_rate.options[10] = new Option("36 Mbps", "36");
-		document.wireless_basic.abg_rate.options[11] = new Option("48 Mbps", "48");
-		document.wireless_basic.abg_rate.options[12] = new Option("54 Mbps", "54");
-		if (fxtxmode == "CCK" || fxtxmode == "cck") {
+		var abg_rate = form.abg_rate;
+		
+		abg_rate.options.length = 0;
+		abg_rate.options[0] = new Option("Auto", "0");
+		abg_rate.options[1] = new Option("1 Mbps", "1");
+		abg_rate.options[2] = new Option("2 Mbps", "2");
+		abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		abg_rate.options[4] = new Option("6 Mbps", "6");
+		abg_rate.options[5] = new Option("9 Mbps", "9");
+		abg_rate.options[6] = new Option("11 Mbps", "11");
+		abg_rate.options[7] = new Option("12 Mbps", "12");
+		abg_rate.options[8] = new Option("18 Mbps", "18");
+		abg_rate.options[9] = new Option("24 Mbps", "24");
+		abg_rate.options[10] = new Option("36 Mbps", "36");
+		abg_rate.options[11] = new Option("48 Mbps", "48");
+		abg_rate.options[12] = new Option("54 Mbps", "54");
+		
+		if (fxtxmode == "CCK" || fxtxmode == "cck")
+		{
 			if (ht_mcs == 0)
-				document.wireless_basic.abg_rate.options.selectedIndex = 1;
+				abg_rate.value = "1";
 			else if (ht_mcs == 1)
-				document.wireless_basic.abg_rate.options.selectedIndex = 2;
+				abg_rate.value = "2";
 			else if (ht_mcs == 2)
-				document.wireless_basic.abg_rate.options.selectedIndex = 3;
+				abg_rate.value = "5";
 			else if (ht_mcs == 3)
-				document.wireless_basic.abg_rate.options.selectedIndex = 6;
+				abg_rate.value = "11";
 			else
-				document.wireless_basic.abg_rate.options.selectedIndex = 0;
+				abg_rate.value = "0";
 		}
-		else {
-			if (ht_mcs == 0)
-				document.wireless_basic.abg_rate.options.selectedIndex = 4;
-			else if (ht_mcs == 1)
-				document.wireless_basic.abg_rate.options.selectedIndex = 5;
-			else if (ht_mcs == 2)
-				document.wireless_basic.abg_rate.options.selectedIndex = 7;
-			else if (ht_mcs == 3)
-				document.wireless_basic.abg_rate.options.selectedIndex = 8;
-			else if (ht_mcs == 4)
-				document.wireless_basic.abg_rate.options.selectedIndex = 9;
-			else if (ht_mcs == 5)
-				document.wireless_basic.abg_rate.options.selectedIndex = 10;
-			else if (ht_mcs == 6)
-				document.wireless_basic.abg_rate.options.selectedIndex = 11;
-			else if (ht_mcs == 7)
-				document.wireless_basic.abg_rate.options.selectedIndex = 12;
-			else
-				document.wireless_basic.abg_rate.options.selectedIndex = 0;
-		}
-
-		document.getElementById("div_abg_rate").style.visibility = "visible";
-		document.getElementById("div_abg_rate").style.display = style_display_on();
-		document.wireless_basic.abg_rate.disabled = false;
-	}
-	else if (wmode == 1)
-	{
-		ht_mcs = 1*ht_mcs;
-		document.wireless_basic.abg_rate.options.length = 0;
-		document.wireless_basic.abg_rate.options[0] = new Option("Auto", "0");
-		document.wireless_basic.abg_rate.options[1] = new Option("1 Mbps", "1");
-		document.wireless_basic.abg_rate.options[2] = new Option("2 Mbps", "2");
-		document.wireless_basic.abg_rate.options[3] = new Option("5.5 Mbps", "5");
-		document.wireless_basic.abg_rate.options[4] = new Option("11 Mbps", "11");
-		if (ht_mcs == 0)
-			document.wireless_basic.abg_rate.options.selectedIndex = 1;
-		else if (ht_mcs == 1)
-			document.wireless_basic.abg_rate.options.selectedIndex = 2;
-		else if (ht_mcs == 2)
-			document.wireless_basic.abg_rate.options.selectedIndex = 3;
-		else if (ht_mcs == 3)
-			document.wireless_basic.abg_rate.options.selectedIndex = 4;
 		else
-			document.wireless_basic.abg_rate.options.selectedIndex = 0;
-
-		document.getElementById("div_abg_rate").style.visibility = "visible";
-		document.getElementById("div_abg_rate").style.display = style_display_on();
-		document.wireless_basic.abg_rate.disabled = false;
+		{
+			if (ht_mcs == 0)
+				abg_rate.value = "6";
+			else if (ht_mcs == 1)
+				abg_rate.value = "9";
+			else if (ht_mcs == 2)
+				abg_rate.value = "12";
+			else if (ht_mcs == 3)
+				abg_rate.value = "18";
+			else if (ht_mcs == 4)
+				abg_rate.value = "24";
+			else if (ht_mcs == 5)
+				abg_rate.value = "36";
+			else if (ht_mcs == 6)
+				abg_rate.value = "48";
+			else if (ht_mcs == 7)
+				abg_rate.value = "54";
+			else
+				abg_rate.value = "0";
+		}
 	}
+	else if (wmode == "1")
+	{
+		ht_mcs = 1*ht_mcs;
+		var abg_rate = form.abg_rate;
+		
+		abg_rate.options.length = 0;
+		abg_rate.options[0] = new Option("Auto", "0");
+		abg_rate.options[1] = new Option("1 Mbps", "1");
+		abg_rate.options[2] = new Option("2 Mbps", "2");
+		abg_rate.options[3] = new Option("5.5 Mbps", "5");
+		abg_rate.options[4] = new Option("11 Mbps", "11");
+		
+		if (ht_mcs == 0)
+			abg_rate.value = "1";
+		else if (ht_mcs == 1)
+			abg_rate.value = "2";
+		else if (ht_mcs == 2)
+			abg_rate.value = "5";
+		else if (ht_mcs == 3)
+			abg_rate.value = "11";
+		else
+			abg_rate.value = "0";
+	}
+	else
+	{
+		hideElement("div_abg_rate");
+		form.abg_rate.disabled = true;
+	}
+}
+
+function wirelessModeChange(form)
+{
+	hideElement("div_11a_channel");
+	hideElement("div_11b_channel");
+	hideElement("div_11g_channel");
+	hideElement("div_abg_rate");
+	hideElement("div_11n");
+
+	form.sz11aChannel.disabled = true;
+	form.sz11bChannel.disabled = true;
+	form.sz11gChannel.disabled = true;
+	form.abg_rate.disabled = true;
+	form.n_mode.disabled = true;
+	form.n_bandwidth.disabled = true;
+	form.n_rdg.disabled = true;
+	form.n_gi.disabled = true;
+	form.n_mcs.disabled = true;
+	
+	// Hide & disable elements
+	var wmode = form.wirelessmode.value;
+
+	if ((wmode == "8") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
+	{
+		showElement("div_11n");
+		form.n_mode.disabled = false;
+		form.n_bandwidth.disabled = false;
+		form.n_rdg.disabled = false;
+		form.n_gi.disabled = false;
+		form.n_mcs.disabled = false;
+	}
+
+	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
+	{
+		form.sz11gChannel.disabled = false;
+		showElementEx("div_11g_channel", style_display_on());
+		
+		if (form.sz11gChannel.options.selectedIndex == 0)
+		{
+			hideElement("extension_channel");
+			form.n_extcha.disabled = true;
+		}
+
+		insertExtChannelOption();
+	}
+	else if (wmode == "1")
+	{
+		form.sz11bChannel.disabled = false;
+		showElementEx("div_11b_channel", style_display_on());
+	}
+	else if ((wmode == "2") || (wmode == "8") || (wmode == "11"))
+	{
+		form.sz11aChannel.disabled = false;
+		showElementEx("div_11a_channel", style_display_on());
+
+		Check5GBandChannelException();
+		if (form.sz11aChannel.options.selectedIndex == 0)
+		{
+			hideElement("extension_channel");
+			form.n_extcha.disabled = true;
+		}
+
+		insertExtChannelOption();
+	}
+	
+	show_abg_rate(form);
 }
 
 function switch_hidden_ssid()
 {
-	if (document.wireless_basic.broadcastssid[0].checked == true)
-		for (i=0;i<8;i++)
-			document.wireless_basic.hssid[i].checked = false;
-	else
-		for (i=0;i<8;i++)
-			document.wireless_basic.hssid[i].checked = true;
+	for (i=0; i<8; i++)
+		document.wireless_basic.hssid[i].checked = document.wireless_basic.broadcastssid[0].checked;
 }
 
 function switch_isolated_ssid()
 {
-	if (document.wireless_basic.apisolated[0].checked == true)
-		for (i=0;i<8;i++)
-			document.wireless_basic.isolated_ssid[i].checked = true;
-	else
-		for (i=0;i<8;i++)
-			document.wireless_basic.isolated_ssid[i].checked = false;
+	for (i=0; i<8; i++)
+		document.wireless_basic.isolated_ssid[i].checked = document.wireless_basic.apisolated[1].checked;
 }
 
 function CheckValue()
@@ -1422,12 +1109,13 @@ function CheckValue()
 	var wireless_mode;
 	var submit_ssid_num;
 	var channel_11a_index;
+	var form_basic = document.wireless_basic;
 
-	if (document.wireless_basic.ssid.value == "")
+	if (form_basic.ssid.value == "")
 	{
 		alert("Please enter SSID!");
-		document.wireless_basic.ssid.focus();
-		document.wireless_basic.ssid.select();
+		form_basic.ssid.focus();
+		form_basic.ssid.select();
 		return false;
 	}
 
@@ -1435,7 +1123,8 @@ function CheckValue()
 
 	for (i = 1; i < 8; i++)
 	{
-		if (eval("document.wireless_basic.mssid_"+i).value != "")
+		//if (eval("document.wireless_basic.mssid_"+i).value != "")
+		if (form_basic.elements["mssid_"+i].value != "")
 		{
 			if (i == 7)
 			{
@@ -1447,71 +1136,75 @@ function CheckValue()
 		}
 	}
 
-	document.wireless_basic.bssid_num.value = submit_ssid_num;
+	form_basic.bssid_num.value = submit_ssid_num;
 	return true;
 }
 
-function RadioStatusChange(rs)
+function doRadioStatusChange(form)
 {
-	if (rs == 1) {
-		document.wireless_basic.radioButton.value = "RADIO OFF";
-		document.wireless_basic.radiohiddenButton.value = 0;
+	if (form.radioButton.value.indexOf('OFF') >= 0)
+	{
+		form.radioButton.value = "RADIO OFF";
+		form.radiohiddenButton.value = 0;
 	}
-	else {
-		document.wireless_basic.radioButton.value = "RADIO ON";
-		document.wireless_basic.radiohiddenButton.value = 1;
+	else
+	{
+		form.radioButton.value = "RADIO ON";
+		form.radiohiddenButton.value = 1;
 	}
+	
+	form.submit();
 }
+
 </script>
 </head>
-
 
 <body onLoad="initValue()">
 <table class="body"><tr><td>
 
 <h1 id="basicTitle">Basic Wireless Settings </h1>
 <p id="basicIntroduction"> You could configure the minimum number of Wireless settings for communication, such as Network Name (SSID) and Channel. The Access Point can be set simply with only the minimum setting items. </p>
-<hr />
+<hr>
 
-<form method=post name=wireless_basic action="/goform/wirelessBasic" onSubmit="return CheckValue()">
+<form method="POST" name="wireless_basic" action="/goform/wirelessBasic" onSubmit="return CheckValue();">
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
-  </tr>
-  <tr> 
-    <td class="head" id="basicRadioButton">Radio On/Off</td>
-    <td>
-      <input type="button" name="radioButton" style="{width:120px;}" value="RADIO ON"
-      onClick="if (this.value.indexOf('OFF') >= 0) RadioStatusChange(1); else RadioStatusChange(0); document.wireless_basic.submit();"> &nbsp; &nbsp;
-      <input type=hidden name=radiohiddenButton value="2">
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="basicNetMode">Network Mode</td>
-    <td>
-      <select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange()">
-        <option value=0>11b/g mixed mode</option>
-        <option value=1>11b only</option>
-        <option value=4>11g only</option>
-        <option value=9>11b/g/n mixed mode</option>
-	<option value=6>11n only(2.4G)</option>
-      </select>
-      <!--
-      <select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange()">
-	<option value=0>802.11 b/g mixed mode</option>
-	<option value=1>802.11 b only</option>
-	<option value=2>802.11 a only</option>
-	<option value=3>802.11 a/b/g mixed mode</option>
-	<option value=4>802.11 g</option>
-	<option value=5>802.11 a/b/g/n mixed mode</option>
-	<option value=6>802.11 n only</option>
-	<option value=7>802.11 g/n mixed mode</option>
-	<option value=8>802.11 a/n mixed mode</option>
-	<option value=9>802.11 b/g/n mixed mode</option>
-      </select>
-      -->
-    </td>
-  </tr>
+<tr> 
+	<td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
+</tr>
+<tr> 
+	<td class="head" id="basicRadioButton">Radio On/Off</td>
+	<td>
+		<input type="button" name="radioButton" style="{width:120px;}" value="RADIO ON" onClick="doRadioStatusChange(this.form);">
+		<input type="hidden" name="radiohiddenButton" value="2">
+	</td>
+</tr>
+<tr> 
+	<td class="head" id="basicNetMode">Network Mode</td>
+	<td>
+		<select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange(this.form);">
+			<option value="0">11b/g mixed mode</option>
+			<option value="1">11b only</option>
+			<option value="4">11g only</option>
+			<option value="7">11g/n mixed mode</option>
+			<option value="9">11b/g/n mixed mode</option>
+			<option value="6">11n only</option>
+		</select>
+	<!--
+		<select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange(this.form);">
+			<option value="0">802.11 b/g mixed mode</option>
+			<option value="1">802.11 b only</option>
+			<option value="2">802.11 a only</option>
+			<option value="3">802.11 a/b/g mixed mode</option>
+			<option value="4">802.11 g</option>
+			<option value="5">802.11 a/b/g/n mixed mode</option>
+			<option value="6">802.11 n only</option>
+			<option value="7">802.11 g/n mixed mode</option>
+			<option value="8">802.11 a/n mixed mode</option>
+			<option value="9">802.11 b/g/n mixed mode</option>
+		</select>
+	-->
+	</td>
+</tr>
 <input type="hidden" name="bssid_num" value="1">
 
 <tr> 
@@ -1578,208 +1271,191 @@ function RadioStatusChange(rs)
 		<font id="basicIsolatedSSID7">Isolated</font><input type="checkbox" name="isolated_ssid" value="7">
 	</td>
 </tr>
-  <tr> 
-    <td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
-    <td>
-      <input type=radio name=broadcastssid value="1" checked onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDEnable">Enable&nbsp;</font>
-      <input type=radio name=broadcastssid value="0" onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="basicApIsolated">AP Isolation</td>
-    <td>
-      <input type=radio name=apisolated value="1" onClick="switch_isolated_ssid()"><font id="basicApIsolatedEnable">Enable&nbsp;</font>
-      <input type=radio name=apisolated value="0" checked onClick="switch_isolated_ssid()"><font id="basicApIsolatedDisable">Disable</font>
-    </td>
-  </tr>
-  <tr id="div_mbssidapisolated"> 
-    <td class="head" id="basicMBSSIDApIsolated">MBSSID AP Isolation</td>
-    <td>
-      <input type=radio name=mbssidapisolated value="1"><font id="basicMBSSIDApIsolatedEnable">Enable&nbsp;</font>
-      <input type=radio name=mbssidapisolated value="0" checked><font id="basicMBSSIDApIsolatedDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="basicBSSID">BSSID</td>
-    <td>&nbsp;&nbsp;<% getWlanCurrentMac(); %></td>
-  </tr>
-  <tr id="div_11a_channel" name="div_11a_channel">
-    <td class="head"><font id="basicFreqA">Frequency (Channel)</font></td>
-    <td>
-      <select id="sz11aChannel" name="sz11aChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0 id="basicFreqAAuto">AutoSelect</option>
-	<% getWlan11aChannels(); %>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_11b_channel" name="div_11b_channel">
-    <td class="head"><font id="basicFreqB">Frequency (Channel)</font></td>
-    <td>
-      <select id="sz11bChannel" name="sz11bChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0 id="basicFreqBAuto">AutoSelect</option>
-	<% getWlan11bChannels(); %>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_11g_channel" name="div_11g_channel">
-    <td class="head"><font id="basicFreqG">Frequency (Channel)</font></td>
-    <td>
-      <select id="sz11gChannel" name="sz11gChannel" size="1" onChange="ChannelOnChange()">
-	<option value=0 id="basicFreqGAuto">AutoSelect</option>
-	<% getWlan11gChannels(); %>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_abg_rate">
-    <td class="head"><font id="basicRate">Rate</font></td>
-    <td>
-      <select name="abg_rate" size="1">
-      </select>
-    </td>
-  </tr>
+<tr> 
+	<td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
+	<td>
+		<input type="radio" name="broadcastssid" value="0" onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDDisable">Disable&nbsp;</font>
+		<input type="radio" name="broadcastssid" value="1" checked onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDEnable">Enable</font>
+	</td>
+</tr>
+<tr> 
+	<td class="head" id="basicApIsolated">AP Isolation</td>
+	<td>
+		<input type="radio" name="apisolated" value="0" checked onClick="switch_isolated_ssid()"><font id="basicApIsolatedDisable">Disable&nbsp;</font>
+		<input type="radio" name="apisolated" value="1" onClick="switch_isolated_ssid()"><font id="basicApIsolatedEnable">Enable</font>
+	</td>
+</tr>
+<tr id="div_mbssidapisolated"> 
+	<td class="head" id="basicMBSSIDApIsolated">MBSSID AP Isolation</td>
+	<td>
+		<input type="radio" name="mbssidapisolated" value="0" checked><font id="basicMBSSIDApIsolatedDisable">Disable&nbsp;</font>
+		<input type="radio" name="mbssidapisolated" value="1"><font id="basicMBSSIDApIsolatedEnable">Enable</font>
+	</td>
+</tr>
+<tr> 
+	<td class="head" id="basicBSSID">BSSID</td>
+	<td>&nbsp;&nbsp;<% getWlanCurrentMac(); %></td>
+</tr>
+<tr id="div_11a_channel" name="div_11a_channel">
+	<td class="head"><font id="basicFreqA">Frequency (Channel)</font></td>
+	<td>
+		<select id="sz11aChannel" name="sz11aChannel" size="1" onChange="ChannelOnChange()">
+			<option value="0" id="basicFreqAAuto">AutoSelect</option>
+			<% getWlan11aChannels(); %>
+		</select>
+	</td>
+</tr>
+<tr id="div_11b_channel" name="div_11b_channel">
+	<td class="head"><font id="basicFreqB">Frequency (Channel)</font></td>
+	<td>
+		<select id="sz11bChannel" name="sz11bChannel" size="1" onChange="ChannelOnChange()">
+			<option value="0" id="basicFreqBAuto">AutoSelect</option>
+			<% getWlan11bChannels(); %>
+		</select>
+	</td>
+</tr>
+<tr id="div_11g_channel" name="div_11g_channel">
+	<td class="head"><font id="basicFreqG">Frequency (Channel)</font></td>
+	<td>
+		<select id="sz11gChannel" name="sz11gChannel" size="1" onChange="ChannelOnChange()">
+			<option value="0" id="basicFreqGAuto">AutoSelect</option>
+			<% getWlan11gChannels(); %>
+		</select>
+	</td>
+</tr>
+<tr id="div_abg_rate">
+	<td class="head"><font id="basicRate">Rate</font></td>
+	<td>
+		<select name="abg_rate" size="1">
+		</select>
+	</td>
+</tr>
 </table>
 
 <table id="div_11n" name="div_11n" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">
-  <tr> 
-    <td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTOPMode">Operating Mode</td>
-    <td>
-      <input type=radio name=n_mode value="0" checked><font id="basicHTMixed">Mixed Mode&nbsp;</font>
-      <input type=radio name=n_mode value="1">Green Field
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTChannelBW">Channel BandWidth</td>
-    <td>
-      <input type=radio name=n_bandwidth value="0" onClick="Channel_BandWidth_onClick()" checked>20&nbsp;
-      <input type=radio name=n_bandwidth value="1" onClick="Channel_BandWidth_onClick()">20/40
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTGI">Guard Interval</td>
-    <td>
-      <input type=radio name=n_gi value="0" checked><font id="basicHTLongGI">long&nbsp;</font>
-      <input type=radio name=n_gi value="1"><font id="basicHTAutoGI">Auto</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head">MCS</td>
-    <td>
-      <select name="n_mcs" size="1">
-	<option value = 0>0</option>
-	<option value = 1>1</option>
-	<option value = 2>2</option>
-	<option value = 3>3</option>
-	<option value = 4>4</option>
-	<option value = 5>5</option>
-	<option value = 6>6</option>
-	<option value = 7>7</option>
-	<option value = 8>8</option>
-	<option value = 9>9</option>
-	<option value = 10>10</option>
-	<option value = 11>11</option>
-	<option value = 12>12</option>
-	<option value = 13>13</option>
-	<option value = 14>14</option>
-	<option value = 15>15</option>
-	<option value = 32>32</option>
-	<option value = 33 selected id="basicHTAutoMCS">Auto</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTRDG">Reverse Direction Grant(RDG)</td>
-    <td>
-      <input type=radio name=n_rdg value="0" checked><font id="basicHTRDGDisable">Disable&nbsp;</font>
-      <input type=radio name=n_rdg value="1"><font id="basicHTRDGEnable">Enable</font>
-    </td>
-  </tr>
-  <tr name="extension_channel" id="extension_channel">
-    <td class="head" id="basicHTExtChannel">Extension Channel</td>
-    <td>
-      <select id="n_extcha" name="n_extcha" size="1">
-	<option value=1 selected>2412MHz (Channel 1)</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTAMSDU">Aggregation MSDU(A-MSDU)</td>
-    <td>
-      <input type=radio name=n_amsdu value="0" checked><font id="basicHTAMSDUDisable">Disable&nbsp;</font>
-      <input type=radio name=n_amsdu value="1"><font id="basicHTAMSDUEnable">Enable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTAddBA">Auto Block ACK</td>
-    <td>
-      <input type=radio name=n_autoba value="0" checked><font id="basicHTAddBADisable">Disable&nbsp;</font>
-      <input type=radio name=n_autoba value="1"><font id="basicHTAddBAEnable">Enable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTDelBA">Decline BA Request</td>
-    <td>
-      <input type=radio name=n_badecline value="0" checked><font id="basicHTDelBADisable">Disable&nbsp;</font>
-      <input type=radio name=n_badecline value="1"><font id="basicHTDelBAEnable">Enable</font>
-    </td>
-  </tr>
+<tr> 
+	<td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTOPMode">Operating Mode</td>
+	<td>
+		<input type="radio" name="n_mode" value="0" checked><font id="basicHTMixed">Mixed Mode&nbsp;</font>
+		<input type="radio" name="n_mode" value="1">Green Field
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTChannelBW">Channel BandWidth</td>
+	<td>
+		<input type="radio" name="n_bandwidth" value="0" onClick="Channel_BandWidth_onClick()" checked>20&nbsp;
+		<input type="radio" name="n_bandwidth" value="1" onClick="Channel_BandWidth_onClick()">20/40
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTGI">Guard Interval</td>
+	<td>
+		<input type="radio" name="n_gi" value="0" checked><font id="basicHTLongGI">long&nbsp;</font>
+		<input type="radio" name="n_gi" value="1"><font id="basicHTAutoGI">Auto</font>
+	</td>
+</tr>
+<tr>
+	<td class="head">MCS</td>
+	<td>
+		<select name="n_mcs" size="1">
+			<option value = "0">0</option>
+			<option value = "1">1</option>
+			<option value = "2">2</option>
+			<option value = "3">3</option>
+			<option value = "4">4</option>
+			<option value = "5">5</option>
+			<option value = "6">6</option>
+			<option value = "7">7</option>
+			<option value = "8">8</option>
+			<option value = "9">9</option>
+			<option value = "10">10</option>
+			<option value = "11">11</option>
+			<option value = "12">12</option>
+			<option value = "13">13</option>
+			<option value = "14">14</option>
+			<option value = "15">15</option>
+			<option value = "32">32</option>
+			<option value = "33" selected id="basicHTAutoMCS">Auto</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTRDG">Reverse Direction Grant(RDG)</td>
+	<td>
+		<input type="radio" name="n_rdg" value="0" checked><font id="basicHTRDGDisable">Disable&nbsp;</font>
+		<input type="radio" name="n_rdg" value="1"><font id="basicHTRDGEnable">Enable</font>
+	</td>
+</tr>
+<tr name="extension_channel" id="extension_channel">
+	<td class="head" id="basicHTExtChannel">Extension Channel</td>
+	<td>
+		<select id="n_extcha" name="n_extcha" size="1">
+			<option value="1" selected>2412MHz (Channel 1)</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTAMSDU">Aggregation MSDU(A-MSDU)</td>
+	<td>
+		<input type="radio" name="n_amsdu" value="0" checked><font id="basicHTAMSDUDisable">Disable&nbsp;</font>
+		<input type="radio" name="n_amsdu" value="1"><font id="basicHTAMSDUEnable">Enable</font>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTAddBA">Auto Block ACK</td>
+	<td>
+		<input type="radio" name="n_autoba" value="0" checked><font id="basicHTAddBADisable">Disable&nbsp;</font>
+		<input type="radio" name="n_autoba" value="1"><font id="basicHTAddBAEnable">Enable</font>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTDelBA">Decline BA Request</td>
+	<td>
+		<input type="radio" name="n_badecline" value="0" checked><font id="basicHTDelBADisable">Disable&nbsp;</font>
+		<input type="radio" name="n_badecline" value="1"><font id="basicHTDelBAEnable">Enable</font>
+	</td>
+</tr>
 </table>
 
-<!--<table id="div_11n_plugfest" name="div_11n_plugfest" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">-->
 <table id="div_11n_plugfest" name="div_11n_plugfest" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="basicOther">Other</td>
-  </tr>
-  <!--
-  <tr>
-    <td width="45%" bgcolor="#E8F8FF" nowrap>40 Mhz Intolerant</td>
-    <td bgcolor="#FFFFFF"><font color="#003366" face=arial><b>
-      <input type=radio name=f_40mhz value="0" checked>Diable&nbsp;
-      <input type=radio name=f_40mhz value="1">Enable
-    </b></font></td>
-  </tr>
-  <tr>
-    <td class="head">WiFi Optimum</td>
-    <td>
-      <input type=radio name=wifi_opt value="0" checked>Diable&nbsp;
-      <input type=radio name=wifi_opt value="1">Enable
-    </td>
-  </tr>
-  -->
-  <tr>
-    <td class="head" id="basicHTTxStream">HT TxStream</td>
-    <td>
-      <select name="tx_stream" size="1">
-	<option value = 1>1</option>
-	<option value = 2 id="div_HtTx2Stream">2</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="basicHTRxStream">HT RxStream</td>
-    <td>
-      <select name="rx_stream" size="1">
-	<option value = 1>1</option>
-	<option value = 2 id="div_HtRx2Stream">2</option>
-      </select>
-    </td>
-  </tr>
+<tr> 
+	<td class="title" colspan="2" id="basicOther">Other</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTTxStream">HT TxStream</td>
+	<td>
+		<select name="tx_stream" size="1">
+			<option value="1">1</option>
+			<option value="2" id="div_HtTx2Stream">2</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="basicHTRxStream">HT RxStream</td>
+	<td>
+		<select name="rx_stream" size="1">
+			<option value="1">1</option>
+			<option value="2" id="div_HtRx2Stream">2</option>
+		</select>
+	</td>
+</tr>
 </table>
-<br />
+
+<br>
 
 <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=submit style="{width:120px;}" value="Apply" id="basicApply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="basicCancel" onClick="window.location.reload()">
-    </td>
-  </tr>
+<tr align="center">
+	<td>
+		<input type="submit" style="{width:120px;}" value="Apply" id="basicApply"> &nbsp; &nbsp;
+		<input type="reset" style="{width:120px;}" value="Cancel" id="basicCancel" onClick="window.location.reload()">
+	</td>
+</tr>
 </table>
-</form>  
+</form>
 
 </td></tr></table>
 </body>
 </html>
-

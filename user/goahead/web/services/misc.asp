@@ -7,6 +7,7 @@
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
@@ -107,6 +108,7 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
+	form.lltdEnbl.options.selectedIndex = 1*lltdb;
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
@@ -115,38 +117,32 @@ function initValue()
 
 	if (lltdb == "0")
 	{
-		document.getElementById("lltd").style.visibility = "hidden";
-		document.getElementById("lltd").style.display = "none";
+		hideElement("lltd");
 		form.lltdEnbl.options.selectedIndex = 0;
 	}
 	if (igmpb == "0")
 	{
-		document.getElementById("igmpProxy").style.visibility = "hidden";
-		document.getElementById("igmpProxy").style.display = "none";
+		hideElement("igmpProxy");
 		form.igmpEnbl.options.selectedIndex = 0;
 	}
 	if (upnpb == "0")
 	{
-		document.getElementById("upnp").style.visibility = "hidden";
-		document.getElementById("upnp").style.display = "none";
+		hideElement("upnp");
 		form.upnpEnbl.options.selectedIndex = 0;
 	}
 	if (radvdb == "0")
 	{
-		document.getElementById("radvd").style.visibility = "hidden";
-		document.getElementById("radvd").style.display = "none";
+		hideElement("radvd");
 		form.radvdEnbl.options.selectedIndex = 0;
 	}
 	if (pppoeb == "0")
 	{
-		document.getElementById("pppoerelay").style.visibility = "hidden";
-		document.getElementById("pppoerelay").style.display = "none";
+		hideElement("pppoerelay");
 		form.pppoeREnbl.options.selectedIndex = 0;
 	}
 	if (dnsp == "0")
 	{
-		document.getElementById("dnsproxy").style.visibility = "hidden";
-		document.getElementById("dnsproxy").style.display = "none";
+		hideElement("dnsproxy");
 		form.dnspEnbl.options.selectedIndex = 0;
 	}
 }
