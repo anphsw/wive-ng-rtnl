@@ -16,8 +16,8 @@ ifndef ROOTDIR
 ROOTDIR=..                                                                                                                                  
 endif 
 
-ifndef CONFIG_IPV6                                                                                                           
-CFLAGS += DNO_IPV6                                                                                                           
+ifndef CONFIG_IPV6
+CFLAGS += DNO_IPV6
 endif   
 
 CFLAGS += -Os -mips32 -mtune=mips32
