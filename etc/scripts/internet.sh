@@ -16,15 +16,11 @@ MODE=$1 #restart mode
 
 ifRaxWdsxDown()
 {
-	num=0
         for i in `seq 0 7`; do
-	    ip link set ra$num down > /dev/null 2>&1
-            num=`expr $num + 1`
+	    ip link set ra$i down > /dev/null 2>&1
         done
-	num=0
         for i in `seq 0 3`; do
-    	    ip link set wds$num down > /dev/null 2>&1
-            num=`expr $num + 1`
+    	    ip link set wds$i down > /dev/null 2>&1
         done
 
 	ip link set apcli0 down > /dev/null 2>&1
@@ -56,11 +52,9 @@ addWds2Br0()
 {
     wds_en=`nvram_get 2860 WdsEnable`
     if [ "$wds_en" != "0" ]; then
-	num=0
         for i in `seq 0 3`; do
-    	    ip link set wds$num up
-	    brctl addif br0 wds$num
-            num=`expr $num + 1`
+    	    ip link set wds$i up
+	    brctl addif br0 wds$i
         done
     fi
 }
@@ -103,14 +97,14 @@ resetLanWan()
 #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
 #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
 
-if [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
+if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
+	nvram_set 2860 OperationMode 1
+	opmode="1"
+elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
 	nvram_set 2860 OperationMode 1
 	opmode="1"
 fi
-if [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-fi
+
 if [ "$CONFIG_DWC_OTG" == "m" ]; then
     isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`
 fi
