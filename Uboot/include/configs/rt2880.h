@@ -33,7 +33,6 @@
 //#define ET_DEBUG
 
 #define CONFIG_RT2880_ETH		1	/* Enable built-in 10/100 Ethernet */
-
 #define CONFIG_MIPS32		1	/* MIPS 4Kc CPU core	*/
 //CONFIG_INCA_IP
 #if defined (RT3052_FPGA_BOARD) || defined (RT2883_FPGA_BOARD) || defined (RT3883_FPGA_BOARD) 

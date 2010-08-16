@@ -29,6 +29,9 @@ LIB	= lib$(BOARD).a
 OBJS	= $(BOARD).o flash.o serial.o 
 SOBJS	= $(BOARD)_init.o memsetup.o
 
+#OBJS   = flash.o serial.o
+#SOBJS  = memsetup.o
+
 $(LIB):	.depend $(OBJS) $(SOBJS)
 	$(AR) crv $@ $(OBJS) $(SOBJS)
 

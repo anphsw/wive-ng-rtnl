@@ -53,6 +53,7 @@ int		BootpTry;
 ulong		seed1, seed2;
 #endif
 
+void BootpRequest (void);
 #if (CONFIG_COMMANDS & CFG_CMD_DHCP)
 dhcp_state_t dhcp_state = INIT;
 unsigned long dhcp_leasetime = 0;

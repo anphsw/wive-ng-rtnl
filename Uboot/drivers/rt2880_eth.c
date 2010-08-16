@@ -997,16 +997,19 @@ void rt305x_esw_init(void)
 	RT2882_REG(0xb011008C) = 0x02404040; 
 
 #if defined (RT3052_ASIC_BOARD)
-	RT2882_REG(0xb01100C8) = 0x3f502b28; //Ext PHY Addr=0x1F 
+	RT2882_REG(0xb01100C8) = 0x20f02b2a; //Ext PHY Addr=0x0 - 0x00f03f3a
+	//RT2882_REG(0xb01100C8) = 0x3f502b28; //Ext PHY Addr=0x1F 
 	RT2882_REG(0xb0110084) = 0x00000000;
 #elif defined (RT3052_FPGA_BOARD)
-	RT2882_REG(0xb01100C8) = 0x20f02b28; //Ext PHY Addr=0x0 
-	RT2882_REG(0xb0110084) = 0xffdf1f00;
+	//RT2882_REG(0xb01100C8) = 0x20f02b28; //Ext PHY Addr=0x0 
+	//RT2882_REG(0xb0110084) = 0xffdf1f00;
 
 	/* In order to use 10M/Full on FPGA board. We configure phy capable to 
 	 * 10M Full/Half duplex, so we can use auto-negotiation on PC side */
 	for(i=0;i<5;i++){
-	    mii_mgr_write(i, 4, 0x0461);   //Capable of 10M Full/Half Duplex, flow control on/off
+	    //mii_mgr_write(i, 4, 0x0461);   //Capable of 10M Full/Half Duplex, flow control on/off
+	    mii_mgr_write(i, 4, 0x05E1);
+	    mii_mgr_write(i, 9, 0x0200);
 	    mii_mgr_write(i, 0, 0xB100);   //reset all digital logic, except phy_reg
 	}
 #endif // RT3052_ASIC_BOARD
@@ -1032,10 +1035,14 @@ void rt305x_esw_init(void)
         mii_mgr_write(0, 29, 0x598b); //change PLL bias current to internal(RT3052_MP3)
         mii_mgr_write(0, 31, 0x8000); //select local register
 
+	RT2882_REG(0xb01100C8) = 0x00f03f3a; //Salim
+
 #if defined (P5_RGMII_TO_MAC_MODE)
+	RT2882_REG(0xb0000060) &= ~(1<<9);
 	RT2882_REG(0xb01100C8) &= ~(1<<29); //disable port 5 auto-polling
 	RT2882_REG(0xb01100C8) |= 0x3fff; //force 1000M full duplex
 	RT2882_REG(0xb01100C8) &= ~(0xf<<20); //rxclk_skew, txclk_skew = 0
+	RT2882_REG(0xb01100C8) &= ~(0xf<<6);
 #elif defined (P5_MII_TO_MAC_MODE)
 	RT2882_REG(0xb01100C8) &= ~(1<<29); //disable port 5 auto-polling
 	RT2882_REG(0xb01100C8) |= 0x3ffd; //force 100M full duplex
@@ -1093,11 +1100,16 @@ static int rt2880_eth_setup(struct eth_device* dev)
 // RT3052 + EmbeddedSW
 #elif defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
 	rt305x_esw_init();
+
+	/* Initialize atheros Switch */
+	athrs16_phy_setup(0);
+	athrs16_phy_setup(1);
+
   #ifdef P5_RGMII_TO_MAC_MODE
 	printf("\n Vitesse giga Mac support \n");
 	ResetSWusingGPIO10();
 	udelay(125000);
-	vtss_init();
+	//vtss_init();  Ramesh
   #endif
 // RT2880 + GigaSW
 #elif defined (MAC_TO_VITESSE_MODE)
@@ -1121,7 +1133,6 @@ static int rt2880_eth_setup(struct eth_device* dev)
 #ifndef RT3052_PHY_TEST
 	LANWANPartition();
 #endif
-
 
 #ifdef RT3883_USE_GE2
 	wTmp = (u16)dev->enetaddr[0];

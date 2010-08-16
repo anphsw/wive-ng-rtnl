@@ -54,6 +54,7 @@ extern int scc_initialize(bd_t*);
 extern int skge_initialize(bd_t*);
 extern int tsec_initialize(bd_t*, int);
 extern int rt2880_eth_initialize(bd_t *bis);
+extern int ag7100_enet_initialize(bd_t *bis);
 
 static struct eth_device *eth_devices, *eth_current;
 static char rt2880_gmac1_mac[]=CONFIG_ETHADDR;
@@ -205,6 +206,11 @@ ll
 #if defined(CONFIG_RT2880_ETH)
 	rt2880_eth_initialize(bis);
 #endif
+
+#if defined(CONFIG_AG7100)
+	ag7100_enet_initialize(bis);
+#endif
+	
 
 	if (!eth_devices) {
 		puts ("No ethernet found.\n");

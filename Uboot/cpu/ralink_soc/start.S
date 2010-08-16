@@ -778,10 +778,10 @@ SDRAM_INIT_DOWN:
 	//set SDRAM pin to gpio mode
 	or t6, 0x100
 #endif
-//#if defined(UARTF_AT_GPIO_FUNC)
+#if defined(UARTF_AT_GPIO_FUNC)
 	//configure UARTF pin to gpio mode (GPIO7~GPIO14)
 	or t6, 0x1c
-//#endif
+#endif
 
 #endif
 

@@ -54,7 +54,9 @@ int modifies= 0;
 
 extern int timer_init(void);
 
+#ifdef CONFIG_RT2880_ETH
 extern void  rt2880_eth_halt(struct eth_device* dev);
+#endif
 
 //extern void pci_init(void);
 
@@ -68,7 +70,10 @@ int get_addr_boundary (ulong *addr);
 extern int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 extern void input_value(u8 *str);
 extern void rt305x_esw_init(void);
+//extern void athrs16_reg_init();
+#ifndef RT3052_PHY_TEST
 extern void LANWANPartition(void);
+#endif
 
 extern struct eth_device* 	rt2880_pdev;
 
@@ -1291,12 +1296,11 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	debug(" SDRAM size =%d Mbytes\n",gd->ram_size /1024/1024 );
 
 
-#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
-	rt305x_esw_init();
-#endif
+	//rt305x_esw_init(); Salim
+	//athrs16_reg_init();
 
 #ifndef RT3052_PHY_TEST
-	LANWANPartition();
+//	LANWANPartition();
 #endif
 
 #ifdef DUAL_IMAGE_SUPPORT
@@ -1370,12 +1374,14 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			}
 #elif defined (CFG_ENV_IS_IN_SPI)
 			if (1) {
+				printf("Salim-ENV_IS_IN_SPI\n");
 				unsigned int load_address = simple_strtoul(argv[1], NULL, 16);
 				raspi_erase_write((u8 *)load_address, CFG_KERN_ADDR-CFG_FLASH_BASE, NetBootFileXferSize);
 			}
 #else //CFG_ENV_IS_IN_FLASH
 #if (defined (ON_BOARD_8M_FLASH_COMPONENT) || defined (ON_BOARD_16M_FLASH_COMPONENT)) && (defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD) || defined (RT3052_MP1))
 			//erase linux
+			printf("Salim-In Flash\n");
 			if (NetBootFileXferSize <= (0x400000 - (CFG_BOOTLOADER_SIZE + CFG_CONFIG_SIZE + CFG_FACTORY_SIZE))) {
 				e_end = CFG_KERN_ADDR + NetBootFileXferSize;
 				if (0 != get_addr_boundary(&e_end))
@@ -1666,14 +1672,105 @@ void adjust_frequency(void)
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 void config_usbotg(void)
 {
-	udelay(100000);
-	RT2882_REG(0xB01C000C) = 0x40001408;    // force device mode
-	RT2882_REG(0xB01C0E00) = 0x1;           // stop pclock
-	udelay(200000);
-	RT2882_REG(0xB0000034) = 0x00400000;    // reset OTG
-	RT2882_REG(0xB0000034) = 0x00000000;
-	udelay(200000);
-
-	RT2882_REG(0xB01C0E00) = 0xF;        //disable USB module, optimize for power-saving
+    u32 val;
+    int i, retry_count=0;
+ 
+retry:
+    val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+    val = val >> 10;
+    val = val & 0x00000003;
+    if(val == 0x2 || val == 0x3){
+        if(val == 0x3){
+            if(retry_count++ < 0x100000)
+                goto retry;
+            printf("*** Error: config usb failed.\n");
+        }
+        printf("Config usb otg 2\n");
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0400));
+        //printf("1.b01c0400 = 0x%08x\n", val);
+        //printf("force \"FS-LS only mode\"\n");
+        val = val | (1 << 2);
+        *(volatile u_long *)(0xB01C0400) = cpu_to_le32(val);
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0400));
+        //printf("2.b01c0400 = 0x%08x\n", val);
+ 
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("3.b01c0440 = 0x%08x\n", val);
+ 
+        //printf("port power on\n");
+        val = val | (1 << 12);
+        *(volatile u_long *)(0xB01C0440) = cpu_to_le32(val);
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("4.b01c0440 = 0x%08x\n", val);
+ 
+        udelay(3000);   // 3ms
+ 
+        ////printf("check port connect status\n");
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        ////printf("5.b01c0440 = 0x%08x\n", val);
+ 
+        ////printf("port reset --set\n");
+        val = val | (1 << 8);
+        *(volatile u_long *)(0xB01C0440) = cpu_to_le32(val);
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("6.b01c0440 = 0x%08x\n", val);
+ 
+        udelay(10000);
+        //printf("port reset -- clear\n");
+        val = val & ~(1 << 8);
+        *(volatile u_long *)(0xB01C0440) = cpu_to_le32(val);
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("7.b01c0440 = 0x%08x\n", val);
+ 
+        udelay(1000);
+ 
+        //printf("port suspend --set\n");
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("b.b01c0440 = 0x%08x\n", val);
+        val = val | (1 << 7);
+        /* avoid write 1 to port enable */
+        val = val & 0xFFFFFFF3;
+ 
+        *(volatile u_long *)(0xB01C0440) = cpu_to_le32(val);
+ 
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("c.b01c0440 = 0x%08x\n", val);
+ 
+        //printf(" stop pclk\n");
+        *(volatile u_long *)(0xB01C0E00) = cpu_to_le32(0x1);
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0E00));
+        //printf("8.b01c0e00 = 0x%08x\n", val);
+ 
+        //printf("wait for suspend...");
+        for(i=0; i<10000000; i++){
+            val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+            val = val & (1 << 7);
+            if(val)
+                break;          // done.
+        }
+        val = le32_to_cpu(*(volatile u_long *)(0xB01C0440));
+        //printf("timeout, ignore..(0x%08x)\n", val);
+        udelay(10000);
+ 
+        *(volatile u_long *)(0xB0000034) = 0x00400000;
+        *(volatile u_long *)(0xB0000034) = 0x0;
+        udelay(100000);
+ 
+        *(volatile u_long *)(0xB01C0E00) = 0xF;        //disable USB module, optimize for power-saving
+ 
+    }else{
+        printf("config usb otg\n");
+ 
+        udelay(100000);
+        RT2882_REG(0xB01C000C) = 0x40001408;    // force device mode
+        RT2882_REG(0xB01C0E00) = 0x1;           // stop pclock
+        udelay(200000);
+        RT2882_REG(0xB0000034) = 0x00400000;    // reset OTG
+        RT2882_REG(0xB0000034) = 0x00000000;
+        udelay(200000);
+ 
+        RT2882_REG(0xB01C0E00) = 0xF;        //disable USB module, optimize for power-saving
+        return;
+    }
 }
 #endif

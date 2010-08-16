@@ -1,4 +1,4 @@
-string 'Cross Compiler Path' CONFIG_CROSS_COMPILER_PATH /opt/buildroot-gcc342/bin
+string 'Cross Compiler Path' CONFIG_CROSS_COMPILER_PATH /opt/Wive-RTNL/toolchain/bin
 comment ""
 
 mainmenu_name 'Uboot Configuration'
