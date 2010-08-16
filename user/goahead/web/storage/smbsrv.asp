@@ -172,19 +172,19 @@ function smb_enable_switch()
   <tr>
     <td class="head" id="smbSrvWG">Workgroup</td>
     <td>
-      <input type=text name=smb_workgroup size=16 maxlength=16 value="ralink">
+      <input type=text name=smb_workgroup size=16 maxlength=16 value="LOCALNET">
     </td>
   </tr>
   <tr>
     <td class="head" id="smbSrvNetBIOS">NetBIOS Name</td>
     <td>
-      <input type=text name=smb_netbios size=16 maxlength=16 value="RT3052">
+      <input type=text name=smb_netbios size=16 maxlength=16 value="Wive-RTNL">
     </td>
   </tr>
   <tr>
     <td class="head" id="smbSrvString">Server String</td>
     <td>
-      <input type=text name=smb_string size=16 maxlength=16 value="Samba Server">
+      <input type=text name=smb_string size=16 maxlength=16 value="SERVER">
     </td>
   </tr>
 </table>

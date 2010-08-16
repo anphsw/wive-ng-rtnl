@@ -69,11 +69,11 @@ if [ "$CONFIG_USER_STORAGE" = "y" ]; then
 fi
 
 dep_bool 'stupid ftpd'				CONFIG_USER_STUPID_FTPD $CONFIG_USER_STORAGE
-dep_bool 'samba server(need hostname cmd)'	CONFIG_USER_SAMBA $CONFIG_USER_STORAGE
+dep_bool 'samba server'				CONFIG_USER_SAMBA
 if [ "$CONFIG_USER_SAMBA" = "y" ]; then
-	define_bool CONFIG_USER_GOAHEAD_HOSTNAME y
-	define_bool CONFIG_LIB_NSL_FORCE y
+        define_bool CONFIG_USER_STORAGE
 fi
+
 bool 'go-ahead webserver'			CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable IPv6 support'		CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable SSL support'			CONFIG_USER_GOAHEAD_SSL $CONFIG_USER_GOAHEAD_HTTPD
