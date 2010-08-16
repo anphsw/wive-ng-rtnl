@@ -112,6 +112,14 @@ start() {
 	else	    
     	    iptables -A servicelimit -p tcp --dport 81 -j DROP
 	fi
+	#samba
+	if [ "$SmbEnabled" = "1" ]; then
+	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j ACCEPT
+	else
+	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
+	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j DROP
+	fi
         #icmp limit
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
@@ -266,6 +274,7 @@ get_param() {
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
     DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
     IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
+    SmbEnabled=`nvram_get 2860 SmbEnabled`
 
     #change wan if
     if [ "$vpnEnabled" = "on"  ]; then

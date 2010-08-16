@@ -22,6 +22,7 @@ usage () {
   echo "  -d dns1 [dns2]  : set dns1 and dns2 as DNS"
   echo "  -m mask         : set mask as subnet netmask"
   echo "  -g gateway      : set gateway as router's IP address"
+  echo "  -w wins	  : set wins server IP address"
   echo "  -t time         : set time seconds as the IP life time"
   echo "  -r [sleep_time] : run dhcp server"
   echo "  -k              : kill the running dhcp server"
@@ -49,6 +50,9 @@ config () {
     "-g")
       sed -e '/option *router/d' $fname > $fbak
       echo "option router $2" >> $fbak ;;
+    "-w")
+      sed -e '/option *wins/d' $fname > $fbak
+      echo "option wins $2" >> $fbak ;;
     "-t")
       sed -e '/option *lease/d' $fname > $fbak
       echo "option lease $2" >> $fbak ;;
@@ -94,6 +98,7 @@ case "$1" in
   "-d") config "$1" "$2" "$3";;
   "-m") config "$1" "$2";;
   "-g") config "$1" "$2";;
+  "-w") config "$1" "$2";;
   "-t") config "$1" "$2";;
   "-S") config "$1" "$2" "$3";;
   "-r")

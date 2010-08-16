@@ -18,6 +18,8 @@ start() {
 		gw=`nvram_get 2860 dhcpGateway`
 		lease=`nvram_get 2860 dhcpLease`
 		static1=`nvram_get 2860 dhcpStatic1`
+		lan_ip=`nvram_get 2860 lan_ipaddr`
+		SmbEnabled=`nvram_get 2860 SmbEnabled`
 
 		> /etc/udhcpd.conf
 		> /var/udhcpd.leases
@@ -35,6 +37,9 @@ start() {
 		fi
 		if [ "$lease" != "" ]; then
 			config-udhcpd.sh -t $lease
+		fi
+		if [ "$SmbEnabled" = "1" ]; then
+			config-udhcpd.sh -w $lan_ip
 		fi
 
 		# Write static DHCP leases

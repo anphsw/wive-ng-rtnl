@@ -236,7 +236,7 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 
 	// set to nvram
 	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb);
-	nvram_bufset(RT2860_NVRAM, "HostName", wg);
+	nvram_bufset(RT2860_NVRAM, "WorkGroup", wg);
 	nvram_bufset(RT2860_NVRAM, "SmbNetBIOS", netbios);
 	nvram_bufset(RT2860_NVRAM, "SmbString", str);
 	nvram_commit(RT2860_NVRAM);
