@@ -10,6 +10,8 @@ PF_EXT_SLIB:=ah addrtype comment connlimit connmark conntrack dscp ecn esp hashl
 PF_EXT_SLIB+=CONNLOG IMQ string account
 PF6_EXT_SLIB:=connmark eui64 hl icmpv6 length limit mac mark multiport owner physdev policy standard state tcp udp CONNMARK HL LOG NFQUEUE MARK TRACE
 
+PF_EXT_SLIB+=account
+
 ifeq ($(DO_SELINUX), 1)
 PF_EXT_SE_SLIB:=SECMARK CONNSECMARK
 PF6_EXT_SE_SLIB:=SECMARK CONNSECMARK
