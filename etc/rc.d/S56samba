@@ -21,8 +21,8 @@ if [ "$SmbEnabled" = "1" ]; then
 	SmbNetBIOS="$HOSTNAME_NVRAM"
 	SmbString="$HOSTNAME_NVRAM-SERVER"
 	nvram_set 2860  WorkGroup LOCALNET
-	nvram_set 2860 SmbNetBIOS $SmbNetBIOS
-	nvram_set 2860  SmbString $SmbString
+	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
+	nvram_set 2860  SmbString "$SmbString"
     fi
 
     echo "[global]" > $CONFIG
