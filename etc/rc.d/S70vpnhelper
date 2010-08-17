@@ -27,7 +27,7 @@ start() {
       if [ "$vpnType" = "0" ]; then
 	echo "PPPOE calling..."
 	(sleep 5 && /etc/scripts/config-pppoe.sh) &
-      elif if [ "$vpnType" = "1" ]; then
+      elif [ "$vpnType" = "1" ]; then
 	echo "PPTP calling..."
 	(sleep 5 && /etc/scripts/config-pptp.sh) &
       elif [ "$vpnType" = "2" ]; then
