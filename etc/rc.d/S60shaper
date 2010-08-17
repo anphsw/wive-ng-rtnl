@@ -19,8 +19,7 @@ get_param
     if [ "$QoSEnable" = "1" ]; then
 	echo "--------------RALINK-QOS------------------------"
 	qos_run
-    fi
-    if [ "$QoSEnable" = "2" ]; then
+    elif [ "$QoSEnable" = "2" ]; then
 	echo "---------------NONIMQ-IN------------------------"
 	if [ "$LANUP" = "1" ]; then
 	    #input
@@ -80,8 +79,7 @@ get_param
 	    tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 110 0xffff flowid 1:3
 	    tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 25 0xffff flowid 1:3
 	fi
-    fi
-    if [ "$QoSEnable" = "3" ]; then
+    elif [ "$QoSEnable" = "3" ]; then
 	    echo "-----------------IMQ-FULL-------------------------"
 	    modprobe imq > /dev/null 2>&1
 	    modprobe ipt_IMQ > /dev/null 2>&1
