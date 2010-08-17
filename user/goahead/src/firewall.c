@@ -24,6 +24,7 @@
 #define _PATH_PFW           "/etc"
 #define _PATH_PFW_FILE      _PATH_PFW "/portforward"
 #define _PATH_MACIP_FILE    _PATH_PFW "/macipfilter"
+#define _PATH_WEBS_FILE     _PATH_PFW "/websfilter"
 
 #define DD printf("---> %d\n", __LINE__);
 
@@ -343,11 +344,9 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 
 static void iptablesIPPortFilterBuildScript(void)
 {
-	int i=0;
+	int i=0, mode, sprf_int, sprt_int, proto, action, dprf_int, dprt_int;
 	char rec[256];
 	char cmd[1024];
-	int sprf_int, sprt_int, proto, action;
-	int dprf_int, dprt_int;
 	char sprf[8], sprt[8], protocol[8], iface[8];
 	char dprf[8], dprt[8], wan_name[16];
 	char mac_address[32];
@@ -355,9 +354,7 @@ static void iptablesIPPortFilterBuildScript(void)
 	char dip_1[32], dip_2[32];
 	char *firewall_enable, *default_policy, *rule, *c_if;
 	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
-	int mode;
 	
-	printf("iptablesIPPortFilterBuildScript\n");
 	
 	firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
 	if (!firewall_enable)
@@ -387,8 +384,6 @@ static void iptablesIPPortFilterBuildScript(void)
 	FILE *fd = fopen(_PATH_MACIP_FILE, "w");
 	if (fd != NULL)
 	{
-		printf("iptablesIPPortFilterBuildScript opened file\n");
-		
 		fputs("#!/bin/sh\n\n", fd);
 		fputs("iptables -t filter -N macipport_filter\n", fd);
 		fputs("iptables -t filter -A FORWARD -j macipport_filter\n", fd);
@@ -1166,8 +1161,6 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 
 	//generate and save rules
 	iptablesIPPortFilterBuildScript();
-	// Call rwfs to store data
-	doSystem("fs save &");
 	// call iptables
 	firewall_rebuild();
 
@@ -1386,8 +1379,6 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	
 	// generate and save rules
 	iptablesIPPortFilterBuildScript();
-	// Call rwfs to store data
-	doSystem("fs save &");
 	// call iptables
 	firewall_rebuild();
 }
@@ -1498,8 +1489,6 @@ end:
 
 	// generate and save rules
 	iptablesPortForwardBuildScript();
-	// Call rwfs to store data
-	doSystem("fs save &");
 	// call iptables
 	firewall_rebuild();
 }
@@ -1539,8 +1528,6 @@ static void BasicSettings(webs_t wp, char_t *path, char_t *query)
 	if (firewall_enable && atoi(firewall_enable))
 	{
 		iptablesIPPortFilterBuildScript();
-		// Call rwfs to store data
-		doSystem("fs save &");
 		// call iptables
 		firewall_rebuild();
 	}
@@ -1594,8 +1581,6 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	iptablesIPPortFilterBuildScript();
-	// Call rwfs to store data
-	doSystem("fs save &");
 	// call iptables
 	firewall_rebuild();
 }
@@ -1608,9 +1593,9 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 #define BLK_PROXY               0x08
 void iptablesWebsFilterRun(void)
 {
-	int i;
-	int content_filter = 0;
+	int i, content_filter = 0;
 	char entry[256];
+	char buff[4096]; //need long buffer for utf domain name encoding support
 	char *url_filter = nvram_bufget(RT2860_NVRAM, "websURLFilters");
 	char *host_filter = nvram_bufget(RT2860_NVRAM, "websHostFilters");
 	char *proxy = nvram_bufget(RT2860_NVRAM, "websFilterProxy");
@@ -1618,8 +1603,10 @@ void iptablesWebsFilterRun(void)
 	char *activex = nvram_bufget(RT2860_NVRAM, "websFilterActivex");
 	char *cookies = nvram_bufget(RT2860_NVRAM, "websFilterCookies");
 
-	if(!url_filter || !host_filter || !proxy || !java || !activex || !cookies)
+	if(!url_filter || !host_filter || !proxy || !java || !activex || !cookies) {
+		doSystem("rm -f" _PATH_WEBS_FILE);
 		return;
+	}
 
 	// Content filter
 	if(!strcmp(java, "1"))
@@ -1631,36 +1618,50 @@ void iptablesWebsFilterRun(void)
 	if(!strcmp(proxy, "1"))
 		content_filter += BLK_PROXY;
 
-	if (content_filter)
+	//Generate portforward script file
+	FILE *fd = fopen(_PATH_WEBS_FILE, "w");
+	if (fd != NULL)
 	{
+	    fputs("#!/bin/sh\n\n", fd);
+	    fputs("iptables -t filter -N web_filter\n", fd);
+	    fputs("iptables -t filter -A FORWARD -j web_filter\n", fd);
+
+	    if (content_filter) {
 		// Why only 3 ports are inspected?(This idea is from CyberTAN source code)
 		// TODO: use layer7 to inspect HTTP
-		doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset", content_filter);
-		doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 3128 -m webstr --content %d -j REJECT --reject-with tcp-reset", content_filter);
-		doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 8080 -m webstr --content %d -j REJECT --reject-with tcp-reset", content_filter);
-	}
+		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
+		fputs(buff, fd);
+		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 3128 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
+		fputs(buff, fd);
+		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 8080 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
+		fputs(buff, fd);
+	    }
 
-	// URL filter
-	i=0;
-	while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) )
-	{
+	    // URL filter
+	    i=0;
+	    while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) )
+	    {
 		if (strlen(entry))
 		{
 			if(!strncasecmp(entry, "http://", strlen("http://")))
 				strcpy(entry, entry + strlen("http://"));
-			doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset", entry);
+			sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", entry);
+			fputs(buff, fd);
 		}
-	}
+	    }
 
-	// HOST(Keyword) filter
-	i=0;
-	while ( (getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1) )
-	{
+	    // HOST(Keyword) filter
+	    i=0;
+	    while ( (getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1) )
+	    {
 		if(strlen(entry))
-			doSystem("iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset", entry);
-	}
-
-	return;
+			sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", entry);
+			fputs(buff, fd);
+	    }
+	  //closefile
+	  fclose(fd);
+        }
+    return;
 }
 
 
@@ -1703,13 +1704,13 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "websURLFilters", rules);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
-	iptablesWebsFilterRun();
-
 	websHeader(wp);
 	websWrite(wp, T("Delete : success<br>\n") );
 	websFooter(wp);
 	websDone(wp, 200);
+
+	//call iptables
+	firewall_rebuild();
 
 	return;
 }
@@ -1752,13 +1753,13 @@ static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
 	nvram_set(RT2860_NVRAM, "websHostFilters", rules);
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
-	iptablesWebsFilterRun();
-
 	websHeader(wp);
 	websWrite(wp, T("Delete : success<br>\n") );
 	websFooter(wp);
 	websDone(wp, 200);
+
+	//call iptables
+	firewall_rebuild();
 
 	return;
 }
@@ -1780,9 +1781,6 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
-	iptablesWebsFilterRun();
-
 	websHeader(wp);
 	websWrite(wp, T("Proxy: %s<br>\n"),  atoi(proxy) ? "enable" : "disable");
 	websWrite(wp, T("Java: %s<br>\n"),   atoi(java) ? "enable" : "disable");
@@ -1790,6 +1788,10 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("Cookies: %s<br>\n"), atoi(cookies) ? "enable" : "disable");
 	websFooter(wp);
 	websDone(wp, 200);
+
+	//call iptables
+	firewall_rebuild();
+
 }
 
 static void websURLFilter(webs_t wp, char_t *path, char_t *query)
@@ -1817,13 +1819,14 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
-	iptablesWebsFilterRun();
 
 	websHeader(wp);
 	websWrite(wp, T("add URL filter: %s<br>\n"), rule);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	//call iptables
+	firewall_rebuild();
 }
 
 static void websHostFilter(webs_t wp, char_t *path, char_t *query)
@@ -1850,13 +1853,13 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_commit(RT2860_NVRAM);
 
-	doSystem("iptables -t filter -F " WEB_FILTER_CHAIN);
-	iptablesWebsFilterRun();
-
 	websHeader(wp);
 	websWrite(wp, T("add Host filter: %s<br>\n"), rule);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	//call iptables
+	firewall_rebuild();	
 }
 
 char *getNameIntroFromPat(char *filename)
@@ -1989,9 +1992,9 @@ void firewall_rebuild(void)
 	//rebuild firewall scripts in etc
 	iptablesPortForwardBuildScript();
 	iptablesIPPortFilterBuildScript();
+	iptablesWebsFilterRun();
 	//no backgroudn it!!!!         
 	doSystem("service iptables restart");
 	///-----Load L7 filters rules----////
 	LoadLayer7FilterName();
-	iptablesWebsFilterRun();
 }

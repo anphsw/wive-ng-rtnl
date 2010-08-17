@@ -151,9 +151,12 @@ start() {
 		fi
 	    fi
 
-            #to do  use this for content filters
-	    iptables -t filter -N web_filter
-	    iptables -t filter -A FORWARD -j web_filter
+	    if [ -f /etc/websfilter ]; then
+        	$LOG "Add rules for content filters"
+		modprobe -q xt_webstr
+		chmod 777 /etc/websfilter
+    		/etc/websfilter
+	    fi
 
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
