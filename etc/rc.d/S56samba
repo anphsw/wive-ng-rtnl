@@ -16,12 +16,13 @@ if [ "$SmbEnabled" = "1" ]; then
     CONFIG="/etc/smb.conf"
 
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
-	nvram_set 2860  WorkGroup LOCALNET
-	nvram_set 2860 SmbNetBIOS Wive-RTNL
-	nvram_set 2860  SmbString SERVER
+	HOSTNAME_NVRAM=`nvram_get 2860 HostName`
 	WorkGroup="LOCALNET"
-	SmbNetBIOS="Wive-RTNL"
-	SmbString="SERVER"
+	SmbNetBIOS="$HOSTNAME_NVRAM"
+	SmbString="$HOSTNAME_NVRAM-SERVER"
+	nvram_set 2860  WorkGroup LOCALNET
+	nvram_set 2860 SmbNetBIOS $SmbNetBIOS
+	nvram_set 2860  SmbString $SmbString
     fi
 
     echo "[global]" > $CONFIG
