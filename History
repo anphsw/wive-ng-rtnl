@@ -107,6 +107,8 @@
 25) Fix lldt control in webui<br>
 26) Add interface select for macip filter and port forward in WebUI<br>
 27) Add 802.11g/n mixed mode and set default<br>
+28) Add samba for smb and wins services<br>
+29) portforward and ipport filter scripts now reboot at start<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
