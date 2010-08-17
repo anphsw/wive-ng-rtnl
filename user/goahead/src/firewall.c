@@ -390,6 +390,8 @@ static void iptablesIPPortFilterBuildScript(void)
 		printf("iptablesIPPortFilterBuildScript opened file\n");
 		
 		fputs("#!/bin/sh\n\n", fd);
+		fputs("iptables -t filter -N macipport_filter\n", fd);
+		fputs("iptables -t filter -A FORWARD -j macipport_filter\n", fd);
 		
 		while ( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
 		{
@@ -513,6 +515,8 @@ static void iptablesPortForwardBuildScript(void)
 	if (fd != NULL)
 	{
 		fputs("#!/bin/sh\n\n", fd);
+		fputs("iptables -t nat -N port_forward\n", fd);
+		fputs("iptables -t nat -A PREROUTING -j port_forward\n", fd);
 
 		while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
 		{
