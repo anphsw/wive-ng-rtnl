@@ -135,6 +135,9 @@ start() {
 	    sysctl -w net.ipv4.ip_forward=1
 	    #accept my packets
 	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+	    #tune mss size for tranzit packets
+	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+
 	    if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then    
 		$LOG "Set macipport_filter rules"
 		chmod 777 /etc/macipfilter
@@ -147,12 +150,11 @@ start() {
 		    iptables -t filter -A macipport_filter -j ACCEPT
 		fi
 	    fi
+
             #to do  use this for content filters
 	    iptables -t filter -N web_filter
 	    iptables -t filter -A FORWARD -j web_filter
 
-	    #tune mss size for tranzit packets
-	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
 	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
