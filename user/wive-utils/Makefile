@@ -1,8 +1,9 @@
-UTILSLIST=ader cpu mcprobe ipget
+UTILSLIST=ader cpu mcprobe ipget lanauth
+CFLAGS += -lcrypto
 
 all:
 	@set -e;
-	for i in $(UTILSLIST); do $(CC) $$i.c -o $$i; $(STRIP) $$i; done
+	for i in $(UTILSLIST); do $(CC) $(CFLAGS)  $$i.c -o $$i; $(STRIP) $$i; done
 
 clean:
 	@set -e; 
