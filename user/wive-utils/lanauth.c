@@ -24,8 +24,8 @@
 #include<stdarg.h>
 #include<string.h>
 #include<syslog.h>
-#include<openssl/md5.h>
-#include<openssl/ripemd.h>
+#include"md5.h"
+#include"ripemd.h"
 
 int nodaemon = 0;		/* don't become daemon */
 int nobind = 1;			/* don't really bind, just assume we binded */

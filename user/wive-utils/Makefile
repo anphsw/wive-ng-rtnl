@@ -1,9 +1,16 @@
-UTILSLIST=ader cpu mcprobe ipget lanauth
-CFLAGS += -lcrypto
+#baswd utility for all routers
+
+UTILSLIST = ader cpu mcprobe ipget
+CFLAGS += -Os
+
+ifdef CONFIG_USER_KABINET
+UTILSLIST += lanauth
+CFLAGS += -lcrypt
+endif
 
 all:
 	@set -e;
-	for i in $(UTILSLIST); do $(CC) $(CFLAGS)  $$i.c -o $$i; $(STRIP) $$i; done
+	for i in $(UTILSLIST); do $(CC) $(CFLAGS) $$i.c -o $$i; $(STRIP) $$i; done
 
 clean:
 	@set -e; 

@@ -101,6 +101,11 @@ fi
 bool 'igmp proxy (RFC4605)'			CONFIG_USER_IGMP_PROXY
 bool 'udpxy'					CONFIG_USER_UDPXY
 bool 'wive-utils'				CONFIG_USER_WIVE
+bool 'kabinet auth utils'			CONFIG_USER_KABINET
+if [ "$CONFIG_USER_KABINET" = "y" ]; then
+    define_bool CONFIG_USER_WIVE y
+    define_bool CONFIG_USER_OPENSSL y
+fi
 bool 'inadyn (DDNS Client)'     		CONFIG_USER_INADYN
 bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
 bool 'iptables-tools'				CONFIG_USER_IPTABLES_SAVE_RESTORE

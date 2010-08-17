@@ -6,7 +6,6 @@
 #wait to start web and run from goahead code
 web_wait
 
-
 start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     if [ "$vpnEnabled" = "on" ]; then
@@ -24,17 +23,14 @@ start() {
       echo "$USER * $PASSWORD *" > $ppp/chap-secrets
       echo "$USER * $PASSWORD *" > $ppp/pap-secrets
 
-    
       #call to vpn
       if [ "$vpnType" = "0" ]; then
 	echo "PPPOE calling..."
 	(sleep 5 && /etc/scripts/config-pppoe.sh) &
-      fi
-      if [ "$vpnType" = "1" ]; then
+      elif if [ "$vpnType" = "1" ]; then
 	echo "PPTP calling..."
 	(sleep 5 && /etc/scripts/config-pptp.sh) &
-      fi
-      if [ "$vpnType" = "2" ]; then
+      elif [ "$vpnType" = "2" ]; then
 	echo "L2TP calling..."
 	(sleep 5 && /etc/scripts/config-l2tp.sh) &
       fi
