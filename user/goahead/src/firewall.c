@@ -1986,8 +1986,10 @@ void formDefineFirewall(void)
 
 void firewall_rebuild(void)
 {
-	////----SET-RULES----------------////
-	//no backgroudn it!!!!
+	//rebuild firewall scripts in etc
+	iptablesPortForwardBuildScript();
+	iptablesIPPortFilterBuildScript();
+	//no backgroudn it!!!!         
 	doSystem("service iptables restart");
 	///-----Load L7 filters rules----////
 	LoadLayer7FilterName();
