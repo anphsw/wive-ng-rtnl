@@ -137,10 +137,6 @@ start() {
 	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 	    #tune mss size for tranzit packets
 	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-	    #second lan
-	    if [ "$Lan2Enabled" = "1" ]; then
-        	iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
-	    fi
 	    if [ "$IPPortFilterEnable" = "1" ]; then    
 		$LOG "Set macipport_filter rules"
 		iptables -t filter -N macipport_filter
@@ -160,12 +156,16 @@ start() {
             #to do  use this for content filters
 	    iptables -t filter -N web_filter
 	    iptables -t filter -A FORWARD -j web_filter
-	fi
 
-	#enable forward only from local network to wan/ppp
-	iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
-	iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
-        iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
+	    #enable forward only from local network to wan/ppp
+	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
+	    #second lan
+	    if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	    fi
+	fi
 
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
