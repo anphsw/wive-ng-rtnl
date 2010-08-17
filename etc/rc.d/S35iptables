@@ -136,10 +136,8 @@ start() {
 	    #accept my packets
 	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 	    if [ "$IPPortFilterEnable" = "1" ]; then    
-		$LOG "Set macipport_filter rules"
-		iptables -t filter -N macipport_filter
-    		iptables -t filter -A FORWARD -j macipport_filter
 		if [ -f /etc/macipfilter ]; then
+		    $LOG "Set macipport_filter rules"
 		    chmod 777 /etc/macipfilter
 		    /etc/macipfilter
 		fi
@@ -173,8 +171,6 @@ start() {
 	    $LOG "Add masqrade rules"
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		$LOG "Add portforward rules"
-		iptables -t nat -N port_forward
-		iptables -t nat -A PREROUTING -j port_forward
 		chmod 777 /etc/portforward
 		/etc/portforward
 	    fi
