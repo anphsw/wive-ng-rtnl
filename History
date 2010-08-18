@@ -110,6 +110,7 @@
 28) Add samba for smb and wins services<br>
 29) portforward and ipport filter scripts now reboot at start<br>
 30) Content filters based on webstr now works<br>
+31) Use WLAN_MAC_ADDR, WAN_MAC_ADDR, LAN_MAC_ADDR variable in nvram for set macs to interfaces<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
