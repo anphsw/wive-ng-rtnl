@@ -838,7 +838,7 @@ VOID	NICReadEEPROMParameters(
 	IN	PUCHAR			mac_addr)
 {
 	UINT32			data = 0;
-	USHORT			i, value, value2;
+	USHORT			i =0 , value, value2;
 	UCHAR			TmpPhy;
 	EEPROM_TX_PWR_STRUC	    Power;
 	EEPROM_VERSION_STRUC    Version;
@@ -852,8 +852,6 @@ VOID	NICReadEEPROMParameters(
 
 	if (pAd->chipOps.eeinit)
 		pAd->chipOps.eeinit(pAd);
-#ifdef RTMP_EFUSE_SUPPORT
-#endif // RTMP_EFUSE_SUPPORT //
 
 	// Init EEPROM Address Number, before access EEPROM; if 93c46, EEPROMAddressNum=6, else if 93c66, EEPROMAddressNum=8
 	RTMP_IO_READ32(pAd, E2PROM_CSR, &data);
@@ -867,6 +865,7 @@ VOID	NICReadEEPROMParameters(
 		pAd->EEPROMAddressNum = 8;     // 93C86
 	DBGPRINT(RT_DEBUG_TRACE, ("--> EEPROMAddressNum = %d\n", pAd->EEPROMAddressNum ));
 
+#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
 	/* Read MAC setting from EEPROM and record as permanent MAC address */
 	DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
 
@@ -885,17 +884,15 @@ VOID	NICReadEEPROMParameters(
 	if (pAd->PermanentAddress[0] == 0xff)
 		pAd->PermanentAddress[0] = RandomByte(pAd)&0xf8;
 			
-	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
-								PRINT_MAC(pAd->PermanentAddress)));
-
+	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(pAd->PermanentAddress)));
+#endif								
 	/* Assign the actually working MAC Address */
+#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
 	if (pAd->bLocalAdminMAC)
-	{		
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Configuration file(.dat). \n"));
-	}
-	else if (mac_addr && 
-			 strlen((PSTRING)mac_addr) == 17 &&
-			 (strcmp(mac_addr, "00:00:00:00:00:00") != 0))
+	else 
+#endif
+	if (mac_addr &&  strlen((PSTRING)mac_addr) == 17 && (strcmp(mac_addr, "00:00:00:00:00:00") != 0))
 	{
 		INT		j;
 		PSTRING	macptr;
@@ -910,11 +907,12 @@ VOID	NICReadEEPROMParameters(
 		
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
-	else
-	{
+#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
+	else {
 		COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from EEPROM. \n"));
 	}
+#endif
 
 	/* Set the current MAC to ASIC */	
 	csr2.field.Byte0 = pAd->CurrentAddress[0];
@@ -927,8 +925,7 @@ VOID	NICReadEEPROMParameters(
 	csr3.field.Byte5 = pAd->CurrentAddress[5];
 	csr3.field.U2MeMask = 0xff;
 	RTMP_IO_WRITE32(pAd, MAC_ADDR_DW1, csr3.word);
-	DBGPRINT_RAW(RT_DEBUG_TRACE,("Current MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n",
-					PRINT_MAC(pAd->CurrentAddress)));
+	DBGPRINT_RAW(RT_DEBUG_TRACE,("Current MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(pAd->CurrentAddress)));
 					
 	// if not return early. cause fail at emulation.
 	// Init the channel number for TX channel power	
@@ -951,23 +948,6 @@ VOID	NICReadEEPROMParameters(
 	if (Version.field.Version > VALID_EEPROM_VERSION)
 	{
 		DBGPRINT_ERR(("E2PROM: WRONG VERSION 0x%x, should be %d\n",Version.field.Version, VALID_EEPROM_VERSION));
-		/*pAd->SystemErrorBitmap |= 0x00000001;
-
-		// hard-code default value when no proper E2PROM installed
-		pAd->bAutoTxAgcA = FALSE;
-		pAd->bAutoTxAgcG = FALSE;
-
-		// Default the channel power
-		for (i = 0; i < MAX_NUM_OF_CHANNELS; i++)
-			pAd->TxPower[i].Power = DEFAULT_RF_TX_POWER;
-
-		// Default the channel power
-		for (i = 0; i < MAX_NUM_OF_11JCHANNELS; i++)
-			pAd->TxPower11J[i].Power = DEFAULT_RF_TX_POWER;
-		
-		for(i = 0; i < NUM_EEPROM_BBP_PARMS; i++)
-			pAd->EEPROMDefaultValue[i] = 0xffff;
-		return;  */
 	}
 
 	// Read BBP default value from EEPROM and store to array(EEPROMDefaultValue) in pAd
@@ -1032,13 +1012,6 @@ VOID	NICReadEEPROMParameters(
 			// only 2 Rx streams for RT2860 series
 			pAd->CommonCfg.RxStream = 2;
 		}
-	}
-
-	// 3*3
-	// read value from EEPROM and set them to CSR174 ~ 177 in chain0 ~ chain2
-	// yet implement
-	for(i=0; i<3; i++)
-	{
 	}
 
 	NicConfig2.word = pAd->EEPROMDefaultValue[1];
@@ -1265,7 +1238,6 @@ VOID	NICReadEEPROMParameters(
 	pAd->ALNAGain1 = value & 0x00ff;
 	pAd->ALNAGain2 = (value >> 8);
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
-
 
 	if (((UCHAR)pAd->ALNAGain1 == 0xFF) || (pAd->ALNAGain1 == 0x00))
 		pAd->ALNAGain1 = pAd->ALNAGain0;
@@ -4013,8 +3985,6 @@ VOID RTMPSetLED(
 			HighByte = 0x04;
 			AsicSendCommandToMcu(pAd, 0x50, 0xff, LowByte, HighByte);
 			break;
-#ifdef RALINK_ATE
-#endif // RALINK_ATE //
 #ifdef WSC_INCLUDED
 #ifdef WSC_LED_SUPPORT
 		case LED_WPS_IN_PROCESS:
@@ -4631,12 +4601,8 @@ int rt28xx_init(
 	DBGPRINT(RT_DEBUG_OFF, ("2. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
 
 	// We should read EEPROM for all cases.  rt2860b
-	NICReadEEPROMParameters(pAd, (PUCHAR)pDefaultMac);	
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
+	NICReadEEPROMParameters(pAd, (PUCHAR)pDefaultMac);
 	DBGPRINT(RT_DEBUG_OFF, ("3. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
-
 	NICInitAsicFromEEPROM(pAd); //rt2860b
 	
 	// Set PHY to appropriate mode

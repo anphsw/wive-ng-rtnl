@@ -32,8 +32,10 @@ start() {
 	    $LOG "Normal mode. Sta mode $stamode"
 	    if [ "$stamode" = "y" ]; then
     		modprobe rt2860v2_sta "$mac"
+		ifconfig ra0 hw ether $WMAC
 	    else
     		modprobe rt2860v2_ap "$mac"
+		ifconfig ra0 hw ether $WMAC
 	    fi
 	fi
     fi
