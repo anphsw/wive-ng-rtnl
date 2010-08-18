@@ -101,9 +101,9 @@ resetLanWan()
 ra0flushadress()
 {
     #flush adresses
-    ip addr flush dev ra0
+    ip addr flush dev ra0  > /dev/null 2>&1
     if [ "$CONFIG_IPV6" != "" ] ; then
-	ip -6 addr flush dev ra0
+	ip -6 addr flush dev ra0 > /dev/null 2>&1
     fi
 }
 
@@ -132,7 +132,7 @@ fi
 
 echo "link wifi down first"
 ra0flushadress
-ip link set ra0 down
+ip link set ra0 down > /dev/null 2>&1
 
 if [ "$MODE" != "lanonly" ]; then
     #reload wifi modules
