@@ -30,7 +30,7 @@ $LOG "Start network interfaces..."
      MAC_TEST=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
      WMAC_TEST=`nvram_get WLAN_MAC_ADDR | grep 00:0B:2B -c`
      LANMAC_TEST=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
- 	if [ $MAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
+ 	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
 	    $LOG "First start MAC generate"
     	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
     	    macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
