@@ -6,13 +6,15 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo WSCD: "
+
 start() {
 if [ -f /bin/wscd ]; then
     wsc=`nvram_get 2860 WscModeOption`
     lan_ip=`nvram_get 2860 lan_ipaddr`
     opmode=`nvram_get 2860 OperationMode`
     if [ "$wsc" = "1" ]; then
-      echo "Starting WPS: "
+      $LOG "Starting WPS: "
 	if [ "$opmode" = "0" ]; then
 	    wscd -m 1 -a $lan_ip -i ra0 -D &
 	else
@@ -23,7 +25,7 @@ fi
 }
 
 stop() {
- echo "Stopping WPS: "
+ $LOG "Stopping WPS: "
     killall -q wscd
 }
 

@@ -3,6 +3,8 @@
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
 
+LOG="echo INIT: "
+
 #include kernel config                                                                                                                      
 . /bin/config.sh    
 
@@ -23,20 +25,20 @@ get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
-echo "Prepare start init!"
+$LOG "Prepare start init!"
 export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
-echo "Init DEV particion"
+$LOG "Init DEV particion"
 zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
 
-echo "Init RW particion"
+$LOG "Init RW particion"
 zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 
 if [ -f /etc/filesystem.ok ]; then
-    echo "RW File system is ok - preparing ..."
+    $LOG "RW File system is ok - preparing ..."
   else
-    echo "File system is clear or poor."
+    $LOG "File system is clear or poor."
     zcat /rwfs.gz | tar xf - -C / >>/dev/null
-    echo "Restored. Save after full boot and configure."
+    $LOG "Restored. Save after full boot and configure."
     echo > /etc/filesystem.ok
     echo > /var/MODIFIED
 fi

@@ -1,15 +1,17 @@
 #!/bin/sh
 
+LOG="echo WATCHDOG: "
+
 start() {
     WatchdogEnabled=`nvram_get 2860 WatchdogEnabled`
     if [ "$WatchdogEnabled" = "1" ]; then
-	echo "Start watchdog"
+	$LOG "Start watchdog"
 	nice --19 watchdog -T 180 -t 10 -F /dev/watchdog  > /dev/null 2>&1 &
     fi
 }
 
 stop() {
- echo "Stop watchdog"
+ $LOG "Stop watchdog"
     killall -q watchdog
     killall -q -9 watchdog
 }

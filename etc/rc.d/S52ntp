@@ -6,12 +6,14 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo NTP: "
+
 start() {
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
 
-    echo "Set timezone: "
+    $LOG "Set timezone: "
     backup_time=`date +%T`
     sync=`expr $sync \* 3600`
 
@@ -27,13 +29,13 @@ start() {
     date +%T -s $backup_time
 
     if [ "$srv" != "" ] || [ -f /bin/ntpd ]; then
-	echo "Starting NTPD: "
+	$LOG "Starting NTPD: "
 	ntpd -d -p $srv &
     fi
 }
 
 stop() {
- echo "Stopping NTPD: "
+ $LOG "Stopping NTPD: "
     killall -q ntpd
 }
 

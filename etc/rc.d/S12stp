@@ -3,9 +3,11 @@
 #get params
 . /sbin/global.sh
 
+LOG="echo BRSTP: "
+
 start() {
- echo "Config br-stp: "
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
+	$LOG "Config br-stp: "
         stp=`nvram_get 2860 stpEnabled`
         if [ "$stp" = "1" ]; then
                 brctl setfd br0 15
@@ -18,7 +20,7 @@ start() {
 }
 
 stop() {
- echo "Disable stp on br0 "
+ $LOG "Disable stp on br0 "
     brctl setfd br0 1 > /dev/null 2>&1
     brctl stp br0 0 > /dev/null 2>&1
 }

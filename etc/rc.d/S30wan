@@ -7,8 +7,10 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo WAN: "
+
 start() {
- echo "Start wan config"
+ $LOG "Start wan config"
 
     #set variable
     HOSTNAME_NVRAM=`nvram_get 2860 HostName`
@@ -60,7 +62,7 @@ start() {
 	if [ "$opmode" != "0" ]; then
 	    #lan and wan ip should not be the same except in bridge mode
 	    if [ "$ip" = "$lan_ip" ]; then
-		echo "wan service: warning: WAN's IP address is set identical to LAN"
+		$LOG "wan service: warning: WAN's IP address is set identical to LAN"
 		exit 0
 	    fi
 	    #wan interface up and default gateway
@@ -84,7 +86,7 @@ start() {
     elif [ "$wanmode" = "DHCP" ]; then
 	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
     else
-	echo "wan service: unknown wan connection type: $wanmode"
+	$LOG "wan service: unknown wan connection type: $wanmode"
 	exit 1
     fi
 
@@ -105,7 +107,7 @@ start() {
 }
 
 stop() {
- echo "OK"
+ $LOG " "
 }
 
 case "$1" in

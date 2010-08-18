@@ -1,12 +1,14 @@
 #!/bin/sh
 
+LOG="echo CRON: "
+
 start() {
- echo "Starting crontab: "
+ $LOG "Starting crontab: "
  /sbin/crond -l 0 -L /var/log/cron.log
 }
 
 stop() {
- echo "Stopping crontab: "
+ $LOG "Stopping crontab: "
  killall -q crond
 }
 

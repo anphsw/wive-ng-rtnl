@@ -6,18 +6,20 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo LLD2D: "
+
 start() {
 if [ -f /bin/lld2d ]; then
     lltd=`nvram_get 2860 lltdEnabled`
     if [ "$lltd" = "1" ]; then
-	echo "Starting LLD2D: "
+	$LOG "Starting LLD2D: "
         lld2d $lan_if
     fi
 fi
 }
 
 stop() {
- echo "Stopping LLD2D: "
+ $LOG "Stopping LLD2D: "
   killall -q lld2d
   rm -rf /var/run/lld2d-* > /dev/null 2>&1
 }

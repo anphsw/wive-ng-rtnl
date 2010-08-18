@@ -6,17 +6,19 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo ZEBRA: "
+
 start() {
 if [ -f /bin/zebra ]; then
  if [ -f /etc/zebra.conf ]; then
-    echo "Starting ZEBRA: "
+    $LOG "Starting ZEBRA: "
     zebra -d -f /etc/zebra.conf
  fi
 fi
 }
 
 stop() {
- echo "Stopping ZEBRA: "
+ $LOG "Stopping ZEBRA: "
   killall -q zebra
 }
 

@@ -7,6 +7,8 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo IGMPPROXY: "
+
 start() {
 if [ -f /bin/igmpproxy ]; then
     #workaround fix me later                                                                                                    
@@ -15,7 +17,7 @@ if [ -f /bin/igmpproxy ]; then
     OperationMode=`nvram_get 2860 OperationMode`
     #if igmpproxy enable and mode not full bridge
     if [ "$igmpen" = "1" ] && [ "$OperationMode" != "0" ]; then
-      echo "Starting IGMPPROXY: "
+      $LOG "Starting IGMPPROXY: "
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
 	sysctl -w net.ipv4.conf.all.mc_forwarding=1
 	sysctl -w net.ipv4.conf.default.mc_forwarding=1
@@ -35,7 +37,7 @@ fi
 }
 
 stop() {
- echo "Stopping IGMPPROXY: "
+ $LOG "Stopping IGMPPROXY: "
     killall -q igmpproxy
     ip route del 224.0.0.0/4 dev $wan_if > /dev/null 2>&1
     sysctl -w net.ipv4.conf.all.mc_forwarding=0

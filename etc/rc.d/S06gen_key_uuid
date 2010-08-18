@@ -1,22 +1,24 @@
 #!/bin/sh
 
+LOG="echo GENKEY: "
+
 start() {
 MODIFIED=0
 
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
-	echo "DSS file exist"
+	$LOG "DSS file exist"
     else
-	echo "Generate host key for first start"
-        echo "If no DSS key  and generate new key"
+	$LOG "Generate host key for first start"
+        $LOG "If no DSS key  and generate new key"
 	mkdir -p /etc/dropbear
         (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key && fs save) &
 	MODIFIED=1
     fi
 
     if [ -f /etc/miniupnpd.conf.uuid ]; then
-       echo "Use exist UUID file"
+       $LOG "Use exist UUID file"
     else
-       echo "Generate UUID for miniupnpd"
+       $LOG "Generate UUID for miniupnpd"
        num=0
         for i in `seq 1 36`; do
             id=`cat /dev/urandom | hexdump | head -1 | cut -c9`
@@ -27,7 +29,7 @@ MODIFIED=0
             outid=$outid$id
         done
         serial=`hostid`
-        echo "UPNP UUID is $outid , serial is $serial"
+        $LOG "UPNP UUID is $outid , serial is $serial"
         printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
 	MODIFIED=1
     fi
@@ -37,7 +39,7 @@ MODIFIED=0
 }
 
 stop() {
- echo "OK"
+ $LOG " "
 }
 
 case "$1" in

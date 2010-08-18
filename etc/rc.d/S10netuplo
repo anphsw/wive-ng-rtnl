@@ -3,8 +3,10 @@
 #include kernel config
 . /bin/config.sh
 
+LOG="echo LOOPBACK: "
+
 start() {
- echo "Start loopback interface..."
+ $LOG "Start loopback interface..."
     ip link set lo up
     ip addr flush dev lo
 if [ "$CONFIG_IPV6" != "" ] ; then
@@ -19,7 +21,7 @@ fi
 }
 
 stop() {
- echo "Stop br0 and loopback interfaces..."
+ $LOG "Stop br0 and loopback interfaces..."
     ip link set lo down > /dev/null 2>&1
 }
 

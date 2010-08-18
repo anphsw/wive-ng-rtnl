@@ -1,19 +1,21 @@
 #!/bin/sh
 
+LOG="echo GOAHEADWEBSERVER: "
+
 start() {
- echo "Start goahead"
+ $LOG "Start goahead"
     killall -q nvram_daemon
-    echo "Copy web pages to tmpfs"
+    $LOG "Copy web pages to tmpfs"
     mkdir -p /tmp/web
     cp -rpf /web/* /tmp/web
-    echo "Run goahead"
+    $LOG "Run goahead"
     /bin/goahead &
     echo > /tmp/webrun
     sleep 10
 }
 
 stop() {
- echo "Stop goahead"
+ $LOG "Stop goahead"
     killall -q goahead
     killall -q nvram_daemon
 }

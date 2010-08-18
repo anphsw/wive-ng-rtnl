@@ -1,11 +1,13 @@
 #!/bin/sh
 
+LOG="echo MEMFREE: "
+
 start() {
 
- echo "Unload unneeded modules"
+ $LOG "Unload unneeded modules"
     rmmod -a
 
- echo "Drop caches"
+ $LOG "Drop caches"
     echo 1 /proc/sys/vm/drop_caches
     echo 2 /proc/sys/vm/drop_caches
     echo 3 /proc/sys/vm/drop_caches
@@ -13,14 +15,14 @@ start() {
 
  #if firts boot or restore
  if [ -f /var/MODIFIED ]; then
-    echo "Save rwfs"
+    $LOG "Save rwfs"
     fs save
  fi
 
 }
 
 stop() {
- echo "OK"
+ $LOG " "
 }
 
 case "$1" in

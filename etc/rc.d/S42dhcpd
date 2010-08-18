@@ -6,10 +6,12 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo DHCPSERVER: "
+
 start() {
 	dhcp=`nvram_get 2860 dhcpEnabled`
 	if [ "$dhcp" = "1" ]; then
-	    echo "Start dhcpserver "
+	    $LOG "Start dhcpserver "
 		start=`nvram_get 2860 dhcpStart`
 		end=`nvram_get 2860 dhcpEnd`
 		mask=`nvram_get 2860 dhcpMask`
@@ -54,7 +56,7 @@ start() {
 }
 
 stop() {
-	echo "Stop dhcpserver "
+	$LOG "Stop dhcpserver "
 	killall -q udhcpd
 }
 

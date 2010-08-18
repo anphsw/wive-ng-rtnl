@@ -3,12 +3,14 @@
 #include kernel config
 . /bin/config.sh
 
+LOG="echo HOTPLUG: "
+
 start() {
 if [ -f /bin/mdev ] ; then
     #create device in /dev
     mdev -s
     if [ -f /proc/sys/kernel/hotplug ] ; then
-	echo "Start mdev for support HOTPLUG"
+	$LOG "Start mdev for support HOTPLUG"
 	printf "
 		# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
 		# The special characters have the meaning:
@@ -24,7 +26,7 @@ fi
 }
 
 stop() {
- echo "Stop mdev generate..."
+ $LOG "Stop mdev generate..."
     killall -q mdev
 }
 

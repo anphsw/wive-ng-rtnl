@@ -6,9 +6,10 @@
 #wait to start web and run from goahead code
 web_wait
 
-start() {
- echo "Starting IPTABLES: "
  LOG="echo IPTABLES: "
+
+start() {
+ $LOG "Starting IPTABLES: "
  get_param
 #########################################DEFAULTRULES###################################
 	#default filters
@@ -224,7 +225,7 @@ start() {
 
 
 stop() {
- echo "Stopping IPTABLES: "
+ $LOG "Stopping IPTABLES: "
 	iptables -F > /dev/null 2>&1
 	iptables -t nat -F > /dev/null 2>&1
         iptables -t filter -F > /dev/null 2>&1

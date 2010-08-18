@@ -3,25 +3,27 @@
 #get params                                                                                                                                 
 . /sbin/global.sh                                                                                                                           
 
+LOG="echo MODULES: "
+
 opmode=`nvram_get 2860 OperationMode`
 start() {
     #if goahead not started
     if [ ! -f /tmp/webrun ]; then
-	echo "Start modules.dep generate..."
+	$LOG "Start modules.dep generate..."
 	depmod -a -n >  /tmp/modules.dep
 	ln -sf /tmp/modules.dep /etc/modules.dep
     else
-	echo "Load wifi module..."
+	$LOG "Load wifi module..."
 	clone_en=`nvram_get 2860 macCloneEnabled`
 	clone_mac=`nvram_get 2860 macCloneMac`
 	#regenerate config for wifi driver 
 	rm -rf /etc/Wireless/RT2860/RT2860.dat
 	ralink_init make_wireless_config rt2860
 	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ]; then
-	    echo "Macclone mode. Mac is $clone_mac"
+	    $LOG "Macclone mode. Mac is $clone_mac"
 	    modprobe rt2860v2_sta mac=$clone_mac
 	else
-	    echo "Normal mode. Sta mode $stamode"
+	    $LOG "Normal mode. Sta mode $stamode"
 	    if [ "$stamode" = "y" ]; then
     		modprobe rt2860v2_sta
 	    else
@@ -33,9 +35,9 @@ start() {
 
 stop() {
     if [ ! -f /tmp/webrun ]; then
-        echo "Stop modules.dep generate..."
+        $LOG "Stop modules.dep generate..."
     else
-        echo "Unload wifi module..."
+        $LOG "Unload wifi module..."
 	rmmod rt2860v2_ap > /dev/null 2>&1
 	rmmod rt2860v2_sta > /dev/null 2>&1
     fi

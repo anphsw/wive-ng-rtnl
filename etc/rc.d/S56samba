@@ -6,6 +6,8 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo SAMBA: "
+
 start() {
 SmbEnabled=`nvram_get 2860 SmbEnabled`
 if [ "$SmbEnabled" = "1" ]; then
@@ -37,14 +39,14 @@ if [ "$SmbEnabled" = "1" ]; then
 
     if [ -f /bin/smbd ] && [ -f /bin/nmbd ]; then
 	if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
-	 echo "Already started... Stop WINS/SMB SERVER."
+	 $LOG "Already started... Stop WINS/SMB SERVER."
 	    killall -q smbd
 	    killall -q nmbd
 	    sleep 1
 	    killall -q -9 smbd
 	    killall -q -9 nmbd
         fi
-	echo "Starting WINS/SMB SERVER."
+	$LOG "Starting WINS/SMB SERVER."
 	echo > /var/log/samba.log
 	echo > /var/log/nmbd.log
 	rm -f /var/lock/*mbd.pid
@@ -56,7 +58,7 @@ fi
 
 stop() {
     if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
-     echo "Stop WINS/SMB SERVER."
+     $LOG "Stop WINS/SMB SERVER."
       killall -q nmbd > /dev/null
       killall -q smbd > /dev/null
       sleep 1

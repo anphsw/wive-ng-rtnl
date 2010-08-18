@@ -23,4 +23,3 @@ for i in /etc/rc.d/S??* ;do
 done
 
 CURRDATE=`date`
-echo "stage1" "complete at $CURRDATE"

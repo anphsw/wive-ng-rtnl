@@ -1,9 +1,11 @@
 #!/bin/sh
 
+LOG="echo RESOLVE: "
+
 start() {
 get_param
 if [ ! -f /tmp/webrun ] || [ "$static" = "on" ] ; then
- echo "Generate resolve: "
+ $LOG "Generate resolve: "
     #in case no previous file
     if [ "$fname" = "" ]; then
 	fname = "/etc/resolv.conf"
@@ -36,7 +38,7 @@ fi
 }
 
 stop() {
- echo " "
+ $LOG " "
 }
 
 get_param() {

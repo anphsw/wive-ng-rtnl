@@ -6,6 +6,8 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo UDPXY: "
+
 start() {
 if [ -f /bin/udpxy ]; then
  UDPXY=`nvram_get 2860 UDPXYMode`
@@ -15,14 +17,14 @@ if [ -f /bin/udpxy ]; then
         else                                                                                                                                
             wan_igmp_if=$wan_if                                                                                                             
         fi                         
-        echo "UDPXY start"
+        $LOG "UDPXY start"
 	udpxy -m $wan_igmp_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi
 fi
 }
 
 stop() {
-    echo "UDPXY stop"
+    $LOG "UDPXY stop"
     killall -q udpxy
 }
 

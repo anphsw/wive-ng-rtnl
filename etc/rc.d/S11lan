@@ -4,8 +4,10 @@
 . /sbin/global.sh
 . /sbin/config.sh
 
+LOG="echo LAN: "
+
 start() {
-echo "Start network interfaces..."
+$LOG "Start network interfaces..."
  ip=`nvram_get 2860 lan_ipaddr`
  nm=`nvram_get 2860 lan_netmask`
  ip_2=`nvram_get 2860 lan2_ipaddr`
@@ -27,7 +29,7 @@ echo "Start network interfaces..."
      MAC_TEST=`nvram_get WAN_MAC_ADDR | grep 00:0B:2B -c`
      LANMAC_TEST=`nvram_get LAN_MAC_ADDR | grep 00:0B:2B -c`
  	if [ $MAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
-	    echo "First start MAC generate"
+	    $LOG "First start MAC generate"
     	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
     	    macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
     	    macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
@@ -35,7 +37,7 @@ echo "Start network interfaces..."
     	    macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
     	    macinc6=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
 
-	    echo "Set new mac!"
+	    $LOG "Set new mac!"
     	    WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
     	    LAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc6"
     	    nvram_set 2860 WAN_MAC_ADDR "$WAN_MACADDR"
@@ -48,30 +50,30 @@ echo "Start network interfaces..."
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ "$brset" = "0" ]; then
-	    echo "-==Add bridge in the system==-"
+	    $LOG "-==Add bridge in the system==-"
 	    brctl addbr br0
         fi
-	echo "-==BR0_MACADDR $LANMAC==-"
+	$LOG "-==BR0_MACADDR $LANMAC==-"
 	ifconfig br0 hw ether $LANMAC
-	echo "-==Up bridge interface==-"
+	$LOG "-==Up bridge interface==-"
 	ip link set br0 up
     fi
     if [ "$lanisup" = "0" ]; then
-	echo "-==ETH2_MACADDR $LANMAC==-"
+	$LOG "-==ETH2_MACADDR $LANMAC==-"
 	ifconfig eth2 hw ether $LANMAC
-	echo "-==Up vlan root interface==-"
+	$LOG "-==Up vlan root interface==-"
 	ip link set eth2 up
 	vlanisconfig=0
     fi
     if [ "$vlanisconfig" != "2" ]; then
-        echo "-==Add vlans and config==-"
+        $LOG "-==Add vlans and config==-"
 	vconfig add eth2 1
 	vconfig add eth2 2
-	echo "-==ETH2.1_MACADDR $LANMAC==-"
+	$LOG "-==ETH2.1_MACADDR $LANMAC==-"
 	ifconfig eth2.1 hw ether $LANMAC
-	echo "-==ETH2.2_MACADDR $MAC==-"
+	$LOG "-==ETH2.2_MACADDR $MAC==-"
 	ifconfig eth2.2 hw ether $MAC
-        echo "-==Set vlanmap for 2.1 and 2.2 interfaces==-"
+        $LOG "-==Set vlanmap for 2.1 and 2.2 interfaces==-"
 	set_vlan_map eth2.1
 	set_vlan_map eth2.2
     fi
@@ -88,7 +90,7 @@ fi
 #-------------------CONFIG--------------------------------
   ip link set $lan_if down
  #-------------------LAN1----------------
- echo "Add LAN1 iface"
+ $LOG "Add LAN1 iface"
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
  fi
@@ -100,36 +102,36 @@ fi
  else
     ifconfig $lan_if 0.0.0.0 up	
  fi
- echo ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $ip <<<<<"
+ $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $ip <<<<<"
 
  #-------------------LAN2----------------
  if [ "$lan2enabled" = "1" ]; then
- echo "Add LAN2 iface"
+ $LOG "Add LAN2 iface"
         if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$opmode" = "3" ]; then
                 ifconfig "br0:9" "$ip_2" netmask "$nm_2"
-                echo "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
+                $LOG "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
         elif [ "$opmode" = "2" ]; then
                 ifconfig "eth2:9" "$ip_2" netmask "$nm_2"
-                echo "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
+                $LOG "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
         fi
  fi
 
  #-------------------DGW-----------------
  if [ "$opmode" != "0" ]; then
     if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-	echo "Add default gateway in router mode via $gw"
+	$LOG "Add default gateway in router mode via $gw"
 	ip route replace default via $gw
 	ip route replace 255.255.255.255 dev $lan_if
     fi 
  else
-    echo "Add default gateway in bridge mode via br0"
+    $LOG "Add default gateway in bridge mode via br0"
     ip route replace default dev br0
     ip route replace 255.255.255.255 dev br0
  fi
 }
 
 stop() {
-echo "Stop network interfaces..."
+$LOG "Stop network interfaces..."
     ip link set eth2.2 down > /dev/null 2>&1
     ip link set eth2.1 down > /dev/null 2>&1
     vconfig rem eth2.1 > /dev/null 2>&1
@@ -144,8 +146,8 @@ echo "Stop network interfaces..."
 set_vlan_map()
 {
  if [ "$CONFIG_RAETH_QOS_PORT_BASED" = "y" ]; then
-        echo "vlan priority tag => skb->priority mapping"
-        echo "skb->priority => vlan priority tag mapping"
+        $LOG "vlan priority tag => skb->priority mapping"
+        $LOG "skb->priority => vlan priority tag mapping"
         num=0
         for i in `seq 0 7`; do
             vconfig set_ingress_map eth2.2 $num $num

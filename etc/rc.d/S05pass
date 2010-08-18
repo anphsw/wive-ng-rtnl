@@ -1,7 +1,9 @@
 #!/bin/sh
 
+LOG="echo PASSWD: "
+
 start() {
- echo "Set current password"
+ $LOG "Set current password"
     #get user/password    
     admID=`nvram_get 2860 Login`
     if [ "$admID" = "" ]; then
@@ -28,7 +30,7 @@ start() {
 }
 
 stop() {
- echo "OK"
+ $LOG " "
 }
 
 case "$1" in

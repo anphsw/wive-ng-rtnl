@@ -1,8 +1,10 @@
 #!/bin/sh
 
+LOG="echo INETD: "
+
 start() {
     if [ -f /sbin/inetd ]; then
-      echo "Starting inetd: "
+      $LOG "Starting inetd: "
 	admID=`nvram_get 2860 Login`
 	if [ "$admID" = "" ]; then
     	    admID="Admin"
@@ -15,7 +17,7 @@ start() {
 }
 
 stop() {
- echo "Stopping inetd: "
+ $LOG "Stopping inetd: "
  killall -q inetd
 }
 

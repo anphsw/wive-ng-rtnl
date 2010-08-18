@@ -1,16 +1,18 @@
 #!/bin/sh
 
+LOG="echo SYSLOG: "
+
 start() {
- echo "Start klogd"
+ $LOG "Start klogd"
     klogd &
 
- echo "Start syslogd"
+ $LOG "Start syslogd"
     #log to /var/log/messages
     syslogd -b0 -s20 -l6 -S -D &
 }
 
 stop() {
- echo "Stop syslog and klog"
+ $LOG "Stop syslog and klog"
     killall -q klogd
     killall -q syslogd
     rm -f /var/log/messages > /dev/null 2>&1

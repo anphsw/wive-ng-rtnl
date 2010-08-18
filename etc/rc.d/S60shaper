@@ -6,21 +6,22 @@
 #wait to start web and run from goahead code
 web_wait
 
-QoSEnable=`nvram_get 2860 QoSEnable`
+LOG="echo SHAPER: "
 
 start() {
+QoSEnable=`nvram_get 2860 QoSEnable`
 if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 get_param
- echo "Starting SHAPER: "
+ $LOG "Starting SHAPER: "
     tc qdisc del dev $lan_if root > /dev/null 2>&1
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
     tc qdisc del dev $wan_if root  > /dev/null 2>&1
     tc qdisc del dev $wan_if ingress > /dev/null 2>&1
     if [ "$QoSEnable" = "1" ]; then
-	echo "--------------RALINK-QOS------------------------"
+	$LOG "--------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
-	echo "---------------NONIMQ-IN------------------------"
+	$LOG "---------------NONIMQ-IN------------------------"
 	if [ "$LANUP" = "1" ]; then
 	    #input
 	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
@@ -49,7 +50,7 @@ get_param
 	    tc filter add dev $lan_if parent 1:0 protocol ip prio 3 u32 match ip sport 110 0xffff flowid 1:3
 	    tc filter add dev $lan_if parent 1:0 protocol ip prio 3 u32 match ip sport 25 0xffff flowid 1:3
 	fi
-	echo "---------------NONIMQ-OUT--------------------------"
+	$LOG "---------------NONIMQ-OUT--------------------------"
 	if [ "$WANUP" = "1" ]; then
 	    #output
 	    tc qdisc add dev $wan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
@@ -80,7 +81,7 @@ get_param
 	    tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 25 0xffff flowid 1:3
 	fi
     elif [ "$QoSEnable" = "3" ]; then
-	    echo "-----------------IMQ-FULL-------------------------"
+	    $LOG "-----------------IMQ-FULL-------------------------"
 	    modprobe imq > /dev/null 2>&1
 	    modprobe ipt_IMQ > /dev/null 2>&1
 	    ip link set imq0 up > /dev/null 2>&1
@@ -90,7 +91,7 @@ fi
 }
 
 stop() {
- echo "Stopping SHAPER: "
+ $LOG "Stopping SHAPER: "
  get_param
     qos_run c
     for i in $INTERFACES; do

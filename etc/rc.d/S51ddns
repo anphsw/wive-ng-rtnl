@@ -6,13 +6,15 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo DYNDNS: "
+
 start() {
 if [ -f /bin/inadyn ]; then
     get_param
     if [ "$srv" = "" -o "$srv" = "none" ] || [ "$ddns" = "" -o "$u" = "" -o "$pw" = "" ]; then
 	exit 0
     else
-    echo "Starting DynDNS: "
+    $LOG "Starting DynDNS: "
 	if [ "$srv" = "dyndns.org" ]; then
 	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv &
 	elif [ "$srv" = "freedns.afraid.org" ]; then
@@ -22,7 +24,7 @@ if [ -f /bin/inadyn ]; then
 	elif [ "$srv" = "no-ip.com" ]; then
     	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
 	else
-	    echo "$0: unknown DDNS provider: $srv"
+	    $LOG "$0: unknown DDNS provider: $srv"
 	    exit 1
         fi
     fi
@@ -37,7 +39,7 @@ get_param() {
 }
 
 stop() {
- echo "Stopping DynDns: "
+ $LOG "Stopping DynDns: "
     killall -q inadyn
 }
 

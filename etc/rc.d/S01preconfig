@@ -1,19 +1,21 @@
 #!/bin/sh
 
+LOG="echo PRECONFIG: "
+
 start() {
- echo "Preconfigure..."
+ $LOG "Preconfigure..."
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
-    echo "Delete old config"
+    $LOG "Delete old config"
     rm -f /etc/zebra.conf
     rm -f /etc/ripd.conf
 
-    echo "Mount all filesystems"
+    $LOG "Mount all filesystems"
     mount -a
     mount -t devpts /dev/pts /dev/pts
     mknod /dev/ptmx c 5 2
     
-    echo "Create some folders"
+    $LOG "Create some folders"
     mkdir -p /var/run
     mkdir -p /var/lock
     mkdir -p /var/lock/subsys
@@ -55,34 +57,34 @@ start() {
 #check firmwave update or clean burn
 IS_WIVE=`nvram_get IS_WIVE`
 if [ "$IS_WIVE" = "YES" ]; then
-    echo "Normal boot no need reset"
+    $LOG "Normal boot no need reset"
 else
     #if web not start
     if [ ! -f /tmp/webrun ]; then
-	echo "Clear and load defaults to nvram!"
+	$LOG "Clear and load defaults to nvram!"
 	ralink_init clear 2860
 	ralink_init renew 2860 /etc/default/RT2860_default_novlan
 	ralink_init make_wireless_config 2860
 	ralink_init gen 2860
 	nvram_set 2860 IS_WIVE YES
 	fs save
-	echo "Reset OK... boot..."
+	$LOG "Reset OK... boot..."
     fi
 fi
 
-echo "Start nvram daemon"
+$LOG "Start nvram daemon"
 nvram_daemon &
     
 #if compile date fille is exist
 if [ -f /etc/compile-date ]; then
-    echo "Restore time to build time or save time"
+    $LOG "Restore time to build time or save time"
     BUILDDATE=`cat /etc/compile-date`
     if [ "$BUILDDATE" != "" ]; then
 	date -s $BUILDDATE
     fi
 fi
 
-echo "Reinit power mode for all switch ports" #workaroud for dir
+$LOG "Reinit power mode for all switch ports" #workaroud for dir
     #disable
     config-vlan.sh 2 DDDDD
     #full 100mbit
@@ -92,13 +94,13 @@ echo "Reinit power mode for all switch ports" #workaroud for dir
     #reset all phy and auto negotinate now
     config-vlan.sh 2 RRRRR
 
-echo "Get BOARDID and save /var/boardid"
+$LOG "Get BOARDID and save /var/boardid"
     getBoardID
 
 }
 
 stop() {
- echo "Stop preconfigure."
+ $LOG "Stop preconfigure."
  killall -q nvram_daemon
 }
 

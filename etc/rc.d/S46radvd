@@ -7,6 +7,8 @@
 #wait to start web and run from goahead code
 web_wait
 
+LOG="echo RADVD: "
+
 start() {
 if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
  opmode=`nvram_get 2860 OperationMode`
@@ -19,12 +21,12 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
     ip -6 link set sit0 down
     echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
     if [ "$radvd" = "1" ]; then
-      echo "Starting radvd: "
+      $LOG "Starting radvd: "
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
-	echo "Up sit0 interface"
+	$LOG "Up sit0 interface"
 	ip -6 link set sit0 up
 
-	echo "Add iptables rules fo ipv6"
+	$LOG "Add iptables rules fo ipv6"
 	iptables -I INPUT  -p ipv6 -j ACCEPT
 	iptables -I OUTPUT -p ipv6 -j ACCEPT
 	iptables -I FORWARD  -p ipv6 -j ACCEPT
@@ -33,7 +35,7 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
 	ip6tables -A OUTPUT -j ACCEPT
 	ip6tables -F
 
-	echo "Tunel ipv6 in ipv4 configure and up..."
+	$LOG "Tunel ipv6 in ipv4 configure and up..."
 	ipv6subnet="2000"
 	relay6to4="192.88.99.1"
 	ipv4=`ip route get $relay6to4 | awk {' print $5 '}`
@@ -45,9 +47,9 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
 	    ip -6 route replace 2000::/3 via ::${relay6to4} dev tun6to4 metric 1
 	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
 	else
-	    echo "No route to ip4v6 router..."
+	    $LOG "No route to ip4v6 router..."
 	fi
-	echo "Configure radvd"
+	$LOG "Configure radvd"
 	echo > /etc/radvd.conf
 	printf "
         interface $lan_if
@@ -64,21 +66,21 @@ if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
 	    };
 	" > /etc/radvd.conf
 
-	echo "Starting radvd"
+	$LOG "Starting radvd"
 	radvd -s -C /etc/radvd.conf -d 1 &
 
-	echo "Send NS(change $lan_if state) to pass RFC4862"
+	$LOG "Send NS(change $lan_if state) to pass RFC4862"
 	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev $lan_if
 	ip -6 addr add fe80::2e0:4cff:fe86:7001/64 dev $lan_if
 
-	echo "Set alias IP for $lan_if to pass RFC1981 and RFC4443"
+	$LOG "Set alias IP for $lan_if to pass RFC1981 and RFC4443"
 	ip -6 addr add 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev $lan_if:0
     fi
 fi
 }
 
 stop() {
- echo  "Stop radvd daemon..."
+ $LOG  "Stop radvd daemon..."
 if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
   killall radvd > /dev/null 2>&1
   ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     
