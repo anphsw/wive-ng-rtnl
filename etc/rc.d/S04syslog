@@ -8,7 +8,7 @@ start() {
 
  $LOG "Start syslogd"
     #log to /var/log/messages
-    syslogd -b0 -s20 -l7 -C16 -S -D &
+    syslogd -b0 -s20 -l7 -S -D &
 }
 
 stop() {
