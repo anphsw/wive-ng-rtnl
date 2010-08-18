@@ -21,7 +21,7 @@ start() {
 	ralink_init make_wireless_config rt2860
 	WMAC=`nvram_get WLAN_MAC_ADDR`
 	if [ "$WMAC" != "" ]; then
-	    mac="mac $WMAC"
+	    mac="mac=$WMAC"
 	else
 	    mac=
 	fi
@@ -31,9 +31,9 @@ start() {
 	else
 	    $LOG "Normal mode. Sta mode $stamode"
 	    if [ "$stamode" = "y" ]; then
-    		modprobe rt2860v2_sta $mac
+    		modprobe rt2860v2_sta "$mac"
 	    else
-    		modprobe rt2860v2_ap $mac
+    		modprobe rt2860v2_ap "$mac"
 	    fi
 	fi
     fi
