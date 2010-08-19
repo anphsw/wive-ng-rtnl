@@ -943,7 +943,7 @@ static struct proto pptp_sk_proto = {
 };
 #endif
 
-static struct proto_ops pptp_ops = {
+static const struct proto_ops pptp_ops = {
     .family		= AF_PPPOX,
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
     .owner		= THIS_MODULE,

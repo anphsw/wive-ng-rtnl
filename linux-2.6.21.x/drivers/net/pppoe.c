@@ -85,8 +85,6 @@
 #define PPPOE_HASH_BITS 4
 #define PPPOE_HASH_SIZE (1<<PPPOE_HASH_BITS)
 
-static struct ppp_channel_ops pppoe_chan_ops;
-
 static int pppoe_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
 static int pppoe_xmit(struct ppp_channel *chan, struct sk_buff *skb);
 static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb);
@@ -94,7 +92,7 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb);
 static const struct proto_ops pppoe_ops;
 static DEFINE_RWLOCK(pppoe_hash_lock);
 
-static struct ppp_channel_ops pppoe_chan_ops;
+static const struct ppp_channel_ops pppoe_chan_ops;
 
 static inline int cmp_2_addr(struct pppoe_addr *a, struct pppoe_addr *b)
 {
@@ -925,7 +923,7 @@ static int pppoe_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 }
 
 
-static struct ppp_channel_ops pppoe_chan_ops = {
+static const struct ppp_channel_ops pppoe_chan_ops = {
 	.start_xmit = pppoe_xmit,
 };
 
