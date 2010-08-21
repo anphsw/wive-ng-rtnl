@@ -27,6 +27,7 @@
 #include <linux/signal.h>
 
 int sysctl_panic_on_oom;
+int sysctl_oom_kill_allocating_task;
 #ifdef CONFIG_OOM_EMBEDDED
        int oom_reconfigure_wanted = 0;
        int     oom_rank_threshold = 0;
@@ -441,16 +442,17 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 				"No available memory (MPOL_BIND)");
 		break;
 
-	case CONSTRAINT_CPUSET:
-		ct_policy = 2;
-		oom_kill_process(current, points,
-				"No available memory in cpuset");
-		break;
-
 	case CONSTRAINT_NONE:
 		ct_policy = 3;
 		if (sysctl_panic_on_oom)
 			panic("out of memory. panic_on_oom is selected\n");
+               /* Fall-through */
+	case CONSTRAINT_CPUSET:
+		if (sysctl_oom_kill_allocating_task) {
+			oom_kill_process(current, points,
+					"Out of memory (oom_kill_allocating_task)");
+			break;
+		}
 retry:
 		/*
 		 * Rambo mode: Shoot down a process and hope it solves whatever
