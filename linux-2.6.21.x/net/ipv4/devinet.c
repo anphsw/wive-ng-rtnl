@@ -1032,7 +1032,7 @@ static void inetdev_changename(struct net_device *dev, struct in_device *in_dev)
 		memcpy(ifa->ifa_label, dev->name, IFNAMSIZ);
 		if (named++ == 0)
 			continue;
-		dot = strchr(ifa->ifa_label, ':');
+		dot = strchr(old, ':');
 		if (dot == NULL) {
 			sprintf(old, ":%d", named);
 			dot = old;
@@ -1638,6 +1638,7 @@ void __init devinet_init(void)
 
 EXPORT_SYMBOL(in_dev_finish_destroy);
 EXPORT_SYMBOL(inet_select_addr);
+EXPORT_SYMBOL(inet_confirm_addr);
 EXPORT_SYMBOL(inetdev_by_index);
 EXPORT_SYMBOL(register_inetaddr_notifier);
 EXPORT_SYMBOL(unregister_inetaddr_notifier);
