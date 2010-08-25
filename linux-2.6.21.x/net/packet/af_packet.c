@@ -1282,16 +1282,6 @@ static int packet_mc_add(struct sock *sk, struct packet_mreq_max *mreq)
 			goto done;
 		}
 	}
-	case PACKET_RECV_TYPE:
-	{
-		unsigned int val;
-		if (optlen != sizeof(val))
-			return -EINVAL;
-		if (copy_from_user(&val, optval, sizeof(val)))
-			return -EFAULT;
-		po->pkt_type = val & ~PACKET_LOOPBACK;
-		return 0;
-	}
 
 	i->type = mreq->mr_type;
 	i->ifindex = mreq->mr_ifindex;
@@ -1505,8 +1495,8 @@ static int packet_notifier(struct notifier_block *this, unsigned long msg, void 
 #ifdef CONFIG_PACKET_MULTICAST
 			if (po->mclist)
 				packet_dev_mclist(dev, po->mclist, -1);
-			// fallthrough
 #endif
+		// fallthrough
 		case NETDEV_DOWN:
 			if (dev->ifindex == po->ifindex) {
 				spin_lock(&po->bind_lock);
