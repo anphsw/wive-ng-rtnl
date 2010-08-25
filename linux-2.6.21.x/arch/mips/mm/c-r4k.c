@@ -361,11 +361,26 @@ static void r4k___flush_cache_all(void)
 	r4k_on_each_cpu(local_r4k___flush_cache_all, NULL, 1, 1);
 }
 
+static inline int has_valid_asid(const struct mm_struct *mm)
+{
+#if defined(CONFIG_MIPS_MT_SMP) || defined(CONFIG_MIPS_MT_SMTC)
+	int i;
+
+	for_each_online_cpu(i)
+		if (cpu_context(i, mm))
+			return 1;
+
+	return 0;
+#else
+	return cpu_context(smp_processor_id(), mm);
+#endif
+}
+
 static inline void local_r4k_flush_cache_range(void * args)
 {
 	struct vm_area_struct *vma = args;
 
-	if (!(cpu_context(smp_processor_id(), vma->vm_mm)))
+	if (!(has_valid_asid(vma->vm_mm)))
 		return;
 
 	r4k_blast_dcache();
@@ -384,7 +399,7 @@ static inline void local_r4k_flush_cache_mm(void * args)
 {
 	struct mm_struct *mm = args;
 
-	if (!cpu_context(smp_processor_id(), mm))
+	if (!has_valid_asid(mm))
 		return;
 
 	/*
@@ -435,7 +450,7 @@ static inline void local_r4k_flush_cache_page(void *args)
 	 * If ownes no valid ASID yet, cannot possibly have gotten
 	 * this page into the cache.
 	 */
-	if (cpu_context(smp_processor_id(), mm) == 0)
+	if (!has_valid_asid(mm))
 		return;
 
 	addr &= PAGE_MASK;
@@ -900,7 +915,9 @@ static void __init probe_pcache(void)
 		              c->dcache.linesz;
 		c->dcache.waybit = __ffs(dcache_size/c->dcache.ways);
 
+#ifdef CONFIG_CPU_HAS_PREFETCH
 		c->options |= MIPS_CPU_PREFETCH;
+#endif
 		break;
 	}
 
