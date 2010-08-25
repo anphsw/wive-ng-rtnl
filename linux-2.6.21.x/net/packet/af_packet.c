@@ -213,6 +213,7 @@ struct packet_sock {
 	unsigned int		pg_vec_pages;
 	unsigned int		pg_vec_len;
 #endif
+	unsigned int		pkt_type;
 };
 
 struct packet_skb_cb {
@@ -269,6 +270,7 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,  struct 
 {
 	struct sock *sk;
 	struct sockaddr_pkt *spkt;
+	struct packet_sock *po;
 
 	/*
 	 *	When we registered the protocol we saved the socket in the data
@@ -276,6 +278,7 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,  struct 
 	 */
 
 	sk = pt->af_packet_priv;
+	po = pkt_sk(sk);
 
 	/*
 	 *	Yank back the headers [hope the device set this
@@ -288,7 +291,7 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,  struct 
 	 *	so that this procedure is noop.
 	 */
 
-	if (skb->pkt_type == PACKET_LOOPBACK)
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
 		goto out;
 
 	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
@@ -471,11 +474,12 @@ static int packet_rcv(struct sk_buff *skb, struct net_device *dev, struct packet
 	int skb_len = skb->len;
 	unsigned int snaplen, res;
 
-	if (skb->pkt_type == PACKET_LOOPBACK)
-		goto drop;
-
 	sk = pt->af_packet_priv;
 	po = pkt_sk(sk);
+
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
+		goto drop;
+
 
 	skb->dev = dev;
 
@@ -583,11 +587,12 @@ static int tpacket_rcv(struct sk_buff *skb, struct net_device *dev, struct packe
 	unsigned short macoff, netoff;
 	struct sk_buff *copy_skb = NULL;
 
-	if (skb->pkt_type == PACKET_LOOPBACK)
-		goto drop;
 
 	sk = pt->af_packet_priv;
 	po = pkt_sk(sk);
+
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
+		goto drop;
 
 	if (dev->hard_header) {
 		if (sk->sk_type != SOCK_DGRAM)
@@ -1037,6 +1042,8 @@ static int packet_create(struct socket *sock, int protocol)
 
 	spin_lock_init(&po->bind_lock);
 	po->prot_hook.func = packet_rcv;
+	po->pkt_type = PACKET_MASK_ANY & ~(1 << PACKET_LOOPBACK);
+
 #ifdef CONFIG_SOCK_PACKET
 	if (sock->type == SOCK_PACKET)
 		po->prot_hook.func = packet_rcv_spkt;
@@ -1275,6 +1282,16 @@ static int packet_mc_add(struct sock *sk, struct packet_mreq_max *mreq)
 			goto done;
 		}
 	}
+	case PACKET_RECV_TYPE:
+	{
+		unsigned int val;
+		if (optlen != sizeof(val))
+			return -EINVAL;
+		if (copy_from_user(&val, optval, sizeof(val)))
+			return -EFAULT;
+		po->pkt_type = val & ~PACKET_LOOPBACK;
+		return 0;
+	}
 
 	i->type = mreq->mr_type;
 	i->ifindex = mreq->mr_ifindex;
@@ -1451,6 +1468,13 @@ static int packet_getsockopt(struct socket *sock, int level, int optname,
 		if (len > sizeof(int))
 			len = sizeof(int);
 		val = po->auxdata;
+
+		data = &val;
+		break;
+	case PACKET_RECV_TYPE:
+		if (len > sizeof(unsigned int))
+			len = sizeof(unsigned int);
+		val = po->pkt_type;
 
 		data = &val;
 		break;
