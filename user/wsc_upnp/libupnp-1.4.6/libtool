@@ -7801,7 +7801,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/../../../../i586-manbo-linux-gnu/lib/i586-manbo-linux-gnu/4.4.3/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/../../../../i586-manbo-linux-gnu/lib/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/../../../i586-manbo-linux-gnu/4.4.3/ /usr/lib/gcc/i586-manbo-linux-gnu/4.4.3/../../../ /lib/i586-manbo-linux-gnu/4.4.3/ /lib/ /usr/lib/i586-manbo-linux-gnu/4.4.3/ /usr/lib/"
+sys_lib_search_path_spec=" /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../ /lib/i586-manbo-linux-gnu/4.5.1/ /lib/ /usr/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /opt/kde3/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
