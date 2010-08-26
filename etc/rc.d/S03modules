@@ -13,10 +13,9 @@ start() {
 	depmod -a -n >  /tmp/modules.dep
 	ln -sf /tmp/modules.dep /etc/modules.dep
     else
-	$LOG "Load wifi module..."
+	$LOG "Prepare wifi config..."
 	clone_en=`nvram_get 2860 macCloneEnabled`
 	clone_mac=`nvram_get 2860 macCloneMac`
-	#regenerate config for wifi driver 
 	rm -rf /etc/Wireless/RT2860/RT2860.dat
 	ralink_init make_wireless_config rt2860
 	WMAC=`nvram_get WLAN_MAC_ADDR`
@@ -25,19 +24,23 @@ start() {
 	else
 	    mac=
 	fi
-	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ]; then
+	$LOG "Load wifi module..."
+	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
 	    $LOG "Macclone mode. Mac is $clone_mac"
-	    modprobe rt2860v2_sta mac=$clone_mac
+	    modprobe -q rt2860v2_sta mac=$clone_mac
 	else
 	    $LOG "Normal mode. Sta mode $stamode"
-	    if [ "$stamode" = "y" ]; then
-    		modprobe rt2860v2_sta "$mac"
+    	    if [ "$stamode" = "y" ]; then
+    		modprobe -q rt2860v2_sta "$mac"
 		ifconfig ra0 hw ether $WMAC
 	    else
-    		modprobe rt2860v2_ap "$mac"
+    		modprobe -q rt2860v2_ap "$mac"
 		ifconfig ra0 hw ether $WMAC
 	    fi
 	fi
+	$LOG "link wifi up second"
+	ip link set ra0 up > /dev/null 2>&1
+	ra0flushadress
     fi
 }
 
@@ -45,13 +48,29 @@ stop() {
     if [ ! -f /tmp/webrun ]; then
         $LOG "Stop modules.dep generate..."
     else
+	$LOG "link wifi down first"
+	ra0flushadress
+	ip link set ra0 down > /dev/null 2>&1
         $LOG "Unload wifi module..."
 	rmmod rt2860v2_ap > /dev/null 2>&1
 	rmmod rt2860v2_sta > /dev/null 2>&1
     fi
 }
 
+ra0flushadress()
+{
+    #flush adresses
+    ip addr flush dev ra0  > /dev/null 2>&1
+    if [ "$CONFIG_IPV6" != "" ] ; then
+        ip -6 addr flush dev ra0 > /dev/null 2>&1
+    fi
+}
+
 case "$1" in
+	ra0flushadress)
+	    ra0flushadress
+	    ;;
+
 	start)
 	    start
 	    ;;
@@ -66,6 +85,6 @@ case "$1" in
 	    ;;
 
 	*)
-	    echo $"Usage: $0 {start|stop|restart}"
+	    echo $"Usage: $0 {start|stop|restart|ra0flushadress}"
 	    exit 1
 esac

@@ -13,9 +13,9 @@ opmode=`nvram_get 2860 OperationMode`
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
 
-modprobe ppp_generic > /dev/null 2>&1
-modprobe pppox > /dev/null 2>&1
-modprobe pppoe > /dev/null 2>&1
+modprobe -q ppp_generic > /dev/null 2>&1
+modprobe -q pppox > /dev/null 2>&1
+modprobe -q pppoe > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
 

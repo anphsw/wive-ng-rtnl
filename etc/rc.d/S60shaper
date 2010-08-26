@@ -82,8 +82,8 @@ get_param
 	fi
     elif [ "$QoSEnable" = "3" ]; then
 	    $LOG "-----------------IMQ-FULL-------------------------"
-	    modprobe imq > /dev/null 2>&1
-	    modprobe ipt_IMQ > /dev/null 2>&1
+	    modprobe -q imq > /dev/null 2>&1
+	    modprobe -q ipt_IMQ > /dev/null 2>&1
 	    ip link set imq0 up > /dev/null 2>&1
 	    ip link set imq1 up > /dev/null 2>&1
     fi
