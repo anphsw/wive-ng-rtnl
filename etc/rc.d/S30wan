@@ -16,13 +16,6 @@ start() {
     HOSTNAME_NVRAM=`nvram_get 2860 HostName`
     UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O routes staticroutes msroutes -f &"
 
-    #get parametrs
-    opmode=`nvram_get 2860 OperationMode`
-    wanmode=`nvram_get 2860 wanConnectionMode`
-
-    clone_en=`nvram_get 2860 macCloneEnabled`
-    clone_mac=`nvram_get 2860 macCloneMac`
-
     #stop dhcp client
     killall -q udhcpc
     killall -q -9 udhcpc
@@ -43,21 +36,21 @@ start() {
 	wan_if="eth2.2"
     fi
 
-    #MAC Clone: bridge mode doesn't support MAC Clone
-    if [ "$opmode" != "0" ] && [ "$clone_en" = "1" ]; then
-	ip link set $wan_if down > /dev/null 2>&1
-        if [ "$opmode" = "2" ]; then
-		#reload wifi modules
-		service modules restart
-        else
-                ifconfig $wan_if hw ether $clone_mac
-        fi
-	ip link set $wan_if up
+    #get parametrs
+    opmode=`nvram_get 2860 OperationMode`
+    clone_en=`nvram_get 2860 macCloneEnabled`
+    clone_mac=`nvram_get 2860 macCloneMac`
+
+    #Only Ethernet converter support MAC Clone
+    if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
+	#reload wifi modules
+	service modules restart
     fi
 
     ip=`nvram_get 2860 wan_ipaddr`
     nm=`nvram_get 2860 wan_netmask`
     lan_ip=`nvram_get 2860 lan_ipaddr`
+    wanmode=`nvram_get 2860 wanConnectionMode`
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then
 	if [ "$opmode" != "0" ]; then
 	    #lan and wan ip should not be the same except in bridge mode
