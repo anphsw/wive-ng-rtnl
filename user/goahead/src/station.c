@@ -2961,8 +2961,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	}
 
 	close(s);
-
-	initInternet();		// restart wan.sh if needed (renew dhcp, pppoe etc)
+	doSystem("services_restart.sh"); //renew dhcp, pppoe etc if needed
 }
 
 /*
