@@ -844,7 +844,9 @@ VOID	NICReadEEPROMParameters(
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
+#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
 	USHORT  Addr01,Addr23,Addr45 ;
+#endif
 	MAC_DW0_STRUC csr2;
 	MAC_DW1_STRUC csr3;
 
@@ -885,9 +887,8 @@ VOID	NICReadEEPROMParameters(
 		pAd->PermanentAddress[0] = RandomByte(pAd)&0xf8;
 			
 	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(pAd->PermanentAddress)));
-#endif								
+
 	/* Assign the actually working MAC Address */
-#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
 	if (pAd->bLocalAdminMAC)
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Configuration file(.dat). \n"));
 	else 
@@ -926,7 +927,10 @@ VOID	NICReadEEPROMParameters(
 	csr3.field.U2MeMask = 0xff;
 	RTMP_IO_WRITE32(pAd, MAC_ADDR_DW1, csr3.word);
 	DBGPRINT_RAW(RT_DEBUG_TRACE,("Current MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(pAd->CurrentAddress)));
-					
+
+	// Set up the Mac address
+	RtmpOSNetDevAddrSet(pAd->net_dev, &pAd->CurrentAddress[0]);
+
 	// if not return early. cause fail at emulation.
 	// Init the channel number for TX channel power	
 #if defined (CONFIG_RALINK_RT3883)
@@ -4799,10 +4803,6 @@ int rt28xx_init(
 	/* WSC hardware push button function 0811 */
 	WSC_HDR_BTN_Init(pAd);
 #endif // WSC_INCLUDED //
-
-	// Set up the Mac address
-	RtmpOSNetDevAddrSet(pAd->net_dev, &pAd->CurrentAddress[0]);
-
 	// Various AP function init
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
