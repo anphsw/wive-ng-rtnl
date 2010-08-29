@@ -260,7 +260,7 @@ function getAChannel( channel )
 			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64+ch149+ch153+ch157+ch161+ch165);
 			break;
 		case 1:
-			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64+ch100+ch104+ch108+ch112+ch116+ch120+ch124+CH128+ch132+ch136+ch140);
+			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64+ch100+ch104+ch108+ch112+ch116+ch120+ch124+ch128+ch132+ch136+ch140);
 			break;
 		case 2:
 			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64);
@@ -278,7 +278,7 @@ function getAChannel( channel )
 			document.write(ch36+ch40+ch44+ch48);
 			break;
 		case 7:
-			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64+ch100+ch104+ch108+ch112+ch116+ch120+ch124+CH128+ch132+ch136+ch140+ch149+ch153+ch157+ch161+ch165);
+			document.write(ch36+ch40+ch44+ch48+ch52+ch56+ch60+ch64+ch100+ch104+ch108+ch112+ch116+ch120+ch124+ch128+ch132+ch136+ch140+ch149+ch153+ch157+ch161+ch165);
 			break;
 		case 8:
 			document.write(ch52+ch56+ch60+ch64);

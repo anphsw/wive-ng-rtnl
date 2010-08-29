@@ -112,6 +112,7 @@
 30) Content filters based on webstr now works<br>
 31) Use WLAN_MAC_ADDR, WAN_MAC_ADDR, LAN_MAC_ADDR variable in nvram for set macs to interfaces<br>
 32) STA profiles now works<br>
+33) Add netmask for ip filter pages<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

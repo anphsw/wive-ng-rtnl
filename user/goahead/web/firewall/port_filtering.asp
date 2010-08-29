@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
 
@@ -96,11 +97,6 @@ function updatePacketCount(str){
 
 function timerHandler(){
 	makeRequest("/goform/getRulesPacketCount", "n/a");
-}
-
-function deleteClick()
-{
-    return true;
 }
 
 function checkRange(str, num, min, max)
@@ -207,9 +203,10 @@ function isNumOnly(str)
 	return 1;
 }
 
-function ipportFormCheck()
+function ipportFormCheck(form)
 {
-	if(rules_num >= (MAX_RULES-1) ){
+	if (rules_num >= (MAX_RULES-1) )
+	{
 		alert("The rule number is exceeded "+ MAX_RULES +".");
 		return false;
 	}
@@ -280,20 +277,50 @@ function ipportFormCheck()
 			}
 		}
 	}
+
 	// check ip address format
-	if(document.ipportFilter.sip_address.value != ""){
-		if(! checkIpAddr(document.ipportFilter.sip_address) ){
-			alert("Source IP address format error.");
+	if (form.dip_address.value != "")
+	{
+		if (!validateIP(form.dip_address, true))
+		{
+			form.dip_address.focus();
 			return false;
 		}
 	}
 	
-	if(document.ipportFilter.dip_address.value != ""){
-		if(! checkIpAddr(document.ipportFilter.dip_address) ){
-			alert("Dest IP address format error.");
+	if (form.sip_addres.value != "")
+	{
+		if (!validateIP(form.sip_address, true))
+		{
+			form.dip_address.focus();
 			return false;
 		}
 	}
+	
+	if (form.dip_mask.value != "")
+	{
+		if (!validateIPMask(form.dip_mask, false))
+		{
+			alert("Dest IP mask format error.");
+			form.dip_mask.focus();
+			return false;
+		}
+	}
+	
+	if (form.sip_mask.value != "")
+	{
+		if (!validateIPMask(form.sip_mask, false))
+		{
+			alert("Source IP mask format error.");
+			form.sip_mask.focus();
+			return false;
+		}
+	}
+	
+	if (form.dip_mask.value == "")
+		form.dip_mask.value = "255.255.255.255";
+	if (form.sip_mask.value == "")
+		form.sip_mask.value = "255.255.255.255";
 
 	return true;
 }
@@ -357,16 +384,6 @@ function initTranslation()
 	_TRV("portFilterReset", "firewall reset");
 
 	_TR("portCurrentFilter", "port current filter");
-	_TR("portCurrentFilterNo", "firewall no");
-	_TR("portCurrentFilterSIP", "port filter source ipaddr");
-	_TR("portCurrentFilterSPort", "port filter source port range");
-	_TR("portCurrentFilterDIP", "port filter dest ipaddr");
-	_TR("portCurrentFilterMac", "port filter macaddr");
-	_TR("portCurrentFilterDPort", "port filter dest port range");
-	_TR("portCurrentFilterProtocol", "firewall protocol");
-	_TR("portCurrentFilterAction", "port filter action");
-	_TR("portCurrentFilterPacketCount", "port filter packetcount");
-	_TR("portCurrentFilterComment", "firewall comment");
 	_TRV("portCurrentFilterDel", "firewall del select");
 	_TRV("portCurrentFilterReset", "firewall reset");
 
@@ -538,12 +555,19 @@ function protocolChange()
 </tr>
 
 <tr>
-	<td class="head" colspan="2" id="portFilterDIPAddr">Dest IP Address</td>
+	<td class="head" colspan="2" id="portFilterDIPAddr">Destination IP Address</td>
 	<td colspan="2">
 		<input type="text" size="16" name="dip_address">
 		<!-- we dont support ip range in kernel 2.4.30 
 		-<input type="text" size="16" name="dip_address2">
 		-->
+	</td>
+</tr>
+
+<tr>
+	<td class="head" colspan="2" id="portFilterDIPAddr">Destination IP Mask</td>
+	<td colspan="2">
+		<input type="text" size="16" name="dip_mask"> (optional)
 	</td>
 </tr>
 
@@ -554,6 +578,13 @@ function protocolChange()
 		<!-- we dont support ip range in kernel 2.4.30 
 		-<input type="text" size="16" name="sip_address2">
 		-->
+	</td>
+</tr>
+
+<tr>
+	<td class="head" colspan="2" id="portFilterSIPAddr">Source IP Mask</td>
+	<td colspan="2">
+		<input type="text" size="16" name="sip_mask"> (optional)
 	</td>
 </tr>
 
@@ -605,7 +636,7 @@ function protocolChange()
 	document.write("(The maximum rule count is "+ MAX_RULES +".)");
 </script>
 <p>
-	<input type="submit" value="Apply" id="portFilterApply" name="addFilterPort" onClick="return ipportFormCheck()"> &nbsp;&nbsp;
+	<input type="submit" value="Apply" id="portFilterApply" name="addFilterPort" onClick="return ipportFormCheck(this.form);"> &nbsp;&nbsp;
 	<input type="reset" value="Reset" id="portFilterReset" name="reset">
 </p>
 </form>
@@ -614,7 +645,7 @@ function protocolChange()
 <hr />
 
 <!-- =========================  delete rules  ========================= -->
-<form action="/goform/ipportFilterDelete" method="POST" name="ipportFilterDelete">
+<form action="/goform/ipportFilterDelete" method="POST" name="ipportFilterDelete" >
 
 <table width="500" border="1" cellpadding="2" cellspacing="1">
 	<tr>
@@ -622,24 +653,24 @@ function protocolChange()
 	</tr>
 
 	<tr>
-		<td id="portCurrentFilterNo"> No.</td>
-		<td align="center" id="portCurrentFilterMac"> Mac Address </td>
-		<td align="center" id="portCurrentFilterMac"> Interface </td>
-		<td align="center" id="portCurrentFilterDIP"> Dest IP Address </td>
-		<td align="center" id="portCurrentFilterSIP"> Source IP Address </td>
-		<td align="center" id="portCurrentFilterProtocol"> Protocol</td>
-		<td align="center" id="portCurrentFilterDPort"> Dest Port Range</td>
-		<td align="center" id="portCurrentFilterSPort"> Source Port Range</td>
-		<td align="center" id="portCurrentFilterAction"> Action</td>
-		<td align="center" id="portCurrentFilterComment"> Comment</td>
-		<td align="center" id="portCurrentFilterPacketCount"> PktCnt</td>
+		<td> No.</td>
+		<td align="center"> Mac Address </td>
+		<td align="center"> Interface </td>
+		<td align="center"> Dest&nbsp;IP&nbsp;Address / Netmask</td>
+		<td align="center"> Source&nbsp;IP&nbsp;Address / Netmask</td>
+		<td align="center"> Protocol</td>
+		<td align="center"> Dest Port Range</td>
+		<td align="center"> Source Port Range</td>
+		<td align="center"> Action</td>
+		<td align="center"> Comment</td>
+		<td align="center"> PktCnt</td>
 	</tr>
 
 	<% showIPPortFilterRulesASP(); %>
 </table>
 <br>
 
-<input type="submit" value="Delete Selected" id="portCurrentFilterDel" name="deleteSelFilterPort" onClick="return deleteClick()">&nbsp;&nbsp;
+<input type="submit" value="Delete Selected" id="portCurrentFilterDel" name="deleteSelFilterPort">&nbsp;&nbsp;
 <input type="reset" value="Reset" id="portCurrentFilterReset" name="reset">
 </form>
 

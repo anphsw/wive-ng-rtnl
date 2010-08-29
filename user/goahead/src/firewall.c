@@ -217,8 +217,8 @@ static int getNums(char *value, char delimit)
  *
  */
 static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_address,
-char *sip_1, char *sip_2, int sprf_int, int sprt_int, 
-char *dip_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
+char *sip_1, char *sim_1, char *sip_2, int sprf_int, int sprt_int, 
+char *dip_1, char *dim_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
 {
 	int rc = 0;
 	char *pos = buf;
@@ -253,11 +253,17 @@ char *dip_1, char *dip_2, int dprf_int, int dprt_int, int proto, int action)
 	}
 
 	// write source ip
-	rc = snprintf(pos, len-rc, "-s %s ", sip_1);
+	if ((sim_1==NULL) || (strlen(sim_1)==0) || (strcmp(sim_1, "255.255.255.255")==0))
+		rc = snprintf(pos, len-rc, "-s %s ", sip_1);
+	else
+		rc = snprintf(pos, len-rc, "-s %s/%s ", sip_1, sim_1);
 	pos = pos+rc;
 	
 	// write dest ip
-	rc = snprintf(pos, len-rc, "-d %s ", dip_1);
+	if ((dim_1==NULL) || (strlen(dim_1)==0) || (strcmp(dim_1, "255.255.255.255")==0))
+		rc = snprintf(pos, len-rc, "-d %s ", dip_1);
+	else
+		rc = snprintf(pos, len-rc, "-d %s/%s ", dip_1, dim_1);
 	pos = pos+rc;
 
 	// write protocol type
@@ -352,6 +358,7 @@ static void iptablesIPPortFilterBuildScript(void)
 	char mac_address[32];
 	char sip_1[32], sip_2[32], action_str[4];
 	char dip_1[32], dip_2[32];
+	char sim_1[32], dim_1[32];
 	char *firewall_enable, *default_policy, *rule, *c_if;
 	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
 	
@@ -401,54 +408,68 @@ static void iptablesIPPortFilterBuildScript(void)
 			if (!isIpNetmaskValid(sip_1))
 				continue;
 
+			// get sip mask 1
+			if ((getNthValueSafe(2, rec, ',', sim_1, sizeof(sim_1)) == -1))
+				continue;
+
+			if (!isIpNetmaskValid(sim_1))
+				continue;
+
 			// get source port range "from"
-			if ((getNthValueSafe(3, rec, ',', sprf, sizeof(sprf)) == -1))
+			if ((getNthValueSafe(4, rec, ',', sprf, sizeof(sprf)) == -1))
 				continue;
 
 			if ((sprf_int = atoi(sprf)) > 65535)
 				continue;
 
 			// get dest port range "to"
-			if ((getNthValueSafe(4, rec, ',', sprt, sizeof(sprt)) == -1))
+			if ((getNthValueSafe(5, rec, ',', sprt, sizeof(sprt)) == -1))
 				continue;
 
 			if( (sprt_int = atoi(sprt)) > 65535)
 				continue;
 
 			// Destination Part
-			if ((getNthValueSafe(5, rec, ',', dip_1, sizeof(dip_1)) == -1))
+			if ((getNthValueSafe(6, rec, ',', dip_1, sizeof(dip_1)) == -1))
+				continue;
+
+			if (!isIpNetmaskValid(dip_1))
+				continue;
+			
+			// Destination IP mask
+			if ((getNthValueSafe(7, rec, ',', dim_1, sizeof(dim_1)) == -1))
 				continue;
 
 			if (!isIpNetmaskValid(dip_1))
 				continue;
 
 			// get source port range "from"
-			if ((getNthValueSafe(7, rec, ',', dprf, sizeof(dprf)) == -1))
+			if ((getNthValueSafe(9, rec, ',', dprf, sizeof(dprf)) == -1))
 				continue;
 
 			if( (dprf_int = atoi(dprf)) > 65535)
 				continue;
 
 			// get dest port range "to"
-			if ((getNthValueSafe(8, rec, ',', dprt, sizeof(dprt)) == -1))
+			if ((getNthValueSafe(10, rec, ',', dprt, sizeof(dprt)) == -1))
 				continue;
 
 			if ((dprt_int = atoi(dprt)) > 65535)
 				continue;
 
 			// get protocol
-			if ((getNthValueSafe(9, rec, ',', protocol, sizeof(protocol)) == -1))
+			if ((getNthValueSafe(11, rec, ',', protocol, sizeof(protocol)) == -1))
 				continue;
 			proto = atoi(protocol);
 
 			// get action
-			if ((getNthValueSafe(10, rec, ',', action_str, sizeof(action_str)) == -1))
+			if ((getNthValueSafe(12, rec, ',', action_str, sizeof(action_str)) == -1))
 				continue;
 
 			action = atoi(action_str);
 
 			// get mac address
-			if ((getNthValueSafe(12, rec, ',', mac_address, sizeof(mac_address)) == -1))
+			if ((getNthValueSafe(14, rec, ',', mac_address, sizeof(mac_address)) == -1))
 				continue;
 
 			if (strlen(mac_address))
@@ -464,7 +485,7 @@ static void iptablesIPPortFilterBuildScript(void)
 			else
 				c_if = wan_name;
 
-			makeIPPortFilterRule(cmd, sizeof(cmd), c_if, mac_address, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action);
+			makeIPPortFilterRule(cmd, sizeof(cmd), c_if, mac_address, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action);
 			fputs(cmd, fd);
 		}
 
@@ -832,6 +853,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	char mac_address[32];
 	char sip_1[32], sip_2[32], sprf[8], sprt[8], comment[16], protocol[8], action[4];
 	char dip_1[32], dip_2[32], dprf[8], dprt[8], iface[8];
+	char sim_1[32], dim_1[32];
 	int dprf_int, dprt_int;
 	char rec[256];
 	char *default_policy;
@@ -847,7 +869,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		return 0;
 
 	i=0;
-	while(getNthValueSafe(i, rules, ';', rec, sizeof(rec)) != -1 && strlen(rec))
+	while (getNthValueSafe(i, rules, ';', rec, sizeof(rec)) != -1 && strlen(rec))
 	{
 		printf("i=%d, rec=%s, strlen(rec)=%d\n", i, rec, strlen(rec));
 		
@@ -872,10 +894,24 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		// translate "any/0" to "any" for readable reason
 		if (!strcmp(sip_1, "any/0"))
 			strcpy(sip_1, "-");
+		
+		// get ip mask 1
+		if ((getNthValueSafe(2, rec, ',', sim_1, sizeof(sim_1)) == -1))
+		{
+			i++;
+			printf("bad sim1\n");
+			continue;
+		}
+		if (!isIpNetmaskValid(sim_1))
+		{
+			i++;
+			printf("bad sim1-2\n");
+			continue;
+		}
 
 		// get ip 2
 		// get ip address
-		if ((getNthValueSafe(2, rec, ',', sip_2, sizeof(sip_2)) == -1))
+		if ((getNthValueSafe(3, rec, ',', sip_2, sizeof(sip_2)) == -1))
 		{
 			i++;
 			continue;
@@ -885,7 +921,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		//	continue;
 
 		// get port range "from"
-		if ((getNthValueSafe(3, rec, ',', sprf, sizeof(sprf)) == -1))
+		if ((getNthValueSafe(4, rec, ',', sprf, sizeof(sprf)) == -1))
 		{
 			i++;
 			continue;
@@ -897,7 +933,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get port range "to"
-		if ((getNthValueSafe(4, rec, ',', sprt, sizeof(sprt)) == -1))
+		if ((getNthValueSafe(5, rec, ',', sprt, sizeof(sprt)) == -1))
 		{
 			i++;
 			continue;
@@ -909,7 +945,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get ip 1
-		if ((getNthValueSafe(5, rec, ',', dip_1, sizeof(dip_1)) == -1))
+		if ((getNthValueSafe(6, rec, ',', dip_1, sizeof(dip_1)) == -1))
 		{
 			i++;
 			continue;
@@ -923,8 +959,22 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		if (!strcmp(dip_1, "any/0"))
 			strcpy(dip_1, "-");
 		
+		// get ip mask 1
+		if ((getNthValueSafe(7, rec, ',', dim_1, sizeof(dim_1)) == -1))
+		{
+			i++;
+			printf("bad dim1\n");
+			continue;
+		}
+		if (!isIpNetmaskValid(dim_1))
+		{
+			i++;
+			printf("bad dim1-2\n");
+			continue;
+		}
+		
 		// get ip 2
-		if ((getNthValueSafe(6, rec, ',', dip_2, sizeof(dip_2)) == -1))
+		if ((getNthValueSafe(8, rec, ',', dip_2, sizeof(dip_2)) == -1))
 		{
 			i++;
 			continue;
@@ -934,7 +984,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		//	continue;
 
 		// get protocol
-		if ((getNthValueSafe(9, rec, ',', protocol, sizeof(protocol)) == -1))
+		if ((getNthValueSafe(11, rec, ',', protocol, sizeof(protocol)) == -1))
 		{
 			i++;
 			continue;
@@ -953,7 +1003,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get port range "from"
-		if ((getNthValueSafe(7, rec, ',', dprf, sizeof(dprf)) == -1))
+		if ((getNthValueSafe(9, rec, ',', dprf, sizeof(dprf)) == -1))
 		{
 			i++;
 			continue;
@@ -965,7 +1015,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get port range "to"
-		if ((getNthValueSafe(8, rec, ',', dprt, sizeof(dprt)) == -1))
+		if ((getNthValueSafe(10, rec, ',', dprt, sizeof(dprt)) == -1))
 		{
 			i++;
 			continue;
@@ -977,20 +1027,20 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// get action
-		if ((getNthValueSafe(10, rec, ',', action, sizeof(action)) == -1)){
+		if ((getNthValueSafe(12, rec, ',', action, sizeof(action)) == -1)){
 			i++;
 			continue;
 		}
 
 		// get comment
-		if ((getNthValueSafe(11, rec, ',', comment, sizeof(comment)) == -1))
+		if ((getNthValueSafe(13, rec, ',', comment, sizeof(comment)) == -1))
 		{
 			i++;
 			continue;
 		}
 
 		// get mac address
-		if ((getNthValueSafe(12, rec, ',', mac_address, sizeof(mac_address)) == -1))
+		if ((getNthValueSafe(14, rec, ',', mac_address, sizeof(mac_address)) == -1))
 		{
 			i++;
 			continue;
@@ -1009,12 +1059,12 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, T("<td align=\"center\"> %s </td>"), iface);
 
 		// output DIP
-		websWrite(wp, T("<td align=\"center\"> %s </td>"), dip_1);
+		websWrite(wp, T("<td align=\"center\"> %s / %s </td>"), dip_1, dim_1);
 		// we dont support ip range 
 		// websWrite(wp, T("<td align=center> %s-%s </td>"), ip_1, ip_2);
 
 		// output SIP
-		websWrite(wp, T("<td align=\"center\"> %s </td>"), sip_1);
+		websWrite(wp, T("<td align=\"center\"> %s / %s </td>"), sip_1, sim_1);
 		// we dont support ip range 
 		// websWrite(wp, T("<td align=center> %s-%s </td>"), ip_1, ip_2);
 
@@ -1036,7 +1086,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		// output dest Port Range
-		if(dprt_int)
+		if (dprt_int)
 			websWrite(wp, T("<td align=\"center\"> %d - %d </td>"), dprf_int, dprt_int);
 		else
 		{
@@ -1241,6 +1291,7 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	char *mac_address;
 	char *sip_1, *sip_2, *sprf, *sprt, *protocol, *action_str, *comment;
 	char *dip_1, *dip_2, *dprf, *dprt, *iface;
+	char *sim_1, *dim_1;
 	char *IPPortFilterRules;
 	
 	int sprf_int, sprt_int, dprf_int, dprt_int, proto, action;
@@ -1249,11 +1300,13 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 
 	sip_1 = websGetVar(wp, T("sip_address"), T("any"));
 	sip_2 = websGetVar(wp, T("sip_address2"), T(""));
+	sim_1 = websGetVar(wp, T("sip_mask"), T(""));
 	sprf = websGetVar(wp, T("sFromPort"), T("0"));
 	sprt = websGetVar(wp, T("sToPort"), T(""));
 
 	dip_1 = websGetVar(wp, T("dip_address"), T("any"));
 	dip_2 = websGetVar(wp, T("dip_address2"), T(""));
+	dim_1 = websGetVar(wp, T("dip_mask"), T(""));
 	dprf = websGetVar(wp, T("dFromPort"), T("0"));
 	dprt = websGetVar(wp, T("dToPort"), T(""));
 
@@ -1262,10 +1315,12 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	comment = websGetVar(wp, T("comment"), T(""));
 	iface = websGetVar(wp, T("fltIface"), T(""));
 
-	if(!mac_address || !sip_1 || !dip_1 || !sprf || !dprf || !iface)
+	if(!mac_address || !sip_1 || !dip_1 || !sprf || !dprf || !iface || !sim_1 || !dim_1)
 		return;
 
-	if(!strlen(mac_address) && !strlen(sip_1) && !strlen(dip_1) && !strlen(sprf) && !strlen(dprf) && !strlen(iface))
+	if(!strlen(mac_address) && !strlen(sip_1) && !strlen(dip_1) &&
+		!strlen(sprf) && !strlen(dprf) && !strlen(iface) && 
+		!strlen(sim_1) && !strlen(dim_1))
 		return;
 
 	// we dont trust user input.....
@@ -1275,19 +1330,37 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 			return;
 	}
 
-	if(strlen(sip_1)){
-		if(!isIpNetmaskValid(sip_1))
+	if (strlen(sip_1))
+	{
+		if (!isIpNetmaskValid(sip_1))
 			return;
-	}else
+	}
+	else
 		sip_1 = T("any/0");
+	
+	if (strlen(sim_1))
+	{
+		if (!isIpNetmaskValid(sim_1))
+			return;
+	}
+	else
+		sip_1 = T("255.255.255.255");
 
-	if(strlen(dip_1))
+	if (strlen(dip_1))
 	{
 		if(!isIpNetmaskValid(dip_1))
 			return;
 	}
 	else
 		dip_1 = T("any/0");
+	
+	if (strlen(dim_1))
+	{
+		if(!isIpNetmaskValid(dim_1))
+			return;
+	}
+	else
+		dim_1 = T("255.255.255.255");
 
 	sip_2 = dip_2 = "0";
 
@@ -1352,9 +1425,11 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 		return;
 
 	if (( IPPortFilterRules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules")) && strlen(IPPortFilterRules))
-		snprintf(rule, sizeof(rule), "%s;%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", IPPortFilterRules, iface, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
+		snprintf(rule, sizeof(rule), "%s;%s,%s,%s,%s,%d,%d,%s,%s,%s,%d,%d,%d,%d,%s,%s",
+			IPPortFilterRules, iface, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 	else
-		snprintf(rule, sizeof(rule), "%s,%s,%s,%d,%d,%s,%s,%d,%d,%d,%d,%s,%s", iface, sip_1, sip_2, sprf_int, sprt_int, dip_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
+		snprintf(rule, sizeof(rule), "%s,%s,%s,%s,%d,%d,%s,%s,%s,%d,%d,%d,%d,%s,%s",
+			iface, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);
 	nvram_commit(RT2860_NVRAM);
@@ -1364,10 +1439,12 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("iface: %s<br>\n"), iface);
 	websWrite(wp, T("sip1: %s<br>\n"), sip_1);
 	websWrite(wp, T("sip2: %s<br>\n"), sip_2);
+	websWrite(wp, T("sim1: %s<br>\n"), sim_1);
 	websWrite(wp, T("sFromPort: %s<br>\n"), sprf);
 	websWrite(wp, T("sToPort: %s<br>\n"), sprt);
 	websWrite(wp, T("dip1: %s<br>\n"), dip_1);
 	websWrite(wp, T("dip2: %s<br>\n"), dip_2);
+	websWrite(wp, T("dim1: %s<br>\n"), dim_1);
 	websWrite(wp, T("dFromPort: %s<br>\n"), dprf);
 	websWrite(wp, T("dToPort: %s<br>\n"), dprt);
 	websWrite(wp, T("protocol: %s<br>\n"), protocol);
