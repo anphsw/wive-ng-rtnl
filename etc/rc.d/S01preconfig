@@ -42,8 +42,8 @@ start() {
     mknod /dev/pty/m15    c       2       15
 
     mkdir -p /dev/tts
-    mknod -p /dev/tts/0              c       4       64
-    mknod -p /dev/tts/1              c       4       65
+    mknod /dev/tts/0              c       4       64
+    mknod /dev/tts/1              c       4       65
 
     mkdir -p /dev/cua
     mknod /dev/cua/0              c       5       64
