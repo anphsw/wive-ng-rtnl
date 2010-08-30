@@ -21,6 +21,7 @@ fi
 if [ "$2" = "" ]; then
     VENDOR=acorp
     #VENDOR=dlink
+    #VENDOR=asus
 else
     VENDOR=$2
 fi
