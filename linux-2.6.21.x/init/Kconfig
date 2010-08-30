@@ -539,7 +539,7 @@ config PANIC
 	  occurs, as the kernel may ignore the condition entirely.<F11>jj
 
 config FULL_PANIC
-	depends PANIC
+	depends on PANIC
 	default y
 	bool "Full panic reporting data" if TINY
 	help
@@ -570,7 +570,7 @@ config FILE_LOCKING
 	  This enables standard file locking support.
 
 config ETHTOOL
-	depends NET
+	depends on NET
 	default y
 	bool "Enable ethtool support" if TINY
 	help
@@ -586,7 +586,7 @@ config INETPEER
 
 config NET_SK_FILTER
 	default y
-	depends NET
+	depends on NET
 	bool "Enable network socket filter" if TINY
 	help
 	  This enables the basic kernel level socket filtering, not to
@@ -594,13 +594,13 @@ config NET_SK_FILTER
 
 config NET_DEV_MULTICAST
 	default y
-	depends NET
+	depends on NET
 	bool "Enable device multicast support" if TINY
 	help
 	  This enables the core device multicast list management code.
 
 config IGMP
-	depends NET
+	depends on NET
 	default y
 	bool "Enable IGMP support" if TINY && !IP_MULTICAST
 	help
