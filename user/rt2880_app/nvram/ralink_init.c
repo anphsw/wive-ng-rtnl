@@ -378,7 +378,6 @@ int gen_config(int mode)
 		FPRINT_NUM(DFS_R66);
 		FPRINT_STR(BlockCh);
 
-		FPRINT_NUM(GreenAP);
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);

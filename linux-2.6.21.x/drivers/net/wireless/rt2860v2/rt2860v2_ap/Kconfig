@@ -92,10 +92,6 @@ config  RT2860V2_AP_COC
 	bool "CoC Support"
 	depends on RT2860V2_AP
 
-config  RT2860V2_AP_GREENAP
-        bool "Green AP Support"
-        depends on RT2860V2_AP
-
 config  RT2860V2_AP_MEMORY_OPTIMIZATION
 	bool "Memory Optimization"
 	depends on RT2860V2_AP

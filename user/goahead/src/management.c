@@ -170,78 +170,6 @@ static void NTPSyncWithHost(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#ifdef CONFIG_USER_GOAHEAD_GreenAP
-/*
- * goform/GreenAP
- */
-static void GreenAP(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *shour1, *sminute1, *ehour1, *eminute1, *action1;
-	char_t *shour2, *sminute2, *ehour2, *eminute2, *action2;
-	char_t *shour3, *sminute3, *ehour3, *eminute3, *action3;
-	char_t *shour4, *sminute4, *ehour4, *eminute4, *action4;
-	char start[6], end[6];
-	shour1 = websGetVar(wp, T("GAPSHour1"), T(""));
-	sminute1 = websGetVar(wp, T("GAPSMinute1"), T(""));
-	ehour1 = websGetVar(wp, T("GAPEHour1"), T(""));
-	eminute1 = websGetVar(wp, T("GAPEMinute1"), T(""));
-	action1 = websGetVar(wp, T("GAPAction1"), T(""));
-	sprintf(start, "%s %s", sminute1, shour1);
-	sprintf(end, "%s %s", eminute1, ehour1);
-	nvram_bufset(RT2860_NVRAM, "GreenAPStart1", start);
-	nvram_bufset(RT2860_NVRAM, "GreenAPEnd1", end);
-	nvram_bufset(RT2860_NVRAM, "GreenAPAction1", action1);
-	shour2 = websGetVar(wp, T("GAPSHour2"), T(""));
-	sminute2 = websGetVar(wp, T("GAPSMinute2"), T(""));
-	ehour2 = websGetVar(wp, T("GAPEHour2"), T(""));
-	eminute2 = websGetVar(wp, T("GAPEMinute2"), T(""));
-	action2 = websGetVar(wp, T("GAPAction2"), T(""));
-	sprintf(start, "%s %s", sminute2, shour2);
-	sprintf(end, "%s %s", eminute2, ehour2);
-	nvram_bufset(RT2860_NVRAM, "GreenAPStart2", start);
-	nvram_bufset(RT2860_NVRAM, "GreenAPEnd2", end);
-	nvram_bufset(RT2860_NVRAM, "GreenAPAction2", action2);
-	shour3 = websGetVar(wp, T("GAPSHour3"), T(""));
-	sminute3 = websGetVar(wp, T("GAPSMinute3"), T(""));
-	ehour3 = websGetVar(wp, T("GAPEHour3"), T(""));
-	eminute3 = websGetVar(wp, T("GAPEMinute3"), T(""));
-	action3 = websGetVar(wp, T("GAPAction3"), T(""));
-	sprintf(start, "%s %s", sminute3, shour3);
-	sprintf(end, "%s %s", eminute3, ehour3);
-	nvram_bufset(RT2860_NVRAM, "GreenAPStart3", start);
-	nvram_bufset(RT2860_NVRAM, "GreenAPEnd3", end);
-	nvram_bufset(RT2860_NVRAM, "GreenAPAction3", action3);
-	shour4 = websGetVar(wp, T("GAPSHour4"), T(""));
-	sminute4 = websGetVar(wp, T("GAPSMinute4"), T(""));
-	ehour4 = websGetVar(wp, T("GAPEHour4"), T(""));
-	eminute4 = websGetVar(wp, T("GAPEMinute4"), T(""));
-	action4 = websGetVar(wp, T("GAPAction4"), T(""));
-	sprintf(start, "%s %s", sminute4, shour4);
-	sprintf(end, "%s %s", eminute4, ehour4);
-	nvram_bufset(RT2860_NVRAM, "GreenAPStart4", start);
-	nvram_bufset(RT2860_NVRAM, "GreenAPEnd4", end);
-	nvram_bufset(RT2860_NVRAM, "GreenAPAction4", action4);
-	nvram_commit(RT2860_NVRAM);
-
-	doSystem("greenap.sh init");
-
-	websHeader(wp);
-	websWrite(wp, T("GreenAPStart1: %s %s<br>\n"), sminute1, shour1);
-	websWrite(wp, T("GreenAPEnd1: %s %s<br>\n"), eminute1, ehour1);
-	websWrite(wp, T("GreenAPAction1: %s<br>\n"), action1);
-	websWrite(wp, T("GreenAPStart2: %s %s<br>\n"), sminute2, shour2);
-	websWrite(wp, T("GreenAPEnd2: %s %s<br>\n"), eminute2, ehour2);
-	websWrite(wp, T("GreenAPAction2: %s<br>\n"), action2);
-	websWrite(wp, T("GreenAPStart3: %s %s<br>\n"), sminute3, shour3);
-	websWrite(wp, T("GreenAPEnd3: %s %s<br>\n"), eminute3, ehour3);
-	websWrite(wp, T("GreenAPAction3: %s<br>\n"), action3);
-	websWrite(wp, T("GreenAPStart4: %s %s<br>\n"), sminute4, shour4);
-	websWrite(wp, T("GreenAPEnd4: %s %s<br>\n"), eminute4, ehour4);
-	websWrite(wp, T("GreenAPAction4: %s<br>\n"), action4);
-	websFooter(wp);
-	websDone(wp, 200);
-}
-#endif
 
 #ifdef CONFIG_USER_INADYN
 /*
@@ -884,20 +812,13 @@ error:
 void management_init(void)
 {
 	doSystem("service ntp restart &");
-#ifdef CONFIG_USER_GOAHEAD_GreenAP
-    	doSystem("greenap.sh init &");
-#endif
 	doSystem("service ddns restart &");
 	WPSRestart();
 }
 
 static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_GOAHEAD_GreenAP
-	return websWrite(wp, T("1"));
-#else
 	return websWrite(wp, T("0"));
-#endif
 }
 
 void formDefineManagement(void)
@@ -910,9 +831,6 @@ void formDefineManagement(void)
 #endif
 	websAspDefine(T("getCurrentTimeASP"), getCurrentTimeASP);
 	websAspDefine(T("getGAPBuilt"), getGAPBuilt);
-#ifdef CONFIG_USER_GOAHEAD_GreenAP
-	websFormDefine(T("GreenAP"), GreenAP);
-#endif
 #ifdef CONFIG_USER_INADYN
 	websFormDefine(T("DDNS"), DDNS);
 #endif
