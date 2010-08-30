@@ -1,3 +1,7 @@
+config RT_FULL_DEVICE_NAME
+        string "Original device name"
+        default "Acorp WR-N"
+
 if RALINK_RT3052
 
 choice
@@ -10,7 +14,6 @@ config  RT3052_ASIC
         bool "RT305x/RT3350-ASIC"
 endchoice
 
-#Dias Kuo: Define CONFIG_UMEDIA_WAP356L for WAP-356L in kernel configuration
 if RT3052_ASIC
 config  UMEDIA_WAP356L
         bool "U-Media WAP-356L PCBA"
