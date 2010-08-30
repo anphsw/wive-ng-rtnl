@@ -521,7 +521,7 @@ CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 CFLAGS += $(call cc-option,-Wno-pointer-sign,)
 
 ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
-LDFLAGS_vmlinux	+= $(call ld-option, -X,)
+LDFLAGS_vmlinux	+= -X
 endif
 
 # Default kernel image to build when no specific target is given.
