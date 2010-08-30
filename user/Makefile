@@ -24,6 +24,8 @@ CFLAGS += -Os -mips32 -mtune=mips32
 CFLAGS += -Wpadded -Wall -Wno-unused 
 export $(CFLAGS)
 
+MFLAGS  = -j2
+
 UCLINUX_BUILD_USER=1
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
@@ -110,13 +112,13 @@ endif
 .PHONY: $(sort $(dir_y) $(dir_p))
 
 $(sort $(dir_y) $(dir_p)):  config
-	[ ! -d "$@" ] || ( touch $@/.sgbuilt_user && $(MAKE) -j1 -C $@ ) || exit $$?
+	[ ! -d "$@" ] || ( touch $@/.sgbuilt_user && $(MAKE) $(MFLAGS) -C $@ ) || exit $$?
 
 %_only:
-	touch $(@:_only=)/.sgbuilt_user && $(MAKE) -j1 -C $(@:_only=)
+	touch $(@:_only=)/.sgbuilt_user && $(MAKE) $(MFLAGS) -C $(@:_only=)
 
 %_clean:
-	$(MAKE) -j1 -C $(@:_clean=) clean; rm -f $(@:_clean=)/.sgbuilt_user; true
+	$(MAKE) $(MFLAGS) -C $(@:_clean=) clean; rm -f $(@:_clean=)/.sgbuilt_user; true
 
 romfs:
 	for i in $(sort $(dir_y)) $(dir_p) ; do \
