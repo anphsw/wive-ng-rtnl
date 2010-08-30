@@ -30,11 +30,6 @@
 extern u32 get_surfboard_sysclk(void) ;
 
 static struct mtd_partition rt2880_partitions[] = {
-	{
-                name:           "ALL",
-                size:           MTDPART_SIZ_FULL,
-                offset:         0,
-        },
 	/* Put your own partition definitions here */
         {
                 name:           "Bootloader",

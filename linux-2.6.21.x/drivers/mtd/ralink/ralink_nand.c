@@ -70,11 +70,6 @@ module_param(ranfc_verify, int, 0644);
 
 
 static struct mtd_partition rt2880_partitions[] = {
-	{
-                name:           "ALL",
-                size:           MTDPART_SIZ_FULL,
-                offset:         0,
-        },
 	/* Put your own partition definitions here */
         {
                 name:           "Bootloader",
