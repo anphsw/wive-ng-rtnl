@@ -212,7 +212,7 @@ static RAW_NOTIFIER_HEAD(netdev_chain);
  *	Device drivers call our routines to queue packets here. We empty the
  *	queue in the local softnet handler.
  */
-DEFINE_PER_CPU(struct softnet_data, softnet_data) = { NULL };
+DEFINE_PER_CPU_ALIGNED(struct softnet_data, softnet_data) = { NULL };
 
 #ifdef CONFIG_SYSFS
 extern int netdev_sysfs_init(void);
@@ -1882,7 +1882,6 @@ static int process_backlog(struct net_device *backlog_dev, int *budget)
 	int work = 0;
 	int quota = min(backlog_dev->quota, *budget);
 	struct softnet_data *queue = &__get_cpu_var(softnet_data);
-	unsigned long start_time = jiffies;
 
 	backlog_dev->weight = weight_p;
 	for (;;) {
@@ -1903,7 +1902,7 @@ static int process_backlog(struct net_device *backlog_dev, int *budget)
 
 		work++;
 
-		if (work >= quota || jiffies - start_time > 1)
+		if (work >= quota)
 			break;
 
 	}
