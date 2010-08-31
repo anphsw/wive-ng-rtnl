@@ -3,7 +3,7 @@
 <head>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
@@ -11,162 +11,109 @@
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
-var ch1 = "<option value = 1 >1</option>";
-var ch2 = "<option value = 2 >2</option>";
-var ch3 = "<option value = 3 >3</option>";
-var ch4 = "<option value = 4 >4</option>";
-var ch5 = "<option value = 5 >5</option>";
-var ch6 = "<option value = 6 >6</option>";
-var ch7 = "<option value = 7 >7</option>";
-var ch8 = "<option value = 8 >8</option>";
-var ch9 = "<option value = 9 >9</option>";
-var ch10 = "<option value = 10>10</option>";
-var ch11 = "<option value = 11>11</option>";
-var ch12 = "<option value = 12>12</option>";
-var ch13 = "<option value = 13>13</option>";
-var ch14 = "<option value = 14>14</option>";
-var ch36 = "<option value = 36 >36</option>";
-var ch40 = "<option value = 40 >40</option>";
-var ch44 = "<option value = 44 >44</option>";
-var ch48 = "<option value = 48 >48</option>";
-var ch52 = "<option value = 52 >52</option>";
-var ch56 = "<option value = 56 >56</option>";
-var ch60 = "<option value = 60 >60</option>";
-var ch64 = "<option value = 64 >64</option>";
-var ch100 = "<option value = 100>100</option>";
-var ch104 = "<option value = 104>104</option>";
-var ch108 = "<option value = 108>108</option>";
-var ch112 = "<option value = 112>112</option>";
-var ch116 = "<option value = 116>116</option>";
-var ch120 = "<option value = 120>120</option>";
-var ch124 = "<option value = 124>124</option>";
-var ch128 = "<option value = 128>128</option>";
-var ch132 = "<option value = 132>132</option>";
-var ch136 = "<option value = 136>136</option>";
-var ch140 = "<option value = 140>140</option>";
-var ch149 = "<option value = 149>149</option>";
-var ch153 = "<option value = 153>153</option>";
-var ch157 = "<option value = 157>157</option>";
-var ch161 = "<option value = 161>161</option>";
-var ch165 = "<option value = 165>165</option>";
+var ch1 = "<option value=\"1\">1</option>";
+var ch2 = "<option value=\"2\">2</option>";
+var ch3 = "<option value=\"3\">3</option>";
+var ch4 = "<option value=\"4\">4</option>";
+var ch5 = "<option value=\"5\">5</option>";
+var ch6 = "<option value=\"6\">6</option>";
+var ch7 = "<option value=\"7\">7</option>";
+var ch8 = "<option value=\"8\">8</option>";
+var ch9 = "<option value=\"9\">9</option>";
+var ch10 = "<option value=\"10\">10</option>";
+var ch11 = "<option value=\"11\">11</option>";
+var ch12 = "<option value=\"12\">12</option>";
+var ch13 = "<option value=\"13\">13</option>";
+var ch14 = "<option value=\"14\">14</option>";
+var ch36 = "<option value=\"36\">36</option>";
+var ch40 = "<option value=\"40\">40</option>";
+var ch44 = "<option value=\"44\">44</option>";
+var ch48 = "<option value=\"48\">48</option>";
+var ch52 = "<option value=\"52\">52</option>";
+var ch56 = "<option value=\"56\">56</option>";
+var ch60 = "<option value=\"60\">60</option>";
+var ch64 = "<option value=\"64\">64</option>";
+var ch100 = "<option value=\"100\">100</option>";
+var ch104 = "<option value=\"104\">104</option>";
+var ch108 = "<option value=\"108\">108</option>";
+var ch112 = "<option value=\"112\">112</option>";
+var ch116 = "<option value=\"116\">116</option>";
+var ch120 = "<option value=\"120\">120</option>";
+var ch124 = "<option value=\"124\">124</option>";
+var ch128 = "<option value=\"128\">128</option>";
+var ch132 = "<option value=\"132\">132</option>";
+var ch136 = "<option value=\"136\">136</option>";
+var ch140 = "<option value=\"140\">140</option>";
+var ch149 = "<option value=\"149\">149</option>";
+var ch153 = "<option value=\"153\">153</option>";
+var ch157 = "<option value=\"157\">157</option>";
+var ch161 = "<option value=\"161\">161</option>";
+var ch165 = "<option value=\"165\">165</option>";
 
-var ch34 = "<option value = 34 >34</option>";
-var ch38 = "<option value = 38 >38</option>";
-var ch42 = "<option value = 42 >42</option>";
-var ch46 = "<option value = 46 >46</option>";
+var ch34 = "<option value=\"34\">34</option>";
+var ch38 = "<option value=\"38\">38</option>";
+var ch42 = "<option value=\"42\">42</option>";
+var ch46 = "<option value=\"46\">46</option>";
 
 function initTranslation()
 {
-	var e = document.getElementById("addprofSysConf");
-	e.innerHTML = _("addprof system config");
-	e = document.getElementById("addprofProfName");
-	e.innerHTML = _("addprof profile name");
-	e = document.getElementById("addprofSSID");
-	e.innerHTML = _("station ssid");
-	e = document.getElementById("addprofNetType");
-	e.innerHTML = _("station network type");
-	e = document.getElementById("addprofAdHoc");
-	e.innerHTML = _("addprof adhoc");
-	e = document.getElementById("addprofInfra");
-	e.innerHTML = _("addprof infrastructure");
-	e = document.getElementById("addprofPWSave");
-	e.innerHTML = _("addprof power save");
-	e = document.getElementById("addprofCAM");
-	e.innerHTML = _("addprof cam");
-	e = document.getElementById("addprofPWSaveMode");
-	e.innerHTML = _("addprof power save");
-	e = document.getElementById("addprofChannel");
-	e.innerHTML = _("station channel");
-	e = document.getElementById("addprofPreambleType");
-	e.innerHTML = _("addprof preamble type");
-	e = document.getElementById("addprofPremableAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("addprofPremableLong");
-	e.innerHTML = _("wireless long");
-	e = document.getElementById("addprofRTS");
-	e.innerHTML = _("adv rts threshold");
-	e = document.getElementById("addprofRTSUsed");
-	e.innerHTML = _("station used");
-	e = document.getElementById("addprofFrag");
-	e.innerHTML = _("adv fragment threshold");
-	e = document.getElementById("addprofFragUsed");
-	e.innerHTML = _("station used");
-	e = document.getElementById("addprofSecurePolicy");
-	e.innerHTML = _("addprof secure policy");
-	e = document.getElementById("addprofSecureMode");
-	e.innerHTML = _("secure security mode");
-	e = document.getElementById("addprofAdHocSecure");
-	e.innerHTML = _("secure security mode");
-	e = document.getElementById("addprofWEP");
-	e.innerHTML = _("secure wep");
-	e = document.getElementById("addprofWEPKeyLength");
-	e.innerHTML = _("addprof wep key length");
-	e = document.getElementById("addprofWEPKeyEntryMethod");
-	e.innerHTML = _("addprof wep key entry method");
-	e = document.getElementById("addprofHex");
-	e.innerHTML = _("addprof hex");
-	e = document.getElementById("addprofASCII");
-	e.innerHTML = _("addprof ascii");
-	e = document.getElementById("addprofWEPKey");
-	e.innerHTML = _("secure wep key");
-	e = document.getElementById("addprofWEPKey1");
-	e.innerHTML = _("secure wep key1");
-	e = document.getElementById("addprofWEPKey2");
-	e.innerHTML = _("secure wep key2");
-	e = document.getElementById("addprofWEPKey3");
-	e.innerHTML = _("secure wep key3");
-	e = document.getElementById("addprofWEPKey4");
-	e.innerHTML = _("secure wep key4");
-	e = document.getElementById("addprofDefaultKey");
-	e.innerHTML = _("secure wep default key");
-	e = document.getElementById("addprofDKey1");
-	e.innerHTML = _("secure wep default key1");
-	e = document.getElementById("addprofDKey2");
-	e.innerHTML = _("secure wep default key2");
-	e = document.getElementById("addprofDKey3");
-	e.innerHTML = _("secure wep default key3");
-	e = document.getElementById("addprofDKey4");
-	e.innerHTML = _("secure wep default key4");
-	e = document.getElementById("addprofWPA");
-	e.innerHTML = _("secure wpa");
-	e = document.getElementById("addprofWPAAlg");
-	e.innerHTML = _("secure wpa algorithm");
-	e = document.getElementById("addprofPassPhrase");
-	e.innerHTML = _("secure wpa pass phrase");
-	e = document.getElementById("addprof1XAuthType");
-	e.innerHTML = _("addprof 8021X Auth Type");
-	e = document.getElementById("addprofWPAAuthType");
-	e.innerHTML = _("addprof 8021X Auth Type");
-	e = document.getElementById("addprofPEAPTunnelAtuth");
-	e.innerHTML = _("addprof tunnel auth");
-	e = document.getElementById("addprofTTLSTunnelAuth");
-	e.innerHTML = _("addprof tunnel auth");
-	e = document.getElementById("addprofIdentity");
-	e.innerHTML = _("addprof identity");
-	e = document.getElementById("addprofPasswd");
-	e.innerHTML = _("addprof passwd");
-	e = document.getElementById("addprofClientCert");
-	e.innerHTML = _("addprof client cert");
-	e = document.getElementById("addprofClientCertUsed");
-	e.innerHTML = _("station used");
-	e = document.getElementById("addprofClientCertPath");
-	e.innerHTML = _("addprof client cert path");
-	e = document.getElementById("addprofPrivateKeyPath");
-	e.innerHTML = _("addprof private key path");
-	e = document.getElementById("addprofPrivateKeyPasswd");
-	e.innerHTML = _("addprof private key passwd");
-	e = document.getElementById("addprofCACert");
-	e.innerHTML = _("addprof ca cert");
-	e = document.getElementById("addprofCACertUsed");
-	e.innerHTML = _("station used");
-	e = document.getElementById("addprofCACertPath");
-	e.innerHTML = _("addprof ca cert path");
-	e = document.getElementById("addprofApply");
-	e.value = _("wireless apply");
-	e = document.getElementById("addprofCancel");
-	e.value = _("wireless cancel");
+	_TR("addprofSysConf", "addprof system config");
+	_TR("addprofProfName", "addprof profile name");
+	_TR("addprofSSID", "station ssid");
+	_TR("addprofNetType", "station network type");
+	_TR("addprofAdHoc", "addprof adhoc");
+	_TR("addprofInfra", "addprof infrastructure");
+	_TR("addprofPWSave", "addprof power save");
+	_TR("addprofCAM", "addprof cam");
+	_TR("addprofPWSaveMode", "addprof power save");
+	_TR("addprofChannel", "station channel");
+	_TR("addprofPreambleType", "addprof preamble type");
+	_TR("addprofPremableAuto", "wireless auto");
+	_TR("addprofPremableLong", "wireless long");
+	_TR("addprofRTS", "adv rts threshold");
+	_TR("addprofRTSUsed", "station used");
+	_TR("addprofFrag", "adv fragment threshold");
+	_TR("addprofFragUsed", "station used");
+	_TR("addprofSecurePolicy", "addprof secure policy");
+	_TR("addprofSecureMode", "secure security mode");
+	_TR("addprofAdHocSecure", "secure security mode");
+	_TR("addprofWEP", "secure wep");
+	_TR("addprofWEPKeyLength", "addprof wep key length");
+	_TR("addprofWEPKeyEntryMethod", "addprof wep key entry method");
+	_TR("addprofHex", "addprof hex");
+	_TR("addprofASCII", "addprof ascii");
+	_TR("addprofWEPKey", "secure wep key");
+	_TR("addprofWEPKey1", "secure wep key1");
+	_TR("addprofWEPKey2", "secure wep key2");
+	_TR("addprofWEPKey3", "secure wep key3");
+	_TR("addprofWEPKey4", "secure wep key4");
+	_TR("addprofDefaultKey", "secure wep default key");
+	_TR("addprofDKey1", "secure wep default key1");
+	_TR("addprofDKey2", "secure wep default key2");
+	_TR("addprofDKey3", "secure wep default key3");
+	_TR("addprofDKey4", "secure wep default key4");
+	_TR("addprofWPA", "secure wpa");
+	_TR("addprofWPAAlg", "secure wpa algorithm");
+	_TR("addprofPassPhrase", "secure wpa pass phrase");
+	_TR("addprof1XAuthType", "addprof 8021X Auth Type");
+	_TR("addprofWPAAuthType", "addprof 8021X Auth Type");
+	_TR("addprofPEAPTunnelAtuth", "addprof tunnel auth");
+	_TR("addprofTTLSTunnelAuth", "addprof tunnel auth");
+	_TR("addprofIdentity", "addprof identity");
+	_TR("addprofPasswd", "addprof passwd");
+	_TR("addprofClientCert", "addprof client cert");
+	_TR("addprofClientCertUsed", "station used");
+	_TR("addprofClientCertPath", "addprof client cert path");
+	_TR("addprofPrivateKeyPath", "addprof private key path");
+	_TR("addprofPrivateKeyPasswd", "addprof private key passwd");
+	_TR("addprofCACert", "addprof ca cert");
+	_TR("addprofCACertUsed", "station used");
+	_TR("addprofCACertPath", "addprof ca cert path");
+
+	_TRV("addprofApply", "wireless apply");
+	_TRV("addprofCancel", "wireless cancel");
 }
-	
+
 function initValue()
 {
 	initTranslation();
@@ -185,9 +132,8 @@ function initValue()
 	var tmp = "<% getStaNewProfileName(); %>";
 	document.profile_page.profile_name.value = tmp;
 
-	if (opener.showProfileSsid) {
+	if (opener.showProfileSsid)
 		opener.showProfileSsid();
-	}
 
 	networkTypeChange();
 	RTSThresholdChange();
@@ -495,45 +441,53 @@ function profileClose()
 
 function wep_switch_key_length()
 {
-    document.profile_page.wep_key_1.value = "";
-    document.profile_page.wep_key_2.value = "";
-    document.profile_page.wep_key_3.value = "";
-    document.profile_page.wep_key_4.value = "";
+	var form = document.profile_page;
+	
+	form.wep_key_1.value = "";
+	form.wep_key_2.value = "";
+	form.wep_key_3.value = "";
+	form.wep_key_4.value = "";
 
-    if (document.profile_page.wep_key_length.options.selectedIndex == 0) {
-       <!-- KEY length 64 bits -->
-       if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0) {
-          <!-- HEX -->
-          document.profile_page.wep_key_1.maxLength = 10;
-          document.profile_page.wep_key_2.maxLength = 10;
-          document.profile_page.wep_key_3.maxLength = 10;
-          document.profile_page.wep_key_4.maxLength = 10;
-       }
-       else {
-          <!-- ASCII -->
-          document.profile_page.wep_key_1.maxLength = 5;
-          document.profile_page.wep_key_2.maxLength = 5;
-          document.profile_page.wep_key_3.maxLength = 5;
-          document.profile_page.wep_key_4.maxLength = 5;
-       }
-    }
-    else {
-       <!-- KEY length 128 bits -->
-       if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0) {
-          <!-- HEX -->
-          document.profile_page.wep_key_1.maxLength = 26;
-          document.profile_page.wep_key_2.maxLength = 26;
-          document.profile_page.wep_key_3.maxLength = 26;
-          document.profile_page.wep_key_4.maxLength = 26;
-       }
-       else {
-          <!-- ASCII -->
-          document.profile_page.wep_key_1.maxLength = 13;
-          document.profile_page.wep_key_2.maxLength = 13;
-          document.profile_page.wep_key_3.maxLength = 13;
-          document.profile_page.wep_key_4.maxLength = 13;
-       }
-    }
+	if (form.wep_key_length.options.selectedIndex == 0)
+	{
+		<!-- KEY length 64 bits -->
+		if (form.wep_key_entry_method.options.selectedIndex == 0)
+		{
+			<!-- HEX -->
+			form.wep_key_1.maxLength = 10;
+			form.wep_key_2.maxLength = 10;
+			form.wep_key_3.maxLength = 10;
+			form.wep_key_4.maxLength = 10;
+		}
+		else
+		{
+			<!-- ASCII -->
+			form.wep_key_1.maxLength = 5;
+			form.wep_key_2.maxLength = 5;
+			form.wep_key_3.maxLength = 5;
+			form.wep_key_4.maxLength = 5;
+		}
+	}
+	else
+	{
+		<!-- KEY length 128 bits -->
+		if (form.wep_key_entry_method.options.selectedIndex == 0)
+		{
+			<!-- HEX -->
+			form.wep_key_1.maxLength = 26;
+			form.wep_key_2.maxLength = 26;
+			form.wep_key_3.maxLength = 26;
+			form.wep_key_4.maxLength = 26;
+		}
+		else
+		{
+			<!-- ASCII -->
+			form.wep_key_1.maxLength = 13;
+			form.wep_key_2.maxLength = 13;
+			form.wep_key_3.maxLength = 13;
+			form.wep_key_4.maxLength = 13;
+		}
+	}
 }
 
 function securityMode()
@@ -809,13 +763,16 @@ function hideWep()
 	document.getElementById("div_wep").style.visibility = "hidden";
 	document.getElementById("div_wep").style.display = "none";
 	//document.profile_page.wep_auth_type.disabled = true;
-	document.profile_page.wep_key_length.disabled = true;
-	document.profile_page.wep_key_entry_method.disabled = true;
-	document.profile_page.wep_key_1.disabled = true;
-	document.profile_page.wep_key_2.disabled = true;
-	document.profile_page.wep_key_3.disabled = true;
-	document.profile_page.wep_key_4.disabled = true;
-	document.profile_page.wep_default_key.disabled = true;
+	
+	var form = document.profile_page;
+
+	form.wep_key_length.disabled = true;
+	form.wep_key_entry_method.disabled = true;
+	form.wep_key_1.disabled = true;
+	form.wep_key_2.disabled = true;
+	form.wep_key_3.disabled = true;
+	form.wep_key_4.disabled = true;
+	form.wep_default_key.disabled = true;
 }
 function showWep()
 {
@@ -838,38 +795,43 @@ function showWep()
 	document.profile_page.wep_key_4.disabled = false;
 	document.profile_page.wep_default_key.disabled = false;
 
-	if (document.profile_page.wep_key_length.options.selectedIndex == 0) {
+	if (document.profile_page.wep_key_length.options.selectedIndex == 0)
+	{
 		<!-- KEY length 64 bits -->
-		if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0) {
-		  <!-- HEX -->
-		  document.profile_page.wep_key_1.maxLength = 10;
-		  document.profile_page.wep_key_2.maxLength = 10;
-		  document.profile_page.wep_key_3.maxLength = 10;
-		  document.profile_page.wep_key_4.maxLength = 10;
+		if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0)
+		{
+			<!-- HEX -->
+			document.profile_page.wep_key_1.maxLength = 10;
+			document.profile_page.wep_key_2.maxLength = 10;
+			document.profile_page.wep_key_3.maxLength = 10;
+			document.profile_page.wep_key_4.maxLength = 10;
 		}
-		else {
-		  <!-- ASCII -->
-		  document.profile_page.wep_key_1.maxLength = 5;
-		  document.profile_page.wep_key_2.maxLength = 5;
-		  document.profile_page.wep_key_3.maxLength = 5;
-		  document.profile_page.wep_key_4.maxLength = 5;
+		else
+		{
+			<!-- ASCII -->
+			document.profile_page.wep_key_1.maxLength = 5;
+			document.profile_page.wep_key_2.maxLength = 5;
+			document.profile_page.wep_key_3.maxLength = 5;
+			document.profile_page.wep_key_4.maxLength = 5;
 		}
 	}
 	else {
 		<!-- KEY length 128 bits -->
-		if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0) {
-		  <!-- HEX -->
-		  document.profile_page.wep_key_1.maxLength = 26;
-		  document.profile_page.wep_key_2.maxLength = 26;
-		  document.profile_page.wep_key_3.maxLength = 26;
-		  document.profile_page.wep_key_4.maxLength = 26;
+		if (document.profile_page.wep_key_entry_method.options.selectedIndex == 0)
+		{
+			<!-- HEX -->
+			document.profile_page.wep_key_1.maxLength = 26;
+			document.profile_page.wep_key_2.maxLength = 26;
+			document.profile_page.wep_key_3.maxLength = 26;
+			document.profile_page.wep_key_4.maxLength = 26;
 		}
-		else {
-		  <!-- ASCII -->
-		  document.profile_page.wep_key_1.maxLength = 13;
-		  document.profile_page.wep_key_2.maxLength = 13;
-		  document.profile_page.wep_key_3.maxLength = 13;
-		  document.profile_page.wep_key_4.maxLength = 13;
+		else
+		{
+			<!-- ASCII -->
+			document.profile_page.wep_key_1.maxLength = 13;
+			document.profile_page.wep_key_2.maxLength = 13;
+			document.profile_page.wep_key_3.maxLength = 13;
+			document.profile_page.wep_key_4.maxLength = 13;
 		}
 	}
 }
@@ -928,296 +890,306 @@ function check_Wep(securitymode)
 	}
 	return true;
 }
-	
-function submit_apply()
+</script>
+
+<script type="text/javascript">
+function applyForm()
 {
 	if (checkData() == true)
 	{
 		document.profile_page.submit();
-		opener.location.reload();
-		window.close();
+		window.opener.location.reload();
+//		window.close();
 	}
 }
 </script>
 </head>
 
-<body onLoad="initValue()" onUnload="profileClose()">
+<body onLoad="initValue();" onUnload="profileClose();">
 <table class="body"><tr><td>
 
 
-<form method=post name="profile_page" action="/goform/addStaProfile">
+<form method="POST" name="profile_page" action="/goform/addStaProfile">
+
 <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="addprofSysConf">System Configuration</td>
-  </tr>
-  <tr>
-    <td class="head" id="addprofProfName">Profile Name</td>
-    <td><input type=text name="profile_name" maxlength=32></td>
-  </tr>
-  <tr>
-    <td class="head" id="addprofSSID">SSID</td>
-    <td><input type=text name="Ssid" maxlength=32></td>
-  </tr>
-  <tr>
-    <td class="head" id="addprofNetType">Network Type</td>
-    <td>
-      <select name="network_type" size="1" onChange="networkTypeChange()">
-	<option value=0 id="addprofAdHoc">802.11 Ad Hoc</option>
-	<option value=1 id="addprofInfra" selected>Infrastructure</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_power_saving_mode" name="div_power_saving_mode">
-    <td class="head" id="addprofPWSave">Power Saving Mode</td>
-    <td>
-      <input type=radio name="power_saving_mode" value="0" checked><font id="addprofCAM">CAM (Constantly Awake Mode)</font>
-      <br>
-      <input type=radio name="power_saving_mode" value="1"><font id="addprofPWSaveMode">Power Saving Mode</font>
-    </td>
-  </tr>
-  <tr id="div_channel" name="div_channel">
-    <td class="head" id="addprofChannel">Channel</td>
-    <td>
-      <select name="channel" size="1">
-	<script>getChannel();</script>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_b_premable_type" name="div_b_premable_type">
-    <td class="head" id="addprofPreambleType">11B Premable Type</td>
-    <td>
-      <select name="b_premable_type" size="1">
-	<option value=0 id="addprofPremableAuto" selected>Auto</option>
-	<option value=1 id="addprofPremableLong">Long</option>
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="addprofRTS"> RTS Threshold </td>
-    <td>
-      <input type=checkbox name=rts_threshold onClick="RTSThresholdChange()"><font id="addprofRTSUsed"> Used &nbsp;&nbsp;</font>
-      <input type=text name=rts_thresholdvalue value=2347>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="addprofFrag"> Fragement Threshold </td>
-    <td>
-      <input type=checkbox name=fragment_threshold onClick="FragmentThresholdChange()"><font id="addprofFragUsed"> Used &nbsp;&nbsp;</font>
-      <input type=text name=fragment_thresholdvalue value=2346>
-    </td>
-  </tr>
+<tr>
+	<td class="title" colspan="2" id="addprofSysConf">System Configuration</td>
+</tr>
+<tr>
+	<td class="head" id="addprofProfName">Profile Name</td>
+	<td><input type=text name="profile_name" maxlength=32></td>
+</tr>
+<tr>
+	<td class="head" id="addprofSSID">SSID</td>
+	<td><input type=text name="Ssid" maxlength=32></td>
+</tr>
+<tr>
+	<td class="head" id="addprofNetType">Network Type</td>
+	<td>
+		<select name="network_type" size="1" onChange="networkTypeChange()">
+			<option value="0" id="addprofAdHoc">802.11 Ad Hoc</option>
+			<option value="1" id="addprofInfra" selected>Infrastructure</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_power_saving_mode">
+	<td class="head" id="addprofPWSave">Power Saving Mode</td>
+	<td>
+		<input type="radio" name="power_saving_mode" value="0" checked><font id="addprofCAM">CAM (Constantly Awake Mode)</font>
+		<br>
+		<input type="radio" name="power_saving_mode" value="1"><font id="addprofPWSaveMode">Power Saving Mode</font>
+	</td>
+</tr>
+<tr id="div_channel">
+	<td class="head" id="addprofChannel">Channel</td>
+	<td>
+		<select name="channel" size="1">
+			<script type="text/javascript">getChannel();</script>
+		</select>
+	</td>
+</tr>
+<tr id="div_b_premable_type">
+	<td class="head" id="addprofPreambleType">11B Premable Type</td>
+	<td>
+		<select name="b_premable_type" size="1">
+			<option value="0" id="addprofPremableAuto" selected>Auto</option>
+			<option value="1" id="addprofPremableLong">Long</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="addprofRTS"> RTS Threshold </td>
+	<td>
+		<input type="checkbox" name="rts_threshold" onClick="RTSThresholdChange()"><font id="addprofRTSUsed"> Used &nbsp;&nbsp;</font>
+		<input type="text" name="rts_thresholdvalue" value=2347>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="addprofFrag"> Fragement Threshold </td>
+	<td>
+		<input type="checkbox" name="fragment_threshold" onClick="FragmentThresholdChange()"><font id="addprofFragUsed"> Used &nbsp;&nbsp;</font>
+		<input type="text" name="fragment_thresholdvalue" value=2346>
+	</td>
+</tr>
 </table>
+
 <hr width="90%" align="left">
 
 <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="addprofSecurePolicy">Security Policy</td>
-  </tr>
-  <tr id="div_security_infra_mode" name="div_security_infra_mode"> 
-    <td class="head" id="addprofSecureMode">Security Mode</td>
-    <td>
-      <select name="security_infra_mode" id="security_infra_mode" size="1" onChange="securityMode()">
-	<option value=0 selected>OPEN</option>
-	<option value=1>SHARED</option>
-	<option value=4>WPA-Personal</option>
-	<option value=7>WPA2-Personal</option>
-<!--	<option value=3>WPA-Enterprise</option>
-	<option value=6>WPA2-Enterprise</option>
-	<option value=8>802.1x</option>
--->      </select>
-    </td>
-  </tr>
-  <tr id="div_security_adhoc_mode" name="div_security_adhoc_mode"> 
-    <td class="head"i id="addprofAdHocSecure">Security Mode</td>
-    <td>
-      <select name="security_adhoc_mode" id="security_adhoc_mode" size="1" onChange="securityMode()">
-	<option value=0 id="addprofAdHocOpen" selected>OPEN</option>
-	<option value=1 id="addprofAdHocShared">SHARED</option>
-	<option value=5 id="addprofAdHocWPA-None">WPA-NONE</option>
-      </select>
-    </td>
-  </tr>
+<tr>
+	<td class="title" colspan="2" id="addprofSecurePolicy">Security Policy</td>
+</tr>
+<tr id="div_security_infra_mode"> 
+	<td class="head" id="addprofSecureMode">Security Mode</td>
+	<td>
+		<select name="security_infra_mode" id="security_infra_mode" size="1" onChange="securityMode()">
+			<option value="0" selected>OPEN</option>
+			<option value="1">SHARED</option>
+			<option value="4">WPA-Personal</option>
+			<option value="7">WPA2-Personal</option>
+<!--			<option value="3">WPA-Enterprise</option>
+			<option value="6">WPA2-Enterprise</option>
+			<option value="8">802.1x</option>
+-->		</select>
+	</td>
+</tr>
+<tr id="div_security_adhoc_mode"> 
+	<td class="head" id="addprofAdHocSecure">Security Mode</td>
+	<td>
+		<select name="security_adhoc_mode" id="security_adhoc_mode" size="1" onChange="securityMode()">
+			<option value="0" id="addprofAdHocOpen" selected>OPEN</option>
+			<option value="1" id="addprofAdHocShared">SHARED</option>
+			<option value="5" id="addprofAdHocWPA-None">WPA-NONE</option>
+		</select>
+	</td>
+</tr>
 </table>
-<br />
+
+<br>
 
 <!-- WEP -->
 <table id="div_wep" name="div_wep" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="3" id="addprofWEP">Wire Equivalence Protection (WEP)</td>
-  </tr>
-  <tr> 
-    <td class="head" colspan="2" id="addprofWEPKeyLength">WEP Key Length</td>
-    <td>
-      <select name="wep_key_length" size="1" onChange="wep_switch_key_length()">
-	<option value=0 selected>64 bit (10 hex digits / 5 ascii keys)</option>
-	<option value=1>128 bit (26 hex digits / 13 ascii keys)</option>
-      </select>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" colspan="2" id="addprofWEPKeyEntryMethod">WEP Key Entry Method</td>
-    <td>
-      <select name="wep_key_entry_method" size="1" onChange="wep_switch_key_length()">
-	<option value=0 id="addprofHex" selected >Hexadecimal</option>
-	<option value=1 id="addprofASCII">Ascii Text</option>
-      </select>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head1" rowspan="4" id="addprofWEPKey">WEP Keys</td>
-    <td class="head2" id="addprofWEPKey1">WEP Key 1 :</td>
-    <td><input type=password name=wep_key_1 maxlength=26 value=""></td>
-  </tr>
-  <tr> 
-    <td class="head2" id="addprofWEPKey2">WEP Key 2 : </td>
-    <td><input type=password name=wep_key_2 maxlength=26 value=""></td>
-  </tr>
-  <tr> 
-    <td class="head2" id="addprofWEPKey3">WEP Key 3 : </td>
-    <td><input type=password name=wep_key_3 maxlength=26 value=""></td>
-  </tr>
-  <tr> 
-    <td class="head2" id="addprofWEPKey4">WEP Key 4 : </td>
-    <td><input type=password name=wep_key_4 maxlength=26 value=""></td>
-  </tr>
-  <tr> 
-    <td class="head" colspan="2" id="addprofDefaultKey">Default Key</td>
-    <td>
-      <select name="wep_default_key" size="1">
-	<option value=1 selected id="addprofDKey1">Key 1</option>
-	<option value=2 id="addprofDKey2">Key 2</option>
-	<option value=3 id="addprofDKey3">Key 3</option>
-	<option value=4 id="addprofDKey4">Key 4</option>
-      </select>
-    </td>
-  </tr>
+<tr>
+	<td class="title" colspan="3" id="addprofWEP">Wire Equivalence Protection (WEP)</td>
+</tr>
+<tr> 
+	<td class="head" colspan="2" id="addprofWEPKeyLength">WEP Key Length</td>
+	<td>
+		<select name="wep_key_length" size="1" onChange="wep_switch_key_length()">
+			<option value="0" selected>64 bit (10 hex digits / 5 ascii keys)</option>
+			<option value="1">128 bit (26 hex digits / 13 ascii keys)</option>
+		</select>
+	</td>
+</tr>
+<tr> 
+	<td class="head" colspan="2" id="addprofWEPKeyEntryMethod">WEP Key Entry Method</td>
+	<td>
+		<select name="wep_key_entry_method" size="1" onChange="wep_switch_key_length()">
+			<option value="0" id="addprofHex" selected >Hexadecimal</option>
+			<option value="1" id="addprofASCII">Ascii Text</option>
+		</select>
+	</td>
+</tr>
+<tr> 
+	<td class="head1" rowspan="4" id="addprofWEPKey">WEP Keys</td>
+	<td class="head2" id="addprofWEPKey1">WEP Key 1 :</td>
+	<td><input type="password" name="wep_key_1" maxlength="26" value=""></td>
+</tr>
+<tr> 
+	<td class="head2" id="addprofWEPKey2">WEP Key 2 : </td>
+	<td><input type="password" name="wep_key_2" maxlength="26" value=""></td>
+</tr>
+<tr> 
+	<td class="head2" id="addprofWEPKey3">WEP Key 3 : </td>
+	<td><input type="password" name="wep_key_3" maxlength="26" value=""></td>
+</tr>
+<tr> 
+	<td class="head2" id="addprofWEPKey4">WEP Key 4 : </td>
+	<td><input type="password" name="wep_key_4" maxlength="26" value=""></td>
+</tr>
+<tr> 
+	<td class="head" colspan="2" id="addprofDefaultKey">Default Key</td>
+	<td>
+		<select name="wep_default_key" size="1">
+			<option value="1" selected id="addprofDKey1">Key 1</option>
+			<option value="2" id="addprofDKey2">Key 2</option>
+			<option value="3" id="addprofDKey3">Key 3</option>
+			<option value="4" id="addprofDKey4">Key 4</option>
+		</select>
+	</td>
+</tr>
 </table>
-<br />
+<br>
 
 <!-- WPA -->
-<table id="div_wpa" name="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="addprofWPA">WPA</td>
-  </tr>
-  <tr id="div_wpa_algorithms" name="div_wpa_algorithms"> 
-    <td class="head" id="addprofWPAAlg">WPA Algorithms</td>
-    <td>
-      <input type=radio name="cipher" id="cipher" value="0" checked>TKIP &nbsp;
-      <input type=radio name="cipher" id="cipher" value="1">AES &nbsp;
-    </td>
-  </tr>
-  <tr id="wpa_passphrase" name="wpa_passphrase">
-    <td class="head" id="addprofPassPhrase">Pass Phrase</td>
-    <td>
-      <input type=password name=passphrase size=28 maxlength=64 value="">
-    </td>
-  </tr>
+<table id="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<tr>
+	<td class="title" colspan="2" id="addprofWPA">WPA</td>
+</tr>
+<tr id="div_wpa_algorithms"> 
+	<td class="head" id="addprofWPAAlg">WPA Algorithms</td>
+	<td>
+		<input type="radio" name="cipher" value="0" checked>TKIP &nbsp;
+		<input type="radio" name="cipher" value="1">AES &nbsp;
+	</td>
+</tr>
+<tr id="wpa_passphrase">
+	<td class="head" id="addprofPassPhrase">Pass Phrase</td>
+	<td>
+		<input type="password" name="passphrase" size="28" maxlength="64" value="">
+	</td>
+</tr>
 </table>
-<br />
+
+<br>
 
 <!-- 802.1x -->
-<table id="div_8021x" name="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" >802.1x</td>
-  </tr>
-  <tr id="div_8021x_cert_from_1x" name="div_8021x_cert_from_1x">
-    <td class="head" id="addprof1XAuthType">Authentication Type</td>
-    <td>
-      <select name="cert_auth_type_from_1x" id="cert_auth_type_from_1x" size="1" onChange="certAuthModeChange()">
-	<option value=5 selected>PEAP</option>
-	<option value=6>TTLS</option>
-	<option value=4>TLS</option>
-	<option value=0>MD5</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_8021x_cert_from_wpa" name="div_8021x_cert_from_wpa">
-    <td class="head" id="addprofWPAAuthType">Authentication Type</td>
-    <td>
-      <select name="cert_auth_type_from_wpa" id="cert_auth_type_from_wpa" size="1" onChange="certAuthModeChange()">
-	<option value=5 selected>PEAP</option>
-	<option value=6>TTLS</option>
-	<option value=4>TLS</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_tunnel_auth_peap" name="div_tunnel_auth_peap">
-    <td class="head" id="addprofPEAPTunnelAtuth">Tunnel Authentication</td>
-    <td>
-      <select name="cert_tunnel_auth_peap" id="cert_tunnel_auth_peap" size="1">
-	<option value=1 selected>MSCHAP v2</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_tunnel_auth_ttls" name="div_tunnel_auth_ttls">
-    <td class="head" id="addprofTTLSTunnelAuth">Tunnel Authentication</td>
-    <td>
-      <select name="cert_tunnel_auth_ttls" id="cert_tunnel_auth_ttls" size="1">
-	<option value=0 selected>MSCHAP</option>
-	<option value=1>MSCHAP v2</option>
-	<option value=2>PAP</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_identity" name="div_identity">
-    <td class="head" id="addprofIdentity">Identity</td>
-    <td>
-      <input type=text name="cert_id" maxlength=32>
-    </td>
-  </tr>
-  <tr id="div_password" name="div_password">
-    <td class="head" id="addprofPasswd">Password</td>
-    <td>
-      <input type=password name="cert_password" maxlength=32>
-    </td>
-  </tr>
-  <tr id="div_use_client_cert" name="div_use_client_cert">
-    <td class="head" id="addprofClientCert">Client Certificate</td>
-    <td>
-      <input type=checkbox name="cert_use_client_cert" onClick="use_client_cert()"><font id="addprofClientCertUsed">Used</font>
-    </td>
-  </tr>
-  <tr id="div_client_cert_path" name="div_client_cert_path">
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofClientCertPath">Client Certificate Path</font></td>
-    <td>
-      <input type=text name="cert_client_cert_path" maxlength=64>
-    </td>
-  </tr>
-  <tr id="div_private_key_path" name="div_private_key_path">
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofPrivateKeyPath">Private Key Path</font></td>
-    <td>
-      <input type=text name="cert_private_key_path" maxlength=64>
-    </td>
-  </tr>
-  <tr id="div_private_key_password" name="div_private_key_password">
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofPrivateKeyPasswd">Private Key Password</font></td>
-    <td>
-      <input type=text name="cert_private_key_password" maxlength=32>
-    </td>
-  </tr>
-  <tr id="div_use_ca_cert" name="div_use_ca_cert">
-    <td class="head" id="addprofCACert">CA Certificate</td>
-    <td>
-      <input type=checkbox name="cert_use_ca_cert" onClick="use_ca_cert()"><font id="addprofCACertUsed">Used</font>
-    </td>
-  </tr>
-  <tr id="div_ca_cert_path" name="div_ca_cert_path">
-    <td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofCACertPath">CA Certificate Path</font></td>
-    <td>
-      <input type=text name="cert_ca_cert_path" maxlength=64>
-    </td>
-  </tr>
+<table id="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<tr>
+	<td class="title" colspan="2" >802.1x</td>
+</tr>
+<tr id="div_8021x_cert_from_1x">
+	<td class="head" id="addprof1XAuthType">Authentication Type</td>
+	<td>
+		<select name="cert_auth_type_from_1x" id="cert_auth_type_from_1x" size="1" onChange="certAuthModeChange()">
+			<option value="5" selected>PEAP</option>
+			<option value="6">TTLS</option>
+			<option value="4">TLS</option>
+			<option value="0">MD5</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_8021x_cert_from_wpa">
+	<td class="head" id="addprofWPAAuthType">Authentication Type</td>
+	<td>
+		<select name="cert_auth_type_from_wpa" id="cert_auth_type_from_wpa" size="1" onChange="certAuthModeChange()">
+			<option value="5" selected>PEAP</option>
+			<option value="6">TTLS</option>
+			<option value="4">TLS</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_tunnel_auth_peap">
+	<td class="head" id="addprofPEAPTunnelAtuth">Tunnel Authentication</td>
+	<td>
+		<select name="cert_tunnel_auth_peap" id="cert_tunnel_auth_peap" size="1">
+			<option value="1" selected>MSCHAP v2</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_tunnel_auth_ttls">
+	<td class="head" id="addprofTTLSTunnelAuth">Tunnel Authentication</td>
+	<td>
+		<select name="cert_tunnel_auth_ttls" id="cert_tunnel_auth_ttls" size="1">
+			<option value="0" selected>MSCHAP</option>
+			<option value="1">MSCHAP v2</option>
+			<option value="2">PAP</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_identity">
+	<td class="head" id="addprofIdentity">Identity</td>
+	<td>
+		<input type="text" name="cert_id" maxlength="32">
+	</td>
+</tr>
+<tr id="div_password">
+	<td class="head" id="addprofPasswd">Password</td>
+	<td>
+		<input type="password" name="cert_password" maxlength="32">
+	</td>
+</tr>
+<tr id="div_use_client_cert">
+	<td class="head" id="addprofClientCert">Client Certificate</td>
+	<td>
+		<input type="checkbox" name="cert_use_client_cert" onClick="use_client_cert()"><font id="addprofClientCertUsed">Used</font>
+	</td>
+</tr>
+<tr id="div_client_cert_path">
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofClientCertPath">Client Certificate Path</font></td>
+	<td>
+		<input type="text" name="cert_client_cert_path" maxlength="64">
+	</td>
+</tr>
+<tr id="div_private_key_path" name="div_private_key_path">
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofPrivateKeyPath">Private Key Path</font></td>
+	<td>
+		<input type="text" name="cert_private_key_path" maxlength="64">
+	</td>
+</tr>
+<tr id="div_private_key_password">
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofPrivateKeyPasswd">Private Key Password</font></td>
+	<td>
+		<input type="text" name="cert_private_key_password" maxlength="32">
+	</td>
+</tr>
+<tr id="div_use_ca_cert">
+	<td class="head" id="addprofCACert">CA Certificate</td>
+	<td>
+		<input type="checkbox" name="cert_use_ca_cert" onClick="use_ca_cert()"><font id="addprofCACertUsed">Used</font>
+	</td>
+</tr>
+<tr id="div_ca_cert_path">
+	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="addprofCACertPath">CA Certificate Path</font></td>
+	<td>
+		<input type="text" name="cert_ca_cert_path" maxlength="64">
+	</td>
+</tr>
 </table>
-<br />
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="addprofApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="addprofCancel" onClick="window.close()">
-    </td>
-  </tr>
+<br>
+
+<table width="90%" border="0" cellpadding="2" cellspacing="1">
+<tr align="center">
+	<td>
+		<input type="button" name="applyButton" style="{width:120px;}" value="Apply" id="addprofApply" onClick="applyForm();"> &nbsp; &nbsp;
+		<input type="button" name="resetButton" style="{width:120px;}" value="Cancel" id="addprofCancel" onClick="window.close();">
+	</td>
+</tr>
 </table>
 </form>
 
-</td></tr></table>
+</td></tr>
+</table>
+</body>
+</html>

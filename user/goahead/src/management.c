@@ -160,9 +160,10 @@ static void NTPSyncWithHost(webs_t wp, char_t *path, char_t *query)
 		return;
 	if(strchr(query, ';'))
 		return;
+		
+	printf("date=%s\n", query);
 
 	doSystem("date -s %s", query);
-
 
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("n/a"));

@@ -100,48 +100,12 @@ function initValue()
 
 function syncWithHost()
 {
-	var currentTime = new Date();
-
-	var seconds = currentTime.getSeconds();
-	var minutes = currentTime.getMinutes();
-	var hours = currentTime.getHours();
-	var month = currentTime.getMonth() + 1;
-	var day = currentTime.getDate();
-	var year = currentTime.getFullYear();
-
-	var seconds_str = " ";
-	var minutes_str = " ";
-	var hours_str = " ";
-	var month_str = " ";
-	var day_str = " ";
-	var year_str = " ";
-
-	if (seconds < 10)
-		seconds_str = "0" + seconds;
-	else
-		seconds_str = "" + seconds;
-
-	if (minutes < 10)
-		minutes_str = "0" + minutes;
-	else
-		minutes_str = "" + minutes;
-
-	if (hours < 10)
-		hours_str = "0" + hours;
-	else
-		hours_str = "" + hours;
-
-	if (month < 10)
-		month_str = "0" + month;
-	else
-		month_str = "" + month;
-
-	if (day < 10)
-		day_str = "0" + day;
-	else
-		day_str = day;
-
-	var tmp = month_str + day_str + hours_str + minutes_str + year + " ";
+	var cTime = new Date();
+	
+	var tmp = sprintf('%04d%02d%02d%02d%02d%02d',
+			cTime.getFullYear(), cTime.getMonth()+1, cTime.getDay(),
+			cTime.getHours(), cTime.getMinutes(), cTime.getSeconds());
+	
 	ajaxPostRequest("/goform/NTPSyncWithHost", tmp, true);
 }
 

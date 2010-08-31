@@ -1,4 +1,3 @@
-/* vi: set sw=4 ts=4 sts=4: */
 /*
  *  station.c -- Station Mode
  *
@@ -3729,11 +3728,14 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	
 	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
 	tmpProfileSetting.Next = NULL;
+	
+	printf("query=%s\n", query);
 
 	//profile name
 	// TODO: to tell profile is duplication with other
 	value = websGetVar(wp, T("profile_name"), T(""));
-	if (strlen(value) <= 0) {
+	if (strlen(value) <= 0)
+	{
 		websError(wp, 500, T("No profile name given!"));
 		return;
 	}
@@ -3818,12 +3820,14 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "staPreamType", tmp_buffer);
 
 	//rts threshold value
-	if (websCompareVar(wp, T("rts_threshold"), T("on"))) {
+	if (websCompareVar(wp, T("rts_threshold"), T("on")))
+	{
 		tmpProfileSetting.RTSCheck = 1;
 		value = websGetVar(wp, T("rts_thresholdvalue"), T("2347"));
 		tmpProfileSetting.RTS = atoi(value);
 	}
-	else {
+	else
+	{
 		tmpProfileSetting.RTSCheck = 0;
 		tmpProfileSetting.RTS = 2347;
 	}
@@ -4182,6 +4186,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//write into /etc/rt61sta.ui
 	//writeProfileToFile(&tmpProfileSetting);
+	websRedirect(wp, "/form_close.asp");
 
 	tmpProfileSetting.Active = 0;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staActive");

@@ -393,6 +393,15 @@ function submitClick(form)
 		return false;
 	}
 	
+	if (form.vpn_type.value != "0")
+	{
+		if ((!validateIP(form.vpn_type, false)) && (!validateDNS(form.vpn_type, false)))
+		{
+			alert("Invalid IP address or domain name!");
+			form.vpn_type.focus();
+			return false;
+		}
+	}
 
 	rememberRoutingTable(form); // Remember routing table
 
@@ -461,7 +470,8 @@ tunnel on your Router.
 				<option value="0" selected="selected">PPPoE client</option>
 				<option value="1">PPTP  client</option>
 				<option value="2">L2TP  client</option>
-				<option value="3">L2TP  server</option>
+				<!-- No L2TP support now
+				<option value="3">L2TP  server</option> -->
 			</select>
 		</td>
 	</tr>

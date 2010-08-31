@@ -79,7 +79,7 @@ function PageInit()
 
 <h1 id="profTitle">Station Profile</h1>
 <p id="profIntroduction">The Status page shows the settings and current operation status of the Station.</p>
-<hr />
+<hr>
 
 <form method="post" name="sta_profile" action="/goform/setStaProfile">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">

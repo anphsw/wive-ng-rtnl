@@ -288,7 +288,7 @@ function ipportFormCheck(form)
 		}
 	}
 	
-	if (form.sip_addres.value != "")
+	if (form.sip_address.value != "")
 	{
 		if (!validateIP(form.sip_address, true))
 		{

@@ -63,6 +63,26 @@ function validateIPMask(ip, info)
 	return true;
 }
 
+function validateDNS(dns, info)
+{
+	var re = /^(?:([a-zA-Z0-9\-]+)\.){0,}[a-zA-Z0-9\-]+\.?$/;
+	
+	if (dns.value == "")
+	{
+		if (info)
+			alert("Error. Domain name is invalid.");
+		return false;
+	}
+	if (!re.test(dns.value))
+	{
+		if (info)
+			alert("Error. Invalid domain name format!");
+		return false;
+	}
+	
+	return true;
+}
+
 function checkDigitRange(value, start, stop)
 {
 	var re = /^\d+$/;
