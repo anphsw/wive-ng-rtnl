@@ -212,7 +212,7 @@ static RAW_NOTIFIER_HEAD(netdev_chain);
  *	Device drivers call our routines to queue packets here. We empty the
  *	queue in the local softnet handler.
  */
-DEFINE_PER_CPU_ALIGNED(struct softnet_data, softnet_data) = { NULL };
+DEFINE_PER_CPU(struct softnet_data, softnet_data) = { NULL };
 
 #ifdef CONFIG_SYSFS
 extern int netdev_sysfs_init(void);
