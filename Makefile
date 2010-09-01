@@ -459,7 +459,9 @@ dist-prep:
 		$(MAKEARCH) -C `dirname $$t` -f `basename $$t` $@; \
 	 done
 
-web:
+web: web_make romfs image
+
+web_make:
 	$(MAKE) -C user web
 
 ############################################################################
