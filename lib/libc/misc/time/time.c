@@ -455,6 +455,7 @@ char *ctime(const time_t *clock)
 char *ctime_r(const time_t *clock, char *buf)
 {
 	struct tm xtm;
+	memset(&xtm, 0, sizeof(xtm));
 
 	return asctime_r(localtime_r(clock, &xtm), buf);
 }
