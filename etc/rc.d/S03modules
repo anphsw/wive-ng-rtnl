@@ -5,7 +5,6 @@
 
 LOG="echo MODULES: "
 
-opmode=`nvram_get 2860 OperationMode`
 start() {
     #if goahead not started
     if [ ! -f /tmp/webrun ]; then
@@ -14,11 +13,9 @@ start() {
 	ln -sf /tmp/modules.dep /etc/modules.dep
     else
 	$LOG "Prepare wifi config..."
-	clone_en=`nvram_get 2860 macCloneEnabled`
-	clone_mac=`nvram_get 2860 macCloneMac`
+	get_param
 	rm -rf /etc/Wireless/RT2860/RT2860.dat
 	ralink_init make_wireless_config rt2860
-	WMAC=`nvram_get WLAN_MAC_ADDR`
 	if [ "$WMAC" != "" ]; then
 	    mac="mac=$WMAC"
 	else
@@ -64,6 +61,13 @@ ra0flushadress()
     if [ "$CONFIG_IPV6" != "" ] ; then
         ip -6 addr flush dev ra0 > /dev/null 2>&1
     fi
+}
+
+get_param() {
+	opmode=`nvram_get 2860 OperationMode`
+	clone_en=`nvram_get 2860 macCloneEnabled`
+	clone_mac=`nvram_get 2860 macCloneMac`
+	WMAC=`nvram_get WLAN_MAC_ADDR`
 }
 
 case "$1" in

@@ -4,14 +4,13 @@ LOG="echo PASSWD: "
 
 start() {
  $LOG "Set current password"
-    #get user/password    
-    admID=`nvram_get 2860 Login`
+    #get user/password
+    get_param    
+
     if [ "$admID" = "" ]; then
         admID="Admin"
         nvram_set 2860 Login Admin
     fi
-
-    admPW=`nvram_get 2860 Password`
     if [ "$admPW" = "" ]; then
         admPW="Admin"
         nvram_set 2860 Password Admin
@@ -33,6 +32,10 @@ stop() {
  $LOG " "
 }
 
+get_param() {
+    admID=`nvram_get 2860 Login`
+    admPW=`nvram_get 2860 Password`
+}
 case "$1" in
 	start)
 	    start

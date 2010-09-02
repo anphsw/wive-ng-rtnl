@@ -10,9 +10,7 @@ LOG="echo WSCD: "
 
 start() {
 if [ -f /bin/wscd ]; then
-    wsc=`nvram_get 2860 WscModeOption`
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    opmode=`nvram_get 2860 OperationMode`
+    get_param
     if [ "$wsc" = "1" ]; then
       $LOG "Starting WPS: "
 	if [ "$opmode" = "0" ]; then
@@ -27,6 +25,12 @@ fi
 stop() {
  $LOG "Stopping WPS: "
     killall -q wscd
+}
+
+get_param() {
+    wsc=`nvram_get 2860 WscModeOption`
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    opmode=`nvram_get 2860 OperationMode`
 }
 
 case "$1" in

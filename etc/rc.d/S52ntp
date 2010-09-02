@@ -9,9 +9,7 @@ web_wait
 LOG="echo NTP: "
 
 start() {
-    srv=`nvram_get 2860 NTPServerIP`
-    sync=`nvram_get 2860 NTPSync`
-    tz=`nvram_get 2860 TZ`
+    get_param
 
     $LOG "Set timezone: "
     backup_time=`date +%T`
@@ -37,6 +35,12 @@ start() {
 stop() {
  $LOG "Stopping NTPD: "
     killall -q ntpd
+}
+
+get_param() {
+    srv=`nvram_get 2860 NTPServerIP`
+    sync=`nvram_get 2860 NTPSync`
+    tz=`nvram_get 2860 TZ`
 }
 
 case "$1" in

@@ -12,16 +12,11 @@ start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     if [ "$vpnEnabled" = "on" ]; then
      $LOG "Start vpnhelper"
-      #get param
-      vpnType=`nvram_get 2860 vpnType`
-      USER=`nvram_get 2860 vpnUser`
-      PASSWORD=`nvram_get 2860 vpnPassword`
-
+      get_param
       #clear all configs and generate new
-      ppp=/etc/ppp                                                                                                                                
-      echo > $ppp/chap-secrets                                                                                                                    
-      echo > $ppp/pap-secrets                                                                                                                     
-      echo > $ppp/connect-errors 
+      echo > $ppp/chap-secrets
+      echo > $ppp/pap-secrets
+      echo > $ppp/connect-errors
       echo "$USER * $PASSWORD *" > $ppp/chap-secrets
       echo "$USER * $PASSWORD *" > $ppp/pap-secrets
 
@@ -55,6 +50,14 @@ stop() {
     rmmod pppol2tp > /dev/null 2>&1
     rmmod pptp     > /dev/null 2>&1
     rmmod ppp_generic     > /dev/null 2>&1
+}
+
+get_param() {
+      #get param
+      vpnType=`nvram_get 2860 vpnType`
+      USER=`nvram_get 2860 vpnUser`
+      PASSWORD=`nvram_get 2860 vpnPassword`
+      ppp=/etc/ppp
 }
 
 case "$1" in

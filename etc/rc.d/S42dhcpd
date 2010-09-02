@@ -12,16 +12,7 @@ start() {
 	dhcp=`nvram_get 2860 dhcpEnabled`
 	if [ "$dhcp" = "1" ]; then
 	    $LOG "Start dhcpserver "
-		start=`nvram_get 2860 dhcpStart`
-		end=`nvram_get 2860 dhcpEnd`
-		mask=`nvram_get 2860 dhcpMask`
-		pd=`nvram_get 2860 dhcpPriDns`
-		sd=`nvram_get 2860 dhcpSecDns`
-		gw=`nvram_get 2860 dhcpGateway`
-		lease=`nvram_get 2860 dhcpLease`
-		static1=`nvram_get 2860 dhcpStatic1`
-		lan_ip=`nvram_get 2860 lan_ipaddr`
-		SmbEnabled=`nvram_get 2860 SmbEnabled`
+	    get_param
 
 		> /etc/udhcpd.conf
 		> /var/udhcpd.leases
@@ -58,6 +49,19 @@ start() {
 stop() {
 	$LOG "Stop dhcpserver "
 	killall -q udhcpd
+}
+
+get_param() {
+	start=`nvram_get 2860 dhcpStart`
+	end=`nvram_get 2860 dhcpEnd`
+	mask=`nvram_get 2860 dhcpMask`
+	pd=`nvram_get 2860 dhcpPriDns`
+	sd=`nvram_get 2860 dhcpSecDns`
+	gw=`nvram_get 2860 dhcpGateway`
+	lease=`nvram_get 2860 dhcpLease`
+	static1=`nvram_get 2860 dhcpStatic1`
+	lan_ip=`nvram_get 2860 lan_ipaddr`
+	SmbEnabled=`nvram_get 2860 SmbEnabled`
 }
 
 case "$1" in

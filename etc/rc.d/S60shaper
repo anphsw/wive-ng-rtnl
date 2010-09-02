@@ -115,7 +115,6 @@ get_param() {
     nm=`nvram_get 2860 lan_netmask`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     QoSEnable=`nvram_get 2860 QoSEnable`
-    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
 
     #if ppp is up shaper to ppp0 else to wan_if
     if [ "$vpnEnabled" = "on" ]; then
@@ -133,6 +132,7 @@ get_param() {
     fi
 
     #check interfaces is up
+    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
     WANUP=`ip link show up | grep "$wan_if" -c` > /dev/null 2>&1
     LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
 }

@@ -11,7 +11,7 @@ start() {
     $LOG "Run goahead"
     /bin/goahead &
     echo > /tmp/webrun
-    sleep 10
+    sleep 15
 }
 
 stop() {

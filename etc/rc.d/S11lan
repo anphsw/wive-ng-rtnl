@@ -8,21 +8,7 @@ LOG="echo LAN: "
 
 start() {
 $LOG "Start network interfaces..."
- ip=`nvram_get 2860 lan_ipaddr`
- nm=`nvram_get 2860 lan_netmask`
- ip_2=`nvram_get 2860 lan2_ipaddr`
- nm_2=`nvram_get 2860 lan2_netmask`
- gw=`nvram_get 2860 wan_gateway`
- opmode=`nvram_get 2860 OperationMode`
- lan2enabled=`nvram_get 2860 Lan2Enabled`
- brset=`brctl show  | grep br0 -c`
- vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
- brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
- lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
- CHECKMAC=`nvram_get CHECKMAC`
- MAC=`nvram_get WAN_MAC_ADDR`
- WMAC=`nvram_get WLAN_MAC_ADDR`
- LANMAC=`nvram_get LAN_MAC_ADDR`
+get_param
 
 #-------------------CHECK_MAC-----------------------------
     #if check mac in nvram set to not NO and web not start
@@ -144,6 +130,24 @@ $LOG "Stop network interfaces..."
     ip link set "br0:9" down > /dev/null 2>&1
     ip link set "eth2:9" down > /dev/null 2>&1
     brctl delbr br0 > /dev/null 2>&1
+}
+
+get_param() {
+ ip=`nvram_get 2860 lan_ipaddr`
+ nm=`nvram_get 2860 lan_netmask`
+ ip_2=`nvram_get 2860 lan2_ipaddr`
+ nm_2=`nvram_get 2860 lan2_netmask`
+ gw=`nvram_get 2860 wan_gateway`
+ opmode=`nvram_get 2860 OperationMode`
+ lan2enabled=`nvram_get 2860 Lan2Enabled`
+ CHECKMAC=`nvram_get CHECKMAC`
+ MAC=`nvram_get WAN_MAC_ADDR`
+ WMAC=`nvram_get WLAN_MAC_ADDR`
+ LANMAC=`nvram_get LAN_MAC_ADDR`
+ brset=`brctl show  | grep br0 -c`
+ vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
+ brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
+ lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
 
 case "$1" in

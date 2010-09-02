@@ -11,12 +11,7 @@ LOG="echo SAMBA: "
 start() {
 SmbEnabled=`nvram_get 2860 SmbEnabled`
 if [ "$SmbEnabled" = "1" ]; then
-    WorkGroup=`nvram_get 2860  WorkGroup`
-    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
-    SmbString=`nvram_get 2860  SmbString`
-    Login=`nvram_get 2860 Login`
-    CONFIG="/etc/smb.conf"
-
+    get_param
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
 	HOSTNAME_NVRAM=`nvram_get 2860 HostName`
 	WorkGroup="LOCALNET"
@@ -66,6 +61,14 @@ stop() {
       killall -q -9 smbd > /dev/null
       rm -f /var/lock/*mbd.pid
     fi
+}
+
+get_param() {
+    WorkGroup=`nvram_get 2860  WorkGroup`
+    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
+    SmbString=`nvram_get 2860  SmbString`
+    Login=`nvram_get 2860 Login`
+    CONFIG="/etc/smb.conf"
 }
 
 case "$1" in
