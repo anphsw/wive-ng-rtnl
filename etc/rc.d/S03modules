@@ -7,10 +7,11 @@ LOG="echo MODULES: "
 
 start() {
     #if goahead not started
-    if [ ! -f /tmp/webrun ]; then
+    if [ ! -f /tmp/webrun ] && [ ! -f /etc/modules.dep ]; then
 	$LOG "Start modules.dep generate..."
-	depmod -a -n >  /tmp/modules.dep
-	ln -sf /tmp/modules.dep /etc/modules.dep
+	depmod -a -n >  /etc/modules.dep
+	ln -sf /etc/modules.dep /tmp/modules.dep
+	touch /var/MODIFIED
     else
 	$LOG "Prepare wifi config..."
 	get_param
