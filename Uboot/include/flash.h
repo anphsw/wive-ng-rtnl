@@ -24,7 +24,13 @@
 #ifndef _FLASH_H_
 #define _FLASH_H_
 
+
 #ifndef CFG_NO_FLASH
+
+#ifndef CFG_MAX_FLASH_SECT
+#define CFG_MAX_FLASH_SECT      (263)   /* max number of sectors on one chip */
+#endif
+
 /*-----------------------------------------------------------------------
  * FLASH Info: contains chip specific data, per FLASH bank
  */

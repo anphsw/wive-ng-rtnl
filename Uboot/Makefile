@@ -1647,6 +1647,7 @@ clobber:	clean
 
 mrproper \
 distclean:	clobber unconfig
+	rm -f .config*
 
 backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \

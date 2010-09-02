@@ -15,24 +15,18 @@
  * MA 02111-1307 USA
  */
 /*
- * This file is derived from crc32.c from the zlib-1.1.3 distribution
+ * This file is derived from crc32.c from the zlib distribution
  * by Jean-loup Gailly and Mark Adler.
  */
 
 /* crc32.c -- compute the CRC-32 of a data stream
- * Copyright (C) 1995-1998 Mark Adler
+ * Copyright (C) 1995-2002 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
-
-#ifndef USE_HOSTCC	/* Shut down "ANSI does not permit..." warnings */
-#include <common.h>	/* to get command definitions like CFG_CMD_JFFS2 */
-#endif
 
 #include "zlib.h"
 
 #define local static
-#define ZEXPORT	/* empty */
-unsigned long crc32 (unsigned long, const unsigned char *, unsigned int);
 
 #ifdef DYNAMIC_CRC_TABLE
 
@@ -76,7 +70,7 @@ local void make_crc_table()
   poly = 0L;
   for (n = 0; n < sizeof(p)/sizeof(Byte); n++)
     poly |= 1L << (31 - p[n]);
-
+ 
   for (n = 0; n < 256; n++)
   {
     c = (uLong)n;
@@ -146,18 +140,20 @@ local const uLongf crc_table[256] = {
 };
 #endif
 
-#if 0
 /* =========================================================================
  * This function can be used by asm versions of crc32()
  */
+#if 0
 const uLongf * ZEXPORT get_crc_table()
+#else
+const uLongf * get_crc_table()
+#endif
 {
 #ifdef DYNAMIC_CRC_TABLE
   if (crc_table_empty) make_crc_table();
 #endif
   return (const uLongf *)crc_table;
 }
-#endif
 
 /* ========================================================================= */
 #define DO1(buf) crc = crc_table[((int)crc ^ (*buf++)) & 0xff] ^ (crc >> 8);
@@ -165,12 +161,17 @@ const uLongf * ZEXPORT get_crc_table()
 #define DO4(buf)  DO2(buf); DO2(buf);
 #define DO8(buf)  DO4(buf); DO4(buf);
 
+#if 0
 /* ========================================================================= */
 uLong ZEXPORT crc32(crc, buf, len)
+#else
+uLong crc32(crc, buf, len)
+#endif
     uLong crc;
     const Bytef *buf;
     uInt len;
 {
+    if (buf == Z_NULL) return 0L;
 #ifdef DYNAMIC_CRC_TABLE
     if (crc_table_empty)
       make_crc_table();
@@ -186,28 +187,3 @@ uLong ZEXPORT crc32(crc, buf, len)
     } while (--len);
     return crc ^ 0xffffffffL;
 }
-
-#if (CONFIG_COMMANDS & CFG_CMD_JFFS2)
-
-/* No ones complement version. JFFS2 (and other things ?)
- * don't use ones compliment in their CRC calculations.
- */
-uLong ZEXPORT crc32_no_comp(uLong crc, const Bytef *buf, uInt len)
-{
-#ifdef DYNAMIC_CRC_TABLE
-    if (crc_table_empty)
-      make_crc_table();
-#endif
-    while (len >= 8)
-    {
-      DO8(buf);
-      len -= 8;
-    }
-    if (len) do {
-      DO1(buf);
-    } while (--len);
-
-    return crc;
-}
-
-#endif	/* CFG_CMD_JFFS2 */
