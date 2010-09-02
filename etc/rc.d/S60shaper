@@ -115,7 +115,7 @@ get_param() {
     nm=`nvram_get 2860 lan_netmask`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
     QoSEnable=`nvram_get 2860 QoSEnable`
-    INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
+    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
 
     #if ppp is up shaper to ppp0 else to wan_if
     if [ "$vpnEnabled" = "on" ]; then
