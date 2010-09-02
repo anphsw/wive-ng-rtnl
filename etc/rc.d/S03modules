@@ -10,7 +10,6 @@ start() {
     if [ ! -f /tmp/webrun ] && [ ! -f /etc/modules.dep ]; then
 	$LOG "Start modules.dep generate..."
 	depmod -a -n >  /etc/modules.dep
-	ln -sf /etc/modules.dep /tmp/modules.dep
 	touch /var/MODIFIED
     else
 	$LOG "Prepare wifi config..."
