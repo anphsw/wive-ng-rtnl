@@ -11,7 +11,7 @@ MODIFIED=0
 	$LOG "Generate host key for first start"
         $LOG "If no DSS key  and generate new key"
 	mkdir -p /etc/dropbear
-        (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key && fs save) &
+        (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key) &
 	MODIFIED=1
     fi
 
@@ -34,7 +34,7 @@ MODIFIED=0
 	MODIFIED=1
     fi
     if [ "$MODIFIED" = "1" ]; then
-	echo > /var/MODIFIED
+	touch /var/MODIFIED
     fi
 }
 

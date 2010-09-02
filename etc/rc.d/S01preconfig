@@ -67,7 +67,7 @@ else
 	ralink_init make_wireless_config 2860
 	ralink_init gen 2860
 	nvram_set 2860 IS_WIVE YES
-	fs save
+	touch /var/MODIFIED
 	$LOG "Reset OK... boot..."
     fi
 fi

@@ -10,7 +10,7 @@ start() {
     cp -rpf /web/* /tmp/web
     $LOG "Run goahead"
     /bin/goahead &
-    echo > /tmp/webrun
+    touch /tmp/webrun
     sleep 15
 }
 

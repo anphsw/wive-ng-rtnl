@@ -7,16 +7,13 @@ start() {
  $LOG "Unload unneeded modules"
     rmmod -a
 
- $LOG "Drop caches"
-    echo 1 /proc/sys/vm/drop_caches
-    echo 2 /proc/sys/vm/drop_caches
-    echo 3 /proc/sys/vm/drop_caches
-    sync
-
  #if firts boot or restore
  if [ -f /var/MODIFIED ]; then
-    $LOG "Save rwfs"
-    fs save
+    if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
+    ($LOG "Save rwfs" && sleep 10 && fs save)
+    else
+    ($LOG "Save rwfs" && sleep 30 && fs save)
+    fi
  fi
 
 }
