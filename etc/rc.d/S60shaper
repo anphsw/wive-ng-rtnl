@@ -12,14 +12,14 @@ start() {
 get_param
 if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
  $LOG "Starting SHAPER: "
-    tc qdisc del dev $lan_if root > /dev/null 2>&1
-    tc qdisc del dev $lan_if ingress > /dev/null 2>&1
-    tc qdisc del dev $wan_if root  > /dev/null 2>&1
-    tc qdisc del dev $wan_if ingress > /dev/null 2>&1
+    set_def
     if [ "$QoSEnable" = "1" ]; then
 	$LOG "--------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
+	#check interfaces is up
+	WANUP=`ip link show up | grep "$wan_if" -c` > /dev/null 2>&1
+        LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
 	$LOG "---------------NONIMQ-IN------------------------"
 	if [ "$LANUP" = "1" ]; then
 	    #input
@@ -92,13 +92,21 @@ fi
 stop() {
  $LOG "Stopping SHAPER: "
  get_param
-    if [ "$QoSEnable" = "1" ]; then
-	qos_run c
-    fi
+ set_def
+
+ #drop others QoS rules
+    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
     for i in $INTERFACES; do
         echo $i;
 	tc qdisc del dev $i root > /dev/null 2>&1
+	tc qdisc del dev $i ingress > /dev/null 2>&1
     done
+    if [ "$QoSEnable" = "1" ]; then
+	qos_run c > /dev/null 2>&1
+    fi
+}
+
+set_def() {
     tc qdisc del dev $wan_if root > /dev/null 2>&1
     tc qdisc del dev $wan_if ingress > /dev/null 2>&1
     tc qdisc del dev $lan_if root  > /dev/null 2>&1
@@ -107,7 +115,6 @@ stop() {
     ip link set imq1 down > /dev/null 2>&1
     rmmod imq > /dev/null 2>&1
     rmmod ipt_IMQ > /dev/null 2>&1
-
 }
 
 get_param() {
@@ -124,17 +131,11 @@ get_param() {
 	    $wan_if="eth2.2"
 	fi
     fi
-    
     if [ "$lan_if" = "" ]; then
         lan_if="br0"
     else
         lan_if=$lan_if
     fi
-
-    #check interfaces is up
-    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
-    WANUP=`ip link show up | grep "$wan_if" -c` > /dev/null 2>&1
-    LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
 }
 
 case "$1" in
