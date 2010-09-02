@@ -28,12 +28,15 @@
 
 #ifndef INLINE_SYSCALL
 #define INLINE_SYSCALL(name, nr, args...) __syscall_exit (args)
+#undef __NR___syscall_exit
 #define __NR___syscall_exit __NR_exit
 static inline _syscall1(void, __syscall_exit, int, status);
 #endif
 
 void _exit(int status)
 {
-	INLINE_SYSCALL(exit, 1, status);
+	/* The loop is added only to keep gcc happy. */
+	while(1)
+		INLINE_SYSCALL(exit, 1, status);
 }
-
+weak_alias(_exit,_Exit)
