@@ -37,7 +37,7 @@ addBr0()
 addMesh2Br0()
 {
     meshenabled=`nvram_get 2860 MeshEnabled`
-    WMAC=`nvram_get WLAN_MAC_ADDR`
+    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
     if [ "$meshenabled" = "1" ]; then
 	ifconfig mesh0 hw ether $WMAC
         ip link set mesh0 up
@@ -48,7 +48,7 @@ addMesh2Br0()
 addWds2Br0()
 {
     wds_en=`nvram_get 2860 WdsEnable`
-    WMAC=`nvram_get WLAN_MAC_ADDR`
+    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
     if [ "$wds_en" != "0" ]; then
         for i in `seq 0 3`; do
 	    ifconfig wds$i hw ether $WMAC
@@ -82,7 +82,7 @@ setLanWan()
 
 addMBSSID()
 {
-WMAC=`nvram_get WLAN_MAC_ADDR`
+WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
     for i in `seq 1 $bssidnum`; do
         ip addr flush dev ra$i

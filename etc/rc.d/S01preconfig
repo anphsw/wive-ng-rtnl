@@ -55,7 +55,7 @@ start() {
     chmod 777 /tmp
 
 #check firmwave update or clean burn
-IS_WIVE=`nvram_get IS_WIVE`
+IS_WIVE=`nvram_get 2860 IS_WIVE`
 if [ "$IS_WIVE" = "YES" ]; then
     $LOG "Normal boot no need reset"
 else
