@@ -1,0 +1,17 @@
+/bin/sh: line 0: [: : integer expression expected
+dirname: лишний операнд «-gdwarf-2»
+Попробуйте `dirname --help' для получения более подробного описания.
+In file included from /opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:26:
+/opt/Wive-RTNL/Uboot/include/version.h:37:2: #error "PLATFORM_TYPE not defined in config.mk"
+/opt/Wive-RTNL/Uboot/include/version.h:51:2: #error "CHIP_VER not defined in config.mk"
+/opt/Wive-RTNL/Uboot/include/version.h:79:2: #error "GMAC_MODE not defined"
+/opt/Wive-RTNL/Uboot/include/version.h:101:2: #error "DRAM SIZE not defined"
+/opt/Wive-RTNL/Uboot/include/version.h:113:2: #error "DRAM BUS not defined"
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:504:16: operator '==' has no left operand
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S: Assembler messages:
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:766: Error: absolute expression required `li'
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:826: Error: absolute expression required `li'
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:831: Error: absolute expression required `li'
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:987: Error: absolute expression required `li'
+/opt/Wive-RTNL/Uboot/cpu/ralink_soc/start.S:998: Error: absolute expression required `sub'
+make: *** [cpu/ralink_soc/start.o] Ошибка 1
