@@ -9,9 +9,8 @@ web_wait
 LOG="echo SHAPER: "
 
 start() {
-QoSEnable=`nvram_get 2860 QoSEnable`
-if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 get_param
+if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
  $LOG "Starting SHAPER: "
     tc qdisc del dev $lan_if root > /dev/null 2>&1
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
@@ -93,7 +92,9 @@ fi
 stop() {
  $LOG "Stopping SHAPER: "
  get_param
-    qos_run c
+    if [ "$QoSEnable" = "1" ]; then
+	qos_run c
+    fi
     for i in $INTERFACES; do
         echo $i;
 	tc qdisc del dev $i root > /dev/null 2>&1
@@ -113,6 +114,7 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     nm=`nvram_get 2860 lan_netmask`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
+    QoSEnable=`nvram_get 2860 QoSEnable`
     INTERFACES=`ip link show up | grep mtu | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
 
     #if ppp is up shaper to ppp0 else to wan_if
