@@ -36,7 +36,6 @@ getWanIfName()
 # LAN interface name -> $lan_if
 getLanIfName()
 {
-	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$opmode" = "2" ]; then
 		lan_if="eth2"
 	else

@@ -83,6 +83,7 @@ setLanWan()
 addMBSSID()
 {
 WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
+bssidnum=`nvram_get 2860 BssidNum`
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
     for i in `seq 1 $bssidnum`; do
         ip addr flush dev ra$i
