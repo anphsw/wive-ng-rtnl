@@ -2,6 +2,9 @@
 
 . /sbin/config.sh
 
+#first get operation mode
+opmode=`nvram_get 2860 OperationMode`
+
 web_wait(){
 #wait to start web and run from goahead code
     if [ ! -f /tmp/webrun ]; then
@@ -12,7 +15,6 @@ web_wait(){
 # WAN interface name -> $wan_if
 getWanIfName()
 {
-	opmode=`nvram_get 2860 OperationMode`
 	vpnEnabled=`nvram_get 2860 vpnEnabled`
 	if [ "$opmode" = "0" ]; then
 		wan_if="br0"
@@ -35,7 +37,6 @@ getWanIfName()
 getLanIfName()
 {
 	bssidnum=`nvram_get 2860 BssidNum`
-
 	if [ "$opmode" = "2" ]; then
 		lan_if="eth2"
 	else
@@ -64,7 +65,6 @@ getStaMode()
 	fi
 }
 
-opmode=`nvram_get 2860 OperationMode`
 ethconv="n"
 stamode="n"
 wan_if="br0"
@@ -74,11 +74,4 @@ getWanIfName
 getLanIfName
 getEthConv
 getStaMode
-
-# debug
-#echo "opmode=$opmode"
-#echo "ethconv=$ethconv"
-#echo "stamode=$stamode"
-#echo "wan_if=$wan_if"
-#echo "lan_if=$lan_if"
 
