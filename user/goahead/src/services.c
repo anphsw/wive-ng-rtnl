@@ -179,8 +179,8 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
 	nvram_bufset(RT2860_NVRAM, "WatchdogEnabled", watchdog);
 	
-	printf("dnsPEnabled = %s, RemoteManagement = %s, RemoteSSH = %s, UDPXYMode = %s\n",
-			dnsp_en, rmt_http, rmt_ssh, udpxy_mode);
+	printf("lltdEnabled = %s, dnsPEnabled = %s, RemoteManagement = %s, RemoteSSH = %s, UDPXYMode = %s\n",
+			lltd_en, dnsp_en, rmt_http, rmt_ssh, udpxy_mode);
 
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);

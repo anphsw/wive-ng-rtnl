@@ -91,6 +91,7 @@ function initValue()
 	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
+	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
 	var upnpb = "<% getUpnpBuilt(); %>";
@@ -108,7 +109,7 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
-	form.lltdEnbl.options.selectedIndex = 1*lltdb;
+	form.lltdEnbl.options.selectedIndex = 1*lltd;
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
