@@ -650,8 +650,6 @@ VOID	RTMPCalculateMICValue(
 	else
 #endif // IGMP_SNOOP_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 	{
 		RTMPInitMICEngine(
 			pAd,

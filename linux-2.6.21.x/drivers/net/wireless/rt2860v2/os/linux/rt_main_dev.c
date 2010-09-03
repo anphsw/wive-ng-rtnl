@@ -471,9 +471,6 @@ int rt28xx_close(IN PNET_DEV dev)
 	ba_reordering_resource_release(pAd);
 #endif // DOT11_N_SUPPORT //
 	
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
 /*+++Modify by woody to solve the bulk fail+++*/
@@ -561,9 +558,6 @@ int rt28xx_open(IN PNET_DEV dev)
 	if (rt28xx_init(pAd, mac, hostname) == FALSE)
 		goto err;
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 	// Enable Interrupt
 	RTMP_IRQ_ENABLE(pAd);
 
@@ -575,19 +569,6 @@ int rt28xx_open(IN PNET_DEV dev)
 	UINT32 reg = 0;
 	RTMP_IO_READ32(pAd, 0x1300, &reg);  // clear garbage interrupts
 	printk("0x1300 = %08x\n", reg);
-	}
-
-	{
-//	u32 reg;
-//	UINT8  byte;
-//	u16 tmp;
-
-//	RTMP_IO_READ32(pAd, XIFS_TIME_CFG, &reg);
-
-//	tmp = 0x0805;
-//	reg  = (reg & 0xffff0000) | tmp;
-//	RTMP_IO_WRITE32(pAd, XIFS_TIME_CFG, reg);
-
 	}
 
 #ifdef CONFIG_STA_SUPPORT
