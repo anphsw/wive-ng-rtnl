@@ -64,6 +64,24 @@ getStaMode()
 	fi
 }
 
+#select switch type from config
+getSwType()
+{
+    if [ "$CONFIG_RAETH_ROUTER" = "y" ]; then
+	#VIA external switch
+	SWITCH_MODE=0
+    elif [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+	#VTSS external switch
+	SWITCH_MODE=1
+    elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	#internal 3052 ESW
+	SWITCH_MODE=2
+    else
+	#default internal switch
+	SWITCH_MODE=2
+    fi
+}
+
 ethconv="n"
 stamode="n"
 wan_if="br0"
@@ -73,4 +91,4 @@ getWanIfName
 getLanIfName
 getEthConv
 getStaMode
-
+getSwType

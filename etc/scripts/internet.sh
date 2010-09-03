@@ -60,24 +60,20 @@ addWds2Br0()
 
 setLanWan()
 {
-    if [ "$CONFIG_RAETH_ROUTER" = "y" ]; then
-	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+    #init vlan mode switch
+    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
 	    echo '##### config vlan partition (WLLLL) #####'
-	    config-vlan.sh 0 WLLLL
-	else
+	    config-vlan.sh $SWITCH_MODE WLLLL
+    else
 	    echo '##### config vlan partition (LLLLW) #####'
-	    config-vlan.sh 0 LLLLW
-	fi
+	    config-vlan.sh $SWITCH_MODE LLLLW
     fi
-    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
-    	    echo '##### config RT3052 vlan partition (WLLLL) #####'
-	    config-vlan.sh 2 WLLLL
-	else
-	    echo '##### config RT3052 vlan partition (LLLLW) #####'
-	    config-vlan.sh 2 LLLLW
-	fi
-    fi
+}
+
+resetLanWan()
+{
+    echo "##### restore to dump switch #####"
+    config-vlan.sh $SWITCH_MODE 0
 }
 
 addMBSSID()
@@ -94,17 +90,6 @@ if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
         ip link set ra$i up
     done
 fi
-}
-
-resetLanWan()
-{
-    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-	echo "##### restore Vtss to dump switch #####"
-	config-vlan.sh 1 0
-    elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-	echo "##### restore RT3052 to dump switch #####"
-	config-vlan.sh 2 0
-    fi
 }
 
 # opmode adjustment:
