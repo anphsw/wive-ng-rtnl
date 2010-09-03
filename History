@@ -117,6 +117,7 @@
 35) Fix part table in SPI and nand flash types<br>
 36) pppd up to current git src 24 Aug 2010<br>
 37) xl2tpd up to 1.2.7 version<br>
+38) Fix conntrack flush<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
