@@ -87,7 +87,9 @@ bssidnum=`nvram_get 2860 BssidNum`
 if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
     for i in `seq 1 $bssidnum`; do
         ip addr flush dev ra$i
-        ip -6 addr flush dev ra$i
+	if [ "$CONFIG_IPV6" != "" ] ; then
+    	    ip -6 addr flush dev ra$i
+	fi
 	ifconfig ra$i hw ether $WMAC
         ip link set ra$i up
     done
