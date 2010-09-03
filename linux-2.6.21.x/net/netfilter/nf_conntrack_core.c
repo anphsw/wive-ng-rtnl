@@ -691,6 +691,11 @@ __nf_conntrack_confirm(struct sk_buff **pskb)
 
 	write_lock_bh(&nf_conntrack_lock);
 
+	if (unlikely(nf_ct_is_dying(ct))) {
+		spin_unlock_bh(&nf_conntrack_lock);
+		return NF_ACCEPT;
+	}
+
 	/* See if there's one in the list already, including reverse:
 	   NAT could have grabbed it without realizing, since we're
 	   not in the hash.  If there is, we lost race. */
