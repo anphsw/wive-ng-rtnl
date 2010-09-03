@@ -496,7 +496,7 @@ CONFIG_DEPMOD=y
 # CONFIG_FEATURE_MODUTILS_ALIAS is not set
 # CONFIG_FEATURE_MODUTILS_SYMBOLS is not set
 CONFIG_DEFAULT_MODULES_DIR="/lib/modules"
-CONFIG_DEFAULT_DEPMOD_FILE="/tmp/modules.dep"
+CONFIG_DEFAULT_DEPMOD_FILE="/etc/modules.dep"
 
 #
 # Linux System Utilities
