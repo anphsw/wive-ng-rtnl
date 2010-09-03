@@ -156,6 +156,8 @@ if [ "$opmode" = "0" ]; then
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
     fi
+	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
+        ip addr flush dev eth2
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
         addWds2Br0

@@ -80,9 +80,6 @@ fi
   ip link set $lan_if down
  #-------------------LAN1----------------
  $LOG "Add LAN1 iface"
- if [ "$opmode" = "2" ]; then
-    lan_if="eth2"
- fi
  if [ "$ip" != "" ]; then
     if [ "$nm" = "" ]; then
 	nm="255.0.0.0"
@@ -95,7 +92,7 @@ fi
 
  #-------------------LAN2----------------
  if [ "$lan2enabled" = "1" ]; then
- $LOG "Add LAN2 iface"
+	$LOG "Add LAN2 iface"
         if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$opmode" = "3" ]; then
                 ifconfig "br0:9" "$ip_2" netmask "$nm_2"
                 $LOG "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
