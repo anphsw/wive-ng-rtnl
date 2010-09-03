@@ -5,10 +5,26 @@
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
 
-web_wait(){
+web_wait()
+{
 #wait to start web and run from goahead code
     if [ ! -f /tmp/webrun ]; then
       exit 0
+    fi
+}
+
+opModeAdj()
+{
+    # opmode adjustment:
+    #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
+    #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
+
+    if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
+	nvram_set 2860 OperationMode 1
+	opmode="1"
+    elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
+	nvram_set 2860 OperationMode 1
+	opmode="1"
     fi
 }
 
@@ -87,6 +103,7 @@ stamode="n"
 wan_if="br0"
 wan_ppp_if="br0"
 lan_if="br0"
+opModeAdj
 getWanIfName
 getLanIfName
 getEthConv

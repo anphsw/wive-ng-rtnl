@@ -13,15 +13,15 @@ MODE=$1 #restart mode
 
 ifRaxWdsxDown()
 {
-        for i in `seq 0 7`; do
-	    ip link set ra$i down > /dev/null 2>&1
-        done
-        for i in `seq 0 3`; do
-    	    ip link set wds$i down > /dev/null 2>&1
-        done
+    for i in `seq 0 7`; do
+	ip link set ra$i down > /dev/null 2>&1
+    done
+    for i in `seq 0 3`; do
+        ip link set wds$i down > /dev/null 2>&1
+    done
 
-	ip link set apcli0 down > /dev/null 2>&1
-	ip link set mesh0 down > /dev/null 2>&1
+    ip link set apcli0 down > /dev/null 2>&1
+    ip link set mesh0 down > /dev/null 2>&1
 }
 
 addBr0()
@@ -60,7 +60,6 @@ addWds2Br0()
 
 setLanWan()
 {
-    #init vlan mode switch
     if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
 	    echo '##### config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL
@@ -78,35 +77,19 @@ resetLanWan()
 
 addMBSSID()
 {
-WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
-bssidnum=`nvram_get 2860 BssidNum`
-if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-    for i in `seq 1 $bssidnum`; do
-        ip addr flush dev ra$i
-	if [ "$CONFIG_IPV6" != "" ] ; then
-    	    ip -6 addr flush dev ra$i
-	fi
-	ifconfig ra$i hw ether $WMAC
-        ip link set ra$i up
-    done
-fi
+    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
+    bssidnum=`nvram_get 2860 BssidNum`
+    if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	for i in `seq 1 $bssidnum`; do
+    	    ip addr flush dev ra$i
+	    if [ "$CONFIG_IPV6" != "" ] ; then
+    		ip -6 addr flush dev ra$i
+	    fi
+	    ifconfig ra$i hw ether $WMAC
+    	    ip link set ra$i up
+	done
+    fi
 }
-
-# opmode adjustment:
-#   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
-#   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
-
-if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-fi
-
-if [ "$CONFIG_DWC_OTG" == "m" ]; then
-    isDWCOTGExist=`nvram_get 2860 IsDWCOTGExist`
-fi
 
 ifRaxWdsxDown
 
