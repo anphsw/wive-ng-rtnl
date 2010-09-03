@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#include kernel config
+. /bin/config.sh
+
 LOG="echo PRECONFIG: "
 
 start() {
@@ -84,7 +87,8 @@ if [ -f /etc/compile-date ]; then
     fi
 fi
 
-$LOG "Reinit power mode for all switch ports" #workaroud for dir
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    $LOG "Reinit power mode for all switch ports" #workaroud for dir
     #disable
     config-vlan.sh 2 DDDDD
     #full 100mbit
@@ -93,6 +97,7 @@ $LOG "Reinit power mode for all switch ports" #workaroud for dir
     #config-vlan.sh 2 HHHHH
     #reset all phy and auto negotinate now
     config-vlan.sh 2 RRRRR
+fi
 
 $LOG "Get BOARDID and save /var/boardid"
     getBoardID
