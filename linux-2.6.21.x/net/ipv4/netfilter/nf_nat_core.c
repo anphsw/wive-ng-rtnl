@@ -238,7 +238,8 @@ find_best_ips_proto(struct nf_conntrack_tuple *tuple,
 	maxip = ntohl(range->max_ip);
 	j = jhash_2words((__force u32)tuple->src.u3.ip,
 			 (__force u32)tuple->dst.u3.ip, 0);
-	*var_ipp = htonl(minip + j % (maxip - minip + 1));
+	j = ((u64)j * (maxip - minip + 1)) >> 32;
+	*var_ipp = htonl(minip + j);
 }
 
 /* Manipulate the tuple into the range given.  For NF_IP_POST_ROUTING,
