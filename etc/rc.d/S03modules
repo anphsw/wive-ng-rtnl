@@ -14,8 +14,7 @@ start() {
     else
 	$LOG "Prepare wifi config..."
 	get_param
-	rm -rf /etc/Wireless/RT2860/RT2860.dat
-	ralink_init make_wireless_config rt2860
+	gen_wifi_config
 	if [ "$WMAC" != "" ]; then
 	    mac="mac=$WMAC"
 	else
@@ -68,6 +67,12 @@ get_param() {
 	clone_en=`nvram_get 2860 macCloneEnabled`
 	clone_mac=`nvram_get 2860 macCloneMac`
 	WMAC=`nvram_get WLAN_MAC_ADDR`
+}
+
+gen_wifi_config()
+{
+	rm -rf /etc/Wireless/RT2860/RT2860.dat
+	ralink_init make_wireless_config rt2860
 }
 
 case "$1" in
