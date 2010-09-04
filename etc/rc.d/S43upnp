@@ -38,11 +38,7 @@ get_param() {
     if [ "$vpnEnabled" = "on" ]; then
 	wan_upnp_if="ppp0"
     else
-	if [ "$wan_if" = "" ]; then
-	    wan_upnp_if="eth2.2"
-	else
-	    wan_upnp_if=$wan_if
-        fi
+	wan_upnp_if=$wan_if
     fi
 }
 

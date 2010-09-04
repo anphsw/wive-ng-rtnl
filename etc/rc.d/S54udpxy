@@ -12,13 +12,8 @@ start() {
 if [ -f /bin/udpxy ]; then
  UDPXY=`nvram_get 2860 UDPXYMode`
     if [ "$UDPXY" != "0" ] && [ "$UDPXY" != "" ]; then
-        if [ "$wan_if" = "" ]; then                                                                                                         
-            wan_igmp_if="eth2.2"                                                                                                            
-        else                                                                                                                                
-            wan_igmp_if=$wan_if                                                                                                             
-        fi                         
         $LOG "UDPXY start"
-	udpxy -m $wan_igmp_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
+	udpxy -m $wan_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi
 fi
 }

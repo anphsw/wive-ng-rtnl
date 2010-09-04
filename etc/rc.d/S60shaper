@@ -126,15 +126,6 @@ get_param() {
     #if ppp is up shaper to ppp0 else to wan_if
     if [ "$vpnEnabled" = "on" ]; then
         wan_if="ppp0"
-    else
-	if [ "$wan_if" = "" ]; then
-	    $wan_if="eth2.2"
-	fi
-    fi
-    if [ "$lan_if" = "" ]; then
-        lan_if="br0"
-    else
-        lan_if=$lan_if
     fi
 }
 
