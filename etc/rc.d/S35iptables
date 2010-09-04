@@ -287,9 +287,6 @@ get_param() {
     #second lan
     lan2_if="br0:9"
 
-    #get wan IP
-    EXTIP="`LC_ALL=C /sbin/ifconfig $wan_ppp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
-    
     #check ppp
     PPPUP=`ip link show up | grep ppp0 -c` > /dev/null 2>&1
 }
