@@ -38,6 +38,12 @@ if [ -f /etc/filesystem.ok ]; then
   else
     $LOG "File system is clear or poor."
     zcat /rwfs.gz | tar xf - -C / >>/dev/null
+
+    $LOG "Regenerate configs for wifi."
+    ralink_init renew 2860 /etc/default/RT2860_default_novlan
+    ralink_init make_wireless_config 2860
+    ralink_init gen 2860
+
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
     touch /var/MODIFIED

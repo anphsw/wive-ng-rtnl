@@ -65,10 +65,7 @@ else
     #if web not start
     if [ ! -f /tmp/webrun ]; then
 	$LOG "Clear and load defaults to nvram!"
-	ralink_init clear 2860
-	ralink_init renew 2860 /etc/default/RT2860_default_novlan
-	ralink_init make_wireless_config 2860
-	ralink_init gen 2860
+	fs nvramreset
 	nvram_set 2860 IS_WIVE YES
 	touch /var/MODIFIED
 	$LOG "Reset OK... boot..."
