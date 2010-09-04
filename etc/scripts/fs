@@ -39,7 +39,8 @@ save(){
   else
     echo "Error: File $tmp too big: $(get_size $tmp)k"
   fi
-  rm $tmp
+  rm -f $tmp
+  rm -f /var/MODIFIED
 }
 
 restore(){
