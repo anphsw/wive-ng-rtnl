@@ -16,6 +16,7 @@ endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp
+	rm -f $(ROMFSDIR)/etc/scripts/mesh.sh
 endif
 endif
 ifeq ("$(CONFIG_RT2860V2_AP_WDS)", "")
@@ -42,6 +43,8 @@ endif
 ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
+	rm -f $(ROMFSDIR)/etc/scripts/storage.sh
+	rm -f $(ROMFSDIR)/etc/scripts/automount.sh
 endif
 
 ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "")
