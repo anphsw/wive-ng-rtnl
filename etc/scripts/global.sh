@@ -31,7 +31,6 @@ opModeAdj()
 # WAN interface name -> $wan_if
 getWanIfName()
 {
-	vpnEnabled=`nvram_get 2860 vpnEnabled`
 	if [ "$opmode" = "0" ]; then
 		wan_if="br0"
 	elif [ "$opmode" = "1" ]; then
@@ -42,6 +41,11 @@ getWanIfName()
 		wan_if="apcli0"
 	fi
 
+}
+
+getWanPppIfName()
+{
+	vpnEnabled=`nvram_get 2860 vpnEnabled`
 	if [ "$vpnEnabled" = "on"  ]; then
 		wan_ppp_if="ppp0"
 	else
@@ -56,6 +60,16 @@ getLanIfName()
 		lan_if="eth2"
 	else
 		lan_if="br0"
+	fi
+}
+
+# LAN interface name -> $lan_if
+getLan2IfName()
+{
+	if [ "$opmode" = "2" ]; then
+		lan2_if="eth2:9"
+	else
+		lan2_if="br0:9"
 	fi
 }
 
@@ -103,9 +117,12 @@ stamode="n"
 wan_if="br0"
 wan_ppp_if="br0"
 lan_if="br0"
+lan2_if="br0:9"
 opModeAdj
-getWanIfName
 getLanIfName
+getLan2IfName
+getWanIfName
+getWanPppIfName
 getEthConv
 getStaMode
 getSwType

@@ -35,11 +35,6 @@ get_param() {
     ip=`nvram_get 2860 lan_ipaddr`
     upnp=`nvram_get 2860 upnpEnabled`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
-    if [ "$vpnEnabled" = "on" ]; then
-	wan_upnp_if="ppp0"
-    else
-	wan_upnp_if=$wan_if
-    fi
 }
 
 

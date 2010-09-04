@@ -31,7 +31,6 @@ stop() {
 get_param() {
     wsc=`nvram_get 2860 WscModeOption`
     lan_ip=`nvram_get 2860 lan_ipaddr`
-    opmode=`nvram_get 2860 OperationMode`
 }
 
 case "$1" in

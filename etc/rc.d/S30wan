@@ -87,7 +87,6 @@ stop() {
 get_param() {
     #get parametrs
     HOSTNAME_NVRAM=`nvram_get 2860 HostName`
-    opmode=`nvram_get 2860 OperationMode`
     clone_en=`nvram_get 2860 macCloneEnabled`
     clone_mac=`nvram_get 2860 macCloneMac`
     ip=`nvram_get 2860 wan_ipaddr`

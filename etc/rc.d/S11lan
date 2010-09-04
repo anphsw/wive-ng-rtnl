@@ -93,13 +93,8 @@ fi
  #-------------------LAN2----------------
  if [ "$lan2enabled" = "1" ]; then
 	$LOG "Add LAN2 iface"
-        if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$opmode" = "3" ]; then
-                ifconfig "br0:9" "$ip_2" netmask "$nm_2"
-                $LOG "ifconfig "br0:9" "$ip_2" netmask "$nm_2""
-        elif [ "$opmode" = "2" ]; then
-                ifconfig "eth2:9" "$ip_2" netmask "$nm_2"
-                $LOG "ifconfig "eth2:9" "$ip_2" netmask "$nm_2""
-        fi
+        ifconfig "$lan2_if" "$ip_2" netmask "$nm_2"
+        $LOG "ifconfig "$lan2_if" "$ip_2" netmask "$nm_2""
  fi
 
  #-------------------DGW-----------------
@@ -124,8 +119,7 @@ $LOG "Stop network interfaces..."
     vconfig rem eth2.2 > /dev/null 2>&1
     ip link set br0 down > /dev/null 2>&1
     ip link set $lan_if down > /dev/null 2>&1
-    ip link set "br0:9" down > /dev/null 2>&1
-    ip link set "eth2:9" down > /dev/null 2>&1
+    ip link set $lan2_if down > /dev/null 2>&1
     brctl delbr br0 > /dev/null 2>&1
 }
 
@@ -135,7 +129,6 @@ get_param() {
  ip_2=`nvram_get 2860 lan2_ipaddr`
  nm_2=`nvram_get 2860 lan2_netmask`
  gw=`nvram_get 2860 wan_gateway`
- opmode=`nvram_get 2860 OperationMode`
  lan2enabled=`nvram_get 2860 Lan2Enabled`
  CHECKMAC=`nvram_get 2860 CHECKMAC`
  MAC=`nvram_get 2860 WAN_MAC_ADDR`
