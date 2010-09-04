@@ -20,6 +20,7 @@ fi
 stop() {
  $LOG "Stopping RIPD: "
   killall -q ripd
+  killall -q -9 ripd
 }
 
 case "$1" in

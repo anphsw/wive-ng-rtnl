@@ -11,8 +11,6 @@ LOG="echo IGMPPROXY: "
 
 start() {
 if [ -f /bin/igmpproxy ]; then
-    #workaround fix me later                                                                                                    
-    killall -q igmpproxy
     igmpen=`nvram_get 2860 igmpEnabled`
     OperationMode=`nvram_get 2860 OperationMode`
     #if igmpproxy enable and mode not full bridge
@@ -39,6 +37,7 @@ fi
 stop() {
  $LOG "Stopping IGMPPROXY: "
     killall -q igmpproxy
+    killall -q -9 igmpproxy
     ip route del 224.0.0.0/4 dev $wan_if > /dev/null 2>&1
     sysctl -w net.ipv4.conf.all.mc_forwarding=0
     sysctl -w net.ipv4.conf.default.mc_forwarding=0

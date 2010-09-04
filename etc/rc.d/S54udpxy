@@ -26,6 +26,7 @@ fi
 stop() {
     $LOG "UDPXY stop"
     killall -q udpxy
+    killall -q -9 udpxy
 }
 
 case "$1" in

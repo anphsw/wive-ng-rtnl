@@ -20,6 +20,7 @@ fi
 stop() {
  $LOG "Stopping ZEBRA: "
   killall -q zebra
+  killall -q -9 zebra
 }
 
 case "$1" in

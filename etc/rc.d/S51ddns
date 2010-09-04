@@ -41,6 +41,7 @@ get_param() {
 stop() {
  $LOG "Stopping DynDns: "
     killall -q inadyn
+    killall -q -9 inadyn
 }
 
 case "$1" in

@@ -21,6 +21,7 @@ fi
 stop() {
  $LOG "Stopping LLD2D: "
   killall -q lld2d
+  killall -q -9 lld2d
   rm -rf /var/run/lld2d-* > /dev/null 2>&1
 }
 

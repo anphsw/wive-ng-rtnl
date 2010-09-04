@@ -35,6 +35,7 @@ start() {
 stop() {
  $LOG "Stopping NTPD: "
     killall -q ntpd
+    killall -q -9 ntpd
 }
 
 get_param() {

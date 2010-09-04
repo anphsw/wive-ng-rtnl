@@ -19,6 +19,7 @@ start() {
 stop() {
  $LOG "Stopping inetd: "
  killall -q inetd
+ killall -q -9 inetd
 }
 
 case "$1" in

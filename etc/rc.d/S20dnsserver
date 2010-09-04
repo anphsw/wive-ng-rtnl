@@ -9,8 +9,6 @@ start() {
 dnsp=`nvram_get 2860 dnsPEnabled`
     if [ -f /bin/dnsmasq ] && [ "$dnsp" = "1" ]; then
      get_param
-     #workaround fix me later
-     killall -q dnsmasq
      $LOG "Starting DNSMASQ: "
      if [ -f /etc/dnsmasq.conf ]; then
 	/bin/dnsmasq  -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if
@@ -21,6 +19,7 @@ dnsp=`nvram_get 2860 dnsPEnabled`
 stop() {
  $LOG "Stopping DNSMASQ: "
   killall -q dnsmasq
+  killall -q -9 dnsmasq
   rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
 }
 

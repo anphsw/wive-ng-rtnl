@@ -28,6 +28,7 @@ fi
 stop() {
  $LOG "Stop mdev generate..."
     killall -q mdev
+    killall -q -9 mdev
 }
 
 case "$1" in

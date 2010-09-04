@@ -107,6 +107,7 @@ $LOG "Get BOARDID and save /var/boardid"
 stop() {
  $LOG "Stop preconfigure."
  killall -q nvram_daemon
+ killall -q -9 nvram_daemon
 }
 
 case "$1" in

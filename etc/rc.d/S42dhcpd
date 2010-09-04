@@ -49,6 +49,7 @@ start() {
 stop() {
 	$LOG "Stop dhcpserver "
 	killall -q udhcpd
+	killall -q -9 udhcpd
 }
 
 get_param() {

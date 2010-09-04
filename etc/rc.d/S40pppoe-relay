@@ -21,6 +21,7 @@ fi
 stop() {
  $LOG "Stopping pppoe-relay: "
     killall -q pppoe-relay
+    killall -q -9 pppoe-relay
 }
 
 case "$1" in

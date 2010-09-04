@@ -27,6 +27,7 @@ fi
 stop() {
  $LOG "Stop upnp "
     killall -q miniupnpd
+    killall -q -9 miniupnpd
     ip route del 239.0.0.0/8 dev $lan_if > /dev/null 2>&1
 }
 

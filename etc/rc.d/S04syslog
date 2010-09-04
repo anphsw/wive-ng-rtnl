@@ -14,7 +14,9 @@ start() {
 stop() {
  $LOG "Stop syslog and klog"
     killall -q klogd
+    killall -q -9 klogd
     killall -q syslogd
+    killall -q -9 syslogd
     rm -f /var/log/messages > /dev/null 2>&1
 }
 

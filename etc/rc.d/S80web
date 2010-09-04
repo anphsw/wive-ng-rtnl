@@ -5,6 +5,7 @@ LOG="echo GOAHEADWEBSERVER: "
 start() {
  $LOG "Start goahead"
     killall -q nvram_daemon
+    killall -q -9 nvram_daemon
     $LOG "Copy web pages to tmpfs"
     mkdir -p /tmp/web
     cp -rpf /web/* /tmp/web
@@ -17,7 +18,9 @@ start() {
 stop() {
  $LOG "Stop goahead"
     killall -q goahead
+    killall -q -9 goahead
     killall -q nvram_daemon
+    killall -q -9 nvram_daemon
 }
 
 case "$1" in
