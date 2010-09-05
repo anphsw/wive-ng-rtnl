@@ -302,10 +302,12 @@ extern int skb_make_writable(struct sk_buff **pskb, unsigned int writable_len);
 #define nf_proto_csum_replace4	inet_proto_csum_replace4
 #define nf_proto_csum_replace2	inet_proto_csum_replace2
 
+struct flowi;
 struct nf_afinfo {
 	unsigned short	family;
 	__sum16		(*checksum)(struct sk_buff *skb, unsigned int hook,
 				    unsigned int dataoff, u_int8_t protocol);
+	int		(*route)(struct dst_entry **dst, struct flowi *fl);
 	void		(*saveroute)(const struct sk_buff *skb,
 				     struct nf_info *info);
 	int		(*reroute)(struct sk_buff **skb,
