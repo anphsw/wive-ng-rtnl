@@ -54,14 +54,14 @@ echo "==================START-L2TP-CLIENT======================="
 
     $LOG "Get route to vpn server."
     if [ -f /etc/default.gw ]; then
-	newdgw="via `cat /etc/default.gw`"
+	newdgw=`cat /etc/default.gw`
     else
 	newdgw=""
     fi
 
-    $LOG "Add route to $SERVER $newdgw over $wan_if"
-    if [ "$newdgw" != "" ]; then
-	ip route replace $SERVER $newdgw metric 0
+    $LOG "Add route to $SERVER via $newdgw over $wan_if"
+    if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
+	ip route replace $SERVER via $newdgw metric 0
     else
 	ip route replace $SERVER dev $wan_if metric 0
     fi

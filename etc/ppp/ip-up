@@ -64,9 +64,11 @@ vpnServerIP=`nvram_get 2860 vpnServerIP`
     #Route to VPN server over WAN select
     if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /etc/default.gw ]; then
 	$LOG "Replace route to wan...."
-	newdgw="via `cat /etc/default.gw`"
-	ip route del $vpnServerIP > /dev/null 2>&1
-	ip route add $vpnServerIP $newdgw
+	newdgw=`cat /etc/default.gw`
+	if [ "$newdgw" != "" ] && [ "$newdgw" != "$vpnServerIP" ]; then
+	    ip route del $vpnServerIP > /dev/null 2>&1
+	    ip route add $vpnServerIP via $newdgw
+	fi
     fi
 
     #Replace default route to ppp tunnel
