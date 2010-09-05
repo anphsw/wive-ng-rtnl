@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
 SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
@@ -55,22 +58,12 @@ echo "==================START-L2TP-CLIENT======================="
     else
 	newdgw=""
     fi
-    DEV="eth2.2"
-    if [ "$opmode" = "0" ]; then
-	    DEV="br0"
-        elif [ "$opmode" = "1" ]; then
-	    DEV="eth2.2"
-        elif [ "$opmode" = "2" ]; then
-	    DEV="ra0"
-        elif [ "$opmode" = "3" ]; then
-	    DEV="apcli0"
-    fi
 
-    $LOG "Add route to $SERVER $newdgw over $DEV"
+    $LOG "Add route to $SERVER $newdgw over $wan_if"
     if [ "$newdgw" != "" ]; then
 	ip route replace $SERVER $newdgw metric 0
     else
-	ip route replace $SERVER dev $DEV metric 0
+	ip route replace $SERVER dev $wan_if metric 0
     fi
 
     if [ "$PEERDNS" = "on" ]; then

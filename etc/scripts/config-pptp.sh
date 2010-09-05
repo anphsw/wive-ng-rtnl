@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
 SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
@@ -7,7 +10,6 @@ MTU=`nvram_get 2860 vpnMTU`
 MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
-opmode=`nvram_get 2860 OperationMode`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -55,22 +57,12 @@ echo "==================START-PPTP-CLIENT======================="
     else
 	newdgw=""
     fi
-    DEV="eth2.2"
-    if [ "$opmode" = "0" ]; then
-	    DEV="br0"
-        elif [ "$opmode" = "1" ]; then
-	    DEV="eth2.2"
-        elif [ "$opmode" = "2" ]; then
-	    DEV="ra0"
-        elif [ "$opmode" = "3" ]; then
-	    DEV="apcli0"
-    fi
 
-    $LOG "Add route to $SERVER $newdgw over $DEV"
+    $LOG "Add route to $SERVER $newdgw over $wan_if"
     if [ "$newdgw" != "" ]; then
 	ip route replace $SERVER $newdgw metric 0
     else
-	ip route replace $SERVER dev $DEV metric 0
+	ip route replace $SERVER dev $wan_if metric 0
     fi
 
     if [ "$PEERDNS" = "on" ]; then

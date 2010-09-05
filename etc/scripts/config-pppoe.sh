@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get params
+. /sbin/global.sh
+
 SERVER=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
@@ -8,7 +11,6 @@ MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 IFACE=`nvram_get 2860 vpnInterface`
-opmode=`nvram_get 2860 OperationMode`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -22,19 +24,9 @@ LOG="logger -t vpnhelper"
 echo "==================START-PPPOE-CLIENT======================="
 
 if [ "$IFACE" = "WAN" ]; then
-    if [ "$opmode" = "1" ]; then
-	IFACE=eth2.2
-    elif [ "$opmode" = "2" ]; then
-	IFACE=ra0
-    elif [ "$opmode" = "3" ]; then
-	IFACE=apcli0
-    fi
+    IFACE=$wan_if
 elif [ "$IFACE" = "LAN" ]; then
-    if [ "$opmode" = "2" ]; then
-	IFACE=eth2
-    else
-	IFACE=br0
-    fi
+    IFACE=$lan_if
 else
     IFACE=br0
 fi
