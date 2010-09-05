@@ -3,6 +3,11 @@
 #include kernel config
 . /bin/config.sh
 
+#only clean load start this
+if [ -f /tmp/webrun ]; then
+    exit 0
+fi
+
 LOG="echo PRECONFIG: "
 
 start() {
@@ -62,18 +67,12 @@ IS_WIVE=`nvram_get 2860 IS_WIVE`
 if [ "$IS_WIVE" = "YES" ]; then
     $LOG "Normal boot no need reset"
 else
-    #if web not start
-    if [ ! -f /tmp/webrun ]; then
 	$LOG "Clear and load defaults to nvram!"
 	fs nvramreset
 	nvram_set 2860 IS_WIVE YES
 	touch /var/MODIFIED
 	$LOG "Reset OK... boot..."
-    fi
 fi
-
-$LOG "Start nvram daemon"
-nvram_daemon &
     
 #if compile date fille is exist
 if [ -f /etc/compile-date ]; then
@@ -98,6 +97,10 @@ fi
 
 $LOG "Get BOARDID and save /var/boardid"
     getBoardID
+
+$LOG "Copy web pages to tmpfs"
+    mkdir -p /tmp/web
+    cp -rpf /web/* /tmp/web
 
 }
 

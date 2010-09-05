@@ -6,9 +6,7 @@ start() {
  $LOG "Start goahead"
     killall -q nvram_daemon
     killall -q -9 nvram_daemon
-    $LOG "Copy web pages to tmpfs"
-    mkdir -p /tmp/web
-    cp -rpf /web/* /tmp/web
+
     $LOG "Run goahead"
     /bin/goahead &
     touch /tmp/webrun
