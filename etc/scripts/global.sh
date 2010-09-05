@@ -112,6 +112,18 @@ getSwType()
     fi
 }
 
+getHostName()
+{
+    HOSTNAME_NVRAM=`nvram_get 2860 HostName`
+    #need hostname
+    if [ "$HOSTNAME_NVRAM" = "" ]; then
+	HOSTNAME_NVRAM="Wive-RTNL"
+	nvram_set 2860 HostName $HOSTNAME_NVRAM
+    fi
+    HOSTNAME="$HOSTNAME_NVRAM"
+}
+
+
 ethconv="n"
 stamode="n"
 wan_if="br0"
@@ -126,3 +138,4 @@ getWanPppIfName
 getEthConv
 getStaMode
 getSwType
+getHostName

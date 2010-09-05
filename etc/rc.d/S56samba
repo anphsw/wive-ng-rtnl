@@ -13,10 +13,9 @@ SmbEnabled=`nvram_get 2860 SmbEnabled`
 if [ "$SmbEnabled" = "1" ]; then
     get_param
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
-	HOSTNAME_NVRAM=`nvram_get 2860 HostName`
 	WorkGroup="LOCALNET"
-	SmbNetBIOS="$HOSTNAME_NVRAM"
-	SmbString="$HOSTNAME_NVRAM-SERVER"
+	SmbNetBIOS="$HOSTNAME"
+	SmbString="$HOSTNAME-SERVER"
 	nvram_set 2860  WorkGroup LOCALNET
 	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
 	nvram_set 2860  SmbString "$SmbString"

@@ -25,13 +25,6 @@ start() {
     mkdir -p /var/tmp/is_up
     echo 1 > /var/tmp/is_up/force_renew
 
-    #need hostname
-    if [ "$HOSTNAME_NVRAM" != "" ]; then
-	HOSTNAME="$HOSTNAME_NVRAM"
-    else
-	HOSTNAME="Wive-RTNL"
-    fi
-
     /bin/hostname $HOSTNAME
     echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
     echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts
@@ -86,7 +79,6 @@ stop() {
 
 get_param() {
     #get parametrs
-    HOSTNAME_NVRAM=`nvram_get 2860 HostName`
     clone_en=`nvram_get 2860 macCloneEnabled`
     clone_mac=`nvram_get 2860 macCloneMac`
     ip=`nvram_get 2860 wan_ipaddr`
