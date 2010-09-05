@@ -1576,6 +1576,10 @@ void tcp_close(struct sock *sk, long timeout)
 
 	sk_stream_mem_reclaim(sk);
 
+	/* If socket has been already reset (e.g. in tcp_reset()) - kill it. */
+	if (sk->sk_state == TCP_CLOSE)
+	    goto adjudge_to_death;
+
 	/* As outlined in draft-ietf-tcpimpl-prob-03.txt, section
 	 * 3.10, we send a RST here because data was lost.  To
 	 * witness the awful effects of the old behavior of always
