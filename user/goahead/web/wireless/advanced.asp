@@ -428,6 +428,8 @@ function wmm_capable_enable_switch()
 <p id="advIntroduction">Use the Advanced Setup page to make detailed settings for the Wireless. Advanced Setup includes items that are not available from the Basic Setup page, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
 <hr>
 
+
+
 <form method=post name=wireless_advanced action="/goform/wirelessAdvanced" onSubmit="return CheckValue()">
 <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>

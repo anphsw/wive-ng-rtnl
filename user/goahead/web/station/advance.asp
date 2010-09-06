@@ -2,8 +2,9 @@
 <head>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
 <title>Wireless Station Advanced Configurations</title>
@@ -88,7 +89,8 @@ function wirelessModeChange()
 	document.getElementById("div_ht_phy_mode").style.visibility = "hidden";
 	document.getElementById("div_ht_phy_mode").style.display = "none";
 
-	if (nmode >= 5) {
+	if (nmode >= 5)
+	{
 		document.getElementById("div_ht_phy_mode").style.visibility = "visible";
 		if (window.ActiveXObject) // IE
 			document.getElementById("div_ht_phy_mode").style.display = "block";
@@ -103,11 +105,13 @@ function wirelessModeChange()
 
 function RadioStatusChange(rs)
 {
-	if (rs == 1) {
+	if (rs == 1)
+	{
 		document.sta_advance.radioButton.value = "RADIO OFF";
 		document.sta_advance.radiohiddenButton.value = 0;
 	}
-	else {
+	else
+	{
 		document.sta_advance.radioButton.value = "RADIO ON";
 		document.sta_advance.radiohiddenButton.value = 1;
 	}
@@ -115,49 +119,41 @@ function RadioStatusChange(rs)
 
 function initTranslation()
 {
-	var e = document.getElementById("staadvTitle");
-	e.innerHTML = _("staadv title");
-	e = document.getElementById("staadvIntroduction");
-	e.innerHTML = _("staadv introduction");
+	_TR("staadvTitle", "staadv title");
+	_TR("staadvIntroduction", "staadv introduction");
 
-	e = document.getElementById("staadvConfig");
-	e.innerHTML = _("staadv config");
-	e = document.getElementById("staadvInfra");
-	e.innerHTML = _("staadv infra");
-	e = document.getElementById("staadvCountry");
-	e.innerHTML = _("staadv country");
-	e = document.getElementById("staadvBGProtect");
-	e.innerHTML = _("staadv bgprotect");
-	e = document.getElementById("staadvBGProAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("staadvBGProOn");
-	e.innerHTML = _("wireless on");
-	e = document.getElementById("staadvBGProOff");
-	e.innerHTML = _("wireless off");
-	e = document.getElementById("staadvTxRate");
-	e.innerHTML = _("staadv tx rate");
-	e = document.getElementById("staadvTxRateAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("staadvTxBurst");
-	e.innerHTML = _("adv tx burst");
-	e = document.getElementById("staadvHTPhyMode");
-	e.innerHTML = _("basic ht phy mode");
-	e = document.getElementById("staadvHT");
-	e.innerHTML = _("link ht");
-	e = document.getElementById("staadvBW");
-	e.innerHTML = _("staadv bw");
-	e = document.getElementById("staadvBWAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("staadvGI");
-	e.innerHTML = _("staadv gi");
-	e = document.getElementById("staadvGILong");
-	e.innerHTML = _("wireless long");
-	e = document.getElementById("staadvGIAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("staadvMCSAuto");
-	e.innerHTML = _("wireless auto");
-	e = document.getElementById("staadvApply");
-	e.value = _("wireless apply");
+	_TR("staadvConfig", "staadv config");
+	_TR("staadvInfra", "staadv infra");
+	_TR("staadvCountry", "staadv country");
+	_TR("staadvBGProtect", "staadv bgprotect");
+	_TR("staadvBGProAuto", "wireless auto");
+	_TR("staadvBGProOn", "wireless on");
+	_TR("staadvBGProOff", "wireless off");
+	_TR("staadvTxRate", "staadv tx rate");
+	_TR("staadvTxRateAuto", "wireless auto");
+	_TR("staadvTxBurst", "adv tx burst");
+	_TR("staadvHTPhyMode", "basic ht phy mode");
+	_TR("staadvHT", "link ht");
+	_TR("staadvBW", "staadv bw");
+	_TR("staadvBWAuto", "wireless auto");
+	_TR("staadvGI", "staadv gi");
+	_TR("staadvGILong", "wireless long");
+	_TR("staadvGIAuto", "wireless auto");
+	_TR("staadvMCSAuto", "wireless auto");
+
+	_TRV("staadvApply", "wireless apply");
+
+	_TR("11nTitle", "11n title");
+	_TR("11nIntroduction", "11n introduction");
+	_TR("11nConfig", "11n config");
+	_TR("11nAMPDU", "11n ampdu");
+	_TR("11nAMPDUEnable", "station enable");
+	_TR("11nAMPDUManual", "11n ampdu manual");
+	_TR("11nAMPDUAuto", "wireless auto");
+	_TR("11nMPDUDensity", "11n mpdu density");
+	_TR("11nAMSDU", "basic ht amsdu");
+	_TR("11nAMSDUEnable", "station enable");
+	_TRV("11nApply", "wireless apply");
 }
 
 function initValue()
@@ -165,10 +161,10 @@ function initValue()
 	var is3t3r = '<% is3t3r(); %>';
 	var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
 
-	if (1*is3t3r == 1) {
-		for (i = 16; i < 24; i++) {
+	if (1*is3t3r == 1)
+	{
+		for (i = 16; i < 24; i++)
 			document.sta_advance.n_mcs.options[i] = new Option(i, i);
-		}
 	}
 	var mcs_length = document.sta_advance.n_mcs.options.length;
 	document.sta_advance.n_mcs.options[mcs_length] = new Option("32", "32");
@@ -210,8 +206,53 @@ function macCloneSwitch(form)
 function PageInit()
 {
 	initValue();
+	init11NValues();
 	initTranslation();
 }
+
+function Mpdu_Aggregtion_Click(form)
+{
+	var dis = ! form.a_mpdu_enable.checked;
+
+	form.mpdu_density.disabled = dis;
+	form.autoBA[0].disabled = dis;
+	form.autoBA[1].disabled = dis;
+}
+
+function Auto_BA_Click(form)
+{
+	form.mpdu_density.disabled = form.autoBA[1].checked;
+}
+
+function init11NValues()
+{
+	var form = document.sta_11n_configuration;
+
+	var baenable = <% getCfgZero(1, "staPolicy"); %>;
+	var autoba = <% getCfgZero(1, "HT_AutoBA"); %>;
+	var density = <% getCfgZero(1, "HT_MpduDensity"); %>;
+	var amsdu = <% getCfgZero(1, "HT_AMSDU"); %>;
+	var opmode = '<% getCfgZero(1, "OperationMode"); %>';
+	var dpbsta = '<% getDpbSta(); %>';
+	var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
+
+	form.a_mpdu_enable.checked = baenable;
+	form.autoBA[(autoba) ? 1 : 0].checked = true;
+	Auto_BA_Click(form);
+
+	if (!autoba)
+	{
+		form.mpdu_density.options.selectedIndex = density;
+		Mpdu_Aggregtion_Click(form);
+	}
+
+	if (amsdu)
+		form.a_msdu_enable.checked = true;
+
+	if (((opmode == '0') && (dpbsta == '1') && (ethconv == '1')) || (opmode == '2'))
+		showElement("frm11NConfiguration");
+}
+
 </script>
 </head>
 
@@ -222,6 +263,54 @@ function PageInit()
 <h1 id="staadvTitle">Station Advanced Configurations</h1>
 <p id="staadvIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr>
+
+<form method="post" name="sta_11n_configuration" action="/goform/setSta11nCfg" id="frm11NConfiguration" style="display: none;">
+<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<tr>
+	<td class="title" colspan="2" id="11nConfig">11n Configuration</td>
+</tr>
+<tr>
+	<td class="head" rowspan="2" id="11nAMPDU">MPDU Aggregation</td>
+	<td><input type="checkbox" name="a_mpdu_enable" onClick="Mpdu_Aggregtion_Click(this.form);"><font id="11nAMPDUEnable">enable</font></td>
+</tr>
+<tr>
+	<td>
+		<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>&nbsp;&nbsp;
+		<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="11nMPDUDensity">MPDU density</td>
+	<td>
+		<select name="mpdu_density" size="1">
+			<option value="0" selected>0</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="11nAMSDU">Aggregation MSDU(A-MSDU)</td>
+	<td><input type="checkbox" name="a_msdu_enable"><font id="11nAMSDUEnable">enable</font></td>
+</tr>
+</table>
+
+<br>
+
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<tr align="center">
+<tr align="center">
+	<td colspan="2">
+		<input type="submit" style="{width:120px;}" value="Apply" id="11nApply"> &nbsp; &nbsp;
+	</td>
+</tr>
+</table>
+</form>
 
 <form method="POST" name="sta_advance" action="/goform/setStaAdvance">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">

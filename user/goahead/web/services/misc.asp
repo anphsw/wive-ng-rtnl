@@ -92,6 +92,7 @@ function initValue()
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
+	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
 	var upnpb = "<% getUpnpBuilt(); %>";
@@ -110,6 +111,7 @@ function initValue()
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
+	form.pingWANEnbl.options.selectedIndex = (wpf == "1") ? 1 : 0;
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
@@ -252,6 +254,16 @@ function CheckValue()
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head" id="sysfwPingFrmWANFilterHead">
+	Ping form WAN Filter
+</td>
+<td>
+	<select name="pingWANEnbl" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
 <tr>
 <td class="head">UDPXY</td>
 <td>

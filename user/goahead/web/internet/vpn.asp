@@ -395,7 +395,7 @@ function submitClick(form)
 	
 	if (form.vpn_type.value != "0")
 	{
-		if ((!validateIP(form.vpn_type, false)) && (!validateDNS(form.vpn_type, false)))
+		if ((!validateIP(form.vpn_server, false)) && (!validateDNS(form.vpn_server, false)))
 		{
 			alert("Invalid IP address or domain name!");
 			form.vpn_type.focus();

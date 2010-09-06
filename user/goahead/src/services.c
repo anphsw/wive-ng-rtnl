@@ -19,6 +19,7 @@
 #include	"utils.h"
 #include	"management.h"
 #include	"station.h"
+#include	"firewall.h"
 
 #include	"linux/autoconf.h"  //kernel config
 #include	"config/autoconf.h" //user config
@@ -151,7 +152,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
 	char_t  *stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en;
-	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh, *udpxy_mode;
+	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh, *udpxy_mode, *ping_wan;
 	char_t  *watchdog;
 
 	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
@@ -165,6 +166,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	rmt_ssh = websGetVar(wp, T("rmtSSH"), T("0"));
 	udpxy_mode = websGetVar(wp, T("udpxyMode"), T("0"));
 	watchdog = websGetVar(wp, T("watchdogEnable"), T("0"));
+	ping_wan = websGetVar(wp, T("pingWANEnbl"), T("0"));
 
 	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
 	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
@@ -172,6 +174,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "upnpEnabled", upnp_en);
 	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
 	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
+	nvram_bufset(RT2860_NVRAM, "WANPingFilter", ping_wan);
 
 	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
 	nvram_bufset(RT2860_NVRAM, "RemoteManagement", rmt_http);
@@ -179,12 +182,11 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
 	nvram_bufset(RT2860_NVRAM, "WatchdogEnabled", watchdog);
 	
-	printf("lltdEnabled = %s, dnsPEnabled = %s, RemoteManagement = %s, RemoteSSH = %s, UDPXYMode = %s\n",
-			lltd_en, dnsp_en, rmt_http, rmt_ssh, udpxy_mode);
-
 	// Commit settings
 	nvram_commit(RT2860_NVRAM);
 
 	//restart some services instead full reload
-	doSystem("services_restart.sh misc");
+	//firewall_rebuild(); // now we do not need it
+	
+	doSystem("services_restart.sh misc &");
 }

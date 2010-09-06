@@ -59,6 +59,7 @@ var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
 var meshb = '<% getMeshBuilt(); %>';
 var wdsb = '<% getWDSBuilt(); %>';
 var wscb = '<% getWSCBuilt(); %>';
+var stab = '<% getSTABuilt(); %>';
 var usbb = '<% getUSBBuilt(); %>';
 var storageb = '<% getStorageBuilt(); %>';
 var ftpb = '<% getFtpBuilt(); %>';
@@ -106,10 +107,8 @@ if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
 	a.add(404, 400, _("treeapp statistics"),            "javascript:go('station/statistics.asp');");
 	a.add(405, 400, _("treeapp advance"),               "javascript:go('station/advance.asp');");
 	a.add(406, 400, _("treeapp qos"),                   "javascript:go('station/qos.asp');");
-	a.add(407, 400, _("treeapp 11n configurations"),    "javascript:go('station/11n_cfg.asp');");
-	a.add(408, 400, _("treeapp about"),                 "javascript:go('station/about.asp');");
-	if (wscb == "1")
-		a.add(409, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
+	if (stab == "1")
+		a.add(407, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
 }
 else
 {
@@ -147,8 +146,7 @@ if (opmode != '0') {
 	a.add(701, 700, _("treeapp ip/port filtering"),     "javascript:go('firewall/port_filtering.asp');");
 	a.add(703, 700, _("treeapp port forwarding"),       "javascript:go('firewall/port_forward.asp');");
 	a.add(704, 700, _("treeapp dmz"),                   "javascript:go('firewall/DMZ.asp');");
-	a.add(705, 700, _("treeapp system firewall"),       "javascript:go('firewall/system_firewall.asp');");
-	a.add(706, 700, _("treeapp content filtering"),     "javascript:go('firewall/content_filtering.asp');");
+	a.add(705, 700, _("treeapp content filtering"),     "javascript:go('firewall/content_filtering.asp');");
 }
 
 if (usbb == "1")

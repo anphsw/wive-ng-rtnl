@@ -546,35 +546,26 @@ static void iptablesPortForwardBuildScript(void)
 		{
 			// get interface
 			if ((getNthValueSafe(0, rec, ',', iface, sizeof(iface)) == -1))
-			{
-				printf("iface = %s\n", iface);
 				continue;
-			}
 			
 			// get ip address
 			if ((getNthValueSafe(1, rec, ',', ip_address, sizeof(ip_address)) == -1))
-			{
-				fprintf(fd, "ip_addr = %s\n", prf);
 				continue;
-			}
+
 			if (!isIpValid(ip_address))
 				continue;
 
 			// get port range "from"
 			if ((getNthValueSafe(2, rec, ',', prf, sizeof(prf)) == -1))
-			{
-				fprintf(fd, "prf = %s\n", prf);
 				continue;
-			}
+
 			if( (prf_int = atoi(prf)) == 0 || prf_int > 65535)
 				continue;
 
 			// get port range "to"
 			if ((getNthValueSafe(3, rec, ',', prt, sizeof(prt)) == -1))
-			{
-				printf("prt = %s\n", prt);
 				continue;
-			}
+
 			if ((prt_int = atoi(prt)) > 65535)
 				continue;
 
@@ -879,8 +870,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	i=0;
 	while (getNthValueSafe(i, rules, ';', rec, sizeof(rec)) != -1 && strlen(rec))
 	{
-		printf("i=%d, rec=%s, strlen(rec)=%d\n", i, rec, strlen(rec));
-		
 		// Get interface
 		if ((getNthValueSafe(0, rec, ',', iface, sizeof(iface)) == -1))
 		{
@@ -896,10 +885,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		if (!isIpNetmaskValid(sip_1))
 			sip_1[0] = '\0';
-		//{
-		//	i++;
-		//	continue;
-		//}
+
 		// translate "any/0" to "any" for readable reason
 		if (strcmp(sip_1, "any/0")==0)
 			strcpy(sip_1, "-");
@@ -908,16 +894,10 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		if ((getNthValueSafe(2, rec, ',', sim_1, sizeof(sim_1)) == -1))
 		{
 			i++;
-			printf("bad sim1\n");
 			continue;
 		}
 		if (!isIpNetmaskValid(sim_1))
 			sim_1[0] = '\0';
-		//{
-		//	i++;
-		//	printf("bad sim1-2\n");
-		//	continue;
-		//}
 
 		// get ip 2
 		// get ip address
@@ -962,10 +942,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		if (!isIpNetmaskValid(dip_1))
 			dip_1[0] = '\0';
-		//{
-		//	i++;
-		//	continue;
-		//}
 		
 		// translate "any/0" to "any" for readable reason
 		if (!strcmp(dip_1, "any/0"))
@@ -980,11 +956,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		if (!isIpNetmaskValid(dim_1))
 			dim_1[0] = '\0';
-		//{
-		//	i++;
-		//	printf("bad dim1-2\n");
-		//	continue;
-		//}
 		
 		// get ip 2
 		if ((getNthValueSafe(8, rec, ',', dip_2, sizeof(dip_2)) == -1))
@@ -992,9 +963,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 			i++;
 			continue;
 		}
-		// dont verify cause we dont have ip range support
-		//if(!isIpValid(dip_2))
-		//	continue;
 
 		// get protocol
 		if ((getNthValueSafe(11, rec, ',', protocol, sizeof(protocol)) == -1))
@@ -1071,8 +1039,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 		// output Interface
 		websWrite(wp, T("<td align=\"center\"> %s </td>"), iface);
 
-		printf("dip_1 / dim_1 = %s/%s\n", dip_1, dim_1);
-
 		// output DIP
 		if ((dip_1 != NULL) && (strlen(dip_1)>0) && (strcmp(dip_1, "-")!=0))
 			websWrite(wp, T("<td align=\"center\"> %s / %s </td>"), dip_1, dim_1);
@@ -1080,8 +1046,6 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 			websWrite(wp, T("<td align=\"center\"> - </td>"));
 		// we dont support ip range 
 		// websWrite(wp, T("<td align=center> %s-%s </td>"), ip_1, ip_2);
-
-		printf("sip_1 / sim_1 = %s/%s\n", sip_1, sim_1);
 
 		// output SIP
 		if ((sip_1 != NULL) && (strlen(sip_1)>0) && (strcmp(sip_1, "-")!=0))
