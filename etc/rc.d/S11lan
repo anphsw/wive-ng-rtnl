@@ -80,34 +80,21 @@ fi
   ip link set $lan_if down
  #-------------------LAN1----------------
  $LOG "Add LAN1 iface"
- if [ "$ip" != "" ]; then
-    if [ "$nm" = "" ]; then
+ if [ "$lan_ip" != "" ]; then
+    if [ "$lan_nm" = "" ]; then
 	nm="255.0.0.0"
     fi
-    ifconfig $lan_if $ip netmask $nm up
+    ifconfig $lan_if $lan_ip netmask $lan_nm up
  else
     ifconfig $lan_if 0.0.0.0 up	
  fi
- $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $ip <<<<<"
+ $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip <<<<<"
 
  #-------------------LAN2----------------
  if [ "$lan2enabled" = "1" ]; then
 	$LOG "Add LAN2 iface"
-        ifconfig "$lan2_if" "$ip_2" netmask "$nm_2"
-        $LOG "ifconfig "$lan2_if" "$ip_2" netmask "$nm_2""
- fi
-
- #-------------------DGW-----------------
- if [ "$opmode" != "0" ]; then
-    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-	$LOG "Add default gateway in router mode via $gw"
-	ip route replace default via $gw
-	ip route replace 255.255.255.255 dev $lan_if
-    fi 
- else
-    $LOG "Add default gateway in bridge mode via br0"
-    ip route replace default dev br0
-    ip route replace 255.255.255.255 dev br0
+        ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2"
+        $LOG "ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2""
  fi
 }
 
@@ -124,11 +111,10 @@ $LOG "Stop network interfaces..."
 }
 
 get_param() {
- ip=`nvram_get 2860 lan_ipaddr`
- nm=`nvram_get 2860 lan_netmask`
- ip_2=`nvram_get 2860 lan2_ipaddr`
- nm_2=`nvram_get 2860 lan2_netmask`
- gw=`nvram_get 2860 wan_gateway`
+ lan_ip=`nvram_get 2860 lan_ipaddr`
+ lan_nm=`nvram_get 2860 lan_netmask`
+ lan_ip_2=`nvram_get 2860 lan2_ipaddr`
+ lan_nm_2=`nvram_get 2860 lan2_netmask`
  lan2enabled=`nvram_get 2860 Lan2Enabled`
  CHECKMAC=`nvram_get 2860 CHECKMAC`
  MAC=`nvram_get 2860 WAN_MAC_ADDR`
