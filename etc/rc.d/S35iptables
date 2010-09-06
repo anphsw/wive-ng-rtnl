@@ -160,9 +160,9 @@ start() {
 	    fi
 
 	    #enable forward only from local network to wan/ppp
-	    iptables -A FORWARD -i $lan_if -s $lan_ip/$nm -j ACCEPT
-	    iptables -A FORWARD -o $wan_if -s $lan_ip/$nm -j ACCEPT
-	    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$nm -j ACCEPT
+	    iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
+	    iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
+	    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
@@ -183,16 +183,16 @@ start() {
 		iptables -t nat -N DMZ
 		iptables -t nat -A PREROUTING -j DMZ
 		$LOG "DMZ enabled for $DMZIPAddress"
-		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$nm --to $DMZIPAddress
+		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
 
 	  if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
 	    #for ISP localnet alya dualacess
-    	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$nm -j MASQUERADE
+    	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
-	    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$nm -j MASQUERADE
-	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$nm -j MASQUERADE
+	    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$lan_nm -j MASQUERADE
+	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
 	    
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
@@ -255,7 +255,7 @@ stop() {
 
 get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
-    nm=`nvram_get 2860 lan_netmask`
+    lan_nm=`nvram_get 2860 lan_netmask`
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
