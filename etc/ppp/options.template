@@ -1,0 +1,24 @@
+noauth
+noktune
+
+#Options for redial
+idle 0
+maxfail 0
+holdoff 5
+
+#Disable ARP proxy and IPX protocol
+noproxyarp
+noipx
+
+# Turn off compression protocols we know won't be used
+novj
+novjccomp
+nopcomp
+noaccomp
+nobsdcomp
+nodeflate
+
+# LCP Control
+lcp-echo-failure        10
+lcp-echo-interval       5
+

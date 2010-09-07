@@ -11,6 +11,8 @@ MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 IFACE=`nvram_get 2860 vpnInterface`
+AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+OPTFILE="/etc/ppp/options.pppoe"
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -70,12 +72,32 @@ else
     DEBUG=""
 fi
 
-OPTFILE="file /etc/ppp/options.pppoe"
+if [ "$AUTHMODE" = "1" ]; then
+    PAP="require-pap"
+    CHAP="refuse-chap"
+elif [ "$AUTHMODE" = "2" ]; then
+    PAP="refuse-pap"
+    CHAP="require-chap"
+elif [ "$AUTHMODE" = "3" ]; then
+    PAP="refuse-pap"
+    CHAP="refuse-chap"
+else
+    PAP=""
+    CHAP=""
+fi
+
+cp -f /etc/ppp/options.template
+printf "
+lock
+$PAP
+$CHAP
+" >> $OPTFILE
+
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 # PPPoE invocation
 PPPOE_CMD="$IFACE $SERVER user $USER password $PASSWORD"
 
 $LOG "Start pppd at $IFACE to $SERVER mode PPPOE"
-FULLOPT="$OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
+FULLOPT="file $OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &

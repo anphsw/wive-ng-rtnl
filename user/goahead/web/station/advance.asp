@@ -11,16 +11,6 @@
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
-function style_display_on()
-{
-	if (window.ActiveXObject) { // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest) { // Mozilla, Safari,...
-		return "table-row";
-	}
-}
-
 function macCloneMacFillSubmit()
 {
 	http_request = false;
@@ -82,25 +72,13 @@ function wirelessModeChange()
 	else if (nmode == 2)
 		document.sta_advance.country_region_bg.disabled = true;
 	
-	document.getElementById("div_tx_rate").style.visibility = "hidden";
-	document.getElementById("div_tx_rate").style.display = "none";
-
-	//For 11n
-	document.getElementById("div_ht_phy_mode").style.visibility = "hidden";
-	document.getElementById("div_ht_phy_mode").style.display = "none";
+	hideElement("div_tx_rate");
+	hideElement("div_ht_phy_mode");
 
 	if (nmode >= 5)
-	{
-		document.getElementById("div_ht_phy_mode").style.visibility = "visible";
-		if (window.ActiveXObject) // IE
-			document.getElementById("div_ht_phy_mode").style.display = "block";
-		else if (window.XMLHttpRequest)  // Mozilla, Safari,...
-			document.getElementById("div_ht_phy_mode").style.display = "table";
-	}
-	else {
-		document.getElementById("div_tx_rate").style.visibility = "visible";
-		document.getElementById("div_tx_rate").style.display = style_display_on();
-	}
+		showElement("div_ht_phy_mode");
+	else
+		showElement("div_tx_rate");
 }
 
 function RadioStatusChange(rs)
@@ -192,15 +170,9 @@ function initValue()
 function macCloneSwitch(form)
 {
 	if (form.macCloneEnbl.options.selectedIndex == 1)
-	{
-		document.getElementById("macCloneMacRow").style.visibility = "visible";
-		document.getElementById("macCloneMacRow").style.display = style_display_on();
-	}
+		showElement("macCloneMacRow");
 	else
-	{
-		document.getElementById("macCloneMacRow").style.visibility = "hidden";
-		document.getElementById("macCloneMacRow").style.display = "none";
-	}
+		hideElement("macCloneMacRow");
 }
 
 function PageInit()
@@ -226,15 +198,12 @@ function Auto_BA_Click(form)
 
 function init11NValues()
 {
-	var form = document.sta_11n_configuration;
+	var form = document.sta_advance;
 
 	var baenable = <% getCfgZero(1, "staPolicy"); %>;
 	var autoba = <% getCfgZero(1, "HT_AutoBA"); %>;
 	var density = <% getCfgZero(1, "HT_MpduDensity"); %>;
 	var amsdu = <% getCfgZero(1, "HT_AMSDU"); %>;
-	var opmode = '<% getCfgZero(1, "OperationMode"); %>';
-	var dpbsta = '<% getDpbSta(); %>';
-	var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
 
 	form.a_mpdu_enable.checked = baenable;
 	form.autoBA[(autoba) ? 1 : 0].checked = true;
@@ -248,9 +217,6 @@ function init11NValues()
 
 	if (amsdu)
 		form.a_msdu_enable.checked = true;
-
-	if (((opmode == '0') && (dpbsta == '1') && (ethconv == '1')) || (opmode == '2'))
-		showElement("frm11NConfiguration");
 }
 
 </script>
@@ -264,41 +230,9 @@ function init11NValues()
 <p id="staadvIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr>
 
+<!--
 <form method="post" name="sta_11n_configuration" action="/goform/setSta11nCfg" id="frm11NConfiguration" style="display: none;">
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
-<tr>
-	<td class="title" colspan="2" id="11nConfig">11n Configuration</td>
-</tr>
-<tr>
-	<td class="head" rowspan="2" id="11nAMPDU">MPDU Aggregation</td>
-	<td><input type="checkbox" name="a_mpdu_enable" onClick="Mpdu_Aggregtion_Click(this.form);"><font id="11nAMPDUEnable">enable</font></td>
-</tr>
-<tr>
-	<td>
-		<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>&nbsp;&nbsp;
-		<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="11nMPDUDensity">MPDU density</td>
-	<td>
-		<select name="mpdu_density" size="1">
-			<option value="0" selected>0</option>
-			<option value="1">1</option>
-			<option value="2">2</option>
-			<option value="3">3</option>
-			<option value="4">4</option>
-			<option value="5">5</option>
-			<option value="6">6</option>
-			<option value="7">7</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="11nAMSDU">Aggregation MSDU(A-MSDU)</td>
-	<td><input type="checkbox" name="a_msdu_enable"><font id="11nAMSDUEnable">enable</font></td>
-</tr>
-</table>
+
 
 <br>
 
@@ -311,6 +245,7 @@ function init11NValues()
 </tr>
 </table>
 </form>
+-->
 
 <form method="POST" name="sta_advance" action="/goform/setStaAdvance">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
@@ -389,7 +324,7 @@ function init11NValues()
 </tr>
 <tr id="div_tx_rate" name="div_tx_rate" <% var wm = getCfgZero(0, "WirelessMode");
 	if (wm == "0" || wm == "1" || wm == "2" || wm == "3")
-	write("style=\"visibility:hidden;display:none\""); %>>
+	write("style=\"display:none;\""); %>>
 	<td class="head" id="staadvTxRate">Tx Rate</td>
 	<td>
 		<select name="tx_rate" size="1">
@@ -421,7 +356,7 @@ function init11NValues()
 
 <table id="div_ht_phy_mode" name="div_ht_phy_mode" width="90%" border="1" cellpadding="2" cellspacing="1" <%
 	if (wm == "0" || wm == "1" || wm == "2" || wm == "3")
-	write("style=\"visibility:hidden;display:none\""); %>>
+	write("style=\"display:none;\""); %>>
 <tr>
 	<td class="title" colspan="2" id="staadvHTPhyMode">HT Physical Mode</td>
 </tr>
@@ -476,6 +411,35 @@ function init11NValues()
 			<option value=33 id="staadvMCSAuto">AUTO</option>
 		</select>
 	</td>
+</tr>
+<tr>
+	<td class="head" rowspan="2" id="11nAMPDU">MPDU Aggregation</td>
+	<td><input type="checkbox" name="a_mpdu_enable" onClick="Mpdu_Aggregtion_Click(this.form);"><font id="11nAMPDUEnable">enable</font></td>
+</tr>
+<tr>
+	<td>
+		<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>&nbsp;&nbsp;
+		<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="11nMPDUDensity">MPDU density</td>
+	<td>
+		<select name="mpdu_density" size="1">
+			<option value="0" selected>0</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head" id="11nAMSDU">Aggregation MSDU(A-MSDU)</td>
+	<td><input type="checkbox" name="a_msdu_enable"><font id="11nAMSDUEnable">enable</font></td>
 </tr>
 </table>
 

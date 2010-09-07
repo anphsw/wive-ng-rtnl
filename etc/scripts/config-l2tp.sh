@@ -10,7 +10,7 @@ MTU=`nvram_get 2860 vpnMTU`
 MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
-opmode=`nvram_get 2860 OperationMode`
+AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -94,6 +94,28 @@ echo "==================START-L2TP-CLIENT======================="
         MTU="mtu $MTU"
     fi
 
+    if [ "$AUTHMODE" = "1" ]; then
+	L2TPPAP="require pap = yes"
+	L2TPCHAP="require chap = no"
+	PAP="require-pap"
+	CHAP="refuse-chap"
+    elif [ "$AUTHMODE" = "2" ]; then
+	L2TPPAP="require pap = no"
+	L2TPCHAP="require chap = yes"
+	PAP="refuse-pap"
+	CHAP="require-chap"
+    elif [ "$AUTHMODE" = "3" ]; then
+	L2TPPAP="require pap = no"
+	L2TPCHAP="require chap = yes"
+	PAP="refuse-pap"
+	CHAP="refuse-chap"
+    else
+	L2TPPAP=""
+	L2TPCHAP=""
+	PAP=""
+	CHAP=""
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -104,11 +126,11 @@ echo "==================START-L2TP-CLIENT======================="
     [lac $SERVER]\n
     redial = yes
     redial timeout = 20
-    require chap = yes
+    $L2TPPAP
+    $L2TPCHAP
     require authentication = no
     lns = $SERVER
     name = $USER
-    require pap = no
     autodial = yes
     pppoptfile = $ppp/options.l2tp
     " >> $ppp/l2tpd.conf
@@ -117,8 +139,9 @@ echo "==================START-L2TP-CLIENT======================="
     connect /bin/true
     idle 0
     maxfail 0
-    refuse-pap
     refuse-eap
+    $PAP
+    $CHAP
     noipx
     noproxyarp
     $MTU

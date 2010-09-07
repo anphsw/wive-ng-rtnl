@@ -56,6 +56,8 @@ function showHint(key)
 			text += 'Specify user name given by your network provider.';
 		else if (key=='vpn_password')
 			text += 'Specify password given by your network provider.';
+		else if (key=='vpn_auth_type')
+			text += 'Select VPN authentication protocol type.';
 		else if (key=='vpn_pppoe_iface')
 			text += 'Select available interface for PPPoE.';
 		else if (key=='vpn_server')
@@ -181,6 +183,7 @@ function vpnSwitchClick(form)
 
 	form.vpn_server.disabled       = dis;
 	form.vpn_range.disabled        = dis;
+	form.vpn_auth_type.disabled    = dis;
 	form.vpn_user.disabled         = dis;
 	form.vpn_pass.disabled         = dis;
 	form.vpn_mtu.disabled          = dis;
@@ -418,6 +421,7 @@ function initializeForm(form)
 	var debug      = '<% getCfgGeneral(1, "vpnDebug"); %>';
 	var nat        = '<% getCfgGeneral(1, "vpnNAT"); %>';
 	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
+	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
 
 	form.vpn_enabled.checked = (vpnEnabled == 'on');
 	form.vpn_routing_enabled.checked = (routingOn == 'on');
@@ -427,6 +431,7 @@ function initializeForm(form)
 	form.vpn_nat.checked     = (nat == 'on');
 	form.vpn_type.value      = pptpType;
 	form.vpn_dgw.value       = dgw;
+	form.vpn_auth_type.value = vpn_auth;
 }
 
 function showVPNStatus()
@@ -492,6 +497,17 @@ tunnel on your Router.
 	<tr id="vpn_l2tp_range" onMouseOver="showHint('vpn_range')" onMouseOut="hideHint('vpn_range')" style="display: none;" >
 		<td width="50%"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>
 		<td width="50%"><input name="vpn_range" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnRange"); %>" disabled="disabled" type="text"></td>
+	</tr>
+	<tr onMouseOver="showHint('vpn_auth_type')" onMouseOut="hideHint('vpn_auth_type')" >
+		<td width="50%"><b>Authentication method:</b></td>
+		<td width="50%">
+			<select id="vpn_auth_type_select" disabled="disabled" name="vpn_auth_type" class="mid">
+				<option value="0" selected="selected">AUTO</option>
+				<option value="1">PAP</option>
+				<option value="2">CHAP</option>
+				<option value="3">MSCHAP</option>
+			</select>
+		</td>
 	</tr>
 	<tr onMouseOver="showHint('vpn_user')" onMouseOut="hideHint('vpn_user')" >
 		<td width="50%"><b>User name:</b></td>

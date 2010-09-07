@@ -116,7 +116,6 @@ void formDefineStation(void)
 	websFormDefine(T("addStaProfile"), addStaProfile);
 	websFormDefine(T("editStaProfile"), editStaProfile);
 	websFormDefine(T("resetStaCounters"), resetStaCounters);
-	websFormDefine(T("setSta11nCfg"), setSta11nCfg);
 	websFormDefine(T("setStaAdvance"), setStaAdvance);
 	websFormDefine(T("setStaConnect"), setStaConnect);
 	websFormDefine(T("setStaDbm"), setStaDbm);
@@ -3694,22 +3693,22 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 	int bSuppA = myGetSuppAMode();
 
 	mode = (NULL == mode_s)? 0 : atoi(mode_s);
-	websWrite(wp, "<option value=0 %s>802.11 B/G mixed mode</option>", (mode == 0)? "selected" : "");
-	websWrite(wp, "<option value=1 %s>802.11 B Only</option>", (mode == 1)? "selected" : "");
+	websWrite(wp, "<option value=\"0\" %s>802.11 B/G mixed mode</option>", (mode == 0)? "selected" : "");
+	websWrite(wp, "<option value=\"1\" %s>802.11 B Only</option>", (mode == 1)? "selected" : "");
 	if (bSuppA) {
-		websWrite(wp, "<option value=2 %s>802.11 A Only</option>", (mode == 2)? "selected" : "");
-		websWrite(wp, "<option value=3 %s>802.11 A/B/G mixed mode</option>", (mode == 3)? "selected" : "");
+		websWrite(wp, "<option value=\"2\" %s>802.11 A Only</option>", (mode == 2)? "selected" : "");
+		websWrite(wp, "<option value=\"3\" %s>802.11 A/B/G mixed mode</option>", (mode == 3)? "selected" : "");
 	}
-	websWrite(wp, "<option value=4 %s>802.11 G Only</option>", (mode == 4)? "selected" : "");
-	websWrite(wp, "<option value=6 %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
-	websWrite(wp, "<option value=7 %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
+	websWrite(wp, "<option value=\"4\" %s>802.11 G Only</option>", (mode == 4)? "selected" : "");
+	websWrite(wp, "<option value=\"6\" %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
+	websWrite(wp, "<option value=\"7\" %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
 	if (bSuppA) {
-		websWrite(wp, "<option value=8 %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
+		websWrite(wp, "<option value=\"8\" %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
 	}
-	websWrite(wp, "<option value=9 %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
+	websWrite(wp, "<option value=\"9\" %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
 	if (bSuppA) {
-		websWrite(wp, "<option value=10 %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
-		websWrite(wp, "<option value=5 %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
+		websWrite(wp, "<option value=\"10\" %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
+		websWrite(wp, "<option value=\"5\" %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
 	}
 
 	return 0;
@@ -4970,8 +4969,7 @@ static void resetStaCounters(webs_t wp, char_t *path, char_t *query)
 static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *a_mpdu_enable, *autoBA, *mpdu_density, *a_msdu_enable;
-	int policy;
-	int s;
+	int policy, s;
 	OID_BACAP_STRUC BACap;
 
 	a_mpdu_enable = websGetVar(wp, T("a_mpdu_enable"), T("off"));
@@ -4979,11 +4977,13 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 	mpdu_density = websGetVar(wp, T("mpdu_density"), T("0"));
 	a_msdu_enable = websGetVar(wp, T("a_msdu_enable"), T("off"));
 
-	if (!strcmp(a_mpdu_enable, "on")) {
+	if (!strcmp(a_mpdu_enable, "on"))
+	{
 		policy = 1;
 		nvram_bufset(RT2860_NVRAM, "staPolicy", "1"); //FIXME: typo?
 	}
-	else {
+	else
+	{
 		policy = 0;
 		nvram_bufset(RT2860_NVRAM, "staPolicy", "0");
 	}
@@ -4993,25 +4993,18 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	OidQueryInformation(RT_OID_802_11_QUERY_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-	BACap.Policy = policy;
-	BACap.AutoBA = atoi(autoBA);
-	BACap.MpduDensity = atoi(mpdu_density);
-	if (!strcmp(a_msdu_enable, "on"))
-		BACap.AmsduEnable = 1;
+	if (s >= 0)
+	{
+		OidQueryInformation(RT_OID_802_11_QUERY_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
+		BACap.Policy = policy;
+		BACap.AutoBA = atoi(autoBA);
+		BACap.MpduDensity = atoi(mpdu_density);
+		if (!strcmp(a_msdu_enable, "on"))
+			BACap.AmsduEnable = 1;
 
-	OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-	close(s);
-
-	//debug print
-	websHeader(wp);
-	websWrite(wp, T("<h3>11n configuration</h3><br>\n"));
-	websWrite(wp, T("a_mpdu_enable: %s<br>\n"), a_mpdu_enable);
-	websWrite(wp, T("autoBA: %s<br>\n"), autoBA);
-	websWrite(wp, T("mpdu_density: %s<br>\n"), mpdu_density);
-	websWrite(wp, T("a_msdu_enable: %s<br>\n"), a_msdu_enable);
-	websFooter(wp);
-	websDone(wp, 200);
+		OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
+		close(s);
+	}
 }
 
 /*
@@ -5099,7 +5092,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
 
 	//set 11n ht phy mode
-	if (wireless_mode >= PHY_11ABGN_MIXED) {
+	if (wireless_mode >= PHY_11ABGN_MIXED)
+	{
 		OID_BACAP_STRUC    BACap;
 		OID_SET_HT_PHYMODE phymode;
 
@@ -5118,6 +5112,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		ret = OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
 		if (ret < 0)
 			return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_IMME_BA_CAP error = %d", ret);
+		
+		setSta11nCfg(wp, path, query);
 	}
 	else {
 		OID_BACAP_STRUC	BACap;

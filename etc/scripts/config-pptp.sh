@@ -10,6 +10,8 @@ MTU=`nvram_get 2860 vpnMTU`
 MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
+AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+OPTFILE="/etc/ppp/options.pptp"
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -93,9 +95,29 @@ echo "==================START-PPTP-CLIENT======================="
 	DEBUG=""
     fi
 
+    if [ "$AUTHMODE" = "1" ]; then
+	PAP="require-pap"
+	CHAP="refuse-chap"
+    elif [ "$AUTHMODE" = "2" ]; then
+	PAP="refuse-pap"
+	CHAP="require-chap"
+    elif [ "$AUTHMODE" = "3" ]; then
+	PAP="refuse-pap"
+	CHAP="refuse-chap"
+    else
+	PAP=""
+	CHAP=""
+    fi
+
+    cp -f /etc/ppp/options.template
+    printf "                                                                                                                                                                                                                                                                        
+    $PAP
+    $CHAP
+    " >> $OPTFILE
+
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file /etc/ppp/options.pptp -detach $DEBUG $MTU $MRU $MPPE plugin"
+    PPPDOPT="file $OPTFILE -detach $DEBUG $MTU $MRU $MPPE plugin"
     PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
