@@ -105,9 +105,7 @@ $LOG "Copy web pages to tmpfs"
 }
 
 stop() {
- $LOG "Stop preconfigure."
- killall -q nvram_daemon
- killall -q -9 nvram_daemon
+ $LOG ""
 }
 
 case "$1" in

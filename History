@@ -118,6 +118,12 @@
 36) pppd up to current git src 24 Aug 2010<br>
 37) xl2tpd up to 1.2.7 version<br>
 38) Fix conntrack flush<br>
+39) Wireless pages split and optimize<br>
+40) VPN page add auth type select<br>
+41) Fix trunclate nvram values at aplly change and device mode select<br>
+42) Fix restart nvram_daemon<br>
+43) Kernel fix lock in mtdchar, more small fixes and cleanups<br>
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

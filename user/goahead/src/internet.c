@@ -773,14 +773,12 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	if (vpn_enabled[0] == '\0')
 		vpn_enabled="off";
 
-	//kill tunnels firt sigterm second sigkill
-	printf("Kill tunnels\n");
-	system("/bin/killall -q xl2tpd");
-	system("/bin/killall -q pppd");
-	system("/bin/killall -q vpnhelper.sh");
-	system("/bin/killall -q -9 xl2tpd");
-	system("/bin/killall -q -9 pppd");
-	system("/bin/killall -q -9 vpnhelper.sh");
+	//kill helpers firt sigterm second sigkill
+	printf("Kill helpers\n");
+	system("/bin/killall -q S70vpnhelper");
+	system("/bin/killall -q vpnhelper");
+	system("/bin/killall -q -9 S70vpnhelper");
+	system("/bin/killall -q -9 vpnhelper");
 	
 	// Do not set other params if VPN is turned off
 	if (strcmp(vpn_enabled, "on")==0)
@@ -819,19 +817,17 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 				vpnStoreRouting(vpn_rt);
 		}
 	}
-	
+
 	// Now store VPN_ENABLED flag
 	if (nvram_bufset(RT2860_NVRAM, "vpnEnabled", (void *)vpn_enabled)==0)
 	{
 		printf("vpn_enabled value : %s\n", vpn_enabled);
+		nvram_commit(RT2860_NVRAM);
+    		sleep(1);
 		printf("Calling vpn helper...\n");
 		system("service vpnhelper restart &");
-	}
-	else
+	} else
 		printf("Set vpnEnabled error!\n");
-
-	// Commit nvram
-	nvram_commit(RT2860_NVRAM);
 	
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
