@@ -109,7 +109,7 @@ echo "==================START-PPTP-CLIENT======================="
 	CHAP=""
     fi
 
-    cp -f /etc/ppp/options.template
+    cp -f /etc/ppp/options.template $OPTFILE
     printf "                                                                                                                                                                                                                                                                        
     $PAP
     $CHAP
