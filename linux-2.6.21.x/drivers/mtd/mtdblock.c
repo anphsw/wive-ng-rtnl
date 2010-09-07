@@ -1,9 +1,7 @@
 /*
  * Direct MTD block device access
  *
- * $Id: mtdblock.c,v 1.1.1.1 2007-05-25 06:50:07 bruce Exp $
- *
- * (C) 2000-2003 Nicolas Pitre <nico@cam.org>
+ * (C) 2000-2003 Nicolas Pitre <nico@fluxnic.net>
  * (C) 1999-2003 David Woodhouse <dwmw2@infradead.org>
  */
 
@@ -86,7 +84,7 @@ static int erase_write (struct mtd_info *mtd, unsigned long pos,
 	remove_wait_queue(&wait_q, &wait);
 
 	/*
-	 * Next, writhe data to flash.
+	 * Next, write the data to flash.
 	 */
 
 	ret = mtd->write(mtd, pos, len, &retlen, buf);
@@ -356,10 +354,7 @@ static void mtdblock_add_mtd(struct mtd_blktrans_ops *tr, struct mtd_info *mtd)
 
 static void mtdblock_remove_dev(struct mtd_blktrans_dev *dev)
 {
-	struct mtdblk_dev *mtdblk = container_of(dev, struct mtdblk_dev, mbd);
-
 	del_mtd_blktrans_dev(dev);
-	kfree(mtdblk);
 }
 
 static struct mtd_blktrans_ops mtdblock_tr = {
@@ -394,5 +389,5 @@ module_exit(cleanup_mtdblock);
 
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Nicolas Pitre <nico@cam.org> et al.");
+MODULE_AUTHOR("Nicolas Pitre <nico@fluxnic.net> et al.");
 MODULE_DESCRIPTION("Caching read/erase/writeback block device emulation access to MTD devices");
