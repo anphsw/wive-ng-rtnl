@@ -25,6 +25,15 @@ LOG="logger -t vpnhelper"
 
 echo "==================START-PPPOE-CLIENT======================="
 
+check_param() {
+    if [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
+	$LOG "Username or password not set. Exit..."
+	exit 1
+    fi
+}
+
+check_param
+
 if [ "$IFACE" = "WAN" ]; then
     IFACE=$wan_if
 elif [ "$IFACE" = "LAN" ]; then

@@ -21,6 +21,13 @@ modprobe -q pppol2tp > /dev/null 2>&1
 
 LOG="logger -t vpnhelper"
 
+check_param() {
+    if [ "$SERVERNM" = "" ] || [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
+	$LOG "Server adress, username or password not set. Exit..."
+	exit 1
+    fi
+}
+
 get_vpn_ip() {
     $LOG "Get vpn server $SERVERNM ip adress"
     NS=`ipget $SERVERNM | tail -n1`
@@ -34,6 +41,7 @@ get_vpn_ip() {
 }
 
 echo "==================START-L2TP-CLIENT======================="
+    check_param
     get_vpn_ip
     reachable=0;
     while [ $reachable -eq 0 ]; do
