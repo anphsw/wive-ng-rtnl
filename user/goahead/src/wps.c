@@ -586,7 +586,7 @@ static void WPSAPTimerHandler(int signo)
 	struct _WSC_CONFIGURED_VALUE wsc_value;
 
 	WscStatus = getWscStatus("ra0");
-	printf("WscStatus == %d\n", WscStatus);
+	// printf("WscStatus == %d\n", WscStatus);
 
 	if( WscStatus == 3 && g_wps_timer_state == 0){	// 3 == "Start WSC Process"
 		printf("goahead: Start to monitor WSC Status...\n");
