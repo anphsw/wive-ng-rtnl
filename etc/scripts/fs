@@ -9,7 +9,8 @@
 TGZfs_size=131072
 BLOCKS=2
 MTDDEVICE=/dev/mtdblock5
-CURRCONFIG=/etc/default/RT2860_default_novlan
+CURRCONFIG=/etc/Wireless/RT2860/RT2860.dat
+DEFCONFIG=/etc/default/RT2860_default_novlan
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
@@ -17,12 +18,15 @@ get_size(){
 
 usage(){
   echo "Usage: $0 | save | load | restore | nvramreset | regenerate | fullreset" >&2
+  echo " " >&2
+  echo "____________________________________________________________________________" >&2
   echo "save - Save rwfs to mtd." >&2
   echo "load - Load rwfs from mtd." >&2
   echo "restore - Crash $MTDDEVICE and reboot for restore clean rwfs." >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
-  echo "regenerate - Generate new default config from current and save to rewfs." >&2
+  echo "regenerate - Generate new config from current and save to rwfs." >&2
   echo "fullreset - Full reset include rwfs, nvram and mac adress settings." >&2
+  echo "____________________________________________________________________________" >&2
  exit 1
 }
 
@@ -73,10 +77,9 @@ nvramreset(){
   WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
   LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
   CHECKMAC=`nvram_get 2860 CHECKMAC`
-  #clear nvram
+  #clear nvram and config
   ralink_init clear 2860
-  ralink_init gen
-  ralink_init renew 2860 $CURRCONFIG
+  ralink_init renew 2860 $DEFCONFIG
   #restore macs
   nvram_set 2860 LAN_MAC_ADDR $LANMAC
   nvram_set 2860 WLAN_MAC_ADDR $WMAC
