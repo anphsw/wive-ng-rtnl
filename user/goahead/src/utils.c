@@ -957,7 +957,7 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
     #elif CONFIG_RALINK_RT3052_2T2R
 	return websWrite(wp, T("RT3052 2T2R embedded switch"));
     #else
-	return websWrite(wp, T("RT3052 2T2R unknown switch mode"));
+	return websWrite(wp, T("Don`t detected RT3050 or RT3052 unknown switch mode"));
     #endif
 #else
 	return websWrite(wp, T("Unknown SoC"));
