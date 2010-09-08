@@ -36,8 +36,12 @@ fi
     else
 	$LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
         ifconfig $interface $ip $BROADCAST $NETMASK
-	nvram_set 2860 wan_ipaddr $ip
-	nvram_set 2860 wan_netmask $NETMASK
+	if [ "$ip" != "" ]; then
+	    nvram_set 2860 wan_ipaddr $ip
+	fi
+	if [ "$subnet" != "" ]; then
+	    nvram_set 2860 wan_netmask $subnet
+	fi
 	rm -rf /var/tmp/is_up
 	mkdir -p /var/tmp/is_up
 	echo $ip $NETMASK > /var/tmp/is_up/$ip
