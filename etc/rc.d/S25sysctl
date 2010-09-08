@@ -21,13 +21,13 @@ start() {
         #16mb                                                                                                                
         CONNTRACK_MAX=2048                                                                                                   
         let "HASHSIZE=$CONNTRACK_MAX/8"
-        let "ROUTEMAX=$CONNTRACK_MAX*12"
+        let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     else                                                                                                                     
         #32mb                                                                                                                
         CONNTRACK_MAX=4096                                                                                                   
         let "HASHSIZE=$CONNTRACK_MAX/4"
-        let "ROUTEMAX=$CONNTRACK_MAX*16"
+        let "ROUTEMAX=$CONNTRACK_MAX*12"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     fi                                                                                                                       
 
