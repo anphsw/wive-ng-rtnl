@@ -29,7 +29,7 @@ fi
     #force renew if needed
     if [ -f /var/tmp/is_up/force_renew ]; then
 	STARTEDPPPD=0
-	rm -rf /var/tmp/is_up
+	rm -rf /var/tmp/is_up/*
     fi
     #no change routes if pppd is started
     if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/is_up/$ip ]; then
@@ -37,15 +37,6 @@ fi
     else
 	$LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
         ifconfig $interface $ip $BROADCAST $NETMASK
-	if [ "$ip" != "" ]; then
-	    nvram_set 2860 wan_ipaddr $ip
-	fi
-	if [ "$subnet" != "" ]; then
-	    nvram_set 2860 wan_netmask $subnet
-	fi
-	rm -rf /var/tmp/is_up
-	mkdir -p /var/tmp/is_up
-	echo $ip $NETMASK > /var/tmp/is_up/$ip
         
 	#Get default gateway
     	if [ -n "$router" ] ; then
@@ -207,14 +198,24 @@ fi
 		done
 	}
 
+	#set nvram_variable for goahead
+	if [ "$ip" != "" ]; then
+	    nvram_set 2860 wan_ipaddr $ip
+	fi
+	if [ "$subnet" != "" ]; then
+	    nvram_set 2860 wan_netmask $subnet
+	fi
+
+	#remove force renew flag and save current ip and netmask
+	rm -rf /var/tmp/is_up/*
+	echo "$ip $NETMASK" > /var/tmp/is_up/$ip
+
         # notify goahead when the WAN IP has been acquired. --yy
 	killall -SIGUSR2 goahead
 
     	$LOG "Restart needed services"
 	services_restart.sh dhcp
 
-	#remove force renew flag
-	rm -f /var/tmp/is_up/force_renew
     fi
 	$LOG "Renew OK.."
         ;;

@@ -22,7 +22,6 @@ start() {
     killall -q -9 udhcpc
 
     #set force renew marker
-    mkdir -p /var/tmp/is_up
     touch /var/tmp/is_up/force_renew
 
     /bin/hostname $HOSTNAME
