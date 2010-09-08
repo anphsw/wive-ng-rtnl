@@ -39,9 +39,6 @@ if [ -f /etc/filesystem.ok ]; then
     $LOG "File system is clear or poor."
     zcat /rwfs.gz | tar xf - -C / >>/dev/null
 
-    #regen current settings
-    fs regenerate
-
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
     touch /var/MODIFIED

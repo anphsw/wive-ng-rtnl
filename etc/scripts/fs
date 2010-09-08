@@ -17,7 +17,13 @@ get_size(){
 
 usage(){
   echo "Usage: $0 | save | load | restore | nvramreset | regenerate | fullreset" >&2
-  exit 1
+  echo "save - Save rwfs to mtd." >&2
+  echo "load - Load rwfs from mtd." >&2
+  echo "restore - Crash $MTDDEVICE and reboot for restore clean rwfs." >&2
+  echo "nvramreset - Nvarm clean and load default config." >&2
+  echo "regenerate - Generate new default config from current and save to rewfs." >&2
+  echo "fullreset - Full reset include rwfs, nvram and mac adress settings." >&2
+ exit 1
 }
 
 regenerate(){
@@ -62,7 +68,21 @@ restore(){
 
 nvramreset(){
   echo "Clear and load defaults to nvram!"
+  #store mac adesses
+  MAC=`nvram_get 2860 WAN_MAC_ADDR`
+  WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
+  LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+  CHECKMAC=`nvram_get 2860 CHECKMAC`
+  #clear nvram
   ralink_init clear 2860
+  ralink_init gen
+  ralink_init renew 2860 $CURRCONFIG
+  #restore macs
+  nvram_set 2860 LAN_MAC_ADDR $LANMAC
+  nvram_set 2860 WLAN_MAC_ADDR $WMAC
+  nvram_set 2860 WAN_MAC_ADDR $MAC
+  nvram_set 2860 CHECKMAC $CHECKMAC
+  #regenerate defaults configs
   regenerate
 }
 
