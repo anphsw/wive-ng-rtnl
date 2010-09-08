@@ -63,9 +63,7 @@ restore(){
 nvramreset(){
   echo "Clear and load defaults to nvram!"
   ralink_init clear 2860
-  ralink_init gen 2860
-  ralink_init renew 2860 /etc/default/RT2860_default_novlan
-  ralink_init make_wireless_config 2860
+  regenerate
 }
 
 fullreset(){
