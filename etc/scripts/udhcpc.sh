@@ -21,6 +21,7 @@ case "$1" in
 if [ "$CONFIG_IPV6" != "" ] ; then
         ip -6 addr flush dev $interface
 fi
+	touch /var/tmp/is_up/force_renew
 	ip link set $interface up
         ;;
 
@@ -208,8 +209,12 @@ fi
 
         # notify goahead when the WAN IP has been acquired. --yy
 	killall -SIGUSR2 goahead
+
     	$LOG "Restart needed services"
 	services_restart.sh dhcp
+
+	#remove force renew flag
+	rm -f /var/tmp/is_up/force_renew
     fi
 	$LOG "Renew OK.."
         ;;
