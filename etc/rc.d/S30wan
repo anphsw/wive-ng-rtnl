@@ -23,7 +23,7 @@ start() {
 
     #set force renew marker
     mkdir -p /var/tmp/is_up
-    echo 1 > /var/tmp/is_up/force_renew
+    touch /var/tmp/is_up/force_renew
 
     /bin/hostname $HOSTNAME
     echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
