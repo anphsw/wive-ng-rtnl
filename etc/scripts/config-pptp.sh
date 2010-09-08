@@ -71,9 +71,6 @@ echo "==================START-PPTP-CLIENT======================="
     if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
 	$LOG "Add route to $SERVER via $newdgw"
 	ip route replace $SERVER via $newdgw metric 0
-    else
-	$LOG "Add route to $SERVER over $wan_if"
-	ip route replace $SERVER dev $wan_if metric 0
     fi
 
     if [ "$PEERDNS" = "on" ]; then
