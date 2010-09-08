@@ -2048,12 +2048,12 @@ int initInternet(void)
 
 #if defined (CONFIG_RT2860V2_AP) || defined (CONFIG_RT2860V2_AP_MODULE)
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
-#endif
-#if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_PCI) || defined (CONFIG_INIC_USB) 
+#elif defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_PCI) || defined (CONFIG_INIC_USB) 
 	restart8021XDaemon(RTINIC_NVRAM);	// in wireless.c
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
+#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	restart8021XDaemon(RT2561_NVRAM);	// in wireless.c
+#else
+	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
 #endif
 
 #ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY

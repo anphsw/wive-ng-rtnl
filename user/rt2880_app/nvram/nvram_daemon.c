@@ -25,18 +25,6 @@ void loadDefault(int chip_id)
 {
     switch(chip_id)
     {
-    case 2860:
-	system("ralink_init clear 2860");
-#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
-	system("ralink_init renew 2860 /etc/default/RT2860_default_novlan");
-#elif defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE 
-	system("ralink_init renew 2860 /etc/default/RT2860_default_vlan");
-#elif defined(CONFIG_ICPLUS_PHY)
-	system("ralink_init renew 2860 /etc/default/RT2860_default_oneport");
-#else
-	system("ralink_init renew 2860 /etc/default/RT2860_default_novlan");
-#endif
-	break;
     case 2880:
 	system("ralink_init clear inic");
 #if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
@@ -88,15 +76,14 @@ static void nvramIrqHandler(int signum)
 	} else 
 #endif
 	if (signum == SIGUSR2) {
-		printf("load default and reboot..\n");
-		loadDefault(2860);
 #if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI) 
 		loadDefault(2880);
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
+#elif  defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 		loadDefault(2561);
+#else
+		printf("nvram_daemon: Load default and reboot..\n");
+		system("fs nvramreset");
 #endif
-		
 	    system("fs restore");
 	}
 }
@@ -199,27 +186,22 @@ int main(int argc,char **argv)
 	pid_t pid;
 	int fd;
 
-	if (strcmp(nvram_bufget(RT2860_NVRAM, "WebInit"),"1")) {
-		loadDefault(2860);
-	}
-	
 #if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
 	if (strcmp(nvram_bufget(RTINIC_NVRAM, "WebInit"),"1")) {
 		loadDefault(2880);
 	}
-#endif
-
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
+	nvram_close(RTINIC_NVRAM);
+#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	if (strcmp(nvram_bufget(RT2561_NVRAM, "WebInit"),"1")) {
 		loadDefault(2561);
 	}
-#endif
-	nvram_close(RT2860_NVRAM);
-	nvram_close(RTINIC_NVRAM);
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	nvram_close(RT2561_NVRAM);
+#else
+	if (strcmp(nvram_bufget(RT2860_NVRAM, "WebInit"),"1")) {
+		loadDefault(2860);
+	}
+	nvram_close(RT2860_NVRAM);
 #endif
-
 	if (initGpio() != 0)
 		exit(EXIT_FAILURE);
 

@@ -32,10 +32,10 @@ usage(){
 
 regenerate(){
   echo "Regenerate configs for wifi and rwfs defaults."
-  ralink_init make_wireless_config 2860
   echo "#The following line must not be removed." > $CURRCONFIG
   echo "Default" >> $CURRCONFIG
   ralink_init show 2860 >> $CURRCONFIG
+  ralink_init make_wireless_config 2860
 }
 
 load(){
