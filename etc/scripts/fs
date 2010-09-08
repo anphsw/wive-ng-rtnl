@@ -9,15 +9,23 @@
 TGZfs_size=131072
 BLOCKS=2
 MTDDEVICE=/dev/mtdblock5
-
+CURRCONFIG=/etc/default/RT2860_default_novlan
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore | nvramreset | fullreset" >&2
+  echo "Usage: $0 | save | load | restore | nvramreset | regenerate | fullreset" >&2
   exit 1
+}
+
+regenerate(){
+  echo "Regenerate configs for wifi and rwfs defaults."
+  ralink_init make_wireless_config 2860
+  echo "#The following line must not be removed." > $CURRCONFIG
+  echo "Default" >> $CURRCONFIG
+  ralink_init show 2860 >> $CURRCONFIG
 }
 
 load(){
@@ -28,6 +36,7 @@ load(){
 
 save(){
   echo "Save curent date and current time to rwfs"
+  regenerate
   date +%Y%m%d%H%M > /etc/compile-date
   echo "Compress config files"
   tmp="/tmp/tgzfs"
@@ -52,16 +61,16 @@ restore(){
 }
 
 nvramreset(){
-    echo "Clear and load defaults to nvram!"
-    ralink_init clear 2860
-    ralink_init renew 2860 /etc/default/RT2860_default_novlan
-    ralink_init make_wireless_config 2860
-    ralink_init gen 2860
+  echo "Clear and load defaults to nvram!"
+  ralink_init clear 2860
+  ralink_init gen 2860
+  ralink_init renew 2860 /etc/default/RT2860_default_novlan
+  ralink_init make_wireless_config 2860
 }
 
 fullreset(){
-    nvramreset
-    restore
+  nvramreset
+  restore
 }
 
 main(){
@@ -69,6 +78,9 @@ main(){
   [ -z "$cmd" ] && usage
   shift
   case "$cmd" in 
+    regenerate)
+      regenerate $@
+      ;;
     load) 
       load $@ 
       ;;

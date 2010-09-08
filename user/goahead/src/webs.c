@@ -2768,33 +2768,6 @@ long GregorianYearFromFixed(long fixedDate)
 
 /******************************************************************************/
 /* 
- *	Returns the Gregorian date from a fixed date
- *	(not needed for this use, but included for completeness
- */
-
-#if 0
-GregorianFromFixed(long fixedDate, long *month, long *day, long *year) 
-{
-	long priorDays, correction;
-
-	*year =			GregorianYearFromFixed(fixedDate);
-	priorDays =		fixedDate - FixedFromGregorian(1, 1, *year);
-
-	if (fixedDate < FixedFromGregorian(3,1,*year)) {
-		correction = 0;
-	} else if (true == GregorianLeapYearP(*year)) {
-		correction = 1;
-	} else {
-		correction = 2;
-	}
-
-	*month = (long)(floor((12.0 * (double)(priorDays + correction) + 373.0) / 367.0));
-	*day = fixedDate - FixedFromGregorian(*month, 1, *year);
-}
-#endif
-
-/******************************************************************************/
-/* 
  *	Returns the difference between two Gregorian dates
  */
 

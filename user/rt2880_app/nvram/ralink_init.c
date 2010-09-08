@@ -252,11 +252,6 @@ int gen_config(int mode)
 
 	nvram_init(mode);
 
-	/*
-	nvram_bufset(mode, "SystemName", "RalinkAP");
-	nvram_bufset(mode, "ModuleName", "RT2860");
-	nvram_commit(mode);
-	*/
 	unsigned char temp[2], buf[4];
 	flash_read_NicConf(buf);
 	sprintf(temp, "%x", buf[1]);

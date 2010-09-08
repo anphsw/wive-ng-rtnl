@@ -260,13 +260,17 @@ static void dhcpcHandler(int signum)
  */
 static int initSystem(void)
 {
+#ifndef CONFIG_RALINK_RT3052
 	int setDefault(void);
-
+#endif
 	signal(SIGUSR2, dhcpcHandler);
+#ifndef CONFIG_RALINK_RT3052
 	if (setDefault() < 0)
 		return (-1);
+#endif
 	if (initInternet() < 0)
 		return (-1);
+
 #if defined CONFIG_USB
 	signal(SIGTTIN, hotPluglerHandler);
 	hotPluglerHandler(SIGTTIN);
@@ -286,6 +290,7 @@ static int initSystem(void)
  *	Set Default should be done by nvram_daemon.
  *	We check the pid file's existence.
  */
+#ifndef CONFIG_RALINK_RT3052
 int setDefault(void)
 {
 	FILE *fp;
@@ -302,12 +307,12 @@ int setDefault(void)
 		}
 		else {
 			fclose(fp);
-			nvram_init(RT2860_NVRAM);
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
+#if defined (INIC_SUPPORT) || (defined INICv2_SUPPORT)
 			nvram_init(RTINIC_NVRAM);
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
+#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 			nvram_init(RT2561_NVRAM);
+#else
+			nvram_init(RT2860_NVRAM);
 #endif
 			return 0;
 		}
@@ -316,6 +321,7 @@ int setDefault(void)
 	error(E_L, E_LOG, T("goahead: please execute nvram_daemon first!"));
 	return (-1);
 }
+#endif
 
 /******************************************************************************/
 /*

@@ -66,8 +66,8 @@ void loadDefault(int chip_id)
  */
 static void nvramIrqHandler(int signum)
 {
-	if (signum == SIGUSR1) {
 #ifdef CONFIG_RALINK_RT2880
+	if (signum == SIGUSR1) {
 		int gopid;
 		FILE *fp = fopen("/var/run/goahead.pid", "r");
 
@@ -85,11 +85,9 @@ static void nvramIrqHandler(int signum)
 		printf("notify goahead to start WPS PBC..\n");
 		kill(gopid, SIGUSR1);
 		fclose(fp);
-#else
-		//RT2883, RT3052 use a different gpio number for WPS,
-		//which will be registered in goahead instead
+	} else 
 #endif
-	} else if (signum == SIGUSR2) {
+	if (signum == SIGUSR2) {
 		printf("load default and reboot..\n");
 		loadDefault(2860);
 #if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI) 

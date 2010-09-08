@@ -598,24 +598,6 @@ static void WPSAPTimerHandler(int signo)
 	// check if timeout
 	wsc_timeout_counter += WPS_AP_CATCH_CONFIGURED_TIMER;
 	if(wsc_timeout_counter > WPS_AP_TIMEOUT_SECS){
-
-#if 0
-		// keep for reference
-		// ==    Work around for "Send M7" issue	  ==
-		//if(g_wsc_configured == 1){
-		//	if( WscStatus == 1 /* Idle */){
-		//		g_WscResult = 1;
-		//		wsc_timeout_counter = 0;
-		//		resetTimerAll();
-		//		LedSuccess();
-		//		return;
-		//	}
-		//	if( WscStatus == 23 /* Send M7 */ && wsc_timeout_counter < WPS_AP_TIMEOUT_SECS_SEND_M7 )
-		//		return;	// keep monitoring
-		//}
-		// ==    Work around for "Send M7" issue	  ==
-#endif
-
 		// Timeout happened.
 		// Set g_WscResult to indicate WSC process failed.
 		g_WscResult = -1;
@@ -759,14 +741,8 @@ static void WPSAPTimerHandler(int signo)
 
 			STF(0, "IEEE8021X", "0");
 			nvram_commit(RT2860_NVRAM);
-
-			//doSystem("ifconfig ra0 down");	// for Windows 7
-			//doSystem("ralink_init make_wireless_config rt2860");	// for Windows 7
-			//doSystem("ifconfig ra0 up");		// for Windows 7
 			restart8021XDaemon(RT2860_NVRAM);
-
 			WPSRestart();
-
 		}
 	}
 

@@ -488,26 +488,6 @@ static void legacyBasic(webs_t wp, char_t *path, char_t *query)
 	if (!strncmp(wirelessmode, "4", 2))
 		nvram_bufset(RT2561_NVRAM, "BasicRate", "351");
 
-#if 0
-	i = atoi(mode);
-	if (i == 1)
-		nvram_bufset(RT2561_NVRAM, "BasicRate", "3");
-	else if (i == 0) {
-		nvram_bufset(RT2561_NVRAM, "TxPreamble","0");
-		nvram_bufset(RT2561_NVRAM, "TxBurst", "0");
-		nvram_bufset(RT2561_NVRAM, "PktAggregate", "0");
-	}
-	else if (i == 5) {
-		nvram_bufset(RT2561_NVRAM, "TxPreamble","1");
-		nvram_bufset(RT2561_NVRAM, "TxBurst", "1");
-		nvram_bufset(RT2561_NVRAM, "PktAggregate", "1");
-		nvram_bufset(RT2561_NVRAM, "DisableOLBC", "1");
-	}
-	if (i != 5) {
-		nvram_bufset(RT2561_NVRAM, "DisableOLBC", "0");
-	}
-#endif
-
 	//SSID, Multiple SSID
 	if (0 == strlen(ssid)) {
 		nvram_commit(RT2561_NVRAM);

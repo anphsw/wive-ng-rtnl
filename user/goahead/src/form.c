@@ -72,16 +72,6 @@ int websFormHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
  *			For good practice, forms must call websDone()
  */
 			(*fn)((void*) wp, formName, query);
-
-/*
- *			Remove the test to force websDone, since this prevents
- *			the server "push" from a form>
- */
-#if 0 /* push */
-			if (websValid(wp)) {
-				websError(wp, 200, T("Form didn't call websDone"));
-			}
-#endif /* push */
 		}
 	}
 	return 1;

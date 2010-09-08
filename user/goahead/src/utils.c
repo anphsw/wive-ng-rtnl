@@ -943,28 +943,25 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_RAETH_ROUTER
 	return websWrite(wp, T("RT2880 with IC+ MACPHY"));
-#endif
-#ifdef CONFIG_ICPLUS_PHY
+#elif CONFIG_ICPLUS_PHY
 	return websWrite(wp, T("RT2880 with IC+ PHY"));
-#endif
-#ifdef CONFIG_RT_MARVELL
+#elif CONFIG_RT_MARVELL
 	return websWrite(wp, T("RT2880 with MARVELL"));
-#endif
-#ifdef CONFIG_MAC_TO_MAC_MODE
+#elif CONFIG_MAC_TO_MAC_MODE
 	return websWrite(wp, T("RT2880 with Vitesse"));
-#endif
-#ifdef CONFIG_RT_3052_ESW
-#ifdef CONFIG_RALINK_RT3050_1T1R
+#elif CONFIG_RALINK_RT3052
+    #ifdef CONFIG_RALINK_RT3050_1T1R
 	return websWrite(wp, T("RT3050 1T1R embedded switch"));
-#endif
-#ifdef CONFIG_RALINK_RT3051_1T2R
+    #elif CONFIG_RALINK_RT3051_1T2R
 	return websWrite(wp, T("RT3051 1T2R embedded switch"));
-#endif
-#ifdef CONFIG_RALINK_RT3052_2T2R
+    #elif CONFIG_RALINK_RT3052_2T2R
 	return websWrite(wp, T("RT3052 2T2R embedded switch"));
+    #else
+	return websWrite(wp, T("RT3052 2T2R unknown switch mode"));
+    #endif
+#else
+	return websWrite(wp, T("Unknown SoC"));
 #endif
-#endif
-    
 	return 0;
 }
 

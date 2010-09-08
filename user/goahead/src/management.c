@@ -663,40 +663,6 @@ int getMemLeftASP(int eid, webs_t wp, int argc, char_t **argv)
 
 static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if 0
-	FILE *fp;
-	char ver[128], week[32], mon[32] , date[32], time[32], *pos;
-	
-	char *expect = nvram_bufget(RT2860_NVRAM, "Expect_Firmware");
-	if(!expect || !strlen(expect) )
-		return 0;
-
-	fp = fopen("/proc/version", "r");
-	if(!fp)
-		return 0;
-
-	fgets(ver, 128, fp);
-	fclose(fp);	
-
-	if(!(pos = strchr(ver, '#')) )
-		return 0;
-
-	if(!(pos = strchr(pos+1, ' ')) )
-		return 0;
-
-	pos++;
-	sscanf(pos, "%s %s %s %s", week, mon, date, time);
-	sprintf(ver, "Linux Kernel Image %s%s%s", mon, date, time); 
-
-	if(!strcmp(expect, ver)){
-		websWrite(wp, T("alert(\"Firmware Upgrade Success.\");"));
-		nvram_bufset(RT2860_NVRAM, "Expect_Firmware", "");
-		nvram_commit(RT2860_NVRAM);
-	}else{
-		websWrite(wp, T("alert(\"Firmware Upgrade may be failed:\\nexpect new image : %s\\ncurrent : %s\");"), expect, ver);
-	}	
-	return 0;
-#endif
 	FILE *fp;
 	char buf[512];
 	char *old_firmware = nvram_bufget(RT2860_NVRAM, "old_firmware");
@@ -721,55 +687,18 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
-	system("ralink_init clear 2860");
-        system("ralink_init renew 2860 /etc/Wireless/RT2860_default_vlan");
 #if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI)
 	system("ralink_init clear inic");
         system("ralink_init renew inic /etc/Wireless/RT2860_default_vlan");
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
+#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
 	system("ralink_init clear 2561");
         system("ralink_init renew 2561 /etc/Wireless/RT2561_default");
+#else
+	system("fs nvramreset");
 #endif
 	
 	system("fs restore");
 }
-
-
-/*
- * callee must free memory.
- */
-/*
-static char *getLog(char *filename)
-{
-	FILE *fp;
-	struct stat filestat;
-	char *log;
-
-	if(stat(filename, &filestat) == -1)
-		return NULL;
-
-//	printf("%d\n", filestat.st_size);
-	log = (char *)malloc(sizeof(char) * (filestat.st_size + 1) );
-	if(!log)
-		return NULL;
-
-	if(!(fp = fopen(filename, "r"))){
-		return NULL;
-	}
-
-	if( fread(log, 1, filestat.st_size, fp) != filestat.st_size){
-		printf("read not enough\n");
-		free(log);
-		return NULL;
-	}
-
-	log[filestat.st_size] = '\0';
-
-	fclose(fp);
-	return log;
-}
-*/
 
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)

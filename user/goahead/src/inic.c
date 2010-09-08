@@ -430,26 +430,6 @@ static void inicBasic(webs_t wp, char_t *path, char_t *query)
 	else if (!strncmp(wirelessmode, "8", 2) || !strncmp(wirelessmode, "9", 2))
 		is_n = 1;
 
-#if 0
-	i = atoi(mode);
-	if (i == 1)
-		nvram_bufset(RTINIC_NVRAM, "BasicRate", "3");
-	else if (i == 0) {
-		nvram_bufset(RTINIC_NVRAM, "TxPreamble","0");
-		nvram_bufset(RTINIC_NVRAM, "TxBurst", "0");
-		nvram_bufset(RTINIC_NVRAM, "PktAggregate", "0");
-	}
-	else if (i == 5) {
-		nvram_bufset(RTINIC_NVRAM, "TxPreamble","1");
-		nvram_bufset(RTINIC_NVRAM, "TxBurst", "1");
-		nvram_bufset(RTINIC_NVRAM, "PktAggregate", "1");
-		nvram_bufset(RTINIC_NVRAM, "DisableOLBC", "1");
-	}
-	if (i != 5) {
-		nvram_bufset(RTINIC_NVRAM, "DisableOLBC", "0");
-	}
-#endif
-
 	//SSID, Multiple SSID
 	if (0 == strlen(ssid)) {
 		nvram_commit(RTINIC_NVRAM);

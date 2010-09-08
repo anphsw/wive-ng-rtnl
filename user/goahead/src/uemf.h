@@ -231,17 +231,6 @@
 #define F_OK	0
 #endif /* WIN || CE */
 
-#if 0
-#if (defined (LINUX) && !defined (_STRUCT_TIMEVAL))
-struct timeval
-{
-	time_t	tv_sec;		/* Seconds.  */
-	time_t	tv_usec;	/* Microseconds.  */
-};
-#define _STRUCT_TIMEVAL 1
-#endif /* LINUX && ! _STRUCT_TIMEVAL */
-#endif
-
 #ifdef ECOS
 	#define		O_RDONLY		1
 	#define		O_BINARY		2

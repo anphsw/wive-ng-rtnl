@@ -346,17 +346,6 @@ void *balloc(B_ARGS_DEC, int size)
 #endif
 	bp->flags |= B_INTEGRITY;
 
-/*
- *	The following is a good place to put a breakpoint when trying to reduce
- *	determine and reduce maximum memory use.
- */
-#if 0
-#ifdef B_STATS
-	if (bStatsBallocInUse == bStatsBallocMax) {
-		bstats(0, NULL);
-	}
-#endif
-#endif
 	return (void*) ((char*) bp + sizeof(bType));
 }
 
