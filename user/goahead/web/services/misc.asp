@@ -256,7 +256,7 @@ function CheckValue()
 </tr>
 <tr>
 <td class="head" id="sysfwPingFrmWANFilterHead">
-	Ping form WAN Filter
+	Ping from WAN
 </td>
 <td>
 	<select name="pingWANEnbl" class="half">
