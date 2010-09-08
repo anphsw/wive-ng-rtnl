@@ -5,8 +5,8 @@
 
 LOG="echo INIT: "
 
-#include kernel config                                                                                                                      
-. /bin/config.sh    
+#include kernel config --- IN BIN...
+. /bin/config.sh
 
 if [ "$CONFIG_TMPFS" != "" ] ; then
     #mount /tmp /etc in /var

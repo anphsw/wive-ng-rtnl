@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #get params                                                                                                                                 
-. /sbin/global.sh                                                                                                                           
+. /etc/scripts/global.sh
 
 LOG="echo MODULES: "
 

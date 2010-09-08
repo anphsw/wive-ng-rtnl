@@ -1,8 +1,8 @@
 #!/bin/sh
 
 #get params
-. /sbin/global.sh
-. /sbin/config.sh
+. /etc/scripts/global.sh
+. /etc/scripts/config.sh
 
 LOG="echo LAN: "
 

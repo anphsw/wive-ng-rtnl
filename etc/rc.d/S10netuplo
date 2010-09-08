@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #include kernel config
-. /bin/config.sh
+. /etc/scripts/config.sh
 
 LOG="echo LOOPBACK: "
 
