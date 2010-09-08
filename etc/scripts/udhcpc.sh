@@ -3,7 +3,7 @@
 # udhcpc script edited by Tim Riker <Tim@Rikers.org>
 
 #include kernel config                                                                                                                      
-. /bin/config.sh
+. /etc/scripts/config.sh
 
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 

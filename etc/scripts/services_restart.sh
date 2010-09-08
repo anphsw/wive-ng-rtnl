@@ -2,7 +2,8 @@
 
 # This scipt restart needed services
 
-. /sbin/global.sh
+#include global
+. /etc/scripts/global.sh
 
 MODE=$1
 

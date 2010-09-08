@@ -1,6 +1,7 @@
 #!/bin/sh
 
-. /sbin/config.sh
+#include kernel config
+. /etc/scripts/config.sh
 
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`

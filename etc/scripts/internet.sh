@@ -5,11 +5,12 @@
 # usage: internet.sh
 #
 
-#include kernel config                                                                                                                      
-. /bin/config.sh
-. /bin/global.sh
+#include kernel config and global
+. /etc/scripts/config.sh
+. /etc/scripts/global.sh
 
-MODE=$1 #restart mode
+#restart mode
+MODE=$1
 
 ifRaxWdsxDown()
 {

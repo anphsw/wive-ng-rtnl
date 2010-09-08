@@ -1,8 +1,8 @@
 #!/bin/sh
 
-#include kernel config                                                                                                                      
-. /bin/config.sh
-. /bin/global.sh
+#include kernel config and global
+. /etc/scripts/config.sh
+. /etc/scripts/global.sh
 
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 ########################################get param#########################

@@ -14,7 +14,8 @@
 # ifconfig command so this script is not needed anymore.
 #
 
-. /sbin/global.sh
+#include global
+. /etc/scripts/global.sh
 
 kill_apps="udhcpd udhcpc syslogd klogd zebra ripd wscd rt2860apd rt61apd inadyn \
 	    iwevent stupid-ftpd smbd ated ntpclient lld2d igmpproxy dnsmasq telnetd pppd xl2tpd"

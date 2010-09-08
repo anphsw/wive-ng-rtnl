@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#get params
-. /sbin/global.sh
+#include global
+. /etc/scripts/global.sh
 
 SERVERNM=`nvram_get 2860 vpnServer`
 USER=`nvram_get 2860 vpnUser`

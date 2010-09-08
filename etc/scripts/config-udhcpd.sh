@@ -4,8 +4,10 @@
 #
 # usage: see function usage()
 #
-. /sbin/config.sh
-. /sbin/global.sh
+
+#include kernel config and global
+. /etc/scripts/config.sh
+. /etc/scripts/global.sh
 
 fname="/etc/udhcpd.conf"
 fbak="/etc/udhcpd.conf_bak"
