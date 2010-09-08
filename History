@@ -123,6 +123,7 @@
 41) Fix trunclate nvram values at aplly change and device mode select<br>
 42) Fix restart nvram_daemon<br>
 43) Kernel fix lock in mtdchar, more small fixes and cleanups<br>
+44) Fix keep mac adresses at push reset button<br>
 
 <br><br>
 <b>For support see:</b><br>

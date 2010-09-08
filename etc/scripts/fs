@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Modified by N.Leiten and adopted for Wive-firmware, renamed in "fs"
-# "flash" is a part of midge - mini distribuition for adm5120 based routers
+# "flash" is a part of midge - mini distribuition for adm5120 based routers.
+# Full rewrite for Wive-RTNL (RT3050/RT3052) by Evgeniy Manachkin.
 # Copyright (C) 2004-2005 by Vladislav Moskovets <midge at vlad.org.ua>
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU GPL v2 or later.
