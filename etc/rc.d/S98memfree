@@ -6,12 +6,6 @@ start() {
 
  $LOG "Unload unneeded modules"
     rmmod -a
-
- #if firts boot or restore
- if [ -f /var/MODIFIED ]; then
-    ($LOG "Save rwfs" && sleep 20 && fs save) &
- fi
-
 }
 
 stop() {
