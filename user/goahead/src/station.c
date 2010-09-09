@@ -4993,18 +4993,18 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (s >= 0)
-	{
-		OidQueryInformation(RT_OID_802_11_QUERY_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-		BACap.Policy = policy;
-		BACap.AutoBA = atoi(autoBA);
-		BACap.MpduDensity = atoi(mpdu_density);
-		if (!strcmp(a_msdu_enable, "on"))
+	if (s < 0)
+		return; //if error
+
+	OidQueryInformation(RT_OID_802_11_QUERY_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
+	BACap.Policy = policy;
+	BACap.AutoBA = atoi(autoBA);
+	BACap.MpduDensity = atoi(mpdu_density);
+	if (!strcmp(a_msdu_enable, "on"))
 			BACap.AmsduEnable = 1;
 
-		OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-		close(s);
-	}
+	OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
+	close(s);
 }
 
 /*
