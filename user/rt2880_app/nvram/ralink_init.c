@@ -232,8 +232,6 @@ int gen_config(int mode)
 	nvram_bufset(mode, "RXPath", temp);
 	nvram_commit(mode);
 
-	sleep(1);
-
 	system("mkdir -p /etc/Wireless/RT2860");
 	if (mode == RT2860_NVRAM) {
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
