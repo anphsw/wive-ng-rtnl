@@ -262,6 +262,8 @@ int gen_config(int mode)
 	nvram_bufset(mode, "RXPath", temp);
 	nvram_commit(mode);
 
+	sleep(1);
+
 	system("mkdir -p /etc/Wireless/RT2860");
 	if (mode == RT2860_NVRAM) {
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
@@ -724,8 +726,10 @@ int renew_nvram(int mode, char *fname)
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
 		if (NULL == (p = strchr(buf, '='))) {
-			if (need_commit)
+			if (need_commit) {
 				nvram_commit(mode);
+				need_commit = 0;
+			}
 			printf("%s file format error!\n", fname);
 			fclose(fp);
 			return -1;
@@ -737,16 +741,18 @@ int renew_nvram(int mode, char *fname)
 		need_commit = 1;
 	}
 
+#ifndef CONFIG_RALINK_RT3052
 	//Get wan port mac address, please refer to eeprom format doc
 	//0x30000=user configure, 0x32000=rt2860 parameters, 0x40000=RF parameter
 	flash_read_mac(buf);
 	sprintf(wan_mac,"%0X:%0X:%0X:%0X:%0X:%0X\n",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
 	nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR", wan_mac);
-
 	need_commit = 1;
-
-	if (need_commit)
-		nvram_commit(mode);
+#endif
+	if (need_commit) {
+	    nvram_commit(mode);
+	    need_commit = 0;
+	}
 
 	nvram_close(mode);
 	fclose(fp);
