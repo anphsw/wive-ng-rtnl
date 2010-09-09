@@ -34,7 +34,12 @@ int mtd_open(const char *name, int flags)
 	if ((fp = fopen("/proc/mtd", "r"))) {
 		while (fgets(dev, sizeof(dev), fp)) {
 			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, name)) {
+#ifdef CONFIG_MTD_BLOCK
+				snprintf(dev, sizeof(dev), "/dev/mtdblock%d", i);
+#else
 				snprintf(dev, sizeof(dev), "/dev/mtd/%d", i);
+#endif
+
 				if ((ret = open(dev, flags)) < 0) {
 					snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
 					ret = open(dev, flags);
