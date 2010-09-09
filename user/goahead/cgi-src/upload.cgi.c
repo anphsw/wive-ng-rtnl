@@ -411,9 +411,6 @@ getenv("SERVER_SOFTWARE"));
 #else
 #error "no upload support defined!"
 #endif
-#ifdef CONFIG_RT2880_DRAM_8M
-    system("sleep 3 && reboot &");
-#endif
     printf("Done...rebooting");
     javascriptUpdate(1);
     webFoot();

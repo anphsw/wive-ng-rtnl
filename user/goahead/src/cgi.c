@@ -357,7 +357,6 @@ void websCgiCleanup()
 					if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) != 0)
 						return;
 					sync();
-					//doSystem("sleep 3 && reboot &");
 					sleep(3);
 					reboot(LINUX_REBOOT_CMD_RESTART);
 				}
