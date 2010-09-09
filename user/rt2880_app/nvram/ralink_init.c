@@ -698,7 +698,9 @@ int renew_nvram(int mode, char *fname)
 	FILE *fp;
 #define BUFSZ 1024
 	unsigned char buf[BUFSZ], *p;
+#ifndef CONFIG_RALINK_RT3052
 	unsigned wan_mac[32];
+#endif
 	int found = 0, need_commit = 0;
 
 	if (NULL == (fp = fopen(fname, "ro"))) {
