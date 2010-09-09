@@ -124,6 +124,8 @@
 42) Fix restart nvram_daemon<br>
 43) Kernel fix lock in mtdchar, more small fixes and cleanups<br>
 44) Fix keep mac adresses at push reset button<br>
+45) libnvram use mtdblock instead mtdchar for write/read function<br>
+46) Fix unlocked kernel write to mtd. Use kernel_lock for fix concurrent write issue<br>
 
 <br><br>
 <b>For support see:</b><br>
