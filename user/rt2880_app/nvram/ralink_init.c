@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
 #endif
 			else
 				usage(argv[0]);
+
 		} else if(!strncasecmp(argv[1], "clear", 6)) {
 			if (!strncmp(argv[2], "2860", 5) || 
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible

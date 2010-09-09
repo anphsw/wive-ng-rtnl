@@ -26,17 +26,13 @@
 #define LedSessionOverlapDetected() {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_ORANGE, WPS_LED_SESSION_OVERLAP);}
 #define LedSuccess()                {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_SUCCESS);}
 
-void WPSRestart(void);
-void formDefineWPS(void);
-
 #define WSC_CONF_STATUS_STR "WscConfStatus"
 #define WSC_CONF_STATUS_UNCONFIGURED    1   /* these value are taken from 2860 driver Release Note document. */
 #define WSC_CONF_STATUS_CONFIGURED      2
 
-
 /*
  * ripped from driver wsc.h,....ugly
-  */
+*/
 #define PACKED  __attribute__ ((packed))
 #define USHORT  unsigned short
 #define UCHAR   unsigned char
@@ -124,10 +120,10 @@ void getWPSEncrypType(WSC_CONFIGURED_VALUE *result, char *ret_str);
 int getWscStatus(char *interface);
 char *getWscStatusStr(int status);
 int getAPMac(char *ifname, char *if_hw);
-
 void RaixWPSRestart();
 #endif
 
-#endif /* __WPS__H_ */
-
 void resetTimerAll(void);
+void WPSRestart(void);
+void formDefineWPS(void);
+#endif /* __WPS__H_ */

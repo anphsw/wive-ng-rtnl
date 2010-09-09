@@ -43,3 +43,4 @@ service dnsserver restart
 service radvd restart
 service ntp restart
 service ripd restart
+service ddns restart

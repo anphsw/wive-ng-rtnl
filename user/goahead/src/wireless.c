@@ -15,17 +15,15 @@
 #include	<linux/socket.h>
 #include	<linux/if.h>
 #include	"wireless.h"
-
 #include	"internet.h"
 #include	"nvram.h"
 #include	"utils.h"
 #include	"webs.h"
-#define AP_MODE
 #include	"oid.h"
-
+#include 	"wps.h"
 #include	"linux/autoconf.h"
 
-
+#define AP_MODE
 #define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 
 #define MAX_MBSSID_NUM         8
 
@@ -1104,8 +1102,6 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	// restart wireless network                                                                                                         
         doSystem("internet.sh wifionly &");
 }
-
-void WPSRestart(void);
 
 /* goform/wirelessWmm */
 static void wirelessWmm(webs_t wp, char_t *path, char_t *query)

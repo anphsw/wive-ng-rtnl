@@ -118,12 +118,13 @@ int main(int argc, char** argv)
 	if (writeGoPid() < 0)
 		return -1;
 
+	/* Set flag goahead run to scripts */
+	system("touch /tmp/webrun");
+
 	if (initSystem() < 0)
 		return -1;
 
-/*
- *	Initialize the web server
- */
+	/* Initialize the web server */
 	if (initWebs() < 0) {
 		return -1;
 	}
@@ -137,6 +138,9 @@ int main(int argc, char** argv)
 	websSSLOpen();
 #endif
 
+	//backup nvram setting and save rwfs
+	system("fs backup_nvram");
+	system("fs save");
 /*
  *	Basic event loop. SocketReady returns true when a socket is ready for
  *	service. SocketSelect will block until an event occurs. SocketProcess
@@ -273,10 +277,11 @@ static int initSystem(void)
 	signal(SIGTTIN, hotPluglerHandler);
 	hotPluglerHandler(SIGTTIN);
 #endif
+	signal(SIGXFSZ, WPSSingleTriggerHandler);
+
 #ifdef CONFIG_RALINK_GPIO
 	goaInitGpio();
 #endif
-	signal(SIGXFSZ, WPSSingleTriggerHandler);
 
 //--------NETWORK INIT-----------------------------
 	if (initInternet() < 0)

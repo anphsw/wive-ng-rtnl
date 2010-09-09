@@ -2059,13 +2059,12 @@ int initInternet(void)
 #endif
 
 	firewall_rebuild();
-	management_init();
 	RoutingInit();
 #ifdef CONFIG_NET_SCHED
 	QoSInit();
 #endif
-
-	return 0;
+	WPSRestart();
+    return 0;
 }
 
 static void getMyMAC(webs_t wp, char_t *path, char_t *query)

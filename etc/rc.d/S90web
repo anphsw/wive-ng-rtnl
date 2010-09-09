@@ -4,9 +4,6 @@ LOG="echo GOAHEADWEBSERVER: "
 
 start() {
  $LOG "Start goahead"
-    fs backup_nvram
-    fs save
-    touch /tmp/webrun
     /bin/goahead &
 }
 

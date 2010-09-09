@@ -23,10 +23,6 @@
 #include "management.h"
 #include "wps.h"
 
-extern void WPSRestart(void);
-extern void formDefineWPS(void);
-
-
 #define COMMAND_MAX	1024
 static char system_command[COMMAND_MAX];
 
@@ -733,13 +729,6 @@ error:
 	if(fp)
 		pclose(fp);
 	websDone(wp, 200);
-}
-
-void management_init(void)
-{
-	doSystem("service ntp restart &");
-	doSystem("service ddns restart &");
-	WPSRestart();
 }
 
 static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
