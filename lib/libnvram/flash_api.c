@@ -115,7 +115,6 @@ int flash_read(char *buf, off_t from, size_t len)
 	ret = read(fd, buf, len);
 	if (ret == -1) {
 		fprintf(stderr, "Reading from mtd failed\n");
-		ret = -1;
 		goto out;
 	}
 
