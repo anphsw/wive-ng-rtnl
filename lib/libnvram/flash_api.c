@@ -209,7 +209,6 @@ int flash_write(char *buf, off_t to, size_t len)
 			ret = write(fd, buf, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Writing to mtd failed\n");
-				free(bak);
 				goto out;
 			}
 
