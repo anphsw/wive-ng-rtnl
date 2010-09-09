@@ -209,9 +209,6 @@ fi
 	rm -rf /var/tmp/is_up/*
 	echo "$ip $NETMASK" > /var/tmp/is_up/$ip
 
-        # notify goahead when the WAN IP has been acquired. --yy
-	killall -SIGUSR2 goahead
-
     	$LOG "Restart needed services"
 	services_restart.sh dhcp
 
