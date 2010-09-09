@@ -66,8 +66,7 @@ fi
 	        echo nameserver $i >> $RESOLV_CONF
 	        if [ "$count" = "0" ]; then
 	    	    nvram_set 2860 wan_primary_dns $i
-		fi
-		if [ "$count" = "1" ]; then
+		elif [ "$count" = "1" ]; then
 		    nvram_set 2860 wan_secondary_dns $i
 		fi
 		let "count=$count+1"

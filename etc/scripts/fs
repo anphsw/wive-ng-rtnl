@@ -95,6 +95,10 @@ nvramreset(){
   else
     nvram_set 2860 CHECKMAC YES
   fi
+
+  #set wive flag
+  nvram_set 2860 IS_WIVE YES
+
   #regenerate defaults configs
   regenerate
 }

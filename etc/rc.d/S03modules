@@ -7,10 +7,13 @@ LOG="echo MODULES: "
 
 start() {
     #if goahead not started
-    if [ ! -f /tmp/webrun ] && [ ! -f /etc/modules.dep ]; then
-	$LOG "Start modules.dep generate..."
-	depmod -a -n >  /etc/modules.dep
-	touch /var/MODIFIED
+    if [ ! -f /tmp/webrun ]; then
+	if [ ! -f /etc/modules.dep ]
+	    $LOG "Start modules.dep generate..."
+	    depmod -a -n >  /etc/modules.dep
+	fi
+	$LOG "Check nvram..."
+	check_nvram
     else
 	$LOG "Prepare wifi config..."
 	get_param
@@ -72,6 +75,21 @@ gen_wifi_config()
 {
 	rm -rf /etc/Wireless/RT2860/RT2860.dat
 	ralink_init make_wireless_config rt2860
+}
+
+check_nvram()
+{
+    #check firmwave update or clean burn
+    IS_WIVE=`nvram_get 2860 IS_WIVE`
+    if [ "$IS_WIVE" = "YES" ]; then
+	$LOG "Normal boot no need reset"
+    else
+	$LOG "Clear and load defaults to nvram!"
+	fs nvramreset
+	nvram_set 2860 IS_WIVE YES
+	touch /var/MODIFIED
+	$LOG "Reset OK... boot..."
+    fi
 }
 
 case "$1" in

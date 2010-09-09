@@ -63,18 +63,6 @@ start() {
 
     #modify permissions
     chmod 777 /tmp
-
-#check firmwave update or clean burn
-IS_WIVE=`nvram_get 2860 IS_WIVE`
-if [ "$IS_WIVE" = "YES" ]; then
-    $LOG "Normal boot no need reset"
-else
-	$LOG "Clear and load defaults to nvram!"
-	fs nvramreset
-	nvram_set 2860 IS_WIVE YES
-	touch /var/MODIFIED
-	$LOG "Reset OK... boot..."
-fi
     
 #if compile date fille is exist
 if [ -f /etc/compile-date ]; then
@@ -96,9 +84,6 @@ if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
     #reset all phy and auto negotinate now
     config-vlan.sh 2 RRRRR
 fi
-
-$LOG "Get BOARDID and save /var/boardid"
-    getBoardID
 
 $LOG "Copy web pages to tmpfs"
     mkdir -p /tmp/web
