@@ -869,9 +869,6 @@ INT	Show_QoSLoad_Proc(
 				(BusyTimeId+1)*Time,
 				pAd->QloadBusyCountSec[BusyTimeId]);
 	} /* End of for */
-#else
-
-	printk("\tBusy time statistics is not included into the driver!\n");
 #endif // QLOAD_FUNC_BUSY_TIME_STATS //
 
 	printk("\n");
