@@ -6,9 +6,8 @@ start() {
  $LOG "Start goahead"
     fs backup_nvram
     fs save
-    /bin/goahead &
     touch /tmp/webrun
-    sleep 15
+    /bin/goahead &
 }
 
 stop() {

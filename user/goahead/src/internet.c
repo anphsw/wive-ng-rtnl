@@ -822,13 +822,16 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	if (nvram_bufset(RT2860_NVRAM, "vpnEnabled", (void *)vpn_enabled)==0)
 	{
 		printf("vpn_enabled value : %s\n", vpn_enabled);
-		nvram_commit(RT2860_NVRAM);
-    		sleep(1);
-		printf("Calling vpn helper...\n");
-		system("service vpnhelper restart &");
-	} else
+	} else  {
 		printf("Set vpnEnabled error!\n");
-	
+		return ;
+	}
+	nvram_commit(RT2860_NVRAM);
+
+    	sleep(3);
+	printf("Calling vpn helper...\n");
+	system("service vpnhelper restart &");
+
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
@@ -1920,7 +1923,7 @@ void ripdRestart(void)
         return;
 
 	if(!password || !strlen(password))
-		password = "rt2880";
+		password = "Admin";
 
 	doSystem("echo \"hostname linux.router1\" > /etc/ripd.conf ");
 	doSystem("echo \"password %s\" >> /etc/ripd.conf ", password);
@@ -1966,11 +1969,11 @@ inline void zebraRestart(void)
 		return;
 
 	if(!password || !strlen(password))
-		password = "rt2880";
+		password = "Admin";
 
 	doSystem("echo \"hostname linux.router1\" > /etc/zebra.conf ");
 	doSystem("echo \"password %s\" >> /etc/zebra.conf ", password);
-	doSystem("echo \"enable password rt2880\" >> /etc/zebra.conf ");
+	doSystem("echo \"enable password Admin\" >> /etc/zebra.conf ");
 	doSystem("echo \"log syslog\" >> /etc/zebra.conf ");
 	doSystem("service zebra start &");
 }
@@ -2020,9 +2023,7 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
  */
 int initInternet(void)
 {
-#ifndef CONFIG_RALINK_RT2880
 	char *auth_mode = nvram_bufget(RT2860_NVRAM, "AuthMode");
-#endif
 #if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
 	char *opmode;
 #endif
@@ -2038,13 +2039,10 @@ int initInternet(void)
 			initStaConnection();
 	}
 #endif
-
-#ifndef CONFIG_RALINK_RT2880
 	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
 		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
 	else
 		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
-#endif
 
 #if defined (CONFIG_RT2860V2_AP) || defined (CONFIG_RT2860V2_AP_MODULE)
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c

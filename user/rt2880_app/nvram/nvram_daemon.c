@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <linux/autoconf.h>
-
 #include "nvram.h"
 
 #ifdef CONFIG_RALINK_GPIO
@@ -16,10 +15,6 @@
 #endif
 
 static char *saved_pidfile;
-
-void loadDefault(int chip_id)
-{
-}
 
 /*
  * gpio interrupt handler -
@@ -90,7 +85,8 @@ ioctl_err:
 
 static void pidfile_delete(void)
 {
-	if (saved_pidfile) unlink(saved_pidfile);
+	if (saved_pidfile) 
+	    unlink(saved_pidfile);
 }
 
 int pidfile_acquire(const char *pidfile)
@@ -138,5 +134,6 @@ int main(int argc,char **argv)
 	while (1) {
 		pause();
 	}
+
     exit(EXIT_SUCCESS);
 }

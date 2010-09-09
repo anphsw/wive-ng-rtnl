@@ -1585,15 +1585,11 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	LFW(security_mode, security_mode);
 
-#ifndef CONFIG_RALINK_RT2880
-	// RT2880: GPIO13 is belong to WPS PBC indicator.
-
+	//GPIO13 is belong to WPS PBC indicator.
 	if (!strcmp(security_mode, "Disable") || !strcmp(security_mode, "OPEN"))
 		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
 	else
 		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
-
-#endif
 
 	//clear Radius settings
 	clearRadiusSetting(nvram, mbssid);

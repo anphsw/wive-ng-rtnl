@@ -12,8 +12,10 @@ start() {
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n >  /etc/modules.dep
 	fi
-	$LOG "Check nvram..."
-	check_nvram
+	if [ ! -f /tmp/nvram_checked ]; then
+	    $LOG "Check nvram..."
+    	    check_nvram
+	fi
     else
 	$LOG "Prepare wifi config..."
 	get_param
@@ -69,6 +71,7 @@ get_param() {
 	clone_en=`nvram_get 2860 macCloneEnabled`
 	clone_mac=`nvram_get 2860 macCloneMac`
 	WMAC=`nvram_get WLAN_MAC_ADDR`
+	IS_WIVE=`nvram_get 2860 IS_WIVE`
 }
 
 gen_wifi_config()
@@ -80,11 +83,12 @@ gen_wifi_config()
 check_nvram()
 {
     #check firmwave update or clean burn
-    IS_WIVE=`nvram_get 2860 IS_WIVE`
     if [ "$IS_WIVE" = "YES" ]; then
-	$LOG "Backup nvram... Normal boot"
+	$LOG ">>>> NORMAL BOOT <<<<"
+	$LOG "Backup nvram..."
 	fs backup_nvram 
     else
+	$LOG ">>>> RESTORE NVRAM <<<<"
 	if [ -f /etc/backup/nvram_backup.dat ]; then
 	    $LOG "Load backuped setting to nvram!"
 	    fs load_nvram
@@ -95,6 +99,7 @@ check_nvram()
 	nvram_set 2860 IS_WIVE YES
 	$LOG "Reset OK... boot..."
     fi
+    touch /tmp/nvram_checked
 }
 
 case "$1" in

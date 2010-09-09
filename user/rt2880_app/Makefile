@@ -8,6 +8,7 @@ ra_dir_$(CONFIG_RT2880_FLASH_TEST)  += flash
 ra_dir_$(CONFIG_RT2880_MII_MGR)     += mii_mgr
 ra_dir_$(CONFIG_RT2880_NVRAM)       += nvram
 ra_dir_$(CONFIG_RT2880_RAINIT)      += nvram
+ra_dir_$(CONFIG_RT2880_RADAEMON)    += nvram
 ra_dir_$(CONFIG_RT2880_MTD)         += mtd
 ra_dir_$(CONFIG_RT2880_GPIO_TEST)   += gpio
 ra_dir_$(CONFIG_RT2880_SPI)         += spicmd

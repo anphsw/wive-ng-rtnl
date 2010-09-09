@@ -1,17 +1,9 @@
 #ifndef __WPS__H__
 #define __WPS__H__
 
-#ifdef CONFIG_RT2860V2_STA_WSC                      // if RT2880 support Wifi - STA
+#ifdef CONFIG_RT2860V2_STA_WSC                      // if support Wifi - STA
 #include "stapriv.h"
 #endif
-
-/*#ifdef CONFIG_RALINK_RT2880
-#define WPS_AP_PBC_LED_GPIO     13   // 0 ~ 24( or disable this feature by undefine it)
-#elif defined CONFIG_RALINK_RT3883
-#define WPS_AP_PBC_LED_GPIO     0   // 0 ~ 24( or disable this feature by undefine it)
-#else
-#define WPS_AP_PBC_LED_GPIO     14   // 0 ~ 24( or disable this feature by undefine it)
-#endif*/
 
 #include "utils.h"
 

@@ -23,6 +23,7 @@ usage(){
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
+  echo "backup_nvram - Save nvram snapshot to rwfs." >&2
   echo "load - Load rwfs from mtd." >&2
   echo "restore - Crash $MTDDEVICE and reboot for restore clean rwfs." >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
@@ -33,11 +34,10 @@ usage(){
 }
 
 regenerate(){
-  echo "Regenerate configs for wifi and rwfs defaults."
+  echo "Regenerate configs for wifi and rwfs defaults. Save to $CURRCONFIG"
   echo "#The following line must not be removed." > $CURRCONFIG
   echo "Default" >> $CURRCONFIG
   ralink_init show 2860 >> $CURRCONFIG
-  ralink_init make_wireless_config 2860
 }
 
 load(){
@@ -97,26 +97,26 @@ nvramreset(){
 
   #set wive flag
   nvram_set 2860 IS_WIVE YES
-
-  #regenerate defaults configs
-  regenerate
 }
 
 fullreset(){
   #set reset mac flag
+  echo "Reset rwfs and nvram...."
   KEEPMAC=NO
   nvramreset
   restore
 }
 
 backup_nvram(){
- mkdir -p /etc/backup
- CURRCONFIG=/etc/backup/nvram_backup.dat
- regenerate
+  mkdir -p /etc/backup
+  CURRCONFIG=/etc/backup/nvram_backup.dat
+  echo "Store settings to backup file...."
+  regenerate
 }
 
 load_nvram(){
- ralink_init renew 2860 /etc/backup/nvram_backup.dat
+  echo "Clear nvram and load settings from backup file...."
+  ralink_init renew 2860 /etc/backup/nvram_backup.dat
 }
 
 main(){

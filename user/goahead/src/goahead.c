@@ -115,16 +115,13 @@ int main(int argc, char** argv)
 	signal(SIGPIPE, SIG_IGN);
 
         /* Start needed services */
-        doSystem("killall -q nvram_daemon");
-        doSystem("killall -q gpio");
-        doSystem("killall -q -9 nvram_daemon");
-        doSystem("killall -q -9 gpio");
-        doSystem("/bin/nvram_daemon &");
-        doSystem("/bin/gpio r &");
-        sleep (1);
+//        doSystem("killall -q nvram_daemon");
+//        doSystem("killall -q -9 nvram_daemon");
+//        doSystem("/bin/nvram_daemon &");
 
 	if (writeGoPid() < 0)
 		return -1;
+
 	if (initSystem() < 0)
 		return -1;
 
@@ -213,26 +210,36 @@ static void goaSigHandler(int signum)
 		WPSAPPBCStartAll();
 }
 
-#ifndef CONFIG_RALINK_RT2880
+#ifdef CONFIG_RALINK_GPIO
 static void goaInitGpio()
 {
 	int fd;
 	ralink_gpio_reg_info info;
+
+	//register my information
+	info.pid = getpid();
+
+        //RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
+#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
+        info.irq = 43;
+#else
+        info.irq = 10;
+#endif
 
 	fd = open("/dev/gpio", O_RDONLY);
 	if (fd < 0) {
 		perror("/dev/gpio");
 		return;
 	}
+
 	//set gpio direction to input
-	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, RALINK_GPIO(0)) < 0)
+	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
 		goto ioctl_err;
+
 	//enable gpio interrupt
 	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
 		goto ioctl_err;
-	//register my information
-	info.pid = getpid();
-	info.irq = 0;
+
 	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
 		goto ioctl_err;
 	close(fd);
@@ -248,9 +255,9 @@ ioctl_err:
 }
 #endif
 
-static void dhcpcHandler(int signum)
+static void fs_nvram_reset_handler (int signum)
 {
-	ripdRestart();
+	ResetNvram();
 }
 
 
@@ -260,68 +267,27 @@ static void dhcpcHandler(int signum)
  */
 static int initSystem(void)
 {
-#ifndef CONFIG_RALINK_RT3052
-	int setDefault(void);
-#endif
-	signal(SIGUSR2, dhcpcHandler);
-#ifndef CONFIG_RALINK_RT3052
-	if (setDefault() < 0)
-		return (-1);
-#endif
-	if (initInternet() < 0)
-		return (-1);
+
+//--------REGISTER SIGNALS-------------------------
+
+	//register fs nvram reset helper
+	signal(SIGUSR2, fs_nvram_reset_handler);
 
 #if defined CONFIG_USB
 	signal(SIGTTIN, hotPluglerHandler);
 	hotPluglerHandler(SIGTTIN);
 #endif
-#ifdef CONFIG_RALINK_RT2880
-	signal(SIGUSR1, goaSigHandler);
-#else
+#ifdef CONFIG_RALINK_GPIO
 	goaInitGpio();
 #endif
 	signal(SIGXFSZ, WPSSingleTriggerHandler);
 
+//--------NETWORK INIT-----------------------------
+	if (initInternet() < 0)
+		return (-1);
+
 	return 0;
 }
-
-/******************************************************************************/
-/*
- *	Set Default should be done by nvram_daemon.
- *	We check the pid file's existence.
- */
-#ifndef CONFIG_RALINK_RT3052
-int setDefault(void)
-{
-	FILE *fp;
-	int i;
-
-	//retry 15 times (15 seconds)
-	for (i = 0; i < 15; i++) {
-		fp = fopen("/var/run/nvramd.pid", "r");
-		if (fp == NULL) {
-			if (i == 0)
-				trace(0, T("goahead: waiting for nvram_daemon "));
-			else
-				trace(0, T(". "));
-		}
-		else {
-			fclose(fp);
-#if defined (INIC_SUPPORT) || (defined INICv2_SUPPORT)
-			nvram_init(RTINIC_NVRAM);
-#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-			nvram_init(RT2561_NVRAM);
-#else
-			nvram_init(RT2860_NVRAM);
-#endif
-			return 0;
-		}
-		Sleep(1);
-	}
-	error(E_L, E_LOG, T("goahead: please execute nvram_daemon first!"));
-	return (-1);
-}
-#endif
 
 /******************************************************************************/
 /*

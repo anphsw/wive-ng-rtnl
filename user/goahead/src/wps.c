@@ -33,7 +33,7 @@ int g_wsc_configured = 0;							// export for wireless.c
 static int g_WscResult = 0;							// for AP only ( STA WPS don't need this)
 static int g_isEnrollee = 0;						// for AP only
 
-#ifdef CONFIG_RT2860V2_STA_WSC						// if RT2880 support Wifi - STA 
+#ifdef CONFIG_RT2860V2_STA_WSC						// if support Wifi - STA 
 #define WPS_STA_TIMEOUT_SECS			120000				// 120 seconds
 #define WPS_STA_CATCH_CONFIGURED_TIMER	10					// 10 * 1000 microsecond = every 0.010 sec
 #define REGISTRAR_TIMER_MODE			0xdeadbeef			// okay, this is a magic number
@@ -562,7 +562,7 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
 
         /*
          *   IMPORTANT !!!!!
-         *   5VT doesn't need it cause it will reboot after OOB reset, but RT2880 does.
+         *   5VT doesn't need it cause it will reboot after OOB reset.
          */
         g_wsc_configured = 0;
 
