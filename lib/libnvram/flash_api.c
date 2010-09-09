@@ -39,8 +39,8 @@ int mtd_open(const char *name, int flags)
 #else
 				snprintf(dev, sizeof(dev), "/dev/mtd/%d", i);
 #endif
-
-				if ((ret = open(dev, flags)) < 0) {
+				ret = open(dev, flags);
+				if (ret < 0) {
 					snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
 					ret = open(dev, flags);
 				}
@@ -102,30 +102,24 @@ int flash_read(char *buf, off_t from, size_t len)
 
 	if (ioctl(fd, MEMGETINFO, &info)) {
 		fprintf(stderr, "Could not get mtd device info\n");
-		close(fd);
-		return -1;
+		ret = -1;
+		goto out;
 	}
 	if (len > info.size) {
 		fprintf(stderr, "Too many bytes - %d > %d bytes\n", len, info.erasesize);
-		close(fd);
-		return -1;
-	}
-
-	close(fd);
-	fd = mtd_open("Config", O_RDONLY);
-	if (fd < 0) {
-		fprintf(stderr, "Could not open mtd block device\n");
-		return -1;
+		ret = -1;
+		goto out;
 	}
 
 	lseek(fd, from, SEEK_SET);
 	ret = read(fd, buf, len);
 	if (ret == -1) {
 		fprintf(stderr, "Reading from mtd failed\n");
-		close(fd);
-		return -1;
+		ret = -1;
+		goto out;
 	}
 
+out:
 	close(fd);
 	return ret;
 }
@@ -147,13 +141,13 @@ int flash_write(char *buf, off_t to, size_t len)
 
 	if (ioctl(fd, MEMGETINFO, &info)) {
 		fprintf(stderr, "Could not get mtd device info\n");
-		close(fd);
-		return -1;
+		ret = -1;
+		goto out;
 	}
 	if (len > info.size) {
 		fprintf(stderr, "Too many bytes: %d > %d bytes\n", len, info.erasesize);
-		close(fd);
-		return -1;
+		ret = -1;
+		goto out;
 	}
 
 	while (len > 0) {
@@ -162,10 +156,10 @@ int flash_write(char *buf, off_t to, size_t len)
 			unsigned int piece, bakaddr;
 
 			bak = (char *)malloc(info.erasesize);
-			if (bak == NULL) {
+			if (!bak) {
 				fprintf(stderr, "Not enough memory\n");
-				close(fd);
-				return -1;
+				ret = -1;
+				goto out;
 			}
 
 			bakaddr = to & ~(info.erasesize - 1);
@@ -174,9 +168,8 @@ int flash_write(char *buf, off_t to, size_t len)
 			ret = read(fd, bak, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Reading from mtd failed\n");
-				close(fd);
 				free(bak);
-				return -1;
+				goto out;
 			}
 
 			piece = to & (info.erasesize - 1);
@@ -187,18 +180,17 @@ int flash_write(char *buf, off_t to, size_t len)
 			ei.length = info.erasesize;
 			if (ioctl(fd, MEMERASE, &ei) < 0) {
 				fprintf(stderr, "Erasing mtd failed\n");
-				close(fd);
 				free(bak);
-				return -1;
+				ret = -1;
+				goto out;
 			}
 
 			lseek(fd, bakaddr, SEEK_SET);
 			ret = write(fd, bak, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Writing to mtd failed\n");
-				close(fd);
 				free(bak);
-				return -1;
+				goto out;
 			}
 
 			free(bak);
@@ -211,16 +203,15 @@ int flash_write(char *buf, off_t to, size_t len)
 			ei.length = info.erasesize;
 			if (ioctl(fd, MEMERASE, &ei) < 0) {
 				fprintf(stderr, "Erasing mtd failed\n");
-				close(fd);
-				return -1;
+				ret = -1;
+				goto out;
 			}
 
 			ret = write(fd, buf, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Writing to mtd failed\n");
-				close(fd);
 				free(bak);
-				return -1;
+				goto out;
 			}
 
 			buf += info.erasesize;
@@ -229,6 +220,7 @@ int flash_write(char *buf, off_t to, size_t len)
 		}
 	}
 
+out:
 	close(fd);
 	return ret;
 }
