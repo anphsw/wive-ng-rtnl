@@ -8,7 +8,7 @@ LOG="echo MODULES: "
 start() {
     #if goahead not started
     if [ ! -f /tmp/webrun ]; then
-	if [ ! -f /etc/modules.dep ]
+	if [ ! -f /etc/modules.dep ]; then
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n >  /etc/modules.dep
 	fi
