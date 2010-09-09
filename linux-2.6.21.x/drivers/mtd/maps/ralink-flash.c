@@ -299,25 +299,30 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 	struct erase_info ei;
 	u_char *bak = NULL;
 
+	lock_kernel();
 	mtd = get_mtd_device(NULL, num);
-	if (IS_ERR(mtd))
-		return (int)mtd;
+	if (IS_ERR(mtd)) {
+		ret = (int)mtd;
+		goto out;
+	}
+
 	if (len > mtd->erasesize) {
 		put_mtd_device(mtd);
-		return -E2BIG;
+		ret = -E2BIG;
+		goto out;
 	}
 
 	bak = kmalloc(mtd->erasesize, GFP_KERNEL);
 	if (bak == NULL) {
 		put_mtd_device(mtd);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto out;
 	}
 
 	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
 	if (ret != 0) {
 		put_mtd_device(mtd);
-		kfree(bak);
-		return ret;
+		goto free_out;
 	}
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
@@ -332,14 +337,17 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 	ret = mtd->erase(mtd, &ei);
 	if (ret != 0) {
 		put_mtd_device(mtd);
-		kfree(bak);
-		return ret;
+		goto free_out;
 	}
 
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
 
 	put_mtd_device(mtd);
+
+free_out:
 	kfree(bak);
+out:
+	unlock_kernel();
 	return ret;
 }
 #endif
@@ -352,26 +360,33 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	struct erase_info ei;
 	u_char *bak = NULL;
 
+	lock_kernel();
 	mtd = get_mtd_device_nm(name);
-	if (IS_ERR(mtd))
-		return (int)mtd;
+
+	if (IS_ERR(mtd)) {
+		ret = (int)mtd;
+		goto out;
+	}
+
 	if (len > mtd->erasesize) {
 		put_mtd_device(mtd);
-		return -E2BIG;
+		ret = -E2BIG;
+		goto out;
 	}
 
 	bak = kmalloc(mtd->erasesize, GFP_KERNEL);
 	if (bak == NULL) {
 		put_mtd_device(mtd);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto out;
 	}
 
 	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
 	if (ret != 0) {
 		put_mtd_device(mtd);
-		kfree(bak);
-		return ret;
+		goto free_out;
 	}
+
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
 
@@ -385,14 +400,17 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	ret = mtd->erase(mtd, &ei);
 	if (ret != 0) {
 		put_mtd_device(mtd);
-		kfree(bak);
-		return ret;
+		goto free_out;
 	}
 
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
 
 	put_mtd_device(mtd);
+
+free_out:
 	kfree(bak);
+out:
+	unlock_kernel();
 	return ret;
 }
 
