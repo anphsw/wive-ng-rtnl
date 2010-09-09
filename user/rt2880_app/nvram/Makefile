@@ -23,7 +23,7 @@ ralink_init: ralink_init.o
 endif
 
 clean:
-	rm -f *.o $(EXEC)
+	rm -f *.o nvram_daemon ralink_init
 
 romfs:
 	for i in $(EXEC) ; do $(ROMFSINST) /bin/$$i ; done
