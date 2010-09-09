@@ -275,13 +275,6 @@ static void __exit rt2880_mtd_cleanup(void)
 #endif
 }
 
-rootfs_initcall(rt2880_mtd_init);
-module_exit(rt2880_mtd_cleanup);
-
-MODULE_AUTHOR("Steven Liu <steven_liu@ralinktech.com.tw>");
-MODULE_DESCRIPTION("Ralink APSoC Flash Map");
-MODULE_LICENSE("GPL");
-
 /*
  * Flash API: ra_mtd_read, ra_mtd_write
  * Arguments:
@@ -455,9 +448,16 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	return ret;
 }
 
+rootfs_initcall(rt2880_mtd_init);
+module_exit(rt2880_mtd_cleanup);
+
 #ifdef RA_MTD_RW_BY_NUM
 EXPORT_SYMBOL(ra_mtd_write);
 EXPORT_SYMBOL(ra_mtd_read);
 #endif
 EXPORT_SYMBOL(ra_mtd_write_nm);
 EXPORT_SYMBOL(ra_mtd_read_nm);
+
+MODULE_AUTHOR("Steven Liu <steven_liu@ralinktech.com.tw>");
+MODULE_DESCRIPTION("Ralink APSoC Flash Map");
+MODULE_LICENSE("GPL");
