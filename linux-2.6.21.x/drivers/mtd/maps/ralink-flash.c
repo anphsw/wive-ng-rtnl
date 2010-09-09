@@ -13,7 +13,10 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/err.h>
-
+#include <linux/smp_lock.h>
+#include <linux/backing-dev.h>
+#include <linux/compat.h>
+#include <linux/mount.h>
 #include <asm/io.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
