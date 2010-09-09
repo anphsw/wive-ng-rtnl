@@ -4,12 +4,7 @@ LOG="echo GOAHEADWEBSERVER: "
 
 start() {
  $LOG "Start goahead"
-
-    #if firts boot or restore                                                                                                                  
-     if [ -f /var/MODIFIED ]; then
-	fs save
-     fi
-
+    fs save
     /bin/goahead &
     touch /tmp/webrun
     sleep 15

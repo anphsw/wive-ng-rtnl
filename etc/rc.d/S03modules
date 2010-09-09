@@ -82,12 +82,17 @@ check_nvram()
     #check firmwave update or clean burn
     IS_WIVE=`nvram_get 2860 IS_WIVE`
     if [ "$IS_WIVE" = "YES" ]; then
-	$LOG "Normal boot no need reset"
+	$LOG "Backup nvram... Normal boot"
+	fs backup_nvram 
     else
-	$LOG "Clear and load defaults to nvram!"
-	fs nvramreset
+	if [ -f /etc/backup/nvram_backup.dat ]; then
+	    $LOG "Load backuped setting to nvram!"
+	    fs load_nvram
+	else
+	    $LOG "Clear and load defaults to nvram!"
+	    fs nvramreset
+	fi
 	nvram_set 2860 IS_WIVE YES
-	touch /var/MODIFIED
 	$LOG "Reset OK... boot..."
     fi
 }

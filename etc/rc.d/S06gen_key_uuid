@@ -3,8 +3,6 @@
 LOG="echo GENKEY: "
 
 start() {
-MODIFIED=0
-
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then
 	$LOG "DSS file exist"
     else
@@ -12,7 +10,6 @@ MODIFIED=0
         $LOG "If no DSS key  and generate new key"
 	mkdir -p /etc/dropbear
         (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key) &
-	MODIFIED=1
     fi
 
     if [ -f /etc/miniupnpd.conf.uuid ]; then
@@ -31,10 +28,6 @@ MODIFIED=0
         serial=`hostid`
         $LOG "UPNP UUID is $outid , serial is $serial"
         printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
-	MODIFIED=1
-    fi
-    if [ "$MODIFIED" = "1" ]; then
-	touch /var/MODIFIED
     fi
 }
 

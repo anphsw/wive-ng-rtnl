@@ -61,7 +61,6 @@ save(){
     echo "Error: File $tmp too big: $(get_size $tmp)k"
   fi
   rm -f $tmp
-  rm -f /var/MODIFIED
 }
 
 restore(){
@@ -110,6 +109,16 @@ fullreset(){
   restore
 }
 
+backup_nvram(){
+ mkdir -p /etc/backup
+ CURRCONFIG=/etc/backup/nvram_backup.dat
+ regenerate
+}
+
+load_nvram(){
+ ralink_init renew 2860 /etc/backup/nvram_backup.dat
+}
+
 main(){
   local cmd="$1"
   [ -z "$cmd" ] && usage
@@ -132,6 +141,12 @@ main(){
       ;;
     fullreset)
       fullreset $@
+      ;;
+    backup_nvram)
+      backup_nvram $@
+      ;;
+    load_nvram)
+      load_nvram $@
       ;;
     *) 
       usage $@ 

@@ -41,7 +41,6 @@ if [ -f /etc/filesystem.ok ]; then
 
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
-    touch /var/MODIFIED
 fi
 
 /bin/sh /etc/rc.d/rcS &
