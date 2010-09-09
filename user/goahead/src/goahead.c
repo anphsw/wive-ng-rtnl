@@ -115,10 +115,6 @@ int main(int argc, char** argv)
 	signal(SIGPIPE, SIG_IGN);
 
         /* Start needed services */
-//        doSystem("killall -q nvram_daemon");
-//        doSystem("killall -q -9 nvram_daemon");
-//        doSystem("/bin/nvram_daemon &");
-
 	if (writeGoPid() < 0)
 		return -1;
 
