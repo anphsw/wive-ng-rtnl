@@ -813,12 +813,12 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 				vpnStoreRouting(vpn_rt);
 		}
 
-	    nvram_commit(RT2860_NVRAM);
 	} else  {
 	    printf("Set vpnEnabled error!\n");
 	    return ;
 	}
 
+	nvram_commit(RT2860_NVRAM);
 
 	//kill helpers firt sigterm second sigkill
 	printf("Kill helpers\n");
