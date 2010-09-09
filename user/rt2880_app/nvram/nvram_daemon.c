@@ -15,36 +15,10 @@
 #define GPIO_DEV "/dev/gpio"
 #endif
 
-
-#ifdef CONFIG_RT2880_L2_MANAGE
-int ramad_start(void);
-#endif
 static char *saved_pidfile;
 
 void loadDefault(int chip_id)
 {
-    switch(chip_id)
-    {
-    case 2880:
-	system("ralink_init clear inic");
-#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
-	system("ralink_init renew inic /etc/default/RT2860_default_novlan");
-#elif defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
-	system("ralink_init renew inic /etc/default/RT2860_default_vlan");
-#elif defined(CONFIG_ICPLUS_PHY)
-	system("ralink_init renew inic /etc/default/RT2860_default_oneport");
-#else
-	system("ralink_init renew inic /etc/default/RT2860_default_novlan");
-#endif
-	break;
-    case 2561: 
-	system("ralink_init clear 2561");
-	system("ralink_init renew 2561 /etc/default/RT2561_default");
-	break;
-    default:
-	printf("%s:Wrong chip id\n",__FUNCTION__);
-	break;
-    }
 }
 
 /*
@@ -54,36 +28,9 @@ void loadDefault(int chip_id)
  */
 static void nvramIrqHandler(int signum)
 {
-#ifdef CONFIG_RALINK_RT2880
-	if (signum == SIGUSR1) {
-		int gopid;
-		FILE *fp = fopen("/var/run/goahead.pid", "r");
-
-		if (NULL == fp) {
-			printf("nvram: goAhead is not running\n");
-			return;
-		}
-		fscanf(fp, "%d", &gopid);
-		if (gopid < 2) {
-			printf("nvram: goAhead pid(%d) <= 1\n", gopid);
-			return;
-		}
-
-		//send SIGUSR1 signal to goAhead for WPSPBCStart();
-		printf("notify goahead to start WPS PBC..\n");
-		kill(gopid, SIGUSR1);
-		fclose(fp);
-	} else 
-#endif
 	if (signum == SIGUSR2) {
-#if defined (CONFIG_INIC_MII) || defined (CONFIG_INIC_USB) || defined (CONFIG_INIC_PCI) 
-		loadDefault(2880);
-#elif  defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-		loadDefault(2561);
-#else
-		printf("nvram_daemon: Load default and reboot..\n");
-		system("fs nvramreset");
-#endif
+	    printf("nvram_daemon: Load default and reboot..\n");
+	    system("fs nvramreset");
 	    system("fs restore");
 	}
 }
@@ -105,17 +52,13 @@ int initGpio(void)
 	ralink_gpio_reg_info info;
 
 	info.pid = getpid();
-#ifdef CONFIG_RALINK_RT2880
-	info.irq = 0;
-#else
+
 	//RT2883, RT3052 use gpio 10 for load-to-default
 #if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE	
 	info.irq = 43;
 #else
 	info.irq = 10;
-#endif	
 #endif
-
 	fd = open(GPIO_DEV, O_RDONLY);
 	if (fd < 0) {
 		perror(GPIO_DEV);
@@ -186,37 +129,14 @@ int main(int argc,char **argv)
 	pid_t pid;
 	int fd;
 
-#if defined CONFIG_INIC_MII || defined CONFIG_INIC_USB || defined CONFIG_INIC_PCI 
-	if (strcmp(nvram_bufget(RTINIC_NVRAM, "WebInit"),"1")) {
-		loadDefault(2880);
-	}
-	nvram_close(RTINIC_NVRAM);
-#elif defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	if (strcmp(nvram_bufget(RT2561_NVRAM, "WebInit"),"1")) {
-		loadDefault(2561);
-	}
-	nvram_close(RT2561_NVRAM);
-#else
-	if (strcmp(nvram_bufget(RT2860_NVRAM, "WebInit"),"1")) {
-		loadDefault(2860);
-	}
-	nvram_close(RT2860_NVRAM);
-#endif
 	if (initGpio() != 0)
 		exit(EXIT_FAILURE);
 
 	fd = pidfile_acquire("/var/run/nvramd.pid");
 	pidfile_write_release(fd);
 
-#ifdef CONFIG_RT2880_L2_MANAGE
-	//start the management daemon (blocking)
-	ramad_start();
-#else
 	while (1) {
 		pause();
 	}
-#endif
-
-	exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
-
