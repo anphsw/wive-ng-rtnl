@@ -6,6 +6,7 @@
 LOG="echo MODULES: "
 
 start() {
+    get_param
     #if goahead not started
     if [ ! -f /tmp/webrun ]; then
 	if [ ! -f /etc/modules.dep ]; then
@@ -18,7 +19,6 @@ start() {
 	fi
     else
 	$LOG "Prepare wifi config..."
-	get_param
 	gen_wifi_config
 	if [ "$WMAC" != "" ]; then
 	    mac="mac=$WMAC"
