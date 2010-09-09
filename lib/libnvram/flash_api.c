@@ -53,6 +53,7 @@ int mtd_open(const char *name, int flags)
 	return -1;
 }
 
+#ifndef CONFIG_RALINK_RT3052
 int flash_read_mac(char *buf)
 {
 	int fd, ret;
@@ -69,6 +70,7 @@ int flash_read_mac(char *buf)
 	close(fd);
 	return ret;
 }
+#endif
 
 int flash_read_NicConf(char *buf)
 {
