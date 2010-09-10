@@ -47,8 +47,12 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 		error(E_L, E_LOG, T("setSysAdm: password empty, leave it unchanged"));
 		return;
 	}
-	nvram_set(RT2860_NVRAM, "Login", admuser);
-	nvram_set(RT2860_NVRAM, "Password", admpass);
+
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "Login", admuser);
+	nvram_bufset(RT2860_NVRAM, "Password", admpass);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 	
 
 	/* modify /etc/passwd to new user name and passwd */
@@ -104,6 +108,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	ntpSync = websGetVar(wp, T("NTPSync"), T(""));
 	ntpEnabled = websGetVar(wp, T("ntp_enabled"), T("off"));
 
+	nvram_init(RT2860_NVRAM);
 	if (strcmp(ntpEnabled, "on")==0)
 	{
 		if ((strlen(tz)>0) && (!checkSemicolon(tz)))
@@ -111,24 +116,25 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 			if (strlen(ntpServer)==0)
 			{
 				// user choose to make  NTP server disable
-				nvram_set(RT2860_NVRAM, "NTPServerIP", "");
-				nvram_set(RT2860_NVRAM, "NTPSync", "");
+				nvram_bufset(RT2860_NVRAM, "NTPServerIP", "");
+				nvram_bufset(RT2860_NVRAM, "NTPSync", "");
 			}
 			else
 			{
 				if ((!checkSemicolon(ntpServer)) && (strlen(ntpSync)>0) && (atoi(ntpSync)<=300))
 				{
-					nvram_set(RT2860_NVRAM, "NTPServerIP", ntpServer);
-					nvram_set(RT2860_NVRAM, "NTPSync", ntpSync);
+					nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
+					nvram_bufset(RT2860_NVRAM, "NTPSync", ntpSync);
 				}
 			}
 
-			nvram_set(RT2860_NVRAM, "TZ", tz);
+			nvram_bufset(RT2860_NVRAM, "TZ", tz);
 		}
 	}
 	
-	nvram_set(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
-	
+	nvram_bufset(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	if (strcmp(ntpEnabled, "on")==0)
 		doSystem("service ntp start &");
@@ -194,10 +200,13 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	if(checkSemicolon(ddns) || checkSemicolon(ddns_acc) || checkSemicolon(ddns_pass))
 		return;
 
-	nvram_set(RT2860_NVRAM, "DDNSProvider", ddns_provider);
-	nvram_set(RT2860_NVRAM, "DDNS", ddns);
-	nvram_set(RT2860_NVRAM, "DDNSAccount", ddns_acc);
-	nvram_set(RT2860_NVRAM, "DDNSPassword", ddns_pass);
+        nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "DDNSProvider", ddns_provider);
+	nvram_bufset(RT2860_NVRAM, "DDNS", ddns);
+	nvram_bufset(RT2860_NVRAM, "DDNSAccount", ddns_acc);
+	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 	
 
 	doSystem("service ddns start &");
