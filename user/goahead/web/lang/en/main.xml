@@ -56,7 +56,7 @@
   <message msgid="treeapp system command" msgstr="System Command" />
   <message msgid="treeapp system log" msgstr="System Log" />
   <message msgid="treeapp sdk history" msgstr="Version History" />
-  <message msgid="treeapp reboot" msgstr="Reboot your router" />
+  <message msgid="treeapp reboot" msgstr="Save and reboot" />
   <message msgid="treeapp reboot confirm" msgstr="Do you really want to reboot your router?" />
   <message msgid="treeapp system firewall" msgstr="System Security" />
 
