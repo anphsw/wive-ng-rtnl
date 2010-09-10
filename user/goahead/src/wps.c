@@ -268,7 +268,7 @@ void getWPSEncrypType(WSC_CONFIGURED_VALUE *result, char *ret_str)
 
 static int getWPSModeASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
+	char *wordlist=  nvram_bufget(RT2860_NVRAM, "WscModeOption");
 	if (wordlist == NULL)
 		websWrite(wp, T("%s"), "0");
 	else{
@@ -372,7 +372,7 @@ void WPSRestart(void)
 		doSystem("service wscd restart &");
 	}
 		
-	wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
+	wordlist =  nvram_bufget(RT2860_NVRAM, "WscConfigured");
 	if(wordlist)
 		g_wsc_configured = atoi(wordlist);
 	else
@@ -391,45 +391,6 @@ static int getPINASP(int eid, webs_t wp, int argc, char_t **argv)
 	websWrite(wp, T("%08d"), getAPPIN("ra0"));
 	return 0;
 }
-
-/*
-static int getWlanWscDevPinCodeASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int ioctl_sock;
-	struct iwreq iwr;
-	char *wordlist=NULL;
-	unsigned long WscPinCode = 0;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
-	iwr.u.data.pointer = (caddr_t) &WscPinCode;
-	iwr.u.data.flags = RT_OID_WSC_PIN_CODE;
-
-	ioctl_sock = socket(PF_INET, SOCK_DGRAM, 0);
-	if (ioctl_sock < 0){
-		fprintf(stderr, "ioctl sock fail!!!\n");
-		websWrite(wp, T("%s"), "00000000");
-		return 0;
-	}
-
-	if (ioctl(ioctl_sock, RT_PRIV_IOCTL, &iwr) < 0){
-		fprintf(stderr, "ioctl -> RT_PRIV_IOCTL Fail !\n");
-		websWrite(wp, T("%s"), "00000000");
-		return 0;
-	}
-
-	wordlist = nvram_get(RT2860_NVRAM, "WscPinCode");
-
-	if ((wordlist == NULL) || (strcmp(wordlist, "") == 0))
-		websWrite(wp, T("%d"), (int)WscPinCode);
-	else
-		websWrite(wp, T("%s"), wordlist);
-
-	close(ioctl_sock);
-	return 0;
-}
-*/
-
 
 /* Load from Web */
 #define LFW(x, y)	do{												\

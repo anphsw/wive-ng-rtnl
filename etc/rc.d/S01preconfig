@@ -59,8 +59,6 @@ start() {
     mkdir -p /dev/misc
     mknod /dev/misc/rtc   c       10      135
 
-    mkdir /var/tmp/is_up
-
     #modify permissions
     chmod 777 /tmp
     

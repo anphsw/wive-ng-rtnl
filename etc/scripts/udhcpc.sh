@@ -11,6 +11,8 @@ LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
 STATICDNS=`nvram_get 2860 wan_static_dns`
+WRITECONF="/etc/dhcp_current_conf"
+FORCRENEW="/tmp/dhcp_force_renew"
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -21,18 +23,17 @@ case "$1" in
 if [ "$CONFIG_IPV6" != "" ] ; then
         ip -6 addr flush dev $interface
 fi
-	touch /var/tmp/is_up/force_renew
+	touch "$FORCRENEW"
 	ip link set $interface up
         ;;
 
     renew|bound)
     #force renew if needed
-    if [ -f /var/tmp/is_up/force_renew ]; then
+    if [ -f "$FORCRENEW" ]; then
 	STARTEDPPPD=0
-	rm -rf /var/tmp/is_up/*
     fi
     #no change routes if pppd is started
-    if [ "$STARTEDPPPD" != "0" ] || [ -f /var/tmp/is_up/$ip ]; then
+    if [ "$STARTEDPPPD" != "0" ]; then
             $LOG "PPPD is start or no change parametrs. No renew needed."
     else
 	$LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
@@ -50,7 +51,8 @@ fi
                 route add default gw $i dev $interface metric $metric
 	        #save first dgw with metric=1 to use in corbina hack
 	        if [ "$metric" = "0" ]; then
-		    echo $i > /etc/default.gw
+		    echo $i > /tmp/default.gw
+		    DGW="$i"
 		fi
             	metric=`expr $metric + 1`
     	    done
@@ -65,9 +67,9 @@ fi
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
 	        if [ "$count" = "0" ]; then
-	    	    nvram_set 2860 wan_primary_dns $i
+		    DNS1="$i"
 		elif [ "$count" = "1" ]; then
-		    nvram_set 2860 wan_secondary_dns $i
+		    DNS2="$i"
 		fi
 		let "count=$count+1"
 	    done
@@ -197,17 +199,28 @@ fi
 		done
 	}
 
-	#set nvram_variable for goahead
+	#generate file to nvram set current param as default
+	echo "#!/bin/sh"> $WRITECONF
+	echo ""> $WRITECONF
 	if [ "$ip" != "" ]; then
-	    nvram_set 2860 wan_ipaddr $ip
+	    echo "nvram_set 2860 wan_ipaddr $ip" >> $WRITECONF
 	fi
 	if [ "$subnet" != "" ]; then
-	    nvram_set 2860 wan_netmask $subnet
+	    echo "nvram_set 2860 wan_netmask $subnet" >> $WRITECONF
 	fi
+	if [ "$DGW" != "" ]; then
+	    echo "nvram_set 2860 wan_gateway $DGW" >> $WRITECONF
+	fi
+	if [ "$DNS1" != "" ]; then
+    	    echo "nvram_set 2860 wan_primary_dns $DNS1" >> $WRITECONF
+	fi
+	if [ "$DNS2" != "" ]; then
+    	    echo "nvram_set 2860 wan_primary_dns $DNS2" >> $WRITECONF
+	fi
+        chmod 777 $WRITECONF
 
-	#remove force renew flag and save current ip and netmask
-	rm -rf /var/tmp/is_up/*
-	echo "$ip $NETMASK" > /var/tmp/is_up/$ip
+	#remove force renew flag
+	rm -f $FORCRENEW
 
     	$LOG "Restart needed services"
 	services_restart.sh dhcp

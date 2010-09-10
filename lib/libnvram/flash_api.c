@@ -94,6 +94,11 @@ int flash_read(char *buf, off_t from, size_t len)
 	int fd, ret;
 	struct mtd_info_user info;
 
+	if (len <= 0) {
+		fprintf(stderr, "No data to read\n");
+		return -1;
+	}
+
 	fd = mtd_open("Config", O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
@@ -131,6 +136,11 @@ int flash_write(char *buf, off_t to, size_t len)
 	char *bak = NULL;
 	struct mtd_info_user info;
 	struct erase_info_user ei;
+
+	if (len <= 0) {
+		fprintf(stderr, "No data to write\n");
+		return -1;
+	}
 
 	fd = mtd_open("Config", O_RDWR | O_SYNC);
 	if (fd < 0) {

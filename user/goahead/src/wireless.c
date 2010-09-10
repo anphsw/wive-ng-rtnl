@@ -454,14 +454,6 @@ static void revise_mbss_value(int old_num, int new_num)
 		//MBSS_INIT(Key3Str, "");
 		MBSS_INIT(Key4Type, "0");
 		//MBSS_INIT(Key4Str, "");
-/*		MBSS_INIT(AccessPolicy0, "0");
-		MBSS_INIT(AccessControlList0, "");
-		MBSS_INIT(AccessPolicy1, "0");
-		MBSS_INIT(AccessControlList1, "");
-		MBSS_INIT(AccessPolicy2, "0");
-		MBSS_INIT(AccessControlList2, "");
-		MBSS_INIT(AccessPolicy3, "0");
-		MBSS_INIT(AccessControlList3, ""); */
 		MBSS_INIT(NoForwarding, "0");
 		MBSS_INIT(NoForwardingBTNBSSID, "0");
 		MBSS_INIT(IEEE8021X, "0");
@@ -494,14 +486,6 @@ static void revise_mbss_value(int old_num, int new_num)
 		//MBSS_REMOVE(Key3Str);
 		MBSS_REMOVE(Key4Type);
 		//MBSS_REMOVE(Key4Str);
-/*		MBSS_REMOVE(AccessPolicy0);
-		MBSS_REMOVE(AccessControlList0);
-		MBSS_REMOVE(AccessPolicy1);
-		MBSS_REMOVE(AccessControlList1);
-		MBSS_REMOVE(AccessPolicy2);
-		MBSS_REMOVE(AccessControlList2);
-		MBSS_REMOVE(AccessPolicy3);
-		MBSS_REMOVE(AccessControlList3); */
 		MBSS_REMOVE(NoForwarding);
 		MBSS_REMOVE(NoForwardingBTNBSSID);
 		MBSS_REMOVE(IEEE8021X);
@@ -540,13 +524,13 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	radio = websGetVar(wp, T("radiohiddenButton"), T("2"));
 	if (!strncmp(radio, "0", 2)) {
 		doSystem("iwpriv ra0 set RadioOn=0");
-		nvram_set(RT2860_NVRAM, "RadioOff", "1");
+		nvram_bufset(RT2860_NVRAM, "RadioOff", "1");
 		websRedirect(wp, "wireless/basic.asp");
 		return;
 	}
 	else if (!strncmp(radio, "1", 2)) {
 		doSystem("iwpriv ra0 set RadioOn=1");
-		nvram_set(RT2860_NVRAM, "RadioOff", "0");
+		nvram_bufset(RT2860_NVRAM, "RadioOff", "0");
 		websRedirect(wp, "wireless/basic.asp");
 		return;
 	}
@@ -965,7 +949,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
     //debug print
     websHeader(wp);
     websWrite(wp, T("bg_protection: %s<br>\n"), bg_protection);
-    //websWrite(wp, T("basic_rate: %s<br>\n"), basic_rate);
     websWrite(wp, T("beacon: %s<br>\n"), beacon);
     websWrite(wp, T("dtim: %s<br>\n"), dtim);
     websWrite(wp, T("fragment: %s<br>\n"), fragment);

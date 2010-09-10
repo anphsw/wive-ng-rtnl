@@ -186,7 +186,5 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 
 	//restart some services instead full reload
-	//firewall_rebuild(); // now we do not need it
-	
 	doSystem("services_restart.sh misc &");
 }

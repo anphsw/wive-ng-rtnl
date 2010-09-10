@@ -34,7 +34,7 @@ get_vpn_ip() {
     if [ "$NS" != "" ]; then
         SERVER=$NS
         $LOG "Server adress is $SERVER"
-	nvram_set 2860 vpnServerIP "$SERVER"
+	echo "$SERVER" > /tmp/vpnip
     else
         SERVER=$SERVERNM
         $LOG "Not resolve adress for $SERVER"
@@ -60,8 +60,8 @@ echo "==================START-L2TP-CLIENT======================="
     
 
     $LOG "Get route to vpn server."
-    if [ -f /etc/default.gw ]; then
-	newdgw=`cat /etc/default.gw`
+    if [ -f /tmp/default.gw ]; then
+	newdgw=`cat /tmp/default.gw`
     else
 	newdgw=""
     fi

@@ -23,6 +23,20 @@ int set_usage(char *aout)
 	return -1;
 }
 
+int get_usage(char *aout)
+{
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
+	int i;
+
+	printf("Usage: \n");
+	for (i = 0; i < getNvramNum(); i++){
+		printf("\t%s %s ", aout, getNvramName(i));
+		printf("lan_ipaddr\n");
+	}
+#endif
+	return -1;
+}
+
 int ra_nv_set(int argc,char **argv)
 {
 	int index, rc;
@@ -50,24 +64,9 @@ int ra_nv_set(int argc,char **argv)
 		return set_usage(argv[0]);
 	}
 
-	nvram_init(index);
 	rc = nvram_set(index, key, value);
 	nvram_close(index);
 	return rc;
-}
-
-int get_usage(char *aout)
-{
-#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
-	int i;
-
-	printf("Usage: \n");
-	for (i = 0; i < getNvramNum(); i++){
-		printf("\t%s %s ", aout, getNvramName(i));
-		printf("lan_ipaddr\n");
-	}
-#endif
-	return -1;
 }
 
 int ra_nv_get(int argc, char *argv[])
@@ -94,10 +93,9 @@ int ra_nv_get(int argc, char *argv[])
 		return get_usage(argv[0]);
 	}
 
-	nvram_init(index);
-	printf("%s\n", nvram_bufget(index, key));
+	printf("%s\n", nvram_get(index, key));
 	nvram_close(index);
-	return 0;
+    return 0;
 }
 
 void usage(char *cmd)

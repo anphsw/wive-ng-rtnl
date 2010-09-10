@@ -2354,7 +2354,7 @@ int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned c
 static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef WPA_SUPPLICANT_SUPPORT
-	char *caclcert_file = (char *) nvram_get(CERT_NVRAM, "CACLCertFile");
+	char *caclcert_file = (char *) nvram_bufget(CERT_NVRAM, "CACLCertFile");
 
 	if (strlen(caclcert_file) > 0)
 		websWrite(wp, T("<option value=\"%s\">%s</option>"), caclcert_file, caclcert_file);
@@ -2368,7 +2368,7 @@ static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
 static int getKeyCertList(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef WPA_SUPPLICANT_SUPPORT
-	char *keycert_file = (char *) nvram_get(CERT_NVRAM, "KeyCertFile");
+	char *keycert_file = (char *)  nvram_bufget(CERT_NVRAM, "KeyCertFile");
 
 	if (strlen(keycert_file) > 0)
 		websWrite(wp, T("<option value=\"%s\">%s</option>"), keycert_file, keycert_file);

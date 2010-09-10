@@ -365,7 +365,7 @@ static void QoSDeleteRules(webs_t wp, char_t *path, char_t *query)
 
     deleteNthValueMulti(deleArray, j, rules, ';');
 
-    nvram_set(RT2860_NVRAM, "QoSRules", rules);
+    nvram_bufset(RT2860_NVRAM, "QoSRules", rules);
     nvram_commit(RT2860_NVRAM);
 
 	QoSRestart();

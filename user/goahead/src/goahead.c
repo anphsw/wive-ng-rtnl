@@ -617,7 +617,7 @@ int getGoAHeadServerPort(void)
 static int set_stable_flag(void)
 {
 	int set = 0;
-	char *wordlist = nvram_get(UBOOT_NVRAM, "Image1Stable");
+	char *wordlist = nvram_bufget(UBOOT_NVRAM, "Image1Stable");
 
 	if (wordlist) {
 		if (strcmp(wordlist, "1") != 0)
@@ -628,7 +628,7 @@ static int set_stable_flag(void)
 
 	if (set) {
 		printf("Set Image1 stable flag\n");
-		nvram_set(UBOOT_NVRAM, "Image1Stable", "1");
+		nvram_bufset(UBOOT_NVRAM, "Image1Stable", "1");
 	}
 	
 	return 0;

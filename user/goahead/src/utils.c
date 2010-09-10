@@ -1291,12 +1291,12 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		char *old_mii = nvram_bufget(RTINIC_NVRAM, "InicMiiEnable");
 
 		if (strncmp(mii, old_mii, 2)) {
-			nvram_set(RTINIC_NVRAM, "InicMiiEnable", mii);
+			nvram_bufset(RTINIC_NVRAM, "InicMiiEnable", mii);
 			need_commit = 1; //force to run initInternet
 		}
 	}
 	else {
-		nvram_set(RTINIC_NVRAM, "InicMiiEnable", "0");
+		nvram_bufset(RTINIC_NVRAM, "InicMiiEnable", "0");
 		need_commit = 1; //force to run initInternet
 	}
 #endif

@@ -22,7 +22,7 @@ start() {
     killall -q -9 udhcpc
 
     #set force renew marker
-    touch /var/tmp/is_up/force_renew
+    touch /tmp/dhcp_force_renew
 
     /bin/hostname $HOSTNAME
     echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts

@@ -8,7 +8,13 @@
 
 #include <linux/autoconf.h>
 
+//#define DEBUG
+
+#ifdef DEBUG
+char libnvram_debug = 1;
+#else
 char libnvram_debug = 0;
+#endif
 #define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 #define LIBNV_ERROR(x, ...) do { printf("%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 
@@ -217,7 +223,9 @@ char *nvram_get(int index, char *name)
 int nvram_set(int index, char *name, char *value)
 {
 	//LIBNV_PRINT("--> nvram_set\n");
-	if (-1 == nvram_bufset(index, name, value))
+	nvram_close(index);
+	nvram_init(index);
+	if (nvram_bufset(index, name, value) == -1 )
 		return -1;
 	return nvram_commit(index);
 }
@@ -441,6 +449,7 @@ unsigned int getNvramIndex(char *name)
 
 void toggleNvramDebug()
 {
+#ifndef DEBUG
 	if (libnvram_debug) {
 		libnvram_debug = 0;
 		printf("%s: turn off debugging\n", __FILE__);
@@ -449,5 +458,8 @@ void toggleNvramDebug()
 		libnvram_debug = 1;
 		printf("%s: turn ON debugging\n", __FILE__);
 	}
+#else
+		libnvram_debug = 1;
+#endif
 }
 

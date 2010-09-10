@@ -22,7 +22,6 @@ NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnType=`nvram_get 2860 vpnType`
-vpnServerIP=`nvram_get 2860 vpnServerIP`
 
     if [ "$vpnType" != 0 ]; then
 	$LOG "Modify route table need for buggy nas"
@@ -62,9 +61,10 @@ vpnServerIP=`nvram_get 2860 vpnServerIP`
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
 
     #Route to VPN server over WAN select
-    if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /etc/default.gw ]; then
+    if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /tmp/default.gw ] && [ -f /tmp/vpnip ]; then
 	$LOG "Replace route to wan...."
-	newdgw=`cat /etc/default.gw`
+	newdgw=`cat /tmp/default.gw`
+	vpnServerIP=`cat /tmp/vpnip`
 	if [ "$newdgw" != "" ] && [ "$newdgw" != "$vpnServerIP" ]; then
 	    ip route del $vpnServerIP > /dev/null 2>&1
 	    ip route add $vpnServerIP via $newdgw
