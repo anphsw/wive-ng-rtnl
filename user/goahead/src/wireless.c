@@ -1226,7 +1226,7 @@ void restart8021XDaemon(int nvram)
 /* LFF means "Load From Flash" ...*/
 #define LFF(result, nvram, x, n)	\
 							do{		char tmp[128];										\
-									if(! ( x  = nvram_bufget(nvram, #x)) )				\
+									if(! ( x  = nvram_get(nvram, #x)) )				\
 										tmp[0] = '\0';									\
 									else{												\
 										if( getNthValueSafe(n, x, ';', tmp, 128) != -1){\
@@ -1270,31 +1270,23 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 			//LFF(result, nvram, SSID, i);
 			gstrncat(result, nvram_get(nvram, racat("SSID", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
-			nvram_init(RT2860_NVRAM);
 			LFF(result, nvram, PreAuth, i);
 			LFF(result, nvram, AuthMode, i);
 			LFF(result, nvram, EncrypType, i);
 			LFF(result, nvram, DefaultKeyID, i);
 			LFF(result, nvram, Key1Type, i);
-			nvram_close(RT2860_NVRAM);
 			//LFF(result, nvram, Key1Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key1Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
-			nvram_init(RT2860_NVRAM);
 			LFF(result, nvram, Key2Type, i);
-			nvram_close(RT2860_NVRAM);
 			//LFF(result, nvram, Key2Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key2Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
-			nvram_init(RT2860_NVRAM);
 			LFF(result, nvram, Key3Type, i);
-			nvram_close(RT2860_NVRAM);
 			//LFF(result, nvram, Key3Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key3Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
-			nvram_init(RT2860_NVRAM);
 			LFF(result, nvram, Key4Type, i);
-			nvram_close(RT2860_NVRAM);
 			//LFF(result, nvram, Key4Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key4Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
@@ -1302,7 +1294,6 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 			gstrncat(result, nvram_get(nvram, racat("WPAPSK", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 
-			nvram_init(RT2860_NVRAM);
 			LFF(result, nvram, RekeyMethod, i);
 			LFF(result, nvram, RekeyInterval, i);
 			LFF(result, nvram, PMKCachePeriod, i);
@@ -1311,7 +1302,6 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 			LFF(result, nvram, RADIUS_Port, i);
 			LFF(result, nvram, RADIUS_Key, i);
 			LFF(result, nvram, session_timeout_interval, i);
-			nvram_close(RT2860_NVRAM);
 
 			// access control related.
 			gstrncat(result, nvram_get(nvram, racat("AccessPolicy", i)), 4096);

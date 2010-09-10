@@ -771,9 +771,17 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	if (vpn_enabled[0] == '\0')
 		vpn_enabled="off";
 
+	if (nvram_set(RT2860_NVRAM, "vpnEnabled", (void *)vpn_enabled)!=0)
+	{
+		printf("Set vpnEnabled error!\n");
+		return;
+	}
+
+	nvram_init(RT2860_NVRAM);
+
 	// Now store VPN_ENABLED flag
 	// Do not set other params if VPN is turned off
-	if (strcmp(vpn_enabled, "on") && (nvram_set(RT2860_NVRAM, "vpnEnabled", (void *)vpn_enabled)==0))
+	if (strcmp(vpn_enabled, "on"))
 	{
 		printf("vpn_enabled value : %s\n", vpn_enabled);
 
@@ -790,7 +798,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 					str = "off";
 			}
 			
-			if (nvram_set(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
+			if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
 				printf("Set %s nvram error!", fetch->nvram_param);
 			
 			printf("%s value : %s\n", fetch->nvram_param, str);
@@ -810,13 +818,10 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 			if (vpn_rt != NULL)
 				vpnStoreRouting(vpn_rt);
 		}
-
-	} else  {
-	    printf("Set vpnEnabled error!\n");
-	    return ;
 	}
-
 	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	//kill helpers firt sigterm second sigkill
 	printf("Kill helpers\n");
@@ -824,7 +829,6 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	system("/bin/killall -q vpnhelper");
 	system("/bin/killall -q -9 S70vpnhelper");
 	system("/bin/killall -q -9 vpnhelper");
-    	sleep(3);
 	printf("Calling vpn helper...\n");
 	system("service vpnhelper restart &");
 
@@ -1801,23 +1805,24 @@ static void addRouting(webs_t wp, char_t *path, char_t *query)
 	fgets(result, sizeof(result), fp);
 	pclose(fp);
 
-
-	if(!strlen(result)){
+	if (!strlen(result))
+	{
 		// success, write down to the flash
 		char tmp[1024];
 		char *rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
-		if(!rrs || !strlen(rrs)){
+		if (!rrs || !strlen(rrs))
 			memset(tmp, 0, sizeof(tmp));
-		}else{
+		else
 			strncpy(tmp, rrs, sizeof(tmp));
-		}
+
 		if(strlen(tmp))
 			strcat(tmp, ";");
 		sprintf(tmp, "%s%s,%s,%s,%s,%s,%s,%s", tmp, dest, netmask, gateway, interface, true_interface, custom_interface, comment);
 		nvram_set(RT2860_NVRAM, "RoutingRules", tmp);
-		
-	}else{
-		websHeader(wp);		
+	}
+	else
+	{
+		websHeader(wp);
 		websWrite(wp, T("<h1>Add routing failed:<br> %s<h1>"), result);
 		websFooter(wp);
 		websDone(wp, 200);
@@ -1827,9 +1832,9 @@ static void addRouting(webs_t wp, char_t *path, char_t *query)
 	//debug print
 	websHeader(wp);
 	websWrite(wp, T("<h3>Add routing table:</h3><br>\n"));
-	if(strlen(result)){
+	if (strlen(result))
 		websWrite(wp, T("Success"));
-	}else
+	else
 		websWrite(wp, T("%s"), result);
 
 	websWrite(wp, T("Destination: %s<br>\n"), dest);
@@ -1866,10 +1871,13 @@ static void delRouting(webs_t wp, char_t *path, char_t *query)
 		
 	websHeader(wp);
 
-	for(index=0; index< rule_count; index++){
+	for (index=0; index< rule_count; index++)
+	{
 		snprintf(name_buf, sizeof(name_buf), "DR%d", index);
 		value = websGetVar(wp, name_buf, NULL);
-		if(value){
+
+		if (value)
+		{
 			deleArray[j++] = index;
 			if(strlen(value) > 256)
 				continue;
@@ -1879,10 +1887,10 @@ static void delRouting(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 
-	if(j>0){
+	if (j>0)
+	{
 		deleteNthValueMulti(deleArray, j, rrs, ';');
 		nvram_set(RT2860_NVRAM, "RoutingRules", rrs);
-		
 	}
 
 	websFooter(wp);
@@ -1901,13 +1909,13 @@ void ripdRestart(void)
 
 	doSystem("service ripd stop &");
 
-	if(!opmode||!strlen(opmode))
+	if (!opmode || !strlen(opmode))
 		return;
-	if(!strcmp(opmode, "0"))	// bridge
+	if (!strcmp(opmode, "0"))	// bridge
 		return;
 
-	if(!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0"))
-        return;
+	if (!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0"))
+		return;
 
 	if(!password || !strlen(password))
 		password = "Admin";
@@ -1942,7 +1950,6 @@ inline void zebraRestart(void)
 {
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char *password = nvram_get(RT2860_NVRAM, "Password");
-
 	char *RIPEnable = nvram_get(RT2860_NVRAM, "RIPEnable");
 
 	doSystem("service zebra start &");
@@ -1977,23 +1984,30 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	if(!RIPEnable || !strlen(RIPEnable))
 		RIPEnable = "0";
 
-	if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "0")){
+	if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "0"))
+	{
 		// nothing changed
-	}else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "1")){
+	}
+	else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "1"))
+	{
 		// nothing changed
-	}else if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "1")){
+	}
+	else if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "1"))
+	{
 		nvram_set(RT2860_NVRAM, "RIPEnable", rip);
 		
 		doSystem("service ripd stop &");
 		doSystem("service zebra stop &");
-	}else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0")){
+	}
+	else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0"))
+	{
 		nvram_set(RT2860_NVRAM, "RIPEnable", rip);
 		
 		zebraRestart();
 		ripdRestart();
-	}else{
-		return;
 	}
+	else
+		return;
 
 	//debug print
 	websHeader(wp);
@@ -2098,26 +2112,30 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 	}
+	
+	nvram_init(RT2860_NVRAM);
+	
 	// configure gateway and dns (WAN) at bridge mode
 	if (!strncmp(opmode, "0", 2))
 	{
 		gw = websGetVar(wp, T("lanGateway"), T(""));
 		pd = websGetVar(wp, T("lanPriDns"), T(""));
 		sd = websGetVar(wp, T("lanSecDns"), T(""));
-		nvram_set(RT2860_NVRAM, "wan_gateway", gw);
-		nvram_set(RT2860_NVRAM, "wan_primary_dns", pd);
-		nvram_set(RT2860_NVRAM, "wan_secondary_dns", sd);
+		nvram_bufset(RT2860_NVRAM, "wan_gateway", gw);
+		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
+		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
 
-	nvram_set(RT2860_NVRAM, "lan_ipaddr", ip);
-	nvram_set(RT2860_NVRAM, "lan_netmask", nm);
-	nvram_set(RT2860_NVRAM, "Lan2Enabled", lan2enabled);
-	nvram_set(RT2860_NVRAM, "lan2_ipaddr", lan2_ip);
-	nvram_set(RT2860_NVRAM, "lan2_netmask", lan2_nm);
+	nvram_bufset(RT2860_NVRAM, "lan_ipaddr", ip);
+	nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
+	nvram_bufset(RT2860_NVRAM, "Lan2Enabled", lan2enabled);
+	nvram_bufset(RT2860_NVRAM, "lan2_ipaddr", lan2_ip);
+	nvram_bufset(RT2860_NVRAM, "lan2_netmask", lan2_nm);
 #ifdef GA_HOSTNAME_SUPPORT
-	nvram_set(RT2860_NVRAM, "HostName", host);
+	nvram_bufset(RT2860_NVRAM, "HostName", host);
 #endif
-	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	//debug print
 	websHeader(wp);
@@ -2130,7 +2148,8 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("LAN2 Enabled: %s<br>\n"), lan2enabled);
 	websWrite(wp, T("LAN2 IP: %s<br>\n"), lan2_ip);
 	websWrite(wp, T("LAN2 Netmask: %s<br>\n"), lan2_nm);
-	if (!strncmp(opmode, "0", 2)) {
+	if (!strncmp(opmode, "0", 2))
+	{
 		websWrite(wp, T("Gateway: %s<br>\n"), gw);
 		websWrite(wp, T("PriDns: %s<br>\n"), pd);
 		websWrite(wp, T("SecDns: %s<br>\n"), sd);
@@ -2157,9 +2176,8 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
 
-	ctype = ip = nm = gw = eth = user = pass = 
-		vpn_srv = vpn_mode = l2tp_srv = l2tp_mode =
-		NULL;
+	ctype = ip = nm = gw = eth = user = pass =
+	vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
@@ -2170,50 +2188,58 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		gw = websGetVar(wp, T("staticGateway"), T(""));
 
 		nvram_set(RT2860_NVRAM, "wanConnectionMode", ctype);
-		if (-1 == inet_addr(ip)) {
-			
+		if (-1 == inet_addr(ip))
+		{
 			websError(wp, 200, "invalid IP Address");
 			return;
 		}
 		/*
 		 * lan and wan ip should not be the same except in bridge mode
 		 */
-		if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, lan_ip, 15)) {
-			
+		if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, lan_ip, 15))
+		{
 			websError(wp, 200, "IP address is identical to LAN");
 			return;
 		}
 		if (!strcmp(lan2enabled, "1"))
 		{
-			char	*lan2_ip = nvram_get(RT2860_NVRAM, "lan2_ipaddr");
-			if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, lan2_ip, 15)) {
-				
+			char *lan2_ip = nvram_get(RT2860_NVRAM, "lan2_ipaddr");
+			if (NULL != opmode && strcmp(opmode, "0") && !strncmp(ip, lan2_ip, 15))
+			{
 				websError(wp, 200, "IP address is identical to LAN2");
 				return;
 			}
 		}
-		nvram_set(RT2860_NVRAM, "wan_ipaddr", ip);
-		if (-1 == inet_addr(nm)) {
-			
+
+		if (-1 == inet_addr(nm))
+		{
 			websError(wp, 200, "invalid Subnet Mask");
 			return;
 		}
-		nvram_set(RT2860_NVRAM, "wan_netmask", nm);
+
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "wan_ipaddr", ip);
+		nvram_bufset(RT2860_NVRAM, "wan_netmask", nm);
 		/*
 		 * in Bridge Mode, lan and wan are bridged together and associated with
 		 * the same ip address
 		 */
-		if (NULL != opmode && !strcmp(opmode, "0")) {
-			nvram_set(RT2860_NVRAM, "lan_ipaddr", ip);
-			nvram_set(RT2860_NVRAM, "lan_netmask", nm);
+		if (NULL != opmode && !strcmp(opmode, "0"))
+		{
+			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", ip);
+			nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
 		}
-		nvram_set(RT2860_NVRAM, "wan_gateway", gw);
+		nvram_bufset(RT2860_NVRAM, "wan_gateway", gw);
+		
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 	else if (!strncmp(ctype, "DHCP", 5))
 	{
 		nvram_set(RT2860_NVRAM, "wanConnectionMode", ctype);
 	}
-	else {
+	else
+	{
 		websHeader(wp);
 		websWrite(wp, T("<h2>Unknown Connection Type: %s</h2><br>\n"), ctype);
 		websFooter(wp);
@@ -2229,13 +2255,14 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	
 	printf("st_en = %s, pd = %s, sd = %s, hostname=%s\n", st_en, pd, sd, host);
 	
-	nvram_set(RT2860_NVRAM, "wan_static_dns", st_en);
-	nvram_set(RT2860_NVRAM, "HostName", host);
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
+	nvram_bufset(RT2860_NVRAM, "HostName", host);
 	
 	if (strcmp(st_en, "on") == 0)
 	{
-		nvram_set(RT2860_NVRAM, "wan_primary_dns", pd);
-		nvram_set(RT2860_NVRAM, "wan_secondary_dns", sd);
+		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
+		nvram_bufset(RT2860_NVRAM, "wan_secondary_dns", sd);
 	}
 
 	// NAT
@@ -2246,10 +2273,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		printf("nat_enable = %s\n", nat_enable);
 		nat_enable = (strcmp(nat_enable, "on") == 0) ? "1" : "0";
 		printf("nat_enable = %s\n", nat_enable);
-		nvram_set(RT2860_NVRAM, "natEnabled", nat_enable);
+		nvram_bufset(RT2860_NVRAM, "natEnabled", nat_enable);
 	}
 	
-	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// debug print
 	websHeader(wp);

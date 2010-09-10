@@ -149,27 +149,27 @@ static void storageAdm(webs_t wp, char_t *path, char_t *query)
 		char_t *user_select;
 		char feild[20];
 
+		nvram_init(RT2860_NVRAM);
+
 		feild[0] = '\0';
 		user_select = websGetVar(wp, T("storage_user_select"), T(""));
 		sprintf(feild, "User%s", user_select);
-		doSystem("storage.sh deldir %s/home/%s", 
-				 first_part, nvram_get(RT2860_NVRAM, feild));
-		/*
-		doSystem("storage.sh deldir %s/%s", 
-				 "/var/home", nvram_get(RT2860_NVRAM, feild));
-		*/
-		nvram_set(RT2860_NVRAM, feild, "");
+		doSystem("storage.sh deldir %s/home/%s", first_part, nvram_bufget(RT2860_NVRAM, feild));
+
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "FtpUser%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "UserPasswd%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "FtpMaxLogins%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "FtpMode%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "SmbUser%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 	else if (0 == strcmp(submit, "apply"))
 	{
@@ -231,21 +231,25 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	// set to nvram
 	if (0 != index)
 	{
+		nvram_init(RT2860_NVRAM);
+		
 		sprintf(feild, "User%d", index);
-		nvram_set(RT2860_NVRAM, feild, name);
+		nvram_bufset(RT2860_NVRAM, feild, name);
 		sprintf(feild, "UserPasswd%d", index);
-		nvram_set(RT2860_NVRAM, feild, password);
+		nvram_bufset(RT2860_NVRAM, feild, password);
 		
 		sprintf(feild, "FtpUser%d", index);
-		nvram_set(RT2860_NVRAM, feild, user_ftp_enable);
+		nvram_bufset(RT2860_NVRAM, feild, user_ftp_enable);
 		sprintf(feild, "FtpMaxLogins%d", index);
-		nvram_set(RT2860_NVRAM, feild, max_logins);
+		nvram_bufset(RT2860_NVRAM, feild, max_logins);
 		sprintf(feild, "FtpMode%d", index);
-		nvram_set(RT2860_NVRAM, feild, mode);
+		nvram_bufset(RT2860_NVRAM, feild, mode);
 		
 		sprintf(feild, "SmbUser%d", index);
-		nvram_set(RT2860_NVRAM, feild, user_smb_enable);
+		nvram_bufset(RT2860_NVRAM, feild, user_smb_enable);
 		
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 }
 
@@ -295,23 +299,27 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 	// DEBUG(mode);
 
 	// set to nvram
+	nvram_init(RT2860_NVRAM);
+	
 	sprintf(feild, "UserPasswd%s", index);
-	nvram_set(RT2860_NVRAM, feild, password);
+	nvram_bufset(RT2860_NVRAM, feild, password);
 	sprintf(feild, "FtpUser%s", index);
 	// DEBUG(feild);
-	nvram_set(RT2860_NVRAM, feild, user_ftp_enable);
+	nvram_bufset(RT2860_NVRAM, feild, user_ftp_enable);
 	if (0 == strcmp(user_ftp_enable, "1"))
 	{
 		sprintf(feild, "FtpMaxLogins%s", index);
-		nvram_set(RT2860_NVRAM, feild, max_logins);
+		nvram_bufset(RT2860_NVRAM, feild, max_logins);
 		sprintf(feild, "FtpMode%s", index);
-		nvram_set(RT2860_NVRAM, feild, mode);
+		nvram_bufset(RT2860_NVRAM, feild, mode);
 	}
 	sprintf(feild, "SmbUser%s", index);
 	// DEBUG(feild);
-	nvram_set(RT2860_NVRAM, feild, user_smb_enable);
+	nvram_bufset(RT2860_NVRAM, feild, user_smb_enable);
 	
-		
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+	
 	websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 }
 
@@ -453,13 +461,17 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 	stay_timeout = websGetVar(wp, T("ftp_stay_timeout"), T(""));
 
 	// set to nvram
-	nvram_set(RT2860_NVRAM, "FtpEnabled", ftp);
-	nvram_set(RT2860_NVRAM, "FtpAnonymous", anonymous);
-	nvram_set(RT2860_NVRAM, "FtpPort", port);
-	nvram_set(RT2860_NVRAM, "FtpMaxUsers", max_users);
-	nvram_set(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
-	nvram_set(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
+	nvram_init(RT2860_NVRAM);
 	
+	nvram_bufset(RT2860_NVRAM, "FtpEnabled", ftp);
+	nvram_bufset(RT2860_NVRAM, "FtpAnonymous", anonymous);
+	nvram_bufset(RT2860_NVRAM, "FtpPort", port);
+	nvram_bufset(RT2860_NVRAM, "FtpMaxUsers", max_users);
+	nvram_bufset(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
+	nvram_bufset(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// setup device
 	doSystem("storage.sh ftp");
@@ -520,10 +532,12 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 		netbios = websGetVar(wp, T("smb_netbios"), T(""));
 
 		// set to nvram
-		nvram_set(RT2860_NVRAM, "SmbEnabled", smb_enable);
-		nvram_set(RT2860_NVRAM, "HostName", wg);
-		nvram_set(RT2860_NVRAM, "SmbNetBIOS", netbios);
-		
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb_enable);
+		nvram_bufset(RT2860_NVRAM, "HostName", wg);
+		nvram_bufset(RT2860_NVRAM, "SmbNetBIOS", netbios);
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 
 		// setup device
 		SetSambaSrv();
@@ -751,9 +765,11 @@ static void storageMediaSrv(webs_t wp, char_t *path, char_t *query)
 		media_name = websGetVar(wp, T("media_name"), T(""));
 
 		// set to nvram
-		nvram_set(RT2860_NVRAM, "mediaSrvEnabled", media_enabled);
-		nvram_set(RT2860_NVRAM, "mediaSrvName", media_name);
-		
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "mediaSrvEnabled", media_enabled);
+		nvram_bufset(RT2860_NVRAM, "mediaSrvName", media_name);
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 
 		// setup device
 		if (0 == strcmp(media_enabled, "0"))
@@ -888,11 +904,13 @@ static void webcamra(webs_t wp, char_t *path, char_t *query)
 	port = websGetVar(wp, T("port"), T(""));
 
 	// set to nvram
-	nvram_set(RT2860_NVRAM, "WebCamEnabled", enable);
-	nvram_set(RT2860_NVRAM, "WebCamResolution", resolution);
-	nvram_set(RT2860_NVRAM, "WebCamFPS", fps);
-	nvram_set(RT2860_NVRAM, "WebCamPort", port);
-	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "WebCamEnabled", enable);
+	nvram_bufset(RT2860_NVRAM, "WebCamResolution", resolution);
+	nvram_bufset(RT2860_NVRAM, "WebCamFPS", fps);
+	nvram_bufset(RT2860_NVRAM, "WebCamPort", port);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// setup device
 	doSystem("killall -q uvc_stream");
@@ -923,7 +941,6 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 	enable = websGetVar(wp, T("enabled"), T(""));
 	// set to nvram
 	nvram_set(RT2860_NVRAM, "PrinterSrvEnabled", enable);
-	
 
 	// setup device
 	doSystem("killall -q p910nd");
@@ -964,8 +981,8 @@ int initUSB(void)
 	doSystem("killall -q uvc_stream");
 	if (0 == strcmp(webcamebl, "1"))
 	{
-	printf("UVC start\n");
-		doSystem("uvc_stream -r %s -f %s -p %s -b", 
+		printf("UVC start\n");
+			doSystem("uvc_stream -r %s -f %s -p %s -b", 
 				  nvram_get(RT2860_NVRAM, "WebCamResolution"), 
 				  nvram_get(RT2860_NVRAM, "WebCamFPS"), 
 				  nvram_get(RT2860_NVRAM, "WebCamPort"));

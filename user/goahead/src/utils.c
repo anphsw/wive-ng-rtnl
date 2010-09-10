@@ -1120,11 +1120,11 @@ static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
 	else
 		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "0");
 	
-    websHeader(wp);
-    websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
-    websWrite(wp, T("mode: %s<br>\n"), mode);
-    websFooter(wp);
-    websDone(wp, 200);	
+	websHeader(wp);
+	websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
+	websWrite(wp, T("mode: %s<br>\n"), mode);
+	websFooter(wp);
+	websDone(wp, 200);
 }
 
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
@@ -1141,8 +1141,8 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 static void setOpMode(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*mode;
-	char	*old_mode = nvram_get(RT2860_NVRAM, "OperationMode");
-	int		need_commit = 0;
+
+	int	need_commit = 0;
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
 #else
 	char	*wan_ip, *lan_ip;
@@ -1151,6 +1151,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	char_t	*econv = "";
 #endif
 	mode = websGetVar(wp, T("opMode"), T("0")); 
+	
+	nvram_init(RT2860_NVRAM);
+	
+	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
 	if (!strncmp(old_mode, "0", 2)) {
 	}
@@ -1162,8 +1166,8 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * mode: gateway (or ap-client) -> bridge
 			 * config: wan_ip(wired) overwrites lan_ip(bridge)
 			 */
-			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
-			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
+			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1175,10 +1179,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * config: wan_ip(wired) overwrites lan_ip(wired) 
 			 *         lan_ip(wireless) overwrites wan_ip(wireless)
 			 */
-			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
-			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_set(RT2860_NVRAM, "wan_ipaddr", lan_ip);
+			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
+			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
+			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1198,10 +1202,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * config: lan_ip(wired) overwrites wan_ip(wired) 
 			 *         wan_ip(wireless) overwrites lan_ip(wireless)
 			 */
-			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
-			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_set(RT2860_NVRAM, "wan_ipaddr", lan_ip);
+			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
+			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
+			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1212,16 +1216,19 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		char *old;
 
 		econv = websGetVar(wp, T("ethConv"), T("0"));
-		old = nvram_get(RT2860_NVRAM, "ethConvert");
-		if (strncmp(old, econv, 2)) {
-			nvram_set(RT2860_NVRAM, "ethConvert", econv);
+		old = nvram_bufget(RT2860_NVRAM, "ethConvert");
+		if (strncmp(old, econv, 2))
+		{
+			nvram_bufset(RT2860_NVRAM, "ethConvert", econv);
 			need_commit = 1;
 		}
-		if (!strncmp(econv, "1", 2)) {
+		if (!strncmp(econv, "1", 2))
+		{
 			//disable dhcp server in this mode
-			old = nvram_get(RT2860_NVRAM, "dhcpEnabled");
-			if (!strncmp(old, "1", 2)) {
-				nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
+			old = nvram_bufget(RT2860_NVRAM, "dhcpEnabled");
+			if (!strncmp(old, "1", 2))
+			{
+				nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
 				need_commit = 1;
 			}
 		}
@@ -1229,16 +1236,20 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #endif
 
 	//new OperationMode
-	if (strncmp(mode, old_mode, 2)) {
-		nvram_set(RT2860_NVRAM, "OperationMode", mode);
+	if (strncmp(mode, old_mode, 2))
+	{
+		nvram_bufset(RT2860_NVRAM, "OperationMode", mode);
 
 		//from or to ap client mode
 		if (!strncmp(mode, "3", 2))
-			nvram_set(RT2860_NVRAM, "ApCliEnable", "1");
+			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
 		else if (!strncmp(old_mode, "3", 2))
-			nvram_set(RT2860_NVRAM, "ApCliEnable", "0");
+			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "0");
 		need_commit = 1;
 	}
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// For 100PHY  ( Ethernet Convertor with one port only)
 	// If this is one port only board(IC+ PHY) then redirect

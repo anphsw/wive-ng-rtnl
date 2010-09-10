@@ -65,16 +65,18 @@ static void storageAdm(webs_t wp, char_t *path, char_t *query)
 
 	if (strcmp(submit, "delete") == 0)
 	{
-
+		nvram_init(RT2860_NVRAM);
 		sprintf(feild, "User%s", user_select);
-		doSystem("storage.sh del \"%s\"", nvram_get(RT2860_NVRAM, feild));
-		nvram_set(RT2860_NVRAM, feild, "");
+		doSystem("storage.sh del \"%s\"", nvram_bufget(RT2860_NVRAM, feild));
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "Upw%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "Umax%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "Umode%s", user_select);
-		nvram_set(RT2860_NVRAM, feild, "");
+		nvram_bufset(RT2860_NVRAM, feild, "");
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 		
 		websRedirect(wp, "storage/management.asp");
 	}
@@ -131,15 +133,19 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	// set to nvram
 	if (index != 0)
 	{
-		sprintf(feild, "User%d", index);
-		nvram_set(RT2860_NVRAM, feild, name);
-		sprintf(feild, "Upw%d", index);
-		nvram_set(RT2860_NVRAM, feild, password);
-		sprintf(feild, "Umax%d", index);
-		nvram_set(RT2860_NVRAM, feild, max_logins);
-		sprintf(feild, "Umode%d", index);
-		nvram_set(RT2860_NVRAM, feild, mode);
+		nvram_init(RT2860_NVRAM);
 		
+		sprintf(feild, "User%d", index);
+		nvram_bufset(RT2860_NVRAM, feild, name);
+		sprintf(feild, "Upw%d", index);
+		nvram_bufset(RT2860_NVRAM, feild, password);
+		sprintf(feild, "Umax%d", index);
+		nvram_bufset(RT2860_NVRAM, feild, max_logins);
+		sprintf(feild, "Umode%d", index);
+		nvram_bufset(RT2860_NVRAM, feild, mode);
+		
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 }
 
@@ -173,13 +179,17 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 		sprintf(mode, "%sE", mode);
 
 	// set to nvram
-	sprintf(feild, "Upw%s", index);
-	nvram_set(RT2860_NVRAM, feild, password);
-	sprintf(feild, "Umax%s", index);
-	nvram_set(RT2860_NVRAM, feild, max_logins);
-	sprintf(feild, "Umode%s", index);
-	nvram_set(RT2860_NVRAM, feild, mode);
+	nvram_init(RT2860_NVRAM);
 	
+	sprintf(feild, "Upw%s", index);
+	nvram_bufset(RT2860_NVRAM, feild, password);
+	sprintf(feild, "Umax%s", index);
+	nvram_bufset(RT2860_NVRAM, feild, max_logins);
+	sprintf(feild, "Umode%s", index);
+	nvram_bufset(RT2860_NVRAM, feild, mode);
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 }
 
 #ifdef CONFIG_USER_STUPID_FTPD
@@ -198,13 +208,15 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 	stay_timeout = websGetVar(wp, T("ftp_stay_timeout"), T(""));
 
 	// set to nvram
-	nvram_set(RT2860_NVRAM, "FtpEnabled", ftp);
-	nvram_set(RT2860_NVRAM, "FtpAnonymous", anonymous);
-	nvram_set(RT2860_NVRAM, "FtpPort", port);
-	nvram_set(RT2860_NVRAM, "FtpMaxUsers", max_users);
-	nvram_set(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
-	nvram_set(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
-	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "FtpEnabled", ftp);
+	nvram_bufset(RT2860_NVRAM, "FtpAnonymous", anonymous);
+	nvram_bufset(RT2860_NVRAM, "FtpPort", port);
+	nvram_bufset(RT2860_NVRAM, "FtpMaxUsers", max_users);
+	nvram_bufset(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
+	nvram_bufset(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// setup device
 	doSystem("storage.sh ftp");
@@ -235,11 +247,13 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 	str = websGetVar(wp, T("smb_string"), T(""));
 
 	// set to nvram
-	nvram_set(RT2860_NVRAM, "SmbEnabled", smb);
-	nvram_set(RT2860_NVRAM, "WorkGroup", wg);
-	nvram_set(RT2860_NVRAM, "SmbNetBIOS", netbios);
-	nvram_set(RT2860_NVRAM, "SmbString", str);
-	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb);
+	nvram_bufset(RT2860_NVRAM, "WorkGroup", wg);
+	nvram_bufset(RT2860_NVRAM, "SmbNetBIOS", netbios);
+	nvram_bufset(RT2860_NVRAM, "SmbString", str);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	// setup device
 	doSystem("storage.sh samba");
@@ -270,17 +284,24 @@ int initStorage(void)
 
 static int GetNthNullUser()
 {
-	int index = 1;
 	char *feild, *user_name;
+	int result = 0, index;
 
-	do
+	nvram_init(RT2860_NVRAM);
+	
+	for (index = 1; index < 9; index++)
 	{
 		sprintf(feild, "User%d", index);
-		user_name = nvram_get(RT2860_NVRAM, feild);
+		user_name = nvram_bufget(RT2860_NVRAM, feild);
 		if (strlen(user_name) == 0)
-			return index;
-		index++;
-	} while (index < 9);
+		{
+			result = index;
+			break;
+		}
+	}
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
-	return 0;
+	return result;
 }

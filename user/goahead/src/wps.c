@@ -407,8 +407,8 @@ static int getPINASP(int eid, webs_t wp, int argc, char_t **argv)
 
 static void STF(int index, char *flash_key, char *value)
 {
-	char *tmp = nvram_get(RT2860_NVRAM, flash_key);
-	nvram_set(RT2860_NVRAM, flash_key, setNthValue(index, tmp, value));
+	char *tmp = nvram_bufget(RT2860_NVRAM, flash_key);
+	nvram_bufset(RT2860_NVRAM, flash_key, setNthValue(index, tmp, value));
 	return;
 }
 
@@ -422,20 +422,22 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 	g_WscResult = 0;
 	LedReset();
 
-	if (wsc_enable == 0){
+	if (wsc_enable == 0)
 		nvram_set(RT2860_NVRAM, "WscModeOption", "0");
-	}else{
-				nvram_set(RT2860_NVRAM, "WscModeOption", "7");
-	}
-	
+	else
+		nvram_set(RT2860_NVRAM, "WscModeOption", "7");
 
-	if (wsc_enable == 0){
+	if (wsc_enable == 0)
+	{
 		doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
 		doSystem("service wscd stop &");
 		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
-	}else{
+	}
+	else
+	{
 		char lan_if_addr[16];
-		if ((getIfIp(getLanIfName(), lan_if_addr)) == -1) {
+		if ((getIfIp(getLanIfName(), lan_if_addr)) == -1)
+		{
 			printf("WPSRestart error, can't get lan ip.\n");
 			return;
 		}
@@ -494,14 +496,14 @@ static void GenPIN(webs_t wp, char_t *path, char_t *query)
  */
 static void OOB(webs_t wp, char_t *path, char_t *query)
 {
-        char SSID[64], mac[32];
+	char SSID[64], mac[32];
 
-        // clear timer
-        resetTimerAll();
+	// clear timer
+	resetTimerAll();
 
-        // clear WSC result indicator
-        g_WscResult = 0;
-        LedReset();
+	// clear WSC result indicator
+	g_WscResult = 0;
+	LedReset();
 
 /*        if(getAPMac("ra0", mac) != -1) do not touch SSID sfstudio
                 sprintf(SSID, "%s_%s", mac, nvram_get(RT2860_NVRAM, "SSID1"));
@@ -510,34 +512,31 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
 
         nvram_set(RT2860_NVRAM, "SSID1", SSID); */
 
-        nvram_set(RT2860_NVRAM, "WscConfigured", "0");
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "WscConfigured", "0");
 
-        STF(RT2860_NVRAM, "AuthMode", "OPEN");
-        STF(RT2860_NVRAM, "EncrypType", "NONE");
-        /*
-        STF(RT2860_NVRAM, "DefaultKeyID", "2");
-        nvram_set(RT2860_NVRAM, "WPAPSK1", "12345678");
-        */
+	STF(RT2860_NVRAM, "AuthMode", "OPEN");
+	STF(RT2860_NVRAM, "EncrypType", "NONE");
 
-        STF(RT2860_NVRAM, "IEEE8021X", "0");
+	STF(RT2860_NVRAM, "IEEE8021X", "0");
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
         /*
          *   IMPORTANT !!!!!
          *   5VT doesn't need it cause it will reboot after OOB reset.
          */
-        g_wsc_configured = 0;
+	g_wsc_configured = 0;
 
-        
+	doSystem("iwpriv ra0 set AuthMode=OPEN");
+	doSystem("iwpriv ra0 set EncrypType=NONE");
+	doSystem("iwpriv ra0 set SSID=%s", nvram_get(RT2860_NVRAM, "SSID1"));
 
-        doSystem("iwpriv ra0 set AuthMode=OPEN");
-        doSystem("iwpriv ra0 set EncrypType=NONE");
-        doSystem("iwpriv ra0 set SSID=%s", nvram_get(RT2860_NVRAM, "SSID1"));
+	restart8021XDaemon(RT2860_NVRAM);
 
-        restart8021XDaemon(RT2860_NVRAM);
+	WPSRestart();
 
-        WPSRestart();
-
-        websRedirect(wp, "wps/wps.asp");
+	websRedirect(wp, "wps/wps.asp");
 }
 
 static void WPSAPTimerHandler(int signo)
@@ -607,61 +606,74 @@ static void WPSAPTimerHandler(int signo)
 		return;
 	}
 
-	if (WscStatus != 34 /* Configured*/){			// 34 == "Configured"
+	if (WscStatus != 34 /* Configured*/) // 34 == "Configured"
+	{
 		// still in progress and keep monitoring.
 		return;
-	}else{
+	}
+	else
+	{
 		wsc_timeout_counter = 0;
 		resetTimerAll();
 		g_WscResult = 1;
 		LedSuccess();
 
-		if (g_wsc_configured == 0 /* && WscStatus == Configured */){
-			
+		if (g_wsc_configured == 0 /* && WscStatus == Configured */)
+		{
 			getWscProfile("ra0", &wsc_value, sizeof(WSC_CONFIGURED_VALUE));
 
-			nvram_set(RT2860_NVRAM, "WscConfigured", "1");
+			nvram_init(RT2860_NVRAM);
+			nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
 			g_wsc_configured = 1;
 
-			nvram_set(RT2860_NVRAM, "SSID1", wsc_value.WscSsid);
-			nvram_set(RT2860_NVRAM, "WscSSID", wsc_value.WscSsid);
+			nvram_bufset(RT2860_NVRAM, "SSID1", wsc_value.WscSsid);
+			nvram_bufset(RT2860_NVRAM, "WscSSID", wsc_value.WscSsid);
 
-			if (wsc_value.WscAuthMode == 0x0001){
+			if (wsc_value.WscAuthMode == 0x0001)
 				STF(0, "AuthMode", "OPEN");
-			}else if (wsc_value.WscAuthMode == 0x0002){
+			else if (wsc_value.WscAuthMode == 0x0002)
 				STF(0, "AuthMode", "WPAPSK");
-			}else if (wsc_value.WscAuthMode == 0x0004){
+			else if (wsc_value.WscAuthMode == 0x0004)
 				STF(0, "AuthMode", "SHARED");
-			}else if (wsc_value.WscAuthMode == 0x0008){
+			else if (wsc_value.WscAuthMode == 0x0008)
 				STF(0, "AuthMode", "WPA");
-			}else if (wsc_value.WscAuthMode == 0x0010){
+			else if (wsc_value.WscAuthMode == 0x0010)
 				STF(0, "AuthMode", "WPA2");
-			}else if (wsc_value.WscAuthMode == 0x0020){
+			else if (wsc_value.WscAuthMode == 0x0020)
 				STF(0, "AuthMode", "WPA2PSK");
-			}else if (wsc_value.WscAuthMode == 0x0022){
+			else if (wsc_value.WscAuthMode == 0x0022)
 				STF(0, "AuthMode", "WPAPSKWPA2PSK");
-			}else{
+			else
+			{
 				printf("goahead: Warning: can't get invalid authmode\n.");
 				STF(0, "AuthMode", "OPEN");
 			}
-			if (wsc_value.WscEncrypType == 0x0001){
+			if (wsc_value.WscEncrypType == 0x0001)
+			{
 				STF(0, "EncrypType", "NONE");
 				STF(0, "DefaultKeyID", "1");
-			}else if (wsc_value.WscEncrypType == 0x0002){
+			}
+			else if (wsc_value.WscEncrypType == 0x0002)
+			{
 				STF(0, "EncrypType", "WEP");
-				if ((strlen(wsc_value.WscWPAKey) == 5) || (strlen(wsc_value.WscWPAKey) == 13)){
+				if ((strlen(wsc_value.WscWPAKey) == 5) || (strlen(wsc_value.WscWPAKey) == 13))
+				{
 					// Key Entry Method == ASCII 
 					STF(0, "Key1Type", "1");
 					STF(0, "Key2Type", "1");
 					STF(0, "Key3Type", "1");
 					STF(0, "Key4Type", "1");
-				}else if ((strlen(wsc_value.WscWPAKey) == 10) || (strlen(wsc_value.WscWPAKey) == 26)){
+				}
+				else if ((strlen(wsc_value.WscWPAKey) == 10) || (strlen(wsc_value.WscWPAKey) == 26))
+				{
 					// Key Entry Method == HEX 
 					STF(0, "Key1Type", "0");
 					STF(0, "Key2Type", "0");
 					STF(0, "Key3Type", "0");
 					STF(0, "Key4Type", "0");
-				}else{
+				}
+				else
+				{
 					// Key Entry Method == ASCII
 					STF(0, "Key1Type", "1");
 					STF(0, "Key2Type", "1");
@@ -669,39 +681,57 @@ static void WPSAPTimerHandler(int signo)
 					STF(0, "Key4Type", "1");
 				}
 
-				if (wsc_value.DefaultKeyIdx == 1){
+				if (wsc_value.DefaultKeyIdx == 1)
+				{
 					STF(0, "Key1Str1", wsc_value.WscWPAKey);
 					STF(0, "DefaultKeyID", "1");
-				}else if (wsc_value.DefaultKeyIdx == 2){
+				}
+				else if (wsc_value.DefaultKeyIdx == 2)
+				{
 					STF(0, "Key2Str1", wsc_value.WscWPAKey);
 					STF(0, "DefaultKeyID", "2");
-				}else if (wsc_value.DefaultKeyIdx == 3){
+				}
+				else if (wsc_value.DefaultKeyIdx == 3)
+				{
 					STF(0, "Key3Str1", wsc_value.WscWPAKey);
 					STF(0, "DefaultKeyID", "3");
-				}else if (wsc_value.DefaultKeyIdx == 4){
+				}
+				else if (wsc_value.DefaultKeyIdx == 4)
+				{
 					STF(0, "Key4Str1", wsc_value.WscWPAKey);
 					STF(0, "DefaultKeyID", "4");
 				}
-			}else if (wsc_value.WscEncrypType == 0x0004){
+			}
+			else if (wsc_value.WscEncrypType == 0x0004)
+			{
 				STF(0, "EncrypType", "TKIP");
 				STF(0, "DefaultKeyID", "2");
-				nvram_set(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
-			}else if (wsc_value.WscEncrypType == 0x0008){
+				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
+			}
+			else if (wsc_value.WscEncrypType == 0x0008)
+			{
 				STF(0, "EncrypType", "AES");
 				STF(0, "DefaultKeyID", "2");
-				nvram_set(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
-			}else if (wsc_value.WscEncrypType == 0x000C){
+				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
+			}
+			else if (wsc_value.WscEncrypType == 0x000C)
+			{
 				STF(0, "EncrypType", "TKIPAES");
 				STF(0, "DefaultKeyID", "2");
-				nvram_set(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
-			}else{
+				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
+			}
+			else
+			{
 				printf("goahead: Warning: can't get invalid encryptype\n.");
 				STF(0, "EncrypType", "NONE");
 				STF(0, "DefaultKeyID", "1");
 			}
 
 			STF(0, "IEEE8021X", "0");
-			
+
+			nvram_commit(RT2860_NVRAM);
+			nvram_close(RT2860_NVRAM);
+
 			restart8021XDaemon(RT2860_NVRAM);
 			WPSRestart();
 		}
@@ -715,7 +745,8 @@ void WPSAPPBCStartAll(void)
 	char *wsc_enable = nvram_get(RT2860_NVRAM, "WscModeOption");
 	
 	// It is possible user press PBC button when WPS is disabled.
-	if(!strcmp(wsc_enable, "0")){
+	if(!strcmp(wsc_enable, "0"))
+	{
 		printf("The PBC button is pressed but WPS is disabled now.\n");
 		return;
 	}
@@ -725,7 +756,6 @@ void WPSAPPBCStartAll(void)
 
 	resetTimerAll();
 	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
-
 }
 
 /*
@@ -1819,10 +1849,14 @@ static void WPSSTARegistrarSetupRest(webs_t wp, char_t *path, char_t *query)
 	printf("query = %s\n", query);
 	sscanf(query, "%32s %32s %2s %2s", auth, encrypt, keytype, keyindex);
 	printf("auth = %s\n", auth);
-	nvram_set(RT2860_NVRAM, "staRegAuth", auth);
-	nvram_set(RT2860_NVRAM, "staRegEncry", encrypt);
-	nvram_set(RT2860_NVRAM, "staRegKeyType", keytype);
-	nvram_set(RT2860_NVRAM, "staRegKeyIndex", keyindex);
+	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "staRegAuth", auth);
+	nvram_bufset(RT2860_NVRAM, "staRegEncry", encrypt);
+	nvram_bufset(RT2860_NVRAM, "staRegKeyType", keytype);
+	nvram_bufset(RT2860_NVRAM, "staRegKeyIndex", keyindex);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 	
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
 	websWrite(wp, T("WPS STA Registrar settings: rest all done\n"));
@@ -1831,9 +1865,9 @@ static void WPSSTARegistrarSetupRest(webs_t wp, char_t *path, char_t *query)
 
 static void WPSSTAMode(webs_t wp, char_t *path, char_t *query)
 {
-	if(!gstrcmp(query, "0")){
+	if(!gstrcmp(query, "0"))
 		nvram_set(RT2860_NVRAM, "staWPSMode", "0");
-	}else if(!gstrcmp(query, "1"))
+	else if(!gstrcmp(query, "1"))
 		nvram_set(RT2860_NVRAM, "staWPSMode", "1");
 	else
 		return;
@@ -2012,13 +2046,15 @@ static unsigned char *getStaMacAddr(void)
 static int getWPSSTARegSSIDASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	unsigned char *regSSID = nvram_get(RT2860_NVRAM, "staRegSSID");
-	if(!regSSID || !strlen(regSSID)){
+	if (!regSSID || !strlen(regSSID))
+	{
 		unsigned char mac[6];
 		char defaultSSID[33];
 		memcpy(mac, getStaMacAddr(), 6);
 		snprintf(defaultSSID, 32, "STARegistrar%02X%02X%02X", mac[3], mac[4], mac[5]);
 		websWrite(wp, T("%s"), defaultSSID);
-	}else
+	}
+	else
 		websWrite(wp, T("%s"), regSSID);
 	return 0;
 }
