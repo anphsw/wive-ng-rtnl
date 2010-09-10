@@ -592,11 +592,19 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
 		return websWrite(wp, T("Insufficient args\n"));
 	}
 	value = nvram_get(RT2860_NVRAM, field);
+
+	//if get lang not return true info set Lang=en
+	if ((field == "Language") && (value = "")) {
+	    printf(" Unknown lang %s. Set lang to en.", value);
+	    value = "en";
+	}
+
 	if (1 == type) {
-		if (NULL == value)
+		if (!value)
 			return websWrite(wp, T(""));
 		return websWrite(wp, T("%s"), value);
 	}
+
 	if (NULL == value)
 		ejSetResult(eid, "");
 	ejSetResult(eid, value);

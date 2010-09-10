@@ -244,7 +244,7 @@ static int OpenRaCfgSocket(void)
 	memset(&ifr, 0, sizeof(ifr));
 	memcpy(ifr.ifr_name, "eth2" , 5);
 #if defined CONFIG_LAN_WAN_SUPPORT || defined CONFIG_MAC_TO_MAC_MODE
-	opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
+	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (opmode != NULL && !strcmp(opmode, "1")) { // gateway mode
 		memcpy(ifr.ifr_name, "eth2.1" , 7);
 	}

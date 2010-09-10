@@ -74,13 +74,12 @@ if [ "$CONFIG_USER_SAMBA" = "y" ]; then
         define_bool CONFIG_USER_STORAGE
 fi
 
-bool 'go-ahead webserver'			CONFIG_USER_GOAHEAD_HTTPD
-dep_bool '  enable IPv6 support'		CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
-dep_bool '  enable SSL support'			CONFIG_USER_GOAHEAD_SSL $CONFIG_USER_GOAHEAD_HTTPD
-dep_bool '  enable hostname support'		CONFIG_USER_GOAHEAD_HOSTNAME $CONFIG_USER_GOAHEAD_HTTPD
-dep_bool '  language pack - English'		CONFIG_USER_GOAHEAD_LANG_EN $CONFIG_USER_GOAHEAD_HTTPD
+bool 'go-ahead webserver'				CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable IPv6 support'			CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable SSL support'				CONFIG_USER_GOAHEAD_SSL $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  enable hostname support'			CONFIG_USER_GOAHEAD_HOSTNAME $CONFIG_USER_GOAHEAD_HTTPD
+dep_bool '  language pack - English'			CONFIG_USER_GOAHEAD_LANG_EN $CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  language pack - Traditional Chinese'	CONFIG_USER_GOAHEAD_LANG_ZHTW $CONFIG_USER_GOAHEAD_HTTPD
-dep_bool '  language pack - Simple Chinese'	CONFIG_USER_GOAHEAD_LANG_ZHCN $CONFIG_USER_GOAHEAD_HTTPD
 if [ "$CONFIG_USER_GOAHEAD_HTTPD" = "y" ]; then
 	define_bool CONFIG_LIB_LIBNVRAM_FORCE y
 fi

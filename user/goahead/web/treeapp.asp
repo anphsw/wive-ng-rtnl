@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
-<!-- !!! Dont forget to modify   INIC mode treeapp.asp !!! -->
+<!-- !!! Dont forget to modify   2860 mode treeapp.asp !!! -->
 
 <head>
 <title>DTree</title>
@@ -67,7 +67,6 @@ var smbb = '<% getSmbBuilt(); %>';
 var mediab = '<% getMediaBuilt(); %>';
 var webcamb = '<% getWebCamBuilt(); %>';
 var printersrvb = '<% getPrinterSrvBuilt(); %>';
-var usbiNICb = '<% getUSBiNICBuilt(); %>';
 var syslogb = '<% getSysLogBuilt(); %>';
 var swqos = '<% getSWQoSBuilt(); %>';
 var ad = '<% isAntennaDiversityBuilt(); %>';
@@ -90,10 +89,6 @@ a.add(303, 300, _("treeapp vpn"),                   "javascript:go('internet/vpn
 
 if (opmode != '0')
 	a.add(304, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
-
-//if (vpnen == "1") {
-//	a.add(305, 300, _("treeapp vpn passthrough"),       "javascript:go('internet/vpnpass.asp');");
-//}
 
 if (swqos == '1')
 	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
@@ -151,14 +146,12 @@ if (opmode != '0') {
 
 if (usbb == "1")
 {
-	if ((webcamb == "1") || (printersrvb == "1") || (usbiNICb == "1"))
+	if ((webcamb == "1") || (printersrvb == "1"))
 		a.add(800,   0, _("treeapp usb"),		"javascript:a.oo(800);");
 	if (webcamb == "1")
 		a.add(801, 800, _("treeapp webcam"),		"javascript:go('usb/UVCwebcam.asp');");
 	if (printersrvb == "1")
 		a.add(802, 800, _("treeapp printersrv"),	"javascript:go('usb/P910NDprintersrv.asp');");
-	if (usbiNICb == "1")
-		a.add(803, 800, _("treeapp usbinic"),		"javascript:go('usb/INICusb_inic.asp');");
 	if (storageb == "1")
 	{
 		a.add(850,   0, _("treeapp storage"),		"javascript:a.oo(850);");

@@ -8,11 +8,11 @@
 <script language="JavaScript" type="text/javascript">
 function initLanguage()
 {
+
 	var lang = "<% getCfgGeneral(1, "Language"); %>";
 	var cook = "en";
 	var lang_en = "<% getLangBuilt("en"); %>";
 	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
-	var lang_zhcn = "<% getLangBuilt("zhcn"); %>";
 
 	if (document.cookie.length > 0) {
 		var s = document.cookie.indexOf("language=");
@@ -34,10 +34,6 @@ function initLanguage()
 				document.cookie="language=zhtw; path=/";
 				window.location.reload();
 			}
-			else if (lang_zhcn == "1") {
-				document.cookie="language=zhcn; path=/";
-				window.location.reload();
-			}
 		}
 	}
 	else if (lang == "zhtw") {
@@ -49,26 +45,12 @@ function initLanguage()
 				document.cookie="language=en; path=/";
 				window.location.reload();
 			}
-			else if (lang_zhcn == "1") {
-				document.cookie="language=zhcn; path=/";
-				window.location.reload();
-			}
 		}
 	}
-	else if (lang == "zhcn") {
-		document.cookie="language=zhcn; path=/";
-		if (cook != lang)
-			window.location.reload();
-		if (lang_zhcn != "1") {
-			if (lang_en == "1") {
-				document.cookie="language=en; path=/";
-				window.location.reload();
-			}
-			else if (lang_zhtw == "1") {
-				document.cookie="language=zhtw; path=/";
-				window.location.reload();
-			}
-		}
+	else {
+		document.cookie="language=en; path=/";
+		lang_en == "1";
+		window.location.reload();
 	}
 }
 

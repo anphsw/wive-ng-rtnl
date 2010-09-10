@@ -90,8 +90,9 @@ function Butterlation() {
     end = (document.cookie.indexOf(';',one)!=-1) ? document.cookie.indexOf(';',one) : document.cookie.length;
     return unescape(document.cookie.substring(one+9,end));
   };
-  this.lang = this.getLang();
-  //this.setTextDomain = function(domain) { this.po=window.location.protocol+"//"+window.location.host+"/lang/"+this.lang+"/"+domain+".xml"; this.initializeDictionary(); }
+  //temp for test
+  //this.lang = this.getLang();
+  this.lang = "en";
   this.setTextDomain = function(domain) { this.po=window.location.protocol+"//"+window.location.host+"/lang/"+this.lang+"/"+domain+".xml"; this.initializeDictionary(); }
   this.initializeDictionary = function() {
     var request;

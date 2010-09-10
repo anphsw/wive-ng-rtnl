@@ -137,12 +137,13 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 		usage(argv[0]);
 
-	//call nvram_get or nvram_set
+	//call nvram_get, nvram_set or nvram_show
 	if (cmd = strrchr(argv[0], '/'))
 		cmd++;
 	else
 		cmd = argv[0];
-	if (!strncmp(argv[0], "nvram_get", 10))
+
+	if (!strncmp(cmd, "nvram_get", 10))
 		return ra_nv_get(argc, argv);
 	else if (!strncmp(cmd, "nvram_set", 10))
 		return ra_nv_set(argc, argv);
@@ -338,7 +339,7 @@ int gen_config(int mode)
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);
-        /*kurtis: WAPI*/
+    		/*kurtis: WAPI*/
 		FPRINT_STR(WapiPsk1);
 		FPRINT_STR(WapiPskType);
 		FPRINT_STR(Wapiifname);
@@ -600,5 +601,3 @@ int nvram_show(int mode)
 	nvram_close(mode);
 	return 0;
 }
-
-
