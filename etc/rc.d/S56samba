@@ -12,14 +12,6 @@ start() {
 SmbEnabled=`nvram_get 2860 SmbEnabled`
 if [ "$SmbEnabled" = "1" ]; then
     get_param
-    if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
-	WorkGroup="LOCALNET"
-	SmbNetBIOS="$HOSTNAME"
-	SmbString="$HOSTNAME-SERVER"
-	nvram_set 2860 WorkGroup LOCALNET
-	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
-	nvram_set 2860 SmbString "$SmbString"
-    fi
 
     echo "[global]" > $CONFIG
     echo "    socket options = SO_BROADCAST SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG

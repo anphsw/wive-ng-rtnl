@@ -107,16 +107,6 @@ setSmb()
 
 case $1 in
 	"admin")
-		admID=`nvram_get 2860 Login`
-		if [ "$admID" = "" ]; then
-		    admID="Admin"
-		    nvram_set 2860 Login Admin
-                fi
-		admPW=`nvram_get 2860 Password`
-		if [ "$admPW" = "" ]; then
-		    admPW="Admin"
-		    nvram_set 2860 Password Admin
-                fi
 		service pass start
 		if [ -e "$PART1" ]; then
 			setUser

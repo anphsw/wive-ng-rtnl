@@ -11,15 +11,14 @@ TGZfs_size=131072
 BLOCKS=2
 KEEPMAC=YES
 MTDDEVICE=/dev/mtdblock5
-CURRCONFIG=/etc/Wireless/RT2860/RT2860.dat
-DEFCONFIG=/etc/default/RT2860_default_novlan
+BACKUPCGF=/etc/backup/nvram_backup.dat
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore | nvramreset | regenerate | fullreset" >&2
+  echo "Usage: $0 | save | load | restore | nvramreset | fullreset" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
@@ -27,17 +26,9 @@ usage(){
   echo "load - Load rwfs from mtd." >&2
   echo "restore - Crash $MTDDEVICE and reboot for restore clean rwfs." >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
-  echo "regenerate - Generate new config from current and save to rwfs." >&2
   echo "fullreset - Full reset include rwfs, nvram and mac adress settings." >&2
   echo "____________________________________________________________________________" >&2
  exit 1
-}
-
-regenerate(){
-  echo "Regenerate configs for wifi and rwfs defaults. Save to $CURRCONFIG"
-  echo "#The following line must not be removed." > $CURRCONFIG
-  echo "Default" >> $CURRCONFIG
-  ralink_init show 2860 >> $CURRCONFIG
 }
 
 load(){
@@ -48,7 +39,6 @@ load(){
 
 save(){
   echo "Save curent date and current time to rwfs"
-  regenerate
   date +%Y%m%d%H%M > /etc/compile-date
   echo "Compress config files"
   tmp="/tmp/tgzfs"
@@ -72,51 +62,27 @@ restore(){
 }
 
 nvramreset(){
-  echo "Clear and load defaults to nvram!"
-  if [ "$KEEPMAC" != "NO" ]; then
-    #store mac adesses
-    MAC=`nvram_get 2860 WAN_MAC_ADDR`
-    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
-    LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
-    CHECKMAC=`nvram_get 2860 CHECKMAC`
-  fi
-
-  #clear nvram and config
-  ralink_init clear 2860
-  ralink_init renew 2860 $DEFCONFIG
-
-  if [ "$KEEPMAC" != "NO" ]; then
-    #restore macs
-    nvram_set 2860 LAN_MAC_ADDR $LANMAC
-    nvram_set 2860 WLAN_MAC_ADDR $WMAC
-    nvram_set 2860 WAN_MAC_ADDR $MAC
-    nvram_set 2860 CHECKMAC $CHECKMAC
-  else
-    nvram_set 2860 CHECKMAC YES
-  fi
-
-  #set wive flag
-  nvram_set 2860 IS_WIVE YES
+    ralink_init default 2860
 }
 
 fullreset(){
   #set reset mac flag
   echo "Reset rwfs and nvram...."
-  KEEPMAC=NO
   nvramreset
   restore
 }
 
 backup_nvram(){
   mkdir -p /etc/backup
-  CURRCONFIG=/etc/backup/nvram_backup.dat
   echo "Store settings to backup file...."
-  regenerate
+  echo "#The following line must not be removed." > "$BACKUPCGF"
+  echo "Default" >> "$BACKUPCGF"
+  ralink_init show 2860 >> "$BACKUPCGF"
 }
 
 load_nvram(){
-  echo "Clear nvram and load settings from backup file...."
-  ralink_init renew 2860 /etc/backup/nvram_backup.dat
+  echo "Load settings from backup file...."
+  ralink_init renew 2860 "$BACKUPCGF"
 }
 
 main(){
@@ -124,9 +90,6 @@ main(){
   [ -z "$cmd" ] && usage
   shift
   case "$cmd" in 
-    regenerate)
-      regenerate $@
-      ;;
     load) 
       load $@ 
       ;;

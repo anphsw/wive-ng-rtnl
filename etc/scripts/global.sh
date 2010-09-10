@@ -15,21 +15,6 @@ web_wait()
     fi
 }
 
-opModeAdj()
-{
-    # opmode adjustment:
-    #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
-    #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
-
-    if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-    elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-    fi
-}
-
 # WAN interface name -> $wan_if
 getWanIfName()
 {
@@ -123,13 +108,7 @@ getSwType()
 
 getHostName()
 {
-    HOSTNAME_NVRAM=`nvram_get 2860 HostName`
-    #need hostname
-    if [ "$HOSTNAME_NVRAM" = "" ]; then
-	HOSTNAME_NVRAM="Wive-RTNL"
-	nvram_set 2860 HostName $HOSTNAME_NVRAM
-    fi
-    HOSTNAME="$HOSTNAME_NVRAM"
+    HOSTNAME=`nvram_get 2860 HostName`
 }
 
 
@@ -139,7 +118,6 @@ wan_if="br0"
 wan_ppp_if="br0"
 lan_if="br0"
 lan2_if="br0:9"
-opModeAdj
 getLanIfName
 getLan2IfName
 getWanIfName

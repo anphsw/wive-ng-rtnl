@@ -13,8 +13,6 @@ start() {
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n >  /etc/modules.dep
 	fi
-	$LOG "Check nvram..."
-    	check_nvram
     else
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
@@ -74,32 +72,8 @@ get_param() {
 
 gen_wifi_config()
 {
-	rm -rf /etc/Wireless/RT2860/RT2860.dat
+	rm -f /etc/Wireless/RT2860/RT2860.dat
 	ralink_init make_wireless_config rt2860
-}
-
-check_nvram()
-{
-    if [ ! -f /tmp/nvram_checked ]; then
-	#check firmwave update or clean burn
-	if [ "$IS_WIVE" = "YES" ]; then
-	    $LOG ">>>> NORMAL BOOT <<<<"
-	    $LOG "Backup nvram..."
-	    fs backup_nvram 
-	else
-	    $LOG ">>>> RESTORE NVRAM <<<<"
-	    if [ -f /etc/backup/nvram_backup.dat ]; then
-		$LOG "Load backuped setting to nvram.."
-	        fs load_nvram
-	    else
-		$LOG "Clear and load defaults to nvram !!!"
-	        fs nvramreset
-	    fi
-	  nvram_set 2860 IS_WIVE YES
-	  $LOG "Reset OK... boot..."
-	fi
-    fi
-    touch /tmp/nvram_checked
 }
 
 case "$1" in

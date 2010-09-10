@@ -7,15 +7,6 @@ start() {
     #get user/password
     get_param    
 
-    if [ "$admID" = "" ]; then
-        admID="Admin"
-        nvram_set 2860 Login Admin
-    fi
-    if [ "$admPW" = "" ]; then
-        admPW="Admin"
-        nvram_set 2860 Password Admin
-    fi
-
     #generate pass file
     printf "$admID::0:0:Adminstrator:/:/bin/sh\nnobody:x:99:99:Nobody:/:\n" > /etc/passwd
 
