@@ -1920,7 +1920,6 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 		free(new_hostfilters);
 	}
 	
-
 	websHeader(wp);
 	websWrite(wp, T("add Host filter: %s<br>\n"), rule);
 	websFooter(wp);
