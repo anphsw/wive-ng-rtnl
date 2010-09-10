@@ -60,13 +60,12 @@ int ra_nv_set(int argc,char **argv)
 	}
 
 	if ((index = getNvramIndex(fz)) == -1) {
-		printf("%s: Error: \"%s\" flash zone not existed\n", argv[0], fz);
+		fprintf(stderr,"%s: Error: \"%s\" flash zone not existed\n", argv[0], fz);
 		return set_usage(argv[0]);
 	}
 
 	rc = nvram_set(index, key, value);
-	nvram_close(index);
-	return rc;
+    return rc;
 }
 
 int ra_nv_get(int argc, char *argv[])
@@ -74,8 +73,9 @@ int ra_nv_get(int argc, char *argv[])
 	char *fz;
 	char *key;
 	char *value;
+	char *rc;
 
-	int index;
+	int index, ret;
 
 	if (argc != 3 && argc != 2)
 		return get_usage(argv[0]);
@@ -89,13 +89,20 @@ int ra_nv_get(int argc, char *argv[])
 	}
 
 	if ((index = getNvramIndex(fz)) == -1) {
-		printf("%s: Error: \"%s\" flash zone not existed\n", argv[0], fz);
+		fprintf(stderr,"%s: Error: \"%s\" flash zone not existed\n", argv[0], fz);
 		return get_usage(argv[0]);
 	}
 
-	printf("%s\n", nvram_get(index, key));
-	nvram_close(index);
-    return 0;
+	rc = nvram_get(index, key);
+	if (rc) {
+	    printf("%s\n", rc);
+	    ret = 0;
+	} else {
+	    fprintf(stderr, "nvram_get return error or not return data!\n");
+	    ret = -1;
+	}
+
+    return (ret);
 }
 
 void usage(char *cmd)
@@ -164,7 +171,7 @@ int main(int argc, char *argv[])
 				gen_config(RTINIC_NVRAM);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
-				printf("No support of gen command of uboot parameter.\n");
+				fprintf(stderr,"No support of gen command of uboot parameter.\n");
 #endif
 			else
 				usage(argv[0]);
@@ -204,7 +211,7 @@ int main(int argc, char *argv[])
 				renew_nvram(RTINIC_NVRAM, argv[3]);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
-				printf("No support of renew command of uboot parameter.\n");
+				fprintf(stderr,"No support of renew command of uboot parameter.\n");
 #endif
 		} else
 			usage(argv[0]);
@@ -230,6 +237,10 @@ int gen_config(int mode)
 	sprintf(temp, "%x", buf[0]&0x0f);
 	nvram_bufset(mode, "RXPath", temp);
 	nvram_commit(mode);
+
+	//reinit nvram
+	nvram_close(mode);
+	nvram_init(mode);
 
 	system("mkdir -p /etc/Wireless/RT2860");
 	if (mode == RT2860_NVRAM) {
@@ -608,8 +619,8 @@ int nvram_show(int mode)
 		printf("%s\n", p);
 		p += strlen(p) + 1;
 	}
-
 	free(buffer);
+	nvram_close(mode);
 	return 0;
 }
 

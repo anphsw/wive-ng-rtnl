@@ -1,5 +1,5 @@
 /*
- *	inic.h -- Wireless Configuration Header 
+ *	firewall.h -- Firewall Configuration Header 
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *

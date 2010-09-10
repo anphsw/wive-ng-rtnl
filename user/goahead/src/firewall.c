@@ -144,7 +144,7 @@ int isIpNetmaskValid(char *s)
 static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *dmze = nvram_bufget(RT2860_NVRAM, "DMZEnable");
+	const char *dmze = nvram_get(RT2860_NVRAM, "DMZEnable");
 	if (dmze)
 		value = atoi(dmze);
 	else
@@ -163,7 +163,7 @@ static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *pfe = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
+	const char *pfe = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -183,7 +183,7 @@ static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *pfe = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
+	const char *pfe = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -222,7 +222,7 @@ static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_addr
 {
 	int rc = 0;
 	char *pos = buf;
-	const char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
+	const char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
 
 	switch(action)
 	{
@@ -368,10 +368,10 @@ static void iptablesIPPortFilterBuildScript(void)
 	char dip_1[32], dip_2[32];
 	char sim_1[32], dim_1[32];
 	char *firewall_enable, *default_policy, *rule, *c_if;
-	char *spifw = nvram_bufget(RT2860_NVRAM, "SPIFWEnabled");
+	char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
 	
 	
-	firewall_enable = nvram_bufget(RT2860_NVRAM, "IPPortFilterEnable");
+	firewall_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
 	if (!firewall_enable)
 	{
 		printf("Warning: can't find \"IPPortFilterEnable\" in flash.\n");
@@ -381,13 +381,13 @@ static void iptablesIPPortFilterBuildScript(void)
 	if(!mode)
 		return;
 
-	rule = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	rule = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
 	if(!rule){
 		printf("Warning: can't find \"IPPortFilterRules\" in flash.\n");
 		return;
 	}
 
-	default_policy = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
+	default_policy = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		default_policy = "0";
@@ -511,7 +511,7 @@ static void iptablesPortForwardBuildScript(void)
 	char *firewall_enable, *rule, *c_if;
 	int i=0,prf_int, prt_int, proto;
 
-	firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
+	firewall_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 	if(!firewall_enable)
 	{
 		printf("Warning: can't find \"PortForwardEnable\" in flash\n");
@@ -520,7 +520,7 @@ static void iptablesPortForwardBuildScript(void)
 
 	if(atoi(firewall_enable))
 	{
-		rule = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+		rule = nvram_get(RT2860_NVRAM, "PortForwardRules");
 		if(!rule)
 		{
 			printf("Warning: can't find \"PortForwardRules\" in flash\n");
@@ -614,7 +614,7 @@ inline int getRuleNums(char *rules)
 static int getDefaultFirewallPolicyASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int value;
-	char *p = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
+	char *p = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	int default_policy;
 	if(!p)
 		default_policy = 0;
@@ -632,7 +632,7 @@ static int getDefaultFirewallPolicyASP(int eid, webs_t wp, int argc, char_t **ar
 
 static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
+	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if(!mode)
 		return -1;	// fatal error, make ASP engine complained.
 	if(atoi(mode) == 0)	// bridge mode
@@ -645,7 +645,7 @@ static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv
  */
 static int getPortForwardRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+	char *rules = nvram_get(RT2860_NVRAM, "PortForwardRules");
 	
 	if (!rules || !strlen(rules))
 	{
@@ -662,7 +662,7 @@ static int getPortForwardRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv
  */
 static int getIPPortRuleNumsASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	char *rules = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
 	
 	if(!rules || !strlen(rules) )
 	{
@@ -684,7 +684,7 @@ static int showPortForwardRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	char ip_address[32], prf[8], prt[8], comment[16], protocol[8], interface[8];
 	char rec[128];
 
-	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+	char *rules = nvram_get(RT2860_NVRAM, "PortForwardRules");
 	if(!rules)
 		return 0;
 	if(!strlen(rules))
@@ -789,7 +789,7 @@ static void getRulesPacketCount(webs_t wp, char_t *path, char_t *query)
 	int *result;
 
 	// check if the default policy is "drop" 
-	default_policy = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
+	default_policy = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	if(!default_policy)
 		default_policy = "0";
 	default_drop_flag = atoi(default_policy);
@@ -856,11 +856,11 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 	int dprf_int, dprt_int;
 	char rec[256];
 	char *default_policy;
-	char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	char *rules = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
 	if(!rules)
 		return 0;
 
-	default_policy = nvram_bufget(RT2860_NVRAM, "DefaultFirewallPolicy");
+	default_policy = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	// add the default policy to the end of FORWARD chain
 	if(!default_policy)
 		return 0;
@@ -1138,7 +1138,7 @@ static int showIPPortFilterRulesASP(int eid, webs_t wp, int argc, char_t **argv)
 
 static int showDMZIPAddressASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char *DMZIPAddress = nvram_bufget(RT2860_NVRAM, "DMZIPAddress");
+	char *DMZIPAddress = nvram_get(RT2860_NVRAM, "DMZIPAddress");
 	if(!DMZIPAddress)
 		return 0;
 	if(!strlen(DMZIPAddress))
@@ -1155,7 +1155,7 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-	char *rules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules");
+	char *rules = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
 	if (!rules || !strlen(rules))
 		return;
 
@@ -1184,8 +1184,8 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
 
-	nvram_bufset(RT2860_NVRAM, "IPPortFilterRules", rules);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rules);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("s<br>\n") );
@@ -1212,7 +1212,7 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	int *deleArray;
 	char *firewall_enable;
 
-	char *rules = nvram_bufget(RT2860_NVRAM, "PortForwardRules");
+	char *rules = nvram_get(RT2860_NVRAM, "PortForwardRules");
 	if(!rules || !strlen(rules) )
 		return;
 
@@ -1242,8 +1242,8 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
 
-	nvram_bufset(RT2860_NVRAM, "PortForwardRules", rules);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "PortForwardRules", rules);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("s<br>\n") );
@@ -1255,7 +1255,7 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	// restart iptables if it is running
-	firewall_enable = nvram_bufget(RT2860_NVRAM, "PortForwardEnable");
+	firewall_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 
 	if (firewall_enable)
 	{
@@ -1411,15 +1411,15 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 	if (strchr(comment, ';') || strchr(comment, ','))
 		return;
 
-	if (( IPPortFilterRules = nvram_bufget(RT2860_NVRAM, "IPPortFilterRules")) && strlen(IPPortFilterRules))
+	if (( IPPortFilterRules = nvram_get(RT2860_NVRAM, "IPPortFilterRules")) && strlen(IPPortFilterRules))
 		snprintf(rule, sizeof(rule), "%s;%s,%s,%s,%s,%d,%d,%s,%s,%s,%d,%d,%d,%d,%s,%s",
 			IPPortFilterRules, iface, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 	else
 		snprintf(rule, sizeof(rule), "%s,%s,%s,%s,%d,%d,%s,%s,%s,%d,%d,%d,%d,%s,%s",
 			iface, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 
-	nvram_bufset(RT2860_NVRAM, "IPPortFilterRules", rule);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("mac: %s<br>\n"), mac_address);
@@ -1468,7 +1468,7 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 
 	if (!atoi(pfe))
 	{
-		nvram_bufset(RT2860_NVRAM, "PortForwardEnable", "0");
+		nvram_set(RT2860_NVRAM, "PortForwardEnable", "0");
 		//no chainge in rules
 		goto end;
 	}
@@ -1476,7 +1476,7 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	// user choose nothing but press "apply" only
 	if (!strlen(ip_address) && !strlen(prf) && !strlen(prt) && !strlen(comment) && !strlen(iface))
 	{
-		nvram_bufset(RT2860_NVRAM, "PortForwardEnable", "1");
+		nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
 		//generate and save rules
 		iptablesPortForwardBuildScript();
 		// no change in rules
@@ -1529,15 +1529,15 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	if(strchr(comment, ';') || strchr(comment, ','))
 		return;
 
-	nvram_bufset(RT2860_NVRAM, "PortForwardEnable", "1");
+	nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
 
-	if ((PortForwardRules = nvram_bufget(RT2860_NVRAM, "PortForwardRules")) && strlen( PortForwardRules))
+	if ((PortForwardRules = nvram_get(RT2860_NVRAM, "PortForwardRules")) && strlen( PortForwardRules))
 		snprintf(rule, sizeof(rule), "%s;%s,%s,%d,%d,%d,%s",  PortForwardRules, iface, ip_address, prf_int, prt_int, proto, comment);
 	else
 		snprintf(rule, sizeof(rule), "%s,%s,%d,%d,%d,%s", iface, ip_address, prf_int, prt_int, proto, comment);
 
-	nvram_bufset(RT2860_NVRAM, "PortForwardRules", rule);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "PortForwardRules", rule);
+	
 
 end:
 	websHeader(wp);
@@ -1566,23 +1566,23 @@ static void BasicSettings(webs_t wp, char_t *path, char_t *query)
 
 	switch(atoi(firewall_enable)){
 	case 0:
-		nvram_bufset(RT2860_NVRAM, "IPPortFilterEnable", "0");
+		nvram_set(RT2860_NVRAM, "IPPortFilterEnable", "0");
 		break;
 	case 1:
-		nvram_bufset(RT2860_NVRAM, "IPPortFilterEnable", "1");
+		nvram_set(RT2860_NVRAM, "IPPortFilterEnable", "1");
 		break;
 	}
 
 	switch(atoi(default_policy)){
 	case 1:
-		nvram_bufset(RT2860_NVRAM, "DefaultFirewallPolicy", "1");
+		nvram_set(RT2860_NVRAM, "DefaultFirewallPolicy", "1");
 		break;
 	case 0:
 	default:
-		nvram_bufset(RT2860_NVRAM, "DefaultFirewallPolicy", "0");
+		nvram_set(RT2860_NVRAM, "DefaultFirewallPolicy", "0");
 		break;
 	}
-	nvram_commit(RT2860_NVRAM);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
@@ -1613,15 +1613,15 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 		return;
 
 	if(atoi(dmzE) == 0){		// disable
-		nvram_bufset(RT2860_NVRAM, "DMZEnable", "0");
+		nvram_set(RT2860_NVRAM, "DMZEnable", "0");
 	}else{					// enable
-		nvram_bufset(RT2860_NVRAM, "DMZEnable", "1");
+		nvram_set(RT2860_NVRAM, "DMZEnable", "1");
 		if(strlen(ip_address)){
-			nvram_bufset(RT2860_NVRAM, "DMZIPAddress", ip_address);
+			nvram_set(RT2860_NVRAM, "DMZIPAddress", ip_address);
 		}
 	}
 
-	nvram_commit(RT2860_NVRAM);
+	
 	websHeader(wp);
 	websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
 	websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
@@ -1639,7 +1639,7 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 	if(!wpfE || !strlen(wpfE))
 		return;
 
-	nvram_commit(RT2860_NVRAM);
+	
 	websHeader(wp);
 	websWrite(wp, T("WANPingFilter: %s<br>\n"), wpfE);
 	websFooter(wp);
@@ -1661,12 +1661,12 @@ void iptablesWebsFilterRun(void)
 	int i, content_filter = 0;
 	char entry[256];
 	char buff[4096]; //need long buffer for utf domain name encoding support
-	char *url_filter = nvram_bufget(RT2860_NVRAM, "websURLFilters");
-	char *host_filter = nvram_bufget(RT2860_NVRAM, "websHostFilters");
-	char *proxy = nvram_bufget(RT2860_NVRAM, "websFilterProxy");
-	char *java = nvram_bufget(RT2860_NVRAM, "websFilterJava");
-	char *activex = nvram_bufget(RT2860_NVRAM, "websFilterActivex");
-	char *cookies = nvram_bufget(RT2860_NVRAM, "websFilterCookies");
+	char *url_filter = nvram_get(RT2860_NVRAM, "websURLFilters");
+	char *host_filter = nvram_get(RT2860_NVRAM, "websHostFilters");
+	char *proxy = nvram_get(RT2860_NVRAM, "websFilterProxy");
+	char *java = nvram_get(RT2860_NVRAM, "websFilterJava");
+	char *activex = nvram_get(RT2860_NVRAM, "websFilterActivex");
+	char *cookies = nvram_get(RT2860_NVRAM, "websFilterCookies");
 
 	if(!url_filter || !host_filter || !proxy || !java || !activex || !cookies) {
 		doSystem("rm -f" _PATH_WEBS_FILE);
@@ -1737,7 +1737,7 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-	char *rules = nvram_bufget(RT2860_NVRAM, "websURLFilters");
+	char *rules = nvram_get(RT2860_NVRAM, "websURLFilters");
 	if(!rules || !strlen(rules) )
 		return;
 
@@ -1766,8 +1766,8 @@ static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
 
-	nvram_bufset(RT2860_NVRAM, "websURLFilters", rules);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "websURLFilters", rules);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("Delete : success<br>\n") );
@@ -1787,7 +1787,7 @@ static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
 	char_t *value;
 	int *deleArray;
 
-	char *rules = nvram_bufget(RT2860_NVRAM, "websHostFilters");
+	char *rules = nvram_get(RT2860_NVRAM, "websHostFilters");
 	if(!rules || !strlen(rules) )
 		return;
 
@@ -1815,8 +1815,8 @@ static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
 
-	nvram_bufset(RT2860_NVRAM, "websHostFilters", rules);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "websHostFilters", rules);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("Delete : success<br>\n") );
@@ -1840,11 +1840,11 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 	if(!proxy || !java || !activex || !cookies)
 		return;
 
-	nvram_bufset(RT2860_NVRAM, "websFilterProxy",   atoi(proxy)   ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterJava",    atoi(java)    ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterActivex", atoi(activex) ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "websFilterProxy",   atoi(proxy)   ? "1" : "0" );
+	nvram_set(RT2860_NVRAM, "websFilterJava",    atoi(java)    ? "1" : "0" );
+	nvram_set(RT2860_NVRAM, "websFilterActivex", atoi(activex) ? "1" : "0" );
+	nvram_set(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
+	
 
 	websHeader(wp);
 	websWrite(wp, T("Proxy: %s<br>\n"),  atoi(proxy) ? "enable" : "disable");
@@ -1861,7 +1861,7 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 
 static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 {
-	char *urlfilters = nvram_bufget(RT2860_NVRAM, "websURLFilters");
+	char *urlfilters = nvram_get(RT2860_NVRAM, "websURLFilters");
 	char *rule = websGetVar(wp, T("addURLFilter"), T(""));
 	char *new_urlfilters;
 	if(!rule)
@@ -1870,7 +1870,7 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 		return;
 
 	if(!urlfilters || !strlen(urlfilters))
-		nvram_bufset(RT2860_NVRAM, "websURLFilters", rule);
+		nvram_set(RT2860_NVRAM, "websURLFilters", rule);
 	else
 	{
 		if(! (new_urlfilters = (char *)malloc(sizeof(char) * (strlen(urlfilters)+strlen(rule)+1))))
@@ -1879,10 +1879,10 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 		strcat(new_urlfilters, urlfilters);
 		strcat(new_urlfilters, ";");
 		strcat(new_urlfilters, rule);
-		nvram_bufset(RT2860_NVRAM, "websURLFilters", new_urlfilters);
+		nvram_set(RT2860_NVRAM, "websURLFilters", new_urlfilters);
 		free(new_urlfilters);
 	}
-	nvram_commit(RT2860_NVRAM);
+	
 
 
 	websHeader(wp);
@@ -1896,7 +1896,7 @@ static void websURLFilter(webs_t wp, char_t *path, char_t *query)
 
 static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 {
-	char *hostfilters = nvram_bufget(RT2860_NVRAM, "websHostFilters");
+	char *hostfilters = nvram_get(RT2860_NVRAM, "websHostFilters");
 	char *rule = websGetVar(wp, T("addHostFilter"), T(""));
 	char *new_hostfilters;
 	if(!rule)
@@ -1905,7 +1905,7 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 		return;
 
 	if(!hostfilters || !strlen(hostfilters))
-		nvram_bufset(RT2860_NVRAM, "websHostFilters", rule);
+		nvram_set(RT2860_NVRAM, "websHostFilters", rule);
 	else{
 		if(! (new_hostfilters = (char *)malloc(sizeof(char) * (strlen(hostfilters)+strlen(rule)+1))))
 			return;
@@ -1913,10 +1913,10 @@ static void websHostFilter(webs_t wp, char_t *path, char_t *query)
 		strcat(new_hostfilters, hostfilters);
 		strcat(new_hostfilters, ";");
 		strcat(new_hostfilters, rule);
-		nvram_bufset(RT2860_NVRAM, "websHostFilters", new_hostfilters);
+		nvram_set(RT2860_NVRAM, "websHostFilters", new_hostfilters);
 		free(new_hostfilters);
 	}
-	nvram_commit(RT2860_NVRAM);
+	
 
 	websHeader(wp);
 	websWrite(wp, T("add Host filter: %s<br>\n"), rule);

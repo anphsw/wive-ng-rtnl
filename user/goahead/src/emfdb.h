@@ -107,5 +107,3 @@ extern void		basicSetProductDir(char_t *proddir);
 #endif /* _h_EMFDB */
 
 /******************************************************************************/
-
-

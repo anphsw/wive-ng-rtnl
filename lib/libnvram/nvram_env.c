@@ -214,20 +214,28 @@ static int cache_idx(int index, char *name)
 
 char *nvram_get(int index, char *name)
 {
+	char *rc;
 	//LIBNV_PRINT("--> nvram_get\n");
-	nvram_close(index);
 	nvram_init(index);
-	return nvram_bufget(index, name);
+	rc = nvram_bufget(index, name);
+	nvram_close(index);
+    return rc;
 }
 
 int nvram_set(int index, char *name, char *value)
 {
+	int rc;
 	//LIBNV_PRINT("--> nvram_set\n");
-	nvram_close(index);
 	nvram_init(index);
-	if (nvram_bufset(index, name, value) == -1 )
-		return -1;
-	return nvram_commit(index);
+	if (nvram_bufset(index, name, value) == -1 ) 
+	{
+		rc = -1;
+		goto out;
+	}
+	rc = nvram_commit(index);
+out:
+    nvram_close(index);
+    return rc;
 }
 
 char const *nvram_bufget(int index, char *name)
@@ -244,7 +252,7 @@ char const *nvram_bufget(int index, char *name)
 		if (fb[index].cache[idx].value) {
 			//duplicate the value in case caller modify it
 			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
-			//                   but if we return value directly, it will cause many other crash or delete value to nvram error.
+			//but if we return value directly, it will cause many other crash or delete value to nvram error.
 			ret = strdup(fb[index].cache[idx].value);
 			//ret = fb[index].cache[idx].value;
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);

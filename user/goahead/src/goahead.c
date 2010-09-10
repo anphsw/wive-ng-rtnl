@@ -24,12 +24,6 @@
 #include	"ralink_gpio.h"
 #include	"internet.h"
 #include	"services.h"
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-#include	"inic.h"
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-#include	"legacy.h"
-#endif
 #include	"utils.h"
 #include	"wireless.h"
 #include	"firewall.h" 
@@ -195,8 +189,8 @@ int writeGoPid(void)
 static void goaSigHandler(int signum)
 {
 #ifdef CONFIG_RT2860V2_STA_WSC
-	char *opmode = nvram_bufget(RT2860_NVRAM, "OperationMode");
-	char *ethCon = nvram_bufget(RT2860_NVRAM, "ethConvert");
+	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
+	char *ethCon = nvram_get(RT2860_NVRAM, "ethConvert");
 #endif
 
 	if (signum != SIGUSR1)
@@ -298,7 +292,7 @@ static int initSystem(void)
 static int initWebs(void)
 {
 	struct in_addr	intaddr;
-	char			*lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
+	char			*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char			webdir[128];
 	char			*cp;
 	char_t			wbuf[128];
@@ -312,8 +306,8 @@ static int initWebs(void)
 /*
  *	Initialize the User Management database
  */
-	char *admu = nvram_bufget(RT2860_NVRAM, "Login");
-	char *admp = nvram_bufget(RT2860_NVRAM, "Password");
+	char *admu = nvram_get(RT2860_NVRAM, "Login");
+	char *admp = nvram_get(RT2860_NVRAM, "Password");
 	umOpen();
 	//umRestore(T("umconfig.txt"));
 	//winfred: instead of using umconfig.txt, we create 'the one' adm defined in nvram
@@ -395,24 +389,11 @@ static int initWebs(void)
 	formDefineMedia();
 #endif
 	formDefineWireless();
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-	formDefineInic();
-#endif
-#if defined (CONFIG_RT2561_AP) || defined (CONFIG_RT2561_AP_MODULE)
-	formDefineLegacy();
-#endif
 #if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
 	formDefineStation();
 #endif
 	formDefineFirewall();
 	formDefineManagement();
-
-/*
- *	Create the Form handlers for the User Management pages
- */
-#ifdef USER_MANAGEMENT_SUPPORT
-	//formDefineUserMgmt();  winfred: we do it ourselves
-#endif
 
 /*
  *	Create a handler for the default home page
@@ -475,7 +456,7 @@ void defaultTraceHandler(int level, char_t *buf)
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 char_t *websGetCgiCommName(webs_t wp)
 {
-	char *force_mem_upgrade = nvram_bufget(RT2860_NVRAM, "Force_mem_upgrade");
+	char *force_mem_upgrade = nvram_get(RT2860_NVRAM, "Force_mem_upgrade");
 	char_t	*pname1 = NULL, *pname2 = NULL;
 	char *part;
 
@@ -617,7 +598,7 @@ int getGoAHeadServerPort(void)
 static int set_stable_flag(void)
 {
 	int set = 0;
-	char *wordlist = nvram_bufget(UBOOT_NVRAM, "Image1Stable");
+	char *wordlist = nvram_get(UBOOT_NVRAM, "Image1Stable");
 
 	if (wordlist) {
 		if (strcmp(wordlist, "1") != 0)
@@ -628,7 +609,7 @@ static int set_stable_flag(void)
 
 	if (set) {
 		printf("Set Image1 stable flag\n");
-		nvram_bufset(UBOOT_NVRAM, "Image1Stable", "1");
+		nvram_set(UBOOT_NVRAM, "Image1Stable", "1");
 	}
 	
 	return 0;

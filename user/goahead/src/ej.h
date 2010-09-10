@@ -44,4 +44,3 @@ extern char_t	*ejEval(int eid, char_t *script, char_t **emsg);
 #endif /* _h_EJ */
 
 /*****************************************************************************/
-

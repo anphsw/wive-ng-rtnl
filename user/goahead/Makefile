@@ -50,27 +50,8 @@ endif
 ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/media
 endif
-
-ifneq ("$(CONFIG_INIC_MII)", "") 
-	$(ROMFSINST) inic $(ROOT_DIRECTORY)
-else
-ifneq ("$(CONFIG_INIC_PCI)", "") 
-	$(ROMFSINST) inic $(ROOT_DIRECTORY)
-else
-ifneq ("$(CONFIG_INIC_USB)", "") 
-	$(ROMFSINST) inic $(ROOT_DIRECTORY)
-endif
-endif
-endif
-
-ifneq ("$(CONFIG_RT2561_AP)", "")
-	$(ROMFSINST) legacy $(ROOT_DIRECTORY)
-endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
-endif
-ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHCN)", "y")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhcn
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
 

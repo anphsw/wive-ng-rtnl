@@ -35,7 +35,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	char_t *admuser, *admpass;
 	char *old_user;
 
-	old_user = nvram_bufget(RT2860_NVRAM, "Login");
+	old_user = nvram_get(RT2860_NVRAM, "Login");
 	admuser = websGetVar(wp, T("admuser"), T(""));
 	admpass = websGetVar(wp, T("admpass"), T(""));
 
@@ -47,9 +47,9 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 		error(E_L, E_LOG, T("setSysAdm: password empty, leave it unchanged"));
 		return;
 	}
-	nvram_bufset(RT2860_NVRAM, "Login", admuser);
-	nvram_bufset(RT2860_NVRAM, "Password", admpass);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "Login", admuser);
+	nvram_set(RT2860_NVRAM, "Password", admpass);
+	
 
 	/* modify /etc/passwd to new user name and passwd */
 	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
@@ -83,9 +83,8 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
 	char_t *lang;
 
 	lang = websGetVar(wp, T("langSelection"), T(""));
-	nvram_bufset(RT2860_NVRAM, "Language", lang);
-	nvram_commit(RT2860_NVRAM);
-
+	nvram_set(RT2860_NVRAM, "Language", lang);
+	
 	websHeader(wp);
 	websWrite(wp, T("<h2>Language Selection</h2><br>\n"));
 	websWrite(wp, T("language: %s<br>\n"), lang);
@@ -112,24 +111,24 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 			if (strlen(ntpServer)==0)
 			{
 				// user choose to make  NTP server disable
-				nvram_bufset(RT2860_NVRAM, "NTPServerIP", "");
-				nvram_bufset(RT2860_NVRAM, "NTPSync", "");
+				nvram_set(RT2860_NVRAM, "NTPServerIP", "");
+				nvram_set(RT2860_NVRAM, "NTPSync", "");
 			}
 			else
 			{
 				if ((!checkSemicolon(ntpServer)) && (strlen(ntpSync)>0) && (atoi(ntpSync)<=300))
 				{
-					nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
-					nvram_bufset(RT2860_NVRAM, "NTPSync", ntpSync);
+					nvram_set(RT2860_NVRAM, "NTPServerIP", ntpServer);
+					nvram_set(RT2860_NVRAM, "NTPSync", ntpSync);
 				}
 			}
 
-			nvram_bufset(RT2860_NVRAM, "TZ", tz);
+			nvram_set(RT2860_NVRAM, "TZ", tz);
 		}
 	}
 	
-	nvram_bufset(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
+	
 
 	if (strcmp(ntpEnabled, "on")==0)
 		doSystem("service ntp start &");
@@ -195,11 +194,11 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	if(checkSemicolon(ddns) || checkSemicolon(ddns_acc) || checkSemicolon(ddns_pass))
 		return;
 
-	nvram_bufset(RT2860_NVRAM, "DDNSProvider", ddns_provider);
-	nvram_bufset(RT2860_NVRAM, "DDNS", ddns);
-	nvram_bufset(RT2860_NVRAM, "DDNSAccount", ddns_acc);
-	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "DDNSProvider", ddns_provider);
+	nvram_set(RT2860_NVRAM, "DDNS", ddns);
+	nvram_set(RT2860_NVRAM, "DDNSAccount", ddns_acc);
+	nvram_set(RT2860_NVRAM, "DDNSPassword", ddns_pass);
+	
 
 	doSystem("service ddns start &");
 
@@ -661,7 +660,7 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fp;
 	char buf[512];
-	char *old_firmware = nvram_bufget(RT2860_NVRAM, "old_firmware");
+	char *old_firmware = nvram_get(RT2860_NVRAM, "old_firmware");
 	if(!old_firmware || !strlen(old_firmware) )
 		return 0;
 	fp = fopen("/proc/version", "r");
@@ -675,8 +674,8 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 	}else{
 		websWrite(wp, T("alert(\"Firmware Upgrade success\");"));
 	}	
-	nvram_bufset(RT2860_NVRAM, "old_firmware", "");
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "old_firmware", "");
+	
 
 	return 0;
 }

@@ -40,7 +40,7 @@ inline void QoSRestart(void)
 inline void QoSInit(void)
 {
 	char *cm;
-	cm = nvram_bufget(RT2860_NVRAM, "wanConnectionMode");
+	cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
 #ifdef CONFIG_USER_3G
 		|| !strncmp(cm, "3G", 3)
@@ -74,12 +74,12 @@ static void QoSAFAttribute(webs_t wp, char_t *path, char_t *query)
 		return;
 
 	sprintf(tmp, "QoSAF%dName", index_i);
-	nvram_bufset(RT2860_NVRAM, tmp, name);
+	nvram_set(RT2860_NVRAM, tmp, name);
 	sprintf(tmp, "QoSAF%dRate", index_i);
-	nvram_bufset(RT2860_NVRAM, tmp, rate);
+	nvram_set(RT2860_NVRAM, tmp, rate);
 	sprintf(tmp, "QoSAF%dCeil", index_i);
-	nvram_bufset(RT2860_NVRAM, tmp, ceil);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, tmp, ceil);
+	
 
 	QoSRestart();
 
@@ -107,7 +107,7 @@ static int qosGetIndexByName(int af_index, int dp_index, char *match)
 	char *rule, name[32];
 
 	sprintf(asdp_str, "QoSAF%dDP%d", af_index, dp_index);
-	rule = nvram_bufget(RT2860_NVRAM, asdp_str);
+	rule = nvram_get(RT2860_NVRAM, asdp_str);
 	if(!rule || !strlen(rule))
 		return -1;
 
@@ -247,29 +247,29 @@ static void qosClassifier(webs_t wp, char_t *path, char_t *query)
         }
 	}
 
-	old_rule = nvram_bufget(RT2860_NVRAM, "QoSRules");
+	old_rule = nvram_get(RT2860_NVRAM, "QoSRules");
 	if(!old_rule || !strlen(old_rule))
 		snprintf(rule, sizeof(rule), "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", comment, af_index, dp_index, mac_address, protocol, dip_address, sip_address, pktlenfrom, pktlento, dprf, dprt, sprf, sprt, layer7, dscp, ingress_if, remark);
 	else
 		snprintf(rule, sizeof(rule), "%s;%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", old_rule, comment, af_index, dp_index, mac_address, protocol, dip_address, sip_address, pktlenfrom, pktlento, dprf, dprt, sprf, sprt, layer7, dscp, ingress_if, remark);
 
-	nvram_bufset(RT2860_NVRAM, "QoSRules", rule);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, "QoSRules", rule);
+	
 
 	QoSRestart();
 
 //	websHeader(wp);
-    websWrite(wp, T("HTTP/1.0 200 OK\n"));
-    websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
-    websWrite(wp, T("Pragma: no-cache\n"));
-    websWrite(wp, T("Cache-control: no-cache\n"));
-    websWrite(wp, T("Content-Type: text/html\n"));
-    websWrite(wp, T("\n"));
-    websWrite(wp, T("<html>\n<head>\n"));
-    websWrite(wp, T("<title>QoS</title>"));
-    websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
-    websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">"));
-    websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
+        websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
+        websWrite(wp, T("Pragma: no-cache\n"));
+        websWrite(wp, T("Cache-control: no-cache\n"));
+        websWrite(wp, T("Content-Type: text/html\n"));
+        websWrite(wp, T("\n"));
+        websWrite(wp, T("<html>\n<head>\n"));
+        websWrite(wp, T("<title>QoS</title>"));
+        websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
+        websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">"));
+        websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
 
 	websWrite(wp, T("name: %s<br>\n"), comment);
 	websWrite(wp, T("mac: %s<br>\n"), mac_address);
@@ -304,7 +304,7 @@ static void QoSDelete(webs_t wp, char_t *path, char_t *query)
 	dp_i = atoi(dp);
 
 	snprintf(tmp, sizeof(tmp), "QoSAF%dDP%d", af_i, dp_i);
-	orig_rule = nvram_bufget(RT2860_NVRAM, tmp);
+	orig_rule = nvram_get(RT2860_NVRAM, tmp);
 	if(!orig_rule || !strlen(orig_rule))
 		goto err;
 
@@ -316,8 +316,8 @@ static void QoSDelete(webs_t wp, char_t *path, char_t *query)
 	new_rule = strdup(orig_rule);
 	deleteNthValueMulti(&del_index, 1, new_rule, ';');
 
-	nvram_bufset(RT2860_NVRAM, tmp, new_rule);
-	nvram_commit(RT2860_NVRAM);
+	nvram_set(RT2860_NVRAM, tmp, new_rule);
+	
 
 	free(new_rule);
 
@@ -337,7 +337,7 @@ static void QoSDeleteRules(webs_t wp, char_t *path, char_t *query)
     char_t *value;
     int *deleArray;
 
-    char *rules = nvram_bufget(RT2860_NVRAM, "QoSRules");
+    char *rules = nvram_get(RT2860_NVRAM, "QoSRules");
     if(!rules || !strlen(rules) )
         return;
 
@@ -365,8 +365,8 @@ static void QoSDeleteRules(webs_t wp, char_t *path, char_t *query)
 
     deleteNthValueMulti(deleArray, j, rules, ';');
 
-    nvram_bufset(RT2860_NVRAM, "QoSRules", rules);
-    nvram_commit(RT2860_NVRAM);
+    nvram_set(RT2860_NVRAM, "QoSRules", rules);
+    
 
 	QoSRestart();
 
@@ -386,12 +386,12 @@ static void QoSLoadDefaultProfile(webs_t wp, char_t *path, char_t *query)
     int i;
 	for(i=0; i<QOS_PROFILE_ENTRYS_MAX ; i++){
 		if(QOS_PROFILE[i].name){
-			nvram_bufset(RT2860_NVRAM, QOS_PROFILE[i].name, QOS_PROFILE[i].value);
+			nvram_set(RT2860_NVRAM, QOS_PROFILE[i].name, QOS_PROFILE[i].value);
 		}else{
 			break;
 		}
 	}
-	nvram_commit(RT2860_NVRAM);
+	
 	QoSRestart();
 
     websHeader(wp);
@@ -424,23 +424,23 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 			return;
 	}
 
-	nvram_bufset(RT2860_NVRAM, "QoSEnable", qos_enable);
+	nvram_set(RT2860_NVRAM, "QoSEnable", qos_enable);
 
 	if(!strcmp(qos_enable, "1") /*|| !strcmp(qos_enable, "2")*/){
 		char postfix[16];
 		strncpy(postfix, upload_bandwidth_custom, sizeof(postfix));
 		if(!strchr(postfix, 'k') && !strchr(postfix, 'K')  && !strchr(postfix, 'm') && !strchr(postfix, 'M') )
 			strncat(postfix, "k", sizeof(postfix));
-		nvram_bufset(RT2860_NVRAM, "QoSUploadBandwidth_custom", postfix);
+		nvram_set(RT2860_NVRAM, "QoSUploadBandwidth_custom", postfix);
 		strncpy(postfix, download_bandwidth_custom, sizeof(postfix));
 		if(!strchr(postfix, 'k') && !strchr(postfix, 'K')  && !strchr(postfix, 'm') && !strchr(postfix, 'M') )
 			strncat(postfix, "k", sizeof(postfix));
-		nvram_bufset(RT2860_NVRAM, "QoSDownloadBandwidth_custom", postfix);
-		nvram_bufset(RT2860_NVRAM, "QoSUploadBandwidth", upload_bandwidth);
-		nvram_bufset(RT2860_NVRAM, "QoSDownloadBandwidth", download_bandwidth);
+		nvram_set(RT2860_NVRAM, "QoSDownloadBandwidth_custom", postfix);
+		nvram_set(RT2860_NVRAM, "QoSUploadBandwidth", upload_bandwidth);
+		nvram_set(RT2860_NVRAM, "QoSDownloadBandwidth", download_bandwidth);
 	}
 
-	nvram_commit(RT2860_NVRAM);
+	
 
 	QoSRestart();
 

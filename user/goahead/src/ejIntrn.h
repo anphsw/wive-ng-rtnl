@@ -228,4 +228,3 @@ extern int ejEmfDbWrite(int eid, void *handle, int argc, char_t **argv);
 extern int ejEmfDbCollectTable(int eid, void *handle, int argc, char_t **argv);
 
 #endif /* _h_EJINTERNAL */
-

@@ -86,7 +86,7 @@ dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
 #alwayse make service utility
-dir_y                                       += getBoardID
+#dir_y                                       += getBoardID
 
 all: config
 ifeq ($(CONFIG_USER_PPPD),y)

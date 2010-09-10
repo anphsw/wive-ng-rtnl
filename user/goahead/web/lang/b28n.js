@@ -91,6 +91,7 @@ function Butterlation() {
     return unescape(document.cookie.substring(one+9,end));
   };
   this.lang = this.getLang();
+  //this.setTextDomain = function(domain) { this.po=window.location.protocol+"//"+window.location.host+"/lang/"+this.lang+"/"+domain+".xml"; this.initializeDictionary(); }
   this.setTextDomain = function(domain) { this.po=window.location.protocol+"//"+window.location.host+"/lang/"+this.lang+"/"+domain+".xml"; this.initializeDictionary(); }
   this.initializeDictionary = function() {
     var request;

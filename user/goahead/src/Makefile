@@ -45,23 +45,6 @@ endif
 ifneq ("$(CONFIG_RT2860V2_STA)", "")
 DEPEND_FILES += station.o
 endif
-ifneq ("$(CONFIG_INIC_MII)", "") 
-DEPEND_FILES += inic.o
-CFLAGS += -DINICv2_SUPPORT
-else
-ifneq ("$(CONFIG_INIC_PCI)", "")
-DEPEND_FILES += inic.o
-CFLAGS += -DINICv2_SUPPORT
-else
-ifneq ("$(CONFIG_INIC_USB)", "")
-DEPEND_FILES += inic.o
-CFLAGS += -DINICv2_SUPPORT
-endif
-endif
-endif
-ifneq ("$(CONFIG_RT2561_AP)", "")
-DEPEND_FILES += legacy.o
-endif
 ifeq ("$(CONFIG_USER_GOAHEAD_IPV6)", "y")
 CFLAGS += -DWF_USE_IPV6
 endif
@@ -143,10 +126,6 @@ goahead.o: goahead.c uemf.h wsIntrn.h internet.h utils.h wireless.h firewall.h m
 h.o:  h.c uemf.h
 
 handler.o:  handler.c webs.h wsIntrn.h ej.h ejIntrn.h uemf.h
-
-inic.o: inic.c inic.h internet.h utils.h webs.h 
-
-legacy.o: legacy.c legacy.h internet.h utils.h webs.h 
 
 internet.o: internet.c internet.h utils.h webs.h  $(CONF_H) $(UCONF_H) $(BUSYBOXCONF_H)
 

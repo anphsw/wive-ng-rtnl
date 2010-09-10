@@ -43,7 +43,6 @@ static int  getCfg3General(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv);
 static int  getDpbSta(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLangBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int  getMiiInicBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPlatform(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStationBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysBuildTime(int eid, webs_t wp, int argc, char_t **argv);
@@ -561,7 +560,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("getCfg3Zero"), getCfg3Zero);
 	websAspDefine(T("getDpbSta"), getDpbSta);
 	websAspDefine(T("getLangBuilt"), getLangBuilt);
-	websAspDefine(T("getMiiInicBuilt"), getMiiInicBuilt);
 	websAspDefine(T("getPlatform"), getPlatform);
 	websAspDefine(T("getStationBuilt"), getStationBuilt);
 	websAspDefine(T("getSysBuildTime"), getSysBuildTime);
@@ -593,7 +591,7 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = nvram_bufget(RT2860_NVRAM, field);
+	value = nvram_get(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -623,7 +621,7 @@ static int getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_get(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -657,7 +655,7 @@ static int getCfgZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_get(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -687,7 +685,7 @@ static int getCfgNthZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RT2860_NVRAM, field);
+	value = (char *) nvram_get(RT2860_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -721,7 +719,7 @@ static int getCfg2General(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -751,7 +749,7 @@ static int getCfg2NthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -785,7 +783,7 @@ static int getCfg2Zero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -815,7 +813,7 @@ static int getCfg2NthZero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s %d"), &type, &field, &idx) < 3) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -849,7 +847,7 @@ static int getCfg3General(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (NULL == value)
 			return websWrite(wp, T(""));
@@ -877,7 +875,7 @@ static int getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args"));
 	}
-	value = (char *) nvram_bufget(RTDEV_NVRAM, field);
+	value = (char *) nvram_get(RTDEV_NVRAM, field);
 	if (1 == type) {
 		if (!strcmp(value, ""))
 			return websWrite(wp, T("0"));
@@ -906,34 +904,14 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
 		return websWrite(wp, T("0"));
 	}
 	if (!strncmp(lang, "en", 3))
-#ifdef CONFIG_USER_GOAHEAD_LANG_EN
 		return websWrite(wp, T("1"));
-#else
-		return websWrite(wp, T("0"));
-#endif
 	else if (!strncmp(lang, "zhtw", 5))
 #ifdef CONFIG_USER_GOAHEAD_LANG_ZHTW
 		return websWrite(wp, T("1"));
 #else
 		return websWrite(wp, T("0"));
 #endif
-	else if (!strncmp(lang, "zhcn", 5))
-#ifdef CONFIG_USER_GOAHEAD_LANG_ZHCN
-		return websWrite(wp, T("1"));
-#else
-		return websWrite(wp, T("0"));
-#endif
-
 	return websWrite(wp, T("0"));
-}
-
-static int getMiiInicBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#if defined (CONFIG_INIC_MII)
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
 }
 
 /*
@@ -1130,10 +1108,10 @@ static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
 	if(!mode)
 		return;
 	if(!strcmp(mode, "1"))
-		nvram_bufset(RT2860_NVRAM, "Force_mem_upgrade", "1");
+		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "1");
 	else
-		nvram_bufset(RT2860_NVRAM, "Force_mem_upgrade", "0");
-	nvram_commit(RT2860_NVRAM);
+		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "0");
+	
     websHeader(wp);
     websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
     websWrite(wp, T("mode: %s<br>\n"), mode);
@@ -1155,7 +1133,7 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 static void setOpMode(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*mode;
-	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
+	char	*old_mode = nvram_get(RT2860_NVRAM, "OperationMode");
 	int		need_commit = 0;
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
 #else
@@ -1164,10 +1142,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_STA_DPB
 	char_t	*econv = "";
 #endif
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-	char_t	*mii;
-#endif
-
 	mode = websGetVar(wp, T("opMode"), T("0")); 
 
 	if (!strncmp(old_mode, "0", 2)) {
@@ -1180,8 +1154,8 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * mode: gateway (or ap-client) -> bridge
 			 * config: wan_ip(wired) overwrites lan_ip(bridge)
 			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
+			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1193,10 +1167,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * config: wan_ip(wired) overwrites lan_ip(wired) 
 			 *         lan_ip(wireless) overwrites wan_ip(wireless)
 			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
+			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
+			lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			nvram_set(RT2860_NVRAM, "wan_ipaddr", lan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1216,10 +1190,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 * config: lan_ip(wired) overwrites wan_ip(wired) 
 			 *         wan_ip(wireless) overwrites lan_ip(wireless)
 			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
+			wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
+			lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+			nvram_set(RT2860_NVRAM, "lan_ipaddr", wan_ip);
+			nvram_set(RT2860_NVRAM, "wan_ipaddr", lan_ip);
 			need_commit = 1;
 #endif
 		}
@@ -1230,16 +1204,16 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		char *old;
 
 		econv = websGetVar(wp, T("ethConv"), T("0"));
-		old = nvram_bufget(RT2860_NVRAM, "ethConvert");
+		old = nvram_get(RT2860_NVRAM, "ethConvert");
 		if (strncmp(old, econv, 2)) {
-			nvram_bufset(RT2860_NVRAM, "ethConvert", econv);
+			nvram_set(RT2860_NVRAM, "ethConvert", econv);
 			need_commit = 1;
 		}
 		if (!strncmp(econv, "1", 2)) {
 			//disable dhcp server in this mode
-			old = nvram_bufget(RT2860_NVRAM, "dhcpEnabled");
+			old = nvram_get(RT2860_NVRAM, "dhcpEnabled");
 			if (!strncmp(old, "1", 2)) {
-				nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
+				nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
 				need_commit = 1;
 			}
 		}
@@ -1248,13 +1222,13 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 
 	//new OperationMode
 	if (strncmp(mode, old_mode, 2)) {
-		nvram_bufset(RT2860_NVRAM, "OperationMode", mode);
+		nvram_set(RT2860_NVRAM, "OperationMode", mode);
 
 		//from or to ap client mode
 		if (!strncmp(mode, "3", 2))
-			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
+			nvram_set(RT2860_NVRAM, "ApCliEnable", "1");
 		else if (!strncmp(old_mode, "3", 2))
-			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "0");
+			nvram_set(RT2860_NVRAM, "ApCliEnable", "0");
 		need_commit = 1;
 	}
 
@@ -1267,7 +1241,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 				(!strcmp(old_mode, "1") && !strcmp(mode, "2"))  ||
 				(!strcmp(old_mode, "1") && !strcmp(mode, "3"))  ){
 			char redirect_url[512];
-			char *lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
+			char *lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 
 			if(! strlen(lan_ip))
 				lan_ip = "DEFAULT_LAN_IP";
@@ -1285,28 +1259,9 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		}
 	}
     
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-	mii = websGetVar(wp, T("miiMode"), T("0"));
-	if (!strncmp(mode, "0", 2)) {
-		char *old_mii = nvram_bufget(RTINIC_NVRAM, "InicMiiEnable");
-
-		if (strncmp(mii, old_mii, 2)) {
-			nvram_bufset(RTINIC_NVRAM, "InicMiiEnable", mii);
-			need_commit = 1; //force to run initInternet
-		}
-	}
-	else {
-		nvram_bufset(RTINIC_NVRAM, "InicMiiEnable", "0");
-		need_commit = 1; //force to run initInternet
-	}
-#endif
-
 	websHeader(wp);
 	websWrite(wp, T("<h2>Operation Mode</h2>\n"));
 	websWrite(wp, T("mode: %s<br>\n"), mode);
-#if defined INIC_SUPPORT || defined INICv2_SUPPORT
-	websWrite(wp, T("INIC MII mode: %s<br>\n"), mii);
-#endif
 	websFooter(wp);
 	websDone(wp, 200);
 
@@ -1315,7 +1270,7 @@ final:
 
 	//restart internet if any changes
 	if (need_commit) {
-		nvram_commit(RT2860_NVRAM);
+		
 		updateFlash8021x(RT2860_NVRAM);
 		initInternet();
 	}

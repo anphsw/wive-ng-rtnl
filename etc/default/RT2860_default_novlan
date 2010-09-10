@@ -1,6 +1,7 @@
 #The following line must not be removed.
 Default
 WebInit=1
+Language=en
 HostName=Wive-RTNL
 Login=Admin
 Password=Admin
