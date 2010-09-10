@@ -108,42 +108,38 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	static_leases = websGetVar(wp, T("dhcpAssignIP"), T(""));
 
 	// configure gateway and dns (WAN) at bridge mode
-	if (strncmp(dhcp_tp, "DISABLE", 8)==0)
-		nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
-	else if (strncmp(dhcp_tp, "SERVER", 7)==0)
+	if (strncmp(dhcp_tp, "SERVER", 7)==0)
 	{
 		if (inet_addr(dhcp_s) == -1)
 		{
-			
 			websError(wp, 200, "invalid DHCP Start IP");
 			return;
 		}
-		nvram_set(RT2860_NVRAM, "dhcpStart", dhcp_s);
 		if (inet_addr(dhcp_e) == -1)
-		{
-			
+		{	
 			websError(wp, 200, "invalid DHCP End IP");
 			return;
 		}
-		nvram_set(RT2860_NVRAM, "dhcpEnd", dhcp_e);
 		if (inet_addr(dhcp_m) == -1)
 		{
-			
 			websError(wp, 200, "invalid DHCP Subnet Mask");
 			return;
 		}
-		nvram_set(RT2860_NVRAM, "dhcpMask", dhcp_m);
-		nvram_set(RT2860_NVRAM, "dhcpEnabled", "1");
-		nvram_set(RT2860_NVRAM, "dhcpPriDns", dhcp_pd);
-		nvram_set(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
-		nvram_set(RT2860_NVRAM, "dhcpGateway", dhcp_g);
-		nvram_set(RT2860_NVRAM, "dhcpLease", dhcp_l);
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "dhcpStart", dhcp_s);
+		nvram_bufset(RT2860_NVRAM, "dhcpEnd", dhcp_e);
+		nvram_bufset(RT2860_NVRAM, "dhcpMask", dhcp_m);
+		nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "1");
+		nvram_bufset(RT2860_NVRAM, "dhcpPriDns", dhcp_pd);
+		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
+		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
+		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 		dhcpStoreAliases(static_leases);
-	}
+	} else 	if (strncmp(dhcp_tp, "DISABLE", 8)==0)
+		nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
 	
-	// Commit settings
-	
-
 	// Restart DHCP service
 	doSystem("service dhcpd restart &");
 }
@@ -168,22 +164,21 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	watchdog = websGetVar(wp, T("watchdogEnable"), T("0"));
 	ping_wan = websGetVar(wp, T("pingWANEnbl"), T("0"));
 
-	nvram_set(RT2860_NVRAM, "stpEnabled", stp_en);
-	nvram_set(RT2860_NVRAM, "lltdEnabled", lltd_en);
-	nvram_set(RT2860_NVRAM, "igmpEnabled", igmp_en);
-	nvram_set(RT2860_NVRAM, "upnpEnabled", upnp_en);
-	nvram_set(RT2860_NVRAM, "radvdEnabled", radvd_en);
-	nvram_set(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
-	nvram_set(RT2860_NVRAM, "WANPingFilter", ping_wan);
-
-	nvram_set(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
-	nvram_set(RT2860_NVRAM, "RemoteManagement", rmt_http);
-	nvram_set(RT2860_NVRAM, "RemoteSSH", rmt_ssh);
-	nvram_set(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
-	nvram_set(RT2860_NVRAM, "WatchdogEnabled", watchdog);
-	
-	// Commit settings
-	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
+	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
+	nvram_bufset(RT2860_NVRAM, "igmpEnabled", igmp_en);
+	nvram_bufset(RT2860_NVRAM, "upnpEnabled", upnp_en);
+	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
+	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
+	nvram_bufset(RT2860_NVRAM, "WANPingFilter", ping_wan);
+	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
+	nvram_bufset(RT2860_NVRAM, "RemoteManagement", rmt_http);
+	nvram_bufset(RT2860_NVRAM, "RemoteSSH", rmt_ssh);
+	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
+	nvram_bufset(RT2860_NVRAM, "WatchdogEnabled", watchdog);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
 	doSystem("services_restart.sh misc &");
