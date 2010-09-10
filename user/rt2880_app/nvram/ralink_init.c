@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 		usage(argv[0]);
 
 	//call nvram_get or nvram_set
-	if ((cmd = strrchr(argv[0], '/')) != NULL)
+	if (cmd = strrchr(argv[0], '/'))
 		cmd++;
 	else
 		cmd = argv[0];
@@ -146,6 +146,8 @@ int main(int argc, char *argv[])
 		return ra_nv_get(argc, argv);
 	else if (!strncmp(cmd, "nvram_set", 10))
 		return ra_nv_set(argc, argv);
+	else if (!strncmp(cmd, "nvram_show", 10))
+		return nvram_show(RT2860_NVRAM);
 
 	if (argc == 2) {
 		if (!strncmp(argv[1], "rt2860_nvram_show", 18))
@@ -523,13 +525,13 @@ int renew_nvram(int mode, char *fname)
 #endif
 	int found = 0, need_commit = 0;
 
-	if (NULL == (fp = fopen(fname, "ro"))) {
+	if (!(fp = fopen(fname, "ro")) {
 		perror("fopen");
 		return -1;
 	}
 
 	//find "Default" first
-	while (NULL != fgets(buf, BUFSZ, fp)) {
+	while (fgets(buf, BUFSZ, fp) {
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
 		if (!strncmp(buf, "Default\n", 8)) {
@@ -544,17 +546,16 @@ int renew_nvram(int mode, char *fname)
 	}
 
 	nvram_init(mode);
-	while (NULL != fgets(buf, BUFSZ, fp)) {
+	while (fgets(buf, BUFSZ, fp)) {
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
-		if (NULL == (p = strchr(buf, '='))) {
+		if (!(p = strchr(buf, '='))) {
 			if (need_commit) {
 				nvram_commit(mode);
 				need_commit = 0;
 			}
 			printf("%s file format error!\n", fname);
-			fclose(fp);
-			return -1;
+			goto out;
 		}
 		buf[strlen(buf) - 1] = '\0'; //remove carriage return
 		*p++ = '\0'; //seperate the string
@@ -563,19 +564,9 @@ int renew_nvram(int mode, char *fname)
 		need_commit = 1;
 	}
 
-#ifndef CONFIG_RALINK_RT3052
-	//Get wan port mac address, please refer to eeprom format doc
-	//0x30000=user configure, 0x32000=rt2860 parameters, 0x40000=RF parameter
-	flash_read_mac(buf);
-	sprintf(wan_mac,"%0X:%0X:%0X:%0X:%0X:%0X\n",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
-	nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR", wan_mac);
-	need_commit = 1;
-#endif
-	if (need_commit) {
+	if (need_commit)
 	    nvram_commit(mode);
-	    need_commit = 0;
-	}
-
+out:
 	nvram_close(mode);
 	fclose(fp);
 	return 0;
@@ -591,7 +582,7 @@ int nvram_show(int mode)
 	nvram_init(mode);
 	len = getNvramBlockSize(mode);
 	buffer = malloc(len);
-	if (buffer == NULL) {
+	if (!buffer) {
 		fprintf(stderr, "nvram_show: Can not allocate memory!\n");
 		return -1;
 	}
