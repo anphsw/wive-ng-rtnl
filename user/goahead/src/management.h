@@ -17,5 +17,4 @@
 void formDefineManagement(void);
 void management_init(void);
 char *setNthValueLong(int index, char *old_values, char *new_value);
-void ResetNvram(void);
 #endif

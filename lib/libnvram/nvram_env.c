@@ -471,3 +471,426 @@ void toggleNvramDebug()
 #endif
 }
 
+int renew_nvram(int mode, char *fname)
+{
+	FILE *fp;
+#define BUFSZ 1024
+	unsigned char buf[BUFSZ], *p;
+#ifndef CONFIG_RALINK_RT3052
+	unsigned wan_mac[32];
+#endif
+	int found = 0, need_commit = 0;
+
+	fp = fopen(fname, "ro");
+	if (!fp) {
+		perror("fopen");
+		return -1;
+	}
+
+	//find "Default" first
+	while (fgets(buf, BUFSZ, fp)) {
+		if (buf[0] == '\n' || buf[0] == '#')
+			continue;
+		if (!strncmp(buf, "Default\n", 8)) {
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+		printf("file format error!\n");
+		fclose(fp);
+		return -1;
+	}
+
+	nvram_init(mode);
+	while (fgets(buf, BUFSZ, fp)) {
+		if (buf[0] == '\n' || buf[0] == '#')
+			continue;
+		if (!(p = strchr(buf, '='))) {
+			if (need_commit) {
+				nvram_commit(mode);
+				need_commit = 0;
+			}
+			printf("%s file format error!\n", fname);
+			goto out;
+		}
+		buf[strlen(buf) - 1] = '\0'; //remove carriage return
+		*p++ = '\0'; //seperate the string
+		//printf("bufset %d '%s'='%s'\n", mode, buf, p);
+		nvram_bufset(mode, buf, p);
+		need_commit = 1;
+	}
+
+	if (need_commit)
+	    nvram_commit(mode);
+out:
+	nvram_close(mode);
+	fclose(fp);
+	return 0;
+}
+
+int nvram_show(int mode)
+{
+	char *buffer, *p;
+	int rc;
+	int crc;
+	unsigned int len = 0x4000;
+
+	nvram_init(mode);
+	len = getNvramBlockSize(mode);
+	buffer = malloc(len);
+	if (!buffer) {
+		fprintf(stderr, "nvram_show: Can not allocate memory!\n");
+		return -1;
+	}
+	flash_read(buffer, getNvramOffset(mode), len);
+	memcpy(&crc, buffer, 4);
+
+	fprintf(stderr, "crc = %x\n", crc);
+	p = buffer + 4;
+	while (*p != '\0') {
+		printf("%s\n", p);
+		p += strlen(p) + 1;
+	}
+	free(buffer);
+	nvram_close(mode);
+	return 0;
+}
+
+int nvram_load_default(void)
+
+{
+	//store macs
+	char    *WLAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "WLAN_MAC_ADDR");
+        char    *WAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
+        char    *LAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "LAN_MAC_ADDR");
+        char    *CHECKMAC = nvram_get(RT2860_NVRAM, "CHECKMAC");
+
+	//clear flash and load defaults
+	nvram_clear(RT2860_NVRAM);
+	renew_nvram(RT2860_NVRAM, "/etc/default/RT2860_default_novlan");
+
+	//restore mac adresses
+	nvram_init(RT2860_NVRAM);
+	if (!WLAN_MAC_ADDR)
+    	    nvram_bufset(RT2860_NVRAM, "WLAN_MAC_ADDR", WLAN_MAC_ADDR);
+	if (!WAN_MAC_ADDR)
+    	    nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR",  WAN_MAC_ADDR);
+	if (!LAN_MAC_ADDR)
+    	    nvram_bufset(RT2860_NVRAM, "LAN_MAC_ADDR",  LAN_MAC_ADDR);
+	if ((!WLAN_MAC_ADDR) || (!WAN_MAC_ADDR) ||(!LAN_MAC_ADDR))
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", 	    "YES");
+	else
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", 	    CHECKMAC);
+
+        nvram_bufset(RT2860_NVRAM, "IS_WIVE", 	    "YES");
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+
+    return 0;
+}
+
+int gen_wifi_config(int mode)
+{
+	FILE *fp;
+	int  i, ssid_num = 1;
+	char tx_rate[16], wmm_enable[16];
+
+	nvram_init(mode);
+
+	unsigned char temp[2], buf[4];
+	flash_read_NicConf(buf);
+	sprintf(temp, "%x", buf[1]);
+	nvram_bufset(mode, "RFICType", temp);
+	sprintf(temp, "%x", buf[1]&0xf0>>4);
+	nvram_bufset(mode, "TXPath", temp);
+	sprintf(temp, "%x", buf[0]&0x0f);
+	nvram_bufset(mode, "RXPath", temp);
+	nvram_commit(mode);
+
+	//reinit nvram
+	nvram_close(mode);
+	nvram_init(mode);
+
+	system("mkdir -p /etc/Wireless/RT2860");
+	if (mode == RT2860_NVRAM) {
+		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
+	} else
+		return 0;
+
+	fprintf(fp, "#The word of \"Default\" must not be removed\n");
+	fprintf(fp, "Default\n");
+
+#define FPRINT_NUM(x) fprintf(fp, #x"=%d\n", atoi(nvram_bufget(mode, #x)));
+#define FPRINT_STR(x) fprintf(fp, #x"=%s\n", nvram_bufget(mode, #x));
+
+	if (RT2860_NVRAM == mode) {
+		FPRINT_NUM(CountryRegion);
+		FPRINT_NUM(CountryRegionABand);
+		FPRINT_STR(CountryCode);
+		FPRINT_NUM(BssidNum);
+		ssid_num = atoi(nvram_get(mode, "BssidNum"));
+
+		FPRINT_STR(SSID1);
+		FPRINT_STR(SSID2);
+		FPRINT_STR(SSID3);
+		FPRINT_STR(SSID4);
+		FPRINT_STR(SSID5);
+		FPRINT_STR(SSID6);
+		FPRINT_STR(SSID7);
+		FPRINT_STR(SSID8);
+
+		FPRINT_NUM(WirelessMode);
+		FPRINT_STR(FixedTxMode);
+
+		//TxRate(FixedRate)
+		bzero(tx_rate, sizeof(char)*16);
+		for (i = 0; i < ssid_num; i++)
+		{
+			sprintf(tx_rate+strlen(tx_rate), "%d",
+					atoi(nvram_bufget(mode, "TxRate")));
+			sprintf(tx_rate+strlen(tx_rate), "%c", ';');
+		}
+		tx_rate[strlen(tx_rate) - 1] = '\0';
+		fprintf(fp, "TxRate=%s\n", tx_rate);
+
+		FPRINT_NUM(Channel);
+		FPRINT_NUM(BasicRate);
+		FPRINT_NUM(BeaconPeriod);
+		FPRINT_NUM(DtimPeriod);
+		FPRINT_NUM(TxPower);
+		FPRINT_NUM(DisableOLBC);
+		FPRINT_NUM(BGProtection);
+		fprintf(fp, "TxAntenna=\n");
+		fprintf(fp, "RxAntenna=\n");
+		FPRINT_NUM(TxPreamble);
+		FPRINT_NUM(RTSThreshold  );
+		FPRINT_NUM(FragThreshold  );
+		FPRINT_NUM(TxBurst);
+		FPRINT_NUM(PktAggregate);
+		fprintf(fp, "TurboRate=0\n");
+
+		//WmmCapable
+		bzero(wmm_enable, sizeof(char)*16);
+		for (i = 0; i < ssid_num; i++)
+		{
+			sprintf(wmm_enable+strlen(wmm_enable), "%d",
+					atoi(nvram_bufget(mode, "WmmCapable")));
+			sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
+		}
+		wmm_enable[strlen(wmm_enable) - 1] = '\0';
+		fprintf(fp, "WmmCapable=%s\n", wmm_enable);
+
+		FPRINT_STR(APAifsn);
+		FPRINT_STR(APCwmin);
+		FPRINT_STR(APCwmax);
+		FPRINT_STR(APTxop);
+		FPRINT_STR(APACM);
+		FPRINT_STR(BSSAifsn);
+		FPRINT_STR(BSSCwmin);
+		FPRINT_STR(BSSCwmax);
+		FPRINT_STR(BSSTxop);
+		FPRINT_STR(BSSACM);
+		FPRINT_STR(AckPolicy);
+		FPRINT_STR(APSDCapable);
+		FPRINT_STR(DLSCapable);
+		FPRINT_STR(NoForwarding);
+		FPRINT_NUM(NoForwardingBTNBSSID);
+		FPRINT_STR(HideSSID);
+		FPRINT_NUM(ShortSlot);
+		FPRINT_NUM(AutoChannelSelect);
+
+		FPRINT_STR(IEEE8021X);
+		FPRINT_NUM(IEEE80211H);
+		FPRINT_NUM(CarrierDetect);
+
+		FPRINT_NUM(CSPeriod);
+		FPRINT_STR(RDRegion);
+		FPRINT_NUM(StationKeepAlive);
+		FPRINT_NUM(DfsLowerLimit);
+		FPRINT_NUM(DfsUpperLimit);
+		FPRINT_NUM(FixDfsLimit);
+		FPRINT_NUM(LongPulseRadarTh);
+		FPRINT_NUM(AvgRssiReq);
+		FPRINT_NUM(DFS_R66);
+		FPRINT_STR(BlockCh);
+
+		FPRINT_STR(PreAuth);
+		FPRINT_STR(AuthMode);
+		FPRINT_STR(EncrypType);
+    		/*kurtis: WAPI*/
+		FPRINT_STR(WapiPsk1);
+		FPRINT_STR(WapiPskType);
+		FPRINT_STR(Wapiifname);
+		FPRINT_STR(WapiAsCertPath);
+		FPRINT_STR(WapiUserCertPath);
+		FPRINT_STR(WapiAsIpAddr);
+		FPRINT_STR(WapiAsPort);
+        
+		FPRINT_NUM(BssidNum);
+
+		FPRINT_STR(RekeyMethod);
+		FPRINT_NUM(RekeyInterval);
+		FPRINT_STR(PMKCachePeriod);
+
+		FPRINT_NUM(MeshAutoLink);
+		FPRINT_STR(MeshAuthMode);
+		FPRINT_STR(MeshEncrypType);
+		FPRINT_NUM(MeshDefaultkey);
+		FPRINT_STR(MeshWEPKEY);
+		FPRINT_STR(MeshWPAKEY);
+		FPRINT_STR(MeshId);
+
+		//WPAPSK
+		FPRINT_STR(WPAPSK1);
+		FPRINT_STR(WPAPSK2);
+		FPRINT_STR(WPAPSK3);
+		FPRINT_STR(WPAPSK4);
+		FPRINT_STR(WPAPSK5);
+		FPRINT_STR(WPAPSK6);
+		FPRINT_STR(WPAPSK7);
+		FPRINT_STR(WPAPSK8);
+
+		FPRINT_STR(DefaultKeyID);
+		FPRINT_STR(Key1Type);
+		FPRINT_STR(Key1Str1);
+		FPRINT_STR(Key1Str2);
+		FPRINT_STR(Key1Str3);
+		FPRINT_STR(Key1Str4);
+		FPRINT_STR(Key1Str5);
+		FPRINT_STR(Key1Str6);
+		FPRINT_STR(Key1Str7);
+		FPRINT_STR(Key1Str8);
+
+		FPRINT_STR(Key2Type);
+		FPRINT_STR(Key2Str1);
+		FPRINT_STR(Key2Str2);
+		FPRINT_STR(Key2Str3);
+		FPRINT_STR(Key2Str4);
+		FPRINT_STR(Key2Str5);
+		FPRINT_STR(Key2Str6);
+		FPRINT_STR(Key2Str7);
+		FPRINT_STR(Key2Str8);
+
+		FPRINT_STR(Key3Type);
+		FPRINT_STR(Key3Str1);
+		FPRINT_STR(Key3Str2);
+		FPRINT_STR(Key3Str3);
+		FPRINT_STR(Key3Str4);
+		FPRINT_STR(Key3Str5);
+		FPRINT_STR(Key3Str6);
+		FPRINT_STR(Key3Str7);
+		FPRINT_STR(Key3Str8);
+
+		FPRINT_STR(Key4Type);
+		FPRINT_STR(Key4Str1);
+		FPRINT_STR(Key4Str2);
+		FPRINT_STR(Key4Str3);
+		FPRINT_STR(Key4Str4);
+		FPRINT_STR(Key4Str5);
+		FPRINT_STR(Key4Str6);
+		FPRINT_STR(Key4Str7);
+		FPRINT_STR(Key4Str8);
+
+		FPRINT_NUM(HSCounter);
+
+		FPRINT_NUM(HT_HTC);
+		FPRINT_NUM(HT_RDG);
+		FPRINT_NUM(HT_LinkAdapt);
+		FPRINT_NUM(HT_OpMode);
+		FPRINT_NUM(HT_MpduDensity);
+		FPRINT_NUM(HT_EXTCHA);
+		FPRINT_NUM(HT_BW);
+		FPRINT_NUM(HT_AutoBA);
+		FPRINT_NUM(HT_BADecline);
+		FPRINT_NUM(HT_AMSDU);
+		FPRINT_NUM(HT_BAWinSize);
+		FPRINT_NUM(HT_GI);
+		FPRINT_NUM(HT_STBC);
+		FPRINT_NUM(HT_MCS);
+		FPRINT_NUM(HT_TxStream);
+		FPRINT_NUM(HT_RxStream);
+		FPRINT_NUM(HT_PROTECT);
+
+		FPRINT_NUM(WscConfMode);
+
+		//WscConfStatus
+		if (atoi(nvram_bufget(mode, "WscConfigured")) == 0)
+			fprintf(fp, "WscConfStatus=%d\n", 1);
+		else
+			fprintf(fp, "WscConfStatus=%d\n", 2);
+		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
+			FPRINT_STR(WscVendorPinCode);
+
+		FPRINT_NUM(AccessPolicy0);
+		FPRINT_STR(AccessControlList0);
+		FPRINT_NUM(AccessPolicy1);
+		FPRINT_STR(AccessControlList1);
+		FPRINT_NUM(AccessPolicy2);
+		FPRINT_STR(AccessControlList2);
+		FPRINT_NUM(AccessPolicy3);
+		FPRINT_STR(AccessControlList3);
+		FPRINT_NUM(AccessPolicy4);
+		FPRINT_STR(AccessControlList4);
+		FPRINT_NUM(AccessPolicy5);
+		FPRINT_STR(AccessControlList5);
+		FPRINT_NUM(AccessPolicy6);
+		FPRINT_STR(AccessControlList6);
+		FPRINT_NUM(AccessPolicy7);
+		FPRINT_STR(AccessControlList7);
+
+		FPRINT_NUM(WdsEnable);
+		FPRINT_STR(WdsPhyMode);
+		FPRINT_STR(WdsEncrypType);
+		FPRINT_STR(WdsList);
+		FPRINT_STR(WdsKey);
+		FPRINT_STR(RADIUS_Server);
+		FPRINT_STR(RADIUS_Port);
+		FPRINT_STR(RADIUS_Key);
+		FPRINT_STR(RADIUS_Acct_Server);
+		FPRINT_NUM(RADIUS_Acct_Port);
+		FPRINT_STR(RADIUS_Acct_Key);
+		FPRINT_STR(own_ip_addr);
+		FPRINT_STR(Ethifname);
+		FPRINT_STR(EAPifname);
+		FPRINT_STR(PreAuthifname);
+		FPRINT_NUM(session_timeout_interval);
+		FPRINT_NUM(idle_timeout_interval);
+		FPRINT_NUM(WiFiTest);
+		FPRINT_NUM(TGnWifiTest);
+
+		//AP Client parameters
+		FPRINT_NUM(ApCliEnable);
+		FPRINT_STR(ApCliSsid);
+		FPRINT_STR(ApCliBssid);
+		FPRINT_STR(ApCliAuthMode);
+		FPRINT_STR(ApCliEncrypType);
+		FPRINT_STR(ApCliWPAPSK);
+		FPRINT_NUM(ApCliDefaultKeyId);
+		FPRINT_NUM(ApCliKey1Type);
+		FPRINT_STR(ApCliKey1Str);
+		FPRINT_NUM(ApCliKey2Type);
+		FPRINT_STR(ApCliKey2Str);
+		FPRINT_NUM(ApCliKey3Type);
+		FPRINT_STR(ApCliKey3Str);
+		FPRINT_NUM(ApCliKey4Type);
+		FPRINT_STR(ApCliKey4Str);
+
+		//Radio On/Off
+		if (atoi(nvram_bufget(mode, "RadioOff")) == 1)
+			fprintf(fp, "RadioOn=0\n");
+		else
+			fprintf(fp, "RadioOn=1\n");
+
+		/*
+		 * There are no SSID/WPAPSK/Key1Str/Key2Str/Key3Str/Key4Str anymore since driver1.5 , but 
+		 * STA WPS still need these entries to show the WPS result(That is the only way i know to get WPAPSK key) and
+		 * so we create empty entries here.   --YY
+		 */
+		fprintf(fp, "SSID=\nWPAPSK=\nKey1Str=\nKey2Str=\nKey3Str=\nKey4Str=\n");
+	}
+
+    nvram_close(mode);
+    fclose(fp);
+    return 0;
+}

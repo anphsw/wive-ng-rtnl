@@ -40,5 +40,8 @@ unsigned int getNvramBlockSize(int index);
 char *getNvramName(int index);
 unsigned int getNvramIndex(char *name);
 void toggleNvramDebug(void);
-
+int renew_nvram(int mode, char *fname);
+int nvram_show(int mode);
+int nvram_load_default(void);
+int gen_wifi_config(int mode);
 #endif

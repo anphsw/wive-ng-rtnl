@@ -62,7 +62,7 @@ restore(){
 }
 
 nvramreset(){
-    ralink_init default 2860
+    nvram_default 2860
 }
 
 fullreset(){

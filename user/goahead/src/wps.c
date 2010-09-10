@@ -485,9 +485,7 @@ static void GenPIN(webs_t wp, char_t *path, char_t *query)
 	sprintf(new_pin, "%08d", getAPPIN("ra0"));
 
 	nvram_set(RT2860_NVRAM, "WscVendorPinCode", new_pin);
-	
-	doSystem("ralink_init make_wireless_config rt2860");
-
+	gen_wifi_config(RT2860_NVRAM);	
 	websRedirect(wp, "wps/wps.asp");
 }
 
@@ -504,13 +502,6 @@ static void OOB(webs_t wp, char_t *path, char_t *query)
 	// clear WSC result indicator
 	g_WscResult = 0;
 	LedReset();
-
-/*        if(getAPMac("ra0", mac) != -1) do not touch SSID sfstudio
-                sprintf(SSID, "%s_%s", mac, nvram_get(RT2860_NVRAM, "SSID1"));
-        else
-                sprintf(SSID, "%s_AP", nvram_get(RT2860_NVRAM, "SSID1"));
-
-        nvram_set(RT2860_NVRAM, "SSID1", SSID); */
 
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "WscConfigured", "0");

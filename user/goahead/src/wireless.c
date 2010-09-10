@@ -1175,7 +1175,7 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	doSystem("ifconfig ra0 down");
-	doSystem("ralink_init make_wireless_config rt2860");
+	gen_wifi_config(RT2860_NVRAM);
 	doSystem("ifconfig ra0 up");
 	//after ra0 down&up we must restore WPS status
 	WPSRestart();
@@ -1191,10 +1191,8 @@ void restart8021XDaemon(int nvram)
 		return;
 	num = atoi(num_s);
 
-	if(nvram == RT2860_NVRAM) {
-		doSystem("killall -q rt2860apd");
-		doSystem("killall -q -9 rt2860apd");
-	}
+	doSystem("killall -q rt2860apd");
+	doSystem("killall -q -9 rt2860apd");
 
 	/*
 	 * In fact we only support mbssid[0] to use 802.1x radius settings.
@@ -1216,10 +1214,8 @@ void restart8021XDaemon(int nvram)
 		}
 	}
 
-	if(apd_flag){
-		if(nvram == RT2860_NVRAM)
-			doSystem("rt2860apd");	
-	}
+	if(apd_flag)
+		doSystem("rt2860apd");	
 }
 
 
@@ -1610,7 +1606,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
 		STF(nvram, mbssid, PMKCachePeriod);
 		STF(nvram, mbssid, PreAuth);
-	}else if(	!strcmp(security_mode, "WPA2PSK") ||	// !------------------  WPA2 Personal Mode ----------------
+	}else if( !strcmp(security_mode, "WPA2PSK") ||	// !------------------  WPA2 Personal Mode ----------------
 				!strcmp(security_mode, "WPAPSKWPA2PSK") ){ 	//! -------------   WPA PSK WPA2 PSK mixed
 		char *pass_phrase_str;
 
@@ -1642,7 +1638,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
 //# WPS
-	if(nvram == RT2860_NVRAM && mbssid == 0){		// only ra0 supports WPS now.
+	if(mbssid == 0){		// only ra0 supports WPS now.
 		char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
 		if(wordlist){
 			if (strcmp(wordlist, "0"))
@@ -1653,17 +1649,14 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}
 
 	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
-	if(nvram == RT2860_NVRAM){
-		doSystem("ralink_init make_wireless_config rt2860");
-		for(i=0; i<mbssid_num; i++){
-			doSystem("ifconfig ra%d down", i);
-		}
-		for(i=0; i<mbssid_num; i++){
-			doSystem("ifconfig ra%d up", i);
-		}
-		WPSRestart();
-	}else
-		printf("*** Unknown interface.\n");
+	for(i=0; i<mbssid_num; i++){
+		doSystem("ifconfig ra%d down", i);
+	}
+	gen_wifi_config(RT2860_NVRAM);
+	for(i=0; i<mbssid_num; i++){
+		doSystem("ifconfig ra%d up", i);
+	}
+	WPSRestart();
 
 	restart8021XDaemon(nvram);
 

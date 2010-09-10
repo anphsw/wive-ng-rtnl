@@ -30,6 +30,8 @@ romfs:
 	ln -sf ralink_init nvram_get
 	ln -sf ralink_init nvram_set
 	ln -sf ralink_init nvram_show
+	ln -sf ralink_init nvram_default
 	mv -f nvram_get $(ROMFSDIR)/bin
 	mv -f nvram_set $(ROMFSDIR)/bin
 	mv -f nvram_show $(ROMFSDIR)/bin
+	mv -f nvram_default $(ROMFSDIR)/bin

@@ -689,15 +689,11 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-void ResetNvram(void)
-{
-        system("fs nvramreset");
-        system("fs restore");
-}
-
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
-    ResetNvram();
+    nvram_load_default();
+    //crash rwfs. restore at load
+    system("fs restore");
 }
 
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD

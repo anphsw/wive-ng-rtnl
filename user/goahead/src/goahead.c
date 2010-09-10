@@ -251,7 +251,9 @@ ioctl_err:
 
 static void fs_nvram_reset_handler (int signum)
 {
-	ResetNvram();
+	nvram_load_default();
+        //crash rwfs. restore at load                                                                                                       
+        system("fs restore"); 
 }
 
 
