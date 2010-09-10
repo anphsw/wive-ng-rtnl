@@ -112,7 +112,6 @@ void usage(char *cmd)
 	printf("  %s <command> [<platform>] [<file>]\n\n", cmd);
 	printf("command:\n");
 	printf("  rt2860_nvram_show - display rt2860 values in nvram\n");
-	printf("  inic_nvram_show   - display inic values in nvram\n");
 #ifdef CONFIG_DUAL_IMAGE
 	printf("  uboot_nvram_show - display uboot parameter values\n");
 #endif
@@ -122,7 +121,6 @@ void usage(char *cmd)
 	printf("  clear	  - clear all entries in nvram for <platform>\n");
 	printf("platform:\n");
 	printf("  2860    - rt2860\n");
-	printf("  inic    - intelligent nic\n");
 #ifdef CONFIG_DUAL_IMAGE
 	printf("  uboot    - uboot parameter\n");
 #endif
@@ -152,8 +150,6 @@ int main(int argc, char *argv[])
 	if (argc == 2) {
 		if (!strncmp(argv[1], "rt2860_nvram_show", 18))
 			nvram_show(RT2860_NVRAM);
-		else if (!strncmp(argv[1], "inic_nvram_show", 16))
-			nvram_show(RTINIC_NVRAM);
 #ifdef CONFIG_DUAL_IMAGE
 		else if (!strncmp(argv[1], "uboot_nvram_show", 17))
 			nvram_show(UBOOT_NVRAM);
@@ -167,8 +163,6 @@ int main(int argc, char *argv[])
 			if (!strncmp(argv[2], "2860", 5) ||
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
 				gen_config(RT2860_NVRAM);
-			else if (!strncasecmp(argv[2], "inic", 5))
-				gen_config(RTINIC_NVRAM);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				fprintf(stderr,"No support of gen command of uboot parameter.\n");
@@ -179,21 +173,17 @@ int main(int argc, char *argv[])
 			if (!strncmp(argv[2], "2860", 5) ||
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
 				nvram_show(RT2860_NVRAM);
-			else if (!strncasecmp(argv[2], "inic", 5))
-				nvram_show(RTINIC_NVRAM);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				nvram_show(UBOOT_NVRAM);
 #endif
 			else
-				usage(argv[0]);
+				nvram_show(RT2860_NVRAM); //default show 2860
 
 		} else if(!strncasecmp(argv[1], "clear", 6)) {
 			if (!strncmp(argv[2], "2860", 5) || 
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
 				nvram_clear(RT2860_NVRAM);
-			else if (!strncasecmp(argv[2], "inic", 5))
-				nvram_clear(RTINIC_NVRAM);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				nvram_clear(UBOOT_NVRAM);
@@ -207,8 +197,6 @@ int main(int argc, char *argv[])
 			if (!strncmp(argv[2], "2860", 5) ||
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
 				renew_nvram(RT2860_NVRAM, argv[3]);
-			else if (!strncasecmp(argv[2], "inic", 5))
-				renew_nvram(RTINIC_NVRAM, argv[3]);
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				fprintf(stderr,"No support of renew command of uboot parameter.\n");
@@ -245,9 +233,6 @@ int gen_config(int mode)
 	system("mkdir -p /etc/Wireless/RT2860");
 	if (mode == RT2860_NVRAM) {
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
-	} else if (mode == RTINIC_NVRAM) {
-		system("mkdir -p /etc/Wireless/iNIC");
-		fp = fopen("/etc/Wireless/iNIC/iNIC_ap.dat", "w+");
 	} else
 		return 0;
 
@@ -257,7 +242,7 @@ int gen_config(int mode)
 #define FPRINT_NUM(x) fprintf(fp, #x"=%d\n", atoi(nvram_bufget(mode, #x)));
 #define FPRINT_STR(x) fprintf(fp, #x"=%s\n", nvram_bufget(mode, #x));
 
-	if ((RT2860_NVRAM == mode) || (RTINIC_NVRAM == mode)) {
+	if (RT2860_NVRAM == mode) {
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
