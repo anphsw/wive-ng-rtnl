@@ -532,7 +532,7 @@ int renew_nvram(int mode, char *fname)
 	}
 
 	//find "Default" first
-	while (fgets(buf, BUFSZ, fp) {
+	while (fgets(buf, BUFSZ, fp)) {
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
 		if (!strncmp(buf, "Default\n", 8)) {
