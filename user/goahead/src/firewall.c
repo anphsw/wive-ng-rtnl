@@ -1186,7 +1186,6 @@ static void ipportFilterDelete(webs_t wp, char_t *path, char_t *query)
 
 	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rules);
 	
-
 	websHeader(wp);
 	websWrite(wp, T("s<br>\n") );
 	websWrite(wp, T("fromPort: <br>\n"));
@@ -1242,8 +1241,7 @@ static void portForwardDelete(webs_t wp, char_t *path, char_t *query)
 	deleteNthValueMulti(deleArray, rule_count, rules, ';');
 	free(deleArray);
 
-	nvram_set(RT2860_NVRAM, "PortForwardRules", rules);
-	
+	nvram_set(RT2860_NVRAM, "PortForwardRules", rules);	
 
 	websHeader(wp);
 	websWrite(wp, T("s<br>\n") );
@@ -1418,8 +1416,7 @@ static void ipportFilter(webs_t wp, char_t *path, char_t *query)
 		snprintf(rule, sizeof(rule), "%s,%s,%s,%s,%d,%d,%s,%s,%s,%d,%d,%d,%d,%s,%s",
 			iface, sip_1, sim_1, sip_2, sprf_int, sprt_int, dip_1, dim_1, dip_2, dprf_int, dprt_int, proto, action, comment, mac_address);
 
-	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);
-	
+	nvram_set(RT2860_NVRAM, "IPPortFilterRules", rule);	
 
 	websHeader(wp);
 	websWrite(wp, T("mac: %s<br>\n"), mac_address);
@@ -1529,16 +1526,16 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	if(strchr(comment, ';') || strchr(comment, ','))
 		return;
 
-	nvram_set(RT2860_NVRAM, "PortForwardEnable", "1");
-
 	if ((PortForwardRules = nvram_get(RT2860_NVRAM, "PortForwardRules")) && strlen( PortForwardRules))
 		snprintf(rule, sizeof(rule), "%s;%s,%s,%d,%d,%d,%s",  PortForwardRules, iface, ip_address, prf_int, prt_int, proto, comment);
 	else
 		snprintf(rule, sizeof(rule), "%s,%s,%d,%d,%d,%s", iface, ip_address, prf_int, prt_int, proto, comment);
 
-	nvram_set(RT2860_NVRAM, "PortForwardRules", rule);
-	
-
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "PortForwardEnable", "1");
+	nvram_bufset(RT2860_NVRAM, "PortForwardRules", rule);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 end:
 	websHeader(wp);
 	websWrite(wp, T("portForwardEnabled: %s<br>\n"), pfe);
@@ -1615,10 +1612,13 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	if(atoi(dmzE) == 0){		// disable
 		nvram_set(RT2860_NVRAM, "DMZEnable", "0");
 	}else{					// enable
-		nvram_set(RT2860_NVRAM, "DMZEnable", "1");
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "DMZEnable", "1");
 		if(strlen(ip_address)){
-			nvram_set(RT2860_NVRAM, "DMZIPAddress", ip_address);
+			nvram_bufset(RT2860_NVRAM, "DMZIPAddress", ip_address);
 		}
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 
 	
@@ -1840,10 +1840,13 @@ static void webContentFilter(webs_t wp, char_t *path, char_t *query)
 	if(!proxy || !java || !activex || !cookies)
 		return;
 
-	nvram_set(RT2860_NVRAM, "websFilterProxy",   atoi(proxy)   ? "1" : "0" );
-	nvram_set(RT2860_NVRAM, "websFilterJava",    atoi(java)    ? "1" : "0" );
-	nvram_set(RT2860_NVRAM, "websFilterActivex", atoi(activex) ? "1" : "0" );
-	nvram_set(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "websFilterProxy",   atoi(proxy)   ? "1" : "0" );
+	nvram_bufset(RT2860_NVRAM, "websFilterJava",    atoi(java)    ? "1" : "0" );
+	nvram_bufset(RT2860_NVRAM, "websFilterActivex", atoi(activex) ? "1" : "0" );
+	nvram_bufset(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 	
 
 	websHeader(wp);
