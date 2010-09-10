@@ -525,7 +525,8 @@ int renew_nvram(int mode, char *fname)
 #endif
 	int found = 0, need_commit = 0;
 
-	if (!(fp = fopen(fname, "ro")) {
+	fp = fopen(fname, "ro")
+	if (!fp) {
 		perror("fopen");
 		return -1;
 	}
