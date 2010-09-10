@@ -419,7 +419,7 @@ static void revise_mbss_value(int old_num, int new_num)
 			snprintf(p, 264 - (p - new_value), ";%s", default_value); \
 			p += 1 + strlen(default_value); \
 		} \
-		nvram_set(RT2860_NVRAM, #field, new_value); \
+		nvram_bufset(RT2860_NVRAM, #field, new_value); \
 	} while (0)
 
 #define MBSS_REMOVE(field) \
@@ -441,6 +441,7 @@ static void revise_mbss_value(int old_num, int new_num)
 	} while (0)
 
 	if (new_num > old_num) {
+		nvram_init(RT2860_NVRAM);
 		//MBSS_INIT(SSID, "ssid");
 		MBSS_INIT(AuthMode, "OPEN");
 		MBSS_INIT(EncrypType, "NONE");
@@ -461,18 +462,25 @@ static void revise_mbss_value(int old_num, int new_num)
 		//MBSS_INIT(HideSSID, "0");
 		MBSS_INIT(PreAuth, "0");
 		MBSS_INIT(WmmCapable, "1");
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
+
+		nvram_init(RT2860_NVRAM);
 		for (i = old_num + 1; i <= new_num; i++) {
-			nvram_set(RT2860_NVRAM, racat("WPAPSK", i), "12345678");
-			nvram_set(RT2860_NVRAM, racat("Key1Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key2Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key3Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key4Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("WPAPSK", i), "12345678");
+			nvram_bufset(RT2860_NVRAM, racat("Key1Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key2Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key3Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key4Str", i), "");
 			// The index of AccessPolicy & AccessControlList starts at 0.
-			nvram_set(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
-			nvram_set(RT2860_NVRAM, racat("AccessControlList", i-1), "");
+			nvram_bufset(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
+			nvram_bufset(RT2860_NVRAM, racat("AccessControlList", i-1), "");
 		}
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 	else if (new_num < old_num) {
+		nvram_init(RT2860_NVRAM);
 		//MBSS_REMOVE(SSID);
 		MBSS_REMOVE(AuthMode);
 		MBSS_REMOVE(EncrypType);
@@ -493,17 +501,23 @@ static void revise_mbss_value(int old_num, int new_num)
 		MBSS_REMOVE(HideSSID);
 		MBSS_REMOVE(PreAuth);
 		MBSS_REMOVE(WmmCapable);
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
+
+		nvram_init(RT2860_NVRAM);
 		for (i = new_num + 1; i <= old_num; i++) {
-			nvram_set(RT2860_NVRAM, racat("SSID", i), "");
-			nvram_set(RT2860_NVRAM, racat("WPAPSK", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key1Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key2Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key3Str", i), "");
-			nvram_set(RT2860_NVRAM, racat("Key4Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("SSID", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("WPAPSK", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key1Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key2Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key3Str", i), "");
+			nvram_bufset(RT2860_NVRAM, racat("Key4Str", i), "");
 			// The index of AccessPolicy & AccessControlList starts at 0.
-			nvram_set(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
-			nvram_set(RT2860_NVRAM, racat("AccessControlList", i-1), "");
+			nvram_bufset(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
+			nvram_bufset(RT2860_NVRAM, racat("AccessControlList", i-1), "");
 		}
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 }
 
@@ -567,14 +581,17 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	old_bssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
 	new_bssid_num = atoi(bssid_num);
 
-	nvram_set(RT2860_NVRAM, "WirelessMode", wirelessmode);
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "WirelessMode", wirelessmode);
 	//BasicRate: bg,bgn,n:15, b:3; g,gn:351
 	if (!strncmp(wirelessmode, "4", 2) || !strncmp(wirelessmode, "7", 2)) //g, gn
-		nvram_set(RT2860_NVRAM, "BasicRate", "351");
+		nvram_bufset(RT2860_NVRAM, "BasicRate", "351");
 	else if (!strncmp(wirelessmode, "1", 2)) //b
-		nvram_set(RT2860_NVRAM, "BasicRate", "3");
+		nvram_bufset(RT2860_NVRAM, "BasicRate", "3");
 	else //bg,bgn,n
-		nvram_set(RT2860_NVRAM, "BasicRate", "15");
+		nvram_bufset(RT2860_NVRAM, "BasicRate", "15");
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
         if (atoi(wirelessmode) >= 6)
                 is_n = 1;
@@ -585,7 +602,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websError(wp, 403, T("'SSID' should not be empty!"));
 		return;
 	}
-	nvram_set(RT2860_NVRAM, "SSID1", ssid);
+
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "SSID1", ssid);
 	if (strchr(hssid, '0') != NULL)
 		sprintf(hidden_ssid, "%s", "1");
 	else
@@ -596,22 +615,19 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		sprintf(noforwarding, "%s", "0");
 
 //#WPS
-	{
-		char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
-		if(wordlist){
-			if (strcmp(wordlist, "0"))
-				doSystem("iwpriv ra0 set WscConfStatus=1");
-			nvram_set(RT2860_NVRAM, "WscConfigured", "1");
-			g_wsc_configured = 1;
-		}
+	char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
+	if(wordlist){
+		if (strcmp(wordlist, "0"))
+		    doSystem("iwpriv ra0 set WscConfStatus=1");
+		    nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
+		    g_wsc_configured = 1;
 	}
 
-//#WPS
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
 	i = 2;
 	if (0 != strlen(mssid_1)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_1);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_1);
 		if (strchr(hssid, '1') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -623,7 +639,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_2)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_2);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_2);
 		if (strchr(hssid, '2') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -635,7 +651,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_3)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_3);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_3);
 		if (strchr(hssid, '3') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -647,7 +663,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_4)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_4);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_4);
 		if (strchr(hssid, '4') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -659,7 +675,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_5)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_5);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_5);
 		if (strchr(hssid, '5') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -671,7 +687,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_6)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_6);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_6);
 		if (strchr(hssid, '6') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -683,7 +699,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 	if (0 != strlen(mssid_7)) {
-		nvram_set(RT2860_NVRAM, racat("SSID", i), mssid_7);
+		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_7);
 		if (strchr(hssid, '7') != NULL)
 			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
 		else
@@ -695,7 +711,10 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		i++;
 	}
 
-	nvram_set(RT2860_NVRAM, "BssidNum", bssid_num);
+	nvram_bufset(RT2860_NVRAM, "BssidNum", bssid_num);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+
 	if (new_bssid_num < 1 || new_bssid_num > 8) {
 		
 		websError(wp, 403, T("'bssid_num' %s is out of range!"), bssid_num);
@@ -703,13 +722,15 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 	revise_mbss_value(old_bssid_num, new_bssid_num);
 
+	nvram_init(RT2860_NVRAM);
 	//Broadcast SSID
-	nvram_set(RT2860_NVRAM, "HideSSID", hidden_ssid);
-
+	nvram_bufset(RT2860_NVRAM, "HideSSID", hidden_ssid);
 	// NoForwarding and NoForwardingBTNBSSID
-	nvram_set(RT2860_NVRAM, "NoForwarding", noforwarding);
-	nvram_set(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
-
+	nvram_bufset(RT2860_NVRAM, "NoForwarding", noforwarding);
+	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+                    
 	//11abg Channel or AutoSelect
 	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
 			(0 == strlen(sz11gChannel))) {
@@ -717,96 +738,99 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
-	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) &&
-			!strncmp(sz11gChannel, "0", 2))
-		nvram_set(RT2860_NVRAM, "AutoChannelSelect", "1");
+	nvram_init(RT2860_NVRAM);
+	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
+		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
 	else
-		nvram_set(RT2860_NVRAM, "AutoChannelSelect", "0");
+		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
 	if (0 != strlen(sz11aChannel))
 	{
-		nvram_set(RT2860_NVRAM, "Channel", sz11aChannel);
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
 		doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
 	}
 	if (0 != strlen(sz11bChannel))
 	{
-		nvram_set(RT2860_NVRAM, "Channel", sz11bChannel);
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
 		doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
 	}
 	if (0 != strlen(sz11gChannel))
 	{
-		nvram_set(RT2860_NVRAM, "Channel", sz11gChannel);
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
 		doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
 	}
-	sleep(1);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
+	nvram_init(RT2860_NVRAM);
 	//Rate for a, b, g
 	if (strncmp(abg_rate, "", 1)) {
 		int rate = atoi(abg_rate);
 		if (!strncmp(wirelessmode, "0", 2) || !strncmp(wirelessmode, "2", 2) || !strncmp(wirelessmode, "4", 2)) {
 			if (rate == 1 || rate == 2 || rate == 5 || rate == 11)
-				nvram_set(RT2860_NVRAM, "FixedTxMode", "CCK");
+				nvram_bufset(RT2860_NVRAM, "FixedTxMode", "CCK");
 			else
-				nvram_set(RT2860_NVRAM, "FixedTxMode", "OFDM");
+				nvram_bufset(RT2860_NVRAM, "FixedTxMode", "OFDM");
 
 			if (rate == 1)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "0");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "0");
 			else if (rate == 2)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "1");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "1");
 			else if (rate == 5)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "2");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "2");
 			else if (rate == 6)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "0");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "0");
 			else if (rate == 9)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "1");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "1");
 			else if (rate == 11)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "3");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "3");
 			else if (rate == 12)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "2");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "2");
 			else if (rate == 18)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "3");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "3");
 			else if (rate == 24)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "4");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "4");
 			else if (rate == 36)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "5");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "5");
 			else if (rate == 48)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "6");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "6");
 			else if (rate == 54)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "7");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "7");
 			else
-				nvram_set(RT2860_NVRAM, "HT_MCS", "33");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "33");
 		}
 		else if (!strncmp(wirelessmode, "1", 2)) {
-			nvram_set(RT2860_NVRAM, "FixedTxMode", "CCK");
+			nvram_bufset(RT2860_NVRAM, "FixedTxMode", "CCK");
 			if (rate == 1)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "0");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "0");
 			else if (rate == 2)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "1");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "1");
 			else if (rate == 5)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "2");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "2");
 			else if (rate == 11)
-				nvram_set(RT2860_NVRAM, "HT_MCS", "3");
+				nvram_bufset(RT2860_NVRAM, "HT_MCS", "3");
 		}
 		else //shall not happen
 			error(E_L, E_LOG, T("wrong configurations from web UI"));
 	}
 	else
-		nvram_set(RT2860_NVRAM, "FixedTxMode", "HT");
+		nvram_bufset(RT2860_NVRAM, "FixedTxMode", "HT");
 
 	//HT_OpMode, HT_BW, HT_GI, HT_MCS, HT_RDG, HT_EXTCHA, HT_AMSDU, HT_TxStream, HT_RxStream
 	if (is_n) {
-		nvram_set(RT2860_NVRAM, "HT_OpMode", n_mode);
-		nvram_set(RT2860_NVRAM, "HT_BW", n_bandwidth);
-		nvram_set(RT2860_NVRAM, "HT_GI", n_gi);
-		nvram_set(RT2860_NVRAM, "HT_MCS", n_mcs);
-		nvram_set(RT2860_NVRAM, "HT_RDG", n_rdg);
-		nvram_set(RT2860_NVRAM, "HT_EXTCHA", n_extcha);
-		nvram_set(RT2860_NVRAM, "HT_AMSDU", n_amsdu);
-		nvram_set(RT2860_NVRAM, "HT_AutoBA", n_autoba);
-		nvram_set(RT2860_NVRAM, "HT_BADecline", n_badecline);
+		nvram_bufset(RT2860_NVRAM, "HT_OpMode", n_mode);
+		nvram_bufset(RT2860_NVRAM, "HT_BW", n_bandwidth);
+		nvram_bufset(RT2860_NVRAM, "HT_GI", n_gi);
+		nvram_bufset(RT2860_NVRAM, "HT_MCS", n_mcs);
+		nvram_bufset(RT2860_NVRAM, "HT_RDG", n_rdg);
+		nvram_bufset(RT2860_NVRAM, "HT_EXTCHA", n_extcha);
+		nvram_bufset(RT2860_NVRAM, "HT_AMSDU", n_amsdu);
+		nvram_bufset(RT2860_NVRAM, "HT_AutoBA", n_autoba);
+		nvram_bufset(RT2860_NVRAM, "HT_BADecline", n_badecline);
 	}
-	nvram_set(RT2860_NVRAM, "HT_TxStream", tx_stream);
-	nvram_set(RT2860_NVRAM, "HT_RxStream", rx_stream);
-	
+	nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
+	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);	
 
 	//debug print
 	websHeader(wp);
@@ -883,22 +907,22 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	wlan_mode = atoi(nvram_get(RT2860_NVRAM, "WirelessMode"));
 
 	//set to nvram
-	nvram_set(RT2860_NVRAM, "BGProtection", bg_protection);
-	//nvram_set(RT2860_NVRAM, "BasicRate", basic_rate);
-	nvram_set(RT2860_NVRAM, "BeaconPeriod", beacon);
-	nvram_set(RT2860_NVRAM, "DtimPeriod", dtim);
-	nvram_set(RT2860_NVRAM, "FragThreshold", fragment);
-	nvram_set(RT2860_NVRAM, "RTSThreshold", rts);
-	nvram_set(RT2860_NVRAM, "TxPower", tx_power);
-	nvram_set(RT2860_NVRAM, "TxPreamble", short_preamble);
-	nvram_set(RT2860_NVRAM, "ShortSlot", short_slot);
-	nvram_set(RT2860_NVRAM, "TxBurst", tx_burst);
-	nvram_set(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
-	nvram_set(RT2860_NVRAM, "RDRegion", rd_region);
-	nvram_set(RT2860_NVRAM, "CarrierDetect", carrier_detect);
-	nvram_set(RT2860_NVRAM, "APSDCapable", apsd_capable);
-	nvram_set(RT2860_NVRAM, "DLSCapable", dls_capable);
-	nvram_set(RT2860_NVRAM, "M2UEnabled", m2u_enable);
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "BGProtection", bg_protection);
+	nvram_bufset(RT2860_NVRAM, "BeaconPeriod", beacon);
+	nvram_bufset(RT2860_NVRAM, "DtimPeriod", dtim);
+	nvram_bufset(RT2860_NVRAM, "FragThreshold", fragment);
+	nvram_bufset(RT2860_NVRAM, "RTSThreshold", rts);
+	nvram_bufset(RT2860_NVRAM, "TxPower", tx_power);
+	nvram_bufset(RT2860_NVRAM, "TxPreamble", short_preamble);
+	nvram_bufset(RT2860_NVRAM, "ShortSlot", short_slot);
+	nvram_bufset(RT2860_NVRAM, "TxBurst", tx_burst);
+	nvram_bufset(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
+	nvram_bufset(RT2860_NVRAM, "RDRegion", rd_region);
+	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
+	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
+	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
+	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);
 
 	bzero(wmm_enable, sizeof(char)*16);
 	for (i = 0; i < ssid_num; i++)
@@ -907,43 +931,43 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
 	}
 	wmm_enable[strlen(wmm_enable) - 1] = '\0';
-	nvram_set(RT2860_NVRAM, "WmmCapable", wmm_enable);
+	nvram_bufset(RT2860_NVRAM, "WmmCapable", wmm_enable);
 
 	if (!strncmp(wmm_capable, "1", 2)) {
 		if (wlan_mode < 5)
-			nvram_set(RT2860_NVRAM, "TxBurst", "0");
+			nvram_bufset(RT2860_NVRAM, "TxBurst", "0");
 	}
 
-	nvram_set(RT2860_NVRAM, "CountryCode", countrycode);
+	nvram_bufset(RT2860_NVRAM, "CountryCode", countrycode);
 	if (!strncmp(countrycode, "US", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "0");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "0");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "0");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
 	else if (!strncmp(countrycode, "JP", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "5");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "6");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "5");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "6");
 	}
 	else if (!strncmp(countrycode, "FR", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "1");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "2");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "2");
 	}
 	else if (!strncmp(countrycode, "TW", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "1");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "3");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "3");
 	}
 	else if (!strncmp(countrycode, "IE", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "1");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "2");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "2");
 	}
 	else if (!strncmp(countrycode, "HK", 3)) {
-		nvram_set(RT2860_NVRAM, "CountryRegion", "1");
-		nvram_set(RT2860_NVRAM, "CountryRegionABand", "0");
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
 	else {
-		nvram_set(RT2860_NVRAM, "CountryCode", "");
+		nvram_bufset(RT2860_NVRAM, "CountryCode", "");
 	}
-
-	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);	
 
     //debug print
     websHeader(wp);
@@ -988,23 +1012,22 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 	wds_encryp_key3 = websGetVar(wp, T("wds_encryp_key3"), T(""));
 	wds_list = websGetVar(wp, T("wds_list"), T(""));
 
-	nvram_set(RT2860_NVRAM, "WdsEnable", wds_mode);
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "WdsEnable", wds_mode);
 	if (strncmp(wds_mode, "0", 2)) {
-		nvram_set(RT2860_NVRAM, "WdsPhyMode", wds_phy_mode);
-		nvram_set(RT2860_NVRAM, "WdsEncrypType", wds_encryp_type);
-		nvram_set(RT2860_NVRAM, "Wds0Key", wds_encryp_key0);
-		nvram_set(RT2860_NVRAM, "Wds1Key", wds_encryp_key1);
-		nvram_set(RT2860_NVRAM, "Wds2Key", wds_encryp_key2);
-		nvram_set(RT2860_NVRAM, "Wds3Key", wds_encryp_key3);
+		nvram_bufset(RT2860_NVRAM, "WdsPhyMode", wds_phy_mode);
+		nvram_bufset(RT2860_NVRAM, "WdsEncrypType", wds_encryp_type);
+		nvram_bufset(RT2860_NVRAM, "Wds0Key", wds_encryp_key0);
+		nvram_bufset(RT2860_NVRAM, "Wds1Key", wds_encryp_key1);
+		nvram_bufset(RT2860_NVRAM, "Wds2Key", wds_encryp_key2);
+		nvram_bufset(RT2860_NVRAM, "Wds3Key", wds_encryp_key3);
 		if (!strncmp(wds_mode, "2", 2) || !strncmp(wds_mode, "3", 2)) {
 			if (0 != strlen(wds_list))
-				nvram_set(RT2860_NVRAM, "WdsList", wds_list);
+				nvram_bufset(RT2860_NVRAM, "WdsList", wds_list);
 		}
 	}
-	
-
-	// restart wireless network
-        doSystem("internet.sh wifionly &");
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);	
 
 	//debug print
 	websHeader(wp);
@@ -1018,6 +1041,9 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("wds_list: %s<br>\n"), wds_list);
 	websFooter(wp);
 	websDone(wp, 200);
+
+	// restart wireless network
+        doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessApcli */
@@ -1044,22 +1070,24 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 		return;
 	}
 
-	nvram_set(RT2860_NVRAM, "ApCliEnable", "1");
-	nvram_set(RT2860_NVRAM, "ApCliSsid", ssid);
-	nvram_set(RT2860_NVRAM, "ApCliBssid", bssid);
-	nvram_set(RT2860_NVRAM, "ApCliAuthMode", mode);
-	nvram_set(RT2860_NVRAM, "ApCliEncrypType", enc);
-	nvram_set(RT2860_NVRAM, "ApCliWPAPSK", wpapsk);
-	nvram_set(RT2860_NVRAM, "ApCliDefaultKeyId", keyid);
-	nvram_set(RT2860_NVRAM, "ApCliKey1Type", keytype);
-	nvram_set(RT2860_NVRAM, "ApCliKey1Str", key1);
-	nvram_set(RT2860_NVRAM, "ApCliKey2Type", keytype);
-	nvram_set(RT2860_NVRAM, "ApCliKey2Str", key2);
-	nvram_set(RT2860_NVRAM, "ApCliKey3Type", keytype);
-	nvram_set(RT2860_NVRAM, "ApCliKey3Str", key3);
-	nvram_set(RT2860_NVRAM, "ApCliKey4Type", keytype);
-	nvram_set(RT2860_NVRAM, "ApCliKey4Str", key4);
-	
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
+	nvram_bufset(RT2860_NVRAM, "ApCliSsid", ssid);
+	nvram_bufset(RT2860_NVRAM, "ApCliBssid", bssid);
+	nvram_bufset(RT2860_NVRAM, "ApCliAuthMode", mode);
+	nvram_bufset(RT2860_NVRAM, "ApCliEncrypType", enc);
+	nvram_bufset(RT2860_NVRAM, "ApCliWPAPSK", wpapsk);
+	nvram_bufset(RT2860_NVRAM, "ApCliDefaultKeyId", keyid);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey1Type", keytype);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey1Str", key1);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey2Type", keytype);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey2Str", key2);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey3Type", keytype);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey3Str", key3);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey4Type", keytype);
+	nvram_bufset(RT2860_NVRAM, "ApCliKey4Str", key4);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	//debug print
 	websHeader(wp);
@@ -1105,30 +1133,31 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	sta_txop_all = websGetVar(wp, T("sta_txop_all"), T(""));
 	sta_acm_all = websGetVar(wp, T("sta_acm_all"), T(""));
 
+	nvram_init(RT2860_NVRAM);
 	if (0 != strlen(ap_aifsn_all))
-		nvram_set(RT2860_NVRAM, "APAifsn", ap_aifsn_all);
+		nvram_bufset(RT2860_NVRAM, "APAifsn", ap_aifsn_all);
 	if (0 != strlen(ap_cwmin_all))
-		nvram_set(RT2860_NVRAM, "APCwmin", ap_cwmin_all);
+		nvram_bufset(RT2860_NVRAM, "APCwmin", ap_cwmin_all);
 	if (0 != strlen(ap_cwmax_all))
-		nvram_set(RT2860_NVRAM, "APCwmax", ap_cwmax_all);
+		nvram_bufset(RT2860_NVRAM, "APCwmax", ap_cwmax_all);
 	if (0 != strlen(ap_txop_all))
-		nvram_set(RT2860_NVRAM, "APTxop", ap_txop_all);
+		nvram_bufset(RT2860_NVRAM, "APTxop", ap_txop_all);
 	if (0 != strlen(ap_acm_all))
-		nvram_set(RT2860_NVRAM, "APACM", ap_acm_all);
+		nvram_bufset(RT2860_NVRAM, "APACM", ap_acm_all);
 	if (0 != strlen(ap_ackpolicy_all))
-		nvram_set(RT2860_NVRAM, "AckPolicy", ap_ackpolicy_all);
+		nvram_bufset(RT2860_NVRAM, "AckPolicy", ap_ackpolicy_all);
 	if (0 != strlen(sta_aifsn_all))
-		nvram_set(RT2860_NVRAM, "BSSAifsn", sta_aifsn_all);
+		nvram_bufset(RT2860_NVRAM, "BSSAifsn", sta_aifsn_all);
 	if (0 != strlen(sta_cwmin_all))
-		nvram_set(RT2860_NVRAM, "BSSCwmin", sta_cwmin_all);
+		nvram_bufset(RT2860_NVRAM, "BSSCwmin", sta_cwmin_all);
 	if (0 != strlen(sta_cwmax_all))
-		nvram_set(RT2860_NVRAM, "BSSCwmax", sta_cwmax_all);
+		nvram_bufset(RT2860_NVRAM, "BSSCwmax", sta_cwmax_all);
 	if (0 != strlen(sta_txop_all))
-		nvram_set(RT2860_NVRAM, "BSSTxop", sta_txop_all);
+		nvram_bufset(RT2860_NVRAM, "BSSTxop", sta_txop_all);
 	if (0 != strlen(sta_acm_all))
-		nvram_set(RT2860_NVRAM, "BSSACM", sta_acm_all);
-
-	
+		nvram_bufset(RT2860_NVRAM, "BSSACM", sta_acm_all);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	websHeader(wp);
 	websWrite(wp, T("ap_aifsn_all: %s<br>\n"), ap_aifsn_all);
@@ -1327,34 +1356,39 @@ void updateFlash8021x(int nvram)
 	if(!strlen(RADIUS_Server))
 		return;
 
+	nvram_init(RT2860_NVRAM);
 	if(*operation_mode == '0'){ // Bridge
 		if (getIfIp(getLanIfName(), lan_if_addr) == -1)
-			return;
-		nvram_set(nvram, "own_ip_addr", lan_if_addr);
+			goto out;
+		nvram_bufset(nvram, "own_ip_addr", lan_if_addr);
 		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, "EAPifname", getLanIfName());
-			nvram_set(nvram, "PreAuthifname", getLanIfName());
+			nvram_bufset(nvram, "EAPifname", getLanIfName());
+			nvram_bufset(nvram, "PreAuthifname", getLanIfName());
 		}
 	}else if(*operation_mode == '1'){	// Gateway
 		if (getIfIp(getLanIfName(), lan_if_addr) == -1)
-			return;
-		nvram_set(nvram, "own_ip_addr", lan_if_addr);
+			goto out;
+		nvram_bufset(nvram, "own_ip_addr", lan_if_addr);
 		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, "EAPifname", getLanIfName());
-			nvram_set(nvram, "PreAuthifname", getLanIfName());
+			nvram_bufset(nvram, "EAPifname", getLanIfName());
+			nvram_bufset(nvram, "PreAuthifname", getLanIfName());
 		}
 	}else if(*operation_mode == '2'){	// Wireless gateway
 		if (getIfIp(getLanIfName(), lan_if_addr) == -1)
-			return;
-		nvram_set(nvram, "own_ip_addr", lan_if_addr);
+			goto out;
+		nvram_bufset(nvram, "own_ip_addr", lan_if_addr);
 		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, "EAPifname", getLanIfName());
-			nvram_set(nvram, "PreAuthifname", getLanIfName());
+			nvram_bufset(nvram, "EAPifname", getLanIfName());
+			nvram_bufset(nvram, "PreAuthifname", getLanIfName());
 		}
 	}else{
 		printf("not op mode\n");
-		return;
+		goto out;
 	}
+out:
+    nvram_commit(RT2860_NVRAM);
+    nvram_close(RT2860_NVRAM);
+    return;
 }
 
 
@@ -1438,12 +1472,14 @@ void confWEP(int nvram, webs_t wp, int mbssid)
 	STF(nvram, mbssid, Key2Type);
 	STF(nvram, mbssid, Key3Type);
 	STF(nvram, mbssid, Key4Type);
-	if (RT2860_NVRAM == nvram) {
-		nvram_set(nvram, racat("Key1Str", mbssid+1), Key1Str);
-		nvram_set(nvram, racat("Key2Str", mbssid+1), Key2Str);
-		nvram_set(nvram, racat("Key3Str", mbssid+1), Key3Str);
-		nvram_set(nvram, racat("Key4Str", mbssid+1), Key4Str);
-	}
+
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(nvram, racat("Key1Str", mbssid+1), Key1Str);
+	nvram_bufset(nvram, racat("Key2Str", mbssid+1), Key2Str);
+	nvram_bufset(nvram, racat("Key3Str", mbssid+1), Key3Str);
+	nvram_bufset(nvram, racat("Key4Str", mbssid+1), Key4Str);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 }
 
 void confWPAGeneral(int nvram, webs_t wp, int mbssid)
@@ -1481,12 +1517,13 @@ inline void clearRadiusSetting(int nvram, int mbssid)
 	RADIUS_Key = nvram_get(nvram, "RADIUS_Key");
 	//session_timeout_interval = nvram_get(nvram, "session_timeout_interval");
 
-	nvram_set(nvram, "RADIUS_Server", setNthValue(mbssid, RADIUS_Server, "0"));
-	nvram_set(nvram, "RADIUS_Port", setNthValue(mbssid, RADIUS_Port, "1812"));
-	nvram_set(nvram, "RADIUS_Key", setNthValue(mbssid, RADIUS_Key, "ralink"));
-	//nvram_set(nvram, "session_timeout_interval", setNthValue(mbssid, session_timeout_interval, ""));
-            
-	return;
+        nvram_init(RT2860_NVRAM);
+	nvram_bufset(nvram, "RADIUS_Server", setNthValue(mbssid, RADIUS_Server, "0"));
+	nvram_bufset(nvram, "RADIUS_Port", setNthValue(mbssid, RADIUS_Port, "1812"));
+	nvram_bufset(nvram, "RADIUS_Key", setNthValue(mbssid, RADIUS_Key, "ralink"));
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+    return;
 }
 
 
@@ -1515,6 +1552,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	//clear Radius settings
 	clearRadiusSetting(nvram, mbssid);
 
+	nvram_init(RT2860_NVRAM);
 	if( !strcmp(security_mode, "Disable")){			// !------------------       Disable Mode --------------
 		STFs(nvram, mbssid, "AuthMode", "OPEN");
 		STFs(nvram, mbssid, "EncrypType", "NONE");
@@ -1553,15 +1591,10 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		char *pass_phrase_str;
 
 		confWPAGeneral(nvram, wp, mbssid);
-
 		LFW(pass_phrase_str, passphrase);
-
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-
-		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
-		}
+		nvram_bufset(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
 	}else if( !strcmp(security_mode, "WPA2")){		// !------------------  WPA2 Enterprise Mode ----------------
 		char *pass_phrase_str;
 		char *PMKCachePeriod;
@@ -1576,9 +1609,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
-		}
+		nvram_bufset(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
 		STF(nvram, mbssid, PMKCachePeriod);
 		STF(nvram, mbssid, PreAuth);
 	}else if(	!strcmp(security_mode, "WPA2PSK") ||	// !------------------  WPA2 Personal Mode ----------------
@@ -1590,10 +1621,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-
-		if (RT2860_NVRAM == nvram) {
-			nvram_set(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
-		}
+		nvram_bufset(nvram, racat("WPAPSK", mbssid+1), pass_phrase_str);
 	}else if( !strcmp(security_mode, "IEEE8021X")){	// !------------------ 802.1X WEP Mode ----------------
 		char *ieee8021x_wep;
 
@@ -1609,24 +1637,23 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}else{
 		return;
 	}
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 //# Access Policy
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
-
 //# WPS
-	{
-		if(nvram == RT2860_NVRAM && mbssid == 0){		// only ra0 supports WPS now.
-			char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
-			if(wordlist){
-				if (strcmp(wordlist, "0"))
-					doSystem("iwpriv ra0 set WscConfStatus=1");
-				nvram_set(RT2860_NVRAM, "WscConfigured", "1");
-				g_wsc_configured = 1;
-			}
+	if(nvram == RT2860_NVRAM && mbssid == 0){		// only ra0 supports WPS now.
+		char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
+		if(wordlist){
+			if (strcmp(wordlist, "0"))
+				doSystem("iwpriv ra0 set WscConfStatus=1");
+			nvram_set(RT2860_NVRAM, "WscConfigured", "1");
+			g_wsc_configured = 1;
 		}
 	}
-//# WPS
+
 	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
 	if(nvram == RT2860_NVRAM){
 		doSystem("ralink_init make_wireless_config rt2860");
@@ -1716,17 +1743,19 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	wpakey = websGetVar(wp, T("passphrase"), T(""));
 
 	// store to flash
-	nvram_set(RT2860_NVRAM, "MeshEnabled", meshenable);
-	nvram_set(RT2860_NVRAM, "MeshId", mid);
-	nvram_set(RT2860_NVRAM, "MeshHostName", hostname);
-	nvram_set(RT2860_NVRAM, "MeshAutoLink", autolink);
-	nvram_set(RT2860_NVRAM, "MeshAuthMode", mode);
-	nvram_set(RT2860_NVRAM, "MeshEncrypType", encrypt_type);
-	nvram_set(RT2860_NVRAM, "MeshDefaultkey", defaultkey);
-	nvram_set(RT2860_NVRAM, "MeshWEPKEY", wepkey);
-	nvram_set(RT2860_NVRAM, "MeshWEPKEYType", wep_select);
-	nvram_set(RT2860_NVRAM, "MeshWPAKEY", wpakey);
-
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "MeshEnabled", meshenable);
+	nvram_bufset(RT2860_NVRAM, "MeshId", mid);
+	nvram_bufset(RT2860_NVRAM, "MeshHostName", hostname);
+	nvram_bufset(RT2860_NVRAM, "MeshAutoLink", autolink);
+	nvram_bufset(RT2860_NVRAM, "MeshAuthMode", mode);
+	nvram_bufset(RT2860_NVRAM, "MeshEncrypType", encrypt_type);
+	nvram_bufset(RT2860_NVRAM, "MeshDefaultkey", defaultkey);
+	nvram_bufset(RT2860_NVRAM, "MeshWEPKEY", wepkey);
+	nvram_bufset(RT2860_NVRAM, "MeshWEPKEYType", wep_select);
+	nvram_bufset(RT2860_NVRAM, "MeshWPAKEY", wpakey);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 	
 	// debug print
 	websHeader(wp);
@@ -1902,7 +1931,6 @@ static void AntennaDiversity(webs_t wp, char_t *path, char_t *query)
 		return;
 	
 	nvram_set(RT2860_NVRAM, "AntennaDiversity", mode);
-	
 
 	// re-init
 	AntennaDiversityInit();
