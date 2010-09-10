@@ -10,6 +10,9 @@ function initLanguage()
 {
 
 	var lang = "<% getCfgGeneral(1, "Language"); %>";
+	var lang = "<% getCfgGeneral(1, "Language"); %>";
+	if (lang=="")
+		lang = "en";
 	var cook = "en";
 	var lang_en = "<% getLangBuilt("en"); %>";
 	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
