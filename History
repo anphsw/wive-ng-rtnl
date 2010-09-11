@@ -128,8 +128,8 @@
 46) Fix unlocked kernel write to mtd. Use kernel_lock for fix concurrent write issue<br>
 47) Some scripts rewrite<br>
 48) nvram_daemon and gpio utility no more needed<br>
-49) Add backup dvram to rwfs logic add<br>
-50) Rewrite logiic in libnvram and goahead for correct nvram init/close<br>
+49) Add backup nvram to rwfs logic add<br>
+50) Rewrite logic in libnvram and goahead for correct nvram init/close<br>
 
 <br><br>
 <b>For support see:</b><br>
