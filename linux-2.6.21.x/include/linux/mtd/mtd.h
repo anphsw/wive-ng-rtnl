@@ -17,6 +17,7 @@
 #include <linux/module.h>
 #include <linux/uio.h>
 #include <linux/notifier.h>
+#include <linux/device.h>
 
 #include <linux/mtd/compatmac.h>
 #include <mtd/mtd-abi.h>
@@ -199,6 +200,7 @@ struct mtd_info {
 	void *priv;
 
 	struct module *owner;
+	struct device dev;
 	int usecount;
 
 	/* If the driver is something smart, like UBI, it may need to maintain
@@ -209,6 +211,10 @@ struct mtd_info {
 	void (*put_device) (struct mtd_info *mtd);
 };
 
+static inline struct mtd_info *dev_to_mtd(struct device *dev)
+{
+       return dev ? container_of(dev, struct mtd_info, dev) : NULL;
+}
 
 	/* Kernel-side ioctl definitions */
 

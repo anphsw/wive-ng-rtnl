@@ -1,6 +1,4 @@
 /*
- * $Id: mtd-user.h,v 1.1.1.1 2007-05-25 06:50:12 bruce Exp $
- *
  * MTD ABI header for use by user space only.
  */
 
