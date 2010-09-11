@@ -65,6 +65,9 @@ static DEFINE_SPINLOCK(modlist_lock);
 static DEFINE_MUTEX(module_mutex);
 static LIST_HEAD(modules);
 
+/* Waiting for a module to finish initializing? */
+static DECLARE_WAIT_QUEUE_HEAD(module_wq);
+
 static BLOCKING_NOTIFIER_HEAD(module_notify_list);
 
 int register_module_notifier(struct notifier_block * nb)
@@ -79,12 +82,16 @@ int unregister_module_notifier(struct notifier_block * nb)
 }
 EXPORT_SYMBOL(unregister_module_notifier);
 
-/* We require a truly strong try_module_get() */
+/* We require a truly strong try_module_get(): 0 means failure due to
+   ongoing or failed initialization etc. */
 static inline int strong_try_module_get(struct module *mod)
 {
 	if (mod && mod->state == MODULE_STATE_COMING)
+		return -EBUSY;
+	if (try_module_get(mod))
 		return 0;
-	return try_module_get(mod);
+	else
+		return -ENOENT;
 }
 
 static inline void add_taint_module(struct module *mod, unsigned flag)
@@ -537,11 +544,21 @@ static int already_uses(struct module *a, struct module *b)
 static int use_module(struct module *a, struct module *b)
 {
 	struct module_use *use;
-	int no_warn;
+	int no_warn, err;
 
 	if (b == NULL || already_uses(a, b)) return 1;
 
-	if (!strong_try_module_get(b))
+	/* If we're interrupted or time out, we fail. */
+	if (wait_event_interruptible_timeout(
+		    module_wq, (err = strong_try_module_get(b)) != -EBUSY,
+		    30 * HZ) <= 0) {
+		printk("%s: gave up waiting for init of module %s.\n",
+		       a->name, b->name);
+		return 0;
+	}
+
+	/* If strong_try_module_get() returned a different error, we fail. */
+	if (err)
 		return 0;
 
 	DEBUGP("Allocating new usage for %s.\n", a->name);
@@ -820,7 +837,7 @@ static inline void module_unload_free(struct module *mod)
 
 static inline int use_module(struct module *a, struct module *b)
 {
-	return strong_try_module_get(b);
+	return strong_try_module_get(b) == 0;
 }
 
 static inline void module_unload_init(struct module *mod)
@@ -959,7 +976,8 @@ static unsigned long resolve_symbol(Elf_Shdr *sechdrs,
 	ret = __find_symbol(name, &owner, &crc,
 			!(mod->taints & TAINT_PROPRIETARY_MODULE));
 	if (ret) {
-		/* use_module can fail due to OOM, or module unloading */
+		/* use_module can fail due to OOM,
+		   or module initialization or unloading */
 		if (!check_version(sechdrs, versindex, name, mod, crc) ||
 		    !use_module(mod, owner))
 			ret = 0;
@@ -967,6 +985,19 @@ static unsigned long resolve_symbol(Elf_Shdr *sechdrs,
 	return ret;
 }
 
+struct module_sect_attr
+{
+       struct module_attribute mattr;
+       char *name;
+       unsigned long address;
+};
+
+struct module_sect_attrs
+{
+       struct attribute_group grp;
+       unsigned int nsections;
+       struct module_sect_attr attrs[0];
+};
 
 /*
  * /sys/module/foo/sections stuff
@@ -983,7 +1014,7 @@ static ssize_t module_sect_show(struct module_attribute *mattr,
 
 static void free_sect_attrs(struct module_sect_attrs *sect_attrs)
 {
-	int section;
+	unsigned int section;
 
 	for (section = 0; section < sect_attrs->nsections; section++)
 		kfree(sect_attrs->attrs[section].name);
@@ -1184,6 +1215,17 @@ static void mod_kobject_remove(struct module *mod)
 }
 
 /*
+ * link the module with the whole machine is stopped with interrupts off
+ * - this defends against kallsyms not taking locks
+ */
+static int __link_module(void *_mod)
+{
+	struct module *mod = _mod;
+	list_add(&mod->list, &modules);
+	return 0;
+}
+
+/*
  * unlink the module with the whole machine is stopped with interrupts off
  * - this defends against kallsyms not taking locks
  */
@@ -1231,7 +1273,7 @@ void *__symbol_get(const char *symbol)
 
 	spin_lock_irqsave(&modlist_lock, flags);
 	value = __find_symbol(symbol, &owner, &crc, 1);
-	if (value && !strong_try_module_get(owner))
+	if (value && strong_try_module_get(owner) != 0)
 		value = 0;
 	spin_unlock_irqrestore(&modlist_lock, flags);
 
@@ -1272,7 +1314,7 @@ dup:
 	return ret;
 }
 
-/* Change all symbols so that sh_value encodes the pointer directly. */
+/* Change all symbols so that st_value encodes the pointer directly. */
 static int simplify_symbols(Elf_Shdr *sechdrs,
 			    unsigned int symindex,
 			    const char *strtab,
@@ -1673,8 +1715,9 @@ static struct module *load_module(void __user *umod,
 	unwindex = find_sec(hdr, sechdrs, secstrings, ARCH_UNWIND_SECTION_NAME);
 #endif
 
-	/* Don't keep modinfo section */
+	/* Don't keep modinfo and version sections. */
 	sechdrs[infoindex].sh_flags &= ~(unsigned long)SHF_ALLOC;
+	sechdrs[versindex].sh_flags &= ~(unsigned long)SHF_ALLOC;
 #ifdef CONFIG_KALLSYMS
 	/* Keep symbol and string tables for decoding later. */
 	sechdrs[symindex].sh_flags |= SHF_ALLOC;
@@ -1828,7 +1871,8 @@ static struct module *load_module(void __user *umod,
 		mod->unused_crcs = (void *)sechdrs[unusedcrcindex].sh_addr;
 	mod->unused_gpl_syms = (void *)sechdrs[unusedgplindex].sh_addr;
 	if (unusedgplcrcindex)
-		mod->unused_crcs = (void *)sechdrs[unusedgplcrcindex].sh_addr;
+		mod->unused_gpl_crcs
+			= (void *)sechdrs[unusedgplcrcindex].sh_addr;
 
 #ifdef CONFIG_MODVERSIONS
 	if ((mod->num_syms && !crcindex) || 
@@ -1908,6 +1952,11 @@ static struct module *load_module(void __user *umod,
 		printk(KERN_WARNING "%s: Ignoring obsolete parameters\n",
 		       mod->name);
 
+	/* Now sew it into the lists so we can get lockdep and oops
+         * info during argument parsing.  Noone should access us, since
+         * strong_try_module_get() will fail. */
+	stop_machine_run(__link_module, mod, NR_CPUS);
+
 	/* Size of section 0 is 0, so this works well if no params */
 	err = parse_args(mod->name, mod->args,
 			 (struct kernel_param *)
@@ -1916,7 +1965,7 @@ static struct module *load_module(void __user *umod,
 			 / sizeof(struct kernel_param),
 			 NULL);
 	if (err < 0)
-		goto arch_cleanup;
+		goto unlink;
 
 	err = mod_sysfs_setup(mod, 
 			      (struct kernel_param *)
@@ -1924,7 +1973,7 @@ static struct module *load_module(void __user *umod,
 			      sechdrs[setupindex].sh_size
 			      / sizeof(struct kernel_param));
 	if (err < 0)
-		goto arch_cleanup;
+		goto unlink;
 	add_sect_attrs(mod, hdr->e_shnum, secstrings, sechdrs);
 
 	/* Size of section 0 is 0, so this works well if no unwind info. */
@@ -1938,7 +1987,8 @@ static struct module *load_module(void __user *umod,
 	/* Done! */
 	return mod;
 
- arch_cleanup:
+ unlink:
+	stop_machine_run(__unlink_module, mod, NR_CPUS);
 	module_arch_cleanup(mod);
  cleanup:
 	module_unload_free(mod);
@@ -1958,17 +2008,6 @@ static struct module *load_module(void __user *umod,
 	printk(KERN_ERR "Module len %lu truncated\n", len);
 	err = -ENOEXEC;
 	goto free_hdr;
-}
-
-/*
- * link the module with the whole machine is stopped with interrupts off
- * - this defends against kallsyms not taking locks
- */
-static int __link_module(void *_mod)
-{
-	struct module *mod = _mod;
-	list_add(&mod->list, &modules);
-	return 0;
 }
 
 /* This is where the real work happens */
@@ -1995,10 +2034,6 @@ sys_init_module(void __user *umod,
 		return PTR_ERR(mod);
 	}
 
-	/* Now sew it into the lists.  They won't access us, since
-           strong_try_module_get() will fail. */
-	stop_machine_run(__link_module, mod, NR_CPUS);
-
 	/* Drop lock so they can recurse */
 	mutex_unlock(&module_mutex);
 
@@ -2021,13 +2056,24 @@ sys_init_module(void __user *umod,
 			mutex_lock(&module_mutex);
 			free_module(mod);
 			mutex_unlock(&module_mutex);
+			wake_up(&module_wq);
 		}
 		return ret;
 	}
+	if (ret > 0) {
+		printk(KERN_WARNING "%s: '%s'->init suspiciously returned %d, "
+				    "it should follow 0/-E convention\n"
+		       KERN_WARNING "%s: loading module anyway...\n",
+		       __func__, mod->name, ret,
+		       __func__);
+		dump_stack();
+	}
 
-	/* Now it's a first class citizen! */
-	mutex_lock(&module_mutex);
+	/* Now it's a first class citizen!  Wake up anyone waiting for it. */
 	mod->state = MODULE_STATE_LIVE;
+	wake_up(&module_wq);
+
+	mutex_lock(&module_mutex);
 	/* Drop initial reference. */
 	module_put(mod);
 	unwind_remove_table(mod->unwind_info, 1);
