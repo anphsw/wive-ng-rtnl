@@ -10,7 +10,10 @@
 TGZfs_size=131072
 BLOCKS=2
 KEEPMAC=YES
-MTDDEVICE=/dev/mtdblock5
+MTDRWFS=/dev/mtdblock5
+MTD2CFG=/dev/mtdblock1
+MTD2FAC=/dev/mtdblock2
+
 BACKUPCGF=/etc/backup/nvram_backup.dat
 
 get_size(){
@@ -24,9 +27,10 @@ usage(){
   echo "save - Save rwfs to mtd." >&2
   echo "backup_nvram - Save nvram snapshot to rwfs." >&2
   echo "load - Load rwfs from mtd." >&2
-  echo "restore - Crash $MTDDEVICE and reboot for restore clean rwfs." >&2
+  echo "restore - Crash $MTDRWFS and reboot for restore clean rwfs." >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
   echo "fullreset - Full reset include rwfs, nvram and mac adress settings." >&2
+  echo "cleanall - Full zero write in config,factory and rwfs particions." >&2
   echo "____________________________________________________________________________" >&2
  exit 1
 }
@@ -34,7 +38,7 @@ usage(){
 load(){
   local dst=/ 
   echo "Loading TGZfs"
-  zcat $MTDDEVICE | tar xf - -C $dst>>/dev/null
+  zcat $MTDRWFS | tar xf - -C $dst>>/dev/null
 }
 
 save(){
@@ -45,7 +49,7 @@ save(){
   tar cf - /etc | gzip -9 > $tmp
   if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
     echo "Write configs to flash"
-    dd if=$tmp of=$MTDDEVICE bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
+    dd if=$tmp of=$MTDRWFS bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
     echo "Config saved. OK."
   else
     echo "Error: File $tmp too big: $(get_size $tmp)k"
@@ -55,10 +59,17 @@ save(){
 
 restore(){
   echo "Clear rwfs and reboot. Please go smoke..."
-  dd if=/dev/urandom of=$MTDDEVICE bs=64k count=$BLOCKS
-  echo "123456789">$MTDDEVICE 
+  dd if=/dev/urandom of=$MTDRWFS bs=64k count=$BLOCKS
+  echo "123456789">$MTDRWFS 
   echo "Restoring defaults..."
   reboot
+}
+cleanall(){
+    echo "Write zero in $MTDRWFS,$MTD2CFG,$MTD2FAC mtd particions" 
+    dd if=/dev/zero of=$MTDRWFS conv=sync > /dev/null 2>&1
+    dd if=/dev/zero of=$MTD2CFG conv=sync > /dev/null 2>&1
+    dd if=/dev/zero of=$MTD2FAC conv=sync > /dev/null 2>&1
+    reboot
 }
 
 nvramreset(){
@@ -104,6 +115,9 @@ main(){
       ;;
     fullreset)
       fullreset $@
+      ;;
+    cleanall)
+      cleanall $@
       ;;
     backup_nvram)
       backup_nvram $@
