@@ -119,7 +119,7 @@ static inline int __udp_lib_lport_inuse(__u16 num, struct hlist_head udptable[])
 	struct sock *sk;
 	struct hlist_node *node;
 
-	sk_for_each(sk, node, &udptable[num & (UDP_HTABLE_SIZE - 1)])
+	sk_for_each(sk, node, &udptable[udp_hashfn(num)])
 		if (sk->sk_hash == num)
 			return 1;
 	return 0;
@@ -145,50 +145,27 @@ int __udp_lib_get_port(struct sock *sk, unsigned short snum,
 	int    error = 1;
 
 	write_lock_bh(&udp_hash_lock);
-	if (snum == 0) {
-		int best_size_so_far, best, result, i;
+	if (!snum) {
+		int low, high, remaining;
+		unsigned rand;
+		unsigned short first;
 
-		if (*port_rover > sysctl_local_port_range[1] ||
-		    *port_rover < sysctl_local_port_range[0])
-			*port_rover = sysctl_local_port_range[0];
-		best_size_so_far = 32767;
-		best = result = *port_rover;
-		for (i = 0; i < UDP_HTABLE_SIZE; i++, result++) {
-			int size;
+		inet_get_local_port_range(&low, &high);
+                remaining = (high - low) + 1;
 
-			head = &udptable[result & (UDP_HTABLE_SIZE - 1)];
-			if (hlist_empty(head)) {
-				if (result > sysctl_local_port_range[1])
-					result = sysctl_local_port_range[0] +
-						((result - sysctl_local_port_range[0]) &
-						 (UDP_HTABLE_SIZE - 1));
-				goto gotit;
-			}
-			size = 0;
-			sk_for_each(sk2, node, head) {
-				if (++size >= best_size_so_far)
-					goto next;
-			}
-			best_size_so_far = size;
-			best = result;
-		next:
-			;
+		rand = net_random();
+		snum = first = rand % remaining + low;
+		rand |= 1;
+		while (__udp_lib_lport_inuse(snum, udptable)) {
+			do {
+				snum = snum + rand;
+			} while (snum < low || snum > high);
+			if (snum == first)
+				goto fail; 
 		}
-		result = best;
-		for(i = 0; i < (1 << 16) / UDP_HTABLE_SIZE; i++, result += UDP_HTABLE_SIZE) {
-			if (result > sysctl_local_port_range[1])
-				result = sysctl_local_port_range[0]
-					+ ((result - sysctl_local_port_range[0]) &
-					   (UDP_HTABLE_SIZE - 1));
-			if (! __udp_lib_lport_inuse(result, udptable))
-				break;
-		}
-		if (i >= (1 << 16) / UDP_HTABLE_SIZE)
-			goto fail;
-gotit:
-		*port_rover = snum = result;
+		*port_rover = snum;
 	} else {
-		head = &udptable[snum & (UDP_HTABLE_SIZE - 1)];
+		head = &udptable[udp_hashfn(snum)];
 
 		sk_for_each(sk2, node, head)
 			if (sk2->sk_hash == snum                             &&
@@ -202,7 +179,7 @@ gotit:
 	inet_sk(sk)->num = snum;
 	sk->sk_hash = snum;
 	if (sk_unhashed(sk)) {
-		head = &udptable[snum & (UDP_HTABLE_SIZE - 1)];
+		head = &udptable[udp_hashfn(snum)];
 		sk_add_node(sk, head);
 		sock_prot_inc_use(sk->sk_prot);
 	}
@@ -245,7 +222,7 @@ static struct sock *__udp4_lib_lookup(__be32 saddr, __be16 sport,
 	int badness = -1;
 
 	read_lock(&udp_hash_lock);
-	sk_for_each(sk, node, &udptable[hnum & (UDP_HTABLE_SIZE - 1)]) {
+	sk_for_each(sk, node, &udptable[udp_hashfn(hnum)]) {
 		struct inet_sock *inet = inet_sk(sk);
 
 		if (sk->sk_hash == hnum && !ipv6_only_sock(sk)) {
@@ -1138,7 +1115,7 @@ static int __udp4_lib_mcast_deliver(struct sk_buff *skb,
 	int dif;
 
 	read_lock(&udp_hash_lock);
-	sk = sk_head(&udptable[ntohs(uh->dest) & (UDP_HTABLE_SIZE - 1)]);
+	sk = sk_head(&udptable[udp_hashfn(ntohs(uh->dest))]);
 	dif = skb->dev->ifindex;
 	sk = udp_v4_mcast_next(sk, uh->dest, daddr, uh->source, saddr, dif);
 	if (sk) {

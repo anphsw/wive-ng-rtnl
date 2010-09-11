@@ -41,6 +41,11 @@ struct udphdr {
 #include <net/inet_sock.h>
 #define UDP_HTABLE_SIZE		128
 
+static inline int udp_hashfn(const unsigned num)
+{
+	return num & (UDP_HTABLE_SIZE - 1);
+}
+
 struct udp_sock {
 	/* inet_sock has to be the first member */
 	struct inet_sock inet;

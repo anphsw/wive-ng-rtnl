@@ -164,8 +164,8 @@ struct udp_seq_afinfo {
 
 struct udp_iter_state {
 	sa_family_t		family;
-	int			bucket;
 	struct hlist_head	*hashtable;
+	int			bucket;
 	struct seq_operations	seq_ops;
 };
 
