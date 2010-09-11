@@ -4168,7 +4168,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 #else
 #define BUFSET(column, value) \
-	wordlist = nvram_get(RT2860_NVRAM, column); \
+	wordlist = nvram_bufget(RT2860_NVRAM, column); \
 	if (wordlist && strcmp(wordlist, "") != 0) \
 		sprintf(tmp_buffer, "%s;%s", wordlist, value); \
 	else \

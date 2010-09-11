@@ -1285,7 +1285,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 final:
-	sleep(1);	// wait for websDone() to finish tcp http session(close socket)
+	sleep(2);	// wait for websDone() to finish tcp http session(close socket)
 
 	//restart internet if any changes
 	if (need_commit) {
