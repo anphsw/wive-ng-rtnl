@@ -60,7 +60,7 @@ int flash_read_mac(char *buf)
 
 	if (!buf)
 		return -1;
-	fd = mtd_open("Factory", O_RDONLY);
+	fd = mtd_open("Factory", O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
@@ -78,7 +78,7 @@ int flash_read_NicConf(char *buf)
 
 	if (!buf)
 		return -1;
-	fd = mtd_open("Factory", O_RDONLY);
+	fd = mtd_open("Factory", O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
@@ -99,7 +99,7 @@ int flash_read(char *buf, off_t from, size_t len)
 		return -1;
 	}
 
-	fd = mtd_open("Config", O_RDONLY);
+	fd = mtd_open("Config", O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
@@ -142,7 +142,7 @@ int flash_write(char *buf, off_t to, size_t len)
 		return -1;
 	}
 
-	fd = mtd_open("Config", O_RDWR | O_SYNC);
+	fd = mtd_open("Config", O_RDWR | O_SYNC | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
