@@ -781,7 +781,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 
 	// Now store VPN_ENABLED flag
 	// Do not set other params if VPN is turned off
-	if (strcmp(vpn_enabled, "on"))
+	if (!strcmp(vpn_enabled, "on"))
 	{
 		printf("vpn_enabled value : %s\n", vpn_enabled);
 
@@ -811,7 +811,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 			vpn_rt_enabled="off";
 		
 		// Routing table is enabled, store it
-		if (strcmp(vpn_rt_enabled, "on") == 0)
+		if (!strcmp(vpn_rt_enabled, "on"))
 		{
 			char *vpn_rt = websGetVar(wp, T("vpn_routing_table"), T(""));
 			
