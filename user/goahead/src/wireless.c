@@ -412,7 +412,7 @@ static void revise_mbss_value(int old_num, int new_num)
 
 #define MBSS_INIT(field, default_value) \
 	do { \
-		old_value = nvram_get(RT2860_NVRAM, #field); \
+		old_value = nvram_bufget(RT2860_NVRAM, #field); \
 		snprintf(new_value, 264, "%s", old_value); \
 		p = new_value + strlen(old_value); \
 		for (i = old_num; i < new_num; i++) { \
@@ -424,7 +424,7 @@ static void revise_mbss_value(int old_num, int new_num)
 
 #define MBSS_REMOVE(field) \
 	do { \
-		old_value = nvram_get(RT2860_NVRAM, #field); \
+		old_value = nvram_bufget(RT2860_NVRAM, #field); \
 		snprintf(new_value, 264, "%s", old_value); \
 		p = new_value; \
 		for (i = 0; i < new_num; i++) { \
@@ -437,7 +437,7 @@ static void revise_mbss_value(int old_num, int new_num)
 		} \
 		if (p) \
 			*p = '\0'; \
-		nvram_set(RT2860_NVRAM, #field, new_value); \
+		nvram_bufset(RT2860_NVRAM, #field, new_value); \
 	} while (0)
 
 	if (new_num > old_num) {
@@ -827,8 +827,10 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "HT_AutoBA", n_autoba);
 		nvram_bufset(RT2860_NVRAM, "HT_BADecline", n_badecline);
 	}
+
 	nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
 	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);	
 
@@ -1325,11 +1327,11 @@ static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query)
 static void STFs(int nvram, int index, char *flash_key, char *value)
 {
 	char *result;
-	char *tmp = nvram_get(nvram, flash_key);
+	char *tmp = nvram_bufget(nvram, flash_key);
 	if(!tmp)
 		tmp = "";
 	result = setNthValue(index, tmp, value);
-	nvram_set(nvram, flash_key, result);
+	nvram_bufset(nvram, flash_key, result);
 	return ;
 }
 
@@ -1440,10 +1442,13 @@ void conf8021x(int nvram, webs_t wp, int mbssid)
 	if(!gstrlen(RadiusServerSessionTimeout))
 		RadiusServerSessionTimeout = "0";
 
+	nvram_init(RT2860_NVRAM);
 	STFs(nvram, mbssid, "RADIUS_Server", RadiusServerIP);
 	STFs(nvram, mbssid, "RADIUS_Port", RadiusServerPort);
 	STFs(nvram, mbssid, "RADIUS_Key", RadiusServerSecret);
 	STFs(nvram, mbssid, "session_timeout_interval", RadiusServerSessionTimeout);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
 	updateFlash8021x(nvram);
 	restart8021XDaemon(nvram);
@@ -1486,6 +1491,7 @@ void confWPAGeneral(int nvram, webs_t wp, int mbssid)
 	LFW(cipher_str, cipher);
 	LFW(key_renewal_interval, keyRenewalInterval);
 
+	nvram_init(RT2860_NVRAM);
 	switch(cipher_str[0]){
 	case '0':
 		STFs(nvram, mbssid, "EncrypType", "TKIP");
@@ -1494,13 +1500,18 @@ void confWPAGeneral(int nvram, webs_t wp, int mbssid)
 		STFs(nvram, mbssid, "EncrypType", "AES");
 		break;
 	case '2':
+		// there is no tkip-aes mixed mode in WPA-PSK.
 		STFs(nvram, mbssid, "EncrypType", "TKIPAES");
-		return;							// there is no tkip-aes mixed mode in WPA-PSK.
+		goto out;
 	}
 	STFs(nvram, mbssid, "DefaultKeyID", "2");	// DefaultKeyID is 2
 	STFs(nvram, mbssid, "RekeyInterval", key_renewal_interval);
 	STFs(nvram, mbssid, "RekeyMethod", "TIME");		
 	STFs(nvram, mbssid, "IEEE8021X", "0");
+out:
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+	return;
 }
 
 inline void clearRadiusSetting(int nvram, int mbssid)
