@@ -1907,17 +1907,16 @@ void ripdRestart(void)
 	char *password = nvram_get(RT2860_NVRAM, "Password");
 	char *RIPEnable = nvram_get(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service ripd stop &");
+	if (!opmode || !strlen(opmode)) // unknown
+		goto out;
 
-	if (!opmode || !strlen(opmode))
-		return;
 	if (!strcmp(opmode, "0"))	// bridge
-		return;
+		goto out;
 
-	if (!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0"))
-		return;
+	if (!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0")) //ripd disable
+		goto out;
 
-	if(!password || !strlen(password))
+	if(!password || !strlen(password)) //if password not set
 		password = "Admin";
 
 	doSystem("echo \"hostname linux.router1\" > /etc/ripd.conf ");
@@ -1943,7 +1942,8 @@ void ripdRestart(void)
 	}
 	doSystem("echo \"version 2\" >> /etc/ripd.conf");
 	doSystem("echo \"log syslog\" >> /etc/ripd.conf");
-	doSystem("service ripd start &");
+out:
+	doSystem("service ripd restart &");
 }
 
 inline void zebraRestart(void)
@@ -1952,15 +1952,14 @@ inline void zebraRestart(void)
 	char *password = nvram_get(RT2860_NVRAM, "Password");
 	char *RIPEnable = nvram_get(RT2860_NVRAM, "RIPEnable");
 
-	doSystem("service zebra start &");
+	if(!opmode||!strlen(opmode))   //unknown
+		goto out;
 
-	if(!opmode||!strlen(opmode))
-		return;
 	if(!strcmp(opmode, "0"))	// bridge
-		return;
+		goto out;
 
-	if(!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0"))
-		return;
+	if(!RIPEnable || !strlen(RIPEnable) || !strcmp(RIPEnable,"0")) // zebra disabled
+		goto out;
 
 	if(!password || !strlen(password))
 		password = "Admin";
@@ -1969,7 +1968,8 @@ inline void zebraRestart(void)
 	doSystem("echo \"password %s\" >> /etc/zebra.conf ", password);
 	doSystem("echo \"enable password Admin\" >> /etc/zebra.conf ");
 	doSystem("echo \"log syslog\" >> /etc/zebra.conf ");
-	doSystem("service zebra start &");
+out:
+	doSystem("service zebra restart &");
 }
 
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
