@@ -308,7 +308,7 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 		goto out;
 	}
 
-	bak = kmalloc(mtd->erasesize, GFP_KERNEL);
+	bak = kzalloc(mtd->erasesize, GFP_KERNEL);
 	if (bak == NULL) {
 		put_mtd_device(mtd);
 		ret = -ENOMEM;
@@ -370,7 +370,7 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 		goto out;
 	}
 
-	bak = kmalloc(mtd->erasesize, GFP_KERNEL);
+	bak = kzalloc(mtd->erasesize, GFP_KERNEL);
 	if (bak == NULL) {
 		put_mtd_device(mtd);
 		ret = -ENOMEM;
