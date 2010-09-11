@@ -13,15 +13,15 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/err.h>
-#include <linux/smp_lock.h>
+#include <linux/sched.h>
 #include <linux/backing-dev.h>
 #include <linux/compat.h>
 #include <linux/mount.h>
-#include <asm/io.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/map.h>
 #include <linux/mtd/concat.h>
 #include <linux/mtd/partitions.h>
+#include <asm/io.h>
 #include <asm/addrspace.h>
 #include "ralink-flash.h"
 
@@ -294,8 +294,9 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 	struct mtd_info *mtd;
 	struct erase_info ei;
 	u_char *bak = NULL;
+        DECLARE_WAITQUEUE(wait, current);                                                                                                   
+        wait_queue_head_t wait_q;
 
-	lock_kernel();
 	mtd = get_mtd_device(NULL, num);
 	if (IS_ERR(mtd)) {
 		ret = (int)mtd;
@@ -315,11 +316,21 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 		goto out;
 	}
 
+        set_current_state(TASK_INTERRUPTIBLE);
+        add_wait_queue(&wait_q, &wait);
+
 	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
-	if (ret != 0) {
+	if (ret) {
+                set_current_state(TASK_RUNNING);
+                remove_wait_queue(&wait_q, &wait);
 		put_mtd_device(mtd);
 		goto free_out;
 	}
+
+        schedule();  /* Wait for write to finish. */                                                                                
+        remove_wait_queue(&wait_q, &wait);                                                                                          
+
+
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
 
@@ -336,14 +347,18 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 		goto free_out;
 	}
 
+        set_current_state(TASK_INTERRUPTIBLE);
+        add_wait_queue(&wait_q, &wait);
+
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
 
+        schedule();  /* Wait for write to finish. */                                                                                
+        remove_wait_queue(&wait_q, &wait);                                                                                          
 	put_mtd_device(mtd);
 
 free_out:
 	kfree(bak);
 out:
-	unlock_kernel();
 	return ret;
 }
 #endif
@@ -355,8 +370,9 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	struct mtd_info *mtd;
 	struct erase_info ei;
 	u_char *bak = NULL;
+        DECLARE_WAITQUEUE(wait, current);                                                                                                   
+        wait_queue_head_t wait_q;
 
-	lock_kernel();
 	mtd = get_mtd_device_nm(name);
 
 	if (IS_ERR(mtd)) {
@@ -377,11 +393,19 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 		goto out;
 	}
 
+        set_current_state(TASK_INTERRUPTIBLE);
+        add_wait_queue(&wait_q, &wait);
+
 	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
-	if (ret != 0) {
+	if (ret) {
+                set_current_state(TASK_RUNNING);
+                remove_wait_queue(&wait_q, &wait);
 		put_mtd_device(mtd);
 		goto free_out;
 	}
+
+        schedule();  /* Wait for write to finish. */                                                                                
+        remove_wait_queue(&wait_q, &wait);                                                                                          
 
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
@@ -399,14 +423,18 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 		goto free_out;
 	}
 
+        set_current_state(TASK_INTERRUPTIBLE);
+        add_wait_queue(&wait_q, &wait);
+
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
 
+        schedule();  /* Wait for write to finish. */                                                                                
+        remove_wait_queue(&wait_q, &wait);                                                                                          
 	put_mtd_device(mtd);
 
 free_out:
 	kfree(bak);
 out:
-	unlock_kernel();
 	return ret;
 }
 
