@@ -52,7 +52,6 @@ fi
 	        #save first dgw with metric=1 to use in corbina hack
 	        if [ "$metric" = "0" ]; then
 		    echo $i > /tmp/default.gw
-		    DGW="$i"
 		fi
             	metric=`expr $metric + 1`
     	    done
@@ -66,11 +65,6 @@ fi
 	    for i in $dns ; do
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
-	        if [ "$count" = "0" ]; then
-		    DNS1="$i"
-		elif [ "$count" = "1" ]; then
-		    DNS2="$i"
-		fi
 		let "count=$count+1"
 	    done
 	fi
@@ -198,26 +192,6 @@ fi
 
 		done
 	}
-
-	#generate file to nvram set current param as default
-	echo "#!/bin/sh"> $WRITECONF
-	echo ""> $WRITECONF
-	if [ "$ip" != "" ]; then
-	    echo "nvram_set 2860 wan_ipaddr $ip" >> $WRITECONF
-	fi
-	if [ "$subnet" != "" ]; then
-	    echo "nvram_set 2860 wan_netmask $subnet" >> $WRITECONF
-	fi
-	if [ "$DGW" != "" ]; then
-	    echo "nvram_set 2860 wan_gateway $DGW" >> $WRITECONF
-	fi
-	if [ "$DNS1" != "" ]; then
-    	    echo "nvram_set 2860 wan_primary_dns $DNS1" >> $WRITECONF
-	fi
-	if [ "$DNS2" != "" ]; then
-    	    echo "nvram_set 2860 wan_primary_dns $DNS2" >> $WRITECONF
-	fi
-        chmod 777 $WRITECONF
 
 	#remove force renew flag
 	rm -f $FORCRENEW
