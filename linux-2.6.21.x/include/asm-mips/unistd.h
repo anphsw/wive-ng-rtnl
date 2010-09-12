@@ -299,7 +299,6 @@
 #define __NR_mq_getsetattr		(__NR_Linux + 276)
 #define __NR_vserver			(__NR_Linux + 277)
 #define __NR_waitid			(__NR_Linux + 278)
-/* #define __NR_sys_setaltroot		(__NR_Linux + 279) */
 #define __NR_add_key			(__NR_Linux + 280)
 #define __NR_request_key		(__NR_Linux + 281)
 #define __NR_keyctl			(__NR_Linux + 282)
@@ -336,11 +335,12 @@
 #define __NR_epoll_pwait		(__NR_Linux + 313)
 #define __NR_ioprio_set			(__NR_Linux + 314)
 #define __NR_ioprio_get			(__NR_Linux + 315)
+#ifdef __KERNEL__
 #define __NR_track_flag                 (__NR_Linux + 316)              /* ASUS QOS */
 #define __NR_set_mbss_nolan		(__NR_Linux + 317)		/* Jiahao for MBSSID */
 #define __NR_set_mbss_nowan		(__NR_Linux + 318)		/* Jiahao for MBSSID */
 #define __NR_set_mbss_prio		(__NR_Linux + 319)		/* Jiahao for MBSSID */
-
+#endif
 /*
  * Offset of the last Linux o32 flavoured syscall
  */
@@ -940,9 +940,7 @@
 #define __NR_N32_Linux_syscalls		278
 
 #ifdef __KERNEL__
-
 #ifndef __ASSEMBLY__
-
 #define __ARCH_OMIT_COMPAT_SYS_GETDENTS64
 #define __ARCH_WANT_IPC_PARSE_VERSION
 #define __ARCH_WANT_OLD_READDIR
@@ -969,7 +967,6 @@
 # ifdef CONFIG_MIPS32_O32
 #  define __ARCH_WANT_COMPAT_SYS_TIME
 # endif
-
 #endif /* !__ASSEMBLY__ */
 
 /*
