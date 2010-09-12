@@ -97,6 +97,60 @@ retune_wifi() {
     /etc/scripts/wifi.sh $MODE
 }
 
+bridge_config() {
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
+	addBr0
+    if [ "$MODE" != "wifionly" ]; then
+	resetLanWan
+    fi
+	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
+        ip addr flush dev eth2
+	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
+	brctl addif br0 eth2
+        addWds2Br0
+        addMesh2Br0
+}
+
+gate_config() {
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
+    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+	echo '##### config Vtss vlan partition #####'
+    	config-vlan.sh 1 1
+    fi
+    if [ "$MODE" != "wifionly" ]; then
+	resetLanWan
+	setLanWan
+    fi
+	addBr0
+	brctl addif br0 eth2.1
+	addWds2Br0
+	addMesh2Br0
+}
+
+ethcv_config() {
+    if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
+	resetLanWan
+    fi
+}
+
+apcli_config() {
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
+    if [ "$MODE" != "wifionly" ]; then
+	resetLanWan
+    fi
+	addBr0
+	brctl addif br0 eth2
+}
+
 #clear conntrack tables
 if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
@@ -120,67 +174,23 @@ fi
 #
 if [ "$opmode" = "0" ]; then
     echo "Bridge OperationMode: $opmode"
-	addMBSSID
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
-    fi
-	addBr0
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-    fi
-	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
-        ip addr flush dev eth2
-	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
-	brctl addif br0 eth2
-        addWds2Br0
-        addMesh2Br0
+    bridge_config
 
 elif [ "$opmode" = "1" ]; then
     echo "Gateway OperationMode: $opmode"
-	addMBSSID
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
-    fi
-    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-	echo '##### config Vtss vlan partition #####'
-    	config-vlan.sh 1 1
-    fi
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-	setLanWan
-    fi
-	addBr0
-	brctl addif br0 eth2.1
-	addWds2Br0
-	addMesh2Br0
+    gate_config
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
-    if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
-	resetLanWan
-    fi
+    ethcv_config
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
-	addMBSSID
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
-    fi
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-    fi
-	addBr0
-	brctl addif br0 eth2
+    apcli_config
 else
-    echo "unknown OperationMode: $opmode"
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-	setLanWan
-    fi
-        addBr0
-        brctl addif br0 eth2.1
-        addWds2Br0
-	exit 1
+    echo "unknown OperationMode use gate_config: $opmode"
+    opmode=1
+    gate_config
 fi
 
 #reconfigure wan and services restart
