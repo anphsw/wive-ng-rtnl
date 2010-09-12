@@ -119,10 +119,6 @@ gate_config() {
     if [ "$MODE" != "lanonly" ]; then
 	retune_wifi
     fi
-    if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
-	echo '##### config Vtss vlan partition #####'
-    	config-vlan.sh 1 1
-    fi
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
 	setLanWan
