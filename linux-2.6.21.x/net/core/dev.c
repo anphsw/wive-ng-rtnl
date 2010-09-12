@@ -3169,9 +3169,11 @@ void netdev_run_todo(void)
 
 		/* paranoia */
 		BUG_ON(atomic_read(&dev->refcnt));
+#if 0 //i`m not paranoic
 		WARN_ON(dev->ip_ptr);
 		WARN_ON(dev->ip6_ptr);
 		WARN_ON(dev->dn_ptr);
+#endif
 
 		if (dev->destructor)
 			dev->destructor(dev);

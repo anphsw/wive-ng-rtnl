@@ -54,6 +54,7 @@
 #include <linux/lockdep.h>
 #include <linux/pid_namespace.h>
 #include <linux/device.h>
+#include <linux/kthread.h>
 #include <linux/idr.h>
 
 #include <asm/io.h>
@@ -436,8 +437,12 @@ static void __init setup_command_line(char *command_line)
 static void noinline rest_init(void)
 	__releases(kernel_lock)
 {
+	int pid;
+
 	kernel_thread(init, NULL, CLONE_FS | CLONE_SIGHAND);
 	numa_default_policy();
+	pid = kernel_thread(kthreadd, NULL, CLONE_FS | CLONE_FILES);
+	kthreadd_task = find_task_by_pid(pid);
 	unlock_kernel();
 
 	/*

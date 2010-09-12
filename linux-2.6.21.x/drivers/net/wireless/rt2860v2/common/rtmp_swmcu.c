@@ -161,7 +161,9 @@ VOID RtmpAsicSendCommandToSwMcu(
 				if (pAd->CommonCfg.McuRadarCmd == DETECTION_STOP)
 				{
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
+#ifdef CARRIER_DETECTION_SUPPORT
 					unregister_tmr_service();
+#endif
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -187,7 +189,9 @@ VOID RtmpAsicSendCommandToSwMcu(
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
+#ifdef CARRIER_DETECTION_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
+#endif
 				}
 				else
 				{
@@ -212,7 +216,9 @@ VOID RtmpAsicSendCommandToSwMcu(
 				{
 					ULONG Value;
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
+#ifdef CARRIER_DETECTION_SUPPORT
 					unregister_tmr_service();
+#endif
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -240,7 +246,9 @@ VOID RtmpAsicSendCommandToSwMcu(
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
+#ifdef CARRIER_DETECTION_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
+#endif
 				}
 				else
 				{

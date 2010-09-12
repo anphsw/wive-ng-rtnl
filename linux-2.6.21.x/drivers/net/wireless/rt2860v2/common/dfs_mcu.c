@@ -2074,7 +2074,9 @@ VOID NewRadarDetectionStart(
 	
 
 
+#ifdef CARRIER_DETECTION_SUPPORT
 	request_tmr_service(NEW_DFS_WATCH_DOG_TIME, &TimerCB, (void *)pAd);
+#endif
 	
 }
 
@@ -2083,7 +2085,9 @@ VOID NewRadarDetectionStop(
 	IN PRTMP_ADAPTER pAd)
 {
 	DBGPRINT(RT_DEBUG_TRACE, ("NewRadarDetectionStop\n"));
+#ifdef CARRIER_DETECTION_SUPPORT
 	unregister_tmr_service();
+#endif
 	BBP_IO_WRITE8_BY_REG_ID(pAd, 140, 0x0);
 	
 	if (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40)
@@ -3789,8 +3793,9 @@ VOID NewRadarDetectionStart(
 	RTMP_DFS_IO_WRITE8(pAd, 0x1, (pAd->CommonCfg.ChEnable & 0xf));
 
 	dfs_sw_init(pAd);
-
+#ifdef CARRIER_DETECTION_SUPPORT
 	request_tmr_service(NEW_DFS_WATCH_DOG_TIME, &NewTimerCB_Radar, (unsigned long)pAd);
+#endif
 	DBGPRINT(RT_DEBUG_TRACE,("Poll Time=%d\n", pAd->CommonCfg.PollTime));
 
 #if 0
@@ -3808,7 +3813,9 @@ VOID NewRadarDetectionStop(
 	DBGPRINT(RT_DEBUG_TRACE, ("NewRadarDetectionStop2\n"));
 	// Disable detection
 	RTMP_DFS_IO_WRITE8(pAd, 0x1, 0);
+#ifdef CARRIER_DETECTION_SUPPORT
 	unregister_tmr_service();
+#endif
 }
 
 
