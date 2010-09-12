@@ -56,7 +56,7 @@ vpnType=`nvram_get 2860 vpnType`
 	if [ -f /tmp/default.gw ] && [ -f /tmp/vpnip ]; then
 	    newdgw=`tail -qn1 /tmp/default.gw`
 	    vpnServerIP=`tail -qn1 /tmp/vpnip`
-	    if [ "$vpnServerIP" != "" ] && [ "$newdgw" != "" ] && [ "$newdgw" != "" ] && [ "$vpnServerIP" = "$PPP_REMOTE" ]; then
+	    if [ "$vpnServerIP" != "" ] && [ "$newdgw" != "" ] && [ "$vpnServerIP" = "$PPP_REMOTE" ]; then
 		$LOG "Replace route to $vpnServerIP via $newdgw for ppp remote $PPP_REMOTE Corbina ?...."
 		ip route del $vpnServerIP > /dev/null 2>&1
 		ip route add $vpnServerIP via $newdgw
