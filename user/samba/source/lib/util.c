@@ -3102,7 +3102,7 @@ like mktemp() but make sure that no % characters are used
  *****************************************************************/  
 char *smbd_mktemp(char *template)
 {
-	char *p = mktemp(template);
+	char *p = mkstemp(template);
 	char *p2;
 	SMB_STRUCT_STAT st;
 
@@ -3134,7 +3134,7 @@ int smb_mkstemp(char *template)
 #else
 	/* have a reasonable go at emulating it. Hope that
 	   the system mktemp() isn't completly hopeless */
-	if (!mktemp(template)) return -1;
+	if (!mkstemp(template)) return -1;
 	return open(template, O_CREAT|O_EXCL|O_RDWR, 0600);
 #endif
 }

@@ -10,7 +10,7 @@ prefix=
 exec_prefix=${prefix}
 mandir=${prefix}/man
 
-LIBS=$(LIBCRYPT)
+LIBS=$(LIBCRYPT) -lcrypt
 #-lreadline -ldl  -lcrypt
 CPPFLAGS=
 AWK=mawk

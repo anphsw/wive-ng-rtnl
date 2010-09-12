@@ -45,7 +45,7 @@ void add_char_string(char *s);
 
 /*The following definitions come from  lib/crc32.c  */
 
-uint32 crc32_calc_buffer( char *buffer, uint32 count);
+uint32 crc32_calc_buffer(const char *buf, size_t size);
 
 /*The following definitions come from  lib/debug.c  */
 
@@ -132,8 +132,7 @@ void interpret_coding_system(char *str);
 void initialize_multibyte_vectors( int client_codepage);
 
 /*The following definitions come from  lib/md4.c  */
-
-void mdfour(unsigned char *out, unsigned char *in, int n);
+void mdfour(unsigned char *out, const unsigned char *in, int n);
 
 /*The following definitions come from  lib/pidfile.c  */
 
@@ -147,7 +146,7 @@ char *rep_inet_ntoa(struct in_addr ip);
 /*The following definitions come from  lib/signal.c  */
 
 void BlockSignals(BOOL block,int signum);
-void CatchSignal(int signum,void (*handler)(int ));
+void (*CatchSignal(int signum,void (*handler)(int )))(int);
 void CatchChild(void);
 void CatchChildLeaveStatus(void);
 
@@ -164,7 +163,6 @@ int smbrun(char *cmd,char *outfile,BOOL shared);
 
 /*The following definitions come from  lib/system.c  */
 
-int sys_select(int maxfd, fd_set *fds,struct timeval *tval);
 int sys_select(int maxfd, fd_set *fds,struct timeval *tval);
 int sys_usleep(long usecs);
 int sys_stat(const char *fname,SMB_STRUCT_STAT *sbuf);
@@ -681,10 +679,6 @@ void start_async_dns(void);
 void run_dns_queue(void);
 BOOL queue_dns_query(struct packet_struct *p,struct nmb_name *question,
 		     struct name_record **n);
-BOOL queue_dns_query(struct packet_struct *p,struct nmb_name *question,
-		     struct name_record **n);
-void kill_async_dns_child(void);
-
 /*The following definitions come from  nmbd/nmbd.c  */
 
 BOOL reload_services(BOOL test);
@@ -2385,7 +2379,6 @@ void process_blocking_lock_queue(time_t t);
 /*The following definitions come from  smbd/chgpasswd.c  */
 
 BOOL chgpasswd(char *name,char *oldpass,char *newpass, BOOL as_root);
-BOOL chgpasswd(char *name,char *oldpass,char *newpass, BOOL as_root);
 BOOL check_lanman_password(char *user, uchar *pass1, 
                            uchar *pass2, struct smb_passwd **psmbpw);
 BOOL change_lanman_password(struct smb_passwd *smbpw, uchar *pass1, uchar *pass2);
@@ -2719,7 +2712,6 @@ int reply_getattrE(connection_struct *conn, char *inbuf,char *outbuf, int size, 
 
 /*The following definitions come from  smbd/server.c  */
 
-BOOL reload_services(BOOL test);
 void exit_server(char *reason);
 
 /*The following definitions come from  smbd/service.c  */

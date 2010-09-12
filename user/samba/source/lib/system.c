@@ -20,7 +20,7 @@
 */
 
 #include "includes.h"
-#include <config/autoconf.h>
+//#include <config/autoconf.h>
 
 extern int DEBUGLEVEL;
 

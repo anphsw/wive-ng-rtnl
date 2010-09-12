@@ -69,11 +69,11 @@ static int string_match(char *tok,char *s, char *invalid_char)
 		char *hostname = NULL;
 		BOOL netgroup_ok = False;
 
-		if (!mydomain) yp_get_default_domain(&mydomain);
+		if (!mydomain)
+			yp_get_default_domain(&mydomain);
 
 		if (!mydomain) {
-			DEBUG(0,("Unable to get default yp domain.\n"));
-			return False;
+			DEBUG(0,("Unable to get default yp domain. Try without it.\n"));
 		}
 		if (!(hostname = strdup(s))) {
 			DEBUG(1,("out of memory for strdup!\n"));

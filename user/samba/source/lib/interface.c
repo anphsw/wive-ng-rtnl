@@ -134,9 +134,9 @@ static void interpret_interface(char *token)
 	}
 
 	/* parse it into an IP address/netmasklength pair */
-	*p++ = 0;
-
+	*p = 0;
 	ip = *interpret_addr2(token);
+	*p++ = '/';
 
 	if (strlen(p) > 2) {
 		nmask = *interpret_addr2(p);
@@ -199,7 +199,7 @@ void load_interfaces(void)
 
 	/* if we don't have a interfaces line then use all broadcast capable 
 	   interfaces except loopback */
-	if (!ptr || !*ptr) {
+	if (!ptr || !*ptr ) {
 		if (total_probed <= 0) {
 			DEBUG(0,("ERROR: Could not determine network interfaces, you must use a interfaces config line\n"));
 			exit(1);
@@ -234,8 +234,8 @@ BOOL interfaces_changed(void)
 
 	n = get_interfaces(ifaces, MAX_INTERFACES);
 
-	if (n != total_probed ||
-	    memcmp(ifaces, probed_ifaces, sizeof(ifaces[0])*n)) {
+	if ((n > 0 )&& (n != total_probed ||
+	    memcmp(ifaces, probed_ifaces, sizeof(ifaces[0])*n))) {
 		return True;
 	}
 	

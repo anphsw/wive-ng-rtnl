@@ -282,9 +282,7 @@ static ufc_long longmask[32] = {
  * bzero and some don't have memset.
  */
 
-static void clearmem(start, cnt)
-  char *start;
-  int cnt;
+static void clearmem(char *start, int cnt)
   { while(cnt--)
       *start++ = '\0';
   }
@@ -300,7 +298,7 @@ static int initialized = 0;
  * by fcrypt users.
  */
 
-static void ufc_init_des()
+static void ufc_init_des(void)
   { int comes_from_bit;
     int bit, sg;
     ufc_long j;
