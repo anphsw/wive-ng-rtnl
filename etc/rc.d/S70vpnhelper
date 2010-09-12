@@ -50,6 +50,9 @@ stop() {
     rmmod pppol2tp > /dev/null 2>&1
     rmmod pptp     > /dev/null 2>&1
     rmmod ppp_generic     > /dev/null 2>&1
+
+    #remove VPN server IP file
+    rm -f /tmp/vpnip
 }
 
 get_param() {
