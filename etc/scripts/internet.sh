@@ -97,19 +97,17 @@ retune_wifi() {
     /etc/scripts/wifi.sh $MODE
 }
 
-ifRaxWdsxDown
-
 #clear conntrack tables
 if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
+#All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "lanonly" ] && [ "$MODE" != "connect_sta" ]; then
-    #reload wifi modules
+    ifRaxWdsxDown
     service modules restart
 fi
-
+#restart lan interfaces
 if [ "$MODE" != "connect_sta" ]; then
-    #restart lan interfaces
     service lan restart
 fi
 
