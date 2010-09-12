@@ -2959,8 +2959,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	}
 
 	close(s);
-	doSystem("service wan restart"); //configure wan and get param from dhcp
-	doSystem("services_restart.sh"); //restart needed services
+	doSystem("internet.sh  &");; //Configure wan and get param from dhcp and restart all service. Not use wifi only mode
 	
 }
 
