@@ -19,12 +19,10 @@ m2uenabled=`nvram_get 2860 M2UEnabled`
 
 ########################################set param#########################
 
-if [ "$ethconv" = "n" ]; then
-    if [ "$radio_off" = "1" ]; then
-	iwpriv ra0 set RadioOn=0
-    else
-	iwpriv ra0 set RadioOn=1
-    fi
+if [ "$radio_off" = "1" ]; then
+    iwpriv ra0 set RadioOn=0
+else
+    iwpriv ra0 set RadioOn=1
 fi
 
 iwpriv ra0 set CountryRegion=$CountryRegion
