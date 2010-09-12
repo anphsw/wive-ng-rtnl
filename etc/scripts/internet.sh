@@ -114,6 +114,9 @@ addMBSSID
 fi
 
 if [ "$MODE" != "lanonly" ]; then 
+    if [ "$MODE" = "connect_sta" ]; then
+	ip link set ra0 up
+    fi
     #preconfigure wifi and 40Mhz workaround
     /etc/scripts/wifi.sh $MODE
 fi
