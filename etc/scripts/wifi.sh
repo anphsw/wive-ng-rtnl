@@ -4,6 +4,10 @@
 . /etc/scripts/config.sh
 . /etc/scripts/global.sh
 
+if [ "$ethconv" != "n" ]; then
+    exit 0
+fi
+
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 ########################################get param#########################
 radio_off=`nvram_get 2860 RadioOff`
