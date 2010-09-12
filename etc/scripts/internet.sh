@@ -92,6 +92,11 @@ addMBSSID()
     fi
 }
 
+retune_wifi() {
+    #preconfigure wifi and 40Mhz workaround
+    /etc/scripts/wifi.sh $MODE
+}
+
 ifRaxWdsxDown
 
 #clear conntrack tables
@@ -104,18 +109,8 @@ if [ "$MODE" != "lanonly" ] && [ "$MODE" != "connect_sta" ]; then
 fi
 
 if [ "$MODE" != "connect_sta" ]; then
-#restart lan interfaces
-service lan restart
-fi
-
-if [ "$ethconv" = "n" ]; then
-#always after br0 is create
-addMBSSID
-fi
-
-if [ "$MODE" != "lanonly" ] && [ "$MODE" != "connect_sta" ]; then 
-    #preconfigure wifi and 40Mhz workaround
-    /etc/scripts/wifi.sh $MODE
+    #restart lan interfaces
+    service lan restart
 fi
 
 #
@@ -127,6 +122,10 @@ fi
 #
 if [ "$opmode" = "0" ]; then
     echo "Bridge OperationMode: $opmode"
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
 	addBr0
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
@@ -140,6 +139,10 @@ if [ "$opmode" = "0" ]; then
 
 elif [ "$opmode" = "1" ]; then
     echo "Gateway OperationMode: $opmode"
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
     if [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
 	echo '##### config Vtss vlan partition #####'
     	config-vlan.sh 1 1
@@ -161,6 +164,10 @@ elif [ "$opmode" = "2" ]; then
 
 elif [ "$opmode" = "3" ]; then
     echo "ApClient OperationMode: $opmode"
+	addMBSSID
+    if [ "$MODE" != "lanonly" ]; then
+	retune_wifi
+    fi
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
     fi
