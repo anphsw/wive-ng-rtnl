@@ -729,7 +729,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 			parent->nlink--;
 		proc_kill_inodes(de);
 		de->nlink = 0;
-		WARN_ON(de->subdir);
+		WARN_ON((int)de->subdir);
 		if (!atomic_read(&de->count))
 			free_proc_entry(de);
 		else {

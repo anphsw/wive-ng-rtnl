@@ -3169,11 +3169,9 @@ void netdev_run_todo(void)
 
 		/* paranoia */
 		BUG_ON(atomic_read(&dev->refcnt));
-#if 0 //i`m not paranoic
-		WARN_ON(dev->ip_ptr);
-		WARN_ON(dev->ip6_ptr);
-		WARN_ON(dev->dn_ptr);
-#endif
+		WARN_ON((int)dev->ip_ptr);
+		WARN_ON((int)dev->ip6_ptr);
+		WARN_ON((int)dev->dn_ptr);
 
 		if (dev->destructor)
 			dev->destructor(dev);
@@ -3332,7 +3330,7 @@ void unregister_netdevice(struct net_device *dev)
 		dev->uninit(dev);
 
 	/* Notifier chain MUST detach us from master device. */
-	WARN_ON(dev->master);
+	WARN_ON((int)dev->master);
 
 	/* Remove entries from sysfs */
 	netdev_unregister_sysfs(dev);

@@ -1869,7 +1869,6 @@ context_switch(struct rq *rq, struct task_struct *prev,
 
 	if (!prev->mm) {
 		prev->active_mm = NULL;
-		WARN_ON(rq->prev_mm);
 		rq->prev_mm = oldmm;
 	}
 	/*
