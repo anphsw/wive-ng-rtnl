@@ -1,5 +1,9 @@
 #!/bin/sh
 
+############################################################
+# global.sh - correct enviroment helper for automatization #
+############################################################
+
 #include kernel config
 . /etc/scripts/config.sh
 

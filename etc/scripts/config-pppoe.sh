@@ -1,5 +1,9 @@
 #!/bin/sh
 
+###################################################
+# config-pppoe.sh - configure PPPOE client helper #
+###################################################
+
 #include global
 . /etc/scripts/global.sh
 

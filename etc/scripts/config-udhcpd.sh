@@ -1,9 +1,8 @@
 #!/bin/sh
-#
-# $Id: config-udhcpd.sh,v 1.6.4.4 2009-04-22 02:46:43 michael Exp $
-#
-# usage: see function usage()
-#
+
+###################################################
+# config-udhcpd.sh - configure DHCP server helper #
+###################################################
 
 #include kernel config and global
 . /etc/scripts/config.sh

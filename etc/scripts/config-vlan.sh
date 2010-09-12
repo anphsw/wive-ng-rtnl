@@ -1,12 +1,13 @@
 #!/bin/sh
 
-# $Id: config-vlan.sh,v 1.21 2008-10-01 08:32:57 winfred Exp $
-#
-# usage: config-vlan.sh <switch_type> <vlan_type>
-#   switch_type: 0=IC+, 1=vtss
-#   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0
-# 
-
+############################################################
+# config-vlan.sh - configure vlan switch particion helper  #
+#                                                          #
+# usage: config-vlan.sh <switch_type> <vlan_type>          #
+#   switch_type: 0=IC+, 1=vtss                             #
+#   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
+############################################################
+ 
 #include kernel config
 . /etc/scripts/config.sh
 

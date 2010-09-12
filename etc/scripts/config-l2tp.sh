@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#################################################
+# config-l2tp.sh - configure L2TP client helper #
+#################################################
+
 #include global
 . /etc/scripts/global.sh
 

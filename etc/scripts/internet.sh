@@ -1,9 +1,8 @@
 #!/bin/sh
-#
-# $Id: internet.sh,v 1.53.2.3 2008-10-20 05:15:44 steven Exp $
-#
-# usage: internet.sh
-#
+
+########################################################
+# internet.sh - reconfigure network helper for goahead #
+########################################################
 
 #include kernel config and global
 . /etc/scripts/config.sh

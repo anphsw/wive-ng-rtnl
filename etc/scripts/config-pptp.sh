@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#################################################
+# config-pptp.sh - configure PPTP client helper #
+#################################################
+
 #include global
 . /etc/scripts/global.sh
 
