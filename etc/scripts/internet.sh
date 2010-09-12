@@ -98,16 +98,20 @@ ifRaxWdsxDown
 if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
-if [ "$MODE" != "lanonly" ]; then
+if [ "$MODE" != "lanonly" ] && [ "$MODE" != "connect_sta" ]; then
     #reload wifi modules
     service modules restart
 fi
 
+if [ "$MODE" != "connect_sta" ]; then
 #restart lan interfaces
 service lan restart
+fi
 
+if [ "$ethconv" = "n" ]; then
 #always after br0 is create
 addMBSSID
+fi
 
 if [ "$MODE" != "lanonly" ]; then 
     #preconfigure wifi and 40Mhz workaround
@@ -151,7 +155,7 @@ elif [ "$opmode" = "1" ]; then
 
 elif [ "$opmode" = "2" ]; then
     echo "Ethernet Converter OperationMode: $opmode"
-    if [ "$MODE" != "wifionly" ]; then
+    if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
 	resetLanWan
     fi
 
