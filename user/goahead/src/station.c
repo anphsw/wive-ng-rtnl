@@ -2959,7 +2959,9 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	}
 
 	close(s);
-	doSystem("services_restart.sh"); //renew dhcp, pppoe etc if needed
+	doSystem("service wan restart"); //configure wan and get param from dhcp
+	doSystem("services_restart.sh"); //restart needed services
+	
 }
 
 /*
