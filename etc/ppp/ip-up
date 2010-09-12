@@ -23,12 +23,9 @@ DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnType=`nvram_get 2860 vpnType`
 
-    if [ "$vpnType" != 0 ]; then
-	$LOG "Modify route table need for buggy nas"
-	#Remove auto route in VPN
-	ip route del $PPP_REMOTE  > /dev/null 2>&1
-        ip route del dev $PPP_IFACE  > /dev/null 2>&1
-    fi
+    #disable multicast on ppp+ interface
+    ifconfig $PPP_IFACE -allmulti
+    ifconfig $PPP_IFACE -multicast
 
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
@@ -50,26 +47,29 @@ vpnType=`nvram_get 2860 vpnType`
 	rm -f /tmp/ip-down-route-reload
     fi
 
-
-    #disable multicast on ppp+ interface
-    ifconfig $PPP_IFACE -allmulti
-    ifconfig $PPP_IFACE -multicast
+    #Route to VPN server over WAN select
+    if [ "$vpnType" != 0 ]; then
+	$LOG "Modify route table need for buggy nas"
+	#Remove auto route in VPN
+	ip route del $PPP_REMOTE  > /dev/null 2>&1
+        ip route del dev $PPP_IFACE  > /dev/null 2>&1
+	if [ -f /tmp/default.gw ] && [ -f /tmp/vpnip ]; then
+	    newdgw=`tail -qn1 /tmp/default.gw`
+	    vpnServerIP=`tail -qn1 /tmp/vpnip`
+	    if [ "$vpnServerIP" != "" ] && [ "$newdgw" != "" ] && [ "$newdgw" != "" ] && [ "$vpnServerIP" = "$PPP_REMOTE" ]; then
+		$LOG "Replace route to $vpnServerIP via $newdgw for ppp remote $PPP_REMOTE Corbina ?...."
+		ip route del $vpnServerIP > /dev/null 2>&1
+		ip route add $vpnServerIP via $newdgw
+		$LOG "Drop OUTPUT to $vpnServerIP over $PPP_IFACE"                                                               
+                iptables -I OUTPUT -o $PPP_IFACE -d $vpnServerIP -j DROP
+	    fi
+	fi
+    fi
 
     $LOG "Replace DNS from pppd"
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
     cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
-
-    #Route to VPN server over WAN select
-    if [ "$vpnType" != 0 ] && [ "$vpnServerIP" != "" ] && [ -f /tmp/default.gw ] && [ -f /tmp/vpnip ]; then
-	$LOG "Replace route to wan...."
-	newdgw=`cat /tmp/default.gw`
-	vpnServerIP=`cat /tmp/vpnip`
-	if [ "$newdgw" != "" ] && [ "$newdgw" != "$vpnServerIP" ]; then
-	    ip route del $vpnServerIP > /dev/null 2>&1
-	    ip route add $vpnServerIP via $newdgw
-	fi
-    fi
 
     #Replace default route to ppp tunnel
     if [ "$DGW" = "1" ]; then
