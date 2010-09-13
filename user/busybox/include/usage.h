@@ -685,7 +685,6 @@
      "\n	delbr BRIDGE		Delete BRIDGE" \
      "\n	addif BRIDGE IFACE	Add IFACE to BRIDGE" \
      "\n	delif BRIDGE IFACE	Delete IFACE from BRIDGE" \
-     "\n	forward IFACE		Disable FORWARD from IFACE" \
 	IF_FEATURE_BRCTL_FANCY( \
      "\n	setageing BRIDGE TIME		Set ageing time" \
      "\n	setfd BRIDGE TIME		Set bridge forward delay" \
