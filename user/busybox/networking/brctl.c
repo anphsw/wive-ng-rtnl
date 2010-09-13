@@ -100,6 +100,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 {
 	static const char keywords[] ALIGN1 =
 		"addbr\0" "delbr\0" "addif\0" "delif\0"
+		"forward\0"
 	IF_FEATURE_BRCTL_FANCY(
 		"stp\0"
 		"setageing\0" "setfd\0" "sethello\0" "setmaxage\0"
@@ -108,6 +109,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 	IF_FEATURE_BRCTL_SHOW("showmacs\0" "show\0");
 
 	enum { ARG_addbr = 0, ARG_delbr, ARG_addif, ARG_delif
+		, ARG_forward
 		IF_FEATURE_BRCTL_FANCY(,
 		   ARG_stp,
 		   ARG_setageing, ARG_setfd, ARG_sethello, ARG_setmaxage,
@@ -203,7 +205,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 			goto done;
 		}
 
-		if (!*argv) /* all but 'addbr/delbr' need at least two arguments */
+		if (!*argv) /* all but 'addbr/delbr/forward' need at least two arguments */
 			bb_show_usage();
 
 		strncpy_IFNAMSIZ(ifr.ifr_name, br);
@@ -218,6 +220,26 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
 					&ifr, "bridge %s", br);
 			goto done_next_argv;
 		}
+
+		if (key == ARG_forward) { /* forward enable */
+			int onoff = 0;
+			static const char no_yes[] ALIGN1 =
+				"0\0" "off\0" "n\0" "no\0"   /* 0 .. 3 */
+				"1\0" "on\0"  "y\0" "yes\0"; /* 4 .. 7 */
+			brif = *argv; //first arg get
+			ifr.ifr_ifindex = if_nametoindex(brif);
+			if (!ifr.ifr_ifindex) {
+				bb_perror_msg_and_die("iface %s", brif);
+			}
+			argv++; //next arg
+			onoff = index_in_strings(no_yes, *argv);
+			if (onoff < 0)
+				bb_error_msg_and_die(bb_msg_invalid_arg, *argv, applet_name);
+			onoff = (unsigned)onoff / 4;
+			ioctl_or_perror_and_die(fd, SIOCBRPFWCT, &ifr,(unsigned int)onoff);
+			goto done;
+		}
+
 #if ENABLE_FEATURE_BRCTL_FANCY
 		if (key == ARG_stp) { /* stp */
 			static const char no_yes[] ALIGN1 =
