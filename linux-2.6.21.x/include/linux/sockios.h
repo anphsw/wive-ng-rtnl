@@ -123,6 +123,10 @@
 #define SIOCBRADDIF	0x89a2		/* add interface to bridge      */
 #define SIOCBRDELIF	0x89a3		/* remove interface from bridge */
 
+/* bridge extensions call */
+#define SIOCBRMCAST	0x89a4		/* multicast bridge control 	*/
+#define SIOCBRPFWCT	0x89a5		/* portforwart bridge control 	*/
+
 /* Device private ioctl calls */
 
 /*

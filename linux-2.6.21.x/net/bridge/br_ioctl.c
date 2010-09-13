@@ -303,7 +303,7 @@ static int old_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 		return get_fdb_entries(br, (void __user *)args[1],
 				       args[2], args[3]);
 #ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-        case 103:
+        case BRCTL_MULTICAST_BWCTRL:
         {
                 struct net_bridge_port *p;
 
@@ -324,23 +324,24 @@ static int old_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
                 return 0;
         }
 #endif
-
 #ifdef CONFIG_BRIDGE_PORT_FORWARD
-		case 104:
-		{
-				struct net_bridge_port *p;
-				if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
-				if (args[2] == 0) {
-						p->port_forwarding = 0;
-						printk(KERN_INFO "%s: port %i(%s) forwarding is disabled!\n",
-                                        p->br->dev->name, p->port_no, p->dev->name );
-				} else {
-						p->port_forwarding = 1;
-						printk(KERN_INFO "%s: port %i(%s) forwarding is enabled!\n",
-                                        p->br->dev->name, p->port_no, p->dev->name );
-				}
-				return 0;
+	case BRCTL_PORT_FORWARD:
+	{
+		struct net_bridge_port *p;
+
+		if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
+
+		if (args[2] == 0) {
+			p->port_forwarding = 0;
+			printk(KERN_INFO "%s: port %i(%s) forwarding is disabled!\n",
+                        p->br->dev->name, p->port_no, p->dev->name );
+		} else {
+			p->port_forwarding = 1;
+			printk(KERN_INFO "%s: port %i(%s) forwarding is enabled!\n",
+                        p->br->dev->name, p->port_no, p->dev->name );
 		}
+		return 0;
+	}
 #endif
 
 	}
@@ -442,6 +443,56 @@ int br_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	case SIOCBRDELIF:
 		return add_del_if(br, rq->ifr_ifindex, cmd == SIOCBRADDIF);
 
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        case SIOCBRMCAST:
+        {
+		unsigned long args[4];
+                struct net_bridge_port *p;
+
+		if (copy_from_user(args, rq->ifr_data, sizeof(args)))
+			return -EFAULT;
+
+                if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
+
+                if (args[2] == 0) {
+                        p->bandwidth = 0;
+                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth all\n",
+                                        p->br->dev->name, p->port_no, p->dev->name );
+                del_timer(&p->bwctrl_timer);
+                } else {
+                        p->bandwidth = args[2] * 1000 / 8;
+                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth %dkbps\n",
+                                         p->br->dev->name, p->port_no, p->dev->name,
+                                        (unsigned int)args[2]);
+
+                mod_timer(&p->bwctrl_timer, jiffies+1*HZ);
+                }
+                return 0;
+        }
+#endif
+#ifdef CONFIG_BRIDGE_PORT_FORWARD
+	case SIOCBRPFWCT:
+	{
+		unsigned long args[4];
+		struct net_bridge_port *p;
+
+		if (copy_from_user(args, rq->ifr_data, sizeof(args)))
+			return -EFAULT;
+
+		if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
+
+    		if (args[2] == 0) {
+			p->port_forwarding = 0;
+			printk(KERN_INFO "%s: port %i(%s) forwarding is disabled!\n",
+                        p->br->dev->name, p->port_no, p->dev->name );
+		} else {
+			p->port_forwarding = 1;
+			printk(KERN_INFO "%s: port %i(%s) forwarding is enabled!\n",
+                        p->br->dev->name, p->port_no, p->dev->name );
+		}
+		return 0;
+	}
+#endif
 	}
 
 	pr_debug("Bridge does not support ioctl 0x%x\n", cmd);
