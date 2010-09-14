@@ -32,7 +32,7 @@ start() {
 }
 
 stop() {
- $LOG " "
+ echo ""
 }
 
 case "$1" in

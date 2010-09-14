@@ -3,14 +3,12 @@
 LOG="echo INETD: "
 
 start() {
-    if [ -f /sbin/inetd ]; then
+    get_param
+    if [ -f /sbin/inetd ] && [ "$admID" != "" ]; then
       $LOG "Starting inetd: "
-	admID=`nvram_get 2860 Login`
-	if [ "$admID" = "" ]; then
-    	    admID="Admin"
-	fi
-	if [ -f /bin/dropbear ]; then
-	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i -K60 -I360 -m" > /etc/inetd.conf
+      echo  > /etc/inetd.conf
+	if [ -f /bin/dropbear ] && [ "$RemoteSSH" != "" ] && [ "$RemoteSSH" != "0" ]; then
+	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
 	fi
         /sbin/inetd
     fi
@@ -20,6 +18,11 @@ stop() {
  $LOG "Stopping inetd: "
  killall -q inetd
  killall -q -9 inetd
+}
+
+get_param() {
+ admID=`nvram_get 2860 Login`
+ RemoteSSH=`nvram_get 2860 RemoteSSH`
 }
 
 case "$1" in
