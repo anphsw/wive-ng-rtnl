@@ -49,6 +49,19 @@ echo "==================START-L2TP-CLIENT======================="
     check_param
     get_vpn_ip
     reachable=0;
+
+    $LOG "Set route to vpn server."
+    if [ -f /tmp/default.gw ]; then
+	newdgw=`cat /tmp/default.gw`
+    else
+	newdgw=""
+    fi
+
+    if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
+	$LOG "Add route to $SERVER via $newdgw"
+	ip route replace $SERVER via $newdgw metric 0
+    fi
+
     while [ $reachable -eq 0 ]; do
 	$LOG "Check for L2TP server $SERVER reachable"
         ping -q -c 1 $SERVER
@@ -60,20 +73,7 @@ echo "==================START-L2TP-CLIENT======================="
 	    get_vpn_ip
             reachable=0;
         fi
-    done
-    
-
-    $LOG "Get route to vpn server."
-    if [ -f /tmp/default.gw ]; then
-	newdgw=`cat /tmp/default.gw`
-    else
-	newdgw=""
-    fi
-
-    if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
-	$LOG "Add route to $SERVER via $newdgw"
-	ip route replace $SERVER via $newdgw metric 0
-    fi
+    done    
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns
