@@ -130,13 +130,13 @@
 48) nvram_daemon and gpio utility no more needed<br>
 49) Add backup nvram to rwfs logic add<br>
 50) Rewrite logic in libnvram and goahead for correct nvram init/close<br>
-55) More optimization init logic and cleanup goahead code<br>
-56) Fix renew ip from dhcp at profile activate<br>
-57) New logic for corbina workaround<br>
-58) Samba fixup to correct build new gcc and others<br>
-59) Some kernel backports and fix needed for correct wifi drivers work<br>
-60) Fix radvd skipping multiple interfaces when UnicastOnly is on or AdvSendAdvert is off<br>
-61) Update pppd from git<br>
+51) More optimization init logic and cleanup goahead code<br>
+52) Fix renew ip from dhcp at profile activate<br>
+53) New logic for corbina workaround<br>
+54) Samba fixup to correct build new gcc and others<br>
+55) Some kernel backports and fix needed for correct wifi drivers work<br>
+56) Fix radvd skipping multiple interfaces when UnicastOnly is on or AdvSendAdvert is off<br>
+57) Update pppd from git<br>
 
 <br><br>
 <b>For support see:</b><br>
