@@ -14,14 +14,14 @@ if [ -f /bin/inadyn ]; then
     if [ "$srv" != "" ] && [ "$srv" != "none" ] && [ "$ddns" != "" ] && [ "$u" != "" ] && [ "$pw" != "" ]; then
 	if [ "$srv" = "dyndns.org" ] || [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || [ "$srv" = "no-ip.com" ]; then
 	    $LOG "Starting DynDNS: "
-	    param="-u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --syslog"
-	    inadyn "$param" &
+	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --background --syslog
 	else
 	    $LOG "Unknown DDNS provider: $srv"
 	    exit 1
 	fi
+    else
+	$LOG "Some parametrs needed..."
     fi
-    $LOG "Some parametrs needed..."
 fi
 }
 
