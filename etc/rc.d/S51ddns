@@ -15,14 +15,9 @@ if [ -f /bin/inadyn ]; then
 	exit 0
     else
     $LOG "Starting DynDNS: "
-	if [ "$srv" = "dyndns.org" ]; then
-	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv &
-	elif [ "$srv" = "freedns.afraid.org" ]; then
-	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
-	elif [ "$srv" = "zoneedit.com" ]; then
-	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
-	elif [ "$srv" = "no-ip.com" ]; then
-    	    inadyn -u $u -p $pw -a $ddns --dyndns_system default@$srv &
+	param="-u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --syslog"
+	if [ "$srv" = "dyndns.org" ] || [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || [ "$srv" = "no-ip.com" ]; then
+	    inadyn "$param" &
 	else
 	    $LOG "$0: unknown DDNS provider: $srv"
 	    exit 1
@@ -36,6 +31,7 @@ get_param() {
     ddns=`nvram_get 2860 DDNS`
     u=`nvram_get 2860 DDNSAccount`
     pw=`nvram_get 2860 DDNSPassword`
+    update_period="43200"
 }
 
 stop() {
