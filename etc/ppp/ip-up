@@ -59,7 +59,7 @@ vpnType=`nvram_get 2860 vpnType`
 	    if [ "$vpnServerIP" != "" ] && [ "$newdgw" != "" ] && [ "$vpnServerIP" = "$PPP_REMOTE" ]; then
 		$LOG "Replace route to $vpnServerIP via $newdgw for ppp remote $PPP_REMOTE Corbina ?...."
 		ip route del $vpnServerIP > /dev/null 2>&1
-		ip route add $vpnServerIP via $newdgw
+		ip route replace $vpnServerIP via $newdgw
 		$LOG "Drop OUTPUT to $vpnServerIP over $PPP_IFACE"                                                               
                 iptables -I OUTPUT -o $PPP_IFACE -d $vpnServerIP -j DROP
 	    fi

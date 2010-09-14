@@ -42,13 +42,13 @@ fi
 	#Get default gateway
     	if [ -n "$router" ] ; then
     	    $LOG "Deleting default route"
-    	    while route del default gw 0.0.0.0 dev $interface ; do
+    	    while ip route del default dev $interface ; do
                 :
     	    done
     	    metric=0
     	    for i in $router ; do
     	        $LOG "Add default route $i dev $interface metric $metric"
-                route add default gw $i dev $interface metric $metric
+		ip route replace default via $i dev $interface metric $metric
 	        #save first dgw with metric=1 to use in corbina hack
 	        if [ "$metric" = "0" ]; then
 		    echo $i > /tmp/default.gw
@@ -166,7 +166,7 @@ fi
 			# Malformed data is: ... or xxx... or xxx.yyy.. or xxx.yyy.zzz.
 
 			[ -n "$NW" ] && [ -n "$GW" ] && {
-				route add $NW gw $GW dev $interface
+				ip route replace $NW via $GW dev $interface
 			}
 
 			# Clear the strings incase they don't get set next time around
