@@ -11,17 +11,19 @@ LOG="echo DYNDNS: "
 start() {
 if [ -f /bin/inadyn ]; then
     get_param
-    if [ "$srv" = "" -o "$srv" = "none" ] || [ "$ddns" = "" -o "$u" = "" -o "$pw" = "" ]; then
-	exit 0
+    if [ "$srv" != "" ] &&  [ "$srv" != "none" ] && [ "$ddns" != "" ] && [ "$u" != "" ] && [ "$pw" != "" ] \
+       [ "$srv" = "dyndns.org" ] || [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || \
+       [ "$srv" = "no-ip.com" ]; then
+
+      $LOG "Starting DynDNS: "
+      param="-u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --syslog"
+      inadyn "$param" &
+
     else
-    $LOG "Starting DynDNS: "
-	param="-u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --syslog"
-	if [ "$srv" = "dyndns.org" ] || [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || [ "$srv" = "no-ip.com" ]; then
-	    inadyn "$param" &
-	else
-	    $LOG "$0: unknown DDNS provider: $srv"
-	    exit 1
-        fi
+
+      $LOG "$0: unknown DDNS provider: $srv"
+      exit 1
+
     fi
 fi
 }
