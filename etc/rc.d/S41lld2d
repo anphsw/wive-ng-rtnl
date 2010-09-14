@@ -9,13 +9,11 @@ web_wait
 LOG="echo LLD2D: "
 
 start() {
-if [ -f /bin/lld2d ]; then
-    lltd=`nvram_get 2860 lltdEnabled`
-    if [ "$lltd" = "1" ]; then
+    get_param
+    if [ -f /bin/lld2d ] && [ "$lltd" = "1" ]; then
 	$LOG "Starting LLD2D: "
-        lld2d $lan_if
+	lld2d $lan_if
     fi
-fi
 }
 
 stop() {
@@ -23,6 +21,10 @@ stop() {
   killall -q lld2d
   killall -q -9 lld2d
   rm -rf /var/run/lld2d-* > /dev/null 2>&1
+}
+
+get_param() {
+    lltd=`nvram_get 2860 lltdEnabled`
 }
 
 case "$1" in

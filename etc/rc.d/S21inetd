@@ -6,7 +6,7 @@ start() {
     get_param
     if [ -f /sbin/inetd ] && [ "$admID" != "" ]; then
       $LOG "Starting inetd: "
-      echo  > /etc/inetd.conf
+      echo > /etc/inetd.conf
 	if [ -f /bin/dropbear ] && [ "$RemoteSSH" != "" ] && [ "$RemoteSSH" != "0" ]; then
 	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
 	fi
