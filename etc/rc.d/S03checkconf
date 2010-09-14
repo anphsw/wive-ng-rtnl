@@ -10,7 +10,7 @@ start() {
 }
 
 stop() {
-    echo ""
+    echo "" > /dev/null
 }
 
 get_param() {

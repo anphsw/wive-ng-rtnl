@@ -38,7 +38,7 @@ fi
 }
 
 stop() {
- $LOG " "
+ echo "" > /dev/null
 }
 
 get_param() {

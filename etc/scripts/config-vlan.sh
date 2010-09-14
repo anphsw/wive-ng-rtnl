@@ -334,8 +334,7 @@ if [ "$1" = "0" ]; then
 			config175D "WLLLL"
 		fi
 	else
-		echo "unknown vlan type $2"
-		echo ""
+		echo ">>> unknown vlan type $2 <<<"
 		usage $0
 	fi
 elif [ "$1" = "1" ]; then
@@ -344,8 +343,7 @@ elif [ "$1" = "1" ]; then
 	elif [ "$2" = "1" ]; then
 		configVtss
 	else
-		echo "unknown vlan type $2"
-		echo ""
+		echo ">>> unknown vlan type $2 <<<"
 		usage $0
 	fi
 elif [ "$1" = "2" ]; then

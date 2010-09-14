@@ -90,7 +90,7 @@ $LOG "Copy web pages to tmpfs"
 }
 
 stop() {
- $LOG ""
+ echo "" > /dev/null
 }
 
 case "$1" in

@@ -64,10 +64,9 @@ ra0flushadress()
 }
 
 get_param() {
-	clone_en=`nvram_get 2860 macCloneEnabled`
-	clone_mac=`nvram_get 2860 macCloneMac`
-	WMAC=`nvram_get WLAN_MAC_ADDR`
-	IS_WIVE=`nvram_get 2860 IS_WIVE`
+    clone_en=`nvram_get 2860 macCloneEnabled`
+    clone_mac=`nvram_get 2860 macCloneMac`
+    WMAC=`nvram_get WLAN_MAC_ADDR`
 }
 
 gen_wifi_config()
