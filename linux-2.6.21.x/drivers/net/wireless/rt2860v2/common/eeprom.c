@@ -50,8 +50,8 @@ INT RtmpChipOpsEepromHook(
 #ifdef RTMP_RBUS_SUPPORT
 		case RTMP_DEV_INF_RBUS:
 			pChipOps->eeinit  = rtmp_nv_init;
-			pChipOps->eeread  = rtmp_ee_flash_read;
-			pChipOps->eewrite = rtmp_ee_flash_write;
+			pChipOps->eeread  = (void *)rtmp_ee_flash_read;
+			pChipOps->eewrite = (void *)rtmp_ee_flash_write;
 			pChipOps->loadFirmware = NULL;
 			break;
 #endif // RTMP_RBUS_SUPPORT //

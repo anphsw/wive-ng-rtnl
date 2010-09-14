@@ -98,7 +98,6 @@ static UINT32 gSimDelay = 0;
 static UINT32 gSimDelayCount;
 #endif // IEEE80211E_SIMULATION //
 
-
 /* ----- Extern Variable ----- */
 #ifdef ACM_MEMORY_TEST
 extern UINT32 gAcmMemAllocNum;
@@ -106,12 +105,7 @@ extern UINT32 gAcmMemFreeNum;
 #endif // ACM_MEMORY_TEST //
 
 extern UCHAR gAcmTestFlag;
-
-extern VOID ap_cmm_peer_assoc_req_action(
-										IN PRTMP_ADAPTER pAd,
-										IN MLME_QUEUE_ELEM *Elem,
-										IN BOOLEAN isReassoc);
-
+extern VOID ap_cmm_peer_assoc_req_action(IN PRTMP_ADAPTER pAd,IN MLME_QUEUE_ELEM *Elem, IN BOOLEAN isReassoc);
 
 /* ----- Private Variable ----- */
 static ACM_TCLAS gCMD_TCLAS_Group[ACM_TSPEC_TCLAS_MAX_NUM];

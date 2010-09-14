@@ -378,10 +378,8 @@ ACM_FUNC_STATUS ACMP_Release(
 	ACMR_ADAPTER_DB = NULL;
 
 #ifdef ACM_MEMORY_TEST
-	ACMR_DEBUG(ACMR_DEBUG_ERR,
-				("acm_msg> ACM_MEM_Alloc_Num = %d\n", gAcmMemAllocNum));
-	ACMR_DEBUG(ACMR_DEBUG_ERR,
-				("acm_msg> ACM_MEM_Free_Num  = %d\n", gAcmMemFreeNum));
+	ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_msg> ACM_MEM_Alloc_Num = %d\n", gAcmMemAllocNum));
+	ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_msg> ACM_MEM_Free_Num  = %d\n", gAcmMemFreeNum));
 #endif // ACM_MEMORY_TEST //
 
 	return ACM_RTN_OK;

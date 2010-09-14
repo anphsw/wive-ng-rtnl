@@ -1345,7 +1345,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 			TX_LINK_CFG_STRUC	TxLinkCfg;
 			unsigned long		TxOpThres;
 
-			pTempTxRate = (PRTMP_TX_RATE_SWITCH)(&pTable[(tmpTxRate + 1)*10]);
+			pTempTxRate = (void *)(PRTMP_TX_RATE_SWITCH)(&pTable[(tmpTxRate + 1)*10]);
 			RTMP_IO_READ32(pAd, TX_LINK_CFG, &TxLinkCfg.word);
 
 			if (pAd->RalinkCounters.OneSecReceivedByteCount > (pAd->RalinkCounters.OneSecTransmittedByteCount * 5) &&

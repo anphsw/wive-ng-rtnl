@@ -720,8 +720,6 @@ VOID APPeerBeaconAction(
 	UCHAR	pPreNHtCapabilityLen = 0;
 #endif // CONFIG_STA_SUPPORT //
 
-
-
 	RTMPZeroMemory(&HtCapability, sizeof(HT_CAPABILITY_IE));
 	RTMPZeroMemory(&AddHtInfo, sizeof(ADD_HT_INFO_IE));
 
@@ -1028,7 +1026,6 @@ VOID APPeerBeaconAtScanAction(
 #ifdef CONFIG_STA_SUPPORT
 	UCHAR	pPreNHtCapabilityLen = 0;
 #endif // CONFIG_STA_SUPPORT //
-
 
 	SsidLen = 0;
 

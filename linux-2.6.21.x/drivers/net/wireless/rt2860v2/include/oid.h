@@ -840,8 +840,8 @@ typedef struct _NDIS_802_11_CAPABILITY
 
 
 #ifdef CONFIG_STA_SUPPORT
-#define RT_PRIV_IOCTL							(SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
-#define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
+#define RT_PRIV_IOCTL				    (SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
+#define RTPRIV_IOCTL_SET			    (SIOCIWFIRSTPRIV + 0x02)
 
 #define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
 #define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
@@ -1328,8 +1328,6 @@ typedef enum _RT_802_11_DLS_MODE {
     DLS_FINISH
 } RT_802_11_DLS_MODE;
 #endif // QOS_DLS_SUPPORT //
-
-
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef WSC_INCLUDED

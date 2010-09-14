@@ -191,19 +191,6 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 	{MAX_LEN_CFG,		MAX_AGGREGATION_SIZE | 0x00001000},	// 0x3018, MAX frame length. Max PSDU = 16kbytes.
 	{LED_CFG,		0x7f031e46}, // Gary, 2006-08-23
 
-//#ifdef CONFIG_AP_SUPPORT
-//	{WMM_AIFSN_CFG,		0x00001173},
-//	{WMM_CWMIN_CFG,		0x00002344},
-//	{WMM_CWMAX_CFG,		0x000034a6},
-//	{WMM_TXOP0_CFG,		0x00100020},
-//	{WMM_TXOP1_CFG,		0x002F0038},
-//#endif // CONFIG_AP_SUPPORT //
-
-//#ifdef CONFIG_STA_SUPPORT
-//	{WMM_AIFSN_CFG,		0x00002273},
-//	{WMM_CWMIN_CFG,		0x00002344},
-//	{WMM_CWMAX_CFG,		0x000034aa},
-//#endif // CONFIG_STA_SUPPORT //
 #ifdef INF_AMAZON_SE
 	{PBF_MAX_PCNT,			0x1F3F6F6F}, 	//iverson modify for usb issue, 2008/09/19
 											// 6F + 6F < total page count FE
@@ -2362,16 +2349,6 @@ VOID NICUpdateFifoStaCounters(
 #ifdef DOT11_N_SUPPORT
 					pEntry->NoBADataCountDown = 64;
 #endif // DOT11_N_SUPPORT //
-
-//#ifdef CONFIG_STA_SUPPORT
-//#ifdef DOT11Z_TDLS_SUPPORT
-//					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-//					{
-//						if(IS_ENTRY_TDLS(pEntry))
-//							TDLS_LinkTearDown(pAd);
-//					}
-//#endif // DOT11Z_TDLS_SUPPORT //
-//#endif // CONFIG_STA_SUPPORT //
 
 					// Update the continuous transmission counter.
 					pEntry->ContinueTxFailCnt++;
@@ -5113,7 +5090,7 @@ static INT RtmpChipOpsRegister(
 
 #ifdef RTMP_RBUS_SUPPORT
 		case RTMP_DEV_INF_RBUS:
-			pChipOps->sendCommandToMcu = RtmpAsicSendCommandToSwMcu;
+			pChipOps->sendCommandToMcu = (void *)RtmpAsicSendCommandToSwMcu;
 			break;
 #endif //RTMP_RBUS_SUPPORT //
 		default:

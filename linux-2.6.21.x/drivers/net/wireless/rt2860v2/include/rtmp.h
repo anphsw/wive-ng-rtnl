@@ -40,8 +40,6 @@
 #include "rtmp_dot11.h"
 #include "wpa_cmm.h"
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
 #include "ap_autoChSel_cmm.h"
 #endif // CONFIG_AP_SUPPORT //
@@ -3820,9 +3818,6 @@ struct _RTMP_ADAPTER
 	NDIS_SPIN_LOCK	TxSndgLock;
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
 #ifdef VENDOR_FEATURE1_SUPPORT
 	UCHAR	FifoUpdateDone, FifoUpdateRx;
 #endif // VENDOR_FEATURE1_SUPPORT //
@@ -4004,11 +3999,6 @@ typedef struct _TX_BLK_
 #define fTX_bWDSEntry			0x1000	// Used when WDS_SUPPORT
 #endif // WDS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-
-#ifdef CONFIG_STA_SUPPORT
-#endif // CONFIG_STA_SUPPORT //
-
-
 
 #ifdef CLIENT_WDS
 #define fTX_bClientWDSFrame		0x10000

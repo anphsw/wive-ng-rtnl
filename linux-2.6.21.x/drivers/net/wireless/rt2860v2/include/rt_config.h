@@ -61,8 +61,6 @@
 #include "rtmp_mcu.h"
 #endif
 
-
-
 #undef AP_WSC_INCLUDED
 #undef STA_WSC_INCLUDED
 #undef WSC_INCLUDED
@@ -127,13 +125,9 @@
 #endif // RALINK_ATE //
 #endif // RALINK_28xx_QA //
 
-
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 #include "ap_diversity.h"
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
-
-
-
 
 #if defined(AP_WSC_INCLUDED) || defined(STA_WSC_INCLUDED)
 #define WSC_INCLUDED
@@ -145,32 +139,20 @@
 #endif // WDS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef CONFIG_STA_SUPPORT
-
-#endif // CONFIG_STA_SUPPORT //
-
 #ifdef WSC_INCLUDED
 // WSC security code
-//#define OLD_DH_ALGORITHM //Change to old dh algorithm
-//#define OLD_AES_ALGORITHM //Change to old aes algorithm
 #include "crypt_biginteger.h"
 #include "crypt_dh.h"
 #include "wsc.h"
 #include "wsc_tlv.h"
 #endif // WSC_INCLUDED //
 
-
 #ifdef IKANOS_VX_1X0
 #include "vr_ikans.h"
 #endif // IKANOS_VX_1X0 //
-
-
 
 #ifdef WORKQUEUE_BH
 #include <linux/workqueue.h>
 #endif // WORKQUEUE_BH /
 
-
 #endif	// __RT_CONFIG_H__
-
-

@@ -1600,7 +1600,7 @@ VOID RT28xxPciMlmeRadioOn(
 #ifdef PCIE_PS_SUPPORT
         && (!OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE)
         ||pAd->StaCfg.PSControl.field.EnableNewPS == FALSE)
- #endif // PCIE_PS_SUPPORT //
+#endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
         ))
     {

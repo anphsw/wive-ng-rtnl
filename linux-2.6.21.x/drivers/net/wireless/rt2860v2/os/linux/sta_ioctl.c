@@ -513,7 +513,7 @@ static struct {
 
 #ifdef WSC_STA_SUPPORT
 	{"WscGetConf",					Set_WscGetConf_Proc},
-    {"WscVendorPinCode",            Set_WscVendorPinCode_Proc},
+	{"WscVendorPinCode",            Set_WscVendorPinCode_Proc},
 #endif // WSC_STA_SUPPORT //
 
 

@@ -233,9 +233,9 @@ static struct {
 #endif         
 	{"IEEE80211H",				Show_IEEE80211H_Proc},
 #ifdef CONFIG_STA_SUPPORT	
-    {"NetworkType",				Show_NetworkType_Proc},        
+	{"NetworkType",				Show_NetworkType_Proc},        
 #ifdef WSC_STA_SUPPORT
-    {"WpsApBand",				Show_WpsPbcBand_Proc},
+	{"WpsApBand",				Show_WpsPbcBand_Proc},
 #endif // WSC_STA_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 	{"AuthMode",				Show_AuthMode_Proc},           

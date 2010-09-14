@@ -1296,7 +1296,7 @@ VOID WscEapEnrolleeAction(
 		{
 			//let it pass
 		} else 
-	#endif // CONFIG_STA_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //
 		if(MsgType ==WSC_MSG_M2 && pWscUPnPInfo->bUPnPInProgress == FALSE)
 		{
 #ifdef CONFIG_AP_SUPPORT

@@ -129,7 +129,12 @@
 #endif // CONFIG_STA_SUPPORT //
 
 #define ACM_LITTLE_ENDIAN				/* CPU endian mode */
+
+#ifdef DBG
 #define ACM_MEMORY_TEST					/* Memory alloc/free debug */
+#else
+#undef ACM_MEMORY_TEST					/* Memory alloc/free debug */
+#endif
 
 /* ex: OS_HZ = 100 means 100 ticks in a second, 1 jiffies = 1000000/100us */
 //#define ACM_JIFFIES_BASE				(1000000/OS_HZ)

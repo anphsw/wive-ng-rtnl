@@ -3601,8 +3601,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 
 				DBGPRINT(RT_DEBUG_TRACE, ("RoamThreshold=%d  dBm\n", pAd->StaCfg.dBmToRoam));
 			}
-#ifdef WSC_STA_SUPPORT
-#endif // WSC_STA_SUPPORT //                    
 
 			if(RTMPGetKeyParameter("TGnWifiTest", tmpbuf, 10, pBuffer, TRUE))
 			{				

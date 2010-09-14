@@ -490,7 +490,6 @@
 
 
 /* ----- ACTION ------ */
-//#if defined(CONFIG_STA_SUPPORT_SIM) || defined(CONFIG_STA_SUPPORT)
 /* send a ADDTS request frame to a peer */
 #define ACM_ADDREQ_MAKEUP(__pAd, __pCdb, __pPktBuf, __Len, __pReq, __LabelSemErr)\
 	{																		\

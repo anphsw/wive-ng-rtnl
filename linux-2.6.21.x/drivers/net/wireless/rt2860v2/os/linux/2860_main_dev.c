@@ -95,17 +95,6 @@ void carrier_sense_tasklet(unsigned long data);
 #define INT_TONE_RADAR	(RT2860_INT_TONE_RADAR)
 #endif
 
-#ifdef CONFIG_STA_SUPPORT
-#if 0
-extern	const struct iw_handler_def rt2860_iw_handler_def;
-#if WIRELESS_EXT >= 12
-// This function will be called when query /proc
-struct iw_statistics *rt2860_get_wireless_stats(
-    IN struct net_device *net_dev);
-#endif
-#endif
-#endif // CONFIG_STA_SUPPORT //
-
 /*---------------------------------------------------------------------*/
 /* Prototypes of Functions Used                                        */
 /*---------------------------------------------------------------------*/
