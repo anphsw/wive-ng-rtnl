@@ -4,6 +4,8 @@ ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
 
 echo "-------------CLEAN-ALL---------------"
+rm -rf $PWD/releases
+rm -rf $PWD/images
 make clean
 echo "--------------MRPROPER---------------"
 make mrproper
