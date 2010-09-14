@@ -20,6 +20,7 @@ if [ -f /bin/inadyn ]; then
 	    $LOG "Unknown DDNS provider: $srv"
 	    exit 1
 	fi
+    fi
     $LOG "Some parametrs needed..."
 fi
 }
