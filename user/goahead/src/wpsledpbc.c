@@ -459,37 +459,46 @@ static void timerHandler(int signo)
 	CurrentState = WscStatus;
 }
 
-static int initGpio(void)
+static void WPSinitGpio()
 {
-    int fd;
-    ralink_gpio_reg_info info;
+	int fd;
+	ralink_gpio_reg_info info;
 
-    info.pid = getpid();
-    info.irq = pbc_gpio;
+	//register my information
+	info.pid = getpid();
+	info.irq = pbc_gpio;
 
-    fd = open("/dev/gpio", O_RDONLY);
-    if (fd < 0) {
-        perror("/dev/gpio");
-        return -1;
-    }
-    //set gpio direction to input
-    if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
-        goto ioctl_err;
-    //enable gpio interrupt
-    if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
-        goto ioctl_err;
+        //RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
+#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
+        info.irq = 43;
+#else
+        info.irq = 10;
+#endif
 
-    //register my information
-    if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
-        goto ioctl_err;
-    close(fd);
+	fd = open("/dev/gpio", O_RDONLY);
+	if (fd < 0) {
+		perror("/dev/gpio");
+		return;
+	}
 
-	return 0;
+	//set gpio direction to input
+	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
+		goto ioctl_err;
+
+	//enable gpio interrupt
+	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
+		goto ioctl_err;
+
+	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
+		goto ioctl_err;
+	close(fd);
+
+	return;
 
 ioctl_err:
-    perror("ioctl");
-    close(fd);
-    return -1;
+	perror("ioctl");
+	close(fd);
+	return;
 }
 
 static void nvramIrqHandler(int signum)
@@ -515,7 +524,7 @@ int main(int argc, char *argv[])
 	if(argc >= 4)
 		wlan_if = argv[3];
 
-	initGpio();
+	WPSinitGpio();
 
 	LedReset();
 
