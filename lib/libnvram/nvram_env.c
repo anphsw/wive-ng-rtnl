@@ -628,6 +628,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
+
 		FPRINT_NUM(BssidNum);
 		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
 
@@ -718,7 +719,12 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);
-    		/*kurtis: WAPI*/
+
+    		FPRINT_STR(RekeyMethod);
+		FPRINT_NUM(RekeyInterval);
+		FPRINT_STR(PMKCachePeriod);
+
+#if defined(CONFIG_RT2860V2_STA_WAPI) || defined(CONFIG_RT2860V2_AP_WAPI)
 		FPRINT_STR(WapiPsk1);
 		FPRINT_STR(WapiPskType);
 		FPRINT_STR(Wapiifname);
@@ -726,13 +732,8 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WapiUserCertPath);
 		FPRINT_STR(WapiAsIpAddr);
 		FPRINT_STR(WapiAsPort);
-        
-		FPRINT_NUM(BssidNum);
-
-		FPRINT_STR(RekeyMethod);
-		FPRINT_NUM(RekeyInterval);
-		FPRINT_STR(PMKCachePeriod);
-
+#endif
+#if defined(CONFIG_RT2860V2_STA_MESH) || defined(CONFIG_RT2860V2_AP_MESH)
 		FPRINT_NUM(MeshAutoLink);
 		FPRINT_STR(MeshAuthMode);
 		FPRINT_STR(MeshEncrypType);
@@ -740,7 +741,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(MeshWEPKEY);
 		FPRINT_STR(MeshWPAKEY);
 		FPRINT_STR(MeshId);
-
+#endif
 		//WPAPSK
 		FPRINT_STR(WPAPSK1);
 		FPRINT_STR(WPAPSK2);
@@ -794,6 +795,7 @@ int gen_wifi_config(int mode)
 
 		FPRINT_NUM(HSCounter);
 
+		//MIMO
 		FPRINT_NUM(HT_HTC);
 		FPRINT_NUM(HT_RDG);
 		FPRINT_NUM(HT_LinkAdapt);
