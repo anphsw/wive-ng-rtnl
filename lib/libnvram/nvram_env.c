@@ -811,6 +811,10 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_TxStream);
 		FPRINT_NUM(HT_RxStream);
 		FPRINT_NUM(HT_PROTECT);
+		FPRINT_NUM(HT_40MHZ_INTOLERANT);
+		FPRINT_NUM(HT_MIMOPSEnable);
+		FPRINT_NUM(HT_MIMOPSMode);
+		FPRINT_NUM(HT_DisableReordering);
 
 		FPRINT_NUM(WscConfMode);
 
