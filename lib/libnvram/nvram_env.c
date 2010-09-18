@@ -665,8 +665,8 @@ int gen_wifi_config(int mode)
 		fprintf(fp, "TxAntenna=\n");
 		fprintf(fp, "RxAntenna=\n");
 		FPRINT_NUM(TxPreamble);
-		FPRINT_NUM(RTSThreshold  );
-		FPRINT_NUM(FragThreshold  );
+		FPRINT_NUM(RTSThreshold);
+		FPRINT_NUM(FragThreshold);
 		FPRINT_NUM(TxBurst);
 		FPRINT_NUM(PktAggregate);
 		fprintf(fp, "TurboRate=0\n");
@@ -865,6 +865,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(WiFiTest);
 		FPRINT_NUM(TGnWifiTest);
 
+#ifdef CONFIG_RT2860V2_AP_APCLI
 		//AP Client parameters
 		FPRINT_NUM(ApCliEnable);
 		FPRINT_STR(ApCliSsid);
@@ -881,6 +882,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(ApCliKey3Str);
 		FPRINT_NUM(ApCliKey4Type);
 		FPRINT_STR(ApCliKey4Str);
+#endif
 
 		//Radio On/Off
 		if (atoi(nvram_bufget(mode, "RadioOff")) == 1)
