@@ -629,7 +629,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
 		FPRINT_NUM(BssidNum);
-		ssid_num = atoi(nvram_buf_get(mode, "BssidNum"));
+		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
 
 		FPRINT_STR(SSID1);
 		FPRINT_STR(SSID2);
