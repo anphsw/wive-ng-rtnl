@@ -468,13 +468,6 @@ static void WPSinitGpio()
 	info.pid = getpid();
 	info.irq = pbc_gpio;
 
-        //RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
-#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
-        info.irq = 43;
-#else
-        info.irq = 10;
-#endif
-
 	fd = open("/dev/gpio", O_RDONLY);
 	if (fd < 0) {
 		perror("/dev/gpio");
