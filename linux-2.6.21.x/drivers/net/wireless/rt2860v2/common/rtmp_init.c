@@ -3004,7 +3004,7 @@ VOID	UserCfgInit(
 	pAd->EepromAccess = FALSE;
 	
 	pAd->Antenna.word = 0; 
-	pAd->CommonCfg.BBPCurrentBW = BW_20;
+	pAd->CommonCfg.BBPCurrentBW = BW_40;
 
 	pAd->LedCntl.word = 0;
 #ifdef RTMP_MAC_PCI
@@ -3089,7 +3089,6 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.Rx_PE_Mask = 45;
 	pAd->CommonCfg.PollTime = 3;
 #endif // DFS_2_SUPPORT //
-
 #endif // DFS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
@@ -3159,7 +3158,7 @@ VOID	UserCfgInit(
 
 	pAd->CommonCfg.bExtChannelSwitchAnnouncement = 1;
 	pAd->CommonCfg.bHTProtect = 1;
-	pAd->CommonCfg.bMIMOPSEnable = TRUE;
+	pAd->CommonCfg.bMIMOPSEnable = FALSE;
 #ifdef GREENAP_SUPPORT
 	pAd->ApCfg.bGreenAPEnable=FALSE;
 	pAd->ApCfg.bBlockAntDivforGreenAP = FALSE;
@@ -3178,14 +3177,9 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.REGBACapability.word = pAd->CommonCfg.BACapability.word;
 #endif // DOT11_N_SUPPORT //
 
-	//pAd->CommonCfg.HTPhyMode.field.BW = BW_20;
-	//pAd->CommonCfg.HTPhyMode.field.MCS = MCS_AUTO;
-	//pAd->CommonCfg.HTPhyMode.field.ShortGI = GI_800;
-	//pAd->CommonCfg.HTPhyMode.field.STBC = STBC_NONE;
 	pAd->CommonCfg.TxRate = RATE_6;
-	
 	pAd->CommonCfg.MlmeTransmit.field.MCS = MCS_RATE_6;
-	pAd->CommonCfg.MlmeTransmit.field.BW = BW_20;
+	pAd->CommonCfg.MlmeTransmit.field.BW = BW_40;
 	pAd->CommonCfg.MlmeTransmit.field.MODE = MODE_OFDM;
 
 	pAd->CommonCfg.BeaconPeriod = 100;     // in mSec

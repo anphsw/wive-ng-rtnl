@@ -1982,9 +1982,9 @@ typedef struct _COMMON_CONFIG {
 	BOOLEAN					bBssCoexNotify;
 #endif // DOT11N_DRAFT3 //
 
-    BOOLEAN                 bHTProtect;
-    BOOLEAN                 bMIMOPSEnable;
-    BOOLEAN					bBADecline;
+	BOOLEAN                 		bHTProtect;
+	BOOLEAN                 		bMIMOPSEnable;
+	BOOLEAN					bBADecline;
 	BOOLEAN					bDisableReordering;
 	BOOLEAN					bForty_Mhz_Intolerant;
 	BOOLEAN					bExtChannelSwitchAnnouncement;
