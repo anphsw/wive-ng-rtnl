@@ -126,7 +126,7 @@ static VOID QBSS_LoadAlarm(
 		UINT32 StaId;
 
 
-		DBGPRINT(RT_DEBUG_TRACE, ("qbss> Alarm! Change to 20 bw...\n"));
+		printk("qbss> Alarm! Change to 20 bw...\n");
 
 		/* disassociate stations without D3 2040Coexistence function */
 		pMacTable = &pAd->MacTab;

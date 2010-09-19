@@ -2372,9 +2372,6 @@ int SWRadarCheck(
 						{
 							if (id <= 2) // && (id >= 0)
 							{
-
-								//if (((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40) && (T[1] > minPeriod)) ||
-								//	((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_20) && (T[1] > (minPeriod >> 1))) )
 								{
 									unsigned int loop, PeriodMatched = 0, idx1;
 									for (loop = 1; loop < pAd->CommonCfg.dfs_check_loop; loop++)

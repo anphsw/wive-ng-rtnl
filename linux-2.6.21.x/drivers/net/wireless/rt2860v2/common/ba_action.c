@@ -1543,9 +1543,7 @@ VOID SendPSMPAction(
 			Frame.Psmp = 1;
 			break;
 	}
-	MakeOutgoingFrame(pOutBuffer,               &FrameLen,
-					  sizeof(FRAME_PSMP_ACTION),      &Frame,
-					  END_OF_ARGS);
+	MakeOutgoingFrame(pOutBuffer, &FrameLen, sizeof(FRAME_PSMP_ACTION), &Frame, END_OF_ARGS);
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 	MlmeFreeMemory(pAd, pOutBuffer);
 	DBGPRINT(RT_DEBUG_ERROR,("HT - SendPSMPAction( %d )  \n", Frame.Psmp));

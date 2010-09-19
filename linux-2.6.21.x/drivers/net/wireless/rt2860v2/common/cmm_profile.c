@@ -1705,13 +1705,10 @@ static void HTParametersHook(
 	{
 		Value = simple_strtol(pValueStr, 0, 10);
 		if (Value == 0)
-		{
-			pAd->HTCEnable = FALSE;
-		}
+		    pAd->HTCEnable = FALSE;
 		else
-		{
-            pAd->HTCEnable = TRUE;
-		}
+        	    pAd->HTCEnable = TRUE;
+
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Tx +HTC frame = %s\n", (Value==0) ? "Disable" : "Enable"));
 	}
 
@@ -1720,14 +1717,10 @@ static void HTParametersHook(
 	{
 		Value = simple_strtol(pValueStr, 0, 10);
 		if (Value == 0)
-		{
 			pAd->bLinkAdapt = FALSE;
-		}
 		else
-		{
 			pAd->HTCEnable = TRUE;
 			pAd->bLinkAdapt = TRUE;
-		}
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Link Adaptation Control = %s\n", (Value==0) ? "Disable" : "Enable(+HTC)"));
 	}
 
@@ -1872,15 +1865,10 @@ static void HTParametersHook(
 	if (RTMPGetKeyParameter("HT_BW", pValueStr, 25, pInput, TRUE))
 	{
 		Value = simple_strtol(pValueStr, 0, 10);
-
 		if (Value == BW_40)
-		{
-			pAd->CommonCfg.RegTransmitSetting.field.BW  = BW_40;
-		}
+    		    pAd->CommonCfg.RegTransmitSetting.field.BW  = BW_40;
 		else
-		{
-            pAd->CommonCfg.RegTransmitSetting.field.BW  = BW_20;
-		}		
+        	    pAd->CommonCfg.RegTransmitSetting.field.BW  = BW_20;
 
 #ifdef MCAST_RATE_SPECIFIC
 		pAd->CommonCfg.MCastPhyMode.field.BW = pAd->CommonCfg.RegTransmitSetting.field.BW;
@@ -1892,16 +1880,10 @@ static void HTParametersHook(
 	if (RTMPGetKeyParameter("HT_EXTCHA", pValueStr, 25, pInput, TRUE))
 	{
 		Value = simple_strtol(pValueStr, 0, 10);
-
-		if (Value == 0)
-		{
-			
-			pAd->CommonCfg.RegTransmitSetting.field.EXTCHA  = EXTCHA_BELOW;
-		}
+		if (Value == 0)	
+		    pAd->CommonCfg.RegTransmitSetting.field.EXTCHA  = EXTCHA_BELOW;
 		else
-		{
-            pAd->CommonCfg.RegTransmitSetting.field.EXTCHA = EXTCHA_ABOVE;
-		}		
+        	    pAd->CommonCfg.RegTransmitSetting.field.EXTCHA = EXTCHA_ABOVE;
 
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Ext Channel = %s\n", (Value==0) ? "BELOW" : "ABOVE" ));
 	}
@@ -2074,7 +2056,7 @@ NDIS_STATUS	RTMPSetProfileParameters(
 #ifdef NEW_DFS
 	INT					k;
 #endif
-	tmpbuf = kmalloc(MAX_PARAM_BUFFER_SIZE, MEM_ALLOC_FLAG);
+	tmpbuf = kzalloc(MAX_PARAM_BUFFER_SIZE, MEM_ALLOC_FLAG);
 	if(tmpbuf == NULL)
 		return NDIS_STATUS_FAILURE;
 	
@@ -2461,9 +2443,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 		//BGProtection
 		if(RTMPGetKeyParameter("BGProtection", tmpbuf, 10, pBuffer, TRUE))
 		{
-	//#if 0	//#ifndef WIFI_TEST
-	//		pAd->CommonCfg.UseBGProtection = 2;// disable b/g protection for throughput test
-	//#else
 			switch (simple_strtol(tmpbuf, 0, 10))
 			{
 				case 1: //Always On
@@ -2477,7 +2456,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 					pAd->CommonCfg.UseBGProtection = 0;
 					break;
 			}
-	//#endif
 			DBGPRINT(RT_DEBUG_TRACE, ("BGProtection=%ld\n", pAd->CommonCfg.UseBGProtection));
 		}
 		//OLBCDetection
@@ -2550,14 +2528,10 @@ NDIS_STATUS	RTMPSetProfileParameters(
 		//TxBurst
 		if(RTMPGetKeyParameter("TxBurst", tmpbuf, 10, pBuffer, TRUE))
 		{
-	//#ifdef WIFI_TEST
-	//						pAd->CommonCfg.bEnableTxBurst = FALSE;
-	//#else
 			if(simple_strtol(tmpbuf, 0, 10) != 0)  //Enable
 				pAd->CommonCfg.bEnableTxBurst = TRUE;
 			else //Disable
 				pAd->CommonCfg.bEnableTxBurst = FALSE;
-	//#endif
 			DBGPRINT(RT_DEBUG_TRACE, ("TxBurst=%d\n", pAd->CommonCfg.bEnableTxBurst));
 		}
 
@@ -3366,22 +3340,6 @@ NDIS_STATUS	RTMPSetProfileParameters(
 		//DefaultKeyID, KeyType, KeyStr
 		rtmp_read_key_parms_from_file(pAd, tmpbuf, pBuffer);
 
-
-		//HSCounter
-		/*if(RTMPGetKeyParameter("HSCounter", tmpbuf, 10, pBuffer, TRUE))
-		{
-			switch (simple_strtol(tmpbuf, 0, 10))
-			{
-				case 1: //Enable
-					pAd->CommonCfg.bEnableHSCounter = TRUE;
-					break;
-				case 0: //Disable
-				default:
-					pAd->CommonCfg.bEnableHSCounter = FALSE;
-					break;
-			}
-			DBGPRINT(RT_DEBUG_TRACE, "HSCounter=%d\n", pAd->CommonCfg.bEnableHSCounter);
-		}*/
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{

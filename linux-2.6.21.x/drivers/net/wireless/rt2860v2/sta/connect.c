@@ -945,9 +945,7 @@ VOID CntlWaitStartProc(
 			// 5G bands rules of Japan:
 			// Ad hoc must be disabled in W53(ch52,56,60,64) channels.
 			//
-			if ( (pAd->CommonCfg.bIEEE80211H == 1) && 
-                  RadarChannelCheck(pAd, pAd->CommonCfg.Channel)
-			   )
+			if ((pAd->CommonCfg.bIEEE80211H == 1) &&  RadarChannelCheck(pAd, pAd->CommonCfg.Channel))
 			{
 				pAd->Mlme.CntlMachine.CurrState = CNTL_IDLE;
 				DBGPRINT(RT_DEBUG_TRACE, ("CNTL - Channel=%d, Start adhoc on W53(52,56,60,64) Channels are not accepted\n", pAd->CommonCfg.Channel));
@@ -2846,14 +2844,14 @@ VOID InitChannelRelatedValue(
             DBGPRINT(RT_DEBUG_TRACE, ("!!!rt2860C !!! \n" ));
 		}	
 
-		DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Lower !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel ));
+		printk("!!!40MHz Lower !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel );
 	}
 	else if ((pAd->CommonCfg.CentralChannel < pAd->CommonCfg.Channel) && (pAd->MlmeAux.HtCapability.HtCapInfo.ChannelWidth == BW_40))
     {	
 	    // Must using 40MHz.
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
-	    AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
+		AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 		
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &Value);
 		Value &= (~0x18);
@@ -2865,7 +2863,7 @@ VOID InitChannelRelatedValue(
 		RTMP_IO_WRITE32(pAd, TX_BAND_CFG, Data);
 		
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &Value);
-	    Value |= (0x20);
+		Value |= (0x20);
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
 #ifdef RTMP_MAC_PCI
         pAd->StaCfg.BBPR3 = Value;
@@ -2879,7 +2877,7 @@ VOID InitChannelRelatedValue(
 			    DBGPRINT(RT_DEBUG_TRACE, ("!!!rt2860C !!! \n" ));
 		}
 
-	    DBGPRINT(RT_DEBUG_TRACE, ("!!! 40MHz Upper !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel ));
+	    printk("!!! 40MHz Upper !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel );
     }
     else
 #endif // DOT11_N_SUPPORT //
@@ -2912,7 +2910,7 @@ VOID InitChannelRelatedValue(
 			DBGPRINT(RT_DEBUG_TRACE, ("!!!rt2860C !!! \n" ));
 		}
 		
-	    DBGPRINT(RT_DEBUG_TRACE, ("!!! 20MHz !!! \n" ));
+	    printk("connect> !!! 20MHz !!! \n" );
 	}
 
 	RTMPSetAGCInitValue(pAd, pAd->CommonCfg.BBPCurrentBW);

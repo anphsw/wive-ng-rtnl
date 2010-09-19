@@ -2350,8 +2350,8 @@ typedef struct _STA_ADMIN_CONFIG {
 
 	ULONG       LastBeaconRxTime;     // OS's timestamp of the last BEACON RX time
 	ULONG       Last11bBeaconRxTime;  // OS's timestamp of the last 11B BEACON RX time
-	ULONG		Last11gBeaconRxTime;	// OS's timestamp of the last 11G BEACON RX time
-	ULONG		Last20NBeaconRxTime;	// OS's timestamp of the last 20MHz N BEACON RX time
+	ULONG	    Last11gBeaconRxTime;	// OS's timestamp of the last 11G BEACON RX time
+	ULONG	    Last20NBeaconRxTime;	// OS's timestamp of the last 20MHz N BEACON RX time
 	
 	ULONG       LastScanTime;       // Record last scan time for issue BSSID_SCAN_LIST
 	ULONG       ScanCnt;            // Scan counts since most recent SSID, BSSID, SCAN OID request

@@ -313,8 +313,7 @@ static inline INT SelectClearChannel(
 			/* QLOAD ALARM */
 			/* when busy time of a channel > threshold, skip it */
 			/* TODO: Use weight for different references to do channel selection */
-			if (QBSS_LoadIsBusyTimeAccepted(pAd,
-									pChannelInfo->chanbusytime[i]) == FALSE)
+			if (QBSS_LoadIsBusyTimeAccepted(pAd, pChannelInfo->chanbusytime[i]) == FALSE)
 			{
 				/* check next one */
 				continue;

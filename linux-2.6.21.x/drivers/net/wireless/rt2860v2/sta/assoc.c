@@ -1422,12 +1422,10 @@ BOOLEAN StaAddMacTableEntry(
 
 		if (ADHOC_ON(pAd))
 			CLIENT_STATUS_SET_FLAG(pEntry, fCLIENT_STATUS_WMM_CAPABLE);
-		if ((pHtCapability->HtCapInfo.GF) && (pAd->CommonCfg.DesiredHtPhy.GF))
-		{
+
+		if ((pHtCapability->HtCapInfo.GF) && (pAd->CommonCfg.DesiredHtPhy.GF)) {
 			pEntry->MaxHTPhyMode.field.MODE = MODE_HTGREENFIELD;
-		}
-		else
-		{	
+		} else {	
 			pEntry->MaxHTPhyMode.field.MODE = MODE_HTMIX;
 			pAd->MacTab.fAnyStationNonGF = TRUE;
 			pAd->CommonCfg.AddHTInfo.AddHtInfo2.NonGfPresent = 1;

@@ -3189,8 +3189,8 @@ VOID	UserCfgInit(
 	pAd->CommonCfg.StreamMode = 1;
 	pAd->CommonCfg.PhyRateLimit = 0;
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
-	pAd->CommonCfg.DebugFlags = 0;
 
+	pAd->CommonCfg.DebugFlags = 0;
 
 #ifdef CONFIG_RALINK_RT3883
 	pAd->CommonCfg.VCORecalibrationThreshold = DEFAULT_VCO_RECALIBRATION_THRESHOLD;
@@ -3198,8 +3198,7 @@ VOID	UserCfgInit(
 #endif // CONFIG_RALINK_RT3883 //
 
 #ifdef MCAST_RATE_SPECIFIC
-	pAd->CommonCfg.MCastPhyMode.word
-	= pAd->MacTab.Content[MCAST_WCID].HTPhyMode.word;
+	pAd->CommonCfg.MCastPhyMode.word = pAd->MacTab.Content[MCAST_WCID].HTPhyMode.word;
 #endif // MCAST_RATE_SPECIFIC //
 
 	//
@@ -3258,7 +3257,7 @@ pAd->StaCfg.PSControl.field.EnableNewPS=FALSE;
 pAd->StaCfg.PSControl.field.EnableNewPS=TRUE;
 pAd->b3090ESpecialChip = FALSE;
 //The value of PowerMode could be 1 or 3. Level 3 could save more power than Level 1. 
-pAd->StaCfg.PSControl.field.rt30xxPowerMode=3;
+pAd->StaCfg.PSControl.field.rt30xxPowerMode=1;
 pAd->StaCfg.PSControl.field.rt30xxForceASPMTest=0;
 pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 #endif // PCIE_PS_SUPPORT //
@@ -3342,9 +3341,8 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 		pWscControl->WpsApBand = PREFERRED_WPS_AP_PHY_TYPE_AUTO_SELECTION;
 		}
 #endif // WSC_STA_SUPPORT //
+
 		NdisZeroMemory(pAd->StaCfg.ReplayCounter, 8);
-
-
 		pAd->StaCfg.bAutoConnectByBssid = FALSE;
 		pAd->StaCfg.BeaconLostTime = BEACON_LOST_TIME;
 		NdisZeroMemory(pAd->StaCfg.WpaPassPhrase, 64);    
@@ -3529,7 +3527,7 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 	pAd->ate.TxWI.ShortGI = 0;// LONG GI : 800 ns
 	pAd->ate.TxWI.PHYMODE = MODE_CCK;
 	pAd->ate.TxWI.MCS = 3;
-	pAd->ate.TxWI.BW = BW_20;
+	pAd->ate.TxWI.BW = BW_40;
 	pAd->ate.Channel = 1;
 	pAd->ate.QID = QID_AC_BE;
 
@@ -3602,7 +3600,6 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
-
 RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //

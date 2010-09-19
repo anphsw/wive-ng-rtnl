@@ -264,15 +264,6 @@
 #define EEPROM_BBP_BASE_OFFSET			0xf0	// The address is from NIC config 0, not BBP register ID
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 
-//#define EEPROM_Japan_TX_PWR_OFFSET      	0x90 	// 802.11j
-//#define EEPROM_Japan_TX2_PWR_OFFSET      	0xbe
-//#define EEPROM_TSSI_REF_OFFSET		0x54
-//#define EEPROM_TSSI_DELTA_OFFSET		0x24
-//#define EEPROM_CCK_TX_PWR_OFFSET  		0x62
-//#define EEPROM_CALIBRATE_OFFSET		0x7c
-
-
-
 /*
   *   EEPROM operation related marcos
   */

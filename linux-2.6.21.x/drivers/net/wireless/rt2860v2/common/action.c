@@ -739,7 +739,7 @@ VOID ChannelSwitchAction(
 		AsicSwitchChannel(pAd, pAd->CommonCfg.Channel,FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.Channel);
 		pAd->MacTab.Content[Wcid].HTPhyMode.field.BW = 0;
-		DBGPRINT(RT_DEBUG_TRACE, ("!!!20MHz   !!! \n" ));
+		printk("action !!!20MHz   !!! \n" );
 	}
 	// 1.  Switches to BW = 40 And Station supports BW = 40.
 	else if (((Secondary == 1) || (Secondary == 3)) && (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == 1))
@@ -769,7 +769,7 @@ VOID ChannelSwitchAction(
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
 			BBPValue&= (~0x20);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPValue);
-			DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Lower LINK UP !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel ));
+			printk("action !!!40MHz Lower LINK UP !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel );
 		}
 		else
 		{
@@ -787,22 +787,22 @@ VOID ChannelSwitchAction(
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
 #ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 0)
-#endif // COC_SUPPORT
-				BBPValue|= (0x10);
+	if (pAd->CoC_sleep == 0)
+#endif
+			BBPValue|= (0x10);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
 			BBPValue&= (~0x20);
 			BBPValue|= (0x20);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPValue);
-			DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Upper LINK UP !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel ));
+			printk("action!!!40MHz Upper LINK UP !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel );
 		}
 #ifdef COC_SUPPORT
-		if (pAd->CoC_sleep == 1)
-			pAd->CommonCfg.BBPCurrentBW = BW_20;
-		else
-#endif // COC_SUPPORT
-			pAd->CommonCfg.BBPCurrentBW = BW_40;
+	if (pAd->CoC_sleep == 1)
+		pAd->CommonCfg.BBPCurrentBW = BW_20;
+	else
+#endif
+		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 		pAd->MacTab.Content[Wcid].HTPhyMode.field.BW = 1;

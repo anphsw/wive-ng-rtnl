@@ -104,7 +104,7 @@ void DetectExtChannel(
 	}
 
 	Send_Probe_Request(pAd);
-    Send_Probe_Request(pAd);
+	Send_Probe_Request(pAd);
 //	AsicSwitchChannel(pAd, CentralChannel, TRUE);
 }
 
@@ -149,8 +149,8 @@ VOID APDetectOverlappingExec(
 		// switch back 20/40		
 		if ((pAd->CommonCfg.Channel <=14) && (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == BW_40))
 		{
-            pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth = 1;	
-			pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = pAd->CommonCfg.RegTransmitSetting.field.EXTCHA;			
+        	    pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth = 1;	
+		    pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = pAd->CommonCfg.RegTransmitSetting.field.EXTCHA;			
 		}
 	}
 	else

@@ -872,7 +872,7 @@ typedef	union	_EDCA_AC_CFG_STRUC	{
 #define TX_PWR_CFG_3	0x1320
 #define TX_PWR_CFG_4	0x1324
 #define TX_PIN_CFG		0x1328		 
-#define TX_BAND_CFG	0x132c		// 0x1 use upper 20MHz. 0 juse lower 20MHz
+#define TX_BAND_CFG		0x132c		// 0x1 use upper 20MHz. 0 juse lower 20MHz
 #define TX_SW_CFG0		0x1330
 #define TX_SW_CFG1		0x1334
 #define TX_SW_CFG2		0x1338
@@ -1903,12 +1903,6 @@ typedef struct _HW_WCID_ENTRY {  // 8-byte per entry
 #define EEPROM_RSSI_A_OFFSET		0x4a
 #define EEPROM_A_TX_PWR_OFFSET      0x78
 #define EEPROM_A_TX2_PWR_OFFSET      0xa6
-//#define EEPROM_Japan_TX_PWR_OFFSET      0x90 // 802.11j
-//#define EEPROM_Japan_TX2_PWR_OFFSET      0xbe
-//#define EEPROM_TSSI_REF_OFFSET	0x54
-//#define EEPROM_TSSI_DELTA_OFFSET	0x24
-//#define EEPROM_CCK_TX_PWR_OFFSET  0x62
-//#define EEPROM_CALIBRATE_OFFSET	0x7c
 #define EEPROM_VERSION_OFFSET       0x02
 #define	EEPROM_FREQ_OFFSET			0x3a
 #define EEPROM_TXPOWER_BYRATE 	0xde	// 20MHZ power. 

@@ -642,6 +642,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(SSID8);
 
 		FPRINT_NUM(WirelessMode);
+		FPRINT_NUM(staWirelessMode);
 		FPRINT_STR(FixedTxMode);
 
 		//TxRate(FixedRate)

@@ -422,16 +422,16 @@ typedef struct PACKED _HT_CAPABILITY_IE{
 
 // 802.11n draft3 related structure definitions.
 // 7.3.2.60
-#define dot11OBSSScanPassiveDwell							20	// in TU. min amount of time that the STA continously scans each channel when performing an active OBSS scan.
-#define dot11OBSSScanActiveDwell							10	// in TU.min amount of time that the STA continously scans each channel when performing an passive OBSS scan.
-#define dot11BSSWidthTriggerScanInterval					300  // in sec. max interval between scan operations to be performed to detect BSS channel width trigger events.
-#define dot11OBSSScanPassiveTotalPerChannel					200	// in TU. min total amount of time that the STA scans each channel when performing a passive OBSS scan.
-#define dot11OBSSScanActiveTotalPerChannel					20	//in TU. min total amount of time that the STA scans each channel when performing a active OBSS scan
+#define dot11OBSSScanPassiveDwell					20	// in TU. min amount of time that the STA continously scans each channel when performing an active OBSS scan.
+#define dot11OBSSScanActiveDwell					10	// in TU.min amount of time that the STA continously scans each channel when performing an passive OBSS scan.
+#define dot11BSSWidthTriggerScanInterval				300	// in sec. max interval between scan operations to be performed to detect BSS channel width trigger events.
+#define dot11OBSSScanPassiveTotalPerChannel				200	// in TU. min total amount of time that the STA scans each channel when performing a passive OBSS scan.
+#define dot11OBSSScanActiveTotalPerChannel				20	//in TU. min total amount of time that the STA scans each channel when performing a active OBSS scan
 #define dot11BSSWidthChannelTransactionDelayFactor			5	// min ratio between the delay time in performing a switch from 20MHz BSS to 20/40 BSS operation and the maximum
-																//	interval between overlapping BSS scan operations.
-#define dot11BSSScanActivityThreshold						25	// in %%, max total time that a STA may be active on the medium during a period of 
-																//	(dot11BSSWidthChannelTransactionDelayFactor * dot11BSSWidthTriggerScanInterval) seconds without
-																//	being obligated to perform OBSS Scan operations. default is 25(== 0.25%)
+										//	interval between overlapping BSS scan operations.
+#define dot11BSSScanActivityThreshold					25	// in %%, max total time that a STA may be active on the medium during a period of 
+										//	(dot11BSSWidthChannelTransactionDelayFactor * dot11BSSWidthTriggerScanInterval) seconds without
+										//	being obligated to perform OBSS Scan operations. default is 25(== 0.25%)
 
 typedef struct PACKED _OVERLAP_BSS_SCAN_IE{
 	USHORT		ScanPassiveDwell;

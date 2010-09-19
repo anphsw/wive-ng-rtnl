@@ -418,6 +418,8 @@ VOID APStartUp(
 	{
 		// Patch UI
 		pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth = BW_20;
+	} else {
+		pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth = BW_40;
 	}
 
 	// init
@@ -2101,8 +2103,7 @@ VOID APOverlappingBSSScan(
 
 
 	// We just care BSS who operating in 40MHz N Mode.
-	if ((pAd->CommonCfg.PhyMode < PHY_11ABGN_MIXED) || 
-		(pAd->CommonCfg.RegTransmitSetting.field.BW  == BW_20))
+	if ((pAd->CommonCfg.PhyMode < PHY_11ABGN_MIXED) || (pAd->CommonCfg.RegTransmitSetting.field.BW  == BW_20))
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("The pAd->PhyMode=%d, BW=%d, didn't need channel adjustment!\n", 
 				pAd->CommonCfg.PhyMode, pAd->CommonCfg.RegTransmitSetting.field.BW));
