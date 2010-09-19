@@ -137,6 +137,13 @@
 55) Some kernel backports and fix needed for correct wifi drivers work<br>
 56) Fix radvd skipping multiple interfaces when UnicastOnly is on or AdvSendAdvert is off<br>
 57) Update pppd from git<br>
+58) Fix gen_wifi config<br>
+59) Fix 40Mhz mode in eth converter mode select<br>
+60) Tune wifi modes for speedup<br>
+61) Fix memory alloc in wifi driver<br>
+62) Fix some errors on libnvram<br>
+63) Fix init gpio for leds and button at wps mode enabled<br>
+64) Some cleanups and review kernel code to fix potentional errors<br>
 
 <br><br>
 <b>For support see:</b><br>
