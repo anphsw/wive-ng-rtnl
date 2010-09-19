@@ -64,7 +64,7 @@ static char	*g_pAPListData = NULL;
 
 #endif	/* CONFIG_RT2860V2_STA_WSC */
 
-static void resetTimerAll(void)
+void resetTimerAll(void)
 {
 	stopTimer();
 	g_wps_timer_state = 0;
