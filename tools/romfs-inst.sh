@@ -113,8 +113,8 @@ file_append()
 hard_link()
 {
 	rm -f ${ROMFSDIR}${dst}
-	[ "$v" ] && echo "ln ${src} ${ROMFSDIR}${dst}"
-	ln ${ROMFSDIR}${src} ${ROMFSDIR}${dst}
+	[ "$v" ] && echo "ln -f ${src} ${ROMFSDIR}${dst}"
+	ln -f ${ROMFSDIR}${src} ${ROMFSDIR}${dst}
 	return $?
 }
 
@@ -123,7 +123,7 @@ hard_link()
 sym_link()
 {
 	rm -f ${ROMFSDIR}${dst}
-	[ "$v" ] && echo "ln -s ${src} ${ROMFSDIR}${dst}"
+	[ "$v" ] && echo "ln -sf ${src} ${ROMFSDIR}${dst}"
 	ln -sf ${src} ${ROMFSDIR}${dst}
 	return $?
 }
