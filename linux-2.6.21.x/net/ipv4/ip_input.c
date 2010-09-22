@@ -350,9 +350,9 @@ static inline int ip_rcv_finish(struct sk_buff *skb)
 		struct ip_rt_acct *st = ip_rt_acct + 256*smp_processor_id();
 		u32 idx = skb->dst->tclassid;
 		st[idx&0xFF].o_packets++;
-		st[idx&0xFF].o_bytes+=skb->len;
+		st[idx&0xFF].o_bytes += skb->len;
 		st[(idx>>16)&0xFF].i_packets++;
-		st[(idx>>16)&0xFF].i_bytes+=skb->len;
+		st[(idx>>16)&0xFF].i_bytes += skb->len;
 	}
 #endif
 
