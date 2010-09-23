@@ -22,19 +22,28 @@
 #define	ip_t		__u32
 /* ---------------------------------------------------------------------------------------------------- */
 
-#define	IFNAME_LEN_MAX		16
-#define	MAC_ADDR_LEN_MAX		18
-#define	ARP_TABLE_LIST_MAX		32
-#define	ARP_TABLE_ENTRY_MAX	128
+#if 0
 #define	ROUTE_TABLE_LIST_MAX	16
 #define	ROUTE_TABLE_ENTRY_MAX	64
 #define	NAPT_TABLE_LIST_MAX	32
 #define	NAPT_TABLE_ENTRY_MAX	32
 #define	PATH_TABLE_LIST_MAX	32
 #define	PATH_TABLE_ENTRY_MAX NAPT_TABLE_ENTRY_MAX	//(NAPT_TABLE_ENTRY_MAX * 2)  //cathy
-#define	INTERFACE_ENTRY_MAX	8
+#else   //for new torrents users must allocate more ram for routes and conntrack tables
+#define	ROUTE_TABLE_LIST_MAX	64
+#define	ROUTE_TABLE_ENTRY_MAX	256
+#define	NAPT_TABLE_LIST_MAX	128
+#define	NAPT_TABLE_ENTRY_MAX	128
+#define	PATH_TABLE_LIST_MAX	128
+#define	PATH_TABLE_ENTRY_MAX 	NAPT_TABLE_ENTRY_MAX+ROUTE_TABLE_LIST_MAX
+#endif
 
+#define	ARP_TABLE_LIST_MAX	32
+#define	ARP_TABLE_ENTRY_MAX	128
+#define	IFNAME_LEN_MAX		16
+#define	MAC_ADDR_LEN_MAX	18
 #define	ETHER_ADDR_LEN		6
+
 typedef struct ether_s {
         __u8 octet[ETHER_ADDR_LEN];
 } ether_t;

@@ -144,6 +144,8 @@
 62) Fix some errors on libnvram<br>
 63) Fix init gpio for leds and button at wps mode enabled<br>
 64) Some cleanups and review kernel code to fix potentional errors<br>
+65) More kernel backports fixes<br>
+66) Fix compile procedure from clean git copy<br>
 
 <br><br>
 <b>For support see:</b><br>
