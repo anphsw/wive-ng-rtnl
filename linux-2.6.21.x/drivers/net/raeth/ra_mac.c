@@ -101,39 +101,57 @@ void ra2880EnableInterrupt()
 {
 	unsigned int regValue = sysRegRead(FE_INT_ENABLE);
 	RAETH_PRINT("FE_INT_ENABLE -- : 0x%08x\n", regValue);
-//	regValue |= (RX_DONE_INT0 | TX_DONE_INT0);
-		
 	sysRegWrite(FE_INT_ENABLE, regValue);
 }
 
 void ra2880MacAddressSet(MAC_INFO *MACInfo, unsigned char p[6])
 {
-        unsigned long regValue;
+        unsigned long regValue=0; 
+	int ok=0;
 
 	regValue = (p[0] << 8) | (p[1]);
-        sysRegWrite(GDMA1_MAC_ADRH, regValue);
+	if (regValue)
+    	    sysRegWrite(GDMA1_MAC_ADRH, regValue);
+	else
+	    ok=1;
 
         regValue = (p[2] << 24) | (p[3] <<16) | (p[4] << 8) | p[5];
-        sysRegWrite(GDMA1_MAC_ADRL, regValue);
+	if (regValue)
+    	    sysRegWrite(GDMA1_MAC_ADRL, regValue);
+	else
+	    ok=1;
+	
+	if (ok != 1) {
+	    printk("GDMA1_MAC_ADRH -- : 0x%08x\n", sysRegRead(GDMA1_MAC_ADRH));
+	    printk("GDMA1_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA1_MAC_ADRL));
+	}
 
-	printk("GDMA1_MAC_ADRH -- : 0x%08x\n", sysRegRead(GDMA1_MAC_ADRH));
-	printk("GDMA1_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA1_MAC_ADRL));	    
-        return;
+    return;
 }
 
 void ra2880Mac2AddressSet(MAC_INFO *MACInfo, unsigned char p[6])
 {
-        unsigned long regValue;
+        unsigned long regValue=0; 
+	int ok=0;
 
 	regValue = (p[0] << 8) | (p[1]);
-        sysRegWrite(GDMA2_MAC_ADRH, regValue);
+	if (regValue)
+    	    sysRegWrite(GDMA2_MAC_ADRH, regValue);
+	else
+	    ok=1;
 
         regValue = (p[2] << 24) | (p[3] <<16) | (p[4] << 8) | p[5];
-        sysRegWrite(GDMA2_MAC_ADRL, regValue);
+	if (regValue)
+    	    sysRegWrite(GDMA2_MAC_ADRL, regValue);
+	else
+	    ok=1;
 
-	printk("GDMA2_MAC_ADRH -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRH));
-	printk("GDMA2_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRL));	    
-        return;
+	if (ok != 1) {
+	    printk("GDMA2_MAC_ADRH -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRH));
+	    printk("GDMA2_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRL));	    
+	}
+
+    return;
 }
 
 #if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )

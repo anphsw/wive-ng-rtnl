@@ -448,6 +448,7 @@ VOID RtmpMgmtTaskExit(
 		{
 			DBGPRINT(RT_DEBUG_ERROR, ("%s: kill task(%s) failed!\n", 
 					RTMP_OS_NETDEV_GET_DEVNAME(pAd->net_dev), pTask->taskName));
+			return;
 		}
 		pAd->CmdQ.CmdQState = RTMP_TASK_STAT_UNKNOWN;
 	}

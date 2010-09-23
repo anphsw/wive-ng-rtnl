@@ -198,13 +198,19 @@ static int rt2860_suspend(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_suspend()\n"));
 
-	if (net_dev == NULL)
+	if (!net_dev)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("net_dev == NULL!\n"));
+		retval = 0; //Allready stopped
+		goto out;
 	}
 	else
 	{
 		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		if(!pAd) {
+		    retval = 0; //Allready stopped
+		    goto out;
+		}
 
 		// stop interface
 		netif_carrier_off(net_dev);
@@ -232,6 +238,7 @@ static int rt2860_suspend(
 
 	retval = pci_set_power_state(pci_dev, pci_choose_state(pci_dev, state));
 
+out:
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_suspend()\n"));
 	return retval;
 }
@@ -1921,16 +1928,16 @@ VOID RTMPPCIeLinkCtrlSetting(
 VOID rt2860_stop(struct net_device *net_dev)
 {
     PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)NULL;
-    if (net_dev == NULL)
-	{
+    if (!net_dev) {
 		DBGPRINT(RT_DEBUG_ERROR, ("net_dev == NULL!\n"));
+		return; //all ready stop or not started
 	}
 	else
 		pAd = (PRTMP_ADAPTER)net_dev->priv;
  
-	if (pAd != NULL)
-	{
-	    // stop interface
+	if (pAd) {
+
+		// stop interface
 		netif_carrier_off(net_dev);
 		netif_stop_queue(net_dev);
 

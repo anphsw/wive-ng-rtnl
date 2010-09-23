@@ -700,7 +700,6 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 	_Pkt = dev_alloc_skb(_length);			\
 	if (_Pkt != NULL) _pAd->NumOfPktAlloc ++;
 #else
-
 #define DEV_ALLOC_SKB(_pAd, _Pkt, _length)	\
 	_Pkt = dev_alloc_skb(_length);
 #endif // VENDOR_FEATURE2_SUPPORT //

@@ -3823,18 +3823,14 @@ struct _RTMP_ADAPTER
 #endif // VENDOR_FEATURE1_SUPPORT //
 
 #ifdef VENDOR_FEATURE2_SUPPORT
-
 #define MEM_DBG_PKT_ALLOC_INC(_pAd)	_pAd->NumOfPktAlloc ++
 #define MEM_DBG_PKT_FREE_INC(_pAd)	_pAd->NumOfPktFree ++
-	UINT32	NumOfPktAlloc, NumOfPktFree; // used in memory debug
+UINT32	NumOfPktAlloc, NumOfPktFree; // used in memory debug
 #else
-
 #define MEM_DBG_PKT_ALLOC_INC(_pAd)
 #define MEM_DBG_PKT_FREE_INC(_pAd)
 #endif // VENDOR_FEATURE2_SUPPORT //
 };
-
-
 
 #ifdef TONE_RADAR_DETECT_SUPPORT
 #define DELAYINTMASK		0x0013fffb

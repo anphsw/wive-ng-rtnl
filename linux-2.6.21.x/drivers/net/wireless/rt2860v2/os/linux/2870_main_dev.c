@@ -144,13 +144,16 @@ static int rt2870_suspend(
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2870_suspend()\n"));
 
 	net_dev = pAd->net_dev;
-	if (net_dev == NULL)
+	if (!net_dev)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("net_dev == NULL!\n"));
+		    goto out; //already stopped or not init
 	}
 	else
 	{
 		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		if (!pad)
+		    goto out; //already stopped or not init
 
 		// stop interface
 		netif_carrier_off(net_dev);
@@ -164,7 +167,7 @@ static int rt2870_suspend(
 		// take down the device
 		rt28xx_close(net_dev);
 	}
-
+out:
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2870_suspend()\n"));
 	return 0;
 }
