@@ -1763,7 +1763,6 @@ int rt_ioctl_siwnickn(struct net_device *dev,
 	memset(pAdapter->nickname, 0, IW_ESSID_MAX_SIZE + 1);
 	memcpy(pAdapter->nickname, nickname, data->length);
 
-
 	return 0;
 }
 

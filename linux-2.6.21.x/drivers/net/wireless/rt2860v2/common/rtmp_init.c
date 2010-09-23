@@ -3303,11 +3303,7 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 			pAd->StaCfg.LastScanTime -= (10 * OS_HZ);
 		
 		NdisZeroMemory(pAd->nickname, IW_ESSID_MAX_SIZE+1);
-
-
-
 		RTMPInitTimer(pAd, &pAd->StaCfg.WpaDisassocAndBlockAssocTimer, GET_TIMER_FUNCTION(WpaDisassocApAndBlockAssoc), pAd, FALSE);
-
 
 #ifdef WSC_STA_SUPPORT
 		{
