@@ -56,6 +56,13 @@
 #include "ap_autoChSel.h"
 #endif // CONFIG_AP_SUPPORT //
 
+#ifdef CONFIG_AP_SUPPORT
+#define AP_NIC_DEVICE_NAME              "Wive-RTNL-AP"
+#endif
+#ifdef CONFIG_STA_SUPPORT
+#define STA_NIC_DEVICE_NAME             "Wive-RTNL-STA"
+#endif
+
 #include "eeprom.h"
 #if defined(RTMP_PCI_SUPPORT) || defined(RTMP_USB_SUPPORT)
 #include "rtmp_mcu.h"

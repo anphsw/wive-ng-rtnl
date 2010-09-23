@@ -45,7 +45,6 @@
 #include <linux/unistd.h>
 #include <asm/uaccess.h>
 
-
 #define MEM_ALLOC_FLAG      (GFP_ATOMIC) //(GFP_DMA | GFP_ATOMIC)
 
 #ifndef IFNAMSIZ
@@ -78,7 +77,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #define AP_PROFILE_PATH			"/etc/Wireless/RT2860i.dat"
 #define AP_PROFILE_PATH_RBUS		"/etc/Wireless/RT2860/RT2860.dat"
 #define AP_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/RT2860/RT2860AP.bin"
-#define AP_NIC_DEVICE_NAME		"RT2860AP"
 #define AP_DRIVER_VERSION		"1.8.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860/RT2860APCard.dat"
@@ -87,7 +85,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #ifdef RT2870
 #define AP_PROFILE_PATH			"/etc/Wireless/RT2870AP/RT2870AP.dat"
 #define AP_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/RT2870AP/RT2870AP.bin"
-#define AP_NIC_DEVICE_NAME		"RT2870AP"
 #define AP_DRIVER_VERSION		"1.1.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2870AP/RT2870APCard.dat"
@@ -100,7 +97,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #define STA_PROFILE_PATH		"/etc/Wireless/RT2860i.dat"
 #define STA_PROFILE_PATH_RBUS		"/etc/Wireless/RT2860/RT2860.dat"
 #define STA_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/RT2860/RT2860STA.bin"
-#define STA_NIC_DEVICE_NAME		"Wive-RTNL-STA"
 #define STA_DRIVER_VERSION		"1.6.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860/RT2860STACard.dat"
@@ -110,7 +106,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #ifdef RT2870
 #define STA_PROFILE_PATH		"/etc/Wireless/RT2870STA/RT2870STA.dat"
 #define STA_RT2870_IMAGE_FILE_NAME  	"/etc/Wireless/RT2870STA/rt2870.bin"
-#define STA_NIC_DEVICE_NAME		"RT2870STA"
 #define STA_DRIVER_VERSION		"1.3.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2870STA/RT2870STACard.dat"
