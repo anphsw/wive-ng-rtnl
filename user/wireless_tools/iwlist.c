@@ -629,6 +629,7 @@ print_scanning_info(int		skfd,
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
 
+#if 0
   /* Debugging stuff */
   if((IW_EV_LCP_PK2_LEN != IW_EV_LCP_PK_LEN) || (IW_EV_POINT_PK2_LEN != IW_EV_POINT_PK_LEN))
     {
@@ -637,6 +638,7 @@ print_scanning_info(int		skfd,
       fprintf(stderr, "*** IW_EV_LCP_PK2_LEN = %zu ; IW_EV_POINT_PK2_LEN = %zu\n\n",
 	      IW_EV_LCP_PK2_LEN, IW_EV_POINT_PK2_LEN);
     }
+#endif
 
   /* Get range stuff */
   has_range = (iw_get_range_info(skfd, ifname, &range) >= 0);

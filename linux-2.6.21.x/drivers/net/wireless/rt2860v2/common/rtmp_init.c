@@ -3591,7 +3591,7 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 
 	pAd->CommonCfg.bWiFiTest = FALSE;
 #ifdef RTMP_MAC_PCI
-    pAd->bPCIclkOff = FALSE;
+	pAd->bPCIclkOff = FALSE;
 #endif // RTMP_MAC_PCI //
 
 #ifdef CONFIG_AP_SUPPORT

@@ -181,34 +181,29 @@ NDIS_STATUS os_free_mem(
 
 
 #ifdef RTMP_RBUS_SUPPORT
-
 #ifdef CONFIG_RALINK_FLASH_API
-
 int32_t FlashRead(uint32_t *dst, uint32_t *src, uint32_t count);
 int32_t FlashWrite(uint16_t *source, uint16_t *destination, uint32_t numBytes);
-#define NVRAM_OFFSET                            0x30000
-#if defined (CONFIG_RT2880_FLASH_32M)
-#define RF_OFFSET                               0x1FE0000
+#else /* CONFIG_RALINK_FLASH_API */
+#ifndef RA_MTD_RW_BY_NUM
+#ifdef CONFIG_RT2880_FLASH_32M
+#define MTD_NUM_FACTORY 		5
 #else
-#define RF_OFFSET                               0x40000
+#define MTD_NUM_FACTORY 		2
 #endif
-
-#else // CONFIG_RALINK_FLASH_API //
-
-#ifdef RA_MTD_RW_BY_NUM
-#if defined (CONFIG_RT2880_FLASH_32M)
-#define MTD_NUM_FACTORY 5
+extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
+extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
+#else /* BYNUM - BYOFFSET*/
+#define NVRAM_OFFSET			0x30000
+#ifdef CONFIG_RT2880_FLASH_32M
+#define RF_OFFSET			0x1FE0000
 #else
-#define MTD_NUM_FACTORY 2
+#define RF_OFFSET			0x40000
 #endif
 extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
-#else
-extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
-extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
-#endif
-
-#endif // CONFIG_RALINK_FLASH_API //
+#endif /* BYNUM - BYOFFSET*/
+#endif /* CONFIG_RALINK_FLASH_API */
 
 void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b)
 {
@@ -235,7 +230,7 @@ void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
 #endif
 #endif
 }
-#endif // RTMP_RBUS_SUPPORT //
+#endif /* RTMP_RBUS_SUPPORT */
 
 
 PNDIS_PACKET RtmpOSNetPktAlloc(
@@ -276,7 +271,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	return (PNDIS_PACKET) pkt;
 }
 
-
 PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
 	IN	ULONG	Length,
@@ -305,7 +299,6 @@ PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
 
 	return (PNDIS_PACKET) pkt;	
 }
-
 
 VOID build_tx_packet(
 	IN	PRTMP_ADAPTER	pAd,
@@ -857,10 +850,6 @@ void announce_802_3_packet(
 	}	  	
 #endif // INF_AMAZON_PPA //
 
-//#ifdef CONFIG_5VT_ENHANCE
-//	*(int*)(pRxPkt->cb) = BRIDGE_TAG; 
-//#endif
-
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef CONFIG_RT2880_BRIDGING_ONLY
 	pRxPkt->cb[22]=0xa8;
@@ -892,7 +881,7 @@ void announce_802_3_packet(
 	else 
 #endif
  
-#endif // RTMP_RBUS_SUPPORT //
+#endif /* RTMP_RBUS_SUPPORT */
 	{
 #ifdef CONFIG_AP_SUPPORT
 #ifdef BG_FT_SUPPORT

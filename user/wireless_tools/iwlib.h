@@ -118,7 +118,7 @@ extern "C" {
 
 /* Various versions information */
 /* Recommended Wireless Extension version */
-#define WE_VERSION	21
+#define WE_VERSION	22
 /* Maximum forward compatibility built in this version of WT */
 #define WE_MAX_VERSION	22
 /* Version of Wireless Tools */
@@ -158,6 +158,7 @@ struct iw_pk_event
 	__u16		cmd;			/* Wireless IOCTL */
 	union iwreq_data	u;		/* IOCTL fixed payload */
 } __attribute__ ((packed));
+
 struct	iw_pk_point
 {
   void __user	*pointer;	/* Pointer to the data  (in user space) */
