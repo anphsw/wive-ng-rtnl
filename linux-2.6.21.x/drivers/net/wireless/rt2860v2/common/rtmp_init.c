@@ -1058,7 +1058,7 @@ VOID	NICReadEEPROMParameters(
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
-		sprintf((PSTRING) pAd->nickname, "RT2860STA");
+		sprintf((PSTRING) pAd->nickname, STA_NIC_DEVICE_NAME);
 #endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
 

@@ -100,7 +100,7 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #define STA_PROFILE_PATH		"/etc/Wireless/RT2860i.dat"
 #define STA_PROFILE_PATH_RBUS		"/etc/Wireless/RT2860/RT2860.dat"
 #define STA_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/RT2860/RT2860STA.bin"
-#define STA_NIC_DEVICE_NAME		"RT2860STA"
+#define STA_NIC_DEVICE_NAME		"Wive-RTNL-STA"
 #define STA_DRIVER_VERSION		"1.6.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860/RT2860STACard.dat"
