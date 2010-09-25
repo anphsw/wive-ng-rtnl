@@ -844,10 +844,8 @@ static int dccp_v6_rcv(struct sk_buff **pskb)
 
 	/* Step 2:
 	 *	Look up flow ID in table and get corresponding socket */
-	sk = __inet6_lookup(&dccp_hashinfo, &skb->nh.ipv6h->saddr,
-			    dh->dccph_sport,
-			    &skb->nh.ipv6h->daddr, ntohs(dh->dccph_dport),
-			    inet6_iif(skb));
+	sk = __inet6_lookup_skb(&dccp_hashinfo, skb,
+				dh->dccph_sport, dh->dccph_dport);
 	/*
 	 * Step 2:
 	 *	If no socket ...
