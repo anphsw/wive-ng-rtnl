@@ -469,7 +469,7 @@ static inline int test_and_change_bit(unsigned long nr,
  * Return the bit position (0..63) of the most significant 1 bit in a word
  * Returns -1 if no 1 bit exists
  */
-static inline int __ilog2(unsigned long x)
+static inline unsigned long __fls(unsigned long x)
 {
 	int lz;
 
@@ -498,8 +498,6 @@ static inline int __ilog2(unsigned long x)
 	return 63 - lz;
 }
 
-#if defined(CONFIG_CPU_MIPS32) || defined(CONFIG_CPU_MIPS64)
-
 /*
  * __ffs - find first bit in word.
  * @word: The word to search
@@ -509,7 +507,7 @@ static inline int __ilog2(unsigned long x)
  */
 static inline unsigned long __ffs(unsigned long word)
 {
-	return __ilog2(word & -word);
+	return __fls(word & -word);
 }
 
 /*
@@ -537,6 +535,8 @@ static inline int fls64(__u64 word)
 #include <asm-generic/bitops/fls64.h>
 #endif
 
+#if defined(CONFIG_CPU_MIPS32) || defined(CONFIG_CPU_MIPS64)
+
 /*
  * ffs - find first bit set.
  * @word: The word to search
@@ -556,6 +556,7 @@ static inline int ffs(int word)
 #else
 
 #include <asm-generic/bitops/__ffs.h>
+#include <asm-generic/bitops/__fls.h>
 #include <asm-generic/bitops/ffs.h>
 #include <asm-generic/bitops/fls.h>
 #include <asm-generic/bitops/fls64.h>

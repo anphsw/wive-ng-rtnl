@@ -253,6 +253,11 @@ static __inline__ int ffs(int x)
 	return __ilog2(i & -i) + 1;
 }
 
+static __inline__ unsigned long __fls(unsigned long x)
+{
+	return __ilog2(x);
+}
+
 /*
  * fls: find last (most-significant) bit set.
  * Note fls(0) = 0, fls(1) = 1, fls(0x80000000) = 32.
