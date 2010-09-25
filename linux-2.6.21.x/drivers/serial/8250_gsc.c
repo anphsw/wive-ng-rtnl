@@ -39,9 +39,10 @@ serial_init_chip(struct parisc_device *dev)
 		 * the user what they're missing.
 		 */
 		if (parisc_parent(dev)->id.hw_type != HPHW_IOA) {
-			printk(KERN_INFO "Serial: device 0x%lx not configured.\n"
+			printk(KERN_INFO 
+				"Serial: device 0x%llx not configured.\n"
 				"Enable support for Wax, Lasi, Asp or Dino.\n",
-				dev->hpa.start);
+				(unsigned long long)dev->hpa.start);
 		}
 		return -ENODEV;
 	}

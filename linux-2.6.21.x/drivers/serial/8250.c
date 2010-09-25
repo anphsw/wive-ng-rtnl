@@ -72,6 +72,9 @@ static unsigned int nr_uarts = CONFIG_SERIAL_8250_RUNTIME_UARTS;
 
 #define PASS_LIMIT	256
 
+#define BOTH_EMPTY 	(UART_LSR_TEMT | UART_LSR_THRE)
+
+
 /*
  * We default to IRQ0 for the "no irq" hack.   Some
  * machine types want others as well - they're free
@@ -939,7 +942,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
 	 * be frobbing the chips IRQ enable register to see if it exists.
 	 */
 	spin_lock_irqsave(&up->port.lock, flags);
-//	save_flags(flags); cli();
 
 	up->capabilities = 0;
 	up->bugs = 0;
@@ -1096,7 +1098,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
 
  out:	
 	spin_unlock_irqrestore(&up->port.lock, flags);
-//	restore_flags(flags);
 	DEBUG_AUTOCONF("type=%s\n", uart_config[up->port.type].name);
 }
 
@@ -1474,7 +1475,7 @@ static int serial_link_irq_chain(struct uart_8250_port *up)
 		INIT_LIST_HEAD(&up->list);
 		i->head = &up->list;
 		spin_unlock_irq(&i->lock);
-
+		irq_flags |= up->port.irqflags;
 		ret = request_irq(up->port.irq, serial8250_interrupt,
 				  irq_flags, "serial", i);
 		if (ret < 0)
@@ -1565,7 +1566,7 @@ static unsigned int serial8250_tx_empty(struct uart_port *port)
 	unsigned int ret;
 
 	spin_lock_irqsave(&up->port.lock, flags);
-	ret = serial_in(up, UART_LSR) & UART_LSR_TEMT ? TIOCSER_TEMT : 0;
+	ret = (serial_in(up, UART_LSR) & BOTH_EMPTY) == BOTH_EMPTY ? TIOCSER_TEMT : 0;
 	spin_unlock_irqrestore(&up->port.lock, flags);
 
 	return ret;
@@ -1625,8 +1626,6 @@ static void serial8250_break_ctl(struct uart_port *port, int break_state)
 	serial_out(up, UART_LCR, up->lcr);
 	spin_unlock_irqrestore(&up->port.lock, flags);
 }
-
-#define BOTH_EMPTY (UART_LSR_TEMT | UART_LSR_THRE)
 
 /*
  *	Wait for transmitter & holding register to empty
@@ -1739,7 +1738,9 @@ static int serial8250_startup(struct uart_port *port)
 		 * the interrupt is enabled.  Delays are necessary to
 		 * allow register changes to become visible.
 		 */
-		spin_lock_irqsave(&up->port.lock, flags);
+		spin_lock(&up->port.lock);
+		if (up->port.irqflags & IRQF_SHARED)
+			disable_irq_nosync(up->port.irq);
 
 		wait_for_xmitr(up, UART_LSR_THRE);
 		serial_out_sync(up, UART_IER, UART_IER_THRI);
@@ -1751,7 +1752,9 @@ static int serial8250_startup(struct uart_port *port)
 		iir = serial_in(up, UART_IIR);
 		serial_out(up, UART_IER, 0);
 
-		spin_unlock_irqrestore(&up->port.lock, flags);
+		if (up->port.irqflags & IRQF_SHARED)
+			enable_irq(up->port.irq);
+		spin_unlock(&up->port.lock);
 
 		/*
 		 * If the interrupt is not reasserted, setup a timer to
@@ -2333,6 +2336,7 @@ static void __init serial8250_isa_init_ports(void)
 	     i++, up++) {
 		up->port.iobase   = old_serial_port[i].port;
 		up->port.irq      = irq_canonicalize(old_serial_port[i].irq);
+		up->port.irqflags = old_serial_port[i].irqflags;
 		up->port.uartclk  = old_serial_port[i].baud_base * 16;
 		up->port.flags    = old_serial_port[i].flags;
 		up->port.hub6     = old_serial_port[i].hub6;
@@ -2340,7 +2344,7 @@ static void __init serial8250_isa_init_ports(void)
 		up->port.iotype   = old_serial_port[i].io_type;
 		up->port.regshift = old_serial_port[i].iomem_reg_shift;
 		if (share_irqs)
-			up->port.flags |= UPF_SHARE_IRQ;
+			up->port.irqflags |= IRQF_SHARED;
 	}
 }
 
@@ -2566,6 +2570,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.iobase	= p->iobase;
 		port.membase	= p->membase;
 		port.irq	= p->irq;
+		port.irqflags   = p->irqflags;
 		port.uartclk	= p->uartclk;
 		port.regshift	= p->regshift;
 		port.iotype	= p->iotype;
@@ -2574,7 +2579,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.hub6	= p->hub6;
 		port.dev	= &dev->dev;
 		if (share_irqs)
-			port.flags |= UPF_SHARE_IRQ;
+			port.irqflags |= IRQF_SHARED;
 		ret = serial8250_register_port(&port);
 		if (ret < 0) {
 			dev_err(&dev->dev, "unable to register port at index %d "
@@ -2715,6 +2720,7 @@ int serial8250_register_port(struct uart_port *port)
 		uart->port.iobase   = port->iobase;
 		uart->port.membase  = port->membase;
 		uart->port.irq      = port->irq;
+		uart->port.irqflags = port->irqflags;
 		uart->port.uartclk  = port->uartclk;
 		uart->port.fifosize = port->fifosize;
 		uart->port.regshift = port->regshift;

@@ -22,6 +22,7 @@ struct plat_serial8250_port {
 	void __iomem	*membase;	/* ioremap cookie or NULL */
 	unsigned long	mapbase;	/* resource base */
 	unsigned int	irq;		/* interrupt number */
+	unsigned long	irqflags;	/* request_irq flags */
 	unsigned int	uartclk;	/* UART clock rate */
 	unsigned char	regshift;	/* register shift */
 	unsigned char	iotype;		/* UPIO_* */
