@@ -235,7 +235,6 @@ struct kmem_cache {
 	unsigned int size, align;
 	const char *name;
 	void (*ctor)(void *, struct kmem_cache *, unsigned long);
-	void (*dtor)(void *, struct kmem_cache *, unsigned long);
 };
 
 struct kmem_cache *kmem_cache_create(const char *name, size_t size,
@@ -251,7 +250,6 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size,
 		c->name = name;
 		c->size = size;
 		c->ctor = ctor;
-		c->dtor = dtor;
 		/* ignore alignment unless it's forced */
 		c->align = (flags & SLAB_HWCACHE_ALIGN) ? SLOB_ALIGN : 0;
 		if (c->align < align)
@@ -296,9 +294,6 @@ EXPORT_SYMBOL(kmem_cache_zalloc);
 
 void kmem_cache_free(struct kmem_cache *c, void *b)
 {
-	if (c->dtor)
-		c->dtor(b, c, 0);
-
 	if (c->size < PAGE_SIZE)
 		slob_free(b, c->size);
 	else

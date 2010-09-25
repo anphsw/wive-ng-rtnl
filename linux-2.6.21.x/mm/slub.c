@@ -862,17 +862,14 @@ static void __free_slab(struct kmem_cache *s, struct page *page)
 {
 	int pages = 1 << s->order;
 
-	if (unlikely(PageError(page) || s->dtor)) {
+	if (unlikely(SlabDebug(page))) {
 		void *start = page_address(page);
 		void *end = start + (pages << PAGE_SHIFT);
 		void *p;
 
 		slab_pad_check(s, page);
-		for (p = start; p <= end - s->size; p += s->size) {
-			if (s->dtor)
-				s->dtor(p, s, 0);
+		for_each_object(p, s, page_address(page))
 			check_object(s, page, p, 0);
-		}
 	}
 
 	mod_zone_page_state(page_zone(page),
@@ -1572,7 +1569,7 @@ static int calculate_sizes(struct kmem_cache *s)
 	 * then we should never poison the object itself.
 	 */
 	if ((flags & SLAB_POISON) && !(flags & SLAB_DESTROY_BY_RCU) &&
-			!s->ctor && !s->dtor)
+			!s->ctor)
 		s->flags |= __OBJECT_POISON;
 	else
 		s->flags &= ~__OBJECT_POISON;
@@ -1601,7 +1598,7 @@ static int calculate_sizes(struct kmem_cache *s)
 	s->inuse = size;
 
 	if (((flags & (SLAB_DESTROY_BY_RCU | SLAB_POISON)) ||
-		s->ctor || s->dtor)) {
+		s->ctor)) {
 		/*
 		 * Relocate free pointer after the object if it is not
 		 * permitted to overwrite the first word of the object on
@@ -1685,13 +1682,11 @@ static int __init finish_bootstrap(void)
 static int kmem_cache_open(struct kmem_cache *s, gfp_t gfpflags,
 		const char *name, size_t size,
 		size_t align, unsigned long flags,
-		void (*ctor)(void *, struct kmem_cache *, unsigned long),
-		void (*dtor)(void *, struct kmem_cache *, unsigned long))
+		void (*ctor)(void *, struct kmem_cache *, unsigned long))
 {
 	memset(s, 0, kmem_size);
 	s->name = name;
 	s->ctor = ctor;
-	s->dtor = dtor;
 	s->objsize = size;
 	s->flags = flags;
 	s->align = align;
@@ -1705,13 +1700,13 @@ static int kmem_cache_open(struct kmem_cache *s, gfp_t gfpflags,
 	 * On 32 bit platforms the limit is 256k. On 64bit platforms
 	 * the limit is 512k.
 	 *
-	 * Debugging or ctor/dtors may create a need to move the free
+	 * Debugging or ctor may create a need to move the free
 	 * pointer. Fail if this happens.
 	 */
 	if (s->size >= 65535 * sizeof(void *)) {
 		BUG_ON(flags & (SLAB_RED_ZONE | SLAB_POISON |
 				SLAB_STORE_USER | SLAB_DESTROY_BY_RCU));
-		BUG_ON(ctor || dtor);
+		BUG_ON(s->ctor);
 	}
 	else
 		/*
@@ -1946,7 +1941,7 @@ static struct kmem_cache *create_kmalloc_cache(struct kmem_cache *s,
 
 	down_write(&slub_lock);
 	if (!kmem_cache_open(s, gfp_flags, name, size, ARCH_KMALLOC_MINALIGN,
-			flags, NULL, NULL))
+			flags, NULL))
 		goto panic;
 
 	list_add(&s->list, &slab_caches);
@@ -2187,7 +2182,7 @@ static int slab_unmergeable(struct kmem_cache *s)
 	if (slub_nomerge || (s->flags & SLUB_NEVER_MERGE))
 		return 1;
 
-	if (s->ctor || s->dtor)
+	if (s->ctor)
 		return 1;
 
 	return 0;
@@ -2195,15 +2190,14 @@ static int slab_unmergeable(struct kmem_cache *s)
 
 static struct kmem_cache *find_mergeable(size_t size,
 		size_t align, unsigned long flags,
-		void (*ctor)(void *, struct kmem_cache *, unsigned long),
-		void (*dtor)(void *, struct kmem_cache *, unsigned long))
+		void (*ctor)(void *, struct kmem_cache *, unsigned long))
 {
 	struct list_head *h;
 
 	if (slub_nomerge || (flags & SLUB_NEVER_MERGE))
 		return NULL;
 
-	if (ctor || dtor)
+	if (ctor)
 		return NULL;
 
 	size = ALIGN(size, sizeof(void *));
@@ -2246,7 +2240,7 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size,
 	struct kmem_cache *s;
 
 	down_write(&slub_lock);
-	s = find_mergeable(size, align, flags, dtor, ctor);
+	s = find_mergeable(size, align, flags, ctor);
 	if (s) {
 		s->refcount++;
 		/*
@@ -2260,7 +2254,7 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size,
 	} else {
 		s = kmalloc(kmem_size, GFP_KERNEL);
 		if (s && kmem_cache_open(s, GFP_KERNEL, name,
-				size, align, flags, ctor, dtor)) {
+				size, align, flags, ctor)) {
 			if (sysfs_slab_add(s)) {
 				kfree(s);
 				goto err;
@@ -2343,91 +2337,6 @@ int kmem_cache_shrink(struct kmem_cache *s)
 	return 0;
 }
 EXPORT_SYMBOL(kmem_cache_shrink);
-
-#ifdef CONFIG_NUMA
-
-/*****************************************************************
- * Generic reaper used to support the page allocator
- * (the cpu slabs are reaped by a per slab workqueue).
- *
- * Maybe move this to the page allocator?
- ****************************************************************/
-
-static DEFINE_PER_CPU(unsigned long, reap_node);
-
-static void init_reap_node(int cpu)
-{
-	int node;
-
-	node = next_node(cpu_to_node(cpu), node_online_map);
-	if (node == MAX_NUMNODES)
-		node = first_node(node_online_map);
-
-	__get_cpu_var(reap_node) = node;
-}
-
-static void next_reap_node(void)
-{
-	int node = __get_cpu_var(reap_node);
-
-	/*
-	 * Also drain per cpu pages on remote zones
-	 */
-	if (node != numa_node_id())
-		drain_node_pages(node);
-
-	node = next_node(node, node_online_map);
-	if (unlikely(node >= MAX_NUMNODES))
-		node = first_node(node_online_map);
-	__get_cpu_var(reap_node) = node;
-}
-#else
-#define init_reap_node(cpu) do { } while (0)
-#define next_reap_node(void) do { } while (0)
-#endif
-
-#define REAPTIMEOUT_CPUC	(2*HZ)
-
-#ifdef CONFIG_SMP
-static DEFINE_PER_CPU(struct delayed_work, reap_work);
-
-static void cache_reap(struct work_struct *unused)
-{
-	next_reap_node();
-	refresh_cpu_vm_stats(smp_processor_id());
-	schedule_delayed_work(&__get_cpu_var(reap_work),
-				      REAPTIMEOUT_CPUC);
-}
-
-static void __devinit start_cpu_timer(int cpu)
-{
-	struct delayed_work *reap_work = &per_cpu(reap_work, cpu);
-
-	/*
-	 * When this gets called from do_initcalls via cpucache_init(),
-	 * init_workqueues() has already run, so keventd will be setup
-	 * at that time.
-	 */
-	if (keventd_up() && reap_work->work.func == NULL) {
-		init_reap_node(cpu);
-		INIT_DELAYED_WORK(reap_work, cache_reap);
-		schedule_delayed_work_on(cpu, reap_work, HZ + 3 * cpu);
-	}
-}
-
-static int __init cpucache_init(void)
-{
-	int cpu;
-
-	/*
-	 * Register the timers that drain pcp pages and update vm statistics
-	 */
-	for_each_online_cpu(cpu)
-		start_cpu_timer(cpu);
-	return 0;
-}
-__initcall(cpucache_init);
-#endif
 
 #ifdef SLUB_RESILIENCY_TEST
 static unsigned long validate_slab_cache(struct kmem_cache *s);
@@ -2697,17 +2606,6 @@ static ssize_t ctor_show(struct kmem_cache *s, char *buf)
 }
 SLAB_ATTR_RO(ctor);
 
-static ssize_t dtor_show(struct kmem_cache *s, char *buf)
-{
-	if (s->dtor) {
-		int n = sprint_symbol(buf, (unsigned long)s->dtor);
-
-		return n + sprintf(buf + n, "\n");
-	}
-	return 0;
-}
-SLAB_ATTR_RO(dtor);
-
 static ssize_t aliases_show(struct kmem_cache *s, char *buf)
 {
 	return sprintf(buf, "%d\n", s->refcount - 1);
@@ -2888,7 +2786,6 @@ static struct attribute * slab_attrs[] = {
 	&partial_attr.attr,
 	&cpu_slabs_attr.attr,
 	&ctor_attr.attr,
-	&dtor_attr.attr,
 	&aliases_attr.attr,
 	&align_attr.attr,
 	&sanity_checks_attr.attr,

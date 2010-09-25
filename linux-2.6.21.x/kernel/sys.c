@@ -101,7 +101,7 @@ EXPORT_SYMBOL(cad_pid);
  *	and the like. 
  */
 
-static BLOCKING_NOTIFIER_HEAD(reboot_notifier_list);
+BLOCKING_NOTIFIER_HEAD(reboot_notifier_list);
 
 /*
  *	Notifier chain core routines.  The exported routines below

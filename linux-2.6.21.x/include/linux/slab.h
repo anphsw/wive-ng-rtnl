@@ -34,6 +34,8 @@ typedef struct kmem_cache kmem_cache_t __deprecated;
 
 /* Flags passed to a constructor functions */
 #define SLAB_CTOR_CONSTRUCTOR	0x001UL		/* If not set, then deconstructor */
+#define SLAB_CTOR_ATOMIC        0x002UL         /* Tell constructor it can't sleep */
+#define SLAB_CTOR_VERIFY        0x004UL         /* Tell constructor it's a verify call */
 
 /*
  * struct kmem_cache related prototypes
@@ -63,6 +65,21 @@ static inline void *kmem_cache_alloc_node(struct kmem_cache *cachep,
 	return kmem_cache_alloc(cachep, flags);
 }
 #endif
+
+/*
+ * The largest kmalloc size supported by the slab allocators is
+ * 32 megabyte (2^25) or the maximum allocatable page order if that is
+ * less than 32 MB.
+ *
+ * WARNING: Its not easy to increase this value since the allocators have
+ * to do various tricks to work around compiler limitations in order to
+ * ensure proper constant folding.
+ */
+#define KMALLOC_SHIFT_HIGH	((MAX_ORDER + PAGE_SHIFT - 1) <= 25 ? \
+				(MAX_ORDER + PAGE_SHIFT - 1) : 25)
+
+#define KMALLOC_MAX_SIZE	(1UL << KMALLOC_SHIFT_HIGH)
+#define KMALLOC_MAX_ORDER	(KMALLOC_SHIFT_HIGH - PAGE_SHIFT)
 
 /*
  * Common kmalloc functions provided by all allocators
