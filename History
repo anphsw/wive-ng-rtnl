@@ -146,6 +146,8 @@
 64) Some cleanups and review kernel code to fix potentional errors<br>
 65) More kernel backports fixes<br>
 66) Fix compile procedure from clean git copy<br>
+67) Always use v22 wireless extensions at all application and kerenl code<br>
+68) Fix up/down raX interface in sta mode<br>
 
 <br><br>
 <b>For support see:</b><br>
