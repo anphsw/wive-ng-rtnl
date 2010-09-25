@@ -48,6 +48,9 @@ struct pppoe_addr{
        char            dev[IFNAMSIZ];          /* Local device to use */ 
 }; 
 
+/************************************************************************ 
+ * PPTP addressing definition
+ */
 struct pptp_addr{
        __u16           call_id;
        struct in_addr  sin_addr;
@@ -101,7 +104,7 @@ struct pppoe_tag {
 	__u16 tag_type;
 	__u16 tag_len;
 	char tag_data[0];
-} __attribute ((packed));
+} __packed;
 
 /* Tag identifiers */
 #define PTT_EOL		__constant_htons(0x0000)
