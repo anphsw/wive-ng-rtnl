@@ -148,6 +148,9 @@
 66) Fix compile procedure from clean git copy<br>
 67) Always use v22 wireless extensions at all application and kerenl code<br>
 68) Fix up/down raX interface in sta mode<br>
+69) Backports tmpfs critical fixes<br>
+70) Backports memory critical allocator fixes<br>
+71) Backports tty critical fixes<br>
 
 <br><br>
 <b>For support see:</b><br>
