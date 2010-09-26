@@ -982,6 +982,8 @@ static inline int shmem_parse_mpol(char *value, int *policy, nodemask_t *policy_
 		*nodelist++ = '\0';
 		if (nodelist_parse(nodelist, *policy_nodes))
 			goto out;
+		if (!nodes_subset(*policy_nodes, node_online_map))
+			goto out;
 	}
 	if (!strcmp(value, "default")) {
 		*policy = MPOL_DEFAULT;
@@ -1064,7 +1066,7 @@ shmem_alloc_page(gfp_t gfp, struct shmem_inode_info *info,
 	pvma.vm_policy = mpol_shared_policy_lookup(&info->policy, idx);
 	pvma.vm_pgoff = idx;
 	pvma.vm_end = PAGE_SIZE;
-	page = alloc_page_vma(gfp | __GFP_ZERO, &pvma, 0);
+	page = alloc_page_vma(gfp, &pvma, 0);
 	mpol_free(pvma.vm_policy);
 	return page;
 }
@@ -1084,7 +1086,7 @@ shmem_swapin(struct shmem_inode_info *info,swp_entry_t entry,unsigned long idx)
 static inline struct page *
 shmem_alloc_page(gfp_t gfp,struct shmem_inode_info *info, unsigned long idx)
 {
-	return alloc_page(gfp | __GFP_ZERO);
+	return alloc_page(gfp);
 }
 #endif
 
@@ -1113,9 +1115,9 @@ static int shmem_getpage(struct inode *inode, unsigned long idx,
 	 * Normally, filepage is NULL on entry, and either found
 	 * uptodate immediately, or allocated and zeroed, or read
 	 * in under swappage, which is then assigned to filepage.
-	 * But shmem_prepare_write passes in a locked filepage,
-	 * which may be found not uptodate by other callers too,
-	 * and may need to be copied from the swappage read in.
+	 * But shmem_readpage (required for splice) passes in a locked
+	 * filepage, which may be found not uptodate by other callers
+	 * too, and may need to be copied from the swappage read in.
 	 */
 repeat:
 	if (!filepage)
@@ -1293,6 +1295,7 @@ repeat:
 
 		info->alloced++;
 		spin_unlock(&info->lock);
+		clear_highpage(filepage);
 		flush_dcache_page(filepage);
 		SetPageUptodate(filepage);
 	}
@@ -1498,117 +1501,23 @@ static const struct inode_operations shmem_symlink_inode_operations;
 static const struct inode_operations shmem_symlink_inline_operations;
 
 /*
- * Normally tmpfs makes no use of shmem_prepare_write, but it
- * lets a tmpfs file be used read-write below the loop driver.
+ * Normally tmpfs avoids the use of shmem_readpage and shmem_prepare_write;
+ * but providing them allows a tmpfs file to be used for splice, sendfile, and
+ * below the loop driver, in the generic fashion that many filesystems support.
  */
+static int shmem_readpage(struct file *file, struct page *page)
+{
+	struct inode *inode = page->mapping->host;
+	int error = shmem_getpage(inode, page->index, &page, SGP_CACHE, NULL);
+	unlock_page(page);
+	return error;
+}
+
 static int
 shmem_prepare_write(struct file *file, struct page *page, unsigned offset, unsigned to)
 {
 	struct inode *inode = page->mapping->host;
 	return shmem_getpage(inode, page->index, &page, SGP_WRITE, NULL);
-}
-
-static ssize_t
-shmem_file_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
-{
-	struct inode	*inode = file->f_path.dentry->d_inode;
-	loff_t		pos;
-	unsigned long	written;
-	ssize_t		err;
-
-	if ((ssize_t) count < 0)
-		return -EINVAL;
-
-	if (!access_ok(VERIFY_READ, buf, count))
-		return -EFAULT;
-
-	mutex_lock(&inode->i_mutex);
-
-	pos = *ppos;
-	written = 0;
-
-	err = generic_write_checks(file, &pos, &count, 0);
-	if (err || !count)
-		goto out;
-
-	err = remove_suid(file->f_path.dentry);
-	if (err)
-		goto out;
-
-	inode->i_ctime = inode->i_mtime = CURRENT_TIME;
-
-	do {
-		struct page *page = NULL;
-		unsigned long bytes, index, offset;
-		char *kaddr;
-		int left;
-
-		offset = (pos & (PAGE_CACHE_SIZE -1)); /* Within page */
-		index = pos >> PAGE_CACHE_SHIFT;
-		bytes = PAGE_CACHE_SIZE - offset;
-		if (bytes > count)
-			bytes = count;
-
-		/*
-		 * We don't hold page lock across copy from user -
-		 * what would it guard against? - so no deadlock here.
-		 * But it still may be a good idea to prefault below.
-		 */
-
-		err = shmem_getpage(inode, index, &page, SGP_WRITE, NULL);
-		if (err)
-			break;
-
-		left = bytes;
-		if (PageHighMem(page)) {
-			volatile unsigned char dummy;
-			__get_user(dummy, buf);
-			__get_user(dummy, buf + bytes - 1);
-
-			kaddr = kmap_atomic(page, KM_USER0);
-			left = __copy_from_user_inatomic(kaddr + offset,
-							buf, bytes);
-			kunmap_atomic(kaddr, KM_USER0);
-		}
-		if (left) {
-			kaddr = kmap(page);
-			left = __copy_from_user(kaddr + offset, buf, bytes);
-			kunmap(page);
-		}
-
-		written += bytes;
-		count -= bytes;
-		pos += bytes;
-		buf += bytes;
-		if (pos > inode->i_size)
-			i_size_write(inode, pos);
-
-		flush_dcache_page(page);
-		set_page_dirty(page);
-		mark_page_accessed(page);
-		page_cache_release(page);
-
-		if (left) {
-			pos -= left;
-			written -= left;
-			err = -EFAULT;
-			break;
-		}
-
-		/*
-		 * Our dirty pages are not counted in nr_dirty,
-		 * and we do not attempt to balance dirty pages.
-		 */
-
-		cond_resched();
-	} while (count);
-
-	*ppos = pos;
-	if (written)
-		err = written;
-out:
-	mutex_unlock(&inode->i_mutex);
-	return err;
 }
 
 static void do_shmem_file_read(struct file *filp, loff_t *ppos, read_descriptor_t *desc, read_actor_t actor)
@@ -1719,25 +1628,6 @@ static ssize_t shmem_file_read(struct file *filp, char __user *buf, size_t count
 	desc.error = 0;
 
 	do_shmem_file_read(filp, ppos, &desc, file_read_actor);
-	if (desc.written)
-		return desc.written;
-	return desc.error;
-}
-
-static ssize_t shmem_file_sendfile(struct file *in_file, loff_t *ppos,
-			 size_t count, read_actor_t actor, void *target)
-{
-	read_descriptor_t desc;
-
-	if (!count)
-		return 0;
-
-	desc.written = 0;
-	desc.count = count;
-	desc.arg.data = target;
-	desc.error = 0;
-
-	do_shmem_file_read(in_file, ppos, &desc, actor);
 	if (desc.written)
 		return desc.written;
 	return desc.error;
@@ -2171,7 +2061,7 @@ static int shmem_parse_options(char *options, int *mode, uid_t *uid,
 			}
 			if (*rest)
 				goto bad_val;
-			*blocks = size >> PAGE_CACHE_SHIFT;
+			*blocks = DIV_ROUND_UP(size, PAGE_CACHE_SIZE);
 		} else if (!strcmp(this_char,"nr_blocks")) {
 			*blocks = memparse(value,&rest);
 			if (*rest)
@@ -2401,6 +2291,7 @@ static const struct address_space_operations shmem_aops = {
 	.writepage	= shmem_writepage,
 	.set_page_dirty	= __set_page_dirty_no_writeback,
 #ifdef CONFIG_TMPFS
+	.readpage	= shmem_readpage,
 	.prepare_write	= shmem_prepare_write,
 	.commit_write	= simple_commit_write,
 #endif
@@ -2412,9 +2303,11 @@ static const struct file_operations shmem_file_operations = {
 #ifdef CONFIG_TMPFS
 	.llseek		= generic_file_llseek,
 	.read		= shmem_file_read,
-	.write		= shmem_file_write,
+	.write		= do_sync_write,
+	.aio_write	= generic_file_aio_write,
 	.fsync		= simple_sync_file,
-	.sendfile	= shmem_file_sendfile,
+	.splice_read	= generic_file_splice_read,
+	.splice_write	= generic_file_splice_write,
 #endif
 };
 

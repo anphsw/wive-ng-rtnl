@@ -610,7 +610,7 @@ hugetlbfs_parse_options(char *options, struct hugetlbfs_config *pconfig)
 		else if (!strcmp(opt, "gid"))
 			pconfig->gid = simple_strtoul(value, &value, 0);
 		else if (!strcmp(opt, "mode"))
-			pconfig->mode = simple_strtoul(value,&value,0) & 0777U;
+			pconfig->mode = simple_strtoul(value,&value,0) & 01777U;
 		else if (!strcmp(opt, "size")) {
 			unsigned long long size = memparse(value, &rest);
 			if (*rest == '%') {

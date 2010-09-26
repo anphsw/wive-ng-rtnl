@@ -1529,7 +1529,7 @@ static inline void cow_user_page(struct page *dst, struct page *src, unsigned lo
  * and potentially makes it more efficient.
  *
  * We enter with non-exclusive mmap_sem (to exclude vma changes,
- * but allow concurrent faults), with pte both mapped and locked.
+ * but allow concurrent faults), and pte neither mapped nor locked.
  * We return with mmap_sem still held, but pte unmapped and unlocked.
  */
 static int do_wp_page(struct mm_struct *mm, struct vm_area_struct *vma,
@@ -2227,7 +2227,6 @@ static int do_no_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	int anon = 0;
 	struct page *dirty_page = NULL;
 
-	pte_unmap(page_table);
 	BUG_ON(vma->vm_flags & VM_PFNMAP);
 
 	if (vma->vm_file) {
