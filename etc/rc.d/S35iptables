@@ -106,7 +106,10 @@ start() {
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
 		$LOG "Drop ping from wan $wan_if"
-    		iptables -A servicelimit -i $wan_if -p icmp -j DROP
+    		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
+    		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
+    		iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
+    		iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
     		iptables -A servicelimit -i ppp+ -p icmp -j DROP
 	    fi
 	else
