@@ -337,5 +337,9 @@ static inline struct nf_conn_help *nfct_help(const struct nf_conn *ct)
 	return (struct nf_conn_help *) ((void *)ct + offset);
 }
 #endif /* CONFIG_NF_NAT_NEEDED */
+
+#define MODULE_ALIAS_NFCT_HELPER(helper) \
+	MODULE_ALIAS("nfct-helper-" helper)
+
 #endif /* __KERNEL__ */
 #endif /* _NF_CONNTRACK_H */
