@@ -1114,6 +1114,21 @@ typedef enum _RT_802_11_PHY_MODE {
 #endif // DOT11_N_SUPPORT //
 } RT_802_11_PHY_MODE;
 
+#ifdef DOT11_N_SUPPORT
+#define PHY_MODE_IS_5G_BAND(__Mode)	\
+	((__Mode == PHY_11A) ||			\
+	(__Mode == PHY_11ABG_MIXED) ||	\
+	(__Mode == PHY_11ABGN_MIXED) ||	\
+	(__Mode == PHY_11AN_MIXED) ||	\
+	(__Mode == PHY_11AGN_MIXED) ||	\
+	(__Mode == PHY_11N_5G))
+#else
+
+#define PHY_MODE_IS_5G_BAND(__Mode)	\
+	((__Mode == PHY_11A) ||			\
+	(__Mode == PHY_11ABG_MIXED))
+#endif // DOT11_N_SUPPORT //
+
 
 // put all proprietery for-query objects here to reduce # of Query_OID
 typedef struct _RT_802_11_LINK_STATUS {

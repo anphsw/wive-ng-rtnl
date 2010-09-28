@@ -4365,7 +4365,7 @@ NDIS_STATUS	RT30xxReadRFRegister(
 
 VOID NICReadEEPROMParameters(
 	IN  PRTMP_ADAPTER       pAd,
-	IN	PUCHAR				mac_addr);
+	IN  PUCHAR				mac_addr);
 
 VOID NICInitAsicFromEEPROM(
 	IN  PRTMP_ADAPTER       pAd);

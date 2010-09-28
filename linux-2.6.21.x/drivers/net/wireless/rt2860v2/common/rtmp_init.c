@@ -203,7 +203,7 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 //	{TX_RTY_CFG,			0x6bb80101},	// sample
 	{TX_RTY_CFG,			0x47d01f0f},	// Jan, 2006/11/16, Set TxWI->ACK =0 in Probe Rsp Modify for 2860E ,2007-08-03
 	
-	{AUTO_RSP_CFG,			0x00000013},	// Initial Auto_Responder, because QA will turn off Auto-Responder
+	{AUTO_RSP_CFG,			0x00000053},	// Initial Auto_Responder, because QA will turn off Auto-Responder
 	{CCK_PROT_CFG,			0x05740003 /*0x01740003*/},	// Initial Auto_Responder, because QA will turn off Auto-Responder. And RTS threshold is enabled. 
 	{OFDM_PROT_CFG,			0x05740003 /*0x01740003*/},	// Initial Auto_Responder, because QA will turn off Auto-Responder. And RTS threshold is enabled. 
 	{GF20_PROT_CFG,			0x01744004},    // set 19:18 --> Short NAV for MIMO PS
@@ -292,7 +292,7 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 	IN  PVOID	handle,
 	OUT	PRTMP_ADAPTER	*ppAdapter)
 {
-	PRTMP_ADAPTER	pAd;
+	PRTMP_ADAPTER	pAd = NULL;
 	NDIS_STATUS		Status;
 	INT 			index;
 	UCHAR			*pBeaconBuf = NULL;
@@ -320,6 +320,7 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 			break;
 		}
 		pAd->BeaconBuf = pBeaconBuf;
+		DBGPRINT(RT_DEBUG_OFF, ("\n\n=== pAd = %p, size = %d ===\n\n", pAd, (UINT32)sizeof(RTMP_ADAPTER)));
 
 
 		// Init spin locks
@@ -822,10 +823,10 @@ NDIS_STATUS	NICReadRegParameters(
 */
 VOID	NICReadEEPROMParameters(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PUCHAR			mac_addr)
+	IN	PUCHAR		mac_addr)
 {
 	UINT32			data = 0;
-	USHORT			i =0 , value, value2;
+	USHORT			i = 0 , value, value2;
 	UCHAR			TmpPhy;
 	EEPROM_TX_PWR_STRUC	    Power;
 	EEPROM_VERSION_STRUC    Version;
@@ -1047,6 +1048,9 @@ VOID	NICReadEEPROMParameters(
 	else
 		pAd->bAutoTxAgcA = pAd->bAutoTxAgcG = FALSE;
 	
+	/* Save value for future using */
+	pAd->NicConfig2.word = NicConfig2.word;
+	
 	DBGPRINT_RAW(RT_DEBUG_TRACE, ("NICReadEEPROMParameters: RxPath = %d, TxPath = %d\n", Antenna.field.RxPath, Antenna.field.TxPath));
 
 	// Save the antenna for future use
@@ -1054,16 +1058,17 @@ VOID	NICReadEEPROMParameters(
 
 	// Set the RfICType here, then we can initialize RFIC related operation callbacks
 	pAd->Mlme.RealRxPath = (UCHAR) Antenna.field.RxPath;
+
 	pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
-		sprintf((PSTRING) pAd->nickname, STA_NIC_DEVICE_NAME);
+	sprintf((PSTRING) pAd->nickname, STA_NIC_DEVICE_NAME);
 #endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef RTMP_RF_RW_SUPPORT
-	RtmpChipOpsRFHook(pAd);
+	RtmpChipOpsRFHook(pAd);                                                                                                             
 #endif // RTMP_RF_RW_SUPPORT //
 
 	//
@@ -1884,8 +1889,6 @@ NDIS_STATUS	NICInitializeAsic(
 
 #endif // RTMP_MAC_PCI //
 
-
-
 	//
 	// Before program BBP, we need to wait BBP/RF get wake up.
 	//
@@ -1901,25 +1904,24 @@ NDIS_STATUS	NICInitializeAsic(
 		RTMPusecDelay(1000);
 	} while (Index++ < 100);
 
+#ifdef RTMP_MAC_PCI
 	// The commands to firmware should be after these commands, these commands will init firmware
 	// PCI and USB are not the same because PCI driver needs to wait for PCI bus ready
 	RTMP_IO_WRITE32(pAd, H2M_BBP_AGENT, 0);	// initialize BBP R/W access agent
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_CSR, 0);
-
-#ifdef RTMP_MAC_PCI
-	//2008/11/28:KH add to fix the dead rf frequency offset bug<--
 	AsicSendCommandToMcu(pAd, 0x72, 0, 0, 0);
-	//2008/11/28:KH add to fix the dead rf frequency offset bug-->
 #endif // RTMP_MAC_PCI //
 
+	// Wait to be stable.
 	RTMPusecDelay(1000);
 
-#if !defined(CONFIG_RT2883_FPGA) && !defined(CONFIG_RT3883_FPGA) && !defined(CONFIG_RT3352_FPGA)
 	// Read BBP register, make sure BBP is up and running before write new data
 	Index = 0;
 	do 
 	{
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R0, &R0);
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
+			return NDIS_STATUS_FAILURE;
 		DBGPRINT(RT_DEBUG_TRACE, ("BBP version = %x\n", R0));
 	} while ((++Index < 20) && ((R0 == 0xff) || (R0 == 0x00)));
 	//ASSERT(Index < 20); //this will cause BSOD on Check-build driver
@@ -1932,10 +1934,6 @@ NDIS_STATUS	NICInitializeAsic(
 	{
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBPRegTable[Index].Register, BBPRegTable[Index].Value);
 	}
-#endif
-
-
-
 
 
 #ifdef RT305x
@@ -2208,10 +2206,10 @@ VOID NICUpdateFifoStaCounters(
 {
 	TX_STA_FIFO_STRUC	StaFifo;
 	MAC_TABLE_ENTRY		*pEntry;
-	UCHAR				i = 0;
+	UINT32			i = 0;
 	UCHAR			pid = 0, wcid = 0;
-	CHAR				reTry;
-	UCHAR				succMCS;
+	INT32			reTry;
+	UCHAR			succMCS;
 
 #ifdef RALINK_ATE		
 	/* Nothing to do in ATE mode */

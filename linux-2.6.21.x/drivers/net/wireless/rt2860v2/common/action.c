@@ -568,38 +568,63 @@ ULONG BuildIntolerantChannelRep(
 {
 	ULONG			FrameLen = 0;
 	ULONG			ReadOffset = 0;
-	UCHAR			i;
-	UCHAR			LastRegClass = 0xff;
-	PUCHAR			pLen;
-	
-	for ( i = 0;i < MAX_TRIGGER_EVENT;i++)
+	UCHAR			i, j, k, idx = 0;
+	UCHAR			ChannelList[MAX_TRIGGER_EVENT];
+	UCHAR			TmpRegClass;
+	UCHAR			RegClassArray[7] = {0, 11,12, 32, 33, 54,55}; // Those regulatory class has channel in 2.4GHz. See Annex J.
+
+
+	RTMPZeroMemory(ChannelList, MAX_TRIGGER_EVENT);
+
+	// Find every regulatory class
+	for ( k = 0;k < 7;k++)
 	{
-		if (pAd->CommonCfg.TriggerEventTab.EventA[i].bValid == TRUE)
+		TmpRegClass = RegClassArray[k];
+		
+		idx = 0;
+		// Find Channel report with the same regulatory class in 2.4GHz.
+		for ( i = 0;i < pAd->CommonCfg.TriggerEventTab.EventANo;i++)
 		{
-			if (pAd->CommonCfg.TriggerEventTab.EventA[i].RegClass == LastRegClass)
+			if (pAd->CommonCfg.TriggerEventTab.EventA[i].bValid == TRUE)
 			{
-				*(pDest + ReadOffset) = (UCHAR)pAd->CommonCfg.TriggerEventTab.EventA[i].Channel;
-				*pLen++;
-				ReadOffset++;
-				FrameLen++;
+				if (pAd->CommonCfg.TriggerEventTab.EventA[i].RegClass == TmpRegClass)
+				{				
+					for (j = 0;j < idx;j++)
+					{
+						if (ChannelList[j] == (UCHAR)pAd->CommonCfg.TriggerEventTab.EventA[i].Channel)
+							break;
+					}
+					if ((j == idx))
+					{
+						ChannelList[idx] = (UCHAR)pAd->CommonCfg.TriggerEventTab.EventA[i].Channel;
+						idx++;
+					} 
+					pAd->CommonCfg.TriggerEventTab.EventA[i].bValid = FALSE;
+				}
+				printk("ACT - BuildIntolerantChannelRep , Total Channel number = %d \n", idx);
 			}
-			else
-			{
-				*(pDest + ReadOffset) = IE_2040_BSS_INTOLERANT_REPORT;  // IE
-				*(pDest + ReadOffset + 1) = 2;	// Len = RegClass byte + channel byte.
-				pLen = pDest + ReadOffset + 1;
-				LastRegClass = pAd->CommonCfg.TriggerEventTab.EventA[i].RegClass;
-				*(pDest + ReadOffset + 2) = LastRegClass;	// Len = RegClass byte + channel byte.
-				*(pDest + ReadOffset + 3) = (UCHAR)pAd->CommonCfg.TriggerEventTab.EventA[i].Channel;
-				FrameLen += 4;
-				ReadOffset += 4;
-			}
-			
 		}
+
+		// idx > 0 means this regulatory class has some channel report and need to copy to the pDest.
+		if (idx > 0)
+		{
+			// For each regaulatory IE report, contains all channels that has the same regulatory class.
+			*(pDest + ReadOffset) = IE_2040_BSS_INTOLERANT_REPORT;  // IE
+			*(pDest + ReadOffset + 1) = 1+ idx;	// Len = RegClass byte + channel byte.
+			*(pDest + ReadOffset + 2) = TmpRegClass;	// Len = RegClass byte + channel byte.
+			RTMPMoveMemory(pDest + ReadOffset + 3, ChannelList, idx);
+
+			FrameLen += (3 + idx);
+			ReadOffset += (3 + idx);
+		}
+		
 	}
+
+	DBGPRINT(RT_DEBUG_ERROR,("ACT-BuildIntolerantChannelRep(Size=%ld)\n", FrameLen));
+	hex_dump("ACT-pDestMsg", pDest, FrameLen);
+
 	return FrameLen;
 }
-
 
 /*
 Description : Send 20/40 BSS Coexistence Action frame If one trigger event is triggered.
@@ -1141,6 +1166,11 @@ VOID PeerHTAction(
 
 			if (Elem->Msg[LENGTH_802_11+2] == 0)	// 7.4.8.2. if value is 1, keep the same as supported channel bandwidth. 
 				pAd->MacTab.Content[Elem->Wcid].HTPhyMode.field.BW = 0;
+			else 
+			{
+				pAd->MacTab.Content[Elem->Wcid].HTPhyMode.field.BW = 
+					pAd->MacTab.Content[Elem->Wcid].MaxHTPhyMode.field.BW & pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth;
+			}
 			
 			break;
 
