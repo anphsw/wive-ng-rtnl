@@ -956,6 +956,7 @@ tcp_sacktag_write_queue(struct sock *sk, struct sk_buff *ack_skb, u32 prior_snd_
 	if (!tp->sacked_out)
 		tp->fackets_out = 0;
 	prior_fackets = tp->fackets_out;
+	prior_in_flight = tcp_packets_in_flight(tp);
 
 	/* Check for D-SACK. */
 	if (before(ntohl(sp[0].start_seq), TCP_SKB_CB(ack_skb)->ack_seq)) {
@@ -2669,8 +2670,6 @@ static int tcp_ack(struct sock *sk, struct sk_buff *skb, int flag)
 	prior_packets = tp->packets_out;
 	if (!prior_packets)
 		goto no_queue;
-
-	prior_in_flight = tcp_packets_in_flight(tp);
 
 	/* See if we can take anything off of the retransmit queue. */
 	flag |= tcp_clean_rtx_queue(sk, &seq_rtt);
