@@ -768,8 +768,7 @@ static int dwc_otg_driver_probe(struct lm_device *lmdev)
 	 * Install the interrupt handler for the common interrupts before
 	 * enabling common interrupts in core_init below.
 	 */
-	DWC_DEBUGPL(DBG_CIL, "registering (common) handler for irq%d\n",
-		    lmdev->irq);
+	DWC_DEBUGPL(DBG_CIL, "registering (common) handler for irq%d\n",lmdev->irq);
 	retval = request_irq(lmdev->irq, dwc_otg_common_irq,
 			     SA_SHIRQ, "dwc_otg", dwc_otg_device);
 	if (retval) {
