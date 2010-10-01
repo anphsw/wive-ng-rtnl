@@ -1,4 +1,5 @@
 #!/bin/sh
+
 echo "Content-type: text/html"
 echo ""
 IPADDR=`nvram_get 2860 lan_ipaddr`;

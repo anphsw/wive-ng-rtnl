@@ -1,13 +1,3 @@
-
-/*
- * Codes at here are heavily taken from upload.cgi.c which is for large file uploading , but 
- * in fact "upload_settings" only need few memory(~16k) so it is not necessary to follow 
- * upload.cgi.c at all.
- * 
- * YYHuang@Ralink TODO: code size.
- *  
- */
-
 #include "upload.h"
 #include "../options.h"
 
