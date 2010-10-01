@@ -54,13 +54,6 @@ static int udp_print_tuple(struct seq_file *s,
 			  ntohs(tuple->dst.u.udp.port));
 }
 
-/* Print out the private part of the conntrack. */
-static int udp_print_conntrack(struct seq_file *s,
-			       const struct ip_conntrack *conntrack)
-{
-	return 0;
-}
-
 /* Returns verdict for packet, and may modify conntracktype */
 static int udp_packet(struct ip_conntrack *conntrack,
 		      const struct sk_buff *skb,
@@ -136,7 +129,6 @@ struct ip_conntrack_protocol ip_conntrack_protocol_udp =
 	.pkt_to_tuple		= udp_pkt_to_tuple,
 	.invert_tuple		= udp_invert_tuple,
 	.print_tuple		= udp_print_tuple,
-	.print_conntrack	= udp_print_conntrack,
 	.packet			= udp_packet,
 	.new			= udp_new,
 	.error			= udp_error,
