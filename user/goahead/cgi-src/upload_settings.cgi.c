@@ -8,14 +8,8 @@
  *  
  */
 
-#include <unistd.h>	//for unlink
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <linux/reboot.h>
-#include "../options.h"
-
 #include "upload.h"
+#include "../options.h"
 
 void import(char *filename, int offset, int len)
 {

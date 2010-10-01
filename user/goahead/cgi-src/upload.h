@@ -7,13 +7,15 @@
  *  
  */
 
-#include <unistd.h>	//for unlink
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <linux/reboot.h>
-#include <net/if.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
+#include <net/if.h>
+#include <string.h>
+#include <linux/reboot.h>
+#include <errno.h>
+
 #include "../options.h"
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)

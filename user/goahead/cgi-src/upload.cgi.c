@@ -1,6 +1,6 @@
 #include "upload.cgi.h"
-#include "../options.h"
 #include "upload.h"
+#include "../options.h"
 
 #if defined (UPLOAD_FIRMWARE_SUPPORT)
 

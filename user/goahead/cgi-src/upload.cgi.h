@@ -16,10 +16,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <wait.h>
-#include "../options.h"
 #include "include/linux/autoconf.h"		/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
                                         /*   CONFIG_RT2880_ROOTFS_IN_FLASH */
                                         /*   CONFIG_RT2880_ROOTFS_IN_RAM   */
+#include "../options.h"
 
 /*
  *  Uboot image header format
