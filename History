@@ -151,6 +151,11 @@
 69) Backports tmpfs critical fixes<br>
 70) Backports memory critical allocator fixes<br>
 71) Backports tty critical fixes<br>
+72) Backports netfilter fixup from upstream<br>
+73) WebUI fix power set in ethernet converter mode<br>
+74) WebUI fix update firmware and upload settings<br>
+75) In wifi driver fix BW mode on reconnect<br>
+76) In wifi driver fix memory leaks<br>
 
 <br><br>
 <b>For support see:</b><br>
