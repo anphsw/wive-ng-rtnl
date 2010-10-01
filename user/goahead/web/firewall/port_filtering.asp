@@ -2,7 +2,7 @@
 <head>
 <title>IP/Port Filtering Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script language="JavaScript" type="text/javascript">

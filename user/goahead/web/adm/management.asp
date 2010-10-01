@@ -4,8 +4,10 @@
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
+<link rel="stylesheet" href="/style/windows.css" type="text/css">
 <title>System Management</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -78,29 +80,29 @@ function setLanguage()
 	return true;
 }
 
-var _singleton = false;
-function uploadFirmwareCheck()
+function postForm(question, form, reloader, message)
 {
-	if (document.UploadFirmware.filename.value == "")
-	{
-		alert("Firmware Upgrade: Please specify a file.");
+	if (!confirm(question))
 		return false;
+
+	if (parent!=null)
+	{
+		var obj = parent.document.getElementById("homeFrameset");
+		if (obj != null)
+			obj.rows = "0,1*"; // Hide top logo
+		var obj = parent.document.getElementById("homeMenuFrameset");
+		if (obj != null)
+			obj.cols = "0,1*"; // Hide menu
 	}
 	
-	if (!confirm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?'))
-		return false;
+	var submitForm = function()
+	{
+		form.submit();
+	};
 	
-	if (_singleton)
-		return false;
+	form.target = reloader;
+	ajaxPopupWindow('ajxLoadParams', message, submitForm);
 	
-	//StopTheClock();
-	var form = document.UploadFirmware;
-	form.UploadFirmwareSubmit.disabled = true;
-	document.getElementById("loading").style.display="";
-	document.getElementById("staticControls").style.display="none";
-	document.getElementById("staticText").style.display="none";
-	parent.menu.setUnderFirmwareUpload(1);
-	_singleton = true;
 	return true;
 }
 
@@ -155,7 +157,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 	<td class="head" id="manAdmPasswd">Password</td>
 	<td><input type="password" name="admpass" size="16" maxlength="32" value="<% getCfgGeneral(1, "Password"); %>"></td>
 </tr>
-<tr enter">
+<tr>
 	<td class="head">Apply new login/password</td>
 	<td><input type="submit" class="half" value="Apply" id="manAdmApply" onClick="return AdmFormCheck();"></td>
 </tr>
@@ -172,7 +174,8 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 	<td class="value">
 	<form method="POST" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data" onSubmit="return uploadFirmwareCheck();" >
 		<input name="filename" size="20" maxlength="256" type="file">
-		<input value="Update" class="half" id="uploadFWApply" name="UploadFirmwareSubmit" type="submit">
+		<input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onclick="postForm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?', this.form, 'firmwareReloader', '/messages/wait_firmware.asp');">
+		<iframe id="firmwareReloader" name="firmwareReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 	</form>
 	</td>
 </tr>
@@ -195,15 +198,15 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 <tr>
 	<td class="head" id="setmanImpSetFileLocation">Load settings from file</td>
 	<td>
-		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data"
-			onsubmit="return confirm('Proceed importing settings?');" >
+		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data">
 			<input type="file" name="filename" maxlength="256">
-			<input type="submit" value="Load" id="setmanImpSetImport" class="half">
+			<input type="button" value="Load" id="setmanImpSetImport" class="half" onclick="postForm('Proceed uploading settings?', this.form, 'setmanReloader', '/messages/wait_config.asp');">
+			<iframe id="setmanReloader" name="setmanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 		</form>
 	</td>
 </tr>
 <tr>
-	<td class="head" id="setmanImpSetFileLocation">Reset to factory defaults</td>
+	<td class="head">Reset to factory defaults</td>
 	<td>
 		<form method="POST" name="LoadDefaultSettings" action="/goform/LoadDefaultSettings"
 			onsubmit="return confirm('All settings will be reset to factory defaults. Really proceed?');">

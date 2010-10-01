@@ -5,23 +5,43 @@
 
 <head>
 <title>DTree</title>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
-<link rel="stylesheet" href="/dtree/dtree.css" type="text/css" />
-<link rel="StyleSheet" href="dtree.css" type="text/css" />
+<link rel="stylesheet" href="/dtree/dtree.css" type="text/css" >
+<link rel="StyleSheet" href="dtree.css" type="text/css" >
+<link rel="stylesheet" href="/style/windows.css" type="text/css">
 <script type="text/javascript" src="/dtree/dtree.js"></script>
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 </head>
 
-<body bgcolor=#FFFFFF onLoad="initValue()">
+<body bgcolor="#FFFFFF" onLoad="initValue();">
 <script language="JavaScript">
 
-function rebootRouter()
+function rebootRouter(form, reloader)
 {
-	if (confirm(_('treeapp reboot confirm')))
-		ajaxPerformRequest('cgi-bin/reboot.sh');
+	if (!confirm(_('treeapp reboot confirm')))
+		return;
+
+	if (parent!=null)
+	{
+		var obj = parent.document.getElementById("homeFrameset");
+		if (obj != null)
+			obj.rows = "0,1*"; // Hide top logo
+		var obj = parent.document.getElementById("homeMenuFrameset");
+		if (obj != null)
+			obj.cols = "250,0"; // Hide menu
+	}
+	
+	var submitForm = function()
+	{
+		form.submit();
+	};
+	
+	form.target = reloader;
+	
+	ajaxPopupWindow('ajxReboot', '/messages/rebooting.asp', submitForm);
 }
 
 var isFimwareUpload = 0;
@@ -50,6 +70,10 @@ function refresh(){
 </script>
 
 <!-- <p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p> -->
+
+<form name="rebootForm" style="display: none;" method="GET" action="/cgi-bin/reboot.sh" >
+	<iframe id="rebootReloader" name="rebootReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+</form>
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
@@ -176,8 +200,9 @@ if (syslogb == "1")
 	a.add(908, 900, _("treeapp system log"),            "javascript:go('adm/syslog.asp');");
 }
 a.add(907, 900, _("treeapp sdk history"),           "javascript:go('cgi-bin/history.sh');");
-a.add(909, 900, _("treeapp reboot"),                       "javascript:rebootRouter();");
+a.add(909, 900, _("treeapp reboot"),                       "javascript:rebootRouter(document.rebootForm, 'rebootReloader');");
 document.write(a);
+
 </script>
 
 </body>

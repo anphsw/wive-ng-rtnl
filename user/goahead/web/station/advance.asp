@@ -230,23 +230,6 @@ function init11NValues()
 <p id="staadvIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr>
 
-<!--
-<form method="post" name="sta_11n_configuration" action="/goform/setSta11nCfg" id="frm11NConfiguration" style="display: none;">
-
-
-<br>
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-<tr align="center">
-<tr align="center">
-	<td colspan="2">
-		<input type="submit" style="{width:120px;}" value="Apply" id="11nApply"> &nbsp; &nbsp;
-	</td>
-</tr>
-</table>
-</form>
--->
-
 <form method="POST" name="sta_advance" action="/goform/setStaAdvance">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
 <tr>
@@ -322,6 +305,13 @@ function init11NValues()
 		</select>
 	</td>
 </tr>
+<tr> 
+	<td class="head" id="advTxPW">TX Power</td>
+	<td>
+		<input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>">
+		<span style="color: #808080;">&nbsp;(range 1 - 100, default 100)</span>
+	</td>
+</tr>
 <tr id="div_tx_rate" name="div_tx_rate" <% var wm = getCfgZero(0, "WirelessMode");
 	if (wm == "0" || wm == "1" || wm == "2" || wm == "3")
 	write("style=\"display:none;\""); %>>
@@ -391,24 +381,24 @@ function init11NValues()
 	<td class="head">MCS</td>
 	<td>
 		<select name="n_mcs" size="1">
-			<option value=0>0</option>
-			<option value=1>1</option>
-			<option value=2>2</option>
-			<option value=3>3</option>
-			<option value=4>4</option>
-			<option value=5>5</option>
-			<option value=6>6</option>
-			<option value=7>7</option>
-			<option value=8>8</option>
-			<option value=9>9</option>
-			<option value=10>10</option>
-			<option value=11>11</option>
-			<option value=12>12</option>
-			<option value=13>13</option>
-			<option value=14>14</option>
-			<option value=15>15</option>
-			<option value=32>32</option>
-			<option value=33 id="staadvMCSAuto">AUTO</option>
+			<option value="0">0</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="32">32</option>
+			<option value="33" id="staadvMCSAuto">AUTO</option>
 		</select>
 	</td>
 </tr>

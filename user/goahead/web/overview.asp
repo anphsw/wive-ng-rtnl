@@ -2,7 +2,7 @@
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <LINK REL="stylesheet" HREF="style/normal_ws.css" TYPE="text/css">
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 

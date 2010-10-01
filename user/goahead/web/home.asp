@@ -2,7 +2,7 @@
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <script language="JavaScript" type="text/javascript">
@@ -65,11 +65,11 @@ function onInit()
 
 </script>
 </HEAD>
-<FRAMESET ROWS="70,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()">
+<FRAMESET id="homeFrameset" ROWS="70,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()">
 
   <FRAME SRC="title.htm" NAME="title" FRAMEBORDER="NO" SCROLLING="NO" MARGINWIDTH="0" MARGINHEIGHT="0">
 
-  <FRAMESET COLS="250,1*">
+  <FRAMESET id="homeMenuFrameset" COLS="250,1*">
 
     <FRAME SRC="treeapp.asp" NAME="menu" MARGINWIDTH="0" MARGINHEIGHT="0" scrolling="AUTO" FRAMEBORDER="NO" >
 
@@ -77,8 +77,10 @@ function onInit()
 
   </FRAMESET>
 </FRAMESET>
+
 <NOFRAMES>
 <BODY BGCOLOR="#FFFFFF">
+</BODY>
+</NOFRAMES>
 
-</BODY></NOFRAMES>
 </HTML>

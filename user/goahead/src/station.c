@@ -5024,7 +5024,7 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
-	char_t *ht, *bw, *gi, *mcs, *rf;
+	char_t *ht, *bw, *gi, *mcs, *rf, *tx_power;
 
 	int s, ret, country_region_a=0, country_region_bg=0;
 	int tx_burst=0, short_slot_time=0, wireless_mode=0, tx_rate=0;
@@ -5046,24 +5046,27 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	gi = websGetVar(wp, T("n_gi"), T("0"));
 	mcs = websGetVar(wp, T("n_mcs"), T("0"));
 	rf = websGetVar(wp, T("radiohiddenButton"), T("2"));
+	tx_power = websGetVar(wp, T("tx_power"), T("100"));
 
         // mac clone
-        char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
-        char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
+	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
+	char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
 
 	nvram_init(RT2860_NVRAM);
-        nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
-        if (!strncmp(clone_en, "1", 2))
-               nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
+	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
+	if (!strncmp(clone_en, "1", 2))
+		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	radio_status = atoi(rf);
-	if (radio_status < 2) {
+	if (radio_status < 2)
+	{
 		OidSetInformation(RT_OID_802_11_RADIO, s, "ra0", &radio_status, sizeof(radio_status));
-		if (radio_status == 1) {
+		if (radio_status == 1)
+		{
 			ret = OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
 			if (ret < 0)
 				error(E_L, E_LOG, T("Set OID_802_11_BSSID_LIST_SCAN error = %d"), ret);
@@ -5077,18 +5080,22 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, "station/advance.asp");
 		return;
 	}
+	
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "WirelessMode", w_mode);
 	nvram_bufset(RT2860_NVRAM, "CountryRegion", cr_bg);
 	nvram_bufset(RT2860_NVRAM, "CountryRegionABand", cr_a);
 	nvram_bufset(RT2860_NVRAM, "BGProtection", bg_prot);
 	nvram_bufset(RT2860_NVRAM, "TxRate", rate);
+	nvram_bufset(RT2860_NVRAM, "TxPower", tx_power);
 
-	if (!strncmp(burst, "on", 3)) {
-	    nvram_bufset(RT2860_NVRAM, "TxBurst", "1");
-	    tx_burst = 1;
-	} else
-	    nvram_bufset(RT2860_NVRAM, "TxBurst", "0");
+	if (!strncmp(burst, "on", 3))
+	{
+		nvram_bufset(RT2860_NVRAM, "TxBurst", "1");
+		tx_burst = 1;
+	}
+	else
+		nvram_bufset(RT2860_NVRAM, "TxBurst", "0");
 
 	nvram_bufset(RT2860_NVRAM, "HT_OpMode", ht);
 	nvram_bufset(RT2860_NVRAM, "HT_BW", bw);
@@ -5096,7 +5103,6 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "HT_MCS", mcs);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
 
 	//set wireless mode
 	ret = OidSetInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &wireless_mode, sizeof(wireless_mode));
@@ -5127,7 +5133,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		
 		setSta11nCfg(wp, path, query);
 	}
-	else {
+	else
+	{
 		OID_BACAP_STRUC	BACap;
 		BACap.AutoBA = FALSE;
 		OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));

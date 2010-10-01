@@ -1,7 +1,7 @@
 <html><head><title>WPS</title>
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/adm/wps_timer.js"></script>
 <script language="JavaScript" type="text/javascript">

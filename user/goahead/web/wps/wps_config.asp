@@ -11,7 +11,7 @@
 <html>
 <head>
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 <link href="/style/normal_ws.css" rel="stylesheet" type="text/css">

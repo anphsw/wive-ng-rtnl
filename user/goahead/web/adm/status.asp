@@ -2,7 +2,7 @@
 <head>
 <title>Access Point Status</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <META HTTP-EQUIV="refresh" CONTENT="3; URL=./status.asp">
 

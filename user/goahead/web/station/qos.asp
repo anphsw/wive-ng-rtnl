@@ -2,9 +2,10 @@
 <head>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <title>Wireless Station QoS</title>
 <script language="JavaScript" type="text/javascript">
@@ -241,17 +242,17 @@ function PageInit()
   <tr>
     <td class="head" id="qosDLSMac">MAC Address</td>
     <td>
-      <input type=text size=2 maxlength=2 name=mac0
+      <input type="text" class="xsmall" name="mac0"
         <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type=text size=2 maxlength=2 name=mac1
+      <input type="text" class="xsmall" name="mac1"
         <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type=text size=2 maxlength=2 name=mac2
+      <input type="text" class="xsmall" name="mac2"
         <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type=text size=2 maxlength=2 name=mac3
+      <input type="text" class="xsmall" name="mac3"
         <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type=text size=2 maxlength=2 name=mac4
+      <input type="text" class="xsmall" name="mac4"
         <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type=text size=2 maxlength=2 name=mac5
+      <input type="text" class="xsmall" name="mac5"
         <% if (dls != "1") write("disabled"); %>>
     </td>
   </tr>

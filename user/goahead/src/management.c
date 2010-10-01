@@ -678,13 +678,12 @@ static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
 
 	fgets(buf, sizeof(buf), fp);
 	fclose(fp);	
-	if(!strcmp(buf, old_firmware)){
-		websWrite(wp, T("alert(\"Warning!The firmware didn't change.\");"));
-	}else{
-		websWrite(wp, T("alert(\"Firmware Upgrade success\");"));
-	}	
+//	if(!strcmp(buf, old_firmware)){
+//		websWrite(wp, T("alert(\"Warning!The firmware didn't change.\");"));
+//	}else{
+		websWrite(wp, T("alert(\"Firmware Upgrade success!\");"));
+//	}	
 	nvram_set(RT2860_NVRAM, "old_firmware", "");
-	
 
 	return 0;
 }

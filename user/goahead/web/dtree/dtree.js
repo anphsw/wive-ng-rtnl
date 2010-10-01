@@ -130,11 +130,12 @@ dTree.prototype.node = function(node, nodeId) {
 		str += '<img id="i' + this.obj + nodeId + '" src="' + ((node._io) ? node.iconOpen : node.icon) + '" alt="" />';
 	}
 	if (node.url) {
-		str += '<a id="s' + this.obj + nodeId + '" class="' + ((this.config.useSelection) ? ((node._is ? 'nodeSel' : 'node')) : 'node') + '" href="' + node.url + '"';
+		var attribute = (node.url.match(/javascript:/)) ? 'onclick' : 'href';
+		str += '<a id="s' + this.obj + nodeId + '" class="' + ((this.config.useSelection) ? ((node._is ? 'nodeSel' : 'node')) : 'node') + '" ' + attribute + '="' + node.url + '"';
 		if (node.title) str += ' title="' + node.title + '"';
 		if (node.target) str += ' target="' + node.target + '"';
 		if (this.config.useStatusText) str += ' onmouseover="window.status=\'' + node.name + '\';return true;" onmouseout="window.status=\'\';return true;" ';
-		if (this.config.useSelection && ((node._hc && this.config.folderLinks) || !node._hc))
+		if (this.config.useSelection && ((node._hc && this.config.folderLinks) || !node._hc) && (attribute != 'onclick'))
 			str += ' onclick="javascript: ' + this.obj + '.s(' + nodeId + ');"';
 		str += '>';
 	}
