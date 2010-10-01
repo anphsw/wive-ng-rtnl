@@ -1,6 +1,4 @@
-#include "upload.cgi.h"
-#include <unistd.h>
-#include <linux/reboot.h>
+#include "upload.h"                                                                                                                         
 #include "../options.h"
 
 /*

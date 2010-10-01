@@ -1,4 +1,3 @@
-#include "upload.cgi.h"
 #include "upload.h"
 #include "../options.h"
 

@@ -16,6 +16,7 @@
 #include <linux/reboot.h>
 #include <errno.h>
 
+#include "upload.cgi.h"
 #include "../options.h"
 
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
