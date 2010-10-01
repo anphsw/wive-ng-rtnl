@@ -9,8 +9,8 @@
 
 
 CONF	= $(ROOTDIR)/$(LINUXDIR)
+CONF_H  = $(CONF)/include/linux/autoconf.h
 ZLIB_H  = $(ROOTDIR)/lib/zlib
-CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
 
 #
 #  As you can see, RRDTool(traffic graphic) is obsoleted.
