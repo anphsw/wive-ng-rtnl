@@ -113,41 +113,6 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	return 1;
 }
 
-/*
- * I'm too lazy to use popen() instead of system()....
- * ( note:  static buffer used)
- */
-char *getLanIP(void)
-{
-	static char buf[64];
-	char *nl;
-	FILE *fp;
-
-	memset(buf, 0, sizeof(buf));
-	if( (fp = popen("nvram_get 2860 lan_ipaddr", "r")) == NULL )
-		goto error;
-
-	if(!fgets(buf, sizeof(buf), fp)){
-		pclose(fp);
-		goto error;
-	}
-
-	if(!strlen(buf)){
-		pclose(fp);
-		goto error;
-	}
-	pclose(fp);
-
-	if(nl = strchr(buf, '\n'))
-		*nl = '\0';
-
-	return buf;
-
-error:
-	fprintf(stderr, "warning, cant find lan ip\n");
-	return DEFAULT_LAN_IP;
-}
-
 void javascriptUpdate(int success)
 {
 	printf("<script language=\"JavaScript\" type=\"text/javascript\">");
