@@ -565,7 +565,7 @@ function wmm_capable_enable_switch()
 
 <table id="div_m2u" name="div_m2u" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>
-	<td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter</td>
+	<td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter (IGMP Snooping)</td>
 </tr>
 <tr>
 	<td class="head" id="advMul2Uni">Multicast-to-Unicast</td>

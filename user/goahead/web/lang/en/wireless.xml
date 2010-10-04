@@ -99,7 +99,7 @@
   <message msgid="adv dls capable" msgstr="DLS Capable" />
   <message msgid="adv wmm parameter" msgstr="WMM Parameters" />
   <message msgid="adv wmm configuration" msgstr="WMM Configuration" />
-  <message msgid="adv multicast2unicast converter" msgstr="Multicast-to-Unicast Converter" />
+  <message msgid="adv multicast2unicast converter" msgstr="Multicast-to-Unicast Converter (IGMP Snooping)" />
   <message msgid="adv multicast2unicast" msgstr="Multicast-to-Unicast" />
   <message msgid="wmm ap parameter" msgstr="WMM Parameters of Access Point" />
   <message msgid="wmm sta parameter" msgstr="WMM Parameters of Station" />
