@@ -28,6 +28,7 @@ meshhostname=`nvram_get 2860 MeshHostName`
 bssidnum=`nvram_get 2860 BssidNum`
 m2uenabled=`nvram_get 2860 M2UEnabled`
 McastPhyMode=`nvram_get 2860 McastPhyMode`
+McastMcs=`nvram_get 2860 McastMcs`
 
 if [ "$radio_off" = "1" ]; then
     iwpriv ra0 set RadioOn=0
@@ -39,6 +40,9 @@ iwpriv ra0 set CountryRegion=$CountryRegion
 iwpriv ra0 set WirelessMode=$WirelessMode
 iwpriv ra0 set McastPhyMode=$McastPhyMode
 
+if [ "$McastMcs" != "" ]; then
+    iwpriv mesh0 set  McastMcs="$McastMcs"
+fi
 if [ "$meshenabled" = "1" ]; then
     iwpriv mesh0 set  MeshHostName="$meshhostname"
 fi

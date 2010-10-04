@@ -683,6 +683,9 @@ int gen_wifi_config(int mode)
 		wmm_enable[strlen(wmm_enable) - 1] = '\0';
 		fprintf(fp, "WmmCapable=%s\n", wmm_enable);
 
+		FPRINT_NUM(McastPhyMode);
+		FPRINT_NUM(McastMcs);
+
 		FPRINT_STR(APAifsn);
 		FPRINT_STR(APCwmin);
 		FPRINT_STR(APCwmax);
