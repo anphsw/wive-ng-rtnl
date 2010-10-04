@@ -33,15 +33,14 @@ fi
 ########################################ap mode param###########################
 CountryRegion=`nvram_get 2860 CountryRegion`
 WirelessMode=`nvram_get 2860 WirelessMode`
-meshenabled=`nvram_get 2860 MeshEnabled`
-meshhostname=`nvram_get 2860 MeshHostName` 
-bssidnum=`nvram_get 2860 BssidNum`
-m2uenabled=`nvram_get 2860 M2UEnabled`
-McastPhyMode=`nvram_get 2860 McastPhyMode`
-McastMcs=`nvram_get 2860 McastMcs`
 
 iwpriv ra0 set CountryRegion=$CountryRegion
 iwpriv ra0 set WirelessMode=$WirelessMode
+
+########################################MULTICAST param###########################
+m2uenabled=`nvram_get 2860 M2UEnabled`
+McastPhyMode=`nvram_get 2860 McastPhyMode`
+McastMcs=`nvram_get 2860 McastMcs`
 
 if [ "$McastPhyMode" != "" ]; then
     iwpriv ra0 set McastPhyMode=$McastPhyMode
@@ -49,9 +48,14 @@ fi
 if [ "$McastMcs" != "" ]; then
     iwpriv ra0 set  McastMcs="$McastMcs"
 fi
-if [ "$m2uenabled" = "1" ]; then
-    iwpriv ra0 set IgmpSnEnable=1
+if [ "$m2uenabled" != "" ]; then
+    iwpriv ra0 set IgmpSnEnable="$m2uenabled"
 fi
+
+########################################MESH mode param###########################
+meshenabled=`nvram_get 2860 MeshEnabled`
+meshhostname=`nvram_get 2860 MeshHostName` 
+
 if [ "$meshenabled" = "1" ]; then
     iwpriv mesh0 set  MeshHostName="$meshhostname"
 fi
