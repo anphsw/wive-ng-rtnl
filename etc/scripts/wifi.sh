@@ -53,9 +53,11 @@ if [ "$m2uenabled" != "" ]; then
 fi
 
 ########################################MESH mode param###########################
-meshenabled=`nvram_get 2860 MeshEnabled`
-meshhostname=`nvram_get 2860 MeshHostName` 
+if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
+    meshenabled=`nvram_get 2860 MeshEnabled`
+    meshhostname=`nvram_get 2860 MeshHostName` 
 
-if [ "$meshenabled" = "1" ]; then
-    iwpriv mesh0 set  MeshHostName="$meshhostname"
+    if [ "$meshenabled" = "1" ]; then
+	iwpriv mesh0 set  MeshHostName="$meshhostname"
+    fi
 fi
