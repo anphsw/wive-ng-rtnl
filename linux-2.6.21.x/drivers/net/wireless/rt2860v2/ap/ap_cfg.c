@@ -9430,7 +9430,7 @@ INT Set_McastMcs(
 
 		case MODE_OFDM:
 			if (Mcs > 7)
-				printk("MCS must in range from 0 to 7 for CCK Mode.\n");
+				printk("MCS must in range from 0 to 7 for OFDM Mode.\n");
 			else
 				pAd->CommonCfg.MCastPhyMode.field.MCS = Mcs;
 			break;
