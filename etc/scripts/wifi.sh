@@ -47,7 +47,7 @@ if [ "$McastPhyMode" != "" ]; then
     iwpriv ra0 set McastPhyMode=$McastPhyMode
 fi
 if [ "$McastMcs" != "" ]; then
-    iwpriv mesh0 set  McastMcs="$McastMcs"
+    iwpriv ra0 set  McastMcs="$McastMcs"
 fi
 if [ "$m2uenabled" = "1" ]; then
     iwpriv ra0 set IgmpSnEnable=1
