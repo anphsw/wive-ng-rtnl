@@ -19,8 +19,18 @@ if [ "$ethconv" != "n" ]; then
     exit 0
 fi
 
-########################################ap mode param###########################
+#########################################ON/OFF param##########################
 radio_off=`nvram_get 2860 RadioOff`
+
+if [ "$radio_off" = "1" ]; then
+    iwpriv ra0 set RadioOn=0
+    echo ">>>> WIFI DISABLED <<<<"
+    exit 0
+else
+    iwpriv ra0 set RadioOn=1
+fi
+
+########################################ap mode param###########################
 CountryRegion=`nvram_get 2860 CountryRegion`
 WirelessMode=`nvram_get 2860 WirelessMode`
 meshenabled=`nvram_get 2860 MeshEnabled`
@@ -30,22 +40,18 @@ m2uenabled=`nvram_get 2860 M2UEnabled`
 McastPhyMode=`nvram_get 2860 McastPhyMode`
 McastMcs=`nvram_get 2860 McastMcs`
 
-if [ "$radio_off" = "1" ]; then
-    iwpriv ra0 set RadioOn=0
-else
-    iwpriv ra0 set RadioOn=1
-fi
-
 iwpriv ra0 set CountryRegion=$CountryRegion
 iwpriv ra0 set WirelessMode=$WirelessMode
-iwpriv ra0 set McastPhyMode=$McastPhyMode
 
+if [ "$McastPhyMode" != "" ]; then
+    iwpriv ra0 set McastPhyMode=$McastPhyMode
+fi
 if [ "$McastMcs" != "" ]; then
     iwpriv mesh0 set  McastMcs="$McastMcs"
 fi
-if [ "$meshenabled" = "1" ]; then
-    iwpriv mesh0 set  MeshHostName="$meshhostname"
-fi
 if [ "$m2uenabled" = "1" ]; then
     iwpriv ra0 set IgmpSnEnable=1
+fi
+if [ "$meshenabled" = "1" ]; then
+    iwpriv mesh0 set  MeshHostName="$meshhostname"
 fi
