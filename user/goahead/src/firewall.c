@@ -2053,12 +2053,18 @@ void formDefineFirewall(void)
 	websAspDefine(T("checkIfUnderBridgeModeASP"), checkIfUnderBridgeModeASP);
 }
 
-void firewall_rebuild(void)
+void firewall_rebuild_etc(void)
 {
 	//rebuild firewall scripts in etc
 	iptablesPortForwardBuildScript();
 	iptablesIPPortFilterBuildScript();
 	iptablesWebsFilterRun();
+}
+
+void firewall_rebuild(void)
+{
+	//rebuild firewall scripts in etc
+	firewall_rebuild_etc();
 	//no backgroudn it!!!!         
 	doSystem("service iptables restart");
 	///-----Load L7 filters rules----////

@@ -1180,9 +1180,12 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	gen_wifi_config(RT2860_NVRAM);
 	doSystem("ifconfig ra0 up");
 	//after ra0 down&up we must restore WPS status
+#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
+#endif
 }
 
+#ifdef CONFIG_USER_802_1X 
 void restart8021XDaemon(int nvram)
 {
 	int i, num, apd_flag = 0;
@@ -1219,7 +1222,7 @@ void restart8021XDaemon(int nvram)
 	if(apd_flag)
 		doSystem("rt2860apd");	
 }
-
+#endif
 
 /* LFF means "Load From Flash" ...*/
 #define LFF(result, nvram, x, n)	\
@@ -1451,7 +1454,9 @@ void conf8021x(int nvram, webs_t wp, int mbssid)
 	nvram_close(RT2860_NVRAM);
 
 	updateFlash8021x(nvram);
+#ifdef CONFIG_USER_802_1X 
 	restart8021XDaemon(nvram);
+#endif
 }
 
 void confWEP(int nvram, webs_t wp, int mbssid)
@@ -1667,9 +1672,6 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	for(i=0; i<mbssid_num; i++){
 		doSystem("ifconfig ra%d up", i);
 	}
-	WPSRestart();
-
-	restart8021XDaemon(nvram);
 
 	//debug print
 	websHeader(wp);
@@ -1678,6 +1680,12 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);	
 
+#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
+	WPSRestart();
+#endif
+#ifdef CONFIG_USER_802_1X
+	restart8021XDaemon(nvram);
+#endif
 }
 
 static void APSecurity(webs_t wp, char_t *path, char_t *query)

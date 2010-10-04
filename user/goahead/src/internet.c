@@ -2025,14 +2025,18 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 int initInternet(void)
 {
 	char *auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
-#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+#if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
 	char *opmode;
 #endif
-
+	firewall_rebuild_etc();
 	doSystem("internet.sh");
+	RoutingInit();
+#ifdef CONFIG_NET_SCHED
+	QoSInit();
+#endif
 
-	//automatically connect to AP according to the active profile
-#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+//automatically connect to AP according to the active profile
+#if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") && !strcmp("1",  nvram_get(RT2860_NVRAM, "ethConver")))) {
 		if (initStaProfile() != -1)
@@ -2044,18 +2048,15 @@ int initInternet(void)
 	else
 		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
 
+#ifdef CONFIG_USER_802_1X 
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
-
+#endif
 #ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY
 	AntennaDiversityInit();
 #endif
-
-	firewall_rebuild();
-	RoutingInit();
-#ifdef CONFIG_NET_SCHED
-	QoSInit();
-#endif
+#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
+#endif
     return 0;
 }
 

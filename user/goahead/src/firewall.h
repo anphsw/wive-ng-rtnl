@@ -39,5 +39,6 @@ void iptablesFilterRun(char *rule);
 void iptablesWebsFilterRun(void);
 void formDefineFirewall(void);
 void firewall_rebuild(void);
+void firewall_rebuild_etc(void);
 int isIpNetmaskValid(char *s);	// export for QoS
 int isMacValid(char *);			// export for QoS
