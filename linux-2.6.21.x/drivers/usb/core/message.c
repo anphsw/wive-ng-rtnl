@@ -1488,7 +1488,8 @@ free_interfaces:
 		intf->dev.bus = &usb_bus_type;
 		intf->dev.dma_mask = dev->dev.dma_mask;
 		intf->dev.release = release_interface;
-		device_initialize (&intf->dev);
+		intf->minor = -1;
+		device_initialize(&intf->dev);
 		mark_quiesced(intf);
 		sprintf (&intf->dev.bus_id[0], "%d-%s:%d.%d",
 			 dev->bus->busnum, dev->devpath,
