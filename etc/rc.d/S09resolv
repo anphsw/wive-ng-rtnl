@@ -4,7 +4,7 @@ LOG="echo RESOLVE: "
 
 start() {
 get_param
-if [ ! -f /tmp/webrun ] || [ "$static" = "on" ] ; then
+if [ ! -f /var/run/goahead.pid ] || [ "$static" = "on" ] ; then
  $LOG "Generate resolve: "
     #in case no previous file
     if [ "$fname" = "" ]; then

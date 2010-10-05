@@ -8,7 +8,7 @@ LOG="echo MODULES: "
 start() {
     get_param
     #if goahead not started
-    if [ ! -f /tmp/webrun ]; then
+    if [ ! -f /var/run/goahead.pid ]; then
 	if [ ! -f /etc/modules.dep ]; then
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n >  /etc/modules.dep
@@ -42,7 +42,7 @@ start() {
 }
 
 stop() {
-    if [ ! -f /tmp/webrun ]; then
+    if [ ! -f /var/run/goahead.pid ]; then
         $LOG "Stop modules.dep generate..."
     else
 	$LOG "link wifi down first"

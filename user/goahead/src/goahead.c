@@ -58,18 +58,18 @@ void	formDefineUserMgmt(void);
  */
 
 static char_t		*rootWeb = T("/tmp/web");		/* Root web directory */
-static char_t		*password = T("");				/* Security password */
-static int		port = 80;						/* Server port */
-static int		retries = 5;					/* Server port retries */
-static int		finished;						/* Finished flag */
+static char_t		*password = T("");			/* Security password */
 static char_t		*gopid = T("/var/run/goahead.pid");	/* pid file */
+static int		port = 80;				/* Server port */
+static int		retries = 5;				/* Server port retries */
+static int		finished;				/* Finished flag */
 
 /****************************** Forward Declarations **************************/
 
-static int	writeGoPid(void);
-static int 	initSystem(void);
-static int 	initWebs(void);
-static int	websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
+static int writeGoPid(void);
+static int initSystem(void);
+static int initWebs(void);
+static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
 				int arg, char_t *url, char_t *path, char_t *query);
 extern void defaultErrorHandler(int etype, char_t *msg);
 extern void defaultTraceHandler(int level, char_t *buf);
@@ -108,13 +108,11 @@ int main(int argc, char** argv)
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
-        /* Start needed services */
+	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
 
-	/* Set flag goahead run to scripts */
-	system("touch /tmp/webrun");
-
+        /* Start needed services */
 	if (initSystem() < 0)
 		return -1;
 
@@ -182,8 +180,8 @@ int writeGoPid(void)
 		return (-1);
 	}
 	fprintf(fp, "%d", getpid());
-    fclose(fp);
-	return 0;
+	fclose(fp);
+    return 0;
 }
 
 static void goaSigHandler(int signum)
