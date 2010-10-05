@@ -115,9 +115,7 @@ int main(int argc, char** argv)
 	InitSignals();
 
         /* Start needed services */
-	if (initInternet() < 0)
-		return (-1);
-
+	initInternet();
 
 	/* Initialize the web server */
 	if (initWebs() < 0) {

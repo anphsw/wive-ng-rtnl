@@ -16,6 +16,6 @@ char* getWanIfName(void);
 char* getWanIfNamePPP(void);
 char* getLanIfName(void);
 char *getLanWanNamebyIf(char *ifname);
-int initInternet(void);
+void initInternet(void);
 
 

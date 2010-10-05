@@ -2022,7 +2022,7 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
  *              (assume that nvram_init has already been called)
  *              return value: 0 = successful, -1 = failed
  */
-int initInternet(void)
+void initInternet(void)
 {
 	char *auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
@@ -2057,7 +2057,6 @@ int initInternet(void)
 #if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
 #endif
-    return 0;
 }
 
 static void getMyMAC(webs_t wp, char_t *path, char_t *query)
