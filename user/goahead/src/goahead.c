@@ -67,10 +67,9 @@ static int		finished;				/* Finished flag */
 /****************************** Forward Declarations **************************/
 
 static int writeGoPid(void);
-static int initSystem(void);
+static void InitSignals(void);
 static int initWebs(void);
-static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
-				int arg, char_t *url, char_t *path, char_t *query);
+static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
 extern void defaultErrorHandler(int etype, char_t *msg);
 extern void defaultTraceHandler(int level, char_t *buf);
 extern void ripdRestart(void);
@@ -112,9 +111,13 @@ int main(int argc, char** argv)
 	if (writeGoPid() < 0)
 		return -1;
 
+	/* Registr signals */
+	InitSignals();
+
         /* Start needed services */
-	if (initSystem() < 0)
-		return -1;
+	if (initInternet() < 0)
+		return (-1);
+
 
 	/* Initialize the web server */
 	if (initWebs() < 0) {
@@ -259,29 +262,24 @@ static void fs_nvram_reset_handler (int signum)
 /*
  *	Initialize System Parameters
  */
-static int initSystem(void)
+static void InitSignals(void)
 {
 
 //--------REGISTER SIGNALS-------------------------
-
 	//register fs nvram reset helper
 	signal(SIGUSR2, fs_nvram_reset_handler);
 
 #if defined CONFIG_USB
+	//registr hotplug signal
 	signal(SIGTTIN, hotPluglerHandler);
 	hotPluglerHandler(SIGTTIN);
 #endif
+	//regist WPS button
 	signal(SIGXFSZ, WPSSingleTriggerHandler);
 
 #ifdef CONFIG_RALINK_GPIO
 	goaInitGpio();
 #endif
-
-//--------NETWORK INIT-----------------------------
-	if (initInternet() < 0)
-		return (-1);
-
-	return 0;
 }
 
 /******************************************************************************/
