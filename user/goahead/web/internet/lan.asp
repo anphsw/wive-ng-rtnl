@@ -192,7 +192,7 @@ function lan2_enable_switch(form)
 </tr>
 <tr id="brGateway">
   <td class="head" id="lGateway">Default Gateway</td>
-  <td><input name="lanGateway" maxlength="15" value="<% getWanGateway(); %>"></td>
+  <td><input name="lanGateway" maxlength="15" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
 </tr>
 <tr id="brPriDns">
   <td class="head" id="lPriDns">Primary DNS Server</td>
