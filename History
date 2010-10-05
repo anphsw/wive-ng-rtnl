@@ -156,6 +156,8 @@
 74) WebUI fix update firmware and upload settings<br>
 75) In wifi driver fix BW mode on reconnect<br>
 76) In wifi driver fix memory leaks<br>
+77) inet_hash fixup<br>
+78) Fix init logic in goahead<br>
 
 <br><br>
 <b>For support see:</b><br>

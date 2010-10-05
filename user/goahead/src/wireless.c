@@ -1675,8 +1675,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	//debug print
 	websHeader(wp);
-	websWrite(wp, T("<h2>MBSSID index: %d, Security Mode: %s Done</h2><br>\n"),
-			mbssid, security_mode);
+	websWrite(wp, T("<h2>MBSSID index: %d, Security Mode: %s Done</h2><br>\n"), mbssid, security_mode);
 	websFooter(wp);
 	websDone(wp, 200);	
 
