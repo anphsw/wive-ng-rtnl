@@ -83,7 +83,6 @@ extern void WPSSingleTriggerHandler(int);
 extern void hotPluglerHandler(int);
 #endif
 
-
 #ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSSTAPBCStartEnr(void);
 #endif
@@ -91,6 +90,7 @@ extern void WPSSTAPBCStartEnr(void);
 #ifdef CONFIG_DUAL_IMAGE
 static int set_stable_flag(void);
 #endif
+
 /*********************************** Code *************************************/
 /*
  *	Main -- entry point from LINUX
@@ -362,12 +362,10 @@ static int initWebs(void)
  *	with the longest path handler examined first. Here we define the security 
  *	handler, forms handler and the default web page handler.
  */
-	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler, 
-		WEBS_HANDLER_FIRST);
+	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler, WEBS_HANDLER_FIRST);
 	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
 	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
-	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler, 
-		WEBS_HANDLER_LAST); 
+	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler, WEBS_HANDLER_LAST); 
 
 /*
  *	Define our functions
@@ -581,14 +579,6 @@ static void printMemStats(int handle, char_t *fmt, ...)
 	write(handle, buf, strlen(buf));
 }
 #endif
-
-/******************************************************************************/
-
-/* added by YYhuang 07/04/02 */
-int getGoAHeadServerPort(void)
-{
-    return port;
-}
 
 #ifdef CONFIG_DUAL_IMAGE
 static int set_stable_flag(void)

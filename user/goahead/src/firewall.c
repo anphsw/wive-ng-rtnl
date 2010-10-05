@@ -29,12 +29,7 @@
 #define DD printf("---> %d\n", __LINE__);
 
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query);
-
-
-char l7name[8192];						// export it for internet.c qos
-										// (The actual string is about 7200 bytes.)
-
-int getGoAHeadServerPort(void);
+char l7name[8192]; // export it for internet.c qos (The actual string is about 7200 bytes.)
 
 int isMacValid(char *str)
 {

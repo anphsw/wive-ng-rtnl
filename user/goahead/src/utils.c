@@ -1289,7 +1289,6 @@ final:
 
 	//restart internet if any changes
 	if (need_commit) {
-		
 		updateFlash8021x(RT2860_NVRAM);
 		initInternet();
 	}
