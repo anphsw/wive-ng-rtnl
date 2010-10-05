@@ -78,8 +78,8 @@ file_copy()
 			dstfile=${ROMFSDIR}${dst}
 		fi
 		rm -f ${dstfile}
-		[ "$v" ] && echo "cp ${src} ${dstfile}"
-		cp ${src} ${dstfile} && setperm ${dstfile}
+		[ "$v" ] && echo "cp -f ${src} ${dstfile}"
+		cp -f ${src} ${dstfile} && setperm ${dstfile}
 		rc=$?
 		if [ $rc -eq 0 -a -n "$strip" ]; then
 			${STRIPTOOL} ${dstfile} 2>/dev/null
