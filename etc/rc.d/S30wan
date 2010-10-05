@@ -53,7 +53,11 @@ start() {
 	    #wan interface up and default gateway
 	    ifconfig br0 $lan_ip netmask $lan_nm
 	    #if bridge mode dgw on dev br0 set
-    	    ip route replace default dev br0
+	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
+    		ip route replace default dev br0 via $gw
+	    else
+    		ip route replace default dev br0
+	    fi
         fi
 
     elif [ "$wanmode" = "DHCP" ]; then
