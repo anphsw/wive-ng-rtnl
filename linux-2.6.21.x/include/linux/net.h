@@ -108,11 +108,14 @@ enum sock_type {
 struct socket {
 	socket_state		state;
 	unsigned long		flags;
-	const struct proto_ops	*ops;
+        /*
+         * Please keep fasync_list & wait fields in the same cache line
+         */
 	struct fasync_struct	*fasync_list;
+	wait_queue_head_t	wait;
 	struct file		*file;
 	struct sock		*sk;
-	wait_queue_head_t	wait;
+	const struct proto_ops	*ops;
 	short			type;
 };
 
