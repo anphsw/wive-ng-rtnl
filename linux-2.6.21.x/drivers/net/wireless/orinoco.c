@@ -152,9 +152,6 @@ static const u8 encaps_hdr[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00};
 #define TX_NICBUF_SIZE_BUG	1585		/* Bug in Symbol firmware */
 
 #define DUMMY_FID		0xFFFF
-
-/*#define MAX_MULTICAST(priv)	(priv->firmware_type == FIRMWARE_TYPE_AGERE ? \
-  HERMES_MAX_MULTICAST : 0)*/
 #define MAX_MULTICAST(priv)	(HERMES_MAX_MULTICAST)
 
 #define ORINOCO_INTEN	 	(HERMES_EV_RX | HERMES_EV_ALLOC \

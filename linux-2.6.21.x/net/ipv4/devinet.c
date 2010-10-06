@@ -411,7 +411,7 @@ static int inet_set_ifa(struct net_device *dev, struct in_ifaddr *ifa)
 		in_dev_hold(in_dev);
 		ifa->ifa_dev = in_dev;
 	}
-	if (LOOPBACK(ifa->ifa_local))
+	if (ipv4_is_loopback(ifa->ifa_local))
 		ifa->ifa_scope = RT_SCOPE_HOST;
 	return inet_insert_ifa(ifa);
 }

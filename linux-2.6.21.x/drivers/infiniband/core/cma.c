@@ -582,7 +582,7 @@ static inline int cma_zero_addr(struct sockaddr *addr)
 
 static inline int cma_loopback_addr(struct sockaddr *addr)
 {
-	return LOOPBACK(((struct sockaddr_in *) addr)->sin_addr.s_addr);
+	return ipv4_is_loopback(((struct sockaddr_in *) addr)->sin_addr.s_addr);
 }
 
 static inline int cma_any_addr(struct sockaddr *addr)

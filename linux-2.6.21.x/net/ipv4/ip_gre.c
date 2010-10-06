@@ -176,7 +176,7 @@ static struct ip_tunnel * ipgre_tunnel_lookup(__be32 remote, __be32 local, __be3
 	}
 	for (t = tunnels_l[h1]; t; t = t->next) {
 		if (local == t->parms.iph.saddr ||
-		     (local == t->parms.iph.daddr && MULTICAST(local))) {
+		     (local == t->parms.iph.daddr && ipv4_is_multicast(local))) {
 			if (t->parms.i_key == key && (t->dev->flags&IFF_UP))
 				return t;
 		}
@@ -201,7 +201,7 @@ static struct ip_tunnel **ipgre_bucket(struct ip_tunnel *t)
 
 	if (local)
 		prio |= 1;
-	if (remote && !MULTICAST(remote)) {
+	if (remote && !ipv4_is_multicast(remote)) {
 		prio |= 2;
 		h ^= HASH(remote);
 	}
@@ -246,7 +246,7 @@ static struct ip_tunnel * ipgre_tunnel_locate(struct ip_tunnel_parm *parms, int 
 
 	if (local)
 		prio |= 1;
-	if (remote && !MULTICAST(remote)) {
+	if (remote && !ipv4_is_multicast(remote)) {
 		prio |= 2;
 		h ^= HASH(remote);
 	}
@@ -370,7 +370,7 @@ static void ipgre_err(struct sk_buff *skb, u32 info)
 
 	read_lock(&ipgre_lock);
 	t = ipgre_tunnel_lookup(iph->daddr, iph->saddr, (flags&GRE_KEY) ? *(((__be32*)p) + (grehlen>>2) - 1) : 0);
-	if (t == NULL || t->parms.iph.daddr == 0 || MULTICAST(t->parms.iph.daddr))
+	if (t == NULL || t->parms.iph.daddr == 0 || ipv4_is_multicast(t->parms.iph.daddr))
 		goto out;
 
 	if (t->parms.iph.ttl == 0 && type == ICMP_TIME_EXCEEDED)
@@ -621,7 +621,7 @@ static int ipgre_rcv(struct sk_buff *skb)
 		skb_postpull_rcsum(skb, skb->h.raw, offset);
 		skb->pkt_type = PACKET_HOST;
 #ifdef CONFIG_NET_IPGRE_BROADCAST
-		if (MULTICAST(iph->daddr)) {
+		if (ipv4_is_multicast(iph->daddr)) {
 			/* Looped back packet, drop it! */
 			if (((struct rtable*)skb->dst)->fl.iif == 0)
 				goto drop;
@@ -785,7 +785,7 @@ static int ipgre_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
 		struct rt6_info *rt6 = (struct rt6_info*)skb->dst;
 
 		if (rt6 && mtu < dst_mtu(skb->dst) && mtu >= IPV6_MIN_MTU) {
-			if ((tunnel->parms.iph.daddr && !MULTICAST(tunnel->parms.iph.daddr)) ||
+			if ((tunnel->parms.iph.daddr && !ipv4_is_multicast(tunnel->parms.iph.daddr)) ||
 			    rt6->rt6i_dst.plen == 128) {
 				rt6->rt6i_flags |= RTF_MODIFIED;
 				skb->dst->metrics[RTAX_MTU-1] = mtu;
@@ -956,7 +956,7 @@ ipgre_tunnel_ioctl (struct net_device *dev, struct ifreq *ifr, int cmd)
 
 				t = netdev_priv(dev);
 
-				if (MULTICAST(p.iph.daddr))
+				if (ipv4_is_multicast(p.iph.daddr))
 					nflags = IFF_BROADCAST;
 				else if (p.iph.daddr)
 					nflags = IFF_POINTOPOINT;
@@ -1085,7 +1085,7 @@ static int ipgre_header(struct sk_buff *skb, struct net_device *dev, unsigned sh
 		memcpy(&iph->daddr, daddr, 4);
 		return t->hlen;
 	}
-	if (iph->daddr && !MULTICAST(iph->daddr))
+	if (iph->daddr && !ipv4_is_multicast(iph->daddr))
 		return t->hlen;
 
 	return -t->hlen;
@@ -1095,7 +1095,7 @@ static int ipgre_open(struct net_device *dev)
 {
 	struct ip_tunnel *t = netdev_priv(dev);
 
-	if (MULTICAST(t->parms.iph.daddr)) {
+	if (ipv4_is_multicast(t->parms.iph.daddr)) {
 		struct flowi fl = { .oif = t->parms.link,
 				    .nl_u = { .ip4_u =
 					      { .daddr = t->parms.iph.daddr,
@@ -1118,7 +1118,7 @@ static int ipgre_open(struct net_device *dev)
 static int ipgre_close(struct net_device *dev)
 {
 	struct ip_tunnel *t = netdev_priv(dev);
-	if (MULTICAST(t->parms.iph.daddr) && t->mlink) {
+	if (ipv4_is_multicast(t->parms.iph.daddr) && t->mlink) {
 		struct in_device *in_dev = inetdev_by_index(t->mlink);
 		if (in_dev) {
 			ip_mc_dec_group(in_dev, t->parms.iph.daddr);
@@ -1184,7 +1184,7 @@ static int ipgre_tunnel_init(struct net_device *dev)
 		dev->flags |= IFF_POINTOPOINT;
 
 #ifdef CONFIG_NET_IPGRE_BROADCAST
-		if (MULTICAST(iph->daddr)) {
+		if (ipv4_is_multicast(iph->daddr)) {
 			if (!iph->saddr)
 				return -EINVAL;
 			dev->flags = IFF_BROADCAST;

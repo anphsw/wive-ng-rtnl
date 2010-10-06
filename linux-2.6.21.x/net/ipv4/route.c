@@ -1139,7 +1139,7 @@ void ip_rt_redirect(__be32 old_gw, __be32 daddr, __be32 new_gw,
 		return;
 
 	if (new_gw == old_gw || !IN_DEV_RX_REDIRECTS(in_dev)
-	    || MULTICAST(new_gw) || BADCLASS(new_gw) || ZERONET(new_gw))
+	    || ipv4_is_multicast(new_gw) || BADCLASS(new_gw) || ZERONET(new_gw))
 		goto reject_redirect;
 
 	if (!IN_DEV_SHARED_MEDIA(in_dev)) {
@@ -1618,7 +1618,7 @@ static int ip_route_input_mc(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	if (in_dev == NULL)
 		return -EINVAL;
 
-	if (MULTICAST(saddr) || BADCLASS(saddr) || LOOPBACK(saddr) ||
+	if (ipv4_is_multicast(saddr) || BADCLASS(saddr) || ipv4_is_loopback(saddr) ||
 	    skb->protocol != htons(ETH_P_IP))
 		goto e_inval;
 
@@ -1941,7 +1941,7 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	   by fib_lookup.
 	 */
 
-	if (MULTICAST(saddr) || BADCLASS(saddr) || LOOPBACK(saddr))
+	if (ipv4_is_multicast(saddr) || BADCLASS(saddr) || ipv4_is_loopback(saddr))
 		goto martian_source;
 
 	if (daddr == htonl(0xFFFFFFFF) || (saddr == 0 && daddr == 0))
@@ -1953,12 +1953,12 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	if (ZERONET(saddr))
 		goto martian_source;
 
-	if (BADCLASS(daddr) || ZERONET(daddr) || LOOPBACK(daddr))
+	if (BADCLASS(daddr) || ZERONET(daddr) || ipv4_is_loopback(daddr))
 		goto martian_destination;
 
 	if (lsrc) {
-		if (MULTICAST(lsrc) || BADCLASS(lsrc) ||
-		    ZERONET(lsrc) || LOOPBACK(lsrc))
+		if (ipv4_is_multicast(lsrc) || BADCLASS(lsrc) ||
+		    ZERONET(lsrc) || ipv4_is_loopback(lsrc))
 			goto e_inval;
 	}
 
@@ -2148,7 +2148,7 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	   Note, that multicast routers are not affected, because
 	   route cache entry is created eventually.
 	 */
-	if (MULTICAST(daddr)) {
+	if (ipv4_is_multicast(daddr)) {
 		struct in_device *in_dev;
 
 		rcu_read_lock();
@@ -2205,7 +2205,7 @@ static int __mkroute_output(struct rtable **result,
 
 	if (fl->fl4_dst == htonl(0xFFFFFFFF))
 		res->type = RTN_BROADCAST;
-	else if (MULTICAST(fl->fl4_dst))
+	else if (ipv4_is_multicast(fl->fl4_dst))
 		res->type = RTN_MULTICAST;
 	else if (BADCLASS(fl->fl4_dst) || ZERONET(fl->fl4_dst))
 		return -EINVAL;
@@ -2426,7 +2426,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 
 	if (oldflp->fl4_src) {
 		err = -EINVAL;
-		if (MULTICAST(oldflp->fl4_src) ||
+		if (ipv4_is_multicast(oldflp->fl4_src) ||
 		    BADCLASS(oldflp->fl4_src) ||
 		    ZERONET(oldflp->fl4_src))
 			goto out;
@@ -2445,7 +2445,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 		 */
 
 		if (oldflp->oif == 0
-		    && (MULTICAST(oldflp->fl4_dst) || oldflp->fl4_dst == htonl(0xFFFFFFFF))) {
+		    && (ipv4_is_multicast(oldflp->fl4_dst) || oldflp->fl4_dst == htonl(0xFFFFFFFF))) {
 			/* Special hack: user can direct multicasts
 			   and limited broadcast via necessary interface
 			   without fiddling with IP_MULTICAST_IF or IP_PKTINFO.
@@ -2489,7 +2489,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 			goto make_route;
 		}
 		if (!fl.fl4_src) {
-			if (MULTICAST(oldflp->fl4_dst))
+			if (ipv4_is_multicast(oldflp->fl4_dst))
 				fl.fl4_src = inet_select_addr(dev_out, 0,
 							      fl.fl4_scope);
 			else if (!oldflp->fl4_dst)
@@ -2730,7 +2730,7 @@ static int rt_fill_info(struct sk_buff *skb, u32 pid, u32 seq, int event,
 #ifdef CONFIG_IP_MROUTE
 		__be32 dst = rt->rt_dst;
 
-		if (MULTICAST(dst) && !LOCAL_MCAST(dst) &&
+		if (ipv4_is_multicast(dst) && !LOCAL_MCAST(dst) &&
 		    ipv4_devconf.mc_forwarding) {
 			int err = ipmr_get_route(skb, r, nowait);
 			if (err <= 0) {

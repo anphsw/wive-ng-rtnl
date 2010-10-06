@@ -157,7 +157,7 @@ unsigned inet_addr_type(__be32 addr)
 
 	if (ZERONET(addr) || BADCLASS(addr))
 		return RTN_BROADCAST;
-	if (MULTICAST(addr))
+	if (ipv4_is_multicast(addr))
 		return RTN_MULTICAST;
 
 #ifdef CONFIG_IP_MULTIPLE_TABLES

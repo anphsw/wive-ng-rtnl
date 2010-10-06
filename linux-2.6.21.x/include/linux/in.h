@@ -247,17 +247,38 @@ struct sockaddr_in {
 #include <asm/byteorder.h> 
 
 #ifdef __KERNEL__
-static inline bool ipv4_is_loopback(__be32 addr)                                                                                            
-{                                                                                                                                           
-        return (addr & htonl(0xff000000)) == htonl(0x7f000000);                                                                             
-}   
+
+static inline bool ipv4_is_loopback(__be32 addr)
+{
+	return (addr & htonl(0xff000000)) == htonl(0x7f000000);
+}
+
+static inline bool ipv4_is_multicast(__be32 addr)
+{
+	return (addr & htonl(0xf0000000)) == htonl(0xe0000000);
+}
+
+static inline bool ipv4_is_local_multicast(__be32 addr)
+{
+	return (addr & htonl(0xffffff00)) == htonl(0xe0000000);
+}
+
+static inline bool ipv4_is_badclass(__be32 addr)
+{
+	return (addr & htonl(0xf0000000)) == htonl(0xf0000000);
+}
+
+static inline bool ipv4_is_zeronet(__be32 addr)
+{
+	return (addr & htonl(0xff000000)) == htonl(0x00000000);
+}
 
 /* Some random defines to make it easier in the kernel.. */
-#define LOOPBACK(x)	(((x) & htonl(0xff000000)) == htonl(0x7f000000))
-#define MULTICAST(x)	(((x) & htonl(0xf0000000)) == htonl(0xe0000000))
-#define BADCLASS(x)	(((x) & htonl(0xf0000000)) == htonl(0xf0000000))
-#define ZERONET(x)	(((x) & htonl(0xff000000)) == htonl(0x00000000))
-#define LOCAL_MCAST(x)	(((x) & htonl(0xFFFFFF00)) == htonl(0xE0000000))
+#define LOOPBACK(x)            ipv4_is_loopback(x)
+#define MULTICAST(x)           ipv4_is_multicast(x)
+#define BADCLASS(x)            ipv4_is_badclass(x)
+#define ZERONET(x)             ipv4_is_zeronet(x)
+#define LOCAL_MCAST(x)         ipv4_is_local_multicast(x)
 
 #endif
 

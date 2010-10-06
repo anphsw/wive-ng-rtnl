@@ -34,7 +34,7 @@ static int match(const struct sk_buff *skb,
 	const struct xt_pkttype_info *info = matchinfo;
 
 	if (skb->pkt_type == PACKET_LOOPBACK)
-		type = (MULTICAST(skb->nh.iph->daddr)
+		type = (ipv4_is_multicast(skb->nh.iph->daddr)
 			? PACKET_MULTICAST
 			: PACKET_BROADCAST);
 	else

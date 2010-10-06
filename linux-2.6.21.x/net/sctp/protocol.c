@@ -392,7 +392,7 @@ static sctp_scope_t sctp_v4_scope(union sctp_addr *addr)
 	/* Check for unusable SCTP addresses. */
 	if (IS_IPV4_UNUSABLE_ADDRESS(&addr->v4.sin_addr.s_addr)) {
 		retval =  SCTP_SCOPE_UNUSABLE;
-	} else if (LOOPBACK(addr->v4.sin_addr.s_addr)) {
+	} else if (ipv4_is_loopback(addr->v4.sin_addr.s_addr)) {
 		retval = SCTP_SCOPE_LOOPBACK;
 	} else if (IS_IPV4_LINK_ADDRESS(&addr->v4.sin_addr.s_addr)) {
 		retval = SCTP_SCOPE_LINK;
