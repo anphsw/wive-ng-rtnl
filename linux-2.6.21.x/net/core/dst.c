@@ -224,6 +224,18 @@ again:
 	return NULL;
 }
 
+void dst_release(struct dst_entry *dst)
+{
+	if (dst) {
+               int newrefcnt;
+
+		smp_mb__before_atomic_dec();
+               newrefcnt = atomic_dec_return(&dst->__refcnt);
+               WARN_ON(newrefcnt < 0);
+	}
+}
+EXPORT_SYMBOL(dst_release);
+
 /* Dirty hack. We did it in 2.2 (in __dst_free),
  * we have _very_ good reasons not to repeat
  * this mistake in 2.3, but we have no choice

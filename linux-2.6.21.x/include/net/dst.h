@@ -182,17 +182,7 @@ struct dst_entry * dst_clone(struct dst_entry * dst)
 	return dst;
 }
 
-static inline
-void dst_release(struct dst_entry * dst)
-{
-	if (dst) {
-		int newrefcnt;
-
-		smp_mb__before_atomic_dec();
-		newrefcnt = atomic_dec_return(&dst->__refcnt);
-		WARN_ON(newrefcnt < 0);
-	}
-}
+extern void dst_release(struct dst_entry *dst);
 
 /* Children define the path of the packet through the
  * Linux networking.  Thus, destinations are stackable.
