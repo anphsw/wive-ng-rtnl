@@ -155,7 +155,7 @@ unsigned inet_addr_type(__be32 addr)
 	struct fib_result	res;
 	unsigned ret = RTN_BROADCAST;
 
-	if (ZERONET(addr) || BADCLASS(addr))
+	if (ipv4_is_zeronet(addr) || ipv4_is_badclass(addr))
 		return RTN_BROADCAST;
 	if (ipv4_is_multicast(addr))
 		return RTN_MULTICAST;
@@ -697,7 +697,7 @@ void fib_add_ifaddr(struct in_ifaddr *ifa)
 	if (ifa->ifa_broadcast && ifa->ifa_broadcast != htonl(0xFFFFFFFF))
 		fib_magic(RTM_NEWROUTE, RTN_BROADCAST, ifa->ifa_broadcast, 32, prim);
 
-	if (!ZERONET(prefix) && !(ifa->ifa_flags&IFA_F_SECONDARY) &&
+	if (!ipv4_is_zeronet(prefix) && !(ifa->ifa_flags&IFA_F_SECONDARY) &&
 	    (prefix != addr || ifa->ifa_prefixlen < 32)) {
 		fib_magic(RTM_NEWROUTE, dev->flags&IFF_LOOPBACK ? RTN_LOCAL :
 			  RTN_UNICAST, prefix, ifa->ifa_prefixlen, prim);

@@ -273,7 +273,7 @@ static inline bool ipv4_is_zeronet(__be32 addr)
 	return (addr & htonl(0xff000000)) == htonl(0x00000000);
 }
 
-/* Some random defines to make it easier in the kernel.. */
+/* Some random defines to make it easier in the kernel.. Remove in future sfstudio... */
 #define LOOPBACK(x)            ipv4_is_loopback(x)
 #define MULTICAST(x)           ipv4_is_multicast(x)
 #define BADCLASS(x)            ipv4_is_badclass(x)

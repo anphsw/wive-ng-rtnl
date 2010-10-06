@@ -2232,8 +2232,8 @@ static void mod_cur_headers(struct pktgen_dev *pkt_dev)
 					s = htonl(t);
 
 					while (ipv4_is_loopback(s) || ipv4_is_multicast(s)
-					       || BADCLASS(s) || ZERONET(s)
-					       || LOCAL_MCAST(s)) {
+					       || ipv4_is_badclass(s) || ipv4_is_zeronet(s)
+					       || ipv4_is_local_multicast(s)) {
 						t = (pktgen_random() %
 						      (imx - imn)) + imn;
 						s = htonl(t);

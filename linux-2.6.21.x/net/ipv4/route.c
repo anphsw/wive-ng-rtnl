@@ -1139,7 +1139,7 @@ void ip_rt_redirect(__be32 old_gw, __be32 daddr, __be32 new_gw,
 		return;
 
 	if (new_gw == old_gw || !IN_DEV_RX_REDIRECTS(in_dev)
-	    || ipv4_is_multicast(new_gw) || BADCLASS(new_gw) || ZERONET(new_gw))
+	    || ipv4_is_multicast(new_gw) || ipv4_is_badclass(new_gw) || ipv4_is_zeronet(new_gw))
 		goto reject_redirect;
 
 	if (!IN_DEV_SHARED_MEDIA(in_dev)) {
@@ -1618,12 +1618,12 @@ static int ip_route_input_mc(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	if (in_dev == NULL)
 		return -EINVAL;
 
-	if (ipv4_is_multicast(saddr) || BADCLASS(saddr) || ipv4_is_loopback(saddr) ||
+	if (ipv4_is_multicast(saddr) || ipv4_is_badclass(saddr) || ipv4_is_loopback(saddr) ||
 	    skb->protocol != htons(ETH_P_IP))
 		goto e_inval;
 
-	if (ZERONET(saddr)) {
-		if (!LOCAL_MCAST(daddr))
+	if (ipv4_is_zeronet(saddr)) {
+		if (!ipv4_is_local_multicast(daddr))
 			goto e_inval;
 		spec_dst = inet_select_addr(dev, 0, RT_SCOPE_LINK);
 	} else if (fib_validate_source(saddr, 0, tos, 0,
@@ -1667,7 +1667,7 @@ static int ip_route_input_mc(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	}
 
 #ifdef CONFIG_IP_MROUTE
-	if (!LOCAL_MCAST(daddr) && IN_DEV_MFORWARD(in_dev))
+	if (!ipv4_is_local_multicast(daddr) && IN_DEV_MFORWARD(in_dev))
 		rth->u.dst.input = ip_mr_input;
 #endif
 	RT_CACHE_STAT_INC(in_slow_mc);
@@ -1941,7 +1941,7 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	   by fib_lookup.
 	 */
 
-	if (ipv4_is_multicast(saddr) || BADCLASS(saddr) || ipv4_is_loopback(saddr))
+	if (ipv4_is_multicast(saddr) || ipv4_is_badclass(saddr) || ipv4_is_loopback(saddr))
 		goto martian_source;
 
 	if (daddr == htonl(0xFFFFFFFF) || (saddr == 0 && daddr == 0))
@@ -1950,15 +1950,15 @@ static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	/* Accept zero addresses only to limited broadcast;
 	 * I even do not know to fix it or not. Waiting for complains :-)
 	 */
-	if (ZERONET(saddr))
+	if (ipv4_is_zeronet(saddr))
 		goto martian_source;
 
-	if (BADCLASS(daddr) || ZERONET(daddr) || ipv4_is_loopback(daddr))
+	if (ipv4_is_badclass(daddr) || ipv4_is_zeronet(daddr) || ipv4_is_loopback(daddr))
 		goto martian_destination;
 
 	if (lsrc) {
-		if (ipv4_is_multicast(lsrc) || BADCLASS(lsrc) ||
-		    ZERONET(lsrc) || ipv4_is_loopback(lsrc))
+		if (ipv4_is_multicast(lsrc) || ipv4_is_badclass(lsrc) ||
+		    ipv4_is_zeronet(lsrc) || ipv4_is_loopback(lsrc))
 			goto e_inval;
 	}
 
@@ -2015,7 +2015,7 @@ brd_input:
 	if (lsrc)
 		goto e_inval;
 
-	if (ZERONET(saddr))
+	if (ipv4_is_zeronet(saddr))
 		spec_dst = inet_select_addr(dev, 0, RT_SCOPE_LINK);
 	else {
 		err = fib_validate_source(saddr, 0, tos, 0, dev, &spec_dst,
@@ -2163,7 +2163,7 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 #endif              
 			if (our
 #ifdef CONFIG_IP_MROUTE
-			    || (!LOCAL_MCAST(daddr) && IN_DEV_MFORWARD(in_dev))
+			    || (!ipv4_is_local_multicast(daddr) && IN_DEV_MFORWARD(in_dev))
 #endif
 			    ) {
 				rcu_read_unlock();
@@ -2207,7 +2207,7 @@ static int __mkroute_output(struct rtable **result,
 		res->type = RTN_BROADCAST;
 	else if (ipv4_is_multicast(fl->fl4_dst))
 		res->type = RTN_MULTICAST;
-	else if (BADCLASS(fl->fl4_dst) || ZERONET(fl->fl4_dst))
+	else if (ipv4_is_badclass(fl->fl4_dst) || ipv4_is_zeronet(fl->fl4_dst))
 		return -EINVAL;
 
 	if (dev_out->flags & IFF_LOOPBACK)
@@ -2298,7 +2298,7 @@ static int __mkroute_output(struct rtable **result,
 #ifdef CONFIG_IP_MROUTE
 		if (res->type == RTN_MULTICAST) {
 			if (IN_DEV_MFORWARD(in_dev) &&
-			    !LOCAL_MCAST(oldflp->fl4_dst)) {
+			    !ipv4_is_local_multicast(oldflp->fl4_dst)) {
 				rth->u.dst.input = ip_mr_input;
 				rth->u.dst.output = ip_mc_output;
 			}
@@ -2427,8 +2427,8 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 	if (oldflp->fl4_src) {
 		err = -EINVAL;
 		if (ipv4_is_multicast(oldflp->fl4_src) ||
-		    BADCLASS(oldflp->fl4_src) ||
-		    ZERONET(oldflp->fl4_src))
+		    ipv4_is_badclass(oldflp->fl4_src) ||
+		    ipv4_is_zeronet(oldflp->fl4_src))
 			goto out;
 
 		/* It is equivalent to inet_addr_type(saddr) == RTN_LOCAL */
@@ -2482,7 +2482,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 			goto out;	/* Wrong error code */
 		}
 
-		if (LOCAL_MCAST(oldflp->fl4_dst) || oldflp->fl4_dst == htonl(0xFFFFFFFF)) {
+		if (ipv4_is_local_multicast(oldflp->fl4_dst) || oldflp->fl4_dst == htonl(0xFFFFFFFF)) {
 			if (!fl.fl4_src)
 				fl.fl4_src = inet_select_addr(dev_out, 0,
 							      RT_SCOPE_LINK);
@@ -2730,7 +2730,7 @@ static int rt_fill_info(struct sk_buff *skb, u32 pid, u32 seq, int event,
 #ifdef CONFIG_IP_MROUTE
 		__be32 dst = rt->rt_dst;
 
-		if (ipv4_is_multicast(dst) && !LOCAL_MCAST(dst) &&
+		if (ipv4_is_multicast(dst) && !ipv4_is_local_multicast(dst) &&
 		    ipv4_devconf.mc_forwarding) {
 			int err = ipmr_get_route(skb, r, nowait);
 			if (err <= 0) {

@@ -266,7 +266,7 @@ static int addr_resolve_local(struct sockaddr_in *src_in,
 	if (!dev)
 		return -EADDRNOTAVAIL;
 
-	if (ZERONET(src_ip)) {
+	if (ipv4_is_zeronet(src_ip)) {
 		src_in->sin_family = dst_in->sin_family;
 		src_in->sin_addr.s_addr = dst_ip;
 		ret = rdma_copy_addr(addr, dev, dev->dev_addr);

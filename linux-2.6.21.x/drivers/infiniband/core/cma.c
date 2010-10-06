@@ -572,7 +572,7 @@ static inline int cma_zero_addr(struct sockaddr *addr)
 	struct in6_addr *ip6;
 
 	if (addr->sa_family == AF_INET)
-		return ZERONET(((struct sockaddr_in *) addr)->sin_addr.s_addr);
+		return ipv4_is_zeronet(((struct sockaddr_in *) addr)->sin_addr.s_addr);
 	else {
 		ip6 = &((struct sockaddr_in6 *) addr)->sin6_addr;
 		return (ip6->s6_addr32[0] | ip6->s6_addr32[1] |
