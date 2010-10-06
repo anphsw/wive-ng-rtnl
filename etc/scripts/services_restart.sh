@@ -5,8 +5,10 @@
 #include global
 . /etc/scripts/global.sh
 
+LOG="logger -t services"
 MODE=$1
 
+$LOG "Restart needed services and scripts. Mode $MODE"
 # stop needed
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
@@ -22,6 +24,7 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 #restart iptables
+$LOG "Reload iptables rules. Mode $MODE"
 service iptables restart
 
 #start all
@@ -44,3 +47,6 @@ service radvd restart
 service ntp restart
 service ripd restart
 service ddns restart
+
+$LOG "All OK!. Mode $MODE"
+
