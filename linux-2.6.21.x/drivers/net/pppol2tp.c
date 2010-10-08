@@ -351,19 +351,13 @@ pppol2tp_session_find(struct pppol2tp_tunnel *tunnel, u16 session_id)
  */
 static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_buff *skb)
 {
-	struct sk_buff *next;
-	struct sk_buff *prev;
 	struct sk_buff *skbp;
 	struct sk_buff *tmp;
-	u16 ns = PPPOL2TP_SKB_CB(skb)->ns;
+	u32 ns = PPPOL2TP_SKB_CB(skb)->ns;
 
 	ENTER_FUNCTION;
 
 	spin_lock(&session->reorder_q.lock);
-
-	prev = (struct sk_buff *) &session->reorder_q;
-	next = prev->next;
-
 	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
 		if (L2TP_SKB_CB(skbp)->ns > ns) {
 			__skb_queue_before(&session->reorder_q, skbp, skb);
@@ -374,7 +368,6 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 			session->stats.rx_oos_packets++;
 			goto out;
 		}
-		next = next->next;
 	}
 
 	__skb_queue_tail(&session->reorder_q, skb);
