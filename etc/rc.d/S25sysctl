@@ -23,12 +23,14 @@ start() {
         let "HASHSIZE=$CONNTRACK_MAX/8"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
+	sysctl -w vm.min_free_kbytes = 1280
     else                                                                                                                     
         #32mb                                                                                                                
         CONNTRACK_MAX=4096                                                                                                   
         let "HASHSIZE=$CONNTRACK_MAX/4"
         let "ROUTEMAX=$CONNTRACK_MAX*12"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
+	sysctl -w vm.min_free_kbytes = 2048
     fi                                                                                                                       
 
     if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
@@ -48,7 +50,6 @@ start() {
 
     $LOG "Tune with proc"
     #memory
-    echo 1500  > /proc/sys/vm/min_free_kbytes
     echo 0    > /proc/sys/vm/page-cluster
     echo 0    > /proc/sys/vm/overcommit_ratio
     echo 0    > /proc/sys/vm/overcommit_memory
