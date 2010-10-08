@@ -353,6 +353,7 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 {
 	struct sk_buff *next;
 	struct sk_buff *prev;
+	struct sk_buff *skbp;
 	struct sk_buff *tmp;
 	u16 ns = PPPOL2TP_SKB_CB(skb)->ns;
 
@@ -364,11 +365,11 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 	next = prev->next;
 
 	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
-		if (PPPOL2TP_SKB_CB(next)->ns > ns) {
-			__skb_insert(skb, next->prev, next, &session->reorder_q);
+		if (L2TP_SKB_CB(skbp)->ns > ns) {
+			__skb_queue_before(&session->reorder_q, skbp, skb);
 			PRINTK(session->debug, PPPOL2TP_MSG_SEQ, KERN_DEBUG,
 			       "%s: pkt %hu, inserted before %hu, reorder_q len=%d\n",
-			       session->name, ns, PPPOL2TP_SKB_CB(next)->ns,
+			       session->name, ns, L2TP_SKB_CB(skbp)->ns,
 			       skb_queue_len(&session->reorder_q));
 			session->stats.rx_oos_packets++;
 			goto out;
