@@ -353,6 +353,7 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 {
 	struct sk_buff *next;
 	struct sk_buff *prev;
+	struct sk_buff *tmp;
 	u16 ns = PPPOL2TP_SKB_CB(skb)->ns;
 
 	ENTER_FUNCTION;
@@ -361,7 +362,8 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 
 	prev = (struct sk_buff *) &session->reorder_q;
 	next = prev->next;
-	while (next != prev) {
+
+	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
 		if (PPPOL2TP_SKB_CB(next)->ns > ns) {
 			__skb_insert(skb, next->prev, next, &session->reorder_q);
 			PRINTK(session->debug, PPPOL2TP_MSG_SEQ, KERN_DEBUG,
@@ -391,10 +393,9 @@ static void pppol2tp_recv_dequeue_skb(struct pppol2tp_session *session, struct s
 
 	ENTER_FUNCTION;
 
-	/* We're about to requeue the skb, so unlink it and return resources
+	/* We're about to requeue the skb, so return resources
 	 * to its current owner (a socket receive buffer).
 	 */
-	skb_unlink(skb, &session->reorder_q);
 	skb_orphan(skb);
 
 	tunnel->stats.rx_packets++;
@@ -503,6 +504,11 @@ static void pppol2tp_recv_dequeue(struct pppol2tp_session *session)
 				goto out;
 			}
 		}
+		__skb_unlink(skb, &session->reorder_q);
+
+		/* Process the skb. We release the queue lock while we
+		* do so to let other contexts process the queue.
+		*/
 		pppol2tp_recv_dequeue_skb(session, skb);
 again:
 		spin_lock(&session->reorder_q.lock);
