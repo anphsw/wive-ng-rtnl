@@ -31,8 +31,8 @@
 #include <net/sock.h>
 #include <net/act_api.h>
 
-#define L2T(p,L)   ((p)->tcfp_R_tab->data[(L)>>(p)->tcfp_R_tab->rate.cell_log])
-#define L2T_P(p,L) ((p)->tcfp_P_tab->data[(L)>>(p)->tcfp_P_tab->rate.cell_log])
+#define L2T(p,L)   qdisc_l2t((p)->tcfp_R_tab, L)
+#define L2T_P(p,L) qdisc_l2t((p)->tcfp_P_tab, L)
 
 #define POL_TAB_MASK     15
 static struct tcf_common *tcf_police_ht[POL_TAB_MASK + 1];
