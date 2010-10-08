@@ -1181,10 +1181,14 @@ static int psched_tick_per_us = 1;
 #ifdef CONFIG_PROC_FS
 static int psched_show(struct seq_file *seq, void *v)
 {
-	seq_printf(seq, "%08x %08x %08x %08x\n",
-		      psched_tick_per_us, psched_us_per_tick,
-		      1000000, HZ);
+	struct timespec ts;
 
+	hrtimer_get_res(CLOCK_MONOTONIC, &ts);
+ 	seq_printf(seq, "%08x %08x %08x %08x\n",
+ 		   (u32)NSEC_PER_USEC, (u32)PSCHED_US2NS(1),
+ 		   1000000,
+		   (u32)NSEC_PER_SEC/(u32)ktime_to_ns(timespec_to_ktime(ts)));
+ 
 	return 0;
 }
 
