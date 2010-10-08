@@ -351,23 +351,27 @@ pppol2tp_session_find(struct pppol2tp_tunnel *tunnel, u16 session_id)
  */
 static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_buff *skb)
 {
-	struct sk_buff *skbp;
-	struct sk_buff *tmp;
-	u32 ns = PPPOL2TP_SKB_CB(skb)->ns;
+	struct sk_buff *next;
+	struct sk_buff *prev;
+	u16 ns = PPPOL2TP_SKB_CB(skb)->ns;
 
 	ENTER_FUNCTION;
 
 	spin_lock(&session->reorder_q.lock);
-	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
-		if (L2TP_SKB_CB(skbp)->ns > ns) {
-			__skb_queue_before(&session->reorder_q, skbp, skb);
+
+	prev = (struct sk_buff *) &session->reorder_q;
+	next = prev->next;
+	while (next != prev) {
+		if (PPPOL2TP_SKB_CB(next)->ns > ns) {
+			__skb_insert(skb, next->prev, next, &session->reorder_q);
 			PRINTK(session->debug, PPPOL2TP_MSG_SEQ, KERN_DEBUG,
 			       "%s: pkt %hu, inserted before %hu, reorder_q len=%d\n",
-			       session->name, ns, L2TP_SKB_CB(skbp)->ns,
+			       session->name, ns, PPPOL2TP_SKB_CB(next)->ns,
 			       skb_queue_len(&session->reorder_q));
 			session->stats.rx_oos_packets++;
 			goto out;
 		}
+		next = next->next;
 	}
 
 	__skb_queue_tail(&session->reorder_q, skb);
@@ -387,9 +391,10 @@ static void pppol2tp_recv_dequeue_skb(struct pppol2tp_session *session, struct s
 
 	ENTER_FUNCTION;
 
-	/* We're about to requeue the skb, so return resources
+	/* We're about to requeue the skb, so unlink it and return resources
 	 * to its current owner (a socket receive buffer).
 	 */
+	skb_unlink(skb, &session->reorder_q);
 	skb_orphan(skb);
 
 	tunnel->stats.rx_packets++;
@@ -498,11 +503,6 @@ static void pppol2tp_recv_dequeue(struct pppol2tp_session *session)
 				goto out;
 			}
 		}
-		__skb_unlink(skb, &session->reorder_q);
-
-		/* Process the skb. We release the queue lock while we
-		* do so to let other contexts process the queue.
-		*/
 		pppol2tp_recv_dequeue_skb(session, skb);
 again:
 		spin_lock(&session->reorder_q.lock);
