@@ -53,7 +53,7 @@ static inline void *qdisc_priv(struct Qdisc *q)
    may be read from /proc/net/psched.
  */
 
-
+#define PSCHED_US2NS(x)			((s64)(x) << PSCHED_SHIFT)
 #ifdef CONFIG_NET_SCH_CLK_GETTIMEOFDAY
 
 typedef struct timeval	psched_time_t;
