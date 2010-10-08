@@ -49,7 +49,6 @@ struct tc_police_compat
 
 /* Each policer is serialized by its individual spinlock */
 
-#ifdef CONFIG_NET_CLS_ACT
 static int tcf_act_police_walker(struct sk_buff *skb, struct netlink_callback *cb,
 			      int type, struct tc_action *a)
 {
@@ -95,9 +94,8 @@ rtattr_failure:
 	skb_trim(skb, (u8*)r - skb->data);
 	goto done;
 }
-#endif
 
-void tcf_police_destroy(struct tcf_police *p)
+static void tcf_police_destroy(struct tcf_police *p)
 {
 	unsigned int h = tcf_hash(p->tcf_index, POL_TAB_MASK);
 	struct tcf_common **p1p;
@@ -120,7 +118,6 @@ void tcf_police_destroy(struct tcf_police *p)
 	BUG_TRAP(0);
 }
 
-#ifdef CONFIG_NET_CLS_ACT
 static int tcf_act_police_locate(struct rtattr *rta, struct rtattr *est,
 				 struct tc_action *a, int ovr, int bind)
 {
@@ -246,10 +243,19 @@ failure:
 static int tcf_act_police_cleanup(struct tc_action *a, int bind)
 {
 	struct tcf_police *p = a->priv;
+	int ret = 0;
 
-	if (p != NULL)
-		return tcf_police_release(p, bind);
-	return 0;
+	if (p != NULL) {
+		if (bind)
+			p->tcf_bindcnt--;
+
+		p->tcf_refcnt--;
+		if (p->tcf_refcnt <= 0 && !p->tcf_bindcnt) {
+			tcf_police_destroy(p);
+			ret = 1;
+		}
+	}
+	return ret;
 }
 
 static int tcf_act_police(struct sk_buff *skb, struct tc_action *a,

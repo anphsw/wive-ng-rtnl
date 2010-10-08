@@ -409,8 +409,9 @@ static int atm_tc_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 	    !(flow = (struct atm_flow_data *)atm_tc_get(sch, skb->priority)))
 		for (flow = p->flows; flow; flow = flow->next)
 			if (flow->filter_list) {
-				result = tc_classify(skb, flow->filter_list,
-						     &res);
+				result = tc_classify_compat(skb,
+							    flow->filter_list,
+							    &res);
 				if (result < 0)
 					continue;
 				flow = (struct atm_flow_data *)res.class;
@@ -433,27 +434,16 @@ static int atm_tc_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 		case TC_ACT_SHOT:
 			kfree_skb(skb);
 			goto drop;
-		}
-#elif defined(CONFIG_NET_CLS_POLICE)
-		switch (result) {
-		case TC_POLICE_SHOT:
-			kfree_skb(skb);
-			goto drop;
 		case TC_POLICE_RECLASSIFY:
 			if (flow->excess)
 				flow = flow->excess;
-			else {
+			else
 				ATM_SKB(skb)->atm_options |= ATM_ATMOPT_CLP;
-				break;
-			}
-			/* fall through */
-		case TC_POLICE_OK:
-			/* fall through */
-		default:
 			break;
 		}
 #endif
 	}
+
 	if ((ret = flow->q->enqueue(skb, flow->q)) != 0) {
 drop: __maybe_unused
 		sch->qstats.drops++;
