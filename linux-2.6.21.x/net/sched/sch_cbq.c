@@ -97,7 +97,7 @@ struct cbq_class
 	unsigned char		priority2;	/* priority to be used after overlimit */
 	unsigned char		ewma_log;	/* time constant for idle time calculation */
 	unsigned char		ovl_strategy;
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	unsigned char		police;
 #endif
 
@@ -147,7 +147,6 @@ struct cbq_class
 	struct gnet_stats_basic bstats;
 	struct gnet_stats_queue qstats;
 	struct gnet_stats_rate_est rate_est;
-	spinlock_t		*stats_lock;
 	struct tc_cbq_xstats	xstats;
 
 	struct tcf_proto	*filter_list;
@@ -170,7 +169,7 @@ struct cbq_sched_data
 	struct cbq_class	*active[TC_CBQ_MAXPRIO+1];	/* List of all classes
 								   with backlog */
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	struct cbq_class	*rx_class;
 #endif
 	struct cbq_class	*tx_class;
@@ -191,7 +190,7 @@ struct cbq_sched_data
 };
 
 
-#define L2T(cl,len)	((cl)->R_tab->data[(len)>>(cl)->R_tab->rate.cell_log])
+#define L2T(cl,len)	qdisc_l2t((cl)->R_tab,len)
 
 
 static __inline__ unsigned cbq_hash(u32 h)
@@ -212,7 +211,7 @@ cbq_class_lookup(struct cbq_sched_data *q, u32 classid)
 	return NULL;
 }
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 
 static struct cbq_class *
 cbq_reclassify(struct sk_buff *skb, struct cbq_class *this)
@@ -263,7 +262,8 @@ cbq_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
 		/*
 		 * Step 2+n. Apply classifier.
 		 */
-		if (!head->filter_list || (result = tc_classify(skb, head->filter_list, &res)) < 0)
+		if (!head->filter_list ||
+		    (result = tc_classify_compat(skb, head->filter_list, &res)) < 0)
 			goto fallback;
 
 		if ((cl = (void*)res.class) == NULL) {
@@ -283,15 +283,8 @@ cbq_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
 			*qerr = NET_XMIT_SUCCESS;
 		case TC_ACT_SHOT:
 			return NULL;
-		}
-#elif defined(CONFIG_NET_CLS_POLICE)
-		switch (result) {
-		case TC_POLICE_RECLASSIFY:
+		case TC_ACT_RECLASSIFY:
 			return cbq_reclassify(skb, cl);
-		case TC_POLICE_SHOT:
-			return NULL;
-		default:
-			break;
 		}
 #endif
 		if (cl->level == 0)
@@ -405,7 +398,7 @@ cbq_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 	int ret;
 	struct cbq_class *cl = cbq_classify(skb, sch, &ret);
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	q->rx_class = cl;
 #endif
 	if (cl == NULL) {
@@ -415,7 +408,7 @@ cbq_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 		return ret;
 	}
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	cl->q->__parent = sch;
 #endif
 	if ((ret = cl->q->enqueue(skb, cl->q)) == NET_XMIT_SUCCESS) {
@@ -450,7 +443,7 @@ cbq_requeue(struct sk_buff *skb, struct Qdisc *sch)
 
 	cbq_mark_toplevel(q, cl);
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	q->rx_class = cl;
 	cl->q->__parent = sch;
 #endif
@@ -680,9 +673,7 @@ static void cbq_undelay(unsigned long arg)
 	netif_schedule(sch->dev);
 }
 
-
-#ifdef CONFIG_NET_CLS_POLICE
-
+#ifdef CONFIG_NET_CLS_ACT
 static int cbq_reshape_fail(struct sk_buff *skb, struct Qdisc *child)
 {
 	int len = skb->len;
@@ -1383,7 +1374,7 @@ static int cbq_set_overlimit(struct cbq_class *cl, struct tc_cbq_ovl *ovl)
 	return 0;
 }
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 static int cbq_set_police(struct cbq_class *cl, struct tc_cbq_police *p)
 {
 	cl->police = p->police;
@@ -1444,7 +1435,6 @@ static int cbq_init(struct Qdisc *sch, struct rtattr *opt)
 	q->link.ewma_log = TC_CBQ_DEF_EWMA;
 	q->link.avpkt = q->link.allot/2;
 	q->link.minidle = -0x7FFFFFFF;
-	q->link.stats_lock = &sch->dev->queue_lock;
 
 	init_timer(&q->wd_timer);
 	q->wd_timer.data = (unsigned long)sch;
@@ -1555,7 +1545,7 @@ rtattr_failure:
 	return -1;
 }
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 static __inline__ int cbq_dump_police(struct sk_buff *skb, struct cbq_class *cl)
 {
 	unsigned char	 *b = skb->tail;
@@ -1581,7 +1571,7 @@ static int cbq_dump_attr(struct sk_buff *skb, struct cbq_class *cl)
 	    cbq_dump_rate(skb, cl) < 0 ||
 	    cbq_dump_wrr(skb, cl) < 0 ||
 	    cbq_dump_ovl(skb, cl) < 0 ||
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	    cbq_dump_police(skb, cl) < 0 ||
 #endif
 	    cbq_dump_fopt(skb, cl) < 0)
@@ -1658,9 +1648,7 @@ cbq_dump_class_stats(struct Qdisc *sch, unsigned long arg,
 		cl->xstats.undertime = PSCHED_TDIFF(cl->undertime, q->now);
 
 	if (gnet_stats_copy_basic(d, &cl->bstats) < 0 ||
-#ifdef CONFIG_NET_ESTIMATOR
 	    gnet_stats_copy_rate_est(d, &cl->rate_est) < 0 ||
-#endif
 	    gnet_stats_copy_queue(d, &cl->qstats) < 0)
 		return -1;
 
@@ -1678,7 +1666,7 @@ static int cbq_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 						     cl->classid)) == NULL)
 				return -ENOBUFS;
 		} else {
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 			if (cl->police == TC_POLICE_RECLASSIFY)
 				new->reshape_fail = cbq_reshape_fail;
 #endif
@@ -1741,9 +1729,7 @@ static void cbq_destroy_class(struct Qdisc *sch, struct cbq_class *cl)
 	cbq_destroy_filters(cl);
 	qdisc_destroy(cl->q);
 	qdisc_put_rtab(cl->R_tab);
-#ifdef CONFIG_NET_ESTIMATOR
 	gen_kill_estimator(&cl->bstats, &cl->rate_est);
-#endif
 	if (cl != &q->link)
 		kfree(cl);
 }
@@ -1755,7 +1741,7 @@ cbq_destroy(struct Qdisc* sch)
 	struct cbq_class *cl;
 	unsigned h;
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	q->rx_class = NULL;
 #endif
 	/*
@@ -1782,7 +1768,7 @@ static void cbq_put(struct Qdisc *sch, unsigned long arg)
 	struct cbq_class *cl = (struct cbq_class*)arg;
 
 	if (--cl->refcnt == 0) {
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 		struct cbq_sched_data *q = qdisc_priv(sch);
 
 		spin_lock_bh(&sch->dev->queue_lock);
@@ -1830,7 +1816,7 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 	    RTA_PAYLOAD(tb[TCA_CBQ_WRROPT-1]) < sizeof(struct tc_cbq_wrropt))
 			return -EINVAL;
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	if (tb[TCA_CBQ_POLICE-1] &&
 	    RTA_PAYLOAD(tb[TCA_CBQ_POLICE-1]) < sizeof(struct tc_cbq_police))
 			return -EINVAL;
@@ -1873,7 +1859,7 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 		if (tb[TCA_CBQ_OVL_STRATEGY-1])
 			cbq_set_overlimit(cl, RTA_DATA(tb[TCA_CBQ_OVL_STRATEGY-1]));
 
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 		if (tb[TCA_CBQ_POLICE-1])
 			cbq_set_police(cl, RTA_DATA(tb[TCA_CBQ_POLICE-1]));
 #endif
@@ -1886,11 +1872,10 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 
 		sch_tree_unlock(sch);
 
-#ifdef CONFIG_NET_ESTIMATOR
 		if (tca[TCA_RATE-1])
 			gen_replace_estimator(&cl->bstats, &cl->rate_est,
-				cl->stats_lock, tca[TCA_RATE-1]);
-#endif
+					      &sch->dev->queue_lock,
+					      tca[TCA_RATE-1]);
 		return 0;
 	}
 
@@ -1948,7 +1933,6 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 	cl->allot = parent->allot;
 	cl->quantum = cl->allot;
 	cl->weight = cl->R_tab->rate.rate;
-	cl->stats_lock = &sch->dev->queue_lock;
 
 	sch_tree_lock(sch);
 	cbq_link_class(cl);
@@ -1968,7 +1952,7 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 	cl->overlimit = cbq_ovl_classic;
 	if (tb[TCA_CBQ_OVL_STRATEGY-1])
 		cbq_set_overlimit(cl, RTA_DATA(tb[TCA_CBQ_OVL_STRATEGY-1]));
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	if (tb[TCA_CBQ_POLICE-1])
 		cbq_set_police(cl, RTA_DATA(tb[TCA_CBQ_POLICE-1]));
 #endif
@@ -1976,11 +1960,9 @@ cbq_change_class(struct Qdisc *sch, u32 classid, u32 parentid, struct rtattr **t
 		cbq_set_fopt(cl, RTA_DATA(tb[TCA_CBQ_FOPT-1]));
 	sch_tree_unlock(sch);
 
-#ifdef CONFIG_NET_ESTIMATOR
 	if (tca[TCA_RATE-1])
 		gen_new_estimator(&cl->bstats, &cl->rate_est,
-			cl->stats_lock, tca[TCA_RATE-1]);
-#endif
+				  &sch->dev->queue_lock, tca[TCA_RATE-1]);
 
 	*arg = (unsigned long)cl;
 	return 0;
@@ -2014,7 +1996,7 @@ static int cbq_delete(struct Qdisc *sch, unsigned long arg)
 		q->tx_class = NULL;
 		q->tx_borrowed = NULL;
 	}
-#ifdef CONFIG_NET_CLS_POLICE
+#ifdef CONFIG_NET_CLS_ACT
 	if (q->rx_class == cl)
 		q->rx_class = NULL;
 #endif

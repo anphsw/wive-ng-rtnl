@@ -53,7 +53,9 @@ static inline void *qdisc_priv(struct Qdisc *q)
    may be read from /proc/net/psched.
  */
 
-
+/* Avoid doing 64 bit divide */
+#define PSCHED_SHIFT			6
+#define PSCHED_US2NS(x)			((s64)(x) << PSCHED_SHIFT)
 #ifdef CONFIG_NET_SCH_CLK_GETTIMEOFDAY
 
 typedef struct timeval	psched_time_t;
@@ -227,8 +229,10 @@ static inline void qdisc_run(struct net_device *dev)
 		__qdisc_run(dev);
 }
 
+extern int tc_classify_compat(struct sk_buff *skb, struct tcf_proto *tp,
+			      struct tcf_result *res);
 extern int tc_classify(struct sk_buff *skb, struct tcf_proto *tp,
-	struct tcf_result *res);
+		       struct tcf_result *res);
 
 /* Calculate maximal size of packet seen by hard_start_xmit
    routine of this device.
