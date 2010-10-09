@@ -446,6 +446,10 @@ static int pppoe_disc_rcv(struct sk_buff *skb,
 
 		bh_lock_sock(sk);
 
+		/* Check destination address */
+		if (memcmp(eth_hdr(skb)->h_dest, dev->dev_addr, ETH_ALEN))
+			goto abort;
+
 		/* If the user has locked the socket, just ignore
 		 * the packet.  With the way two rcv protocols hook into
 		 * one socket family type, we cannot (easily) distinguish

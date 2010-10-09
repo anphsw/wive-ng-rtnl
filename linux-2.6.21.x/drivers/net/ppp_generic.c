@@ -1924,7 +1924,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 	u32 seq = ppp->nextseq;
 	u32 minseq = ppp->minseq;
 	struct sk_buff_head *list = &ppp->mrq;
-	struct sk_buff *p, *next;
+	struct sk_buff *p, *tmp;
 	struct sk_buff *head, *tail;
 	struct sk_buff *skb = NULL;
 	int lost = 0, len = 0;
@@ -1933,13 +1933,15 @@ ppp_mp_reconstruct(struct ppp *ppp)
 		return NULL;
 	head = list->next;
 	tail = NULL;
-	for (p = head; p != (struct sk_buff *) list; p = next) {
+	skb_queue_walk_safe(list, p, tmp) {
+	again:
 		next = p->next;
 		if (seq_before(p->sequence, seq)) {
 			/* this can't happen, anyway ignore the skb */
 			printk(KERN_ERR "ppp_mp_reconstruct bad seq %u < %u\n",
 			       p->sequence, seq);
-			head = next;
+			__skb_unlink(p, list);
+			kfree_skb(p);
 			continue;
 		}
 		if (p->sequence != seq) {
@@ -1951,8 +1953,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 			lost = 1;
 			seq = seq_before(minseq, p->sequence)?
 				minseq + 1: p->sequence;
-			next = p;
-			continue;
+			goto again;
 		}
 
 		/*
@@ -2000,7 +2001,16 @@ ppp_mp_reconstruct(struct ppp *ppp)
 		 * we can discard up to and including this fragment.
 		 */
 		if (p->BEbits & E)
-			head = next;
+			struct sk_buff *tmp2;
+
+			skb_queue_reverse_walk_from_safe(list, p, tmp2) {
+				__skb_unlink(p, list);
+				kfree_skb(p);
+                        }
+			head = skb_peek(list);
+			if (!head)
+				break;
+		}
 
 		++seq;
 	}
@@ -2023,13 +2033,6 @@ ppp_mp_reconstruct(struct ppp *ppp)
 				skb_copy_bits(p, 0, skb_put(skb, p->len), p->len);
 		ppp->nextseq = tail->sequence + 1;
 		head = tail->next;
-	}
-
-	/* Discard all the skbuffs that we have copied the data out of
-	   or that we can't use. */
-	while ((p = list->next) != head) {
-		__skb_unlink(p, list);
-		kfree_skb(p);
 	}
 
 	return skb;
