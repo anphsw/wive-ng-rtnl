@@ -453,8 +453,8 @@ hashlimit_match(const struct sk_buff *skb,
 		unsigned int protoff,
 		int *hotdrop)
 {
-	struct xt_hashlimit_info *r =
-		((struct xt_hashlimit_info *)matchinfo)->u.master;
+	const struct xt_hashlimit_info *r = matchinfo;
+
 	struct xt_hashlimit_htable *hinfo = r->hinfo;
 	unsigned long now = jiffies;
 	struct dsthash_ent *dh;
@@ -545,8 +545,6 @@ hashlimit_checkentry(const char *tablename,
 	}
 	mutex_unlock(&hlimit_mutex);
 
-	/* Ugly hack: For SMP, we only want to use one set */
-	r->u.master = r;
 	return 1;
 }
 
