@@ -865,12 +865,13 @@ __nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 		goto out;
 	}
 
-	conntrack = kmem_cache_zalloc(nf_ct_cache[features].cachep, GFP_ATOMIC);
+	conntrack = kmem_cache_alloc(nf_ct_cache[features].cachep, GFP_ATOMIC);
 	if (conntrack == NULL) {
 		DEBUGP("nf_conntrack_alloc: Can't alloc conntrack from cache\n");
 		goto out;
 	}
 
+	memset(conntrack, 0, nf_ct_cache[features].size);
 	conntrack->features = features;
 	atomic_set(&conntrack->ct_general.use, 1);
 	conntrack->ct_general.destroy = destroy_conntrack;
@@ -1373,7 +1374,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	NF_CT_ASSERT((*pskb)->nfct);
 
 	ret = l4proto->packet(ct, *pskb, dataoff, ctinfo, pf, hooknum);
-	if (ret <= 0) {
+	if (ret < 0) {
 		/* Invalid: inverse of the return code tells
 		 * the netfilter core what to do */
 		DEBUGP("nf_conntrack_in: Can't track with proto module\n");
@@ -1481,8 +1482,10 @@ void __nf_ct_refresh_acct(struct nf_conn *ct,
 	write_lock_bh(&nf_conntrack_lock);
 
 	/* Only update if this is not a fixed timeout */
-	if (test_bit(IPS_FIXED_TIMEOUT_BIT, &ct->status))
-		goto acct;
+	if (test_bit(IPS_FIXED_TIMEOUT_BIT, &ct->status)) {
+		write_unlock_bh(&nf_conntrack_lock);
+		return;
+	}
 
 	/* If not in hash table, timer will not be active yet */
 	if (!nf_ct_is_confirmed(ct)) {
@@ -1502,7 +1505,6 @@ void __nf_ct_refresh_acct(struct nf_conn *ct,
 		}
 	}
 
-acct:
 #ifdef CONFIG_NF_CT_ACCT
 	if (do_acct) {
 		ct->counters[CTINFO2DIR(ctinfo)].packets++;
@@ -1741,15 +1743,13 @@ void nf_conntrack_cleanup(void)
 		}
 }
 
-static struct list_head *alloc_hashtable(int *sizep, int *vmalloced)
+static struct list_head *alloc_hashtable(int size, int *vmalloced)
 {
 	struct list_head *hash;
-	unsigned int size, i;
+	unsigned int i;
 
 	*vmalloced = 0;
-
-	size = *sizep = roundup(*sizep, PAGE_SIZE / sizeof(struct list_head));
-	hash = (void*)__get_free_pages(GFP_KERNEL|__GFP_NOWARN,
+	hash = (void*)__get_free_pages(GFP_KERNEL,
 				       get_order(sizeof(struct list_head)
 						 * size));
 	if (!hash) {
@@ -1781,7 +1781,7 @@ int set_hashsize(const char *val, struct kernel_param *kp)
 	if (!hashsize)
 		return -EINVAL;
 
-	hash = alloc_hashtable(&hashsize, &vmalloced);
+	hash = alloc_hashtable(hashsize, &vmalloced);
 	if (!hash)
 		return -ENOMEM;
 
@@ -1833,14 +1833,6 @@ int __init nf_conntrack_init(void)
 		if (nf_conntrack_htable_size < 16)
 			nf_conntrack_htable_size = 16;
 	}
-
-	nf_conntrack_hash = alloc_hashtable(&nf_conntrack_htable_size,
-					    &nf_conntrack_vmalloc);
-	if (!nf_conntrack_hash) {
-		printk(KERN_ERR "Unable to create nf_conntrack_hash\n");
-		goto err_out;
-	}
-
 	nf_conntrack_max = 8 * nf_conntrack_htable_size;
 #endif
 	 /* SpeedMod: Hashtable size */
@@ -1855,6 +1847,13 @@ int __init nf_conntrack_init(void)
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
 	       nf_conntrack_max);
+
+	nf_conntrack_hash = alloc_hashtable(nf_conntrack_htable_size,
+					    &nf_conntrack_vmalloc);
+	if (!nf_conntrack_hash) {
+		printk(KERN_ERR "Unable to create nf_conntrack_hash\n");
+		goto err_out;
+	}
 
 	ret = nf_conntrack_register_cache(NF_CT_F_BASIC, "nf_conntrack:basic",
 					  sizeof(struct nf_conn));

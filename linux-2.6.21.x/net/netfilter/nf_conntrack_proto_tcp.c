@@ -382,13 +382,12 @@ static unsigned int get_conntrack_index(const struct tcphdr *tcph)
 
    I.   Upper bound for valid data:	seq <= sender.td_maxend
    II.  Lower bound for valid data:	seq + len >= sender.td_end - receiver.td_maxwin
-   III.	Upper bound for valid (s)ack:   sack <= receiver.td_end
-   IV.	Lower bound for valid (s)ack:	sack >= receiver.td_end - MAXACKWINDOW
+   III.	Upper bound for valid ack:      sack <= receiver.td_end
+   IV.	Lower bound for valid ack:	ack >= receiver.td_end - MAXACKWINDOW
 
-   where sack is the highest right edge of sack block found in the packet
-   or ack in the case of packet without SACK option.
+   where sack is the highest right edge of sack block found in the packet.
 
-   The upper bound limit for a valid (s)ack is not ignored -
+   The upper bound limit for a valid ack is not ignored -
    we doesn't have to deal with fragments.
 */
 
@@ -662,13 +661,13 @@ static int tcp_in_window(struct ip_ct_tcp *state,
 		before(seq, sender->td_maxend + 1),
 		after(end, sender->td_end - receiver->td_maxwin - 1),
 		before(sack, receiver->td_end + 1),
-		after(sack, receiver->td_end - MAXACKWINDOW(sender) - 1));
+		after(ack, receiver->td_end - MAXACKWINDOW(sender)));
 
 #if defined (CONFIG_RA_NAT_NONE)
 	if (before(seq, sender->td_maxend + 1) &&
 	    after(end, sender->td_end - receiver->td_maxwin - 1) &&
 	    before(sack, receiver->td_end + 1) &&
-	    after(sack, receiver->td_end - MAXACKWINDOW(sender) - 1)) {
+	    after(ack, receiver->td_end - MAXACKWINDOW(sender))) {
 		/*
 		 * Take into account window scaling (RFC 1323).
 		 */
@@ -900,16 +899,10 @@ static int tcp_packet(struct nf_conn *conntrack,
 			/* Attempt to reopen a closed/aborted connection.
 			 * Delete this connection and look up again. */
 			write_unlock_bh(&tcp_lock);
-			/* Only repeat if we can actually remove the timer.
-			 * Destruction may already be in progress in process
-			 * context and we must give it a chance to terminate.
-			 */
-			if (del_timer(&conntrack->timeout)) {
+			if (del_timer(&conntrack->timeout))
 				conntrack->timeout.function((unsigned long)
 							    conntrack);
-				return -NF_REPEAT;
-			}
-			return NF_DROP;
+			return -NF_REPEAT;
 		}
 		/* Fall through */
 	case TCP_CONNTRACK_IGNORE:
@@ -938,7 +931,7 @@ static int tcp_packet(struct nf_conn *conntrack,
 			if (del_timer(&conntrack->timeout))
 				conntrack->timeout.function((unsigned long)
 							    conntrack);
-			return NF_DROP;
+			return -NF_DROP;
 		}
 		conntrack->proto.tcp.last_index = index;
 		conntrack->proto.tcp.last_dir = dir;

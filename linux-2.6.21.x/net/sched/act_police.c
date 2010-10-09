@@ -10,19 +10,29 @@
  * 		J Hadi Salim (action changes)
  */
 
+#include <asm/uaccess.h>
+#include <asm/system.h>
+#include <linux/bitops.h>
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
+#include <linux/mm.h>
+#include <linux/socket.h>
+#include <linux/sockios.h>
+#include <linux/in.h>
 #include <linux/errno.h>
+#include <linux/interrupt.h>
+#include <linux/netdevice.h>
 #include <linux/skbuff.h>
 #include <linux/module.h>
 #include <linux/rtnetlink.h>
 #include <linux/init.h>
+#include <net/sock.h>
 #include <net/act_api.h>
 
-#define L2T(p,L)   qdisc_l2t((p)->tcfp_R_tab, L)
-#define L2T_P(p,L) qdisc_l2t((p)->tcfp_P_tab, L)
+#define L2T(p,L)   ((p)->tcfp_R_tab->data[(L)>>(p)->tcfp_R_tab->rate.cell_log])
+#define L2T_P(p,L) ((p)->tcfp_P_tab->data[(L)>>(p)->tcfp_P_tab->rate.cell_log])
 
 #define POL_TAB_MASK     15
 static struct tcf_common *tcf_police_ht[POL_TAB_MASK + 1];
@@ -49,6 +59,7 @@ struct tc_police_compat
 
 /* Each policer is serialized by its individual spinlock */
 
+#ifdef CONFIG_NET_CLS_ACT
 static int tcf_act_police_walker(struct sk_buff *skb, struct netlink_callback *cb,
 			      int type, struct tc_action *a)
 {
@@ -94,8 +105,9 @@ rtattr_failure:
 	skb_trim(skb, (u8*)r - skb->data);
 	goto done;
 }
+#endif
 
-static void tcf_police_destroy(struct tcf_police *p)
+void tcf_police_destroy(struct tcf_police *p)
 {
 	unsigned int h = tcf_hash(p->tcf_index, POL_TAB_MASK);
 	struct tcf_common **p1p;
@@ -105,8 +117,10 @@ static void tcf_police_destroy(struct tcf_police *p)
 			write_lock_bh(&police_lock);
 			*p1p = p->tcf_next;
 			write_unlock_bh(&police_lock);
+#ifdef CONFIG_NET_ESTIMATOR
 			gen_kill_estimator(&p->tcf_bstats,
 					   &p->tcf_rate_est);
+#endif
 			if (p->tcfp_R_tab)
 				qdisc_put_rtab(p->tcfp_R_tab);
 			if (p->tcfp_P_tab)
@@ -170,6 +184,7 @@ static int tcf_act_police_locate(struct rtattr *rta, struct rtattr *est,
 	ret = ACT_P_CREATED;
 	police->tcf_refcnt = 1;
 	spin_lock_init(&police->tcf_lock);
+	police->tcf_stats_lock = &police->tcf_lock;
 	if (bind)
 		police->tcf_bindcnt = 1;
 override:
@@ -211,13 +226,15 @@ override:
 		police->tcfp_ptoks = L2T_P(police, police->tcfp_mtu);
 	police->tcf_action = parm->action;
 
+#ifdef CONFIG_NET_ESTIMATOR
 	if (tb[TCA_POLICE_AVRATE-1])
 		police->tcfp_ewma_rate =
 			*(u32*)RTA_DATA(tb[TCA_POLICE_AVRATE-1]);
 	if (est)
 		gen_replace_estimator(&police->tcf_bstats,
 				      &police->tcf_rate_est,
-				      &police->tcf_lock, est);
+				      police->tcf_stats_lock, est);
+#endif
 
 	spin_unlock_bh(&police->tcf_lock);
 	if (ret != ACT_P_CREATED)
@@ -244,19 +261,10 @@ failure:
 static int tcf_act_police_cleanup(struct tc_action *a, int bind)
 {
 	struct tcf_police *p = a->priv;
-	int ret = 0;
 
-	if (p != NULL) {
-		if (bind)
-			p->tcf_bindcnt--;
-
-		p->tcf_refcnt--;
-		if (p->tcf_refcnt <= 0 && !p->tcf_bindcnt) {
-			tcf_police_destroy(p);
-			ret = 1;
-		}
-	}
-	return ret;
+	if (p != NULL)
+		return tcf_police_release(p, bind);
+	return 0;
 }
 
 static int tcf_act_police(struct sk_buff *skb, struct tc_action *a,
@@ -272,12 +280,14 @@ static int tcf_act_police(struct sk_buff *skb, struct tc_action *a,
 	police->tcf_bstats.bytes += skb->len;
 	police->tcf_bstats.packets++;
 
+#ifdef CONFIG_NET_ESTIMATOR
 	if (police->tcfp_ewma_rate &&
 	    police->tcf_rate_est.bps >= police->tcfp_ewma_rate) {
 		police->tcf_qstats.overlimits++;
 		spin_unlock(&police->tcf_lock);
 		return police->tcf_action;
 	}
+#endif
 
 	if (skb->len <= police->tcfp_mtu) {
 		if (police->tcfp_R_tab == NULL) {
@@ -338,8 +348,10 @@ tcf_act_police_dump(struct sk_buff *skb, struct tc_action *a, int bind, int ref)
 	if (police->tcfp_result)
 		RTA_PUT(skb, TCA_POLICE_RESULT, sizeof(int),
 			&police->tcfp_result);
+#ifdef CONFIG_NET_ESTIMATOR
 	if (police->tcfp_ewma_rate)
 		RTA_PUT(skb, TCA_POLICE_AVRATE, 4, &police->tcfp_ewma_rate);
+#endif
 	return skb->len;
 
 rtattr_failure:
@@ -446,6 +458,7 @@ struct tcf_police *tcf_police_locate(struct rtattr *rta, struct rtattr *est)
 
 	police->tcf_refcnt = 1;
 	spin_lock_init(&police->tcf_lock);
+	police->tcf_stats_lock = &police->tcf_lock;
 	if (parm->rate.rate) {
 		police->tcfp_R_tab =
 			qdisc_get_rtab(&parm->rate, tb[TCA_POLICE_RATE-1]);
@@ -464,12 +477,14 @@ struct tcf_police *tcf_police_locate(struct rtattr *rta, struct rtattr *est)
 			goto failure;
 		police->tcfp_result = *(u32*)RTA_DATA(tb[TCA_POLICE_RESULT-1]);
 	}
+#ifdef CONFIG_NET_ESTIMATOR
 	if (tb[TCA_POLICE_AVRATE-1]) {
 		if (RTA_PAYLOAD(tb[TCA_POLICE_AVRATE-1]) != sizeof(u32))
 			goto failure;
 		police->tcfp_ewma_rate =
 			*(u32*)RTA_DATA(tb[TCA_POLICE_AVRATE-1]);
 	}
+#endif
 	police->tcfp_toks = police->tcfp_burst = parm->burst;
 	police->tcfp_mtu = parm->mtu;
 	if (police->tcfp_mtu == 0) {
@@ -483,9 +498,11 @@ struct tcf_police *tcf_police_locate(struct rtattr *rta, struct rtattr *est)
 	police->tcf_index = parm->index ? parm->index :
 		tcf_police_new_index();
 	police->tcf_action = parm->action;
+#ifdef CONFIG_NET_ESTIMATOR
 	if (est)
 		gen_new_estimator(&police->tcf_bstats, &police->tcf_rate_est,
-				  &police->tcf_lock, est);
+				  police->tcf_stats_lock, est);
+#endif
 	h = tcf_hash(police->tcf_index, POL_TAB_MASK);
 	write_lock_bh(&police_lock);
 	police->tcf_next = tcf_police_ht[h];
@@ -511,12 +528,14 @@ int tcf_police(struct sk_buff *skb, struct tcf_police *police)
 	police->tcf_bstats.bytes += skb->len;
 	police->tcf_bstats.packets++;
 
+#ifdef CONFIG_NET_ESTIMATOR
 	if (police->tcfp_ewma_rate &&
 	    police->tcf_rate_est.bps >= police->tcfp_ewma_rate) {
 		police->tcf_qstats.overlimits++;
 		spin_unlock(&police->tcf_lock);
 		return police->tcf_action;
 	}
+#endif
 	if (skb->len <= police->tcfp_mtu) {
 		if (police->tcfp_R_tab == NULL) {
 			spin_unlock(&police->tcf_lock);
@@ -572,8 +591,10 @@ int tcf_police_dump(struct sk_buff *skb, struct tcf_police *police)
 	if (police->tcfp_result)
 		RTA_PUT(skb, TCA_POLICE_RESULT, sizeof(int),
 			&police->tcfp_result);
+#ifdef CONFIG_NET_ESTIMATOR
 	if (police->tcfp_ewma_rate)
 		RTA_PUT(skb, TCA_POLICE_AVRATE, 4, &police->tcfp_ewma_rate);
+#endif
 	return skb->len;
 
 rtattr_failure:
@@ -586,12 +607,14 @@ int tcf_police_dump_stats(struct sk_buff *skb, struct tcf_police *police)
 	struct gnet_dump d;
 
 	if (gnet_stats_start_copy_compat(skb, TCA_STATS2, TCA_STATS,
-					 TCA_XSTATS, &police->tcf_lock,
+					 TCA_XSTATS, police->tcf_stats_lock,
 					 &d) < 0)
 		goto errout;
 
 	if (gnet_stats_copy_basic(&d, &police->tcf_bstats) < 0 ||
+#ifdef CONFIG_NET_ESTIMATOR
 	    gnet_stats_copy_rate_est(&d, &police->tcf_rate_est) < 0 ||
+#endif
 	    gnet_stats_copy_queue(&d, &police->tcf_qstats) < 0)
 		goto errout;
 
