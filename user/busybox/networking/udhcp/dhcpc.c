@@ -357,6 +357,23 @@ static void init_packet(struct dhcp_packet *packet, char type)
 	) {
 		udhcp_add_binary_option(packet, client_config.vendorclass);
 	}
+	if (type == DHCPDISCOVER
+	 || type == DHCPREQUEST
+	) {
+		int max_packet;
+
+		if (type == DHCPDISCOVER) {
+			/* Explicitly saying that we want RFC-compliant packets helps
+			 * some buggy DHCP servers to NOT send bigger packets */
+			max_packet = 576;
+		} else {
+			max_packet = sizeof(struct ip_udp_dhcp_packet);
+			if (client_config.client_mtu > 0
+			 && max_packet > client_config.client_mtu)
+				max_packet = client_config.client_mtu;
+		}
+		udhcp_add_simple_option(packet, DHCP_MAX_SIZE, htons(max_packet));
+	}
 }
 
 static void add_client_options(struct dhcp_packet *packet)
@@ -433,9 +450,6 @@ static int send_discover(uint32_t xid, uint32_t requested)
 	packet.xid = xid;
 	if (requested)
 		udhcp_add_simple_option(&packet, DHCP_REQUESTED_IP, requested);
-	/* Explicitly saying that we want RFC-compliant packets helps
-	 * some buggy DHCP servers to NOT send bigger packets */
-	udhcp_add_simple_option(&packet, DHCP_MAX_SIZE, htons(576));
 	add_client_options(&packet);
 
 	bb_info_msg("Sending discover...");
@@ -924,7 +938,8 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 	if (udhcp_read_interface(client_config.interface,
 			&client_config.ifindex,
 			NULL,
-			client_config.client_mac)
+			client_config.client_mac,
+			&client_config.client_mtu)
 	) {
 		return 1;
 	}
@@ -983,7 +998,11 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 		 * member interfaces were added/removed or if the status of the
 		 * bridge changed).
 		 * Workaround: refresh it here before processing the next packet */
-		udhcp_read_interface(client_config.interface, &client_config.ifindex, NULL, client_config.client_mac);
+		udhcp_read_interface(client_config.interface,
+				&client_config.ifindex,
+				NULL,
+				client_config.client_mac,
+				&client_config.client_mtu);
 
 		//bb_error_msg("sockfd:%d, listen_mode:%d", sockfd, listen_mode);
 
