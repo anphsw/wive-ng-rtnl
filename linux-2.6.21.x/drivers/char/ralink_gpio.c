@@ -139,12 +139,12 @@ int ralink_gpio_led_set(ralink_gpio_led_info led)
 #ifdef RALINK_GPIO_HAS_5124
 		else if (led.gpio <= 39) {
 			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO3924DIR));
-			tmp |= RALINK_GPIO(led.gpio-24);
+			tmp |= RALINK_GPIO((led.gpio - 24));
 			*(volatile u32 *)(RALINK_REG_PIO3924DIR) = tmp;
 		}
 		else {
 			tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIO5140DIR));
-			tmp |= RALINK_GPIO(led.gpio-40);
+			tmp |= RALINK_GPIO((led.gpio - 40));
 			*(volatile u32 *)(RALINK_REG_PIO5140DIR) = tmp;
 		}
 #endif

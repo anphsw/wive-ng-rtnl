@@ -221,8 +221,9 @@ extern void start_thread(struct pt_regs * regs, unsigned long pc, unsigned long 
 
 unsigned long get_wchan(struct task_struct *p);
 
-#define __KSTK_TOS(tsk) ((unsigned long)task_stack_page(tsk) + THREAD_SIZE - 32)
-#define task_pt_regs(tsk) ((struct pt_regs *)__KSTK_TOS(tsk) - 1)
+#define __KSTK_TOS(tsk) ((unsigned long)task_stack_page(tsk) + \
+			 THREAD_SIZE - 32 - sizeof(struct pt_regs))
+#define task_pt_regs(tsk) ((struct pt_regs *)__KSTK_TOS(tsk))
 #define KSTK_EIP(tsk) (task_pt_regs(tsk)->cp0_epc)
 #define KSTK_ESP(tsk) (task_pt_regs(tsk)->regs[29])
 #define KSTK_STATUS(tsk) (task_pt_regs(tsk)->cp0_status)
@@ -246,16 +247,10 @@ unsigned long get_wchan(struct task_struct *p);
 #ifdef CONFIG_CPU_HAS_PREFETCH
 
 #define ARCH_HAS_PREFETCH
+#define prefetch(x) __builtin_prefetch((x), 0, 1)
 
-extern inline void prefetch(const void *addr)
-{
-	__asm__ __volatile__(
-	"	.set	mips4		\n"
-	"	pref	%0, (%1)	\n"
-	"	.set	mips0		\n"
-	:
-	: "i" (Pref_Load), "r" (addr));
-}
+#define ARCH_HAS_PREFETCHW
+#define prefetchw(x) __builtin_prefetch((x), 1, 1)
 
 #endif
 

@@ -12,6 +12,7 @@
 #ifndef _ASM_SYSTEM_H
 #define _ASM_SYSTEM_H
 
+#include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/irqflags.h>
 
@@ -66,8 +67,6 @@ do {									\
 	if (cpu_has_dsp)						\
 		__save_dsp(prev);					\
 	(last) = resume(prev, next, task_thread_info(next));		\
-	if (cpu_has_dsp)						\
-		__restore_dsp(current);					\
 } while(0)
 #endif
 

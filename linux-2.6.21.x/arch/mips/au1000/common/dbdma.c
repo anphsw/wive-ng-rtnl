@@ -161,22 +161,22 @@ static dbdev_tab_t dbdev_tab[] = {
 	{ DSCR_CMD0_ALWAYS, DEV_FLAGS_ANYUSE, 0, 0, 0x00000000, 0, 0 },
 
 	/* Provide 16 user definable device types */
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
+	{ ~0, 0, 0, 0, 0, 0, 0 },
 };
 
 #define DBDEV_TAB_SIZE (sizeof(dbdev_tab) / sizeof(dbdev_tab_t))
@@ -209,7 +209,7 @@ au1xxx_ddma_add_device(dbdev_tab_t *dev)
 	dbdev_tab_t *p=NULL;
 	static u16 new_id=0x1000;
 
-	p = find_dbdev_id(0);
+	p = find_dbdev_id(~0);
 	if ( NULL != p )
 	{
 		memcpy(p, dev, sizeof(dbdev_tab_t));
@@ -411,8 +411,11 @@ au1xxx_dbdma_ring_alloc(u32 chanid, int entries)
 		if ((desc_base = (u32)kmalloc(i, GFP_KERNEL|GFP_DMA)) == 0)
 			return 0;
 
+		ctp->cdb_membase = desc_base;
 		desc_base = ALIGN_ADDR(desc_base, sizeof(au1x_ddma_desc_t));
-	}
+	} else
+		ctp->cdb_membase = desc_base;
+
 	dp = (au1x_ddma_desc_t *)desc_base;
 
 	/* Keep track of the base descriptor.
@@ -838,7 +841,7 @@ au1xxx_dbdma_chan_free(u32 chanid)
 
 	au1xxx_dbdma_stop(chanid);
 
-	kfree((void *)ctp->chan_desc_base);
+	kfree((void *)ctp->cdb_membase);
 
 	stp->dev_flags &= ~DEV_FLAGS_INUSE;
 	dtp->dev_flags &= ~DEV_FLAGS_INUSE;

@@ -607,7 +607,11 @@ load-$(CONFIG_SIBYTE_BIGSUR)	:= 0xffffffff80100000
 #
 core-$(CONFIG_SNI_RM)		+= arch/mips/sni/
 cflags-$(CONFIG_SNI_RM)		+= -Iinclude/asm-mips/mach-rm
+ifdef CONFIG_CPU_LITTLE_ENDIAN
 load-$(CONFIG_SNI_RM)		+= 0xffffffff80600000
+else
+load-$(CONFIG_SNI_RM)		+= 0xffffffff80030000
+endif
 
 #
 # Toshiba JMR-TX3927 board
@@ -759,6 +763,16 @@ vmlinux.srec: $(vmlinux-32)
 
 CLEAN_FILES += vmlinux.ecoff \
 	       vmlinux.srec
+
+archprepare:
+ifdef CONFIG_MIPS32_N32
+	@echo '  Checking missing-syscalls for N32'
+	$(Q)$(MAKE) $(build)=. missing-syscalls EXTRA_CFLAGS="-mabi=n32"
+endif
+ifdef CONFIG_MIPS32_O32
+	@echo '  Checking missing-syscalls for O32'
+	$(Q)$(MAKE) $(build)=. missing-syscalls EXTRA_CFLAGS="-mabi=32"
+endif
 
 archclean:
 	@$(MAKE) $(clean)=arch/mips/boot

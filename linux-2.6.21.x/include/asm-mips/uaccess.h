@@ -104,11 +104,21 @@
 
 #define __access_mask get_fs().seg
 
-#define __access_ok(addr, size, mask)					\
-	(((signed long)((mask) & ((addr) | ((addr) + (size)) | __ua_size(size)))) == 0)
+#define __access_ok(addr, size, mask)							\
+({											\
+	const volatile void __user *__up = addr;					\
+	unsigned long __addr = (unsigned long) __up;					\
+	unsigned long __size = size;							\
+	unsigned long __mask = mask;							\
+	unsigned long __ok;								\
+											\
+	__ok = (signed long)(__mask & (__addr | (__addr + __size) |			\
+		__ua_size(__size)));							\
+	__ok == 0;									\
+})
 
 #define access_ok(type, addr, size)					\
-	likely(__access_ok((unsigned long)(addr), (size),__access_mask))
+	likely(__access_ok((addr), (size), __access_mask))
 
 /*
  * put_user: - Write a simple value into user space.
@@ -622,6 +632,7 @@ extern size_t __copy_user_inatomic(void *__to, const void *__from, size_t __n);
 	__cu_len;							\
 })
 
+#if 0
 /*
  * __clear_user: - Zero a block of memory in user space, with less checking.
  * @to:   Destination address, in user space.
@@ -661,6 +672,29 @@ __clear_user(void __user *addr, __kernel_size_t size)
 		__cl_size = __clear_user(__cl_addr, __cl_size);		\
 	__cl_size;							\
 })
+#else
+/*
+ * Zero Userspace
+ */
+#ifndef __clear_user
+static inline __must_check unsigned long
+__clear_user(void __user *to, unsigned long n)
+{
+	memset((void __force *)to, 0, n);
+	return 0;
+}
+#endif
+
+static inline __must_check unsigned long
+clear_user(void __user *to, unsigned long n)
+{
+	might_sleep();
+	if (!access_ok(VERIFY_WRITE, to, n))
+		return n;
+
+	return __clear_user(to, n);
+}
+#endif
 
 /*
  * __strncpy_from_user: - Copy a NUL terminated string from userspace, with less checking.

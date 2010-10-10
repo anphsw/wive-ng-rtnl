@@ -1169,8 +1169,10 @@ reclassify:
 	return -1;
 }
 
+#if defined(CONFIG_NET_SCH_CLK_CPU) || defined(CONFIG_NET_SCH_CLK_JIFFIES)
 static int psched_us_per_tick = 1;
 static int psched_tick_per_us = 1;
+#endif
 
 #ifdef CONFIG_PROC_FS
 static int psched_show(struct seq_file *seq, void *v)

@@ -124,6 +124,10 @@ obj-$(CONFIG_GALILEO_64240_ETH) += gt64240eth.o
 obj-$(CONFIG_BIG_SUR_FE) += big_sur_ge.o
 obj-$(CONFIG_TITAN_GE) += titan_mdio.o titan_ge.o
 
+obj-$(CONFIG_GALILEO_64240_ETH) += gt64240eth.o
+obj-$(CONFIG_BIG_SUR_FE) += big_sur_ge.o
+obj-$(CONFIG_TITAN_GE) += titan_mdio.o titan_ge.o
+
 obj-$(CONFIG_PPP) += ppp_generic.o
 obj-$(CONFIG_PPP_ASYNC) += ppp_async.o
 obj-$(CONFIG_PPP_SYNC_TTY) += ppp_synctty.o

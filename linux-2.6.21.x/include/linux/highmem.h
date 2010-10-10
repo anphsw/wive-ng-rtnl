@@ -52,6 +52,7 @@ static inline void *kmap(struct page *page)
 #endif /* CONFIG_HIGHMEM */
 
 /* when CONFIG_HIGHMEM is not set these will be plain clear/copy_page */
+#ifndef clear_user_highpage
 static inline void clear_user_highpage(struct page *page, unsigned long vaddr)
 {
 	void *addr = kmap_atomic(page, KM_USER0);
@@ -60,6 +61,7 @@ static inline void clear_user_highpage(struct page *page, unsigned long vaddr)
 	/* Make sure this page is cleared on other CPU's too before using it */
 	smp_wmb();
 }
+#endif
 
 #ifndef __HAVE_ARCH_ALLOC_ZEROED_USER_HIGHPAGE
 static inline struct page *

@@ -40,13 +40,13 @@
 #include <asm/fpu.h>
 #include <asm/cpu-features.h>
 #include <asm/war.h>
+#include <asm/vdso.h>
 
 #include "signal-common.h"
 
 /*
  * Including <asm/unistd.h> would give use the 64-bit syscall numbers ...
  */
-#define __NR_N32_rt_sigreturn		6211
 #define __NR_N32_restart_syscall	6214
 
 extern int setup_sigcontext(struct pt_regs *, struct sigcontext __user *);
@@ -174,7 +174,7 @@ badframe:
 	force_sig(SIGSEGV, current);
 }
 
-static int setup_rt_frame_n32(struct k_sigaction * ka,
+static int setup_rt_frame_n32(void *sig_return, struct k_sigaction *ka,
 	struct pt_regs *regs, int signr, sigset_t *set, siginfo_t *info)
 {
 	struct rt_sigframe_n32 __user *frame;
@@ -184,8 +184,6 @@ static int setup_rt_frame_n32(struct k_sigaction * ka,
 	frame = get_sigframe(ka, regs, sizeof(*frame));
 	if (!access_ok(VERIFY_WRITE, frame, sizeof (*frame)))
 		goto give_sigsegv;
-
-	install_sigtramp(frame->rs_code, __NR_N32_rt_sigreturn);
 
 	/* Create siginfo.  */
 	err |= copy_siginfo_to_user(&frame->rs_info, info);
@@ -220,7 +218,7 @@ static int setup_rt_frame_n32(struct k_sigaction * ka,
 	regs->regs[ 5] = (unsigned long) &frame->rs_info;
 	regs->regs[ 6] = (unsigned long) &frame->rs_uc;
 	regs->regs[29] = (unsigned long) frame;
-	regs->regs[31] = (unsigned long) frame->rs_code;
+	regs->regs[31] = (unsigned long) sig_return;
 	regs->cp0_epc = regs->regs[25] = (unsigned long) ka->sa.sa_handler;
 
 	DEBUGP("SIG deliver (%s:%d): sp=0x%p pc=0x%lx ra=0x%lx\n",
@@ -236,5 +234,7 @@ give_sigsegv:
 
 struct mips_abi mips_abi_n32 = {
 	.setup_rt_frame	= setup_rt_frame_n32,
+	.rt_signal_return_offset =
+		offsetof(struct mips_vdso, n32_rt_signal_trampoline),
 	.restart	= __NR_N32_restart_syscall
 };
