@@ -61,9 +61,9 @@ static inline unsigned int irq_ffs(unsigned int pending)
 
 	t0 = s0 & 0x8000;
 	t0 = t0 < 1;
-	//t0 = t0 << 2;
+	/* t0 = t0 << 2; */
 	a0 = a0 - t0;
-	//s0 = s0 << t0;
+	/* s0 = s0 << t0; */
 
 	return a0;
 #endif
