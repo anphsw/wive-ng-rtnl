@@ -53,19 +53,13 @@ do {									\
 		prev->thread.mflags &= ~MF_FPUBOUND;			\
 		prev->cpus_allowed = prev->thread.user_cpus_allowed;	\
 	}								\
-	if (cpu_has_dsp)						\
-		__save_dsp(prev);					\
 	next->thread.emulated_fp = 0;					\
 	(last) = resume(prev, next, next->thread_info);			\
-	if (cpu_has_dsp)						\
-		__restore_dsp(current);					\
 } while(0)
 
 #else
 #define switch_to(prev,next,last)					\
 do {									\
-	if (cpu_has_dsp)						\
-		__save_dsp(prev);					\
 	(last) = resume(prev, next, task_thread_info(next));		\
 } while(0)
 #endif

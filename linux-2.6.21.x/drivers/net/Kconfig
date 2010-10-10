@@ -573,14 +573,6 @@ config GALILEO_64240_ETH
 	  This is the driver for the ethernet interfaces integrated into
 	  the Galileo (now Marvell) GT64240 chipset.
 
-config GALILEO_64240_ETH
-	tristate "Galileo GT64240 Ethernet support"
-	depends on NET_ETHERNET && MOMENCO_OCELOT_G
-	select MII
-	help
-	  This is the driver for the ethernet interfaces integrated into
-	  the Galileo (now Marvell) GT64240 chipset.
-
 config MIPS_AU1X00_ENET
 	bool "MIPS AU1000 Ethernet support"
 	depends on NET_ETHERNET && SOC_AU1X00
@@ -2200,10 +2192,6 @@ config R8169_NAPI
 	  information.
 
 	  If in doubt, say N.
-
-config NET_SB1250_MAC
-	tristate "SB1250 Ethernet support"
-	depends on SIBYTE_SB1xxx_SOC
 
 config NET_SB1250_MAC
 	tristate "SB1250 Ethernet support"

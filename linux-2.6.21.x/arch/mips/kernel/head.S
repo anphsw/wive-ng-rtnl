@@ -21,7 +21,6 @@
 #include <asm/irqflags.h>
 #include <asm/regdef.h>
 #include <asm/page.h>
-#include <asm/pgtable-bits.h>
 #include <asm/mipsregs.h>
 #include <asm/stackframe.h>
 
@@ -230,6 +229,4 @@ NESTED(smp_bootstrap, 16, sp)
 	END(smp_bootstrap)
 #endif /* CONFIG_SMP */
 
-#ifndef CONFIG_HOTPLUG_CPU
 	__FINIT
-#endif

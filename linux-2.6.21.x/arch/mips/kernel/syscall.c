@@ -77,24 +77,18 @@ unsigned long arch_get_unmapped_area(struct file *filp, unsigned long addr,
 	task_size = test_thread_flag(TIF_32BIT_ADDR) ? TASK_SIZE32 : TASK_SIZE;
 #endif
 
-	if (len > task_size)
-		return -ENOMEM;
-
 	if (flags & MAP_FIXED) {
-		/* Even MAP_FIXED mappings must reside within task_size.  */
-		if (task_size - len < addr)
-			return -EINVAL;
-
 		/*
 		 * We do not accept a shared mapping if it would violate
 		 * cache aliasing constraints.
 		 */
-		if ((flags & MAP_SHARED) &&
-		    ((addr - (pgoff << PAGE_SHIFT)) & shm_align_mask))
+		if ((flags & MAP_SHARED) && (addr & shm_align_mask))
 			return -EINVAL;
 		return addr;
 	}
 
+	if (len > task_size)
+		return -ENOMEM;
 	do_color_align = 0;
 	if (filp || (flags & MAP_SHARED))
 		do_color_align = 1;
@@ -283,8 +277,9 @@ asmlinkage int sys_set_thread_area(unsigned long addr)
 	struct thread_info *ti = task_thread_info(current);
 
 	ti->tp_value = addr;
-	if (cpu_has_userlocal)
-		write_c0_userlocal(addr);
+
+	/* If some future MIPS implementation has this register in hardware,
+	 * we will need to update it here (and in context switches).  */
 
 	return 0;
 }

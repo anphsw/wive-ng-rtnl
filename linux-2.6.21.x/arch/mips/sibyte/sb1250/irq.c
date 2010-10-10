@@ -26,7 +26,6 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/errno.h>
-#include <asm/gdb-stub.h>
 #include <asm/signal.h>
 #include <asm/system.h>
 #include <asm/io.h>
@@ -117,15 +116,22 @@ static void sb1250_set_affinity(unsigned int irq, cpumask_t mask)
 {
 	int i = 0, old_cpu, cpu, int_on;
 	u64 cur_ints;
+	struct irq_desc *desc = irq_desc + irq;
 	unsigned long flags;
 
 	i = first_cpu(mask);
+
+	if (cpus_weight(mask) > 1) {
+		printk("attempted to set irq affinity for irq %d to multiple CPUs\n", irq);
+		return;
+	}
 
 	/* Convert logical CPU to physical CPU */
 	cpu = cpu_logical_map(i);
 
 	/* Protect against other affinity changers and IMR manipulation */
-	spin_lock_irqsave(&sb1250_imr_lock, flags);
+	spin_lock_irqsave(&desc->lock, flags);
+	spin_lock(&sb1250_imr_lock);
 
 	/* Swizzle each CPU's IMR (but leave the IP selection alone) */
 	old_cpu = sb1250_irq_owner[irq];
@@ -147,7 +153,8 @@ static void sb1250_set_affinity(unsigned int irq, cpumask_t mask)
 		____raw_writeq(cur_ints, IOADDR(A_IMR_MAPPER(cpu) +
 					R_IMR_INTERRUPT_MASK));
 	}
-	spin_unlock_irqrestore(&sb1250_imr_lock, flags);
+	spin_unlock(&sb1250_imr_lock);
+	spin_unlock_irqrestore(&desc->lock, flags);
 }
 #endif
 

@@ -131,6 +131,9 @@ config ARCH_MAY_HAVE_PC_FDC
 config DMA_COHERENT
 	bool
 
+config DMA_IP27
+	bool
+
 config DMA_IP32
 	bool
 	select DMA_NEED_PCI_MAP_STATE
@@ -309,6 +312,12 @@ config EMMA2RH
 config SERIAL_RM9000
 	bool
 
+config GPI_RM9000
+	bool
+
+config WDT_RM9000
+	bool
+
 #
 # Unfortunately not all GT64120 systems run the chip at the same clock.
 # As the user for the clock rate and try to minimize the available options.
@@ -340,7 +349,6 @@ config BOOT_ELF32
 config MIPS_L1_CACHE_SHIFT
 	int
 	default "4" if MACH_DECSTATION || SNI_RM
-	default "6" if MIPS_CPU_SCACHE
 	default "7" if SGI_IP27
 	default "5"
 
@@ -799,16 +807,8 @@ config MIPS_MT_SMP
 	select SMP
 	select SYS_SUPPORTS_SMP
 	help
-	  This is a kernel model which is known a VSMP but lately has been
-	  marketesed into SMVP.
-	  Virtual SMP uses the processor's VPEs  to implement virtual
-	  processors. In currently available configuration of the 34K processor
-	  this allows for a dual processor. Both processors will share the same
-	  primary caches; each will obtain the half of the TLB for it's own
-	  exclusive use. For a layman this model can be described as similar to
-	  what Intel calls Hyperthreading.
-
-	  For further information see http://www.linux-mips.org/wiki/34K#VSMP
+	  This is a kernel model which is also known a VSMP or lately
+	  has been marketesed into SMVP.
 
 config MIPS_MT_SMTC
 	bool "SMTC: Use all TCs on all VPEs for SMP"
@@ -824,14 +824,6 @@ config MIPS_MT_SMTC
 	help
 	  This is a kernel model which is known a SMTC or lately has been
 	  marketesed into SMVP.
-	  is presenting the available TC's of the core as processors to Linux.
-	  On currently available 34K processors this means a Linux system will
-	  see up to 5 processors. The implementation of the SMTC kernel differs
-	  significantly from VSMP and cannot efficiently coexist in the same
-	  kernel binary so the choice between VSMP and SMTC is a compile time
-	  decision.
-
-	  For further information see http://www.linux-mips.org/wiki/34K#SMTC
 
 config MIPS_VPE_LOADER
 	bool "VPE loader support."
@@ -867,19 +859,6 @@ config MIPS_MT_SMTC_INSTANT_REPLAY
 	  processing, which adds runtime overhead (hence the option to turn
 	  it off), but ensures that IPIs are handled promptly even under
 	  heavy I/O interrupt load.
-
-config MIPS_MT_SMTC_IM_BACKSTOP
-	bool "Use per-TC register bits as backstop for inhibited IM bits"
-	depends on MIPS_MT_SMTC
-	default y
-	help
-	  To support multiple TC microthreads acting as "CPUs" within
-	  a VPE, VPE-wide interrupt mask bits must be specially manipulated
-	  during interrupt handling. To support legacy drivers and interrupt
-	  controller management code, SMTC has a "backstop" to track and
-	  if necessary restore the interrupt mask. This has some performance
-	  impact on interrupt service overhead. Disable it only if you know
-	  what you are doing.
 
 config MIPS_VPE_LOADER_TOM
 	bool "Load VPE program into memory hidden from linux"
@@ -954,6 +933,12 @@ config CPU_MIPSR2_IRQ_VI
 # Extended interrupt mode is an R2 feature
 #
 config CPU_MIPSR2_IRQ_EI
+	bool
+
+#
+# Shadow registers are an R2 feature
+#
+config CPU_MIPSR2_SRS
 	bool
 
 config CPU_HAS_SYNC
@@ -1119,7 +1104,7 @@ choice
 	 Allows the configuration of the timer frequency.
 
 	config HZ_48
-		bool "48 HZ" if SYS_SUPPORTS_48HZ || SYS_SUPPORTS_ARBIT_HZ
+		bool "48 HZ" if SYS_SUPPORTS_48HZ
 
 	config HZ_100
 		bool "100 HZ" if SYS_SUPPORTS_100HZ || SYS_SUPPORTS_ARBIT_HZ
@@ -1226,6 +1211,10 @@ config SECCOMP
 	  If unsure, say Y. Only embedded should say N here.
 
 endmenu
+
+config RWSEM_GENERIC_SPINLOCK
+	bool
+	default y
 
 config LOCKDEP_SUPPORT
 	bool

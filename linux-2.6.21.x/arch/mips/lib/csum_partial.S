@@ -38,14 +38,12 @@
 #ifdef USE_DOUBLE
 
 #define LOAD   ld
-#define LOAD32 lwu
 #define ADD    daddu
 #define NBYTES 8
 
 #else
 
 #define LOAD   lw
-#define LOAD32 lw
 #define ADD    addu
 #define NBYTES 4
 
@@ -57,14 +55,6 @@
 	ADD	sum, reg;					\
 	sltu	v1, sum, reg;					\
 	ADD	sum, v1
-
-#define ADDC32(sum,reg)						\
-	.set	push;						\
-	.set	noat;						\
-	addu	sum, reg;					\
-	sltu	v1, sum, reg;					\
-	addu	sum, v1;					\
-	.set	pop
 
 #define CSUM_BIGCHUNK1(src, offset, sum, _t0, _t1, _t2, _t3)	\
 	LOAD	_t0, (offset + UNIT(0))(src);			\
@@ -138,7 +128,7 @@ dword_align:
 	beqz	t8, qword_align
 	 andi	t8, src, 0x8
 
-	LOAD32	t0, 0x00(src)
+	lw	t0, 0x00(src)
 	LONG_SUBU	a1, a1, 0x4
 	ADDC(sum, t0)
 	PTR_ADDU	src, src, 0x4
@@ -215,7 +205,7 @@ do_end_words:
 	LONG_SRL	t8, t8, 0x2
 
 end_words:
-	LOAD32	t0, (src)
+	lw	t0, (src)
 	LONG_SUBU	t8, t8, 0x1
 	ADDC(sum, t0)
 	bnez	t8, end_words
@@ -232,9 +222,6 @@ small_csumcpy:
 	/* Still a full word to go  */
 	ulw	t1, (src)
 	PTR_ADDIU	src, 4
-#ifdef USE_DOUBLE
-	dsll	t1, t1, 32			/* clear lower 32bit */
-#endif
 	ADDC(sum, t1)
 
 1:	move	t1, zero
@@ -282,7 +269,7 @@ small_csumcpy:
 1:
 	.set	reorder
 	/* Add the passed partial csum.  */
-	ADDC32(sum, a2)
+	ADDC(sum, a2)
 	jr	ra
 	.set	noreorder
 	END(csum_partial)
@@ -666,7 +653,7 @@ done:
 	andi	sum, 0xffff
 1:
 	.set reorder
-	ADDC32(sum, psum)
+	ADDC(sum, psum)
 	jr	ra
 	.set noreorder
 

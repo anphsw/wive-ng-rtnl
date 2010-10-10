@@ -30,7 +30,6 @@
 #include <linux/sched.h>
 #include <linux/cpumask.h>
 #include <linux/cpu.h>
-#include <linux/smp.h>
 
 #include <asm/atomic.h>
 #include <asm/cpu.h>
@@ -63,6 +62,7 @@ static void smp_tune_scheduling (void)
 }
 
 extern void __init calibrate_delay(void);
+extern ATTRIB_NORET void cpu_idle(void);
 
 /*
  * First C code run on the secondary CPUs after being started up by
@@ -209,10 +209,8 @@ static void stop_this_cpu(void *dummy)
 	 * Remove this CPU:
 	 */
 	cpu_clear(smp_processor_id(), cpu_online_map);
-	for (;;) {
-		if (cpu_wait)
-			(*cpu_wait)();		/* Wait if available. */
-	}
+	local_irq_enable();	/* May need to service _machine_restart IPI */
+	for (;;);		/* Wait if available. */
 }
 
 void smp_send_stop(void)

@@ -163,7 +163,6 @@ static int dma_setup(struct scsi_cmnd *cmd, int datainp)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(sgiwd93_reset);
 
 static void dma_stop(struct Scsi_Host *instance, struct scsi_cmnd *SCpnt,
 		     int status)

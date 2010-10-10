@@ -40,7 +40,7 @@ int irq_to_slot[MAX_PCI_BUSSES * MAX_DEVICES_PER_PCIBUS];
 
 extern struct pci_ops bridge_pci_ops;
 
-int __cpuinit bridge_probe(nasid_t nasid, int widget_id, int masterwid)
+int __init bridge_probe(nasid_t nasid, int widget_id, int masterwid)
 {
 	unsigned long offset = NODE_OFFSET(nasid);
 	struct bridge_controller *bc;
@@ -136,47 +136,25 @@ int __cpuinit bridge_probe(nasid_t nasid, int widget_id, int masterwid)
  */
 int __devinit pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 {
-	return 0;
-}
-
-/* Most MIPS systems have straight-forward swizzling needs.  */
-static inline u8 bridge_swizzle(u8 pin, u8 slot)
-{
-	return (((pin - 1) + slot) % 4) + 1;
-}
-
-static inline struct pci_dev *bridge_root_dev(struct pci_dev *dev)
-{
-	while (dev->bus->parent) {
-		/* Move up the chain of bridges. */
-		dev = dev->bus->self;
-	}
-
-	return dev;
-}
-
-/* Do platform specific device initialization at pci_enable_device() time */
-int pcibios_plat_dev_init(struct pci_dev *dev)
-{
 	struct bridge_controller *bc = BRIDGE_CONTROLLER(dev->bus);
-	struct pci_dev *rdev = bridge_root_dev(dev);
-	int slot = PCI_SLOT(rdev->devfn);
-	int irq;
+	int irq = bc->pci_int[slot];
 
-	irq = bc->pci_int[slot];
 	if (irq == -1) {
-		irq = request_bridge_irq(bc);
+		irq = bc->pci_int[slot] = request_bridge_irq(bc);
 		if (irq < 0)
-			return irq;
-
-		bc->pci_int[slot] = irq;
+			panic("Can't allocate interrupt for PCI device %s\n",
+			      pci_name(dev));
 	}
 
 	irq_to_bridge[irq] = bc;
 	irq_to_slot[irq] = slot;
 
-	dev->irq = irq;
+	return irq;
+}
 
+/* Do platform specific device initialization at pci_enable_device() time */
+int pcibios_plat_dev_init(struct pci_dev *dev)
+{
 	return 0;
 }
 

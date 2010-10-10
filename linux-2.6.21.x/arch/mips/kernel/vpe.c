@@ -69,7 +69,7 @@ static int major;
 static const int minor = 1;	/* fixed for now  */
 
 #ifdef CONFIG_MIPS_APSP_KSPD
-static struct kspd_notifications kspd_events;
+ static struct kspd_notifications kspd_events;
 static int kspd_events_reqd = 0;
 #endif
 
@@ -155,9 +155,10 @@ struct {
 
 static void release_progmem(void *ptr);
 /* static __attribute_used__ void dump_vpe(struct vpe * v); */
+extern void save_gp_address(unsigned int secbase, unsigned int rel);
 
 /* get the vpe associated with this minor */
-static struct vpe *get_vpe(int minor)
+struct vpe *get_vpe(int minor)
 {
 	struct vpe *v;
 
@@ -173,7 +174,7 @@ static struct vpe *get_vpe(int minor)
 }
 
 /* get the vpe associated with this minor */
-static struct tc *get_tc(int index)
+struct tc *get_tc(int index)
 {
 	struct tc *t;
 
@@ -185,8 +186,20 @@ static struct tc *get_tc(int index)
 	return NULL;
 }
 
+struct tc *get_tc_unused(void)
+{
+	struct tc *t;
+
+	list_for_each_entry(t, &vpecontrol.tc_list, list) {
+		if (t->state == TC_STATE_UNUSED)
+			return t;
+	}
+
+	return NULL;
+}
+
 /* allocate a vpe and associate it with this minor (or index) */
-static struct vpe *alloc_vpe(int minor)
+struct vpe *alloc_vpe(int minor)
 {
 	struct vpe *v;
 
@@ -203,7 +216,7 @@ static struct vpe *alloc_vpe(int minor)
 }
 
 /* allocate a tc. At startup only tc0 is running, all other can be halted. */
-static struct tc *alloc_tc(int index)
+struct tc *alloc_tc(int index)
 {
 	struct tc *t;
 
@@ -220,7 +233,7 @@ static struct tc *alloc_tc(int index)
 }
 
 /* clean up and free everything */
-static void release_vpe(struct vpe *v)
+void release_vpe(struct vpe *v)
 {
 	list_del(&v->list);
 	if (v->load_addr)
@@ -228,7 +241,7 @@ static void release_vpe(struct vpe *v)
 	kfree(v);
 }
 
-static void dump_mtregs(void)
+void dump_mtregs(void)
 {
 	unsigned long val;
 
@@ -251,21 +264,13 @@ static void dump_mtregs(void)
 /* Find some VPE program space  */
 static void *alloc_progmem(unsigned long len)
 {
-	void *addr;
-
 #ifdef CONFIG_MIPS_VPE_LOADER_TOM
-	/*
-	 * This means you must tell Linux to use less memory than you
-	 * physically have, for example by passing a mem= boot argument.
-	 */
-	addr = pfn_to_kaddr(max_low_pfn);
-	memset(addr, 0, len);
+	/* this means you must tell linux to use less memory than you physically have */
+	return pfn_to_kaddr(max_pfn);
 #else
-	/* simple grab some mem for now */
-	addr = kzalloc(len, GFP_KERNEL);
+	// simple grab some mem for now
+	return kmalloc(len, GFP_KERNEL);
 #endif
-
-	return addr;
 }
 
 static void release_progmem(void *ptr)
@@ -315,8 +320,7 @@ static void layout_sections(struct module *mod, const Elf_Ehdr * hdr,
 			    || (s->sh_flags & masks[m][1])
 			    || s->sh_entsize != ~0UL)
 				continue;
-			s->sh_entsize =
-				get_offset((unsigned long *)&mod->core_size, s);
+			s->sh_entsize = get_offset(&mod->core_size, s);
 		}
 
 		if (m == 0)
@@ -450,15 +454,16 @@ static int apply_r_mips_lo16(struct module *me, uint32_t *location,
 {
 	unsigned long insnlo = *location;
 	Elf32_Addr val, vallo;
-	struct mips_hi16 *l, *next;
 
 	/* Sign extend the addend we extract from the lo insn.  */
 	vallo = ((insnlo & 0xffff) ^ 0x8000) - 0x8000;
 
 	if (mips_hi16_list != NULL) {
+		struct mips_hi16 *l;
 
 		l = mips_hi16_list;
 		while (l != NULL) {
+			struct mips_hi16 *next;
 			unsigned long insn;
 
 			/*
@@ -468,7 +473,7 @@ static int apply_r_mips_lo16(struct module *me, uint32_t *location,
 				printk(KERN_DEBUG "VPE loader: "
 				       "apply_r_mips_lo16/hi16: 	"
 				       "inconsistent value information\n");
-				goto out_free;
+				return -ENOEXEC;
 			}
 
 			/*
@@ -506,16 +511,6 @@ static int apply_r_mips_lo16(struct module *me, uint32_t *location,
 	*location = insnlo;
 
 	return 0;
-
-out_free:
-	while (l != NULL) {
-		next = l->next;
-		kfree(l);
-		l = next;
-	}
-	mips_hi16_list = NULL;
-
-	return -ENOEXEC;
 }
 
 static int (*reloc_handlers[]) (struct module *me, uint32_t *location,
@@ -539,7 +534,7 @@ static char *rstrs[] = {
 	[R_MIPS_PC16] = "MIPS_PC16"
 };
 
-static int apply_relocations(Elf32_Shdr *sechdrs,
+int apply_relocations(Elf32_Shdr *sechdrs,
 		      const char *strtab,
 		      unsigned int symindex,
 		      unsigned int relsec,
@@ -584,7 +579,7 @@ static int apply_relocations(Elf32_Shdr *sechdrs,
 	return 0;
 }
 
-static inline void save_gp_address(unsigned int secbase, unsigned int rel)
+void save_gp_address(unsigned int secbase, unsigned int rel)
 {
 	gp_addr = secbase + rel;
 	gp_offs = gp_addr - (secbase & 0xffff0000);
@@ -909,10 +904,9 @@ static int vpe_elfload(struct vpe * v)
 	}
 
 	v->load_addr = alloc_progmem(mod.core_size);
-	if (!v->load_addr)
-		return -ENOMEM;
+	memset(v->load_addr, 0, mod.core_size);
 
-	pr_info("VPE loader: loading to %p\n", v->load_addr);
+	printk("VPE loader: loading to %p\n", v->load_addr);
 
 	if (relocate) {
 		for (i = 0; i < hdr->e_shnum; i++) {
@@ -961,20 +955,8 @@ static int vpe_elfload(struct vpe * v)
 
   		}
   	} else {
-		struct elf_phdr *phdr = (struct elf_phdr *) ((char *)hdr + hdr->e_phoff);
+  		for (i = 0; i < hdr->e_shnum; i++) {
 
-		for (i = 0; i < hdr->e_phnum; i++) {
-			if (phdr->p_type == PT_LOAD) {
-				memcpy((void *)phdr->p_paddr,
-				       (char *)hdr + phdr->p_offset,
-				       phdr->p_filesz);
-				memset((void *)phdr->p_paddr + phdr->p_filesz,
-				       0, phdr->p_memsz - phdr->p_filesz);
-		    }
-		    phdr++;
-		}
-
-		for (i = 0; i < hdr->e_shnum; i++) {
  			/* Internal symbols and strings. */
  			if (sechdrs[i].sh_type == SHT_SYMTAB) {
  				symindex = i;
@@ -985,6 +967,39 @@ static int vpe_elfload(struct vpe * v)
  				   magic symbols */
  				sechdrs[i].sh_addr = (size_t) hdr + sechdrs[i].sh_offset;
  			}
+
+ 			/* filter sections we dont want in the final image */
+ 			if (!(sechdrs[i].sh_flags & SHF_ALLOC) ||
+ 			    (sechdrs[i].sh_type == SHT_MIPS_REGINFO)) {
+ 				printk( KERN_DEBUG " ignoring section, "
+ 					"name %s type %x address 0x%x \n",
+ 					secstrings + sechdrs[i].sh_name,
+ 					sechdrs[i].sh_type, sechdrs[i].sh_addr);
+ 				continue;
+ 			}
+
+  			if (sechdrs[i].sh_addr < (unsigned int)v->load_addr) {
+ 				printk( KERN_WARNING "VPE loader: "
+ 					"fully linked image has invalid section, "
+ 					"name %s type %x address 0x%x, before load "
+ 					"address of 0x%x\n",
+ 					secstrings + sechdrs[i].sh_name,
+ 					sechdrs[i].sh_type, sechdrs[i].sh_addr,
+ 					(unsigned int)v->load_addr);
+  				return -ENOEXEC;
+  			}
+
+ 			printk(KERN_DEBUG " copying section sh_name %s, sh_addr 0x%x "
+			       "size 0x%x0 from x%p\n",
+			       secstrings + sechdrs[i].sh_name, sechdrs[i].sh_addr,
+			       sechdrs[i].sh_size, hdr + sechdrs[i].sh_offset);
+
+  			if (sechdrs[i].sh_type != SHT_NOBITS)
+				memcpy((void *)sechdrs[i].sh_addr,
+				       (char *)hdr + sechdrs[i].sh_offset,
+ 				       sechdrs[i].sh_size);
+			else
+				memset((void *)sechdrs[i].sh_addr, 0, sechdrs[i].sh_size);
 		}
 	}
 
@@ -1038,7 +1053,6 @@ static void cleanup_tc(struct tc *tc)
 	write_tc_c0_tcstatus(tmp);
 
 	write_tc_c0_tchalt(TCHALT_H);
-	mips_ihb();
 
 	/* bind it to anything other than VPE1 */
 	write_tc_c0_tcbind(read_tc_c0_tcbind() & ~TCBIND_CURVPE); // | TCBIND_CURVPE
@@ -1150,7 +1164,7 @@ static int vpe_release(struct inode *inode, struct file *filp)
 
 	/* It's good to be able to run the SP and if it chokes have a look at
 	   the /dev/rt?. But if we reset the pointer to the shared struct we
-	   lose what has happened. So perhaps if garbage is sent to the vpe
+	   loose what has happened. So perhaps if garbage is sent to the vpe
 	   device, use it as a trigger for the reset. Hopefully a nice
 	   executable will be along shortly. */
 	if (ret < 0)
@@ -1271,12 +1285,9 @@ int vpe_free(vpe_handle vpe)
 	settc(t->index);
 	write_vpe_c0_vpeconf0(read_vpe_c0_vpeconf0() & ~VPECONF0_VPA);
 
-	/* halt the TC */
-	write_tc_c0_tchalt(TCHALT_H);
-	mips_ihb();
-
-	/* mark the TC unallocated */
+	/* mark the TC unallocated and halt'ed */
 	write_tc_c0_tcstatus(read_tc_c0_tcstatus() & ~TCSTATUS_A);
+	write_tc_c0_tchalt(TCHALT_H);
 
 	v->state = VPE_STATE_UNUSED;
 
@@ -1462,16 +1473,14 @@ static int __init vpe_module_init(void)
 				t->pvpe = get_vpe(0);	/* set the parent vpe */
 			}
 
-			/* halt the TC */
-			write_tc_c0_tchalt(TCHALT_H);
-			mips_ihb();
-
 			tmp = read_tc_c0_tcstatus();
 
 			/* mark not activated and not dynamically allocatable */
 			tmp &= ~(TCSTATUS_A | TCSTATUS_DA);
 			tmp |= TCSTATUS_IXMT;	/* interrupt exempt */
 			write_tc_c0_tcstatus(tmp);
+
+			write_tc_c0_tchalt(TCHALT_H);
 		}
 	}
 

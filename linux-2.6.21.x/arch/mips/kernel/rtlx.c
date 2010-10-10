@@ -76,15 +76,6 @@ static void rtlx_dispatch(void)
 static irqreturn_t rtlx_interrupt(int irq, void *dev_id)
 {
 	int i;
-	unsigned int flags, vpeflags;
-
-	/* Ought not to be strictly necessary for SMTC builds */
-	local_irq_save(flags);
-	vpeflags = dvpe();
-	set_c0_status(0x100 << MIPS_CPU_RTLX_IRQ);
-	irq_enable_hazard();
-	evpe(vpeflags);
-	local_irq_restore(flags);
 
 	for (i = 0; i < RTLX_CHANNELS; i++) {
 			wake_up(&channel_wqs[i].lx_queue);
@@ -121,8 +112,7 @@ static __attribute_used__ void dump_rtlx(void)
 static int rtlx_init(struct rtlx_info *rtlxi)
 {
 	if (rtlxi->id != RTLX_ID) {
-		printk(KERN_ERR "no valid RTLX id at 0x%p 0x%lx\n",
-			rtlxi, rtlxi->id);
+		printk(KERN_ERR "no valid RTLX id at 0x%p 0x%x\n", rtlxi, rtlxi->id);
 		return -ENOEXEC;
 	}
 
@@ -175,15 +165,16 @@ int rtlx_open(int index, int can_sleep)
 	}
 
 	if (rtlx == NULL) {
-		if ((p = vpe_get_shared(RTLX_TARG_VPE)) == NULL) {
+		if( (p = vpe_get_shared(RTLX_TARG_VPE)) == NULL) {
 			if (can_sleep) {
 				__wait_event_interruptible(channel_wqs[index].lx_queue,
-							   (p = vpe_get_shared(RTLX_TARG_VPE)), ret);
+				                           (p = vpe_get_shared(RTLX_TARG_VPE)),
+				                           ret);
 				if (ret)
 					goto out_fail;
-		    	} else {
+			} else {
 				printk(KERN_DEBUG "No SP program loaded, and device "
-				       "opened with O_NONBLOCK\n");
+					"opened with O_NONBLOCK\n");
 				ret = -ENOSYS;
 				goto out_fail;
 			}
@@ -195,9 +186,7 @@ int rtlx_open(int index, int can_sleep)
 				DEFINE_WAIT(wait);
 
 				for (;;) {
-					prepare_to_wait(
-						&channel_wqs[index].lx_queue,
-						&wait, TASK_INTERRUPTIBLE);
+					prepare_to_wait(&channel_wqs[index].lx_queue, &wait, TASK_INTERRUPTIBLE);
 					smp_rmb();
 					if (*p != NULL)
 						break;
@@ -210,7 +199,7 @@ int rtlx_open(int index, int can_sleep)
 				}
 				finish_wait(&channel_wqs[index].lx_queue, &wait);
 			} else {
-				printk(KERN_ERR " *vpe_get_shared is NULL. "
+				printk(" *vpe_get_shared is NULL. "
 				       "Has an SP program been loaded?\n");
 				ret = -ENOSYS;
 				goto out_fail;
@@ -218,9 +207,8 @@ int rtlx_open(int index, int can_sleep)
 		}
 
 		if ((unsigned int)*p < KSEG0) {
-			printk(KERN_WARNING "vpe_get_shared returned an "
-			       "invalid pointer maybe an error code %d\n",
-			       (int)*p);
+			printk(KERN_WARNING "vpe_get_shared returned an invalid pointer "
+			       "maybe an error code %d\n", (int)*p);
 			ret = -ENOSYS;
 			goto out_fail;
 		}
@@ -248,10 +236,6 @@ out_ret:
 
 int rtlx_release(int index)
 {
-	if (rtlx == NULL) {
-		printk(KERN_ERR "rtlx_release() with null rtlx\n");
-		return 0;
-	}
 	rtlx->channel[index].lx_state = RTLX_STATE_UNUSED;
 	return 0;
 }
@@ -271,8 +255,8 @@ unsigned int rtlx_read_poll(int index, int can_sleep)
 			int ret = 0;
 
 			__wait_event_interruptible(channel_wqs[index].lx_queue,
-				(chan->lx_read != chan->lx_write) ||
-				sp_stopping, ret);
+			                           chan->lx_read != chan->lx_write || sp_stopping,
+			                           ret);
 			if (ret)
 				return ret;
 
@@ -302,9 +286,7 @@ static inline int write_spacefree(int read, int write, int size)
 unsigned int rtlx_write_poll(int index)
 {
 	struct rtlx_channel *chan = &rtlx->channel[index];
-
-	return write_spacefree(chan->rt_read, chan->rt_write,
-				chan->buffer_size);
+	return write_spacefree(chan->rt_read, chan->rt_write, chan->buffer_size);
 }
 
 ssize_t rtlx_read(int index, void __user *buff, size_t count)
@@ -366,8 +348,8 @@ ssize_t rtlx_write(int index, const void __user *buffer, size_t count)
 	rt_read = rt->rt_read;
 
 	/* total number of bytes to copy */
-	count = min(count, (size_t)write_spacefree(rt_read, rt->rt_write,
-							rt->buffer_size));
+	count = min(count,
+		    (size_t)write_spacefree(rt_read, rt->rt_write, rt->buffer_size));
 
 	/* first bit from write pointer to the end of the buffer, or count */
 	fl = min(count, (size_t) rt->buffer_size - rt->rt_write);
@@ -523,12 +505,6 @@ static int rtlx_module_init(void)
 
 	if (cpu_has_vint)
 		set_vi_handler(MIPS_CPU_RTLX_IRQ, rtlx_dispatch);
-	else {
-		printk(KERN_ERR "APRP RTLX init on non-vectored-interrupt "
-		       "processor\n");
-		err = -ENODEV;
-		goto out_chrdev;
-	}
 
 	rtlx_irq.dev_id = rtlx;
 	setup_irq(rtlx_irq_num, &rtlx_irq);

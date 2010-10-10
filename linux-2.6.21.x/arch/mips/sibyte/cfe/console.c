@@ -51,13 +51,12 @@ static int cfe_console_setup(struct console *cons, char *str)
 			setleds("u0cn");
 		} else if (!strcmp(consdev, "uart1")) {
 			setleds("u1cn");
-		} else
 #endif
 #ifdef CONFIG_VGA_CONSOLE
-		       if (!strcmp(consdev, "pcconsole0")) {
-				setleds("pccn");
-		} else
+		} else if (!strcmp(consdev, "pcconsole0")) {
+			setleds("pccn");
 #endif
+		} else
 			return -ENODEV;
 	}
 	return 0;

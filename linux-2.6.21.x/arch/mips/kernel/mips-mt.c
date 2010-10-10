@@ -11,7 +11,6 @@
 #include <linux/security.h>
 
 #include <asm/cpu.h>
-#include <linux/cpuset.h>
 #include <asm/processor.h>
 #include <asm/atomic.h>
 #include <asm/system.h>

@@ -8,7 +8,6 @@
  * Kevin D. Kissell, kevink@mips.com and Carsten Langgaard, carstenl@mips.com
  * Copyright (C) 2000 MIPS Technologies, Inc.  All rights reserved.
  */
-#include <linux/bug.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/signal.h>
@@ -26,7 +25,6 @@
 #include <linux/swap.h>
 #include <linux/proc_fs.h>
 #include <linux/pfn.h>
-#include <linux/hardirq.h>
 
 #include <asm/bootinfo.h>
 #include <asm/cachectl.h>
@@ -133,15 +131,10 @@ void *kmap_coherent(struct page *page, unsigned long addr)
 	pte_t pte;
 	int tlbidx;
 
-	BUG_ON(Page_dcache_dirty(page));
-
 	inc_preempt_count();
 	idx = (addr >> PAGE_SHIFT) & (FIX_N_COLOURS - 1);
 #ifdef CONFIG_MIPS_MT_SMTC
-	idx += FIX_N_COLOURS * smp_processor_id() +
-		(in_interrupt() ? (FIX_N_COLOURS * NR_CPUS) : 0);
-#else
-	idx += in_interrupt() ? FIX_N_COLOURS : 0;
+	idx += FIX_N_COLOURS * smp_processor_id();
 #endif
 	vaddr = __fix_to_virt(FIX_CMAP_END - idx);
 	pte = mk_pte(page, PAGE_KERNEL);

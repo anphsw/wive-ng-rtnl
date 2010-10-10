@@ -33,7 +33,6 @@ static struct irq_chip rm7k_irq_controller = {
 	.mask = mask_rm7k_irq,
 	.mask_ack = mask_rm7k_irq,
 	.unmask = unmask_rm7k_irq,
-	.eoi	= unmask_rm7k_irq
 };
 
 void __init rm7k_cpu_irq_init(void)
@@ -45,5 +44,5 @@ void __init rm7k_cpu_irq_init(void)
 
 	for (i = base; i < base + 4; i++)
 		set_irq_chip_and_handler(i, &rm7k_irq_controller,
-					 handle_percpu_irq);
+					 handle_level_irq);
 }

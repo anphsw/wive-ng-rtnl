@@ -43,9 +43,6 @@
 #include <asm/types.h>
 #include <asm/stacktrace.h>
 
-extern void check_wait(void);
-extern asmlinkage void r4k_wait(void);
-extern asmlinkage void rollback_handle_int(void);
 extern asmlinkage void handle_int(void);
 extern asmlinkage void handle_tlbm(void);
 extern asmlinkage void handle_tlbl(void);
@@ -401,7 +398,7 @@ asmlinkage void do_be(struct pt_regs *regs)
 }
 
 /*
- * ll/sc, rdhwr, sync emulation
+ * ll/sc emulation
  */
 
 #define OPCODE 0xfc000000
@@ -410,11 +407,9 @@ asmlinkage void do_be(struct pt_regs *regs)
 #define OFFSET 0x0000ffff
 #define LL     0xc0000000
 #define SC     0xe0000000
-#define SPEC0  0x00000000
 #define SPEC3  0x7c000000
 #define RD     0x0000f800
 #define FUNC   0x0000003f
-#define SYNC   0x0000000f
 #define RDHWR  0x0000003b
 
 /*
@@ -425,10 +420,11 @@ unsigned long ll_bit;
 
 static struct task_struct *ll_task = NULL;
 
-static inline int simulate_ll(struct pt_regs *regs, unsigned int opcode)
+static inline void simulate_ll(struct pt_regs *regs, unsigned int opcode)
 {
 	unsigned long value, __user *vaddr;
 	long offset;
+	int signal = 0;
 
 	/*
 	 * analyse the ll instruction that just caused a ri exception
@@ -443,10 +439,14 @@ static inline int simulate_ll(struct pt_regs *regs, unsigned int opcode)
 	vaddr = (unsigned long __user *)
 	        ((unsigned long)(regs->regs[(opcode & BASE) >> 21]) + offset);
 
-	if ((unsigned long)vaddr & 3)
-		return SIGBUS;
-	if (get_user(value, vaddr))
-		return SIGSEGV;
+	if ((unsigned long)vaddr & 3) {
+		signal = SIGBUS;
+		goto sig;
+	}
+	if (get_user(value, vaddr)) {
+		signal = SIGSEGV;
+		goto sig;
+	}
 
 	preempt_disable();
 
@@ -459,16 +459,22 @@ static inline int simulate_ll(struct pt_regs *regs, unsigned int opcode)
 
 	preempt_enable();
 
+	compute_return_epc(regs);
+
 	regs->regs[(opcode & RT) >> 16] = value;
 
-	return 0;
+	return;
+
+sig:
+	force_sig(signal, current);
 }
 
-static inline int simulate_sc(struct pt_regs *regs, unsigned int opcode)
+static inline void simulate_sc(struct pt_regs *regs, unsigned int opcode)
 {
 	unsigned long __user *vaddr;
 	unsigned long reg;
 	long offset;
+	int signal = 0;
 
 	/*
 	 * analyse the sc instruction that just caused a ri exception
@@ -484,25 +490,34 @@ static inline int simulate_sc(struct pt_regs *regs, unsigned int opcode)
 	        ((unsigned long)(regs->regs[(opcode & BASE) >> 21]) + offset);
 	reg = (opcode & RT) >> 16;
 
-	if ((unsigned long)vaddr & 3)
-		return SIGBUS;
+	if ((unsigned long)vaddr & 3) {
+		signal = SIGBUS;
+		goto sig;
+	}
 
 	preempt_disable();
 
 	if (ll_bit == 0 || ll_task != current) {
+		compute_return_epc(regs);
 		regs->regs[reg] = 0;
 		preempt_enable();
-		return 0;
+		return;
 	}
 
 	preempt_enable();
 
-	if (put_user(regs->regs[reg], vaddr))
-		return SIGSEGV;
+	if (put_user(regs->regs[reg], vaddr)) {
+		signal = SIGSEGV;
+		goto sig;
+	}
 
+	compute_return_epc(regs);
 	regs->regs[reg] = 1;
 
-	return 0;
+	return;
+
+sig:
+	force_sig(signal, current);
 }
 
 /*
@@ -512,14 +527,27 @@ static inline int simulate_sc(struct pt_regs *regs, unsigned int opcode)
  * few processors such as NEC's VR4100 throw reserved instruction exceptions
  * instead, so we're doing the emulation thing in both exception handlers.
  */
-static int simulate_llsc(struct pt_regs *regs, unsigned int opcode)
+static inline int simulate_llsc(struct pt_regs *regs)
 {
-	if ((opcode & OPCODE) == LL)
-		return simulate_ll(regs, opcode);
-	if ((opcode & OPCODE) == SC)
-		return simulate_sc(regs, opcode);
+	unsigned int opcode;
 
-	return -1;			/* Must be something else ... */
+	if (get_user(opcode, (unsigned int __user *) exception_epc(regs)))
+		goto out_sigsegv;
+
+	if ((opcode & OPCODE) == LL) {
+		simulate_ll(regs, opcode);
+		return 0;
+	}
+	if ((opcode & OPCODE) == SC) {
+		simulate_sc(regs, opcode);
+		return 0;
+	}
+
+	return -EFAULT;			/* Strange things going on ... */
+
+out_sigsegv:
+	force_sig(SIGSEGV, current);
+	return -EFAULT;
 }
 
 /*
@@ -527,9 +555,16 @@ static int simulate_llsc(struct pt_regs *regs, unsigned int opcode)
  * registers not implemented in hardware.  The only current use of this
  * is the thread area pointer.
  */
-static int simulate_rdhwr(struct pt_regs *regs, unsigned int opcode)
+static inline int simulate_rdhwr(struct pt_regs *regs)
 {
 	struct thread_info *ti = task_thread_info(current);
+	unsigned int opcode;
+
+	if (get_user(opcode, (unsigned int __user *) exception_epc(regs)))
+		goto out_sigsegv;
+
+	if (unlikely(compute_return_epc(regs)))
+		return -EFAULT;
 
 	if ((opcode & OPCODE) == SPEC3 && (opcode & FUNC) == RDHWR) {
 		int rd = (opcode & RD) >> 11;
@@ -539,20 +574,16 @@ static int simulate_rdhwr(struct pt_regs *regs, unsigned int opcode)
 				regs->regs[rt] = ti->tp_value;
 				return 0;
 			default:
-				return -1;
+				return -EFAULT;
 		}
 	}
 
 	/* Not ours.  */
-	return -1;
-}
+	return -EFAULT;
 
-static int simulate_sync(struct pt_regs *regs, unsigned int opcode)
-{
-	if ((opcode & OPCODE) == SPEC0 && (opcode & FUNC) == SYNC)
-		return 0;
-
-	return -1;			/* Must be something else ... */
+out_sigsegv:
+	force_sig(SIGSEGV, current);
+	return -EFAULT;
 }
 
 asmlinkage void do_ov(struct pt_regs *regs)
@@ -613,46 +644,10 @@ asmlinkage void do_fpe(struct pt_regs *regs, unsigned long fcr31)
 	force_sig(SIGFPE, current);
 }
 
-static void do_trap_or_bp(struct pt_regs *regs, unsigned int code,
-	const char *str)
-{
-	siginfo_t info;
-	char b[40];
-
-	/*
-	 * A short test says that IRIX 5.3 sends SIGTRAP for all trap
-	 * insns, even for trap and break codes that indicate arithmetic
-	 * failures.  Weird ...
-	 * But should we continue the brokenness???  --macro
-	 */
-	switch (code) {
-	case BRK_OVERFLOW:
-	case BRK_DIVZERO:
-		scnprintf(b, sizeof(b), "%s instruction in kernel code", str);
-		die_if_kernel(b, regs);
-		if (code == BRK_DIVZERO)
-			info.si_code = FPE_INTDIV;
-		else
-			info.si_code = FPE_INTOVF;
-		info.si_signo = SIGFPE;
-		info.si_errno = 0;
-		info.si_addr = (void __user *) regs->cp0_epc;
-		force_sig_info(SIGFPE, &info, current);
-		break;
-	case BRK_BUG:
-		die_if_kernel("Kernel bug detected", regs);
-		force_sig(SIGTRAP, current);
-		break;
-	default:
-		scnprintf(b, sizeof(b), "%s instruction in kernel code", str);
-		die_if_kernel(b, regs);
-		force_sig(SIGTRAP, current);
-	}
-}
-
 asmlinkage void do_bp(struct pt_regs *regs)
 {
 	unsigned int opcode, bcode;
+	siginfo_t info;
 
 	if (__get_user(opcode, (unsigned int __user *) exception_epc(regs)))
 		goto out_sigsegv;
@@ -664,10 +659,35 @@ asmlinkage void do_bp(struct pt_regs *regs)
 	 * We handle both cases with a simple heuristics.  --macro
 	 */
 	bcode = ((opcode >> 6) & ((1 << 20) - 1));
-	if (bcode >= (1 << 10))
-		bcode >>= 10;
+	if (bcode < (1 << 10))
+		bcode <<= 10;
 
-	do_trap_or_bp(regs, bcode, "Break");
+	/*
+	 * (A short test says that IRIX 5.3 sends SIGTRAP for all break
+	 * insns, even for break codes that indicate arithmetic failures.
+	 * Weird ...)
+	 * But should we continue the brokenness???  --macro
+	 */
+	switch (bcode) {
+	case BRK_OVERFLOW << 10:
+	case BRK_DIVZERO << 10:
+		die_if_kernel("Break instruction in kernel code", regs);
+		if (bcode == (BRK_DIVZERO << 10))
+			info.si_code = FPE_INTDIV;
+		else
+			info.si_code = FPE_INTOVF;
+		info.si_signo = SIGFPE;
+		info.si_errno = 0;
+		info.si_addr = (void __user *) regs->cp0_epc;
+		force_sig_info(SIGFPE, &info, current);
+		break;
+	case BRK_BUG:
+		die("Kernel bug detected", regs);
+		break;
+	default:
+		die_if_kernel("Break instruction in kernel code", regs);
+		force_sig(SIGTRAP, current);
+	}
 	return;
 
 out_sigsegv:
@@ -677,6 +697,7 @@ out_sigsegv:
 asmlinkage void do_tr(struct pt_regs *regs)
 {
 	unsigned int opcode, tcode = 0;
+	siginfo_t info;
 
 	if (__get_user(opcode, (unsigned int __user *) exception_epc(regs)))
 		goto out_sigsegv;
@@ -685,7 +706,32 @@ asmlinkage void do_tr(struct pt_regs *regs)
 	if (!(opcode & OPCODE))
 		tcode = ((opcode >> 6) & ((1 << 10) - 1));
 
-	do_trap_or_bp(regs, tcode, "Trap");
+	/*
+	 * (A short test says that IRIX 5.3 sends SIGTRAP for all trap
+	 * insns, even for trap codes that indicate arithmetic failures.
+	 * Weird ...)
+	 * But should we continue the brokenness???  --macro
+	 */
+	switch (tcode) {
+	case BRK_OVERFLOW:
+	case BRK_DIVZERO:
+		die_if_kernel("Trap instruction in kernel code", regs);
+		if (tcode == BRK_DIVZERO)
+			info.si_code = FPE_INTDIV;
+		else
+			info.si_code = FPE_INTOVF;
+		info.si_signo = SIGFPE;
+		info.si_errno = 0;
+		info.si_addr = (void __user *) regs->cp0_epc;
+		force_sig_info(SIGFPE, &info, current);
+		break;
+	case BRK_BUG:
+		die("Kernel bug detected", regs);
+		break;
+	default:
+		die_if_kernel("Trap instruction in kernel code", regs);
+		force_sig(SIGTRAP, current);
+	}
 	return;
 
 out_sigsegv:
@@ -694,44 +740,21 @@ out_sigsegv:
 
 asmlinkage void do_ri(struct pt_regs *regs)
 {
-	unsigned int __user *epc = (unsigned int __user *)exception_epc(regs);
-	unsigned long old_epc = regs->cp0_epc;
-	unsigned int opcode = 0;
-	int status = -1;
-
 	die_if_kernel("Reserved instruction in kernel code", regs);
 
-	if (unlikely(compute_return_epc(regs) < 0))
+	if (!cpu_has_llsc)
+		if (!simulate_llsc(regs))
+			return;
+
+	if (!simulate_rdhwr(regs))
 		return;
 
-	if (unlikely(get_user(opcode, epc) < 0))
-		status = SIGSEGV;
-
-	if (!cpu_has_llsc && status < 0)
-		status = simulate_llsc(regs, opcode);
-
-	if (status < 0)
-		status = simulate_rdhwr(regs, opcode);
-
-	if (status < 0)
-		status = simulate_sync(regs, opcode);
-
-	if (status < 0)
-		status = SIGILL;
-
-	if (unlikely(status > 0)) {
-		regs->cp0_epc = old_epc;		/* Undo skip-over.  */
-		force_sig(status, current);
-	}
+	force_sig(SIGILL, current);
 }
 
 asmlinkage void do_cpu(struct pt_regs *regs)
 {
-	unsigned int __user *epc;
-	unsigned long old_epc;
-	unsigned int opcode;
 	unsigned int cpid;
-	int status;
 
 	die_if_kernel("do_cpu invoked from kernel context!", regs);
 
@@ -739,32 +762,14 @@ asmlinkage void do_cpu(struct pt_regs *regs)
 
 	switch (cpid) {
 	case 0:
-		epc = (unsigned int __user *)exception_epc(regs);
-		old_epc = regs->cp0_epc;
-		opcode = 0;
-		status = -1;
+		if (!cpu_has_llsc)
+			if (!simulate_llsc(regs))
+				return;
 
-		if (unlikely(compute_return_epc(regs) < 0))
+		if (!simulate_rdhwr(regs))
 			return;
 
-		if (unlikely(get_user(opcode, epc) < 0))
-			status = SIGSEGV;
-
-		if (!cpu_has_llsc && status < 0)
-			status = simulate_llsc(regs, opcode);
-
-		if (status < 0)
-			status = simulate_rdhwr(regs, opcode);
-
-		if (status < 0)
-			status = SIGILL;
-
-		if (unlikely(status > 0)) {
-			regs->cp0_epc = old_epc;	/* Undo skip-over.  */
-			force_sig(status, current);
-		}
-
-		return;
+		break;
 
 	case 1:
 		if (used_math())	/* Using the FPU again.  */
@@ -1127,7 +1132,6 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 {
 	unsigned long handler;
 	unsigned long old_handler = vi_handlers[n];
-	int srssets = current_cpu_data.srsets;
 	u32 *w;
 	unsigned char *b;
 
@@ -1143,7 +1147,7 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 
 	b = (unsigned char *)(ebase + 0x200 + n*VECTORSPACING);
 
-	if (srs >= srssets)
+	if (srs >= mips_srs_max())
 		panic("Shadow register set %d not supported", srs);
 
 	if (cpu_has_veic) {
@@ -1151,7 +1155,7 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 			board_bind_eic_interrupt (n, srs);
 	} else if (cpu_has_vint) {
 		/* SRSMap is only defined if shadow sets are implemented */
-		if (srssets > 1)
+		if (mips_srs_max() > 1)
 			change_c0_srsmap (0xf << n*4, srs << n*4);
 	}
 
@@ -1163,9 +1167,6 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 
 		extern char except_vec_vi, except_vec_vi_lui;
 		extern char except_vec_vi_ori, except_vec_vi_end;
-		extern char rollback_except_vec_vi;
-		char *vec_start = (cpu_wait == r4k_wait) ?
-			&rollback_except_vec_vi : &except_vec_vi;
 #ifdef CONFIG_MIPS_MT_SMTC
 		/*
 		 * We need to provide the SMTC vectored interrupt handler
@@ -1173,11 +1174,11 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 		 * Status.IM bit to be masked before going there.
 		 */
 		extern char except_vec_vi_mori;
-		const int mori_offset = &except_vec_vi_mori - vec_start;
+		const int mori_offset = &except_vec_vi_mori - &except_vec_vi;
 #endif /* CONFIG_MIPS_MT_SMTC */
-		const int handler_len = &except_vec_vi_end - vec_start;
-		const int lui_offset = &except_vec_vi_lui - vec_start;
-		const int ori_offset = &except_vec_vi_ori - vec_start;
+		const int handler_len = &except_vec_vi_end - &except_vec_vi;
+		const int lui_offset = &except_vec_vi_lui - &except_vec_vi;
+		const int ori_offset = &except_vec_vi_ori - &except_vec_vi;
 
 		if (handler_len > VECTORSPACING) {
 			/*
@@ -1187,7 +1188,7 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 			panic ("VECTORSPACING too small");
 		}
 
-		memcpy(b, vec_start, handler_len);
+		memcpy (b, &except_vec_vi, handler_len);
 #ifdef CONFIG_MIPS_MT_SMTC
 		if (n > 7)
 			printk("Vector index %d exceeds SMTC maximum\n", n);
@@ -1220,7 +1221,14 @@ void *set_vi_handler(int n, void *addr)
 {
 	return set_vi_srs_handler(n, addr, 0);
 }
-#endif
+
+#else
+
+static inline void mips_srs_init(void)
+{
+}
+
+#endif /* CONFIG_CPU_MIPSR2_SRS */
 
 /*
  * This is used by native signal handling
@@ -1297,7 +1305,7 @@ extern void cpu_cache_init(void);
 extern void tlb_init(void);
 extern void flush_tlb_handlers(void);
 
-void __cpuinit per_cpu_trap_init(void)
+void __init per_cpu_trap_init(void)
 {
 	unsigned int cpu = smp_processor_id();
 	unsigned int status_set = ST0_CU0;
@@ -1327,21 +1335,14 @@ void __cpuinit per_cpu_trap_init(void)
 #endif
 	if (current_cpu_data.isa_level == MIPS_CPU_ISA_IV)
 		status_set |= ST0_XX;
-	if (cpu_has_dsp)
-		status_set |= ST0_MX;
-
 	change_c0_status(ST0_CU|ST0_MX|ST0_RE|ST0_FR|ST0_BEV|ST0_TS|ST0_KX|ST0_SX|ST0_UX,
 			 status_set);
 
+	if (cpu_has_dsp)
+		set_c0_status(ST0_MX);
+
 #ifdef CONFIG_CPU_MIPSR2
-	if (cpu_has_mips_r2) {
-		unsigned int enable = 0x0000000f;
-
-		if (cpu_has_userlocal)
-			enable |= (1 << 29);
-
-		write_c0_hwrena(enable);
-	}
+	write_c0_hwrena (0x0000000f); /* Allow rdhwr to all registers */
 #endif
 
 #ifdef CONFIG_MIPS_MT_SMTC
@@ -1394,8 +1395,7 @@ void __init set_handler (unsigned long offset, void *addr, unsigned long size)
 }
 
 /* Install uncached CPU exception handler */
-void __cpuinit set_uncached_handler(unsigned long offset, void *addr,
-	unsigned long size)
+void __init set_uncached_handler (unsigned long offset, void *addr, unsigned long size)
 {
 #ifdef CONFIG_32BIT
 	unsigned long uncached_ebase = KSEG1ADDR(ebase);
@@ -1421,15 +1421,13 @@ void __init trap_init(void)
 	extern char except_vec3_generic, except_vec3_r4000;
 	extern char except_vec4;
 	unsigned long i;
-	int rollback;
-
-	check_wait();
-	rollback = (cpu_wait == r4k_wait);
 
 	if (cpu_has_veic || cpu_has_vint)
 		ebase = (unsigned long) alloc_bootmem_low_pages (0x200 + VECTORSPACING*64);
 	else
 		ebase = CAC_BASE;
+
+	mips_srs_init();
 
 	per_cpu_trap_init();
 
@@ -1484,7 +1482,7 @@ void __init trap_init(void)
 	if (board_be_init)
 		board_be_init();
 
-	set_except_vector(0, rollback ? rollback_handle_int : handle_int);
+	set_except_vector(0, handle_int);
 	set_except_vector(1, handle_tlbm);
 	set_except_vector(2, handle_tlbl);
 	set_except_vector(3, handle_tlbs);

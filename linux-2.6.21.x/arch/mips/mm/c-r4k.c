@@ -89,7 +89,7 @@ static inline void r4k_blast_dcache_page_dc32(unsigned long addr)
 	blast_dcache32_page(addr);
 }
 
-static void __cpuinit r4k_blast_dcache_page_setup(void)
+static void __init r4k_blast_dcache_page_setup(void)
 {
 	unsigned long  dc_lsize = cpu_dcache_line_size();
 
@@ -103,7 +103,7 @@ static void __cpuinit r4k_blast_dcache_page_setup(void)
 
 static void (* r4k_blast_dcache_page_indexed)(unsigned long addr);
 
-static void __cpuinit r4k_blast_dcache_page_indexed_setup(void)
+static void __init r4k_blast_dcache_page_indexed_setup(void)
 {
 	unsigned long dc_lsize = cpu_dcache_line_size();
 
@@ -117,7 +117,7 @@ static void __cpuinit r4k_blast_dcache_page_indexed_setup(void)
 
 static void (* r4k_blast_dcache)(void);
 
-static void __cpuinit r4k_blast_dcache_setup(void)
+static void __init r4k_blast_dcache_setup(void)
 {
 	unsigned long dc_lsize = cpu_dcache_line_size();
 
@@ -202,7 +202,7 @@ static inline void tx49_blast_icache32_page_indexed(unsigned long page)
 #endif /* !defined(CONFIG_RALINK_RT3052) */
 static void (* r4k_blast_icache_page)(unsigned long addr);
 
-static void __cpuinit r4k_blast_icache_page_setup(void)
+static void __init r4k_blast_icache_page_setup(void)
 {
 	unsigned long ic_lsize = cpu_icache_line_size();
 
@@ -219,7 +219,7 @@ static void __cpuinit r4k_blast_icache_page_setup(void)
 
 static void (* r4k_blast_icache_page_indexed)(unsigned long addr);
 
-static void __cpuinit r4k_blast_icache_page_indexed_setup(void)
+static void __init r4k_blast_icache_page_indexed_setup(void)
 {
 #if !defined(CONFIG_RALINK_RT3052)
 	unsigned long ic_lsize = cpu_icache_line_size();
@@ -246,7 +246,7 @@ static void __cpuinit r4k_blast_icache_page_indexed_setup(void)
 
 static void (* r4k_blast_icache)(void);
 
-static void __cpuinit r4k_blast_icache_setup(void)
+static void __init r4k_blast_icache_setup(void)
 {
 #if !defined(CONFIG_RALINK_RT3052)
 	unsigned long ic_lsize = cpu_icache_line_size();
@@ -270,7 +270,7 @@ static void __cpuinit r4k_blast_icache_setup(void)
 
 static void (* r4k_blast_scache_page)(unsigned long addr);
 
-static void __cpuinit r4k_blast_scache_page_setup(void)
+static void __init r4k_blast_scache_page_setup(void)
 {
 	unsigned long sc_lsize = cpu_scache_line_size();
 
@@ -288,7 +288,7 @@ static void __cpuinit r4k_blast_scache_page_setup(void)
 
 static void (* r4k_blast_scache_page_indexed)(unsigned long addr);
 
-static void __cpuinit r4k_blast_scache_page_indexed_setup(void)
+static void __init r4k_blast_scache_page_indexed_setup(void)
 {
 	unsigned long sc_lsize = cpu_scache_line_size();
 
@@ -306,7 +306,7 @@ static void __cpuinit r4k_blast_scache_page_indexed_setup(void)
 
 static void (* r4k_blast_scache)(void);
 
-static void __cpuinit r4k_blast_scache_setup(void)
+static void __init r4k_blast_scache_setup(void)
 {
 	unsigned long sc_lsize = cpu_scache_line_size();
 
@@ -992,8 +992,7 @@ static void __init probe_pcache(void)
 
 	printk("Primary instruction cache %ldkB, %s, %s, linesize %d bytes.\n",
 	       icache_size >> 10,
-	       c->icache.flags & MIPS_CACHE_VTAG ?
-			"virtually tagged" : "physically tagged",
+	       cpu_has_vtag_icache ? "virtually tagged" : "physically tagged",
 	       way_string[c->icache.ways], c->icache.linesz);
 
 	printk("Primary data cache %ldkB, %s, linesize %d bytes.\n",
@@ -1070,7 +1069,7 @@ extern int r5k_sc_init(void);
 extern int rm7k_sc_init(void);
 extern int mips_sc_init(void);
 
-static void __cpuinit setup_scache(void)
+static void __init setup_scache(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
 #if !defined(CONFIG_RALINK_RT3052)
@@ -1219,7 +1218,7 @@ static void __init coherency_setup(void)
 	}
 }
 
-void __cpuinit r4k_cache_init(void)
+void __init r4k_cache_init(void)
 {
 	extern void build_clear_page(void);
 	extern void build_copy_page(void);

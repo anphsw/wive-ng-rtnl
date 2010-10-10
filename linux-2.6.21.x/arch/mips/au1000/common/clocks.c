@@ -46,7 +46,6 @@ unsigned int get_au1x00_speed(void)
 {
 	return au1x00_clock;
 }
-EXPORT_SYMBOL(get_au1x00_speed);
 
 
 

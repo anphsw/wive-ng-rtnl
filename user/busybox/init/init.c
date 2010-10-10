@@ -541,9 +541,9 @@ static void parse_inittab(void)
 		/* Askfirst shell on tty1-4 */
 		new_init_action(ASKFIRST, bb_default_login_shell, "");
 //TODO: VC_1 instead of ""? "" is console -> ctty problems -> angry users
-		new_init_action(ASKFIRST, bb_default_login_shell, VC_2);
+/*		new_init_action(ASKFIRST, bb_default_login_shell, VC_2);
 		new_init_action(ASKFIRST, bb_default_login_shell, VC_3);
-		new_init_action(ASKFIRST, bb_default_login_shell, VC_4);
+		new_init_action(ASKFIRST, bb_default_login_shell, VC_4); */
 		/* sysinit */
 		new_init_action(SYSINIT, INIT_SCRIPT, "");
 		return;

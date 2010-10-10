@@ -20,8 +20,6 @@
 #ifndef __NEC_VR41XX_SIU_H
 #define __NEC_VR41XX_SIU_H
 
-#define SIU_PORTS_MAX 2
-
 typedef enum {
 	SIU_INTERFACE_RS232C,
 	SIU_INTERFACE_IRDA,

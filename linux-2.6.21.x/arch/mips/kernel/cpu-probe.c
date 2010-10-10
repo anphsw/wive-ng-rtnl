@@ -47,7 +47,18 @@ static void r39xx_wait(void)
 }
 #endif
 
-extern void r4k_wait(void);
+/*
+ * There is a race when WAIT instruction executed with interrupt
+ * enabled.
+ * But it is implementation-dependent wheter the pipelie restarts when
+ * a non-enabled interrupt is requested.
+ */
+static void r4k_wait(void)
+{
+	__asm__("	.set	mips3			\n"
+		"	wait				\n"
+		"	.set	mips0			\n");
+}
 
 /*
  * This variant is preferable as it allows testing need_resched and going to
@@ -123,7 +134,7 @@ static int __init wait_disable(char *s)
 
 __setup("nowait", wait_disable);
 
-void __init check_wait(void)
+static inline void check_wait(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
 
@@ -193,6 +204,7 @@ void __init check_wait(void)
 
 void __init check_bugs32(void)
 {
+	check_wait();
 }
 
 /*
@@ -492,7 +504,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 	}
 }
 
-static char unknown_isa[] __cpuinitdata = KERN_ERR \
+static char unknown_isa[] __initdata = KERN_ERR \
 	"Unsupported ISA type, c0.config0: %d.";
 
 static inline unsigned int decode_config0(struct cpuinfo_mips *c)
@@ -592,13 +604,11 @@ static inline unsigned int decode_config3(struct cpuinfo_mips *c)
 		c->options |= MIPS_CPU_VEIC;
 	if (config3 & MIPS_CONF3_MT)
 	        c->ases |= MIPS_ASE_MIPSMT;
-	if (config3 & MIPS_CONF3_ULRI)
-		c->options |= MIPS_CPU_ULRI;
 
 	return config3 & MIPS_CONF_M;
 }
 
-static void __cpuinit decode_configs(struct cpuinfo_mips *c)
+static void __init decode_configs(struct cpuinfo_mips *c)
 {
 	/* MIPS32 or MIPS64 compliant CPU.  */
 	c->options = MIPS_CPU_4KEX | MIPS_CPU_4K_CACHE | MIPS_CPU_COUNTER |
@@ -735,15 +745,10 @@ static inline void cpu_probe_philips(struct cpuinfo_mips *c)
 		panic("Unknown Philips Core!"); /* REVISIT: die? */
 		break;
 	}
-
-	if (cpu_has_mips_r2)
-		c->srsets = ((read_c0_srsctl() >> 26) & 0x0f) + 1;
-	else
-		c->srsets = 1;
 }
 
 
-__cpuinit void cpu_probe(void)
+__init void cpu_probe(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
 
@@ -799,7 +804,7 @@ __cpuinit void cpu_probe(void)
 #endif
 }
 
-__cpuinit void cpu_report(void)
+__init void cpu_report(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
 
