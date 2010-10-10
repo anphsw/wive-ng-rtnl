@@ -24,15 +24,15 @@ all: ${Tgt}
 RObjs = LZMAEncoder_r.o Alloc_r.o LZInWindow_r.o CRC_r.o StreamUtils_r.o \
 	OutBuffer_r.o RangeCoderBit_r.o
 %_r.cc: ../LZMA/%.cpp
-	ln $< $@
+	ln -f $< $@
 %_r.cc: ../LZ/%.cpp
-	ln $< $@
+	ln -f $< $@
 %_r.cc: ../RangeCoder/%.cpp
-	ln $< $@
+	ln -f $< $@
 %_r.cc: ../../Common/%.cpp
-	ln $< $@
+	ln -f $< $@
 %_r.cc: ../../../Common/%.cpp
-	ln $< $@
+	ln -f $< $@
 LZMAEncoder_r.o: CXXFLAGS += -I../LZMA
 LZInWindow_r.o: CXXFLAGS += -I../LZ
 RangeCoderBit_r.o: CXXFLAGS += -I../RangeCoder
@@ -48,6 +48,8 @@ liblzma_r.a: ${RObjs} comp.o
 clean: clean_sqlzma
 clean_sqlzma:
 	$(RM) comp.o *_r.o ${Tgt} *~
+	$(RM) Alloc_r.cc CRC_r.cc LZMAEncoder_r.cc RangeCoderBit_r.cc \
+	LZInWindow_r.cc OutBuffer_r.cc StreamUtils_r.cc
 
 # Local variables: ;
 # compile-command: (concat "make Sqlzma=../../../../.. -f " (file-name-nondirectory (buffer-file-name)));
