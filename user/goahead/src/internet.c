@@ -2030,10 +2030,12 @@ void initInternet(void)
 #endif
 	firewall_rebuild_etc();
 	doSystem("internet.sh");
-	RoutingInit();
-#ifdef CONFIG_NET_SCHED
-	QoSInit();
-#endif
+
+	//First Security LED init
+	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
+		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
+	else
+		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
 
 //automatically connect to AP according to the active profile
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
@@ -2043,11 +2045,6 @@ void initInternet(void)
 			    initStaConnection();
 	}
 #endif
-	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
-	else
-		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
-
 #ifdef CONFIG_USER_802_1X 
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
 #endif
@@ -2056,6 +2053,12 @@ void initInternet(void)
 #endif
 #if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
+#endif
+
+//Routing and QoS in STA mode need set after connect to STA
+	RoutingInit();
+#ifdef CONFIG_NET_SCHED
+	QoSInit();
 #endif
 }
 
