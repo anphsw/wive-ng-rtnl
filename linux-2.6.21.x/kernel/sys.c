@@ -95,477 +95,6 @@ int C_A_D = 1;
 struct pid *cad_pid;
 EXPORT_SYMBOL(cad_pid);
 
-/*
- *	Notifier list for kernel code which wants to be called
- *	at shutdown. This is used to stop any idling DMA operations
- *	and the like. 
- */
-
-BLOCKING_NOTIFIER_HEAD(reboot_notifier_list);
-
-/*
- *	Notifier chain core routines.  The exported routines below
- *	are layered on top of these, with appropriate locking added.
- */
-
-static int notifier_chain_register(struct notifier_block **nl,
-		struct notifier_block *n)
-{
-	while ((*nl) != NULL) {
-		if (n->priority > (*nl)->priority)
-			break;
-		nl = &((*nl)->next);
-	}
-	n->next = *nl;
-	rcu_assign_pointer(*nl, n);
-	return 0;
-}
-
-static int notifier_chain_unregister(struct notifier_block **nl,
-		struct notifier_block *n)
-{
-	while ((*nl) != NULL) {
-		if ((*nl) == n) {
-			rcu_assign_pointer(*nl, n->next);
-			return 0;
-		}
-		nl = &((*nl)->next);
-	}
-	return -ENOENT;
-}
-
-static int __kprobes notifier_call_chain(struct notifier_block **nl,
-		unsigned long val, void *v)
-{
-	int ret = NOTIFY_DONE;
-	struct notifier_block *nb, *next_nb;
-
-	nb = rcu_dereference(*nl);
-	while (nb) {
-		next_nb = rcu_dereference(nb->next);
-		ret = nb->notifier_call(nb, val, v);
-		if ((ret & NOTIFY_STOP_MASK) == NOTIFY_STOP_MASK)
-			break;
-		nb = next_nb;
-	}
-	return ret;
-}
-
-/*
- *	Atomic notifier chain routines.  Registration and unregistration
- *	use a spinlock, and call_chain is synchronized by RCU (no locks).
- */
-
-/**
- *	atomic_notifier_chain_register - Add notifier to an atomic notifier chain
- *	@nh: Pointer to head of the atomic notifier chain
- *	@n: New entry in notifier chain
- *
- *	Adds a notifier to an atomic notifier chain.
- *
- *	Currently always returns zero.
- */
-
-int atomic_notifier_chain_register(struct atomic_notifier_head *nh,
-		struct notifier_block *n)
-{
-	unsigned long flags;
-	int ret;
-
-	spin_lock_irqsave(&nh->lock, flags);
-	ret = notifier_chain_register(&nh->head, n);
-	spin_unlock_irqrestore(&nh->lock, flags);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(atomic_notifier_chain_register);
-
-/**
- *	atomic_notifier_chain_unregister - Remove notifier from an atomic notifier chain
- *	@nh: Pointer to head of the atomic notifier chain
- *	@n: Entry to remove from notifier chain
- *
- *	Removes a notifier from an atomic notifier chain.
- *
- *	Returns zero on success or %-ENOENT on failure.
- */
-int atomic_notifier_chain_unregister(struct atomic_notifier_head *nh,
-		struct notifier_block *n)
-{
-	unsigned long flags;
-	int ret;
-
-	spin_lock_irqsave(&nh->lock, flags);
-	ret = notifier_chain_unregister(&nh->head, n);
-	spin_unlock_irqrestore(&nh->lock, flags);
-	synchronize_rcu();
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(atomic_notifier_chain_unregister);
-
-/**
- *	atomic_notifier_call_chain - Call functions in an atomic notifier chain
- *	@nh: Pointer to head of the atomic notifier chain
- *	@val: Value passed unmodified to notifier function
- *	@v: Pointer passed unmodified to notifier function
- *
- *	Calls each function in a notifier chain in turn.  The functions
- *	run in an atomic context, so they must not block.
- *	This routine uses RCU to synchronize with changes to the chain.
- *
- *	If the return value of the notifier can be and'ed
- *	with %NOTIFY_STOP_MASK then atomic_notifier_call_chain()
- *	will return immediately, with the return value of
- *	the notifier function which halted execution.
- *	Otherwise the return value is the return value
- *	of the last notifier function called.
- */
- 
-int __kprobes atomic_notifier_call_chain(struct atomic_notifier_head *nh,
-		unsigned long val, void *v)
-{
-	int ret;
-
-	rcu_read_lock();
-	ret = notifier_call_chain(&nh->head, val, v);
-	rcu_read_unlock();
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(atomic_notifier_call_chain);
-
-/*
- *	Blocking notifier chain routines.  All access to the chain is
- *	synchronized by an rwsem.
- */
-
-/**
- *	blocking_notifier_chain_register - Add notifier to a blocking notifier chain
- *	@nh: Pointer to head of the blocking notifier chain
- *	@n: New entry in notifier chain
- *
- *	Adds a notifier to a blocking notifier chain.
- *	Must be called in process context.
- *
- *	Currently always returns zero.
- */
- 
-int blocking_notifier_chain_register(struct blocking_notifier_head *nh,
-		struct notifier_block *n)
-{
-	int ret;
-
-	/*
-	 * This code gets used during boot-up, when task switching is
-	 * not yet working and interrupts must remain disabled.  At
-	 * such times we must not call down_write().
-	 */
-	if (unlikely(system_state == SYSTEM_BOOTING))
-		return notifier_chain_register(&nh->head, n);
-
-	down_write(&nh->rwsem);
-	ret = notifier_chain_register(&nh->head, n);
-	up_write(&nh->rwsem);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(blocking_notifier_chain_register);
-
-/**
- *	blocking_notifier_chain_unregister - Remove notifier from a blocking notifier chain
- *	@nh: Pointer to head of the blocking notifier chain
- *	@n: Entry to remove from notifier chain
- *
- *	Removes a notifier from a blocking notifier chain.
- *	Must be called from process context.
- *
- *	Returns zero on success or %-ENOENT on failure.
- */
-int blocking_notifier_chain_unregister(struct blocking_notifier_head *nh,
-		struct notifier_block *n)
-{
-	int ret;
-
-	/*
-	 * This code gets used during boot-up, when task switching is
-	 * not yet working and interrupts must remain disabled.  At
-	 * such times we must not call down_write().
-	 */
-	if (unlikely(system_state == SYSTEM_BOOTING))
-		return notifier_chain_unregister(&nh->head, n);
-
-	down_write(&nh->rwsem);
-	ret = notifier_chain_unregister(&nh->head, n);
-	up_write(&nh->rwsem);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(blocking_notifier_chain_unregister);
-
-/**
- *	blocking_notifier_call_chain - Call functions in a blocking notifier chain
- *	@nh: Pointer to head of the blocking notifier chain
- *	@val: Value passed unmodified to notifier function
- *	@v: Pointer passed unmodified to notifier function
- *
- *	Calls each function in a notifier chain in turn.  The functions
- *	run in a process context, so they are allowed to block.
- *
- *	If the return value of the notifier can be and'ed
- *	with %NOTIFY_STOP_MASK then blocking_notifier_call_chain()
- *	will return immediately, with the return value of
- *	the notifier function which halted execution.
- *	Otherwise the return value is the return value
- *	of the last notifier function called.
- */
- 
-int blocking_notifier_call_chain(struct blocking_notifier_head *nh,
-		unsigned long val, void *v)
-{
-	int ret = NOTIFY_DONE;
-
-	/*
-	 * We check the head outside the lock, but if this access is
-	 * racy then it does not matter what the result of the test
-	 * is, we re-check the list after having taken the lock anyway:
-	 */
-	if (rcu_dereference(nh->head)) {
-		down_read(&nh->rwsem);
-		ret = notifier_call_chain(&nh->head, val, v);
-		up_read(&nh->rwsem);
-	}
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(blocking_notifier_call_chain);
-
-/*
- *	Raw notifier chain routines.  There is no protection;
- *	the caller must provide it.  Use at your own risk!
- */
-
-/**
- *	raw_notifier_chain_register - Add notifier to a raw notifier chain
- *	@nh: Pointer to head of the raw notifier chain
- *	@n: New entry in notifier chain
- *
- *	Adds a notifier to a raw notifier chain.
- *	All locking must be provided by the caller.
- *
- *	Currently always returns zero.
- */
-
-int raw_notifier_chain_register(struct raw_notifier_head *nh,
-		struct notifier_block *n)
-{
-	return notifier_chain_register(&nh->head, n);
-}
-
-EXPORT_SYMBOL_GPL(raw_notifier_chain_register);
-
-/**
- *	raw_notifier_chain_unregister - Remove notifier from a raw notifier chain
- *	@nh: Pointer to head of the raw notifier chain
- *	@n: Entry to remove from notifier chain
- *
- *	Removes a notifier from a raw notifier chain.
- *	All locking must be provided by the caller.
- *
- *	Returns zero on success or %-ENOENT on failure.
- */
-int raw_notifier_chain_unregister(struct raw_notifier_head *nh,
-		struct notifier_block *n)
-{
-	return notifier_chain_unregister(&nh->head, n);
-}
-
-EXPORT_SYMBOL_GPL(raw_notifier_chain_unregister);
-
-/**
- *	raw_notifier_call_chain - Call functions in a raw notifier chain
- *	@nh: Pointer to head of the raw notifier chain
- *	@val: Value passed unmodified to notifier function
- *	@v: Pointer passed unmodified to notifier function
- *
- *	Calls each function in a notifier chain in turn.  The functions
- *	run in an undefined context.
- *	All locking must be provided by the caller.
- *
- *	If the return value of the notifier can be and'ed
- *	with %NOTIFY_STOP_MASK then raw_notifier_call_chain()
- *	will return immediately, with the return value of
- *	the notifier function which halted execution.
- *	Otherwise the return value is the return value
- *	of the last notifier function called.
- */
-
-int raw_notifier_call_chain(struct raw_notifier_head *nh,
-		unsigned long val, void *v)
-{
-	return notifier_call_chain(&nh->head, val, v);
-}
-
-EXPORT_SYMBOL_GPL(raw_notifier_call_chain);
-
-/*
- *	SRCU notifier chain routines.    Registration and unregistration
- *	use a mutex, and call_chain is synchronized by SRCU (no locks).
- */
-
-/**
- *	srcu_notifier_chain_register - Add notifier to an SRCU notifier chain
- *	@nh: Pointer to head of the SRCU notifier chain
- *	@n: New entry in notifier chain
- *
- *	Adds a notifier to an SRCU notifier chain.
- *	Must be called in process context.
- *
- *	Currently always returns zero.
- */
-
-int srcu_notifier_chain_register(struct srcu_notifier_head *nh,
-		struct notifier_block *n)
-{
-	int ret;
-
-	/*
-	 * This code gets used during boot-up, when task switching is
-	 * not yet working and interrupts must remain disabled.  At
-	 * such times we must not call mutex_lock().
-	 */
-	if (unlikely(system_state == SYSTEM_BOOTING))
-		return notifier_chain_register(&nh->head, n);
-
-	mutex_lock(&nh->mutex);
-	ret = notifier_chain_register(&nh->head, n);
-	mutex_unlock(&nh->mutex);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(srcu_notifier_chain_register);
-
-/**
- *	srcu_notifier_chain_unregister - Remove notifier from an SRCU notifier chain
- *	@nh: Pointer to head of the SRCU notifier chain
- *	@n: Entry to remove from notifier chain
- *
- *	Removes a notifier from an SRCU notifier chain.
- *	Must be called from process context.
- *
- *	Returns zero on success or %-ENOENT on failure.
- */
-int srcu_notifier_chain_unregister(struct srcu_notifier_head *nh,
-		struct notifier_block *n)
-{
-	int ret;
-
-	/*
-	 * This code gets used during boot-up, when task switching is
-	 * not yet working and interrupts must remain disabled.  At
-	 * such times we must not call mutex_lock().
-	 */
-	if (unlikely(system_state == SYSTEM_BOOTING))
-		return notifier_chain_unregister(&nh->head, n);
-
-	mutex_lock(&nh->mutex);
-	ret = notifier_chain_unregister(&nh->head, n);
-	mutex_unlock(&nh->mutex);
-	synchronize_srcu(&nh->srcu);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(srcu_notifier_chain_unregister);
-
-/**
- *	srcu_notifier_call_chain - Call functions in an SRCU notifier chain
- *	@nh: Pointer to head of the SRCU notifier chain
- *	@val: Value passed unmodified to notifier function
- *	@v: Pointer passed unmodified to notifier function
- *
- *	Calls each function in a notifier chain in turn.  The functions
- *	run in a process context, so they are allowed to block.
- *
- *	If the return value of the notifier can be and'ed
- *	with %NOTIFY_STOP_MASK then srcu_notifier_call_chain()
- *	will return immediately, with the return value of
- *	the notifier function which halted execution.
- *	Otherwise the return value is the return value
- *	of the last notifier function called.
- */
-
-int srcu_notifier_call_chain(struct srcu_notifier_head *nh,
-		unsigned long val, void *v)
-{
-	int ret;
-	int idx;
-
-	idx = srcu_read_lock(&nh->srcu);
-	ret = notifier_call_chain(&nh->head, val, v);
-	srcu_read_unlock(&nh->srcu, idx);
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(srcu_notifier_call_chain);
-
-/**
- *	srcu_init_notifier_head - Initialize an SRCU notifier head
- *	@nh: Pointer to head of the srcu notifier chain
- *
- *	Unlike other sorts of notifier heads, SRCU notifier heads require
- *	dynamic initialization.  Be sure to call this routine before
- *	calling any of the other SRCU notifier routines for this head.
- *
- *	If an SRCU notifier head is deallocated, it must first be cleaned
- *	up by calling srcu_cleanup_notifier_head().  Otherwise the head's
- *	per-cpu data (used by the SRCU mechanism) will leak.
- */
-
-void srcu_init_notifier_head(struct srcu_notifier_head *nh)
-{
-	mutex_init(&nh->mutex);
-	if (init_srcu_struct(&nh->srcu) < 0)
-		BUG();
-	nh->head = NULL;
-}
-
-EXPORT_SYMBOL_GPL(srcu_init_notifier_head);
-
-/**
- *	register_reboot_notifier - Register function to be called at reboot time
- *	@nb: Info about notifier function to be called
- *
- *	Registers a function with the list of functions
- *	to be called at reboot time.
- *
- *	Currently always returns zero, as blocking_notifier_chain_register()
- *	always returns zero.
- */
- 
-int register_reboot_notifier(struct notifier_block * nb)
-{
-	return blocking_notifier_chain_register(&reboot_notifier_list, nb);
-}
-
-EXPORT_SYMBOL(register_reboot_notifier);
-
-/**
- *	unregister_reboot_notifier - Unregister previously registered reboot notifier
- *	@nb: Hook to be unregistered
- *
- *	Unregisters a previously registered reboot
- *	notifier function.
- *
- *	Returns zero on success, or %-ENOENT on failure.
- */
- 
-int unregister_reboot_notifier(struct notifier_block * nb)
-{
-	return blocking_notifier_chain_unregister(&reboot_notifier_list, nb);
-}
-
-EXPORT_SYMBOL(unregister_reboot_notifier);
-
 static int set_one_prio(struct task_struct *p, int niceval, int error)
 {
 	int no_nice;
@@ -1589,16 +1118,16 @@ static int groups_to_user(gid_t __user *grouplist,
     struct group_info *group_info)
 {
 	int i;
-	int count = group_info->ngroups;
+	unsigned int count = group_info->ngroups;
 
 	for (i = 0; i < group_info->nblocks; i++) {
-		int cp_count = min(NGROUPS_PER_BLOCK, count);
-		int off = i * NGROUPS_PER_BLOCK;
-		int len = cp_count * sizeof(*grouplist);
+		unsigned int cp_count = min(NGROUPS_PER_BLOCK, count);
+		unsigned int len = cp_count * sizeof(*grouplist);
 
-		if (copy_to_user(grouplist+off, group_info->blocks[i], len))
+		if (copy_to_user(grouplist, group_info->blocks[i], len))
 			return -EFAULT;
 
+		grouplist += NGROUPS_PER_BLOCK;
 		count -= cp_count;
 	}
 	return 0;
@@ -1609,16 +1138,16 @@ static int groups_from_user(struct group_info *group_info,
     gid_t __user *grouplist)
 {
 	int i;
-	int count = group_info->ngroups;
+	unsigned int count = group_info->ngroups;
 
 	for (i = 0; i < group_info->nblocks; i++) {
-		int cp_count = min(NGROUPS_PER_BLOCK, count);
-		int off = i * NGROUPS_PER_BLOCK;
-		int len = cp_count * sizeof(*grouplist);
+		unsigned int cp_count = min(NGROUPS_PER_BLOCK, count);
+		unsigned int len = cp_count * sizeof(*grouplist);
 
-		if (copy_from_user(group_info->blocks[i], grouplist+off, len))
+		if (copy_from_user(group_info->blocks[i], grouplist, len))
 			return -EFAULT;
 
+		grouplist += NGROUPS_PER_BLOCK;
 		count -= cp_count;
 	}
 	return 0;
@@ -1809,8 +1338,10 @@ asmlinkage long sys_sethostname(char __user *name, int len)
 	down_write(&uts_sem);
 	errno = -EFAULT;
 	if (!copy_from_user(tmp, name, len)) {
-		memcpy(utsname()->nodename, tmp, len);
-		utsname()->nodename[len] = 0;
+		struct new_utsname *u = utsname();
+
+		memcpy(u->nodename, tmp, len);
+		memset(u->nodename + len, 0, sizeof(u->nodename) - len);
 		errno = 0;
 	}
 	up_write(&uts_sem);
@@ -1822,15 +1353,17 @@ asmlinkage long sys_sethostname(char __user *name, int len)
 asmlinkage long sys_gethostname(char __user *name, int len)
 {
 	int i, errno;
+	struct new_utsname *u;
 
 	if (len < 0)
 		return -EINVAL;
 	down_read(&uts_sem);
-	i = 1 + strlen(utsname()->nodename);
+	u = utsname();
+	i = 1 + strlen(u->nodename);
 	if (i > len)
 		i = len;
 	errno = 0;
-	if (copy_to_user(name, utsname()->nodename, i))
+	if (copy_to_user(name, u->nodename, i))
 		errno = -EFAULT;
 	up_read(&uts_sem);
 	return errno;
@@ -1855,8 +1388,10 @@ asmlinkage long sys_setdomainname(char __user *name, int len)
 	down_write(&uts_sem);
 	errno = -EFAULT;
 	if (!copy_from_user(tmp, name, len)) {
-		memcpy(utsname()->domainname, tmp, len);
-		utsname()->domainname[len] = 0;
+		struct new_utsname *u = utsname();
+
+		memcpy(u->domainname, tmp, len);
+		memset(u->domainname + len, 0, sizeof(u->domainname) - len);
 		errno = 0;
 	}
 	up_write(&uts_sem);

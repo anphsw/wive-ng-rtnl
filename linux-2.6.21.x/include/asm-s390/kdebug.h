@@ -42,19 +42,6 @@ enum die_val {
 	DIE_PAGE_FAULT,
 };
 
-static inline int notify_die(enum die_val val, const char *str,
-			struct pt_regs *regs, long err, int trap, int sig)
-{
-	struct die_args args = {
-		.regs = regs,
-		.str = str,
-		.err = err,
-		.trapnr = trap,
-		.signr = sig
-	};
-	return atomic_notifier_call_chain(&s390die_chain, val, &args);
-}
-
 extern void die(const char *, struct pt_regs *, long);
 
 #endif
