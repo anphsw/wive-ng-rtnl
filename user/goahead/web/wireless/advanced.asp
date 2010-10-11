@@ -6,16 +6,13 @@
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Advanced Wireless Settings</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
 var bgProtection = '<% getCfgZero(1, "BGProtection"); %>';
-var beaconInterval = '<% getCfgZero(1, "BeaconPeriod"); %>';
-var dtimValue = '<% getCfgZero(1, "DtimPeriod"); %>';
-var fragmentThreshold = '<% getCfgZero(1, "FragThreshold"); %>';
-var rtsThreshold = '<% getCfgZero(1, "RTSThreshold"); %>';
 var shortPreamble = '<% getCfgZero(1, "TxPreamble"); %>';
 var shortSlot = '<% getCfgZero(1, "ShortSlot"); %>';
 var txBurst = '<% getCfgZero(1, "TxBurst"); %>';
@@ -23,9 +20,7 @@ var pktAggregate = '<% getCfgZero(1, "PktAggregate"); %>';
 var wmmCapable = '<% getCfgZero(1, "WmmCapable"); %>';
 var APSDCapable = '<% getCfgZero(1, "APSDCapable"); %>';
 var DLSCapable = '<% getCfgZero(1, "DLSCapable"); %>';
-var wirelessMode = '<% getCfgZero(1, "WirelessMode"); %>';
 var countrycode = '<% getCfgGeneral(1, "CountryCode"); %>';
-var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "M2UEnabled"); %>';
@@ -100,7 +95,8 @@ function initTranslation()
 	_TR("advDLSEnable", "wireless enable");
 	_TR("advDLSDisable", "wireless disable");
 	_TR("advWMMParameter", "adv wmm parameter");
-	_TR("advWMMConf", "adv wmm configuration");
+	_TRV("advWMMConf", "adv wmm configuration");
+
 	_TR("advMul2UniConver", "adv multicast2unicast converter");
 	_TR("advMul2Uni", "adv multicast2unicast");
 	_TR("advMul2UniEnable", "wireless enable");
@@ -117,17 +113,6 @@ function initValue()
 	initTranslation();
 	bgProtection = 1*bgProtection;
 	document.wireless_advanced.bg_protection.options.selectedIndex = bgProtection;
-
-	wirelessMode = 1*wirelessMode;
-
-	beaconInterval = 1*beaconInterval;
-	document.wireless_advanced.beacon.value = beaconInterval;
-	dtimValue = 1*dtimValue;
-	document.wireless_advanced.dtim.value = dtimValue;
-	fragmentThreshold = 1*fragmentThreshold;
-	document.wireless_advanced.fragment.value = fragmentThreshold;
-	rtsThreshold = 1*rtsThreshold;
-	document.wireless_advanced.rts.value = rtsThreshold;
 
 	shortPreamble = 1*shortPreamble;
 	if (shortPreamble == 1)
@@ -235,7 +220,6 @@ function initValue()
 			document.wireless_advanced.dls_capable[1].checked = true;
 		}
 	}
-	document.wireless_advanced.tx_power.value = txPower;
 
 	if (countrycode == "US")
 		document.wireless_advanced.country_code.options.selectedIndex = 0;
@@ -448,59 +432,59 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advBeaconInterval">Beacon Interval</td>
 	<td>
-		<input type=text name=beacon size=5 maxlength=3 value="100"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
+		<input type="text" name="beacon" size="5" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
 	<td>
-		<input type=text name=dtim size=5 maxlength=3 value="1"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
+		<input type="text" name="dtim" size="5" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advFrag">Fragment Threshold</td>
 	<td>
-		<input type=text name=fragment size=5 maxlength=4 value=""> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
+		<input type="text" name="fragment" size="5" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advRTS">RTS Threshold</td>
 	<td>
-		<input type=text name=rts size=5 maxlength=4 value=""> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
+		<input type="text" name="rts" size="5" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
-		<input type=text name=tx_power size=5 maxlength=3 value="100"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font>
+		<input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advShortPre">Short Preamble</td>
 	<td>
-		<input type=radio name=short_preamble value="1" checked><font id="advShortPreEnable">Enable &nbsp;</font>
-		<input type=radio name=short_preamble value="0"><font id="advShortPreDisable">Disable</font>
+		<input type="radio" name="short_preamble" value="1"><font id="advShortPreEnable">Enable</font>&nbsp;
+		<input type="radio" name="short_preamble" value="0"><font id="advShortPreDisable">Disable</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advShortSlot">Short Slot</td>
 	<td>
-		<input type=radio name=short_slot value="1" checked><font id="advShortSlotEnable">Enable &nbsp;</font>
-		<input type=radio name=short_slot value="0"><font id="advShortSlotDisable">Disable</font>
+		<input type="radio" name="short_slot" value="1" checked><font id="advShortSlotEnable">Enable</font>&nbsp;
+		<input type="radio" name="short_slot" value="0"><font id="advShortSlotDisable">Disable</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advTxBurst">Tx Burst</td>
 	<td>
-		<input type=radio name=tx_burst value="1" checked><font id="advTxBurstEnable">Enable &nbsp;</font>
-		<input type=radio name=tx_burst value="0"><font id="advTxBurstDisable">Disable</font>
+		<input type="radio" name="tx_burst" value="1" checked><font id="advTxBurstEnable">Enable</font>&nbsp;
+		<input type="radio" name="tx_burst" value="0"><font id="advTxBurstDisable">Disable</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advPktAggr">Pkt_Aggregate</td>
 	<td>
-		<input type=radio name=pkt_aggregate value="1"><font id="advPktAggrEnable">Enable &nbsp;</font>
-		<input type=radio name=pkt_aggregate value="0" checked><font id="advPktAggrDisable">Disable</font>
+		<input type="radio" name="pkt_aggregate" value="1"><font id="advPktAggrEnable">Enable</font>&nbsp;
+		<input type="radio" name="pkt_aggregate" value="0" checked><font id="advPktAggrDisable">Disable</font>
 	</td>
 </tr>
 <tr> 
@@ -520,7 +504,7 @@ function wmm_capable_enable_switch()
 <tr id="div_carrier_detect" name="div_carrier_detect">
 	<td class="head" id="advCarrierDetect">Carrier Detect</td>
 	<td>
-		<input type="radio" name="carrier_detect" value="1"><font id="advCarrierDetectEnable">Enable</font>&nbsp;&nbsp;
+		<input type="radio" name="carrier_detect" value="1"><font id="advCarrierDetectEnable">Enable</font>&nbsp;
 		<input type="radio" name="carrier_detect" value="0" checked><font id="advCarrierDetectDisable">Disable</font>
 	</td>
 </tr>
@@ -535,28 +519,28 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advWMM">WMM Capable</td>
 	<td>
-		<input type=radio name=wmm_capable value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable &nbsp;</font>
-		<input type=radio name=wmm_capable value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>
+		<input type="radio" name="wmm_capable" value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable</font>&nbsp;
+		<input type="radio" name="wmm_capable" value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>
 	</td>
 </tr>
 <tr id="div_apsd_capable" name="div_apsd_capable">
 	<td class="head" id="advAPDS">APSD Capable</td>
 	<td>
-		<input type=radio name=apsd_capable value="1"><font id="advAPDSEnable">Enable &nbsp;</font>
-		<input type=radio name=apsd_capable value="0" checked><font id="advAPDSDisable">Disable</font>
+		<input type="radio" name="apsd_capable" value="1"><font id="advAPDSEnable">Enable</font>&nbsp;
+		<input type="radio" name="apsd_capable" value="0" checked><font id="advAPDSDisable">Disable</font>
 	</td>
 </tr>
 <tr id="div_dls_capable" name="div_dls_capable">
 	<td class="head" id="advDLS">DLS Capable</td>
 	<td>
-		<input type=radio name=dls_capable value="1"><font id="advDLSEnable">Enable &nbsp;</font>
-		<input type=radio name=dls_capable value="0" checked><font id="advDLSDisable">Disable</font>
+		<input type="radio" name="dls_capable" value="1"><font id="advDLSEnable">Enable</font>&nbsp;
+		<input type="radio" name="dls_capable" value="0" checked><font id="advDLSDisable">Disable</font>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="advWMMParameter">WMM Parameters</td>
 	<td>
-		<input type=button name="wmm_list" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
+		<input type="button" name="wmm_list" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
 	</td>
 </tr>
 
@@ -570,8 +554,8 @@ function wmm_capable_enable_switch()
 <tr>
 	<td class="head" id="advMul2Uni">Multicast-to-Unicast</td>
 	<td>
-		<input type=radio name="m2u_enable" value="1"><font id="advMul2UniEnable">Enable &nbsp;</font>
-		<input type=radio name="m2u_enable" value="0"><font id="advMul2UniDisable">Disable</font>
+		<input type="radio" name="m2u_enable" value="1"><font id="advMul2UniEnable">Enable</font>&nbsp;
+		<input type="radio" name="m2u_enable" value="0"><font id="advMul2UniDisable">Disable</font>
 	</td>
 </tr>
 </table>
@@ -581,8 +565,8 @@ function wmm_capable_enable_switch()
 <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
 <tr align="center">
 	<td>
-		<input type=submit style="{width:120px;}" value="Apply" id="advApply"> &nbsp; &nbsp;
-		<input type=reset  style="{width:120px;}" value="Cancel" id="advCancel" onClick="window.location.reload()">
+		<input type="submit" class="half" value="Apply" id="advApply">&nbsp;&nbsp;
+		<input type="reset"  class="half" value="Cancel" id="advCancel" onClick="window.location.reload()">
 	</td>
 </tr>
 </table>

@@ -93,12 +93,14 @@ function isAllNum(str)
 
 function formCheck()
 {
-	if(rules_num >= (MAX_RULES-1) ){
+	if (rules_num >= (MAX_RULES-1))
+	{
 		alert("The rule number is exceeded "+ MAX_RULES +".");
 		return false;
 	}
 
-	if(!document.portForward.portForwardEnabled.options.selectedIndex){
+	if (!document.portForward.portForwardEnabled.options.selectedIndex)
+	{
 		// user choose disable
 		return true;
 	}
@@ -117,7 +119,7 @@ function formCheck()
 		return false;
 	}
 
-	if(! checkIpAddr(document.portForward.ip_address) )
+	if (! checkIpAddr(document.portForward.ip_address))
 	{
 		alert("IP address format error.");
 		document.portForward.ip_address.focus();
@@ -132,13 +134,15 @@ function formCheck()
 	}
 
 	// exam Port
-	if(document.portForward.fromPort.value == ""){
+	if (document.portForward.fromPort.value == "")
+	{
 		alert("Not set a port range.");
 		document.portForward.fromPort.focus();
 		return false;
 	}
 
-	if(isAllNum( document.portForward.fromPort.value ) == 0){
+	if (isAllNum( document.portForward.fromPort.value ) == 0)
+	{
 		alert("Invalid port number.");
 		document.portForward.fromPort.focus();
 		return false;
@@ -232,32 +236,37 @@ function initTranslation()
 function updateState()
 {
 	initTranslation();
+	var form = document.portForwardDelete;
+	
 	if(! rules_num )
 	{
-		disableTextField(document.portForwardDelete.deleteSelPortForward);
-		disableTextField(document.portForwardDelete.reset);
+		disableTextField(form.deleteSelPortForward);
+		disableTextField(form.reset);
 	}
 	else
 	{
-		enableTextField(document.portForwardDelete.deleteSelPortForward);
-		enableTextField(document.portForwardDelete.reset);
+		enableTextField(form.deleteSelPortForward);
+		enableTextField(form.reset);
 	}
 
+	form = document.portForwardDelete;
 	if(document.portForward.portForwardEnabled.options.selectedIndex == 1)
 	{
-		enableTextField(document.portForward.ip_address);
-		enableTextField(document.portForward.fromPort);
-		enableTextField(document.portForward.toPort);
-		enableTextField(document.portForward.protocol);
-		enableTextField(document.portForward.comment);
+		enableTextField(form.ip_address);
+		enableTextField(form.fromPort);
+		enableTextField(form.toPort);
+		enableTextField(form.protocol);
+		enableTextField(form.comment);
+		enableTextField(form.fwdIface);
 	}
 	else
 	{
-		disableTextField(document.portForward.ip_address);
-		disableTextField(document.portForward.fromPort);
-		disableTextField(document.portForward.toPort);
-		disableTextField(document.portForward.protocol);
-		disableTextField(document.portForward.comment);
+		disableTextField(form.ip_address);
+		disableTextField(form.fromPort);
+		disableTextField(form.toPort);
+		disableTextField(form.protocol);
+		disableTextField(form.comment);
+		disableTextField(form.fwdIface);
 	}
 }
 
