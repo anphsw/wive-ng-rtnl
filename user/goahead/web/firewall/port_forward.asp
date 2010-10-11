@@ -249,8 +249,8 @@ function updateState()
 		enableTextField(form.reset);
 	}
 
-	form = document.portForwardDelete;
-	if(document.portForward.portForwardEnabled.options.selectedIndex == 1)
+	form = document.portForward;
+	if (form.portForwardEnabled.options.selectedIndex == 1)
 	{
 		enableTextField(form.ip_address);
 		enableTextField(form.fromPort);
