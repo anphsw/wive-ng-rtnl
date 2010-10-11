@@ -158,6 +158,13 @@
 76) In wifi driver fix memory leaks<br>
 77) inet_hash fixup<br>
 78) Fix init logic in goahead<br>
+79) Fix WebUI apply in wireless advanced for googe chrome<br>
+80) Fix memleak in tty driver code<br>
+81) Workaround for badmem devices<br>
+82) Update netsched and netfilter code<br>
+83) Fix corbina dhcp work<br>
+84) Fix restore dns at reconnect VPN<br>
+85) Speedup ppp_generic, ipv4, sys_time, hrtimer kernel code<br>
 
 <br><br>
 <b>For support see:</b><br>
