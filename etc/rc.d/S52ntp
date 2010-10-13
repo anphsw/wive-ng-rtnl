@@ -26,7 +26,7 @@ start() {
     rm -rf /etc/tmpTZ2
     date +%T -s $backup_time
 
-    if [ "$srv" != "" ] || [ -f /bin/ntpd ]; then
+    if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ] && [ -f /bin/ntpd ]; then
 	$LOG "Starting NTPD: "
 	ntpd -d -p $srv &
     fi
@@ -39,6 +39,7 @@ stop() {
 }
 
 get_param() {
+    NTPEnabled=`nvram_get 2860 NTPEnabled`
     srv=`nvram_get 2860 NTPServerIP`
     sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
