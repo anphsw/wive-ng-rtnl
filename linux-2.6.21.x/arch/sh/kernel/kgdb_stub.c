@@ -341,14 +341,6 @@ static char *ebin_to_mem(const char *buf, char *mem, int count)
 	return mem;
 }
 
-/* Pack a hex byte */
-static char *pack_hex_byte(char *pkt, int byte)
-{
-	*pkt++ = hexchars[(byte >> 4) & 0xf];
-	*pkt++ = hexchars[(byte & 0xf)];
-	return pkt;
-}
-
 #ifdef CONFIG_KGDB_THREAD
 
 /* Pack a thread ID */
