@@ -991,12 +991,6 @@ int udhcpc_main(int argc UNUSED_PARAM, char **argv)
 
 		/* When running on a bridge, the ifindex may have changed (e.g. if
 		 * member interfaces were added/removed or if the status of the
-		 * bridge changed).
-		 * Workaround: refresh it here before processing the next packet */
-		udhcp_read_interface(client_config.interface, &client_config.ifindex, NULL, client_config.client_mac);
-
-		/* When running on a bridge, the ifindex may have changed (e.g. if
-		 * member interfaces were added/removed or if the status of the
 		 * bridge changed). Interface mtu may have changed also.
 		 * Workaround: refresh it here before processing the next packet */
 		udhcp_read_interface(client_config.interface,
