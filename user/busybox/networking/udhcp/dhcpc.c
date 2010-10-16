@@ -84,25 +84,26 @@ static int mton(uint32_t mask)
 static NOINLINE char *xmalloc_optname_optval(uint8_t *option, const struct dhcp_optflag *optflag, const char *opt_name)
 {
 	unsigned upper_length;
-	int len, type, optlen;
+	int len, type, optlen, origlen;
 	char *dest, *ret;
 
 	/* option points to OPT_DATA, need to go back and get OPT_LEN */
 	len = option[OPT_LEN - OPT_DATA];
 	type = optflag->flags & OPTION_TYPE_MASK;
-	optlen = dhcp_option_lengths[type];
+	optlen = origlen = dhcp_option_lengths[type];
 	upper_length = len_of_option_as_string[type] * ((unsigned)len / (unsigned)optlen);
 
 	dest = ret = xmalloc(upper_length + strlen(opt_name) + 2);
 	dest += sprintf(ret, "%s=", opt_name);
 
-	while (len >= optlen) {
+	while (len >= origlen) {
 		switch (type) {
 		case OPTION_IP_PAIR:
 			dest += sprint_nip(dest, "", option);
 			*dest++ = '/';
-			option += 4;
 			optlen = 4;
+			option += optlen;
+			len -= optlen;
 		case OPTION_IP:
 			dest += sprint_nip(dest, "", option);
 // TODO: it can be a list only if (optflag->flags & OPTION_LIST).
