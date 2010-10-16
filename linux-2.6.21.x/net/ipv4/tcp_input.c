@@ -2592,9 +2592,9 @@ static int tcp_ack_update_window(struct sock *sk, struct sk_buff *skb, u32 ack,
 
 /* F-RTO spurious RTO detection algorithm (RFC4138)
  *
- * F-RTO affects during two new ACKs following RTO. State (ACK number) is kept
- * in frto_counter. When ACK advances window (but not to or beyond highest
- * sequence sent before RTO):
+ * F-RTO affects during two new ACKs following RTO (well, almost, see inline
+ * comments). State (ACK number) is kept in frto_counter. When ACK advances
+ * window (but not to or beyond highest sequence sent before RTO):
  *   On First ACK,  send two new segments out.
  *   On Second ACK, RTO was likely spurious. Do spurious response (response
  *                  algorithm is not part of the F-RTO detection algorithm
@@ -2623,6 +2623,13 @@ static void tcp_process_frto(struct sock *sk, u32 prior_snd_una, int flag)
 	/* Duplicate the behavior from Loss state (fastretrans_alert) */
 	if (flag&FLAG_DATA_ACKED)
 		inet_csk(sk)->icsk_retransmits = 0;
+
+	/* RFC4138 shortcoming in step 2; should also have case c): ACK isn't
+	 * duplicate nor advances window, e.g., opposite dir data, winupdate
+	 */
+	if ((tp->snd_una == prior_snd_una) && (flag&FLAG_NOT_DUP) &&
+	    !(flag&FLAG_FORWARD_PROGRESS))
+		return;
 
 	if (!before(tp->snd_una, tp->frto_highmark)) {
 		tcp_enter_frto_loss(sk, tp->frto_counter + 1, flag);
