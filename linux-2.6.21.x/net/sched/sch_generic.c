@@ -599,7 +599,7 @@ void dev_shutdown(struct net_device *dev)
 		qdisc_destroy(qdisc);
 	}
 #endif
-	BUG_TRAP(!timer_pending(&dev->watchdog_timer));
+	WARN_ON(timer_pending(&dev->watchdog_timer));
 	qdisc_unlock_tree(dev);
 }
 

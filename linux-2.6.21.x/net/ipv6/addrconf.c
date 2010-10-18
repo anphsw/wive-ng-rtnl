@@ -257,8 +257,10 @@ static void in6_dev_finish_destroy_rcu(struct rcu_head *head)
 void in6_dev_finish_destroy(struct inet6_dev *idev)
 {
 	struct net_device *dev = idev->dev;
-	BUG_TRAP(idev->addr_list==NULL);
-	BUG_TRAP(idev->mc_list==NULL);
+
+	WARN_ON(idev->addr_list != NULL);
+	WARN_ON(idev->mc_list != NULL);
+
 #ifdef NET_REFCNT_DEBUG
 	printk(KERN_DEBUG "in6_dev_finish_destroy: %s\n", dev ? dev->name : "NIL");
 #endif
@@ -436,8 +438,9 @@ static void addrconf_forward_change(void)
 
 void inet6_ifa_finish_destroy(struct inet6_ifaddr *ifp)
 {
-	BUG_TRAP(ifp->if_next==NULL);
-	BUG_TRAP(ifp->lst_next==NULL);
+	WARN_ON(ifp->if_next != NULL);
+	WARN_ON(ifp->lst_next != NULL);
+
 #ifdef NET_REFCNT_DEBUG
 	printk(KERN_DEBUG "inet6_ifa_finish_destroy\n");
 #endif

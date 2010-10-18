@@ -622,8 +622,8 @@ static struct sk_buff *ip_frag_reasm(struct ipq *qp, struct net_device *dev)
 
 	ipq_kill(qp);
 
-	BUG_TRAP(head != NULL);
-	BUG_TRAP(FRAG_CB(head)->offset == 0);
+	WARN_ON(head == NULL);
+	WARN_ON(FRAG_CB(head)->offset != 0);
 
 	/* Allocate a new buffer for the datagram. */
 	ihlen = head->nh.iph->ihl*4;

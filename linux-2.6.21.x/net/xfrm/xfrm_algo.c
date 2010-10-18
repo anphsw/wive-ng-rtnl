@@ -636,7 +636,7 @@ skb_to_sgvec(struct sk_buff *skb, struct scatterlist *sg, int offset, int len)
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
@@ -661,7 +661,7 @@ skb_to_sgvec(struct sk_buff *skb, struct scatterlist *sg, int offset, int len)
 		for (; list; list = list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {

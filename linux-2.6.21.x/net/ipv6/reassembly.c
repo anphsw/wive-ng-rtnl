@@ -601,8 +601,8 @@ static int ip6_frag_reasm(struct frag_queue *fq, struct sk_buff **skb_in,
 
 	fq_kill(fq);
 
-	BUG_TRAP(head != NULL);
-	BUG_TRAP(FRAG6_CB(head)->offset == 0);
+	WARN_ON(head == NULL);
+	WARN_ON(FRAG6_CB(head)->offset != 0);
 
 	/* Unfragmented part is taken from the first segment. */
 	payload_len = (head->data - head->nh.raw) - sizeof(struct ipv6hdr) + fq->len - sizeof(struct frag_hdr);

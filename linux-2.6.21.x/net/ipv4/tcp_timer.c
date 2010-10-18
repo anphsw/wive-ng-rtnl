@@ -284,7 +284,7 @@ static void tcp_retransmit_timer(struct sock *sk)
 	if (!tp->packets_out)
 		goto out;
 
-	BUG_TRAP(!skb_queue_empty(&sk->sk_write_queue));
+	WARN_ON(skb_queue_empty(&sk->sk_write_queue));
 
 	if (!tp->snd_wnd && !sock_flag(sk, SOCK_DEAD) &&
 	    !((1 << sk->sk_state) & (TCPF_SYN_SENT | TCPF_SYN_RECV))) {

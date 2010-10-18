@@ -115,7 +115,7 @@ static void tcf_police_destroy(struct tcf_police *p)
 			return;
 		}
 	}
-	BUG_TRAP(0);
+	WARN_ON(1);
 }
 
 #ifdef CONFIG_NET_CLS_ACT

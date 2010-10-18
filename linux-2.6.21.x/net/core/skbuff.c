@@ -1058,7 +1058,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
@@ -1087,7 +1087,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 		for (; list; list = list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {
@@ -1145,7 +1145,7 @@ int skb_store_bits(const struct sk_buff *skb, int offset, void *from, int len)
 		skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + frag->size;
 		if ((copy = end - offset) > 0) {
@@ -1173,7 +1173,7 @@ int skb_store_bits(const struct sk_buff *skb, int offset, void *from, int len)
 		for (; list; list = list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {
@@ -1222,7 +1222,7 @@ __wsum skb_checksum(const struct sk_buff *skb, int offset,
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
@@ -1251,7 +1251,7 @@ __wsum skb_checksum(const struct sk_buff *skb, int offset,
 		for (; list; list = list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {
@@ -1299,7 +1299,7 @@ __wsum skb_copy_and_csum_bits(const struct sk_buff *skb, int offset,
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
@@ -1332,7 +1332,7 @@ __wsum skb_copy_and_csum_bits(const struct sk_buff *skb, int offset,
 			__wsum csum2;
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {
