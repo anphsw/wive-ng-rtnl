@@ -1665,8 +1665,9 @@ void iptablesWebsFilterRun(void)
 	char *activex = nvram_get(RT2860_NVRAM, "websFilterActivex");
 	char *cookies = nvram_get(RT2860_NVRAM, "websFilterCookies");
 
-	if(!url_filter || !host_filter || !proxy || !java || !activex || !cookies) {
-		doSystem("rm -f" _PATH_WEBS_FILE);
+	doSystem("rm -f" _PATH_WEBS_FILE);
+	sync();
+	if(!url_filter && !host_filter && !proxy && !java && !activex && !cookies) {
 		return;
 	}
 
