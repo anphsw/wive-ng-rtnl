@@ -76,5 +76,3 @@ MODULE_LICENSE("GPL");
 
 module_init(init_em_nbyte);
 module_exit(exit_em_nbyte);
-
-MODULE_ALIAS_TCF_EMATCH(TCF_EM_NBYTE);

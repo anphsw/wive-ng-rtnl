@@ -11,19 +11,27 @@
  *              - Ingress support
  */
 
+#include <asm/uaccess.h>
+#include <asm/system.h>
 #include <linux/bitops.h>
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/string.h>
+#include <linux/mm.h>
+#include <linux/socket.h>
+#include <linux/sockios.h>
+#include <linux/in.h>
 #include <linux/errno.h>
+#include <linux/interrupt.h>
 #include <linux/netdevice.h>
 #include <linux/skbuff.h>
 #include <linux/rtnetlink.h>
 #include <linux/init.h>
 #include <linux/rcupdate.h>
 #include <linux/list.h>
+#include <net/sock.h>
 #include <net/pkt_sched.h>
 
 /* Main transmission queue. */
@@ -79,6 +87,7 @@ void qdisc_unlock_tree(struct net_device *dev)
 
    NOTE: Called under dev->queue_lock with locally disabled BH.
 */
+
 static inline int qdisc_restart(struct net_device *dev)
 {
 	struct Qdisc *q = dev->qdisc;
@@ -170,11 +179,6 @@ requeue:
 	}
 	BUG_ON((int) q->q.qlen < 0);
 	return q->q.qlen;
-}
-
-int qdisc_restart1(struct net_device *dev)
-{
-	return qdisc_restart(dev);
 }
 
 void __qdisc_run(struct net_device *dev)
@@ -494,7 +498,9 @@ void qdisc_destroy(struct Qdisc *qdisc)
 		return;
 
 	list_del(&qdisc->list);
+#ifdef CONFIG_NET_ESTIMATOR
 	gen_kill_estimator(&qdisc->bstats, &qdisc->rate_est);
+#endif
 	if (ops->reset)
 		ops->reset(qdisc);
 	if (ops->destroy)
@@ -611,4 +617,3 @@ EXPORT_SYMBOL(qdisc_destroy);
 EXPORT_SYMBOL(qdisc_reset);
 EXPORT_SYMBOL(qdisc_lock_tree);
 EXPORT_SYMBOL(qdisc_unlock_tree);
-EXPORT_SYMBOL(qdisc_restart1);

@@ -150,5 +150,3 @@ MODULE_LICENSE("GPL");
 
 module_init(init_em_text);
 module_exit(exit_em_text);
-
-MODULE_ALIAS_TCF_EMATCH(TCF_EM_TEXT);

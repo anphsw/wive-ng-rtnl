@@ -478,6 +478,7 @@ qdisc_create(struct net_device *dev, u32 handle, struct rtattr **tca, int *errp)
 	sch->handle = handle;
 
 	if (!ops->init || (err = ops->init(sch, tca[TCA_OPTIONS-1])) == 0) {
+#ifdef CONFIG_NET_ESTIMATOR
 		if (tca[TCA_RATE-1]) {
 			err = gen_new_estimator(&sch->bstats, &sch->rate_est,
 						sch->stats_lock,
@@ -493,6 +494,7 @@ qdisc_create(struct net_device *dev, u32 handle, struct rtattr **tca, int *errp)
 				goto err_out3;
 			}
 		}
+#endif
 		qdisc_lock_tree(dev);
 		list_add_tail(&sch->list, &dev->qdisc_list);
 		qdisc_unlock_tree(dev);
@@ -520,9 +522,11 @@ static int qdisc_change(struct Qdisc *sch, struct rtattr **tca)
 		if (err)
 			return err;
 	}
+#ifdef CONFIG_NET_ESTIMATOR
 	if (tca[TCA_RATE-1])
 		gen_replace_estimator(&sch->bstats, &sch->rate_est,
 			sch->stats_lock, tca[TCA_RATE-1]);
+#endif
 	return 0;
 }
 
@@ -798,7 +802,9 @@ static int tc_fill_qdisc(struct sk_buff *skb, struct Qdisc *q, u32 clid,
 		goto rtattr_failure;
 
 	if (gnet_stats_copy_basic(&d, &q->bstats) < 0 ||
+#ifdef CONFIG_NET_ESTIMATOR
 	    gnet_stats_copy_rate_est(&d, &q->rate_est) < 0 ||
+#endif
 	    gnet_stats_copy_queue(&d, &q->qstats) < 0)
 		goto rtattr_failure;
 
@@ -1169,22 +1175,16 @@ reclassify:
 	return -1;
 }
 
-#if defined(CONFIG_NET_SCH_CLK_CPU) || defined(CONFIG_NET_SCH_CLK_JIFFIES)
 static int psched_us_per_tick = 1;
 static int psched_tick_per_us = 1;
-#endif
 
 #ifdef CONFIG_PROC_FS
 static int psched_show(struct seq_file *seq, void *v)
 {
-	struct timespec ts;
+	seq_printf(seq, "%08x %08x %08x %08x\n",
+		      psched_tick_per_us, psched_us_per_tick,
+		      1000000, HZ);
 
-	hrtimer_get_res(CLOCK_MONOTONIC, &ts);
- 	seq_printf(seq, "%08x %08x %08x %08x\n",
- 		   (u32)NSEC_PER_USEC, (u32)PSCHED_US2NS(1),
- 		   1000000,
-		   (u32)NSEC_PER_SEC/(u32)ktime_to_ns(timespec_to_ktime(ts)));
- 
 	return 0;
 }
 
@@ -1306,3 +1306,4 @@ EXPORT_SYMBOL(qdisc_get_rtab);
 EXPORT_SYMBOL(qdisc_put_rtab);
 EXPORT_SYMBOL(register_qdisc);
 EXPORT_SYMBOL(unregister_qdisc);
+EXPORT_SYMBOL(tc_classify);

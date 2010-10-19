@@ -719,13 +719,11 @@ static int em_meta_match(struct sk_buff *skb, struct tcf_ematch *m,
 
 static inline void meta_delete(struct meta_match *meta)
 {
-	if (meta) {
-		struct meta_type_ops *ops = meta_type_ops(&meta->lvalue);
+	struct meta_type_ops *ops = meta_type_ops(&meta->lvalue);
 
-		if (ops && ops->destroy) {
-			ops->destroy(&meta->lvalue);
-			ops->destroy(&meta->rvalue);
-		}
+	if (ops && ops->destroy) {
+		ops->destroy(&meta->lvalue);
+		ops->destroy(&meta->rvalue);
 	}
 
 	kfree(meta);
@@ -850,5 +848,3 @@ MODULE_LICENSE("GPL");
 
 module_init(init_em_meta);
 module_exit(exit_em_meta);
-
-MODULE_ALIAS_TCF_EMATCH(TCF_EM_META);
