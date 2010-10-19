@@ -151,7 +151,7 @@ static int rt2870_suspend(
 	}
 	else
 	{
-		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		pAd = net_dev->ml_priv;
 		if (!pad)
 		    goto out; //already stopped or not init
 
@@ -187,7 +187,7 @@ static int rt2870_resume(
 		DBGPRINT(RT_DEBUG_ERROR, ("net_dev == NULL!\n"));
 	}
 	else
-		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		pAd = net_dev->ml_priv;
  
 	if (pAd != NULL)
 	{

@@ -503,6 +503,8 @@ int RtmpPCIMgmtKickOut(
     RTMPDescriptorEndianChange((PUCHAR)pTxD, TYPE_TXD);
 #else
 	pTxD  = (PTXD_STRUC) pAd->MgmtRing.Cell[SwIdx].AllocVa;
+	if (!pTxD)
+	    return 0;
 #endif
 
 	pAd->MgmtRing.Cell[SwIdx].pNdisPacket = pPacket;

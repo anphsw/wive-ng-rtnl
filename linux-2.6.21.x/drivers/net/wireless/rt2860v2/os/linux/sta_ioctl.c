@@ -811,7 +811,7 @@ int rt_ioctl_giwfreq(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -885,7 +885,7 @@ int rt_ioctl_giwmode(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -952,7 +952,7 @@ int rt_ioctl_giwrange(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -1089,7 +1089,7 @@ int rt_ioctl_giwap(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -1540,15 +1540,15 @@ int rt_ioctl_giwscan(struct net_device *dev,
 
 			if (tmpRate == 0x6c && pAdapter->ScanTab.BssEntry[i].HtCapabilityLen > 0)
 			{
-				int rate_count = sizeof(ralinkrate)/sizeof(__s32);
+    				int rate_count = ARRAY_SIZE(ralinkrate);
 				HT_CAP_INFO capInfo = pAdapter->ScanTab.BssEntry[i].HtCapability.HtCapInfo;
 				int shortGI = capInfo.ChannelWidth ? capInfo.ShortGIfor40 : capInfo.ShortGIfor20;
 				int maxMCS = pAdapter->ScanTab.BssEntry[i].HtCapability.MCSSet[1] ?  15 : 7;
 				int rate_index = 12 + ((UCHAR)capInfo.ChannelWidth * 24) + ((UCHAR)shortGI *48) + ((UCHAR)maxMCS);
 				if (rate_index < 0)
 					rate_index = 0;
-				if (rate_index > rate_count)
-					rate_index = rate_count;
+				if (rate_index >= rate_count)
+					rate_index = rate_count - 1;
 				iwe.u.bitrate.value	=  ralinkrate[rate_index] * 500000;
 			}
             
@@ -1708,7 +1708,7 @@ int rt_ioctl_giwessid(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -1777,7 +1777,7 @@ int rt_ioctl_giwnickn(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -1840,7 +1840,7 @@ int rt_ioctl_giwrts(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -1875,9 +1875,9 @@ int rt_ioctl_siwfrag(struct net_device *dev,
     	}
 
 	if (frag->disabled)
-		val = MAX_FRAG_THRESHOLD;
-	else if (frag->value >= MIN_FRAG_THRESHOLD || frag->value <= MAX_FRAG_THRESHOLD)
-        val = __cpu_to_le16(frag->value & ~0x1); /* even numbers only */
+	    val = MAX_FRAG_THRESHOLD;
+	else if (frag->value >= MIN_FRAG_THRESHOLD && frag->value <= MAX_FRAG_THRESHOLD)
+	    val = __cpu_to_le16(frag->value & ~0x1); /* even numbers only */
 	else if (frag->value == 0)
 	    val = MAX_FRAG_THRESHOLD;
 	else
@@ -1898,7 +1898,7 @@ int rt_ioctl_giwfrag(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -2010,9 +2010,8 @@ int rt_ioctl_siwencode(struct net_device *dev,
             }
         else
 			/* Don't complain if only change the mode */
-		if(!erq->flags & IW_ENCODE_MODE) 
-		{
-				return -EINVAL;
+		if (!(erq->flags & IW_ENCODE_MODE)) {
+    				return -EINVAL;
 		}
 	}
 		
@@ -2037,7 +2036,7 @@ rt_ioctl_giwencode(struct net_device *dev,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -2123,7 +2122,7 @@ rt_ioctl_setparam(struct net_device *dev, struct iw_request_info *info,
 	if (pAdapter == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -2807,7 +2806,7 @@ rt_private_show(struct net_device *dev, struct iw_request_info *info,
 	if (pAd == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 
@@ -3840,7 +3839,7 @@ int rt_ioctl_giwrate(struct net_device *dev,
 
 	GET_PAD_FROM_NET_DEV(pAd, dev);
 
-    rate_count = sizeof(ralinkrate)/sizeof(__s32);
+    rate_count = ARRAY_SIZE(ralinkrate);
     //check if the interface is down
 	if(!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
 	{
@@ -3871,8 +3870,8 @@ int rt_ioctl_giwrate(struct net_device *dev,
     if (rate_index < 0)
         rate_index = 0;
     
-    if (rate_index > rate_count)
-        rate_index = rate_count;
+    if (rate_index >= rate_count)
+        rate_index = rate_count - 1;
 
     wrqu->bitrate.value = ralinkrate[rate_index] * 500000;
     wrqu->bitrate.disabled = 0;
@@ -6600,7 +6599,7 @@ INT rt28xx_sta_ioctl(
 	if (pAd == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->priv will be NULL in 2rd open */
+		   So the net_dev->ml_priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 	pObj = (POS_COOKIE) pAd->OS_Cookie;

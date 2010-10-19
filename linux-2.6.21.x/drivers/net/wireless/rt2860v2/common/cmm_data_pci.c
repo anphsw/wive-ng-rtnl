@@ -445,6 +445,8 @@ int RtmpPCIMgmtKickOut(
     RTMPDescriptorEndianChange((PUCHAR)pTxD, TYPE_TXD);
 #else
 	pTxD  = (PTXD_STRUC) pAd->MgmtRing.Cell[SwIdx].AllocVa;
+	if (!pTxD)
+	    return 0;
 #endif
 
 	pAd->MgmtRing.Cell[SwIdx].pNdisPacket = pPacket;
@@ -1519,6 +1521,8 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 
 #ifndef RT_BIG_ENDIAN
 	pTxD  = (PTXD_STRUC) pAd->TxRing[QueIdx].Cell[SwIdx].AllocVa;
+	if (!pTxD)
+	    return 0;
 #else
     pDestTxD  = (PTXD_STRUC)pAd->TxRing[QueIdx].Cell[SwIdx].AllocVa;
     TxD = *pDestTxD;

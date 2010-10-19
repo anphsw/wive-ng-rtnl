@@ -426,6 +426,8 @@ VOID	RTMPRingCleanUp(
 			for (i=0; i<TX_RING_SIZE; i++) // We have to scan all TX ring
 			{
 				pTxD  = (PTXD_STRUC) pTxRing->Cell[i].AllocVa;
+				if (!pTxD)
+				    return;
 
 				pPacket = (PNDIS_PACKET) pTxRing->Cell[i].pNdisPacket;
 				// release scatter-and-gather NDIS_PACKET
@@ -469,6 +471,8 @@ VOID	RTMPRingCleanUp(
 			for (i=0; i<MGMT_RING_SIZE; i++)
 			{
 				pTxD  = (PTXD_STRUC) pAd->MgmtRing.Cell[i].AllocVa;
+				if (!pTxD)
+				    return;
 
 				pPacket = (PNDIS_PACKET) pAd->MgmtRing.Cell[i].pNdisPacket;
 				// rlease scatter-and-gather NDIS_PACKET

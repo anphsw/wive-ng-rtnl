@@ -33,8 +33,7 @@
 #include "rt_config.h"
 
 
-static struct net_device_stats *RT28xx_get_wds_ether_stats(
-    IN  struct net_device *net_dev);
+static struct net_device_stats *RT28xx_get_wds_ether_stats(IN  struct net_device *net_dev);
 
 #define VAILD_KEY_INDEX( _X ) ((((_X) >= 0) && ((_X) < 4)) ? (TRUE) : (FALSE))
 
@@ -1390,8 +1389,7 @@ VOID WdsPrepareWepKeyFromMainBss(
 
     ========================================================================
 */
-static struct net_device_stats *RT28xx_get_wds_ether_stats(
-    IN  struct net_device *net_dev)
+static struct net_device_stats *RT28xx_get_wds_ether_stats(IN  struct net_device *net_dev)
 {
     RTMP_ADAPTER *pAd = NULL;
 	INT WDS_apidx = 0,index;

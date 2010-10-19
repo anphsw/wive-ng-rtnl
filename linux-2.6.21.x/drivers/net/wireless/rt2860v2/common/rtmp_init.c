@@ -25,7 +25,7 @@
 	Who         When          What
 	--------    ----------    ----------------------------------------------
 */
-#include	"rt_config.h"
+#include "rt_config.h"
 
 UCHAR    BIT8[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 char*   CipherName[] = {"none","wep64","wep128","TKIP","AES","CKIP64","CKIP128","CKIP152","SMS4"};
@@ -5034,7 +5034,7 @@ err1:
 #endif // DOT11_N_SUPPORT //
 
 	// shall not set priv to NULL here because the priv didn't been free yet.
-	//net_dev->priv = 0;
+	//net_dev->ml_priv = 0;
 #ifdef INF_AMAZON_SE
 err0:
 #endif // INF_AMAZON_SE //

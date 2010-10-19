@@ -881,7 +881,7 @@ Note:
 // This function will be called when query /proc
 struct iw_statistics *rtusb_get_wireless_stats(IN struct net_device *net_dev)
 {
-	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) net_dev->priv;
+	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) net_dev->ml_priv;
 	UCHAR		R66;
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("rtusb_get_wireless_stats --->\n"));
@@ -936,7 +936,7 @@ Note:
 NDIS_STATUS	 CreateThreads( 
 	IN	struct net_device *net_dev)
 {
-	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) net_dev->priv;
+	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) net_dev->ml_priv;
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	//init_MUTEX(&(pAd->usbdev_semaphore));

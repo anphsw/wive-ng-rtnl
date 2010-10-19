@@ -926,6 +926,7 @@ VOID BAOriSessionTearDown(
 			else
 			{
 				DBGPRINT(RT_DEBUG_ERROR, ("%s(bForceSend):alloc memory failed!\n", __FUNCTION__));
+				return;
 			}
 		}
 

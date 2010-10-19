@@ -1707,7 +1707,7 @@ struct net_device *alloc_netdev(
     }
 
     if (sizeof_priv)
-        dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
+        dev->ml_priv = (void *) (((long)(dev + 1) + 31) & ~31);
 
     setup(dev);
     strcpy(dev->name, mask);

@@ -206,7 +206,7 @@ static int rt2860_suspend(
 	}
 	else
 	{
-		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		pAd = net_dev->ml_priv;
 		if(!pAd) {
 		    retval = 0; //Allready stopped
 		    goto out;
@@ -280,7 +280,7 @@ static int rt2860_resume(
 		DBGPRINT(RT_DEBUG_ERROR, ("net_dev == NULL!\n"));
 	}
 	else
-		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		pAd = net_dev->ml_priv;
 
 		if (pAd != NULL)
 	{
@@ -373,17 +373,16 @@ static INT __devinit rt2860_init_one (
 }
 
 
-static VOID __devexit rt2860_remove_one(
-    IN  struct pci_dev  *pci_dev)
+static VOID __devexit rt2860_remove_one(IN  struct pci_dev  *pci_dev)
 {
     struct net_device   *net_dev = pci_get_drvdata(pci_dev);
     RTMP_ADAPTER        *pAd;
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_remove_one\n"));
 
-	if ( net_dev!=NULL && net_dev->priv != NULL)
+	if ( net_dev!=NULL && net_dev->ml_priv != NULL)
 	{
-		pAd = net_dev->priv;
+		pAd = net_dev->ml_priv;
 #ifdef MULTIPLE_CARD_SUPPORT
 		if ((pAd->MC_RowID >= 0) && (pAd->MC_RowID <= MAX_NUM_OF_MULTIPLE_CARD))
 			MC_CardUsed[pAd->MC_RowID] = 0; // not clear MAC address
@@ -882,7 +881,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 #endif
 {
 	struct net_device *net_dev = (struct net_device *) dev_instance;
-	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) net_dev->priv;
+	PRTMP_ADAPTER pAd = net_dev->ml_priv;
 	INT_SOURCE_CSR_STRUC	IntSource;
 	POS_COOKIE pObj;
 	
@@ -1362,9 +1361,6 @@ BOOLEAN RT28XXNetDevInit(
     pci_set_master(pci_dev);
 
     net_dev->priv_flags = INT_MAIN;
-
-    //net_dev->set_multicast_list = rt2860_set_rx_mode;
-    //net_dev->priv_flags = INT_MAIN;
 
     DBGPRINT(RT_DEBUG_TRACE, ("%s: at 0x%lx, VA 0x%lx, IRQ %d. \n", 
         	net_dev->name, (ULONG)pci_resource_start(pci_dev, 0),
@@ -1933,7 +1929,7 @@ VOID rt2860_stop(struct net_device *net_dev)
 		return; //all ready stop or not started
 	}
 	else
-		pAd = (PRTMP_ADAPTER)net_dev->priv;
+		pAd = net_dev->ml_priv;
  
 	if (pAd) {
 

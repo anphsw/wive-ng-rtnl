@@ -2387,6 +2387,8 @@ UINT deaggregate_AMSDU_announce(
 				//WpaEAPOLKeyAction(pAd, Elem);
 				REPORT_MGMT_FRAME_TO_MLME(pAd, BSSID_WCID, Elem->Msg, Elem->MsgLen, 0, 0, 0, 0);
 				kfree(Elem);
+			} else {
+			    return 0;
 			}
 		}
 #endif // CONFIG_STA_SUPPORT //

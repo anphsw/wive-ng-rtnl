@@ -75,6 +75,9 @@ int rbus_module_init(VOID)
     csr_addr = (unsigned long) RT2860_CSR_ADDR;
 
     handle = kmalloc(sizeof(struct os_cookie) , GFP_KERNEL);
+    if (handle == NULL)
+	goto err_out_free_res;
+    
     ((POS_COOKIE)handle)->pci_dev = net_dev;
     if( RTMPAllocAdapterBlock(handle, &pAd) != NDIS_STATUS_SUCCESS) {
 	printk(" RTMPAllocAdapterBlock !=  NDIS_STATUS_SUCCESS\n");
@@ -84,7 +87,7 @@ int rbus_module_init(VOID)
 
     // Save CSR virtual address and irq to device structure
     net_dev->base_addr = csr_addr;
-    net_dev->priv = (PVOID)pAd;
+    net_dev->ml_priv = (PVOID)pAd;
     pAd->CSRBaseAddress = net_dev->base_addr;
     pAd->net_dev = net_dev;
     net_dev->priv_flags = INT_MAIN;
@@ -204,7 +207,7 @@ err_out:
 VOID rbus_module_exit(VOID)
 {
 	struct net_device   *net_dev = rt2860_dev;
-    RTMP_ADAPTER *pAd = net_dev->priv;
+    RTMP_ADAPTER *pAd = net_dev->ml_priv;
 
 	if (pAd != NULL)
 	{
