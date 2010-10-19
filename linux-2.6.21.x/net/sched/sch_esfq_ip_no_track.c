@@ -132,12 +132,12 @@ static __inline__ unsigned esfq_hash_direct(struct esfq_sched_data *q, u32 h)
 
 static __inline__ unsigned esfq_jhash_1word(struct esfq_sched_data *q,u32 h)
 {
-	return jhash_1word(h, q->perturbation) & q->hash_divisor-1;
+	return jhash_1word(h, q->perturbation) & (q->hash_divisor-1);
 }
 
 static __inline__ unsigned esfq_jhash_2words(struct esfq_sched_data *q, u32 h, u32 h1)
 {
-	return jhash_2words(h, h1, q->perturbation) & q->hash_divisor-1;
+	return jhash_2words(h, h1, q->perturbation) & (q->hash_divisor-1);
 }
 
 static unsigned esfq_hash(struct esfq_sched_data *q, struct sk_buff *skb)
