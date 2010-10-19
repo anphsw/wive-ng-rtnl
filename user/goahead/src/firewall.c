@@ -365,6 +365,9 @@ static void iptablesIPPortFilterBuildScript(void)
 	char *firewall_enable, *default_policy, *rule, *c_if;
 	char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
 	
+	//Remove mac_ip iptables script
+	doSystem("rm -f" _PATH_MACIP_FILE);
+	sync();
 	
 	firewall_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
 	if (!firewall_enable)
@@ -507,6 +510,10 @@ static void iptablesPortForwardBuildScript(void)
 	char *firewall_enable, *rule, *c_if;
 	int i=0,prf_int, prt_int, proto;
 
+	//Remove portforward script
+	doSystem("rm -f" _PATH_PFW_FILE);
+	sync();
+	
 	firewall_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 	if(!firewall_enable)
 	{
@@ -1665,8 +1672,10 @@ void iptablesWebsFilterRun(void)
 	char *activex = nvram_get(RT2860_NVRAM, "websFilterActivex");
 	char *cookies = nvram_get(RT2860_NVRAM, "websFilterCookies");
 
+	// Remove content filter script
 	doSystem("rm -f" _PATH_WEBS_FILE);
 	sync();
+
 	if(!url_filter && !host_filter && !proxy && !java && !activex && !cookies) {
 		return;
 	}
