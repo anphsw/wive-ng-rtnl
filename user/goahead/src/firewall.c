@@ -1708,24 +1708,25 @@ void iptablesWebsFilterRun(void)
 
 	    // URL filter
 	    i=0;
-	    while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) ) {
+	    while ((i < getRuleNums(url_filter)) && (getNthValueSafe(i, url_filter, ';', entry, sizeof(entry)) != -1)) {
 		if (strlen(entry)) {
 		    if(!strncasecmp(entry, "http://", strlen("http://")))
 			strcpy(entry, entry + strlen("http://"));
 		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", entry);
 		    fputs(buff, fd);
 		}
+	    i++;
 	    }
 
 	    // HOST(Keyword) filter
 	    i=0;
-	    while ((getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1)) {
-		if(strlen(entry))
+	    while ((i < getRuleNums(host_filter)) && (getNthValueSafe(i, host_filter, ';', entry, sizeof(entry)) != -1)) {
+		if (strlen(entry)) {
 		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", entry);
-		fputs(buff, fd);
+		    fputs(buff, fd);
+		}
+	    i++;
 	    }
-	    //clear string at end
-	    fputs("\n", fd);
 	    //closefile
 	    fclose(fd);
 	    sync();
