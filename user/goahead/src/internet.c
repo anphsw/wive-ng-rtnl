@@ -755,6 +755,7 @@ void vpnStoreRouting(const char *rt_config)
 		}
 		
 		fclose(fd);
+		sync();
 		
 		// Call rwfs to store data
 		system("fs save &");

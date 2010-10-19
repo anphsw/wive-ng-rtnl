@@ -494,6 +494,7 @@ static void iptablesIPPortFilterBuildScript(void)
 
 		//close file
 		fclose(fd);
+		sync();
 	}
 }
 
@@ -598,6 +599,7 @@ static void iptablesPortForwardBuildScript(void)
 		
 		//close file
 		fclose(fd);
+		sync();
 	}
 }
 
@@ -1720,6 +1722,7 @@ void iptablesWebsFilterRun(void)
 	    }
 	  //closefile
 	  fclose(fd);
+	  sync();
         }
     return;
 }
