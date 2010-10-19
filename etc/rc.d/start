@@ -43,4 +43,7 @@ if [ -f /etc/filesystem.ok ]; then
     touch /etc/filesystem.ok
 fi
 
+#sync need after restore rwfs
+sync
+
 /bin/sh /etc/rc.d/rcS &
