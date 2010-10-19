@@ -35,10 +35,12 @@ usage()
 
 config3052()
 {
+	#preinit
 	switch reg w 14 405555
 	switch reg w 50 2001
 	switch reg w 98 7f3f
-		switch reg w e4 3f
+	switch reg w e4 3f
+
 	if [ "$1" = "WLLLL" ]; then
 		switch reg w 40 1001
 		switch reg w 44 1001
