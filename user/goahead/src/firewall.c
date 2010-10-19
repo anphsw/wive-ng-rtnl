@@ -363,7 +363,6 @@ static void iptablesIPPortFilterBuildScript(void)
 	char dip_1[32], dip_2[32];
 	char sim_1[32], dim_1[32];
 	char *firewall_enable, *default_policy, *rule, *c_if;
-	char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
 	
 	//Remove mac_ip iptables script
 	doSystem("rm -f " _PATH_MACIP_FILE);
@@ -1662,38 +1661,36 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 #define BLK_PROXY               0x08
 void iptablesWebsFilterRun(void)
 {
-	int i, content_filter = 0;
-	char entry[256];
-	char buff[4096]; //need long buffer for utf domain name encoding support
-	char *url_filter = nvram_get(RT2860_NVRAM, "websURLFilters");
-	char *host_filter = nvram_get(RT2860_NVRAM, "websHostFilters");
-	char *proxy = nvram_get(RT2860_NVRAM, "websFilterProxy");
-	char *java = nvram_get(RT2860_NVRAM, "websFilterJava");
-	char *activex = nvram_get(RT2860_NVRAM, "websFilterActivex");
-	char *cookies = nvram_get(RT2860_NVRAM, "websFilterCookies");
-
-	// Remove content filter script
-	doSystem("rm -f " _PATH_WEBS_FILE);
-	sync();
-
-	if(!url_filter && !host_filter && !proxy && !java && !activex && !cookies) {
-		return;
-	}
+    int i, content_filter = 0;
+    char entry[256], buff[4096]; //need long buffer for utf domain name encoding support 
+    char *proxy		= nvram_get(RT2860_NVRAM, "websFilterProxy");
+    char *java		= nvram_get(RT2860_NVRAM, "websFilterJava");
+    char *activex	= nvram_get(RT2860_NVRAM, "websFilterActivex");
+    char *cookies	= nvram_get(RT2860_NVRAM, "websFilterCookies");
+    char *url_filter	= nvram_get(RT2860_NVRAM, "websURLFilters");
+    char *host_filter	= nvram_get(RT2860_NVRAM, "websHostFilters");
+    
+    // Remove content filter script
+    doSystem("rm -f " _PATH_WEBS_FILE);
+    sync();
+    
+    if ((url_filter && strlen(url_filter) && getRuleNums(url_filter)) || 
+	(host_filter && strlen(host_filter) && getRuleNums(host_filter)) || 
+		atoi(proxy) || atoi(java) || atoi(activex) || atoi(cookies)) {
 
 	// Content filter
-	if(!strcmp(java, "1"))
-		content_filter += BLK_JAVA;
-	if(!strcmp(activex, "1"))
-		content_filter += BLK_ACTIVE;
-	if(!strcmp(cookies, "1"))
-		content_filter += BLK_COOKIE;
-	if(!strcmp(proxy, "1"))
-		content_filter += BLK_PROXY;
+	if(atoi(java))
+	    content_filter += BLK_JAVA;
+	if(atoi(activex))
+	    content_filter += BLK_ACTIVE;
+	if(atoi(cookies))
+	    content_filter += BLK_COOKIE;
+	if(atoi(proxy))
+	    content_filter += BLK_PROXY;
 
 	//Generate portforward script file
 	FILE *fd = fopen(_PATH_WEBS_FILE, "w");
-	if (fd != NULL)
-	{
+	if (fd != NULL) {
 	    fputs("#!/bin/sh\n\n", fd);
 	    fputs("iptables -t filter -N web_filter\n", fd);
 	    fputs("iptables -t filter -A FORWARD -j web_filter\n", fd);
@@ -1711,30 +1708,33 @@ void iptablesWebsFilterRun(void)
 
 	    // URL filter
 	    i=0;
-	    while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) )
-	    {
-		if (strlen(entry))
-		{
-			if(!strncasecmp(entry, "http://", strlen("http://")))
-				strcpy(entry, entry + strlen("http://"));
-			sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", entry);
-			fputs(buff, fd);
+	    while ((getNthValueSafe(i++, url_filter, ';', entry, sizeof(entry)) != -1) ) {
+		if (strlen(entry)) {
+		    if(!strncasecmp(entry, "http://", strlen("http://")))
+			strcpy(entry, entry + strlen("http://"));
+		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", entry);
+		    fputs(buff, fd);
 		}
 	    }
 
 	    // HOST(Keyword) filter
 	    i=0;
-	    while ( (getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1) )
-	    {
+	    while ((getNthValueSafe(i++, host_filter, ';', entry, sizeof(entry)) != -1)) {
 		if(strlen(entry))
-			sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", entry);
-			fputs(buff, fd);
+		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", entry);
+		fputs(buff, fd);
 	    }
-	  //closefile
-	  fclose(fd);
-	  sync();
-        }
-    return;
+	    //clear string at end
+	    fputs("\n", fd);
+	    //closefile
+	    fclose(fd);
+	    sync();
+	}
+    } else {
+	printf("Content filter disabled.\n");
+	return;
+    }
+  return;
 }
 
 
