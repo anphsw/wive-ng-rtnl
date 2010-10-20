@@ -181,6 +181,11 @@ requeue:
 	return q->q.qlen;
 }
 
+int qdisc_restart1(struct net_device *dev)
+{
+        return qdisc_restart(dev);
+}
+
 void __qdisc_run(struct net_device *dev)
 {
 	if (unlikely(dev->qdisc == &noop_qdisc))
