@@ -73,14 +73,7 @@ fi
 
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
     $LOG "Reinit power mode for all switch ports" #workaroud for dir
-    #disable
-    config-vlan.sh 2 DDDDD
-    #full 100mbit
-    config-vlan.sh 2 EEEEE
-    #full 10mbit
-    #config-vlan.sh 2 HHHHH
-    #reset all phy and auto negotinate now
-    config-vlan.sh 2 RRRRR
+    config-vlan.sh 2 FFFFF
 fi
 
 $LOG "Copy web pages to tmpfs"

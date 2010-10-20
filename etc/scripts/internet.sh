@@ -8,6 +8,9 @@
 . /etc/scripts/config.sh
 . /etc/scripts/global.sh
 
+#get current config wan port
+WAN_PORT=`nvram_get 2860 wan_port`
+
 #restart mode
 MODE=$1
 
@@ -60,7 +63,7 @@ addWds2Br0()
 
 setLanWan()
 {
-    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+    if [ "$WAN_PORT" = "0" ]; then
 	    echo '##### config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL
     else

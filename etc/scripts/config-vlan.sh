@@ -11,6 +11,9 @@
 #include kernel config
 . /etc/scripts/config.sh
 
+#get current config wan port
+WAN_PORT=`nvram_get 2860 wan_port`
+
 usage()
 {
 	echo "Usage:"
@@ -24,6 +27,7 @@ usage()
 	echo "  $0 2 HHHHH - config RT3052 Enable all ports 10FD"
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 RRRRR - config RT3052 Reset all ports"
+	echo "  $0 2 FFFFF - config RT3052 Full reinit switch"
 	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
         echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and VLAN 1~4 at port 1~4"
@@ -172,7 +176,7 @@ reset_all_phys()
 
 	if [ "$opmode" = "1" ]; then
 	    #Ports down skip WAN port
-	    if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+	    if [ "$WAN_PORT" = "0" ]; then
 		start=0
 		end=3
 	    else
@@ -199,6 +203,13 @@ reset_all_phys()
 	for i in `seq $start $end`; do
     	    link_up $i
 	done
+}
+
+reinit_all_phys()
+{
+	disable3052
+	enable3052 
+	reset_all_phys
 }
 
 config175C()
@@ -359,6 +370,8 @@ elif [ "$1" = "2" ]; then
 		disable3052
 	elif [ "$2" = "RRRRR" ]; then
 		reset_all_phys
+	elif [ "$2" = "FFFFF" ]; then
+		reinit_all_phys
 	elif [ "$2" = "LLLLW" ]; then
 		config3052 LLLLW
 	elif [ "$2" = "WLLLL" ]; then
