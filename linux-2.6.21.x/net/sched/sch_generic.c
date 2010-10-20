@@ -620,5 +620,6 @@ EXPORT_SYMBOL(noop_qdisc);
 EXPORT_SYMBOL(qdisc_create_dflt);
 EXPORT_SYMBOL(qdisc_destroy);
 EXPORT_SYMBOL(qdisc_reset);
+EXPORT_SYMBOL(qdisc_restart1);
 EXPORT_SYMBOL(qdisc_lock_tree);
 EXPORT_SYMBOL(qdisc_unlock_tree);
