@@ -30,13 +30,6 @@ else
     iwpriv ra0 set RadioOn=1
 fi
 
-########################################ap mode param###########################
-CountryRegion=`nvram_get 2860 CountryRegion`
-WirelessMode=`nvram_get 2860 WirelessMode`
-
-iwpriv ra0 set CountryRegion=$CountryRegion
-iwpriv ra0 set WirelessMode=$WirelessMode
-
 ########################################MULTICAST param###########################
 m2uenabled=`nvram_get 2860 M2UEnabled`
 McastPhyMode=`nvram_get 2860 McastPhyMode`
