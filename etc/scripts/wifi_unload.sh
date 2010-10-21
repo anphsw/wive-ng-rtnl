@@ -20,9 +20,10 @@
 kill_apps="udhcpd udhcpc syslogd klogd zebra ripd wscd rt2860apd rt61apd inadyn \
 	    iwevent stupid-ftpd smbd ated ntpclient lld2d igmpproxy dnsmasq telnetd pppd xl2tpd"
 
-rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq cls_u32 ipt_TTL ipt_IMQ ipt_tos \
+rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \
-	    ts_fsm ts_kmp ts_bm"
+	    act_gact act_police cls_tcindex em_cmp em_u32 sch_gred sch_red act_ipt cls_fw cls_u32 \
+	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm"
 
 bssidnum=`nvram_get 2860 BssidNum`
 is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`

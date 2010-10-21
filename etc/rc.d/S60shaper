@@ -11,9 +11,27 @@ LOG="echo SHAPER: "
 start() {
 get_param
 if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
- $LOG "Starting SHAPER: "
+ $LOG "Starting... "
+    $LOG "Set default rules."
     set_def
+
+    $LOG "Load modules."
+    modprobe -q sch_htb
+    modprobe -q cls_u32
+    modprobe -q act_gact  
+    modprobe -q act_police  
+    modprobe -q cls_tcindex  
+    modprobe -q em_cmp    
+    modprobe -q em_u32    
+    modprobe -q act_ipt   
+    modprobe -q cls_fw      
+    modprobe -q cls_u32      
+    modprobe -q em_nbyte 
+
     if [ "$QoSEnable" = "1" ]; then
+	modprobe -q sch_sfq
+	modprobe -q sch_red
+	modprobe -q sch_gred
 	$LOG "--------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
@@ -22,6 +40,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
         LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
 	$LOG "---------------NONIMQ-IN------------------------"
 	if [ "$LANUP" = "1" ]; then
+	    modprobe -q sch_esfq
 	    #input
 	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
 	    tc qdisc add dev $lan_if parent 1:1 handle 10: esfq
@@ -51,6 +70,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	fi
 	$LOG "---------------NONIMQ-OUT--------------------------"
 	if [ "$WANUP" = "1" ]; then
+	    modprobe -q sch_sfq
 	    #output
 	    tc qdisc add dev $wan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
 	    tc qdisc add dev $wan_if parent 1:1 handle 10: sfq
@@ -113,8 +133,6 @@ set_def() {
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
     ip link set imq0 down > /dev/null 2>&1
     ip link set imq1 down > /dev/null 2>&1
-    rmmod imq > /dev/null 2>&1
-    rmmod ipt_IMQ > /dev/null 2>&1
 }
 
 get_param() {
