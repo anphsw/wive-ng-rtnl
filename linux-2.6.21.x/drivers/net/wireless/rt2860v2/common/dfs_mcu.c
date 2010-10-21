@@ -30,7 +30,9 @@
 
 #if defined(DFS_SUPPORT) || defined(CARRIER_DETECTION_SUPPORT)
 static void TimerCB_Radar(PRTMP_ADAPTER pAd);
+#ifdef CARRIER_DETECTION_SUPPORT
 static void TimerCB_Carrier(PRTMP_ADAPTER pAd);
+#endif
 #ifdef NEW_DFS
 static VOID NewTimerCB_Radar(PRTMP_ADAPTER pAd);
 #endif // NEW_DFS //
@@ -864,9 +866,9 @@ NewDFSValidRadar NewDFSValidTable[] =
 	},
 };
 
+#ifndef NEW_DFS
 static void dfs_sw_init(PRTMP_ADAPTER pAd);
-
-
+#endif
 
 #define NEW_DFS_BANDWITH_MONITOR_TIME (NEW_DFS_CHECK_TIME / NEW_DFS_CHECK_TIME_TASKLET)
 #define NEW_DFS_CHECK_TIME			300
@@ -964,9 +966,9 @@ static VOID NewTimerCB_Radar(PRTMP_ADAPTER pAd)
 	UCHAR channel;
 	UCHAR radarDeclared;
 	INT i, j;
-	UCHAR bbp_r140, bbp_r141;
-	UCHAR bbp_r156, bbp_r157, bbp_r158, bbp_r159;
-	UCHAR bbp_r160, bbp_r161, bbp_r162, bbp_r163;
+	UCHAR bbp_r140=0, bbp_r141=0;
+	UCHAR bbp_r156=0, bbp_r157=0, bbp_r158=0, bbp_r159=0;
+	UCHAR bbp_r160=0, bbp_r161=0, bbp_r162=0, bbp_r163=0;
 	
 	if (pAd->CommonCfg.PollTime == 0)
 		return;
@@ -1076,7 +1078,7 @@ static VOID NewTimerCB_Radar(PRTMP_ADAPTER pAd)
 			{
 				//int k, count, limit = ((pAd->CommonCfg.RadarDetect.RDDurRegion != CE)? 384: 288);
 				int k, count, limit = 384;
-				UCHAR BBPR127, BBPR126, LastBBPR127 = 0xff;
+				UCHAR BBPR127 = 0, BBPR126 = 0, LastBBPR127 = 0xff;
 				ULONG time = 0;
 				USHORT width = 0;
 				UCHAR id = 0;
@@ -1216,7 +1218,7 @@ static VOID NewTimerCB_Radar(PRTMP_ADAPTER pAd)
 							{
 								if (time != pAd->CommonCfg.DFS_W[id][((pAd->CommonCfg.dfs_w_idx[id] == 0)? (NEW_DFS_DBG_PORT_ENT_NUM-1):(pAd->CommonCfg.dfs_w_idx[id] - 1))].timestamp)
 								{
-									if (!(((time & 0xff) == 0) || ((time & 0xff00) == 0) || (((time & 0x3f0000) == 0) && ((width & 0x3) == 0x3) || ((width & 0x3fc) == 0x3fc) || ((width & 0x3fc) == 0))))
+									if (!(((time & 0xff) == 0) || ((time & 0xff00) == 0) || ((((time & 0x3f0000) == 0) && ((width & 0x3) == 0x3)) || ((width & 0x3fc) == 0x3fc) || ((width & 0x3fc) == 0))))
 									{
 										pAd->CommonCfg.DFS_W[id][pAd->CommonCfg.dfs_w_idx[id]].counter = pAd->CommonCfg.dfs_w_counter;
 										pAd->CommonCfg.DFS_W[id][pAd->CommonCfg.dfs_w_idx[id]].timestamp = time;
@@ -2067,7 +2069,7 @@ VOID NewRadarDetectionStart(
 
 	// prevent trigger radar when switch to another channel
 	{
-		UCHAR BBPR141;
+		UCHAR BBPR141=0;
 		BBP_IO_READ8_BY_REG_ID(pAd, 141, &BBPR141);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, 141, BBPR141);
 	}
@@ -2117,10 +2119,8 @@ int SWRadarCheck(
 	int i, j, k, start_idx, end_idx;
 	pNewDFSDebugPort pCurrent, p1, pEnd;
 	ULONG period;
-	int radar_detected = 0, regular_radar = 0;
-	ULONG PRF1 = 0, PRF2 = 0, PRF3 = 0;
-	USHORT	minDiff, maxDiff, widthsum;
-	UCHAR	Radar2PRF=0, Radar3PRF=0;
+	int radar_detected = 0;
+	USHORT	widthsum;
 	USHORT	Total, SwIdxPlus = ENTRY_PLUS(pAd->CommonCfg.sw_idx[id], 1, NEW_DFS_DBG_PORT_ENT_NUM);
 	UCHAR	CounterToCheck;
 	
@@ -2742,7 +2742,7 @@ int SWRadarCheck(
 		// Check Staggered radar
 		if (pCurrent->start_idx != 0xffff)
 		{
-			pNewDFSDebugPort	p2, p3, p4, p5, p6, p7;
+			pNewDFSDebugPort	p2, p3;
 			pNewDFSMPeriod pCE_T;
 			ULONG idx[10], T[10];
 			
@@ -4043,7 +4043,6 @@ int SWRadarCheck(
 				break;
 			if (pCurrent->start_idx != 0xffff)
 			{
-				//pNewDFSDebugPort	p2, p3, p4, p5, p6;
 				pNewDFSDebugPort	p2, p3;
 				pNewDFSMPeriod pCE_T;
 				ULONG idx[10], T[10];
@@ -4468,7 +4467,7 @@ int SWRadarCheck(
 		// Check Staggered radar
 		if (pCurrent->start_idx != 0xffff)
 		{
-			pNewDFSDebugPort	p2, p3, p4, p5, p6, p7;
+			pNewDFSDebugPort	p2, p3;
 			pNewDFSMPeriod pCE_T;
 			ULONG idx[10], T[10];
 			
@@ -4603,6 +4602,7 @@ int SWRadarCheck(
 
 #endif // DFS_2_SUPPORT //
 
+#ifndef NEW_DFS
 static void dfs_sw_init(PRTMP_ADAPTER pAd)
 {
 	
@@ -4653,6 +4653,7 @@ static void dfs_sw_init(PRTMP_ADAPTER pAd)
 		pAd->CommonCfg.PollTime = NEW_DFS_CHECK_TIME;
 
 }
+#endif
 
 void 	modify_table1(PRTMP_ADAPTER pAd, ULONG idx, ULONG value)
 {
@@ -4784,28 +4785,30 @@ void 	modify_table1(PRTMP_ADAPTER pAd, ULONG idx, ULONG value)
 		pAd->CommonCfg.Rx_PE_Mask = (ULONG)value;
 	}
 
+#ifdef DFS_DEBUG
 	printk("Delta_Delay(0) = %d\n", pAd->CommonCfg.DeltaDelay);
 	for (x = 0; x < 4; x++)
 	{
-		printk("Channel %d\n", x);
-		printk("        mode(%02d)=%d, M(%02d)=%03d, EL(%02d)=%03d EH(%02d)=%03d, WL(%02d)=%03d WH(%02d)=%04d, eW(%02d)=%02d\n        TL(%02d)=%05d TH(%02d)=%06d, eT(%02d)=%03d, BL(%02d)=%d, BH(%02d)=%d\n", 
-		(x*10+1), (unsigned int)pDFS2Table->entry[x].mode, 
-		(x*10+2), (unsigned int)pDFS2Table->entry[x].avgLen, 
-		(x*10+3), (unsigned int)pDFS2Table->entry[x].ELow, 
-		(x*10+4), (unsigned int)pDFS2Table->entry[x].EHigh, 
-		(x*10+5), (unsigned int)pDFS2Table->entry[x].WLow, 
-		(x*10+6), (unsigned int)pDFS2Table->entry[x].WHigh, 
-		(x*10+7), (unsigned int)pDFS2Table->entry[x].EpsilonW, 
-		(x*10+8), (unsigned int)pDFS2Table->entry[x].TLow, 
-		(x*10+9), (unsigned int)pDFS2Table->entry[x].THigh, 
+		printk("Channel %ld\n", x);
+		printk("        mode(%02ld)=%ld, M(%02ld)=%03ld, EL(%02ld)=%03ld EH(%02ld)=%03ld, WL(%02ld)=%03ld WH(%02ld)=%04ld, eW(%02ld)=%02ld\n TL(%02ld)=%05ld TH(%02ld)=%06ld, eT(%02ld)=%03ld, BL(%02ld)=%ld, BH(%02ld)=%02ld\n",
+		(x*10+1), (unsigned long)pDFS2Table->entry[x].mode, 
+		(x*10+2), (unsigned long)pDFS2Table->entry[x].avgLen, 
+		(x*10+3), (unsigned long)pDFS2Table->entry[x].ELow, 
+		(x*10+4), (unsigned long)pDFS2Table->entry[x].EHigh, 
+		(x*10+5), (unsigned long)pDFS2Table->entry[x].WLow, 
+		(x*10+6), (unsigned long)pDFS2Table->entry[x].WHigh, 
+		(x*10+7), (unsigned long)pDFS2Table->entry[x].EpsilonW, 
+		(x*10+8), (unsigned long)pDFS2Table->entry[x].TLow, 
+		(x*10+9), (unsigned long)pDFS2Table->entry[x].THigh, 
 #ifdef DFS_1_SUPPORT
-		(x*10+10), (unsigned int)pDFS2Table->entry[x].EpsilonT,
-		(2*x+41), (unsigned int)pDFS2Table->entry[x].BLow, 
-		(2*x+42), (unsigned int)pDFS2Table->entry[x].BHigh);
+		(x*10+10),(unsigned long)pDFS2Table->entry[x].EpsilonT,
+		(2*x+41), (unsigned long)pDFS2Table->entry[x].BLow, 
+		(2*x+42), (unsigned long)pDFS2Table->entry[x].BHigh);
 #else
-		(x*10+10), (unsigned int)pDFS2Table->entry[x].EpsilonT);
+		(x*10+10), (unsigned long)pDFS2Table->entry[x].EpsilonT);
 #endif
 	}
+#endif
 	
 	printk("Symmetric_Round(49) = %d\n", pAd->CommonCfg.Symmetric_Round);
 	printk("VGA_Mask(50) = %d\n", pAd->CommonCfg.VGA_Mask);
