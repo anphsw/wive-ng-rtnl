@@ -34,7 +34,7 @@ fi
 AutoChannelSelect=`nvram_get AutoChannelSelect`
 Channel=`nvram_get Channel`
 if [ "$AutoChannelSelect" = "0" ]; then
-    iwpriv ra0 set Channel=14
+    iwpriv ra0 set Channel=$Channel
 fi
 
 ########################################MULTICAST param###########################

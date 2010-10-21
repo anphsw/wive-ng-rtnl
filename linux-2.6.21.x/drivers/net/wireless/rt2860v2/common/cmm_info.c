@@ -3859,7 +3859,7 @@ INT	Set_HtRdg_Proc(
 	else if ( Value ==1 )
 	{
 		pAd->HTCEnable = TRUE;
-        pAd->CommonCfg.bRdg = TRUE;
+    		pAd->CommonCfg.bRdg = TRUE;
 	}
 	else 
 		return FALSE; //Invalid argument

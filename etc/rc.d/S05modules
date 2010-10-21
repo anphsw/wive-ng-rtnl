@@ -42,13 +42,14 @@ start() {
 }
 
 stop() {
+    get_param
     if [ ! -f /var/run/goahead.pid ]; then
         $LOG "Stop modules.dep generate..."
     else
 	$LOG "link wifi down first"
 	ra0flushadress
 	ip link set ra0 down > /dev/null 2>&1
-        $LOG "Unload wifi module..."
+	$LOG "Unload wifi module..."
 	rmmod rt2860v2_ap > /dev/null 2>&1
 	rmmod rt2860v2_sta > /dev/null 2>&1
     fi

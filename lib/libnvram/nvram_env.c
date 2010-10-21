@@ -628,6 +628,9 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
+		FPRINT_NUM(ChannelGeography);
+		FPRINT_NUM(Channel);
+		FPRINT_NUM(AutoChannelSelect);
 
 		FPRINT_NUM(BssidNum);
 		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
@@ -656,7 +659,6 @@ int gen_wifi_config(int mode)
 		tx_rate[strlen(tx_rate) - 1] = '\0';
 		fprintf(fp, "TxRate=%s\n", tx_rate);
 
-		FPRINT_NUM(Channel);
 		FPRINT_NUM(BasicRate);
 		FPRINT_NUM(BeaconPeriod);
 		FPRINT_NUM(DtimPeriod);
@@ -703,7 +705,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(NoForwardingBTNBSSID);
 		FPRINT_STR(HideSSID);
 		FPRINT_NUM(ShortSlot);
-		FPRINT_NUM(AutoChannelSelect);
 
 		FPRINT_STR(IEEE8021X);
 		FPRINT_NUM(IEEE80211H);

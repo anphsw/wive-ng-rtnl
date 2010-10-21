@@ -11,7 +11,7 @@ export ROOTDIR=$ROOTDIR
 #----WR-NL-4M-16M---WR-NL+-4M-32M----#
 if [ "$1" = "" ]; then
     MODE=2T2R
-    #MODE=1T1R
+    #MODE=1T1R-16
     #MODE=1T1R
 else
     MODE=$1
@@ -50,7 +50,7 @@ rm -rfv romfs/*
 rm -rfv images/*
 
 echo --------------------------------COPY-CONFIG-----------------------------
-if [ "$MODE" = "1T1R" ] ; then
+if [ "$MODE" = "1T1R-16" ] ; then
     cp -fv ./configs/kernel-$VENDOR/config-kernel-1t1r-16	./linux/.config
     cp -fv ./configs/defaults-$VENDOR/RT2860_default_novlan	./etc/default/RT2860_default_novlan
 fi
