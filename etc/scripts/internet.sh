@@ -105,9 +105,6 @@ bridge_config() {
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
     fi
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
-    fi
 	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
         ip addr flush dev eth2
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
@@ -121,9 +118,6 @@ gate_config() {
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
 	setLanWan
-    fi
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
     fi
 	addBr0
 	brctl addif br0 eth2.1
@@ -141,9 +135,6 @@ apcli_config() {
 	addMBSSID
     if [ "$MODE" != "wifionly" ]; then
 	resetLanWan
-    fi
-    if [ "$MODE" != "lanonly" ]; then
-	retune_wifi
     fi
 	addBr0
 	brctl addif br0 eth2
@@ -197,4 +188,7 @@ services_restart.sh all
 
 if [ "$MODE" = "lanonly" ]; then
     service shaper restart
+fi
+if [ "$MODE" != "lanonly" ]; then
+    retune_wifi
 fi

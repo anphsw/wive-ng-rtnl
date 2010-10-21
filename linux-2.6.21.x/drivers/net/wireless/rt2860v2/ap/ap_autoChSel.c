@@ -629,7 +629,12 @@ UCHAR New_APAutoSelectChannel(
 		}
 		ch = SelectClearChannel(pAd, IsABand);
 
-		DBGPRINT(RT_DEBUG_TRACE, ("ApAutoSelectChannel pick up ch#%d\n",ch));
+		//1~13ch auto for more compat		
+		if (ch == 0)
+		    ch=1;
+                else if (ch == 14)
+		    ch=13;
+		printk("ApAutoSelectChannel pick up ch#%d\n",ch);
 	}
 
 	return ch;
@@ -829,7 +834,14 @@ UCHAR APAutoSelectChannel(
 
 		// RULE 4. still not available, pick up the random channel
 		ch = (pAd->ChannelList[RandomByte(pAd)%pAd->ChannelListNum].Channel);
-		DBGPRINT(RT_DEBUG_TRACE,("APAutoSelectChannel pick up ch#%d\n",ch));
+
+		//1~13ch auto for more compat		
+		if (ch == 0)
+		    ch=1;
+                else if (ch == 14)
+		    ch=13;
+
+		printk("APAutoSelectChannel pick up ch#%d\n",ch);
 		return ch;
 	}
 }

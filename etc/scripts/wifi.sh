@@ -30,6 +30,13 @@ else
     iwpriv ra0 set RadioOn=1
 fi
 
+###############################################Others#############################
+AutoChannelSelect=`nvram_get AutoChannelSelect`
+Channel=`nvram_get Channel`
+if [ "$AutoChannelSelect" = "0" ]; then
+    iwpriv ra0 set Channel=14
+fi
+
 ########################################MULTICAST param###########################
 m2uenabled=`nvram_get 2860 M2UEnabled`
 McastPhyMode=`nvram_get 2860 McastPhyMode`

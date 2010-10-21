@@ -1065,6 +1065,7 @@ VOID	RTMPHandleMgmtRingDmaDoneInterrupt(
 	
 	========================================================================
 */
+extern void schedule_dfs_task(PRTMP_ADAPTER pAd);
 VOID	RTMPHandleTBTTInterrupt(
 	IN PRTMP_ADAPTER pAd)
 {

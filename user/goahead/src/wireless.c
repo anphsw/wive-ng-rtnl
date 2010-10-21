@@ -738,30 +738,29 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
-	nvram_init(RT2860_NVRAM);
-	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
-		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
-	else
-		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
-	if (0 != strlen(sz11aChannel))
-	{
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
-	}
-	if (0 != strlen(sz11bChannel))
-	{
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
-	}
-	if (0 != strlen(sz11gChannel))
-	{
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
-	}
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
 
 	nvram_init(RT2860_NVRAM);
+	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
+	{
+	    nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
+	} else {
+	    nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
+	    if (0 != strlen(sz11aChannel))
+	    {
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
+		doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
+	    }
+	    if (0 != strlen(sz11bChannel))
+	    {
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
+		doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
+	    }
+	    if (0 != strlen(sz11gChannel))
+	    {
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
+		doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
+	    }
+	}
 	//Rate for a, b, g
 	if (strncmp(abg_rate, "", 1)) {
 		int rate = atoi(abg_rate);
@@ -800,13 +799,13 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		}
 		else if (!strncmp(wirelessmode, "1", 2)) {
 			nvram_bufset(RT2860_NVRAM, "FixedTxMode", "CCK");
-			if (rate == 1)
+			    if (rate == 1)
 				nvram_bufset(RT2860_NVRAM, "HT_MCS", "0");
-			else if (rate == 2)
+			    else if (rate == 2)
 				nvram_bufset(RT2860_NVRAM, "HT_MCS", "1");
-			else if (rate == 5)
+			    else if (rate == 5)
 				nvram_bufset(RT2860_NVRAM, "HT_MCS", "2");
-			else if (rate == 11)
+			    else if (rate == 11)
 				nvram_bufset(RT2860_NVRAM, "HT_MCS", "3");
 		}
 		else //shall not happen
@@ -826,11 +825,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "HT_AMSDU", n_amsdu);
 		nvram_bufset(RT2860_NVRAM, "HT_AutoBA", n_autoba);
 		nvram_bufset(RT2860_NVRAM, "HT_BADecline", n_badecline);
+		nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
+    		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 	}
-
-	nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
-	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
-
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);	
 
@@ -908,6 +905,10 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		ssid_num = 1;
 	wlan_mode = atoi(nvram_get(RT2860_NVRAM, "WirelessMode"));
 
+	//Radar Detect region
+	if (!rd_region || !strlen(rd_region))
+		rd_region = "CE";
+
 	//set to nvram
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "BGProtection", bg_protection);
@@ -948,6 +949,10 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	else if (!strncmp(countrycode, "JP", 3)) {
 		nvram_bufset(RT2860_NVRAM, "CountryRegion", "5");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "6");
+	}
+	else if (!strncmp(countrycode, "RU", 3)) {
+		nvram_bufset(RT2860_NVRAM, "CountryRegion", "5");
+		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
 	else if (!strncmp(countrycode, "FR", 3)) {
 		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");

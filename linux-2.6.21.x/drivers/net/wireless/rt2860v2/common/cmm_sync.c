@@ -270,8 +270,8 @@ VOID BuildChannelList(
 	}
 
 	pAd->ChannelListNum = index;	
-	DBGPRINT(RT_DEBUG_TRACE,("country code=%d/%d, RFIC=%d, PHY mode=%d, support %d channels\n", 
-		pAd->CommonCfg.CountryRegion, pAd->CommonCfg.CountryRegionForABand, pAd->RfIcType, pAd->CommonCfg.PhyMode, pAd->ChannelListNum));
+	printk("country code=%d/%d, RFIC=%d, PHY mode=%d, support %d channels\n", 
+		pAd->CommonCfg.CountryRegion, pAd->CommonCfg.CountryRegionForABand, pAd->RfIcType, pAd->CommonCfg.PhyMode, pAd->ChannelListNum);
 #ifdef DBG	
 	for (i=0;i<pAd->ChannelListNum;i++)
 	{

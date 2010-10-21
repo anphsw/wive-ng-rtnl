@@ -75,6 +75,7 @@ function initTranslation()
 	_TR("advCountryCode", "adv country code");
 	_TR("advCountryCodeUS", "adv country code us");
 	_TR("advCountryCodeJP", "adv country code jp");
+	_TR("advCountryCodeRU", "adv country code ru");
 	_TR("advCountryCodeFR", "adv country code fr");
 	_TR("advCountryCodeTW", "adv country code tw");
 	_TR("advCountryCodeIE", "adv country code ie");
@@ -225,18 +226,20 @@ function initValue()
 		document.wireless_advanced.country_code.options.selectedIndex = 0;
 	else if (countrycode == "JP")
 		document.wireless_advanced.country_code.options.selectedIndex = 1;
-	else if (countrycode == "FR")
+	else if (countrycode == "RU")
 		document.wireless_advanced.country_code.options.selectedIndex = 2;
-	else if (countrycode == "TW")
+	else if (countrycode == "FR")
 		document.wireless_advanced.country_code.options.selectedIndex = 3;
-	else if (countrycode == "IE")
+	else if (countrycode == "TW")
 		document.wireless_advanced.country_code.options.selectedIndex = 4;
-	else if (countrycode == "HK")
+	else if (countrycode == "IE")
 		document.wireless_advanced.country_code.options.selectedIndex = 5;
+	else if (countrycode == "HK")
+		document.wireless_advanced.country_code.options.selectedIndex = 6;
 	else if (countrycode == "NONE")
-		document.wireless_advanced.country_code.options.selectedIndex = 6;
+		document.wireless_advanced.country_code.options.selectedIndex = 7;
 	else
-		document.wireless_advanced.country_code.options.selectedIndex = 6;
+		document.wireless_advanced.country_code.options.selectedIndex = 8;
 
 	//multicase to unicast converter
 	m2uBuilt = 1*m2uBuilt;
@@ -493,6 +496,7 @@ function wmm_capable_enable_switch()
 		<select name="country_code">
 			<option value="US" id="advCountryCodeUS">US (United States)</option>
 			<option value="JP" id="advCountryCodeJP">JP (Japan)</option>
+			<option value="RU" id="advCountryCodeRU">RU (Japan)</option>
 			<option value="FR" id="advCountryCodeFR">FR (France)</option>
 			<option value="TW" id="advCountryCodeTW">TW (Taiwan)</option>
 			<option value="IE" id="advCountryCodeIE">IE (Ireland)</option>

@@ -62,122 +62,121 @@
 #define GAP_INTERVAL_800	0	
 #define GAP_INTERVAL_BOTH	2
 
-#define NdisMediaStateConnected			1
-#define NdisMediaStateDisconnected		0
+#define NdisMediaStateConnected		1
+#define NdisMediaStateDisconnected	0
 
 #define NDIS_802_11_LENGTH_SSID         32
 
 #define	IEEE80211_ADDR_LEN		6		/* size of 802.11 address */
-#define	IEEE80211_NWID_LEN      32
+#define	IEEE80211_NWID_LEN      	32
 
 #define NDIS_802_11_LENGTH_RATES        8
 #define NDIS_802_11_LENGTH_RATES_EX     16
 #define MAC_ADDR_LENGTH                 6
-//#define MAX_NUM_OF_CHS					49 // 14 channels @2.4G +  12@UNII + 4 @MMAC + 11 @HiperLAN2 + 7 @Japan + 1 as NULL terminationc
-#define MAX_NUM_OF_CHS             		54      // 14 channels @2.4G +  12@UNII(lower/middle) + 16@HiperLAN2 + 11@UNII(upper) + 0 @Japan + 1 as NULL termination
-#define MAX_NUMBER_OF_EVENT				10  // entry # in EVENT table
-#define MAX_NUMBER_OF_MAC				32 // if MAX_MBSSID_NUM is 8, this value can't be larger than 211
+#define MAX_NUM_OF_CHS             	54      // 14 channels @2.4G +  12@UNII(lower/middle) + 16@HiperLAN2 + 11@UNII(upper) + 0 @Japan + 1 as NULL termination
+#define MAX_NUMBER_OF_EVENT		10  // entry # in EVENT table
+#define MAX_NUMBER_OF_MAC		32 // if MAX_MBSSID_NUM is 8, this value can't be larger than 211
 
-#define MAX_NUMBER_OF_ACL				64
-#define MAX_LENGTH_OF_SUPPORT_RATES		12    // 1, 2, 5.5, 11, 6, 9, 12, 18, 24, 36, 48, 54
-#define MAX_NUMBER_OF_DLS_ENTRY			4
+#define MAX_NUMBER_OF_ACL		64
+#define MAX_LENGTH_OF_SUPPORT_RATES	12    // 1, 2, 5.5, 11, 6, 9, 12, 18, 24, 36, 48, 54
+#define MAX_NUMBER_OF_DLS_ENTRY		4
 
 
-#define RT_QUERY_SIGNAL_CONTEXT				0x0402
-#define RT_SET_IAPP_PID                 	0x0404
-#define RT_SET_APD_PID						0x0405
-#define RT_SET_DEL_MAC_ENTRY				0x0406
-#define RT_QUERY_EVENT_TABLE            	0x0407
+#define RT_QUERY_SIGNAL_CONTEXT		0x0402
+#define RT_SET_IAPP_PID                 0x0404
+#define RT_SET_APD_PID			0x0405
+#define RT_SET_DEL_MAC_ENTRY		0x0406
+#define RT_QUERY_EVENT_TABLE            0x0407
 //
 // IEEE 802.11 OIDs
 //
-#define	OID_GET_SET_TOGGLE			0x8000
-#define	OID_GET_SET_FROM_UI			0x4000
+#define	OID_GET_SET_TOGGLE		0x8000
+#define	OID_GET_SET_FROM_UI		0x4000
 
-#define	OID_802_11_NETWORK_TYPES_SUPPORTED			0x0103
-#define	OID_802_11_NETWORK_TYPE_IN_USE				0x0104
-#define	OID_802_11_RSSI_TRIGGER						0x0107
-#define	RT_OID_802_11_RSSI							0x0108 //rt2860	only , kathy
-#define	RT_OID_802_11_RSSI_1						0x0109 //rt2860	only , kathy
-#define	RT_OID_802_11_RSSI_2						0x010A //rt2860	only , kathy
-#define	OID_802_11_NUMBER_OF_ANTENNAS				0x010B
-#define	OID_802_11_RX_ANTENNA_SELECTED				0x010C
-#define	OID_802_11_TX_ANTENNA_SELECTED				0x010D
-#define	OID_802_11_SUPPORTED_RATES					0x010E
-#define	OID_802_11_ADD_WEP							0x0112
-#define	OID_802_11_REMOVE_WEP						0x0113
-#define	OID_802_11_DISASSOCIATE						0x0114
-#define	OID_802_11_PRIVACY_FILTER					0x0118
-#define	OID_802_11_ASSOCIATION_INFORMATION			0x011E
-#define	OID_802_11_TEST								0x011F
+#define	OID_802_11_NETWORK_TYPES_SUPPORTED		0x0103
+#define	OID_802_11_NETWORK_TYPE_IN_USE			0x0104
+#define	OID_802_11_RSSI_TRIGGER				0x0107
+#define	RT_OID_802_11_RSSI				0x0108 //rt2860	only , kathy
+#define	RT_OID_802_11_RSSI_1				0x0109 //rt2860	only , kathy
+#define	RT_OID_802_11_RSSI_2				0x010A //rt2860	only , kathy
+#define	OID_802_11_NUMBER_OF_ANTENNAS			0x010B
+#define	OID_802_11_RX_ANTENNA_SELECTED			0x010C
+#define	OID_802_11_TX_ANTENNA_SELECTED			0x010D
+#define	OID_802_11_SUPPORTED_RATES			0x010E
+#define	OID_802_11_ADD_WEP				0x0112
+#define	OID_802_11_REMOVE_WEP				0x0113
+#define	OID_802_11_DISASSOCIATE				0x0114
+#define	OID_802_11_PRIVACY_FILTER			0x0118
+#define	OID_802_11_ASSOCIATION_INFORMATION		0x011E
+#define	OID_802_11_TEST					0x011F
 
 #ifdef WMM_ACM_SUPPORT
-#define RT_OID_WMM_ACM_TSPEC                        0x0450
-#define RT_OID_WMM_ACM_BandWidth                          0x0788
+#define RT_OID_WMM_ACM_TSPEC                        	0x0450
+#define RT_OID_WMM_ACM_BandWidth                        0x0788
 #endif // WMM_ACM_SUPPORT //
 
-#define	RT_OID_802_11_COUNTRY_REGION				0x0507
-#define	OID_802_11_BSSID_LIST_SCAN					0x0508
-#define	OID_802_11_SSID								0x0509
-#define	OID_802_11_BSSID							0x050A
-#define	RT_OID_802_11_RADIO							0x050B
-#define	RT_OID_802_11_PHY_MODE						0x050C
-#define	RT_OID_802_11_STA_CONFIG					0x050D
-#define	OID_802_11_DESIRED_RATES					0x050E
-#define	RT_OID_802_11_PREAMBLE						0x050F
-#define	OID_802_11_WEP_STATUS						0x0510
-#define	OID_802_11_AUTHENTICATION_MODE				0x0511
-#define	OID_802_11_INFRASTRUCTURE_MODE				0x0512
-#define	RT_OID_802_11_RESET_COUNTERS				0x0513
-#define	OID_802_11_RTS_THRESHOLD					0x0514
-#define	OID_802_11_FRAGMENTATION_THRESHOLD			0x0515
-#define	OID_802_11_POWER_MODE						0x0516
-#define	OID_802_11_TX_POWER_LEVEL					0x0517
-#define	RT_OID_802_11_ADD_WPA						0x0518
-#define	OID_802_11_REMOVE_KEY						0x0519
-#define	OID_802_11_ADD_KEY							0x0520
-#define	OID_802_11_CONFIGURATION					0x0521
-#define	OID_802_11_TX_PACKET_BURST					0x0522
-#define	RT_OID_802_11_QUERY_NOISE_LEVEL				0x0523
-#define	RT_OID_802_11_EXTRA_INFO					0x0524
-#define	RT_OID_802_11_HARDWARE_REGISTER				0x0525
-#define OID_802_11_ENCRYPTION_STATUS            OID_802_11_WEP_STATUS
-#define OID_802_11_DEAUTHENTICATION                 0x0526
-#define OID_802_11_DROP_UNENCRYPTED                 0x0527
-#define OID_802_11_MIC_FAILURE_REPORT_FRAME         0x0528
-#define OID_802_11_EAP_METHOD						0x0529
+#define	RT_OID_802_11_COUNTRY_REGION			0x0507
+#define	OID_802_11_BSSID_LIST_SCAN			0x0508
+#define	OID_802_11_SSID					0x0509
+#define	OID_802_11_BSSID				0x050A
+#define	RT_OID_802_11_RADIO				0x050B
+#define	RT_OID_802_11_PHY_MODE				0x050C
+#define	RT_OID_802_11_STA_CONFIG			0x050D
+#define	OID_802_11_DESIRED_RATES			0x050E
+#define	RT_OID_802_11_PREAMBLE				0x050F
+#define	OID_802_11_WEP_STATUS				0x0510
+#define	OID_802_11_AUTHENTICATION_MODE			0x0511
+#define	OID_802_11_INFRASTRUCTURE_MODE			0x0512
+#define	RT_OID_802_11_RESET_COUNTERS			0x0513
+#define	OID_802_11_RTS_THRESHOLD			0x0514
+#define	OID_802_11_FRAGMENTATION_THRESHOLD		0x0515
+#define	OID_802_11_POWER_MODE				0x0516
+#define	OID_802_11_TX_POWER_LEVEL			0x0517
+#define	RT_OID_802_11_ADD_WPA				0x0518
+#define	OID_802_11_REMOVE_KEY				0x0519
+#define	OID_802_11_ADD_KEY				0x0520
+#define	OID_802_11_CONFIGURATION			0x0521
+#define	OID_802_11_TX_PACKET_BURST			0x0522
+#define	RT_OID_802_11_QUERY_NOISE_LEVEL			0x0523
+#define	RT_OID_802_11_EXTRA_INFO			0x0524
+#define	RT_OID_802_11_HARDWARE_REGISTER			0x0525
+#define OID_802_11_ENCRYPTION_STATUS            	OID_802_11_WEP_STATUS
+#define OID_802_11_DEAUTHENTICATION                 	0x0526
+#define OID_802_11_DROP_UNENCRYPTED                 	0x0527
+#define OID_802_11_MIC_FAILURE_REPORT_FRAME         	0x0528
+#define OID_802_11_EAP_METHOD				0x0529
 
 /* For 802.1x daemin using */
-#define OID_802_DOT1X_CONFIGURATION					0x0540
-#define OID_802_DOT1X_PMKID_CACHE					0x0541
-#define OID_802_DOT1X_RADIUS_DATA					0x0542
-#define OID_802_DOT1X_WPA_KEY						0x0543
-#define OID_802_DOT1X_STATIC_WEP_COPY				0x0544
-#define OID_802_DOT1X_IDLE_TIMEOUT					0x0545
+#define OID_802_DOT1X_CONFIGURATION			0x0540
+#define OID_802_DOT1X_PMKID_CACHE			0x0541
+#define OID_802_DOT1X_RADIUS_DATA			0x0542
+#define OID_802_DOT1X_WPA_KEY				0x0543
+#define OID_802_DOT1X_STATIC_WEP_COPY			0x0544
+#define OID_802_DOT1X_IDLE_TIMEOUT			0x0545
 
-#define	RT_OID_DEVICE_NAME							0x0607
-#define	RT_OID_VERSION_INFO							0x0608
-#define	OID_802_11_BSSID_LIST						0x0609
-#define	OID_802_3_CURRENT_ADDRESS					0x060A
-#define	OID_GEN_MEDIA_CONNECT_STATUS				0x060B
-#define	RT_OID_802_11_QUERY_LINK_STATUS				0x060C
-#define	OID_802_11_RSSI								0x060D
-#define	OID_802_11_STATISTICS						0x060E
-#define	OID_GEN_RCV_OK								0x060F
-#define	OID_GEN_RCV_NO_BUFFER						0x0610
-#define	RT_OID_802_11_QUERY_EEPROM_VERSION			0x0611
+#define	RT_OID_DEVICE_NAME				0x0607
+#define	RT_OID_VERSION_INFO				0x0608
+#define	OID_802_11_BSSID_LIST				0x0609
+#define	OID_802_3_CURRENT_ADDRESS			0x060A
+#define	OID_GEN_MEDIA_CONNECT_STATUS			0x060B
+#define	RT_OID_802_11_QUERY_LINK_STATUS			0x060C
+#define	OID_802_11_RSSI					0x060D
+#define	OID_802_11_STATISTICS				0x060E
+#define	OID_GEN_RCV_OK					0x060F
+#define	OID_GEN_RCV_NO_BUFFER				0x0610
+#define	RT_OID_802_11_QUERY_EEPROM_VERSION		0x0611
 #define	RT_OID_802_11_QUERY_FIRMWARE_VERSION		0x0612
-#define	RT_OID_802_11_QUERY_LAST_RX_RATE			0x0613
-#define	RT_OID_802_11_TX_POWER_LEVEL_1				0x0614
-#define	RT_OID_802_11_QUERY_PIDVID					0x0615
+#define	RT_OID_802_11_QUERY_LAST_RX_RATE		0x0613
+#define	RT_OID_802_11_TX_POWER_LEVEL_1			0x0614
+#define	RT_OID_802_11_QUERY_PIDVID			0x0615
 //for WPA_SUPPLICANT_SUPPORT
-#define OID_SET_COUNTERMEASURES                     0x0616
-#define OID_802_11_SET_IEEE8021X                    0x0617
-#define OID_802_11_SET_IEEE8021X_REQUIRE_KEY        0x0618
-#define OID_802_11_PMKID                            0x0620
-#define RT_OID_WPA_SUPPLICANT_SUPPORT               0x0621
-#define RT_OID_WE_VERSION_COMPILED                  0x0622
-#define RT_OID_NEW_DRIVER                           0x0623
+#define OID_SET_COUNTERMEASURES                    	0x0616
+#define OID_802_11_SET_IEEE8021X                    	0x0617
+#define OID_802_11_SET_IEEE8021X_REQUIRE_KEY        	0x0618
+#define OID_802_11_PMKID                            	0x0620
+#define RT_OID_WPA_SUPPLICANT_SUPPORT               	0x0621
+#define RT_OID_WE_VERSION_COMPILED                  	0x0622
+#define RT_OID_NEW_DRIVER                           	0x0623
 
 #define	RT_OID_802_11_SNR_0							0x0630
 #define	RT_OID_802_11_SNR_1							0x0631

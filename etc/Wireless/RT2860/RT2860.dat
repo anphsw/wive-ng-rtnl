@@ -1,9 +1,9 @@
 #The word of "Default" must not be removed
 Default
 CountryRegion=5
-CountryRegionABand=7
-CountryCode=JP
-RDRegion=JAP
+CountryRegionABand=0
+CountryCode=RU
+RDRegion=CE
 BssidNum=1
 SSID1=Wive-RTNL
 SSID2=

@@ -727,7 +727,7 @@ CH_REGION ChRegion[] =
 			"RU",
 			CE,
 			{
-				{ 1,   13,  20, BOTH, FALSE},	// 2.4 G, ch 1~13
+				{ 1,   14,  20, BOTH, FALSE},	// 2.4 G, ch 1~14
 				{ 149,  4,  20, IDOR, FALSE},	// 5G, ch 149~161
 				{ 0},							// end
 			}
@@ -1074,16 +1074,15 @@ static inline VOID CreateChList(
 				continue;
 		}
 
-		if ((pChDesp->Geography == BOTH)
-			|| (pChDesp->Geography == Geography))
-        {
-			if (pChDesp->FirstChannel > 14)
-                increment = 4;
-            else
-                increment = 1;
-			regulatoryDomain = pChRegion->DfsType;
-			offset = FillChList(pAd, pChDesp, offset, increment, regulatoryDomain);
-        }
+		if ((pChDesp->Geography == BOTH) || (pChDesp->Geography == Geography)) {
+		    if (pChDesp->FirstChannel > 14)
+            		increment = 4;
+        	    else
+            		increment = 1;
+
+		    regulatoryDomain = pChRegion->DfsType;
+		    offset = FillChList(pAd, pChDesp, offset, increment, regulatoryDomain);
+    		}
 	}
 }
 

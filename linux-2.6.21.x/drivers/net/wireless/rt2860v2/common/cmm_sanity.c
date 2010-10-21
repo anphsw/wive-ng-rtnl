@@ -534,11 +534,8 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 #ifdef CONFIG_STA_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 					{
-						if (ChannelSanity(pAd, *pChannel) == 0)
-						{
-							
+						if (ChannelSanity(pAd, *pChannel) == 0)							
 							return FALSE;
-						}
 					}
 #endif // CONFIG_STA_SUPPORT //
                     Sanity |= 0x4;
