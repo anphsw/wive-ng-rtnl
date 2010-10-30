@@ -1023,7 +1023,7 @@ static inline int ioctl_private_call(struct net_device *	dev,
 
 		/* Always allocate for max space. Easier, and won't last
 		 * long... */
-		extra = kmalloc(extra_size, GFP_KERNEL);
+		extra = kzalloc(extra_size, GFP_KERNEL);
 		if (extra == NULL) {
 			return -ENOMEM;
 		}
