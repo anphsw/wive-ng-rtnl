@@ -104,10 +104,6 @@ struct iphdr {
 	/*The options start here. */
 };
 
-#ifdef __KERNEL__
-#include <linux/skbuff.h>
-#endif
-
 struct ip_auth_hdr {
 	__u8  nexthdr;
 	__u8  hdrlen;		/* This one is measured in 32 bit units! */

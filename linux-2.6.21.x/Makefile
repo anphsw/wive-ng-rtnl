@@ -918,7 +918,7 @@ depend dep:
 
 # ---------------------------------------------------------------------------
 # Kernel headers
-INSTALL_HDR_PATH=$(objtree)/usr
+INSTALL_HDR_PATH=../headers
 export INSTALL_HDR_PATH
 
 HDRARCHES=$(filter-out generic,$(patsubst $(srctree)/include/asm-%/Kbuild,%,$(wildcard $(srctree)/include/asm-*/Kbuild)))
