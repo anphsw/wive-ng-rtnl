@@ -190,7 +190,7 @@ fi
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
 		ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-		if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw"]; then
+		if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
 		    $LOG "Add static route to DNS $ROUTE_NS dev $interface"
 		    REPLACE="ip route replace $ROUTE_NS dev $interface"
 		    $REPLACE
