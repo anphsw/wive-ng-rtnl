@@ -57,18 +57,6 @@ fi
     	    done
     	fi
 
-	#Get DNS servers
-	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
-	    $LOG "Renew DNS from dhcp"
-	    count=0                                                                                                         
-	    rm -f $RESOLV_CONF                                                                                                          
-	    for i in $dns ; do
-	        $LOG "DNS= $i"
-	        echo nameserver $i >> $RESOLV_CONF
-		let "count=$count+1"
-	    done
-	fi
-
 	#MSSTATIC ROUTES (rfc3442)
 	if [ ! -z "$msroutes" ]; then
 	    set $msroutes
@@ -192,6 +180,20 @@ fi
 
 		done
 	}
+
+	#Get DNS servers
+	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
+	    $LOG "Renew DNS from dhcp"
+	    count=0                                                                                                         
+	    rm -f $RESOLV_CONF                                                                                                          
+	    for i in $dns ; do
+	        $LOG "DNS= $i"
+	        echo nameserver $i >> $RESOLV_CONF
+		let "count=$count+1"
+	    done
+	    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+	    ip route replace "$ROUTE_NS"
+	fi
 
 	#remove force renew flag
 	rm -f $FORCRENEW
