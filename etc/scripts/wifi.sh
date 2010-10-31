@@ -8,14 +8,12 @@
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 ########################################all mode param#########################
 HT_BW=`nvram_get 2860 HT_BW`
-HT_GI=`nvram_get 2860 HT_GI`
 HT_PROTECT=`nvram_get 2860 HT_PROTECT`
 
-iwpriv ra0 set HtBw=$HT_BW
-iwpriv ra0 set HtGi=$HT_GI
-iwpriv ra0 set HtProtect=$HT_PROTECT
+iwpriv ra0 set HtBw="$HT_BW"
+iwpriv ra0 set HtProtect="$HT_PROTECT"
 
-if [ "$ethconv" != "n" ]; then
+if [ "$stamode" = "y" ]; then
     exit 0
 fi
 
