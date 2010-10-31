@@ -52,6 +52,7 @@ fi
 	        #save first dgw with metric=1 to use in corbina hack
 	        if [ "$metric" = "0" ]; then
 		    echo $i > /tmp/default.gw
+		    first_dgw="$i"
 		fi
             	metric=`expr $metric + 1`
     	    done
@@ -189,7 +190,7 @@ fi
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
 		ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-		if [ "$ROUTE_NS" != "" ]; then
+		if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw"]; then
 		    $LOG "Add static route to DNS $ROUTE_NS dev $interface"
 		    REPLACE="ip route replace $ROUTE_NS dev $interface"
 		    $REPLACE
