@@ -184,15 +184,14 @@ fi
 	#Get DNS servers
 	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
 	    $LOG "Renew DNS from dhcp"
-	    count=0                                                                                                         
-	    rm -f $RESOLV_CONF                                                                                                          
+	    rm -f $RESOLV_CONF
 	    for i in $dns ; do
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
-		let "count=$count+1"
+		ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+		$LOG "Add static route to DNS $ROUTE_NS"
+		ip route replace "$ROUTE_NS"
 	    done
-	    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-	    ip route replace "$ROUTE_NS"
 	fi
 
 	#remove force renew flag
