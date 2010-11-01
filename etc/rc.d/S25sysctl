@@ -20,15 +20,15 @@ start() {
     if [ "$MEM_SIZE" = "1" ]; then                                                                                             
         #16mb                                                                                                                
         CONNTRACK_MAX=2048                                                                                                   
-        let "HASHSIZE=$CONNTRACK_MAX/8"
+        let "HASHSIZE=$CONNTRACK_MAX/4"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
 	sysctl -w vm.min_free_kbytes=1280
     else                                                                                                                     
         #32mb                                                                                                                
         CONNTRACK_MAX=4096                                                                                                   
-        let "HASHSIZE=$CONNTRACK_MAX/4"
-        let "ROUTEMAX=$CONNTRACK_MAX*12"
+        let "HASHSIZE=$CONNTRACK_MAX/2"
+        let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
 	sysctl -w vm.min_free_kbytes=2048
     fi                                                                                                                       
