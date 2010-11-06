@@ -660,7 +660,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	/* Copy only real data... and, alas, header. This should be
 	 * optimized for the cases when header is void. */
 	memcpy(data + nhead, skb->head, skb->tail - skb->head);
-	memcpy(data + size, skb->end, sizeof(struct skb_shared_info));
+	memcpy(data + size, skb->end, offsetof(struct skb_shared_info, frags[skb_shinfo(skb)->nr_frags]));
 
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 		get_page(skb_shinfo(skb)->frags[i].page);
