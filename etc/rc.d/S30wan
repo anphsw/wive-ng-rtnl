@@ -66,14 +66,6 @@ start() {
 	$LOG "wan service: unknown wan connection type: $wanmode"
 	exit 1
     fi
-
-    #check pppd or xl2tpd started
-    PPP_STARTED=`pidof pppd`
-    XL2TPD_STARTED=`pidof xl2tpd`
-
-    if [ "$vpnEnabled" = "on" ] && [ "$PPP_STARTED" = "" ] && [ "$XL2TPD_STARTED" = "" ]; then
-    	    (sleep 20 && service vpnhelper restart) &
-    fi
 }
 
 stop() {

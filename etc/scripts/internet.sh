@@ -182,13 +182,24 @@ else
     gate_config
 fi
 
+#set flag for init scripts
+if [ "$stamode" = "y" ] && [ "$MODE" = "connect_sta" ]; then
+    touch /tmp/sta_connected
+fi
+
 #reconfigure wan and services restart
 service wan restart
-services_restart.sh all
-
-if [ "$MODE" = "lanonly" ]; then
-    service shaper restart
-fi
 if [ "$MODE" != "lanonly" ]; then
     retune_wifi
 fi
+
+#some daemons need restart
+services_restart.sh all
+
+#retune shaper
+if [ "$MODE" = "lanonly" ]; then
+    service shaper restart
+fi
+
+#restart vpn helper
+service vpnhelper restart &

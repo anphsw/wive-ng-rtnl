@@ -121,7 +121,7 @@ wait_connect()
     getStaMode
     if [ "$stamode" = "y" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
-	if [ "$connected" = "0" ]; then
+	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
     	    exit 0
 	fi    
     fi
