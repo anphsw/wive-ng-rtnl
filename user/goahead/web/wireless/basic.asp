@@ -566,7 +566,25 @@ function initTranslation()
 	_TRV("basicCancel", "wireless cancel");
 }
 
+function show14channel(show)
+{
+	var list = [ 'sz11aChannel', 'sz11bChannel', 'sz11gChannel'];
+	
+	for (var i=0; i<list.length; i++)
+	{
+		var id = list[i];
+		var select = document.getElementById(id);
 
+		if (select != null)
+		{
+			for (var j=0; j<select.options.length; j++)
+			{
+				if (select.options[j].value == '14')
+					displayElement(select.options[j], show);
+			}
+		}
+	}
+}
 
 function initValue()
 {
@@ -590,6 +608,8 @@ function initValue()
 	hideElement("div_11a_channel");
 	hideElement("div_11b_channel");
 	hideElement("div_11g_channel");
+	hideElement("div_ht_tx_stream");
+	hideElement("div_ht_rx_stream");
 	hideElement("div_abg_rate");
 	hideElement("div_11n");
 
@@ -605,6 +625,7 @@ function initValue()
 	
 	hideElement("div_mbssidapisolated");
 	form.mbssidapisolated.disabled = true;
+	show14channel(true);
 	
 	// Wireless mode
 	if ((wmode*1) >= 6)
@@ -630,6 +651,13 @@ function initValue()
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
+
+		if ((1*wmode) >= 5)
+		{
+			showElementEx("div_ht_tx_stream", style_display_on());
+			showElementEx("div_ht_rx_stream", style_display_on());
+			show14channel(false);
+		}
 	}
 	else if (wmode == "1")
 	{
@@ -1028,8 +1056,11 @@ function wirelessModeChange(form)
 	hideElement("div_11a_channel");
 	hideElement("div_11b_channel");
 	hideElement("div_11g_channel");
+	hideElement("div_ht_tx_stream");
+	hideElement("div_ht_rx_stream");
 	hideElement("div_abg_rate");
 	hideElement("div_11n");
+	show14channel(true);
 
 	form.sz11aChannel.disabled = true;
 	form.sz11bChannel.disabled = true;
@@ -1058,6 +1089,13 @@ function wirelessModeChange(form)
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
+		
+		if ((1*wmode) >= 5)
+		{
+			showElementEx("div_ht_tx_stream", style_display_on());
+			showElementEx("div_ht_rx_stream", style_display_on());
+			show14channel(false);
+		}
 		
 		if (form.sz11gChannel.options.selectedIndex == 0)
 		{
@@ -1328,6 +1366,24 @@ function doRadioStatusChange(form)
 		</select>
 	</td>
 </tr>
+<tr id="div_ht_tx_stream">
+	<td class="head" id="basicHTTxStream">HT TxStream</td>
+	<td>
+		<select name="tx_stream" size="1">
+			<option value="1">1</option>
+			<option value="2" id="div_HtTx2Stream">2</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_ht_rx_stream">
+	<td class="head" id="basicHTRxStream">HT RxStream</td>
+	<td>
+		<select name="rx_stream" size="1">
+			<option value="1">1</option>
+			<option value="2" id="div_HtRx2Stream">2</option>
+		</select>
+	</td>
+</tr>
 </table>
 
 <table id="div_11n" name="div_11n" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">
@@ -1418,40 +1474,7 @@ function doRadioStatusChange(form)
 </tr>
 </table>
 
-<table id="div_11n_plugfest" name="div_11n_plugfest" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-<tr> 
-	<td class="title" colspan="2" id="basicOther">Other</td>
-</tr>
-<tr>
-	<td class="head" id="basicHTTxStream">HT TxStream</td>
-	<td>
-		<select name="tx_stream" size="1">
-			<option value="1">1</option>
-			<option value="2" id="div_HtTx2Stream">2</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="basicHTRxStream">HT RxStream</td>
-	<td>
-		<select name="rx_stream" size="1">
-			<option value="1">1</option>
-			<option value="2" id="div_HtRx2Stream">2</option>
-		</select>
-	</td>
-</tr>
-</table>
-
 <br>
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-<tr align="center">
-	<td>
-		<input type="submit" style="{width:120px;}" value="Apply" id="basicApply"> &nbsp; &nbsp;
-		<input type="reset" style="{width:120px;}" value="Cancel" id="basicCancel" onClick="window.location.reload()">
-	</td>
-</tr>
-</table>
 </form>
 
 </td></tr></table>

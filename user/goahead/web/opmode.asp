@@ -149,7 +149,7 @@ function msg()
 
 <center>
 	<!--input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); document.opmode.submit(); parent.menu.location.reload();"-->
-	<input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); postForm(null, this.form, 'setmodeReloader', '/messages/wait_chmode.asp');">
+	<input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); postForm('Changing operation mode needs to reboot you router. Do you want to proceed?', this.form, 'setmodeReloader', '/messages/rebooting.asp');">
 	&nbsp;&nbsp;
 	<input type="reset" style="{width:120px;}" value="Reset" id="oCancel" onClick="window.location.reload()">
 	<iframe id="setmodeReloader" name="setmodeReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>

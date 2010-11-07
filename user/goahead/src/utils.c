@@ -1314,16 +1314,22 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 
-	outputTimerForReload(wp, 20000);
+	outputTimerForReload(wp, 40000);
 
 final:
 	sleep(2);	// wait for websDone() to finish tcp http session(close socket)
 
+	if (need_commit)
+		updateFlash8021x(RT2860_NVRAM);
+
+	// Reboot
+	doSystem("sleep 2 && reboot &");
+
 	//restart internet if any changes
-	if (need_commit) {
+/*	if (need_commit) {
 		updateFlash8021x(RT2860_NVRAM);
 		initInternet();
-	}
+	}*/
 }
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)

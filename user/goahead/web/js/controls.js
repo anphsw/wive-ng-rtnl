@@ -23,7 +23,8 @@ function style_display_on()
 
 function showElement(elementID)
 {
-	var item = document.getElementById(elementID);
+	var item = (typeof(elementID)=='object') ? 
+		elementID : document.getElementById(elementID);
 	if (item != null)
 	{
 		item.style.display = "";
@@ -33,7 +34,8 @@ function showElement(elementID)
 
 function showElementEx(elementID, display)
 {
-	var item = document.getElementById(elementID);
+	var item = (typeof(elementID)=='object') ? 
+		elementID : document.getElementById(elementID);
 	if (item != null)
 	{
 		item.style.display = display;
@@ -43,7 +45,8 @@ function showElementEx(elementID, display)
 
 function hideElement(elementID)
 {
-	var item = document.getElementById(elementID);
+	var item = (typeof(elementID)=='object') ? 
+		elementID : document.getElementById(elementID);
 	if (item != null)
 	{
 		item.style.display = "none";
