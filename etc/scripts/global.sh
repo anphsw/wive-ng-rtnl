@@ -115,13 +115,27 @@ getHostName()
     HOSTNAME=`nvram_get 2860 HostName`
 }
 
+wait_connect()
+#wait connect to ap
+{
+    getStaMode
+    if [ "$stamode" = "y" ]; then
+	connected=`iwpriv ra0 connStatus | grep Connected -c`
+	if [ "$connected" = "0" ]; then
+    	    exit 0
+	fi    
+    fi
+}
 
+#set default
 ethconv="n"
 stamode="n"
 wan_if="br0"
 wan_ppp_if="br0"
 lan_if="br0"
 lan2_if="br0:9"
+
+#get param
 getLanIfName
 getLan2IfName
 getWanIfName

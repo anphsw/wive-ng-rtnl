@@ -6,6 +6,9 @@
 #wait to start web and run from goahead code
 web_wait
 
+#wait connetc to ap in sta mode
+wait_connect
+
 LOG="echo VPN: "
 
 start() {
