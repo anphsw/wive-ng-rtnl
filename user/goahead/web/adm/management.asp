@@ -80,32 +80,6 @@ function setLanguage()
 	return true;
 }
 
-function postForm(question, form, reloader, message)
-{
-	if (!confirm(question))
-		return false;
-
-	if (parent!=null)
-	{
-		var obj = parent.document.getElementById("homeFrameset");
-		if (obj != null)
-			obj.rows = "0,1*"; // Hide top logo
-		var obj = parent.document.getElementById("homeMenuFrameset");
-		if (obj != null)
-			obj.cols = "0,1*"; // Hide menu
-	}
-	
-	var submitForm = function()
-	{
-		form.submit();
-	};
-	
-	form.target = reloader;
-	ajaxPopupWindow('ajxLoadParams', message, submitForm);
-	
-	return true;
-}
-
 </script>
 
 </head>

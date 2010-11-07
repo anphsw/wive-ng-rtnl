@@ -2,138 +2,157 @@
 <head>
 <title>Access Point Status</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+<link rel="stylesheet" href="/style/windows.css" type="text/css">
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
-<META HTTP-EQUIV="refresh" CONTENT="3; URL=./status.asp">
+<script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
+
+<style type="text/css">
+td.port_status {
+	background-position: center center;
+	background-repeat: no-repeat;
+	width: 35px;
+	height: 24px;
+	text-align: center;
+	vertical-align: middle;
+	cursor: default;
+}
+</style>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
+var wan_port = '<% getCfgZero(1, "wan_port"); %>';
+var timer = null;
 
 function showOpMode()
 {
-	var opmode = 1* <% getCfgZero(1, "OperationMode"); %>;
-	if (opmode == 0)
-		document.write("Bridge Mode");
-	else if (opmode == 1)
-		document.write("Gateway Mode");
-	else if (opmode == 2)
-		document.write("Ethernet Converter Mode");
-	else if (opmode == 3)
-		document.write("AP Client Mode");
-	else
-		document.write("Unknown");
+	var el = document.getElementById('inpOperationMode');
+	if (el == null)
+		return;
+	
+	var opmode = el.value;
+	var s_opmode = 'Unknown';
+	if (opmode == '0')
+		s_opmode = "Bridge Mode";
+	else if (opmode == '1')
+		s_opmode = "Gateway Mode";
+	else if (opmode == '2')
+		s_opmode = "Ethernet Converter Mode";
+	else if (opmode == '3')
+		s_opmode = "AP Client Mode";
+	
+	ajaxModifyElementHTML('tdOperationMode', s_opmode);
 }
 
 function showPortStatus()
 {
-	var str = "<% getPortStatus(); %>";
-	var all = new Array();
+	var el = document.getElementById('inpWanPort');
+	if (el == null)
+		return;
+	
+	var pstatus = el.value.split(';');
 
-	if(str == "-1"){
-		document.write("not support");
-		return ;
+	if (pstatus.length <= 0)
+	{
+		ajaxModifyElementHTML('portStatusRow', '<td>not supported</td>');
+		return;
 	}
+	
+	var wan = 1 * document.setWanForm.wan_port.value;
+	var content = '';
 
-	all = str.split(",");
-	for(i=0; i< all.length-1; i+=3){
-		document.write("<td>");
-		if(all[i] == "1"){
-			if(all[i+1] == "10")
-				document.write("<img src=/graphics/10.gif> ");
-			else if(all[i+1] == "100")
-				document.write("<img src=/graphics/100.gif> ");
-
-//			if(all[i+2] == "F")
-//				document.write("Full ");
-//			else(all[i+2] == "H")
-//				document.write("Half ");
-		}else if(all[i] == "0"){
-				document.write("<img src=/graphics/empty.gif> ");
+	for (i=0; i<pstatus.length; i++)
+	{
+		var port = pstatus[i].split(',');
+		var image = 'empty';
+		
+		if (port[0] == '1')
+		{
+			if (port[1] == '10')
+				image = '10';
+			else if (port[1] == '100')
+				image = '100';
+			else
+				image = '100';
+			
+			if (port[2] == 'H')
+				image += '_h';
 		}
-		document.write("</td>");
+		
+		var text = (i == wan) ? 'WAN' : (i+1);
+		content = content + '<td class="port_status" style="background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
+	
+	ajaxModifyElementHTML('portStatusRow', '<table><td>' + content + '</td></table>');
 }
 
 function initTranslation()
 {
-	var e = document.getElementById("statusTitle");
-	e.innerHTML = _("status title");
-	e = document.getElementById("statusIntroduction");
-	e.innerHTML = _("status introduction");
+	_TR("statusTitle", "status title");
+	_TR("statusIntroduction", "status introduction");
 	
-	e = document.getElementById("statusSysInfo");
-	e.innerHTML = _("status system information");
-	e = document.getElementById("statusSDKVersion");
-	e.innerHTML = _("status sdk version");
-	e = document.getElementById("statusSysUpTime");
-	e.innerHTML = _("status system up time");
-	e = document.getElementById("statusSysPlatform");
-	e.innerHTML = _("status system platform");
-	e = document.getElementById("statusOPMode");
-	e.innerHTML = _("status operate mode");
+	_TR("statusSysInfo", "status system information");
+	_TR("statusSDKVersion", "status sdk version");
+	_TR("statusSysUpTime", "status system up time");
+	_TR("statusSysPlatform", "status system platform");
+	_TR("statusOPMode", "status operate mode");
 
-	e = document.getElementById("statusInternetConfig");
-	e.innerHTML = _("status internet config");
-	e = document.getElementById("statusConnectedType");
-	e.innerHTML = _("status connect type");
-	e = document.getElementById("statusWANIPAddr");
-	e.innerHTML = _("status wan ipaddr");
-	e = document.getElementById("statusSubnetMask");
-	e.innerHTML = _("status subnet mask");
-	e = document.getElementById("statusDefaultGW");
-	e.innerHTML = _("status default gateway");
-	e = document.getElementById("statusPrimaryDNS");
-	e.innerHTML = _("status primary dns");
-	e = document.getElementById("statusSecondaryDNS");
-	e.innerHTML = _("status secondary dns");
-	e = document.getElementById("statusWANMAC");
-	e.innerHTML = _("status mac");
+	_TR("statusInternetConfig", "status internet config");
+	_TR("statusConnectedType", "status connect type");
+	_TR("statusWANIPAddr", "status wan ipaddr");
+	_TR("statusSubnetMask", "status subnet mask");
+	_TR("statusDefaultGW", "status default gateway");
+	_TR("statusPrimaryDNS", "status primary dns");
+	_TR("statusSecondaryDNS", "status secondary dns");
+	_TR("statusWANMAC", "status mac");
 
-	e = document.getElementById("statusLocalNet");
-	e.innerHTML = _("status local network");
-	e = document.getElementById("statusLANIPAddr");
-	e.innerHTML = _("status lan ipaddr");
-	e = document.getElementById("statusLocalNetmask");
-	e.innerHTML = _("status local netmask");
-	e = document.getElementById("statusLANMAC");
-	e.innerHTML = _("status mac");
+	_TR("statusLocalNet", "status local network");
+	_TR("statusLANIPAddr", "status lan ipaddr");
+	_TR("statusLocalNetmask", "status local netmask");
+	_TR("statusLANMAC", "status mac");
 
-	e = document.getElementById("statusEthPortStatus");
-	e.innerHTML = _("status ethernet port status");
+	_TR("statusEthPortStatus", "status ethernet port status");
 }
 
 function PageInit()
 {
 	var ethtoolb = "<% getETHTOOLBuilt(); %>";
-	initTranslation();
-
 	if (ethtoolb == "1")
+		showElement('div_ethtool');
+	
+	if (!((wan_port >= '0') && (wan_port <= '4')))
+		wan_port = '4';
+	
+	document.setWanForm.wan_port.value = wan_port;
+	
+	reloadPage();
+}
+
+function reloadPage()
+{
+	ajaxLoadElement("sysinfoTable", "/adm/sysinfo.asp", onPageReload);
+	timer = setTimeout('reloadPage();', 3000);
+}
+
+function onPageReload()
+{
+	initTranslation();
+	showOpMode();
+	showPortStatus();
+}
+
+function setWanPort(form)
+{
+	if (confirm('Changing WAN port needs to reboot you router. Do you want to proceed?'))
 	{
-		//document.getElementById("statusEthPortStatus").style.visibility = "visible";
-		//document.getElementById("statusEthPortStatus").style.display = style_display_on();
-		document.getElementById("div_ethtool").style.visibility = "visible";
-		document.getElementById("div_ethtool").style.display = style_display_on();
-	}
-	else
-	{
-		//document.getElementById("statusEthPortStatus").style.visibility = "hidden";
-		//document.getElementById("statusEthPortStatus").style.display = "none";
-		document.getElementById("div_ethtool").style.visibility = "hidden";
-		document.getElementById("div_ethtool").style.display = "none";
+		clearTimeout(timer);
+		postForm(null, form, 'setwanReloader', '/messages/rebooting.asp');
 	}
 }
+
 </script>
 </head>
 
@@ -142,91 +161,27 @@ function PageInit()
 <H1 id="statusTitle">Access Point Status</H1>
 <P id="statusIntroduction">Let's take a look at the status. </P>
 
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
-<!-- ================= System Info ================= -->
-<tr>
-  <td class="title" colspan="2" id="statusSysInfo">System Info</td>
-</tr>
-<tr>
-  <td class="head" id="statusSDKVersion">Firmware Version</td>
-  <td><% getSdkVersion(); %> (<% getSysBuildTime(); %>)</td>
-</tr>
-<tr>
-  <td class="head" id="statusSysUpTime">System Time</td>
-  <td><% getSysUptime(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusSysPlatform">System Platform</td>
-  <td><% getPlatform(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusOPMode">Operation Mode</td>
-  <td><script type="text/javascript">showOpMode();</script></td>
-</tr>
-<!-- ================= Internet Configurations ================= -->
-<tr>
-  <td class="title" colspan="2" id="statusInternetConfig">Internet Configurations</td>
-</tr>
-<tr>
-  <td class="head" id="statusConnectedType">Connected Type</td>
-  <td><% getCfgGeneral(1, "wanConnectionMode"); %> </td>
-</tr>
-<tr>
-  <td class="head" id="statusWANIPAddr">WAN IP Address</td>
-  <td><% getWanIp(); %>&nbsp;</td>
-</tr>
-<tr>
-  <td class="head" id="statusSubnetMask">Subnet Mask</td>
-  <td><% getWanNetmask(); %>&nbsp;</td>
-</tr>
-<tr>
-  <td class="head" id="statusDefaultGW">Default Gateway</td>
-  <td><% getWanGateway(); %>&nbsp;</td>
-</tr>
-<tr>
-  <td class="head" id="statusPrimaryDNS">Primary Domain Name Server</td>
-  <td><% getDns(1); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusSecondaryDNS">Secondary Domain Name Server</td>
-  <td><% getDns(2); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusWANMAC">MAC Address</td>
-  <td><% getWanMac(); %></td>
-</tr>
-<!-- ================= Local Network ================= -->
-<tr>
-  <td class="title" colspan="2" id="statusLocalNet">Local Network</td>
-</tr>
-<tr>
-  <td class="head" id="statusLANIPAddr">Local IP Address</td>
-  <td><% getLanIp(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusLocalNetmask">Local Netmask</td>
-  <td><% getLanNetmask(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statusLANMAC">MAC Address</td>
-  <td><% getLanMac(); %></td>
-</tr>
-<!-- ================= Other Information ================= -->
+<table width="95%" border="1" cellpadding="2" cellspacing="1" id="sysinfoTable">
 </table>
 
-
-<table border="0" id="div_ethtool">
-<tr>
-  <td>
-    <H1 id="statusEthPortStatus">Ethernet Port Status</H1>
-  </td>
-</tr>
-<tr>
-  <td>
-    <script type="text/javascript">showPortStatus();</script>
-  </td>
-</tr>
+<form name="setWanForm" method="POST" action="/goform/setWanPort">
+<table width="95%" border="1" cellpadding="2" cellspacing="1" id="sysinfoTable">
+	<td class="head">
+		Wan port
+	</td>
+	<td>
+		<select name="wan_port" onchange="showPortStatus();" class="short">
+			<option value="0">1</option>
+			<option value="1">2</option>
+			<option value="2">3</option>
+			<option value="3">4</option>
+			<option value="4">5</option>
+		</select>
+		<input type="button" class="half" value="Change port" onclick="setWanPort(this.form);" />
+		<iframe id="setwanReloader" name="setwanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+	</td>
 </table>
+</form>
 
 </td></tr></table>
 </body>

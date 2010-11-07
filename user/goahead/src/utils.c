@@ -52,6 +52,7 @@ static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
 static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
+static void setWanPort(webs_t wp, char_t *path, char_t *query);
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query);
 #endif
@@ -569,6 +570,7 @@ void formDefineUtilities(void)
 	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
 	websFormDefine(T("forceMemUpgrade"), forceMemUpgrade);
 	websFormDefine(T("setOpMode"), setOpMode);
+	websFormDefine(T("setWanPort"), setWanPort);
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 	websFormDefine(T("ScanUSBFirmware"), ScanUSBFirmware);
 #endif
@@ -996,38 +998,38 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 	int port, rc;
 	FILE *fp;
 	char buf[1024];
+	int first = 1;
 
-	for(port=4; port>-1; port--){
+	for (port=4; port>-1; port--)
+	{
 		char *pos;
 		char link = '0';
 		int speed = 100;
 		char duplex = 'F';
 		FILE *proc_file = fopen("/proc/rt2880/gmac", "w");
-		if(!proc_file){
-			websWrite(wp, T("-1"));		// indicate error
+		if (!proc_file)
 			return 0;
-		}
+
 		fprintf(proc_file, "%d", port);
 		fclose(proc_file);
 
-		if((fp = popen("ethtool eth2", "r")) == NULL){
-			websWrite(wp, T("-1"));		// indicate error
+		if ((fp = popen("ethtool eth2", "r")) == NULL)
 			return 0;
-		}
+
 		rc = fread(buf, 1, 1024, fp);
 		pclose(fp);
-		if(rc == -1){
-			websWrite(wp, T("-1"));		// indicate error
-			return 0;
-		}else{
+		if (rc != -1)
+		{
 			// get Link status
-			if((pos = strstr(buf, "Link detected: ")) != NULL){
+			if ((pos = strstr(buf, "Link detected: ")) != NULL)
+			{
 				pos += strlen("Link detected: ");
 				if(*pos == 'y')
 					link = '1';
 			}
 			// get speed
-			if((pos = strstr(buf, "Speed: ")) != NULL){
+			if ((pos = strstr(buf, "Speed: ")) != NULL)
+			{
 				pos += strlen("Speed: ");
 				if(*pos == '1' && *(pos+1) == '0' && *(pos+2) == 'M')
 					speed = 10;
@@ -1035,21 +1037,21 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 					speed = 1000;
 			}
 			// get duplex
-			if((pos = strstr(buf, "Duplex: ")) != NULL){
+			if ((pos = strstr(buf, "Duplex: ")) != NULL)
+			{
 				pos += strlen("Duplex: ");
 				if(*pos == 'H')
 					duplex = 'H';
 			}
 
-			websWrite(wp, T("%c,%d,%c,"), link, speed, duplex);
+			websWrite(wp, T("%s%c,%d,%c"),
+				(first) ? "" : ";",
+				link, speed, duplex);
+			first = 0;
 		}
 	}
-	return 0;
-#else
-	websWrite(wp, T("-1"));
-	return 0;
 #endif
-
+	return 0;
 }
 
 inline int getOnePortOnly(void)
@@ -1136,6 +1138,38 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 	websRedirect(wp, "adm/upload_firmware.asp");
 }
 #endif
+
+static void outputTimerForReload(webs_t wp, long delay)
+{
+	char lan_if_addr[32];
+	struct in_addr lan_ip;
+	const char *lan_if_ip;
+
+	if (getIfIp(getLanIfName(), lan_if_addr) != -1)
+		lan_if_ip = lan_if_addr;
+	else
+	{
+		lan_if_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+		if (lan_if_ip == NULL)
+			lan_if_ip = "192.168.1.1";
+	}
+	
+	websHeader(wp);
+	websWrite
+	(
+		wp,
+		T("<script language=\"JavaScript\" type=\"text/javascript\">\n"
+		"function refresh_all()\n"
+		"{\n"
+		"	top.location.href = \"http://%s\";\n"
+		"}\n\n"
+		"setTimeout(\"refresh_all()\", %ld);\n"
+		"</script>"),
+		lan_if_ip, delay
+	);
+	websFooter(wp);
+	websDone(wp, 200);
+}
 
 /* goform/setOpMode */
 static void setOpMode(webs_t wp, char_t *path, char_t *query)
@@ -1254,35 +1288,33 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	// For 100PHY  ( Ethernet Convertor with one port only)
 	// If this is one port only board(IC+ PHY) then redirect
 	// the user browser to our alias ip address.
-	if( getOnePortOnly() ){
+	if (getOnePortOnly())
+	{
 		//     old mode is Gateway, and new mode is BRIDGE/WirelessISP/Apcli
-		if (    (!strcmp(old_mode, "1") && !strcmp(mode, "0"))  ||
+		if ((!strcmp(old_mode, "1") && !strcmp(mode, "0"))  ||
 				(!strcmp(old_mode, "1") && !strcmp(mode, "2"))  ||
-				(!strcmp(old_mode, "1") && !strcmp(mode, "3"))  ){
+				(!strcmp(old_mode, "1") && !strcmp(mode, "3"))  )
+		{
 			char redirect_url[512];
 			char *lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 
-			if(! strlen(lan_ip))
+			if (!strlen(lan_ip))
 				lan_ip = "DEFAULT_LAN_IP";
 			snprintf(redirect_url, 512, "http://%s", lan_ip);
 			redirect_wholepage(wp, redirect_url);
 			goto final;
-        }
+		}
 
 		//     old mode is BRIDGE/WirelessISP/Apcli, and new mode is Gateway
-		if (    (!strcmp(old_mode, "0") && !strcmp(mode, "1"))  ||
+		if ((!strcmp(old_mode, "0") && !strcmp(mode, "1"))  ||
 				(!strcmp(old_mode, "2") && !strcmp(mode, "1"))  ||
 				(!strcmp(old_mode, "3") && !strcmp(mode, "1"))  ){
 			redirect_wholepage(wp, "http://172.32.1.254");
 			goto final;
 		}
 	}
-    
-	websHeader(wp);
-	websWrite(wp, T("<h2>Operation Mode</h2>\n"));
-	websWrite(wp, T("mode: %s<br>\n"), mode);
-	websFooter(wp);
-	websDone(wp, 200);
+
+	outputTimerForReload(wp, 20000);
 
 final:
 	sleep(2);	// wait for websDone() to finish tcp http session(close socket)
@@ -1292,4 +1324,22 @@ final:
 		updateFlash8021x(RT2860_NVRAM);
 		initInternet();
 	}
+}
+
+static void setWanPort(webs_t wp, char_t *path, char_t *query)
+{
+	const char* wan_port = websGetVar(wp, T("wan_port"), T("0"));
+	
+	// Set-up WAN port
+	if ((wan_port != NULL) && (strlen(wan_port) == 1))
+	{
+		if ((wan_port[0] >= '0') && (wan_port[0] <= '4'))
+			nvram_set(RT2860_NVRAM, "wan_port", wan_port);
+	}
+
+	outputTimerForReload(wp, 40000);
+
+	// Reboot
+	sleep(2);
+	doSystem("sleep 2 && reboot &");
 }

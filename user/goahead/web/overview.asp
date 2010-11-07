@@ -12,22 +12,16 @@ Butterlate.setTextDomain("main");
 
 function initTranslation()
 {
-	// var e = document.getElementById("ovIntroduction");
-	// e.innerHTML = _("overview introduction");
-	var e = document.getElementById("ovSelectLang");
-	e.innerHTML = _("overview select language");
-	e = document.getElementById("ovLangApply");
-	e.value = _("main apply");
+	_TR("ovSelectLang", "overview select language");
+	_TRV("ovLangApply", "main apply");
 
-	e = document.getElementById("ovStatus");
-	e.innerHTML = _("overview status link");
-	e = document.getElementById("ovStatistic");
-	e.innerHTML = _("overview statistic link");
-	e = document.getElementById("ovManagement");
-	e.innerHTML = _("overview management link");
+	_TR("ovStatus", "overview status link");
+	_TR("ovStatistic", "overview statistic link");
+	_TR("ovManagement", "overview management link");
 }
 
-function initValue() {
+function initValue()
+{
 	var lang_element = document.getElementById("langSelection");
 	var lang_en = "<% getLangBuilt("en"); %>";
 	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
@@ -39,7 +33,8 @@ function initValue() {
 	if (lang_zhtw == "1")
 		lang_element.options[lang_element.length] = new Option('Traditional Chinese', 'zhtw');
 
-	if (document.cookie.length > 0) {
+	if (document.cookie.length > 0)
+	{
 		var s = document.cookie.indexOf("language=");
 		var e = document.cookie.indexOf(";", s);
 		var lang = "en";
@@ -82,7 +77,7 @@ function setLanguage()
 <select name="langSelection" id="langSelection">
 <!-- added by initValue -->
 </select>&nbsp;&nbsp;
-<input type=submit style="{width:50px;}" value="Apply" id="ovLangApply" onClick="return setLanguage()">
+<input type="submit" style="{width:50px;}" value="Apply" id="ovLangApply" onClick="return setLanguage()">
 </fieldset></blockquote>
 </form>
 

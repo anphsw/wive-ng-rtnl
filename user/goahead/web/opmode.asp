@@ -2,9 +2,11 @@
 <head>
 <title>Operation Mode</title>
 <link rel="stylesheet" href="style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="style/windows.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("main");
 
@@ -112,7 +114,7 @@ function msg()
 <p id="oIntroduction"></p>
 <hr>
 
-<form method="post" name="opmode" action="/goform/setOpMode">
+<form method="POST" name="opmode" action="/goform/setOpMode">
 <dl>
 	<dt>
 		<input type="radio" name="opMode" id="opMode" value="0" onClick="changeMode()"><b id="oModeB">Bridge:</b>
@@ -146,8 +148,11 @@ function msg()
 <p></p>
 
 <center>
-	<input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); document.opmode.submit(); parent.menu.location.reload();">&nbsp;&nbsp;
+	<!--input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); document.opmode.submit(); parent.menu.location.reload();"-->
+	<input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); postForm(null, this.form, 'setmodeReloader', '/messages/wait_chmode.asp');">
+	&nbsp;&nbsp;
 	<input type="reset" style="{width:120px;}" value="Reset" id="oCancel" onClick="window.location.reload()">
+	<iframe id="setmodeReloader" name="setmodeReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 </center>
 </form>
 

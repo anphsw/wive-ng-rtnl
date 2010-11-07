@@ -10,6 +10,38 @@ function validateNum(str, floating)
 	return re.test(str);
 }
 
+function validatePort(field, info)
+{
+	var re = /^\d+$/;
+
+	if (!re.test(field.value))
+	{
+		if (info)
+		{
+			alert("Invalid port value: " + field.value);
+			field.focus();
+		}
+		
+		return false;
+	}
+	
+	// Cast to int
+	var port = field.value*1;
+	
+	if ((port<1) || (port>65535))
+	{
+		if (info)
+		{
+			alert("Port value to be between 1 and 65535 but is set to: " + field.value);
+			field.focus();
+		}
+		
+		return false;
+	}
+	
+	return true;
+}
+
 function validateMAC(mac, info)
 {
 	var re = /^(?:[A-Fa-f0-9]{2}\:){5}[A-Fa-f0-9]{2}$/;

@@ -82,7 +82,7 @@ function ajaxPostRequest(uri, content, refresh)
 	xmlHttp.send(content);
 }
 
-function ajaxLoadElement(elementID, url)
+function ajaxLoadElement(elementID, url, onLoadAction)
 {
 	var element = document.getElementById(elementID);
 	if (element == null)
@@ -100,11 +100,14 @@ function ajaxLoadElement(elementID, url)
 			if (xmlHttp.status == 200)
 				element.innerHTML = xmlHttp.responseText;
 			else
-				element.innerHTML = '<b>' + xmlhttp.statusText + '</b>';
+				element.innerHTML = '<b>' + xmlHttp.statusText + '</b>';
 			
 			// Free resources
 			xmlHttp.onreadystatechange = null;
 			xmlHttp = null;
+
+			if (onLoadAction != null)
+				onLoadAction();
 		}
 	}
 	
@@ -229,4 +232,41 @@ function ajaxCloseWindow(popupID)
 		doc.body.removeChild(popup);
 
 	doc.body.onscroll = doc.body.oldOnScroll;
+}
+
+function postForm(question, form, reloader, message)
+{
+	if (question != null)
+	{
+		if (!confirm(question))
+			return false;
+	}
+
+	if (parent!=null)
+	{
+		var obj = parent.document.getElementById("homeFrameset");
+		if (obj != null)
+			obj.rows = "0,1*"; // Hide top logo
+		var obj = parent.document.getElementById("homeMenuFrameset");
+		if (obj != null)
+			obj.cols = "0,1*"; // Hide menu
+	}
+	
+	var submitForm = function()
+	{
+		form.submit();
+	};
+	
+	if (reloader != null)
+		form.target = reloader;
+	ajaxPopupWindow('ajxLoadParams', message, submitForm);
+	
+	return true;
+}
+
+function ajaxModifyElementHTML(elementID, value)
+{
+	var elem = document.getElementById(elementID);
+	if (elem != null)
+		elem.innerHTML = value;
 }
