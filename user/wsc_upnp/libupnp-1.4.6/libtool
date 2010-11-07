@@ -328,7 +328,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /opt/kde3/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7496,7 +7496,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/lib/gcc/mipsel-linux-uclibc/3.4.2/ /usr/lib/gcc/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/../../../../mipsel-linux-uclibc/lib/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/mipsel-linux-uclibc/3.4.2/ /home/winfred/RT288x_SDK/toolchain/buildroot-gdb/mipsel-linux-uclibc/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /opt/kde3/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7804,7 +7804,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec=" /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../ /lib/i586-manbo-linux-gnu/4.5.1/ /lib/ /usr/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /opt/kde3/lib /usr/lib/qt3/lib /usr/lib/qt3/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
