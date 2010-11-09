@@ -165,6 +165,17 @@
 83) Fix corbina dhcp work<br>
 84) Fix restore dns at reconnect VPN<br>
 85) Speedup ppp_generic, ipv4, sys_time, hrtimer kernel code<br>
+<br>
+<b>1.2.x</b><br>
+1) More backports from upstream<br>
+2) More wifi driver fixup<br>
+3) Some WebUI rewrite<br>
+4) New buggy ISP support<br>
+5) More speedup<br>
+6) Add select WAN port mode in web<br>
+7) Some fixes for support Google Chrome<br>
+8) Rewrite some init.d logic for speedup<br>
+9) Fix wlan client mode + VPN work correct<br>
 
 <br><br>
 <b>For support see:</b><br>
