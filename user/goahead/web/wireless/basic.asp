@@ -566,22 +566,52 @@ function initTranslation()
 	_TRV("basicCancel", "wireless cancel");
 }
 
-function show14channel(show)
-{
-	var list = [ 'sz11aChannel', 'sz11bChannel', 'sz11gChannel'];
-	
-	for (var i=0; i<list.length; i++)
-	{
-		var id = list[i];
-		var select = document.getElementById(id);
+var channel_list = [ 'sz11aChannel', 'sz11bChannel', 'sz11gChannel'];
+var channels = [];
 
+function saveRadioChannels()
+{
+	// Store all comboBox options in arrays
+	for (var i=0; i<channel_list.length; i++)
+	{
+		var id = channel_list[i];
+		var select = document.getElementById(id);
+		var options = [];
+		
 		if (select != null)
 		{
 			for (var j=0; j<select.options.length; j++)
+				options[j] = select.options[j];
+			channels[id] = options;
+		}
+	}
+}
+
+function show14channel(show)
+{
+	// Display all options except 14 frequency
+	for (var i=0; i<channel_list.length; i++)
+	{
+		var id = channel_list[i];
+		var select = document.getElementById(id);
+		var options = channels[id];
+		
+		if ((select != null) && (options != null))
+		{
+			// Store selected option
+			var index = select.selectedIndex;
+			
+			// remove all options
+			select.options.length = 0;
+			
+			for (var j=0; j<options.length; j++)
 			{
-				if (select.options[j].value == '14')
-					displayElement(select.options[j], show);
+				if ((options[j].value != '14') || (show))
+					select.options[select.options.length] = options[j];
 			}
+			
+			// Restore selected option
+			select.selectedIndex = (index >= select.options.length) ? 0 : index;
 		}
 	}
 }
@@ -594,6 +624,7 @@ function initValue()
 	var current_channel_length;
 	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
 
+	saveRadioChannels();
 	initTranslation();
 	if (countrycode == '')
 		countrycode = 'NONE';
@@ -1475,6 +1506,16 @@ function doRadioStatusChange(form)
 </table>
 
 <br>
+
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<tr align="center">
+	<td>
+		<input type="submit" class="half" value="Apply" id="basicApply">&nbsp;&nbsp;
+		<input type="button" class="half" value="Cancel" id="basicCancel" onClick="window.location.reload();">
+	</td>
+</tr>
+</table>
+
 </form>
 
 </td></tr></table>

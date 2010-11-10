@@ -36,13 +36,13 @@ function showOpMode()
 	var opmode = el.value;
 	var s_opmode = 'Unknown';
 	if (opmode == '0')
-		s_opmode = "Bridge Mode";
+		s_opmode = 'Bridge Mode';
 	else if (opmode == '1')
-		s_opmode = "Gateway Mode";
+		s_opmode = 'Gateway Mode';
 	else if (opmode == '2')
-		s_opmode = "Ethernet Converter Mode";
+		s_opmode = 'Ethernet Converter Mode';
 	else if (opmode == '3')
-		s_opmode = "AP Client Mode";
+		s_opmode = 'AP Client Mode';
 	
 	ajaxModifyElementHTML('tdOperationMode', s_opmode);
 }
@@ -98,7 +98,6 @@ function initTranslation()
 	_TR("statusSDKVersion", "status sdk version");
 	_TR("statusSysUpTime", "status system up time");
 	_TR("statusSysPlatform", "status system platform");
-	_TR("statusOPMode", "status operate mode");
 
 	_TR("statusInternetConfig", "status internet config");
 	_TR("statusConnectedType", "status connect type");
