@@ -15,17 +15,17 @@ all:
 clean:
 	@set -e; 
 	for i in $(UTILSLIST); do rm -rf $$i; done
-	rm -rfd filesystem
+	rm -rf filesystem
 
 install:
-	rm -rfd filesystem
+	rm -rf filesystem
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
 	for i in $(UTILSLIST); do cp $$i ./filesystem/bin/$$i; done
 
 romfs:
-	rm -rfd filesystem
+	rm -rf filesystem
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
