@@ -2544,7 +2544,6 @@ int __init early_serial_setup(struct uart_port *port)
 	p->iotype       = port->iotype;
 	p->flags        = port->flags;
 	p->mapbase      = port->mapbase;
-	p->private_data = port->private_data;
 	p->type		= port->type;
 	p->line		= port->line;
 
