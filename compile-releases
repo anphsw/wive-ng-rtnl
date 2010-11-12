@@ -2,7 +2,11 @@
 
 PWD=`pwd`
 
-MODE=acorp
+if [ "$1" = "" ]; then
+    MODE=acorp
+else
+    MODE=$1
+fi
 
 rm -rf $PWD/releases
 mkdir -p $PWD/releases
