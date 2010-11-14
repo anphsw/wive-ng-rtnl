@@ -58,6 +58,9 @@ static int snap_rcv(struct sk_buff *skb, struct net_device *dev,
 	if (unlikely(!pskb_may_pull(skb, 5)))
 		goto drop;
 
+	if (unlikely(!pskb_may_pull(skb, 5)))
+		goto drop;
+
 	rcu_read_lock();
 	proto = find_snap_client(skb->h.raw);
 	if (proto) {

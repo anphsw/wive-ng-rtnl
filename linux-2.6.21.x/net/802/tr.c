@@ -189,11 +189,13 @@ static int tr_rebuild_header(struct sk_buff *skb)
 __be16 tr_type_trans(struct sk_buff *skb, struct net_device *dev)
 {
 
-	struct trh_hdr *trh=(struct trh_hdr *)skb->data;
+	struct trh_hdr *trh;
 	struct trllc *trllc;
 	unsigned riflen=0;
 
+	skb->dev = dev;
 	skb_reset_mac_header(skb);
+	trh = tr_hdr(skb);
 
 	if(trh->saddr[0] & TR_RII)
 		riflen = (ntohs(trh->rcf) & TR_RCF_LEN_MASK) >> 8;
