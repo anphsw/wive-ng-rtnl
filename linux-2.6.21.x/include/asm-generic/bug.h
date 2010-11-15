@@ -32,6 +32,7 @@ struct bug_entry {
 #endif
 
 #ifndef HAVE_ARCH_WARN_ON
+#ifdef CONFIG_DEBUG_BUGVERBOSE
 #define WARN_ON(condition) ({						\
 	typeof(condition) __ret_warn_on = !!(condition);		\
 	if (unlikely(__ret_warn_on)) {					\
@@ -39,6 +40,11 @@ struct bug_entry {
 			__LINE__, __FUNCTION__);			\
 		dump_stack();						\
 	}								\
+	unlikely(__ret_warn_on);					\
+})
+#else
+#define WARN_ON(condition) ({						\
+	typeof(condition) __ret_warn_on = (condition);			\
 	unlikely(__ret_warn_on);					\
 })
 
@@ -51,6 +57,7 @@ struct bug_entry {
 	}								\
 	unlikely(__ret_warn_on);					\
 })
+#endif
 #endif
 #endif
 
