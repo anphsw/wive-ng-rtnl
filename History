@@ -177,6 +177,7 @@
 8) Rewrite some init.d logic for speedup<br>
 9) Fix wlan client mode + VPN work correct<br>
 10) Fix apply kay at wlan page<br>
+11) Fix rcu locks speed issue<br>
 
 <br><br>
 <b>For support see:</b><br>
