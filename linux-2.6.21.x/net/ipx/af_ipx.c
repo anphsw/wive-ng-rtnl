@@ -1959,7 +1959,6 @@ static const struct proto_ops SOCKOPS_WRAPPED(ipx_dgram_ops) = {
 	.sendpage	= sock_no_sendpage,
 };
 
-#include <linux/smp_lock.h>
 SOCKOPS_WRAP(ipx_dgram, PF_IPX);
 
 static struct packet_type ipx_8023_packet_type = {

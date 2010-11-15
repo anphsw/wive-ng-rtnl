@@ -177,7 +177,7 @@ void *kmap_coherent(struct page *page, unsigned long addr)
 
 #define UNIQUE_ENTRYHI(idx) (CKSEG0 + ((idx) << (PAGE_SHIFT + 1)))
 
-void kunmap_coherent(struct page *page)
+void kunmap_coherent(void)
 {
 #ifndef CONFIG_MIPS_MT_SMTC
 	unsigned int wired;
@@ -208,7 +208,7 @@ void copy_to_user_page(struct vm_area_struct *vma,
 	if (cpu_has_dc_aliases) {
 		void *vto = kmap_coherent(page, vaddr) + (vaddr & ~PAGE_MASK);
 		memcpy(vto, src, len);
-		kunmap_coherent(page);
+		kunmap_coherent();
 	} else
 		memcpy(dst, src, len);
 	if ((vma->vm_flags & VM_EXEC) && !cpu_has_ic_fills_f_dc)
@@ -225,7 +225,7 @@ void copy_from_user_page(struct vm_area_struct *vma,
 		void *vfrom =
 			kmap_coherent(page, vaddr) + (vaddr & ~PAGE_MASK);
 		memcpy(dst, vfrom, len);
-		kunmap_coherent(page);
+		kunmap_coherent();
 	} else
 		memcpy(dst, src, len);
 }
@@ -326,18 +326,15 @@ void __init paging_init(void)
 #endif
 	kmap_coherent_init();
 
-#ifdef CONFIG_ISA
-	if (max_low_pfn >= MAX_DMA_PFN)
-		if (min_low_pfn >= MAX_DMA_PFN) {
-			zones_size[ZONE_DMA] = 0;
-			zones_size[ZONE_NORMAL] = max_low_pfn - min_low_pfn;
-		} else {
-			zones_size[ZONE_DMA] = MAX_DMA_PFN - min_low_pfn;
-			zones_size[ZONE_NORMAL] = max_low_pfn - MAX_DMA_PFN;
-		}
+#ifdef CONFIG_ZONE_DMA
+	if (min_low_pfn < MAX_DMA_PFN && MAX_DMA_PFN <= max_low_pfn) {
+		zones_size[ZONE_DMA] = MAX_DMA_PFN - min_low_pfn;
+		zones_size[ZONE_NORMAL] = max_low_pfn - MAX_DMA_PFN;
+	} else if (max_low_pfn < MAX_DMA_PFN)
+		zones_size[ZONE_DMA] = max_low_pfn - min_low_pfn;
 	else
 #endif
-	zones_size[ZONE_DMA] = max_low_pfn - min_low_pfn;
+	zones_size[ZONE_NORMAL] = max_low_pfn - min_low_pfn;
 
 #ifdef CONFIG_HIGHMEM
 	zones_size[ZONE_HIGHMEM] = highend_pfn - highstart_pfn;

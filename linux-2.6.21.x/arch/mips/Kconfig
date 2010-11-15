@@ -11,7 +11,6 @@ menu "Machine selection"
 
 config ZONE_DMA
 	bool
-	default y
 
 config RALINK_RT2880_MP
 	bool
@@ -164,6 +163,7 @@ config SYS_HAS_EARLY_PRINTK
 
 config GENERIC_ISA_DMA
 	bool
+	select ZONE_DMA
 
 config I8259
 	bool
@@ -187,6 +187,7 @@ config MIPS_DISABLE_OBSOLETE_IDE
 
 config GENERIC_ISA_DMA_SUPPORT_BROKEN
 	bool
+	select ZONE_DMA
 
 #
 # Endianess selection.  Sufficiently obscure so many users don't know what to
