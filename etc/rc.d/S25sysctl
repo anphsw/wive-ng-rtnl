@@ -23,14 +23,14 @@ start() {
         let "HASHSIZE=$CONNTRACK_MAX/4"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
-	sysctl -w vm.min_free_kbytes=2048
+	sysctl -w vm.min_free_kbytes=1536
     else                                                                                                                     
         #32mb                                                                                                                
         CONNTRACK_MAX=4096                                                                                                   
         let "HASHSIZE=$CONNTRACK_MAX/2"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
-	sysctl -w vm.min_free_kbytes=3072
+	sysctl -w vm.min_free_kbytes=2304
     fi                                                                                                                       
 
     if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
