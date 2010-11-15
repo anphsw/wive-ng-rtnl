@@ -2125,14 +2125,6 @@ uart_configure_port(struct uart_driver *drv, struct uart_state *state,
 		spin_unlock_irqrestore(&port->lock, flags);
 
 		/*
-		 * If this driver supports console, and it hasn't been
-		 * successfully registered yet, try to re-register it.
-		 * It may be that the port was not available.
-		 */
-		if (port->cons && !(port->cons->flags & CON_ENABLED))
-			register_console(port->cons);
-
-		/*
 		 * Power down all ports by default, except the
 		 * console if we have one.
 		 */
@@ -2182,7 +2174,7 @@ static const struct tty_operations uart_ops = {
  */
 int uart_register_driver(struct uart_driver *drv)
 {
-	struct tty_driver *normal;
+	struct tty_driver *normal = NULL;
 	int i, retval;
 
 	BUG_ON(drv->state);
@@ -2192,12 +2184,13 @@ int uart_register_driver(struct uart_driver *drv)
 	 * we have a large number of ports to handle.
 	 */
 	drv->state = kzalloc(sizeof(struct uart_state) * drv->nr, GFP_KERNEL);
+	retval = -ENOMEM;
 	if (!drv->state)
 		goto out;
 
-	normal = alloc_tty_driver(drv->nr);
+	normal  = alloc_tty_driver(drv->nr);
 	if (!normal)
-		goto out_kfree;
+		goto out;
 
 	drv->tty_driver = normal;
 
@@ -2228,14 +2221,12 @@ int uart_register_driver(struct uart_driver *drv)
 	}
 
 	retval = tty_register_driver(normal);
-	if (retval >= 0)
-		return retval;
-
-	put_tty_driver(normal);
-out_kfree:
-	kfree(drv->state);
-out:
-	return -ENOMEM;
+ out:
+	if (retval < 0) {
+		put_tty_driver(normal);
+		kfree(drv->state);
+	}
+	return retval;
 }
 
 /**
@@ -2293,7 +2284,6 @@ int uart_add_one_port(struct uart_driver *drv, struct uart_port *port)
 	}
 
 	state->port = port;
-	state->pm_state = -1;
 
 	port->cons = drv->cons;
 	port->info = state->info;
@@ -2314,6 +2304,15 @@ int uart_add_one_port(struct uart_driver *drv, struct uart_port *port)
 	 * setserial to be used to alter this ports parameters.
 	 */
 	tty_register_device(drv->tty_driver, port->line, port->dev);
+
+	/*
+	 * If this driver supports console, and it hasn't been
+	 * successfully registered yet, try to re-register it.
+	 * It may be that the port was not available.
+	 */
+	if (port->type != PORT_UNKNOWN &&
+	    port->cons && !(port->cons->flags & CON_ENABLED))
+		register_console(port->cons);
 
 	/*
 	 * Ensure UPF_DEAD is not set.
