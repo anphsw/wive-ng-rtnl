@@ -59,13 +59,10 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 	/* otherwise look in the environment */
 	memsize_str = prom_getenv("memsize");
 	if (!memsize_str) {
-		printk(KERN_WARNING
-		       "memsize not set in boot prom, set to default (32Mb)\n");
+		printk(KERN_WARNING "memsize not set in boot prom, set to default (32Mb)\n");
 		physical_memsize = 0x02000000;
 	} else {
-#ifdef DEBUG
 		pr_debug("prom_memsize = %s\n", memsize_str);
-#endif
 		physical_memsize = simple_strtol(memsize_str, NULL, 0);
 	}
 

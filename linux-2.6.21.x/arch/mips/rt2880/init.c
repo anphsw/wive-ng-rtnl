@@ -50,6 +50,9 @@
 #include <asm/rt2880/surfboard.h>
 #include <asm/rt2880/surfboardint.h>
 #include <asm/rt2880/rt_mmap.h>
+
+#define DEFAULT_BAUD 57600
+
 extern unsigned long surfboard_sysclk;
 extern unsigned long mips_machgroup;
 u32 mips_cpu_feq;
@@ -239,7 +242,6 @@ void prom_init_sysclk(void)
 	}
 
 #endif
-	
 #if defined (CONFIG_RT3883_ASIC) 
 	if ((reg>>17) & 0x1) { //DDR2
 		switch (clk_sel) {
@@ -302,30 +304,30 @@ int prom_init_serial_port(void)
   serial_req[0].line       = 0;
   serial_req[0].irq        = SURFBOARDINT_UART;
   serial_req[0].flags      = STD_COM_FLAGS;
-  serial_req[0].uartclk    = 57600 *16;
+  serial_req[0].uartclk    = DEFAULT_BAUD *16;
   serial_req[0].iotype     = SERIAL_IO_PORT;
   serial_req[0].iobase	   = KSEG1ADDR(RALINK_UART_BASE);
   serial_req[0].regshift   = 2;
   serial_req[0].mapbase    = KSEG1ADDR(RALINK_UART_BASE);
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
-  serial_req[0].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / 57600);
+  serial_req[0].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #else
-  serial_req[0].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
+  serial_req[0].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #endif
 
   serial_req[1].type       = PORT_16550A;
   serial_req[1].line       = 1;
   serial_req[1].irq        = SURFBOARDINT_UART1;
   serial_req[1].flags      = STD_COM_FLAGS;
-  serial_req[1].uartclk    = 57600 *16;
+  serial_req[1].uartclk    = DEFAULT_BAUD *16;
   serial_req[1].iotype     = SERIAL_IO_PORT;
   serial_req[1].iobase	   = KSEG1ADDR(RALINK_UART_LITE_BASE);
   serial_req[1].regshift   = 2;
   serial_req[1].mapbase    = KSEG1ADDR(RALINK_UART_LITE_BASE);
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
-  serial_req[1].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / 57600);
+  serial_req[1].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #else
-  serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
+  serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #endif
 
   early_serial_setup(&serial_req[0]);
@@ -333,8 +335,6 @@ int prom_init_serial_port(void)
 
   return(0);
 }
-
-//early_initcall(prom_init_serial_port);
 
 int prom_get_ttysnum(void)
 {
@@ -363,23 +363,23 @@ static void serial_setbrg(unsigned long wBaud)
         clock_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV);
 	
 #if 1
-	//fix at 57600 8 n 1 n
+	//fix at DEFAULT_BAUD 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC08)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC10)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC14)= 0x3;
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (40000000 / SURFBOARD_BAUD_DIV / 57600);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (40000000 / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #else
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #endif
-	//fix at 57600 8 n 1 n
+	//fix at DEFAULT_BAUD 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0x508)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x510)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x514)= 0x3;
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (40000000 / SURFBOARD_BAUD_DIV / 57600);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (40000000 / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #else
-        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / 57600);
+        *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / DEFAULT_BAUD);
 #endif
 #else
         IER(CFG_RT2880_CONSOLE) = 0;                                    /* Disable for now */
@@ -415,11 +415,12 @@ __init void prom_init(void)
 
 	set_io_port_base(KSEG1);
 	write_c0_wired(0);
-	serial_init(57600);
 
-	prom_init_serial_port();  /* Needed for Serial Console */
-	prom_meminit();
-	prom_setup_printf(prom_get_ttysnum());
+	prom_setup_printf(prom_get_ttysnum());	/* Get tty name */
+	serial_init(DEFAULT_BAUD); 		/* Kernel driver serial init */
+	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
+	prom_meminit();				/* Autodetect RAM size and set need variable */
+
 	prom_printf("\nLINUX started...\n");
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)
 	prom_printf("\n THIS IS FPGA\n");

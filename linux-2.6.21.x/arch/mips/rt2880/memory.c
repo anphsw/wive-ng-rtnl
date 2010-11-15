@@ -49,6 +49,15 @@
 #include <asm/rt2880/prom.h>
 
 //#define DEBUG
+#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024
+
+#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
+#define RAM_FIRST       0x08000400  /* Leave room for interrupt vectors */
+#define RAM_END         (0x08000000 + RAM_SIZE)
+#else
+#define RAM_FIRST       0x00000400  /* Leave room for interrupt vectors */
+#define RAM_END         (0x00000000 + RAM_SIZE)
+#endif
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
 unsigned long detect_ram_sequence[4];
@@ -58,7 +67,6 @@ enum surfboard_memtypes {
 	surfboard_rom,
 	surfboard_ram,
 };
-struct prom_pmemblock mdesc[PROM_MAX_PMEMBLOCKS];
 
 #ifdef DEBUG
 static char *mtypes[3] = {
@@ -71,15 +79,6 @@ static char *mtypes[3] = {
 /* References to section boundaries */
 extern char _end;
 
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-#define RAM_FIRST       0x08000400  /* Leave room for interrupt vectors */
-#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024
-#define RAM_END         (0x08000000 + RAM_SIZE)
-#else
-#define RAM_FIRST       0x00000400  /* Leave room for interrupt vectors */
-#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024
-#define RAM_END         (0x00000000 + RAM_SIZE)
-#endif
 struct resource rt2880_res_ram = {
         .name = "RAM",
         .start = 0,
@@ -87,10 +86,8 @@ struct resource rt2880_res_ram = {
         .flags = IORESOURCE_MEM
 };
 
-
-#define PFN_ALIGN(x)    (((unsigned long)(x) + (PAGE_SIZE - 1)) & PAGE_MASK)
-
-
+#ifdef DEBUG
+struct prom_pmemblock mdesc[PROM_MAX_PMEMBLOCKS];
 struct prom_pmemblock * __init prom_getmdesc(void)
 {
 	char *env_str;
@@ -98,12 +95,10 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 
 	env_str = prom_getenv("ramsize");
 	if (!env_str) {
-		ramsize = CONFIG_RALINK_RAM_SIZE * 1024 * 1024;
-		prom_printf("ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
+		ramsize = RAM_SIZE;
+		prom_printf("maximum ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 	} else {
-#ifdef DEBUG
-		prom_printf("ramsize = %s\n", env_str);
-#endif
+		prom_printf("maximum ramsize = %s\n", env_str);
 		ramsize = simple_strtol(env_str, NULL, 0);
 	}
 
@@ -131,17 +126,19 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 
 	return &mdesc[0];
 }
+#endif
 
 void __init prom_meminit(void)
 {
+#ifdef DEBUG
+    struct prom_pmemblock *psave;
+#endif
+#ifdef CONFIG_RAM_SIZE_AUTO
     unsigned long mem, memsize, reg_mem, mempos, memmeg;
     unsigned long before, offset;
     unsigned long flags;
     unsigned short save_dword;
 
-#ifdef DEBUG
-    struct prom_pmemblock *psave;
-#endif
        spin_lock_irqsave(&rtlmem_lock, flags);
        //Maximum RAM for autodetect
        reg_mem = 64;
@@ -190,19 +187,19 @@ void __init prom_meminit(void)
 
        spin_unlock_irq(&rtlmem_lock);
 
-#ifdef CONFIG_RAM_SIZE_AUTO
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
 	add_memory_region(0x08000000, memsize, BOOT_MEM_RAM);
 #else
 	add_memory_region(0x00000000, memsize, BOOT_MEM_RAM);
 #endif
-#else
+#else /* Fix mesize */
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
         add_memory_region(0x08000000, RAM_SIZE, BOOT_MEM_RAM);
 #else
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
 #endif
-#endif	
+#endif /* CONFIG_RAM_SIZE_AUTO */	
+
 #ifdef DEBUG
 	prom_printf("MEMORY DESCRIPTOR dump:\n");
 	psave = p;	/* Save p */
