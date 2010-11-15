@@ -139,17 +139,20 @@ void __init rt2880_setup(void)
 	if ((argptr = strstr(argptr, "nofpu")) != NULL)
 		cpu_data[0].options &= ~MIPS_CPU_FPU;
 
-	//rtc_ops = &no_rtc_ops;
 	board_time_init = mips_time_init;
-	//board_timer_setup = mips_timer_setup;
-
 	mips_reboot_setup();
 }
 
+#ifdef CONFIG_RAM_SIZE_AUTO
 extern unsigned long detect_ram_sequence[4];
+#endif
 void __init plat_mem_setup(void)
 {
-  printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM after first pass:[%ld]\nRAM after second pass:[%ld]\nFullviewRAM:[%ld]\n",
+#ifdef CONFIG_RAM_SIZE_AUTO
+    printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM after first pass:[%ld]\nRAM after second pass:[%ld]\nFullviewRAM:[%ld]\n",
            detect_ram_sequence[0],detect_ram_sequence[1],detect_ram_sequence[2],detect_ram_sequence[3]);
+#else
+    printk("Fixed Ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
+#endif
   rt2880_setup();
 }
