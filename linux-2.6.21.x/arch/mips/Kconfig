@@ -945,7 +945,6 @@ config CPU_MIPSR2_SRS
 config CPU_HAS_SYNC
 	bool
 	depends on !CPU_R3000
-	default y
 
 #
 # Use the generic interrupt handling code in kernel/irq/:
