@@ -178,6 +178,8 @@
 9) Fix wlan client mode + VPN work correct<br>
 10) Fix apply kay at wlan page<br>
 11) Fix rcu locks speed issue<br>
+12) Some optimization<br>
+13) Fix some race condition bug<br>
 
 <br><br>
 <b>For support see:</b><br>
