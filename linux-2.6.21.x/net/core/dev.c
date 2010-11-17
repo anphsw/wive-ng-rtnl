@@ -232,12 +232,6 @@ extern void netdev_unregister_sysfs(struct net_device *);
 *******************************************************************************/
 
 /*
- *	For efficiency
- */
-
-static int netdev_nit;
-
-/*
  *	Add a protocol ID to the list. Now that the input handler is
  *	smarter we can dispense with all the messy stuff that used to be
  *	here.
@@ -271,10 +265,9 @@ void dev_add_pack(struct packet_type *pt)
 	int hash;
 
 	spin_lock_bh(&ptype_lock);
-	if (pt->type == htons(ETH_P_ALL)) {
-		netdev_nit++;
+	if (pt->type == htons(ETH_P_ALL))
 		list_add_rcu(&pt->list, &ptype_all);
-	} else {
+	else {
 		hash = ntohs(pt->type) & 15;
 		list_add_rcu(&pt->list, &ptype_base[hash]);
 	}
@@ -301,10 +294,9 @@ void __dev_remove_pack(struct packet_type *pt)
 
 	spin_lock_bh(&ptype_lock);
 
-	if (pt->type == htons(ETH_P_ALL)) {
-		netdev_nit--;
+	if (pt->type == htons(ETH_P_ALL))
 		head = &ptype_all;
-	} else
+	else
 		head = &ptype_base[ntohs(pt->type) & 15];
 
 	list_for_each_entry(pt1, head, list) {
@@ -1346,7 +1338,7 @@ static int dev_gso_segment(struct sk_buff *skb)
 int dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	if (likely(!skb->next)) {
-		if (netdev_nit
+		if (!list_empty(&ptype_all)
 #if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 		    && !(skb->imq_flags & IMQ_F_ENQUEUE)
 #endif
