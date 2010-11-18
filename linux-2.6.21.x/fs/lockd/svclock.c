@@ -363,7 +363,7 @@ again:
 	} else
 		lock = &block->b_call->a_args.lock;
 
-	error = posix_lock_file(file->f_file, &lock->fl);
+	error = posix_lock_file(file->f_file, &lock->fl, NULL);
 	lock->fl.fl_flags &= ~FL_SLEEP;
 
 	dprintk("lockd: posix_lock_file returned %d\n", error);
@@ -426,15 +426,18 @@ nlmsvc_testlock(struct nlm_file *file, struct nlm_lock *lock,
 				(long long)lock->fl.fl_start,
 				(long long)lock->fl.fl_end);
 
-	if (posix_test_lock(file->f_file, &lock->fl, &conflock->fl)) {
+	if (posix_test_lock(file->f_file, &lock->fl)) {
 		dprintk("lockd: conflicting lock(ty=%d, %Ld-%Ld)\n",
-				conflock->fl.fl_type,
-				(long long)conflock->fl.fl_start,
-				(long long)conflock->fl.fl_end);
+				lock->fl.fl_type,
+				(long long)lock->fl.fl_start,
+				(long long)lock->fl.fl_end);
 		conflock->caller = "somehost";	/* FIXME */
 		conflock->len = strlen(conflock->caller);
 		conflock->oh.len = 0;		/* don't return OH info */
-		conflock->svid = conflock->fl.fl_pid;
+		conflock->svid = lock->fl.fl_pid;
+		conflock->fl.fl_type = lock->fl.fl_type;
+		conflock->fl.fl_start = lock->fl.fl_start;
+		conflock->fl.fl_end = lock->fl.fl_end;
 		return nlm_lck_denied;
 	}
 
@@ -464,7 +467,7 @@ nlmsvc_unlock(struct nlm_file *file, struct nlm_lock *lock)
 	nlmsvc_cancel_blocked(file, lock);
 
 	lock->fl.fl_type = F_UNLCK;
-	error = posix_lock_file(file->f_file, &lock->fl);
+	error = posix_lock_file(file->f_file, &lock->fl, NULL);
 
 	return (error < 0)? nlm_lck_denied_nolocks : nlm_granted;
 }
@@ -566,7 +569,7 @@ nlmsvc_grant_blocked(struct nlm_block *block)
 
 	/* Try the lock operation again */
 	lock->fl.fl_flags |= FL_SLEEP;
-	error = posix_lock_file(file->f_file, &lock->fl);
+	error = posix_lock_file(file->f_file, &lock->fl, NULL);
 	lock->fl.fl_flags &= ~FL_SLEEP;
 
 	switch (error) {
