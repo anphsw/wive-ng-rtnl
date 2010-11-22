@@ -815,7 +815,6 @@ static int default_rebuild_header(struct sk_buff *skb)
 	return 1;
 }
 
-
 /**
  *	dev_open	- prepare an interface for use.
  *	@dev:	device to open
@@ -2122,9 +2121,9 @@ void dev_seq_stop(struct seq_file *seq, void *v)
 
 static void dev_seq_printf_stats(struct seq_file *seq, struct net_device *dev)
 {
-	if (dev->get_stats) {
-		struct net_device_stats *stats = dev->get_stats(dev);
+	struct net_device_stats *stats = dev->get_stats(dev);
 
+	if (stats) {
 		seq_printf(seq, "%6s:%8lu %7lu %4lu %4lu %4lu %5lu %10lu %9lu "
 				"%8lu %7lu %4lu %4lu %4lu %5lu %7lu %10lu\n",
 			   dev->name, stats->rx_bytes, stats->rx_packets,
@@ -3161,6 +3160,13 @@ void netdev_run_todo(void)
 	}
 }
 
+static struct net_device_stats *maybe_internal_stats(struct net_device *dev)
+{
+	if (dev->features & NETIF_F_INTERNAL_STATS)
+		return &dev->stats;
+	return NULL;
+}
+
 /**
  *	alloc_netdev - allocate network device
  *	@sizeof_priv:	size of private data to allocate space for
@@ -3196,6 +3202,7 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *name,
 	if (sizeof_priv)
 		dev->priv = netdev_priv(dev);
 
+	dev->get_stats = maybe_internal_stats;
 	setup(dev);
 	strcpy(dev->name, name);
 	return dev;
