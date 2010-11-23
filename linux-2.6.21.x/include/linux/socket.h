@@ -25,10 +25,12 @@ struct __kernel_sockaddr_storage {
 #include <linux/compiler.h>		/* __user			*/
 
 extern int sysctl_somaxconn;
-#ifdef CONFIG_PROC_FS
+#ifdef __KERNEL__
+# ifdef CONFIG_PROC_FS
 struct seq_file;
 extern void socket_seq_show(struct seq_file *seq);
-#endif
+# endif
+#endif /* __KERNEL__ */ 
 
 typedef unsigned short	sa_family_t;
 
