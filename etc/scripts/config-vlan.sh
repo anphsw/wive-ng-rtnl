@@ -4,7 +4,7 @@
 # config-vlan.sh - configure vlan switch particion helper  #
 #                                                          #
 # usage: config-vlan.sh <switch_type> <vlan_type>          #
-#   switch_type: 0=IC+, 1=vtss                             #
+#   switch_type: 0=IC+, 1=vtss, 2=esw3050x                 #
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
  
@@ -28,8 +28,8 @@ usage()
 	echo "  $0 2 FFFFF - config RT3052 Full reinit switch"
 	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
-        echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and VLAN 1~4 at port 1~4"
-        echo "  $0 2 12345 - config RT3052 with VLAN 1~5 at port 0~4"
+        echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and individual VLAN 1~4 at port 1~4"
+        echo "  $0 2 12345 - config RT3052 with individual VLAN 1~5 at port 0~4"
 	echo "  $0 2 GW - config RT3052 with WAN at Giga port"
 	echo "  $0 2 GS - config RT3052 with Giga port connecting to an external switch"
 	exit 0
