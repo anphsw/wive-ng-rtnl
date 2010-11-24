@@ -212,3 +212,5 @@ fi
 
 #restart vpn helper
 service vpnhelper restart &
+
+exit 0
