@@ -186,6 +186,9 @@ fi
 	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
 	    $LOG "Renew DNS from dhcp"
 	    rm -f $RESOLV_CONF
+            #get domain name
+    	    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+	    #parce dnsservers
 	    for i in $dns ; do
 	        $LOG "DNS= $i"
 	        echo nameserver $i >> $RESOLV_CONF
