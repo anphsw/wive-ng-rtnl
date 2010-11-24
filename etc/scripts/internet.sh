@@ -27,47 +27,41 @@ ifRaxWdsxDown()
 addBr0()
 {
     #if kernel build without bridge support - exit
-    if [ "$CONFIG_BRIDGE" = "" ]; then
-	exit 0
+    if [ "$CONFIG_BRIDGE" != "" ]; then
+	brset=`brctl show  | grep br0 -c`
+	if [ "$brset" = "0" ]; then
+    	    echo "Add bridge in the system for ra0"
+    	    brctl addbr br0
+	fi
+	brctl addif br0 ra0
     fi
-
-    brset=`brctl show  | grep br0 -c`
-    if [ "$brset" = "0" ]; then
-        echo "Add bridge in the system for ra0"
-        brctl addbr br0
-    fi
-    brctl addif br0 ra0
 }
 
 addMesh2Br0()
 {
     #if kernel build without MESH support - exit
-    if [ "$CONFIG_RT2860V2_STA_MESH" = "" ] && [ "$CONFIG_RT2860V2_STA_MESH" = "" ]; then
-	exit 0
-    fi
-
-    meshenabled=`nvram_get 2860 MeshEnabled`
-    if [ "$meshenabled" = "1" ]; then
-	ifconfig mesh0 hw ether $WMAC
-        ip link set mesh0 up
-        brctl addif br0 mesh0
+    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_STA_MESH" != "" ]; then
+        meshenabled=`nvram_get 2860 MeshEnabled`
+	if [ "$meshenabled" = "1" ]; then
+	    ifconfig mesh0 hw ether $WMAC
+    	    ip link set mesh0 up
+    	    brctl addif br0 mesh0
+	fi
     fi
 }
 
 addWds2Br0()
 {
     #if kernel build without WDS support - exit
-    if [ "$CONFIG_RT2860V2_AP_WDS" = "" ]; then
-	exit 0
-    fi
-
-    wds_en=`nvram_get 2860 WdsEnable`
-    if [ "$wds_en" != "0" ]; then
-        for i in `seq 0 3`; do
-	    ifconfig wds$i hw ether $WMAC
-    	    ip link set wds$i up
-	    brctl addif br0 wds$i
-        done
+    if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
+	wds_en=`nvram_get 2860 WdsEnable`
+	if [ "$wds_en" != "0" ]; then
+    	    for i in `seq 0 3`; do
+		ifconfig wds$i hw ether $WMAC
+    		ip link set wds$i up
+		brctl addif br0 wds$i
+    	    done
+	fi
     fi
 }
 
@@ -91,20 +85,18 @@ resetLanWan()
 addMBSSID()
 {
     #if kernel build without Multiple SSID support - exit
-    if [ "$CONFIG_RT2860V2_AP_MBSS" = "" ]; then
-	exit 0
-    fi
-
-    bssidnum=`nvram_get 2860 BssidNum`
-    if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	for i in `seq 1 $bssidnum`; do
-    	    ip addr flush dev ra$i
-	    if [ "$CONFIG_IPV6" != "" ] ; then
-    		ip -6 addr flush dev ra$i
-	    fi
-	    ifconfig ra$i hw ether $WMAC
-    	    ip link set ra$i up
-	done
+    if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
+	bssidnum=`nvram_get 2860 BssidNum`
+	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	    for i in `seq 1 $bssidnum`; do
+    		ip addr flush dev ra$i
+		if [ "$CONFIG_IPV6" != "" ] ; then
+    		    ip -6 addr flush dev ra$i
+		fi
+		ifconfig ra$i hw ether $WMAC
+    		ip link set ra$i up
+	    done
+	fi
     fi
 }
 
