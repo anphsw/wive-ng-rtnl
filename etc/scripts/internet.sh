@@ -150,11 +150,13 @@ apcli_config() {
 if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
     echo 0 > /proc/cleannat
 fi
+
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "lanonly" ] && [ "$MODE" != "connect_sta" ]; then
     ifRaxWdsxDown
     service modules restart
 fi
+
 #restart lan interfaces
 if [ "$MODE" != "connect_sta" ]; then
     service lan restart
@@ -195,6 +197,7 @@ fi
 
 #reconfigure wan and services restart
 service wan restart
+
 if [ "$MODE" != "lanonly" ]; then
     retune_wifi
 fi
