@@ -88,7 +88,6 @@ get_param() {
  lan2enabled=`nvram_get 2860 Lan2Enabled`
  CHECKMAC=`nvram_get 2860 CHECKMAC`
  MAC=`nvram_get 2860 WAN_MAC_ADDR`
- WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
  LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
  brset=`brctl show  | grep br0 -c`
  vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1

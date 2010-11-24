@@ -8,9 +8,6 @@
 . /etc/scripts/config.sh
 . /etc/scripts/global.sh
 
-#get current config wan port
-WAN_PORT=`nvram_get 2860 wan_port`
-
 #restart mode
 MODE=$1
 
@@ -40,7 +37,6 @@ addBr0()
 addMesh2Br0()
 {
     meshenabled=`nvram_get 2860 MeshEnabled`
-    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
     if [ "$meshenabled" = "1" ]; then
 	ifconfig mesh0 hw ether $WMAC
         ip link set mesh0 up
@@ -51,7 +47,6 @@ addMesh2Br0()
 addWds2Br0()
 {
     wds_en=`nvram_get 2860 WdsEnable`
-    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
     if [ "$wds_en" != "0" ]; then
         for i in `seq 0 3`; do
 	    ifconfig wds$i hw ether $WMAC
@@ -63,7 +58,7 @@ addWds2Br0()
 
 setLanWan()
 {
-    if [ "$WAN_PORT" = "0" ]; then
+    if [ "$wan_port" = "0" ]; then
 	    echo '##### config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL
     else
@@ -80,7 +75,6 @@ resetLanWan()
 
 addMBSSID()
 {
-    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
     bssidnum=`nvram_get 2860 BssidNum`
     if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	for i in `seq 1 $bssidnum`; do

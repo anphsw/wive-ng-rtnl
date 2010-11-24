@@ -9,7 +9,15 @@
 
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
+
+#get vpn mode
 vpnEnabled=`nvram_get 2860 vpnEnabled`
+
+#get current config wan port
+wan_port=`nvram_get 2860 wan_port`
+
+#get wireless mac adress
+WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
 
 web_wait()
 {

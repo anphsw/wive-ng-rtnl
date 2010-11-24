@@ -10,9 +10,7 @@
  
 #include kernel config
 . /etc/scripts/config.sh
-
-#get current config wan port
-WAN_PORT=`nvram_get 2860 wan_port`
+. /etc/scripts/global.sh
 
 usage()
 {
@@ -172,11 +170,9 @@ reset_all_phys()
 	fi
 
 	echo "Reset all phy port"
-	opmode=`nvram_get 2860 OperationMode`
-
 	if [ "$opmode" = "1" ]; then
 	    #Ports down skip WAN port
-	    if [ "$WAN_PORT" = "0" ]; then
+	    if [ "$wan_port" = "0" ]; then
 		start=0
 		end=3
 	    else
