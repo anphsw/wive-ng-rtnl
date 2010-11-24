@@ -9,9 +9,16 @@ start() {
     get_param
     #if goahead not started
     if [ ! -f /var/run/goahead.pid ]; then
+	#generate modules dep
 	if [ ! -f /etc/modules.dep ]; then
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n >  /etc/modules.dep
+	fi
+	#configure switch
+	resetLanWan
+	if [ "$opmode" = "1" ]; then
+	    #in gate mode configure vlans
+	    setLanWan
 	fi
     else
 	$LOG "Prepare wifi config..."
@@ -75,7 +82,38 @@ gen_wifi_config()
 	ralink_init make_wireless_config rt2860
 }
 
+setLanWan()
+{
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    if [ "$wan_port" = "0" ]; then
+	    echo '##### config vlan partition (WLLLL) #####'
+	    config-vlan.sh $SWITCH_MODE WLLLL
+    else
+	    echo '##### config vlan partition (LLLLW) #####'
+	    config-vlan.sh $SWITCH_MODE LLLLW
+    fi
+fi
+}
+
+resetLanWan()
+{
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    $LOG "Reinit power mode for all switch ports" #workaroud for dir-300NRU
+    config-vlan.sh 2 FFFFF
+    echo "##### restore to dump switch #####"
+    config-vlan.sh $SWITCH_MODE 0
+fi
+}
+
 case "$1" in
+	setLanWan)
+	    setLanWan
+	    ;;
+
+	resetLanWan)
+	    resetLanWan
+	    ;;
+
 	ra0flushadress)
 	    ra0flushadress
 	    ;;

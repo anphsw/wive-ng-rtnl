@@ -65,23 +65,6 @@ addWds2Br0()
     fi
 }
 
-setLanWan()
-{
-    if [ "$wan_port" = "0" ]; then
-	    echo '##### config vlan partition (WLLLL) #####'
-	    config-vlan.sh $SWITCH_MODE WLLLL
-    else
-	    echo '##### config vlan partition (LLLLW) #####'
-	    config-vlan.sh $SWITCH_MODE LLLLW
-    fi
-}
-
-resetLanWan()
-{
-    echo "##### restore to dump switch #####"
-    config-vlan.sh $SWITCH_MODE 0
-}
-
 addMBSSID()
 {
     #if kernel build without Multiple SSID support - exit
@@ -106,11 +89,9 @@ retune_wifi() {
 }
 
 bridge_config() {
+	echo "Bridge OperationMode: $opmode"
 	addMBSSID
 	addBr0
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-    fi
 	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
         ip addr flush dev eth2
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
@@ -120,11 +101,8 @@ bridge_config() {
 }
 
 gate_config() {
+	echo "Gateway OperationMode: $opmode"
 	addMBSSID
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-	setLanWan
-    fi
 	addBr0
 	brctl addif br0 eth2.1
 	addWds2Br0
@@ -132,16 +110,12 @@ gate_config() {
 }
 
 ethcv_config() {
-    if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
-	resetLanWan
-    fi
+	echo "Ethernet Converter OperationMode: $opmode"
 }
 
 apcli_config() {
+	echo "ApClient OperationMode: $opmode"
 	addMBSSID
-    if [ "$MODE" != "wifionly" ]; then
-	resetLanWan
-    fi
 	addBr0
 	brctl addif br0 eth2
 }
@@ -170,19 +144,15 @@ fi
 #   3 = AP Client
 #
 if [ "$opmode" = "0" ]; then
-    echo "Bridge OperationMode: $opmode"
     bridge_config
 
 elif [ "$opmode" = "1" ]; then
-    echo "Gateway OperationMode: $opmode"
     gate_config
 
 elif [ "$opmode" = "2" ]; then
-    echo "Ethernet Converter OperationMode: $opmode"
     ethcv_config
 
 elif [ "$opmode" = "3" ]; then
-    echo "ApClient OperationMode: $opmode"
     apcli_config
 else
     echo "unknown OperationMode use gate_config: $opmode"

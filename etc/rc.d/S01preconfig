@@ -71,11 +71,6 @@ if [ -f /etc/compile-date ]; then
     fi
 fi
 
-if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-    $LOG "Reinit power mode for all switch ports" #workaroud for dir
-    config-vlan.sh 2 FFFFF
-fi
-
 $LOG "Copy web pages to tmpfs"
     mkdir -p /tmp/web
     cp -rpf /web/* /tmp/web
