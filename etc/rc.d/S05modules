@@ -3,6 +3,9 @@
 #get params                                                                                                                                 
 . /etc/scripts/global.sh
 
+#include kernel config
+. /etc/scripts/config.sh
+
 LOG="echo MODULES: "
 
 start() {
@@ -78,8 +81,8 @@ get_param() {
 
 gen_wifi_config()
 {
-	rm -f /etc/Wireless/RT2860/RT2860.dat
-	ralink_init make_wireless_config rt2860
+    rm -f /etc/Wireless/RT2860/RT2860.dat
+    ralink_init make_wireless_config rt2860
 }
 
 setLanWan()
