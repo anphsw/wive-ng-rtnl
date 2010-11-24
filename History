@@ -180,7 +180,8 @@
 11) Fix rcu locks speed issue<br>
 12) Some optimization<br>
 13) Fix some race condition bug<br>
-
+14) Fix init phy on buggy devices as D-link DIR-300NRU<br>
+15) More speed init.d<br>
 
 <br><br>
 <b>For support see:</b><br>
