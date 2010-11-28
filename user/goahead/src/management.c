@@ -60,6 +60,8 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
 	doSystem("service pass start &");
+	doSystem("service inetd restart &");
+	doSystem("service samba restart &");
 
 #ifdef USER_MANAGEMENT_SUPPORT
 	if (umGroupExists(T("adm")) == FALSE)
