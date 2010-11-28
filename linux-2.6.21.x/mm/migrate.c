@@ -851,9 +851,8 @@ static int do_pages_stat(struct mm_struct *mm, struct page_to_node *pm)
 	for ( ; pm->node != MAX_NUMNODES; pm++) {
 		struct vm_area_struct *vma;
 		struct page *page;
-		int err;
+		int err = -EFAULT;
 
-		err = -EFAULT;
 		vma = find_vma(mm, pm->addr);
 		if (!vma)
 			goto set_status;
