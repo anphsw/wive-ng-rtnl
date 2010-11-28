@@ -68,61 +68,8 @@ module_param(ranfc_verify, int, 0644);
 #define CLEAR_INT_STATUS() 	ra_outl(NFC_INT_ST, ra_inl(NFC_INT_ST))
 #define NFC_TRANS_DONE() 	(ra_inl(NFC_INT_ST) & INT_ST_ND_DONE)
 
-
-static struct mtd_partition rt2880_partitions[] = {
-	/* Put your own partition definitions here */
-        {
-                name:           "Bootloader",
-                size:           MTD_BOOT_PART_SIZE,
-                offset:         0,
-        }, {
-                name:           "Config",
-                size:           MTD_CONFIG_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND
-        }, {
-                name:           "Factory",
-                size:           MTD_FACTORY_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
-        }, {
-                name:           "Kernel",
-                size:           MTD_KERN_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND,
-        }, {
-                name:           "RootFS",
-                size:           MTD_ROOTFS_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND,
-#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
-        }, {
-                name:           "Kernel_RootFS",
-                size:           MTD_KERN_PART_SIZE + MTD_ROOTFS_PART_SIZE,
-                offset:         MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE,
-#endif
-#else //CONFIG_RT2880_ROOTFS_IN_RAM
-        }, {
-                name:           "Kernel",
-                size:           MTD_KERN_PART_SIZE,
-                offset:         MTDPART_OFS_APPEND,
-#endif
-        }, {
-                name:           "RW-FS",        /* mtdblock4/5 */
-                size:           MTD_RWFS_PART_SIZE,     /* 128K */
-                offset:         MTDPART_OFS_APPEND,
-#ifdef CONFIG_DUAL_IMAGE
-        }, {
-                name:           "Kernel2",
-                size:           MTD_KERN2_PART_SIZE,
-                offset:         MTD_KERN2_PART_OFFSET,
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
-        }, {
-                name:           "RootFS2",
-                size:           MTD_ROOTFS2_PART_SIZE,
-                offset:         MTD_ROOTFS2_PART_OFFSET,
-#endif
-#endif
-        }
-};
-
+//include map flash
+#include "../maps/ralink-flash-map.h"
 
 /*************************************************************
  * nfc functions 
