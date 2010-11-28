@@ -9,7 +9,8 @@ start() {
     get_param
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsp" = "1" ]; then
         $LOG "Starting DNSMASQ: "
-    	/bin/dnsmasq  -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if
+    	/bin/dnsmasq -c 100 -N --dns-forward-max=100 --clear-on-reload --leasefile-ro dhcp-script=/bin/echo \
+	    -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if
     fi
 }
 
