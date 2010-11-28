@@ -182,6 +182,12 @@
 13) Fix some race condition bug<br>
 14) Fix init phy on buggy devices as D-link DIR-300NRU<br>
 15) More speed init.d<br>
+16) Use 4.3.5 gcc for kernel build<br>
+17) Always use long preamble for CCK. This need to correct work mixed mode<br>
+18) Fix ssh and samba work after login name change<br>
+19) Uclibc fix wchar issue<br>
+20) More correct mount tmpfs and decrase mem usadge<br>
+21) Fix some compile warnings<br>
 
 <br><br>
 <b>For support see:</b><br>
