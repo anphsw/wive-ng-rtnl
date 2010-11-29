@@ -374,7 +374,6 @@ int activateRoute(uint32_t group, uint32_t originAddr) {
             }
             croute->originAddr = originAddr;
         }
-
         // Only update kernel table if there are listeners !
         if(croute->vifBits > 0) {
             result = internUpdateKernelRoute(croute, 1);
@@ -627,6 +626,7 @@ int internUpdateKernelRoute(struct RouteTable *route, int activate) {
             addMRoute( &mrDesc );
     
         } else {
+        
             // Delete the route from Kernel...
             delMRoute( &mrDesc );
         }
