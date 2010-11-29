@@ -49,4 +49,3 @@ service ripd restart
 service ddns restart
 
 $LOG "All OK!. Mode $MODE"
-

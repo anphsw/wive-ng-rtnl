@@ -165,12 +165,15 @@ if [ "$stamode" = "y" ] && [ "$MODE" = "connect_sta" ]; then
     touch /tmp/sta_connected
 fi
 
+if [ "$MODE" != "lanonly" ]; then
+    #usermode script for wor around and more tune
+    retune_wifi
+    #wait connect if needed
+    sleep 2
+fi
+
 #reconfigure wan and services restart
 service wan restart
-
-if [ "$MODE" != "lanonly" ]; then
-    retune_wifi
-fi
 
 #some daemons need restart
 services_restart.sh all

@@ -22,13 +22,16 @@ STATICDNS=`nvram_get 2860 wan_static_dns`
 
 case "$1" in
     deconfig)
+    #on STA mode not need deconfig. After reconnect adress replace automatically.
+    if [ "$stamode" != "y" ]; then
         ip addr flush dev $interface
-if [ "$CONFIG_IPV6" != "" ] ; then
-        ip -6 addr flush dev $interface
-fi
-	touch "$FORCRENEW"
-	ip link set $interface up
-        ;;
+	if [ "$CONFIG_IPV6" != "" ] ; then
+    	    ip -6 addr flush dev $interface
+	fi
+    fi
+    touch "$FORCRENEW"
+    ip link set $interface up
+    ;;
 
     renew|bound)
     #force renew if needed or if radioclient on
@@ -204,15 +207,14 @@ fi
 	    done
 	fi
 
-	#remove force renew flag
-	rm -f $FORCRENEW
-
     	$LOG "Restart needed services"
 	services_restart.sh dhcp
 
     fi
-	$LOG "Renew OK.."
-        ;;
+    #remove force flag
+    rm -f $FORCRENEW
+    $LOG "Renew OK.."
+    ;;
 esac
 
 exit 0
