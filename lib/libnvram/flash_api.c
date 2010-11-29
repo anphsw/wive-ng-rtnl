@@ -142,7 +142,7 @@ int flash_write(char *buf, off_t to, size_t len)
 		return -1;
 	}
 
-	fd = mtd_open("Config", O_RDWR | O_SYNC | O_NONBLOCK);
+	fd = mtd_open("Config", O_RDWR | O_SYNC );
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;

@@ -29,7 +29,7 @@ typedef struct cache_environment_s {
 	char *value;
 } cache_t;
 
-#define MAX_CACHE_ENTRY 500
+#define MAX_CACHE_ENTRY 400
 typedef struct block_s {
 	char *name;
 	env_t env;			//env block
