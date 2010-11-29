@@ -27,8 +27,9 @@ char usage[] = 	"spicmd read/write eeprom_address data(if write)\n"\
 	"  spicmd read [address in hex]\n"\
 	"  spicmd write [size] [address] [value]\n"\
 	"  spicmd vtss read [block] [sub-block] [register]\n"\
-	"  spicmd vtss write [block] [sub-block] [register]\n"\
-	"  spicmd vtss vlan\n"\
+	"  spicmd vtss write [block] [sub-block] [register] [value]\n"\
+	"  spicmd vtss p0\n"\
+	"  spicmd vtss p4\n"\
 	"  spicmd vtss novlan\n"\
 	"NOTE -- size is 1, 2, 4 bytes only, address and value are in hex\n";
 
@@ -53,8 +54,13 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
-		if (!strncmp(argv[2], "vlan", 5)) {
-			ioctl(fd, RT2880_SPI_INIT_VTSS_VLAN);
+		if (!strncmp(argv[2], "p0", 3)) {
+			ioctl(fd, RT2880_SPI_INIT_VTSS_WANATP0);
+			close(fd);
+			return 0;
+		}
+		else if (!strncmp(argv[2], "p4", 3)) {
+			ioctl(fd, RT2880_SPI_INIT_VTSS_WANATP4);
 			close(fd);
 			return 0;
 		}
