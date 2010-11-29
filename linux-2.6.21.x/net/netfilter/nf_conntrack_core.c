@@ -895,9 +895,6 @@ struct nf_conn *nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 {
 	struct nf_conntrack_l3proto *l3proto;
 	struct nf_conn *ct;
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
-	struct iphdr *iph=(struct iphdr *)skb->nh.raw;
-#endif
 
 	rcu_read_lock();
 	l3proto = __nf_ct_l3proto_find(orig->src.l3num);
