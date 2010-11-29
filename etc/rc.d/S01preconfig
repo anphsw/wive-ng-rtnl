@@ -71,10 +71,6 @@ if [ -f /etc/compile-date ]; then
     fi
 fi
 
-$LOG "Copy web pages to tmpfs"
-    mkdir -p /tmp/web
-    cp -rpf /web/* /tmp/web
-
 }
 
 stop() {
