@@ -15,6 +15,7 @@
  * MA 02111-1307 USA
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -53,16 +54,27 @@ void usage(char *cmd)
 {
 #if RT_SWITCH_HELP
 	printf("Usage:\n");
-	printf(" %s dump                                - dump switch table\n", cmd);
-	printf(" %s add [mac] [portmap]                 - add an entry to switch table\n", cmd);
-	printf(" %s add [mac] [portmap] [vlan idx]      - add an entry to switch table\n", cmd);
-	printf(" %s add [mac] [portmap] [vlan idx] [age]- add an entry to switch table\n", cmd);
-	printf(" %s del [mac]                           - delete an entry from switch table\n", cmd);
-	printf(" %s del [mac] [vlan idx]                - delete an entry from switch table\n", cmd);
-	printf(" %s vlan dump                           - dump switch table\n", cmd);
-	printf(" %s vlan set [vlan idx] [vid] [portmap] - set vlan id and associated member\n", cmd);
-	printf(" %s reg r [offset]                      - register read from offset\n", cmd);
-	printf(" %s reg w [offset] [value]              - register write value to offset\n", cmd);
+	printf(" %s dump                                 - dump switch table\n", cmd);
+	printf(" %s clear                                - clear switch table\n", cmd);
+	printf(" %s add [mac] [portmap]                  - add an entry to switch table\n", cmd);
+	printf(" %s add [mac] [portmap] [vlan idx]       - add an entry to switch table\n", cmd);
+	printf(" %s add [mac] [portmap] [vlan idx] [age] - add an entry to switch table\n", cmd);
+#ifdef CONFIG_RALINK_RT3352
+	printf(" %s ingress-rate on [port] [Mbps]        - set ingress rate limit on port 0~5 \n", cmd);
+	printf(" %s egress-rate on [port] [Mbps]         - set egress rate limit on port 0~5 \n", cmd);
+	printf(" %s ingress-rate off [port]              - del ingress rate limit on port 0~5 \n", cmd);
+	printf(" %s egress-rate off [port]               - del egress rate limit on port 0~5 \n", cmd);
+	printf(" %s filt [mac]                           - add an SA filtering entry (with portmap 1111111) to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap]                 - add an SA filtering entry to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap] [vlan idx]      - add an SA filtering entry to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap] [vlan idx] [age]- add an SA filtering entry to switch table\n", cmd);
+#endif
+	printf(" %s del [mac]                            - delete an entry from switch table\n", cmd);
+	printf(" %s del [mac] [vlan idx]                 - delete an entry from switch table\n", cmd);
+	printf(" %s vlan dump                            - dump switch table\n", cmd);
+	printf(" %s vlan set [vlan idx] [vid] [portmap]  - set vlan id and associated member\n", cmd);
+	printf(" %s reg r [offset]                       - register read from offset\n", cmd);
+	printf(" %s reg w [offset] [value]               - register write value to offset\n", cmd);
 #endif
 	switch_fini();
 	exit(0);
@@ -104,13 +116,59 @@ int reg_write(int offset, int value)
 	return 0;
 }
 
+
+#ifdef CONFIG_RALINK_RT3352
+
+int ingress_rate_set(int on_off, int port, int bw)
+{
+	struct ifreq ifr;
+	esw_rate reg;
+
+	reg.on_off = on_off;
+	reg.port = port;
+	reg.bw = bw;
+	strncpy(ifr.ifr_name, "eth2", 5);
+	ifr.ifr_data = &reg;
+	if (-1 == ioctl(esw_fd, RAETH_ESW_INGRESS_RATE, &ifr)) {
+		perror("ioctl");
+		close(esw_fd);
+		exit(0);
+	}
+	return 0;
+}
+
+int egress_rate_set(int on_off, int port, int bw)
+{
+	struct ifreq ifr;
+	esw_rate reg;
+
+	reg.on_off = on_off;
+	reg.port = port;
+	reg.bw = bw;
+	strncpy(ifr.ifr_name, "eth2", 5);
+	ifr.ifr_data = &reg;
+	if (-1 == ioctl(esw_fd, RAETH_ESW_EGRESS_RATE, &ifr)) {
+		perror("ioctl");
+		close(esw_fd);
+		exit(0);
+	}
+	return 0;
+}
+#endif
 #if RT_TABLE_MANIPULATE
 void table_dump(void)
 {
 	int i, j, value, mac;
+	int vid[16];
+
+	for (i = 0; i < 8; i++) {
+		reg_read(REG_ESW_VLAN_ID_BASE + 4*i, &value);
+		vid[2 * i] = value & 0xfff;
+		vid[2 * i + 1] = (value & 0xfff000) >> 12;
+	}
 
 	reg_write(REG_ESW_TABLE_SEARCH, 0x1);
-	printf("hash  port(0:6)  vid  age  pxy  in   mac-address\n");
+	printf("hash  port(0:6)  vidx   vid  age   mac-address\n");
 	for (i = 0; i < 0x400; i++) {
 		while(1) {
 			reg_read(REG_ESW_TABLE_STATUS0, &value);
@@ -119,7 +177,7 @@ void table_dump(void)
 					printf("found an unused entry (age = 3'b000), please check!\n");
 					return;
 				}
-				printf("%03x:  ", (value >> 22) & 0x3ff); //hash_addr_lu
+				printf("%03x:   ", (value >> 22) & 0x3ff); //hash_addr_lu
 				j = (value >> 12) & 0x7f; //r_port_map
 				printf("%c", (j & 0x01)? '1':'-');
 				printf("%c", (j & 0x02)? '1':'-');
@@ -128,15 +186,14 @@ void table_dump(void)
 				printf("%c ", (j & 0x10)? '1':'-');
 				printf("%c", (j & 0x20)? '1':'-');
 				printf("%c", (j & 0x40)? '1':'-');
-				printf("    %2d", (value >> 7) & 0xf); //r_vid
+				printf("   %2d", (value >> 7) & 0xf); //r_vid
+				printf("  %4d", vid[(value >> 7) & 0xf]);
 				printf("    %1d", (value >> 4) & 0x7); //r_age_field
-				printf("    %c", (value & 0x8)? 'y':'n'); //r_proxy
-				printf("   %c", (value & 0x4)? 'y':'n'); //r_mc_ingress
-
 				reg_read(REG_ESW_TABLE_STATUS2, &mac);
 				printf("  %08x", mac);
 				reg_read(REG_ESW_TABLE_STATUS1, &mac);
-				printf("%04x\n", (mac & 0xffff));
+				printf("%04x", (mac & 0xffff));
+				printf("     %c\n", (value & 0x8)? 'y':'-');
 				if (value & 0x2) {
 					printf("end of table %d\n", i);
 					return;
@@ -155,9 +212,10 @@ void table_dump(void)
 
 void table_add(int argc, char *argv[])
 {
-	int i, j, value;
+	int i, j, value, is_filter;
 	char tmpstr[9];
 
+	is_filter = (argv[1][0] == 'f')? 1 : 0;
 	if (!argv[2] || strlen(argv[2]) != 12) {
 		printf("MAC address format error, should be of length 12\n");
 		return;
@@ -173,8 +231,12 @@ void table_add(int argc, char *argv[])
 	reg_write(REG_ESW_WT_MAC_AD1, value);
 
 	if (!argv[3] || strlen(argv[3]) != 7) {
-		printf("portmap format error, should be of length 7\n");
-		return;
+		if (is_filter)
+			argv[3] = "1111111";
+		else {
+			printf("portmap format error, should be of length 7\n");
+			return;
+		}
 	}
 	j = 0;
 	for (i = 0; i < 7; i++) {
@@ -205,6 +267,9 @@ void table_add(int argc, char *argv[])
 	}
 	else
 		value += (7 << 4); //w_age_field
+
+	if (is_filter)
+		value |= (1 << 3); //sa_filter
 
 	value += 1; //w_mac_cmd
 	reg_write(REG_ESW_WT_MAC_AD0, value);
@@ -256,13 +321,53 @@ void table_del(int argc, char *argv[])
 	for (i = 0; i < 20; i++) {
 		reg_read(REG_ESW_WT_MAC_AD0, &value);
 		if (value & 0x2) { //w_mac_done
-			printf("done.\n");
+			if (argv[1] != NULL)
+				printf("done.\n");
 			return;
 		}
 		usleep(1000);
 	}
 	if (i == 20)
 		printf("timeout.\n");
+}
+
+void table_clear(void)
+{
+	int i, value, mac;
+	char v[2][13];
+	char *argv[4];
+
+	memset(argv, 0, sizeof(v));
+	memset(argv, 0, sizeof(argv));
+
+	reg_write(REG_ESW_TABLE_SEARCH, 0x1);
+	for (i = 0; i < 0x400; i++) {
+		while(1) {
+			reg_read(REG_ESW_TABLE_STATUS0, &value);
+			if (value & 0x1) { //search_rdy
+				if ((value & 0x70) == 0) {
+					return;
+				}
+				sprintf(v[1], "%d", (value >> 7) & 0xf);
+				reg_read(REG_ESW_TABLE_STATUS2, &mac);
+				sprintf(v[0], "%08x", mac);
+				reg_read(REG_ESW_TABLE_STATUS1, &mac);
+				sprintf(v[0]+8, "%04x", (mac & 0xffff));
+				argv[2] = v[0];
+				argv[3] = v[1];
+				table_del(4, argv);
+				if (value & 0x2) {
+					return;
+				}
+				break;
+			}
+			else if (value & 0x2) { //at_table_end
+				return;
+			}
+			usleep(5000);
+		}
+		reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
+	}
 }
 
 void vlan_dump(void)
@@ -317,7 +422,7 @@ void vlan_dump(void)
 void vlan_set(int argc, char *argv[])
 {
 	int i, j, value;
-	int idx, vid, pmap;
+	int idx, vid;
 
 	if (argc != 6) {
 		printf("insufficient arguments!\n");
@@ -390,10 +495,16 @@ int main(int argc, char *argv[])
 	if (argc == 2) {
 		if (!strncmp(argv[1], "dump", 5))
 			table_dump();
+		else if (!strncmp(argv[1], "clear", 6)) {
+			table_clear();
+			printf("done.\n");
+		}
 		else
 			usage(argv[0]);
 	}
 	else if (!strncmp(argv[1], "add", 4))
+		table_add(argc, argv);
+	else if (!strncmp(argv[1], "filt", 5))
 		table_add(argc, argv);
 	else if (!strncmp(argv[1], "del", 4))
 		table_del(argc, argv);
@@ -428,6 +539,46 @@ int main(int argc, char *argv[])
 		else
 			usage(argv[0]);
 	}
+#ifdef CONFIG_RALINK_RT3352
+	else if (!strncmp(argv[1], "ingress-rate", 6)) {
+		int port=0, bw=0;
+
+		if (argv[2][1] == 'n') {
+			port = strtoul(argv[3], NULL, 16);
+			bw = strtoul(argv[4], NULL, 16);
+			ingress_rate_set(1, port, bw);
+			printf("switch port=%d, bw=%d\n", port, bw);
+		}
+		else if (argv[2][1] == 'f') {
+			if (argc != 4)
+				usage(argv[0]);
+			port = strtoul(argv[3], NULL, 16);
+			ingress_rate_set(0, port, bw);
+			printf("switch port=%d ingress rate limit off\n", port);
+		}
+		else
+			usage(argv[0]);
+	}
+	else if (!strncmp(argv[1], "egress-rate", 6)) {
+		int port=0, bw=0;
+		
+		if (argv[2][1] == 'n') {
+			port = strtoul(argv[3], NULL, 16);
+			bw = strtoul(argv[4], NULL, 16);
+			egress_rate_set(1, port, bw);
+			printf("switch port=%d, bw=%d\n", port, bw);
+		}
+		else if (argv[2][1] == 'f') {
+			if (argc != 4)
+				usage(argv[0]);
+			port = strtoul(argv[3], NULL, 16);
+			egress_rate_set(0, port, bw);
+			printf("switch port=%d egress rate limit off\n", port);
+		}
+		else
+			usage(argv[0]);
+	}
+#endif
 	else
 		usage(argv[0]);
 
