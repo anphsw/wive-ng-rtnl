@@ -29,7 +29,7 @@ typedef struct cache_environment_s {
 	char *value;
 } cache_t;
 
-#define MAX_CACHE_ENTRY 400
+#define MAX_CACHE_ENTRY 500
 typedef struct block_s {
 	char *name;
 	env_t env;			//env block
@@ -602,9 +602,13 @@ int gen_wifi_config(int mode)
 	flash_read_NicConf(buf);
 	sprintf(temp, "%x", buf[1]);
 	nvram_bufset(mode, "RFICType", temp);
-	sprintf(temp, "%x", buf[1]&0xf0>>4);
+	sprintf(temp, "%x", buf[0]&0xf0>>4);
+	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))
+		nvram_bufset(mode, "HT_TxStream", temp);
 	nvram_bufset(mode, "TXPath", temp);
 	sprintf(temp, "%x", buf[0]&0x0f);
+	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_RxStream")))
+		nvram_bufset(mode, "HT_RxStream", temp);
 	nvram_bufset(mode, "RXPath", temp);
 	nvram_commit(mode);
 
@@ -643,6 +647,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(SSID6);
 		FPRINT_STR(SSID7);
 		FPRINT_STR(SSID8);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(SSID9);
+		FPRINT_STR(SSID10);
+		FPRINT_STR(SSID11);
+		FPRINT_STR(SSID12);
+		FPRINT_STR(SSID13);
+		FPRINT_STR(SSID14);
+		FPRINT_STR(SSID15);
+		FPRINT_STR(SSID16);
+#endif
 
 		FPRINT_NUM(WirelessMode);
 		FPRINT_NUM(staWirelessMode);
@@ -672,7 +686,13 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(FragThreshold);
 		FPRINT_NUM(TxBurst);
 		FPRINT_NUM(PktAggregate);
+		FPRINT_NUM(AutoProvisionEn);
+		FPRINT_NUM(FreqDelta);
 		fprintf(fp, "TurboRate=0\n");
+
+#if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
+			FPRINT_NUM(VideoTurbine);
+#endif
 
 		//WmmCapable
 		bzero(wmm_enable, sizeof(char)*16);
@@ -710,11 +730,44 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(IEEE80211H);
 		FPRINT_NUM(CarrierDetect);
 
+		FPRINT_NUM(ITxBfEn);
+		FPRINT_STR(PreAntSwitch);
+		FPRINT_NUM(PhyRateLimit);
+		FPRINT_NUM(DebugFlags);
+		FPRINT_NUM(ETxBfEnCond);
+		FPRINT_NUM(ITxBfTimeout);
+		FPRINT_NUM(ETxBfTimeout);
+		FPRINT_NUM(FineAGC);
+		FPRINT_NUM(StreamMode);
+		FPRINT_STR(StreamModeMac0);
+		FPRINT_STR(StreamModeMac1);
+		FPRINT_STR(StreamModeMac2);
+		FPRINT_STR(StreamModeMac3);
+
+
 		FPRINT_NUM(CSPeriod);
 		FPRINT_STR(RDRegion);
 		FPRINT_NUM(StationKeepAlive);
 		FPRINT_NUM(DfsLowerLimit);
 		FPRINT_NUM(DfsUpperLimit);
+		FPRINT_NUM(DfsIndoor);
+		FPRINT_NUM(DFSParamFromConfig);
+		FPRINT_STR(FCCParamCh0);
+		FPRINT_STR(FCCParamCh1);
+		FPRINT_STR(FCCParamCh2);
+		FPRINT_STR(FCCParamCh3);
+		FPRINT_STR(CEParamCh0);
+		FPRINT_STR(CEParamCh1);
+		FPRINT_STR(CEParamCh2);
+		FPRINT_STR(CEParamCh3);
+		FPRINT_STR(JAPParamCh0);
+		FPRINT_STR(JAPParamCh1);
+		FPRINT_STR(JAPParamCh2);
+		FPRINT_STR(JAPParamCh3);
+		FPRINT_STR(JAPW53ParamCh0);
+		FPRINT_STR(JAPW53ParamCh1);
+		FPRINT_STR(JAPW53ParamCh2);
+		FPRINT_STR(JAPW53ParamCh3);
 		FPRINT_NUM(FixDfsLimit);
 		FPRINT_NUM(LongPulseRadarTh);
 		FPRINT_NUM(AvgRssiReq);
@@ -730,7 +783,25 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(PMKCachePeriod);
 
 #if defined(CONFIG_RT2860V2_STA_WAPI) || defined(CONFIG_RT2860V2_AP_WAPI)
+		/*kurtis: WAPI*/
 		FPRINT_STR(WapiPsk1);
+		FPRINT_STR(WapiPsk2);
+		FPRINT_STR(WapiPsk3);
+		FPRINT_STR(WapiPsk4);
+		FPRINT_STR(WapiPsk5);
+		FPRINT_STR(WapiPsk6);
+		FPRINT_STR(WapiPsk7);
+		FPRINT_STR(WapiPsk8);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(WapiPsk9);
+		FPRINT_STR(WapiPsk10);
+		FPRINT_STR(WapiPsk11);
+		FPRINT_STR(WapiPsk12);
+		FPRINT_STR(WapiPsk13);
+		FPRINT_STR(WapiPsk14);
+		FPRINT_STR(WapiPsk15);
+		FPRINT_STR(WapiPsk16);
+#endif 
 		FPRINT_STR(WapiPskType);
 		FPRINT_STR(Wapiifname);
 		FPRINT_STR(WapiAsCertPath);
@@ -756,6 +827,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WPAPSK6);
 		FPRINT_STR(WPAPSK7);
 		FPRINT_STR(WPAPSK8);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(WPAPSK9);
+		FPRINT_STR(WPAPSK10);
+		FPRINT_STR(WPAPSK11);
+		FPRINT_STR(WPAPSK12);
+		FPRINT_STR(WPAPSK13);
+		FPRINT_STR(WPAPSK14);
+		FPRINT_STR(WPAPSK15);
+		FPRINT_STR(WPAPSK16);
+#endif
 
 		FPRINT_STR(DefaultKeyID);
 		FPRINT_STR(Key1Type);
@@ -767,6 +848,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key1Str6);
 		FPRINT_STR(Key1Str7);
 		FPRINT_STR(Key1Str8);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(Key1Str9);
+		FPRINT_STR(Key1Str10);
+		FPRINT_STR(Key1Str11);
+		FPRINT_STR(Key1Str12);
+		FPRINT_STR(Key1Str13);
+		FPRINT_STR(Key1Str14);
+		FPRINT_STR(Key1Str15);
+		FPRINT_STR(Key1Str16);
+#endif
 
 		FPRINT_STR(Key2Type);
 		FPRINT_STR(Key2Str1);
@@ -777,7 +868,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key2Str6);
 		FPRINT_STR(Key2Str7);
 		FPRINT_STR(Key2Str8);
-
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(Key2Str9);
+		FPRINT_STR(Key2Str10);
+		FPRINT_STR(Key2Str11);
+		FPRINT_STR(Key2Str12);
+		FPRINT_STR(Key2Str13);
+		FPRINT_STR(Key2Str14);
+		FPRINT_STR(Key2Str15);
+		FPRINT_STR(Key2Str16);
+#endif
 		FPRINT_STR(Key3Type);
 		FPRINT_STR(Key3Str1);
 		FPRINT_STR(Key3Str2);
@@ -787,7 +887,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key3Str6);
 		FPRINT_STR(Key3Str7);
 		FPRINT_STR(Key3Str8);
-
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(Key3Str9);
+		FPRINT_STR(Key3Str10);
+		FPRINT_STR(Key3Str11);
+		FPRINT_STR(Key3Str12);
+		FPRINT_STR(Key3Str13);
+		FPRINT_STR(Key3Str14);
+		FPRINT_STR(Key3Str15);
+		FPRINT_STR(Key3Str16);
+#endif
 		FPRINT_STR(Key4Type);
 		FPRINT_STR(Key4Str1);
 		FPRINT_STR(Key4Str2);
@@ -797,7 +906,16 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key4Str6);
 		FPRINT_STR(Key4Str7);
 		FPRINT_STR(Key4Str8);
-
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(Key4Str9);
+		FPRINT_STR(Key4Str10);
+		FPRINT_STR(Key4Str11);
+		FPRINT_STR(Key4Str12);
+		FPRINT_STR(Key4Str13);
+		FPRINT_STR(Key4Str14);
+		FPRINT_STR(Key4Str15);
+		FPRINT_STR(Key4Str16);
+#endif
 		FPRINT_NUM(HSCounter);
 
 		//MIMO
@@ -814,10 +932,12 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_BAWinSize);
 		FPRINT_NUM(HT_GI);
 		FPRINT_NUM(HT_STBC);
-		FPRINT_NUM(HT_MCS);
+		FPRINT_STR(HT_MCS);
 		FPRINT_NUM(HT_TxStream);
 		FPRINT_NUM(HT_RxStream);
 		FPRINT_NUM(HT_PROTECT);
+		FPRINT_NUM(HT_DisallowTKIP);
+		FPRINT_NUM(GreenAP);
 		FPRINT_NUM(HT_40MHZ_INTOLERANT);
 		FPRINT_NUM(HT_MIMOPSEnable);
 		FPRINT_NUM(HT_MIMOPSMode);
@@ -832,6 +952,7 @@ int gen_wifi_config(int mode)
 			fprintf(fp, "WscConfStatus=%d\n", 2);
 		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
 			FPRINT_STR(WscVendorPinCode);
+		FPRINT_NUM(WCNTest);
 
 		FPRINT_NUM(AccessPolicy0);
 		FPRINT_STR(AccessControlList0);
@@ -849,15 +970,53 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(AccessControlList6);
 		FPRINT_NUM(AccessPolicy7);
 		FPRINT_STR(AccessControlList7);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_NUM(AccessPolicy8);
+		FPRINT_STR(AccessControlList8);
+		FPRINT_NUM(AccessPolicy9);
+		FPRINT_STR(AccessControlList9);
+		FPRINT_NUM(AccessPolicy10);
+		FPRINT_STR(AccessControlList10);
+		FPRINT_NUM(AccessPolicy11);
+		FPRINT_STR(AccessControlList11);
+		FPRINT_NUM(AccessPolicy12);
+		FPRINT_STR(AccessControlList12);
+		FPRINT_NUM(AccessPolicy13);
+		FPRINT_STR(AccessControlList13);
+		FPRINT_NUM(AccessPolicy14);
+		FPRINT_STR(AccessControlList14);
+		FPRINT_NUM(AccessPolicy15);
+		FPRINT_STR(AccessControlList15);
+#endif
 
 		FPRINT_NUM(WdsEnable);
 		FPRINT_STR(WdsPhyMode);
 		FPRINT_STR(WdsEncrypType);
 		FPRINT_STR(WdsList);
-		FPRINT_STR(WdsKey);
+		FPRINT_STR(Wds0Key);
+		FPRINT_STR(Wds1Key);
+		FPRINT_STR(Wds2Key);
+		FPRINT_STR(Wds3Key);
 		FPRINT_STR(RADIUS_Server);
 		FPRINT_STR(RADIUS_Port);
-		FPRINT_STR(RADIUS_Key);
+		FPRINT_STR(RADIUS_Key1);
+		FPRINT_STR(RADIUS_Key2);
+		FPRINT_STR(RADIUS_Key3);
+		FPRINT_STR(RADIUS_Key4);
+		FPRINT_STR(RADIUS_Key5);
+		FPRINT_STR(RADIUS_Key6);
+		FPRINT_STR(RADIUS_Key7);
+		FPRINT_STR(RADIUS_Key8);
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3883) && defined (CONFIG_16MBSSID_MODE)
+		FPRINT_STR(RADIUS_Key9);
+		FPRINT_STR(RADIUS_Key10);
+		FPRINT_STR(RADIUS_Key11);
+		FPRINT_STR(RADIUS_Key12);
+		FPRINT_STR(RADIUS_Key13);
+		FPRINT_STR(RADIUS_Key14);
+		FPRINT_STR(RADIUS_Key15);
+		FPRINT_STR(RADIUS_Key16);
+#endif
 		FPRINT_STR(RADIUS_Acct_Server);
 		FPRINT_NUM(RADIUS_Acct_Port);
 		FPRINT_STR(RADIUS_Acct_Key);
@@ -878,7 +1037,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(ApCliAuthMode);
 		FPRINT_STR(ApCliEncrypType);
 		FPRINT_STR(ApCliWPAPSK);
-		FPRINT_NUM(ApCliDefaultKeyId);
+		FPRINT_NUM(ApCliDefaultKeyID);
 		FPRINT_NUM(ApCliKey1Type);
 		FPRINT_STR(ApCliKey1Str);
 		FPRINT_NUM(ApCliKey2Type);
