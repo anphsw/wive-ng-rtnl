@@ -5,7 +5,7 @@
  *
  * See the file "license.txt" for usage and redistribution license requirements
  *
- * $Id: cgi.c,v 1.10.2.2 2009-04-07 07:28:24 chhung Exp $
+ * $Id: cgi.c,v 1.13 2009-05-08 03:27:48 chhung Exp $
  */
 
 /********************************** Description *******************************/
@@ -20,8 +20,6 @@
 
 /*********************************** Includes *********************************/
 #include	"wsIntrn.h"
-#include	<unistd.h>
-#include	<linux/reboot.h>
 #include	<sys/types.h>
 #include	<sys/wait.h>
 #ifdef UEMF
@@ -357,8 +355,7 @@ void websCgiCleanup()
 					if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) != 0)
 						return;
 					sync();
-					sleep(3);
-					reboot(LINUX_REBOOT_CMD_RESTART);
+					doSystem("sleep 3 && reboot &");
 				}
 			}
 		}

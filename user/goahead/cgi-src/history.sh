@@ -12,7 +12,7 @@ echo "<html><head><title>Wive-RTNL</title>"
 
 echo '<META HTTP-EQUIV="Pragma" CONTENT="no-cache">'
 echo '<META HTTP-EQUIV="Expires" CONTENT="-1">'
-echo '<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">'
+echo '<meta http-equiv="content-type" content="text/html; charset=utf-8">'
 echo '<link rel="stylesheet" href="/style/normal_ws.css" type="text/css">'
 echo '</head>'
 

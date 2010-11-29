@@ -208,7 +208,7 @@ getenv("SERVER_SOFTWARE"));
 <head>\n\
 <TITLE>Upload Firmware</TITLE>\n\
 <link rel=stylesheet href=/style/normal_ws.css type=text/css>\n\
-<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\">\n\
+<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">\n\
 <META HTTP-EQUIV=\"Pragma\" CONTENT=\"no-cache\">\n\
 <META HTTP-EQUIV=\"Expires\" CONTENT=\"-1\">\n\
 </head>\n\

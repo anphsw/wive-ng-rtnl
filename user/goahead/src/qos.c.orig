@@ -241,7 +241,7 @@ static void qosClassifier(webs_t wp, char_t *path, char_t *query)
 	if(!strcmp(remark, "Auto")){
 		if(af_index_i == 5 && dp_index_i == 1){				/* EF class*/
 			remark = "EF";
-		}else if(af_index_i == 6 && dp_index_i == 1){		/* BE class */
+		}else if(af_index_i == 6 && dp_index_i == 1){		/* BE classes */
 			remark = "BE";
 		}else{                                  /* AF classes */
             snprintf(tmp, sizeof(tmp), "AF%d%d", af_index_i, dp_index_i);
