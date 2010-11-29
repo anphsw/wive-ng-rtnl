@@ -1066,6 +1066,14 @@ asmlinkage long sys_close(unsigned int fd)
 	FD_CLR(fd, fdt->close_on_exec);
 	__put_unused_fd(files, fd);
 
+	/* USB stroage device may be unpluged after write complete.
+	 * So, we have to flush cache to disk after sys_close()
+	 * by Steven
+	 */
+	if (filp->f_mode == (FMODE_WRITE | FMODE_LSEEK | FMODE_PREAD)) {
+	    sys_sync();
+	}
+
 	spin_unlock(&files->file_lock);
 	retval = filp_close(filp, files);
 

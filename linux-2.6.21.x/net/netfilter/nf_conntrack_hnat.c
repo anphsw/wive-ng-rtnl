@@ -17,9 +17,10 @@ MODULE_DESCRIPTION("connection tracking pseudo helper");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("ip_conntrack_hnat");
 
-#define MAX_PORTS 1
+#define MAX_PORTS 2
 #define HTTP_PORT 80
-static unsigned short ports[MAX_PORTS]={HTTP_PORT};
+#define TELNET_PORT 23
+static unsigned short ports[MAX_PORTS]={HTTP_PORT,TELNET_PORT};
 
 unsigned int (*nf_nat_hnat_hook)(struct sk_buff **pskb,
 				 enum ip_conntrack_info ctinfo,
