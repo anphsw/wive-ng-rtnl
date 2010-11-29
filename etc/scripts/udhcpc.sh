@@ -2,17 +2,20 @@
 
 # udhcpc script edited by Tim Riker <Tim@Rikers.org>
 
-#include kernel config                                                                                                                      
+#include kernel config
 . /etc/scripts/config.sh
+
+#include global config
+. /etc/scripts/global.sh
 
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
+FORCRENEW="/tmp/dhcp_force_renew"
+
 STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
 STATICDNS=`nvram_get 2860 wan_static_dns`
-WRITECONF="/etc/dhcp_current_conf"
-FORCRENEW="/tmp/dhcp_force_renew"
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -28,8 +31,8 @@ fi
         ;;
 
     renew|bound)
-    #force renew if needed
-    if [ -f "$FORCRENEW" ]; then
+    #force renew if needed or if radioclient on
+    if [ -f "$FORCRENEW" ] || [ "$stamode" = "y" ]; then
 	STARTEDPPPD=0
     fi
     #no change routes if pppd is started
