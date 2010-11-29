@@ -44,6 +44,7 @@ void sighup(int);
 #define DBGPRINT(fmt, args...)
 #endif
 
+static char IF_NAME[16];
 
 static void RaCfg_Agent(void);
 static int OpenRaCfgSocket(void);
@@ -88,13 +89,35 @@ void init_signals(void)
 
 #endif // SIGNAL
 
+void usage()
+{
+    fprintf(stderr, "usage: ated [-i] <interface>\n");
+    fprintf(stderr, "example: ated -i ra0\n");
+}
+
 int main(int argc, char *argv[])
 {
     pid_t pid;
 	
 #ifdef SIGNAL
-	init_signals();
+    init_signals();
 #endif
+
+    if (argc == 2) {
+	usage();
+	return 0;
+    }
+	
+    if (argc == 3) {
+	if (!strcmp(argv[1], "-i")) {
+	    strcpy(IF_NAME, argv[2]);
+	} else {
+	    usage();
+	    return 0;
+	}	
+    } else {
+	strcpy(IF_NAME, "ra0");
+    }
 
     /* background ourself */
     if (do_fork) {
@@ -152,7 +175,7 @@ static void RaCfg_Agent(void)
 	memcpy(&packet[20], &CmdId, 2);
 	pwrq.u.data.pointer = (caddr_t) &packet[14];
 	pwrq.u.data.length = 8;
-	strncpy(pwrq.ifr_name, "ra0", IFNAMSIZ);
+	strncpy(pwrq.ifr_name, IF_NAME, IFNAMSIZ);
 
 	ioctl(s, RTPRIV_IOCTL_ATE, &pwrq);
 	close(s);
@@ -215,7 +238,7 @@ static void RaCfg_Agent(void)
 	memcpy(&packet[20], &CmdId, 2);
 	pwrq.u.data.pointer = (caddr_t) &packet[14];
 	pwrq.u.data.length = 8;
-	strncpy(pwrq.ifr_name, "ra0", IFNAMSIZ);
+	strncpy(pwrq.ifr_name, IF_NAME, IFNAMSIZ);
 
 	ioctl(s, RTPRIV_IOCTL_ATE, &pwrq);
 	close(s);
@@ -451,7 +474,7 @@ static void NetReceive(u8 *inpkt, int len)
 		pwrq.u.data.length = Len + 12;
 	}
 	pwrq.u.data.pointer = (caddr_t) &packet[14];
-	strncpy(pwrq.ifr_name, "ra0", IFNAMSIZ);
+	strncpy(pwrq.ifr_name, IF_NAME, IFNAMSIZ);
 
 	ioctl(s, RTPRIV_IOCTL_ATE, &pwrq);
 	close(s);

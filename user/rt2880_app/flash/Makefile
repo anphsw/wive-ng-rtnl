@@ -1,6 +1,7 @@
 EXEC = flash
-OBJS = flash.o flash_api.o
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash 
+OBJS = flash_mtd.o
+#OBJS = flash.o flash_api.o
+#CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/flash 
 
 all: $(EXEC) 
 
