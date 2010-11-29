@@ -172,7 +172,12 @@ int fe_qos_packet_send(struct net_device *dev, struct sk_buff* skb, unsigned int
 	}
 	
 	//tell hwnat module, which is incoming interface of this packet
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3052)
 	tx_desc[tx_cpu_owner_idx].txd_info4.RXIF = FOE_ALG_RXIF(skb); /* 0: WLAN, 1: PCI */
+#else
+	tx_desc[tx_cpu_owner_idx].txd_info4.UDF = FOE_UDF(skb); 
+#endif
+
 #endif
 
 	spin_lock_irqsave(&ei_local->page_lock, flags);
@@ -352,7 +357,7 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 
     /* Bridge:: {BG,BE,VI,VO} */
     /* GateWay:: WAN: {BG,BE,VI,VO}, LAN: {BG,BE,VI,VO} */
-#if defined (CONFIG_RALINK_RT2883) && defined (CONFIG_RAETH_GMAC2)
+#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_RAETH_GMAC2)
     /* 
      * 1) Bridge: 
      *    1.1) GMAC1 ONLY:
@@ -371,7 +376,8 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
     static unsigned char AcToRing_BridgeMap[4] = {2, 2, 3, 3}; 
     static unsigned char AcToRing_GE1Map[2][4] = {{3, 3, 3, 3},{2, 2, 2, 2}}; 
     static unsigned char AcToRing_GE2Map[4] = {0, 0, 1, 1};
-#elif defined (CONFIG_RALINK_RT3052) || (defined (CONFIG_RALINK_RT2883) && !defined(CONFIG_RAETH_GMAC2))
+#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
+     (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_RAETH_GMAC2))
     /* 
      * 1) Bridge: VO->Ring3, VI->Ring2, BG->Ring1, BE->Ring0 
      * 2) GateWay:
@@ -433,16 +439,16 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 	    *ring_no = AcToRing_GE1Map[lan_traffic][ac];
 	}
     }else { //GMAC2
-#if defined (CONFIG_RALINK_RT2883) && defined (CONFIG_RAETH_GMAC2)
+#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_RAETH_GMAC2)
 	*ring_no = AcToRing_GE2Map[ac];
 #endif
     }
 
 
     /* Set Port No - PN field in Tx Descriptor*/
-#if defined (CONFIG_RALINK_RT2883) && defined(CONFIG_RAETH_GMAC2)
+#if defined (CONFIG_RALINK_RT3883) && defined(CONFIG_RAETH_GMAC2)
     *port_no = gmac_no;
-#elif defined (CONFIG_RALINK_RT3052) || (defined (CONFIG_RALINK_RT2883) && !defined(CONFIG_RAETH_GMAC2))
+#elif defined (CONFIG_RALINK_RT3052) || (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_RAETH_GMAC2))
     if(bridge_traffic) {
 	*port_no = 1;
     }else {
@@ -614,6 +620,7 @@ void set_schedule_pause_condition(void)
 	( PSE_P1_HQ_FULL << 0 );  /* queue 0 */
 }
 
+
 void set_output_shaper(void)
 {
 #define GDMA1_TOKEN_RATE	16  /* unit=64bits/ms */
@@ -625,10 +632,9 @@ void set_output_shaper(void)
 					(GDMA1_TOKEN_RATE << 0); /* token rate (unit=8B/ms) */
 #endif
 
-#if 0 
+#if 0
     *(unsigned long *)GDMA2_SHPR_CFG =  (1 << 24) | /* output shaper enable */
 		                        (128 << 16) | /* bucket size (unit=1KB) */
 					(GDMA2_TOKEN_RATE << 0); /* token rate (unit=8B/ms) */
 #endif
 }
-

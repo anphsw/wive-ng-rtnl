@@ -36,6 +36,12 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 
+#include "../../../../config/autoconf.h"
+
+#if defined(CONFIG_USER_SNMPD)
+#include <linux/seq_file.h>
+#endif
+
 #include "ra2882ethreg.h"
 #include "raether.h"
 #include "ra_mac.h"
@@ -44,29 +50,74 @@
 extern END_DEVICE *ra_ei_local;
 
 
-#if defined (CONFIG_GIGAPHY) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
-void enable_auto_negotiate(void)
+#if defined(CONFIG_USER_SNMPD)
+
+static int ra_snmp_seq_show(struct seq_file *seq, void *v)
 {
-#if defined (CONFIG_RALINK_RT3052)
-        u32 regValue = sysRegRead(0xb01100C8);
-#else
-	u32 regValue = sysRegRead(MDIO_CFG);
+	char strprint[100];
+	sprintf(strprint, "rx counters: %lu %lu %lu %lu %lu %lu %lu\n", sysRegRead(GDMA_RX_GBCNT0), sysRegRead(GDMA_RX_GPCNT0),sysRegRead(GDMA_RX_OERCNT0), sysRegRead(GDMA_RX_FERCNT0), sysRegRead(GDMA_RX_SERCNT0), sysRegRead(GDMA_RX_LERCNT0), sysRegRead(GDMA_RX_CERCNT0));
+	seq_puts(seq, strprint);
+
+	sprintf(strprint, "fc config: %lu %lu %lu\n", sysRegRead(CDMA_FC_CFG), sysRegRead(GDMA1_FC_CFG), PDMA_FC_CFG, sysRegRead(PDMA_FC_CFG));
+	seq_puts(seq, strprint);
+
+	sprintf(strprint, "scheduler: %lu %lu %lu\n", sysRegRead(GDMA1_SCH_CFG), sysRegRead(GDMA2_SCH_CFG), sysRegRead(PDMA_SCH_CFG));
+	seq_puts(seq, strprint);
+
+	sprintf(strprint, "ports: %lu %lu %lu %lu %lu %lu\n", sysRegRead(PORT0_PKCOUNT), sysRegRead(PORT1_PKCOUNT), sysRegRead(PORT2_PKCOUNT), sysRegRead(PORT3_PKCOUNT), sysRegRead(PORT4_PKCOUNT), sysRegRead(PORT5_PKCOUNT));
+	seq_puts(seq, strprint);
+
+	return 0;
+}
+
+static int ra_snmp_seq_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, ra_snmp_seq_show, NULL);
+}
+
+static const struct file_operations ra_snmp_seq_fops = {
+	.owner	 = THIS_MODULE,
+	.open	 = ra_snmp_seq_open,
+	.read	 = seq_read,
+	.llseek	 = seq_lseek,
+	.release = single_release,
+};
 #endif
 
-        u32 addr = CONFIG_MAC_TO_GIGAPHY_MODE_ADDR;     // define in linux/autoconf.h
+
+#if defined (CONFIG_GIGAPHY) || defined (CONFIG_100PHY) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
+void enable_auto_negotiate(int ge)
+{
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352)
+        u32 regValue = sysRegRead(0xb01100C8);
+#else
+	u32 regValue;
+	regValue = (ge == 2)? sysRegRead(MDIO_CFG2) : sysRegRead(MDIO_CFG);
+#endif
 
         regValue &= 0xe0ff7fff;                 // clear auto polling related field:
                                                 // (MD_PHY1ADDR & GP1_FRC_EN).
         regValue |= 0x20000000;                 // force to enable MDC/MDIO auto polling.
-        regValue |= (addr << 24);               // setup PHY address for auto polling.
 
-#if defined (CONFIG_RALINK_RT3052)
-	sysRegWrite(0xb01100C8, regValue);
-#else
-	sysRegWrite(MDIO_CFG, regValue);
+#if defined (CONFIG_GE2_RGMII_AN) || defined (CONFIG_GE2_MII_AN)
+	if(ge==2) {
+	    regValue |= (CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2 << 24);               // setup PHY address for auto polling.
+	}
+#endif
+#if defined (CONFIG_GE1_RGMII_AN) || defined (CONFIG_GE1_MII_AN) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
+	if(ge==1) {
+	    regValue |= (CONFIG_MAC_TO_GIGAPHY_MODE_ADDR << 24);               // setup PHY address for auto polling.
+	}
 #endif
 
-
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352)
+	sysRegWrite(0xb01100C8, regValue);
+#else
+	if (ge == 2)
+		sysRegWrite(MDIO_CFG2, regValue);
+	else
+		sysRegWrite(MDIO_CFG, regValue);
+#endif
 }
 
 #endif
@@ -90,11 +141,8 @@ void ei_irq_clear(void)
 
 void rt2880_gmac_hard_reset(void)
 {
-	unsigned int regValue = 0;
-
-	regValue |= FE_RESET_BIT;
-	sysRegWrite(FE_RESET, regValue);
-	sysRegWrite(FE_RESET, 0);	// update for RSTCTL issue
+	sysRegWrite(RSTCTRL, RALINK_FE_RST);
+	sysRegWrite(RSTCTRL, 0);
 }
 
 void ra2880EnableInterrupt()
@@ -215,6 +263,7 @@ void hard_init(struct net_device *dev)
 	return;
 }
 
+#if defined(CONFIG_RAETH_QOS)
 /*
  *	Routine Name : get_idx(mode, index)
  *	Description: calculate ring usage for tx/rx rings
@@ -223,24 +272,28 @@ void hard_init(struct net_device *dev)
  */
 int get_ring_usage(int mode, int i)
 {
-	unsigned long tx_ctx_idx, tx_dtx_idx, rx_usage, tx_usage;
+	unsigned long tx_ctx_idx, tx_dtx_idx, tx_usage;
+	unsigned long rx_calc_idx, rx_drx_idx, rx_usage;
+
 	struct PDMA_rxdesc* rxring;
 	struct PDMA_txdesc* txring;
 
+	extern struct net_device  *dev_raether;
+	END_DEVICE *ei_local = netdev_priv(dev_raether);
+
+
 	if (mode == 2 ) {
 		/* cpu point to the next descriptor of rx dma ring */
-		rx_usage =  (*(unsigned long*)RX_DRX_IDX0 - *(unsigned long*)RX_CALC_IDX0 - 1 + NUM_RX_DESC) % NUM_RX_DESC;
-
-		if ( rx_usage == 0 )
-		{
-			rxring = (struct PDMA_rxdesc*)RX_BASE_PTR0;
-			if(rxring == NULL)
-				return 0;
-
-			if( rxring->rxd_info2.DDONE_bit == 1)
-				rx_usage = NUM_RX_DESC;
-			else
-				rx_usage = 0;
+	        rx_calc_idx = *(unsigned long*)RX_CALC_IDX0;
+	        rx_drx_idx = *(unsigned long*)RX_DRX_IDX0;
+		rxring = (struct PDMA_rxdesc*)RX_BASE_PTR0;
+		
+		rx_usage = (rx_drx_idx - rx_calc_idx -1 + NUM_RX_DESC) % NUM_RX_DESC;
+		if ( rx_calc_idx == rx_drx_idx ) {
+		    if ( rxring[rx_drx_idx].rxd_info2.DDONE_bit == 1)
+			tx_usage = NUM_RX_DESC;
+		    else
+			tx_usage = 0;
 		}
 		return rx_usage;
 	}
@@ -250,22 +303,22 @@ int get_ring_usage(int mode, int i)
 		case 0:
 				tx_ctx_idx = *(unsigned long*)TX_CTX_IDX0;
 				tx_dtx_idx = *(unsigned long*)TX_DTX_IDX0;
-				txring = (struct PDMA_txdesc*)(TX_BASE_PTR0 + (sizeof(struct PDMA_txdesc)*((tx_dtx_idx + NUM_TX_DESC-1)%NUM_TX_DESC)));
+				txring = ei_local->tx_ring0;
 				break;
 		case 1:
 				tx_ctx_idx = *(unsigned long*)TX_CTX_IDX1;
 				tx_dtx_idx = *(unsigned long*)TX_DTX_IDX1;
-				txring = (struct PDMA_txdesc*)(TX_BASE_PTR1 + (sizeof(struct PDMA_txdesc)*((tx_dtx_idx + NUM_TX_DESC-1)%NUM_TX_DESC)));
+				txring = ei_local->tx_ring1;
 				break;
 		case 2:
 				tx_ctx_idx = *(unsigned long*)TX_CTX_IDX2;
 				tx_dtx_idx = *(unsigned long*)TX_DTX_IDX2;
-				txring = (struct PDMA_txdesc*)(TX_BASE_PTR2 + (sizeof(struct PDMA_txdesc)*((tx_dtx_idx + NUM_TX_DESC-1)%NUM_TX_DESC)));
+				txring = ei_local->tx_ring2;
 				break;
 		case 3:
 				tx_ctx_idx = *(unsigned long*)TX_CTX_IDX3;
 				tx_dtx_idx = *(unsigned long*)TX_DTX_IDX3;
-				txring = (struct PDMA_txdesc*)(TX_BASE_PTR3 + (sizeof(struct PDMA_txdesc)*((tx_dtx_idx + NUM_TX_DESC-1)%NUM_TX_DESC)));
+				txring = ei_local->tx_ring3;
 				break;
 		default:
 			printk("get_tx_idx failed %d %d\n", mode, i);
@@ -274,18 +327,15 @@ int get_ring_usage(int mode, int i)
 
 	tx_usage = (tx_ctx_idx - tx_dtx_idx + NUM_TX_DESC) % NUM_TX_DESC;
 	if ( tx_ctx_idx == tx_dtx_idx ) {
-		if ( txring == NULL )
-			return -1;
-		if ( txring->txd_info2.DDONE_bit == 1)
-			tx_usage = NUM_TX_DESC;
-		else
+		if ( txring[tx_ctx_idx].txd_info2.DDONE_bit == 1)
 			tx_usage = 0;
+		else
+			tx_usage = NUM_TX_DESC;
 	}
 	return tx_usage;
 
 }
 
-#if defined(CONFIG_RAETH_QOS)
 void dump_qos()
 {
 	int usage;
@@ -417,7 +467,7 @@ void dump_reg()
 	printk("The current PHY address selected by ethtool is %d\n", get_current_phy_address());
 #endif
 
-#if defined (CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
 	printk("GDMA_RX_FCCNT1(0x%08x)     : 0x%08x\n\n", GDMA_RX_FCCNT1, sysRegRead(GDMA_RX_FCCNT1));	
 #endif
 }
@@ -460,7 +510,11 @@ void dump_cp0(void)
 	printk("CP0_DESAVE\t: 0x%08x\n\n", read_32bit_cp0_register(CP0_DESAVE));
 }
 
-static struct proc_dir_entry *procRegDir, *procGmac, *procSysCP0;
+struct proc_dir_entry *procRegDir;
+static struct proc_dir_entry *procGmac, *procSysCP0;
+#if defined(CONFIG_USER_SNMPD)
+static struct proc_dir_entry *procRaSnmp;
+#endif
 
 int RegReadMain(void)
 {
@@ -475,7 +529,10 @@ int CP0RegRead(void)
 }
 
 #if defined(CONFIG_RAETH_QOS)
-static struct proc_dir_entry *procRaQOS;
+static struct proc_dir_entry *procRaQOS, *procRaFeIntr, *procRaEswIntr;
+extern uint32_t num_of_rxdone_intr;
+extern uint32_t num_of_esw_intr;
+
 int RaQOSRegRead(void)
 {
 	dump_qos();
@@ -513,8 +570,9 @@ static int change_phyid(struct file *file, const char *buffer, unsigned long cou
 
 int debug_proc_init(void)
 {
-    procRegDir = proc_mkdir(PROCREG_DIR, NULL);
-	
+    if (procRegDir == NULL)
+	procRegDir = proc_mkdir(PROCREG_DIR, NULL);
+   
     if ((procGmac = create_proc_entry(PROCREG_GMAC, 0, procRegDir))){
 	 procGmac->read_proc = (read_proc_t*)&RegReadMain;
 #if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
@@ -530,6 +588,13 @@ int debug_proc_init(void)
 	 procRaQOS->read_proc = (read_proc_t*)&RaQOSRegRead;
 #endif
 
+#if defined(CONFIG_USER_SNMPD)
+    procRaSnmp = create_proc_entry(PROCREG_SNMP, S_IRUGO, procRegDir);
+    if (procRaSnmp == NULL)
+    	printk(KERN_ALERT "raeth: snmp proc create failed!!!");
+    else
+    	procRaSnmp->proc_fops = &ra_snmp_seq_fops;
+#endif
     printk(KERN_ALERT "PROC INIT OK!\n");
     return 0;
 }
@@ -546,12 +611,20 @@ void debug_proc_exit(void)
 #if defined(CONFIG_RAETH_QOS)
     if (procRaQOS)
     	remove_proc_entry(PROCREG_RAQOS, procRegDir);
+    if (procRaFeIntr)
+    	remove_proc_entry(PROCREG_RXDONE_INTR, procRegDir);
+    if (procRaEswIntr)
+    	remove_proc_entry(PROCREG_ESW_INTR, procRegDir);
 #endif
 
-    if (procRegDir)
-	remove_proc_entry(PROCREG_DIR, 0);
-	
+#if defined(CONFIG_USER_SNMPD)
+    if (procRaSnmp)
+	remove_proc_entry(PROCREG_SNMP, procRegDir);
+#endif
 
+    //if (procRegDir)
+   	//remove_proc_entry(PROCREG_DIR, 0);
+	
     printk(KERN_ALERT "proc exit\n");
 }
-
+EXPORT_SYMBOL(procRegDir);

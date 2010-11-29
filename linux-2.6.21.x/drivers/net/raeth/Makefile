@@ -1,5 +1,5 @@
 obj-$(CONFIG_RAETH) += raeth.o
-raeth-objs := raether.o ra_mac.o mcast.o mii_mgr.o
+raeth-objs := raether.o ra_mac.o mii_mgr.o ra_rfrw.o
 
 EXTRA_CFLAGS   += 
 
@@ -15,6 +15,10 @@ ifeq ($(CONFIG_RT_3052_ESW),y)
 raeth-objs += ra_ethtool.o
 endif
 endif
+endif
+
+ifeq ($(CONFIG_RALINK_RT3052_MP2),y)
+raeth-objs += mcast.o
 endif
 
 ifeq ($(CONFIG_RAETH_NETLINK),y)
@@ -39,4 +43,8 @@ endif
 
 ifeq ($(CONFIG_RAETH_JUMBOFRAME),y)
 EXTRA_CFLAGS += -DCONFIG_RAETH_JUMBOFRAME
+endif
+
+ifeq ($(CONFIG_RA_NETWORK_WORKQUEUE_BH),y)
+EXTRA_CFLAGS   += -DWORKQUEUE_BH
 endif

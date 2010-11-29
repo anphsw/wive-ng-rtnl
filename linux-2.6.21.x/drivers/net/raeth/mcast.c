@@ -12,8 +12,6 @@
 #include <asm/semaphore.h>
 
 
-#if defined(CONFIG_RALINK_RT3052_MP) || defined(CONFIG_RALINK_RT3052_MP2)
-
 #define MAX_MCAST_ENTRY	    16
 #define AGEING_TIME	    5  //Unit: Sec
 #define MAC_ARG(x) ((u8*)(x))[0],((u8*)(x))[1],((u8*)(x))[2], \
@@ -181,4 +179,3 @@ int32_t mcast_tx(struct sk_buff *skb)
     return 1;
 }
 
-#endif

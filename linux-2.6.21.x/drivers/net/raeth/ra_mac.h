@@ -18,15 +18,7 @@ void dump_cp0(void);
 int debug_proc_init(void);
 void debug_proc_exit(void);
 
-unsigned long readreg(unsigned long addr);
-void writereg(unsigned long value, unsigned long addr);
-
-void enable_auto_negotiate(void);
-int wait_linkup(void);
-int wait_an_completed(void);
-
+void enable_auto_negotiate(int ge);
 void rt2880_gmac_hard_reset(void);
 
-extern u32 mii_mgr_read( unsigned int , unsigned int, unsigned int *);
-extern u32 mii_mgr_write( unsigned int, unsigned int, unsigned int);
 #endif

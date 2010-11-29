@@ -9,6 +9,9 @@
 #endif
 #include "raether.h"
 
+#ifdef WORKQUEUE_BH
+#include <linux/workqueue.h>
+#endif // WORKQUEUE_BH //
 
 #define MAX_PACKET_SIZE	1514
 #define	MIN_PACKET_SIZE 60
@@ -23,21 +26,25 @@
 
 #define EV_MARVELL_PHY_ID0 0x0141  
 #define EV_MARVELL_PHY_ID1 0x0CC2  
+#define EV_VTSS_PHY_ID0 0x0007
+#define EV_VTSS_PHY_ID1 0x0421
 
 /*
      FE_INT_STATUS
 */
-#define RT2880_CNT_PPE_AF       RT2880_BIT(31)     
-#define RT2880_CNT_GDM_AF       RT2880_BIT(29)
+//#define RT2880_CNT_PPE_AF       RT2880_BIT(31)     
+//#define RT2880_CNT_GDM_AF       RT2880_BIT(29)
 #define RT2880_PSE_P2_FC	RT2880_BIT(26)
+#define RT2880_GDM_CRC_DROP     RT2880_BIT(25)
 #define RT2880_PSE_BUF_DROP     RT2880_BIT(24)
 #define RT2880_GDM_OTHER_DROP	RT2880_BIT(23)
 #define RT2880_PSE_P1_FC        RT2880_BIT(22)
 #define RT2880_PSE_P0_FC        RT2880_BIT(21)
 #define RT2880_PSE_FQ_EMPTY     RT2880_BIT(20)
-#define RT2880_GE1_STA_CHG	RT2880_BIT(18)
+#define RT2880_GE1_STA_CHG      RT2880_BIT(18)
 #define RT2880_TX_COHERENT      RT2880_BIT(17)
 #define RT2880_RX_COHERENT      RT2880_BIT(16)
+
 #define RT2880_TX_DONE_INT3     RT2880_BIT(11)
 #define RT2880_TX_DONE_INT2     RT2880_BIT(10)
 #define RT2880_TX_DONE_INT1     RT2880_BIT(9)
@@ -45,6 +52,31 @@
 #define RT2880_RX_DONE_INT0     RT2880_BIT(2)
 #define RT2880_TX_DLY_INT       RT2880_BIT(1)
 #define RT2880_RX_DLY_INT       RT2880_BIT(0)
+
+#define FE_INT_ALL		(RT2880_TX_DONE_INT3 | RT2880_TX_DONE_INT2 | \
+			         RT2880_TX_DONE_INT1 | RT2880_TX_DONE_INT0 | \
+	                         RT2880_RX_DONE_INT0 )
+/*
+ * SW_INT_STATUS
+ */
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352)
+#define PORT0_QUEUE_FULL        RT2880_BIT(14) //port0 queue full
+#define PORT1_QUEUE_FULL        RT2880_BIT(15) //port1 queue full
+#define PORT2_QUEUE_FULL        RT2880_BIT(16) //port2 queue full
+#define PORT3_QUEUE_FULL        RT2880_BIT(17) //port3 queue full
+#define PORT4_QUEUE_FULL        RT2880_BIT(18) //port4 queue full
+#define PORT5_QUEUE_FULL        RT2880_BIT(19) //port5 queue full
+#define PORT6_QUEUE_FULL        RT2880_BIT(20) //port6 queue full
+#define SHARED_QUEUE_FULL       RT2880_BIT(23) //shared queue full
+#define QUEUE_EXHAUSTED         RT2880_BIT(24) //global queue is used up and all packets are dropped
+#define BC_STROM                RT2880_BIT(25) //the device is undergoing broadcast storm
+#define PORT_ST_CHG             RT2880_BIT(26) //Port status change
+#define UNSECURED_ALERT         RT2880_BIT(27) //Intruder alert
+#define ABNORMAL_ALERT          RT2880_BIT(28) //Abnormal
+
+#define ESW_INT_ALL		(PORT_ST_CHG)
+
+#endif // CONFIG_RALINK_RT3052 || CONFIG_RALINK_RT3352 //
 
 #define RX_BUF_ALLOC_SIZE	2000
 #define FASTPATH_HEADROOM   	64
@@ -59,6 +91,7 @@
 typedef struct _PSEUDO_ADAPTER {
     struct net_device *RaethDev;
     struct net_device *PseudoDev;
+    struct net_device_stats stat;
 } PSEUDO_ADAPTER, PPSEUDO_ADAPTER;
 
 #define MAX_PSEUDO_ENTRY               1
@@ -89,10 +122,13 @@ typedef struct _PSEUDO_ADAPTER {
 
 
 /* Register Map Detail */
+/* RT3883 */
+#define SYSCFG1			(RALINK_SYSCTL_BASE + 0x14)
 
 /* 1. Frame Engine Global Registers */
 #define MDIO_ACCESS		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x00)
 #define MDIO_CFG 		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x04)
+#define MDIO_CFG2 		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x18)
 #define FE_GLO_CFG		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x08)
 #define FE_RST_GL		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x0C)
 #define FE_INT_STATUS		(RA2882ETH_BASE+RAFRAMEENGINE_OFFSET+0x10)
@@ -167,13 +203,7 @@ typedef struct _PSEUDO_ADAPTER {
 
 #define DELAY_INT_INIT		0x84048404
 #define FE_INT_DLY_INIT		(RT2880_TX_DLY_INT | RT2880_RX_DLY_INT)
-#define FE_INT_ALL		(RT2880_PSE_P2_FC | RT2880_PSE_BUF_DROP | \
-                                 RT2880_GDM_OTHER_DROP | RT2880_PSE_P1_FC | \
-                                 RT2880_PSE_P0_FC | RT2880_PSE_FQ_EMPTY |   \
-                                 RT2880_TX_COHERENT | RT2880_RX_COHERENT |  \
-				 RT2880_TX_DONE_INT3 | RT2880_TX_DONE_INT2 | \
-				 RT2880_TX_DONE_INT1 | RT2880_TX_DONE_INT0 | \
-                                 RT2880_RX_DONE_INT0 | RT2880_GE1_STA_CHG )
+
 
 /* 6. PPE, 168 bytes */
 #define PPE_GLO_CFG		(RA2882ETH_BASE+RAPPE_OFFSET+0x00)
@@ -246,6 +276,15 @@ typedef struct _PSEUDO_ADAPTER {
 #define GDMA_RX_LERCNT0		(RA2882ETH_BASE+RACMTABLE_OFFSET+0x334)
 #define GDMA_RX_CERCNT0		(RA2882ETH_BASE+RACMTABLE_OFFSET+0x338)
 #define GDMA_RX_FCCNT1		(RA2882ETH_BASE+RACMTABLE_OFFSET+0x33C)
+
+
+/* Per Port Packet Counts in RT3052, added by bobtseng 2009.4.17. */
+#define	PORT0_PKCOUNT		(0xb01100e8)
+#define	PORT1_PKCOUNT		(0xb01100ec)
+#define	PORT2_PKCOUNT		(0xb01100f0)
+#define	PORT3_PKCOUNT		(0xb01100f4)
+#define	PORT4_PKCOUNT		(0xb01100f8)
+#define	PORT5_PKCOUNT		(0xb01100fc)
 
 /* 8. PPE Policy Table */
 #define PT_Rule0_L		(RA2882ETH_BASE+RAPOLICYTABLE_OFFSET+0x000) /* Policy table rule bit 31:0 for rule xxx */
@@ -388,16 +427,11 @@ typedef unsigned int RA2880_REG;
 
 #define INIT_VALUE_OF_RT2883_PSE_FQ_CFG		0xff908000
 #define INIT_VALUE_OF_RT2880_PSE_FQFC_CFG	0x80504000
-#define INIT_VALUE_OF_ICPLUS_PHY_INIT_VALUE	0x1001BC01
+#define INIT_VALUE_OF_FORCE_100_FD		0x1001BC01
+#define INIT_VALUE_OF_FORCE_1000_FD		0x1F01DC01
 
 // Define Whole FE Reset Register
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-#define FE_RESET        (RALINK_SYSCTL_BASE + 0x34)
-#define FE_RESET_BIT    RALINK_FE_RST
-#else
-#define FE_RESET        0xA0300034
-#define FE_RESET_BIT    BIT(18)
-#endif
+#define RSTCTRL         (RALINK_SYSCTL_BASE + 0x34)
 
 /*=========================================
       PDMA RX Descriptor Format define
@@ -498,7 +532,8 @@ struct _PDMA_TXD_INFO4_
     unsigned int    RXIF            	: 1; /* RT2880E used by hw_nat to identity RX interface */
     unsigned int    UN_USE3             : 2;
     unsigned int    QN                  : 3;
-    unsigned int    UN_USE2             : 5;
+    unsigned int    UN_USE2             : 1;
+    unsigned int    UDF			: 4;
     unsigned int    PN                  : 3;
     unsigned int    UN_USE1             : 2;
     unsigned int    TCO                 : 1;
@@ -537,8 +572,19 @@ struct PDMA_txdesc {
 #define PSE_IQ_STA	(RA2882ETH_BASE+RAPSE_OFFSET+0x58)
 
 #define PROCREG_CONTROL_FILE      "/var/run/procreg_control"
-
-#define PROCREG_DIR		"rt2880"
+#if defined (CONFIG_RALINK_RT2880)
+#define PROCREG_DIR             "rt2880"
+#elif defined (CONFIG_RALINK_RT3052)
+#define PROCREG_DIR             "rt3052"
+#elif defined (CONFIG_RALINK_RT3352)
+#define PROCREG_DIR             "rt3352"
+#elif defined (CONFIG_RALINK_RT2883)
+#define PROCREG_DIR             "rt2883"
+#elif defined (CONFIG_RALINK_RT3883)
+#define PROCREG_DIR             "rt3883"
+#else
+#define PROCREG_DIR             "rt2880"
+#endif
 #define PROCREG_GMAC		"gmac"
 #define PROCREG_CP0		"cp0"
 #define PROCREG_RAQOS		"qos"
@@ -546,6 +592,9 @@ struct PDMA_txdesc {
 #define PROCREG_WRITE_VAL	"regwrite_value"
 #define PROCREG_ADDR	  	"reg_addr"
 #define PROCREG_CTL		"procreg_control"
+#define PROCREG_RXDONE_INTR	"rxdone_intr_count"
+#define PROCREG_ESW_INTR	"esw_intr_count"
+#define PROCREG_SNMP		"snmp"
 
 struct rt2880_reg_op_data {
   char	name[64];
@@ -578,8 +627,18 @@ typedef struct end_device
     unsigned int	phy_rx_ring, phy_tx_ring0;
 #endif
 
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352)
+    //send signal to user application to notify link status changed
+    struct work_struct  kill_sig_wq;
+#endif
+
+#ifdef WORKQUEUE_BH
+    struct work_struct  rx_wq;
+    struct work_struct  tx_wq;
+#else
     struct              tasklet_struct     rx_tasklet;
     struct              tasklet_struct     tx_tasklet;
+#endif // WORKQUEUE_BH //
 
 #if defined(CONFIG_RAETH_QOS)
     struct		sk_buff *	   skb_free[NUM_TX_RINGS][NUM_TX_DESC];
@@ -605,6 +664,6 @@ typedef struct end_device
 #endif
 } END_DEVICE, *pEND_DEVICE;
 
-#define RAETH_VERSION	"v2.00"
+#define RAETH_VERSION	"v2.0"
 
 #endif
