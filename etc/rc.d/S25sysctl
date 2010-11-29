@@ -15,23 +15,23 @@ start() {
     sysctl -w net.core.rmem_max=$CMAX_MEM
     sysctl -w net.core.wmem_max=$CMAX_MEM
 
-    MEM_SIZE=`free | grep Total | awk '{ print $2/10000 }' | cut -d '.' -f1`                                                 
+    MEM_SIZE=`free | grep Total | awk '{ print $2/10000 }' | cut -d '.' -f1`
     MINPORT=3072
-    if [ "$MEM_SIZE" = "1" ]; then                                                                                             
-        #16mb                                                                                                                
-        CONNTRACK_MAX=2048                                                                                                   
+    if [ "$MEM_SIZE" = "1" ]; then
+        #16mb
+        CONNTRACK_MAX=1792
         let "HASHSIZE=$CONNTRACK_MAX/4"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
 	sysctl -w vm.min_free_kbytes=1536
-    else                                                                                                                     
-        #32mb                                                                                                                
-        CONNTRACK_MAX=4096                                                                                                   
+    else
+        #32mb
+        CONNTRACK_MAX=4096
         let "HASHSIZE=$CONNTRACK_MAX/2"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
 	sysctl -w vm.min_free_kbytes=2304
-    fi                                                                                                                       
+    fi
 
     if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
         echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
@@ -49,10 +49,6 @@ start() {
     $LOG "##$CONNTRACK_MAX##$HASHSIZE##$ROUTEMAX##$MINPORT $MAXPORT"
 
     $LOG "Tune with proc"
-    #memory
-    echo 0    > /proc/sys/vm/page-cluster
-    echo 0    > /proc/sys/vm/overcommit_ratio
-    echo 0    > /proc/sys/vm/overcommit_memory
     #on kernel crash
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops

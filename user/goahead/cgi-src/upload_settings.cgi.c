@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
 
 	import(filename, file_begin, file_end - file_begin);
 
-	html_success("55000");
+	html_success("80000");
 	fflush(stdout);
 	fclose(stdout);
 

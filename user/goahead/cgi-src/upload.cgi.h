@@ -21,6 +21,7 @@
 					/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
                                         /*   CONFIG_RT2880_ROOTFS_IN_FLASH */
                                         /*   CONFIG_RT2880_ROOTFS_IN_RAM   */
+#include "nvram.h"
 #include "../options.h"
 
 /*
@@ -51,8 +52,11 @@ inline void write_flash_kernel_version(char *file, int offset)
 	fgets(buf, 512, fp);
 	fclose(fp);
 
-	sprintf(cmd, "nvram_set 2860 old_firmware \"%s\"", buf);
-	system(cmd);
+	nvram_set(RT2860_NVRAM, "old_firmware",  buf);
+
+//------ no external commadn call - crash at small memory devices use libnvram instead
+//	sprintf(cmd, "nvram_set 2860 old_firmware \"%s\"", buf);
+//	system(cmd);
 }
 
 inline unsigned int getMTDPartSize(char *part)
@@ -78,15 +82,15 @@ inline unsigned int getMTDPartSize(char *part)
 
 inline int mtd_write_firmware(char *filename, int offset, int len)
 {
-	char cmd[512];
-	int status;
+    char cmd[512];
+    int status;
+
 #if defined (CONFIG_RT2880_FLASH_8M) || defined (CONFIG_RT2880_FLASH_16M)
     /* workaround: erase 8k sector by myself instead of mtd_erase */
     /* this is for bottom 8M NOR flash only */
     snprintf(cmd, sizeof(cmd), "/bin/flash -f 0x400000 -l 0x40ffff");
     system(cmd);
 #endif
-
 #if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
     status = system(cmd);

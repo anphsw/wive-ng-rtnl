@@ -4,7 +4,6 @@
 #include <linux/autoconf.h>
 
 #ifdef CONFIG_DUAL_IMAGE
-
 #define UBOOT_NVRAM	0
 #define RT2860_NVRAM    1
 #define RTDEV_NVRAM    	2

@@ -858,3 +858,437 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
   # Remove the trailing spaces.
   sed 's/[	 ]*$//' $ac_file_inputs >$tmp/in
 
+  # Handle all the #define templates only if necessary.
+  if grep "^[	 ]*#[	 ]*define" $tmp/in >/dev/null; then
+  # If there are no defines, we may have an empty if/fi
+  :
+  cat >$tmp/defines.sed <<CEOF
+/^[	 ]*#[	 ]*define/!b
+t clr
+: clr
+${ac_dA}PACKAGE_NAME${ac_dB}PACKAGE_NAME${ac_dC}""${ac_dD}
+${ac_dA}PACKAGE_TARNAME${ac_dB}PACKAGE_TARNAME${ac_dC}""${ac_dD}
+${ac_dA}PACKAGE_VERSION${ac_dB}PACKAGE_VERSION${ac_dC}""${ac_dD}
+${ac_dA}PACKAGE_STRING${ac_dB}PACKAGE_STRING${ac_dC}""${ac_dD}
+${ac_dA}PACKAGE_BUGREPORT${ac_dB}PACKAGE_BUGREPORT${ac_dC}""${ac_dD}
+${ac_dA}PACKAGE${ac_dB}PACKAGE${ac_dC}"zebra"${ac_dD}
+${ac_dA}VERSION${ac_dB}VERSION${ac_dC}"0.95"${ac_dD}
+${ac_dA}STDC_HEADERS${ac_dB}STDC_HEADERS${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_TYPES_H${ac_dB}HAVE_SYS_TYPES_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_STAT_H${ac_dB}HAVE_SYS_STAT_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STDLIB_H${ac_dB}HAVE_STDLIB_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STRING_H${ac_dB}HAVE_STRING_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_MEMORY_H${ac_dB}HAVE_MEMORY_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STRINGS_H${ac_dB}HAVE_STRINGS_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_INTTYPES_H${ac_dB}HAVE_INTTYPES_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STDINT_H${ac_dB}HAVE_STDINT_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_UNISTD_H${ac_dB}HAVE_UNISTD_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STRING_H${ac_dB}HAVE_STRING_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_TIME_H${ac_dB}HAVE_SYS_TIME_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_TIMES_H${ac_dB}HAVE_SYS_TIMES_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_SELECT_H${ac_dB}HAVE_SYS_SELECT_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_SYSCTL_H${ac_dB}HAVE_SYS_SYSCTL_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_TYPES_H${ac_dB}HAVE_SYS_TYPES_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_LINUX_VERSION_H${ac_dB}HAVE_LINUX_VERSION_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_NETDB_H${ac_dB}HAVE_NETDB_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_NETINET_IN_H${ac_dB}HAVE_NETINET_IN_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_ASM_TYPES_H${ac_dB}HAVE_ASM_TYPES_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_NETINET_ICMP6_H${ac_dB}HAVE_NETINET_ICMP6_H${ac_dC}1${ac_dD}
+${ac_dA}RETSIGTYPE${ac_dB}RETSIGTYPE${ac_dC}void${ac_dD}
+${ac_dA}GNU_LINUX${ac_dB}GNU_LINUX${ac_dC}${ac_dD}
+${ac_dA}HAVE_BCOPY${ac_dB}HAVE_BCOPY${ac_dC}1${ac_dD}
+${ac_dA}HAVE_BZERO${ac_dB}HAVE_BZERO${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STRERROR${ac_dB}HAVE_STRERROR${ac_dC}1${ac_dD}
+${ac_dA}HAVE_INET_ATON${ac_dB}HAVE_INET_ATON${ac_dC}1${ac_dD}
+${ac_dA}HAVE_DAEMON${ac_dB}HAVE_DAEMON${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SNPRINTF${ac_dB}HAVE_SNPRINTF${ac_dC}1${ac_dD}
+${ac_dA}HAVE_VSNPRINTF${ac_dB}HAVE_VSNPRINTF${ac_dC}1${ac_dD}
+${ac_dA}HAVE_STRLCAT${ac_dB}HAVE_STRLCAT${ac_dC}1${ac_dD}
+CEOF
+  sed -f $tmp/defines.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  cat >$tmp/defines.sed <<CEOF
+/^[	 ]*#[	 ]*define/!b
+t clr
+: clr
+${ac_dA}HAVE_STRLCPY${ac_dB}HAVE_STRLCPY${ac_dC}1${ac_dD}
+${ac_dA}HAVE_IF_NAMETOINDEX${ac_dB}HAVE_IF_NAMETOINDEX${ac_dC}1${ac_dD}
+${ac_dA}HAVE_IF_INDEXTONAME${ac_dB}HAVE_IF_INDEXTONAME${ac_dC}1${ac_dD}
+${ac_dA}HAVE_NETLINK${ac_dB}HAVE_NETLINK${ac_dC}${ac_dD}
+${ac_dA}HAVE_PROC_NET_DEV${ac_dB}HAVE_PROC_NET_DEV${ac_dC}${ac_dD}
+${ac_dA}HAVE_GETADDRINFO${ac_dB}HAVE_GETADDRINFO${ac_dC}1${ac_dD}
+${ac_dA}HAVE_INET_NTOP${ac_dB}HAVE_INET_NTOP${ac_dC}${ac_dD}
+${ac_dA}HAVE_INET_PTON${ac_dB}HAVE_INET_PTON${ac_dC}${ac_dD}
+${ac_dA}HAVE_LIBCRYPT${ac_dB}HAVE_LIBCRYPT${ac_dC}1${ac_dD}
+${ac_dA}HAVE_LIBM${ac_dB}HAVE_LIBM${ac_dC}1${ac_dD}
+${ac_dA}HAVE_GNU_REGEX${ac_dB}HAVE_GNU_REGEX${ac_dC}${ac_dD}
+${ac_dA}HAVE_SOCKLEN_T${ac_dB}HAVE_SOCKLEN_T${ac_dC}${ac_dD}
+${ac_dA}HAVE_INPKTINFO${ac_dB}HAVE_INPKTINFO${ac_dC}${ac_dD}
+${ac_dA}HAVE_RUSAGE${ac_dB}HAVE_RUSAGE${ac_dC}${ac_dD}
+${ac_dA}PATH_ZEBRA_PID${ac_dB}PATH_ZEBRA_PID${ac_dC}"/var/run/zebra.pid"${ac_dD}
+${ac_dA}PATH_RIPD_PID${ac_dB}PATH_RIPD_PID${ac_dC}"/var/run/ripd.pid"${ac_dD}
+${ac_dA}PATH_RIPNGD_PID${ac_dB}PATH_RIPNGD_PID${ac_dC}"/var/run/ripngd.pid"${ac_dD}
+${ac_dA}PATH_BGPD_PID${ac_dB}PATH_BGPD_PID${ac_dC}"/var/run/bgpd.pid"${ac_dD}
+${ac_dA}PATH_OSPFD_PID${ac_dB}PATH_OSPFD_PID${ac_dC}"/var/run/ospfd.pid"${ac_dD}
+${ac_dA}PATH_OSPF6D_PID${ac_dB}PATH_OSPF6D_PID${ac_dC}"/var/run/ospf6d.pid"${ac_dD}
+CEOF
+  sed -f $tmp/defines.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  fi # grep
+
+  # Handle all the #undef templates
+  cat >$tmp/undefs.sed <<CEOF
+/^[	 ]*#[	 ]*undef/!b
+t clr
+: clr
+${ac_uA}PACKAGE_NAME${ac_uB}PACKAGE_NAME${ac_uC}""${ac_uD}
+${ac_uA}PACKAGE_TARNAME${ac_uB}PACKAGE_TARNAME${ac_uC}""${ac_uD}
+${ac_uA}PACKAGE_VERSION${ac_uB}PACKAGE_VERSION${ac_uC}""${ac_uD}
+${ac_uA}PACKAGE_STRING${ac_uB}PACKAGE_STRING${ac_uC}""${ac_uD}
+${ac_uA}PACKAGE_BUGREPORT${ac_uB}PACKAGE_BUGREPORT${ac_uC}""${ac_uD}
+${ac_uA}PACKAGE${ac_uB}PACKAGE${ac_uC}"zebra"${ac_uD}
+${ac_uA}VERSION${ac_uB}VERSION${ac_uC}"0.95"${ac_uD}
+${ac_uA}STDC_HEADERS${ac_uB}STDC_HEADERS${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_TYPES_H${ac_uB}HAVE_SYS_TYPES_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_STAT_H${ac_uB}HAVE_SYS_STAT_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STDLIB_H${ac_uB}HAVE_STDLIB_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STRING_H${ac_uB}HAVE_STRING_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_MEMORY_H${ac_uB}HAVE_MEMORY_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STRINGS_H${ac_uB}HAVE_STRINGS_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_INTTYPES_H${ac_uB}HAVE_INTTYPES_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STDINT_H${ac_uB}HAVE_STDINT_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_UNISTD_H${ac_uB}HAVE_UNISTD_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STRING_H${ac_uB}HAVE_STRING_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_TIME_H${ac_uB}HAVE_SYS_TIME_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_TIMES_H${ac_uB}HAVE_SYS_TIMES_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_SELECT_H${ac_uB}HAVE_SYS_SELECT_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_SYSCTL_H${ac_uB}HAVE_SYS_SYSCTL_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_TYPES_H${ac_uB}HAVE_SYS_TYPES_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_LINUX_VERSION_H${ac_uB}HAVE_LINUX_VERSION_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_NETDB_H${ac_uB}HAVE_NETDB_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_NETINET_IN_H${ac_uB}HAVE_NETINET_IN_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_ASM_TYPES_H${ac_uB}HAVE_ASM_TYPES_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_NETINET_ICMP6_H${ac_uB}HAVE_NETINET_ICMP6_H${ac_uC}1${ac_uD}
+${ac_uA}RETSIGTYPE${ac_uB}RETSIGTYPE${ac_uC}void${ac_uD}
+${ac_uA}GNU_LINUX${ac_uB}GNU_LINUX${ac_uC}${ac_uD}
+${ac_uA}HAVE_BCOPY${ac_uB}HAVE_BCOPY${ac_uC}1${ac_uD}
+${ac_uA}HAVE_BZERO${ac_uB}HAVE_BZERO${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STRERROR${ac_uB}HAVE_STRERROR${ac_uC}1${ac_uD}
+${ac_uA}HAVE_INET_ATON${ac_uB}HAVE_INET_ATON${ac_uC}1${ac_uD}
+${ac_uA}HAVE_DAEMON${ac_uB}HAVE_DAEMON${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SNPRINTF${ac_uB}HAVE_SNPRINTF${ac_uC}1${ac_uD}
+${ac_uA}HAVE_VSNPRINTF${ac_uB}HAVE_VSNPRINTF${ac_uC}1${ac_uD}
+${ac_uA}HAVE_STRLCAT${ac_uB}HAVE_STRLCAT${ac_uC}1${ac_uD}
+CEOF
+  sed -f $tmp/undefs.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  cat >$tmp/undefs.sed <<CEOF
+/^[	 ]*#[	 ]*undef/!b
+t clr
+: clr
+${ac_uA}HAVE_STRLCPY${ac_uB}HAVE_STRLCPY${ac_uC}1${ac_uD}
+${ac_uA}HAVE_IF_NAMETOINDEX${ac_uB}HAVE_IF_NAMETOINDEX${ac_uC}1${ac_uD}
+${ac_uA}HAVE_IF_INDEXTONAME${ac_uB}HAVE_IF_INDEXTONAME${ac_uC}1${ac_uD}
+${ac_uA}HAVE_NETLINK${ac_uB}HAVE_NETLINK${ac_uC}${ac_uD}
+${ac_uA}HAVE_PROC_NET_DEV${ac_uB}HAVE_PROC_NET_DEV${ac_uC}${ac_uD}
+${ac_uA}HAVE_GETADDRINFO${ac_uB}HAVE_GETADDRINFO${ac_uC}1${ac_uD}
+${ac_uA}HAVE_INET_NTOP${ac_uB}HAVE_INET_NTOP${ac_uC}${ac_uD}
+${ac_uA}HAVE_INET_PTON${ac_uB}HAVE_INET_PTON${ac_uC}${ac_uD}
+${ac_uA}HAVE_LIBCRYPT${ac_uB}HAVE_LIBCRYPT${ac_uC}1${ac_uD}
+${ac_uA}HAVE_LIBM${ac_uB}HAVE_LIBM${ac_uC}1${ac_uD}
+${ac_uA}HAVE_GNU_REGEX${ac_uB}HAVE_GNU_REGEX${ac_uC}${ac_uD}
+${ac_uA}HAVE_SOCKLEN_T${ac_uB}HAVE_SOCKLEN_T${ac_uC}${ac_uD}
+${ac_uA}HAVE_INPKTINFO${ac_uB}HAVE_INPKTINFO${ac_uC}${ac_uD}
+${ac_uA}HAVE_RUSAGE${ac_uB}HAVE_RUSAGE${ac_uC}${ac_uD}
+${ac_uA}PATH_ZEBRA_PID${ac_uB}PATH_ZEBRA_PID${ac_uC}"/var/run/zebra.pid"${ac_uD}
+${ac_uA}PATH_RIPD_PID${ac_uB}PATH_RIPD_PID${ac_uC}"/var/run/ripd.pid"${ac_uD}
+${ac_uA}PATH_RIPNGD_PID${ac_uB}PATH_RIPNGD_PID${ac_uC}"/var/run/ripngd.pid"${ac_uD}
+${ac_uA}PATH_BGPD_PID${ac_uB}PATH_BGPD_PID${ac_uC}"/var/run/bgpd.pid"${ac_uD}
+${ac_uA}PATH_OSPFD_PID${ac_uB}PATH_OSPFD_PID${ac_uC}"/var/run/ospfd.pid"${ac_uD}
+${ac_uA}PATH_OSPF6D_PID${ac_uB}PATH_OSPF6D_PID${ac_uC}"/var/run/ospf6d.pid"${ac_uD}
+s,^[	 ]*#[	 ]*undef[	 ][	 ]*[a-zA-Z_][a-zA-Z_0-9]*,/* & */,
+CEOF
+  sed -f $tmp/undefs.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  # Let's still pretend it is `configure' which instantiates (i.e., don't
+  # use $as_me), people would be surprised to read:
+  #    /* config.h.  Generated by config.status.  */
+  if test x"$ac_file" = x-; then
+    echo "/* Generated by configure.  */" >$tmp/config.h
+  else
+    echo "/* $ac_file.  Generated by configure.  */" >$tmp/config.h
+  fi
+  cat $tmp/in >>$tmp/config.h
+  rm -f $tmp/in
+  if test x"$ac_file" != x-; then
+    if diff $ac_file $tmp/config.h >/dev/null 2>&1; then
+      { echo "$as_me:$LINENO: $ac_file is unchanged" >&5
+echo "$as_me: $ac_file is unchanged" >&6;}
+    else
+      ac_dir=`(dirname "$ac_file") 2>/dev/null ||
+$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$ac_file" : 'X\(//\)[^/]' \| \
+	 X"$ac_file" : 'X\(//\)$' \| \
+	 X"$ac_file" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$ac_file" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      { if $as_mkdir_p; then
+    mkdir -p "$ac_dir"
+  else
+    as_dir="$ac_dir"
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory \"$ac_dir\"" >&5
+echo "$as_me: error: cannot create directory \"$ac_dir\"" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+      rm -f $ac_file
+      mv $tmp/config.h $ac_file
+    fi
+  else
+    cat $tmp/config.h
+    rm -f $tmp/config.h
+  fi
+  # Run the commands associated with the file.
+  case $ac_file in
+    config.h ) # update the timestamp
+echo 'timestamp for config.h' >"./stamp-h1"
+ ;;
+  esac
+done
+
+#
+# CONFIG_COMMANDS section.
+#
+for ac_file in : $CONFIG_COMMANDS; do test "x$ac_file" = x: && continue
+  ac_dest=`echo "$ac_file" | sed 's,:.*,,'`
+  ac_source=`echo "$ac_file" | sed 's,[^:]*:,,'`
+  ac_dir=`(dirname "$ac_dest") 2>/dev/null ||
+$as_expr X"$ac_dest" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$ac_dest" : 'X\(//\)[^/]' \| \
+	 X"$ac_dest" : 'X\(//\)$' \| \
+	 X"$ac_dest" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$ac_dest" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+  { if $as_mkdir_p; then
+    mkdir -p "$ac_dir"
+  else
+    as_dir="$ac_dir"
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory \"$ac_dir\"" >&5
+echo "$as_me: error: cannot create directory \"$ac_dir\"" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+  ac_builddir=.
+
+if test "$ac_dir" != .; then
+  ac_dir_suffix=/`echo "$ac_dir" | sed 's,^\.[\\/],,'`
+  # A "../" for each directory in $ac_dir_suffix.
+  ac_top_builddir=`echo "$ac_dir_suffix" | sed 's,/[^\\/]*,../,g'`
+else
+  ac_dir_suffix= ac_top_builddir=
+fi
+
+case $srcdir in
+  .)  # No --srcdir option.  We are building in place.
+    ac_srcdir=.
+    if test -z "$ac_top_builddir"; then
+       ac_top_srcdir=.
+    else
+       ac_top_srcdir=`echo $ac_top_builddir | sed 's,/$,,'`
+    fi ;;
+  [\\/]* | ?:[\\/]* )  # Absolute path.
+    ac_srcdir=$srcdir$ac_dir_suffix;
+    ac_top_srcdir=$srcdir ;;
+  *) # Relative path.
+    ac_srcdir=$ac_top_builddir$srcdir$ac_dir_suffix
+    ac_top_srcdir=$ac_top_builddir$srcdir ;;
+esac
+
+# Do not use `cd foo && pwd` to compute absolute paths, because
+# the directories may not exist.
+case `pwd` in
+.) ac_abs_builddir="$ac_dir";;
+*)
+  case "$ac_dir" in
+  .) ac_abs_builddir=`pwd`;;
+  [\\/]* | ?:[\\/]* ) ac_abs_builddir="$ac_dir";;
+  *) ac_abs_builddir=`pwd`/"$ac_dir";;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_top_builddir=${ac_top_builddir}.;;
+*)
+  case ${ac_top_builddir}. in
+  .) ac_abs_top_builddir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_top_builddir=${ac_top_builddir}.;;
+  *) ac_abs_top_builddir=$ac_abs_builddir/${ac_top_builddir}.;;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_srcdir=$ac_srcdir;;
+*)
+  case $ac_srcdir in
+  .) ac_abs_srcdir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_srcdir=$ac_srcdir;;
+  *) ac_abs_srcdir=$ac_abs_builddir/$ac_srcdir;;
+  esac;;
+esac
+case $ac_abs_builddir in
+.) ac_abs_top_srcdir=$ac_top_srcdir;;
+*)
+  case $ac_top_srcdir in
+  .) ac_abs_top_srcdir=$ac_abs_builddir;;
+  [\\/]* | ?:[\\/]* ) ac_abs_top_srcdir=$ac_top_srcdir;;
+  *) ac_abs_top_srcdir=$ac_abs_builddir/$ac_top_srcdir;;
+  esac;;
+esac
+
+
+  { echo "$as_me:$LINENO: executing $ac_dest commands" >&5
+echo "$as_me: executing $ac_dest commands" >&6;}
+  case $ac_dest in
+    depfiles ) test x"$AMDEP_TRUE" != x"" || for mf in $CONFIG_FILES; do
+  # Strip MF so we end up with the name of the file.
+  mf=`echo "$mf" | sed -e 's/:.*$//'`
+  # Check whether this is an Automake generated Makefile or not.
+  # We used to match only the files named `Makefile.in', but
+  # some people rename them; so instead we look at the file content.
+  # Grep'ing the first line is not enough: some people post-process
+  # each Makefile.in and add a new line on top of each file to say so.
+  # So let's grep whole file.
+  if grep '^#.*generated by automake' $mf > /dev/null 2>&1; then
+    dirpart=`(dirname "$mf") 2>/dev/null ||
+$as_expr X"$mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$mf" : 'X\(//\)[^/]' \| \
+	 X"$mf" : 'X\(//\)$' \| \
+	 X"$mf" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$mf" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+  else
+    continue
+  fi
+  grep '^DEP_FILES *= *[^ #]' < "$mf" > /dev/null || continue
+  # Extract the definition of DEP_FILES from the Makefile without
+  # running `make'.
+  DEPDIR=`sed -n -e '/^DEPDIR = / s///p' < "$mf"`
+  test -z "$DEPDIR" && continue
+  # When using ansi2knr, U may be empty or an underscore; expand it
+  U=`sed -n -e '/^U = / s///p' < "$mf"`
+  test -d "$dirpart/$DEPDIR" || mkdir "$dirpart/$DEPDIR"
+  # We invoke sed twice because it is the simplest approach to
+  # changing $(DEPDIR) to its actual value in the expansion.
+  for file in `sed -n -e '
+    /^DEP_FILES = .*\\\\$/ {
+      s/^DEP_FILES = //
+      :loop
+	s/\\\\$//
+	p
+	n
+	/\\\\$/ b loop
+      p
+    }
+    /^DEP_FILES = / s/^DEP_FILES = //p' < "$mf" | \
+       sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g' -e 's/\$U/'"$U"'/g'`; do
+    # Make sure the directory exists.
+    test -f "$dirpart/$file" && continue
+    fdir=`(dirname "$file") 2>/dev/null ||
+$as_expr X"$file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$file" : 'X\(//\)[^/]' \| \
+	 X"$file" : 'X\(//\)$' \| \
+	 X"$file" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$file" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    { if $as_mkdir_p; then
+    mkdir -p $dirpart/$fdir
+  else
+    as_dir=$dirpart/$fdir
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory $dirpart/$fdir" >&5
+echo "$as_me: error: cannot create directory $dirpart/$fdir" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+    # echo "creating $dirpart/$file"
+    echo '# dummy' > "$dirpart/$file"
+  done
+done
+ ;;
+  esac
+done
+
+{ (exit 0); exit 0; }

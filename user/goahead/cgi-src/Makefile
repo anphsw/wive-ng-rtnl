@@ -20,6 +20,11 @@ UPLOAD_BOOTLOADER_CGI = upload_bootloader.cgi
 UPLOAD_SETTINGS = upload_settings.cgi
 USB_UPGRADE_CGI = usb_upgrade.cgi
 
+#need direct link to libnvram
+CFLAGS  += -I$(ROOTDIR)/lib/libnvram
+LDFLAGS += -L$(ROOTDIR)/lib/libnvram/libnvram.a
+LDLIBS  += -lnvram
+
 #RRDTOOL_CGIWARPPER = rrdtool_cgiwrapper.cgi
 #CPU_MEM_RRD_UPDATER	= cpu_mem_updater
 #NETWORK_RRD_UPDATER	= network_updater
@@ -34,19 +39,19 @@ endif
 all:	$(ALL_EXE)
 
 $(UPLOAD_CGI): upload.cgi.o crc32.o
-	$(CC) $(CFLAGS) crc32.o upload.cgi.o -o $@
+	$(CC) $(CFLAGS) crc32.o upload.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(UPLOAD_BOOTLOADER_CGI): upload_bootloader.cgi.o
-	$(CC) $(CFLAGS) upload_bootloader.cgi.o -o $@
+	$(CC) $(CFLAGS) upload_bootloader.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(UPLOAD_SETTINGS): upload_settings.cgi.o
-	$(CC) $(CFLAGS) upload_settings.cgi.o -o $@
+	$(CC) $(CFLAGS) upload_settings.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(USB_UPGRADE_CGI): usb_upgrade.cgi.o crc32.o
-	$(CC) $(CFLAGS) crc32.o usb_upgrade.cgi.o -o $@
+	$(CC) $(CFLAGS) crc32.o usb_upgrade.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 #$(RRDTOOL_CGIWARPPER): rrdtool_cgiwrapper.o
@@ -87,19 +92,19 @@ clean:
 #	Dependencies
 #
 upload.cgi.o: upload.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -DUPLOAD_FIRMWARE_SUPPORT -I$(CONF) -c upload.cgi.c -o $@
+	$(CC) $(CFLAGS) -DUPLOAD_FIRMWARE_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
 
 crc32.o: crc32.c $(CONF_H)
 	$(CC) $(CFLAGS) -DUSE_HOSTCC -I$(CONF) -I$(ZLIB_H) -c crc32.c -o $@
 
 upload_bootloader.cgi.o: upload.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -DUPLOAD_BOOTLOADER_SUPPORT -I$(CONF) -c upload.cgi.c -o $@
+	$(CC) $(CFLAGS) -DUPLOAD_BOOTLOADER_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
 
 upload_settings.cgi.o: upload_settings.cgi.c
-	$(CC) $(CFLAGS) -c upload_settings.cgi.c -o $@
+	$(CC) $(CFLAGS) -c upload_settings.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
 
 usb_upgrade.cgi.o: usb_upgrade.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -I$(CONF) -c usb_upgrade.cgi.c -o $@
+	$(CC) $(CFLAGS) -I$(CONF) -c usb_upgrade.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
 
 #rrdtool_cgiwrapper.o: rrdtool_cgiwrapper.c
 #	$(CC) -c rrdtool_cgiwrapper.c -o $@

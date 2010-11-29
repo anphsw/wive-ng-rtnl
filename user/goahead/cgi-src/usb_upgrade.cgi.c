@@ -221,10 +221,14 @@ getenv("SERVER_SOFTWARE"));
 		goto err;
 	}
 
-    /*
-     * write the new image version into flash.
-     */
-    write_flash_kernel_version(filename, 0);
+	sync();
+
+	/*
+	* write the new image version into flash.
+	*/
+	write_flash_kernel_version(filename, 0);
+
+	sync();
 
 	// flash write
 	if( mtd_write_firmware(filename, 0, stat_buf.st_size) == -1){

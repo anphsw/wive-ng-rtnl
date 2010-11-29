@@ -360,7 +360,7 @@ static int raspi_wait_ready(int sleep_ms)
 	while (timeout) 
 		timeout = schedule_timeout (timeout);*/
 
-	/* one chip guarantees max 5 msec wait here after page writes,
+	/* one chip guarantees max 50 msec wait here after page writes,
 	 * but potentially three seconds (!) after page erase.
 	 */
 	for (count = 0;  count < ((sleep_ms+1) *1000); count++) {
@@ -370,7 +370,7 @@ static int raspi_wait_ready(int sleep_ms)
 			return 0;
 		}
 
-		udelay(500);
+		udelay(5000);
 		/* REVISIT sometimes sleeping would be best */
 	}
 

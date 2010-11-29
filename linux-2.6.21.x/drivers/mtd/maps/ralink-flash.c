@@ -234,6 +234,7 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
         schedule();  /* Wait for write to finish. */                                                                                
         remove_wait_queue(&wait_q, &wait);                                                                                          
 
+	udelay(5000); //add 5ms delay after write
 
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
@@ -258,6 +259,9 @@ int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
 
         schedule();  /* Wait for write to finish. */                                                                                
         remove_wait_queue(&wait_q, &wait);                                                                                          
+
+	udelay(5000); //add 5ms delay after write
+
 	put_mtd_device(mtd);
 
 free_out:

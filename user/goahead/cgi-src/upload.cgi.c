@@ -225,10 +225,14 @@ int main (int argc, char *argv[])
 		goto err;
 	}
 
+	sync();
+
 	/*
 	 * write the current linux version into flash.
 	 */
 	write_flash_kernel_version(filename, file_begin);
+
+	sync();
 
 	// flash write
 	if ( mtd_write_firmware(filename, file_begin, file_end - file_begin) == -1)
@@ -243,12 +247,12 @@ int main (int argc, char *argv[])
 #error "no upload support defined!"
 #endif
 
-	html_success("25000");
+	html_success("30000");
 	free(boundary);
 	fflush(stdout);
 	fclose(stdout);
 
-	system("sleep 3 && reboot &");
+	system("sleep 5 && reboot &");
 	exit(0);
 
 err:

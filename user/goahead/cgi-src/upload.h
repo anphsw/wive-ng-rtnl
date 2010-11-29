@@ -106,6 +106,8 @@ void *getMemInFile(char *filename, int offset, int len)
 	return result;
 }
 
+//use libnvram
+#if 0
 char *nvram_get(char *buf, const char *param)
 {
 	char *nl;
@@ -133,6 +135,7 @@ char *nvram_get(char *buf, const char *param)
 	
 	return result;
 }
+#endif
 
 /*
  * description: return LAN interface name
