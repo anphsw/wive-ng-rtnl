@@ -43,15 +43,15 @@ rm -rfv images/*
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R-16" ] ; then
     cp -fv ./configs/kernel/config-kernel-1t1r-16	./linux/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan-1T1R
 fi
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./configs/kernel/config-kernel-1t1r		./linux/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan-1T1R
 fi
 if [ "$MODE" = "2T2R" ] ; then
     cp -fv ./configs/kernel/config-kernel-2t2r		./linux/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan-2T2R
 fi
 
 #######################################################################
