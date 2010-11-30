@@ -176,7 +176,9 @@ void *dlopen(const char *libname, int flag)
 				&& (tfrom == NULL || tfrom->loadaddr < tpnt->loadaddr))
 			tfrom = tpnt;
 	}
-	for(rpnt = _dl_symbol_tables; rpnt && rpnt->next; rpnt=rpnt->next);
+
+	for (rpnt = _dl_symbol_tables; rpnt && rpnt->next; rpnt = rpnt->next)                                                               
+		continue;
 
 	relro_ptr = rpnt;
 	now_flag = (flag & RTLD_NOW) ? RTLD_NOW : 0;
