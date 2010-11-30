@@ -2959,7 +2959,9 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	}
 
 	close(s);
-	doSystem("internet.sh connect_sta  &");; //Configure wan and get param from dhcp and restart all service. Not use wifi only mode
+	sync();
+	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
+	doSystem("internet.sh connect_sta  &");
 	
 }
 

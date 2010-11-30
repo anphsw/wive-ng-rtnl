@@ -95,7 +95,7 @@ if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
 	    echo '##### config vlan partition (LLLLW) #####'
 	    config-vlan.sh $SWITCH_MODE LLLLW
     fi
-	echo '##### clear switch mac table after #####'
+	echo '######## clear switch mac table  ########'
         switch clear
 fi
 }
