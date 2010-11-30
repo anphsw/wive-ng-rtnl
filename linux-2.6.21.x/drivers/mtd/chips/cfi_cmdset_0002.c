@@ -85,9 +85,7 @@ static struct mtd_chip_driver cfi_amdstd_chipdrv = {
 	.module		= THIS_MODULE
 };
 
-
-/* #define DEBUG_CFI_FEATURES */
-
+//#define DEBUG_CFI_FEATURES
 
 #ifdef DEBUG_CFI_FEATURES
 static void cfi_tell_features(struct cfi_pri_amdstd *extp)

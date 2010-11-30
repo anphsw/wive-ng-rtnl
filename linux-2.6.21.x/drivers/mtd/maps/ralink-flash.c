@@ -24,7 +24,7 @@
 #include <asm/io.h>
 #include <asm/addrspace.h>
 #include "ralink-flash.h"
-
+#include "ralink-flash-map.h"
 
 #ifndef CONFIG_RT2880_FLASH_32M 
 #define WINDOW_ADDR		CPHYSADDR(CONFIG_MTD_PHYSMAP_START)
@@ -39,9 +39,7 @@
 
 #define BUSWIDTH		CONFIG_MTD_PHYSMAP_BUSWIDTH
 
-
-#if !defined (CONFIG_MTD_NAND_RALINK) && !defined (CONFIG_MTD_SPI_RALINK)
-
+#ifdef CONFIG_MTD_NOR_RALINK
 static struct mtd_info *ralink_mtd[NUM_FLASH_BANKS];
 #ifndef CONFIG_RT2880_FLASH_32M 
 static struct map_info ralink_map[] = {
@@ -69,13 +67,9 @@ static struct map_info ralink_map[] = {
 	}
 };
 #endif
+#endif //CONFIG_MTD_NOR_RALINK
 
-//include map flash
-#include "ralink-flash-map.h"
-
-#endif // !defined (CONFIG_MTD_NAND_RALINK) && !defined (CONFIG_MTD_SPI_RALINK)
-
-#if !defined (CONFIG_MTD_NAND_RALINK) && !defined (CONFIG_MTD_SPI_RALINK)
+#ifdef CONFIG_MTD_NOR_RALINK
 static int ralink_lock(struct mtd_info *mtd, loff_t ofs, size_t len)
 {
 	return 0;
@@ -96,7 +90,7 @@ typedef struct __image_header {
 
 int __init rt2880_mtd_init(void)
 {
-#if !defined (CONFIG_MTD_NAND_RALINK) && !defined (CONFIG_MTD_SPI_RALINK)
+#ifdef CONFIG_MTD_NOR_RALINK
 	int ret = -ENXIO;
 	int i, found = 0;
 
@@ -134,6 +128,10 @@ int __init rt2880_mtd_init(void)
 			iounmap(ralink_map[i].virt);
 	}
 	if (found == NUM_FLASH_BANKS) {
+	    if (!found) {
+		printk("Error: No Flash device was found\n");
+		return -ENXIO;
+	    }
 #ifdef CONFIG_RT2880_FLASH_32M
 		merged_mtd = mtd_concat_create(ralink_mtd, NUM_FLASH_BANKS,
 				"Ralink Merged Flash");
@@ -159,9 +157,8 @@ int __init rt2880_mtd_init(void)
 
 static void __exit rt2880_mtd_cleanup(void)
 {
-#if !defined (CONFIG_MTD_NAND_RALINK) && !defined (CONFIG_MTD_SPI_RALINK)
+#ifdef CONFIG_MTD_NOR_RALINK
 	int i;
-
 #ifdef CONFIG_RT2880_FLASH_32M 
 	if (merged_mtd) {
 		del_mtd_device(merged_mtd);

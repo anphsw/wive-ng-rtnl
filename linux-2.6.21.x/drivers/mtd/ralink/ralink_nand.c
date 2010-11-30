@@ -26,9 +26,9 @@
 
 #else // !defined (__UBOOT__)
 
-#define DEBUG
-#include <linux/device.h>
 #undef DEBUG
+
+#include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/mtd/mtd.h>
 #include <linux/pci.h>
@@ -45,6 +45,8 @@
 #endif// !defined (__UBOOT__)
 
 #define READ_STATUS_RETRY	1000
+
+int nand_chip_detected = 0;
 
 struct mtd_info *ranfc_mtd = NULL;
 
@@ -362,7 +364,9 @@ static int nfc_enable_chip(struct ra_nand_chip *ra, unsigned int offs, int read_
 {
 	int chipnr = offs >> ra->chip_shift;
 
+#ifdef DEBUG
 	ra_dbg("%s: offs:%x read_only:%x \n", __func__, offs, read_only);
+#endif
 
 	chipnr = nfc_select_chip(ra, chipnr);
 	if (chipnr < 0) {
@@ -425,9 +429,12 @@ static int nfc_wait_ready(int snooze_ms)
 			break;
 		ndelay(100);
 	}
-	if (retry<0)
-		printk("nfc_wait_ready 2: no device ready, status(%x). \n", status);	
-
+	if (retry>=0)
+	    nand_chip_detected=1;
+#ifdef DEBUG
+	else
+	    printk("nfc_wait_ready 2: no device ready, status(%x). \n", status);	
+#endif
 	return status;
 #endif
 }
@@ -1140,8 +1147,7 @@ int nand_erase_nand(struct ra_nand_chip *ra, struct erase_info *instr)
 		 * heck if we have a bad block, we do not erase bad blocks !
 		 */
 		if (nand_block_checkbad(ra, addr)) {
-			printk(KERN_WARNING "nand_erase: attempt to erase a "
-			       "bad block at 0x%08x\n", addr);
+			printk(KERN_WARNING "nand_erase: attempt to erase a bad block at 0x%08x\n", addr);
 			instr->state = MTD_ERASE_FAILED;
 			goto erase_exit;
 		}
@@ -1830,29 +1836,14 @@ int __devinit ra_nand_init(void)
 	ranfc_mtd->oobsize 	= CFG_PAGE_OOBSIZE;
 	ranfc_mtd->oobavail	= RA_CHIP_OOB_AVAIL;
 	ranfc_mtd->name		= "ra_nfc";
-	//ranfc_mtd->index
 	ranfc_mtd->ecclayout	= &ra_oob_layout;
-	//ranfc_mtd->numberaseregions
-	//ranfc_mtd->eraseregions
-	//ranfc_mtd->bansize
 	ranfc_mtd->erase 	= ramtd_nand_erase;
-	//ranfc_mtd->point
-	//ranfc_mtd->unpoint
 	ranfc_mtd->read		= ramtd_nand_read;
 	ranfc_mtd->write	= ramtd_nand_write;
 	ranfc_mtd->read_oob	= ramtd_nand_readoob;
 	ranfc_mtd->write_oob	= ramtd_nand_writeoob;
-	//ranfc_mtd->get_fact_prot_info; ranfc_mtd->read_fact_prot_reg; 
-	//ranfc_mtd->get_user_prot_info; ranfc_mtd->read_user_prot_reg;
-	//ranfc_mtd->write_user_prot_reg; ranfc_mtd->lock_user_prot_reg;
-	//ranfc_mtd->writev; ranfc_mtd->sync; ranfc_mtd->lock; ranfc_mtd->unlock; ranfc_mtd->suspend; ranfc_mtd->resume;
 	ranfc_mtd->block_isbad		= ramtd_nand_block_isbad;
 	ranfc_mtd->block_markbad	= ramtd_nand_block_markbad;
-	//ranfc_mtd->reboot_notifier
-	//ranfc_mtd->ecc_stats;
-	// subpage_sht;
-
-	//ranfc_mtd->get_device; ranfc_mtd->put_device
 	ranfc_mtd->priv = ra;
 
 #if !defined (__UBOOT__)
@@ -1874,7 +1865,8 @@ int __devinit ra_nand_init(void)
 	}
 #endif
 	/* Register the partitions */
-	add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
+	if (nand_chip_detected)
+	    add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 
 	return 0;
 #else

@@ -104,24 +104,24 @@ config RT2880_DRAM_128M
 endchoice
 
 
-choice
-       prompt "Flash Type"
-       default MTD_NOR_RALINK
+menu "Flash Type support."
 
 config MTD_NOR_RALINK
-       bool "NOR"
+       bool "Ralink NOR support."
+       default y
        depends on  !RALINK_RT3352
 
 config MTD_SPI_RALINK
-       bool "SPI"
+       bool "Ralink SPI support."
+       default y
        depends on  !RALINK_RT2880
 
 config MTD_NAND_RALINK
-       bool "NAND"
+       bool "Ralink NAND support."
+       default y
        depends on  !RALINK_RT3352 && !RALINK_RT2880
 
-endchoice
-
+endmenu
 
 choice
        prompt "Flash Size"

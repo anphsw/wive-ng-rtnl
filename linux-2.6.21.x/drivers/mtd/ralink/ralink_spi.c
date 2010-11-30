@@ -56,7 +56,7 @@ extern u32 get_surfboard_sysclk(void) ;
 #define SR_EPE			0x20	/* Erase/Program error */
 #define SR_SRWD			0x80	/* SR write protect */
 
-
+int spi_chip_detected = 0;
 static unsigned int spi_wait_nsec = 0;
 
 //#define SPI_DEBUG
@@ -330,13 +330,12 @@ static inline int raspi_write_enable(void)
  * Set all sectors (global) unprotected if they are protected.
  * Returns negative if error occurred.
  */
-static inline int raspi_unprotect(void)
+void raspi_unprotect(void)
 {
 	u8 sr = 0;
 
 	if (raspi_read_sr(&sr) < 0) {
 		printk("%s: read_sr fail: %x\n", __func__, sr);
-		return -1;
 	}
 
 	if ((sr & (SR_BP0 | SR_BP1 | SR_BP2)) != 0) {
@@ -714,9 +713,10 @@ struct chip_info *chip_prob(void)
 	for (i = 0; i < ARRAY_SIZE(chips_data); i++) {
 		info = &chips_data[i];
 		if (info->id == buf[0]) {
-			if (info->jedec_id == jedec)
+			if (info->jedec_id == jedec) {
+                                spi_chip_detected=1;
 				return info;
-
+			}
 			if (weight > (info->jedec_id ^ jedec)) {
 				weight = info->jedec_id ^ jedec;
 				match = info;
@@ -724,7 +724,7 @@ struct chip_info *chip_prob(void)
 		}
 	}
 	printk("Warning: un-recognized chip ID, please update SPI driver!\n");
-
+	spi_chip_detected=0;        
 	return match;
 }
 
@@ -798,7 +798,10 @@ static int __devinit raspi_prob(void)
 				ntohl(hdr.ih_ksz));
 	}
 #endif
-	return add_mtd_partitions(&flash->mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
+	if (spi_chip_detected)
+	    return add_mtd_partitions(&flash->mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
+	else
+	    return 0;
 }
 
 static void __devexit raspi_remove(void)
