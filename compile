@@ -17,15 +17,6 @@ else
     MODE=$1
 fi
 
-#----acorp--dlink--------------------#
-if [ "$2" = "" ]; then
-    VENDOR=acorp
-    #VENDOR=dlink
-    #VENDOR=asus
-else
-    VENDOR=$2
-fi
-
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "2T2R" ]; then
@@ -51,16 +42,16 @@ rm -rfv images/*
 
 echo --------------------------------COPY-CONFIG-----------------------------
 if [ "$MODE" = "1T1R-16" ] ; then
-    cp -fv ./configs/kernel-$VENDOR/config-kernel-1t1r-16	./linux/.config
-    cp -fv ./configs/defaults-$VENDOR/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/kernel/config-kernel-1t1r-16	./linux/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
 fi
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv ./configs/kernel-$VENDOR/config-kernel-1t1r		./linux/.config
-    cp -fv ./configs/defaults-$VENDOR/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/kernel/config-kernel-1t1r		./linux/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
 fi
 if [ "$MODE" = "2T2R" ] ; then
-    cp -fv ./configs/kernel-$VENDOR/config-kernel-2t2r		./linux/.config
-    cp -fv ./configs/defaults-$VENDOR/RT2860_default_novlan	./etc/default/RT2860_default_novlan
+    cp -fv ./configs/kernel/config-kernel-2t2r		./linux/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan	./etc/default/RT2860_default_novlan
 fi
 
 #######################################################################
@@ -89,5 +80,5 @@ echo ---------------------------------MAKE-ALL--------------------------------
 make
 
 echo -----------------------------------PACK----------------------------------
-mv -f images/*.bin "images/$VENDOR.$MODE.$VERSIONPKG.bin"
-zip -r images/$VENDOR.$MODE.$VERSIONPKG.bin.zip images/*.bin
+mv -f images/*.bin "images/$MODE.$VERSIONPKG.bin"
+zip -r images/$MODE.$VERSIONPKG.bin.zip images/*.bin

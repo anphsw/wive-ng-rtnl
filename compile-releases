@@ -2,23 +2,17 @@
 
 PWD=`pwd`
 
-if [ "$1" = "" ]; then
-    MODE=acorp
-else
-    MODE=$1
-fi
-
 rm -rf $PWD/releases
 mkdir -p $PWD/releases
 
 ./clear
-nice -19 ./compile 2T2R $MODE
+nice -19 ./compile 2T2R
 cp -f $PWD/images/*.zip $PWD/releases
 
 ./clear RELEASE
-nice -19 ./compile 1T1R $MODE
+nice -19 ./compile 1T1R
 cp -f $PWD/images/*.zip $PWD/releases
 
 ./clear RELEASE
-nice -19 ./compile 1T1R-16 $MODE
+nice -19 ./compile 1T1R-16
 cp -f $PWD/images/*.zip $PWD/releases
