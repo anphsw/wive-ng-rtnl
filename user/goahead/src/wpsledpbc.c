@@ -25,8 +25,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-//#include "ralink_gpio.h"
+#include "oid.h"
 
 #define WPS_AP_LED_GPIO		13
 #define WPS_AP_PBC_GPIO		0
@@ -42,12 +41,6 @@
 #define LedError()                  {ledWps(led_gpio, WPS_LED_ERROR);}
 #define LedSessionOverlapDetected() {ledWps(led_gpio, WPS_LED_SESSION_OVERLAP);}
 #define LedSuccess()                {ledWps(led_gpio, WPS_LED_SUCCESS);}
-
-/* WPS ioctl */
-#define RT_PRIV_IOCTL				(SIOCIWFIRSTPRIV + 0x01)
-#define RTPRIV_IOCTL_WSC_PROFILE	(SIOCIWFIRSTPRIV + 0x12)
-#define RT_OID_SYNC_RT61			0x0D010750
-#define RT_OID_WSC_QUERY_STATUS		((RT_OID_SYNC_RT61 + 0x01) & 0xffff)
 
 typedef struct  __attribute__ ((packed)) _WSC_CONFIGURED_VALUE {
 	unsigned short	WscConfigured; // 1 un-configured; 2 configured

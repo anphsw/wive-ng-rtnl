@@ -178,4 +178,4 @@
 /* for WPS --YY  */
 #define RT_OID_SYNC_RT61                            0x0D010750
 #define RT_OID_WSC_QUERY_STATUS                     ((RT_OID_SYNC_RT61 + 0x01) & 0xffff)
-#define RT_OID_WSC_PIN_CODE							((RT_OID_SYNC_RT61 + 0x02) & 0xffff)
+#define RT_OID_WSC_PIN_CODE			    ((RT_OID_SYNC_RT61 + 0x02) & 0xffff)

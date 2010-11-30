@@ -16,27 +16,28 @@
 #include "linux/autoconf.h"									/* for CONFIG_RT2860V2_STA_WSC */
 
 #include "wps.h"
+#include "oid.h"
 
 #define DD printf("%s(),  %d\n", __FUNCTION__, __LINE__);	fflush(stdout);
 #define AP_MODE
-#include "oid.h"
+                                        
+#define WPS_AP_TIMEOUT_SECS		120000				// 120 seconds
+#define WPS_AP_TIMEOUT_SECS_SEND_M7	120000				// 120 seconds
+#define WPS_AP_CATCH_CONFIGURED_TIMER	100				// 0.1 sec 
 
-#define WPS_AP_TIMEOUT_SECS				120000				// 120 seconds
-#define WPS_AP_TIMEOUT_SECS_SEND_M7		120000				// 120 seconds
-#define WPS_AP_CATCH_CONFIGURED_TIMER	100					// 0.1 sec 
+#define WPS_STA_TIMEOUT_SECS		120000				// 120 seconds
+#define WPS_STA_CATCH_CONFIGURED_TIMER	10				// 10 * 1000 microsecond = every 0.010 sec
+#define REGISTRAR_TIMER_MODE		0xdeadbeef			// okay, this is a magic number
 
 static int g_wps_timer_state = 0;
-
-int g_wsc_configured = 0;							// export for wireless.c
-													// We can't know if WSC process success or not by the variable 
-													// g_wsc_configured when AP being a WSC proxy.
-static int g_WscResult = 0;							// for AP only ( STA WPS don't need this)
+int g_wsc_configured = 0;						// export for wireless.c
+									// We can't know if WSC process success or not by the variable 
+									// g_wsc_configured when AP being a WSC proxy.
+static int g_WscResult = 0;						// for AP only ( STA WPS don't need this)
 static int g_isEnrollee = 0;						// for AP only
 
+
 #ifdef CONFIG_RT2860V2_STA_WSC						// if support Wifi - STA 
-#define WPS_STA_TIMEOUT_SECS			120000				// 120 seconds
-#define WPS_STA_CATCH_CONFIGURED_TIMER	10					// 10 * 1000 microsecond = every 0.010 sec
-#define REGISTRAR_TIMER_MODE			0xdeadbeef			// okay, this is a magic number
 unsigned int ConvertRssiToSignalQuality(long RSSI);
 int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength);
 int OidSetInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength);
@@ -52,16 +53,12 @@ static int getStaWscProfile(char *interface, WSC_PROFILE *wsc_profile);
 void WPSSTAEnrolleeTimerHandler(int);
 void WPSSTARegistrarTimerHandler(int);
 void freeHeaderProfileSettings(void);
-
 extern PAIR_CHANNEL_FREQ_ENTRY ChannelFreqTable[] ;
 extern int G_nChanFreqCount;
 extern char G_bRadio ;
 extern NDIS_802_11_SSID        G_SSID;
 extern PRT_PROFILE_SETTING headerProfileSetting;
-
-
 static char	*g_pAPListData = NULL;
-
 #endif	/* CONFIG_RT2860V2_STA_WSC */
 
 void resetTimerAll(void)
@@ -2113,11 +2110,6 @@ static int getWPSSTAModeASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-
-/* I believe it has been defined in oid.h, but just make a sure. */
-#ifndef RT_OID_802_11_WSC_QUERY_PROFILE
-#define RT_OID_802_11_WSC_QUERY_PROFILE             0x0750
-#endif
 static int getStaWscProfile(char *interface, WSC_PROFILE *wsc_profile)
 {
 	int socket_id;

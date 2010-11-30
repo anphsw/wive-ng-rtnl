@@ -2961,7 +2961,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	close(s);
 	sync();
 	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
-	doSystem("internet.sh connect_sta  &");
+	doSystem("(sleep 5 && internet.sh connect_sta) &");
 	
 }
 
@@ -3504,8 +3504,10 @@ static int getStaSNR(int eid, webs_t wp, int argc, char_t **argv)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_0, s, "ra0", &SNR, sizeof(SNR));
 	else if (n == 1)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_1, s, "ra0", &SNR, sizeof(SNR));
+#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
 	else if (n == 2)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_2, s, "ra0", &SNR, sizeof(SNR));
+#endif
 	else
 		ret = -1;
 	close(s);
