@@ -14,7 +14,7 @@ start() {
 
     get_param
 
-    #set variable
+    $LOG "Configure WAN."
     UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O routes staticroutes msroutes -f &"
 
     #stop dhcp client
@@ -61,7 +61,8 @@ start() {
         fi
 
     elif [ "$wanmode" = "DHCP" ]; then
-	udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1 &
+	$LOG "Start DHCP client."
+	(sleep 1 && udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1) &
     else
 	$LOG "wan service: unknown wan connection type: $wanmode"
 	exit 1
@@ -80,7 +81,6 @@ get_param() {
     wan_nm=`nvram_get 2860 wan_netmask`
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
-    wanmode=`nvram_get 2860 wanConnectionMode`
     gw=`nvram_get 2860 wan_gateway`
     vpnEnabled=`nvram_get 2860 vpnEnabled`
 }

@@ -54,6 +54,28 @@ stop() {
     rmmod pptp     > /dev/null 2>&1
     rmmod ppp_generic     > /dev/null 2>&1
 
+    if [ "$wanmode" = "DHCP" ]; then
+	#clear all default route
+        if [ -f /tmp/ip-down-route-reload ] || [ -f /tmp/default.gw ]; then
+	    while ip route del default ; do
+    		:
+	    done 
+	fi
+	if [ -f /tmp/default.gw ]; then
+	    #resote old dgw
+	    olddgw=`tail -qn1 /tmp/default.gw`
+	    if [ "$olddgw" != "" ]; then
+		ip route replace default via $olddgw
+	    fi
+	else
+	    if [ -f /tmp/ip-down-route-reload ]; then
+		/tmp/ip-down-route-reload
+		rm -f /tmp/ip-down-route-reload
+	    fi
+	fi
+	ip route flush cache
+    fi
+
     #remove VPN server IP file
     rm -f /tmp/vpnip
 }

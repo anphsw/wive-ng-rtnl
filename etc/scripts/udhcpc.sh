@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# udhcpc script edited by Tim Riker <Tim@Rikers.org>
+# Wive-NG  udhcpc script
 
 #include kernel config
 . /etc/scripts/config.sh
@@ -14,8 +14,15 @@ LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 FORCRENEW="/tmp/dhcp_force_renew"
 
-STARTEDPPPD=`ip link show up | grep ppp -c` > /dev/null 2>&1
 STATICDNS=`nvram_get 2860 wan_static_dns`
+
+STARTEDPPPD=`ip link show up | grep ppp -c`
+#routes and dns always renew
+if [ -f "$FORCRENEW" ] || [ "$STARTEDPPPD" = "0" ]; then
+    NEEDRENEW=1
+else
+    NEEDRENEW=0
+fi
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -23,7 +30,7 @@ STATICDNS=`nvram_get 2860 wan_static_dns`
 case "$1" in
     deconfig)
     #on STA mode not need deconfig. After reconnect adress replace automatically.
-    if [ "$stamode" != "y" ]; then
+    if [ "$NEEDRENEW" = "1" ]; then
         ip addr flush dev $interface
 	if [ "$CONFIG_IPV6" != "" ] ; then
     	    ip -6 addr flush dev $interface
@@ -34,13 +41,9 @@ case "$1" in
     ;;
 
     renew|bound)
-    #force renew if needed or if radioclient on
-    if [ -f "$FORCRENEW" ] || [ "$stamode" = "y" ]; then
-	STARTEDPPPD=0
-    fi
     #no change routes if pppd is started
-    if [ "$STARTEDPPPD" != "0" ]; then
-            $LOG "PPPD is start or no change parametrs. No renew needed."
+    if [ "$NEEDRENEW" = "0" ]; then
+        $LOG "No renew needed..."
     else
 	$LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
         ifconfig $interface $ip $BROADCAST $NETMASK
@@ -205,6 +208,8 @@ case "$1" in
 		    $REPLACE
 		fi
 	    done
+	else
+	    $LOG "Use static DNS."
 	fi
 
     	$LOG "Restart needed services"

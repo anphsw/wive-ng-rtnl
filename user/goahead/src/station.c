@@ -2960,6 +2960,9 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 
 	close(s);
 	sync();
+
+	//set flag for daemons is connected
+	doSystem("touch /tmp/sta_connected");
 	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
 	doSystem("(sleep 5 && internet.sh connect_sta) &");
 	

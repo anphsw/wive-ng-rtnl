@@ -3,6 +3,9 @@
 #get params
 . /etc/scripts/global.sh
 
+#include kernel config
+. /etc/scripts/config.sh
+
 #wait to start web and run from goahead code
 web_wait
 
@@ -39,8 +42,7 @@ start() {
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
-
-	#web limit
+	$LOG "web limit"
 	if [ "$RemoteManagement" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
@@ -58,7 +60,7 @@ start() {
 	else	    
     	    iptables -A servicelimit -p tcp --dport 80 -j DROP
 	fi
-	#ssh limit
+	$LOG "ssh limit"
 	if [ "$RemoteSSH" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 22 -m connlimit --connlimit-above 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
@@ -76,7 +78,7 @@ start() {
 	else	    
     	    iptables -A servicelimit -p tcp --dport 22 -j DROP
 	fi
-	#udpxy limit
+	$LOG "udpxy limit"
 	if [ "$UDPXY" != "0" ]; then
     	    iptables -A servicelimit -p tcp --dport 81 -m connlimit --connlimit-above 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
@@ -94,7 +96,7 @@ start() {
 	else	    
     	    iptables -A servicelimit -p tcp --dport 81 -j DROP
 	fi
-	#samba
+	$LOG "samba"
 	if [ "$SmbEnabled" = "1" ]; then
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j ACCEPT
@@ -102,7 +104,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
 	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j DROP
 	fi
-        #icmp limit
+        $LOG "icmp limit"
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
 		$LOG "Drop ping from wan $wan_if"
@@ -195,15 +197,18 @@ start() {
     	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
 	    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$lan_nm -j MASQUERADE
-	    iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
-	    
+	    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+		iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
+	    fi
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
 		#for ISP localnet alya dualacess
     		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		#wireless ISP net dual dual acess....gyyy
 		iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+		    iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		fi
 	    fi
 	 fi
 	fi

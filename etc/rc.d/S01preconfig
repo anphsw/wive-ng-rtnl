@@ -34,6 +34,9 @@ start() {
     mkdir -p /var/log
     mkdir -p /var/tmp
     mkdir -p /var/run/xl2tpd
+    mkdir -p /etc/ppp/ip-up.d
+    mkdir -p /etc/ppp/ip-down.d
+
     mkdir -p /dev/pty
 
     mknod /dev/pty/m0             c       2       0

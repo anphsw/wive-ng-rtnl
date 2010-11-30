@@ -2,6 +2,7 @@
 
 #include kernel config
 . /bin/config.sh
+. /etc/scripts/global.sh
 
 PPP_IFACE="$1"
 PPP_TTY="$2"
@@ -35,12 +36,15 @@ vpnType=`nvram_get 2860 vpnType`
         rm -f /tmp/ip-down-route-reload
         (
 	    echo '#!/bin/sh'
-	    echo 'ip route del default'
+	    echo ''
 	    echo "$RESTORESTRING"
 	) > /tmp/ip-down-route-reload
 	chmod 777 /tmp/ip-down-route-reload
 	$LOG "Remove DGW"
-	ip route del default > /dev/null 2>&1
+	#clear all default route
+	while ip route del default ; do
+    	    :
+	done 
     else
 	$LOG "No dgw stored."
 	RESTORESTRING=""
@@ -104,6 +108,9 @@ vpnType=`nvram_get 2860 vpnType`
     chmod 777 /etc/ppp_firewall
 
     #########################CALL SERVICE HELPER##################################################################################
+
+    $LOG "Flush route cache"
+    ip route flush cache
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
     services_restart.sh pppd

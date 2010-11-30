@@ -10,6 +10,9 @@
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
 
+#get wan mode
+wanmode=`nvram_get 2860 wanConnectionMode`
+
 #get vpn mode
 vpnEnabled=`nvram_get 2860 vpnEnabled`
 

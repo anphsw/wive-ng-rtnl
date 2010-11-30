@@ -109,7 +109,6 @@ case "$1" in
     touch $leases
     echo "lease_file $leases" >> $fname
     udhcpd -S $fname &
-    config-vlan.sh 2 RRRRR
     ;;
   "-k")
     service dhcpd stop
