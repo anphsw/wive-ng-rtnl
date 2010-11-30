@@ -29,7 +29,7 @@
 
 #include <asm/io.h>
 
-#undef DEBUG
+#undef DEBUG /* undef me for production */
 
 struct v3020 {
 	void __iomem *ioaddress;

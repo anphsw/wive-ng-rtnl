@@ -1,3 +1,6 @@
+
+#undef DEBUG /* undef me for production */
+
 #if defined (__UBOOT__)
 #include <common.h>
 #include <malloc.h>
@@ -25,8 +28,6 @@
 #define cond_resched()		NULL_DEF_RET_0()
 
 #else // !defined (__UBOOT__)
-
-#undef DEBUG
 
 #include <linux/device.h>
 #include <linux/slab.h>
@@ -364,7 +365,7 @@ static int nfc_enable_chip(struct ra_nand_chip *ra, unsigned int offs, int read_
 {
 	int chipnr = offs >> ra->chip_shift;
 
-#ifdef DEBUG
+#if 0
 	ra_dbg("%s: offs:%x read_only:%x \n", __func__, offs, read_only);
 #endif
 
@@ -431,7 +432,7 @@ static int nfc_wait_ready(int snooze_ms)
 	}
 	if (retry>=0)
 	    nand_chip_detected=1;
-#ifdef DEBUG
+#if 0
 	else
 	    printk("nfc_wait_ready 2: no device ready, status(%x). \n", status);	
 #endif
@@ -932,7 +933,7 @@ nand_get_device(struct ra_nand_chip *ra, int new_state)
 
 #if !defined (__UBOOT__)
 	ret = mutex_lock_interruptible(ra->controller);
-#endif ///
+#endif 
 	if (!ret) 
 		ra->state = new_state;
 
@@ -983,7 +984,9 @@ int nand_block_checkbad(struct ra_nand_chip *ra, loff_t offs)
 	int page, block;
 	int ret = 4;
 	unsigned int tag;
+#if 0
 	char *str[]= {"UNK", "RES", "BAD", "GOOD"};
+#endif
 
 	if (ranfc_bbt == 0)
 		return 0;
@@ -1013,7 +1016,9 @@ int nand_block_checkbad(struct ra_nand_chip *ra, loff_t offs)
 #endif
 
 	if (tag != BBT_TAG_GOOD) {
+#if 0
 		printk("%s: offs:%x tag: %s \n", __func__, (unsigned int)offs, str[tag]);
+#endif
 		return 1;
 	}
 	else 
@@ -1199,7 +1204,6 @@ static int nand_write_oob_buf(struct ra_nand_chip *ra, uint8_t *buf, uint8_t *oo
 			      int mode, int ooboffs) 
 {
 	size_t oobsize = 1<<ra->oob_shift;
-//	uint8_t *buf = ra->buffers + (1<<ra->page_shift);
 	int retsize = 0;
 
 	ra_dbg("%s: size:%x, mode:%x, offs:%x  \n", __func__, size, mode, ooboffs);
@@ -1210,7 +1214,7 @@ static int nand_write_oob_buf(struct ra_nand_chip *ra, uint8_t *buf, uint8_t *oo
 		if (ooboffs > oobsize)
 			return -1;
 
-#if 0		//* clear buffer */
+#if 0		/* clear buffer */
 		if (ooboffs || ooboffs+size < oobsize) 
 			memset (ra->buffers + oobsize, 0x0ff, 1<<ra->oob_shift);
 #endif
@@ -1867,6 +1871,8 @@ int __devinit ra_nand_init(void)
 	/* Register the partitions */
 	if (nand_chip_detected)
 	    add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
+	else
+	    printk("ralink_nand: No flash detected\n");
 
 	return 0;
 #else

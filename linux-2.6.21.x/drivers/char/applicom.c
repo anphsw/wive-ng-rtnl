@@ -44,7 +44,7 @@
 */
 
 
-#undef DEBUG
+#undef DEBUG /* undef me for production */
 
 #define MAX_BOARD 8		/* maximum of pc board possible */
 #define MAX_ISA_BOARD 4

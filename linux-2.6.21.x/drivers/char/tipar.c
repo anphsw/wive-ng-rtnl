@@ -40,8 +40,9 @@
  * the minor number.
  *
  */
-#undef DEBUG				/* change to #define to get debugging
-					 * output - for pr_debug() */
+
+#undef DEBUG				/* change to #define to get debugging * output - for pr_debug() */
+
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/errno.h>

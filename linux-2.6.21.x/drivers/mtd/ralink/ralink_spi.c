@@ -800,8 +800,10 @@ static int __devinit raspi_prob(void)
 #endif
 	if (spi_chip_detected)
 	    return add_mtd_partitions(&flash->mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
-	else
+	else {
+	    printk("ralink_spi: No flash detected\n");
 	    return 0;
+	}
 }
 
 static void __devexit raspi_remove(void)

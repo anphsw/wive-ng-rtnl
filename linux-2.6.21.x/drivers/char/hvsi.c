@@ -29,7 +29,7 @@
  * the OS cannot change the speed of the port through this protocol.
  */
 
-#undef DEBUG
+#undef DEBUG /* undef me for production */
 
 #include <linux/console.h>
 #include <linux/ctype.h>
