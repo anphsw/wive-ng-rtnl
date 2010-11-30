@@ -71,9 +71,6 @@ config3052()
 		switch reg w 48 2001
 		switch reg w 70 ffff605f
 	fi
-
-	#clear mac table if vlan configuration changed
-	switch clear
 }
 
 restore3052()
