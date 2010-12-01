@@ -66,16 +66,19 @@ restore(){
   echo "Restoring defaults..."
   reboot
 }
+
+nvramreset(){
+    nvram_default 2860
+}
+
 cleanall(){
     echo "Write zero in $MTDRWFS,$MTD2CFG,$MTD2FAC mtd particions" 
     dd if=/dev/zero of=$MTDRWFS conv=sync > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2CFG conv=sync > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2FAC conv=sync > /dev/null 2>&1
+    load
+    nvramreset
     reboot
-}
-
-nvramreset(){
-    nvram_default 2860
 }
 
 fullreset(){
