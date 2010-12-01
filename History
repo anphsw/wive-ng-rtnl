@@ -188,7 +188,7 @@
 19) Uclibc fix wchar issue<br>
 20) More correct mount tmpfs and decrase mem usadge<br>
 21) Fix some compile warnings<br>
-22) Add autodetect flash type NOR->NAND->SPI<br>
+22) Add autodetect flash type NOR->SPI<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -1,6 +1,3 @@
-
-#undef DEBUG /* undef me for production */
-
 #if defined (__UBOOT__)
 #include <common.h>
 #include <malloc.h>
@@ -29,7 +26,9 @@
 
 #else // !defined (__UBOOT__)
 
+#define DEBUG
 #include <linux/device.h>
+#undef DEBUG
 #include <linux/slab.h>
 #include <linux/mtd/mtd.h>
 #include <linux/pci.h>
@@ -46,8 +45,6 @@
 #endif// !defined (__UBOOT__)
 
 #define READ_STATUS_RETRY	1000
-
-int nand_chip_detected = 0;
 
 struct mtd_info *ranfc_mtd = NULL;
 
@@ -365,9 +362,7 @@ static int nfc_enable_chip(struct ra_nand_chip *ra, unsigned int offs, int read_
 {
 	int chipnr = offs >> ra->chip_shift;
 
-#if 0
 	ra_dbg("%s: offs:%x read_only:%x \n", __func__, offs, read_only);
-#endif
 
 	chipnr = nfc_select_chip(ra, chipnr);
 	if (chipnr < 0) {
@@ -430,12 +425,9 @@ static int nfc_wait_ready(int snooze_ms)
 			break;
 		ndelay(100);
 	}
-	if (retry>=0)
-	    nand_chip_detected=1;
-#if 0
-	else
-	    printk("nfc_wait_ready 2: no device ready, status(%x). \n", status);	
-#endif
+	if (retry<0)
+		printk("nfc_wait_ready 2: no device ready, status(%x). \n", status);	
+
 	return status;
 #endif
 }
@@ -933,7 +925,7 @@ nand_get_device(struct ra_nand_chip *ra, int new_state)
 
 #if !defined (__UBOOT__)
 	ret = mutex_lock_interruptible(ra->controller);
-#endif 
+#endif ///
 	if (!ret) 
 		ra->state = new_state;
 
@@ -984,9 +976,7 @@ int nand_block_checkbad(struct ra_nand_chip *ra, loff_t offs)
 	int page, block;
 	int ret = 4;
 	unsigned int tag;
-#if 0
 	char *str[]= {"UNK", "RES", "BAD", "GOOD"};
-#endif
 
 	if (ranfc_bbt == 0)
 		return 0;
@@ -1016,9 +1006,7 @@ int nand_block_checkbad(struct ra_nand_chip *ra, loff_t offs)
 #endif
 
 	if (tag != BBT_TAG_GOOD) {
-#if 0
 		printk("%s: offs:%x tag: %s \n", __func__, (unsigned int)offs, str[tag]);
-#endif
 		return 1;
 	}
 	else 
@@ -1152,7 +1140,8 @@ int nand_erase_nand(struct ra_nand_chip *ra, struct erase_info *instr)
 		 * heck if we have a bad block, we do not erase bad blocks !
 		 */
 		if (nand_block_checkbad(ra, addr)) {
-			printk(KERN_WARNING "nand_erase: attempt to erase a bad block at 0x%08x\n", addr);
+			printk(KERN_WARNING "nand_erase: attempt to erase a "
+			       "bad block at 0x%08x\n", addr);
 			instr->state = MTD_ERASE_FAILED;
 			goto erase_exit;
 		}
@@ -1204,6 +1193,7 @@ static int nand_write_oob_buf(struct ra_nand_chip *ra, uint8_t *buf, uint8_t *oo
 			      int mode, int ooboffs) 
 {
 	size_t oobsize = 1<<ra->oob_shift;
+//	uint8_t *buf = ra->buffers + (1<<ra->page_shift);
 	int retsize = 0;
 
 	ra_dbg("%s: size:%x, mode:%x, offs:%x  \n", __func__, size, mode, ooboffs);
@@ -1214,7 +1204,7 @@ static int nand_write_oob_buf(struct ra_nand_chip *ra, uint8_t *buf, uint8_t *oo
 		if (ooboffs > oobsize)
 			return -1;
 
-#if 0		/* clear buffer */
+#if 0		//* clear buffer */
 		if (ooboffs || ooboffs+size < oobsize) 
 			memset (ra->buffers + oobsize, 0x0ff, 1<<ra->oob_shift);
 #endif
@@ -1840,14 +1830,29 @@ int __devinit ra_nand_init(void)
 	ranfc_mtd->oobsize 	= CFG_PAGE_OOBSIZE;
 	ranfc_mtd->oobavail	= RA_CHIP_OOB_AVAIL;
 	ranfc_mtd->name		= "ra_nfc";
+	//ranfc_mtd->index
 	ranfc_mtd->ecclayout	= &ra_oob_layout;
+	//ranfc_mtd->numberaseregions
+	//ranfc_mtd->eraseregions
+	//ranfc_mtd->bansize
 	ranfc_mtd->erase 	= ramtd_nand_erase;
+	//ranfc_mtd->point
+	//ranfc_mtd->unpoint
 	ranfc_mtd->read		= ramtd_nand_read;
 	ranfc_mtd->write	= ramtd_nand_write;
 	ranfc_mtd->read_oob	= ramtd_nand_readoob;
 	ranfc_mtd->write_oob	= ramtd_nand_writeoob;
+	//ranfc_mtd->get_fact_prot_info; ranfc_mtd->read_fact_prot_reg; 
+	//ranfc_mtd->get_user_prot_info; ranfc_mtd->read_user_prot_reg;
+	//ranfc_mtd->write_user_prot_reg; ranfc_mtd->lock_user_prot_reg;
+	//ranfc_mtd->writev; ranfc_mtd->sync; ranfc_mtd->lock; ranfc_mtd->unlock; ranfc_mtd->suspend; ranfc_mtd->resume;
 	ranfc_mtd->block_isbad		= ramtd_nand_block_isbad;
 	ranfc_mtd->block_markbad	= ramtd_nand_block_markbad;
+	//ranfc_mtd->reboot_notifier
+	//ranfc_mtd->ecc_stats;
+	// subpage_sht;
+
+	//ranfc_mtd->get_device; ranfc_mtd->put_device
 	ranfc_mtd->priv = ra;
 
 #if !defined (__UBOOT__)
@@ -1869,10 +1874,7 @@ int __devinit ra_nand_init(void)
 	}
 #endif
 	/* Register the partitions */
-	if (nand_chip_detected)
-	    add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
-	else
-	    printk("ralink_nand: No flash detected\n");
+	add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 
 	return 0;
 #else

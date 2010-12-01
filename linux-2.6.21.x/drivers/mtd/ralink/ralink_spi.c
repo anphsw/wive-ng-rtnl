@@ -802,6 +802,7 @@ static int __devinit raspi_prob(void)
 	    return add_mtd_partitions(&flash->mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 	else {
 	    printk("ralink_spi: No flash detected\n");
+	    kfree(flash);
 	    return 0;
 	}
 }
