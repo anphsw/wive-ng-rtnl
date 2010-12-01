@@ -92,6 +92,8 @@ unload_apps()
     do
 	service $serv stop
     done
+    echo "Wait 5 seconds."
+    sleep 5
     echo "Kill aplications..." #second step terminate and kill application
     for apps in $kill_apps
     do
@@ -125,8 +127,8 @@ sysctl -w vm.min_free_kbytes=4096
 drop_caches
 sysctl -w vm.min_free_kbytes=512
 
-echo "Wait 5 seconds."
-sleep 5
+echo "Wait 3 seconds."
+sleep 3
 
 echo "Prepare for burn OK..."
 
