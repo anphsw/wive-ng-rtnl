@@ -10,12 +10,12 @@
 #include kernel config
 . /etc/scripts/config.sh
 
-stop_serv="inetd shaper crontab iptables pppoe-relay stp  ddns wscd dhcpd lld2d radvd syslog \
-	    zebra dnsserver udpxy upnp hotplug igmp_proxy ntp samba"
+stop_serv="vpnhelper inetd shaper crontab iptables pppoe-relay stp  ddns wscd dhcpd lld2d radvd syslog \
+	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver"
 
-kill_apps="dnsmasq smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
+kill_apps="smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
-	    iwevent telnetd wscd rt2860apd rt61apd"
+	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq"
 
 rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \

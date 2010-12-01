@@ -24,6 +24,9 @@ if [ "$MODE" != "pppd" ]; then
     service samba stop
 fi
 
+#wait for some service stop
+sleep 2
+
 ##########################################################
 # This is services restart always                       #
 ##########################################################
