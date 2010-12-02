@@ -29,6 +29,7 @@
 
 #ifdef LINUX
 #include <linux/skbuff.h>
+#include <linux/autoconf.h>
 #endif // LINUX //
 
 

@@ -33,6 +33,9 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 #include <asm/rt2880/rt_mmap.h>
 #endif
+#ifdef LINUX
+#include <linux/autoconf.h>
+#endif
 
 //
 // PCI registers - base address 0x0000

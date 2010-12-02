@@ -27,6 +27,9 @@
 */
 
 #include <rt_config.h>
+#ifdef LINUX
+#include <linux/autoconf.h>
+#endif
 
 #define FORTY_MHZ_INTOLERANT_INTERVAL	(60*1000) // 1 min
 

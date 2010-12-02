@@ -26,6 +26,9 @@
 	--------    ----------    ----------------------------------------------
 */
 #include "rt_config.h"
+#ifdef LINUX
+#include <linux/autoconf.h>
+#endif
 
 UCHAR    BIT8[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 char*   CipherName[] = {"none","wep64","wep128","TKIP","AES","CKIP64","CKIP128","CKIP152","SMS4"};
@@ -968,7 +971,6 @@ VOID	NICReadEEPROMParameters(
 	if (Antenna.word == 0xFFFF)
 	{
 		{
-
 #if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
 		Antenna.word = 0;
 #if defined (CONFIG_RALINK_RT2883)
@@ -981,11 +983,28 @@ VOID	NICReadEEPROMParameters(
 		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
 #else
 		Antenna.word = 0;
+#if defined(CONFIG_RALINK_RT3050_1T1R)
 		Antenna.field.RfIcType = RFIC_3020;
+		Antenna.field.TxPath = 1;
+		Antenna.field.RxPath = 1;
+		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
+#elif defined(CONFIG_RALINK_RT3051_1T2R)
+		Antenna.field.RfIcType = RFIC_3021;
 		Antenna.field.TxPath = 1;
 		Antenna.field.RxPath = 2;
 		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
-#endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
+#elif defined(CONFIG_RALINK_RT3052_2T2R)
+		Antenna.field.RfIcType = RFIC_3022;
+		Antenna.field.TxPath = 2;
+		Antenna.field.RxPath = 2;
+		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
+#else
+		Antenna.field.RfIcType = RFIC_3020;
+		Antenna.field.TxPath = 1;
+		Antenna.field.RxPath = 1;
+		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
+#endif
+#endif /* CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 */
 		}
 	}
 
@@ -1057,33 +1076,18 @@ VOID	NICReadEEPROMParameters(
 	// Set the RfICType here, then we can initialize RFIC related operation callbacks
 	pAd->Mlme.RealRxPath = (UCHAR) Antenna.field.RxPath;
 
+	//Chipid
+	pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
+
+	printk("NICReadEEPROMParameters: RxPath = %d, TxPath = %d, RFICType = %d\n",
+		Antenna.field.RxPath, Antenna.field.TxPath, Antenna.field.RfIcType);
+
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
 	sprintf((PSTRING) pAd->nickname, STA_NIC_DEVICE_NAME);
 #endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
 
-	printk("NICReadEEPROMParameters: RxPath = %d, TxPath = %d, RFICType = %d\n",
-		Antenna.field.RxPath, Antenna.field.TxPath, Antenna.field.RfIcType);
-
-//This is need for up interface if Factory mtd particion is null
-//RFICType in mtd need set from userspace if mtd crash
-	if (Antenna.field.RfIcType)
-	    pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
-	else
-#if defined(CONFIG_RALINK_RT3050_1T1R)                                                                                                      
-	    pAd->RfIcType = RFIC_3020;
-	    Antenna.field.RfIcType = RFIC_3020;
-#elif defined(CONFIG_RALINK_RT3051_1T2R)                                                                                                    
-	    pAd->RfIcType = RFIC_3021;
-	    Antenna.field.RfIcType = RFIC_3021;
-#elif defined(CONFIG_RALINK_RT3052_2T2R)                                                                                                    
-	    pAd->RfIcType = RFIC_3022;
-	    Antenna.field.RfIcType = RFIC_3022;
-#else                                                                                                                                       
-	    pAd->RfIcType = RFIC_3020;
-	    Antenna.field.RfIcType = RFIC_3020;
-#endif
 #ifdef RTMP_RF_RW_SUPPORT
 	RtmpChipOpsRFHook(pAd);                                                                                                             
 #endif
