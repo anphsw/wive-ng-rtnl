@@ -978,13 +978,13 @@ VOID	NICReadEEPROMParameters(
 #endif
 		Antenna.field.TxPath = 3;
 		Antenna.field.RxPath = 3;
-		DBGPRINT(RT_DEBUG_WARN, ("E2PROM error, hard code as 0x%04x\n", Antenna.word));
+		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
 #else
 		Antenna.word = 0;
-		Antenna.field.RfIcType = RFIC_2820;
+		Antenna.field.RfIcType = RFIC_3020;
 		Antenna.field.TxPath = 1;
 		Antenna.field.RxPath = 2;
-		DBGPRINT(RT_DEBUG_WARN, ("E2PROM error, hard code as 0x%04x\n", Antenna.word));
+		printk("E2PROM error, hard code as 0x%04x\n", Antenna.word);
 #endif // CONFIG_RALINK_RT2883 || CONFIG_RALINK_RT3883 //
 		}
 	}
@@ -1051,15 +1051,11 @@ VOID	NICReadEEPROMParameters(
 	/* Save value for future using */
 	pAd->NicConfig2.word = NicConfig2.word;
 	
-	DBGPRINT_RAW(RT_DEBUG_TRACE, ("NICReadEEPROMParameters: RxPath = %d, TxPath = %d\n", Antenna.field.RxPath, Antenna.field.TxPath));
-
 	// Save the antenna for future use
 	pAd->Antenna.word = Antenna.word;
 
 	// Set the RfICType here, then we can initialize RFIC related operation callbacks
 	pAd->Mlme.RealRxPath = (UCHAR) Antenna.field.RxPath;
-
-	pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
@@ -1067,9 +1063,30 @@ VOID	NICReadEEPROMParameters(
 #endif // RTMP_MAC_PCI //
 #endif // CONFIG_STA_SUPPORT //
 
+	printk("NICReadEEPROMParameters: RxPath = %d, TxPath = %d, RFICType = %d\n",
+		Antenna.field.RxPath, Antenna.field.TxPath, Antenna.field.RfIcType);
+
+//This is need for up interface if Factory mtd particion is null
+//RFICType in mtd need set from userspace if mtd crash
+	if (Antenna.field.RfIcType)
+	    pAd->RfIcType = (UCHAR) Antenna.field.RfIcType;
+	else
+#if defined(CONFIG_RALINK_RT3050_1T1R)                                                                                                      
+	    pAd->RfIcType = RFIC_3020;
+	    Antenna.field.RfIcType = RFIC_3020;
+#elif defined(CONFIG_RALINK_RT3051_1T2R)                                                                                                    
+	    pAd->RfIcType = RFIC_3021;
+	    Antenna.field.RfIcType = RFIC_3021;
+#elif defined(CONFIG_RALINK_RT3052_2T2R)                                                                                                    
+	    pAd->RfIcType = RFIC_3022;
+	    Antenna.field.RfIcType = RFIC_3022;
+#else                                                                                                                                       
+	    pAd->RfIcType = RFIC_3020;
+	    Antenna.field.RfIcType = RFIC_3020;
+#endif
 #ifdef RTMP_RF_RW_SUPPORT
 	RtmpChipOpsRFHook(pAd);                                                                                                             
-#endif // RTMP_RF_RW_SUPPORT //
+#endif
 
 	//
 	// Reset PhyMode if we don't support 802.11a

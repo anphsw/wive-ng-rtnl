@@ -1,6 +1,6 @@
 #The word of "Default" must not be removed
 Default
-RFICType=5
+RFICType=8
 CountryRegion=5
 CountryRegionABand=0
 CountryCode=RU
@@ -133,8 +133,8 @@ HT_BAWinSize=64
 HT_GI=600
 HT_STBC=1
 HT_MCS=33
-HT_TxStream=1
-HT_RxStream=1
+HT_TxStream=2
+HT_RxStream=2
 HT_PROTECT=1
 HT_40MHZ_INTOLERANT=0
 HT_MIMOPSEnable=1

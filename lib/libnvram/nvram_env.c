@@ -584,11 +584,22 @@ int nvram_load_default(void)
 	if (!LAN_MAC_ADDR)
     	    nvram_bufset(RT2860_NVRAM, "LAN_MAC_ADDR",  LAN_MAC_ADDR);
 	if ((!WLAN_MAC_ADDR) || (!WAN_MAC_ADDR) ||(!LAN_MAC_ADDR))
-    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", 	    "YES");
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
 	else
-    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", 	    CHECKMAC);
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", CHECKMAC);
 
-        nvram_bufset(RT2860_NVRAM, "IS_WIVE", 	    "YES");
+	//set default cip type
+#if defined(CONFIG_RALINK_RT3050_1T1R)
+        nvram_bufset(RT2860_NVRAM, "RFICType", "5");
+#elif defined(CONFIG_RALINK_RT3051_1T2R)
+        nvram_bufset(RT2860_NVRAM, "RFICType", "7");
+#elif defined(CONFIG_RALINK_RT3052_2T2R)
+        nvram_bufset(RT2860_NVRAM, "RFICType", "8");
+#else
+        nvram_bufset(RT2860_NVRAM, "RFICType", "5");
+#endif
+	//set wive flag
+        nvram_bufset(RT2860_NVRAM, "IS_WIVE", "YES");
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
