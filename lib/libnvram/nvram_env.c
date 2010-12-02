@@ -606,6 +606,7 @@ int gen_wifi_config(int mode)
 	if (!atoi(temp))
 	    temp="5";
 	nvram_bufset(mode, "RFICType", temp);
+
 	//TxStream for select HT mode
 	sprintf(temp, "%x", buf[0]&0xf0>>4);
 	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))

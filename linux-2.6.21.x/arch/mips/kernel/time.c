@@ -37,11 +37,6 @@
 #include <asm/rt2880/rt_mmap.h>
 #endif
 
-#ifdef CONFIG_RALINK_EXTERNAL_TIMER
-#include <asm/rt2880/rt_mmap.h>
-//#define RALINK_16BIT_COUNT_CMP
-#endif
-
 /*
  * The integer part of the number of usecs per jiffy is taken from tick,
  * but the fractional part is not recorded, so we calculate it using the
