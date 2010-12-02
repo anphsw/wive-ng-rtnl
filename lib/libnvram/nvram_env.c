@@ -215,10 +215,16 @@ static int cache_idx(int index, char *name)
 char *nvram_get(int index, char *name)
 {
 	char *rc;
+
 	//LIBNV_PRINT("--> nvram_get\n");
 	nvram_init(index);
-	rc = nvram_bufget(index, name);
+
+	rc = strdup(nvram_bufget(index, name));
+	if (!rc)
+	    return "";
+
 	nvram_close(index);
+
     return rc;
 }
 
@@ -532,7 +538,6 @@ out:
 int nvram_show(int mode)
 {
 	char *buffer, *p;
-	int rc;
 	int crc;
 	unsigned int len = 0x4000;
 
@@ -604,7 +609,7 @@ int gen_wifi_config(int mode)
 	//chiptype
 	sprintf(temp, "%x", buf[1]);
 	if (!atoi(temp))
-	    temp="5";
+	    sprintf(temp, "%x", "5");
 	nvram_bufset(mode, "RFICType", temp);
 
 	//TxStream for select HT mode
