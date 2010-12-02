@@ -595,16 +595,23 @@ int gen_wifi_config(int mode)
 	FILE *fp;
 	int  i, ssid_num = 1;
 	char tx_rate[16], wmm_enable[16];
+	unsigned char temp[2], buf[4];
+
+	//Read radio config
+	flash_read_NicConf(buf);
 
 	nvram_init(mode);
-
-	unsigned char temp[2], buf[4];
-	flash_read_NicConf(buf);
+	//chiptype
 	sprintf(temp, "%x", buf[1]);
+	if (!atoi(temp))
+	    temp="5";
 	nvram_bufset(mode, "RFICType", temp);
+	//TxStream for select HT mode
 	sprintf(temp, "%x", buf[0]&0xf0>>4);
 	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))
 		nvram_bufset(mode, "HT_TxStream", temp);
+
+	//RxStream for select HT mode
 	nvram_bufset(mode, "TXPath", temp);
 	sprintf(temp, "%x", buf[0]&0x0f);
 	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_RxStream")))
