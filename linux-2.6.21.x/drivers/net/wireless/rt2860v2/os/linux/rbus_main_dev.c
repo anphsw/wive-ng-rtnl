@@ -95,7 +95,7 @@ int rt2880_module_init(VOID)
 	((POS_COOKIE)handle)->pci_dev = (void *)net_dev;
 
 #ifdef CONFIG_STA_SUPPORT
-    pAd->StaCfg.OriDevType = net_dev->type;
+	pAd->StaCfg.OriDevType = net_dev->type;
 #endif // CONFIG_STA_SUPPORT //
 
 

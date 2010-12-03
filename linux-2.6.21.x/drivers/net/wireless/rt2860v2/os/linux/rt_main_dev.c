@@ -276,12 +276,9 @@ int rt28xx_close(IN PNET_DEV dev)
 	/* must call first */
 	ACMP_Release(pAd);
 #endif // WMM_ACM_SUPPORT //
-
-
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 	RT3XXX_AntDiversity_Fini(pAd);
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -299,12 +296,17 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // RTMP_MAC_PCI //
 	}
 #endif // CONFIG_STA_SUPPORT //
-
-	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-
+#ifdef CONFIG_STA_SUPPORT
+	// Lost AP, send disconnect & link down event
+	LinkDown(pAd, FALSE);
+#endif
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);
 #endif // WDS_SUPPORT //
+
+	MacTableReset(pAd);
+
+	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 
 	for (i = 0 ; i < NUM_OF_TX_RING; i++)
 	{
@@ -335,11 +337,10 @@ int rt28xx_close(IN PNET_DEV dev)
 	// Close net tasklets
 	RtmpNetTaskExit(pAd);
 
-
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		MacTableReset(pAd);
+		AsicDisableSync(pAd);
 		RTMPSetLED(pAd, LED_LINK_DOWN);
 		MlmeRadioOff(pAd);
 	}

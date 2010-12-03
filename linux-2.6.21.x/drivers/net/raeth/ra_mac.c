@@ -124,7 +124,7 @@ void enable_auto_negotiate(int ge)
 void ra2880stop(END_DEVICE *ei_local)
 {
 	unsigned int regValue;
-	printk("ra2880stop()...");
+	printk("raether...");
 
 	regValue = sysRegRead(PDMA_GLO_CFG);
 	regValue &= ~(RT2880_TX_WB_DDONE | RT2880_RX_DMA_EN | RT2880_TX_DMA_EN);
