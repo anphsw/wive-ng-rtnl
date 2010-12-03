@@ -930,12 +930,15 @@ VOID APUpdateAllBeaconFrame(
     IN PRTMP_ADAPTER pAd)
 {
 	INT		i;
+#if defined(DOT11N_DRAFT3) && defined(DOT11_N_SUPPORT)
 	BOOLEAN FlgQloadIsAlarmIssued;
+#endif
 	
 	if (pAd->ApCfg.DtimCount == 0)
 		pAd->ApCfg.DtimCount = pAd->ApCfg.DtimPeriod - 1;
 	else
 		pAd->ApCfg.DtimCount -= 1;
+
 #ifdef DOT11_N_SUPPORT
 #ifdef DOT11N_DRAFT3
 	/* QLOAD ALARM */

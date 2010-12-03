@@ -30,6 +30,10 @@
 
 #include	"rt_config.h"
 
+#ifdef LINUX
+#include <linux/string.h>
+#endif
+
 #ifdef DBG
 extern ULONG    RTDebugLevel;
 #endif
@@ -2091,9 +2095,7 @@ rt_ioctl_giwencode(struct net_device *dev,
 
 }
 
-#if 0
-int strcasecmp(const char *s1, const char *s2);
-#else
+#ifndef LINUX
 static int strcasecmp(const char *s1, const char *s2)
 {
 	while ((*s1 == *s2) || (tolower(*s1) == tolower(*s2))) {

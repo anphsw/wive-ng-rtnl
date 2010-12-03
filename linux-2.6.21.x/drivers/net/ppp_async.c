@@ -158,9 +158,6 @@ ppp_asynctty_open(struct tty_struct *tty)
 	struct asyncppp *ap;
 	int err;
 
-        if (tty->ops->write == NULL)
-                return -EOPNOTSUPP;
-
 	err = -ENOMEM;
 	ap = kzalloc(sizeof(*ap), GFP_KERNEL);
 	if (!ap)

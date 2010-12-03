@@ -58,7 +58,9 @@ VOID RtmpAsicSendCommandToSwMcu(
 {
 	BBP_CSR_CFG_STRUC  BbpCsr, BbpCsr2;
 	int             j, k;
+#if defined (WLAN_LED)
 	UINT16 Temp;
+#endif
 	
 	switch(Command)
 	{

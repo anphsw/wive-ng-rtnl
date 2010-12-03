@@ -1634,6 +1634,7 @@ static int __init eventpoll_init(void)
 
 epanic:
 	panic("eventpoll_init() failed\n");
+	return 0;
 }
 
 

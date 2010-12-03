@@ -53,7 +53,6 @@ BOOLEAN rtstrmactohex(PSTRING s1, PSTRING s2)
 
 }
 
-
 // we assume the s1 and s2 both are strings.
 BOOLEAN rtstrcasecmp(PSTRING s1, PSTRING s2)
 {

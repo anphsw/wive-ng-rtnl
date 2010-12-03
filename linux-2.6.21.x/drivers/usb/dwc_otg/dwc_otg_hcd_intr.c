@@ -1051,7 +1051,7 @@ static int32_t handle_hc_xfercomp_intr(dwc_otg_hcd_t *hcd,
 		break;
 	case PIPE_INTERRUPT:
 		DWC_DEBUGPL(DBG_HCDV, "  Interrupt transfer complete\n");
-#if DWC_OTG_HAS_SILEX_PATCH
+#ifdef DWC_OTG_HAS_SILEX_PATCH
 		urb_xfer_done = update_urb_state_xfer_comp(hc, hc_regs, urb, qtd);
 		if (urb_xfer_done) {
 			dwc_otg_hcd_complete_urb(hcd, urb, urb->status);

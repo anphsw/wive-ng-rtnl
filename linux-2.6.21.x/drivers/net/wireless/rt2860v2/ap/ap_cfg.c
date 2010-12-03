@@ -26,6 +26,11 @@
 
 
 #include "rt_config.h"
+
+#ifdef LINUX
+#include <linux/string.h>
+#endif
+
 #ifdef CONFIG_ASUS_EXT
 UINT ApcliMonitorPid = 0;
 extern UINT count_Alive;
@@ -1174,16 +1179,14 @@ static struct {
 	{NULL,}
 };
 
-#if 0
+#ifndef LINUX
 char tolower(char c)
 {
 	if (c>='A' && c<='Z')
 		return 'a' + (c - 'A');
 	return c;
 }
-#endif
 
-#if 1
 int strcasecmp(const char *s1, const char *s2)
 {
 	while ((*s1 == *s2) || (tolower(*s1) == tolower(*s2))) {

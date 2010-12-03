@@ -26,6 +26,10 @@
 #include <linux/notifier.h>
 #include <linux/signal.h>
 
+#ifdef CONFIG_OOM_EMBEDDED_REBOOT
+#include <linux/reboot.h>
+#endif
+
 int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
 #ifdef CONFIG_OOM_EMBEDDED

@@ -44,6 +44,7 @@ static int lm_bus_probe(struct device *dev)
 	if(lmdrv->probe !=NULL) {
 	    return lmdrv->probe(lmdev);
 	}
+    return 0;
 }
 
 static int lm_bus_remove(struct device *dev)

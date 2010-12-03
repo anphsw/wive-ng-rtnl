@@ -548,6 +548,7 @@ static inline unsigned int decode_config0(struct cpuinfo_mips *c)
 
 unknown:
 	panic(unknown_isa, config0);
+	return 0;
 }
 
 static inline unsigned int decode_config1(struct cpuinfo_mips *c)
