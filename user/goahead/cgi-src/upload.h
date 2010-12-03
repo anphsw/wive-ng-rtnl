@@ -142,10 +142,9 @@ char *nvram_get(char *buf, const char *param)
  */
 const char* getLanIfName(void)
 {
-	char buf[64];
 	const char *if_name = "br0";
-	
-	char *mode = nvram_get(buf, "OperationMode");
+	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
+
 	if (mode == NULL)
 		return if_name;
 	if (!strncmp(mode, "0", 2))

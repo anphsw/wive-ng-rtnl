@@ -1142,7 +1142,6 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 static void outputTimerForReload(webs_t wp, long delay)
 {
 	char lan_if_addr[32];
-	struct in_addr lan_ip;
 	const char *lan_if_ip;
 
 	if (getIfIp(getLanIfName(), lan_if_addr) != -1)

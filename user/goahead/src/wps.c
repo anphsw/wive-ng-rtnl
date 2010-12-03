@@ -491,8 +491,6 @@ static void GenPIN(webs_t wp, char_t *path, char_t *query)
  */
 static void OOB(webs_t wp, char_t *path, char_t *query)
 {
-	char SSID[64], mac[32];
-
 	// clear timer
 	resetTimerAll();
 

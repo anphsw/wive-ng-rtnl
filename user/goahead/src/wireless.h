@@ -25,7 +25,11 @@
 
 #ifndef _LINUX_WIRELESS_H
 #define _LINUX_WIRELESS_H
+
+#ifndef IFNAMSIZ
 #define IFNAMSIZ 16
+#endif
+
 /************************** DOCUMENTATION **************************/
 /*
  * Initial APIs (1996 -> onward) :
