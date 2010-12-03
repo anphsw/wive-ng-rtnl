@@ -106,37 +106,6 @@ void *getMemInFile(char *filename, int offset, int len)
 	return result;
 }
 
-//use libnvram
-#if 0
-char *nvram_get(char *buf, const char *param)
-{
-	char *nl;
-	char *result = NULL;
-	char cmdline[64];
-	FILE *fp;
-	
-	sprintf(cmdline, "nvram_get 2860 %s", param);
-	memset(buf, 0, sizeof(buf));
-
-	if ((fp = popen(cmdline, "r")) != NULL)
-	{
-		if (fgets(buf, sizeof(buf), fp))
-		{
-			if (strlen(buf)>0)
-			{
-				if ((nl = strchr(buf, '\n')) != NULL)
-					*nl = '\0';
-				result = buf;
-			}
-		}
-
-		pclose(fp);
-	}
-	
-	return result;
-}
-#endif
-
 /*
  * description: return LAN interface name
  */
