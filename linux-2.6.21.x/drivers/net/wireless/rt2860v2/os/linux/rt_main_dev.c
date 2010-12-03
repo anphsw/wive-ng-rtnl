@@ -299,6 +299,7 @@ int rt28xx_close(IN PNET_DEV dev)
 #ifdef CONFIG_STA_SUPPORT
 	// Lost AP, send disconnect & link down event
 	LinkDown(pAd, FALSE);
+	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
 #endif
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);
@@ -340,7 +341,6 @@ int rt28xx_close(IN PNET_DEV dev)
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		AsicDisableSync(pAd);
 		RTMPSetLED(pAd, LED_LINK_DOWN);
 		MlmeRadioOff(pAd);
 	}
@@ -356,9 +356,9 @@ int rt28xx_close(IN PNET_DEV dev)
 #ifdef CLIENT_WDS
 		CliWds_ProxyTabDestory(pAd);
 #endif // CLIENT_WDS //
+
 		// Shutdown Access Point function, release all related resources 
 		APShutdown(pAd);
-
 		// Free BssTab & ChannelInfo tabbles.
 		AutoChBssTableDestroy(pAd);
 		ChannelInfoDestroy(pAd);
@@ -424,12 +424,8 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // PCIE_PS_SUPPORT //
 
 			if (brc==FALSE)
-			{
 				DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
-			}
 	}
-	
-
 #endif // RTMP_MAC_PCI //
 
 	// Free IRQ
@@ -439,29 +435,24 @@ int rt28xx_close(IN PNET_DEV dev)
 		// Deregister interrupt function
 		RtmpOSIRQRelease(net_dev);
 #endif // RTMP_MAC_PCI //
+
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE);
 	}
 
 	// Free Ring or USB buffers
 	RTMPFreeTxRxRingMemory(pAd);
 
-	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-
 #ifdef DOT11_N_SUPPORT
 	// Free BA reorder resource
 	ba_reordering_resource_release(pAd);
 #endif // DOT11_N_SUPPORT //
 	
+	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
-/*+++Modify by woody to solve the bulk fail+++*/
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	{
-    	    printk("Waiting for STA driver down...\n");
-	    RTMPusecDelay(1500);
-	}
-#endif // CONFIG_STA_SUPPORT //
+	printk("Waiting for WiFi driver down...\n");
+	RTMPusecDelay(1500);
+
 #ifdef VENDOR_FEATURE2_SUPPORT
 	printk("Number of Packet Allocated = %d\n", pAd->NumOfPktAlloc);
 	printk("Number of Packet Freed = %d\n", pAd->NumOfPktFree);
@@ -1082,11 +1073,11 @@ BOOLEAN RtmpPhyNetDevExit(
 	// Unregister network device
 	if (net_dev != NULL)
 	{
-		printk("RtmpOSNetDevDetach(): RtmpOSNetDeviceDetach(), dev->name=%s!\n", net_dev->name);
+		printk("RtmpOSNetDevDetach(): dev->name=%s!\n", net_dev->name);
 		RtmpOSNetDevDetach(net_dev);
 	}
 
-	return TRUE;
+    return TRUE;
 	
 }
 

@@ -152,7 +152,6 @@ VOID rt2880_module_exit(VOID)
 #endif // WLAN_LED //
 
 		RtmpPhyNetDevExit(pAd, net_dev);
-
 		RtmpRaDevCtrlExit(pAd);
 	}
 	else
@@ -162,8 +161,5 @@ VOID rt2880_module_exit(VOID)
 	
 	// Free the root net_device.
 	RtmpOSNetDevFree(net_dev);
-
-
-	//wl_proc_exit();
 }
 
