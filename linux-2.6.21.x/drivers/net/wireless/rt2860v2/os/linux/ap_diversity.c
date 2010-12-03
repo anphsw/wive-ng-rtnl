@@ -386,12 +386,11 @@ static INT work_handler(IN void *Context)
 {
 	PRTMP_ADAPTER	pAd;
     RTMP_OS_TASK	*pTask;
-    int				Status = 0;
-	INT				AntArrayRSSI[]	= {0, 0, 0};		// 3 candidates
-	const INT		AntFixedIdx		= 1;			// Ant1 is unchanged;
-	INT				UpdateRSSI		= 0;
-	BOOLEAN			EVChanged		= FALSE;
-	INT				EVNotChangeCount= 0;
+    INT			AntArrayRSSI[]	= {0, 0, 0};		// 3 candidates
+    const INT		AntFixedIdx		= 1;			// Ant1 is unchanged;
+    INT			UpdateRSSI		= 0;
+    BOOLEAN		EVChanged		= FALSE;
+    INT			EVNotChangeCount= 0;
 
 //	rtmp_os_thread_init("rtmpAntDiversity", (PVOID)&(pAd->ad_notify));
 
