@@ -8661,9 +8661,8 @@ void dbQueueEnqueue(
 	IN UCHAR *data);
 #endif
 
-int rt28xx_close(IN PNET_DEV dev);
+void rt28xx_close(IN PNET_DEV dev);
 int rt28xx_open(IN PNET_DEV dev);
-
 
 #define VIRTUAL_IF_INC(__pAd) ((__pAd)->VirtualIfCnt++)
 #define VIRTUAL_IF_DEC(__pAd) ((__pAd)->VirtualIfCnt--)

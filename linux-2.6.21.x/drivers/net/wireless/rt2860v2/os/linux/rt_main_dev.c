@@ -51,7 +51,7 @@ MODULE_PARM_DESC (mac, "rt28xx: wireless mac addr");
 /*---------------------------------------------------------------------*/
 
 // public function prototype
-int rt28xx_close(IN struct net_device *net_dev);
+void rt28xx_close(IN struct net_device *net_dev);
 int rt28xx_open(struct net_device *net_dev);
 
 // private function prototype
@@ -247,7 +247,7 @@ Note:
 		(3) BA Reordering: 				ba_reordering_resource_release()
 ========================================================================
 */
-int rt28xx_close(IN PNET_DEV dev)
+void rt28xx_close(IN PNET_DEV dev)
 {
 	struct net_device * net_dev = (struct net_device *)dev;
 	RTMP_ADAPTER		*pAd = NULL;
@@ -258,7 +258,7 @@ int rt28xx_close(IN PNET_DEV dev)
 
 	// Sanity check for pAd
 	if (!pAd)
-		return 0; // allready close
+		return; // allready close
 
 	printk("===> rt28xx_close\n");
 
@@ -267,11 +267,6 @@ int rt28xx_close(IN PNET_DEV dev)
 	BG_FTPH_Remove();
 #endif // BG_FT_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-
-	Cancelled = FALSE;
-	if (!pAd)
-		return 0; // Allready close
-
 #ifdef WMM_ACM_SUPPORT
 	/* must call first */
 	ACMP_Release(pAd);
@@ -459,7 +454,7 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // VENDOR_FEATURE2_SUPPORT //
 
 	printk("<=== rt28xx_close\n");
-	return 0; // close ok
+
 } /* End of rt28xx_close */
 
 
