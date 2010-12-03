@@ -1016,7 +1016,7 @@ CONFIG_SQUASHFS_NOERROR=y
 # Partition Types
 #
 # CONFIG_PARTITION_ADVANCED is not set
-CONFIG_MSDOS_PARTITION=y
+# CONFIG_MSDOS_PARTITION is not set
 
 #
 # Native Language Support
