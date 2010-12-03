@@ -2508,7 +2508,6 @@ Arguments:
     Note:
     ==========================================================================
 */
-#ifndef CONFIG_ASUS_EXT
 PSTRING GetEncryptType(CHAR enc)
 {
     if(enc == Ndis802_11WEPDisabled)
@@ -2524,27 +2523,7 @@ PSTRING GetEncryptType(CHAR enc)
     else
     	return "UNKNOW";
 }
-#endif
 
-#ifdef CONFIG_ASUS_EXT
-PSTRING GetEncryptType(CHAR enc)
-{
-    if(enc == Ndis802_11WEPDisabled)
-        return "NONE";
-    if(enc == Ndis802_11WEPEnabled)
-    	return "WEP";
-    if(enc == Ndis802_11Encryption2Enabled)
-    	return "TKIP";
-    if(enc == Ndis802_11Encryption3Enabled)
-    	return "AES";
-    if(enc == Ndis802_11Encryption4Enabled)
-	return "AES";
-    else
-	return "Unknown";
-}
-#endif
-
-#ifndef CONFIG_ASUS_EXT
 PSTRING GetAuthMode(CHAR auth)
 {
     if(auth == Ndis802_11AuthModeOpen)
@@ -2570,42 +2549,6 @@ PSTRING GetAuthMode(CHAR auth)
 	
     	return "UNKNOW";
 }
-#endif
-
-#ifdef CONFIG_ASUS_EXT
-PSTRING GetAuthMode(CHAR auth)
-{
-    if(auth == Ndis802_11AuthModeOpen)
-    	return "OPEN";
-    if(auth == Ndis802_11AuthModeShared)
-    	return "SHARED";
-    if(auth == Ndis802_11AuthModeAutoSwitch)
-//	return "AUTOWEP";
-	return "WEP";
-    if(auth == Ndis802_11AuthModeWPA)
-//    	return "WPA";
-	return "WPA-Enterprise";
-    if(auth == Ndis802_11AuthModeWPAPSK)
-//    	return "WPAPSK";
-	return "WPA-Personal";
-    if(auth == Ndis802_11AuthModeWPANone)
-    	return "WPANONE";
-    if(auth == Ndis802_11AuthModeWPA2)
-//    	return "WPA2";
-	return "WPA2-Enterprise";
-    if(auth == Ndis802_11AuthModeWPA2PSK)
-//	return "WPA2PSK";
-	return "WPA2-Personal";
-    if(auth == Ndis802_11AuthModeWPA1WPA2)
-//	return "WPA1WPA2";
-	return "WPA2-Enterprise";
-    if(auth == Ndis802_11AuthModeWPA1PSKWPA2PSK)
-//	return "WPA1PSKWPA2PSK";
-	return "WPA2-Personal";
-
-	return "Unknown";
-}		
-#endif
 
 /* 
     ==========================================================================
@@ -2632,6 +2575,7 @@ PSTRING GetAuthMode(CHAR auth)
 #define	WPS_LINE_LEN	(4+5)	// WPS+DPID
 #endif // WSC_STA_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
+
 VOID	RTMPCommSiteSurveyData(
 	IN  PSTRING		msg,
 	IN  PBSS_ENTRY	pBss)
@@ -2640,14 +2584,12 @@ VOID	RTMPCommSiteSurveyData(
 	UINT        Rssi_Quality = 0;
 	NDIS_802_11_NETWORK_TYPE    wireless_mode;
 	CHAR		Ssid[MAX_LEN_OF_SSID +1];
-#ifdef CONFIG_ASUS_EXT
 	STRING		SecurityStr[32] = {0};
-#endif
+
 	NDIS_802_11_ENCRYPTION_STATUS	ap_cipher = Ndis802_11EncryptionDisabled;
 	NDIS_802_11_AUTHENTICATION_MODE	ap_auth_mode = Ndis802_11AuthModeOpen;
 
 	memset(Ssid, 0 ,(MAX_LEN_OF_SSID +1));
-#ifdef CONFIG_ASUS_EXT
 		//Channel
 		sprintf(msg+strlen(msg),"%-3d", pBss->Channel);
 		//SSID
@@ -2662,8 +2604,6 @@ VOID	RTMPCommSiteSurveyData(
 			pBss->Bssid[3], 
 			pBss->Bssid[4], 
 			pBss->Bssid[5]);
-#endif
-	
 	//Security
 	if ((Ndis802_11AuthModeWPA <= pBss->AuthMode) &&
 		(pBss->AuthMode <= Ndis802_11AuthModeWPA1PSKWPA2PSK))
@@ -2739,12 +2679,9 @@ VOID	RTMPCommSiteSurveyData(
 					 (pBss->WPA.PairCipherAux == Ndis802_11WEPDisabled))
 				ap_cipher = pBss->WPA.PairCipher;
 		}
-#ifdef CONFIG_ASUS_EXT
 		sprintf(SecurityStr+strlen(SecurityStr),"%-9s", GetEncryptType((CHAR)ap_cipher));
 		sprintf(SecurityStr+strlen(SecurityStr),"%-16s", GetAuthMode((CHAR)ap_auth_mode));
-#endif
 	}			
-#ifdef CONFIG_ASUS_EXT
 	else
 	{
 		ap_auth_mode = pBss->AuthMode;
@@ -2760,7 +2697,6 @@ VOID	RTMPCommSiteSurveyData(
 		}
 	}
 	sprintf(msg+strlen(msg), "%-25s", SecurityStr);
-#endif
 		// Rssi
 		Rssi = (INT)pBss->Rssi;
 		if (Rssi >= -50)
@@ -2774,7 +2710,6 @@ VOID	RTMPCommSiteSurveyData(
 		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
 		// Wireless Mode
 		wireless_mode = NetworkTypeInUseSanity(pBss);
-#ifdef CONFIG_ASUS_EXT
 		if (wireless_mode == Ndis802_11FH ||
 			wireless_mode == Ndis802_11DS)
 			sprintf(msg+strlen(msg),"%-8s", "11b");
@@ -2788,8 +2723,6 @@ VOID	RTMPCommSiteSurveyData(
 			sprintf(msg+strlen(msg),"%-8s", "11b/g/n");
 		else
 			sprintf(msg+strlen(msg),"%-8s", "unknown");
-#endif
-#ifndef CONFIG_ASUS_EXT
 		// Ext Channel						// use Central Channel instead
 		if (pBss->AddHtInfoLen > 0)
 		{
@@ -2804,8 +2737,6 @@ VOID	RTMPCommSiteSurveyData(
 		{
 			sprintf(msg+strlen(msg),"%-7s", " NONE");
 		}
-#endif	
-#ifdef CONFIG_ASUS_EXT
 		//Network Type		
 		if (pBss->BssType == BSS_ADHOC)
 			sprintf(msg+strlen(msg),"%-3s", "Ad ");
@@ -2813,7 +2744,6 @@ VOID	RTMPCommSiteSurveyData(
 			sprintf(msg+strlen(msg),"%-3s", "In ");
 		//Central Channel
 		sprintf(msg+strlen(msg),"%-2d", pBss->CentralChannel);
-#endif
         sprintf(msg+strlen(msg),"\n");
 	
 	return;
@@ -2827,7 +2757,7 @@ VOID RTMPIoctlGetSiteSurvey(
 	INT 		i=0;	 
 	INT			WaitCnt;
 	INT 		Status=0;	
-    INT         max_len = LINE_LEN;		
+	INT         	max_len = LINE_LEN;		
 	PBSS_ENTRY	pBss;
 
 #ifdef CONFIG_STA_SUPPORT
@@ -2846,12 +2776,8 @@ VOID RTMPIoctlGetSiteSurvey(
 
 	memset(msg, 0 ,(MAX_LEN_OF_BSS_TABLE)*max_len );
 	sprintf(msg,"%s","\n");
-//	sprintf(msg+strlen(msg),"%-4s%-33s%-20s%-23s%-9s%-7s%-7s%-3s\n",
-//	    "Ch", "SSID", "BSSID", "Security", "Siganl(%)", "W-Mode", " ExtCH"," NT");
-#ifdef CONFIG_ASUS_EXT
-	sprintf(msg+strlen(msg),"%-3s%-33s%-18s%-9s%-16s%-9s%-8s%-2s%-3s\n",
-	    "Ch", "SSID", "BSSID", "Enc", "Auth", "Siganl(%)", "W-Mode", "NT", " CC");
-#endif
+	sprintf(msg+strlen(msg),"%-4s%-33s%-20s%-23s%-9s%-7s%-7s%-3s\n",
+	    "Ch", "SSID", "BSSID", "Security", "Siganl(%)", "W-Mode", " ExtCH"," NT");
 	
 #ifdef CONFIG_STA_SUPPORT
 #ifdef WSC_STA_SUPPORT
@@ -2895,7 +2821,6 @@ VOID RTMPIoctlGetSiteSurvey(
 		else
 			sprintf(msg+strlen(msg),"%-5s\n", " ");
 #endif // WSC_STA_SUPPORT //
-
 #endif // CONFIG_STA_SUPPORT //
 	}
 

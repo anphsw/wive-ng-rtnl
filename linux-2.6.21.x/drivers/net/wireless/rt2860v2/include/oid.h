@@ -404,11 +404,11 @@ typedef struct _NDIS_802_11_PMKID_CANDIDATE_LIST
 // Added new types for OFDM 5G and 2.4G
 typedef enum _NDIS_802_11_NETWORK_TYPE
 {
-   Ndis802_11FH, 
-   Ndis802_11DS, 
+    Ndis802_11FH, 
+    Ndis802_11DS, 
     Ndis802_11OFDM5,    
     Ndis802_11OFDM24,
-	Ndis802_11Automode,
+    Ndis802_11Automode,
     Ndis802_11OFDM5_N,
     Ndis802_11OFDM24_N,
     Ndis802_11NetworkTypeMax    // not a real type, defined as an upper bound

@@ -26,11 +26,7 @@
 	Fonchi		2006-06-23      modified for rt61-APClinent
 */
 #ifdef APCLI_SUPPORT
-
 #include "rt_config.h"
-#ifdef CONFIG_ASUS_EXT
-UINT count_DeAssoc;
-#endif
 
 static VOID ApCliCtrlJoinReqAction(
 	IN PRTMP_ADAPTER pAd, 
