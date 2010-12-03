@@ -3312,30 +3312,10 @@ VOID	WscInitRegistrarPair(
 #endif // CONFIG_STA_SUPPORT //
 	
 	// 7. Model Number
-//	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, WSC_MODEL_NUMBER, sizeof(WSC_MODEL_NUMBER));
-#ifdef CONFIG_ASUS_EXT
-	char pid_tmpstr[12];
-	memset(pid_tmpstr, 0, 12);
-	sprintf(pid_tmpstr, "%s", "WR-NL");
-	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, pid_tmpstr, strlen(pid_tmpstr));
-#endif
+	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, WSC_MODEL_NUMBER, sizeof(WSC_MODEL_NUMBER));
 	
 	// 8. Serial Number
-//	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, WSC_MODEL_SERIAL, sizeof(WSC_MODEL_SERIAL));
-#ifdef CONFIG_ASUS_EXT
-#ifdef CONFIG_AP_SUPPORT
-	char tmpstr[17];
-	sprintf(tmpstr, "%02x:%02x:%02x:%02x:%02x:%02x", pAdapter->ApCfg.MBSSID[apidx].Bssid[0],
-							 pAdapter->ApCfg.MBSSID[apidx].Bssid[1],
-							 pAdapter->ApCfg.MBSSID[apidx].Bssid[2],
-							 pAdapter->ApCfg.MBSSID[apidx].Bssid[3],
-							 pAdapter->ApCfg.MBSSID[apidx].Bssid[4],
-							 pAdapter->ApCfg.MBSSID[apidx].Bssid[5]);
-	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, tmpstr, 17);
-#else
 	NdisMoveMemory(&pWscControl->RegData.SelfInfo.SerialNumber, WSC_MODEL_SERIAL, sizeof(WSC_MODEL_SERIAL));
-#endif
-#endif
 
 	// 9. Authentication Type Flags
 	// Open(=1), WPAPSK(=2),Shared(=4), WPA2PSK(=20),WPA(=8),WPA2(=10)
@@ -5513,39 +5493,6 @@ void    WscWriteConfToPortCfg(
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- ra%d - WscWriteConfToPortCfg\n", CurApIdx));
 }
 
-#ifdef CONFIG_ASUS_EXT
-void char_to_ascii(char *output, char *input)
-{
-	int i;
-	char tmp[10];
-	char *ptr;
-
-	ptr = output;
-
-	for( i=0; i<strlen(input); i++ )
-	{
-		if((input[i]>='0' && input[i] <='9')
-		   ||(input[i]>='A' && input[i]<='Z')
-		   ||(input[i] >='a' && input[i]<='z')
-		   || input[i] == '!' || input[i] == '*'
-		   || input[i] == '(' || input[i] == ')'
-		   || input[i] == '_' || input[i] == '-'
-		   || input[i] == "'" || input[i] == '.')
-		{
-			*ptr = input[i];
-			ptr ++;
-		}
-		else
-		{
-			sprintf(tmp, "%%%.02X", input[i]);
-			strcpy(ptr, tmp);
-			ptr += 3;
-		}
-	}
-	*(ptr) = '\0';
-}
-#endif
-
 VOID	WscWriteSsidToDatFile(
 	IN  PRTMP_ADAPTER	pAd,
 	IN  PSTRING		 	pTempStr,
@@ -5553,12 +5500,8 @@ VOID	WscWriteSsidToDatFile(
 {
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR	apidx;
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 	INT		offset = 0;
-
-#ifdef CONFIG_ASUS_EXT
-	char tmpstr[128];
-#endif
 
 	if (bNewFormat == FALSE)
 	{		
@@ -5581,15 +5524,6 @@ VOID	WscWriteSsidToDatFile(
 					offset += 1;
 				}
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
-
-#ifdef CONFIG_ASUS_EXT
-				if (apidx == 0)
-				{
-					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
-					memset(tmpstr, 0x0, 128);
-					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
-				}
-#endif
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5600,20 +5534,6 @@ VOID	WscWriteSsidToDatFile(
 			NdisMoveMemory(pTempStr, "SSID=", strlen("SSID="));
 			offset = strlen(pTempStr);
 			NdisMoveMemory(pTempStr + offset, pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
-#ifdef CONFIG_ASUS_EXT
-			printk("Current SSID=%s\n", pCredential->SSID.Ssid);
-			memset(tmpstr, 0x0, 128);
-			char_to_ascii(tmpstr, pCredential->SSID.Ssid);
-			memset(tmpstr, 0x0, 128);
-			sprintf(tmpstr, "%02X:%02X:%02X:%02X:%02X:%02X",
-				pCredential->MacAddr[0], 
-				pCredential->MacAddr[1],
-				pCredential->MacAddr[2], 
-				pCredential->MacAddr[3], 
-				pCredential->MacAddr[4], 
-				pCredential->MacAddr[5]);
-			printk("AP BSSID=%s\n", tmpstr);
-#endif
 		}
 #endif // CONFIG_STA_SUPPORT //
 	}
@@ -5632,14 +5552,6 @@ VOID	WscWriteSsidToDatFile(
 				NdisMoveMemory(pTempStr + offset, "=", 1);
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen);
-#ifdef CONFIG_ASUS_EXT
-				if (apidx == 0)
-				{
-					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
-					memset(tmpstr, 0x0, 128);
-					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
-				}
-#endif
 			}
 			NdisZeroMemory(item_str, 10);
 		}
@@ -5685,15 +5597,6 @@ VOID	WscWriteWpaPskToDatFile(
 					offset += 1;
 				}
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-
-#ifdef CONFIG_ASUS_EXT
-				if (apidx == 0)
-				{
-					memset(tmpstr, 0x0, 128);
-					memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-					printk("Current WPA-PSK=%s\n", tmpstr);
-				}
-#endif
 			}
 		}
 #endif // CONFIG_AP_SUPPORT //
@@ -5706,12 +5609,6 @@ VOID	WscWriteWpaPskToDatFile(
 			{
 				offset = strlen(pTempStr);				
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-
-#ifdef CONFIG_ASUS_EXT
-				memset(tmpstr, 0x0, 128);
-				memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-				printk("Current WPA-PSK=%s\n", tmpstr);
-#endif
 			}
 		}
 #endif // CONFIG_STA_SUPPORT //
@@ -5732,14 +5629,6 @@ VOID	WscWriteWpaPskToDatFile(
 				NdisMoveMemory(pTempStr + offset, "=", 1);
 				offset += 1;
 				NdisMoveMemory(pTempStr + offset, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-#ifdef CONFIG_ASUS_EXT
-				if (apidx == 0)
-				{
-					memset(tmpstr, 0x0, 128);
-					memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
-					printk("Current WPA-PSK=%s\n", tmpstr);
-				}
-#endif
 			}
 			NdisZeroMemory(item_str, 10);
 		}
@@ -7544,10 +7433,6 @@ void    WscWriteConfToDatFile(
 	STRING			WepKeyFormatName[10] = {0};
 	INT				tempStrLen = 0;
 
-#ifdef CONFIG_ASUS_EXT
-	char tmpstr[128];
-#endif
-
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscWriteConfToDatFile\n"));
 
 #ifdef CONFIG_AP_SUPPORT
@@ -7770,11 +7655,6 @@ void    WscWriteConfToDatFile(
 							if (index == 0)
 							{
 								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
-#ifdef CONFIG_ASUS_EXT
-							printk("Current DefaultKeyID=%d\n", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
-							memset(tmpstr, 0x0, 128);
-							sprintf(tmpstr, "%d", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
-#endif
 							}
 							else
 								sprintf(pTempStr, "%s;%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
@@ -7785,11 +7665,6 @@ void    WscWriteConfToDatFile(
 					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 					{
 						sprintf(pTempStr, "%s%d", pTempStr, pAd->StaCfg.DefaultKeyId+1);
-#ifdef CONFIG_ASUS_EXT
-						printk("Current DefaultKeyID=%d\n", pAd->StaCfg.DefaultKeyId+1);
-						memset(tmpstr, 0x0, 128);
-						sprintf(tmpstr, "%d", pAd->StaCfg.DefaultKeyId+1);
-#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -7835,12 +7710,6 @@ void    WscWriteConfToDatFile(
 							if (apidx < (pAd->ApCfg.BssidNum - 1))
 								sprintf(pTempStr, "%s;", pTempStr);
 						}
-#ifdef CONFIG_ASUS_EXT
-						if (apidx == 0)
-						{
-							pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
-						}
-#endif
 					}
 				}
 				else if ((strncmp(pTempStr, WepKeyName, strlen(WepKeyFormatName)) == 0) &&
@@ -7866,44 +7735,6 @@ void    WscWriteConfToDatFile(
 							{
 								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
 							}
-#ifdef CONFIG_ASUS_EXT
-							if (apidx == 0)
-							{
-								int ii;
-								if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 13))
-								{
-									int flag_hex=0;
-									for (ii=0; ii<pCredentail->KeyLength; ii++)
-										if (pCredentail->Key[ii]<32 || pCredentail->Key[ii]>126)
-										{
-											flag_hex=1;
-											break;
-										}
-		
-									if (flag_hex)
-									{
-						        			memset(tmpstr, 0x0, 128);
-			                                			for (ii=0; ii<pCredentail->KeyLength; ii++)
-											sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
-										printk("Don't try to fool me with non-ASCII chars!\n");
-										printk("Wep Key:%s\n", tmpstr);
-										printk("Wep Key Type:HEX\n");
-									}
-									else
-									{
-										printk("Wep Key:%s\n", pCredentail->Key);
-										printk("Wep Key Type:ASCII\n");
-									}
-								}
-								else
-								{
-									memset(tmpstr, 0x0, 128);
-									memcpy(tmpstr, pCredentail->Key, pCredentail->KeyLength);
-									printk("Wep Key:%s\n", tmpstr);
-									printk("Wep Key Type:HEX\n");
-								}
-							}
-#endif
 						}
 					}
 				}
@@ -7935,40 +7766,6 @@ void    WscWriteConfToDatFile(
 							{
 								NdisMoveMemory(pTempStr + tempStrLen, pCredentail->Key, pCredentail->KeyLength);
 
-#ifdef CONFIG_ASUS_EXT
-								int ii;
-								if (pCredentail->KeyLength == 5 || pCredentail->KeyLength == 13)
-								{
-									int flag_hex=0;
-									for (ii=0; ii<pCredentail->KeyLength; ii++)
-										if (	pCredentail->Key[ii]<32 ||
-											pCredentail->Key[ii]>126
-										)
-										{
-											flag_hex=1;
-											break;
-										}
-									if (flag_hex)
-									{
-                	        				        	memset(tmpstr, 0x0, 128);
-					                                	for (ii=0; ii<pCredentail->KeyLength; ii++)
-											sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
-										printk("Don't try to fool me with non-ASCII chars!\n");
-										printk("Wep Key:%s\n", tmpstr);
-										printk("Wep Key Type:HEX\n");
-									}
-									else
-									{
-										printk("Wep Key:%s\n", pCredentail->Key);
-										printk("Wep Key Type:ASCII\n");
-									}
-								}
-								else
-								{
-									printk("Wep Key:%s\n", pCredentail->Key);
-									printk("Wep Key Type:HEX\n");
-								}
-#endif
 							}
 					}
 				}
