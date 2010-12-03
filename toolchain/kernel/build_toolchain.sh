@@ -5,7 +5,7 @@
 #urpmi -a libmpc- --download-all --allow-force
 #urpmi -a mpfr- --download-all --allow-force
 
-DIR="/opt/toolchain-mipsel"
+DIR=`pwd`
 BINUTILVER=binutils-2.20.1
 GCCVER=gcc-4.2.4
 
