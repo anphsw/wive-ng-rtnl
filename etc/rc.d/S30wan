@@ -67,6 +67,9 @@ start() {
 	$LOG "wan service: unknown wan connection type: $wanmode"
 	exit 1
     fi
+    #Flush conntrack table and route cache
+    echo 1 > /proc/sys/net/nf_conntrack_flush
+    ip route flush cache
 }
 
 stop() {

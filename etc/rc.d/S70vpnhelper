@@ -73,7 +73,9 @@ stop() {
 		rm -f /tmp/ip-down-route-reload
 	    fi
 	fi
+	#Flush route cache and conntrack table
 	ip route flush cache
+	echo 1 > /proc/sys/net/nf_conntrack_flush
     fi
 
     #remove VPN server IP file
