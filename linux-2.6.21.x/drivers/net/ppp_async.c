@@ -36,7 +36,7 @@
 
 #define PPP_VERSION	"2.4.2"
 
-#define OBUFSIZE	256
+#define OBUFSIZE	4096
 
 /* Structure for storing local state. */
 struct asyncppp {
@@ -158,13 +158,15 @@ ppp_asynctty_open(struct tty_struct *tty)
 	struct asyncppp *ap;
 	int err;
 
+        if (tty->ops->write == NULL)
+                return -EOPNOTSUPP;
+
 	err = -ENOMEM;
-	ap = kmalloc(sizeof(*ap), GFP_KERNEL);
-	if (ap == 0)
+	ap = kzalloc(sizeof(*ap), GFP_KERNEL);
+	if (!ap)
 		goto out;
 
 	/* initialize the asyncppp structure */
-	memset(ap, 0, sizeof(*ap));
 	ap->tty = tty;
 	ap->mru = PPP_MRU;
 	spin_lock_init(&ap->xmit_lock);
@@ -231,10 +233,10 @@ ppp_asynctty_close(struct tty_struct *tty)
 	tasklet_kill(&ap->tsk);
 
 	ppp_unregister_channel(&ap->chan);
-	if (ap->rpkt != 0)
+	if (ap->rpkt)
 		kfree_skb(ap->rpkt);
 	skb_queue_purge(&ap->rqueue);
-	if (ap->tpkt != 0)
+	if (ap->tpkt)
 		kfree_skb(ap->tpkt);
 	kfree(ap);
 }
@@ -286,13 +288,13 @@ ppp_asynctty_ioctl(struct tty_struct *tty, struct file *file,
 	int err, val;
 	int __user *p = (int __user *)arg;
 
-	if (ap == 0)
+	if (!ap)
 		return -ENXIO;
 	err = -EFAULT;
 	switch (cmd) {
 	case PPPIOCGCHAN:
 		err = -ENXIO;
-		if (ap == 0)
+		if (!ap)
 			break;
 		err = -EFAULT;
 		if (put_user(ppp_channel_index(&ap->chan), p))
@@ -302,7 +304,7 @@ ppp_asynctty_ioctl(struct tty_struct *tty, struct file *file,
 
 	case PPPIOCGUNIT:
 		err = -ENXIO;
-		if (ap == 0)
+		if (!ap)
 			break;
 		err = -EFAULT;
 		if (put_user(ppp_unit_number(&ap->chan), p))
@@ -355,7 +357,7 @@ ppp_asynctty_receive(struct tty_struct *tty, const unsigned char *buf,
 	struct asyncppp *ap = ap_get(tty);
 	unsigned long flags;
 
-	if (ap == 0)
+	if (!ap)
 		return;
 	spin_lock_irqsave(&ap->recv_lock, flags);
 	ppp_async_input(ap, buf, cflags, count);
@@ -374,7 +376,7 @@ ppp_asynctty_wakeup(struct tty_struct *tty)
 	struct asyncppp *ap = ap_get(tty);
 
 	clear_bit(TTY_DO_WRITE_WAKEUP, &tty->flags);
-	if (ap == 0)
+	if (!ap)
 		return;
 	set_bit(XMIT_WAKEUP, &ap->xmit_flags);
 	tasklet_schedule(&ap->tsk);
@@ -720,7 +722,7 @@ ppp_async_push(struct asyncppp *ap)
 
 flush:
 	clear_bit(XMIT_BUSY, &ap->xmit_flags);
-	if (ap->tpkt != 0) {
+	if (ap->tpkt) {
 		kfree_skb(ap->tpkt);
 		ap->tpkt = NULL;
 		clear_bit(XMIT_FULL, &ap->xmit_flags);
@@ -853,7 +855,7 @@ ppp_async_input(struct asyncppp *ap, const unsigned char *buf,
 		s = 0;
 		for (i = 0; i < count; ++i) {
 			c = buf[i];
-			if (flags != 0 && flags[i] != 0)
+			if (flags && flags[i] != 0)
 				continue;
 			s |= (c & 0x80)? SC_RCV_B7_1: SC_RCV_B7_0;
 			c = ((c >> 4) ^ c) & 0xf;
@@ -870,7 +872,7 @@ ppp_async_input(struct asyncppp *ap, const unsigned char *buf,
 			n = scan_ordinary(ap, buf, count);
 
 		f = 0;
-		if (flags != 0 && (ap->state & SC_TOSS) == 0) {
+		if (flags && (ap->state & SC_TOSS) == 0) {
 			/* check the flags to see if any char had an error */
 			for (j = 0; j < n; ++j)
 				if ((f = flags[j]) != 0)
@@ -883,9 +885,9 @@ ppp_async_input(struct asyncppp *ap, const unsigned char *buf,
 		} else if (n > 0 && (ap->state & SC_TOSS) == 0) {
 			/* stuff the chars in the skb */
 			skb = ap->rpkt;
-			if (skb == 0) {
+			if (!skb) {
 				skb = dev_alloc_skb(ap->mru + PPP_HDRLEN + 2);
-				if (skb == 0)
+				if (!skb)
 					goto nomem;
  				ap->rpkt = skb;
  			}
@@ -932,7 +934,7 @@ ppp_async_input(struct asyncppp *ap, const unsigned char *buf,
 		++n;
 
 		buf += n;
-		if (flags != 0)
+		if (flags)
 			flags += n;
 		count -= n;
 	}
