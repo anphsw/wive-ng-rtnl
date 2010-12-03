@@ -228,6 +228,8 @@ static int rt2860_suspend(
 
 		// take down the device
 		rt28xx_close(net_dev);
+
+		RT_MOD_DEC_USE_COUNT();
 	}
 
 	// reference to http://vovo2000.com/type-lab/linux/kernel-api/linux-kernel-api.html
@@ -1934,7 +1936,7 @@ VOID rt2860_stop(struct net_device *net_dev)
 	else
 		pAd = net_dev->ml_priv;
  
-	if (pAd) {
+	if (VIRTUAL_IF_NUM(pAd) > 0)
 
 		// stop interface
 		netif_carrier_off(net_dev);
@@ -1949,6 +1951,8 @@ VOID rt2860_stop(struct net_device *net_dev)
 
 		// take down the device
 		rt28xx_close(net_dev);
+
+		RT_MOD_DEC_USE_COUNT();
 	}
     return;
 }
@@ -1964,7 +1968,7 @@ static int rt2860_shutdown(
 	rt2860_stop(net_dev);
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== %s\n", __FUNCTION__));
     
-    pci_disable_device(pci_dev);
+	pci_disable_device(pci_dev);
     
 	return 0;
 }
