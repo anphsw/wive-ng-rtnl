@@ -269,6 +269,8 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // CONFIG_AP_SUPPORT //
 
 	Cancelled = FALSE;
+	if (!pAd)
+		return 0; // Allready close
 
 #ifdef WMM_ACM_SUPPORT
 	/* must call first */
@@ -279,10 +281,6 @@ int rt28xx_close(IN PNET_DEV dev)
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 	RT3XXX_AntDiversity_Fini(pAd);
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
-
-#ifdef WDS_SUPPORT
-	WdsDown(pAd);
-#endif // WDS_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -296,7 +294,6 @@ int rt28xx_close(IN PNET_DEV dev)
 		if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE))
 					AsicForceWakeup(pAd, TRUE);
 
-		MlmeRadioOff(pAd);
 #ifdef RTMP_MAC_PCI
 		pAd->bPCIclkOff = FALSE;    
 #endif // RTMP_MAC_PCI //
@@ -304,6 +301,10 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // CONFIG_STA_SUPPORT //
 
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
+
+#ifdef WDS_SUPPORT
+	WdsDown(pAd);
+#endif // WDS_SUPPORT //
 
 	for (i = 0 ; i < NUM_OF_TX_RING; i++)
 	{
@@ -340,6 +341,7 @@ int rt28xx_close(IN PNET_DEV dev)
 	{
 		MacTableReset(pAd);
 		RTMPSetLED(pAd, LED_LINK_DOWN);
+		MlmeRadioOff(pAd);
 	}
 #endif // CONFIG_STA_SUPPORT //
 
