@@ -193,6 +193,10 @@
 24) Some fix iptables code<br>
 25) Fix defaults for init wifi<br>
 26) Fix update firmware at small memory device<br>
+27) Some rewrite wifi drivers<br>
+28) Remove dead code in wifi and nvram<br>
+29) Some wifi function now works in native mode<br>
+30) Fix build if all wifi driver options is set<br>
 
 <br><br>
 <b>For support see:</b><br>

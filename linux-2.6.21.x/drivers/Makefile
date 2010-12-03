@@ -5,7 +5,6 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-$(CONFIG_IS_ASUS)          += nvram/
 #added by Steven Liu
 obj-$(CONFIG_RALINK_FLASH_API) += flash/
 #--

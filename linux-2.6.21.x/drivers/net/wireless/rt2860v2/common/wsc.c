@@ -5571,10 +5571,6 @@ VOID	WscWriteWpaPskToDatFile(
 	PWSC_CTRL		pWscControl;
 	INT				offset = 0;
 
-#ifdef  CONFIG_ASUS_EXT
-	char tmpstr[128];
-#endif
-
 	if (bNewFormat == FALSE)
 	{		
 		NdisZeroMemory(pTempStr, 512);
