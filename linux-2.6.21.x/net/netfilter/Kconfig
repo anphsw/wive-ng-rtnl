@@ -16,11 +16,6 @@ choice
 
 endchoice
 
-config USER_CLEAN_NAT
-	bool "Proc interface for conntrack clean"
-	depends on NET && INET && NETFILTER
-	default y
-
 config NETFILTER_NETLINK
        tristate "Netfilter netlink interface"
        help
@@ -745,14 +740,6 @@ config NETFILTER_XT_MATCH_HASHLIMIT
 config ASUS_QOS
 	bool "Asus conntrack based QoS support Enable"
 	depends on NF_CONNTRACK_ENABLED
-
-config USER_CLEAN_NAT
-        default y
-        bool "Clean NAT session driver."
-        depends on IP_NF_CONNTRACK
-        ---help---
-          Pronets add the clean nat module.
-          If unsure, say M.
 
 endmenu
 

@@ -53,13 +53,12 @@ lan2_netmask=`nvram_get 2860 lan2_netmask`
 	fi
     fi
 
+    $LOG "Cleanup conntrack table"
+    echo 1 > /proc/sys/net/nf_conntrack_flush
+
     $LOG "Flush route cache"
     ip route flush cache
 
-    if [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
-	$LOG "Cleanup conntrack table"
-	echo 0 > /proc/cleannat
-    fi
 
     $LOG "Restart need service and rebuild shaper and iptables rules"
     services_restart.sh pppd

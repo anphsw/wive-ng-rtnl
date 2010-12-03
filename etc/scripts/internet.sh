@@ -126,8 +126,8 @@ apcli_config() {
 }
 
 #clear conntrack tables
-if [ "$MODE" != "wifionly" ] && [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
-    echo 0 > /proc/cleannat
+if [ "$MODE" != "wifionly" ]; then
+    echo 1 > /proc/sys/net/nf_conntrack_flush
 fi
 
 #All WDS interfaces down and reload wifi modules

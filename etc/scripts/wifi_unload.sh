@@ -26,10 +26,8 @@ rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ip
 sysctl -w net.ipv4.ip_forward=0
 sysctl -w net.ipv4.conf.default.mc_forwarding=0
 
-#clear conntrack tables                                                                                                                     
-if [ "$CONFIG_USER_CLEAN_NAT" != "" ]; then
-    echo 0 > /proc/cleannat
-fi
+#clear conntrack tables
+echo 1 > /proc/sys/net/nf_conntrack_flush
 
 #clear route cache
 ip route flush cache
