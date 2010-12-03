@@ -16,6 +16,11 @@ choice
 
 endchoice
 
+config USER_CLEAN_NAT
+	bool "Proc interface for conntrack clean"
+	depends on NET && INET && NETFILTER
+	default y
+
 config NETFILTER_NETLINK
        tristate "Netfilter netlink interface"
        help
