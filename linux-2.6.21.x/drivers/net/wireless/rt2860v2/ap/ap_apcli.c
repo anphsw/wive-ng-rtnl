@@ -50,13 +50,6 @@
 #ifdef APCLI_SUPPORT
 
 #include "rt_config.h"
-#ifdef CONFIG_ASUS_EXT
-#define Link_Up_Threshold 3
-extern UINT count_DeAssoc;
-UINT count_Alive;
-UINT flag_Reconnect;
-extern UINT ApcliMonitorPid;
-#endif
 
 /* --------------------------------- Public -------------------------------- */
 /*
@@ -1025,11 +1018,6 @@ VOID ApCliIfUp(
 			&& (pApCliEntry->Enable == TRUE)
 			&& (pApCliEntry->Valid == FALSE))
 		{
-#ifdef CONFIG_ASUS_EXT
-			count_Alive=0;
-			count_DeAssoc=0;
-			flag_Reconnect = (flag_Reconnect % 65535) + 1;
-#endif
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) ApCli interface[%d] startup.\n", __FUNCTION__, ifIndex));
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_JOIN_REQ, 0, NULL, ifIndex);
 		}
@@ -1102,45 +1090,6 @@ VOID ApCliIfMonitor(
 			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: Reconnect the Root-Ap again.\n"));
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
 			RTMP_MLME_HANDLER(pAd);
-		}
-#endif
-#ifdef CONFIG_ASUS_EXT
-		if ((pApCliEntry->Valid == TRUE))
-		{
-			if ((RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
-			{
-				DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: IF(apcli%d) - no Beancon is received from root-AP.\n", index));
-				DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: Reconnect the Root-Ap again.\n"));
-
-				count_Alive=0;
-				count_DeAssoc=0;
-				flag_Reconnect = (flag_Reconnect % 65535) + 1;
-				MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
-				RTMP_MLME_HANDLER(pAd);
-			}
-			else
-			{
-#ifdef CONFIG_ASUS_EXT
-				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc && !strcmp(nvram_get("sta_connected"), "1"))
-#else
-				if (++count_Alive == Link_Up_Threshold && flag_Reconnect && !count_DeAssoc)
-#endif
-				{
-					printk("Wireless Driver: link down & up!\n");
-
-					if ((flag_Reconnect > 2) && ApcliMonitorPid)
-					{
-						flag_Reconnect = 0;
-						printk("Wireless Driver: send SIGUSR2 to PID %d\n", ApcliMonitorPid);
-						kill_proc(ApcliMonitorPid, SIGUSR2, 1);
-					}
-				}
-				else if (flag_Reconnect && count_Alive > Link_Up_Threshold * 2)	// reset flag_Reconnect
-					flag_Reconnect = 0;
-
-				if (count_Alive == 65535)
-					count_Alive = Link_Up_Threshold * 2;
-			}
 		}
 #endif
 	}

@@ -31,12 +31,6 @@
 #include <linux/string.h>
 #endif
 
-#ifdef CONFIG_ASUS_EXT
-UINT ApcliMonitorPid = 0;
-extern UINT count_Alive;
-extern UINT flag_Reconnect;
-#endif
-
 #define A_BAND_REGION_0				0
 #define A_BAND_REGION_1				1
 #define A_BAND_REGION_2				2
@@ -535,11 +529,7 @@ INT	Set_ACLClearAll_Proc(
 INT	Set_RadioOn_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PSTRING			arg);
-#ifdef CONFIG_ASUS_EXT
-INT	Set_ApcliMonitorPid_Proc(
-	IN	PRTMP_ADAPTER	pAdapter, 
-	IN	PUCHAR			arg);
-#endif
+
 INT Set_SiteSurvey_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
@@ -875,9 +865,6 @@ static struct {
 	{"ACLClearAll",					Set_ACLClearAll_Proc},
 	{"WPAPSK",					Set_AP_WPAPSK_Proc},
 	{"RadioOn",					Set_RadioOn_Proc},
-#ifdef CONFIG_ASUS_EXT
-	{"ApcliMonitorPid",				Set_ApcliMonitorPid_Proc},
-#endif
 	{"SiteSurvey",					Set_SiteSurvey_Proc},
 	{"ResetCounter",				Set_ResetStatCounter_Proc},
 	{"DisConnectSta",				Set_DisConnectSta_Proc},
@@ -5280,18 +5267,6 @@ INT	Set_RadioOn_Proc(
 	return TRUE;
 }
 
-#ifdef CONFIG_ASUS_EXT
-INT	Set_ApcliMonitorPid_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PUCHAR			arg)
-{
-	ApcliMonitorPid = simple_strtol(arg, 0, 10);
-	printk("set apcli_monitor pid as: %d\n", ApcliMonitorPid);
-	
-	return TRUE;
-}
-#endif
-
 /* 
     ==========================================================================
     Description:
@@ -7660,16 +7635,6 @@ INT Set_ApCli_Enable_Proc(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("I/F(apcli%d) Set_ApCli_Enable_Proc::(enable = %d)\n", ifIndex, pAd->ApCfg.ApCliTab[ifIndex].Enable));
 
-#ifdef CONFIG_ASUS_EXT
-	if (Enable > 0)
-	{
-		flag_Reconnect = (flag_Reconnect % 65535) + 1;
-	}
-	else
-	{
-		count_Alive = 0;
-	}
-#endif
 	ApCliIfDown(pAd);
 	return TRUE;
 }
