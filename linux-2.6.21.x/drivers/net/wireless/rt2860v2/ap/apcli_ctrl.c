@@ -232,10 +232,6 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
 	if (ApScanRunning(pAd) == TRUE)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif
 		return;
 	}
 
@@ -337,10 +333,6 @@ static VOID ApCliCtrlProbeRspAction(
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Probe respond fail.\n", __FUNCTION__));
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif
 	}
 
 	return;
@@ -402,10 +394,6 @@ static VOID ApCliCtrlAuthRspAction(
 			NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 			pApCliEntry->AuthReqCnt = 0;
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-			nvram_set("sta_connected", "0");
-			nvram_set("sta_authorized", "0");
-#endif
 		}
 	}
 
@@ -483,10 +471,6 @@ static VOID ApCliCtrlAuthReqTimeoutAction(
 	if (pApCliEntry->AuthReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -548,19 +532,12 @@ static VOID ApCliCtrlAssocRspAction(
 		if (ApCliLinkUp(pAd, ifIndex))
 		{
 			*pCurrState = APCLI_CTRL_CONNECTED;
-#ifdef CONFIG_ASUS_EXT
-			nvram_set("sta_connected", "1");
-#endif
 		}
 		else
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Insert Remote AP to MacTable failed.\n", __FUNCTION__,  ifIndex));
 			// Reset the apcli interface as disconnected and Invalid.
 			*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-			nvram_set("sta_connected", "0");
-			nvram_set("sta_authorized", "0");
-#endif
 			pApCliEntry->Valid = FALSE;
 		}
 	}
@@ -569,10 +546,6 @@ static VOID ApCliCtrlAssocRspAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Receive Assoc Rsp Failure.\n", __FUNCTION__,  ifIndex));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif
 		// set the apcli interface be valid.
 		pApCliEntry->Valid = FALSE;
 	}
@@ -613,10 +586,6 @@ static VOID ApCliCtrlDeAssocRspAction(
 		ApCliLinkDown(pAd, ifIndex);
 	
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-	nvram_set("sta_connected", "0");
-	nvram_set("sta_authorized", "0");
-#endif
 	return;
 }
 
@@ -648,10 +617,6 @@ static VOID ApCliCtrlAssocReqTimeoutAction(
 	if (pApCliEntry->AssocReqCnt > 5)
 	{
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-		nvram_set("sta_connected", "0");
-		nvram_set("sta_authorized", "0");
-#endif
 		NdisZeroMemory(pAd->MlmeAux.Bssid, MAC_ADDR_LEN);
 		NdisZeroMemory(pAd->MlmeAux.Ssid, MAX_LEN_OF_SSID);
 		pApCliEntry->AuthReqCnt = 0;
@@ -705,10 +670,6 @@ static VOID ApCliCtrlDisconnectReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-	nvram_set("sta_connected", "0");
-	nvram_set("sta_authorized", "0");
-#endif
 	return;
 }
 
@@ -732,14 +693,6 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
 
-#ifdef CONFIG_ASUS_EXT
-	count_DeAssoc = (count_DeAssoc % 65535) + 1;
-	{
-		nvram_set("sta_authorized", "0");
-		printk("Peer DeAssoc Req: %d\n", count_DeAssoc);
-	}
-#endif
-
 	pApCliEntry = &pAd->ApCfg.ApCliTab[ifIndex];
 	if (pApCliEntry->Valid)
 		ApCliLinkDown(pAd, ifIndex);
@@ -754,9 +707,6 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-	nvram_set("sta_connected", "0");
-#endif
 	return;
 }
 
@@ -852,10 +802,6 @@ static VOID ApCliCtrlDeAuthAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-#ifdef CONFIG_ASUS_EXT
-	nvram_set("sta_connected", "0");
-	nvram_set("sta_authorized", "0");
-#endif
 
 	return;
 }

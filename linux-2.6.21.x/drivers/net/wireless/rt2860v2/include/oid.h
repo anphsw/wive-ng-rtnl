@@ -844,6 +844,11 @@ typedef struct _NDIS_802_11_CAPABILITY
 #define RTPRIV_IOCTL_RF                             (SIOCIWFIRSTPRIV + 0x13)
 #endif // RTMP_RF_RW_SUPPORT //
 
+#ifdef RALINK_ATE
+#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)
+#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)
+#endif
+
 #ifdef CONFIG_STA_SUPPORT
 #define RT_PRIV_IOCTL				    (SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
 #define RTPRIV_IOCTL_SET			    (SIOCIWFIRSTPRIV + 0x02)
@@ -858,18 +863,10 @@ typedef struct _NDIS_802_11_CAPABILITY
 #define RTPRIV_IOCTL_STATISTICS                     (SIOCIWFIRSTPRIV + 0x09)
 #define RTPRIV_IOCTL_ADD_PMKID_CACHE                (SIOCIWFIRSTPRIV + 0x0A)
 #define RTPRIV_IOCTL_RADIUS_DATA                    (SIOCIWFIRSTPRIV + 0x0C)
-#define RTPRIV_IOCTL_GSITESURVEY					(SIOCIWFIRSTPRIV + 0x0D)
-#define RT_PRIV_IOCTL_EXT							(SIOCIWFIRSTPRIV + 0x0E) // Sync. with RT61 (for wpa_supplicant)
-#define RTPRIV_IOCTL_GET_MAC_TABLE2					(SIOCIWFIRSTPRIV + 0x1F)	// modified by Red@Ralink, 2009/09/30
-
-#define RTPRIV_IOCTL_SHOW							(SIOCIWFIRSTPRIV + 0x11)
-
-#ifdef CONFIG_ASUS_EXT
-#ifdef RALINK_ATE
-#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)
-#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)
-#endif
-#endif
+#define RTPRIV_IOCTL_GSITESURVEY		    (SIOCIWFIRSTPRIV + 0x0D)
+#define RT_PRIV_IOCTL_EXT			    (SIOCIWFIRSTPRIV + 0x0E) // Sync. with RT61 (for wpa_supplicant)
+#define RTPRIV_IOCTL_GET_MAC_TABLE2		    (SIOCIWFIRSTPRIV + 0x1F)	// modified by Red@Ralink, 2009/09/30
+#define RTPRIV_IOCTL_SHOW			    (SIOCIWFIRSTPRIV + 0x11)
 
 enum {    
 #ifdef MAT_SUPPORT
@@ -955,14 +952,6 @@ enum {
 #define RTPRIV_IOCTL_QUERY_BATABLE                  (SIOCIWFIRSTPRIV + 0x16)
 #define RTPRIV_IOCTL_GET_AR9_SHOW   (SIOCIWFIRSTPRIV + 0x17)
 #define RTPRIV_IOCTL_SET_WSCOOB	(SIOCIWFIRSTPRIV + 0x19)
-
-#ifdef CONFIG_ASUS_EXT
-#ifdef RALINK_ATE
-#define RTPRIV_IOCTL_GATESHOW                       (SIOCIWFIRSTPRIV + 0x20)
-#define RTPRIV_IOCTL_GATEHELP                       (SIOCIWFIRSTPRIV + 0x21)
-#endif
-#endif
-
 #endif // CONFIG_AP_SUPPORT //
 
 

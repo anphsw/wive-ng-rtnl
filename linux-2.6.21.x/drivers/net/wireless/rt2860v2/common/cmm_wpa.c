@@ -28,10 +28,6 @@
 */
 #include "rt_config.h"
 
-#ifdef CONFIG_ASUS_EXT
-extern UINT count_DeAssoc;
-#endif
-
 // WPA OUI
 UCHAR		OUI_WPA[3]				= {0x00, 0x50, 0xF2};
 UCHAR		OUI_WPA_NONE_AKM[4]		= {0x00, 0x50, 0xF2, 0x00};
@@ -1375,12 +1371,6 @@ VOID PeerPairMsg3Action(
 	os_free_mem(NULL, mpool);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerPairMsg3Action: send Msg4 of 4-way \n"));
-#ifdef CONFIG_ASUS_EXT 
-#ifdef APCLI_SUPPORT
-	count_DeAssoc = 0;
-	nvram_set("sta_authorized", "1");
-#endif
-#endif
 }
 
 /*
@@ -1730,13 +1720,6 @@ VOID	PeerGroupMsg1Action(
 	os_free_mem(NULL, mpool);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== PeerGroupMsg1Action: send group message 2\n"));
-
-#ifdef CONFIG_ASUS_EXT 
-#ifdef APCLI_SUPPORT
-	count_DeAssoc = 0;
-	nvram_set("sta_authorized", "2");
-#endif
-#endif
 }	
 
 /*

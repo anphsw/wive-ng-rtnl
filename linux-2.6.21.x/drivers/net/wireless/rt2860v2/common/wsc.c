@@ -5591,11 +5591,8 @@ VOID	WscWriteSsidToDatFile(
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
-					nvram_set("wl_ssid", pAd->ApCfg.MBSSID[apidx].Ssid);
-
 					memset(tmpstr, 0x0, 128);
 					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
-					nvram_set("wl_ssid2", tmpstr);
 				}
 #endif
 			}
@@ -5610,11 +5607,8 @@ VOID	WscWriteSsidToDatFile(
 			NdisMoveMemory(pTempStr + offset, pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
 #ifdef CONFIG_ASUS_EXT
 			printk("Current SSID=%s\n", pCredential->SSID.Ssid);
-			nvram_set("sta_ssid", pCredential->SSID.Ssid);
-			nvram_set("wl_ssid", pCredential->SSID.Ssid);
 			memset(tmpstr, 0x0, 128);
 			char_to_ascii(tmpstr, pCredential->SSID.Ssid);
-			nvram_set("wl_ssid2", tmpstr);
 			memset(tmpstr, 0x0, 128);
 			sprintf(tmpstr, "%02X:%02X:%02X:%02X:%02X:%02X",
 				pCredential->MacAddr[0], 
@@ -5624,7 +5618,6 @@ VOID	WscWriteSsidToDatFile(
 				pCredential->MacAddr[4], 
 				pCredential->MacAddr[5]);
 			printk("AP BSSID=%s\n", tmpstr);
-			nvram_set("sta_bssid", tmpstr);
 #endif
 		}
 #endif // CONFIG_STA_SUPPORT //
@@ -5648,11 +5641,8 @@ VOID	WscWriteSsidToDatFile(
 				if (apidx == 0)
 				{
 					printk("Current SSID=%s\n", pAd->ApCfg.MBSSID[apidx].Ssid);
-					nvram_set("wl_ssid", pAd->ApCfg.MBSSID[apidx].Ssid);
-
 					memset(tmpstr, 0x0, 128);
 					char_to_ascii(tmpstr, pAd->ApCfg.MBSSID[apidx].Ssid);
-					nvram_set("wl_ssid2", tmpstr);
 				}
 #endif
 			}
@@ -5707,7 +5697,6 @@ VOID	WscWriteWpaPskToDatFile(
 					memset(tmpstr, 0x0, 128);
 					memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 					printk("Current WPA-PSK=%s\n", tmpstr);
-					nvram_set("wl_wpa_psk", tmpstr);
 				}
 #endif
 			}
@@ -5727,8 +5716,6 @@ VOID	WscWriteWpaPskToDatFile(
 				memset(tmpstr, 0x0, 128);
 				memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 				printk("Current WPA-PSK=%s\n", tmpstr);
-				nvram_set("sta_wpa_psk", tmpstr);
-				nvram_set("wl_wpa_psk", tmpstr);
 #endif
 			}
 		}
@@ -5756,7 +5743,6 @@ VOID	WscWriteWpaPskToDatFile(
 					memset(tmpstr, 0x0, 128);
 					memcpy(tmpstr, pWscControl->WpaPsk, pWscControl->WpaPskLen);
 					printk("Current WPA-PSK=%s\n", tmpstr);
-					nvram_set("wl_wpa_psk", tmpstr);
 				}
 #endif
 			}
@@ -7696,58 +7682,7 @@ void    WscWriteConfToDatFile(
 						{
 							if (pAd->ApCfg.MBSSID[index].SsidLen)
 							{
-								if (index == 0)
-								{
-									sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
-#ifdef CONFIG_ASUS_EXT
-									printk("Current AuthMode=%s\n", RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
-
-									if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "OPEN") == 0))
-										nvram_set("wl_auth_mode", "open");
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "SHARED") == 0))
-										nvram_set("wl_auth_mode", "shared");
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPAPSK") == 0))
-									{
-										nvram_set("wl_auth_mode", "psk");
-										nvram_set("wl_wpa_mode", "1");
-									}
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPA") == 0))
-									{
-										nvram_set("wl_auth_mode", "wpa");
-										nvram_set("wl_wpa_mode", "1");
-									}
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPA2PSK") == 0))
-									{
-										nvram_set("wl_auth_mode", "psk");
-										nvram_set("wl_wpa_mode", "2");
-									}
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPA2") == 0))
-									{
-										nvram_set("wl_auth_mode", "wpa");
-										nvram_set("wl_wpa_mode", "2");
-									}
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPAPSKWPA2PSK") == 0))
-									{
-										nvram_set("wl_auth_mode", "psk");
-										nvram_set("wl_wpa_mode", "0");
-/*
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "tkip+aes");
-*/
-									}
-									else if ((strcmp(RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode), "WPA1WPA2") == 0))
-									{
-										nvram_set("wl_auth_mode", "wpa");
-										nvram_set("wl_wpa_mode", "0");
-/*
-										nvram_set("wl_wep_x", "0");
-										nvram_set("wl_crypto", "tkip+aes");
-*/
-									}
-#endif
-								}
-								else
-									sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
+								sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkAuthModeStr(pAd->ApCfg.MBSSID[index].AuthMode));
 							}
 						}
 					}
@@ -7758,48 +7693,6 @@ void    WscWriteConfToDatFile(
 						USHORT auth_flag = WscGetAuthType(pAd->StaCfg.AuthMode);
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetAuthTypeStr(auth_flag));
 
-#ifdef CONFIG_ASUS_EXT
-						printk("Current AuthMode=%s\n", WscGetAuthTypeStr(auth_flag));
-
-						if ((strcmp(WscGetAuthTypeStr(auth_flag), "OPEN") == 0))
-						{
-							nvram_set("sta_auth_mode", "open");
-							nvram_set("wl_auth_mode", "open");
-						}
-						else if ((strcmp(WscGetAuthTypeStr(auth_flag), "SHARED") == 0))
-						{
-							nvram_set("sta_auth_mode", "shared");
-							nvram_set("wl_auth_mode", "shared");
-						}
-						else if ((strcmp(WscGetAuthTypeStr(auth_flag), "WPAPSK") == 0))
-						{
-							nvram_set("sta_auth_mode", "psk");
-							nvram_set("sta_wpa_mode", "1");
-							nvram_set("wl_auth_mode", "psk");
-							nvram_set("wl_wpa_mode", "1");
-						}
-						else if ((strcmp(WscGetAuthTypeStr(auth_flag), "WPA") == 0))
-						{
-							nvram_set("sta_auth_mode", "wpa");
-							nvram_set("sta_wpa_mode", "1");
-							nvram_set("wl_auth_mode", "wpa");
-							nvram_set("wl_wpa_mode", "1");							
-						}
-						else if ((strcmp(WscGetAuthTypeStr(auth_flag), "WPA2PSK") == 0))
-						{
-							nvram_set("sta_auth_mode", "psk");
-							nvram_set("sta_wpa_mode", "2");
-							nvram_set("wl_auth_mode", "psk");
-							nvram_set("wl_wpa_mode", "2");
-						}
-						else if ((strcmp(WscGetAuthTypeStr(auth_flag), "WPA2") == 0))
-						{
-							nvram_set("sta_auth_mode", "wpa");
-							nvram_set("sta_wpa_mode", "2");
-							nvram_set("wl_auth_mode", "wpa");
-							nvram_set("wl_wpa_mode", "2");
-						}
-#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -7812,37 +7705,7 @@ void    WscWriteConfToDatFile(
 					{
 						for (index = 0; index < pAd->ApCfg.BssidNum; index++)
 						{
-							if (index == 0)
-							{
-								sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
-
-#ifdef CONFIG_ASUS_EXT
-								printk("Current EncrypType=%s\n", RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
-
-								if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "NONE") == 0))
-									nvram_set("wl_wep_x", "0");
-								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "WEP") == 0))
-								{
-								}
-								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "TKIP") == 0))
-								{
-									nvram_set("wl_wep_x", "0");
-									nvram_set("wl_crypto", "tkip");
-								}
-								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "AES") == 0))
-								{
-									nvram_set("wl_wep_x", "0");
-									nvram_set("wl_crypto", "aes");
-								}
-								else if ((strcmp(RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus), "TKIPAES") == 0))
-								{
-									nvram_set("wl_wep_x", "0");
-									nvram_set("wl_crypto", "tkip+aes");
-								}
-#endif
-							}
-							else
-								sprintf(pTempStr, "%s;%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
+							sprintf(pTempStr, "%s%s", pTempStr, RTMPGetRalinkEncryModeStr(pAd->ApCfg.MBSSID[index].WepStatus));
 						}
 					}
 #endif // CONFIG_AP_SUPPORT //
@@ -7852,32 +7715,6 @@ void    WscWriteConfToDatFile(
 						USHORT encrypt_flag = WscGetEncryType(pAd->StaCfg.WepStatus);
 						sprintf(pTempStr, "%s%s", pTempStr, WscGetEncryTypeStr(encrypt_flag));
 
-#ifdef CONFIG_ASUS_EXT
-						printk("Current EncrypType=%s\n", WscGetEncryTypeStr(encrypt_flag));
-
-						if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "NONE") == 0))
-						{
-							nvram_set("sta_wep_x", "0");
-							nvram_set("wl_wep_x", "0");
-						}
-						else if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "WEP") == 0))
-						{
-						}
-						else if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "TKIP") == 0))
-						{
-							nvram_set("sta_wep_x", "0");
-							nvram_set("sta_crypto", "tkip");
-							nvram_set("wl_wep_x", "0");
-							nvram_set("wl_crypto", "tkip");
-						}
-						else if ((strcmp(WscGetEncryTypeStr(encrypt_flag), "AES") == 0))
-						{
-							nvram_set("sta_wep_x", "0");
-							nvram_set("sta_crypto", "aes");
-							nvram_set("wl_wep_x", "0");
-							nvram_set("wl_crypto", "aes");
-						}
-#endif
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}    
@@ -7940,10 +7777,8 @@ void    WscWriteConfToDatFile(
 								sprintf(pTempStr, "%s%d", pTempStr, pAd->ApCfg.MBSSID[index].DefaultKeyId+1);
 #ifdef CONFIG_ASUS_EXT
 							printk("Current DefaultKeyID=%d\n", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
-
 							memset(tmpstr, 0x0, 128);
 							sprintf(tmpstr, "%d", pAd->ApCfg.MBSSID[apidx].DefaultKeyId+1);
-   					               	nvram_set("wl_key", tmpstr);
 #endif
 							}
 							else
@@ -7957,11 +7792,8 @@ void    WscWriteConfToDatFile(
 						sprintf(pTempStr, "%s%d", pTempStr, pAd->StaCfg.DefaultKeyId+1);
 #ifdef CONFIG_ASUS_EXT
 						printk("Current DefaultKeyID=%d\n", pAd->StaCfg.DefaultKeyId+1);
-
 						memset(tmpstr, 0x0, 128);
 						sprintf(tmpstr, "%d", pAd->StaCfg.DefaultKeyId+1);
-						nvram_set("sta_key", tmpstr);
-						nvram_set("wl_key", tmpstr);
 #endif
 					}
 #endif // CONFIG_STA_SUPPORT //
@@ -8012,11 +7844,6 @@ void    WscWriteConfToDatFile(
 						if (apidx == 0)
 						{
 							pCredentail = &pAd->ApCfg.MBSSID[apidx].WscControl.WscProfile.Profile[0];
-
-							if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
-								nvram_set("wl_wep_x", "1");
-							else
-								nvram_set("wl_wep_x", "2");
 						}
 #endif
 					}
@@ -8063,22 +7890,12 @@ void    WscWriteConfToDatFile(
 						        			memset(tmpstr, 0x0, 128);
 			                                			for (ii=0; ii<pCredentail->KeyLength; ii++)
 											sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
-										nvram_set("wl_key_type", "0");
-										nvram_set("wl_key1", tmpstr);
-										nvram_set("wl_key2", tmpstr);
-										nvram_set("wl_key3", tmpstr);
-										nvram_set("wl_key4", tmpstr);
 										printk("Don't try to fool me with non-ASCII chars!\n");
 										printk("Wep Key:%s\n", tmpstr);
 										printk("Wep Key Type:HEX\n");
 									}
 									else
 									{
-										nvram_set("wl_key_type", "1");
-										nvram_set("wl_key1", pCredentail->Key);
-										nvram_set("wl_key2", pCredentail->Key);
-										nvram_set("wl_key3", pCredentail->Key);
-										nvram_set("wl_key4", pCredentail->Key);
 										printk("Wep Key:%s\n", pCredentail->Key);
 										printk("Wep Key Type:ASCII\n");
 									}
@@ -8087,11 +7904,6 @@ void    WscWriteConfToDatFile(
 								{
 									memset(tmpstr, 0x0, 128);
 									memcpy(tmpstr, pCredentail->Key, pCredentail->KeyLength);
-									nvram_set("wl_key_type", "0");
-									nvram_set("wl_key1", tmpstr);
-									nvram_set("wl_key2", tmpstr);
-									nvram_set("wl_key3", tmpstr);
-									nvram_set("wl_key4", tmpstr);
 									printk("Wep Key:%s\n", tmpstr);
 									printk("Wep Key Type:HEX\n");
 								}
@@ -8115,18 +7927,6 @@ void    WscWriteConfToDatFile(
 						else
 							sprintf(pTempStr, "%s0", WepKeyFormatName); // Hex
 					}
-#ifdef CONFIG_ASUS_EXT
-					if ((pCredentail->KeyLength == 5) || (pCredentail->KeyLength == 10))
-					{
-						nvram_set("sta_wep_x", "1");
-						nvram_set("wl_wep_x", "1");
-					}
-					else
-					{
-						nvram_set("sta_wep_x", "2");
-						nvram_set("wl_wep_x", "2");
-					}
-#endif
 				}
 				else if (rtstrstr(pTempStr, (PSTRING) WepKeyName) &&  (pAd->OpMode == OPMODE_STA))
 				{
@@ -8158,48 +7958,18 @@ void    WscWriteConfToDatFile(
                 	        				        	memset(tmpstr, 0x0, 128);
 					                                	for (ii=0; ii<pCredentail->KeyLength; ii++)
 											sprintf(tmpstr, "%s%02x", tmpstr, pCredentail->Key[ii]);
-										nvram_set("sta_key_type", "0");
-										nvram_set("sta_key1", tmpstr);
-										nvram_set("sta_key2", tmpstr);
-										nvram_set("sta_key3", tmpstr);
-										nvram_set("sta_key4", tmpstr);
-										nvram_set("wl_key_type", "0");
-										nvram_set("wl_key1", tmpstr);
-										nvram_set("wl_key2", tmpstr);
-										nvram_set("wl_key3", tmpstr);
-										nvram_set("wl_key4", tmpstr);
 										printk("Don't try to fool me with non-ASCII chars!\n");
 										printk("Wep Key:%s\n", tmpstr);
 										printk("Wep Key Type:HEX\n");
 									}
 									else
 									{
-										nvram_set("sta_key_type", "1");
-										nvram_set("sta_key1", pCredentail->Key);
-										nvram_set("sta_key2", pCredentail->Key);
-										nvram_set("sta_key3", pCredentail->Key);
-										nvram_set("sta_key4", pCredentail->Key);
-										nvram_set("wl_key_type", "1");
-										nvram_set("wl_key1", pCredentail->Key);
-										nvram_set("wl_key2", pCredentail->Key);
-										nvram_set("wl_key3", pCredentail->Key);
-										nvram_set("wl_key4", pCredentail->Key);
 										printk("Wep Key:%s\n", pCredentail->Key);
 										printk("Wep Key Type:ASCII\n");
 									}
 								}
 								else
 								{
-									nvram_set("sta_key_type", "0");
-									nvram_set("sta_key1", pCredentail->Key);
-									nvram_set("sta_key2", pCredentail->Key);
-									nvram_set("sta_key3", pCredentail->Key);
-									nvram_set("sta_key4", pCredentail->Key);
-									nvram_set("wl_key_type", "0");
-									nvram_set("wl_key1", pCredentail->Key);
-									nvram_set("wl_key2", pCredentail->Key);
-									nvram_set("wl_key3", pCredentail->Key);
-									nvram_set("wl_key4", pCredentail->Key);
 									printk("Wep Key:%s\n", pCredentail->Key);
 									printk("Wep Key Type:HEX\n");
 								}
@@ -8218,15 +7988,6 @@ void    WscWriteConfToDatFile(
 			}
 		}
 		RtmpOSFileClose(file_w);
-#ifdef CONFIG_ASUS_EXT
-#ifdef CONFIG_AP_SUPPORT
-		nvram_set("wsc_config_state", "1");
-#endif
-		nvram_commit();
-#ifdef CONFIG_AP_SUPPORT
-		nvram_set("x_Setting", "1");
-#endif
-#endif
 	}
 
 WriteErr:   
