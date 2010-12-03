@@ -1687,7 +1687,11 @@ int rt_ioctl_siwessid(struct net_device *dev,
 			NdisZeroMemory(pSsidString, MAX_LEN_OF_SSID+1);
 			NdisMoveMemory(pSsidString, essid, data->length);
 			if (Set_SSID_Proc(pAdapter, pSsidString) == FALSE)
+			{
+				kfree(pSsidString);
 				return -EINVAL;
+			}
+			kfree(pSsidString);
 		}
 		else
 			return -ENOMEM;
@@ -2149,7 +2153,7 @@ rt_ioctl_setparam(struct net_device *dev, struct iw_request_info *info,
 	                                                                                                                            
 	if (!value && (strcmp(this_char, "SiteSurvey") != 0))                                                                                                      
 	    return -EINVAL;                                                                                                                  
-	else
+	else if (!value && (strcmp(this_char, "SiteSurvey") == 0))
 		goto SET_PROC;
 
 	// reject setting nothing besides ANY ssid(ssidLen=0)
@@ -2980,7 +2984,8 @@ int rt_ioctl_siwmlme(struct net_device *dev,
 {
 	PRTMP_ADAPTER   pAd = NULL;
 	struct iw_mlme *pMlme = (struct iw_mlme *)wrqu->data.pointer;
-	MLME_QUEUE_ELEM				MsgElem;
+//	MLME_QUEUE_ELEM				MsgElem;
+	MLME_QUEUE_ELEM				*pMsgElem = NULL;
 	MLME_DISASSOC_REQ_STRUCT	DisAssocReq;
 	MLME_DEAUTH_REQ_STRUCT      DeAuthReq;
 
@@ -2998,6 +3003,14 @@ int rt_ioctl_siwmlme(struct net_device *dev,
 	if (pMlme == NULL)
 		return -EINVAL;
 
+	/* allocate memory */
+	os_alloc_mem(NULL, (UCHAR **)&pMsgElem, sizeof(MLME_QUEUE_ELEM));
+	if (pMsgElem == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s: Allocate memory fail!!!\n", __FUNCTION__));
+		return -ENOMEM;
+	}
+
 	switch(pMlme->cmd)
 	{
 #ifdef IW_MLME_DEAUTH	
@@ -3005,9 +3018,9 @@ int rt_ioctl_siwmlme(struct net_device *dev,
 			DBGPRINT(RT_DEBUG_TRACE, ("====> %s - IW_MLME_DEAUTH\n", __FUNCTION__));			                
 			COPY_MAC_ADDR(DeAuthReq.Addr, pAd->CommonCfg.Bssid);
 			DeAuthReq.Reason = pMlme->reason_code;
-			MsgElem.MsgLen = sizeof(MLME_DEAUTH_REQ_STRUCT);
-			NdisMoveMemory(MsgElem.Msg, &DeAuthReq, sizeof(MLME_DEAUTH_REQ_STRUCT));
-			MlmeDeauthReqAction(pAd, &MsgElem);
+			pMsgElem->MsgLen = sizeof(MLME_DEAUTH_REQ_STRUCT);
+			NdisMoveMemory(pMsgElem->Msg, &DeAuthReq, sizeof(MLME_DEAUTH_REQ_STRUCT));
+			MlmeDeauthReqAction(pAd, pMsgElem);
 			if (INFRA_ON(pAd))
 			{
 			    LinkDown(pAd, FALSE);
@@ -3021,13 +3034,13 @@ int rt_ioctl_siwmlme(struct net_device *dev,
 			COPY_MAC_ADDR(DisAssocReq.Addr, pAd->CommonCfg.Bssid);
 			DisAssocReq.Reason =  pMlme->reason_code;
 
-			MsgElem.Machine = ASSOC_STATE_MACHINE;
-			MsgElem.MsgType = MT2_MLME_DISASSOC_REQ;
-			MsgElem.MsgLen = sizeof(MLME_DISASSOC_REQ_STRUCT);
-			NdisMoveMemory(MsgElem.Msg, &DisAssocReq, sizeof(MLME_DISASSOC_REQ_STRUCT));
+			pMsgElem->Machine = ASSOC_STATE_MACHINE;
+			pMsgElem->MsgType = MT2_MLME_DISASSOC_REQ;
+			pMsgElem->MsgLen = sizeof(MLME_DISASSOC_REQ_STRUCT);
+			NdisMoveMemory(pMsgElem->Msg, &DisAssocReq, sizeof(MLME_DISASSOC_REQ_STRUCT));
 
 			pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_DISASSOC;
-			MlmeDisassocReqAction(pAd, &MsgElem);
+			MlmeDisassocReqAction(pAd, pMsgElem);
 			break;
 #endif // IW_MLME_DISASSOC //
 		default:
@@ -3035,6 +3048,9 @@ int rt_ioctl_siwmlme(struct net_device *dev,
 			break;
 	}
 	
+	if (pMsgElem != NULL)
+		os_free_mem(NULL, pMsgElem);
+
 	return 0;
 }
 #endif // SIOCSIWMLME //
