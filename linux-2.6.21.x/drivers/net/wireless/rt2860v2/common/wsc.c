@@ -3321,11 +3321,7 @@ VOID	WscInitRegistrarPair(
 #ifdef CONFIG_ASUS_EXT
 	char pid_tmpstr[12];
 	memset(pid_tmpstr, 0, 12);
-#ifdef CONFIG_ASUS_EXT
-	sprintf(pid_tmpstr, "%s", nvram_get("productid"));
-#else
 	sprintf(pid_tmpstr, "%s", "WR-NL");
-#endif
 	NdisMoveMemory(&pWscControl->RegData.SelfInfo.ModelNumber, pid_tmpstr, strlen(pid_tmpstr));
 #endif
 	
