@@ -51,9 +51,6 @@ VOID RTMPIoctlGetRadioDynInfo(
 VOID RTMPAPIoctlE2PROM(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
-
-//#ifdef DBG
-#ifdef CONFIG_ASUS_EXT
 VOID RTMPAPIoctlBBP(
     IN  PRTMP_ADAPTER   pAdapter,
     IN  struct iwreq    *wrq);
@@ -67,7 +64,6 @@ VOID RTMPAPIoctlRF(
 	IN	PRTMP_ADAPTER	pAdapter,
 	IN	struct iwreq	*wrq);
 #endif // RTMP_RF_RW_SUPPORT //
-#endif
 
 VOID RT28XX_IOCTL_MaxRateGet(
 	IN	RTMP_ADAPTER			*pAd,

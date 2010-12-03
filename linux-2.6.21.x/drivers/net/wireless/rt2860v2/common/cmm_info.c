@@ -2848,7 +2848,7 @@ VOID RTMPIoctlGetSiteSurvey(
 	sprintf(msg,"%s","\n");
 //	sprintf(msg+strlen(msg),"%-4s%-33s%-20s%-23s%-9s%-7s%-7s%-3s\n",
 //	    "Ch", "SSID", "BSSID", "Security", "Siganl(%)", "W-Mode", " ExtCH"," NT");
-#ifdef ASUS_EXT
+#ifdef CONFIG_ASUS_EXT
 	sprintf(msg+strlen(msg),"%-3s%-33s%-18s%-9s%-16s%-9s%-8s%-2s%-3s\n",
 	    "Ch", "SSID", "BSSID", "Enc", "Auth", "Siganl(%)", "W-Mode", "NT", " CC");
 #endif
@@ -3014,13 +3014,11 @@ VOID RTMPIoctlGetATESHOW(
 	os_free_mem(NULL, (PUCHAR)msg);
 }
 
-#ifdef ASUS_EXT
 VOID RTMPIoctlGetATEHELP(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	struct iwreq	*wrq)
 {
 	CHAR		*msg;
-	INT 		i=0;	 
 	INT 		Status=0;
 
 	os_alloc_mem(NULL, (PUCHAR *)&msg, sizeof(CHAR)*(1024));
@@ -3094,7 +3092,6 @@ VOID RTMPIoctlGetATEHELP(
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPIoctlGetATEHELP - wrq->u.data.length = %d\n", wrq->u.data.length));
 	os_free_mem(NULL, (PUCHAR)msg);
 }
-#endif
 #endif
 
 VOID RTMPIoctlGetMacTable(

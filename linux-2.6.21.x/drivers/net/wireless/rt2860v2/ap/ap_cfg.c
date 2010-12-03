@@ -6565,8 +6565,6 @@ VOID RTMPIoctlSetIdleTimeout(
 	return;
 }
 
-//#ifdef DBG
-#ifdef CONFIG_ASUS_EXT
 /* 
     ==========================================================================
     Description:
@@ -7422,8 +7420,6 @@ done:
     if (wrq->u.data.flags != RT_OID_802_11_HARDWARE_REGISTER)	
 	DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlE2PROM\n"));
 }
-#endif
-
 
 /* 
     ==========================================================================

@@ -8094,7 +8094,6 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	struct iwreq	*wrq);
 
-#ifdef CONFIG_ASUS_EXT
 #ifdef RALINK_ATE
 VOID RTMPIoctlGetATESHOW(
 	IN      PRTMP_ADAPTER   pAdapter,
@@ -8103,7 +8102,6 @@ VOID RTMPIoctlGetATESHOW(
 VOID RTMPIoctlGetATEHELP(
 	IN      PRTMP_ADAPTER   pAdapter,
 	IN      struct iwreq    *wrq);
-#endif
 #endif
 
 #ifdef CONFIG_AP_SUPPORT

@@ -56,8 +56,6 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_E2P,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "e2p"},
-//#ifdef DBG
-#ifdef CONFIG_ASUS_EXT
 { RTPRIV_IOCTL_BBP,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "bbp"},
@@ -69,9 +67,6 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "rf"},
 #endif // RTMP_RF_RW_SUPPORT //
-//#endif // DBG //
-#endif
-
 #ifdef WSC_AP_SUPPORT
 { RTPRIV_IOCTL_WSC_PROFILE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
@@ -529,7 +524,6 @@ INT rt28xx_ap_ioctl(
 		    RTMPIoctlQueryBaTable(pAd, wrq);
 		    break;
 #endif // DOT11_N_SUPPORT //
-#ifdef CONFIG_ASUS_EXT
 		case RTPRIV_IOCTL_E2P:
 			RTMPAPIoctlE2PROM(pAd, wrq);
 			break;
@@ -546,7 +540,6 @@ INT rt28xx_ap_ioctl(
 		case RTPRIV_IOCTL_RF:
 			RTMPAPIoctlRF(pAd, wrq);
 			break;
-#endif
 #endif
 
 		default:

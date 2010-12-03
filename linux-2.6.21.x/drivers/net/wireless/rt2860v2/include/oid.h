@@ -837,21 +837,21 @@ typedef struct _NDIS_802_11_CAPABILITY
 #endif
 #endif // LINUX //
 
+#define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
+#define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
+
+#ifdef RTMP_RF_RW_SUPPORT
+#define RTPRIV_IOCTL_RF                             (SIOCIWFIRSTPRIV + 0x13)
+#endif // RTMP_RF_RW_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 #define RT_PRIV_IOCTL				    (SIOCIWFIRSTPRIV + 0x01) // Sync. with AP for wsc upnp daemon
 #define RTPRIV_IOCTL_SET			    (SIOCIWFIRSTPRIV + 0x02)
-
-#define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
-#define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
-#ifdef RTMP_RF_RW_SUPPORT
-#define RTPRIV_IOCTL_RF                             (SIOCIWFIRSTPRIV + 0x13)  // edit by johnli, fix read rf register problem
-#endif // RTMP_RF_RW_SUPPORT //
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
 
 #ifdef RALINK_ATE
 #ifdef RALINK_28xx_QA
-#define RTPRIV_IOCTL_ATE							(SIOCIWFIRSTPRIV + 0x08)
+#define RTPRIV_IOCTL_ATE			    (SIOCIWFIRSTPRIV + 0x08)
 #endif // RALINK_28xx_QA //
 #endif // RALINK_ATE //
 
@@ -925,22 +925,13 @@ enum {
 // Ralink defined OIDs
 #define RT_PRIV_IOCTL								(SIOCIWFIRSTPRIV + 0x01)
 #define RTPRIV_IOCTL_SET							(SIOCIWFIRSTPRIV + 0x02)
-				
-#ifdef CONFIG_ASUS_EXT
-#define RTPRIV_IOCTL_BBP                            (SIOCIWFIRSTPRIV + 0x03)
-#define RTPRIV_IOCTL_MAC                            (SIOCIWFIRSTPRIV + 0x05)
-
-#ifdef RTMP_RF_RW_SUPPORT
-#define RTPRIV_IOCTL_RF                             (SIOCIWFIRSTPRIV + 0x13)
-#endif // RTMP_RF_RW_SUPPORT //
 
 /*
 	When use private ioctl oid get/set the configuration, we can use following flags to provide specific rules when handle the cmd
  */
 #define RTPRIV_IOCTL_FLAG_UI			0x0001	// Notidy this private cmd send by UI.
-#define RTPRIV_IOCTL_FLAG_NODUMPMSG	0x0002	// Notify driver cannot dump msg to stdio/stdout when run this private ioctl cmd
+#define RTPRIV_IOCTL_FLAG_NODUMPMSG		0x0002	// Notify driver cannot dump msg to stdio/stdout when run this private ioctl cmd
 #define RTPRIV_IOCTL_FLAG_NOSPACE		0x0004	// Notify driver didn't need copy msg to caller due to the caller didn't reserve space for this cmd
-#endif
 
 #define RTPRIV_IOCTL_E2P                            (SIOCIWFIRSTPRIV + 0x07)
 
