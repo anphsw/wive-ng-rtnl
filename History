@@ -189,6 +189,10 @@
 20) Fix some compile warnings<br>
 21) Add autodetect flash type NOR->SPI<br>
 22) Fix race in libnvram<br>
+23) Use kernel native string functions in wifi driver<br>
+24) Some fix iptables code<br>
+25) Fix defaults for init wifi<br>
+26) Fix update firmware at small memory device<br>
 
 <br><br>
 <b>For support see:</b><br>
