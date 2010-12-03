@@ -499,9 +499,9 @@ static VOID ApCliInvalidStateWhenJoin(
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
 	USHORT ifIndex = (USHORT)(Elem->Priv);
+#ifdef DBG
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
-
-
+#endif
 	ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
 	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
