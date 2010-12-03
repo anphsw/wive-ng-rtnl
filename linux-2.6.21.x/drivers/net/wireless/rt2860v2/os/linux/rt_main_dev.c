@@ -257,6 +257,7 @@ void rt28xx_close(IN PNET_DEV dev)
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
 	// Sanity check for pAd
+	Cancelled = FALSE;
 	if (!pAd)
 		return; // allready close
 
