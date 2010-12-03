@@ -32,7 +32,7 @@ start() {
 	    mac=
 	fi
 	$LOG "Load wifi module..."
-	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
+	if [ "$stamode" = "y" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
 	    $LOG "Macclone mode. Mac is $clone_mac"
 	    modprobe -q rt2860v2_sta mac=$clone_mac
 	else
