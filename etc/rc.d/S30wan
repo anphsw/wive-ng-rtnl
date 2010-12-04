@@ -62,7 +62,7 @@ start() {
 
     elif [ "$wanmode" = "DHCP" ]; then
 	$LOG "Start DHCP client."
-	(sleep 1 && udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1) &
+	(udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1) &
     else
 	$LOG "wan service: unknown wan connection type: $wanmode"
 	exit 1

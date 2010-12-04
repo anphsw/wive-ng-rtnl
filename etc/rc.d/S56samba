@@ -28,7 +28,6 @@ if [ "$SmbEnabled" = "1" ]; then
 	 $LOG "Already started... Stop WINS/SMB SERVER."
 	    killall -q smbd
 	    killall -q nmbd
-	    sleep 1
 	    killall -q -9 smbd
 	    killall -q -9 nmbd
         fi

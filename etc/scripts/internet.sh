@@ -137,7 +137,6 @@ if [ "$MODE" != "connect_sta" ]; then
 	service modules restart
 	$LOG "Tune wifi modules..."
 	retune_wifi
-	sleep 2
     fi
     #restart lan interfaces
     service lan restart

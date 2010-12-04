@@ -25,7 +25,7 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 #wait for some service stop
-sleep 2
+sleep 3
 
 ##########################################################
 # This is services restart always                       #

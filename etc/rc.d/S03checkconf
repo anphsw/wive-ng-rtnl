@@ -30,7 +30,7 @@ get_param() {
 check_nvram()
 {
  if [ ! -f /tmp/nvram_checked ]; then
-	#check firmwave update or clean burn
+	echo "Check firmware update or clean boot."
 	if [ "$IS_WIVE" = "YES" ]; then
 	    $LOG ">>>> NORMAL BOOT <<<<"
 	    $LOG "Backup nvram..."
@@ -38,7 +38,7 @@ check_nvram()
 	else
 	    $LOG ">>>> RESTORE NVRAM <<<<"
 	    if [ -f /etc/backup/nvram_backup.dat ]; then
-		$LOG "Load backuped setting to nvram.."
+		$LOG "Load backuped setting to nvram."
 	        fs load_nvram
 	    else
 		$LOG "Clear and load defaults to nvram !!!"
