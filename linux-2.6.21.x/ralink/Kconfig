@@ -110,3 +110,4 @@ config RT3XXX_EHCI_OHCI
 	select USB_ARCH_HAS_OHCI
 	select USB_ARCH_HAS_EHCI
 endmenu
+

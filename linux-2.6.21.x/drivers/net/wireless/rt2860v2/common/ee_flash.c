@@ -91,14 +91,11 @@ USHORT rtmp_ee_flash_read(
 extern void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b);
 VOID rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 {
-	if (init_flag)
-	{
-		memcpy(nv_ee_start+ Offset, &Data, 2);
-		//rt_nv_commit();
-		//rt_cfg_commit();
-		RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
-	}
-	return;
+	if (!init_flag)
+		return;
+
+	memcpy(nv_ee_start+ Offset, &Data, 2);
+	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
 }
 
 
@@ -115,6 +112,7 @@ VOID rtmp_ee_flash_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 {
 	if (!init_flag)
 		return;
+
 	memcpy(nv_ee_start, Data, EEPROM_SIZE);
 	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
 }

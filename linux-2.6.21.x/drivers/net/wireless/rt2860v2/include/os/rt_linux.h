@@ -1191,10 +1191,8 @@ void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time);
 int rt28xx_packet_xmit(struct sk_buff *skb);
 
 #ifdef RTMP_RBUS_SUPPORT
-#ifndef CONFIG_RALINK_FLASH_API
 void FlashWrite(UCHAR * p, ULONG a, ULONG b);
 void FlashRead(UCHAR * p, ULONG a, ULONG b);
-#endif // CONFIG_RALINK_FLASH_API //
 #endif // RTMP_RBUS_SUPPORT //
 
 #if LINUX_VERSION_CODE <= 0x20402	// Red Hat 7.1

@@ -181,10 +181,6 @@ NDIS_STATUS os_free_mem(
 
 
 #ifdef RTMP_RBUS_SUPPORT
-#ifdef CONFIG_RALINK_FLASH_API
-int32_t FlashRead(uint32_t *dst, uint32_t *src, uint32_t count);
-int32_t FlashWrite(uint16_t *source, uint16_t *destination, uint32_t numBytes);
-#else /* CONFIG_RALINK_FLASH_API */
 #ifndef RA_MTD_RW_BY_NUM
 #ifdef CONFIG_RT2880_FLASH_32M
 #define MTD_NUM_FACTORY 		5
@@ -203,31 +199,22 @@ extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 #endif /* BYNUM - BYOFFSET*/
-#endif /* CONFIG_RALINK_FLASH_API */
 
 void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b)
 {
-#ifdef CONFIG_RALINK_FLASH_API
-	FlashRead((uint32_t *)p, (uint32_t *)a, (uint32_t)b);
-#else
 #ifdef RA_MTD_RW_BY_NUM
 	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t)b, p);
 #else
 	ra_mtd_read_nm("Factory", 0, (size_t)b, p);
 #endif
-#endif
 }
 
 void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
 {
-#ifdef CONFIG_RALINK_FLASH_API
-	FlashWrite((uint16_t *)p, (uint16_t *)a, (uint32_t)b);
-#else
 #ifdef RA_MTD_RW_BY_NUM
 	ra_mtd_write(MTD_NUM_FACTORY, 0, (size_t)b, p);
 #else
 	ra_mtd_write_nm("Factory", 0, (size_t)b, p);
-#endif
 #endif
 }
 #endif /* RTMP_RBUS_SUPPORT */

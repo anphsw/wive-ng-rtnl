@@ -287,9 +287,8 @@ VOID rt_ee_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 {
 	if (!init_flag)
 		return;
+
 	memcpy(nv_ee_start+ Offset, &Data, 2);
-	//rt_nv_commit();
-	//rt_cfg_commit();
 	FlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
 }
 

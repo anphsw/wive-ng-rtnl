@@ -31,11 +31,7 @@
 #define surf_boot_enable_time			10
 #define surf_restore_settings_enable_time	15
 #define surf_do_nothing_time			20
-#ifdef CONFIG_RALINK_FLASH_API
-#define FLASH_WRITE_LOCATION	0x10000
-#else
 #define FLASH_WRITE_LOCATION	0xbfc00000+0x10000
-#endif
 #define FLASH_ERASE_SECTOR	1
 #define SURF_BUTTON_INTERRUPT	4
 #define SURF_TIMER_INTERRUPT 	1
