@@ -199,6 +199,7 @@
 30) Fix build if all wifi driver options is set<br>
 31) Full kernel code review and cleanup<br>
 32) Drop unused, dead and potentional buggy code<br>
+32) Full cycle of retraining flash on command fs cleanall.<br>
 
 <br><br>
 <b>For support see:</b><br>

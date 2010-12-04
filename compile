@@ -45,16 +45,19 @@ if [ "$MODE" = "1T1R-16" ] ; then
     cp -fv ./configs/kernel/config-kernel-1t1r-16		./linux/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-1T1R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-1T1R			./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3050_AP_1T1R_V1_0.bin 				./etc/Wireless/rf.bin
 fi
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./configs/kernel/config-kernel-1t1r			./linux/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-1T1R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-1T1R			./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3050_AP_1T1R_V1_0.bin 				./etc/Wireless/rf.bin
 fi
 if [ "$MODE" = "2T2R" ] ; then
     cp -fv ./configs/kernel/config-kernel-2t2r			./linux/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-2T2R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-2T2R			./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
 fi
 
 #######################################################################

@@ -381,6 +381,7 @@ clean: modules_clean
 	rm -f $(ROOTDIR)/etc/scripts/config.sh
 	rm -f $(ROOTDIR)/etc/default/RT2860_default_novlan
 	rm -f $(ROOTDIR)/etc/Wireless/RT2860/RT2860.dat
+	rm -f $(ROOTDIR)/etc/Wireless/rf.bin
 	rm -f config.tk
 	rm -f .tmp*
 	rm -f sdk_version.h
