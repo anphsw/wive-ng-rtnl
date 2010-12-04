@@ -1525,18 +1525,6 @@ void __nf_ct_refresh_acct(struct nf_conn *ct,
 }
 EXPORT_SYMBOL_GPL(__nf_ct_refresh_acct);
 
-void wanduck_ct_refresh(struct nf_conn *ct,
-                          unsigned long extra_jiffies)
-{
-	if((!drop_target(&ct->tuplehash[IP_CT_DIR_ORIGINAL])) && (!drop_target(&ct->tuplehash[IP_CT_DIR_REPLY])))
-		return;
-
-        write_lock_bh(&nf_conntrack_lock);
-
-        write_unlock_bh(&nf_conntrack_lock);
-}
-EXPORT_SYMBOL_GPL(wanduck_ct_refresh);
-
 #if defined(CONFIG_NF_CT_NETLINK) || defined(CONFIG_NF_CT_NETLINK_MODULE)
 
 #include <linux/netfilter/nfnetlink.h>

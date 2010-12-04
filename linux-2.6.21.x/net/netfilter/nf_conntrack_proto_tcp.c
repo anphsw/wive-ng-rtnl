@@ -345,7 +345,6 @@ static int tcp_print_conntrack(struct seq_file *s,
 
         if(nf_clean_flag)
 		nf_ct_refresh(conntrack, NULL, 0);
-                //wanduck_ct_refresh(conntrack, 0);
 
 	read_lock_bh(&tcp_lock);
 	state = conntrack->proto.tcp.state;
