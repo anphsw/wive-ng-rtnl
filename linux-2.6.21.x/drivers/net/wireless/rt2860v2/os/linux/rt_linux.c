@@ -1739,7 +1739,7 @@ int RtmpOSNetDevAddrSet(
 	net_dev = pNetDev;
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 	
-#ifdef CONFIG_STA_SUPPORT
+#if 0
 	// work-around for the SuSE due to it has it's own interface name management system.
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{

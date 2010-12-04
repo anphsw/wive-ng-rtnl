@@ -921,6 +921,11 @@ VOID	NICReadEEPROMParameters(
 	// Set up the Mac address
 	RtmpOSNetDevAddrSet(pAd->net_dev, &pAd->CurrentAddress[0]);
 
+#ifdef LINUX
+	//Workaround
+	dev_set_mac_address(pAd->net_dev, (void*)pAd->CurrentAddress);
+#endif
+
 	// if not return early. cause fail at emulation.
 	// Init the channel number for TX channel power	
 #if defined (CONFIG_RALINK_RT3883)
