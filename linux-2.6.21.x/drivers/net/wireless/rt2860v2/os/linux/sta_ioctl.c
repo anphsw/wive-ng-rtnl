@@ -376,11 +376,11 @@ INT	Set_Antenna_Proc(
 	IN	PUCHAR			arg);
 #endif // ANT_DIVERSITY_SUPPORT //
 
+#ifdef WMM_ACM_SUPPORT
 static void AcmCmdStreamGuiDisplay(
 	IN	PRTMP_ADAPTER	pAd,
 	OUT char            *extra);
 
-#ifdef WMM_ACM_SUPPORT
 static void ACM_CMD_Stream_Gui_Display(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC	ad_p,
 	ACM_PARAM_IN	ACM_STREAM_INFO		*stream_p,
@@ -2947,11 +2947,6 @@ rt_private_show(struct net_device *dev, struct iw_request_info *info,
 			break;
 
 #ifdef WMM_ACM_SUPPORT
-
-       /* case SHOW_ACM_BADNWIDTH:
-            AcmCmdBandwidthGuiDisplay(pAd, extra);
-            wrq->length = strlen(extra) + 1; // 1: size of '\0'            
-            break;*/
         case SHOW_ACM_STREAM:
             AcmCmdStreamGuiDisplay(pAd, extra);
             wrq->length = strlen(extra) + 1; // 1: size of '\0'
@@ -8897,7 +8892,6 @@ INT	Set_Antenna_Proc(
 #endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef WMM_ACM_SUPPORT
-
 static void AcmCmdStreamGuiDisplay(
 	IN	PRTMP_ADAPTER	pAd,
 	OUT char            *extra)
