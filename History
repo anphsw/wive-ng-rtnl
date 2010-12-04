@@ -198,7 +198,7 @@
 29) Some wifi function now works in native mode<br>
 30) Fix build if all wifi driver options is set<br>
 31) Full kernel code review and cleanup<br>
-32) Drop unused, dead and potential byggy code<br>
+32) Drop unused, dead and potentional buggy code<br>
 
 <br><br>
 <b>For support see:</b><br>
