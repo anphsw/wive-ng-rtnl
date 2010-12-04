@@ -855,8 +855,8 @@ typedef struct _COUNTER_RALINK {
 	UINT32          OneSecReceivedByteCount;
 	UINT32          OneSecTxAggregationCount;
 	UINT32          OneSecRxAggregationCount;
-	UINT32   		OneSecFrameDuplicateCount;
-	UINT32			OneSecEnd; /* for one sec count clear use */
+	UINT32   	OneSecFrameDuplicateCount;
+	UINT32		OneSecEnd; /* for one sec count clear use */
 
 	ULONG           TransmittedByteCount;   // both successful and failure, used to calculate TX throughput
 	ULONG           ReceivedByteCount;      // both CRC okay and CRC error, used to calculate RX throughput
@@ -871,28 +871,10 @@ typedef struct _COUNTER_RALINK {
 	ULONG           TxRingErrCount;
 	LARGE_INTEGER   RealFcsErrCount;
 	ULONG           PendingNdisPacketCount;
-
-//	ULONG           OneSecOsTxCount[NUM_OF_TX_RING];
-//	ULONG           OneSecDmaDoneCount[NUM_OF_TX_RING];
-//	UINT32          OneSecTxDoneCount;
-//	ULONG           OneSecRxCount;
-//	UINT32          OneSecTxAggregationCount;
-//	UINT32          OneSecRxAggregationCount;
-//	UINT32          OneSecReceivedByteCount;
-//	UINT32   		OneSecFrameDuplicateCount;
-
-//	UINT32          OneSecTransmittedByteCount;   // both successful and failure, used to calculate TX throughput
-//	UINT32          OneSecTxNoRetryOkCount;
-//	UINT32          OneSecTxRetryOkCount;
-//	UINT32          OneSecTxFailCount;
-//	UINT32          OneSecFalseCCACnt;      // CCA error count, for debug purpose, might move to global counter
-//	UINT32          OneSecRxOkCnt;          // RX without error
-//	UINT32          OneSecRxOkDataCnt;      // unicast-to-me DATA frame count
-//	UINT32          OneSecRxFcsErrCnt;      // CRC error
-//	UINT32          OneSecBeaconSentCnt;
 	UINT32          LastOneSecTotalTxCount; // OneSecTxNoRetryOkCount + OneSecTxRetryOkCount + OneSecTxFailCount
 	UINT32          LastOneSecRxOkDataCnt;  // OneSecRxOkDataCnt
 	ULONG		DuplicateRcv;
+
 	ULONG		TxAggCount;
 	ULONG		TxNonAggCount;
 	ULONG		TxAgg1MPDUCount;
@@ -3336,7 +3318,6 @@ struct _RTMP_ADAPTER
 /*****************************************************************************************/
 /*      Tx related parameters                                                           */
 /*****************************************************************************************/
-	BOOLEAN                 DeQueueRunning[NUM_OF_TX_RING];  // for ensuring RTUSBDeQueuePacket get call once
 	NDIS_SPIN_LOCK          DeQueueLock[NUM_OF_TX_RING];
 		
 

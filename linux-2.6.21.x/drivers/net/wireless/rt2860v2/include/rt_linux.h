@@ -51,8 +51,6 @@
 #define IFNAMSIZ 16
 #endif
 
-//#define CONFIG_CKIP_SUPPORT
-
 #undef __inline
 #define __inline	   static inline 
 
@@ -61,9 +59,8 @@
 #define SHORT           signed short
 #define UINT            unsigned int 
 #undef  ULONG           
-//#define ULONG           unsigned int
-#define ULONG           unsigned long /* 32-bit in 32-bit CPU or
-										 64-bit in 64-bit CPU */
+#define ULONG           unsigned int
+#define ULONG           unsigned long /* 32-bit in 32-bit CPU or 64-bit in 64-bit CPU */
 #define USHORT          unsigned short
 #define UCHAR           unsigned char
 
@@ -157,10 +154,9 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 
 
 #define BOOLEAN         unsigned char
-//#define LARGE_INTEGER s64
 #define VOID            void
-//#define LONG            int
-#define LONG 			long
+#undef	LONG
+#define LONG		long
 #define LONGLONG        s64
 #define ULONGLONG       u64
 typedef VOID            *PVOID;
@@ -210,25 +206,25 @@ typedef union _LARGE_INTEGER {
 #define NDIS_PACKET_TYPE_DIRECTED		0
 #define NDIS_PACKET_TYPE_MULTICAST		1
 #define NDIS_PACKET_TYPE_BROADCAST		2
-#define NDIS_PACKET_TYPE_ALL_MULTICAST	3
+#define NDIS_PACKET_TYPE_ALL_MULTICAST		3
 #endif // CONFIG_STA_SUPPORT //
 
 struct os_lock  {
-	spinlock_t		lock;
+	spinlock_t	lock;
 	unsigned long  	flags;
 };
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef IAPP_SUPPORT
 typedef struct _RT_SIGNAL_STRUC {
-	USHORT					Sequence;
+    USHORT					Sequence;
     UCHAR					MacAddr[ETH_LENGTH_OF_ADDRESS];
     UCHAR					CurrAPAddr[ETH_LENGTH_OF_ADDRESS];
     UCHAR					Sig;
 } RT_SIGNAL_STRUC, *PRT_SIGNAL_STRUC;
 
 // definition of signal
-#define	SIG_NONE					0
+#define	SIG_NONE				0
 #define SIG_ASSOCIATION				1
 #define SIG_REASSOCIATION			2
 #endif // IAPP_SUPPORT //
@@ -236,16 +232,16 @@ typedef struct _RT_SIGNAL_STRUC {
 
 struct os_cookie {
 #ifdef RT2860
-	struct pci_dev 			*pci_dev;
-	dma_addr_t		  		pAd_pa;
+	struct pci_dev 		*pci_dev;
+	dma_addr_t		pAd_pa;
 #endif // RT2860 //	
 
 #ifdef RT2870
-	struct usb_device		*pUsb_Dev;
-
-	pid_t					MLMEThr_pid;
-	pid_t					RTUSBCmdThr_pid;
-	pid_t					TimerQThr_pid;
+	struct usb_device	*pUsb_Dev;
+                                
+	pid_t			MLMEThr_pid;
+	pid_t			RTUSBCmdThr_pid;
+	pid_t			TimerQThr_pid;
 #endif // RT2870 //
 
 	struct tasklet_struct 	rx_done_task;
@@ -275,15 +271,15 @@ struct os_cookie {
 #endif // CARRIER_DETECTION_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
-	unsigned long			apd_pid; //802.1x daemon pid
+	unsigned long		apd_pid; //802.1x daemon pid
 #ifdef CONFIG_AP_SUPPORT
 #ifdef IAPP_SUPPORT
-	RT_SIGNAL_STRUC			RTSignal;
-	unsigned long			IappPid; //IAPP daemon pid
+	RT_SIGNAL_STRUC		RTSignal;
+	unsigned long		IappPid; //IAPP daemon pid
 #endif // IAPP_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-	INT						ioctl_if_type;
-	INT 					ioctl_if;
+	INT			ioctl_if_type;
+	INT 			ioctl_if;
 };	
 
 typedef struct _VIRTUAL_ADAPTER
@@ -304,18 +300,15 @@ typedef struct _VIRTUAL_ADAPTER
 typedef struct os_cookie	* POS_COOKIE;	
 typedef struct pci_dev 		* PPCI_DEV;	
 typedef struct net_device	* PNET_DEV;
-typedef void				* PNDIS_PACKET;
-typedef char				NDIS_PACKET;
+typedef void			* PNDIS_PACKET;
+typedef char			NDIS_PACKET;
 typedef PNDIS_PACKET		* PPNDIS_PACKET;
-typedef	dma_addr_t			NDIS_PHYSICAL_ADDRESS;
-typedef	dma_addr_t			* PNDIS_PHYSICAL_ADDRESS;
-//typedef struct timer_list	RALINK_TIMER_STRUCT;
-//typedef struct timer_list	* PRALINK_TIMER_STRUCT;
-//typedef struct os_lock		NDIS_SPIN_LOCK;
-typedef spinlock_t			NDIS_SPIN_LOCK;
+typedef	dma_addr_t		NDIS_PHYSICAL_ADDRESS;
+typedef	dma_addr_t		* PNDIS_PHYSICAL_ADDRESS;
+typedef spinlock_t		NDIS_SPIN_LOCK;
 typedef struct timer_list	NDIS_MINIPORT_TIMER;
-typedef void				* NDIS_HANDLE;
-typedef char 				* PNDIS_BUFFER;
+typedef void			* NDIS_HANDLE;
+typedef char 			* PNDIS_BUFFER;
 
 
 

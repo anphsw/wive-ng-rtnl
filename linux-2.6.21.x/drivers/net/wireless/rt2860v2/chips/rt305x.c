@@ -26,13 +26,8 @@
 	--------    ----------    ----------------------------------------------
 */
 
-
-
 #ifdef RT305x
-
 #include "rt_config.h"
-
-
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
@@ -280,6 +275,4 @@ VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd)
 #endif
 }
 
-
 #endif // RT305x //
-

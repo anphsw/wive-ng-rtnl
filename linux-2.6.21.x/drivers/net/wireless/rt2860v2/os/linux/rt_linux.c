@@ -324,7 +324,6 @@ VOID	RTMPFreeAdapter(
 	{
 		NdisFreeSpinLock(&pAd->TxSwQueueLock[index]);
 		NdisFreeSpinLock(&pAd->DeQueueLock[index]);
-		pAd->DeQueueRunning[index] = FALSE;
 	}
 	
 	NdisFreeSpinLock(&pAd->irq_lock);

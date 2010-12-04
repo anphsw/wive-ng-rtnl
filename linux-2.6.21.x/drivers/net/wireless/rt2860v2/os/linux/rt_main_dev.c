@@ -260,7 +260,6 @@ void rt28xx_close(IN PNET_DEV dev)
 	if (!pAd)
 		return; // allready close
 
-	Cancelled = FALSE;
 	printk("===> rt28xx_close\n");
 
 #ifdef CONFIG_AP_SUPPORT
@@ -268,13 +267,26 @@ void rt28xx_close(IN PNET_DEV dev)
 	BG_FTPH_Remove();
 #endif // BG_FT_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
+
+	Cancelled = FALSE;
+
 #ifdef WMM_ACM_SUPPORT
 	/* must call first */
 	ACMP_Release(pAd);
 #endif // WMM_ACM_SUPPORT //
+
+
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 	RT3XXX_AntDiversity_Fini(pAd);
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
+
+#ifdef WDS_SUPPORT
+	WdsDown(pAd);
+#endif // WDS_SUPPORT //
+
+	MlmeRadioOff(pAd);
+	MacTableReset(pAd);
+
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -292,26 +304,13 @@ void rt28xx_close(IN PNET_DEV dev)
 #endif // RTMP_MAC_PCI //
 	}
 #endif // CONFIG_STA_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-	// Lost AP, send disconnect & link down event
-	LinkDown(pAd, FALSE);
-	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
-#endif
-#ifdef WDS_SUPPORT
-	WdsDown(pAd);
-#endif // WDS_SUPPORT //
-
-	MacTableReset(pAd);
 
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 
 	for (i = 0 ; i < NUM_OF_TX_RING; i++)
 	{
-		while (pAd->DeQueueRunning[i] == TRUE)
-		{
-			printk("Waiting for TxQueue[%d] done..........\n", i);
-			RTMPusecDelay(1500);
-		}
+		printk("Waiting for TxQueue[%d].\n", i);
+		RTMPusecDelay(1500);
 	}
 	
 #ifdef CONFIG_AP_SUPPORT
@@ -336,10 +335,7 @@ void rt28xx_close(IN PNET_DEV dev)
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	{
 		RTMPSetLED(pAd, LED_LINK_DOWN);
-		MlmeRadioOff(pAd);
-	}
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -352,9 +348,9 @@ void rt28xx_close(IN PNET_DEV dev)
 #ifdef CLIENT_WDS
 		CliWds_ProxyTabDestory(pAd);
 #endif // CLIENT_WDS //
-
 		// Shutdown Access Point function, release all related resources 
 		APShutdown(pAd);
+
 		// Free BssTab & ChannelInfo tabbles.
 		AutoChBssTableDestroy(pAd);
 		ChannelInfoDestroy(pAd);
@@ -422,6 +418,8 @@ void rt28xx_close(IN PNET_DEV dev)
 			if (brc==FALSE)
 				DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
 	}
+	
+
 #endif // RTMP_MAC_PCI //
 
 	// Free IRQ
@@ -431,22 +429,22 @@ void rt28xx_close(IN PNET_DEV dev)
 		// Deregister interrupt function
 		RtmpOSIRQRelease(net_dev);
 #endif // RTMP_MAC_PCI //
-
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE);
 	}
 
 	// Free Ring or USB buffers
 	RTMPFreeTxRxRingMemory(pAd);
 
+	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
+
 #ifdef DOT11_N_SUPPORT
 	// Free BA reorder resource
 	ba_reordering_resource_release(pAd);
 #endif // DOT11_N_SUPPORT //
 	
-	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
-	printk("Waiting for WiFi driver down...\n");
+	printk("Waiting for STA driver down...\n");
 	RTMPusecDelay(1500);
 
 #ifdef VENDOR_FEATURE2_SUPPORT
@@ -1069,11 +1067,11 @@ BOOLEAN RtmpPhyNetDevExit(
 	// Unregister network device
 	if (net_dev != NULL)
 	{
-		printk("RtmpOSNetDevDetach(): dev->name=%s!\n", net_dev->name);
+		printk("RtmpOSNetDevDetach(): RtmpOSNetDeviceDetach(), dev->name=%s!\n", net_dev->name);
 		RtmpOSNetDevDetach(net_dev);
 	}
 
-    return TRUE;
+	return TRUE;
 	
 }
 

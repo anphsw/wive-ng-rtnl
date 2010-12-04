@@ -336,7 +336,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 		{
 			NdisAllocateSpinLock(&pAd->TxSwQueueLock[index]);
 			NdisAllocateSpinLock(&pAd->DeQueueLock[index]);
-			pAd->DeQueueRunning[index] = FALSE;
 		}
 
 		NdisAllocateSpinLock(&pAd->irq_lock);
@@ -4686,16 +4685,13 @@ int rt28xx_init(
 		//
 		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
 		{
-//			NdisMDeregisterInterrupt(&pAd->Interrupt);
 			RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE);
 		}
-//		RTMPFreeAdapter(pAd); // we will free it in disconnect()
 	}
 	else if (pAd)
 	{
 		// Microsoft HCT require driver send a disconnect event after driver initialization.
 		OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
-//		pAd->IndicateMediaState = NdisMediaStateDisconnected;
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_MEDIA_STATE_CHANGE);
 
 		DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event B!\n"));
@@ -5161,13 +5157,10 @@ extern UINT8  MC_CardUsed[MAX_NUM_OF_MULTIPLE_CARD];
 		MC_CardUsed[pAd->MC_RowID] = 0; // not clear MAC address
 #endif // MULTIPLE_CARD_SUPPORT //
 
-
-
 	RTMPFreeAdapter(pAd);
 
 	return TRUE;
 }
-
 
 // not yet support MBSS
 PNET_DEV get_netdev_from_bssid(
