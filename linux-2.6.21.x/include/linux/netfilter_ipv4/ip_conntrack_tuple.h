@@ -100,35 +100,12 @@ DEBUGP("tuple %p: %u %u.%u.%u.%u:%hu -> %u.%u.%u.%u:%hu\n",	\
 /* If we're the first tuple, it's the original dir. */
 #define DIRECTION(h) ((enum ip_conntrack_dir)(h)->tuple.dst.dir)
 
-#ifdef CONFIG_ASUS_QOS
-#define IP_TRACK_MAX              10
-#define IP_TRACK_COMPARE          40
-
-#define IP_TRACK_FULL           0x01
-#define IP_TRACK_PORT           0x02
-#define IP_TRACK_DATA           0x04
-#define IP_TRACK_PD             0x08
-#define IP_TRACK_DOWN           0x10
-#define IP_TRACK_TIME           0x20
-
-struct ip_track
-{
-        int flag;
-        u_int8_t number;
-        int length[IP_TRACK_MAX];
-};
-#endif
-
 /* Connections have two entries in the hash table: one for each way */
 struct ip_conntrack_tuple_hash
 {
 	struct list_head list;
 
 	struct ip_conntrack_tuple tuple;
-
-#ifdef CONFIG_ASUS_QOS
-	struct ip_track track;
-#endif
 };
 
 #endif /* __KERNEL__ */

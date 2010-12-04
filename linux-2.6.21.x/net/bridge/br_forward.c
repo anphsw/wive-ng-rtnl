@@ -20,76 +20,13 @@
 #include <linux/if_vlan.h>
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-#include <linux/in.h>
-unsigned char bcast_mac_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-#endif
-
-extern unsigned char mbss_nolan_g;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_1;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_2_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_3;				/* Jiahao for MBSSID */
-
-int SSID1_to_SSID2(unsigned char *deva, unsigned char *devb)	/* Jiahao for MBSSID */
-{
-	if (!mbss_nolan_g)
-		return 0;
-
-	if ( mbss_nolan_M_1 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_M_2 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_M_3 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_1 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_2 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_3 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_2 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_2 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_2_3 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_2_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-
-    return 0;
-}
 
 /* Don't forward packets to originating port or forwarding diasabled */
 static inline int should_deliver(struct net_bridge_port *p, 
 				 const struct sk_buff *skb)
 {
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-	unsigned char * dest;
-#endif
- 	if (skb->dev == p->dev ||
- 	    p->state != BR_STATE_FORWARDING ||
-	    SSID1_to_SSID2(skb->dev->name, p->dev->name))
+ 	if (skb->dev == p->dev || p->state != BR_STATE_FORWARDING)
  		return 0;
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-    dest = skb->mac.raw;
-    if ((dest[0] & 1) && p->bandwidth !=0) {
-            if ((p->accumulation + skb->len) > p->bandwidth) return 0;
-            p->accumulation += skb->len;
-    }
-#endif
 
 	return 1;
 }
@@ -165,15 +102,6 @@ void br_forward(struct net_bridge_port *to, struct sk_buff *skb)
 
 	kfree_skb(skb);
 }
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-static void copy_mac(unsigned char* to, unsigned char * from)
-{
-	int i;
-	for(i=0; i<6; i++)
-		*(to+i)=*(from+i);
-	return;
-}
-#endif
 
 /* called under bridge lock */
 static void br_flood(struct net_bridge *br, struct sk_buff *skb,
@@ -182,96 +110,6 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 {
 	struct net_bridge_port *p;
 	struct net_bridge_port *prev;
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	struct ethhdr *dest;
-	int i;
-
-	if(atomic_read(&br->br_igmpp_table_enable) == 1){
-		list_for_each_entry_rcu(p, &br->port_list, list) {
-			struct sk_buff *skb2;
-			if ( atomic_read(&p->wireless_interface) == 1){ /* wireless interface */
-				if (    !memcmp(eth_hdr(skb)->h_dest, bcast_mac_addr, 6) ||	/* always flooding broadcast packets */
-					skb->nh.iph->protocol == IPPROTO_IGMP   )			/* always flooding IGMP packets */
-				{
-					if ((skb2 = skb_clone(skb, GFP_ATOMIC)) == NULL) {
-						br->statistics.tx_dropped++;
-						kfree_skb(skb);
-					return;
-					}
-					if (should_deliver(p,skb2))
-						__packet_hook(p, skb2);
-					else
-						kfree_skb(skb2);
-				} else {/* neither broadcast nor IGMP packet, does group address stored in table ? */
-					int groupIdx;
-					groupIdx = search_group_IP( &p->port_igmpp_table, skb->nh.iph->daddr);
-					if (groupIdx >=0){
-						/* skb_copy for each host*/
-						for(i=0; i<HOSTLIST_NUMBER; i++){	
-							if (p->port_igmpp_table.group_list[groupIdx].host_list[i].used ==1){
-								if ((skb2 = skb_copy(skb, GFP_ATOMIC)) == NULL) {
-									br->statistics.tx_dropped++;
-									kfree_skb(skb);
-									return;
-								}
-								dest = eth_hdr(skb2);
-								copy_mac( dest->h_dest, p->port_igmpp_table.group_list[groupIdx].host_list[i].mac_addr);
-								if (should_deliver(p, skb2))
-									__packet_hook(p, skb2);
-								else
-									kfree_skb(skb2);
-							}// if used - END
-						}// for loop - END
-					}else { /* skb's destination IP address does't match in port_igmpp_table, do nothing (packet will be droped) */
-					}// groupIdx >=0 - END
-				} //broadcast and IGMP check - END
-			}else{ 
-				/* it's wired interface */
-				/* skb_clone..... */
-				if ((skb2 = skb_clone(skb, GFP_ATOMIC)) == NULL) {
-					br->statistics.tx_dropped++;
-					kfree_skb(skb);
-					return;
-				}
-				if (should_deliver(p,skb2))
-					__packet_hook(p, skb2);
-				else
-					kfree_skb(skb2);
-
-			}// interface ==1 - END
-		} //list_for_each_entry_rcu() - END
-
-		kfree_skb(skb);
-
-	}else{
-		prev = NULL;
-
-		list_for_each_entry_rcu(p, &br->port_list, list) {
-			if (should_deliver(p, skb)) {
-				if (prev != NULL) {
-					struct sk_buff *skb2;
-
-					if ((skb2 = skb_clone(skb, GFP_ATOMIC)) == NULL) {
-						br->statistics.tx_dropped++;
-						kfree_skb(skb);
-						return;
-					}
-
-					__packet_hook(prev, skb2);
-				}
-
-				prev = p;
-			}
-		}
-
-		if (prev != NULL) {
-			__packet_hook(prev, skb);
-			return;
-		}
-
-		kfree_skb(skb);
-	}
-#else
 	prev = NULL;
 
 	list_for_each_entry_rcu(p, &br->port_list, list) {
@@ -298,7 +136,6 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	}
 
 	kfree_skb(skb);
-#endif
 }
 
 

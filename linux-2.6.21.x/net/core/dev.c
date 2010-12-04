@@ -1592,15 +1592,6 @@ int netif_rx(struct sk_buff *skb)
 	if (!skb->tstamp.off_sec)
 		net_timestamp(skb);
 
-	if (!memcmp(skb->dev->name + 2, "1", 1))	/* Jiahao for MBSSID: match ra1 */
-		skb->wl_idx = 0x2;
-	else if (!memcmp(skb->dev->name + 2, "2", 1))	/* Jiahao for MBSSID: match ra2 */
-		skb->wl_idx = 0x4;
-	else if (!memcmp(skb->dev->name + 2, "3", 1))	/* Jiahao for MBSSID: match ra3 */
-		skb->wl_idx = 0x8;
-	else						/* Angela: for priority ssid and lan */
-		skb->wl_idx = 0x0;
-
 	/*
 	 * The code is rearranged so that the path is the most
 	 * short when CPU is congested, but is still operating.

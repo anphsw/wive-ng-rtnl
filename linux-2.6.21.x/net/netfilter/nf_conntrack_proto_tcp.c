@@ -106,7 +106,6 @@ static unsigned int nf_ct_tcp_timeout_close_wait __read_mostly =   60 SECS;
 static unsigned int nf_ct_tcp_timeout_last_ack __read_mostly =     30 SECS;
 static unsigned int nf_ct_tcp_timeout_time_wait __read_mostly =     2 MINS;
 static unsigned int nf_ct_tcp_timeout_close __read_mostly =        10 SECS;
-extern int nf_clean_flag;
 
 /* RFC1122 says the R2 limit should be at least 100 seconds.
    Linux uses 15 packets as limit, which corresponds
@@ -342,9 +341,6 @@ static int tcp_print_conntrack(struct seq_file *s,
 			       const struct nf_conn *conntrack)
 {
 	enum tcp_conntrack state;
-
-        if(nf_clean_flag)
-		nf_ct_refresh(conntrack, NULL, 0);
 
 	read_lock_bh(&tcp_lock);
 	state = conntrack->proto.tcp.state;

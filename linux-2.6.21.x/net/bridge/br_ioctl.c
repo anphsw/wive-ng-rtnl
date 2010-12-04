@@ -302,28 +302,6 @@ static int old_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	case BRCTL_GET_FDB_ENTRIES:
 		return get_fdb_entries(br, (void __user *)args[1],
 				       args[2], args[3]);
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-        case BRCTL_MULTICAST_BWCTRL:
-        {
-                struct net_bridge_port *p;
-
-                if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
-                if (args[2] == 0) {
-                        p->bandwidth = 0;
-                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth all\n",
-                                        p->br->dev->name, p->port_no, p->dev->name );
-                del_timer(&p->bwctrl_timer);
-                } else {
-                        p->bandwidth = args[2] * 1000 / 8;
-                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth %dkbps\n",
-                                         p->br->dev->name, p->port_no, p->dev->name,
-                                        (unsigned int)args[2]);
-
-                mod_timer(&p->bwctrl_timer, jiffies+1*HZ);
-                }
-                return 0;
-        }
-#endif
 #ifdef CONFIG_BRIDGE_PORT_FORWARD
 	case BRCTL_PORT_FORWARD:
 	{
@@ -442,34 +420,6 @@ int br_dev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	case SIOCBRADDIF:
 	case SIOCBRDELIF:
 		return add_del_if(br, rq->ifr_ifindex, cmd == SIOCBRADDIF);
-
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-        case SIOCBRMCAST:
-        {
-		unsigned long args[4];
-                struct net_bridge_port *p;
-
-		if (copy_from_user(args, rq->ifr_data, sizeof(args)))
-			return -EFAULT;
-
-                if ((p = br_get_port(br, args[1])) == NULL) return -EINVAL;
-
-                if (args[2] == 0) {
-                        p->bandwidth = 0;
-                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth all\n",
-                                        p->br->dev->name, p->port_no, p->dev->name );
-                del_timer(&p->bwctrl_timer);
-                } else {
-                        p->bandwidth = args[2] * 1000 / 8;
-                        printk(KERN_INFO "%s: port %i(%s) multicast bandwidth %dkbps\n",
-                                         p->br->dev->name, p->port_no, p->dev->name,
-                                        (unsigned int)args[2]);
-
-                mod_timer(&p->bwctrl_timer, jiffies+1*HZ);
-                }
-                return 0;
-        }
-#endif
 #ifdef CONFIG_BRIDGE_PORT_FORWARD
 	case SIOCBRPFWCT:
 	{

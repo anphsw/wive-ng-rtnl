@@ -36,7 +36,6 @@ int sysctl_oom_kill_allocating_task;
        int oom_reconfigure_wanted = 0;
        int     oom_rank_threshold = 0;
 #endif
-extern int mm_kill_flag;
 /* #define DEBUG */
 
 /**
@@ -500,7 +499,6 @@ out:
 	if(ct_policy > 0)
 	{
 		printk("\nKill process by oom\n");
-		mm_kill_flag = 301;
 		kill_proc(1, SIGUSR1, 1);
 	}
 }
