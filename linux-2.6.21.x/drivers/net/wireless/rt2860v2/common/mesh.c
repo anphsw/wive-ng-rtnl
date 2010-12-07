@@ -1525,7 +1525,7 @@ static INT Mesh_VirtualIF_Close(
 		AsicDisableSync(pAd);
 #endif // CONFIG_STA_SUPPORT //
 
-	MOD_DEC_USE_COUNT;
+	module_put(THIS_MODULE);
 
 	return 0;
 } 
