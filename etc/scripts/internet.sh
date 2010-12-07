@@ -126,21 +126,22 @@ apcli_config() {
 }
 
 #clear conntrack tables
-if [ "$MODE" != "wifionly" ]; then
-    echo 1 > /proc/sys/net/nf_conntrack_flush
-fi
+echo 1 > /proc/sys/net/nf_conntrack_flush
 
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "lanonly" ]; then
+	if [ "$MODE" = "wifionly" ] && [ "$stamode" = "y" ]; then
+	    #Need stop tun before reload drivers
+	    #this need for prevent loop in routes
+	    service vpnhelper stop
+	    sleep 5
+	fi
+	$LOG "Shutdown wireless interfaces."
 	ifRaxWdsxDown
-	#Need stop tun before reload drivers
-	#this need for prevent loop in routes
-	service vpnhelper stop
-	sleep 3
-	#Reload modules drivers for current mode
+	$LOG "Reload modules drivers for current mode."
 	service modules restart
-	$LOG "Tune wifi modules..."
+	$LOG "Tune wifi modules."
 	retune_wifi
     fi
     #restart lan interfaces
