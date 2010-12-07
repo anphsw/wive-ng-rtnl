@@ -30,8 +30,7 @@
 #ifdef LINUX
 #include <linux/skbuff.h>
 #include <linux/autoconf.h>
-#endif // LINUX //
-
+#endif
 
 /*************************************************************************
   *
@@ -40,7 +39,7 @@
   ************************************************************************/  
 
 #define RTMP_MAC_IRQ_NUM		4
-
+#define CMDTHREAD_CHAN_RESCAN		0x0D730101
 
 /*************************************************************************
   *
@@ -81,27 +80,20 @@
 #define NVRAM_OFFSET					0x30000
 #define RF_OFFSET					0x40000
 
-#ifdef LINUX
 /*************************************************************************
   *
   *	Device Tx/Rx related definitions.
   *
   ************************************************************************/
+#ifdef LINUX
 #if !defined(CONFIG_RA_NAT_NONE)
-/* bruce+ */
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 #endif
-
-// TODO: Check these functions.
 #ifdef CARRIER_DETECTION_SUPPORT
 extern void unregister_tmr_service(void);
 extern void request_tmr_service(int, void *, void *);
 #endif
-#endif
+#endif /* LINUX */
 
-#endif // LINUX //
-
-#define CMDTHREAD_CHAN_RESCAN                      0x0D730101	// cmd
-
-#endif // __RTMP_RBUS_H__ //
+#endif /* __RTMP_RBUS_H__ */
