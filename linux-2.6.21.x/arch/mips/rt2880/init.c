@@ -149,25 +149,31 @@ int get_ethernet_addr(char *ethernet_addr)
 
 void prom_init_sysclk(void)
 {
-
-#if defined(CONFIG_RT2880_FPGA)
-        mips_cpu_feq = 25000000; 
-#elif defined (CONFIG_RT3052_FPGA) || defined (CONFIG_RT3352_FPGA) || defined (CONFIG_RT2883_FPGA) || defined (CONFIG_RT3883_FPGA)
-        mips_cpu_feq = 40000000; 
-#else
 	u32 	reg;
         u8      clk_sel;
 
+#if defined(CONFIG_RT2880_FPGA)
+        mips_cpu_feq = 25000000; 
+#elif defined (CONFIG_RT3052_FPGA) 
+	mips_cpu_feq = 32000000;	
+#elif  defined (CONFIG_RT3352_FPGA) || defined (CONFIG_RT2883_FPGA) || defined (CONFIG_RT3883_FPGA)
+        mips_cpu_feq = 40000000; 
+#else
+	//get sysclc from reg
         reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x10)));
 #if defined (CONFIG_RT2880_ASIC)
         clk_sel = (reg>>20) & 0x03;
 #elif defined (CONFIG_RT2883_ASIC) 
+	mips_cpu_feq = (380*1000*1000);
         clk_sel = (reg>>18) & 0x03;
 #elif defined (CONFIG_RT3052_ASIC) 
+	mips_cpu_feq = (320*1000*1000);
         clk_sel = (reg>>18) & 0x01;
 #elif defined (CONFIG_RT3352_ASIC) 
+	mips_cpu_feq = (384*1000*1000);
         clk_sel = (reg>>8) & 0x01;
 #elif defined (CONFIG_RT3883_ASIC) 
+	mips_cpu_feq = (250*1000*1000);
         clk_sel = (reg>>8) & 0x03;
 #else
 #error Please Choice System Type
