@@ -5142,7 +5142,7 @@ INT RtmpRaDevCtrlInit(
 		strcpy(pAd->MC_FileName, STA_PROFILE_PATH);
 #endif // CONFIG_STA_SUPPORT //
 
-	DBGPRINT(RT_DEBUG_TRACE, ("MC> ROW = %d, PATH = %s\n", pAd->MC_RowID, pAd->MC_FileName));
+	printk("MC> ROW = %d, PATH = %s\n", pAd->MC_RowID, pAd->MC_FileName);
 }
 #endif // MULTIPLE_CARD_SUPPORT //
 

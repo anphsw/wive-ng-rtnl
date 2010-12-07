@@ -542,17 +542,17 @@ INT	Set_Channel_Proc(
 					pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40)
 				{
 					N_SetCenCh(pAd);
-						AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
-						AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
-					DBGPRINT(RT_DEBUG_TRACE, ("BW_40, control_channel(%d), CentralChannel(%d) \n", 
-								pAd->CommonCfg.Channel, pAd->CommonCfg.CentralChannel));
+					AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
+					AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
+					printk("BW_40, control_channel(%d), CentralChannel(%d) \n", 
+							pAd->CommonCfg.Channel, pAd->CommonCfg.CentralChannel);
 				}
 				else
 #endif // DOT11_N_SUPPORT //
 				{
 					AsicSwitchChannel(pAd, pAd->CommonCfg.Channel, FALSE);
 					AsicLockChannel(pAd, pAd->CommonCfg.Channel);
-					DBGPRINT(RT_DEBUG_TRACE, ("BW_20, Channel(%d)\n", pAd->CommonCfg.Channel));
+					printk("BW_20, Channel(%d)\n", pAd->CommonCfg.Channel);
 				}
 			}
 		}

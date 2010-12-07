@@ -891,17 +891,17 @@ int rt_ioctl_giwmode(struct net_device *dev,
 		return -ENETDOWN;
 	}
 
-	//check if the interface is down
+    //check if the interface is down
     if(!RTMP_TEST_FLAG(pAdapter, fRTMP_ADAPTER_INTERRUPT_IN_USE))
     {
         DBGPRINT(RT_DEBUG_TRACE, ("INFO::Network is down!\n"));
         return -ENETDOWN;   
     }
 
-	if (ADHOC_ON(pAdapter))
-		*mode = IW_MODE_ADHOC;
+    if (ADHOC_ON(pAdapter))
+	*mode = IW_MODE_ADHOC;
     else if (INFRA_ON(pAdapter))
-		*mode = IW_MODE_INFRA;
+	*mode = IW_MODE_INFRA;
     else if (MONITOR_ON(pAdapter))
         *mode = IW_MODE_MONITOR;
     else
@@ -1208,8 +1208,7 @@ int rt_ioctl_siwscan(struct net_device *dev,
 		return -ENETDOWN;   
 	}
 
-	if (MONITOR_ON(pAdapter))
-    {
+    if (MONITOR_ON(pAdapter)) {
         DBGPRINT(RT_DEBUG_TRACE, ("!!! Driver is in Monitor Mode now !!!\n"));
         return -EINVAL;
     }
@@ -1719,28 +1718,29 @@ int rt_ioctl_giwessid(struct net_device *dev,
     {
        	DBGPRINT(RT_DEBUG_TRACE, ("INFO::Network is down!\n"));
         return -ENETDOWN;
-	}
+    }
 
-	data->flags = 1;		
+    data->flags = 1;		
+
     if (MONITOR_ON(pAdapter))
     {
         data->length  = 0;
         return 0;
     }
 
-	if (OPSTATUS_TEST_FLAG(pAdapter, fOP_STATUS_MEDIA_STATE_CONNECTED))
-	{
-		DBGPRINT(RT_DEBUG_TRACE ,("MediaState is connected\n"));
-		data->length = pAdapter->CommonCfg.SsidLen;
-		memcpy(essid, pAdapter->CommonCfg.Ssid, pAdapter->CommonCfg.SsidLen);
-	}
-	else
-	{//the ANY ssid was specified
-		data->length  = 0;
-		DBGPRINT(RT_DEBUG_TRACE ,("MediaState is not connected, ess\n"));
-	}
+    if (OPSTATUS_TEST_FLAG(pAdapter, fOP_STATUS_MEDIA_STATE_CONNECTED))
+    {
+	DBGPRINT(RT_DEBUG_TRACE ,("MediaState is connected\n"));
+	data->length = pAdapter->CommonCfg.SsidLen;
+	memcpy(essid, pAdapter->CommonCfg.Ssid, pAdapter->CommonCfg.SsidLen);
+    }
+    else
+    {//the ANY ssid was specified
+	data->length  = 0;
+	DBGPRINT(RT_DEBUG_TRACE ,("MediaState is not connected, ess\n"));
+    }
 
-	return 0;
+    return 0;
 
 }
 
@@ -4044,8 +4044,6 @@ INT RTMPSetInformation(
 	ULONG						ShortRetryLimit, LongRetryLimit;
 	UCHAR						ctmp;
 #endif // SNMP_SUPPORT //
-
-
 
 #ifdef WSC_INCLUDED
 #ifdef WSC_LED_SUPPORT
@@ -8791,15 +8789,14 @@ INT Set_SiteSurvey_Proc(
 	//check if the interface is down
 	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("INFO::Network is down!\n"));
-		return -ENETDOWN;   
+	    DBGPRINT(RT_DEBUG_TRACE, ("INFO::Network is down!\n"));
+	    return -ENETDOWN;   
 	}
 
-	if (MONITOR_ON(pAd))
-    {
-        DBGPRINT(RT_DEBUG_TRACE, ("!!! Driver is in Monitor Mode now !!!\n"));
-        return -EINVAL;
-    }
+	if (MONITOR_ON(pAd)) {
+    	    DBGPRINT(RT_DEBUG_TRACE, ("!!! Driver is in Monitor Mode now !!!\n"));
+    	    return -EINVAL;
+	}
 
 	RTMPZeroMemory(&Ssid, sizeof(NDIS_802_11_SSID));	
 	Ssid.SsidLength = 0; 

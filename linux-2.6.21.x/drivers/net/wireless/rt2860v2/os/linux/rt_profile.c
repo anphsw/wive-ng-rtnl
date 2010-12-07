@@ -31,8 +31,8 @@ NDIS_STATUS	RTMPReadParametersHook(
 {
 	PSTRING					src = NULL;
 	RTMP_OS_FD				srcf;
-	RTMP_OS_FS_INFO			osFSInfo;
-	INT 						retval = NDIS_STATUS_FAILURE;
+	RTMP_OS_FS_INFO				osFSInfo;
+	INT 					retval = NDIS_STATUS_FAILURE;
 	PSTRING					buffer;
 
 	buffer = kmalloc(MAX_INI_BUFFER_SIZE, MEM_ALLOC_FLAG);
@@ -45,16 +45,11 @@ NDIS_STATUS	RTMPReadParametersHook(
 	{
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-		{
 			src = AP_PROFILE_PATH_RBUS;
-		}
 #endif // CONFIG_AP_SUPPORT //
-
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-		{
 			src = STA_PROFILE_PATH_RBUS;
-		}
 #endif // CONFIG_STA_SUPPORT //
 #ifdef MULTIPLE_CARD_SUPPORT
 		src = pAd->MC_FileName;
@@ -65,16 +60,12 @@ NDIS_STATUS	RTMPReadParametersHook(
 	{	
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-		{
 			src = AP_PROFILE_PATH;
-		}
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-		{
 			src = STA_PROFILE_PATH;
-		}
 #endif // CONFIG_STA_SUPPORT //
 #ifdef MULTIPLE_CARD_SUPPORT
 		src = (PSTRING)pAd->MC_FileName;
@@ -87,7 +78,7 @@ NDIS_STATUS	RTMPReadParametersHook(
 		srcf = RtmpOSFileOpen(src, O_RDONLY, 0);
 		if (IS_FILE_OPEN_ERR(srcf)) 
 		{
-			DBGPRINT(RT_DEBUG_ERROR, ("Open file \"%s\" failed!\n", src));
+			printk("Open file \"%s\" failed!\n", src);
 		}
 		else 
 		{
@@ -98,13 +89,13 @@ NDIS_STATUS	RTMPReadParametersHook(
 				retval = NDIS_STATUS_SUCCESS;
 			}
 			else
-				DBGPRINT(RT_DEBUG_ERROR, ("Read file \"%s\" failed(errCode=%d)!\n", src, retval));
+				printk("Read file \"%s\" failed(errCode=%d)!\n", src, retval);
 
 			retval = RtmpOSFileClose(srcf);
 			if ( retval != 0)
 			{
 				retval = NDIS_STATUS_FAILURE;
-				DBGPRINT(RT_DEBUG_ERROR, ("Close file \"%s\" failed(errCode=%d)!\n", src, retval));
+				printk("Close file \"%s\" failed(errCode=%d)!\n", src, retval);
 			}
 		}
 		
@@ -116,4 +107,3 @@ NDIS_STATUS	RTMPReadParametersHook(
 	return (retval);
 
 }
-
