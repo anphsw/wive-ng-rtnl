@@ -57,7 +57,7 @@ void	formDefineUserMgmt(void);
  *	Change configuration here
  */
 
-static char_t		*rootWeb = T("/web");		/* Root web directory */
+static char_t		*rootWeb = T("/tmp/web");		/* Root web directory */
 static char_t		*password = T("");			/* Security password */
 static char_t		*gopid = T("/var/run/goahead.pid");	/* pid file */
 static int		port = 80;				/* Server port */
