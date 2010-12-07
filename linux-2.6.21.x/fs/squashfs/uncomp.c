@@ -69,7 +69,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 #endif
 		err = -ENOMEM;
 		sbuf->sz = 0;
-		sbuf->buf = kmalloc(i, GFP_ATOMIC);
+		sbuf->buf = kzalloc(i, GFP_ATOMIC);
 		if (unlikely(!sbuf->buf))
 			goto out;
 		sbuf->sz = i;
@@ -151,7 +151,7 @@ int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 	un->un_a[SQUN_PROB].buf = un->un_prob;
 	un->un_a[SQUN_PROB].sz = sizeof(un->un_prob);
 	if (res_sz) {
-		un->un_a[SQUN_RESULT].buf = kmalloc(res_sz, GFP_KERNEL);
+		un->un_a[SQUN_RESULT].buf = kzalloc(res_sz, GFP_KERNEL);
 		if (unlikely(!un->un_a[SQUN_RESULT].buf))
 			return err;
 		un->un_a[SQUN_RESULT].sz = res_sz;
@@ -160,7 +160,7 @@ int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 	un->un_stream.next_in = NULL;
 	un->un_stream.avail_in = 0;
 #ifdef __KERNEL__
-	un->un_stream.workspace = kmalloc(zlib_inflate_workspacesize(), GFP_KERNEL);
+	un->un_stream.workspace = kzalloc(zlib_inflate_workspacesize(), GFP_KERNEL);
 	if (unlikely(!un->un_stream.workspace))
 		return err;
 #else
