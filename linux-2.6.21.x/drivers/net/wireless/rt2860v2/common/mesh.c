@@ -1425,7 +1425,7 @@ static INT Mesh_VirtualIF_Open(
 	/* sanity check */
 	ASSERT(virtual_pAd);
 	ASSERT(virtual_pAd->RtmpDev);
-	pAd = virtual_pAd->RtmpDev->ml_priv;
+	pAd = virtual_pAd->RtmpDev->priv;
 	ASSERT(pAd);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("%s: ===> %s\n", __FUNCTION__, dev_p->name));
@@ -1495,7 +1495,7 @@ static INT Mesh_VirtualIF_Close(
 	/* sanity check */
 	ASSERT(virtual_ad_p);
 	ASSERT(virtual_ad_p->RtmpDev);
-	pAd = virtual_ad_p->RtmpDev->ml_priv;
+	pAd = virtual_ad_p->RtmpDev->priv;
 	ASSERT(pAd);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("%s: ===> %s\n", __FUNCTION__, dev_p->name));
@@ -1560,7 +1560,7 @@ static INT Mesh_VirtualIF_PacketSend(
 	/* sanity check */
 	ASSERT(virtual_pAd);
 	ASSERT(virtual_pAd->RtmpDev);
-	pAd = virtual_pAd->RtmpDev->ml_priv;
+	pAd = virtual_pAd->RtmpDev->priv;
 	ASSERT(pAd);
 
 #ifdef RALINK_ATE

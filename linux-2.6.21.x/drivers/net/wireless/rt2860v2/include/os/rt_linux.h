@@ -166,7 +166,7 @@ typedef char 				* PNDIS_BUFFER;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
 typedef	struct pid *	RTMP_OS_PID;
 #else
-typedef pid_t 				RTMP_OS_PID;
+typedef pid_t		RTMP_OS_PID;
 #endif
 
 typedef struct semaphore	RTMP_OS_SEM;
@@ -858,10 +858,13 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
 #define RTMP_OS_NETDEV_GET_PRIV(_pNetDev)		((_pNetDev)->ml_priv)
 #define RTMP_OS_NETDEV_SET_PRIV(_pNetDev, _pPriv)	((_pNetDev)->ml_priv = (_pPriv))
+#define GET_PAD_FROM_NET_DEV(_pAd, _net_dev)		((_pAd) = (PRTMP_ADAPTER)(_net_dev)->ml_priv);
 #else
 #define RTMP_OS_NETDEV_GET_PRIV(_pNetDev)		((_pNetDev)->priv)
 #define RTMP_OS_NETDEV_SET_PRIV(_pNetDev, _pPriv)	((_pNetDev)->priv = (_pPriv))
+#define GET_PAD_FROM_NET_DEV(_pAd, _net_dev)		((_pAd) = (PRTMP_ADAPTER)(_net_dev)->priv);
 #endif
+
 #define RTMP_OS_NETDEV_GET_DEVNAME(_pNetDev)	((_pNetDev)->name)
 #define RTMP_OS_NETDEV_GET_PHYADDR(_PNETDEV)	((_PNETDEV)->dev_addr)
 
@@ -1011,7 +1014,6 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #define RTMP_GET_PACKET_EOSP(_p)         (RTPKT_TO_OSPKT(_p)->cb[CB_OFF+10])
 #endif // UAPSD_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-
 
 //
 //	Sepcific Pakcet Type definition
@@ -1204,12 +1206,5 @@ INT rt28xx_sta_ioctl(
 
 extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
-#define GET_PAD_FROM_NET_DEV(_pAd, _net_dev)	(_pAd) = (PRTMP_ADAPTER)(_net_dev)->ml_priv;
-#else
-#define GET_PAD_FROM_NET_DEV(_pAd, _net_dev)	(_pAd) = (PRTMP_ADAPTER)(_net_dev)->priv;
-#endif
-
 
 #endif // __RT_LINUX_H__ //

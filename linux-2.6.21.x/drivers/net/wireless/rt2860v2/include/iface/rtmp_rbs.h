@@ -98,11 +98,6 @@ extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern void unregister_tmr_service(void);
 extern void request_tmr_service(int, void *, void *);
 #endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
-#ifndef SA_SHIRQ
-#define SA_SHIRQ IRQF_SHARED
-#endif
 #endif
 
 #endif // LINUX //

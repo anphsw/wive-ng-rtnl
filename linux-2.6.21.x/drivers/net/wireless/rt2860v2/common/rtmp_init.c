@@ -5052,9 +5052,6 @@ err1:
 #ifdef DOT11_N_SUPPORT
 	os_free_mem(pAd, pAd->mpdu_blk_pool.mem); // free BA pool
 #endif // DOT11_N_SUPPORT //
-
-	// shall not set priv to NULL here because the priv didn't been free yet.
-	//net_dev->ml_priv = 0;
 #ifdef INF_AMAZON_SE
 err0:
 #endif // INF_AMAZON_SE //

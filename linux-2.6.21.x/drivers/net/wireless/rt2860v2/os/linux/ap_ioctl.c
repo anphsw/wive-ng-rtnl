@@ -112,7 +112,7 @@ INT rt28xx_ap_ioctl(
 	if (pAd == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
-		   So the net_dev->ml_priv will be NULL in 2rd open */
+		   So the net_dev->priv will be NULL in 2rd open */
 		return -ENETDOWN;
 	}
 

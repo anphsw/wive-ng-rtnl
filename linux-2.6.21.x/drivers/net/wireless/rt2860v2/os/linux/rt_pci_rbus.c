@@ -1472,9 +1472,6 @@ VOID CMDHandler(
 	PCmdQElmt		cmdqelmt;                                                                                                                                       
 	PUCHAR			pData;                                                                                                                                          
 	NDIS_STATUS		NdisStatus = NDIS_STATUS_SUCCESS;                                                                                                               
-//	ULONG			Now = 0;
-//	NTSTATUS		ntStatus;
-//	unsigned long	IrqFlags;
 	
 	while (pAd && pAd->CmdQ.size > 0)	
 	{                                                                                                                                                           

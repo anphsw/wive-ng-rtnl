@@ -1352,7 +1352,7 @@ int RtmpOSIRQRequest(IN PNET_DEV pNetDev)
 	{
 		POS_COOKIE _pObj = (POS_COOKIE)(pAd->OS_Cookie);
 		RTMP_MSI_ENABLE(pAd);	
-		retval = request_irq(_pObj->pci_dev->irq,  rt2860_interrupt, SA_SHIRQ, (net_dev)->name, (net_dev));
+		retval = request_irq(_pObj->pci_dev->irq,  rt2860_interrupt, IRQF_SHARED, (net_dev)->name, (net_dev));
 		if (retval != 0) 
 			printk("RT2860: request_irq  ERROR(%d)\n", retval);
 	}
@@ -1643,40 +1643,6 @@ void RTMP_IndicateMediaState(
 		}	
 	}
 }
-
-
-#if LINUX_VERSION_CODE <= 0x20402	// Red Hat 7.1
-//static struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)(struct net_device *)) //sample
-struct net_device *alloc_netdev(
-	int sizeof_priv,
-	const char *mask,
-	void (*setup)(struct net_device *))
-{
-    struct net_device	*dev;
-    INT					alloc_size;
-
-
-    /* ensure 32-byte alignment of the private area */
-    alloc_size = sizeof (*dev) + sizeof_priv + 31;
-
-    dev = (struct net_device *) kzalloc(alloc_size, GFP_KERNEL);
-    if (dev == NULL)
-    {
-        DBGPRINT(RT_DEBUG_ERROR,
-				("alloc_netdev: Unable to allocate device memory.\n"));
-        return NULL;
-    }
-
-    if (sizeof_priv)
-        dev->ml_priv = (void *) (((long)(dev + 1) + 31) & ~31);
-
-    setup(dev);
-    strcpy(dev->name, mask);
-
-    return dev;
-}
-#endif // LINUX_VERSION_CODE //
-
 
 int RtmpOSWrielessEventSend(
 	IN RTMP_ADAPTER *pAd,
