@@ -783,15 +783,7 @@ static int noinline init_post(void)
             printk("mount /dev file system fail!\n");
             else
             printk("mount /dev file system ok!\n");
-/* #if defined(CONFIG_RT2880_FLASH_4M)
-	if (sys_mount("tmpfs", "/var", "tmpfs", flags, "size=5M") < 0)
-#elif defined(CONFIG_RT2880_FLASH_8M)
-	if (sys_mount("tmpfs", "/var", "tmpfs", flags, "size=10M") < 0)
-#elif defined(CONFIG_RT2880_FLASH_16M)
-	if (sys_mount("tmpfs", "/var", "tmpfs", flags, "size=18M") < 0)
-#else */
 	if (sys_mount("tmpfs", "/var", "tmpfs", flags, NULL) < 0)
-//#endif
             printk("mount /var file system fail!\n");
             else
             printk("mount /var file system ok!\n");
