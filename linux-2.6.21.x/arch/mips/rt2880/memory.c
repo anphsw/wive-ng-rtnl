@@ -51,12 +51,21 @@
 //#define DEBUG
 #define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024
 
+//no need
+#if 0
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
 #define RAM_FIRST       0x08000400  /* Leave room for interrupt vectors */
 #define RAM_END         (0x08000000 + RAM_SIZE)
 #else
 #define RAM_FIRST       0x00000400  /* Leave room for interrupt vectors */
 #define RAM_END         (0x00000000 + RAM_SIZE)
+#endif
+struct resource rt2880_res_ram = {
+        .name = "RAM",
+        .start = 0,
+        .end = RAM_SIZE,
+        .flags = IORESOURCE_MEM
+};
 #endif
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
@@ -78,13 +87,6 @@ static char *mtypes[3] = {
 
 /* References to section boundaries */
 extern char _end;
-
-struct resource rt2880_res_ram = {
-        .name = "RAM",
-        .start = 0,
-        .end = RAM_SIZE,
-        .flags = IORESOURCE_MEM
-};
 
 #ifdef DEBUG
 struct prom_pmemblock mdesc[PROM_MAX_PMEMBLOCKS];
