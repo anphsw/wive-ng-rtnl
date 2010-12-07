@@ -72,15 +72,10 @@
 #include "mat.h"
 #endif // MAT_SUPPORT //
 
-
-
 #include "rtmp_chip.h"
 #include "rtmp_iface.h"
 #include "chip/rtmp_mac.h"
 #include "chip/mac_pci.h"
-
-
-
 
 #ifdef CLIENT_WDS
 #include "client_wds_cmm.h"

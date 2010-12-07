@@ -1,5 +1,4 @@
 #include "rt_config.h"
-#include "linux/time.h"
 
 #ifdef RALINK_ATE
 
@@ -5018,7 +5017,7 @@ INT Set_ATE_Load_E2P_Proc(
 	IN	PSTRING			arg)
 {
 	BOOLEAN		    	ret = FALSE;
-	PSTRING			src = EEPROM_DEFAULT_FILE_PATH;
+	PSTRING			src = EEPROM_DEFAULT_PATH;
 	RTMP_OS_FD		srcf;
 	INT32 			retval;
 	USHORT 			WriteEEPROM[(EEPROM_SIZE/2)];

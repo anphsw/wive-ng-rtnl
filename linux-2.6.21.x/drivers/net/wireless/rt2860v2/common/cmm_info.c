@@ -4988,7 +4988,6 @@ int iCalcCalibration(PRTMP_ADAPTER pAd, int calParams[2], int profileNum)
 			c0[1] = (ei0[pi][1] + c1[1])>>12;
 			sum -= isqrt(c0[0]*c0[0] + c0[1]*c0[1]);
 		}
-		//ATEDBGPRINT(RT_DEBUG_OFF, ("%d s=%d %d %d\n", ii, sum, c0[0], c1[0]));
 
 		// Record minimum
 		if (ii==0 || minSum>sum) {
@@ -5034,9 +5033,6 @@ int iCalcCalibration(PRTMP_ADAPTER pAd, int calParams[2], int profileNum)
 	// Convert to calibration parameters
 	calParams[0] = -di1 & 0xFF;
 	calParams[1] = -(di1-di2) & 0xFF;
-
-	//do_gettimeofday(&tval2);
-    //ATEDBGPRINT(RT_DEBUG_WARN, ("iCalcCal = %ld usec\n", tval2.tv_usec - tval1.tv_usec));
 
 	return 0;
 }

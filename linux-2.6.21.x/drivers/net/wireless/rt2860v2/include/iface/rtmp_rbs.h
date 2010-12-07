@@ -27,10 +27,7 @@
 #ifndef __RTMP_RBUS_H__
 #define __RTMP_RBUS_H__
 
-#ifdef LINUX
-#include <linux/skbuff.h>
-#include <linux/autoconf.h>
-#endif
+#include "rt_config.h"
 
 /*************************************************************************
   *
@@ -40,45 +37,6 @@
 
 #define RTMP_MAC_IRQ_NUM		4
 #define CMDTHREAD_CHAN_RESCAN		0x0D730101
-
-/*************************************************************************
-  *
-  *	EEPROM Related definitions
-  *
-  ************************************************************************/
-#if defined(CONFIG_RALINK_RT3050_1T1R)
-#ifdef CONFIG_RALINK_RT3350
-#define EEPROM_DEFAULT_FILE_PATH                    "/etc/Wireless/RT3350_AP_1T1R_V1_0.bin"
-#else
-#define EEPROM_DEFAULT_FILE_PATH		    "/etc/Wireless/RT3050_AP_1T1R_V1_0.bin"
-#endif // CONFIG_RALINK_RT3350 //
-#elif defined(CONFIG_RALINK_RT3051_1T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3051_AP_1T2R_V1_0.bin"
-#elif defined(CONFIG_RALINK_RT3052_2T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3052_AP_2T2R_V1_1.bin"
-#elif defined(CONFIG_RALINK_RT3883_3T3R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3883_AP_3T3R_V0_1.bin"
-#elif defined(CONFIG_RALINK_RT3662_2T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3662_AP_2T2R_V0_0.bin"
-#elif defined(CONFIG_RT2860V2_2850)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT2880_RT2850_AP_2T3R_V1_6.bin"
-#else // RFIC 2820
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT2880_RT2820_AP_2T3R_V1_6.bin"
-#endif
-
-#if defined (CONFIG_RT2880_FLASH_32M)
-#define MTD_NUM_FACTORY 5
-#else
-#define MTD_NUM_FACTORY 2
-#endif
-
-#ifdef CONFIG_RALINK_RT3883
-#define EEPROM_SIZE					0x400
-#else
-#define EEPROM_SIZE					0x200
-#endif // CONFIG_RALINK_RT3883 //
-#define NVRAM_OFFSET					0x30000
-#define RF_OFFSET					0x40000
 
 /*************************************************************************
   *

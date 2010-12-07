@@ -125,7 +125,7 @@ static NDIS_STATUS rtmp_ee_flash_reset(PUCHAR start)
 	RTMP_OS_FD			srcf;
 	INT 					retval;
 
-	src = EEPROM_DEFAULT_FILE_PATH;
+	src = EEPROM_DEFAULT_PATH;
 
 	RtmpOSFSInfoChange(&osFsInfo, TRUE);
 
@@ -194,11 +194,10 @@ int	Set_EECMD_Proc(
 		case 1:
 			if (pAd->infType == RTMP_DEV_INF_RBUS)
 			{
-				DBGPRINT(RT_DEBUG_OFF, ("EEPROM reset to default......\n"));
-				DBGPRINT(RT_DEBUG_OFF, ("The last byte of MAC address will be re-generated...\n"));
+				printk("EEPROM reset to default......\n");
 				if (rtmp_ee_flash_reset(nv_ee_start) != NDIS_STATUS_SUCCESS)
 				{
-					DBGPRINT(RT_DEBUG_ERROR, ("Set_EECMD_Proc: rtmp_ee_flash_reset() failed\n"));
+					printk("Set_EECMD_Proc: rtmp_ee_flash_reset() failed\n");
 					return FALSE;
 				}
 			
@@ -215,7 +214,7 @@ int	Set_EECMD_Proc(
 			
 				if ((rtmp_ee_flash_read(pAd, 0, &i) != 0x2880) && (rtmp_ee_flash_read(pAd, 0, &i) != 0x2860))
 				{
-					DBGPRINT(RT_DEBUG_ERROR, ("Set_EECMD_Proc: invalid eeprom\n"));
+					printk("Set_EECMD_Proc: invalid eeprom\n");
 					return FALSE;
 				}
 			}
@@ -274,7 +273,7 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 	{
 		if (rtmp_ee_flash_reset(start) != NDIS_STATUS_SUCCESS)
 		{
-			DBGPRINT(RT_DEBUG_ERROR, ("rtmp_ee_init(): rtmp_ee_flash_init() failed\n"));
+			printk("rtmp_ee_init(): rtmp_ee_flash_init() failed\n");
 			return NDIS_STATUS_FAILURE;
 		}
 
@@ -287,12 +286,12 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 			Addr45 = Addr45 | (RandomByte(pAd)&0xf8) << 8;
 			
 			rtmp_ee_flash_write(pAd, 0x08, Addr45);
-			DBGPRINT(RT_DEBUG_ERROR, ("The EEPROM in Flash is wrong, use default\n"));
+			printk("The EEPROM in Flash is wrong, use default\n");
 		}
 
 		if (validFlashEepromID(pAd) == FALSE)
 		{
-			DBGPRINT(RT_DEBUG_ERROR, ("rtmp_ee_flash_init(): invalid eeprom\n"));
+			printk("rtmp_ee_flash_init(): invalid eeprom\n");
 			return NDIS_STATUS_FAILURE;
 		}
 	}

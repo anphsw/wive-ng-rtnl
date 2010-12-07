@@ -30,13 +30,11 @@
 #ifndef _MAT_H_
 #define _MAT_H_
 
-
 #ifdef LINUX
 #include <linux/if_ether.h>
 #include <linux/if_arp.h>
 #include <linux/ip.h>
 #endif // LINUX //
-
 
 #if defined(LINUX) || defined (VXWORKS)
 #else

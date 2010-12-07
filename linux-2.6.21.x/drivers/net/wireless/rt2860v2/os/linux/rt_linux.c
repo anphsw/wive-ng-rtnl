@@ -182,20 +182,9 @@ NDIS_STATUS os_free_mem(
 
 #ifdef RTMP_RBUS_SUPPORT
 #ifndef RA_MTD_RW_BY_NUM
-#ifdef CONFIG_RT2880_FLASH_32M
-#define MTD_NUM_FACTORY 		5
-#else
-#define MTD_NUM_FACTORY 		2
-#endif
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 #else /* BYNUM - BYOFFSET*/
-#define NVRAM_OFFSET			0x30000
-#ifdef CONFIG_RT2880_FLASH_32M
-#define RF_OFFSET			0x1FE0000
-#else
-#define RF_OFFSET			0x40000
-#endif
 extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 #endif /* BYNUM - BYOFFSET*/
@@ -1788,7 +1777,6 @@ INT RtmpOSNetDevAlloc(
 PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 {
 	PNET_DEV	pTargetNetDev = NULL;
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)

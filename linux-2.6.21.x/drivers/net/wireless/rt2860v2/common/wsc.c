@@ -182,7 +182,9 @@ INT WscGenerateUUID(
 	
 // for fixed UUID -  YYHuang 07/10/09
 #define FIXED_UUID
-	
+#ifdef FIXED_UUID
+	uuid_time  = 0x2880288028802880LL;
+#else
 	// Get the current time.
 	if (bUseCurrentTime)
 	{
@@ -196,15 +198,9 @@ INT WscGenerateUUID(
 	else
 		uuid_time = 2860; //xtime.tv_sec; 	// Well, we fix this to make JumpStart  happy!
 
-
 	uuid_time *= 10000000;
 	uuid_time += 0x01b21dd213814000LL;
-
-#ifdef FIXED_UUID
-    uuid_time  = 0x2880288028802880LL;
 #endif
-
-	
 	uuid_t.timeLow = (UINT32)uuid_time & 0xFFFFFFFF;
 	uuid_t.timeMid = (UINT16)((uuid_time >>32) & 0xFFFF);
 	uuid_t.timeHi_Version = (UINT16)((uuid_time >> 48) & 0x0FFF);

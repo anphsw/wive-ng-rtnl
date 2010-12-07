@@ -1,20 +1,12 @@
 #ifndef __ATE_H__
 #define __ATE_H__
 
+#include <rt_config.h>
 
 #ifdef LINUX
 #define ate_print printk
 #define ATEDBGPRINT DBGPRINT
-#ifdef RTMP_MAC_PCI
-#ifdef CONFIG_RALINK_RT3883
-#define EEPROM_SIZE						0x400
-#else
-#define EEPROM_SIZE						0x200
-#endif
-#define EEPROM_BIN_FILE_NAME 	"/etc/Wireless/RT2860/e2p.bin"
-#endif // RTMP_MAC_PCI //
 #endif // LINUX //
-
 
 #define ATE_ON(_p)              (((_p)->ate.Mode) != ATE_STOP)
 
