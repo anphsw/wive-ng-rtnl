@@ -1215,11 +1215,7 @@ VOID RTMP_Mesh_Init(
 	/* create virtual network interface */
 	do {
 		/* allocate a new network device */
-#if LINUX_VERSION_CODE <= 0x20402 // Red Hat 7.1
-		new_dev_p = alloc_netdev(sizeof(VIRTUAL_ADAPTER), "eth%d", ether_setup);
-#else   
 		new_dev_p = alloc_etherdev(sizeof(VIRTUAL_ADAPTER));
-#endif // LINUX_VERSION_CODE //
         
 		if (new_dev_p == NULL)
 		{

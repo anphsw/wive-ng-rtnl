@@ -1171,11 +1171,6 @@ void FlashWrite(UCHAR * p, ULONG a, ULONG b);
 void FlashRead(UCHAR * p, ULONG a, ULONG b);
 #endif // RTMP_RBUS_SUPPORT //
 
-#if LINUX_VERSION_CODE <= 0x20402	// Red Hat 7.1
-struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)(struct net_device *));
-#endif // LINUX_VERSION_CODE //
-
-
 #ifdef RTMP_MAC_PCI
 /* function declarations */
 #define IRQ_HANDLE_TYPE  irqreturn_t

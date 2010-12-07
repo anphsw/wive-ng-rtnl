@@ -1780,11 +1780,7 @@ INT RtmpOSNetDevAlloc(
 	*new_dev_p = NULL;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("Allocate a net device with private data size=%d!\n", privDataSize));
-#if LINUX_VERSION_CODE <= 0x20402 // Red Hat 7.1
-	*new_dev_p = alloc_netdev(privDataSize, "eth%d", ether_setup);
-#else
 	*new_dev_p = alloc_etherdev(privDataSize);
-#endif // LINUX_VERSION_CODE //
 
 	if (*new_dev_p)
 		return NDIS_STATUS_SUCCESS;
