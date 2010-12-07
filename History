@@ -201,6 +201,8 @@
 32) Drop unused, dead and potentional buggy code<br>
 33) Full cycle of retraining flash on command fs cleanall.<br>
 34) Cleanup wifi driver code<br>
+35) Remove samba for 4Mb flash devices need more flash free<br>
+36) Increase kernel padded size. Try fix crash mapping.<br>
 
 <br><br>
 <b>For support see:</b><br>
