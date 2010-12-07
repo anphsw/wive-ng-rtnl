@@ -88,14 +88,14 @@ USHORT rtmp_ee_flash_read(
 	return (*pValue);
 }
 
-extern void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b);
+extern void RtmpFlashWrite(UCHAR * p, ULONG a);
 VOID rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 {
 	if (!init_flag)
 		return;
 
 	memcpy(nv_ee_start+ Offset, &Data, 2);
-	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+	RtmpFlashWrite(EeBuffer, EEPROM_SIZE);
 }
 
 
@@ -114,7 +114,7 @@ VOID rtmp_ee_flash_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 		return;
 
 	memcpy(nv_ee_start, Data, EEPROM_SIZE);
-	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+	RtmpFlashWrite(EeBuffer, EEPROM_SIZE);
 }
 
 
@@ -299,11 +299,11 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 	return NDIS_STATUS_SUCCESS;
 }
 
-extern void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b);
+extern void RtmpFlashRead(UCHAR * p, ULONG a);
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
 	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));	
-	RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+	RtmpFlashRead(EeBuffer, EEPROM_SIZE);
 
 	return rtmp_ee_flash_init(pAd, EeBuffer);
 }

@@ -61,11 +61,7 @@ int32_t mcast_tx(struct sk_buff * skb);
 #endif
 
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
-#ifdef RA_MTD_RW_BY_NUM
-int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
-#else
 int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
-#endif
 #endif
 
 /* gmac driver feature set config */
@@ -1466,11 +1462,7 @@ int __init rather_probe(struct net_device *dev)
 
 //Get mac0 address from flash
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
-#ifdef RA_MTD_RW_BY_NUM
-	i = ra_mtd_read(2, GMAC0_OFFSET, 6, addr.sa_data);
-#else
 	i = ra_mtd_read_nm("Factory", GMAC0_OFFSET, 6, addr.sa_data);
-#endif
 
 	//If reading mtd failed or mac0 is empty, generate a mac address
 	if (i < 0 || (memcmp(addr.sa_data, zero, 6) == 0)) {
@@ -1686,11 +1678,7 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 
 //Get mac2 address from flash
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
-#ifdef RA_MTD_RW_BY_NUM
-	i = ra_mtd_read(2, GMAC2_OFFSET, 6, addr.sa_data);
-#else
 	i = ra_mtd_read_nm("Factory", GMAC2_OFFSET, 6, addr.sa_data);
-#endif
 
 	//If reading mtd failed or mac0 is empty, generate a mac address
 	if (i < 0 || (memcmp(addr.sa_data, zero, 6) == 0)) {

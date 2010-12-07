@@ -13,6 +13,7 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/err.h>
+#include <linux/delay.h>
 #include <linux/sched.h>
 #include <linux/backing-dev.h>
 #include <linux/compat.h>
@@ -187,87 +188,6 @@ static void __exit rt2880_mtd_cleanup(void)
  *   - return -errno if failed
  *   - return the number of bytes read/written if successed
  */
-#ifdef RA_MTD_RW_BY_NUM
-int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf)
-{
-	int ret = -1;
-	size_t rdlen, wrlen;
-	struct mtd_info *mtd;
-	struct erase_info ei;
-	u_char *bak = NULL;
-        DECLARE_WAITQUEUE(wait, current);                                                                                                   
-        wait_queue_head_t wait_q;
-
-	mtd = get_mtd_device(NULL, num);
-	if (IS_ERR(mtd)) {
-		ret = (int)mtd;
-		goto out;
-	}
-
-	if (len > mtd->erasesize) {
-		put_mtd_device(mtd);
-		ret = -E2BIG;
-		goto out;
-	}
-
-	bak = kzalloc(mtd->erasesize, GFP_KERNEL);
-	if (bak == NULL) {
-		put_mtd_device(mtd);
-		ret = -ENOMEM;
-		goto out;
-	}
-
-        set_current_state(TASK_INTERRUPTIBLE);
-        add_wait_queue(&wait_q, &wait);
-
-	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
-	if (ret) {
-                set_current_state(TASK_RUNNING);
-                remove_wait_queue(&wait_q, &wait);
-		put_mtd_device(mtd);
-		goto free_out;
-	}
-
-        schedule();  /* Wait for write to finish. */                                                                                
-        remove_wait_queue(&wait_q, &wait);                                                                                          
-
-	udelay(5000); //add 5ms delay after write
-
-	if (rdlen != mtd->erasesize)
-		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
-
-	memcpy(bak + to, buf, len);
-
-	ei.mtd = mtd;
-	ei.callback = NULL;
-	ei.addr = 0;
-	ei.len = mtd->erasesize;
-	ei.priv = 0;
-	ret = mtd->erase(mtd, &ei);
-	if (ret != 0) {
-		put_mtd_device(mtd);
-		goto free_out;
-	}
-
-        set_current_state(TASK_INTERRUPTIBLE);
-        add_wait_queue(&wait_q, &wait);
-
-	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
-
-        schedule();  /* Wait for write to finish. */                                                                                
-        remove_wait_queue(&wait_q, &wait);                                                                                          
-
-	udelay(5000); //add 5ms delay after write
-
-	put_mtd_device(mtd);
-
-free_out:
-	kfree(bak);
-out:
-	return ret;
-}
-#endif
-
 int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 {
 	int ret = -1;
@@ -335,6 +255,9 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 
         schedule();  /* Wait for write to finish. */                                                                                
         remove_wait_queue(&wait_q, &wait);                                                                                          
+
+	udelay(5000); //add 5ms delay after write
+
 	put_mtd_device(mtd);
 
 free_out:
@@ -342,26 +265,6 @@ free_out:
 out:
 	return ret;
 }
-
-#ifdef RA_MTD_RW_BY_NUM
-int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf)
-{
-	int ret;
-	size_t rdlen;
-	struct mtd_info *mtd;
-
-	mtd = get_mtd_device(NULL, num);
-	if (IS_ERR(mtd))
-		return (int)mtd;
-
-	ret = mtd->read(mtd, from, len, &rdlen, buf);
-	if (rdlen != len)
-		printk("warning: ra_mtd_read: rdlen is not equal to len\n");
-
-	put_mtd_device(mtd);
-	return ret;
-}
-#endif
 
 int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 {
@@ -377,6 +280,8 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	if (rdlen != len)
 		printk("warning: ra_mtd_read_nm: rdlen is not equal to len\n");
 
+	udelay(5000); //add 5ms delay after read
+
 	put_mtd_device(mtd);
 	return ret;
 }
@@ -384,10 +289,6 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 rootfs_initcall(rt2880_mtd_init);
 module_exit(rt2880_mtd_cleanup);
 
-#ifdef RA_MTD_RW_BY_NUM
-EXPORT_SYMBOL(ra_mtd_write);
-EXPORT_SYMBOL(ra_mtd_read);
-#endif
 EXPORT_SYMBOL(ra_mtd_write_nm);
 EXPORT_SYMBOL(ra_mtd_read_nm);
 

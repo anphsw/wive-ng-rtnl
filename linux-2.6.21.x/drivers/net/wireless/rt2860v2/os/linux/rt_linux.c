@@ -1,8 +1,7 @@
 #include "rt_config.h"
+#include "os/rt_linux.h"
 
-//ULONG	RTDebugLevel =  RT_DEBUG_TRACE;
 ULONG	RTDebugLevel =  RT_DEBUG_ERROR;
-
 
 // for wireless system event message
 char const *pWirelessSysEventText[IW_SYS_EVENT_TYPE_NUM] = {    
@@ -179,35 +178,17 @@ NDIS_STATUS os_free_mem(
 	return (NDIS_STATUS_SUCCESS);
 }
 
-
 #ifdef RTMP_RBUS_SUPPORT
-#ifndef RA_MTD_RW_BY_NUM
-extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
-extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
-#else /* BYNUM - BYOFFSET*/
-extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
-extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
-#endif /* BYNUM - BYOFFSET*/
-
-void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b)
+void RtmpFlashRead(UCHAR * p, ULONG a)
 {
-#ifdef RA_MTD_RW_BY_NUM
-	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t)b, p);
-#else
-	ra_mtd_read_nm("Factory", 0, (size_t)b, p);
-#endif
+	ra_mtd_read_nm("Factory", 0, (size_t)a, p);
 }
 
-void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
+void RtmpFlashWrite(UCHAR * p, ULONG a)
 {
-#ifdef RA_MTD_RW_BY_NUM
-	ra_mtd_write(MTD_NUM_FACTORY, 0, (size_t)b, p);
-#else
-	ra_mtd_write_nm("Factory", 0, (size_t)b, p);
-#endif
+	ra_mtd_write_nm("Factory", 0, (size_t)a, p);
 }
 #endif /* RTMP_RBUS_SUPPORT */
-
 
 PNDIS_PACKET RtmpOSNetPktAlloc(
 	IN RTMP_ADAPTER *pAd, 
@@ -223,7 +204,6 @@ PNDIS_PACKET RtmpOSNetPktAlloc(
 	
 	return ((PNDIS_PACKET)skb);
 }
-
 
 PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,

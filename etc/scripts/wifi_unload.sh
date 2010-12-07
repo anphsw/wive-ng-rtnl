@@ -90,8 +90,8 @@ unload_apps()
     do
 	service $serv stop
     done
-    echo "Wait 5 seconds."
-    sleep 5
+    echo "Wait 3 seconds."
+    sleep 3
     echo "Kill aplications..." #second step terminate and kill application
     for apps in $kill_apps
     do
@@ -121,12 +121,12 @@ unload_modules
 
 #This drop unneded caches to free more ram. 
 #Work exelent!
-sysctl -w vm.min_free_kbytes=4096
+sysctl -w vm.min_free_kbytes=3192
 drop_caches
-sysctl -w vm.min_free_kbytes=512
+sysctl -w vm.min_free_kbytes=1024
 
-echo "Wait 3 seconds."
-sleep 3
+echo "Wait 5 seconds."
+sleep 5
 
 echo "Prepare for burn OK..."
 

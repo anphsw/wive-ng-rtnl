@@ -1867,8 +1867,8 @@ int __devinit ra_nand_init(void)
 	offs = MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE;
 	ramtd_nand_read(ranfc_mtd, offs, sizeof(hdr), (size_t *)&i, (u_char *)(&hdr));
 	if (hdr.ih_ksz != 0) {
-		rt2880_partitions[4].size = ntohl(hdr.ih_ksz);
-		rt2880_partitions[5].size = IMAGE1_SIZE - (MTD_BOOT_PART_SIZE +
+		rt2880_partitions[3].size = ntohl(hdr.ih_ksz);
+		rt2880_partitions[4].size = IMAGE1_SIZE - (MTD_BOOT_PART_SIZE +
 				MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE +
 				ntohl(hdr.ih_ksz));
 	}

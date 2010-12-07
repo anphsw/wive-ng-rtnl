@@ -28,21 +28,11 @@
 #ifndef __EEPROM_H__
 #define __EEPROM_H__
 
-#ifdef CONFIG_RT2880_FLASH_32M
-#define MTD_NUM_FACTORY 		5
-#define RF_OFFSET                       0x1FE0000
-#else
-#define MTD_NUM_FACTORY 		2
-#define RF_OFFSET			0x40000
-#endif
-
 #ifdef CONFIG_RALINK_RT3883
 #define EEPROM_SIZE			0x400
 #else                                           
 #define EEPROM_SIZE			0x200
 #endif
-
-#define NVRAM_OFFSET			0x30000
 
 #if defined(CONFIG_RALINK_RT3052)
 #if defined(CONFIG_RALINK_RT3050_1T1R)

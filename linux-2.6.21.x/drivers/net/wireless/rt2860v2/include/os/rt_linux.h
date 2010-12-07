@@ -111,7 +111,6 @@
 #endif // RTMP_RBUS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
-
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
 #define STA_PROFILE_PATH		"/etc/Wireless/RT2860S/RT2860.dat"
@@ -120,21 +119,23 @@
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860/RT2860STACard.dat"
 #endif // MULTIPLE_CARD_SUPPORT //
 #endif // RTMP_MAC_PCI //
-
-
 #ifdef RTMP_RBUS_SUPPORT
 #define RTMP_FIRMWARE_FILE_NAME		"/etc/Wireless/RT2860/RT2860STA.bin"
 #define PROFILE_PATH			"/etc/Wireless/RT2860i.dat"
 #define STA_PROFILE_PATH_RBUS		"/etc/Wireless/RT2860/RT2860.dat"
 #define RT2880_STA_DRIVER_VERSION		"1.0.0.0"
-#endif // RTMP_RBUS_SUPPORT //
-
+#endif /* RTMP_RBUS_SUPPORT */
 extern	const struct iw_handler_def rt28xx_iw_handler_def;
-#endif // CONFIG_STA_SUPPORT //
+#endif /* CONFIG_STA_SUPPORT */
 
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 extern	const struct iw_handler_def rt28xx_ap_iw_handler_def;
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
+
+#ifdef RTMP_RBUS_SUPPORT
+extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
+extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
+#endif
 
 /***********************************************************************************
  *	Compiler related definitions
@@ -146,24 +147,23 @@ extern	const struct iw_handler_def rt28xx_ap_iw_handler_def;
 #define INOUT
 #define NDIS_STATUS		INT
 
-
 /***********************************************************************************
  *	OS Specific definitions and data structures
  ***********************************************************************************/
 typedef struct pci_dev 		* PPCI_DEV;
 typedef struct net_device	* PNET_DEV;
-typedef void				* PNDIS_PACKET;
-typedef char				NDIS_PACKET;
+typedef void			* PNDIS_PACKET;
+typedef char			NDIS_PACKET;
 typedef PNDIS_PACKET		* PPNDIS_PACKET;
-typedef	dma_addr_t			NDIS_PHYSICAL_ADDRESS;
-typedef	dma_addr_t			* PNDIS_PHYSICAL_ADDRESS;
-typedef void				* NDIS_HANDLE;
-typedef char 				* PNDIS_BUFFER;
+typedef	dma_addr_t		NDIS_PHYSICAL_ADDRESS;
+typedef	dma_addr_t		* PNDIS_PHYSICAL_ADDRESS;
+typedef void			* NDIS_HANDLE;
+typedef char 			* PNDIS_BUFFER;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
-typedef	struct pid *	RTMP_OS_PID;
+typedef	struct pid *		RTMP_OS_PID;
 #else
-typedef pid_t		RTMP_OS_PID;
+typedef pid_t			RTMP_OS_PID;
 #endif
 
 typedef struct semaphore	RTMP_OS_SEM;
@@ -191,13 +191,11 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #define RTMP_DEC_REF(_A)		0
 #define RTMP_GET_REF(_A)		0
 
-
 #if WIRELESS_EXT >= 12
 // This function will be called when query /proc
 struct iw_statistics *rt28xx_get_wireless_stats(
     IN struct net_device *net_dev);
 #endif
-
 
 /***********************************************************************************
  *	Network related constant definitions
@@ -210,10 +208,10 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 
 #define NDIS_STATUS_SUCCESS                     0x00
 #define NDIS_STATUS_FAILURE                     0x01
-#define NDIS_STATUS_INVALID_DATA				0x02
+#define NDIS_STATUS_INVALID_DATA		0x02
 #define NDIS_STATUS_RESOURCES                   0x03
 
-#define NDIS_SET_PACKET_STATUS(_p, _status)			do{} while(0)
+#define NDIS_SET_PACKET_STATUS(_p, _status)		do{} while(0)
 #define NdisWriteErrorLogEntry(_a, _b, _c, _d)		do{} while(0)
 
 /* statistics counter */
@@ -228,7 +226,6 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 
 #define STATS_INC_RX_DROPPED(_pAd, _dev)
 #define STATS_INC_TX_DROPPED(_pAd, _dev)
-
 
 /***********************************************************************************
  *	Ralink Specific network related constant definitions
@@ -252,12 +249,6 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 #define NDIS_PACKET_TYPE_ALL_MULTICAST		3
 #define NDIS_PACKET_TYPE_PROMISCUOUS		4
 #endif // CONFIG_STA_SUPPORT //
-
-
-/***********************************************************************************
- *	OS signaling related constant definitions
- ***********************************************************************************/
-
 
 /***********************************************************************************
  *	OS file operation related data structure definitions
@@ -1195,8 +1186,5 @@ INT rt28xx_sta_ioctl(
 	IN	OUT	struct ifreq	*rq, 
 	IN	INT			cmd);
 #endif // CONFIG_STA_SUPPORT //
-
-extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
-extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 
 #endif // __RT_LINUX_H__ //
