@@ -134,6 +134,11 @@ fi
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "lanonly" ]; then
 	ifRaxWdsxDown
+	#Need stop tun before reload drivers
+	#this need for prevent loop in routes
+	service vpnhelper stop
+	sleep 3
+	#Reload modules drivers for current mode
 	service modules restart
 	$LOG "Tune wifi modules..."
 	retune_wifi

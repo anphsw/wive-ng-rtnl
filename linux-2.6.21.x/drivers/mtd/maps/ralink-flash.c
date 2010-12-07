@@ -256,7 +256,7 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
         schedule();  /* Wait for write to finish. */                                                                                
         remove_wait_queue(&wait_q, &wait);                                                                                          
 
-	udelay(5000); //add 5ms delay after write
+	udelay(3000); //add 3ms delay after write
 
 	put_mtd_device(mtd);
 
@@ -280,7 +280,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	if (rdlen != len)
 		printk("warning: ra_mtd_read_nm: rdlen is not equal to len\n");
 
-	udelay(5000); //add 5ms delay after read
+	udelay(1000); //add 1ms delay after read
 
 	put_mtd_device(mtd);
 	return ret;
