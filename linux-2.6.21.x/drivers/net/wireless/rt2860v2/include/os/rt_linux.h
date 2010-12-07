@@ -65,12 +65,9 @@
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
 #define KTHREAD_SUPPORT 1
-#endif
-
-#ifdef KTHREAD_SUPPORT
 #include <linux/err.h>
 #include <linux/kthread.h>
-#endif // KTHREAD_SUPPORT //
+#endif
 
 #undef AP_WSC_INCLUDED
 #undef STA_WSC_INCLUDED

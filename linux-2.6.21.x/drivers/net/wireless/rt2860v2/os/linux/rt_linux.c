@@ -1869,23 +1869,16 @@ int RtmpOSNetDevAttach(
 		pNetDev->get_wireless_stats = rt28xx_get_wireless_stats;
 #endif
 
+#if WIRELESS_EXT >= 12
 #ifdef CONFIG_STA_SUPPORT
-#if WIRELESS_EXT >= 12
 		if (pAd->OpMode == OPMODE_STA)
-		{
 			pNetDev->wireless_handlers = &rt28xx_iw_handler_def;
-		}
-#endif //WIRELESS_EXT >= 12
 #endif // CONFIG_STA_SUPPORT //
-
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
-#if WIRELESS_EXT >= 12
 		if (pAd->OpMode == OPMODE_AP)
-		{
 			pNetDev->wireless_handlers = &rt28xx_ap_iw_handler_def;
-		}
-#endif //WIRELESS_EXT >= 12
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
+#endif
 
 		// copy the net device mac address to the net_device structure.
 		NdisMoveMemory(pNetDev->dev_addr, &pDevOpHook->devAddr[0], MAC_ADDR_LEN);
@@ -1896,7 +1889,6 @@ int RtmpOSNetDevAttach(
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 	pNetDev->validate_addr = NULL;
 #endif
-
 	if (rtnl_locked)
 		ret = register_netdevice(pNetDev);
 	else
