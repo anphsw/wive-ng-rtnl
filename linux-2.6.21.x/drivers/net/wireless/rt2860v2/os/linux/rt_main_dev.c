@@ -38,11 +38,7 @@ UINT32 CW_MAX_IN_BITS;
 
 PSTRING mac = "";		   // default 00:00:00:00:00:00
 PSTRING hostname = "";		   // default CMPC
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,12)
-MODULE_PARM (mac, "s");
-#else
 module_param (mac, charp, 0);
-#endif
 MODULE_PARM_DESC (mac, "rt28xx: wireless mac addr");
 
 

@@ -92,12 +92,6 @@
 #define WSC_INCLUDED
 #endif
 
-#ifdef KTHREAD_SUPPORT
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,4)
-#error "This kerne version doesn't support kthread!!"
-#endif
-#endif // KTHREAD_SUPPORT //
-
 /***********************************************************************************
  *	Profile related sections
  ***********************************************************************************/
