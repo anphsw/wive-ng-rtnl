@@ -187,7 +187,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #endif // PCI_DEVICE //
 #endif // RTMP_MAC_PCI //
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 #define RT_MOD_INC_USE_COUNT() \
 	if (!try_module_get(THIS_MODULE)) \
 	{ \
@@ -196,10 +195,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 	}
 
 #define RT_MOD_DEC_USE_COUNT() module_put(THIS_MODULE);
-#else
-#define RT_MOD_INC_USE_COUNT()	MOD_INC_USE_COUNT;
-#define RT_MOD_DEC_USE_COUNT() MOD_DEC_USE_COUNT;
-#endif
 
 #define RTMP_INC_REF(_A)		0
 #define RTMP_DEC_REF(_A)		0
@@ -480,7 +475,6 @@ typedef void (*TIMER_FUNCTION)(unsigned long);
 	}\
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 #define RTMP_TIME_AFTER(a,b)		\
 	(typecheck(unsigned long, (unsigned long)a) && \
 	 typecheck(unsigned long, (unsigned long)b) && \
@@ -491,20 +485,6 @@ typedef void (*TIMER_FUNCTION)(unsigned long);
 	 typecheck(unsigned long, (unsigned long)b) && \
 	 ((long)(a) - (long)(b) >= 0))
 #define RTMP_TIME_BEFORE(a,b)	RTMP_TIME_AFTER_EQ(b,a)
-#else
-#define typecheck(type,x) \
-({      type __dummy; \
-        typeof(x) __dummy2; \
-        (void)(&__dummy == &__dummy2); \
-        1; \
-})
-#define RTMP_TIME_AFTER_EQ(a,b)	\
-	(typecheck(unsigned long, (unsigned long)a) && \
-	 typecheck(unsigned long, (unsigned long)b) && \
-	 ((long)(a) - (long)(b) >= 0))
-#define RTMP_TIME_BEFORE(a,b)	RTMP_TIME_AFTER_EQ(b,a)
-#define RTMP_TIME_AFTER(a,b) time_after(a, b)
-#endif
 
 #define ONE_TICK 1
 
@@ -1202,11 +1182,7 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)
 
 #ifdef RTMP_MAC_PCI
 /* function declarations */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 #define IRQ_HANDLE_TYPE  irqreturn_t
-#else
-#define IRQ_HANDLE_TYPE  void
-#endif
 
 IRQ_HANDLE_TYPE
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))

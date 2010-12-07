@@ -119,8 +119,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 #endif // PCI_DEVICE //
 #endif // RT2860 //
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-
 #define RTMP_TIME_AFTER(a,b)		\
 	(typecheck(unsigned long, (unsigned long)a) && \
 	 typecheck(unsigned long, (unsigned long)b) && \
@@ -131,9 +129,6 @@ typedef int (*HARD_START_XMIT_FUNC)(struct sk_buff *skb, struct net_device *net_
 	 typecheck(unsigned long, (unsigned long)b) && \
 	 ((long)(a) - (long)(b) >= 0))
 #define RTMP_TIME_BEFORE(a,b)	RTMP_TIME_AFTER_EQ(b,a)
-#else
-#define RTMP_TIME_AFTER(a,b) time_after(a, b)
-#endif
 
 #define A2Hex(_X, _p) 				\
 {									\

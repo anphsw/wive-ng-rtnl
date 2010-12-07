@@ -1240,19 +1240,10 @@ VOID RTMP_Mesh_Init(
 #endif // MULTIPLE_CARD_SUPPORT //
 				sprintf(slot_name, "mesh%d", index);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 			cur_dev_p = dev_get_by_name(slot_name);
-#else
-			for(cur_dev_p=dev_base; cur_dev_p!=NULL; cur_dev_p=cur_dev_p->next)
-			{
-				if (strncmp(cur_dev_p->name, slot_name, 6) == 0)
-					break;
-			}
-#endif // LINUX_VERSION_CODE //
 
 			if (cur_dev_p == NULL)
 				break; /* fine, the RA name is not used */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 			else
 			{
 				/* every time dev_get_by_name is called, and it has returned a
@@ -1261,7 +1252,6 @@ VOID RTMP_Mesh_Init(
 					device is unregistered (since dev->refcnt > 1). */
 				dev_put(cur_dev_p);
 			}
-#endif // LINUX_VERSION_CODE //
 		} /* End of for */
 
 		/* assign interface name to the new network interface */
@@ -1392,12 +1382,7 @@ VOID RTMP_Mesh_Remove(
 	if (ad_p->MeshTab.dev)
 	{
 		unregister_netdev(ad_p->MeshTab.dev);
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 		free_netdev(ad_p->MeshTab.dev);
-#else
-		kfree(ad_p->MeshTab.dev);
-#endif // LINUX_VERSION_CODE //
 	}
 
 	NeighborTableDestroy(ad_p);
@@ -1449,15 +1434,11 @@ static INT Mesh_VirtualIF_Open(
 	if (ADHOC_ON(pAd))
 		return -1;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	if (!try_module_get(THIS_MODULE))
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s: cannot reserve module\n", __FUNCTION__));
 		return -1;
 	}
-	#else
-		MOD_INC_USE_COUNT;
-#endif	
 
 	// Initialize RF register to default value
 	MeshChannelInit(pAd);
@@ -1544,11 +1525,7 @@ static INT Mesh_VirtualIF_Close(
 		AsicDisableSync(pAd);
 #endif // CONFIG_STA_SUPPORT //
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-	module_put(THIS_MODULE);
-#else
 	MOD_DEC_USE_COUNT;
-#endif
 
 	return 0;
 } 

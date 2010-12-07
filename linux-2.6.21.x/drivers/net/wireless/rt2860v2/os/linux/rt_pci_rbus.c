@@ -1088,13 +1088,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 
 	// Do nothing if Reset in progress
 	if (RTMP_TEST_FLAG(pAd, (fRTMP_ADAPTER_RESET_IN_PROGRESS |fRTMP_ADAPTER_HALT_IN_PROGRESS)))
-	{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-        return  IRQ_HANDLED;
-#else
-        return;
-#endif
-	}
+    	    return  IRQ_HANDLED;
 
 	//
 	// Handle interrupt, walk through all bits
@@ -1117,11 +1111,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 	if (IntSource.word == 0xffffffff)
 	{
 		RTMP_SET_FLAG(pAd, (fRTMP_ADAPTER_NIC_NOT_EXIST | fRTMP_ADAPTER_HALT_IN_PROGRESS));
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-        return  IRQ_HANDLED;
-#else
-        return;
-#endif
+    		return  IRQ_HANDLED;
 	}
 	
 	if (IntSource.word & TxCoherent)
@@ -1320,10 +1310,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	return  IRQ_HANDLED;
-#endif
-
 }
 
 /*
