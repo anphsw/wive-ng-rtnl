@@ -6996,12 +6996,8 @@ INT	WscGetConfWithoutTrigger(
     {
         struct task_struct *p;
         read_lock(&tasklist_lock);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	for_each_process(p) {
-#else
-	for_each_task(p) {
-#endif
-            if(!strcmp(p->comm, WSC_SINGLE_TRIGGER_APPNAME))
+    		if(!strcmp(p->comm, WSC_SINGLE_TRIGGER_APPNAME))
                 send_sig(SIGXFSZ, p, 0);
         }
         read_unlock(&tasklist_lock);
@@ -7009,8 +7005,8 @@ INT	WscGetConfWithoutTrigger(
 /* ---  added by YYHuang@Ralink, 08/03/12 */
 
 
-	// TODO: Is it possible ApCli call this fucntion??
-	apIdx = pWscControl->EntryIfIdx;
+    // TODO: Is it possible ApCli call this fucntion??
+    apIdx = pWscControl->EntryIfIdx;
 
     IsAPConfigured = pWscControl->WscConfStatus;
     pWscUPnPNodeInfo = &pWscControl->WscUPnPNodeInfo;

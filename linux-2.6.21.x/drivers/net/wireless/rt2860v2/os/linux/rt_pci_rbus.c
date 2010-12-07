@@ -31,11 +31,7 @@
 
 
 IRQ_HANDLE_TYPE
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance);
-#else
-rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs);
-#endif
 
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 static void ch_switch_workq(unsigned data);
@@ -1030,11 +1026,7 @@ void dfs_tasklet(unsigned long data)
 int print_int_count;
 
 IRQ_HANDLE_TYPE
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance)
-#else
-rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
-#endif
 {
 	struct net_device *net_dev = (struct net_device *) dev_instance;
 	PRTMP_ADAPTER pAd = NULL;

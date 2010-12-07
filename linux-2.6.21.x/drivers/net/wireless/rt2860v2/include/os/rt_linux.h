@@ -1185,11 +1185,7 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)
 #define IRQ_HANDLE_TYPE  irqreturn_t
 
 IRQ_HANDLE_TYPE
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance);
-#else
-rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs);
-#endif
 
 #endif // RTMP_MAC_PCI //
 

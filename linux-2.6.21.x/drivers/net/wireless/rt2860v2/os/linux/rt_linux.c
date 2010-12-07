@@ -1366,9 +1366,7 @@ int RtmpOSIRQRequest(IN PNET_DEV pNetDev)
 #else
 		if ((retval = request_irq(net_dev->irq,rt2860_interrupt, SA_INTERRUPT, net_dev->name ,net_dev))) 
 #endif
-		{
 			printk("RT2860: request_irq  ERROR(%d)\n", retval);
-		}
 	}
 #endif // RTMP_RBUS_SUPPORT //
 
