@@ -7,9 +7,6 @@
 #include global
 . /etc/scripts/global.sh
 
-#include kernel config
-. /etc/scripts/config.sh
-
 stop_serv="vpnhelper inetd shaper crontab iptables pppoe-relay stp  ddns wscd dhcpd lld2d radvd syslog \
 	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver"
 
