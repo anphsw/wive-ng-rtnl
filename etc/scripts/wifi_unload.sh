@@ -21,7 +21,8 @@ rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ip
 
 #disable forward
 sysctl -w net.ipv4.ip_forward=0
-sysctl -w net.ipv4.conf.default.mc_forwarding=0
+echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
+echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 
 #clear conntrack tables
 echo 1 > /proc/sys/net/nf_conntrack_flush
