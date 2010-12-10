@@ -45,7 +45,9 @@
 #include <net/addrconf.h>
 #include <net/xfrm.h>
 
-
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#endif
 
 inline int ip6_rcv_finish( struct sk_buff *skb)
 {
@@ -224,6 +226,14 @@ discard:
 
 int ip6_input(struct sk_buff *skb)
 {
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+            if( (skb_headroom(skb) >=4)  &&
+                    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
+                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN) ||
+                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE))){
+                    FOE_ALG_RXIF(skb)=1;
+            }
+#endif
 	return NF_HOOK(PF_INET6,NF_IP6_LOCAL_IN, skb, skb->dev, NULL, ip6_input_finish);
 }
 
