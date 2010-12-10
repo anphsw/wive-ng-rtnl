@@ -128,7 +128,7 @@ static unsigned int fillrand(unsigned char *buf, unsigned int len)
     unsigned int result = -1;
     fd = open("/dev/urandom", O_RDONLY);
     if (fd < 0) {
-	fd = open("/dev/random", O_RDONLY | O_NONBLOCK);
+	fd = open("/dev/urandom", O_RDONLY | O_NONBLOCK);
     }
     if (fd >= 0) {
 	result = read(fd, buf, len);

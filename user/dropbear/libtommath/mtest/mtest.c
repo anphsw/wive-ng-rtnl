@@ -100,7 +100,7 @@ int main(void)
 
    rng = fopen("/dev/urandom", "rb");
    if (rng == NULL) {
-      rng = fopen("/dev/random", "rb");
+      rng = fopen("/dev/urandom", "rb");
       if (rng == NULL) {
          fprintf(stderr, "\nWarning:  stdin used as random source\n\n");
          rng = stdin;
