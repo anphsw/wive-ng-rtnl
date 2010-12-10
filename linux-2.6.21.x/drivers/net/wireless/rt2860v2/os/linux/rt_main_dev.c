@@ -589,28 +589,6 @@ PNET_DEV RtmpPhyNetDevInit(
 
 	pAd->net_dev = net_dev;
 
-#if (WIRELESS_EXT < 21) && (WIRELESS_EXT >= 12)
-	pNetDevHook->get_wstats = rt28xx_get_wireless_stats;
-#endif
-
-#ifdef CONFIG_STA_SUPPORT
-#if WIRELESS_EXT >= 12
-	if (pAd->OpMode == OPMODE_STA)
-	{
-		pNetDevHook->iw_handler = (void *)&rt28xx_iw_handler_def;
-	}
-#endif //WIRELESS_EXT >= 12
-#endif // CONFIG_STA_SUPPORT //
-
-#ifdef CONFIG_APSTA_MIXED_SUPPORT
-#if WIRELESS_EXT >= 12
-	if (pAd->OpMode == OPMODE_AP)
-	{
-		pNetDevHook->iw_handler = &rt28xx_ap_iw_handler_def;
-	}
-#endif //WIRELESS_EXT >= 12
-#endif // CONFIG_APSTA_MIXED_SUPPORT //
-
 	RTMP_OS_NETDEV_SET_PRIV(net_dev, pAd);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
 	SET_MODULE_OWNER(net_dev);
@@ -803,7 +781,7 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 	// link quality
 #ifdef CONFIG_STA_SUPPORT
 	if (pAd->OpMode == OPMODE_STA)
-		pAd->iw_stats.qual.qual = ((pAd->Mlme.ChannelQuality * 12)/10 + 10);
+	pAd->iw_stats.qual.qual = ((pAd->Mlme.ChannelQuality * 12)/10 + 10);
 #endif // CONFIG_STA_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
 	if (pAd->OpMode == OPMODE_AP)
