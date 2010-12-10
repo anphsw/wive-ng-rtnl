@@ -7,10 +7,11 @@ config MIPS
 
 mainmenu "Linux/MIPS Kernel Configuration"
 
-menu "Machine selection"
-
 config ZONE_DMA
 	bool
+	default y
+
+menu "Machine selection"
 
 config RALINK_RT2880_MP
 	bool
@@ -18,9 +19,9 @@ config RALINK_RT2880_SHUTTLE
 	bool
 config RALINK_RT3052_MP2
 	bool
+	default y
 config RALINK_RT3883_MP
 	bool
-
 choice
 	prompt "System type"
 
