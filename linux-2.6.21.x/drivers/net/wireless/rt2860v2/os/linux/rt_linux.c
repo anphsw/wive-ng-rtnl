@@ -909,12 +909,14 @@ VOID RTMPSendWirelessEvent(
 	IN	UCHAR			BssIdx,
 	IN	CHAR			Rssi)
 {
-#if WIRELESS_EXT >= 15
-
-	//union 	iwreq_data      wrqu;
 	PSTRING	pBuf = NULL, pBufPtr = NULL;
 	USHORT	event, type, BufLen;	
 	UCHAR	event_table_len = 0;
+
+	if (pAd->CommonCfg.bWirelessEvent == FALSE)
+		return;
+
+#if WIRELESS_EXT >= 15
 
 	type = Event_flag & 0xFF00;	
 	event = Event_flag & 0x00FF;
