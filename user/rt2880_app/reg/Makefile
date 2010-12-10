@@ -11,5 +11,5 @@ romfs:
 	$(ROMFSINST) /bin/$(EXEC)
 
 clean:
-	-rm -f $(EXEC) *.elf *.gdb *.o
+	-rm -f $(EXEC) *.elf *.gdb *.o *.map
 
