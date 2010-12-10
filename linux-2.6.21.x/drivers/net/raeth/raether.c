@@ -589,9 +589,6 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 	unsigned int	length = 0;
 	unsigned long	RxProcessed;
 	int bReschedule = 0;
-#if !defined(CONFIG_RA_NAT_NONE) 
-	unsigned long flags;
-#endif
 	END_DEVICE* 	ei_local = netdev_priv(dev);
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;

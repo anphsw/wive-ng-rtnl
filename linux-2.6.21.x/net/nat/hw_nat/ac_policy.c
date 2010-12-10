@@ -45,6 +45,10 @@
 AcPlcyNode AcPlcyList= { .List = LIST_HEAD_INIT(AcPlcyList.List)};
 static char AcFreeList[8];
 
+extern uint16_t GLOBAL_PRE_AC_STR; 
+extern uint16_t GLOBAL_PRE_AC_END; 
+extern uint16_t GLOBAL_POST_AC_STR; 
+extern uint16_t GLOBAL_POST_AC_END; 
 void SyncAcTbl(void)
 {
     struct list_head *pos = NULL, *tmp;
@@ -99,7 +103,7 @@ AcPlcyNode *AcExistNode(AcPlcyNode *NewNode)
                 switch(NewNode->RuleType)
                 {
                 case AC_MAC_GROUP:
-                        if(strcmp(node->Mac,NewNode->Mac)==0 &&
+                        if(memcmp(node->Mac,NewNode->Mac,6)==0 &&
 			   node->Type == NewNode->Type){
                                 return node;
                         }
@@ -199,14 +203,21 @@ void  PpeSetPreAcEbl(uint32_t PreAcEbl)
 
     /* Pre-Account engine for unicast/multicast/broadcast flow */
     if(PreAcEbl==1) {
-	PpeFlowSet |= BIT_FUC_PREA | BIT_FMC_PREA | BIT_FBC_PREA;
+	PpeFlowSet |= (BIT_FUC_PREA | BIT_FMC_PREA | BIT_FBC_PREA);
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+	PpeFlowSet |= (BIT_IPV6_PE_EN);
+#endif
 	RegModifyBits(PPE_POL_CFG, DFL_POL_AC_PRD , 16, 16); //period
 	RegModifyBits(PPE_POL_CFG, 1, 13, 1); //enable Pre-account
+	
     } else {
 	PpeFlowSet &= ~(BIT_FUC_PREA | BIT_FMC_PREA | BIT_FBC_PREA);
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+	PpeFlowSet &= ~(BIT_IPV6_PE_EN);
+#endif
 	/* Set Pre AC Table */
-	RegModifyBits(PPE_PRE_AC, DFL_PRE_AC_STR, 0, 9);
-	RegModifyBits(PPE_PRE_AC, DFL_PRE_AC_END, 16, 9);
+	RegModifyBits(PPE_PRE_AC, GLOBAL_PRE_AC_STR, 0, 9);
+	RegModifyBits(PPE_PRE_AC, GLOBAL_PRE_AC_END, 16, 9);
 
 	/* We have to set period=0 first */
 	RegModifyBits(PPE_POL_CFG, 0, 16, 16); //period
@@ -267,15 +278,23 @@ void  PpeSetPostAcEbl(uint32_t PostAcEbl)
 
     /* Post-Account engine for unicast/multicast/broadcast flow */
     if(PostAcEbl==1) {
-	PpeFlowSet |= BIT_FUC_POSA | BIT_FMC_POSA | BIT_FBC_POSA;
+	PpeFlowSet |= (BIT_FUC_POSA | BIT_FMC_POSA | BIT_FBC_POSA);
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+	PpeFlowSet |= (BIT_IPV6_PE_EN);
+#endif
+
 	RegModifyBits(PPE_POL_CFG, DFL_POL_AC_PRD , 16, 16); //period
 	RegModifyBits(PPE_POL_CFG, 1, 12, 1); //enable Post-account
 
     } else {
 	PpeFlowSet &= ~(BIT_FUC_POSA | BIT_FMC_POSA | BIT_FBC_POSA);
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+	PpeFlowSet &= ~(BIT_IPV6_PE_EN);
+#endif
+	
 	/* Set Post AC Table */
-	RegModifyBits(PPE_POST_AC, DFL_POST_AC_STR, 0, 9);
-	RegModifyBits(PPE_POST_AC, DFL_POST_AC_END, 16, 9);
+	RegModifyBits(PPE_POST_AC, GLOBAL_POST_AC_STR, 0, 9);
+	RegModifyBits(PPE_POST_AC, GLOBAL_POST_AC_END, 16, 9);
 	
 	/* We have to set period=0 first */
 	RegModifyBits(PPE_POL_CFG, 0, 16, 16); //period
@@ -380,7 +399,7 @@ uint32_t AcInsIp(AcPlcyNode *node)
 
 	memset(&L3Rule,0,sizeof(L3Rule));
 
-	CalIpRange(node->IpE, node->IpE, &M, &E);
+	CalIpRange(node->IpS, node->IpE, &M, &E);
 	L3Rule.com.ee_0.ee=1;
 	L3Rule.com.ac.ag=node->AgNum;
 

@@ -440,7 +440,7 @@ void rt28xx_close(IN PNET_DEV dev)
 	
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
-	printk("Waiting for STA driver down...\n");
+	printk("Waiting for WiFi driver down...\n");
 	RTMPusecDelay(1500);
 
 #ifdef VENDOR_FEATURE2_SUPPORT

@@ -70,6 +70,17 @@ struct _MtrParam {
         {PRE_MTR, MTR_IP_GROUP}, /*MTR_DEL_IP_UL_ENTRY*/
         {POST_MTR, MTR_IP_GROUP}, /*MTR_DEL_IP_DL_ENTRY*/
 
+	{PRE_MTR, MTR_SYN}, /*MTR_ADD_SYN_ENTRY*/
+        {PRE_MTR, MTR_SYN}, /*MTR_DEL_SYN_ENTRY*/
+        {PRE_MTR, MTR_FIN}, /*MTR_ADD_FIN_ENTRY*/
+        {PRE_MTR, MTR_FIN}, /*MTR_DEL_FIN_ENTRY*/
+        {PRE_MTR, MTR_PROTOCOL_UDP}, /*MTR_ADD_UDP_ENTRY*/
+        {PRE_MTR, MTR_PROTOCOL_UDP}, /*MTR_DEL_UDP_ENTRY*/
+        {PRE_MTR, MTR_PROTOCOL_ICMP}, /*MTR_ADD_ICMP_ENTRY*/
+        {PRE_MTR, MTR_PROTOCOL_ICMP}, /*MTR_DEL_ICMP_ENTRY*/
+
+
+
         {PRE_MTR+POST_MTR, MTR_MAC_GROUP + MTR_IP_GROUP}, /* MTR_CLEAN_TBL */
 
 };
@@ -142,6 +153,10 @@ int MtrIoctl(struct inode *inode, struct file *filp,
 	case MTR_ADD_MAC_DL_ENTRY:        
 	case MTR_ADD_IP_UL_ENTRY:          
 	case MTR_ADD_IP_DL_ENTRY:
+	case MTR_ADD_SYN_ENTRY:
+	case MTR_ADD_FIN_ENTRY:
+	case MTR_ADD_UDP_ENTRY:
+	case MTR_ADD_ICMP_ENTRY:
 		opt->result=MtrBndryCheck(&node);
 		if(opt->result!=MTR_TBL_FULL) {
 			MtrAddNode(&node);
@@ -150,7 +165,11 @@ int MtrIoctl(struct inode *inode, struct file *filp,
 	case MTR_DEL_MAC_UL_ENTRY:          
 	case MTR_DEL_MAC_DL_ENTRY:          
 	case MTR_DEL_IP_UL_ENTRY:         
-	case MTR_DEL_IP_DL_ENTRY:         
+	case MTR_DEL_IP_DL_ENTRY:  
+	case MTR_DEL_SYN_ENTRY:
+	case MTR_DEL_FIN_ENTRY:
+	case MTR_DEL_UDP_ENTRY:
+	case MTR_DEL_ICMP_ENTRY:
 		opt->result=MtrDelNode(&node);
 		break;
 	case MTR_CLEAN_TBL:

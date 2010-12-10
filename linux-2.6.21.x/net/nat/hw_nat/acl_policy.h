@@ -50,8 +50,19 @@ typedef struct {
     uint16_t DpS; /* start of dport */
     uint16_t DpE; /* end of dport */
     uint16_t FoeTb; /* Foe Table Entry */
+    unsigned int   up:3; /*acl=>up*/
 }AclPlcyNode;
 
+
+/*acl-up*/
+typedef struct {
+    enum AclProtoType  Proto;  /* Any,Tcp,Udp */
+    uint8_t Mac[6];
+    uint32_t Sip; /* source ip */
+    uint32_t Dip; /* destination ip */
+    uint16_t Sp; /* source port */
+    uint16_t Dp; /* destination port */
+}AclClassifyKey;
 
 /*
  * EXPORT FUNCTION
@@ -62,6 +73,7 @@ uint32_t AclInsDflAllow(void);
 uint32_t AclAddNode(AclPlcyNode *NewNode);
 uint32_t AclDelNode(AclPlcyNode *NewNode);
 
+uint32_t AclInsSDmac(AclPlcyNode *node);
 uint32_t AclInsSmacDipDp(AclPlcyNode *node);
 uint32_t AclInsSipDipDp(AclPlcyNode *node);
 
@@ -75,5 +87,7 @@ uint32_t AclSetIpEntry(AclPlcyNode *node,  enum L3RuleDir Dir, enum FoeTblEE End
 
 void  PpeSetPreAclEbl(uint32_t AclEbl);
 AclPlcyNode *AclExistNode(AclPlcyNode *NewNode);
+uint8_t AclClassify(AclClassifyKey *NewRateReach);
+
 
 #endif

@@ -40,8 +40,18 @@
 #define MTR_ADD_IP_DL_ENTRY               (5)
 #define MTR_DEL_IP_UL_ENTRY               (6)
 #define MTR_DEL_IP_DL_ENTRY               (7)
-#define MTR_CLEAN_TBL                     (8)
-#define MTR_GET_CHIP_VER		  (9)
+
+#define MTR_ADD_SYN_ENTRY                 (8)
+#define MTR_DEL_SYN_ENTRY                 (9)
+#define MTR_ADD_FIN_ENTRY                 (10)
+#define MTR_DEL_FIN_ENTRY		  (11)
+#define MTR_ADD_UDP_ENTRY                 (12)
+#define MTR_DEL_UDP_ENTRY                 (13)
+#define MTR_ADD_ICMP_ENTRY                (14)
+#define MTR_DEL_ICMP_ENTRY		  (15)
+
+#define MTR_CLEAN_TBL                     (16)
+#define MTR_GET_CHIP_VER		  (17)
 
 #define MTR_DEVNAME                     "mtr0"
 #define MTR_MAJOR                       (250)
@@ -71,7 +81,10 @@ enum Rt2880ChipVer { //MTR feature not support in RT2880-Shuttle & RT2880-MP
 enum RalinkChipId {
     RT2880=0,
     RT3052=1,
-    RT2883=2
+    RT2883=2,
+    RT3883=3,
+    RT3350=4,
+    RT3352=5
 };
 
 struct mtr_args {
