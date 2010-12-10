@@ -19,7 +19,7 @@
 	rt2880.c
 
 	Abstract:
-	Specific funcitons and variables for RT2883
+	Specific funcitons and variables for RT2880
 
 	Revision History:
 	Who         When          What
