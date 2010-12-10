@@ -810,7 +810,7 @@ BOOLEAN ApCliLinkUp(
 				//2008/12/17:KH modified to fix the low throughput of AP-Client on Big-Endian Platform<--
 
 				//for (i=15; i>=0; i--)
-				for (i=23; i>=0; i--)	//3*3
+				for (i=23; i>=0; i--)	// 3*3
 				//2008/12/17:KH modified to fix the low throughput of AP-Client on Big-Endian Platform-->
 				{	
 					j = i/8;	
@@ -868,6 +868,8 @@ BOOLEAN ApCliLinkUp(
 					CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_RDG_CAPABLE);	
 				if (pHtCapability->ExtHtCapInfo.MCSFeedback == 0x03)
 					CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_MCSFEEDBACK_CAPABLE);		
+				NdisMoveMemory(&pMacEntry->HTCapability, &pAd->MlmeAux.HtCapability, sizeof(HT_CAPABILITY_IE));
+				NdisMoveMemory(pMacEntry->HTCapability.MCSSet, pApCliEntry->RxMcsSet, 16);
 			}
 			else
 			{
@@ -876,8 +878,6 @@ BOOLEAN ApCliLinkUp(
 								  RateIdToMbps[pMacEntry->MaxSupportedRate]));
 			}				
 
-			NdisMoveMemory(&pMacEntry->HTCapability, &pAd->MlmeAux.HtCapability, sizeof(HT_CAPABILITY_IE));
-			NdisMoveMemory(pMacEntry->HTCapability.MCSSet, pApCliEntry->RxMcsSet, 16);
 #endif // DOT11_N_SUPPORT //
 
 			pMacEntry->HTPhyMode.word = pMacEntry->MaxHTPhyMode.word;

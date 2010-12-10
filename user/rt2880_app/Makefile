@@ -5,6 +5,7 @@ ra_dir_$(CONFIG_RT2880_REG_RW)      += reg
 ra_dir_$(CONFIG_RT2880_ATED)        += ated
 ra_dir_$(CONFIG_RT2880_CSR_TEST)    += csr_test
 ra_dir_$(CONFIG_RT2880_FLASH_TEST)  += flash
+ra_dir_$(CONFIG_RALINKAPP_HWNAT)    += hw_nat
 ra_dir_$(CONFIG_RT2880_MII_MGR)     += mii_mgr
 ra_dir_$(CONFIG_RT2880_NVRAM)       += nvram
 ra_dir_$(CONFIG_RT2880_RAINIT)      += nvram

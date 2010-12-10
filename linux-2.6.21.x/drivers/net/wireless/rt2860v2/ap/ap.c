@@ -137,7 +137,7 @@ VOID APStartUp(
 	UINT32		Value = 0;
 	BOOLEAN		bWmmCapable = FALSE;
 	UCHAR		apidx;
-	BOOLEAN		TxPreamble, SpectrumMgmt;
+	BOOLEAN		TxPreamble, SpectrumMgmt = FALSE;
 	UCHAR		BBPR1 = 0, BBPR3 = 0; //byteValue = 0;
 	UCHAR		phy_mode = pAd->CommonCfg.DesiredPhyMode;
 	
