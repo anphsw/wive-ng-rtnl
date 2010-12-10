@@ -68,6 +68,9 @@ int rt2880_module_init(VOID)
 		DBGPRINT(RT_DEBUG_ERROR, ("Allocate memory for os_cookie failed!\n"));
 		goto err_out;
 	}
+
+	NdisZeroMemory(handle, sizeof(struct os_cookie));
+
 	rv = RTMPAllocAdapterBlock(handle, &pAd);
 	if (rv != NDIS_STATUS_SUCCESS)
 	{
@@ -85,14 +88,12 @@ int rt2880_module_init(VOID)
 
 	net_dev = RtmpPhyNetDevInit(pAd, &netDevHook);
 	if (net_dev == NULL)
-	{
 		goto err_out_free_radev;
-	}
 
 	// Here are the net_device structure with pci-bus specific parameters.
 	net_dev->irq = dev_irq;			// Interrupt IRQ number
 	net_dev->base_addr = csr_addr;		// Save CSR virtual address and irq to device structure
-	((POS_COOKIE)handle)->pci_dev = (void *)net_dev;
+	((POS_COOKIE)handle)->pci_dev = (struct pci_dev *)net_dev;
 
 #ifdef CONFIG_STA_SUPPORT
 	pAd->StaCfg.OriDevType = net_dev->type;
