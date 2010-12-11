@@ -1,1 +1,0 @@
-../ldso/mips/dl-startup.h

@@ -464,7 +464,7 @@ config BUG
           Just say Y.
 
 config ELF_CORE
-	default y
+	default n
 	bool "Enable ELF core dumps" if EMBEDDED
 	help
 	  Enable support for generating core dumps. Disabling saves about 4k.
@@ -488,7 +488,7 @@ config FUTEX
 
 config EPOLL
 	bool "Enable eventpoll support" if EMBEDDED
-	default y
+	default n
 	help
 	  Disabling this option will cause the kernel to be built without
 	  support for epoll family of system calls.
@@ -505,7 +505,7 @@ config SHMEM
 	  which may be appropriate on small systems without swap.
 
 config VM_EVENT_COUNTERS
-	default y
+	default n
 	bool "Enable VM event counters for /proc/vmstat" if EMBEDDED
 	help
 	  VM event counters are needed for event counts to be shown.

@@ -22,14 +22,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/if_ether.h>
 #include <net/sock.h>
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
 #include <linux/proc_fs.h>
-#endif
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	#ifndef CONFIG_BRIDGE_FORWARD_CTRL
-		#include <linux/proc_fs.h>
-	#endif
-#endif
 
 #include "br_private.h"
 

@@ -65,14 +65,10 @@ config BRIDGE_PORT_FORWARD
 	default y
 	---help---
 
-config BRIDGE_MULTICAST_BWCTRL
-	bool "Multicast packet bandwidth control"
-	depends on BRIDGE
-	---help---
-
 config BRIDGE_IGMPP_PROCFS
 	bool "Bridge with IGMPProxy procfs support"
 	depends on BRIDGE
+	default y
 	---help---
 	  The original kernel bridge module will flooding multicast packet to each 
 	  interface (port list), this kind of phenomenon will cause bandwidth of wireless 

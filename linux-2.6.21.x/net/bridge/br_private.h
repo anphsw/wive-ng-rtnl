@@ -131,11 +131,6 @@ struct net_bridge_port
 	struct timer_list		message_age_timer;
 	struct kobject			kobj;
 	struct rcu_head			rcu;
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-    unsigned int                    bandwidth;
-    unsigned int                    accumulation;
-    struct timer_list               bwctrl_timer;
-#endif
 #ifdef CONFIG_BRIDGE_PORT_FORWARD
 	u8			port_forwarding;
 #endif

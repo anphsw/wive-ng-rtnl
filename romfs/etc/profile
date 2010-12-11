@@ -1,9 +1,0 @@
-#!/bin/sh
-
-export TERM=vt102
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
-export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
-export HOME=${HOME:-/}
-export PS1='[`hostname`@`echo $PWD`]# '
-
-[ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi

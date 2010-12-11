@@ -20,6 +20,7 @@
 #include <linux/if_vlan.h>
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
+
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 #include <linux/in.h>
 unsigned char bcast_mac_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -29,19 +30,8 @@ unsigned char bcast_mac_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 static inline int should_deliver(struct net_bridge_port *p, 
 				 const struct sk_buff *skb)
 {
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-	unsigned char * dest;
-#endif
  	if ((skb->dev == p->dev) || (p->state != BR_STATE_FORWARDING))
  		return 0;
-
-#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
-    dest = skb->mac.raw;
-    if ((dest[0] & 1) && p->bandwidth !=0) {
-            if ((p->accumulation + skb->len) > p->bandwidth) return 0;
-            p->accumulation += skb->len;
-    }
-#endif
 
 	return 1;
 }

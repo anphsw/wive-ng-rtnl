@@ -1,1 +1,0 @@
-../etc/scripts/config-pptp.sh

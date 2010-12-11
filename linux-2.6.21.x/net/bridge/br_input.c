@@ -20,9 +20,9 @@
 #include "br_private.h"
 
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	#include <linux/ip.h>
-	#include <linux/in.h>
-	#include <linux/igmp.h>
+#include <linux/ip.h>
+#include <linux/in.h>
+#include <linux/igmp.h>
 #endif
 
 /* Bridge group multicast address 802.1d (pg 51). */
@@ -110,7 +110,6 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	if (is_multicast_ether_addr(dest)) { 
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-
 		spin_lock_bh(&br->lock); // bridge lock
 
 		if (atomic_read(&br->br_mac_table_enable) == 1 )
@@ -134,7 +133,6 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			}
 
 		spin_unlock_bh(&br->lock); // bridge unlock
-
 #endif
 		br->statistics.multicast++;
 		skb2 = skb;

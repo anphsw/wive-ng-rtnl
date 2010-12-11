@@ -1,1 +1,0 @@
-../etc/scripts/config-l2tp.sh
