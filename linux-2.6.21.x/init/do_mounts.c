@@ -38,7 +38,13 @@ static int __init readonly(char *str)
 {
 	if (*str)
 		return 0;
+
 	root_mountflags |= MS_RDONLY;
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+	root_mountflags &= ~MS_MGC_VAL;
+        root_mountflags &= ~MS_NOSUID;
+        root_mountflags &= ~MS_SYNCHRONOUS;
+#endif
 	return 1;
 }
 
@@ -46,7 +52,15 @@ static int __init readwrite(char *str)
 {
 	if (*str)
 		return 0;
+
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+	root_mountflags |= MS_RDONLY;
+	root_mountflags &= ~MS_MGC_VAL;
+        root_mountflags &= ~MS_NOSUID;
+        root_mountflags &= ~MS_SYNCHRONOUS;
+#else
 	root_mountflags &= ~MS_RDONLY;
+#endif
 	return 1;
 }
 
