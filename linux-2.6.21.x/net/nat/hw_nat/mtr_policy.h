@@ -35,7 +35,11 @@ Steven Liu  2007-01-23      Initial version
 
 enum MtrRuleType { 
 	MTR_MAC_GROUP=0,
-	MTR_IP_GROUP=1
+	MTR_IP_GROUP=1,
+	MTR_SYN=2,
+	MTR_FIN=3,
+	MTR_PROTOCOL_UDP=4,
+	MTR_PROTOCOL_ICMP=5
 };
 
 enum MtrType {
@@ -81,6 +85,11 @@ typedef struct {
 
 uint32_t MtrInsMac(MtrPlcyNode *node);
 uint32_t MtrInsIp(MtrPlcyNode *node);
+uint32_t MtrInsSYN(MtrPlcyNode *node);
+uint32_t MtrInsFIN(MtrPlcyNode *node);
+uint32_t MtrInsProtocol(MtrPlcyNode *node);
+
+
 
 uint32_t MtrAddNode(MtrPlcyNode *NewNode);
 uint32_t MtrDelNode(MtrPlcyNode *NewNode);

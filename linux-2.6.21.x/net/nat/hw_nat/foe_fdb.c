@@ -41,8 +41,7 @@
 #include "hwnat_ioctl.h"
 #include "util.h"
 
-extern struct FoeEntry  *PpeFoeBase; 
-extern struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP]; 
+extern struct FoeEntry *PpeFoeBase; 
 extern dma_addr_t phy_foe_base;
 
 /* 
@@ -99,29 +98,23 @@ void FoeDumpEntry(uint32_t Index)
     struct FoeEntry *entry=&PpeFoeBase[Index];
     int *p;
 
-    /* Use index 0 as the key of showing exception entry */
-    if (Index == 0) {
-        int i;
-        struct FoeExpEntry *entry;
-
-        for (i = 0; i < FOE_ENTRY_MAX_EXP; i++) {
-            entry = &PpeFoeExp[i];
-            NAT_PRINT("FoeExpEntry(%d): %u.%u.%u.%u:%d\n",
-                      i, IP_FORMAT(entry->ip), entry->port);
-        }
-    }
-
     NAT_PRINT("==========<Flow Table Entry=%d>===============\n", Index);
     p=(int *)entry;
-#if 0
+
+
+    NAT_PRINT("-----------------<Flow Info>------------------\n");
     NAT_PRINT("Information Block 1: %08X\n",*(p));
     NAT_PRINT("SIP: %08X\n",*(p+1));
     NAT_PRINT("DIP: %08X\n",*(p+2));
-    NAT_PRINT("SP|DP: %08X\n",*(p+3));
+    if(entry->bfib1.fmt == IPV4_NAPT) {
+	NAT_PRINT("SP|DP: %08X\n",*(p+3));
+    }
     NAT_PRINT("Information Block 2: %08X\n",*(p+4));
     NAT_PRINT("NewSIP: %08X\n",*(p+5));
     NAT_PRINT("NewDIP: %08X\n",*(p+6));
-    NAT_PRINT("NewSP|NewDP: %08X\n",*(p+7));
+    if(entry->bfib1.fmt == IPV4_NAPT) {
+	NAT_PRINT("NewSP|NewDP: %08X\n",*(p+7));
+    }
     NAT_PRINT("VL1|DMAC_Hi: %08X\n",*(p+8));
     NAT_PRINT("DMAC_Lo: %08X\n",*(p+9));
     NAT_PRINT("PPPoE|SMAC_Hi: %08X\n",*(p+10));
@@ -130,17 +123,35 @@ void FoeDumpEntry(uint32_t Index)
     NAT_PRINT("Resv|VL2: %08X\n",*(p+13));
     NAT_PRINT("Resv: %08X\n",*(p+14));
     NAT_PRINT("Resv: %08X\n",*(p+15));
-#endif
-    NAT_PRINT("State: %d\n", entry->bfib1.state);
-    NAT_PRINT("-----------------<Flow Info>------------------\n");
-    NAT_PRINT("ORG: %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n",IP_FORMAT(entry->sip),entry->sport,
-		    IP_FORMAT(entry->dip),entry->dport);
-    NAT_PRINT("NEW: %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n",IP_FORMAT(entry->new_sip),entry->new_sport, 
-		    IP_FORMAT(entry->new_dip),entry->new_dport);
-    NAT_PRINT("DMAC=%02X:%02X:%02X:%02X:%02X:%02X SMAC=%02X:%02X:%02X:%02X:%02X:%02X\n",
-	    entry->dmac_hi[1], entry->dmac_hi[0], entry->dmac_lo[3],entry->dmac_lo[2],
-	    entry->dmac_lo[1],entry->dmac_lo[0], entry->smac_hi[1],entry->smac_hi[0], 
-	    entry->smac_lo[3],entry->smac_lo[2],entry->smac_lo[1],entry->smac_lo[0]);
+
+    if(entry->bfib1.fmt == IPV4_NAPT) {
+	NAT_PRINT("IPv4 Org IP/Port: %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n",
+		IP_FORMAT(entry->sip),entry->sport, 
+		IP_FORMAT(entry->dip),entry->dport);
+	NAT_PRINT("IPv4 New IP/Port: %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n",
+		IP_FORMAT(entry->new_sip),entry->new_sport, 
+		IP_FORMAT(entry->new_dip),entry->new_dport);
+    } else if (entry->bfib1.fmt == IPV4_NAT) {
+	NAT_PRINT("IPv4 Org IP: %u.%u.%u.%u->%u.%u.%u.%u\n",
+		IP_FORMAT(entry->sip),
+		IP_FORMAT(entry->dip));
+	NAT_PRINT("IPv4 New IP: %u.%u.%u.%u->%u.%u.%u.%u\n",
+		IP_FORMAT(entry->new_sip), 
+		IP_FORMAT(entry->new_dip));
+    } else if (entry->bfib1.fmt == IPV6_ROUTING) {
+	NAT_PRINT("IP: %04X:%04X:%04X:%04X",
+		entry->ipv6_dip0, entry->ipv6_dip1, 
+		entry->ipv6_dip2, entry->ipv6_dip3); 
+    } else {
+	NAT_PRINT("Wrong MFT value\n");
+    }
+
+    NAT_PRINT("DMAC=%02X:%02X:%02X:%02X:%02X:%02X \
+	       SMAC=%02X:%02X:%02X:%02X:%02X:%02X\n",
+	    entry->dmac_hi[1], entry->dmac_hi[0], entry->dmac_lo[3],
+	    entry->dmac_lo[2], entry->dmac_lo[1],entry->dmac_lo[0], 
+	    entry->smac_hi[1],entry->smac_hi[0], entry->smac_lo[3],
+	    entry->smac_lo[2],entry->smac_lo[1],entry->smac_lo[0]);
     NAT_PRINT("=========================================\n\n");
 }
 
@@ -150,16 +161,19 @@ int FoeAddEntry(struct hwnat_tuple *opt)
 	struct FoeEntry *entry;
 	int32_t hash_index;
 
-	key.sip=opt->sip;
-	key.dip=opt->dip;
-	key.sport=opt->sport;
-	key.dport=opt->dport;
-
-	if((hash_index=FoeHashFun(&key,INVALID)) != -1) {
+	key.ipv4.sip=opt->sip;
+	key.ipv4.dip=opt->dip;
+	key.ipv4.sport=opt->sport;
+	key.ipv4.dport=opt->dport;
+	key.ipv4.is_udp=opt->is_udp;
+	key.fmt=IPV4_NAPT; /* FIXME */
+   
+	hash_index = FoeHashFun(&key,INVALID);
+	if(hash_index != -1) {
 
 		opt->hash_index=hash_index;
 		entry=&PpeFoeBase[hash_index];
-		entry->bfib1.sta=1; /* static entry */
+		entry->bfib1.sta=0; /* static entry=>dynamic to fix TCP last ACK issue */
 		entry->bfib1.t_u=opt->is_udp; /* tcp/udp */
 		entry->bfib1.state=BIND; 
 		entry->bfib1.ka=1; /* keepalive */
@@ -167,7 +181,8 @@ int FoeAddEntry(struct hwnat_tuple *opt)
 		entry->bfib1.pppoe=opt->pppoe_act; /* insert / remove */
 		entry->bfib1.snap=0;
 		entry->bfib1.v1=opt->vlan1_act; /* insert / remove */
-		entry->bfib1.v2=0;
+		entry->bfib1.v2=opt->vlan2_act;
+		entry->bfib1.time_stamp=RegRead(FOE_TS_T)&0xFFFF;
 
 		entry->sip=opt->sip; 
 		entry->dip=opt->dip;
@@ -182,6 +197,7 @@ int FoeAddEntry(struct hwnat_tuple *opt)
 		entry->new_dport=opt->new_dport;
 		entry->new_sport=opt->new_sport;
 		entry->vlan1=opt->vlan1;
+		entry->vlan2=opt->vlan2;
 		entry->pppoe_id=opt->pppoe_id;
 
 		FoeSetMacInfo(entry->dmac_hi,opt->dmac);
@@ -215,6 +231,8 @@ int FoeGetAllEntries(struct hwnat_args *opt)
 			opt->entries[count].new_dip = entry->new_dip;
 			opt->entries[count].new_sport = entry->new_sport;
 			opt->entries[count].new_dport = entry->new_dport;
+			opt->entries[count].fmt = entry->bfib1.fmt;
+			opt->entries[count].is_udp = entry->bfib1.t_u;
 			count++;
 		}
 
@@ -235,14 +253,16 @@ int FoeDelEntry(struct hwnat_tuple *opt)
 	struct FoePriKey key;
 	int32_t hash_index;
 
-	key.sip=opt->sip;
-	key.dip=opt->dip;
-	key.sport=opt->sport;
-	key.dport=opt->dport;
-	key.is_udp=opt->is_udp;
+	key.ipv4.sip=opt->sip;
+	key.ipv4.dip=opt->dip;
+	key.ipv4.sport=opt->sport;
+	key.ipv4.dport=opt->dport;
+	key.ipv4.is_udp=opt->is_udp;
+	key.fmt=IPV4_NAPT; /* FIXME */
 
 	// find bind entry                 
-	if((hash_index=FoeHashFun(&key,BIND) != -1)) {
+	hash_index = FoeHashFun(&key,BIND);
+	if(hash_index != -1) {
 		opt->hash_index=hash_index;
 		FoeDelEntryByNum(hash_index);
 		return HWNAT_SUCCESS;
@@ -257,7 +277,7 @@ int FoeBindEntry(struct hwnat_args *opt)
 
     entry = &PpeFoeBase[opt->entry_num];
 
-    //recovery right information block1
+    //restore right information block1
     entry->tmp_buf.time_stamp=RegRead(FOE_TS_T)&0xFFFF;
     entry->tmp_buf.state = BIND;
     memcpy(&entry->bfib1, &entry->tmp_buf, sizeof(entry->tmp_buf));
@@ -288,23 +308,6 @@ int FoeDelEntryByNum(uint32_t entry_num)
     memset(entry, 0, sizeof(struct FoeEntry));
 
     return HWNAT_SUCCESS;
-}
-
-int FoeAddExpEntry(struct hwnat_tuple *opt)
-{
-	struct FoeExpEntry *entry;
-
-	if (opt->hash_index < FOE_ENTRY_MAX_EXP) {
-		entry = &PpeFoeExp[opt->hash_index];
-		entry->ip = opt->dip;
-		entry->port = opt->dport;
-
-		NAT_PRINT("hwnat-exception(%d): %u.%u.%u.%u:%d\n",
-			  opt->hash_index, IP_FORMAT(entry->ip), entry->port);
-		return HWNAT_SUCCESS;
-	}
-
-	return HWNAT_FAIL;
 }
 
 #ifdef CONFIG_RA_HW_NAT_HASH1
@@ -346,16 +349,28 @@ static uint32_t inline ExtractBits(uint32_t *Buf, uint8_t StartBit, uint8_t EndB
 int32_t FoeHashFun(struct FoePriKey *key,enum FoeEntryState TargetState)
 {
 
-	uint32_t index;
+	uint32_t index=0;
 	uint32_t buf[3];
 	struct FoeEntry *entry;
 
 #ifdef CONFIG_RA_HW_NAT_HASH0
 
-	buf[0] = (key->sip & FOE_HASH_MASK);
-	buf[0] += (key->dip & FOE_HASH_MASK);
-	buf[0] += (key->sport & FOE_HASH_MASK);
-	buf[0] += (key->dport & FOE_HASH_MASK);
+	if(key->fmt == IPV4_NAPT) {
+            buf[0] = (key->ipv4.sip & FOE_HASH_MASK);
+            buf[0] += (key->ipv4.dip & FOE_HASH_MASK);
+            buf[0] += (key->ipv4.sport & FOE_HASH_MASK);
+            buf[0] += (key->ipv4.dport & FOE_HASH_MASK);
+        }else if(key->fmt == IPV4_NAT) {
+            buf[0] = (key->ipv4.sip & FOE_HASH_MASK);
+            buf[0] += (key->ipv4.dip & FOE_HASH_MASK);
+        }else if(key->fmt == IPV6_ROUTING) {
+            buf[0] = (key->ipv6.dip0 & FOE_HASH_MASK);
+            buf[0] += (key->ipv6.dip1 & FOE_HASH_MASK);
+            buf[0] += (key->ipv6.dip2 & FOE_HASH_MASK);
+            buf[0] += (key->ipv6.dip3 & FOE_HASH_MASK);
+        }else {
+	    NAT_PRINT("Wrong MFT value\n");
+	}
 
 	switch(FOE_4TB_SIZ)
 	{
@@ -379,9 +394,21 @@ int32_t FoeHashFun(struct FoePriKey *key,enum FoeEntryState TargetState)
 	}
 
 #elif CONFIG_RA_HW_NAT_HASH1
-	buf[0] = key->sport<<16 | key->dport;
-	buf[1] = key->dip;
-	buf[2] = key->sip;
+	if(key->fmt == IPV4_NAPT) {
+	    buf[0] = key->ipv4.sport<<16 | key->ipv4.dport;
+	    buf[1] = key->ipv4.dip;
+	    buf[2] = key->ipv4.sip;
+	}else if (key->fmt == IPV4_NAT) {
+	    buf[0] = (key->ipv4.dip<<16) | (key->ipv4.sip & 0xFFFF);
+	    buf[1] = key->ipv4.dip;
+	    buf[2] = key->ipv4.sip;
+	}else if (key->fmt == IPV6_ROUTING) {
+	    buf[0] = key->ipv6.dip0 ^ key->ipv6.dip3;
+	    buf[1] = key->ipv6.dip1 ^ 0x0;
+	    buf[2] = key->ipv6.dip2 ^ 0x0;
+	}else {
+	    NAT_PRINT("Wrong MFT value\n");
+	}
 
 	switch(FOE_4TB_SIZ)
 	{
@@ -430,17 +457,44 @@ int32_t FoeHashFun(struct FoePriKey *key,enum FoeEntryState TargetState)
 
 	do {
 		entry = &PpeFoeBase[index];
-		if(TargetState==BIND) {
-			if(entry->bfib1.state == BIND && entry->sip==key->sip && 
-				entry->dip==key->dip && entry->sport==key->sport &&
-				entry->dport==key->dport && 
-				entry->bfib1.t_u==key->is_udp){
-				return index;
+
+		//case1.want to search binding entry
+		//case2.want to insert duplicate entry
+		if(TargetState==BIND || 
+		  (TargetState==INVALID && entry->bfib1.state == BIND)) {
+		    if(key->fmt == IPV4_NAPT) {
+			if(entry->bfib1.state == BIND && 
+		  	   entry->sip==key->ipv4.sip && 
+			   entry->dip==key->ipv4.dip && 
+			   entry->sport== key->ipv4.sport &&
+			   entry->dport==key->ipv4.dport && 
+			   entry->bfib1.t_u==key->ipv4.is_udp){
+			    return index;
 			}
-		}else if(TargetState==INVALID) {
-			if(entry->bfib1.state == INVALID) {
-				return index;
+		    }else if(key->fmt == IPV4_NAT){
+			if(entry->bfib1.state == BIND && 
+		  	   entry->sip==key->ipv4.sip && 
+			   entry->dip==key->ipv4.dip) {
+			    return index;
 			}
+		    }else if (key->fmt == IPV6_ROUTING ) {
+			if(entry->bfib1.state == BIND &&
+			   entry->ipv6_dip0==key->ipv6.dip0 && 
+			   entry->ipv6_dip1==key->ipv6.dip1 && 
+			   entry->ipv6_dip2==key->ipv6.dip2 &&
+			   entry->ipv6_dip3==key->ipv6.dip3){
+			    return index;
+			}
+		    } else {
+			NAT_PRINT("Wrong MFT value\n");
+		    }
+		}else if(TargetState==INVALID) 
+		{
+		    // empty entry found
+		    if(entry->bfib1.state == INVALID) 
+		    {
+			return index;
+		    }
 		} 
 	} while( ((index++)%FOE_HASH_WAY) ==0 );
 

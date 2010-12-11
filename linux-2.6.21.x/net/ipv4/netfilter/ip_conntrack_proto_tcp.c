@@ -37,8 +37,6 @@
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../nat/hw_nat/ra_nat.h"
 #include "../../nat/hw_nat/frame_engine.h"
-struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP];
-extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb); 
 #endif
 
 #if 0
@@ -913,23 +911,6 @@ static int tcp_packet(struct ip_conntrack *conntrack,
 				sizeof(_tcph), &_tcph);
 	BUG_ON(th == NULL);
 
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	/* ra_sw_nat_hook_rx() will be hooked if hw_nat is enabled. */
-	if (ra_sw_nat_hook_rx) {
-		for (index = 0; index < FOE_ENTRY_MAX_EXP; index++) {
-			if ((ntohs(th->dest) == PpeFoeExp[index].port &&
-			     ntohl(iph->daddr) == PpeFoeExp[index].ip) ||
-			    (ntohs(th->source) == PpeFoeExp[index].port &&
-			     ntohl(iph->saddr) == PpeFoeExp[index].ip)) {
-				DEBUGP("hwnat-exp: %u.%u.%u.%u:%u\n",
-					NIPQUAD(PpeFoeExp[index].ip),
-					PpeFoeExp[index].port);
-				FOE_ALG_RXIF(skb) = 1;
-			}
-		}
-	}
-#endif
-
 	write_lock_bh(&tcp_lock);
 	old_state = conntrack->proto.tcp.state;
 	dir = CTINFO2DIR(ctinfo);
@@ -1032,15 +1013,13 @@ static int tcp_packet(struct ip_conntrack *conntrack,
 		break;
 	}
 
-#ifndef CONFIG_CONNTRACK_FAST_PATH
-        // skip sanity check if we are using fastpath, andrew 2008/02/27
 	if (!tcp_in_window(&conntrack->proto.tcp, dir, index,
 			   skb, iph, th)) {
 		write_unlock_bh(&tcp_lock);
 		return -NF_ACCEPT;
 	}
-#endif
-    in_window:
+
+in_window:
 	/* From now on we have got in-window packets */
 	conntrack->proto.tcp.last_index = index;
 

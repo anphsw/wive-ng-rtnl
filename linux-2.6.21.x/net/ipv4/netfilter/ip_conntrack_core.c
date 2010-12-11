@@ -51,9 +51,6 @@
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../../nat/hw_nat/ra_nat.h"
 #endif
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-#include "../fastpath/fastpath_core.h"
-#endif
 
 #define IP_CONNTRACK_VERSION	"2.4"
 
@@ -364,14 +361,6 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	proto = __ip_conntrack_proto_find(ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.protonum);
 	if (proto && proto->destroy)
 		proto->destroy(ct);
-
-#ifdef	CONFIG_CONNTRACK_FAST_PATH
-	if (FastPath_Enabled()) {
-	    if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status))
-		if ( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP )
-			fastpath_delNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple, ct->tuplehash[IP_CT_DIR_REPLY].tuple);
-	}
-#endif
 
 	if (ip_conntrack_destroyed)
 		ip_conntrack_destroyed(ct);
@@ -1004,10 +993,6 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 	struct ip_conntrack_protocol *proto;
 	int set_reply = 0;
 	int ret;
-#ifdef CONFIG_CONNTRACK_FAST_PATH	
-        int first_reply=0;
-#endif	
-
 
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
@@ -1059,20 +1044,6 @@ unsigned int ip_conntrack_in(unsigned int hooknum,
 		CONNTRACK_STAT_INC(invalid);
 		return -ret;
 	}
-
-	if (set_reply && !test_bit(IPS_SEEN_REPLY_BIT, &ct->status)){
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-                first_reply=1;
-#endif
-        }
-
-#ifdef	CONFIG_CONNTRACK_FAST_PATH
-	if (FastPath_Enabled()) {
-	    if (!ct->helper &&  set_reply && first_reply)
-		if( ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum != IPPROTO_ICMP )
-			fastpath_addNaptConnection(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple, ct->tuplehash[IP_CT_DIR_REPLY].tuple, NP_NONE);
-	}
-#endif
 
 	if (set_reply && !test_bit(IPS_SEEN_REPLY_BIT, &ct->status)){
 		test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status) ;

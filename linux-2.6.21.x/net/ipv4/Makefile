@@ -55,4 +55,3 @@ obj-$(CONFIG_XFRM) += xfrm4_policy.o xfrm4_state.o xfrm4_input.o \
 
 obj-$(CONFIG_NETFILTER) 		+= netfilter.o netfilter/
 obj-$(CONFIG_NF_CONNTRACK_ENABLED)	+= netfilter/
-obj-$(CONFIG_CONNTRACK_FAST_PATH) 	+= fastpath/

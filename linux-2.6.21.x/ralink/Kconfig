@@ -56,16 +56,13 @@ choice
         depends on RALINK_RT3052
         default RA_NAT_NONE
 
-config  RA_HW_NAT
+config  RA_NAT_HW
+	select RA_HW_NAT
         bool "Hardware NAT acceleration"
 
 config RA_NAT_NONE
         bool "Disable NAT acceleration"
 endchoice
-
-config CONNTRACK_FAST_PATH
-        bool "Software netfilter fast-path"
-        default n
 
 config BCM_NAT
         tristate "Broadcom fast NAT support"
@@ -75,7 +72,7 @@ config BCM_NAT
                 This helps packets pass through netfilter faster when a packet
                 is an established or reply traffic.
 
-if RA_HW_NAT
+if RA_NAT_HW
 menu "Ralink RT3xx/RT28xx NAT Acell support."
 source "net/nat/hw_nat/Kconfig"
 endmenu

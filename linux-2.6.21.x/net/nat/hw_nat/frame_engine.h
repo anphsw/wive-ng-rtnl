@@ -47,7 +47,7 @@
 #define FE_BASE		   0xA0400000
 #define SYS_CTRL_BASE      0xA0300000
 #else
-#error Please Choice Chip Version 
+#error Please Choose Chip Version 
 #endif
 #endif
 
@@ -61,6 +61,11 @@
 #define METER_BASE	    FE_BASE + 0x600
 
 #define FOE_TS_T	    FE_GLO_BASE+0x1C
+#define GDMA1_BASE          FE_GLO_BASE+0x20
+#define GDMA1_SCH_CFG       GDMA1_BASE+0x04
+#define GDMA2_BASE          FE_GLO_BASE+0x60
+#define GDMA2_SCH_CFG       GDMA2_BASE+0x04
+
 
 #define PPE_GLO_CFG	    PPE_BASE + 0x00
 #define PPE_STD_GA_H	    PPE_BASE + 0x04
@@ -106,6 +111,8 @@
 
 #define GDMA1_FWD_CFG	    FE_BASE + 0x20 
 #define GDMA2_FWD_CFG	    FE_BASE + 0x60
+#define FE_COS_MAP	    FE_BASE + 0xC8
+#define IS_EXT_SW_EN(x)     (x & 1<<30)
 
 /* GDMA1 My MAC unicast frame destination port */
 #define GDM1_UFRC_P_CPU     (0 << 12) 
@@ -151,16 +158,34 @@ enum FoeCpuReason {
     ACL_TBL_TTL_1=0x9B,			/* ACL link FOE table & TTL=1 & TTL-1 */
     ACL_ALERT_CPU=0x9C,			/* ACL alert CPU */
     NO_FORCE_DEST_PORT=0xA0,		/* No force destination port */
+    ACL_FORCE_PRIORITY0=0xA8,		/* ACL to UP0 */
+    ACL_FORCE_PRIORITY1=0xA9,		/* ACL to UP1 */
+    ACL_FORCE_PRIORITY2=0xAA,		/* ACL to UP2 */
+    ACL_FORCE_PRIORITY3=0xAB,		/* ACL to UP3 */
+    ACL_FORCE_PRIORITY4=0xAC,		/* ACL to UP4 */
+    ACL_FORCE_PRIORITY5=0xAD,		/* ACL to UP5 */
+    ACL_FORCE_PRIORITY6=0xAE,		/* ACL to UP6 */
+    ACL_FORCE_PRIORITY7=0xAF,		/* ACL to UP7 */
     EXCEED_MTU=0xA1			/* Exceed mtu */
 };	
 
-
 /* PPE_GLO_CFG, Offset=0x200 */
 #define DFL_TTL0_DRP		(1) /* 1:Drop, 0: Alert CPU */
-#define DFL_VPRI_EN		(0) /* Use VLAN pri tag as priority desision */
+#define DFL_VPRI_EN		(1) /* Use VLAN pri tag as priority desision */
 #define DFL_DPRI_EN		(1) /* Use DSCP as priority decision */
+
+#if defined (CONFIG_RA_HW_NAT_ACL2UP_HELPER)
+#define DFL_REG_DSCP		(0) /* Re-gePnerate DSCP */
+#define DFL_REG_VPRI		(1) /* Re-generate VLAN priority tag */
+#elif defined (CONFIG_RA_HW_NAT_DSCP2UP_HELPER)
+#define DFL_REG_DSCP		(1) /* Re-gePnerate DSCP */
 #define DFL_REG_VPRI		(0) /* Re-generate VLAN priority tag */
-#define DFL_REG_DSCP		(0) /* Re-generate DSCP */
+#else
+#define DFL_REG_DSCP		(0) /* Re-gePnerate DSCP */
+#define DFL_REG_VPRI		(0) /* Re-generate VLAN priority tag */
+#endif
+
+#define DFL_ACL_PRI_EN		(1) /* ACL force priority for hit unbind and rate reach */
 
 /* FreeQueueLen	|RedMode=0| RedMode=1| RedMode=2 | RedMode=3
  * -------------+----------+----------+-----------+-----------
@@ -173,14 +198,14 @@ enum FoeCpuReason {
 
 
 /* DSCPx_y_MAP_UP=0x60~0x7C */
-#define DFL_DSCP0_7_UP		(0) /* User priority of DSCP0~7 */
-#define DFL_DSCP24_31_UP	(3) /* User priority of DSCP24~31 */
-#define DFL_DSCP8_15_UP		(1) /* User priority of DSCP8~15 */
-#define DFL_DSCP16_23_UP	(2) /* User priority of DSCP16~23 */
-#define DFL_DSCP32_39_UP	(4) /* User priority of DSCP32~39 */
-#define DFL_DSCP40_47_UP	(5) /* User priority of DSCP40~47 */
-#define DFL_DSCP48_55_UP	(6) /* User priority of DSCP48~55 */
-#define DFL_DSCP56_63_UP	(7) /* User priority of DSCP56~63 */
+#define DFL_DSCP0_7_UP		(0x00000000) /* User priority of DSCP0~7 */
+#define DFL_DSCP24_31_UP	(0x33333333) /* User priority of DSCP24~31 */
+#define DFL_DSCP8_15_UP		(0x11111111) /* User priority of DSCP8~15 */
+#define DFL_DSCP16_23_UP	(0x22222222) /* User priority of DSCP16~23 */
+#define DFL_DSCP32_39_UP	(0x44444444) /* User priority of DSCP32~39 */
+#define DFL_DSCP40_47_UP	(0x55555555) /* User priority of DSCP40~47 */
+#define DFL_DSCP48_55_UP	(0x66666666) /* User priority of DSCP48~55 */
+#define DFL_DSCP56_63_UP	(0x77777777) /* User priority of DSCP56~63 */
 
 /* AUTO_UP_CFG=0x80~0x84 */
 
@@ -205,10 +230,13 @@ enum FoeCpuReason {
 #define FUP_WT_OFFSET		(16) /* weight of FOE priority */
 #define ATP_WT_OFFSET		(20) /* weight of Auto priority */
 
-/* DSCP is highest pri */
+#if defined (CONFIG_RA_HW_NAT_ACL2UP_HELPER) || defined (CONFIG_RA_HW_NAT_DSCP2UP_HELPER)
+#define DFL_UP_RES		(7<<FUP_WT_OFFSET) /* use user priority in foe entry */
+#else
 #define DFL_UP_RES		((0<<ATP_WT_OFFSET) | (0<<VUP_WT_OFFSET) |\
 				 (7<<DUP_WT_OFFSET) | (0<<AUP_WT_OFFSET) | \
 				 (0<<FUP_WT_OFFSET) | (0<<ATP_WT_OFFSET) )
+#endif
 				
 				
 
@@ -243,12 +271,12 @@ enum FoeCpuReason {
 #define DFL_UP7_ODSCP		(0x30) /* user pri 7 map to out-profile DSCP */
 
 /* UP_MAP_AC=0xA0 */
-#define DFL_UP0_AC		(0) /* user pri 0 map to access category */
-#define DFL_UP1_AC		(0) /* user pri 1 map to access category */
-#define DFL_UP2_AC		(0) /* user pri 2 map to access category */
-#define DFL_UP3_AC		(0) /* user pri 3 map to access category */
-#define DFL_UP4_AC		(1) /* user pri 4 map to access category */
-#define DFL_UP5_AC		(1) /* user pri 5 map to access category */
+#define DFL_UP0_AC		(2) /* user pri 0 map to access category */
+#define DFL_UP1_AC		(2) /* user pri 1 map to access category */
+#define DFL_UP2_AC		(2) /* user pri 2 map to access category */
+#define DFL_UP3_AC		(2) /* user pri 3 map to access category */
+#define DFL_UP4_AC		(2) /* user pri 4 map to access category */
+#define DFL_UP5_AC		(2) /* user pri 5 map to access category */
 #define DFL_UP6_AC		(2) /* user pri 6 map to access category */
 #define DFL_UP7_AC		(2) /* user pri 7 map to access category */
 
@@ -275,6 +303,10 @@ enum FoeCpuReason {
 #define BIT_FUC_PREA		(1<<19) /* pre-account engine for multicast flow */
 #define BIT_FUC_PREM		(1<<20) /* pre-meter engine for multicast flow */
 #define BIT_FUC_ACL		(1<<21) /* ACL engine for boardcast flow */
+#define BIT_IPV4_NAPT_EN        (1<<27) /* Enable HNAPT engine for IPv4 flow */
+#define BIT_IPV4_NAT_EN         (1<<26) /* Enable HNAT engine for IPv4 flow */
+#define BIT_IPV6_FOE_EN		(1<<24) /* plicy engine for IPV6 */
+#define BIT_IPV6_PE_EN		(1<<25) /* FoE engine for IPV6 */
 
 /* 
  * Pre/Post - ACL & MTR Table 
@@ -382,6 +414,13 @@ enum FoeCpuReason {
 #define DFL_FOE_FIN_DLTA 	CONFIG_RA_HW_NAT_FIN_DLTA 
 /* Delta time for aging out an bind TCP entry */
 #define DFL_FOE_TCP_DLTA	CONFIG_RA_HW_NAT_TCP_DLTA 
+
+
+#define DFL_FOE_TTL_REGEN	1   /* TTL = TTL -1 */
+
+
+#define IS_FORCE_ACL_TO_UP(x)   (FOE_AI(x)&0xF8)==ACL_FORCE_PRIORITY0
+#define GET_ACL_TO_UP(x)        FOE_AI(x)&0x07
 
 
 #endif

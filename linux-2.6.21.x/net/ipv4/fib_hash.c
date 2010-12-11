@@ -43,9 +43,6 @@
 #include <net/ip_fib.h>
 
 #include "fib_lookup.h"
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-#include "fastpath/fastpath_core.h"
-#endif
 
 static struct kmem_cache *fn_hash_kmem __read_mostly;
 static struct kmem_cache *fn_alias_kmem __read_mostly;
@@ -497,10 +494,6 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
                                         err = 0;                                                                                            
                                 goto out;                                                                                                   
                        }
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-                    if (FastPath_Enabled())
-                           fastpath_modifyRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type); 
-#endif
 
 			write_lock_bh(&fib_hash_lock);
 			fi_drop = fa->fa_info;
@@ -530,9 +523,6 @@ static int fn_hash_insert(struct fib_table *tb, struct fib_config *cfg)
 			fa = fa_first;
 	}
 
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-	fastpath_addRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len),cfg->fc_gw ? cfg->fc_gw : 0, (__u8 *)fi->fib_dev->name, RT_NONE,cfg->fc_type);
-#endif
 	err = -ENOENT;
 	if (!(cfg->fc_nlflags & NLM_F_CREATE))
 		goto out;
@@ -612,12 +602,6 @@ static int fn_hash_delete(struct fib_table *tb, struct fib_config *cfg)
 		key = fz_key(cfg->fc_dst, fz);
 	}
 
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-	/* For fixing the bug that system will be hang if keep changing secondary IP&netmask . */
-        //  Remove the redundant node in the list_inuse of table_route.      
-	fastpath_delRoute(cfg->fc_dst ? cfg->fc_dst : 0, inet_make_mask(cfg->fc_dst_len));
-#endif	
-
 	f = fib_find_node(fz, key);
 
 	if (!f)
@@ -693,9 +677,6 @@ static int fn_flush_list(struct fn_zone *fz, int idx)
 			struct fib_info *fi = fa->fa_info;
 
 			if (fi && (fi->fib_flags&RTNH_F_DEAD)) {
-#ifdef CONFIG_CONNTRACK_FAST_PATH
-				fastpath_delRoute(f->fn_key, fz->fz_mask);
-#endif	
 				write_lock_bh(&fib_hash_lock);
 				list_del(&fa->fa_list);
 				if (list_empty(&f->fn_alias)) {

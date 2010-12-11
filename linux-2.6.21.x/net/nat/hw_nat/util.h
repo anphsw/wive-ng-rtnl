@@ -65,7 +65,8 @@ void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E);
 void FoeToOrgTcpHdr(IN struct FoeEntry *foe_entry, IN struct iphdr *iph, OUT struct tcphdr *th);
 void FoeToOrgUdpHdr(IN struct FoeEntry *foe_entry, IN struct iphdr *iph, OUT struct udphdr *uh);
 void FoeToOrgIpHdr(IN struct FoeEntry *foe_entry, OUT struct iphdr *iph);
-void PpePktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *foe_entry);
+void PpeIpv6PktRebuild(struct sk_buff *skb, struct FoeEntry *foe_entry);
+void PpeIpv4PktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *foe_entry);
 unsigned int Str2Ip(IN char *str);
 
 #endif
