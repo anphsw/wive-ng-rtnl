@@ -354,6 +354,7 @@ struct net_device
 
 
 	struct net_device_stats* (*get_stats)(struct net_device *dev);
+	struct net_device_stats	stats;
 
 #ifdef CONFIG_WIRELESS_EXT
 	/* List of functions to handle Wireless Extensions (instead of ioctl).

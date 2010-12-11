@@ -78,6 +78,12 @@ extern __kernel_size_t strspn(const char *,const char *);
 #ifndef __HAVE_ARCH_STRCSPN
 extern __kernel_size_t strcspn(const char *,const char *);
 #endif
+#ifndef __HAVE_ARCH_STRCASECMP
+extern int strcasecmp(const char *s1, const char *s2);
+#endif
+#ifndef __HAVE_ARCH_STRNCASECMP
+extern int strncasecmp(const char *s1, const char *s2, size_t n);
+#endif
 
 #ifndef __HAVE_ARCH_MEMSET
 extern void * memset(void *,int,__kernel_size_t);
@@ -96,12 +102,6 @@ extern int memcmp(const void *,const void *,__kernel_size_t);
 #endif
 #ifndef __HAVE_ARCH_MEMCHR
 extern void * memchr(const void *,int,__kernel_size_t);
-#endif
-#ifndef __HAVE_ARCH_STRCASECMP
-extern int strcasecmp(const char *s1, const char *s2);
-#endif
-#ifndef __HAVE_ARCH_STRNCASECMP
-extern int strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
 extern char *kstrdup(const char *s, gfp_t gfp);
