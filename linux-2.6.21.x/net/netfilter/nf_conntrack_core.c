@@ -90,7 +90,7 @@ EXPORT_SYMBOL_GPL(nf_conntrack_destroyed);
 unsigned int nf_conntrack_htable_size __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_htable_size);
 
-int nf_conntrack_max __read_mostly;
+unsigned int nf_conntrack_max __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
 struct list_head *nf_conntrack_hash __read_mostly;
