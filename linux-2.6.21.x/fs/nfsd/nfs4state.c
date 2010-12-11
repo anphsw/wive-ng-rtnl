@@ -250,7 +250,7 @@ nfs4_close_delegation(struct nfs4_delegation *dp)
 	/* The following nfsd_close may not actually close the file,
 	 * but we want to remove the lease in any case. */
 	if (dp->dl_flock)
-		vfs_setlease(filp, F_UNLCK, &dp->dl_flock);
+		setlease(filp, F_UNLCK, &dp->dl_flock);
 	nfsd_close(filp);
 }
 
@@ -1397,7 +1397,7 @@ void nfsd_release_deleg_cb(struct file_lock *fl)
 /*
  * Set the delegation file_lock back pointer.
  *
- * Called from setlease() with lock_kernel() held.
+ * Called from __setlease() with lock_kernel() held.
  */
 static
 void nfsd_copy_lock_deleg_cb(struct file_lock *new, struct file_lock *fl)
@@ -1411,7 +1411,7 @@ void nfsd_copy_lock_deleg_cb(struct file_lock *new, struct file_lock *fl)
 }
 
 /*
- * Called from setlease() with lock_kernel() held
+ * Called from __setlease() with lock_kernel() held
  */
 static
 int nfsd_same_client_deleg_cb(struct file_lock *onlist, struct file_lock *try)
@@ -1711,10 +1711,10 @@ nfs4_open_delegation(struct svc_fh *fh, struct nfsd4_open *open, struct nfs4_sta
 	fl.fl_file = stp->st_vfs_file;
 	fl.fl_pid = current->tgid;
 
-	/* vfs_setlease checks to see if delegation should be handed out.
+	/* setlease checks to see if delegation should be handed out.
 	 * the lock_manager callbacks fl_mylease and fl_change are used
 	 */
-	if ((status = vfs_setlease(stp->st_vfs_file,
+	if ((status = setlease(stp->st_vfs_file,
 		flag == NFS4_OPEN_DELEGATE_READ? F_RDLCK: F_WRLCK, &flp))) {
 		dprintk("NFSD: setlease failed [%d], no delegation\n", status);
 		unhash_delegation(dp);
@@ -2657,7 +2657,6 @@ nfsd4_lock(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	struct file_lock conflock;
 	__be32 status = 0;
 	unsigned int strhashval;
-	unsigned int cmd;
 	int err;
 
 	dprintk("NFSD: nfsd4_lock: start=%Ld length=%Ld\n",
@@ -2740,12 +2739,10 @@ nfsd4_lock(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 		case NFS4_READ_LT:
 		case NFS4_READW_LT:
 			file_lock.fl_type = F_RDLCK;
-			cmd = F_SETLK;
 		break;
 		case NFS4_WRITE_LT:
 		case NFS4_WRITEW_LT:
 			file_lock.fl_type = F_WRLCK;
-			cmd = F_SETLK;
 		break;
 		default:
 			status = nfserr_inval;
@@ -2772,8 +2769,9 @@ nfsd4_lock(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 
 	/* XXX?: Just to divert the locks_release_private at the start of
 	 * locks_copy_lock: */
-	locks_init_lock(&conflock);
-	err = posix_lock_file(filp, &file_lock, &conflock);
+	conflock.fl_ops = NULL;
+	conflock.fl_lmops = NULL;
+	err = posix_lock_file_conf(filp, &file_lock, &conflock);
 	switch (-err) {
 	case 0: /* success! */
 		update_stateid(&lock_stp->st_stateid);
@@ -2815,6 +2813,7 @@ nfsd4_lockt(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	struct inode *inode;
 	struct file file;
 	struct file_lock file_lock;
+	struct file_lock conflock;
 	__be32 status;
 
 	if (nfs4_in_grace())
@@ -2879,10 +2878,9 @@ nfsd4_lockt(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	file.f_path.dentry = cstate->current_fh.fh_dentry;
 
 	status = nfs_ok;
-	posix_test_lock(&file, &file_lock);
-	if (file_lock.fl_type != F_UNLCK) {
+	if (posix_test_lock(&file, &file_lock, &conflock)) {
 		status = nfserr_denied;
-		nfs4_set_lock_denied(&file_lock, &lockt->lt_denied);
+		nfs4_set_lock_denied(&conflock, &lockt->lt_denied);
 	}
 out:
 	nfs4_unlock_state();
@@ -2935,7 +2933,7 @@ nfsd4_locku(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	/*
 	*  Try to unlock the file in the VFS.
 	*/
-	err = posix_lock_file(filp, &file_lock, NULL);
+	err = posix_lock_file(filp, &file_lock);
 	if (err) {
 		dprintk("NFSD: nfs4_locku: posix_lock_file failed!\n");
 		goto out_nfserr;

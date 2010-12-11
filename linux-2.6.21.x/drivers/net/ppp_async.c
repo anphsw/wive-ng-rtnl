@@ -107,9 +107,9 @@ static void ppp_async_process(unsigned long arg);
 static void async_lcp_peek(struct asyncppp *ap, unsigned char *data,
 			   int len, int inbound);
 
-static struct ppp_channel_ops async_ops = {
-	ppp_async_send,
-	ppp_async_ioctl
+static const struct ppp_channel_ops async_ops = {
+	.start_xmit = ppp_async_send,
+	.ioctl      = ppp_async_ioctl,
 };
 
 /*
@@ -132,13 +132,15 @@ static DEFINE_RWLOCK(disc_data_lock);
 
 static struct asyncppp *ap_get(struct tty_struct *tty)
 {
+	unsigned long flags;
 	struct asyncppp *ap;
 
-	read_lock(&disc_data_lock);
+	read_lock_irqsave(&disc_data_lock, flags);
 	ap = tty->disc_data;
 	if (ap != NULL)
 		atomic_inc(&ap->refcnt);
-	read_unlock(&disc_data_lock);
+	read_unlock_irqrestore(&disc_data_lock, flags);
+
 	return ap;
 }
 
@@ -157,6 +159,9 @@ ppp_asynctty_open(struct tty_struct *tty)
 {
 	struct asyncppp *ap;
 	int err;
+
+        if (tty->ops->write == NULL)
+                return -EOPNOTSUPP;
 
 	err = -ENOMEM;
 	ap = kzalloc(sizeof(*ap), GFP_KERNEL);
@@ -209,13 +214,14 @@ ppp_asynctty_open(struct tty_struct *tty)
 static void
 ppp_asynctty_close(struct tty_struct *tty)
 {
+	unsigned long flags;
 	struct asyncppp *ap;
 
-	write_lock_irq(&disc_data_lock);
+	write_lock_irqsave(&disc_data_lock, flags);
 	ap = tty->disc_data;
 	tty->disc_data = NULL;
-	write_unlock_irq(&disc_data_lock);
-	if (ap == 0)
+	write_unlock_irqrestore(&disc_data_lock, flags);
+	if (!ap)
 		return;
 
 	/*
@@ -309,16 +315,11 @@ ppp_asynctty_ioctl(struct tty_struct *tty, struct file *file,
 		err = 0;
 		break;
 
-	case TCGETS:
-	case TCGETA:
-		err = n_tty_ioctl(tty, file, cmd, arg);
-		break;
-
 	case TCFLSH:
 		/* flush our buffers and the serial port's buffer */
 		if (arg == TCIOFLUSH || arg == TCOFLUSH)
 			ppp_async_flush_output(ap);
-		err = n_tty_ioctl(tty, file, cmd, arg);
+		err = tty_perform_flush(tty, arg);
 		break;
 
 	case FIONREAD:
@@ -329,7 +330,8 @@ ppp_asynctty_ioctl(struct tty_struct *tty, struct file *file,
 		break;
 
 	default:
-		err = -ENOIOCTLCMD;
+		/* Try the various mode ioctls */
+		err = tty_mode_ioctl(tty, file, cmd, arg);
 	}
 
 	ap_put(ap);
@@ -362,9 +364,7 @@ ppp_asynctty_receive(struct tty_struct *tty, const unsigned char *buf,
 	if (!skb_queue_empty(&ap->rqueue))
 		tasklet_schedule(&ap->tsk);
 	ap_put(ap);
-	if (test_and_clear_bit(TTY_THROTTLED, &tty->flags)
-	    && tty->driver->unthrottle)
-		tty->driver->unthrottle(tty);
+	tty_unthrottle(tty);
 }
 
 static void
@@ -381,7 +381,7 @@ ppp_asynctty_wakeup(struct tty_struct *tty)
 }
 
 
-static struct tty_ldisc ppp_ldisc = {
+static struct tty_ldisc_ops ppp_ldisc = {
 	.owner  = THIS_MODULE,
 	.magic	= TTY_LDISC_MAGIC,
 	.name	= "ppp",
@@ -680,7 +680,7 @@ ppp_async_push(struct asyncppp *ap)
 		if (!tty_stuffed && ap->optr < ap->olim) {
 			avail = ap->olim - ap->optr;
 			set_bit(TTY_DO_WRITE_WAKEUP, &tty->flags);
-			sent = tty->driver->write(tty, ap->optr, avail);
+			sent = tty->ops->write(tty, ap->optr, avail);
 			if (sent < 0)
 				goto flush;	/* error, e.g. loss of CD */
 			ap->optr += sent;
@@ -688,7 +688,7 @@ ppp_async_push(struct asyncppp *ap)
 				tty_stuffed = 1;
 			continue;
 		}
-		if (ap->optr >= ap->olim && ap->tpkt != 0) {
+		if (ap->optr >= ap->olim && ap->tpkt) {
 			if (ppp_async_encode(ap)) {
 				/* finished processing ap->tpkt */
 				clear_bit(XMIT_FULL, &ap->xmit_flags);
@@ -708,7 +708,7 @@ ppp_async_push(struct asyncppp *ap)
 		clear_bit(XMIT_BUSY, &ap->xmit_flags);
 		/* any more work to do? if not, exit the loop */
 		if (!(test_bit(XMIT_WAKEUP, &ap->xmit_flags)
-		      || (!tty_stuffed && ap->tpkt != 0)))
+		      || (!tty_stuffed && ap->tpkt)))
 			break;
 		/* more work to do, see if we can do it now */
 		if (test_and_set_bit(XMIT_BUSY, &ap->xmit_flags))

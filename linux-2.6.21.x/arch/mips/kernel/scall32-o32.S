@@ -658,6 +658,10 @@ einval:	li	v0, -EINVAL
 	sys	sys_epoll_pwait		6
 	sys	sys_ioprio_set		3
 	sys	sys_ioprio_get		2
+	sys     sys_track_flag          2       /* ASUS_QOS */
+	sys	sys_set_mbss_nolan	1	/* Jiahao for MBSSID */
+	sys	sys_set_mbss_nowan	1	/* Jiahao for MBSSID */
+	sys	sys_set_mbss_prio	1	/* Jiahao for MBSSID */
 	.endm
 
 	/* We pre-compute the number of _instruction_ bytes needed to

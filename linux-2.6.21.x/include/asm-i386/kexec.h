@@ -47,6 +47,8 @@
 /* The native architecture */
 #define KEXEC_ARCH KEXEC_ARCH_386
 
+#define MAX_NOTE_BYTES 1024
+
 /* CPU does not save ss and esp on stack if execution is already
  * running in kernel mode at the time of NMI occurrence. This code
  * fixes it.

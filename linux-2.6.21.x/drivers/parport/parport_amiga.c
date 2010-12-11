@@ -24,7 +24,7 @@
 #include <asm/io.h>
 #include <asm/amigaints.h>
 
-#undef DEBUG /* undef me for production */
+#undef DEBUG
 #ifdef DEBUG
 #define DPRINTK printk
 #else

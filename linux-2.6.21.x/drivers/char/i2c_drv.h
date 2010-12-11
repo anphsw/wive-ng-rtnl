@@ -39,17 +39,30 @@
 #define	RT2880_I2C_READ_STR		"read"	/* I2C read operation */
 #define	RT2880_I2C_WRITE_STR		"write"	/* I2C read operation */
 
-#define RT2880_I2C_READ			3
+#define RT2880_I2C_READ		3
 #define RT2880_I2C_WRITE		5
 #define RT2880_I2C_SET_ADDR		7
 
+#define RT2880_I2C_INIT_RTL_NOCLONE     8
+#define RT2880_I2C_INIT_RTL_CLONE       9
+#define RT2880_I2C_VIEW_ARL_TABLE       10
+#define RT2880_I2C_SETREG               11
+#define RT2880_I2C_GETREG               12
+
+
 #define I2C_DEV_NAME			"i2cM0"
+#define MAC_ADDR_SIZE   6
 
 typedef struct i2c_write_data {
 	unsigned long address;
 	unsigned long value;
 	unsigned long size;
 } I2C_WRITE;
+
+typedef struct i2c_wr_reg {
+	unsigned int reg;
+	unsigned long value;
+} I2C_REG_WR;
 
 
 /*---------------------------------------------------------------------*/

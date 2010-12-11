@@ -67,10 +67,6 @@ uint32_t  AclBndryCheck(AclPlcyNode *NewNode)
 
 	switch(NewNode->RuleType)
 	{
-
-	case ACL_ADD_SDMAC_ANY:
-		RuleSize=1;
-		break;
 	case ACL_ADD_SMAC_DIP_ANY:
 	case ACL_ADD_SIP_DIP_ANY:
 		RuleSize=2; /* SMAC + DIP */
@@ -100,6 +96,7 @@ uint32_t RunIoctlAddHandler(AclPlcyNode *NewNode, enum AclProtoType Proto)
 	if(Result !=ACL_TBL_FULL) {
 		Result=AclAddNode(NewNode);
 	}
+
 	return Result;
 }
 
@@ -119,6 +116,7 @@ int AclIoctl (struct inode *inode, struct file *filp,
     struct acl_args *opt=(struct acl_args *)arg;
     AclPlcyNode node;
 
+    MacReverse(opt->mac);
     memcpy(node.Mac,opt->mac,ETH_ALEN);
     node.Method=opt->method;
     node.RuleType=cmd;
@@ -128,16 +126,9 @@ int AclIoctl (struct inode *inode, struct file *filp,
     node.DipE=opt->dip_e;
     node.DpS=opt->dp_s;
     node.DpE=opt->dp_e;
-    node.up=opt->up;
 
     switch(cmd) 
     {
-    case ACL_ADD_SDMAC_ANY:
-	    opt->result = RunIoctlAddHandler(&node, ACL_PROTO_ANY);
-            break;
-    case ACL_DEL_SDMAC_ANY:
-	    opt->result = RunIoctlDelHandler(&node, ACL_PROTO_ANY);
-            break;
     case ACL_ADD_SMAC_DIP_ANY:
     case ACL_ADD_SIP_DIP_ANY:
 	    opt->result = RunIoctlAddHandler(&node, ACL_PROTO_ANY);
@@ -157,7 +148,6 @@ int AclIoctl (struct inode *inode, struct file *filp,
     case ACL_ADD_SMAC_DIP_UDP:
     case ACL_ADD_SIP_DIP_UDP:
 	    opt->result = RunIoctlAddHandler(&node, ACL_PROTO_UDP);
-	    break;
     case ACL_DEL_SMAC_DIP_UDP:
     case ACL_DEL_SIP_DIP_UDP:
 	    opt->result = RunIoctlDelHandler(&node, ACL_PROTO_UDP);

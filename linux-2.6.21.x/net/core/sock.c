@@ -1542,7 +1542,8 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_rcvtimeo		=	MAX_SCHEDULE_TIMEOUT;
 	sk->sk_sndtimeo		=	MAX_SCHEDULE_TIMEOUT;
 
-	sk->sk_stamp = ktime_set(-1L, -1L);
+	sk->sk_stamp.tv_sec     = -1L;
+	sk->sk_stamp.tv_usec    = -1L;
 
 	atomic_set(&sk->sk_refcnt, 1);
 }
@@ -1583,17 +1584,14 @@ EXPORT_SYMBOL(release_sock);
 
 int sock_get_timestamp(struct sock *sk, struct timeval __user *userstamp)
 {
-	struct timeval tv;
 	if (!sock_flag(sk, SOCK_TIMESTAMP))
 		sock_enable_timestamp(sk);
-	tv = ktime_to_timeval(sk->sk_stamp);
-	if (tv.tv_sec == -1)
+	if (sk->sk_stamp.tv_sec == -1)
 		return -ENOENT;
-	if (tv.tv_sec == 0) {
-		sk->sk_stamp = ktime_get_real();
-		tv = ktime_to_timeval(sk->sk_stamp);
-	}
-	return copy_to_user(userstamp, &tv, sizeof(tv)) ? -EFAULT : 0;
+	if (sk->sk_stamp.tv_sec == 0)
+		do_gettimeofday(&sk->sk_stamp);
+	return copy_to_user(userstamp, &sk->sk_stamp, sizeof(struct timeval)) ?
+		-EFAULT : 0;
 }
 EXPORT_SYMBOL(sock_get_timestamp);
 

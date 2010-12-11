@@ -1056,18 +1056,6 @@ out:
 	in6_dev_put(idev);
 }
 
-static inline int accept_ra(struct inet6_dev *in6_dev)
-{
-	/*
-	 * If forwarding is enabled, RA are not accepted unless the special
-	 * hybrid mode (accept_ra=2) is enabled.
-	 */
-	if (in6_dev->cnf.forwarding && in6_dev->cnf.accept_ra < 2)
-		return 0;
-
-	return in6_dev->cnf.accept_ra;
-}
-
 static void ndisc_router_discovery(struct sk_buff *skb)
 {
 	struct ra_msg *ra_msg = (struct ra_msg *) skb->h.raw;
@@ -1113,7 +1101,8 @@ static void ndisc_router_discovery(struct sk_buff *skb)
 		return;
 	}
 
-	if (!accept_ra(in6_dev))
+	/* skip route and link configuration on routers */
+	if (in6_dev->cnf.forwarding || !in6_dev->cnf.accept_ra)
 		goto skip_linkparms;
 
 	if (in6_dev->if_flags & IF_RS_SENT) {
@@ -1257,7 +1246,8 @@ skip_linkparms:
 			     NEIGH_UPDATE_F_ISROUTER);
 	}
 
-	if (!accept_ra(in6_dev))
+	/* skip route and link configuration on routers */
+	if (in6_dev->cnf.forwarding || !in6_dev->cnf.accept_ra)
 		goto out;
 
 #ifdef CONFIG_IPV6_ROUTE_INFO

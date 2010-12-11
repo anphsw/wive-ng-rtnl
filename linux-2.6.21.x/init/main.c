@@ -742,8 +742,6 @@ static void run_init_process(char *init_filename)
  */
 static int noinline init_post(void)
 {
-	unsigned long flags;
-
 	free_initmem();
 	unlock_kernel();
 	mark_rodata_ro();
@@ -756,54 +754,51 @@ static int noinline init_post(void)
 	(void) sys_dup(0);
 	(void) sys_dup(0);
 
-	flags=MS_MGC_VAL;
-	flags&=~MS_NOSUID;
-	flags&=~MS_SYNCHRONOUS;
-
 #ifdef CONFIG_PROC_FS
-        if (sys_mount("proc", "/proc", "proc", flags, NULL) < 0)
+        if (sys_mount("proc", "/proc", "proc", 0, NULL) < 0)
             printk("mount /proc file system fail!\n");
             else
             printk("mount /proc file system ok!\n");
 #ifdef CONFIG_USB_DEVICEFS
-        if (sys_mount("usbfs", "/proc/bus/usb", "usbfs", flags, NULL) < 0)
+        if (sys_mount("usbfs", "/proc/bus/usb", "usbfs", 0, NULL) < 0)
             printk("mount /proc/bus/usb file system fail!\n");
             else
             printk("mount /proc/bus/usb file system ok!\n");
 #endif
 #endif
 #ifdef CONFIG_SYSFS
-        if (sys_mount("sysfs", "/sys", "sysfs", flags, NULL) < 0)
+        if (sys_mount("sysfs", "/sys", "sysfs", 0, NULL) < 0)
             printk("mount /sys file system fail!\n");
             else
             printk("mount /sys file system ok!\n");
 #endif
 #ifdef CONFIG_TMPFS
-        if (sys_mount("tmpfs", "/dev", "tmpfs", flags, "size=32k") < 0)
+        if (sys_mount("tmpfs", "/dev", "tmpfs", 0, NULL) < 0)
             printk("mount /dev file system fail!\n");
             else
             printk("mount /dev file system ok!\n");
-	if (sys_mount("tmpfs", "/var", "tmpfs", flags, NULL) < 0)
+
+        if (sys_mount("tmpfs", "/var", "tmpfs", 0, NULL) < 0)
             printk("mount /var file system fail!\n");
             else
             printk("mount /var file system ok!\n");
 #elif CONFIG_RAMFS
-        if (sys_mount("ramfs", "/dev", "ramfs", flags, NULL) < 0)
+        if (sys_mount("ramfs", "/dev", "ramfs", 0, NULL) < 0)
             printk("mount /dev file system fail!\n");
             else
             printk("mount /dev file system ok!\n");
 
-        if (sys_mount("ramfs", "/var", "ramfs", flags, NULL) < 0)
+        if (sys_mount("ramfs", "/var", "ramfs", 0, NULL) < 0)
             printk("mount /var file system fail!\n");
             else
             printk("mount /var file system ok!\n");
 
-        if (sys_mount("ramfs", "/tmp", "ramfs", flags, NULL) < 0)
+        if (sys_mount("ramfs", "/tmp", "ramfs", 0, NULL) < 0)
             printk("mount /tmp file system fail!\n");
             else
             printk("mount /tmp file system ok!\n");
 
-        if (sys_mount("ramfs", "/etc", "ramfs", flags, NULL) < 0)
+        if (sys_mount("ramfs", "/etc", "ramfs", 0, NULL) < 0)
             printk("mount /etc file system fail!\n");
             else
             printk("mount /etc file system ok!\n");
@@ -829,7 +824,6 @@ static int noinline init_post(void)
 	run_init_process("/linuxrc");
 #endif
 	panic("No init found.  Try passing init= option to kernel.");
-
 	return 0;
 }
 

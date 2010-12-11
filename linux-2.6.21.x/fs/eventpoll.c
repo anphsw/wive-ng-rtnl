@@ -857,7 +857,7 @@ static void ep_free(struct eventpoll *ep)
 	 * write-holding "sem" we can be sure that no file cleanup code will hit
 	 * us during this operation. So we can avoid the lock on "ep->lock".
 	 */
-	while ((rbp = rb_first(&ep->rbr)) != NULL) {
+	while ((rbp = rb_first(&ep->rbr)) != 0) {
 		epi = rb_entry(rbp, struct epitem, rbn);
 		ep_remove(ep, epi);
 	}
@@ -1634,7 +1634,6 @@ static int __init eventpoll_init(void)
 
 epanic:
 	panic("eventpoll_init() failed\n");
-	return 0;
 }
 
 

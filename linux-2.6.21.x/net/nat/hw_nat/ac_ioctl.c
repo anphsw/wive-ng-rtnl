@@ -102,7 +102,7 @@ uint32_t  AcBndryCheck(AcPlcyNode *NewNode)
 		break;
 	case POST_AC:
 		CurAcEnd=PpeGetPostAcEnd();
-		MaxAcEnd=511;
+		MaxAcEnd=DFL_POST_AC_STR + CONFIG_RA_HW_NAT_POST_AC_SIZE;
 		break;
         }
 

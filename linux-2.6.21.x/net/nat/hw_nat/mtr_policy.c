@@ -47,10 +47,6 @@ static char MtrFreeList[8];
 extern uint32_t ChipVer;
 extern uint32_t ChipId;
 
-extern uint16_t GLOBAL_PRE_MTR_STR; 
-extern uint16_t GLOBAL_PRE_MTR_END; 
-extern uint16_t GLOBAL_POST_MTR_STR; 
-extern uint16_t GLOBAL_POST_MTR_END; 
 void SyncMtrTbl(void)
 {
     struct list_head *pos = NULL, *tmp;
@@ -61,25 +57,15 @@ void SyncMtrTbl(void)
     PpeSetPostMtrEbl(0); // Disable PostMtr Table
 
     list_for_each_safe(pos, tmp, &MtrPlcyList.List) {
-    node = list_entry(pos, MtrPlcyNode, List);
+	node = list_entry(pos, MtrPlcyNode, List);
 
-    switch(node->RuleType)
-    {
+	switch(node->RuleType)
+	{
 	case MTR_MAC_GROUP:
 		MtrInsMac(node);
 		break;
 	case MTR_IP_GROUP:
 		MtrInsIp(node);
-		break;
-	case MTR_SYN:
-		MtrInsSYN(node);
-		break;
-	case MTR_FIN:
-		MtrInsFIN(node);
-		break;
-	case MTR_PROTOCOL_UDP:
-	case MTR_PROTOCOL_ICMP:
-		MtrInsProtocol(node);
 		break;
 	default:
 		break;
@@ -114,7 +100,7 @@ MtrPlcyNode *MtrExistNode(MtrPlcyNode *NewNode)
 		switch(NewNode->RuleType)
 		{
 		case MTR_MAC_GROUP:
-			if(memcmp(node->Mac,NewNode->Mac,6)==0 &&
+			if(strcmp(node->Mac,NewNode->Mac)==0 &&
 			   node->Type == NewNode->Type) {
 				return node;
 			}
@@ -123,26 +109,6 @@ MtrPlcyNode *MtrExistNode(MtrPlcyNode *NewNode)
 			if(node->IpS==NewNode->IpS && node->IpE==NewNode->IpE && 
 			   node->Type == NewNode->Type) {
 				return node;
-			}
-			break;
-		case MTR_SYN:
-			if(node->RuleType == MTR_SYN) {
-			    return node;
-			}
-			break;
-		case MTR_FIN:
-			if(node->RuleType == MTR_FIN) {
-			    return node;
-			}
-			break;
-		case MTR_PROTOCOL_UDP:
-			if(node->RuleType == MTR_PROTOCOL_UDP) {
-			    return node;
-			}
-			break;
-		case MTR_PROTOCOL_ICMP:
-			if(node->RuleType ==  MTR_PROTOCOL_ICMP) {
-			    return node;
 			}
 			break;
 		}
@@ -185,40 +151,24 @@ uint32_t MtrDelNode(MtrPlcyNode *DelNode)
 	MtrPlcyNode *node;
 
 	list_for_each_safe(pos, tmp, &MtrPlcyList.List) {
-	    node = list_entry(pos, MtrPlcyNode, List);
+		node = list_entry(pos, MtrPlcyNode, List);
 
-	    switch(DelNode->RuleType)
-	    {
-	    case MTR_MAC_GROUP:
-		if(memcmp(node->Mac, DelNode->Mac,ETH_ALEN)==0){
-		    goto found;
-		}
-		break;
-	    case MTR_IP_GROUP:
-		if(node->IpS== DelNode->IpS && node->IpE== DelNode->IpE){
-		    goto found;
-		}
-		break;
-	    case MTR_SYN:
-		if(node->RuleType == MTR_SYN)
-		    goto found;
-		break;
-	    case MTR_FIN:
-		if(node->RuleType == MTR_FIN)
-		    goto found;
-		break;
-	    case MTR_PROTOCOL_UDP:
-		if(node->RuleType == MTR_PROTOCOL_UDP)
-		    goto found;
-		break;
-	    case MTR_PROTOCOL_ICMP:	
-		if(node->RuleType == MTR_PROTOCOL_ICMP)
-		    goto found;
-		break;
+		switch(DelNode->RuleType)
+		{
+		case MTR_MAC_GROUP:
+			if(memcmp(node->Mac, DelNode->Mac,ETH_ALEN)==0){
+				goto found;
+			}
+			break;
+		case MTR_IP_GROUP:
+	    if(node->IpS== DelNode->IpS && node->IpE== DelNode->IpE){
+		goto found;
 	    }
+	    break;
 	}
+    }
 
-	return MTR_FAIL;
+    return MTR_FAIL;
 
 found:
     PpeSetFreeMtrGrp(node->MgNum);
@@ -256,18 +206,12 @@ void  PpeSetPreMtrEbl(uint32_t PreMtrEbl)
 
     /* Pre-Meter engine for unicast/multicast/broadcast flow */
     if(PreMtrEbl==1) {
-	PpeFlowSet |= (BIT_FUC_PREM | BIT_FMC_PREM | BIT_FBC_PREM);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-	PpeFlowSet |= (BIT_IPV6_PE_EN);
-#endif
+	PpeFlowSet |= BIT_FUC_PREM | BIT_FMC_PREM | BIT_FBC_PREM;
     } else {
 	PpeFlowSet &= ~(BIT_FUC_PREM | BIT_FMC_PREM | BIT_FBC_PREM);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-	PpeFlowSet &= ~(BIT_IPV6_PE_EN);
-#endif
 	/* Set Pre MTR Table */
-	RegModifyBits(PPE_PRE_MTR, GLOBAL_PRE_MTR_STR, 0, 9);
-	RegModifyBits(PPE_PRE_MTR, GLOBAL_PRE_MTR_END, 16, 9);
+	RegModifyBits(PPE_PRE_MTR, DFL_PRE_MTR_STR, 0, 9);
+	RegModifyBits(PPE_PRE_MTR, DFL_PRE_MTR_END, 16, 9);
     }
 
     RegWrite( PPE_FLOW_SET, PpeFlowSet);
@@ -325,17 +269,11 @@ void  PpeSetPostMtrEbl(uint32_t PostMtrEbl)
     /* Post-Meter engine for unicast/multicast/broadcast flow */
     if(PostMtrEbl==1) {
 	PpeFlowSet |= BIT_FUC_POSM | BIT_FMC_POSM | BIT_FBC_POSM;
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-	PpeFlowSet |= (BIT_IPV6_PE_EN);
-#endif
     } else {
 	PpeFlowSet &= ~(BIT_FUC_POSM | BIT_FMC_POSM | BIT_FBC_POSM);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-	PpeFlowSet &= ~(BIT_IPV6_PE_EN);
-#endif
 	/* Set Post MTR Table */
-	RegModifyBits(PPE_POST_MTR, GLOBAL_POST_MTR_STR, 0, 9);
-	RegModifyBits(PPE_POST_MTR, GLOBAL_POST_MTR_END, 16, 9);
+	RegModifyBits(PPE_POST_MTR, DFL_POST_MTR_STR, 0, 9);
+	RegModifyBits(PPE_POST_MTR, DFL_POST_MTR_END, 16, 9);
     }
 
     RegWrite( PPE_FLOW_SET, PpeFlowSet);
@@ -522,91 +460,7 @@ uint32_t MtrInsIp(MtrPlcyNode *node)
     return 1;
 }
 
-uint32_t MtrInsSYN(MtrPlcyNode *node)
-{
-	struct l4_rule L4Rule;
 
-	memset(&L4Rule,0,sizeof(L4Rule));
-	L4Rule.tcp.tcp_f = TCP_SYN;
-	L4Rule.tcp.tcp_fop = IN_SET;
-	L4Rule.tcp.tu = FLT_TCP;
-
-	L4Rule.com.rt=L4_RULE;
-	L4Rule.com.pn = PN_DONT_CARE;
-	L4Rule.com.match = 1;
-
-	L4Rule.com.mtr.ee=1;
-	L4Rule.com.mtr.dop=1; /* drop out profile */
-	L4Rule.com.mtr.mg=node->MgNum;
-	
-	if(node->Type==PRE_MTR){
-		L4Rule.com.dir= DONT_CARE;
-		PpeInsMtrEntry(&L4Rule, PRE_MTR);
-	}else { /* Post Mtr Doesnot Need*/
-	}
-
-
-	PpeInsMtrTbl(node);
-	return 1;
-}
-uint32_t MtrInsFIN(MtrPlcyNode *node)
-{
-	struct l4_rule L4Rule;
-
-	memset(&L4Rule,0,sizeof(L4Rule));
-	L4Rule.tcp.tcp_f = TCP_FIN;
-	L4Rule.tcp.tcp_fop = IN_SET;
-	L4Rule.tcp.tu = FLT_TCP;
-
-	L4Rule.com.rt=L4_RULE;
-	L4Rule.com.pn = PN_DONT_CARE;
-	L4Rule.com.match = 1;
-
-	L4Rule.com.mtr.ee=1;
-	L4Rule.com.mtr.dop=1; /* drop out profile */
-	L4Rule.com.mtr.mg=node->MgNum;
-	
-	if(node->Type==PRE_MTR){
-		L4Rule.com.dir= DONT_CARE;
-		PpeInsMtrEntry(&L4Rule, PRE_MTR);
-	}else { /* Post Mtr Doesnot Need*/
-	}
-
-
-	PpeInsMtrTbl(node);
-	return 1;
-}
-uint32_t MtrInsProtocol(MtrPlcyNode *node)
-{
-	struct l4_rule L4Rule;
-
-	memset(&L4Rule,0,sizeof(L4Rule));
-	
-	L4Rule.tcp.tu = FLT_IP_PROT;
-        
-	if(node->RuleType == MTR_PROTOCOL_UDP)
-		L4Rule.ip.prot = 0x11;/*UDP*/
-	else if (node->RuleType == MTR_PROTOCOL_ICMP)
-		L4Rule.ip.prot = 1;/*ICMP*/
-
-	L4Rule.com.rt=L4_RULE;
-	L4Rule.com.pn = PN_DONT_CARE;
-	L4Rule.com.match = 1;
-
-	L4Rule.com.mtr.ee=1;
-	L4Rule.com.mtr.dop=1; /* drop out profile */
-	L4Rule.com.mtr.mg=node->MgNum;
-	
-	if(node->Type==PRE_MTR){
-		L4Rule.com.dir= DONT_CARE;
-		PpeInsMtrEntry(&L4Rule, PRE_MTR);
-	}else { /* Post Mtr Doesnot Need*/
-	}
-
-
-	PpeInsMtrTbl(node);
-	return 1;
-}
 /* Remove all MTR entries */
 uint32_t MtrCleanTbl(void)
 {

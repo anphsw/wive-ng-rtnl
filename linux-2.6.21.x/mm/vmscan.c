@@ -1091,7 +1091,7 @@ out:
 	 */
 	if (priority < 0)
 		priority = 0;
-	for (i = 0; zones[i] != NULL; i++) {
+	for (i = 0; zones[i] != 0; i++) {
 		struct zone *zone = zones[i];
 
 		if (!cpuset_zone_allowed_hardwall(zone, GFP_KERNEL))

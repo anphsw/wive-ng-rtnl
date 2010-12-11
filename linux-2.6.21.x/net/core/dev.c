@@ -582,28 +582,17 @@ struct net_device *dev_getbyhwaddr(unsigned short type, char *ha)
 
 EXPORT_SYMBOL(dev_getbyhwaddr);
 
-struct net_device *__dev_getfirstbyhwtype(unsigned short type)
-{
-	struct net_device *dev;
-
-	ASSERT_RTNL();
-	for (dev = dev_base; dev; dev = dev->next) {
-		if (dev->type == type)
-			break;
-	}
-	return dev;
-}
-
-EXPORT_SYMBOL(__dev_getfirstbyhwtype);
-
 struct net_device *dev_getfirstbyhwtype(unsigned short type)
 {
 	struct net_device *dev;
 
 	rtnl_lock();
-	dev = __dev_getfirstbyhwtype(type);
-	if (dev)
-		dev_hold(dev);
+	for (dev = dev_base; dev; dev = dev->next) {
+		if (dev->type == type) {
+			dev_hold(dev);
+			break;
+		}
+	}
 	rtnl_unlock();
 	return dev;
 }
@@ -826,6 +815,7 @@ static int default_rebuild_header(struct sk_buff *skb)
 	return 1;
 }
 
+
 /**
  *	dev_open	- prepare an interface for use.
  *	@dev:	device to open
@@ -1039,12 +1029,23 @@ void net_disable_timestamp(void)
 	atomic_dec(&netstamp_needed);
 }
 
+void __net_timestamp(struct sk_buff *skb)
+{
+	struct timeval tv;
+
+	do_gettimeofday(&tv);
+	skb_set_timestamp(skb, &tv);
+}
+EXPORT_SYMBOL(__net_timestamp);
+
 static inline void net_timestamp(struct sk_buff *skb)
 {
 	if (atomic_read(&netstamp_needed))
 		__net_timestamp(skb);
-	else
-		skb->tstamp.tv64 = 0;
+	else {
+		skb->tstamp.off_sec = 0;
+		skb->tstamp.off_usec = 0;
+	}
 }
 
 /*
@@ -1578,8 +1579,17 @@ int netif_rx(struct sk_buff *skb)
 	if (netpoll_rx(skb))
 		return NET_RX_DROP;
 
-	if (!skb->tstamp.tv64)
+	if (!skb->tstamp.off_sec)
 		net_timestamp(skb);
+
+	if (!memcmp(skb->dev->name + 2, "1", 1))	/* Jiahao for MBSSID: match ra1 */
+		skb->wl_idx = 0x2;
+	else if (!memcmp(skb->dev->name + 2, "2", 1))	/* Jiahao for MBSSID: match ra2 */
+		skb->wl_idx = 0x4;
+	else if (!memcmp(skb->dev->name + 2, "3", 1))	/* Jiahao for MBSSID: match ra3 */
+		skb->wl_idx = 0x8;
+	else						/* Angela: for priority ssid and lan */
+		skb->wl_idx = 0x0;
 
 	/*
 	 * The code is rearranged so that the path is the most
@@ -1685,9 +1695,9 @@ static void net_tx_action(struct softirq_action *h)
 	}
 }
 
-static inline int deliver_skb(struct sk_buff *skb,
-			      struct packet_type *pt_prev,
-			      struct net_device *orig_dev)
+static __inline__ int deliver_skb(struct sk_buff *skb,
+				  struct packet_type *pt_prev,
+				  struct net_device *orig_dev)
 {
 	atomic_inc(&skb->users);
 	return pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
@@ -1776,7 +1786,7 @@ int netif_receive_skb(struct sk_buff *skb)
 	if (skb->dev->poll && netpoll_rx(skb))
 		return NET_RX_DROP;
 
-	if (!skb->tstamp.tv64)
+	if (!skb->tstamp.off_sec)
 		net_timestamp(skb);
 
 	if (!skb->iif)
@@ -1941,7 +1951,6 @@ static void net_rx_action(struct softirq_action *h)
 		}
 	}
 out:
-	local_irq_enable();
 #ifdef CONFIG_NET_DMA
 	/*
 	 * There may not be any more sk_buffs coming right now, so push
@@ -1955,6 +1964,7 @@ out:
 		rcu_read_unlock();
 	}
 #endif
+	local_irq_enable();
 	return;
 
 softnet_break:
@@ -2083,7 +2093,7 @@ static int dev_ifconf(char __user *arg)
  *	This is invoked by the /proc filesystem handler to display a device
  *	in detail.
  */
-static struct net_device *dev_get_idx(loff_t pos)
+static __inline__ struct net_device *dev_get_idx(loff_t pos)
 {
 	struct net_device *dev;
 	loff_t i;
@@ -2112,25 +2122,28 @@ void dev_seq_stop(struct seq_file *seq, void *v)
 
 static void dev_seq_printf_stats(struct seq_file *seq, struct net_device *dev)
 {
-	struct net_device_stats *stats = dev->get_stats(dev);
+	if (dev->get_stats) {
+		struct net_device_stats *stats = dev->get_stats(dev);
 
-	seq_printf(seq, "%6s:%8lu %7lu %4lu %4lu %4lu %5lu %10lu %9lu "
-		   "%8lu %7lu %4lu %4lu %4lu %5lu %7lu %10lu\n",
-		   dev->name, stats->rx_bytes, stats->rx_packets,
-		   stats->rx_errors,
-		   stats->rx_dropped + stats->rx_missed_errors,
-		   stats->rx_fifo_errors,
-		   stats->rx_length_errors + stats->rx_over_errors +
-		    stats->rx_crc_errors + stats->rx_frame_errors,
-		   stats->rx_compressed, stats->multicast,
-		   stats->tx_bytes, stats->tx_packets,
-		   stats->tx_errors, stats->tx_dropped,
-		   stats->tx_fifo_errors, stats->collisions,
-		   stats->tx_carrier_errors +
-		    stats->tx_aborted_errors +
-		    stats->tx_window_errors +
-		    stats->tx_heartbeat_errors,
-		   stats->tx_compressed);
+		seq_printf(seq, "%6s:%8lu %7lu %4lu %4lu %4lu %5lu %10lu %9lu "
+				"%8lu %7lu %4lu %4lu %4lu %5lu %7lu %10lu\n",
+			   dev->name, stats->rx_bytes, stats->rx_packets,
+			   stats->rx_errors,
+			   stats->rx_dropped + stats->rx_missed_errors,
+			   stats->rx_fifo_errors,
+			   stats->rx_length_errors + stats->rx_over_errors +
+			     stats->rx_crc_errors + stats->rx_frame_errors,
+			   stats->rx_compressed, stats->multicast,
+			   stats->tx_bytes, stats->tx_packets,
+			   stats->tx_errors, stats->tx_dropped,
+			   stats->tx_fifo_errors, stats->collisions,
+			   stats->tx_carrier_errors +
+			     stats->tx_aborted_errors +
+			     stats->tx_window_errors +
+			     stats->tx_heartbeat_errors,
+			   stats->tx_compressed);
+	} else
+		seq_printf(seq, "%6s: No statistics available.\n", dev->name);
 }
 
 /*
@@ -2378,7 +2391,7 @@ unsigned dev_get_flags(const struct net_device *dev)
 
 int dev_change_flags(struct net_device *dev, unsigned flags)
 {
-	int ret, changes;
+	int ret;
 	int old_flags = dev->flags;
 
 	/*
@@ -2433,10 +2446,8 @@ int dev_change_flags(struct net_device *dev, unsigned flags)
 		dev_set_allmulti(dev, inc);
 	}
 
-	/* Exclude state transition flags, already notified */
-	changes = (old_flags ^ dev->flags) & ~(IFF_UP | IFF_RUNNING);
-	if (changes)
-		rtmsg_ifinfo(RTM_NEWLINK, dev, changes);
+	if (old_flags ^ dev->flags)
+		rtmsg_ifinfo(RTM_NEWLINK, dev, old_flags ^ dev->flags);
 
 	return ret;
 }
@@ -2855,7 +2866,7 @@ static int dev_boot_phase = 1;
 /* Delayed registration/unregisteration */
 static struct list_head net_todo_list = LIST_HEAD_INIT(net_todo_list);
 
-static void net_set_todo(struct net_device *dev)
+static inline void net_set_todo(struct net_device *dev)
 {
 	list_add_tail(&dev->todo_list, &net_todo_list);
 }
@@ -3150,11 +3161,6 @@ void netdev_run_todo(void)
 	}
 }
 
-static struct net_device_stats *internal_stats(struct net_device *dev)
-{
-	return &dev->stats;
-}
-
 /**
  *	alloc_netdev - allocate network device
  *	@sizeof_priv:	size of private data to allocate space for
@@ -3190,7 +3196,6 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *name,
 	if (sizeof_priv)
 		dev->priv = netdev_priv(dev);
 
-	dev->get_stats = internal_stats;
 	setup(dev);
 	strcpy(dev->name, name);
 	return dev;

@@ -7,8 +7,6 @@
 
 
 #define KSYM_NAME_LEN 127
-#define KSYM_SYMBOL_LEN (sizeof("%s+%#lx/%#lx [%s]") + KSYM_NAME_LEN +	\
-			 2*(BITS_PER_LONG*3/10) + MODULE_NAME_LEN + 1)
 
 #ifdef CONFIG_KALLSYMS
 /* Lookup the address for a symbol. Returns 0 if not found. */
@@ -24,14 +22,8 @@ const char *kallsyms_lookup(unsigned long addr,
 			    unsigned long *offset,
 			    char **modname, char *namebuf);
 
-/* Look up a kernel symbol and return it in a text buffer. */
-extern int sprint_symbol(char *buffer, unsigned long address);
-
-/* Look up a kernel symbol and print it to the kernel messages. */
+/* Replace "%s" in format with address, if found */
 extern void __print_symbol(const char *fmt, unsigned long address);
-
-int lookup_symbol_name(unsigned long addr, char *symname);
-int lookup_symbol_attrs(unsigned long addr, unsigned long *size, unsigned long *offset, char *modname, char *name);
 
 #else /* !CONFIG_KALLSYMS */
 
@@ -53,22 +45,6 @@ static inline const char *kallsyms_lookup(unsigned long addr,
 					  char **modname, char *namebuf)
 {
 	return NULL;
-}
-
-static inline int sprint_symbol(char *buffer, unsigned long addr)
-{
-	*buffer = '\0';
-	return 0;
-}
-
-static inline int lookup_symbol_name(unsigned long addr, char *symname)
-{
-	return -ERANGE;
-}
-
-static inline int lookup_symbol_attrs(unsigned long addr, unsigned long *size, unsigned long *offset, char *modname, char *name)
-{
-	return -ERANGE;
 }
 
 /* Stupid that this does nothing, but I didn't create this mess. */

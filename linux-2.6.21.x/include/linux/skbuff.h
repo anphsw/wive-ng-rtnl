@@ -26,7 +26,6 @@
 #include <net/checksum.h>
 #include <linux/rcupdate.h>
 #include <linux/dmaengine.h>
-#include <linux/hrtimer.h>
 #include <linux/compat_skbuff.h>
 
 #define HAVE_ALLOC_SKB		/* For the drivers to know */
@@ -158,6 +157,11 @@ struct skb_shared_info {
 #define SKB_DATAREF_SHIFT 16
 #define SKB_DATAREF_MASK ((1 << SKB_DATAREF_SHIFT) - 1)
 
+struct skb_timeval {
+	u32	off_sec;
+	u32	off_usec;
+};
+
 
 enum {
 	SKB_FCLONE_UNAVAILABLE,
@@ -231,7 +235,7 @@ struct sk_buff {
 	struct sk_buff		*prev;
 
 	struct sock		*sk;
-	ktime_t			tstamp;
+	struct skb_timeval	tstamp;
 	struct net_device	*dev;
 	int			iif;
 	/* 4 byte hole on 64 bit*/
@@ -322,6 +326,7 @@ struct sk_buff {
 				*data,
 				*tail,
 				*end;
+	unsigned char		wl_idx;		/* Jiahao for MBSSID */
 };
 
 #ifdef __KERNEL__
@@ -1491,14 +1496,26 @@ extern void skb_add_mtu(int mtu);
  */
 static inline void skb_get_timestamp(const struct sk_buff *skb, struct timeval *stamp)
 {
-	*stamp = ktime_to_timeval(skb->tstamp);
+	stamp->tv_sec  = skb->tstamp.off_sec;
+	stamp->tv_usec = skb->tstamp.off_usec;
 }
 
-static inline void __net_timestamp(struct sk_buff *skb)
+/**
+ * 	skb_set_timestamp - set timestamp of a skb
+ *	@skb: skb to set stamp of
+ *	@stamp: pointer to struct timeval to get stamp from
+ *
+ *	Timestamps are stored in the skb as offsets to a base timestamp.
+ *	This function converts a struct timeval to an offset and stores
+ *	it in the skb.
+ */
+static inline void skb_set_timestamp(struct sk_buff *skb, const struct timeval *stamp)
 {
-	skb->tstamp = ktime_get_real();
+	skb->tstamp.off_sec  = stamp->tv_sec;
+	skb->tstamp.off_usec = stamp->tv_usec;
 }
 
+extern void __net_timestamp(struct sk_buff *skb);
 
 extern __sum16 __skb_checksum_complete(struct sk_buff *skb);
 

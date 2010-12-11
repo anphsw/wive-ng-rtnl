@@ -68,7 +68,7 @@
 /* Maximum Number of Cards supported */
 #define MAX_MFC 5
 
-#undef DEBUG /* undef me for production */
+#undef DEBUG
 #ifdef DEBUG
 #define DPRINTK printk
 #else

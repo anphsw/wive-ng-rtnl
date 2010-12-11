@@ -30,7 +30,7 @@ config CMDLINE
 
 config UBOOT_CMDLINE
 	bool "UBoot kernel command line"
-	default n
+	default ""
 	help
 	  Say Y here if you want to use UBoot parameter "bootargs" as kernel command line.
 

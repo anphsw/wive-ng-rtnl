@@ -79,10 +79,9 @@ struct unix_sock {
 	struct mutex		readlock;
         struct sock		*peer;
         struct sock		*other;
-	struct list_head	link;
+        struct sock		*gc_tree;
         atomic_t                inflight;
         spinlock_t		lock;
-	unsigned int		gc_candidate : 1;
         wait_queue_head_t       peer_wait;
 };
 #define unix_sk(__sk) ((struct unix_sock *)__sk)

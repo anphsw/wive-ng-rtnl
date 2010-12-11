@@ -355,13 +355,37 @@ void i2c_read_config(char *data, unsigned int len)
 	i2c_eeprom_read(0, data, len);
 }
 
+typedef unsigned int uint32;
+unsigned char cloneMac[6];
+unsigned int enClone;
+static uint32 addedMacToLUTFlag = 0;
+
+
+//for raether drivers use ,when raether receive mac clone packet user.
+int i2cdrv_addARL()
+{
+		uint32 cloneport;
+		 if(!addedMacToLUTFlag )
+		  {
+			cloneport = searchARLEntry(cloneMac);
+			if(cloneport) {
+				modifyARLPort(cloneMac,cloneport);
+				addedMacToLUTFlag=1;
+				printk("Added %02X:%02X:%02X:%02X:%02X:%02X to ARL, port=%d\n",
+				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);				
+			}	
+		}
+		return 0;
+}
+
 int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
                      unsigned int cmd, unsigned long arg)
 {
 	//unsigned char w_byte[4];
-	unsigned int address, size;
+	unsigned int address, size, cloneport, reg;
 	unsigned long value;
 	I2C_WRITE *i2c_write;
+	I2C_REG_WR *i2c_wr;
 
 	switch (cmd) {
 	case RT2880_I2C_READ:
@@ -399,6 +423,41 @@ int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
 	case RT2880_I2C_SET_ADDR:
 		i2cdrv_addr = (unsigned long)arg;
 		break;
+	case RT2880_I2C_SETREG:
+		i2c_wr = (I2C_REG_WR*) arg;
+		reg = i2c_wr->reg;
+		value = i2c_wr->value;
+
+		ARL_WRITE(reg, value);
+		break;
+
+	case RT2880_I2C_GETREG:
+		reg = (unsigned int) arg;
+		ARL_READ(reg);
+		break;
+
+	case RT2880_I2C_INIT_RTL_NOCLONE:		    //mac clone disable
+		memcpy(&cloneMac, arg, sizeof(cloneMac));
+		enClone = 0;	
+		if( cloneport = searchARLEntry(cloneMac)){
+			deleteARLEntry(cloneMac);
+			printk("[RT2880_I2C_INIT_RTL_NOCLONE]Delete %02X:%02X:%02X:%02X:%02X:%02X from LUT , port is %d\n",
+				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);								
+			addedMacToLUTFlag = 0;	
+		}	
+		break;
+
+	case RT2880_I2C_INIT_RTL_CLONE:	       //mac eclone enable ,init public variable setting
+		printk("RT2880_I2C_INIT_RTL_CLONE\n");
+		memcpy(&cloneMac,arg,sizeof(cloneMac));
+		modifyARLPort(cloneMac, 1); 
+		addedMacToLUTFlag = 0;
+		enClone = 1;
+		break;
+	case RT2880_I2C_VIEW_ARL_TABLE:
+		 printk("RT2880_I2C_VIEW_ARL_TABLE\n");
+		 displayARLTable();
+		 break;
 	default :
 		printk("i2c_drv: command format error\n");
 	}

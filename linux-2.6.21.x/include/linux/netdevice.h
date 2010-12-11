@@ -87,16 +87,14 @@ struct netpoll_info;
  *	used.
  */
  
-#if defined(CONFIG_WLAN_80211) || defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-# if defined(CONFIG_MAC80211_MESH)
-#  define LL_MAX_HEADER 128
-# else
-#  define LL_MAX_HEADER 96
-# endif
-#elif defined(CONFIG_TR)
-# define LL_MAX_HEADER 48
+#if !defined(CONFIG_AX25) && !defined(CONFIG_AX25_MODULE) && !defined(CONFIG_TR)
+#define LL_MAX_HEADER	32
 #else
-# define LL_MAX_HEADER 32
+#if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
+#define LL_MAX_HEADER	96
+#else
+#define LL_MAX_HEADER	48
+#endif
 #endif
 
 #if !defined(CONFIG_NET_IPIP) && !defined(CONFIG_NET_IPIP_MODULE) && \
@@ -354,15 +352,13 @@ struct net_device
 
 
 	struct net_device_stats* (*get_stats)(struct net_device *dev);
-	struct net_device_stats	stats;
 
-#ifdef CONFIG_WIRELESS_EXT
 	/* List of functions to handle Wireless Extensions (instead of ioctl).
 	 * See <net/iw_handler.h> for details. Jean II */
 	const struct iw_handler_def *	wireless_handlers;
 	/* Instance data managed by the core of Wireless Extensions. */
 	struct iw_public_data *	wireless_data;
-#endif
+
 	const struct ethtool_ops *ethtool_ops;
 
 	/*
@@ -600,7 +596,6 @@ extern int 			netdev_boot_setup_check(struct net_device *dev);
 extern unsigned long		netdev_boot_base(const char *prefix, int unit);
 extern struct net_device    *dev_getbyhwaddr(unsigned short type, char *hwaddr);
 extern struct net_device *dev_getfirstbyhwtype(unsigned short type);
-extern struct net_device *__dev_getfirstbyhwtype(unsigned short type);
 extern void		dev_add_pack(struct packet_type *pt);
 extern void		dev_remove_pack(struct packet_type *pt);
 extern void		__dev_remove_pack(struct packet_type *pt);
@@ -904,17 +899,6 @@ static inline int netif_rx_reschedule(struct net_device *dev, int undo)
 	return 0;
 }
 
-/* same as netif_rx_complete, except that local_irq_save(flags)
- * has already been issued
- */
-static inline void __netif_rx_complete(struct net_device *dev)
-{
-	BUG_ON(!test_bit(__LINK_STATE_RX_SCHED, &dev->state));
-	list_del(&dev->poll_list);
-	smp_mb__before_clear_bit();
-	clear_bit(__LINK_STATE_RX_SCHED, &dev->state);
-}
-
 /* Remove interface from poll list: it must be in the poll list
  * on current cpu. This primitive is called by dev->poll(), when
  * it completes the work. The device cannot be out of poll list at this
@@ -925,7 +909,10 @@ static inline void netif_rx_complete(struct net_device *dev)
 	unsigned long flags;
 
 	local_irq_save(flags);
-	__netif_rx_complete(dev);
+	BUG_ON(!test_bit(__LINK_STATE_RX_SCHED, &dev->state));
+	list_del(&dev->poll_list);
+	smp_mb__before_clear_bit();
+	clear_bit(__LINK_STATE_RX_SCHED, &dev->state);
 	local_irq_restore(flags);
 }
 
@@ -938,6 +925,17 @@ static inline void netif_poll_disable(struct net_device *dev)
 
 static inline void netif_poll_enable(struct net_device *dev)
 {
+	smp_mb__before_clear_bit();
+	clear_bit(__LINK_STATE_RX_SCHED, &dev->state);
+}
+
+/* same as netif_rx_complete, except that local_irq_save(flags)
+ * has already been issued
+ */
+static inline void __netif_rx_complete(struct net_device *dev)
+{
+	BUG_ON(!test_bit(__LINK_STATE_RX_SCHED, &dev->state));
+	list_del(&dev->poll_list);
 	smp_mb__before_clear_bit();
 	clear_bit(__LINK_STATE_RX_SCHED, &dev->state);
 }

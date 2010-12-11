@@ -47,16 +47,12 @@
 #define ACL_DEL_SIP_DIP_UDP    		(11)
 #define ACL_CLEAN_TBL    		(12)
 
-#define ACL_ADD_SDMAC_ANY   		(13)
-#define ACL_DEL_SDMAC_ANY   		(14)
-
 #define ACL_DEVNAME			"acl0"
 #define ACL_MAJOR			(230)
 
 enum AclRuleMethod {
-	ACL_ALLOW_RULE=0,	
-	ACL_DENY_RULE=1,
-	ACL_PRIORITY_RULE=2/*set user priority only*/
+	ACL_ALLOW_RULE=0,
+	ACL_DENY_RULE=1
 };
 
 enum AclRuleOpt {
@@ -86,7 +82,6 @@ struct acl_args {
 	unsigned long  dip_e; /* end of dip */
 	unsigned short dp_s; /* start of dp */
 	unsigned short dp_e; /* end of dp */
-	unsigned int   up:3; /*acl=>up*/
 };
 
 int AclRegIoctlHandler(void);

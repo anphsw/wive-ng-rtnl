@@ -495,11 +495,11 @@ nfqnl_build_packet_message(struct nfqnl_instance *queue,
 		NFA_PUT(skb, NFQA_HWADDR, sizeof(phw), &phw);
 	}
 
-	if (entskb->tstamp.tv64) {
+	if (entskb->tstamp.off_sec) {
 		struct nfqnl_msg_packet_timestamp ts;
-		struct timeval tv = ktime_to_timeval(entskb->tstamp);
-		ts.sec = cpu_to_be64(tv.tv_sec);
-		ts.usec = cpu_to_be64(tv.tv_usec);
+
+		ts.sec = cpu_to_be64(entskb->tstamp.off_sec);
+		ts.usec = cpu_to_be64(entskb->tstamp.off_usec);
 
 		NFA_PUT(skb, NFQA_TIMESTAMP, sizeof(ts), &ts);
 	}

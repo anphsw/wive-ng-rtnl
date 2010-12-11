@@ -163,7 +163,13 @@ static void nolock_unhold_lvb(void *lock, char *lvb)
 static int nolock_plock_get(void *lockspace, struct lm_lockname *name,
 			    struct file *file, struct file_lock *fl)
 {
-	posix_test_lock(file, fl);
+	struct file_lock tmp;
+	int ret;
+
+	ret = posix_test_lock(file, fl, &tmp);
+	fl->fl_type = F_UNLCK;
+	if (ret)
+		memcpy(fl, &tmp, sizeof(struct file_lock));
 
 	return 0;
 }

@@ -44,7 +44,6 @@
 #include "hwnat_ioctl.h"
 #include "foe_fdb.h"
 #include "util.h"
-#include "ra_nat.h"
 
 #ifdef  CONFIG_DEVFS_FS
 #include <linux/devfs_fs_kernel.h>
@@ -59,9 +58,7 @@ int HwNatIoctl (struct inode *inode, struct file *filp,
 {
     struct hwnat_args *opt=(struct hwnat_args *)arg;
     struct hwnat_tuple *opt2=(struct hwnat_tuple *)arg;
-    struct hwnat_qos_args *opt3=(struct hwnat_qos_args *)arg;
-    struct hwnat_config_args *opt4=(struct hwnat_config_args *)arg;
- 
+
     switch(cmd) 
     {
     case HW_NAT_ADD_ENTRY:
@@ -82,73 +79,19 @@ int HwNatIoctl (struct inode *inode, struct file *filp,
     case HW_NAT_INVALID_ENTRY:
 	opt->result = FoeDelEntryByNum(opt->entry_num);
 	break;
-    case HW_NAT_DUMP_ENTRY: 
+    case HW_NAT_DUMP_ENTRY: /* For Debug */
 	FoeDumpEntry(opt->entry_num);
 	break;
     case HW_NAT_DEBUG: /* For Debug */
 	DebugLevel=opt->debug;
 	break;
-    case HW_NAT_DSCP_REMARK:
-	opt3->result = PpeSetDscpRemarkEbl(opt3->enable);
+    case HW_NAT_ADD_EXP_ENTRY:
+	opt2->result = FoeAddExpEntry(opt2);
 	break;
-    case HW_NAT_VPRI_REMARK:
-	opt3->result = PpeSetVpriRemarkEbl(opt3->enable);
-	break;
-    case HW_NAT_FOE_WEIGHT:
-	opt3->result = PpeSetWeightFOE(opt3->weight);
-	break;
-    case HW_NAT_ACL_WEIGHT:/*Weight for ACL to UP */
-	opt3->result = PpeSetWeightACL(opt3->weight);
-	break;
-    case HW_NAT_DSCP_WEIGHT:
-	opt3->result = PpeSetWeightDSCP(opt3->weight);
-	break;
-    case HW_NAT_VPRI_WEIGHT:
-	opt3->result = PpeSetWeightVPRI(opt3->weight);
-	break;
-    case HW_NAT_DSCP_UP:
-	opt3->result = PpeSetDSCP_UP(opt3->dscp_set, opt3->up);
-	break;
-    case HW_NAT_UP_IDSCP:
-	opt3->result = PpeSetUP_IDSCP(opt3->up, opt3->dscp);
-	break;
-    case HW_NAT_UP_ODSCP:
-	opt3->result = PpeSetUP_ODSCP(opt3->up, opt3->dscp);
-	break;
-    case HW_NAT_UP_VPRI:
-	opt3->result = PpeSetUP_VPRI(opt3->up, opt3->vpri);
-	break;
-    case HW_NAT_UP_AC: 
-	opt3->result = PpeSetUP_AC(opt3->up, opt3->ac);
-	break;
-   case HW_NAT_SCH_MODE: 
-	opt3->result = PpeSetSchMode(opt3->mode);
-	break;
-   case HW_NAT_SCH_WEIGHT: 
-	opt3->result = PpeSetSchWeight(opt3->weight0, opt3->weight1, opt3->weight2, opt3->weight3);
-	break;
-    case HW_NAT_BIND_THRESHOLD:
-	opt4->result = PpeSetBindThreshold(opt4->bind_threshold);
-	break;
-    case HW_NAT_MAX_ENTRY_LMT:
-	opt4->result = PpeSetMaxEntryLimit(opt4->foe_full_lmt, opt4->foe_half_lmt, opt4->foe_qut_lmt);
-	break;
-    case HW_NAT_RULE_SIZE:
-	opt4->result = PpeSetRuleSize(opt4->pre_acl, opt4->pre_meter, opt4->pre_ac, opt4->post_meter, opt4->post_ac);
-	break;
-    case HW_NAT_KA_INTERVAL: 
-	opt4->result = PpeSetKaInterval(opt4->foe_tcp_ka, opt4->foe_udp_ka);
-	break;
-    case HW_NAT_UB_LIFETIME: 
-	opt4->result = PpeSetUnbindLifeTime(opt4->foe_unb_dlta);
-	break;
-    case HW_NAT_BIND_LIFETIME: 
-	opt4->result = PpeSetBindLifetime(opt4->foe_tcp_dlta, opt4->foe_udp_dlta, opt4->foe_fin_dlta);
-	break;
-
     default:
 	break;
     }
+
     return 0;
 }
 
@@ -188,11 +131,13 @@ int PpeRegIoctlHandler(void)
 
 void PpeUnRegIoctlHandler(void)
 {
+
 #ifdef  CONFIG_DEVFS_FS
     devfs_unregister_chrdev(hw_nat_major, HW_NAT_DEVNAME);
     devfs_unregister(devfs_handle);
 #else
     unregister_chrdev(hw_nat_major, HW_NAT_DEVNAME);
 #endif
+
 }
 

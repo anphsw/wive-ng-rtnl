@@ -340,15 +340,6 @@ unsigned blk_ordered_req_seq(struct request *rq)
 	if (rq == &q->post_flush_rq)
 		return QUEUE_ORDSEQ_POSTFLUSH;
 
-	/*
-	 * !fs requests don't need to follow barrier ordering.  Always
-	 * put them at the front.  This fixes the following deadlock.
-	 *
-	 * http://thread.gmane.org/gmane.linux.kernel/537473
-	 */
-	if (!blk_fs_request(rq))
-		return QUEUE_ORDSEQ_DRAIN;
-
 	if ((rq->cmd_flags & REQ_ORDERED_COLOR) ==
 	    (q->orig_bar_rq->cmd_flags & REQ_ORDERED_COLOR))
 		return QUEUE_ORDSEQ_DRAIN;
@@ -1303,9 +1294,9 @@ static int blk_hw_contig_segment(request_queue_t *q, struct bio *bio,
 	if (unlikely(!bio_flagged(nxt, BIO_SEG_VALID)))
 		blk_recount_segments(q, nxt);
 	if (!BIOVEC_VIRT_MERGEABLE(__BVEC_END(bio), __BVEC_START(nxt)) ||
-	    BIOVEC_VIRT_OVERSIZE(bio->bi_hw_back_size + nxt->bi_hw_front_size))
+	    BIOVEC_VIRT_OVERSIZE(bio->bi_hw_front_size + bio->bi_hw_back_size))
 		return 0;
-	if (bio->bi_hw_back_size + nxt->bi_hw_front_size > q->max_segment_size)
+	if (bio->bi_size + nxt->bi_size > q->max_segment_size)
 		return 0;
 
 	return 1;
@@ -1932,8 +1923,6 @@ blk_init_queue_node(request_fn_proc *rfn, spinlock_t *lock, int node_id)
 
 	blk_queue_max_hw_segments(q, MAX_HW_SEGMENTS);
 	blk_queue_max_phys_segments(q, MAX_PHYS_SEGMENTS);
-
-	q->sg_reserved_size = INT_MAX;
 
 	/*
 	 * all done

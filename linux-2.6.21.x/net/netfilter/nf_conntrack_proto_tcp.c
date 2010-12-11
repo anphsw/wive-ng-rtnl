@@ -45,6 +45,14 @@
 #include <net/netfilter/nf_conntrack_l4proto.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)                                                                         
+#include "../nat/hw_nat/ra_nat.h"                                                                                                        
+#include "../nat/hw_nat/frame_engine.h"                                                                                                  
+struct FoeExpEntry PpeFoeExp[FOE_ENTRY_MAX_EXP];                                                                                            
+extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);                                                                                       
+EXPORT_SYMBOL(PpeFoeExp);
+#endif
+
 #if 0
 #define DEBUGP printk
 #define DEBUGP_VARS
@@ -98,6 +106,7 @@ static unsigned int nf_ct_tcp_timeout_close_wait __read_mostly =   60 SECS;
 static unsigned int nf_ct_tcp_timeout_last_ack __read_mostly =     30 SECS;
 static unsigned int nf_ct_tcp_timeout_time_wait __read_mostly =     2 MINS;
 static unsigned int nf_ct_tcp_timeout_close __read_mostly =        10 SECS;
+extern int nf_clean_flag;
 
 /* RFC1122 says the R2 limit should be at least 100 seconds.
    Linux uses 15 packets as limit, which corresponds
@@ -333,6 +342,10 @@ static int tcp_print_conntrack(struct seq_file *s,
 			       const struct nf_conn *conntrack)
 {
 	enum tcp_conntrack state;
+
+        if(nf_clean_flag)
+		nf_ct_refresh(conntrack, NULL, 0);
+                //wanduck_ct_refresh(conntrack, 0);
 
 	read_lock_bh(&tcp_lock);
 	state = conntrack->proto.tcp.state;
@@ -847,10 +860,28 @@ static int tcp_packet(struct nf_conn *conntrack,
 	struct tcphdr *th, _tcph;
 	unsigned long timeout;
 	unsigned int index;
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	struct iphdr *iph = skb->nh.iph;
+#endif
 
 	th = skb_header_pointer(skb, dataoff, sizeof(_tcph), &_tcph);
-	//BUG_ON(th == NULL); null size is hw_nat mode not bug
-
+	BUG_ON(th == NULL);
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+        /* ra_sw_nat_hook_rx() will be hooked if hw_nat is enabled. */
+        if (ra_sw_nat_hook_rx) {
+                for (index = 0; index < FOE_ENTRY_MAX_EXP; index++) {
+                        if ((ntohs(th->dest) == PpeFoeExp[index].port &&
+                             ntohl(iph->daddr) == PpeFoeExp[index].ip) ||
+                            (ntohs(th->source) == PpeFoeExp[index].port &&
+                             ntohl(iph->saddr) == PpeFoeExp[index].ip)) {
+                                DEBUGP("hwnat-exp: %u.%u.%u.%u:%u\n",
+                                        NIPQUAD(PpeFoeExp[index].ip),
+                                        PpeFoeExp[index].port);
+                                FOE_ALG_RXIF(skb) = 1;
+                        }
+                }
+        }
+#endif
 	write_lock_bh(&tcp_lock);
 	old_state = conntrack->proto.tcp.state;
 	dir = CTINFO2DIR(ctinfo);

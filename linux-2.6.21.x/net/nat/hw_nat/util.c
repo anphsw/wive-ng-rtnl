@@ -101,7 +101,7 @@ uint8_t *Ip2Str(IN uint32_t Ip)
     c[1] = *(ptr+1);
     c[2] = *(ptr+2);
     c[3] = *(ptr+3);
-    sprintf(Buf, "%d.%d.%d.%d", c[3], c[2], c[1], c[0]);
+    sprintf(Buf, "%d.%d.%d.%d", c[0], c[1], c[2], c[3]);
     return Buf;
 }
 
@@ -279,7 +279,7 @@ void FoeToOrgIpHdr(IN struct FoeEntry *foe_entry, OUT struct iphdr *iph)
 /*
  * Recover SIP/DIP, SP/DP, SMAC/DMAC, VLANID and recalculate ip checksum
  */
-void PpeIpv4PktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *foe_entry)
+void PpePktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *foe_entry)
 {
     struct udphdr *uh;
     struct tcphdr *th;
@@ -314,32 +314,7 @@ void PpeIpv4PktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *
     iph->check = ip_fast_csum((unsigned char *) (iph), iph->ihl);
 
     //overwrite vlan header
-    if (entry.bfib1.v1==INSERT) { 
-	skb_push(skb, VLAN_HLEN);
-	/* vlan_type(0x8100) + vlan id + eth_type(0x0800) */
-	*(uint16_t *) ((skb)->data) = htons(entry.vlan1);
-	*(uint16_t *) ((skb)->data - 2) = htons(ETH_P_8021Q);
-    }
-
-    //overwrite layer2 header
-    skb_push(skb, ETH_HLEN);
-    eth=(struct ethhdr *)skb->data;
-    FoeGetMacInfo(eth->h_dest, entry.dmac_hi);
-    FoeGetMacInfo(eth->h_source, entry.smac_hi);
-}
-
-/*
- * Recover SMAC/DMAC, VLANID
- */
-void PpeIpv6PktRebuild(struct sk_buff *skb, struct FoeEntry *foe_entry)
-{
-    struct ethhdr *eth;
-    struct FoeEntry entry;
-    
-    memcpy(&entry, foe_entry, sizeof(entry));
-   
-    //overwrite vlan header
-    if (entry.bfib1.v1==INSERT) { 
+    if (entry.bfib1.v1==VA_INSERT) { 
 	skb_push(skb, VLAN_HLEN);
 	/* vlan_type(0x8100) + vlan id + eth_type(0x0800) */
 	*(uint16_t *) ((skb)->data) = htons(entry.vlan1);

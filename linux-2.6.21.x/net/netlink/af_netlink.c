@@ -1812,7 +1812,6 @@ out:
 	return err;
 panic:
 	panic("netlink_init: Cannot allocate nl_table\n");
-	return 0;
 }
 
 core_initcall(netlink_proto_init);

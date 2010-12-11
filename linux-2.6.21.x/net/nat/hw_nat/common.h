@@ -33,9 +33,6 @@
 #define MAC_ARG(x) ((u8*)(x))[0],((u8*)(x))[1],((u8*)(x))[2], \
                        ((u8*)(x))[3],((u8*)(x))[4],((u8*)(x))[5]
 
-#define IPV6_ADDR(x) ntohs(x[0]),ntohs(x[1]),ntohs(x[2]),ntohs(x[3]),ntohs(x[4]),\
-		     ntohs(x[5]),ntohs(x[6]),ntohs(x[7])
-
 #define IN
 #define OUT
 #define INOUT
@@ -87,22 +84,6 @@ enum OpCode {
     OR=1
 };
 
-enum TcpFlag {
-    TCP_FIN=1,
-    TCP_SYN=2,
-    TCP_RESET=4,
-    TCP_PUSH=8,
-    TCP_ACK=16,
-    TCP_URGENT=32
-};
-
-enum TcpFlagOp {
-    EQUAL=0,
-    NOT_EQUAL=1,
-    IN_SET=2,
-    NOT_IN_SET=3
-};
-
 enum L4Type {
     FLT_IP_PROT=0,
     FLT_UDP=1,
@@ -113,10 +94,16 @@ enum L4Type {
 enum FpnType {
     FPN_CPU=0,
     FPN_GE1=1,
-    FPN_GE2=2,
     FPN_FRC_PRI_ONLY=5,
     FPN_ALLOW=4,
     FPN_DROP=7
+};
+
+enum TcpFlagOp {
+    FLAG_EQUAL,
+    FLAG_NOT_EQUAL,
+    FLAG_IN_SET,
+    FLAG_NOT_IN_SET
 };
 
 #endif

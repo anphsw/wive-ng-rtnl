@@ -244,7 +244,7 @@ struct sock {
 	struct sk_filter      	*sk_filter;
 	void			*sk_protinfo;
 	struct timer_list	sk_timer;
-	ktime_t			sk_stamp;
+	struct timeval		sk_stamp;
 	struct socket		*sk_socket;
 	void			*sk_user_data;
 	struct page		*sk_sndmsg_page;
@@ -1287,19 +1287,19 @@ static inline int sock_intr_errno(long timeo)
 static __inline__ void
 sock_recv_timestamp(struct msghdr *msg, struct sock *sk, struct sk_buff *skb)
 {
-	ktime_t kt = skb->tstamp;
+	struct timeval stamp;
 
+	skb_get_timestamp(skb, &stamp);
 	if (sock_flag(sk, SOCK_RCVTSTAMP)) {
-		struct timeval tv;
 		/* Race occurred between timestamp enabling and packet
 		   receiving.  Fill in the current time for now. */
-		if (kt.tv64 == 0)
-			kt = ktime_get_real();
-		skb->tstamp = kt;
-		tv = ktime_to_timeval(kt);
-		put_cmsg(msg, SOL_SOCKET, SO_TIMESTAMP, sizeof(tv), &tv);
+		if (stamp.tv_sec == 0)
+			do_gettimeofday(&stamp);
+		skb_set_timestamp(skb, &stamp);
+		put_cmsg(msg, SOL_SOCKET, SO_TIMESTAMP, sizeof(struct timeval),
+			 &stamp);
 	} else
-		sk->sk_stamp = kt;
+		sk->sk_stamp = stamp;
 }
 
 /**

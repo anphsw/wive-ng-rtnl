@@ -512,7 +512,12 @@ static int gfs2_lock(struct file *file, int cmd, struct file_lock *fl)
 
 	if (sdp->sd_args.ar_localflocks) {
 		if (IS_GETLK(cmd)) {
-			posix_test_lock(file, fl);
+			struct file_lock tmp;
+			int ret;
+			ret = posix_test_lock(file, fl, &tmp);
+			fl->fl_type = F_UNLCK;
+			if (ret)
+				memcpy(fl, &tmp, sizeof(struct file_lock));
 			return 0;
 		} else {
 			return posix_lock_file_wait(file, fl);

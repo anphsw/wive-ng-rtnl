@@ -4309,12 +4309,16 @@ static void handle_slab(unsigned long *n, struct kmem_cache *c, struct slab *s)
 static void show_symbol(struct seq_file *m, unsigned long address)
 {
 #ifdef CONFIG_KALLSYMS
+	char *modname;
+	const char *name;
 	unsigned long offset, size;
-	char modname[MODULE_NAME_LEN + 1], name[KSYM_NAME_LEN + 1];
+	char namebuf[KSYM_NAME_LEN+1];
 
-	if (lookup_symbol_attrs(address, &size, &offset, modname, name) == 0) {
+	name = kallsyms_lookup(address, &size, &offset, &modname, namebuf);
+
+	if (name) {
 		seq_printf(m, "%s+%#lx/%#lx", name, offset, size);
-		if (modname[0])
+		if (modname)
 			seq_printf(m, " [%s]", modname);
 		return;
 	}

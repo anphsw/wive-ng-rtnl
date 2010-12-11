@@ -353,13 +353,15 @@ struct module *module_text_address(unsigned long addr);
 struct module *__module_text_address(unsigned long addr);
 int is_module_address(unsigned long addr);
 
-/* Returns 0 and fills in value, defined and namebuf, or -ERANGE if
+/* Returns module and fills in value, defined and namebuf, or NULL if
    symnum out of range. */
-int module_get_kallsym(unsigned int symnum, unsigned long *value, char *type,
-			char *name, char *module_name, int *exported);
+struct module *module_get_kallsym(unsigned int symnum, unsigned long *value,
+				char *type, char *name, size_t namelen);
 
 /* Look for this name: can be of form module:name. */
 unsigned long module_kallsyms_lookup_name(const char *name);
+
+int is_exported(const char *name, const struct module *mod);
 
 extern void __module_put_and_exit(struct module *mod, long code)
 	__attribute__((noreturn));
@@ -437,8 +439,6 @@ const char *module_address_lookup(unsigned long addr,
 				  unsigned long *symbolsize,
 				  unsigned long *offset,
 				  char **modname);
-int lookup_module_symbol_name(unsigned long addr, char *symname);
-int lookup_module_symbol_attrs(unsigned long addr, unsigned long *size, unsigned long *offset, char *modname, char *name);
 
 /* For extable.c to search modules' exception tables. */
 const struct exception_table_entry *search_module_extables(unsigned long addr);
@@ -510,24 +510,20 @@ static inline const char *module_address_lookup(unsigned long addr,
 	return NULL;
 }
 
-static inline int lookup_module_symbol_name(unsigned long addr, char *symname)
+static inline struct module *module_get_kallsym(unsigned int symnum,
+						unsigned long *value,
+						char *type, char *name,
+						size_t namelen)
 {
-	return -ERANGE;
-}
-
-static inline int lookup_module_symbol_attrs(unsigned long addr, unsigned long *size, unsigned long *offset, char *modname, char *name)
-{
-	return -ERANGE;
-}
-
-static inline int module_get_kallsym(unsigned int symnum, unsigned long *value,
-					char *type, char *name,
-					char *module_name, int *exported)
-{
-	return -ERANGE;
+	return NULL;
 }
 
 static inline unsigned long module_kallsyms_lookup_name(const char *name)
+{
+	return 0;
+}
+
+static inline int is_exported(const char *name, const struct module *mod)
 {
 	return 0;
 }

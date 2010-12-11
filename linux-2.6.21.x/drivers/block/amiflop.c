@@ -1480,7 +1480,7 @@ static int fd_ioctl(struct inode *inode, struct file *filp,
 		break;
 	case FDFMTEND:
 		floppy_off(drive);
-		invalidate_bdev(inode->i_bdev);
+		invalidate_bdev(inode->i_bdev, 0);
 		break;
 	case FDGETPRM:
 		memset((void *)&getprm, 0, sizeof (getprm));

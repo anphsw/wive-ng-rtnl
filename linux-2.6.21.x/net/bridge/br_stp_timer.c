@@ -143,6 +143,20 @@ static void br_hold_timer_expired(unsigned long arg)
 	spin_unlock(&p->br->lock);
 }
 
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+static void br_bwctrl_timer_expired(unsigned long arg)
+{
+        struct net_bridge_port *p = (struct net_bridge_port *) arg;
+
+        pr_debug("%s: %d(%s) bwctrl timer expired\n",
+                 p->br->dev->name, p->port_no, p->dev->name);
+        spin_lock_bh(&p->br->lock);
+        p->accumulation = 0;
+        mod_timer(&p->bwctrl_timer, jiffies+1*HZ);
+        spin_unlock_bh(&p->br->lock);
+}
+#endif
+
 void br_stp_timer_init(struct net_bridge *br)
 {
 	setup_timer(&br->hello_timer, br_hello_timer_expired,
@@ -168,6 +182,11 @@ void br_stp_port_timer_init(struct net_bridge_port *p)
 
 	setup_timer(&p->hold_timer, br_hold_timer_expired,
 		      (unsigned long) p);
+
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        setup_timer(&p->bwctrl_timer, br_bwctrl_timer_expired,
+                      (unsigned long) p);
+#endif
 }
 
 /* Report ticks left (in USER_HZ) used for API */

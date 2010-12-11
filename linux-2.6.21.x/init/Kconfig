@@ -479,7 +479,7 @@ config BASE_FULL
 
 config FUTEX
 	bool "Enable futex support" if EMBEDDED
-	default n
+	default y
 	select RT_MUTEXES
 	help
 	  Disabling this option will cause the kernel to be built without
@@ -661,7 +661,6 @@ config SLAB
 config SLUB
 	depends on EXPERIMENTAL && !ARCH_USES_SLAB_PAGE_STRUCT
 	bool "SLUB (Unqueued Allocator)"
-	select KALLSYMS
 	help
 	   SLUB is a slab allocator that minimizes cache line usage
 	   instead of managing queues of cached objects (SLAB approach).

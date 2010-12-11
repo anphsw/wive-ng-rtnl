@@ -97,8 +97,9 @@ extern struct atomic_notifier_head panic_notifier_list;
 extern long (*panic_blink)(long time);
 
 #ifndef CONFIG_PANIC
+NORET_TYPE static inline void panic(const char * fmt, ...)
+	__attribute__ ((NORET_AND format (printf, 1, 2)));
 NORET_TYPE static inline void panic(const char * fmt, ...) {}
-NORET_TYPE static inline void panic(const char * fmt, ...) __attribute__ ((format (printf, 1, 2)));
 #else
 
 #ifdef CONFIG_FULL_PANIC

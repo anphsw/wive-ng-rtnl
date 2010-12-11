@@ -60,7 +60,7 @@ identify_ramdisk_image(int fd, int start_block)
 	unsigned char *buf;
 
 	buf = kmalloc(size, GFP_KERNEL);
-	if (!buf)
+	if (buf == 0)
 		return -1;
 
 	minixsb = (struct minix_super_block *) buf;
@@ -424,12 +424,12 @@ static int __init crd_load(int in_fd, int out_fd)
 	crd_infd = in_fd;
 	crd_outfd = out_fd;
 	inbuf = kmalloc(INBUFSIZ, GFP_KERNEL);
-	if (!inbuf) {
+	if (inbuf == 0) {
 		printk(KERN_ERR "RAMDISK: Couldn't allocate gzip buffer\n");
 		return -1;
 	}
 	window = kmalloc(WSIZE, GFP_KERNEL);
-	if (!window) {
+	if (window == 0) {
 		printk(KERN_ERR "RAMDISK: Couldn't allocate gzip window\n");
 		kfree(inbuf);
 		return -1;

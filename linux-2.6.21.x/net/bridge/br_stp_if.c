@@ -39,8 +39,11 @@ void br_init_port(struct net_bridge_port *p)
 	p->state = BR_STATE_BLOCKING;
 	p->topology_change_ack = 0;
 	p->config_pending = 0;
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        p->accumulation = 0;
+#endif
 #ifdef CONFIG_BRIDGE_PORT_FORWARD
-	p->port_forwarding = 1;
+		p->port_forwarding = 1;
 #endif
 
 }
@@ -111,6 +114,10 @@ void br_stp_disable_port(struct net_bridge_port *p)
 	p->state = BR_STATE_DISABLED;
 	p->topology_change_ack = 0;
 	p->config_pending = 0;
+#ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
+        p->accumulation = 0;
+        del_timer(&p->bwctrl_timer);
+#endif
 
 	del_timer(&p->message_age_timer);
 	del_timer(&p->forward_delay_timer);

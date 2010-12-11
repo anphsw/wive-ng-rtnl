@@ -44,9 +44,6 @@
 #include "frame_engine.h"
 
 AclPlcyNode AclPlcyList= { .List = LIST_HEAD_INIT(AclPlcyList.List)};
-extern uint32_t DebugLevel;
-extern uint16_t GLOBAL_PRE_ACL_STR; 
-extern uint16_t GLOBAL_PRE_ACL_END; 
 
 uint32_t SyncAclTbl(void)
 {
@@ -59,9 +56,6 @@ uint32_t SyncAclTbl(void)
 
 		switch(node->RuleType)
 		{
-                case ACL_ADD_SDMAC_ANY:
-			AclInsSDmac(node);
-			break;
 		case ACL_ADD_SMAC_DIP_ANY:
 		case ACL_ADD_SMAC_DIP_TCP:
 		case ACL_ADD_SMAC_DIP_UDP:
@@ -100,22 +94,16 @@ AclPlcyNode *AclExistNode(AclPlcyNode *NewNode)
 
 		switch(NewNode->RuleType)
 		{
-		case ACL_ADD_SDMAC_ANY:
-			if(memcmp(node->Mac,NewNode->Mac,ETH_ALEN)==0)
-			{
-				return node;
-			} 
-			break;
 		case ACL_ADD_SMAC_DIP_ANY: /* primary key = smac + dip + protocol */
-			if(memcmp(node->Mac,NewNode->Mac,ETH_ALEN)==0 &&
-				node->DipS==NewNode->DipS && node->DipE==NewNode->DipE &&
+			if(strcmp(node->Mac,NewNode->Mac)==0 &&
+					node->DipS==NewNode->DipS && node->DipE==NewNode->DipE &&
 					node->Proto==NewNode->Proto) {
 				return node;
 			}
 			break;
 		case ACL_ADD_SMAC_DIP_TCP:
 		case ACL_ADD_SMAC_DIP_UDP: /* primary key = smac + dip +dp + protocol */
-			if(memcmp(node->Mac,NewNode->Mac,ETH_ALEN)==0 &&
+			if(strcmp(node->Mac,NewNode->Mac)==0 &&
 					(node->DipS==NewNode->DipS) && (node->DipE==NewNode->DipE) &&
 					(node->DpS==NewNode->DpS) && (node->Proto==NewNode->Proto)) {
 				return node;
@@ -137,102 +125,9 @@ AclPlcyNode *AclExistNode(AclPlcyNode *NewNode)
 			}
 			break;
 		}
-	} 
-
-	return NULL;
-}
-
-/*use ACL table to make classification to UP*/
-uint8_t AclClassify(AclClassifyKey *NewRateReach)
-{
-	struct list_head *pos = NULL, *tmp;
-	AclPlcyNode *node = NULL;
-
-        uint8_t ZeroMac[ETH_ALEN]={0,0,0,0,0,0};
-	
-	list_for_each_safe(pos, tmp, &AclPlcyList.List) 
-	{
-		node = list_entry(pos, AclPlcyNode, List);
-
-		switch(node->RuleType)
-		{
-		case ACL_ADD_SDMAC_ANY:
-		        /* 1. SDrc Mac
-			 */
-			if(memcmp(node->Mac,NewRateReach->Mac,ETH_ALEN)==0) 
-			{
-				return node->up;
-			}
-			break;
-		case ACL_ADD_SMAC_DIP_ANY:
-		        /* 1. Src Mac
-			 * 2. Dest IP
-			 * 3. Src Mac + Dest Ip
-			 */
-			if((memcmp(node->Mac,NewRateReach->Mac,ETH_ALEN)==0 || 
-			    memcmp(node->Mac,ZeroMac,ETH_ALEN)==0)&&
-				((node->DipS <= NewRateReach->Dip && 
-				  NewRateReach->Dip <= node->DipE)||
-				 node->DipE == 0)) 
-			{
-				return node->up;
-			}
-			break;
-		case ACL_ADD_SMAC_DIP_TCP:
-		case ACL_ADD_SMAC_DIP_UDP: 
-			/* 1. Src Mac (TCP/UDP)
-			 * 2. Dest Ip (TCP/UDP)
-			 * 3. Src Mac + Dest Ip (TCP/UDP)
-			 * 4. Dest Port ONLY (TCP/UDP)
-			 * 5. Src Mac + Dest Port (TCP/UDP)
-			 * 6. Dest Ip + Dest Port (TCP/UDP)
-			 * 7. Src Mac + Dest Ip + Dest Port (TCP/UDP)
-			 */
-			if((memcmp(node->Mac,NewRateReach->Mac,ETH_ALEN)==0 || 
-			    memcmp(node->Mac,ZeroMac,ETH_ALEN)==0)&&
-			    ((node->DipS <= NewRateReach->Dip && 
-			      NewRateReach->Dip <= node->DipE)|| node->DipE == 0) && 
-			    ((node->DpS <= NewRateReach->Dp &&  
-			      NewRateReach->Dp <=node->DpE )||node->DpE == 0) && 
-			     (node->Proto==NewRateReach->Proto)) 
-			{
-				return node->up;
-			}
-			break;
-		case ACL_ADD_SIP_DIP_ANY: 
-			/* 1. Src IP
-			 * 2. Dest IP
-			 * 3. Src IP + Dest IP
-			 */
-			if(((node->SipS <= NewRateReach->Sip && 
-				NewRateReach->Sip <= node->SipE)||node->SipE == 0) &&
-			    ((node->DipS <= NewRateReach->Dip && 
-			      NewRateReach->Dip <= node->DipE)||node->DipE == 0))
-			{
-				return node->up;
-			}
-			break;
-		case ACL_ADD_SIP_DIP_TCP:
-		case ACL_ADD_SIP_DIP_UDP: 
-			/* 1. Dest IP (TCP/UDP)
-			 * 2. Dest Port ONLY (TCP/UDP)
-			 * 3. Dest IP + Dest Port (TCP/UDP)
-			 */
-			if(((node->SipS <= NewRateReach->Sip && 
-				NewRateReach->Sip <= node->SipE)||node->SipE == 0) &&
-			    ((node->DipS <= NewRateReach->Dip && 
-			      NewRateReach->Dip <= node->DipE)||node->DipE == 0) &&
-			    ((node->DpS <= NewRateReach->Dp &&  
-			      NewRateReach->Dp <=node->DpE )||node->DpE == 0) && 
-			    (node->Proto==NewRateReach->Proto))
-			{
-				return node->up;
-			}
-			break;
-		}
 	}
 
-	return 0;/*default UP=0*/
+	return NULL;
 }
 
 uint32_t AclAddNode(AclPlcyNode *NewNode)
@@ -265,12 +160,6 @@ uint32_t AclDelNode(AclPlcyNode *DelNode)
 
 		switch(DelNode->RuleType)
 		{
-		case ACL_DEL_SDMAC_ANY:
-			if(memcmp(node->Mac, DelNode->Mac, ETH_ALEN)==0){
-				goto found;
-			}
-			break;
-
 		case ACL_DEL_SMAC_DIP_ANY:
 			if( (memcmp(node->Mac, DelNode->Mac, ETH_ALEN)==0) &&
 					node->DipS== DelNode->DipS && node->DipE== DelNode->DipE ){
@@ -338,20 +227,12 @@ void  PpeSetPreAclEbl(uint32_t AclEbl)
 
 	/* ACL engine for unicast/multicast/broadcast flow */
 	if(AclEbl==1) {
-		PpeFlowSet |= (BIT_FUC_ACL | BIT_FMC_ACL | BIT_FBC_ACL);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-		PpeFlowSet |= (BIT_IPV6_PE_EN);
-#endif
-
+		PpeFlowSet |= BIT_FUC_ACL | BIT_FMC_ACL | BIT_FBC_ACL;
 	} else {
 		/* Set Pre ACL Table */
 		PpeFlowSet &= ~(BIT_FUC_ACL | BIT_FMC_ACL | BIT_FBC_ACL);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-		PpeFlowSet &= ~(BIT_IPV6_PE_EN);
-#endif
-		/* Set Pre ACL Table */
-		RegModifyBits(PPE_PRE_ACL, GLOBAL_PRE_ACL_STR, 0, 9);
-		RegModifyBits(PPE_PRE_ACL, GLOBAL_PRE_ACL_END, 16, 9);
+		RegModifyBits(PPE_PRE_ACL, DFL_PRE_ACL_STR, 0, 9);
+		RegModifyBits(PPE_PRE_ACL, DFL_PRE_ACL_END, 16, 9);
 	}
 
 	RegWrite( PPE_FLOW_SET, PpeFlowSet);
@@ -392,12 +273,11 @@ void inline PpeInsAclEntry(void *Rule)
 	uint32_t *p=(uint32_t *)Rule;
 
 	Index = PpeGetPreAclEnd();
-        if(DebugLevel==1) 
-	{    
-		printk("Policy Table Base=%08X Offset=%d\n",POLICY_TBL_BASE, Index*8);
-		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8, *p);
-		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8+4, *(p+1));
-	}
+
+	printk("Policy Table Base=%08X Offset=%d\n",POLICY_TBL_BASE, Index*8);
+	printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8, *p);
+	printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8+4, *(p+1));
+
 	RegWrite(POLICY_TBL_BASE + Index*8, *p); /* Low bytes */
 	RegWrite(POLICY_TBL_BASE + Index*8 + 4, *(p+1)); /* High bytes */
 
@@ -459,8 +339,6 @@ uint32_t AclSetMacEntry(AclPlcyNode *node, enum L2RuleDir Dir, enum FoeTblEE End
 	memset(&L2Rule,0,sizeof(L2Rule));
 
 	memcpy(&L2Rule.mac,node->Mac, ETH_ALEN);
-	MacReverse(L2Rule.mac);
-
 	L2Rule.com.rt=L2_RULE;
 	L2Rule.com.dir= Dir;
 	L2Rule.com.pn = PN_DONT_CARE;
@@ -477,14 +355,10 @@ uint32_t AclSetMacEntry(AclPlcyNode *node, enum L2RuleDir Dir, enum FoeTblEE End
 		L2Rule.com.fpp.ee=1;
 		L2Rule.com.fpp.fpp=0;
 
-		if(node->Method==ACL_ALLOW_RULE) 
-		{
-		    L2Rule.com.fpp.up = node->up;
-		    L2Rule.com.fpp.fpn=FPN_ALLOW;
-		} 
-		else 
-		{
-		    L2Rule.com.fpp.fpn=FPN_DROP;
+		if(node->Method==ACL_ALLOW_RULE) {
+			L2Rule.com.fpp.fpn=FPN_ALLOW;
+		} else {
+			L2Rule.com.fpp.fpn=FPN_DROP;
 		}
 		break;
 	case NOT_ENTRY_END:
@@ -539,14 +413,10 @@ uint32_t AclSetIpFragEntry(AclPlcyNode *node, enum FoeTblEE End)
 		L3Rule.com.fpp.ee=1;
 		L3Rule.com.fpp.fpp=0; 
 
-		if(node->Method==ACL_ALLOW_RULE) 
-		{	
-		    L3Rule.com.fpp.up = node->up;
-		    L3Rule.com.fpp.fpn=FPN_ALLOW;
-		} 
-		else 
-		{
-		    L3Rule.com.fpp.fpn=FPN_DROP;
+		if(node->Method==ACL_ALLOW_RULE) {
+			L3Rule.com.fpp.fpn=FPN_ALLOW;
+		} else {
+			L3Rule.com.fpp.fpn=FPN_DROP;
 		}
 		break;
 	case NOT_ENTRY_END:
@@ -602,16 +472,11 @@ uint32_t AclSetIpEntry(AclPlcyNode *node,  enum L3RuleDir Dir, enum FoeTblEE End
 		L3Rule.com.fpp.ee=1;
 		L3Rule.com.fpp.fpp=0; 
 
-		if(node->Method==ACL_ALLOW_RULE) 
-		{	
-		    L3Rule.com.fpp.up = node->up;
-		    L3Rule.com.fpp.fpn=FPN_ALLOW;
-		} 
-		else 
-		{
-	            L3Rule.com.fpp.fpn=FPN_DROP;
+		if(node->Method==ACL_ALLOW_RULE) {
+			L3Rule.com.fpp.fpn=FPN_ALLOW;
+		} else {
+			L3Rule.com.fpp.fpn=FPN_DROP;
 		}
-
 		break;
 	case NOT_ENTRY_END:
 		L3Rule.com.ee_0.ee=0;
@@ -654,14 +519,10 @@ uint32_t AclSetProtoEntry(AclPlcyNode *node, enum FoeTblTcpUdp Proto, enum FoeTb
 	case ENTRY_END_FP:
 		L4Rule.com.fpp.ee=1;
 		L4Rule.com.fpp.fpp=0;
-		if(node->Method==ACL_ALLOW_RULE) 
-		{
-		    L4Rule.com.fpp.up = node->up;
-		    L4Rule.com.fpp.fpn=FPN_ALLOW;
-		} 
-		else 
-		{
-		    L4Rule.com.fpp.fpn=FPN_DROP;
+		if(node->Method==ACL_ALLOW_RULE) {
+			L4Rule.com.fpp.fpn=FPN_ALLOW;
+		} else {
+			L4Rule.com.fpp.fpn=FPN_DROP;
 		}
 		break;
 	case NOT_ENTRY_END:
@@ -705,7 +566,7 @@ uint32_t AclSetPortEntry(AclPlcyNode *node, enum L4RuleDir Dir,
 
 	if(Proto==TCP) {
 		L4Rule.tcp.tu=FLT_TCP;
-		L4Rule.tcp.tcp_fop=EQUAL;
+		L4Rule.tcp.tcp_fop=FLAG_EQUAL;
 		L4Rule.tcp.tcp_fm=0x3F; 
 	}else {
 		L4Rule.udp.tu=FLT_UDP;
@@ -721,14 +582,11 @@ uint32_t AclSetPortEntry(AclPlcyNode *node, enum L4RuleDir Dir,
 	case ENTRY_END_FP:
 		L4Rule.com.fpp.ee=1;
 		L4Rule.com.fpp.fpp=0;
-		if(node->Method==ACL_ALLOW_RULE)
-		{
-		    L4Rule.com.fpp.up = node->up;
-		    L4Rule.com.fpp.fpn=FPN_ALLOW;
-		} 
-		else 
-		{
-		    L4Rule.com.fpp.fpn=FPN_DROP;
+
+		if(node->Method==ACL_ALLOW_RULE) {
+			L4Rule.com.fpp.fpn=FPN_ALLOW;
+		} else {
+			L4Rule.com.fpp.fpn=FPN_DROP;
 		}
 		break;
 	case NOT_ENTRY_END:
@@ -745,16 +603,10 @@ uint32_t AclSetPortEntry(AclPlcyNode *node, enum L4RuleDir Dir,
 
 } 
 
-uint32_t AclInsSDmac(AclPlcyNode *node)
-{
-	//Insert SDMAC Entry 
-	AclSetMacEntry(node, SDMAC, ENTRY_END_FP);
-
-	return ACL_SUCCESS;
-}
 
 uint32_t AclInsSmacDipDp(AclPlcyNode *node)
 {
+
 	//Insert SMAC Entry 
 	AclSetMacEntry(node, SMAC, NOT_ENTRY_END);
 

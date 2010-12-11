@@ -111,7 +111,7 @@ utf8_wctomb(__u8 *s, wchar_t wc, int maxlen)
 	int c, nc;
 	struct utf8_table *t;
   
-	if (!s)
+	if (s == 0)
 		return 0;
   
 	l = wc;

@@ -41,10 +41,8 @@ Steven Liu  2007-01-23      Initial version
 #else
 #if defined(CONFIG_RALINK_RT2880_SHUTTLE)
 #define POLICY_TBL_BASE    0xA0311000
-#elif defined (CONFIG_RALINK_RT2880_MP)
-#define POLICY_TBL_BASE    0xA0401000
 #else
-#error Please Choose Chip Version 
+#error Please Choice Chip Version 
 #endif
 #endif
 

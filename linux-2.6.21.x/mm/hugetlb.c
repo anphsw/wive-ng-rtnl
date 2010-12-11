@@ -735,7 +735,7 @@ static long region_chg(struct list_head *head, long f, long t)
 	 * size such that we can guarentee to record the reservation. */
 	if (&rg->link == head || t < rg->from) {
 		nrg = kmalloc(sizeof(*nrg), GFP_KERNEL);
-		if (!nrg)
+		if (nrg == 0)
 			return -ENOMEM;
 		nrg->from = f;
 		nrg->to   = f;

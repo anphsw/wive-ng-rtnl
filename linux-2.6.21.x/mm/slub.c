@@ -862,6 +862,16 @@ static void __free_slab(struct kmem_cache *s, struct page *page)
 {
 	int pages = 1 << s->order;
 
+	if (unlikely(SlabDebug(page))) {
+		void *start = page_address(page);
+		void *end = start + (pages << PAGE_SHIFT);
+		void *p;
+
+		slab_pad_check(s, page);
+		for_each_object(p, s, page_address(page))
+			check_object(s, page, p, 0);
+	}
+
 	mod_zone_page_state(page_zone(page),
 		(s->flags & SLAB_RECLAIM_ACCOUNT) ?
 		NR_SLAB_RECLAIMABLE : NR_SLAB_UNRECLAIMABLE,

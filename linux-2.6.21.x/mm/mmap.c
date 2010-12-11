@@ -92,7 +92,7 @@ atomic_t vm_committed_space = ATOMIC_INIT(0);
  * Note this is a helper function intended to be used by LSMs which
  * wish to use this logic.
  */
-int __vm_enough_memory(struct mm_struct *mm, long pages, int cap_sys_admin)
+int __vm_enough_memory(long pages, int cap_sys_admin)
 {
 	unsigned long free, allowed;
 
@@ -165,7 +165,7 @@ int __vm_enough_memory(struct mm_struct *mm, long pages, int cap_sys_admin)
 
 	/* Don't let a single process grow too big:
 	   leave 3% of the size of this process for other processes */
-	allowed -= mm->total_vm / 32;
+	allowed -= current->mm->total_vm / 32;
 
 	/*
 	 * cast `allowed' as a signed long because vm_committed_space
@@ -352,7 +352,7 @@ find_vma_prepare(struct mm_struct *mm, unsigned long addr,
 		if (vma_tmp->vm_end > addr) {
 			vma = vma_tmp;
 			if (vma_tmp->vm_start <= addr)
-				break;
+				return vma;
 			__rb_link = &__rb_parent->rb_left;
 		} else {
 			rb_prev = __rb_parent;
@@ -1199,9 +1199,6 @@ arch_get_unmapped_area(struct file *filp, unsigned long addr,
 	if (len > TASK_SIZE)
 		return -ENOMEM;
 
-	if (flags & MAP_FIXED)
-		return addr;
-
 	if (addr) {
 		addr = PAGE_ALIGN(addr);
 		vma = find_vma(mm, addr);
@@ -1274,9 +1271,6 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 	/* requested length too big for entire address space */
 	if (len > TASK_SIZE)
 		return -ENOMEM;
-
-	if (flags & MAP_FIXED)
-		return addr;
 
 	/* requesting a specific address */
 	if (addr) {
@@ -1365,21 +1359,39 @@ unsigned long
 get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 		unsigned long pgoff, unsigned long flags)
 {
-	unsigned long (*get_area)(struct file *, unsigned long,
-				  unsigned long, unsigned long, unsigned long);
+	unsigned long ret;
 
-	get_area = current->mm->get_unmapped_area;
-	if (file && file->f_op && file->f_op->get_unmapped_area)
-		get_area = file->f_op->get_unmapped_area;
-	addr = get_area(file, addr, len, pgoff, flags);
-	if (IS_ERR_VALUE(addr))
-		return addr;
+	if (!(flags & MAP_FIXED)) {
+		unsigned long (*get_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);
+
+		get_area = current->mm->get_unmapped_area;
+		if (file && file->f_op && file->f_op->get_unmapped_area)
+			get_area = file->f_op->get_unmapped_area;
+		addr = get_area(file, addr, len, pgoff, flags);
+		if (IS_ERR_VALUE(addr))
+			return addr;
+	}
 
 	if (addr > TASK_SIZE - len)
 		return -ENOMEM;
 	if (addr & ~PAGE_MASK)
 		return -EINVAL;
-
+	if (file && is_file_hugepages(file))  {
+		/*
+		 * Check if the given range is hugepage aligned, and
+		 * can be made suitable for hugepages.
+		 */
+		ret = prepare_hugepage_range(addr, len, pgoff);
+	} else {
+		/*
+		 * Ensure that a normal request is not falling in a
+		 * reserved hugepage range.  For some archs like IA-64,
+		 * there is a separate region for hugepages.
+		 */
+		ret = is_hugepage_only_range(current->mm, addr, len);
+	}
+	if (ret)
+		return -EINVAL;
 	return addr;
 }
 
@@ -2016,7 +2028,7 @@ int insert_vm_struct(struct mm_struct * mm, struct vm_area_struct * vma)
 	if (__vma && __vma->vm_start < vma->vm_end)
 		return -ENOMEM;
 	if ((vma->vm_flags & VM_ACCOUNT) &&
-	     security_vm_enough_memory_mm(mm, vma_pages(vma)))
+	     security_vm_enough_memory(vma_pages(vma)))
 		return -ENOMEM;
 	vma_link(mm, vma, prev, rb_link, rb_parent);
 	return 0;

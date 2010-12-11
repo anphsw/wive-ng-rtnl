@@ -82,7 +82,7 @@
 #define ECR_MODE_MASK 0xe0
 #define ECR_WRITE(p,v) frob_econtrol((p),0xff,(v))
 
-#undef DEBUG /* undef me for production */
+#undef DEBUG
 
 #ifdef DEBUG
 #define DPRINTK  printk

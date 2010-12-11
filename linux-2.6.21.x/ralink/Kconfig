@@ -65,7 +65,7 @@ endchoice
 
 config CONNTRACK_FAST_PATH
         bool "Software netfilter fast-path"
-        default n
+        default y
 
 config EXPRESS_NAT
         tristate "Software Express nat support"
@@ -75,7 +75,6 @@ config EXPRESS_NAT
 config BCM_NAT
         tristate "Broadcom fast NAT support"
         depends on NF_CONNTRACK && NF_NAT
-        default y
         help
                 This helps packets pass through netfilter faster when a packet
                 is an established or reply traffic.
@@ -109,5 +108,8 @@ config RT3XXX_EHCI_OHCI
         depends on (RALINK_RT3883 || RALINK_RT3352)
 	select USB_ARCH_HAS_OHCI
 	select USB_ARCH_HAS_EHCI
-endmenu
 
+config  ASUS_EXT
+	bool 
+	default n
+endmenu

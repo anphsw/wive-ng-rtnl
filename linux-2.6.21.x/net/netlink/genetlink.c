@@ -596,8 +596,6 @@ errout_register:
 	genl_unregister_family(&genl_ctrl);
 errout:
 	panic("GENL: Cannot register controller: %d\n", err);
-
-	return 0;
 }
 
 subsys_initcall(genl_init);

@@ -521,15 +521,12 @@ static int writeout(struct address_space *mapping, struct page *page)
 	remove_migration_ptes(page, page);
 
 	rc = mapping->a_ops->writepage(page, &wbc);
-	if (rc < 0)
-		/* I/O Error writing */
-		return -EIO;
 
 	if (rc != AOP_WRITEPAGE_ACTIVATE)
 		/* unlocked. Relock */
 		lock_page(page);
 
-	return -EAGAIN;
+	return (rc < 0) ? -EIO : -EAGAIN;
 }
 
 /*
@@ -854,8 +851,9 @@ static int do_pages_stat(struct mm_struct *mm, struct page_to_node *pm)
 	for ( ; pm->node != MAX_NUMNODES; pm++) {
 		struct vm_area_struct *vma;
 		struct page *page;
-		int err = -EFAULT;
+		int err;
 
+		err = -EFAULT;
 		vma = find_vma(mm, pm->addr);
 		if (!vma)
 			goto set_status;

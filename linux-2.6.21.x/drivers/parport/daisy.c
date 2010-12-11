@@ -27,7 +27,7 @@
 #include <asm/current.h>
 #include <asm/uaccess.h>
 
-#undef DEBUG /* undef me for production */
+#undef DEBUG
 
 #ifdef DEBUG
 #define DPRINTK(stuff...) printk(stuff)

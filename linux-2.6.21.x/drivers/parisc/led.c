@@ -372,6 +372,8 @@ static __inline__ int led_get_net_activity(void)
 		continue;
 	    if (ipv4_is_loopback(in_dev->ifa_list->ifa_local))
 		continue;
+	    if (!dev->get_stats) 
+		continue;
 	    stats = dev->get_stats(dev);
 	    rx_total += stats->rx_packets;
 	    tx_total += stats->tx_packets;

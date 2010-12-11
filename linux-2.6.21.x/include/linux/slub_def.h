@@ -57,7 +57,6 @@ struct kmem_cache {
  */
 #define KMALLOC_SHIFT_LOW 3
 
-#if 0
 #ifdef CONFIG_LARGE_ALLOCS
 #define KMALLOC_SHIFT_HIGH 25
 #else
@@ -65,7 +64,6 @@ struct kmem_cache {
 #define KMALLOC_SHIFT_HIGH 20
 #else
 #define KMALLOC_SHIFT_HIGH 18
-#endif
 #endif
 #endif
 

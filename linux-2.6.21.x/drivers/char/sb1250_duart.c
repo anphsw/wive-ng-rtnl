@@ -69,7 +69,7 @@
 #endif
 
 /* Toggle spewing of debugging output */
-#undef DEBUG /* undef me for production */
+#undef DEBUG
 
 #define DEFAULT_CFLAGS          (CS8 | B115200)
 

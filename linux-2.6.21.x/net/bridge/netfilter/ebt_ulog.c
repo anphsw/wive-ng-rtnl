@@ -130,7 +130,6 @@ static void ebt_ulog_packet(unsigned int hooknr, const struct sk_buff *skb,
 	unsigned int group = uloginfo->nlgroup;
 	ebt_ulog_buff_t *ub = &ulog_buffers[group];
 	spinlock_t *lock = &ub->lock;
-	ktime_t kt;
 
 	if ((uloginfo->cprange == 0) ||
 	    (uloginfo->cprange > skb->len + ETH_HLEN))
@@ -165,10 +164,9 @@ static void ebt_ulog_packet(unsigned int hooknr, const struct sk_buff *skb,
 
 	/* Fill in the ulog data */
 	pm->version = EBT_ULOG_VERSION;
-	kt = ktime_get_real();
-	pm->stamp = ktime_to_timeval(kt);
+	do_gettimeofday(&pm->stamp);
 	if (ub->qlen == 1)
-		ub->skb->tstamp = kt;
+		skb_set_timestamp(ub->skb, &pm->stamp);
 	pm->data_len = copy_len;
 	pm->mark = skb->mark;
 	pm->hook = hooknr;
