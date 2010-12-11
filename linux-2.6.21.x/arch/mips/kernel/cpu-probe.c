@@ -31,7 +31,7 @@
  */
 void (*cpu_wait)(void) = NULL;
 
-#if 0
+#ifndef CONFIG_RALINK_RT3052_MP2
 static void r3081_wait(void)
 {
 	unsigned long cfg = read_c0_conf();
@@ -67,7 +67,7 @@ static void r4k_wait(void)
  * interrupt is requested" restriction in the MIPS32/MIPS64 architecture makes
  * using this version a gamble.
  */
-#if 0
+#ifndef CONFIG_RALINK_RT3052_MP2
 static void r4k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -77,13 +77,11 @@ static void r4k_wait_irqoff(void)
 			"	.set	mips0		\n");
 	local_irq_enable();
 }
-#endif
 
 /*
  * The RM7000 variant has to handle erratum 38.  The workaround is to not
  * have any pending stores when the WAIT instruction is executed.
  */
-#if 0
 static void rm7k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -100,7 +98,6 @@ static void rm7k_wait_irqoff(void)
 		"	.set	pop					\n");
 	local_irq_enable();
 }
-#endif
 
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
@@ -122,6 +119,7 @@ static void au1k_wait(void)
 		"	.set	mips0			\n"
 		: : "r" (au1k_wait));
 }
+#endif
 
 static int __initdata nowait = 0;
 
@@ -142,7 +140,7 @@ static inline void check_wait(void)
 		printk("Wait instruction disabled.\n");
 		return;
 	}
-#if 1 /* cfho, we only consider AR71xx */
+#ifdef CONFIG_RALINK_RT3052_MP2
         switch (c->cputype) {
         case CPU_24K:
                 cpu_wait = r4k_wait;
@@ -343,7 +341,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 			     MIPS_CPU_LLSC;
 		c->tlbsize = 48;
 		break;
-	#if 0
+	#ifndef CONFIG_RALINK_RT3052_MP2
  	case PRID_IMP_R4650:
 		/*
 		 * This processor doesn't have an MMU, so it's not
@@ -758,7 +756,7 @@ __init void cpu_probe(void)
         
 	c->processor_id = read_c0_prid();
 
-#if 1 /* cfho 2009-1020, we only probe MIPs CPU without FPU */
+#ifdef CONFIG_RALINK_RT3052_MP2 /* cfho 2009-1020, we only probe MIPs CPU without FPU */
         switch (c->processor_id & 0xff0000) {
         case PRID_COMP_MIPS:
                 cpu_probe_mips(c);
