@@ -1,0 +1,167 @@
+#!/bin/sh
+
+#include functions and env
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo SHAPER: "
+
+start() {
+get_param
+if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
+ $LOG "Starting... "
+    $LOG "Set default rules."
+    set_def
+
+    $LOG "Load modules."
+    modprobe -q sch_htb
+    modprobe -q cls_u32
+    modprobe -q act_gact  
+    modprobe -q act_police  
+    modprobe -q cls_tcindex  
+    modprobe -q em_cmp    
+    modprobe -q em_u32    
+    modprobe -q act_ipt   
+    modprobe -q cls_fw      
+    modprobe -q cls_u32      
+    modprobe -q em_nbyte 
+
+    if [ "$QoSEnable" = "1" ]; then
+	modprobe -q sch_sfq
+	modprobe -q sch_red
+	modprobe -q sch_gred
+	$LOG "--------------RALINK-QOS------------------------"
+	qos_run
+    elif [ "$QoSEnable" = "2" ]; then
+	#check interfaces is up
+	WANUP=`ip link show up | grep "$wan_if" -c` > /dev/null 2>&1
+        LANUP=`ip link show up | grep "$lan_if" -c` > /dev/null 2>&1
+	$LOG "---------------NONIMQ-IN------------------------"
+	if [ "$LANUP" = "1" ]; then
+	    modprobe -q sch_esfq
+	    #input
+	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
+	    tc qdisc add dev $lan_if parent 1:1 handle 10: esfq
+	    tc qdisc add dev $lan_if parent 1:2 handle 20: esfq
+	    tc qdisc add dev $lan_if parent 1:3 handle 30: esfq
+
+	    #HIGH icmp,ssh,https,telnet,sip,dns //fix me
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 21 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 22 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 23 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 53 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip dport 53 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 443 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip dport 443 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip sport 5060 0xffff flowid 1:1
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 1 u32 match ip protocol 1 0xff flowid 1:1
+
+	    #MEDIUM http/ftpdata/udp
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 2 u32 match ip sport 80 0xffff flowid 1:2
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 2 u32 match ip dport 80 0xffff flowid 1:2
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 2 u32 match ip sport 20 0xffff flowid 1:2
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 2 u32 match ip protocol 17 0xff flowid 1:2
+
+	    #LOW smtp/pop and others
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 3 u32 match ip sport 110 0xffff flowid 1:3
+	    tc filter add dev $lan_if parent 1:0 protocol ip prio 3 u32 match ip sport 25 0xffff flowid 1:3
+	fi
+	$LOG "---------------NONIMQ-OUT--------------------------"
+	if [ "$WANUP" = "1" ]; then
+	    modprobe -q sch_sfq
+	    #output
+	    tc qdisc add dev $wan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
+	    tc qdisc add dev $wan_if parent 1:1 handle 10: sfq
+    	    tc qdisc add dev $wan_if parent 1:2 handle 20: sfq
+	    tc qdisc add dev $wan_if parent 1:3 handle 30: sfq
+	    tc filter add dev $wan_if protocol ip parent 1: prio 1 u32 match ip dport 10000 0x3C00 flowid 1:1
+
+	    #HIGH icmp,ssh,https,telnet,sip,dns //fix me
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 21 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 22 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 23 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 53 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip sport 53 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 443 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip sport 443 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip dport 5060 0xffff flowid 1:1
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 1 u32 match ip protocol 1 0xff flowid 1:1
+
+	    #MEDIUM http/ftpdata/udp
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip dport 80 0xffff flowid 1:2
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip sport 80 0xffff flowid 1:2
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip dport 20 0xffff flowid 1:2
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip protocol 17 0xff flowid 1:2
+
+	    #LOW smtp/pop and others
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 110 0xffff flowid 1:3
+	    tc filter add dev $wan_if parent 1:0 protocol ip prio 3 u32 match ip dport 25 0xffff flowid 1:3
+	fi
+    elif [ "$QoSEnable" = "3" ]; then
+	    $LOG "-----------------IMQ-FULL-------------------------"
+	    modprobe -q imq > /dev/null 2>&1
+	    modprobe -q ipt_IMQ > /dev/null 2>&1
+	    ip link set imq0 up > /dev/null 2>&1
+	    ip link set imq1 up > /dev/null 2>&1
+    fi
+fi
+}
+
+stop() {
+ $LOG "Stopping SHAPER: "
+ get_param
+ set_def
+
+ #drop others QoS rules
+    INTERFACES=`ip link show up | grep -v lo | grep state | awk {' print $2 '} | grep -v "@" | cut -d ":" -f1` > /dev/null 2>&1
+    for i in $INTERFACES; do
+        echo $i;
+	tc qdisc del dev $i root > /dev/null 2>&1
+	tc qdisc del dev $i ingress > /dev/null 2>&1
+    done
+    if [ "$QoSEnable" = "1" ]; then
+	qos_run c > /dev/null 2>&1
+    fi
+}
+
+set_def() {
+    tc qdisc del dev $wan_if root > /dev/null 2>&1
+    tc qdisc del dev $wan_if ingress > /dev/null 2>&1
+    tc qdisc del dev $lan_if root  > /dev/null 2>&1
+    tc qdisc del dev $lan_if ingress > /dev/null 2>&1
+    ip link set imq0 down > /dev/null 2>&1
+    ip link set imq1 down > /dev/null 2>&1
+}
+
+get_param() {
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    nm=`nvram_get 2860 lan_netmask`
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
+    QoSEnable=`nvram_get 2860 QoSEnable`
+
+    #if ppp is up shaper to ppp0 else to wan_if
+    if [ "$vpnEnabled" = "on" ]; then
+        wan_if="ppp0"
+    fi
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

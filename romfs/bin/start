@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Start all init scripts in /etc/rc.d
+# executing them in numerical order.
+
+LOG="echo INIT: "
+
+#include kernel config --- IN BIN...
+. /bin/config.sh
+
+if [ "$CONFIG_TMPFS" != "" ] ; then
+    #mount /tmp /etc in /var
+    mkdir -p /var/tmpfs
+    mount -o bind /var/tmpfs /tmp
+    #make dir for rwfs
+    mkdir -p /var/rwfs
+    mount -o bind /var/rwfs /etc
+fi
+
+TGZfs_size=131072
+BLOCKS=2
+MTDDEVICE=/dev/mtdblock5
+
+get_size(){
+  ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
+}
+
+$LOG "Prepare start init!"
+export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+$LOG "Init DEV particion"
+zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
+
+$LOG "Init RW particion"
+zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
+
+if [ -f /etc/filesystem.ok ]; then
+    $LOG "RW File system is ok - preparing ..."
+  else
+    $LOG "File system is clear or poor."
+    zcat /rwfs.gz | tar xf - -C / >>/dev/null
+
+    $LOG "Restored. Save after full boot and configure."
+    touch /etc/filesystem.ok
+fi
+
+#sync need after restore rwfs
+sync
+
+/bin/sh /etc/rc.d/rcS &

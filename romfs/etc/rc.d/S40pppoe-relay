@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo PPPOERELAY: "
+
+start() {
+if [ -f /bin/pppoe-relay ]; then
+    pppr=`nvram_get 2860 pppoeREnabled`
+    if [ "$pppr" = "1" ]; then
+	$LOG "Starting pppoe-relay: "
+        pppoe-relay -S $wan_if -B $lan_if
+    fi
+fi
+}
+
+stop() {
+ $LOG "Stopping pppoe-relay: "
+    killall -q pppoe-relay
+    killall -q -9 pppoe-relay
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

@@ -1,0 +1,115 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+. /etc/scripts/config.sh
+
+LOG="echo LAN: "
+
+start() {
+$LOG "Start network interfaces..."
+get_param
+#-------------------PRECONFIG-----------------------------
+    if [ "$brisup" = "0" ]; then
+	if [ "$brset" = "0" ]; then
+	    $LOG "-==Add bridge in the system==-"
+	    brctl addbr br0
+        fi
+	$LOG "-==BR0_MACADDR $LANMAC==-"
+	ifconfig br0 hw ether $LANMAC
+	$LOG "-==Up bridge interface==-"
+	ip link set br0 up
+    fi
+    if [ "$lanisup" = "0" ]; then
+	$LOG "-==ETH2_MACADDR $LANMAC==-"
+	ifconfig eth2 hw ether $LANMAC
+	$LOG "-==Up vlan root interface==-"
+	ip link set eth2 up
+	vlanisconfig=0
+    fi
+    if [ "$vlanisconfig" != "2" ]; then
+        $LOG "-==Add vlans and config==-"
+	vconfig add eth2 1
+	vconfig add eth2 2
+	$LOG "-==ETH2.1_MACADDR $LANMAC==-"
+	ifconfig eth2.1 hw ether $LANMAC
+	$LOG "-==ETH2.2_MACADDR $MAC==-"
+	ifconfig eth2.2 hw ether $MAC
+    fi
+
+    #drop adresses
+    ip addr flush dev eth2.1
+    ip addr flush dev eth2.2
+if [ "$CONFIG_IPV6" != "" ] ; then
+    ip -6 addr flush dev eth2.1
+    ip -6 addr flush dev eth2.2
+fi
+    ip link set eth2.1 up
+ 
+#-------------------CONFIG--------------------------------
+  ip link set $lan_if down
+ #-------------------LAN1----------------
+ $LOG "Add LAN1 iface"
+ if [ "$lan_ip" != "" ]; then
+    if [ "$lan_nm" = "" ]; then
+	nm="255.0.0.0"
+    fi
+    ifconfig $lan_if $lan_ip netmask $lan_nm up
+ else
+    ifconfig $lan_if 0.0.0.0 up	
+ fi
+ $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip <<<<<"
+
+ #-------------------LAN2----------------
+ if [ "$lan2enabled" = "1" ]; then
+	$LOG "Add LAN2 iface"
+        ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2"
+        $LOG "ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2""
+ fi
+}
+
+stop() {
+$LOG "Stop network interfaces..."
+    ip link set eth2.2 down > /dev/null 2>&1
+    ip link set eth2.1 down > /dev/null 2>&1
+    vconfig rem eth2.1 > /dev/null 2>&1
+    vconfig rem eth2.2 > /dev/null 2>&1
+    ip link set br0 down > /dev/null 2>&1
+    ip link set $lan_if down > /dev/null 2>&1
+    ip link set $lan2_if down > /dev/null 2>&1
+    brctl delbr br0 > /dev/null 2>&1
+}
+
+get_param() {
+ lan_ip=`nvram_get 2860 lan_ipaddr`
+ lan_nm=`nvram_get 2860 lan_netmask`
+ lan_ip_2=`nvram_get 2860 lan2_ipaddr`
+ lan_nm_2=`nvram_get 2860 lan2_netmask`
+ lan2enabled=`nvram_get 2860 Lan2Enabled`
+ CHECKMAC=`nvram_get 2860 CHECKMAC`
+ MAC=`nvram_get 2860 WAN_MAC_ADDR`
+ LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+ brset=`brctl show  | grep br0 -c`
+ vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
+ brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
+ lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

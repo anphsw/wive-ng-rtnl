@@ -1,0 +1,1 @@
+../etc/scripts/services_restart.sh

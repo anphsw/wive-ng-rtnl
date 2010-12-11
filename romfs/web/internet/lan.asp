@@ -1,0 +1,224 @@
+<html>
+<head>
+<title>Local Area Network (LAN) Settings</title>
+<link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+
+<script language="JavaScript" type="text/javascript">
+
+Butterlate.setTextDomain("internet");
+
+var secs;
+var timerID = null;
+var timerRunning = false;
+
+function StartTheTimer()
+{
+	if (secs==0)
+	{
+		TimeoutReload(5);
+		//window.location.reload();
+		window.location.href=window.location.href;	//reload page
+	}
+	else
+	{
+		self.status = secs;
+		secs = secs - 1;
+		timerRunning = true;
+		timerID = self.setTimeout("StartTheTimer()", 1000);
+	}
+}
+
+function TimeoutReload(timeout)
+{
+	secs = timeout;
+	if (timerRunning)
+		clearTimeout(timerID);
+	timerRunning = false;
+	StartTheTimer();
+}
+
+function display_on()
+{
+	if (window.ActiveXObject) // IE
+		return "block";
+	else if (window.XMLHttpRequest) // Mozilla, Firefox, Safari,...
+		return "table-row";
+}
+
+function initTranslation()
+{
+	_TR("lTitle", "lan title");
+	_TR("lIntroduction", "lan introduction");
+	_TR("lSetup", "lan setup");
+
+	_TR("lHostname", "inet hostname");
+	_TR("lIp", "inet ip");
+	_TR("lNetmask", "inet netmask");
+	_TR("lLan2", "inet lan2");
+	_TR("lLan2Enable", "inet enable");
+	_TR("lLan2Disable", "inet disable");
+	_TR("lLan2Ip", "inet lan2 ip");
+	_TR("lLan2Netmask", "inet lan2 netmask");
+	_TR("lGateway", "inet gateway");
+	_TR("lPriDns", "inet pri dns");
+	_TR("lSecDns", "inet sec dns");
+	_TR("lMac", "inet mac");
+
+	_TRV("lApply", "inet apply");
+	_TRV("lCancel", "inet cancel");
+}
+
+function initValue()
+{
+	var form = document.lanCfg;
+	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
+	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
+	var lan2 = "<% getCfgZero(1, "Lan2Enabled"); %>";
+
+	initTranslation();
+
+	// Lan2
+	form.lan2Ip.value = '<% getCfgGeneral(1, "lan2_ipaddr"); %>';
+	form.lan2Netmask.value = '<% getCfgGeneral(1, "lan2_netmask"); %>';
+	form.lan2enabled.value = (lan2 == "1") ? "1" : "0";
+	lan2_enable_switch(form);
+
+	//gateway, dns only allow to configure at bridge mode
+	if (opmode != "0")
+	{
+		document.getElementById("brGateway").style.visibility = "hidden";
+		document.getElementById("brGateway").style.display = "none";
+		document.getElementById("brPriDns").style.visibility = "hidden";
+		document.getElementById("brPriDns").style.display = "none";
+		document.getElementById("brSecDns").style.visibility = "hidden";
+		document.getElementById("brSecDns").style.display = "none";
+	}
+}
+
+function CheckValue()
+{
+	var form = document.lanCfg;
+
+	if (form.hostname.value.indexOf(" ") >= 0)
+	{
+		alert('Don\'t enter Blank Space in this field');
+		document.lanCfg.hostname.focus();
+		document.lanCfg.hostname.select();
+		return false;
+	}
+	if (!validateIP(form.lanIp, true))
+	{
+		form.lanIp.focus();
+		return false;
+	}
+	if (!validateIP(form.lanNetmask, true))
+	{
+		form.lanNetmask.focus();
+		return false;
+	}
+	if (document.lanCfg.lan2enabled[0].checked)
+	{
+		if (!validateIP(form.lan2Ip.value, true))
+		{
+			form.lan2Ip.focus();
+			return false;
+		}
+		if (!validateIP(form.lan2Netmask.value, true))
+		{
+			form.lan2Netmask.focus();
+			return false;
+		}
+	}
+	return true;
+}
+
+function lan2_enable_switch(form)
+{
+	var lan2_dis = (form.lan2enabled.value != "1");
+	
+	form.lan2Ip.disabled = lan2_dis;
+	form.lan2Netmask.disabled = lan2_dis;
+}
+
+</script>
+</head>
+
+<body onload="initValue()">
+<table class="body">
+<tr><td>
+
+<h1 id="lTitle"></h1>
+<p id="lIntroduction"></p>
+<hr />
+
+<form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
+<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<tr>
+  <td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
+</tr>
+<tr <% var hashost = getHostSupp();
+      if (hashost != "1") write("style=\"visibility:hidden;display:none\""); %>>
+  <td class="head" id="lHostname">Hostname</td>
+  <td><input name="hostname" maxlength="16" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+</tr>
+<tr>
+  <td class="head" id="lIp">IP Address</td>
+  <td><input name="lanIp" maxlength="15" value="<% getLanIp(); %>" ></td>
+</tr>
+<tr>
+  <td class="head" id="lNetmask">Subnet Mask</td>
+  <td><input name="lanNetmask" maxlength="15" value="<% getLanNetmask(); %>"></td>
+</tr>
+<tr>
+  <td class="head" id="lLan2">LAN2</td>
+  <td>
+	<select name="lan2enabled" onchange="lan2_enable_switch(this.form);" class="half">
+		<option value="1">Enabled</option>
+		<option value="0">Disabled</option>
+	</select>
+  </td>
+</tr>
+<tr>
+  <td class="head" id="lLan2Ip">LAN2 IP Address</td>
+  <td><input name="lan2Ip" maxlength="15" value=""></td>
+</tr>
+<tr>
+  <td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
+  <td><input name="lan2Netmask" maxlength="15" value=""></td>
+</tr>
+<tr id="brGateway">
+  <td class="head" id="lGateway">Default Gateway</td>
+  <td><input name="lanGateway" maxlength="15" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
+</tr>
+<tr id="brPriDns">
+  <td class="head" id="lPriDns">Primary DNS Server</td>
+  <td><input name="lanPriDns" maxlength="15" value="<% getDns(1); %>"></td>
+</tr>
+<tr id="brSecDns">
+  <td class="head" id="lSecDns">Secondary DNS Server</td>
+  <td><input name="lanSecDns" maxlength="15" value="<% getDns(2); %>"></td>
+</tr>
+<tr>
+  <td class="head" id="lMac">MAC Address</td>
+  <td><% getLanMac(); %></td>
+</tr>
+</table>
+
+<table width="95%" cellpadding="2" cellspacing="1">
+<tr align="center">
+  <td>
+    <input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
+    <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
+  </td>
+</tr>
+</table>
+</form>
+
+</td></tr></table>
+</body>
+</html>
+

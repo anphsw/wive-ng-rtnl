@@ -1,0 +1,85 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo DHCPSERVER: "
+
+start() {
+	dhcp=`nvram_get 2860 dhcpEnabled`
+	if [ "$dhcp" = "1" ]; then
+	    $LOG "Start dhcpserver "
+	    get_param
+
+		> /etc/udhcpd.conf
+		> /var/udhcpd.leases
+
+		config-udhcpd.sh -s $start
+		config-udhcpd.sh -e $end
+		config-udhcpd.sh -i $lan_if
+		config-udhcpd.sh -m $mask
+
+		if [ "$pd" != "" ] || [ "$sd" != "" ]; then
+			config-udhcpd.sh -d $pd $sd
+		fi
+		if [ "$gw" != "" ]; then
+			config-udhcpd.sh -g $gw
+		fi
+		if [ "$lease" != "" ]; then
+			config-udhcpd.sh -t $lease
+		fi
+		if [ "$SmbEnabled" = "1" ]; then
+			config-udhcpd.sh -w $lan_ip
+		fi
+
+		# Write static DHCP leases
+		if [ -e /etc/dhcpd_static.conf ]; then
+			cat /etc/dhcpd_static.conf | while read line; do
+				config-udhcpd.sh -S $line;
+			done;
+		fi
+
+		config-udhcpd.sh -r
+	fi
+}
+
+stop() {
+	$LOG "Stop dhcpserver "
+	killall -q udhcpd
+	killall -q -9 udhcpd
+}
+
+get_param() {
+	start=`nvram_get 2860 dhcpStart`
+	end=`nvram_get 2860 dhcpEnd`
+	mask=`nvram_get 2860 dhcpMask`
+	pd=`nvram_get 2860 dhcpPriDns`
+	sd=`nvram_get 2860 dhcpSecDns`
+	gw=`nvram_get 2860 dhcpGateway`
+	lease=`nvram_get 2860 dhcpLease`
+	static1=`nvram_get 2860 dhcpStatic1`
+	lan_ip=`nvram_get 2860 lan_ipaddr`
+	SmbEnabled=`nvram_get 2860 SmbEnabled`
+}
+
+case "$1" in
+	start)
+		start
+		;;
+
+	stop)
+		stop
+		;;
+
+	restart)
+		stop
+		start
+		;;
+
+	*)
+		echo $"Usage: $0 {start|stop|restart}"
+		exit 1
+esac

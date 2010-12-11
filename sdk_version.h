@@ -1,0 +1,3 @@
+
+#define RT288X_SDK_VERSION "WR-N-1.2.4.RU.11122010"
+

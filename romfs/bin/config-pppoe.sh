@@ -1,0 +1,1 @@
+../etc/scripts/config-pppoe.sh

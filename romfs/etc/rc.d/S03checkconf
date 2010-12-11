@@ -1,0 +1,129 @@
+#!/bin/sh
+
+LOG="echo CHECKCONF: "
+#include kernel config
+. /etc/scripts/config.sh
+
+start() {
+    get_param
+    check_nvram
+}
+
+stop() {
+    echo "" > /dev/null
+}
+
+get_param() {
+    IS_WIVE=`nvram_get 2860 IS_WIVE`
+    admID=`nvram_get 2860 Login`
+    admPW=`nvram_get 2860 Password`
+    opmode=`nvram_get 2860 OperationMode`
+    WorkGroup=`nvram_get 2860  WorkGroup`
+    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
+    SmbString=`nvram_get 2860  SmbString`
+    MAC_TEST=`nvram_get 2860 WAN_MAC_ADDR | grep 00:0B:2B -c`
+    WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
+    LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`
+    HOSTNAME_NVRAM=`nvram_get 2860 HostName`
+}
+
+check_nvram()
+{
+ if [ ! -f /tmp/nvram_checked ]; then
+	echo "Check firmware update or clean boot."
+	if [ "$IS_WIVE" = "YES" ]; then
+	    $LOG ">>>> NORMAL BOOT <<<<"
+	    $LOG "Backup nvram..."
+	    fs backup_nvram 
+	else
+	    $LOG ">>>> RESTORE NVRAM <<<<"
+	    if [ -f /etc/backup/nvram_backup.dat ]; then
+		$LOG "Burn RF template to flash"
+		fs burnrf
+		$LOG "Load backuped setting to nvram."
+	        fs load_nvram
+	    else
+		$LOG "Burn RF template to flash"
+		fs burnrf
+		$LOG "Clear and load defaults to nvram !!!"
+	        fs nvramreset
+	    fi
+	  $LOG "Reset OK... boot..."
+	fi
+    #user and password need set
+    if [ "$admID" = "" ] || [ "$admPW" = "" ]; then
+        nvram_set 2860 Login "Admin"
+        nvram_set 2860 Password "Admin"
+    fi
+    #need hostname
+    if [ "$HOSTNAME_NVRAM" = "" ]; then
+	HOSTNAME_NVRAM="Wive-RTNL"
+	nvram_set 2860 HostName $HOSTNAME_NVRAM
+    fi
+    HOSTNAME="$HOSTNAME_NVRAM"
+    #samba configs to
+    if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
+	WorkGroup="LOCALNET"
+	SmbNetBIOS="$HOSTNAME"
+	SmbString="$HOSTNAME-SERVER"
+	nvram_set 2860 WorkGroup LOCALNET
+	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
+	nvram_set 2860 SmbString "$SmbString"
+    fi
+    #if check mac in nvram set to not NO and web not start
+    if [ $CHECKMAC != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
+ 	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
+	    $LOG "First start MAC generate"
+    	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc2=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc3=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+	    macinc4=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc5=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc6=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+    	    macinc7=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
+
+	    $LOG "Set new mac!"
+    	    WAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc5"
+    	    LAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc4""$macinc6"
+    	    WLAN_MACADDR="00:0B:2B:""$macinc1""$macinc2"":""$macinc1""$macinc3"":""$macinc6""$macinc7"
+    	    nvram_set 2860 WAN_MAC_ADDR "$WAN_MACADDR"
+    	    nvram_set 2860 LAN_MAC_ADDR "$LAN_MACADDR"
+    	    nvram_set 2860 WLAN_MAC_ADDR "$WLAN_MACADDR"
+    	    MAC=$WAN_MACADDR
+    	    WMAC=$WLAN_MACADDR
+    	    LANMAC=$LAN_MACADDR
+	fi
+    fi
+    # opmode adjustment:
+    #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
+    #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
+
+    if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
+	nvram_set 2860 OperationMode 1
+	opmode="1"
+    elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
+	nvram_set 2860 OperationMode 1
+	opmode="1"
+    fi
+ fi
+ touch /tmp/nvram_checked
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

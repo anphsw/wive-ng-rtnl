@@ -1,0 +1,1 @@
+../etc/scripts/wifi_unload.sh

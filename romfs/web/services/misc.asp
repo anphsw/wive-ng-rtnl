@@ -1,0 +1,300 @@
+<html>
+<head>
+<title>Internet Services Settings</title>
+<link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
+
+<script language="JavaScript" type="text/javascript">
+Butterlate.setTextDomain("internet");
+Butterlate.setTextDomain("services");
+
+var secs;
+var timerID = null;
+var timerRunning = false;
+
+function StartTheTimer()
+{
+	if (secs==0)
+	{
+		TimeoutReload(5);
+		//window.location.reload();
+		window.location.href=window.location.href;	//reload page
+	}
+	else
+	{
+		self.status = secs;
+		secs = secs - 1;
+		timerRunning = true;
+		timerID = self.setTimeout("StartTheTimer()", 1000);
+	}
+}
+
+function TimeoutReload(timeout)
+{
+	secs = timeout;
+	if (timerRunning)
+		clearTimeout(timerID);
+	timerRunning = false;
+	StartTheTimer();
+}
+
+function initTranslation()
+{
+	_TR("lTitle", "services misc title");
+	_TR("lIntroduction", "services misc introduction");
+	_TR("lSetup", "services misc setup");
+
+	_TR("lStp", "lan stp");
+	_TR("lStpD", "inet disable");
+	_TR("lStpE", "inet enable");
+
+	_TR("lLltd", "lan lltd");
+	_TR("lLltdD", "inet disable");
+	_TR("lLltdE", "inet enable");
+
+	_TR("lIgmpp", "lan igmpp");
+	_TR("lIgmppD", "inet disable");
+	_TR("lIgmppE", "inet enable");
+
+	_TR("lUpnp", "lan upnp");
+	_TR("lUpnpD", "inet disable");
+	_TR("lUpnpE", "inet enable");
+
+	_TR("lRadvd", "lan radvd");
+	_TR("lRadvdD", "inet disable");
+	_TR("lRadvdE", "inet enable");
+
+	_TR("lPppoer", "lan pppoer");
+	_TR("lPppoerD", "inet disable");
+	_TR("lPppoerE", "inet enable");
+
+	_TR("lDnsp", "lan dnsp");
+	_TR("lDnspD", "inet disable");
+	_TR("lDnspE", "inet enable");
+
+	_TRV("lApply", "inet apply");
+	_TRV("lCancel", "inet cancel");
+}
+
+function initValue()
+{
+	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
+	var stp = <% getCfgZero(1, "stpEnabled"); %>;
+	var igmp = <% getCfgZero(1, "igmpEnabled"); %>;
+	var upnp = <% getCfgZero(1, "upnpEnabled"); %>;
+	var radvd = <% getCfgZero(1, "radvdEnabled"); %>;
+	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
+	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
+	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
+	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
+	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
+	var lltdb = "<% getLltdBuilt(); %>";
+	var igmpb = "<% getIgmpProxyBuilt(); %>";
+	var upnpb = "<% getUpnpBuilt(); %>";
+	var radvdb = "<% getRadvdBuilt(); %>";
+	var pppoeb = "<% getPppoeRelayBuilt(); %>";
+	var dnsp = "<% getDnsmasqBuilt(); %>";
+
+	initTranslation();
+
+	var form = document.miscServiceCfg;
+
+	form.stpEnbl.options.selectedIndex = 1*stp;
+	form.igmpEnbl.options.selectedIndex = 1*igmp;
+	form.upnpEnbl.options.selectedIndex = 1*upnp;
+	form.radvdEnbl.options.selectedIndex = 1*radvd;
+	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
+	form.dnspEnbl.options.selectedIndex = 1*dns;
+	form.lltdEnbl.options.selectedIndex = 1*lltd;
+	form.pingWANEnbl.options.selectedIndex = (wpf == "1") ? 1 : 0;
+
+	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
+	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
+	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
+	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
+
+	if (lltdb == "0")
+	{
+		hideElement("lltd");
+		form.lltdEnbl.options.selectedIndex = 0;
+	}
+	if (igmpb == "0")
+	{
+		hideElement("igmpProxy");
+		form.igmpEnbl.options.selectedIndex = 0;
+	}
+	if (upnpb == "0")
+	{
+		hideElement("upnp");
+		form.upnpEnbl.options.selectedIndex = 0;
+	}
+	if (radvdb == "0")
+	{
+		hideElement("radvd");
+		form.radvdEnbl.options.selectedIndex = 0;
+	}
+	if (pppoeb == "0")
+	{
+		hideElement("pppoerelay");
+		form.pppoeREnbl.options.selectedIndex = 0;
+	}
+	if (dnsp == "0")
+	{
+		hideElement("dnsproxy");
+		form.dnspEnbl.options.selectedIndex = 0;
+	}
+}
+
+function CheckValue()
+{
+	return true;
+}
+
+</script>
+</head>
+
+<body onLoad="initValue()">
+<table class="body"><tr><td>
+
+<h1 id="lTitle"></h1>
+<p id="lIntroduction"></p>
+<hr />
+
+<form method=post name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue()">
+<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<tr>
+	<td class="title" colspan="2" id="lSetup">Miscellaneous Services Setup</td>
+</tr>
+
+<tr>
+<td class="head" id="lStp">802.1d Spanning Tree</td>
+<td>
+	<select name="stpEnbl" size="1" class="half">
+		<option value="0" id="lStpD">Disable</option>
+		<option value="1" id="lStpE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="lltd">
+<td class="head" id="lLltd">LLTD</td>
+<td>
+	<select name="lltdEnbl" size="1" class="half">
+		<option value="0" id="lLltdD">Disable</option>
+		<option value="1" id="lLltdE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="igmpProxy">
+<td class="head" id="lIgmpp">IGMP proxy</td>
+<td>
+	<select name="igmpEnbl" size="1" class="half">
+		<option value="0" id="lIgmppD">Disable</option>
+		<option value="1" id="lIgmppE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="upnp">
+<td class="head" id="lUpnp">UPNP</td>
+<td>
+	<select name="upnpEnbl" size="1" class="half">
+		<option value="0" id="lUpnpD">Disable</option>
+		<option value="1" id="lUpnpE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="radvd">
+<td class="head" id="lRadvd">Router Advertisement</td>
+<td>
+	<select name="radvdEnbl" size="1" class="half">
+		<option value="0" id="lRadvdD">Disable</option>
+		<option value="1" id="lRadvdE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="pppoerelay">
+<td class="head" id="lPppoer">PPPOE relay</td>
+<td>
+	<select name="pppoeREnbl" size="1" class="half">
+		<option value="0" id="lPppoerD">Disable</option>
+		<option value="1" id="lPppoerE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="dnsproxy">
+<td class="head" id="lDnsp">DNS proxy</td>
+<td>
+	<select name="dnspEnbl" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">HTTP Remote Management</td>
+<td>
+	<select name="rmtHTTP" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">SSH Remote Management</td>
+<td>
+	<select name="rmtSSH" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head" id="sysfwPingFrmWANFilterHead">
+	Ping from WAN
+</td>
+<td>
+	<select name="pingWANEnbl" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+<tr>
+<td class="head">UDPXY</td>
+<td>
+	<select name="udpxyMode" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Watchdog</td>
+<td>
+	<select name="watchdogEnable" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+</table>
+
+<table width="95%" cellpadding="2" cellspacing="1">
+<tr align="center">
+<td>
+	<input type="submit" class="normal" value="Apply"  id="lApply"  onClick="TimeoutReload(20)">&nbsp;
+	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload()">
+</td>
+</tr>
+</table>
+</form>
+
+</td></tr></table>
+</body>
+</html>

@@ -1,0 +1,1 @@
+../etc/scripts/wifi.sh

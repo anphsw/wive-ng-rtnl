@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo UDPXY: "
+
+start() {
+if [ -f /bin/udpxy ]; then
+ UDPXY=`nvram_get 2860 UDPXYMode`
+    if [ "$UDPXY" != "0" ] && [ "$UDPXY" != "" ]; then
+        $LOG "UDPXY start"
+	udpxy -m $wan_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
+    fi
+fi
+}
+
+stop() {
+    $LOG "UDPXY stop"
+    killall -q udpxy
+    killall -q -9 udpxy
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

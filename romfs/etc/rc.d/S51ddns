@@ -1,0 +1,59 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo DYNDNS: "
+
+start() {
+if [ -f /bin/inadyn ]; then
+    get_param
+    if [ "$srv" != "" ] && [ "$srv" != "none" ] && [ "$ddns" != "" ] && [ "$u" != "" ] && [ "$pw" != "" ]; then
+	if [ "$srv" = "dyndns.org" ] || [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || [ "$srv" = "no-ip.com" ]; then
+	    $LOG "Starting DynDNS: "
+	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --background --syslog
+	else
+	    $LOG "Unknown DDNS provider: $srv"
+	    exit 1
+	fi
+    else
+	$LOG "Some parametrs needed..."
+    fi
+fi
+}
+
+get_param() {
+    srv=`nvram_get 2860 DDNSProvider`
+    ddns=`nvram_get 2860 DDNS`
+    u=`nvram_get 2860 DDNSAccount`
+    pw=`nvram_get 2860 DDNSPassword`
+    update_period="43200"
+}
+
+stop() {
+ $LOG "Stopping DynDns: "
+    killall -q inadyn
+    killall -q -9 inadyn
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac

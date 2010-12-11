@@ -1,0 +1,58 @@
+#!/bin/sh
+
+#get params
+. /etc/scripts/global.sh
+
+#wait to start web and run from goahead code
+web_wait
+
+LOG="echo UPNPD: "
+
+start() {
+if [ -f /bin/miniupnpd ]; then
+ get_param
+    if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$vpnEnabled" = "on" ]; then
+	EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
+        if [ "$upnp" = "1" ] && [ "$EXTIP" != "" ]; then
+	  $LOG "Start upnp at $EXTIP"
+	    ip route replace 239.0.0.0/8 dev $lan_if
+	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
+	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
+            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $ip &
+	fi
+    fi
+fi
+}
+
+stop() {
+ $LOG "Stop upnp "
+    killall -q miniupnpd
+    killall -q -9 miniupnpd
+    ip route del 239.0.0.0/8 dev $lan_if > /dev/null 2>&1
+}
+
+get_param() {
+    ip=`nvram_get 2860 lan_ipaddr`
+    upnp=`nvram_get 2860 upnpEnabled`
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
+}
+
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac
