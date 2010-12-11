@@ -56,4 +56,3 @@ ifneq ($(CONFIG_RA_NAT_NONE),y)
 obj-y                           += nat/foe_hook/
 endif
 obj-$(CONFIG_RA_HW_NAT)         += nat/hw_nat/
-obj-$(CONFIG_EXPRESS_NAT)       += nat/expressnat/

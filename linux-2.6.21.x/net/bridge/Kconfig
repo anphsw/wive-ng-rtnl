@@ -34,12 +34,14 @@ config BRIDGE
 config BRIDGE_2WAYS_FDB
 	bool "2-Ways Forwarding DataBase"
 	depends on BRIDGE
+	default y
 	---help---
 	  prevent ARP flooding attack (memory protection code)
 
 config BRIDGE_FORWARD_CTRL
 	bool "Forwarding Control"
 	depends on BRIDGE
+	default y
 	---help---
 	  This option allows you to enable/disable the forward function of the kernel
 	  bridge module by proc_fs /proc/net/br_forward_br0.
@@ -54,11 +56,13 @@ config BRIDGE_FORWARD_CTRL
 config BRIDGE_MAC_AUTO
         bool "Set mac to bridge automaticaly"
         depends on BRIDGE
+	default y
         ---help---
 
 config BRIDGE_PORT_FORWARD
 	bool "Port forwarding Control"
 	depends on BRIDGE
+	default y
 	---help---
 
 config BRIDGE_MULTICAST_BWCTRL

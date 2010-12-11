@@ -65,16 +65,12 @@ endchoice
 
 config CONNTRACK_FAST_PATH
         bool "Software netfilter fast-path"
-        default y
-
-config EXPRESS_NAT
-        tristate "Software Express nat support"
-	depends on !CONNTRACK_FAST_PATH
         default n
 
 config BCM_NAT
         tristate "Broadcom fast NAT support"
         depends on NF_CONNTRACK && NF_NAT
+        default y
         help
                 This helps packets pass through netfilter faster when a packet
                 is an established or reply traffic.
