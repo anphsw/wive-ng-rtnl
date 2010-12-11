@@ -113,21 +113,6 @@ unsigned int nf_conntrack_clear = 0;
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
-#ifdef CONFIG_ASUS_QOS
-#define IP_TRACK_SMALL          0x01
-#define IP_TRACK_PORT           0x02
-#define IP_TRACK_DATA           0x04
-#define IP_TRACK_UDP            0x08
-
-extern int nf_track_flag;
-extern unsigned long nf_ipaddr;
-u_int8_t port_num_udp[65536];
-
-extern unsigned char mbss_prio_1;	//SZ-Angela Add for MBSSID
-extern unsigned char mbss_prio_2;
-extern unsigned char mbss_prio_3;
-#endif
-
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #define	BCM_FASTNAT_DENY	1
 extern int ipv4_conntrack_fastnat;
@@ -916,114 +901,6 @@ void nf_conntrack_free(struct nf_conn *conntrack)
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_free);
 
-#ifdef CONFIG_ASUS_QOS
-#define isdigit(c) (c >= '0' && c <= '9') 
- __inline unsigned int atoi(const char *s)
-{
-         int i=0,j,k=0;
-         for(j=1; j<5; ++j) {
-                 i=0;
-                 while (isdigit(*s)) {
-                         i = i*10 + *(s++) - '0';
-                }
-                 k = k*256 +i;
-                 if(j == 4)
-                         return k;
-                 ++s;
-        }
-         return k;
-}
-
-/* On success, returns h->track.flags & NF_TRACK_MARK */
-inline int deal_track(struct nf_conntrack_tuple_hash *h, int len)
-{
-        struct nf_conntrack_tuple_hash *rep_h;
-        unsigned int port=0, dport=0;
-        struct nf_conn *ct = NULL;
-
-        // Add the packet number of this connect track and record the length of the packet 
-        h->track.number ++;
-        if(len > 512)
-        	h->track.large_packet++;
-
-        // The download packet set the IP_TRACK_DOWN flag
-        if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-        {
-               port = h->tuple.dst.u.all;
-               dport = h->tuple.src.u.all;
-        }
-        else
-        {
-                port = h->tuple.src.u.all;
-                dport = h->tuple.dst.u.all;
-        }
-
-        // if the connect track is data connect ,we return IP_TRACK_DATA
-        if((h->track.flag & IP_TRACK_DATA) == IP_TRACK_DATA)
-                return IP_TRACK_DATA;
-
-        // if the destination port of this connect track is one of 80,8080,443.We return IP_TRACK_PORT
-        if((h->track.flag & IP_TRACK_PORT) == IP_TRACK_PORT)
-                return IP_TRACK_PORT;
-
-        if((h->track.flag & IP_TRACK_SMALL) == IP_TRACK_SMALL)
-                return IP_TRACK_SMALL;
-
-        if((h->track.flag & IP_TRACK_UDP) == IP_TRACK_UDP)
-                return IP_TRACK_UDP;
-
-        ct = nf_ct_tuplehash_to_ctrack(h);
-
-        //start compare 
-        if(NF_CT_DIRECTION(h) == IP_CT_DIR_REPLY)
-                rep_h = &ct->tuplehash[IP_CT_DIR_ORIGINAL];
-        else
-                rep_h = &ct->tuplehash[IP_CT_DIR_REPLY];
-        if(!rep_h)
-                return 0;
-
-        if(ntohs(dport) == 80 || ntohs(dport) == 8080 || ntohs(dport) == 443)
-        {
-                h->track.flag |= IP_TRACK_PORT;
-                rep_h->track.flag |= IP_TRACK_PORT;
-                return IP_TRACK_PORT;
-        }
-
-        // if the port has connections more than 30, we mark it and return IP_TRACK_UDP
-        // h->tuple.dst.protonum == 17 &&
-        if((port_num_udp[port] > 30 || port_num_udp[dport] >30))
-        {
-                h->track.flag |= IP_TRACK_UDP;
-                rep_h->track.flag |= IP_TRACK_UDP;
-                return IP_TRACK_UDP;
-        }
-
-        if(h->track.number == 250)
-        {
-                if(h->track.large_packet<70)
-                {
-                        if((rep_h->track.flag & IP_TRACK_DATA) == IP_TRACK_DATA)
-                        {
-                                h->track.flag |= IP_TRACK_DATA;
-                                return IP_TRACK_DATA;
-                        }
-                        h->track.flag |= IP_TRACK_SMALL;
-                        return IP_TRACK_SMALL;
-                }
-
-                if((rep_h->track.flag & IP_TRACK_SMALL) == IP_TRACK_SMALL)
-                {
-                        rep_h->track.flag |= IP_TRACK_DATA;
-                        rep_h->track.flag &= ~IP_TRACK_SMALL;
-                }
-                h->track.flag |= IP_TRACK_DATA;
-                return IP_TRACK_DATA;
-        }
-
-        return 0;
-}
-#endif
-
 /* Allocate a new conntrack: we return -ENOMEM if classification
    failed due to stress.  Otherwise it really is unclassifiable. */
 static struct nf_conntrack_tuple_hash *
@@ -1064,20 +941,6 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	}
 
 	write_lock_bh(&nf_conntrack_lock);
-#ifdef CONFIG_ASUS_QOS
-        /* if the qos enable and the layer 3 protocol is ipv4 */
-        if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4") == 0)) {
-                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.flag = 0;
-                conntrack->tuplehash[IP_CT_DIR_ORIGINAL].track.number =1;
-
-                if(strcmp(l4proto->name, "udp") == 0) {
-                        if(conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip == nf_ipaddr)
-                                port_num_udp[conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all]++;
-                        else
-                                port_num_udp[conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all]++;
-                }
-        }
-#endif
 	exp = find_expectation(tuple);
 
 	if (exp) {
@@ -1145,7 +1008,6 @@ resolve_normal_ct(struct sk_buff *skb,
 	}
 
 	//printk("src=(%x), dst=%x(%x)\n", ntohl(tuple.src.u3.ip), ntohl(tuple.dst.u3.ip));	// tmp test
-	//printk("track flag is %x, nf ipaddr is %x\n", nf_track_flag, nf_ipaddr);	// tmp test
 	/* look for tuple match */
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
         /*
@@ -1220,55 +1082,6 @@ resolve_normal_ct(struct sk_buff *skb,
 		if (IS_ERR(h))
 			return (void *)h;
 	}
-#ifdef CONFIG_ASUS_QOS
-        else if((nf_track_flag == 1) && (strcmp(l3proto->name, "ipv4")==0)) {
-
-                switch(deal_track(h, ntohs(skb->nh.iph->tot_len))) {
-                        case IP_TRACK_UDP:
-                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-                                        skb->mark = 91;
-                                else
-                                        skb->mark = 51;
-                                break;
-                        case IP_TRACK_DATA:
-                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-                                        skb->mark = 90;
-                                else
-                                        skb->mark = 50;
-                                break;
-                        case IP_TRACK_PORT:
-                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-                                        skb->mark = 80;
-                                else
-                                        skb->mark = 20;
-                                break;
-                        case IP_TRACK_SMALL:
-                                if(ntohl(h->tuple.dst.u3.ip) == nf_ipaddr)
-                                        skb->mark = 70;
-                                else
-                                        skb->mark = 10;
-                                break;
-                }
-
-		switch(skb->wl_idx)	//SZ-Angela Add for MBSSID
-		{
-			case 2:
-				if(mbss_prio_1 == 0)
-					skb->mark = 60;
-				break;
-			case 4:
-				if(mbss_prio_2 == 0)
-					skb->mark = 60;
-				break;
-			case 8:
-				if(mbss_prio_3 == 0)
-					skb->mark = 60;
-				break;
-			default:
-				break;
-		}
-        }
-#endif
 	ct = nf_ct_tuplehash_to_ctrack(h);
 
 	/* It exists; we have (non-exclusive) reference. */
@@ -1525,20 +1338,7 @@ void __nf_ct_refresh_acct(struct nf_conn *ct,
 }
 EXPORT_SYMBOL_GPL(__nf_ct_refresh_acct);
 
-void wanduck_ct_refresh(struct nf_conn *ct,
-                          unsigned long extra_jiffies)
-{
-	if((!drop_target(&ct->tuplehash[IP_CT_DIR_ORIGINAL])) && (!drop_target(&ct->tuplehash[IP_CT_DIR_REPLY])))
-		return;
-
-        write_lock_bh(&nf_conntrack_lock);
-
-        write_unlock_bh(&nf_conntrack_lock);
-}
-EXPORT_SYMBOL_GPL(wanduck_ct_refresh);
-
 #if defined(CONFIG_NF_CT_NETLINK) || defined(CONFIG_NF_CT_NETLINK_MODULE)
-
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter/nfnetlink_conntrack.h>
 #include <linux/mutex.h>
@@ -1838,11 +1638,6 @@ int __init nf_conntrack_init(void)
 	 /* SpeedMod: Hashtable size */
         nf_conntrack_htable_size = 16384;
         nf_conntrack_max = nf_conntrack_htable_size / 2;
-
-#ifdef CONFIG_ASUS_QOS
-        for(ret=0; ret<65535; ret++)            //--SZ Angela 09.03 QOS Initialization
-                port_num_udp[ret]=0;
-#endif
 
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,

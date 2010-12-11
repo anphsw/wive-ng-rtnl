@@ -736,10 +736,5 @@ config NETFILTER_XT_MATCH_HASHLIMIT
 	  It enables you to express policies like `10kpps for any given
 	  destination address' or `500pps from any given source address'
 	  with a single rule.
-
-config ASUS_QOS
-	bool "Asus conntrack based QoS support Enable"
-	depends on NF_CONNTRACK_ENABLED
-
 endmenu
 

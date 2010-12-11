@@ -25,53 +25,6 @@
 unsigned char bcast_mac_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 #endif
 
-extern unsigned char mbss_nolan_g;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_1;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_M_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_2_3;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_1;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_2;				/* Jiahao for MBSSID */
-extern unsigned char mbss_nolan_3;				/* Jiahao for MBSSID */
-
-int SSID1_to_SSID2(unsigned char *deva, unsigned char *devb)	/* Jiahao for MBSSID */
-{
-	if (!mbss_nolan_g)
-		return 0;
-
-	if ( mbss_nolan_M_1 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_M_2 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_M_3 && !strncmp(deva + 3, "2", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_1 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_2 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_3 && !strncmp(deva + 2, "1", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_2 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_2 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_2_3 && !strncmp(deva + 2, "2", 1) && !strncmp(devb + 2, "3", 1) )
-		return 1;
-
-	else if ( mbss_nolan_M_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 3, "2", 1) )
-		return 1;
-	else if ( mbss_nolan_1_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 2, "1", 1) )
-		return 1;
-	else if ( mbss_nolan_2_3 && !strncmp(deva + 2, "3", 1) && !strncmp(devb + 2, "2", 1) )
-		return 1;
-
-    return 0;
-}
-
 /* Don't forward packets to originating port or forwarding diasabled */
 static inline int should_deliver(struct net_bridge_port *p, 
 				 const struct sk_buff *skb)
@@ -79,10 +32,9 @@ static inline int should_deliver(struct net_bridge_port *p,
 #ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
 	unsigned char * dest;
 #endif
- 	if (skb->dev == p->dev ||
- 	    p->state != BR_STATE_FORWARDING ||
-	    SSID1_to_SSID2(skb->dev->name, p->dev->name))
+ 	if ((skb->dev == p->dev) || (p->state != BR_STATE_FORWARDING))
  		return 0;
+
 #ifdef CONFIG_BRIDGE_MULTICAST_BWCTRL
     dest = skb->mac.raw;
     if ((dest[0] & 1) && p->bandwidth !=0) {

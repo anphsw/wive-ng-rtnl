@@ -604,11 +604,4 @@ asmlinkage long sys_set_robust_list(struct robust_list_head __user *head,
 asmlinkage long sys_getcpu(unsigned __user *cpu, unsigned __user *node, struct getcpu_cache __user *cache);
 
 int kernel_execve(const char *filename, char *const argv[], char *const envp[]);
-
-asmlinkage int sys_track_flag(int __user *flag, unsigned long __user *addr);    // 1209 ASUS
-
-asmlinkage long sys_set_mbss_nolan(unsigned char flag);				/* Jiahao for MBSSID */
-asmlinkage long sys_set_mbss_nowan(unsigned char flag);				/* Jiahao for MBSSID */
-asmlinkage long sys_set_mbss_prio(unsigned char flag);				/* Jiahao for MBSSID */
-
 #endif
