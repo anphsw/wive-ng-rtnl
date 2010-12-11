@@ -607,7 +607,7 @@ static __always_inline int __do_follow_link(struct path *path, struct nameidata 
 		char *s = nd_get_link(nd);
 		error = 0;
 		if (s)
-			error = __vfs_follow_link(nd, s);
+			error = vfs_follow_link(nd, s);
 		if (dentry->d_inode->i_op->put_link)
 			dentry->d_inode->i_op->put_link(dentry, nd, cookie);
 	}
@@ -624,7 +624,7 @@ static __always_inline int __do_follow_link(struct path *path, struct nameidata 
  * Without that kind of total limit, nasty chains of consecutive
  * symlinks can cause almost arbitrarily long lookups. 
  */
-static inline int do_follow_link(struct path *path, struct nameidata *nd)
+static int do_follow_link(struct path *path, struct nameidata *nd)
 {
 	int err = -ELOOP;
 	if (current->link_count >= MAX_NESTED_LINKS)
@@ -1420,7 +1420,7 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
  *  3. We should have write and exec permissions on dir
  *  4. We can't do it if dir is immutable (done in permission())
  */
-static inline int may_create(struct inode *dir, struct dentry *child,
+static int may_create(struct inode *dir, struct dentry *child,
 			     struct nameidata *nd)
 {
 	if (child->d_inode)
