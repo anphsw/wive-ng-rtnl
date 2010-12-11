@@ -741,13 +741,5 @@ config ASUS_QOS
 	bool "Asus conntrack based QoS support Enable"
 	depends on NF_CONNTRACK_ENABLED
 
-config USER_CLEAN_NAT
-        default y
-        bool "Clean NAT session driver."
-        depends on IP_NF_CONNTRACK
-        ---help---
-          Pronets add the clean nat module.
-          If unsure, say M.
-
 endmenu
 
