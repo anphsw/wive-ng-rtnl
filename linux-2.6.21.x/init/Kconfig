@@ -479,7 +479,7 @@ config BASE_FULL
 
 config FUTEX
 	bool "Enable futex support" if EMBEDDED
-	default y
+	default n
 	select RT_MUTEXES
 	help
 	  Disabling this option will cause the kernel to be built without
