@@ -413,7 +413,6 @@ __init void prom_init(void)
 	_prom_argv = fw_arg1;
 	_prom_envp = fw_arg2;
 #endif
-
 	prom_init_cmdline();
 	prom_init_sysclk();
 
@@ -422,8 +421,8 @@ __init void prom_init(void)
 
 	serial_init(SURFBOARD_DEFAULT_BAUD);	/* Kernel driver serial init */
 	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
-	prom_setup_printf(prom_get_ttysnum());	/* Get tty name and init prompt */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
+	prom_setup_printf(prom_get_ttysnum());	/* Get tty name and init prompt */
 
 	prom_printf("\nLINUX started...\n");
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)

@@ -42,7 +42,9 @@
 #include <asm/bootinfo.h>
 
 char rt2880_cmdline[]=CONFIG_CMDLINE;
+extern char arcs_cmdline[CL_SIZE];
 
+#ifdef CONFIG_UBOOT_CMDLINE
 extern int prom_argc;
 extern int *_prom_argv;
 
@@ -51,8 +53,8 @@ extern int *_prom_argv;
  * This macro take care of sign extension.
  */
 #define prom_argv(index) ((char *)(((int *)(int)_prom_argv)[(index)]))
+#endif
 
-extern char arcs_cmdline[CL_SIZE];
 
 char * __init prom_getcmdline(void)
 {
@@ -61,13 +63,12 @@ char * __init prom_getcmdline(void)
 
 void  __init prom_init_cmdline(void)
 {
-	char *cp;
 #ifdef CONFIG_UBOOT_CMDLINE
 	int actr=1; /* Always ignore argv[0] */
 #endif
+	char *cp;
 
 	cp = &(arcs_cmdline[0]);
-
 #ifdef CONFIG_UBOOT_CMDLINE
 	while(actr < prom_argc) {
 	    strcpy(cp, prom_argv(actr));
@@ -80,10 +81,7 @@ void  __init prom_init_cmdline(void)
 	cp += strlen(rt2880_cmdline);
 	*cp++ = ' ';
 #endif
-
-
 	if (cp != &(arcs_cmdline[0])) /* get rid of trailing space */
 	    --cp;
 	*cp = '\0';
-	
 }
