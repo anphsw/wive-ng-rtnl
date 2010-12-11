@@ -62,6 +62,8 @@
 #define IE_WPA					221
 #define IE_RSN					48
 
+#define WPA_KDE_TYPE			0xdd
+
 //EAP Packet Type
 #define	EAPPacket		0
 #define	EAPOLStart		1
@@ -83,6 +85,8 @@
 #define LEN_PMKID					16
 #define LEN_PMK_NAME				16
 
+#define LEN_GMK						32
+
 #define LEN_PTK_KCK					16
 #define LEN_PTK_KEK					16
 #define LEN_TK						16	// The length Temporal key.
@@ -103,6 +107,7 @@
 #define OFFSET_OF_STA_TKIP_RX_MIC	(OFFSET_OF_PTK_TK + LEN_TK)
 #define OFFSET_OF_STA_TKIP_TX_MIC	(OFFSET_OF_AP_TKIP_TX_MIC + LEN_TKIP_MIC)
 
+#define LEN_KDE_HDR					6
 #define LEN_NONCE					32
 #define LEN_PN						6
 #define LEN_TKIP_IV_HDR				8
@@ -114,8 +119,23 @@
 #define LEN_WEP_IV_HDR				4
 #define LEN_ICV						4
 
+/* It's defined in IEEE Std 802.11-2007 Table 8-4 */
+typedef enum _WPA_KDE_ID
+{		
+   	KDE_RESV0,
+   	KDE_GTK,
+   	KDE_RESV2,
+   	KDE_MAC_ADDR,
+   	KDE_PMKID,
+   	KDE_SMK,
+   	KDE_NONCE,
+   	KDE_LIFETIME,
+   	KDE_ERROR,
+   	KDE_RESV_OTHER
+} WPA_KDE_ID;
+
 // EAPOL Key Information definition within Key descriptor format
-typedef	struct PACKED _KEY_INFO
+typedef	struct GNU_PACKED _KEY_INFO
 {
 #ifdef RT_BIG_ENDIAN
 	UCHAR	KeyAck:1;
@@ -145,7 +165,7 @@ typedef	struct PACKED _KEY_INFO
 }	KEY_INFO, *PKEY_INFO;
 
 // EAPOL Key descriptor format
-typedef	struct PACKED _KEY_DESCRIPTER
+typedef	struct GNU_PACKED _KEY_DESCRIPTER
 {
 	UCHAR		Type;
 	KEY_INFO	KeyInfo;
@@ -160,7 +180,7 @@ typedef	struct PACKED _KEY_DESCRIPTER
 	UCHAR		KeyData[0];
 }	KEY_DESCRIPTER, *PKEY_DESCRIPTER;
 
-typedef	struct PACKED _EAPOL_PACKET
+typedef	struct GNU_PACKED _EAPOL_PACKET
 {
 	UCHAR	 			ProVer;
 	UCHAR	 			ProType;
@@ -168,8 +188,17 @@ typedef	struct PACKED _EAPOL_PACKET
 	KEY_DESCRIPTER		KeyDesc;
 }	EAPOL_PACKET, *PEAPOL_PACKET;
 
+typedef struct GNU_PACKED _KDE_HDR
+{
+    UCHAR               Type;
+    UCHAR               Len;
+    UCHAR               OUI[3];
+    UCHAR               DataType;
+	UCHAR				octet[0];
+}   KDE_HDR, *PKDE_HDR;
+
 //802.11i D10 page 83
-typedef struct PACKED _GTK_ENCAP
+typedef struct GNU_PACKED _GTK_KDE
 {
 #ifndef RT_BIG_ENDIAN
     UCHAR               Kid:2;
@@ -182,57 +211,48 @@ typedef struct PACKED _GTK_ENCAP
     UCHAR               Kid:2;
     UCHAR               rsv1;    	
 #endif
-    UCHAR               GTK[MAX_LEN_GTK];
-}   GTK_ENCAP, *PGTK_ENCAP;
-
-typedef struct PACKED _KDE_ENCAP
-{
-    UCHAR               Type;
-    UCHAR               Len;
-    UCHAR               OUI[3];
-    UCHAR               DataType;
-    GTK_ENCAP      		GTKEncap;
-}   KDE_ENCAP, *PKDE_ENCAP;
+    UCHAR               GTK[0];
+}   GTK_KDE, *PGTK_KDE;
 
 // For WPA1
-typedef struct PACKED _RSNIE {
+typedef struct GNU_PACKED _RSNIE {
     UCHAR   oui[4];
     USHORT  version;
     UCHAR   mcast[4];
     USHORT  ucount;
-    struct PACKED {
+    struct GNU_PACKED {
         UCHAR oui[4];
     }ucast[1];
 } RSNIE, *PRSNIE;
 
 // For WPA2
-typedef struct PACKED _RSNIE2 {
+typedef struct GNU_PACKED _RSNIE2 {
     USHORT  version;
     UCHAR   mcast[4];
     USHORT  ucount;
-    struct PACKED {
+    struct GNU_PACKED {
         UCHAR oui[4];
     }ucast[1];
 } RSNIE2, *PRSNIE2;
 
 // AKM Suite
-typedef struct PACKED _RSNIE_AUTH {
+typedef struct GNU_PACKED _RSNIE_AUTH {
     USHORT acount;
-    struct PACKED {
+    struct GNU_PACKED {
         UCHAR oui[4];
     }auth[1];
 } RSNIE_AUTH,*PRSNIE_AUTH;
 
 // PMKID List
-typedef struct PACKED _RSNIE_PMKID {
+typedef struct GNU_PACKED _RSNIE_PMKID {
     USHORT pcount;
-    struct PACKED {
+    struct GNU_PACKED {
         UCHAR list[16];
     }pmkid[1];
 } RSNIE_PMKID,*PRSNIE_PMKID;
 
-typedef	union PACKED _RSN_CAPABILITIES	{
-	struct	PACKED {
+typedef	union GNU_PACKED _RSN_CAPABILITIES	{
+	struct	GNU_PACKED {
 #ifdef RT_BIG_ENDIAN
         USHORT		Rsvd:8;		
 		USHORT		MFPC:1;
@@ -254,7 +274,7 @@ typedef	union PACKED _RSN_CAPABILITIES	{
 	USHORT			word;
 }	RSN_CAPABILITIES, *PRSN_CAPABILITIES;
 
-typedef struct PACKED _EAP_HDR {
+typedef struct GNU_PACKED _EAP_HDR {
     UCHAR   ProVer;
     UCHAR   ProType;
     UCHAR   Body_Len[2];

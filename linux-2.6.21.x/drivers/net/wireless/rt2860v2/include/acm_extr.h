@@ -111,6 +111,7 @@
 #define ACM_CC_FUNC_11N					/* 11N support */
 #endif // DOT11_N_SUPPORT //
 
+//#define ACM_CC_FUNC_ACL				/* ACL function in AP mode */
 //#define ACM_CC_FUNC_AUX_TX_TIME		/* Accurate tx time */
 //#define ACM_CC_FUNC_STATS				/* ACM statistics count */
 //#define ACM_CC_FUNC_MBSS				/* ACM in multiple BSS */
@@ -128,16 +129,18 @@
 #define CONFIG_STA_SUPPORT_SIM			/* must define in station mode */
 #endif // CONFIG_STA_SUPPORT //
 
-#define ACM_LITTLE_ENDIAN				/* CPU endian mode */
-
-#ifdef DBG
-#define ACM_MEMORY_TEST					/* Memory alloc/free debug */
+#ifndef RT_BIG_ENDIAN
+#define ACM_LITTLE_ENDIAN				/* CPU little endian mode */
 #else
-#undef ACM_MEMORY_TEST					/* Memory alloc/free debug */
-#endif
+#define ACM_BIG_ENDIAN					/* CPU bit endian mode */
+#endif // RT_BIG_ENDIAN //
+
+#define ACM_MEMORY_TEST					/* Memory alloc/free debug */
 
 /* ex: OS_HZ = 100 means 100 ticks in a second, 1 jiffies = 1000000/100us */
-//#define ACM_JIFFIES_BASE				(1000000/OS_HZ)
+#ifdef LINUX
+#define ACM_OS_TIME_BASE				(1000000/OS_HZ)
+#endif // LINUX //
 
 
 
@@ -313,18 +316,14 @@
 		(__pAd)->AcmAvalCap -= (UINT16)((__Time)>>5);
 
 	/* get original settings for AIFSN */
-#define ACMR_AIFSN_DEFAULT_GET(__pAd, __AifsnAp, __AifsnBss)			\
-		memcpy((__AifsnAp), (__pAd)->CommonCfg.APEdcaParm.Aifsn, 4);	\
-		memcpy((__AifsnBss), (__pAd)->ApCfg.BssEdcaParm.Aifsn, 4);
+#define ACMR_AIFSN_DEFAULT_GET(__pAd, __AifsnAp, __AifsnBss)				\
+		ACMR_MEM_COPY((__AifsnAp), (__pAd)->CommonCfg.APEdcaParm.Aifsn, 4);	\
+		ACMR_MEM_COPY((__AifsnBss), (__pAd)->ApCfg.BssEdcaParm.Aifsn, 4);
 
 	/* get maximum supported rate */
 #ifdef ACM_CC_FUNC_11N
 #define ACMR_SUP_RATE_MAX_GET(__pAd, __pCdb, __MaxRate)					\
 		{																\
-			extern VOID RT28XX_IOCTL_MaxRateGet(						\
-							IN	RTMP_ADAPTER			*pAd,			\
-							IN	PHTTRANSMIT_SETTING		pHtPhyMode,		\
-							OUT	UINT32					*pRate);		\
 			RT28XX_IOCTL_MaxRateGet(									\
 							__pAd, &__pCdb->MaxHTPhyMode, &__MaxRate);	\
 		};
@@ -332,10 +331,6 @@
 
 #define ACMR_SUP_RATE_MAX_GET(__pAd, __pCdb, __MaxRate)					\
 		{																\
-			extern VOID RT28XX_IOCTL_MaxRateGet(						\
-							IN	RTMP_ADAPTER			*pAd,			\
-							IN	PHTTRANSMIT_SETTING		pHtPhyMode,		\
-							OUT	UINT32					*pRate);		\
 			RT28XX_IOCTL_MaxRateGet(									\
 							__pAd, &__pCdb->MaxHTPhyMode, &__MaxRate);	\
 			if (__MaxRate > 54000000)									\
@@ -416,8 +411,12 @@
 #endif // ACM_CC_FUNC_11N //
 
 	/* get channel busy time in a TBT */
-#define ACMR_CHAN_BUSY_GET(__pAd, __Time)				\
-	{	__Time = 0; }
+#define ACMR_CHAN_BUSY_GET(__pAd, __Time)			\
+	{	__Time = pAd->QloadLatestChannelBusyTimePri; }
+
+	/* get UAPSD Capability */
+#define ACMR_APSD_CAPABLE_GET(__pAd)				\
+		pAd->CommonCfg.bAPSDCapable
 
 #endif // CONFIG_AP_SUPPORT //
 
@@ -530,8 +529,36 @@
 		(__pAd->StaCfg.Psm == PWR_ACTIVE)
 
 	/* get channel busy time in a TBT (not supported) */
-#define ACMR_CHAN_BUSY_GET(__pAd, __Time)				\
+#define ACMR_CHAN_BUSY_GET(__pAd, __Time)			\
 	{	__Time = 0; }
+
+	/* get WMM & UAPSD Capability */
+#define ACMR_WMM_CAPABLE_GET(__pAd)					\
+		pAd->CommonCfg.bWmmCapable
+
+#define ACMR_APSD_CAPABLE_GET(__pAd)				\
+		pAd->CommonCfg.bAPSDCapable
+
+	/* Retry count change */
+#define ACMR_RETRY_DISABLE(__pAd)											\
+	{																		\
+		UINT32 __CSR=0;														\
+		RTMP_IO_READ32((__pAd), TX_RTY_CFG, &__CSR);						\
+		if ((__CSR & 0x0000FFFF) != 0x0000)									\
+			((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->RetryCountOldSettings =\
+				(__CSR & 0x0000FFFF);										\
+		__CSR = __CSR & 0xFFFF0000;											\
+		RTMP_IO_WRITE32((__pAd), TX_RTY_CFG, __CSR);						\
+	}
+
+#define ACMR_RETRY_ENABLE(__pAd)											\
+	{																		\
+		UINT32 __CSR=0;														\
+		RTMP_IO_READ32((__pAd), TX_RTY_CFG, &__CSR);						\
+		__CSR = __CSR | 													\
+			((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->RetryCountOldSettings;	\
+		RTMP_IO_WRITE32((__pAd), TX_RTY_CFG, __CSR);						\
+	}
 
 #endif // CONFIG_STA_SUPPORT //
 
@@ -566,40 +593,76 @@
 #define ACMR_SELF_MAC_GET(__pAd)	(__pAd)->CurrentAddress
 
 	/*	get current timestamp low 32-bit value */
+#ifdef RTMP_MAC_PCI
 
 #ifdef ACM_CC_FUNC_AUX_ADMIT_TIME
-#define ACMR_TIMESTAMP_GET(__pAd, __TimeStamp)			\
-	{													\
-		UINT32 __CSR=0;	UINT64 __Value64;				\
-		RTMP_IO_READ32((__pAd), TSF_TIMER_DW0, &__CSR);	\
-		__TimeStamp = (UINT64)__CSR;					\
-		RTMP_IO_READ32((__pAd), TSF_TIMER_DW1, &__CSR);	\
-		__Value64 = (UINT64)__CSR;						\
-		__TimeStamp |= (__Value64 << 32);				\
+#define ACMR_TIMESTAMP_GET(__pAd, __TimeStamp)				\
+	{														\
+		UINT32 __CSR=0;	UINT64 __Value64;					\
+		RTMP_IO_READ32((__pAd), TSF_TIMER_DW0, &__CSR);		\
+		__TimeStamp = (UINT64)__CSR;						\
+		RTMP_IO_READ32((__pAd), TSF_TIMER_DW1, &__CSR);		\
+		__Value64 = (UINT64)__CSR;							\
+		__TimeStamp |= (__Value64 << 32);					\
 	}
 
-#define ACMR_MEDIUM_TIME_GET(__pStream, __MediumTime)		\
+#define ACMR_ALLOWED_TIME_GET(__pStream, __MediumTime)		\
 	{														\
 		__MediumTime = __pStream->pTspec->MediumTime << 5;	\
 	}
 #else
 
-	/* same as USB */
-#define ACMR_TIMESTAMP_GET(__pAd, __TimeStamp)			\
-	{													\
-		ULONG __Time_MS;								\
-		NdisGetSystemUpTime(&__Time_MS);				\
-		__TimeStamp = __Time_MS * (1000000/OS_HZ);		\
+/* use jiffies to replace timestamp register get */
+/* we can not get register value in tasklet or ISR in USB */
+#define ACMR_TIMESTAMP_GET(__pAd, __TimeStamp)				\
+	{														\
+		ULONG __Time_MS;									\
+		NdisGetSystemUpTime(&__Time_MS);					\
+		__TimeStamp = __Time_MS * (ACM_OS_TIME_BASE);		\
 	}
 
-#define ACMR_MEDIUM_TIME_GET(__pStream, __MediumTime)		\
+/*
+	In USB/LINUX, we use jiffies to replace timestamp get.
+	But in PC, 1 tick is 4ms = 4000us.
+	Sometimes we will see extra 8000us will be counted to test result and the
+	test will fail. So we need to minus the real medium time with 2 tick time.
+
+	But in test plan, it will check minium & maximum used time.
+	So it still may not pass the WiFi ACM test plan, carefully for the method!
+*/
+#define ACMR_ALLOWED_TIME_GET(__pStream, __MediumTime)		\
 	{														\
 		__MediumTime = __pStream->pTspec->MediumTime << 5;	\
-		if (__MediumTime > (2000000/OS_HZ))					\
-			__MediumTime -= (2000000/OS_HZ);				\
+		if (__MediumTime > (2*ACM_OS_TIME_BASE))			\
+			__MediumTime -= (2*ACM_OS_TIME_BASE);			\
 	}
 #endif // ACM_CC_FUNC_AUX_ADMIT_TIME //
 
+#else // RTMP_MAC_USB //
+
+/* use jiffies to replace timestamp register get */
+/* we can not get register value in tasklet or ISR in USB */
+#define ACMR_TIMESTAMP_GET(__pAd, __TimeStamp)				\
+	{														\
+		ULONG __Time_MS;									\
+		NdisGetSystemUpTime(&__Time_MS);					\
+		__TimeStamp = __Time_MS * (ACM_OS_TIME_BASE);		\
+	}
+
+/*
+	In USB/LINUX, we use jiffies to replace timestamp get.
+	But in PC, 1 tick is 4ms = 4000us.
+	Sometimes we will see 8000us will be added to test result and the
+	test will fail.
+	So we need to minus the real medium time with 2 tick time.
+*/
+#define ACMR_ALLOWED_TIME_GET(__pStream, __MediumTime)		\
+	{														\
+		__MediumTime = __pStream->pTspec->MediumTime << 5;	\
+		if (__MediumTime > (2*ACM_OS_TIME_BASE))			\
+			__MediumTime -= (2*ACM_OS_TIME_BASE);			\
+	}
+#endif // RTMP_MAC_USB //
 
 	/* channel busy time, bit 0 must be set to 1 to enable */
 #define ACMR_CHAN_BUSY_DETECT_ENABLE(__pAd)				\
@@ -614,6 +677,93 @@
 
 #define ACMP_NUM_OF_TSPEC_OUT_GET(__pCdb)				\
 	(__pCdb)->ACM_NumOfTspecOut
+
+
+/* ------------------ MARCO: LIST -------------------------- */
+
+#define ACMR_LIST					LIST_HEADER
+
+/* init the ACL list */
+#define ACMR_LIST_INIT				initList
+
+/* insert a ACL station */
+#define ACMR_LIST_INSERT_TAIL(__pAd, __pEntry)							\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	if ((__pList != NULL) && (__pEntry != NULL))						\
+		insertTailList((__pList), (LIST_ENTRY *)(__pEntry));			\
+}
+
+/* get a ACL station from the head of list */
+#define ACMR_LIST_REMOVE_HEAD(__pAd, __pEntry)							\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	if ((__pList != NULL) && (__pEntry != NULL))						\
+		__pEntry = (ACM_ACL_ENTRY *)removeHeadList((__pList));			\
+}
+
+/* get number of ACL station */
+#define ACM_LIST_SIZE_GET(__pAd, __Size)								\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	if (__pList != NULL)												\
+		__Size = getListSize((__pList));								\
+}
+
+/* get a ACL station by MAC */
+#define ACM_LIST_ENTRY_GET(__pAd, __pMac, __FlgIsFound, __pEntry)		\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	UINT32 __Size, __IdEntry;											\
+	ACM_ACL_ENTRY *__pAclEntry;											\
+	__Size = getListSize((__pList));									\
+	__FlgIsFound = FALSE;												\
+	for(__IdEntry=0; __IdEntry<__Size; __IdEntry++)						\
+	{																	\
+		__pAclEntry = (ACM_ACL_ENTRY *)removeHeadList((__pList));		\
+		if (ACMR_MAC_CMP(__pAclEntry->STA_MAC, __pMac) == 0)			\
+		{																\
+			if (__pEntry != NULL)										\
+			ACMR_MEM_COPY(__pEntry, __pAclEntry, sizeof(ACM_ACL_ENTRY));\
+			insertTailList((__pList), (LIST_ENTRY *)(__pAclEntry));		\
+			__FlgIsFound = TRUE;										\
+			break;														\
+		}																\
+		insertTailList((__pList), (LIST_ENTRY *)(__pAclEntry));			\
+	}																	\
+}
+
+/* delete a ACL station by MAC */
+#define ACM_LIST_ENTRY_DEL(__pAd, __pMac)								\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	UINT32 __Size, __IdEntry;											\
+	ACM_ACL_ENTRY *__pAclEntry;											\
+	__Size = getListSize((__pList));									\
+	for(__IdEntry=0; __IdEntry<__Size; __IdEntry++)						\
+	{																	\
+		__pAclEntry = (ACM_ACL_ENTRY *)removeHeadList((__pList));		\
+		if (ACMR_MAC_CMP(__pAclEntry->STA_MAC, __pMac) == 0)			\
+		{																\
+			ACMR_MEM_FREE(__pAclEntry);									\
+			break;														\
+		}																\
+		insertTailList((__pList), (LIST_ENTRY *)(__pAclEntry));			\
+	}																	\
+}
+
+/* clear all ACL station records */
+#define ACM_LIST_EMPTY(__pAd)											\
+{																		\
+	ACMR_LIST *__pList = &((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_List;\
+	ACM_ACL_ENTRY *__pAclEntry;											\
+	__pAclEntry = (ACM_ACL_ENTRY *)removeHeadList((__pList));			\
+	while(__pAclEntry != NULL)											\
+	{																	\
+		ACMR_MEM_FREE(__pAclEntry);										\
+		__pAclEntry = (ACM_ACL_ENTRY *)removeHeadList((__pList));		\
+	}																	\
+}
 
 
 /* ------------------ MARCO: TASK & TIMER ------------------ */
@@ -668,7 +818,7 @@
 
 	/* init a tasklet */
 #define ACMR_TASK_INIT(__pAd, __TaskletBlock, __TaskletFunc, __TaskletData, __TkName)	\
-	tasklet_init(&(__TaskletBlock), __TaskletFunc, (unsigned long)__TaskletData);
+	tasklet_init(&(__TaskletBlock), __TaskletFunc, __TaskletData);
 #endif // ACMR_OS_LINUX //
 
 
@@ -678,7 +828,7 @@
 
 	/* init a tasklet */
 #define ACMR_TASK_INIT(__pAd, __TaskletBlock, __TaskletFunc, __TaskletData, __TkName)	\
-	RTMP_NET_TASK_INIT(&(__TaskletBlock), __TaskletFunc, (unsigned long)__TaskletData); \
+	RTMP_NET_TASK_INIT(&(__TaskletBlock), __TaskletFunc, __TaskletData); \
 	strcpy(&((__TaskletBlock).taskName[0]), __TkName);
 #endif // ACMR_OS_VXWORKS //
 
@@ -809,7 +959,7 @@
 	}
 
 #define ACMR_PKT_COPY(__pMblk, __BufFrame, __Len)	\
-		memcpy(skb_put(RTPKT_TO_OSPKT(__pMblk), __Len), __BufFrame, __Len)
+		ACMR_MEM_COPY(skb_put(RTPKT_TO_OSPKT(__pMblk), __Len), __BufFrame, __Len)
 #define ACMR_PKT_FREE(__pAd, __pMblk)				\
 		RELEASE_NDIS_PACKET((__pAd), (__pMblk), NDIS_STATUS_SUCCESS)
 
@@ -841,6 +991,13 @@
 #define ACMR_ENCRYPT_AES					Ndis802_11Encryption3Enabled
 
 	/*
+		1. the RALINK AGGREGATION type;
+		2. the AMSDU type;
+	*/
+#define ACMR_AGG_RALINK						TX_RALINK_FRAME
+#define ACMR_AGG_AMSDU						TX_AMSDU_FRAME
+
+	/*
 		1. the ACTION sub type;
 		2. get the data pointer of a packet;
 		3. get the data length of a packet;
@@ -859,13 +1016,13 @@
 #define ACMR_WLAN_PKT_RA_GET(__pMbuf, __Addr)							\
 	{																	\
 		ACMR_WLAN_HEADER *__pHdr = (ACMR_WLAN_HEADER *)__pMbuf;			\
-		memcpy(__Addr, __pHdr->Addr1, 6);								\
+		ACMR_MEM_COPY(__Addr, __pHdr->Addr1, 6);						\
 	}
 
 #define ACMR_WLAN_PKT_TA_GET(__pMbuf, __Addr)							\
 	{																	\
 		ACMR_WLAN_HEADER *__pHdr= (ACMR_WLAN_HEADER *)__pMbuf;			\
-		memcpy(__Addr, __pHdr->Addr2, 6);								\
+		ACMR_MEM_COPY(__Addr, __pHdr->Addr2, 6);						\
 	}
 
 #define ACMR_WLAN_PKT_TYPE_GET(__pMbuf, __Type)							\
@@ -886,19 +1043,19 @@
 #define ACMR_WLAN_PKT_RA_SET(__pMbuf, __Addr)							\
 	{																	\
 		ACMR_WLAN_HEADER *__pHdr = (ACMR_WLAN_HEADER *)__pMbuf;			\
-		memcpy(__pHdr->Addr1, __Addr, 6);								\
+		ACMR_MEM_COPY(__pHdr->Addr1, __Addr, 6);						\
 	}
 
 #define ACMR_WLAN_PKT_TA_SET(__pMbuf, __Addr)							\
 	{																	\
 		ACMR_WLAN_HEADER *__pHdr = (ACMR_WLAN_HEADER *)__pMbuf;			\
-		memcpy(__pHdr->Addr2, __Addr, 6);								\
+		ACMR_MEM_COPY(__pHdr->Addr2, __Addr, 6);						\
 	}
 
 #define ACMR_WLAN_PKT_BSSID_SET(__pMbuf, __Addr)						\
 	{																	\
 		ACMR_WLAN_HEADER *__pHdr = (ACMR_WLAN_HEADER *)__pMbuf;			\
-		memcpy(__pHdr->Addr3, __Addr, 6);								\
+		ACMR_MEM_COPY(__pHdr->Addr3, __Addr, 6);						\
 	}
 
 	/*
@@ -978,13 +1135,20 @@
 		7. MAC compare;
 	*/
 #ifndef ACM_MEMORY_TEST
-#define ACMR_MEM_ALLOC(__Size)				kmalloc(__Size, GFP_ATOMIC)
-#define ACMR_MEM_FREE(__Mem)				kfree(__Mem)
+#define ACMR_MEM_ALLOC(__pMem, __Size, __Type)					\
+		os_alloc_mem(NULL, (UCHAR **)&(__pMem), __Size)
+
+#define ACMR_MEM_FREE(__pMem)									\
+		os_free_mem(NULL, __pMem)
 #else
-#define ACMR_MEM_ALLOC(__Size)				kmalloc(__Size, GFP_ATOMIC);\
-											gAcmMemAllocNum ++;
-#define ACMR_MEM_FREE(__Mem)				{ kfree(__Mem);				\
-											gAcmMemFreeNum ++; }
+
+#define ACMR_MEM_ALLOC(__pMem, __Size, __Type)					\
+		os_alloc_mem(NULL, (UCHAR **)&(__pMem), __Size);		\
+		gAcmMemAllocNum ++;
+
+#define ACMR_MEM_FREE(__pMem)									\
+		{ os_free_mem(NULL, __pMem);							\
+		gAcmMemFreeNum ++; }
 #endif // ACM_MEMORY_TEST //
 
 #define ACMR_MEM_COPY(__Dst, __Src, __Len)	memcpy(__Dst, __Src, __Len)
@@ -1274,7 +1438,7 @@ typedef struct _ACM_TS_INFO {
 #define ACM_SCHEDULE_APSD				0x03
 	UCHAR  Schedule;
 
-} PACKED ACM_TS_INFO;
+} GNU_PACKED ACM_TS_INFO;
 
 /*
 	Unspecified parameter sin these fields as indicated by a zero value indicate
@@ -1409,7 +1573,7 @@ typedef struct _ACM_TSPEC {
 	*/
 	UINT32  MediumTime;
 
-} PACKED ACM_TSPEC;
+} GNU_PACKED ACM_TSPEC;
 
 /* Stream information */
 typedef struct _ACM_STREAM_INFO {
@@ -1507,8 +1671,8 @@ typedef struct _ACM_CTRL_INFO {
 	/* out time = AC0~3 dn for AP mode; AC0~3 up for STA mode */
 	/* ac time = AC0 up + AC0 dn or AC1 up + AC1 dn or ... */
 	UINT32 AcmTotalTime;						/* total ACM used time */
-	UINT32 AcmOutTime[ACM_DEV_NUM_OF_AC];		/* Out time for different AC */
-	UINT32 AcmAcTime[ACM_DEV_NUM_OF_AC];		/* Used time for different AC */
+	UINT32 AcmOutTime[ACM_DEV_NUM_OF_AC];		/* Out time for each AC */
+	UINT32 AcmAcTime[ACM_DEV_NUM_OF_AC];		/* Used time for each AC */
 
 	/* the number for uplink, dnlink, bidirectional link, or direct link */
 	UINT32 LinkNumUp, LinkNumDn, LinkNumBi, LinkNumDi;
@@ -1521,7 +1685,6 @@ typedef struct _ACM_CTRL_INFO {
 	UINT32	DatlBorAcBw[ACM_DEV_NUM_OF_AC][ACM_DEV_NUM_OF_AC];
 
 #ifdef CONFIG_AP_SUPPORT
-#define ACMR_AVAL_ADM_CAP_NONE	0xFFFF
 	UINT16 AvalAdmCapAc[ACM_DEV_NUM_OF_AC]; /* for each AC, unit: 32us */
 #endif // CONFIG_AP_SUPPORT //
 
@@ -2107,6 +2270,8 @@ Arguments:
 	pMbuf				- the received frame
 	QueueTypeCur		- the current used queue type
 	FlgIsForceToHighAc	- 1: force the packet to AC3
+	AggType				- ACMR_AGG_RALINK or ACMR_AGG_AMSDU
+	AggId				- the aggregation number, base 1
 
 Return Value:
 	Queue Type: AC0 ~ AC3
@@ -2122,7 +2287,9 @@ ACM_EXTERN UINT32 ACMP_MsduClassify(
 	ACM_PARAM_IN	ACMR_STA_DB				*pCdb,
 	ACM_PARAM_IN	ACMR_MBUF				*pMbuf,
 	ACM_PARAM_IN	UINT32					QueueTypeCur,
-	ACM_PARAM_IN	UCHAR					FlgIsForceToHighAc);
+	ACM_PARAM_IN	BOOLEAN					FlgIsForceToHighAc,
+	ACM_PARAM_IN	UCHAR					AggType,
+	ACM_PARAM_IN	UCHAR					AggId);
 
 /*
 ========================================================================
@@ -2253,7 +2420,7 @@ ACM_EXTERN VOID ACMP_NullTspecSupportSignal(
 /*
 ========================================================================
 Routine Description:
-	Update UAPSD states after power save ADDTS Response is sent out.
+	Update UAPSD states after ADDTS Response or DELTS is sent out.
 
 Arguments:
 	pAd				- WLAN control block pointer
@@ -2449,6 +2616,24 @@ ACM_EXTERN UINT32 ACMP_StreamNumGet(
 /*
 ========================================================================
 Routine Description:
+	Translate factor decimal part binary to decimal. (unit: 1/100)
+
+Arguments:
+	BIN				- the binary of decimal part
+
+Return Value:
+	the decimal
+
+Note:
+	Ex: 0b0001 1000 0000 0000 ==> 0.75
+========================================================================
+*/
+UINT32 ACM_SurplusFactorDecimalBin2Dec(
+	ACM_PARAM_IN	UINT32				BIN);
+
+/*
+========================================================================
+Routine Description:
 	Delete all activated TSPECs.
 
 Arguments:
@@ -2573,6 +2758,26 @@ ACM_EXTERN ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 	ACM_PARAM_IN	ACM_TCLAS				*pTclasSrc,
 	ACM_PARAM_IN	UCHAR					TclasProcessing,
 	ACM_PARAM_IN	UCHAR					StreamType);
+
+/*
+========================================================================
+Routine Description:
+	Adjust retry count limit automatically.
+
+Arguments:
+	pAd				- WLAN control block pointer
+
+Return Value:
+	None
+
+Note:
+	Only for QSTA.
+
+	No retry count for 'active' mode station.
+========================================================================
+*/
+VOID ACMP_RetryCountCtrl(
+ 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd);
 
 /*
 ========================================================================

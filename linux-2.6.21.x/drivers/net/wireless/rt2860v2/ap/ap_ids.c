@@ -53,6 +53,7 @@ VOID RTMPIdsStop(
 	}
 }
 
+#ifdef SYSTEM_LOG_SUPPORT
 VOID RTMPHandleIdsEvent(
 	IN PRTMP_ADAPTER	pAd)
 {
@@ -75,7 +76,7 @@ VOID RTMPHandleIdsEvent(
 	FloodFrameThreshold[3] = pAd->ApCfg.ProbeReqFloodThreshold;
 	FloodFrameThreshold[4] = pAd->ApCfg.DisassocFloodThreshold;
 	FloodFrameThreshold[5] = pAd->ApCfg.DeauthFloodThreshold;
-	FloodFrameThreshold[6] = pAd->ApCfg.EapReqFooldThreshold;
+	FloodFrameThreshold[6] = pAd->ApCfg.EapReqFloodThreshold;
 
 	// trigger flooding traffic event
 	for (j = 0; j < IW_FLOOD_EVENT_TYPE_NUM; j++)
@@ -126,10 +127,8 @@ VOID RTMPHandleIdsEvent(
 		}					
 	}
 
-	
-			
-	
 }
+#endif // SYSTEM_LOG_SUPPORT //
 
 VOID RTMPClearAllIdsCounter(
 	IN PRTMP_ADAPTER	pAd)
@@ -181,9 +180,11 @@ VOID RTMPIdsPeriodicExec(
 
 	pAd->ApCfg.IDSTimerRunning = FALSE;
 
+#ifdef SYSTEM_LOG_SUPPORT
 	// when IDS occured, send out wireless event
 	if (pAd->CommonCfg.bWirelessEvent)	
 		RTMPHandleIdsEvent(pAd);
+#endif // SYSTEM_LOG_SUPPORT //
 
 	// clear all IDS counter
 	RTMPClearAllIdsCounter(pAd);
@@ -442,12 +443,12 @@ VOID rtmp_read_ids_from_file(
 		DBGPRINT(RT_DEBUG_TRACE, ("DeauthFloodThreshold = %d\n", pAd->ApCfg.DeauthFloodThreshold));
 	}
 
-	//EapReqFooldThreshold
-	if(RTMPGetKeyParameter("EapReqFooldThreshold", tmpbuf, 10, buffer, TRUE))
+	//EapReqFloodThreshold
+	if(RTMPGetKeyParameter("EapReqFloodThreshold", tmpbuf, 10, buffer, TRUE))
 	{						
-		pAd->ApCfg.EapReqFooldThreshold = simple_strtol(tmpbuf, 0, 10);
+		pAd->ApCfg.EapReqFloodThreshold = simple_strtol(tmpbuf, 0, 10);
 							
-		DBGPRINT(RT_DEBUG_TRACE, ("EapReqFooldThreshold = %d\n", pAd->ApCfg.EapReqFooldThreshold));
+		DBGPRINT(RT_DEBUG_TRACE, ("EapReqFloodThreshold = %d\n", pAd->ApCfg.EapReqFloodThreshold));
 	}
 }
 

@@ -85,6 +85,8 @@ typedef struct _ULED_PARAMETER
 	UINT8 LedMode;
 } ULED_PARAMETER, *PULED_PARAMETER;
 
+extern RALINK_TIMER_STRUCT LedCheckTimer;
+extern unsigned char CheckTimerEbl;
 
 INT Show_LedCfg_Proc(
 	IN PRTMP_ADAPTER pAd,

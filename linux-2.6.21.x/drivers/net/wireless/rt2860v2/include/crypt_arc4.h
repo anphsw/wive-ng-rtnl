@@ -28,11 +28,7 @@
 #ifndef __CRYPT_ARC4_H__
 #define __CRYPT_ARC4_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
 #include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
 
 /* ARC4 definition & structure */
 #define ARC4_KEY_BLOCK_SIZE 256

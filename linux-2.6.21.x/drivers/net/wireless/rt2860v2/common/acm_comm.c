@@ -18,12 +18,46 @@
 
 	All related WMM ACM common (AP/STA) function body.
 
+	History:
+		1. 2009/08/26	Sample Lin
+			(1) Move ACM_APSD_Ctrl() to ACM_TC_Destroy()
+			(2) Do not delete TSPEC if DELTS is not sent to STA when STA
+				is in Power Save mode, i.e. UAPSD mode.
+			(3) Duplicate action frames to legacy PS queue
+				in AP_QueuePsActionPacket if UAPSD of VO is enabled,
+				not all ACs are UAPSD mode and STA is in PS mode.
+		2. 2009/09/29	Sample Lin
+			(1) Improve WMM ACM TCLAS add command in acm_iocl.c.
+			(2) No need check timeout if timeout function is disabled in
+				ACMP_DataNullHandle().
+			(3) No need TCLAS UP check in ACMP_DataNullHandle().
+		3. 2009/11/09	Sample Lin
+			(1) Add some TODO in the fucture.
+		4. 2009/12/15	Sample Lin
+			(1) Fix bugs in CPU 64bit.
+		5. 2009/12/22	Sample Lin
+			(1) Fix bugs for big-endian mode in acm_extr.h.
+		6. 2010/01/07	Sample Lin
+			(1) Add function: ACL list. (admit control list)
+				Only accept ACM request in the list.
+			(2) Add function: Aggregation (AMSDU)
+				Take care about aggregation in tx time fomula.
+			(3) Fix bug: LenDataId --
+				No need to do "LenDataId --" when getting LenDataId.
+				EX: Data Size = 64, LenDataId will be 64 >> 5 = 2
+				So the tx time of 64B will be same as the tx time of 95B.
+				(64+32-1 = 95B)
+
 ***************************************************************************/
+
+
 
 
 #include "rt_config.h"
 
 //#define PERFORMANCE_IMPACT_TEST /* only for test */
+//#define WMM_ACM_FUNC_DEBUG /* only for function hang debug */
+//#define WMM_ACM_PKT_NUM_DEBUG /* only for ACM packet number debug */
 
 #ifdef WMM_ACM_SUPPORT
 
@@ -33,13 +67,16 @@
 #include "acm_edca.h" /* used for edca/wmm */
 
 
-/* ----- Extern Variable ----- */
-/* other modules */
-extern VOID RT28XX_IOCTL_MaxRateGet(
-	IN	RTMP_ADAPTER			*pAd,
-	IN	PHTTRANSMIT_SETTING		pHtPhyMode,
-	OUT	UINT32					*pRate);
+#ifdef WMM_ACM_FUNC_DEBUG
+#define WMM_ACM_FUNC_NAME_PRINT(__pMsg)	\
+	ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_func> %s: %s\n", __FUNCTION__, __pMsg));
 
+#else
+#define WMM_ACM_FUNC_NAME_PRINT(__pMsg)
+#endif // WMM_ACM_FUNC_DEBUG //
+
+/* ----- Extern Variable ----- */
+/* other WLAN modules */
 extern VOID BA_MaxWinSizeReasign(
 	IN PRTMP_ADAPTER	pAd,
 	IN MAC_TABLE_ENTRY  *pEntryPeer,
@@ -69,6 +106,10 @@ static const UCHAR gAcmRateG[8] =
 
 /* cck & ofdm MCS */
 #define ACM_RATE_UNIT		((UINT32)100000)	/* 100000bps */
+#define ACM_CCK_LPM_MIN_MCS		0
+#define ACM_CCK_LPM_MAX_MCS		3
+#define ACM_CCK_SPM_MIN_MCS		8
+#define ACM_CCK_SPM_MAX_MCS		11
 
 UINT8 gAcmMCS_CCK[2][4][2] =
 	{
@@ -161,12 +202,14 @@ static const UINT16 gAcmRateNdbps[2][32] =
 
 static const UINT32 gAcmRateNes[2] = { 0x00000000, 0xF0E00000 };
 
-
 #ifndef ACM_CC_FUNC_AUX_TX_TIME
-static UINT16 gAcmTxTimeBodyHT[2][2][ACM_RATE_MAX_NUM_HT][ACM_PRE_TIME_DATA_SIZE_NUM][2];
+
+
+static UINT16 gAcmTxTimeBodyHT[2][2][ACM_RATE_MAX_NUM_HT][ACM_PRE_TIME_DATA_SIZE_NUM][3];
 
 /* tx time for block ack whatever 20/40 or GI */
 static UINT16 gAcmTxTimeOthersHT;
+
 #endif // ACM_CC_FUNC_AUX_TX_TIME //
 
 #endif // ACM_CC_FUNC_11N //
@@ -222,25 +265,26 @@ ACM_FUNC_STATUS ACMP_Init(
 
 
 	/* allocate ACM Control Block memory */
-	ACMR_ADAPTER_DB = ACMR_MEM_ALLOC(sizeof(ACM_CTRL_BLOCK));
+	ACMR_MEM_ALLOC(ACMR_ADAPTER_DB, sizeof(ACM_CTRL_BLOCK), (VOID *));
 	if (ACMR_ADAPTER_DB == NULL)
 		return ACM_RTN_FAIL;
 	/* End of if */
 	ACMR_MEM_ZERO(ACMR_ADAPTER_DB, sizeof(ACM_CTRL_BLOCK));
 
 	/* init tasklets */
+	/* Note: pAd can not be casted to non-ULONG, ex: (UINT32)pAd */
 	ACMR_TASK_INIT(pAd, ACMR_CB->TaskletTspecReqCheck,
-					ACM_TASK_TC_ReqCheck, (UINT32)pAd, "ACM_TCREQ");
+					ACM_TASK_TC_ReqCheck, pAd, "ACM_TCREQ");
 
 	ACMR_TASK_INIT(pAd, ACMR_CB->TaskletStreamAliveCheck,
-					ACM_TASK_STM_Check, (UINT32)pAd, "ACM_AVCK");
+					ACM_TASK_STM_Check, pAd, "ACM_AVCK");
 
 	/* init timers */
 	ACMR_TIMER_INIT(pAd, ACMR_CB->TimerTspecReqCheck,
-					ACMP_TR_TC_ReqCheck, (UINT32)pAd);
+					ACMP_TR_TC_ReqCheck, pAd);
 
 	ACMR_TIMER_INIT(pAd, ACMR_CB->TimerStreamAliveCheck,
-					ACMP_TR_STM_Check, (UINT32)pAd);
+					ACMP_TR_STM_Check, pAd);
 
 	/* init other parameters */
 	pEdcaParam = &ACMR_CB->EdcaCtrlParam;
@@ -290,6 +334,12 @@ ACM_FUNC_STATUS ACMP_Init(
 
 	/* init DATL */
 	pEdcaParam->FlgDatl = FlgDatl;
+
+#ifdef ACM_CC_FUNC_ACL
+	/* init link list */
+	ACMR_CB->ACL_IsEnabled = FALSE;
+	ACMR_LIST_INIT(&ACMR_CB->ACL_List);
+#endif // ACM_CC_FUNC_ACL //
 #endif // CONFIG_AP_SUPPORT //
 
 	pEdcaParam->DatlBwMin[ACM_EDCA_VO_AC_QUE_ID] = ACM_DATL_BW_MIN_VO;
@@ -315,16 +365,16 @@ ACM_FUNC_STATUS ACMP_Init(
 
 	/* activate a general timer */
 	ACMR_TASK_INIT(pAd, ACMR_CB->TaskletGeneral,
-					ACM_TASK_General, (UINT32)pAd, "ACM_OTHER");
+					ACM_TASK_General, (ULONG)pAd, "ACM_OTHER");
 
 	ACMR_TIMER_INIT(pAd, ACMR_CB->TimerGeneral,
-					ACMP_TR_TC_General, (UINT32)pAd);
+					ACMP_TR_TC_General, (ULONG)pAd);
 
 #if defined(ACM_CC_FUNC_MBSS) || defined(ACM_CC_FUNC_CHAN_UTIL_MONITOR)
 	ACMR_TIMER_ENABLE(ACMR_CB->FlgTimerGeneralEnable,
 						ACMR_CB->TimerGeneral,
 						ACM_TIMER_GENERAL_PERIOD_TIMEOUT);
-#endif
+#endif // ACM_CC_FUNC_MBSS || ACM_CC_FUNC_CHAN_UTIL_MONITOR //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef ACM_CC_FUNC_CHAN_UTIL_MONITOR
@@ -370,6 +420,12 @@ ACM_FUNC_STATUS ACMP_Release(
 	ACMR_TIMER_DISABLE(ACMR_CB->FlgTimerGeneralEnable,
 						ACMR_CB->TimerGeneral);
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+	ACM_LIST_EMPTY(pAd);
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
+
 	ACM_TC_ReleaseAll(pAd);
 	ACM_CMD_Release(pAd);
 
@@ -378,8 +434,10 @@ ACM_FUNC_STATUS ACMP_Release(
 	ACMR_ADAPTER_DB = NULL;
 
 #ifdef ACM_MEMORY_TEST
-	ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_msg> ACM_MEM_Alloc_Num = %d\n", gAcmMemAllocNum));
-	ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_msg> ACM_MEM_Free_Num  = %d\n", gAcmMemFreeNum));
+	ACMR_DEBUG(ACMR_DEBUG_ERR,
+				("acm_msg> ACM_MEM_Alloc_Num = %d\n", gAcmMemAllocNum));
+	ACMR_DEBUG(ACMR_DEBUG_ERR,
+				("acm_msg> ACM_MEM_Free_Num  = %d\n", gAcmMemFreeNum));
 #endif // ACM_MEMORY_TEST //
 
 	return ACM_RTN_OK;
@@ -409,6 +467,8 @@ ACM_FUNC_STATUS ACMP_BandwidthInfoGet(
 	ACM_CTRL_PARAM *pEdcaParam;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if ((pAd == NULL) || (pInfo == NULL))
@@ -490,6 +550,8 @@ ACM_FUNC_STATUS ACMP_BandwidthInfoSet(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if (pAd == NULL)
 	{
@@ -550,6 +612,8 @@ ACM_FUNC_STATUS ACMP_BE_IsReallyToReleaseWhenQueFull(
 	UINT32 QueueType;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* check if the packet is BE and ACM of BE is enabled */
 	if ((QueIdx == ACM_EDCA_BE_AC_QUE_ID) &&
 		(ACMR_CB->EdcaCtrlParam.FlgAcmStatus[ACM_EDCA_BE_AC_QUE_ID]))
@@ -607,6 +671,8 @@ ACM_FUNC_STATUS ACMP_BE_QueueFullHandle(
 	ACM_PARAM_IN	ACMR_MBUF				*pMbuf)
 {
 #ifdef ACM_CC_FUNC_BE_BW_CTRL
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (pCdb->ACM_NumOfOutTspecInAc[ACM_EDCA_BE_AC_QUE_ID] > 0)
 	{
 		/* we only need to do protection when BE TSPEC exists */
@@ -649,7 +715,7 @@ ACM_FUNC_STATUS ACMP_BE_QueueFullHandle(
 
 						RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
 
-						/* discard the packet without TSPEC */
+						/* discard the packet without matched TSPEC */
 						RELEASE_NDIS_PACKET(pAd,
 											QUEUE_ENTRY_TO_PACKET(pQueueEntry),
 											NDIS_STATUS_FAILURE);
@@ -697,6 +763,8 @@ ACM_FUNC_STATUS ACMP_ControlInfomationGet(
 #endif // CONFIG_AP_SUPPORT //
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if ((pAd == NULL) || (pInfo == NULL))
@@ -770,7 +838,7 @@ ACM_FUNC_STATUS ACMP_ControlInfomationGet(
 		else
 		{
 			/* not support for the AC */
-			pInfo->AvalAdmCapAc[IdAcNum] = ACMR_AVAL_ADM_CAP_NONE;
+			pInfo->AvalAdmCapAc[IdAcNum] = pEdcaParam->AvalAdmCap; /* unit: 32us */
 		} /* End of if */
 	} /* End of for */
 #endif // CONFIG_AP_SUPPORT //
@@ -810,6 +878,7 @@ VOID ACMP_DataNullHandle(
 	ACM_PARAM_IN	ACMR_STA_DB				*pCdb,
 	ACM_PARAM_IN	ACMR_WLAN_HEADER		*pHeader)
 {
+	ACM_CTRL_PARAM *pEdcaParam;
 	ACM_ENTRY_INFO *pStaAcmInfo;
 	ACM_STREAM **ppStmListIn;
 	ACM_STREAM *pStream;
@@ -820,6 +889,8 @@ VOID ACMP_DataNullHandle(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	/*
 		We will check ACM_NumOfTspecIn of pCdb before calling the function;
@@ -827,6 +898,11 @@ VOID ACMP_DataNullHandle(
 	*/
 //	if (!ACMR_IS_ENABLED(pAd))
 //		return;
+	/* End of if */
+
+	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
+	if (pEdcaParam->FlgIsTspecTimeoutEnable == 0)
+		return; /* no need to do TSPEC timeout check */
 	/* End of if */
 
 	/* init */
@@ -839,7 +915,11 @@ VOID ACMP_DataNullHandle(
 		(FrmSubType == ACMR_FME_SUB_TYPE_QOS_NULL))
 	{
 #ifdef ACM_CC_FUNC_TCLAS
-		/* TODO: we need to compare packet with all TCLAS to get UP */
+		/*
+			TODO: We need to compare packet with all TCLAS to get UP.
+			Solution: Currently we use same UP for all TCLAS in a TSPEC.
+		*/
+		UP = ACM_TID_GET(QosCtrl);
 #else
 		UP = ACM_TID_GET(QosCtrl);
 #endif // ACM_CC_FUNC_TCLAS //
@@ -919,7 +999,10 @@ Return Value:
 */
 
 
-//UINT32 WMM_ACM_NumOfPkt = 0;
+#ifdef WMM_ACM_PKT_NUM_DEBUG
+UINT32 WMM_ACM_NumOfPkt[4] = { 0, 0, 0, 0 };
+#endif // WMM_ACM_PKT_NUM_DEBUG //
+
 ACM_FUNC_STATUS ACMP_DataPacketQueue(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd,
 	ACM_PARAM_IN	ACMR_STA_DB				*pCdb,
@@ -946,7 +1029,7 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 #ifdef ACM_CC_FUNC_TCLAS
 	ACM_TCLAS *pTclas, TclasIpClass;
 	UINT32 IdTclasNum;
-	UCHAR  TclasBitmap
+	UCHAR  TclasBitmap;
 
 	UCHAR *pPkt; /* same as pMbuf */
 	UCHAR *pAddrSrc, *pAddrDst;
@@ -955,6 +1038,8 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 	UCHAR  FlgIsMatchTspec, FlgIsIpPkt;
 #endif // ACM_CC_FUNC_TCLAS //
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
     /* sanity check */
 	RTMP_SET_PACKET_TX_TIME(pMbuf, 0);
@@ -1221,8 +1306,7 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 			if (pEdcaParam->FlgAcmStatus[PktAcId] != ACM_FLG_FUNC_ENABLED)
 			{
 				/* *pQueueType is useless */
-				ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-				return ACM_RTN_NO_ACM;
+				goto LabelErrNoACM;
 			} /* End of if */
 
 			/* check if the UP matches any out TSPEC with TCLAS number = 0 */
@@ -1289,12 +1373,24 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 
 
 	/* here, we have got the PktAcId */
-	
+
 #ifdef ACM_CC_FUNC_SOFT_ACM
+
+	/*
+		Test Note:
+		When you want to test a TSPEC with 208B/83Kbps, you must not
+		send packets with 1514B to do the test.
+		Because we have about 51 packets with 208B and we will have
+		51 * (11g preamble time + sifs + ack time), if you send packets
+		with 1514B, these extra times will be used to send packets with
+		1514B, you will not see the 83kbps throughput and you will see
+		higher throughput.
+	*/
 
 	ACM_TG_CMT_USED_TIME_PASS_CRITERIA;
 
 	/* check whether tx time > TXOP limit for AC2 & AC3 */
+
 	if (pStream != NULL)
 	{
 		/* no TSPEC is found so no need to calculate the tx time */
@@ -1353,7 +1449,7 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 		/* no need to mark direction, must be output TSPEC */
 
 		/* translate MediumTime (unit: 32us) to us */
-		ACMR_MEDIUM_TIME_GET(pStream, TimeAllowed);
+		ACMR_ALLOWED_TIME_GET(pStream, TimeAllowed);
 
 		/* use signed INT64 to avoid round-up problem */
 		TimeOffset = (UINT64)((INT64)Timestamp - \
@@ -1371,9 +1467,12 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 				pStream->AcmUsedTimeEnqueue = 0;
 			/* End of if */
 
-//			ACMR_DEBUG(ACMR_DEBUG_ERR,
-//				("acm> Num Of Packet in a second = %d\n", WMM_ACM_NumOfPkt));
-//			WMM_ACM_NumOfPkt = 0;
+#ifdef WMM_ACM_PKT_NUM_DEBUG
+			ACMR_DEBUG(ACMR_DEBUG_ERR,
+				("acm> Num Of Packet for AC %d in a second = %d\n", PktAcId,
+				WMM_ACM_NumOfPkt[PktAcId]));
+			WMM_ACM_NumOfPkt[PktAcId] = 0;
+#endif // WMM_ACM_PKT_NUM_DEBUG //
 		}
 		else
 		{
@@ -1391,9 +1490,6 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 										pEdcaParam->DowngradeAcNum[PktAcId]);
 
 					ACM_STATS_COUNT_INC(pStats->Downgrade[PktAcId]);
-
-					/* release semaphore */
-					ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
 
 					/*
 						In WMM spec., A.2 Use of Admission Control and
@@ -1414,23 +1510,22 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 					TSID = gEDCA_AC_UP[pEdcaParam->DowngradeAcNum[PktAcId]];
 					ACMR_PKT_MARK_UP(pMbuf, TSID);
 
-					*pQueueType = TxQueueType;
-			        return ACM_RTN_OK;
+					goto LabelOK;
 				} /* End of if */
 
 				ACM_STATS_COUNT_INC(pStats->DropByAdmittedTime);
 
-				/* release semaphore */
-				ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 				/* downgrade function is disabled so discarding the packet */
-				return ACM_RTN_FAIL;
+				goto LabelErr;
 			} /* End of if */
 #endif // PERFORMANCE_IMPACT_TEST //
 		} /* End of if */
 
 		/* accumulate used time */
-//		WMM_ACM_NumOfPkt ++;
+#ifdef WMM_ACM_PKT_NUM_DEBUG
+		WMM_ACM_NumOfPkt[PktAcId] ++;
+#endif // WMM_ACM_PKT_NUM_DEBUG //
+
 		pStream->AcmUsedTimeEnqueue += TxTime;
 	}
 	else
@@ -1490,16 +1585,13 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 			{
 				ACM_STATS_COUNT_INC(pStats->DropByACM);
 
-				/* release semaphore */
-				ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 				ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> ACM of BE is set!\n"));
 
 				/*
 					My god!
 					The ACM of BE is also enabled! Discard the packet!
 				*/
-				return ACM_RTN_FAIL;
+				goto LabelErr;
 			} /* End of if */
 #endif // CONFIG_STA_SUPPORT //
 
@@ -1514,11 +1606,18 @@ ACM_FUNC_STATUS ACMP_DataPacketQueue(
 		ACMR_PKT_MARK_UP(pMbuf, TSID);
 	} /* End of if */
 
-	/* release semaphore */
+LabelOK:
 	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 	*pQueueType = TxQueueType;
 	return ACM_RTN_OK;
+
+LabelErrNoACM:
+	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
+	return ACM_RTN_NO_ACM;
+
+LabelErr:
+	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
+	return ACM_RTN_FAIL;
 
 LabelSemErr:
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
@@ -1556,6 +1655,8 @@ VOID ACMP_DatlCtrl(
 	UINT32 IdAcNum, IdAcNumOther;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if (!ACMR_IS_ENABLED(pAd))
@@ -1640,9 +1741,11 @@ VOID ACMP_DeltsFrameACK(
 	UINT32 NumMaxSearch;
 	UCHAR StmAcId;
 	UCHAR Direction;
-	UCHAR FlgIsActive;
+//	UCHAR FlgIsActive;
 //	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 
 	/* init */
@@ -1650,7 +1753,7 @@ VOID ACMP_DeltsFrameACK(
 	NumMaxSearch = 0;
 	StmAcId = 0;
 	Direction = 0;
-	FlgIsActive = 0;
+//	FlgIsActive = 0;
 
 	/* find it in request or active list */
 //	ACM_TSPEC_IRQ_LOCK_CHK(pAd, SplFlags, LabelSemErr);
@@ -1667,14 +1770,9 @@ VOID ACMP_DeltsFrameACK(
 		StmAcId = pStream->AcmAcId;
 		Direction = pStream->pTspec->TsInfo.Direction;
 
-		if ((pStream->Status == TSPEC_STATUS_ACTIVE) ||
-			(pStream->Status == TSPEC_STATUS_ACTIVE_SUSPENSION) ||
-			(pStream->Status == TSPEC_STATUS_ACT_DELETING))
-		{
-			FlgIsActive = 1;
-		} /* End of if */
 
-		ACM_TC_Destroy(pAd, pStream);
+		/* destroy the request or active stream */
+		ACM_TC_Destroy(pAd, pStream, 0);
 
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
 					("acm_msg> DEL the request ok! DeltsFrameACK()\n"));
@@ -1687,18 +1785,11 @@ VOID ACMP_DeltsFrameACK(
 //	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
 
 	/* recover the UAPSD state if the deleted TSPEC is ever actived */
-	if ((pCdb != NULL) && (FlgIsActive))
-		ACM_APSD_Ctrl(pAd, pCdb, StmAcId, Direction, 0, 0);
+	/* we have already recover UAPSD state in ACM_TC_Destroy() */
+//	if ((pCdb != NULL) && (FlgIsActive))
+//		ACM_APSD_Ctrl(pAd, pCdb, StmAcId, Direction, 0, 0);
 	/* End of if */
 
-	/*
-		Note: We can not call ACM_PS_CtrlRightReturn() here because
-		managemnet lock mabye locked before calling ACMP_DeltsFrameACK();
-		If we call management frame tx function in ACM_PS_CtrlRightReturn(),
-		the tx function will lock again to cause 'CPU lock bug'.
-
-		So we remove calling it here.
-	*/
 	return;
 
 } /* End of ACMP_DeltsFrameACK */
@@ -1726,6 +1817,8 @@ UINT32 ACMP_Element_QBSS_LoadAppend(
 {
 	ACM_ELM_QBSS_LOAD QBSS_Load, *pLoad = &QBSS_Load;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if (!ACMR_IS_ENABLED(pAd))
@@ -1778,6 +1871,8 @@ VOID ACMP_EnableFlagReset(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	FlgIsAllTspecNeedToDelete = 1;
 
@@ -1801,6 +1896,15 @@ VOID ACMP_EnableFlagReset(
 	pFlgArrayIsAcmEnabled[1] = FlgIsAcm1Enable;
 	pFlgArrayIsAcmEnabled[2] = FlgIsAcm2Enable;
 	pFlgArrayIsAcmEnabled[3] = FlgIsAcm3Enable;
+
+#ifdef CONFIG_STA_SUPPORT
+	/* update new TSPEC UAPSD function */
+	if (ACMR_APSD_CAPABLE_GET(pAd) == TRUE)
+		ACMP_TC_UapsdCtrl(pAd, 1); /* can change UAPSD in TSPEC */
+	else
+		ACMP_TC_UapsdCtrl(pAd, 0); /* can not change UAPSD in TSPEC */
+	/* End of if */
+#endif // CONFIG_STA_SUPPORT //
 
 	/* release semaphore */
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
@@ -1854,6 +1958,8 @@ Note:
 VOID ACMP_FSM_Resume(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	ACM_MR_TSPEC_ALLOW(pAd);
 } /* End of ACMP_FSM_Resume */
 
@@ -1877,6 +1983,8 @@ Note:
 VOID ACMP_FSM_Suspend(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	ACM_MR_TSPEC_DISALLOW(pAd);
 } /* End of ACMP_FSM_Suspend */
 
@@ -1902,6 +2010,8 @@ ACM_FUNC_STATUS ACMP_IsAllACEnabled(
 	UCHAR FlgAcmStatus[ACM_DEV_NUM_OF_AC];
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* copy ACM enabled flag first */
 	ACM_TSPEC_SEM_LOCK_CHK_RTN(pAd, SplFlags, LabelSemErr, ACM_RTN_FAIL);
@@ -1950,6 +2060,8 @@ ACM_FUNC_STATUS ACMP_IsAnyACEnabled(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd)
 {
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* check ACM enabled flag */
 	if (*(UINT32 *)(ACMR_CB->EdcaCtrlParam.FlgAcmStatus) == 0)
 	{
@@ -1986,6 +2098,8 @@ ACM_FUNC_STATUS ACMP_IsBwAnnounceActionFrame(
 	ACM_BW_ANN_FRAME *pFrameAnn;
 	UCHAR *pActFrame;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	pActFrame = (UCHAR *)pMbuf + ACMR_FME_LEG_HEADER_SIZE;
 	pFrameAnn = (ACM_BW_ANN_FRAME *)pActFrame;
@@ -2025,6 +2139,8 @@ BOOLEAN ACMP_IsDeltsFrame(
 	UCHAR *pActFrame;
 	UCHAR Category, Action;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* points to the action frame WLAN header */
 	pActFrame = (UCHAR *)pMblk;
@@ -2073,6 +2189,8 @@ BOOLEAN ACMP_IsNeedToDoAcm(
 	UINT8 AcId;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	AcId = ACM_MR_EDCA_AC(UP);
 
 	if (ACMR_CB->EdcaCtrlParam.FlgAcmStatus[AcId])
@@ -2104,6 +2222,8 @@ BOOLEAN ACMP_IsResponseFrame(
 	UCHAR *pActFrame;
 	UCHAR Category, Action;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* points to the action frame WLAN header */
 	pActFrame = (UCHAR *)pMblk;
@@ -2151,6 +2271,8 @@ ACM_FUNC_STATUS ACMP_ManagementHandle(
 	ACM_PARAM_IN	UINT32					PktLen,
 	ACM_PARAM_IN	UINT32					PhyRate)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 
 	/*
@@ -2209,7 +2331,9 @@ UINT32 ACMP_MsduClassify(
 	ACM_PARAM_IN	ACMR_STA_DB				*pCdb,
 	ACM_PARAM_IN	ACMR_MBUF				*pMbuf,
 	ACM_PARAM_IN	UINT32					QueueTypeCur,
-	ACM_PARAM_IN	UCHAR					FlgIsForceToHighAc)
+	ACM_PARAM_IN	UCHAR					FlgIsForceToHighAc,
+	ACM_PARAM_IN	UCHAR					AggType,
+	ACM_PARAM_IN	UCHAR					AggId)
 {
 #ifdef ACM_CC_FUNC_SOFT_ACM
 #ifdef ACM_CC_FUNC_QUE_TX_CTRL
@@ -2229,6 +2353,8 @@ UINT32 ACMP_MsduClassify(
 	ULONG  SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
     /* sanity check */
     if (pCdb == NULL)
         return QueueTypeCur;
@@ -2245,6 +2371,63 @@ UINT32 ACMP_MsduClassify(
 
 	pPkt = (UCHAR *)ACMR_WLAN_PKT_GET(pMbuf);
 	PktLen = ACMR_WLAN_LEN_GET(pMbuf);
+
+	/* aggregation check */
+#ifdef ACM_CC_FUNC_11N
+	/*
+		WLAN Header + A-MSDU Subframe 1 + A-MSDU Subframe 2 + ...
+
+		A-MSDU Subframe is as below:
+			DA(6) + SA(6) + Length(2) + MSDU + Padding (0~3)
+
+		Nothing to do for 1st A-MSDU.
+	*/
+	if ((AggType == ACMR_AGG_AMSDU) && (AggId > 1))
+	{
+		/* re-calculate TX time */
+#ifdef ACM_CC_FUNC_AUX_TX_TIME
+		ACM_TX_TimeCalHT(pAd, NULL,
+							PktLen+FRM_LENGTH_AGG_AMSDU_HDR, /* body len */
+							McsId,					/* MCS Index */
+							ACMR_IS_2040_STA(pCdb),	/* 20 or 20/40 MHz */
+							0,				/* regular or short GI */
+							0,				/* rts/cts */
+							0,				/* no AMPDU or fist pkt in AMPDU */
+							1,				/* no ack */
+							0xFFFFFFFF,		/* txop limit */
+							NULL,			/* no data tx time */
+							NULL,			/* wlan header tx time */
+							NULL,			/* ack tx time */
+							NULL, 			/* data+hdr only tx time */
+							&TxTime);		/* data only tx time */
+#else
+		UINT32 LenDataId;
+		UINT32 McsId;
+
+		McsId = ACMR_CLIENT_MCS_GET(pCdb);
+
+		LenDataId = (PktLen+FRM_LENGTH_AGG_AMSDU_HDR);
+		LenDataId >>= ACM_PRE_TIME_DATA_SIZE_OFFSET;
+
+//		if (LenDataId > 0)
+//			LenDataId --; /* use small length */
+		/* End of if */
+
+		if (LenDataId > ACM_PRE_TIME_DATA_SIZE_NUM)
+			LenDataId = ACM_PRE_TIME_DATA_SIZE_NUM;
+		/* End of if */
+
+		/* data time */
+		TxTime = gAcmTxTimeBodyHT\
+							[ACMR_IS_2040_STA(pCdb)][0][McsId][LenDataId][2];
+#endif // ACM_CC_FUNC_AUX_TX_TIME //
+	} /* End of if */
+#endif // ACM_CC_FUNC_11N //
+
+	if (AggType == ACMR_AGG_RALINK)
+	{
+		/* TODO */
+	} /* End of if */
 
 	/* get management semaphore */
 	ACM_TSPEC_IRQ_LOCK_CHK_RTN(pAd, SplFlags, LabelSemErr, ACM_CLSFY_NOT_ALLOW);
@@ -2265,7 +2448,7 @@ UINT32 ACMP_MsduClassify(
 		ACMR_TIMESTAMP_GET(pAd, Timestamp);
 
 		/* translate MediumTime (unit: 32us) to us */
-		ACMR_MEDIUM_TIME_GET(pStream, TimeAllowed);
+		ACMR_ALLOWED_TIME_GET(pStream, TimeAllowed);
 
 		TimeOffset = (UINT64)((INT64)Timestamp - \
 								(INT64)pStream->TxTimestampMarkTransmit);
@@ -2299,23 +2482,17 @@ UINT32 ACMP_MsduClassify(
 
 					ACM_STATS_COUNT_INC(pStats->Downgrade[PktAcId]);
 
-					/* release semaphore */
-					ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 					/* need to change the UP of QoS Control field */
 					TSID = gEDCA_AC_UP[pEdcaParam->DowngradeAcNum[PktAcId]];
 					ACMR_PKT_MARK_UP(pMbuf, TSID);
 
-					return TxQueueType;
+					goto LabelDowngrade;
 				} /* End of if */
 
 				ACM_STATS_COUNT_INC(pStats->DropByAdmittedTime);
 
-				/* release semaphore */
-				ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 				/* downgrade function is disabled so discarding the packet */
-				return ACM_CLSFY_NOT_ALLOW;
+				goto LabelDiscard;
 			} /* End of if */
 #endif // PERFORMANCE_IMPACT_TEST //
 		} /* End of if */
@@ -2326,8 +2503,15 @@ UINT32 ACMP_MsduClassify(
 
 	/* release semaphore */
 	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
-
 	return QueueTypeCur;
+
+LabelDowngrade:
+	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
+	return TxQueueType;
+
+LabelDiscard:
+	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
+	return ACM_CLSFY_NOT_ALLOW;
 
 LabelSemErr:
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
@@ -2335,11 +2519,13 @@ LabelSemErr:
 	return ACM_CLSFY_NOT_ALLOW;
 #else
 
+	/* no ACM in packet dequeue */
 	return QueueTypeCur;
 #endif // ACM_CC_FUNC_QUE_TX_CTRL //
 
 #else
 
+	/* no hardware ACM */
 	return QueueTypeCur;
 #endif // ACM_CC_FUNC_SOFT_ACM //
 } /* End of ACMP_MsduClassify */
@@ -2368,6 +2554,8 @@ VOID ACMP_NonAcmAdjustParamUpdate(
 {
 #ifdef CONFIG_AP_SUPPORT
 #ifdef ACM_CC_FUNC_CHAN_UTIL_MONITOR
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	if (!ACMR_SANITY_CHECK(pAd))
 		return;
@@ -2504,6 +2692,8 @@ ACM_FUNC_STATUS ACMP_PacketPhyModeMCSCheck(
 	UCHAR PhyModeMin, McsMin;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* get minimum rate information from the packet */
 	ACMR_PKT_MIN_PHY_MODE_GET(pMbuf, PhyModeMin);
 
@@ -2520,10 +2710,18 @@ ACM_FUNC_STATUS ACMP_PacketPhyModeMCSCheck(
 	switch(PhyModeMin)
 	{
 		case ACMR_PHY_CCK:
-			if (McsMin <= 3)
-				RateMin = gAcmMCS_CCK[0][McsMin][1]; /* long preamble */
+			if (McsMin <= ACM_CCK_LPM_MAX_MCS)
+			{
+				/* long preamble */
+				RateMin = gAcmMCS_CCK[0][McsMin][1];
+			}
+			else if (McsMin <= ACM_CCK_SPM_MAX_MCS)
+			{
+				/* short preamble */
+				RateMin = gAcmMCS_CCK[1][McsMin - ACM_CCK_SPM_MIN_MCS][1];
+			}
 			else
-				RateMin = gAcmMCS_CCK[1][McsMin][1]; /* short preamble */
+				RateMin = gAcmMCS_CCK[0][0][1];
 			/* End of if */
 			break;
 
@@ -2547,10 +2745,18 @@ ACM_FUNC_STATUS ACMP_PacketPhyModeMCSCheck(
 	switch(PhyMode)
 	{
 		case ACMR_PHY_CCK:
-			if (Mcs <= 3)
-				Rate = gAcmMCS_CCK[0][Mcs][1]; /* long preamble */
+			if (Mcs <= ACM_CCK_LPM_MAX_MCS)
+			{
+				/* long preamble */
+				Rate = gAcmMCS_CCK[0][Mcs][1];
+			}
+			else if (Mcs <= ACM_CCK_SPM_MAX_MCS)
+			{
+				/* short preamble */
+				Rate = gAcmMCS_CCK[1][Mcs - ACM_CCK_SPM_MIN_MCS][1];
+			}
 			else
-				Rate = gAcmMCS_CCK[1][Mcs][1]; /* short preamble */
+				Rate = gAcmMCS_CCK[0][0][1];
 			/* End of if */
 			break;
 
@@ -2602,6 +2808,8 @@ VOID ACMP_StaPsCtrlRightReturn(
 	ACM_STREAM *pStreamReq;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	ACM_TSPEC_SEM_LOCK_CHK(pAd, SplFlags, LabelSemErr);
@@ -2662,7 +2870,7 @@ VOID ACMP_NullTspecSupportSignal(
 /*
 ========================================================================
 Routine Description:
-	Update UAPSD states after power save ADDTS Response is sent out.
+	Update UAPSD states after ADDTS Response or DELTS is sent out.
 
 Arguments:
 	pAd				- WLAN control block pointer
@@ -2688,6 +2896,8 @@ ACM_EXTERN VOID ACMP_PsRspDeltsSentOutHandle(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if ((pCdb == NULL) || (!ACMR_SANITY_CHECK(pAd)))
 		return;
@@ -2700,6 +2910,7 @@ ACM_EXTERN VOID ACMP_PsRspDeltsSentOutHandle(
 		return; /* not WME action frame */
 	/* End of if */
 
+	/* DELTS */
 	if (pNotFrame->Action == ACM_ACTION_WME_TEAR_DOWN)
 	{
 		ACM_TS_INFO TsInfo;
@@ -2714,13 +2925,13 @@ ACM_EXTERN VOID ACMP_PsRspDeltsSentOutHandle(
 		return; /* handle DELTS ok for power-save station */
 	} /* End of if */
 
+	/* ADDTS Response */
 	if (pNotFrame->StatusCode != WLAN_STATUS_CODE_WME_ACM_ACCEPTED)
 		return; /* only care about SUCCESS */
 	/* End of if */
 
 	Direction = pNotFrame->ElmTspec.Tspec.TsInfo.Direction;
 
-	/* get management semaphore */
 	ACM_TSPEC_IRQ_LOCK_CHK(pAd, SplFlags, LabelSemErr);
 
 	/* check if we need to update UAPSD state after the RESPONSE is sent out */
@@ -2811,6 +3022,8 @@ ACM_EXTERN ACM_FUNC_STATUS ACMP_ResourceAllocate(
 	ACM_FUNC_STATUS RtnCode;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	pElmWmeTspec = (ACM_ELM_WME_TSPEC *)pBufRscReq;
 
@@ -2866,10 +3079,8 @@ ACM_EXTERN ACM_FUNC_STATUS ACMP_ResourceAllocate(
 	ACMR_MEM_COPY(pBufRscRsp, pElmWmeTspec, sizeof(ACM_ELM_WME_TSPEC));
 	*pBufRspLen = sizeof(ACM_ELM_WME_TSPEC);
 
-#ifdef ACM_CC_FUNC_MBSS
-	/* send a broadcast private ACTION frame to advise used ACM time */
+	/* send a broadcast private ACTION frame to advise used ACM time in AP */
 	ACM_FrameBwAnnSend(pAd, FALSE);
-#endif // ACM_CC_FUNC_MBSS //
 
 	return ACM_RTN_OK;
 
@@ -2916,6 +3127,8 @@ VOID ACMP_UAPSD_StateUpdate(
 	UCHAR AcId, Direction, UP, APSD;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if ((pCdb == NULL) || (!ACMR_SANITY_CHECK(pAd)))
@@ -3053,6 +3266,8 @@ VOID ACMP_StationDelete(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 #ifdef CONFIG_STA_SUPPORT
 	/* sanity check for WMM */
 	if (!ACMR_SANITY_CHECK(pAd))
@@ -3074,16 +3289,6 @@ VOID ACMP_StationDelete(
 	pAd->CommonCfg.bAPSDAC_BE = \
 						pAd->CommonCfg.bACMAPSDBackup[ACM_EDCA_BE_AC_QUE_ID];
 
-	if ((pAd->CommonCfg.bAPSDAC_VO == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_VI == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_BE == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_BK == FALSE))
-	{
-		pAd->CommonCfg.bAPSDCapable = FALSE;
-	}
-	else
-		pAd->CommonCfg.bAPSDCapable = TRUE;
-	/* End of if */
 #endif // CONFIG_STA_SUPPORT //
 
 	/* sanity check for ACM */
@@ -3238,6 +3443,8 @@ ACM_FUNC_STATUS ACMP_StreamsGet(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if ((*pNumStm) == 0)
 		return ACM_RTN_FAIL;
@@ -3342,9 +3549,7 @@ ACM_FUNC_STATUS ACMP_StreamsGet(
 			break;
 
 		default:
-			/* release semaphore */
-			ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
-			return ACM_RTN_FAIL;
+			goto LabelErr;
 	} /* End of switch */
 
 	/* release semaphore */
@@ -3353,6 +3558,11 @@ ACM_FUNC_STATUS ACMP_StreamsGet(
 	/* return actual got number */
 	*pNumStm = NumActualGot;
 	return ACM_RTN_OK;
+
+LabelErr:
+	/* release semaphore */
+	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+	return ACM_RTN_FAIL;
 
 LabelSemErr:
 	/* management semaphore get fail */
@@ -3396,6 +3606,8 @@ UINT32 ACMP_StreamNumGet(
 	UCHAR MAC[ACM_MAC_ADDR_LEN];
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	NumStream = 0;
@@ -3525,6 +3737,8 @@ VOID ACMP_TC_DeleteAll(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pAcmDevList = NULL;
 
@@ -3624,6 +3838,8 @@ BOOLEAN ACMP_TC_DeleteOneSilently(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* get management semaphore */
 	ACM_TSPEC_IRQ_LOCK_CHK_RTN(pAd, SplFlags, LabelSemErr, FALSE);
 
@@ -3633,10 +3849,9 @@ BOOLEAN ACMP_TC_DeleteOneSilently(
 	pStream = ACM_TC_Find(pAd, pMacPeer, &TsInfo);
 	if (pStream == NULL)
 	{
-		ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
 		ACMR_DEBUG(ACMR_DEBUG_ERR,
 					("acm_msg> can not find the stream (TID=%d)!\n", TID));
-		return FALSE;
+		goto LabelNotFound;
 	} /* End of if */
 
 	/* delete the stream */
@@ -3648,11 +3863,15 @@ BOOLEAN ACMP_TC_DeleteOneSilently(
 	pStream->Cause = TSPEC_CAUSE_DELETED_BY_QSTA;
 #endif // CONFIG_STA_SUPPORT //
 
-	ACM_TC_Destroy(pAd, pStream);
+	ACM_TC_Destroy(pAd, pStream, 0);
 
 	/* release semaphore */
 	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
 	return TRUE;
+
+LabelNotFound:
+	ACM_TSPEC_IRQ_UNLOCK(pAd, SplFlags, LabelSemErr);
+	return FALSE;
 
 LabelSemErr:
 	return FALSE;
@@ -3718,6 +3937,8 @@ VOID ACMP_TC_TimeoutCtrl(
 {
 	ACM_CTRL_PARAM  *pEdcaParam;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
 	pEdcaParam->FlgIsTspecTimeoutEnable = FlgIsEnable;
@@ -3790,6 +4011,8 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 #endif // ACM_CC_FUNC_TCLAS //
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
 	pTclas = pTclasSrc;
@@ -3831,15 +4054,17 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 	if (Status != ACM_RTN_OK)
 	{
 		/* can not find it in active list so can not re-negotiate it */
+		ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> Old TSPEC does not exist!\n"));
+
 		RtnCode = ACM_RTN_NOT_EXIST;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 
 
 	if (pTspecSrc->TsInfo.AccessPolicy != ACM_ACCESS_POLICY_EDCA)
 	{
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 
 #ifdef ACM_CC_FUNC_TCLAS
@@ -3847,7 +4072,7 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 	if (TclasNum > ACM_TCLAS_MAX_NUM)
 	{
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 
 	/* check user priority and get the user priority */
@@ -3865,7 +4090,7 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 					if (pTclas->UserPriority != UserPriority)
 					{
 						RtnCode = ACM_RTN_INVALID_PARAM;
-						goto label_reno_err;
+						goto LabelErr;
 					} /* End of if */
 				} /* End of if */
 			} /* End of if */
@@ -3882,27 +4107,27 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 	if (ACMR_CB->EdcaCtrlParam.FlgAcmStatus[ACM_MR_EDCA_AC(UserPriority)] == 0)
 	{
 		RtnCode = ACM_RTN_DISALLOW;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 #endif // ACM_CC_FUNC_SPEC_CHANGE_TG //
 
 	/* allocate a TSPEC request structure */
-	pStreamReq = (ACM_STREAM *)ACMR_MEM_ALLOC(sizeof(ACM_STREAM));
+	ACMR_MEM_ALLOC(pStreamReq, sizeof(ACM_STREAM), (ACM_STREAM *));
 	if (pStreamReq == NULL)
 	{
 		RtnCode = ACM_RTN_ALLOC_ERR;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 
 	/* init the TSPEC request structure: TSPEC, TCLAS, etc. */
 	ACMR_MEM_ZERO(pStreamReq, sizeof(ACM_STREAM));
 
-	pStreamReq->pTspec = (ACM_TSPEC *)ACMR_MEM_ALLOC(sizeof(ACM_TSPEC));
+	ACMR_MEM_ALLOC(pStreamReq->pTspec, sizeof(ACM_TSPEC), (ACM_TSPEC *));
 	if (pStreamReq->pTspec == NULL)
 	{
 		ACMR_MEM_FREE(pStreamReq);
 		RtnCode = ACM_RTN_ALLOC_ERR;
-		goto label_reno_err;
+		goto LabelErr;
 	} /* End of if */
 
 	ACM_TSPEC_COPY(pStreamReq->pTspec, pTspecSrc);
@@ -3928,7 +4153,7 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 			if (pStreamReq->pTclas[IdTclasNum] == NULL)
 			{
 				TclasNum = IdTclasNum+1;
-				goto label_alloc_err;
+				goto LabelErrAlloc;
 			} /* End of if */
 
 			ACM_TCLAS_COPY(pStreamReq->pTclas[IdTclasNum], pTclas);
@@ -4003,7 +4228,7 @@ ACM_FUNC_STATUS ACMP_TC_Renegotiate(
 
 	return ACM_RTN_OK;
 
-label_reno_err:
+LabelErr:
 	/* release semaphore */
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
@@ -4017,7 +4242,7 @@ LabelSemErr:
 	return RtnCode;
 
 #ifdef ACM_CC_FUNC_TCLAS
-label_alloc_err:
+LabelErrAlloc:
 	/* release semaphore */
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
@@ -4032,6 +4257,55 @@ label_alloc_err:
 	return ACM_RTN_ALLOC_ERR;
 #endif // ACM_CC_FUNC_TCLAS //
 } /* End of ACMP_TC_Renegotiate */
+
+
+/*
+========================================================================
+Routine Description:
+	Adjust retry count limit automatically.
+
+Arguments:
+	pAd				- WLAN control block pointer
+
+Return Value:
+	None
+
+Note:
+	Only for QSTA.
+
+	Retry count enable:
+	(1) Power Save mode;
+	(2) No TSPEC;
+========================================================================
+*/
+VOID ACMP_RetryCountCtrl(
+ 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd)
+{
+#ifdef CONFIG_STA_SUPPORT
+	if ((ACMR_CB->EdcaCtrlParam.LinkNumUp > 0) ||
+		(ACMR_CB->EdcaCtrlParam.LinkNumDn > 0) ||
+		(ACMR_CB->EdcaCtrlParam.LinkNumBi > 0) ||
+		(ACMR_CB->EdcaCtrlParam.LinkNumDi > 0))
+	{
+		if (pAd->StaCfg.Psm != PWR_ACTIVE)
+		{
+			ACMR_RETRY_ENABLE(pAd);
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> Enable retry!\n"));
+		}
+		else
+		{
+			ACMR_RETRY_DISABLE(pAd);
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> Disable retry %x!\n",
+						ACMR_CB->RetryCountOldSettings));
+		} /* End of if */
+	}
+	else
+	{
+		ACMR_RETRY_ENABLE(pAd);
+		ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> Enable retry!\n"));
+	} /* End of if */
+#endif // CONFIG_STA_SUPPORT //
+} /* End of ACMP_RetryCountCtrl */
 
 
 /*
@@ -4167,6 +4441,8 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 #endif // ACM_CC_FUNC_TCLAS //
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
 	pTclas = pTclasSrc;
@@ -4174,14 +4450,18 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 	UserPriority = ACM_UP_UNKNOWN;
 
 	if (!ACM_MR_TSPEC_IS_ALLOWED(pAd))
+	{
+		ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> ACM is not allowed!\n"));
 		return ACM_RTN_DISALLOW;
-	/* End of if */
+	} /* End of if */
 
 	/* check if QSTA is in ASSOCIATION state */
 	if (!ACMR_STA_IS_ASSOC(pCdb))
 	{
 		/* QSTA yet associate to the QAP */
 		/* QSTA can send ADDTS request only when it associates to a AP */
+		ACMR_DEBUG(ACMR_DEBUG_TRACE,
+					("acm_err> Station does not yet associate to any AP!\n"));
 		return ACM_RTN_FAIL;
 	} /* End of if */
 
@@ -4208,6 +4488,8 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 		(pTspecSrc->MinPhyRate <= pTspecSrc->MeanDataRate))
 	{
 		/* minimum PHY rate must > mean data rate */
+		ACMR_DEBUG(ACMR_DEBUG_TRACE,
+					("acm_err> Minimum Phy Rate > Mean Data Rate!\n"));
 		return ACM_RTN_INVALID_PARAM;
 	} /* End of if */
 
@@ -4276,7 +4558,7 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 	} /* End of if */
 
 	/* allocate a TSPEC request structure */
-	pStreamReq = (ACM_STREAM *)ACMR_MEM_ALLOC(sizeof(ACM_STREAM));
+	ACMR_MEM_ALLOC(pStreamReq, sizeof(ACM_STREAM), (ACM_STREAM *));
 	if (pStreamReq == NULL)
 	{
 		RtnCode = ACM_RTN_ALLOC_ERR;
@@ -4286,7 +4568,7 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 	/* init the TSPEC request structure */
 	ACMR_MEM_ZERO(pStreamReq, sizeof(ACM_STREAM));
 
-	pStreamReq->pTspec = (ACM_TSPEC *)ACMR_MEM_ALLOC(sizeof(ACM_TSPEC));
+	ACMR_MEM_ALLOC(pStreamReq->pTspec, sizeof(ACM_TSPEC), (ACM_TSPEC *));
 	if (pStreamReq->pTspec == NULL)
 	{
 		ACMR_MEM_FREE(pStreamReq);
@@ -4300,14 +4582,14 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 #ifdef ACM_CC_FUNC_TCLAS
 	for(IdTclasNum=0; IdTclasNum<TclasNum; IdTclasNum++)
 	{
-		pStreamReq->pTclas[IdTclasNum] = \
-							(ACM_TCLAS *)ACMR_MEM_ALLOC(sizeof(ACM_TCLAS));
+		ACMR_MEM_ALLOC(pStreamReq->pTclas[IdTclasNum],
+						sizeof(ACM_TCLAS), (ACM_TCLAS *));
 
 		if (pStreamReq->pTclas[IdTclasNum] == NULL)
 		{
 			RtnCode = ACM_RTN_ALLOC_ERR;
 			TclasNum = IdTclasNum+1;
-			goto label_tclas_aloc_fail;
+			goto LabelErrAlloc;
 		} /* End of if */
 
 		*pStreamReq->pTclas[IdTclasNum] = *pTclas;
@@ -4407,7 +4689,7 @@ LabelSemErr:
 	return ACM_RTN_SEM_GET_ERR;
 
 #ifdef ACM_CC_FUNC_TCLAS
-label_tclas_aloc_fail:
+LabelErrAlloc:
 	/* release semaphore */
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
@@ -4630,6 +4912,8 @@ STATIC VOID ACM_APSD_Ctrl(
 	UCHAR FlgIsTrEnabled, FlgIsDeEnabled;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init new UAPSD state */
 	FlgIsTrEnabled = pCdb->bAPSDCapablePerAC[AcId];
 	FlgIsDeEnabled = pCdb->bAPSDDeliverEnabledPerAC[AcId];
@@ -4747,6 +5031,8 @@ STATIC VOID ACM_APSD_Ctrl(
 	BOOLEAN *pApsdCur;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (Direction != ACM_DIRECTION_DOWN_LINK)
 	{
 		if (!FlgTsAdd)
@@ -4821,16 +5107,6 @@ STATIC VOID ACM_APSD_Ctrl(
 
 	*pApsdCur = FlgIsApsdEnable;
 
-	if ((pAd->CommonCfg.bAPSDAC_VO == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_VI == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_BE == FALSE) &&
-		(pAd->CommonCfg.bAPSDAC_BK == FALSE))
-	{
-		pAd->CommonCfg.bAPSDCapable = FALSE;
-	}
-	else
-		pAd->CommonCfg.bAPSDCapable = TRUE;
-	/* End of if */
 }
 #endif // CONFIG_STA_SUPPORT //
 } /* End of ACM_APSD_Ctrl */
@@ -5270,14 +5546,17 @@ STATIC UINT32 ACM_EncryptExtraLenGet(
 
 	if (ACMR_STA_ENCRYPT_MODE_GET(pCdb) == ACMR_ENCRYPT_WEP)
 	{
+		/* IV (4B) + ICV (4B) */
 		DataExtraLen = 8;
 	}
 	else if (ACMR_STA_ENCRYPT_MODE_GET(pCdb) == ACMR_ENCRYPT_TKIP)
 	{
+		/* IV/KeyID (4B) + Extended IV (4B) + MIC (8B) + ICV (4B) */
 		DataExtraLen = 20;
 	}
 	else if (ACMR_STA_ENCRYPT_MODE_GET(pCdb) == ACMR_ENCRYPT_AES)
 	{
+		/* CCMP Header (8B) + MIC (8B) */
 		DataExtraLen = 16;
 	}
 	else
@@ -5994,8 +6273,8 @@ STATIC ACM_FUNC_STATUS ACM_PeerDeviceAdd(
 	/* check whether no any QSTA exists in the backup list */
 	if (pAcmStmList == NULL)
 	{
-		ACMR_CB->pDevListPeer = (ACM_PEER_DEV_LIST *) \
-									ACMR_MEM_ALLOC(sizeof(ACM_PEER_DEV_LIST));
+		ACMR_MEM_ALLOC(ACMR_CB->pDevListPeer,
+						sizeof(ACM_PEER_DEV_LIST), (ACM_PEER_DEV_LIST *));
 
 		if (ACMR_CB->pDevListPeer == NULL)
 			goto LabelAllocFail;
@@ -6023,7 +6302,7 @@ STATIC ACM_FUNC_STATUS ACM_PeerDeviceAdd(
 	pAcmStmList = pStmLast;
 
 	/* do not find so append the new peer device to the last one */
-	pStmLast = (ACM_PEER_DEV_LIST *)ACMR_MEM_ALLOC(sizeof(ACM_PEER_DEV_LIST));
+	ACMR_MEM_ALLOC(pStmLast, sizeof(ACM_PEER_DEV_LIST), (ACM_PEER_DEV_LIST *));
 	if (pStmLast == NULL)
 		goto LabelAllocFail;
 	/* End of if */
@@ -6572,7 +6851,7 @@ Note:
 	Ex: 0b0001 1000 0000 0000 ==> 0.75
 ========================================================================
 */
-STATIC UINT32 ACM_SurplusFactorDecimalBin2Dec(
+UINT32 ACM_SurplusFactorDecimalBin2Dec(
 	ACM_PARAM_IN	UINT32				BIN)
 {
 	UINT32 ValueMax, Bit1Index, Base, ValueDec, ValueCarry;
@@ -6777,7 +7056,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_Active(
 	ACM_LINK_NUM_INCREASE(pAd, pStreamReq->pTspec->TsInfo.AccessPolicy, Direction);
 
 	/* count number of TSPEC */
-	ACM_NUM_OF_TSPEC_RECOUNT(pStreamReq->pCdb);
+	ACM_NUM_OF_TSPEC_RECOUNT(pAd, pStreamReq->pCdb);
 
 	return ACM_RTN_OK;
 } /* End of ACM_TC_Active */
@@ -6962,22 +7241,27 @@ label_check_timer_enable:
 /*
 ========================================================================
 Routine Description:
-	Move it the the fail list.
+	Move TSPEC active the the fail list.
 
 Arguments:
 	pAd					- WLAN control block pointer
 	*pStreamReq			- the TSPEC pointer
+	FlgIsActiveExcluded	-	1: do not delete active TSPEC
+							0: delete both request and active TSPEC
 
 Return Value:
 	None
 
 Note:
 	1. Put the TSPEC into the failed list. Not free it to OS kernel.
+	2. If pStreamReq belongs to a active TSPEC, we will delete the
+		both of request TSPEC and active TSPEC simulatenously.
 ========================================================================
 */
 STATIC VOID ACM_TC_Destroy(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
-	ACM_PARAM_IN	ACM_STREAM			*pStreamReq)
+	ACM_PARAM_IN	ACM_STREAM			*pStreamReq,
+	ACM_PARAM_IN	BOOLEAN				FlgIsActiveExcluded)
 {
 	ACM_TSPEC_REQ_LIST *pTspecFreedList;
 	ACM_STREAM *pTspecFree;
@@ -7017,13 +7301,17 @@ STATIC VOID ACM_TC_Destroy(
 		ACM_TC_ReqRemove(pAd, pStreamReq);
 	} /* End of if */
 
-	if ((pStreamReq->Status == TSPEC_STATUS_ACTIVE) ||
-		(pStreamReq->Status == TSPEC_STATUS_ACTIVE_SUSPENSION) ||
-		(pStreamReq->Status == TSPEC_STATUS_ACT_DELETING))
+	if (FlgIsActiveExcluded == 0)
 	{
-		/* remove it from the active table linked list */
-		FlgIsActStm = 1; /* this is a active stream */
-		ACM_TC_ActRemove(pAd, pStreamReq);
+		/* need also to delete active TSPEC */
+		if ((pStreamReq->Status == TSPEC_STATUS_ACTIVE) ||
+			(pStreamReq->Status == TSPEC_STATUS_ACTIVE_SUSPENSION) ||
+			(pStreamReq->Status == TSPEC_STATUS_ACT_DELETING))
+		{
+			/* remove it from the active table linked list */
+			FlgIsActStm = 1; /* this is a active stream */
+			ACM_TC_ActRemove(pAd, pStreamReq);
+		} /* End of if */
 	} /* End of if */
 
 	/* change current status to fail */
@@ -7089,10 +7377,19 @@ STATIC VOID ACM_TC_Destroy(
 		if (pStreamReq->pCdb != NULL)
 			ACM_PeerDeviceMaintain(pAd, ACMR_CLIENT_MAC(pStreamReq->pCdb));
 		/* End of if */
+
+		/* recover the UAPSD state if the TSPEC is active TSPEC */
+		if (pStreamReq->pCdb != NULL)
+		{
+			ACM_APSD_Ctrl(pAd,
+						pStreamReq->pCdb,
+						ACM_MR_EDCA_AC(pStreamReq->UP),
+						Direction, 0, 0);
+		} /* End of if */
 	} /* End of if */
 
 	/* count number of TSPEC */
-	ACM_NUM_OF_TSPEC_RECOUNT(pStreamReq->pCdb);
+	ACM_NUM_OF_TSPEC_RECOUNT(pAd, pStreamReq->pCdb);
 } /* End of ACM_TC_Destroy */
 
 
@@ -7152,10 +7449,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_DestroyBy_TS_Info(
 		can delete the stream, other QSTA can NOT delete.
 	*/
 	if (!(AMR_IS_SAME_MAC(ACMR_CLIENT_MAC(pStream->pCdb), pDevMac)))
-	{
-		ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
-		return ACM_RTN_FAIL;
-	} /* End of if */
+		goto LabelErr;
+	/* End of if */
 
 	if (FlgIsFromSta == 1)
 		pStream->Cause = TSPEC_CAUSE_DELETED_BY_QSTA;
@@ -7167,19 +7462,23 @@ STATIC ACM_FUNC_STATUS ACM_TC_DestroyBy_TS_Info(
 	StmAcId = pStream->AcmAcId;
 	Direction = pStream->pTspec->TsInfo.Direction;
 
-	ACM_TC_Destroy(pAd, pStream);
+	ACM_TC_Destroy(pAd, pStream, 0);
 
 LabelDestroyOk:
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
 	/* recover UAPSD state */
-	if (pStream != NULL)
-		ACM_APSD_Ctrl(pAd, pCdb, StmAcId, Direction, 0, 0);
+//	if (pStream != NULL)
+//		ACM_APSD_Ctrl(pAd, pCdb, StmAcId, Direction, 0, 0);
 	/* End of if */
 
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
 				("acm_msg> DEL a stream! TC_DestroyBy_TS_Info()\n"));
 	return ACM_RTN_OK;
+
+LabelErr:
+	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+	return ACM_RTN_FAIL;
 
 LabelSemErr:
 	return ACM_RTN_SEM_GET_ERR;
@@ -7256,7 +7555,6 @@ STATIC VOID ACM_TC_Discard(
 		/* End of if */
 	} /* End of if */
 
-	/* recover APSD state */ /* bug fixed in Test Event 3 */
 	ACM_APSD_Ctrl(pAd, pStreamReq->pCdb,
 					ACM_MR_EDCA_AC(pStreamReq->UP), Direction, 0, 0);
 
@@ -7268,7 +7566,7 @@ STATIC VOID ACM_TC_Discard(
                 FlgIsActStm));
 
 	/* count number of TSPEC */
-	ACM_NUM_OF_TSPEC_RECOUNT(pStreamReq->pCdb);
+	ACM_NUM_OF_TSPEC_RECOUNT(pAd, pStreamReq->pCdb);
 } /* End of ACM_TC_Discard */
 
 
@@ -7298,7 +7596,7 @@ STATIC ACM_STREAM *ACM_TC_Duplicate(
 
 
 	/* allocate & copy the stream */
-	pTspecDup = (ACM_STREAM *)ACMR_MEM_ALLOC(sizeof(ACM_STREAM));
+	ACMR_MEM_ALLOC(pTspecDup, sizeof(ACM_STREAM), (ACM_STREAM *));
 
 	if (pTspecDup == NULL)
 		return NULL;
@@ -7309,7 +7607,7 @@ STATIC ACM_STREAM *ACM_TC_Duplicate(
 	pTspecDup->pPrev = pTspecDup->pNext = NULL;
 
 	/* allocate & copy TSPEC */
-	pTspecDup->pTspec = (ACM_TSPEC *)ACMR_MEM_ALLOC(sizeof(ACM_TSPEC));
+	ACMR_MEM_ALLOC(pTspecDup->pTspec, sizeof(ACM_TSPEC), (ACM_TSPEC *));
 
 	if (pTspecDup->pTspec == NULL)
 	{
@@ -7329,8 +7627,8 @@ STATIC ACM_STREAM *ACM_TC_Duplicate(
 	{
 		if (pStream->pTclas[IdTclasNum] != NULL)
 		{
-			pTspecDup->pTclas[IdTclasNum] = \
-								(ACM_TCLAS *)ACMR_MEM_ALLOC(sizeof(ACM_TCLAS));
+			ACMR_MEM_ALLOC(pTspecDup->pTclas[IdTclasNum],
+							sizeof(ACM_TCLAS), (ACM_TCLAS *));
 
 			if (pTspecDup->pTclas[IdTclasNum] == NULL)
 				goto label_dup_err;
@@ -8491,7 +8789,7 @@ STATIC VOID ACM_TASK_General(
 
 	/* get management semaphore */
 	ACM_TSPEC_IRQ_LOCK_CHK(pAd, SplFlags, LabelSemErr);
-#endif
+#endif // ACM_CC_FUNC_MBSS || ACM_CC_FUNC_CHAN_UTIL_MONITOR //
 
 	pAd = pAd; /* avoid compile warning */
 
@@ -8508,10 +8806,10 @@ STATIC VOID ACM_TASK_General(
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef ACM_CC_FUNC_CHAN_UTIL_MONITOR
-	/* TODO: maybe we can check at least TSPEC exist */
+	/* TODO: maybe we can check at least one TSPEC exist */
 	if (ACMP_IsAnyACEnabled(pAd))
 	{
-		/* only do the function when at least the ACM of one AC is set */
+		/* only do the function when at least one AC ACM is set */
 		ACMR_CB->CU_MON_Timeout ++;
 
 		if (ACMR_CB->CU_MON_Timeout >= ACM_CH_MON_TIMEOUT_NUM)
@@ -8568,10 +8866,10 @@ Note:
 STATIC VOID ACM_TASK_TC_ReqCheck(
 	ACM_PARAM_IN	ULONG		Data)
 {
-#define TASK_LMR_STREAM_DESTROY(pAd, pStreamReq)	\
-	pCdb = pStreamReq->pCdb;					\
-	StmAcId = pStreamReq->AcmAcId;			\
-	ACM_TC_Destroy(pAd, pStreamReq);
+#define TASK_LMR_STREAM_DESTROY(pAd, pStreamReq, FlgIsActiveExcluded)	\
+	pCdb = pStreamReq->pCdb;											\
+	StmAcId = pStreamReq->AcmAcId;										\
+	ACM_TC_Destroy(pAd, pStreamReq, FlgIsActiveExcluded);
 
 	ACMR_PWLAN_STRUC pAd = (ACMR_PWLAN_STRUC)Data;
 	ACM_TSPEC_REQ_LIST *pStmReqList;
@@ -8669,7 +8967,7 @@ STATIC VOID ACM_TASK_TC_ReqCheck(
 
 #ifdef CONFIG_AP_SUPPORT
 					/* for QAP, the type is error type, so delete the request */
-					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq);
+					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq, 0);
 #endif // CONFIG_AP_SUPPORT //
 					break;
 
@@ -8678,7 +8976,7 @@ STATIC VOID ACM_TASK_TC_ReqCheck(
 					ACMR_DEBUG(ACMR_DEBUG_TRACE,
 								("acm_err> error timeout action! "
 								"TASK_TC_Req_Check()\n"));
-					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq);
+					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq, 0);
 					break;
 			} /* End of switch */
 		}
@@ -8689,11 +8987,43 @@ STATIC VOID ACM_TASK_TC_ReqCheck(
 			{
 				case ACM_TC_TIMEOUT_ACTION_DELTS:
 				default:
+					/* we do not yet take care about ACK frame of DELTS */
+
+#ifdef CONFIG_STA_SUPPORT
 					/* move to the fail list from the requested list */
 					ACMR_DEBUG(ACMR_DEBUG_TRACE,
-								("acm_msg> DELTS tx limit! DEL the request! "
+								("acm_msg> DELTS tx limit! "
+								"Delete the request/active! "
 								"TC_TASK_ReqCheck()\n"));
-					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq);
+
+					/*
+						In STA, AP will not sleep so AP will receive the
+						DELTS frame.
+
+						Delete both of request TSPEC and active TSPEC.
+					*/
+					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq, 0);
+#endif // CONFIG_STA_SUPPORT //
+
+#ifdef CONFIG_AP_SUPPORT
+					ACMR_DEBUG(ACMR_DEBUG_TRACE,
+								("acm_msg> DELTS tx limit! "
+								"Delete the request! "
+								"TC_TASK_ReqCheck()\n"));
+
+					/*
+						We can not delete activated TSPEC after DELTS timeout
+						in AP if PS STA does not use trigger frame or PS-Poll
+						frame to get the DELTS frame.
+
+						So we just only delete TSPEC request, not TSPEC active.
+
+						EX: UAPSD of VO is enabled, all DELTS will be put
+						in VO queue. DELTS will not sent from AP if STA does
+						not send any trigger frame.
+					*/
+					TASK_LMR_STREAM_DESTROY(pAd, pStreamReq, 1);
+#endif // CONFIG_AP_SUPPORT //
 					break;
 
 				case ACM_TC_TIMEOUT_ACTION_ADDTS_REQ:
@@ -8711,6 +9041,7 @@ STATIC VOID ACM_TASK_TC_ReqCheck(
 			ACMP_StaPsCtrlRightReturn(pAd);
 #endif // CONFIG_STA_SUPPORT //
 
+			/* send ADDTS Request frame again */
 			if (FrameLen > 0)
 			{
 				ACM_ADDREQ_SEND(pAd, pFrameBuf, FrameLen);
@@ -9062,7 +9393,11 @@ Return Value:
 	None
 
 Note:
-	1. Carefully! This is a broadcast frame.
+	1. Carefully! This is a broadcast frame and must be non-encryption.
+	2. The frame is only sent by AP. STA only forward it.
+	3. AP A <--> AP B <--> AP C
+		AP B only need to broadcast its used ACM time, no AP A used time.
+		Because AP C does not see AP A.
 ========================================================================
 */
 STATIC VOID ACM_FrameBwAnnSend(
@@ -9159,6 +9494,7 @@ Note:
 	1. Only when ASSOC OK.
 	2. If the source is from our AP, forward it to broadcast;
 	3. If the source is not from our AP, forward it to our AP.
+	4. TODO: Can not encrypt the frame.
 ========================================================================
 */
 STATIC VOID ACM_MBSS_BwAnnForward(
@@ -9221,10 +9557,11 @@ STATIC ACM_FUNC_STATUS ACM_MBSS_BwAnnHandle(
 	/* learn it to our database */
 	for(IdMbssNum=0; IdMbssNum<ACM_MBSS_BK_NUM; IdMbssNum++)
 	{
+		/* TODO: Need check SSID ? */
 		if ((pMbssNew->Channel == pMbss->Channel) &&
 			(memcmp(pMbssNew->BSSID, pMbss->BSSID, 6) == 0))
 		{
-			/* same channe and BSSID */
+			/* this is from same channel and BSSID */
 			if (pMbssNew->Identifier != pMbss->Identifier)
 			{
 				/* new announce */
@@ -9278,7 +9615,7 @@ STATIC ACM_FUNC_STATUS ACM_MBSS_BwAnnHandle(
 
 	if (FlgIsNewAnn)
 	{
-		/* forward the announce */
+		/* need to forward the announce frame */
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
 					("acm_msg> [mbss] Ann Time %d %d %d %d!\n",
 					pMbss->UsedTime[0], pMbss->UsedTime[1],
@@ -9286,6 +9623,7 @@ STATIC ACM_FUNC_STATUS ACM_MBSS_BwAnnHandle(
 		return ACM_RTN_OK;
 	} /* End of if */
 
+	/* this is duplicated announce frame */
 	return ACM_RTN_FAIL;
 } /* End of ACM_MBSS_BwAnnHandle */
 
@@ -9341,7 +9679,7 @@ STATIC VOID ACM_MBSS_BwReCalculate(
 /*
 ========================================================================
 Routine Description:
-	Broadcast our used bandwidth.
+	Broadcast our used bandwidth periodically.
 
 Arguments:
 	Data
@@ -9362,16 +9700,13 @@ STATIC VOID ACM_TC_TASK_BwAnn(
 	ULONG SplFlags;
 
 
-#ifdef CONFIG_AP_SUPPORT
 	/* broadcast our bandwidth */
 	ACM_FrameBwAnnSend(pAd, TRUE);
-#endif // CONFIG_AP_SUPPORT //
-
 
 	/* get management semaphore */
 	ACM_TSPEC_SEM_LOCK_CHK(pAd, SplFlags, LabelSemErr);
 
-	/* check timeout */
+	/* check admission time timeout from other BSS */
 	for(IdMbssNum=0; IdMbssNum<ACM_MBSS_BK_NUM; IdMbssNum++)
 	{
 		if (ACMR_CB->MBSS[IdMbssNum].Channel == 0)
@@ -9965,7 +10300,7 @@ UINT32 ACM_TX_TimeCal(
 			/* add data tx time */
 			/*
 				EX: data size = 208B, rate = 54Mbps,
-				TimeData = 32us in A band.
+				TimeData without header = 32us in A band.
 			*/
 			if (BodyLen > 0)
 			{
@@ -9997,8 +10332,12 @@ UINT32 ACM_TX_TimeCal(
 	TxTime += TimeData;
 
 	/*
-		EX: data size = 208B, rate = 54Mbps,
+		EX1: data size = 208B, rate = 54Mbps,
 		TxTime = 104us in A band.
+
+		EX2: data size = 208B, rate = 6Mbps,
+		In A band, TxTimeAck = 60us, TimeHeader = 64us,
+		TimeData = 284us, so TxTime = 64+284+60 = 408us.
 	*/
 	return TxTime;
 } /* End of ACM_TX_TimeCal */
@@ -10025,6 +10364,8 @@ Arguments:
 	*pTimeNoData		- the tx time, not include data body
 	*pTimeHeader		- the tx time, only include WLAN header
 	*pTimeAck			- the tx time, BLOCK ACK
+	*pTimeDataHdrOnly	- the tx time, data + BLOCK ACK
+	*pTimeDataOnly		- the tx time, data
 
 Return Value:
 	transmission time (miscro second, us)
@@ -10048,6 +10389,7 @@ UINT32 ACM_TX_TimeCalHT(
 	ACM_PARAM_OUT	UINT32				*pTimeNoData,
 	ACM_PARAM_OUT	UINT32				*pTimeHeader,
 	ACM_PARAM_OUT	UINT32				*pTimeAck,
+	ACM_PARAM_OUT	UINT32				*pTimeDataHdrOnly,
 	ACM_PARAM_OUT	UINT32				*pTimeDataOnly)
 {
 	UINT32 LenHeader;
@@ -10114,7 +10456,7 @@ UINT32 ACM_TX_TimeCalHT(
 
 	/* If FlgIsAmpdu == 1, means we do not care HT preamble time */
 
-	/* preamble + Data */
+	/* preamble + header */
 	TimeHeader = ACM_TX_TimePlcpCalHT(
 										LenHeader,
 										McsId,
@@ -10125,7 +10467,7 @@ UINT32 ACM_TX_TimeCalHT(
 										GIId,
 										FlgIsAmpdu);
 
-	/* add data tx time */
+	/* add data tx time without preamble */
 	if (BodyLen > 0)
 	{
 		if (pCdb != NULL)
@@ -10141,6 +10483,7 @@ UINT32 ACM_TX_TimeCalHT(
 										BwId,
 										GIId,
 										FlgIsAmpdu);
+
 		TimeData -= TimeHeader; /* only data, no HT preamble */
 	}
 	else
@@ -10158,21 +10501,52 @@ UINT32 ACM_TX_TimeCalHT(
 		*pTimeHeader = TimeHeader;
 	/* End of if */
 
-	if (pTimeDataOnly != NULL)
+	if (pTimeDataHdrOnly != NULL)
 	{
-		if (pCdb != NULL)
+		if ((pCdb != NULL) && (TimeData > 0))
 			DataExtraLen = ACM_EncryptExtraLenGet(pAd, pCdb);
 		/* End of if */
 
-		*pTimeDataOnly = ACM_TX_TimePlcpCalHT(
-										LenHeader+BodyLen+DataExtraLen,
-										McsId,
-										Nss,
-										0,
-										0,
-										BwId,
-										GIId,
-										1);
+		if ((BodyLen > 0) && (TimeData == 0))
+		{
+			/* calculate time */
+			*pTimeDataHdrOnly = ACM_TX_TimePlcpCalHT(
+											LenHeader+BodyLen+DataExtraLen,
+											McsId,
+											Nss,
+											0,
+											0,
+											BwId,
+											GIId,
+											FlgIsAmpdu);
+		}
+		else
+			*pTimeDataHdrOnly = TimeHeader + TimeData;
+		/* End of if */
+	} /* End of if */
+
+	if (pTimeDataOnly != NULL)
+	{
+		if ((pCdb != NULL) && (TimeData > 0))
+			DataExtraLen = ACM_EncryptExtraLenGet(pAd, pCdb);
+		/* End of if */
+
+		if ((BodyLen > 0) && (TimeData == 0))
+		{
+			/* calculate time */
+			*pTimeDataOnly = ACM_TX_TimePlcpCalHT(
+											BodyLen+DataExtraLen,
+											McsId,
+											Nss,
+											0,
+											0,
+											BwId,
+											GIId,
+											FlgIsAmpdu);
+		}
+		else
+			*pTimeDataOnly = TimeData;
+		/* End of if */
 	} /* End of if */
 
 	TxTime += TimeData;
@@ -10253,8 +10627,8 @@ UINT32 ACM_TX_TimeCalOnFly(
 		RateIndex = ACM_PRE_TIME_ID_54M;
 	/* End of if */
 
-	if (LenDataId > 0)
-		LenDataId --; /* use small length */
+//	if (LenDataId > 0)
+//		LenDataId --; /* use small length */
 	/* End of if */
 
 	if (LenDataId > ACM_PRE_TIME_DATA_SIZE_NUM)
@@ -10390,6 +10764,7 @@ UINT32 ACM_TX_TimeCalOnFlyHT(
 							NULL,			/* no data tx time */
 							NULL,			/* wlan header tx time */
 							NULL,			/* ack tx time */
+							NULL,			/* data+hdr only tx time */
 							NULL); 			/* data only tx time */
 #else
 		UINT32 LenDataId;
@@ -10397,8 +10772,8 @@ UINT32 ACM_TX_TimeCalOnFlyHT(
 		LenDataId = (BodyLen+ACMR_FME_QOS_N_HEADER_SIZE);
 		LenDataId >>= ACM_PRE_TIME_DATA_SIZE_OFFSET;
 
-		if (LenDataId > 0)
-			LenDataId --; /* use small length */
+//		if (LenDataId > 0)
+//			LenDataId --; /* use small length */
 		/* End of if */
 
 		if (LenDataId > ACM_PRE_TIME_DATA_SIZE_NUM)
@@ -10464,7 +10839,8 @@ UINT32 ACM_TX_TimeCalOnFlyHT(
 							NULL,			/* no data tx time */
 							NULL,			/* wlan header tx time */
 							NULL,			/* ack tx time */
-							&TxTime);		/* data only tx time */
+							&TxTime,		/* data+hdr only tx time */
+							NULL);			/* data only tx time */
 #else
 		UINT32 LenDataId;
 
@@ -10472,8 +10848,8 @@ UINT32 ACM_TX_TimeCalOnFlyHT(
 		LenDataId = (ACMR_FME_QOS_N_HEADER_SIZE + BodyLen + 4 + 3);
 		LenDataId = LenDataId >> ACM_PRE_TIME_DATA_SIZE_OFFSET;
 
-		if (LenDataId > 0)
-			LenDataId --; /* use small length */
+//		if (LenDataId > 0)
+//			LenDataId --; /* use small length */
 		/* End of if */
 
 		if (LenDataId > ACM_PRE_TIME_DATA_SIZE_NUM)
@@ -10553,11 +10929,11 @@ VOID ACM_TX_TimeCalPre(
 					{ ACM_RATE_48M,  1, ACM_RATE_ID_48M },
 					{ ACM_RATE_54M,  1, ACM_RATE_ID_54M }};
 	UINT32 TimeHeader, TimeCtsSelf, TimeRtsCts, TimeAck;
-	UINT32 TimeData;
+	UINT32 TimeDataAck;
 	UINT32 IdRateNum, IdSizeNum, IdPreambleNum, Size;
 
 #ifdef ACM_CC_FUNC_11N
-	UINT32 TimeDataOnly;
+	UINT32 TimeDatHdrOnly, TimeDataOnly;
 	UINT32 IdBw, IdGI;
 #endif // ACM_CC_FUNC_11N //
 
@@ -10571,7 +10947,7 @@ VOID ACM_TX_TimeCalPre(
 
 		for(IdSizeNum=0; IdSizeNum<ACM_PRE_TIME_DATA_SIZE_NUM; IdSizeNum++)
 		{
-			TimeData = ACM_TX_TimeCal(pAd, NULL,
+			TimeDataAck = ACM_TX_TimeCal(pAd, NULL,
 										Size,					/* body len */
 										RateMap[IdRateNum][0],	/* RateIndex */
 										RateMap[IdRateNum][1],	/* g mode */
@@ -10585,8 +10961,8 @@ VOID ACM_TX_TimeCalPre(
 										NULL,			/* cts self tx time */
 										NULL,			/* rts/cts tx time */
 										NULL);			/* ack tx time */
-			TimeData -= TimeHeader;
-			gAcmTxTimeBody[IdRateNum][IdSizeNum] = TimeData;
+			TimeDataAck -= TimeHeader;
+			gAcmTxTimeBody[IdRateNum][IdSizeNum] = TimeDataAck;
 			Size += ACM_PRE_TIME_DATA_SIZE_INTERVAL;
 		} /* End of for */
 	} /* End of for */
@@ -10605,7 +10981,7 @@ VOID ACM_TX_TimeCalPre(
 					IdSizeNum++)
 				{
 					/* not include RTS/CTS time */
-					TimeData = ACM_TX_TimeCalHT(pAd, NULL,
+					TimeDataAck = ACM_TX_TimeCalHT(pAd, NULL,
 										Size,			/* body len */
 										IdRateNum,		/* MCS Index */
 										IdBw,			/* 20 or 20/40 MHz */
@@ -10617,12 +10993,15 @@ VOID ACM_TX_TimeCalPre(
 										NULL,			/* no data tx time */
 										NULL,			/* wlan header tx time */
 										NULL,			/* ack tx time */
-										&TimeDataOnly); /* data only tx time */
+										&TimeDatHdrOnly,/* data+hdr only tx time */
+										&TimeDataOnly);	/* data only tx time */
 
 					gAcmTxTimeBodyHT\
-						[IdBw][IdGI][IdRateNum][IdSizeNum][0] = TimeData;
+						[IdBw][IdGI][IdRateNum][IdSizeNum][0] = TimeDataAck;
 					gAcmTxTimeBodyHT\
-						[IdBw][IdGI][IdRateNum][IdSizeNum][1] = TimeDataOnly;
+						[IdBw][IdGI][IdRateNum][IdSizeNum][1] = TimeDatHdrOnly;
+					gAcmTxTimeBodyHT\
+						[IdBw][IdGI][IdRateNum][IdSizeNum][2] = TimeDataOnly;
 
 					Size += ACM_PRE_TIME_DATA_SIZE_INTERVAL;
 				} /* End of for */
@@ -10678,7 +11057,7 @@ VOID ACM_TX_TimeCalPre(
 
 #ifdef ACM_CC_FUNC_11N
 	/* only for BLOCK ACK frame, 24Mbps */
-	TimeData = ACM_TX_TimeCalHT(pAd, NULL,
+	TimeDataAck = ACM_TX_TimeCalHT(pAd, NULL,
 						FRM_LENGTH_BLOCK_ACK,		/* body len */
 						0,							/* MCS Index */
 						0,							/* 20 or 20/40 MHz */
@@ -10690,6 +11069,7 @@ VOID ACM_TX_TimeCalPre(
 						NULL,						/* no data tx time */
 						NULL,						/* wlan header tx time */
 						&TimeAck,					/* ack tx time */
+						NULL,						/* data+hdr only tx time */
 						NULL);						/* data only tx time */
 
 	gAcmTxTimeOthersHT = (UINT16)TimeAck;
@@ -10951,6 +11331,8 @@ STATIC VOID ACM_ActionHandleByQAP(
 						("acm_msg> A WME BW ANN frame is received!\n"));
 
 				ACM_MBSS_BwAnnHandle(pAd, pActFrame, BodyLen);
+
+				/* not forward the public frame to other BSSs to avoid loop */
 				goto label_exit;
 #endif // ACM_CC_FUNC_MBSS //
 
@@ -10965,7 +11347,7 @@ STATIC VOID ACM_ActionHandleByQAP(
 			/* if the ACM of the AC is disabled, we do not need to response */
 			if (StatusCode != ACM_STATUS_CODE_PRIVATE_ACM_DISABLED)
 			{
-				UCHAR mac_ra[6], mac_ta[6];
+				UCHAR MacRa[6], MacTa[6];
 
 
 				ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> prepare to response...\n"));
@@ -10984,10 +11366,10 @@ STATIC VOID ACM_ActionHandleByQAP(
 				pNotFrame->ElmTspec.Tspec.MediumTime = MediumTime;
 
 				/* swap DA & SA */
-				ACMR_WLAN_PKT_RA_GET(pMblk, mac_ra);
-				ACMR_WLAN_PKT_TA_GET(pMblk, mac_ta);
-				ACMR_WLAN_PKT_RA_SET(pMblk, mac_ta);
-				ACMR_WLAN_PKT_TA_SET(pMblk, mac_ra);
+				ACMR_WLAN_PKT_RA_GET(pMblk, MacRa);
+				ACMR_WLAN_PKT_TA_GET(pMblk, MacTa);
+				ACMR_WLAN_PKT_RA_SET(pMblk, MacTa);
+				ACMR_WLAN_PKT_TA_SET(pMblk, MacRa);
 
 				/* send out it */
 				ACM_ADDRSP_SEND(pAd, pMblk, PktLen);
@@ -11002,10 +11384,8 @@ STATIC VOID ACM_ActionHandleByQAP(
 			} /* End of if */
 		} /* End of if */
 
-#ifdef ACM_CC_FUNC_MBSS
-		/* send a broadcast private ACTION frame to advise used ACM time */
+		/* send a private public ACTION frame to advise used ACM time in AP */
 		ACM_FrameBwAnnSend(pAd, FALSE);
-#endif // ACM_CC_FUNC_MBSS //
 	} /* End of if */
 
 label_exit:
@@ -11089,14 +11469,33 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	*pStatusCode = ACM_STATUS_CODE_UNSPECIFIED_FAILURE;
 
 	if (!ACM_MR_TSPEC_IS_ALLOWED(pAd))
+	{
+		ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> ACM is not allowed!\n"));
 		return ACM_RTN_DISALLOW;
-	/* End of if */
+	} /* End of if */
 
 	if (pTspec == NULL)
 	{
 		/* TSPEC element shall NOT be NULL */
 		return ACM_RTN_NULL_POINTER;
 	} /* End of if */
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+	/* ACL check */
+	if (ACM_MR_ACL_IS_ENABLED(pAd))
+	{
+		BOOLEAN FlgIsAllowed;
+
+		ACM_LIST_ENTRY_GET(pAd, ACMR_CLIENT_MAC(pCdb), FlgIsAllowed, NULL);
+		if (FlgIsAllowed == FALSE)
+		{
+			/* not in ACL list so we reject it */
+			return ACM_RTN_DISALLOW;
+		} /* End of if */
+	}
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
 
 	/* init */
 	pOldStreamIn = NULL;
@@ -11110,7 +11509,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	FlgIsSupRate = 0;
 
 	/* allocate a TSPEC request TS */
-	pNewStream = (ACM_STREAM *)ACMR_MEM_ALLOC(sizeof(ACM_STREAM));
+	ACMR_MEM_ALLOC(pNewStream, sizeof(ACM_STREAM), (ACM_STREAM *));
 
 	if (pNewStream == NULL)
 		return ACM_RTN_ALLOC_ERR;
@@ -11125,10 +11524,10 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	pNewStream->StreamType = StreamType;
 
 	/* allocate/copy a TSPEC */
-	pNewStream->pTspec = (ACM_TSPEC *)ACMR_MEM_ALLOC(sizeof(ACM_TSPEC));
+	ACMR_MEM_ALLOC(pNewStream->pTspec, sizeof(ACM_TSPEC), (ACM_TSPEC *));
 
 	if (pNewStream->pTspec == NULL)
-		goto label_alloc_err;
+		goto LabelErrAlloc;
 	/* End of if */
 
 	ACM_TSPEC_COPY(pNewStream->pTspec, pTspec);
@@ -11142,7 +11541,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 					("acm_msg> No tclas processing element!\n"));
 		StatusCode = ACM_STATUS_CODE_DECLINED;
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 #endif // ACM_CC_FUNC_TCLAS //
 
@@ -11155,7 +11554,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 					ACM_ACCESS_POLICY_EDCA));
 		StatusCode = ACM_STATUS_CODE_DECLINED;
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 
 #ifdef ACM_CC_FUNC_TCLAS
@@ -11167,7 +11566,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
 					("acm_msg> Wrong tclas process value!\n"));
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 #endif // ACM_CC_FUNC_TCLAS //
 
@@ -11181,13 +11580,13 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	{
 		if (pTclas[IdTclasNum] != NULL)
 		{
-			pNewStream->pTclas[IdTclasNum] = \
-								(ACM_TCLAS *)ACMR_MEM_ALLOC(sizeof(ACM_TCLAS));
+			ACMR_MEM_ALLOC(pNewStream->pTclas[IdTclasNum],
+							sizeof(ACM_TCLAS), (ACM_TCLAS *));
 
 			if (pNewStream->pTclas[IdTclasNum] == NULL)
 			{
 				RtnCode = ACM_RTN_ALLOC_ERR;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 
 			ACM_TCLAS_COPY(pNewStream->pTclas[IdTclasNum], pTclas[IdTclasNum]);
@@ -11210,7 +11609,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	{
 		/* ERR! source STA is not a QSTA and not a WMM STA */
 		StatusCode = ACM_STATUS_CODE_DECLINED;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 
 	/* check TCLSS parameters and get user priority */
@@ -11226,7 +11625,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 			{
 				/* classifier type is illegal */
 				StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 
 			/* check user priority, priority for each TCLAS must be the same */
@@ -11238,7 +11637,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 				{
 					/* user priority for all TCLASS element shall be the same */
 					StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-					goto label_rsp_err;
+					goto LabelRspErr;
 				} /* End of if */
 			} /* End of if */
 		} /* End of if */
@@ -11253,7 +11652,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
 					("acm_msg> Direct Link is not allowed!\n"));
 		StatusCode = ACM_STATUS_CODE_DIRECT_LINK_IS_NOT_ALLOWED;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 
 
@@ -11292,7 +11691,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
 					("acm_msg> min phy rate = 0 or tclas is too many!\n"));
 		RtnCode = ACM_RTN_INVALID_PARAM;
-		goto label_rsp_err;
+		goto LabelRspErr;
 	} /* End of if */
 
 	ACM_TG_CMT_UAPSD_SETTING_ON_NON_ACM_AC;
@@ -11317,7 +11716,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 						"maximum supported rate %dbps!\n",
 						pTspec->MinPhyRate, MaxRate));
 			RtnCode = ACM_RTN_INVALID_PARAM;
-			goto label_rsp_err;
+			goto LabelRspErr;
 		} /* End of if */
 
 		/* check min phy rate must be one of supported rates non-11n */
@@ -11357,7 +11756,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 							("acm_msg> min phy rate %d is not a supported rate!\n",
 							pTspec->MinPhyRate));
 				RtnCode = ACM_RTN_INVALID_PARAM;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 
@@ -11390,14 +11789,14 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 							pTspec->TsInfo.Aggregation,
 							pTspec->TsInfo.Schedule));
 				StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		}
 		else
 		{
 			/* non-EDCA is not support */
 			StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-			goto label_rsp_err;
+			goto LabelRspErr;
 		} /* End of if */
 
 #ifdef ACM_CC_FUNC_HCCA
@@ -11410,7 +11809,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 			{
 				/* error: suspension interval > inactivity interval */
 				StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 
@@ -11426,7 +11825,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 				is supported.
 			*/
 			StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-			goto label_rsp_err;
+			goto LabelRspErr;
 		} /* End of if */
 
 		/* get QOS MIB database */
@@ -11450,7 +11849,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 				/* minimum service interval is too small */
 				pTspec->MinServInt = ACM_TSPEC_MIN_SERV_INT_LIMIT;
 				StatusCode = ACM_STATUS_CODE_SUGGESTED_TSPEC;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 
@@ -11470,7 +11869,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 				/* inactivity interval is too small */
 				pTspec->InactivityInt = MinServInt;
 				StatusCode = ACM_STATUS_CODE_SUGGESTED_TSPEC;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 
@@ -11484,7 +11883,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 				/* suspension interval is too small */
 				pTspec->SuspensionInt = ACM_TSPEC_SUSPENSION_MIN;
 				StatusCode = ACM_STATUS_CODE_SUGGESTED_TSPEC;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 #endif // ACM_CC_FUNC_HCCA //
@@ -11504,7 +11903,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 		{
 			pTspec->TsInfo.Aggregation = ACM_AGGREGATION_DISABLE;
 			StatusCode = ACM_STATUS_CODE_SUGGESTED_TSPEC;
-			goto label_rsp_err;
+			goto LabelRspErr;
 		} /* End of if */
 
 		/* semaphore protection */
@@ -11535,7 +11934,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 							("acm_msg> Reject the TSPEC due to "
 							"replacement rule check!\n"));
 				StatusCode = ACM_STATUS_CODE_INVALID_PARAMETERS;
-				goto label_rsp_err;
+				goto LabelRspErr;
 			} /* End of if */
 		} /* End of if */
 #endif // ACM_CC_FUNC_REPLACE_RULE_TG //
@@ -11603,20 +12002,21 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 		if (StatusCode != ACM_STATUS_CODE_SUCCESS)
 		{
 			ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
-			goto label_rsp_err;
+			goto LabelRspErr;
 		} /* End of if */
 
-		goto label_rsp_ok;
+		goto LabelOK;
 	} /* End of if */
 
 
 	/* ---- Handle non-EDCA TSPEC ---- */
 	/* HCCA is not support */
+	ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> HCCA is not supported!\n"));
 	StatusCode = ACM_STATUS_CODE_DECLINED;
 	RtnCode = ACM_RTN_DISALLOW;
-	goto label_rsp_err;
+	goto LabelRspErr;
 
-label_rsp_ok:
+LabelOK:
 	/* active stream check timer for any stream */
 	ACMR_TIMER_ENABLE(ACMR_CB->FlgStreamAliveCheckEnable,
 						ACMR_CB->TimerStreamAliveCheck,
@@ -11649,13 +12049,13 @@ label_rsp_ok:
 label_rsp_err_sem:
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
-label_rsp_err:
+LabelRspErr:
 LabelSemErr:
 	/* response TSPEC to QSTA with error code */
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
 				("acm_msg> A request is rejected (%d)!\n", StatusCode));
 
-label_alloc_err:
+LabelErrAlloc:
 	/* free local allocated memory */
 	ACM_FREE_TS(pNewStream);
 	*pStatusCode = StatusCode;
@@ -11757,6 +12157,7 @@ STATIC VOID ACM_ActionHandleByQSTA(
 				ACMR_DEBUG(ACMR_DEBUG_TRACE,
 							("acm_msg> Forward the bandwidth announce...\n"));
 
+				/* forward the public frame to other BSSs */
 				ACM_MBSS_BwAnnForward(pAd, pMblk, PktLen);
 				goto label_exit;
 #endif // ACM_CC_FUNC_MBSS //
@@ -11839,7 +12240,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 {
 #define TC_LMR_STREAM_DESTROY(__pAd, __StmAcId, __pStreamReq)	\
 	__StmAcId = __pStreamReq->AcmAcId;							\
-	ACM_TC_Destroy(__pAd, __pStreamReq);
+	ACM_TC_Destroy(__pAd, __pStreamReq, 0);
 
 	ACM_STREAM *pStreamReq, *pOldStreamIn, *pOldStreamOut, *pOldStreamDiffAc;
 	ACM_FUNC_STATUS RtnCode, Status;
@@ -11884,9 +12285,9 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 			ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("acm_err> Find same active TSPEC. Skip the response. "
+						("acm_err> Find exist same active TSPEC. Skip the response. "
 						"TC_RspHandle()\n"));
-			goto LabelHandleOk;
+			goto LabelHandleOK;
 		} /* End of if */
 
 		ACMR_DEBUG(ACMR_DEBUG_TRACE,
@@ -11907,6 +12308,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 	if ((pStreamReq->Status != TSPEC_STATUS_REQUEST) &&
 		(pStreamReq->Status != TSPEC_STATUS_RENEGOTIATING))
 	{
+		/* must be new TSPEC request or TSPEC negotiate */
 		goto LabelHandleErr;
 	} /* End of if */
 
@@ -12000,7 +12402,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 		} /* End of switch */
 	} /* End of if */
 
-	/* remove it from the requested list, not free it */
+	/* remove it from the "requested" list, not free it */
 	ACM_TC_ReqRemove(pAd, pStreamReq);
 
 	/* we need to keep the TSPEC even it is a NULL TSPEC */
@@ -12026,7 +12428,7 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 
 		/* free the request */
 		ACM_TC_Free(pAd, pStreamReq);
-		return ACM_RTN_OK;
+		goto LabelHandleOK;
 	} /* End of if */
 #endif // ACM_CC_FUNC_SPEC_CHANGE_TG //
 
@@ -12147,21 +12549,24 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 	/* return power save right to system */
 	ACMP_StaPsCtrlRightReturn(pAd);
 
+	/* retry count change */
+	ACMR_RETRY_DISABLE(pAd);
+
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
 				("acm_msg> My request is successfully %d! TC_RspHandle()\n",
 				*pStatusCode));
 
-LabelHandleOk:
+LabelHandleOK:
 	return ACM_RTN_OK;
 
 LabelHandleErr:
-	*pStatusCode = ACM_STATUS_CODE_DECLINED;
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+
+	*pStatusCode = ACM_STATUS_CODE_DECLINED;
 
 LabelSemErr:
 	/* return power save right to system */
 	ACMP_StaPsCtrlRightReturn(pAd);
-
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
 				("acm_msg> Response Handle ERR! TC_RspHandle()\n"));
 	return RtnCode;
@@ -12172,9 +12577,6 @@ LabelErr:
 
 	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
 
-	/* recover UAPSD state */
-	ACM_APSD_Ctrl(pAd, pCdb, StmAcId,
-					pStreamReq->pTspec->TsInfo.Direction, 0, 0);
 
 	goto LabelSemErr;
 } /* End of ACM_TC_RspHandle */

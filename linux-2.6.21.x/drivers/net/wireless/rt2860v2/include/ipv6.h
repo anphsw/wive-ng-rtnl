@@ -94,7 +94,7 @@ typedef struct rt_ipv6_addr_
 
 
 /*IPv6 Header related structures */
-typedef struct PACKED _rt_ipv6_hdr_
+typedef struct GNU_PACKED _rt_ipv6_hdr_
 {
 	UINT32 			ver:4,
 					trafficClass:8,
@@ -107,7 +107,7 @@ typedef struct PACKED _rt_ipv6_hdr_
 }RT_IPV6_HDR, *PRT_IPV6_HDR;
 
 
-typedef struct PACKED _rt_ipv6_ext_hdr_
+typedef struct GNU_PACKED _rt_ipv6_ext_hdr_
 {
 	UCHAR	nextProto; // Indicate the protocol type of next extension header.
 	UCHAR	extHdrLen; // optional field for msg length of this extension header which didn't include the first "nextProto" field.
@@ -116,7 +116,7 @@ typedef struct PACKED _rt_ipv6_ext_hdr_
 
 
 /* ICMPv6 related structures */
-typedef struct PACKED _rt_ipv6_icmpv6_hdr_
+typedef struct GNU_PACKED _rt_ipv6_icmpv6_hdr_
 {
 	UCHAR	type;
 	UCHAR	code;
@@ -125,7 +125,7 @@ typedef struct PACKED _rt_ipv6_icmpv6_hdr_
 }RT_ICMPV6_HDR, *PRT_ICMPV6_HDR;
 
 
-typedef struct PACKED _rt_icmp6_option_hdr_
+typedef struct GNU_PACKED _rt_icmp6_option_hdr_
 {
 	UCHAR type;
 	UCHAR len;

@@ -54,17 +54,19 @@ VOID BA_MaxWinSizeReasign(
 	UCHAR MaxPeerRxSize;
 
 
-	MaxPeerRxSize = ((1<<(pEntryPeer->MaxRAmpduFactor+3)) * 10)/16 - 1;
-
-	DBGPRINT(RT_DEBUG_TRACE, ("MaxRAmpduFactor = %d,  MaxPeerRxSize = %d\n", 
-				pEntryPeer->MaxRAmpduFactor, MaxPeerRxSize));
-
+	MaxPeerRxSize = (((1 << (pEntryPeer->MaxRAmpduFactor + 3)) * 10) / 16) -1;
 #ifdef RT3883
-	if (pAd->MACVersion == RALINK_3883_VERSION) // 3*3
-		MaxSize = 31;
+	if (pAd->MACVersion == RALINK_3883_VERSION)
+	{
+		MaxSize = 31;	/* RT3883 */
+
+		if ((pEntryPeer->HTCapability.MCSSet[2] != 0xff) &&
+			(!CLIENT_STATUS_TEST_FLAG(pEntryPeer, fCLIENT_STATUS_RALINK_CHIPSET)))
+			MaxSize = 15;
+	}
 	else
-#endif
-	if (pAd->MACVersion >= RALINK_2883_VERSION) // 3*3
+#endif // RT3883 // 
+	if (pAd->MACVersion >= RALINK_2883_VERSION)
 	{
 		if (pAd->MACVersion >= RALINK_3070_VERSION)
 		{
@@ -76,7 +78,7 @@ VOID BA_MaxWinSizeReasign(
 		else
 			MaxSize = 31;
 	}
-	else if (pAd->MACVersion >= RALINK_2880MP2_VERSION)
+	else if (pAd->MACVersion >= RALINK_2880E_VERSION) // 2880 e
 	{
 		if (pEntryPeer->WepStatus != Ndis802_11EncryptionDisabled)
 			MaxSize = 7; // for non-open mode
@@ -86,25 +88,24 @@ VOID BA_MaxWinSizeReasign(
 	else
 		MaxSize = 7;
 
-	DBGPRINT(RT_DEBUG_TRACE, ("ba> Win Size = %d, Max Size = %d\n", 
-			*pWinSize, MaxSize));
+#ifdef CONFIG_AP_SUPPORT
+#endif // CONFIG_AP_SUPPORT //
 
+#ifdef CONFIG_STA_SUPPORT
+#endif // CONFIG_STA_SUPPORT //
+
+
+	DBGPRINT(RT_DEBUG_TRACE, ("ba>WinSize=%d, MaxSize=%d, MaxPeerRxSize=%d\n", 
+			*pWinSize, MaxSize, MaxPeerRxSize));
+
+	MaxSize = min(MaxPeerRxSize, MaxSize);
 	if ((*pWinSize) > MaxSize)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("1. ba> reassign max win size from %d to %d\n", 
+		DBGPRINT(RT_DEBUG_TRACE, ("ba> reassign max win size from %d to %d\n", 
 				*pWinSize, MaxSize));
 
 		*pWinSize = MaxSize;
 	}
-
-	if ((*pWinSize) > MaxPeerRxSize)
-	{
-		DBGPRINT(RT_DEBUG_TRACE, ("2. ba> reassign max win size from %d to %d\n", 
-				*pWinSize, MaxPeerRxSize));
-
-		*pWinSize = MaxPeerRxSize;
-	}
-
 }
 
 void Announce_Reordering_Packet(IN PRTMP_ADAPTER			pAd,
@@ -449,21 +450,21 @@ void ba_flush_reordering_timeout_mpdus(
 //		DBGPRINT(RT_DEBUG_OFF, ("timeout[%d] (%lx-%lx = %d > %d): %x, ", pBAEntry->list.qlen, Now32, (pBAEntry->LastIndSeqAtTimer), 
 //			   (int)((long) Now32 - (long)(pBAEntry->LastIndSeqAtTimer)), REORDERING_PACKET_TIMEOUT,
 //			   pBAEntry->LastIndSeq));
-		//
+    		//
 		// force LastIndSeq to shift to LastIndSeq+1
-		// 
-		Sequence = (pBAEntry->LastIndSeq+1) & MAXSEQ;
-		ba_indicate_reordering_mpdus_le_seq(pAd, pBAEntry, Sequence);
-		pBAEntry->LastIndSeqAtTimer = Now32;
-		pBAEntry->LastIndSeq = Sequence;
-		//
-		// indicate in-order mpdus
-		// 
-		Sequence = ba_indicate_reordering_mpdus_in_order(pAd, pBAEntry, Sequence);
-		if (Sequence != RESET_RCV_SEQ)
-		{
+    		// 
+    		Sequence = (pBAEntry->LastIndSeq+1) & MAXSEQ;
+    		ba_indicate_reordering_mpdus_le_seq(pAd, pBAEntry, Sequence);
+    		pBAEntry->LastIndSeqAtTimer = Now32;
 			pBAEntry->LastIndSeq = Sequence;
-		}
+    		//
+    		// indicate in-order mpdus
+    		// 
+    		Sequence = ba_indicate_reordering_mpdus_in_order(pAd, pBAEntry, Sequence);
+    		if (Sequence != RESET_RCV_SEQ)
+    		{
+    			pBAEntry->LastIndSeq = Sequence;
+    		}
 
 		DBGPRINT(RT_DEBUG_OFF, ("%x, flush one!\n", pBAEntry->LastIndSeq));
 
@@ -488,7 +489,7 @@ VOID BAOriSessionSetUp(
 	BA_ORI_ENTRY            *pBAEntry = NULL;
 	USHORT                  Idx;
 	BOOLEAN                 Cancelled;
-	
+
 	ASSERT(TID < NUM_OF_TID);
     
 	if ((pAd->CommonCfg.BACapability.field.AutoBA != TRUE)  &&  (isForced == FALSE))
@@ -564,6 +565,7 @@ VOID BAOriSessionAdd(
 	NDIS_STATUS     NStatus;
 	ULONG           FrameLen;
 	FRAME_BAR       FrameBar;
+	UCHAR			MaxPeerBufSize = 0;
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR			apidx;
 #endif // CONFIG_AP_SUPPORT //
@@ -575,7 +577,14 @@ VOID BAOriSessionAdd(
 	// Start fill in parameters.
 	if ((Idx !=0) && (pBAEntry->TID == TID) && (pBAEntry->ORI_BA_Status == Originator_WaitRes))
 	{
-		pBAEntry->BAWinSize = min(pBAEntry->BAWinSize, ((UCHAR)pFrame->BaParm.BufSize));
+		MaxPeerBufSize = (UCHAR)pFrame->BaParm.BufSize;
+
+		if (MaxPeerBufSize > 0)
+			MaxPeerBufSize -= 1;
+		else
+			MaxPeerBufSize = 0;
+
+		pBAEntry->BAWinSize = min(pBAEntry->BAWinSize, MaxPeerBufSize);
 		BA_MaxWinSizeReasign(pAd, pEntry, &pBAEntry->BAWinSize);
 
 		pBAEntry->TimeOutValue = pFrame->TimeOutValue;
@@ -791,7 +800,7 @@ BA_ORI_ENTRY *BATableAllocOriEntry(
 	{
 		goto done;
 	}
-
+		
 	// reserve idx 0 to identify BAWcidArray[TID] as empty
 	for (i=1; i<MAX_LEN_OF_BA_ORI_TABLE; i++)
 	{
@@ -836,15 +845,15 @@ VOID BATableFreeOriEntry(
 		if (pBAEntry->ORI_BA_Status == Originator_Done)
 		{
 			pAd->BATable.numDoneOriginator -= 1;
-			pEntry->TXBAbitmap &= (~(1<<(pBAEntry->TID) ));
+		 	pEntry->TXBAbitmap &= (~(1<<(pBAEntry->TID) ));
 			DBGPRINT(RT_DEBUG_TRACE, ("BATableFreeOriEntry numAsOriginator= %ld\n", pAd->BATable.numAsRecipient));
 			// Erase Bitmap flag.
 		}
-
+	
 		ASSERT(pAd->BATable.numAsOriginator != 0);
 
 		pAd->BATable.numAsOriginator -= 1;
-
+		
 		pBAEntry->ORI_BA_Status = Originator_NONE;
 		pBAEntry->Token = 0;
 		NdisReleaseSpinLock(&pAd->BATabLock);
@@ -871,7 +880,7 @@ VOID BATableFreeRecEntry(
 		pEntry->BARecWcidArray[pBAEntry->TID] = 0;
 
 		NdisAcquireSpinLock(&pAd->BATabLock);
-
+		
 		ASSERT(pAd->BATable.numAsRecipient != 0);
 
 		pAd->BATable.numAsRecipient -= 1;
@@ -926,7 +935,6 @@ VOID BAOriSessionTearDown(
 			else
 			{
 				DBGPRINT(RT_DEBUG_ERROR, ("%s(bForceSend):alloc memory failed!\n", __FUNCTION__));
-				return;
 			}
 		}
 
@@ -995,7 +1003,7 @@ VOID BARecSessionTearDown(
 		return;
 
 	DBGPRINT(RT_DEBUG_TRACE,("%s===>Wcid=%d.TID=%d \n", __FUNCTION__, Wcid, TID));
-
+	
 
 	pBAEntry = &pAd->BATable.BARecEntry[Idx];
 	DBGPRINT(RT_DEBUG_TRACE,("\t===>Idx = %ld, Wcid=%d.TID=%d, REC_BA_Status = %d \n", Idx, Wcid, TID, pBAEntry->REC_BA_Status));
@@ -1008,7 +1016,7 @@ VOID BARecSessionTearDown(
 		BOOLEAN 				Cancelled;
 		//ULONG   offset; 
 		//UINT32  VALUE;
-
+				
 		RTMPCancelTimer(&pBAEntry->RECBATimer, &Cancelled);         
 
 		//
@@ -1302,6 +1310,9 @@ VOID PeerAddBAReqAction(
 #ifdef QOS_DLS_SUPPORT
 			|| (IS_ENTRY_DLS(&pAd->MacTab.Content[Elem->Wcid]))
 #endif // QOS_DLS_SUPPORT //
+#ifdef DOT11Z_TDLS_SUPPORT
+			|| (IS_ENTRY_TDLS(&pAd->MacTab.Content[Elem->Wcid]))
+#endif // DOT11Z_TDLS_SUPPORT //
 			)
 			ActHeaderInit(pAd, &ADDframe.Hdr, pAddr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
 		else
@@ -1544,7 +1555,9 @@ VOID SendPSMPAction(
 			Frame.Psmp = 1;
 			break;
 	}
-	MakeOutgoingFrame(pOutBuffer, &FrameLen, sizeof(FRAME_PSMP_ACTION), &Frame, END_OF_ARGS);
+	MakeOutgoingFrame(pOutBuffer,               &FrameLen,
+					  sizeof(FRAME_PSMP_ACTION),      &Frame,
+					  END_OF_ARGS);
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 	MlmeFreeMemory(pAd, pOutBuffer);
 	DBGPRINT(RT_DEBUG_ERROR,("HT - SendPSMPAction( %d )  \n", Frame.Psmp));
@@ -1553,7 +1566,7 @@ VOID SendPSMPAction(
 
 #define RADIO_MEASUREMENT_REQUEST_ACTION	0
 
-typedef struct PACKED
+typedef struct GNU_PACKED
 {
 	UCHAR	RegulatoryClass;
 	UCHAR	ChannelNumber;
@@ -1566,7 +1579,7 @@ typedef struct PACKED
 	UCHAR   SSIDIE[2];			// 2 byte
 } BEACON_REQUEST;
 
-typedef struct PACKED
+typedef struct GNU_PACKED
 {
 	UCHAR	ID;
 	UCHAR	Length;
@@ -1687,9 +1700,8 @@ void convert_reordering_packet_to_preAMSDU_or_802_3_packet(
 #ifdef LINUX
 			data_p = skb_push(pRxPkt, LENGTH_802_3+VLAN_Size);
 #endif // LINUX //
-
 			VLAN_8023_Header_Copy(pAd, Header802_3, LENGTH_802_3,
-									data_p, FromWhichBSSID);
+									data_p, FromWhichBSSID, TPID);
 		}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -1818,6 +1830,16 @@ VOID Indicate_AMPDU_Packet(
 
 	if (!RX_BLK_TEST_FLAG(pRxBlk, fRX_AMSDU) &&  (pRxBlk->DataSize > MAX_RX_PKT_LEN))
 	{
+		static int err_size;
+
+		err_size++;
+		if (err_size > 20) {
+			 DBGPRINT(RT_DEBUG_TRACE, ("AMPDU DataSize = %d\n", pRxBlk->DataSize));
+			 hex_dump("802.11 Header", (UCHAR *)pRxBlk->pHeader, 24);
+			 hex_dump("Payload", pRxBlk->pData, 64);
+			 err_size = 0;
+		}
+
 		// release packet
 		RELEASE_NDIS_PACKET(pAd, pRxBlk->pRxPacket, NDIS_STATUS_FAILURE);
 		return;

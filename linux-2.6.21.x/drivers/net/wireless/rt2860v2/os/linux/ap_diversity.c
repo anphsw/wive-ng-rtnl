@@ -294,20 +294,6 @@ INT AntDiversity_RXWIRead(
 				}
 			else{
 				ADDBGPRINT("%02d(e, %d,%d) ", (INT)LastRSSI, now, LastRSSIJiffy);
-#if 0
-				/* keep for reference: send NULL frame.*/
-				BOOLEAN bQosNull = FALSE;
-				ADDBGPRINT("%02d(e) ", pEntry->RssiSample.LastRssi0);
-				if (CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_WMM_CAPABLE))
-					bQosNull = TRUE;
-				if(first_try){
-					tryagain = TRUE;
-					EnableACKFrame(pAd, 1);
-					ADDBGPRINT("send null\n");
-					ApEnqueueNullFrame(pAd, pEntry->Addr, pEntry->CurrTxRate, pEntry->Aid, pEntry->apidx, bQosNull, TRUE, 0);
-					// damn we unable to know which ACK frame belong to us.
-				}
-#endif
 
 			}
 		} /* if */
@@ -386,11 +372,12 @@ static INT work_handler(IN void *Context)
 {
 	PRTMP_ADAPTER	pAd;
     RTMP_OS_TASK	*pTask;
-    INT			AntArrayRSSI[]	= {0, 0, 0};		// 3 candidates
-    const INT		AntFixedIdx		= 1;			// Ant1 is unchanged;
-    INT			UpdateRSSI		= 0;
-    BOOLEAN		EVChanged		= FALSE;
-    INT			EVNotChangeCount= 0;
+    //int				Status = 0;
+	INT				AntArrayRSSI[]	= {0, 0, 0};		// 3 candidates
+	const INT		AntFixedIdx		= 1;			// Ant1 is unchanged;
+	INT				UpdateRSSI		= 0;
+	BOOLEAN			EVChanged		= FALSE;
+	INT				EVNotChangeCount= 0;
 
 //	rtmp_os_thread_init("rtmpAntDiversity", (PVOID)&(pAd->ad_notify));
 

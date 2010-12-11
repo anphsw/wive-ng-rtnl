@@ -36,7 +36,10 @@ BUILD_TIMER_FUNCTION(MlmePeriodicExec);
 //BUILD_TIMER_FUNCTION(MlmeRssiReportExec);
 BUILD_TIMER_FUNCTION(AsicRxAntEvalTimeout);
 BUILD_TIMER_FUNCTION(APSDPeriodicExec);
-BUILD_TIMER_FUNCTION(AsicRfTuningExec);
+BUILD_TIMER_FUNCTION(EnqueueStartForPSKExec);
+#ifdef CONFIG_STA_SUPPORT
+BUILD_TIMER_FUNCTION(Adhoc_WpaRetryExec);
+#endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 extern VOID APDetectOverlappingExec(
@@ -54,8 +57,9 @@ BUILD_TIMER_FUNCTION(Bss2040CoexistTimeOut);
 BUILD_TIMER_FUNCTION(GREKEYPeriodicExec);
 BUILD_TIMER_FUNCTION(CMTimerExec);
 BUILD_TIMER_FUNCTION(WPARetryExec);
-BUILD_TIMER_FUNCTION(EnqueueStartForPSKExec);
+#ifdef AP_SCAN_SUPPORT
 BUILD_TIMER_FUNCTION(APScanTimeout);
+#endif // AP_SCAN_SUPPORT //
 BUILD_TIMER_FUNCTION(APQuickResponeForRateUpExec);
 #ifdef IDS_SUPPORT
 BUILD_TIMER_FUNCTION(RTMPIdsPeriodicExec);
@@ -84,6 +88,9 @@ BUILD_TIMER_FUNCTION(RadioOnExec);
 BUILD_TIMER_FUNCTION(DlsTimeoutAction);
 #endif // QOS_DLS_SUPPORT //
 
+#ifdef DOT11Z_TDLS_SUPPORT
+BUILD_TIMER_FUNCTION(TDLS_TimeoutAction);
+#endif // DOT11Z_TDLS_SUPPORT //
 
 
 #endif // CONFIG_STA_SUPPORT //
@@ -93,11 +100,10 @@ BUILD_TIMER_FUNCTION(WscEAPOLTimeOutAction);
 BUILD_TIMER_FUNCTION(Wsc2MinsTimeOutAction);
 BUILD_TIMER_FUNCTION(WscUPnPMsgTimeOutAction);
 BUILD_TIMER_FUNCTION(WscUPnPM2DTimeOutAction);
-#ifdef CONFIG_STA_SUPPORT
+
 BUILD_TIMER_FUNCTION(WscPBCTimeOutAction);
 BUILD_TIMER_FUNCTION(WscScanTimeOutAction);
 BUILD_TIMER_FUNCTION(WscProfileRetryTimeout);
-#endif // CONFIG_STA_SUPPORT //
 #ifdef WSC_LED_SUPPORT
 BUILD_TIMER_FUNCTION(WscLEDTimer);
 BUILD_TIMER_FUNCTION(WscSkipTurnOffLEDTimer);
@@ -105,14 +111,14 @@ BUILD_TIMER_FUNCTION(WscSkipTurnOffLEDTimer);
 #endif // WSC_INCLUDED //
 
 
-#if defined(WLAN_LED)
+#ifdef WLAN_LED
 extern void LedCtrlMain(
 	IN PVOID SystemSpecific1, 
 	IN PVOID FunctionContext, 
 	IN PVOID SystemSpecific2, 
 	IN PVOID SystemSpecific3);
 BUILD_TIMER_FUNCTION(LedCtrlMain);
-#endif
+#endif // WLAN_LED //
 
 #ifdef WMM_ACM_SUPPORT
 BUILD_TIMER_FUNCTION(ACMP_TR_TC_ReqCheck);
@@ -121,11 +127,11 @@ BUILD_TIMER_FUNCTION(ACMP_TR_TC_General);
 BUILD_TIMER_FUNCTION(ACMP_CMD_Timer_Data_Simulation);
 #endif // WMM_ACM_SUPPORT //
 
-#ifdef CONFIG_AP_SUPPORT
+#ifdef RTMP_RBUS_SUPPORT
 #ifdef TXBF_SUPPORT
 BUILD_TIMER_FUNCTION(eTxBfProbeTimerExec);
 #endif // TXBF_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef RTMP_TIMER_TASK_SUPPORT
 static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
@@ -195,7 +201,7 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 
 
 INT RtmpTimerQThread(
-	IN OUT PVOID Context)
+	IN ULONG Context)
 {
 	RTMP_OS_TASK	*pTask;
 	PRTMP_ADAPTER	pAd;
@@ -371,3 +377,4 @@ void RtmpTimerQInit(RTMP_ADAPTER *pAd)
 	}
 }
 #endif // RTMP_TIMER_TASK_SUPPORT //
+

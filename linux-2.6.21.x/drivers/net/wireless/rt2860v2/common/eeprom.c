@@ -32,9 +32,16 @@ INT RtmpChipOpsEepromHook(
 	IN RTMP_ADAPTER *pAd,
 	IN INT			infType)
 {
-	RTMP_CHIP_OP	*pChipOps;
+	RTMP_CHIP_OP	*pChipOps = &pAd->chipOps;
 
-	pChipOps = &pAd->chipOps;
+#ifdef RTMP_FLASH_SUPPORT
+	pChipOps->eeinit = rtmp_nv_init;
+	pChipOps->eeread = rtmp_ee_flash_read;
+	pChipOps->eewrite = rtmp_ee_flash_write;
+	return 0;
+#endif // RTMP_FLASH_SUPPORT //
+
+
 	switch(infType) 
 	{
 #ifdef RTMP_PCI_SUPPORT
@@ -45,15 +52,17 @@ INT RtmpChipOpsEepromHook(
 			pChipOps->eeread = rtmp_ee_prom_read16;
 			pChipOps->eewrite = rtmp_ee_prom_write16;
 			break;
-#endif /* RTMP_PCI_SUPPORT */
+#endif // RTMP_PCI_SUPPORT //
+
 #ifdef RTMP_RBUS_SUPPORT
 		case RTMP_DEV_INF_RBUS:
-			pChipOps->eeinit  = rtmp_nv_init;
-			pChipOps->eeread  = (void *)rtmp_ee_flash_read;
-			pChipOps->eewrite = (void *)rtmp_ee_flash_write;
+			pChipOps->eeinit = rtmp_nv_init;
+			pChipOps->eeread = rtmp_ee_flash_read;
+			pChipOps->eewrite = rtmp_ee_flash_write;
 			pChipOps->loadFirmware = NULL;
 			break;
-#endif /* RTMP_RBUS_SUPPORT */
+#endif // RTMP_RBUS_SUPPORT //
+
 		default:
 			DBGPRINT(RT_DEBUG_ERROR, ("RtmpChipOpsEepromHook() failed!\n"));
 			break;

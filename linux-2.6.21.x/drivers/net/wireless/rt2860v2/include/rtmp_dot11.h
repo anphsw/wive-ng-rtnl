@@ -7,9 +7,16 @@
 
 #include "rtmp_type.h"
 
+#ifdef TXBF_SUPPORT
+// CSI/Steering values
+#define DOT11N_BF_FB_NONE		0
+#define DOT11N_BF_FB_CSI		1
+#define DOT11N_BF_FB_NOCOMP	2
+#define DOT11N_BF_FB_COMP		3
+#endif // TXBF_SUPPORT //
 
 // 4-byte HTC field.  maybe included in any frame except non-QOS data frame.  The Order bit must set 1.
-typedef struct PACKED {
+typedef struct GNU_PACKED {
 #ifdef RT_BIG_ENDIAN
     UINT32		RDG:1;	//RDG / More PPDU
     UINT32		ACConstraint:1;	//feedback request
@@ -44,7 +51,7 @@ typedef struct PACKED {
 } HT_CONTROL, *PHT_CONTROL;
 
 // 2-byte QOS CONTROL field
-typedef struct PACKED {
+typedef struct GNU_PACKED {
 #ifdef RT_BIG_ENDIAN
     USHORT      Txop_QueueSize:8;
     USHORT      AMsduPresent:1;
@@ -62,7 +69,7 @@ typedef struct PACKED {
 
 
 // 2-byte Frame control field
-typedef	struct	PACKED {
+typedef	struct	GNU_PACKED {
 #ifdef RT_BIG_ENDIAN
 	USHORT		Order:1;			// Strict order expected
 	USHORT		Wep:1;				// Wep data
@@ -90,7 +97,7 @@ typedef	struct	PACKED {
 #endif /* !RT_BIG_ENDIAN */
 } FRAME_CONTROL, *PFRAME_CONTROL;
 
-typedef	struct	PACKED _HEADER_802_11	{
+typedef	struct	GNU_PACKED _HEADER_802_11	{
     FRAME_CONTROL   FC;
     USHORT          Duration;
     UCHAR           Addr1[MAC_ADDR_LEN];
@@ -106,14 +113,14 @@ typedef	struct	PACKED _HEADER_802_11	{
 	UCHAR			Octet[0];
 }	HEADER_802_11, *PHEADER_802_11;
 
-typedef struct PACKED _PSPOLL_FRAME {
+typedef struct GNU_PACKED _PSPOLL_FRAME {
     FRAME_CONTROL   FC;
     USHORT          Aid;
     UCHAR           Bssid[MAC_ADDR_LEN];
     UCHAR           Ta[MAC_ADDR_LEN];
 }   PSPOLL_FRAME, *PPSPOLL_FRAME;
 
-typedef	struct	PACKED _RTS_FRAME	{
+typedef	struct	GNU_PACKED _RTS_FRAME	{
     FRAME_CONTROL   FC;
     USHORT          Duration;
     UCHAR           Addr1[MAC_ADDR_LEN];

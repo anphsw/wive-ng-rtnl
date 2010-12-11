@@ -53,7 +53,7 @@ typedef struct _ACM_ACI_AIFSN {
 	UCHAR ACM:1;
 	UCHAR ACI:2;
 	UCHAR Reserved:1;
-} PACKED ACM_ACI_AIFSN;
+} GNU_PACKED ACM_ACI_AIFSN;
 
 typedef struct _ACM_AC_PARAM_RECORD {
 
@@ -65,7 +65,7 @@ typedef struct _ACM_AC_PARAM_RECORD {
 	UCHAR ECW_Max:4;
 
 	UINT16 TXOP_Limit; /* in units of 32 microseconds */
-} PACKED ACM_AC_PARAM_RECORD;
+} GNU_PACKED ACM_AC_PARAM_RECORD;
 
 typedef struct _ACM_ELM_EDCA_PARAM {
 
@@ -79,7 +79,7 @@ typedef struct _ACM_ELM_EDCA_PARAM {
 	ACM_AC_PARAM_RECORD AC_BK;	/* background */
 	ACM_AC_PARAM_RECORD AC_VI;	/* video */
 	ACM_AC_PARAM_RECORD AC_VO;	/* voice */
-} PACKED ACM_ELM_EDCA_PARAM;
+} GNU_PACKED ACM_ELM_EDCA_PARAM;
 
 
 /* ----- WMM v1.1 ----- */
@@ -115,7 +115,7 @@ typedef struct _ACM_WME_AC_INFO {
 #define WME_UAPSD_OP_AP		OP.AP
 #define WME_UAPSD_OP_STA	OP.STA
 #endif
-} PACKED ACM_WME_AC_INFO;
+} GNU_PACKED ACM_WME_AC_INFO;
 
 #define ACM_WME_OUI_HDR_LEN		6
 #define ACM_WME_OUI_0			0x00
@@ -138,7 +138,7 @@ typedef struct _ACM_ELM_WME_INFO {
 	UCHAR Version;				/* ACM_WME_OUI_VERSION */
 
 	ACM_WME_AC_INFO AcInfo;
-} PACKED ACM_ELM_WME_INFO;
+} GNU_PACKED ACM_ELM_WME_INFO;
 
 typedef struct _ACM_WME_ACI_AIFSN {
 
@@ -154,7 +154,7 @@ typedef struct _ACM_WME_ACI_AIFSN {
 	/* -------------------------------------	*/
 	UCHAR ACI:2;			/* bit 5 ~ 6 */
 	UCHAR Reserved:1;		/* bit 7 */
-} PACKED ACM_WME_ACI_AIFSN;
+} GNU_PACKED ACM_WME_ACI_AIFSN;
 
 typedef struct _ACM_WME_AC_PARAM {
 
@@ -164,7 +164,7 @@ typedef struct _ACM_WME_AC_PARAM {
 	UCHAR ECW_Max:4;
 
 	UINT16 TXOP_Limit;
-} PACKED ACM_WME_AC_PARAM;
+} GNU_PACKED ACM_WME_AC_PARAM;
 
 typedef struct _ACM_ELM_WME_PARAM {
 
@@ -182,7 +182,7 @@ typedef struct _ACM_ELM_WME_PARAM {
 	ACM_WME_AC_PARAM AC_BK;
 	ACM_WME_AC_PARAM AC_VI;
 	ACM_WME_AC_PARAM AC_VO;
-} PACKED ACM_ELM_WME_PARAM;
+} GNU_PACKED ACM_ELM_WME_PARAM;
 
 typedef struct _ACM_WME_TS_INFO {
 
@@ -209,7 +209,7 @@ typedef struct _ACM_WME_TS_INFO {
 	UCHAR Reserved2:2;	/* ack policy */
 
 	UCHAR Reserved1;	/* bit16: 802.11e S-APSD */
-} PACKED ACM_WME_TS_INFO;
+} GNU_PACKED ACM_WME_TS_INFO;
 
 typedef struct _ACM_WME_TSPEC {
 
@@ -232,7 +232,7 @@ typedef struct _ACM_WME_TSPEC {
 
 	UINT16  SurplusBandwidthAllowance;
 	UINT16  MediumTime;
-} PACKED ACM_WME_TSPEC;
+} GNU_PACKED ACM_WME_TSPEC;
 
 typedef struct _ACM_ELM_WME_TSPEC {
 
@@ -245,7 +245,7 @@ typedef struct _ACM_ELM_WME_TSPEC {
 	UCHAR Version;				/* ACM_WME_OUI_VERSION */
 
 	ACM_WME_TSPEC Tspec;
-} PACKED ACM_ELM_WME_TSPEC;
+} GNU_PACKED ACM_ELM_WME_TSPEC;
 
 typedef struct _ACM_ELM_WME_TCLAS {
 
@@ -258,7 +258,7 @@ typedef struct _ACM_ELM_WME_TCLAS {
 	UCHAR Version;				/* ACM_WME_OUI_VERSION */
 
 	ACM_TCLAS Tclas;
-} PACKED ACM_ELM_WME_TCLAS;
+} GNU_PACKED ACM_ELM_WME_TCLAS;
 
 typedef struct _ACM_ELM_WME_TCLAS_PROCESSING {
 
@@ -273,7 +273,7 @@ typedef struct _ACM_ELM_WME_TCLAS_PROCESSING {
 #define ACM_WME_TCLAS_PROCESSING_ALL		0
 #define ACM_WME_TCLAS_PROCESSING_ONE		1
 	UCHAR Processing;
-} PACKED ACM_ELM_WME_TCLAS_PROCESSING;
+} GNU_PACKED ACM_ELM_WME_TCLAS_PROCESSING;
 
 /* WME notification Frame */
 typedef struct _ACM_WME_NOT_FRAME {
@@ -302,7 +302,7 @@ typedef struct _ACM_WME_NOT_FRAME {
 	UCHAR Tclas[sizeof(ACM_ELM_WME_TCLAS) * ACM_TSPEC_TCLAS_MAX_NUM +
 				sizeof(ACM_ELM_WME_TCLAS_PROCESSING)];
 
-} PACKED ACM_WME_NOT_FRAME;
+} GNU_PACKED ACM_WME_NOT_FRAME;
 #endif // ACM_CC_FUNC_WMM //
 
 

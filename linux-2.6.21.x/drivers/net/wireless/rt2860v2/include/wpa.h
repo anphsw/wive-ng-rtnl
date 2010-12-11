@@ -84,8 +84,7 @@
  */
 #define IS_INVALID_HT_SECURITY(_mode)		\
 	(((_mode) == Ndis802_11Encryption1Enabled) || \
-	 ((_mode) == Ndis802_11Encryption2Enabled) || \
-	 ((_mode) == Ndis802_11Encryption4Enabled))
+	 ((_mode) == Ndis802_11Encryption2Enabled))
 
 #define MIX_CIPHER_WPA_TKIP_ON(x)       (((x) & 0x08) != 0)
 #define MIX_CIPHER_WPA_AES_ON(x)        (((x) & 0x04) != 0)
@@ -202,6 +201,14 @@
 
 #endif // End of Driver Mode //
 
+#ifdef CONFIG_AP_SUPPORT
+/*========================================
+	The prototype is defined in ap_wpa.c
+  ========================================*/
+VOID	WPA_APSetGroupRekeyAction(
+	IN  PRTMP_ADAPTER   pAd);
+
+#endif // CONFIG_AP_SUPPORT //
 
 /*========================================
 	The prototype is defined in cmm_wpa.c
@@ -225,7 +232,7 @@ VOID    PRF(
 	OUT UCHAR   *output,
 	IN  INT     len);
 
-int PasswordHash(
+int RtmpPasswordHash(
 	char *password, 
 	unsigned char *ssid, 
 	int ssidlength, 
@@ -241,7 +248,7 @@ VOID	KDF(
 	OUT	PUINT8	output,
 	IN	USHORT	len);
 
-PUINT8	ExtractSuiteFromRSNIE(
+PUINT8	WPA_ExtractSuiteFromRSNIE(
 		IN 	PUINT8	rsnie,
 		IN 	UINT	rsnie_len,
 		IN	UINT8	type,
@@ -283,6 +290,13 @@ VOID WpaDerivePTK(
 	OUT UCHAR   *output,
 	IN  UINT    len);
 
+VOID WpaDeriveGTK(
+	IN  UCHAR   *PMK,
+	IN  UCHAR   *GNonce,
+	IN  UCHAR   *AA,
+	OUT UCHAR   *output,
+	IN  UINT    len);
+
 VOID    GenRandom(
 	IN  PRTMP_ADAPTER   pAd, 
 	IN	UCHAR			*macAddr,
@@ -303,6 +317,11 @@ BOOLEAN RTMPParseEapolKeyData(
 	IN	UCHAR			MsgType,
 	IN	BOOLEAN			bWPA2,
 	IN  MAC_TABLE_ENTRY *pEntry);
+
+VOID WPA_ConstructKdeHdr(
+	IN 	UINT8	data_type,	
+	IN 	UINT8 	data_len,
+	OUT PUCHAR 	pBuf);
 
 VOID	ConstructEapolMsg(
 	IN 	PMAC_TABLE_ENTRY	pEntry,
@@ -375,6 +394,78 @@ VOID RTMPSetWcidSecurityInfo(
 	UINT8				CipherAlg,
 	UINT8				Wcid,
 	UINT8				KeyTabFlag);
+
+VOID	CalculateMIC(
+	IN	UCHAR			KeyDescVer,	
+	IN	UCHAR			*PTK,
+	OUT PEAPOL_PACKET   pMsg);
+
+PSTRING GetEapolMsgType(CHAR msg);
+
+#ifdef CONFIG_STA_SUPPORT
+/* 
+ =====================================	
+ 	function prototype in cmm_wpa_adhoc.c
+ =====================================	
+*/
+VOID WpaProfileInit(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry);
+
+VOID WpaProfileRelease(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry);
+
+VOID WpaProfileReset(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile);
+
+VOID WpaProfileDataHook(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile);
+    
+VOID Adhoc_WpaEAPOLStartAction(
+    IN PRTMP_ADAPTER    pAd, 
+    IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_WpaEAPOLKeyAction(
+    IN PRTMP_ADAPTER    pAd, 
+    IN MLME_QUEUE_ELEM  *Elem);
+    
+VOID Adhoc_WpaRetryExec(
+    IN PVOID SystemSpecific1, 
+    IN PVOID FunctionContext, 
+    IN PVOID SystemSpecific2, 
+    IN PVOID SystemSpecific3);
+    
+VOID Adhoc_ConstructEapolMsg(
+	IN 	PMAC_TABLE_ENTRY	pEntry,
+    IN 	UCHAR				GroupKeyWepStatus,
+    IN 	UCHAR				MsgType,  
+    IN	UCHAR				DefaultKeyIdx,
+	IN 	UCHAR				*KeyNonce,
+	IN	UCHAR				*TxRSC,
+	IN	UCHAR				*GTK,
+	IN	UCHAR				*RSNIE,
+	IN	UCHAR				RSNIE_Len,
+	IN  PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile,	
+    OUT PEAPOL_PACKET       pMsg);
+
+VOID Adhoc_ConstructEapolKeyData(
+	IN	PMAC_TABLE_ENTRY	pEntry,
+	IN	UCHAR			GroupKeyWepStatus,
+	IN	UCHAR			keyDescVer,
+	IN 	UCHAR			MsgType,
+	IN	UCHAR			DefaultKeyIdx,
+	IN	UCHAR			*GTK,
+	IN	UCHAR			*RSNIE,
+	IN	UCHAR			RSNIE_LEN,
+	IN  PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile,	
+	OUT PEAPOL_PACKET   pMsg);
+
+#endif // CONFIG_STA_SUPPORT // 
 
 /* 
  =====================================	

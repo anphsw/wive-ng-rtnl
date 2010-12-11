@@ -74,7 +74,6 @@ VOID	RTMPReportMicError(
 		else
 		{
 
-			if (pAd->CommonCfg.bWirelessEvent)
 				RTMPSendWirelessEvent(pAd, IW_COUNTER_MEASURES_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 
 
 			pAd->StaCfg.LastMicErrorTime = Now; 		
@@ -112,6 +111,47 @@ VOID	RTMPReportMicError(
 }
 
 
+#ifdef WPA_SUPPLICANT_SUPPORT
+#define	LENGTH_EAP_H    4
+// If the received frame is EAP-Packet ,find out its EAP-Code (Request(0x01), Response(0x02), Success(0x03), Failure(0x04)).
+INT	    WpaCheckEapCode(
+	IN  PRTMP_ADAPTER   		pAd,
+	IN  PUCHAR				pFrame,
+	IN  USHORT				FrameLen,
+	IN  USHORT				OffSet)
+{
+	
+	PUCHAR	pData;
+	INT	result = 0;
+		
+	if( FrameLen < OffSet + LENGTH_EAPOL_H + LENGTH_EAP_H ) 
+		return result;
+		
+	pData = pFrame + OffSet; // skip offset bytes
+ 	
+	if(*(pData+1) == EAPPacket) 	// 802.1x header - Packet Type
+	{
+		 result = *(pData+4);		// EAP header - Code
+	}
+
+	return result;
+}
+
+VOID    WpaSendMicFailureToWpaSupplicant(
+    IN  PRTMP_ADAPTER    pAd,
+    IN  BOOLEAN          bUnicast)
+{    
+	char custom[IW_CUSTOM_MAX] = {0};
+    
+	sprintf(custom, "MLME-MICHAELMICFAILURE.indication");
+	if(bUnicast)
+		sprintf(custom, "%s unicast", custom);
+
+	RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, -1, NULL, (PUCHAR)custom, strlen(custom));
+	
+	return;
+}
+#endif // WPA_SUPPLICANT_SUPPORT //
 
 VOID	WpaMicFailureReportFrame(
 	IN  PRTMP_ADAPTER   pAd,
@@ -198,12 +238,12 @@ VOID	WpaMicFailureReportFrame(
 	if(pAd->StaCfg.WepStatus  == Ndis802_11Encryption3Enabled)
 	{	// AES
         UCHAR digest[20] = {0};
-		HMAC_SHA1(pAd->StaCfg.PTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
+		RT_HMAC_SHA1(pAd->StaCfg.PTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
 		NdisMoveMemory(Mic, digest, LEN_KEY_DESC_MIC);
 	} 
 	else
 	{	// TKIP
-		HMAC_MD5(pAd->StaCfg.PTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
+		RT_HMAC_MD5(pAd->StaCfg.PTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
 	}
 	NdisMoveMemory(pPacket->KeyDesc.KeyMic, Mic, LEN_KEY_DESC_MIC);
 

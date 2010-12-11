@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     DH
@@ -29,13 +28,7 @@
 #ifndef __CRYPT_DH_H__
 #define __CRYPT_DH_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
 #include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
-
-/* DH definition & structure */
 
 
 /* DH operations */
@@ -58,6 +51,15 @@ void DH_SecretKey_Generate (
     IN UINT PrivateKeyLength,
     OUT UINT8 SecretKey[],
     INOUT UINT *SecretKeyLength);
+
+#define RT_DH_PublicKey_Generate(GK, GKL, PV, PVL, PriK, PriKL, PubK, PubKL) \
+    DH_PublicKey_Generate((GK), (GKL), (PV), (PVL), (PriK), (PriKL), (UINT8 *) (PubK), (UINT *) (PubKL))
+
+#define RT_DH_SecretKey_Generate(PubK, PubKL, PV, PVL, PriK, PriKL, SecK, SecKL) \
+    DH_SecretKey_Generate((PubK), (PubKL), (PV), (PVL), (PriK), (PriKL), (UINT8 *) (SecK), (UINT *) (SecKL))
+
+#define RT_DH_FREE_ALL()
+
     
 #endif /* __CRYPT_DH_H__ */
 

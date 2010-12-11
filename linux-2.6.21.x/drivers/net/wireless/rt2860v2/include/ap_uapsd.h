@@ -28,6 +28,8 @@
 #define UAPSD_TIMING_RECORD_MAX				1000
 #define UAPSD_TIMING_RECORD_DISPLAY_TIMES	10
 
+#define UAPSD_QUEUE_TIMEOUT					5 /* unit: seconds */
+
 #define UAPSD_TIMING_RECORD_ISR				1
 #define UAPSD_TIMING_RECORD_TASKLET			2
 #define UAPSD_TIMING_RECORD_TRG_RCV			3
@@ -71,6 +73,11 @@
 #define UAPSD_TIMING_RECORD_INDEX(__LoopIndex)
 #endif // UAPSD_TIMING_RECORD_FUNC //
 
+#ifdef VENDOR_FEATURE3_SUPPORT
+#define UAPSD_INSERT_QUEUE_AC	UAPSD_InsertTailQueueAc
+#else
+#define UAPSD_INSERT_QUEUE_AC	InsertTailQueueAc
+#endif // VENDOR_FEATURE3_SUPPORT //
 
 #ifndef MODULE_WMM_UAPSD
 
@@ -115,6 +122,7 @@
 		(__pEntry)->bAPSDFlagSPStart = 0;									\
 		(__pEntry)->bAPSDFlagEOSPOK = 0;									\
 		(__pEntry)->MaxSPLength = 0;										\
+		DBGPRINT(RT_DEBUG_TRACE, ("uapsd> MaxSPLength = 0!\n"));			\
 	}
 
 /*
@@ -292,24 +300,6 @@ Note:
 ========================================================================
 */
 UAPSD_EXTERN VOID UAPSD_Release(
-	IN	PRTMP_ADAPTER		pAd);
-
-
-/*
-========================================================================
-Routine Description:
-	Free all EOSP frames and close all SP.
-
-Arguments:
-	pAd		Pointer to our adapter
-
-Return Value:
-	None
-
-Note:
-========================================================================
-*/
-UAPSD_EXTERN VOID UAPSD_FreeAll(
 	IN	PRTMP_ADAPTER		pAd);
 
 

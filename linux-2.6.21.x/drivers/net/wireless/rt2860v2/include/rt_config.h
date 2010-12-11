@@ -31,9 +31,36 @@
 #ifndef	__RT_CONFIG_H__
 #define	__RT_CONFIG_H__
 
-#ifdef LINUX
-#include <linux/autoconf.h>
-#endif
+#define VENDOR_FEATURE1_SUPPORT
+//#define VENDOR_FEATURE2_SUPPORT
+//#define VENDOR_FEATURE3_SUPPORT
+//#define VENDOR_FEATURE4_SUPPORT
+
+//#define MONITOR_FLAG_11N_SNIFFER_SUPPORT
+
+#ifdef VENDOR_FEATURE3_SUPPORT 
+#ifdef DOT1X_SUPPORT
+#undef DOT1X_SUPPORT
+#endif // DOT1X_SUPPORT //
+#ifdef SYSTEM_LOG_SUPPORT
+#undef SYSTEM_LOG_SUPPORT
+#endif // SYSTEM_LOG_SUPPORT //
+#ifdef LED_CONTROL_SUPPORT
+#undef LED_CONTROL_SUPPORT
+#endif // LED_CONTROL_SUPPORT //
+#ifdef WSC_LED_SUPPORT
+#undef WSC_LED_SUPPORT
+#endif // WSC_LED_SUPPORT //
+#endif // VENDOR_FEATURE3_SUPPORT //
+
+
+#ifdef CONFIG_AP_SUPPORT
+
+#ifndef VENDOR_FEATURE3_SUPPORT
+#define AP_QLOAD_SUPPORT
+#endif // VENDOR_FEATURE3_SUPPORT //
+
+#endif // CONFIG_AP_SUPPORT //
 
 #include "rtmp_type.h"
 #include "rtmp_os.h"
@@ -41,6 +68,12 @@
 #include "rtmp_def.h"
 #include "rtmp_chip.h"
 #include "rtmp_timer.h"
+
+#ifdef LINUX
+#ifdef RT_CFG80211_SUPPORT
+#include "cfg80211extr.h"
+#endif // RT_CFG80211_SUPPORT //
+#endif // LINUX //
 
 #include "oid.h"
 #include "mlme.h"
@@ -60,17 +93,12 @@
 #include "ap_autoChSel.h"
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef CONFIG_AP_SUPPORT
-#define AP_NIC_DEVICE_NAME              "Wive-RTNL-AP"
-#endif
-#ifdef CONFIG_STA_SUPPORT
-#define STA_NIC_DEVICE_NAME             "Wive-RTNL-STA"
-#endif
-
 #include "eeprom.h"
 #if defined(RTMP_PCI_SUPPORT) || defined(RTMP_USB_SUPPORT)
 #include "rtmp_mcu.h"
 #endif
+
+
 
 #undef AP_WSC_INCLUDED
 #undef STA_WSC_INCLUDED
@@ -109,7 +137,7 @@
 #endif // MAT_SUPPORT //
 
 #ifdef WMM_ACM_SUPPORT
-#include "acm_extr.h"
+#include	"acm_extr.h"
 #endif // WMM_ACM_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
@@ -128,6 +156,9 @@
 
 #ifdef RALINK_ATE
 #include "rt_ate.h"
+#ifdef LINUX
+#include <linux/time.h>
+#endif // LINUX //
 #endif // RALINK_ATE //
 
 #ifdef RALINK_28xx_QA
@@ -136,9 +167,21 @@
 #endif // RALINK_ATE //
 #endif // RALINK_28xx_QA //
 
+
+#ifdef RTMP_RBUS_SUPPORT
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 #include "ap_diversity.h"
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
+
+#ifdef WAPI_SUPPORT
+#include "wapi.h"
+#endif // WAPI_SUPPORT //
+
+
+#ifdef DOT11Z_TDLS_SUPPORT
+#include "tdls.h"
+#endif // DOT11Z_TDLS_SUPPORT //
 
 #if defined(AP_WSC_INCLUDED) || defined(STA_WSC_INCLUDED)
 #define WSC_INCLUDED
@@ -150,20 +193,62 @@
 #endif // WDS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
+#ifdef CONFIG_STA_SUPPORT
+#ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
+#ifndef WPA_SUPPLICANT_SUPPORT
+#error "Build for being controlled by NetworkManager or wext, please set HAS_WPA_SUPPLICANT=y and HAS_NATIVE_WPA_SUPPLICANT_SUPPORT=y"
+#endif // WPA_SUPPLICANT_SUPPORT //
+#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
+
+#endif // CONFIG_STA_SUPPORT //
+
 #ifdef WSC_INCLUDED
-// WSC security code
 #include "crypt_biginteger.h"
 #include "crypt_dh.h"
 #include "wsc.h"
 #include "wsc_tlv.h"
 #endif // WSC_INCLUDED //
 
+
 #ifdef IKANOS_VX_1X0
 #include "vr_ikans.h"
 #endif // IKANOS_VX_1X0 //
 
+
+
+
+
+#ifdef WAPI_SUPPORT
+#include "wapi.h"
+#endif // WAPI_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+#include "sta_cfg.h"
+#endif // CONFIG_STA_SUPPORT //
+
+#ifdef LINUX
+#ifdef RT_CFG80211_SUPPORT
+#include "cfg80211.h"
+#endif // RT_CFG80211_SUPPORT //
+#endif // LINUX //
+
+
+#ifdef RTMP_RBUS_SUPPORT
+#ifdef VIDEO_TURBINE_SUPPORT
+#include "video.h"
+#endif // VIDEO_TURBINE_SUPPORT //
+
 #ifdef WORKQUEUE_BH
 #include <linux/workqueue.h>
 #endif // WORKQUEUE_BH /
+#endif // RTMP_RBUS_SUPPORT //
 
+#ifdef WLAN_LED
+#include	"led.h"
+#endif // WLAN_LED //
+
+#ifdef TXBF_SUPPORT
+#include "rt_txbf.h"
+#endif // TXBF_SUPPORT //
 #endif	// __RT_CONFIG_H__
+

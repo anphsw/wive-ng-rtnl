@@ -27,10 +27,11 @@
 */
 
 
-#include	"rt_config.h"
-#include 	"led.h"
+#include "rt_config.h"
+#include "led.h"
 
-#if defined (WLAN_LED)
+
+#ifdef WLAN_LED
 extern unsigned char   LinkStatus;
 extern unsigned char   SignalStrength;
 extern unsigned char   GPIOPolarity;
@@ -45,11 +46,8 @@ extern void TimerCB(PRTMP_ADAPTER pAd);
 #endif // CONFIG_AP_SUPPORT //
 
 
-#ifdef CARRIER_DETECTION_SUPPORT
-extern void unregister_tmr_service(void);
-extern void request_tmr_service(int, void *, void *);
-#endif
-VOID RtmpAsicSendCommandToSwMcu(
+
+int RtmpAsicSendCommandToSwMcu(
 	IN RTMP_ADAPTER *pAd, 
 	IN UCHAR Command, 
 	IN UCHAR Token,
@@ -58,9 +56,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 {
 	BBP_CSR_CFG_STRUC  BbpCsr, BbpCsr2;
 	int             j, k;
-#if defined (WLAN_LED)
 	UINT16 Temp;
-#endif
 	
 	switch(Command)
 	{
@@ -124,7 +120,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 			break;
 		case 0x31:
 			break;
-#if defined (WLAN_LED)
+#ifdef WLAN_LED
 		case 0x50:
 			{					
 	                        LedParameter.LedMode    = Arg0;
@@ -163,9 +159,12 @@ VOID RtmpAsicSendCommandToSwMcu(
 				if (pAd->CommonCfg.McuRadarCmd == DETECTION_STOP)
 				{
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
-#ifdef CARRIER_DETECTION_SUPPORT
+#ifdef RTMP_RBUS_SUPPORT
 					unregister_tmr_service();
-#endif
+#else
+	BOOLEAN Cancelled;
+	RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
+#endif // RTMP_RBUS_SUPPORT //					
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -176,7 +175,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 				if (!(pAd->CommonCfg.McuRadarCmd & RADAR_DETECTION))
 				{
 					pAd->CommonCfg.McuRadarPeriod = Arg0;
-					pAd->CommonCfg.McuRadarDetectPeriod = Arg1 & 0x1f;
+						pAd->CommonCfg.McuRadarDetectPeriod = Arg1 & 0x1f;							
 					pAd->CommonCfg.McuRadarCtsProtect = (Arg1 & 0x60) >> 5;
 					pAd->CommonCfg.McuRadarState = WAIT_CTS_BEING_SENT;
 					pAd->CommonCfg.McuRadarTick = pAd->CommonCfg.McuRadarPeriod;
@@ -188,17 +187,26 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
+#ifdef RTMP_RBUS_SUPPORT
+						request_tmr_service(1, &TimerCB, pAd);
+#else
+						RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
+						RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
+#endif // RTMP_RBUS_SUPPORT //
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
-#ifdef CARRIER_DETECTION_SUPPORT
+#ifdef RTMP_RBUS_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
-#endif
+#else
+					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
+					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
+#endif // RTMP_RBUS_SUPPORT //
 				}
 				else
 				{
 					pAd->CommonCfg.McuRadarPeriod = Arg0;
-					pAd->CommonCfg.McuRadarDetectPeriod = Arg1 & 0x1f;
+						pAd->CommonCfg.McuRadarDetectPeriod = Arg1 & 0x1f;							
 					pAd->CommonCfg.McuRadarCtsProtect = (Arg1 & 0x60) >> 5;
 					RTMPPrepareRDCTSFrame(pAd, pAd->CurrentAddress,	(pAd->CommonCfg.McuRadarDetectPeriod * 1000 + 100), pAd->CommonCfg.RtsRate, HW_DFS_CTS_BASE, IFS_SIFS);
 				}
@@ -218,9 +226,12 @@ VOID RtmpAsicSendCommandToSwMcu(
 				{
 					ULONG Value;
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
-#ifdef CARRIER_DETECTION_SUPPORT
+#ifdef RTMP_RBUS_SUPPORT
 					unregister_tmr_service();
-#endif
+#else
+					BOOLEAN Cancelled;
+					RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
+#endif // RTMP_RBUS_SUPPORT //
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -245,12 +256,21 @@ VOID RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
+#ifdef RTMP_RBUS_SUPPORT
+						request_tmr_service(1, &TimerCB, pAd);
+#else
+					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
+					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
+#endif // RTMP_RBUS_SUPPORT //
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
-#ifdef CARRIER_DETECTION_SUPPORT
+#ifdef RTMP_RBUS_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
-#endif
+#else
+					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
+					RTMPSetTimer(&pAd->CommonCfg.CSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
+#endif // RTMP_RBUS_SUPPORT //
 				}
 				else
 				{
@@ -293,7 +313,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 				}
 			}
 			break;
-#endif
+#endif // defined(DFS_SUPPORT) || defined(CARRIER_DETECTION_SUPPORT) //
 
 #endif // CONFIG_AP_SUPPORT //
 
@@ -301,6 +321,7 @@ VOID RtmpAsicSendCommandToSwMcu(
 			break;
 	}
 
+	return 0;
 }
 
 

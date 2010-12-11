@@ -29,6 +29,62 @@
 #include "rt_config.h"
 
 
+
+INT ComputeChecksum(
+	IN UINT PIN)
+{
+	INT digit_s;
+    UINT accum = 0;
+
+	PIN *= 10;
+	accum += 3 * ((PIN / 10000000) % 10); 
+	accum += 1 * ((PIN / 1000000) % 10); 
+	accum += 3 * ((PIN / 100000) % 10); 
+	accum += 1 * ((PIN / 10000) % 10); 
+	accum += 3 * ((PIN / 1000) % 10); 
+	accum += 1 * ((PIN / 100) % 10); 
+	accum += 3 * ((PIN / 10) % 10); 
+
+	digit_s = (accum % 10);
+	return ((10 - digit_s) % 10);
+} // ComputeChecksum
+
+UINT GenerateWpsPinCode(
+	IN	PRTMP_ADAPTER	pAd,
+#ifdef CONFIG_AP_SUPPORT
+    IN  BOOLEAN         bFromApcli,	
+#endif // CONFIG_AP_SUPPORT //	
+	IN	UCHAR			apidx)
+{
+	UCHAR	macAddr[MAC_ADDR_LEN];
+	UINT 	iPin;
+	UINT	checksum;
+
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{
+#ifdef APCLI_SUPPORT
+	    if (bFromApcli)
+	        NdisMoveMemory(&macAddr[0], pAd->ApCfg.ApCliTab[apidx].CurrentAddress, MAC_ADDR_LEN);
+	    else
+#endif // APCLI_SUPPORT //
+		NdisMoveMemory(&macAddr[0], pAd->ApCfg.MBSSID[apidx].Bssid, MAC_ADDR_LEN);
+	}
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+		NdisMoveMemory(&macAddr[0], pAd->CurrentAddress, MAC_ADDR_LEN);
+#endif // CONFIG_STA_SUPPORT //
+
+	iPin = macAddr[3] * 256 * 256 + macAddr[4] * 256 + macAddr[5];
+
+	iPin = iPin % 10000000;
+	checksum = ComputeChecksum( iPin );
+	iPin = iPin*10 + checksum;
+
+	return iPin;
+}
+
 char* GetPhyMode(
 	int Mode)
 {
@@ -139,7 +195,8 @@ INT RT_CfgSetWirelessMode(
 	LONG	WirelessMode;
 	
 #ifdef DOT11_N_SUPPORT
-	MaxPhyMode = PHY_11N_5G;
+	if (!RTMP_TEST_MORE_FLAG(pAd, fRTMP_ADAPTER_DISABLE_DOT_11N))
+		MaxPhyMode = PHY_11N_5G;
 #endif // DOT11_N_SUPPORT //
 		
 	WirelessMode = simple_strtol(arg, 0, 10);
@@ -151,6 +208,7 @@ INT RT_CfgSetWirelessMode(
 	}
 	
 	return FALSE;
+	
 }
 
 
@@ -189,6 +247,7 @@ INT	RT_CfgSetWepKey(
 {
 	INT				KeyLen;
 	INT				i;
+	//UCHAR			CipherAlg = CIPHER_NONE;
 	BOOLEAN			bKeyIsHex = FALSE;
 
 	// TODO: Shall we do memset for the original key info??
@@ -222,7 +281,7 @@ INT	RT_CfgSetWepKey(
 
 	pSharedKey->CipherAlg = ((KeyLen % 5) ? CIPHER_WEP128 : CIPHER_WEP64);
 	DBGPRINT(RT_DEBUG_TRACE, ("RT_CfgSetWepKey:(KeyIdx=%d,type=%s, Alg=%s)\n", 
-				keyIdx, (bKeyIsHex == FALSE ? "Ascii" : "Hex"), CipherName[pSharedKey->CipherAlg]));
+						keyIdx, (bKeyIsHex == FALSE ? "Ascii" : "Hex"), CipherName[pSharedKey->CipherAlg]));
 
 	return TRUE;
 }
@@ -269,7 +328,7 @@ INT RT_CfgSetWPAPSKKey(
 	}
 	else
 	{
-	    PasswordHash(keyString, pHashStr, hashStrLen, keyMaterial);
+	    RtmpPasswordHash(keyString, pHashStr, hashStrLen, keyMaterial);
 	    NdisMoveMemory(pPMKBuf, keyMaterial, 32);		
 	}
 

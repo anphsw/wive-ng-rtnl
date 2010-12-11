@@ -124,16 +124,48 @@ VOID PeerDeauthAction(
         {
             DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from our AP (Reason=%d)\n", Reason));
 
+			if (Reason == REASON_4_WAY_TIMEOUT)
+				RTMPSendWirelessEvent(pAd, IW_PAIRWISE_HS_TIMEOUT_EVENT_FLAG, NULL, 0, 0); 
 
+			if (Reason == REASON_GROUP_KEY_HS_TIMEOUT)
+				RTMPSendWirelessEvent(pAd, IW_GROUP_HS_TIMEOUT_EVENT_FLAG, NULL, 0, 0); 
+
+#ifdef WAPI_SUPPORT			
+			WAPI_InternalCmdAction(pAd, 
+								   pAd->StaCfg.AuthMode, 
+								   BSS0, 
+								   Addr2, 
+								   WAI_MLME_DISCONNECT);					
+#endif // WAPI_SUPPORT //
+
+#ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
+		RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+#endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
             
 
 			// send wireless event - for deauthentication
-			if (pAd->CommonCfg.bWirelessEvent)
-				RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 
+				RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, NULL, BSS0, 0); 
 
+#ifdef WPA_SUPPLICANT_SUPPORT
+			if ((pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE) &&
+				(pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) &&
+				(pAd->StaCfg.PortSecured == WPA_802_1X_PORT_SECURED))
+				pAd->StaCfg.bLostAp = TRUE;
+#endif // WPA_SUPPLICANT_SUPPORT //
 
             LinkDown(pAd, TRUE);
         }
+        else if (ADHOC_ON(pAd)
+            && (MAC_ADDR_EQUAL(Addr1, pAd->CurrentAddress) || MAC_ADDR_EQUAL(Addr1, BROADCAST_ADDR)))
+        {
+            MAC_TABLE_ENTRY     *pEntry;
+
+            pEntry = MacTableLookup(pAd, Addr2);
+            if (pEntry && IS_ENTRY_CLIENT(pEntry))
+                MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
+
+            DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from %02x:%02x:%02x:%02x:%02x:%02x \n", PRINT_MAC(Addr2)));            
+        }        
     }
     else
     {

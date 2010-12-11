@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     MD5
@@ -29,11 +28,6 @@
 #ifndef __CRYPT_MD5_H__
 #define __CRYPT_MD5_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
-#include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
 
 /* Algorithm options */
 #define MD5_SUPPORT
@@ -48,15 +42,15 @@ typedef struct {
     UINT   BlockLen;
 } MD5_CTX_STRUC, *PMD5_CTX_STRUC;
 
-VOID MD5_Init (
+VOID RT_MD5_Init (
     IN  MD5_CTX_STRUC *pMD5_CTX);
-VOID MD5_Hash (
+VOID RT_MD5_Hash (
     IN  MD5_CTX_STRUC *pMD5_CTX);
-VOID MD5_Append (
+VOID RT_MD5_Append (
     IN  MD5_CTX_STRUC *pMD5_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen);
-VOID MD5_End (
+VOID RT_MD5_End (
     IN  MD5_CTX_STRUC *pMD5_CTX, 
     OUT UINT8 DigestMessage[]);
 VOID RT_MD5 (
@@ -64,6 +58,7 @@ VOID RT_MD5 (
     IN  UINT MessageLen,
     OUT UINT8 DigestMessage[]);
 #endif /* MD5_SUPPORT */
+
 
 #endif /* __CRYPT_MD5_H__ */
 

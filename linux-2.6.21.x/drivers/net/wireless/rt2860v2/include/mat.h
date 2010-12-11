@@ -30,11 +30,13 @@
 #ifndef _MAT_H_
 #define _MAT_H_
 
+
 #ifdef LINUX
 #include <linux/if_ether.h>
 #include <linux/if_arp.h>
 #include <linux/ip.h>
 #endif // LINUX //
+
 
 #if defined(LINUX) || defined (VXWORKS)
 #else
@@ -94,7 +96,7 @@ struct iphdr{
 
 /* MAT relate definition */
 #define MAT_MAX_HASH_ENTRY_SUPPORT		64
-#define MAT_TB_ENTRY_AGEOUT_TIME		  	(1 * 60 * OS_HZ)	// 30000, 5min. MAT convert table entry age-out time interval. now set it as 5min.
+#define MAT_TB_ENTRY_AGEOUT_TIME		  	(5 * 60 * OS_HZ)	// 30000, 5min. MAT convert table entry age-out time interval. now set it as 5min.
 
 
 /* 802.3 Ethernet related definition */

@@ -369,10 +369,8 @@ void LedCtrlMain(
 
 	switch(LedParameter.LedMode)
 	{
-#if 0 //MAC LED is always controlled by LED firmware, so we can ignore this case.
 		case 0:		// Hardware controlled mode. Just ignore it.
 			return;
-#endif
 		case 0x40:	// In addition to mode 0, set signal strength LED
 			ChgSignalStrengthLed(pAd);
 		default:
@@ -384,8 +382,6 @@ void LedCtrlMain(
 		LedBlinkTimer--;
 	else
 		LedBlinkTimer = 0xff;
-		
-
 }
 
 
@@ -439,20 +435,11 @@ void ChgMacLedCfg(
 
 	RTMP_IO_READ32(pAd, MAC_LED_CFG, &LedCfgBuf.word);
 
-#if 0
-	/*
-	** always set it as active low polarity.
-	** And control the LED by reverse LED mode
-	** if the LED's polarity is active high.
-	*/
-	LedCfgBuf.field.LED_POL = 0;
-#else	
 	/* For backward compatible issue,
          * LedActMode: 0: None, 1: Solid ON, 2: Blink (data/mgr), 3: Blink (data,mgr,beacon)
 	 * =>Solid off = solid on + high polarity
          */
 	LedCfgBuf.field.LED_POL = CurrentLedCfg.field.LedActPolarity;
-#endif
 
 	/* LED Act. connect to G_LED. */
 	if (LedParameter.LedMode == 2 && BlinkFor8sTimer)
@@ -514,7 +501,7 @@ void ChgMacLedCfg(
 		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF)) {
 	    RTMP_IO_WRITE32(pAd, MAC_LED_CFG, 0);
 	} else {
-	    RTMP_IO_WRITE32(pAd, MAC_LED_CFG, LedCfgBuf.word);
+	RTMP_IO_WRITE32(pAd, MAC_LED_CFG, LedCfgBuf.word);
 	}
 
 	return;
@@ -528,5 +515,9 @@ void ChgSignalStrengthLed(
 	RTMP_IO_WRITE32(pAd, GPIO_DAT, (GPIOPolarity ? SignalStrength : ~SignalStrength));
 }
 
+#ifdef OS_ABL_SUPPORT
+EXPORT_SYMBOL(LedCheckTimer);
+EXPORT_SYMBOL(CheckTimerEbl);
+#endif // OS_ABL_SUPPORT //
 #endif
 

@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     SHA2
@@ -30,11 +29,6 @@
 #ifndef __CRYPT_SHA2_H__
 #define __CRYPT_SHA2_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
-#include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
 
 /* Algorithm options */
 #define SHA1_SUPPORT
@@ -52,13 +46,13 @@ typedef struct _SHA1_CTX_STRUC {
 
 VOID RT_SHA1_Init (
     IN  SHA1_CTX_STRUC *pSHA_CTX);
-VOID SHA1_Hash (
+VOID RT_SHA1_Hash (
     IN  SHA1_CTX_STRUC *pSHA_CTX);
-VOID SHA1_Append (
+VOID RT_SHA1_Append (
     IN  SHA1_CTX_STRUC *pSHA_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen);
-VOID SHA1_End (
+VOID RT_SHA1_End (
     IN  SHA1_CTX_STRUC *pSHA_CTX, 
     OUT UINT8 DigestMessage[]);
 VOID RT_SHA1 (
@@ -77,15 +71,15 @@ typedef struct _SHA256_CTX_STRUC {
     UINT   BlockLen;
 } SHA256_CTX_STRUC, *PSHA256_CTX_STRUC;
 
-VOID SHA256_Init (
+VOID RT_SHA256_Init (
     IN  SHA256_CTX_STRUC *pSHA_CTX);
-VOID SHA256_Hash (
+VOID RT_SHA256_Hash (
     IN  SHA256_CTX_STRUC *pSHA_CTX);
-VOID SHA256_Append (
+VOID RT_SHA256_Append (
     IN  SHA256_CTX_STRUC *pSHA_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen);
-VOID SHA256_End (
+VOID RT_SHA256_End (
     IN  SHA256_CTX_STRUC *pSHA_CTX, 
     OUT UINT8 DigestMessage[]);
 VOID RT_SHA256 (
@@ -93,6 +87,7 @@ VOID RT_SHA256 (
     IN  UINT MessageLen,
     OUT UINT8 DigestMessage[]);
 #endif /* SHA256_SUPPORT */
+
 
 #endif /* __CRYPT_SHA2_H__ */
 

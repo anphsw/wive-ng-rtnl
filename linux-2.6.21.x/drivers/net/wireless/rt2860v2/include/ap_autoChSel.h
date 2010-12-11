@@ -23,12 +23,7 @@
 #ifndef __AUTOCHSELECT_H__
 #define __AUTOCHSELECT_H__
 
-#ifdef AUTO_CH_SELECT_ENHANCE
-#define AP_AUTO_CH_SEL(__P, __O)	New_APAutoSelectChannel((__P), (__O))
-#else
 #define AP_AUTO_CH_SEL(__P, __O)	APAutoSelectChannel((__P), (__O))
-#endif
-
 
 ULONG AutoChBssSearchWithSSID(
 	IN PRTMP_ADAPTER pAd,
@@ -36,6 +31,14 @@ ULONG AutoChBssSearchWithSSID(
 	IN PUCHAR pSsid,
 	IN UCHAR SsidLen,
 	IN UCHAR Channel);
+
+VOID APAutoChannelInit(
+	IN PRTMP_ADAPTER pAd);
+
+VOID UpdateChannelInfo(
+	IN PRTMP_ADAPTER pAd,
+	IN int ch,
+	IN ChannelSel_Alg Alg);
 
 ULONG AutoChBssInsertEntry(
 	IN PRTMP_ADAPTER pAd,
@@ -46,28 +49,28 @@ ULONG AutoChBssInsertEntry(
 	IN UCHAR ExtChOffset,
 	IN CHAR Rssi);
 
-void AutoChBssTableInit(
+VOID AutoChBssTableInit(
 	IN PRTMP_ADAPTER pAd);
 
-void ChannelInfoInit(
+VOID ChannelInfoInit(
 	IN PRTMP_ADAPTER pAd);
 
-void AutoChBssTableDestroy(
+VOID AutoChBssTableDestroy(
 	IN PRTMP_ADAPTER pAd);
 
-void ChannelInfoDestroy(
+VOID ChannelInfoDestroy(
 	IN PRTMP_ADAPTER pAd);
 
-UCHAR RandomChannel(
+VOID CheckPhyModeIsABand(
 	IN PRTMP_ADAPTER pAd);
 
-UCHAR New_APAutoSelectChannel(
+UCHAR SelectBestChannel(
 	IN PRTMP_ADAPTER pAd,
-	IN BOOLEAN Optimal);
+	IN ChannelSel_Alg Alg);
 
 UCHAR APAutoSelectChannel(
 	IN PRTMP_ADAPTER pAd,
-	IN BOOLEAN Optimal);
+	IN ChannelSel_Alg Alg);
 
 #endif // __AUTOCHSELECT_H__ //
 

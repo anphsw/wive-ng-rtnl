@@ -72,6 +72,7 @@ CH_FREQ_MAP CH_HZ_ID_MAP[]=
 
 INT	CH_HZ_ID_MAP_NUM = (sizeof(CH_HZ_ID_MAP)/sizeof(CH_FREQ_MAP));
 
+#ifdef EXT_BUILD_CHANNEL_LIST
 CH_REGION ChRegion[] =
 {
 		{	// Antigua and Berbuda
@@ -727,7 +728,7 @@ CH_REGION ChRegion[] =
 			"RU",
 			CE,
 			{
-				{ 1,   14,  20, BOTH, FALSE},	// 2.4 G, ch 1~14
+				{ 1,   13,  20, BOTH, FALSE},	// 2.4 G, ch 1~13
 				{ 149,  4,  20, IDOR, FALSE},	// 5G, ch 149~161
 				{ 0},							// end
 			}
@@ -954,6 +955,7 @@ static PCH_REGION GetChRegion(
 		}
 		loop++;
 	}
+
 	if (pChRegion == NULL)
 		pChRegion = &ChRegion[loop];
 	return pChRegion;
@@ -968,6 +970,7 @@ static VOID ChBandCheck(
 		case PHY_11A:
 #ifdef DOT11_N_SUPPORT
 		case PHY_11AN_MIXED:
+		case PHY_11N_5G:
 #endif // DOT11_N_SUPPORT //
 			*pChType = BAND_5G;
 			break;
@@ -999,29 +1002,31 @@ static UCHAR FillChList(
 	for (i = 0; i < pChDesp->NumOfCh; i++)
 	{
 		channel = pChDesp->FirstChannel + i * increment;
-
-		if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 1))
+//New FCC spec restrict the used channel under DFS 
+#ifdef CONFIG_AP_SUPPORT	
+#ifdef DFS_SUPPORT
+		if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == FALSE))
 		{
 			if((channel >= 116) && (channel <=128))
 				continue;
 		}
-		else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 0))
+		else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == TRUE))
 		{
 			if((channel >= 100) && (channel <= 140))
 				continue;
-		}			
+		}
 
-
-
+#endif // DFS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
 		for (l=0; l<MAX_NUM_OF_CHANNELS; l++)
 		{
 			if (channel == pAd->TxPower[l].Channel)
 			{
 				pAd->ChannelList[j].Power = pAd->TxPower[l].Power;
 				pAd->ChannelList[j].Power2 = pAd->TxPower[l].Power2;
-#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
-				pAd->ChannelList[j].Power3 = pAd->TxPower[l].Power3;
-#endif
+#ifdef DOT11N_SS3_SUPPORT
+					pAd->ChannelList[j].Power3 = pAd->TxPower[l].Power3;
+#endif // DOT11N_SS3_SUPPORT //
 				break;
 			}
 		}
@@ -1074,15 +1079,16 @@ static inline VOID CreateChList(
 				continue;
 		}
 
-		if ((pChDesp->Geography == BOTH) || (pChDesp->Geography == Geography)) {
-		    if (pChDesp->FirstChannel > 14)
-            		increment = 4;
-        	    else
-            		increment = 1;
-
-		    regulatoryDomain = pChRegion->DfsType;
-		    offset = FillChList(pAd, pChDesp, offset, increment, regulatoryDomain);
-    		}
+		if ((pChDesp->Geography == BOTH)
+			|| (pChDesp->Geography == Geography))
+        {
+			if (pChDesp->FirstChannel > 14)
+                increment = 4;
+            else
+                increment = 1;
+			regulatoryDomain = pChRegion->DfsType;
+			offset = FillChList(pAd, pChDesp, offset, increment, regulatoryDomain);
+        }
 	}
 }
 
@@ -1095,7 +1101,6 @@ VOID BuildChannelListEx(
 	pChReg = GetChRegion(pAd->CommonCfg.CountryCode);
 	CreateChList(pAd, pChReg, pAd->CommonCfg.Geography);
 }
-
 
 VOID BuildBeaconChList(
 	IN PRTMP_ADAPTER pAd,
@@ -1145,7 +1150,7 @@ VOID BuildBeaconChList(
 		}
 	}
 }
-
+#endif // EXT_BUILD_CHANNEL_LIST //
 
 #ifdef DOT11_N_SUPPORT
 static BOOLEAN IsValidChannel(
@@ -1235,6 +1240,12 @@ VOID N_ChannelCheck(
 			}
 		}
 	}
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef DOT11N_DRAFT3
+#endif // DOT11N_DRAFT3 //
+#endif // CONFIG_AP_SUPPORT //
+
 }
 
 
@@ -1245,12 +1256,8 @@ VOID N_SetCenCh(
 	{
 		if (pAd->CommonCfg.RegTransmitSetting.field.EXTCHA == EXTCHA_ABOVE)
 		{
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 1)
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
-			else
-#endif // COC_SUPPORT
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
+
+			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
 		}
 		else
 		{
@@ -1258,11 +1265,6 @@ VOID N_SetCenCh(
 				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 1;
 			else
 				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
-
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 1)
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
-#endif // COC_SUPPORT
 		}
 	}
 	else
@@ -1289,28 +1291,70 @@ UINT8 GetCuntryMaxTxPwr(
 #ifdef SINGLE_SKU
 	if (pAd->CommonCfg.bSKUMode == TRUE)
 	{
+		UINT deltaTxStreamPwr = 0;
+
+#ifdef DOT11_N_SUPPORT
+		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) && (pAd->CommonCfg.TxStream == 2))
+			deltaTxStreamPwr = 3; // If 2Tx case, antenna gain will increase 3dBm
+#endif // DOT11_N_SUPPORT //
 		if (pAd->ChannelList[i].RegulatoryDomain == FCC)
 		{
 			/* FCC should maintain 20/40 Bandwidth, and without antenna gain */
+#ifdef DOT11_N_SUPPORT
 			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
-				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40))
-				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.BandedgeDelta);
+				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40) &&
+				((channel == 1) || (channel == 11)))
+				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.BandedgeDelta - deltaTxStreamPwr);
 			else
-				return pAd->ChannelList[i].MaxTxPwr;
+#endif // DOT11_N_SUPPORT //
+				return (pAd->ChannelList[i].MaxTxPwr - deltaTxStreamPwr);
 		}
 		else if (pAd->ChannelList[i].RegulatoryDomain == CE)
 		{
-#ifdef DOT11_N_SUPPORT
-			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
-				(pAd->CommonCfg.TxStream == 2))
-#endif // DOT11_N_SUPPORT //
-				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain - 3); // If 2Tx case, antenna gain will increase 3dBm
-			else
-				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain);
+			return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain - deltaTxStreamPwr);
 		}
-		else ;
+		else
+			return 0xff;
 	}
 	else
 #endif // SINGLE_SKU //
 		return pAd->ChannelList[i].MaxTxPwr;
 }
+
+
+/* for OS_ABL */
+VOID RTMP_MapChannelID2KHZ(
+	IN UCHAR Ch,
+	OUT UINT32 *pFreq)
+{
+	int chIdx;
+	for (chIdx = 0; chIdx < CH_HZ_ID_MAP_NUM; chIdx++)
+	{
+		if ((Ch) == CH_HZ_ID_MAP[chIdx].channel)
+		{
+			(*pFreq) = CH_HZ_ID_MAP[chIdx].freqKHz * 1000;
+			break;
+		}
+	}
+	if (chIdx == CH_HZ_ID_MAP_NUM)
+		(*pFreq) = 2412000;
+}
+
+/* for OS_ABL */
+VOID RTMP_MapKHZ2ChannelID(
+	IN ULONG Freq,
+	OUT INT *pCh)
+{
+	int chIdx;
+	for (chIdx = 0; chIdx < CH_HZ_ID_MAP_NUM; chIdx++)
+	{
+		if ((Freq) == CH_HZ_ID_MAP[chIdx].freqKHz)
+		{
+			(*pCh) = CH_HZ_ID_MAP[chIdx].channel;
+			break;
+		}
+	}
+	if (chIdx == CH_HZ_ID_MAP_NUM)
+		(*pCh) = 1;
+}
+

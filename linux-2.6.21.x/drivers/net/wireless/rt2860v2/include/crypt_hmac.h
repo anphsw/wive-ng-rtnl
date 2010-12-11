@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     HMAC
@@ -25,18 +24,16 @@
     --------    ----------      ------------------------------------------
     Eddy        2008/11/24      Create HMAC-SHA1, HMAC-SHA256
 ***************************************************************************/
+
 #ifndef __CRYPT_HMAC_H__
 #define __CRYPT_HMAC_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
 #include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
+
 
 #ifdef SHA1_SUPPORT
 #define HMAC_SHA1_SUPPORT
-VOID HMAC_SHA1 (
+VOID RT_HMAC_SHA1 (
     IN  const UINT8 Key[], 
     IN  UINT KeyLen, 
     IN  const UINT8 Message[], 
@@ -47,7 +44,7 @@ VOID HMAC_SHA1 (
 
 #ifdef SHA256_SUPPORT
 #define HMAC_SHA256_SUPPORT
-VOID HMAC_SHA256 (
+VOID RT_HMAC_SHA256 (
     IN  const UINT8 Key[], 
     IN  UINT KeyLen, 
     IN  const UINT8 Message[], 
@@ -58,7 +55,7 @@ VOID HMAC_SHA256 (
 
 #ifdef MD5_SUPPORT
 #define HMAC_MD5_SUPPORT
-VOID HMAC_MD5 (
+VOID RT_HMAC_MD5 (
     IN  const UINT8 Key[], 
     IN  UINT KeyLen, 
     IN  const UINT8 Message[], 
@@ -66,6 +63,7 @@ VOID HMAC_MD5 (
     OUT UINT8 MAC[],
     IN  UINT MACLen);
 #endif /* MD5_SUPPORT */
+
 
 #endif /* __CRYPT_HMAC_H__ */
 

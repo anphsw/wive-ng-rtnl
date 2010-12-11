@@ -1,8 +1,25 @@
 #include "rt_config.h"
-#include "os/rt_linux.h"
 
-ULONG	RTDebugLevel =  RT_DEBUG_ERROR;
+ULONG	RTDebugLevel = RT_DEBUG_ERROR;
 
+#ifdef RTMP_RBUS_SUPPORT
+#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
+extern int (*ra_classifier_hook_rx) (struct sk_buff * skb, unsigned long cycle);
+extern volatile unsigned long classifier_cur_cycle;
+#endif // CONFIG_RA_CLASSIFIER //
+
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../../../../../net/nat/hw_nat/ra_nat.h"
+#include "../../../../../../net/nat/hw_nat/frame_engine.h"
+#endif
+#endif // RTMP_RBUS_SUPPORT //
+
+#ifdef VENDOR_FEATURE4_SUPPORT
+ULONG	OS_NumOfMemAlloc = 0, OS_NumOfMemFree = 0;
+#endif // VENDOR_FEATURE4_SUPPORT //
+
+
+#ifdef SYSTEM_LOG_SUPPORT
 // for wireless system event message
 char const *pWirelessSysEventText[IW_SYS_EVENT_TYPE_NUM] = {    
 	// system status event     
@@ -28,9 +45,13 @@ char const *pWirelessSysEventText[IW_SYS_EVENT_TYPE_NUM] = {
 	"channel switch to ",									/* IW_CHANNEL_CHANGE_EVENT_FLAG */
 	"wireless mode is not support",							/* IW_STA_MODE_EVENT_FLAG */
 	"blacklisted in MAC filter list",						/* IW_MAC_FILTER_LIST_EVENT_FLAG */
-	"Authentication rejected because of challenge failure"	/* IW_AUTH_REJECT_CHALLENGE_FAILURE */
+	"Authentication rejected because of challenge failure",	/* IW_AUTH_REJECT_CHALLENGE_FAILURE */
+	"Scanning",												/* IW_SCANNING_EVENT_FLAG */
+	"Start a new IBSS",										/* IW_START_IBSS_FLAG */
+	"Join the IBSS",										/* IW_JOIN_IBSS_FLAG */
 	};
 
+#ifdef IDS_SUPPORT
 // for wireless IDS_spoof_attack event message
 char const *pWirelessSpoofEventText[IW_SPOOF_EVENT_TYPE_NUM] = {   	
     "detected conflict SSID",								/* IW_CONFLICT_SSID_EVENT_FLAG */
@@ -55,6 +76,7 @@ char const *pWirelessFloodEventText[IW_FLOOD_EVENT_TYPE_NUM] = {
     "detected deauthentication flooding",					/* IW_FLOOD_DEAUTH_EVENT_FLAG */
     "detected 802.1x eap-request flooding"					/* IW_FLOOD_EAP_REQ_EVENT_FLAG */	
 	};
+#endif // IDS_SUPPORT //
 
 #ifdef WSC_INCLUDED
 // for WSC wireless event message
@@ -65,8 +87,35 @@ char const *pWirelessWscEventText[IW_WSC_EVENT_TYPE_NUM] = {
 	"WPS status success",									/* IW_WSC_STATUS_SUCCESS */
 	"WPS status fail",										/* IW_WSC_STATUS_FAIL */
 	"WPS 2 mins time out!",									/* IW_WSC_2MINS_TIMEOUT */
+	"WPS Send EAPOL_Start!",								/* IW_WSC_SEND_EAPOL_START */
+	"WPS Send WscStart!",									/* IW_WSC_SEND_WSC_START */
+	"WPS Send M1!",											/* IW_WSC_SEND_M1 */
+	"WPS Send M2!",											/* IW_WSC_SEND_M2 */
+	"WPS Send M3!",											/* IW_WSC_SEND_M3 */
+	"WPS Send M4!",											/* IW_WSC_SEND_M4 */
+	"WPS Send M5!",											/* IW_WSC_SEND_M5 */
+	"WPS Send M6!",											/* IW_WSC_SEND_M6 */
+	"WPS Send M7!",											/* IW_WSC_SEND_M7 */
+	"WPS Send M8!",											/* IW_WSC_SEND_M8 */
+	"WPS Send WscDone!",									/* IW_WSC_SEND_DONE */
+	"WPS Send WscAck!",										/* IW_WSC_SEND_ACK */
+	"WPS Send WscNack!",									/* IW_WSC_SEND_NACK */
+	"WPS Receive WscStart!",								/* IW_WSC_RECEIVE_WSC_START */
+	"WPS Receive M1!",										/* IW_WSC_RECEIVE_M1 */
+	"WPS Receive M2!",										/* IW_WSC_RECEIVE_M2 */
+	"WPS Receive M3!",										/* IW_WSC_RECEIVE_M3 */
+	"WPS Receive M4!",										/* IW_WSC_RECEIVE_M4 */
+	"WPS Receive M5!",										/* IW_WSC_RECEIVE_M5 */
+	"WPS Receive M6!",										/* IW_WSC_RECEIVE_M6 */
+	"WPS Receive M7!",										/* IW_WSC_RECEIVE_M7 */
+	"WPS Receive M8!",										/* IW_WSC_RECEIVE_M8 */
+	"WPS Receive WscDone!",									/* IW_WSC_RECEIVE_DONE */
+	"WPS Receive WscAck!",									/* IW_WSC_RECEIVE_ACK */
+	"WPS Receive WscNack!",									/* IW_WSC_RECEIVE_NACK */
+	"Not only one candidate found"							/* IW_WSC_MANY_CANDIDATE */
 	};
 #endif // WSC_INCLUDED //
+#endif // SYSTEM_LOG_SUPPORT //
 
 /* timeout -- ms */
 VOID RTMP_SetPeriodicTimer(
@@ -87,9 +136,9 @@ VOID RTMP_OS_Init_Timer(
 {
 	if (!timer_pending(pTimer))
 	{
-	init_timer(pTimer);
-    pTimer->data = (unsigned long)data;
-    pTimer->function = function;		
+		init_timer(pTimer);
+		pTimer->data = (unsigned long)data;
+		pTimer->function = function;		
 	}
 }
 
@@ -129,12 +178,6 @@ VOID RTMP_OS_Del_Timer(
 	
 }
 
-VOID RTMP_OS_Release_Packet(
-	IN	PRTMP_ADAPTER pAd,
-	IN	PQUEUE_ENTRY  pEntry)
-{
-	//RTMPFreeNdisPacket(pAd, (struct sk_buff *)pEntry);
-}
 	
 // Unify all delay routine by using udelay
 VOID RTMPusecDelay(
@@ -162,7 +205,13 @@ NDIS_STATUS os_alloc_mem(
 {	
 	*mem = (PUCHAR) kmalloc(size, GFP_ATOMIC);
 	if (*mem)
+	{
+#ifdef VENDOR_FEATURE4_SUPPORT
+		OS_NumOfMemAlloc ++;
+#endif // VENDOR_FEATURE4_SUPPORT //
+
 		return (NDIS_STATUS_SUCCESS);
+	}
 	else
 		return (NDIS_STATUS_FAILURE);
 }
@@ -172,23 +221,78 @@ NDIS_STATUS os_free_mem(
 	IN	PRTMP_ADAPTER pAd,
 	IN	PVOID mem)
 {
-	
 	ASSERT(mem);
 	kfree(mem);
+
+#ifdef VENDOR_FEATURE4_SUPPORT
+	OS_NumOfMemFree ++;
+#endif // VENDOR_FEATURE4_SUPPORT //
+
 	return (NDIS_STATUS_SUCCESS);
 }
 
-#ifdef RTMP_RBUS_SUPPORT
-void RtmpFlashRead(UCHAR * p, ULONG a)
+
+#if defined(RTMP_RBUS_SUPPORT) || defined (RTMP_FLASH_SUPPORT)
+/* The flag "CONFIG_RALINK_FLASH_API" is used for APSoC Linux SDK */
+#ifdef CONFIG_RALINK_FLASH_API
+
+int32_t FlashRead(uint32_t *dst, uint32_t *src, uint32_t count);
+int32_t FlashWrite(uint16_t *source, uint16_t *destination, uint32_t numBytes);
+#define NVRAM_OFFSET                            0x30000
+#if defined (CONFIG_RT2880_FLASH_32M)
+#define RF_OFFSET                               0x1FE0000
+#else
+#ifdef RTMP_FLASH_SUPPORT
+#define RF_OFFSET                               0x48000
+#else
+#define RF_OFFSET                               0x40000
+#endif // RTMP_FLASH_SUPPORT //
+#endif
+
+#else // CONFIG_RALINK_FLASH_API //
+
+#ifdef RA_MTD_RW_BY_NUM
+#if defined (CONFIG_RT2880_FLASH_32M)
+#define MTD_NUM_FACTORY 5
+#else
+#define MTD_NUM_FACTORY 2
+#endif
+extern int ra_mtd_write(int num, loff_t to, size_t len, const u_char *buf);
+extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
+#else
+extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
+extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
+#endif
+
+#endif // CONFIG_RALINK_FLASH_API //
+
+void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b)
 {
-	ra_mtd_read_nm("Factory", 0, (size_t)a, p);
+#ifdef CONFIG_RALINK_FLASH_API
+	FlashRead((uint32_t *)p, (uint32_t *)a, (uint32_t)b);
+#else
+#ifdef RA_MTD_RW_BY_NUM
+	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t)b, p);
+#else
+	ra_mtd_read_nm("Factory", 0, (size_t)b, p);
+#endif
+#endif // CONFIG_RALINK_FLASH_API //
 }
 
-void RtmpFlashWrite(UCHAR * p, ULONG a)
+void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b)
 {
-	ra_mtd_write_nm("Factory", 0, (size_t)a, p);
+#ifdef CONFIG_RALINK_FLASH_API
+	FlashWrite((uint16_t *)p, (uint16_t *)a, (uint32_t)b);
+#else
+#ifdef RA_MTD_RW_BY_NUM
+	ra_mtd_write(MTD_NUM_FACTORY, 0, (size_t)b, p);
+#else
+	ra_mtd_write_nm("Factory", 0, (size_t)b, p);
+#endif
+#endif // CONFIG_RALINK_FLASH_API //
 }
-#endif /* RTMP_RBUS_SUPPORT */
+#endif // defined(RTMP_RBUS_SUPPORT) || defined (RTMP_FLASH_SUPPORT) //
+
 
 PNDIS_PACKET RtmpOSNetPktAlloc(
 	IN RTMP_ADAPTER *pAd, 
@@ -204,6 +308,7 @@ PNDIS_PACKET RtmpOSNetPktAlloc(
 	
 	return ((PNDIS_PACKET)skb);
 }
+
 
 PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	IN	PRTMP_ADAPTER pAd,
@@ -225,50 +330,6 @@ PNDIS_PACKET RTMP_AllocateFragPacketBuffer(
 	}
 
 	return (PNDIS_PACKET) pkt;
-}
-
-PNDIS_PACKET RTMP_AllocateTxPacketBuffer(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress)
-{
-	struct sk_buff *pkt;
-
-	pkt = dev_alloc_skb(Length);
-
-	if (pkt == NULL)
-	{
-		DBGPRINT(RT_DEBUG_ERROR, ("can't allocate tx %ld size packet\n",Length));
-	}
-
-	if (pkt)
-	{
-		MEM_DBG_PKT_ALLOC_INC(pAd);
-		RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
-		*VirtualAddress = (PVOID) pkt->data;	
-	}
-	else
-	{
-		*VirtualAddress = (PVOID) NULL;
-	}	
-
-	return (PNDIS_PACKET) pkt;	
-}
-
-VOID build_tx_packet(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PNDIS_PACKET	pPacket,
-	IN	PUCHAR	pFrame,
-	IN	ULONG	FrameLen)
-{
-
-	struct sk_buff	*pTxPkt;
-
-	ASSERT(pPacket);
-	pTxPkt = RTPKT_TO_OSPKT(pPacket);
-
-	NdisMoveMemory(skb_put(pTxPkt, FrameLen), pFrame, FrameLen);	
 }
 
 VOID	RTMPFreeAdapter(
@@ -293,81 +354,24 @@ VOID	RTMPFreeAdapter(
 	{
 		NdisFreeSpinLock(&pAd->TxSwQueueLock[index]);
 		NdisFreeSpinLock(&pAd->DeQueueLock[index]);
+		pAd->DeQueueRunning[index] = FALSE;
 	}
 	
 	NdisFreeSpinLock(&pAd->irq_lock);
 
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+	NdisFreeSpinLock(&pAd->ShrMemLock);
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
+
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
-	UAPSD_Release(pAd);
+	NdisFreeSpinLock(&pAd->UAPSDEOSPLock); // OS_ABL_SUPPORT
 #endif // UAPSD_AP_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
 	vfree(pAd); // pci_free_consistent(os_cookie->pci_dev,sizeof(RTMP_ADAPTER),pAd,os_cookie->pAd_pa);
 	if (os_cookie)
 		kfree(os_cookie);
-}
-
-BOOLEAN OS_Need_Clone_Packet(void)
-{
-	return (FALSE);	
-}
-
-
-
-/*
-	========================================================================
-
-	Routine Description:
-		clone an input NDIS PACKET to another one. The new internally created NDIS PACKET
-		must have only one NDIS BUFFER
-		return - byte copied. 0 means can't create NDIS PACKET
-		NOTE: internally created NDIS_PACKET should be destroyed by RTMPFreeNdisPacket
-		
-	Arguments:
-		pAd 	Pointer to our adapter
-		pInsAMSDUHdr	EWC A-MSDU format has extra 14-bytes header. if TRUE, insert this 14-byte hdr in front of MSDU.
-		*pSrcTotalLen			return total packet length. This lenght is calculated with 802.3 format packet.
-		
-	Return Value:
-		NDIS_STATUS_SUCCESS 	
-		NDIS_STATUS_FAILURE 	
-		
-	Note:
-	
-	========================================================================
-*/
-NDIS_STATUS RTMPCloneNdisPacket(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	BOOLEAN			pInsAMSDUHdr,
-	IN	PNDIS_PACKET	pInPacket,
-	OUT PNDIS_PACKET   *ppOutPacket)
-{
-
-	struct sk_buff *pkt;
-
-	ASSERT(pInPacket);
-	ASSERT(ppOutPacket);
-
-	// 1. Allocate a packet 
-	pkt = dev_alloc_skb(2048);
-	
-	if (pkt == NULL)
-	{
-		return NDIS_STATUS_FAILURE;
-	}
-
-	MEM_DBG_PKT_ALLOC_INC(pAd);
- 	skb_put(pkt, GET_OS_PKT_LEN(pInPacket));
-	NdisMoveMemory(pkt->data, GET_OS_PKT_DATAPTR(pInPacket), GET_OS_PKT_LEN(pInPacket));  
-	*ppOutPacket = OSPKT_TO_RTPKT(pkt);
-
-
-	RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
-
-	printk("###Clone###\n");
-
-	return NDIS_STATUS_SUCCESS;
 }
 
 
@@ -386,6 +390,7 @@ NDIS_STATUS RTMPAllocateNdisPacket(
 
 	// 1. Allocate a packet 
 	pPacket = (PNDIS_PACKET *) dev_alloc_skb(HeaderLen + DataLen + RTMP_PKT_TAIL_PADDING);
+
 	if (pPacket == NULL)
  	{
 		*ppPacket = NULL;
@@ -458,41 +463,6 @@ void RTMP_QueryPacketInfo(
 	*pSrcBufLen = GET_OS_PKT_LEN(pPacket); 	
 }
 
-void RTMP_QueryNextPacketInfo(
-	IN  PNDIS_PACKET *ppPacket,
-	OUT PACKET_INFO  *pPacketInfo,
-	OUT PUCHAR		 *pSrcBufVA,
-	OUT	UINT		 *pSrcBufLen)
-{
-	PNDIS_PACKET pPacket = NULL;
-
-	if (*ppPacket)
-		pPacket = GET_OS_PKT_NEXT(*ppPacket);
-
-	if (pPacket)
-	{
-		pPacketInfo->BufferCount = 1;
-		pPacketInfo->pFirstBuffer = (PNDIS_BUFFER)GET_OS_PKT_DATAPTR(pPacket);
-		pPacketInfo->PhysicalBufferCount = 1;
-		pPacketInfo->TotalPacketLength = GET_OS_PKT_LEN(pPacket);
-
-		*pSrcBufVA = GET_OS_PKT_DATAPTR(pPacket);
-		*pSrcBufLen = GET_OS_PKT_LEN(pPacket); 	
-		*ppPacket = GET_OS_PKT_NEXT(pPacket);		
-	}
-	else
-	{
-		pPacketInfo->BufferCount = 0;
-		pPacketInfo->pFirstBuffer = NULL;
-		pPacketInfo->PhysicalBufferCount = 0;
-		pPacketInfo->TotalPacketLength = 0;
-
-		*pSrcBufVA = NULL;
-		*pSrcBufLen = 0; 	
-		*ppPacket = NULL;
-	}
-}
-
 	
 PNDIS_PACKET DuplicatePacket(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -531,7 +501,6 @@ PNDIS_PACKET duplicate_pkt(
 {
 	struct sk_buff	*skb;
 	PNDIS_PACKET	pPacket = NULL;
-
 
 	if ((skb = __dev_alloc_skb(HdrLen + DataSize + 2, MEM_ALLOC_FLAG)) != NULL)
 	{
@@ -589,7 +558,8 @@ PNDIS_PACKET duplicate_pkt_with_VLAN(
     IN  UINT            HdrLen,
 	IN	PUCHAR			pData,
 	IN	ULONG			DataSize,
-	IN	UCHAR			FromWhichBSSID)
+	IN	UCHAR			FromWhichBSSID,
+	IN	UCHAR			*TPID)
 {
 	struct sk_buff	*skb;
 	PNDIS_PACKET	pPacket = NULL;
@@ -605,7 +575,7 @@ PNDIS_PACKET duplicate_pkt_with_VLAN(
 
 		/* copy header (maybe +VLAN tag) */
 		VLAN_Size = VLAN_8023_Header_Copy(pAd, pHeader802_3, HdrLen,
-											skb->tail, FromWhichBSSID);
+											skb->tail, FromWhichBSSID, TPID);
 		skb_put(skb, HdrLen + VLAN_Size);
 
 		/* copy data body */
@@ -619,6 +589,54 @@ PNDIS_PACKET duplicate_pkt_with_VLAN(
 } /* End of duplicate_pkt_with_VLAN */
 #endif // CONFIG_AP_SUPPORT //
 
+/*
+	========================================================================
+	
+	Routine Description:
+		Send a L2 frame to upper daemon to trigger state machine
+
+	Arguments:		
+		pAd			-	pointer to our pAdapter context	
+  				
+	Return Value:
+		
+	Note:
+		
+	========================================================================
+*/
+BOOLEAN RTMPL2FrameTxAction(
+		IN  PRTMP_ADAPTER		pAd,
+		IN	UCHAR				apidx,
+		IN	PUCHAR				pData,
+		IN	UINT32				data_len)
+{												   
+	struct sk_buff *skb = dev_alloc_skb(data_len+2);
+
+	if (!skb)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : Error! Can't allocate a skb.\n", __FUNCTION__));
+		return FALSE;
+	}
+
+	MEM_DBG_PKT_ALLOC_INC(pAd);
+	SET_OS_PKT_NETDEV(skb, get_netdev_from_bssid(pAd, apidx));
+
+	/* 16 byte align the IP header */
+	skb_reserve(skb, 2);
+
+	/* Insert the frame content */
+	NdisMoveMemory(GET_OS_PKT_DATAPTR(skb), pData, data_len);
+
+	/* End this frame */
+	skb_put(GET_OS_PKT_TYPE(skb), data_len);
+
+	DBGPRINT(RT_DEBUG_TRACE, ("%s doen\n", __FUNCTION__));
+
+	announce_802_3_packet(pAd, skb);
+
+	return TRUE;
+	
+}	
 
 PNDIS_PACKET ExpandPacket(
 	IN	PRTMP_ADAPTER	pAd,
@@ -708,7 +726,8 @@ void wlan_802_11_to_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	RX_BLK			*pRxBlk,
 	IN	PUCHAR			pHeader802_3,
-	IN  UCHAR			FromWhichBSSID)
+	IN  UCHAR			FromWhichBSSID,
+	IN	UCHAR			*TPID)
 {
 	struct sk_buff	*pOSPkt;
 
@@ -743,7 +762,7 @@ void wlan_802_11_to_802_3_packet(
 		data_p = skb_push(pOSPkt, LENGTH_802_3+VLAN_Size);
 
 		VLAN_8023_Header_Copy(pAd, pHeader802_3, LENGTH_802_3,
-								data_p, FromWhichBSSID);
+								data_p, FromWhichBSSID, TPID);
 	}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -761,10 +780,11 @@ void announce_802_3_packet(
 {
 
 	struct sk_buff	*pRxPkt;
-#ifdef INF_AMAZON_PPA
+#ifdef INF_PPA_SUPPORT
         int             ret = 0;
         unsigned int ppa_flags = 0; /* reserved for now */
-#endif // INF_AMAZON_PPA //
+#endif // INF_PPA_SUPPORT //
+
 
 	ASSERT(pPacket);
 
@@ -775,11 +795,14 @@ void announce_802_3_packet(
 #ifdef APCLI_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
-		if (MATPktRxNeedConvert(pAd, pRxPkt->dev))
-			MATEngineRxHandle(pAd, pPacket, 0);
+		if (RTMP_MATPktRxNeedConvert(pAd, pRxPkt->dev))
+			RTMP_MATEngineRxHandle(pAd, pPacket, 0);
 	}
 #endif // APCLI_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+#endif // CONFIG_STA_SUPPORT //
 
     /* Push up the protocol stack */
 #ifdef IKANOS_VX_1X0
@@ -789,10 +812,10 @@ void announce_802_3_packet(
 // mark for bridge fast path, 2009/06/22
 //	pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 
-#ifdef INF_AMAZON_PPA
+#ifdef INF_PPA_SUPPORT
 	if (ppa_hook_directpath_send_fn && pAd->PPAEnable==TRUE ) 
 	{
-	pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
+		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 
 		memset(pRxPkt->head,0,pRxPkt->data-pRxPkt->head-14);
 		DBGPRINT(RT_DEBUG_TRACE, ("ppa_hook_directpath_send_fn rx :ret:%d headroom:%d dev:%s pktlen:%d<===\n",ret,skb_headroom(pRxPkt)
@@ -803,40 +826,58 @@ void announce_802_3_packet(
 		return;
 
 	}	  	
-#endif // INF_AMAZON_PPA //
+#endif // INF_PPA_SUPPORT //
+
+//#ifdef CONFIG_5VT_ENHANCE
+//	*(int*)(pRxPkt->cb) = BRIDGE_TAG; 
+//#endif
 
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef CONFIG_RT2880_BRIDGING_ONLY
 	pRxPkt->cb[22]=0xa8;
-#endif
+#endif // CONFIG_RT2880_BRIDGING_ONLY //
 
-	
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
-#include "../../../../../../net/nat/hw_nat/ra_nat.h"
-       FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
-#endif
+#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
+	if(ra_classifier_hook_rx!= NULL)
+	{
+		unsigned int flags;
+		
+		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
+		ra_classifier_hook_rx(pRxPkt, classifier_cur_cycle);
+		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
+	}
+#endif // CONFIG_RA_CLASSIFIER //
 
 #if !defined(CONFIG_RA_NAT_NONE)
-	/* bruce+
-	  * ra_sw_nat_hook_rx return 1 --> continue
-	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
-	 */
+#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+	FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
+#endif // defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE) //
+
+	/*
+	 * ra_sw_nat_hook_rx return 1 --> continue
+	 * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
+	*/
+
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
 		unsigned int flags;
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
-
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 
-		if(ra_sw_nat_hook_rx(pRxPkt)) 
+		if(ra_sw_nat_hook_rx(pRxPkt))
+		{
 			netif_rx(pRxPkt);
+		}
 
 		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
-	else 
-#endif
- 
-#endif /* RTMP_RBUS_SUPPORT */
+	else
+#else
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+		FOE_AI(pRxPkt)=UN_HIT;
+#endif // defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) //
+#endif // !defined(CONFIG_RA_NAT_NONE) // 
+#endif // RTMP_RBUS_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT
 #ifdef BG_FT_SUPPORT
@@ -864,6 +905,7 @@ rt_get_sg_list_from_packet(PNDIS_PACKET pPacket, RTMP_SCATTER_GATHER_LIST *sg)
 
 void hex_dump(char *str, unsigned char *pSrcBufVA, unsigned int SrcBufLen)
 {
+#ifdef DBG
 	unsigned char *pt;
 	int x;
 
@@ -880,8 +922,10 @@ void hex_dump(char *str, unsigned char *pSrcBufVA, unsigned int SrcBufLen)
 		if (x%16 == 15) printk("\n");
 	}
 	printk("\n");
+#endif // DBG //
 }
 
+#ifdef SYSTEM_LOG_SUPPORT
 /*
 	========================================================================
 	
@@ -926,7 +970,7 @@ VOID RTMPSendWirelessEvent(
 		case IW_SYS_EVENT_FLAG_START:
 			event_table_len = IW_SYS_EVENT_TYPE_NUM;
 			break;
-
+#ifdef IDS_SUPPORT
 		case IW_SPOOF_EVENT_FLAG_START:
 			event_table_len = IW_SPOOF_EVENT_TYPE_NUM;
 			break;
@@ -934,6 +978,7 @@ VOID RTMPSendWirelessEvent(
 		case IW_FLOOD_EVENT_FLAG_START:
 			event_table_len = IW_FLOOD_EVENT_TYPE_NUM;
 			break;
+#endif // IDS_SUPPORT // 			
 #ifdef WSC_INCLUDED
 		case IW_WSC_EVENT_FLAG_START:
 			event_table_len = IW_WSC_EVENT_TYPE_NUM;
@@ -954,9 +999,11 @@ VOID RTMPSendWirelessEvent(
 	}	
  
 	//Allocate memory and copy the msg.
-	if((pBuf = kzalloc(IW_CUSTOM_MAX_LEN, GFP_ATOMIC)) != NULL)
+	if((pBuf = kmalloc(IW_CUSTOM_MAX_LEN, GFP_ATOMIC)) != NULL)
 	{
 		//Prepare the payload 
+		memset(pBuf, 0, IW_CUSTOM_MAX_LEN);
+
 		pBufPtr = pBuf;		
 
 		if (pAddr)
@@ -975,10 +1022,12 @@ VOID RTMPSendWirelessEvent(
 			 	pBufPtr += sprintf(pBufPtr, "%3d", Rssi);
 			}			
 		}
+#ifdef IDS_SUPPORT		
 		else if (type == IW_SPOOF_EVENT_FLAG_START)
 			pBufPtr += sprintf(pBufPtr, "%s (RSSI=%d)", pWirelessSpoofEventText[event], Rssi);
 		else if (type == IW_FLOOD_EVENT_FLAG_START)
 			pBufPtr += sprintf(pBufPtr, "%s", pWirelessFloodEventText[event]);
+#endif // IDS_SUPPORT //		
 #ifdef WSC_INCLUDED
 		else if (type == IW_WSC_EVENT_FLAG_START)
 			pBufPtr += sprintf(pBufPtr, "%s", pWirelessWscEventText[event]);
@@ -1000,147 +1049,54 @@ VOID RTMPSendWirelessEvent(
 	DBGPRINT(RT_DEBUG_ERROR, ("%s : The Wireless Extension MUST be v15 or newer.\n", __FUNCTION__));	
 #endif  /* WIRELESS_EXT >= 15 */  
 }
-
+#endif // SYSTEM_LOG_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
-VOID SendSingalToDaemon(
+VOID SendSignalToDaemon(
 					   IN INT              sig,
-					   ULONG               pid)
+		RTMP_OS_PID			pid,
+		unsigned long		pid_no)
 {
-	DBGPRINT(RT_DEBUG_TRACE, ("SendSingalToDaemon : Pid=%ld\n", pid));
-	if (pid != 0)
-	{
-		KILL_THREAD_PID(GET_PID(pid), sig, 0);
-	}
 }
-
-
-/*
- ========================================================================
- Routine Description:
-    Send Leyer 2 Frame to notify 802.1x daemon to disconnect
-    a specific client.
-
- Arguments:
-
- Return Value:
-    TRUE - send successfully
-    FAIL - send fail
-
- Note:
- ========================================================================
-*/
-BOOLEAN Dot1xDisconnectNotifyAction(
-    IN  PRTMP_ADAPTER	pAd,
-    IN  MAC_TABLE_ENTRY *pEntry)
-{
-	INT				apidx = MAIN_MBSSID;
-	UCHAR 			Header802_3[14];
-	UCHAR 			RalinkIe[9] = {221, 7, 0x00, 0x0c, 0x43, 0x00, 0x00, 0x00, 0x00};
-
-    if((pEntry->AuthMode == Ndis802_11AuthModeWPA) || (pEntry->AuthMode == Ndis802_11AuthModeWPA2) || (pAd->ApCfg.MBSSID[apidx].IEEE8021X == TRUE))
-	{
-		INT size = sizeof(Header802_3) + sizeof(RalinkIe);
-		struct sk_buff *skb = dev_alloc_skb(size+2);
-
-		apidx = pEntry->apidx;
-		MAKE_802_3_HEADER(Header802_3, pAd->ApCfg.MBSSID[apidx].Bssid, pEntry->Addr, EAPOL);
-
-		if (!skb)
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("Error! Can't allocate a skb.\n"));
-			return FALSE;
-		}
-		MEM_DBG_PKT_ALLOC_INC(pAd);
-   		GET_OS_PKT_NETDEV(skb) = get_netdev_from_bssid(pAd, apidx);
-
-		skb_reserve(skb, 2);	// 16 byte align the IP header
-		NdisMoveMemory(GET_OS_PKT_DATAPTR(skb), Header802_3, LENGTH_802_3);
-		NdisMoveMemory(GET_OS_PKT_DATAPTR(skb) + LENGTH_802_3, RalinkIe, sizeof(RalinkIe));
-
- 		skb_put(GET_OS_PKT_TYPE(skb), size);
-
-		DBGPRINT(RT_DEBUG_TRACE, ("Notify 8021.x daemon to remove this sta(%02x:%02x:%02x:%02x:%02x:%02x)\n", PRINT_MAC(pEntry->Addr)));
-
-		announce_802_3_packet(pAd, skb);
-
-	}
-
-	return TRUE;
-}
-
-
-
-/*
- ========================================================================
- Routine Description:
-    Send Leyer 2 Frame to trigger 802.1x EAP state machine.
-
- Arguments:
-
- Return Value:
-    TRUE - send successfully
-    FAIL - send fail
-
- Note:
- ========================================================================
-*/
-BOOLEAN Dot1xEapTriggerAction(
-    IN  PRTMP_ADAPTER	pAd,
-    IN  MAC_TABLE_ENTRY *pEntry)
-{
-	INT				apidx = MAIN_MBSSID;
-	UCHAR 			Header802_3[14];
-	UCHAR 			eapol_start_1x_hdr[4] = {0x01, 0x01, 0x00, 0x00};
-
-    if((pEntry->AuthMode == Ndis802_11AuthModeWPA) || (pEntry->AuthMode == Ndis802_11AuthModeWPA2) || (pAd->ApCfg.MBSSID[apidx].IEEE8021X == TRUE))
-	{
-		INT size = sizeof(Header802_3) + sizeof(eapol_start_1x_hdr);
-		struct sk_buff *skb = dev_alloc_skb(size+2);
-
-		apidx = pEntry->apidx;
-		MAKE_802_3_HEADER(Header802_3, pAd->ApCfg.MBSSID[apidx].Bssid, pEntry->Addr, EAPOL);
-
-		if (!skb)
-		{
-				DBGPRINT(RT_DEBUG_ERROR, ("Error! Can't allocate a skb.\n"));
-				return FALSE;
-		}
-		MEM_DBG_PKT_ALLOC_INC(pAd);
-	   	GET_OS_PKT_NETDEV(skb) = get_netdev_from_bssid(pAd, apidx);
-
-		skb_reserve(skb, 2);	// 16 byte align the IP header
-		NdisMoveMemory(GET_OS_PKT_DATAPTR(skb), Header802_3, LENGTH_802_3);
-		NdisMoveMemory(GET_OS_PKT_DATAPTR(skb) + LENGTH_802_3, eapol_start_1x_hdr, sizeof(eapol_start_1x_hdr));
-
- 		skb_put(GET_OS_PKT_TYPE(skb), size);
-
-		DBGPRINT(RT_DEBUG_TRACE, ("Notify 8021.x daemon to trigger EAP-SM for this sta(%02x:%02x:%02x:%02x:%02x:%02x)\n", PRINT_MAC(pEntry->Addr)));
-
-	    announce_802_3_packet(pAd, skb);
-
-	}
-
-	return TRUE;
-}
-
 #endif // CONFIG_AP_SUPPORT //
 
 
 #ifdef CONFIG_STA_SUPPORT
+__s32 ralinkrate[] =
+	{2,  4,   11,  22, // CCK
+	12, 18,   24,  36, 48, 72, 96, 108, // OFDM
+	13, 26,   39,  52,  78, 104, 117, 130, 26,  52,  78, 104, 156, 208, 234, 260, // 20MHz, 800ns GI, MCS: 0 ~ 15
+	39, 78,  117, 156, 234, 312, 351, 390,										  // 20MHz, 800ns GI, MCS: 16 ~ 23
+	27, 54,   81, 108, 162, 216, 243, 270, 54, 108, 162, 216, 324, 432, 486, 540, // 40MHz, 800ns GI, MCS: 0 ~ 15
+	81, 162, 243, 324, 486, 648, 729, 810,										  // 40MHz, 800ns GI, MCS: 16 ~ 23
+	14, 29,   43,  57,  87, 115, 130, 144, 29, 59,   87, 115, 173, 230, 260, 288, // 20MHz, 400ns GI, MCS: 0 ~ 15
+	43, 87,  130, 173, 260, 317, 390, 433,										  // 20MHz, 400ns GI, MCS: 16 ~ 23
+	30, 60,   90, 120, 180, 240, 270, 300, 60, 120, 180, 240, 360, 480, 540, 600, // 40MHz, 400ns GI, MCS: 0 ~ 15
+	90, 180, 270, 360, 540, 720, 810, 900};										  // 40MHz, 400ns GI, MCS: 16 ~ 23
+
+UINT32 RT_RateSize = sizeof(ralinkrate);
+
 void send_monitor_packets(
 	IN	PRTMP_ADAPTER	pAd, 
-	IN	RX_BLK			*pRxBlk)
+	IN	RX_BLK			*pRxBlk,
+	IN  CHAR			(*RTMPMaxRssi)(
+			IN PRTMP_ADAPTER	pAd,
+			IN CHAR				Rssi0,
+			IN CHAR				Rssi1,
+			IN CHAR				Rssi2),
+	IN  CHAR			(*ConvertToRssi)(
+			IN PRTMP_ADAPTER	pAd,
+			IN CHAR				Rssi,
+			IN UCHAR			RssiNumber))
 {   	
     struct sk_buff	*pOSPkt;
     wlan_ng_prism2_header *ph;
+#ifdef MONITOR_FLAG_11N_SNIFFER_SUPPORT
+	ETHEREAL_RADIO h, *ph_11n33; // for new 11n sniffer format
+#endif // MONITOR_FLAG_11N_SNIFFER_SUPPORT //
     int rate_index = 0;
     USHORT header_len = 0;
     UCHAR temp_header[40] = {0};
-
-    u_int32_t ralinkrate[256] = {2,4,11,22, 12,18,24,36,48,72,96,  108,   109, 110, 111, 112, 13, 26, 39, 52,78,104, 117, 130, 26, 52, 78,104, 156, 208, 234, 260, 27, 54,81,108,162, 216, 243, 270, // Last 38
-	54, 108, 162, 216, 324, 432, 486, 540,  14, 29, 43, 57, 87, 115, 130, 144, 29, 59,87,115, 173, 230,260, 288, 30, 60,90,120,180,240,270,300,60,120,180,240,360,480,540,600, 0,1,2,3,4,5,6,7,8,9,10,
-	11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80};
 
     
 	MEM_DBG_PKT_FREE_INC(pAd);
@@ -1218,76 +1174,138 @@ void send_monitor_packets(
     if (header_len > 0)
         NdisMoveMemory(skb_push(pOSPkt, header_len), temp_header, header_len);
 
-    ph = (wlan_ng_prism2_header *) skb_push(pOSPkt, sizeof(wlan_ng_prism2_header));
-	NdisZeroMemory(ph, sizeof(wlan_ng_prism2_header));
-    
-    ph->msgcode		    = DIDmsg_lnxind_wlansniffrm;
-	ph->msglen		    = sizeof(wlan_ng_prism2_header);
-	strcpy((PSTRING) ph->devname, (PSTRING) pAd->net_dev->name);
+#ifdef MONITOR_FLAG_11N_SNIFFER_SUPPORT
+	if ((pAd->StaCfg.BssMonitorFlag & MONITOR_FLAG_11N_SNIFFER) == 0)
+#endif // MONITOR_FLAG_11N_SNIFFER_SUPPORT //
+	{
+	    ph = (wlan_ng_prism2_header *) skb_push(pOSPkt, sizeof(wlan_ng_prism2_header));
+		NdisZeroMemory(ph, sizeof(wlan_ng_prism2_header));
+	    
+	    ph->msgcode		    = DIDmsg_lnxind_wlansniffrm;
+		ph->msglen		    = sizeof(wlan_ng_prism2_header);
+		strcpy((PSTRING) ph->devname, (PSTRING) pAd->net_dev->name);
 
-    ph->hosttime.did = DIDmsg_lnxind_wlansniffrm_hosttime;
-	ph->hosttime.status = 0;
-	ph->hosttime.len = 4;
-	ph->hosttime.data = jiffies;
+	    ph->hosttime.did = DIDmsg_lnxind_wlansniffrm_hosttime;
+		ph->hosttime.status = 0;
+		ph->hosttime.len = 4;
+		ph->hosttime.data = jiffies;
 
-	ph->mactime.did = DIDmsg_lnxind_wlansniffrm_mactime;
-	ph->mactime.status = 0;
-	ph->mactime.len = 0;
-	ph->mactime.data = 0;
+		ph->mactime.did = DIDmsg_lnxind_wlansniffrm_mactime;
+		ph->mactime.status = 0;
+		ph->mactime.len = 0;
+		ph->mactime.data = 0;
 
-    ph->istx.did = DIDmsg_lnxind_wlansniffrm_istx;
-	ph->istx.status = 0;
-	ph->istx.len = 0;
-	ph->istx.data = 0;
- 
-    ph->channel.did = DIDmsg_lnxind_wlansniffrm_channel;
-	ph->channel.status = 0;
-	ph->channel.len = 4;
+	    ph->istx.did = DIDmsg_lnxind_wlansniffrm_istx;
+		ph->istx.status = 0;
+		ph->istx.len = 0;
+		ph->istx.data = 0;
+	 
+	    ph->channel.did = DIDmsg_lnxind_wlansniffrm_channel;
+		ph->channel.status = 0;
+		ph->channel.len = 4;
 
-    ph->channel.data = (u_int32_t)pAd->CommonCfg.Channel;
+	    ph->channel.data = (u_int32_t)pAd->CommonCfg.Channel;
 
-    ph->rssi.did = DIDmsg_lnxind_wlansniffrm_rssi;
-	ph->rssi.status = 0;
-	ph->rssi.len = 4;
-    ph->rssi.data = (u_int32_t)RTMPMaxRssi(pAd, ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI0, RSSI_0), ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI1, RSSI_1), ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI2, RSSI_2));;
-            
-	ph->signal.did = DIDmsg_lnxind_wlansniffrm_signal;
-	ph->signal.status = 0;
-	ph->signal.len = 4;
-	ph->signal.data = 0; //rssi + noise;
-            
-	ph->noise.did = DIDmsg_lnxind_wlansniffrm_noise;
-	ph->noise.status = 0;
-	ph->noise.len = 4;
-	ph->noise.data = 0;
+	    ph->rssi.did = DIDmsg_lnxind_wlansniffrm_rssi;
+		ph->rssi.status = 0;
+		ph->rssi.len = 4;
+	    ph->rssi.data = (u_int32_t)RTMPMaxRssi(pAd, ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI0, RSSI_0), ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI1, RSSI_1), ConvertToRssi(pAd, pRxBlk->pRxWI->RSSI2, RSSI_2));;
+	            
+		ph->signal.did = DIDmsg_lnxind_wlansniffrm_signal;
+		ph->signal.status = 0;
+		ph->signal.len = 4;
+		ph->signal.data = 0; //rssi + noise;
+	            
+		ph->noise.did = DIDmsg_lnxind_wlansniffrm_noise;
+		ph->noise.status = 0;
+		ph->noise.len = 4;
+		ph->noise.data = 0;
 
 #ifdef DOT11_N_SUPPORT
-    if (pRxBlk->pRxWI->PHYMODE >= MODE_HTMIX)
-    {
-    	rate_index = 16 + ((UCHAR)pRxBlk->pRxWI->BW *16) + ((UCHAR)pRxBlk->pRxWI->ShortGI *32) + ((UCHAR)pRxBlk->pRxWI->MCS);
-    }
-    else
+	    if (pRxBlk->pRxWI->PHYMODE >= MODE_HTMIX)
+	    {
+	    	rate_index = 12 + ((UCHAR)pRxBlk->pRxWI->BW *24) + ((UCHAR)pRxBlk->pRxWI->ShortGI *48) + ((UCHAR)pRxBlk->pRxWI->MCS);
+	    }
+	    else
 #endif // DOT11_N_SUPPORT //
-	if (pRxBlk->pRxWI->PHYMODE == MODE_OFDM)
-    	rate_index = (UCHAR)(pRxBlk->pRxWI->MCS) + 4;
-    else 
-    	rate_index = (UCHAR)(pRxBlk->pRxWI->MCS);
-    if (rate_index < 0)
-        rate_index = 0;
-    if (rate_index > 255)
-        rate_index = 255;
-    
-	ph->rate.did = DIDmsg_lnxind_wlansniffrm_rate;
-	ph->rate.status = 0;
-	ph->rate.len = 4;
-    ph->rate.data = ralinkrate[rate_index];
+		if (pRxBlk->pRxWI->PHYMODE == MODE_OFDM)
+	    	rate_index = (UCHAR)(pRxBlk->pRxWI->MCS) + 4;
+	    else 
+	    	rate_index = (UCHAR)(pRxBlk->pRxWI->MCS);
 
-	ph->frmlen.did = DIDmsg_lnxind_wlansniffrm_frmlen;
-    ph->frmlen.status = 0;
-	ph->frmlen.len = 4;
-	ph->frmlen.data	= (u_int32_t)pRxBlk->DataSize;
-    
-    
+	    if (rate_index < 0)
+	        rate_index = 0;
+	    if (rate_index > 255)
+	        rate_index = 255;
+	    
+		ph->rate.did = DIDmsg_lnxind_wlansniffrm_rate;
+		ph->rate.status = 0;
+		ph->rate.len = 4;
+	    ph->rate.data = ralinkrate[rate_index]; /* real rate = ralinkrate[rate_index] / 2 */
+
+		ph->frmlen.did = DIDmsg_lnxind_wlansniffrm_frmlen;
+	    ph->frmlen.status = 0;
+		ph->frmlen.len = 4;
+		ph->frmlen.data	= (u_int32_t)pRxBlk->DataSize;
+	}
+#ifdef MONITOR_FLAG_11N_SNIFFER_SUPPORT
+	else
+	{
+		ph_11n33 = &h;
+		NdisZeroMemory((unsigned char *)ph_11n33, sizeof(ETHEREAL_RADIO));
+
+		//802.11n fields
+		if (pRxBlk->pRxWI->MCS > 15)
+	    	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_3x3;    
+	    	                         
+	    if (pRxBlk->pRxWI->PHYMODE == MODE_HTGREENFIELD )
+	    	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_GF;
+
+	    
+	    if (pRxBlk->pRxWI->BW == 1){                                               
+	    	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_BW40;                 
+	    }
+	    else if (pAd->CommonCfg.Channel < pAd->CommonCfg.CentralChannel){
+	        ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_BW20U;
+	    }    
+	    else if (pAd->CommonCfg.Channel > pAd->CommonCfg.CentralChannel){
+	        ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_BW20D;
+	    }    
+	   	else{
+	        ph_11n33->Flag_80211n |= (WIRESHARK_11N_FLAG_BW20U | WIRESHARK_11N_FLAG_BW20D);
+	    }    
+
+	    if (pRxBlk->pRxWI->ShortGI == 1)
+	      	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_SGI;
+
+	  	if (pRxBlk->RxD.AMPDU)   // RXD_STRUC   PRT28XX_RXD_STRUC				pRxD = &(pRxBlk->RxD);
+	      	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_AMPDU;
+
+	    if (pRxBlk->pRxWI->STBC)
+	       	ph_11n33->Flag_80211n |= WIRESHARK_11N_FLAG_STBC;    
+
+		ph_11n33->signal_level = (UCHAR)pRxBlk->pRxWI->RSSI1;
+
+		/* data_rate is the rate index in the wireshark rate table */
+	  	if (pRxBlk->pRxWI->PHYMODE >= MODE_HTMIX)
+	  	{
+	     	if (pRxBlk->pRxWI->MCS > 15)
+	     		ph_11n33->data_rate = (16*4 + ((UCHAR)pRxBlk->pRxWI->BW *16) + ((UCHAR)pRxBlk->pRxWI->ShortGI *32) + ((UCHAR)pRxBlk->pRxWI->MCS));                          
+	     	else
+	     		ph_11n33->data_rate = 16 + ((UCHAR)pRxBlk->pRxWI->BW *16) + ((UCHAR)pRxBlk->pRxWI->ShortGI *32) + ((UCHAR)pRxBlk->pRxWI->MCS);
+	  	}
+	   	else if (pRxBlk->pRxWI->PHYMODE == MODE_OFDM)
+	     	ph_11n33->data_rate = (UCHAR)(pRxBlk->pRxWI->MCS) + 4;
+	   	else
+	      	ph_11n33->data_rate = (UCHAR)(pRxBlk->pRxWI->MCS);
+	    
+	    //channel field
+	    ph_11n33->channel = (UCHAR)pAd->CommonCfg.Channel;   
+
+		NdisMoveMemory(skb_put(pOSPkt, sizeof(ETHEREAL_RADIO)), (UCHAR *)ph_11n33, sizeof(ETHEREAL_RADIO));
+	}
+#endif // MONITOR_FLAG_11N_SNIFFER_SUPPORT //
+
     pOSPkt->pkt_type = PACKET_OTHERHOST;
     pOSPkt->protocol = eth_type_trans(pOSPkt, pOSPkt->dev);
     pOSPkt->ip_summed = CHECKSUM_NONE;
@@ -1303,74 +1321,6 @@ err_free_sk_buff:
 #endif // CONFIG_STA_SUPPORT //
 
 
-/*******************************************************************************
-
-	Device IRQ related functions.
-	
- *******************************************************************************/
-int RtmpOSIRQRequest(IN PNET_DEV pNetDev)
-{
-	struct net_device *net_dev = pNetDev;
-	PRTMP_ADAPTER pAd = NULL;
-	int retval = 0;
-	
-	GET_PAD_FROM_NET_DEV(pAd, pNetDev);	
-	
-	ASSERT(pAd);
-	
-#ifdef RTMP_PCI_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
-	{
-		POS_COOKIE _pObj = (POS_COOKIE)(pAd->OS_Cookie);
-		RTMP_MSI_ENABLE(pAd);	
-		retval = request_irq(_pObj->pci_dev->irq,  rt2860_interrupt, IRQF_SHARED, (net_dev)->name, (net_dev));
-		if (retval != 0) 
-			printk("RT2860: request_irq  ERROR(%d)\n", retval);
-	}
-#endif // RTMP_PCI_SUPPORT //
-#ifdef RTMP_RBUS_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_RBUS)
-	{
-		retval = request_irq(net_dev->irq, rt2860_interrupt, IRQF_SHARED, (net_dev)->name ,(net_dev));
-		if (retval != 0) 
-			printk("RT2860: request_irq  ERROR(%d)\n", retval);
-	}
-#endif // RTMP_RBUS_SUPPORT //
-
-	return retval; 
-	
-}
-
-
-int RtmpOSIRQRelease(IN PNET_DEV pNetDev)
-{
-	struct net_device *net_dev = pNetDev;
-	PRTMP_ADAPTER pAd = NULL;
-
-	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
-	
-	ASSERT(pAd);
-	
-#ifdef RTMP_PCI_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
-	{ 
-		POS_COOKIE pObj = (POS_COOKIE)(pAd->OS_Cookie);
-		synchronize_irq(pObj->pci_dev->irq);
-		free_irq(pObj->pci_dev->irq, (net_dev));
-		RTMP_MSI_DISABLE(pAd);
-	}
-#endif // RTMP_PCI_SUPPORT //
-
-#ifdef RTMP_RBUS_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_RBUS)
-	{
-		synchronize_irq(net_dev->irq);
-		free_irq(net_dev->irq, (net_dev));
-	}
-#endif // RTMP_RBUS_SUPPORT //
-
-	return 0;
-}
 
 
 /*******************************************************************************
@@ -1476,7 +1426,8 @@ NDIS_STATUS RtmpOSTaskKill(
 #else
 	CHECK_PID_LEGALITY(pTask->taskPID)
 	{
-		printk("Terminate the task(%s) with pid(%d)!\n", pTask->taskName, GET_PID_NUMBER(pTask->taskPID));
+		DBGPRINT(RT_DEBUG_TRACE,
+				("Terminate the task(%s) with pid(%d)!\n", pTask->taskName, GET_PID_NUMBER(pTask->taskPID)));
 		mb();
 		pTask->task_killed = 1;
 		mb();
@@ -1491,6 +1442,7 @@ NDIS_STATUS RtmpOSTaskKill(
 			wait_for_completion(&pTask->taskComplete);
 			pTask->taskPID = THREAD_PID_INIT_VALUE;
 			pTask->task_killed = 0;
+			RTMP_SEM_EVENT_DESTORY(&pTask->taskSema);
 			ret = NDIS_STATUS_SUCCESS;
 		}
 	}
@@ -1519,13 +1471,34 @@ void RtmpOSTaskCustomize(
 
 #ifndef KTHREAD_SUPPORT
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	daemonize((PSTRING)&pTask->taskName[0]/*"%s",pAd->net_dev->name*/);
 
 	allow_signal(SIGTERM);
 	allow_signal(SIGKILL);
 	current->flags |= PF_NOFREEZE;
+#else
+	unsigned long flags;
 
-	/* signal that we've started the thread */
+	daemonize();
+	reparent_to_init();
+	strcpy(current->comm, &pTask->taskName[0]);
+
+	siginitsetinv(&current->blocked, sigmask(SIGTERM) | sigmask(SIGKILL));	
+	
+	/* Allow interception of SIGKILL only
+	 * Don't allow other signals to interrupt the transmission */
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,22)
+	spin_lock_irqsave(&current->sigmask_lock, flags);
+	flush_signals(current);
+	recalc_sigpending(current);
+	spin_unlock_irqrestore(&current->sigmask_lock, flags);
+#endif
+#endif
+	
+	RTMP_GET_OS_PID(pTask->taskPID, current->pid);
+
+    /* signal that we've started the thread */
 	complete(&pTask->taskComplete);
 
 #endif
@@ -1534,20 +1507,22 @@ void RtmpOSTaskCustomize(
 
 NDIS_STATUS RtmpOSTaskAttach(
 	IN RTMP_OS_TASK *pTask,
-	IN int (*fn)(void *), 
-	IN void *arg)
+	IN RTMP_OS_TASK_CALLBACK fn, 
+	IN ULONG arg)
 {	
 	NDIS_STATUS status = NDIS_STATUS_SUCCESS;
+#ifndef KTHREAD_SUPPORT
 	pid_t pid_number = -1;
+#endif // KTHREAD_SUPPORT //
 	
 #ifdef KTHREAD_SUPPORT
 	pTask->task_killed = 0;
 	pTask->kthread_task = NULL;
-	pTask->kthread_task = kthread_run(fn, arg, pTask->taskName);
+	pTask->kthread_task = kthread_run(fn, (void *)arg, pTask->taskName);
 	if (IS_ERR(pTask->kthread_task))
 		status = NDIS_STATUS_FAILURE;
 #else
-	pid_number = kernel_thread(fn, arg, RTMP_OS_MGMT_TASK_FLAGS);
+	pid_number = kernel_thread(fn, (void *)arg, RTMP_OS_MGMT_TASK_FLAGS);
 	if (pid_number < 0) 
 	{
 		DBGPRINT (RT_DEBUG_ERROR, ("Attach task(%s) failed!\n", pTask->taskName));
@@ -1555,8 +1530,6 @@ NDIS_STATUS RtmpOSTaskAttach(
 	}
 	else
 	{
-		pTask->taskPID = GET_PID(pid_number);
-		
 		// Wait for the thread to start
 		wait_for_completion(&pTask->taskComplete);
 		status = NDIS_STATUS_SUCCESS;
@@ -1597,9 +1570,8 @@ NDIS_STATUS RtmpOSTaskInit(
 
 void RTMP_IndicateMediaState(
 	IN	PRTMP_ADAPTER	pAd)
-{	
-	if (pAd->CommonCfg.bWirelessEvent)	
-	{
+{
+#ifdef SYSTEM_LOG_SUPPORT
 		if (pAd->IndicateMediaState == NdisMediaStateConnected)
 		{
 			RTMPSendWirelessEvent(pAd, IW_STA_LINKUP_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0);
@@ -1607,9 +1579,45 @@ void RTMP_IndicateMediaState(
 		else
 		{							
 			RTMPSendWirelessEvent(pAd, IW_STA_LINKDOWN_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 		
-		}	
-	}
+		}
+#endif // SYSTEM_LOG_SUPPORT //
 }
+
+
+#if LINUX_VERSION_CODE <= 0x20402	// Red Hat 7.1
+//static struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)(struct net_device *)) //sample
+struct net_device *alloc_netdev(
+	int sizeof_priv,
+	const char *mask,
+	void (*setup)(struct net_device *))
+{
+    struct net_device	*dev;
+    INT					alloc_size;
+
+
+    /* ensure 32-byte alignment of the private area */
+    alloc_size = sizeof (*dev) + sizeof_priv + 31;
+
+    dev = (struct net_device *) kmalloc(alloc_size, GFP_KERNEL);
+    if (dev == NULL)
+    {
+        DBGPRINT(RT_DEBUG_ERROR,
+				("alloc_netdev: Unable to allocate device memory.\n"));
+        return NULL;
+    }
+
+    memset(dev, 0, alloc_size);
+
+    if (sizeof_priv)
+        dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
+
+    setup(dev);
+    strcpy(dev->name, mask);
+
+    return dev;
+}
+#endif // LINUX_VERSION_CODE //
+
 
 int RtmpOSWrielessEventSend(
 	IN RTMP_ADAPTER *pAd,
@@ -1647,7 +1655,7 @@ int RtmpOSNetDevAddrSet(
 	net_dev = pNetDev;
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 	
-#if 0
+#ifdef CONFIG_STA_SUPPORT
 	// work-around for the SuSE due to it has it's own interface name management system.
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
@@ -1735,7 +1743,12 @@ void RtmpOSNetDevClose(
 void RtmpOSNetDevFree(PNET_DEV pNetDev)
 {
 	ASSERT(pNetDev);
+	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	free_netdev(pNetDev);
+#else
+	kfree(pNetDev);
+#endif
 }
 
 
@@ -1747,7 +1760,11 @@ INT RtmpOSNetDevAlloc(
 	*new_dev_p = NULL;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("Allocate a net device with private data size=%d!\n", privDataSize));
+#if LINUX_VERSION_CODE <= 0x20402 // Red Hat 7.1
+	*new_dev_p = alloc_netdev(privDataSize, "eth%d", ether_setup);
+#else
 	*new_dev_p = alloc_etherdev(privDataSize);
+#endif // LINUX_VERSION_CODE //
 
 	if (*new_dev_p)
 		return NDIS_STATUS_SUCCESS;
@@ -1755,10 +1772,28 @@ INT RtmpOSNetDevAlloc(
 		return NDIS_STATUS_FAILURE;
 }
 
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+INT RtmpOSNetDevOpsAlloc(
+	IN PVOID *pNetDevOps)
+{
+	*pNetDevOps = (PVOID)vmalloc(sizeof(struct net_device_ops));
+	if (*pNetDevOps)
+	{
+		NdisZeroMemory(*pNetDevOps,sizeof(struct net_device_ops)); 
+		return NDIS_STATUS_SUCCESS;
+	}
+	else
+	{
+		return NDIS_STATUS_FAILURE;
+	}
+}
+#endif
 PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 {
 	PNET_DEV	pTargetNetDev = NULL;
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)
@@ -1771,12 +1806,26 @@ PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 	pTargetNetDev = dev_get_by_name(pDevName);
 #endif // KERNEL_VERSION(2,6,24) //
 
+#else
+	int	devNameLen;
+
+	devNameLen = strlen(pDevName);
+	ASSERT((devNameLen <= IFNAMSIZ));
+	
+	for(pTargetNetDev=dev_base; pTargetNetDev!=NULL; pTargetNetDev=pTargetNetDev->next)
+	{
+		if (strncmp(pTargetNetDev->name, pDevName, devNameLen) == 0)
+			break;
+	}
+#endif // KERNEL_VERSION(2,5,0) //
+
 	return pTargetNetDev;
 }
 
 
 void RtmpOSNetDeviceRefPut(PNET_DEV pNetDev)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	/* 
 		every time dev_get_by_name is called, and it has returned a valid struct 
 		net_device*, dev_put should be called afterwards, because otherwise the 
@@ -1784,6 +1833,7 @@ void RtmpOSNetDeviceRefPut(PNET_DEV pNetDev)
 	*/
 	if(pNetDev)
 		dev_put(pNetDev);
+#endif // LINUX_VERSION_CODE //
 }
 
 
@@ -1800,9 +1850,39 @@ INT RtmpOSNetDevDestory(
 
 void RtmpOSNetDevDetach(PNET_DEV pNetDev)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	struct net_device_ops *pNetDevOps = pNetDev->netdev_ops;
+#endif
+
 	unregister_netdev(pNetDev);
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	vfree(pNetDevOps);
+#endif
 }
 
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+static void RALINK_ET_DrvInfoGet(
+	IN struct net_device *pDev,
+	IN struct ethtool_drvinfo *pInfo)
+{
+	strcpy(pInfo->driver, "RALINK WLAN");
+
+#ifdef CONFIG_AP_SUPPORT
+	strcpy(pInfo->version, AP_DRIVER_VERSION);
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	strcpy(pInfo->version, STA_DRIVER_VERSION);
+#endif // CONFIG_STA_SUPPORT //
+
+	sprintf(pInfo->bus_info, "CSR 0x%lx", pDev->base_addr);
+}
+
+static struct ethtool_ops RALINK_Ethtool_Ops = {
+	.get_drvinfo		= RALINK_ET_DrvInfoGet,
+};
+#endif
 
 int RtmpOSNetDevAttach(
 	IN PNET_DEV pNetDev, 
@@ -1810,51 +1890,98 @@ int RtmpOSNetDevAttach(
 {	
 	int ret, rtnl_locked = FALSE;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	struct net_device_ops *pNetDevOps = pNetDev->netdev_ops;
+#endif
+
 	DBGPRINT(RT_DEBUG_TRACE, ("RtmpOSNetDevAttach()--->\n"));
+
 	// If we need hook some callback function to the net device structrue, now do it.
 	if (pDevOpHook)
 	{
 		PRTMP_ADAPTER pAd = NULL;
 	
 		GET_PAD_FROM_NET_DEV(pAd, pNetDev);	
+		
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+		pNetDevOps->ndo_open			= pDevOpHook->open;
+		pNetDevOps->ndo_stop			= pDevOpHook->stop;
+		pNetDevOps->ndo_start_xmit	= (HARD_START_XMIT_FUNC)(pDevOpHook->xmit);
+		pNetDevOps->ndo_do_ioctl		= pDevOpHook->ioctl;
+#else
 		pNetDev->open			= pDevOpHook->open;
 		pNetDev->stop			= pDevOpHook->stop;
 		pNetDev->hard_start_xmit	= (HARD_START_XMIT_FUNC)(pDevOpHook->xmit);
 		pNetDev->do_ioctl		= pDevOpHook->ioctl;
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+		pNetDev->ethtool_ops = &RALINK_Ethtool_Ops;
+#endif
 		
 		/* if you don't implement get_stats, just leave the callback function as NULL, a dummy 
 		     function will make kernel panic.
 		*/
 		if (pDevOpHook->get_stats)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+			pNetDevOps->ndo_get_stats = pDevOpHook->get_stats;
+#else
 			pNetDev->get_stats = pDevOpHook->get_stats;
+#endif
 
 		/* OS specific flags, here we used to indicate if we are virtual interface */
 		pNetDev->priv_flags = pDevOpHook->priv_flags; 
 
 #if (WIRELESS_EXT < 21) && (WIRELESS_EXT >= 12)
-		pNetDev->get_wireless_stats = rt28xx_get_wireless_stats;
+//		pNetDev->get_wireless_stats = rt28xx_get_wireless_stats;
+		pNetDev->get_wireless_stats = pDevOpHook->get_wstats;
 #endif
 
-#if WIRELESS_EXT >= 12
 #ifdef CONFIG_STA_SUPPORT
+#if WIRELESS_EXT >= 12
 		if (pAd->OpMode == OPMODE_STA)
-			pNetDev->wireless_handlers = &rt28xx_iw_handler_def;
+		{
+//			pNetDev->wireless_handlers = &rt28xx_iw_handler_def;
+			pNetDev->wireless_handlers = pDevOpHook->iw_handler;
+		}
+#endif //WIRELESS_EXT >= 12
 #endif // CONFIG_STA_SUPPORT //
+
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
+#if WIRELESS_EXT >= 12
 		if (pAd->OpMode == OPMODE_AP)
-			pNetDev->wireless_handlers = &rt28xx_ap_iw_handler_def;
+		{
+//			pNetDev->wireless_handlers = &rt28xx_ap_iw_handler_def;
+			pNetDev->wireless_handlers = pDevOpHook->iw_handler;
+		}
+#endif //WIRELESS_EXT >= 12
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
-#endif
 
 		// copy the net device mac address to the net_device structure.
 		NdisMoveMemory(pNetDev->dev_addr, &pDevOpHook->devAddr[0], MAC_ADDR_LEN);
 
 		rtnl_locked = pDevOpHook->needProtcted;
+
+#ifdef RT_CFG80211_SUPPORT
+		/*
+			In 2.6.32, cfg80211 register must be before register_netdevice();
+			We can not put the register in rt28xx_open();
+			Or you will suffer NULL pointer in list_add of
+			cfg80211_netdev_notifier_call().
+		*/
+		CFG80211_Register(pAd, pAd->pCfgDev, pNetDev);
+#endif // RT_CFG80211_SUPPORT //
 	}
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	pNetDevOps->ndo_validate_addr = NULL;
+	//pNetDev->netdev_ops = ops;
+#else
 	pNetDev->validate_addr = NULL;
 #endif
+#endif
+
 	if (rtnl_locked)
 		ret = register_netdevice(pNetDev);
 	else
@@ -1876,6 +2003,9 @@ PNET_DEV RtmpOSNetDevCreate(
 	IN PSTRING		pNamePrefix)
 {
 	struct net_device *pNetDev = NULL;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	struct net_device_ops *pNetDevOps = NULL;
+#endif
 	int status;
 
 
@@ -1887,8 +2017,22 @@ PNET_DEV RtmpOSNetDevCreate(
 		DBGPRINT(RT_DEBUG_ERROR, ("Allocate network device fail (%s)...\n", pNamePrefix));
 		return NULL;
 	}
-
-	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
+	status = RtmpOSNetDevOpsAlloc((PVOID)&pNetDevOps);
+	if (status != NDIS_STATUS_SUCCESS)
+	{
+		/* error! no any available ra name can be used! */
+		DBGPRINT(RT_DEBUG_TRACE, ("Allocate net device ops fail!\n"));
+		RtmpOSNetDevFree(pNetDev);
+		
+		return NULL;
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("Allocate net device ops success!\n"));
+		pNetDev->netdev_ops = pNetDevOps;
+	}
+#endif
 	/* find a available interface name, max 32 interfaces */
 	status = RtmpOSNetDevRequestName(pAd, pNetDev, pNamePrefix, devNum);
 	if (status != NDIS_STATUS_SUCCESS)
@@ -1907,3 +2051,268 @@ PNET_DEV RtmpOSNetDevCreate(
 	return pNetDev;
 }
 
+
+// OS_ABL_SUPPORT
+// not yet support MBSS
+PNET_DEV get_netdev_from_bssid(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			FromWhichBSSID)
+{
+	PNET_DEV dev_p = NULL;
+
+	
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{
+		UCHAR infRealIdx;
+
+		infRealIdx = FromWhichBSSID & (NET_DEVICE_REAL_IDX_MASK);
+#ifdef APCLI_SUPPORT
+		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_APCLI)
+		{
+			dev_p = (infRealIdx > MAX_APCLI_NUM ? NULL : pAd->ApCfg.ApCliTab[infRealIdx].dev);
+		} 
+		else
+#endif // APCLI_SUPPORT //
+#ifdef WDS_SUPPORT
+		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_WDS)
+		{
+			dev_p = ((infRealIdx > MAX_WDS_ENTRY) ? NULL : pAd->WdsTab.WdsEntry[infRealIdx].dev);
+		}
+		else
+#endif // WDS_SUPPORT //
+		{
+			if (FromWhichBSSID >= pAd->ApCfg.BssidNum)
+	    		{
+				DBGPRINT(RT_DEBUG_ERROR, ("%s: fatal error ssid > ssid num!\n", __FUNCTION__));
+				dev_p = pAd->net_dev;
+	    		}
+
+	    		if (FromWhichBSSID == BSS0)
+				dev_p = pAd->net_dev;
+	    		else
+	    		{
+	    	    		dev_p = pAd->ApCfg.MBSSID[FromWhichBSSID].MSSIDDev;
+	    		}
+		}
+	}
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+	{
+		dev_p = pAd->net_dev;
+	}
+#endif // CONFIG_STA_SUPPORT //
+
+	ASSERT(dev_p);
+	return dev_p; /* return one of MBSS */
+}
+
+#ifdef CONFIG_AP_SUPPORT
+UCHAR VLAN_8023_Header_Copy(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PUCHAR			pHeader802_3,
+	IN	UINT            HdrLen,
+	OUT PUCHAR			pData,
+	IN	UCHAR			FromWhichBSSID,
+	IN	UCHAR			*TPID)
+{
+	UINT16 TCI;
+	UCHAR VLAN_Size = 0;
+
+
+	if ((FromWhichBSSID < pAd->ApCfg.BssidNum) && (pAd->ApCfg.MBSSID[FromWhichBSSID].VLAN_VID != 0))
+	{
+		MULTISSID_STRUCT *mbss_p = &pAd->ApCfg.MBSSID[FromWhichBSSID];
+
+		/* need to insert VLAN tag */
+		VLAN_Size = LENGTH_802_1Q;
+
+		/* make up TCI field */
+		TCI = (mbss_p->VLAN_VID & 0x0fff) | ((mbss_p->VLAN_Priority & 0x7)<<13);
+
+#ifndef RT_BIG_ENDIAN
+		TCI = SWAP16(TCI);
+#endif // RT_BIG_ENDIAN //
+
+		/* copy dst + src MAC (12B) */
+		memcpy(pData, pHeader802_3, LENGTH_802_3_NO_TYPE);
+
+		/* copy VLAN tag (4B) */
+		/* do NOT use memcpy to speed up */
+		*(UINT16 *)(pData+LENGTH_802_3_NO_TYPE) = *(UINT16 *)TPID;
+		*(UINT16 *)(pData+LENGTH_802_3_NO_TYPE+2) = TCI;
+
+		/* copy type/len (2B) */
+		*(UINT16 *)(pData+LENGTH_802_3_NO_TYPE+LENGTH_802_1Q) = \
+				*(UINT16 *)&pHeader802_3[LENGTH_802_3-LENGTH_802_3_TYPE];
+
+		/* copy tail if exist */
+		if (HdrLen > LENGTH_802_3)
+		{
+			memcpy(pData+LENGTH_802_3+LENGTH_802_1Q,
+					pHeader802_3+LENGTH_802_3,
+					HdrLen - LENGTH_802_3);
+		} /* End of if */
+	}
+	else
+	{
+		/* no VLAN tag is needed to insert */
+		memcpy(pData, pHeader802_3, HdrLen);
+	} /* End of if */
+
+	return VLAN_Size;
+} /* End of VLAN_Tag_Insert */
+#endif // CONFIG_AP_SUPPORT //
+
+
+/*
+========================================================================
+Routine Description:
+    Allocate memory for adapter control block.
+
+Arguments:
+    pAd					Pointer to our adapter
+
+Return Value:
+	NDIS_STATUS_SUCCESS
+	NDIS_STATUS_FAILURE
+	NDIS_STATUS_RESOURCES
+
+Note:
+========================================================================
+*/
+NDIS_STATUS AdapterBlockAllocateMemory(
+	IN PVOID	handle,
+	OUT	PVOID	*ppAd)
+{
+#ifdef WORKQUEUE_BH
+	POS_COOKIE cookie;
+#endif // WORKQUEUE_BH //
+
+
+	*ppAd = (PVOID)vmalloc(sizeof(RTMP_ADAPTER)); //pci_alloc_consistent(pci_dev, sizeof(RTMP_ADAPTER), phy_addr);
+    
+	if (*ppAd) 
+	{
+		NdisZeroMemory(*ppAd, sizeof(RTMP_ADAPTER));
+		((PRTMP_ADAPTER)*ppAd)->OS_Cookie = handle;
+#ifdef WORKQUEUE_BH
+		cookie = (POS_COOKIE)(((PRTMP_ADAPTER)*ppAd)->OS_Cookie);
+		cookie->pAd_va = *ppAd;
+#endif // WORKQUEUE_BH //
+
+		return (NDIS_STATUS_SUCCESS);
+	} else {
+		return (NDIS_STATUS_FAILURE);
+	}
+}
+
+
+/* export utility function symbol list */
+#ifdef OS_ABL_SUPPORT
+
+EXPORT_SYMBOL(RTDebugLevel);
+
+EXPORT_SYMBOL(RtmpOSTaskNotifyToExit);
+
+EXPORT_SYMBOL(RTMPFreeNdisPacket);
+EXPORT_SYMBOL(AdapterBlockAllocateMemory);
+EXPORT_SYMBOL(RTMP_IndicateMediaState);
+
+EXPORT_SYMBOL(RTMP_SetPeriodicTimer);
+EXPORT_SYMBOL(RTMP_OS_Add_Timer);
+EXPORT_SYMBOL(RTMP_OS_Mod_Timer);
+EXPORT_SYMBOL(RTMP_OS_Del_Timer);
+EXPORT_SYMBOL(RTMP_OS_Init_Timer);
+
+EXPORT_SYMBOL(os_alloc_mem);
+EXPORT_SYMBOL(os_free_mem);
+
+EXPORT_SYMBOL(RTMPL2FrameTxAction);
+EXPORT_SYMBOL(ExpandPacket);
+EXPORT_SYMBOL(ClonePacket);
+EXPORT_SYMBOL(RTMP_AllocateFragPacketBuffer);
+EXPORT_SYMBOL(announce_802_3_packet);
+EXPORT_SYMBOL(Sniff2BytesFromNdisBuffer);
+EXPORT_SYMBOL(RtmpOSNetPktAlloc);
+EXPORT_SYMBOL(duplicate_pkt);
+EXPORT_SYMBOL(duplicate_pkt_with_TKIP_MIC);
+EXPORT_SYMBOL(DuplicatePacket);
+EXPORT_SYMBOL(wlan_802_11_to_802_3_packet);
+EXPORT_SYMBOL(RTMPAllocateNdisPacket);
+EXPORT_SYMBOL(update_os_packet_info);
+EXPORT_SYMBOL(RTMP_QueryPacketInfo);
+
+EXPORT_SYMBOL(RtmpOSNetDevCreate);
+EXPORT_SYMBOL(RtmpOSNetDevAddrSet);
+EXPORT_SYMBOL(RtmpOSNetDevClose);
+EXPORT_SYMBOL(RtmpOSNetDevAttach);
+EXPORT_SYMBOL(RtmpOSNetDevDetach);
+EXPORT_SYMBOL(RtmpOSNetDevFree);
+
+EXPORT_SYMBOL(RtmpOSFileOpen);
+EXPORT_SYMBOL(RtmpOSFSInfoChange);
+EXPORT_SYMBOL(RtmpOSFileWrite);
+EXPORT_SYMBOL(RtmpOSFileRead);
+EXPORT_SYMBOL(RtmpOSFileClose);
+EXPORT_SYMBOL(RtmpOSFileSeek);
+
+EXPORT_SYMBOL(RtmpOSTaskInit);
+EXPORT_SYMBOL(RtmpOSTaskAttach);
+EXPORT_SYMBOL(RtmpOSTaskCustomize);
+EXPORT_SYMBOL(RtmpOSTaskKill);
+
+EXPORT_SYMBOL(get_netdev_from_bssid);
+EXPORT_SYMBOL(hex_dump);
+EXPORT_SYMBOL(RTMPFreeAdapter);
+EXPORT_SYMBOL(RTMP_GetCurrentSystemTime);
+#ifdef SYSTEM_LOG_SUPPORT
+EXPORT_SYMBOL(RTMPSendWirelessEvent);
+#endif // SYSTEM_LOG_SUPPORT //
+EXPORT_SYMBOL(RTMPusecDelay);
+EXPORT_SYMBOL(RtmpOSWrielessEventSend);
+
+#ifdef CONFIG_AP_SUPPORT
+EXPORT_SYMBOL(duplicate_pkt_with_VLAN);
+EXPORT_SYMBOL(VLAN_8023_Header_Copy);
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+EXPORT_SYMBOL(ralinkrate);
+EXPORT_SYMBOL(RT_RateSize);
+EXPORT_SYMBOL(send_monitor_packets);
+#endif // CONFIG_STA_SUPPORT //
+
+#ifdef RTMP_MAC_PCI
+EXPORT_SYMBOL(RTMP_AllocateMgmtDescMemory);
+EXPORT_SYMBOL(RTMP_AllocateRxPacketBuffer);
+EXPORT_SYMBOL(RTMP_FreeDescMemory);
+EXPORT_SYMBOL(RTMP_AllocateTxDescMemory);
+EXPORT_SYMBOL(linux_pci_unmap_single);
+EXPORT_SYMBOL(RTMP_AllocateFirstTxBuffer);
+EXPORT_SYMBOL(linux_pci_map_single);
+EXPORT_SYMBOL(RTMP_AllocateRxDescMemory);
+EXPORT_SYMBOL(RTMP_FreeFirstTxBuffer);
+#ifdef CONFIG_STA_SUPPORT
+#ifdef PCIE_PS_SUPPORT
+EXPORT_SYMBOL(RTMPPCIeLinkCtrlValueRestore);
+EXPORT_SYMBOL(RTMPPCIeLinkCtrlSetting);
+#endif // PCIE_PS_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //
+#endif // RTMP_MAC_PCI //
+
+
+#ifdef RTMP_RBUS_SUPPORT
+EXPORT_SYMBOL(RtmpFlashRead);
+EXPORT_SYMBOL(RtmpFlashWrite);
+#endif // RTMP_RBUS_SUPPORT //
+
+//#ifdef CONFIG_AP_SUPPORT
+//#ifdef NEW_DFS
+//EXPORT_SYMBOL(schedule_dfs_task);
+//#endif // NEW_DFS //
+//#endif // CONFIG_AP_SUPPORT //
+
+#endif // OS_ABL_SUPPORT //

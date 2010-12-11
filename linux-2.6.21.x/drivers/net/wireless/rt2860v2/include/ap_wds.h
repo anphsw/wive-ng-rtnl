@@ -42,9 +42,9 @@ static inline BOOLEAN WDS_IF_UP_CHECK(
 		(ifidx >= MAX_WDS_ENTRY))
 		return FALSE;
 
-//	if (pAd->WdsTab.WdsEntry[ifidx].dev->flags & IFF_UP)
+//	if(RTMP_OS_NETDEV_STATE_RUNNING(pAd->WdsTab.WdsEntry[ifidx].dev))
 // Patch for wds ,when dirver call apmlmeperiod => APMlmeDynamicTxRateSwitching check if wds device ready
-if ((pAd->WdsTab.WdsEntry[ifidx].dev != NULL) && (pAd->WdsTab.WdsEntry[ifidx].dev->flags & IFF_UP))
+if ((pAd->WdsTab.WdsEntry[ifidx].dev != NULL) && (RTMP_OS_NETDEV_STATE_RUNNING(pAd->WdsTab.WdsEntry[ifidx].dev)))
 		return TRUE;
 
 	return FALSE;

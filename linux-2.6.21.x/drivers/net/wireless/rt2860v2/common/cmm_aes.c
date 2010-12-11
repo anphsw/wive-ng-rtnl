@@ -297,7 +297,7 @@ void construct_mic_header2(
 	mic_header2[6] = mpdu[22] & 0x0f;   /* SC */
 	mic_header2[7] = 0x00; /* mpdu[23]; */
 
-	if ((!qc_exists) && a4_exists)
+	if ((!qc_exists) & a4_exists)
 	{
 		for (i=0;i<6;i++) mic_header2[8+i] = mpdu[24+i];   /* A4 */
 
@@ -832,7 +832,8 @@ BOOLEAN RTMPSoftEncryptCCMP(
 	INOUT 	PUCHAR			pData,
 	IN 	UINT32			DataLen)
 {
-	PHEADER_802_11	pFrame;
+	UINT8			frame_type, frame_subtype;
+	UINT8			from_ds, to_ds;
 	UINT8 			a4_exists, qc_exists;
 	UINT8			aad_hdr[30];
 	UINT			aad_len = 0;
@@ -848,20 +849,24 @@ BOOLEAN RTMPSoftEncryptCCMP(
 	NdisZeroMemory(aad_hdr, 30);
 	NdisZeroMemory(nonce_hdr, 13);
 
-	/* pointer to 802.11 header */
-	pFrame = (PHEADER_802_11)pHdr;
+	/* Indicate type and subtype of Frame Control field */
+	frame_type = (((*pHdr) >> 2) & 0x03);
+	frame_subtype = (((*pHdr) >> 4) & 0x0f);	
 
-	/* decide if the Address 4 exist or QoS exist */
-	a4_exists = (pFrame->FC.FrDs & pFrame->FC.ToDs);
-	qc_exists = ((pFrame->FC.SubType == SUBTYPE_QDATA) || 
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFACK) ||
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFPOLL) ||
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFACK_CFPOLL));
+	/* Indicate the fromDS and ToDS */
+	from_ds = ((*(pHdr + 1)) & 0x2) >> 1;
+	to_ds = ((*(pHdr + 1)) & 0x1);
 			
+	/* decide if the Address 4 exist or QoS exist */
+	a4_exists = (from_ds & to_ds);
+	qc_exists = ((frame_subtype == SUBTYPE_QDATA) || 
+				 (frame_subtype == SUBTYPE_QDATA_CFACK) ||
+				 (frame_subtype == SUBTYPE_QDATA_CFPOLL) ||
+				 (frame_subtype == SUBTYPE_QDATA_CFACK_CFPOLL));
 
 	/* Construct AAD header */
 	RTMPConstructCCMPAAD(pHdr, 
-						 (pFrame->FC.Type == BTYPE_DATA), 
+						 (frame_type == BTYPE_DATA), 
 						 a4_exists,
 						 qc_exists,
 						 aad_hdr, 
@@ -871,7 +876,7 @@ BOOLEAN RTMPSoftEncryptCCMP(
 	RTMPConstructCCMPNonce(pHdr, 
 						   a4_exists,
 						   qc_exists,
-						   (pFrame->FC.Type == BTYPE_MGMT), 
+						   (frame_type == BTYPE_MGMT), 
 						   pIV, 
 						   nonce_hdr,
 						   &nonce_hdr_len);
@@ -914,7 +919,8 @@ BOOLEAN RTMPSoftDecryptCCMP(
 	INOUT 	PUCHAR			pData,
 	INOUT 	UINT16			*DataLen)
 {
-	PHEADER_802_11	pFrame;
+	UINT8			frame_type, frame_subtype;
+	UINT8			from_ds, to_ds;
 	UINT8 			a4_exists, qc_exists;
 	UINT8			aad_hdr[30];
 	UINT			aad_len = 0;
@@ -940,15 +946,20 @@ BOOLEAN RTMPSoftDecryptCCMP(
 	NdisZeroMemory(aad_hdr, 30);
 	NdisZeroMemory(nonce_hdr, 13);
 
-	/* pointer to 802.11 header */
-	pFrame = (PHEADER_802_11)pHdr;
+	/* Indicate type and subtype of Frame Control field */
+	frame_type = (((*pHdr) >> 2) & 0x03);
+	frame_subtype = (((*pHdr) >> 4) & 0x0f);	
+
+	/* Indicate the fromDS and ToDS */
+	from_ds = ((*(pHdr + 1)) & 0x2) >> 1;
+	to_ds = ((*(pHdr + 1)) & 0x1);
 
 	/* decide if the Address 4 exist or QoS exist */
-	a4_exists = (pFrame->FC.FrDs & pFrame->FC.ToDs);
-	qc_exists = ((pFrame->FC.SubType == SUBTYPE_QDATA) || 
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFACK) ||
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFPOLL) ||
-				 (pFrame->FC.SubType == SUBTYPE_QDATA_CFACK_CFPOLL));
+	a4_exists = (from_ds & to_ds);
+	qc_exists = ((frame_subtype == SUBTYPE_QDATA) || 
+				 (frame_subtype == SUBTYPE_QDATA_CFACK) ||
+				 (frame_subtype == SUBTYPE_QDATA_CFPOLL) ||
+				 (frame_subtype == SUBTYPE_QDATA_CFACK_CFPOLL));	
 			
 	/* Extract PN and from CCMP header */
 	pn[0] =	pData[0];
@@ -964,7 +975,7 @@ BOOLEAN RTMPSoftDecryptCCMP(
 		
 	/* Construct AAD header */
 	RTMPConstructCCMPAAD(pHdr, 
-						 (pFrame->FC.Type == BTYPE_DATA), 
+						 (frame_type == BTYPE_DATA), 
 						 a4_exists,
 						 qc_exists,
 						 aad_hdr, 
@@ -974,7 +985,7 @@ BOOLEAN RTMPSoftDecryptCCMP(
 	RTMPConstructCCMPNonce(pHdr, 
 						   a4_exists,
 						   qc_exists,
-						   (pFrame->FC.Type == BTYPE_MGMT), 
+						   (frame_type == BTYPE_MGMT), 
 						   pn, 
 						   nonce_hdr,
 						   &nonce_hdr_len);

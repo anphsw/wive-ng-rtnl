@@ -218,6 +218,7 @@ BOOLEAN ACMP_WME_TSPEC_ElementCheck(
 		(pElmTspec->OUI_SubType != ACM_WME_OUI_SUBTYPE_TSPEC) ||
 		(pElmTspec->Version != ACM_WME_OUI_VERSION))
 	{
+		/* not TSPEC element */
 		return FALSE;
 	} /* End of if */
 
@@ -597,7 +598,7 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 	PPS = 1;
 	NormSize = pTspec->NominalMsduSize;
 
-	if (pTspec->NominalMsduSize > 0)
+	if (NormSize > 0)
 	{
 		NormSize = NormSize & 0x7FFF;
 		PPS = ((pTspec->MeanDataRate>>3)/NormSize) + 1;
@@ -617,8 +618,9 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 		if (pNewStream->PhyModeMin >= ACMR_PHY_HT)
 		{
 			/* for HT minimum physical rate, includes RTS/CTS time */
+			/* TODO: for AMSDU, if no legacy station connects, no RTS/CTS */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("acm_msg> MCS = %d, 2040MHz Flag = %d!\n",
+						("acm_msg> minimal MCS = %d, 20/40MHz Flag = %d!\n",
 						pNewStream->McsMin, ACMR_IS_2040_STA(pCdb)));
 
 			MpduExgTime = ACM_TX_TimeCalHT(
@@ -632,7 +634,7 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 										0, /* has ACK */
 										0, /* no AMPDU */
 										TxopLimit,
-										NULL, NULL, NULL, NULL);
+										NULL, NULL, NULL, NULL, NULL);
 		}
 		else
 #endif // ACM_CC_FUNC_11N //
@@ -649,8 +651,10 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 			} /* End of for */
 
 			if (IdPhyRateNum == ACM_RATE_MAX_NUM)
-				RateIndex = ACM_RATE_1M; /* use default 1M rate */
-			/* End of if */
+			{
+				/* should not be here so using default 1M rate */
+				RateIndex = ACM_RATE_1M;
+			} /* End of if */
 
 			/* get CTS-self & B/G mode flag */
 			FlgIsCtsEnable = 0; /* no CTS-self function */
@@ -677,10 +681,6 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 				FlgIsRtsEnable = 0;
 			/* End of if */
 
-			/*
-				EX: data size = 208B, rate = 54Mbps,
-				MpduExgTime = 104us in A band.
-			*/
 			MpduExgTime = ACM_TX_TimeCal(
 										pAd,
 										pCdb,
@@ -704,8 +704,10 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 
 		if (SBA_Dec > 0)
 		{
-			/* avoid MediumTime * SBA_Dec > 0xFFFFFFFF, because MediumTime is
-				unsigned */
+			/*
+				Avoid MediumTime * SBA_Dec > 0xFFFFFFFF because MediumTime
+				is only unsigned (32-bit).
+			*/
 			MediumTimeTemp = 0xFFFFFFFF/MediumTime;
 			if (SBA_Dec <= MediumTimeTemp)
 			{
@@ -1210,8 +1212,8 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 		} /* End of switch */
 
 		/* check next element */
-		pElm += (2+ElmLen);
-		BodyLen -= (2+ElmLen);
+		pElm += (2+ElmLen); /* 2: Element ID & Element Length */
+		BodyLen -= (2+ElmLen); /* 2: Element ID & Element Length */
 	} /* End of while */
 
 	return ACM_RTN_OK;
@@ -1359,7 +1361,7 @@ STATIC UINT32 ACM_WME_ActionFrameBodyMake(
 	if (Action != ACM_ACTION_WME_TEAR_DOWN)
 		pFrameBody->DialogToken = pStream->DialogToken;
 	else
-		pFrameBody->DialogToken = 0;
+		pFrameBody->DialogToken = 0; /* always 0 for DELTS */
 	/* End of if */
 
 	pFrameBody->StatusCode = StatusCode;
@@ -1452,8 +1454,10 @@ STATIC UINT32 ACM_WME_ActionFrameBodyMake(
 	/* TCLASS Processing element */
 	if (pStream->pTclas[0] != NULL)
 	{
-		/* TCLAS PROCESSING element exists only when at least one TCLAS element
-			exists */
+		/*
+			TCLAS PROCESSING element exists only when at least one TCLAS
+			element exists.
+		*/
 		if (pStream->TclasProcessing != ACM_TCLAS_PROCESSING_NOT_EXIST)
 		{
 			pElmTspecProcessing = (ACM_ELM_WME_TCLAS_PROCESSING *)pElmTclas;
@@ -1618,6 +1622,7 @@ STATIC VOID ACM_WME_ActionHandle(
 			break;
 
 		default:
+			/* should not be here */
 			break;
 	} /* End of switch */
 

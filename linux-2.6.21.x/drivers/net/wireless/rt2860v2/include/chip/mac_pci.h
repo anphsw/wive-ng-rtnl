@@ -64,7 +64,7 @@
 // TX descriptor format, Tx	ring, Mgmt Ring
 //
 #ifdef RT_BIG_ENDIAN
-typedef	struct	PACKED _TXD_STRUC {
+typedef	struct	GNU_PACKED _TXD_STRUC {
 	// Word 0
 	UINT32		SDPtr0;
 	// Word 1
@@ -86,7 +86,7 @@ typedef	struct	PACKED _TXD_STRUC {
 	UINT32		rsv2:24;
 }	TXD_STRUC, *PTXD_STRUC;
 #else
-typedef	struct	PACKED _TXD_STRUC {
+typedef	struct	GNU_PACKED _TXD_STRUC {
 	// Word	0
 	UINT32		SDPtr0;
 	// Word	1
@@ -114,7 +114,7 @@ typedef	struct	PACKED _TXD_STRUC {
 // Rx descriptor format, Rx Ring
 //
 #ifdef RT_BIG_ENDIAN
-typedef	struct	PACKED _RXD_STRUC{
+typedef	struct	GNU_PACKED _RXD_STRUC{
 	// Word 0
 	UINT32		SDP0;
 	// Word 1
@@ -148,7 +148,7 @@ typedef	struct	PACKED _RXD_STRUC{
 	
 }	RXD_STRUC, *PRXD_STRUC, RT28XX_RXD_STRUC, *PRT28XX_RXD_STRUC;
 #else
-typedef	struct	PACKED _RXD_STRUC{
+typedef	struct	GNU_PACKED _RXD_STRUC{
 	// Word	0
 	UINT32		SDP0;
 	// Word	1
@@ -182,7 +182,7 @@ typedef	struct	PACKED _RXD_STRUC{
 }	RXD_STRUC, *PRXD_STRUC, RT28XX_RXD_STRUC, *PRT28XX_RXD_STRUC;
 #endif
 
-#ifdef BIG_ENDIAN
+#ifdef RT_BIG_ENDIAN
 typedef union _TX_ATTENUATION_CTRL_STRUC
 {
 	struct
@@ -218,25 +218,27 @@ typedef union _TX_ATTENUATION_CTRL_STRUC {
 
 
 /* ----------------- Frimware Related MACRO ----------------- */
-#define RTMP_WRITE_FIRMWARE(_pAd, _pFwImage, _FwLen)			\
-	do{								\
-		ULONG	_i, _firm;					\
+#define RTMP_WRITE_FIRMWARE(_pAd, _pFwImage, _FwLen)		\
+	do{														\
+		ULONG	_i, _firm;									\
+		/* protect 8051 we will do firmware upload */		\
 		RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, 0x10000);		\
-									\
-		for(_i=0; _i<_FwLen; _i+=4)				\
-		{							\
-			_firm = _pFwImage[_i] +				\
-			   (_pFwImage[_i+3] << 24) +			\
-			   (_pFwImage[_i+2] << 16) +			\
-			   (_pFwImage[_i+1] << 8);			\
+															\
+		for(_i=0; _i<_FwLen; _i+=4)						\
+		{													\
+			_firm = _pFwImage[_i] +							\
+			   (_pFwImage[_i+3] << 24) +					\
+			   (_pFwImage[_i+2] << 16) +					\
+			   (_pFwImage[_i+1] << 8);						\
 			RTMP_IO_WRITE32(_pAd, FIRMWARE_IMAGE_BASE + _i, _firm);	\
-		}							\
+		}													\
+		/* do 8051 firmware reset */						\
 		RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, 0x00000);		\
 		RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, 0x00001);		\
-									\
-		/* initialize BBP R/W access agent */			\
-		RTMP_IO_WRITE32(_pAd, H2M_BBP_AGENT, 0);		\
-		RTMP_IO_WRITE32(_pAd, H2M_MAILBOX_CSR, 0);		\
+															\
+		/* initialize BBP R/W access agent */				\
+		RTMP_IO_WRITE32(_pAd, H2M_BBP_AGENT, 0);			\
+		RTMP_IO_WRITE32(_pAd, H2M_MAILBOX_CSR, 0);			\
 	}while(0)
 
 

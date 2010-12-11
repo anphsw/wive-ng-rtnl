@@ -18,6 +18,512 @@
 #include	"rt_config.h"
 
 
+#ifdef RESOURCE_PRE_ALLOC
+VOID RTMPResetTxRxRingMemory(
+	IN RTMP_ADAPTER * pAd)
+{
+	int index, j;
+	PRTMP_TX_RING pTxRing;
+	PTXD_STRUC	  pTxD;
+	PNDIS_PACKET  pPacket;
+	unsigned int  IrqFlags;
+
+
+	// Free TxSwQueue Packet
+	for (index=0; index <NUM_OF_TX_RING; index++)
+	{
+		PQUEUE_ENTRY pEntry;
+		PNDIS_PACKET pPacket;
+		PQUEUE_HEADER   pQueue;
+
+		RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
+		pQueue = &pAd->TxSwQueue[index];
+		while (pQueue->Head)
+		{
+			pEntry = RemoveHeadQueue(pQueue);
+			pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
+			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+		}
+		RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
+	}
+
+
+	// Free Tx Ring Packet
+	for (index=0;index< NUM_OF_TX_RING;index++)
+	{
+		pTxRing = &pAd->TxRing[index];
+		
+		for (j=0; j< TX_RING_SIZE; j++)
+		{	
+			pTxD = (PTXD_STRUC) (pTxRing->Cell[j].AllocVa);
+			pPacket = pTxRing->Cell[j].pNdisPacket;
+
+			if (pPacket)
+			{
+				PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr0, pTxD->SDLen0, PCI_DMA_TODEVICE);
+				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
+			}		
+			//Always assign pNdisPacket as NULL after clear
+			pTxRing->Cell[j].pNdisPacket = NULL;
+					
+			pPacket = pTxRing->Cell[j].pNextNdisPacket;
+			
+			if (pPacket)
+			{
+				PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr1, pTxD->SDLen1, PCI_DMA_TODEVICE);
+				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_SUCCESS);
+			}
+			//Always assign pNextNdisPacket as NULL after clear
+			pTxRing->Cell[pTxRing->TxSwFreeIdx].pNextNdisPacket = NULL;
+
+		}
+	}	
+
+	
+	for (index = RX_RING_SIZE - 1 ; index >= 0; index--)
+	{
+		if ((pAd->RxRing.Cell[index].DmaBuf.AllocVa) && (pAd->RxRing.Cell[index].pNdisPacket))
+		{
+			PCI_UNMAP_SINGLE(pAd, pAd->RxRing.Cell[index].DmaBuf.AllocPa, pAd->RxRing.Cell[index].DmaBuf.AllocSize, PCI_DMA_FROMDEVICE);
+			RELEASE_NDIS_PACKET(pAd, pAd->RxRing.Cell[index].pNdisPacket, NDIS_STATUS_SUCCESS);
+		}
+	}
+	NdisZeroMemory(pAd->RxRing.Cell, RX_RING_SIZE * sizeof(RTMP_DMACB));
+
+	if (pAd->FragFrame.pFragPacket)
+	{
+		RELEASE_NDIS_PACKET(pAd, pAd->FragFrame.pFragPacket, NDIS_STATUS_SUCCESS);
+		pAd->FragFrame.pFragPacket = NULL;
+	}
+}
+
+
+VOID RTMPFreeTxRxRingMemory(
+    IN  PRTMP_ADAPTER   pAd)
+{
+	int num;
+	
+	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPFreeTxRxRingMemory\n"));
+
+
+	// Free RxDesc buffer
+	if (pAd->RxDescRing.AllocVa)
+	{
+		RTMP_FreeDescMemory(pAd, 
+								pAd->RxDescRing.AllocSize, 
+								pAd->RxDescRing.AllocVa, 
+								pAd->RxDescRing.AllocPa);
+	}
+	NdisZeroMemory(&pAd->RxDescRing, sizeof(RTMP_DMABUF));
+
+	// Free MgmtDesc buffer
+	if (pAd->MgmtDescRing.AllocVa)
+	{
+		RTMP_FreeDescMemory(pAd, 
+								pAd->MgmtDescRing.AllocSize, 
+								pAd->MgmtDescRing.AllocVa, 
+								pAd->MgmtDescRing.AllocPa);
+	}
+	NdisZeroMemory(&pAd->MgmtDescRing, sizeof(RTMP_DMABUF));
+
+	// Free 1st TxBufSpace and TxDesc buffer
+	for (num = 0; num < NUM_OF_TX_RING; num++)
+	{
+		if (pAd->TxBufSpace[num].AllocVa)
+		{
+			RTMP_FreeFirstTxBuffer(pAd, 
+									pAd->TxBufSpace[num].AllocSize, 
+									FALSE, pAd->TxBufSpace[num].AllocVa, 
+									pAd->TxBufSpace[num].AllocPa);
+		}
+		NdisZeroMemory(&pAd->TxBufSpace[num], sizeof(RTMP_DMABUF));
+
+		if (pAd->TxDescRing[num].AllocVa)
+		{
+			RTMP_FreeDescMemory(pAd, 
+									pAd->TxDescRing[num].AllocSize, 
+									pAd->TxDescRing[num].AllocVa, 
+									pAd->TxDescRing[num].AllocPa);
+		}
+		NdisZeroMemory(&pAd->TxDescRing[num], sizeof(RTMP_DMABUF));
+	}
+
+	DBGPRINT(RT_DEBUG_TRACE, ("<-- RTMPFreeTxRxRingMemory\n"));
+}
+
+
+NDIS_STATUS RTMPInitTxRxRingMemory
+	(IN RTMP_ADAPTER *pAd)
+{
+	INT				num, index;
+	ULONG			RingBasePaHigh;
+	ULONG			RingBasePaLow;
+	PVOID			RingBaseVa;
+	PRTMP_TX_RING	pTxRing;
+	PRTMP_DMABUF	pDmaBuf;
+	PNDIS_PACKET	pPacket;
+	PTXD_STRUC		pTxD;
+	PRXD_STRUC		pRxD;
+	ULONG			ErrorValue = 0;
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+
+
+	// Init the CmdQ and CmdQLock
+	NdisAllocateSpinLock(&pAd->CmdQLock);	
+	NdisAcquireSpinLock(&pAd->CmdQLock);
+	RTInitializeCmdQ(&pAd->CmdQ);
+	NdisReleaseSpinLock(&pAd->CmdQLock);
+
+
+	//
+	// Initialize All Tx Ring Descriptors and associated buffer memory
+	// (5 TX rings = 4 ACs + 1 HCCA)
+	for (num=0; num<NUM_OF_TX_RING; num++)
+	{
+		ULONG  BufBasePaHigh;
+		ULONG  BufBasePaLow;
+		PVOID  BufBaseVa;
+		
+		// memory zero the  Tx ring descriptor's memory 
+		NdisZeroMemory(pAd->TxDescRing[num].AllocVa, pAd->TxDescRing[num].AllocSize);
+		// Save PA & VA for further operation
+		RingBasePaHigh = RTMP_GetPhysicalAddressHigh(pAd->TxDescRing[num].AllocPa);
+		RingBasePaLow  = RTMP_GetPhysicalAddressLow (pAd->TxDescRing[num].AllocPa);
+		RingBaseVa     = pAd->TxDescRing[num].AllocVa;
+
+		// Zero init all 1st TXBuf's memory for this TxRing
+		NdisZeroMemory(pAd->TxBufSpace[num].AllocVa, pAd->TxBufSpace[num].AllocSize);
+		// Save PA & VA for further operation
+		BufBasePaHigh = RTMP_GetPhysicalAddressHigh(pAd->TxBufSpace[num].AllocPa);
+		BufBasePaLow  = RTMP_GetPhysicalAddressLow (pAd->TxBufSpace[num].AllocPa);
+		BufBaseVa     = pAd->TxBufSpace[num].AllocVa;
+
+		// linking Tx Ring Descriptor and associated buffer memory
+		pTxRing = &pAd->TxRing[num];
+		for (index = 0; index < TX_RING_SIZE; index++)
+		{
+			pTxRing->Cell[index].pNdisPacket = NULL;
+			pTxRing->Cell[index].pNextNdisPacket = NULL;
+			// Init Tx Ring Size, Va, Pa variables
+			pTxRing->Cell[index].AllocSize = TXD_SIZE;
+			pTxRing->Cell[index].AllocVa = RingBaseVa;
+			RTMP_SetPhysicalAddressHigh(pTxRing->Cell[index].AllocPa, RingBasePaHigh);
+			RTMP_SetPhysicalAddressLow (pTxRing->Cell[index].AllocPa, RingBasePaLow);
+
+			// Setup Tx Buffer size & address. only 802.11 header will store in this space
+			pDmaBuf = &pTxRing->Cell[index].DmaBuf;
+			pDmaBuf->AllocSize = TX_DMA_1ST_BUFFER_SIZE;
+			pDmaBuf->AllocVa = BufBaseVa;
+			RTMP_SetPhysicalAddressHigh(pDmaBuf->AllocPa, BufBasePaHigh);
+			RTMP_SetPhysicalAddressLow(pDmaBuf->AllocPa, BufBasePaLow);
+
+			// link the pre-allocated TxBuf to TXD
+			pTxD = (PTXD_STRUC) pTxRing->Cell[index].AllocVa;
+			pTxD->SDPtr0 = BufBasePaLow;
+			// advance to next ring descriptor address
+			pTxD->DMADONE = 1;
+#ifdef RT_BIG_ENDIAN
+			RTMPDescriptorEndianChange((PUCHAR)pTxD, TYPE_TXD);
+#endif
+			RingBasePaLow += TXD_SIZE;
+			RingBaseVa = (PUCHAR) RingBaseVa + TXD_SIZE;
+
+			// advance to next TxBuf address
+			BufBasePaLow += TX_DMA_1ST_BUFFER_SIZE;
+			BufBaseVa = (PUCHAR) BufBaseVa + TX_DMA_1ST_BUFFER_SIZE;
+		}
+		DBGPRINT(RT_DEBUG_TRACE, ("TxRing[%d]: total %d entry initialized\n", num, index));
+	}
+
+
+	//
+	// Initialize MGMT Ring and associated buffer memory
+	//
+	RingBasePaHigh = RTMP_GetPhysicalAddressHigh(pAd->MgmtDescRing.AllocPa);
+	RingBasePaLow  = RTMP_GetPhysicalAddressLow (pAd->MgmtDescRing.AllocPa);
+	RingBaseVa     = pAd->MgmtDescRing.AllocVa;
+	NdisZeroMemory(pAd->MgmtDescRing.AllocVa, pAd->MgmtDescRing.AllocSize);
+	for (index = 0; index < MGMT_RING_SIZE; index++)
+	{
+		pAd->MgmtRing.Cell[index].pNdisPacket = NULL;
+		pAd->MgmtRing.Cell[index].pNextNdisPacket = NULL;
+		// Init MGMT Ring Size, Va, Pa variables
+		pAd->MgmtRing.Cell[index].AllocSize = TXD_SIZE;
+		pAd->MgmtRing.Cell[index].AllocVa = RingBaseVa;
+		RTMP_SetPhysicalAddressHigh(pAd->MgmtRing.Cell[index].AllocPa, RingBasePaHigh);
+		RTMP_SetPhysicalAddressLow (pAd->MgmtRing.Cell[index].AllocPa, RingBasePaLow);
+
+		// Offset to next ring descriptor address
+		RingBasePaLow += TXD_SIZE;
+		RingBaseVa = (PUCHAR) RingBaseVa + TXD_SIZE;
+
+		// link the pre-allocated TxBuf to TXD
+		pTxD = (PTXD_STRUC) pAd->MgmtRing.Cell[index].AllocVa;
+		pTxD->DMADONE = 1;
+
+#ifdef RT_BIG_ENDIAN
+		RTMPDescriptorEndianChange((PUCHAR)pTxD, TYPE_TXD);
+#endif
+		// no pre-allocated buffer required in MgmtRing for scatter-gather case
+	}
+	
+
+	//
+	// Initialize Rx Ring and associated buffer memory
+	//
+	NdisZeroMemory(pAd->RxDescRing.AllocVa, pAd->RxDescRing.AllocSize);
+	DBGPRINT(RT_DEBUG_OFF,  ("RX DESC %p  size = %ld\n", 
+					pAd->RxDescRing.AllocVa, pAd->RxDescRing.AllocSize));
+
+	// Save PA & VA for further operation
+	RingBasePaHigh = RTMP_GetPhysicalAddressHigh(pAd->RxDescRing.AllocPa);
+	RingBasePaLow  = RTMP_GetPhysicalAddressLow (pAd->RxDescRing.AllocPa);
+	RingBaseVa     = pAd->RxDescRing.AllocVa;
+
+	// Linking Rx Ring and associated buffer memory
+	for (index = 0; index < RX_RING_SIZE; index++)
+	{
+		// Init RX Ring Size, Va, Pa variables
+		pAd->RxRing.Cell[index].AllocSize = RXD_SIZE;
+		pAd->RxRing.Cell[index].AllocVa = RingBaseVa;
+		RTMP_SetPhysicalAddressHigh(pAd->RxRing.Cell[index].AllocPa, RingBasePaHigh);
+		RTMP_SetPhysicalAddressLow (pAd->RxRing.Cell[index].AllocPa, RingBasePaLow);;
+
+		// Offset to next ring descriptor address
+		RingBasePaLow += RXD_SIZE;
+		RingBaseVa = (PUCHAR) RingBaseVa + RXD_SIZE;
+
+		// Setup Rx associated Buffer size & allocate share memory
+		pDmaBuf = &pAd->RxRing.Cell[index].DmaBuf;
+		pDmaBuf->AllocSize = RX_BUFFER_AGGRESIZE;
+		pPacket = RTMP_AllocateRxPacketBuffer(
+			pAd,
+			pDmaBuf->AllocSize,
+			FALSE,
+			&pDmaBuf->AllocVa,
+			&pDmaBuf->AllocPa);
+		
+		/* keep allocated rx packet */
+		pAd->RxRing.Cell[index].pNdisPacket = pPacket;
+
+		// Error handling
+		if (pDmaBuf->AllocVa == NULL)
+		{
+			ErrorValue = ERRLOG_OUT_OF_SHARED_MEMORY;
+			DBGPRINT_ERR(("Failed to allocate RxRing's 1st buffer\n"));
+			Status = NDIS_STATUS_RESOURCES;
+			break;
+		}
+
+		// Zero init this memory block
+		NdisZeroMemory(pDmaBuf->AllocVa, pDmaBuf->AllocSize);
+
+		// Write RxD buffer address & allocated buffer length
+		pRxD = (PRXD_STRUC) pAd->RxRing.Cell[index].AllocVa;
+		pRxD->SDP0 = RTMP_GetPhysicalAddressLow(pDmaBuf->AllocPa);
+		pRxD->DDONE = 0;
+
+#ifdef RT_BIG_ENDIAN
+		RTMPDescriptorEndianChange((PUCHAR)pRxD, TYPE_RXD);
+#endif
+	}
+
+
+	NdisZeroMemory(&pAd->FragFrame, sizeof(FRAGMENT_FRAME));
+	pAd->FragFrame.pFragPacket =  RTMP_AllocateFragPacketBuffer(pAd, RX_BUFFER_NORMSIZE);
+
+	if (pAd->FragFrame.pFragPacket == NULL)
+	{
+		Status = NDIS_STATUS_RESOURCES;
+	}
+
+
+	// Following code segment get from original func:NICInitTxRxRingAndBacklogQueue(), now should integrate it to here.
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("--> NICInitTxRxRingAndBacklogQueue\n"));
+
+/*	
+		// Disable DMA.
+		RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);
+		GloCfg.word &= 0xff0;
+		GloCfg.field.EnTXWriteBackDDONE =1;
+		RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);
+*/
+
+		// Initialize all transmit related software queues
+		for(index = 0; index < NUM_OF_TX_RING; index++)
+		{
+			InitializeQueueHeader(&pAd->TxSwQueue[index]);
+			// Init TX rings index pointer
+			pAd->TxRing[index].TxSwFreeIdx = 0;
+			pAd->TxRing[index].TxCpuIdx = 0;
+			//RTMP_IO_WRITE32(pAd, (TX_CTX_IDX0 + i * 0x10) ,  pAd->TxRing[i].TX_CTX_IDX);
+		}
+	
+		// Init RX Ring index pointer
+		pAd->RxRing.RxSwReadIdx = 0;
+		pAd->RxRing.RxCpuIdx = RX_RING_SIZE - 1;
+		//RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RX_CRX_IDX0);
+
+		
+		// init MGMT ring index pointer
+		pAd->MgmtRing.TxSwFreeIdx = 0;
+		pAd->MgmtRing.TxCpuIdx = 0;
+
+		pAd->PrivateInfo.TxRingFullCnt = 0;
+		
+		DBGPRINT(RT_DEBUG_TRACE, ("<-- NICInitTxRxRingAndBacklogQueue\n"));
+	}
+	
+	return Status;
+	
+}
+
+
+/*
+	========================================================================
+	
+	Routine Description:
+		Allocate DMA memory blocks for send, receive
+
+	Arguments:
+		Adapter		Pointer to our adapter
+
+	Return Value:
+		NDIS_STATUS_SUCCESS
+		NDIS_STATUS_FAILURE
+		NDIS_STATUS_RESOURCES
+
+	IRQL = PASSIVE_LEVEL
+
+	Note:
+	
+	========================================================================
+*/
+NDIS_STATUS	RTMPAllocTxRxRingMemory(
+	IN	PRTMP_ADAPTER	pAd)
+{
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+#ifdef DBG
+	INT			index=0;
+#endif
+	INT			num=0;
+	ULONG			ErrorValue = 0;
+
+	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPAllocTxRxRingMemory\n"));
+	do
+	{
+		//
+		// Allocate all ring descriptors, include TxD, RxD, MgmtD.
+		// Although each size is different, to prevent cacheline and alignment
+		// issue, I intentional set them all to 64 bytes.
+		//
+		for (num=0; num<NUM_OF_TX_RING; num++)
+		{			
+			// 
+			// Allocate Tx ring descriptor's memory (5 TX rings = 4 ACs + 1 HCCA)
+			//
+			pAd->TxDescRing[num].AllocSize = TX_RING_SIZE * TXD_SIZE;
+			RTMP_AllocateTxDescMemory(
+				pAd,
+				num,
+				pAd->TxDescRing[num].AllocSize,
+				FALSE,
+				&pAd->TxDescRing[num].AllocVa,
+				&pAd->TxDescRing[num].AllocPa);
+
+			if (pAd->TxDescRing[num].AllocVa == NULL)
+			{
+				ErrorValue = ERRLOG_OUT_OF_SHARED_MEMORY;
+				DBGPRINT_ERR(("Failed to allocate a big buffer\n"));
+				Status = NDIS_STATUS_RESOURCES;
+				break;
+			}
+
+			// 
+			// Allocate all 1st TXBuf's memory for this TxRing
+			//
+			pAd->TxBufSpace[num].AllocSize = TX_RING_SIZE * TX_DMA_1ST_BUFFER_SIZE;
+			RTMP_AllocateFirstTxBuffer(
+				pAd,
+				num,
+				pAd->TxBufSpace[num].AllocSize,
+				FALSE,
+				&pAd->TxBufSpace[num].AllocVa,
+				&pAd->TxBufSpace[num].AllocPa);
+
+			if (pAd->TxBufSpace[num].AllocVa == NULL)
+			{
+				ErrorValue = ERRLOG_OUT_OF_SHARED_MEMORY;
+				DBGPRINT_ERR(("Failed to allocate a big buffer\n"));
+				Status = NDIS_STATUS_RESOURCES;
+				break;
+			}
+
+			DBGPRINT(RT_DEBUG_TRACE, ("TxRing[%d]: total %d entry allocated\n", num, index));
+		}
+		if (Status == NDIS_STATUS_RESOURCES)
+			break;
+
+		//
+		// Allocate MGMT ring descriptor's memory except Tx ring which allocated eariler
+		//
+		pAd->MgmtDescRing.AllocSize = MGMT_RING_SIZE * TXD_SIZE;
+		RTMP_AllocateMgmtDescMemory(
+			pAd,
+			pAd->MgmtDescRing.AllocSize,
+			FALSE,
+			&pAd->MgmtDescRing.AllocVa,
+			&pAd->MgmtDescRing.AllocPa);
+
+		if (pAd->MgmtDescRing.AllocVa == NULL)
+		{
+			ErrorValue = ERRLOG_OUT_OF_SHARED_MEMORY;
+			DBGPRINT_ERR(("Failed to allocate a big buffer\n"));
+			Status = NDIS_STATUS_RESOURCES;
+			break;
+		}
+		DBGPRINT(RT_DEBUG_TRACE, ("MGMT Ring: total %d entry allocated\n", index));
+
+
+		//
+		// Allocate RX ring descriptor's memory except Tx ring which allocated eariler
+		//
+		pAd->RxDescRing.AllocSize = RX_RING_SIZE * RXD_SIZE;
+		RTMP_AllocateRxDescMemory(
+			pAd,
+			pAd->RxDescRing.AllocSize,
+			FALSE,
+			&pAd->RxDescRing.AllocVa,
+			&pAd->RxDescRing.AllocPa);
+
+		if (pAd->RxDescRing.AllocVa == NULL)
+		{
+			ErrorValue = ERRLOG_OUT_OF_SHARED_MEMORY;
+			DBGPRINT_ERR(("Failed to allocate a big buffer\n"));
+			Status = NDIS_STATUS_RESOURCES;
+			break;
+		}
+		DBGPRINT(RT_DEBUG_TRACE, ("Rx Ring: total %d entry allocated\n", index));
+
+	}	while (FALSE);
+
+
+	if (Status != NDIS_STATUS_SUCCESS)
+	{
+		// Log error inforamtion
+		NdisWriteErrorLogEntry(
+			pAd->AdapterHandle,
+			NDIS_ERROR_CODE_OUT_OF_RESOURCES,
+			1,
+			ErrorValue);
+	}
+
+	DBGPRINT_S(Status, ("<-- RTMPAllocTxRxRingMemory, Status=%x\n", Status));
+	return Status;
+}
+
+#else
 /*
 	========================================================================
 	
@@ -376,157 +882,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 
 
 
-/*
-	========================================================================
-	
-	Routine Description:
-		Reset NIC Asics. Call after rest DMA. So reset TX_CTX_IDX to zero.
-
-	Arguments:
-		Adapter						Pointer to our adapter
-
-	Return Value:
-		None
-
-	IRQL = PASSIVE_LEVEL
-	IRQL = DISPATCH_LEVEL
-	
-	Note:
-		Reset NIC to initial state AS IS system boot up time.
-		
-	========================================================================
-*/
-VOID	RTMPRingCleanUp(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	UCHAR			RingType)
-{
-	PTXD_STRUC		pTxD;
-	PRXD_STRUC		pRxD;
-	PQUEUE_ENTRY	pEntry;
-	PNDIS_PACKET	pPacket;
-	int				i;
-	PRTMP_TX_RING	pTxRing;
-	unsigned long	IrqFlags;
-	//UINT32			RxSwReadIdx;
-
-
-	DBGPRINT(RT_DEBUG_TRACE,("RTMPRingCleanUp(RingIdx=%d, Pending-NDIS=%ld)\n", RingType, pAd->RalinkCounters.PendingNdisPacketCount));
-	switch (RingType)
-	{
-		case QID_AC_BK:
-		case QID_AC_BE:
-		case QID_AC_VI:
-		case QID_AC_VO:
-		case QID_HCCA:
-			
-			pTxRing = &pAd->TxRing[RingType];
-			
-			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-			// We have to clean all descriptors in case some error happened with reset
-			for (i=0; i<TX_RING_SIZE; i++) // We have to scan all TX ring
-			{
-				pTxD  = (PTXD_STRUC) pTxRing->Cell[i].AllocVa;
-				if (!pTxD)
-				    return;
-
-				pPacket = (PNDIS_PACKET) pTxRing->Cell[i].pNdisPacket;
-				// release scatter-and-gather NDIS_PACKET
-				if (pPacket)
-				{
-					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-					pTxRing->Cell[i].pNdisPacket = NULL;
-				}
-
-				pPacket = (PNDIS_PACKET) pTxRing->Cell[i].pNextNdisPacket;
-				// release scatter-and-gather NDIS_PACKET
-				if (pPacket)
-				{
-					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-					pTxRing->Cell[i].pNextNdisPacket = NULL;
-				}
-			}
-
-			RTMP_IO_READ32(pAd, TX_DTX_IDX0 + RingType * 0x10, &pTxRing->TxDmaIdx);
-			pTxRing->TxSwFreeIdx = pTxRing->TxDmaIdx;
-			pTxRing->TxCpuIdx = pTxRing->TxDmaIdx;
-			RTMP_IO_WRITE32(pAd, TX_CTX_IDX0 + RingType * 0x10, pTxRing->TxCpuIdx);
-			
-			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-			
-			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-			while (pAd->TxSwQueue[RingType].Head != NULL)
-			{
-				pEntry = RemoveHeadQueue(&pAd->TxSwQueue[RingType]);
-				pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
-				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-				DBGPRINT(RT_DEBUG_TRACE,("Release 1 NDIS packet from s/w backlog queue\n"));
-			}
-			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-			break;
-
-		case QID_MGMT:
-			// We have to clean all descriptors in case some error happened with reset
-			NdisAcquireSpinLock(&pAd->MgmtRingLock);
-			
-			for (i=0; i<MGMT_RING_SIZE; i++)
-			{
-				pTxD  = (PTXD_STRUC) pAd->MgmtRing.Cell[i].AllocVa;
-				if (!pTxD)
-				    return;
-
-				pPacket = (PNDIS_PACKET) pAd->MgmtRing.Cell[i].pNdisPacket;
-				// rlease scatter-and-gather NDIS_PACKET
-				if (pPacket)
-				{
-					PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr0, pTxD->SDLen0, PCI_DMA_TODEVICE);
-					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-				}
-				pAd->MgmtRing.Cell[i].pNdisPacket = NULL;
-
-				pPacket = (PNDIS_PACKET) pAd->MgmtRing.Cell[i].pNextNdisPacket;
-				// release scatter-and-gather NDIS_PACKET
-				if (pPacket)
-				{
-					PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr1, pTxD->SDLen1, PCI_DMA_TODEVICE);			
-					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-			}
-				pAd->MgmtRing.Cell[i].pNextNdisPacket = NULL;
-
-			}
-
-			RTMP_IO_READ32(pAd, TX_MGMTDTX_IDX, &pAd->MgmtRing.TxDmaIdx);
-			pAd->MgmtRing.TxSwFreeIdx = pAd->MgmtRing.TxDmaIdx;
-			pAd->MgmtRing.TxCpuIdx = pAd->MgmtRing.TxDmaIdx;
-			RTMP_IO_WRITE32(pAd, TX_MGMTCTX_IDX, pAd->MgmtRing.TxCpuIdx);
-			
-			NdisReleaseSpinLock(&pAd->MgmtRingLock);
-			pAd->RalinkCounters.MgmtRingFullCount = 0;
-			break;
-			
-		case QID_RX:
-			// We have to clean all descriptors in case some error happened with reset
-			NdisAcquireSpinLock(&pAd->RxRingLock);
-
-			for (i=0; i<RX_RING_SIZE; i++)
-			{
-				pRxD  = (PRXD_STRUC) pAd->RxRing.Cell[i].AllocVa;
-                pRxD->DDONE = 0 ;
-			}
-			 
-			RTMP_IO_READ32(pAd, RX_DRX_IDX, &pAd->RxRing.RxDmaIdx);
-			pAd->RxRing.RxSwReadIdx = pAd->RxRing.RxDmaIdx;
-			pAd->RxRing.RxCpuIdx = ((pAd->RxRing.RxDmaIdx == 0) ? (RX_RING_SIZE-1) : (pAd->RxRing.RxDmaIdx-1));
-			RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RxCpuIdx);
-			 
-			NdisReleaseSpinLock(&pAd->RxRingLock);
-			break;
-			
-		default:
-			break;
-	}
-}
-
-
 VOID RTMPFreeTxRxRingMemory(
     IN  PRTMP_ADAPTER   pAd)
 {
@@ -630,6 +985,155 @@ VOID RTMPFreeTxRxRingMemory(
 		RELEASE_NDIS_PACKET(pAd, pAd->FragFrame.pFragPacket, NDIS_STATUS_SUCCESS);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<-- RTMPFreeTxRxRingMemory\n"));
+}
+
+#endif // RESOURCE_PRE_ALLOC //
+
+
+/*
+	========================================================================
+	
+	Routine Description:
+		Reset NIC Asics. Call after rest DMA. So reset TX_CTX_IDX to zero.
+
+	Arguments:
+		Adapter						Pointer to our adapter
+
+	Return Value:
+		None
+
+	IRQL = PASSIVE_LEVEL
+	IRQL = DISPATCH_LEVEL
+	
+	Note:
+		Reset NIC to initial state AS IS system boot up time.
+		
+	========================================================================
+*/
+VOID	RTMPRingCleanUp(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			RingType)
+{
+	PTXD_STRUC		pTxD;
+	PRXD_STRUC		pRxD;
+	PQUEUE_ENTRY	pEntry;
+	PNDIS_PACKET	pPacket;
+	int				i;
+	PRTMP_TX_RING	pTxRing;
+	unsigned long	IrqFlags;
+	//UINT32			RxSwReadIdx;
+
+
+	DBGPRINT(RT_DEBUG_TRACE,("RTMPRingCleanUp(RingIdx=%d, Pending-NDIS=%ld)\n", RingType, pAd->RalinkCounters.PendingNdisPacketCount));
+	switch (RingType)
+	{
+		case QID_AC_BK:
+		case QID_AC_BE:
+		case QID_AC_VI:
+		case QID_AC_VO:
+		case QID_HCCA:
+			
+			pTxRing = &pAd->TxRing[RingType];
+			
+			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
+			// We have to clean all descriptors in case some error happened with reset
+			for (i=0; i<TX_RING_SIZE; i++) // We have to scan all TX ring
+			{
+				pTxD  = (PTXD_STRUC) pTxRing->Cell[i].AllocVa;
+
+				pPacket = (PNDIS_PACKET) pTxRing->Cell[i].pNdisPacket;
+				// release scatter-and-gather NDIS_PACKET
+				if (pPacket)
+				{
+					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+					pTxRing->Cell[i].pNdisPacket = NULL;
+				}
+
+				pPacket = (PNDIS_PACKET) pTxRing->Cell[i].pNextNdisPacket;
+				// release scatter-and-gather NDIS_PACKET
+				if (pPacket)
+				{
+					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+					pTxRing->Cell[i].pNextNdisPacket = NULL;
+				}
+			}
+
+			RTMP_IO_READ32(pAd, TX_DTX_IDX0 + RingType * 0x10, &pTxRing->TxDmaIdx);
+			pTxRing->TxSwFreeIdx = pTxRing->TxDmaIdx;
+			pTxRing->TxCpuIdx = pTxRing->TxDmaIdx;
+			RTMP_IO_WRITE32(pAd, TX_CTX_IDX0 + RingType * 0x10, pTxRing->TxCpuIdx);
+			
+			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
+			
+			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
+			while (pAd->TxSwQueue[RingType].Head != NULL)
+			{
+				pEntry = RemoveHeadQueue(&pAd->TxSwQueue[RingType]);
+				pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
+				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+				DBGPRINT(RT_DEBUG_TRACE,("Release 1 NDIS packet from s/w backlog queue\n"));
+			}
+			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
+			break;
+
+		case QID_MGMT:
+			// We have to clean all descriptors in case some error happened with reset
+			NdisAcquireSpinLock(&pAd->MgmtRingLock);
+			
+			for (i=0; i<MGMT_RING_SIZE; i++)
+			{
+				pTxD  = (PTXD_STRUC) pAd->MgmtRing.Cell[i].AllocVa;
+
+				pPacket = (PNDIS_PACKET) pAd->MgmtRing.Cell[i].pNdisPacket;
+				// rlease scatter-and-gather NDIS_PACKET
+				if (pPacket)
+				{
+					PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr0, pTxD->SDLen0, PCI_DMA_TODEVICE);
+					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+				}
+				pAd->MgmtRing.Cell[i].pNdisPacket = NULL;
+
+				pPacket = (PNDIS_PACKET) pAd->MgmtRing.Cell[i].pNextNdisPacket;
+				// release scatter-and-gather NDIS_PACKET
+				if (pPacket)
+				{
+					PCI_UNMAP_SINGLE(pAd, pTxD->SDPtr1, pTxD->SDLen1, PCI_DMA_TODEVICE);			
+					RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+			}
+				pAd->MgmtRing.Cell[i].pNextNdisPacket = NULL;
+
+			}
+
+			RTMP_IO_READ32(pAd, TX_MGMTDTX_IDX, &pAd->MgmtRing.TxDmaIdx);
+			pAd->MgmtRing.TxSwFreeIdx = pAd->MgmtRing.TxDmaIdx;
+			pAd->MgmtRing.TxCpuIdx = pAd->MgmtRing.TxDmaIdx;
+			RTMP_IO_WRITE32(pAd, TX_MGMTCTX_IDX, pAd->MgmtRing.TxCpuIdx);
+			
+			NdisReleaseSpinLock(&pAd->MgmtRingLock);
+			pAd->RalinkCounters.MgmtRingFullCount = 0;
+			break;
+			
+		case QID_RX:
+			// We have to clean all descriptors in case some error happened with reset
+			NdisAcquireSpinLock(&pAd->RxRingLock);
+
+			for (i=0; i<RX_RING_SIZE; i++)
+			{
+				pRxD  = (PRXD_STRUC) pAd->RxRing.Cell[i].AllocVa;
+                pRxD->DDONE = 0 ;
+			}
+			 
+			RTMP_IO_READ32(pAd, RX_DRX_IDX, &pAd->RxRing.RxDmaIdx);
+			pAd->RxRing.RxSwReadIdx = pAd->RxRing.RxDmaIdx;
+			pAd->RxRing.RxCpuIdx = ((pAd->RxRing.RxDmaIdx == 0) ? (RX_RING_SIZE-1) : (pAd->RxRing.RxDmaIdx-1));
+			RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RxCpuIdx);
+			 
+			NdisReleaseSpinLock(&pAd->RxRingLock);
+			break;
+			
+		default:
+			break;
+	}
 }
 
 
@@ -802,6 +1306,9 @@ VOID RT28xx_UpdateBeaconToAsic(
 	BOOLEAN			bBcnReq = FALSE;
 	UCHAR			bcn_idx = 0;
 
+#ifdef SPECIFIC_BCN_BUF_SUPPORT	
+	unsigned long irqFlag;
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	if (apidx < pAd->ApCfg.BssidNum && pAd->OpMode == OPMODE_AP)
@@ -823,19 +1330,20 @@ VOID RT28xx_UpdateBeaconToAsic(
 		return;
 	}
 
-	//if ((pAd->WdsTab.Mode == WDS_BRIDGE_MODE)
-	//	|| ((pAd->ApCfg.MBSSID[apidx].MSSIDDev == NULL) 
-	//		|| !(pAd->ApCfg.MBSSID[apidx].MSSIDDev->flags & IFF_UP))
-	//	)
 	if (bBcnReq == FALSE)
 	{
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM);
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
+
 		/* when the ra interface is down, do not send its beacon frame */
 		/* clear all zero */
 		for(i=0; i<TXWI_SIZE; i+=4)
 			RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[bcn_idx] + i, 0x00);
 
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM);
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	}
 	else
 	{
@@ -843,35 +1351,45 @@ VOID RT28xx_UpdateBeaconToAsic(
 #ifdef RT_BIG_ENDIAN
 		RTMPWIEndianChange(ptr, TYPE_TXWI);
 #endif
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM);
+
+
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+		/*
+			Shared memory access selection (higher 8KB shared memory)
+		*/
+		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
+
 		for (i=0; i<TXWI_SIZE; i+=4)  // 16-byte TXWI field
 		{
 			UINT32 longptr =  *ptr + (*(ptr+1)<<8) + (*(ptr+2)<<16) + (*(ptr+3)<<24);
 			RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[bcn_idx] + i, longptr);
 			ptr += 4;
 		}
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM);
 
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM);
 		// Update CapabilityInfo in Beacon
 		for (i = CapInfoPos; i < (CapInfoPos+2); i++)
 		{
 			RTMP_IO_WRITE8(pAd, pAd->BeaconOffset[bcn_idx] + TXWI_SIZE + i, *ptr_capinfo); 
 			ptr_capinfo ++;
 		}
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM);
 
 		if (FrameLen > UpdatePos)
 		{
-			RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM);
 			for (i= UpdatePos; i< (FrameLen); i++)
 			{
 				RTMP_IO_WRITE8(pAd, pAd->BeaconOffset[bcn_idx] + TXWI_SIZE + i, *ptr_update); 
 				ptr_update ++;
 			}
-			RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM);
 		}
-		
+
+
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+		/*
+			Shared memory access selection (lower 16KB shared memory)
+		*/
+		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	}
 	
 }
@@ -915,17 +1433,6 @@ VOID RT28xxPciStaAsicForceWakeup(
 	
         if (RT28xxPciAsicRadioOn(pAd, DOT11POWERSAVE))
         {
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-			// add by johnli, RF power sequence setup, load RF normal operation-mode setup
-			if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd))
-			{
-				RTMP_CHIP_OP *pChipOps = &pAd->chipOps;
-				
-				if (pChipOps->AsicReverseRfFromSleepMode)
-					pChipOps->AsicReverseRfFromSleepMode(pAd);
-			}
-			else
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
 			{
 			// end johnli
 				// In Radio Off, we turn off RF clk, So now need to call ASICSwitchChannel again.
@@ -944,19 +1451,6 @@ VOID RT28xxPciStaAsicForceWakeup(
 				}
 			} 
         }
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-		// 3090 MCU Wakeup command needs more time to be stable.
-		// Before stable, don't issue other MCU command to prevent from firmware error.	
-		if (((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)) && IS_VERSION_AFTER_F(pAd)
-			&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-			&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-			{                      		
-			DBGPRINT(RT_DEBUG_TRACE, ("<==RT28xxPciStaAsicForceWakeup::Release the MCU Lock(3090)\n"));
-			RTMP_SEM_LOCK(&pAd->McuCmdLock);
-			pAd->brt30xxBanMcuCmd = FALSE;
-			RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
-			}
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
     }
     else
 #endif // PCIE_PS_SUPPORT //
@@ -980,7 +1474,7 @@ VOID RT28xxPciStaAsicSleepThenAutoWakeup(
 {
 #ifdef PCIE_PS_SUPPORT
 	BOOLEAN brc;
-#endif
+#endif // PCIE_PS_SUPPORT //
 	
 	if (pAd->StaCfg.bRadio == FALSE)
 	{
@@ -1059,18 +1553,6 @@ VOID PsPollWakeExec(
     }
     pAd->Mlme.bPsPollTimerRunning = FALSE;
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-	// For rt30xx power solution 3, Use software timer to wake up in psm. So call
-	// AsicForceWakeup here instead of handling twakeup interrupt.
-	if (((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd))
-	&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-	&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-	{
-		DBGPRINT(RT_DEBUG_TRACE,("<--PsPollWakeExec::3090 calls AsicForceWakeup(pAd, DOT11POWERSAVE) in advance \n"));
-		AsicForceWakeup(pAd, DOT11POWERSAVE);
-}
-
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
 }
 
 
@@ -1156,23 +1638,13 @@ if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE)
 		if (pChipOps->AsicReverseRfFromSleepMode)
 			pChipOps->AsicReverseRfFromSleepMode(pAd);
 
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-// 3090 MCU Wakeup command needs more time to be stable.
-// Before stable, don't issue other MCU command to prevent from firmware error.	
-if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)	
-	&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-	&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-	{
-	RTMP_SEM_LOCK(&pAd->McuCmdLock);
-	pAd->brt30xxBanMcuCmd = FALSE;
-	RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
-	}
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
 		// Clear Radio off flag
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF);
 
+#ifdef LED_CONTROL_SUPPORT
 		// Set LED
 		RTMPSetLED(pAd, LED_RADIO_ON);
+#endif // LED_CONTROL_SUPPORT //
 
         if (pAd->StaCfg.Psm == PWR_ACTIVE)
         {
@@ -1203,11 +1675,13 @@ BOOLEAN RT28xxPciAsicRadioOn(
 	IN PRTMP_ADAPTER pAd,
 	IN UCHAR     Level)
 {
+    //WPDMA_GLO_CFG_STRUC	DmaCfg;
 #ifdef CONFIG_STA_SUPPORT    
 #ifdef PCIE_PS_SUPPORT
 	BOOLEAN				Cancelled;   
-#endif
+#endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
+    //UINT32			    MACValue;
 
 	if (pAd->OpMode == OPMODE_AP && Level==DOT11POWERSAVE)
 		return FALSE;
@@ -1241,11 +1715,6 @@ BOOLEAN RT28xxPciAsicRadioOn(
 		}
 	}
     
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-if (!(((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)
-	&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-	&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))))
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
 	{	
     pAd->bPCIclkOff = FALSE;
 		DBGPRINT(RT_DEBUG_TRACE, ("PSM :309xbPCIclkOff == %d\n", pAd->bPCIclkOff));
@@ -1253,6 +1722,7 @@ if (!(((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_
 	}
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
+
 	// 2. Send wake up command.
 	AsicSendCommandToMcu(pAd, 0x31, PowerWakeCID, 0x00, 0x02);
     pAd->bPCIclkOff = FALSE;
@@ -1265,33 +1735,6 @@ if (!(((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_
     	if (Level == GUI_IDLE_POWER_SAVE)
     	{
  //2009/06/09: AP and stations need call the following function
-#if defined (RT3090) || defined(RT3572) || defined(RT3390)
-
-			// add by johnli, RF power sequence setup, load RF normal operation-mode setup
-			if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)))
-			{
-				RTMP_CHIP_OP *pChipOps = &pAd->chipOps;
-				
-				if (pChipOps->AsicReverseRfFromSleepMode)
-					pChipOps->AsicReverseRfFromSleepMode(pAd);
-#ifdef CONFIG_STA_SUPPORT
-#ifdef PCIE_PS_SUPPORT
-				// 3090 MCU Wakeup command needs more time to be stable.
-				// Before stable, don't issue other MCU command to prevent from firmware error.	
-				if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)
-					&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-					&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-					{
-						RTMP_SEM_LOCK(&pAd->McuCmdLock);
-						pAd->brt30xxBanMcuCmd = FALSE;
-						RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
-					}
-#endif // PCIE_PS_SUPPORT //
-#endif // CONFIG_STA_SUPPORT //
-			}
-			else
-			// end johnli
-#endif // defined (RT3090) || defined(RT3572) || defined(RT3390) //
 			{
 	    		// In Radio Off, we turn off RF clk, So now need to call ASICSwitchChannel again.
 #ifdef CONFIG_STA_SUPPORT
@@ -1347,34 +1790,38 @@ BOOLEAN RT28xxPciAsicRadioOff(
 	WPDMA_GLO_CFG_STRUC	DmaCfg;
 	UCHAR		i, tempBBP_R3 = 0;
 #ifdef PCIE_PS_SUPPORT	
-    ULONG		BeaconPeriodTime;
-	UINT32		PsPollTime = 0, MACValue;
+	ULONG		BeaconPeriodTime;
+	UINT32		PsPollTime = 0/*, MACValue*/;
 	UINT32		TbTTTime = 0;
 	BOOLEAN		Cancelled;
 #endif // PCIE_PS_SUPPORT //	
 #endif // CONFIG_STA_SUPPORT //
+#ifdef RT2860
 	BOOLEAN		brc = FALSE;
-    UINT32		RxDmaIdx, RxCpuIdx, MACValue;
+#endif
+	UINT32		RxDmaIdx, RxCpuIdx;
 	DBGPRINT(RT_DEBUG_TRACE, ("%s ===> Lv= %d, TxCpuIdx = %d, TxDmaIdx = %d. RxCpuIdx = %d, RxDmaIdx = %d.\n", 
 								__FUNCTION__, Level,pAd->TxRing[0].TxCpuIdx, pAd->TxRing[0].TxDmaIdx, pAd->RxRing.RxCpuIdx, pAd->RxRing.RxDmaIdx));
 
 	if (pAd->OpMode == OPMODE_AP && Level==DOT11POWERSAVE)
 		return FALSE;
 
-    // Check Rx DMA busy status, if more than half is occupied, give up this radio off.
-	RTMP_IO_READ32(pAd, RX_DRX_IDX , &RxDmaIdx);
-	RTMP_IO_READ32(pAd, RX_CRX_IDX , &RxCpuIdx);
-	if ((RxDmaIdx > RxCpuIdx) && ((RxDmaIdx - RxCpuIdx) > RX_RING_SIZE/3))
+	if (Level == DOT11POWERSAVE)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return1. RxDmaIdx = %d ,  RxCpuIdx = %d. \n", RxDmaIdx, RxCpuIdx));
-		return FALSE;
+    	// Check Rx DMA busy status, if more than half is occupied, give up this radio off.
+		RTMP_IO_READ32(pAd, RX_DRX_IDX , &RxDmaIdx);
+		RTMP_IO_READ32(pAd, RX_CRX_IDX , &RxCpuIdx);
+		if ((RxDmaIdx > RxCpuIdx) && ((RxDmaIdx - RxCpuIdx) > RX_RING_SIZE/3))
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return1. RxDmaIdx = %d ,  RxCpuIdx = %d. \n", RxDmaIdx, RxCpuIdx));
+			return FALSE;
+		}
+		else if ((RxCpuIdx >= RxDmaIdx) && ((RxCpuIdx - RxDmaIdx) < RX_RING_SIZE/3))
+		{
+			DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return2.  RxCpuIdx = %d. RxDmaIdx = %d ,  \n", RxCpuIdx, RxDmaIdx));
+			return FALSE;
+		}
 	}
-	else if ((RxCpuIdx >= RxDmaIdx) && ((RxCpuIdx - RxDmaIdx) < RX_RING_SIZE/3))
-	{
-		DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return2.  RxCpuIdx = %d. RxDmaIdx = %d ,  \n", RxCpuIdx, RxDmaIdx));
-		return FALSE;
-	}
-
     // Once go into this function, disable tx because don't want too many packets in queue to prevent HW stops.
 	//pAd->bPCIclkOffDisableTx = TRUE;
 #ifdef CONFIG_STA_SUPPORT
@@ -1406,15 +1853,6 @@ BOOLEAN RT28xxPciAsicRadioOff(
 			else
 			{
 				PsPollTime = (64*TbTTTime- LEAD_TIME*1024)/1000;
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-				if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)
-				&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-				&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-				{
-							PsPollTime -= 5;
-				}
-				else
-#endif // defined(RT3090) || defined(RT3572) || defined(RT3390) //
 				PsPollTime -= 3;
 
 	            BeaconPeriodTime = pAd->CommonCfg.BeaconPeriod*102/100;
@@ -1460,18 +1898,14 @@ BOOLEAN RT28xxPciAsicRadioOff(
 	if (Level != RTMP_HALT)
 	{
 		// Change Interrupt bitmask.
-    // When PCI clock is off, don't want to service interrupt.
-	RTMP_IO_WRITE32(pAd, INT_MASK_CSR, AutoWakeupInt);
+    	// When PCI clock is off, don't want to service interrupt.
+		RTMP_IO_WRITE32(pAd, INT_MASK_CSR, AutoWakeupInt);
 	}
 	else
 	{
-		RTMP_ASIC_INTERRUPT_DISABLE(pAd);
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE))
+			RTMP_ASIC_INTERRUPT_DISABLE(pAd);
 	}
-
-	// Disable MAC Rx
-	RTMP_IO_READ32(pAd, MAC_SYS_CTRL , &MACValue);
-	MACValue &= 0xf7;
-	RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL , MACValue);
 
     
 	RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RxCpuIdx);
@@ -1479,25 +1913,33 @@ BOOLEAN RT28xxPciAsicRadioOff(
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_STATUS, 0xffffffff);
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_CID, 0xffffffff);    
 	// send POWER-SAVE command to MCU. high-byte = 1 save power as much as possible. high byte = 0 save less power
-	AsicSendCommandToMcu(pAd, 0x30, PowerSafeCID, 0xff, 0x1);   
-	//  2-1. Wait command success
-	// Status = 1 : success, Status = 2, already sleep, Status = 3, Maybe MAC is busy so can't finish this task.
-	brc = AsicCheckCommanOk(pAd, PowerSafeCID);	
+	AsicSendCommandToMcu(pAd, SLEEP_MCU_CMD, PowerSafeCID, 0xff, 0x1);   
 
-	//  3. After 0x30 command is ok, send radio off command. lowbyte = 0 for power safe.
-	// If 0x30 command is not ok this time, we can ignore 0x35 command. It will make sure not cause firmware'r problem.
-	if ((Level == DOT11POWERSAVE) && (brc == TRUE))
+#ifdef RT2860
+	// in rt3xxx, after issue SLEEP command, can't read/write register. So don't check Command ok.
+	if ((pAd->DeviceID == NIC2860_PCIe_DEVICE_ID) 
+		||(pAd->DeviceID == NIC2790_PCIe_DEVICE_ID))
 	{
-		AsicSendCommandToMcu(pAd, 0x35, PowerRadioOffCID, 0, 0x00);	// lowbyte = 0 means to do power safe, NOT turn off radio.
-	 	//  3-1. Wait command success
-	 	AsicCheckCommanOk(pAd, PowerRadioOffCID);
+		//  2-1. Wait command success
+		// Status = 1 : success, Status = 2, already sleep, Status = 3, Maybe MAC is busy so can't finish this task.
+		brc = AsicCheckCommanOk(pAd, PowerSafeCID);	
+
+		//  3. After 0x30 command is ok, send radio off command. lowbyte = 0 for power safe.
+		// If 0x30 command is not ok this time, we can ignore 0x35 command. It will make sure not cause firmware'r problem.
+		if ((Level == DOT11POWERSAVE) && (brc == TRUE))
+		{
+			AsicSendCommandToMcu(pAd, 0x35, PowerRadioOffCID, 0, 0x00);	// lowbyte = 0 means to do power safe, NOT turn off radio.
+		 	//  3-1. Wait command success
+		 	AsicCheckCommanOk(pAd, PowerRadioOffCID);
+		}
+		else if (brc == TRUE)
+		{
+			AsicSendCommandToMcu(pAd, 0x35, PowerRadioOffCID, 1, 0x00);	// lowbyte = 0 means to do power safe, NOT turn off radio.
+		 	//  3-1. Wait command success
+		 	AsicCheckCommanOk(pAd, PowerRadioOffCID);
+		}
 	}
-	else if (brc == TRUE)
-	{
-		AsicSendCommandToMcu(pAd, 0x35, PowerRadioOffCID, 1, 0x00);	// lowbyte = 0 means to do power safe, NOT turn off radio.
-	 	//  3-1. Wait command success
-	 	AsicCheckCommanOk(pAd, PowerRadioOffCID);
-	}
+#endif // RT2860 //
     
 #ifdef CONFIG_STA_SUPPORT
 	// 1. Wait DMA not busy
@@ -1525,23 +1967,11 @@ BOOLEAN RT28xxPciAsicRadioOff(
 #endif // CONFIG_STA_SUPPORT //
 //KH Debug:My original codes have the follwoing codes, but currecnt codes do not have it.
 // Disable for stability. If PCIE Link Control is modified for advance power save, re-covery this code segment.
-RTMP_IO_WRITE32(pAd, PBF_SYS_CTRL, 0x1280);
+//RTMP_IO_WRITE32(pAd, PBF_SYS_CTRL, 0x1280);
 //OPSTATUS_SET_FLAG(pAd, fOP_STATUS_CLKSELECT_40MHZ);
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
-#if defined(RT3090) || defined(RT3572) || defined(RT3390)
-if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd)) && IS_VERSION_AFTER_F(pAd)
-	&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3)
-	&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
-	{
-	DBGPRINT(RT_DEBUG_TRACE, ("RT28xxPciAsicRadioOff::3090 return to skip the following TbttNumToNextWakeUp setting for 279x\n"));
-	pAd->bPCIclkOff = TRUE;
-	RTMP_CLEAR_PSFLAG(pAd, fRTMP_PS_DISABLE_TX);
-	// For this case, doesn't need to below actions, so return here.
-	return brc;	
-	}
-#endif // #if defined(RT3090) || defined(RT3572) || defined(RT3390) //
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 	if (Level == DOT11POWERSAVE)
@@ -1604,13 +2034,10 @@ VOID RT28xxPciMlmeRadioOn(
 #ifdef PCIE_PS_SUPPORT
         && (!OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE)
         ||pAd->StaCfg.PSControl.field.EnableNewPS == FALSE)
-#endif // PCIE_PS_SUPPORT //
+ #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
         ))
     {
-			//RT28xxPciAsicRadioOn(pAd, GUI_IDLE_POWER_SAVE);
-		NICResetFromError(pAd);
-
     	RTMPRingCleanUp(pAd, QID_AC_BK);
     	RTMPRingCleanUp(pAd, QID_AC_BE);
     	RTMPRingCleanUp(pAd, QID_AC_VI);
@@ -1619,12 +2046,23 @@ VOID RT28xxPciMlmeRadioOn(
     	RTMPRingCleanUp(pAd, QID_MGMT);
     	RTMPRingCleanUp(pAd, QID_RX);
 
+#ifdef RTMP_RBUS_SUPPORT
+	if (pAd->infType == RTMP_DEV_INF_RBUS)
+		NICResetFromError(pAd);
+#endif // RTMP_RBUS_SUPPORT //
+#ifdef RTMP_PCI_SUPPORT
+	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
+		RT28xxPciAsicRadioOn(pAd, GUI_IDLE_POWER_SAVE);
+#endif // RTMP_PCI_SUPPORT //
+
     	// Enable Tx/Rx
     	RTMPEnableRxTx(pAd);
     	
     	// Clear Radio off flag
     	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF);
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF);
+
+#ifdef LED_CONTROL_SUPPORT
 	    // Set LED
 	    RTMPSetLED(pAd, LED_RADIO_ON);
 #ifdef CONFIG_AP_SUPPORT
@@ -1633,6 +2071,7 @@ VOID RT28xxPciMlmeRadioOn(
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	    	RTMPSetLED(pAd, LED_LINK_UP);
 #endif // CONFIG_AP_SUPPORT //
+#endif // LED_CONTROL_SUPPORT //
     }
 
 #ifdef CONFIG_STA_SUPPORT
@@ -1659,37 +2098,13 @@ VOID RT28xxPciMlmeRadioOn(
 VOID RT28xxPciMlmeRadioOFF(
 	IN PRTMP_ADAPTER pAd)
 {
+#ifdef RTMP_PCI_SUPPORT
+	BOOLEAN brc=TRUE;
+#endif // RTMP_PCI_SUPPORT //
+    
     if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF))
     	return;
-    
-#ifdef CONFIG_STA_SUPPORT
-	// Link down first if any association exists
-	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
-	{
-		if (INFRA_ON(pAd) || ADHOC_ON(pAd))
-		{
-			MLME_DISASSOC_REQ_STRUCT DisReq;
-			MLME_QUEUE_ELEM *pMsgElem = (MLME_QUEUE_ELEM *) kmalloc(sizeof(MLME_QUEUE_ELEM), MEM_ALLOC_FLAG);
 
-			if (pMsgElem)
-			{
-				COPY_MAC_ADDR(&DisReq.Addr, pAd->CommonCfg.Bssid);
-				DisReq.Reason =  REASON_DISASSOC_STA_LEAVING;
-
-				pMsgElem->Machine = ASSOC_STATE_MACHINE;
-				pMsgElem->MsgType = MT2_MLME_DISASSOC_REQ;
-				pMsgElem->MsgLen = sizeof(MLME_DISASSOC_REQ_STRUCT);
-				NdisMoveMemory(pMsgElem->Msg, &DisReq, sizeof(MLME_DISASSOC_REQ_STRUCT));
-			
-				MlmeDisassocReqAction(pAd, pMsgElem);
-				kfree(pMsgElem);
-				
-				RTMPusecDelay(1000);
-			}
-		}
-	}
-#endif // CONFIG_STA_SUPPORT //
-	
     DBGPRINT(RT_DEBUG_TRACE,("%s===>\n", __FUNCTION__));
 
 	// Set Radio off flag
@@ -1704,12 +2119,16 @@ VOID RT28xxPciMlmeRadioOFF(
 			RTMPCancelTimer(&pAd->MlmeAux.ScanTimer, &Cancelled);
 			RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS);
     	}
+
+#ifdef PCIE_PS_SUPPORT
 		// If during power safe mode.
 		if (pAd->StaCfg.bRadio == TRUE)
 		{
 			DBGPRINT(RT_DEBUG_TRACE,("-->MlmeRadioOff() return on bRadio == TRUE; \n"));
 			return;
 		}
+#endif // PCIE_PS_SUPPORT //
+
 		// Always radio on since the NIC needs to set the MCU command (LED_RADIO_OFF).
 		if (IDLE_ON(pAd) &&
 			(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF)))
@@ -1734,10 +2153,20 @@ VOID RT28xxPciMlmeRadioOFF(
         //==========================================    
         // Clean up old bss table   
         BssTableInit(&pAd->ScanTab);
+		
+        /*
+        if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE))
+        {
+            RTMPSetTimer(&pAd->Mlme.RadioOnOffTimer, 10);
+            return;
+        }
+        */
     }
 #endif // CONFIG_STA_SUPPORT //
-	// Set LED.Move to here for fixing LED bug. This flag must be called after LinkDown
+
+#ifdef LED_CONTROL_SUPPORT
 	RTMPSetLED(pAd, LED_RADIO_OFF);
+#endif // LED_CONTROL_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
@@ -1753,5 +2182,62 @@ if (pAd->OpMode == OPMODE_STA&&
 else 
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
+
+#ifdef RTMP_PCI_SUPPORT
+	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
+	{
+		brc=RT28xxPciAsicRadioOff(pAd, GUIRADIO_OFF, 0);
+		if (brc==FALSE)
+		{
+			DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
+		}
+	}
+#endif // RTMP_PCI_SUPPORT //
+
+#ifdef RTMP_RBUS_SUPPORT
+	if (pAd->infType == RTMP_DEV_INF_RBUS)
+	{
+		int	i;
+		WPDMA_GLO_CFG_STRUC	GloCfg;
+
+		// Disable Tx/Rx DMA
+		RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);	   // disable DMA 
+		GloCfg.field.EnableTxDMA = 0;
+		GloCfg.field.EnableRxDMA = 0;
+		RTMP_IO_WRITE32(pAd, WPDMA_GLO_CFG, GloCfg.word);	   // abort all TX rings
+
+		
+		// MAC_SYS_CTRL => value = 0x0 => 40mA
+		RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, 0);
+		
+		// PWR_PIN_CFG => value = 0x0 => 40mA
+		RTMP_IO_WRITE32(pAd, PWR_PIN_CFG, 0);
+		
+		// TX_PIN_CFG => value = 0x0 => 20mA
+		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, 0x00010000);
+
+		if (pAd->CommonCfg.BBPCurrentBW == BW_40)
+		{	
+			// Must using 40MHz.
+			AsicTurnOffRFClk(pAd, pAd->CommonCfg.CentralChannel);
+		}
+		else
+		{	
+			// Must using 20MHz.
+			AsicTurnOffRFClk(pAd, pAd->CommonCfg.Channel);
+		}
+
+		// Waiting for DMA idle
+		i = 0;
+		do
+		{
+			RTMP_IO_READ32(pAd, WPDMA_GLO_CFG, &GloCfg.word);
+			if ((GloCfg.field.TxDMABusy == 0) && (GloCfg.field.RxDMABusy == 0))
+				break;
+			
+			RTMPusecDelay(1000);
+		}while (i++ < 100);
+}
+#endif // RTMP_RBUS_SUPPORT //
 }
 #endif // RTMP_MAC_PCI //

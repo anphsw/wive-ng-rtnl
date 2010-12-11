@@ -26,7 +26,9 @@
 	Fonchi		2006-06-23      modified for rt61-APClinent
 */
 #ifdef APCLI_SUPPORT
+
 #include "rt_config.h"
+
 
 static VOID ApCliCtrlJoinReqAction(
 	IN PRTMP_ADAPTER pAd, 
@@ -160,6 +162,9 @@ static VOID ApCliCtrlJoinReqAction(
 	PAPCLI_STRUCT pApCliEntry;
 	USHORT ifIndex = (USHORT)(Elem->Priv);
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
+#ifdef WSC_AP_SUPPORT
+	PWSC_CTRL	pWpsCtrl = &pAd->ApCfg.ApCliTab[ifIndex].WscControl;
+#endif // WSC_AP_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Start Probe Req.\n", __FUNCTION__));
 	if (ifIndex >= MAX_APCLI_NUM)
@@ -178,11 +183,58 @@ static VOID ApCliCtrlJoinReqAction(
 	}
 
 #ifdef WSC_AP_SUPPORT
-    if (pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode != WSC_DISABLE)
+    if ((pWpsCtrl->WscConfMode != WSC_DISABLE) &&
+		(pWpsCtrl->bWscTrigger == TRUE))
     {
+    	ULONG bss_idx = 0;
         NdisZeroMemory(JoinReq.Ssid, MAX_LEN_OF_SSID);
         JoinReq.SsidLen = pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscSsid.SsidLength;
 		NdisMoveMemory(JoinReq.Ssid, pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscSsid.Ssid, JoinReq.SsidLen);
+		if (pWpsCtrl->WscMode == 1) // PIN
+		{
+			bss_idx = BssSsidTableSearchBySSID(&pAd->ScanTab, (PCHAR)JoinReq.Ssid, JoinReq.SsidLen);
+			if (bss_idx == BSS_NOT_FOUND)
+			{
+				ApSiteSurvey(pAd, NULL, SCAN_WSC_ACTIVE, FALSE);
+				return;
+			}
+			else
+			{
+				INT old_conf_mode = pWpsCtrl->WscConfMode;
+				ADD_HTINFO	RootApHtInfo, ApHtInfo;
+				UCHAR channel = pAd->CommonCfg.Channel, RootApChannel = pAd->ScanTab.BssEntry[bss_idx].Channel;
+				UCHAR RootApCentralChannel = pAd->ScanTab.BssEntry[bss_idx].CentralChannel;
+				ApHtInfo = pAd->CommonCfg.AddHTInfo.AddHtInfo;
+				RootApHtInfo = pAd->ScanTab.BssEntry[bss_idx].AddHtInfo.AddHtInfo;
+				
+				if ((RootApChannel != channel) ||
+					((RootApCentralChannel != RootApChannel) &&
+					 (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40) && 
+					 (ApHtInfo.ExtChanOffset != RootApHtInfo.ExtChanOffset)))
+				{
+					STRING	ChStr[5] = {0};
+					if (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40)
+					{
+						if (RootApHtInfo.ExtChanOffset == EXTCHA_ABOVE)
+							Set_HtExtcha_Proc(pAd, "1");
+						else
+							Set_HtExtcha_Proc(pAd, "0");
+					}
+					sprintf(ChStr, "%d", pAd->ScanTab.BssEntry[bss_idx].Channel);
+					Set_Channel_Proc(pAd, ChStr);
+					/*
+						ApStop will call WscStop, we need to reset WscConfMode, WscMode & bWscTrigger here.
+					*/
+
+					pWpsCtrl->WscState = WSC_STATE_START;
+					pWpsCtrl->WscStatus = STATUS_WSC_START_ASSOC;
+					pWpsCtrl->WscMode = 1;
+					pWpsCtrl->WscConfMode = old_conf_mode;
+					pWpsCtrl->bWscTrigger = TRUE;
+					return;
+				}				
+			}
+		}
     }
     else
 #endif // WSC_AP_SUPPORT //
@@ -247,7 +299,8 @@ static VOID ApCliCtrlJoinReqTimeoutAction(
 	}
 
 #ifdef WSC_AP_SUPPORT
-    if (pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode != WSC_DISABLE)
+    if ((pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode != WSC_DISABLE) &&
+		(pAd->ApCfg.ApCliTab[ifIndex].WscControl.bWscTrigger == TRUE))
     {
         NdisZeroMemory(JoinReq.Ssid, MAX_LEN_OF_SSID);
         JoinReq.SsidLen = pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscSsid.SsidLength;
@@ -542,6 +595,7 @@ static VOID ApCliCtrlAssocRspAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("(%s) apCliIf = %d, Receive Assoc Rsp Failure.\n", __FUNCTION__,  ifIndex));
 
 		*pCurrState = APCLI_CTRL_DISCONNECTED;
+
 		// set the apcli interface be valid.
 		pApCliEntry->Valid = FALSE;
 	}
@@ -582,6 +636,7 @@ static VOID ApCliCtrlDeAssocRspAction(
 		ApCliLinkDown(pAd, ifIndex);
 	
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
+
 	return;
 }
 
@@ -666,6 +721,7 @@ static VOID ApCliCtrlDisconnectReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
+
 	return;
 }
 
@@ -703,6 +759,7 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
+
 	return;
 }
 

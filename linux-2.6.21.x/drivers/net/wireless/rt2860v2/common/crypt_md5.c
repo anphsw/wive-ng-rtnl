@@ -11,8 +11,22 @@
  * way altering the source code is stricitly prohibited, unless the prior
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
- 
-#include "crypt_md5.h"
+
+/****************************************************************************
+    Module Name:
+    MD5
+
+    Abstract:
+    RFC1321: The MD5 Message-Digest Algorithm
+    
+    Revision History:
+    Who         When            What
+    --------    ----------      ------------------------------------------
+    Eddy        2008/11/24      Create md5
+***************************************************************************/
+
+#include "rt_config.h"
+
 
 #ifdef MD5_SUPPORT
 /* 
@@ -68,7 +82,7 @@ Note:
     None
 ========================================================================
 */
-VOID MD5_Init (
+VOID RT_MD5_Init (
     IN  MD5_CTX_STRUC *pMD5_CTX)
 {
     NdisMoveMemory(pMD5_CTX->HashValue, MD5_DefaultHashValue, 
@@ -76,7 +90,7 @@ VOID MD5_Init (
     NdisZeroMemory(pMD5_CTX->Block, MD5_BLOCK_SIZE);
     pMD5_CTX->BlockLen   = 0;
     pMD5_CTX->MessageLen = 0;  
-} /* End of MD5_Init */
+} /* End of RT_MD5_Init */
 
 
 /*
@@ -94,7 +108,7 @@ Note:
     T[i] := floor(abs(sin(i + 1)) * (2 pow 32)), i is number of round
 ========================================================================
 */
-VOID MD5_Hash (
+VOID RT_MD5_Hash (
     IN  MD5_CTX_STRUC *pMD5_CTX)
 {
     UINT32 X_i;
@@ -210,7 +224,7 @@ VOID MD5_Hash (
 
     NdisZeroMemory(pMD5_CTX->Block, MD5_BLOCK_SIZE);
     pMD5_CTX->BlockLen = 0;
-} /* End of MD5_Hash */
+} /* End of RT_MD5_Hash */
 
 
 /*
@@ -231,7 +245,7 @@ Note:
     None
 ========================================================================
 */
-VOID MD5_Append (
+VOID RT_MD5_Append (
     IN  MD5_CTX_STRUC *pMD5_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen)
@@ -253,11 +267,11 @@ VOID MD5_Append (
                 Message + appendLen, MD5_BLOCK_SIZE - pMD5_CTX->BlockLen);
             appendLen += (MD5_BLOCK_SIZE - pMD5_CTX->BlockLen);
             pMD5_CTX->BlockLen = MD5_BLOCK_SIZE;
-            MD5_Hash(pMD5_CTX);
+            RT_MD5_Hash(pMD5_CTX);
         } /* End of if */
     } /* End of while */
     pMD5_CTX->MessageLen += MessageLen;
-} /* End of MD5_Append */
+} /* End of RT_MD5_Append */
 
 
 /*
@@ -277,7 +291,7 @@ Note:
     None
 ========================================================================
 */
-VOID MD5_End (
+VOID RT_MD5_End (
     IN  MD5_CTX_STRUC *pMD5_CTX, 
     OUT UINT8 DigestMessage[])
 {
@@ -289,21 +303,21 @@ VOID MD5_End (
 
     /* 55 = 64 - 8 - 1: append 1 bit(1 byte) and message length (8 bytes) */
     if (pMD5_CTX->BlockLen > 55)
-        MD5_Hash(pMD5_CTX);
-        /* End of if */
+        RT_MD5_Hash(pMD5_CTX);
+    /* End of if */
 
     /* Append the length of message in rightmost 64 bits */
     message_length_bits = pMD5_CTX->MessageLen*8;
     message_length_bits = cpu2le64(message_length_bits);
     NdisMoveMemory(&pMD5_CTX->Block[56], &message_length_bits, 8);
-    MD5_Hash(pMD5_CTX);
+    RT_MD5_Hash(pMD5_CTX);
 
     /* Return message digest, transform the UINT32 hash value to bytes */    
     for (index = 0; index < 4;index++)
         pMD5_CTX->HashValue[index] = cpu2le32(pMD5_CTX->HashValue[index]);
         /* End of for */
     NdisMoveMemory(DigestMessage, pMD5_CTX->HashValue, MD5_DIGEST_SIZE);
-} /* End of MD5_End */
+} /* End of RT_MD5_End */
 
 
 /*
@@ -330,12 +344,13 @@ VOID RT_MD5 (
     MD5_CTX_STRUC md5_ctx;
 
     NdisZeroMemory(&md5_ctx, sizeof(MD5_CTX_STRUC));
-    MD5_Init(&md5_ctx);    
-    MD5_Append(&md5_ctx, Message, MessageLen);
-    MD5_End(&md5_ctx, DigestMessage);
+    RT_MD5_Init(&md5_ctx);    
+    RT_MD5_Append(&md5_ctx, Message, MessageLen);
+    RT_MD5_End(&md5_ctx, DigestMessage);
 } /* End of RT_MD5 */
 
 #endif /* MD5_SUPPORT */
+
 
 /* End of crypt_md5.c */
 

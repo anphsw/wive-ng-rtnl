@@ -26,8 +26,12 @@
 	--------    ----------    ----------------------------------------------
 */
 
+
+
 #ifdef RT305x
+
 #include "rt_config.h"
+
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
@@ -251,7 +255,7 @@ REG_PAIR   RT305x_RFRegTable[] = {
 	{RF_R25,		0x3F},
 	{RF_R26, 		0x0D},
 	{RF_R27, 		0x75},//0x71<========LDO input voltage : NOT key point
-      	{RF_R28, 		0x10},
+      	{RF_R28, 	0x10},
 	{RF_R29,		0x07},
 	{RF_R30,		0x00},
 	{RF_R31,		0x48},//0x08:CCK<========NOT key point
@@ -284,9 +288,9 @@ REG_PAIR   RT305x_RFRegTable[] = {
 	{RF_R23,		0x31}, //
 	{RF_R24,		0x08}, //
 	{RF_R25,		0x01},
-	{RF_R26, 		0x25}, //Core Power: 0x25=1.25v
-	{RF_R27, 		0x23}, //RF: 1.35v (Mason Hsu 20081023)
-	{RF_R28, 		0x13}, //ADC: must consist with R27
+	{RF_R26, 	0x25}, //Core Power: 0x25=1.25v
+	{RF_R27, 	0x23}, //RF: 1.35v (Mason Hsu 20081023)
+       {RF_R28, 	0x13}, //ADC: must consist with R27
 	{RF_R29,		0x83}, //0x18},
 	{RF_R30,		0x00}, //
 	{RF_R31,		0x00}, //
@@ -328,4 +332,6 @@ VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd)
 #endif // RT3350 //
 }
 
+
 #endif // RT305x //
+

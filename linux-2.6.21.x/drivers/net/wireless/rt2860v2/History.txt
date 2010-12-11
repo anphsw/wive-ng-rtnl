@@ -1,3 +1,37 @@
+[V2.x.x.x]
+	1.	Add mac80211 iw utility other commands support.
+		Rename crda.c to cfg80211.c, CRDA_SUPPORT to RT_CFG80211_SUPPORT.
+	2.	Fix issue: No McuCmdLock initialization for RT3592/RT3390.
+	3.	Fix issue: The start address of HeaderBuf must be aligned by 4 when
+		VENDOR_FEATURE1_SUPPORT is enabled.
+	4.	WMM ACM: see history of acm_comm.c.
+	5.	Fix issue: sometimes rt2860_interrupt() will be called before rt28xx_init()
+		in fedora core 7.
+	6.	Add RT3592 PCIe chip ID.
+	7.	Fix issue in 64bit CPU:
+		(1) WMM ACM: see history of acm_comm.c.
+		(2) Fix function RTMP_MapChannelID2KHZ().
+	8.	CFG80211: Patch for Linux 2.6.32.
+
+[V2.4.0.0]
+	1.	AMSDU supports NO-ACK.
+	2.	Added new channel list of A-Band Region 16
+	3.	Basic Ethtool support. (i.e. GSO)
+	4.	Fix issue: PCI command thread initialization in pci_main_dev.c
+	5.	WMM ACM: see history of acm_comm.c.
+	6.	Fix issue: When PS-Poll is received in AP and STA is not WMM device and
+		no any queued packet, we will reply DATA NULL frame. We will double-lock.
+	7.	AP QLOAD: Add compile option.
+	8.	Add CRDA function in Linux 2.6.28 above.
+	9.	Increase channel property. Property is only set in CRDA function currently.
+	10. RSSI feedback supported(only with Ralink client).
+	11. Fix issue: Wmm capable will be enabled from ABG mode to N mode but Wmm capable is
+		not recovered when from N mode to ABG mode.
+	12.	Two iwpriv commands "ACLDelEntry" and "ACLShowAll" are added.
+	13. Support 802.11v draft 5.0 WNM - BSS transition Management and DMS.
+	14. Add OS abstract layer partition, util.ko, driver.ko, and netif.ko
+	15. Support ApClient WPS PBC.
+
 [V2.3.0.0]
 	1.	WMM ACM AP/STA support. (Pass WiFi Test Plan v0.30)
 	2.	Add HAS_STATS_COUNT compile option.
@@ -7,7 +41,7 @@
 	6.	QLOAD: Add channel busy alarm and a command thread in PCI/USB driver.
 	7.	It supports the MAC assignment from configuration file(.dat).
 	8.	Fix issue : No packet is delivered from AP when PsMode from PS to ACTIVE.
-	9.	Fast Power Save : Use Null frame with PM=0 to get buffered packet, not PS-Poll.
+	9.	Fast Power Save : Use Null frame with PM=0 to get buffered packet, not PS-Poll in station mode.
 	10.	miniupnpd supported.
 	11. AP-Client and WDS support fixed rate.
 	12.	Support GreenAP.

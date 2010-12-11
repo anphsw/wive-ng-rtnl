@@ -148,6 +148,10 @@ static VOID ApCliMlmeProbeReqAction(
 	pAd->MlmeAux.SupRateLen = pAd->CommonCfg.SupRateLen;
 	NdisMoveMemory(pAd->MlmeAux.SupRate, pAd->CommonCfg.SupRate, pAd->CommonCfg.SupRateLen);
 
+	/* Prepare the default value for extended rate */
+	pAd->MlmeAux.ExtRateLen = pAd->CommonCfg.ExtRateLen;
+	NdisMoveMemory(pAd->MlmeAux.ExtRate, pAd->CommonCfg.ExtRate, pAd->CommonCfg.ExtRateLen);
+
 	RTMPSetTimer(&pAd->MlmeAux.ProbeTimer, PROBE_TIMEOUT);
 
 	ApCliEnqueueProbeRequest(pAd, Info->SsidLen, (PCHAR) Info->Ssid, ifIndex);
@@ -202,6 +206,8 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 #ifdef CONFIG_STA_SUPPORT
 	UCHAR	pPreNHtCapabilityLen = 0;
 #endif // CONFIG_STA_SUPPORT //
+	EXT_CAP_INFO_ELEMENT	ExtCapInfo;
+
 	USHORT ifIndex = (USHORT)(Elem->Priv);
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
 
@@ -248,6 +254,7 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 								&pPreNHtCapabilityLen,
 #endif // CONFIG_STA_SUPPORT //
 								&HtCapability,
+								&ExtCapInfo,
 								&AddHtInfoLen,
 								&AddHtInfo,
 								&NewExtChannelOffset,
@@ -300,7 +307,8 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 			// Validate RSN IE if necessary, then copy store this information
 			if (LenVIE > 0 
 #ifdef WSC_AP_SUPPORT
-                && pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode == WSC_DISABLE
+                && ((pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode == WSC_DISABLE) || 
+                	(pAd->ApCfg.ApCliTab[ifIndex].WscControl.bWscTrigger == FALSE))
 #endif // WSC_AP_SUPPORT //
                 )
 			{
@@ -313,18 +321,16 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 				{
 					// ignore this response
 					pAd->MlmeAux.VarIELen = 0;
-					if (pAd->ApCfg.ApCliTab[ifIndex].AuthMode >= Ndis802_11AuthModeWPA)
-					{
-						DBGPRINT(RT_DEBUG_ERROR, ("ERROR: The RSN IE of this received Probe-resp is dis-match !!!!!!!!!! \n"));
-						return;
-					}
+					DBGPRINT(RT_DEBUG_ERROR, ("ERROR: The RSN IE of this received Probe-resp is dis-match !!!!!!!!!! \n"));
+					return;
 				}
 			}
 			else
 			{
 				if (pApCliEntry->AuthMode >= Ndis802_11AuthModeWPA
 #ifdef WSC_AP_SUPPORT
-                    && pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode == WSC_DISABLE
+                    && ((pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode == WSC_DISABLE) || 
+                		(pAd->ApCfg.ApCliTab[ifIndex].WscControl.bWscTrigger == FALSE))
 #endif // WSC_AP_SUPPORT //
                     )
 				{
@@ -381,6 +387,7 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 			RTMPCheckRates(pAd, pAd->MlmeAux.ExtRate, &pAd->MlmeAux.ExtRateLen);
 
 #ifdef DOT11_N_SUPPORT
+			NdisZeroMemory(pAd->ApCfg.ApCliTab[ifIndex].RxMcsSet,sizeof(pAd->ApCfg.ApCliTab[ifIndex].RxMcsSet));
 			// filter out un-supported ht rates
 			if ((HtCapabilityLen > 0) && 
 				(pApCliEntry->DesiredHtPhyInfo.bHtEnable) &&
@@ -499,9 +506,9 @@ static VOID ApCliInvalidStateWhenJoin(
 {
 	APCLI_CTRL_MSG_STRUCT ApCliCtrlMsg;
 	USHORT ifIndex = (USHORT)(Elem->Priv);
-#ifdef DBG
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].SyncCurrState;
-#endif
+
+	*pCurrState = APCLI_SYNC_IDLE;
 	ApCliCtrlMsg.Status = MLME_STATE_MACHINE_REJECT;
 	MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PROBE_RSP,
 		sizeof(APCLI_CTRL_MSG_STRUCT), &ApCliCtrlMsg, ifIndex);
@@ -562,6 +569,20 @@ static VOID ApCliEnqueueProbeRequest(
 			1,								&pAd->MlmeAux.SupRateLen,
 			pAd->MlmeAux.SupRateLen,		pAd->MlmeAux.SupRate,
 			END_OF_ARGS);
+
+		/* Add the extended rate IE */
+		if (pAd->MlmeAux.ExtRateLen != 0)
+		{
+			ULONG	tmp;
+
+			MakeOutgoingFrame(pOutBuffer + FrameLen,	&tmp,
+								1,						&ExtRateIe,
+								1,						&pAd->MlmeAux.ExtRateLen,
+								pAd->MlmeAux.ExtRateLen,  pAd->MlmeAux.ExtRate,                           
+                                END_OF_ARGS);
+
+			FrameLen += tmp;
+		}
 
 		MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);

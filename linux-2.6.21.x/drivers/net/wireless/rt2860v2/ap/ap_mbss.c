@@ -82,7 +82,6 @@ VOID RT28xx_MBSS_Init(
 	if (pAd->FlgMbssInit != FALSE)
 		return;
 	/* End of if */
-	pAd->FlgMbssInit = TRUE;
 
 
 	/* init */
@@ -135,6 +134,8 @@ VOID RT28xx_MBSS_Init(
 		status = RtmpOSNetDevAttach(pDevNew, &netDevHook);
 
 	}
+
+	pAd->FlgMbssInit = TRUE;
 
 }
 
@@ -276,8 +277,10 @@ INT MBSS_VirtualIF_Open(
 
 	pAd = RTMP_OS_NETDEV_GET_PRIV(pDev);
 	BssId = RT28xx_MBSS_IdxGet(pAd, pDev);
-
-	pAd->ApCfg.MBSSID[BssId].bBcnSntReq = TRUE;
+    if (BssId < 0)
+        return -1;
+    
+    pAd->ApCfg.MBSSID[BssId].bBcnSntReq = TRUE;
 
 	if (VIRTUAL_IF_UP(pAd) != 0)
 		return -1;
@@ -325,6 +328,7 @@ INT MBSS_VirtualIF_Close(
 	pAd->ApCfg.MBSSID[BssId].bBcnSntReq = FALSE;
 	APMakeAllBssBeacon(pAd);
 	APUpdateAllBeaconFrame(pAd);
+
 
 	VIRTUAL_IF_DOWN(pAd);
 
@@ -379,7 +383,7 @@ INT MBSS_VirtualIF_PacketSend(
 		return 0;
 	} /* End of if */
 
-	if (!(pDev->flags & IFF_UP))
+	if(!(RTMP_OS_NETDEV_STATE_RUNNING(pDev)))
 	{
 		/* the interface is down */
 		RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);

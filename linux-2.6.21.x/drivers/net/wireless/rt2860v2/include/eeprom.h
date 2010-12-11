@@ -28,31 +28,15 @@
 #ifndef __EEPROM_H__
 #define __EEPROM_H__
 
-#ifdef CONFIG_RALINK_RT3883
-#define EEPROM_SIZE			0x400
-#else                                           
-#define EEPROM_SIZE			0x200
-#endif
-
-#if defined(CONFIG_RALINK_RT3052)
-#if defined(CONFIG_RALINK_RT3050_1T1R)
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT3050_AP_1T1R_V1_0.bin"
-#elif defined(CONFIG_RALINK_RT3051_1T2R)
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT3051_AP_1T2R_V1_0.bin"
-#elif defined(CONFIG_RALINK_RT3052_2T2R)
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT3052_AP_2T2R_V1_1.bin"                                                      
-#elif defined(CONFIG_RT2860V2_2850)
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT2880_RT2850_AP_2T3R_V1_6.bin"
-#else // RFIC 2820
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT2880_RT2820_AP_2T3R_V1_6.bin"
-#endif
+#ifdef RTMP_MAC_PCI
+#ifdef RT3883
+#define EEPROM_SIZE					0x400
 #else
-#if defined(CONFIG_RT2860V2_AP_2850) || defined(CONFIG_RT2860V2_STA_2850)
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT2880_RT2850_AP_2T3R_V1_5.bin"
-#else // RFIC 2820
-#define EEPROM_DEFAULT_PATH			"/etc/Wireless/RT2880_RT2820_AP_2T3R_V1_5.bin"
-#endif
-#endif //RT3052
+#define EEPROM_SIZE					0x200
+#endif // RT3883 //
+#endif // RTMP_MAC_PCI //
+
+
 
 #ifdef RTMP_PCI_SUPPORT
 /*************************************************************************
@@ -69,19 +53,22 @@ int rtmp_ee_prom_write16(
 	IN USHORT			value);
 #endif // RTMP_PCI_SUPPORT //
 
-#ifdef RTMP_RBUS_SUPPORT
+
+
+
+#if defined(RTMP_RBUS_SUPPORT) || defined(RTMP_FLASH_SUPPORT)
 /*************************************************************************
   *	Public function declarations for flash-based chipset
   ************************************************************************/
 NDIS_STATUS rtmp_nv_init(
 	IN PRTMP_ADAPTER pAd);
 
-USHORT rtmp_ee_flash_read(
+int rtmp_ee_flash_read(
 	IN PRTMP_ADAPTER pAd, 
 	IN USHORT Offset,
 	OUT USHORT *pValue);
 
-VOID rtmp_ee_flash_write(
+int rtmp_ee_flash_write(
 	IN PRTMP_ADAPTER pAd, 
 	IN USHORT Offset, 
 	IN USHORT Data);
@@ -94,7 +81,7 @@ VOID rtmp_ee_flash_write_all(
 	IN PRTMP_ADAPTER pAd, 
 	IN USHORT *Data);
 
-#endif // RTMP_RBUS_SUPPORT //
+#endif // defined(RTMP_RBUS_SUPPORT) || defined(RTMP_FLASH_SUPPORT) //
 
 
 /*************************************************************************

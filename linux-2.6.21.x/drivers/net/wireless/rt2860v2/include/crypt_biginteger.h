@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     BigInteger
@@ -27,11 +26,7 @@
 #ifndef __CRYPT_BIGINTEGER_H__
 #define __CRYPT_BIGINTEGER_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
 #include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
 
 
 /* BigInteger definition & structure */
@@ -133,6 +128,7 @@ VOID BigInteger_Montgomery_ExpMod (
     IN PBIG_INTEGER pBI_E,
     IN PBIG_INTEGER pBI_P,
     OUT PBIG_INTEGER *pBI_Result);
+
 
 #endif /* __CRYPT_BIGINTEGER_H__ */
 

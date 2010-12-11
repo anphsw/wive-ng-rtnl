@@ -46,11 +46,15 @@
 		2. maximum retry number of delts frame;
 		3. maximum request timeout of ADDTS Request frame;
 		4. general timer timeout;
-		5. default timeout if inactivity of a request TSPEC is 0;
+		5. default timeout when inactivity of a request TSPEC is 0;
 		6. broadcast time interval of used ACM time;
-		7. maximum backup MBSS number;
-		8. log BSS ACM information timeout;
+		7. maximum backup ACM MBSS number;
+		8. Other BSS ACM information timeout;
 		9. CUmax;
+		10.How long to do Channel monitor function;
+		11.When to increase AIFSN of BE;
+		12.Maximum increased/decreased AIFSN;
+		13.When to decrease AIFSN of BE;
 	*/
 #define ACM_MAX_NUM_OF_FAIL_RSV_TSPEC		5
 #define ACM_MAX_NUM_OF_DELTS_RETRY			5
@@ -94,6 +98,8 @@
 #define ACM_ELM_ID_LEN_SIZE					2 /* size of ID + LENGTH field */
 
 #define ACM_MAC_ADDR_LEN					6
+
+#define ACM_UP_MAX							8 /* 0 ~ 7 */
 
 
 /* ----- Rate & Time ----- */
@@ -152,9 +158,11 @@
 #define ACM_PRE_TIME_HEADER					3
 #define ACM_PRE_TIME_ACK					4
 
-/* in software ACM, we partition max packet size to
+/*
+	In software ACM, we partition max packet size to
 	0 ~ 31B, 32 ~ 63B, .....
-	i.e. the tx time of 0B is same as the tx time of 31B */
+	i.e. the tx time of 0B is same as the tx time of 31B.
+*/
 #define ACM_PRE_TIME_DATA_SIZE_OFFSET	5
 #define ACM_PRE_TIME_DATA_SIZE_INTERVAL	(1<<ACM_PRE_TIME_DATA_SIZE_OFFSET)
 #define ACM_PRE_TIME_DATA_SIZE_NUM		(ACMR_MAX_BUF_SIZE/ACM_PRE_TIME_DATA_SIZE_INTERVAL+1)
@@ -198,7 +206,12 @@
 #define FRM_LENGTH_ACKx2			0x1C
 #define FRM_LENGTH_RTS				0x14
 
+/* 11n related */
 #define FRM_LENGTH_BLOCK_ACK		32		/* compressed BLOCK ACK */
+
+/* aggregation related */
+#define FRM_LENGTH_AGG_AMSDU_HDR	17
+#define FRM_LENGTH_AGG_RAILNK_HDR	14
 
 
 /* ----- QoS ----- */
@@ -246,9 +259,9 @@
 /* MACRO */
 
 /* ----- General ----- */
-#ifndef PACKED
-#define PACKED	__attribute__ ((packed))
-#endif // PACKED //
+#ifndef GNU_PACKED
+#define GNU_PACKED	__attribute__ ((packed))
+#endif // GNU_PACKED //
 
 #ifdef ACM_MEMORY_TEST
 #define ACM_MEM_DEBUG(__ID)												\
@@ -274,7 +287,7 @@
 					(ACMR_CLIENT_MAC((__pCdbDst))))
 
 	/*	check if the pointer address is same */
-#define AMR_IS_SAME_POINTER(__SRC, __DST)	((UINT32)(__SRC) == (UINT32)(__DST))
+#define AMR_IS_SAME_POINTER(__SRC, __DST)	((ULONG)(__SRC) == (ULONG)(__DST))
 
 	/*	get VLAN priority field */
 #define ACM_VLAN_UP_GET(__FieldTCI)		(((__FieldTCI)>>ACM_VLAN_OFFSET) & 0x07)
@@ -283,19 +296,17 @@
 	/*	1. lock a TSPEC semaphore;
 		2. unlock a TSPEC semaphore; */
 #define ACM_TSPEC_SEM_LOCK_CHK_RTN(__pAd, __SplFlags, __LabelSemErr, __RtnValue)\
-        do { ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecSemLock));			\
+        do { if (ACMR_ADAPTER_DB == NULL) 								\
+				return (__RtnValue);									\
+			 ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecSemLock));			\
 			 (__SplFlags) = 0;											\
-			 if (ACMR_ADAPTER_DB == NULL) {								\
-				ACMR_OS_SPIN_UNLOCK_BH(&((__pAd)->AcmTspecSemLock));	\
-				return (__RtnValue); }									\
 			 if (0) goto __LabelSemErr; } while(0);
 
 #define ACM_TSPEC_SEM_LOCK_CHK(__pAd, __SplFlags, __LabelSemErr)		\
-        do { ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecSemLock));			\
+        do { if (ACMR_ADAPTER_DB == NULL) 								\
+				return;													\
+			 ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecSemLock));			\
 			 (__SplFlags) = 0;											\
-			 if (ACMR_ADAPTER_DB == NULL) {								\
-				ACMR_OS_SPIN_UNLOCK_BH(&((__pAd)->AcmTspecSemLock));	\
-				return; }												\
              if (0) goto __LabelSemErr; } while(0);
 
 #define ACM_TSPEC_SEM_LOCK(__pAd, __SplFlags, __LabelSemErr) 			\
@@ -310,19 +321,17 @@
 		2. irq unlock; */
 
 #define ACM_TSPEC_IRQ_LOCK_CHK_RTN(__pAd, __SplFlags, __LabelSemErr, __RtnValue)\
-        do { ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecIrqLock));				\
+        do { if (ACMR_ADAPTER_DB == NULL)									\
+				return (__RtnValue);										\
+			 ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecIrqLock));				\
 			 (__SplFlags) = 0;												\
-			 if (ACMR_ADAPTER_DB == NULL) {									\
-				ACMR_OS_SPIN_UNLOCK_BH(&((__pAd)->AcmTspecIrqLock));		\
-				return (__RtnValue); }										\
              if (0) goto __LabelSemErr; } while(0);
 
 #define ACM_TSPEC_IRQ_LOCK_CHK(__pAd, __SplFlags, __LabelSemErr)			\
-        do { ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecIrqLock));				\
+        do { if (ACMR_ADAPTER_DB == NULL)									\
+				return;														\
+			 ACMR_OS_SPIN_LOCK_BH(&((__pAd)->AcmTspecIrqLock));				\
 			 (__SplFlags) = 0;												\
-			 if (ACMR_ADAPTER_DB == NULL) {									\
-				ACMR_OS_SPIN_UNLOCK_BH(&((__pAd)->AcmTspecIrqLock));		\
-				return; }													\
              if (0) goto __LabelSemErr; } while(0);
 
 #define ACM_TSPEC_IRQ_LOCK(__pAd, __SplFlags, __LabelSemErr)				\
@@ -349,7 +358,7 @@
 		if (MlmeAllocateMemory((__pAd), &__pPktBuf) == NDIS_STATUS_SUCCESS)	\
 		{																	\
 			__Len = ACM_FrameDeltsToStaMakeUp((__pAd), (__pCdb), __pPktBuf, (__pReq));\
-			memcpy(&__TsInfo, &(__pReq)->pTspec->TsInfo, sizeof(ACM_TS_INFO));	\
+			ACMR_MEM_COPY(&__TsInfo, &(__pReq)->pTspec->TsInfo, sizeof(ACM_TS_INFO));\
 			MiniportMMRequest((__pAd), 0, __pPktBuf, __Len);				\
 			MlmeFreeMemory((__pAd), __pPktBuf);								\
 			if (__pCdb->PsMode != PWR_SAVE)									\
@@ -370,7 +379,7 @@
 		if (MlmeAllocateMemory((__pAd), &__pPktBuf) == NDIS_STATUS_SUCCESS)	\
 		{																	\
 			__Len = ACM_FrameDeltsToApMakeUp((__pAd), (__pCdb), __pPktBuf, (__pReq));\
-			memcpy(&__TsInfo, &(__pReq)->pTspec->TsInfo, sizeof(ACM_TS_INFO));	\
+			ACMR_MEM_COPY(&__TsInfo, &(__pReq)->pTspec->TsInfo, sizeof(ACM_TS_INFO));\
 			MiniportMMRequest((__pAd), 0, __pPktBuf, __Len);				\
 			MlmeFreeMemory((__pAd), __pPktBuf);								\
 			ACMP_DeltsFrameACK((__pAd), ACMR_AP_ADDR_GET(__pAd),			\
@@ -430,10 +439,10 @@
 	(((__TsidSrc) == (__TsidDst))))
 
 #define ACM_TSPEC_COPY(__pTspecDst, __pTspecSrc)							\
-    (memcpy((UCHAR *)(__pTspecDst), (UCHAR *)(__pTspecSrc), sizeof(ACM_TSPEC)))
+    (ACMR_MEM_COPY((UCHAR *)(__pTspecDst), (UCHAR *)(__pTspecSrc), sizeof(ACM_TSPEC)))
 
 #define ACM_TCLAS_COPY(__pTclasDst, __pTclasSrc)							\
-    (memcpy((UCHAR *)(__pTclasDst), (UCHAR *)(__pTclasSrc), sizeof(ACM_TCLAS)))
+    (ACMR_MEM_COPY((UCHAR *)(__pTclasDst), (UCHAR *)(__pTclasSrc), sizeof(ACM_TCLAS)))
 
 /* free all TSPECs in the TSPEC list */
 #define ACM_LIST_ALL_FREE(__pAd, __pStreamList)								\
@@ -456,7 +465,8 @@
 	ACM_LinkNumCtrl((__pAd), (__AccessPolicy), (__Dir), 0);
 
 /* count the number of TSPEC of the station */
-#define ACM_NUM_OF_TSPEC_RECOUNT(__pCdb)									\
+#ifdef CONFIG_AP_SUPPORT
+#define ACM_NUM_OF_TSPEC_RECOUNT(__pAd, __pCdb)								\
 	{																		\
 		if ((__pCdb) != NULL)												\
 		{																	\
@@ -487,9 +497,46 @@
 			}																\
 		}																	\
 	}
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+#define ACM_NUM_OF_TSPEC_RECOUNT(__pAd, __pCdb)								\
+	{																		\
+		if ((__pCdb) != NULL)												\
+		{																	\
+			ACM_ENTRY_INFO *__pStaAcmInfo;									\
+			ACM_STREAM *__pStream;											\
+			UINT32 __IdTidNum;												\
+			__pStaAcmInfo = ACMR_STA_ACM_PARAM_INFO(__pCdb);				\
+			__pCdb->ACM_NumOfTspecIn = 0;									\
+			__pCdb->ACM_NumOfTspecOut = 0;									\
+			ACMR_MEM_ZERO(__pCdb->ACM_NumOfInTspecInAc,						\
+						sizeof(__pCdb->ACM_NumOfOutTspecInAc));				\
+			ACMR_MEM_ZERO(__pCdb->ACM_NumOfOutTspecInAc,					\
+						sizeof(__pCdb->ACM_NumOfOutTspecInAc));				\
+			for(__IdTidNum=0; __IdTidNum<ACM_STA_TID_MAX_NUM; __IdTidNum++)	\
+			{																\
+				__pStream = (ACM_STREAM *)__pStaAcmInfo->pAcStmIn[__IdTidNum];	\
+				if (__pStream != NULL)										\
+				{															\
+					__pCdb->ACM_NumOfTspecIn ++;							\
+					__pCdb->ACM_NumOfInTspecInAc[__pStream->AcmAcId] ++;	\
+				}															\
+				__pStream = (ACM_STREAM *)__pStaAcmInfo->pAcStmOut[__IdTidNum];	\
+				if (__pStream != NULL)										\
+				{															\
+					__pCdb->ACM_NumOfTspecOut ++;							\
+					__pCdb->ACM_NumOfOutTspecInAc[__pStream->AcmAcId] ++;	\
+				}															\
+			}																\
+			ACMP_RetryCountCtrl(__pAd);										\
+		}																	\
+	}
+#endif // CONFIG_STA_SUPPORT //
 
 
 /* ----- ACTION ------ */
+//#if defined(CONFIG_STA_SUPPORT_SIM) || defined(CONFIG_STA_SUPPORT)
 /* send a ADDTS request frame to a peer */
 #define ACM_ADDREQ_MAKEUP(__pAd, __pCdb, __pPktBuf, __Len, __pReq, __LabelSemErr)\
 	{																		\
@@ -673,8 +720,21 @@ typedef struct _ACM_MBSS_BW {
 	UCHAR Timeout;							/* used in timeout mechanism */
 	UCHAR Reserved2;
 	UINT32 UsedTime[ACM_DEV_NUM_OF_AC];		/* Used ACM time, unit: us */
+
 } ACM_MBSS_BW;
 #endif // ACM_CC_FUNC_MBSS //
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+typedef struct _ACM_ACL_ENTRY {
+
+	struct _ACM_ACL *pNext;
+
+	UCHAR STA_MAC[ETH_ALEN];
+
+} ACM_ACL_ENTRY;
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
 
 
 
@@ -715,7 +775,7 @@ typedef struct _ACM_ELM_TSPEC {
 
 	ACM_TSPEC Tspec;
 
-} PACKED ACM_ELM_TSPEC;
+} GNU_PACKED ACM_ELM_TSPEC;
 
 typedef struct _ACM_ELM_TCLAS {
 
@@ -746,7 +806,7 @@ typedef struct _ACM_ELM_TS_DELAY {
 										traffic stream */
 	UINT32 Delay; /* unit: TUs, >= 0 */
 
-} PACKED ACM_ELM_TS_DELAY;
+} GNU_PACKED ACM_ELM_TS_DELAY;
 
 typedef struct _ACM_ELM_QBSS_LOAD {
 
@@ -768,7 +828,7 @@ typedef struct _ACM_ELM_QBSS_LOAD {
 		admission control, in units of 32 microsecond periods per 1 second. */
 	UINT16 AvalAdmCap;
 
-} PACKED ACM_ELM_QBSS_LOAD;
+} GNU_PACKED ACM_ELM_QBSS_LOAD;
 
 
 /* ----- ACM Frame ----- */
@@ -796,7 +856,7 @@ typedef struct _ACM_ADDTS_REQ_FRAME {
 	/* max 5 TCLASS & 1 TCLASS Processing or none */
     UCHAR pTclas[0];
 
-} PACKED ACM_ADDTS_REQ_FRAME;
+} GNU_PACKED ACM_ADDTS_REQ_FRAME;
 
 typedef struct _ACM_ADDTS_RSP_FRAME {
 
@@ -814,7 +874,7 @@ typedef struct _ACM_ADDTS_RSP_FRAME {
 
 	/* TS Delay, TSPEC, TCLASS, TCLASS Processing, Schedule elements */
 	UCHAR pElm[0];
-} PACKED ACM_ADDTS_RSP_FRAME;
+} GNU_PACKED ACM_ADDTS_RSP_FRAME;
 
 typedef struct _ACM_DELTS_FRAME {
 
@@ -825,7 +885,7 @@ typedef struct _ACM_DELTS_FRAME {
 	UCHAR Action;
 
 	ACM_TS_INFO TsInfo;
-} PACKED ACM_DELTS_FRAME;
+} GNU_PACKED ACM_DELTS_FRAME;
 
 typedef struct _ACM_QOS_INFO { /* 1B */
 
@@ -834,7 +894,7 @@ typedef struct _ACM_QOS_INFO { /* 1B */
 	UCHAR FlgTxopReq:1;
 	UCHAR MoreDataAck:1;
 	UCHAR EdcaUpdateCount:4;
-} PACKED ACM_QOS_INFO;
+} GNU_PACKED ACM_QOS_INFO;
 
 #ifdef ACM_CC_FUNC_MBSS
 typedef struct _ACM_BW_ANN_FRAME {
@@ -846,7 +906,7 @@ typedef struct _ACM_BW_ANN_FRAME {
 	UCHAR Action;
 
 	ACM_MBSS_BW MBSS; /* my bss related ACM information */
-} PACKED ACM_BW_ANN_FRAME;
+} GNU_PACKED ACM_BW_ANN_FRAME;
 #endif // ACM_CC_FUNC_MBSS //
 
 
@@ -934,7 +994,8 @@ typedef struct _ACM_CTRL_PARAM {
 #else
 #define ACM_STATS_COUNT_INC(__Cnt)
 #endif // ACM_CC_FUNC_STATS //
-	ACM_STATISTICS Stats;
+	ACM_STATISTICS	Stats;
+
 } ACM_CTRL_PARAM;
 
 
@@ -1034,6 +1095,28 @@ typedef struct _ACM_CTRL_BLOCK {
 	UCHAR CU_MON_RecoverCount;
 #endif // ACM_CC_FUNC_CHAN_UTIL_MONITOR //
 #endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+	/* ACL list */
+#define ACMR_ACL_ENABLE(__pAd, __FlgIsEnabled)							\
+	((ACM_CTRL_BLOCK *)__pAd->pACM_Ctrl_BK)->ACL_IsEnabled = __FlgIsEnabled;
+#define ACM_MR_ACL_IS_ENABLED(pAd)										\
+	((ACMR_CB->ACL_IsEnabled) == 1)
+
+	BOOLEAN			ACL_IsEnabled;
+	ACMR_LIST		ACL_List;
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	/* Retry setting backup */
+	/*
+		No need in AP mode because AP is the BSS owner, it can send packets
+		even total transmission time is larger than the medium time.
+	*/
+	UINT32	RetryCountOldSettings;	/* old setting for retry count */
+#endif // CONFIG_STA_SUPPORT //
 } ACM_CTRL_BLOCK;
 
 
@@ -1235,10 +1318,6 @@ STATIC VOID ACM_TASK_STM_Check(
 #define ACM_PEER_TSPEC_OUTPUT_GET		TRUE
 #define ACM_PEER_TSPEC_INPUT_GET		FALSE
 
-/* translate factor decimal part binary to decimal */
-STATIC UINT32 ACM_SurplusFactorDecimalBin2Dec(
-	ACM_PARAM_IN	UINT32				BIN);
-
 /* translate factor decimal part decimal to binary */
 STATIC UINT32 ACM_SurplusFactorDecimalDec2Bin(
 	ACM_PARAM_IN	UINT32				DEC);
@@ -1258,10 +1337,11 @@ STATIC BOOLEAN ACM_TC_Delete(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
 	ACM_PARAM_IN	ACM_STREAM			*pStream);
 
-/* free a stream and move the failed TSPEC to the fail list */
+/* move TSPEC active the the fail list */
 STATIC VOID ACM_TC_Destroy(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
-	ACM_PARAM_IN	ACM_STREAM			*pStream);
+	ACM_PARAM_IN	ACM_STREAM			*pStreamReq,
+	ACM_PARAM_IN	BOOLEAN				FlgIsActiveExcluded);
 
 /* move the failed TSPEC to the fail list or free it */
 STATIC ACM_FUNC_STATUS ACM_TC_DestroyBy_TS_Info(
@@ -1455,6 +1535,7 @@ UINT32 ACM_TX_TimeCalHT(
 	ACM_PARAM_OUT	UINT32				*pTimeNoData,
 	ACM_PARAM_OUT	UINT32				*pTimeHeader,
 	ACM_PARAM_OUT	UINT32				*pTimeAck,
+	ACM_PARAM_OUT	UINT32				*pTimeDataHdrOnly,
 	ACM_PARAM_OUT	UINT32				*pTimeDataOnly);
 
 /* calculate the QoS packet transmission time on the fly */

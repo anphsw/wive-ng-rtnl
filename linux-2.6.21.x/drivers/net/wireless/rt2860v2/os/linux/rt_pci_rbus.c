@@ -31,11 +31,12 @@
 
 
 IRQ_HANDLE_TYPE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance);
-
-#ifdef QLOAD_FUNC_BUSY_TIME_ALARM
-static void ch_switch_workq(unsigned data);
+#else
+rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs);
 #endif
+
 #ifdef WORKQUEUE_BH
 static void rx_done_workq(struct work_struct *work);
 static void mgmt_dma_done_workq(struct work_struct *work);
@@ -49,6 +50,9 @@ static void fifo_statistic_full_workq(struct work_struct *work);
 static void rx_done_tasklet(unsigned long data);
 static void mgmt_dma_done_tasklet(unsigned long data);
 static void ac0_dma_done_tasklet(unsigned long data);
+#ifdef RALINK_ATE
+static void ate_ac0_dma_done_tasklet(unsigned long data);
+#endif // RALINK_ATE //
 static void ac1_dma_done_tasklet(unsigned long data);
 static void ac2_dma_done_tasklet(unsigned long data);
 static void ac3_dma_done_tasklet(unsigned long data);
@@ -79,9 +83,12 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define RT2860_INT_AC3_DMA_DONE			(1<<6)		// bit 6
 #define RT2860_INT_HCCA_DMA_DONE		(1<<7)		// bit 7
 #define RT2860_INT_MGMT_DONE			(1<<8)		// bit 8
-#ifdef TONE_RADAR_DETECT_SUPPORT
+#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
+#if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 #define RT2860_INT_TONE_RADAR			(1<<20)		// bit 20
-#endif // TONE_RADAR_DETECT_SUPPORT //
+#endif // defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT)  //
+#endif // defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
+
 
 #define INT_RX			RT2860_INT_RX_DONE
 
@@ -91,9 +98,12 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define INT_AC3_DLY		(RT2860_INT_AC3_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_HCCA_DLY 	(RT2860_INT_HCCA_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_MGMT_DLY	RT2860_INT_MGMT_DONE
-#ifdef TONE_RADAR_DETECT_SUPPORT
+#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
+#if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 #define INT_TONE_RADAR	(RT2860_INT_TONE_RADAR)
-#endif // TONE_RADAR_DETECT_SUPPORT //
+#endif // defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT)  //
+#endif // defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
+
 
 
 /***************************************************************************
@@ -102,157 +112,7 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
   *		Mainly for Hardware TxDesc/RxDesc/MgmtDesc, DMA Memory for TxData/RxData, etc.,
   *
   **************************************************************************/
-// Function for TxDesc Memory allocation.
-void RTMP_AllocateTxDescMemory(
-	IN	PRTMP_ADAPTER pAd,
-	IN	UINT	Index,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
 
-	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
-
-}
-
-
-// Function for MgmtDesc Memory allocation.
-void RTMP_AllocateMgmtDescMemory(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-
-	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
-
-}
-
-
-// Function for RxDesc Memory allocation.
-void RTMP_AllocateRxDescMemory(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-
-	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
-
-}
-
-
-// Function for free allocated Desc Memory.
-void RTMP_FreeDescMemory(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	PVOID	VirtualAddress,
-	IN	NDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-	
-	pci_free_consistent(pObj->pci_dev, Length, VirtualAddress, PhysicalAddress);
-}
-
-
-// Function for TxData DMA Memory allocation.
-void RTMP_AllocateFirstTxBuffer(
-	IN	PRTMP_ADAPTER pAd,
-	IN	UINT	Index,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-
-	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);
-}
-
-
-void RTMP_FreeFirstTxBuffer(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	IN	PVOID	VirtualAddress,
-	IN	NDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-
-	pci_free_consistent(pObj->pci_dev, Length, VirtualAddress, PhysicalAddress);
-}
-
-
-/*
- * FUNCTION: Allocate a common buffer for DMA
- * ARGUMENTS:
- *     AdapterHandle:  AdapterHandle
- *     Length:  Number of bytes to allocate
- *     Cached:  Whether or not the memory can be cached
- *     VirtualAddress:  Pointer to memory is returned here
- *     PhysicalAddress:  Physical address corresponding to virtual address
- */
-void RTMP_AllocateSharedMemory(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
-
-	*VirtualAddress = (PVOID)pci_alloc_consistent(pObj->pci_dev,sizeof(char)*Length, PhysicalAddress);	
-}
-
-
-/*
- * FUNCTION: Allocate a packet buffer for DMA
- * ARGUMENTS:
- *     AdapterHandle:  AdapterHandle
- *     Length:  Number of bytes to allocate
- *     Cached:  Whether or not the memory can be cached
- *     VirtualAddress:  Pointer to memory is returned here
- *     PhysicalAddress:  Physical address corresponding to virtual address
- * Notes:
- *     Cached is ignored: always cached memory
- */
-PNDIS_PACKET RTMP_AllocateRxPacketBuffer(
-	IN	PRTMP_ADAPTER pAd,
-	IN	ULONG	Length,
-	IN	BOOLEAN	Cached,
-	OUT	PVOID	*VirtualAddress,
-	OUT	PNDIS_PHYSICAL_ADDRESS PhysicalAddress)
-{
-	struct sk_buff *pkt;
-
-//	pkt = dev_alloc_skb(Length);
-	DEV_ALLOC_SKB(pAd, pkt, Length);
-
-	if (pkt == NULL) {
-		DBGPRINT(RT_DEBUG_ERROR, ("can't allocate rx %ld size packet\n",Length));
-	}
-
-	if (pkt) {
-		RTMP_SET_PACKET_SOURCE(OSPKT_TO_RTPKT(pkt), PKTSRC_NDIS);
-		*VirtualAddress = (PVOID) pkt->data;	
-//#ifdef CONFIG_5VT_ENHANCE
-//		*PhysicalAddress = PCI_MAP_SINGLE(pAd, *VirtualAddress, 1600, PCI_DMA_FROMDEVICE);
-//#else
-		*PhysicalAddress = PCI_MAP_SINGLE(pAd, *VirtualAddress, Length,  -1, PCI_DMA_FROMDEVICE);
-//#endif
-	} else {
-		*VirtualAddress = (PVOID) NULL;
-		*PhysicalAddress = (NDIS_PHYSICAL_ADDRESS) NULL;
-	}	
-
-	return (PNDIS_PACKET) pkt;
-}
 
 
 VOID Invalid_Remaining_Packet(
@@ -270,10 +130,7 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 	POS_COOKIE pObj;
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
-
-#ifdef QLOAD_FUNC_BUSY_TIME_ALARM
-	INIT_WORK(&pObj->ch_switch_work, ch_switch_workq);
-#endif
+	
 #ifdef WORKQUEUE_BH
 	INIT_WORK(&pObj->rx_done_work, rx_done_workq);
 	INIT_WORK(&pObj->mgmt_dma_done_work, mgmt_dma_done_workq);
@@ -299,15 +156,18 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 		INIT_WORK(&pObj->carrier_sense_work, carrier_sense_workq);
 #endif // CARRIER_DETECTION_SUPPORT //
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 		INIT_WORK(&pObj->dfs_work, dfs_workq);
-#endif // NEW_DFS //
+#endif // DFS_HARDWARE_SUPPORT //
 	}
 #endif // CONFIG_AP_SUPPORT //
-#else
+#else	
 	tasklet_init(&pObj->rx_done_task, rx_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->mgmt_dma_done_task, mgmt_dma_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->ac0_dma_done_task, ac0_dma_done_tasklet, (unsigned long)pAd);
+#ifdef RALINK_ATE
+	tasklet_init(&pObj->ate_ac0_dma_done_task, ate_ac0_dma_done_tasklet, (unsigned long)pAd);
+#endif // RALINK_ATE //
 	tasklet_init(&pObj->ac1_dma_done_task, ac1_dma_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->ac2_dma_done_task, ac2_dma_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->ac3_dma_done_task, ac3_dma_done_tasklet, (unsigned long)pAd);
@@ -322,22 +182,25 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 #endif // UAPSD_AP_SUPPORT //
 
 #ifdef DFS_SUPPORT
+#ifdef DFS_SOFTWARE_SUPPORT
 		tasklet_init(&pObj->pulse_radar_detect_task, pulse_radar_detect_tasklet, (unsigned long)pAd);
 		tasklet_init(&pObj->width_radar_detect_task, width_radar_detect_tasklet, (unsigned long)pAd);
+#endif // DFS_SOFTWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 #ifdef CARRIER_DETECTION_SUPPORT
 		tasklet_init(&pObj->carrier_sense_task, carrier_sense_tasklet, (unsigned long)pAd);
 #endif // CARRIER_DETECTION_SUPPORT //
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 		tasklet_init(&pObj->dfs_task, dfs_tasklet, (unsigned long)pAd);
-#endif // NEW_DFS //
+#endif // DFS_HARDWARE_SUPPORT //
 	}
 #endif // CONFIG_AP_SUPPORT //
 #endif // WORKQUEUE_BH //
 
 	return NDIS_STATUS_SUCCESS;
 }
+
 
 void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 {
@@ -349,6 +212,9 @@ void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 	tasklet_kill(&pObj->rx_done_task);
 	tasklet_kill(&pObj->mgmt_dma_done_task);
 	tasklet_kill(&pObj->ac0_dma_done_task);
+#ifdef RALINK_ATE
+	tasklet_kill(&pObj->ate_ac0_dma_done_task);
+#endif // RALINK_ATE //
 	tasklet_kill(&pObj->ac1_dma_done_task);
 	tasklet_kill(&pObj->ac2_dma_done_task);
 	tasklet_kill(&pObj->ac3_dma_done_task);
@@ -366,17 +232,19 @@ void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 		tasklet_kill(&pObj->carrier_sense_task);
 #endif // CARRIER_DETECTION_SUPPORT //
 #ifdef DFS_SUPPORT
+#ifdef DFS_SOFTWARE_SUPPORT
 		tasklet_kill(&pObj->width_radar_detect_task);
 		tasklet_kill(&pObj->pulse_radar_detect_task);
+#endif // DFS_SOFTWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 		tasklet_kill(&pObj->dfs_task);
-#endif // NEW_DFS //
+#endif // DFS_HARDWARE_SUPPORT //
 
 	}
 #endif // CONFIG_AP_SUPPORT //
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 }
 
 
@@ -389,7 +257,7 @@ NDIS_STATUS RtmpMgmtTaskInit(IN RTMP_ADAPTER *pAd)
 	/* Creat Command Thread */
 	pTask = &pAd->cmdQTask;
 	RtmpOSTaskInit(pTask, "RtmpCmdQTask", pAd);
-	status = RtmpOSTaskAttach(pTask, RTPCICmdThread, pTask);
+	status = RtmpOSTaskAttach(pTask, RTPCICmdThread, (ULONG)pTask);
 	if (status == NDIS_STATUS_FAILURE) 
 	{
 		printk (KERN_WARNING "%s: unable to start RTPCICmdThread\n", RTMP_OS_NETDEV_GET_DEVNAME(pAd->net_dev));
@@ -433,18 +301,16 @@ VOID RtmpMgmtTaskExit(
 	CHECK_PID_LEGALITY(pTask->taskPID)
 #endif
 	{
-		mb();
 		NdisAcquireSpinLock(&pAd->CmdQLock);
 		pAd->CmdQ.CmdQState = RTMP_TASK_STAT_STOPED;
 		NdisReleaseSpinLock(&pAd->CmdQLock);
-		mb();
+		
 		//RTUSBCMDUp(pAd);
 		ret = RtmpOSTaskKill(pTask);
 		if (ret == NDIS_STATUS_FAILURE)
 		{
 			DBGPRINT(RT_DEBUG_ERROR, ("%s: kill task(%s) failed!\n", 
 					RTMP_OS_NETDEV_GET_DEVNAME(pAd->net_dev), pTask->taskName));
-			return;
 		}
 		pAd->CmdQ.CmdQState = RTMP_TASK_STAT_UNKNOWN;
 	}
@@ -499,24 +365,24 @@ static inline void rt2860_int_disable(PRTMP_ADAPTER pAd, unsigned int mode)
 static void mgmt_dma_done_workq(struct work_struct *work)
 #else
 static void mgmt_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
-	INT_SOURCE_CSR_STRUC	IntSource;
+    INT_SOURCE_CSR_STRUC	IntSource;
 #ifdef WORKQUEUE_BH
 	POS_COOKIE pObj = container_of(work, struct os_cookie, mgmt_dma_done_work);
 	PRTMP_ADAPTER pAd = pObj->pAd_va;
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 //	printk("mgmt_dma_done_process\n");
 	IntSource.word = 0;
@@ -525,8 +391,6 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 	
 	RTMPHandleMgmtRingDmaDoneInterrupt(pAd);
 
-	// if you use RTMP_SEM_LOCK, sometimes kernel will hang up, no any
-	// bug report output
 	RTMP_INT_LOCK(&pAd->irq_lock, flags);
 	/*
 	 * double check to avoid lose of interrupts
@@ -537,7 +401,7 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->mgmt_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->mgmt_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -552,7 +416,7 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 static void rx_done_workq(struct work_struct *work)
 #else
 static void rx_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	BOOLEAN	bReschedule = 0;
@@ -562,18 +426,18 @@ static void rx_done_tasklet(unsigned long data)
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 
 #ifdef UAPSD_AP_SUPPORT
 	UAPSD_TIMING_RECORD(pAd, UAPSD_TIMING_RECORD_TASKLET);
 #endif // UAPSD_AP_SUPPORT //
 
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 	
 	pAd->int_pending &= ~(INT_RX);
 #ifdef CONFIG_AP_SUPPORT	
@@ -599,7 +463,7 @@ static void rx_done_tasklet(unsigned long data)
 		schedule_work(&pObj->rx_done_work);
 #else
 		tasklet_hi_schedule(&pObj->rx_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -614,7 +478,7 @@ static void rx_done_tasklet(unsigned long data)
 void fifo_statistic_full_workq(struct work_struct *work)
 #else
 void fifo_statistic_full_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 #ifdef WORKQUEUE_BH
@@ -623,14 +487,14 @@ void fifo_statistic_full_tasklet(unsigned long data)
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	pAd->int_pending &= ~(FifoStaFullInt); 
 	NICUpdateFifoStaCounters(pAd);
@@ -645,7 +509,7 @@ void fifo_statistic_full_tasklet(unsigned long data)
 		schedule_work(&pObj->fifo_statistic_full_work);
 #else
 		tasklet_hi_schedule(&pObj->fifo_statistic_full_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -661,24 +525,25 @@ void fifo_statistic_full_tasklet(unsigned long data)
 static void hcca_dma_done_workq(struct work_struct *work)
 #else
 static void hcca_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
-	INT_SOURCE_CSR_STRUC	IntSource;
+    INT_SOURCE_CSR_STRUC	IntSource;
 #ifdef WORKQUEUE_BH
 	POS_COOKIE pObj = container_of(work, struct os_cookie, hcca_dma_done_work);
 	PRTMP_ADAPTER pAd = pObj->pAd_va;
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
+
 
 	IntSource.word = 0;
 	IntSource.field.HccaDmaDone = 1;
@@ -696,7 +561,7 @@ static void hcca_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->hcca_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->hcca_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -710,10 +575,10 @@ static void hcca_dma_done_tasklet(unsigned long data)
 static void ac3_dma_done_workq(struct work_struct *work)
 #else
 static void ac3_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
-	INT_SOURCE_CSR_STRUC	IntSource;
+    INT_SOURCE_CSR_STRUC	IntSource;
 	BOOLEAN bReschedule = 0;
 #ifdef WORKQUEUE_BH
 	POS_COOKIE pObj = container_of(work, struct os_cookie, ac3_dma_done_work);
@@ -721,14 +586,14 @@ static void ac3_dma_done_tasklet(unsigned long data)
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 //	printk("ac0_dma_done_process\n");
 	IntSource.word = 0;
@@ -747,7 +612,7 @@ static void ac3_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->ac3_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->ac3_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -761,10 +626,10 @@ static void ac3_dma_done_tasklet(unsigned long data)
 static void ac2_dma_done_workq(struct work_struct *work)
 #else
 static void ac2_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
-	INT_SOURCE_CSR_STRUC	IntSource;
+    INT_SOURCE_CSR_STRUC	IntSource;
 	BOOLEAN bReschedule = 0;
 #ifdef WORKQUEUE_BH
 	POS_COOKIE pObj = container_of(work, struct os_cookie, ac2_dma_done_work);
@@ -772,14 +637,14 @@ static void ac2_dma_done_tasklet(unsigned long data)
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	IntSource.word = 0;
 	IntSource.field.Ac2DmaDone = 1;
@@ -798,7 +663,7 @@ static void ac2_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->ac2_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->ac2_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -812,25 +677,25 @@ static void ac2_dma_done_tasklet(unsigned long data)
 static void ac1_dma_done_workq(struct work_struct *work)
 #else
 static void ac1_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	BOOLEAN bReschedule = 0;
-	INT_SOURCE_CSR_STRUC	IntSource;
+    INT_SOURCE_CSR_STRUC	IntSource;
 #ifdef WORKQUEUE_BH
 	POS_COOKIE pObj = container_of(work, struct os_cookie, ac1_dma_done_work);
 	PRTMP_ADAPTER pAd = pObj->pAd_va;
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 //	printk("ac0_dma_done_process\n");
 	IntSource.word = 0;
@@ -849,7 +714,7 @@ static void ac1_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->ac1_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->ac1_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
@@ -864,7 +729,7 @@ static void ac1_dma_done_tasklet(unsigned long data)
 static void ac0_dma_done_workq(struct work_struct *work)
 #else
 static void ac0_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	INT_SOURCE_CSR_STRUC	IntSource;
@@ -875,11 +740,11 @@ static void ac0_dma_done_tasklet(unsigned long data)
 #else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST) || !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST))
 		return;
 	
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
@@ -902,7 +767,7 @@ static void ac0_dma_done_tasklet(unsigned long data)
 		schedule_work(&pObj->ac0_dma_done_work);
 #else
 		tasklet_hi_schedule(&pObj->ac0_dma_done_task);
-#endif // WORKQUEUE_BH /
+#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -911,6 +776,13 @@ static void ac0_dma_done_tasklet(unsigned long data)
 	rt2860_int_enable(pAd, INT_AC0_DLY);
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
+
+#ifdef RALINK_ATE
+static void ate_ac0_dma_done_tasklet(unsigned long data)
+{
+	return;
+}
+#endif // RALINK_ATE //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
@@ -947,12 +819,12 @@ static void uapsd_eosp_sent_tasklet(unsigned long data)
 #endif // UAPSD_AP_SUPPORT //
 
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 void schedule_dfs_task(PRTMP_ADAPTER pAd)
 {
 	POS_COOKIE pObj;
 	
-	pObj = (POS_COOKIE) pAd->OS_Cookie;
+    pObj = (POS_COOKIE) pAd->OS_Cookie;
 #ifdef WORKQUEUE_BH
 	schedule_work(&pObj->dfs_work);
 #else
@@ -996,6 +868,8 @@ void dfs_tasklet(unsigned long data)
 	else
 	// check radar here
 	{
+		
+#ifdef DFS_HWTIMER_SUPPORT
 		int idx;
 		
 		if (pAd->CommonCfg.radarDeclared == 0)
@@ -1004,16 +878,18 @@ void dfs_tasklet(unsigned long data)
 			{
 				if (SWRadarCheck(pAd, idx) == 1)
 				{
+					//find the radar signals
 					pAd->CommonCfg.radarDeclared = 1;
 					break;
 				}
 			}
 		}
+#endif // DFS_HWTIMER_SUPPORT //
 	}
 	
 	
 }
-#endif // NEW_DFS //
+#endif // DFS_HARDWARE_SUPPORT //
 
 #endif // CONFIG_AP_SUPPORT //
 
@@ -1026,7 +902,11 @@ void dfs_tasklet(unsigned long data)
 int print_int_count;
 
 IRQ_HANDLE_TYPE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19))
 rt2860_interrupt(int irq, void *dev_instance)
+#else
+rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
+#endif
 {
 	struct net_device *net_dev = (struct net_device *) dev_instance;
 	PRTMP_ADAPTER pAd = NULL;
@@ -1078,9 +958,24 @@ rt2860_interrupt(int irq, void *dev_instance)
 //	DBGPRINT(RT_DEBUG_INFO, ("====> RTMPHandleInterrupt(ISR=%08x,Mcu ISR=%08x, After clear ISR=%08x, MCU ISR=%08x)\n",
 //			IntSource.word, McuIntSource.word, IsrAfterClear, McuIsrAfterClear));
 
+	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP))
+	{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
+        return  IRQ_HANDLED;
+#else
+        return;
+#endif
+	}
+
 	// Do nothing if Reset in progress
 	if (RTMP_TEST_FLAG(pAd, (fRTMP_ADAPTER_RESET_IN_PROGRESS |fRTMP_ADAPTER_HALT_IN_PROGRESS)))
-    	    return  IRQ_HANDLED;
+	{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
+        return  IRQ_HANDLED;
+#else
+        return;
+#endif
+	}
 
 	//
 	// Handle interrupt, walk through all bits
@@ -1103,7 +998,11 @@ rt2860_interrupt(int irq, void *dev_instance)
 	if (IntSource.word == 0xffffffff)
 	{
 		RTMP_SET_FLAG(pAd, (fRTMP_ADAPTER_NIC_NOT_EXIST | fRTMP_ADAPTER_HALT_IN_PROGRESS));
-    		return  IRQ_HANDLED;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
+        return  IRQ_HANDLED;
+#else
+        return;
+#endif
 	}
 	
 	if (IntSource.word & TxCoherent)
@@ -1256,21 +1155,30 @@ rt2860_interrupt(int irq, void *dev_instance)
 #else
 			tasklet_hi_schedule(&pObj->ac0_dma_done_task);
 #endif // WORKQUEUE_BH //
-		}							
+		}
 	}
 
-
 #ifdef CONFIG_AP_SUPPORT
-#ifdef CARRIER_DETECTION_SUPPORT
-#ifdef TONE_RADAR_DETECT_SUPPORT
+#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
+#if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 	if (IntSource.word & INT_TONE_RADAR)
 	{
 		RTMPHandleRadarInterrupt(pAd);
 	}
-#endif // TONE_RADAR_DETECT_SUPPORT //
-#endif // CARRIER_DETECTION_SUPPORT //
+#endif // define(CARRIER_DETECTION_SUPPORT)  || define(DFS_HARDWARE_SUPPORT)  //
+#ifdef DFS_HWTIMER_SUPPORT
+if (IntSource.word & GPTimeOutInt)
+	{
+#ifdef DFS_1_SUPPORT
+	TimerCB(pAd);
+#endif // DFS_1_SUPPORT //
+#ifdef DFS_2_SUPPORT
+	NewTimerCB_Radar(pAd);
+#endif // DFS_1_SUPPORT //
+	}
+#endif // DFS_HWTIMER_SUPPORT //
+#endif // define( TONE_RADAR_DETECT_SUPPORT) || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 #endif // CONFIG_AP_SUPPORT //
-
 
 	if (IntSource.word & PreTBTTInt)
 	{
@@ -1302,62 +1210,12 @@ rt2860_interrupt(int irq, void *dev_instance)
 	}
 #endif // CONFIG_STA_SUPPORT //
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	return  IRQ_HANDLED;
-}
-
-/*
- * invaild or writeback cache 
- * and convert virtual address to physical address 
- */
-dma_addr_t linux_pci_map_single(void *handle, void *ptr, size_t size, int sd_idx, int direction)
-{
-	PRTMP_ADAPTER pAd;
-	POS_COOKIE pObj;
-	
-	/* 
-		------ Porting Information ------
-		> For Tx Alloc:
-			mgmt packets => sd_idx = 0
-			SwIdx: pAd->MgmtRing.TxCpuIdx
-			pTxD : pAd->MgmtRing.Cell[SwIdx].AllocVa;
-	 
-			data packets => sd_idx = 1
-	 		TxIdx : pAd->TxRing[pTxBlk->QueIdx].TxCpuIdx 
-	 		QueIdx: pTxBlk->QueIdx 
-	 		pTxD  : pAd->TxRing[pTxBlk->QueIdx].Cell[TxIdx].AllocVa;
-
-	 	> For Rx Alloc:
-	 		sd_idx = -1
-	*/
-
-	pAd = (PRTMP_ADAPTER)handle;
-	pObj = (POS_COOKIE)pAd->OS_Cookie;
-	
-	if (sd_idx == 1)
-	{
-		PTX_BLK		pTxBlk;
-		pTxBlk = (PTX_BLK)ptr;
-		return pci_map_single(pObj->pci_dev, pTxBlk->pSrcBufData, pTxBlk->SrcBufLen, direction);
-	}
-	else
-	{
-		return pci_map_single(pObj->pci_dev, ptr, size, direction);
-	}
+#endif
 
 }
 
-void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int direction)
-{
-	PRTMP_ADAPTER pAd;
-	POS_COOKIE pObj;
-
-	pAd=(PRTMP_ADAPTER)handle;
-	pObj = (POS_COOKIE)pAd->OS_Cookie;
-	
-	if (size > 0)
-		pci_unmap_single(pObj->pci_dev, dma_addr, size, direction);
-	
-}
 
 
 /*
@@ -1375,7 +1233,7 @@ Note:
 ========================================================================
 */
 INT RTPCICmdThread(
-	IN void * Context)
+	IN ULONG Context)
 {
 	RTMP_ADAPTER *pAd;
 	RTMP_OS_TASK *pTask;
@@ -1463,66 +1321,5 @@ INT RTPCICmdThread(
 #endif
 	return 0;
 
-}
-
-
-VOID CMDHandler(                                                                                                                                                
-    IN PRTMP_ADAPTER pAd)                                                                                                                                       
-{                                                                                                                                                               
-	PCmdQElmt		cmdqelmt;                                                                                                                                       
-	PUCHAR			pData;                                                                                                                                          
-	NDIS_STATUS		NdisStatus = NDIS_STATUS_SUCCESS;                                                                                                               
-	
-	while (pAd && pAd->CmdQ.size > 0)	
-	{                                                                                                                                                           
-		NdisStatus = NDIS_STATUS_SUCCESS;
-		                                                                                                                      
-		NdisAcquireSpinLock(&pAd->CmdQLock);
-		RTThreadDequeueCmd(&pAd->CmdQ, &cmdqelmt);
-		NdisReleaseSpinLock(&pAd->CmdQLock);
-		                                                                                                        
-		if (cmdqelmt == NULL)                                                                                                                                   
-			break; 
-			                                                                                                                                             
-		pData = cmdqelmt->buffer;                                      
-		                                                                                         
-		if(!(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST) || RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS)))
-		{
-			switch (cmdqelmt->command)
-			{
-#ifdef CONFIG_AP_SUPPORT
-#ifdef RTMP_PCI_SUPPORT
-				case CMDTHREAD_CHAN_RESCAN:
-					DBGPRINT(RT_DEBUG_TRACE, ("cmd> Re-scan channel! \n"));
-
-					pAd->CommonCfg.Channel = RandomChannel(pAd);
-					DBGPRINT(RT_DEBUG_TRACE, ("cmd> Switch to %d! \n", pAd->CommonCfg.Channel));
-					APStop(pAd);
-					APStartUp(pAd);
-
-					QBSS_LoadAlarmResume(pAd);
-					break;
-#endif // RTMP_PCI_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
-
-				default:
-					DBGPRINT(RT_DEBUG_ERROR, ("--> Control Thread !! ERROR !! Unknown(cmdqelmt->command=0x%x) !! \n", cmdqelmt->command));
-					break;
-			}
-		}
-
-		if (cmdqelmt->CmdFromNdis == TRUE)
-		{
-			if (cmdqelmt->buffer != NULL)
-				os_free_mem(pAd, cmdqelmt->buffer);
-			os_free_mem(pAd, cmdqelmt);
-		}
-		else
-		{
-			if ((cmdqelmt->buffer != NULL) && (cmdqelmt->bufferlength != 0))
-				os_free_mem(pAd, cmdqelmt->buffer);
-			os_free_mem(pAd, cmdqelmt);
-		}
-	}	/* end of while */
 }
 

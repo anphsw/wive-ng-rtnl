@@ -33,7 +33,6 @@ extern UCHAR	WPA_OUI[];
 extern UCHAR	RSN_OUI[];
 extern UCHAR	WME_INFO_ELEM[];
 extern UCHAR	WME_PARM_ELEM[];
-extern UCHAR	Ccx2QosInfo[];
 extern UCHAR	RALINK_OUI[];
 extern UCHAR	BROADCOM_OUI[];
 extern UCHAR    WPS_OUI[];
@@ -46,7 +45,6 @@ typedef struct wsc_ie_probreq_data
 	UCHAR	data[2];
 } WSC_IE_PROBREQ_DATA;
 #endif // WSC_AP_SUPPORT //
-
 /* 
     ==========================================================================
     Description:
@@ -307,6 +305,7 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
     OUT UCHAR		 *pPreNHtCapabilityLen,
 #endif // CONFIG_STA_SUPPORT //
     OUT HT_CAPABILITY_IE *pHtCapability,
+    OUT EXT_CAP_INFO_ELEMENT	*pExtCapInfo,
 	OUT UCHAR		 *AddHtInfoLen,
 	OUT ADD_HT_INFO_IE *AddHtInfo,
 	OUT UCHAR *NewExtChannelOffset,		// Ht extension channel offset(above or below)
@@ -349,6 +348,7 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 		*pPreNHtCapabilityLen = 0;					// Set the length of VIE to init value 0
 #endif // CONFIG_STA_SUPPORT //
     *AddHtInfoLen = 0;					// Set the length of VIE to init value 0
+    NdisZeroMemory(pExtCapInfo, sizeof(EXT_CAP_INFO_ELEMENT));
     *pRalinkIe = 0;
     *pNewChannel = 0;
     *NewExtChannelOffset = 0xff;	//Default 0xff means no such IE
@@ -534,8 +534,11 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 #ifdef CONFIG_STA_SUPPORT
 					IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 					{
-						if (ChannelSanity(pAd, *pChannel) == 0)							
+						if (ChannelSanity(pAd, *pChannel) == 0)
+						{
+							
 							return FALSE;
+						}
 					}
 #endif // CONFIG_STA_SUPPORT //
                     Sanity |= 0x4;
@@ -648,7 +651,7 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 #endif // CONFIG_STA_SUPPORT //
                 else if (NdisEqualMemory(pEid->Octet, WPA_OUI, 4))
                 {
-                    // Copy to pVIE which will report to microsoft bssid list.
+                    // Copy to pVIE which will report to bssid list.
                     Ptr = (PUCHAR) pVIE;
                     NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
                     *LengthVIE += (pEid->Len + 2);
@@ -712,16 +715,13 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
                     pEdcaParm->Cwmax[QID_AC_VO] = CW_MAX_IN_BITS-1;
                     pEdcaParm->Txop[QID_AC_VO]  = 48;   // AC_VO: 48*32us ~= 1.5ms
                 }
-#ifdef CONFIG_STA_SUPPORT 
-#ifdef WSC_STA_SUPPORT
-                else if (NdisEqualMemory(pEid->Octet, WPS_OUI, 4) && (pAd->OpMode == OPMODE_STA))
+				else if (NdisEqualMemory(pEid->Octet, WPS_OUI, 4))
                 {
+                	// Copy to pVIE which will report to bssid list.
                     Ptr = (PUCHAR) pVIE;
                     NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
                     *LengthVIE += (pEid->Len + 2);
                 }
-#endif // WSC_STA_SUPPORT //
-#endif // CONFIG_STA_SUPPORT //                
 
                 
                 break;
@@ -780,9 +780,22 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
                     *LengthVIE += (pEid->Len + 2);
                 }
                 break;
+#ifdef WAPI_SUPPORT
+			// WAPI information element
+            case IE_WAPI:                
+                if (RTMPEqualMemory(pEid->Octet + 4, WAPI_OUI, 3))
+                {
+                    // Copy to pVIE
+                    Ptr = (PUCHAR) pVIE;
+                    NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
+                    *LengthVIE += (pEid->Len + 2);
+                }
+                break;
+#endif // WAPI_SUPPORT //
+
 #ifdef CONFIG_STA_SUPPORT
-#ifdef EXT_BUILD_CHANNEL_LIST
-			case IE_COUNTRY:				
+#if defined (EXT_BUILD_CHANNEL_LIST) || defined (RT_CFG80211_SUPPORT)
+			case IE_COUNTRY:
 				Ptr = (PUCHAR) pVIE;
                 NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
                 *LengthVIE += (pEid->Len + 2);
@@ -803,14 +816,21 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
 											pQbssLoad->ChannelUtilization,
 											pQbssLoad->RemainingAdmissionControl);
 #endif // WMM_ACM_SUPPORT //
-					Ptr = (PUCHAR) pVIE;
-	                NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
-	                *LengthVIE += (pEid->Len + 2);
+					// Copy to pVIE
+                    Ptr = (PUCHAR) pVIE;
+                    NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
+                    *LengthVIE += (pEid->Len + 2);
                 }
                 break;
                 
 
 
+			case IE_EXT_CAPABILITY:
+			if (pEid->Len >= 1)
+			{
+				NdisMoveMemory(pExtCapInfo,&pEid->Octet[0], sizeof(EXT_CAP_INFO_ELEMENT) /*4*/);
+				break;
+			}
 
             default:
                 break;
@@ -874,17 +894,19 @@ BOOLEAN PeerBeaconAndProbeRspSanity2(
 	IN PRTMP_ADAPTER pAd, 
 	IN VOID *Msg, 
 	IN ULONG MsgLen, 
-	OUT UCHAR 	*RegClass) 
+	IN OVERLAP_BSS_SCAN_IE *BssScan,
+	OUT UCHAR 	*RegClass)
 {
 	CHAR				*Ptr;
 	PFRAME_802_11		pFrame;
 	PEID_STRUCT			pEid;
 	ULONG				Length = 0;	
+	BOOLEAN				brc;
 
 	pFrame = (PFRAME_802_11)Msg;
 
 	*RegClass = 0;
-	Ptr = (PCHAR) pFrame->Octet;
+	Ptr = pFrame->Octet;
 	Length += LENGTH_802_11;
 
 	// get timestamp from payload and advance the pointer
@@ -900,7 +922,9 @@ BOOLEAN PeerBeaconAndProbeRspSanity2(
 	Length += 2;
 
 	pEid = (PEID_STRUCT) Ptr;
+	brc = FALSE;
 
+	RTMPZeroMemory(BssScan, sizeof(OVERLAP_BSS_SCAN_IE));
 	// get variable fields from payload and advance the pointer
 	while ((Length + 2 + pEid->Len) <= MsgLen)	  
 	{	
@@ -913,21 +937,37 @@ BOOLEAN PeerBeaconAndProbeRspSanity2(
 				}
 				else
 				{
-					DBGPRINT(RT_DEBUG_TRACE, ("PeerBeaconAndProbeRspSanity - wrong IE_SSID (len=%d)\n",pEid->Len));
-					return FALSE;
+					DBGPRINT(RT_DEBUG_TRACE, ("PeerBeaconAndProbeRspSanity - wrong IE_SUPP_REG_CLASS (len=%d)\n",pEid->Len));
 				}
 				break;
+			case IE_OVERLAPBSS_SCAN_PARM:
+				if (pEid->Len == sizeof(OVERLAP_BSS_SCAN_IE))
+				{
+					brc = TRUE;
+					RTMPMoveMemory(BssScan, pEid->Octet, sizeof(OVERLAP_BSS_SCAN_IE));
+				}
+				else
+				{
+					DBGPRINT(RT_DEBUG_TRACE, ("PeerBeaconAndProbeRspSanity - wrong IE_OVERLAPBSS_SCAN_PARM (len=%d)\n",pEid->Len));
+				}
+				break;
+
+			case IE_EXT_CHANNEL_SWITCH_ANNOUNCEMENT:
+				DBGPRINT(RT_DEBUG_TRACE, ("PeerBeaconAndProbeRspSanity - IE_EXT_CHANNEL_SWITCH_ANNOUNCEMENT\n"));
+				break;
+
 		}
 
 		Length = Length + 2 + pEid->Len;  // Eid[1] + Len[1]+ content[Len]	
 		pEid = (PEID_STRUCT)((UCHAR*)pEid + 2 + pEid->Len); 	   
 	}
 
-	return TRUE;
+	return brc;
 
 }
 #endif // DOT11N_DRAFT3 //
 
+#if defined(AP_SCAN_SUPPORT) || defined(CONFIG_STA_SUPPORT)
 /* 
     ==========================================================================
     Description:
@@ -955,11 +995,14 @@ BOOLEAN MlmeScanReqSanity(
 
 	if ((*pBssType == BSS_INFRA || *pBssType == BSS_ADHOC || *pBssType == BSS_ANY)
 		&& (*pScanType == SCAN_ACTIVE || *pScanType == SCAN_PASSIVE
-#ifdef CONFIG_STA_SUPPORT
-#ifdef WSC_STA_SUPPORT
-		|| *pScanType == SCAN_WSC_ACTIVE
-#endif // WSC_STA_SUPPORT //
-#endif // CONFIG_STA_SUPPORT //
+#ifdef WSC_INCLUDED
+		|| (*pScanType == SCAN_WSC_ACTIVE)
+#endif // WSC_INCLUDED //
+#ifdef DOT11_N_SUPPORT
+#ifdef DOT11N_DRAFT3
+		|| (*pScanType == SCAN_2040_BSS_COEXIST) 
+#endif //DOT11N_DRAFT3 //
+#endif // DOT11_N_SUPPORT //
 		))
 	{
 		return TRUE;
@@ -970,6 +1013,7 @@ BOOLEAN MlmeScanReqSanity(
 		return FALSE;
 	}
 }
+#endif
 
 // IRQL = DISPATCH_LEVEL
 UCHAR ChannelSanity(
@@ -1107,6 +1151,12 @@ BOOLEAN MlmeAuthReqSanity(
      	) && 
         ((*pAddr & 0x01) == 0)) 
     {
+#ifdef CONFIG_STA_SUPPORT
+#ifdef WSC_INCLUDED
+		if (pAd->StaCfg.WscControl.bWscTrigger && pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE)
+			*pAlg = AUTH_MODE_OPEN;
+#endif // WSC_INCLUDED //
+#endif // // CONFIG_STA_SUPPORT //
         return TRUE;
     } 
     else 
@@ -1566,161 +1616,171 @@ BOOLEAN PeerDlsTearDownSanity(
 #endif // QOS_DLS_SUPPORT //
 
 /* 
-   ==========================================================================
-Description:
-MLME message sanity check
-Return:
-TRUE if all parameters are OK, FALSE otherwise
-==========================================================================
-*/
+    ==========================================================================
+    Description:
+        MLME message sanity check
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+ */
 BOOLEAN PeerProbeReqSanity(
-		IN PRTMP_ADAPTER pAd, 
-		IN VOID *Msg, 
-		IN ULONG MsgLen, 
-		OUT PUCHAR pAddr2,
-		OUT CHAR Ssid[], 
-		OUT UCHAR *SsidLen) 
+    IN PRTMP_ADAPTER pAd, 
+    IN VOID *Msg, 
+    IN ULONG MsgLen, 
+    OUT PUCHAR pAddr2,
+    OUT CHAR Ssid[], 
+    OUT UCHAR *SsidLen, 
+    OUT BOOLEAN *bRssiRequested)
 {
-	PFRAME_802_11 Fr = (PFRAME_802_11)Msg;	
-#ifdef WSC_INCLUDED
+    PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
+    UCHAR		*Ptr;
+    UCHAR		eid =0, eid_len = 0, *eid_data;
 #ifdef CONFIG_AP_SUPPORT
+    UCHAR       apidx = MAIN_MBSSID;
 	UCHAR       Addr1[MAC_ADDR_LEN];
-	UCHAR       apidx;
 #endif // CONFIG_AP_SUPPORT //
-	UCHAR		*Ptr;
-	UCHAR		eid =0, eid_len = 0, *eid_data;
-	UINT		WpsOui = 0, total_ie_len = 0;
+	UINT		total_ie_len = 0;	
+#ifdef WSC_INCLUDED
+	UINT		WpsOui = 0;
 #endif // WSC_INCLUDED //
 
-	// to prevent caller from using garbage output value
-	*SsidLen = 0;
+    // to prevent caller from using garbage output value
+    *SsidLen = 0;
 
-	COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);	
+    COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
 
-	if (Fr->Octet[0] != IE_SSID || Fr->Octet[1] > MAX_LEN_OF_SSID) 
-	{
-		DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity fail - wrong SSID IE\n"));
-		return FALSE;
-	} 
-
-	*SsidLen = Fr->Octet[1];
-	NdisMoveMemory(Ssid, &Fr->Octet[2], *SsidLen);
-
-#ifdef WSC_INCLUDED
-#ifdef CONFIG_AP_SUPPORT
-	COPY_MAC_ADDR(Addr1, &Fr->Hdr.Addr1);
-
-	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-	{
-		if (NdisEqualMemory(Addr1, pAd->ApCfg.MBSSID[apidx].Bssid, MAC_ADDR_LEN))
-			break;
-	}
-
-	if (apidx >= pAd->ApCfg.BssidNum)
-	{
-		return TRUE;
-	}
-#endif // CONFIG_AP_SUPPORT //
-
-	Ptr = Fr->Octet;
-	eid = Ptr[0];
-	eid_len = Ptr[1];
+    if (Fr->Octet[0] != IE_SSID || Fr->Octet[1] > MAX_LEN_OF_SSID) 
+    {
+        DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity fail - wrong SSID IE\n"));
+        return FALSE;
+    } 
+    
+    *SsidLen = Fr->Octet[1];
+    NdisMoveMemory(Ssid, &Fr->Octet[2], *SsidLen);
+	
+    Ptr = Fr->Octet;
+    eid = Ptr[0];
+    eid_len = Ptr[1];
 	total_ie_len = eid_len + 2;
 	eid_data = Ptr+2;
-
-	// get variable fields from payload and advance the pointer
+    
+    // get variable fields from payload and advance the pointer
 	while((eid_data + eid_len) <= ((UCHAR*)Fr + MsgLen))
-	{
-		switch(eid)
-		{
-		case IE_VENDOR_SPECIFIC:
-			if (eid_len <= 4)
-				break;
-			NdisMoveMemory(&WpsOui, eid_data, sizeof(UINT));
-			if (be2cpu32(WpsOui) == WSC_OUI)
-			{
+    {    	
+        switch(eid)
+        {
+	        case IE_VENDOR_SPECIFIC:
+				if (eid_len <= 4)
+					break;
+#ifdef RSSI_FEEDBACK
+                if (bRssiRequested && NdisEqualMemory(eid_data, RALINK_OUI, 3) && (eid_len == 7))
+                {
+					if (*(eid_data + 3/* skip RALINK_OUI */) & 0x8)
+                    	*bRssiRequested = TRUE;
+                    break;
+                }
+#endif // RSSI_FEEDBACK //
+
+#ifdef WSC_INCLUDED
+				NdisMoveMemory(&WpsOui, eid_data, sizeof(UINT));
+                if (be2cpu32(WpsOui) == WSC_OUI)
+                {
 
 
 #ifdef CONFIG_AP_SUPPORT
-				if (pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE)
-				{	    				
-					int bufLen = 0;
-					PUCHAR pBuf = NULL;
-					WSC_IE_PROBREQ_DATA	*pprobreq = NULL;
-					WSC_IE				*pWscIE;
-					PUCHAR				pData = NULL;
-					INT					Len = 0;
-					USHORT				DevicePasswordID;
-					PWSC_CTRL			pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+                    /*if (pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE)*/
+    				{	    				
+    					int bufLen = 0;
+    					PUCHAR pBuf = NULL;
+    					WSC_IE_PROBREQ_DATA	*pprobreq = NULL;
+						WSC_IE				*pWscIE;
+						PUCHAR				pData = NULL;
+						INT					Len = 0;
+						USHORT				DevicePasswordID;
 
-					pData = eid_data + 4;
-					Len = eid_len - 4;
-					while (Len > 0)
-					{
-						WSC_IE	WscIE;
-						NdisMoveMemory(&WscIE, pData, sizeof(WSC_IE));
-						// Check for WSC IEs
-						pWscIE = &WscIE;
-
-						// Check for device password ID, PBC = 0x0004
-						if (be2cpu16(pWscIE->Type) == WSC_ID_DEVICE_PWD_ID)
+						pData = eid_data + 4;
+						Len = eid_len - 4;
+						while (Len > 0)
 						{
-							// Found device password ID
-							NdisMoveMemory(&DevicePasswordID, pData + 4, sizeof(DevicePasswordID));
-							DevicePasswordID = be2cpu16(DevicePasswordID);
-							DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity : DevicePasswordID = 0x%04x\n", DevicePasswordID));
-							if (DevicePasswordID == DEV_PASS_ID_PBC)	// Check for PBC value
+							WSC_IE	WscIE;
+							NdisMoveMemory(&WscIE, pData, sizeof(WSC_IE));
+							// Check for WSC IEs
+							pWscIE = &WscIE;
+
+							// Check for device password ID, PBC = 0x0004
+							if (be2cpu16(pWscIE->Type) == WSC_ID_DEVICE_PWD_ID)
 							{
-								WscPBC_DPID_FromSTA(pWscControl, Fr->Hdr.Addr2);
-								break;
+								// Found device password ID
+								NdisMoveMemory(&DevicePasswordID, pData + 4, sizeof(DevicePasswordID));
+								DevicePasswordID = be2cpu16(DevicePasswordID);
+								DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity : DevicePasswordID = 0x%04x\n", DevicePasswordID));
+								if (DevicePasswordID == DEV_PASS_ID_PBC)	// Check for PBC value
+								{
+									WscPBC_DPID_FromSTA(pAd, Fr->Hdr.Addr2);
+									break;
+								}
 							}
+							
+							// Set the offset and look for PBC information
+							// Since Type and Length are both short type, we need to offset 4, not 2
+							pData += (be2cpu16(pWscIE->Length) + 4);
+							Len   -= (be2cpu16(pWscIE->Length) + 4);
 						}
 
-						// Set the offset and look for PBC information
-						// Since Type and Length are both short type, we need to offset 4, not 2
-						pData += (be2cpu16(pWscIE->Length) + 4);
-						Len   -= (be2cpu16(pWscIE->Length) + 4);
-					}
-
-					if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode & WSC_PROXY) != WSC_DISABLE)
-					{
-
-						bufLen = sizeof(WSC_IE_PROBREQ_DATA) + eid_len;
-						pBuf = kzalloc(bufLen, MEM_ALLOC_FLAG);
-						if(pBuf == NULL)
-							break;
-
-						//Send WSC probe req to UPnP
-						pprobreq = (WSC_IE_PROBREQ_DATA*)pBuf;
-						if (32 >= *SsidLen)	//Well, I think that it must be TRUE!
+						for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
 						{
-							NdisMoveMemory(pprobreq->ssid, Ssid, *SsidLen);			// SSID
-							NdisMoveMemory(pprobreq->macAddr, Fr->Hdr.Addr2, 6);	// Mac address
-							pprobreq->data[0] = 221; 								// element ID
-							pprobreq->data[1] = eid_len;							// element Length
-							NdisMoveMemory((pBuf+sizeof(WSC_IE_PROBREQ_DATA)), eid_data, eid_len);	// (WscProbeReqData)
-							WscSendUPnPMessage(pAd, apidx, 
-									WSC_OPCODE_UPNP_MGMT, WSC_UPNP_MGMT_SUB_PROBE_REQ, 
-									pBuf, bufLen, 0, 0, &Fr->Hdr.Addr2[0]);
+							if (NdisEqualMemory(Addr1, pAd->ApCfg.MBSSID[apidx].Bssid, MAC_ADDR_LEN))
+								break;
 						}
-						if (pBuf)
-							kfree(pBuf);
-					}
-					break;
-				}
+
+						if (apidx >= pAd->ApCfg.BssidNum)
+						{
+							return TRUE;
+						}
+						
+						if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode & WSC_PROXY) != WSC_DISABLE)
+						{
+
+							bufLen = sizeof(WSC_IE_PROBREQ_DATA) + eid_len;
+							pBuf = kmalloc(bufLen, MEM_ALLOC_FLAG);
+							if(pBuf == NULL)
+								break;
+
+							//Send WSC probe req to UPnP
+							memset(pBuf, 0 ,  bufLen);
+							pprobreq = (WSC_IE_PROBREQ_DATA*)pBuf;
+							if (32 >= *SsidLen)	//Well, I think that it must be TRUE!
+							{
+								NdisMoveMemory(pprobreq->ssid, Ssid, *SsidLen);			// SSID
+								NdisMoveMemory(pprobreq->macAddr, Fr->Hdr.Addr2, 6);	// Mac address
+								pprobreq->data[0] = 221; 									// element ID
+								pprobreq->data[1] = eid_len;							// element Length
+								NdisMoveMemory((pBuf+sizeof(WSC_IE_PROBREQ_DATA)), eid_data, eid_len);	// (WscProbeReqData)
+								WscSendUPnPMessage(pAd, apidx, 
+														WSC_OPCODE_UPNP_MGMT, WSC_UPNP_MGMT_SUB_PROBE_REQ, 
+														pBuf, bufLen, 0, 0, &Fr->Hdr.Addr2[0]);
+							}
+							if (pBuf)
+								kfree(pBuf);
+						}
+                		break;
+    				}
 #endif // CONFIG_AP_SUPPORT //
-				break;
-			}                
-		default:
-			break;
-		}
+                    break;
+                }                
+#endif // WSC_INCLUDED //
+
+            default:
+                break;
+        }
 		eid = Ptr[total_ie_len];
-		eid_len = Ptr[total_ie_len + 1];
+    	eid_len = Ptr[total_ie_len + 1];
 		eid_data = Ptr + total_ie_len + 2;
 		total_ie_len += (eid_len + 2);
 	}
-#endif // WSC_INCLUDED //
 
-	return TRUE;
+    return TRUE;
 }
+
+
 

@@ -36,9 +36,9 @@
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef CARRIER_DETECTION_SUPPORT
-#define CARRIER_DETECT_HIGH_BOUNDARY_1	50
-#define CARRIER_DETECT_HIGH_BOUNDARY_2	50
-#define CARRIER_DETECT_LOW_BOUNDARY		20
+#define CARRIER_DETECT_HIGH_BOUNDARY_1	100
+#define CARRIER_DETECT_HIGH_BOUNDARY_2	110
+#define CARRIER_DETECT_LOW_BOUNDARY		40
 #endif // CARRIER_DETECTION_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
@@ -69,23 +69,56 @@
 #define RADAR_DETECTION			1
 #define CARRIER_DETECTION		2
 
-#ifdef RTMP_RBUS_SUPPORT
+#if defined(RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+//Old DFS Only
 #define RADAR_GPIO_DEBUG	0x10 // GPIO external debug
-#define RADAR_SIMULATE		0x20 // simulate a short pulse hit this channel
-#define RADAR_SIMULATE2		0x40 // print any hit
-#define RADAR_LOG			0x80 // log record and ready for print
+#define RADAR_SIMULATE2		0x20 // print any hit
+#define RADAR_LOG		0x80 // log record and ready for print
 
 // Both Old and New DFS
-#define RADAR_DONT_SWITCH		0x1 // Don't Switch channel when hit
+#define RADAR_DONT_SWITCH	0x01 // Don't Switch channel when hit
+#define RADAR_SIMULATE          0x40 // simulate a short pulse hit this channel
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 // New DFS only
-#define RADAR_DEBUG_EVENT			0x2 // print long pulse debug event
-#define RADAR_DEBUG_SILENCE			0x4
-#define RADAR_DEBUG_SW_SILENCE		0x8
-#endif // NEW_DFS //
+#define RADAR_DEBUG_EVENT			0x02 // print long pulse debug event
+#define RADAR_DEBUG_SILENCE			0x04
+#define RADAR_DEBUG_SW_SILENCE		0x08
 
-#ifdef NEW_DFS
+#define RADAR_DEBUG_DONT_CHECK_BUSY		0x10
+#define RADAR_DEBUG_DONT_CHECK_RSSI		0x20
+#define RADAR_DEBUG_RESERVED_40		0x40
+#define RADAR_DEBUG_RESERVED_80		0x80
+
+#endif // DFS_HARDWARE_SUPPORT //
+#define DFS_SW_RADAR_DECLARE_THRES	3
+#define DFS_SW_RADAR_CHECK_LOOP		50
+#define DFS_SW_RADAR_SHIFT              3
+#define DFS_SW_RADAR_CH0_ERR		8
+#define DFS_SW_RADAR_PERIOD_ERR		4
+#define CE_STAGGERED_RADAR_CH0_H_ERR		(DFS_SW_RADAR_CH0_ERR + 16) // the step is 16 for every 0.1 us different in width
+#define CE_STAGGERED_RADAR_DECLARE_THRES	2
+#ifdef DFS_1_SUPPORT
+#define CE_STAGGERED_RADAR_PERIOD_MAX		(133333 + 125000 + 117647 + 1000)
+#define FCC_RADAR_PERIOD_MAX				((28570 << 1) + 1000)
+#define JAP_RADAR_PERIOD_MAX				((80000 << 1) + 1000)
+#endif
+#ifdef DFS_2_SUPPORT
+#define CE_STAGGERED_RADAR_PERIOD_MAX		((133333 + 125000 + 117647 + 1000) * 2)
+#define FCC_RADAR_PERIOD_MAX				(((28570 << 1) + 1000) * 2)
+#define JAP_RADAR_PERIOD_MAX				(((80000 << 1) + 1000) * 2)
+#endif
+#ifdef DFS_1_SUPPORT
+#define DFS_SW_RADAR_CH1_SHIFT		4
+#define DFS_SW_RADAR_CH2_SHIFT		6
+#endif
+#ifdef DFS_2_SUPPORT
+#define DFS_SW_RADAR_CH1_SHIFT		3
+#define DFS_SW_RADAR_CH2_SHIFT		3
+#endif
+#define CE_SW_CHECK							3
+
+#ifdef DFS_HARDWARE_SUPPORT
 VOID NewRadarDetectionStart(
 	IN PRTMP_ADAPTER pAd);
 
@@ -102,22 +135,31 @@ void modify_table2(
 	IN ULONG idx, 
 	IN ULONG value);
 
-#endif // NEW_DFS //
+
+ VOID NewTimerCB_Radar(
+ 	IN PRTMP_ADAPTER pAd);
+ 
+ void schedule_dfs_task(
+ 	IN PRTMP_ADAPTER pAd);
+
+
+#endif // DFS_HARDWARE_SUPPORT //
+
+#endif // defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)  //
+
 
 void MCURadarDetect(PRTMP_ADAPTER pAd);
 
-#endif // RTMP_RBUS_SUPPORT //
-
-
 #ifdef TONE_RADAR_DETECT_SUPPORT
-#define CARRIER_DETECT_START(_P, _F)	NewCarrierDetectionStart((_P))
-#define CARRIER_DETECT_STOP(_P)
-#else // original RT28xx source code //
-#define CARRIER_DETECT_START(_P, _F)	CarrierDetectionStart((_P), (_F))
-#define CARRIER_DETECT_STOP(_P)			CarrierDetectionStop((_P))
-#endif // TONE_RADAR_DETECT_SUPPORT //
-
 void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd);
+#else
+
+#ifdef DFS_HARDWARE_SUPPORT
+#if defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd);
+#endif // defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
+#endif // DFS_HARDWARE_SUPPORT //
+#endif // TONE_RADAR_DETECT_SUPPORT //
 
 #ifdef TONE_RADAR_DETECT_SUPPORT
 INT Set_CarrierCriteria_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
@@ -126,7 +168,7 @@ INT Set_CarrierStopCheck_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 void NewCarrierDetectionStart(PRTMP_ADAPTER pAd);
 #endif // TONE_RADAR_DETECT_SUPPORT //
 
-
+#ifdef DFS_SOFTWARE_SUPPORT
 VOID BbpRadarDetectionStart(
 	IN PRTMP_ADAPTER pAd);
 
@@ -140,6 +182,7 @@ VOID RadarDetectionStart(
 
 VOID RadarDetectionStop(
 	IN PRTMP_ADAPTER	pAd);
+#endif // DFS_SOFTWARE_SUPPORT //
 
 VOID RadarDetectPeriodic(
 	IN PRTMP_ADAPTER	pAd);
@@ -147,10 +190,11 @@ VOID RadarDetectPeriodic(
 #ifdef CONFIG_AP_SUPPORT
 VOID ApRadarDetectPeriodic(
 	IN PRTMP_ADAPTER pAd);
-
+#ifdef DFS_SOFTWARE_SUPPORT
 VOID RadarSMDetect(
 	IN PRTMP_ADAPTER pAd,
 	IN BOOLEAN RadarType);
+#endif // DFS_SOFTWARE_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
 BOOLEAN RadarChannelCheck(
@@ -176,10 +220,10 @@ VOID RTMPPrepareRDCTSFrame(
 	IN  UCHAR           RTSRate,
 	IN  ULONG           CTSBaseAddr,
 	IN  UCHAR			FrameGap);
-
+#ifdef DFS_SOFTWARE_SUPPORT
 VOID RTMPPrepareRadarDetectParams(
 	IN PRTMP_ADAPTER	pAd);
-
+#endif // DFS_SOFTWARE_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
 VOID AdaptRadarDetection(
 	IN PRTMP_ADAPTER pAd);
@@ -265,6 +309,14 @@ static inline VOID CarrierDetectionStop(
 	return;
 }
 
+#ifdef TONE_RADAR_DETECT_SUPPORT
+#define CARRIER_DETECT_START(_P, _F)	NewCarrierDetectionStart((_P))
+#define CARRIER_DETECT_STOP(_P)
+#else // original RT28xx source code //
+#define CARRIER_DETECT_START(_P, _F)	CarrierDetectionStart((_P), (_F))
+#define CARRIER_DETECT_STOP(_P)			CarrierDetectionStop((_P))
+#endif // TONE_RADAR_DETECT_SUPPORT //
+
 VOID CarrierDetectionFsm(
 	IN PRTMP_ADAPTER pAd,
 	IN UINT32 CurFalseCCA);
@@ -280,6 +332,7 @@ INT Set_CarrierDetect_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 #endif // CARRIER_DETECTION_SUPPORT //
 
 #ifdef DFS_SUPPORT
+#ifdef DFS_SOFTWARE_SUPPORT
 #ifdef WORKQUEUE_BH
 void pulse_radar_detect_workq(struct work_struct *work);
 void width_radar_detect_workq(struct work_struct *work);
@@ -287,6 +340,7 @@ void width_radar_detect_workq(struct work_struct *work);
 void pulse_radar_detect_tasklet(unsigned long data);
 void width_radar_detect_tasklet(unsigned long data);
 #endif // WORKQUEUE_BH //
+#endif // DFS_SOFTWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 #ifdef CARRIER_DETECTION_SUPPORT
 #ifdef WORKQUEUE_BH
@@ -296,7 +350,7 @@ void carrier_sense_tasklet(unsigned long data);
 #endif // WORKQUEUE_BH //
 #endif // CARRIER_DETECTION_SUPPORT //
 
-#ifdef NEW_DFS
+#ifdef DFS_HARDWARE_SUPPORT
 #ifdef WORKQUEUE_BH
 void dfs_workq(struct work_struct *work);
 #else
@@ -304,7 +358,7 @@ void dfs_tasklet(unsigned long data);
 #endif // WORKQUEUE_BH //
 int SWRadarCheck(
 	IN PRTMP_ADAPTER pAd, USHORT id);
-#endif // NEW_DFS //
+#endif // DFS_HARDWARE_SUPPORT //
 
 #endif // CONFIG_AP_SUPPORT //
 

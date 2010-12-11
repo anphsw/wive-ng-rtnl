@@ -36,6 +36,7 @@
 #define WSC_HDR_BTN_CHECK_PERIOD	MLME_TASK_EXEC_INTV /* unit: ms, check pin every 100ms */
 #define WSC_HDR_BTN_PRESS_TIME		2000	/* unit: ms, press button for 2s */
 #define WSC_HDR_BTN_CONT_TIMES		(WSC_HDR_BTN_PRESS_TIME/WSC_HDR_BTN_CHECK_PERIOD)
+#define WSC_HDR_BTN_GPIO_0			((UINT32)0x00000001) /* bit 0 for RT2860/RT2870 */
 #define WSC_HDR_BTN_GPIO_3			((UINT32)0x00000008) /* bit 3 for RT2860/RT2870 */
 
 /* bit7: WPS PBC (0:off, 1:on) */
@@ -53,9 +54,13 @@
 /* bit3: WPS PBC function is controlled through GPIO[3] */
 #define WSC_HDR_BTN_MR_PRESS_FLG_GET(__pAd, __FlgIsPressed)				\
 	{																	\
-		UINT32 __gpio_value;											\
+		UINT32 __gpio_value, mask;											\
 		RTMP_IO_READ32(__pAd, GPIO_CTRL_CFG, (&__gpio_value));			\
-		if (__gpio_value & WSC_HDR_BTN_GPIO_3)							\
+		if (RTMP_TEST_MORE_FLAG(__pAd, fRTMP_ADAPTER_WSC_PBC_PIN0))		\
+			mask = WSC_HDR_BTN_GPIO_0;									\
+		else															\
+			mask = WSC_HDR_BTN_GPIO_3;									\
+		if (__gpio_value & mask)										\
 			__FlgIsPressed = 0;											\
 		else															\
 			__FlgIsPressed = 1;											\
@@ -69,23 +74,6 @@
 	    	(_time_flg) = FALSE; \
 	}while(0)
 
-#define WSC_VMALLOC_KEY_MEM(pubKey, secKey, Size) \
-	do{ \
-    pubKey = vmalloc(Size); \
-	if (pubKey == NULL) \
-		DBGPRINT(RT_DEBUG_ERROR, ("Allocate memory for WscControl.pPubKeyMem failed\n")); \
-	secKey = vmalloc(Size); \
-	if (secKey == NULL) \
-		DBGPRINT(RT_DEBUG_ERROR, ("Allocate memory for WscControl.pSecKeyMem failed\n")); \
-	}while(0) 
-
-#define WSC_VFREE_KEY_MEM(pubKey, secKey) \
-	do{ \
-    if (pubKey) \
-		vfree(pubKey); \
-	if (secKey) \
-		vfree(secKey); \
-	}while(0)
 
 //Messages for the WSC state machine,
 #define	WSC_MACHINE_BASE		34
@@ -246,12 +234,10 @@
 #define WSC_ENROLLEE     0x1
 #define WSC_PROXY        0x2
 #define WSC_REGISTRAR    0x4
-#ifdef CONFIG_AP_SUPPORT
 #define WSC_ENROLLEE_PROXY           (WSC_ENROLLEE | WSC_PROXY)
 #define WSC_ENROLLEE_REGISTRAR       (WSC_ENROLLEE | WSC_REGISTRAR)
 #define WSC_PROXY_REGISTRAR          (WSC_PROXY | WSC_REGISTRAR)
 #define WSC_ENROLLEE_PROXY_REGISTRAR (WSC_ENROLLEE | WSC_PROXY | WSC_REGISTRAR)
-#endif // CONFIG_AP_SUPPORT //
 
 // Device request/response type
 #define WSC_MSGTYPE_ENROLLEE_INFO_ONLY		0x00
@@ -268,18 +254,18 @@
 #define WSC_SCSTATE_CONFIGURED		0x02
 
 // Common definition
-#define	WSC_MANUFACTURE		"OSS."
+#define	WSC_MANUFACTURE		"Ralink Technology, Corp."
 #ifdef CONFIG_AP_SUPPORT
-#define	AP_WSC_MODEL_NAME	CONFIG_RT_FULL_DEVICE_NAME
-#define	AP_WSC_DEVICE_NAME	CONFIG_RT_FULL_DEVICE_NAME
+#define	AP_WSC_MODEL_NAME		"Ralink Wireless Access Point"
+#define	AP_WSC_DEVICE_NAME		"RalinkAPS"
 #endif // CONFIG_AP_SUPPORT //
 #ifdef CONFIG_STA_SUPPORT
-#define	STA_WSC_MODEL_NAME	CONFIG_RT_FULL_DEVICE_NAME
-#define	STA_WSC_DEVICE_NAME	CONFIG_RT_FULL_DEVICE_NAME
-#define	WSC_DEVICE_NAME_R	"Wive-RTNL"
+#define	STA_WSC_MODEL_NAME		"Ralink Wireless Linux Client"
+#define	STA_WSC_DEVICE_NAME		"RalinkLinuxClient"
+#define	WSC_DEVICE_NAME_R	"Ralink EX-Registrar"
 #endif // CONFIG_STA_SUPPORT //
-#define	WSC_MODEL_NUMBER	"RT-NL"
-#define	WSC_MODEL_SERIAL	"00000000"
+#define	WSC_MODEL_NUMBER	"RT2860"
+#define	WSC_MODEL_SERIAL	"12345678"
 
 // Time-Out, param for timer func, count by micro-sec, not ticks
 #define WSC_EAPOL_START_TIME_OUT    2000 
@@ -290,9 +276,7 @@
 #define WSC_TWO_MINS_TIME_OUT       120000
 #define WSC_UPNP_M2D_TIME_OUT		15000
 #define WSC_UPNP_MSG_TIME_OUT		15000
-#ifdef CONFIG_STA_SUPPORT
 #define	WSC_PROFILE_RETRY_TIME_OUT	10000
-#endif // CONFIG_STA_SUPPORT //
 #ifdef WSC_LED_SUPPORT
 #define WSC_SUCCESSFUL_LED_PATTERN_TIMEOUT		300000		// 300 seconds
 #define WSC_WPS_FAIL_LED_PATTERN_TIMEOUT		15000		// 15 seconds.
@@ -316,6 +300,13 @@
 #define UUID_LEN_STR 37  // hex to string, plus 4 dash, plus 1 '\0'
 #define UUID_VERSION 1   // We currently just support version 1
 
+// user define length add by woody
+#define WSC_MANUFACTURE_LEN		64
+#define WSC_MODELNAME_LEN		32
+#define WSC_MODELNUNBER_LEN		32
+#define	WSC_DEVICENAME_LEN		32
+#define WSC_SERIALNUNBER_LEN	32
+
 typedef struct _WSC_UUID_T{
 	UINT32 timeLow;
 	UINT16 timeMid;
@@ -326,7 +317,7 @@ typedef struct _WSC_UUID_T{
 }WSC_UUID_T;
 
 // EAP frame format
-typedef	struct PACKED	_EAP_FRAME	{
+typedef	struct GNU_PACKED	_EAP_FRAME	{
 	UCHAR	Code;						// 1 = Request, 2 = Response
 	UCHAR	Id;
 	USHORT	Length;
@@ -334,7 +325,7 @@ typedef	struct PACKED	_EAP_FRAME	{
 }	EAP_FRAME, *PEAP_FRAME;
 
 // WSC fixed information within EAP
-typedef	struct PACKED	_WSC_FRAME	{
+typedef	struct GNU_PACKED	_WSC_FRAME	{
 	UCHAR	SMI[3];
 	UINT	VendorType;
 	UCHAR	OpCode;
@@ -376,7 +367,7 @@ typedef	enum	_WscState
 }	WSC_STATE;
 
 // WSC IE structure
-typedef	struct PACKED	_WSC_IE
+typedef	struct GNU_PACKED	_WSC_IE
 {
 	USHORT	Type;
 	USHORT	Length;
@@ -475,7 +466,7 @@ typedef	struct	_WSC_REG_DATA
 
 
 // WSC UPnP node info.
-typedef struct PACKED _WSC_UPNP_NODE_INFO{
+typedef struct _WSC_UPNP_NODE_INFO{
 	BOOLEAN				bUPnPInProgress;
 	BOOLEAN				bUPnPM2DTimerRunning;
 	BOOLEAN				bUPnPMsgTimerRunning;
@@ -484,7 +475,6 @@ typedef struct PACKED _WSC_UPNP_NODE_INFO{
 	INT					M2DACKBalance;
 	RALINK_TIMER_STRUCT   UPnPMsgTimer;
 	RALINK_TIMER_STRUCT   UPnPM2DTimer;
-	
 }WSC_UPNP_NODE_INFO, *PWSC_UPNP_NODE_INFO;
 
 #ifdef CONFIG_AP_SUPPORT
@@ -493,9 +483,18 @@ typedef struct _WSC_STA_PBC_PROBE_INFO {
     UCHAR				WscPBCStaProbeCount;
     UCHAR   			StaMacAddr[MAX_PBC_STA_TABLE_SIZE][MAC_ADDR_LEN];
 	ULONG				ReciveTime[MAX_PBC_STA_TABLE_SIZE];
-} WSC_STA_PBC_PROBE_INFO;
+} WSC_STA_PBC_PROBE_INFO, *PWSC_STA_PBC_PROBE_INFO;
 #endif // CONFIG_AP_SUPPORT //
 
+
+typedef struct GNU_PACKED _WSC_PEER_DEV_INFO {
+	UCHAR	WscPeerDeviceName[32];
+	UCHAR	WscPeerManufacturer[64];
+	UCHAR	WscPeerModelName[32];
+	UCHAR	WscPeerModelNumber[32];
+	UCHAR	WscPeerSerialNumber[32];
+	UCHAR	WscPeerMAC[6];
+} WSC_PEER_DEV_INFO, *PWSC_PEER_DEV_INFO;
 
 // WSC control block
 typedef	struct	_WSC_CTRL
@@ -513,11 +512,12 @@ typedef	struct	_WSC_CTRL
 	UCHAR			WscEnrolleePinCodeLen; // recored Device own PIN code length
 	INT             WscSelReg;     // record the UI's PIN code input when we are registrar
 	NDIS_802_11_SSID	    WscSsid;		        // select a desired ssid to connect for PIN mode 
-#ifdef CONFIG_STA_SUPPORT
-	UCHAR				    WscBssid[MAC_ADDR_LEN];	// select a desired bssid to connect
 	UCHAR					WscPBCBssCount;			// Count of PBC activated APs.
+	UCHAR				    WscBssid[MAC_ADDR_LEN];	// select a desired bssid to connect	
+#ifdef CONFIG_STA_SUPPORT
 	BOOLEAN				    WscEnAssociateIE;	    // Add WSC IE on Associate frame.
 	BOOLEAN				    WscEnProbeReqIE;	    // Add WSC IE on Probe-Req frame.
+	UCHAR				    WscPeerMAC[MAC_ADDR_LEN];	// peer Mac Address
 #endif // CONFIG_STA_SUPPORT //
 	WSC_REG_DATA	RegData;		// Registrar pair data	
 	UCHAR           lastId;
@@ -539,14 +539,15 @@ typedef	struct	_WSC_CTRL
     BOOLEAN             EapolTimerPending;
     RALINK_TIMER_STRUCT   EapolTimer;
 
-#ifdef CONFIG_STA_SUPPORT
 	BOOLEAN                 WscPBCTimerRunning;
     RALINK_TIMER_STRUCT     WscPBCTimer;
     BOOLEAN                 WscScanTimerRunning;
     RALINK_TIMER_STRUCT     WscScanTimer;
-    BOOLEAN                 WscDriverAutoConnect;
 	BOOLEAN                 WscProfileRetryTimerRunning;
 	RALINK_TIMER_STRUCT		WscProfileRetryTimer;
+#ifdef CONFIG_STA_SUPPORT
+    /* 0x00: disable, 0x01: Auto Connect first credential only, 0x02: Auto Connect and rotate all crentials */
+    UCHAR                 	WscDriverAutoConnect;		
 #endif // CONFIG_STA_SUPPORT //
 #ifdef WSC_LED_SUPPORT
 	ULONG					WscLEDMode; // WPS LED mode: LED_WPS_XXX definitions.
@@ -564,38 +565,39 @@ typedef	struct	_WSC_CTRL
     UCHAR               WpaPsk[64];
     INT                 WpaPskLen;
     BOOLEAN             bWscTrigger;        // TRUE: AP-Enrollee & AP-Registrar work, FALSE: AP-Enrollee & AP-Registrar stop working
-    void 			    *pPubKeyMem;
-	void			    *pSecKeyMem;
     PVOID               pAd;
     UINT                WscLastPinFromEnrollee;
     BOOLEAN             WscRejectSamePinFromEnrollee;
 #ifdef CONFIG_AP_SUPPORT
-	BOOLEAN					WscPBCOverlap;
-	WSC_STA_PBC_PROBE_INFO	WscStaPbcProbeInfo;
-	INT						WscKeyASCII; 		//WscKeyASCII (0:Hex, 1:ASCII(random length), others: ASCII length(8~63, default 8))
 	NDIS_802_11_SSID	    WscDefaultSsid;		// Default WPS SSID after WPS process complete with Enrollee when AP is un-configured Registrar.
 	BOOLEAN					bWCNTest;
 #endif // CONFIG_AP_SUPPORT //
+	INT					WscKeyASCII; 		//WscKeyASCII (0:Hex, 1:ASCII(random length), others: ASCII length(8~63, default 8))
 	INT					WscActionMode;
 	UCHAR                   Wsc_Uuid_E[UUID_LEN_HEX];
 	UCHAR                   Wsc_Uuid_Str[UUID_LEN_STR];
 
 	UCHAR				WpsApBand; // Preferred WPS AP PHY type. Ref: PREFERRED_WPS_AP_PHY_TYPE
+//add by woody
+	UCHAR Flags;
+
+
+	WSC_PEER_DEV_INFO	WscPeerInfo;
 }	WSC_CTRL, *PWSC_CTRL;
 
 // structure to store Simple Config Attributes Info
-typedef struct PACKED _WSC_LV_INFO {
+typedef struct GNU_PACKED _WSC_LV_INFO {
     USHORT  ValueLen;
     UCHAR   Value[512];
 } WSC_LV_INFO;
 
-typedef struct PACKED _WSC_IE_HEADER {
+typedef struct GNU_PACKED _WSC_IE_HEADER {
 	UCHAR elemId;
 	UCHAR length;
 	UCHAR oui[4];
 } WSC_IE_HEADER;
 
-typedef struct PACKED _WSC_CONFIGURED_VALUE {
+typedef struct GNU_PACKED _WSC_CONFIGURED_VALUE {
 	USHORT WscConfigured; // 1 un-configured; 2 configured
 	UCHAR	WscSsid[32 + 1];
 	USHORT WscAuthMode;	// mandatory, 0x01: open, 0x02: wpa-psk, 0x04: shared, 0x08:wpa, 0x10: wpa2, 0x20: wpa2-psk
@@ -610,7 +612,7 @@ typedef struct PACKED _WSC_CONFIGURED_VALUE {
 
 /* Ralink specific message header for Linux specific NETLINK socket. */
 #define RTMP_WSC_NLMSG_HDR_LEN		30		//signature(8) + envID(4) + ackID(4) + msgLen(4) + Flag(2) + segLen(2) + devAddr(6)
-typedef struct PACKED _RTMP_WSC_NLMSG_HDR{
+typedef struct GNU_PACKED _RTMP_WSC_NLMSG_HDR{
 	UCHAR	signature[8];	/* Signature used to identify that this's a Ralink specific NETLINK message. 
 								MUST be "RAWSCMSG" currently.
 							*/
@@ -631,7 +633,7 @@ typedef struct PACKED _RTMP_WSC_NLMSG_HDR{
 	Ralink specific WSC Mesage Header definition. 
 */
 #define RTMP_WSC_MSG_HDR_LEN		12	//msgType(2) + msgSubType(2) + ipAddr(4) + len(4)
-typedef struct PACKED _RTMP_WSC_MSG_HDR{
+typedef struct GNU_PACKED _RTMP_WSC_MSG_HDR{
 	USHORT	msgType;
 	USHORT	msgSubType;
 	UINT   ipAddr;
@@ -655,7 +657,7 @@ PSTRING   WscGetEncryTypeStr(
 
 
 #define WSC_U2KMSG_HDR_LEN	41
-typedef	struct PACKED _RTMP_WSC_U2KMSG_HDR{
+typedef	struct GNU_PACKED _RTMP_WSC_U2KMSG_HDR{
 	UINT			envID;					//Event ID.
 	UCHAR			Addr1[MAC_ADDR_LEN];	//RA, should be the MAC address of the AP.	
 	UCHAR			Addr2[MAC_ADDR_LEN];	//TA, should be the ipAddress of remote UPnP Device/CotrnolPoint.
@@ -672,9 +674,11 @@ typedef	struct PACKED _RTMP_WSC_U2KMSG_HDR{
 #undef     AP_CLIENT_MODE  
 #undef     STA_MODE        
 
-#define     AP_MODE         0
-#define     AP_CLIENT_MODE  1
-#define     STA_MODE        2
+#define     AP_MODE         	0x00
+#define     AP_CLIENT_MODE  	0x01
+#define     STA_MODE        	0x02
+#define		REGISTRAR_ACTION	0x40
+#define 	ENROLLEE_ACTION		0x80
 
 // Definition for Config Methods
 #define		WPS_CONFIG_METHODS_USBA			0x0001
@@ -694,18 +698,19 @@ typedef struct _UUID_BSSID_CH_INFO {
 	UCHAR	Band;
 	UCHAR	Ssid[MAX_LEN_OF_SSID];
 	UCHAR	SsidLen;
+	UCHAR   MacAddr[MAC_ADDR_LEN];
 } UUID_BSSID_CH_INFO, *PUUID_BSSID_CH_INFO;
 
-//
-// Preferred WPS AP type.
-//
-// a) PREFERRED_WPS_AP_PHY_TYPE_2DOT4_G_FIRST
-//     Select 2.4G WPS AP first. Otherwise select 5G WPS AP.
-// b) PREFERRED_WPS_AP_PHY_TYPE_5_G_FIRST
-//     Select the 5G WPS AP first. Otherwise select the 2.4G WPS AP.
-// c) PREFERRED_WPS_AP_PHY_TYPE_AUTO_SELECTION
-//     Automactically select WPS AP.
-//
+/*
+	 Preferred WPS AP type.
+
+	 a) PREFERRED_WPS_AP_PHY_TYPE_2DOT4_G_FIRST
+	     Select 2.4G WPS AP first. Otherwise select 5G WPS AP.
+	 b) PREFERRED_WPS_AP_PHY_TYPE_5_G_FIRST
+	     Select the 5G WPS AP first. Otherwise select the 2.4G WPS AP.
+	 c) PREFERRED_WPS_AP_PHY_TYPE_AUTO_SELECTION
+	     Automactically select WPS AP.
+*/
 typedef enum _PREFERRED_WPS_AP_PHY_TYPE
 {
 	PREFERRED_WPS_AP_PHY_TYPE_2DOT4_G_FIRST = 0, 
@@ -713,6 +718,13 @@ typedef enum _PREFERRED_WPS_AP_PHY_TYPE
 	PREFERRED_WPS_AP_PHY_TYPE_AUTO_SELECTION, 
 	PREFERRED_WPS_AP_PHY_TYPE_MAXIMUM, 
 } PREFERRED_WPS_AP_PHY_TYPE;
+
+typedef enum _WscSecurityMode{
+	WPA2PSKAES,
+	WPA2PSKTKIP,
+	WPAPSKAES,
+	WPAPSKTKIP,
+}WSC_SECURITY_MODE;
 
 #endif	// __WSC_H__
 

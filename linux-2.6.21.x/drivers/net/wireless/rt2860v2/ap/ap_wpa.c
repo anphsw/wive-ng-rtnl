@@ -484,6 +484,8 @@ UINT	APValidateRSNIE(
 {
 	UINT StatusCode = MLME_SUCCESS;
 	PEID_STRUCT  eid_ptr;
+	INT	apidx;
+	PMULTISSID_STRUCT pMbss;
 
 	if (rsnie_len == 0)
 		return MLME_SUCCESS;
@@ -495,6 +497,13 @@ UINT	APValidateRSNIE(
 		return MLME_UNSPECIFY_FAIL;
 	}
 
+	apidx = pEntry->apidx;
+	pMbss = &pAd->ApCfg.MBSSID[apidx];
+
+#ifdef WAPI_SUPPORT
+	if (eid_ptr->Eid == IE_WAPI)	
+		return MLME_SUCCESS;
+#endif // WAPI_SUPPORT //
 
 	// check group cipher
 	if (!RTMPCheckMcast(pAd, eid_ptr, pEntry))
@@ -518,8 +527,8 @@ UINT	APValidateRSNIE(
 	if (StatusCode != MLME_SUCCESS)
 	{
 		// send wireless event - for RSN IE sanity check fail
-		if (pAd->CommonCfg.bWirelessEvent)
-			RTMPSendWirelessEvent(pAd, IW_RSNIE_SANITY_FAIL_EVENT_FLAG, pEntry->Addr, 0, 0);
+		RTMPSendWirelessEvent(pAd, IW_RSNIE_SANITY_FAIL_EVENT_FLAG, pEntry->Addr, 0, 0);
+		DBGPRINT(RT_DEBUG_ERROR, ("%s : invalid status code(%d) !!!\n", __FUNCTION__, StatusCode));
 	}
 	else
 	{
@@ -572,20 +581,18 @@ VOID HandleCounterMeasure(
     pAd->ApCfg.MICFailureCounter++;
     
 	// send wireless event - for MIC error
-	if (pAd->CommonCfg.bWirelessEvent)
-		RTMPSendWirelessEvent(pAd, IW_MIC_ERROR_EVENT_FLAG, pEntry->Addr, 0, 0); 
+	RTMPSendWirelessEvent(pAd, IW_MIC_ERROR_EVENT_FLAG, pEntry->Addr, 0, 0); 
 	
     if (pAd->ApCfg.CMTimerRunning == TRUE)
     {
         DBGPRINT(RT_DEBUG_ERROR, ("Receive CM Attack Twice within 60 seconds ====>>> \n"));
         
 		// send wireless event - for counter measures
-		if (pAd->CommonCfg.bWirelessEvent)
 			RTMPSendWirelessEvent(pAd, IW_COUNTER_MEASURES_EVENT_FLAG, pEntry->Addr, 0, 0); 
+		ApLogEvent(pAd, pEntry->Addr, EVENT_COUNTER_M);
 		
         // renew GTK
 		GenRandom(pAd, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid, pAd->ApCfg.MBSSID[pEntry->apidx].GNonce);
-        ApLogEvent(pAd, pEntry->Addr, EVENT_COUNTER_M);
 
 		// Cancel CounterMeasure Timer
 		RTMPCancelTimer(&pAd->ApCfg.CounterMeasureTimer, &Cancelled);
@@ -596,7 +603,7 @@ VOID HandleCounterMeasure(
             // happened twice within 60 sec,  AP SENDS disaccociate all associated STAs.  All STA's transition to State 2
             if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]))
             {
-                MlmeDeAuthAction(pAd, &pAd->MacTab.Content[i], REASON_MIC_FAILURE);
+                MlmeDeAuthAction(pAd, &pAd->MacTab.Content[i], REASON_MIC_FAILURE, FALSE);
             }
         }
         
@@ -646,42 +653,7 @@ VOID CMTimerExec(
 
     pAd->ApCfg.CMTimerRunning = FALSE;
 }
-    
-VOID EnqueueStartForPSKExec(
-    IN PVOID SystemSpecific1, 
-    IN PVOID FunctionContext, 
-    IN PVOID SystemSpecific2, 
-    IN PVOID SystemSpecific3) 
-{
-	MAC_TABLE_ENTRY     *pEntry = (PMAC_TABLE_ENTRY) FunctionContext;
-
-	if ((pEntry) && IS_ENTRY_CLIENT(pEntry) && (pEntry->WpaState < AS_PTKSTART))
-	{
-		PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)pEntry->pAd;
-
-		switch (pEntry->EnqueueEapolStartTimerRunning)
-		{
-			case EAPOL_START_PSK:								
-				DBGPRINT(RT_DEBUG_TRACE, ("Enqueue EAPoL-Start-PSK for sta(%02x:%02x:%02x:%02x:%02x:%02x) \n", PRINT_MAC(pEntry->Addr)));
-
-				MlmeEnqueue(pAd, WPA_STATE_MACHINE, MT2_EAPOLStart, 6, &pEntry->Addr, 0);
-				break;
-
-			case EAPOL_START_1X:							
-				DBGPRINT(RT_DEBUG_TRACE, ("Enqueue EAPoL-Start-1X for sta(%02x:%02x:%02x:%02x:%02x:%02x) \n", PRINT_MAC(pEntry->Addr)));
-
-				Dot1xEapTriggerAction(pAd, pEntry);						
-				break;
-
-			default:
-				break;
-			
-		}
-	}			
-		pEntry->EnqueueEapolStartTimerRunning = EAPOL_START_DISABLE;
-		
-}				
-	
+   
 VOID WPARetryExec(
     IN PVOID SystemSpecific1, 
     IN PVOID FunctionContext, 
@@ -707,11 +679,10 @@ VOID WPARetryExec(
                 if (pEntry->ReTryCounter > (GROUP_MSG1_RETRY_TIMER_CTR + 1))
                 {    
                 	// send wireless event - for group key handshaking timeout
-					if (pAd->CommonCfg.bWirelessEvent)
 						RTMPSendWirelessEvent(pAd, IW_GROUP_HS_TIMEOUT_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
 					
                     DBGPRINT(RT_DEBUG_TRACE, ("WPARetryExec::Group Key HS exceed retry count, Disassociate client, pEntry->ReTryCounter %d\n", pEntry->ReTryCounter));
-                    MlmeDeAuthAction(pAd, pEntry, REASON_GROUP_KEY_HS_TIMEOUT);
+                    MlmeDeAuthAction(pAd, pEntry, REASON_GROUP_KEY_HS_TIMEOUT, FALSE);
                 }
 				// 2. Retry GTK.
                 else if (pEntry->ReTryCounter > GROUP_MSG1_RETRY_TIMER_CTR)
@@ -727,11 +698,10 @@ VOID WPARetryExec(
                 else if (pEntry->ReTryCounter > (PEER_MSG1_RETRY_TIMER_CTR + 3))
                 {
 					// send wireless event - for pairwise key handshaking timeout
-					if (pAd->CommonCfg.bWirelessEvent)
 						RTMPSendWirelessEvent(pAd, IW_PAIRWISE_HS_TIMEOUT_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0);
 
                     DBGPRINT(RT_DEBUG_TRACE, ("WPARetryExec::MSG1 timeout, pEntry->ReTryCounter = %d\n", pEntry->ReTryCounter));
-                    MlmeDeAuthAction(pAd, pEntry, REASON_4_WAY_TIMEOUT);
+                    MlmeDeAuthAction(pAd, pEntry, REASON_4_WAY_TIMEOUT, FALSE);
                 }
 				// 4. Retry 4 way message 1, the last try, the timeout is 3 sec for EAPOL-Start
                 else if (pEntry->ReTryCounter == (PEER_MSG1_RETRY_TIMER_CTR + 3))                
@@ -773,41 +743,6 @@ VOID WPARetryExec(
 #endif // APCLI_SUPPORT //	
 }
 
-VOID MlmeDeAuthAction(
-    IN PRTMP_ADAPTER    pAd, 
-    IN MAC_TABLE_ENTRY  *pEntry,
-    IN USHORT           Reason)
-{
-    PUCHAR          pOutBuffer = NULL;
-    ULONG           FrameLen = 0;
-    HEADER_802_11   DeAuthHdr;
-    NDIS_STATUS     NStatus;
-
-    if (pEntry)
-    {
-        // Send out a Deauthentication request frame
-        NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
-        if (NStatus != NDIS_STATUS_SUCCESS)
-            return;
-
-		// send wireless event - for send disassication 
-		if (pAd->CommonCfg.bWirelessEvent)
-			RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-
-        DBGPRINT(RT_DEBUG_TRACE, ("Send DEAUTH frame with ReasonCode(%d) to %02x:%02x:%02x:%02x:%02x:%02x \n",Reason, PRINT_MAC(pEntry->Addr)));
-        
-        MgtMacHeaderInit(pAd, &DeAuthHdr, SUBTYPE_DEAUTH, 0, pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid);
-        MakeOutgoingFrame(pOutBuffer,               &FrameLen, 
-                          sizeof(HEADER_802_11),    &DeAuthHdr,
-                          2,                        &Reason,
-                          END_OF_ARGS);
-        MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
-        MlmeFreeMemory(pAd, pOutBuffer);
-    
-        // ApLogEvent(pAd, pEntry->Addr, EVENT_DISASSOCIATED);
-        MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
-    }
-}
 
 /*
     ==========================================================================
@@ -858,13 +793,12 @@ VOID GREKEYPeriodicExec(
 	if (temp_counter > (pMbss->WPAREKEY.ReKeyInterval))
     {
         pMbss->REKEYCOUNTER = 0;
+		pMbss->RekeyCountDown = 3;
         DBGPRINT(RT_DEBUG_TRACE, ("Rekey Interval Excess, GKeyDoneStations=%d\n", pMbss->StaCount));
         
         // take turn updating different groupkey index, 
 		if ((pMbss->StaCount) > 0)
         {
-			USHORT	Wcid;
-
 			/* change key index */
 			pMbss->DefaultKeyId = (pMbss->DefaultKeyId == 1) ? 2 : 1;         
 	
@@ -896,6 +830,16 @@ VOID GREKEYPeriodicExec(
 											  	pMbss->DefaultKeyId));
 				}
 			}
+		}
+	}       
+
+	/* Use countdown to ensure the 2-way handshaking had completed */
+	if (pMbss->RekeyCountDown > 0)
+	{
+		pMbss->RekeyCountDown--;
+		if (pMbss->RekeyCountDown == 0)
+		{
+			USHORT	Wcid;
 
 			/* Get a specific WCID to record this MBSS key attribute */
 			GET_GroupKey_WCID(Wcid, apidx);
@@ -908,54 +852,13 @@ VOID GREKEYPeriodicExec(
 								Wcid, 
 								TRUE, 
 								pMbss->GTK);
-				
 		}
 	}       
     
 }
 
-VOID WpaDeriveGTK(
-    IN  UCHAR   *GMK,
-    IN  UCHAR   *GNonce,
-    IN  UCHAR   *AA,
-    OUT UCHAR   *output,
-    IN  UINT    len)
-{
-    UCHAR   concatenation[76];
-    UINT    CurrPos=0;
-    UCHAR   Prefix[19];
-    UCHAR   temp[80];   
 
-    NdisMoveMemory(&concatenation[CurrPos], AA, 6);
-    CurrPos += 6;
-
-    NdisMoveMemory(&concatenation[CurrPos], GNonce , 32);
-    CurrPos += 32;
-
-    Prefix[0] = 'G';
-    Prefix[1] = 'r';
-    Prefix[2] = 'o';
-    Prefix[3] = 'u';
-    Prefix[4] = 'p';
-    Prefix[5] = ' ';
-    Prefix[6] = 'k';
-    Prefix[7] = 'e';
-    Prefix[8] = 'y';
-    Prefix[9] = ' ';
-    Prefix[10] = 'e';
-    Prefix[11] = 'x';
-    Prefix[12] = 'p';
-    Prefix[13] = 'a';
-    Prefix[14] = 'n';
-    Prefix[15] = 's';
-    Prefix[16] = 'i';
-    Prefix[17] = 'o';
-    Prefix[18] = 'n';
-
-    PRF(GMK, PMK_LEN, Prefix,  19, concatenation, 38 , temp, len);
-    NdisMoveMemory(output, temp, len);
-}
-
+#ifdef DOT1X_SUPPORT
 /*
     ========================================================================
 
@@ -1056,7 +959,7 @@ VOID WpaSend(
     else     
     {
         DBGPRINT(RT_DEBUG_TRACE, ("Send Deauth, Reason : REASON_NO_LONGER_VALID\n"));
-        MlmeDeAuthAction(pAdapter, pEntry, REASON_NO_LONGER_VALID);
+        MlmeDeAuthAction(pAdapter, pEntry, REASON_NO_LONGER_VALID, FALSE);
     }
 }    
 
@@ -1187,6 +1090,7 @@ VOID RTMPMaintainPMKIDCache(
 		}
 	}
 }
+#endif // DOT1X_SUPPORT //
 
 VOID RTMPGetTxTscFromAsic(
 	IN  PRTMP_ADAPTER   pAd,
@@ -1198,16 +1102,39 @@ VOID RTMPGetTxTscFromAsic(
 	UCHAR			IvEiv[8];
 	int				i;
 
+	/* Sanity check of apidx */
+	if (apidx >= MAX_MBSSID_NUM)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("RTMPGetTxTscFromAsic : invalid apidx(%d)\n", apidx));
+		return;
+	}
+
+	/* Initial value */
+	NdisZeroMemory(IvEiv, 8);
+	NdisZeroMemory(pTxTsc, 6);
+
 	// Get apidx for this BSSID
 	GET_GroupKey_WCID(Wcid, apidx);	
 
+	/* When the group rekey action is triggered, a count-down(3 seconds) is started. 
+	   During the count-down, use the initial PN as TSC.
+	   Otherwise, get the IVEIV from ASIC. */
+	if (pAd->ApCfg.MBSSID[apidx].RekeyCountDown > 0)
+	{
+		/*
+		In IEEE 802.11-2007 8.3.3.4.3 described :
+		The PN shall be implemented as a 48-bit monotonically incrementing
+		non-negative integer, initialized to 1 when the corresponding 
+		temporal key is initialized or refreshed. */	
+		IvEiv[0] = 1;
+	}
+	else
+	{
 	// Read IVEIV from Asic
 	offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
-	NdisZeroMemory(IvEiv, 8);
-	NdisZeroMemory(pTxTsc, 6);
-			
 	for (i=0 ; i < 8; i++)
 		RTMP_IO_READ8(pAd, offset+i, &IvEiv[i]); 
+	}
 
 	// Record current TxTsc	
 	if (pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus == Ndis802_11Encryption3Enabled)
@@ -1232,6 +1159,51 @@ VOID RTMPGetTxTscFromAsic(
 									Wcid, *pTxTsc, *(pTxTsc+1), *(pTxTsc+2), *(pTxTsc+3), *(pTxTsc+4), *(pTxTsc+5)));
 			
 
+}
+
+/*
+    ==========================================================================
+    Description:
+       Set group re-key timer
+
+    Return:
+		
+    ==========================================================================
+*/
+VOID	WPA_APSetGroupRekeyAction(
+	IN  PRTMP_ADAPTER   pAd)
+{
+	UINT8	apidx = 0;
+
+	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
+	{
+		PMULTISSID_STRUCT	pMbss = &pAd->ApCfg.MBSSID[apidx];
+
+		if ((pMbss->WepStatus == Ndis802_11Encryption2Enabled) ||
+			(pMbss->WepStatus == Ndis802_11Encryption3Enabled) ||
+			(pMbss->WepStatus == Ndis802_11Encryption4Enabled))
+		{
+			// Group rekey related
+			if ((pMbss->WPAREKEY.ReKeyInterval != 0) 
+				&& ((pMbss->WPAREKEY.ReKeyMethod == TIME_REKEY) || (
+					pMbss->WPAREKEY.ReKeyMethod == PKT_REKEY))) 
+			{
+				// Regularly check the timer
+				if (pMbss->REKEYTimerRunning == FALSE)
+				{
+					RTMPSetTimer(&pMbss->REKEYTimer, GROUP_KEY_UPDATE_EXEC_INTV);
+
+					pMbss->REKEYTimerRunning = TRUE;
+					pMbss->REKEYCOUNTER = 0;
+				}
+				DBGPRINT(RT_DEBUG_TRACE, (" %s : Group rekey method= %ld , interval = 0x%lx\n",
+											__FUNCTION__, pMbss->WPAREKEY.ReKeyMethod,
+											pMbss->WPAREKEY.ReKeyInterval));
+			}
+			else
+				pMbss->REKEYTimerRunning = FALSE;
+		}
+	}
 }
 
 #ifdef QOS_DLS_SUPPORT
@@ -1344,11 +1316,11 @@ VOID RTMPHandleSTAKey(
 	NdisZeroMemory(pSTAKey->KeyDesc.KeyMic, LEN_KEY_DESC_MIC);
     if (pEntry->WepStatus == Ndis802_11Encryption2Enabled)
     {
-        HMAC_MD5(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey, MICMsgLen, mic, MD5_DIGEST_SIZE);
+        RT_HMAC_MD5(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey, MICMsgLen, mic, MD5_DIGEST_SIZE);
     }
     else
     {
-        HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey,  MICMsgLen, mic, SHA1_DIGEST_SIZE);
+        RT_HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey,  MICMsgLen, mic, SHA1_DIGEST_SIZE);
     }
     if (!RTMPEqualMemory(rcv_mic, mic, LEN_KEY_DESC_MIC))
     {
@@ -1500,8 +1472,7 @@ VOID RTMPHandleSTAKey(
        	NdisMoveMemory(pOutPacket->KeyDesc.KeyData, Key_Data, key_length);
 		NdisZeroMemory(mic, sizeof(mic));
 
-		// add by johnli, change endian before calculate MIC, fix bug for big-endian platform
-		*(USHORT *)(&pOutPacket->KeyDesc.KeyInfo) = cpu2le16(*(USHORT *)(&pOutPacket->KeyDesc.KeyInfo));  // add by johnli, fix bug for AMAZON_SE platform
+		*(USHORT *)(&pOutPacket->KeyDesc.KeyInfo) = cpu2le16(*(USHORT *)(&pOutPacket->KeyDesc.KeyInfo));
 
 		MakeOutgoingFrame(pOutBuffer,			&FrameLen,
                         pOutPacket->Body_Len[1] + 4,	pOutPacket,
@@ -1510,32 +1481,14 @@ VOID RTMPHandleSTAKey(
 		// Calculate MIC
         if (pDaEntry->WepStatus == Ndis802_11Encryption3Enabled)
         {
-            HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
+            RT_HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
             NdisMoveMemory(pOutPacket->KeyDesc.KeyMic, digest, LEN_KEY_DESC_MIC);
 	    }
         else
         {
-            HMAC_MD5(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, mic, MD5_DIGEST_SIZE);
+            RT_HMAC_MD5(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, mic, MD5_DIGEST_SIZE);
             NdisMoveMemory(pOutPacket->KeyDesc.KeyMic, mic, LEN_KEY_DESC_MIC);
         }
-
-/* remove by johnli, change endian before calculate MIC, fix bug for big-endian platform
-#ifdef RT_BIG_ENDIAN
-		{
-			USHORT	tmpKeyinfo;
-
-			NdisMoveMemory(&tmpKeyinfo, &Packet.KeyDesc.KeyInfo, sizeof(USHORT)); 
-			tmpKeyinfo = SWAP16(tmpKeyinfo);
-			NdisMoveMemory(&Packet.KeyDesc.KeyInfo, &tmpKeyinfo, sizeof(USHORT)); 
-		}
-#endif
-
-        // Fill frame
-        MakeOutgoingFrame(pOutBuffer,				&FrameLen,
-                            sizeof(Header802_3),	Header802_3,
-                            Packet.Body_Len[1] + 4,	&Packet,
-                            END_OF_ARGS);
-*/
 
         RTMPToWirelessSta(pAd, pDaEntry, Header802_3, LENGTH_802_3, (PUCHAR)pOutPacket, pOutPacket->Body_Len[1] + 4, FALSE);
 

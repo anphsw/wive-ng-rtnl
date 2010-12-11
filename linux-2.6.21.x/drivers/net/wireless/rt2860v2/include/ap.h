@@ -147,11 +147,9 @@ USHORT APBuildAssociation(
     IN UCHAR  *pRSNLen, 
     IN BOOLEAN bWmmCapable,
     IN ULONG  RalinkIe,
-#ifdef DOT11N_DRAFT3
     IN EXT_CAP_INFO_ELEMENT ExtCapInfo,
-#endif // DOT11N_DRAFT3 //
 	IN HT_CAPABILITY_IE		*pHtCapability,
-	IN UCHAR		 HtCapabilityLen,
+	OUT UCHAR		 *pHtCapabilityLen,
     OUT USHORT *pAid);
 
 /*
@@ -246,7 +244,8 @@ VOID APScanCnclAction(
 VOID ApSiteSurvey(
 	IN	PRTMP_ADAPTER  		pAd,
 	IN	PNDIS_802_11_SSID	pSsid,
-	IN	UCHAR				ScanType);
+	IN	UCHAR				ScanType,
+	IN	BOOLEAN				ChannelSel);
 
 VOID SupportRate(
 	IN PUCHAR SupRate,
@@ -266,8 +265,8 @@ VOID APOverlappingBSSScan(
 	IN RTMP_ADAPTER *pAd);
 
 INT GetBssCoexEffectedChRange(
-		IN RTMP_ADAPTER *pAd,
-		IN BSS_COEX_CH_RANGE *pCoexChRange);
+	IN RTMP_ADAPTER *pAd,
+	IN BSS_COEX_CH_RANGE *pCoexChRange);
 
 #endif // DOT11N_DRAFT3 //
 
@@ -281,9 +280,6 @@ VOID WpaStateMachineInit(
 VOID APMlmePeriodicExec(
     IN  PRTMP_ADAPTER   pAd);
 
-VOID APMlmeSelectRateSwitchTable11N3SReplacement(
-    IN PUCHAR               *ppTable);
-
 VOID APMlmeSelectTxRateTable(
 	IN PRTMP_ADAPTER		pAd,
 	IN PMAC_TABLE_ENTRY		pEntry,
@@ -295,36 +291,6 @@ VOID APMlmeSetTxRate(
 	IN PRTMP_ADAPTER		pAd,
 	IN PMAC_TABLE_ENTRY		pEntry,
 	IN PRTMP_TX_RATE_SWITCH	pTxRate);
-
-
-VOID txSndgSameMcs(
-	IN PRTMP_ADAPTER pAd, 
-	IN MAC_TABLE_ENTRY * pEntry, 
-//	IN RX_BLK * pRxBlk, 
-	IN UCHAR smoothMfb);
-
-VOID txSndgOtherGroup(	
-	IN	PRTMP_ADAPTER	pAd,
-	IN	MAC_TABLE_ENTRY	*pEntry);
-
-VOID txMrqInvTxBF(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	MAC_TABLE_ENTRY	*pEntry);
-
-VOID chooseBestMethod(	
-	IN	PRTMP_ADAPTER	pAd,
-	IN	MAC_TABLE_ENTRY	*pEntry,
-	IN	UCHAR			mfb);
-
-VOID rxBestSndg(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	MAC_TABLE_ENTRY	*pEntry);
-
-
-//VOID Trigger_Sounding_Packet(
-//	IN PRTMP_ADAPTER pAd, 
-//	IN UCHAR SngType, 
-//	IN MAC_TABLE_ENTRY * pEntry);
 
 VOID APMlmeDynamicTxRateSwitching(
     IN PRTMP_ADAPTER pAd);
@@ -341,6 +307,14 @@ BOOLEAN APMsgTypeSubst(
     OUT INT *Machine, 
     OUT INT *MsgType);
 
+VOID APQuickResponeForRateUpExec(
+    IN PVOID SystemSpecific1, 
+    IN PVOID FunctionContext, 
+    IN PVOID SystemSpecific2, 
+    IN PVOID SystemSpecific3);
+
+
+#ifdef NEW_RATE_ADAPT_SUPPORT
 VOID APMlmeDynamicTxRateSwitchingAdapt(
     IN PRTMP_ADAPTER pAd,
     IN ULONG idx);
@@ -348,6 +322,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 VOID APQuickResponeForRateUpExecAdapt(
     IN PRTMP_ADAPTER pAd,
     IN ULONG idx);
+#endif //NEW_RATE_ADAPT_SUPPORT //
 
 
 VOID RTMPSetPiggyBack(
@@ -361,11 +336,6 @@ VOID APAsicRxAntEvalTimeout(
 	IN PRTMP_ADAPTER	pAd);
 
 // ap.c
-
-VOID APSwitchChannel(
-	IN PRTMP_ADAPTER pAd,
-	IN INT Channel);
-
 NDIS_STATUS APInitialize(
     IN  PRTMP_ADAPTER   pAd);
 
@@ -420,10 +390,14 @@ BOOLEAN APPsIndicate(
 	IN ULONG Wcid, 
     IN  UCHAR           Psm);
 
+#ifdef SYSTEM_LOG_SUPPORT
 VOID ApLogEvent(
     IN PRTMP_ADAPTER    pAd,
     IN PUCHAR           pAddr,
     IN USHORT           Event);
+#else
+#define ApLogEvent(_pAd, _pAddr, _Event)
+#endif // SYSTEM_LOG_SUPPORT //
 
 #ifdef DOT11_N_SUPPORT
 VOID APUpdateOperationMode(
@@ -452,19 +426,6 @@ VOID ApEnqueueNullFrame(
     IN BOOLEAN       bEOSP,
     IN UCHAR         OldUP);
 
-VOID ApSendFrame(
-    IN  PRTMP_ADAPTER   pAd,
-    IN  PVOID           pBuffer,
-    IN  ULONG           Length,
-    IN  UCHAR           TxRate,
-    IN  UCHAR           PID);
-
-VOID ApEnqueueAckFrame(
-    IN PRTMP_ADAPTER pAd,
-    IN PUCHAR        pAddr,
-    IN UCHAR         TxRate,
-	IN UCHAR         apidx);
-
 // ap_sanity.c
 
 
@@ -488,9 +449,7 @@ BOOLEAN PeerAssocReqCmmSanity(
     OUT BOOLEAN *pWscCapable,
 #endif // WSC_AP_SUPPORT //    
     OUT ULONG  *pRalinkIe,
-#ifdef DOT11N_DRAFT3
     OUT EXT_CAP_INFO_ELEMENT	*pExtCapInfo,
-#endif // DOT11N_DRAFT3 //
     OUT UCHAR		 *pHtCapabilityLen,
     OUT HT_CAPABILITY_IE *pHtCapability);
 
@@ -500,6 +459,7 @@ BOOLEAN PeerDisassocReqSanity(
     IN VOID *Msg, 
     IN ULONG MsgLen, 
     OUT PUCHAR pAddr2, 
+    OUT	UINT16	*SeqNum,
     OUT USHORT *Reason);
 
 BOOLEAN PeerDeauthReqSanity(
@@ -507,6 +467,7 @@ BOOLEAN PeerDeauthReqSanity(
     IN VOID *Msg, 
     IN ULONG MsgLen, 
     OUT PUCHAR pAddr2, 
+   	OUT	UINT16	*SeqNum,    
     OUT USHORT *Reason);
 
 BOOLEAN APPeerAuthSanity(
@@ -521,34 +482,8 @@ BOOLEAN APPeerAuthSanity(
     OUT CHAR *ChlgText
 	);
 
-/*
-BOOLEAN APPeerProbeReqSanity(
-    IN PRTMP_ADAPTER pAd, 
-    IN VOID *Msg, 
-    IN ULONG MsgLen, 
-    OUT PUCHAR pAddr2,
-    OUT CHAR Ssid[], 
-    OUT UCHAR *SsidLen);
-*/
 
-BOOLEAN APPeerBeaconAndProbeRspSanity(
-    IN PRTMP_ADAPTER pAd, 
-    IN VOID *Msg, 
-    IN ULONG MsgLen, 
-    OUT PUCHAR pAddr2, 
-    OUT PUCHAR pBssid, 
-    OUT CHAR Ssid[], 
-    OUT UCHAR *SsidLen, 
-    OUT UCHAR *BssType, 
-    OUT USHORT *BeaconPeriod, 
-    OUT UCHAR *Channel, 
-    OUT LARGE_INTEGER *Timestamp, 
-    OUT USHORT *CapabilityInfo, 
-    OUT UCHAR Rate[], 
-    OUT UCHAR *RateLen,
-    OUT BOOLEAN *ExtendedRateIeExist,
-    OUT UCHAR *Erp);
-
+#ifdef DOT1X_SUPPORT
 /* ap_cfg.h */
 INT	Set_OwnIPAddr_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -561,10 +496,23 @@ INT	Set_EAPIfName_Proc(
 INT	Set_PreAuthIfName_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
+
+/* Define in ap.c */
+BOOLEAN DOT1X_InternalCmdAction(
+    IN  PRTMP_ADAPTER	pAd,
+    IN  MAC_TABLE_ENTRY *pEntry,
+    IN	UINT8			cmd);
+
+BOOLEAN DOT1X_EapTriggerAction(
+    IN  PRTMP_ADAPTER	pAd,
+    IN  MAC_TABLE_ENTRY *pEntry);
+#endif // DOT1X_SUPPORT //
+
 #ifdef DOT11_N_SUPPORT
 #ifdef GREENAP_SUPPORT
 VOID EnableAPMIMOPS(
-    IN PRTMP_ADAPTER pAd);
+    IN PRTMP_ADAPTER pAd,
+    IN BOOLEAN ReduceCorePower);
 
 VOID DisableAPMIMOPS(
     IN PRTMP_ADAPTER pAd);

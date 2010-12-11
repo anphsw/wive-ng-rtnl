@@ -26,8 +26,6 @@
 #ifndef __RT2880_H__
 #define __RT2880_H__
 
-#include "chip/mac_pci.h"
-#include <asm/rt2880/rt_mmap.h>
 
 #ifndef RTMP_RBUS_SUPPORT
 #error "For RT2880, you should define the compile flag -DRTMP_RBUS_SUPPORT"
@@ -37,12 +35,59 @@
 #error "For RT2880, you should define the compile flag -DRTMP_MAC_PCI"
 #endif
 
-#define RT2860_CSR_ADDR_PCI	0xC0000000 // RT2880 PCI
-#define RTMP_MAC_CSR_ADDR 	RALINK_11N_MAC_BASE
+#include "chip/mac_pci.h"
+
+#ifdef LINUX
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
+#include <asm/rt2880/rt_mmap.h>
+#define RTMP_MAC_CSR_ADDR RALINK_11N_MAC_BASE
+#else
+
+#ifdef CONFIG_RALINK_RT2880_SHUTTLE
+#undef RTMP_MAC_CSR_ADDR
+#define RTMP_MAC_CSR_ADDR 0xA0600000
+#endif // CONFIG_RALINK_RT2880_SHUTTLE //
+
+#ifdef CONFIG_RALINK_RT2880_MP
+#undef RTMP_MAC_CSR_ADDR
+#define RTMP_MAC_CSR_ADDR 0xA0480000
+#endif // CONFIG_RALINK_RT2880_MP //
+
+#ifndef RTMP_MAC_CSR_ADDR  
+#error Please Choice Chip Version (Shuttle/MP)
+#endif
+
+#endif // LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21) //
+
+#else
+
+#ifdef CONFIG_RALINK_RT2880_SHUTTLE
+#undef RTMP_MAC_CSR_ADDR
+#define RTMP_MAC_CSR_ADDR 0xA0600000
+#endif // CONFIG_RALINK_RT2880_SHUTTLE //
+
+#ifdef CONFIG_RALINK_RT2880_MP
+#undef RTMP_MAC_CSR_ADDR
+#define RTMP_MAC_CSR_ADDR 0xA0480000
+#endif // CONFIG_RALINK_RT2880_MP //
+
+#ifndef RTMP_MAC_CSR_ADDR  
+#error Please Choice Chip Version (Shuttle/MP)
+#endif
+#endif // LINUX //
+
+#define RT2860_CSR_ADDR_PCI		0xC0000000 // RT2880 PCI
+
 #define RTMP_FLASH_BASE_ADDR	0xbfc00000
 
 #ifdef DFS_SUPPORT
 #define DFS_1_SUPPORT
 #endif
 
+//
+// Device ID & Vendor ID, these values should match EEPROM value
+//
+
+
 #endif //__RT2880_H__ //
+

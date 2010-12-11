@@ -262,17 +262,30 @@ static VOID ApCliMlmeAssocReqAction(
 #endif			
 
 #ifndef RT_BIG_ENDIAN
-				
 			{
+#ifdef RT3883
+				HT_CAPABILITY_IE HtCapabilityTmp;
+
+				NdisZeroMemory(&HtCapabilityTmp, sizeof(HT_CAPABILITY_IE));
+				NdisMoveMemory(&HtCapabilityTmp, &pAd->MlmeAux.HtCapability, pAd->MlmeAux.HtCapabilityLen);
+				HtCapabilityTmp.MCSSet[2] = (pAd->MlmeAux.HtCapability.MCSSet[2] & pAd->ApCfg.ApCliTab[ifIndex].RxMcsSet[2]);
+
+				MakeOutgoingFrame(pOutBuffer + FrameLen,		&TmpLen,
+								1,								&HtCapIe,
+								1,								&pAd->MlmeAux.HtCapabilityLen,
+								pAd->MlmeAux.HtCapabilityLen,	&HtCapabilityTmp,
+								END_OF_ARGS);
+#else
 				MakeOutgoingFrame(pOutBuffer + FrameLen,            &TmpLen,
 							  1,                                &HtCapIe,
 							  1,                                &pAd->MlmeAux.HtCapabilityLen,
 							 pAd->MlmeAux.HtCapabilityLen,          &pAd->MlmeAux.HtCapability, 
 							  END_OF_ARGS);
+#endif
 			}
 #else
-                	NdisZeroMemory(&HtCapabilityTmp, sizeof(HT_CAPABILITY_IE));
-               	 	NdisMoveMemory(&HtCapabilityTmp, &pAd->MlmeAux.HtCapability, pAd->MlmeAux.HtCapabilityLen);
+				NdisZeroMemory(&HtCapabilityTmp, sizeof(HT_CAPABILITY_IE));
+				NdisMoveMemory(&HtCapabilityTmp, &pAd->MlmeAux.HtCapability, pAd->MlmeAux.HtCapabilityLen);
         		*(USHORT *)(&HtCapabilityTmp.HtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.HtCapInfo));
         		*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo));
 
@@ -556,7 +569,6 @@ static VOID ApCliPeerDisassocAction(
 			*pCurrState = APCLI_ASSOC_IDLE;
 
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_PEER_DISCONNECT_REQ, 0, NULL, ifIndex);
-
         }
     }
     else

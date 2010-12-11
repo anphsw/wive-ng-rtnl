@@ -32,24 +32,15 @@ extern UCHAR	CISCO_OUI[];
 
 extern UCHAR	WPA_OUI[];
 extern UCHAR	RSN_OUI[];
-extern UCHAR   WME_INFO_ELEM[];
-extern UCHAR   WME_PARM_ELEM[];
-extern UCHAR	Ccx2QosInfo[];
-extern UCHAR   RALINK_OUI[];
+extern UCHAR	WME_INFO_ELEM[];
+extern UCHAR	WME_PARM_ELEM[];
+extern UCHAR	RALINK_OUI[];
 
 extern UCHAR 	BROADCOM_OUI[]; 
 
 #ifdef WSC_AP_SUPPORT
 extern UCHAR    WPS_OUI[];
-
-typedef struct wsc_ie_probreq_data
-{
-	UCHAR	ssid[32];
-	UCHAR	macAddr[6];
-	UCHAR	data[2];
-} WSC_IE_PROBREQ_DATA;
 #endif // WSC_AP_SUPPORT //
-
 /* 
     ==========================================================================
     Description:
@@ -79,19 +70,18 @@ BOOLEAN PeerAssocReqCmmSanity(
     OUT BOOLEAN *pWscCapable,
 #endif // WSC_AP_SUPPORT //
     OUT ULONG  *pRalinkIe,
-#ifdef DOT11N_DRAFT3
     OUT EXT_CAP_INFO_ELEMENT *pExtCapInfo,
-#endif // DOT11N_DRAFT3 //
     OUT UCHAR		 *pHtCapabilityLen,
     OUT HT_CAPABILITY_IE *pHtCapability)
 {
-    CHAR         *Ptr;
-    PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
-    PEID_STRUCT  eid_ptr;
-    UCHAR        Sanity=0;
-    UCHAR           WPA1_OUI[4]={0x00,0x50,0xF2,0x01};
-    UCHAR           WPA2_OUI[3]={0x00,0x0F,0xAC};
-    MAC_TABLE_ENTRY *pEntry = (MAC_TABLE_ENTRY*)NULL;
+    CHAR			*Ptr;
+    PFRAME_802_11	Fr = (PFRAME_802_11)Msg;
+    PEID_STRUCT		eid_ptr;
+    UCHAR			Sanity = 0;
+    UCHAR			WPA1_OUI[4] = { 0x00, 0x50, 0xF2, 0x01 };
+    UCHAR			WPA2_OUI[3] = { 0x00, 0x0F, 0xAC };
+    MAC_TABLE_ENTRY *pEntry = (MAC_TABLE_ENTRY *)NULL;
+
 
     // to prevent caller from using garbage output value
 	*pSsidLen     = 0;
@@ -104,13 +94,9 @@ BOOLEAN PeerAssocReqCmmSanity(
     COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
 
 	pEntry = MacTableLookup(pAd, pAddr2);
-
-	//ASSERT(pEntry);
-
 	if (pEntry == NULL)
-	{
 		return FALSE;
-	}
+
 
 
 
@@ -126,70 +112,81 @@ BOOLEAN PeerAssocReqCmmSanity(
 	}
 	else
 	{
-    eid_ptr = (PEID_STRUCT) &Fr->Octet[4];
+		eid_ptr = (PEID_STRUCT) &Fr->Octet[4];
 	}
 
 
     // get variable fields from payload and advance the pointer
-    while (((UCHAR*)eid_ptr + eid_ptr->Len + 1) < ((UCHAR*)Fr + MsgLen))
+    while (((UCHAR *)eid_ptr + eid_ptr->Len + 1) < ((UCHAR *)Fr + MsgLen))
     {
         switch(eid_ptr->Eid)
         {
             case IE_SSID:
-		 if (((Sanity&0x1) == 1))
-		 	break;
+				if (((Sanity&0x1) == 1))
+					break;
 
-                if((eid_ptr->Len <= MAX_LEN_OF_SSID))
+                if ((eid_ptr->Len <= MAX_LEN_OF_SSID))
                 {
                     Sanity |= 0x01;
                     NdisMoveMemory(Ssid, eid_ptr->Octet, eid_ptr->Len);
                     *pSsidLen = eid_ptr->Len;
-                    DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - SsidLen = %d  \n", *pSsidLen ));
+                    DBGPRINT(RT_DEBUG_TRACE,
+						("PeerAssocReqSanity - SsidLen = %d  \n", *pSsidLen));
                 }
                 else
                 {
-                    DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - wrong IE_SSID\n"));
+                    DBGPRINT(RT_DEBUG_TRACE,
+						("PeerAssocReqSanity - wrong IE_SSID\n"));
                     return FALSE;
                 }
                 break;
-                
+
             case IE_SUPP_RATES:
-                if ((eid_ptr->Len <= MAX_LEN_OF_SUPPORTED_RATES) && (eid_ptr->Len > 0))
+                if ((eid_ptr->Len <= MAX_LEN_OF_SUPPORTED_RATES) &&
+					(eid_ptr->Len > 0))
                 {
                     Sanity |= 0x02;
                     NdisMoveMemory(Rates, eid_ptr->Octet, eid_ptr->Len);
-                    DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - IE_SUPP_RATES., Len=%d. Rates[0]=%x\n",eid_ptr->Len, Rates[0]));
-                    DBGPRINT(RT_DEBUG_TRACE, ("Rates[1]=%x %x %x %x %x %x %x\n", Rates[1], Rates[2], Rates[3], Rates[4], Rates[5], Rates[6], Rates[7]));
+
+                    DBGPRINT(RT_DEBUG_TRACE,
+						("PeerAssocReqSanity - IE_SUPP_RATES., Len=%d. "
+						"Rates[0]=%x\n", eid_ptr->Len, Rates[0]));
+                    DBGPRINT(RT_DEBUG_TRACE,
+						("Rates[1]=%x %x %x %x %x %x %x\n",
+						Rates[1], Rates[2], Rates[3],
+						Rates[4], Rates[5], Rates[6],
+						Rates[7]));
+
                     *pRatesLen = eid_ptr->Len;
                 }
                 else
                 {
+					UCHAR RateDefault[8] = \
+							{ 0x82, 0x84, 0x8b, 0x96, 0x12, 0x24, 0x48, 0x6c };
+
                 	// HT rate not ready yet. return true temporarily. rt2860c
                     //DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - wrong IE_SUPP_RATES\n"));
                     Sanity |= 0x02;
                     *pRatesLen = 8;
-					Rates[0] = 0x82;
-					Rates[1] = 0x84;
-					Rates[2] = 0x8b;
-					Rates[3] = 0x96;
-					Rates[4] = 0x12;
-					Rates[5] = 0x24;
-					Rates[6] = 0x48;
-					Rates[7] = 0x6c;
-                    DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - wrong IE_SUPP_RATES., Len=%d\n",eid_ptr->Len));
-                    //return FALSE;
+					NdisMoveMemory(Rates, RateDefault, 8);
+
+                    DBGPRINT(RT_DEBUG_TRACE,
+						("PeerAssocReqSanity - wrong IE_SUPP_RATES., Len=%d\n",
+						eid_ptr->Len));
                 }
                 break;
-                
+
             case IE_EXT_SUPP_RATES:
                 if (eid_ptr->Len + *pRatesLen <= MAX_LEN_OF_SUPPORTED_RATES)
                 {
-                    NdisMoveMemory(&Rates[*pRatesLen], eid_ptr->Octet, eid_ptr->Len);
+                    NdisMoveMemory(&Rates[*pRatesLen], eid_ptr->Octet,
+									eid_ptr->Len);
                     *pRatesLen = (*pRatesLen) + eid_ptr->Len;
                 }
                 else
                 {
-                    NdisMoveMemory(&Rates[*pRatesLen], eid_ptr->Octet, MAX_LEN_OF_SUPPORTED_RATES - (*pRatesLen));
+                    NdisMoveMemory(&Rates[*pRatesLen], eid_ptr->Octet,
+									MAX_LEN_OF_SUPPORTED_RATES - (*pRatesLen));
                     *pRatesLen = MAX_LEN_OF_SUPPORTED_RATES;
                 }
                 break;
@@ -199,7 +196,9 @@ BOOLEAN PeerAssocReqCmmSanity(
 			{
 				NdisMoveMemory(pHtCapability, eid_ptr->Octet, SIZE_HT_CAP_IE);
 
-				*(USHORT *)(&pHtCapability->HtCapInfo) = cpu2le16(*(USHORT *)(&pHtCapability->HtCapInfo));
+				*(USHORT *)(&pHtCapability->HtCapInfo) = \
+							cpu2le16(*(USHORT *)(&pHtCapability->HtCapInfo));
+
 #ifdef UNALIGNMENT_SUPPORT
 				{
 					EXT_HT_CAP_INFO extHtCapInfo;
@@ -209,7 +208,8 @@ BOOLEAN PeerAssocReqCmmSanity(
 					NdisMoveMemory((PUCHAR)(&pHtCapability->ExtHtCapInfo), (PUCHAR)(&extHtCapInfo), sizeof(EXT_HT_CAP_INFO));		
 				}
 #else				
-				*(USHORT *)(&pHtCapability->ExtHtCapInfo) = cpu2le16(*(USHORT *)(&pHtCapability->ExtHtCapInfo));
+				*(USHORT *)(&pHtCapability->ExtHtCapInfo) = \
+							cpu2le16(*(USHORT *)(&pHtCapability->ExtHtCapInfo));
 #endif // UNALIGNMENT_SUPPORT //
 
 				*pHtCapabilityLen = SIZE_HT_CAP_IE;
@@ -222,26 +222,26 @@ BOOLEAN PeerAssocReqCmmSanity(
 			}
 				
 		break;
-#ifdef DOT11N_DRAFT3
 		case IE_EXT_CAPABILITY:
 			if (eid_ptr->Len >= sizeof(EXT_CAP_INFO_ELEMENT))
 			{
-				NdisMoveMemory(pExtCapInfo, eid_ptr->Octet, 1);
+				NdisMoveMemory(pExtCapInfo, eid_ptr->Octet, sizeof(EXT_CAP_INFO_ELEMENT));
 				DBGPRINT(RT_DEBUG_WARN, ("PeerAssocReqSanity - IE_EXT_CAPABILITY!\n"));
 			}
 
 			break;
-#endif // DOT11N_DRAFT3 //
 
             case IE_WPA:    // same as IE_VENDOR_SPECIFIC
             case IE_WPA2:
+
 #ifdef WSC_AP_SUPPORT                
-                if (NdisEqualMemory(eid_ptr->Octet, WPS_OUI, 4))
-                {
-                    *pWscCapable = TRUE;
-                    break;
-                }
+				if (NdisEqualMemory(eid_ptr->Octet, WPS_OUI, 4))
+				{
+				    *pWscCapable = TRUE;
+				    break;
+				}
 #endif // WSC_AP_SUPPORT //
+
 				/* Handle Atheros and Broadcom draft 11n STAs */
 				if (NdisEqualMemory(eid_ptr->Octet, BROADCOM_OUI, 3))
 				{
@@ -309,7 +309,7 @@ BOOLEAN PeerAssocReqCmmSanity(
                     break;                          
                 }
                 
-                if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len > MIN_LEN_OF_RSNIE))
+                if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len >= MIN_LEN_OF_RSNIE))
                 {
                     if (!pEntry)
                         return FALSE;
@@ -319,6 +319,7 @@ BOOLEAN PeerAssocReqCmmSanity(
 					// Copy whole RSNIE context
                     NdisMoveMemory(RSN, eid_ptr, eid_ptr->Len + 2);
 					*pRSNLen=eid_ptr->Len + 2;
+
                 }
                 else
                 {
@@ -326,13 +327,30 @@ BOOLEAN PeerAssocReqCmmSanity(
                     DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - missing IE_WPA(%d)\n",eid_ptr->Len));
                     return FALSE;
                 }               
-                break;          
+                break;
+
+#ifdef WAPI_SUPPORT				
+			case IE_WAPI:				
+				if ((pAd->ApCfg.MBSSID[pEntry->apidx].AuthMode != Ndis802_11AuthModeWAICERT) &&
+					(pAd->ApCfg.MBSSID[pEntry->apidx].AuthMode != Ndis802_11AuthModeWAIPSK))
+                    break;				
+
+				// Sanity check the validity of WIE
+				// Todo - AlbertY
+				
+				// Copy whole WAPI-IE context                    
+                NdisMoveMemory(RSN, eid_ptr, eid_ptr->Len + 2);
+				*pRSNLen=eid_ptr->Len + 2;		
+				DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - IE_WAPI(%d)\n",eid_ptr->Len));
+				break;
+#endif // WAPI_SUPPORT //				
 
 
 
             default:
                 break;
         }
+
         eid_ptr = (PEID_STRUCT)((UCHAR*)eid_ptr + 2 + eid_ptr->Len);        
     }
 
@@ -364,15 +382,18 @@ BOOLEAN PeerDisassocReqSanity(
     IN VOID *Msg, 
     IN ULONG MsgLen, 
     OUT PUCHAR pAddr2, 
+    OUT	UINT16	*SeqNum,
     OUT USHORT *Reason) 
 {
     PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
 
     COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
+	*SeqNum = Fr->Hdr.Sequence;
     NdisMoveMemory(Reason, &Fr->Octet[0], 2);
 
     return TRUE;
 }
+
 
 /* 
     ==========================================================================
@@ -387,15 +408,18 @@ BOOLEAN PeerDeauthReqSanity(
     IN VOID *Msg, 
     IN ULONG MsgLen, 
     OUT PUCHAR pAddr2, 
+    OUT	UINT16	*SeqNum, 
     OUT USHORT *Reason) 
 {
     PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
 
     COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
+	*SeqNum = Fr->Hdr.Sequence;
     NdisMoveMemory(Reason, &Fr->Octet[0], 2);
 
     return TRUE;
 }
+
 
 /* 
     ==========================================================================
@@ -463,329 +487,4 @@ BOOLEAN APPeerAuthSanity(
 	return TRUE;
 }
 
-/* 
-    ==========================================================================
-    Description:
-        MLME message sanity check
-    Return:
-        TRUE if all parameters are OK, FALSE otherwise
-    ==========================================================================
- */
-/*
-BOOLEAN APPeerProbeReqSanity(
-    IN PRTMP_ADAPTER pAd, 
-    IN VOID *Msg, 
-    IN ULONG MsgLen, 
-    OUT PUCHAR pAddr2,
-    OUT CHAR Ssid[], 
-    OUT UCHAR *SsidLen) 
-{
-    PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
-#ifdef WSC_AP_SUPPORT
-    UCHAR		*Ptr;
-    UCHAR		eid =0, eid_len = 0, *eid_data;
-    UCHAR       apidx;
-	UINT		WpsOui = 0, total_ie_len = 0;
-#endif // WSC_AP_SUPPORT //
-
-    // to prevent caller from using garbage output value
-    *SsidLen = 0;
-
-    COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
-
-    if (Fr->Octet[0] != IE_SSID || Fr->Octet[1] > MAX_LEN_OF_SSID) 
-    {
-        DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity fail - wrong SSID IE\n"));
-        return FALSE;
-    } 
-    
-    *SsidLen = Fr->Octet[1];
-    NdisMoveMemory(Ssid, &Fr->Octet[2], *SsidLen);
-
-#ifdef WSC_AP_SUPPORT
-	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-	{
-		if (NdisEqualMemory(Ssid, pAd->ApCfg.MBSSID[apidx].Ssid, pAd->ApCfg.MBSSID[apidx].SsidLen))
-			break;
-	}
-
-	if (apidx >= pAd->ApCfg.BssidNum)
-	{
-		return TRUE;
-	}
-	
-    Ptr = Fr->Octet;
-    eid = Ptr[0];
-    eid_len = Ptr[1];
-	total_ie_len = eid_len + 2;
-	eid_data = Ptr+2;
-    
-    // get variable fields from payload and advance the pointer
-	while((eid_data + eid_len) <= ((UCHAR*)Fr + MsgLen))
-    {    	
-        switch(eid)
-        {
-	        case IE_VENDOR_SPECIFIC:
-				if (eid_len <= 4)
-					break;
-				NdisMoveMemory(&WpsOui, eid_data, sizeof(UINT));
-                if (be2cpu32(WpsOui) == WSC_OUI)
-                {
-                    if (pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE)
-    				{	    				
-    					int bufLen = 0;
-    					PUCHAR pBuf = NULL;
-    					WSC_IE_PROBREQ_DATA	*pprobreq = NULL;
-						WSC_IE				*pWscIE;
-						PUCHAR				pData = NULL;
-						INT					Len = 0;
-						USHORT				DevicePasswordID;
-						PWSC_CTRL			pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
-
-						pData = eid_data + 4;
-						Len = eid_len - 4;
-						while (Len > 0)
-						{
-							WSC_IE	WscIE;
-							NdisMoveMemory(&WscIE, pData, sizeof(WSC_IE));
-							// Check for WSC IEs
-							pWscIE = &WscIE;
-
-							// Check for device password ID, PBC = 0x0004
-							if (be2cpu16(pWscIE->Type) == WSC_ID_DEVICE_PWD_ID)
-							{
-								// Found device password ID
-								NdisMoveMemory(&DevicePasswordID, pData + 4, sizeof(DevicePasswordID));
-								DevicePasswordID = be2cpu16(DevicePasswordID);
-								DBGPRINT(RT_DEBUG_TRACE, ("APPeerProbeReqSanity : DevicePasswordID = 0x%04x\n", DevicePasswordID));
-								if (DevicePasswordID == DEV_PASS_ID_PBC)	// Check for PBC value
-								{
-									WscPBC_DPID_FromSTA(pWscControl, Fr->Hdr.Addr2);
-									break;
-								}
-							}
-							
-							// Set the offset and look for PBC information
-							// Since Type and Length are both short type, we need to offset 4, not 2
-							pData += (be2cpu16(pWscIE->Length) + 4);
-							Len   -= (be2cpu16(pWscIE->Length) + 4);
-						}
-
-						if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode & WSC_PROXY) != WSC_DISABLE)
-						{
-
-							bufLen = sizeof(WSC_IE_PROBREQ_DATA) + eid_len;
-							pBuf = kmalloc(bufLen, MEM_ALLOC_FLAG);
-							if(pBuf == NULL)
-								break;
-
-							//Send WSC probe req to UPnP
-							memset(pBuf, 0 ,  bufLen);
-							pprobreq = (WSC_IE_PROBREQ_DATA*)pBuf;
-							if (32 >= *SsidLen)	//Well, I think that it must be TRUE!
-							{
-								NdisMoveMemory(pprobreq->ssid, Ssid, *SsidLen);			// SSID
-								NdisMoveMemory(pprobreq->macAddr, Fr->Hdr.Addr2, 6);	// Mac address
-								pprobreq->data[0] = 221; 									// element ID
-								pprobreq->data[1] = eid_len;							// element Length
-								NdisMoveMemory((pBuf+sizeof(WSC_IE_PROBREQ_DATA)), eid_data, eid_len);	// (WscProbeReqData)
-								WscSendUPnPMessage(pAd, apidx, 
-														WSC_OPCODE_UPNP_MGMT, WSC_UPNP_MGMT_SUB_PROBE_REQ, 
-														pBuf, bufLen, 0, 0, &Fr->Hdr.Addr2[0]);
-							}
-							if (pBuf)
-								kfree(pBuf);
-						}
-                		break;
-    				}
-                    break;
-                }                
-            default:
-                break;
-        }
-		eid = Ptr[total_ie_len];
-    	eid_len = Ptr[total_ie_len + 1];
-		eid_data = Ptr + total_ie_len + 2;
-		total_ie_len += (eid_len + 2);
-	}
-#endif // WSC_AP_SUPPORT //
-
-    return TRUE;
-}
-*/
-
-
-/* 
-    ==========================================================================
-    Description:
-        MLME message sanity check
-    Return:
-        TRUE if all parameters are OK, FALSE otherwise
-    ==========================================================================
- */
-BOOLEAN APPeerBeaconAndProbeRspSanity(
-    IN PRTMP_ADAPTER pAd, 
-    IN VOID *Msg, 
-    IN ULONG MsgLen, 
-    OUT PUCHAR pAddr2, 
-    OUT PUCHAR pBssid, 
-    OUT CHAR Ssid[], 
-    OUT UCHAR *SsidLen, 
-    OUT UCHAR *BssType, 
-    OUT USHORT *BeaconPeriod, 
-    OUT UCHAR *Channel, 
-    OUT LARGE_INTEGER *Timestamp, 
-    OUT USHORT *CapabilityInfo, 
-    OUT UCHAR Rate[], 
-    OUT UCHAR *RateLen,
-    OUT BOOLEAN *ExtendedRateIeExist,
-    OUT UCHAR *Erp)
-{
-    CHAR                *Ptr;
-    PFRAME_802_11       Fr;
-    PEID_STRUCT         eid_ptr;
-    UCHAR               SubType;
-    UCHAR               Sanity;
-
-    // to prevent caller from using garbage output value
-    *RateLen = 0;
-    *ExtendedRateIeExist = FALSE;
-    *Erp = 0;
-    
-    // Add for 3 necessary EID field check
-    Sanity = 0;
-    
-    Fr = (PFRAME_802_11)Msg;
-    
-    // get subtype from header
-    SubType = (UCHAR)Fr->Hdr.FC.SubType;
-
-    // get Addr2 and BSSID from header
-    COPY_MAC_ADDR(pAddr2, &Fr->Hdr.Addr2);
-    COPY_MAC_ADDR(pBssid, &Fr->Hdr.Addr3);
-    
-    Ptr = (PCHAR)Fr->Octet;
-    
-    // get timestamp from payload and advance the pointer
-    NdisMoveMemory(Timestamp, Ptr, TIMESTAMP_LEN);
-    Ptr += TIMESTAMP_LEN;
-
-    // get beacon interval from payload and advance the pointer
-    NdisMoveMemory(BeaconPeriod, Ptr, 2);
-    Ptr += 2;
-
-    // get capability info from payload and advance the pointer
-    NdisMoveMemory(CapabilityInfo, Ptr, 2);
-    Ptr += 2;
-    if (CAP_IS_ESS_ON(*CapabilityInfo)) 
-    {
-        *BssType = BSS_INFRA;
-    } 
-    else 
-    {
-        *BssType = BSS_ADHOC;
-    }
-
-    eid_ptr = (PEID_STRUCT) Ptr;
-
-    // get variable fields from payload and advance the pointer
-    while(((UCHAR*)eid_ptr + eid_ptr->Len + 1) < ((UCHAR*)Fr + MsgLen))
-    {
-        switch(eid_ptr->Eid)
-        {
-            case IE_SSID:
-                if(eid_ptr->Len <= MAX_LEN_OF_SSID)
-                {
-                    NdisMoveMemory(Ssid, eid_ptr->Octet, eid_ptr->Len);
-                    *SsidLen = eid_ptr->Len;
-                    Sanity |= 0x1;
-                }
-                else
-                {
-                    DBGPRINT(RT_DEBUG_TRACE, ("APPeerBeaconAndProbeRspSanity - wrong IE_SSID (len=%d)\n",eid_ptr->Len));
-                    return FALSE;
-                }
-                break;
-
-            case IE_SUPP_RATES:
-                if(eid_ptr->Len <= MAX_LEN_OF_SUPPORTED_RATES)
-                {
-                    NdisMoveMemory(Rate, eid_ptr->Octet, eid_ptr->Len);
-                    *RateLen = eid_ptr->Len;
-                    Sanity |= 0x2;
-                }
-                else
-                {
-                    DBGPRINT(RT_DEBUG_TRACE, ("APPeerBeaconAndProbeRspSanity - wrong IE_SUPP_RATES (len=%d)\n",eid_ptr->Len));
-                    return FALSE;
-                }
-                break;
-
-            case IE_DS_PARM:
-                if(eid_ptr->Len == 1)
-                {
-                    *Channel = *eid_ptr->Octet;                    
-                    Sanity |= 0x4;
-                }
-                else
-                {
-                    DBGPRINT(RT_DEBUG_TRACE, ("APPeerBeaconAndProbeRspSanity - wrong IE_DS_PARM (len=%d)\n",eid_ptr->Len));
-                    return FALSE;
-                }
-                break;
-
-            case IE_FH_PARM:
-            case IE_CF_PARM:
-            case IE_IBSS_PARM:
-            case IE_TIM:
-            case IE_WPA:
-                break;
-
-            case IE_EXT_SUPP_RATES:
-                // concatenate all extended rates to Rates[] and RateLen
-                *ExtendedRateIeExist = TRUE;
-                if (eid_ptr->Len + *RateLen <= MAX_LEN_OF_SUPPORTED_RATES)
-                {
-                    NdisMoveMemory(&Rate[*RateLen], eid_ptr->Octet, eid_ptr->Len);
-                    *RateLen = (*RateLen) + eid_ptr->Len;
-                }
-                else
-                {
-                    NdisMoveMemory(&Rate[*RateLen], eid_ptr->Octet, MAX_LEN_OF_SUPPORTED_RATES - (*RateLen));
-                    *RateLen = MAX_LEN_OF_SUPPORTED_RATES;
-                }
-                break;
-
-            case IE_ERP:
-                if (eid_ptr->Len == 1)
-                {
-                    *Erp = (UCHAR)eid_ptr->Octet[0];
-                }
-                break;
-                
-            default:
-                break;
-        }
-        
-        eid_ptr = (PEID_STRUCT)((UCHAR*)eid_ptr + 2 + eid_ptr->Len);        
-    }
-
-	// For some 11a AP. it did not have the channel EID, patch here
-	if (pAd->LatchRfRegs.Channel > 14)
-	{
-		*Channel = pAd->LatchRfRegs.Channel;					 
-		Sanity |= 0x4;		
-	}
-
-	if ((Sanity&0x7) != 0x7)
-    {
-        DBGPRINT(RT_DEBUG_WARN, ("APPeerBeaconAndProbeRspSanity - missing mandatory field)\n"));
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
-
-}
 

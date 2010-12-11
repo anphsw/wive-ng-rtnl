@@ -47,6 +47,11 @@
 #define IS_IPV6_MULTICAST_MAC_ADDR(Addr)	((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) == 0x33))
 #define IS_BROADCAST_MAC_ADDR(Addr)			((((Addr[0]) & 0xff) == 0xff))
 
+#define IGMP_NONE		0
+#define IGMP_PKT		1
+#define IGMP_IN_GROUP	2
+
+
 VOID MulticastFilterTableInit(
 	IN PMULTICAST_FILTER_TABLE *ppMulticastFilterTable);
 
@@ -133,15 +138,17 @@ NDIS_STATUS IgmpPktInfoQuery(
 	IN PUCHAR pSrcBufVA,
 	IN PNDIS_PACKET pPacket,
 	IN UCHAR FromWhichBSSID,
-	OUT BOOLEAN *pInIgmpGroup,
+	OUT INT *pInIgmpGroup,
 	OUT PMULTICAST_FILTER_TABLE_ENTRY *ppGroupEntry);
 
 NDIS_STATUS IgmpPktClone(
 	IN PRTMP_ADAPTER pAd,
 	IN PNDIS_PACKET pPacket,
-	IN UCHAR QueIdx,
+	IN INT IgmpPktInGroup,
 	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
-	IN UINT8 UserPriority);
+	IN UCHAR QueIdx,
+	IN UINT8 UserPriority,
+	IN PNET_DEV pNetDev);
 
 #endif /* __RTMP_IGMP_SNOOP_H__ */
 

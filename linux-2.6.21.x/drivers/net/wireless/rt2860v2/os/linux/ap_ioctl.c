@@ -28,10 +28,6 @@
 #include "rtmp.h"
 #include <linux/wireless.h>
 
-#ifdef WSC_AP_SUPPORT
-extern VOID RTMPIoctlSetWSCOOB(IN PRTMP_ADAPTER pAd);
-#endif
-
 struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_SET, 
 // 1024 --> 1024 + 512
@@ -44,18 +40,21 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_GSITESURVEY,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_site_survey"}, 
+#ifdef INF_AR9
   { RTPRIV_IOCTL_GET_AR9_SHOW,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "ar9_show"}, 
+#endif
   { RTPRIV_IOCTL_SET_WSCOOB,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "set_wsc_oob"}, 
-{ RTPRIV_IOCTL_GET_MAC_TABLE2,		// modified by Red@Ralink, 2009/09/30
+{ RTPRIV_IOCTL_GET_MAC_TABLE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_mac_table"}, 
 { RTPRIV_IOCTL_E2P,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "e2p"},
+#ifdef DBG
 { RTPRIV_IOCTL_BBP,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "bbp"},
@@ -67,6 +66,8 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "rf"},
 #endif // RTMP_RF_RW_SUPPORT //
+#endif // DBG //
+
 #ifdef WSC_AP_SUPPORT
 { RTPRIV_IOCTL_WSC_PROFILE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
@@ -104,7 +105,7 @@ INT rt28xx_ap_ioctl(
     INT				Status = NDIS_STATUS_SUCCESS;
     USHORT			subcmd, index;
 	POS_COOKIE		pObj;
-	UCHAR			apidx=0;
+	INT			apidx=0;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
@@ -242,7 +243,8 @@ INT rt28xx_ap_ioctl(
 #endif // RALINK_ATE //
         case SIOCGIFHWADDR:
 			DBGPRINT(RT_DEBUG_TRACE, ("IOCTLIOCTLIOCTL::SIOCGIFHWADDR\n"));
-			strcpy((PSTRING) wrq->u.name, (PSTRING) pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid);
+            if (pObj->ioctl_if < MAX_MBSSID_NUM)
+    			strcpy((PSTRING) wrq->u.name, (PSTRING) pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid);
 			break;
 		case SIOCGIWNAME:
 			DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWNAME\n"));
@@ -467,9 +469,14 @@ INT rt28xx_ap_ioctl(
 			{
 				if ( access_ok(VERIFY_WRITE, wrq->u.data.pointer, sizeof(ap_privtab)) != TRUE)
 					break;
-				wrq->u.data.length = sizeof(ap_privtab) / sizeof(ap_privtab[0]);
-				if (copy_to_user(wrq->u.data.pointer, ap_privtab, sizeof(ap_privtab)))
-					Status = -EFAULT;
+				if ((sizeof(ap_privtab) / sizeof(ap_privtab[0])) <= wrq->u.data.length)
+				{
+					wrq->u.data.length = sizeof(ap_privtab) / sizeof(ap_privtab[0]);
+					if (copy_to_user(wrq->u.data.pointer, ap_privtab, sizeof(ap_privtab)))
+						Status = -EFAULT;
+				}
+				else
+					Status = -E2BIG;
 			}
 			break;
 		case RTPRIV_IOCTL_SET:
@@ -484,31 +491,42 @@ INT rt28xx_ap_ioctl(
 				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
 					Status = RTMPAPPrivIoctlShow(pAd, wrq);
 			}
-			break;		    
+			break;	
+			
+#ifdef INF_AR9
+#ifdef AR9_MAPI_SUPPORT
 		case RTPRIV_IOCTL_GET_AR9_SHOW:
 			{
 				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
 					Status = RTMPAPPrivIoctlAR9Show(pAd, wrq);
 			}	
 		    break;
+#endif //AR9_MAPI_SUPPORT//
+#endif//INF_AR9//
+
 #ifdef WSC_AP_SUPPORT
 		case RTPRIV_IOCTL_SET_WSCOOB:
 			RTMPIoctlSetWSCOOB(pAd);
 		    break;
 #endif//WSC_AP_SUPPORT//
+
 /* modified by Red@Ralink, 2009/09/30 */
 		case RTPRIV_IOCTL_GET_MAC_TABLE:
-			RTMPIoctlGetMacTableStaInfo(pAd,wrq);
-		    break;
-
-		case RTPRIV_IOCTL_GET_MAC_TABLE2:
 			RTMPIoctlGetMacTable(pAd,wrq);
 		    break;
+
+#ifdef RTMP_RBUS_SUPPORT
+		case RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT:
+			RTMPIoctlGetMacTableStaInfo(pAd,wrq);
+			break;
+#endif // RTMP_RBUS_SUPPORT //
 /* end of modification */
 
+#ifdef AP_SCAN_SUPPORT
 		case RTPRIV_IOCTL_GSITESURVEY:
 			RTMPIoctlGetSiteSurvey(pAd,wrq);
 			break;
+#endif // AP_SCAN_SUPPORT //
 
 		case RTPRIV_IOCTL_STATISTICS:
 			RTMPIoctlStatistics(pAd, wrq);
@@ -528,6 +546,7 @@ INT rt28xx_ap_ioctl(
 			RTMPAPIoctlE2PROM(pAd, wrq);
 			break;
 
+#ifdef DBG
 		case RTPRIV_IOCTL_BBP:
 			RTMPAPIoctlBBP(pAd, wrq);
 			break;
@@ -535,12 +554,13 @@ INT rt28xx_ap_ioctl(
 		case RTPRIV_IOCTL_MAC:
 			RTMPAPIoctlMAC(pAd, wrq);
 			break;
-
+            
 #ifdef RTMP_RF_RW_SUPPORT
 		case RTPRIV_IOCTL_RF:
 			RTMPAPIoctlRF(pAd, wrq);
 			break;
-#endif
+#endif // RTMP_RF_RW_SUPPORT //
+#endif // DBG //
 
 		default:
 //			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd));

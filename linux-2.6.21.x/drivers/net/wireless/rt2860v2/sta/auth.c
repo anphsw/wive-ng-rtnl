@@ -141,18 +141,37 @@ VOID PeerAuthRspAtSeq2Action(
 {
     UCHAR         Addr2[MAC_ADDR_LEN];
     USHORT        Seq, Status, RemoteStatus, Alg;
-    UCHAR		  iv_hdr[4];
-    UCHAR         ChlgText[CIPHER_TEXT_LEN];
-    UCHAR         CyperChlgText[CIPHER_TEXT_LEN + 8 + 8];
-    ULONG		  c_len = 0;
+	UCHAR		  iv_hdr[4];
+//    UCHAR         ChlgText[CIPHER_TEXT_LEN];
+	UCHAR           *ChlgText = NULL;
+//    UCHAR         CyperChlgText[CIPHER_TEXT_LEN + 8 + 8];
+	UCHAR           *CyperChlgText = NULL;
+	ULONG		  c_len = 0;
     HEADER_802_11 AuthHdr;
     BOOLEAN       TimerCancelled;
     PUCHAR        pOutBuffer = NULL;
     NDIS_STATUS   NStatus;
     ULONG         FrameLen = 0;
     USHORT        Status2;
-    UCHAR		  ChallengeIe = IE_CHALLENGE_TEXT;
-    UCHAR		  len_challengeText = CIPHER_TEXT_LEN;
+	UCHAR		  ChallengeIe = IE_CHALLENGE_TEXT;
+	UCHAR		  len_challengeText = CIPHER_TEXT_LEN;
+
+
+	/* allocate memory */
+	os_alloc_mem(NULL, (UCHAR **)&ChlgText, CIPHER_TEXT_LEN);
+	if (ChlgText == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s: ChlgText Allocate memory fail!!!\n", __FUNCTION__));
+		return;
+	}
+
+	os_alloc_mem(NULL, (UCHAR **)&CyperChlgText, CIPHER_TEXT_LEN + 8 + 8);
+	if (CyperChlgText == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s: CyperChlgText Allocate memory fail!!!\n", __FUNCTION__));
+		os_free_mem(NULL, ChlgText);
+		return;
+	}
 
     if (PeerAuthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Alg, &Seq, &Status, (PCHAR)ChlgText)) 
     {
@@ -183,7 +202,7 @@ VOID PeerAuthRspAtSeq2Action(
                         pAd->Mlme.AuthMachine.CurrState = AUTH_REQ_IDLE;
                         Status2 = MLME_FAIL_NO_RESOURCE;
                         MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_AUTH_CONF, 2, &Status2, 0);
-                        return;
+                        goto LabelOK;
                     }
                     
                     DBGPRINT(RT_DEBUG_TRACE, ("AUTH - Send AUTH request seq#3...\n"));
@@ -222,7 +241,7 @@ VOID PeerAuthRspAtSeq2Action(
                         pAd->Mlme.AuthMachine.CurrState = AUTH_REQ_IDLE;
                         Status2 = MLME_FAIL_NO_RESOURCE;
                         MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_AUTH_CONF, 2, &Status2, 0);
-                        return;
+                        goto LabelOK;
 					}
 						
 					/* Update the total length for 4-bytes ICV */
@@ -255,6 +274,14 @@ VOID PeerAuthRspAtSeq2Action(
     {
         DBGPRINT(RT_DEBUG_TRACE, ("AUTH - PeerAuthSanity() sanity check fail\n"));
     }
+
+LabelOK:
+	if (ChlgText != NULL)
+		os_free_mem(NULL, ChlgText);
+
+	if (CyperChlgText != NULL)
+		os_free_mem(NULL, CyperChlgText);
+	return;
 }
 
 /*
@@ -271,8 +298,17 @@ VOID PeerAuthRspAtSeq4Action(
 {
     UCHAR         Addr2[MAC_ADDR_LEN];
     USHORT        Alg, Seq, Status;
-    CHAR          ChlgText[CIPHER_TEXT_LEN];
+//    CHAR          ChlgText[CIPHER_TEXT_LEN];
+	CHAR		*ChlgText = NULL;
     BOOLEAN       TimerCancelled;
+
+	/* allocate memory */
+	os_alloc_mem(NULL, (UCHAR **)&ChlgText, CIPHER_TEXT_LEN);
+	if (ChlgText == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("%s: ChlgText Allocate memory fail!!!\n", __FUNCTION__));
+		return;
+	}
 
     if(PeerAuthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Alg, &Seq, &Status, ChlgText)) 
     {
@@ -295,6 +331,9 @@ VOID PeerAuthRspAtSeq4Action(
     {
         DBGPRINT(RT_DEBUG_TRACE, ("AUTH - PeerAuthRspAtSeq4Action() sanity check fail\n"));
     }
+
+	if (ChlgText != NULL)
+		os_free_mem(NULL, ChlgText);
 }
 
 /*
@@ -328,6 +367,13 @@ VOID MlmeDeauthReqAction(
         return;
     }
 
+#ifdef WAPI_SUPPORT			
+	WAPI_InternalCmdAction(pAd, 
+						   pAd->StaCfg.AuthMode, 
+						   BSS0, 
+						   pAd->MlmeAux.Bssid, 
+						   WAI_MLME_DISCONNECT);					
+#endif // WAPI_SUPPORT //
 
     DBGPRINT(RT_DEBUG_TRACE, ("AUTH - Send DE-AUTH request (Reason=%d)...\n", pInfo->Reason));
     MgtMacHeaderInit(pAd, &DeauthHdr, SUBTYPE_DEAUTH, 0, pInfo->Addr, pAd->MlmeAux.Bssid);
@@ -345,8 +391,7 @@ VOID MlmeDeauthReqAction(
     MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_DEAUTH_CONF, 2, &Status, 0);
 
 	// send wireless event - for deauthentication
-	if (pAd->CommonCfg.bWirelessEvent)
-		RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 
+		RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, NULL, BSS0, 0); 
 }
 
 /*

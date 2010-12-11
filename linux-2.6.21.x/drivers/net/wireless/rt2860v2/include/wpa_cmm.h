@@ -18,7 +18,7 @@
 #define PEER_MSG1_RETRY_EXEC_INTV           1000        		// 1 sec
 #define PEER_MSG3_RETRY_EXEC_INTV           3000        		// 3 sec
 #define GROUP_KEY_UPDATE_EXEC_INTV          1000				// 1 sec
-#define PEER_GROUP_KEY_UPDATE_INIV			15000				// 2 sec
+#define PEER_GROUP_KEY_UPDATE_INIV			2000				// 2 sec
 
 #define	EAPOL_MSG_INVALID	0
 #define	EAPOL_PAIR_MSG_1	1
@@ -57,6 +57,13 @@
 #define MAX_WPA_MSG                  5
 
 #define WPA_FUNC_SIZE                (MAX_WPA_PTK_STATE * MAX_WPA_MSG)
+
+typedef enum _WpaRole {
+    WPA_NONE,               // 0
+    WPA_Authenticator,      // 1
+    WPA_Supplicant,         // 2
+    WPA_BOTH,               // 3: Authenticator and Supplicant
+} WPA_ROLE;    
 
 //for-wpa value domain of pMacEntry->WpaState  802.1i D3   p.114
 typedef enum _ApWpaState {
@@ -118,8 +125,9 @@ typedef enum _WPA_VARIABLE_ELEMENT_ID
 #define GROUP_SUITE					0
 #define PAIRWISE_SUITE				1
 #define AKM_SUITE					2
-#define PMKID_LIST					3
-#define G_MGMT_SUITE				4
+#define RSN_CAP_INFO				3
+#define PMKID_LIST					4
+#define G_MGMT_SUITE				5
 
 // 
 //	The definition of the cipher combination
@@ -152,6 +160,13 @@ typedef	enum	_WpaMixPairCipher
 	WPA_TKIPAES_WPA2_TKIPAES	= 0x0F,	
 }	WPA_MIX_PAIR_CIPHER;
 
+/* The internal command list for ralink dot1x daemon using */
+typedef	enum	_Dot1xInternalCmd
+{
+	DOT1X_DISCONNECT_ENTRY, 			
+	DOT1X_RELOAD_CONFIG,
+}	DOT1X_INTERNAL_CMD;
+
 // 802.1x authentication format
 typedef	struct	_IEEE8021X_FRAME	{
 	UCHAR	Version;					// 1.0
@@ -159,26 +174,26 @@ typedef	struct	_IEEE8021X_FRAME	{
 	USHORT	Length;
 }	IEEE8021X_FRAME, *PIEEE8021X_FRAME;
 
-typedef struct PACKED _RSN_IE_HEADER_STRUCT	{
+typedef struct GNU_PACKED _RSN_IE_HEADER_STRUCT	{
 	UCHAR		Eid;
 	UCHAR		Length;
 	USHORT		Version;	// Little endian format
 }	RSN_IE_HEADER_STRUCT, *PRSN_IE_HEADER_STRUCT;
 
 // Cipher suite selector types
-typedef struct PACKED _CIPHER_SUITE_STRUCT	{
+typedef struct GNU_PACKED _CIPHER_SUITE_STRUCT	{
 	UCHAR		Oui[3];
 	UCHAR		Type;
 }	CIPHER_SUITE_STRUCT, *PCIPHER_SUITE_STRUCT;
 
 // Authentication and Key Management suite selector
-typedef struct PACKED _AKM_SUITE_STRUCT	{
+typedef struct GNU_PACKED _AKM_SUITE_STRUCT	{
 	UCHAR		Oui[3];
 	UCHAR		Type;
 }	AKM_SUITE_STRUCT, *PAKM_SUITE_STRUCT;
 
 // RSN capability
-typedef struct	PACKED _RSN_CAPABILITY	{
+typedef struct	GNU_PACKED _RSN_CAPABILITY	{
 	USHORT		Rsv:10;
 	USHORT		GTKSAReplayCnt:2;
 	USHORT		PTKSAReplayCnt:2;

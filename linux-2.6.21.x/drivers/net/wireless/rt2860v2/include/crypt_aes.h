@@ -12,7 +12,6 @@
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
 
-
 /****************************************************************************
     Module Name:
     AES
@@ -32,14 +31,12 @@
     Eddy        2009/04/20      Create AES-CMAC, AES-CCM    
     Eddy        2009/01/19      Create AES-128, AES-192, AES-256, AES-CBC
 ***************************************************************************/
+
 #ifndef __CRYPT_AES_H__
 #define __CRYPT_AES_H__
 
-#ifdef CRYPT_TESTPLAN
-#include "crypt_testplan.h"
-#else
 #include "rt_config.h"
-#endif /* CRYPT_TESTPLAN */
+
 
 /* AES definition & structure */
 #define AES_STATE_ROWS 4     /* Block size: 4*4*8 = 128 bits */
@@ -59,12 +56,12 @@ typedef struct {
 
 
 /* AES operations */
-VOID AES_KeyExpansion (
+VOID RT_AES_KeyExpansion (
     IN UINT8 Key[],
     IN UINT KeyLength,
     INOUT AES_CTX_STRUC *paes_ctx);
 
-VOID AES_Encrypt (
+VOID RT_AES_Encrypt (
     IN UINT8 PlainBlock[],
     IN UINT PlainBlockSize,
     IN UINT8 Key[],
@@ -72,49 +69,13 @@ VOID AES_Encrypt (
     OUT UINT8 CipherBlock[],
     INOUT UINT *CipherBlockSize);
 
-VOID AES_Decrypt (
+VOID RT_AES_Decrypt (
     IN UINT8 CipherBlock[],
     IN UINT CipherBlockSize,
     IN UINT8 Key[],
     IN UINT KeyLength,
     OUT UINT8 PlainBlock[],
     INOUT UINT *PlainBlockSize);
-
-/* AES-CBC operations */
-VOID AES_CBC_Encrypt (
-    IN UINT8 PlainText[],
-    IN UINT PlainTextLength,
-    IN UINT8 Key[],
-    IN UINT KeyLength,
-    IN UINT8 IV[],
-    IN UINT IVLength,
-    OUT UINT8 CipherText[],
-    INOUT UINT *CipherTextLength);
-
-VOID AES_CBC_Decrypt (
-    IN UINT8 CipherText[],
-    IN UINT CipherTextLength,
-    IN UINT8 Key[],
-    IN UINT KeyLength,
-    IN UINT8 IV[],
-    IN UINT IVLength,
-    OUT UINT8 PlainText[],
-    INOUT UINT *PlainTextLength);
-
-/* AES-CMAC operations */
-VOID AES_CMAC_GenerateSubKey (
-    IN UINT8 Key[],
-    IN UINT KeyLength,
-    OUT UINT8 SubKey1[],
-    OUT UINT8 SubKey2[]);
-
-VOID AES_CMAC (
-    IN UINT8 PlainText[],
-    IN UINT PlainTextLength,
-    IN UINT8 Key[],
-    IN UINT KeyLength,
-    OUT UINT8 MACText[],
-    INOUT UINT *MACTextLength);
 
 /* AES Counter with CBC-MAC operations */
 VOID AES_CCM_MAC (
@@ -155,6 +116,44 @@ INT AES_CCM_Decrypt (
     OUT UINT8 PlainText[],
     INOUT UINT *PlainTextLength);
 
+/* AES-CMAC operations */
+VOID AES_CMAC_GenerateSubKey (
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    OUT UINT8 SubKey1[],
+    OUT UINT8 SubKey2[]);
+
+VOID AES_CMAC (
+    IN UINT8 PlainText[],
+    IN UINT PlainTextLength,
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    OUT UINT8 MACText[],
+    INOUT UINT *MACTextLength);
+
+
+
+/* AES-CBC operations */
+VOID AES_CBC_Encrypt (
+    IN UINT8 PlainText[],
+    IN UINT PlainTextLength,
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    IN UINT8 IV[],
+    IN UINT IVLength,
+    OUT UINT8 CipherText[],
+    INOUT UINT *CipherTextLength);
+
+VOID AES_CBC_Decrypt (
+    IN UINT8 CipherText[],
+    IN UINT CipherTextLength,
+    IN UINT8 Key[],
+    IN UINT KeyLength,
+    IN UINT8 IV[],
+    IN UINT IVLength,
+    OUT UINT8 PlainText[],
+    INOUT UINT *PlainTextLength);
+
 /* AES key wrap operations */
 INT AES_Key_Wrap (
     IN UINT8 PlainText[],
@@ -171,5 +170,7 @@ INT AES_Key_Unwrap (
     IN UINT  KeyLength,
     OUT UINT8 PlainText [],
     OUT UINT *PlainTextLength);
+
+
 #endif /* __CRYPT_AES_H__ */
 

@@ -1338,12 +1338,12 @@ BOOLEAN RTMPRcvFrameDLSCheck(
 			if (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)
 			{
 				// AES
-				HMAC_SHA1(DlsPTK, LEN_PTK_KCK, (PUCHAR) pEap, pEap->Body_Len[1] + 4, digest, SHA1_DIGEST_SIZE);
+				RT_HMAC_SHA1(DlsPTK, LEN_PTK_KCK, (PUCHAR) pEap, pEap->Body_Len[1] + 4, digest, SHA1_DIGEST_SIZE);
 				NdisMoveMemory(Mic,	digest,	LEN_KEY_DESC_MIC);
 			}
 			else
 			{
-				HMAC_MD5(DlsPTK, LEN_PTK_KCK, (PUCHAR) pEap, pEap->Body_Len[1] + 4, Mic, MD5_DIGEST_SIZE);
+				RT_HMAC_MD5(DlsPTK, LEN_PTK_KCK, (PUCHAR) pEap, pEap->Body_Len[1] + 4, Mic, MD5_DIGEST_SIZE);
 			}
 			
 			if (!NdisEqualMemory(OldMic, Mic, LEN_KEY_DESC_MIC))
@@ -1675,7 +1675,7 @@ NDIS_STATUS RTMPSendSTAKeyRequest(
 	if (mpool == NULL)
     {
         DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
-        return 0;
+        return NDIS_STATUS_FAILURE;
     }
 
 	// Zero message body
@@ -1740,13 +1740,13 @@ NDIS_STATUS RTMPSendSTAKeyRequest(
 	{
 		// AES
 		NdisZeroMemory(digest,	sizeof(digest));
-		HMAC_SHA1(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
+		RT_HMAC_SHA1(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
 		NdisMoveMemory(pPacket->KeyDesc.KeyMic, digest, LEN_KEY_DESC_MIC);
 	}
 	else
 	{
 		NdisZeroMemory(Mic,	sizeof(Mic));
-		HMAC_MD5(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
+		RT_HMAC_MD5(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
 		NdisMoveMemory(pPacket->KeyDesc.KeyMic, Mic, LEN_KEY_DESC_MIC);
 	}
 
@@ -1805,7 +1805,7 @@ NDIS_STATUS RTMPSendSTAKeyHandShake(
 	if (mpool == NULL)
     {
         DBGPRINT(RT_DEBUG_ERROR, ("!!!%s : no memory!!!\n", __FUNCTION__));
-        return 0;
+        return NDIS_STATUS_FAILURE;
     }
 
 	// Zero message body
@@ -1869,13 +1869,13 @@ NDIS_STATUS RTMPSendSTAKeyHandShake(
 	{
 		// AES
 		NdisZeroMemory(digest,	sizeof(digest));
-		HMAC_SHA1(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
+		RT_HMAC_SHA1(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, digest, SHA1_DIGEST_SIZE);
 		NdisMoveMemory(pPacket->KeyDesc.KeyMic, digest, LEN_KEY_DESC_MIC);
 	}
 	else
 	{
 		NdisZeroMemory(Mic,	sizeof(Mic));
-		HMAC_MD5(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
+		RT_HMAC_MD5(DlsPTK, LEN_PTK_KCK, pOutBuffer, FrameLen, Mic, MD5_DIGEST_SIZE);
 		NdisMoveMemory(pPacket->KeyDesc.KeyMic, Mic, LEN_KEY_DESC_MIC);
 	}
 

@@ -89,6 +89,15 @@ UINT32 gUAPSD_TimingSumTxqueue2Air;
 #endif // UAPSD_TIMING_RECORD_FUNC //
 
 
+#ifdef VENDOR_FEATURE3_SUPPORT
+static VOID UAPSD_InsertTailQueueAc(
+	IN	RTMP_ADAPTER	*pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry,
+	IN	QUEUE_HEADER	*pQueueHeader,
+	IN	QUEUE_ENTRY		*pQueueEntry);
+#endif // VENDOR_FEATURE3_SUPPORT //
+
+
 
 
 /*
@@ -161,72 +170,6 @@ VOID UAPSD_Release(
 /*
 ========================================================================
 Routine Description:
-    Free all EOSP frames and close all SP.
-
-Arguments:
-	pAd		Pointer to our adapter
-
-Return Value:
-    None
-
-Note:
-========================================================================
-*/
-VOID UAPSD_FreeAll(
-	IN	PRTMP_ADAPTER		pAd)
-{
-	UINT32 IdEntry;
-
-
-#ifdef UAPSD_DEBUG
-	DBGPRINT(RT_DEBUG_TRACE, ("uapsd> prepare to free all EOSP frames and close all SP...\n"));
-#endif // UAPSD_DEBUG //
-
-	RTMP_SEM_LOCK(&pAd->UAPSDEOSPLock);
-
-    /* check for all CLIENT's UAPSD Service Period */
-	for(IdEntry=0; IdEntry<MAX_LEN_OF_MAC_TABLE; IdEntry++)
-    {
-		MAC_TABLE_ENTRY *pEntry = &pAd->MacTab.Content[IdEntry];
-
-
-        /* check if SP is started and EOSP is transmitted ok */
-		if (pEntry->pUAPSDEOSPFrame != NULL)
-        {
-			RELEASE_NDIS_PACKET(pAd,
-								QUEUE_ENTRY_TO_PACKET(pEntry->pUAPSDEOSPFrame),
-                                NDIS_STATUS_FAILURE);
-			pEntry->pUAPSDEOSPFrame = NULL;
-        } /* End of if */
-
-		if (pEntry->bAPSDFlagSPStart != 0)
-        {
-			/*
-				1. SP is started;
-				2. EOSP frame is sent ok.
-			*/
-
-            /*
-				We close current SP for the STATION so we can receive new
-				trigger frame from the STATION again
-			*/
-
-#ifdef UAPSD_DEBUG
-			DBGPRINT(RT_DEBUG_TRACE, ("uapsd> force to close SP!\n"));
-#endif // UAPSD_DEBUG //
-
-			pEntry->bAPSDFlagSPStart = 0;
-			pEntry->bAPSDFlagEOSPOK = 0;
-        } /* End of if */
-    } /* End of for */
-
-	RTMP_SEM_UNLOCK(&pAd->UAPSDEOSPLock);
-} /* End of UAPSD_FreeAll */
-
-
-/*
-========================================================================
-Routine Description:
     Close current Service Period.
 
 Arguments:
@@ -260,6 +203,12 @@ VOID UAPSD_SP_Close(
 					SP will be closed, should not have EOSP frame
 					if exists, release it
 				*/
+#ifdef UAPSD_DEBUG
+				DBGPRINT(RT_DEBUG_TRACE, ("uapsd> [3] Free EOSP (UP = %d)!\n",
+						RTMP_GET_PACKET_UP(
+							QUEUE_ENTRY_TO_PACKET(pEntry->pUAPSDEOSPFrame))));
+#endif // UAPSD_DEBUG //
+
 				RELEASE_NDIS_PACKET(pAd,
 									QUEUE_ENTRY_TO_PACKET(pEntry->pUAPSDEOSPFrame),
 	                                NDIS_STATUS_FAILURE);
@@ -320,7 +269,7 @@ VOID UAPSD_AllPacketDeliver(
 			QueId = QID_AC_BE;
         } /* End of if */
 
-		InsertTailQueueAc(pAd, pEntry, &pAd->TxSwQueue[QueId],
+		UAPSD_INSERT_QUEUE_AC(pAd, pEntry, &pAd->TxSwQueue[QueId],
 						pEntry->pUAPSDEOSPFrame);
 
 		pEntry->pUAPSDEOSPFrame = NULL;
@@ -336,7 +285,7 @@ VOID UAPSD_AllPacketDeliver(
 		while(pQueApsd->Head)
         {
 			pQueEntry = RemoveHeadQueue(pQueApsd);
-			InsertTailQueueAc(pAd, pEntry, &pAd->TxSwQueue[QueId], pQueEntry);
+			UAPSD_INSERT_QUEUE_AC(pAd, pEntry, &pAd->TxSwQueue[QueId], pQueEntry);
         } /* End of while */
     } /* End of for */
 
@@ -379,6 +328,8 @@ VOID UAPSD_AssocParse(
 	IN	UCHAR				*pElm)
 {
 	PQBSS_STA_INFO_PARM  pQosInfo;
+	UCHAR UAPSD[4];
+	UINT32 IdApsd;
 
 
     /* check if the station enables UAPSD function */
@@ -391,31 +342,28 @@ VOID UAPSD_AssocParse(
 		ACM_TG_CMT_MAX_SP_LENGTH;
 #endif // WMM_ACM_SUPPORT //
 
+		UAPSD[QID_AC_BE] = pQosInfo->UAPSD_AC_BE;
+		UAPSD[QID_AC_BK] = pQosInfo->UAPSD_AC_BK;
+		UAPSD[QID_AC_VI] = pQosInfo->UAPSD_AC_VI;
+		UAPSD[QID_AC_VO] = pQosInfo->UAPSD_AC_VO;
+
 		pEntry->MaxSPLength = pQosInfo->MaxSPLength;
 
-		/* use static UAPSD setting of association request frame */
-		pEntry->bAPSDCapablePerAC[QID_AC_BE] = pQosInfo->UAPSD_AC_BE;
-		pEntry->bAPSDCapablePerAC[QID_AC_BK] = pQosInfo->UAPSD_AC_BK;
-		pEntry->bAPSDCapablePerAC[QID_AC_VI] = pQosInfo->UAPSD_AC_VI;
-		pEntry->bAPSDCapablePerAC[QID_AC_VO] = pQosInfo->UAPSD_AC_VO;
+		DBGPRINT(RT_DEBUG_TRACE,
+					("apsd> MaxSPLength = %d\n", pEntry->MaxSPLength));
 
-		pEntry->bAPSDDeliverEnabledPerAC[QID_AC_BE] = pQosInfo->UAPSD_AC_BE;
-		pEntry->bAPSDDeliverEnabledPerAC[QID_AC_BK] = pQosInfo->UAPSD_AC_BK;
-		pEntry->bAPSDDeliverEnabledPerAC[QID_AC_VI] = pQosInfo->UAPSD_AC_VI;
-		pEntry->bAPSDDeliverEnabledPerAC[QID_AC_VO] = pQosInfo->UAPSD_AC_VO;
+		/* use static UAPSD setting of association request frame */
+		for(IdApsd=0; IdApsd<4; IdApsd++)
+		{
+			pEntry->bAPSDCapablePerAC[IdApsd] = UAPSD[IdApsd];
+			pEntry->bAPSDDeliverEnabledPerAC[IdApsd] = UAPSD[IdApsd];
 
 #ifdef WMM_ACM_SUPPORT
-		/* backup static APSD state in (re)association request frame */
-		pEntry->bACMAPSDBackup[QID_AC_BE] = pQosInfo->UAPSD_AC_BE;
-		pEntry->bACMAPSDBackup[QID_AC_BK] = pQosInfo->UAPSD_AC_BK;
-		pEntry->bACMAPSDBackup[QID_AC_VI] = pQosInfo->UAPSD_AC_VI;
-		pEntry->bACMAPSDBackup[QID_AC_VO] = pQosInfo->UAPSD_AC_VO;
-
-		pEntry->bACMAPSDBackupDeliverEnabled[QID_AC_BE] = pQosInfo->UAPSD_AC_BE;
-		pEntry->bACMAPSDBackupDeliverEnabled[QID_AC_BK] = pQosInfo->UAPSD_AC_BK;
-		pEntry->bACMAPSDBackupDeliverEnabled[QID_AC_VI] = pQosInfo->UAPSD_AC_VI;
-		pEntry->bACMAPSDBackupDeliverEnabled[QID_AC_VO] = pQosInfo->UAPSD_AC_VO;
+			/* backup static APSD state in (re)association request frame */
+			pEntry->bACMAPSDBackup[IdApsd] = UAPSD[IdApsd];
+			pEntry->bACMAPSDBackupDeliverEnabled[IdApsd] = UAPSD[IdApsd];
 #endif // WMM_ACM_SUPPORT //
+		} /* End of for */
 
 		if ((pEntry->bAPSDCapablePerAC[QID_AC_BE] == 0) &&
 			(pEntry->bAPSDCapablePerAC[QID_AC_BK] == 0) &&
@@ -546,6 +494,7 @@ Return Value:
     None
 
 Note:
+	Only for PCI-based device.
 ========================================================================
 */
 VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
@@ -575,6 +524,9 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 
 	pHeader = (HEADER_802_11 *)pDstMac;
 
+	/* find the destination STATION */
+	pEntry = MacTableLookup(pAd, pHeader->Addr1);
+
 	if ((pHeader->FC.Type == BTYPE_DATA) &&
 		(pHeader->FC.SubType == SUBTYPE_QOS_NULL))
     {
@@ -582,9 +534,6 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 			Currently, QoS Null type is only used in UAPSD mechanism
 			and no any UAPSD data packet exists
 		*/
-
-		/* find the destination STATION */
-		pEntry = MacTableLookup(pAd, pHeader->Addr1);
 
 		RTMP_SEM_LOCK(&pAd->UAPSDEOSPLock);
 
@@ -638,8 +587,6 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 	{
 		UINT16 QueId;
 
-		pEntry = MacTableLookup(pAd, pHeader->Addr1);
-
 
 		RTMP_SEM_LOCK(&pAd->UAPSDEOSPLock);
 
@@ -647,7 +594,7 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 			(pEntry->bAPSDFlagSpRoughUse != 0) &&
 			(pEntry->bAPSDFlagSPStart != 0))
 		{
-			UCHAR FlgEosp = FALSE;
+			BOOLEAN FlgEosp = FALSE;
 
 
 			/* Note: UAPSDTxNum does NOT include the EOSP packet */
@@ -678,7 +625,7 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 							QueId = QID_AC_BE;
 						} /* End of if */
 
-						InsertTailQueueAc(pAd, pEntry,
+						UAPSD_INSERT_QUEUE_AC(pAd, pEntry,
 										&pAd->TxSwQueue[QueId],
 										pEntry->pUAPSDEOSPFrame);
 
@@ -792,7 +739,10 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 #endif // WORKQUEUE_BH //
 
 			} /* End of if */
-		} /* End of if (pEntry != NULL) */
+		}
+		else
+			RTMP_SEM_UNLOCK(&pAd->UAPSDEOSPLock);
+		/* End of if (pEntry != NULL) */
     } /* End of if */
 } /* End of UAPSD_QoSNullTxMgmtTxDoneHandle */
 
@@ -818,9 +768,8 @@ VOID UAPSD_QueueMaintenance(
 	IN	MAC_TABLE_ENTRY		*pEntry)
 {
 	QUEUE_HEADER *pQue;
-	ULONG IdAc;
-	UCHAR FlgUapsdPkt;
-	USHORT IdleCount;
+	UINT32 IdAc;
+	BOOLEAN FlgUapsdPkt, FlgEospPkt;
 
 
 	/* sanity check */
@@ -837,6 +786,7 @@ VOID UAPSD_QueueMaintenance(
 
 	pQue = pEntry->UAPSDQueue;
 	FlgUapsdPkt = 0;
+	FlgEospPkt = 0;
 
     /* check if more than one U-APSD packets exists */
 	for(IdAc=0; IdAc<WMM_NUM_OF_AC; IdAc++)
@@ -852,30 +802,41 @@ VOID UAPSD_QueueMaintenance(
         } /* End of if */
     } /* End of for */
 
-    /* check if any queued UAPSD packet exists */
-	if (pAd->CommonCfg.bWiFiTest)
-		IdleCount = 15;	/* 15 seconds for WMM test */
-	else
-		IdleCount = 5;	/* normal timeout value */
+	if (pEntry->pUAPSDEOSPFrame != NULL)
+		FlgEospPkt = 1;
 	/* End of if */
 
-	if (FlgUapsdPkt)
+    /* check if any queued UAPSD packet exists */
+	if (FlgUapsdPkt || FlgEospPkt)
     {
 
 		pEntry->UAPSDQIdleCount ++;
 
-		if (pEntry->UAPSDQIdleCount > IdleCount)
+		if (pEntry->UAPSDQIdleCount > UAPSD_QUEUE_TIMEOUT)
         {
 #ifdef UAPSD_DEBUG
-			DBGPRINT(RT_DEBUG_TRACE, ("uapsd> UAPSD queue timeout! clean all queued frames...\n"));
+			if (FlgUapsdPkt)
+			{
+				DBGPRINT(RT_DEBUG_TRACE,
+						("uapsd> UAPSD queue timeout! clean all queued frames...\n"));
+			} /* End of if */
+
+			if (FlgEospPkt)
+			{
+				DBGPRINT(RT_DEBUG_TRACE,
+						("uapsd> UAPSD EOSP timeout! clean the EOSP frame!\n"));
+			} /* End of if */
 #endif // UAPSD_DEBUG //
 
             /* UAPSDQIdleCount will be 0 after trigger frame is received */
 
             /* clear all U-APSD packets */
+			if (FlgUapsdPkt)
+			{
 			for(IdAc=0; IdAc<WMM_NUM_OF_AC; IdAc++)
 				APCleanupPsQueue(pAd, &pQue[IdAc]);
             /* End of for */
+			} /* End of if */
 
             /* free the EOSP frame */
 			pEntry->UAPSDTxNum = 0;
@@ -1012,7 +973,7 @@ VOID UAPSD_SP_AUE_Handle(
 						QueId = QID_AC_BE;
                     } /* End of if */
 
-					InsertTailQueueAc(pAd, pEntry, &pAd->TxSwQueue[QueId],
+					UAPSD_INSERT_QUEUE_AC(pAd, pEntry, &pAd->TxSwQueue[QueId],
 									pEntry->pUAPSDEOSPFrame);
 
 					pEntry->pUAPSDEOSPFrame = NULL;
@@ -1284,7 +1245,7 @@ VOID UAPSD_SP_PacketCheck(
 						QueId = QID_AC_BE;
                     } /* End of if */
 
-					InsertTailQueueAc(pAd, pEntry, &pAd->TxSwQueue[QueId],
+					UAPSD_INSERT_QUEUE_AC(pAd, pEntry, &pAd->TxSwQueue[QueId],
 									pEntry->pUAPSDEOSPFrame);
 
 					pEntry->pUAPSDEOSPFrame = NULL;
@@ -1603,11 +1564,14 @@ VOID UAPSD_TriggerFrameHandle(
 
 	UINT32	AcQueId;
 	UINT32	TxPktNum, SpMaxLen;
-    /* AC ID          = VO > VI > BK > BE */
-    /* so we need to change BE & BK */
-    /* => AC priority = VO > VI > BE > BK */
+    /*
+		AC ID          = VO > VI > BK > BE
+		so we need to change BE & BK
+		=> AC priority = VO > VI > BE > BK
+	*/
 	UINT32	AcPriority[WMM_NUM_OF_AC] = { 1, 0, 2, 3 };
-	UINT32	SpLenMap[4] = { 0, 2, 4, 6 }; /* 0: deliver all U-APSD packets */
+	/* 0: deliver all U-APSD packets */
+	UINT32	SpLenMap[WMM_NUM_OF_AC] = { 0, 2, 4, 6 };
 	UCHAR	QueIdList[WMM_NUM_OF_AC] = { QID_AC_BE, QID_AC_BK,
                                             QID_AC_VI, QID_AC_VO };
 	BOOLEAN	FlgQueEmpty;
@@ -1624,6 +1588,11 @@ VOID UAPSD_TriggerFrameHandle(
 
 	/* sanity check for Service Period of the STATION */
 	RTMP_SEM_LOCK(&pAd->UAPSDEOSPLock);
+
+#ifdef UAPSD_DEBUG
+	DBGPRINT(RT_DEBUG_TRACE, ("\nuapsd> bAPSDFlagLegacySent = %d!\n",
+			pEntry->bAPSDFlagLegacySent));
+#endif // UAPSD_DEBUG //
 
 	if (pEntry->bAPSDFlagSPStart != 0)
 	{
@@ -1704,6 +1673,8 @@ VOID UAPSD_TriggerFrameHandle(
 	if (pEntry->MaxSPLength >= 4)
 	{
 		/* fatal error, should be 0 ~ 3 so reset it to 0 */
+		DBGPRINT(RT_DEBUG_TRACE,
+					("uapsd> MaxSPLength >= 4 (%d)!\n", pEntry->MaxSPLength));
 		pEntry->MaxSPLength = 0;
 	} /* End of if */
 
@@ -1713,10 +1684,12 @@ VOID UAPSD_TriggerFrameHandle(
 	UAPSD_TIME_GET(pAd, pEntry->UAPSDTimeStampLast);
 
 
-	/* check if current rate of the entry is 1Mbps */
+	/* check if current rate of the entry is 1Mbps (2.4GHz) or 6Mbps (5GHz) */
 #ifdef RTMP_MAC_PCI
-	if ((pEntry->HTPhyMode.field.MODE == MODE_CCK) &&
-		(pEntry->HTPhyMode.field.MCS == MCS_0))
+	if (((pEntry->HTPhyMode.field.MODE == MODE_CCK) &&
+		(pEntry->HTPhyMode.field.MCS == MCS_0)) ||
+		((pEntry->HTPhyMode.field.MODE == MODE_OFDM) &&
+		(pEntry->HTPhyMode.field.MCS == MCS_0)))
 	{
 		/*
 			Note: because no any statistics count for CCK, MCS0 so we need
@@ -1749,7 +1722,7 @@ VOID UAPSD_TriggerFrameHandle(
 
 	/* sanity Check for UAPSD condition */
 	if (UpOfFrame >= 8)
-		UpOfFrame = 1;
+		UpOfFrame = 1; /* shout not be here */
 	/* End of if */
 
 	/* get the AC ID of incoming packet */
@@ -1861,7 +1834,7 @@ VOID UAPSD_TriggerFrameHandle(
                        Each buffered frame shall be delivered using the access
 					parameters of its AC.
 				*/
-				InsertTailQueueAc(pAd, pEntry, pLastAcSwQue, pQuedPkt);
+				UAPSD_INSERT_QUEUE_AC(pAd, pEntry, pLastAcSwQue, pQuedPkt);
 			} /* End of if */
 
 			/* get the U-APSD packet */
@@ -1934,7 +1907,7 @@ VOID UAPSD_TriggerFrameHandle(
 	UAPSD_TIME_GET(pAd, DebugTimeNow);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("uapsd> start a SP (Tx Num = %d) (Rough SP = %d) "
-			"(Has Any Mgmt = %d) (Abnormal = %d) (Time = %ld)\n",
+			"(Has Any Mgmt = %d) (Abnormal = %d) (Time = %lu)\n",
 			TxPktNum, pEntry->bAPSDFlagSpRoughUse, FlgMgmtFrame,
 			gUAPSD_SP_CloseAbnormalNum, DebugTimeNow));
 }
@@ -1943,27 +1916,40 @@ VOID UAPSD_TriggerFrameHandle(
 	if (TxPktNum <= 1)
 	{
 		/* if no data needs to tx, respond with QosNull for the trigger frame */
-            
 		pEntry->pUAPSDEOSPFrame = NULL;
 		pEntry->UAPSDTxNum = 0;
 
 		if (TxPktNum <= 0)
+		{
 			FlgNullSnd = TRUE;
+
+#ifdef UAPSD_DEBUG
+			DBGPRINT(RT_DEBUG_TRACE,
+					 ("uapsd> No data, send a Qos-Null frame with ESOP bit on and "
+					  "UP=%d to end USP\n", UpOfFrame));
+#endif // RELEASE_EXCLUDE //
+		}
 		else
         {
 			/* only one packet so send it directly */
 			RTMP_SET_PACKET_EOSP(pQuedPkt, TRUE);
-			InsertTailQueueAc(pAd, pEntry, pLastAcSwQue, pQuedPkt);
+			UAPSD_INSERT_QUEUE_AC(pAd, pEntry, pLastAcSwQue, pQuedPkt);
+
+#ifdef UAPSD_DEBUG
+			DBGPRINT(RT_DEBUG_TRACE,
+					("uapsd> Only one packet with UP = %d\n",
+					RTMP_GET_PACKET_UP(pQuedPkt)));
+#endif // RELEASE_EXCLUDE //
 		} /* End of if */
 
 		/*
 			We will send the QoS Null frame below and we will hande the
 			QoS Null tx done in RTMPFreeTXDUponTxDmaDone().
 		*/
-        }
-        else
-        {
-            /* more than two U-APSD packets */
+	}
+	else
+	{
+		/* more than two U-APSD packets */
 
 		/*
 			NOTE: EOSP bit != !MoreData bit because Max SP Length,
@@ -2019,13 +2005,18 @@ VOID UAPSD_TriggerFrameHandle(
 		(pEntry->bAPSDFlagLegacySent != 0))
 	{
 		pEntry->UAPSDTxNum ++;
+
+#ifdef UAPSD_DEBUG
+		DBGPRINT(RT_DEBUG_TRACE, ("uapsd> A legacy PS is sent! UAPSDTxNum = %d\n",
+				pEntry->UAPSDTxNum));
+#endif // UAPSD_DEBUG //
 	} /* End of if */
 #endif // UAPSD_SP_ACCURATE //
 
 
 	/* clear corresponding TIM bit */
 
-        /* get its AID for the station */
+	/* get its AID for the station */
 	Aid = pEntry->Aid;
 
 	if ((pEntry->bAPSDAllAC == 1) && (FlgQueEmpty == 1))
@@ -2073,6 +2064,36 @@ VOID UAPSD_TriggerFrameHandle(
 } /* End of UAPSD_TriggerFrameHandle */
 
 
+
+
+#ifdef VENDOR_FEATURE3_SUPPORT
+/*
+========================================================================
+Routine Description:
+    Queue packet to a AC software queue.
+
+Arguments:
+	pAd				Pointer to our adapter
+	pEntry			The station
+	pQueueHeader	The software queue header of the AC
+	bulkEnPos		The packet entry
+
+Return Value:
+    None
+
+Note:
+	Only for code size reduce purpose.
+========================================================================
+*/
+static VOID UAPSD_InsertTailQueueAc(
+	IN	RTMP_ADAPTER	*pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry,
+	IN	QUEUE_HEADER	*pQueueHeader,
+	IN	QUEUE_ENTRY		*pQueueEntry)
+{
+	InsertTailQueueAc(pAd, pEntry, pQueueHeader, pQueueEntry);
+} /* End of InsertTailQueueAc */
+#endif // VENDOR_FEATURE3_SUPPORT //
 
 #endif // UAPSD_AP_SUPPORT //
 

@@ -22,7 +22,9 @@
 
 
 /* ----- Compile Option ------ */
+//#ifdef RELEASE_EXCLUDE
 #define IEEE80211E_SIMULATION
+//#endif // RELEASE_EXCLUDE //
 
 #include "rt_config.h"
 
@@ -36,24 +38,24 @@
 
 
 /* ----- Local Definition ------ */
-#define ACM_QOS_SANITY_CHECK(__pAd)						\
-	if (__pAd == NULL)									\
-	{													\
-		printk("err> __pAd == NULL!\n");				\
-		return;											\
+#define ACM_QOS_SANITY_CHECK(__pAd)								\
+	if (__pAd == NULL)											\
+	{															\
+		ACMR_DEBUG(ACMR_DEBUG_ERR, ("err> __pAd == NULL!\n"));	\
+		return;													\
 	}
 
-#define ACM_ARGC_SANITY_CHECK(__Min, __Max) 			\
-	if ((Argc != __Min) && (Argc != __Max)) 			\
-	{													\
-		printk("11e_err> parameters number error!\n");	\
-		return;											\
+#define ACM_ARGC_SANITY_CHECK(__Min, __Max) 					\
+	if ((Argc != __Min) && (Argc != __Max)) 					\
+	{															\
+		ACMR_DEBUG(ACMR_DEBUG_ERR, ("acm_err> parameters number error!\n"));\
+		return;													\
 	}
 
 #define ACM_IN_SANITY_CHECK(__Condition, __Msg) 		\
 	if (__Condition)									\
 	{													\
-		printk __Msg;									\
+		ACMR_DEBUG(ACMR_DEBUG_ERR, __Msg);				\
 		goto LabelErr;									\
 	}
 
@@ -98,6 +100,7 @@ static UINT32 gSimDelay = 0;
 static UINT32 gSimDelayCount;
 #endif // IEEE80211E_SIMULATION //
 
+
 /* ----- Extern Variable ----- */
 #ifdef ACM_MEMORY_TEST
 extern UINT32 gAcmMemAllocNum;
@@ -105,10 +108,20 @@ extern UINT32 gAcmMemFreeNum;
 #endif // ACM_MEMORY_TEST //
 
 extern UCHAR gAcmTestFlag;
-extern VOID ap_cmm_peer_assoc_req_action(IN PRTMP_ADAPTER pAd,IN MLME_QUEUE_ELEM *Elem, IN BOOLEAN isReassoc);
+
+extern VOID ap_cmm_peer_assoc_req_action(
+										IN PRTMP_ADAPTER pAd,
+										IN MLME_QUEUE_ELEM *Elem,
+										IN BOOLEAN isReassoc);
+
 
 /* ----- Private Variable ----- */
+#ifdef ACM_CC_FUNC_TCLAS
 static ACM_TCLAS gCMD_TCLAS_Group[ACM_TSPEC_TCLAS_MAX_NUM];
+#else
+static ACM_TCLAS *gCMD_TCLAS_Group; /* no TCLAS function */
+#endif // ACM_CC_FUNC_TCLAS //
+
 static UINT32 gTLS_Grp_ID;
 
 #define SIM_AP_NAME "SampleACMAP"
@@ -191,6 +204,14 @@ static VOID AcmCmdTspecUapsdCtrl(ACM_CMD_INPUT_PARAM_DECLARATION);
 static VOID AcmCmdAssociate(ACM_CMD_INPUT_PARAM_DECLARATION);
 #endif // CONFIG_STA_SUPPORT //
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+static VOID AcmCmdAclAdd(ACM_CMD_INPUT_PARAM_DECLARATION);
+static VOID AcmCmdAclDel(ACM_CMD_INPUT_PARAM_DECLARATION);
+static VOID AcmCmdAclCtrl(ACM_CMD_INPUT_PARAM_DECLARATION);
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
+
 
 /* ----- Simulation Function ----- */
 #ifdef IEEE80211E_SIMULATION
@@ -211,7 +232,9 @@ static VOID AcmCmdSimStaMacSet(ACM_CMD_INPUT_PARAM_DECLARATION);
 #ifdef CONFIG_AP_SUPPORT
 static VOID AcmCmdSimRcvTriFrame(ACM_CMD_INPUT_PARAM_DECLARATION);
 static VOID AcmCmdSimUapsdQueCtrl(ACM_CMD_INPUT_PARAM_DECLARATION);
+static VOID AcmCmdSimReqAdvanceRcv(ACM_CMD_INPUT_PARAM_DECLARATION);
 #endif // CONFIG_AP_SUPPORT //
+
 #ifdef CONFIG_STA_SUPPORT
 static VOID AcmCmdSimStaAssoc(ACM_CMD_INPUT_PARAM_DECLARATION);
 static VOID AcmCmdSimWmeReqTx(ACM_CMD_INPUT_PARAM_DECLARATION);
@@ -231,6 +254,13 @@ static VOID AcmCmdTestFlagCtrl(ACM_CMD_INPUT_PARAM_DECLARATION);
 static UINT32 AcmCmdUtilHexGet(CHAR **ppArgv);
 static UINT32 AcmCmdUtilNumGet(CHAR **ppArgv);
 static VOID AcmCmdUtilMacGet(CHAR **ppArgv, UCHAR *pDevMac);
+
+#ifdef CONFIG_STA_SUPPORT
+#ifdef ACM_CC_FUNC_TCLAS
+static UINT32 AcmCmdUtilIpGet(CHAR **ppArgv);
+static VOID AcmCmdUtilNumHexGet(CHAR **ppArgv, UCHAR *pHex, UINT32 Size);
+#endif // ACM_CC_FUNC_TCLAS //
+#endif // CONFIG_STA_SUPPORT //
 
 static VOID AcmCmdStreamDisplayOne(ACMR_PWLAN_STRUC pAd,
 									ACM_STREAM_INFO *pStream);
@@ -379,37 +409,165 @@ Note:
 	4. Command Format:
 		wstclasadd [up:0~7] [type:0~2] [mask:hex]
 
+		wstclasadd [8] [up:0~7] [mask] [DST MAC] [SRC MAC] [Type/Length]
+		wstclasadd [9] [up:0~7] [mask] [Version] [SRC IP] [DST IP]
+						[SRC PORT] [DST PORT] [DSCP] [Protocol]
+		wstclasadd [10] [up:0~7] [mask] [VLAN TAG/Type]
+
+		08_04_07_00:11:22:33:44:55_00:22:33:44:55:66_0800
+		09_06_7F_4_192.168.0.1_192.168.0.2_100_200_E0_17
+		10_01_01_23
+
 ========================================================================
 */
-VOID AcmCmdTclasCreate( //snowpin
+VOID AcmCmdTclasCreate(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
 	ACM_PARAM_IN	INT32				Argc,
 	ACM_PARAM_IN	CHAR				*pArgv)
 {
+#ifdef ACM_CC_FUNC_TCLAS
 	ACM_TCLAS *pTclas;
 	UINT32 TclasLen[ACM_TSPEC_TCLAS_MAX_NUM+1] = { ACM_TCLAS_TYPE_ETHERNET_LEN,
 												ACM_TCLAS_TYPE_IP_V4_LEN,
 												ACM_TCLAS_TYPE_8021DQ_LEN };
 	UCHAR *pClassifier;
 	UINT32 IdByteNum;
+	UINT32 UpOrClas;
 
 
 	if (gTLS_Grp_ID >= ACM_TSPEC_TCLAS_MAX_NUM)
 	{
-		printk("\nErr> max TCLAS number is reached! "
-				"Pls. reset the number first!\n");
+		ACMR_DEBUG(ACMR_DEBUG_ERR,
+					("\nErr> max TCLAS number is reached! "
+					"Pls. reset the number first!\n"));
 		return;
 	} /* End of if */
 
-	pTclas = &gCMD_TCLAS_Group[gTLS_Grp_ID++];
-	pTclas->UserPriority = AcmCmdUtilNumGet(&pArgv);
-	pTclas->ClassifierType = AcmCmdUtilNumGet(&pArgv);
-	pTclas->ClassifierMask = AcmCmdUtilNumGet(&pArgv);
+	UpOrClas = AcmCmdUtilNumGet(&pArgv);
+	pTclas = &gCMD_TCLAS_Group[gTLS_Grp_ID];
 
-	pClassifier = (UCHAR *)&pTclas->Clasifier;
-	for(IdByteNum=0; IdByteNum<(TclasLen[pTclas->ClassifierType]-3); IdByteNum++)
-		*pClassifier ++ = AcmCmdUtilHexGet(&pArgv);
-	/* End of for */
+	if (UpOrClas < ACM_UP_MAX)
+	{
+		pTclas->UserPriority = UpOrClas;
+		pTclas->ClassifierType = AcmCmdUtilNumGet(&pArgv);
+		pTclas->ClassifierMask = AcmCmdUtilNumGet(&pArgv);
+
+		pClassifier = (UCHAR *)&pTclas->Clasifier;
+		for(IdByteNum=0; IdByteNum<(TclasLen[pTclas->ClassifierType]-3); IdByteNum++)
+			*pClassifier ++ = AcmCmdUtilHexGet(&pArgv);
+		/* End of for */
+	}
+	else
+	{
+		pTclas->UserPriority = AcmCmdUtilNumGet(&pArgv);
+		pTclas->ClassifierType = UpOrClas - ACM_UP_MAX; /* 0 ~ 2 */
+		pTclas->ClassifierMask = AcmCmdUtilNumGet(&pArgv);
+
+		switch(pTclas->ClassifierType)
+		{
+			case ACM_TCLAS_TYPE_ETHERNET:
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\nAdd a ethernet TCLAS: UP (%d), Mask (0x%02x)\n",
+							pTclas->UserPriority, pTclas->ClassifierMask));
+
+				AcmCmdUtilMacGet(&pArgv, pTclas->Clasifier.Ethernet.AddrDst);
+				AcmCmdUtilMacGet(&pArgv, pTclas->Clasifier.Ethernet.AddrSrc);
+				AcmCmdUtilNumHexGet(&pArgv,
+								(UCHAR *)&pTclas->Clasifier.Ethernet.Type, 2);
+
+#ifndef RT_BIG_ENDIAN
+				pTclas->Clasifier.Ethernet.Type = \
+									SWAP16(pTclas->Clasifier.Ethernet.Type);
+#endif // RT_BIG_ENDIAN //
+
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tDestination MAC:\t%02x:%02x:%02x:%02x:%02x:%02x\n",
+							pTclas->Clasifier.Ethernet.AddrDst[0],
+							pTclas->Clasifier.Ethernet.AddrDst[1],
+							pTclas->Clasifier.Ethernet.AddrDst[2],
+							pTclas->Clasifier.Ethernet.AddrDst[3],
+							pTclas->Clasifier.Ethernet.AddrDst[4],
+							pTclas->Clasifier.Ethernet.AddrDst[5]));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tSource MAC:\t\t%02x:%02x:%02x:%02x:%02x:%02x\n",
+							pTclas->Clasifier.Ethernet.AddrSrc[0],
+							pTclas->Clasifier.Ethernet.AddrSrc[1],
+							pTclas->Clasifier.Ethernet.AddrSrc[2],
+							pTclas->Clasifier.Ethernet.AddrSrc[3],
+							pTclas->Clasifier.Ethernet.AddrSrc[4],
+							pTclas->Clasifier.Ethernet.AddrSrc[5]));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tType/Length:\t\t%x\n",
+							pTclas->Clasifier.Ethernet.Type));
+				break;
+
+			case ACM_TCLAS_TYPE_IP_V4:
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\nAdd a IPv4 TCLAS: UP (%d), Mask (0x%02x)\n",
+							pTclas->UserPriority, pTclas->ClassifierMask));
+
+				pTclas->Clasifier.IPv4.Version = AcmCmdUtilNumGet(&pArgv);
+				pTclas->Clasifier.IPv4.IpSource = AcmCmdUtilIpGet(&pArgv);
+				pTclas->Clasifier.IPv4.IpDest = AcmCmdUtilIpGet(&pArgv);
+				pTclas->Clasifier.IPv4.PortSource = AcmCmdUtilNumGet(&pArgv);
+				pTclas->Clasifier.IPv4.PortDest = AcmCmdUtilNumGet(&pArgv);
+				pTclas->Clasifier.IPv4.DSCP = AcmCmdUtilHexGet(&pArgv);
+				pTclas->Clasifier.IPv4.Protocol = AcmCmdUtilNumGet(&pArgv);
+
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tVersion:\t\t\t%d\n",
+							pTclas->Clasifier.IPv4.Version));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tSource IP:\t\t\t%d.%d.%d.%d\n",
+							*(UCHAR *)&pTclas->Clasifier.IPv4.IpSource,
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpSource)+1),
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpSource)+2),
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpSource)+3)));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tDestination IP:\t\t\t%d.%d.%d.%d\n",
+							*(UCHAR *)&pTclas->Clasifier.IPv4.IpDest,
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpDest)+1),
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpDest)+2),
+							*(((UCHAR *)&pTclas->Clasifier.IPv4.IpDest)+3)));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tSource Port Number:\t\t%d\n",
+							pTclas->Clasifier.IPv4.PortSource));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tDestination Port Number:\t%d\n",
+							pTclas->Clasifier.IPv4.PortDest));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tDSCP:\t\t\t\t0x%02x\n",
+							pTclas->Clasifier.IPv4.DSCP));
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tProtocol:\t\t\t%d\n",
+							pTclas->Clasifier.IPv4.Protocol));
+				break;
+
+			case ACM_TCLAS_TYPE_8021DQ:
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\nAdd a IEEE802.1Q TCLAS: UP (%d), Mask (0x%02x)\n",
+							pTclas->UserPriority, pTclas->ClassifierMask));
+
+				pTclas->Clasifier.IEEE8021Q.TagType = AcmCmdUtilNumGet(&pArgv);
+
+				ACMR_DEBUG(ACMR_DEBUG_TRACE,
+							("\tTagType: \t\t0x%x\n",
+							pTclas->Clasifier.IEEE8021Q.TagType));
+				break;
+
+			default:
+				ACMR_DEBUG(ACMR_DEBUG_ERR, ("\nacm_err> TCLAS Type fail!\n"));
+				break;
+		}
+	} /* End of if */
+
+	gTLS_Grp_ID++;
+
+	ACMR_DEBUG(ACMR_DEBUG_TRACE, ("\n"));
+#else
+
+	ACMR_DEBUG(ACMR_DEBUG_ERR, ("\nacm_err> TCLAS function is included!\n"));
+#endif // ACM_CC_FUNC_TCLAS //
 } /* End of AcmCmdTclasCreate */
 
 
@@ -459,6 +617,12 @@ VOID AcmCmdStreamTSRequest(
 
 	/* precondition */
 	ACM_QOS_SANITY_CHECK(pAd);
+
+	if (ACMR_WMM_CAPABLE_GET(pAd) == FALSE)
+	{
+		ACMR_DEBUG(ACMR_DEBUG_ERR, ("\nacm_err> WMM is disabled!\n"));
+		return;
+	} /* End of if */
 
 	/* use AP MAC address automatically */
 	ACMR_MEM_COPY(MAC, ACMR_AP_ADDR_GET(pAd), 6);
@@ -527,7 +691,7 @@ VOID AcmCmdStreamTSRequest(
 LabelSemErr:
 	/* management semaphore get fail */
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
-				("11e_err> Semaphore Lock! AcmCmdStreamTSRequest()\n"));
+				("acm_err> Semaphore Lock! AcmCmdStreamTSRequest()\n"));
 	return;
 } /* End of AcmCmdStreamTSRequest */
 #endif // CONFIG_STA_SUPPORT //
@@ -654,7 +818,7 @@ Return Value:
 Note:
 	1. For QAP & QSTA.
 	2. Command Format:
-		wsshow [1:EDCA, 2:HCCA, 3:ALL] (Client MAC)
+		wsshow [1:EDCA, 2:HCCA, 3:ALL] (Client MAC, EX: 00:0c:43:10:12:50)
 	3. If Client MAC doesnt exist, only requested TSPEC & dnlink
 		(bidirectional link) are displayed for QAP; only requested
 		TSPEC & uplink (bidirectional link) are displayed for QSTA.
@@ -726,11 +890,11 @@ static VOID AcmCmdStreamDisplay(
 		} /* End of if */
 
 		SizeBuf = sizeof(ACM_STREAM_INFO) * NumStream;
-		pStream = (ACM_STREAM_INFO *)ACMR_MEM_ALLOC(SizeBuf);
+		ACMR_MEM_ALLOC(pStream, SizeBuf, (ACM_STREAM_INFO *));
 
 		if (pStream == NULL)
 		{
-			printk("11e_err> Allocate stream memory fail! "
+			printk("acm_err> Allocate stream memory fail! "
 					"AcmCmdStreamDisplay()\n");
 			return;
 		} /* End of if */
@@ -738,7 +902,7 @@ static VOID AcmCmdStreamDisplay(
 		if (ACMP_StreamsGet(pAd, Category[IdCateNum], Type,
 							&NumStream, MacPeer, pStream) != ACM_RTN_OK)
 		{
-			printk("11e_err> Get stream information fail! "
+			printk("acm_err> Get stream information fail! "
 					"AcmCmdStreamDisplay()\n");
 			ACMR_MEM_FREE(pStream);
 			return;
@@ -820,11 +984,11 @@ static VOID AcmCmdStreamFailDisplay(
 	} /* End of if */
 
 	SizeBuf = sizeof(ACM_STREAM_INFO) * NumStream;
-	pStream = (ACM_STREAM_INFO *)ACMR_MEM_ALLOC(SizeBuf);
+	ACMR_MEM_ALLOC(pStream, SizeBuf, (ACM_STREAM_INFO *));
 
 	if (pStream == NULL)
 	{
-		printk("11e_err> Allocate stream memory fail! "
+		printk("acm_err> Allocate stream memory fail! "
 				"AcmCmdStreamFailDisplay()\n");
 		return;
 	} /* End of if */
@@ -832,7 +996,7 @@ static VOID AcmCmdStreamFailDisplay(
 	if (ACMP_StreamsGet(pAd, Category, Type, &NumStream, NULL, pStream) != \
 																ACM_RTN_OK)
 	{
-		printk("11e_err> Get stream information fail! "
+		printk("acm_err> Get stream information fail! "
 				"AcmCmdStreamFailDisplay()\n");
 		ACMR_MEM_FREE(pStream);
 		return;
@@ -1138,7 +1302,7 @@ VOID AcmCmdDeltsSend(
 	pCdb = ACMR_STA_ENTRY_GET(pAd, MacPeer);
 	if (pCdb == NULL)
 	{
-		printk("11e_err> the peer does NOT exist "
+		printk("acm_err> the peer does NOT exist "
 				"0x%02x:%02x:%02x:%02x:%02x:%02x:!\n",
 				MacPeer[0], MacPeer[1], MacPeer[2],
 				MacPeer[3], MacPeer[4], MacPeer[5]);
@@ -1184,7 +1348,7 @@ LabelErr:
 LabelSemErr:
 	/* management semaphore get fail */
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
-				("11e_err> Semaphore Lock! AcmCmdDeltsSend()\n"));
+				("acm_err> Semaphore Lock! AcmCmdDeltsSend()\n"));
 	return;
 } /* End of AcmCmdDeltsSend */
 
@@ -1437,11 +1601,11 @@ static VOID AcmCmdTspecReject(
 	ACM_PARAM_IN	INT32				Argc,
 	ACM_PARAM_IN	CHAR				*pArgv)
 {
-	UCHAR FlgIsEnable;
+	BOOLEAN FlgIsEnabled;
 
 
-	FlgIsEnable = AcmCmdUtilNumGet(&pArgv);
-	ACMP_TC_RejectCtrl(pAd, FlgIsEnable);
+	FlgIsEnabled = AcmCmdUtilNumGet(&pArgv);
+	ACMP_TC_RejectCtrl(pAd, FlgIsEnabled);
 } /* End of AcmCmdTspecReject */
 #endif // CONFIG_AP_SUPPORT //
 
@@ -1492,6 +1656,12 @@ VOID AcmCmdStreamTSRequestAdvance(
 
 	/* precondition */
 	ACM_QOS_SANITY_CHECK(pAd);
+
+	if (ACMR_WMM_CAPABLE_GET(pAd) == FALSE)
+	{
+		ACMR_DEBUG(ACMR_DEBUG_ERR, ("\nacm_err> WMM is disabled!\n"));
+		return;
+	} /* End of if */
 
 	/* use AP MAC address automatically */
 	ACMR_MEM_COPY(MAC, ACMR_AP_ADDR_GET(pAd), 6);
@@ -1559,7 +1729,7 @@ VOID AcmCmdStreamTSRequestAdvance(
 LabelSemErr:
 	/* management semaphore get fail */
 	ACMR_DEBUG(ACMR_DEBUG_ERR,
-				("11e_err> Semaphore Lock! AcmCmdStreamTSRequest()\n"));
+				("acm_err> Semaphore Lock! AcmCmdStreamTSRequest()\n"));
 	return;
 } /* End of AcmCmdStreamTSRequestAdvance */
 #endif // CONFIG_STA_SUPPORT //
@@ -1658,10 +1828,12 @@ VOID AcmCmdReAssociate(
 	pBufOut = NULL;
 
 	/* get input arguments */
+#ifdef IEEE80211E_SIMULATION
 	memcpy(ApMac, gMAC_AP, 6);
 	ApMac[5] = AcmCmdUtilHexGet(&pArgv);
 
 	if (ApMac[5] == 0x00)
+#endif // IEEE80211E_SIMULATION //
 		memcpy(ApMac, ACMR_AP_ADDR_GET(pAd), 6);
 	/* End of if */
 
@@ -1669,16 +1841,16 @@ VOID AcmCmdReAssociate(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
 	/* allocate mlme msg queue, dont use local array, the structure size
 		is too large */
-	pMlmeQueue = ACMR_MEM_ALLOC(sizeof(MLME_QUEUE_ELEM));
+	ACMR_MEM_ALLOC(pMlmeQueue, sizeof(MLME_QUEUE_ELEM), (MLME_QUEUE_ELEM *));
 	if (pMlmeQueue == NULL)
 	{
-		printk("11e_err> allocate mlme msg queue fail!\n");
+		printk("acm_err> allocate mlme msg queue fail!\n");
 		goto LabelErr;
 	} /* End of if */
 
@@ -1790,7 +1962,7 @@ Return Value:
 Note:
 	Used in WMM ACM AP Test Cases in WiFi WMM ACM Test Plan.
 
-	1. Command Format: 10
+	1. Command Format: 21
 		[AP MAC]
 		[AC0 UAPSD Flag] [AC1 UAPSD Flag] [AC2 UAPSD Flag] [AC3 UAPSD Flag]
 ========================================================================
@@ -1811,10 +1983,12 @@ VOID AcmCmdAssociate(
 	pBufOut = NULL;
 
 	/* get input arguments */
+#ifdef IEEE80211E_SIMULATION
 	memcpy(ApMac, gMAC_AP, 6);
 	ApMac[5] = AcmCmdUtilHexGet(&pArgv);
 
 	if (ApMac[5] == 0x00)
+#endif // IEEE80211E_SIMULATION //
 		memcpy(ApMac, ACMR_AP_ADDR_GET(pAd), 6);
 	/* End of if */
 
@@ -1822,16 +1996,16 @@ VOID AcmCmdAssociate(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
 	/* allocate mlme msg queue, dont use local array, the structure size
 		is too large */
-	pMlmeQueue = ACMR_MEM_ALLOC(sizeof(MLME_QUEUE_ELEM));
+	ACMR_MEM_ALLOC(pMlmeQueue, sizeof(MLME_QUEUE_ELEM), (MLME_QUEUE_ELEM *));
 	if (pMlmeQueue == NULL)
 	{
-		printk("11e_err> allocate mlme msg queue fail!\n");
+		printk("acm_err> allocate mlme msg queue fail!\n");
 		goto LabelErr;
 	} /* End of if */
 
@@ -1864,8 +2038,142 @@ LabelErr:
 	/* free the frame buffer */
 	MlmeFreeMemory(pAd, pBufOut);
 	return;
-} /* End of AcmCmdReAssociate */
+} /* End of AcmCmdAssociate */
 #endif // CONFIG_STA_SUPPORT //
+
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+/*
+========================================================================
+Routine Description:
+	Add a ACL station entry.
+
+Arguments:
+	pAd				- WLAN control block pointer
+	Argc			- the number of input parameters
+	*pArgv			- input parameters
+
+Return Value:
+	None
+
+Note:
+	1. Command Format: 22
+		[STA MAC]
+========================================================================
+*/
+VOID AcmCmdAclAdd(
+	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
+	ACM_PARAM_IN	INT32				Argc,
+	ACM_PARAM_IN	CHAR				*pArgv)
+{
+	ACM_ACL_ENTRY *pAclEntry;
+	UCHAR MacPeer[6];
+	ULONG SplFlags;
+
+
+	/* init */
+	ACMR_MEM_ALLOC(pAclEntry, sizeof(ACM_ACL_ENTRY), (ACM_ACL_ENTRY *));
+	ACMR_MEM_ZERO(pAclEntry, sizeof(ACM_ACL_ENTRY));
+	ACMR_MEM_ZERO(MacPeer, sizeof(MacPeer));
+
+	/* parse MAC */
+	AcmCmdUtilMacGet(&pArgv, MacPeer);
+	ACMR_MEM_MAC_COPY(pAclEntry->STA_MAC, MacPeer);
+
+	/* add MAC */
+	ACM_TSPEC_SEM_LOCK_CHK(pAd, SplFlags, LabelSemErr);
+	ACMR_LIST_INSERT_TAIL(pAd, pAclEntry);
+	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+	return;
+
+LabelSemErr:
+	ACMR_MEM_FREE(pAclEntry);
+} /* End of AcmCmdAclAdd */
+
+
+/*
+========================================================================
+Routine Description:
+	Del a ACL station entry.
+
+Arguments:
+	pAd				- WLAN control block pointer
+	Argc			- the number of input parameters
+	*pArgv			- input parameters
+
+Return Value:
+	None
+
+Note:
+	1. Command Format: 23
+		[STA MAC]
+========================================================================
+*/
+VOID AcmCmdAclDel(
+	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
+	ACM_PARAM_IN	INT32				Argc,
+	ACM_PARAM_IN	CHAR				*pArgv)
+{
+	UCHAR MacPeer[6];
+	ULONG SplFlags;
+
+
+	/* init */
+	ACMR_MEM_ZERO(MacPeer, sizeof(MacPeer));
+
+	/* parse MAC */
+	AcmCmdUtilMacGet(&pArgv, MacPeer);
+
+	/* add MAC */
+	ACM_TSPEC_SEM_LOCK_CHK(pAd, SplFlags, LabelSemErr);
+	ACM_LIST_ENTRY_DEL(pAd, MacPeer);
+	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+
+LabelSemErr:
+	return;
+} /* End of AcmCmdAclDel */
+
+
+/*
+========================================================================
+Routine Description:
+	Control ACL function.
+
+Arguments:
+	pAd				- WLAN control block pointer
+	Argc			- the number of input parameters
+	*pArgv			- input parameters
+
+Return Value:
+	None
+
+Note:
+	1. Command Format: 24
+		[Enable/Disable]
+========================================================================
+*/
+VOID AcmCmdAclCtrl(
+	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
+	ACM_PARAM_IN	INT32				Argc,
+	ACM_PARAM_IN	CHAR				*pArgv)
+{
+	ULONG SplFlags;
+	BOOLEAN FlgIsEnabled;
+
+
+	FlgIsEnabled = AcmCmdUtilNumGet(&pArgv);
+
+	ACM_TSPEC_SEM_LOCK_CHK(pAd, SplFlags, LabelSemErr);
+	ACMR_ACL_ENABLE(pAd, FlgIsEnabled);
+	ACM_TSPEC_SEM_UNLOCK(pAd, LabelSemErr);
+
+LabelSemErr:
+	return;
+} /* End of AcmCmdAclCtrl */
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
+
 
 
 
@@ -1991,7 +2299,7 @@ VOID AcmCmdSimAssocBuild(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
@@ -2143,7 +2451,7 @@ VOID AcmCmdSimReqRcv(
 	pCdb = ACMR_STA_ENTRY_GET(pAd, MAC);
 	if (pCdb == NULL)
 	{
-		printk("11e_err> the station %02x:%02x:%02x:%02x:%02x:%02x "
+		printk("acm_err> the station %02x:%02x:%02x:%02x:%02x:%02x "
 				"does NOT exist!\n",
 				MAC[0], MAC[1], MAC[2], MAC[3], MAC[4], MAC[5]);
 		return;
@@ -2167,7 +2475,7 @@ VOID AcmCmdSimReqRcv(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate action buffer fail!\n");
+		printk("acm_err> allocate action buffer fail!\n");
 		return;
 	} /* End of if */
 
@@ -2262,7 +2570,7 @@ VOID AcmCmdSimDel(
 	pCdb = ACMR_STA_ENTRY_GET(pAd, DevMac);
 	if (pCdb == NULL)
 	{
-		printk("11e_err> the station does NOT exist!\n");
+		printk("acm_err> the station does NOT exist!\n");
 		return;
 	} /* End of if */
 
@@ -2793,7 +3101,7 @@ VOID AcmCmdSimReAssocBuild(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
@@ -2902,7 +3210,7 @@ VOID AcmCmdSimNonQoSAssocBuild(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
@@ -3165,7 +3473,7 @@ Return Value:
 
 Note:
 	1. For QAP.
-	2. Command Format:
+	2. Command Format: 63
 		[Dst Client MAC]
 ========================================================================
 */
@@ -3232,7 +3540,7 @@ static VOID AcmCmdSimRcvTriFrame(
 	pCdb = ACMR_STA_ENTRY_GET(pAd, MacPeer);
 	if (pCdb == NULL)
 	{
-		printk("11e_err> the station does NOT exist!\n");
+		printk("acm_err> the station does NOT exist!\n");
 		return;
 	} /* End of if */
 
@@ -3273,6 +3581,122 @@ static VOID AcmCmdSimUapsdQueCtrl(
 	gUAPSD_FlgNotQueueMaintain = AcmCmdUtilNumGet(&pArgv);
 #endif // UAPSD_AP_SUPPORT //
 } /* End of AcmCmdSimUapsdQueCtrlpAd */
+
+
+/*
+========================================================================
+Routine Description:
+	Simulate a ADDTS Request frame receive event.
+
+Arguments:
+	pAd				- WLAN control block pointer
+	Argc			- the number of input parameters
+	*pArgv			- input parameters
+
+Return Value:
+	None
+
+Note:
+	For QAP.
+
+	[sta mac:xx:xx:xx:xx:xx:xx]
+	[type:1-WME] [TID:0~7] [dir:0~3] [access:1] [UP:0~7]
+	[Ack Policy: 0~3] [APSD:0~1] [max size:byte] [nom size:byte]
+	[burst size:byte] [inact:sec]
+	[peak data rate:bps] [mean data rate:bps] [min data rate:bps]
+	[min phy rate:bps] [surp factor:>=1] [tclas processing:0~1]
+========================================================================
+*/
+static VOID AcmCmdSimReqAdvanceRcv(
+	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
+	ACM_PARAM_IN	INT32				Argc,
+	ACM_PARAM_IN	CHAR				*pArgv)
+{
+	ACM_STREAM_INFO	StreamInfo;
+	ACMR_STA_DB	*pCdb;
+	ACM_TSPEC *pTspec;
+	ACM_TS_INFO	*pInfo;
+	UCHAR StreamType;
+	UCHAR MAC[6], *pStaMac;
+	UCHAR TclasProcessing;
+
+	NDIS_STATUS Status;
+	HEADER_802_11 HdrAction;
+	PUCHAR pBufOut;
+	ULONG LenFrame;
+
+
+	/* init */
+	pCdb = NULL;
+	pTspec = &StreamInfo.Tspec;
+	pInfo = &pTspec->TsInfo;
+	pStaMac = MAC;
+	pBufOut = NULL;
+
+	/* precondition */
+	ACM_QOS_SANITY_CHECK(pAd);
+
+	/* get sta mac address */
+	ACMR_MEM_COPY(MAC, gMAC_STA, 6);
+
+	MAC[5] = AcmCmdUtilHexGet(&pArgv);
+	if (MAC[5] == 0x00)
+		ACMR_MEM_COPY(MAC, gMAC_STA, 6);
+	/* End of if */
+
+	/* get sta entry */
+	pCdb = ACMR_STA_ENTRY_GET(pAd, MAC);
+	if (pCdb == NULL)
+	{
+		printk("acm_err> the station %02x:%02x:%02x:%02x:%02x:%02x "
+				"does NOT exist!\n",
+				MAC[0], MAC[1], MAC[2], MAC[3], MAC[4], MAC[5]);
+		return;
+	} /* End of if */
+
+	/* parse input command */
+	if (AcmCmdInfoParseAdvance(
+							pAd,
+							&pArgv,
+							pTspec,
+							pInfo,
+							&StreamType) != 0)
+	{
+		return;
+	} /* End of if */
+
+	TclasProcessing = AcmCmdUtilNumGet(&pArgv);
+	pInfo->AckPolicy = AcmCmdUtilNumGet(&pArgv); /* default 0 */
+
+	/* vitual send a ADDTS request frame to our AP */
+	Status = MlmeAllocateMemory(pAd, &pBufOut);
+	if (Status != NDIS_STATUS_SUCCESS)
+	{
+		printk("acm_err> allocate action buffer fail!\n");
+		return;
+	} /* End of if */
+
+	/* init ADDTS request frame body */
+	MgtMacHeaderInit(pAd, &HdrAction, SUBTYPE_ACTION, 0,
+					pAd->ApCfg.MBSSID[BSS0].Bssid, pStaMac);
+	MakeOutgoingFrame(pBufOut,			&LenFrame,
+					sizeof(HEADER_802_11),	&HdrAction,
+					END_OF_ARGS);
+
+	LenFrame += ACM_CMD_WME_Action_Make(pAd, &StreamInfo,
+										&pBufOut[LenFrame],
+										ACM_ACTION_WME_SETUP_REQ,
+										0,
+										TclasProcessing);
+
+	/* send the ADDTS request frame to ACM module */
+	ACMP_ManagementHandle(pAd, pCdb, ACMR_SUBTYPE_ACTION,
+						pBufOut, LenFrame, 11000000);
+
+	/* free the frame buffer */
+	MlmeFreeMemory(pAd, pBufOut);
+} /* End of AcmCmdSimReqAdvanceRcv */
+
 #endif // CONFIG_AP_SUPPORT //
 
 
@@ -3341,16 +3765,16 @@ static VOID AcmCmdSimStaAssoc(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate auth buffer fail!\n");
+		printk("acm_err> allocate auth buffer fail!\n");
 		return;
 	} /* End of if */
 
 	/* allocate mlme msg queue, dont use local array, the structure size
 		is too large */
-	pMlmeQueue = ACMR_MEM_ALLOC(sizeof(MLME_QUEUE_ELEM));
+	ACMR_MEM_ALLOC(pMlmeQueue, sizeof(MLME_QUEUE_ELEM), (MLME_QUEUE_ELEM *));
 	if (pMlmeQueue == NULL)
 	{
-		printk("11e_err> allocate mlme msg queue fail!\n");
+		printk("acm_err> allocate mlme msg queue fail!\n");
 		goto LabelErr;
 	} /* End of if */
 
@@ -3733,7 +4157,7 @@ Return Value:
 
 Note:
 	1. For QSTA test.
-	2. Command Format: 26
+	2. Command Format: 68
 		[1-WME] [TID:0~7] [dir:0~3] [access:1~3] [UP:0~7] [ack:0~1]
 		[nom size:byte] [inact:sec] [mean data rate:bps] [min phy rate:bps]
 		[surp factor:>=1] [tclas processing:0~1]
@@ -3957,7 +4381,7 @@ static VOID AcmCmdSimReqPsPollRcv(
 	pCdb = ACMR_STA_ENTRY_GET(pAd, MAC);
 	if (pCdb == NULL)
 	{
-		printk("11e_err> the station does NOT exist!\n");
+		printk("acm_err> the station does NOT exist!\n");
 		return;
 	} /* End of if */
 
@@ -3978,7 +4402,7 @@ static VOID AcmCmdSimReqPsPollRcv(
 	Status = MlmeAllocateMemory(pAd, &pBufOut);
 	if (Status != NDIS_STATUS_SUCCESS)
 	{
-		printk("11e_err> allocate action buffer fail!\n");
+		printk("acm_err> allocate action buffer fail!\n");
 		return;
 	} /* End of if */
 
@@ -4026,6 +4450,7 @@ Return Value:
 	decimal number
 
 Note:
+	Only for one hex byte.
 ========================================================================
 */
 static UINT32 AcmCmdUtilHexGet(
@@ -4172,6 +4597,98 @@ static VOID AcmCmdUtilMacGet(
 
 	*ppArgv += 17+1; /* skip _ */
 } /* End of AcmCmdUtilMacGet */
+
+
+#ifdef CONFIG_STA_SUPPORT
+#ifdef ACM_CC_FUNC_TCLAS
+
+/*
+========================================================================
+Routine Description:
+	Get argument IP value.
+
+Arguments:
+	**ppArgv			- input parameters
+	*pDevMac			- MAC address
+
+Return Value:
+	4B IP address
+
+Note:
+	192.168.100.1 ==> 0x C0A86401
+========================================================================
+*/
+static UINT32 AcmCmdUtilIpGet(
+	ACM_PARAM_IN	CHAR	**ppArgv)
+{
+	CHAR Buf[4], IP[4];
+	CHAR *pIP = (CHAR *)(*ppArgv);
+	UINT32 ID, BufId, IpId;
+
+
+	for(ID=0, BufId=0, IpId=0; ID<15; ID++)
+	{
+		if ((pIP[ID] == '.') || (pIP[ID] == '_') || (pIP[ID] == 0x00))
+		{
+			/* maximum 4 IP sub-fields */
+			if (IpId < 4)
+			{
+				Buf[BufId] = 0x00;
+				BufId = 0;
+
+				IP[IpId++] = ACMR_ARG_ATOI(Buf);
+			} /* End of if */
+
+			if (pIP[ID] != '.')
+				break; /* '_' or 0x00 */
+			/* End of if */
+
+			continue; /* check next one */
+		} /* End of if */
+
+		/* maximum 3 ASCII characters */
+		if (BufId < 3)
+			Buf[BufId++] = pIP[ID];
+		/* End of if */
+	} /* End of for */
+
+	*ppArgv += ID+1;
+
+	return (*(UINT32 *)IP);
+} /* End of AcmCmdUtilIpGet */
+
+
+/*
+========================================================================
+Routine Description:
+	Get argument number value.
+
+Arguments:
+	*pArgv			- input parameters
+	*pHex			- output value
+	Size			- number of bytes
+
+Return Value:
+	None
+
+Note:
+========================================================================
+*/
+static VOID AcmCmdUtilNumHexGet(
+	ACM_PARAM_IN	CHAR	**ppArgv,
+	ACM_PARAM_OUT	UCHAR	*pHex,
+	ACM_PARAM_IN	UINT32	Size)
+{
+	UINT32 IdSize;
+
+
+	for(IdSize=0; IdSize<Size; IdSize++)
+		*pHex++ = (UCHAR)AcmCmdUtilHexGet(ppArgv);
+	/* End of for */
+} /* End of AcmCmdUtilNumHexGet */
+
+#endif // ACM_CC_FUNC_TCLAS //
+#endif // CONFIG_STA_SUPPORT //
 
 
 /*
@@ -5005,7 +5522,7 @@ static VOID ACM_CMD_Sim_Data_Tx(
 	ACMR_PKT_ALLOCATE(pAd, pMblk);
 	if (pMblk == NULL)
 	{
-		printk("11e_err> allocate action frame fail!\n");
+		printk("acm_err> allocate action frame fail!\n");
 		goto LabelErr;
 	} /* End of if */
 
@@ -5049,7 +5566,9 @@ static VOID ACM_CMD_Sim_Data_Tx(
 	/* send the packet */
 	ACMR_PKT_COPY(pMblk, pBufFrame, pInfo->FrameSize);
 
+#ifndef OS_ABL_SUPPORT
 	rt28xx_packet_xmit(RTPKT_TO_OSPKT(pMblk));
+#endif // OS_ABL_SUPPORT //
 
 LabelErr:
 	/* free the frame buffer */
@@ -5127,6 +5646,9 @@ static VOID AcmCmdTestFlagCtrl(
 #define ACM_CMD_TSPEC_TIMEOUT_CTRL	19	/* wmm tspec timeout */
 #define ACM_CMD_NO_TSPEC_UAPSD		20	/* wmm tspec no uapsd */
 #define ACM_CMD_ASSOCIATE			21	/* wmm associate */
+#define ACM_CMD_ACL_ADD				22	/* wmm acl add */
+#define ACM_CMD_ACL_DEL				23	/* wmm acl del */
+#define ACM_CMD_ACL_CTRL			24	/* wmm acl control */
 
 #define ACM_CMD_SM_ASSOC			50	/* wmm sim assoc */
 #define ACM_CMD_SM_REQ				51	/* wmm sim req */
@@ -5153,6 +5675,7 @@ static VOID AcmCmdTestFlagCtrl(
 #define ACM_CMD_SM_DEL_FRM_QAP		72	/* wmm sim del */
 #define ACM_CMD_SM_TRI_FRM_RCV		73	/* wmm sim trigger frame receive */
 #define ACM_CMD_SM_UAPSD_QUE_MAIN	74	/* wmm sim uapsd queue maintain ctrl */
+#define ACM_CMD_SM_REQ_ADVANCE		75	/* wmm sim req advance */
 #define ACM_TEST_FLAG				90	/* wmm test flag */
 
 /*
@@ -5214,6 +5737,8 @@ Note:
 	19. Enable/disable TSPEC timeout mechanism
 	20.	Enable/disable TSPEC UAPSD function
 	21.	Send a associate frame to the associated AP
+	22. Add a ACL station entry
+	23. Del a ACL station entry
 
 
 	50. Simulate authentication & assocaition req event
@@ -5276,6 +5801,7 @@ Note:
 			[MAC]
 	74. Simulate to enable/disable UAPSD queue maintain
 			[enable: 0~1]
+	75. Simulate a advanced request frame receive event
 
 	90. Test Flag
 			[ON/OFF]
@@ -5290,6 +5816,10 @@ INT ACM_Ioctl(
 	UINT32 Command;
 	INT32 Argc;
 
+#ifdef CONFIG_STA_SUPPORT
+	if (pAd->OpMode == OPMODE_STA)
+		return FALSE;
+#endif // CONFIG_STA_SUPPORT //
 
 	/* init */
 	pArgv = (CHAR *)pArgvIn;
@@ -5324,18 +5854,18 @@ INT ACM_Ioctl(
 	switch(Command)
 	{
 		case ACM_CMD_TCLAS_RESET: /* 1 wmm tclas reset */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> reset TCLAS\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> reset TCLAS\n"));
 			AcmCmdTclasReset(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_TCLAS_ADD: /* 2 wmm tclas add */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> add a TCLAS\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> add a TCLAS\n"));
 			AcmCmdTclasCreate(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_EDCA_TS_ADD: /* 3 wmm edca ts add */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> request a TSPEC\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> request a TSPEC\n"));
 			AcmCmdStreamTSRequest(pAd, Argc, pArgv, 0); //snowpin
 			break;
 #endif // CONFIG_STA_SUPPORT //
@@ -5344,258 +5874,282 @@ INT ACM_Ioctl(
 			break;
 
 		case ACM_CMD_AVAL_SHOW: /* 5 wmm available bw show */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show available bw\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show available bw\n"));
 			AcmCmdBandwidthDisplay(pAd, 0, pArgv);
 			break;
 
 		case ACM_CMD_SHOW: /* 6 wmm ts show */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show ACM status\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show ACM status\n"));
 			AcmCmdStreamDisplay(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_FSHOW: /* 7 wmm fail show */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show failed TS info\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show failed TS info\n"));
 			AcmCmdStreamFailDisplay(pAd, 0, pArgv);
 			break;
 
 		case ACM_CMD_EDCA_SHOW: /* 8 wmm edca info show */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show WMM TS info\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show WMM TS info\n"));
 			AcmCmdEDCAParamDisplay(pAd, 0, pArgv);
 			break;
 
 		case ACM_CMD_WME_DATL: /* 9 wmm datl */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> enable/disable Dynamic ATL\n"));
+					("acm_cmd> enable/disable Dynamic ATL\n"));
 			AcmCmdDATLEnable(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_AP_SUPPORT
 		case ACM_CMD_WME_ACM_CTRL: /* 10 wmm acm ctrl */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> enable/disable ACM Flag for each AC\n"));
+					("acm_cmd> enable/disable ACM Flag for each AC\n"));
 			AcmCmdAcmFlagCtrl(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_AP_SUPPORT //
 
 		case ACM_CMD_DELTS: /* 11 wmm delts */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> send a DELTS request frame\n"));
+					("acm_cmd> send a DELTS request frame\n"));
 			AcmCmdDeltsSend(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_FCLEAR: /* 12 wmm fclr */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> clear failed TS info\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> clear failed TS info\n"));
 			AcmCmdStreamFailClear(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_EDCA_TS_NEG: /* 13 wmm edca ts negotiate */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> negotiate a TSPEC\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> negotiate a TSPEC\n"));
 			AcmCmdStreamTSNegotiate(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_STA_SUPPORT //
 
 		case ACM_CMD_UAPSD_SHOW: /* 14 wmm uapsd show */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show UAPSD info\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show UAPSD info\n"));
 			AcmCmdUapsdDisplay(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_AP_SUPPORT
 		case ACM_CMD_TSPEC_REJECT: /* 15 wmm tspec reject */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> reject all TSPEC\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> reject all TSPEC\n"));
 			AcmCmdTspecReject(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_EDCA_TS_ADD_ADV: /* 16 wmm edca ts add advance */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> request a advanced TSPEC\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> request a advanced TSPEC\n"));
 			AcmCmdStreamTSRequestAdvance(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_STA_SUPPORT //
 
 		case ACM_CMD_STATS: /* 17 wmm statistics */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> show statistics\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> show statistics\n"));
 			AcmCmdStatistics(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_REASSOCIATE: /* 18 wmm reassociate */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> send a reassociate frame\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> send a reassociate frame\n"));
 			AcmCmdReAssociate(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_STA_SUPPORT //
 
 		case ACM_CMD_TSPEC_TIMEOUT_CTRL: /* 19 wmm tspec timeout */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> enable or disable TSPEC timeout\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> enable or disable TSPEC timeout\n"));
 			AcmCmdTspecTimeoutCtrl(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_NO_TSPEC_UAPSD: /* 20 wmm tspec uapsd function */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> enable or disable TSPEC UAPSD\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> enable or disable TSPEC UAPSD\n"));
 			AcmCmdTspecUapsdCtrl(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_ASSOCIATE: /* 21 wmm associate */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> send a associate frame\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> send a associate frame\n"));
 			AcmCmdAssociate(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_STA_SUPPORT //
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef ACM_CC_FUNC_ACL
+		case ACM_CMD_ACL_ADD:
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> add a ACL station entry\n"));
+			AcmCmdAclAdd(pAd, Argc, pArgv);
+			break;
+
+		case ACM_CMD_ACL_DEL:
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> del a ACL station entry\n"));
+			AcmCmdAclDel(pAd, Argc, pArgv);
+			break;
+
+		case ACM_CMD_ACL_CTRL:
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> control ACL function\n"));
+			AcmCmdAclCtrl(pAd, Argc, pArgv);
+			break;
+#endif // ACM_CC_FUNC_ACL //
+#endif // CONFIG_AP_SUPPORT //
+
 
 #ifdef IEEE80211E_SIMULATION
 		case ACM_CMD_SM_ASSOC: /* 50 wmm sim assoc */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate STA auth/assoc\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate STA auth/assoc\n"));
 			AcmCmdSimAssocBuild(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_REQ: /* 51 wmm sim req */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate STA ADDTS req\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate STA ADDTS req\n"));
 			AcmCmdSimReqRcv(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_DEL_FRM_QSTA: /* 52 wmm sim del */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate STA DELTS\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate STA DELTS\n"));
 			AcmCmdSimDel(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_DATRV: /* 53 wmm sim datrv */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate DATA RCV\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate DATA RCV\n"));
 			AcmCmdSimDataRv(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_DATTX: /* 54 wmm sim dattx */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate DATA TX\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate DATA TX\n"));
 			AcmCmdSimDataTx(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_STP: /* 55 wmm sim stp */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate DATA STOP\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate DATA STOP\n"));
 			AcmCmdSimDataStop(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_SUS: /* 56 wmm sim sus */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate DATA SUSPEND\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate DATA SUSPEND\n"));
 			AcmCmdSimDataSuspend(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_RES: /* 57 wmm sim res */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate DATA RESUME\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate DATA RESUME\n"));
 			AcmCmdSimDataResume(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_REASSOC: /* 58 wmm sim reassoc */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate STA reassoc\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate STA reassoc\n"));
 			AcmCmdSimReAssocBuild(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_NASSOC: /* 59 wmm sim nassoc */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate STA non-WMM auth/assoc\n"));
+						("acm_cmd> simulate STA non-WMM auth/assoc\n"));
 			AcmCmdSimNonQoSAssocBuild(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_NDATRV: /* 60 wmm sim ndatrv */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate non-WMM DATA RV\n"));
+						("acm_cmd> simulate non-WMM DATA RV\n"));
 			AcmCmdSimNonQoSDataRv(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_RATE: /* 61 wmm sim rate */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> reset TX rate for a STA\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> reset TX rate for a STA\n"));
 			AcmCmdSimRateSet(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_TCP: /* 62 wmm sim tcp */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> enable/disable to tx simulated TCP PKT\n"));
+						("acm_cmd> enable/disable to tx simulated TCP PKT\n"));
 			AcmCmdSimTcpTxEnable(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_STA_MAC_SET: /* 63 wmm sim staset */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> reset simulated STA MAC\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> reset simulated STA MAC\n"));
 			AcmCmdSimStaMacSet(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_STA_SUPPORT
 		case ACM_CMD_SM_STA_ASSOC: /* 64 wmm sim sta auth/assoc */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate to send auth/assoc\n"));
+						("acm_cmd> simulate to send auth/assoc\n"));
 			AcmCmdSimStaAssoc(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_WME_REQTX: /* 65 wmm sim req */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate to send a ADDTS req/rsp\n"));
+						("acm_cmd> simulate to send a ADDTS req/rsp\n"));
 			AcmCmdSimWmeReqTx(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_WME_NEQTX: /* 66 wmm sim neg */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate to re-send a ADDTS req/rsp\n"));
+						("acm_cmd> simulate to re-send a ADDTS req/rsp\n"));
 			AcmCmdSimWmeNeqTx(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_WME_REQ_FAIL: /* 67 wmm sim req fail */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-						("11e_cmd> simulate to receive a failed ADDTS rsp\n"));
+						("acm_cmd> simulate to receive a failed ADDTS rsp\n"));
 			AcmCmdSimWmeReqFail(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_WME_NEG_FAIL: /* 68 wmm sim neg fail */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate to receive a failed neg ADDTS rsp\n"));
+					("acm_cmd> simulate to receive a failed neg ADDTS rsp\n"));
 			AcmCmdSimWmeNegFail(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_ACM_RESET: /* 69 wmm sim acm reset */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate to reset ACM flags\n"));
+					("acm_cmd> simulate to reset ACM flags\n"));
 			AcmCmdSimWmeAcmReset(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_STA_SUPPORT //
 
 		case ACM_CMD_SM_STA_PS: /* 70 wmm sim station enters PS */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate to receive a packet with PM=0/1\n"));
+					("acm_cmd> simulate to receive a packet with PM=0/1\n"));
 			AcmCmdSimWmePSEnter(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_REQ_PS_POLL: /* 71 wmm ps poll rv */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate STA ADDTS req & Ps Poll\n"));
+					("acm_cmd> simulate STA ADDTS req & Ps Poll\n"));
 			AcmCmdSimReqPsPollRcv(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_DEL_FRM_QAP: /* 72 wmm sim del */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> simulate AP DELTS\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate AP DELTS\n"));
 			AcmCmdSimDel(pAd, Argc, pArgv);
 			break;
 
 #ifdef CONFIG_AP_SUPPORT
 		case ACM_CMD_SM_TRI_FRM_RCV: /* 73 wmm sim trigger frame receive */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate AP RCV a trigger frame\n"));
+					("acm_cmd> simulate AP RCV a trigger frame\n"));
 			AcmCmdSimRcvTriFrame(pAd, Argc, pArgv);
 			break;
 
 		case ACM_CMD_SM_UAPSD_QUE_MAIN: /* 74 wmm sim uapsd queue maintain */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> simulate to enable/disable UAPSD queue maintain\n"));
+					("acm_cmd> simulate to enable/disable UAPSD queue maintain\n"));
 			AcmCmdSimUapsdQueCtrl(pAd, Argc, pArgv);
+			break;
+
+		case ACM_CMD_SM_REQ_ADVANCE: /* 75 wmm sim req advance */
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> simulate STA ADDTS req\n"));
+			AcmCmdSimReqAdvanceRcv(pAd, Argc, pArgv);
 			break;
 #endif // CONFIG_AP_SUPPORT //
 #endif // IEEE80211E_SIMULATION //
 
 		case ACM_TEST_FLAG: /* 90 wmm test flag */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE,
-					("11e_cmd> ON/OFF test flag\n"));
+					("acm_cmd> ON/OFF test flag\n"));
 			AcmCmdTestFlagCtrl(pAd, Argc, pArgv);
 			break;
 
 		default: /* error command type */
-			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("11e_cmd> ERROR! No such command!\n"));
+			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> ERROR! No such command!\n"));
 			return -EINVAL; /* input error */
 	} /* End of switch */
 

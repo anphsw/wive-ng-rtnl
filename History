@@ -205,6 +205,8 @@
 16) Cleanup wifi driver code<br>
 17) Remove samba for 4Mb flash devices need more flash free<br>
 18) Increase kernel padded size. Try fix crash mapping.<br>
+19) Update AP driver from 2.3.0.0 to 2.4.3.3 version.<br>
+20) Update STA driver from 2.2.0.0 to 2.3.3.3 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

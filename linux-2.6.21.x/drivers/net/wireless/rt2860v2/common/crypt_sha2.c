@@ -11,7 +11,23 @@
  * way altering the source code is stricitly prohibited, unless the prior
  * written consent of Ralink Technology, Inc. is obtained.
  ***************************************************************************/
-#include "crypt_sha2.h"
+
+/****************************************************************************
+    Module Name:
+    SHA2
+
+    Abstract:
+    FIPS 180-2: Secure Hash Standard (SHS)
+    
+    Revision History:
+    Who         When            What
+    --------    ----------      ------------------------------------------
+    Eddy        2008/11/24      Create SHA1
+    Eddy        2008/07/23      Create SHA256
+***************************************************************************/
+
+#include "rt_config.h"
+
 
 /* Basic operations */
 #define SHR(x,n) (x >> n) /* SHR(x)^n, right shift n bits , x is w-bit word, 0 <= n <= w */
@@ -111,19 +127,24 @@ Note:
     None
 ========================================================================
 */
-VOID SHA1_Hash (
+VOID RT_SHA1_Hash (
     IN  SHA1_CTX_STRUC *pSHA_CTX)
 {
-    UINT32 W_i,t,s;
-    UINT32 W[16];
+    UINT32 W_i,t;
+    UINT32 W[80];
     UINT32 a,b,c,d,e,T,f_t = 0;
   
     /* Prepare the message schedule, {W_i}, 0 < t < 15 */
     NdisMoveMemory(W, pSHA_CTX->Block, SHA1_BLOCK_SIZE);
-    for (W_i = 0; W_i < 16; W_i++)
+    for (W_i = 0; W_i < 16; W_i++) {
         W[W_i] = cpu2be32(W[W_i]); /* Endian Swap */
-        /* End of for */
- 
+    } /* End of for */
+
+    for (W_i = 16; W_i < 80; W_i++) {
+        W[W_i] = ROTL32((W[W_i - 3] ^ W[W_i - 8] ^ W[W_i - 14] ^ W[W_i - 16]),1);
+    } /* End of for */
+
+        
     /* SHA256 hash computation */
     /* Initialize the working variables */
     a = pSHA_CTX->HashValue[0];
@@ -133,33 +154,43 @@ VOID SHA1_Hash (
     e = pSHA_CTX->HashValue[4];
 
     /* 80 rounds */
-    for (t = 0;t < 80;t++) {
-        s = t & SHA1_MASK;
-        if (t > 15) { /* Prepare the message schedule, {W_i}, 16 < t < 79 */
-            W[s] = (W[(s+13) & SHA1_MASK]) ^ (W[(s+8) & SHA1_MASK]) ^ (W[(s+2) & SHA1_MASK]) ^ W[s];
-            W[s] = ROTL32(W[s],1);
-        } /* End of if */        
-        switch (t / 20) {
-            case 0:
-                 f_t = Ch(b,c,d);
-                 break;
-            case 1:
-                 f_t = Parity(b,c,d);
-                 break;
-            case 2:
-                 f_t = Maj(b,c,d);
-                 break;
-            case 3:
-                 f_t = Parity(b,c,d);
-                 break;
-        } /* End of switch */
-        T = ROTL32(a,5) + f_t + e + SHA1_K[t / 20] + W[s];
+    for (t = 0;t < 20;t++) {
+        f_t = Ch(b,c,d);
+        T = ROTL32(a,5) + f_t + e + SHA1_K[0] + W[t];
         e = d;
         d = c;
         c = ROTL32(b,30);
         b = a;
         a = T;
      } /* End of for */
+    for (t = 20;t < 40;t++) {
+        f_t = Parity(b,c,d);
+        T = ROTL32(a,5) + f_t + e + SHA1_K[1] + W[t];
+        e = d;
+        d = c;
+        c = ROTL32(b,30);
+        b = a;
+        a = T;
+     } /* End of for */
+    for (t = 40;t < 60;t++) {
+        f_t = Maj(b,c,d);
+        T = ROTL32(a,5) + f_t + e + SHA1_K[2] + W[t];
+        e = d;
+        d = c;
+        c = ROTL32(b,30);
+        b = a;
+        a = T;
+     } /* End of for */
+    for (t = 60;t < 80;t++) {
+        f_t = Parity(b,c,d);
+        T = ROTL32(a,5) + f_t + e + SHA1_K[3] + W[t];
+        e = d;
+        d = c;
+        c = ROTL32(b,30);
+        b = a;
+        a = T;
+     } /* End of for */
+
 
      /* Compute the i^th intermediate hash value H^(i) */
      pSHA_CTX->HashValue[0] += a;
@@ -170,7 +201,7 @@ VOID SHA1_Hash (
 
     NdisZeroMemory(pSHA_CTX->Block, SHA1_BLOCK_SIZE);
     pSHA_CTX->BlockLen = 0;
-} /* End of SHA1_Hash */
+} /* End of RT_SHA1_Hash */
 
 
 /*
@@ -191,7 +222,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA1_Append (
+VOID RT_SHA1_Append (
     IN  SHA1_CTX_STRUC *pSHA_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen)
@@ -213,11 +244,11 @@ VOID SHA1_Append (
                 Message + appendLen, SHA1_BLOCK_SIZE - pSHA_CTX->BlockLen);
             appendLen += (SHA1_BLOCK_SIZE - pSHA_CTX->BlockLen);
             pSHA_CTX->BlockLen = SHA1_BLOCK_SIZE;
-            SHA1_Hash(pSHA_CTX);
+            RT_SHA1_Hash(pSHA_CTX);
         } /* End of if */
     } /* End of while */
     pSHA_CTX->MessageLen += MessageLen;
-} /* End of SHA1_Append */
+} /* End of RT_SHA1_Append */
 
 
 /*
@@ -237,7 +268,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA1_End (
+VOID RT_SHA1_End (
     IN  SHA1_CTX_STRUC *pSHA_CTX, 
     OUT UINT8 DigestMessage[])
 {
@@ -249,21 +280,21 @@ VOID SHA1_End (
 
     /* 55 = 64 - 8 - 1: append 1 bit(1 byte) and message length (8 bytes) */
     if (pSHA_CTX->BlockLen > 55)
-        SHA1_Hash(pSHA_CTX);
-        /* End of if */
+        RT_SHA1_Hash(pSHA_CTX);
+    /* End of if */
 
     /* Append the length of message in rightmost 64 bits */
     message_length_bits = pSHA_CTX->MessageLen*8;
     message_length_bits = cpu2be64(message_length_bits);       
     NdisMoveMemory(&pSHA_CTX->Block[56], &message_length_bits, 8);
-    SHA1_Hash(pSHA_CTX);
+    RT_SHA1_Hash(pSHA_CTX);
 
     /* Return message digest, transform the UINT32 hash value to bytes */
     for (index = 0; index < 5;index++)
         pSHA_CTX->HashValue[index] = cpu2be32(pSHA_CTX->HashValue[index]);
         /* End of for */
     NdisMoveMemory(DigestMessage, pSHA_CTX->HashValue, SHA1_DIGEST_SIZE);
-} /* End of SHA1_End */
+} /* End of RT_SHA1_End */
 
 
 /*
@@ -292,8 +323,8 @@ VOID RT_SHA1 (
 
     NdisZeroMemory(&sha_ctx, sizeof(SHA1_CTX_STRUC));
     RT_SHA1_Init(&sha_ctx);
-    SHA1_Append(&sha_ctx, Message, MessageLen);
-    SHA1_End(&sha_ctx, DigestMessage);
+    RT_SHA1_Append(&sha_ctx, Message, MessageLen);
+    RT_SHA1_End(&sha_ctx, DigestMessage);
 } /* End of RT_SHA1 */
 #endif /* SHA1_SUPPORT */
 
@@ -314,7 +345,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA256_Init (
+VOID RT_SHA256_Init (
     IN  SHA256_CTX_STRUC *pSHA_CTX)
 {
     NdisMoveMemory(pSHA_CTX->HashValue, SHA256_DefaultHashValue, 
@@ -322,7 +353,7 @@ VOID SHA256_Init (
     NdisZeroMemory(pSHA_CTX->Block, SHA256_BLOCK_SIZE);
     pSHA_CTX->MessageLen = 0;
     pSHA_CTX->BlockLen   = 0;
-} /* End of SHA256_Init */
+} /* End of RT_SHA256_Init */
 
 
 /*
@@ -340,7 +371,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA256_Hash (
+VOID RT_SHA256_Hash (
     IN  SHA256_CTX_STRUC *pSHA_CTX)
 {
     UINT32 W_i,t;
@@ -393,7 +424,7 @@ VOID SHA256_Hash (
 
     NdisZeroMemory(pSHA_CTX->Block, SHA256_BLOCK_SIZE);
     pSHA_CTX->BlockLen = 0;
-} /* End of SHA256_Hash */
+} /* End of RT_SHA256_Hash */
 
 
 /*
@@ -414,7 +445,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA256_Append (
+VOID RT_SHA256_Append (
     IN  SHA256_CTX_STRUC *pSHA_CTX, 
     IN  const UINT8 Message[], 
     IN  UINT MessageLen)
@@ -436,11 +467,11 @@ VOID SHA256_Append (
                 Message + appendLen, SHA256_BLOCK_SIZE - pSHA_CTX->BlockLen);
             appendLen += (SHA256_BLOCK_SIZE - pSHA_CTX->BlockLen);
             pSHA_CTX->BlockLen = SHA256_BLOCK_SIZE;
-            SHA256_Hash(pSHA_CTX);
+            RT_SHA256_Hash(pSHA_CTX);
         } /* End of if */
     } /* End of while */
     pSHA_CTX->MessageLen += MessageLen;
-} /* End of SHA256_Append */
+} /* End of RT_SHA256_Append */
 
 
 /*
@@ -460,7 +491,7 @@ Note:
     None
 ========================================================================
 */
-VOID SHA256_End (
+VOID RT_SHA256_End (
     IN  SHA256_CTX_STRUC *pSHA_CTX, 
     OUT UINT8 DigestMessage[])
 {
@@ -472,21 +503,21 @@ VOID SHA256_End (
 
     /* 55 = 64 - 8 - 1: append 1 bit(1 byte) and message length (8 bytes) */
     if (pSHA_CTX->BlockLen > 55)
-        SHA256_Hash(pSHA_CTX);
-        /* End of if */
+        RT_SHA256_Hash(pSHA_CTX);
+    /* End of if */
 
     /* Append the length of message in rightmost 64 bits */
     message_length_bits = pSHA_CTX->MessageLen*8;
     message_length_bits = cpu2be64(message_length_bits);       
     NdisMoveMemory(&pSHA_CTX->Block[56], &message_length_bits, 8);
-    SHA256_Hash(pSHA_CTX);
+    RT_SHA256_Hash(pSHA_CTX);
 
     /* Return message digest, transform the UINT32 hash value to bytes */
     for (index = 0; index < 8;index++)
         pSHA_CTX->HashValue[index] = cpu2be32(pSHA_CTX->HashValue[index]);
         /* End of for */
     NdisMoveMemory(DigestMessage, pSHA_CTX->HashValue, SHA256_DIGEST_SIZE);
-} /* End of SHA256_End */
+} /* End of RT_SHA256_End */
 
 
 /*
@@ -513,11 +544,12 @@ VOID RT_SHA256 (
     SHA256_CTX_STRUC sha_ctx;
 
     NdisZeroMemory(&sha_ctx, sizeof(SHA256_CTX_STRUC));
-    SHA256_Init(&sha_ctx);
-    SHA256_Append(&sha_ctx, Message, MessageLen);
-    SHA256_End(&sha_ctx, DigestMessage);
+    RT_SHA256_Init(&sha_ctx);
+    RT_SHA256_Append(&sha_ctx, Message, MessageLen);
+    RT_SHA256_End(&sha_ctx, DigestMessage);
 } /* End of RT_SHA256 */
 #endif /* SHA256_SUPPORT */
+
 
 /* End of crypt_sha2.c */
 

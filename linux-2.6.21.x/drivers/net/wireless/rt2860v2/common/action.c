@@ -28,6 +28,7 @@
 #include "rt_config.h"
 #include "action.h"
 
+extern UCHAR  ZeroSsid[32];
 
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd, 
@@ -94,6 +95,8 @@ VOID ActionStateMachineInit(
 
 #ifdef CONFIG_AP_SUPPORT
 #endif // CONFIG_AP_SUPPORT //
+
+
 
 }
 
@@ -163,6 +166,9 @@ VOID MlmeADDBAAction(
 #ifdef QOS_DLS_SUPPORT
 				|| (IS_ENTRY_DLS(&pAd->MacTab.Content[pInfo->Wcid]))
 #endif // QOS_DLS_SUPPORT //
+#ifdef DOT11Z_TDLS_SUPPORT
+				|| (IS_ENTRY_TDLS(&pAd->MacTab.Content[pInfo->Wcid]))
+#endif // DOT11Z_TDLS_SUPPORT //
 				)
 				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
 			else
@@ -311,6 +317,9 @@ VOID MlmeDELBAAction(
 #ifdef QOS_DLS_SUPPORT
 				|| (IS_ENTRY_DLS(&pAd->MacTab.Content[pInfo->Wcid]))
 #endif // QOS_DLS_SUPPORT //
+#ifdef DOT11Z_TDLS_SUPPORT
+				|| (IS_ENTRY_TDLS(&pAd->MacTab.Content[pInfo->Wcid]))
+#endif // DOT11Z_TDLS_SUPPORT //
 				)
 				ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);
 			else
@@ -537,23 +546,26 @@ VOID SendBSS2040CoexistMgmtAction(
 #ifdef CONFIG_STA_SUPPORT
 VOID StaPublicAction(
 	IN PRTMP_ADAPTER pAd, 
-	IN UCHAR Bss2040Coexist) 
+	IN BSS_2040_COEXIST_IE *pBssCoexIE) 
 {
-	BSS_2040_COEXIST_IE		BssCoexist;
-	MLME_SCAN_REQ_STRUCT			ScanReq;
+	MLME_SCAN_REQ_STRUCT ScanReq;
 
-	BssCoexist.word = Bss2040Coexist;
+	DBGPRINT(RT_DEBUG_TRACE,("ACTION - StaPeerPublicAction  Bss2040Coexist = %x\n", *((PUCHAR)pBssCoexIE)));
+
 	// AP asks Station to return a 20/40 BSS Coexistence mgmt frame.  So we first starts a scan, then send back 20/40 BSS Coexistence mgmt frame 
-	if ((BssCoexist.field.InfoReq == 1) && (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_SCAN_2040)))
+	if ((pBssCoexIE->field.InfoReq == 1) && (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_SCAN_2040)))
 	{
 		// Clear record first.  After scan , will update those bit and send back to transmiter.
 		pAd->CommonCfg.BSSCoexist2040.field.InfoReq = 1;
 		pAd->CommonCfg.BSSCoexist2040.field.Intolerant40 = 0;
 		pAd->CommonCfg.BSSCoexist2040.field.BSS20WidthReq = 0;
-		// Fill out stuff for scan request
+		// Clear Trigger event table
+		TriEventInit(pAd);
+		// Fill out stuff for scan request  and kick to scan
 		ScanParmFill(pAd, &ScanReq, ZeroSsid, 0, BSS_ANY, SCAN_2040_BSS_COEXIST);
 		MlmeEnqueue(pAd, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq, 0);
 		pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_LIST_SCAN;
+		RTMP_MLME_HANDLER(pAd);
 	}
 }
 
@@ -569,6 +581,7 @@ ULONG BuildIntolerantChannelRep(
 	ULONG			FrameLen = 0;
 	ULONG			ReadOffset = 0;
 	UCHAR			i, j, k, idx = 0;
+	//UCHAR			LastRegClass = 0xff;
 	UCHAR			ChannelList[MAX_TRIGGER_EVENT];
 	UCHAR			TmpRegClass;
 	UCHAR			RegClassArray[7] = {0, 11,12, 32, 33, 54,55}; // Those regulatory class has channel in 2.4GHz. See Annex J.
@@ -601,7 +614,7 @@ ULONG BuildIntolerantChannelRep(
 					} 
 					pAd->CommonCfg.TriggerEventTab.EventA[i].bValid = FALSE;
 				}
-				printk("ACT - BuildIntolerantChannelRep , Total Channel number = %d \n", idx);
+				DBGPRINT(RT_DEBUG_ERROR,("ACT - BuildIntolerantChannelRep , Total Channel number = %d \n", idx));
 			}
 		}
 
@@ -626,47 +639,6 @@ ULONG BuildIntolerantChannelRep(
 	return FrameLen;
 }
 
-/*
-Description : Send 20/40 BSS Coexistence Action frame If one trigger event is triggered.
-*/
-VOID Send2040CoexistAction(
-	IN	PRTMP_ADAPTER	pAd,
-	IN    UCHAR  Wcid,
-	IN	BOOLEAN	bAddIntolerantCha) 
-{
-	PUCHAR			pOutBuffer = NULL;
-	NDIS_STATUS 	NStatus;
-	FRAME_ACTION_HDR	Frame;
-	ULONG			FrameLen;
-	ULONG			IntolerantChaRepLen;
-
-	IntolerantChaRepLen = 0;
-	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
-	if(NStatus != NDIS_STATUS_SUCCESS) 
-	{
-		DBGPRINT(RT_DEBUG_ERROR,("ACT - Send2040CoexistAction() allocate memory failed \n"));
-		return;
-	}
-	ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[Wcid].Addr, pAd->CommonCfg.Bssid);
-	Frame.Category = CATEGORY_PUBLIC;
-	Frame.Action = ACTION_BSS_2040_COEXIST;
-	
-	MakeOutgoingFrame(pOutBuffer,				&FrameLen,
-				  sizeof(FRAME_ACTION_HDR),	  &Frame,
-				  END_OF_ARGS);
-
-	*(pOutBuffer + FrameLen) = pAd->CommonCfg.BSSCoexist2040.word;
-	FrameLen++;
-	
-	if (bAddIntolerantCha == TRUE)
-		IntolerantChaRepLen = BuildIntolerantChannelRep(pAd, pOutBuffer + FrameLen);
-
-	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen + IntolerantChaRepLen);
-	DBGPRINT(RT_DEBUG_ERROR,("ACT - Send2040CoexistAction( BSSCoexist2040 = 0x%x )  \n", pAd->CommonCfg.BSSCoexist2040.word));
-		
-}
-
-
 /*	
 	==========================================================================
 	Description: 
@@ -681,20 +653,139 @@ VOID Update2040CoexistFrameAndNotify(
 	IN    UCHAR  Wcid,
 	IN	BOOLEAN	bAddIntolerantCha) 
 {
-	BSS_2040_COEXIST_IE	OldValue;
+	BSS_2040_COEXIST_IE		OldValue;
 
+	DBGPRINT(RT_DEBUG_ERROR,("ACT - Update2040CoexistFrameAndNotify. BSSCoexist2040 = %x. EventANo = %d. \n", pAd->CommonCfg.BSSCoexist2040.word, pAd->CommonCfg.TriggerEventTab.EventANo));
 	OldValue.word = pAd->CommonCfg.BSSCoexist2040.word;
-	if ((pAd->CommonCfg.TriggerEventTab.EventANo > 0) || (pAd->CommonCfg.TriggerEventTab.EventBCountDown > 0))
+	// Reset value.
+	pAd->CommonCfg.BSSCoexist2040.word = 0;
+
+	if (pAd->CommonCfg.TriggerEventTab.EventBCountDown > 0)
 		pAd->CommonCfg.BSSCoexist2040.field.BSS20WidthReq = 1;
 
 	// Need to check !!!!
-	// How STA will set Intolerant40 if implementation dependent. Now we don't set this bit first.!!!!!
+	// How STA will set Intolerant40 if implementation dependent. Now we don't set this bit first!!!!!
 	// So Only check BSS20WidthReq change.
-	if (OldValue.field.BSS20WidthReq != pAd->CommonCfg.BSSCoexist2040.field.BSS20WidthReq)
+	//if (OldValue.field.BSS20WidthReq != pAd->CommonCfg.BSSCoexist2040.field.BSS20WidthReq)
 	{
 		Send2040CoexistAction(pAd, Wcid, bAddIntolerantCha);
 	}
 }
+
+/*
+Description : Send 20/40 BSS Coexistence Action frame If one trigger event is triggered.
+*/
+VOID Send2040CoexistAction(
+	IN	PRTMP_ADAPTER	pAd,
+	IN    UCHAR  Wcid,
+	IN	BOOLEAN	bAddIntolerantCha) 
+{
+	PUCHAR			pOutBuffer = NULL;
+	NDIS_STATUS 	NStatus;
+	FRAME_ACTION_HDR	Frame;
+	ULONG			FrameLen;
+	UINT32			IntolerantChaRepLen;
+	UCHAR			HtLen = 1;
+
+	IntolerantChaRepLen = 0;
+	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
+	if(NStatus != NDIS_STATUS_SUCCESS) 
+	{
+		DBGPRINT(RT_DEBUG_ERROR,("ACT - Send2040CoexistAction() allocate memory failed \n"));
+		return;
+	}
+
+	ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[Wcid].Addr, pAd->CurrentAddress, pAd->CommonCfg.Bssid);	
+
+	Frame.Category = CATEGORY_PUBLIC;
+	Frame.Action = ACTION_BSS_2040_COEXIST; //COEXIST_2040_ACTION;
+	
+	MakeOutgoingFrame(pOutBuffer,				&FrameLen,
+				  sizeof(FRAME_ACTION_HDR),	  &Frame,
+				  1,                                &BssCoexistIe,
+				  1,                                &HtLen,
+				  1,                                &pAd->CommonCfg.BSSCoexist2040.word,
+				  END_OF_ARGS);
+	
+	if (bAddIntolerantCha == TRUE)
+		IntolerantChaRepLen = BuildIntolerantChannelRep(pAd, pOutBuffer + FrameLen);
+
+	//2009 PF#3: IOT issue with Motorola AP. It will not check the field of BSSCoexist2040.
+	//11.14.12 Switching between 40 MHz and 20 MHz
+	DBGPRINT(RT_DEBUG_TRACE, ("IntolerantChaRepLen=%d, BSSCoexist2040=0x%x!\n", 
+								IntolerantChaRepLen, pAd->CommonCfg.BSSCoexist2040.word));
+	if (!((IntolerantChaRepLen == 0) && (pAd->CommonCfg.BSSCoexist2040.word == 0)))
+		MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen + IntolerantChaRepLen);
+		
+	MlmeFreeMemory(pAd, pOutBuffer);
+	
+	DBGPRINT(RT_DEBUG_TRACE,("ACT - Send2040CoexistAction( BSSCoexist2040 = 0x%x )  \n", pAd->CommonCfg.BSSCoexist2040.word));
+}
+
+VOID UpdateBssScanParm(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	OVERLAP_BSS_SCAN_IE	APBssScan) 
+{									 
+	pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor = le2cpu16(APBssScan.DelayFactor); //APBssScan.DelayFactor[1] * 256 + APBssScan.DelayFactor[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor <5) || (pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor > 100))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11BssWidthChanTranDelayFactor out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor = 5;
+	}
+
+	pAd->CommonCfg.Dot11BssWidthTriggerScanInt = le2cpu16(APBssScan.TriggerScanInt); //APBssScan.TriggerScanInt[1] * 256 + APBssScan.TriggerScanInt[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11BssWidthTriggerScanInt < 10) ||(pAd->CommonCfg.Dot11BssWidthTriggerScanInt > 900))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11BssWidthTriggerScanInt out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11BssWidthTriggerScanInt = 900;
+	}
+		
+	pAd->CommonCfg.Dot11OBssScanPassiveDwell = le2cpu16(APBssScan.ScanPassiveDwell); //APBssScan.ScanPassiveDwell[1] * 256 + APBssScan.ScanPassiveDwell[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11OBssScanPassiveDwell < 5) ||(pAd->CommonCfg.Dot11OBssScanPassiveDwell > 1000))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11OBssScanPassiveDwell out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11OBssScanPassiveDwell = 20;
+	}
+	
+	pAd->CommonCfg.Dot11OBssScanActiveDwell = le2cpu16(APBssScan.ScanActiveDwell); //APBssScan.ScanActiveDwell[1] * 256 + APBssScan.ScanActiveDwell[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11OBssScanActiveDwell < 10) ||(pAd->CommonCfg.Dot11OBssScanActiveDwell > 1000))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11OBssScanActiveDwell out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11OBssScanActiveDwell = 10;
+	}
+	
+	pAd->CommonCfg.Dot11OBssScanPassiveTotalPerChannel = le2cpu16(APBssScan.PassiveTalPerChannel); //APBssScan.PassiveTalPerChannel[1] * 256 + APBssScan.PassiveTalPerChannel[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11OBssScanPassiveTotalPerChannel < 200) ||(pAd->CommonCfg.Dot11OBssScanPassiveTotalPerChannel > 10000))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11OBssScanPassiveTotalPerChannel out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11OBssScanPassiveTotalPerChannel = 200;
+	}
+	
+	pAd->CommonCfg.Dot11OBssScanActiveTotalPerChannel = le2cpu16(APBssScan.ActiveTalPerChannel); //APBssScan.ActiveTalPerChannel[1] * 256 + APBssScan.ActiveTalPerChannel[0];
+	// out of range defined in MIB... So fall back to default value.
+	if ((pAd->CommonCfg.Dot11OBssScanActiveTotalPerChannel < 20) ||(pAd->CommonCfg.Dot11OBssScanActiveTotalPerChannel > 10000))
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11OBssScanActiveTotalPerChannel out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11OBssScanActiveTotalPerChannel = 20;
+	}
+	
+	pAd->CommonCfg.Dot11OBssScanActivityThre = le2cpu16(APBssScan.ScanActThre); //APBssScan.ScanActThre[1] * 256 + APBssScan.ScanActThre[0];
+	// out of range defined in MIB... So fall back to default value.
+	if (pAd->CommonCfg.Dot11OBssScanActivityThre > 100)
+	{
+		//DBGPRINT(RT_DEBUG_ERROR,("ACT - UpdateBssScanParm( Dot11OBssScanActivityThre out of range !!!!)  \n"));
+		pAd->CommonCfg.Dot11OBssScanActivityThre = 25;
+	}
+
+	pAd->CommonCfg.Dot11BssWidthChanTranDelay = (pAd->CommonCfg.Dot11BssWidthTriggerScanInt * pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor);
+	//DBGPRINT(RT_DEBUG_LOUD,("ACT - UpdateBssScanParm( Dot11BssWidthTriggerScanInt = %d )  \n", pAd->CommonCfg.Dot11BssWidthTriggerScanInt));
+}
+
 #endif // CONFIG_STA_SUPPORT //
 
 
@@ -764,7 +855,7 @@ VOID ChannelSwitchAction(
 		AsicSwitchChannel(pAd, pAd->CommonCfg.Channel,FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.Channel);
 		pAd->MacTab.Content[Wcid].HTPhyMode.field.BW = 0;
-		printk("action !!!20MHz   !!! \n" );
+		DBGPRINT(RT_DEBUG_TRACE, ("!!!20MHz   !!! \n" ));
 	}
 	// 1.  Switches to BW = 40 And Station supports BW = 40.
 	else if (((Secondary == 1) || (Secondary == 3)) && (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == 1))
@@ -773,60 +864,41 @@ VOID ChannelSwitchAction(
 
 		if (Secondary == 1)
 		{
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 1)
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
-			else
-#endif // COC_SUPPORT
-				// Secondary above.
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
+			// Secondary above.
+			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
 			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, MACValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
 
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 0)
-#endif // COC_SUPPORT
-				BBPValue|= (0x10);
+
+			BBPValue|= (0x10);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
 			BBPValue&= (~0x20);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPValue);
-			printk("action !!!40MHz Lower LINK UP !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel );
+			DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Lower LINK UP !!! Control Channel at Below. Central = %d \n", pAd->CommonCfg.CentralChannel ));
 		}
 		else
 		{
-#ifdef COC_SUPPORT
-			if (pAd->CoC_sleep == 1)
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
-			else
-#endif // COC_SUPPORT
-				// Secondary below.
-				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
+			// Secondary below.
+			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
 			MACValue |= 0x1;
 			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, MACValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
-#ifdef COC_SUPPORT
-	if (pAd->CoC_sleep == 0)
-#endif
+
 			BBPValue|= (0x10);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
 			BBPValue&= (~0x20);
 			BBPValue|= (0x20);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPValue);
-			printk("action!!!40MHz Upper LINK UP !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel );
+			DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Upper LINK UP !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel ));
 		}
-#ifdef COC_SUPPORT
-	if (pAd->CoC_sleep == 1)
-		pAd->CommonCfg.BBPCurrentBW = BW_20;
-	else
-#endif
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
@@ -876,10 +948,11 @@ VOID PeerPublicAction(
 				}
 				//hex_dump("IntolerantReport ", (PUCHAR)pIntolerantReport, sizeof(BSS_2040_INTOLERANT_CH_REPORT));
 				
-				if(pAd->CommonCfg.bForty_Mhz_Intolerant == TRUE)
+				if(pAd->CommonCfg.bBssCoexEnable == FALSE || (pAd->CommonCfg.bForty_Mhz_Intolerant == TRUE))
 				{
-					DBGPRINT(RT_DEBUG_TRACE, ("bForty_Mhz_Intolerant=%d, ignore this action!!\n", 
-								pAd->CommonCfg.bForty_Mhz_Intolerant));
+					DBGPRINT(RT_DEBUG_TRACE, ("20/40 BSS CoexMgmt=%d, bForty_Mhz_Intolerant=%d, ignore this action!!\n", 
+												pAd->CommonCfg.bBssCoexEnable,
+												pAd->CommonCfg.bForty_Mhz_Intolerant));
 					break;
 				}
 
@@ -913,22 +986,22 @@ VOID PeerPublicAction(
 							DBGPRINT(RT_DEBUG_TRACE, ("%d,", *ptr));
 						}
 						DBGPRINT(RT_DEBUG_TRACE, ("\n"));
-						
+
 						retVal = GetBssCoexEffectedChRange(pAd, &coexChRange);
 						if (retVal == TRUE)
 						{
 							ptr = pIntolerantReport->ChList;
 							bNeedFallBack = FALSE;
 							DBGPRINT(RT_DEBUG_TRACE, ("Check IntolerantReport Channel List in our effectedChList(%d~%d)\n",
-										pAd->ChannelList[coexChRange.effectChStart].Channel,
-										pAd->ChannelList[coexChRange.effectChEnd].Channel));
+													pAd->ChannelList[coexChRange.effectChStart].Channel,
+													pAd->ChannelList[coexChRange.effectChEnd].Channel));
 							for(i =0 ; i < (pIntolerantReport->Len -1); i++, ptr++)
 							{
 								UCHAR chEntry;
 
 								chEntry = *ptr;
 								if (chEntry >= pAd->ChannelList[coexChRange.effectChStart].Channel && 
-										chEntry <= pAd->ChannelList[coexChRange.effectChEnd].Channel)
+									chEntry <= pAd->ChannelList[coexChRange.effectChEnd].Channel)
 								{
 									DBGPRINT(RT_DEBUG_TRACE, ("Found Intolerant channel in effect range=%d!\n", *ptr));
 									bNeedFallBack = TRUE;
@@ -937,7 +1010,7 @@ VOID PeerPublicAction(
 							}
 							DBGPRINT(RT_DEBUG_TRACE, ("After CoexChRange Check, bNeedFallBack=%d!\n", bNeedFallBack));
 						}
-
+						
 						if (bNeedFallBack)
 						{
 							pBssCoexistIe->field.Intolerant40 = 1;
@@ -966,7 +1039,7 @@ VOID PeerPublicAction(
 						{
 							DBGPRINT(RT_DEBUG_TRACE, ("Already fallback to 20MHz, Extend the timeout of Bss2040CoexistTimer!\n"));
 							// More 5 sec for the scan report of STAs.
-							RTMPSetTimer(&pAd->CommonCfg.Bss2040CoexistTimer, (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
+							RTMPModTimer(&pAd->CommonCfg.Bss2040CoexistTimer, (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
 						}
 
 						apidx = pAd->MacTab.Content[Elem->Wcid].apidx;
@@ -982,7 +1055,7 @@ VOID PeerPublicAction(
 				{
 					if (INFRA_ON(pAd))
 					{
-						StaPublicAction(pAd, pCoexistInfo);
+						StaPublicAction(pAd, pBssCoexistIe);
 					}
 				}
 #endif // CONFIG_STA_SUPPORT //
@@ -1095,6 +1168,7 @@ static VOID respond_ht_information_exchange_action(
 }
 
 
+#ifdef CONFIG_AP_SUPPORT
 #ifdef DOT11N_DRAFT3
 VOID SendNotifyBWActionFrame(
 	IN PRTMP_ADAPTER pAd,
@@ -1119,8 +1193,9 @@ VOID SendNotifyBWActionFrame(
 		pAddr1 = &BROADCAST_ADDR[0];
 	else
 		pAddr1 = pAd->MacTab.Content[Wcid].Addr;
+
 	ActHeaderInit(pAd, &Frame.Hdr, pAddr1, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].Bssid);
-	
+
 	Frame.Category = CATEGORY_HT;
 	Frame.Action = NOTIFY_BW_ACTION;
 	
@@ -1133,10 +1208,12 @@ VOID SendNotifyBWActionFrame(
 	
 
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
+	MlmeFreeMemory(pAd, pOutBuffer);
 	DBGPRINT(RT_DEBUG_TRACE,("ACT - SendNotifyBWAction(NotifyBW= %d)!\n", pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth));
 
 }
 #endif // DOT11N_DRAFT3 //
+#endif // CONFIG_AP_SUPPORT //
 
 
 VOID PeerHTAction(

@@ -1,6 +1,9 @@
 #ifndef __RTMP_CMD_H__
 #define __RTMP_CMD_H__
 
+#include "rtmp_type.h"
+
+
 typedef struct _CmdQElmt {
 	UINT				command;
 	PVOID				buffer;
@@ -40,7 +43,6 @@ typedef struct _CmdQ {
 	        wake_up(&_pTask->kthread_q); \
 		} \
 	}while(0)
-
 #else
 #define RTCMDUp(pAd)	                \
 	do{									    \
@@ -51,5 +53,18 @@ typedef struct _CmdQ {
 		}\
 	}while(0)
 #endif
+
+#ifdef CONFIG_STA_SUPPORT
+char * rtstrchr(const char * s, int c);
+
+int rt_ioctl_setparam(struct net_device *dev, struct iw_request_info *info,
+			 void *w, char *extra);
+
+int rt_ioctl_siwscan(struct net_device *dev,
+			struct iw_request_info *info,
+			struct iw_point *data, char *extra);
+#endif // CONFIG_STA_SUPPORT //
+
+void  getRate(HTTRANSMIT_SETTING HTSetting, ULONG* fLastTxRxRate);
 
 #endif // __RTMP_CMD_H__ //

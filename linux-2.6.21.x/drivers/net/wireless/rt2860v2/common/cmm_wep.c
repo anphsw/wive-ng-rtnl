@@ -166,7 +166,7 @@ VOID	RTMPInitWepEngine(
 
 	/* RC4 uses a pseudo-random number generator (PRNG) 
 	   to generate a key stream */
-	ARC4_INIT(pARC4_CTX, seed, seed_len);    		
+	ARC4_INIT(pARC4_CTX, &seed[0], seed_len);    		
 }
 
 /*
