@@ -18,9 +18,6 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA 02111-1307 USA
 
-CFLAGS += -Os
-export $(CFLAGS)
-
 #--------------------------------------------------------------
 # You shouldn't need to mess with anything beyond this point...
 #--------------------------------------------------------------
@@ -65,8 +62,11 @@ endif
 ifeq ($(CONFIG_LIB_LIBNVRAM_FORCE),y)
     DIRS += libnvram
 endif
-ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
-    #DIRS += libntfs-3g
+ifeq ($(CONFIG_LIB_FLEX),y)
+    DIRS += libflex
+endif
+ifeq ($(CONFIG_LIB_NAT),y)
+    DIRS += libnatpmp
 endif
 ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
     DIRS += libzebra
@@ -74,11 +74,8 @@ endif
 ifeq ($(CONFIG_LIB_USB),y)
     DIRS += libusb
 endif
-ifeq ($(CONFIG_LIB_NAT),y)
-    DIRS += libnatpmp
-endif
-ifeq ($(CONFIG_LIB_FLEX),y)
-    DIRS += libflex
+ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
+    DIRS += libntfs-3g
 endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
@@ -480,7 +477,7 @@ release: distclean
 						\
 	tar -cvzf uClibc-$(VERSION).tar.gz uClibc-$(VERSION)/;
 
-endif # ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
+endif
 
 check:
 	$(MAKE) -C test
