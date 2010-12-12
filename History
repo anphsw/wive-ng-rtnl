@@ -207,6 +207,7 @@
 18) Increase kernel padded size. Try fix crash mapping.<br>
 19) Update AP driver from 2.3.0.0 to 2.4.3.3 version.<br>
 20) Update STA driver from 2.2.0.0 to 2.3.3.3 version.<br>
+21) Update HW_NAT kernel code and add hw_nat userspace utils<br>
 
 <br><br>
 <b>For support see:</b><br>
