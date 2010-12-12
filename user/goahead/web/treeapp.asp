@@ -153,7 +153,7 @@ else
 }
 
 // Services
-a.add(500, 0,   _("treeapp services"),          "javascript:go('javascript:a.oo(500);');");
+a.add(500, 0,   _("treeapp services"),          "javascript:a.oo(500);");
 a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
 a.add(502, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
 a.add(503, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");

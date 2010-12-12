@@ -485,6 +485,7 @@ const vpn_fetch_t vpn_args[] =
 	{ T("vpn_peerdns"),            "vpnPeerDNS",           1 },
 	{ T("vpn_debug"),              "vpnDebug",             1 },
 	{ T("vpn_nat"),                "vpnNAT",               1 },
+	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
 	{ T("vpn_auth_type"),          "vpnAuthProtocol",      1 },
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
 	{ T("vpn_routing_enabled"),    "vpnRoutingEnabled",    1 },

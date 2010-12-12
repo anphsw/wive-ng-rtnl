@@ -94,6 +94,8 @@ function showHint(key)
 			text += 'Allow debug mode for VPN connections.';
 		else if (key=='vpn_nat')
 			text += 'Add Network Address Translation to new VPN connection.';
+		else if (key=='vpn_lcp')
+			text += 'Enable adaptive LCP echo interval.';
 		else if (key=='vpn_type')
 		{
 			text += 'Specify PPTP mode.<p class="val">';
@@ -195,6 +197,7 @@ function vpnSwitchClick(form)
 	form.vpn_mtu_type.disabled     = dis;
 	form.vpn_pppoe_iface.disabled  = dis;
 	form.vpn_type.disabled         = dis;
+	form.vpn_lcp.disabled          = dis;
 	form.vpn_routing_enabled.disabled = dis;
 	
 	routingSwitchClick(form);
@@ -422,6 +425,7 @@ function initializeForm(form)
 	var nat        = '<% getCfgGeneral(1, "vpnNAT"); %>';
 	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
 	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
+	var lcp        = '<% getCfgGeneral(1, "vpnEnableLCP"); %>';
 
 	form.vpn_enabled.checked = (vpnEnabled == 'on');
 	form.vpn_routing_enabled.checked = (routingOn == 'on');
@@ -431,6 +435,7 @@ function initializeForm(form)
 	form.vpn_nat.checked     = (nat == 'on');
 	form.vpn_type.value      = pptpType;
 	form.vpn_dgw.value       = dgw;
+	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_auth_type.value = vpn_auth;
 }
 
@@ -546,7 +551,6 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-
 </table>
 
 <table width="500" border="0" cellpadding="0" cellspacing="4">
@@ -583,7 +587,14 @@ tunnel on your Router.
 			<b>Enable <acronym title="Network Address Translation">NAT</acronym></b>
 		</td>
 	</tr>
-	<tr height="32px"></tr>
+	<tr>
+		<td width="50%" onMouseOver="showHint('vpn_lcp')" onMouseOut="hideHint('vpn_lcp')" >
+			<input disabled="disabled" name="vpn_lcp" type="checkbox">
+			<b>Adaptive LCP</b>
+		</td>
+		<td></td>
+	</tr>
+	<tr height="32px"><td colspan="2"></td></tr>
 	<tr>
 		<td colspan="2">
 			<input name="vpn_routing_table" type="hidden">

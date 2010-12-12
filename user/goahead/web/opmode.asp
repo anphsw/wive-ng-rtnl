@@ -113,6 +113,8 @@ function msg()
 <h1 id="oTitle"></h1>
 <p id="oIntroduction"></p>
 <hr>
+<p>Current Firmware Version: <% getSdkVersion(); %> (<% getSysBuildTime(); %>)</p>
+<p>Please select device operation mode:</p>
 
 <form method="POST" name="opmode" action="/goform/setOpMode">
 <dl>
