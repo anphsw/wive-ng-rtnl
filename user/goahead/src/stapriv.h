@@ -16,9 +16,6 @@
 #define NdisMediaStateConnected                 1
 #define NdisMediaStateDisconnected              0
 
-#define NdisMediaStateConnected                 1
-#define NdisMediaStateDisconnected              0
-
 // BW
 #define BW_20       0
 #define BW_40       1
