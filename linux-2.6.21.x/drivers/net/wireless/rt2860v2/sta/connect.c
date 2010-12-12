@@ -1434,8 +1434,8 @@ VOID LinkUp(
 	//
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R66, &pAd->BbpTuning.R66CurrentValue);
 
-	DBGPRINT(RT_DEBUG_TRACE, ("!!! LINK UP !!! (BssType=%d, AID=%d, ssid=%s, Channel=%d, CentralChannel = %d)\n", 
-		BssType, pAd->StaActive.Aid, pAd->CommonCfg.Ssid, pAd->CommonCfg.Channel, pAd->CommonCfg.CentralChannel));
+	printk("!!! LINK UP !!! (BssType=%d, AID=%d, ssid=%s, Channel=%d, CentralChannel = %d)\n", 
+		BssType, pAd->StaActive.Aid, pAd->CommonCfg.Ssid, pAd->CommonCfg.Channel, pAd->CommonCfg.CentralChannel);
 
 #ifdef DOT11_N_SUPPORT
 	DBGPRINT(RT_DEBUG_TRACE, ("!!! LINK UP !!! (Density =%d, )\n", pAd->MacTab.Content[BSSID_WCID].MpduDensity));
@@ -2313,7 +2313,7 @@ VOID LinkDown(
 
 		RTMPSendWirelessEvent(pAd, IW_STA_LINKDOWN_EVENT_FLAG, NULL, BSS0, 0); 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("!!! LINK DOWN !!!\n"));
+	printk ("!!! LINK DOWN !!!\n");
 	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_AGGREGATION_INUSED);
     
 	// reset to not doing improved scan

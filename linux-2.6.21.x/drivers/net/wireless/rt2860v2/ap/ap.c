@@ -2395,7 +2395,7 @@ VOID EnableAPMIMOPS(
 #endif // RT305x //
 #endif // COC_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
-	DBGPRINT(RT_DEBUG_INFO, ("Run with BW_20\n"));
+	printk("AP Run with BW_20\n");
 	pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
 	CentralChannel = pAd->CommonCfg.Channel;
 
@@ -2483,7 +2483,7 @@ VOID DisableAPMIMOPS(
 #endif // RTMP_RBUS_SUPPORT //
 	if ((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == BW_40) && (pAd->CommonCfg.Channel != 14))
 	{
-		DBGPRINT(RT_DEBUG_INFO, ("Run with BW_40\n"));
+		printk("AP Run with BW_40\n");
 		/* Set CentralChannel to work for BW40 */
 		if (pAd->CommonCfg.RegTransmitSetting.field.EXTCHA == EXTCHA_ABOVE)
 		{
