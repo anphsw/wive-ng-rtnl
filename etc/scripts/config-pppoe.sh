@@ -16,6 +16,7 @@ PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 IFACE=`nvram_get 2860 vpnInterface`
 AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+LCPECHO=`nvram_get 2860 vpnEnableLCP`
 OPTFILE="/etc/ppp/options.pppoe"
 
 killall -q pppd > /dev/null 2>&1
@@ -99,9 +100,18 @@ else
     CHAP=""
 fi
 
+if [ "$LCPECHO" = "on" ] ; then
+    LCPECHO="lcp-echo-adaptive"
+else
+    LCPECHO=""
+fi
+
 cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
+lcp-echo-failure 10
+lcp-echo-interval 5
+$LCPECHO
 $PAP
 $CHAP
 " >> $OPTFILE

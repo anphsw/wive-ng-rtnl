@@ -195,19 +195,19 @@
 6) Some fix iptables code<br>
 7) Fix defaults for init wifi<br>
 8) Fix update firmware at small memory device<br>
-9) Some rewrite wifi drivers<br>
+9) Some potentional leak fix<br>
 10) Remove dead code in wifi and nvram<br>
 11) Some wifi function now works in native mode<br>
 12) Fix build if all wifi driver options is set<br>
 13) Full kernel code review and cleanup<br>
 14) Drop unused, dead and potentional buggy code<br>
-15) Full cycle of retraining flash on command fs cleanall.<br>
-16) Cleanup wifi driver code<br>
-17) Remove samba for 4Mb flash devices need more flash free<br>
-18) Increase kernel padded size. Try fix crash mapping.<br>
-19) Update AP driver from 2.3.0.0 to 2.4.3.3 version.<br>
-20) Update STA driver from 2.2.0.0 to 2.3.3.3 version.<br>
-21) Update HW_NAT kernel code and add hw_nat userspace utils<br>
+15) Full cycle of retraining flash on command fs cleanall<br>
+16) Remove samba for 4Mb flash devices need more flash free<br>
+17) Increase kernel padded size. Try fix crash mapping<br>
+18) Update AP driver from 2.3.0.0 to 2.4.3.3 version<br>
+19) Update STA driver from 2.2.0.0 to 2.3.3.3 version<br>
+20) Update HW_NAT kernel code and add hw_nat userspace utils<br>
+21) Add LCP echo adaptive options on VPN page. Default on<br>
 22) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
 
 <br><br>
@@ -223,4 +223,3 @@
 <br>
 <br>
 <br>
-

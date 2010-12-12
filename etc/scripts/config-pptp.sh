@@ -15,6 +15,7 @@ MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+LCPECHO=`nvram_get 2860 vpnEnableLCP`
 OPTFILE="/etc/ppp/options.pptp"
 
 killall -q pppd > /dev/null 2>&1
@@ -117,8 +118,17 @@ echo "==================START-PPTP-CLIENT======================="
 	CHAP=""
     fi
 
+    if [ "$LCPECHO" = "on" ] ; then
+        LCPECHO="lcp-echo-adaptive"
+    else
+	LCPECHO=""
+    fi
+
     cp -f /etc/ppp/options.template $OPTFILE
     printf "                                                                                                                                                                                                                                                                        
+    lcp-echo-failure 10
+    lcp-echo-interval 5
+    $LCPECHO
     $PAP
     $CHAP
     " >> $OPTFILE

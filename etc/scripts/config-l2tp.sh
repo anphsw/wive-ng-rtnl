@@ -15,6 +15,7 @@ MPPE=`nvram_get 2860 vpnMPPE`
 PEERDNS=`nvram_get 2860 vpnPeerDNS`
 DEBUG=`nvram_get 2860 vpnDebug`
 AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+LCPECHO=`nvram_get 2860 vpnEnableLCP`
 
 killall -q pppd > /dev/null 2>&1
 killall -q xl2tpd > /dev/null 2>&1
@@ -124,6 +125,12 @@ echo "==================START-L2TP-CLIENT======================="
 	CHAP=""
     fi
 
+    if [ "$LCPECHO" = "on" ] ; then
+        LCPECHO="lcp-echo-adaptive"
+    else
+	LCPECHO=""
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -156,8 +163,9 @@ echo "==================START-L2TP-CLIENT======================="
     $MRU
     $MPPE
     $PEERDNS
-    lcp-echo-failure        10
-    lcp-echo-interval       5 
+    lcp-echo-failure  10
+    lcp-echo-interval  5 
+    $LCPECHO
     " >> $ppp/options.l2tp
 
     printf "$USER * $PASSWORD" >> $ppp/chap-secrets

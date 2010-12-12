@@ -189,6 +189,7 @@ vpnMPPE=off
 vpnPeerDNS=on
 vpnDebug=off
 vpnNAT=on
+vpnEnableLCP=on
 vpnAuthProtocol=0
 vpnInterface=WAN
 vpnServer=192.168.200.1
