@@ -25,7 +25,8 @@ $CC -E $INCLUDE_OPTS - |
   echo "#endif" ; echo ;
   sed -ne 's/^UCLIBC_\([A-Za-z0-9_]*\) *\(.*\)/#undef __NR_\1\
 #define __NR_\1 \2\
-#define SYS_\1 __NR_\1/gp'
+#define SYS_\1 __NR_\1/gp' \
+     -e 's/^UNDEFUCLIBC_\([A-Za-z0-9_]*\).*/#undef __NR_\1/gp'
   echo ;
   echo "#endif" ;
 )

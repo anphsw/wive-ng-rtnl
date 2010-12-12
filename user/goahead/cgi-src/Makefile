@@ -7,70 +7,49 @@
 # $Id: Makefile,v 1.21.2.2 2009-04-17 03:40:21 chhung Exp $
 #
 
-
 CONF	= $(ROOTDIR)/$(LINUXDIR)
 CONF_H  = $(CONF)/include/linux/autoconf.h
-ZLIB_H  = $(ROOTDIR)/lib/zlib
+NVRAM	= $(ROOTDIR)/lib/libnvram
+CRC_L	= $(NVRAM)/crc32.o
 
-#
-#  As you can see, RRDTool(traffic graphic) is obsoleted.
-#
-UPLOAD_CGI = upload.cgi 
-UPLOAD_BOOTLOADER_CGI = upload_bootloader.cgi
-UPLOAD_SETTINGS = upload_settings.cgi
-USB_UPGRADE_CGI = usb_upgrade.cgi
+UPLOAD_CGI 		= upload.cgi 
+UPLOAD_BOOTLOADER_CGI	= upload_bootloader.cgi
+UPLOAD_SETTINGS		= upload_settings.cgi
+USB_UPGRADE_CGI		= usb_upgrade.cgi
 
-#need direct link to libnvram
-CFLAGS  += -I$(ROOTDIR)/lib/libnvram
-LDFLAGS += -L$(ROOTDIR)/lib/libnvram/libnvram.a
-LDLIBS  += -lnvram
+#Need direct link to libnvram
+CFLAGS  += -I$(NVRAM) -lnvram
 
-#RRDTOOL_CGIWARPPER = rrdtool_cgiwrapper.cgi
-#CPU_MEM_RRD_UPDATER	= cpu_mem_updater
-#NETWORK_RRD_UPDATER	= network_updater
-
-ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_BOOTLOADER_CGI) $(UPLOAD_SETTINGS) $(RRDTOOL_CGIWARPPER) $(CPU_MEM_RRD_UPDATER) $(NETWORK_RRD_UPDATER) 
+ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_BOOTLOADER_CGI) $(UPLOAD_SETTINGS)
 ifeq ("$(CONFIG_USB_STORAGE)", "y")
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 ALL_EXE += $(USB_UPGRADE_CGI)
 endif
 endif
 
-all:	$(ALL_EXE)
+all: $(ALL_EXE)
 
-$(UPLOAD_CGI): upload.cgi.o crc32.o
-	$(CC) $(CFLAGS) crc32.o upload.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
+$(UPLOAD_CGI): upload.cgi.o 
+	$(CC) $(CFLAGS) $(CRC_L) upload.cgi.o -o $@ $(LDFLAGS)
+	$(STRIP) --remove-section=.note --remove-section=.comment $@
+
+$(USB_UPGRADE_CGI): usb_upgrade.cgi.o
+	$(CC) $(CFLAGS) $(CRC_L) usb_upgrade.cgi.o -o $@ $(LDFLAGS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(UPLOAD_BOOTLOADER_CGI): upload_bootloader.cgi.o
-	$(CC) $(CFLAGS) upload_bootloader.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) upload_bootloader.cgi.o -o $@ $(LDFLAGS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(UPLOAD_SETTINGS): upload_settings.cgi.o
-	$(CC) $(CFLAGS) upload_settings.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) upload_settings.cgi.o -o $@ $(LDFLAGS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
-$(USB_UPGRADE_CGI): usb_upgrade.cgi.o crc32.o
-	$(CC) $(CFLAGS) crc32.o usb_upgrade.cgi.o -o $@ $(LDFLAGS) $(LDLIBS)
-	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
-#$(RRDTOOL_CGIWARPPER): rrdtool_cgiwrapper.o
-#	$(CC) -o $@	rrdtool_cgiwrapper.o
-#	$(STRIP) --remove-section=.note --remove-section=.comment $@
-#
-#$(CPU_MEM_RRD_UPDATER): cpu_mem_updater.o
-#	$(CC) -o $@	cpu_mem_updater.o
-#	$(STRIP) --remove-section=.note --remove-section=.comment $@
-#
-#$(NETWORK_RRD_UPDATER): network_updater.o
-#	$(CC) -o $@	network_updater.o
-#	$(STRIP) --remove-section=.note --remove-section=.comment $@
-	
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)/cgi-bin/$(UPLOAD_CGI)
 	$(ROMFSINST) $(ROOT_DIRECTORY)/cgi-bin/$(UPLOAD_BOOTLOADER_CGI)
 	$(ROMFSINST) reboot.sh $(ROOT_DIRECTORY)/cgi-bin/reboot.sh
-#	$(ROMFSINST) $(RRDTOOL_CGIWARPPER) $(ROOT_DIRECTORY)/cgi-bin/$(RRDTOOL_CGIWARPPER)
 	$(ROMFSINST) ExportSettings.sh $(ROOT_DIRECTORY)/cgi-bin/ExportSettings.sh
 	$(ROMFSINST) upload_settings.cgi  $(ROOT_DIRECTORY)/cgi-bin/upload_settings.cgi	
 	$(ROMFSINST) history.sh  $(ROOT_DIRECTORY)/cgi-bin/history.sh	
@@ -81,37 +60,20 @@ ifeq ("$(CONFIG_USER_STORAGE)", "y")
 endif
 endif
 
-#they are not cgi but cgi-related.
-#	$(ROMFSINST) $(CPU_MEM_RRD_UPDATER) $(ROOT_DIRECTORY)/cgi-bin/$(CPU_MEM_RRD_UPDATER)
-#	$(ROMFSINST) $(NETWORK_RRD_UPDATER) $(ROOT_DIRECTORY)/cgi-bin/$(NETWORK_RRD_UPDATER)
-	
+#They are not cgi but cgi-related.
 clean:
 	rm -f $(ALL_EXE) $(ARCH) $(USB_UPGRADE_CGI) *.o
 
-#
-#	Dependencies
-#
+#Dependencies
 upload.cgi.o: upload.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -DUPLOAD_FIRMWARE_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
-
-crc32.o: crc32.c $(CONF_H)
-	$(CC) $(CFLAGS) -DUSE_HOSTCC -I$(CONF) -I$(ZLIB_H) -c crc32.c -o $@
-
-upload_bootloader.cgi.o: upload.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -DUPLOAD_BOOTLOADER_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
-
-upload_settings.cgi.o: upload_settings.cgi.c
-	$(CC) $(CFLAGS) -c upload_settings.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -DUPLOAD_FIRMWARE_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS)
 
 usb_upgrade.cgi.o: usb_upgrade.cgi.c $(CONF_H)
-	$(CC) $(CFLAGS) -I$(CONF) -c usb_upgrade.cgi.c -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -I$(CONF) -c usb_upgrade.cgi.c -o $@ $(LDFLAGS)
 
-#rrdtool_cgiwrapper.o: rrdtool_cgiwrapper.c
-#	$(CC) -c rrdtool_cgiwrapper.c -o $@
-#
-#cpu_mem_updater.o: cpu_mem_updater.c
-#	$(CC) -c cpu_mem_updater.c -o $@
-#
-#network_updater.o: network_updater.c
-#	$(CC) -c network_updater.c -o $@
+upload_bootloader.cgi.o: upload.cgi.c $(CONF_H)
+	$(CC) $(CFLAGS) -DUPLOAD_BOOTLOADER_SUPPORT -I$(CONF) -c upload.cgi.c -o $@ $(LDFLAGS)
+
+upload_settings.cgi.o: upload_settings.cgi.c
+	$(CC) $(CFLAGS) -c upload_settings.cgi.c -o $@ $(LDFLAGS)
 
