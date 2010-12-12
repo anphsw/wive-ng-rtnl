@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Sun Dec 12 05:31:06 2010
+# Sun Dec 12 13:21:43 2010
 #
 CONFIG_MIPS=y
 
@@ -743,11 +743,7 @@ CONFIG_PPTP=m
 #
 CONFIG_RALINK_GPIO=y
 CONFIG_RALINK_GPIO_LED=y
-CONFIG_RALINK_GDMA=y
-# CONFIG_GDMA_PCM_ONLY is not set
-CONFIG_GDMA_PCM_I2S_OTHERS=y
-# CONFIG_GDMA_EVERYBODY is not set
-# CONFIG_GDMA_DEBUG is not set
+# CONFIG_RALINK_GDMA is not set
 # CONFIG_RALINK_SPI is not set
 # CONFIG_RALINK_I2C is not set
 # CONFIG_RALINK_PCM is not set
