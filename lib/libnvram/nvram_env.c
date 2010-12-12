@@ -214,7 +214,16 @@ static int cache_idx(int index, char *name)
 
 char *nvram_get(int index, char *name)
 {
-	char *rc;
+	/* Initial value should be NULL */
+	char *rc = NULL;
+
+	/* If we have some pointer, this means we need to free old value 
+	    we are safe with nvram_get, he do his own strdup
+	*/
+	if (rc != NULL) {
+	    free(rc);
+	    rc = NULL;
+	}
 
 	//LIBNV_PRINT("--> nvram_get\n");
 	nvram_init(index);
@@ -247,7 +256,16 @@ out:
 char const *nvram_bufget(int index, char *name)
 {
 	int idx;
-	static char const *ret;
+	/* Initial value should be NULL */
+	static char const *ret = NULL;
+
+	/* If we have some pointer, this means we need to free old value 
+	    we are safe with nvram_get, he do his own strdup
+	*/
+	if (ret != NULL) {
+	    free(ret);
+	    ret = NULL;
+	}
 
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
