@@ -1,12 +1,7 @@
-#baswd utility for all routers
+#based utilites for all routers
 
 UTILSLIST = ader cpu mcprobe ipget
 CFLAGS += -Os
-
-ifdef CONFIG_USER_KABINET
-UTILSLIST += lanauth
-CFLAGS += -lcrypt
-endif
 
 all:
 	@set -e;
@@ -22,11 +17,11 @@ install:
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
-	for i in $(UTILSLIST); do cp $$i ./filesystem/bin/$$i; done
+	for i in $(UTILSLIST); do cp -fv $$i ./filesystem/bin/$$i; done
 
 romfs:
 	rm -rf filesystem
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
-	for i in $(UTILSLIST); do cp $$i $(ROMFSDIR)/bin/$$i; done
+	for i in $(UTILSLIST); do cp -fv $$i $(ROMFSDIR)/bin/$$i; done

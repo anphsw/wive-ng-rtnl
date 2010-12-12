@@ -34,7 +34,7 @@ mkconfig:
 
 install: all
 	mkdir -p $(DESTDIR)/usr/local/sbin/
-	for i in $(ALL); do cp $$i $(DESTDIR)/usr/local/sbin/$$i; done
+	for i in $(ALL); do cp -fv $$i $(DESTDIR)/usr/local/sbin/$$i; done
 
 OBJS = config.o \
 	common.o md5.o md4.o \
