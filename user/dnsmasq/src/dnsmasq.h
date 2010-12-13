@@ -31,8 +31,10 @@
 /* get these before config.h  for IPv6 stuff... */
 #include <sys/types.h> 
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <linux/in.h>
+#include "in.h"
 
+/* Internet address.  */
 #ifdef __APPLE__
 #  include <nameser.h>
 #  include <arpa/nameser_compat.h>
