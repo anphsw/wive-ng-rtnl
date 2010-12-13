@@ -12,7 +12,6 @@ KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.20.1
 UCLIBCVER=uClibc-0.9.28
 GCCVER=gcc-4.2.4
-NEWLIBVER=newlib-1.18.0
 
 UNPACK=YES
 HEADERS=YES
@@ -40,8 +39,6 @@ if [ "$UNPACK" = "YES" ]; then
     tar xjf $KERNELHDRS.tar.bz2
     echo "====================EXTRACT-BINUTILS===================="
     tar xjf $BINUTILVER.tar.bz2
-    echo "=====================EXTRACT-NEWLIB====================="
-    tar xjf $NEWLIBVER.tar.bz2
     echo "=====================EXTRACT-UCLIBC====================="
     tar xjf $UCLIBCVER.tar.bz2
     echo "=======================EXTRACT-GCC======================"
