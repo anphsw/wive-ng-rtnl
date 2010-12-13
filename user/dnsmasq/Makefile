@@ -17,7 +17,9 @@ PREFIX = ./filesystem
 BINDIR = ${PREFIX}/sbin
 MANDIR = ${PREFIX}/share/man
 LOCALEDIR = ${PREFIX}/share/locale
-COPTS=-DNO_DHCP -DNO_TFTP -DNO_IPV6 -Os -fPIC -fomit-frame-pointer -mno-memcpy
+
+CFLAGS += -std=C98
+COPTS=-DNO_DHCP -DNO_TFTP -DNO_IPV6
 
 SRC = src
 PO = po

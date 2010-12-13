@@ -54,7 +54,7 @@
 #  define _(S) gettext(S)
 #endif
 
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #if defined(HAVE_SOLARIS_NETWORK)
@@ -89,9 +89,15 @@
 #  include <net/ethernet.h>
 #endif
 #include <net/if_arp.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
+
+//#include <netinet/in_systm.h>
+//#include <netinet/ip.h>
+//#include <netinet/ip_icmp.h>
+
+#ifndef SOL_IP
+#define SOL_IP  0
+#endif
+
 #include <sys/uio.h>
 #include <syslog.h>
 #include <dirent.h>
