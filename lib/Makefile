@@ -68,9 +68,6 @@ endif
 ifeq ($(CONFIG_LIB_NAT),y)
     DIRS += libnatpmp
 endif
-ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
-    DIRS += libzebra
-endif
 ifeq ($(CONFIG_LIB_USB),y)
     DIRS += libusb
 endif
@@ -124,9 +121,6 @@ ifeq ($(CONFIG_LIB_ZLIB_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_LIBPTHREAD_FORCE),y)
 	@$(MAKE) -C libpthread shared
-endif
-ifeq ($(CONFIG_LIB_LIBZEBRA_FORCE),y)
-	@$(MAKE) -C libzebra shared
 endif
 ifeq ($(CONFIG_LIB_USB),y)
 	@$(MAKE) -C libusb shared
