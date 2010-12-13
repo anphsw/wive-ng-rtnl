@@ -48,7 +48,7 @@ dir_y =
 dir_n =
 dir_  =
 
-#basy system application
+#base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
 dir_$(CONFIG_USER_STRACE_STRACE)            += strace

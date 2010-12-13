@@ -1,12 +1,12 @@
 src/genlib/net/http/libupnp_la-httpparser.lo \
   src/genlib/net/http/libupnp_la-httpparser.o:  \
- src/genlib/net/http/httpparser.c ./src/inc/config.h ../autoconfig.h \
+ src/genlib/net/http/httpparser.c src/inc/config.h ../autoconfig.h \
   /opt/Wive-RTNL/lib/include/assert.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/string.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/ctype.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -15,15 +15,15 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/bits/sched.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_touplow.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix2_lim.h \
   /opt/Wive-RTNL/lib/include/bits/xopen_lim.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
-  ./src/inc/strintmap.h /opt/Wive-RTNL/lib/include/stdlib.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
+  src/inc/strintmap.h /opt/Wive-RTNL/lib/include/stdlib.h \
   /opt/Wive-RTNL/lib/include/bits/waitflags.h \
   /opt/Wive-RTNL/lib/include/bits/waitstatus.h \
   /opt/Wive-RTNL/lib/include/endian.h \
@@ -35,7 +35,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/bits/sigset.h \
   /opt/Wive-RTNL/lib/include/bits/time.h \
   /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
-  /opt/Wive-RTNL/lib/include/alloca.h ./src/inc/util.h ../upnp/inc/upnp.h \
+  /opt/Wive-RTNL/lib/include/alloca.h src/inc/util.h ../upnp/inc/upnp.h \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
@@ -48,9 +48,8 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/asm/sockios.h \
   /opt/Wive-RTNL/lib/include/asm/ioctl.h \
   /opt/Wive-RTNL/lib/include/bits/in.h \
-  /opt/Wive-RTNL/lib/include/bits/byteswap.h ./src/inc/httpparser.h \
-  ./src/inc/membuffer.h ./src/inc/uri.h \
-  /opt/Wive-RTNL/lib/include/fcntl.h \
+  /opt/Wive-RTNL/lib/include/bits/byteswap.h src/inc/httpparser.h \
+  src/inc/membuffer.h src/inc/uri.h /opt/Wive-RTNL/lib/include/fcntl.h \
   /opt/Wive-RTNL/lib/include/bits/fcntl.h \
   /opt/Wive-RTNL/lib/include/sys/stat.h \
   /opt/Wive-RTNL/lib/include/bits/stat.h \
@@ -76,10 +75,10 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
   /opt/Wive-RTNL/lib/include/pthread.h /opt/Wive-RTNL/lib/include/sched.h \
   /opt/Wive-RTNL/lib/include/signal.h \
   /opt/Wive-RTNL/lib/include/bits/initspin.h \
-  /opt/Wive-RTNL/lib/include/bits/sigthread.h ./src/inc/statcodes.h \
-  ./src/inc/unixutil.h
+  /opt/Wive-RTNL/lib/include/bits/sigthread.h src/inc/statcodes.h \
+  src/inc/unixutil.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
@@ -93,7 +92,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/string.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/ctype.h:
 
@@ -111,7 +110,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -125,9 +124,9 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
-./src/inc/strintmap.h:
+src/inc/strintmap.h:
 
 /opt/Wive-RTNL/lib/include/stdlib.h:
 
@@ -155,7 +154,7 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/alloca.h:
 
-./src/inc/util.h:
+src/inc/util.h:
 
 ../upnp/inc/upnp.h:
 
@@ -189,11 +188,11 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/bits/byteswap.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/membuffer.h:
+src/inc/membuffer.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 /opt/Wive-RTNL/lib/include/fcntl.h:
 
@@ -255,6 +254,6 @@ src/genlib/net/http/libupnp_la-httpparser.lo \
 
 /opt/Wive-RTNL/lib/include/bits/sigthread.h:
 
-./src/inc/statcodes.h:
+src/inc/statcodes.h:
 
-./src/inc/unixutil.h:
+src/inc/unixutil.h:

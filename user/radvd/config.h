@@ -8,7 +8,7 @@
 #define HAVE_GETOPT_LONG 1
 
 /* Define to 1 if you have the <ifaddrs.h> header file. */
-/* #undef HAVE_IFADDRS_H */
+#define HAVE_IFADDRS_H 1
 
 /* whether struct in6_addr has u6_addrXX and defines s6_addrXX */
 #define HAVE_IN6_ADDR_S6_ADDR 1

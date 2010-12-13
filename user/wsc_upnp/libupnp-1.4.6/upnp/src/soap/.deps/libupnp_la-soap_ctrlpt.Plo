@@ -1,11 +1,11 @@
 src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
- src/soap/soap_ctrlpt.c ./src/inc/config.h ../autoconfig.h \
+ src/soap/soap_ctrlpt.c src/inc/config.h ../autoconfig.h \
   /opt/Wive-RTNL/lib/include/assert.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/stdlib.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -25,15 +25,15 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
-  /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ./src/inc/miniserver.h \
-  ./src/inc/sock.h ./src/inc/util.h ../upnp/inc/upnp.h ../ixml/inc/ixml.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
+  /opt/Wive-RTNL/lib/include/bits/stdio_lim.h src/inc/miniserver.h \
+  src/inc/sock.h src/inc/util.h ../upnp/inc/upnp.h ../ixml/inc/ixml.h \
   /opt/Wive-RTNL/lib/include/string.h ../upnp/inc/upnpconfig.h \
   /opt/Wive-RTNL/lib/include/netinet/in.h \
   /opt/Wive-RTNL/lib/include/stdint.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -43,9 +43,8 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/asm/sockios.h \
   /opt/Wive-RTNL/lib/include/asm/ioctl.h \
   /opt/Wive-RTNL/lib/include/bits/in.h \
-  /opt/Wive-RTNL/lib/include/bits/byteswap.h ./src/inc/httpparser.h \
-  ./src/inc/membuffer.h ./src/inc/uri.h \
-  /opt/Wive-RTNL/lib/include/fcntl.h \
+  /opt/Wive-RTNL/lib/include/bits/byteswap.h src/inc/httpparser.h \
+  src/inc/membuffer.h src/inc/uri.h /opt/Wive-RTNL/lib/include/fcntl.h \
   /opt/Wive-RTNL/lib/include/bits/fcntl.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_clk_tck.h \
   /opt/Wive-RTNL/lib/include/errno.h \
@@ -67,16 +66,16 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
   /opt/Wive-RTNL/lib/include/pthread.h /opt/Wive-RTNL/lib/include/sched.h \
   /opt/Wive-RTNL/lib/include/signal.h \
   /opt/Wive-RTNL/lib/include/bits/initspin.h \
-  /opt/Wive-RTNL/lib/include/bits/sigthread.h ./src/inc/membuffer.h \
-  ./src/inc/httpparser.h ./src/inc/httpreadwrite.h ./src/inc/config.h \
-  ./src/inc/statcodes.h ./src/inc/parsetools.h ./src/inc/upnpapi.h \
-  ./src/inc/client_table.h ./src/inc/service_table.h ../ixml/inc/ixml.h \
+  /opt/Wive-RTNL/lib/include/bits/sigthread.h src/inc/membuffer.h \
+  src/inc/httpparser.h src/inc/httpreadwrite.h src/inc/config.h \
+  src/inc/statcodes.h src/inc/parsetools.h src/inc/upnpapi.h \
+  src/inc/client_table.h src/inc/service_table.h ../ixml/inc/ixml.h \
   ../threadutil/inc/TimerThread.h ../threadutil/inc/LinkedList.h \
   ../threadutil/inc/ThreadPool.h /opt/Wive-RTNL/lib/include/sys/timeb.h \
-  ./src/inc/upnp_timeout.h ./src/inc/soaplib.h ./src/inc/uri.h \
-  ../upnp/inc/upnp.h ./src/inc/unixutil.h
+  src/inc/upnp_timeout.h src/inc/soaplib.h src/inc/uri.h \
+  ../upnp/inc/upnp.h src/inc/unixutil.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
@@ -90,7 +89,7 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/stdlib.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/sys/types.h:
 
@@ -134,15 +133,15 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
-./src/inc/miniserver.h:
+src/inc/miniserver.h:
 
-./src/inc/sock.h:
+src/inc/sock.h:
 
-./src/inc/util.h:
+src/inc/util.h:
 
 ../upnp/inc/upnp.h:
 
@@ -160,7 +159,7 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -182,11 +181,11 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/byteswap.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/membuffer.h:
+src/inc/membuffer.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 /opt/Wive-RTNL/lib/include/fcntl.h:
 
@@ -240,23 +239,23 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/sigthread.h:
 
-./src/inc/membuffer.h:
+src/inc/membuffer.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/httpreadwrite.h:
+src/inc/httpreadwrite.h:
 
-./src/inc/config.h:
+src/inc/config.h:
 
-./src/inc/statcodes.h:
+src/inc/statcodes.h:
 
-./src/inc/parsetools.h:
+src/inc/parsetools.h:
 
-./src/inc/upnpapi.h:
+src/inc/upnpapi.h:
 
-./src/inc/client_table.h:
+src/inc/client_table.h:
 
-./src/inc/service_table.h:
+src/inc/service_table.h:
 
 ../ixml/inc/ixml.h:
 
@@ -268,12 +267,12 @@ src/soap/libupnp_la-soap_ctrlpt.lo src/soap/libupnp_la-soap_ctrlpt.o:  \
 
 /opt/Wive-RTNL/lib/include/sys/timeb.h:
 
-./src/inc/upnp_timeout.h:
+src/inc/upnp_timeout.h:
 
-./src/inc/soaplib.h:
+src/inc/soaplib.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 ../upnp/inc/upnp.h:
 
-./src/inc/unixutil.h:
+src/inc/unixutil.h:

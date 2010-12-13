@@ -137,14 +137,7 @@ bool 'portmap'					CONFIG_USER_PORTMAP
 bool 'pppd'                             	CONFIG_USER_PPPD
 bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
 bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
-
-bool 'ripd-zebra (RIP)' 						CONFIG_USER_ZEBRA
-if [ "$CONFIG_USER_ZEBRA" = "y" ]; then
-    define_bool CONFIG_LIB_LIBZEBRA_FORCE y
-fi
-if [ "$CONFIG_USER_ZEBRA" = "n" ]; then
-    define_bool CONFIG_LIB_LIBZEBRA_FORCE n
-fi
+bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 
 
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 RO_ROOT=romfs
-TOOLSPREFIX=./toolchain/bin/mipsel-linux
+TOOLSPREFIX=./toolchain/bin/mipsel-linux-uclibc
 STRIP="$TOOLSPREFIX-strip --strip-debug --strip-unneeded"
 OBJCOPY="$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded"
 SSTRIP=./tools/sstrip/sstrip

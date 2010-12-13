@@ -1,6 +1,6 @@
 src/genlib/miniserver/libupnp_la-miniserver.lo \
   src/genlib/miniserver/libupnp_la-miniserver.o:  \
- src/genlib/miniserver/miniserver.c ./src/inc/config.h ../autoconfig.h \
+ src/genlib/miniserver/miniserver.c src/inc/config.h ../autoconfig.h \
   /opt/Wive-RTNL/lib/include/arpa/inet.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
@@ -10,13 +10,13 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/pthreadtypes.h \
   /opt/Wive-RTNL/lib/include/bits/sched.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -56,7 +56,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
   /opt/Wive-RTNL/lib/include/bits/posix_opt.h \
   /opt/Wive-RTNL/lib/include/bits/confname.h \
   /opt/Wive-RTNL/lib/include/bits/getopt.h \
-  /opt/Wive-RTNL/lib/include/sys/time.h ./src/inc/unixutil.h \
+  /opt/Wive-RTNL/lib/include/sys/time.h src/inc/unixutil.h \
   ../threadutil/inc/ithread.h /opt/Wive-RTNL/lib/include/pthread.h \
   /opt/Wive-RTNL/lib/include/sched.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_clk_tck.h \
@@ -67,36 +67,36 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
   /opt/Wive-RTNL/lib/include/stdlib.h /opt/Wive-RTNL/lib/include/alloca.h \
-  /opt/Wive-RTNL/lib/include/string.h ./src/inc/ssdplib.h \
+  /opt/Wive-RTNL/lib/include/string.h src/inc/ssdplib.h \
   /opt/Wive-RTNL/lib/include/setjmp.h \
   /opt/Wive-RTNL/lib/include/bits/setjmp.h \
   /opt/Wive-RTNL/lib/include/fcntl.h \
-  /opt/Wive-RTNL/lib/include/bits/fcntl.h ./src/inc/httpparser.h \
-  ./src/inc/util.h ../upnp/inc/upnp.h ../ixml/inc/ixml.h \
-  ../upnp/inc/upnpconfig.h ./src/inc/membuffer.h ./src/inc/uri.h \
+  /opt/Wive-RTNL/lib/include/bits/fcntl.h src/inc/httpparser.h \
+  src/inc/util.h ../upnp/inc/upnp.h ../ixml/inc/ixml.h \
+  ../upnp/inc/upnpconfig.h src/inc/membuffer.h src/inc/uri.h \
   /opt/Wive-RTNL/lib/include/ctype.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_touplow.h \
   /opt/Wive-RTNL/lib/include/netdb.h \
   /opt/Wive-RTNL/lib/include/rpc/netdb.h \
   /opt/Wive-RTNL/lib/include/bits/netdb.h ../threadutil/inc/LinkedList.h \
   ../threadutil/inc/FreeList.h ../threadutil/inc/ithread.h \
-  ./src/inc/httpreadwrite.h ./src/inc/config.h ./src/inc/sock.h \
-  ./src/inc/miniserver.h /opt/Wive-RTNL/lib/include/syslog.h \
+  src/inc/httpreadwrite.h src/inc/config.h src/inc/sock.h \
+  src/inc/miniserver.h /opt/Wive-RTNL/lib/include/syslog.h \
   /opt/Wive-RTNL/lib/include/sys/syslog.h \
   /opt/Wive-RTNL/lib/include/netinet/in_systm.h \
   /opt/Wive-RTNL/lib/include/netinet/ip.h \
-  /opt/Wive-RTNL/lib/include/netinet/ip_icmp.h ./src/inc/util.h \
-  ./src/inc/miniserver.h ../threadutil/inc/ThreadPool.h \
+  /opt/Wive-RTNL/lib/include/netinet/ip_icmp.h src/inc/util.h \
+  src/inc/miniserver.h ../threadutil/inc/ThreadPool.h \
   ../threadutil/inc/LinkedList.h /opt/Wive-RTNL/lib/include/sys/timeb.h \
-  ./src/inc/httpreadwrite.h ./src/inc/statcodes.h ../upnp/inc/upnp.h \
-  ./src/inc/upnpapi.h ./src/inc/client_table.h ./src/inc/service_table.h \
+  src/inc/httpreadwrite.h src/inc/statcodes.h ../upnp/inc/upnp.h \
+  src/inc/upnpapi.h src/inc/client_table.h src/inc/service_table.h \
   ../ixml/inc/ixml.h ../threadutil/inc/TimerThread.h \
-  ../threadutil/inc/ThreadPool.h ./src/inc/upnp_timeout.h
+  ../threadutil/inc/ThreadPool.h src/inc/upnp_timeout.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
@@ -118,7 +118,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/bits/types.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/kernel_types.h:
 
@@ -130,7 +130,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -214,7 +214,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/sys/time.h:
 
-./src/inc/unixutil.h:
+src/inc/unixutil.h:
 
 ../threadutil/inc/ithread.h:
 
@@ -240,7 +240,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
@@ -250,7 +250,7 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/string.h:
 
-./src/inc/ssdplib.h:
+src/inc/ssdplib.h:
 
 /opt/Wive-RTNL/lib/include/setjmp.h:
 
@@ -260,9 +260,9 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/bits/fcntl.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/util.h:
+src/inc/util.h:
 
 ../upnp/inc/upnp.h:
 
@@ -270,9 +270,9 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 ../upnp/inc/upnpconfig.h:
 
-./src/inc/membuffer.h:
+src/inc/membuffer.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 /opt/Wive-RTNL/lib/include/ctype.h:
 
@@ -290,13 +290,13 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 ../threadutil/inc/ithread.h:
 
-./src/inc/httpreadwrite.h:
+src/inc/httpreadwrite.h:
 
-./src/inc/config.h:
+src/inc/config.h:
 
-./src/inc/sock.h:
+src/inc/sock.h:
 
-./src/inc/miniserver.h:
+src/inc/miniserver.h:
 
 /opt/Wive-RTNL/lib/include/syslog.h:
 
@@ -308,9 +308,9 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/netinet/ip_icmp.h:
 
-./src/inc/util.h:
+src/inc/util.h:
 
-./src/inc/miniserver.h:
+src/inc/miniserver.h:
 
 ../threadutil/inc/ThreadPool.h:
 
@@ -318,17 +318,17 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 /opt/Wive-RTNL/lib/include/sys/timeb.h:
 
-./src/inc/httpreadwrite.h:
+src/inc/httpreadwrite.h:
 
-./src/inc/statcodes.h:
+src/inc/statcodes.h:
 
 ../upnp/inc/upnp.h:
 
-./src/inc/upnpapi.h:
+src/inc/upnpapi.h:
 
-./src/inc/client_table.h:
+src/inc/client_table.h:
 
-./src/inc/service_table.h:
+src/inc/service_table.h:
 
 ../ixml/inc/ixml.h:
 
@@ -336,4 +336,4 @@ src/genlib/miniserver/libupnp_la-miniserver.lo \
 
 ../threadutil/inc/ThreadPool.h:
 
-./src/inc/upnp_timeout.h:
+src/inc/upnp_timeout.h:

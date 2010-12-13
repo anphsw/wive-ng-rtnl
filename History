@@ -208,7 +208,8 @@
 19) Update STA driver from 2.2.0.0 to 2.3.3.3 version<br>
 20) Update HW_NAT kernel code and add hw_nat userspace utils<br>
 21) Add LCP echo adaptive options on VPN page. Default on<br>
-22) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
+22) Use opensource toolchain at 4.2.4 gcc for build all coe in project. No binary from Ralink needed<br>
+23) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
 
 <br><br>
 <b>For support see:</b><br>

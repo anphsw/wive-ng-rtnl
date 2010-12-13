@@ -3,8 +3,8 @@ src/ixmlparser.lo src/ixmlparser.o: src/ixmlparser.c \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
-  ./src/inc/ixmlparser.h ./inc/ixml.h /opt/Wive-RTNL/lib/include/stdio.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
+  src/inc/ixmlparser.h inc/ixml.h /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
@@ -13,9 +13,9 @@ src/ixmlparser.lo src/ixmlparser.o: src/ixmlparser.c \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h \
-  /opt/Wive-RTNL/lib/include/assert.h ./src/inc/ixmlmembuf.h \
+  /opt/Wive-RTNL/lib/include/assert.h src/inc/ixmlmembuf.h \
   /opt/Wive-RTNL/lib/include/stdlib.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
@@ -35,11 +35,11 @@ src/ixmlparser.lo src/ixmlparser.o: src/ixmlparser.c \
 
 /opt/Wive-RTNL/lib/include/sys/cdefs.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
-./src/inc/ixmlparser.h:
+src/inc/ixmlparser.h:
 
-./inc/ixml.h:
+inc/ixml.h:
 
 /opt/Wive-RTNL/lib/include/stdio.h:
 
@@ -59,13 +59,13 @@ src/ixmlparser.lo src/ixmlparser.o: src/ixmlparser.c \
 
 /opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
 /opt/Wive-RTNL/lib/include/assert.h:
 
-./src/inc/ixmlmembuf.h:
+src/inc/ixmlmembuf.h:
 
 /opt/Wive-RTNL/lib/include/stdlib.h:
 

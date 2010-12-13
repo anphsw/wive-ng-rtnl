@@ -1,12 +1,12 @@
 src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
- src/api/upnptools.c ./src/inc/config.h ../autoconfig.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+ src/api/upnptools.c src/inc/config.h ../autoconfig.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
   ../upnp/inc/upnptools.h ../upnp/inc/upnp.h \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
@@ -21,7 +21,7 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
   /opt/Wive-RTNL/lib/include/stdint.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -39,7 +39,7 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
   /opt/Wive-RTNL/lib/include/asm/sockios.h \
   /opt/Wive-RTNL/lib/include/asm/ioctl.h \
   /opt/Wive-RTNL/lib/include/bits/in.h \
-  /opt/Wive-RTNL/lib/include/bits/byteswap.h ./src/inc/uri.h \
+  /opt/Wive-RTNL/lib/include/bits/byteswap.h src/inc/uri.h \
   /opt/Wive-RTNL/lib/include/fcntl.h \
   /opt/Wive-RTNL/lib/include/bits/fcntl.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_clk_tck.h \
@@ -62,11 +62,11 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
   /opt/Wive-RTNL/lib/include/bits/netdb.h \
   /opt/Wive-RTNL/lib/include/sys/time.h ../upnp/inc/upnp.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 ../upnp/inc/upnptools.h:
 
@@ -80,7 +80,7 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
 
 /opt/Wive-RTNL/lib/include/sys/cdefs.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/types.h:
 
@@ -116,7 +116,7 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -156,7 +156,7 @@ src/api/libupnp_la-upnptools.lo src/api/libupnp_la-upnptools.o:  \
 
 /opt/Wive-RTNL/lib/include/bits/byteswap.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 /opt/Wive-RTNL/lib/include/fcntl.h:
 

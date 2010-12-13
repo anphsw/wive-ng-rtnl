@@ -4,7 +4,7 @@ src/ixmlmembuf.lo src/ixmlmembuf.o: src/ixmlmembuf.c \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
   /opt/Wive-RTNL/lib/include/stdlib.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -19,12 +19,12 @@ src/ixmlmembuf.lo src/ixmlmembuf.o: src/ixmlmembuf.c \
   /opt/Wive-RTNL/lib/include/bits/time.h \
   /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
   /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/string.h \
-  ./src/inc/ixmlmembuf.h ./inc/ixml.h /opt/Wive-RTNL/lib/include/stdio.h \
+  src/inc/ixmlmembuf.h inc/ixml.h /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
-  /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ./inc/ixml.h
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
+  /opt/Wive-RTNL/lib/include/bits/stdio_lim.h inc/ixml.h
 
 /opt/Wive-RTNL/lib/include/assert.h:
 
@@ -36,7 +36,7 @@ src/ixmlmembuf.lo src/ixmlmembuf.o: src/ixmlmembuf.c \
 
 /opt/Wive-RTNL/lib/include/stdlib.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/sys/types.h:
 
@@ -70,9 +70,9 @@ src/ixmlmembuf.lo src/ixmlmembuf.o: src/ixmlmembuf.c \
 
 /opt/Wive-RTNL/lib/include/string.h:
 
-./src/inc/ixmlmembuf.h:
+src/inc/ixmlmembuf.h:
 
-./inc/ixml.h:
+inc/ixml.h:
 
 /opt/Wive-RTNL/lib/include/stdio.h:
 
@@ -82,8 +82,8 @@ src/ixmlmembuf.lo src/ixmlmembuf.o: src/ixmlmembuf.c \
 
 /opt/Wive-RTNL/lib/include/bits/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
-./inc/ixml.h:
+inc/ixml.h:

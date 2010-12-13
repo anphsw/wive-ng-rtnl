@@ -1,11 +1,11 @@
 src/genlib/util/libupnp_la-upnp_timeout.lo \
   src/genlib/util/libupnp_la-upnp_timeout.o:  \
- src/genlib/util/upnp_timeout.c ./src/inc/config.h ../autoconfig.h \
-  ./src/inc/upnp_timeout.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ src/genlib/util/upnp_timeout.c src/inc/config.h ../autoconfig.h \
+  src/inc/upnp_timeout.h /opt/Wive-RTNL/lib/include/stdlib.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
   /opt/Wive-RTNL/lib/include/sys/cdefs.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
@@ -21,11 +21,11 @@ src/genlib/util/libupnp_la-upnp_timeout.lo \
   /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
   /opt/Wive-RTNL/lib/include/alloca.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
-./src/inc/upnp_timeout.h:
+src/inc/upnp_timeout.h:
 
 /opt/Wive-RTNL/lib/include/stdlib.h:
 
@@ -35,7 +35,7 @@ src/genlib/util/libupnp_la-upnp_timeout.lo \
 
 /opt/Wive-RTNL/lib/include/sys/cdefs.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/sys/types.h:
 

@@ -9,7 +9,7 @@ lanauth: lanauth.o $(LIBS)
 	$(CC) $(CCFLAGS) -c $<
 
 clean:
-	rm *.o lanauth
+	rm -f *.o lanauth
 
 install:
 	echo "Ok.."

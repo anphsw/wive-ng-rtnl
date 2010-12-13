@@ -1,7 +1,7 @@
 src/gena/libupnp_la-gena_callback2.lo \
   src/gena/libupnp_la-gena_callback2.o: src/gena/gena_callback2.c \
-  ./src/inc/config.h ../autoconfig.h ./src/inc/gena.h ./src/inc/config.h \
-  ./src/inc/service_table.h ./src/inc/uri.h \
+  src/inc/config.h ../autoconfig.h src/inc/gena.h src/inc/config.h \
+  src/inc/service_table.h src/inc/uri.h \
   /opt/Wive-RTNL/lib/include/fcntl.h \
   /opt/Wive-RTNL/lib/include/features.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_config.h \
@@ -9,7 +9,7 @@ src/gena/libupnp_la-gena_callback2.lo \
   /opt/Wive-RTNL/lib/include/bits/fcntl.h \
   /opt/Wive-RTNL/lib/include/sys/types.h \
   /opt/Wive-RTNL/lib/include/bits/types.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h \
   /opt/Wive-RTNL/lib/include/bits/kernel_types.h \
   /opt/Wive-RTNL/lib/include/bits/wordsize.h \
   /opt/Wive-RTNL/lib/include/bits/pthreadtypes.h \
@@ -35,7 +35,7 @@ src/gena/libupnp_la-gena_callback2.lo \
   /opt/Wive-RTNL/lib/include/bits/wchar.h \
   /opt/Wive-RTNL/lib/include/bits/socket.h \
   /opt/Wive-RTNL/lib/include/limits.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h \
   /opt/Wive-RTNL/lib/include/bits/posix1_lim.h \
   /opt/Wive-RTNL/lib/include/bits/local_lim.h \
   /opt/Wive-RTNL/lib/include/linux/limits.h \
@@ -60,34 +60,34 @@ src/gena/libupnp_la-gena_callback2.lo \
   /opt/Wive-RTNL/lib/include/stdio.h \
   /opt/Wive-RTNL/lib/include/bits/uClibc_stdio.h \
   /opt/Wive-RTNL/lib/include/wchar.h \
-  /opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h \
+  /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h \
   /opt/Wive-RTNL/lib/include/bits/stdio_lim.h ../ixml/inc/ixml.h \
   /opt/Wive-RTNL/lib/include/assert.h ../upnp/inc/upnpconfig.h \
-  ../ixml/inc/ixml.h ./src/inc/miniserver.h ./src/inc/sock.h \
-  ./src/inc/util.h ./src/inc/httpparser.h ./src/inc/membuffer.h \
-  ../threadutil/inc/LinkedList.h ../threadutil/inc/FreeList.h \
-  ../threadutil/inc/ithread.h /opt/Wive-RTNL/lib/include/pthread.h \
-  /opt/Wive-RTNL/lib/include/sched.h /opt/Wive-RTNL/lib/include/signal.h \
+  ../ixml/inc/ixml.h src/inc/miniserver.h src/inc/sock.h src/inc/util.h \
+  src/inc/httpparser.h src/inc/membuffer.h ../threadutil/inc/LinkedList.h \
+  ../threadutil/inc/FreeList.h ../threadutil/inc/ithread.h \
+  /opt/Wive-RTNL/lib/include/pthread.h /opt/Wive-RTNL/lib/include/sched.h \
+  /opt/Wive-RTNL/lib/include/signal.h \
   /opt/Wive-RTNL/lib/include/bits/initspin.h \
   /opt/Wive-RTNL/lib/include/bits/sigthread.h \
   ../threadutil/inc/ThreadPool.h ../threadutil/inc/LinkedList.h \
-  /opt/Wive-RTNL/lib/include/sys/timeb.h ./src/inc/client_table.h \
+  /opt/Wive-RTNL/lib/include/sys/timeb.h src/inc/client_table.h \
   ../threadutil/inc/TimerThread.h ../threadutil/inc/ThreadPool.h \
-  ./src/inc/upnp_timeout.h ./src/inc/gena_device.h \
-  ./src/inc/gena_ctrlpt.h ./src/inc/httpparser.h \
-  ./src/inc/httpreadwrite.h ./src/inc/statcodes.h ./src/inc/unixutil.h
+  src/inc/upnp_timeout.h src/inc/gena_device.h src/inc/gena_ctrlpt.h \
+  src/inc/httpparser.h src/inc/httpreadwrite.h src/inc/statcodes.h \
+  src/inc/unixutil.h
 
-./src/inc/config.h:
+src/inc/config.h:
 
 ../autoconfig.h:
 
-./src/inc/gena.h:
+src/inc/gena.h:
 
-./src/inc/config.h:
+src/inc/config.h:
 
-./src/inc/service_table.h:
+src/inc/service_table.h:
 
-./src/inc/uri.h:
+src/inc/uri.h:
 
 /opt/Wive-RTNL/lib/include/fcntl.h:
 
@@ -103,7 +103,7 @@ src/gena/libupnp_la-gena_callback2.lo \
 
 /opt/Wive-RTNL/lib/include/bits/types.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stddef.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stddef.h:
 
 /opt/Wive-RTNL/lib/include/bits/kernel_types.h:
 
@@ -159,7 +159,7 @@ src/gena/libupnp_la-gena_callback2.lo \
 
 /opt/Wive-RTNL/lib/include/limits.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/limits.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/limits.h:
 
 /opt/Wive-RTNL/lib/include/bits/posix1_lim.h:
 
@@ -211,7 +211,7 @@ src/gena/libupnp_la-gena_callback2.lo \
 
 /opt/Wive-RTNL/lib/include/wchar.h:
 
-/opt/Wive-RTNL/toolchain/bin/../lib/gcc/mipsel-linux-uclibc/3.4.2/include/stdarg.h:
+/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/include/stdarg.h:
 
 /opt/Wive-RTNL/lib/include/bits/stdio_lim.h:
 
@@ -223,15 +223,15 @@ src/gena/libupnp_la-gena_callback2.lo \
 
 ../ixml/inc/ixml.h:
 
-./src/inc/miniserver.h:
+src/inc/miniserver.h:
 
-./src/inc/sock.h:
+src/inc/sock.h:
 
-./src/inc/util.h:
+src/inc/util.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/membuffer.h:
+src/inc/membuffer.h:
 
 ../threadutil/inc/LinkedList.h:
 
@@ -255,22 +255,22 @@ src/gena/libupnp_la-gena_callback2.lo \
 
 /opt/Wive-RTNL/lib/include/sys/timeb.h:
 
-./src/inc/client_table.h:
+src/inc/client_table.h:
 
 ../threadutil/inc/TimerThread.h:
 
 ../threadutil/inc/ThreadPool.h:
 
-./src/inc/upnp_timeout.h:
+src/inc/upnp_timeout.h:
 
-./src/inc/gena_device.h:
+src/inc/gena_device.h:
 
-./src/inc/gena_ctrlpt.h:
+src/inc/gena_ctrlpt.h:
 
-./src/inc/httpparser.h:
+src/inc/httpparser.h:
 
-./src/inc/httpreadwrite.h:
+src/inc/httpreadwrite.h:
 
-./src/inc/statcodes.h:
+src/inc/statcodes.h:
 
-./src/inc/unixutil.h:
+src/inc/unixutil.h:
