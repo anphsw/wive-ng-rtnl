@@ -1,6 +1,6 @@
 #!/bin/sh
 # Submit a problem report to a GNATS site.
-# Copyright (C) 1993, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright (C) 1993, 2000, 2001, 2002, 2003, 2007 Free Software Foundation, Inc.
 # Contributed by Brendan Kehoe (brendan@cygnus.com), based on a
 # version written by Heinz G. Seidl (hgs@cygnus.com).
 #
@@ -8,7 +8,7 @@
 #
 # GNU GNATS is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
+# the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 #
 # GNU GNATS is distributed in the hope that it will be useful,
@@ -17,9 +17,8 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU GNATS; see the file COPYING.  If not, write to
-# the Free Software Foundation, 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.
+# along with GNU GNATS; see the file COPYING3.  If not see
+# <http://www.gnu.org/licenses/>.
 
 # The version of this send-pr.
 VERSION=3.113
@@ -31,7 +30,11 @@ SUBMITTER=net
 GNATS_ADDR=gcc-gnats@gcc.gnu.org
 
 # The default release for this host.
-DEFAULT_RELEASE="3.4.2"
+# We have to guess at what program_transform_name might have done.
+# "sed 1q" because neither "head -1" nor "head -n 1" is universal, argh.
+
+DEFAULT_GCC="`echo $0 | sed -e 's/bug//'`"
+DEFAULT_RELEASE="`$DEFAULT_GCC --version | sed 1q`"
 
 # The default organization.
 DEFAULT_ORGANIZATION=
@@ -198,7 +201,7 @@ EOF
 done
 
 # spam does not need to be listed here
-CATEGORIES="ada bootstrap c++ c debug driver fortran inline-asm java libf2c libgcj libobjc libstdc++ middle-end objc other pch preprocessor rtl-optimization target tree-optimization web"
+CATEGORIES="ada bootstrap c++ c debug driver fortran inline-asm java libgcj libobjc libstdc++ middle-end objc other pch preprocessor rtl-optimization target tree-optimization web"
 
 case "$FORMAT" in
   lisp) echo "$CATEGORIES" | \
@@ -341,12 +344,12 @@ SEND-PR: support             I need help with gcc.
 `[ -n "$ARCH" ] && echo Architecture: $ARCH`
 `[ -n "$MACHINE" ] && echo Machine: $MACHINE`
 	$ENVIRONMENT_C
-host: i386-pc-linux-gnu
-build: i386-pc-linux-gnu
+host: i686-pc-linux-gnu
+build: i686-pc-linux-gnu
 target: mipsel-unknown-linux-uclibc
 __EOF__
       cat >> $file << \__EOF__
-configured with: /home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/gcc-3.4.2/configure --prefix=/home/winfred/RT288x_SDK/toolchain/buildroot-gdb --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c,c++ --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --enable-multilib --enable-sjlj-exceptions : (reconfigured) /home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/gcc-3.4.2/configure --prefix=/home/winfred/RT288x_SDK/toolchain/buildroot-gdb --build=i386-pc-linux-gnu --host=i386-pc-linux-gnu --target=mipsel-linux-uclibc --enable-languages=c,c++ --disable-__cxa_atexit --enable-target-optspace --with-gnu-ld --disable-shared --disable-nls --enable-threads --enable-multilib --enable-sjlj-exceptions
+configured with: ../gcc-4.2.4/configure --target=mipsel-linux-uclibc --prefix=/opt/Wive-RTNL/toolchain --includedir=/opt/Wive-RTNL/toolchain/tmp/mipsel-linux-uclibc-toolchain/include --with-gnu-ld --with-gnu-as --disable-tls --disable-libmudflap --disable-libssp --disable-libgomp --disable-threads --with-sysroot=/opt/Wive-RTNL/toolchain --enable-languages=c++
 __EOF__
       cat >> $file << __EOF__
 >Description:

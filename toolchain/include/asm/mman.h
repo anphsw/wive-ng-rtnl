@@ -1,14 +1,12 @@
 /*
- * Linux/MIPS memory manager definitions
- *
  * This file is subject to the terms and conditions of the GNU General Public
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (C) 1995 by Ralf Baechle
+ * Copyright (C) 1995, 1999, 2002 by Ralf Baechle
  */
-#ifndef __ASM_MIPS_MMAN_H
-#define __ASM_MIPS_MMAN_H
+#ifndef _ASM_MMAN_H
+#define _ASM_MMAN_H
 
 /*
  * Protections are chosen from these bits, OR'd together.  The
@@ -16,10 +14,14 @@
  * without PROT_READ.  The only guarantees are that no writing will be
  * allowed without PROT_WRITE and no access will be allowed for PROT_NONE.
  */
-#define PROT_NONE	0x0		/* page can not be accessed */
-#define PROT_READ	0x1		/* page can be read */
-#define PROT_WRITE	0x2		/* page can be written */
-#define PROT_EXEC	0x4		/* page can be executed */
+#define PROT_NONE	0x00		/* page can not be accessed */
+#define PROT_READ	0x01		/* page can be read */
+#define PROT_WRITE	0x02		/* page can be written */
+#define PROT_EXEC	0x04		/* page can be executed */
+/*			0x08		   reserved for PROT_EXEC_NOFLUSH */
+#define PROT_SEM	0x10		/* page may be used for atomic ops */
+#define PROT_GROWSDOWN	0x01000000	/* mprotect flag: extend change to start of growsdown vma */
+#define PROT_GROWSUP	0x02000000	/* mprotect flag: extend change to end of growsup vma */
 
 /*
  * Flags for mmap
@@ -42,6 +44,8 @@
 #define MAP_DENYWRITE	0x2000		/* ETXTBSY */
 #define MAP_EXECUTABLE	0x4000		/* mark it as an executable */
 #define MAP_LOCKED	0x8000		/* pages are locked */
+#define MAP_POPULATE	0x10000		/* populate (prefault) pagetables */
+#define MAP_NONBLOCK	0x20000		/* do not block on IO */
 
 /*
  * Flags for msync
@@ -56,14 +60,18 @@
 #define MCL_CURRENT	1		/* lock all current mappings */
 #define MCL_FUTURE	2		/* lock all future mappings */
 
-#define MADV_NORMAL	0x0		/* default page-in behavior */
-#define MADV_RANDOM	0x1		/* page-in minimum required */
-#define MADV_SEQUENTIAL	0x2		/* read-ahead aggressively */
-#define MADV_WILLNEED	0x3		/* pre-fault pages */
-#define MADV_DONTNEED	0x4		/* discard these pages */
+#define MADV_NORMAL	0		/* no further special treatment */
+#define MADV_RANDOM	1		/* expect random page references */
+#define MADV_SEQUENTIAL	2		/* expect sequential page references */
+#define MADV_WILLNEED	3		/* will need these pages */
+#define MADV_DONTNEED	4		/* don't need these pages */
+
+/* common parameters: try to keep these consistent across architectures */
+#define MADV_REMOVE	9		/* remove these pages & resources */
+#define MADV_DONTFORK	10		/* don't inherit across fork */
+#define MADV_DOFORK	11		/* do inherit across fork */
 
 /* compatibility flags */
-#define MAP_ANON       MAP_ANONYMOUS
-#define MAP_FILE       0
+#define MAP_FILE	0
 
-#endif /* __ASM_MIPS_MMAN_H */
+#endif /* _ASM_MMAN_H */

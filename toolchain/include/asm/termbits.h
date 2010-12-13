@@ -1,12 +1,11 @@
 /*
- * termbits stuff for Linux/MIPS.
- *
  * This file is subject to the terms and conditions of the GNU General Public
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (C) 1995, 1996, 2001 Ralf Baechle
- * Copyright (C) 2001  MIPS Technologies, Inc.
+ * Copyright (C) 1995, 96, 99, 2001, 06 Ralf Baechle
+ * Copyright (C) 1999 Silicon Graphics, Inc.
+ * Copyright (C) 2001 MIPS Technologies, Inc.
  */
 #ifndef _ASM_TERMBITS_H
 #define _ASM_TERMBITS_H
@@ -14,8 +13,8 @@
 #include <linux/posix_types.h>
 
 typedef unsigned char cc_t;
-typedef unsigned long speed_t;
-typedef unsigned long tcflag_t;
+typedef unsigned int speed_t;
+typedef unsigned int tcflag_t;
 
 /*
  * The ABI says nothing about NCC but seems to use NCCS as
@@ -27,11 +26,19 @@ struct termios {
 	tcflag_t c_oflag;		/* output mode flags */
 	tcflag_t c_cflag;		/* control mode flags */
 	tcflag_t c_lflag;		/* local mode flags */
-	/*
-	 * Seems nonexistent in the ABI, but Linux assumes existence ...
-	 */
 	cc_t c_line;			/* line discipline */
 	cc_t c_cc[NCCS];		/* control characters */
+};
+
+struct ktermios {
+	tcflag_t c_iflag;		/* input mode flags */
+	tcflag_t c_oflag;		/* output mode flags */
+	tcflag_t c_cflag;		/* control mode flags */
+	tcflag_t c_lflag;		/* local mode flags */
+	cc_t c_line;			/* line discipline */
+	cc_t c_cc[NCCS];		/* control characters */
+	speed_t c_ispeed;		/* input speed */
+	speed_t c_ospeed;		/* output speed */
 };
 
 /* c_cc characters */
@@ -75,6 +82,7 @@ struct termios {
 #define IXANY	0004000		/* Any character will restart after stop.  */
 #define IXOFF	0010000		/* Enable start/stop input control.  */
 #define IMAXBEL	0020000		/* Ring bell when input queue is full.  */
+#define IUTF8	0040000		/* Input is UTF-8 */
 
 /* c_oflag bits */
 #define OPOST	0000001		/* Perform output processing.  */

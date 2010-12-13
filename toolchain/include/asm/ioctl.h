@@ -1,14 +1,12 @@
 /*
- * Linux ioctl() stuff.
- *
  * This file is subject to the terms and conditions of the GNU General Public
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (C) 1995, 1996, 2001 by Ralf Baechle
+ * Copyright (C) 1995, 96, 99, 2001 Ralf Baechle
  */
-#ifndef __ASM_MIPS_IOCTL_H
-#define __ASM_MIPS_IOCTL_H
+#ifndef _ASM_IOCTL_H
+#define _ASM_IOCTL_H
 
 /*
  * The original linux ioctl numbering scheme was just a general
@@ -62,11 +60,22 @@
 	 ((nr)   << _IOC_NRSHIFT) | \
 	 ((size) << _IOC_SIZESHIFT))
 
+/* provoke compile error for invalid uses of size argument */
+extern unsigned int __invalid_size_argument_for_IOC;
+#define _IOC_TYPECHECK(t) \
+	((sizeof(t) == sizeof(t[1]) && \
+	  sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+	  sizeof(t) : __invalid_size_argument_for_IOC)
+
 /* used to create numbers */
 #define _IO(type,nr)		_IOC(_IOC_NONE,(type),(nr),0)
-#define _IOR(type,nr,size)	_IOC(_IOC_READ,(type),(nr),sizeof(size))
-#define _IOW(type,nr,size)	_IOC(_IOC_WRITE,(type),(nr),sizeof(size))
-#define _IOWR(type,nr,size)	_IOC(_IOC_READ|_IOC_WRITE,(type),(nr),sizeof(size))
+#define _IOR(type,nr,size)	_IOC(_IOC_READ,(type),(nr),(_IOC_TYPECHECK(size)))
+#define _IOW(type,nr,size)	_IOC(_IOC_WRITE,(type),(nr),(_IOC_TYPECHECK(size)))
+#define _IOWR(type,nr,size)	_IOC(_IOC_READ|_IOC_WRITE,(type),(nr),(_IOC_TYPECHECK(size)))
+#define _IOR_BAD(type,nr,size)	_IOC(_IOC_READ,(type),(nr),sizeof(size))
+#define _IOW_BAD(type,nr,size)	_IOC(_IOC_WRITE,(type),(nr),sizeof(size))
+#define _IOWR_BAD(type,nr,size)	_IOC(_IOC_READ|_IOC_WRITE,(type),(nr),sizeof(size))
+
 
 /* used to decode them.. */
 #define _IOC_DIR(nr)		(((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
@@ -82,4 +91,4 @@
 #define IOCSIZE_MASK	(_IOC_SIZEMASK << _IOC_SIZESHIFT)
 #define IOCSIZE_SHIFT	(_IOC_SIZESHIFT)
 
-#endif /* __ASM_MIPS_IOCTL_H */
+#endif /* _ASM_IOCTL_H */
