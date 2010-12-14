@@ -40,14 +40,18 @@ m2uenabled=`nvram_get 2860 M2UEnabled`
 McastPhyMode=`nvram_get 2860 McastPhyMode`
 McastMcs=`nvram_get 2860 McastMcs`
 
-if [ "$McastPhyMode" != "" ]; then
-    iwpriv ra0 set McastPhyMode=$McastPhyMode
-fi
-if [ "$McastMcs" != "" ]; then
-    iwpriv ra0 set  McastMcs="$McastMcs"
-fi
-if [ "$m2uenabled" != "" ]; then
-    iwpriv ra0 set IgmpSnEnable="$m2uenabled"
+if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
+    if [ "$CONFIG_RT2860V2_MCAST_RATE_SPECIFIC" != "" ]; then
+        if [ "$McastPhyMode" != "" ]; then
+	    iwpriv ra0 set McastPhyMode=$McastPhyMode
+	fi
+	if [ "$McastMcs" != "" ]; then
+    	    iwpriv ra0 set  McastMcs="$McastMcs"
+	fi
+    fi
+    if [ "$m2uenabled" != "" ]; then
+	iwpriv ra0 set IgmpSnEnable="$m2uenabled"
+    fi
 fi
 
 ########################################MESH mode param###########################
