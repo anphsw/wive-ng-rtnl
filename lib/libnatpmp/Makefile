@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 2009/06/04 22:27:53 nanard Exp $
+# $Id: Makefile,v 1.14 2010/11/30 11:20:55 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
 # (c) 2007-2009 Thomas Bernard
@@ -53,14 +53,14 @@ clean:
 depend:
 	makedepend -f$(MAKEFILE_LIST) -Y $(OBJS:.o=.c) 2>/dev/null
 
-install:	$(HEADERS) $(STATICLIB) $(SHAREDLIB)
+install:	$(HEADERS) $(STATICLIB) $(SHAREDLIB) natpmpc-shared
 	$(INSTALL) -d $(INSTALLDIRINC)
-	$(INSTALL) --mode=644 $(HEADERS) $(INSTALLDIRINC)
+	$(INSTALL) -m 644 $(HEADERS) $(INSTALLDIRINC)
 	$(INSTALL) -d $(INSTALLDIRLIB)
-	$(INSTALL) --mode=644 $(STATICLIB) $(INSTALLDIRLIB)
-	$(INSTALL) --mode=644 $(SHAREDLIB) $(INSTALLDIRLIB)/$(SONAME)
-	$(INSTALL) --mode=755 natpmpc-shared $(INSTALLDIRBIN)/natpmpc
-	ln --symbolic --force $(SONAME) $(INSTALLDIRLIB)/$(SHAREDLIB)
+	$(INSTALL) -m 644 $(STATICLIB) $(INSTALLDIRLIB)
+	$(INSTALL) -m 644 $(SHAREDLIB) $(INSTALLDIRLIB)/$(SONAME)
+	$(INSTALL) -m 755 natpmpc-shared $(INSTALLDIRBIN)/natpmpc
+	ln -s -f $(SONAME) $(INSTALLDIRLIB)/$(SHAREDLIB)
 
 cleaninstall:
 	$(RM) $(addprefix $(INSTALLDIRINC), $(HEADERS))

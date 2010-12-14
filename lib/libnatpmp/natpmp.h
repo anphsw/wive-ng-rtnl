@@ -1,4 +1,4 @@
-/* $Id: natpmp.h,v 1.12 2009/12/19 12:00:00 nanard Exp $ */
+/* $Id: natpmp.h,v 1.13 2010/04/12 16:15:09 nanard Exp $ */
 /* libnatpmp
  * Copyright (c) 2007-2008, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
@@ -115,6 +115,10 @@ typedef struct {
 /* NATPMP_TRYAGAIN : no data available for the moment. try again later */
 #define NATPMP_TRYAGAIN (-100)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* initnatpmp()
  * initialize a natpmp_t object
  * Return values :
@@ -189,6 +193,10 @@ LIBSPEC int readnatpmpresponseorretry(natpmp_t * p, natpmpresp_t * response);
 
 #ifdef ENABLE_STRNATPMPERR
 LIBSPEC const char * strnatpmperr(int t);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
