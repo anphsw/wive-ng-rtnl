@@ -273,7 +273,7 @@ include $(srctree)/scripts/Kbuild.include
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 
 ARCH		?= $(SUBARCH)
-CROSS_COMPILE	?= ../toolchain/kernel/bin/mipsel-linux-uclibc-
+CROSS_COMPILE	?= ../toolchain/bin/mipsel-linux-uclibc-
 
 # Make variables (CC, etc...)
 
