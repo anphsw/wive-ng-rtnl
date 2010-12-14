@@ -211,21 +211,14 @@ static inline int ip_local_deliver_finish(struct sk_buff *skb)
 
 	rcu_read_lock();
 	{
-		/* Note: See raw.c and net/raw.h, RAWV4_HTABLE_SIZE==MAX_INET_PROTOS */
 		int protocol = skb->nh.iph->protocol;
-		int hash;
-		struct sock *raw_sk;
+		int hash, raw;
 		struct net_protocol *ipprot;
 
 	resubmit:
-		hash = protocol & (MAX_INET_PROTOS - 1);
-		raw_sk = sk_head(&raw_v4_htable[hash]);
+		raw = raw_local_deliver(skb, protocol);
 
-		/* If there maybe a raw socket we must check - if not we
-		 * don't care less
-		 */
-		if (raw_sk && !raw_v4_input(skb, skb->nh.iph, hash))
-			raw_sk = NULL;
+		hash = protocol & (MAX_INET_PROTOS - 1);
 
 		if ((ipprot = rcu_dereference(inet_protos[hash])) != NULL) {
 			int ret;
@@ -244,7 +237,7 @@ static inline int ip_local_deliver_finish(struct sk_buff *skb)
 			}
 			IP_INC_STATS_BH(IPSTATS_MIB_INDELIVERS);
 		} else {
-			if (!raw_sk) {
+			if (!raw) {
 				if (xfrm4_policy_check(NULL, XFRM_POLICY_IN, skb)) {
 					IP_INC_STATS_BH(IPSTATS_MIB_INUNKNOWNPROTOS);
 					icmp_send(skb, ICMP_DEST_UNREACH,
