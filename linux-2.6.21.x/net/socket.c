@@ -1660,6 +1660,8 @@ asmlinkage long sys_setsockopt(int fd, int level, int optname,
 	if (optlen < 0)
 		return -EINVAL;
 
+	if (len > INT_MAX)
+		len = INT_MAX;
 	sock = sockfd_lookup_light(fd, &err, &fput_needed);
 	if (sock != NULL) {
 		err = security_socket_setsockopt(sock, level, optname);
@@ -1720,6 +1722,8 @@ asmlinkage long sys_shutdown(int fd, int how)
 	int err, fput_needed;
 	struct socket *sock;
 
+	if (size > INT_MAX)
+		size = INT_MAX;
 	sock = sockfd_lookup_light(fd, &err, &fput_needed);
 	if (sock != NULL) {
 		err = security_socket_shutdown(sock, how);
