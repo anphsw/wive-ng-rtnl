@@ -41,6 +41,19 @@ rm -rfv romfs/*
 rm -rfv images/*
 
 echo --------------------------------COPY-CONFIG-----------------------------
+##############################FOR-ALL-DEVICES#########################
+cp -fv ./configs/all/config-config	./config/.config
+cp -fv ./configs/all/config-busybox	./user/busybox/.config
+cp -fv ./configs/all/config-lib	./lib/.config
+#######################################################################
+cp -fv ./configs/all/config-cpp		./uClibc++/.config
+cp -fv ./configs/all/config-all		.config
+#######################################################################
+ln -fs vendors/Ralink/RT3052/config.arch config.arch
+ln -fs config/autoconf.h autoconf.h
+#######################################################################
+
+#################################PER-DEVICES###########################
 if [ "$MODE" = "1T1R-16" ] ; then
     cp -fv ./configs/kernel/config-kernel-1t1r-16		./linux/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-1T1R	./etc/default/RT2860_default_novlan
@@ -60,17 +73,6 @@ if [ "$MODE" = "2T2R" ] ; then
     ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
 fi
 
-#######################################################################
-cp -fv ./configs/all/config-config	./config/.config
-cp -fv ./configs/all/config-busybox	./user/busybox/.config
-cp -fv ./configs/all/config-lib	./lib/.config
-#######################################################################
-cp -fv ./configs/all/config-cpp		./uClibc++/.config
-cp -fv ./configs/all/config-all		.config
-#######################################################################
-ln -fs vendors/Ralink/RT3052/config.arch config.arch
-ln -fs config/autoconf.h autoconf.h
-#######################################################################
 
 #for wantusoid`s like.
 if [ "$DOS2UNIX" = "YES" ] ; then
