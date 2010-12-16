@@ -33,8 +33,6 @@ check_nvram()
 	echo "Check firmware update or clean boot."
 	if [ "$IS_WIVE" = "YES" ]; then
 	    $LOG ">>>> NORMAL BOOT <<<<"
-	    $LOG "Backup nvram..."
-	    fs backup_nvram 
 	else
 	    $LOG ">>>> RESTORE NVRAM <<<<"
 	    if [ -f /etc/backup/nvram_backup.dat ]; then
