@@ -2,127 +2,127 @@ EXTRA_CFLAGS = -Idrivers/net/wireless/rt2860v2/include
 
 obj-$(CONFIG_RT2860V2_STA) += rt2860v2_sta.o
 
-rt2860v2_sta-objs += ../common/crypt_md5.o
-rt2860v2_sta-objs += ../common/crypt_sha2.o
-rt2860v2_sta-objs += ../common/crypt_hmac.o
-rt2860v2_sta-objs += ../common/mlme.o
-rt2860v2_sta-objs += ../common/cmm_wep.o
-rt2860v2_sta-objs += ../common/action.o
-rt2860v2_sta-objs += ../common/ba_action.o
-rt2860v2_sta-objs += ../common/cmm_data.o
-rt2860v2_sta-objs += ../common/rtmp_init.o
-rt2860v2_sta-objs += ../common/rtmp_init_inf.o
-rt2860v2_sta-objs += ../common/cmm_tkip.o
-rt2860v2_sta-objs += ../common/cmm_aes.o
-rt2860v2_sta-objs += ../common/cmm_sync.o
-rt2860v2_sta-objs += ../common/cmm_sanity.o
-rt2860v2_sta-objs += ../common/cmm_info.o
-rt2860v2_sta-objs += ../common/cmm_wpa.o
-rt2860v2_sta-objs += ../common/dfs.o
-#rt2860v2_sta-objs += ../common/dfs_mcu.o
-rt2860v2_sta-objs += ../common/spectrum.o
+rt2860v2_sta-y += ../common/crypt_md5.o
+rt2860v2_sta-y += ../common/crypt_sha2.o
+rt2860v2_sta-y += ../common/crypt_hmac.o
+rt2860v2_sta-y += ../common/mlme.o
+rt2860v2_sta-y += ../common/cmm_wep.o
+rt2860v2_sta-y += ../common/action.o
+rt2860v2_sta-y += ../common/ba_action.o
+rt2860v2_sta-y += ../common/cmm_data.o
+rt2860v2_sta-y += ../common/rtmp_init.o
+rt2860v2_sta-y += ../common/rtmp_init_inf.o
+rt2860v2_sta-y += ../common/cmm_tkip.o
+rt2860v2_sta-y += ../common/cmm_aes.o
+rt2860v2_sta-y += ../common/cmm_sync.o
+rt2860v2_sta-y += ../common/cmm_sanity.o
+rt2860v2_sta-y += ../common/cmm_info.o
+rt2860v2_sta-y += ../common/cmm_wpa.o
+rt2860v2_sta-y += ../common/dfs.o
+#rt2860v2_sta-y += ../common/dfs_mcu.o
+rt2860v2_sta-y += ../common/spectrum.o
 
-rt2860v2_sta-objs += ../common/rtmp_timer.o
-rt2860v2_sta-objs += ../common/rt_channel.o
-rt2860v2_sta-objs += ../common/cmm_profile.o
-rt2860v2_sta-objs += ../common/cmm_asic.o
-rt2860v2_sta-objs += ../common/rtmp_swmcu.o
-rt2860v2_sta-objs += ../common/cmm_cfg.o
-rt2860v2_sta-objs += ../common/eeprom.o
-rt2860v2_sta-objs += ../common/ee_flash.o
-
-
-rt2860v2_sta-objs += ../common/cmm_mac_pci.o
-rt2860v2_sta-objs += ../common/cmm_data_pci.o
-rt2860v2_sta-objs += ../common/crypt_aes.o
-rt2860v2_sta-objs += ../common/crypt_arc4.o
-rt2860v2_sta-objs += ../common/cmm_cmd.o
-rt2860v2_sta-objs += ../common/cmm_wpa_adhoc.o
-
-rt2860v2_sta-objs += ../sta/assoc.o
-rt2860v2_sta-objs += ../sta/auth.o
-rt2860v2_sta-objs += ../sta/auth_rsp.o
-rt2860v2_sta-objs += ../sta/sync.o
-rt2860v2_sta-objs += ../sta/sanity.o
-rt2860v2_sta-objs += ../sta/rtmp_data.o
-rt2860v2_sta-objs += ../sta/connect.o
-rt2860v2_sta-objs += ../sta/wpa.o
-rt2860v2_sta-objs += ../sta/sta_cfg.o
-
-rt2860v2_sta-objs +=  ../os/linux/rt_proc.o
-rt2860v2_sta-objs +=  ../os/linux/rt_linux.o
-rt2860v2_sta-objs +=  ../os/linux/rt_profile.o
-rt2860v2_sta-objs +=  ../os/linux/rt_main_dev.o
-rt2860v2_sta-objs +=  ../os/linux/sta_ioctl.o
-rt2860v2_sta-objs += ../common/rt_ate.o
+rt2860v2_sta-y += ../common/rtmp_timer.o
+rt2860v2_sta-y += ../common/rt_channel.o
+rt2860v2_sta-y += ../common/cmm_profile.o
+rt2860v2_sta-y += ../common/cmm_asic.o
+rt2860v2_sta-y += ../common/rtmp_swmcu.o
+rt2860v2_sta-y += ../common/cmm_cfg.o
+rt2860v2_sta-y += ../common/eeprom.o
+rt2860v2_sta-y += ../common/ee_flash.o
 
 
-rt2860v2_sta-objs +=  ../os/linux/rbus_main_dev.o
-rt2860v2_sta-objs +=  ../os/linux/rt_pci_rbus.o
-rt2860v2_sta-objs += ../os/linux/rt_rbus_pci_util.o
+rt2860v2_sta-y += ../common/cmm_mac_pci.o
+rt2860v2_sta-y += ../common/cmm_data_pci.o
+rt2860v2_sta-y += ../common/crypt_aes.o
+rt2860v2_sta-y += ../common/crypt_arc4.o
+rt2860v2_sta-y += ../common/cmm_cmd.o
+rt2860v2_sta-y += ../common/cmm_wpa_adhoc.o
+
+rt2860v2_sta-y += ../sta/assoc.o
+rt2860v2_sta-y += ../sta/auth.o
+rt2860v2_sta-y += ../sta/auth_rsp.o
+rt2860v2_sta-y += ../sta/sync.o
+rt2860v2_sta-y += ../sta/sanity.o
+rt2860v2_sta-y += ../sta/rtmp_data.o
+rt2860v2_sta-y += ../sta/connect.o
+rt2860v2_sta-y += ../sta/wpa.o
+rt2860v2_sta-y += ../sta/sta_cfg.o
+
+rt2860v2_sta-y +=  ../os/linux/rt_proc.o
+rt2860v2_sta-y +=  ../os/linux/rt_linux.o
+rt2860v2_sta-y +=  ../os/linux/rt_profile.o
+rt2860v2_sta-y +=  ../os/linux/rt_main_dev.o
+rt2860v2_sta-y +=  ../os/linux/sta_ioctl.o
+rt2860v2_sta-y += ../common/rt_ate.o
+
+
+rt2860v2_sta-y +=  ../os/linux/rbus_main_dev.o
+rt2860v2_sta-y +=  ../os/linux/rt_pci_rbus.o
+rt2860v2_sta-y += ../os/linux/rt_rbus_pci_util.o
 
 ifeq ($(CONFIG_RALINK_RT2880),y)
-rt2860v2_sta-objs +=  ../chips/rt2880.o
+rt2860v2_sta-y +=  ../chips/rt2880.o
 endif
 
 ifeq ($(CONFIG_RALINK_RT2883),y)
-rt2860v2_sta-objs +=  ../common/rt_rf.o
-rt2860v2_sta-objs +=  ../chips/rt2883.o
+rt2860v2_sta-y +=  ../common/rt_rf.o
+rt2860v2_sta-y +=  ../chips/rt2883.o
 endif
 
 ifeq ($(CONFIG_RALINK_RT3883),y)
-rt2860v2_sta-objs +=  ../common/rt_rf.o
-rt2860v2_sta-objs +=  ../chips/rt3883.o
+rt2860v2_sta-y +=  ../common/rt_rf.o
+rt2860v2_sta-y +=  ../chips/rt3883.o
 endif
 
 ifeq ($(CONFIG_RALINK_RT3052),y)
-rt2860v2_sta-objs +=  ../common/rt_rf.o
-rt2860v2_sta-objs +=  ../chips/rt305x.o
+rt2860v2_sta-y +=  ../common/rt_rf.o
+rt2860v2_sta-y +=  ../chips/rt305x.o
 endif
 
 ifeq ($(CONFIG_RALINK_RT3352),y)
-rt2860v2_sta-objs +=  ../common/rt_rf.o
-rt2860v2_sta-objs +=  ../chips/rt305x.o
+rt2860v2_sta-y +=  ../common/rt_rf.o
+rt2860v2_sta-y +=  ../chips/rt305x.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_STA_LED),y)
-rt2860v2_sta-objs += ../common/led.o
+rt2860v2_sta-y += ../common/led.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_STA_WMM_ACM),y)
-rt2860v2_sta-objs += ../common/acm_edca.o
-rt2860v2_sta-objs += ../common/acm_comm.o
-rt2860v2_sta-objs += ../common/acm_iocl.o
+rt2860v2_sta-y += ../common/acm_edca.o
+rt2860v2_sta-y += ../common/acm_comm.o
+rt2860v2_sta-y += ../common/acm_iocl.o
 endif
 
 #ifeq ($(CONFIG_RT2860V2_STA_WAPI),y)
-#rt2860v2_sta-objs += wapi.obj
-#rt2860v2_sta-objs += wapi_sms4.obj
-#rt2860v2_sta-objs += wapi_crypt.obj
+#rt2860v2_sta-y += wapi.obj
+#rt2860v2_sta-y += wapi_sms4.obj
+#rt2860v2_sta-y += wapi_crypt.obj
 #endif
 
 #ifeq ($(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY),y)
-#rt2860v2_sta-objs += ../os/linux/ap_diversity.o
+#rt2860v2_sta-y += ../os/linux/ap_diversity.o
 #endif
 
 ifeq ($(CONFIG_RT2860V2_STA_DLS),y)
-rt2860v2_sta-objs += ../sta/dls.o
+rt2860v2_sta-y += ../sta/dls.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_STA_WSC),y)
-rt2860v2_sta-objs += ../common/wsc.o
-rt2860v2_sta-objs += ../common/wsc_tlv.o
-rt2860v2_sta-objs += ../common/crypt_biginteger.o
-rt2860v2_sta-objs += ../common/crypt_dh.o
+rt2860v2_sta-y += ../common/wsc.o
+rt2860v2_sta-y += ../common/wsc_tlv.o
+rt2860v2_sta-y += ../common/crypt_biginteger.o
+rt2860v2_sta-y += ../common/crypt_dh.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_STA_VIDEO_TURBINE),y)
-rt2860v2_sta-objs += ../common/cmm_video.o
+rt2860v2_sta-y += ../common/cmm_video.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_STA_TXBF),y)
-rt2860v2_sta-objs +=  ../common/cmm_txbf.o
-rt2860v2_sta-objs +=  ../common/cmm_txbf_cal.o
+rt2860v2_sta-y +=  ../common/cmm_txbf.o
+rt2860v2_sta-y +=  ../common/cmm_txbf_cal.o
 endif
 
 ###################

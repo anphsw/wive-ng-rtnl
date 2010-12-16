@@ -260,7 +260,7 @@ endif
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
-rt$(CHIPSET)sta-objs := \
+rt$(CHIPSET)sta-y := \
 	../../common/crypt_md5.o\
 	../../common/crypt_sha2.o\
 	../../common/crypt_hmac.o\
@@ -298,7 +298,7 @@ rt$(CHIPSET)sta-objs := \
 	../../sta/sta_cfg.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/rtmp_init_inf.o\
 	../../os/linux/rt_profile.o\
 	../../os/linux/sta_ioctl.o\
@@ -308,14 +308,14 @@ endif
 
 #ifdef DOT11_N_SUPPORT
 ifeq ($(HAS_DOT11_N_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/ba_action.o
 endif
 #endif // DOT11_N_SUPPORT //
 
 #ifdef ETH_CONVERT
 ifeq ($(HAS_ETH_CONVERT_SUPPORT), y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/cmm_mat.o \
 	../../common/cmm_mat_iparp.o \
 	../../common/cmm_mat_pppoe.o \
@@ -325,14 +325,14 @@ endif
 
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/wsc.o\
 	../../common/wsc_tlv.o\
 	../../common/crypt_biginteger.o\
 	../../common/crypt_dh.o
 
 ifeq ($(HAS_SAMSUNG_EASY_CONFIG_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/auto_provision.o \
 	../../sta/sta_auto_provision.o
 endif
@@ -340,16 +340,16 @@ endif
 #endif // WSC_INCLUDED //
 
 ifeq ($(HAS_BLOCK_NET_IF),y)
-rt$(CHIPSET)sta-objs += ../../common/netif_block.o
+rt$(CHIPSET)sta-y += ../../common/netif_block.o
 endif
 
 ifeq ($(HAS_QOS_DLS_SUPPORT),y)
-rt$(CHIPSET)sta-objs += ../../sta/dls.o
+rt$(CHIPSET)sta-y += ../../sta/dls.o
 endif
 
 #ifdef DOT11Z_TDLS_SUPPORT
 ifeq ($(HAS_DOT11Z_TDLS_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../sta/tdls.o\
 	../../sta/tdls_ctrl.o\
 	../../sta/tdls_tlv.o\
@@ -359,14 +359,14 @@ endif
 
 #ifdef RT2860
 ifeq ($(CHIPSET),2860)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/cmm_mac_pci.o\
 	../../common/cmm_data_pci.o\
 	../../common/ee_prom.o\
 	../../common/rtmp_mcu.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../os/linux/rt_pci_rbus.o\
 	../../os/linux/rt_rbus_pci_util.o\
 	../../os/linux/pci_main_dev.o
@@ -379,7 +379,7 @@ endif
 
 #ifdef RT2880
 ifeq ($(CHIPSET),2880)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../os/linux/rbus_main_dev.o\
 	../../os/linux/rt_pci_rbus.o\
 	../../os/linux/rt_rbus_pci_util.o\
@@ -395,12 +395,12 @@ endif
 
 
 ifeq ($(HAS_ATE),y)
-rt$(CHIPSET)sta-objs += ../../common/rt_ate.o
+rt$(CHIPSET)sta-y += ../../common/rt_ate.o
 endif
 
 #ifdef WMM_ACM_SUPPORT
 ifeq ($(HAS_WMM_ACM_SUPPORT),y)
-rt$(CHIPSET)sta-objs += ../../common/acm_edca.o\
+rt$(CHIPSET)sta-y += ../../common/acm_edca.o\
 	../../common/acm_comm.o\
 	../../common/acm_iocl.o
 endif
@@ -409,7 +409,7 @@ endif
 
 #ifdef WAPI_SUPPORT
 ifeq ($(HAS_WAPI_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../common/wapi.o
 endif
 #endif // WAPI_SUPPORT //
@@ -419,7 +419,7 @@ endif
 #ifdef CRDA_SUPPORT
 ifeq ($(OSABL),NO)
 ifeq ($(HAS_CFG80211_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
+rt$(CHIPSET)sta-y += \
 	../../os/linux/cfg80211.o
 endif
 endif
@@ -429,7 +429,7 @@ endif
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_APSTA_SUPPORT
-rt$(CHIPSET)apsta-objs := \
+rt$(CHIPSET)apsta-y := \
 	../../common/crypt_md5.o\
 	../../common/crypt_sha2.o\
 	../../common/crypt_hmac.o\
@@ -480,7 +480,7 @@ rt$(CHIPSET)apsta-objs := \
 	../../sta/sta_cfg.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/rtmp_init_inf.o\
 	../../ap/ap_mbss.o\
 	../../os/linux/ap_ioctl.o\
@@ -492,21 +492,21 @@ endif
 
 #ifdef DOT11_N_SUPPORT
 ifeq ($(HAS_DOT11_N_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/ba_action.o
 endif
 #endif // DOT11_N_SUPPORT //
 
 #ifdef RT2860
 ifeq ($(CHIPSET),2860)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/cmm_mac_pci.o\
 	../../common/cmm_data_pci.o\
 	../../common/rtmp_mcu.o\
 	../../common/ee_prom.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../os/linux/rt_pci_rbus.o\
 	../../os/linux/rt_rbus_pci_util.o\
 	../../os/linux/pci_main_dev.o
@@ -519,7 +519,7 @@ endif
 
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/wsc.o\
 	../../common/wsc_tlv.o\
 	../../common/crypt_biginteger.o\
@@ -531,25 +531,25 @@ endif
 
 
 ifeq ($(HAS_WDS),y)
-rt$(CHIPSET)apsta-objs += ../../ap/ap_wds.o
+rt$(CHIPSET)apsta-y += ../../ap/ap_wds.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)ap-objs += \
+rt$(CHIPSET)ap-y += \
 	../../ap/ap_wds_inf.o
 endif
 endif
 
 ifeq ($(HAS_QOS_DLS_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += ../../ap/ap_dls.o
+rt$(CHIPSET)apsta-y += ../../ap/ap_dls.o
 endif
 
 ifeq ($(HAS_IDS_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += ../../ap/ap_ids.o
+rt$(CHIPSET)apsta-y += ../../ap/ap_ids.o
 endif
 
 #ifdef APCLI_SUPPORT
 ifeq ($(HAS_APCLI),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../ap/ap_apcli.o \
 	../../ap/apcli_ctrl.o \
 	../../ap/apcli_sync.o \
@@ -561,7 +561,7 @@ rt$(CHIPSET)apsta-objs += \
 	../../common/cmm_mat_ipv6.o
 
 ifeq ($(OSABL),NO)
-rt$(CHIPSET)ap-objs += \
+rt$(CHIPSET)ap-y += \
 	../../ap/ap_apcli_inf.o
 endif
 endif
@@ -569,7 +569,7 @@ endif
 
 #ifdef ETH_CONVERT
 ifeq ($(HAS_ETH_CONVERT_SUPPORT), y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/cmm_mat.o \
 	../../common/cmm_mat_iparp.o \
 	../../common/cmm_mat_pppoe.o \
@@ -578,17 +578,17 @@ endif
 #endif // ETH_CONVERT //
 
 ifeq ($(HAS_BLOCK_NET_IF),y)
-rt$(CHIPSET)apsta-objs += ../../common/netif_block.o
+rt$(CHIPSET)apsta-y += ../../common/netif_block.o
 endif
 
 ifeq ($(HAS_IGMP_SNOOP_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += ../../common/igmp_snoop.o
+rt$(CHIPSET)apsta-y += ../../common/igmp_snoop.o
 endif
 
 
 #ifdef WAPI_SUPPORT
 ifeq ($(HAS_WAPI_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/libwapi.a\
 	../../common/wapi.o
 endif
@@ -596,14 +596,14 @@ endif
 
 
 ifeq ($(HAS_CLIENT_WDS_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../common/client_wds.o
 endif
 
 #ifdef CRDA_SUPPORT
 ifeq ($(OSABL),NO)
 ifeq ($(HAS_CFG80211_SUPPORT),y)
-rt$(CHIPSET)apsta-objs += \
+rt$(CHIPSET)apsta-y += \
 	../../os/linux/cfg80211.o
 endif
 endif
