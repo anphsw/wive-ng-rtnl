@@ -138,6 +138,7 @@ int getIfIp(const char *ifname, char *if_addr)
 char *getLanIP(char *buf)
 {
 	buf = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+	if(!buf)
 		return buf;
 
 	return NULL;
