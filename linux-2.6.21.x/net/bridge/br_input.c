@@ -51,12 +51,13 @@ static void snoop_MAC(struct net_bridge *br ,struct sk_buff *skb2)
 	uint32_t ip32 =  (uint32_t) skb2->nh.iph->saddr;
 
 	struct br_mac_table_t *tlist;
-	int find = 0;;
+	struct ethhdr *src;
+	int find = 0, i = 0;
+
 	list_for_each_entry(tlist,&(br->br_mac_table.list), list){
 		if ( tlist->ip_addr == ip32){
 			find =1;
-			int i;
-			struct ethhdr * src = eth_hdr(skb2);
+			src = eth_hdr(skb2);
 			for (i =0; i<6; i++)
 				tlist->mac_addr[i] = src->h_source[i];
 			break;
@@ -89,6 +90,9 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	struct net_bridge *br;
 	struct net_bridge_fdb_entry *dst;
         struct sk_buff *skb2;
+#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+	struct igmphdr *ih;
+#endif
 
 	if (!p || p->state == BR_STATE_DISABLED)
 		goto drop;
@@ -117,7 +121,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 				struct sk_buff *skb2;
 				if ((skb2 = skb_clone(skb, GFP_ATOMIC)) != NULL) {
 					skb_pull(skb2, skb2->nh.iph->ihl<<2);
-					struct igmphdr *ih = (struct igmphdr *) skb2->data;
+					ih = (struct igmphdr *) skb2->data;
 					if (ih->type == IGMP_HOST_MEMBERSHIP_REPORT ||		// IGMPv1 REPORT
 						ih->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||	// IGMPv2 REPORT
 						ih->type == IGMPV3_HOST_MEMBERSHIP_REPORT	)	// IGMPv3 REPORT

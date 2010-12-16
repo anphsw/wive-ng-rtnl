@@ -714,12 +714,13 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 	struct net_bridge_fdb_entry *hit_fdb_entry;
 	uint32_t grp_ip32_addr;
 	uint32_t host_ip32_addr;
+	char message[count];
 
-	if(count > MESSAGE_LENGTH) {len = MESSAGE_LENGTH;}
-	else {len = count; }
-	char message[len];
-	if(copy_from_user(message, buf, len))
+        memset(message, 0, sizeof(message));
+	if(copy_from_user(message, buf, count))
 		return -EFAULT;
+
+	len = sizeof(message);
 	message[len-1] = '\0';
 
 	/* split input message that get from user space 
@@ -1051,14 +1052,16 @@ static int proc_write_br_mac (struct file *file, const char *buf,
 	char *action;
 	struct net_bridge *br;
 
-	if(count > MESSAGE_LENGTH) {len = MESSAGE_LENGTH;}
-	else {len = count; }
-	char message[len];
-	if(copy_from_user(message, buf, len))
-		return -EFAULT;
-	message[len-1] = '\0';
+	char message[count];
 
+        memset(message, 0, sizeof(message));
+	if(copy_from_user(message, buf, count))
+		return -EFAULT;
+
+	len = sizeof(message);
+	message[len-1] = '\0';
 	br = (struct net_bridge *) data;
+
 	spin_lock_bh(&br->lock); // bridge lock
 
 	/* ============================  enable br_mac_table ===================*/
@@ -1164,7 +1167,7 @@ static struct net_device *new_bridge_dev(const char *name)
 	br->br_mac_proc->read_proc = proc_read_br_mac;
 	br->br_mac_proc->write_proc = proc_write_br_mac;
 
-    INIT_LIST_HEAD(&br->br_mac_table.list);
+	INIT_LIST_HEAD(&br->br_mac_table.list);
 #endif
 
 	INIT_LIST_HEAD(&br->age_list);
