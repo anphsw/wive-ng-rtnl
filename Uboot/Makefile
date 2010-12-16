@@ -132,7 +132,7 @@ KAIKER_LIBS := $(shell dirname $(CC) $(CFLAGS) -lgcc -print-libgcc-file-name)
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
 ifneq ($(CFG_ENV_IS), IN_FLASH)
-SUBDIRS	= tools
+SUBDIRS	= ../tools/mkimage
 else
 SUBDIRS	=
 endif
@@ -160,7 +160,7 @@ uboot.bin:	u-boot
 
 uboot.img:	uboot.bin
 ifeq ($(CFG_ENV_IS), IN_SPI)
-		./tools/mkimage -A $(ARCH) -T standalone -C none \
+		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
 		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" -d $< $@
 endif
@@ -168,7 +168,7 @@ endif
 #		$(MAKE) -C stage1
 #endif
 ifeq ($(CFG_ENV_IS), IN_NAND)
-		./tools/mkimage -A $(ARCH) -T standalone -C none \
+		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
 		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" -d $< $@
 endif
