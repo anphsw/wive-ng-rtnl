@@ -72,7 +72,7 @@ endif
 endif
 ifeq ($(ARCH),mips)
 # CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mips_4KCle-
-CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-
+CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
 endif
 ifeq ($(ARCH),nios)
 CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/nios-elf-
