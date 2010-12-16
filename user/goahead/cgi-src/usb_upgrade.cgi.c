@@ -117,13 +117,8 @@ void javascriptUpdate(int success)
 {
 	printf("<script language=\"JavaScript\" type=\"text/javascript\">");
 	if(success){
-		printf(" \
-function refresh_all(){	\
-  top.location.href = \"http://%s\"; \
-} \
-function update(){ \
-  self.setTimeout(\"refresh_all()\", %s);\
-}", getLanIP(), REFRESH_TIMEOUT);
+		printf("function refresh_all(){ top.location.href = \"http://%s\"; } function update() \
+			{ self.setTimeout(\"refresh_all()\", %s); }", getLanIP(), REFRESH_TIMEOUT);
 	}else{
 		printf("function update(){ parent.menu.setUnderFirmwareUpload(0);}");
 	}

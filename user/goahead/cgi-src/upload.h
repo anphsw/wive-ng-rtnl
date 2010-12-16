@@ -107,41 +107,6 @@ void *getMemInFile(char *filename, int offset, int len)
 }
 
 /*
- * description: return LAN interface name
- */
-const char* getLanIfName(void)
-{
-	const char *if_name = "br0";
-	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
-
-	if (mode == NULL)
-		return if_name;
-	if (!strncmp(mode, "0", 2))
-		if_name = "br0";
-	else if (!strncmp(mode, "1", 2))
-	{
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
-		if_name = "br0";
-#elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
-		char *num_s = nvram_get(buf, "BssidNum");
-		if (num_s == NULL)
-			return if_name;
-		else if (atoi(num_s) > 1)	// multiple ssid
-			if_name = "br0";
-		else
-			if_name = "ra0";
-#else
-		if_name = "ra0";
-#endif
-	}
-	else if (!strncmp(mode, "2", 2))
-		if_name = "eth2";
-	else if (!strncmp(mode, "3", 2))
-		if_name = "br0";
-	return if_name;
-}
-
-/*
  * arguments: ifname  - interface name
  *            if_addr - a 64-byte buffer to store ip address
  * description: fetch ip address, netmask associated to given interface name
@@ -172,8 +137,9 @@ int getIfIp(const char *ifname, char *if_addr)
 
 char *getLanIP(char *buf)
 {
-	if (getIfIp(getLanIfName(), buf) == 0)
+	buf = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 		return buf;
+
 	return NULL;
 }
 

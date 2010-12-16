@@ -134,6 +134,8 @@ int main(int argc, char** argv)
 	//backup nvram setting and save rwfs
 	system("fs backup_nvram");
 	system("fs save");
+	sync();
+
 /*
  *	Basic event loop. SocketReady returns true when a socket is ready for
  *	service. SocketSelect will block until an event occurs. SocketProcess

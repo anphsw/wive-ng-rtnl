@@ -217,6 +217,8 @@ int main (int argc, char *argv[])
 
 	file_end -= 2;		// back 2 chars.(\r\n);
 
+	sync();
+
     // examination
 #if defined (UPLOAD_FIRMWARE_SUPPORT)
 	if (!check(filename, file_begin, file_end - file_begin, err_msg) )
@@ -224,15 +226,6 @@ int main (int argc, char *argv[])
 		html_error("Not a valid firmware.");
 		goto err;
 	}
-
-	sync();
-
-	/*
-	 * write the current linux version into flash.
-	 */
-	write_flash_kernel_version(filename, file_begin);
-
-	sync();
 
 	// flash write
 	if ( mtd_write_firmware(filename, file_begin, file_end - file_begin) == -1)

@@ -43,22 +43,6 @@ typedef struct image_header {
     uint8_t     ih_name[IH_NMLEN];  /* Image Name       */
 } image_header_t;
 
-
-inline void write_flash_kernel_version(char *file, int offset)
-{
-	char cmd[512];
-	char buf[512];
-	FILE *fp = fopen("/proc/version", "r");
-	fgets(buf, 512, fp);
-	fclose(fp);
-
-	nvram_set(RT2860_NVRAM, "old_firmware",  buf);
-
-//------ no external commadn call - crash at small memory devices use libnvram instead
-//	sprintf(cmd, "nvram_set 2860 old_firmware \"%s\"", buf);
-//	system(cmd);
-}
-
 inline unsigned int getMTDPartSize(char *part)
 {
 	char buf[128], name[32], size[32], dev[32], erase[32];

@@ -667,29 +667,6 @@ int getMemLeftASP(int eid, webs_t wp, int argc, char_t **argv)
 	return -1;
 }
 
-static int FirmwareUpgradePostASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE *fp;
-	char buf[512];
-	char *old_firmware = nvram_get(RT2860_NVRAM, "old_firmware");
-	if(!old_firmware || !strlen(old_firmware) )
-		return 0;
-	fp = fopen("/proc/version", "r");
-	if(!fp)
-		return 0;
-
-	fgets(buf, sizeof(buf), fp);
-	fclose(fp);	
-//	if(!strcmp(buf, old_firmware)){
-//		websWrite(wp, T("alert(\"Warning!The firmware didn't change.\");"));
-//	}else{
-		websWrite(wp, T("alert(\"Firmware Upgrade success!\");"));
-//	}	
-	nvram_set(RT2860_NVRAM, "old_firmware", "");
-
-	return 0;
-}
-
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
     nvram_load_default();
@@ -779,8 +756,5 @@ void formDefineManagement(void)
 #if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 	websFormDefine(T("clearlog"), clearlog);
 #endif
-
-	websAspDefine(T("FirmwareUpgradePostASP"), FirmwareUpgradePostASP);
-
 	formDefineWPS();
 }

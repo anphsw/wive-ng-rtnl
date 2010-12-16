@@ -60,7 +60,6 @@ function initLanguage()
 function onInit()
 {
 	initLanguage();
-	<% FirmwareUpgradePostASP(); %>
 }
 
 </script>
