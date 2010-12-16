@@ -473,12 +473,15 @@ extern volatile uchar	*PktBuf;
 extern volatile uchar	Pkt_Buf_Pool[];
 
 
-#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD)
+#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
 #define GPIO_MDIO_BIT           (1<<7)
 #endif
 
 #define RT2880_PIODIR_R  (RALINK_PIO_BASE + 0X24)
 #define RT2880_PIODATA_R (RALINK_PIO_BASE + 0X20)
+#define RT2880_PIODIR3924_R  (RALINK_PIO_BASE + 0x4c)
+#define RT2880_PIODATA3924_R (RALINK_PIO_BASE + 0x48)
 
 
 #define RT2880_FREEBUF_OFFSET(CURR)  ((int)(((0x0FFFFFFF & (u32)CURR) - (u32) (0x0FFFFFFF & (u32) rt2880_free_buf[0].pbuf)) / 1536))
@@ -732,7 +735,7 @@ static int rt2880_eth_init(struct eth_device* dev, bd_t* bis)
 
 void LANWANPartition(void)
 {
-#ifdef MAC_TO_100PHY_MODE
+#ifdef MAC_TO_100SW_MODE
 	int sw_id = 0;
 	mii_mgr_read(29, 31, &sw_id);
 #ifdef RALINK_DEMO_BOARD_PVLAN
@@ -789,9 +792,10 @@ void LANWANPartition(void)
 		mii_mgr_write(23, 18, 0x3f3f);
 	}
 #endif
-#endif // MAC_TO_100PHY_MODE //
+#endif // MAC_TO_100SW_MODE //
 
-#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD)
+#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x14)) = 0x405555; //enable VLAN
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x50)) = 0x2001; //VLAN id
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x98)) = 0x7f7f; //remove VLAN tag
@@ -809,15 +813,41 @@ void LANWANPartition(void)
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x48)) = 0x1002; //PVID
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x70)) = 0xffff506f; //VLAN member
 #endif
-#endif // (RT3052_ASIC_BOARD || RT3052_FPGA_BOARD)
+#endif // (RT3052_ASIC_BOARD || RT3052_FPGA_BOARD || RT3352_ASIC_BOARD || RT3352_FPGA_BOARD)
 }
 
-static void ResetSWusingGPIO10(void)
+#if defined (P5_RGMII_TO_MAC_MODE) || defined (MAC_TO_VITESSE_MODE)
+static void ResetSWusingGPIOx(void)
 {
-#ifdef GPIO10_RESET_MODE
+#ifdef GPIOx_RESET_MODE
 	u32 value;
 
-#if defined (RT2883_FPGA_BOARD) || defined (RT2883_ASIC_BOARD)
+#if defined (RT2880_FPGA_BOARD) || defined (RT2880_ASIC_BOARD)
+
+	printf("\n GPIO pin 10 reset to switch\n");
+
+	//set spi/gpio share pin to gpio mode
+	value = le32_to_cpu(*(volatile u_long *)RT2880_GPIOMODE_REG);
+	value |= (1 << 1);
+	*(volatile u_long *)(RT2880_GPIOMODE_REG) = cpu_to_le32(value);
+
+	//Set Gpio pin 10 to output
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODIR_R);
+	value |= (1 << 10);
+	*(volatile u_long *)(RT2880_PIODIR_R) = cpu_to_le32(value);
+
+	//Set Gpio pin 10 to low
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
+	value &= ~(1 << 10);
+	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
+	
+	udelay(50000);
+	//Set Gpio pin 10 to high
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
+	value |= (1 << 10);
+	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
+
+#elif defined (RT2883_FPGA_BOARD) || defined (RT2883_ASIC_BOARD)
 	printf("\n GPIO pin 12 reset to switch\n");
 
 	//Set UARTF_SHARED_MODE to 3'b111 bcs we need gpio 12, and SPI to normal mode
@@ -842,10 +872,11 @@ static void ResetSWusingGPIO10(void)
 	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
 	value |= (1 << 12);
 	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
+
 #elif defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
 	printf("\n GPIO pin 36 reset to switch\n");
 
-	//Set UARTF_SHARED_MODE to 3'b111 bcs we need gpio 10, and SPI to normal mode
+	//Set UARTF_SHARED_MODE to 3'b111 bcs we need gpio 36, and SPI to normal mode
 	value = le32_to_cpu(*(volatile u_long *)RT2880_GPIOMODE_REG);
 	value |= (7 << 2);
 	value &= ~(1 << 1);
@@ -867,81 +898,90 @@ static void ResetSWusingGPIO10(void)
 	value |= (1 << 12);
 	*(volatile u_long *)(0xb0000648) = cpu_to_le32(value);
 
-	/*
-	//Set Gpio pin 10 to output
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODIR_R);
-	value |= (1 << 10);
-	*(volatile u_long *)(RT2880_PIODIR_R) = cpu_to_le32(value);
+#elif defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD) 
+	printf("\n Please FIXME... \n");
 
-	//Set Gpio pin 10 to low
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
-	value &= ~(1 << 10);
-	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
-	
+#elif defined (RT3883_ASIC_BOARD)
+	printf("\n GPIO pin 24 reset to switch\n");
+
+	//Set Gpio pin 24 to output
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODIR3924_R);
+	value |= 1;
+	*(volatile u_long *)(RT2880_PIODIR3924_R) = cpu_to_le32(value);
+
+	//Set Gpio pin 24 to low
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA3924_R);
+	value &= ~1;
+	*(volatile u_long *)(RT2880_PIODATA3924_R) = cpu_to_le32(value);
+
 	udelay(50000);
-	//Set Gpio pin 10 to high
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
-	value |= (1 << 10);
-	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
-	*/
+	//Set Gpio pin 24 to high
+	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA3924_R);
+	value |= 1;
+	*(volatile u_long *)(RT2880_PIODATA3924_R) = cpu_to_le32(value);
 #else
-	printf("\n GPIO pin 10 reset to switch\n");
-
-	//set spi/gpio share pin to gpio mode
-	value = le32_to_cpu(*(volatile u_long *)RT2880_GPIOMODE_REG);
-	value |= (1 << 1);
-	*(volatile u_long *)(RT2880_GPIOMODE_REG) = cpu_to_le32(value);
-
-	//Set Gpio pin 10 to output
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODIR_R);
-	value |= (1 << 10);
-	*(volatile u_long *)(RT2880_PIODIR_R) = cpu_to_le32(value);
-
-	//Set Gpio pin 10 to low
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
-	value &= ~(1 << 10);
-	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
-	
-	udelay(50000);
-	//Set Gpio pin 10 to high
-	value = le32_to_cpu(*(volatile u_long *)RT2880_PIODATA_R);
-	value |= (1 << 10);
-	*(volatile u_long *)(RT2880_PIODATA_R) = cpu_to_le32(value);
+#error "Unknown Chip"
 #endif
-	
-#endif // GPIO10_RESET_MODE //
+#endif // GPIOx_RESET_MODE //
 }
+#endif
 
 #if defined (MAC_TO_GIGAPHY_MODE) || defined (P5_MAC_TO_PHY_MODE) 
 #define EV_MARVELL_PHY_ID0 0x0141
 #define EV_MARVELL_PHY_ID1 0x0CC2
 static int isMarvellGigaPHY(void)
 {
-    	u32 phy_id0,phy_id1;
+	u32 phy_id0,phy_id1;
 
-        if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 2, &phy_id0)){
-                printf("\n Read PhyID 0 is Fail!!\n");
-                phy_id0 =0;
-        }
+	if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 2, &phy_id0)){
+		printf("\n Read PhyID 0 is Fail!!\n");
+		phy_id0 =0;
+	}
 
-        if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 3, &phy_id1)){
-                printf("\n Read PhyID 1 is Fail!!\n");
-                phy_id1 = 0;
-        }
+	if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 3, &phy_id1)){
+		printf("\n Read PhyID 1 is Fail!!\n");
+		phy_id1 = 0;
+	}
 
-        if((phy_id0 == EV_MARVELL_PHY_ID0) && (phy_id1 == EV_MARVELL_PHY_ID1))
-                return 1;
+	if((phy_id0 == EV_MARVELL_PHY_ID0) && (phy_id1 == EV_MARVELL_PHY_ID1))
+		return 1;
 
-        return 0;
+	return 0;
 }
 
+#define EV_VTSS_PHY_ID0 0x0007
+#define EV_VTSS_PHY_ID1 0x0421
+static int isVtssGigaPHY(void)
+{
+	u32 phy_id0,phy_id1;
+
+	if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 2, &phy_id0)){
+		printf("\n Read PhyID 0 is Fail!!\n");
+		phy_id0 =0;
+	}
+
+	if( ! mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 3, &phy_id1)){
+		printf("\n Read PhyID 1 is Fail!!\n");
+		phy_id1 = 0;
+	}
+
+	if((phy_id0 == EV_VTSS_PHY_ID0) && (phy_id1 == EV_VTSS_PHY_ID1))
+		return 1;
+
+	return 0;
+}
+
+#endif // MAC_TO_GIGAPHY_MODE || P5_MAC_TO_PHY_MODE //
+
+#if defined (MAC_TO_GIGAPHY_MODE) || defined (P5_MAC_TO_PHY_MODE) || defined (MAC_TO_100PHY_MODE)
 
 void enable_auto_negotiate(void)
 {
 	u32 regValue;
 	u32 addr = MAC_TO_GIGAPHY_MODE_ADDR;	// define in config.mk
 
-#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
+#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	regValue = le32_to_cpu(*(volatile u_long *)(0xb01100C8));
 #else
 	regValue = le32_to_cpu(*(volatile u_long *)(RALINK_FRAME_ENGINE_BASE+RT2880_MDIO_CFG));
@@ -952,7 +992,8 @@ void enable_auto_negotiate(void)
 	regValue |= 0x20000000;				// force to enable MDC/MDIO auto polling.
 	regValue |= (addr << 24);			// setup PHY address for auto polling.
 
-#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
+#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	*(volatile u_long *)(0xb01100C8) = cpu_to_le32(regValue);
 #else
 	*(volatile u_long *)(RALINK_FRAME_ENGINE_BASE+RT2880_MDIO_CFG) = cpu_to_le32(regValue);
@@ -960,7 +1001,7 @@ void enable_auto_negotiate(void)
 
 }
 
-#endif // MAC_TO_GIGAPHY_MODE || P5_MAC_TO_PHY_MODE //
+#endif // defined (MAC_TO_GIGAPHY_MODE) || defined (P5_MAC_TO_PHY_MODE) || defined (MAC_TO_100PHY_MODE) //
 
  int isDMABusy(struct eth_device* dev)
 {
@@ -979,12 +1020,15 @@ void enable_auto_negotiate(void)
 	return 0;
 }
 
-#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) //initial cpu + 3052
+#if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 void rt305x_esw_init(void)
 {
 	u32	i;
+	u32	phy_val=0, phy_val2=0;
 
-	/*                                                                               * FC_RLS_TH=200, FC_SET_TH=160
+	/*                                                                               
+	 * FC_RLS_TH=200, FC_SET_TH=160
 	 * DROP_RLS=120, DROP_SET_TH=80
 	 */
 	RT2882_REG(0xb0110008) = 0xC8A07850;       
@@ -996,67 +1040,141 @@ void rt305x_esw_init(void)
 	RT2882_REG(0xb011009C) = 0x0008a301; //hashing algorithm=XOR48, aging interval=300sec
 	RT2882_REG(0xb011008C) = 0x02404040; 
 
-#if defined (RT3052_ASIC_BOARD)
-	RT2882_REG(0xb01100C8) = 0x20f02b2a; //Ext PHY Addr=0x0 - 0x00f03f3a
-	//RT2882_REG(0xb01100C8) = 0x3f502b28; //Ext PHY Addr=0x1F 
+#if defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD)
+	RT2882_REG(0xb01100C8) = 0x3f502b28; //Ext PHY Addr=0x1F 
 	RT2882_REG(0xb0110084) = 0x00000000;
-#elif defined (RT3052_FPGA_BOARD)
-	//RT2882_REG(0xb01100C8) = 0x20f02b28; //Ext PHY Addr=0x0 
-	//RT2882_REG(0xb0110084) = 0xffdf1f00;
+	RT2882_REG(0xb0110110) = 0x7d000000; //1us cycle number=125 (FE's clock=125Mhz)
+#elif defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD)
+	RT2882_REG(0xb01100C8) = 0x20f02b28; //Ext PHY Addr=0x0 
+	RT2882_REG(0xb0110084) = 0xffdf1f00;
+	RT2882_REG(0xb0110110) = 0x0d000000; //1us cycle number=13 (FE's clock=12.5Mhz)
 
 	/* In order to use 10M/Full on FPGA board. We configure phy capable to 
 	 * 10M Full/Half duplex, so we can use auto-negotiation on PC side */
 	for(i=0;i<5;i++){
-	    //mii_mgr_write(i, 4, 0x0461);   //Capable of 10M Full/Half Duplex, flow control on/off
-	    mii_mgr_write(i, 4, 0x05E1);
-	    mii_mgr_write(i, 9, 0x0200);
+	    mii_mgr_write(i, 4, 0x0461);   //Capable of 10M Full/Half Duplex, flow control on/off
 	    mii_mgr_write(i, 0, 0xB100);   //reset all digital logic, except phy_reg
 	}
-#endif // RT3052_ASIC_BOARD
+#endif
+
+	/* We shall prevent modifying PHY registers if it is FPGA mode */
+#if defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD)
+	rw_rf_reg(0, 26, &phy_val);
+        phy_val2 = (phy_val | (0x3 << 5));
+        rw_rf_reg(1, 26, &phy_val2);
+
+#define RSTCTRL_EPHY_RST	(1<<24)
+	RT2882_REG(RT2880_RSTCTRL_REG)= RSTCTRL_EPHY_RST;
+	RT2882_REG(RT2880_RSTCTRL_REG)= 0;
+
+        rw_rf_reg(1, 26, &phy_val);
 
 	/* to lower down PHY 10Mbps mode power */
 	mii_mgr_write(0, 31, 0x8000);	//---> select local register
-	for(i=0;i<5;i++){
-		mii_mgr_write(i, 26, 0x1601); 	//TX10 waveform coefficient
-		mii_mgr_write(i, 29, 0x7058); 	//TX100/TX10 AD/DA current bias
-		mii_mgr_write(i, 30, 0x0018); 	//TX100 slew rate control
-	}
+        for(i=0;i<5;i++){
+                mii_mgr_write(i, 26, 0x1600);   //TX10 waveform coefficient //LSB=0 disable PHY
+	
+#if defined (RT3052_ASIC_BOARD)
+		rw_rf_reg(0, 0, &phy_val);
+		phy_val = phy_val >> 4;
+		if(phy_val > 0x5) {
+		    mii_mgr_write(i, 29, 0x7015);   //TX100/TX10 AD/DA current bias
+		    mii_mgr_write(i, 30, 0x0038);   //TX100 slew rate control
+		}else {
+		    mii_mgr_write(i, 29, 0x7058);   //TX100/TX10 AD/DA current bias
+		    mii_mgr_write(i, 30, 0x0018);   //TX100 slew rate control
+		}
+#elif defined (RT3352_ASIC_BOARD)
+		mii_mgr_write(i, 29, 0x7015);   //TX100/TX10 AD/DA current bias
+		mii_mgr_write(i, 30, 0x0038);   //TX100 slew rate control
+#else
+#error "Chip is not supported"
+#endif
+        }
 	/* PHY IOT */
 	mii_mgr_write(0, 31, 0x0);   //select global register
         mii_mgr_write(0, 1, 0x4a40); //enlarge agcsel threshold 3 and threshold 2
         mii_mgr_write(0, 2, 0x6254); //enlarge agcsel threshold 5 and threshold 4
         mii_mgr_write(0, 3, 0xa17f); //enlarge agcsel threshold 6
+
+#if defined (RT3052_ASIC_BOARD)
+	rw_rf_reg(0, 0, &phy_val);
+	phy_val = phy_val >> 4;
+	if(phy_val > 0x5) {
+	    mii_mgr_write(0, 12, 0x7eaa);
+	    mii_mgr_write(0, 22, 0x252f); //tune TP_IDL tail and head waveform, enable power down slew rate control
+	    mii_mgr_write(0, 27, 0x2fda); //set PLL/Receive bias current are calibrated
+	}else {
+	    mii_mgr_write(0, 22, 0x052f); //tune TP_IDL tail and head waveform
+	    mii_mgr_write(0, 27, 0x2fce); //set PLL/Receive bias current are calibrated
+	}
+#elif defined (RT3352_ASIC_BOARD)
+	mii_mgr_write(0, 12, 0x7eaa);
+	mii_mgr_write(0, 22, 0x252f); //tune TP_IDL tail and head waveform, enable power down slew rate control
+	mii_mgr_write(0, 27, 0x2fda); //set PLL/Receive bias current are calibrated
+#else
+#error "Chip is not supported"
+#endif
+
         mii_mgr_write(0, 14, 0x65);   //longer TP_IDL tail length
+        mii_mgr_write(0, 16, 0x0684);  //increased squelch pulse count threshold.
         mii_mgr_write(0, 17, 0x0fe0); //set TX10 signal amplitude threshold to minimum
         mii_mgr_write(0, 18, 0x40ba); //set squelch amplitude to higher threshold
-        mii_mgr_write(0, 22, 0x052f); //tune TP_IDL tail and head waveform
-        mii_mgr_write(0, 27, 0x2fc3); //set PLL/Receive bias current are calibrated(RT3350)
         mii_mgr_write(0, 28, 0xc410); //change PLL/Receive bias current to internal(RT3350)
         mii_mgr_write(0, 29, 0x598b); //change PLL bias current to internal(RT3052_MP3)
         mii_mgr_write(0, 31, 0x8000); //select local register
-
-	RT2882_REG(0xb01100C8) = 0x00f03f3a; //Salim
+        for(i=0;i<5;i++){
+                //LSB=1 enable PHY
+                mii_mgr_read(i, 26, &phy_val);
+                phy_val |= 0x0001;
+                mii_mgr_write(i, 26, phy_val);
+        }
+#endif // RT3052_ASIC_BOARD || RT3352_ASIC_BOARD //
 
 #if defined (P5_RGMII_TO_MAC_MODE)
-	RT2882_REG(0xb0000060) &= ~(1<<9);
+	RT2882_REG(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
 	RT2882_REG(0xb01100C8) &= ~(1<<29); //disable port 5 auto-polling
 	RT2882_REG(0xb01100C8) |= 0x3fff; //force 1000M full duplex
 	RT2882_REG(0xb01100C8) &= ~(0xf<<20); //rxclk_skew, txclk_skew = 0
-	RT2882_REG(0xb01100C8) &= ~(0xf<<6);
 #elif defined (P5_MII_TO_MAC_MODE)
+	RT2882_REG(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
 	RT2882_REG(0xb01100C8) &= ~(1<<29); //disable port 5 auto-polling
 	RT2882_REG(0xb01100C8) |= 0x3ffd; //force 100M full duplex
 #elif defined (P5_MAC_TO_PHY_MODE)
+	RT2882_REG(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
+	RT2882_REG(0xb0000060) &= ~(1 << 7); //set MDIO to Normal mode
 	enable_auto_negotiate();
 	if (isMarvellGigaPHY()) {
-		unsigned long my_tmp;
 		printf("\n MARVELL Phy\n");
 		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 20, 0x0ce0);
+#if defined (RT3052_FPGA_BOARD) || defined(RT3352_FPGA_BOARD)
+		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 9, &phy_val);
+		phy_val &= ~(3<<8); //turn off 1000Base-T Advertisement
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 9, phy_val);
+#endif
 		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 0, 0x9140);
+	}
+	if (isVtssGigaPHY()) {
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
+		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 28, &phy_val);
+		printf("GE1 Vitesse Phy reg28 %x --> ",phy_val);
+		phy_val |= (0x3<<12);
+		phy_val &= ~(0x3<<14);
+		printf("%x (without reset PHY)\n", phy_val);
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 28, phy_val);
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
+
+		/*
+		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 0, &phy_val);
+		phy_val |= 1<<15; //PHY Software Reset
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 0, phy_val);
+		*/
 	}
 #elif defined (P5_RMII_TO_MAC_MODE)
 	/* Reserved */
+	RT2882_REG(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
 #else /* Port 5 disabled */
+	RT2882_REG(0xb01100C8) &= ~(1 << 29); //port5 auto polling disable
 	RT2882_REG(0xb0000060) |= (1 << 9); //set RGMII to GPIO mode (GPIO41-GPIO50)
 	RT2882_REG(0xb0000674) = 0xFFF; //GPIO41-GPIO50 output mode
 	RT2882_REG(0xb0000670) = 0x0; //GPIO41-GPIO50 output low
@@ -1083,11 +1201,11 @@ static int rt2880_eth_setup(struct eth_device* dev)
 #if defined (MAC_TO_GIGAPHY_MODE) 
 	enable_auto_negotiate();
 	if (isMarvellGigaPHY()) {
-  #if defined (RT3883_FPGA_BOARD) 
+#if defined (RT3883_FPGA_BOARD) 
 		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
 		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement
 		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
-  #endif
+#endif
 		printf("\n Reset MARVELL phy\n");
 		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
 		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
@@ -1097,42 +1215,86 @@ static int rt2880_eth_setup(struct eth_device* dev)
 		regValue |= 1<<15; //PHY Software Reset
 		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
 	}
-// RT3052 + EmbeddedSW
-#elif defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) 
+	if (isVtssGigaPHY()) {
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
+		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
+		printf("GE1 Vitesse Phy reg28 %x --> ",regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printf("%x (without reset PHY)\n", regValue);
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
+
+		/*
+		mii_mgr_read(MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
+		*/
+	}
+
+// RT305x/RT335x + EmbeddedSW
+#elif defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD) || \
+      defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	rt305x_esw_init();
-
-	/* Initialize atheros Switch */
-	athrs16_phy_setup(0);
-	athrs16_phy_setup(1);
-
-  #ifdef P5_RGMII_TO_MAC_MODE
+#ifdef P5_RGMII_TO_MAC_MODE
 	printf("\n Vitesse giga Mac support \n");
-	ResetSWusingGPIO10();
+	ResetSWusingGPIOx();
 	udelay(125000);
-	//vtss_init();  Ramesh
-  #endif
-// RT2880 + GigaSW
+	vtss_init();
+#endif
+// RT288x/RT388x + GigaSW
 #elif defined (MAC_TO_VITESSE_MODE)
 	printf("\n Vitesse giga Mac support \n");
 	OUTL(dev, cpu_to_le32((u32)(0x1F01DC01)), RT2880_MDIO_CFG);
-	ResetSWusingGPIO10();
+	ResetSWusingGPIOx();
 	udelay(125000);
 	vtss_init();
 
-// RT2880 + 100PHY
-#elif MAC_TO_100PHY_MODE
+// RT288x/RT388x + (10/100 Switch or 100PHY)
+#elif defined (MAC_TO_100SW_MODE) ||  defined (MAC_TO_100PHY_MODE)
+
+#if defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD)
+
+	regValue = RT2882_REG(RT2880_SYSCFG1_REG);
+	regValue &= ~(0xF << 12);
+
+	/* 0=RGMII, 1=MII, 2=RvMii */
+#if defined (RT3883_USE_GE2)
+#if defined (GE_MII_FORCE_100) || defined (GE_MII_AN)
+	regValue |= (0x1 << 14); // GE2 MII Mode
+#elif defined (GE_RVMII_FORCE_100)
+	regValue |= (0x2 << 14); // GE2 RvMII Mode
+#endif
+
+#else //GE1
+#if defined (GE_MII_FORCE_100) || defined (GE_MII_AN)
+	regValue |= (0x1 << 12); // GE1 MII Mode
+#elif defined (GE_RVMII_FORCE_100)
+	regValue |= (0x2 << 12); // GE1 RvMII Mode
+#endif
+
+#endif // RT3883_USE_GE2 //
+
+	RT2882_REG(RT2880_SYSCFG1_REG)=regValue;
+#endif // #if defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) //
+
+#if defined (MAC_TO_100SW_MODE)
 	// due to the flaws of RT2880 GMAC implementation (or IC+ SW ?) we use the
 	// fixed capability instead of auto-polling.
 	OUTL(dev, cpu_to_le32((u32)(0x1F01BC01)), RT2880_MDIO_CFG);
 
 	//force cpu port is 100F
 	mii_mgr_write(29, 22, 0x8420);
-	printf("\n Mac to 100Phy mode \n");
+#elif defined (MAC_TO_100PHY_MODE)
+	enable_auto_negotiate();
+#endif
+
 #endif // MAC_TO_GIGAPHY_MODE //
 
 #ifndef RT3052_PHY_TEST
 	LANWANPartition();
 #endif
+
 
 #ifdef RT3883_USE_GE2
 	wTmp = (u16)dev->enetaddr[0];
@@ -1408,7 +1570,8 @@ static int rt2880_eth_send(struct eth_device* dev, volatile void *packet, int le
 #ifdef RALINK_GDMA_DUP_TX_RING_TEST_FUN
 	static int	tingx_is_free = 0;
 #endif
-#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD)
+#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	char *p=(char *)packet;
 #endif
 
@@ -1422,7 +1585,8 @@ Retry:
 		return (status);
 	}
 
-#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD)
+#if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
 	/* padding to 60 bytes for 3052 */
 #define PADDING_LENGTH 60
 	if (length < PADDING_LENGTH) {
@@ -2551,14 +2715,28 @@ void rt3883_init_gdma(int mode)
 	//reg |= (tmp<<8) | rt2880_pdev->enetaddr[5];
 	reg |= (tmp<<8) | 2;
 	OUTL(rt2880_pdev, reg, RT2880_GDMA2_MAC_ADRL);
+
+	//enable auto polling for both GE1 and GE2
+	reg = INL(rt2880_pdev, 0x04); //MDIO_CFG1
+	reg |= 0x20000000;
+	OUTL(rt2880_pdev, reg, 0x04);
+	reg = INL(rt2880_pdev, 0x18); //MDIO_CFG2
+	reg |= 0x20000000;
+	OUTL(rt2880_pdev, reg, 0x18);
 }
 
 void rt3883_reset_phy(void)
 {
 	//Marvell phy: adj skew and reset both phy connected to ge1 and ge2
 	mii_mgr_write(31, 20, 0x0ce0);
+#ifdef RT3883_FPGA_BOARD
+	mii_mgr_write(31, 9, 0);
+#endif
 	mii_mgr_write(31, 0, 0x9140);
 	mii_mgr_write(30, 20, 0x0ce0);
+#ifdef RT3883_FPGA_BOARD
+	mii_mgr_write(30, 9, 0);
+#endif
 	mii_mgr_write(30, 0, 0x9140);
 }
 
@@ -3989,311 +4167,383 @@ U_BOOT_CMD(
 
 
 #ifdef RALINK_SWITCH_DEBUG_FUN
-#define _REG(x)		(*((volatile u32 *)(x)))
 #define RALINK_VLAN_ID_BASE	(RALINK_ETH_SW_BASE + 0x50)
 #define RALINK_VLAN_MEMB_BASE	(RALINK_ETH_SW_BASE + 0x70)
 
-#define RALINK_ADDRESS_TABLE_SEARCH	_REG(RALINK_ETH_SW_BASE + 0x24)
-#define RALINK_ADDRESS_TABLE_STATUS0	_REG(RALINK_ETH_SW_BASE + 0x28)
-#define RALINK_ADDRESS_TABLE_STATUS1	_REG(RALINK_ETH_SW_BASE + 0x2c)
-#define RALINK_ADDRESS_TABLE_STATUS2	_REG(RALINK_ETH_SW_BASE + 0x30)
-#define RALINK_WT_MAC_AD0		_REG(RALINK_ETH_SW_BASE + 0x34)
-#define RALINK_WT_MAC_AD1		_REG(RALINK_ETH_SW_BASE + 0x38)
-#define RALINK_WT_MAC_AD2		_REG(RALINK_ETH_SW_BASE + 0x3C)
-#define RALINK_WT_MAC_AD2		_REG(RALINK_ETH_SW_BASE + 0x3C)
+#define RALINK_TABLE_SEARCH	(RALINK_ETH_SW_BASE + 0x24)
+#define RALINK_TABLE_STATUS0	(RALINK_ETH_SW_BASE + 0x28)
+#define RALINK_TABLE_STATUS1	(RALINK_ETH_SW_BASE + 0x2c)
+#define RALINK_TABLE_STATUS2	(RALINK_ETH_SW_BASE + 0x30)
+#define RALINK_WT_MAC_AD0	(RALINK_ETH_SW_BASE + 0x34)
+#define RALINK_WT_MAC_AD1	(RALINK_ETH_SW_BASE + 0x38)
+#define RALINK_WT_MAC_AD2	(RALINK_ETH_SW_BASE + 0x3C)
+#define RALINK_WT_MAC_AD2	(RALINK_ETH_SW_BASE + 0x3C)
+
+void table_dump(void)
+{
+	int i, j, value, mac;
+	int vid[16];
+
+	for (i = 0; i < 8; i++) {
+		value = RT2882_REG(RALINK_VLAN_ID_BASE + 4*i);
+		vid[2 * i] = value & 0xfff;
+		vid[2 * i + 1] = (value & 0xfff000) >> 12;
+	}
+
+	RT2882_REG(RALINK_TABLE_SEARCH) = 0x1;
+	printf("hash  port(0:6)  vidx  vid  age   mac-address  filt\n");
+	for (i = 0; i < 0x400; i++) {
+		while(1) {
+			value = RT2882_REG(RALINK_TABLE_STATUS0);
+			if (value & 0x1) { //search_rdy
+				if ((value & 0x70) == 0) {
+					printf("found an unused entry (age = 3'b000), please check!\n");
+					return;
+				}
+				printf("%03x:   ", (value >> 22) & 0x3ff); //hash_addr_lu
+				j = (value >> 12) & 0x7f; //r_port_map
+				printf("%c", (j & 0x01)? '1':'-');
+				printf("%c", (j & 0x02)? '1':'-');
+				printf("%c", (j & 0x04)? '1':'-');
+				printf("%c", (j & 0x08)? '1':'-');
+				printf("%c ", (j & 0x10)? '1':'-');
+				printf("%c", (j & 0x20)? '1':'-');
+				printf("%c", (j & 0x40)? '1':'-');
+				printf("   %2d", (value >> 7) & 0xf); //r_vid
+				printf("  %4d", vid[(value >> 7) & 0xf]);
+				printf("    %1d", (value >> 4) & 0x7); //r_age_field
+				mac = RT2882_REG(RALINK_TABLE_STATUS2);
+				printf("  %08x", mac);
+				mac = RT2882_REG(RALINK_TABLE_STATUS1);
+				printf("%04x", (mac & 0xffff));
+				printf("     %c\n", (value & 0x8)? 'y':'-');
+				if (value & 0x2) {
+					printf("end of table %d\n", i);
+					return;
+				}
+				break;
+			}
+			else if (value & 0x2) { //at_table_end
+				printf("found the last entry %d (not ready)\n", i);
+				return;
+			}
+			udelay(5000);
+		}
+		RT2882_REG(RALINK_TABLE_SEARCH) = 0x2; //search for next address
+	}
+}
+
+void table_add(int argc, char *argv[])
+{
+	int i, j, value, is_filter;
+	char tmpstr[9];
+
+	is_filter = (argv[1][0] == 'f')? 1 : 0;
+	if (!argv[2] || strlen(argv[2]) != 12) {
+		printf("MAC address format error, should be of length 12\n");
+		return;
+	}
+	strncpy(tmpstr, argv[2], 8);
+	tmpstr[8] = '\0';
+	value = simple_strtoul(tmpstr, NULL, 16);
+	RT2882_REG(RALINK_WT_MAC_AD2) = value;
+
+	strncpy(tmpstr, argv[2]+8, 4);
+	tmpstr[4] = '\0';
+	value = simple_strtoul(tmpstr, NULL, 16);
+	RT2882_REG(RALINK_WT_MAC_AD1) = value;
+
+	if (!argv[3] || strlen(argv[3]) != 7) {
+		if (is_filter)
+			argv[3] = "1111111";
+		else {
+			printf("portmap format error, should be of length 7\n");
+			return;
+		}
+	}
+	j = 0;
+	for (i = 0; i < 7; i++) {
+		if (argv[3][i] != '0' && argv[3][i] != '1') {
+			printf("portmap format error, should be of combination of 0 or 1\n");
+			return;
+		}
+		j += (argv[3][i] - '0') * (1 << i);
+	}
+	value = j << 12; //w_port_map
+
+	if (argc > 4) {
+		j = simple_strtoul(argv[4], NULL, 0);
+		if (j < 0 || 15 < j) {
+			printf("wrong member index range, should be within 0~15\n");
+			return;
+		}
+		value += (j << 7); //w_index
+	}
+
+	if (argc > 5) {
+		j = simple_strtoul(argv[5], NULL, 0);
+		if (j < 1 || 7 < j) {
+			printf("wrong age range, should be within 1~7\n");
+			return;
+		}
+		value += (j << 4); //w_age_field
+	}
+	else
+		value += (7 << 4); //w_age_field
+
+	if (is_filter)
+		value |= (1 << 3); //sa_filter
+
+	value += 1; //w_mac_cmd
+	RT2882_REG(RALINK_WT_MAC_AD0) = value;
+
+	for (i = 0; i < 20; i++) {
+		value = RT2882_REG(RALINK_WT_MAC_AD0);
+		if (value & 0x2) { //w_mac_done
+			printf("done.\n");
+			return;
+		}
+		udelay(1000);
+	}
+	if (i == 20)
+		printf("timeout.\n");
+}
+
+void table_del(int argc, char *argv[])
+{
+	int i, j, value;
+	char tmpstr[9];
+
+	if (!argv[2] || strlen(argv[2]) != 12) {
+		printf("MAC address format error, should be of length 12\n");
+		return;
+	}
+	strncpy(tmpstr, argv[2], 8);
+	tmpstr[8] = '\0';
+	value = simple_strtoul(tmpstr, NULL, 16);
+	RT2882_REG(RALINK_WT_MAC_AD2) = value;
+
+	strncpy(tmpstr, argv[2]+8, 4);
+	tmpstr[4] = '\0';
+	value = simple_strtoul(tmpstr, NULL, 16);
+	RT2882_REG(RALINK_WT_MAC_AD1) = value;
+
+	value = 0;
+	if (argc > 3) {
+		j = simple_strtoul(argv[3], NULL, 0);
+		if (j < 0 || 15 < j) {
+			printf("wrong member index range, should be within 0~15\n");
+			return;
+		}
+		value += (j << 7); //w_index
+	}
+
+	value += 1; //w_mac_cmd
+	RT2882_REG(RALINK_WT_MAC_AD0) = value;
+
+	for (i = 0; i < 20; i++) {
+		value = RT2882_REG(RALINK_WT_MAC_AD0);
+		if (value & 0x2) { //w_mac_done
+			if (argv[1] != NULL)
+				printf("done.\n");
+			return;
+		}
+		udelay(1000);
+	}
+	if (i == 20)
+		printf("timeout.\n");
+}
+
+void table_clear(void)
+{
+	int i, value, mac;
+	char v[2][13];
+	char *argv[4];
+
+	memset(argv, 0, sizeof(v));
+	memset(argv, 0, sizeof(argv));
+
+	RT2882_REG(RALINK_TABLE_SEARCH) = 0x1;
+	for (i = 0; i < 0x400; i++) {
+		while(1) {
+			value = RT2882_REG(RALINK_TABLE_STATUS0);
+			if (value & 0x1) { //search_rdy
+				if ((value & 0x70) == 0) {
+					return;
+				}
+				sprintf(v[1], "%d", (value >> 7) & 0xf);
+				mac = RT2882_REG(RALINK_TABLE_STATUS2);
+				sprintf(v[0], "%08x", mac);
+				mac = RT2882_REG(RALINK_TABLE_STATUS1);
+				sprintf(v[0]+8, "%04x", (mac & 0xffff));
+				argv[2] = v[0];
+				argv[3] = v[1];
+				table_del(4, argv);
+				if (value & 0x2) {
+					return;
+				}
+				break;
+			}
+			else if (value & 0x2) { //at_table_end
+				return;
+			}
+			udelay(5000);
+		}
+		RT2882_REG(RALINK_TABLE_SEARCH) = 0x2; //search for next address
+	}
+}
+
+void vlan_dump(void)
+{
+	int i, vid, value;
+
+	printf("idx   vid  portmap\n");
+	for (i = 0; i < 8; i++) {
+		vid = RT2882_REG(RALINK_VLAN_ID_BASE + 4*i);
+		value = RT2882_REG(RALINK_VLAN_MEMB_BASE + 4*(i/2));
+		printf(" %2d  %4d  ", 2*i, vid & 0xfff);
+		if (i%2 == 0) {
+			printf("%c", (value & 0x00000001)? '1':'-');
+			printf("%c", (value & 0x00000002)? '1':'-');
+			printf("%c", (value & 0x00000004)? '1':'-');
+			printf("%c", (value & 0x00000008)? '1':'-');
+			printf("%c", (value & 0x00000010)? '1':'-');
+			printf("%c", (value & 0x00000020)? '1':'-');
+			printf("%c\n", (value & 0x00000040)? '1':'-');
+		}
+		else {
+			printf("%c", (value & 0x00010000)? '1':'-');
+			printf("%c", (value & 0x00020000)? '1':'-');
+			printf("%c", (value & 0x00040000)? '1':'-');
+			printf("%c", (value & 0x00080000)? '1':'-');
+			printf("%c", (value & 0x00100000)? '1':'-');
+			printf("%c", (value & 0x00200000)? '1':'-');
+			printf("%c\n", (value & 0x00400000)? '1':'-');
+		}
+		printf(" %2d  %4d  ", 2*i+1, ((vid & 0xfff000) >> 12));
+		if (i%2 == 0) {
+			printf("%c", (value & 0x00000100)? '1':'-');
+			printf("%c", (value & 0x00000200)? '1':'-');
+			printf("%c", (value & 0x00000400)? '1':'-');
+			printf("%c", (value & 0x00000800)? '1':'-');
+			printf("%c", (value & 0x00001000)? '1':'-');
+			printf("%c", (value & 0x00002000)? '1':'-');
+			printf("%c\n", (value & 0x00004000)? '1':'-');
+		}
+		else {
+			printf("%c", (value & 0x01000000)? '1':'-');
+			printf("%c", (value & 0x02000000)? '1':'-');
+			printf("%c", (value & 0x04000000)? '1':'-');
+			printf("%c", (value & 0x08000000)? '1':'-');
+			printf("%c", (value & 0x10000000)? '1':'-');
+			printf("%c", (value & 0x20000000)? '1':'-');
+			printf("%c\n", (value & 0x40000000)? '1':'-');
+		}
+	}
+}
+
+void vlan_set(int argc, char *argv[])
+{
+	int i, j, value;
+	int idx, vid;
+
+	if (argc != 6) {
+		printf("insufficient arguments!\n");
+		return;
+	}
+	idx = simple_strtoul(argv[3], NULL, 0);
+	if (idx < 0 || 15 < idx) {
+		printf("wrong member index range, should be within 0~15\n");
+		return;
+	}
+	vid = simple_strtoul(argv[4], NULL, 0);
+	if (vid < 0 || 0xfff < vid) {
+		printf("wrong vlan id range, should be within 0~4095\n");
+		return;
+	}
+	if (strlen(argv[5]) != 7) {
+		printf("portmap format error, should be of length 7\n");
+		return;
+	}
+	j = 0;
+	for (i = 0; i < 7; i++) {
+		if (argv[5][i] != '0' && argv[5][i] != '1') {
+			printf("portmap format error, should be of combination of 0 or 1\n");
+			return;
+		}
+		j += (argv[5][i] - '0') * (1 << i);
+	}
+
+	//set vlan identifier
+	value = RT2882_REG(RALINK_VLAN_ID_BASE + 4*(idx/2));
+	if (idx % 2 == 0) {
+		value &= 0xfff000;
+		value |= vid;
+	}
+	else {
+		value &= 0xfff;
+		value |= (vid << 12);
+	}
+	RT2882_REG(RALINK_VLAN_ID_BASE + 4*(idx/2)) = value;
+
+	//set vlan member
+	value = RT2882_REG(RALINK_VLAN_MEMB_BASE + 4*(idx/4));
+	if (idx % 4 == 0) {
+		value &= 0xffffff00;
+		value |= j;
+	}
+	else if (idx % 4 == 1) {
+		value &= 0xffff00ff;
+		value |= (j << 8);
+	}
+	else if (idx % 4 == 2) {
+		value &= 0xff00ffff;
+		value |= (j << 16);
+	}
+	else {
+		value &= 0x00ffffff;
+		value |= (j << 24);
+	}
+	RT2882_REG(RALINK_VLAN_MEMB_BASE + 4*(idx/4)) = value;
+}
 
 int rt3052_switch_command(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
-	u32 value, mac, i, j;
-
-	if (argc == 1 || !strncmp(argv[1], "dump", 5)) { //switch dump
-		RALINK_ADDRESS_TABLE_SEARCH = 0x1; //start searching the address table
-		printf("hash  port(0:6)  vid  age  pxy  in   mac-address\n");
-		for (i = 0; i < 0x400; i++) {
-			while(1) {
-				value = RALINK_ADDRESS_TABLE_STATUS0;
-				if (value & 0x1) { //search_rdy
-					if ((value & 0x70) == 0) {
-						printf("found an unused entry (age = 3'b000), please check!\n");
-						return 1;
-					}
-					printf("%03x:  ", (value >> 22) & 0x3ff); //hash_addr_lu
-					j = (value >> 12) & 0x7f; //r_port_map
-					printf("%c", (j & 0x01)? '1':'-');
-					printf("%c", (j & 0x02)? '1':'-');
-					printf("%c", (j & 0x04)? '1':'-');
-					printf("%c", (j & 0x08)? '1':'-');
-					printf("%c ", (j & 0x10)? '1':'-');
-					printf("%c", (j & 0x20)? '1':'-');
-					printf("%c", (j & 0x40)? '1':'-');
-					printf("    %2d", (value >> 7) & 0xf); //r_vid
-					printf("    %1d", (value >> 4) & 0x7); //r_age_field
-					printf("    %c", (value & 0x8)? 'y':'n'); //r_proxy
-					printf("   %c", (value & 0x4)? 'y':'n'); //r_mc_ingress
-
-					mac = RALINK_ADDRESS_TABLE_STATUS2;
-					printf("  %08x", mac);
-					mac = RALINK_ADDRESS_TABLE_STATUS1;
-					printf("%04x\n", (mac & 0xffff));
-					if (value & 0x2) {
-						printf("end of table %d\n", i);
-						return 0;
-					}
-					break;
-				}
-				else if (value & 0x2) { //at_table_end
-					printf("found the last entry %d (not ready)\n", i);
-					return 1;
-				}
-				udelay(5000);
-			}
-			RALINK_ADDRESS_TABLE_SEARCH = 0x2; //search for next address
-		}
+	if (argc < 2) {
+		printf ("Usage:\n%s\n", cmdtp->usage);
+		return 1;
 	}
-	else if (!strncmp(argv[1], "add", 4)) { //switch add
-		char tmpstr[9];
-
-		if (!argv[2] || strlen(argv[2]) != 12) {
-			printf("MAC address format error, should be of length 12\n");
+	if (argc == 2) {
+		if (!strncmp(argv[1], "dump", 5))
+			table_dump();
+		else if (!strncmp(argv[1], "clear", 6)) {
+			table_clear();
+			printf("done.\n");
+		}
+		else {
+			printf ("Usage:\n%s\n", cmdtp->usage);
 			return 1;
 		}
-		strncpy(tmpstr, argv[2], 8);
-		tmpstr[8] = '\0';
-		value = simple_strtoul(tmpstr, NULL, 16);
-		RALINK_WT_MAC_AD2 = value;
-
-		strncpy(tmpstr, argv[2]+8, 4);
-		tmpstr[4] = '\0';
-		value = simple_strtoul(tmpstr, NULL, 16);
-		RALINK_WT_MAC_AD1 = value;
-
-		if (!argv[3] || strlen(argv[3]) != 7) {
-			printf("portmap format error, should be of length 7\n");
-			return 1;
-		}
-		j = 0;
-		for (i = 0; i < 7; i++) {
-			if (argv[3][i] != '0' && argv[3][i] != '1') {
-				printf("portmap format error, should be of combination of 0 or 1\n");
-				return 1;
-			}
-			j += (argv[3][i] - '0') * (1 << i);
-		}
-		value = j << 12; //w_port_map
-
-		if (argc > 4) {
-			j = simple_strtoul(argv[4], NULL, 0);
-			if (j < 0 || 15 < j) {
-				printf("wrong member index range, should be within 0~15\n");
-				return 1;
-			}
-			value += (j << 7); //w_index
-		}
-
-		if (argc > 5) {
-			j = simple_strtoul(argv[5], NULL, 0);
-			if (j < 1 || 7 < j) {
-				printf("wrong age range, should be within 1~7\n");
-				return 1;
-			}
-			value += (j << 4); //w_age_field
-		}
-		else
-			value += (7 << 4); //w_age_field
-
-		value += 1; //w_mac_cmd
-		RALINK_WT_MAC_AD0 = value;
-
-		for (i = 0; i < 20; i++) {
-			value = RALINK_WT_MAC_AD0;
-			if (value & 0x2) { //w_mac_done
-				printf("done.\n");
-				return 0;
-			}
-			udelay(1000);
-		}
-		if (i == 20)
-			printf("timeout.\n");
 	}
-	else if (!strncmp(argv[1], "del", 4)) { //switch del
-		char tmpstr[9];
-
-		if (!argv[2] || strlen(argv[2]) != 12) {
-			printf("MAC address format error, should be of length 12\n");
-			return 1;
-		}
-		strncpy(tmpstr, argv[2], 8);
-		tmpstr[8] = '\0';
-		value = simple_strtoul(tmpstr, NULL, 16);
-		RALINK_WT_MAC_AD2 = value;
-
-		strncpy(tmpstr, argv[2]+8, 4);
-		tmpstr[4] = '\0';
-		value = simple_strtoul(tmpstr, NULL, 16);
-		RALINK_WT_MAC_AD1 = value;
-
-		value = 0;
-		if (argc > 3) {
-			j = simple_strtoul(argv[3], NULL, 0);
-			if (j < 0 || 15 < j) {
-				printf("wrong member index range, should be within 0~15\n");
-				return 1;
-			}
-			value += (j << 7); //w_index
-		}
-
-		value += 1; //w_mac_cmd
-		RALINK_WT_MAC_AD0 = value;
-
-		for (i = 0; i < 20; i++) {
-			value = RALINK_WT_MAC_AD0;
-			if (value & 0x2) { //w_mac_done
-				printf("done.\n");
-				return 0;
-			}
-			udelay(1000);
-		}
-		if (i == 20)
-			printf("timeout.\n");
-	}
+	else if (!strncmp(argv[1], "add", 4))
+		table_add(argc, argv);
+	else if (!strncmp(argv[1], "filt", 5))
+		table_add(argc, argv);
+	else if (!strncmp(argv[1], "del", 4))
+		table_del(argc, argv);
 	else if (!strncmp(argv[1], "vlan", 5)) {
-		if (argc > 2 && !strncmp(argv[2], "set", 4)) { //vlan set
-			u32 idx, vid, pmap;
-
-			if (argc != 6) {
-				printf("insufficient arguments!\n");
-				return 1;
-			}
-			idx = simple_strtoul(argv[3], NULL, 0);
-			if (idx < 0 || 15 < idx) {
-				printf("wrong member index range, should be within 0~15\n");
-				return 1;
-			}
-			vid = simple_strtoul(argv[4], NULL, 0);
-			if (vid < 0 || 0xfff < vid) {
-				printf("wrong vlan id range, should be within 0~4095\n");
-				return 1;
-			}
-			if (strlen(argv[5]) != 7) {
-				printf("portmap format error, should be of length 7\n");
-				return 1;
-			}
-			j = 0;
-			for (i = 0; i < 7; i++) {
-				if (argv[5][i] != '0' && argv[5][i] != '1') {
-					printf("portmap format error, should be of combination of 0 or 1\n");
-					return 1;
-				}
-				j += (argv[5][i] - '0') * (1 << i);
-			}
-
-			//set vlan identifier
-			value = _REG(RALINK_VLAN_ID_BASE + 4*(idx/2));
-			if (idx % 2 == 0) {
-				value &= 0xfff000;
-				value |= vid;
-			}
-			else {
-				value &= 0xfff;
-				value |= (vid << 12);
-			}
-			_REG(RALINK_VLAN_ID_BASE + 4*(idx/2)) = value;
-
-			//set vlan member
-			value = _REG(RALINK_VLAN_MEMB_BASE + 4*(idx/4));
-			if (idx % 4 == 0) {
-				value &= 0xffffff00;
-				value |= j;
-			}
-			else if (idx % 4 == 1) {
-				value &= 0xffff00ff;
-				value |= (j << 8);
-			}
-			else if (idx % 4 == 2) {
-				value &= 0xff00ffff;
-				value |= (j << 16);
-			}
-			else {
-				value &= 0x00ffffff;
-				value |= (j << 24);
-			}
-			_REG(RALINK_VLAN_MEMB_BASE + 4*(idx/4)) = value;
-		}
-		else { //vlan dump
-			printf("idx   vid  portmap\n");
-			for (i = 0; i < 8; i++) {
-				u32 vid = _REG(RALINK_VLAN_ID_BASE + 4*i);
-				value = _REG(RALINK_VLAN_MEMB_BASE + 4*(i/2));
-				printf(" %2d  %4d  ", 2*i, vid & 0xfff);
-				if (i%2 == 0) {
-					printf("%c", (value & 0x00000001)? '1':'-');
-					printf("%c", (value & 0x00000002)? '1':'-');
-					printf("%c", (value & 0x00000004)? '1':'-');
-					printf("%c", (value & 0x00000008)? '1':'-');
-					printf("%c", (value & 0x00000010)? '1':'-');
-					printf("%c", (value & 0x00000020)? '1':'-');
-					printf("%c\n", (value & 0x00000040)? '1':'-');
-				}
-				else {
-					printf("%c", (value & 0x00010000)? '1':'-');
-					printf("%c", (value & 0x00020000)? '1':'-');
-					printf("%c", (value & 0x00040000)? '1':'-');
-					printf("%c", (value & 0x00080000)? '1':'-');
-					printf("%c", (value & 0x00100000)? '1':'-');
-					printf("%c", (value & 0x00200000)? '1':'-');
-					printf("%c\n", (value & 0x00400000)? '1':'-');
-				}
-				printf(" %2d  %4d  ", 2*i+1, ((vid & 0xfff000) >> 12));
-				if (i%2 == 0) {
-					printf("%c", (value & 0x00000100)? '1':'-');
-					printf("%c", (value & 0x00000200)? '1':'-');
-					printf("%c", (value & 0x00000400)? '1':'-');
-					printf("%c", (value & 0x00000800)? '1':'-');
-					printf("%c", (value & 0x00001000)? '1':'-');
-					printf("%c", (value & 0x00002000)? '1':'-');
-					printf("%c\n", (value & 0x00004000)? '1':'-');
-				}
-				else {
-					printf("%c", (value & 0x01000000)? '1':'-');
-					printf("%c", (value & 0x02000000)? '1':'-');
-					printf("%c", (value & 0x04000000)? '1':'-');
-					printf("%c", (value & 0x08000000)? '1':'-');
-					printf("%c", (value & 0x10000000)? '1':'-');
-					printf("%c", (value & 0x20000000)? '1':'-');
-					printf("%c\n", (value & 0x40000000)? '1':'-');
-				}
-			}
-		}
+		if (argc < 3)
+			printf ("Usage:\n%s\n", cmdtp->usage);
+		if (!strncmp(argv[2], "dump", 5))
+			vlan_dump();
+		else if (!strncmp(argv[2], "set", 4))
+			vlan_set(argc, argv);
+		else
+			printf ("Usage:\n%s\n", cmdtp->usage);
 	}
-	else if (!strncmp(argv[1], "load", 5)) {
-		if (argc != 3) {
-			printf("insufficient arguments!\n");
-			return 1;
-		}
-		i = simple_strtoul(argv[2], NULL, 0);
-#define S_REG(x,y) _REG(x) = y; printf(#x " = " #y "\n");
-
-		/* switch config */
-		if (i == 1) {
-			S_REG(0xb0110008, 0xffc86e5a);
-			S_REG(0xb0110014, 0xffff5555);
-			S_REG(0xb0110084, 0xffdf1f00);
-			S_REG(0xb0110090, 0x00007f7f);
-			S_REG(0xb0110098, 0x00007fff); //disable VLAN
-			S_REG(0xb011009C, 0x0008a100); //bit[3:0]=0001=300 sec, 0000=Disable aging
-			S_REG(0xb01100C8, 0x3FF02b28); //Change polling Ext PHY Addr=0x0
-			S_REG(0xb01100e4, 0x40000000);
-		}
-
-		/* cpu config */
-		if (i == 2) {
-			S_REG(0xb0100020, 0x00010000);
-			S_REG(0xb0110008, 0xffc86e5a);
-			S_REG(0xb0110014, 0xffff5555);
-			S_REG(0xb0110098, 0x00007fbf); //Change polling Ext PHY Addr=0x0
-			S_REG(0xb01100C8, 0x3FF02b28); //Change polling Ext PHY Addr=0x0
-			S_REG(0xb01100e4, 0x40000000);
-		}
+	else {
+		printf ("Usage:\n%s\n", cmdtp->usage);
+		return 1;
 	}
 	return 0;
 }
@@ -4301,11 +4551,15 @@ int rt3052_switch_command(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 U_BOOT_CMD(
  	switch,	6,	1,	rt3052_switch_command,
  	"switch  - rt3052 embedded switch command\n",
-	"switch load [num] - load switch configurations\n"
  	"switch dump - dump switch table\n"
+	"switch clear - clear switch table\n"
  	"switch add [mac] [portmap] - add an entry to switch table\n"
  	"switch add [mac] [portmap] [vlan idx] - add an entry to switch table\n"
  	"switch add [mac] [portmap] [vlan idx] [age] - add an entry to switch table\n"
+ 	"switch filt [mac] - add an SA filtering entry (with portmap 1111111) to switch table\n"
+ 	"switch filt [mac] [portmap] - add an SA filtering entry to switch table\n"
+ 	"switch filt [mac] [portmap] [vlan idx] - add an SA filtering entry to switch table\n"
+ 	"switch filt [mac] [portmap] [vlan idx] [age] - add an SA filtering entry to switch table\n"
  	"switch del [mac] - delete an entry from switch table\n"
  	"switch del [mac] [vlan idx] - delete an entry from switch table\n"
 	"switch vlan dump - dump switch table\n"

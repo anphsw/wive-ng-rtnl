@@ -184,10 +184,11 @@ extern void flash_read_factory_serial(flash_info_t * info, void * buffer, int of
 #define MX_ID_LV320T	0x22A722A7	/* 29LV320T by Macronix, AMD compatible */
 #define AMD_ID_LV320B	0x000022F9	/* 29LV320B ID (32 M, bottom boot sect) */
 #define MX_ID_LV320B	0x22A822A8	/* 29LV320B by Macronix, AMD compatible */
-#define MX_ID_LV320BT   0x000022A8    /* 4 M x 16 T/B add by kaiker  */
-#define MX_ID_LV160B    0x00002249    /* 2 M x 16 B  add by steven */
-#define EN_ID_29LV641L   0x000022A8 /* 8 M x 16 T/B add by kaiker  */
-#define EN_ID_29LV640H   0x00002228 /* 8 M x 16 T/B add by kaiker  */
+#define MX_ID_LV320BT	0x000022A8	/* 4 M x 16 T/B */
+#define MX_ID_LV160B	0x00002249	/* 2 M x 16 B */
+#define MX_ID_LV160T	0x000022C4	/* 2 M x 16 B */
+#define EN_ID_29LV641L	0x000022A8	/* 8 M x 16 T/B */
+#define EN_ID_29LV640H	0x00002228	/* 8 M x 16 T/B */
 #define MX_ID_29LV640DB 0x000022CB	/* 29LV640DBTC (64M, bottom boot sect) */
 #define MX_ID_29LV128DB 0x0000227A	/* 29LV128DBTC (128M, bottom boot sect) */
 
@@ -394,6 +395,7 @@ extern void flash_read_factory_serial(flash_info_t * info, void * buffer, int of
 #define FLASH_MXLV320B  0x00AB		/* MX  29LV320MB   ( 32M = 2M x 16 )	*/
 #define FLASH_MXLV320BT 0x22A8     /* Mx 29LV4320B/T  (4M x 16) */
 #define FLASH_MXLV160B  0x2249		/* Mx 29LV160B  (2M x 16) */
+#define FLASH_MXLV160T  0x22C4		/* Mx 29LV160T  (2M x 16) */
 #define FLASH_MXLV320T	0x00AC		/* MX  29LV320MT   ( 32M = 2M x 16 )	*/
 #define FLASH_28F256L18T 0x00B0		/* Intel 28F256L18T 256M = 128K x 255 + 32k x 4 */
 #define FLASH_AMDL163T	0x00B2		/* AMD AM29DL163T (2M x 16 )			*/

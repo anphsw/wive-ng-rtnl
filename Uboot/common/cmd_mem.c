@@ -1015,7 +1015,7 @@ int do_mem_crc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 }
 #endif
 #else	/* CONFIG_CRC32_VERIFY */
-#ifdef RT2880_U_BOOT_CMD_OPEN
+#if defined(RT2880_U_BOOT_CMD_OPEN) || defined(RALINK_USB)
 
 int do_mem_crc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
@@ -1118,8 +1118,7 @@ U_BOOT_CMD(
 );
 #endif
 #else	/* CONFIG_CRC32_VERIFY */
-#ifdef RT2880_U_BOOT_CMD_OPEN
-
+#if defined(RT2880_U_BOOT_CMD_OPEN) || defined(RALINK_USB)
 U_BOOT_CMD(
 	crc32,    5,    1,     do_mem_crc,
 	"crc32   - checksum calculation\n",

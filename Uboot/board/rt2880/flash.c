@@ -284,8 +284,18 @@ static void flash_get_offsets(ulong base, flash_info_t *info)
 			info->start[3] = info->start[2] + 0x2000; //8K
 			info->start[4] = info->start[3] + 0x8000; //32K
 			for (i = 5; i < info->sector_count; i++) {
-			    info->start[i] = info->start[4] + ( (i-4) * 0x00010000);//64K
+				info->start[i] = info->start[4] + ( (i-4) * 0x00010000);//64K
 			}
+	}
+	else if ((info->flash_id & FLASH_VENDMASK) == FLASH_MAN_MX
+		&& ((info->flash_id & FLASH_TYPEMASK) == MX_ID_LV160T)) {
+			for (i = 0; i < info->sector_count - 4; i++) {
+				info->start[i] = base + (i * 0x10000);//64K
+			}
+			info->start[31] = info->start[30] + 0x10000; //32K
+			info->start[32] = info->start[31] + 0x8000; //8K
+			info->start[33] = info->start[32] + 0x2000; //8K
+			info->start[34] = info->start[33] + 0x2000; //16K
 	}
 	else /*  if ((info->flash_id & FLASH_VENDMASK) == FLASH_MAN_AMD
 		&& (info->flash_id & FLASH_TYPEMASK) == EN_ID_29LV641L) */
@@ -579,7 +589,8 @@ ulong flash_get_size(FPWV *addr, flash_info_t *info)
 			break;				/* => 4 or 8 MB		*/
 
 		case (FPW)MX_ID_LV160B:
-			info->flash_id += MX_ID_LV160B;
+		case (FPW)MX_ID_LV160T:
+			info->flash_id += addr[1];
 			info->sector_count = 35;
 			info->size = 0x00200000 * (sizeof(FPW)/2);
 		//	printf("\n MX_ID_LV160B, Size = %08x bytes\n",info->size);
@@ -673,6 +684,7 @@ int erase_all_chip(flash_info_t *info, int s_first, int s_last)
 	case FLASH_AM640U:
 	case FLASH_MXLV320BT:
 	case FLASH_MXLV160B:
+	case FLASH_MXLV160T:
 	case AMD_ID_LV320B:	
 	case EN_ID_29LV640H:	
 		break;
@@ -799,6 +811,7 @@ int	flash_erase(flash_info_t *info, int s_first, int s_last)
 	case FLASH_AM640U:
 	case FLASH_MXLV320BT:
 	case FLASH_MXLV160B:
+	case FLASH_MXLV160T:
 	case AMD_ID_LV320B:
 	case EN_ID_29LV640H:
 	case MX_ID_29LV640DB:
@@ -1080,7 +1093,7 @@ static int write_word_amd(flash_info_t *info, FPWV *dest, FPW data)
 	int res = 0;	/* result, assume success	*/
 	FPWV *base;		/* first address in flash bank	*/
 
-#if defined (RT2880_ASIC_BOARD) || defined (RT2883_ASIC_BOARD) || defined (RT3052_ASIC_BOARD)
+#if defined (RT2880_ASIC_BOARD) || defined (RT2883_ASIC_BOARD) || defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD)
 	start = get_timer(0);
 	
 	while(*dest != 0xFFFF)  {

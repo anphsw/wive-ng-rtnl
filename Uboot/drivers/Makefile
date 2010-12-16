@@ -33,13 +33,31 @@ OBJS    = athrs16_phy.o rt2880_eth.o i2c_drv.o mii_mgr.o
 ifeq ($(CFG_ENV_IS), IN_FLASH)
 OBJS	+= spi_drv.o 
 endif
+
 ifeq ($(CFG_ENV_IS), IN_SPI)
 OBJS	+= spi_flash.o 
-endif
-ifeq ($(CFG_ENV_IS), IN_NAND)
-OBJS	+= nand_flash.o 
+ ifeq ($(RT3883_MP), y)
+ OBJS	+= spi_drv.o 
+ endif
+ ifeq ($(RT3352_MP), y)
+ OBJS	+= spi_drv.o 
+ endif
 endif
 
+ifeq ($(CFG_ENV_IS), IN_NAND)
+OBJS	+= nand_flash.o 
+ ifeq ($(RT3883_MP), y)
+ OBJS	+= spi_drv.o 
+ endif
+endif
+
+ifeq ($(RALINK_OHCI), ON)
+OBJS	+= ohci-hcd.o
+endif
+
+ifeq ($(RALINK_EHCI), ON)
+OBJS	+= ehci-hcd.o ehci-ra.o
+endif
 
 all:	$(LIB)
 

@@ -13,6 +13,7 @@
 #define ra_dbg(args...)
 /*#define ra_dbg(args...) do { if (1) printf(args); } while(0)*/
 
+#define READ_STATUS_RETRY	1000
 #define CLEAR_INT_STATUS()	ra_outl(NFC_INT_ST, ra_inl(NFC_INT_ST))
 #define NFC_TRANS_DONE()	(ra_inl(NFC_INT_ST) & INT_ST_ND_DONE)
 
@@ -45,7 +46,7 @@ static int nfc_read_status(char *status)
 	 * 3. SUGGESTION: call nfc_read_status() from nfc_wait_ready(),
 	 * that is aware about caller (in sementics) and has snooze plused nfc ND_DONE.
 	 */
-	retry = 100; 
+	retry = READ_STATUS_RETRY; 
 	do {
 		nfc_st = ra_inl(NFC_STATUS);
 		int_st = ra_inl(NFC_INT_ST);
@@ -184,14 +185,14 @@ static int nfc_all_reset(void)
 
 	CLEAR_INT_STATUS();
 
-	retry = 100;
+	retry = READ_STATUS_RETRY;
 	while ((ra_inl(NFC_INT_ST) & 0x02) != 0x02 && retry--);
 	if (retry <= 0) {
 		printf("%s: clean buffer fail\n", __func__);
 		return -1;
 	}
 
-	retry = 100;
+	retry = READ_STATUS_RETRY;
 	while ((ra_inl(NFC_STATUS) & 0x1) != 0x0 && retry--) { //fixme, controller is busy ?
 		udelay(1);
 	}
@@ -207,6 +208,9 @@ unsigned long ranand_init(void)
 {
 	//maks sure gpio-0 is input
 	ra_outl(RALINK_PIO_BASE+0x24, ra_inl(RALINK_PIO_BASE+0x24) & ~0x01);
+
+	//set WP to high
+	ra_or(NFC_CTRL, 0x01);
 
 	if (nfc_all_reset() != 0)
 		return -1;
@@ -229,7 +233,7 @@ static int _ra_nand_pull_data(char *buf, int len)
 	unsigned int ret_data;
 	int ret_size;
 
-	retry = 100;
+	retry = READ_STATUS_RETRY;
 	while (len > 0) {
 		int_st = ra_inl(NFC_INT_ST);
 		if (int_st & INT_ST_RX_BUF_RDY) {
@@ -669,6 +673,8 @@ int ranand_read(char *buf, unsigned int from, int datalen)
 		}
 #endif
 
+		if (datalen > (CFG_PAGESIZE+CFG_PAGE_OOBSIZE) && (page & 0x1f) == 0)
+			printf(".");
 		ret = nfc_read_page(buffers, page);
 		//FIXME, something strange here, some page needs 2 more tries to guarantee read success.
 		if (ret) {
@@ -724,6 +730,8 @@ int ranand_read(char *buf, unsigned int from, int datalen)
 		// address go further to next page, instead of increasing of length of write. This avoids some special cases wrong.
 		addr = (page+1) << CONFIG_PAGE_SIZE_BIT;
 	}
+	if (datalen > (CFG_PAGESIZE+CFG_PAGE_OOBSIZE))
+		printf("\n");
 	return retlen;
 }
 
@@ -920,6 +928,7 @@ try_next_1:
 				return -1;
 			if (ranand_write(buf, offs, aligned_size) != aligned_size)
 				return -1;
+			printf(".");
 
 			buf += aligned_size;
 			offs += aligned_size;
@@ -939,7 +948,12 @@ int ralink_nand_command(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	int len, i;
 	u8 *p = NULL;
 
-	if (!strncmp(argv[1], "read", 5)) {
+	if (!strncmp(argv[1], "id", 3)) {
+		u8 id[4];
+		i = nfc_read_raw_data(0x90, 0, 0x410141, id, 4);
+		printf("flash id: %x %x %x %x\n", id[0], id[1], id[2], id[3]);
+	}
+	else if (!strncmp(argv[1], "read", 5)) {
 		addr = (unsigned int)simple_strtoul(argv[2], NULL, 16);
 		len = (int)simple_strtoul(argv[3], NULL, 16);
 		p = (u8 *)malloc(len);
@@ -983,6 +997,9 @@ U_BOOT_CMD(
 	nand,	4,	1, 	ralink_nand_command,
 	"nand	- nand command\n",
 	"nand usage:\n"
+	"  nand id\n"
 	"  nand read <addr> <len>\n"
+	"  nand page <number>\n"
+	"  nand erase <addr> <len>\n"
 );
 #endif

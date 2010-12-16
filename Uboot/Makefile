@@ -89,6 +89,55 @@ endif
 endif
 endif
 
+ifeq ($(ON_BOARD_DDR),y)
+DRAM_TYPE=DDR
+else
+DRAM_WIDTH=16  #only support 16bit dram width for SDR
+DRAM_TYPE=SDR
+endif
+
+DRAM_SIZE=2
+ifeq ($(ON_BOARD_64M_DRAM_COMPONENT),y)
+DRAM_SIZE=8
+endif
+ifeq ($(ON_BOARD_128M_DRAM_COMPONENT),y)
+DRAM_SIZE=16
+endif
+ifeq ($(ON_BOARD_256M_DRAM_COMPONENT),y)
+DRAM_SIZE=32
+endif
+ifeq ($(ON_BOARD_512M_DRAM_COMPONENT),y)
+DRAM_SIZE=64
+endif
+ifeq ($(ON_BOARD_1024M_DRAM_COMPONENT),y)
+DRAM_SIZE=128
+endif
+
+ifeq ($(ON_BOARD_DDR_WIDTH_16),y)
+DRAM_WIDTH=32
+else
+DRAM_WIDTH=16
+endif
+
+ifeq ($(ON_BOARD_32BIT_DRAM_BUS),y)
+DRAM_TOTAL_WIDTH=32
+else
+DRAM_TOTAL_WIDTH=16
+endif
+
+#default value for syscfg0/syscfg1
+ifeq ($(DRAM_CFG0),)
+DRAM_SYSCFG0=0xFF
+else
+DRAM_SYSCFG0=$(DRAM_CFG0)
+endif
+
+ifeq ($(DRAM_CFG1),)
+DRAM_SYSCFG1=0xFF
+else
+DRAM_SYSCFG1=$(DRAM_CFG1)
+endif
+
 export	CROSS_COMPILE
 
 #########################################################################
@@ -119,6 +168,11 @@ LIBS += rtc/librtc.a
 #LIBS += dtt/libdtt.a
 LIBS += drivers/libdrivers.a
 
+ifdef RALINK_USB
+LIBS += fs/fat/libfat.a
+LIBS += disk/libdisk.a
+endif
+
 #LIBS += post/libpost.a post/cpu/libcpu.a
 LIBS += common/libcommon.a
 .PHONY : $(LIBS)
@@ -146,7 +200,7 @@ ifneq ($(CFG_ENV_IS), IN_FLASH)
 ALL += uboot.img
 endif
 
-all:		$(ALL)
+all:		clean $(ALL)
 
 u-boot.hex:	u-boot
 		$(OBJCOPY) ${OBJCFLAGS} -O ihex $< $@
@@ -162,7 +216,9 @@ uboot.img:	uboot.bin
 ifeq ($(CFG_ENV_IS), IN_SPI)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
 		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
-		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" -d $< $@
+		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" \
+		-r $(DRAM_TYPE) -s $(DRAM_TOTAL_WIDTH) -t $(DRAM_SIZE) -u $(DRAM_WIDTH) \
+		-y $(DRAM_SYSCFG0) -z $(DRAM_SYSCFG1) -d $< $@
 endif
 #ifeq ($(CFG_ENV_IS), IN_NAND)
 #		$(MAKE) -C stage1
@@ -170,8 +226,15 @@ endif
 ifeq ($(CFG_ENV_IS), IN_NAND)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
 		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
-		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" -d $< $@
+		-n "$(shell echo $(CFG_ENV_IS) | sed -e 's/IN_//') Flash Image" \
+		-r $(DRAM_TYPE) -s $(DRAM_TOTAL_WIDTH) -t $(DRAM_SIZE) -u $(DRAM_WIDTH) \
+		-y $(DRAM_SYSCFG0) -z $(DRAM_SYSCFG1) -d $< $@
 endif
+		@echo ""
+		@echo "===============<<IMPORTANT>>=================="
+		@echo "Notes: Uboot firmware is uboot.img NOT uboot.bin"
+		@echo "================================================"
+		@echo ""
 
 u-boot.dis:	u-boot
 		$(OBJDUMP) -d $< > $@
