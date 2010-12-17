@@ -15,7 +15,7 @@ start() {
     get_param
 
     $LOG "Configure WAN."
-    UDHCPCOPTS="-r -S -R -T 10 -A 30 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O routes staticroutes msroutes -f &"
+    UDHCPCOPTS="-S -R -T 10 -A 30 -t 20 -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid -O routes staticroutes msroutes -f &"
 
     #stop dhcp client
     killall -q udhcpc
