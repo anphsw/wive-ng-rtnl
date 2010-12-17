@@ -33,7 +33,7 @@ zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
 $LOG "Init RW particion"
 zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 
-if [ -f /etc/filesystem.ok ]; then
+if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
   else
     $LOG "File system is clear or poor."
@@ -43,7 +43,5 @@ if [ -f /etc/filesystem.ok ]; then
     touch /etc/filesystem.ok
 fi
 
-#sync need after restore rwfs
-sync
-
+$LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &
