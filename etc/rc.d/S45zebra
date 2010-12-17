@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get params
+. /etc/scripts/global.sh
+
 #wait to start web and run from goahead code
 web_wait
 
