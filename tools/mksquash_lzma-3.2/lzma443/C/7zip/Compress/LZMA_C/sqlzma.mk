@@ -24,7 +24,7 @@ Tgt = libunlzma.a libunlzma_r.a
 all: ${Tgt}
 
 %_r.c: %.c
-	ln $< $@
+	ln -f $< $@
 # -pthread
 %_r.o: CFLAGS += -D_REENTRANT -include pthread.h
 
