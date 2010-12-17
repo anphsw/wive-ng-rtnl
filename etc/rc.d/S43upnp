@@ -11,9 +11,12 @@ LOG="echo UPNPD: "
 start() {
 if [ -f /bin/miniupnpd ]; then
  get_param
+ if [ "$upnp" != "1" ]
+    exit 0
+ fi
     if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$vpnEnabled" = "on" ]; then
 	EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
-        if [ "$upnp" = "1" ] && [ "$EXTIP" != "" ]; then
+        if [ "$EXTIP" != "" ]; then
 	  $LOG "Start upnp at $EXTIP"
 	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
