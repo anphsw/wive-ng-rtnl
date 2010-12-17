@@ -37,35 +37,32 @@ get_param
 	ifconfig eth2.2 hw ether $MAC
     fi
 
-    #drop adresses
-    ip addr flush dev eth2.1
-    ip addr flush dev eth2.2
-if [ "$CONFIG_IPV6" != "" ] ; then
-    ip -6 addr flush dev eth2.1
-    ip -6 addr flush dev eth2.2
-fi
+    #eth2.1 always up
     ip link set eth2.1 up
+    
+    #flush ip from interfaces
+    addr_flush
  
 #-------------------CONFIG--------------------------------
-  ip link set $lan_if down
- #-------------------LAN1----------------
- $LOG "Add LAN1 iface"
- if [ "$lan_ip" != "" ]; then
-    if [ "$lan_nm" = "" ]; then
-	nm="255.0.0.0"
+    ip link set $lan_if down
+    #-------------------LAN1----------------
+    $LOG "Add LAN1 iface"
+    if [ "$lan_ip" != "" ]; then
+	if [ "$lan_nm" = "" ]; then
+	    nm="255.0.0.0"
+	fi
+	ifconfig $lan_if $lan_ip netmask $lan_nm up
+    else
+	ifconfig $lan_if 0.0.0.0 up	
     fi
-    ifconfig $lan_if $lan_ip netmask $lan_nm up
- else
-    ifconfig $lan_if 0.0.0.0 up	
- fi
- $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip <<<<<"
+    $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip <<<<<"
 
- #-------------------LAN2----------------
- if [ "$lan2enabled" = "1" ]; then
+     #-------------------LAN2----------------
+    if [ "$lan2enabled" = "1" ]; then
 	$LOG "Add LAN2 iface"
         ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2"
         $LOG "ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2""
- fi
+    fi
 }
 
 stop() {
@@ -93,6 +90,16 @@ get_param() {
  vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
  brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
  lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
+}
+
+addr_flush() {
+    #drop adresses
+    ip addr flush dev eth2.1
+    ip addr flush dev eth2.2
+    if [ "$CONFIG_IPV6" != "" ] ; then
+	ip -6 addr flush dev eth2.1
+	ip -6 addr flush dev eth2.2
+    fi
 }
 
 case "$1" in
