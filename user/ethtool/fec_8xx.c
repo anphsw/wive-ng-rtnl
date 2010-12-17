@@ -43,7 +43,7 @@ struct fec {
 };
 
 #define DUMP_REG(f, x)	fprintf(stdout, \
-			"0x%04lx: %-16s 0x%08x\n", \
+			"0x%04x: %-16s 0x%08x\n", \
 				offsetof(struct fec, x), \
 				#x, f->x)
 
