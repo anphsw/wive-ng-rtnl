@@ -21,6 +21,10 @@ start() {
     killall -q udhcpc
     killall -q -9 udhcpc
 
+    #Flush conntrack table and route cache
+    echo 1 > /proc/sys/net/nf_conntrack_flush
+    ip route flush cache
+
     #set force renew marker
     touch /tmp/dhcp_force_renew
 
@@ -57,10 +61,6 @@ start() {
 	$LOG "Start DHCP client."
 	(udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1) &
     fi
-
-    #Flush conntrack table and route cache
-    echo 1 > /proc/sys/net/nf_conntrack_flush
-    ip route flush cache
 }
 
 stop() {
