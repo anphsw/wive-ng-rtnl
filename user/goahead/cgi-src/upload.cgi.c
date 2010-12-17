@@ -85,7 +85,6 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 		return 0;
 	}
 
-#if 1
 	/*
 	 * compare MTD partition size and image size
 	 */
@@ -122,8 +121,6 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 #else
 #error "goahead: no CONFIG_RT2880_ROOTFS defined!"
 #endif
-#endif
-
 	munmap(ptr, len);
 	close(ifd);
 
