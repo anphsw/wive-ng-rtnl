@@ -57,7 +57,7 @@ start() {
         fi
     else
 	$LOG "Start DHCP client."
-	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 10 -A 30 -t 20 \
+	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5  \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
 		    -O routes staticroutes msroutes -f &"
 
