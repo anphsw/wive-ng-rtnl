@@ -29,13 +29,10 @@ start() {
 
 	$LOG "Select mac."
 	if [ "$stamode" = "y" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
-	    if [ "$clone_mac" != "" ]; then
-		WMAC="$clone_mac"
-		$LOG "STA Macclone mode. MAC: $WMAC"
-	    fi
-	    $LOG "STA Normal mode. MAC: $WMAC"
+	    WMAC="$clone_mac"
+	    $LOG "STA Macclone mode. MAC: $WMAC"
 	else
-	    $LOG "AP Normal mode mode. MAC: $WMAC"
+	    $LOG "AP/STA Normal mode mode. MAC: $WMAC"
 	fi
 	mac="mac=$WMAC"
 
