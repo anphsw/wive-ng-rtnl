@@ -26,16 +26,20 @@ start() {
     else
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
+
+	$LOG "Select mac."
+	hwm="$WMAC"
 	if [ "$stamode" = "y" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
 	    if [ "$clone_mac" != "" ]; then
 		mac="mac=$clone_mac"
+		hwm="$clone_mac"
 	    else
 		mac="mac=$WMAC"
 	    fi
-	    $LOG "Macclone mode. Mac is $mac"
+	    $LOG "Macclone mode. $mac"
 	else
 	    mac="mac=$WMAC"
-	    $LOG "Normal mode mode. Mac is $mac"
+	    $LOG "Normal mode mode. $mac"
 	fi
 
 	$LOG "Load wifi module..."
@@ -44,7 +48,7 @@ start() {
 	else
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
-	ifconfig ra0 hw ether "$WMAC"
+	ifconfig ra0 hw ether "$hwm"
 
 	$LOG "Link wifi up..."
 	ip link set ra0 up
