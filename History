@@ -209,6 +209,8 @@
 20) Add LCP echo adaptive options on VPN page. Default on<br>
 21) Use opensource toolchain at 4.2.4 gcc for build all coe in project. No binary from Ralink needed<br>
 22) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
+23) Update boot code<br>
+24) Some optimization and fix in scripts<br>
 
 <br><br>
 <b>For support see:</b><br>
