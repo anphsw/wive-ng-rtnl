@@ -26,7 +26,7 @@ start() {
       #call to vpn
       if [ "$vpnType" = "0" ]; then
 	$LOG "PPPOE calling..."
-	(sleep 10 && /etc/scripts/config-pppoe.sh) &
+	(sleep 5 && /etc/scripts/config-pppoe.sh) &
       elif [ "$vpnType" = "1" ]; then
 	$LOG "PPTP calling..."
 	(sleep 10 && /etc/scripts/config-pptp.sh) &
