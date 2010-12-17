@@ -1,15 +1,13 @@
 #!/bin/sh
 
-#get params
-. /etc/scripts/global.sh
-
 #wait to start web and run from goahead code
 web_wait
 
 LOG="echo ZEBRA: "
 
 start() {
-if [ -f /bin/zebra ]; then
+RIPEnable=`nvram_get 2860 RIPEnable`
+if [ -f /bin/zebra ] && [ "$RIPEnable" = "1" ]; then
  if [ -f /etc/zebra.conf ]; then
     $LOG "Starting ZEBRA: "
     zebra -d -f /etc/zebra.conf
