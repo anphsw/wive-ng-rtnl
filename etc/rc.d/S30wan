@@ -59,14 +59,11 @@ start() {
     		ip route replace default dev br0
 	    fi
         fi
-
-    elif [ "$wanmode" = "DHCP" ]; then
+    else
 	$LOG "Start DHCP client."
 	(udhcpc -i $wan_if -H $HOSTNAME $UDHCPCOPTS > /dev/null 2>&1) &
-    else
-	$LOG "wan service: unknown wan connection type: $wanmode"
-	exit 1
     fi
+
     #Flush conntrack table and route cache
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
