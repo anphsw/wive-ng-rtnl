@@ -38,23 +38,9 @@ start() {
     mkdir -p /etc/ppp/ip-down.d
 
     mkdir -p /dev/pty
-
-    mknod /dev/pty/m0             c       2       0
-    mknod /dev/pty/m1             c       2       1
-    mknod /dev/pty/m2             c       2       2
-    mknod /dev/pty/m3             c       2       3
-    mknod /dev/pty/m4             c       2       4
-    mknod /dev/pty/m5             c       2       5
-    mknod /dev/pty/m6             c       2       6
-    mknod /dev/pty/m7             c       2       7
-    mknod /dev/pty/m8             c       2       8
-    mknod /dev/pty/m9             c       2       9
-    mknod /dev/pty/m10    c       2       10
-    mknod /dev/pty/m11    c       2       11
-    mknod /dev/pty/m12    c       2       12
-    mknod /dev/pty/m13    c       2       13
-    mknod /dev/pty/m14    c       2       14
-    mknod /dev/pty/m15    c       2       15
+    for i in `seq 0 15`; do
+	mknod /dev/pty/m$i c 2 $i
+    done
 
     mkdir -p /dev/tts
     mknod /dev/tts/0              c       4       64
