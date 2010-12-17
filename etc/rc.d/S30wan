@@ -21,12 +21,6 @@ start() {
     killall -q udhcpc
     killall -q -9 udhcpc
 
-    #Only Ethernet converter support MAC Clone
-    if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
-	$LOG "Call reload wifi modules"
-	service modules restart
-    fi
-
     #set force renew marker
     touch /tmp/dhcp_force_renew
 
