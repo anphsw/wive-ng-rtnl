@@ -64,6 +64,7 @@ enum Enum
   kLitPos,
   kPosBits,
   kMatchFinder,
+  kMultiThread,
   kEOS,
   kStdIn,
   kStdOut,
@@ -160,7 +161,8 @@ int main2(int n, const char *args[])
     return 0;
   }
 
-  if (sizeof(Byte) != 1 || sizeof(UInt32) < 4 || sizeof(UInt64) < 4)
+  bool unsupportedTypes = (sizeof(Byte) != 1 || sizeof(UInt32) < 4 || sizeof(UInt64) < 4);
+  if (unsupportedTypes)
   {
     fprintf(stderr, "Unsupported base types. Edit Common/Types.h and recompile");
     return 1;
@@ -191,7 +193,7 @@ int main2(int n, const char *args[])
   const UString &command = nonSwitchStrings[paramIndex++]; 
 
   bool dictionaryIsDefined = false;
-  UInt32 dictionary = 1 << 21;
+  UInt32 dictionary = (UInt32)-1;
   if(parser[NKey::kDictionary].ThereIs)
   {
     UInt32 dicLog;
@@ -204,9 +206,24 @@ int main2(int n, const char *args[])
   if (parser[NKey::kMatchFinder].ThereIs)
     mf = parser[NKey::kMatchFinder].PostStrings[0];
 
+  UInt32 numThreads = (UInt32)-1;
+
+  #ifdef COMPRESS_MF_MT
+  if (parser[NKey::kMultiThread].ThereIs)
+  {
+    UInt32 numCPUs = NWindows::NSystem::GetNumberOfProcessors();
+    const UString &s = parser[NKey::kMultiThread].PostStrings[0];
+    if (s.IsEmpty())
+      numThreads = numCPUs;
+    else
+      if (!GetNumber(s, numThreads))
+        IncorrectCommand();
+  }
+  #endif
+
   if (command.CompareNoCase(L"b") == 0)
   {
-    const UInt32 kNumDefaultItereations = 10;
+    const UInt32 kNumDefaultItereations = 1;
     UInt32 numIterations = kNumDefaultItereations;
     {
       if (paramIndex < nonSwitchStrings.Size())
@@ -215,6 +232,9 @@ int main2(int n, const char *args[])
     }
     return LzmaBenchmark(stderr, numIterations, dictionary);
   }
+
+  if (numThreads == (UInt32)-1)
+    numThreads = 1;
 
   bool encodeMode = false;
   if (command.CompareNoCase(L"e") == 0)
@@ -250,6 +270,7 @@ int main2(int n, const char *args[])
   }
 
   CMyComPtr<ISequentialOutStream> outStream;
+  COutFileStream *outStreamSpec = NULL;
   if (stdOutMode)
   {
     outStream = new CStdOutFileStream;
@@ -260,7 +281,7 @@ int main2(int n, const char *args[])
     if (paramIndex >= nonSwitchStrings.Size())
       IncorrectCommand();
     const UString &outputName = nonSwitchStrings[paramIndex++]; 
-    COutFileStream *outStreamSpec = new COutFileStream;
+    outStreamSpec = new COutFileStream;
     outStream = outStreamSpec;
     if (!outStreamSpec->Create(GetSystemString(outputName), true))
     {
@@ -309,7 +330,7 @@ int main2(int n, const char *args[])
       if (!dictionaryIsDefined)
         dictionary = 1 << 23;
       int res = LzmaRamEncode(inBuffer, inSize, outBuffer, outSize, &outSizeProcessed, 
-          dictionary, SZ_FILTER_AUTO);
+          dictionary, parser[NKey::kFilter86].PostCharIndex == 0 ? SZ_FILTER_YES : SZ_FILTER_AUTO);
       if (res != 0)
       {
         fprintf(stderr, "\nEncoder error = %d\n", (int)res);
@@ -342,8 +363,7 @@ int main2(int n, const char *args[])
   UInt64 fileSize;
   if (encodeMode)
   {
-    NCompress::NLZMA::CEncoder *encoderSpec = 
-      new NCompress::NLZMA::CEncoder;
+    NCompress::NLZMA::CEncoder *encoderSpec = new NCompress::NLZMA::CEncoder;
     CMyComPtr<ICompressCoder> encoder = encoderSpec;
 
     if (!dictionaryIsDefined)
@@ -354,7 +374,7 @@ int main2(int n, const char *args[])
     // UInt32 litContextBits = 0; // for 32-bit data
     UInt32 litPosBits = 0;
     // UInt32 litPosBits = 2; // for 32-bit data
-    UInt32 algorithm = 2;
+    UInt32 algorithm = 1;
     UInt32 numFastBytes = 128;
     UInt32 matchFinderCycles = 16 + numFastBytes / 2;
     bool matchFinderCyclesDefined = false;
@@ -368,7 +388,8 @@ int main2(int n, const char *args[])
     if(parser[NKey::kFastBytes].ThereIs)
       if (!GetNumber(parser[NKey::kFastBytes].PostStrings[0], numFastBytes))
         IncorrectCommand();
-    if (matchFinderCyclesDefined = parser[NKey::kMatchFinderCycles].ThereIs)
+    matchFinderCyclesDefined = parser[NKey::kMatchFinderCycles].ThereIs;
+    if (matchFinderCyclesDefined)
       if (!GetNumber(parser[NKey::kMatchFinderCycles].PostStrings[0], matchFinderCycles))
         IncorrectCommand();
     if(parser[NKey::kLitContext].ThereIs)
@@ -391,40 +412,34 @@ int main2(int n, const char *args[])
       NCoderPropID::kNumFastBytes,
       NCoderPropID::kMatchFinder,
       NCoderPropID::kEndMarker,
-      NCoderPropID::kMatchFinderCycles
+      NCoderPropID::kNumThreads,
+      NCoderPropID::kMatchFinderCycles,
     };
     const int kNumPropsMax = sizeof(propIDs) / sizeof(propIDs[0]);
-    /*
-    NWindows::NCOM::CPropVariant properties[kNumProps];
-    properties[0] = UInt32(dictionary);
-    properties[1] = UInt32(posStateBits);
-    properties[2] = UInt32(litContextBits);
-   
-    properties[3] = UInt32(litPosBits);
-    properties[4] = UInt32(algorithm);
-    properties[5] = UInt32(numFastBytes);
-    properties[6] = mf;
-    properties[7] = eos;
-    */
+
     PROPVARIANT properties[kNumPropsMax];
     for (int p = 0; p < 6; p++)
       properties[p].vt = VT_UI4;
 
-    properties[0].ulVal = UInt32(dictionary);
-    properties[1].ulVal = UInt32(posStateBits);
-    properties[2].ulVal = UInt32(litContextBits);
-    properties[3].ulVal = UInt32(litPosBits);
-    properties[4].ulVal = UInt32(algorithm);
-    properties[5].ulVal = UInt32(numFastBytes);
+    properties[0].ulVal = (UInt32)dictionary;
+    properties[1].ulVal = (UInt32)posStateBits;
+    properties[2].ulVal = (UInt32)litContextBits;
+    properties[3].ulVal = (UInt32)litPosBits;
+    properties[4].ulVal = (UInt32)algorithm;
+    properties[5].ulVal = (UInt32)numFastBytes;
 
-    properties[8].vt = VT_UI4;
-    properties[8].ulVal = UInt32(matchFinderCycles);
-    
     properties[6].vt = VT_BSTR;
     properties[6].bstrVal = (BSTR)(const wchar_t *)mf;
 
     properties[7].vt = VT_BOOL;
     properties[7].boolVal = eos ? VARIANT_TRUE : VARIANT_FALSE;
+
+    properties[8].vt = VT_UI4;
+    properties[8].ulVal = (UInt32)numThreads;
+
+    // it must be last in property list
+    properties[9].vt = VT_UI4;
+    properties[9].ulVal = (UInt32)matchFinderCycles;
 
     int numProps = kNumPropsMax;
     if (!matchFinderCyclesDefined)
@@ -462,8 +477,7 @@ int main2(int n, const char *args[])
   }
   else
   {
-    NCompress::NLZMA::CDecoder *decoderSpec = 
-        new NCompress::NLZMA::CDecoder;
+    NCompress::NLZMA::CDecoder *decoderSpec = new NCompress::NLZMA::CDecoder;
     CMyComPtr<ICompressCoder> decoder = decoderSpec;
     const UInt32 kPropertiesSize = 5;
     Byte properties[kPropertiesSize];
