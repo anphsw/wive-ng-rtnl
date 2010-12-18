@@ -17,7 +17,7 @@ HWH4			   = "0.0"
 
 MACHINE			   = mips
 ARCH		           = mips
-ROOTDIR			   = /opt/Wive-RTNL
+ROOTDIR			   ?= /opt/Wive-RTNL
 include $(ROOTDIR)/vendors/config/mips/config.arch
 
 FIRMROOT        	   = $(ROOTDIR)
