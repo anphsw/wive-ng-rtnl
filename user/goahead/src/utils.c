@@ -27,6 +27,20 @@
 #include	"wireless.h"
 #include	"../options.h"
 
+#if defined (CONFIG_RALINK_RT2880)
+#define PROCREG_GMAC		"/proc/rt2880/gmac"
+#elif defined (CONFIG_RALINK_RT3052)
+#define PROCREG_GMAC             "/proc/rt3052/gmac"
+#elif defined (CONFIG_RALINK_RT3352)
+#define PROCREG_GMAC             "/proc/rt3352/gmac"
+#elif defined (CONFIG_RALINK_RT2883)
+#define PROCREG_GMAC             "/proc/rt2883/gmac"
+#elif defined (CONFIG_RALINK_RT3883)
+#define PROCREG_GMAC             "/proc/rt3883/gmac"
+#else
+#define PROCREG_GMAC             "/proc/rt2880/gmac"
+#endif
+
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 extern void setFirmwarePath(void);
 #endif
@@ -1006,7 +1020,7 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 		char link = '0';
 		int speed = 100;
 		char duplex = 'F';
-		FILE *proc_file = fopen("/proc/rt2880/gmac", "w");
+		FILE *proc_file = fopen(PROCREG_GMAC, "w");
 		if (!proc_file)
 			return 0;
 
