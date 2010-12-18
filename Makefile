@@ -396,6 +396,8 @@ clean: modules_clean
 	make clean -C tools
 	find $(ROOTDIR) -name 'config.log' | xargs rm -f
 	find $(ROOTDIR)/user -name '*.o' | xargs rm -f
+	find $(ROOTDIR)/user -name '*.ko' | xargs rm -f
+	find $(ROOTDIR)/user -name '*.so' | xargs rm -f
 	find $(ROOTDIR) -name '*.old' | xargs rm -f
 	find $(ROOTDIR) -name '*.log' | xargs rm -f
 	find $(ROOTDIR) -name '.deps' | xargs rm -rf
