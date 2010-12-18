@@ -398,6 +398,7 @@ clean: modules_clean
 	find $(ROOTDIR)/user -name '*.o' | xargs rm -f
 	find $(ROOTDIR) -name '*.old' | xargs rm -f
 	find $(ROOTDIR) -name '*.log' | xargs rm -f
+	find $(ROOTDIR) -name '.deps' | xargs rm -rf
 	find $(ROOTDIR) -name CVS -type d | xargs rm -rf
 
 real_clean mrproper: clean
