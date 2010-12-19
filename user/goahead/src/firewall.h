@@ -26,7 +26,9 @@
 #define IPPORT_FILTER_CHAIN	"macipport_filter"
 
 #define DMZ_CHAIN			"DMZ"
-#define PORT_FORWARD_CHAIN	"port_forward"
+
+#define PORT_FORWARD_PRE_CHAIN	"port_forward_pre" //for clean forward
+#define PORT_FORWARD_POST_CHAIN	"port_forward_post" //for reverse nat
 
 
 #define MAGIC_NUM			"IPCHAINS"			

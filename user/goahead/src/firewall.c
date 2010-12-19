@@ -331,7 +331,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	int rc = 0;
 	char *pos = buf;
 
-	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_CHAIN, wan_name);
+	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_PRE_CHAIN, wan_name);
 	pos += rc;
 	len -= rc;
 
@@ -558,8 +558,8 @@ static void iptablesPortForwardBuildScript(void)
 	if (fd != NULL)
 	{
 		fputs("#!/bin/sh\n\n", fd);
-		fputs("iptables -t nat -N port_forward\n", fd);
-		fputs("iptables -t nat -A PREROUTING -j port_forward\n\n", fd);
+		fputs("iptables -t nat -N port_forward_pre\n", fd);
+		fputs("iptables -t nat -A PREROUTING -j port_forward_pre\n\n", fd);
 
 		while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
 		{
