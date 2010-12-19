@@ -893,7 +893,7 @@ out_free:
 	return NULL;
 }
 
-void sk_free(struct sock *sk)
+static void __sk_free(struct sock *sk)
 {
 	struct sk_filter *filter;
 	struct module *owner = sk->sk_prot_creator->owner;
@@ -921,6 +921,18 @@ void sk_free(struct sock *sk)
 	module_put(owner);
 }
 
+void sk_free(struct sock *sk)
+{
+	/*
+	 * We substract one from sk_wmem_alloc and can know if
+	 * some packets are still in some tx queue.
+	 * If not null, sock_wfree() will call __sk_free(sk) later
+	 */
+	if (atomic_dec_and_test(&sk->sk_wmem_alloc))
+		__sk_free(sk);
+}
+EXPORT_SYMBOL(sk_free);
+
 struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 {
 	struct sock *newsk = sk_alloc(sk->sk_family, priority, sk->sk_prot, 0);
@@ -936,7 +948,10 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		bh_lock_sock(newsk);
 
 		atomic_set(&newsk->sk_rmem_alloc, 0);
-		atomic_set(&newsk->sk_wmem_alloc, 0);
+		/*
+		 * sk_wmem_alloc set to one (see sk_free() and sock_wfree())
+		 */
+		atomic_set(&newsk->sk_wmem_alloc, 1);
 		atomic_set(&newsk->sk_omem_alloc, 0);
 		skb_queue_head_init(&newsk->sk_receive_queue);
 		skb_queue_head_init(&newsk->sk_write_queue);
@@ -1024,12 +1039,23 @@ void __init sk_init(void)
 void sock_wfree(struct sk_buff *skb)
 {
 	struct sock *sk = skb->sk;
+	unsigned int len = skb->truesize;
 
-	/* In case it might be waiting for more memory. */
-	atomic_sub(skb->truesize, &sk->sk_wmem_alloc);
-	if (!sock_flag(sk, SOCK_USE_WRITE_QUEUE))
+	if (!sock_flag(sk, SOCK_USE_WRITE_QUEUE)) {
+		/*
+		 * Keep a reference on sk_wmem_alloc, this will be released
+		 * after sk_write_space() call
+		 */
+		atomic_sub(len - 1, &sk->sk_wmem_alloc);
 		sk->sk_write_space(sk);
-	sock_put(sk);
+		len = 1;
+	}
+	/*
+	 * if sk_wmem_alloc reaches 0, we must finish what sk_free()
+	 * could not do because of in-flight packets
+	 */
+	if (atomic_sub_and_test(len, &sk->sk_wmem_alloc))
+		__sk_free(sk);
 }
 
 /*
@@ -1545,6 +1571,7 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_stamp = ktime_set(-1L, -1L);
 
 	atomic_set(&sk->sk_refcnt, 1);
+	atomic_set(&sk->sk_wmem_alloc, 1);
 	atomic_set(&sk->sk_drops, 0);
 }
 
@@ -1963,7 +1990,6 @@ subsys_initcall(proto_init);
 #endif /* PROC_FS */
 
 EXPORT_SYMBOL(sk_alloc);
-EXPORT_SYMBOL(sk_free);
 EXPORT_SYMBOL(sk_send_sigurg);
 EXPORT_SYMBOL(sock_alloc_send_skb);
 EXPORT_SYMBOL(sock_init_data);
