@@ -713,8 +713,10 @@ static struct sock *unix_find_other(struct sockaddr_un *sunname, int len,
 		if (!u)
 			goto put_fail;
 
+#ifndef CONFIG_FS_ALL_NOATIME
 		if (u->sk_type == type)
 			touch_atime(nd.mnt, nd.dentry);
+#endif
 
 		path_release(&nd);
 
@@ -729,8 +731,10 @@ static struct sock *unix_find_other(struct sockaddr_un *sunname, int len,
 		if (u) {
 			struct dentry *dentry;
 			dentry = unix_sk(u)->dentry;
+#ifndef CONFIG_FS_ALL_NOATIME
 			if (dentry)
 				touch_atime(unix_sk(u)->mnt, dentry);
+#endif
 		} else
 			goto fail;
 	}

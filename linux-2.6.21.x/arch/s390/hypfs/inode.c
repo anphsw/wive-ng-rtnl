@@ -161,7 +161,9 @@ static ssize_t hypfs_aio_read(struct kiocb *iocb, const struct iovec *iov,
 		goto out;
 	}
 	iocb->ki_pos += count;
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(filp);
+#endif
 out:
 	return count;
 }

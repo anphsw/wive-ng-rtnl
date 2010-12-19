@@ -1005,6 +1005,7 @@ CONFIG_SQUASHFS_NOERROR=y
 # CONFIG_CIFS is not set
 # CONFIG_NCP_FS is not set
 # CONFIG_CODA_FS is not set
+CONFIG_FS_ALL_NOATIME=y
 
 #
 # Partition Types

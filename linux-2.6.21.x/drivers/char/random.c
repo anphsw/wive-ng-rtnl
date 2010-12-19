@@ -997,8 +997,10 @@ random_read(struct file * file, char __user * buf, size_t nbytes, loff_t *ppos)
 	/*
 	 * If we gave the user some bytes, update the access time.
 	 */
+#ifndef CONFIG_FS_ALL_NOATIME
 	if (count)
 		file_accessed(file);
+#endif
 
 	return (count ? count : retval);
 }

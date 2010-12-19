@@ -1427,7 +1427,9 @@ out_nomem:
 
 static int shmem_mmap(struct file *file, struct vm_area_struct *vma)
 {
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(file);
+#endif
 	vma->vm_ops = &shmem_vm_ops;
 	return 0;
 }
@@ -1611,7 +1613,9 @@ static void do_shmem_file_read(struct file *filp, loff_t *ppos, read_descriptor_
 	}
 
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(filp);
+#endif
 }
 
 static ssize_t shmem_file_read(struct file *filp, char __user *buf, size_t count, loff_t *ppos)

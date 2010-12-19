@@ -168,9 +168,9 @@ ncp_file_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 	vfree(freepage);
 
 	*ppos = pos;
-
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(file);
-
+#endif
 	DPRINTK("ncp_file_read: exit %s/%s\n",
 		dentry->d_parent->d_name.name, dentry->d_name.name);
 outrel:

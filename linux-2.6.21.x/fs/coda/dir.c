@@ -471,7 +471,9 @@ int coda_readdir(struct file *coda_file, void *dirent, filldir_t filldir)
 		ret = -ENOENT;
 		if (!IS_DEADDIR(host_inode)) {
 			ret = host_file->f_op->readdir(host_file, filldir, dirent);
+#ifndef CONFIG_FS_ALL_NOATIME
 			file_accessed(host_file);
+#endif
 		}
 	}
 out:

@@ -33,7 +33,9 @@ int vfs_readdir(struct file *file, filldir_t filler, void *buf)
 	res = -ENOENT;
 	if (!IS_DEADDIR(inode)) {
 		res = file->f_op->readdir(file, buf, filler);
+#ifndef CONFIG_FS_ALL_NOATIME
 		file_accessed(file);
+#endif
 	}
 	mutex_unlock(&inode->i_mutex);
 out:

@@ -308,7 +308,9 @@ asmlinkage long sys_readlinkat(int dfd, const char __user *path,
 		if (inode->i_op && inode->i_op->readlink) {
 			error = security_inode_readlink(nd.dentry);
 			if (!error) {
+#ifndef CONFIG_FS_ALL_NOATIME
 				touch_atime(nd.mnt, nd.dentry);
+#endif
 				error = inode->i_op->readlink(nd.dentry, buf, bufsiz);
 			}
 		}

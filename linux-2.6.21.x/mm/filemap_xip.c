@@ -131,8 +131,10 @@ no_xip_page:
 
 out:
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;
+#ifndef CONFIG_FS_ALL_NOATIME
 	if (filp)
 		file_accessed(filp);
+#endif
 }
 
 ssize_t
@@ -288,7 +290,9 @@ int xip_file_mmap(struct file * file, struct vm_area_struct * vma)
 {
 	BUG_ON(!file->f_mapping->a_ops->get_xip_page);
 
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(file);
+#endif
 	vma->vm_ops = &xip_file_vm_ops;
 	return 0;
 }

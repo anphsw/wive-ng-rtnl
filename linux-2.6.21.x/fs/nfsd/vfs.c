@@ -1400,7 +1400,9 @@ nfsd_readlink(struct svc_rqst *rqstp, struct svc_fh *fhp, char *buf, int *lenp)
 	if (!inode->i_op || !inode->i_op->readlink)
 		goto out;
 
+#ifndef CONFIG_FS_ALL_NOATIME
 	touch_atime(fhp->fh_export->ex_mnt, dentry);
+#endif
 	/* N.B. Why does this call need a get_fs()??
 	 * Remove the set_fs and watch the fireworks:-) --okir
 	 */

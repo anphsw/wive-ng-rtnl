@@ -1161,6 +1161,7 @@ EXPORT_SYMBOL(bmap);
  *	This function automatically handles read only file systems and media,
  *	as well as the "noatime" flag and inode specific "noatime" markers.
  */
+#ifndef CONFIG_FS_ALL_NOATIME
 void touch_atime(struct vfsmount *mnt, struct dentry *dentry)
 {
 	struct inode *inode = dentry->d_inode;
@@ -1204,6 +1205,7 @@ void touch_atime(struct vfsmount *mnt, struct dentry *dentry)
 	mark_inode_dirty_sync(inode);
 }
 EXPORT_SYMBOL(touch_atime);
+#endif
 
 /**
  *	file_update_time	-	update mtime and ctime time

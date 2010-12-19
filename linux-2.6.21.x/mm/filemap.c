@@ -1069,8 +1069,10 @@ out:
 	*ppos = ((loff_t) index << PAGE_CACHE_SHIFT) + offset;
 	if (cached_page)
 		page_cache_release(cached_page);
+#ifndef CONFIG_FS_ALL_NOATIME
 	if (filp)
 		file_accessed(filp);
+#endif
 }
 EXPORT_SYMBOL(do_generic_mapping_read);
 
@@ -1171,7 +1173,9 @@ generic_file_aio_read(struct kiocb *iocb, const struct iovec *iov,
 				*ppos = pos + retval;
 		}
 		if (likely(retval != 0)) {
+#ifndef CONFIG_FS_ALL_NOATIME
 			file_accessed(filp);
+#endif
 			goto out;
 		}
 	}
@@ -1704,7 +1708,9 @@ int generic_file_mmap(struct file * file, struct vm_area_struct * vma)
 
 	if (!mapping->a_ops->readpage)
 		return -ENOEXEC;
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(file);
+#endif
 	vma->vm_ops = &generic_file_vm_ops;
 	return 0;
 }

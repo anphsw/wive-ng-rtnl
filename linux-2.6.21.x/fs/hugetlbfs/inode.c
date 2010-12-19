@@ -74,8 +74,9 @@ static int hugetlbfs_file_mmap(struct file *file, struct vm_area_struct *vma)
 	vma_len = (loff_t)(vma->vm_end - vma->vm_start);
 
 	mutex_lock(&inode->i_mutex);
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(file);
-
+#endif
 	ret = -ENOMEM;
 	len = vma_len + ((loff_t)vma->vm_pgoff << PAGE_SHIFT);
 

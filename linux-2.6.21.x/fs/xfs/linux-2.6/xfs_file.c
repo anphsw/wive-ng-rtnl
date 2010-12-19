@@ -348,8 +348,9 @@ xfs_file_mmap(
 	if (vn_from_inode(filp->f_path.dentry->d_inode)->v_vfsp->vfs_flag & VFS_DMI)
 		vma->vm_ops = &xfs_dmapi_file_vm_ops;
 #endif /* CONFIG_XFS_DMAPI */
-
+#ifndef CONFIG_FS_ALL_NOATIME
 	file_accessed(filp);
+#endif
 	return 0;
 }
 

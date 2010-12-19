@@ -169,7 +169,10 @@ extern int dir_notify_enable;
 #define IS_DIRSYNC(inode)	(__IS_FLG(inode, MS_SYNCHRONOUS|MS_DIRSYNC) || \
 					((inode)->i_flags & (S_SYNC|S_DIRSYNC)))
 #define IS_MANDLOCK(inode)	__IS_FLG(inode, MS_MANDLOCK)
-#define IS_NOATIME(inode)   __IS_FLG(inode, MS_RDONLY|MS_NOATIME)
+
+#ifndef CONFIG_FS_ALL_NOATIME
+#define IS_NOATIME(inode)   	__IS_FLG(inode, MS_RDONLY|MS_NOATIME)
+#endif
 
 #define IS_NOQUOTA(inode)	((inode)->i_flags & S_NOQUOTA)
 #define IS_APPEND(inode)	((inode)->i_flags & S_APPEND)
@@ -1264,12 +1267,14 @@ static inline void inode_dec_link_count(struct inode *inode)
 	mark_inode_dirty(inode);
 }
 
+#ifndef CONFIG_FS_ALL_NOATIME
 extern void touch_atime(struct vfsmount *mnt, struct dentry *dentry);
 static inline void file_accessed(struct file *file)
 {
 	if (!(file->f_flags & O_NOATIME))
 		touch_atime(file->f_path.mnt, file->f_path.dentry);
 }
+#endif
 
 int sync_inode(struct inode *inode, struct writeback_control *wbc);
 

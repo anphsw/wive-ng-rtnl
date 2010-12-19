@@ -593,7 +593,9 @@ static __always_inline int __do_follow_link(struct path *path, struct nameidata 
 	void *cookie;
 	struct dentry *dentry = path->dentry;
 
+#ifndef CONFIG_FS_ALL_NOATIME
 	touch_atime(path->mnt, dentry);
+#endif
 	nd_set_link(nd, NULL);
 
 	if (path->mnt != nd->mnt) {

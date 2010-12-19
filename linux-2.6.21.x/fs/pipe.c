@@ -326,8 +326,10 @@ redo:
 		wake_up_interruptible(&pipe->wait);
 		kill_fasync(&pipe->fasync_writers, SIGIO, POLL_OUT);
 	}
+#ifndef CONFIG_FS_ALL_NOATIME
 	if (ret > 0)
 		file_accessed(filp);
+#endif
 	return ret;
 }
 

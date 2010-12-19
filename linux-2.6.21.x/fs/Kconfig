@@ -2115,6 +2115,12 @@ config 9P_FS
 
 endmenu
 
+config FS_ALL_NOATIME
+	bool "Disables toush atime at all FS at all devices."
+	default y
+	help
+	    No need update acess time. Good for embedded.
+
 if BLOCK
 menu "Partition Types"
 

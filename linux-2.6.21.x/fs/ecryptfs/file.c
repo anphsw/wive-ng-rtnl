@@ -118,7 +118,9 @@ static ssize_t ecryptfs_read_update_atime(struct kiocb *iocb,
 	if (rc >= 0) {
 		lower_dentry = ecryptfs_dentry_to_lower(file->f_path.dentry);
 		lower_vfsmount = ecryptfs_dentry_to_lower_mnt(file->f_path.dentry);
+#ifndef CONFIG_FS_ALL_NOATIME
 		touch_atime(lower_vfsmount, lower_dentry);
+#endif
 	}
 	return rc;
 }
