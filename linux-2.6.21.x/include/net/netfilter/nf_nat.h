@@ -3,6 +3,8 @@
 #include <linux/netfilter_ipv4.h>
 #include <net/netfilter/nf_conntrack_tuple.h>
 
+struct nf_conn;
+
 #define NF_NAT_MAPPING_TYPE_MAX_NAMELEN 16
 
 enum nf_nat_manip_type
@@ -61,9 +63,9 @@ struct nf_nat_info
 	u_int32_t nat_type;
 #endif
 	struct nf_nat_seq seq[IP_CT_DIR_MAX];
+	struct nf_conn *ct;
 };
 
-struct nf_conn;
 
 /* Call input routing for SNAT-ed traffic */
 extern unsigned int ip_nat_route_input(unsigned int hooknum,
