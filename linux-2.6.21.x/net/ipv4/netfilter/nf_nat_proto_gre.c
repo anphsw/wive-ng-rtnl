@@ -146,7 +146,7 @@ gre_manip_pkt(struct sk_buff **pskb, unsigned int iphdroff,
 	return 1;
 }
 
-static struct nf_nat_protocol gre __read_mostly = {
+static const struct nf_nat_protocol gre = {
 	.name			= "GRE",
 	.protonum		= IPPROTO_GRE,
 	.manip_pkt		= gre_manip_pkt,

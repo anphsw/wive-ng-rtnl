@@ -573,7 +573,7 @@ static int nfnetlink_parse_nat_proto(struct nfattr *attr,
 				     struct nf_nat_range *range)
 {
 	struct nfattr *tb[CTA_PROTONAT_MAX];
-	struct nf_nat_protocol *npt;
+	const struct nf_nat_protocol *npt;
 
 	nfattr_parse_nested(tb, CTA_PROTONAT_MAX, attr);
 
