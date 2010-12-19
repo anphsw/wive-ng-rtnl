@@ -40,6 +40,8 @@ fi
 rm -rfv romfs/*
 rm -rfv images/*
 
+mkdir -p etc/Wireless/RT2860
+
 echo --------------------------------COPY-CONFIG-----------------------------
 ##############################FOR-ALL-DEVICES#########################
 cp -fv ./configs/all/config-config	./config/.config
