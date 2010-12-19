@@ -189,7 +189,7 @@ nf_nat_out(unsigned int hooknum,
 
 	/* root is playing with raw sockets. */
 	if ((*pskb)->len < sizeof(struct iphdr) ||
-	    (*pskb)->nh.iph->ihl * 4 < sizeof(struct iphdr))
+	    ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
 
 	ret = nf_nat_fn(hooknum, pskb, in, out, okfn);
@@ -222,7 +222,7 @@ nf_nat_local_fn(unsigned int hooknum,
 
 	/* root is playing with raw sockets. */
 	if ((*pskb)->len < sizeof(struct iphdr) ||
-	    (*pskb)->nh.iph->ihl * 4 < sizeof(struct iphdr))
+	    ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
 
 	ret = nf_nat_fn(hooknum, pskb, in, out, okfn);

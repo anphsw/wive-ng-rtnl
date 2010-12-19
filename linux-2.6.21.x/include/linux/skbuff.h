@@ -1038,6 +1038,11 @@ static inline void skb_reserve(struct sk_buff *skb, int len)
 	skb->tail += len;
 }
 
+static inline int skb_network_offset(const struct sk_buff *skb)
+{
+	return skb->nh.raw - skb->data;
+}
+
 static inline unsigned char *skb_mac_header(const struct sk_buff *skb)
 {
 	return skb->mac.raw;

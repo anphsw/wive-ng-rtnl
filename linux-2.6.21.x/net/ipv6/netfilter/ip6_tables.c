@@ -1452,7 +1452,7 @@ static void __exit ip6_tables_fini(void)
 int ipv6_find_hdr(const struct sk_buff *skb, unsigned int *offset,
 		  int target, unsigned short *fragoff)
 {
-	unsigned int start = (u8*)(skb->nh.ipv6h + 1) - skb->data;
+	unsigned int start = skb_network_offset(skb) + sizeof(struct ipv6hdr);
 	u8 nexthdr = skb->nh.ipv6h->nexthdr;
 	unsigned int len = skb->len - start;
 

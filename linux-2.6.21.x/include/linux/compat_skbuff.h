@@ -13,7 +13,6 @@ struct udphdr;
 #	define skb_secmark(skb) 0
 #endif
 
-#define ip_hdrlen(skb) (ip_hdr(skb)->ihl * 4)
 #define ipv6_hdr(skb) ((skb)->nh.ipv6h)
 #define skb_network_header(skb) ((skb)->nh.raw)
 #define skb_transport_header(skb) ((skb)->h.raw)
