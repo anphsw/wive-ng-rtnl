@@ -604,6 +604,7 @@ static struct proc_dir_entry *proc_create(struct proc_dir_entry **parent,
 	ent->namelen = len;
 	ent->mode = mode;
 	ent->nlink = nlink;
+	atomic_set(&ent->count, 1);
  out:
 	return ent;
 }
@@ -705,7 +706,6 @@ void free_proc_entry(struct proc_dir_entry *de)
 
 /*
  * Remove a /proc entry and free it if it's not currently in use.
- * If it is in use, we set the 'deleted' flag.
  */
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 {
@@ -730,13 +730,8 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 		proc_kill_inodes(de);
 		de->nlink = 0;
 		WARN_ON((int)de->subdir);
-		if (!atomic_read(&de->count))
+		if (atomic_dec_and_test(&de->count))
 			free_proc_entry(de);
-		else {
-			de->deleted = 1;
-			printk("remove_proc_entry: %s/%s busy, count=%d\n",
-				parent->name, de->name, atomic_read(&de->count));
-		}
 		break;
 	}
 	spin_unlock(&proc_subdir_lock);
