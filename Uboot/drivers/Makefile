@@ -23,12 +23,21 @@
 
 include $(TOPDIR)/config.mk
 
- CFLAGS += -DET_DEBUG -DDEBUG
+#CFLAGS += -DET_DEBUG -DDEBUG
 
 LIB	= libdrivers.a
 
-OBJS    = athrs16_phy.o rt2880_eth.o i2c_drv.o mii_mgr.o
-#OBJS	= i2c_drv.o mii_mgr.o ag7100.o athrs16_phy.o
+OBJS	= i2c_drv.o mii_mgr.o
+
+ifeq ($(CONFIG_ATHEROS_PHY),y)
+ifeq ($(CONFIG_AG7100),y)
+OBJS	+= ag7100.o athrs16_phy.o meminit.o
+else
+OBJS	+= athrs16_phy.o rt2880_eth.o
+endif
+else
+OBJS	+= rt2880_eth.o
+endif
 
 ifeq ($(CFG_ENV_IS), IN_FLASH)
 OBJS	+= spi_drv.o 
