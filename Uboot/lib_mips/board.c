@@ -1703,7 +1703,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			break;
 
 		case 'L':
-			printf("   \n%d: System Load Linux to SDRAM via TFTP. \n", SEL_LOAD_LINUX_SDRAM);
+			printf("   \n%d: System Load Linux to SDRAM via TFTP. AUTO.\n", SEL_LOAD_LINUX_SDRAM);
 			tftp_config_auto(SEL_LOAD_LINUX_SDRAM, argv);           
 			argc= 3;
 			setenv("autostart", "yes");
@@ -1711,13 +1711,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			break;
 
 		case 'F':
-			printf("   \n%d: System Load Linux Kernel then write to Flash via TFTP. \n", SEL_LOAD_LINUX_WRITE_FLASH);
-			printf(" Warning!! Erase Linux in Flash then burn new one. Are you sure?(Y/N)\n");
-			confirm = getc();
-			if (confirm != 'y' && confirm != 'Y') {
-				printf(" Operation terminated\n");
-				break;
-			}
+			printf("   \n%d: System Load Linux Kernel then write to Flash via TFTP. AUTO.\n", SEL_LOAD_LINUX_WRITE_FLASH);
 			tftp_config_auto(SEL_LOAD_LINUX_WRITE_FLASH, argv);
 			argc= 3;
 			setenv("autostart", "no");
