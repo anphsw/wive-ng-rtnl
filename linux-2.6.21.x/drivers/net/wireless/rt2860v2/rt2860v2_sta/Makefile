@@ -19,9 +19,7 @@ rt2860v2_sta-y += ../common/cmm_sanity.o
 rt2860v2_sta-y += ../common/cmm_info.o
 rt2860v2_sta-y += ../common/cmm_wpa.o
 rt2860v2_sta-y += ../common/dfs.o
-#rt2860v2_sta-y += ../common/dfs_mcu.o
 rt2860v2_sta-y += ../common/spectrum.o
-
 rt2860v2_sta-y += ../common/rtmp_timer.o
 rt2860v2_sta-y += ../common/rt_channel.o
 rt2860v2_sta-y += ../common/cmm_profile.o
@@ -30,7 +28,6 @@ rt2860v2_sta-y += ../common/rtmp_swmcu.o
 rt2860v2_sta-y += ../common/cmm_cfg.o
 rt2860v2_sta-y += ../common/eeprom.o
 rt2860v2_sta-y += ../common/ee_flash.o
-
 
 rt2860v2_sta-y += ../common/cmm_mac_pci.o
 rt2860v2_sta-y += ../common/cmm_data_pci.o
@@ -230,4 +227,3 @@ endif
 ifeq ($(CONFIG_RT2860V2_80211N_DRAFT3),y)
 EXTRA_CFLAGS += -DDOT11N_DRAFT3
 endif
-

@@ -348,3 +348,8 @@ ifeq ($(CONFIG_RT2860V2_AP_INTELLIGENT_RATE_ADAPTION),y)
 EXTRA_CFLAGS   += -DNEW_RATE_ADAPT_SUPPORT
 endif
 
+#br fastpath work ok in 2.6.21 rt305x to...
+ifeq ($(CONFIG_RT2860V2_AP_BRIDGE_FASTPATH),y)
+EXTRA_CFLAGS +=  -DBG_FT_SUPPORT
+rt2860v2_ap-objs += ../common/br_ftph.o
+endif

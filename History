@@ -213,6 +213,7 @@
 24) Drop noatime function for small save CPU ticks<br>
 25) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
 26) Integrate kernel mode pppoe/ipv6 pass through (need add in gui)<br>
+27) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC<br>
 
 <br><br>
 <b>For support see:</b><br>

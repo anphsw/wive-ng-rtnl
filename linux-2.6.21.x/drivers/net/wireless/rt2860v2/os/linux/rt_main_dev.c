@@ -277,6 +277,11 @@ Note:
 		(3) BA Reordering: 				ba_reordering_resource_release()
 ========================================================================
 */
+#ifdef CONFIG_AP_SUPPORT
+#ifdef BG_FT_SUPPORT
+extern VOID BG_FTPH_Remove(VOID);
+#endif
+#endif
 int rt28xx_close(IN PNET_DEV dev)
 {
 	struct net_device * net_dev = (struct net_device *)dev;
@@ -558,6 +563,13 @@ Return Value:
 Note:
 ========================================================================
 */
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef BG_FT_SUPPORT
+extern VOID BG_FTPH_Init(VOID);
+#endif
+#endif
+
 int rt28xx_open(IN PNET_DEV dev)
 {				 
 	struct net_device * net_dev = (struct net_device *)dev;

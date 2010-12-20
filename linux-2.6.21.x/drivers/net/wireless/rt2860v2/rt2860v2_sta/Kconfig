@@ -69,4 +69,3 @@ config  RT2860V2_80211N_DRAFT3
 config RALINK_RT2880_STA_DBG
         bool "Debug support for STA mode"
 	depends on RT2860V2_STA
-
