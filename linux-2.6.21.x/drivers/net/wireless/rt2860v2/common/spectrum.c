@@ -2333,27 +2333,27 @@ typedef struct __PWR_CONSTRAIN_CFG
 
 	if (pAd->CommonCfg.TxPowerPercentage > 90)
 		;
-	else if (pAd->CommonCfg.TxPowerPercentage > 90)	/* reduce Pwr for 1 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 90)	/* reduce Pwr for 1 dB. */
 		DaltaPwr += 1;
-	else if (pAd->CommonCfg.TxPowerPercentage > 80)	/* reduce Pwr for 2 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 80)	/* reduce Pwr for 2 dB. */
 		DaltaPwr += 2;
-	else if (pAd->CommonCfg.TxPowerPercentage > 70)	/* reduce Pwr for 3 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 70)	/* reduce Pwr for 3 dB. */
 		DaltaPwr += 3;
-	else if (pAd->CommonCfg.TxPowerPercentage > 60)	/* reduce Pwr for 4 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 60)	/* reduce Pwr for 4 dB. */
 		DaltaPwr += 4;
-	else if (pAd->CommonCfg.TxPowerPercentage > 50)	/* reduce Pwr for 5 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 50)	/* reduce Pwr for 5 dB. */
 		DaltaPwr += 5;
-	else if (pAd->CommonCfg.TxPowerPercentage > 45)	/* reduce Pwr for 6 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 45)	/* reduce Pwr for 6 dB. */
 		DaltaPwr += 6;
-	else if (pAd->CommonCfg.TxPowerPercentage > 40)	/* reduce Pwr for 7 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 40)	/* reduce Pwr for 7 dB. */
 		DaltaPwr += 7;
-	else if (pAd->CommonCfg.TxPowerPercentage > 35)	/* reduce Pwr for 8 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 35)	/* reduce Pwr for 8 dB. */
 		DaltaPwr += 8;
-	else if (pAd->CommonCfg.TxPowerPercentage > 30)	/* reduce Pwr for 9 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 30)	/* reduce Pwr for 9 dB. */
 		DaltaPwr += 9;
-	else if (pAd->CommonCfg.TxPowerPercentage > 20)	/* reduce Pwr for 10 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 20)	/* reduce Pwr for 10 dB. */
 		DaltaPwr += 10;
-	else if (pAd->CommonCfg.TxPowerPercentage > 10)	/* reduce Pwr for 11 dB. */
+	else if (pAd->CommonCfg.TxPowerPercentage >= 10)	/* reduce Pwr for 11 dB. */
 		DaltaPwr += 11;
 	else
 		DaltaPwr += 12;				/* reduce Pwr for 12 dB. */

@@ -36,10 +36,6 @@ config  RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY
 	bool "Antenna Diversity Support"
 	depends on RT2860V2_STA
 
-#config  RT2860V2_STA_WAPI
-#        bool "WAPI Support"
-#        depends on RT2860V2_STA
-
 config  RT2860V2_STA_VIDEO_TURBINE
 	bool "Video Turbine support"
 	depends on RT2860V2_STA

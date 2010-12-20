@@ -124,26 +124,6 @@ ifeq ($(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY),y)
 rt2860v2_ap-objs += ../os/linux/ap_diversity.o
 endif
 
-#ifeq ($(CONFIG_RT2860V2_AP_WAPI),y)
-#rt2860v2_ap-objs += wapi.obj
-#rt2860v2_ap-objs += wapi_sms4.obj
-#rt2860v2_ap-objs += wapi_crypt.obj
-#endif
-
-#ifeq ($(CONFIG_RT2860V2_80211R_FT),y)
-#rt2860v2_ap-objs += ../common/ft.o
-#rt2860v2_ap-objs += ../common/ft_tlv.o
-#rt2860v2_ap-objs += ../common/ft_ioctl.o
-#rt2860v2_ap-objs += ../common/ft_rc.o
-#rt2860v2_ap-objs += ../ap/ap_ftkd.o
-#endif
-
-#ifeq ($(CONFIG_RT2860V2_80211K_RR),y)
-#rt2860v2_ap-objs += ../common/rrm_tlv.o
-#rt2860v2_ap-objs += ../common/rrm_sanity.o
-#rt2860v2_ap-objs += ../common/rrm.o
-#endif
-
 ifeq ($(CONFIG_RT2860V2_AP_VIDEO_TURBINE),y)
 rt2860v2_ap-objs += ../common/cmm_video.o
 endif
@@ -265,8 +245,7 @@ endif
 ifeq ($(CONFIG_RT2860V2_AP_WMM_ACM),y)
 EXTRA_CFLAGS += -DWMM_ACM_SUPPORT
 endif
-
-
+    
 ifeq ($(CONFIG_RT2860V2_AP_LED),y)
 EXTRA_CFLAGS += -DWLAN_LED -DLED_CONTROL_SUPPORT
 endif
@@ -307,14 +286,6 @@ endif
 ifeq ($(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY),y)
 EXTRA_CFLAGS   += -DRT3XXX_ANTENNA_DIVERSITY_SUPPORT
 endif
-
-#ifeq ($(CONFIG_RT2860V2_AP_WAPI),y)
-#ifeq ($(CONFIG_RALINK_RT3883),y)
-#EXTRA_CFLAGS   += -DWAPI_SUPPORT
-#else
-#EXTRA_CFLAGS   += -DWAPI_SUPPORT -DSOFT_ENCRYPT
-#endif
-#endif
 
 ifeq ($(CONFIG_RT2860V2_AP_COC),y)
 EXTRA_CFLAGS   += -DGREENAP_SUPPORT -DCOC_SUPPORT

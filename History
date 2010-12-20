@@ -211,10 +211,11 @@
 22) Update boot code<br>
 23) Some optimization and fix in scripts<br>
 24) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC<br>
-25) Drop noatime function for small save CPU ticks<br>
-26) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
-27) Integrate kernel mode pppoe/ipv6 pass through (need add in gui)<br>
-28) Wifi more small step for power regulation. (need correct gui)<br>
+25) Drop noatime function for small devices save CPU ticks<br>
+26) Integrate kernel mode pppoe/ipv6 pass through (need add in gui)<br>
+27) Wifi more small step for power regulation. (need correct gui, values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
+28) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
+29) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
 
 <br><br>
 <b>For support see:</b><br>

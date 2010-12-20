@@ -92,12 +92,6 @@ rt2860v2_sta-y += ../common/acm_comm.o
 rt2860v2_sta-y += ../common/acm_iocl.o
 endif
 
-#ifeq ($(CONFIG_RT2860V2_STA_WAPI),y)
-#rt2860v2_sta-y += wapi.obj
-#rt2860v2_sta-y += wapi_sms4.obj
-#rt2860v2_sta-y += wapi_crypt.obj
-#endif
-
 #ifeq ($(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY),y)
 #rt2860v2_sta-y += ../os/linux/ap_diversity.o
 #endif
@@ -195,14 +189,6 @@ endif
 ifeq ($(CONFIG_RT2860V2_STA_DLS),y)
 EXTRA_CFLAGS += -DQOS_DLS_SUPPORT
 endif
-
-#ifeq ($(CONFIG_RT2860V2_STA_WAPI),y)
-#ifeq ($(CONFIG_RALINK_RT3883),y)
-#EXTRA_CFLAGS += -DWAPI_SUPPORT
-#else
-#EXTRA_CFLAGS += -DWAPI_SUPPORT -DSOFT_ENCRYPT
-#endif
-#endif
 
 ifeq ($(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY),y)
 EXTRA_CFLAGS   += -DRT3XXX_ANTENNA_DIVERSITY_SUPPORT
