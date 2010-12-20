@@ -409,7 +409,6 @@ init_fnc_t *init_sequence[] = {
 };
 #endif
 
-
 //  
 void board_init_f(ulong bootflag)
 {
@@ -591,6 +590,7 @@ void board_init_f(ulong bootflag)
 	/* NOTREACHED - relocate_code() does not return */
 }
 
+
 #define SEL_LOAD_LINUX_SDRAM            1
 #define SEL_LOAD_LINUX_WRITE_FLASH      2
 #define SEL_BOOT_FLASH                  3
@@ -725,6 +725,64 @@ int tftp_config(int type, char *argv[])
 	setenv("bootfile", file);
 	if (strcmp(default_file, file) != 0)
 		modifies++;
+
+	return 0;
+}
+
+int tftp_config_auto(int type, char *argv[])
+{
+	char *s;
+	char default_file[ARGV_LEN], file[ARGV_LEN], devip[ARGV_LEN], srvip[ARGV_LEN], default_ip[ARGV_LEN];
+
+	memset(default_file, 0, ARGV_LEN);
+	memset(file, 0, ARGV_LEN);
+	memset(devip, 0, ARGV_LEN);
+	memset(srvip, 0, ARGV_LEN);
+	memset(default_ip, 0, ARGV_LEN);
+
+	s = getenv("ipaddr");
+	memcpy(devip, s, strlen(s));
+	memcpy(default_ip, s, strlen(s));
+	printf("(%s) ", devip);
+
+	s = getenv("serverip");
+	memcpy(srvip, s, strlen(s));
+	memset(default_ip, 0, ARGV_LEN);
+	memcpy(default_ip, s, strlen(s));
+	printf("(%s) ", srvip);
+
+	if (type == SEL_LOAD_LINUX_WRITE_FLASH 
+			|| type == SEL_LOAD_CRAMFS_WRITE_FLASH) {
+#if defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD)
+		argv[1] = "0x8a100000";
+#else
+		argv[1] = "0x80100000";
+#endif
+		if(type == SEL_LOAD_CRAMFS_WRITE_FLASH)
+			printf("\tInput Linux FileSystem filename ");
+		else
+			printf("\tInput Linux Kernel filename ");
+
+		strncpy(argv[2], "uImage", ARGV_LEN);
+	}
+	else if (type == SEL_LOAD_LINUX_SDRAM ) {
+		/* bruce to support ramdisk */
+#if defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD)
+		argv[1] = "0x8a800000";
+#else
+		argv[1] = "0x80800000";
+#endif
+		printf("\tInput Linux Kernel filename ");
+		strncpy(argv[2], "uImage", ARGV_LEN);
+	}
+
+	s = getenv("bootfile");
+	if (s != NULL) {
+		memcpy(file, s, strlen(s));
+		memcpy(default_file, s, strlen(s));
+	}
+	printf("(%s) ", file);
+	filename_copy (argv[2], file, sizeof(file));
 
 	return 0;
 }
@@ -1016,6 +1074,22 @@ int check_image_validation(void)
 }
 #endif
 
+#define REG32(x)        (*((volatile u32 *)(x)))
+static int reset_pressed(void)
+{
+	if (REG32(RT2880_REG_PIODATA) & (1 << 10)) 
+	    return 0;
+
+	return 1;
+}
+
+static int wps_pressed(void)
+{
+	if (REG32(RT2880_REG_PIODATA) & (1 << 0)) 
+	    return 0;
+
+	return 1;
+}
 
 /************************************************************************
  *
@@ -1363,6 +1437,13 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	}
 	putc ('\n');
 
+        if (wps_pressed())
+                BootType = 'L'; //wps push - load to ram
+        else if (reset_pressed())
+                BootType = 'F'; //reset push - write to flash
+        else if (reset_pressed() && wps_pressed())
+                BootType = '3'; //reset and wps push - load from flash
+
 	if(BootType == '3') {
 		char *argv[2];
 		sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
@@ -1619,6 +1700,95 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 			//reset            
 			do_reset(cmdtp, 0, argc, argv);
+			break;
+
+		case 'L':
+			printf("   \n%d: System Load Linux to SDRAM via TFTP. \n", SEL_LOAD_LINUX_SDRAM);
+			tftp_config_auto(SEL_LOAD_LINUX_SDRAM, argv);           
+			argc= 3;
+			setenv("autostart", "yes");
+			do_tftpb(cmdtp, 0, argc, argv);
+			break;
+
+		case 'F':
+			printf("   \n%d: System Load Linux Kernel then write to Flash via TFTP. \n", SEL_LOAD_LINUX_WRITE_FLASH);
+			printf(" Warning!! Erase Linux in Flash then burn new one. Are you sure?(Y/N)\n");
+			confirm = getc();
+			if (confirm != 'y' && confirm != 'Y') {
+				printf(" Operation terminated\n");
+				break;
+			}
+			tftp_config_auto(SEL_LOAD_LINUX_WRITE_FLASH, argv);
+			argc= 3;
+			setenv("autostart", "no");
+			do_tftpb(cmdtp, 0, argc, argv);
+
+#if defined (CFG_ENV_IS_IN_NAND)
+			if (1) {
+				unsigned int load_address = simple_strtoul(argv[1], NULL, 16);
+				ranand_erase_write((u8 *)load_address, CFG_KERN_ADDR-CFG_FLASH_BASE, NetBootFileXferSize);
+			}
+#elif defined (CFG_ENV_IS_IN_SPI)
+			if (1) {
+				unsigned int load_address = simple_strtoul(argv[1], NULL, 16);
+				raspi_erase_write((u8 *)load_address, CFG_KERN_ADDR-CFG_FLASH_BASE, NetBootFileXferSize);
+			}
+#else //CFG_ENV_IS_IN_FLASH
+#if (defined (ON_BOARD_8M_FLASH_COMPONENT) || defined (ON_BOARD_16M_FLASH_COMPONENT)) && (defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD) || defined (RT3052_MP1))
+			//erase linux
+			if (NetBootFileXferSize <= (0x400000 - (CFG_BOOTLOADER_SIZE + CFG_CONFIG_SIZE + CFG_FACTORY_SIZE))) {
+				e_end = CFG_KERN_ADDR + NetBootFileXferSize;
+				if (0 != get_addr_boundary(&e_end))
+					break;
+				printf("Erase linux kernel block !!\n");
+				printf("From 0x%X To 0x%X\n", CFG_KERN_ADDR, e_end);
+				flash_sect_erase(CFG_KERN_ADDR, e_end);
+			}
+			else if (NetBootFileXferSize <= CFG_KERN_SIZE) {
+				e_end = PHYS_FLASH_2 + NetBootFileXferSize - (0x400000 - (CFG_BOOTLOADER_SIZE + CFG_CONFIG_SIZE + CFG_FACTORY_SIZE));
+				if (0 != get_addr_boundary(&e_end))
+					break;
+				printf("Erase linux kernel block !!\n");
+				printf("From 0x%X To 0x%X\n", CFG_KERN_ADDR, CFG_FLASH_BASE+0x3FFFFF);
+				flash_sect_erase(CFG_KERN_ADDR, CFG_FLASH_BASE+0x3FFFFF);
+				printf("Erase linux file system block !!\n");
+				printf("From 0x%X To 0x%X\n", PHYS_FLASH_2, e_end);
+				flash_sect_erase(PHYS_FLASH_2, e_end);
+			}
+#else
+			if (NetBootFileXferSize <= (bd->bi_flashsize - (CFG_BOOTLOADER_SIZE + CFG_CONFIG_SIZE + CFG_FACTORY_SIZE))) {
+				e_end = CFG_KERN_ADDR + NetBootFileXferSize;
+				if (0 != get_addr_boundary(&e_end))
+					break;
+				printf("Erase linux kernel block !!\n");
+				printf("From 0x%X To 0x%X\n", CFG_KERN_ADDR, e_end);
+				flash_sect_erase(CFG_KERN_ADDR, e_end);
+			}
+#endif
+			else {
+				printf("***********************************\n");
+				printf("The Linux Image size is too big !! \n");
+				printf("***********************************\n");
+				break;
+			}
+
+			//cp.linux
+			argc = 4;
+			argv[0]= "cp.linux";
+			do_mem_cp(cmdtp, 0, argc, argv);
+#endif //CFG_ENV_IS_IN_FLASH
+
+#ifdef DUAL_IMAGE_SUPPORT
+			/* Don't do anything to the firmware upgraded in Uboot, since it may be used for testing */
+			setenv("Image1Stable", "1");
+			saveenv();
+#endif
+
+			//bootm bc050000
+			argc= 2;
+			sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
+			argv[1] = &addr_str[0];
+			do_bootm(cmdtp, 0, argc, argv);            
 			break;
 
 		default:
