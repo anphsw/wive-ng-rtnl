@@ -18,3 +18,6 @@ obj-$(CONFIG_WIRELESS_EXT) += wireless.o
 obj-$(CONFIG_NETPOLL) += netpoll.o
 obj-$(CONFIG_NET_DMA) += user_dma.o
 obj-$(CONFIG_FIB_RULES) += fib_rules.o
+
+obj-$(CONFIG_NET_PPPOE_IPV6_PTHROUGH) += pthrough/
+

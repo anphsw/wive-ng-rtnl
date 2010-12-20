@@ -1,12 +1,12 @@
 /*
  * passthrough 
  * This module is used to pass through the specific packets
- * 
- * Peter Wu 20050804
  */
 
 #include <linux/netdevice.h>
 #include <linux/proc_fs.h>
+
+#define PT_ROOT		"pthrough"
 
 extern int pppoe_pt_enable;
 extern int ipv6_pt_enable;
@@ -29,7 +29,6 @@ int private_pthrough(struct sk_buff *skb)
 	return ret;
 }
 
-#define PT_ROOT		"pthrough"
 static struct proc_dir_entry * root = NULL;
 static struct proc_dir_entry * pppoe = NULL;
 static struct proc_dir_entry * ipv6 = NULL;
@@ -88,4 +87,3 @@ pt_out:
 	printk("Unable to create %s !!\n", PT_ROOT);
 	return -1;
 }
-

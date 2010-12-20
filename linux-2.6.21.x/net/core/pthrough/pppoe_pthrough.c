@@ -1,12 +1,15 @@
 /*
  * PPPoE passthrough 
  * This module is used to pass through the PPPoE packets
- * 
- * Peter Wu 20050804
  */
 
 #include <linux/netdevice.h>
 #include <linux/proc_fs.h>
+
+//#define DEBUG
+#define ETH_TYPE_PPPOE_DISCOVERY	0x8863
+#define ETH_TYPE_PPPOE_SESSION		0x8864
+#define PTABLE_SIZE 			16
 
 extern struct net_device *dev_get_by_name(const char *name);
 extern void dev_set_promiscuity(struct net_device *dev, int inc);
@@ -16,14 +19,9 @@ int pppoe_pt_enable = 0;
 
 char pppoe_pt_landev[IFNAMSIZ];
 char pppoe_pt_wandev[IFNAMSIZ];
-#define ETH_TYPE_PPPOE_DISCOVERY	0x8863
-#define ETH_TYPE_PPPOE_SESSION		0x8864
 
-#define PTABLE_SIZE 	16
 static int pthrough_idx = 0;
 static unsigned char pthrough_table[PTABLE_SIZE][ETH_ALEN];
-
-//struct sk_buff * private_passthrough(struct sk_buff_head *list)
 
 /* return 1, if we want to handle this packet, or
  * return 0, let other ones do this	 */
@@ -37,22 +35,17 @@ int pppoe_pthrough(struct sk_buff *skb)
 
 	/* check if pppoe pass through enabled or not
 	 * if not set yet, just return and do nothing */
-//	if (!pppoe_pt_enable) return 0;
 	
 	// check and forward packets
 	proto = 0x100*(skb->mac.raw[12]) + skb->mac.raw[13];
 	dmac = skb->mac.raw;
 	smac = dmac + 6;
-//	proto = skb->mac.ethernet->h_proto;
-//	smac = skb->mac.ethernet->h_source;
-//	dmac = skb->mac.ethernet->h_dest;
 
 	if ((proto == ETH_TYPE_PPPOE_SESSION) || (proto == ETH_TYPE_PPPOE_DISCOVERY)) {
 		if (strcmp(skb->dev->name, pppoe_pt_landev) == 0) {
-//			if (!(skb->dev->flags & IFF_PROMISC)) {
-//				skb->dev->flags |= IFF_PROMISC;
-//			}
-//			printk("PeTeR: PPPoE OutGoing packet (%s)\n", skb->dev->name);
+#ifdef DEBUG
+			printk("pppoe_pass: PPPoE OutGoing packet (%s)\n", skb->dev->name);
+#endif
 			for (i=0; i<pthrough_idx; i++) {
 				if (!memcmp(pthrough_table[i], smac, ETH_ALEN)) {
 					break;
@@ -62,11 +55,11 @@ int pppoe_pthrough(struct sk_buff *skb)
 				memcpy(pthrough_table[i], smac, ETH_ALEN);
 				pthrough_idx++;
 				if (pthrough_idx >= PTABLE_SIZE) {
-					printk("PeTeR: pthrough_table full!! (%d)\n", pthrough_idx);
+					printk("pppoe_pass: pthrough_table full!! (%d)\n", pthrough_idx);
 					pthrough_idx--;
 				}
 			}
-//			printk("PeTeR: skb->dev (%s -> %s)\n", landev_name, wandev_name);
+
 			dev = dev_get_by_name(pppoe_pt_wandev);
 			if (!dev)
 				return 0;
@@ -79,7 +72,9 @@ int pppoe_pthrough(struct sk_buff *skb)
 			return 1;
 		}
 		if (strcmp(skb->dev->name, pppoe_pt_wandev) == 0) {
-//			printk("PeTeR: PPPoE Incoming packet (%s)\n", skb->dev->name);
+#ifdef DEBUG
+			printk("pppoe_pass: PPPoE Incoming packet (%s)\n", skb->dev->name);
+#endif
 			for (i=0; i<pthrough_idx; i++) {
 				if (!memcmp(pthrough_table[i], dmac, ETH_ALEN)) {
 					dev = dev_get_by_name(pppoe_pt_landev);
@@ -116,6 +111,7 @@ int proc_pppoe_read(char *page, char **start, off_t off, int count, int *eof, vo
 int proc_pppoe_write(struct file *file, const char * buffer, unsigned long count, void *data)
 {
 	char *pt;
+	int cur_count=0;
 	struct net_device *dev;
 
 	if (pppoe_pt_enable) {
@@ -132,32 +128,54 @@ int proc_pppoe_write(struct file *file, const char * buffer, unsigned long count
 
 	/* we expect that buffer contain format of "landev_name,wandev_name" */
 	memset(pppoe_pt_landev, 0x0, sizeof (pppoe_pt_landev));
-	for (pt=pppoe_pt_landev; *buffer && (*buffer != ','); buffer++) {
+	for (pt=pppoe_pt_landev; (*buffer && (*buffer != ',') && (*buffer != '\n')) ; buffer++) {
 		if ((*buffer != ' ') && isCHAR(*buffer)) {
 			*pt = *buffer;
 			pt++;
 		}
+	    cur_count++;
+	    if (cur_count >= count)
+		break;
 	}
 	
-	if (!(*buffer))	goto ppw_failed;
+	if (!(*buffer) || (cur_count >= count))	{
+	    printk("pppoe_pass: need <lan>,<wan>; device name format\n"); 
+	    goto ppw_failed;
+	}
 	
 	memset(pppoe_pt_wandev, 0x0, sizeof (pppoe_pt_wandev));
-	for (pt=pppoe_pt_wandev, buffer++; *buffer; buffer++) {
+	for (pt=pppoe_pt_wandev, buffer++; (*buffer && (*buffer != ';') && (*buffer != '\n')); buffer++) {
 		if ((*buffer != ' ') && isCHAR(*buffer)) {
 			*pt = *buffer;
 			pt++;
 		}
+	    cur_count++;
+	    if (cur_count >= count)
+		break;
 	}
 	
-	if (!(dev = dev_get_by_name(pppoe_pt_landev))) goto ppw_failed;
-	else {
-		dev_set_promiscuity(dev, 1);
-		dev_put(dev);
+	if (!(dev = dev_get_by_name(pppoe_pt_landev))) {
+#ifdef DEBUG
+	    printk("pppoe_pass: no lan device %s)\n",pppoe_pt_landev); 
+#endif
+	    goto ppw_failed;
 	}
-	if (!(dev = dev_get_by_name(pppoe_pt_wandev))) goto ppw_failed;
-	else {
-		dev_set_promiscuity(dev, 1);
-		dev_put(dev);
+	else 
+	{
+	    dev_set_promiscuity(dev, 1);
+	    dev_put(dev);
+	}
+
+	if (!(dev = dev_get_by_name(pppoe_pt_wandev))) {
+#ifdef DEBUG
+	    printk("pppoe_pass: no wan device %s)\n",pppoe_pt_wandev); 
+#endif
+	    goto ppw_failed;
+	}
+	else 
+	{
+	    dev_set_promiscuity(dev, 1);
+	    dev_put(dev);
 	}
 	
 	pppoe_pt_enable = 1;
@@ -168,46 +186,6 @@ ppw_failed:
 	pppoe_pt_enable = 0;
 	memset(pppoe_pt_landev, 0x0, sizeof (pppoe_pt_landev));
 	memset(pppoe_pt_wandev, 0x0, sizeof (pppoe_pt_wandev));
-//	printk("failed\n");
-
+	printk("pppoe_pass: Disabled.\n");
 	return count;
 }
-
-#if 0
-#define PT_ROOT		"pthrough"
-static struct proc_dir_entry * root;
-
-int pthrough_create_proc_entry(void)
-{
-	static struct proc_dir_entry * pppoe;
-
-	/* create directory */
-	root = proc_mkdir(PT_ROOT, NULL);
-	if (root == NULL) {
-		printk("proc_mkdir return NULL!\n");
-		goto pt_out;
-	}
-
-	/* create entries */
-	pppoe = create_proc_entry("pppoe", 0644, root);
-	if (pppoe == NULL) {
-		printk("create_proc_entry (pppoe) return NULL!\n");
-		goto pt_out;
-	}
-	pppoe->read_proc = proc_pppoe_read;
-	pppoe->write_proc = proc_pppoe_write;
-	
-	return 0;
-	
-pt_out:
-	printk("Unable to create %s !!\n", PT_ROOT);
-	return -1;
-}
-
-void pthrough_rmove_proc_entry(void)
-{
-	remove_proc_entry("pppoe", root);
-	remove_proc_entry(PT_ROOT, NULL);
-	root = NULL;
-}
-#endif // if 0

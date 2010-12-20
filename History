@@ -208,9 +208,11 @@
 19) Update HW_NAT kernel code and add hw_nat userspace utils<br>
 20) Add LCP echo adaptive options on VPN page. Default on<br>
 21) Use opensource toolchain at 4.2.4 gcc for build all coe in project. No binary from Ralink needed<br>
-22) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
-23) Update boot code<br>
-24) Some optimization and fix in scripts<br>
+22) Update boot code<br>
+23) Some optimization and fix in scripts<br>
+24) Drop noatime function for small save CPU ticks<br>
+25) Replace original KabInet auth to small version by thMiron and default on (need gui write)<br>
+26) Integrate kernel mode pppoe/ipv6 pass through (need add in gui)<br>
 
 <br><br>
 <b>For support see:</b><br>

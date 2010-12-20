@@ -120,6 +120,12 @@
 #include <linux/err.h>
 #include <linux/ctype.h>
 
+#ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
+extern int private_pthrough(struct sk_buff *skb);
+extern int pthrough_create_proc_entry(void);
+extern void pthrough_remove_proc_entry(void);
+#endif
+
 int config_raeth_mcast=1;
 EXPORT_SYMBOL(config_raeth_mcast);
 
@@ -1796,6 +1802,13 @@ int netif_receive_skb(struct sk_buff *skb)
 
 	rcu_read_lock();
 
+#ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
+	//if packet forwarded return 1
+	if (private_pthrough(skb)) {
+	    ret = NET_RX_SUCCESS;
+	    goto out;
+	}
+#endif
 #ifdef CONFIG_NET_CLS_ACT
 	if (skb->tc_verd & TC_NCLS) {
 		skb->tc_verd = CLR_TC_NCLS(skb->tc_verd);
@@ -2245,9 +2258,18 @@ static int __init dev_proc_init(void)
 		goto out_dev;
 	if (wireless_proc_init())
 		goto out_softnet;
+#ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
+	if (pthrough_create_proc_entry())
+		goto out_pthrough;
+#endif /* CONFIG_NET_PPPOE_IPV6_PTHROUGH */
+
 	rc = 0;
 out:
 	return rc;
+#ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
+out_pthrough:
+        pthrough_remove_proc_entry();
+#endif /* CONFIG_NET_PPPOE_IPV6_PTHROUGH */
 out_softnet:
 	proc_net_remove("softnet_stat");
 out_dev:
