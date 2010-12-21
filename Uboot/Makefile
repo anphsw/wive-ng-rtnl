@@ -181,7 +181,7 @@ LIBS += common/libcommon.a
 PLATFORM_LIBS += -L $(shell dirname `$(CC) $(CFLAGS)  -print-libgcc-file-name`)
 
 
-KAIKER_LIBS := $(shell dirname $(CC) $(CFLAGS) -lgcc -print-libgcc-file-name)
+KAIKER_LIBS := $(shell dirname `$(CC) $(CFLAGS) -lgcc -print-libgcc-file-name`)
 
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
