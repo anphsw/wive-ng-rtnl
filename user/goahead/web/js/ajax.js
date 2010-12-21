@@ -354,7 +354,7 @@ function ajaxReloadDelayedPage(delay, url)
 
 			// Load/reload page
 			if (url == null)
-				pw.location.reload(true);
+				pw.location.href = pw.location.href;
 			else
 				pw.location.href = url;
 		}
