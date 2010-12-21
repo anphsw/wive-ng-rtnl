@@ -392,6 +392,7 @@ clean: modules_clean
 	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
 	make clean -C uClibc++/extra/config
 	make clean -C Uboot
+	make mrproper -C Uboot
 	make clean -C tools
 	find $(ROOTDIR) -name 'config.log' | xargs rm -f
 	find $(ROOTDIR)/user -name '*.o' | xargs rm -f
