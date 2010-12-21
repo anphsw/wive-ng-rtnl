@@ -9,16 +9,12 @@
 
 CONF	= $(ROOTDIR)/$(LINUXDIR)
 CONF_H  = $(CONF)/include/linux/autoconf.h
-NVRAM	= $(ROOTDIR)/lib/libnvram
-CRC_L	= $(NVRAM)/crc32.o
+CRC_L	= $(ROOTDIR)/lib/libnvram/crc32.o
 
 UPLOAD_CGI 		= upload.cgi 
 UPLOAD_BOOTLOADER_CGI	= upload_bootloader.cgi
 UPLOAD_SETTINGS		= upload_settings.cgi
 USB_UPGRADE_CGI		= usb_upgrade.cgi
-
-#Need direct link to libnvram
-CFLAGS  += -I$(NVRAM) -lnvram
 
 ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_BOOTLOADER_CGI) $(UPLOAD_SETTINGS)
 ifeq ("$(CONFIG_USB_STORAGE)", "y")
