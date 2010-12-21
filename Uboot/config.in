@@ -1,4 +1,4 @@
-string 'Cross Compiler Path' CONFIG_CROSS_COMPILER_PATH  /opt/Wive-RTNL/toolchain/bin
+string 'Cross Compiler Path' CONFIG_CROSS_COMPILER_PATH  `pwd`/toolchain/bin
 comment ""
 
 
