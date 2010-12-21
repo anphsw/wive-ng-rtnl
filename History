@@ -217,7 +217,8 @@
 28) Integrate kernel mode pppoe/ipv6 pass through (need add in gui pppoe_pass=0/1, ipv6_pass=0/1)<br>
 29) Wifi more small step for power regulation. (need correct gui, values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
 30) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
-31) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
+31) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat (need add in gui)<br>
+32) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
 
 <br><br>
 <b>For support see:</b><br>
