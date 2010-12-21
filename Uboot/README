@@ -1,3 +1,10 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!NOT TRY FLASH BOOT MAKED GCC>3.4.x!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!ETHERNET RAETH DRIVER IN UBOOT NOT WORK IF GCC>3.4!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!USE RALINK GCC 3.4.2 IN Uboot/toolchain DIR INSTEAD!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 #
 # (C) Copyright 2000 - 2005
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
