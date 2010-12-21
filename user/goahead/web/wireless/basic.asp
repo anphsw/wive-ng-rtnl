@@ -891,7 +891,7 @@ function initValue()
 	else
 		form.n_mode[0].checked = true;
 
-	if (ht_gi == "800")
+	if (ht_gi == "0")
 		form.n_gi[0].checked = true;
 	else
 		form.n_gi[1].checked = true;
@@ -1438,8 +1438,8 @@ function doRadioStatusChange(form)
 <tr>
 	<td class="head" id="basicHTGI">Guard Interval</td>
 	<td>
-		<input type="radio" name="n_gi" value="800" checked><font id="basicHTLongGI">Long&nbsp;</font>
-		<input type="radio" name="n_gi" value="400"><font id="basicHTAutoGI">Auto</font>
+		<input type="radio" name="n_gi" value="0" checked><font id="basicHTLongGI">Long&nbsp;</font>
+		<input type="radio" name="n_gi" value="1"><font id="basicHTAutoGI">Auto</font>
 	</td>
 </tr>
 <tr>

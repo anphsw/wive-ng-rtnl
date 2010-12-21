@@ -371,10 +371,10 @@ function init11NValues()
 <tr>
 	<td class="head" id="staadvGI">GI</td>
 	<td>
-		<input type=radio name="n_gi" value="800" <% var ngi = getCfgZero(0, "HT_GI");
-			if (ngi == "800") write("checked"); %>><font id="staadvGILong">Long</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type=radio name="n_gi" value="400" <%
-			if (ngi != "800") write("checked"); %>><font id="staadvGIAuto">Auto</font>
+		<input type=radio name="n_gi" value="0" <% var ngi = getCfgZero(0, "HT_GI");
+			if (ngi == "0") write("checked"); %>><font id="staadvGILong">Long</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type=radio name="n_gi" value="1" <%
+			if (ngi != "0") write("checked"); %>><font id="staadvGIAuto">Auto</font>
 	</td>
 </tr>
 <tr>

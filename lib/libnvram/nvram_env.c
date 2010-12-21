@@ -990,6 +990,7 @@ int gen_wifi_config(int mode)
 			fprintf(fp, "WscConfStatus=%d\n", 2);
 		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
 			FPRINT_STR(WscVendorPinCode);
+
 		FPRINT_NUM(WCNTest);
 
 		FPRINT_NUM(AccessPolicy0);
