@@ -703,7 +703,6 @@ int usb_serial_probe(struct usb_interface *interface,
 	int num_ports = 0;
 	int max_endpoints;
 
-	printk("[K] usb serial probe\n");	// tmp test
 	lock_kernel(); /* guard against unloading a serial driver module */
 	type = search_serial_device(interface);
 	if (!type) {
@@ -1082,7 +1081,6 @@ void usb_serial_disconnect(struct usb_interface *interface)
 	struct device *dev = &interface->dev;
 	struct usb_serial_port *port;
 
-	printk("[K] usb serial disconnect\n");	// tmp test
 	usb_serial_console_disconnect(serial);
 	dbg ("%s", __FUNCTION__);
 

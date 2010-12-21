@@ -90,6 +90,13 @@ EXPORT_SYMBOL_GPL(nf_conntrack_htable_size);
 unsigned int nf_conntrack_max __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+#define CONNTRACK_PORT_ARRAY_SIZE   15
+unsigned int general_traffic_conntrack_max = 1024; // conntrack_max/2
+static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
+EXPORT_SYMBOL_GPL(general_traffic_conntrack_max);
+#endif
+
 struct list_head *nf_conntrack_hash __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_hash);
 
@@ -508,15 +515,13 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 	struct nf_conntrack_tuple_hash *h;
 	unsigned int hash = hash_conntrack(tuple);
 
-	//Ricky CAO: Below is added for user space program to clear connection track table
-	//			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
     	if(nf_conntrack_clear){
 		nf_conntrack_clear=0;
 		nf_conntrack_flush();
 		printk("Clear connection track table\n");
     	}
-    	//Ricky CAO: Above is added for user space program to clear connection track table
-
+#endif
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
 		if (nf_ct_tuplehash_to_ctrack(h) != ignored_conntrack &&
 		    nf_ct_tuple_equal(tuple, &h->tuple)) {
@@ -577,14 +582,13 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
 {
     struct nf_conntrack_tuple_hash *h;
 
-    //Ricky CAO: Below is added for user space program to clear connection track table
-    //			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
     if(nf_conntrack_clear){
     	nf_conntrack_clear=0;
 	nf_conntrack_flush();
 	printk("Clear connection track table\n");
     }
-    //Ricky CAO: Above is added for user space program to clear connection track table
+#endif
 
     read_lock_bh(&nf_conntrack_lock);
     h = __nf_cone_conntrack_find(tuple, ignored_conntrack);
@@ -912,7 +916,41 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	struct nf_conntrack_expect *exp;
 	u_int32_t features = 0;
 
-	//printk("init conntrack\n");	// tmp test
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+	int i, passable;
+	unsigned short port;
+
+	/* Here we examine by port if the traffic is allowed to pass. */
+	if(general_traffic_conntrack_max && atomic_read(&nf_conntrack_count) >= general_traffic_conntrack_max)
+	{
+		/* check ports */
+		passable = 0;
+		if(l3proto == IPPROTO_TCP || l3proto == IPPROTO_UDP)
+		{
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
+			printk(KERN_WARNING"conn %d exceeds limit %d\n", atomic_read(&nf_conntrack_count), general_traffic_conntrack_max);
+#endif
+			/* I dont know why the skb tcp header points to wrong place */
+			port = __swab16(*((unsigned short *)(skb->nh.iph)+11));
+			for(i=0;i<CONNTRACK_PORT_ARRAY_SIZE;i++)
+				if((privilege_conntrack_port[i]) &&
+				    (privilege_conntrack_port[i]==port)){
+					passable=1;
+					break;
+				}
+		}else
+			passable = 1;
+
+		if(!passable)
+		{
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
+			printk(KERN_WARNING "nf_conntrack: general conntrack streams full, dropping packet.\n");
+#endif
+			return ERR_PTR(-ENOMEM);
+		}
+	}
+#endif /* CONFIG_NF_PRIVILEGE_CONNTRACK */
+
 	if (!nf_ct_invert_tuple(&repl_tuple, tuple, l3proto, l4proto)) {
 		DEBUGP("Can't invert tuple.\n");
 		return NULL;
@@ -975,7 +1013,6 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 		nf_conntrack_expect_put(exp);
 	}
 
-	//printk("init conntrack end\n");	// tmp test
 	return &conntrack->tuplehash[IP_CT_DIR_ORIGINAL];
 }
 
@@ -1004,7 +1041,6 @@ resolve_normal_ct(struct sk_buff *skb,
 		return NULL;
 	}
 
-	//printk("src=(%x), dst=%x(%x)\n", ntohl(tuple.src.u3.ip), ntohl(tuple.dst.u3.ip));	// tmp test
 	/* look for tuple match */
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
         /*
@@ -1505,7 +1541,6 @@ void nf_conntrack_cleanup(void)
 	nf_conntrack_flush();
 	if (atomic_read(&nf_conntrack_count) != 0) {
 		schedule();
-		printk("i see dead people\n");	// tmp test
 		goto i_see_dead_people;
 	}
 	/* wait until all references to nf_conntrack_untracked are dropped */
@@ -1628,7 +1663,10 @@ int __init nf_conntrack_init(void)
 #endif
 	 /* SpeedMod: Hashtable size */
         nf_conntrack_htable_size = 16384;
-        nf_conntrack_max = nf_conntrack_htable_size / 2;
+
+	//Limit ~2k records for 16Mb devices. 
+	//For more memory devices need increase from userspace.
+        nf_conntrack_max = nf_conntrack_htable_size / 8;
 
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,

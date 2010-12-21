@@ -953,7 +953,6 @@ static int storage_probe(struct usb_interface *intf,
 	int result;
 	struct task_struct *th;
 
-	printk("[K] storage probe\n");	// tmp test
 	if (usb_usual_check_type(id, USB_US_TYPE_STOR))
 		return -ENXIO;
 

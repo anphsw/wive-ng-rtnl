@@ -81,6 +81,26 @@ config IP_NF_CONNTRACK_SUPPORT
 
 endchoice
 
+config NF_PRIVILEGE_CONNTRACK
+	bool "Privilege conntrack for base DST ports."
+	depends on NF_CONNTRACK_SUPPORT
+	default y
+	help
+	  Memory for porst 80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69 may be allocated
+	  over general max conntrack count. For set thresould use net.general_conntrack_max variable 
+	  over sysctl or proc.
+
+config NF_PRIVILEGE_CONNTRACK_DEBUG
+	bool "Privilege conntrack debug."
+	depends on NF_CONNTRACK_SUPPORT
+
+config NF_FLUSH_CONNTRACK
+	bool "Below is added for user space program to clear connection track table"
+	depends on NF_PRIVILEGE_CONNTRACK
+	default y
+	help
+	  Ricky CAO: When user set /proc/sys/net/nf_conntrack_flush to , then clear table.
+
 config NF_CONNTRACK
 	bool
 	default y if NF_CONNTRACK_SUPPORT && NF_CONNTRACK_ENABLED=y

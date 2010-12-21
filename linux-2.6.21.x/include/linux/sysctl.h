@@ -342,7 +342,12 @@ enum
 	NET_NF_CONNTRACK_FRAG6_LOW_THRESH=30,
 	NET_NF_CONNTRACK_FRAG6_HIGH_THRESH=31,
 	NET_NF_CONNTRACK_CHECKSUM=32,
-	NET_NF_CONNTRACK_FLUSH=33, //Ricky CAO: Added for user space program to notify netfilter to clear connection track table
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+	NET_NF_GENERAL_CONNTRACK=33, //sfstudio: Threshold of actuating of exclusive memory allocation for conntrack
+#endif
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
+	NET_NF_CONNTRACK_FLUSH=34,
+#endif
 };
 
 /* /proc/sys/net/ipv4 */

@@ -144,7 +144,6 @@ static int fat_cont_expand(struct inode *inode, loff_t size)
 	loff_t start = inode->i_size, count = size - inode->i_size;
 	int err;
 
-	//printk("fat cont expand: [%11u]\n", size);	// tmp test
 	err = generic_cont_expand_simple(inode, size);
 	if (err)
 		goto out;
@@ -163,7 +162,6 @@ int fat_notify_change(struct dentry *dentry, struct iattr *attr)
 	struct inode *inode = dentry->d_inode;
 	int mask, error = 0;
 
-	//printk("fat notify change 1\n");	// tmp test
 	lock_kernel();
 
 	/*
@@ -172,18 +170,14 @@ int fat_notify_change(struct dentry *dentry, struct iattr *attr)
 	 * hole before it.
 	 */
 	if (attr->ia_valid & ATTR_SIZE) {
-		//printk("chk 2:[attr->ia_size: %llu] [inode->i_size: %llu]\n", (unsigned int)attr->ia_size, (unsigned int)inode->i_size);	// tmp test
 		if (attr->ia_size > inode->i_size) {
-			//printk("chk 2.5\n");	// tmp test
 			error = fat_cont_expand(inode, attr->ia_size);
 			//error = fat_cont_expand(inode, (unsigned int)attr->ia_size);
-			//printk("get attr ia_size = %llu(err=%d)\n", (unsigned int)attr->ia_size, error);	// tmp test
 			if (error || attr->ia_valid == ATTR_SIZE)
 				goto out;
 			attr->ia_valid &= ~ATTR_SIZE;
 		}
 	}
-	//printk("chk 3\n");	// tmp test
 
 	error = inode_change_ok(inode, attr);
 	if (error) {

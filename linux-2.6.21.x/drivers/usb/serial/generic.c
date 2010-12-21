@@ -76,7 +76,6 @@ static int generic_probe(struct usb_interface *interface,
 {
 	const struct usb_device_id *id_pattern;
 
-	printk("[K] usb generic probe\n");	// tmp test
 	id_pattern = usb_match_id(interface, generic_device_ids);
 	if (id_pattern != NULL)
 		return usb_serial_probe(interface, id);

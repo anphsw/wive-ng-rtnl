@@ -23,6 +23,7 @@ start() {
         let "HASHSIZE=$CONNTRACK_MAX/6"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
+        let "CONNGEN=$CONNTRACK_MAX-400"
 	sysctl -w vm.min_free_kbytes=1536
     else
         #32mb
@@ -30,6 +31,7 @@ start() {
         let "HASHSIZE=$CONNTRACK_MAX/2"
         let "ROUTEMAX=$CONNTRACK_MAX*8"
 	let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
+        let "CONNGEN=$CONNTRACK_MAX-400"
 	sysctl -w vm.min_free_kbytes=2304
     fi
 
@@ -41,6 +43,7 @@ start() {
 	sysctl -w net.ipv4.ip_conntrack_max=$CONNTRACK_MAX
     fi
 
+    sysctl -w net.general_conntrack_max=$CONNGEN
     sysctl -w net.ipv4.netfilter.ip_conntrack_max=$CONNTRACK_MAX
     sysctl -w net.ipv4.route.max_size=$ROUTEMAX
     sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"

@@ -1767,7 +1767,6 @@ static void scsi_disk_release(struct class_device *cdev)
 	struct scsi_disk *sdkp = to_scsi_disk(cdev);
 	struct gendisk *disk = sdkp->disk;
 	
-	printk("scsi disk release\n");	// tmp test
 	spin_lock(&sd_index_lock);
 	idr_remove(&sd_index_idr, sdkp->index);
 	spin_unlock(&sd_index_lock);
