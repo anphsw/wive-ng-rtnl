@@ -1711,6 +1711,7 @@ clobber:	clean
 mrproper \
 distclean:	clobber unconfig
 	rm -f .config*
+	rm -f .menuconfig.log*
 
 backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \
