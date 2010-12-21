@@ -115,8 +115,7 @@ int eth_register(struct eth_device* dev)
 
 int eth_initialize(bd_t *bis)
 {
-	unsigned char enetvar[32], env_enetaddr[6];
-	int i, eth_number = 0, regValue=0;
+	int eth_number = 0, regValue=0;
 
 	eth_devices = NULL;
 	eth_current = NULL;
