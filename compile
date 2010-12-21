@@ -89,6 +89,11 @@ make dep
 echo ---------------------------------MAKE-ALL--------------------------------
 make
 
+if [ -f Uboot/uboot.bin ] && [ -f images/zImage.lzma ] ; then
+echo -------------------------------MAKE-FULLDUMP-----------------------------
+    make -C fulldump
+fi
+
 echo -----------------------------------PACK----------------------------------
 mv -f images/*.bin "images/$MODE.$VERSIONPKG.bin"
 zip -r images/$MODE.$VERSIONPKG.bin.zip images/*.bin
