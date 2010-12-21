@@ -59,17 +59,19 @@ int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 	rewind(fp);
 	fseek(fp, offset + pos, SEEK_SET);
 	rc = fread(mem, 1, MEM_SIZE, fp);
-	while(rc){
+	while(rc)
+	{
 		unsigned char *mem_offset;
 		mem_offset = (unsigned char*)memmem(mem, rc, str, str_len);
-		if(mem_offset){
+		if (mem_offset)
+		{
 			fclose(fp);	//found it
 			return (mem_offset - mem) + pos + offset;
 		}
 
-		if(rc == MEM_SIZE){
+		if (rc == MEM_SIZE)
 			pos += MEM_HALF;	// 8
-		}else
+		else
 			break;
 		
 		rewind(fp);
@@ -106,44 +108,6 @@ void *getMemInFile(char *filename, int offset, int len)
 	return result;
 }
 
-/*
- * arguments: ifname  - interface name
- *            if_addr - a 64-byte buffer to store ip address
- * description: fetch ip address, netmask associated to given interface name
- */
-int getIfIp(const char *ifname, char *if_addr)
-{
-	struct ifreq ifr;
-	int skfd = 0;
-
-	if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	{
-		printf("getIfIp: open socket error");
-		return -1;
-	}
-
-	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE);
-	if (ioctl(skfd, SIOCGIFADDR, &ifr) < 0)
-	{
-		printf("getIfIp: ioctl SIOCGIFADDR error for %s", ifname);
-		return -1;
-	}
-
-	strcpy(if_addr, inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-
-	close(skfd);
-	return 0;
-}
-
-char *getLanIP(char *buf)
-{
-	buf = nvram_get(RT2860_NVRAM, "lan_ipaddr");
-	if(!buf)
-		return buf;
-
-	return NULL;
-}
-
 void html_header()
 {
 	printf
@@ -160,6 +124,7 @@ void html_header()
 		"<title>Import Settings</title>\n"
 		"<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">\n"
 		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n"
+		"<script type=\"text/javascript\" src=\"/js/ajax.js\"></script>\n"
 		"</head>\n"
 		"<body>\n"
 		"<h1>Import Settings</h1>\n"
@@ -174,18 +139,10 @@ void html_success(const char *timeout)
 	(
 		"<p>Done</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
-		"function refresh_all()\n"
-		"{\n"
-		"	top.location.href = \"http://%s\";\n"
-		"}\n\n"
-		"function update()\n"
-		"{\n"
-		"	self.setTimeout(\"refresh_all()\", %s);\n"
-		"}\n\n"
-		"update();\n"
+		"ajaxReloadDelayedPage(%s)\n"
 		"</script>"
 		"</body></html>\n\n",
-		getLanIP(buf), timeout
+		timeout
 	);
 }
 
@@ -198,10 +155,9 @@ void html_error(const char *s)
 		"<p>%s</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
 		"alert('%s');\n"
-		"top.location.href = \"http://%s\";\n"
+		"ajaxReloadDelayedPage(0)\n"
 		"</script>\n"
 		"</body></html>\n\n",
-		s, s,
-		getLanIP(buf)
+		s, s
 	);
 }

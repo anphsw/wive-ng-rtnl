@@ -1171,14 +1171,12 @@ static void outputTimerForReload(webs_t wp, long delay)
 	websWrite
 	(
 		wp,
-		T("<script language=\"JavaScript\" type=\"text/javascript\">\n"
-		"function refresh_all()\n"
-		"{\n"
-		"	top.location.href = \"http://%s\";\n"
-		"}\n\n"
-		"setTimeout(\"refresh_all()\", %ld);\n"
+		T(
+		"<script type=\"text/javascript\" src=\"/js/ajax.js\"></script>\n"
+		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
+		"ajaxReloadDelayedPage(%ld, \"http://%s\");\n"
 		"</script>"),
-		lan_if_ip, delay
+		delay, lan_if_ip
 	);
 	websFooter(wp);
 	websDone(wp, 200);
@@ -1327,7 +1325,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 
-	outputTimerForReload(wp, 40000);
+	outputTimerForReload(wp, 50000);
 
 final:
 	sleep(2);	// wait for websDone() to finish tcp http session(close socket)
@@ -1337,12 +1335,6 @@ final:
 
 	// Reboot
 	doSystem("sleep 2 && reboot &");
-
-	//restart internet if any changes
-/*	if (need_commit) {
-		updateFlash8021x(RT2860_NVRAM);
-		initInternet();
-	}*/
 }
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)
@@ -1356,7 +1348,7 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 			nvram_set(RT2860_NVRAM, "wan_port", wan_port);
 	}
 
-	outputTimerForReload(wp, 40000);
+	outputTimerForReload(wp, 50000);
 
 	// Reboot
 	sleep(2);

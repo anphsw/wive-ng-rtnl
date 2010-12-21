@@ -1,9 +1,12 @@
 #!/bin/sh
 
 echo "Content-type: text/html"
-echo ""
-IPADDR=`nvram_get 2860 lan_ipaddr`;
-echo "<body><script lang=\"JavaScript\">function reload() { top.location.href=\"http://$IPADDR/\" }; setTimeout(reload, 40000);</script></body>"
+echo ''
+echo '<html>'
+echo '<head><script type="text/javascript" src="/js/ajax.js"></script></head>'
+echo '<body><script lang=\"JavaScript\">ajaxReloadDelayedPage(50000);</script></body>'
+echo '</html>'
+
 fs backup_nvram
 fs save
 sync

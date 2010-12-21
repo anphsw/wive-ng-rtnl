@@ -326,11 +326,46 @@ static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_addr
 	rc = snprintf(pos, len, "\n");
 }
 
-static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int, int rprf_int, int rprt_int)
+static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int, int rprf_int, int rprt_int, int inat_loopback)
 {
 	int rc = 0;
 	char *pos = buf;
 
+	// Add nat loopback
+	if (inat_loopback)
+	{
+		// write basic rules
+		rc = snprintf(pos, len, "# iptables -t nat -I %s -s %s -d %s", PORT_FORWARD_POST_CHAIN, 
+			"<адрес локалки куда смотрит роутер LANном>", "<адрес сервера в локалке для которого делаем форвард>" );
+		pos += rc;
+		len -= rc;
+		
+		// write protocol type
+		if (proto == PROTO_TCP)
+			rc = snprintf(pos, len, "-p tcp ");
+		else if (proto == PROTO_UDP)
+			rc = snprintf(pos, len, "-p udp ");
+		else if (proto == PROTO_TCP_UDP)
+			rc = snprintf(pos, len, " ");
+		pos += rc;
+		len -= rc;
+
+		// write src port
+		if (prf_int != 0)
+		{
+			rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+			snprintf(pos, len, "--dport %d ", prf_int);
+			pos += rc;
+			len -= rc;
+		}
+		
+		rc = snprintf(pos, len, "--jump SNAT --to-source %s\n", "<внешний адрес роутера>");
+		pos += rc;
+		len -= rc;
+	}
+
+	// Add forwarding rule
 	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_PRE_CHAIN, wan_name);
 	pos += rc;
 	len -= rc;
@@ -520,14 +555,38 @@ static void iptablesIPPortFilterBuildScript(void)
 	}
 }
 
+static int checkNatLoopback(char *rule)
+{
+	char nat_loopback[8];
+	char rec[256];
+	int inat_loopback, i=0;
+	
+	while ( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
+	{
+		// get Nat Loopback enable flag
+		if ((getNthValueSafe(7, rec, ',', nat_loopback, sizeof(nat_loopback)) == -1))
+			continue;
+		
+		if (strlen(nat_loopback) > 0)
+			inat_loopback = atoi(nat_loopback);
+		else
+			inat_loopback = 0;
+		
+		if (inat_loopback)
+			return 1;
+	}
+	
+	return 0;
+}
+
 static void iptablesPortForwardBuildScript(void)
 {
 	char rec[256];
 	char cmd[1024];
 	char wan_name[16];
-	char ip_address[32], prf[8], prt[8], rprf[9], rprt[8], protocol[8], interface[8];
+	char ip_address[32], prf[8], prt[8], rprf[9], rprt[8], protocol[8], interface[8], nat_loopback[8];
 	char *firewall_enable, *rule, *c_if;
-	int i=0, prf_int, prt_int, rprf_int, rprt_int, proto;
+	int i=0, prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback;
 
 	//Remove portforward script
 	firewall_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
@@ -558,8 +617,17 @@ static void iptablesPortForwardBuildScript(void)
 	if (fd != NULL)
 	{
 		fputs("#!/bin/sh\n\n", fd);
-		fputs("iptables -t nat -N port_forward_pre\n", fd);
-		fputs("iptables -t nat -A PREROUTING -j port_forward_pre\n\n", fd);
+		fprintf(fd, 
+			"iptables -t nat -N %s\n"
+			"iptables -t nat -A PREROUTING -j %s\n\n",
+			PORT_FORWARD_PRE_CHAIN, PORT_FORWARD_PRE_CHAIN);
+
+		// Check if nat loopback is enabled
+		if (checkNatLoopback(rule))
+			fprintf(fd, 
+				"iptables -t nat -N %s\n"
+				"iptables -t nat -A POSTROUTING -j %s\n\n",
+				PORT_FORWARD_POST_CHAIN, PORT_FORWARD_POST_CHAIN);
 
 		while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
 		{
@@ -630,13 +698,23 @@ static void iptablesPortForwardBuildScript(void)
 			if ((getNthValueSafe(6, rec, ',', rprt, sizeof(rprt)) == -1))
 				continue;
 
-			if (rprt > 0)
+			if (strlen(rprt) > 0)
 			{
 				if ((rprt_int = atoi(rprt)) > 65535)
 					continue;
 			}
 			else
 				rprt_int = 0;
+			
+			// get Nat Loopback enable flag
+			if ((getNthValueSafe(7, rec, ',', nat_loopback, sizeof(nat_loopback)) == -1))
+				continue;
+			
+			if (strlen(nat_loopback) > 0)
+				inat_loopback = atoi(nat_loopback);
+			else
+				inat_loopback = 0;
+
 			
 			// Patch interface
 			if (strcmp(interface, "LAN")==0)
@@ -650,14 +728,14 @@ static void iptablesPortForwardBuildScript(void)
 			{
 				case PROTO_TCP:
 				case PROTO_UDP:
-					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int);
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
 					break;
 				
 				case PROTO_TCP_UDP:
-					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_TCP, prf_int, prt_int, rprf_int, rprt_int);
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_TCP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
-					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int);
+					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
 					break;
 			}
@@ -689,8 +767,8 @@ static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv
 static int getPortForwardRules(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int first=1, i=0;
-	int prf_int, prt_int, rprf_int, rprt_int, proto;
-	char ip_address[32], prf[8], prt[8], rprf[8], rprt[8], comment[64], protocol[8], interface[8];
+	int prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback;
+	char ip_address[32], prf[8], prt[8], rprf[8], rprt[8], comment[64], protocol[8], interface[8], nat_loopback[8];
 	char rec[128];
 
 	char *rules = nvram_get(RT2860_NVRAM, "PortForwardRules");
@@ -700,7 +778,7 @@ static int getPortForwardRules(int eid, webs_t wp, int argc, char_t **argv)
 		return 0;
 
 	/* format is :
-	 * [interface],[protocol],[src_port],[dst_port],[ip_address],[redirect_src_port],[redirect_dst_port],[comment];
+	 * [interface],[protocol],[src_port],[dst_port],[ip_address],[redirect_src_port],[redirect_dst_port],[nat_loopback],[comment];
 	 */
 	while (getNthValueSafe(i++, rules, ';', rec, sizeof(rec)) != -1 )
 	{
@@ -770,18 +848,29 @@ static int getPortForwardRules(int eid, webs_t wp, int argc, char_t **argv)
 				continue;
 		}
 
+		// get Nat Loopback enable flag
+		if ((getNthValueSafe(7, rec, ',', nat_loopback, sizeof(nat_loopback)) == -1))
+			continue;
+		
+		if (strlen(nat_loopback) > 0)
+			inat_loopback = atoi(nat_loopback);
+		else
+			inat_loopback = 0;
+
+
 		// Get comment
-		if ((getNthValueSafe(7, rec, ',', comment, sizeof(comment)) == -1))
+		if ((getNthValueSafe(8, rec, ',', comment, sizeof(comment)) == -1))
 			continue;
 
 		// Output data
-		websWrite(wp, T("%s[ '%s', %d, '%s', '%s', '%s', '%s', '%s', '%s' ]"),
+		websWrite(wp, T("%s[ '%s', %d, '%s', '%s', '%s', '%s', '%s', %d, '%s' ]"),
 				(first) ? "" : ",\n\t",
 				interface,
 				proto,
 				prf, prt,
 				ip_address,
 				rprf, rprt,
+				inat_loopback,
 				comment
 			);
 		

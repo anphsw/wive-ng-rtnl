@@ -5,6 +5,8 @@
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<script type="text/javascript" src="/js/ajax.js"></script>
+
 <script language="JavaScript" type="text/javascript">
 function initLanguage()
 {

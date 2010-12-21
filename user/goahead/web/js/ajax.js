@@ -234,7 +234,7 @@ function ajaxCloseWindow(popupID)
 	doc.body.onscroll = doc.body.oldOnScroll;
 }
 
-function postForm(question, form, reloader, message)
+function ajaxPostForm(question, form, reloader, message, handler)
 {
 	if (question != null)
 	{
@@ -254,6 +254,8 @@ function postForm(question, form, reloader, message)
 	
 	var submitForm = function()
 	{
+		if (handler != null)
+			handler();
 		form.submit();
 	};
 	
@@ -270,3 +272,96 @@ function ajaxModifyElementHTML(elementID, value)
 	if (elem != null)
 		elem.innerHTML = value;
 }
+
+function ajaxSearchElementById(element_id)
+{
+	var pw = window;
+	while (true)
+	{
+		var elem = window.document.getElementById(element_id);
+		if (elem != null)
+			return elem;
+
+		for (var i=0; i<pw.frames.length; i++)
+		{
+			elem = pw.frames[i].document.getElementById(element_id);
+			if (elem != null)
+				return elem;
+		}
+
+		if ((pw.parent != null) && (pw.parent != pw))
+			pw = pw.parent;
+		else
+			return null;
+	}
+}
+
+function ajaxGetRootWindow()
+{
+	var pw = window;
+	while ((pw.parent != null) && (pw.parent != pw))
+		pw = pw.parent;
+	return pw;
+}
+
+function ajaxShowProgress()
+{
+	var elem = ajaxSearchElementById("ajxCounterIndicator");
+	var pw = ajaxGetRootWindow();
+	if (elem == null)
+		return;
+	
+	var progress = [ '/', '-', '\\', '|' ];
+	var index = 0;
+
+	var indicator = function()
+	{
+		if (pw.currentProgressHandler != indicator)
+			return;
+
+		elem.innerHTML = progress[index];
+		index = (index + 1) % progress.length;
+		pw.setTimeout(indicator, 500);
+	}
+	
+	pw.currentProgressHandler = indicator;
+	
+	indicator();
+}
+
+function ajaxReloadDelayedPage(delay, url)
+{
+	var elem = ajaxSearchElementById("ajxCounterIndicator");
+	var pw = ajaxGetRootWindow();
+
+	delay /= 1000;
+	
+	var reloader = function()
+	{
+		if (pw.currentProgressHandler == reloader)
+		{
+			if (elem != null)
+				elem.innerHTML = delay;
+		}
+
+		if (delay > 0) // check counter
+		{
+			delay--;
+			pw.setTimeout(reloader, 1000);
+		}
+		else // Reload page
+		{
+
+			// Load/reload page
+			if (url == null)
+				pw.location.reload(true);
+			else
+				pw.location.href = url;
+		}
+	}
+	
+	pw.currentProgressHandler = reloader;
+	
+	reloader();
+}
+

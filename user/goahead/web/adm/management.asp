@@ -148,7 +148,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 	<td class="value">
 	<form method="POST" name="UploadFirmware" action="/cgi-bin/upload.cgi" enctype="multipart/form-data" onSubmit="return uploadFirmwareCheck();" >
 		<input name="filename" size="20" maxlength="256" type="file">
-		<input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onclick="postForm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?', this.form, 'firmwareReloader', '/messages/wait_firmware.asp');">
+		<input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onclick="ajaxPostForm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?', this.form, 'firmwareReloader', '/messages/wait_firmware.asp', ajaxShowProgress);">
 		<iframe id="firmwareReloader" name="firmwareReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 	</form>
 	</td>
@@ -174,7 +174,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 	<td>
 		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data">
 			<input type="file" name="filename" maxlength="256">
-			<input type="button" value="Load" id="setmanImpSetImport" class="half" onclick="postForm('Proceed uploading settings?', this.form, 'setmanReloader', '/messages/wait_config.asp');">
+			<input type="button" value="Load" id="setmanImpSetImport" class="half" onclick="ajaxPostForm('Proceed uploading settings?', this.form, 'setmanReloader', '/messages/wait_config.asp', ajaxShowProgress);">
 			<iframe id="setmanReloader" name="setmanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 		</form>
 	</td>

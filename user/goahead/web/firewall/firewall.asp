@@ -67,6 +67,7 @@ function genRulesTable()
 		'<th>Src Ports</th>' +
 		'<th>Dst IP</th>' +
 		'<th>Dst Ports</th>' +
+		'<th>Nat loopback</th>' +
 		'<th>Comment</th>' +
 		'<th>Action</th></tr>';
 
@@ -80,7 +81,8 @@ function genRulesTable()
 			'<td>' + showPortRange(row[2], row[3]) + '</td>' + // Source port range
 			'<td>' + row[4] + '</td>' + // Destination IP
 			'<td>' + showPortRange(row[5], row[6]) + '</td>' + // Destination port range
-			'<td>' + row[7] + '</td>' + // Comment
+			'<td><input type="checkbox"' + ((row[7] != 0) ? ' checked="true">' : '>') + // Destination port range
+			'<td>' + row[8] + '</td>' + // Comment
 			'<td style="text-align: center;"><a style="color: #ff0000;" title="Delete record" href="javascript:deleteRuleItem(' + i + ');"' + disabled + '><b>[x]</b></a></td>' +
 			'</tr>';
 	}
@@ -96,12 +98,13 @@ function genRulesTable()
 		'<td><input type="text" class="short" name="fromPort" tabindex="3"></td>' + 
 		'<td rowspan="2"><input type="text" class="normal" name="ip_address" tabindex="5"></td>' +
 		'<td><input type="text" class="short" name="redirectFromPort" tabindex="6"></td>' + 
+		'<td rowspan="2"><input type="checkbox" name="natLoopback" tabindex="7" checked="true"></td>' + 
 		'<td rowspan="2"><input type="text" class="normal" name="comment" tabindex="8"></td>' +
-		'<td rowspan="2" style="text-align: center;"><input type="button" class="short" title="Add record" value="Add" tabindex="9" onclick="addRuleItem(this.form);"' + disabled + '></td>' +
+		'<td rowspan="2" style="text-align: center;"><input type="button" class="short" title="Add record" value="Add" tabindex="10" onclick="addRuleItem(this.form);"' + disabled + '></td>' +
 		'</tr>' +
 		'<tr>' +
 		'<td><input type="text" class="short" name="toPort" tabindex="4"></td>' + 
-		'<td><input type="text" class="short" name="redirectToPort" tabindex="7"></td>' + 
+		'<td><input type="text" class="short" name="redirectToPort" tabindex="8"></td>' + 
 		'</tr>';
 	
 	// Close manager
@@ -324,6 +327,7 @@ function addRuleItem(form)
 			form.ip_address.value,
 			(dstDistance >= 0) ? form.redirectFromPort.value : '',
 			(dstDistance > 0) ? form.redirectToPort.value : '',
+			(form.natLoopback.checked) ? 1 : 0,
 			comment
 		];
 

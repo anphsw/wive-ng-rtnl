@@ -37,6 +37,16 @@ div.popup_window_content {
 	margin-right: 5px;
 }
 
+div.message {
+	font-size: 14pt;
+	font-weight: bold;
+}
+
+div.red {
+	color: #ff0000;
+	font-family: Courier New, monospace;
+}
+
 /* Events */
 table tr.error {
 	color: #ff0000;

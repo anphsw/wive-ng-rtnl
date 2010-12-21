@@ -148,7 +148,7 @@ function setWanPort(form)
 	if (confirm('Changing WAN port needs to reboot you router. Do you want to proceed?'))
 	{
 		clearTimeout(timer);
-		postForm(null, form, 'setwanReloader', '/messages/rebooting.asp');
+		ajaxPostForm(null, form, 'setwanReloader', '/messages/rebooting.asp');
 	}
 }
 
