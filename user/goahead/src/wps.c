@@ -8,9 +8,12 @@
 
 #include <ctype.h>
 
+#include "nvram.h"
 #include "utils.h"
+#include "webs.h"
 #include "internet.h"
 #include "wireless.h"
+#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_STA_WSC */
 
 #include "wps.h"
 #include "oid.h"
@@ -614,104 +617,104 @@ static void WPSAPTimerHandler(int signo)
 			nvram_bufset(RT2860_NVRAM, "WscSSID", wsc_value.WscSsid);
 
 			if (wsc_value.WscAuthMode == 0x0001)
-				STF(0, "AuthMode", "OPEN");
+				STF(RT2860_NVRAM, "AuthMode", "OPEN");
 			else if (wsc_value.WscAuthMode == 0x0002)
-				STF(0, "AuthMode", "WPAPSK");
+				STF(RT2860_NVRAM, "AuthMode", "WPAPSK");
 			else if (wsc_value.WscAuthMode == 0x0004)
-				STF(0, "AuthMode", "SHARED");
+				STF(RT2860_NVRAM, "AuthMode", "SHARED");
 			else if (wsc_value.WscAuthMode == 0x0008)
-				STF(0, "AuthMode", "WPA");
+				STF(RT2860_NVRAM, "AuthMode", "WPA");
 			else if (wsc_value.WscAuthMode == 0x0010)
-				STF(0, "AuthMode", "WPA2");
+				STF(RT2860_NVRAM, "AuthMode", "WPA2");
 			else if (wsc_value.WscAuthMode == 0x0020)
-				STF(0, "AuthMode", "WPA2PSK");
+				STF(RT2860_NVRAM, "AuthMode", "WPA2PSK");
 			else if (wsc_value.WscAuthMode == 0x0022)
-				STF(0, "AuthMode", "WPAPSKWPA2PSK");
+				STF(RT2860_NVRAM, "AuthMode", "WPAPSKWPA2PSK");
 			else
 			{
 				printf("goahead: Warning: can't get invalid authmode\n.");
-				STF(0, "AuthMode", "OPEN");
+				STF(RT2860_NVRAM, "AuthMode", "OPEN");
 			}
 			if (wsc_value.WscEncrypType == 0x0001)
 			{
-				STF(0, "EncrypType", "NONE");
-				STF(0, "DefaultKeyID", "1");
+				STF(RT2860_NVRAM, "EncrypType", "NONE");
+				STF(RT2860_NVRAM, "DefaultKeyID", "1");
 			}
 			else if (wsc_value.WscEncrypType == 0x0002)
 			{
-				STF(0, "EncrypType", "WEP");
+				STF(RT2860_NVRAM, "EncrypType", "WEP");
 				if ((strlen(wsc_value.WscWPAKey) == 5) || (strlen(wsc_value.WscWPAKey) == 13))
 				{
 					// Key Entry Method == ASCII 
-					STF(0, "Key1Type", "1");
-					STF(0, "Key2Type", "1");
-					STF(0, "Key3Type", "1");
-					STF(0, "Key4Type", "1");
+					STF(RT2860_NVRAM, "Key1Type", "1");
+					STF(RT2860_NVRAM, "Key2Type", "1");
+					STF(RT2860_NVRAM, "Key3Type", "1");
+					STF(RT2860_NVRAM, "Key4Type", "1");
 				}
 				else if ((strlen(wsc_value.WscWPAKey) == 10) || (strlen(wsc_value.WscWPAKey) == 26))
 				{
 					// Key Entry Method == HEX 
-					STF(0, "Key1Type", "0");
-					STF(0, "Key2Type", "0");
-					STF(0, "Key3Type", "0");
-					STF(0, "Key4Type", "0");
+					STF(RT2860_NVRAM, "Key1Type", "0");
+					STF(RT2860_NVRAM, "Key2Type", "0");
+					STF(RT2860_NVRAM, "Key3Type", "0");
+					STF(RT2860_NVRAM, "Key4Type", "0");
 				}
 				else
 				{
 					// Key Entry Method == ASCII
-					STF(0, "Key1Type", "1");
-					STF(0, "Key2Type", "1");
-					STF(0, "Key3Type", "1");
-					STF(0, "Key4Type", "1");
+					STF(RT2860_NVRAM, "Key1Type", "1");
+					STF(RT2860_NVRAM, "Key2Type", "1");
+					STF(RT2860_NVRAM, "Key3Type", "1");
+					STF(RT2860_NVRAM, "Key4Type", "1");
 				}
 
 				if (wsc_value.DefaultKeyIdx == 1)
 				{
-					STF(0, "Key1Str1", wsc_value.WscWPAKey);
-					STF(0, "DefaultKeyID", "1");
+					STF(RT2860_NVRAM, "Key1Str1", wsc_value.WscWPAKey);
+					STF(RT2860_NVRAM, "DefaultKeyID", "1");
 				}
 				else if (wsc_value.DefaultKeyIdx == 2)
 				{
-					STF(0, "Key2Str1", wsc_value.WscWPAKey);
-					STF(0, "DefaultKeyID", "2");
+					STF(RT2860_NVRAM, "Key2Str1", wsc_value.WscWPAKey);
+					STF(RT2860_NVRAM, "DefaultKeyID", "2");
 				}
 				else if (wsc_value.DefaultKeyIdx == 3)
 				{
-					STF(0, "Key3Str1", wsc_value.WscWPAKey);
-					STF(0, "DefaultKeyID", "3");
+					STF(RT2860_NVRAM, "Key3Str1", wsc_value.WscWPAKey);
+					STF(RT2860_NVRAM, "DefaultKeyID", "3");
 				}
 				else if (wsc_value.DefaultKeyIdx == 4)
 				{
-					STF(0, "Key4Str1", wsc_value.WscWPAKey);
-					STF(0, "DefaultKeyID", "4");
+					STF(RT2860_NVRAM, "Key4Str1", wsc_value.WscWPAKey);
+					STF(RT2860_NVRAM, "DefaultKeyID", "4");
 				}
 			}
 			else if (wsc_value.WscEncrypType == 0x0004)
 			{
-				STF(0, "EncrypType", "TKIP");
-				STF(0, "DefaultKeyID", "2");
+				STF(RT2860_NVRAM, "EncrypType", "TKIP");
+				STF(RT2860_NVRAM, "DefaultKeyID", "2");
 				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
 			}
 			else if (wsc_value.WscEncrypType == 0x0008)
 			{
-				STF(0, "EncrypType", "AES");
-				STF(0, "DefaultKeyID", "2");
+				STF(RT2860_NVRAM, "EncrypType", "AES");
+				STF(RT2860_NVRAM, "DefaultKeyID", "2");
 				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
 			}
 			else if (wsc_value.WscEncrypType == 0x000C)
 			{
-				STF(0, "EncrypType", "TKIPAES");
-				STF(0, "DefaultKeyID", "2");
+				STF(RT2860_NVRAM, "EncrypType", "TKIPAES");
+				STF(RT2860_NVRAM, "DefaultKeyID", "2");
 				nvram_bufset(RT2860_NVRAM, "WPAPSK1", wsc_value.WscWPAKey);
 			}
 			else
 			{
 				printf("goahead: Warning: can't get invalid encryptype\n.");
-				STF(0, "EncrypType", "NONE");
-				STF(0, "DefaultKeyID", "1");
+				STF(RT2860_NVRAM, "EncrypType", "NONE");
+				STF(RT2860_NVRAM, "DefaultKeyID", "1");
 			}
 
-			STF(0, "IEEE8021X", "0");
+			STF(RT2860_NVRAM, "IEEE8021X", "0");
 
 			nvram_commit(RT2860_NVRAM);
 			nvram_close(RT2860_NVRAM);

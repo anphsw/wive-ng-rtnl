@@ -18,20 +18,6 @@
 #include	"internet.h"
 #include	"wireless.h"
 
-#if defined (CONFIG_RALINK_RT2880)
-#define PROCREG_GMAC		"/proc/rt2880/gmac"
-#elif defined (CONFIG_RALINK_RT3052)
-#define PROCREG_GMAC             "/proc/rt3052/gmac"
-#elif defined (CONFIG_RALINK_RT3352)
-#define PROCREG_GMAC             "/proc/rt3352/gmac"
-#elif defined (CONFIG_RALINK_RT2883)
-#define PROCREG_GMAC             "/proc/rt2883/gmac"
-#elif defined (CONFIG_RALINK_RT3883)
-#define PROCREG_GMAC             "/proc/rt3883/gmac"
-#else
-#define PROCREG_GMAC             "/proc/rt2880/gmac"
-#endif
-
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 extern void setFirmwarePath(void);
 #endif
@@ -1330,7 +1316,7 @@ final:
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)
 {
-	const char* wan_port = websGetVar(wp, T("wan_port"), T("0"));
+	char* wan_port = websGetVar(wp, T("wan_port"), T("0"));
 	
 	// Set-up WAN port
 	if ((wan_port != NULL) && (strlen(wan_port) == 1))
@@ -1344,4 +1330,15 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 	// Reboot
 	sleep(2);
 	doSystem("sleep 2 && reboot &");
+}
+
+void STFs(int nvram, int index, char *flash_key, char *value)
+{
+	char *result;
+	char *tmp = nvram_bufget(nvram, flash_key);
+	if(!tmp)
+		tmp = "";
+	result = setNthValue(index, tmp, value);
+	nvram_bufset(nvram, flash_key, result);
+	return ;
 }

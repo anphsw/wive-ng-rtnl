@@ -138,7 +138,8 @@ int isIpNetmaskValid(char *s)
 static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *dmze = nvram_get(RT2860_NVRAM, "DMZEnable");
+	char *dmze = nvram_get(RT2860_NVRAM, "DMZEnable");
+
 	if (dmze)
 		value = atoi(dmze);
 	else
@@ -157,7 +158,7 @@ static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *pfe = nvram_get(RT2860_NVRAM, "PortForwardEnable");
+	char *pfe = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -177,7 +178,7 @@ static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int type, value;
-	const char *pfe = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
+	char *pfe = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
 
 	if(pfe)
 		value = atoi(pfe);
@@ -216,7 +217,7 @@ static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_addr
 {
 	int rc = 0;
 	char *pos = buf;
-	const char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
+	char *spifw = nvram_get(RT2860_NVRAM, "SPIFWEnabled");
 
 	switch (action)
 	{
@@ -417,7 +418,8 @@ static void iptablesIPPortFilterBuildScript(void)
 	char dprf[8], dprt[8], wan_name[16];
 	char mac_address[32], action_str[4];
 	char sip[32], dip[32], sim[32], dim[32];
-	char *firewall_enable, *default_policy, *rule, *c_if;
+	char *rule, *c_if;
+	char *firewall_enable, *default_policy;
 	
 	// Check that IP/port filter is enabled
 	firewall_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
@@ -584,7 +586,8 @@ static void iptablesPortForwardBuildScript(void)
 	char cmd[1024];
 	char wan_name[16];
 	char ip_address[32], prf[8], prt[8], rprf[9], rprt[8], protocol[8], interface[8], nat_loopback[8];
-	char *firewall_enable, *rule, *c_if;
+	char *rule, *c_if;
+	char *firewall_enable;
 	int i=0, prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback;
 
 	//Remove portforward script
@@ -753,6 +756,7 @@ inline int getRuleNums(char *rules)
 static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
+
 	if(!mode)
 		return -1;	// fatal error, make ASP engine complained.
 	if(atoi(mode) == 0)	// bridge mode
@@ -769,8 +773,8 @@ static int getPortForwardRules(int eid, webs_t wp, int argc, char_t **argv)
 	int prf_int, prt_int, rprf_int, rprt_int, proto, inat_loopback;
 	char ip_address[32], prf[8], prt[8], rprf[8], rprt[8], comment[64], protocol[8], interface[8], nat_loopback[8];
 	char rec[128];
-
 	char *rules = nvram_get(RT2860_NVRAM, "PortForwardRules");
+
 	if (rules == NULL)
 		return 0;
 	if (strlen(rules) == 0)
@@ -954,6 +958,7 @@ static int getPortFilteringRules(int eid, webs_t wp, int argc, char_t **argv)
 	char dip[32], dprf[8], dprt[8], iface[8], sim[32], dim[32];
 	char rec[256];
 	char *rules = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
+
 	if (rules == NULL)
 		return 0;
 
@@ -1062,6 +1067,7 @@ static int getPortFilteringRules(int eid, webs_t wp, int argc, char_t **argv)
 static int showDMZIPAddressASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char *DMZIPAddress = nvram_get(RT2860_NVRAM, "DMZIPAddress");
+
 	if(!DMZIPAddress)
 		return 0;
 	if(!strlen(DMZIPAddress))
@@ -1585,7 +1591,7 @@ void firewall_rebuild_etc(void)
 	//rebuild firewall scripts in etc
 	
 	// Port forwarding
-	const char *pfw_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
+	char *pfw_enable = nvram_get(RT2860_NVRAM, "PortForwardEnable");
 	if (pfw_enable == NULL)
 		pfw_enable = "0";
 	
@@ -1594,7 +1600,7 @@ void firewall_rebuild_etc(void)
 		iptablesPortForwardBuildScript();
 	
 	// IP/Port/MAC filtering
-	const char *ipf_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
+	char *ipf_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
 	if (ipf_enable == NULL)
 		ipf_enable = "0";
 	

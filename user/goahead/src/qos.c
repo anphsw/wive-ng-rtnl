@@ -37,8 +37,8 @@ inline void QoSRestart(void)
 
 inline void QoSInit(void)
 {
-	char *cm;
-	cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+
 	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
 #ifdef CONFIG_USER_3G
 		|| !strncmp(cm, "3G", 3)
@@ -299,9 +299,9 @@ static void QoSDelete(webs_t wp, char_t *path, char_t *query)
 	int del_index, af_i, dp_i;
 
 	char_t af[2], dp[2], name[64];
-    printf("query = %s\n", query);
-    sscanf(query, "%2s %2s %64s", af, dp, name);
-    printf("af = %s\n dp = %s\n name = %s\n", af, dp, name);
+        printf("query = %s\n", query);
+	sscanf(query, "%2s %2s %64s", af, dp, name);
+        printf("af = %s\n dp = %s\n name = %s\n", af, dp, name);
 
 	af_i = atoi(af);
 	dp_i = atoi(dp);

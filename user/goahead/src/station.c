@@ -219,7 +219,7 @@ int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceN
 	wrq.u.data.pointer = (caddr_t) ptr;
 	wrq.u.data.flags = OidQueryCode;
 
-#ifdef WIRELESS_EXT > 17
+#if WIRELESS_EXT > 17
 	if ( OidQueryCode == OID_802_11_BSSID_LIST )
 		wrq.u.data.length = 8192;
 #endif

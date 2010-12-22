@@ -26,6 +26,20 @@
 #define WPS_LED_SESSION_OVERLAP		4
 #define WPS_LED_SUCCESS			5
 
+#if defined (CONFIG_RALINK_RT2880)
+#define PROCREG_GMAC		"/proc/rt2880/gmac"
+#elif defined (CONFIG_RALINK_RT3052)
+#define PROCREG_GMAC             "/proc/rt3052/gmac"
+#elif defined (CONFIG_RALINK_RT3352)
+#define PROCREG_GMAC             "/proc/rt3352/gmac"
+#elif defined (CONFIG_RALINK_RT2883)
+#define PROCREG_GMAC             "/proc/rt2883/gmac"
+#elif defined (CONFIG_RALINK_RT3883)
+#define PROCREG_GMAC             "/proc/rt3883/gmac"
+#else
+#define PROCREG_GMAC             "/proc/rt2880/gmac"
+#endif
+
 int doKillPid(char_t *fmt, ...);
 int doSystem(char_t *fmt, ...);
 char *getNthValue(int index, char *values);
@@ -47,3 +61,5 @@ void arplookup(char *ip, char *arp);
 void websLongWrite(webs_t wp, char *longstr);
 int netmask_aton(const char *ip);
 inline int getOnePortOnly(void);
+void STFs(int nvram, int index, char *flash_key, char *value);
+

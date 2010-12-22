@@ -25,8 +25,8 @@ void nvram_close(int index);
 
 int nvram_set(int index, char *name, char *value);
 int nvram_bufset(int index, char *name, char *value);
-char const *nvram_get(int index, char *name);
-char const *nvram_bufget(int index, char *name);
+char *nvram_get(int index, char *name);
+char *nvram_bufget(int index, char *name);
 
 void nvram_buflist(int index);
 int nvram_commit(int index);

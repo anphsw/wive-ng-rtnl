@@ -25,6 +25,8 @@
 #define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 
 #define MAX_MBSSID_NUM         8
 
+#define STF(nvram, index, flash_key)    STFs(nvram, index, #flash_key, flash_key)
+
 /*
  * RT2860
  */
@@ -145,8 +147,8 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifndef CONFIG_RALINK_RT3052
 	int  idx = 0, channel, returnEEPROMValue=0;
-	const char *value = nvram_get(RT2860_NVRAM,"CountryCode");
-	const char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
+	char *value = nvram_get(RT2860_NVRAM,"CountryCode");
+	char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
 	char *RemoveDFSChannel = nvram_get(RT2860_NVRAM, "RemoveDFSChannel");
 
 #ifdef CONFIG_RALINK_RT3883
@@ -220,7 +222,7 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
 static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
     int idx = 0, channel;
-    const char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
+    char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
 
     channel = (channel_s == NULL)? 0 : atoi(channel_s);
 
@@ -1195,6 +1197,7 @@ void restart8021XDaemon(int nvram)
 	char *auth_mode = nvram_get(nvram, "AuthMode");
 	char *ieee8021x = nvram_get(nvram, "IEEE8021X");
 	char *num_s = nvram_get(nvram, "BssidNum");
+
 	if(!num_s)
 		return;
 	num = atoi(num_s);
@@ -1250,7 +1253,6 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 	int num_ssid, i;
 	char *num_s = nvram_get(nvram, "BssidNum");
 	char_t result[4096];
-	
 	char_t *PreAuth, *AuthMode, *EncrypType, *DefaultKeyID, *Key1Type, *Key2Type,
 		   *Key3Type, *Key4Type, *RekeyMethod, *RekeyInterval, *PMKCachePeriod, *IEEE8021X;
 	char_t *RADIUS_Server, *RADIUS_Port, *RADIUS_Key, *session_timeout_interval;
@@ -1327,30 +1329,12 @@ static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query)
 	return getSecurity(RT2860_NVRAM, wp, path, query);
 }
 
-/*
- *   TODO:   move to util.c?
- */
-static void STFs(int nvram, int index, char *flash_key, char *value)
-{
-	char *result;
-	char *tmp = nvram_bufget(nvram, flash_key);
-	if(!tmp)
-		tmp = "";
-	result = setNthValue(index, tmp, value);
-	nvram_bufset(nvram, flash_key, result);
-	return ;
-}
-
-
-#define STF(nvram, index, flash_key)	STFs(nvram, index, #flash_key, flash_key)
-
 void updateFlash8021x(int nvram)
 {
 	char lan_if_addr[16];
 	char *RADIUS_Server;
 	char *operation_mode;
 
-	// if(! (operation_mode = nvram_get(nvram, "OperationMode")))
 	if(! (operation_mode = nvram_get(RT2860_NVRAM, "OperationMode")))
 		return;
 
@@ -1911,7 +1895,7 @@ static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 #ifdef CONFIG_RT2860V2_RT3XXX_ANTENNA_DIVERSITY
 void AntennaDiversityInit(void)
 {
-	const char *mode = nvram_get(RT2860_NVRAM, "AntennaDiversity");
+	char *mode = nvram_get(RT2860_NVRAM, "AntennaDiversity");
 
 	if(!gstrcmp(mode, "Disable")){						// Disable
 		doSystem("echo 0 > /proc/AntDiv/AD_RUN");

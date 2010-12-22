@@ -212,7 +212,7 @@ static int cache_idx(int index, char *name)
 	return -1;
 }
 
-char const *nvram_get(int index, char *name)
+char *nvram_get(int index, char *name)
 {
 	/* Initial value should be NULL */
 	static char *recv = NULL;
@@ -249,7 +249,7 @@ out:
     return rc;
 }
 
-char const *nvram_bufget(int index, char *name)
+char *nvram_bufget(int index, char *name)
 {
 	int idx;
 	/* Initial value should be NULL */
@@ -274,8 +274,8 @@ char const *nvram_bufget(int index, char *name)
 			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
 			//but if we return value directly, it will cause many other crash or delete value to nvram error.
 			ret = strdup(fb[index].cache[idx].value);
-			//ret = fb[index].cache[idx].value;
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
+
 			return ret;
 		}
 	}
@@ -495,7 +495,7 @@ int renew_nvram(int mode, char *fname)
 {
 	FILE *fp;
 #define BUFSZ 1024
-	unsigned char buf[BUFSZ], *p;
+	char buf[BUFSZ], *p;
 #ifndef CONFIG_RALINK_RT3052
 	unsigned wan_mac[32];
 #endif
@@ -625,7 +625,7 @@ int gen_wifi_config(int mode)
 	FILE *fp;
 	int  i, ssid_num = 1;
 	char tx_rate[16], wmm_enable[16];
-	unsigned char temp[2], buf[4];
+	char temp[2], buf[4];
 
 	//Read radio config
 	flash_read_NicConf(buf);

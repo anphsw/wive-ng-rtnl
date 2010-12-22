@@ -357,8 +357,8 @@ char* getWanIfName(void)
 
 char* getWanIfNamePPP(void)
 {
-    char *cm;
-    cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+    char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+
     if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
 #ifdef CONFIG_USER_3G
 		|| !strncmp(cm, "3G", 3)
@@ -1331,9 +1331,8 @@ static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv)
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char if_net[16];
-	char *cm;
+	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
-	cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
 #ifdef CONFIG_USER_3G
 			|| !strncmp(cm, "3G", 3)
@@ -1411,6 +1410,7 @@ int getIndexOfRoutingRule(char *dest, char *netmask, char *interface)
 	int index=0;
 	char *rrs, one_rule[256];
 	char dest_f[32], netmask_f[32], interface_f[32];
+
 	rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
 	if(!rrs || !strlen(rrs))
 		return -1;
