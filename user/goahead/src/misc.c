@@ -629,7 +629,7 @@ char_t *ballocAscToUni(char *cp, int alen)
 
 char *ballocUniToAsc(char_t *unip, int ulen)
 {
-	char * cp;
+	char *cp;
 
 	if ((cp = balloc(B_L, ulen+1)) == NULL) {
 		return NULL;

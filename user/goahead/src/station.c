@@ -2113,9 +2113,9 @@ unsigned char BtoH(char ch)
  *             dest    - pointer to output hex
  *             destlen - size of dest
  */
-void AtoH(char * src, unsigned char * dest, int destlen)
+void AtoH(char *src, unsigned char *dest, int destlen)
 {
-	char * srcptr;
+	char *srcptr;
 
 	srcptr = src;
 	unsigned char* destTemp = dest;
