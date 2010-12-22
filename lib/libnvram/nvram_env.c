@@ -215,13 +215,12 @@ static int cache_idx(int index, char *name)
 char *nvram_get(int index, char *name)
 {
 	/* Initial value should be NULL */
-	static char *recv = NULL;
+	char *recv = NULL;
 
 	//LIBNV_PRINT("--> nvram_get\n");
 	nvram_init(index);
 
-	//May be leak... strdup is bad idea. Fix me...
-	recv = strdup(nvram_bufget(index, name));
+	recv = nvram_bufget(index, name);
 
 	//btw, we don't return NULL anymore!
 	if (!recv)
@@ -256,7 +255,8 @@ char *nvram_bufget(int index, char *name)
 	static char const *ret = NULL;
 
 	/* If we have some pointer, this means we need to free old value 
-	    we are safe with nvram_get, he do his own strdup
+	    we are safe with nvram_get, he do his own strdup.
+	    This hack need fix later!
 	*/
 	if (ret != NULL) {
 	    free(ret);

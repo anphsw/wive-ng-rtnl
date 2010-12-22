@@ -49,10 +49,11 @@ int vsnprintf(char *__restrict buf, size_t size,
 		size = SIZE_MAX - (size_t) buf;
 	}
 
+/* TODO: this comment seems to be wrong */
 	/* Set these last since __bufputc initialization depends on
 	 * __user_locking and only gets set if user locking is on. */
-	f.__bufstart = buf;
-	f.__bufend = buf + size;
+	f.__bufstart = (unsigned char *) buf;
+	f.__bufend = (unsigned char *) buf + size;
 	__STDIO_STREAM_INIT_BUFREAD_BUFPOS(&f);
 	__STDIO_STREAM_DISABLE_GETC(&f);
 	__STDIO_STREAM_ENABLE_PUTC(&f);

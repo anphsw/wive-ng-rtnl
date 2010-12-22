@@ -241,7 +241,7 @@ int vsscanf(__const char *sp, __const char *fmt, va_list ap)
 
 	/* Set these last since __bufgetc initialization depends on
 	 * __user_locking and only gets set if user locking is on. */
-	f.__bufstart = 
+	f.__bufstart =
 	f.__bufpos = (unsigned char *) ((void *) sp);
 	f.__bufread =
 	f.__bufend = f.__bufstart + strlen(sp);
@@ -385,10 +385,8 @@ int vswscanf(const wchar_t * __restrict str, const wchar_t * __restrict format,
 {
 	FILE f;
 
-	f.__bufstart =
-	f.__bufpos = (char *) str;
-	f.__bufread =
-	f.__bufend = (char *)(str + wcslen(str));
+	f.__bufstart = f.__bufpos = (unsigned char *) str;
+	f.__bufread = f.__bufend = (unsigned char *) (str + wcslen(str));
 	__STDIO_STREAM_DISABLE_GETC(&f);
 	__STDIO_STREAM_DISABLE_PUTC(&f);
 
@@ -472,7 +470,7 @@ enum {
 	FLAG_THOUSANDS	=	0x20,
 	FLAG_I18N		=	0x40,	/* only works for d, i, u */
 	FLAG_MALLOC     =   0x80,	/* only works for s, S, and [ (and l[)*/
-};	  
+};
 
 
 #define SPEC_RANGES		{ CONV_n, CONV_p, CONV_i, CONV_A, \
@@ -552,13 +550,15 @@ enum {
 #define QUAL_CHARS		{ \
 	/* j:(u)intmax_t z:(s)size_t  t:ptrdiff_t  \0:int  q:long_long */ \
 	'h',   'l',  'L',  'j',  'z',  't',  'q', 0, \
-	 2,     4,    8,  IMS,   SS,  PDS,    8,  0, /* TODO -- fix!!! */\
-     1,     8   }
+	 2,     4,    8,  IMS,   SS,  PDS,    8,  0, /* TODO -- fix!!! */ \
+	 1,     8 \
+}
 
 
 /**********************************************************************/
 
 #ifdef L_vfwscanf
+/* FIXME: "warning: the right operand of ">" changes sign when promoted" */
 #if WINT_MIN > EOF
 #error Unfortunately, we currently need wint_t to be able to store EOF.  Sorry.
 #endif
@@ -1034,9 +1034,6 @@ static int sc_getc(register struct scan_cookie *sc)
 		wc = '.';
 	} else
 #endif /* __UCLIBC_HAS_FLOATS__ */
-	if (!__isascii(wc)) {
-		wc = '?';
-	}
 	sc->wc = sc->ungot_char = wc;
 
 	return (int) wc;
@@ -1202,13 +1199,13 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 
 #ifdef __UCLIBC_HAS_GLIBC_DIGIT_GROUPING__
 	if (*sc.grouping) {
-		sc.thousands_sep = fake_thousands_sep_str;
+		sc.thousands_sep = (const unsigned char *) ",";
 		sc.tslen = 1;
 	}
 #endif /* __UCLIBC_HAS_GLIBC_DIGIT_GROUPING__ */
 
 #ifdef __UCLIBC_HAS_FLOATS__
-	sc.fake_decpt = fake_decpt_str;
+	sc.fake_decpt = (const unsigned char *) ".";
 #endif /* __UCLIBC_HAS_FLOATS__ */
 
 #else  /* L_vfwscanf */
@@ -1332,7 +1329,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 
 			if (psfs.conv_num == CONV_percent) {
 				goto MATCH_CHAR;
- 			}
+			}
 
 			if (psfs.conv_num == CONV_n) {
 #ifdef __UCLIBC_MJN3_ONLY__
@@ -1376,7 +1373,6 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 			{
 				b = (psfs.store ? ((unsigned char *) psfs.cur_ptr) : buf);
 				fail = 1;
-			
 
 				if (psfs.conv_num == CONV_c) {
 					if (sc.width == INT_MAX) {
@@ -1417,7 +1413,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 					if (*++fmt == '^') {
 						++fmt;
 						invert = 1;
- 					}
+					}
 					memset(scanset, invert, sizeof(scanset));
 					invert = 1-invert;
 
@@ -1485,7 +1481,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 
 				wb = (psfs.store ? ((wchar_t *) psfs.cur_ptr) : wbuf);
 				fail = 1;
-			
+
 				if (psfs.conv_num == CONV_C) {
 					if (sc.width == INT_MAX) {
 						sc.width = 1;
@@ -1577,7 +1573,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 							*wb = sc.wc;
 							wb += psfs.store;
 						} else {
-							i = wcrtomb(b, sc.wc, &mbstate);
+							i = wcrtomb((char*) b, sc.wc, &mbstate);
 							if (i < 0) { /* Conversion failure. */
 								goto DONE_DO_UNGET;
 							}
@@ -1605,7 +1601,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 							*wb = sc.wc;
 							wb += psfs.store;
 						} else {
-							i = wcrtomb(b, sc.wc, &mbstate);
+							i = wcrtomb((char*) b, sc.wc, &mbstate);
 							if (i < 0) { /* Conversion failure. */
 								goto DONE_DO_UNGET;
 							}
@@ -1679,7 +1675,7 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 							*wb = sc.wc;
 							wb += psfs.store;
 						} else {
-							i = wcrtomb(b, sc.wc, &mbstate);
+							i = wcrtomb((char*) b, sc.wc, &mbstate);
 							if (i < 0) { /* Conversion failure. */
 								goto DONE_DO_UNGET;
 							}
@@ -1793,7 +1789,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 				if (psfs->store) {
 					++psfs->cnt;
 					_store_inttype(psfs->cur_ptr, psfs->dataargtype,
-								   (uintmax_t) NULL);
+								   (uintmax_t)0);
 				}
 				return 0;
 			}
@@ -1852,7 +1848,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 #ifdef __UCLIBC_HAS_GLIBC_DIGIT_GROUPING__
 
 	if ((psfs->flags & FLAG_THOUSANDS) && (base == 10)
-		&& *(p = sc->grouping)
+		&& *(p = (const unsigned char *) sc->grouping)
 		) {
 
 		int nblk1, nblk2, nbmax, lastblock, pass, i;
@@ -1974,7 +1970,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 								p = sc->fake_decpt + k;
 								do {
 									if (!*++p) {
-										strcpy(b, sc->decpt);
+										strcpy((char*) b, (char*) sc->decpt);
 										b += sc->decpt_len;
 										goto GOT_DECPT;
 									}
@@ -2054,7 +2050,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 			}
 			++psfs->cnt;
 			_store_inttype(psfs->cur_ptr, psfs->dataargtype,
-						   (uintmax_t) STRTOUIM(buf, NULL, base, 1-usflag));
+						   (uintmax_t) STRTOUIM((char *) buf, NULL, base, 1-usflag));
 		}
 		return 0;
 	}
@@ -2068,7 +2064,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 	p = sc->fake_decpt;
 	do {
 		if (!*p) {
-			strcpy(b, sc->decpt);
+			strcpy((char *) b, (char *) sc->decpt);
 			b += sc->decpt_len;
 			break;
 		}
@@ -2175,7 +2171,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 		assert(seendigit);
 		seendigit = 0;
 		nonzero = 0;
-		
+
 		if (sc->cc == '0') {
 			seendigit = 1;
 			*b++ = '0';
@@ -2191,7 +2187,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 			}
 			__scan_getc(sc);
 		}
-			
+
 		if (!seendigit) {		/* No digits.  Unrecoverable. */
 			goto DONE_DO_UNGET;
 		}
@@ -2203,7 +2199,7 @@ int __psfs_do_numeric(psfs_t *psfs, struct scan_cookie *sc)
 	{
 		__fpmax_t x;
 		char *e;
-		x = __strtofpmax(buf, &e, exp_adjust);
+		x = __strtofpmax((char *) buf, &e, exp_adjust);
 		assert(!*e);
 		if (psfs->store) {
 			if (psfs->dataargtype & PA_FLAG_LONG_LONG) {

@@ -35,7 +35,7 @@
 /* April 1, 2002
  * Initialize thread locks for fake files in vsnprintf and vdprintf.
  *    reported by Erik Andersen (andersen@codepoet.com)
- * Fix an arg promotion handling bug in _do_one_spec for %c. 
+ * Fix an arg promotion handling bug in _do_one_spec for %c.
  *    reported by Ilguiz Latypov <ilatypov@superbt.com>
  *
  * May 10, 2002
@@ -229,7 +229,7 @@ enum {
 	FLAG_THOUSANDS	=	0x20,
 	FLAG_I18N		=	0x40,	/* only works for d, i, u */
 	FLAG_WIDESTREAM =   0x80
-};	  
+};
 
 /**********************************************************************/
 
@@ -678,7 +678,7 @@ void _ppfs_setargs(register ppfs_t *ppfs)
 				case PA_STRING:
 				case PA_WSTRING:
 					GET_VA_ARG(p,p,void *,ppfs->arg);
-					break;				
+					break;
 				case __PA_NOARG:
 					continue;
 			}
@@ -689,7 +689,7 @@ void _ppfs_setargs(register ppfs_t *ppfs)
 		if (ppfs->info.width == INT_MIN) {
 			ppfs->info.width
 				= (int) GET_ARG_VALUE(p + ppfs->argnumber[0] - 1,u,unsigned int);
-		} 
+		}
 		if (ppfs->info.prec == INT_MIN) {
 			ppfs->info.prec
 				= (int) GET_ARG_VALUE(p + ppfs->argnumber[1] - 1,u,unsigned int);
@@ -732,7 +732,7 @@ void _ppfs_setargs(register ppfs_t *ppfs)
 
 /* TODO -- rethink this -- perhaps we should set to largest type??? */
 
-#ifdef _OVERLAPPING_DIFFERENT_ARGS 
+#ifdef _OVERLAPPING_DIFFERENT_ARGS
 
 #define PROMOTED_SIZE_OF(X)		((sizeof(X) + sizeof(int) - 1) / sizeof(X))
 
@@ -878,7 +878,7 @@ extern int _ppfs_parsespec(ppfs_t *ppfs)
 				) {
 				return -1;
 			}
-		} while (buf[i++]);
+		} while (buf[i++] && (i < sizeof(buf)));
 		buf[sizeof(buf)-1] = 0;
 	}
 #else  /* __UCLIBC_HAS_WCHAR__ */
@@ -898,8 +898,11 @@ extern int _ppfs_parsespec(ppfs_t *ppfs)
 	}
 	i = 0;
 	while (isdigit(*fmt)) {
-		if (i < MAX_FIELD_WIDTH) { /* Avoid overflow. */
+		if (i < INT_MAX / 10
+		    || (i == INT_MAX / 10 && (*fmt - '0') <= INT_MAX % 10)) {
 			i = (i * 10) + (*fmt - '0');
+		} else {
+			i = INT_MAX; /* best we can do... */
 		}
 		++fmt;
 	}
@@ -956,7 +959,7 @@ extern int _ppfs_parsespec(ppfs_t *ppfs)
 	restart_flags:		/* Process flags. */
 		i = 1;
 		p = spec_flags;
-	
+
 		do {
 			if (*fmt == *p++) {
 				++fmt;
@@ -1082,7 +1085,7 @@ extern int _ppfs_parsespec(ppfs_t *ppfs)
 		/* Otherwise error. */
 		return -1;
 	}
-		
+
 #if defined(__UCLIBC_HAS_GLIBC_CUSTOM_PRINTF__) || defined(__UCLIBC_HAS_PRINTF_M_SPEC__)
  DONE:
 #endif
@@ -1196,7 +1199,7 @@ static size_t _charpad(FILE * __restrict stream, int padchar, size_t numpad);
 #define _PPFS_init _ppfs_init
 #define OUTPUT(F,S)			__fputs_unlocked(S,F)
 /* #define _outnstr(stream, string, len)	__stdio_fwrite(string, len, stream) */
-#define _outnstr(stream, string, len)	((len > 0) ? __stdio_fwrite(string, len, stream) : 0)
+#define _outnstr(stream, string, len)  ((len > 0) ? __stdio_fwrite((const unsigned char *)(string), len, stream) : 0)
 #define FP_OUT _fp_out_narrow
 
 #ifdef __STDIO_PRINTF_FLOAT
@@ -1227,7 +1230,7 @@ static size_t _fp_out_narrow(FILE *fp, intptr_t type, intptr_t len, intptr_t buf
 #define STRLEN  wcslen
 #define _PPFS_init _ppwfs_init
 #define OUTPUT(F,S)			fputws(S,F)
-#define _outnwcs(stream, wstring, len)	_wstdio_fwrite(wstring, len, stream)
+#define _outnwcs(stream, wstring, len) _wstdio_fwrite((const wchar_t *)(wstring), len, stream)
 #define FP_OUT _fp_out_wide
 
 static size_t _outnstr(FILE *stream, const char *s, size_t wclen)
@@ -1239,7 +1242,7 @@ static size_t _outnstr(FILE *stream, const char *s, size_t wclen)
 
 	mbstate.__mask = 0;
 	todo = wclen;
-	
+
 	while (todo) {
 		r = mbsrtowcs(wbuf, &s,
 					  ((todo <= sizeof(wbuf)/sizeof(wbuf[0]))
@@ -1407,7 +1410,7 @@ static size_t _charpad(FILE * __restrict stream, int padchar, size_t numpad)
 	FMT_TYPE pad[1];
 
 	*pad = padchar;
-	while (todo && (OUTNSTR(stream, pad, 1) == 1)) {
+	while (todo && (OUTNSTR(stream, (const char *) pad, 1) == 1)) {
 		--todo;
 	}
 
@@ -1811,7 +1814,7 @@ static int _do_one_spec(FILE * __restrict stream,
 			}
 		}
 #else  /* __UCLIBC_HAS_WCHAR__ */
-		if (_outnstr(stream, s, slen) != slen) {
+		if (_outnstr(stream, (const unsigned char *) s, slen) != slen) {
 			return -1;
 		}
 #endif /* __UCLIBC_HAS_WCHAR__ */
@@ -1877,8 +1880,9 @@ int VFPRINTF (FILE * __restrict stream,
 				++format;
 			}
 
-			if (format-s) {		/* output any literal text in format string */
-				if ( (r = OUTNSTR(stream, s, format-s)) != (format-s)) {
+			if (format - s) {	/* output any literal text in format string */
+				r = OUTNSTR(stream, (const char *) s, format - s);
+				if (r != (format - s)) {
 					count = -1;
 					break;
 				}
@@ -1888,7 +1892,7 @@ int VFPRINTF (FILE * __restrict stream,
 			if (!*format) {			/* we're done */
 				break;
 			}
-		
+
 			if (format[1] != '%') {	/* if we get here, *format == '%' */
 				/* TODO: _do_one_spec needs to know what the output funcs are!!! */
 				ppfs.fmtpos = (const char *)(++format);
