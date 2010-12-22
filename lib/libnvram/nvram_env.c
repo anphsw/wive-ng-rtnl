@@ -252,8 +252,9 @@ char *nvram_bufget(int index, char *name)
 {
 	int idx;
 	/* Initial value should be NULL */
-	static char const *ret = NULL;
+	static char *ret = NULL;
 
+#if 0 //This hack crash goahead...
 	/* If we have some pointer, this means we need to free old value 
 	    we are safe with nvram_get, he do his own strdup.
 	    This hack need fix later!
@@ -262,6 +263,7 @@ char *nvram_bufget(int index, char *name)
 	    free(ret);
 	    ret = NULL;
 	}
+#endif     
 
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
@@ -276,7 +278,11 @@ char *nvram_bufget(int index, char *name)
 			ret = strdup(fb[index].cache[idx].value);
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
 
-			return ret;
+			//btw, we don't return NULL anymore!
+			if (!ret)
+			    ret = "";
+
+		    return ret;
 		}
 	}
 
