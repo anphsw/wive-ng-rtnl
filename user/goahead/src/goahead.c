@@ -18,24 +18,22 @@
 
 /********************************* Includes ***********************************/
 
+#include	<signal.h>
+#include	<unistd.h> 
+#include	<sys/types.h>
+#include	<sys/wait.h>
+
+#include	"utils.h"
 #include	"uemf.h"
 #include	"wsIntrn.h"
-#include	"nvram.h"
 #include	"internet.h"
 #include	"services.h"
-#include	"utils.h"
 #include	"wireless.h"
 #include	"firewall.h" 
 #include	"management.h"
 #include	"station.h"
 #include	"usb.h"
 #include	"media.h"
-#include	<signal.h>
-#include	<unistd.h> 
-#include	<sys/types.h>
-#include	<sys/wait.h>
-#include	"linux/autoconf.h"
-#include	"config/autoconf.h" //user config
 
 #ifdef CONFIG_NET_SCHED
 #include      "qos.h"

@@ -7,19 +7,13 @@
 #include <linux/wireless.h>
 #include <ctype.h>
 #include <errno.h>
-#include "linux/autoconf.h"
-#include "config/autoconf.h" //user config
-#include "user/busybox/include/autoconf.h" //busybox config
 
+#include "utils.h"
 #ifdef USER_MANAGEMENT_SUPPORT
 #include "um.h"
 #endif
-#include "nvram.h"
-#include "utils.h"
-#include "webs.h"
 #include "internet.h"
 #include "wireless.h"
-
 #include "management.h"
 #include "wps.h"
 

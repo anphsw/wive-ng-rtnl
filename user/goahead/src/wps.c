@@ -8,12 +8,9 @@
 
 #include <ctype.h>
 
-#include "nvram.h"
 #include "utils.h"
-#include "webs.h"
 #include "internet.h"
 #include "wireless.h"
-#include "linux/autoconf.h"									/* for CONFIG_RT2860V2_STA_WSC */
 
 #include "wps.h"
 #include "oid.h"

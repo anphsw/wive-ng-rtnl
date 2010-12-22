@@ -12,10 +12,8 @@
 #include	<signal.h>
 #include	<unistd.h> 
 
-#include	"webs.h"
-#include	"nvram.h"
+#include	"utils.h"
 #include	"media.h"
-#include	"config/autoconf.h" //user config
 
 static int getMediaOpt(int eid, webs_t wp, int argc, char_t **argv);
 static int getMediaMode(int eid, webs_t wp, int argc, char_t **argv);

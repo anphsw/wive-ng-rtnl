@@ -13,16 +13,12 @@
 #include	<net/route.h>
 #include	<string.h>
 #include	<dirent.h>
-#include	"internet.h"
-#include	"nvram.h"
-#include	"webs.h"
+
 #include	"utils.h"
+#include	"internet.h"
 #include	"management.h"
 #include	"station.h"
 #include	"firewall.h"
-
-#include	"linux/autoconf.h"  //kernel config
-#include	"config/autoconf.h" //user config
 
 #define _PATH_DHCP_ALIAS_FILE "/etc/dhcpd_static.conf"
 

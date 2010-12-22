@@ -15,9 +15,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <dirent.h>
-#include "nvram.h"
+
 #include "utils.h"
-#include "webs.h"
 #include "firewall.h"
 #include "internet.h"
 

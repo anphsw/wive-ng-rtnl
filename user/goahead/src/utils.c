@@ -10,18 +10,13 @@
 #include	<signal.h>
 #include	<sys/ioctl.h>
 #include	<sys/time.h>
-
 #include	<sys/socket.h>
 #include	<netinet/in.h>
 #include	<arpa/inet.h>
 
-#include	"sdk_version.h"
 #include	"utils.h"
-#include	"nvram.h"
-#include	"webs.h"
 #include	"internet.h"
 #include	"wireless.h"
-#include	"../options.h"
 
 #if defined (CONFIG_RALINK_RT2880)
 #define PROCREG_GMAC		"/proc/rt2880/gmac"

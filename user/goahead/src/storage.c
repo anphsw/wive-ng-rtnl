@@ -25,10 +25,8 @@
 
 #include	<stdlib.h>
 
-#include	"webs.h"
-#include	"nvram.h"
+#include	"utils.h"
 #include	"storage.h"
-#include	"config/autoconf.h" //user config
 
 static void storageAdm(webs_t wp, char_t *path, char_t *query);
 static void StorageAddUser(webs_t wp, char_t *path, char_t *query);

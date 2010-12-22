@@ -6,10 +6,14 @@
  *	$Id: utils.h,v 1.25 2008-03-17 09:28:40 yy Exp $
  */
 
-#include        "linux/autoconf.h"  //kernel config                                                                                         
-#include        "config/autoconf.h" //user config                                                                                           
-#include        "linux/ralink_gpio.h" //gpio config
+#include        "linux/autoconf.h"			//kernel config
+#include        "config/autoconf.h"			//user config
+#include        "user/busybox/include/autoconf.h"	//busybox config
+#include        "linux/ralink_gpio.h"			//gpio config
+#include        "sdk_version.h"				//vetsion config
+#include        "../options.h" 				//goahead options
 
+#include        "nvram.h"
 #include 	"webs.h"
 #include	"uemf.h"
 

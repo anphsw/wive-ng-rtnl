@@ -13,21 +13,14 @@
 #include	<net/route.h>
 #include	<string.h>
 #include	<dirent.h>
-#include	"internet.h"
-#include	"nvram.h"
-#include	"webs.h"
+
 #include	"utils.h"
+#include	"internet.h"
 #include	"procps.h"
 #include 	"firewall.h"
 #include	"management.h"
 #include	"station.h"
 #include	"wireless.h"
-
-#include	"linux/autoconf.h"  //kernel config
-#include	"config/autoconf.h" //user config
-
-// Busybox includes
-#include	"user/busybox/include/autoconf.h" // busybox config
 
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
 #define _PATH_VPN_RT           "/etc"

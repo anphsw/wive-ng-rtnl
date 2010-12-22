@@ -14,14 +14,12 @@
 #include	<linux/types.h>
 #include	<linux/socket.h>
 #include	<linux/if.h>
+
+#include	"utils.h"
 #include	"wireless.h"
 #include	"internet.h"
-#include	"nvram.h"
-#include	"utils.h"
-#include	"webs.h"
 #include	"oid.h"
 #include 	"wps.h"
-#include	"linux/autoconf.h"
 
 #define AP_MODE
 #define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 

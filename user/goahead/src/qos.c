@@ -4,13 +4,11 @@
 #include    <net/route.h>
 #include    <string.h>
 #include    <dirent.h>
-#include    "internet.h"
-#include    "nvram.h"
-#include    "webs.h"
+
 #include    "utils.h"
+#include    "internet.h"
 #include    "firewall.h"
 #include    "qos.h"
-#include    "config/autoconf.h" //user config
 
 extern char l7name[];							// in firewall.c
 inline int getRuleNums(char *);

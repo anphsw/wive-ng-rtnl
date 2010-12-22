@@ -11,13 +11,10 @@
 #include	<dirent.h>
 #include	<arpa/inet.h>
 
-#include	"webs.h"
-#include	"nvram.h"
-#include	"usb.h"
 #include 	"utils.h"
+#include	"usb.h"
 #include 	"internet.h"
-#include	"config/autoconf.h" //user config
-#include 	"../options.h"
+
 #if defined CONFIG_RALINKAPP_MPLAYER
 #include	"media.h"
 #endif

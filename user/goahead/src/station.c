@@ -12,11 +12,10 @@
 #include	<linux/if.h>
 #include	<linux/wireless.h>
 #include	<dirent.h>
-#include	"webs.h"
+
+#include	"utils.h"
 #include	"oid.h"
 #include	"stapriv.h"
-#include	"nvram.h"
-#include	"utils.h"
 #include	"internet.h"
 
 #define Ndis802_11AuthMode8021x 20

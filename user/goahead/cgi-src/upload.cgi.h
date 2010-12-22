@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <wait.h>
+
 #include "linux/autoconf.h"  //kernel config
 #include "config/autoconf.h" //user config
 					/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
