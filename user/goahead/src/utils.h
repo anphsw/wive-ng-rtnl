@@ -5,6 +5,11 @@
  *
  *	$Id: utils.h,v 1.25 2008-03-17 09:28:40 yy Exp $
  */
+
+#include        "linux/autoconf.h"  //kernel config                                                                                         
+#include        "config/autoconf.h" //user config                                                                                           
+#include        "linux/ralink_gpio.h" //gpio config
+
 #include 	"webs.h"
 #include	"uemf.h"
 

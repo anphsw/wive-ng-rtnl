@@ -21,7 +21,6 @@
 #include	"uemf.h"
 #include	"wsIntrn.h"
 #include	"nvram.h"
-#include	"ralink_gpio.h"
 #include	"internet.h"
 #include	"services.h"
 #include	"utils.h"

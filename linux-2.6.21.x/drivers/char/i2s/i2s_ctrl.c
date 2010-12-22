@@ -15,8 +15,8 @@
 #include <linux/mm.h>
 #include <asm/rt2880/surfboardint.h>
 #include <linux/pci.h>
-#include "../ralink_gdma.h"
-#include "../ralink_gpio.h"
+#include <linux/ralink_gpio.h>
+#include <linux/ralink_gdma.h>
 
 #ifdef  CONFIG_DEVFS_FS
 #include <linux/devfs_fs_kernel.h>

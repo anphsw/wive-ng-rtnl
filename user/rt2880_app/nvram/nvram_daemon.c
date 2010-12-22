@@ -10,7 +10,7 @@
 #include "nvram.h"
 
 #ifdef CONFIG_RALINK_GPIO
-#include "ralink_gpio.h"
+#include "linux/ralink_gpio.h"
 #define GPIO_DEV "/dev/gpio"
 #endif
 

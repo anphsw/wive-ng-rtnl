@@ -16,14 +16,10 @@
 #include	<arpa/inet.h>
 
 #include	"sdk_version.h"
+#include	"utils.h"
 #include	"nvram.h"
-#include	"ralink_gpio.h"
-#include	"linux/autoconf.h"  //kernel config
-#include	"config/autoconf.h" //user config
-
 #include	"webs.h"
 #include	"internet.h"
-#include	"utils.h"
 #include	"wireless.h"
 #include	"../options.h"
 

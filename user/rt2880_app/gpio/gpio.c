@@ -41,7 +41,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include "ralink_gpio.h"
+#include "linux/ralink_gpio.h"
 
 #define GPIO_DEV	"/dev/gpio"
 

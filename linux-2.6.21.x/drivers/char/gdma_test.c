@@ -27,7 +27,7 @@
 #include <linux/pci.h>
 #include <asm/uaccess.h>
 
-#include "ralink_gdma.h"
+#include <linux/ralink_gdma.h>
 
 #define PATTERN_LEN      1024
 #define PATTERN_BOUNDARY 1052 //for unalignment memcpy test

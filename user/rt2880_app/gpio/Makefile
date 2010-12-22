@@ -1,5 +1,5 @@
 EXEC = gpio
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/char
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
 
 all: $(EXEC)
 

@@ -1,5 +1,5 @@
 NVDIR = $(ROOTDIR)/lib/libnvram
-CFLAGS += -I$(NVDIR) -I$(ROOTDIR)/$(LINUXDIR)/drivers/char
+CFLAGS += -I$(NVDIR) -I$(ROOTDIR)/$(LINUXDIR)/include
 LDFLAGS += -lnvram
 
 EXEC =

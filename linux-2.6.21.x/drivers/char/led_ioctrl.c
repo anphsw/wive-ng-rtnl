@@ -10,6 +10,7 @@
 #endif
 
 #include <linux/proc_fs.h>
+#include <linux/ralink_gpio.h>
 
 #define RDM_DEVNAME	    "ledctrl"
 #ifdef  CONFIG_DEVFS_FS
@@ -17,7 +18,6 @@ static devfs_handle_t devfs_handle;
 #endif
 int led_ioctrl_major =  23;
 
-#include "ralink_gpio.h"
 	
 //+++Eric add CLIENT_LED function 
 int clk=1;

@@ -42,7 +42,7 @@
 #include <linux/timer.h>
 #endif
 #include <asm/uaccess.h>
-#include "ralink_gpio.h"
+#include <linux/ralink_gpio.h>
 
 #include <asm/rt2880/surfboardint.h>
 

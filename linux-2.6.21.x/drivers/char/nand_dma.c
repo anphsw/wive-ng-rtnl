@@ -2,7 +2,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/module.h>
 #include <linux/sched.h>
-#include "ralink_gdma.h"
+#include <linux/ralink_gdma.h>
 
 #define ra_inl(addr)  (*(volatile unsigned int *)(addr))
 #define ra_outl(addr, value)  (*(volatile unsigned int *)(addr) = (value))
