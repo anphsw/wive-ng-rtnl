@@ -925,7 +925,7 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	{
 		/* check ports */
 		passable = 0;
-		if(l3proto == IPPROTO_TCP || l3proto == IPPROTO_UDP)
+		if(tuple->dst.protonum == IPPROTO_TCP || tuple->dst.protonum == IPPROTO_UDP)
 		{
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
 			printk(KERN_WARNING"conn %d exceeds limit %d\n", atomic_read(&nf_conntrack_count), general_traffic_conntrack_max);
