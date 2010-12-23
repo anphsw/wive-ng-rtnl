@@ -202,6 +202,7 @@ vpnPassword=vpn_password
 vpnMTU=AUTO
 vpnDGW=1
 WatchdogEnabled=0
+CrondEnable=0
 SmbEnabled=0
 WorkGroup=LOCALNET
 SmbNetBIOS=Wive-RTNL

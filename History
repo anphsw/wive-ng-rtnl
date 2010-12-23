@@ -219,7 +219,8 @@
 30) Wifi more small step for power regulation. (need correct gui, values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
 31) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
 32) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat (need add in gui)<br>
-33) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
+33) Enable/Disable Cron variable CrondEnable=1/0 (need add in gui)<br>
+34) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
 
 <br><br>
 <b>For support see:</b><br>
