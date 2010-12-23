@@ -149,7 +149,7 @@ if [ "$MODE" != "connect_sta" ]; then
 		ip route del default > /dev/null 2>&1
 		ip route flush cache > /dev/null 2>&1
 		service vpnhelper stop
-		sleep 10
+		sleep 20
 		ip route del default > /dev/null 2>&1
 		ip route flush cache > /dev/null 2>&1
 	    fi
