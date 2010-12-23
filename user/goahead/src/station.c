@@ -5059,9 +5059,13 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
 
 	nvram_init(RT2860_NVRAM);
+
 	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
 	if (!strncmp(clone_en, "1", 2))
 		nvram_bufset(RT2860_NVRAM, "macCloneMac", clone_mac);
+	else
+		nvram_bufset(RT2860_NVRAM, "macCloneMac", "");
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
