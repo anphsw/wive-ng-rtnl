@@ -144,6 +144,11 @@ if [ "$MODE" != "connect_sta" ]; then
 	if [ "$MODE" = "wifionly" ] && [ "$stamode" = "y" ]; then
 	    #Need stop tun before reload drivers
 	    #this need for prevent loop in routes
+	    vpnEnabled=`nvram_get 2860 vpnEnabled`
+	    if [ "$vpnEnabled" = "on" ]; then
+		ip route del default > /dev/null 2>&1
+		ip route flush cache > /dev/null 2>&1
+	    fi
 	    service vpnhelper stop
 	    sleep 5
 	fi
@@ -187,7 +192,12 @@ if [ "$MODE" != "lanonly" ]; then
     service wan restart
 fi
 
-#some daemons need restart
-services_restart.sh all
+# in dhcp client mode restart
+# service restart from dhcp script
+if [ "$wanmode" != "DHCP" ]; then
+    #some daemons need restart
+    services_restart.sh all
+    (sleep 2 && service vpnhelper restart) &
+fi
 
 exit 0

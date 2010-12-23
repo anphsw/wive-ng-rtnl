@@ -29,10 +29,10 @@ start() {
 	(sleep 5 && /etc/scripts/config-pppoe.sh) &
       elif [ "$vpnType" = "1" ]; then
 	$LOG "PPTP calling..."
-	(sleep 10 && /etc/scripts/config-pptp.sh) &
+	(sleep 5 && /etc/scripts/config-pptp.sh) &
       elif [ "$vpnType" = "2" ]; then
 	$LOG "L2TP calling..."
-	(sleep 10 && /etc/scripts/config-l2tp.sh) &
+	(sleep 5 && /etc/scripts/config-l2tp.sh) &
       fi
     fi
 }
@@ -53,30 +53,6 @@ stop() {
     rmmod pppol2tp > /dev/null 2>&1
     rmmod pptp     > /dev/null 2>&1
     rmmod ppp_generic     > /dev/null 2>&1
-
-    if [ "$wanmode" = "DHCP" ]; then
-	#clear all default route
-        if [ -f /tmp/ip-down-route-reload ] || [ -f /tmp/default.gw ]; then
-	    while ip route del default ; do
-    		:
-	    done 
-	fi
-	if [ -f /tmp/default.gw ]; then
-	    #resote old dgw
-	    olddgw=`tail -qn1 /tmp/default.gw`
-	    if [ "$olddgw" != "" ]; then
-		ip route replace default via $olddgw
-	    fi
-	else
-	    if [ -f /tmp/ip-down-route-reload ]; then
-		/tmp/ip-down-route-reload
-		rm -f /tmp/ip-down-route-reload
-	    fi
-	fi
-	#Flush route cache and conntrack table
-	ip route flush cache
-	echo 1 > /proc/sys/net/nf_conntrack_flush
-    fi
 
     #remove VPN server IP file
     rm -f /tmp/vpnip

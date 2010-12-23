@@ -23,9 +23,6 @@ start() {
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
 
-    #set force renew marker
-    touch /tmp/dhcp_force_renew
-
     /bin/hostname $HOSTNAME
     echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
     echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts

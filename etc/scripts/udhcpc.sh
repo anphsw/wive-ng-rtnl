@@ -4,7 +4,6 @@
 
 #include kernel config
 . /etc/scripts/config.sh
-
 #include global config
 . /etc/scripts/global.sh
 
@@ -12,60 +11,48 @@
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
-FORCRENEW="/tmp/dhcp_force_renew"
-
 STATICDNS=`nvram_get 2860 wan_static_dns`
-
-STARTEDPPPD=`ip link show up | grep ppp -c`
-#routes and dns always renew
-if [ -f "$FORCRENEW" ] || [ "$STARTEDPPPD" = "0" ]; then
-    NEEDRENEW=1
-else
-    NEEDRENEW=0
-fi
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
 
 case "$1" in
     deconfig)
-    #on STA mode not need deconfig. After reconnect adress replace automatically.
-    if [ "$NEEDRENEW" = "1" ]; then
-        ip addr flush dev $interface
-	if [ "$CONFIG_IPV6" != "" ] ; then
-    	    ip -6 addr flush dev $interface
-	fi
+    # on STA mode not need deconfig. 
+    # After reconnect adress replace automatically.
+    if ["$ethconv" = "n" ]; then
+	ip addr flush dev $interface
     fi
-    touch "$FORCRENEW"
+    if [ "$CONFIG_IPV6" != "" ]; then
+	ip -6 addr flush dev $interface
+    fi
     ip link set $interface up
     ;;
 
     renew|bound)
     #no change routes if pppd is started
-    if [ "$NEEDRENEW" = "0" ]; then
-        $LOG "No renew needed..."
-    else
-	$LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
-        ifconfig $interface $ip $BROADCAST $NETMASK
-        
+    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
+    ifconfig $interface $ip $BROADCAST $NETMASK
+
 	#Get default gateway
-    	if [ -n "$router" ] ; then
+	if [ -n "$router" ]; then
     	    $LOG "Deleting default route"
     	    while ip route del default dev $interface ; do
-                :
+        	:
     	    done
+
     	    metric=0
     	    for i in $router ; do
-    	        $LOG "Add default route $i dev $interface metric $metric"
+        	$LOG "Add default route $i dev $interface metric $metric"
 		ip route replace default via $i dev $interface metric $metric
-	        #save first dgw with metric=1 to use in corbina hack
-	        if [ "$metric" = "0" ]; then
+    		#save first dgw with metric=1 to use in corbina hack
+    		if [ "$metric" = "0" ]; then
 		    echo $i > /tmp/default.gw
 		    first_dgw="$i"
 		fi
-            	metric=`expr $metric + 1`
-    	    done
-    	fi
+    		metric=`expr $metric + 1`
+	    done
+	fi
 
 	#MSSTATIC ROUTES (rfc3442)
 	if [ ! -z "$msroutes" ]; then
@@ -216,10 +203,6 @@ case "$1" in
 	services_restart.sh dhcp
 
     fi
-    #remove force flag
-    rm -f $FORCRENEW
     $LOG "Renew OK.."
     ;;
 esac
-
-exit 0

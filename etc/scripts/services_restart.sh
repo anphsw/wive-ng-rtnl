@@ -2,7 +2,8 @@
 
 # This scipt restart needed services
 
-#include global
+#include global and kernel
+. /etc/scripts/config.sh
 . /etc/scripts/global.sh
 
 LOG="logger -t services"
@@ -10,6 +11,11 @@ MODE=$1
 
 $LOG "Restart needed services and scripts. Mode $MODE"
 # stop needed services
+if [ "$MODE" = "dhcp" ]; then 
+    # restart from dhcp script. 
+    # if dhcp disables restart must from internet.sh
+    service vpnhelper stop
+fi
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
     service pppoe-relay stop
@@ -51,9 +57,18 @@ fi
 ##########################################################
 # This is services restart always                       #
 ##########################################################
-service radvd restart
-service ripd restart
-service dnsserver restart
+if [ "$CONFIG_IPV6" != "" ] ; then
+    service radvd restart
+fi
+RIPEnable=`nvram_get 2860 RIPEnable`
+if [ "$RIPEnable" = "1" ]; then
+    service ripd restart
+    service zebra restart
+fi
+dnsp=`nvram_get 2860 dnsPEnabled`
+if [ "$dnsp" = "1" ]; then
+    service dnsserver restart
+fi
 
 ##########################################################
 # Need restart this servieces only:                    	#
@@ -65,11 +80,10 @@ if [ "$MODE" = "pppd" ] || [ "$vpnEnabled" != "on" ]; then
     service ntp restart
     service ddns restart
 fi
-
-#call vpn helper...
-if [ "$MODE" = "all" ]; then
-    $LOG "Call vpnhelper restart..."
-    service vpnhelper restart &
+if [ "$MODE" = "dhcp" ]; then 
+    # restart from dhcp script. 
+    # if dhcp disables restart must from internet.sh
+    service vpnhelper start
 fi
 
 $LOG "All OK!. Mode $MODE"
