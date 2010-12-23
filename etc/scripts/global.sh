@@ -4,6 +4,14 @@
 # global.sh - correct enviroment helper for automatization #
 ############################################################
 
+web_wait()
+{
+#wait to start web and run from goahead code
+    if [ ! -f /var/run/goahead.pid ]; then
+      exit 0
+    fi
+}
+
 #include kernel config
 . /etc/scripts/config.sh
 
@@ -24,13 +32,6 @@ WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
 WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
 LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
 
-web_wait()
-{
-#wait to start web and run from goahead code
-    if [ ! -f /var/run/goahead.pid ]; then
-      exit 0
-    fi
-}
 
 # WAN interface name -> $wan_if
 getWanIfName()

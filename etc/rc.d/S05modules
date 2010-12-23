@@ -24,6 +24,9 @@ start() {
 	    setLanWan
 	fi
     else
+	#not load module before goahead start
+	web_wait
+
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
 
