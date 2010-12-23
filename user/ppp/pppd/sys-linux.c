@@ -2147,12 +2147,12 @@ int ppp_available(void)
     if (kernel_version >= KVERSION(2,3,13)) {
 	error("Couldn't open the /dev/ppp device: %m");
 	char modprobePath[PATH_MAX] = "";
-	int status, p, count;
+	int status, p, count = 0;
 	pid_t pid;
 
 	fd = open("/proc/sys/kernel/modprobe", O_RDONLY);
 	if (fd >= 0) {
-		int count = read(fd, modprobePath, PATH_MAX - 1);
+		count = read(fd, modprobePath, PATH_MAX - 1);
 		if (count < 1)
 			modprobePath[0] = 0;
 		else if (modprobePath[count - 1] == '\n')
@@ -2163,6 +2163,7 @@ int ppp_available(void)
 	if (modprobePath[0] == 0)
 		strcpy(modprobePath, "/sbin/modprobe");
 
+	count = 0;
 	switch (pid = fork()) {
 		case 0: /* child */
 			setenv("PATH", "/sbin", 1);
