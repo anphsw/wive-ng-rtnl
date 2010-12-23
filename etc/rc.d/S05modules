@@ -48,6 +48,11 @@ start() {
 	if [ "$opmode" = "3" ]; then
 	    ifconfig apcli0 hw ether "$WMAC"
 	    ip link set apcli0 up
+	    #workaround for apcli mode
+	    ip link set ra0 down
+	    LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+	    ifconfig ra0 hw ether "$LANMAC"
+	    ip link set ra0 up
 	fi
     fi
 }
