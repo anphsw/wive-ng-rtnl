@@ -33,8 +33,8 @@ get_param
 	vconfig add eth2 2
 	$LOG "-==ETH2.1_MACADDR $LANMAC==-"
 	ifconfig eth2.1 hw ether $LANMAC
-	$LOG "-==ETH2.2_MACADDR $MAC==-"
-	ifconfig eth2.2 hw ether $MAC
+	$LOG "-==ETH2.2_MACADDR $WANMAC==-"
+	ifconfig eth2.2 hw ether $WANMAC
     fi
 
     #eth2.1 always up
@@ -84,8 +84,6 @@ get_param() {
  lan_nm_2=`nvram_get 2860 lan2_netmask`
  lan2enabled=`nvram_get 2860 Lan2Enabled`
  CHECKMAC=`nvram_get 2860 CHECKMAC`
- MAC=`nvram_get 2860 WAN_MAC_ADDR`
- LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
  brset=`brctl show  | grep br0 -c`
  vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
  brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1

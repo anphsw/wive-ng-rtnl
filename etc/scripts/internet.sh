@@ -81,8 +81,13 @@ addMBSSID()
 		if [ "$CONFIG_IPV6" != "" ] ; then
     		    ip -6 addr flush dev ra$i
 		fi
-		ifconfig ra$i hw ether $WMAC
-    		ip link set ra$i up
+		#workaround for apcli mode
+		if [ "$opmode" = "3" ]; then
+		    ifconfig ra$i hw ether "$WANMAC"
+		else
+		    ifconfig ra$i hw ether "$WMAC"
+    		    ip link set ra$i up
+		fi
 	    done
 	fi
     fi

@@ -19,8 +19,10 @@ vpnEnabled=`nvram_get 2860 vpnEnabled`
 #get current config wan port
 wan_port=`nvram_get 2860 wan_port`
 
-#get wireless mac adress
+#get wireless, wan and lan mac adresses
 WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
+WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
+LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
 
 web_wait()
 {
