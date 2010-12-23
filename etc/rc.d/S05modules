@@ -41,10 +41,14 @@ start() {
 	else
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
-	ifconfig ra0 hw ether "$WMAC"
 
 	$LOG "Link wifi up..."
+	ifconfig ra0 hw ether "$WMAC"
 	ip link set ra0 up
+	if [ "$opmode" = "3" ]; then
+	    ifconfig apcli0 hw ether "$WMAC"
+	    ip link set apcli0 up
+	fi
     fi
 }
 
@@ -56,6 +60,9 @@ stop() {
 	$LOG "link wifi down first"
 	ra0flushadress
 	ip link set ra0 down > /dev/null 2>&1
+	if [ "$opmode" = "3" ]; then
+	    ip link set apcli0 down > /dev/null 2>&1
+	fi
 	$LOG "Unload wifi module..."
 	rmmod rt2860v2_ap > /dev/null 2>&1
 	rmmod rt2860v2_sta > /dev/null 2>&1
@@ -66,8 +73,14 @@ ra0flushadress()
 {
     #flush adresses
     ip addr flush dev ra0  > /dev/null 2>&1
+    if [ "$opmode" = "3" ]; then
+	ip addr flush dev apcli0  > /dev/null 2>&1
+    fi
     if [ "$CONFIG_IPV6" != "" ] ; then
         ip -6 addr flush dev ra0 > /dev/null 2>&1
+	if [ "$opmode" = "3" ]; then
+	    ip -6 addr flush dev apcli0  > /dev/null 2>&1
+	fi
     fi
 }
 
