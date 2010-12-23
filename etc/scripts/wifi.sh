@@ -4,11 +4,15 @@
 . /etc/scripts/config.sh
 . /etc/scripts/global.sh
 
+echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
+########################################ALLMODE param##########################
+iwpriv ra0 set HiPower=0
+
+########################################STAMODE param##########################
 if [ "$stamode" = "y" ]; then
+    iwpriv ra0 set AutoReconnect=1
     exit 0
 fi
-
-echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 
 #########################################ON/OFF param##########################
 radio_off=`nvram_get 2860 RadioOff`
@@ -20,13 +24,6 @@ if [ "$radio_off" = "1" ]; then
 else
     iwpriv ra0 set RadioOn=1
 fi
-
-########################################all mode param#########################
-HT_BW=`nvram_get 2860 HT_BW`
-HT_PROTECT=`nvram_get 2860 HT_PROTECT`
-
-iwpriv ra0 set HtBw="$HT_BW"
-iwpriv ra0 set HtProtect="$HT_PROTECT"
 
 ###############################################Others#############################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
