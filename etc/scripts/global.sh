@@ -43,7 +43,12 @@ getWanIfName()
     elif [ "$opmode" = "2" ]; then
 	wan_if="ra0"
     elif [ "$opmode" = "3" ]; then
-	wan_if="apcli0"
+	if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+	    wan_if="apcli0"
+	else
+	    echo "Driver not support APCLI mode."
+	    wan_if="eth2.2"
+	fi
     fi
 }
 

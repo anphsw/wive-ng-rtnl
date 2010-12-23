@@ -308,7 +308,6 @@ romfs.post:
 image:
 	[ -d $(IMAGEDIR) ] || mkdir $(IMAGEDIR)
 	$(MAKEARCH) -C vendors image
-	#cp $(IMAGEDIR)/$(USER)_uImage $(TFTPDIR)
 
 .PHONY: release
 release:
