@@ -51,7 +51,6 @@ start() {
 	    ip link set ra0 up
 	    ifconfig apcli0 hw ether "$WMAC"
 	    ip link set apcli0 up
-	else
 	fi
     fi
 }
