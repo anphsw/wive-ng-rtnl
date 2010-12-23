@@ -148,9 +148,11 @@ if [ "$MODE" != "connect_sta" ]; then
 	    if [ "$vpnEnabled" = "on" ]; then
 		ip route del default > /dev/null 2>&1
 		ip route flush cache > /dev/null 2>&1
+		service vpnhelper stop
+		sleep 10
+		ip route del default > /dev/null 2>&1
+		ip route flush cache > /dev/null 2>&1
 	    fi
-	    service vpnhelper stop
-	    sleep 5
 	fi
 	$LOG "Shutdown wireless interfaces."
 	ifRaxWdsxDown
