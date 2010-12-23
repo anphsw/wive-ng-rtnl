@@ -48,6 +48,7 @@ addMesh2Br0()
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
+	    ip link set mesh0 down > /dev/null 2>&1
 	    ifconfig mesh0 hw ether $WMAC
     	    ip link set mesh0 up
     	    brctl addif br0 mesh0
@@ -62,6 +63,7 @@ addWds2Br0()
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
+		ip link set wds$i down > /dev/null 2>&1
 		ifconfig wds$i hw ether $WMAC
     		ip link set wds$i up
 		brctl addif br0 wds$i
@@ -83,8 +85,11 @@ addMBSSID()
 		fi
 		#workaround for apcli mode
 		if [ "$opmode" = "3" ]; then
+		    ip link set ra$i down > /dev/null 2>&1
 		    ifconfig ra$i hw ether "$WANMAC"
+    		    ip link set ra$i up
 		else
+		    ip link set ra$i down > /dev/null 2>&1
 		    ifconfig ra$i hw ether "$WMAC"
     		    ip link set ra$i up
 		fi

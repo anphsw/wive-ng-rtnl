@@ -43,15 +43,15 @@ start() {
 	fi
 
 	$LOG "Link wifi up..."
-	ifconfig ra0 hw ether "$WMAC"
-	ip link set ra0 up
-	if [ "$opmode" = "3" ]; then
+	if [ "$opmode" != "3" ]; then
+	    ifconfig ra0 hw ether    "$WMAC"
+	    ip link set ra0 up
+	else
+	    ifconfig ra0 hw ether    "$WANMAC"
+	    ip link set ra0 up
 	    ifconfig apcli0 hw ether "$WMAC"
 	    ip link set apcli0 up
-	    #workaround for apcli mode
-	    ip link set ra0 down
-	    ifconfig ra0 hw ether "$WANMAC"
-	    ip link set ra0 up
+	else
 	fi
     fi
 }
