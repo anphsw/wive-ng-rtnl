@@ -1477,7 +1477,7 @@ char *getNameIntroFromPat(char *filename)
 	char *rc;
 	FILE *fp;
 
-	sprintf(path_filename, "%s/%s", "/etc_ro/l7-protocols", filename);
+	sprintf(path_filename, "%s/%s", "/etc/l7-protocols", filename);
 	if(! (fp = fopen(path_filename, "r")))
 		return NULL;
 	result[0] = '\0';
@@ -1527,7 +1527,7 @@ void LoadLayer7FilterName(void)
 	char *intro;
 
 	l7name[0] = '\0';
-	if(!(d = opendir("/etc_ro/l7-protocols")))
+	if(!(d = opendir("/etc/l7-protocols")))
 		return;
 	
 	while ((dir = readdir(d)))

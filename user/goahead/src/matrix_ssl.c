@@ -25,7 +25,7 @@
 
 /******************************* Definitions **********************************/
 
-#define CERT_PATH    "/etc_ro"
+#define CERT_PATH    "/etc"
 #define SSL_CERTFILE "servercert.pem"
 #define SSL_PRIVFILE "serverkey.pem"
 

@@ -15,7 +15,6 @@ COMP = lzma
 
 ROMFS_DIRS = dev dev/pts sys proc tmp bin home mnt var etc web usr lib xml \
 	lib/modules  usr/codepages \
-	etc_ro \
 	media \
 	share
 

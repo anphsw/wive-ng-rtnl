@@ -83,8 +83,8 @@ $(NAME): clean_inet $(DEPEND_FILES)
 romfs:
 	$(ROMFSINST) /bin/$(NAME)
 ifeq ("$(CONFIG_USER_GOAHEAD_SSL)", "y")
-	$(ROMFSINST) /etc_ro/serverkey.pem
-	$(ROMFSINST) /etc_ro/servercert.pem
+	$(ROMFSINST) /etc/serverkey.pem
+	$(ROMFSINST) /etc/servercert.pem
 endif
 
 clean:
