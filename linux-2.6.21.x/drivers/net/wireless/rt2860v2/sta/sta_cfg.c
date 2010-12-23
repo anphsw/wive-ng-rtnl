@@ -227,7 +227,7 @@ static struct {
 	{"OpMode",						Set_OpMode_Proc},
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 #ifdef DOT11_N_SUPPORT
-    {"TGnWifiTest",                 Set_TGnWifiTest_Proc},
+	{"TGnWifiTest",                 Set_TGnWifiTest_Proc},
 #endif // DOT11_N_SUPPORT //
 #ifdef QOS_DLS_SUPPORT
 	{"DlsAddEntry",					Set_DlsAddEntry_Proc},

@@ -704,7 +704,10 @@ int gen_wifi_config(int mode)
 
 		FPRINT_NUM(WirelessMode);
 		FPRINT_NUM(staWirelessMode);
-		FPRINT_STR(FixedTxMode);
+		FPRINT_NUM(AutoConnect);
+		FPRINT_NUM(FastConnect);
+		FPRINT_NUM(AutoRoaming);
+		FPRINT_NUM(FixedTxMode);
 
 		//TxRate(FixedRate)
 		bzero(tx_rate, sizeof(char)*16);
@@ -1070,8 +1073,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(EAPifname);
 		FPRINT_STR(PreAuthifname);
 		FPRINT_NUM(session_timeout_interval);
-		FPRINT_NUM(idle_timeout_interval);
-		FPRINT_NUM(WiFiTest);
+		FPRINT_NUM(quiet_interval);
 		FPRINT_NUM(TGnWifiTest);
 
 #ifdef CONFIG_RT2860V2_AP_APCLI

@@ -1786,7 +1786,6 @@ static void meshManualLink(webs_t wp, char_t *path, char_t *query)
 		doSystem("iwpriv mesh0 set MeshAddLink=%s", mpmac);
 	if (0 == strcmp(action, "del"))
 		doSystem("iwpriv mesh0 set MeshDelLink=%s", mpmac);
-	sleep(1);
 
 	websRedirect(wp, "wireless/mesh.asp");
 }

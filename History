@@ -213,14 +213,17 @@
 24) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC<br>
 25) Drop noatime function for small devices save CPU ticks<br>
 26) Uboot code compile and works now OK<br>
-27) Add conntrack reservation. 400 records in list must be reserved for hugh priority pors.<br>
+27) Add conntrack reservation. 400 records in list must be reserved for high priority pors.<br>
 28) Add fulldump makefile to create single image (boot+kernel+rootfs) for write direct to the flash<br>
-29) Integrate kernel mode pppoe/ipv6 pass through (need add in gui pppoe_pass=0/1, ipv6_pass=0/1)<br>
-30) Wifi more small step for power regulation. (need correct gui, values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
+29) Integrate kernel mode pppoe/ipv6 pass through. Default disable. (need add in gui pppoe_pass=0/1, ipv6_pass=0/1)<br>
+30) Wifi more small step for power regulation. Default 30. (need correct gui, values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
 31) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
-32) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat (need add in gui)<br>
-33) Enable/Disable Cron variable CrondEnable=1/0 (need add in gui)<br>
-34) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
+32) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat. Default enable. (need add in gui)<br>
+33) Enable/Disable Cron variable CrondEnable=1/0. Default disable. (need add in gui)<br>
+34) STA mode - add AutoRoaming=1/0 variable. Enable disable connect migration over wifi ap based by SNR. Disable default. (need add in STA gui)<br>
+35) STA mode - add AutoConnect=1/0 variable. Enable connect to first AP is SSID to connect = NULL. Enable default. (need add in STA gui)<br>
+36) STA mode - add FastConnect=1/0 variable. Enable fast connect procedure to AP. Enable default. (need add in STA gui)<br>
+37) Replace original KabInet auth to small version by theMiron and default on (need gui write)<br>
 
 <br><br>
 <b>For support see:</b><br>
