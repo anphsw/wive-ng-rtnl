@@ -201,8 +201,6 @@ case "$1" in
 
     	$LOG "Restart needed services"
 	services_restart.sh dhcp
-
-    fi
-    $LOG "Renew OK.."
+	$LOG "Renew OK.."
     ;;
 esac
