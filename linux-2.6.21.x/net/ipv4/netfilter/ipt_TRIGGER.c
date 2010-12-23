@@ -27,10 +27,8 @@
 
 #include <linux/netfilter_ipv4.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
-//#include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
 #include <linux/netfilter_ipv4/ip_conntrack_tuple.h>
-#include <linux/netfilter_ipv4/ip_autofw.h>
 #include <linux/netfilter_ipv4/lockhelp.h>
 #ifdef CONFIG_NF_NAT_NEEDED
 #include <net/netfilter/nf_nat_rule.h>
