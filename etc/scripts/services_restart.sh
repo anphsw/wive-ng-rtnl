@@ -60,15 +60,9 @@ fi
 if [ "$CONFIG_IPV6" != "" ] ; then
     service radvd restart
 fi
-RIPEnable=`nvram_get 2860 RIPEnable`
-if [ "$RIPEnable" = "1" ]; then
     service ripd restart
     service zebra restart
-fi
-dnsp=`nvram_get 2860 dnsPEnabled`
-if [ "$dnsp" = "1" ]; then
     service dnsserver restart
-fi
 
 ##########################################################
 # Need restart this servieces only:                    	#
