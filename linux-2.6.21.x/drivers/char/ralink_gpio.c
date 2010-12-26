@@ -69,6 +69,8 @@ extern unsigned long volatile jiffies;
 #ifdef CONFIG_RALINK_GPIO_LED
 #define RALINK_LED_DEBUG 0
 #define RALINK_GPIO_LED_FREQ (HZ/10)
+#define RALINK_GPIO_BTN_LONG (2*HZ)
+#define RALINK_GPIO_BTN_SHORT (HZ/10)
 struct timer_list ralink_gpio_led_timer;
 ralink_gpio_led_info ralink_gpio_led_data[RALINK_GPIO_NUMBER];
 
@@ -999,7 +1001,7 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 		ralink_gpio_irqnum = i;
 		if (ralink_gpio_edge & (1 << i)) { //rising edge
 			if (record[i].rising != 0 && time_before_eq(now,
-						record[i].rising + 40L)) {
+						record[i].rising + RALINK_GPIO_BTN_SHORT)) {
 				/*
 				 * If the interrupt comes in a short period,
 				 * it might be floating. We ignore it.
@@ -1007,7 +1009,7 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 			}
 			else {
 				record[i].rising = now;
-				if (time_before(now, record[i].falling + 200L)) {
+				if (time_before(now, record[i].falling + RALINK_GPIO_BTN_LONG)) {
 					//one click
 					ralink_gpio_notify_user(1);
 				}
@@ -1029,11 +1031,11 @@ irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
 		ralink_gpio_irqnum = i;
 		if (ralink_gpio3924_edge & (1 << (i - 24))) {
 			if (record[i].rising != 0 && time_before_eq(now,
-						record[i].rising + 40L)) {
+						record[i].rising + RALINK_GPIO_BTN_SHORT)) {
 			}
 			else {
 				record[i].rising = now;
-				if (time_before(now, record[i].falling + 200L)) {
+				if (time_before(now, record[i].falling + RALINK_GPIO_BTN_LONG)) {
 					ralink_gpio_notify_user(1);
 				}
 				else {
