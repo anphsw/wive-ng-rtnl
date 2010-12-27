@@ -340,7 +340,7 @@ static inline int raspi_write_enable(void)
  * Set all sectors (global) unprotected if they are protected.
  * Returns negative if error occurred.
  */
-void raspi_unprotect(void)
+static void raspi_unprotect(void)
 {
 	u8 sr = 0;
 
