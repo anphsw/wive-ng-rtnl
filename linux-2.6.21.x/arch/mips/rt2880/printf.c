@@ -88,9 +88,6 @@ void __init prom_setup_printf(int tty_no)
 		uart_base = RALINK_UART_BASE;
 }
 
-static DEFINE_SPINLOCK(con_lock);
-
-static char buf[1024];
 
 /* NOTE:  must call prom_setup_printf before using this function */
 void __init prom_printf(char *fmt, ...)
@@ -99,6 +96,8 @@ void __init prom_printf(char *fmt, ...)
 	int l;
 	char *p, *buf_end;
 	long flags;
+	static char buf[2048];
+	static DEFINE_SPINLOCK(con_lock);
 
 	int putPromChar(char);
 
