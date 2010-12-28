@@ -38,7 +38,6 @@
 
 #include <linux/init.h>
 #include <linux/kernel.h>
-//#include <linux/serial_reg.h>
 #include <linux/spinlock.h>
 #include <asm/io.h>
 #include "serial_rt2880.h"
@@ -46,7 +45,7 @@
 #include <asm/rt2880/surfboard.h>
 #include <asm/rt2880/rt_mmap.h>
 
-static unsigned int uart_base;
+static unsigned int uart_base = RALINK_UART_LITE_BASE;
 
 
 static inline unsigned int serial_in(int offset)
