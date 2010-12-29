@@ -46,7 +46,7 @@
  * argument.  Historically that used to be expensive in Linux.  These days
  * the performance advantage is negligible.
  */
-asmlinkage int sysm_pipe(nabi_no_regargs volatile struct pt_regs regs)
+asmlinkage int sys_pipe(nabi_no_regargs volatile struct pt_regs regs)
 {
 	int fd[2];
 	int error, res;
