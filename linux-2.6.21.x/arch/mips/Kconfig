@@ -947,6 +947,19 @@ config CPU_HAS_SYNC
 	default y
 
 #
+# CPU non-features
+#
+config CPU_DADDI_WORKAROUNDS
+	bool
+
+config CPU_R4000_WORKAROUNDS
+	bool
+	select CPU_R4400_WORKAROUNDS
+
+config CPU_R4400_WORKAROUNDS
+	bool
+
+#
 # Use the generic interrupt handling code in kernel/irq/:
 #
 config GENERIC_HARDIRQS
