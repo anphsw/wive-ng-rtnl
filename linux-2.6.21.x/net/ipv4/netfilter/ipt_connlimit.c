@@ -36,8 +36,6 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_connlimit.h>
 
-#define DEBUG 0
-
 MODULE_LICENSE("GPL");
 
 /* we'll save the tuples of all connections we care about */
@@ -70,7 +68,7 @@ static int count_them(struct ipt_connlimit_data *data,
 #endif
 
 {
-#if DEBUG
+#ifdef DEBUG
 	const static char *tcp[] = { "none", "established", "syn_sent", "syn_recv",
 				     "fin_wait", "time_wait", "close", "close_wait",
 				     "last_ack", "listen" };
@@ -115,7 +113,7 @@ static int count_them(struct ipt_connlimit_data *data,
 			   into a table without "-p tcp --syn" */
 			addit = 0;
 		}
-#if DEBUG
+#ifdef DEBUG
 		printk("ipt_connlimit [%d]: src=%u.%u.%u.%u:%d dst=%u.%u.%u.%u:%d %s\n",
 		       ipt_iphash(addr & mask),
 #ifndef CONFIG_NF_CONNTRACK_SUPPORT
@@ -155,7 +153,7 @@ static int count_them(struct ipt_connlimit_data *data,
 	}
 	if (addit) {
 		/* save the new connection in our list */
-#if DEBUG
+#ifdef DEBUG
 		printk("ipt_connlimit [%d]: src=%u.%u.%u.%u:%d dst=%u.%u.%u.%u:%d new\n",
 		       ipt_iphash(addr & mask),
 #ifndef CONFIG_NF_CONNTRACK_SUPPORT
@@ -226,7 +224,7 @@ match(const struct sk_buff *skb,
 		return 0;
 	}
         rv = (info->inverse) ? (connections <= info->limit) : (connections > info->limit);
-#if DEBUG
+#ifdef DEBUG
 	printk("ipt_connlimit: src=%u.%u.%u.%u mask=%u.%u.%u.%u "
 	       "connections=%d limit=%d match=%s\n",
 	       NIPQUAD(skb->nh.iph->saddr), NIPQUAD(info->mask),

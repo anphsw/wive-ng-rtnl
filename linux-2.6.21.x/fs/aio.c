@@ -17,6 +17,10 @@
 #include <linux/syscalls.h>
 #include <linux/uio.h>
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
+
 #define DEBUG 0
 
 #include <linux/sched.h>

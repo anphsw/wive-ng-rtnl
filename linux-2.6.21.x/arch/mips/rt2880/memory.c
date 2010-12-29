@@ -133,6 +133,7 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 void __init prom_meminit(void)
 {
 #ifdef DEBUG
+    struct prom_pmemblock *p;
     struct prom_pmemblock *psave;
 #endif
 #ifdef CONFIG_RAM_SIZE_AUTO
@@ -203,6 +204,7 @@ void __init prom_meminit(void)
 #endif /* CONFIG_RAM_SIZE_AUTO */	
 
 #ifdef DEBUG
+	p = prom_getmdesc();
 	prom_printf("MEMORY DESCRIPTOR dump:\n");
 	psave = p;	/* Save p */
 	while (p->size) {
