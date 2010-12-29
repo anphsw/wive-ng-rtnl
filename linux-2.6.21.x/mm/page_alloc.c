@@ -2787,7 +2787,7 @@ static void inline setup_usemap(struct pglist_data *pgdat,
  *   - mark all memory queues empty
  *   - clear the memory bitmaps
  */
-static void __meminit free_area_init_core(struct pglist_data *pgdat,
+static void __paginginit free_area_init_core(struct pglist_data *pgdat,
 		unsigned long *zones_size, unsigned long *zholes_size)
 {
 	enum zone_type j;
@@ -2910,7 +2910,7 @@ static void __init alloc_node_mem_map(struct pglist_data *pgdat)
 #endif /* CONFIG_FLAT_NODE_MEM_MAP */
 }
 
-void __meminit free_area_init_node(int nid, struct pglist_data *pgdat,
+void __paginginit free_area_init_node(int nid, struct pglist_data *pgdat,
 		unsigned long *zones_size, unsigned long node_start_pfn,
 		unsigned long *zholes_size)
 {

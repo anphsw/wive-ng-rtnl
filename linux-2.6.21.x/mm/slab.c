@@ -125,6 +125,10 @@
  * FORCED_DEBUG	- 1 enables SLAB_RED_ZONE and SLAB_POISON (if possible)
  */
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
+
 #ifdef CONFIG_DEBUG_SLAB
 #define	DEBUG		1
 #define	STATS		1

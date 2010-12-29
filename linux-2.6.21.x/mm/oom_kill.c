@@ -167,7 +167,7 @@ unsigned long badness(struct task_struct *p, unsigned long uptime)
 	}
 
 #ifdef DEBUG
-	printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
+	printk(KERN_DEBUG "OOMkill: task %d (%s) got %ld points\n",
 	p->pid, p->comm, points);
 #endif
 	return points;
