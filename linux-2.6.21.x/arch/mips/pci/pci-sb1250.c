@@ -256,8 +256,6 @@ static int __init sb1250_pcibios_init(void)
 
 	set_io_port_base((unsigned long)
 			 ioremap(A_PHYS_LDTPCI_IO_MATCH_BYTES, 65536));
-	isa_slot_offset = (unsigned long)
-	    ioremap(A_PHYS_LDTPCI_IO_MATCH_BYTES_32, 1024 * 1024);
 
 #ifdef CONFIG_SIBYTE_HAS_LDT
 	/*
