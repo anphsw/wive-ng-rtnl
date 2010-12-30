@@ -8,6 +8,7 @@
 #include <linux/skbuff.h>
 #include <linux/if_vlan.h>
 #include <linux/if_ether.h>
+#include <linux/fs.h>
 #include <asm/uaccess.h>
 #include <asm/rt2880/surfboardint.h>
 

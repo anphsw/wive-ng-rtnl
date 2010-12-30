@@ -1797,7 +1797,6 @@ retry:
 	page = __read_cache_page(mapping, index, filler, data);
 	if (IS_ERR(page))
 		goto out;
-	mark_page_accessed(page);
 	if (PageUptodate(page))
 		goto out;
 

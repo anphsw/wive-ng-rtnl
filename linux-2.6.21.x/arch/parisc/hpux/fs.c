@@ -22,6 +22,7 @@
  */
 
 #include <linux/mm.h>
+#include <linux/fs.h>
 #include <linux/sched.h>
 #include <linux/file.h>
 #include <linux/slab.h>
