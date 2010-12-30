@@ -54,11 +54,10 @@ start() {
         fi
     else
 	$LOG "Start DHCP client."
-	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
-		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
-		    -O routes staticroutes msroutes -f &"
+	#reload global
+	. /etc/scripts/global.sh
 
-	(sleep 1 && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
+	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     fi
 
     #----Direct pass from kernel--------------------------------

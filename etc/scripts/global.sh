@@ -146,6 +146,18 @@ wait_connect()
     fi
 }
 
+udhcpc_opts()
+{
+	CL_SLEEP=1
+	if [ "$stamode" = "y" ]; then
+	    CL_SLEEP=5
+	fi
+	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
+		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
+		    -O routes staticroutes msroutes -f &"
+}
+
+
 #set default
 ethconv="n"
 stamode="n"
@@ -164,3 +176,4 @@ getEthConv
 getStaMode
 getSwType
 getHostName
+udhcpc_opts
