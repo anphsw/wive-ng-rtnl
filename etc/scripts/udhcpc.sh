@@ -20,7 +20,7 @@ case "$1" in
     deconfig)
     # on STA mode not need deconfig. 
     # After reconnect adress replace automatically.
-    if ["$ethconv" = "n" ]; then
+    if [ "$ethconv" = "n" ]; then
 	ip addr flush dev $interface
     fi
     if [ "$CONFIG_IPV6" != "" ]; then
