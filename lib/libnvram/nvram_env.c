@@ -8,6 +8,15 @@
 
 #include <linux/autoconf.h>
 
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+#include <pthread.h>
+#endif
+
+#define MAX_NV_VALUE_LEN	64
+#define NV_BUFFERS_COUNT	128
+#endif
+
 //#define DEBUG
 
 #ifdef DEBUG
@@ -100,6 +109,33 @@ static block_t fb[FLASH_BLOCK_NUM] =
 } while (0)
 
 #define FREE(x) do { if (x != NULL) {free(x); x=NULL;} } while(0)
+
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+static int bufitem = 0;
+static char buf[NV_BUFFERS_COUNT][MAX_NV_VALUE_LEN];
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+static pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
+char* sstrdup(char* str)
+{
+	char* res;
+	//lock till we'll have pointer to potentially free buffer
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+	pthread_mutex_lock( &mutex1 );
+#endif
+	bufitem++;
+	if (bufitem >= NV_BUFFERS_COUNT)
+	    bufitem = 0;
+	res = buf[bufitem];
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+	pthread_mutex_unlock( &mutex1 );
+#endif
+	//work with that buffer
+	strlcpy(res, str, MAX_NV_VALUE_LEN);
+	return res;
+}
+#endif
 
 /*
  * 1. read env from flash
@@ -275,7 +311,11 @@ char *nvram_bufget(int index, char *name)
 			//duplicate the value in case caller modify it
 			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
 			//but if we return value directly, it will cause many other crash or delete value to nvram error.
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+			ret = sstrdup(fb[index].cache[idx].value);
+#else
 			ret = strdup(fb[index].cache[idx].value);
+#endif
 			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
 
 			//btw, we don't return NULL anymore!

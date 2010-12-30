@@ -606,7 +606,7 @@ s,@am__fastdepCXX_TRUE@,|#_!!_#|,g
 s,@am__fastdepCXX_FALSE@,|#_!!_#|#,g
 s,@CXXCPP@,|#_!!_#|/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E,g
 s,@F77@,|#_!!_#|gfortran,g
-s,@FFLAGS@,|#_!!_#|-g -O2,g
+s,@FFLAGS@,|#_!!_#|,g
 s,@ac_ct_F77@,|#_!!_#|gfortran,g
 s,@LIBTOOL@,|#_!!_#|$(SHELL) $(top_builddir)/libtool,g
 s,@acx_pthread_config@,|#_!!_#|,g

@@ -7567,7 +7567,7 @@ LTCFLAGS="-Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -p
 CC="gfortran"
 
 # Is the compiler the GNU C compiler?
-with_gcc=yes
+with_gcc=
 
 # An ERE matcher.
 EGREP="/bin/grep -E"
@@ -7619,14 +7619,14 @@ shrext_cmds='.so'
 exeext=""
 
 # Additional compiler flags for building library objects.
-pic_flag=" -fPIC"
+pic_flag=""
 pic_mode=default
 
 # What is the maximum length of a command?
 max_cmd_len=32768
 
 # Does compiler simultaneously support -c and -o options?
-compiler_c_o="yes"
+compiler_c_o="no"
 
 # Must we lock files when doing compilation?
 need_locks="no"
@@ -7801,7 +7801,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../../i586-manbo-linux-gnu/lib/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../i586-manbo-linux-gnu/4.5.1/ /usr/lib/gcc/i586-manbo-linux-gnu/4.5.1/../../../ /lib/i586-manbo-linux-gnu/4.5.1/ /lib/ /usr/lib/i586-manbo-linux-gnu/4.5.1/ /usr/lib/"
+sys_lib_search_path_spec=""
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /usr/lib/qt3/lib /usr/lib/qt3/lib "
