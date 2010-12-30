@@ -68,11 +68,9 @@
 # include <asm/irq.h>
 #endif
 
-//#include <asm/arch/lm.h>
 #include <asm/rt2880/lm.h>
 #include <asm/rt2880/sizes.h>
 #include <asm/rt2880/rt_mmap.h>
-//#include <asm/sizes.h>
 
 #include "linux/dwc_otg_plat.h"
 #include "dwc_otg_attr.h"

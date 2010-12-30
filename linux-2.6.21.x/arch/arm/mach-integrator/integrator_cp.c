@@ -28,7 +28,8 @@
 #include <asm/hardware/icst525.h>
 
 #include <asm/arch/cm.h>
-#include <asm/arch/lm.h>
+
+#include <asm/rt2880/lm.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/flash.h>

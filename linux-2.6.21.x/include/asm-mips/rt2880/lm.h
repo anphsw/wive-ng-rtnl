@@ -4,6 +4,7 @@ struct lm_device {
 	struct resource		resource;
 	unsigned int		irq;
 	unsigned int		id;
+	void			*lm_drvdata;
 };
 
 struct lm_driver {
@@ -19,5 +20,5 @@ void lm_driver_unregister(struct lm_driver *drv);
 
 int lm_device_register(struct lm_device *dev);
 
-#define lm_get_drvdata(lm)	dev_get_drvdata(&(lm)->dev)
-#define lm_set_drvdata(lm,d)	dev_set_drvdata(&(lm)->dev, d)
+#define lm_get_drvdata(lm)	((lm)->lm_drvdata)
+#define lm_set_drvdata(lm,d)	do { (lm)->lm_drvdata = (d); } while (0)

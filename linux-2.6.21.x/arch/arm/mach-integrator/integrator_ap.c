@@ -35,7 +35,7 @@
 #include <asm/param.h>		/* HZ */
 #include <asm/mach-types.h>
 
-#include <asm/arch/lm.h>
+#include <asm/rt2880/lm.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/flash.h>

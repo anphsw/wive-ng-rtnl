@@ -33,6 +33,10 @@ config RAETH_CHECKSUM_OFFLOAD
 	default y
         depends on RAETH && !RALINK_RT2880
 
+config RAETH_SNMPD
+        bool "Support SNMPD in raeth"
+	default n
+
 config RAETH_QOS
         bool "QoS Feature"
         depends on RAETH && (RALINK_RT3052 || RALINK_RT3352)

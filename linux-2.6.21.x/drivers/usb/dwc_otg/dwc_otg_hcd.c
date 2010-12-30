@@ -50,9 +50,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/version.h>
 
-//#include <asm/arch/lm.h>
 #include <asm/rt2880/lm.h>
-//#include <asm/arch/irqs.h>
 
 #include "dwc_otg_driver.h"
 #include "dwc_otg_hcd.h"

@@ -23,7 +23,7 @@
 
 #include <asm/io.h>
 #include <asm/hardware/icst525.h>
-#include <asm/arch/lm.h>
+#include <asm/rt2880/lm.h>
 #include <asm/arch/impd1.h>
 #include <asm/sizes.h>
 

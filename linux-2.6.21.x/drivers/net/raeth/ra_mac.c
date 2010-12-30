@@ -36,9 +36,7 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 
-#include "../../../../config/autoconf.h"
-
-#if defined(CONFIG_USER_SNMPD)
+#if defined(CONFIG_RAETH_SNMPD)
 #include <linux/seq_file.h>
 #endif
 
@@ -50,7 +48,7 @@
 extern END_DEVICE *ra_ei_local;
 
 
-#if defined(CONFIG_USER_SNMPD)
+#if defined(CONFIG_RAETH_SNMPD)
 
 static int ra_snmp_seq_show(struct seq_file *seq, void *v)
 {
@@ -512,7 +510,7 @@ void dump_cp0(void)
 
 struct proc_dir_entry *procRegDir;
 static struct proc_dir_entry *procGmac, *procSysCP0;
-#if defined(CONFIG_USER_SNMPD)
+#if defined(CONFIG_RAETH_SNMPD)
 static struct proc_dir_entry *procRaSnmp;
 #endif
 
@@ -588,7 +586,7 @@ int debug_proc_init(void)
 	 procRaQOS->read_proc = (read_proc_t*)&RaQOSRegRead;
 #endif
 
-#if defined(CONFIG_USER_SNMPD)
+#if defined(CONFIG_RAETH_SNMPD)
     procRaSnmp = create_proc_entry(PROCREG_SNMP, S_IRUGO, procRegDir);
     if (procRaSnmp == NULL)
     	printk(KERN_ALERT "raeth: snmp proc create failed!!!");
@@ -617,7 +615,7 @@ void debug_proc_exit(void)
     	remove_proc_entry(PROCREG_ESW_INTR, procRegDir);
 #endif
 
-#if defined(CONFIG_USER_SNMPD)
+#if defined(CONFIG_RAETH_SNMPD)
     if (procRaSnmp)
 	remove_proc_entry(PROCREG_SNMP, procRegDir);
 #endif

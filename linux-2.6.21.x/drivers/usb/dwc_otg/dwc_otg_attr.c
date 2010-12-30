@@ -265,7 +265,7 @@
 //#include <asm/sizes.h>
 #include <asm/rt2880/sizes.h>
 #include <asm/io.h>
-//#include <asm/arch/lm.h>
+
 #include <asm/rt2880/lm.h>
 
 #include "linux/dwc_otg_plat.h"

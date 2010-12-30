@@ -11,7 +11,6 @@
 #include <linux/init.h>
 #include <linux/device.h>
 
-//#include <asm/arch/lm.h>
 #include <asm/rt2880/lm.h>
 
 #define to_lm_device(d)	container_of(d, struct lm_device, dev)

@@ -47,9 +47,9 @@
 #include <linux/list.h>
 #include <linux/interrupt.h>
 #include <linux/string.h>
-//#include <asm/arch/lm.h>
+
 #include <asm/rt2880/lm.h>
-//#include <asm/arch/irqs.h>
+
 #include <linux/dma-mapping.h>
 #include <linux/version.h>
 

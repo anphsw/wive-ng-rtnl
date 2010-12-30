@@ -74,8 +74,6 @@
 #include <linux/dma-mapping.h>
 #include <linux/version.h>
 
-//#include <asm/arch/lm.h>
-//#include <asm/arch/irqs.h>
 #include <asm/rt2880/lm.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
