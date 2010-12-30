@@ -53,10 +53,13 @@ start() {
 	    fi
         fi
     else
-	$LOG "Start DHCP client."
 	#reload global
 	. /etc/scripts/global.sh
-
+	if [ "$stamode" = "y" ] && [ ! -f /tmp/sta_connected ]; then
+	    $LOG "Wait connect to sta."
+	    exit 0
+	fi
+	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     fi
 
@@ -71,6 +74,7 @@ start() {
     else
 	echo "null,null" > /proc/pthrough/ipv6
     fi
+
 }
 
 stop() {
