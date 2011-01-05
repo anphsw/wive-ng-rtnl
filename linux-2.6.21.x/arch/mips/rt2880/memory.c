@@ -49,7 +49,9 @@
 #include <asm/rt2880/prom.h>
 
 //#define DEBUG
-#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024
+#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024 /* Fixed SDRAM SIZE */
+#define MAX_SDRAM_SIZE  (64*1024*1024)			 /* Maximumum SDRAM size */
+#define MIN_SDRAM_SIZE  (16*1024*1024)			 /* Minimumum SDRAM size */
 
 //no need
 #if 0
@@ -142,9 +144,11 @@ void __init prom_meminit(void)
     unsigned long flags;
     unsigned short save_dword;
 
-       spin_lock_irqsave(&rtlmem_lock, flags);
-       //Maximum RAM for autodetect
-       reg_mem = 64;
+    spin_lock_irqsave(&rtlmem_lock, flags);
+
+    //Maximum RAM for autodetect
+    reg_mem = MAX_SDRAM_SIZE >> 20;
+
        //FIRST PASS RAM capacity
        for(memmeg=8;memmeg<reg_mem;memmeg+=8){
 	    mempos = 0xa0000000L + memmeg * 0x100000;
@@ -167,6 +171,7 @@ void __init prom_meminit(void)
        //SECOND PASS Test to be sure in RAM capacity
        before = ((unsigned long) &prom_init) & (127 << 20);
        offset = ((unsigned long) &prom_init) - before;
+
        for (mem = before + (1 << 20); mem < (reg_mem << 20); mem += (1 << 20))
          if (*(unsigned long *)(offset + mem) == *(unsigned long *)(prom_init))
 	 {
@@ -174,22 +179,31 @@ void __init prom_meminit(void)
 		break;
 	 }
 
-       //Calculate and set	
+       //Calculate ram size	
        memsize = memmeg << 20;
        detect_ram_sequence[0] = reg_mem;
        detect_ram_sequence[1] = memsize;
 
-       //Select smallest size from pass
-       if(mem < memsize){
+	//Select smallest size from passes...
+	if(mem < memsize){
 	    memsize = mem;
-	    memmeg  = mem >> 20;
+	}
+
+	//This correct detect ram for some china routers..
+	if(memsize > MAX_SDRAM_SIZE){
+	    memsize = MAX_SDRAM_SIZE;
+	}
+
+	if(memsize < MIN_SDRAM_SIZE){
+	    memsize = MIN_SDRAM_SIZE;
 	}
 
        detect_ram_sequence[2] = mem;
        detect_ram_sequence[3] = memsize;
 
-       spin_unlock_irq(&rtlmem_lock);
+    spin_unlock_irq(&rtlmem_lock);
 
+	/* Set ram size */
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
 	add_memory_region(0x08000000, memsize, BOOT_MEM_RAM);
 #else
