@@ -194,11 +194,12 @@ if [ "$MODE" != "lanonly" ]; then
     service wan restart
 fi
 
+#some daemons need restart
+services_restart.sh all
+
 # in dhcp client mode restart
 # service restart from dhcp script
 if [ "$wanmode" != "DHCP" ]; then
-    #some daemons need restart
-    services_restart.sh all
     (sleep 2 && service vpnhelper restart) &
 fi
 
