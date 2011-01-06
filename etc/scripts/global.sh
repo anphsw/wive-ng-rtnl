@@ -154,7 +154,7 @@ udhcpc_opts()
 	fi
 	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
-		    -O routes staticroutes msroutes -f &"
+		    -O routes staticroutes msstaticroutes -f &"
 }
 
 
