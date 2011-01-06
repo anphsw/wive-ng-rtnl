@@ -12,6 +12,7 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STATICDNS=`nvram_get 2860 wan_static_dns`
+ROUTELIST=""
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -32,21 +33,31 @@ case "$1" in
     renew|bound)
     #no change routes if pppd is started
     $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
+    OLD_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
     ifconfig $interface $ip $BROADCAST $NETMASK
+    CUR_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
 
 	#Get default gateway
 	if [ -n "$router" ]; then
-    	    $LOG "Deleting default route"
-    	    while ip route del default dev $interface ; do
-        	:
-    	    done
+	    #default route with metric 0 is through $iface?
+	    def_iface=`ip route | grep "default" | grep -v "metric" | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	    if [ -n "$def_iface" -a "$def_iface" != "$interface" ]; then
+		metric=1
+		smetric=1
+	    else
+		metric=0
+		smetric=0
+	    fi
+	    $LOG "Deleting default route"
+	    while ip route del default dev $interface ; do
+		:
+	    done
 
-    	    metric=0
-    	    for i in $router ; do
-        	$LOG "Add default route $i dev $interface metric $metric"
-		ip route replace default via $i dev $interface metric $metric
-    		#save first dgw with metric=1 to use in corbina hack
-    		if [ "$metric" = "0" ]; then
+	    for i in $router ; do
+		$LOG "Add default route $i dev $interface metric $metric"
+		ROUTELIST="$ROUTELIST default:$router:$interface:$metric"
+		#save first dgw with metric=1 to use in corbina hack
+		if [ "$metric" = "$smetric" ]; then
 		    echo $i > /tmp/default.gw
 		    first_dgw="$i"
 		fi
@@ -54,129 +65,47 @@ case "$1" in
 	    done
 	fi
 
-	#MSSTATIC ROUTES (rfc3442)
-	if [ ! -z "$msstaticroutes" ]; then
-	    set $msstaticroutes
-	    while true; do
-	      case "$1" in
-	        0)
-	        $LOG "DO NOT set default route in this script"
-	        shift 5
-	        continue
-	        ;;
-	        1|2|3|4|5|6|7|8)
-	        route="$2.0.0.0/$1"
-	        shift 2
-	        ;;
-	        9|10|11|12|13|14|15|16)
-	        route="$2.$3.0.0/$1"
-	        shift 3 
-	        ;;
-	        17|18|19|20|21|22|23|24)
-	        route="$2.$3.$4.0/$1"
-	        shift 4
-	        ;;
-	        25|26|27|28|29|30|31|32)
-	        route="$2.$3.$4.$5/$1"
-	        shift 5
-	        ;;
-	        "")
-	        break
-	        ;;
-	        *)
-	        $LOG "strange bitmask - $1, skipping"
-	        shift 5
-	        continue
-	        ;;
-	      esac
-	        router="$1.$2.$3.$4" 
-	        shift 4
-	      case "$router" in
-	        0.0.0.0)
-	        $LOG "set route to $route via interface $interface"
-	        ip route replace $route dev $interface
-	        ;;
-	        *)
-	        $LOG "set route to $route via $router"
-	        ip route replace $route via $router
-	        ;;
-	      esac
-	    done 
+	#classful routes
+	if [ -n "$routes" ]; then
+	    for i in $routes; do
+		NW=`echo $i | sed 's,/.*,,'`
+		GW=`echo $i | sed 's,.*/,,'`
+		shift 1
+		MASK=`echo $NW | awk '{w=32; split($0,a,"."); \
+		    for (i=4; i>0; i--) {if (a[i]==0) w-=8; else {\
+		    while (a[i]%2==0) {w--; a[i]=a[i]/2}; break}\
+		    }; print w }'`
+		if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
+		    ip route replace $NW/$MASK dev $interface
+		else
+		    ROUTELIST="$ROUTELIST $NW/$MASK:$GW:$interface:"
+		fi
+	    done
 	fi
 
-	#STATIC ROUTES (rfc3442)
-	[ -n "$staticroutes" ] && {
-		$LOG "Add static routes from dhcpd"
-		# This defines how many CIDR Routes can be assigned so that we do not enter
-		# an endless loop on malformed data
-		MAXSTATICROUTES=24;
-		while [ ${MAXSTATICROUTES} -gt "0" ]; do
-			# Format is
-			# $MASK $NW $GW
-			# $NW == AAA.BBB.CCC.DDD
-			# $GW == EEE.FFF.CCC.DDD
-			# $MASK AAA.[BBB].[CCC].[DDD] EEE.FFF.GGG.HHH
-			#   1    2    3     4     5    6   7   8   9
-			MASK=$(echo $staticroutes | awk '{ print $1 }')
-			if [ ${MASK} = "0" ] ; then
-				# $MASK EEE.FFF.GGG.HHH
-				#   1    2   3   5   6
-				NW="0"
-				GW=$(echo $staticroutes | awk '{ print $2"."$3"."$4"."$5 }' )
-			elif [ ${MASK} -le "8" ] ; then
-				# $MASK AAA EEE.FFF.GGG.HHH
-				#   1    2   3   5   6   7
-				NW=$(echo $staticroutes | awk '{ print $2 }' )
-				GW=$(echo $staticroutes | awk '{ print $3"."$4"."$5"."$6 }' )
-			elif [ ${MASK} -le "16" ] ; then
-				# $MASK AAA.BBB EEE.FFF.GGG.HHH
-				#   1    2   3   5   6   7   8
-				NW=$(echo $staticroutes | awk '{ print $2"."$3 }' )
-				GW=$(echo $staticroutes | awk '{ print $4"."$5"."$6"."$7 }' )
-			elif [ ${MASK} -le "24" ] ; then
-				# $MASK AAA.BBB.CCC EEE.FFF.GGG.HHH
-				#   1    2   3   4   5   6   7   8
-				NW=$(echo $staticroutes | awk '{ print $2"."$3"."$4 }' )
-				GW=$(echo $staticroutes | awk '{ print $5"."$6"."$7"."$8 }' )
+	#MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
+	ROUTES="$staticroutes $msstaticroutes"
+	
+	if [ "$ROUTES" != " " ]; then
+	    set $ROUTES
+	    while [ -n "$1" ]; do
+		NW=$1
+		GW=$2
+		shift 2
+		if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
+		    ip route replace $NW dev $interface
+		else
+		    ROUTELIST="$ROUTELIST $NW:$GW:$interface:"
+		fi
+	    done
+	fi
 
-			else
-				# $MASK AAA.BBB.CCC.DDD EEE.FFF.GGG.HHH
-				#   1    2   3   4   5   6   7   8   9
-				NW=$(echo $staticroutes | awk '{ print $2"."$3"."$4"."$5 }' )
-				GW=$(echo $staticroutes | awk '{ print $6"."$7"."$8"."$9 }' )
-			fi
-			echo [$ROUTECOUNTER] Route Network: $NW/$MASK Gateway: $GW on $interface
-
-			# TODO: Check for malformed data here to eliminate counter workaround
-			# Malformed data is: ... or xxx... or xxx.yyy.. or xxx.yyy.zzz.
-
-			[ -n "$NW" ] && [ -n "$GW" ] && {
-				ip route replace $NW via $GW dev $interface
-			}
-
-			# Clear the strings incase they don't get set next time around
-			if [ ${NW} = "0" ]; then
-				NW=""
-			fi
-			TMP="$MASK $NW $GW "
-			NW=""
-			GW=""
-
-			# Remove the '.' so that we can delete them from the input with sed
-			TMP=$(echo $TMP | sed "s/\./ /g")
-
-			# Remove the previous entry from staticroutes
-			staticroutes=$(echo $staticroutes | sed "s/$TMP//g")
-
-			# Add to counter
-			let ROUTECOUNTER=$ROUTECOUNTER+1;
-			let MAXSTATICROUTES=$MAXSTATICROUTES-1;
-
-			# Leave the loop if staticroutess is empty (we've parsed everything)
-			[ ! -n "$staticroutes" ] && break
-
-		done
-	}
+	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
+		IPCMD=`echo $i|awk '{split($0,a,":"); \
+		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
+		    if (a[4]!="") printf " metric %s", a[4]}'`
+		ip route replace $IPCMD
+	done
 
 	#Get DNS servers
 	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
@@ -198,9 +127,10 @@ case "$1" in
 	else
 	    $LOG "Use static DNS."
 	fi
-
-    	$LOG "Restart needed services"
-	services_restart.sh dhcp
+        if [ "$OLD_IP" != "$CUR_IP" ]; then
+		$LOG "Restart needed services"
+		services_restart.sh dhcp
+	fi
 	$LOG "Renew OK.."
     ;;
 esac
