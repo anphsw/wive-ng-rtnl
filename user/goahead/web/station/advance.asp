@@ -148,9 +148,9 @@ function initValue()
 	var is3t3r = '<% is3t3r(); %>';
 	var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
 	var clone = '<% getCfgZero(1, "macCloneEnabled"); %>';
-	var staAR = '<% getCfgZero(1, "staAutoRoaming"); %>';
-	var staAC = '<% getCfgZero(1, "staAutoConnect"); %>';
-	var staFC = '<% getCfgZero(1, "staFastConnect"); %>';
+	var staAR = '<% getCfgZero(1, "AutoRoaming"); %>';
+	var staAC = '<% getCfgZero(1, "AutoConnect"); %>';
+	var staFC = '<% getCfgZero(1, "FastConnect"); %>';
 	var txPower = '<% getCfgZero(1, "TxPower"); %>';
 	
 	var form = document.sta_advance;

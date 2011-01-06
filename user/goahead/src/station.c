@@ -1303,6 +1303,7 @@ static void DisplayLastTxRxRateFor11n(int s, int nID, double* fLastTxRxRate)
 static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int s;
+	char buf[32];
 
 	if (G_ConnectStatus == NdisMediaStateDisconnected)
 		return websWrite(wp, "0");
@@ -1310,7 +1311,9 @@ static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv)
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	double fLastRxRate = 1;
 	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_RX_RATE, &fLastRxRate);
-	websWrite(wp, "%.1f", fLastRxRate);
+	
+	snprintf(buf, sizeof(buf), "%.1f", fLastRxRate);
+	websWrite(wp, "%s", buf);
 
 	close(s);
 	return 0;
@@ -1376,6 +1379,7 @@ static int getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv)
 static int getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int s;
+	char buf[32];
 
 	if (G_ConnectStatus == NdisMediaStateDisconnected)
 		return websWrite(wp, "0");
@@ -1383,7 +1387,9 @@ static int getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv)
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	double fLastTxRate = 1;
 	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_TX_RATE, &fLastTxRate);
-	websWrite(wp, "%.1f", fLastTxRate);
+
+	snprintf(buf, sizeof(buf), "%.1f", fLastTxRate);
+	websWrite(wp, "%s", buf);
 
 	close(s);
 	return 0;
@@ -5091,11 +5097,11 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "macCloneMac", "");
 
 	printf("sta_ar =%s\n", sta_ar);
-	nvram_bufset(RT2860_NVRAM, "staAutoRoaming", (strcmp(sta_ar, "on")==0) ? "1" : "0");
+	nvram_bufset(RT2860_NVRAM, "AutoRoaming", (strcmp(sta_ar, "on")==0) ? "1" : "0");
 	printf("sta_ac =%s\n", sta_ac);
-	nvram_bufset(RT2860_NVRAM, "staAutoConnect", (strcmp(sta_ac, "on")==0) ? "1" : "0");
+	nvram_bufset(RT2860_NVRAM, "AutoConnect", (strcmp(sta_ac, "on")==0) ? "1" : "0");
 	printf("sta_fc =%s\n", sta_fc);
-	nvram_bufset(RT2860_NVRAM, "staFastConnect", (strcmp(sta_fc, "on")==0) ? "1" : "0");
+	nvram_bufset(RT2860_NVRAM, "FastConnect", (strcmp(sta_fc, "on")==0) ? "1" : "0");
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
