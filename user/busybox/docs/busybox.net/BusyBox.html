@@ -114,8 +114,8 @@ been enabled, more detailed usage information will also be available.</p>
 <h1><a name="commands">COMMANDS</a></h1>
 <p>Currently available applets include:</p>
 <pre>
-        [, [[, adduser, arp, arping, ash, awk, bash, brctl, bunzip2, bzcat,
-        bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
+        [, [[, adduser, arp, arping, ash, awk, base64, bash, brctl, bunzip2,
+        bzcat, bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
         crontab, cut, date, dd, deluser, depmod, df, dhcprelay, dmesg,
         dnsdomainname, du, dumpleases, echo, egrep, env, ether-wake, expand,
         expr, false, fgrep, find, flock, free, ftpget, ftpput, fuser, grep,
@@ -170,7 +170,7 @@ been enabled, more detailed usage information will also be available.</p>
         -n              Don't resolve names
         -i IF           Network interface
         -D              Read &lt;hwaddr&gt; from given device
-        -A, -p AF       Protocol family
+        -A,-p AF        Protocol family
         -H HWTYPE       Hardware address type</pre>
 </dd>
 <dt><strong><a name="arping" class="item"><strong>arping</strong></a></strong></dt>
@@ -202,6 +202,15 @@ been enabled, more detailed usage information will also be available.</p>
         -F SEP          Use SEP as field separator
         -f FILE         Read program from FILE</pre>
 </dd>
+<dt><strong><a name="base64" class="item"><strong>base64</strong></a></strong></dt>
+
+<dd>
+<p>base64 [-d] [FILE]</p>
+<p>Base64 encode or decode FILE to standard output
+Options:</p>
+<pre>
+        -d      Decode data</pre>
+</dd>
 <dt><strong><a name="brctl" class="item"><strong>brctl</strong></a></strong></dt>
 
 <dd>
@@ -226,7 +235,7 @@ been enabled, more detailed usage information will also be available.</p>
 <dt><strong><a name="bunzip2" class="item"><strong>bunzip2</strong></a></strong></dt>
 
 <dd>
-<p>bunzip2 [OPTIONS] [FILE]...</p>
+<p>bunzip2 [-cf] [FILE]...</p>
 <p>Decompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
@@ -675,8 +684,7 @@ default EXPRESSION is '-print'</p>
 <p>Options:</p>
 <pre>
         -m      Find processes which use same fs as FILEs
-        -4      Search only IPv4 space
-        -6      Search only IPv6 space
+        -4,-6   Search only IPv4/IPv6 space
         -s      Don't display PIDs
         -k      Kill found processes
         -SIGNAL Signal to send (default: KILL)</pre>
@@ -713,7 +721,7 @@ default EXPRESSION is '-print'</p>
 <dt><strong><a name="gunzip" class="item"><strong>gunzip</strong></a></strong></dt>
 
 <dd>
-<p>gunzip [OPTIONS] [FILE]...</p>
+<p>gunzip [-cft] [FILE]...</p>
 <p>Decompress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
@@ -724,7 +732,7 @@ default EXPRESSION is '-print'</p>
 <dt><strong><a name="gzip" class="item"><strong>gzip</strong></a></strong></dt>
 
 <dd>
-<p>gzip [OPTIONS] [FILE]...</p>
+<p>gzip [-cfd] [FILE]...</p>
 <p>Compress FILEs (or stdin)</p>
 <p>Options:</p>
 <pre>
@@ -739,9 +747,9 @@ default EXPRESSION is '-print'</p>
 <p>Halt the system</p>
 <p>Options:</p>
 <pre>
-        -d      Delay interval for halting
-        -n      No call to sync()
-        -f      Force halt (don't go through init)</pre>
+        -d SEC  Delay interval
+        -n      Do not sync
+        -f      Force (don't go through init)</pre>
 </dd>
 <dt><strong><a name="hd" class="item"><strong>hd</strong></a></strong></dt>
 
@@ -809,11 +817,11 @@ With more than one FILE, precede each with a filename header.</p>
 <p>Print information about USER or the current user</p>
 <p>Options:</p>
 <pre>
-        -u      Print user ID
-        -g      Print group ID
-        -G      Print supplementary group IDs
-        -n      Print name instead of a number
-        -r      Print real user ID instead of effective ID</pre>
+        -u      User ID
+        -g      Group ID
+        -G      Supplementary group IDs
+        -n      Print names instead of numbers
+        -r      Print real ID instead of effective ID</pre>
 </dd>
 <dt><strong><a name="ifconfig" class="item"><strong>ifconfig</strong></a></strong></dt>
 
@@ -852,7 +860,7 @@ With more than one FILE, precede each with a filename header.</p>
 <dt><strong><a name="insmod" class="item"><strong>insmod</strong></a></strong></dt>
 
 <dd>
-<p>insmod FILE [symbol=value]...</p>
+<p>insmod FILE [SYMBOL=VALUE]...</p>
 <p>Load the specified kernel modules into the kernel</p>
 </dd>
 <dt><strong><a name="ip" class="item"><strong>ip</strong></a></strong></dt>
@@ -1004,7 +1012,7 @@ iproute { add | del | change | append | replace | monitor } ROUTE
 <dt><strong><a name="logread" class="item"><strong>logread</strong></a></strong></dt>
 
 <dd>
-<p>logread [OPTIONS]</p>
+<p>logread [-f]</p>
 <p>Show messages in syslogd's circular buffer</p>
 <p>Options:</p>
 <pre>
@@ -1053,8 +1061,8 @@ iproute { add | del | change | append | replace | monitor } ROUTE
 <dt><strong><a name="md5sum" class="item"><strong>md5sum</strong></a></strong></dt>
 
 <dd>
-<p>md5sum [OPTIONS] [FILE]...
-   or: md5sum [OPTIONS] -c [FILE]</p>
+<p>md5sum [FILE]...
+   or: md5sum -c [-sw] [FILE]</p>
 <p>Print or check MD5 checksums</p>
 <p>Options:</p>
 <pre>
@@ -1088,22 +1096,21 @@ It uses /etc/mdev.conf with lines
 <p>Create DIRECTORY</p>
 <p>Options:</p>
 <pre>
-        -m      Mode
+        -m MODE Mode
         -p      No error if exists; make parent directories as needed</pre>
 </dd>
 <dt><strong><a name="mknod" class="item"><strong>mknod</strong></a></strong></dt>
 
 <dd>
-<p>mknod [OPTIONS] NAME TYPE MAJOR MINOR</p>
+<p>mknod [-m MODE] NAME TYPE MAJOR MINOR</p>
 <p>Create a special file (block, character, or pipe)</p>
 <p>Options:</p>
 <pre>
-        -m      Create the special file using the specified mode (default a=rw)
-TYPEs include:</pre>
-<pre>
-        b:      Make a block device
-        c or u: Make a character device
-        p:      Make a named pipe (MAJOR and MINOR are ignored)</pre>
+        -m MODE Creation mode (default a=rw)
+TYPE:
+        b       Block device
+        c or u  Character device
+        p       Named pipe (MAJOR and MINOR are ignored)</pre>
 </dd>
 <dt><strong><a name="modinfo" class="item"><strong>modinfo</strong></a></strong></dt>
 
@@ -1174,32 +1181,35 @@ TYPEs include:</pre>
 <dt><strong><a name="mv" class="item"><strong>mv</strong></a></strong></dt>
 
 <dd>
-<p>mv [OPTIONS] SOURCE DEST
-or: mv [OPTIONS] SOURCE... DIRECTORY</p>
+<p>mv [-fin] SOURCE DEST
+or: mv [-fin] SOURCE... DIRECTORY</p>
 <p>Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY</p>
 <p>Options:</p>
 <pre>
         -f      Don't prompt before overwriting
-        -i      Interactive, prompt before overwrite</pre>
+        -i      Interactive, prompt before overwrite
+        -n      Don't overwrite an existing file</pre>
 </dd>
 <dt><strong><a name="netstat" class="item"><strong>netstat</strong></a></strong></dt>
 
 <dd>
-<p>netstat [-laentuwxrWp]</p>
+<p>netstat [-ral] [-tuwx] [-enWp]</p>
 <p>Display networking information</p>
 <p>Options:</p>
 <pre>
-        -l      Display listening server sockets
-        -a      Display all sockets (default: connected)
-        -e      Display other/more information
-        -n      Don't resolve names
-        -t      Tcp sockets
-        -u      Udp sockets
+        -r      Routing table
+        -a      All sockets
+        -l      Listening sockets
+                Else: connected sockets
+        -t      TCP sockets
+        -u      UDP sockets
         -w      Raw sockets
         -x      Unix sockets
-        -r      Display routing table
-        -W      Display with no column truncation
-        -p      Display PID/Program name for sockets</pre>
+                Else: all socket types
+        -e      Other/more information
+        -n      Don't resolve names
+        -W      Wide display
+        -p      Show PID/program name for sockets</pre>
 </dd>
 <dt><strong><a name="nice" class="item"><strong>nice</strong></a></strong></dt>
 
@@ -1220,15 +1230,15 @@ optionally using a specified DNS server</p>
 <dt><strong><a name="ntpd" class="item"><strong>ntpd</strong></a></strong></dt>
 
 <dd>
-<p>ntpd [-dnqwl] [-S PROG] [-p PEER]...</p>
+<p>ntpd [-dnqNw] [-S PROG] [-p PEER]...</p>
 <p>NTP client/server</p>
 <p>Options:</p>
 <pre>
         -d      Verbose
         -n      Do not daemonize
         -q      Quit after clock is set
+        -N      Run at high priority
         -w      Do not set time (only query peers), implies -n
-        -l      Run as server on port 123
         -S PROG Run PROG after stepping time, stratum change, and every 11 mins
         -p PEER Obtain time from PEER (may be repeated)</pre>
 </dd>
@@ -1240,7 +1250,7 @@ optionally using a specified DNS server</p>
 changes the password for the current user.</p>
 <p>Options:</p>
 <pre>
-        -a      Algorithm to use for password (des, md5)
+        -a ALG  Algorithm to use for password (des, md5)
         -d      Delete password for the account
         -l      Lock (disable) account
         -u      Unlock (re-enable) account</pre>
@@ -1279,7 +1289,7 @@ changes the password for the current user.</p>
 <p>Send ICMP ECHO_REQUEST packets to network hosts</p>
 <p>Options:</p>
 <pre>
-        -4, -6          Force IP or IPv6 name resolution
+        -4,-6           Force IP or IPv6 name resolution
         -c CNT          Send only CNT pings
         -s SIZE         Send SIZE data bytes in packets (default:56)
         -I IFACE/IP     Use interface or IP address as source
@@ -1297,9 +1307,9 @@ changes the password for the current user.</p>
 <p>Halt and shut off power</p>
 <p>Options:</p>
 <pre>
-        -d      Delay interval for halting
+        -d SEC  Delay interval
         -n      Do not sync
-        -f      Force power off (don't go through init)</pre>
+        -f      Force (don't go through init)</pre>
 </dd>
 <dt><strong><a name="printenv" class="item"><strong>printenv</strong></a></strong></dt>
 
@@ -1347,9 +1357,9 @@ where FORMAT controls the output exactly as in C printf</p>
 <p>Reboot the system</p>
 <p>Options:</p>
 <pre>
-        -d      Delay interval for rebooting
-        -n      No call to sync()
-        -f      Force reboot (don't go through init)</pre>
+        -d SEC  Delay interval
+        -n      Do not sync
+        -f      Force (don't go through init)</pre>
 </dd>
 <dt><strong><a name="renice" class="item"><strong>renice</strong></a></strong></dt>
 
@@ -1372,7 +1382,7 @@ where FORMAT controls the output exactly as in C printf</p>
 <dt><strong><a name="rm" class="item"><strong>rm</strong></a></strong></dt>
 
 <dd>
-<p>rm [OPTIONS] FILE...</p>
+<p>rm [-irf] FILE...</p>
 <p>Remove (unlink) FILEs</p>
 <p>Options:</p>
 <pre>
@@ -1393,12 +1403,12 @@ where FORMAT controls the output exactly as in C printf</p>
 <dt><strong><a name="rmmod" class="item"><strong>rmmod</strong></a></strong></dt>
 
 <dd>
-<p>rmmod [OPTIONS] [MODULE]...</p>
-<p>Unload the specified kernel modules from the kernel</p>
+<p>rmmod [-wfa] [MODULE]...</p>
+<p>Unload kernel modules</p>
 <p>Options:</p>
 <pre>
         -w      Wait until the module is no longer used
-        -f      Force unloading
+        -f      Force unload
         -a      Remove all unused modules (recursively)</pre>
 </dd>
 <dt><strong><a name="route" class="item"><strong>route</strong></a></strong></dt>
@@ -1486,9 +1496,9 @@ have an optional suffix of (s)econds, (m)inutes, (h)ours, or (d)ays</p>
 <p>split [OPTIONS] [INPUT [PREFIX]]</p>
 <p>Options:</p>
 <pre>
-        -b n[k|m]       Split by bytes
-        -l n            Split by lines
-        -a n            Use n letters as suffix</pre>
+        -b N[k|m]       Split by N (kilo|mega)bytes
+        -l N            Split by N lines
+        -a N            Use N letters as suffix</pre>
 </dd>
 <dt><strong><a name="stat" class="item"><strong>stat</strong></a></strong></dt>
 
@@ -1654,7 +1664,7 @@ depending on logical value of EXPRESSION</p>
 <dt><strong><a name="time" class="item"><strong>time</strong></a></strong></dt>
 
 <dd>
-<p>time [OPTIONS] PROG ARGS</p>
+<p>time [-v] PROG ARGS</p>
 <p>Run PROG, display resource usage when it exits</p>
 <p>Options:</p>
 <pre>
@@ -1671,12 +1681,13 @@ and display a screenful of them.</p>
 <dt><strong><a name="touch" class="item"><strong>touch</strong></a></strong></dt>
 
 <dd>
-<p>touch [-c] [-d DATE] FILE [FILE]...</p>
+<p>touch [-c] [-d DATE] [-r FILE] FILE [FILE]...</p>
 <p>Update the last-modified date on the given FILE[s]</p>
 <p>Options:</p>
 <pre>
         -c      Don't create files
-        -d DT   Date/time to use</pre>
+        -d DT   Date/time to use
+        -r FILE Use FILE's date/time</pre>
 </dd>
 <dt><strong><a name="traceroute" class="item"><strong>traceroute</strong></a></strong></dt>
 
@@ -1713,36 +1724,40 @@ and display a screenful of them.</p>
 
 <dd>
 <p><table cellspacing="0" cellpadding="0"><tr><td>udhcpc [-fbnqvoCR] [-i IFACE] [-r IP] [-s PROG] [-p PIDFILE]
-<tr><td><td>[-H HOSTNAME] [-c CID] [-V VENDOR] [-O DHCP_OPT]... [-P N]</table></p>
+<tr><td><td>[-H HOSTNAME] [-V VENDOR] [-x OPT:VAL]... [-O OPT]... [-P N]</table></p>
 <pre>
         -i,--interface IFACE    Interface to use (default eth0)
         -p,--pidfile FILE       Create pidfile
-        -r,--request IP         IP address to request
         -s,--script PROG        Run PROG at DHCP events (default /etc/scripts/udhcpc.sh)
         -t,--retries N          Send up to N discover packets
         -T,--timeout N          Pause between packets (default 3 seconds)
         -A,--tryagain N         Wait N seconds after failure (default 20)
         -f,--foreground         Run in foreground
         -b,--background         Background if lease is not obtained
-        -S,--syslog             Log to syslog too
         -n,--now                Exit if lease is not obtained
         -q,--quit               Exit after obtaining lease
         -R,--release            Release IP on exit
+        -S,--syslog             Log to syslog too
         -P,--client-port N      Use port N (default 68)
         -a,--arping             Use arping to validate offered address
-        -O,--request-option OPT Request DHCP option OPT (cumulative)
+        -O,--request-option OPT Request option OPT from server (cumulative)
         -o,--no-default-options Don't request any options (unless -O is given)
+        -r,--request IP         Request this IP address
         -x OPT:VAL              Include option OPT in sent packets (cumulative)
+                                Examples of string, numeric, and hex byte opts:
+                                -x hostname:bbox - option 12
+                                -x lease:3600 - option 51 (lease time)
+                                -x 0x3d:0100BEEFC0FFEE - option 61 (client id)
         -F,--fqdn NAME          Ask server to update DNS mapping for NAME
         -H,-h,--hostname NAME   Send NAME as client hostname (default none)
         -V,--vendorclass VENDOR Vendor identifier (default 'udhcp VERSION')
-        -c,--clientid CLIENTID  Client identifier (default own MAC)
-        -C,--clientid-none      Don't send client identifier</pre>
+        -C,--clientid-none      Don't send MAC as client identifier
+        -v                      Verbose</pre>
 </dd>
 <dt><strong><a name="udhcpd" class="item"><strong>udhcpd</strong></a></strong></dt>
 
 <dd>
-<p>udhcpd [-fS] [-P N] [configfile]</p>
+<p>udhcpd [-fS] [-P N] [CONFFILE]</p>
 <p>DHCP server</p>
 <pre>
         -f      Run in foreground
@@ -1853,29 +1868,30 @@ and display a screenful of them.</p>
 <dt><strong><a name="wc" class="item"><strong>wc</strong></a></strong></dt>
 
 <dd>
-<p>wc [OPTIONS] [FILE]...</p>
-<p>Print line, word, and byte counts for each FILE (or stdin),
-and a total line if more than one FILE is specified</p>
+<p>wc [-cmlwL] [FILE]...</p>
+<p>Count lines, words, and bytes for each FILE (or stdin)</p>
 <p>Options:</p>
 <pre>
-        -c      Print the byte counts
-        -l      Print the newline counts
-        -L      Print the length of the longest line
-        -w      Print the word counts</pre>
+        -c      Count bytes
+        -m      Count characters
+        -l      Count newlines
+        -w      Count words
+        -L      Print longest line length</pre>
 </dd>
 <dt><strong><a name="wget" class="item"><strong>wget</strong></a></strong></dt>
 
 <dd>
 <p><table cellspacing="0" cellpadding="0"><tr><td>wget [-c|--continue] [-s|--spider] [-q|--quiet] [-O|--output-document FILE]
 <tr><td><td>[--header 'header: value'] [-Y|--proxy on/off] [-P DIR]
-<tr><td><td>[--no-check-certificate] [-U|--user-agent AGENT] URL</table></p>
+<tr><td><td>[--no-check-certificate] [-U|--user-agent AGENT][-T SEC]  URL</table></p>
 <p>Retrieve files via HTTP or FTP</p>
 <p>Options:</p>
 <pre>
         -s      Spider mode - only check file existence
         -c      Continue retrieval of aborted transfer
         -q      Quiet
-        -P      Set directory prefix to DIR
+        -P DIR  Save to DIR (default .)
+        -T SEC  Network read timeout is SEC seconds
         -O FILE Save to FILE ('-' for stdout)
         -U STR  Use STR for User-Agent header
         -Y      Use proxy ('on' or 'off')</pre>
@@ -2051,6 +2067,21 @@ incorrect, please send in an update.</p>
 <br><p>Tito Ragusa &lt;<a href="mailto:farmatito@tiscali.it">farmatito@tiscali.it</a>&gt;</p>
 <pre>
     devfsd and size optimizations in strings, openvt and deallocvt.</pre>
+<br><p>Paul Fox &lt;<a href="mailto:pgf@foxharp.boston.ma.us">pgf@foxharp.boston.ma.us</a>&gt;</p>
+<pre>
+    vi editing mode for ash, various other patches/fixes</pre>
+<br><p>Roberto A. Foglietta &lt;<a href="mailto:me@roberto.foglietta.name">me@roberto.foglietta.name</a>&gt;</p>
+<pre>
+    port: dnsd</pre>
+<br><p>Bernhard Reutner-Fischer &lt;<a href="mailto:rep.dot.nop@gmail.com">rep.dot.nop@gmail.com</a>&gt;</p>
+<pre>
+    misc</pre>
+<br><p>Mike Frysinger &lt;<a href="mailto:vapier@gentoo.org">vapier@gentoo.org</a>&gt;</p>
+<pre>
+    initial e2fsprogs, printenv, setarch, sum, misc</pre>
+<br><p>Jie Zhang &lt;<a href="mailto:jie.zhang@analog.com">jie.zhang@analog.com</a>&gt;</p>
+<pre>
+    fixed two bugs in msh and hush (exitcode of killed processes)</pre>
 
 </body>
 

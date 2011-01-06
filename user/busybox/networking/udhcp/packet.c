@@ -4,7 +4,7 @@
  *
  * Rewrite by Russ Dill <Russ.Dill@asu.edu> July 2001
  *
- * Licensed under GPLv2, see file LICENSE in this tarball for details.
+ * Licensed under GPLv2, see file LICENSE in this source tree.
  */
 #include <netinet/in.h>
 #if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1) || defined _NEWLIB_VERSION
@@ -19,17 +19,11 @@
 #include "common.h"
 #include "dhcpd.h"
 
-#define SECS   3       /* lame attempt to add secs field */
-
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
 	memset(packet, 0, sizeof(*packet));
 	packet->op = BOOTREQUEST; /* if client to a server */
 	switch (type) {
-	case DHCPDISCOVER:
-	case DHCPREQUEST:
-		packet->secs = htons(SECS);
-		break;
 	case DHCPOFFER:
 	case DHCPACK:
 	case DHCPNAK:
@@ -222,7 +216,7 @@ int FAST_FUNC udhcp_send_raw_packet(struct dhcp_packet *dhcp_pkt,
 	packet.udp.source = htons(source_port);
 	packet.udp.dest = htons(dest_port);
 	/* size, excluding IP header: */
-	packet.udp.len = htons(UPD_DHCP_SIZE - padding);
+	packet.udp.len = htons(UDP_DHCP_SIZE - padding);
 	/* for UDP checksumming, ip.len is set to UDP packet len */
 	packet.ip.tot_len = packet.udp.len;
 	packet.udp.check = udhcp_checksum(&packet, IP_UDP_DHCP_SIZE - padding);

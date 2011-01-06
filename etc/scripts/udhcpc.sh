@@ -55,7 +55,7 @@ case "$1" in
 	fi
 
 	#MSSTATIC ROUTES (rfc3442)
-	if [ ! -z "$msroutes" ]; then
+	if [ ! -z "$msstaticroutes" ]; then
 	    set $msroutes
 	    while true; do
 	      case "$1" in

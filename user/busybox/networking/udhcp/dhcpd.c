@@ -51,10 +51,6 @@ static void send_packet_to_client(struct dhcp_packet *dhcp_pkt, int force_broadc
 		log1("Broadcasting packet to client");
 		ciaddr = INADDR_BROADCAST;
 		chaddr = MAC_BCAST_ADDR;
-	} else if (ntohs(dhcp_pkt->flags) & BROADCAST_FLAG) {
-		log1("Broadcasting packet to client (requested)");
-		ciaddr = INADDR_BROADCAST;
-		chaddr = MAC_BCAST_ADDR;
 	} else {
 		log1("Unicasting packet to client ciaddr");
 		ciaddr = dhcp_pkt->ciaddr;
@@ -136,7 +132,8 @@ static uint32_t select_lease_time(struct dhcp_packet *packet)
 }
 
 /* We got a DHCP DISCOVER. Send an OFFER. */
-static void send_offer(struct dhcp_packet *oldpacket, uint32_t static_lease_nip, struct dyn_lease *lease)
+/* NOINLINE: limit stack usage in caller */
+static NOINLINE void send_offer(struct dhcp_packet *oldpacket, uint32_t static_lease_nip, struct dyn_lease *lease)
 {
 	struct dhcp_packet packet;
 	uint32_t lease_time_sec;
@@ -206,7 +203,8 @@ static void send_offer(struct dhcp_packet *oldpacket, uint32_t static_lease_nip,
 	send_packet(&packet, /*force_bcast:*/ 0);
 }
 
-static void send_NAK(struct dhcp_packet *oldpacket)
+/* NOINLINE: limit stack usage in caller */
+static NOINLINE void send_NAK(struct dhcp_packet *oldpacket)
 {
 	struct dhcp_packet packet;
 
@@ -216,7 +214,8 @@ static void send_NAK(struct dhcp_packet *oldpacket)
 	send_packet(&packet, /*force_bcast:*/ 1);
 }
 
-static void send_ACK(struct dhcp_packet *oldpacket, uint32_t yiaddr)
+/* NOINLINE: limit stack usage in caller */
+static NOINLINE void send_ACK(struct dhcp_packet *oldpacket, uint32_t yiaddr)
 {
 	struct dhcp_packet packet;
 	uint32_t lease_time_sec;
@@ -247,7 +246,8 @@ static void send_ACK(struct dhcp_packet *oldpacket, uint32_t yiaddr)
 	}
 }
 
-static void send_inform(struct dhcp_packet *oldpacket)
+/* NOINLINE: limit stack usage in caller */
+static NOINLINE void send_inform(struct dhcp_packet *oldpacket)
 {
 	struct dhcp_packet packet;
 
@@ -361,8 +361,7 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
 	if (udhcp_read_interface(server_config.interface,
 			&server_config.ifindex,
 			&server_config.server_nip,
-			server_config.server_mac,
-			NULL)
+			server_config.server_mac)
 	) {
 		retval = 1;
 		goto ret;
@@ -414,7 +413,7 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
 		case SIGTERM:
 			bb_info_msg("Received SIGTERM");
 			goto ret0;
-		case 0:	/* no signal: read a packet */
+		case 0: /* no signal: read a packet */
 			break;
 		default: /* signal or error (probably EINTR): back to select */
 			continue;
