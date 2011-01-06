@@ -10,165 +10,121 @@
 <title>Wireless Station QoS</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
-/*
-function initValue()
+
+function initValues()
 {
-	var wmmenable = <!--#include ssi=getStaWMMEnable()-->;
-	var apsd =  <!--#include ssi=getStaAPSDEnable()-->;
-	var dls =  <!--#include ssi=getStaDLSEnable()-->;
-	var acbk =  <!--#include ssi=getStaPSACBK()-->;
-	var acbe =  <!--#include ssi=getStaPSACBE()-->;
-	var acvo =  <!--#include ssi=getStaPSACVO()-->;
-	var acvi =  <!--#include ssi=getStaPSACVI()-->;
+	var form = document.sta_qos;
 	
-	if ( wmmenable )
+	var wmmenable = '<% getCfgZero(1, "WmmCapable"); %>';
+	var apsd = '<% getCfgZero(1, "APSDCapable"); %>';
+	var dls  = '<% getCfgZero(1, "DLSCapable"); %>';
+	var acbe = '<% getCfgNthZero(1, "APSDAC", 0); %>';
+	var acbk = '<% getCfgNthZero(1, "APSDAC", 1); %>';
+	var acvi = '<% getCfgNthZero(1, "APSDAC", 2); %>';
+	var acvo = '<% getCfgNthZero(1, "APSDAC", 3); %>';
+	
+	form.wmm_enable.checked = (wmmenable == 1);
+	
+	if (form.wmm_enable.checked)
 	{
-		document.sta_qos.wmm_enable.checked = true;
-		if ( apsd )
+		form.wmm_ps_enable.checked = (apsd == '1');
+
+		if (form.wmm_ps_enable.checked)
 		{
-			document.sta_qos.wmm_ps_enable.checked = true;
-			if ( acbk )
-				document.sta_qos.wmm_ps_mode_acbk.checked = true;
-
-			if ( acbe )
-				document.sta_qos.wmm_ps_mode_acbe.checked = true;
-
-			if ( acvo )
-				document.sta_qos.wmm_ps_mode_acvo.checked = true;
-
-			if ( acvi )
-				document.sta_qos.wmm_ps_mode_acvi.checked = true;
+			form.wmm_ps_mode_acbk.checked = (acbk == '1');
+			form.wmm_ps_mode_acbe.checked = (acbe == '1');
+			form.wmm_ps_mode_acvo.checked = (acvo == '1');
+			form.wmm_ps_mode_acvi.checked = (acvi == '1');
 		}
 
-		if ( dls )
-			document.sta_qos.wmm_dls_enable.checked = true;
+		form.wmm_dls_enable.checked = (dls == '1');
 	}
 
-	WMM_Click();
+	WMM_Click(form);
 }
-*/
 
-function WMM_Click()
+function WMM_Click(form)
 {
-	document.sta_qos.wmm_ps_enable.disabled = false;
-	document.sta_qos.wmm_dls_enable.disabled = false;
+	form.wmm_ps_enable.disabled = false;
+	form.wmm_dls_enable.disabled = false;
 
-	if (document.sta_qos.wmm_enable.checked == false)
+	if (!form.wmm_enable.checked)
 	{
-		document.sta_qos.wmm_ps_enable.disabled = true;
-		document.sta_qos.wmm_dls_enable.disabled = true;
-		document.sta_qos.wmm_ps_enable.checked = false;
-		document.sta_qos.wmm_dls_enable.checked = false;
+		form.wmm_ps_enable.disabled = true;
+		form.wmm_dls_enable.disabled = true;
+		form.wmm_ps_enable.checked = false;
+		form.wmm_dls_enable.checked = false;
 	}
-	WMM_PS_Click();
-	WMM_DLS_Click();
+	WMM_PS_Click(form);
+	WMM_DLS_Click(form);
 }
 
-function WMM_PS_Click()
+function WMM_PS_Click(form)
 {
-	document.sta_qos.wmm_ps_mode_acbe.disabled = true;
-	document.sta_qos.wmm_ps_mode_acbk.disabled = true;
-	document.sta_qos.wmm_ps_mode_acvi.disabled = true;
-	document.sta_qos.wmm_ps_mode_acvo.disabled = true;
+	var dis = !form.wmm_ps_enable.checked;
+
+	form.wmm_ps_mode_acbe.disabled = dis;
+	form.wmm_ps_mode_acbk.disabled = dis;
+	form.wmm_ps_mode_acvi.disabled = dis;
+	form.wmm_ps_mode_acvo.disabled = dis;
+}
+
+function WMM_DLS_Click(form)
+{
+	var dis = !form.wmm_dls_enable.checked;
 	
-	if (document.sta_qos.wmm_ps_enable.checked == true)
-	{
-		document.sta_qos.wmm_ps_mode_acbe.disabled = false;
-		document.sta_qos.wmm_ps_mode_acbk.disabled = false;
-		document.sta_qos.wmm_ps_mode_acvi.disabled = false;
-		document.sta_qos.wmm_ps_mode_acvo.disabled = false;
-	}
-
+	form.mac0.disabled = dis;
+	form.mac1.disabled = dis;
+	form.mac2.disabled = dis;
+	form.mac3.disabled = dis;
+	form.mac4.disabled = dis;
+	form.mac5.disabled = dis;
+	form.timeout.disabled = dis;
 }
 
-function WMM_DLS_Click()
+function submit_apply(form, btntype)
 {
-	document.sta_qos.mac0.disabled = false;
-	document.sta_qos.mac1.disabled = false;
-	document.sta_qos.mac2.disabled = false;
-	document.sta_qos.mac3.disabled = false;
-	document.sta_qos.mac4.disabled = false;
-	document.sta_qos.mac5.disabled = false;
-	document.sta_qos.timeout.disabled = false;
-
-	if (document.sta_qos.wmm_dls_enable.checked == false)
-	{
-		document.sta_qos.mac0.disabled = true;
-		document.sta_qos.mac1.disabled = true;
-		document.sta_qos.mac2.disabled = true;
-		document.sta_qos.mac3.disabled = true;
-		document.sta_qos.mac4.disabled = true;
-		document.sta_qos.mac5.disabled = true;
-		document.sta_qos.timeout.disabled = true;
-	}
+	form.button_type.value = btntype;  // 1: wmm , 2: dls setup, 3: tear down
+	form.submit();
 }
 
-function submit_apply(btntype)
-{
-	document.sta_qos.button_type.value = btntype;  // 1: wmm , 2: dls setup, 3: tear down
-	document.sta_qos.submit();
-}
-
-function Move_To_Dls()
-{
-
-}
 function initTranslation()
 {
-	var e = document.getElementById("qosTitle");
-	e.innerHTML = _("qos title");
-	e = document.getElementById("qosIntroduction");
-	e.innerHTML = _("qos introduction");
+	_TR("qosTitle", "qos title");
+	_TR("qosIntroduction", "qos introduction");
 
-	e = document.getElementById("qosConfig");
-	e.innerHTML = _("qos config");
-	e = document.getElementById("qosWMM");
-	e.innerHTML = _("qos wmm");
-	e = document.getElementById("qosWMMEnable");
-	e.innerHTML = _("station enable");
-	e = document.getElementById("qosWMMPWSave");
-	e.innerHTML = _("qos wmm power save");
-	e = document.getElementById("qosPSMode");
-	e.innerHTML = _("qos wmm ps mode");
-	e = document.getElementById("qosWMMPWSaveEnable");
-	e.innerHTML = _("station enable");
-	e = document.getElementById("qosWMMDLS");
-	e.innerHTML = _("qos dls");
-	e = document.getElementById("qosWMMDLSEnable");
-	e.innerHTML = _("station enable");
-	e = document.getElementById("qosWMMApply");
-	e.value = _("wireless apply");
+	_TR("qosConfig", "qos config");
+	_TR("qosWMM", "qos wmm");
+	_TR("qosWMMEnable", "station enable");
+	_TR("qosWMMPWSave", "qos wmm power save");
+	_TR("qosPSMode", "qos wmm ps mode");
+	_TR("qosWMMPWSaveEnable", "station enable");
+	_TR("qosWMMDLS", "qos dls");
+	_TR("qosWMMDLSEnable", "station enable");
+	_TRV("qosWMMApply", "wireless apply");
 
-	e = document.getElementById("qosDLS");
-	e.innerHTML = _("qos dls");
-	e = document.getElementById("qosDLSMac");
-	e.innerHTML = _("stalist macaddr");
-	e = document.getElementById("qosDLSTimeoutValue");
-	e.innerHTML = _("qos dls timeoutvalue");
-	e = document.getElementById("qosSecond");
-	e.innerHTML = _("qos second");
-	e = document.getElementById("qosDLSAppy");
-	e.value = _("wireless apply");
+	_TR("qosDLS", "qos dls");
+	_TR("qosDLSMac", "stalist macaddr");
+	_TR("qosDLSTimeoutValue", "qos dls timeoutvalue");
+	_TR("qosSecond", "qos second");
+	_TRV("qosDLSAppy", "wireless apply");
 
-	e = document.getElementById("qosDLSStaus");
-	e.innerHTML = _("qos dls status");
-	e = document.getElementById("qosDLSStatusMAC");
-	e.innerHTML = _("stalist macaddr");
-	e = document.getElementById("qosDLSStatusTimeout");
-	e.innerHTML = _("qos dls timeout");
-	e = document.getElementById("qosTearDown");
-	e.value = _("qos teardown");
+	_TR("qosDLSStaus", "qos dls status");
+	_TR("qosDLSStatusMAC", "stalist macaddr");
+	_TR("qosDLSStatusTimeout", "qos dls timeout");
+	_TRV("qosTearDown", "qos teardown");
 }
 
 function PageInit()
 {
 	initTranslation();
+	initValues();
 }
 </script>
 </head>
 
 
-<body onload="PageInit()">
+<body onload="PageInit();">
 <table class="body"><tr><td>
 
 <h1 id="qosTitle">Station Advanced Configurations</h1>
@@ -177,122 +133,76 @@ function PageInit()
 
 <form method="post" name="sta_qos" action="/goform/setStaQoS">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
-  <tr>
-    <td class="title" colspan="2" id="qosConfig">Qos Configuration</td>
-  </tr>
-  <tr>
-    <td class="head" id="qosWMM">WMM</td>
-    <td>
-      <input type=checkbox name=wmm_enable
-      <% var wmm = getCfgZero(0, "WmmCapable"); if (wmm == "1") write("checked"); %>
-      OnClick="WMM_Click()"><font id="qosWMMEnable">enable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="qosWMMPWSave">WMM Power Saving</td>
-    <td>
-      <input type=checkbox name=wmm_ps_enable
-      <% var ps = getCfgZero(0, "APSDCapable");
-             if (wmm == "1" && ps == "1") write("checked");
-             if (wmm != "1") write("disabled"); %>
-      onClick="WMM_PS_Click()"><font id="qosWMMPWSaveEnable">enable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="qosPSMode">PS Mode</td>
-    <td>
-      <input type=checkbox name=wmm_ps_mode_acbe <% var acbe = getCfgNthZero(0, "APSDAC", 0);
-        if (wmm == "1" && ps == "1" && acbe == "1") write("checked");
-        if (wmm != "1" || ps != "1") write("disabled"); %>>AC_BE &nbsp;&nbsp;
-      <input type=checkbox name=wmm_ps_mode_acbk <% var acbk = getCfgNthZero(0, "APSDAC", 1);
-        if (wmm == "1" && ps == "1" && acbk == "1") write("checked");
-        if (wmm != "1" || ps != "1") write("disabled"); %>>AC_BK &nbsp;&nbsp;
-      <input type=checkbox name=wmm_ps_mode_acvi <% var acvi = getCfgNthZero(0, "APSDAC", 2);
-        if (wmm == "1" && ps == "1" && acvi == "1") write("checked");
-        if (wmm != "1" || ps != "1") write("disabled"); %>>AC_VI &nbsp;&nbsp;
-      <input type=checkbox name=wmm_ps_mode_acvo <% var acvo = getCfgNthZero(0, "APSDAC", 3);
-        if (wmm == "1" && ps == "1" && acvo == "1") write("checked");
-        if (wmm != "1" || ps != "1") write("disabled"); %>>AC_VO &nbsp;&nbsp;
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="qosWMMDLS">Direct Link Setup</td>
-    <td>
-      <input type=checkbox name=wmm_dls_enable <% var dls = getCfgZero(0, "DLSCapable");
-        if (wmm == "1" && dls == "1") write("checked");
-	if (wmm != "1") write("disabled"); %>
-      onClick="WMM_DLS_Click()"><font id="qosWMMDLSEnable">enable</font>
-    </td>
-  </tr>
+<tr>
+	<td class="title" colspan="2" id="qosConfig">Qos Configuration</td>
+</tr>
+<tr>
+	<td class="head" id="qosWMM">WMM</td>
+	<td><input type="checkbox" name="wmm_enable" onclick="WMM_Click(this.form);"><font id="qosWMMEnable">enable</font></td>
+</tr>
+<tr>
+	<td class="head" id="qosWMMPWSave">WMM Power Saving</td>
+	<td><input type="checkbox" name="wmm_ps_enable" onclick="WMM_PS_Click(this.form);"><font id="qosWMMPWSaveEnable">enable</font></td>
+</tr>
+<tr>
+	<td class="head" id="qosPSMode">PS Mode</td>
+	<td>
+		<input type="checkbox" name="wmm_ps_mode_acbe">AC_BE &nbsp;&nbsp;
+		<input type="checkbox" name="wmm_ps_mode_acbk">AC_BK &nbsp;&nbsp;
+		<input type="checkbox" name="wmm_ps_mode_acvi">AC_VI &nbsp;&nbsp;
+		<input type="checkbox" name="wmm_ps_mode_acvo">AC_VO &nbsp;&nbsp;
+	</td>
+</tr>
+<tr>
+	<td class="head" id="qosWMMDLS">Direct Link Setup</td>
+	<td><input type="checkbox" name="wmm_dls_enable" onclick="WMM_DLS_Click(this.form);"><font id="qosWMMDLSEnable">enable</font></td>
+</tr>
+
+<tr>
+	<td class="title" id="qosDLS" colspan="2">Direct Link Setup</td>
+</tr>
+<tr>
+	<td class="head" id="qosDLSMac">MAC Address</td>
+	<td>
+		<input type="text" class="xsmall" name="mac0" value="<% getStaDLSMacAddress(0); %>">&nbsp;-&nbsp;
+		<input type="text" class="xsmall" name="mac1" value="<% getStaDLSMacAddress(1); %>">&nbsp;-&nbsp;
+		<input type="text" class="xsmall" name="mac2" value="<% getStaDLSMacAddress(2); %>">&nbsp;-&nbsp;
+		<input type="text" class="xsmall" name="mac3" value="<% getStaDLSMacAddress(3); %>">&nbsp;-&nbsp;
+		<input type="text" class="xsmall" name="mac4" value="<% getStaDLSMacAddress(4); %>">&nbsp;-&nbsp;
+		<input type="text" class="xsmall" name="mac5" value="<% getStaDLSMacAddress(5); %>">
+	</td>
+</tr>
+<tr>
+	<td class="head" id="qosDLSTimeoutValue">Timeout Value</td>
+	<td><input type="text" name="timeout" align="right" id="qosSecond" value="<% getStaDLSTimeout(); %>"> sec</td>
+</tr>
 </table>
 
 <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td >
-      <input type="button" name="WMMButton" style="{width:120px;}" value="WMM Apply" id="qosWMMApply" onClick="submit_apply(1)"> &nbsp; &nbsp;
-    </td>
-  </tr>
-</table>
-<br />
-
-<table div="wmm_dls_setup" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" id="qosDLS" colspan="2">Direct Link Setup</td>
-  </tr>
-  <tr>
-    <td class="head" id="qosDLSMac">MAC Address</td>
-    <td>
-      <input type="text" class="xsmall" name="mac0"
-        <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type="text" class="xsmall" name="mac1"
-        <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type="text" class="xsmall" name="mac2"
-        <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type="text" class="xsmall" name="mac3"
-        <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type="text" class="xsmall" name="mac4"
-        <% if (dls != "1") write("disabled"); %>>&nbsp;-&nbsp;
-      <input type="text" class="xsmall" name="mac5"
-        <% if (dls != "1") write("disabled"); %>>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="qosDLSTimeoutValue">Timeout Value</td>
-    <td>
-      <input type=text name=timeout align="right" id="qosSecond"> sec
-    </td>
-  </tr>
-</table>
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td >
-      <input type="button" name="DlsSetupButton" style="{width:120px;}" value="DLS Apply" id="qosDLSAppy" onClick="submit_apply(2)"> &nbsp; &nbsp;
-    </td>
-  </tr>
+<tr align="center">
+	<td><input type="button" name="DlsSetupButton" style="{width:120px;}" value="DLS Apply" id="qosDLSAppy" onClick="submit_apply(this.form, 1)"></td>
+</tr>
 </table>
 <br />
 
 <table div="wmm_dls_status" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="2" id="qosDLSStaus">DLS Status</td>
-  </tr>
-  <tr>
-    <td width=65% bgcolor="#E8F8FF" id="qosDLSStatusMAC">MAC Address</td>
-    <td bgcolor="#E8F8FF" id="qosDLSStatusTimeout">Timeout</td>
-  </tr>
-  <% getStaDLSList(); %>
-</table>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td >
-<!--      <input type="button" name="MoveToDlsButton" style="{width:120px;}" value="Move To Dls Setup" onClick="Move_To_Dls()"> &nbsp; &nbsp;-->
-      <input type="button" name="DlsStatusButton" style="{width:120px;}" value="Tear Down" id="qosTearDown" onClick="submit_apply(3)"> &nbsp; &nbsp;
-    </td>
-  </tr>
+<tr>
+	<td class="title" colspan="2" id="qosDLSStaus">DLS Status</td>
+</tr>
+<tr>
+	<td width="65%" bgcolor="#E8F8FF" id="qosDLSStatusMAC">MAC Address</td>
+	<td bgcolor="#E8F8FF" id="qosDLSStatusTimeout">Timeout</td>
+</tr>
+<% getStaDLSList(); %>
 </table>
 
-<input type=hidden name=button_type value="">
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<tr align="center">
+	<td><input type="button" name="DlsStatusButton" style="{width:120px;}" value="Tear Down" id="qosTearDown" onClick="submit_apply(this.form, 3)"></td>
+</tr>
+</table>
+
+<input type="hidden" name="button_type" value="">
 </form>
 
 </td></tr></table>

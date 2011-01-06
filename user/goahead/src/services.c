@@ -141,40 +141,46 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	doSystem("service dhcpd restart &");
 }
 
+typedef struct service_flag_t
+{
+	char_t *web;
+	char   *nvram;
+	char_t *deflt;
+} service_flag_t;
+
+const service_flag_t service_misc_flags[] =
+{
+	{ T("stpEnbl"), "stpEnabled", T("0") },
+	{ T("lltdEnbl"), "lltdEnabled", T("0") },
+	{ T("igmpEnbl"), "igmpEnabled", T("0") },
+	{ T("upnpEnbl"), "upnpEnabled", T("0") },
+	{ T("radvdEnbl"), "radvdEnabled", T("0") },
+	{ T("pppoeREnbl"), "pppoeREnabled", T("0") },
+	{ T("dnspEnbl"), "dnsPEnabled", T("0") },
+	{ T("rmtHTTP"), "RemoteManagement", T("0") },
+	{ T("rmtSSH"), "RemoteSSH", T("0") },
+	{ T("udpxyMode"), "UDPXYMode", T("0") },
+	{ T("watchdogEnable"), "WatchdogEnabled", T("0") },
+	{ T("pingWANEnbl"), "WANPingFilter", T("0") },
+	{ T("krnlPppoePass"), "pppoe_pass", T("0") },
+	{ T("krnlIpv6Pass"), "ipv6_pass", T("0") },
+	{ NULL, NULL, NULL } // Terminator
+};
+
 /* goform/setMiscServices */
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
-	char_t  *stp_en, *lltd_en, *igmp_en, *upnp_en, *radvd_en;
-	char_t  *pppoer_en, *dnsp_en, *rmt_http, *rmt_ssh, *udpxy_mode, *ping_wan;
-	char_t  *watchdog;
-
-	stp_en = websGetVar(wp, T("stpEnbl"), T("0"));
-	lltd_en = websGetVar(wp, T("lltdEnbl"), T("0"));
-	igmp_en = websGetVar(wp, T("igmpEnbl"), T("0"));
-	upnp_en = websGetVar(wp, T("upnpEnbl"), T("0"));
-	radvd_en = websGetVar(wp, T("radvdEnbl"), T("0"));
-	pppoer_en = websGetVar(wp, T("pppoeREnbl"), T("0"));
-	dnsp_en = websGetVar(wp, T("dnspEnbl"), T("0"));
-	rmt_http = websGetVar(wp, T("rmtHTTP"), T("0"));
-	rmt_ssh = websGetVar(wp, T("rmtSSH"), T("0"));
-	udpxy_mode = websGetVar(wp, T("udpxyMode"), T("0"));
-	watchdog = websGetVar(wp, T("watchdogEnable"), T("0"));
-	ping_wan = websGetVar(wp, T("pingWANEnbl"), T("0"));
+	const service_flag_t *p;
 
 	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "stpEnabled", stp_en);
-	nvram_bufset(RT2860_NVRAM, "lltdEnabled", lltd_en);
-	nvram_bufset(RT2860_NVRAM, "igmpEnabled", igmp_en);
-	nvram_bufset(RT2860_NVRAM, "upnpEnabled", upnp_en);
-	nvram_bufset(RT2860_NVRAM, "radvdEnabled", radvd_en);
-	nvram_bufset(RT2860_NVRAM, "pppoeREnabled", pppoer_en);
-	nvram_bufset(RT2860_NVRAM, "WANPingFilter", ping_wan);
-	nvram_bufset(RT2860_NVRAM, "dnsPEnabled", dnsp_en);
-	nvram_bufset(RT2860_NVRAM, "RemoteManagement", rmt_http);
-	nvram_bufset(RT2860_NVRAM, "RemoteSSH", rmt_ssh);
-	nvram_bufset(RT2860_NVRAM, "UDPXYMode", udpxy_mode);
-	nvram_bufset(RT2860_NVRAM, "WatchdogEnabled", watchdog);
-	nvram_commit(RT2860_NVRAM);
+	
+	for (p = service_misc_flags; p->web != NULL; p++)
+	{
+		char_t *var = websGetVar(wp, p->web, p->deflt);
+		if (var != NULL)
+			nvram_bufset(RT2860_NVRAM, p->nvram, var);
+	}
+	
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload

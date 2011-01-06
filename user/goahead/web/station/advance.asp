@@ -8,7 +8,8 @@
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 
 <title>Wireless Station Advanced Configurations</title>
-<script language="JavaScript" type="text/javascript">
+
+<script type="text/javascript" language="JavaScript">
 Butterlate.setTextDomain("wireless");
 
 function macCloneMacFillSubmit()
@@ -64,13 +65,14 @@ function doFillMyMAC()
 function wirelessModeChange()
 {
 	//For Country Region
-	var nmode = 1*document.sta_advance.wireless_mode.value;
-	document.sta_advance.country_region_a.disabled = false;
-	document.sta_advance.country_region_bg.disabled = false;
+	var form = document.sta_advance;
+	var nmode = 1*form.wireless_mode.value;
+	form.country_region_a.disabled = false;
+	form.country_region_bg.disabled = false;
 	if (nmode == 0 || nmode == 1 || nmode == 6 || nmode == 9)
-		document.sta_advance.country_region_a.disabled = true;
+		form.country_region_a.disabled = true;
 	else if (nmode == 2)
-		document.sta_advance.country_region_bg.disabled = true;
+		form.country_region_bg.disabled = true;
 	
 	hideElement("div_tx_rate");
 	hideElement("div_ht_phy_mode");
@@ -79,6 +81,13 @@ function wirelessModeChange()
 		showElement("div_ht_phy_mode");
 	else
 		showElement("div_tx_rate");
+	
+	// Display b/g protection & country region
+	var amode = '<% getStaSuppAMode(); %>';
+	var prot  = (nmode != 4) && (nmode != 6); // G only, N only
+	displayElement('bgProtectionRow', prot);
+	displayElement('CountryRegionRowBG', prot);
+	displayElement('CountryRegionRowA', (prot) && (amode == '1'));
 }
 
 function RadioStatusChange(rs)
@@ -138,33 +147,45 @@ function initValue()
 {
 	var is3t3r = '<% is3t3r(); %>';
 	var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
+	var clone = '<% getCfgZero(1, "macCloneEnabled"); %>';
+	var staAR = '<% getCfgZero(1, "staAutoRoaming"); %>';
+	var staAC = '<% getCfgZero(1, "staAutoConnect"); %>';
+	var staFC = '<% getCfgZero(1, "staFastConnect"); %>';
+	var txPower = '<% getCfgZero(1, "TxPower"); %>';
+	
+	var form = document.sta_advance;
 
 	if (1*is3t3r == 1)
 	{
 		for (i = 16; i < 24; i++)
-			document.sta_advance.n_mcs.options[i] = new Option(i, i);
+			form.n_mcs.options[i] = new Option(i, i);
 	}
-	var mcs_length = document.sta_advance.n_mcs.options.length;
-	document.sta_advance.n_mcs.options[mcs_length] = new Option("32", "32");
-	mcs_length++;
-	document.sta_advance.n_mcs.options[mcs_length] = new Option("Auto", "33");
+	var mcs_length = form.n_mcs.options.length;
+	form.n_mcs.options[mcs_length++] = new Option("32", "32");
+	form.n_mcs.options[mcs_length] = new Option("Auto", "33");
 
 	if (1*ht_mcs <= mcs_length-1)
-		document.sta_advance.n_mcs.options.selectedIndex = ht_mcs;
+		form.n_mcs.options.selectedIndex = ht_mcs;
 	else if (1*ht_mcs == 32)
-		document.sta_advance.n_mcs.options.selectedIndex = mcs_length-1;
+		form.n_mcs.options.selectedIndex = mcs_length-1;
 	else if (1*ht_mcs == 33)
-		document.sta_advance.n_mcs.options.selectedIndex = mcs_length;
+		form.n_mcs.options.selectedIndex = mcs_length;
 
-	var form = document.sta_advance;
-	var clone = "<% getCfgZero(1, "macCloneEnabled"); %>";
-	
-	if (clone == "1")
-		form.macCloneEnbl.options.selectedIndex = 1;
-	else
-		form.macCloneEnbl.options.selectedIndex = 0;
-	
+	// MAC clone
+	form.macCloneEnbl.options.selectedIndex = (clone == '1') ? 1 : 0;
 	macCloneSwitch(form);
+	
+	form.staAutoRoaming.checked = (staAR == '1');
+	form.staAutoConnect.checked = (staAC == '1');
+	form.staFastConnect.checked = (staFC == '1');
+	
+	// Set-up TX power combo
+	for (var i=0; i<form.tx_power.options.length; i++)
+	{
+		if (form.tx_power.options[i].value > (txPower*1))
+			break;
+		form.tx_power.options.selectedIndex = i;
+	}
 }
 
 function macCloneSwitch(form)
@@ -205,6 +226,8 @@ function init11NValues()
 	var density = <% getCfgZero(1, "HT_MpduDensity"); %>;
 	var amsdu = <% getCfgZero(1, "HT_AMSDU"); %>;
 
+	wirelessModeChange();
+
 	form.a_mpdu_enable.checked = baenable;
 	form.autoBA[(autoba) ? 1 : 0].checked = true;
 	Auto_BA_Click(form);
@@ -223,7 +246,7 @@ function init11NValues()
 </head>
 
 
-<body onload="PageInit()">
+<body onload="PageInit();">
 <table class="body"><tr><td>
 
 <h1 id="staadvTitle">Station Advanced Configurations</h1>
@@ -259,7 +282,7 @@ function init11NValues()
 		</select>
 	</td>
 </tr>
-<tr>
+<tr id="CountryRegionRowBG">
 	<td class="head" id="staadvCountry" <% amode = getStaSuppAMode();
 		if (amode == "1") write("rowspan=2"); %>>Country Region Code</td>
 	<td>11 B/G &nbsp;&nbsp;&nbsp;
@@ -276,40 +299,67 @@ function init11NValues()
 		</select>
 	</td>
 </tr>
-<tr <% if (amode != "1") write("style=\"visibility:hidden;display:none\""); %>>
+<tr id="CountryRegionRowA" <% if (amode != "1") write("style=\"visibility:hidden;display:none\""); %>>
 	<td>11 A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<select id="country_region_a" name="country_region_a" size="1">
-		<option value=0 <% var cr_a = getCfgZero(0, "CountryRegionABand");
+		<option value="0" <% var cr_a = getCfgZero(0, "CountryRegionABand");
 			if (cr_a == "0") write("selected"); %>>0:CH36,40,44,48,52,56,60,64,149,153,157,161,165</option>
-		<option value=1 <% if (cr_a == "1") write("selected"); %>>1:CH36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140</option>
-		<option value=2 <% if (cr_a == "2") write("selected"); %>>2:CH36,40,44,48,52,56,60,64</option>
-		<option value=3 <% if (cr_a == "3") write("selected"); %>>3:CH52,56,60,64,149,153,157,161</option>
-		<option value=4 <% if (cr_a == "4") write("selected"); %>>4:CH149,153,157,161,165</option>
-		<option value=5 <% if (cr_a == "5") write("selected"); %>>5:CH149,153,157,161,</option>
-		<option value=6 <% if (cr_a == "6") write("selected"); %>>6:CH36,40,44,48</option>
-		<option value=7 <% if (cr_a == "7") write("selected"); %>>7:CH36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,149,153,157,161,165</option>
-		<option value=8 <% if (cr_a == "8") write("selected"); %>>8:CH52,56,60,64</option>
-		<option value=9 <% if (cr_a == "9") write("selected"); %>>9:CH34,38,42,46</option>
-		<option value=10 <% if (cr_a == "10") write("selected"); %>>10:CH34,36,38,40,42,44,46,48,52,56,60,64</option>
+		<option value="1" <% if (cr_a == "1") write("selected"); %>>1:CH36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140</option>
+		<option value="2" <% if (cr_a == "2") write("selected"); %>>2:CH36,40,44,48,52,56,60,64</option>
+		<option value="3" <% if (cr_a == "3") write("selected"); %>>3:CH52,56,60,64,149,153,157,161</option>
+		<option value="4" <% if (cr_a == "4") write("selected"); %>>4:CH149,153,157,161,165</option>
+		<option value="5" <% if (cr_a == "5") write("selected"); %>>5:CH149,153,157,161,</option>
+		<option value="6" <% if (cr_a == "6") write("selected"); %>>6:CH36,40,44,48</option>
+		<option value="7" <% if (cr_a == "7") write("selected"); %>>7:CH36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,149,153,157,161,165</option>
+		<option value="8" <% if (cr_a == "8") write("selected"); %>>8:CH52,56,60,64</option>
+		<option value="9" <% if (cr_a == "9") write("selected"); %>>9:CH34,38,42,46</option>
+		<option value="10" <% if (cr_a == "10") write("selected"); %>>10:CH34,36,38,40,42,44,46,48,52,56,60,64</option>
 		</select>
 	</td>
 </tr>
-<tr>
+<tr id="bgProtectionRow">
 	<td class="head" id="staadvBGProtect">B/G Protection</td>
 	<td>
 		<select name="bg_protection" size="1">
 		<option value=0 id="staadvBGProAuto" <% var bg_prot = getCfgZero(0, "BGProtection");
 			if (bg_prot == "0") write("selected"); %>>Auto</option>
-		<option value=1 id="staadvBGProOn" <% if (bg_prot == "1") write("selected"); %>>On</option>
-		<option value=2 id="staadvBGProOff" <% if (bg_prot == "2") write("selected"); %>>Off</option>
+		<option value="1" id="staadvBGProOn" <% if (bg_prot == "1") write("selected"); %>>On</option>
+		<option value="2" id="staadvBGProOff" <% if (bg_prot == "2") write("selected"); %>>Off</option>
 		</select>
 	</td>
+</tr>
+<tr>
+	<td class="head">Auto Roaming</td>
+	<td><input type="checkbox" name="staAutoRoaming">enable</td>
+</tr>
+<tr>
+	<td class="head">Auto Connect</td>
+	<td><input type="checkbox" name="staAutoConnect">enable</td>
+</tr>
+<tr>
+	<td class="head">Fast Connect</td>
+	<td><input type="checkbox" name="staFastConnect">enable</td>
 </tr>
 <tr> 
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
-		<input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>">
-		<span style="color: #808080;">&nbsp;(range 1 - 100, default 100)</span>
+		<!--input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>">
+		<span style="color: #808080;">&nbsp;(range 1 - 100, default 100)</span-->
+		<select name="tx_power">
+			<option value="5">5%</option>
+			<option value="10">10%</option>
+			<option value="20">20%</option>
+			<option value="30">30%</option>
+			<option value="35">35%</option>
+			<option value="40">40%</option>
+			<option value="45">45%</option>
+			<option value="50">50%</option>
+			<option value="60">60%</option>
+			<option value="70">70%</option>
+			<option value="80">80%</option>
+			<option value="90">90%</option>
+			<option value="100">100%</option>
+		</select>
 	</td>
 </tr>
 <tr id="div_tx_rate" name="div_tx_rate" <% var wm = getCfgZero(0, "WirelessMode");
@@ -318,28 +368,26 @@ function init11NValues()
 	<td class="head" id="staadvTxRate">Tx Rate</td>
 	<td>
 		<select name="tx_rate" size="1">
-		<option value=0 id="staadvTxRateAuto" <% var rate = getCfgZero(0, "TxRate");
+		<option value="0" id="staadvTxRateAuto" <% var rate = getCfgZero(0, "TxRate");
 			if (rate == "0") write("selected"); %>>Auto</option>
-		<option value=1 <% if (rate == "1") write("selected"); %>>1 Mbps</option>
-		<option value=2 <% if (rate == "2") write("selected"); %>>2 Mbps</option>
-		<option value=3 <% if (rate == "3") write("selected"); %>>5.5 Mbps</option>
-		<option value=4 <% if (rate == "4") write("selected"); %>>11 Mbps</option>
-		<option value=5 <% if (rate == "5") write("selected"); %>>6 Mbps</option>
-		<option value=6 <% if (rate == "6") write("selected"); %>>9 Mbps</option>
-		<option value=7 <% if (rate == "7") write("selected"); %>>12 Mbps</option>
-		<option value=8 <% if (rate == "8") write("selected"); %>>18 Mbps</option>
-		<option value=9 <% if (rate == "9") write("selected"); %>>24 Mbps</option>
-		<option value=10 <% if (rate == "10") write("selected"); %>>36 Mbps</option>
-		<option value=11 <% if (rate == "11") write("selected"); %>>48 Mbps</option>
-		<option value=12 <% if (rate == "12") write("selected"); %>>54 Mbps</option>
+		<option value="1" <% if (rate == "1") write("selected"); %>>1 Mbps</option>
+		<option value="2" <% if (rate == "2") write("selected"); %>>2 Mbps</option>
+		<option value="3" <% if (rate == "3") write("selected"); %>>5.5 Mbps</option>
+		<option value="4" <% if (rate == "4") write("selected"); %>>11 Mbps</option>
+		<option value="5" <% if (rate == "5") write("selected"); %>>6 Mbps</option>
+		<option value="6" <% if (rate == "6") write("selected"); %>>9 Mbps</option>
+		<option value="7" <% if (rate == "7") write("selected"); %>>12 Mbps</option>
+		<option value="8" <% if (rate == "8") write("selected"); %>>18 Mbps</option>
+		<option value="9" <% if (rate == "9") write("selected"); %>>24 Mbps</option>
+		<option value="10" <% if (rate == "10") write("selected"); %>>36 Mbps</option>
+		<option value="11" <% if (rate == "11") write("selected"); %>>48 Mbps</option>
+		<option value="12" <% if (rate == "12") write("selected"); %>>54 Mbps</option>
 		</select>
 	</td>
 </tr>
 <tr>
-	<td colspan=2>
-		<input type="checkbox" name="tx_burst" <% var burst = getCfgZero(0, "TxBurst");
-			if (burst == "1") write("checked"); %>><font id="staadvTxBurst">Tx BURST</font>
-	</td>
+	<td class="head" id="staadvTxBurst">Tx BURST</td>
+	<td><input type="checkbox" name="tx_burst" <% var burst = getCfgZero(0, "TxBurst"); if (burst == "1") write("checked"); %>>enabled</td>
 </tr>
 </table>
 <br>
@@ -401,17 +449,17 @@ function init11NValues()
 	</td>
 </tr>
 <tr>
-	<td class="head" rowspan="2" id="11nAMPDU">MPDU Aggregation</td>
+	<td class="head" id="11nAMPDU">MPDU Aggregation</td>
 	<td><input type="checkbox" name="a_mpdu_enable" onClick="Mpdu_Aggregtion_Click(this.form);"><font id="11nAMPDUEnable">enable</font></td>
 </tr>
 <tr>
+	<td class="head" id="11nMPDUDensity" rowspan="2">MPDU density</td>
 	<td>
 		<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>&nbsp;&nbsp;
 		<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
 	</td>
 </tr>
 <tr>
-	<td class="head" id="11nMPDUDensity">MPDU density</td>
 	<td>
 		<select name="mpdu_density" size="1">
 			<option value="0" selected>0</option>

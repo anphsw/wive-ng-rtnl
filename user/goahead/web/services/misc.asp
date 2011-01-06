@@ -99,6 +99,8 @@ function initValue()
 	var radvdb = "<% getRadvdBuilt(); %>";
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
+	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
+	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
 
 	initTranslation();
 
@@ -111,10 +113,12 @@ function initValue()
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
+	form.krnlPppoePass.options.selectedIndex = 1*krnl_pppoe;
+	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
 	form.pingWANEnbl.options.selectedIndex = (wpf == "1") ? 1 : 0;
 
-	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "0");
-	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "0");
+	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
+	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 
@@ -172,9 +176,29 @@ function CheckValue()
 </tr>
 
 <tr>
+<td class="head">Kernel mode PPPOE pass through</td>
+<td>
+	<select name="krnlPppoePass" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+
+<tr>
+<td class="head">Kernel mode IPv6 pass through</td>
+<td>
+	<select name="krnlIpv6Pass" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+
+<tr>
 <td class="head" id="lStp">802.1d Spanning Tree</td>
 <td>
-	<select name="stpEnbl" size="1" class="half">
+	<select name="stpEnbl" class="half">
 		<option value="0" id="lStpD">Disable</option>
 		<option value="1" id="lStpE">Enable</option>
 	</select>
@@ -183,7 +207,7 @@ function CheckValue()
 <tr id="lltd">
 <td class="head" id="lLltd">LLTD</td>
 <td>
-	<select name="lltdEnbl" size="1" class="half">
+	<select name="lltdEnbl" class="half">
 		<option value="0" id="lLltdD">Disable</option>
 		<option value="1" id="lLltdE">Enable</option>
 	</select>
@@ -192,7 +216,7 @@ function CheckValue()
 <tr id="igmpProxy">
 <td class="head" id="lIgmpp">IGMP proxy</td>
 <td>
-	<select name="igmpEnbl" size="1" class="half">
+	<select name="igmpEnbl" class="half">
 		<option value="0" id="lIgmppD">Disable</option>
 		<option value="1" id="lIgmppE">Enable</option>
 	</select>
@@ -201,7 +225,7 @@ function CheckValue()
 <tr id="upnp">
 <td class="head" id="lUpnp">UPNP</td>
 <td>
-	<select name="upnpEnbl" size="1" class="half">
+	<select name="upnpEnbl" class="half">
 		<option value="0" id="lUpnpD">Disable</option>
 		<option value="1" id="lUpnpE">Enable</option>
 	</select>
@@ -210,7 +234,7 @@ function CheckValue()
 <tr id="radvd">
 <td class="head" id="lRadvd">Router Advertisement</td>
 <td>
-	<select name="radvdEnbl" size="1" class="half">
+	<select name="radvdEnbl" class="half">
 		<option value="0" id="lRadvdD">Disable</option>
 		<option value="1" id="lRadvdE">Enable</option>
 	</select>
@@ -219,7 +243,7 @@ function CheckValue()
 <tr id="pppoerelay">
 <td class="head" id="lPppoer">PPPOE relay</td>
 <td>
-	<select name="pppoeREnbl" size="1" class="half">
+	<select name="pppoeREnbl" class="half">
 		<option value="0" id="lPppoerD">Disable</option>
 		<option value="1" id="lPppoerE">Enable</option>
 	</select>

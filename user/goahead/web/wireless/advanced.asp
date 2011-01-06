@@ -5,6 +5,7 @@
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Advanced Wireless Settings</title>
@@ -25,6 +26,7 @@ var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "M2UEnabled"); %>';
 var carrierib = '<% getCarrierBuilt(); %>';
+var txPower = '<% getCfgZero(1, "TxPower"); %>';
 
 function style_display_on()
 {
@@ -112,156 +114,153 @@ function initValue()
 	var datarateArray;
 
 	initTranslation();
-	bgProtection = 1*bgProtection;
-	document.wireless_advanced.bg_protection.options.selectedIndex = bgProtection;
+	var form = document.wireless_advanced;
+	form.bg_protection.options.selectedIndex = 1*bgProtection;
 
-	shortPreamble = 1*shortPreamble;
-	if (shortPreamble == 1)
+	if (shortPreamble == '1')
 	{
-		document.wireless_advanced.short_preamble[0].checked = true;
-		document.wireless_advanced.short_preamble[1].checked = false;
+		form.short_preamble[0].checked = true;
+		form.short_preamble[1].checked = false;
 	}
 	else
 	{
-		document.wireless_advanced.short_preamble[0].checked = false;
-		document.wireless_advanced.short_preamble[1].checked = true;
+		form.short_preamble[0].checked = false;
+		form.short_preamble[1].checked = true;
 	}
 
-	shortSlot = 1*shortSlot;
-	if (shortSlot == 1)
-		document.wireless_advanced.short_slot[0].checked = true;
+	if (shortSlot == '1')
+		form.short_slot[0].checked = true;
 	else
-		document.wireless_advanced.short_slot[1].checked = true;
+		form.short_slot[1].checked = true;
 
-	txBurst = 1*txBurst;
-	if (txBurst == 1)
+	if (txBurst == '1')
 	{
-		document.wireless_advanced.tx_burst[0].checked = true;
-		document.wireless_advanced.tx_burst[1].checked = false;
+		form.tx_burst[0].checked = true;
+		form.tx_burst[1].checked = false;
 	}
 	else
 	{
-		document.wireless_advanced.tx_burst[0].checked = false;
-		document.wireless_advanced.tx_burst[1].checked = true;
+		form.tx_burst[0].checked = false;
+		form.tx_burst[1].checked = true;
 	}
 
-	pktAggregate = 1*pktAggregate;
-	if (pktAggregate == 1)
+	if (pktAggregate == '1')
 	{
-		document.wireless_advanced.pkt_aggregate[0].checked = true;
-		document.wireless_advanced.pkt_aggregate[1].checked = false;
+		form.pkt_aggregate[0].checked = true;
+		form.pkt_aggregate[1].checked = false;
 	}
 	else
 	{
-		document.wireless_advanced.pkt_aggregate[0].checked = false;
-		document.wireless_advanced.pkt_aggregate[1].checked = true;
+		form.pkt_aggregate[0].checked = false;
+		form.pkt_aggregate[1].checked = true;
 	}
 	
-	carrierib = 1*carrierib;
-	if (carrierib == 1)
+	if (carrierib == '1')
 	{
 		document.getElementById("div_carrier_detect").style.visibility = "visible";
 		document.getElementById("div_carrier_detect").style.display = style_display_on();
-		document.wireless_advanced.carrier_detect.disabled = false;
+		form.carrier_detect.disabled = false;
+
 		var carrierebl = '<% getCfgZero(1, "CarrierDetect"); %>';
-		if (carrierebl == "1")
+		if (carrierebl == '1')
 		{
-			document.wireless_advanced.carrier_detect[0].checked = true;
-			document.wireless_advanced.carrier_detect[1].checked = false;
+			form.carrier_detect[0].checked = true;
+			form.carrier_detect[1].checked = false;
 		}
 		else
 		{
-			document.wireless_advanced.carrier_detect[0].checked = false;
-			document.wireless_advanced.carrier_detect[1].checked = true;
+			form.carrier_detect[0].checked = false;
+			form.carrier_detect[1].checked = true;
 		}
 	}
 	else
 	{
 		document.getElementById("div_carrier_detect").style.visibility = "hidden";
 		document.getElementById("div_carrier_detect").style.display = "none";
-		document.wireless_advanced.carrier_detect.disabled = true;
+		form.carrier_detect.disabled = true;
 	}
 
 	if (wmmCapable.indexOf("1") >= 0)
 	{
-		document.wireless_advanced.wmm_capable[0].checked = true;
-		document.wireless_advanced.wmm_capable[1].checked = false;
+		form.wmm_capable[0].checked = true;
+		form.wmm_capable[1].checked = false;
 	}
 	else
 	{
-		document.wireless_advanced.wmm_capable[0].checked = false;
-		document.wireless_advanced.wmm_capable[1].checked = true;
+		form.wmm_capable[0].checked = false;
+		form.wmm_capable[1].checked = true;
 	}
 
 	wmm_capable_enable_switch();
 
-	APSDCapable = 1*APSDCapable;
-	if (APSDCapable == 1)
+	if (APSDCapable == '1')
 	{
-		document.wireless_advanced.apsd_capable[0].checked = true;
-		document.wireless_advanced.apsd_capable[1].checked = false;
+		form.apsd_capable[0].checked = true;
+		form.apsd_capable[1].checked = false;
 	}
 	else
 	{
-		document.wireless_advanced.apsd_capable[0].checked = false;
-		document.wireless_advanced.apsd_capable[1].checked = true;
+		form.apsd_capable[0].checked = false;
+		form.apsd_capable[1].checked = true;
 	}
 
 	if (DLSBuilt == 1)
 	{
-		DLSCapable = 1*DLSCapable;
-		if (DLSCapable == 1)
+		if (DLSCapable == '1')
 		{
-			document.wireless_advanced.dls_capable[0].checked = true;
-			document.wireless_advanced.dls_capable[1].checked = false;
+			form.dls_capable[0].checked = true;
+			form.dls_capable[1].checked = false;
 		}
 		else
 		{
-			document.wireless_advanced.dls_capable[0].checked = false;
-			document.wireless_advanced.dls_capable[1].checked = true;
+			form.dls_capable[0].checked = false;
+			form.dls_capable[1].checked = true;
 		}
 	}
 
 	if (countrycode == "US")
-		document.wireless_advanced.country_code.options.selectedIndex = 0;
+		form.country_code.options.selectedIndex = 0;
 	else if (countrycode == "JP")
-		document.wireless_advanced.country_code.options.selectedIndex = 1;
+		form.country_code.options.selectedIndex = 1;
 	else if (countrycode == "RU")
-		document.wireless_advanced.country_code.options.selectedIndex = 2;
+		form.country_code.options.selectedIndex = 2;
 	else if (countrycode == "FR")
-		document.wireless_advanced.country_code.options.selectedIndex = 3;
+		form.country_code.options.selectedIndex = 3;
 	else if (countrycode == "TW")
-		document.wireless_advanced.country_code.options.selectedIndex = 4;
+		form.country_code.options.selectedIndex = 4;
 	else if (countrycode == "IE")
-		document.wireless_advanced.country_code.options.selectedIndex = 5;
+		form.country_code.options.selectedIndex = 5;
 	else if (countrycode == "HK")
-		document.wireless_advanced.country_code.options.selectedIndex = 6;
+		form.country_code.options.selectedIndex = 6;
 	else if (countrycode == "NONE")
-		document.wireless_advanced.country_code.options.selectedIndex = 7;
+		form.country_code.options.selectedIndex = 7;
 	else
-		document.wireless_advanced.country_code.options.selectedIndex = 8;
+		form.country_code.options.selectedIndex = 8;
 
 	//multicase to unicast converter
-	m2uBuilt = 1*m2uBuilt;
-	document.getElementById("div_m2u").style.display = "none";
-	if (m2uBuilt == 1)
+	hideElement('div_m2u');
+	if (m2uBuilt == '1')
 	{
-		if (window.ActiveXObject) // IE
-			document.getElementById("div_m2u").style.display = "block";
-		else
-			document.getElementById("div_m2u").style.display = "table";
+		showElement('div_m2u');
 
-		m2uEnabled = 1*m2uEnabled;
-		if (m2uEnabled == 1)
+		if (m2uEnabled == '1')
 		{
-			document.wireless_advanced.m2u_enable[0].checked = true;
-			document.wireless_advanced.m2u_enable[1].checked = false;
+			form.m2u_enable[0].checked = true;
+			form.m2u_enable[1].checked = false;
 		}
 		else
 		{
-			document.wireless_advanced.m2u_enable[0].checked = false;
-			document.wireless_advanced.m2u_enable[1].checked = true;
+			form.m2u_enable[0].checked = false;
+			form.m2u_enable[1].checked = true;
 		}
+	}
+	
+	// Set-up TX power combo
+	for (var i=0; i<form.tx_power.options.length; i++)
+	{
+		if (form.tx_power.options[i].value > (txPower*1))
+			break;
+		form.tx_power.options.selectedIndex = i;
 	}
 }
 
@@ -459,7 +458,22 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
-		<input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font>
+		<!--input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font-->
+		<select name="tx_power">
+			<option value="5">5%</option>
+			<option value="10">10%</option>
+			<option value="20">20%</option>
+			<option value="30">30%</option>
+			<option value="35">35%</option>
+			<option value="40">40%</option>
+			<option value="45">45%</option>
+			<option value="50">50%</option>
+			<option value="60">60%</option>
+			<option value="70">70%</option>
+			<option value="80">80%</option>
+			<option value="90">90%</option>
+			<option value="100">100%</option>
+		</select>
 	</td>
 </tr>
 <tr> 
