@@ -7,9 +7,11 @@
  */
 
 #include        "linux/autoconf.h"			//kernel config
+#include        "linux/ralink_gpio.h"			//gpio config
+#include 	"linux/reboot.h"			//reboot function
+
 #include        "config/autoconf.h"			//user config
 #include        "user/busybox/include/autoconf.h"	//busybox config
-#include        "linux/ralink_gpio.h"			//gpio config
 #include        "sdk_version.h"				//vetsion config
 #include        "../options.h" 				//goahead options
 

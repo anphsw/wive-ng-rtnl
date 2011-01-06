@@ -48,6 +48,9 @@
 void	formDefineUserMgmt(void);
 #endif
 
+#define GPIO_LED_WAN_GREEN	12
+#define GPIO_LED_WAN_ORANGE	14
+
 
 /*********************************** Locals ***********************************/
 /*
@@ -64,7 +67,9 @@ static int		finished;				/* Finished flag */
 /****************************** Forward Declarations **************************/
 
 static int writeGoPid(void);
-static void InitSignals(void);
+static void InitSignals(int helper);
+static void goaSigReset(int signum);
+static void goaSigWPSHlpr(int signum);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
 extern void defaultErrorHandler(int etype, char_t *msg);
@@ -101,21 +106,42 @@ int main(int argc, char** argv)
  *	60KB allows for several concurrent page requests.  If more space
  *	is required, malloc will be used for the overflow.
  */
+	int pid;
+
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
-
+	
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	pid = fork();
+	
+	if (pid == -1) {
+		error(E_L, E_LOG, T("goahead.c: cannot fork WPS helper"));
+	} else if (pid == 0) {
+		/* Helper that should just process signals, other time it just sleeps */
+		InitSignals(1);
+		while (1) sleep(1000000);
+	}
+#endif
 	/* Registr signals */
-	InitSignals();
+	InitSignals(0);
+
+	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
+	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
         /* Start needed services */
 	initInternet();
 
 	/* Initialize the web server */
 	if (initWebs() < 0) {
+		//Clean-up and exit
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+		if (pid > 0)
+			kill(pid, SIGTERM);
+#endif
 		return -1;
 	}
 
@@ -132,6 +158,9 @@ int main(int argc, char** argv)
 	system("fs backup_nvram");
 	system("fs save");
 	sync();
+	
+	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
+	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
 
 /*
  *	Basic event loop. SocketReady returns true when a socket is ready for
@@ -145,6 +174,11 @@ int main(int argc, char** argv)
 		websCgiCleanup();
 		emfSchedProcess();
 	}
+
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	//Kill helper
+	kill(pid, SIGTERM);
+#endif
 
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
@@ -191,9 +225,6 @@ static void goaSigHandler(int signum)
 	char *ethCon = nvram_get(RT2860_NVRAM, "ethConvert");
 #endif
 
-	if (signum != SIGUSR1)
-		return;
-
 #ifdef CONFIG_RT2860V2_STA_WSC
 	if(!strcmp(opmode, "2") || (!strcmp(opmode, "0") &&   !strcmp(ethCon, "1") ) )		// wireless isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
@@ -203,7 +234,7 @@ static void goaSigHandler(int signum)
 }
 
 #ifdef CONFIG_RALINK_GPIO
-static void goaInitGpio()
+static void goaInitGpio(int helper)
 {
 	int fd;
 	ralink_gpio_reg_info info;
@@ -211,12 +242,17 @@ static void goaInitGpio()
 	//register my information
 	info.pid = getpid();
 
-        //RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
+	if (helper) {
+		//WPS button
+		info.irq = 0;
+	} else {
+		//RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
 #if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
-        info.irq = 43;
+		info.irq = 43;
 #else
-        info.irq = 10;
+		info.irq = 10;
 #endif
+	}
 
 	fd = open("/dev/gpio", O_RDONLY);
 	if (fd < 0) {
@@ -235,9 +271,6 @@ static void goaInitGpio()
 	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
 		goto ioctl_err;
 	close(fd);
-
-	//issue a handler to handle SIGUSR1
-	signal(SIGUSR1, goaSigHandler);
 	return;
 
 ioctl_err:
@@ -259,23 +292,37 @@ static void fs_nvram_reset_handler (int signum)
 /*
  *	Initialize System Parameters
  */
-static void InitSignals(void)
+static void InitSignals(int helper)
 {
 
 //--------REGISTER SIGNALS-------------------------
-	//register fs nvram reset helper
-	signal(SIGUSR2, fs_nvram_reset_handler);
+	if (helper) {
+#ifdef CONFIG_RALINK_GPIO
+		signal(SIGUSR1, goaSigWPSHlpr);
+#endif
+	} else {
+#ifdef CONFIG_RALINK_GPIO
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+		//register fs nvram reset helper
+		signal(SIGUSR1, goaSigReset);
+		signal(SIGHUP, goaSigHandler);
+#else
+		signal(SIGUSR1, goaSigHandler);
+#endif
+		signal(SIGUSR2, fs_nvram_reset_handler);
+#endif
 
 #if defined CONFIG_USB
-	//registr hotplug signal
-	signal(SIGTTIN, hotPluglerHandler);
-	hotPluglerHandler(SIGTTIN);
+		//registr hotplug signal
+		signal(SIGTTIN, hotPluglerHandler);
+		hotPluglerHandler(SIGTTIN);
 #endif
-	//regist WPS button
-	signal(SIGXFSZ, WPSSingleTriggerHandler);
+		//regist WPS button
+		signal(SIGXFSZ, WPSSingleTriggerHandler);
+	}
 
 #ifdef CONFIG_RALINK_GPIO
-	goaInitGpio();
+	goaInitGpio(helper);
 #endif
 }
 
@@ -601,3 +648,16 @@ static int set_stable_flag(void)
 
 }
 #endif
+
+static void goaSigReset(int signum)
+{
+	system("reboot");
+}
+
+static void goaSigWPSHlpr(int signum)
+{
+	int ppid;
+	ppid = getppid();
+	if (kill(ppid, SIGHUP))
+		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
+}
