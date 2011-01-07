@@ -374,6 +374,7 @@ static void __init init_mips_clocksource(void)
 {
 	u64 temp;
 	u32 shift;
+	unsigned int clock;
 
 	if (!mips_hpt_frequency || clocksource_mips.read == null_hpt_read)
 		return;
@@ -383,7 +384,8 @@ static void __init init_mips_clocksource(void)
 	/* Find a shift value */
 	for (shift = 32; shift > 0; shift--) {
 		temp = (u64) NSEC_PER_SEC << shift;
-		do_div(temp, mips_hpt_frequency);
+		clock = mips_hpt_frequency;
+		do_div(temp, clock);
 		if ((temp >> 32) == 0)
 			break;
 	}
