@@ -104,8 +104,8 @@ CFLAGS = -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pi
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
-CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
-CXXDEPMODE = depmode=gcc3
+CXXCPP = /lib/cpp
+CXXDEPMODE = depmode=none
 CXXFLAGS = -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32 -mtune=mips32 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
@@ -169,8 +169,8 @@ ac_ct_F77 = gfortran
 acx_pthread_config = 
 am__fastdepCC_FALSE = #
 am__fastdepCC_TRUE = 
-am__fastdepCXX_FALSE = #
-am__fastdepCXX_TRUE = 
+am__fastdepCXX_FALSE = 
+am__fastdepCXX_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 
