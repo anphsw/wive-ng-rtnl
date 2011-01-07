@@ -88,7 +88,7 @@ dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 #dir_y                                       += getBoardID
 
 all: config
-ifeq ($(CONFIG_USER_PPPD),y)
+ifeq ($(CONFIG_USER_RADVD),y)
 	cd radvd && ./configure-command && cd ..
 endif
 ifeq ($(CONFIG_USER_PPPD),y)
