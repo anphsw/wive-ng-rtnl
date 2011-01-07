@@ -325,7 +325,7 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.3.5/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.3.5/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/4.3.5/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.3.5/../../../../mipsel-linux-uclibc/lib/ /opt/Wive-RTNL/toolchain/lib/mipsel-linux-uclibc/4.3.5/ /opt/Wive-RTNL/toolchain/lib/ /opt/Wive-RTNL/toolchain/usr/lib/mipsel-linux-uclibc/4.3.5/ /opt/Wive-RTNL/toolchain/usr/lib/"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/ /usr/lib/gcc/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/ /opt/Wive-RTNL/toolchain/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/ /opt/Wive-RTNL/toolchain/usr/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/usr/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /usr/lib/qt3/lib /usr/lib/qt3/lib "
@@ -7262,7 +7262,7 @@ LTCFLAGS="-Os -pipe -mips32 -mtune=mips32 -Os -pipe -mips32 -mtune=mips32 -Os -p
 CC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ "
 
 # Is the compiler the GNU C compiler?
-with_gcc=no
+with_gcc=yes
 
 # An ERE matcher.
 EGREP="/bin/grep -E"
@@ -7299,7 +7299,7 @@ reload_flag=" -r"
 reload_cmds="\$LD\$reload_flag -o \$output\$reload_objs"
 
 # How to pass a linker flag through the compiler.
-wl=""
+wl="-Wl,"
 
 # Object file suffix (normally "o").
 objext="o"
@@ -7314,14 +7314,14 @@ shrext_cmds='.so'
 exeext=""
 
 # Additional compiler flags for building library objects.
-pic_flag=" -DPIC"
+pic_flag=" -fPIC -DPIC"
 pic_mode=default
 
 # What is the maximum length of a command?
 max_cmd_len=32768
 
 # Does compiler simultaneously support -c and -o options?
-compiler_c_o="no"
+compiler_c_o="yes"
 
 # Must we lock files when doing compilation?
 need_locks="no"
@@ -7345,13 +7345,13 @@ dlopen_self_static=unknown
 link_static_flag=""
 
 # Compiler flag to turn off builtin functions.
-no_builtin_flag=""
+no_builtin_flag=" -fno-builtin"
 
 # Compiler flag to allow reflexive dlopens.
-export_dynamic_flag_spec=""
+export_dynamic_flag_spec="\${wl}--export-dynamic"
 
 # Compiler flag to generate shared objects directly from archives.
-whole_archive_flag_spec=""
+whole_archive_flag_spec="\${wl}--whole-archive\$convenience \${wl}--no-whole-archive"
 
 # Compiler flag to generate thread-safe objects.
 thread_safe_flag_spec=""
@@ -7382,8 +7382,8 @@ old_archive_from_new_cmds=""
 old_archive_from_expsyms_cmds=""
 
 # Commands used to build and install a shared archive.
-archive_cmds=""
-archive_expsym_cmds=""
+archive_cmds="\$CC -shared -nostdlib \$predep_objects \$libobjs \$deplibs \$postdep_objects \$compiler_flags \${wl}-soname \$wl\$soname -o \$lib"
+archive_expsym_cmds="\$CC -shared -nostdlib \$predep_objects \$libobjs \$deplibs \$postdep_objects \$compiler_flags \${wl}-soname \$wl\$soname \${wl}-retain-symbols-file \$wl\$export_symbols -o \$lib"
 postinstall_cmds=""
 postuninstall_cmds=""
 
@@ -7397,11 +7397,11 @@ striplib="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip --strip-unneede
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects=""
+predep_objects="/opt/Wive-RTNL/toolchain/lib/crti.o /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects=""
+postdep_objects="/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/crtendS.o /opt/Wive-RTNL/toolchain/lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7409,11 +7409,11 @@ predeps=""
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdeps=""
+postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path=""
+compiler_lib_search_path="-L/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4 -L/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib -L/opt/Wive-RTNL/toolchain/lib"
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7452,14 +7452,14 @@ shlibpath_var=LD_LIBRARY_PATH
 shlibpath_overrides_runpath=no
 
 # How to hardcode a shared library path into an executable.
-hardcode_action=unsupported
+hardcode_action=immediate
 
 # Whether we should hardcode library paths into libraries.
 hardcode_into_libs=yes
 
 # Flag to hardcode $libdir into a binary during linking.
 # This must work even if $libdir does not exist.
-hardcode_libdir_flag_spec=""
+hardcode_libdir_flag_spec="\${wl}--rpath \${wl}\$libdir"
 
 # If ld is used when linking, flag to hardcode $libdir into
 # a binary during linking. This must work even if $libdir does
@@ -7487,13 +7487,13 @@ hardcode_automatic=no
 
 # Variables whose values should be saved in libtool wrapper scripts and
 # restored at relink time.
-variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH"
+variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COMPILER_PATH LIBRARY_PATH"
 
 # Whether libtool must link a program against all its dependency libraries.
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/lib /usr/lib /usr/local/lib"
+sys_lib_search_path_spec=" /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/ /usr/lib/gcc/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/ /opt/Wive-RTNL/toolchain/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/lib/ /opt/Wive-RTNL/toolchain/usr/lib/mipsel-linux-uclibc/4.2.4/ /opt/Wive-RTNL/toolchain/usr/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /usr/lib/qt3/lib /usr/lib/qt3/lib "
