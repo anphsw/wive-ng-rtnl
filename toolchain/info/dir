@@ -1,22 +1,22 @@
-This is the file .../info/dir, which contains the
-topmost node of the Info hierarchy, called (dir)Top.
-The first time you invoke Info you start off looking at this node.
+Это файл .../info/dir, содержащий корневую ноду иерархии Info,
+называемую (dir)Top.  При вызове Info вы видите эту ноду.
 
-File: dir,	Node: Top	This is the top of the INFO tree
+File: dir,	Node: Top	Это корневая нода иерархии Info
 
-  This (the Directory node) gives a menu of major topics.
-  Typing "q" exits, "?" lists all Info commands, "d" returns here,
-  "h" gives a primer for first-timers,
-  "mEmacs<Return>" visits the Emacs manual, etc.
+  Здесь (в каталоге Info) представлено меню по основным темам.
+  Нажмите "q" чтобы выйти, "?" чтобы посмотреть все команды Info,
+  "d" чтобы вернуться сюда, "h" чтобы прочитать руководство для новичков,
+  "mEmacs<Return>" чтобы прочитать руководство по Emacs.
 
-  In Emacs, you can click mouse button 2 on a menu item or cross reference
-  to select it.
+  В Emacs вы можете нажать вторую кнопку мыши на пункте меню или ссылке,
+  чтобы перейти к нему.
 
 * Menu:
 
 Software development
 * Cpp: (cpp).                   The GNU C preprocessor.
 * Cpplib: (cppinternals).       Cpplib internals.
+* g++: (gcc).                   The GNU C++ compiler.
 * gcc: (gcc).                   The GNU Compiler Collection.
 * gccinstall: (gccinstall).     Installing the GNU Compiler Collection.
 * gccint: (gccint).             Internals of the GNU Compiler Collection.

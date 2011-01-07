@@ -60,7 +60,6 @@
 #define IP_DEFAULT_MULTICAST_LOOP       1
 #define IP_MAX_MEMBERSHIPS              20
 
-#if defined __USE_MISC || defined __USE_GNU
 /* Structure used to describe IP options for IP_OPTIONS. The `ip_dst'
    field is used for the first-hop gateway when using a source route
    (this gets put into the header proper).  */
@@ -92,7 +91,6 @@ struct in_pktinfo
     struct in_addr ipi_spec_dst;	/* Routing destination address  */
     struct in_addr ipi_addr;		/* Header destination address  */
   };
-#endif
 
 /* Options for use with `getsockopt' and `setsockopt' at the IPv6 level.
    The first word in the comment at the right is the data type used;

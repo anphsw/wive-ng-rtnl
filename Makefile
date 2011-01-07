@@ -300,6 +300,7 @@ romfs.post:
 	cp -rfv dev/* $(ROMFSDIR)/dev
 	rm -fr $(ROOTDIR)/dev
 	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
+	cp -avf $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf

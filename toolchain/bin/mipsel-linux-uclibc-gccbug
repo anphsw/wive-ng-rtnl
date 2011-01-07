@@ -349,7 +349,7 @@ build: i686-pc-linux-gnu
 target: mipsel-unknown-linux-uclibc
 __EOF__
       cat >> $file << \__EOF__
-configured with: ../gcc-4.2.4/configure --target=mipsel-linux-uclibc --prefix=/opt/Wive-RTNL/toolchain --includedir=/opt/Wive-RTNL/toolchain/tmp/mipsel-linux-uclibc-toolchain/include --with-gnu-ld --with-gnu-as --disable-tls --disable-libmudflap --disable-libssp --disable-libgomp --disable-threads --with-sysroot=/opt/Wive-RTNL/toolchain --enable-languages=c++
+configured with: ../gcc-4.4.5/configure --target=mipsel-linux-uclibc --prefix=/opt/Wive-RTNL/toolchain --includedir=/opt/Wive-RTNL/toolchain/tmp/mipsel-linux-uclibc-toolchain/include --with-gnu-ld --with-gnu-as --disable-tls --disable-libmudflap --disable-libssp --disable-libgomp --disable-threads --with-sysroot=/opt/Wive-RTNL/toolchain --enable-languages=c++
 __EOF__
       cat >> $file << __EOF__
 >Description:

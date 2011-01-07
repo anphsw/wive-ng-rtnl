@@ -34,7 +34,8 @@
 
 /* If we are not using GNU CC we have to define all the symbols ourself.
    Otherwise use gcc's definitions (see below).  */
-#if !defined __GNUC__ || __GNUC__ < 2
+//#if !defined __GNUC__ || __GNUC__ < 2
+#if 1
 
 /* We only protect from multiple inclusion here, because all the other
    #include's protect themselves, and in GCC 2 we may #include_next through
@@ -121,7 +122,7 @@
     the definitions from gcc's header.  */
 #if defined __GNUC__ && !defined _GCC_LIMITS_H_
 /* `_GCC_LIMITS_H_' is what GCC's file defines.  */
-# include_next <limits.h>
+//# include_next <linux/limits.h>
 
 /* The <limits.h> files in some gcc versions don't define LLONG_MIN,
    LLONG_MAX, and ULLONG_MAX.  Instead only the values gcc defined for

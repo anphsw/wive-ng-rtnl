@@ -11,7 +11,7 @@ ROOTDIR=$DIR
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.20.1
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.2.4
+GCCVER=gcc-4.4.5
 
 UNPACK=YES
 HEADERS=YES
@@ -58,26 +58,26 @@ fi
 if [ "$BINUTILS" = "YES" ]; then
     echo "=====================BUILD-BINUTILS====================="
     mkdir -p build-binutils && cd build-binutils
-    ../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
-	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX
-    make KERNEL_HEADERS=$TARGET_DIR/include
-    make install
+    (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
+	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX && \
+    make -j3 KERNEL_HEADERS=$TARGET_DIR/include && \
+    make install) || exit 1
     cd ..
 fi
 
 if [ "$GCC" = "YES" ]; then
     echo "=====================BUILD-GCC-C========================"
     mkdir -p build-gcc-bootstrap && cd build-gcc-bootstrap
-    ../$GCCVER/configure \
+    (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
+	--disable-shared \
 	--disable-tls --disable-libmudflap --disable-libssp \
 	--disable-libgomp --disable-threads \
-	--disable-shared \
 	--with-sysroot=$PREFIX \
-	--enable-languages=c
-    make
-    make install
+	--enable-languages=c && \
+    make -j3 && \
+    make install) || exit 1
     cd ..
 fi
 
@@ -85,23 +85,25 @@ if [ "$UCLIB" = "YES" ]; then
     echo "=====================BUILD-C-HEADERS===================="
     cp -fv uclibc-config-all $UCLIBCVER/.config
     cd $UCLIBCVER
-    make oldconfig
-    make
-    make install
+    (make oldconfig && \
+    make -j3 && \
+    make install) || exit 1
     cd ..
 fi
 
 if [ "$GCCCPP" = "YES" ]; then
     echo "====================BUILD-GCC-CPP======================="
     mkdir -p build-gcc-bootstrap-cpp && cd build-gcc-bootstrap-cpp
-    ../$GCCVER/configure \
+    (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
 	--disable-tls --disable-libmudflap --disable-libssp \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
-	--enable-languages=c++
-     make
-    make install
+	--enable-languages=c++ && \
+    make -j3 all-host all-target-libgcc && \
+    make install-host install-target-libgcc) || exit 1
     cd ..
 fi
+echo "====================All IS DONE!========================"
+
