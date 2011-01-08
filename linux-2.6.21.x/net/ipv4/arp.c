@@ -824,7 +824,7 @@ static int arp_process(struct sk_buff *skb)
 				if (!dont_send)
 					dont_send |= arp_ignore(in_dev,dev,sip,tip);
 				if (!dont_send && IN_DEV_ARPFILTER(in_dev))
-					dont_send |= arp_filter(sip,tip,dev);
+					dont_send = arp_filter(sip, tip, dev);
 				if (!dont_send)
 					arp_send(ARPOP_REPLY,ETH_P_ARP,sip,dev,tip,sha,dev->dev_addr,sha);
 
