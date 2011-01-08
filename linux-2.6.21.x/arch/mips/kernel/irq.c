@@ -101,7 +101,7 @@ int show_interrupts(struct seq_file *p, void *v)
 	if (i == 0) {
 		seq_printf(p, "           ");
 		for_each_online_cpu(j)
-			seq_printf(p, "CPU%d       ",j);
+			seq_printf(p, "CPU%d       ", j);
 		seq_putc(p, '\n');
 	}
 
@@ -110,7 +110,7 @@ int show_interrupts(struct seq_file *p, void *v)
 		action = irq_desc[i].action;
 		if (!action)
 			goto skip;
-		seq_printf(p, "%3d: ",i);
+		seq_printf(p, "%3d: ", i);
 #ifndef CONFIG_SMP
 		seq_printf(p, "%10u ", kstat_irqs(i));
 #else

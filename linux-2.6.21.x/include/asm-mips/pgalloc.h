@@ -94,7 +94,7 @@ static inline void pte_free(struct page *pte)
 	__free_pages(pte, PTE_ORDER);
 }
 
-#define __pte_free_tlb(tlb,pte)		tlb_remove_page((tlb),(pte))
+#define __pte_free_tlb(tlb, pte)	tlb_remove_page((tlb), (pte))
 
 #ifdef CONFIG_32BIT
 
@@ -103,7 +103,7 @@ static inline void pte_free(struct page *pte)
  * inside the pgd, so has no extra memory associated with it.
  */
 #define pmd_free(x)			do { } while (0)
-#define __pmd_free_tlb(tlb,x)		do { } while (0)
+#define __pmd_free_tlb(tlb, x)		do { } while (0)
 
 #endif
 
@@ -124,7 +124,7 @@ static inline void pmd_free(pmd_t *pmd)
 	free_pages((unsigned long)pmd, PMD_ORDER);
 }
 
-#define __pmd_free_tlb(tlb,x)	pmd_free(x)
+#define __pmd_free_tlb(tlb, x)	pmd_free(x)
 
 #endif
 
