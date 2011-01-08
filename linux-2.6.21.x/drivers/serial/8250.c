@@ -2767,6 +2767,8 @@ EXPORT_SYMBOL(serial8250_unregister_port);
 
 static int __init serial8250_init(void)
 {
+	int ret;
+
 	if (nr_uarts > UART_NR)
 		nr_uarts = UART_NR;
 
