@@ -2776,9 +2776,12 @@ static int __init serial8250_init(void)
 		"%d ports, IRQ sharing %sabled\n", nr_uarts,
 		share_irqs ? "en" : "dis");
 
+#if 0
 	for (i = 0; i < NR_IRQS; i++)
 		spin_lock_init(&irq_lists[i].lock);
+#endif
 
+	serial8250_reg.nr = UART_NR;
 	ret = uart_register_driver(&serial8250_reg);
 	if (ret)
 		goto out;
