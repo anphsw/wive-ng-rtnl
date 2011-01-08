@@ -622,7 +622,7 @@ asmlinkage void do_fpe(struct pt_regs *regs, unsigned long fcr31)
 		lose_fpu(1);
 
 		/* Run the emulator */
-		sig = fpu_emulator_cop1Handler (regs, &current->thread.fpu, 1);
+		sig = fpu_emulator_cop1Handler(regs, &current->thread.fpu, 1);
 
 		/*
 		 * We can't allow the emulated instruction to leave any of
@@ -1151,11 +1151,11 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 
 	if (cpu_has_veic) {
 		if (board_bind_eic_interrupt)
-			board_bind_eic_interrupt (n, srs);
+			board_bind_eic_interrupt(n, srs);
 	} else if (cpu_has_vint) {
 		/* SRSMap is only defined if shadow sets are implemented */
 		if (mips_srs_max() > 1)
-			change_c0_srsmap (0xf << n*4, srs << n*4);
+			change_c0_srsmap(0xf << n*4, srs << n*4);
 	}
 
 	if (srs == 0) {
@@ -1184,10 +1184,10 @@ static void *set_vi_srs_handler(int n, void *addr, int srs)
 			 * Sigh... panicing won't help as the console
 			 * is probably not configured :(
 			 */
-			panic ("VECTORSPACING too small");
+			panic("VECTORSPACING too small");
 		}
 
-		memcpy (b, &except_vec_vi, handler_len);
+		memcpy(b, &except_vec_vi, handler_len);
 #ifdef CONFIG_MIPS_MT_SMTC
 		if (n > 7)
 			printk("Vector index %d exceeds SMTC maximum\n", n);
@@ -1352,9 +1352,9 @@ void __init per_cpu_trap_init(void)
 	 * Interrupt handling.
 	 */
 	if (cpu_has_veic || cpu_has_vint) {
-		write_c0_ebase (ebase);
+		write_c0_ebase(ebase);
 		/* Setting vector spacing enables EI/VI mode  */
-		change_c0_intctl (0x3e0, VECTORSPACING);
+		change_c0_intctl(0x3e0, VECTORSPACING);
 	}
 	if (cpu_has_divec) {
 		if (cpu_has_mipsmt) {
@@ -1387,14 +1387,14 @@ void __init per_cpu_trap_init(void)
 }
 
 /* Install CPU exception handler */
-void __init set_handler (unsigned long offset, void *addr, unsigned long size)
+void __init set_handler(unsigned long offset, void *addr, unsigned long size)
 {
 	memcpy((void *)(ebase + offset), addr, size);
 	flush_icache_range(ebase + offset, ebase + offset + size);
 }
 
 /* Install uncached CPU exception handler */
-void __init set_uncached_handler (unsigned long offset, void *addr, unsigned long size)
+void __init set_uncached_handler(unsigned long offset, void *addr, unsigned long size)
 {
 #ifdef CONFIG_32BIT
 	unsigned long uncached_ebase = KSEG1ADDR(ebase);
@@ -1422,7 +1422,7 @@ void __init trap_init(void)
 	unsigned long i;
 
 	if (cpu_has_veic || cpu_has_vint)
-		ebase = (unsigned long) alloc_bootmem_low_pages (0x200 + VECTORSPACING*64);
+		ebase = (unsigned long) alloc_bootmem_low_pages(0x200 + VECTORSPACING*64);
 	else
 		ebase = CAC_BASE;
 
@@ -1448,7 +1448,7 @@ void __init trap_init(void)
 	 * destination.
 	 */
 	if (cpu_has_ejtag && board_ejtag_handler_setup)
-		board_ejtag_handler_setup ();
+		board_ejtag_handler_setup();
 
 	/*
 	 * Only some CPUs have the watch exceptions.

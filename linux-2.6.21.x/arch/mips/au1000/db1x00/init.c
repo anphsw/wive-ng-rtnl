@@ -62,11 +62,11 @@ void __init prom_init(void)
 	mips_machgroup = MACH_GROUP_ALCHEMY;
 
 	/* Set the platform # */
-#if	defined (CONFIG_MIPS_DB1550)
+#if	defined(CONFIG_MIPS_DB1550)
 	mips_machtype = MACH_DB1550;
-#elif	defined (CONFIG_MIPS_DB1500)
+#elif	defined(CONFIG_MIPS_DB1500)
 	mips_machtype = MACH_DB1500;
-#elif	defined (CONFIG_MIPS_DB1100)
+#elif	defined(CONFIG_MIPS_DB1100)
 	mips_machtype = MACH_DB1100;
 #else
 	mips_machtype = MACH_DB1000;

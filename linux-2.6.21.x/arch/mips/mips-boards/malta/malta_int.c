@@ -192,7 +192,7 @@ static void corehi_irqdispatch(void)
 
 static inline int clz(unsigned long x)
 {
-	__asm__ (
+	__asm__(
 	"	.set	push					\n"
 	"	.set	mips32					\n"
 	"	clz	%0, %1					\n"

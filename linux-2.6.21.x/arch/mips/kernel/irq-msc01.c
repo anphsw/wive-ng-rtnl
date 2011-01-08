@@ -105,7 +105,7 @@ void ll_msc_irq(void)
 }
 
 void
-msc_bind_eic_interrupt (unsigned int irq, unsigned int set)
+msc_bind_eic_interrupt(unsigned int irq, unsigned int set)
 {
 	MSCIC_WRITE(MSC01_IC_RAMW,
 		    (irq<<MSC01_IC_RAMW_ADDR_SHF) | (set<<MSC01_IC_RAMW_DATA_SHF));

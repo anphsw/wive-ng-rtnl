@@ -94,7 +94,7 @@ void __init plat_mem_setup(void)
 	enable_dma(4);
 
 #ifdef CONFIG_KGDB
-	kgdb_config ();
+	kgdb_config();
 #endif
 
 	if ((mips_revision_corid == MIPS_REVISION_CORID_BONITO64) ||
@@ -105,7 +105,7 @@ void __init plat_mem_setup(void)
 		argptr = prom_getcmdline();
 		if (strstr(argptr, "debug")) {
 			BONITO_BONGENCFG |= BONITO_BONGENCFG_DEBUGMODE;
-			printk ("Enabled Bonito debug mode\n");
+			printk("Enabled Bonito debug mode\n");
 		}
 		else
 			BONITO_BONGENCFG &= ~BONITO_BONGENCFG_DEBUGMODE;
@@ -155,14 +155,14 @@ void __init plat_mem_setup(void)
 		if (pciclock != 33 && !strstr (argptr, "idebus=")) {
 			printk("WARNING: PCI clock is %dMHz, setting idebus\n", pciclock);
 			argptr += strlen(argptr);
-			sprintf (argptr, " idebus=%d", pciclock);
+			sprintf(argptr, " idebus=%d", pciclock);
 			if (pciclock < 20 || pciclock > 66)
-				printk ("WARNING: IDE timing calculations will be incorrect\n");
+				printk("WARNING: IDE timing calculations will be incorrect\n");
 		}
 	}
 #endif
 #ifdef CONFIG_BLK_DEV_FD
-	fd_activate ();
+	fd_activate();
 #endif
 #ifdef CONFIG_VT
 #if defined(CONFIG_VGA_CONSOLE)
