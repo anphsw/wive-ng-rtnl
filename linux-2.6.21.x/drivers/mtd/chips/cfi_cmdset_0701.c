@@ -40,7 +40,6 @@
 
 #define SST_BOOTLOC_BUG
 #define FORCE_WORD_WRITE 0
-
 #define MAX_WORD_RETRIES 3
 
 #define SST49LF004B	        0x0060
@@ -50,21 +49,19 @@
 
 static int cfi_sststd_read (struct mtd_info *, loff_t, size_t, size_t *, u_char *);
 static int cfi_sststd_write_words(struct mtd_info *, loff_t, size_t, size_t *, const u_char *);
-static int cfi_sststd_write_buffers(struct mtd_info *, loff_t, size_t, size_t *, const u_char *);
 static int cfi_sststd_erase_chip(struct mtd_info *, struct erase_info *);
 static int cfi_sststd_erase_varsize(struct mtd_info *, struct erase_info *);
-static void cfi_sststd_sync (struct mtd_info *);
 static int cfi_sststd_suspend (struct mtd_info *);
+
+static void cfi_sststd_sync (struct mtd_info *);
 static void cfi_sststd_resume (struct mtd_info *);
-static int cfi_sststd_secsi_read (struct mtd_info *, loff_t, size_t, size_t *, u_char *);
-
 static void cfi_sststd_destroy(struct mtd_info *);
-
 struct mtd_info *cfi_cmdset_0701(struct map_info *, int);
 static struct mtd_info *cfi_sststd_setup (struct mtd_info *);
 
 static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr, int mode);
 static void put_chip(struct map_info *map, struct flchip *chip, unsigned long adr);
+
 #include "fwh_lock.h"
 
 static int cfi_atmel_lock(struct mtd_info *mtd, loff_t ofs, size_t len);
@@ -76,117 +73,6 @@ static struct mtd_chip_driver cfi_sststd_chipdrv = {
 	.name		= "cfi_cmdset_0701",
 	.module		= THIS_MODULE
 };
-
-//#define DEBUG_CFI_FEATURES
-
-#ifdef DEBUG_CFI_FEATURES
-static void cfi_tell_features(struct cfi_pri_sststd *extp)
-{
-	const char* erase_suspend[3] = {
-		"Not supported", "Read only", "Read/write"
-	};
-	const char* top_bottom[6] = {
-		"No WP", "8x8KiB sectors at top & bottom, no WP",
-		"Bottom boot", "Top boot",
-		"Uniform, Bottom WP", "Uniform, Top WP"
-	};
-
-	printk("  Silicon revision: %d\n", extp->SiliconRevision >> 1);
-	printk("  Address sensitive unlock: %s\n",
-	       (extp->SiliconRevision & 1) ? "Not required" : "Required");
-
-	if (extp->EraseSuspend < ARRAY_SIZE(erase_suspend))
-		printk("  Erase Suspend: %s\n", erase_suspend[extp->EraseSuspend]);
-	else
-		printk("  Erase Suspend: Unknown value %d\n", extp->EraseSuspend);
-
-	if (extp->BlkProt == 0)
-		printk("  Block protection: Not supported\n");
-	else
-		printk("  Block protection: %d sectors per group\n", extp->BlkProt);
-
-
-	printk("  Temporary block unprotect: %s\n",
-	       extp->TmpBlkUnprotect ? "Supported" : "Not supported");
-	printk("  Block protect/unprotect scheme: %d\n", extp->BlkProtUnprot);
-	printk("  Number of simultaneous operations: %d\n", extp->SimultaneousOps);
-	printk("  Burst mode: %s\n",
-	       extp->BurstMode ? "Supported" : "Not supported");
-	if (extp->PageMode == 0)
-		printk("  Page mode: Not supported\n");
-	else
-		printk("  Page mode: %d word page\n", extp->PageMode << 2);
-
-	printk("  Vpp Supply Minimum Program/Erase Voltage: %d.%d V\n",
-	       extp->VppMin >> 4, extp->VppMin & 0xf);
-	printk("  Vpp Supply Maximum Program/Erase Voltage: %d.%d V\n",
-	       extp->VppMax >> 4, extp->VppMax & 0xf);
-
-	if (extp->TopBottom < ARRAY_SIZE(top_bottom))
-		printk("  Top/Bottom Boot Block: %s\n", top_bottom[extp->TopBottom]);
-	else
-		printk("  Top/Bottom Boot Block: Unknown value %d\n", extp->TopBottom);
-}
-#endif
-
-#ifdef SST_BOOTLOC_BUG
-/* Wheee. Bring me the head of someone at SST. */
-static void fixup_sst_bootblock(struct mtd_info *mtd, void* param)
-{
-	struct map_info *map = mtd->priv;
-	struct cfi_private *cfi = map->fldrv_priv;
-	struct cfi_pri_sststd *extp = cfi->cmdset_priv;
-	__u8 major = extp->MajorVersion;
-	__u8 minor = extp->MinorVersion;
-
-	if (((major << 8) | minor) < 0x3131) {
-		/* CFI version 1.0 => don't trust bootloc */
-		if (cfi->id & 0x80) {
-			printk(KERN_WARNING "%s: JEDEC Device ID is 0x%02X. Assuming broken CFI table.\n", map->name, cfi->id);
-			extp->TopBottom = 3;	/* top boot */
-		} else {
-			extp->TopBottom = 2;	/* bottom boot */
-		}
-	}
-}
-#endif
-
-static void fixup_use_write_buffers(struct mtd_info *mtd, void *param)
-{
-	struct map_info *map = mtd->priv;
-	struct cfi_private *cfi = map->fldrv_priv;
-	if (cfi->cfiq->BufWriteTimeoutTyp) {
-		DEBUG(MTD_DEBUG_LEVEL1, "Using buffer write method\n" );
-		mtd->write = cfi_sststd_write_buffers;
-	}
-}
-
-/* Atmel chips don't use the same PRI format as SST chips */
-static void fixup_convert_atmel_pri(struct mtd_info *mtd, void *param)
-{
-	struct map_info *map = mtd->priv;
-	struct cfi_private *cfi = map->fldrv_priv;
-	struct cfi_pri_sststd *extp = cfi->cmdset_priv;
-	struct cfi_pri_atmel atmel_pri;
-
-	memcpy(&atmel_pri, extp, sizeof(atmel_pri));
-	memset((char *)extp + 5, 0, sizeof(*extp) - 5);
-
-	if (atmel_pri.Features & 0x02)
-		extp->EraseSuspend = 2;
-
-	if (atmel_pri.BottomBoot)
-		extp->TopBottom = 2;
-	else
-		extp->TopBottom = 3;
-}
-
-static void fixup_use_secsi(struct mtd_info *mtd, void *param)
-{
-	/* Setup for chips with a secsi area */
-	mtd->read_user_prot_reg = cfi_sststd_secsi_read;
-	mtd->read_fact_prot_reg = cfi_sststd_secsi_read;
-}
 
 static void fixup_use_erase_chip(struct mtd_info *mtd, void *param)
 {
@@ -210,22 +96,6 @@ static void fixup_use_atmel_lock(struct mtd_info *mtd, void *param)
 	mtd->flags |= MTD_POWERUP_LOCK;
 }
 
-static struct cfi_fixup cfi_fixup_table[] = {
-#ifdef SST_BOOTLOC_BUG
-	{ CFI_MFR_SST, CFI_ID_ANY, fixup_sst_bootblock, NULL },
-#endif
-	{ CFI_MFR_SST, 0x0050, fixup_use_secsi, NULL, },
-	{ CFI_MFR_SST, 0x0053, fixup_use_secsi, NULL, },
-	{ CFI_MFR_SST, 0x0055, fixup_use_secsi, NULL, },
-	{ CFI_MFR_SST, 0x0056, fixup_use_secsi, NULL, },
-	{ CFI_MFR_SST, 0x005C, fixup_use_secsi, NULL, },
-	{ CFI_MFR_SST, 0x005F, fixup_use_secsi, NULL, },
-#if !FORCE_WORD_WRITE
-	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_use_write_buffers, NULL, },
-#endif
-	{ CFI_MFR_ATMEL, CFI_ID_ANY, fixup_convert_atmel_pri, NULL },
-	{ 0, 0, NULL, NULL }
-};
 static struct cfi_fixup jedec_fixup_table[] = {
 	{ CFI_MFR_SST, SST49LF004B, fixup_use_fwh_lock, NULL, },
 	{ CFI_MFR_SST, SST49LF040B, fixup_use_fwh_lock, NULL, },
@@ -276,59 +146,6 @@ struct mtd_info *cfi_cmdset_0701(struct map_info *map, int primary)
 		 * routine faked a CFI structure. So we read the feature
 		 * table from it.
 		 */
-#if 0
-		unsigned char bootloc;
-		__u16 adr = primary?cfi->cfiq->P_ADR:cfi->cfiq->A_ADR;
-		struct cfi_pri_sststd *extp;
-		extp = (struct cfi_pri_sststd*)cfi_read_pri(map, adr, sizeof(*extp), "SST");
-		if (!extp) {
-			kfree(mtd);
-			printk("*********extp=null\n");
-			return NULL;
-		}
-
-		if (extp->MajorVersion != '1' ||
-		    (extp->MinorVersion < '0' || extp->MinorVersion > '4')) {
-			printk(KERN_ERR "  Unknown SST Extended Query "
-			       "version %c.%c.\n",  extp->MajorVersion,
-			       extp->MinorVersion);
-			kfree(extp);
-			kfree(mtd);
-			return NULL;
-		}
-
-		/* Install our own private info structure */
-		cfi->cmdset_priv = extp;
-
-		/* Apply cfi device specific fixups */
-		cfi_fixup(mtd, cfi_fixup_table);
-
-#ifdef DEBUG_CFI_FEATURES
-		/* Tell the user about it in lots of lovely detail */
-		cfi_tell_features(extp);
-#endif
-
-		bootloc = extp->TopBottom;
-		if ((bootloc != 2) && (bootloc != 3)) {
-			printk(KERN_WARNING "%s: CFI does not contain boot "
-			       "bank location. Assuming top.\n", map->name);
-			bootloc = 2;
-		}
-
-		if (bootloc == 3 && cfi->cfiq->NumEraseRegions > 1) {
-			printk(KERN_WARNING "%s: Swapping erase regions for broken CFI table.\n", map->name);
-
-			for (i=0; i<cfi->cfiq->NumEraseRegions / 2; i++) {
-				int j = (cfi->cfiq->NumEraseRegions-1)-i;
-				__u32 swap;
-
-				swap = cfi->cfiq->EraseRegionInfo[i];
-				cfi->cfiq->EraseRegionInfo[i] = cfi->cfiq->EraseRegionInfo[j];
-				cfi->cfiq->EraseRegionInfo[j] = swap;
-			}
-		}
-
-#endif
 		/* Set the default CFI lock/unlock addresses */
 		cfi->addr_unlock1 = 0x5555;
 		cfi->addr_unlock2 = 0x2AAA;
@@ -407,15 +224,6 @@ static struct mtd_info *cfi_sststd_setup(struct mtd_info *mtd)
 		printk(KERN_WARNING "Sum of regions (%lx) != total size of set of interleaved chips (%lx)\n", offset, devsize);
 		goto setup_err;
 	}
-#if 0
-	// debug
-	for (i=0; i<mtd->numeraseregions;i++){
-		printk("%d: offset=0x%x,size=0x%x,blocks=%d\n",
-		       i,mtd->eraseregions[i].offset,
-		       mtd->eraseregions[i].erasesize,
-		       mtd->eraseregions[i].numblocks);
-	}
-#endif
 
 	/* FIXME: erase-suspend-program is broken.  See
 	   http://lists.infradead.org/pipermail/linux-mtd/2003-December/009001.html */
@@ -935,6 +743,7 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 	return 0;
 }
 
+#if 0
 static int cfi_sststd_secsi_read (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf)
 {
 	struct map_info *map = mtd->priv;
@@ -977,7 +786,7 @@ static int cfi_sststd_secsi_read (struct mtd_info *mtd, loff_t from, size_t len,
 	}
 	return ret;
 }
-
+#endif
 
 static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, unsigned long adr, map_word datum)
 {
@@ -1228,7 +1037,7 @@ static int cfi_sststd_write_words(struct mtd_info *mtd, loff_t to, size_t len,
 	return 0;
 }
 
-
+#if 0
 /*
  * FIXME: interleaved mode not tested, and probably not supported!
  */
@@ -1343,7 +1152,6 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 	return ret;
 }
 
-
 static int cfi_sststd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,
 				    size_t *retlen, const u_char *buf)
 {
@@ -1422,7 +1230,7 @@ static int cfi_sststd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,
 
 	return 0;
 }
-
+#endif
 
 /*
  * Handle devices with one erase region, that only implement
