@@ -333,9 +333,10 @@ int prom_init_serial_port(void)
 #else
   serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #endif
-
+#ifdef CONFIG_SERIAL_CORE
   early_serial_setup(&serial_req[0]);
   early_serial_setup(&serial_req[1]);
+#endif
 
   return(0);
 }
