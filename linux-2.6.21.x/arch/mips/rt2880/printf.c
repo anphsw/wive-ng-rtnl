@@ -36,12 +36,11 @@
  **************************************************************************
  */
 
+#include <asm/io.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
-#include <linux/spinlock.h>
-#include <asm/io.h>
-#include "serial_rt2880.h"
 
+#include "serial_rt2880.h"
 #include <asm/rt2880/surfboard.h>
 #include <asm/rt2880/rt_mmap.h>
 

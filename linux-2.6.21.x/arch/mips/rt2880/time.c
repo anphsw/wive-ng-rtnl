@@ -40,7 +40,6 @@
 #include <linux/init.h>
 #include <linux/kernel_stat.h>
 #include <linux/sched.h>
-#include <linux/spinlock.h>
 
 #include <asm/mipsregs.h>
 #include <asm/ptrace.h>

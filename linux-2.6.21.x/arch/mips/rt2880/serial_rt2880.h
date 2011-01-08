@@ -36,6 +36,9 @@
  **************************************************************************
  */
 
+#ifndef _LINUX_SERIAL_REG_H
+#define _LINUX_SERIAL_REG_H
+
 #if defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
@@ -400,4 +403,4 @@
 #define UART_OMAP_SYSC		0x15	/* System configuration register */
 #define UART_OMAP_SYSS		0x16	/* System status register */
 
-
+#endif /* _LINUX_SERIAL_REG_H */

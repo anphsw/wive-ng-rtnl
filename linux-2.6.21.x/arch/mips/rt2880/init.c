@@ -364,9 +364,10 @@ int prom_get_ttysnum(void)
 static void serial_setbrg(unsigned long wBaud)
 {
         unsigned int clock_divisor = 0;
+#ifdef CONFIG_SERIAL_CONSOLE
         clock_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV);
-	
-#if 1
+/////////////////////CLASSIC INIT////////////////////////////////////////////////////////////////////////////////////////////
+#include "serial_rt2880.h"
 	//fix at SURFBOARD_DEFAULT_BAUD 8 n 1 n
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC08)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC10)= 0;
@@ -386,14 +387,38 @@ static void serial_setbrg(unsigned long wBaud)
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #endif
 #else
-        IER(CFG_RT2880_CONSOLE) = 0;                                    /* Disable for now */
-        FCR(CFG_RT2880_CONSOLE) = 0;                                    /* No fifos enabled */
-
-        /* set baud rate */
-        LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1 | LCR_DLAB;
-        DLL(CFG_RT2880_CONSOLE) = clock_divisor &0xffff;
-        LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1;
+/////////////////////UBOOT INIT////////////////////////////////////////////////////////////////////////////////////////////
+#include "serial_uboot.h"
+	//reset uart lite and uart full
+#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
+	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<12);
+#elif defined(CONFIG_RT2883_ASIC) || defined(CONFIG_RT2883_FPGA) || \
+      defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3052_FPGA) || \
+      defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA) || \
+      defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA)
+	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<19|1<<12);
+#else
+#error "undefined Platform"
 #endif
+	/* RST Control change from W1C to W1W0 to reset, update 20080812 */
+	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = 0;
+	//clock_divisor = (CPU_CLOCK_RATE / SERIAL_CLOCK_DIVISOR / gd->baudrate);
+#if defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA) || \
+    defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA)
+	clock_divisor = (40*1000*1000/ SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+#else
+	clock_divisor = (surfboard_sysclk/ SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
+#endif
+
+	IER(CFG_RT2880_CONSOLE) = 0;					/* Disable for now */
+	FCR(CFG_RT2880_CONSOLE) = 0;					/* No fifos enabled */
+
+	/* set baud rate */
+	LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1 | LCR_DLAB;
+	DLL(CFG_RT2880_CONSOLE) = clock_divisor & 0xffff;
+	LCR(CFG_RT2880_CONSOLE) = LCR_WLS0 | LCR_WLS1;
+#endif
+
 }
 
 
