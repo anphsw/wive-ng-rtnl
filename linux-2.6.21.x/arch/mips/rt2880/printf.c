@@ -50,15 +50,11 @@ static unsigned int uart_base = RALINK_UART_LITE_BASE;
 
 static inline unsigned int serial_in(int offset)
 {
-	//return inb(PORT(offset));
-//	return inb(uart_base + offset);
 	return inl( uart_base + offset);
 }
 
 static inline void serial_out(int offset, int value)
 {
-	//outb(value, PORT(offset));
-	//outb(value, uart_base + offset);
 	outl(value,  uart_base + offset);
 }
 
@@ -95,16 +91,11 @@ void __init prom_printf(char *fmt, ...)
 	va_list args;
 	int l;
 	char *p, *buf_end;
-	long flags;
-	static char buf[2048];
-	static DEFINE_SPINLOCK(con_lock);
+	static char buf[1024];
 
-	int putPromChar(char);
-
-	spin_lock_irqsave(&con_lock, flags);
 	va_start(args, fmt);
+
 	l = vsprintf(buf, fmt, args); /* hopefully i < sizeof(buf) */
-	va_end(args);
 
 	buf_end = buf + l;
 
@@ -114,5 +105,6 @@ void __init prom_printf(char *fmt, ...)
 			putPromChar('\r');
 		putPromChar(*p);
 	}
-	spin_unlock_irqrestore(&con_lock, flags);
+
+	va_end(args);
 }
