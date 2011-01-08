@@ -224,6 +224,15 @@ static struct mtd_info *cfi_sststd_setup(struct mtd_info *mtd)
 		printk(KERN_WARNING "Sum of regions (%lx) != total size of set of interleaved chips (%lx)\n", offset, devsize);
 		goto setup_err;
 	}
+#if 0
+	// debug
+	for (i=0; i<mtd->numeraseregions;i++){
+		printk("%d: offset=0x%x,size=0x%x,blocks=%d\n",
+		       i,mtd->eraseregions[i].offset,
+		       mtd->eraseregions[i].erasesize,
+		       mtd->eraseregions[i].numblocks);
+	}
+#endif
 
 	/* FIXME: erase-suspend-program is broken.  See
 	   http://lists.infradead.org/pipermail/linux-mtd/2003-December/009001.html */
@@ -743,51 +752,6 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 	return 0;
 }
 
-#if 0
-static int cfi_sststd_secsi_read (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf)
-{
-	struct map_info *map = mtd->priv;
-	struct cfi_private *cfi = map->fldrv_priv;
-	unsigned long ofs;
-	int chipnum;
-	int ret = 0;
-
-
-	/* ofs: offset within the first chip that the first read should start */
-
-	/* 8 secsi bytes per chip */
-	chipnum=from>>3;
-	ofs=from & 7;
-
-
-	*retlen = 0;
-
-	while (len) {
-		unsigned long thislen;
-
-		if (chipnum >= cfi->numchips)
-			break;
-
-		if ((len + ofs -1) >> 3)
-			thislen = (1<<3) - ofs;
-		else
-			thislen = len;
-
-		ret = do_read_secsi_onechip(map, &cfi->chips[chipnum], ofs, thislen, buf);
-		if (ret)
-			break;
-
-		*retlen += thislen;
-		len -= thislen;
-		buf += thislen;
-
-		ofs = 0;
-		chipnum++;
-	}
-	return ret;
-}
-#endif
-
 static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, unsigned long adr, map_word datum)
 {
 	struct cfi_private *cfi = map->fldrv_priv;
@@ -1036,201 +1000,6 @@ static int cfi_sststd_write_words(struct mtd_info *mtd, loff_t to, size_t len,
 
 	return 0;
 }
-
-#if 0
-/*
- * FIXME: interleaved mode not tested, and probably not supported!
- */
-static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
-				    unsigned long adr, const u_char *buf,
-				    int len)
-{
-	struct cfi_private *cfi = map->fldrv_priv;
-	unsigned long timeo = jiffies + HZ;
-	/* see comments in do_write_oneword() regarding uWriteTimeo. */
-	unsigned long uWriteTimeout = ( HZ / 1000 ) + 1;
-	int ret = -EIO;
-	unsigned long cmd_adr;
-	int z, words;
-	map_word datum;
-
-	adr += chip->start;
-	cmd_adr = adr;
-
-	spin_lock(chip->mutex);
-	ret = get_chip(map, chip, adr, FL_WRITING);
-	if (ret) {
-		spin_unlock(chip->mutex);
-		return ret;
-	}
-
-	datum = map_word_load(map, buf);
-
-	DEBUG( MTD_DEBUG_LEVEL3, "MTD %s(): WRITE 0x%.8lx(0x%.8lx)\n",
-	       __func__, adr, datum.x[0] );
-
-	XIP_INVAL_CACHED_RANGE(map, adr, len);
-	ENABLE_VPP(map);
-	xip_disable(map, chip, cmd_adr);
-
-	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
-	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
-	//cfi_send_gen_cmd(0xA0, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
-
-	/* Write Buffer Load */
-	map_write(map, CMD(0x25), cmd_adr);
-
-	chip->state = FL_WRITING_TO_BUFFER;
-
-	/* Write length of data to come */
-	words = len / map_bankwidth(map);
-	map_write(map, CMD(words - 1), cmd_adr);
-	/* Write data */
-	z = 0;
-	while(z < words * map_bankwidth(map)) {
-		datum = map_word_load(map, buf);
-		map_write(map, datum, adr + z);
-
-		z += map_bankwidth(map);
-		buf += map_bankwidth(map);
-	}
-	z -= map_bankwidth(map);
-
-	adr += z;
-
-	/* Write Buffer Program Confirm: GO GO GO */
-	map_write(map, CMD(0x29), cmd_adr);
-	chip->state = FL_WRITING;
-
-	INVALIDATE_CACHE_UDELAY(map, chip,
-				adr, map_bankwidth(map),
-				chip->word_write_time);
-
-	timeo = jiffies + uWriteTimeout;
-
-	for (;;) {
-		if (chip->state != FL_WRITING) {
-			/* Someone's suspended the write. Sleep */
-			DECLARE_WAITQUEUE(wait, current);
-
-			set_current_state(TASK_UNINTERRUPTIBLE);
-			add_wait_queue(&chip->wq, &wait);
-			spin_unlock(chip->mutex);
-			schedule();
-			remove_wait_queue(&chip->wq, &wait);
-			timeo = jiffies + (HZ / 2); /* FIXME */
-			spin_lock(chip->mutex);
-			continue;
-		}
-
-		if (time_after(jiffies, timeo) && !chip_ready(map, adr))
-			break;
-
-		if (chip_ready(map, adr)) {
-			xip_enable(map, chip, adr);
-			goto op_done;
-		}
-
-		/* Latency issues. Drop the lock, wait a while and retry */
-		UDELAY(map, chip, adr, 1);
-	}
-
-	/* reset on all failures. */
-	map_write( map, CMD(0xF0), chip->start );
-	xip_enable(map, chip, adr);
-	/* FIXME - should have reset delay before continuing */
-
-	printk(KERN_WARNING "MTD %s(): software timeout\n",
-	       __func__ );
-
-	ret = -EIO;
- op_done:
-	chip->state = FL_READY;
-	put_chip(map, chip, adr);
-	spin_unlock(chip->mutex);
-
-	return ret;
-}
-
-static int cfi_sststd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,
-				    size_t *retlen, const u_char *buf)
-{
-	struct map_info *map = mtd->priv;
-	struct cfi_private *cfi = map->fldrv_priv;
-	int wbufsize = cfi_interleave(cfi) << cfi->cfiq->MaxBufWriteSize;
-	int ret = 0;
-	int chipnum;
-	unsigned long ofs;
-
-	*retlen = 0;
-	if (!len)
-		return 0;
-
-	chipnum = to >> cfi->chipshift;
-	ofs = to  - (chipnum << cfi->chipshift);
-
-	/* If it's not bus-aligned, do the first word write */
-	if (ofs & (map_bankwidth(map)-1)) {
-		size_t local_len = (-ofs)&(map_bankwidth(map)-1);
-		if (local_len > len)
-			local_len = len;
-		ret = cfi_sststd_write_words(mtd, ofs + (chipnum<<cfi->chipshift),
-					     local_len, retlen, buf);
-		if (ret)
-			return ret;
-		ofs += local_len;
-		buf += local_len;
-		len -= local_len;
-
-		if (ofs >> cfi->chipshift) {
-			chipnum ++;
-			ofs = 0;
-			if (chipnum == cfi->numchips)
-				return 0;
-		}
-	}
-
-	/* Write buffer is worth it only if more than one word to write... */
-	while (len >= map_bankwidth(map) * 2) {
-		/* We must not cross write block boundaries */
-		int size = wbufsize - (ofs & (wbufsize-1));
-
-		if (size > len)
-			size = len;
-		if (size % map_bankwidth(map))
-			size -= size % map_bankwidth(map);
-
-		ret = do_write_buffer(map, &cfi->chips[chipnum],
-				      ofs, buf, size);
-		if (ret)
-			return ret;
-
-		ofs += size;
-		buf += size;
-		(*retlen) += size;
-		len -= size;
-
-		if (ofs >> cfi->chipshift) {
-			chipnum ++;
-			ofs = 0;
-			if (chipnum == cfi->numchips)
-				return 0;
-		}
-	}
-
-	if (len) {
-		size_t retlen_dregs = 0;
-
-		ret = cfi_sststd_write_words(mtd, ofs + (chipnum<<cfi->chipshift),
-					     len, &retlen_dregs, buf);
-
-		*retlen += retlen_dregs;
-		return ret;
-	}
-
-	return 0;
-}
-#endif
 
 /*
  * Handle devices with one erase region, that only implement
