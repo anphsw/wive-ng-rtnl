@@ -23,6 +23,16 @@ start() {
 	    #in gate mode configure vlans
 	    setLanWan
 	fi
+	#load modules for basic start
+	modprobe -q crypto_algapi
+	modprobe -q cryptomgr
+	modprobe -q blkcipher
+	#load conntrack helpers
+	modprobe -q nf_conntrack_tftp
+	modprobe -q nf_conntrack_sip
+	modprobe -q nf_conntrack_gre
+	modprobe -q nf_conntrack_pptp
+	modprobe -q nf_conntrack_h323
     else
 	#not load module before goahead start
 	web_wait

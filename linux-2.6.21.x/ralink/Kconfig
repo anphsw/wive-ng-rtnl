@@ -101,8 +101,4 @@ config RT3XXX_EHCI_OHCI
         depends on (RALINK_RT3883 || RALINK_RT3352)
 	select USB_ARCH_HAS_OHCI
 	select USB_ARCH_HAS_EHCI
-
-config  ASUS_EXT
-	bool 
-	default n
 endmenu
