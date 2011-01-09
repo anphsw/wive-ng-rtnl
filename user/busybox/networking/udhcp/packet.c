@@ -19,11 +19,17 @@
 #include "common.h"
 #include "dhcpd.h"
 
+#define SECS	3	/* lame attempt to add secs field */
+
 void FAST_FUNC udhcp_init_header(struct dhcp_packet *packet, char type)
 {
 	memset(packet, 0, sizeof(*packet));
 	packet->op = BOOTREQUEST; /* if client to a server */
 	switch (type) {
+	case DHCPDISCOVER:
+	case DHCPREQUEST:
+		packet->secs = htons(SECS);
+		break;
 	case DHCPOFFER:
 	case DHCPACK:
 	case DHCPNAK:
