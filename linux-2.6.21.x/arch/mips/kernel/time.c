@@ -181,7 +181,7 @@ int (*mips_timer_state)(void);
 void (*mips_timer_ack)(void);
 
 /* last time when xtime and rtc are sync'ed up */
-static long last_rtc_update;
+static long last_rtc_update = 0;
 
 /*
  * local_timer_interrupt() does profiling and process accounting
