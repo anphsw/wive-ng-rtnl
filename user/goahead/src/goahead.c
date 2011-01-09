@@ -155,9 +155,7 @@ int main(int argc, char** argv)
 #endif
 
 	//backup nvram setting and save rwfs
-	system("fs backup_nvram");
-	system("fs save");
-	sync();
+	system("(sleep 30 && fs backup_nvram && fs save) &");
 	
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
