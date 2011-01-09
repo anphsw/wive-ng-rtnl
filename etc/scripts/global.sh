@@ -141,8 +141,10 @@ wait_connect()
     if [ "$stamode" = "y" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
+	    staCur_SSID=""
     	    exit 0
 	fi    
+	staCur_SSID=`iwpriv ra0 connStatus | grep ra0 | awk ' { print $3 } ' | cut -f1 -d[`
     fi
 }
 
@@ -157,6 +159,30 @@ udhcpc_opts()
 		    -O routes -O staticroutes -O msstaticroutes -f &"
 }
 
+setLanWan()
+{
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    if [ "$wan_port" = "0" ]; then
+	    echo '##### config vlan partition (WLLLL) #####'
+	    config-vlan.sh $SWITCH_MODE WLLLL
+    else
+	    echo '##### config vlan partition (LLLLW) #####'
+	    config-vlan.sh $SWITCH_MODE LLLLW
+    fi
+	echo '######## clear switch mac table  ########'
+        switch clear
+fi
+}
+
+resetLanWan()
+{
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    $LOG "Reinit power mode for all switch ports" #workaroud for dir-300NRU
+    config-vlan.sh 2 FFFFF
+    echo "##### restore to dump switch #####"
+    config-vlan.sh $SWITCH_MODE 0
+fi
+}
 
 #set default
 ethconv="n"

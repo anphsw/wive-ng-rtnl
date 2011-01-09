@@ -225,7 +225,9 @@
 36) No more need restart services if ip no change at dhcp renew.<br>
 37) Fix calculate some sysctl tune parametrs<br>
 38) Fix resource leak (no socket close) station mode code in goahead<br>
+39) Add auto try auto reconnect to AP if lease fail<br>
 
+--) Add switch reinit mode at lease fail (need add in gui dhcpSwReset=0/1 default 0)<br>
 --) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
 --) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat. Default enable. (need add in gui)<br>
 --) Enable/Disable Cron variable CrondEnable=1/0. Default disable. (need add in gui)<br>

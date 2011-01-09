@@ -30,6 +30,31 @@ case "$1" in
     ip link set $interface up
     ;;
 
+    leasefail)
+    # Try reconnect at lease failed
+    # Workaround for infinite OFFER wait
+    if [ "$stamode" = "y" ]; then
+	# Wait connect and get SSID
+	wait_connect
+	if [ "$staCur_SSID" != "" ]; then
+	    #reconnect
+	    $LOG "Reconnect to STA $staCur_SSID"
+	    iwpriv ra0 set SSID="$staCur_SSID"
+	fi
+    else
+	dhcpSwReset=`nvram_get 2860 dhcpSwReset`
+	if [ "$dhcpSwReset" = "1" ]; then
+	    $LOG "Reinit switch"
+	    #Reset switch
+	    resetLanWan
+	    if [ "$opmode" = "1" ]; then
+		#in gate mode configure vlans
+		setLanWan
+	    fi
+	fi
+    fi
+    ;;
+
     renew|bound)
     #no change routes if pppd is started
     $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
