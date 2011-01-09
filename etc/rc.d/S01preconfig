@@ -64,9 +64,14 @@ if [ -f /etc/compile-date ]; then
     fi
 fi
 
-$LOG "Copy web pages to tmpfs"
+if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+    $LOG "Copy web pages to tmpfs"
     mkdir -p /tmp/web
     cp -rpf /web/* /tmp/web
+else
+    $LOG "16M device detected, creating symlink for web pages in tmpfs"
+    ln -s /web /tmp/web
+fi
 
 }
 
