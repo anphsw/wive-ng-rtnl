@@ -333,10 +333,6 @@ int prom_init_serial_port(void)
 #else
   serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #endif
-#ifdef CONFIG_SERIAL_CORE
-  early_serial_setup(&serial_req[0]);
-  early_serial_setup(&serial_req[1]);
-#endif
 
   return(0);
 }
@@ -429,6 +425,10 @@ int serial_init(unsigned long wBaud)
 
         return (0);
 }
+
+#ifdef CONFIG_SERIAL_CORE
+extern int early_serial_setup(struct uart_port *port);
+#endif
 __init void prom_init(void)
 {
 	mips_machgroup = MACH_GROUP_RT2880;
@@ -450,6 +450,10 @@ __init void prom_init(void)
 	prom_setup_printf(prom_get_ttysnum());	/* Get tty name and init prompt */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 
+#ifdef CONFIG_SERIAL_CORE
+	early_serial_setup(&serial_req[0]);
+	early_serial_setup(&serial_req[1]);
+#endif
 	prom_printf("\nLINUX started...\n");
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)
 	prom_printf("\n THIS IS FPGA\n");
