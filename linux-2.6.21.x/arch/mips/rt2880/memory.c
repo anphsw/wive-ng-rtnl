@@ -53,44 +53,22 @@
 #define MAX_SDRAM_SIZE  (64*1024*1024)			 /* Maximumum SDRAM size */
 #define MIN_SDRAM_SIZE  (16*1024*1024)			 /* Minimumum SDRAM size */
 
-//no need
-#if 0
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-#define RAM_FIRST       0x08000400  /* Leave room for interrupt vectors */
-#define RAM_END         (0x08000000 + RAM_SIZE)
-#else
-#define RAM_FIRST       0x00000400  /* Leave room for interrupt vectors */
-#define RAM_END         (0x00000000 + RAM_SIZE)
-#endif
-struct resource rt2880_res_ram = {
-        .name = "RAM",
-        .start = 0,
-        .end = RAM_SIZE,
-        .flags = IORESOURCE_MEM
-};
-#endif
-
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
 unsigned long detect_ram_sequence[4];
 
+#ifdef DEBUG
 enum surfboard_memtypes {
 	surfboard_dontuse,
 	surfboard_rom,
 	surfboard_ram,
 };
 
-#ifdef DEBUG
 static char *mtypes[3] = {
 	"Dont use memory",
 	"Used ROM memory",
 	"Free RAM memory",
 };
-#endif
 
-/* References to section boundaries */
-extern char _end;
-
-#ifdef DEBUG
 struct prom_pmemblock mdesc[PROM_MAX_PMEMBLOCKS];
 struct prom_pmemblock * __init prom_getmdesc(void)
 {
@@ -116,9 +94,7 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 		rambase = 0x00000000;
 #endif 
 	} else {
-#ifdef DEBUG
 		prom_printf("rambase = %s\n", env_str);
-#endif
 		rambase = simple_strtol(env_str, NULL, 0);
 	}
 
@@ -235,6 +211,9 @@ void __init prom_meminit(void)
 
 void __init prom_free_prom_memory(void)
 {
+	/* Nothing to do! Need only for DEBUG.	  */
+	/* This is may be corrupt working memory. */
+#if DEBUG
         unsigned long addr;
         int i;
 
@@ -246,4 +225,5 @@ void __init prom_free_prom_memory(void)
                 free_init_pages("prom memory",
                                 addr, addr + boot_mem_map.map[i].size);
         }
+#endif
 }

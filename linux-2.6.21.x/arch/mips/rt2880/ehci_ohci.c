@@ -108,4 +108,3 @@ int __init init_rt3xxx_ehci_ohci(void)
 
 device_initcall(init_rt3xxx_ehci_ohci);
 #endif	/* CONFIG_RT3XXX_EHCI_OHCI */
-
