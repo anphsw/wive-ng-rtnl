@@ -25,6 +25,7 @@ dhcpPriDns=192.168.1.1
 dhcpSecDns=192.168.1.1
 dhcpGateway=192.168.1.1
 dhcpLease=86400
+dhcpSwReset=0
 stpEnabled=0
 lltdEnabled=1
 igmpEnabled=0

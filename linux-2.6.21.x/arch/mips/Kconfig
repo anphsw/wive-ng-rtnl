@@ -71,7 +71,7 @@ endchoice
 
 config SERIAL_CONSOLE
         bool "Support for serial port console"
-	default n
+	default y
 
 source "arch/mips/rt2880/Kconfig"
 
