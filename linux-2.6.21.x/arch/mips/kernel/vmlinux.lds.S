@@ -88,6 +88,13 @@ SECTIONS
   /* will be freed after init */
   . = ALIGN(_PAGE_SIZE);		/* Init code and data */
   __init_begin = .;
+#ifdef CONFIG_RALINK_RT3052
+#ifdef CONFIG_MTD_SPI_RALINK
+  /* This hack need for SPI devices work only */
+  /* init need start > 0x80220000 */
+  . = 0x80220000;
+#endif
+#endif
   .init.text : {
 	_sinittext = .;
 	*(.init.text)
