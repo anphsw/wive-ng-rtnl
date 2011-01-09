@@ -41,18 +41,20 @@ case "$1" in
 	# Wait connect and get SSID
 	wait_connect
 	if [ "$staCur_SSID" != "" ]; then
-	    #reconnect
+	    # Reconnect
 	    $LOG "Reconnect to STA $staCur_SSID"
 	    iwconfig ra0 essid "$staCur_SSID"
 	fi
+	# Full reinit network and services
+	internet.sh
     else
 	dhcpSwReset=`nvram_get 2860 dhcpSwReset`
 	if [ "$dhcpSwReset" = "1" ]; then
 	    $LOG "Reinit switch"
-	    #Reset switch
+	    # Reset switch
 	    resetLanWan
 	    if [ "$opmode" = "1" ]; then
-		#in gate mode configure vlans
+		# In gate mode configure vlans
 		setLanWan
 	    fi
 	fi
