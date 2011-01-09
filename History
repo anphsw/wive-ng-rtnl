@@ -226,6 +226,7 @@
 37) Fix calculate some sysctl tune parametrs<br>
 38) Fix resource leak (no socket close) station mode code in goahead<br>
 39) Add auto try auto reconnect to AP if lease fail<br>
+40) Add iwlist util for manual rescan (use iwlist ra0 scanning)<br>
 
 --) Add switch reinit mode at lease fail (need add in gui dhcpSwReset=0/1 default 0)<br>
 --) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>

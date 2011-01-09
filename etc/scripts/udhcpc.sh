@@ -19,11 +19,7 @@ ROUTELIST=""
 
 case "$1" in
     deconfig)
-    # on STA mode not need deconfig. 
-    # After reconnect adress replace automatically.
-    if [ "$ethconv" = "n" ]; then
-	ip addr flush dev $interface
-    fi
+    ip addr flush dev $interface
     if [ "$CONFIG_IPV6" != "" ]; then
 	ip -6 addr flush dev $interface
     fi
@@ -33,13 +29,21 @@ case "$1" in
     leasefail)
     # Try reconnect at lease failed
     # Workaround for infinite OFFER wait
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
+    if [ "$vpnEnabled" = "on" ]; then
+	# First vpn stop.. 
+	# Auto start later renew/bound
+	service vpnhelper stop > /dev/null 2>&1
+    fi
+    ip route flush cache > /dev/null 2>&1
+    echo 1 > /proc/sys/net/nf_conntrack_flush
     if [ "$stamode" = "y" ]; then
 	# Wait connect and get SSID
 	wait_connect
 	if [ "$staCur_SSID" != "" ]; then
 	    #reconnect
 	    $LOG "Reconnect to STA $staCur_SSID"
-	    iwpriv ra0 set SSID="$staCur_SSID"
+	    iwconfig ra0 essid "$staCur_SSID"
 	fi
     else
 	dhcpSwReset=`nvram_get 2860 dhcpSwReset`
