@@ -213,7 +213,7 @@ void __init prom_free_prom_memory(void)
 {
 	/* Nothing to do! Need only for DEBUG.	  */
 	/* This is may be corrupt working memory. */
-#if DEBUG
+#ifdef DEBUG
         unsigned long addr;
         int i;
 
