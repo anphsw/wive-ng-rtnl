@@ -456,11 +456,11 @@ __init void prom_init(void)
 	early_serial_setup(&serial_req[1]);
 #endif
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)
-	prom_printf("\nFPGA mode LINUX started...\n");
+	prom_printf("FPGA mode LINUX started...\n");
 #elif defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC)
-	prom_printf("\nASIC mode LINUX started...\n");
+	prom_printf("ASIC mode LINUX started...\n");
 #else
-	prom_printf("\nLINUX started...\n");
+	prom_printf("LINUX started...\n");
 #endif
-	prom_printf("\n The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
+	prom_printf("The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
 }
