@@ -34,14 +34,6 @@ struct mtd_blkcore_priv {
 	spinlock_t queue_lock;
 };
 
-static int blktrans_discard_request(struct request_queue *q,
-				    struct request *req)
-{
-	req->cmd_type = REQ_TYPE_LINUX_BLOCK;
-	req->cmd[0] = REQ_LB_OP_DISCARD;
-	return 0;
-}
-
 static int do_blktrans_request(struct mtd_blktrans_ops *tr,
 			       struct mtd_blktrans_dev *dev,
 			       struct request *req)

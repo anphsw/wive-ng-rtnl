@@ -284,7 +284,6 @@ void prom_init_sysclk(void)
 #else
 	surfboard_sysclk = mips_cpu_feq/3;
 #endif
-	printk("\n The CPU feqenuce set to %d MHz\n",mips_cpu_feq / 1000 / 1000);
 }
 
 /*
@@ -451,15 +450,17 @@ __init void prom_init(void)
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 
 #ifdef CONFIG_SERIAL_CORE
+	/* Switch UART LITE/UART BASE 
+	  mode must after prom_meminit	*/
 	early_serial_setup(&serial_req[0]);
 	early_serial_setup(&serial_req[1]);
 #endif
-	prom_printf("\nLINUX started...\n");
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)
-	prom_printf("\n THIS IS FPGA\n");
+	prom_printf("\nFPGA mode LINUX started...\n");
 #elif defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC)
-	prom_printf("\n THIS IS ASIC\n");
+	prom_printf("\nASIC mode LINUX started...\n");
+#else
+	prom_printf("\nLINUX started...\n");
 #endif
-
+	prom_printf("\n The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
 }
-
