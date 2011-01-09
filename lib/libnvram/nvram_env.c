@@ -20,12 +20,12 @@
 //#define DEBUG
 
 #ifdef DEBUG
-char libnvram_debug = 1;
+static char libnvram_debug = 1;
 #else
-char libnvram_debug = 0;
+static char libnvram_debug = 0;
 #endif
 #define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
-#define LIBNV_ERROR(x, ...) do { printf("%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+#define LIBNV_ERROR(x, ...) do { fprintf(stderr,"%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 
 
 typedef struct environment_s {
@@ -162,6 +162,10 @@ void nvram_init(int index)
 	from = from + len;
 	len = fb[index].flash_max_len - len;
 	fb[index].env.data = (char *)malloc(len);
+	if (fb[index].env.data == NULL) {
+		LIBNV_ERROR("nvram_init(%d): not enough memory!", index);
+		return;
+	}
 	flash_read(fb[index].env.data, from, len);
 
 	//check crc
@@ -401,6 +405,10 @@ int nvram_commit(int index)
 	//construct env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	fb[index].env.data = (char *)malloc(len);
+	if (fb[index].env.data == NULL) {
+		LIBNV_ERROR("nvram_commit(%d): not enough memory!", index);
+		return;
+	}
 	bzero(fb[index].env.data, len);
 	p = fb[index].env.data;
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
@@ -451,6 +459,10 @@ int nvram_clear(int index)
 	//construct all 1s env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	fb[index].env.data = (char *)malloc(len);
+	if (fb[index].env.data == NULL) {
+		LIBNV_ERROR("nvram_clear(%d): not enough memory!", index);
+		return;
+	}
 	memset(fb[index].env.data, 0xFF, len);
 
 	//calculate and write crc
