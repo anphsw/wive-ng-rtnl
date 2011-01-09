@@ -772,7 +772,11 @@ void wlan_802_11_to_802_3_packet(
 #endif // CONFIG_STA_SUPPORT //
 	}
 
-
+#ifdef CONFIG_AP_SUPPORT
+#ifdef BG_FT_SUPPORT
+extern UINT32 BG_FTPH_PacketFromApHandle(IN PNDIS_PACKET pPacket);
+#endif
+#endif
 
 void announce_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd, 
