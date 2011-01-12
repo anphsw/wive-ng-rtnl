@@ -709,65 +709,6 @@
 #define modinfo_example_usage \
        "$ modinfo -F vermagic loop\n" \
 
-#if ENABLE_MODPROBE_SMALL \
-
-#define depmod_trivial_usage NOUSAGE_STR \
-
-#define depmod_full_usage "" \
-
-#define lsmod_trivial_usage \
-       "" \
-
-#define lsmod_full_usage "\n\n" \
-       "List the currently loaded kernel modules" \
-
-#define insmod_trivial_usage \
-	IF_FEATURE_2_4_MODULES("[OPTIONS] MODULE ") \
-	IF_NOT_FEATURE_2_4_MODULES("FILE ") \
-	"[SYMBOL=VALUE]..." \
-
-#define insmod_full_usage "\n\n" \
-       "Load the specified kernel modules into the kernel" \
-	IF_FEATURE_2_4_MODULES( "\n" \
-     "\nOptions:" \
-     "\n	-f	Force module to load into the wrong kernel version" \
-     "\n	-k	Make module autoclean-able" \
-     "\n	-v	Verbose" \
-     "\n	-q	Quiet" \
-     "\n	-L	Lock: prevent simultaneous loads" \
-	IF_FEATURE_INSMOD_LOAD_MAP( \
-     "\n	-m	Output load map to stdout" \
-	) \
-     "\n	-x	Don't export externs" \
-	) \
-
-#define rmmod_trivial_usage \
-       "[-wfa] [MODULE]..." \
-
-#define rmmod_full_usage "\n\n" \
-       "Unload kernel modules\n" \
-     "\nOptions:" \
-     "\n	-w	Wait until the module is no longer used" \
-     "\n	-f	Force unload" \
-     "\n	-a	Remove all unused modules (recursively)" \
-
-#define rmmod_example_usage \
-       "$ rmmod tulip\n" \
-
-#define modprobe_trivial_usage \
-	"[-qfwrsv] MODULE [symbol=value]..." \
-
-#define modprobe_full_usage "\n\n" \
-       "Options:" \
-     "\n	-r	Remove MODULE (stacks) or do autoclean" \
-     "\n	-q	Quiet" \
-     "\n	-v	Verbose" \
-     "\n	-f	Force" \
-     "\n	-w	Wait for unload" \
-     "\n	-s	Report via syslog instead of stderr" \
-
-#endif \
-
 #if !ENABLE_MODPROBE_SMALL \
 
 #define modprobe_notes_usage \
@@ -850,6 +791,65 @@
 
 #endif /* !ENABLE_MODPROBE_SMALL */ \
 
+#if ENABLE_MODPROBE_SMALL \
+
+#define depmod_trivial_usage NOUSAGE_STR \
+
+#define depmod_full_usage "" \
+
+#define lsmod_trivial_usage \
+       "" \
+
+#define lsmod_full_usage "\n\n" \
+       "List the currently loaded kernel modules" \
+
+#define insmod_trivial_usage \
+	IF_FEATURE_2_4_MODULES("[OPTIONS] MODULE ") \
+	IF_NOT_FEATURE_2_4_MODULES("FILE ") \
+	"[SYMBOL=VALUE]..." \
+
+#define insmod_full_usage "\n\n" \
+       "Load the specified kernel modules into the kernel" \
+	IF_FEATURE_2_4_MODULES( "\n" \
+     "\nOptions:" \
+     "\n	-f	Force module to load into the wrong kernel version" \
+     "\n	-k	Make module autoclean-able" \
+     "\n	-v	Verbose" \
+     "\n	-q	Quiet" \
+     "\n	-L	Lock: prevent simultaneous loads" \
+	IF_FEATURE_INSMOD_LOAD_MAP( \
+     "\n	-m	Output load map to stdout" \
+	) \
+     "\n	-x	Don't export externs" \
+	) \
+
+#define rmmod_trivial_usage \
+       "[-wfa] [MODULE]..." \
+
+#define rmmod_full_usage "\n\n" \
+       "Unload kernel modules\n" \
+     "\nOptions:" \
+     "\n	-w	Wait until the module is no longer used" \
+     "\n	-f	Force unload" \
+     "\n	-a	Remove all unused modules (recursively)" \
+
+#define rmmod_example_usage \
+       "$ rmmod tulip\n" \
+
+#define modprobe_trivial_usage \
+	"[-qfwrsv] MODULE [symbol=value]..." \
+
+#define modprobe_full_usage "\n\n" \
+       "Options:" \
+     "\n	-r	Remove MODULE (stacks) or do autoclean" \
+     "\n	-q	Quiet" \
+     "\n	-v	Verbose" \
+     "\n	-f	Force" \
+     "\n	-w	Wait for unload" \
+     "\n	-s	Report via syslog instead of stderr" \
+
+#endif \
+
 #if !ENABLE_MODPROBE_SMALL \
 
 #define rmmod_trivial_usage \
@@ -872,6 +872,36 @@
 
 #define nbdclient_full_usage "\n\n" \
        "Connect to HOST and provide a network block device on BLOCKDEV" \
+
+#if ENABLE_NC_110_COMPAT \
+
+#define nc_trivial_usage \
+       "[OPTIONS] HOST PORT  - connect" \
+	IF_NC_SERVER("\n" \
+       "nc [OPTIONS] -l -p PORT [HOST] [PORT]  - listen" \
+	) \
+
+#define nc_full_usage "\n\n" \
+       "Options:" \
+     "\n	-e PROG	Run PROG after connect (must be last)" \
+	IF_NC_SERVER( \
+     "\n	-l	Listen mode, for inbound connects" \
+	) \
+     "\n	-p PORT	Local port" \
+     "\n	-s ADDR	Local address" \
+     "\n	-w SEC	Timeout for connects and final net reads" \
+	IF_NC_EXTRA( \
+     "\n	-i SEC	Delay interval for lines sent" /* ", ports scanned" */ \
+	) \
+     "\n	-n	Don't do DNS resolution" \
+     "\n	-u	UDP mode" \
+     "\n	-v	Verbose" \
+	IF_NC_EXTRA( \
+     "\n	-o FILE	Hex dump traffic" \
+     "\n	-z	Zero-I/O mode (scanning)" \
+	) \
+
+#endif \
 
 #if !ENABLE_NC_110_COMPAT \
 
@@ -921,36 +951,6 @@
        "214     NOOP QUIT RSET HELP\n" \
        "quit\n" \
        "221 foobar closing connection\n" \
-
-#endif \
-
-#if ENABLE_NC_110_COMPAT \
-
-#define nc_trivial_usage \
-       "[OPTIONS] HOST PORT  - connect" \
-	IF_NC_SERVER("\n" \
-       "nc [OPTIONS] -l -p PORT [HOST] [PORT]  - listen" \
-	) \
-
-#define nc_full_usage "\n\n" \
-       "Options:" \
-     "\n	-e PROG	Run PROG after connect (must be last)" \
-	IF_NC_SERVER( \
-     "\n	-l	Listen mode, for inbound connects" \
-	) \
-     "\n	-p PORT	Local port" \
-     "\n	-s ADDR	Local address" \
-     "\n	-w SEC	Timeout for connects and final net reads" \
-	IF_NC_EXTRA( \
-     "\n	-i SEC	Delay interval for lines sent" /* ", ports scanned" */ \
-	) \
-     "\n	-n	Don't do DNS resolution" \
-     "\n	-u	UDP mode" \
-     "\n	-v	Verbose" \
-	IF_NC_EXTRA( \
-     "\n	-o FILE	Hex dump traffic" \
-     "\n	-z	Zero-I/O mode (scanning)" \
-	) \
 
 #endif \
 
