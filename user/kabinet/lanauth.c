@@ -55,8 +55,10 @@ static void auth2();			/* generate response for v2 protocol */
 static void sigusr(int sig);		/* change access level */
 static int tmread(char *buf, int size, int timeout);	/* read with timeout */
 
+static char *indicator_arg = NULL;
+
 static void usage() {
-	printf("Usage: lanauth [-i] [-v 1|2] [-b localip] [-n] [-g gid] [-u uid] [-s gateip] [-l accesslevel] -p password\n");
+	printf("Usage: lanauth [-i] [-v 1|2] [-b localip] [-n] [-g gid] [-u uid] [-s gateip] [-l accesslevel] [-A x] -p password\n");
 	exit(0);
 }
 
@@ -68,6 +70,13 @@ static void fatal(char *s, ...) {
 	exit(1);
 }
 
+void indicate(char c)
+{
+	if (indicator_arg)
+		indicator_arg[0] = c;
+}
+
+
 int main(int argc, char **argv) {
 	char *s;
 	int op;
@@ -75,7 +84,7 @@ int main(int argc, char **argv) {
 	unsigned char curlevel = 0xff;
 	/* process command line arguments */
 	while(1) {
-		op = getopt(argc, argv, "iv:b:ns:p:l:u:g:");
+		op = getopt(argc, argv, "iv:b:ns:p:l:u:g:A:");
 		if (op == -1) break;
 		switch(op) {
 			case 'i':
@@ -114,6 +123,10 @@ int main(int argc, char **argv) {
 			case 'g':
 				setgid(atoi(optarg));
 				break;
+			case 'A':
+				indicator_arg = argv[optind - 1];
+				indicate('0');
+				break;
 			default:
 				usage();
 		}
@@ -146,6 +159,7 @@ int main(int argc, char **argv) {
 		switch(ch) {
 			case 0:	/* access closed */
 				syslog(LOG_NOTICE, "access closed for us");
+				indicate('0');
 				close(sock);
 				sleep(60);
 			case 1: /* continue authorization */
@@ -157,11 +171,13 @@ int main(int argc, char **argv) {
 				read(sock, gateip, ch);
 				gateip[ch] = 0;
 				syslog(LOG_NOTICE, "gate changed to %s", gateip);
+				indicate('0');
 				close(sock);
 				break;
 			default:
 				close(sock);
 				syslog(LOG_NOTICE, "unknown protocol %d", ch);
+				indicate('0');
 				sleep(60);
 				break;
 		}
@@ -187,6 +203,7 @@ int main(int argc, char **argv) {
 			if (curlevel != ch) {
 				curlevel = ch;
 				syslog(LOG_NOTICE, "auth successful, access level = %d", curlevel);
+				indicate('0' + ch);
 			}
 		}
 	}
@@ -229,6 +246,7 @@ static void opensock() {
 
 		if (connect(sock, (struct sockaddr*)&sin, sizeof(sin)) == -1) {
 			syslog(LOG_NOTICE, "connect: %m");
+			indicate('0');
 			sleep(30);
 			close(sock);
 			continue;
@@ -257,11 +275,13 @@ static int tmread(char *buf, int size, int timeout) {
 	int n = select(sock+1, &fds, NULL ,NULL, &tv);
 	if (n < 0 && errno == EINTR) {
 		syslog(LOG_DEBUG, "reconnecting by request");
+		indicate('0');
 		return 0;
 	}
 	if (n < 0) fatal("select: %m");
 	if (!n) {
 		syslog(LOG_DEBUG, "no response from server, reconnecting");
+		indicate('0');
 		return 0;
 	}
 	/* wait a moment */
@@ -274,10 +294,12 @@ static int tmread(char *buf, int size, int timeout) {
 	n = read(sock, buf, size);
 	if (n < 0) {
 		syslog(LOG_DEBUG, "read: %m");
+		indicate('0');
 		return 0;
 	}
 	if (!n) {
 		syslog(LOG_DEBUG, "server closed connection");
+		indicate('0');
 		return 0;
 	}
 	return n;

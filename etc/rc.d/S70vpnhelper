@@ -9,7 +9,7 @@ web_wait
 #wait connetc to ap in sta mode
 wait_connect
 
-LOG="echo VPN: "
+LOG="echo VPN: $1"
 
 start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`
@@ -33,6 +33,13 @@ start() {
       elif [ "$vpnType" = "2" ]; then
 	$LOG "L2TP calling..."
 	(sleep 5 && /etc/scripts/config-l2tp.sh) &
+      elif [ "$vpnType" = "6" ]; then
+	$LOG "LANAUTH calling... $1"
+	if [ "$1" ]; then
+		/etc/scripts/config-lanauth.sh restart
+	else
+		(sleep 10 && /etc/scripts/config-lanauth.sh start) &
+	fi
       fi
     fi
 }
@@ -49,6 +56,8 @@ stop() {
     killall -q -9 xl2tpd
     killall -q pppd
     killall -q -9 pppd
+    killall -q lanauth
+    killall -q -9 lanauth
     rmmod ppp_mppe > /dev/null 2>&1
     rmmod pppol2tp > /dev/null 2>&1
     rmmod pptp     > /dev/null 2>&1
@@ -77,7 +86,7 @@ case "$1" in
 
 	restart)
 	    stop
-	    start
+	    start force
 	    ;;
 
 	*)

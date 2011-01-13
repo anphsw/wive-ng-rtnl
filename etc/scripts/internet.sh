@@ -200,7 +200,7 @@ services_restart.sh all
 # in dhcp client mode restart
 # service restart from dhcp script
 if [ "$wanmode" != "DHCP" ]; then
-    (sleep 2 && service vpnhelper restart) &
+    (sleep 2 && service vpnhelper stop && service vpnhelper start) &
 fi
 
 exit 0

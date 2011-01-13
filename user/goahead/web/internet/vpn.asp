@@ -355,6 +355,11 @@ function selectType(form)
 	var l2tp_row  = document.getElementById("vpn_l2tp_range");
 	var vpn_server_col = document.getElementById("vpn_server_col");
 	var mppe_row  = document.getElementById("vpn_mppe_row");
+	var table_vpn = document.getElementById("table_vpn");
+	var table_lanauth = document.getElementById("table_lanauth");
+	var table_vpn_routing = document.getElementById("table_vpn_routing");
+	var table_vpn_params = document.getElementById("table_vpn_params");
+	var lanauth_savepwd = document.getElementById("lanauth_savepwd");
 
 	pppoe_row.style.display = (form.vpn_type.value == '0') ? '' : 'none';
 	mppe_row.style.display = (form.vpn_type.value == '3') ? 'none' : '';
@@ -375,6 +380,19 @@ function selectType(form)
 	else
 		form.vpn_server.value = pptpACName;
 	
+	if (form.vpn_type.value == '6') {
+		table_lanauth.style.display='';
+		lanauth_savepwd.style.display='';
+		table_vpn.style.display='none';
+		table_vpn_routing.style.display='none';
+		table_vpn_params.style.display='none';
+	} else {
+		table_lanauth.style.display='none';
+		lanauth_savepwd.style.display='none';
+		table_vpn.style.display='';
+		table_vpn_routing.style.display='';
+		table_vpn_params.style.display='';
+	}
 	vpn_server_col.innerHTML = '<b>' + vpn_server + ':</b>';
 }
 
@@ -399,7 +417,7 @@ function submitClick(form)
 		return false;
 	}
 	
-	if (form.vpn_type.value != "0")
+	if (form.vpn_type.value != "0" && form.vpn_type.value != "6")
 	{
 		if ((!validateIP(form.vpn_server, false)) && (!validateDNS(form.vpn_server, false)))
 		{
@@ -411,6 +429,19 @@ function submitClick(form)
 
 	rememberRoutingTable(form); // Remember routing table
 
+	return true;
+}
+
+function pwdClick(form)
+{
+	if (form.lanauth_pass.value.match(/[\s\$]/))
+	{
+		alert("Password can not contain spaces or dollar ('$') sign!");
+		return false;
+	}
+	if (form.lanauth_pass.value == "")
+		alert("Empty password. Authorizator will not be started");
+	form.lanauth_pass_changed.value = "changed";
 	return true;
 }
 
@@ -426,6 +457,7 @@ function initializeForm(form)
 	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
 	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
 	var lcp        = '<% getCfgGeneral(1, "vpnEnableLCP"); %>';
+	var lanauth_start    = '<% getCfgGeneral(1, "LANAUTH_START"); %>';
 
 	form.vpn_enabled.checked = (vpnEnabled == 'on');
 	form.vpn_routing_enabled.checked = (routingOn == 'on');
@@ -437,6 +469,7 @@ function initializeForm(form)
 	form.vpn_dgw.value       = dgw;
 	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_auth_type.value = vpn_auth;
+	form.lanauth_start.checked     = (lanauth_start == 'on');
 }
 
 function showVPNStatus()
@@ -473,7 +506,7 @@ tunnel on your Router.
 	</tr>
 	<tr onMouseOver="showHint('vpn_type')" onMouseOut="hideHint('vpn_type')" >
 		<td width="50%">
-			<b><acronym title="Point-to-Point Protocol">PPP</acronym> Mode:</b>
+			<b><acronym title="Virtual Private Network">VPN</acronym> Mode:</b>
 		</td>
 		<td width="50%">
 			<select disabled="disabled" name="vpn_type" onChange="selectType(this.form);" class="mid" >
@@ -482,9 +515,13 @@ tunnel on your Router.
 				<option value="2">L2TP  client</option>
 				<!-- No L2TP support now
 				<option value="3">L2TP  server</option> -->
+				<option value="6">KABINET Authorizator</option>
 			</select>
 		</td>
 	</tr>
+</table>
+
+<table id="table_vpn" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
 	<tr id="vpn_type_pppoe" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
 		<td width="50%"><b>PPPoE interface:</b></td>
 		<td width="50%">
@@ -553,7 +590,30 @@ tunnel on your Router.
 	</tr>
 </table>
 
-<table width="500" border="0" cellpadding="0" cellspacing="4">
+<table id="table_lanauth" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
+
+	<tr id="vpn_lanauth_lvl" onMouseOver="showHint('vpn_lanauth_access')" onMouseOut="hideHint('vpn_lanauth_access')">
+		<td width="50%"><b>KABINET access level:</b></td>
+		<td width="50%">
+			<select name="lanauth_access" class="mid" >
+				<% LANAUTH_ACCESS_List(); %>
+			</select>
+		</td>
+	</tr>
+	<tr onmouseover="showHint('vpn_lanauth_start')" onmouseout="hideHint('vpn_lanauth_start')">
+		<td />
+		<td>
+			<input name="lanauth_start" type="checkbox">
+			<b>Start authorizator ob boot</b>
+		</td>
+	</tr>
+	<tr id="vpn_lanauth_pwd" onMouseOver="showHint('vpn_lanauth_pwd')" onMouseOut="hideHint('vpn_lanauth_pwd')">
+		<td width="50%"><b>Authorizator password:</b></td>
+		<td width="50%"><input name="lanauth_pass" class="mid" size="25" maxlength="60" value="" type="password"></td>
+	</tr>
+</table>
+
+<table id="table_vpn_routing" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
 	<tr onmouseover="showHint('vpn_routing')" onmouseout="hideHint('vpn_routing')">
 		<td colspan="2">
 			<input name="vpn_routing_enabled" onclick="routingSwitchClick(this.form);" type="checkbox">
@@ -566,7 +626,7 @@ tunnel on your Router.
 	</tr>
 </table>
 
-<table width="500" border="0" cellpadding="0" cellspacing="4">
+<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none">
 	<tr id="vpn_mppe_row">
 		<td width="50%" onMouseOver="showHint('vpn_mppe')" onMouseOut="hideHint('vpn_mppe')" >
 			<input disabled="disabled" name="vpn_mppe" type="checkbox">
@@ -594,12 +654,16 @@ tunnel on your Router.
 		</td>
 		<td></td>
 	</tr>
+</table>
+<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4">
 	<tr height="32px"><td colspan="2"></td></tr>
 	<tr>
 		<td colspan="2">
 			<input name="vpn_routing_table" type="hidden">
+			<input name="lanauth_pass_changed" type="hidden">
 			<input value="/internet/vpn.asp" name="submit-url" type="hidden">
 			<input style="none" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
+			<input id="lanauth_savepwd" style="display:none" value="Change password" name="savepwd" type="submit" onclick="return pwdClick(this.form);" >&nbsp;&nbsp;
 			<input style="none" value="Reset" name="reset_button" onclick="resetClick(this.form);" type="button">
 		</td>
 	</tr>
