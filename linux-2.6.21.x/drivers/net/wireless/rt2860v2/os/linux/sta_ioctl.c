@@ -6015,7 +6015,7 @@ ACM_BANDWIDTH_INFO BwInfo, *pInfo;
 	    case RT_OID_802_11_QUERY_NOISE_LEVEL:
 			wrq->u.data.length = sizeof(UCHAR);
 			Status = copy_to_user(wrq->u.data.pointer, &pAd->BbpWriteLatch[66], wrq->u.data.length);
-			DBGPRINT(RT_DEBUG_TRACE, ("Query::RT_OID_802_11_QUERY_NOISE_LEVEL (=%d)\n", pAd->BbpWriteLatch[17]));
+			DBGPRINT(RT_DEBUG_TRACE, ("Query::RT_OID_802_11_QUERY_NOISE_LEVEL (=%d)\n", pAd->BbpWriteLatch[66]));
 			break;
 	    case RT_OID_802_11_EXTRA_INFO:
 			wrq->u.data.length = sizeof(ULONG);
