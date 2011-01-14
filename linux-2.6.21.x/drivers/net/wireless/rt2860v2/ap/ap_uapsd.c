@@ -219,6 +219,7 @@ VOID UAPSD_SP_Close(
 			pEntry->UAPSDTxNum = 0;
 			pEntry->bAPSDFlagSPStart = 0;
 			pEntry->bAPSDFlagEOSPOK = 0;
+			pEntry->bAPSDFlagLegacySent = 0;
 
 	    } /* End of if */
 
@@ -564,6 +565,7 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
                 /* no any new uplink packet is received */
 				pEntry->bAPSDFlagSPStart = 0;
 				pEntry->bAPSDFlagEOSPOK = 0;
+				pEntry->bAPSDFlagLegacySent = 0;
             }
             else
 			{
@@ -686,6 +688,7 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 						*/
 						pEntry->bAPSDFlagSPStart = 0;
 						pEntry->bAPSDFlagEOSPOK = 0;
+						pEntry->bAPSDFlagLegacySent = 0;
 
 #ifdef UAPSD_DEBUG
 						DBGPRINT(RT_DEBUG_TRACE, ("uapsd> close SP2 in QoSNullTxMgmtTxDoneHandle()!\n"));
@@ -732,11 +735,7 @@ VOID UAPSD_QoSNullTxMgmtTxDoneHandle(
 						DEQUEUE_LOCK() -->
 						RTMP_IRQ_LOCK() ERROR!
 				*/
-#ifdef WORKQUEUE_BH	
-				schedule_work(&pCookie->uapsd_eosp_sent_work);
-#else
 				tasklet_hi_schedule(&pCookie->uapsd_eosp_sent_task);
-#endif // WORKQUEUE_BH //
 
 			} /* End of if */
 		}
@@ -833,9 +832,9 @@ VOID UAPSD_QueueMaintenance(
             /* clear all U-APSD packets */
 			if (FlgUapsdPkt)
 			{
-			for(IdAc=0; IdAc<WMM_NUM_OF_AC; IdAc++)
-				APCleanupPsQueue(pAd, &pQue[IdAc]);
-            /* End of for */
+				for(IdAc=0; IdAc<WMM_NUM_OF_AC; IdAc++)
+					APCleanupPsQueue(pAd, &pQue[IdAc]);
+	            /* End of for */
 			} /* End of if */
 
             /* free the EOSP frame */
@@ -851,6 +850,7 @@ VOID UAPSD_QueueMaintenance(
 
 			pEntry->bAPSDFlagEOSPOK = 0;
 			pEntry->bAPSDFlagSPStart = 0;
+			pEntry->bAPSDFlagLegacySent = 0;
 
             /* clear idle counter */
 			pEntry->UAPSDQIdleCount = 0;
@@ -905,7 +905,21 @@ VOID UAPSD_SP_AUE_Handle(
 	USHORT QueId;
 
 
-	if ((pEntry != NULL) && (pEntry->PsMode == PWR_SAVE))
+	if (pEntry == NULL)
+		return;
+	/* End of if */
+
+	if (pEntry->PsMode == PWR_ACTIVE)
+	{
+#ifdef UAPSD_DEBUG
+		DBGPRINT(RT_DEBUG_TRACE, ("uapsd> aux: Station actives! Close SP!\n"));
+#endif // UAPSD_DEBUG //
+		pEntry->bAPSDFlagSPStart = 0;
+		pEntry->bAPSDFlagEOSPOK = 0;
+		return;
+	} /* End of if */
+
+	if (pEntry->PsMode == PWR_SAVE)
 	{
 		BOOLEAN FlgEosp;
 
@@ -1012,11 +1026,7 @@ VOID UAPSD_SP_AUE_Handle(
 						DEQUEUE_LOCK() -->
 						RTMP_IRQ_LOCK() ERROR!
 						*/
-#ifdef WORKQUEUE_BH	
-				schedule_work(&pCookie->uapsd_eosp_sent_work);
-#else
 				tasklet_hi_schedule(&pCookie->uapsd_eosp_sent_task);
-#endif // WORKQUEUE_BH //
 			} /* End of if */
 
 			/* must return here; Or double unlock UAPSDEOSPLock */
@@ -1118,6 +1128,7 @@ VOID UAPSD_SP_CloseInRVDone(
 
 			pEntry->bAPSDFlagSPStart = 0;
 			pEntry->bAPSDFlagEOSPOK = 0;
+			pEntry->bAPSDFlagLegacySent = 0;
         } /* End of if */
 
 		RTMP_SEM_UNLOCK(&pAd->UAPSDEOSPLock);
@@ -1308,6 +1319,7 @@ VOID UAPSD_SP_PacketCheck(
 					*/
 					pEntry->bAPSDFlagSPStart = 0;
 					pEntry->bAPSDFlagEOSPOK = 0;
+					pEntry->bAPSDFlagLegacySent = 0;
                 }
                 else
                 {
@@ -1356,11 +1368,7 @@ VOID UAPSD_SP_PacketCheck(
 				DEQUEUE_LOCK() -->
 				RTMP_IRQ_LOCK() ERROR!
 		*/
-#ifdef WORKQUEUE_BH	
-				schedule_work(&pCookie->uapsd_eosp_sent_work);
-#else
 		tasklet_hi_schedule(&pCookie->uapsd_eosp_sent_task);
-#endif // WORKQUEUE_BH //
 	} /* End of if */
 } /* End of UAPSD_SP_PacketCheck */
 

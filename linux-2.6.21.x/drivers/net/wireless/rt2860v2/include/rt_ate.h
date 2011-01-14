@@ -1,8 +1,8 @@
 #ifndef __ATE_H__
 #define __ATE_H__
 
-#ifdef RALINK_28xx_QA
-/* command id with Cmd Type == 0x0008(for 28xx)/0x0005(for iNIC) */
+#ifdef RALINK_QA
+/* command id with Cmd Type == 0x0005(for iNIC)/0x0008(for others) */
 #define RACFG_CMD_RF_WRITE_ALL		0x0000
 #define RACFG_CMD_E2PROM_READ16		0x0001
 #define RACFG_CMD_E2PROM_WRITE16	0x0002
@@ -27,18 +27,6 @@
 #define RACFG_CMD_RX_START			0x0013
 #define RACFG_CMD_RX_STOP			0x0014
 #define RACFG_CMD_GET_NOISE_LEVEL	0x0015
-#if defined(RT2883) || defined(RT3883)
-#define RACFG_CMD_QUERY_BF_RSP		0x0016
-#define RACFG_CMD_QUERY_IBF_TAG		0x0017
-#define RACFG_CMD_QUERY_EBF_TAG		0x0018
-#define RACFG_CMD_QUERY_IBF_PROFILE	0x0019
-#define RACFG_CMD_QUERY_EBF_PROFILE	0x001a
-#define RACFG_CMD_WRITE_IBF_TAG		0x001b
-#define RACFG_CMD_WRITE_EBF_TAG		0x001c
-#define RACFG_CMD_WRITE_IBF_PROFILE	0x001d
-#define RACFG_CMD_WRITE_EBF_PROFILE	0x001e
-#define RACFG_CMD_CALIBRATION_CAPTURE 0x0020
-#endif // defined(RT2883) || defined(RT3883) //
 
 #define RACFG_CMD_ATE_START			0x0080
 #define RACFG_CMD_ATE_STOP			0x0081
@@ -71,21 +59,7 @@
 #define RACFG_CMD_ATE_RF_READ_BULK		0x0119
 #define RACFG_CMD_ATE_RF_WRITE_BULK		0x011a
 #define RACFG_CMD_ATE_SET_TX_POWER2			0x011b
-#ifdef TXBF_SUPPORT
-#define RACFG_CMD_ATE_TXBF_DUT_INIT		0x011c
-#define RACFG_CMD_ATE_TXBF_LNA_CAL		0x011d
-#define RACFG_CMD_ATE_TXBF_DIV_CAL		0x011e
-#define RACFG_CMD_ATE_TXBF_PHASE_CAL		0x011f
-#define RACFG_CMD_ATE_TXBF_GOLDEN_INIT		0x0120
-#define RACFG_CMD_ATE_TXBF_VERIFY		0x0121
-#endif // TXBF_SUPPORT //
-
-#ifdef RT3883
-#define RACFG_CMD_ATE_ETH_EXT_SETTING	0x0200
-#endif // RT3883 //
-
-
-#endif // RALINK_28xx_QA
+#endif // RALINK_QA //
 
 
 
@@ -198,9 +172,11 @@ INT	Set_ATE_CHANNEL_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
-INT	Set_ATE_INIT_CHAN_Proc(
+#ifdef RTMP_INTERNAL_TX_ALC
+INT Set_ATE_TSSI_CALIBRATION_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
+#endif // RTMP_INTERNAL_TX_ALC //
 
 INT	Set_ATE_TX_POWER0_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -210,11 +186,6 @@ INT	Set_ATE_TX_POWER1_Proc(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	PSTRING			arg);
 
-#ifdef DOT11N_SS3_SUPPORT
-INT	Set_ATE_TX_POWER2_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
-#endif // DOT11N_SS3_SUPPORT //
 
 INT	Set_ATE_TX_Antenna_Proc(
 	IN	PRTMP_ADAPTER	pAd,
@@ -306,48 +277,6 @@ INT Set_ATE_Payload_Proc(
     IN  PRTMP_ADAPTER   pAd, 
     IN  PSTRING         arg);
 
-#ifdef TXBF_SUPPORT
-INT	Set_ATE_TXBF_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT	Set_ATE_TXSOUNDING_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT	Set_ATE_TXBF_DIVCAL_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
-
-INT	Set_ATE_TXBF_LNACAL_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
-
-INT Set_ATE_TXBF_INIT_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT Set_ATE_TXBF_CAL_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT Set_ATE_TXBF_GOLDEN_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT Set_ATE_TXBF_VERIFY_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT Set_ATE_TXBF_VERIFY_NoComp_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-
-INT Set_ATE_ForceBBP_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-#endif // TXBF_SUPPORT //
-
 INT	Set_ATE_Show_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
@@ -356,7 +285,7 @@ INT	Set_ATE_Help_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 VOID ATE_QA_Statistics(
 	IN PRTMP_ADAPTER		pAd,
 	IN PRXWI_STRUC			pRxWI,
@@ -410,7 +339,7 @@ INT Set_RFWrite_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 #endif // DBG // 
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 
 
 VOID ATEAsicSwitchChannel(

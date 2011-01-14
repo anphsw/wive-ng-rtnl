@@ -65,38 +65,38 @@
 #define RF_R29			29
 #define RF_R30			30
 #define RF_R31			31
-#define	RF_R32			32
-#define	RF_R33			33
-#define	RF_R34			34
-#define	RF_R35			35
-#define	RF_R36			36
-#define	RF_R37			37
-#define	RF_R38			38
-#define	RF_R39			39
-#define	RF_R40			40
-#define	RF_R41			41
-#define	RF_R42			42
-#define	RF_R43			43
-#define	RF_R44			44
-#define	RF_R45			45
-#define	RF_R46			46
-#define	RF_R47			47
-#define	RF_R48			48
-#define	RF_R49			49
-#define	RF_R50			50
-#define	RF_R51			51
-#define	RF_R52			52
-#define	RF_R53			53
-#define	RF_R54			54
-#define	RF_R55			55
-#define	RF_R56			56
-#define	RF_R57			57
-#define	RF_R58			58
-#define	RF_R59			59
-#define	RF_R60			60
-#define	RF_R61			61
-#define	RF_R62			62
-#define	RF_R63			63
+#define	RF_R32					    32
+#define	RF_R33					    33
+#define	RF_R34					    34
+#define	RF_R35					    35
+#define	RF_R36					    36
+#define	RF_R37					    37
+#define	RF_R38					    38
+#define	RF_R39					    39
+#define	RF_R40					    40
+#define	RF_R41					    41
+#define	RF_R42					    42
+#define	RF_R43					    43
+#define	RF_R44					    44
+#define	RF_R45					    45
+#define	RF_R46					    46
+#define	RF_R47					    47
+#define	RF_R48					    48
+#define	RF_R49					    49
+#define	RF_R50					    50
+#define	RF_R51					    51
+#define	RF_R52					    52
+#define	RF_R53					    53
+#define	RF_R54					    54
+#define	RF_R55					    55
+#define	RF_R56					    56
+#define	RF_R57					    57
+#define	RF_R58					    58
+#define	RF_R59					    59
+#define	RF_R60					    60
+#define	RF_R61					    61
+#define	RF_R62					    62
+#define	RF_R63					    63
 
 
 // value domain of pAd->RfIcType
@@ -114,6 +114,16 @@
 #define RFIC_3322                   12      // 2.4G 2T2R with PA (RT3352/RT3371/RT3372/RT3391/RT3392)
 #define RFIC_3053                   13      // 2.4G/5G 3T3R (RT3883/RT3563/RT3573/RT3593/RT3662)
 #define RFIC_3853                   13      // 2.4G/5G 3T3R (RT3883/RT3563/RT3573/RT3593/RT3662)
+#define RFIC_UNKNOWN				0xff
+
+#define RFIC_IS_5G_BAND(__pAd)			\
+	((__pAd->RfIcType == RFIC_2850) ||	\
+	(__pAd->RfIcType == RFIC_2750) ||	\
+	(__pAd->RfIcType == RFIC_3052) ||	\
+	(__pAd->RfIcType == RFIC_2853) ||	\
+	(__pAd->RfIcType == RFIC_3053) ||	\
+	(__pAd->RfIcType == RFIC_3853) ||	\
+	(__pAd->RfIcType == RFIC_UNKNOWN))
 
 /*
 	BBP sections
@@ -218,8 +228,6 @@
 #define BBP_R189		189
 #define BBP_R190		190
 #define BBP_R191		191
-#define BBP_R250		250
-#define BBP_R255		255 // for TSSI and Tone Radar
 
 
 #define BBPR94_DEFAULT	0x06 // Add 1 value will gain 1db
@@ -592,23 +600,12 @@ typedef union _BBP_R110_STRUC {
 	_pV: data used to save the value of queried bbp register.
 	_bViaMCU: if we need access the bbp via the MCU.
 */
-
-#ifdef RALINK_ATE
-#define RTMP_BBP_CAN_WRITE(_pAd, _bbpId)	(!((ATE_ON(_pAd)) && ((_pAd)->ate.forceBBPReg == (_bbpId))))
-#else
-#define RTMP_BBP_CAN_WRTE(_pAd, _bbpId)	1
-#endif // RALINK_ATE //
-
-
 #ifdef CONFIG_STA_SUPPORT
 #define RTMP_PCIE_PS_L3_BBP_IO_WRITE8(_pAd, _bbpID, _pV, _bViaMCU)				\
 	do{											\
 		BBP_CSR_CFG_STRUC  BbpCsr;							\
 		int             k, _busyCnt=0, _regID;						\
 		BOOLEAN					brc;					\
-														\
-		if (RTMP_BBP_CAN_WRITE(_pAd, _bbpID) == FALSE) \
-			break;	\
 		_regID = ((_bViaMCU) == TRUE ? H2M_BBP_AGENT : BBP_CSR_CFG);			\
 			if (((_pAd)->bPCIclkOff == FALSE)					\
 			&& ((_pAd)->brt30xxBanMcuCmd == FALSE))								\
@@ -684,8 +681,6 @@ typedef union _BBP_R110_STRUC {
 		int             _busyCnt=0, _regID;                               			\
 		BOOLEAN					brc;			\
 																\
-		if (RTMP_BBP_CAN_WRITE(_pAd, _bbpID) == FALSE) \
-			break;	\
 		_regID = ((_bViaMCU) == TRUE ? H2M_BBP_AGENT : BBP_CSR_CFG);	\
 		for (_busyCnt=0; _busyCnt<MAX_BUSY_COUNT; _busyCnt++)  \
 		{                                                   \
@@ -765,32 +760,6 @@ typedef union _BBP_R110_STRUC {
 #define RTMP_BBP_IO_WRITE8_BY_REG_ID	_RTMP_BBP_IO_WRITE8_BY_REG_ID
 #endif // VENDOR_FEATURE3_SUPPORT //
 	
-#if defined(RT2883) || defined(RT3883) || defined(DFS_HARDWARE_SUPPORT)
-
-#define RTMP_DFS_IO_READ8(_A, _I, _V)                   \
-{                                                       \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
-	BBP_IO_READ8_BY_REG_ID(_A, BBP_R141, _V);           \
-}
-
-#define RTMP_DFS_IO_WRITE8(_A, _I, _V)                  \
-{                                                       \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R141, _V);          \
-}
-
-#define RTMP_CARRIER_IO_READ8(_A, _I, _V)               \
-{                                                       \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
-	BBP_IO_READ8_BY_REG_ID(_A, BBP_R185, _V);           \
-}
-#define RTMP_CARRIER_IO_WRITE8(_A, _I, _V)              \
-{                                                       \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
-	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R185, _V);          \
-}
-
-#endif // defined(RT2883) || defined(RT3883) || defined(DFS_HARDWARE_SUPPORT) //
 	
 #endif // RTMP_MAC_PCI //
 

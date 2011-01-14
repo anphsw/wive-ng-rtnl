@@ -3,16 +3,16 @@ include $(RT28xx_DIR)/os/linux/config.mk
 #ifdef CONFIG_AP_SUPPORT
 ifeq ($(RT28xx_MODE),AP)
 MOD_NAME = rt$(CHIPSET)ap
-DAT_PATH = /etc/Wireless/RT$(CHIPSET)AP
-DAT_FILE_NAME = RT$(CHIPSET)AP.dat
+DAT_PATH = /etc/Wireless/RT$(CHIPSET_DAT)AP
+DAT_FILE_NAME = RT$(CHIPSET_DAT)AP.dat
 endif
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 ifeq ($(RT28xx_MODE), STA)
 MOD_NAME = rt$(CHIPSET)sta
-DAT_PATH = /etc/Wireless/RT$(CHIPSET)STA
-DAT_FILE_NAME = RT$(CHIPSET)STA.dat
+DAT_PATH = /etc/Wireless/RT$(CHIPSET_DAT)STA
+DAT_FILE_NAME = RT$(CHIPSET_DAT)STA.dat
 endif
 #endif // CONFIG_STA_SUPPORT //
 
@@ -89,9 +89,11 @@ endif
 #endif // DOT11_N_SUPPORT //
 
 #ifdef BG_FT_SUPPORT
+ifeq ($(OSABL),NO)
 ifeq ($(HAS_BGFP_SUPPORT),y)
 RT28XX_AP_OBJ += \
-	$(RT28xx_DIR)/common/br_ftph.o
+	$(RT28xx_DIR)/os/linux/br_ftph.o
+endif
 endif
 #endif // BG_FT_SUPPORT //
 
@@ -263,7 +265,6 @@ RT28XX_STA_OBJ := \
 	$(RT28xx_DIR)/common/cmm_info.o\
 	$(RT28xx_DIR)/common/cmm_cfg.o\
 	$(RT28xx_DIR)/common/cmm_wpa.o\
-	$(RT28xx_DIR)/common/cmm_wpa_adhoc.o\
 	$(RT28xx_DIR)/common/dfs.o\
 	$(RT28xx_DIR)/common/spectrum.o\
 	$(RT28xx_DIR)/common/rtmp_timer.o\
@@ -307,6 +308,11 @@ RT28XX_STA_OBJ += \
 endif
 #endif // ETH_CONVERT //
 
+#ifdef ADHOC_WPA2PSK_SUPPORT
+RT28XX_STA_OBJ += \
+	$(RT28xx_DIR)/common/cmm_wpa_adhoc.o
+#endif // ADHOC_WPA2PSK_SUPPORT //
+
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
 RT28XX_STA_OBJ += \
@@ -315,13 +321,14 @@ RT28XX_STA_OBJ += \
 	$(RT28xx_DIR)/common/crypt_biginteger.o\
 	$(RT28xx_DIR)/common/crypt_dh.o
 
-ifeq ($(HAS_SAMSUNG_EASY_CONFIG_SUPPORT),y)
-rt$(CHIPSET)sta-objs += \
-	$(RT28xx_DIR)/sta/sta_auto_provision.o
+ifeq ($(HAS_WPSE),y)
+RT28XX_STA_OBJ += \
+	$(RT28xx_DIR)/sta/sta_wpse.o
 endif
 
 endif
 #endif // WSC_INCLUDED //
+
 
 ifeq ($(HAS_BLOCK_NET_IF),y)
 RT28XX_STA_OBJ += $(RT28xx_DIR)/common/netif_block.o

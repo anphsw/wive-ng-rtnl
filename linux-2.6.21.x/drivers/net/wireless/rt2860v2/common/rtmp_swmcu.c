@@ -27,9 +27,8 @@
 */
 
 
-#include "rt_config.h"
+#include	"rt_config.h"
 #include "led.h"
-
 
 #ifdef WLAN_LED
 extern unsigned char   LinkStatus;
@@ -192,7 +191,7 @@ int RtmpAsicSendCommandToSwMcu(
 #else
 						RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 						RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
-#endif // RTMP_RBUS_SUPPORT //
+#endif // DFS_ARCH_TEAM //
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
@@ -201,7 +200,7 @@ int RtmpAsicSendCommandToSwMcu(
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
-#endif // RTMP_RBUS_SUPPORT //
+#endif // DFS_ARCH_TEAM //
 				}
 				else
 				{
@@ -229,8 +228,8 @@ int RtmpAsicSendCommandToSwMcu(
 #ifdef RTMP_RBUS_SUPPORT
 					unregister_tmr_service();
 #else
-					BOOLEAN Cancelled;
-					RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
+	BOOLEAN Cancelled;
+	RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
 #endif // RTMP_RBUS_SUPPORT //
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
@@ -261,7 +260,7 @@ int RtmpAsicSendCommandToSwMcu(
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
-#endif // RTMP_RBUS_SUPPORT //
+#endif // DFS_ARCH_TEAM //
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
@@ -270,7 +269,7 @@ int RtmpAsicSendCommandToSwMcu(
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.CSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
-#endif // RTMP_RBUS_SUPPORT //
+#endif // DFS_ARCH_TEAM //
 				}
 				else
 				{
@@ -313,7 +312,7 @@ int RtmpAsicSendCommandToSwMcu(
 				}
 			}
 			break;
-#endif // defined(DFS_SUPPORT) || defined(CARRIER_DETECTION_SUPPORT) //
+#endif
 
 #endif // CONFIG_AP_SUPPORT //
 

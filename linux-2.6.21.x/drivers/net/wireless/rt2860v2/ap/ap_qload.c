@@ -517,14 +517,14 @@ UINT32 QBSS_LoadElementAppend(
 	pLoad->ElementId = ELM_QBSS_LOAD_ID;
 	pLoad->Length = ELM_QBSS_LOAD_LEN;
 
-	pLoad->StationCount = MacTableAssocStaNumGet(pAd);
+	pLoad->StationCount = le2cpu16(MacTableAssocStaNumGet(pAd));
 	pLoad->ChanUtil = pAd->QloadChanUtil;
 
 	/* because no ACM is supported, the available bandwidth is 1 sec */
-	pLoad->AvalAdmCap = 0x7a12; /* 0x7a12 * 32us = 1 second */
+	pLoad->AvalAdmCap = le2cpu16(0x7a12); /* 0x7a12 * 32us = 1 second */
 	
 #ifdef WMM_ACM_SUPPORT
-	pLoad->AvalAdmCap = pAd->AcmAvalCap;
+	pLoad->AvalAdmCap = le2cpu16(pAd->AcmAvalCap);
 #endif // WMM_ACM_SUPPORT //
 
 	/* copy the element to the frame */

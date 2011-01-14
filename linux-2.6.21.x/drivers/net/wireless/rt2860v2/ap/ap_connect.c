@@ -113,13 +113,16 @@ VOID APMakeBssBeacon(
 	UINT  i;
 	UINT32 longValue;
 	HTTRANSMIT_SETTING	BeaconTransmit;   // MGMT frame PHY rate setting when operatin at Ht rate.
+	UCHAR PhyMode, SupRateLen;
 #ifdef SPECIFIC_BCN_BUF_SUPPORT
 	unsigned long irqFlag;
 #endif // SPECIFIC_BCN_BUF_SUPPORT //
+	BOOLEAN		bHasWpsIE = FALSE;
 
 	if(!BeaconTransmitRequired(pAd, apidx, &pAd->ApCfg.MBSSID[apidx]))
 		return;
 
+	PhyMode = pAd->ApCfg.MBSSID[apidx].PhyMode;
 
 	if (pAd->ApCfg.MBSSID[apidx].bHideSsid)
 		SsidLen = 0;
@@ -130,6 +133,10 @@ VOID APMakeBssBeacon(
 
 	
 	// for update framelen to TxWI later.
+	SupRateLen = pAd->CommonCfg.SupRateLen;
+	if (PhyMode == PHY_11B)
+		SupRateLen = 4;
+
 	MakeOutgoingFrame(pBeaconFrame,                  &FrameLen,
 					sizeof(HEADER_802_11),           &BcnHdr, 
 					TIMESTAMP_LEN,                   &FakeTimestamp,
@@ -139,14 +146,14 @@ VOID APMakeBssBeacon(
 					1,                               &SsidLen, 
 					SsidLen,                         pAd->ApCfg.MBSSID[apidx].Ssid,
 					1,                               &SupRateIe, 
-					1,                               &pAd->CommonCfg.SupRateLen,
-					pAd->CommonCfg.SupRateLen,       pAd->CommonCfg.SupRate, 
+					1,                               &SupRateLen,
+					SupRateLen,                      pAd->CommonCfg.SupRate, 
 					1,                               &DsIe, 
 					1,                               &DsLen, 
 					1,                               &pAd->CommonCfg.Channel,
 					END_OF_ARGS);
 
-	if (pAd->CommonCfg.ExtRateLen)
+	if ((pAd->CommonCfg.ExtRateLen) && (PhyMode != PHY_11B))
 	{
 		ULONG TmpLen;
 		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
@@ -222,7 +229,7 @@ VOID APMakeBssBeacon(
 		UCHAR rclass32[]={32, 1, 2, 3, 4, 5, 6, 7};
         UCHAR rclass33[]={33, 5, 6, 7, 8, 9, 10, 11};
 		UCHAR rclasslen = 8; //sizeof(rclass32);
-		if (pAd->CommonCfg.PhyMode == PHY_11BGN_MIXED)
+		if (PhyMode == PHY_11BGN_MIXED)
 		{
 			MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
 							  1,                    &APChannelReportIe,
@@ -240,18 +247,9 @@ VOID APMakeBssBeacon(
 
 #ifdef WSC_AP_SUPPORT
     // add Simple Config Information Element
-    if (((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode >= 1) && (pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen))
-#ifdef HOSTAPD_SUPPORT
-		|| pAd->ApCfg.HostapdWPS
-#endif
-		)
+    if (((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode >= 1) && (pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen)))
     {
-		ULONG WscTmpLen = 0;
-        
-		MakeOutgoingFrame(pBeaconFrame+FrameLen,                            &WscTmpLen,
-						  pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen,    pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value,
-                              END_OF_ARGS);
-		FrameLen += WscTmpLen;		  
+    	bHasWpsIE = TRUE;
     }
 
     if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE) &&
@@ -279,6 +277,21 @@ VOID APMakeBssBeacon(
     }
 #endif // WSC_AP_SUPPORT //
     
+#ifdef HOSTAPD_SUPPORT
+	if (pAd->ApCfg.HostapdWPS)
+		bHasWpsIE = TRUE;
+#endif
+
+	if (bHasWpsIE)
+    {
+		ULONG WscTmpLen = 0;
+        
+		MakeOutgoingFrame(pBeaconFrame+FrameLen,                            &WscTmpLen,
+						  pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen,    pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value,
+                              END_OF_ARGS);
+		FrameLen += WscTmpLen;		  
+    }
+	
 
 	BeaconTransmit.word = 0;
 	RTMPWriteTxWI(pAd, pTxWI, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, 0, BSS0Mcast_WCID, 
@@ -358,6 +371,7 @@ VOID APUpdateBeaconFrame(
 	UCHAR 			ID_1B, TimFirst, TimLast, *pTim;
 	MULTISSID_STRUCT *pMbss;
 	COMMON_CONFIG *pComCfg;
+	UCHAR PhyMode;
 
 
 	UINT  i;
@@ -365,6 +379,7 @@ VOID APUpdateBeaconFrame(
 
 	pMbss = &pAd->ApCfg.MBSSID[apidx];
 	pComCfg = &pAd->CommonCfg;
+	PhyMode = pMbss->PhyMode;
 
 	if(!BeaconTransmitRequired(pAd, apidx, pMbss))
 		return;
@@ -433,7 +448,7 @@ VOID APUpdateBeaconFrame(
 	FrameLen += (2 + *(ptr+1)); 
 
 	// Update ERP
-    if (pComCfg->ExtRateLen)
+    if ((pComCfg->ExtRateLen) && (PhyMode != PHY_11B))
     {
 		//
         // fill ERP IE
@@ -480,7 +495,7 @@ VOID APUpdateBeaconFrame(
 	//
 	// step 5. Update HT. Since some fields might change in the same BSS.
 	//
-	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && (pMbss->DesiredHtPhyInfo.bHtEnable))
+	if ((PhyMode >= PHY_11ABGN_MIXED) && (pMbss->DesiredHtPhyInfo.bHtEnable))
 	{
 		ULONG TmpLen;
 		UCHAR HtLen, HtLen1;
@@ -541,7 +556,7 @@ VOID APUpdateBeaconFrame(
 #ifdef DOT11N_DRAFT3
  	// P802.11n_D3.03
  	// 7.3.2.60 Overlapping BSS Scan Parameters IE
- 	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) &&
+ 	if ((PhyMode >= PHY_11ABGN_MIXED) && 
 		(pComCfg->Channel <= 14) &&
 		(pMbss->DesiredHtPhyInfo.bHtEnable) &&
 		(pComCfg->HtCapability.HtCapInfo.ChannelWidth == 1))
@@ -588,7 +603,7 @@ VOID APUpdateBeaconFrame(
 #ifdef DOT11N_DRAFT3
 		// P802.11n_D1.10 
 		// HT Information Exchange Support	
-		if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && (pComCfg->Channel <= 14) && 
+		if ((PhyMode >= PHY_11ABGN_MIXED) && (pComCfg->Channel <= 14) && 
 			(pMbss->DesiredHtPhyInfo.bHtEnable) && (pComCfg->bBssCoexEnable == TRUE)
 		)
 		{
@@ -729,7 +744,7 @@ VOID APUpdateBeaconFrame(
 
 
 #ifdef DOT11_N_SUPPORT
-	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && 
+	if ((PhyMode >= PHY_11ABGN_MIXED) && 
 		(pMbss->DesiredHtPhyInfo.bHtEnable))
 	{
 		ULONG TmpLen;
@@ -829,15 +844,6 @@ VOID APUpdateBeaconFrame(
 						END_OF_ARGS);
 	FrameLen += TmpLen;
 
-#ifdef RT3883
-	while(FrameLen < 150)
-	{
-		MakeOutgoingFrame(pBeaconFrame+FrameLen,	&TmpLen,
-							9,						 RalinkSpecificIe,
-							END_OF_ARGS);
-		FrameLen += TmpLen;
-	}
-#endif // RT3883 //
 }
 
 	//
@@ -993,14 +999,9 @@ VOID APMakeAllBssBeacon(
 #ifdef SPECIFIC_BCN_BUF_SUPPORT	
 		if (NumOfBcns > 8)
 			regValue |= (((NumOfBcns - 1) >> 3) << 23);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
+#endif // SPECIFIC_BCN_BUF_SUPPORT //			
 		regValue |= (((NumOfBcns - 1) & 0x7)  << 18);	
 	}
-#ifdef NEW_MBSSID_MODE
-	/* 	set as 0/1 bit-21 of MAC_BSSID_DW1(offset: 0x1014) 
-		to disable/enable the new MAC address assignment.  */
-	regValue |= (1 << 21);
-#endif // NEW_MBSSID_MODE //
 
 
 	RTMP_IO_WRITE32(pAd, MAC_BSSID_DW1, regValue);

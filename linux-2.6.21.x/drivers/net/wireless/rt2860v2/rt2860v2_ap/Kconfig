@@ -1,6 +1,6 @@
 config RT2860V2_AP
 	tristate "Ralink RT2860 802.11n AP support"
-	depends on NET_RADIO 
+	#depends on NET_RADIO 
 	
 config RT2860V2_AP_V24_DATA_STRUCTURE
 	bool
@@ -14,6 +14,10 @@ config  RT2860V2_AP_LED
 config  RT2860V2_AP_WSC
 	bool "WSC (WiFi Simple Config)"
 	depends on RT2860V2_AP
+
+config  RT2860V2_AP_WIN7PREVIEW
+	bool "Win7 Logo Preview"
+	depends on RT2860V2_AP_WSC
 
 config  RT2860V2_AP_LLTD
 	bool "LLTD (Link Layer Topology Discovery Protocol)"
@@ -30,13 +34,6 @@ config  RT2860V2_AP_WMM_ACM
 config  RT2860V2_AP_MBSS
 	bool "MBSSID"
 	depends on RT2860V2_AP
-
-config	NEW_MBSSID_MODE
-	bool "New MBSSID MODE"
-	depends on RT2860V2_AP
-	depends on RT2860V2_AP_MBSS
-	depends on RALINK_RT3883 || RALINK_RT3352
-	default n
 
 config  RT2860V2_AP_APCLI
 	bool "AP-CLient Support"

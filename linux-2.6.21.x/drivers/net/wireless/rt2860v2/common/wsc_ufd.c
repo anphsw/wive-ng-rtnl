@@ -430,7 +430,9 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		
 		DBGPRINT(RT_DEBUG_TRACE, ("WscReadProfileFromUfdFile OK\n"));
 
-		WscWriteConfToPortCfg(pAd, &pAd->ApCfg.MBSSID[ApIdx].WscControl, TRUE);
+		WscWriteConfToPortCfg(pAd, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl.WscProfile.Profile[0], TRUE);
 
 		pAd->WriteWscCfgToDatFile = ApIdx;
 		

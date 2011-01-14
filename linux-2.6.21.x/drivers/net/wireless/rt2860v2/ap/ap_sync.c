@@ -95,7 +95,7 @@ VOID APPeerProbeReqAction(
 	UCHAR         DsLen = 1;//, IbssLen = 2, TimLen=1,
 				  //BitmapControl=0, VirtualBitmap=0;
 	UCHAR   ErpIeLen = 1;
-	UCHAR         apidx = 0;
+	UCHAR         apidx = 0, PhyMode, SupRateLen;
 	UCHAR   RSNIe=IE_WPA, RSNIe2=IE_WPA2;//, RSN_Len=22;
 	BOOLEAN		bRequestRssi=FALSE;
 
@@ -126,6 +126,8 @@ VOID APPeerProbeReqAction(
 			continue;
 		} /* End of if */
 
+		PhyMode = pAd->ApCfg.MBSSID[apidx].PhyMode;
+
 		if (((SsidLen == 0) && (! pAd->ApCfg.MBSSID[apidx].bHideSsid)) ||
 #ifdef WSC_AP_SUPPORT
             /* buffalo WPS testbed STA send ProbrRequest ssid length = 32 and ssid are not AP , but DA are AP. for WPS test send ProbeResponse */
@@ -154,6 +156,10 @@ VOID APPeerProbeReqAction(
 			RSNIe = IE_WAPI;
 #endif // WAPI_SUPPORT //
 
+		SupRateLen = pAd->CommonCfg.SupRateLen;
+		if (PhyMode == PHY_11B)
+			SupRateLen = 4;
+
 		MakeOutgoingFrame(pOutBuffer,                 &FrameLen,
 						  sizeof(HEADER_802_11),      &ProbeRspHdr,
 						  TIMESTAMP_LEN,              &FakeTimestamp,
@@ -163,14 +169,14 @@ VOID APPeerProbeReqAction(
 						  1,                          &pAd->ApCfg.MBSSID[apidx].SsidLen,
 						  pAd->ApCfg.MBSSID[apidx].SsidLen,     pAd->ApCfg.MBSSID[apidx].Ssid,
 						  1,                          &SupRateIe,
-						  1,                          &pAd->CommonCfg.SupRateLen,
-						  pAd->CommonCfg.SupRateLen,      pAd->CommonCfg.SupRate,
+						  1,                          &SupRateLen,
+						  SupRateLen,                 pAd->CommonCfg.SupRate,
 						  1,                          &DsIe,
 						  1,                          &DsLen,
 						  1,                          &pAd->CommonCfg.Channel,
 						  END_OF_ARGS);
 
-		if (pAd->CommonCfg.ExtRateLen)
+		if ((pAd->CommonCfg.ExtRateLen) && (PhyMode != PHY_11B))
 		{
 			MakeOutgoingFrame(pOutBuffer+FrameLen,      &TmpLen,
 							  1,                        &ErpIe,
@@ -205,7 +211,7 @@ VOID APPeerProbeReqAction(
 #endif // A_BAND_SUPPORT //
 
 #ifdef DOT11_N_SUPPORT
-		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+		if ((PhyMode >= PHY_11ABGN_MIXED) &&
 			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable))
 		{
 			ULONG TmpLen;
@@ -282,7 +288,6 @@ VOID APPeerProbeReqAction(
 		}
 #endif // DOT11_N_SUPPORT //
 
-
 		// Append RSN_IE when  WPA OR WPAPSK,
 		if (pAd->ApCfg.MBSSID[apidx].AuthMode < Ndis802_11AuthModeWPA)
 			; // enough information
@@ -347,7 +352,7 @@ VOID APPeerProbeReqAction(
 #ifdef DOT11N_DRAFT3
 	 	// P802.11n_D3.03
 	 	// 7.3.2.60 Overlapping BSS Scan Parameters IE
-	 	if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+	 	if ((PhyMode >= PHY_11ABGN_MIXED) &&
 			(pAd->CommonCfg.Channel <= 14) &&
 			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable) &&
 			(pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == 1))
@@ -389,7 +394,7 @@ VOID APPeerProbeReqAction(
 
 			// P802.11n_D1.10
 			// HT Information Exchange Support
-			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) && (pAd->CommonCfg.Channel <= 14) &&
+			if ((PhyMode >= PHY_11ABGN_MIXED) && (pAd->CommonCfg.Channel <= 14) &&
 				(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable) && 
 				(pAd->CommonCfg.bBssCoexEnable == TRUE))
 			{
@@ -446,15 +451,6 @@ VOID APPeerProbeReqAction(
 						END_OF_ARGS);
 	FrameLen += TmpLen;
 
-#ifdef RT3883
-	while(FrameLen < 150)
-	{
-		MakeOutgoingFrame(pOutBuffer+FrameLen,	&TmpLen,
-							9,						 RalinkSpecificIe,
-							END_OF_ARGS);
-		FrameLen += TmpLen;
-	}
-#endif // RT3883 //
 }
 
 #ifdef A_BAND_SUPPORT
@@ -546,7 +542,7 @@ VOID APPeerProbeReqAction(
 		}// Country IE -
 
 #ifdef DOT11_N_SUPPORT
-		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
+		if ((PhyMode >= PHY_11ABGN_MIXED) &&
 			(pAd->ApCfg.MBSSID[apidx].DesiredHtPhyInfo.bHtEnable))
 		{
 			ULONG TmpLen;

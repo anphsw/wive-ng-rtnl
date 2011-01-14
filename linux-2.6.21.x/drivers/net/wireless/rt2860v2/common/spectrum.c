@@ -931,7 +931,7 @@ VOID InsertDialogToken(
 	OUT PULONG pFrameLen)
 {
 	ULONG TempLen;
-	ULONG Len = 0;
+	UINT8 Len = 0;
 	UINT8 ElementID = IE_TPC_REQUEST;
 
 	MakeOutgoingFrame(pFrameBuf,					&TempLen,
@@ -966,7 +966,7 @@ VOID InsertTpcReportIE(
 	IN UINT8 LinkMargin)
 {
 	ULONG TempLen;
-	ULONG Len = sizeof(TPC_REPORT_INFO);
+	UINT8 Len = sizeof(TPC_REPORT_INFO);
 	UINT8 ElementID = IE_TPC_REPORT;
 	TPC_REPORT_INFO TpcReportIE;
 
@@ -1051,7 +1051,7 @@ static VOID InsertMeasureReportIE(
 	IN PUINT8 pReportInfo)
 {
 	ULONG TempLen;
-	ULONG Len;
+	UINT8 Len;
 	UINT8 ElementID = IE_MEASUREMENT_REPORT;
 
 	Len = sizeof(MEASURE_REPORT_INFO) + ReportLnfoLen;

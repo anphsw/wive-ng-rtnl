@@ -254,15 +254,14 @@ VOID BuildChannelList(
 			PUCHAR ChannelList;
 #ifdef CONFIG_AP_SUPPORT
 #ifdef DFS_SUPPORT
-			UCHAR q = 0;
+			UCHAR q=0;
 #endif // DFS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 			ChannelList=pChannelList;
 #ifdef CONFIG_AP_SUPPORT
 #ifdef DFS_SUPPORT
 			ChannelList=NULL;
-			ChannelList=(PUCHAR)kmalloc(MAX_NUM_OF_CHANNELS*sizeof(UCHAR),GFP_KERNEL);
-
+			ChannelList=(PUCHAR)kmalloc(20*sizeof(UCHAR),GFP_KERNEL);
 			if (ChannelList == NULL) 
 			{
 				DBGPRINT(RT_DEBUG_ERROR,("BuildChannelList allocate memory for ChannelList failed\n"));
@@ -270,29 +269,31 @@ VOID BuildChannelList(
 			}
 			for (i=0; i<num; i++)
 			{
-				if((pAd->CommonCfg.bIEEE80211H == 0) || ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion != FCC)))
-				{
-                                        ChannelList[q] = pChannelList[i];
-					q++;
-				}
-/*Based on the requiremnt of FCC, some channles could not be used anymore when test DFS function.*/
-                                else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == FALSE))
-				{
-                                        if((pChannelList[i] < 116) || (pChannelList[i] > 128))
-					{
-                                                ChannelList[q] = pChannelList[i];
-						q++;
-					}
-				}
 
-                                else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == TRUE))
-				{
-                                        if((pChannelList[i] < 100) || (pChannelList[i] > 140) )
-					{
+				 if((pAd->CommonCfg.bIEEE80211H == 0)|| ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion != FCC)))			 	
+                                {
+                                        ChannelList[q] = pChannelList[i];
+                                        q++;
+                                }
+/*Based on the requiremnt of FCC, some channles could not be used anymore when test DFS function.*/
+                                else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 1))
+                                {
+                                        if((pChannelList[i] < 116) || (pChannelList[i] > 128))
+                                        {
                                                 ChannelList[q] = pChannelList[i];
-						q++;
-					}
-				}
+                                                q++;
+                                        }
+                                }
+
+                                else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 0))
+                                {
+                                        if((pChannelList[i] < 100) || (pChannelList[i] > 140) )
+                                        {
+                                                ChannelList[q] = pChannelList[i];
+                                                q++;
+                                        }
+                                }
+
 			}
 
 			num = q;
@@ -477,6 +478,14 @@ CHAR	ConvertToRssi(
     return (-12 - RssiOffset - LNAGain - Rssi);
 }
 
+CHAR	ConvertToSnr(
+	IN PRTMP_ADAPTER	pAd,
+	IN UCHAR			Snr)	
+{
+	return ((0xeb - Snr) * 3) / 16 ;
+
+}
+
 #if defined(AP_SCAN_SUPPORT) || defined(CONFIG_STA_SUPPORT)
 /*
 	==========================================================================
@@ -494,7 +503,6 @@ VOID ScanNextChannel(
 	UCHAR           SsidLen = 0, ScanType = pAd->MlmeAux.ScanType, BBPValue = 0;
 #ifdef CONFIG_STA_SUPPORT
 	USHORT          Status;
-	PHEADER_802_11  pHdr80211; // no use
 #endif // CONFIG_STA_SUPPORT //
 	UINT			ScanTimeIn5gChannel = SHORT_CHANNEL_TIME;
 	BOOLEAN			ScanPending = FALSE;
@@ -562,21 +570,10 @@ VOID ScanNextChannel(
 			//
 			if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) && (INFRA_ON(pAd)))
 			{
-				NStatus = MlmeAllocateMemory(pAd, (PVOID)&pOutBuffer);
-				if (NStatus	== NDIS_STATUS_SUCCESS)
-				{
-					pHdr80211 = (PHEADER_802_11) pOutBuffer;
-					MgtMacHeaderInit(pAd, pHdr80211, SUBTYPE_NULL_FUNC, 1, pAd->CommonCfg.Bssid, pAd->CommonCfg.Bssid);
-					pHdr80211->Duration = 0;
-					pHdr80211->FC.Type = BTYPE_DATA;
-					pHdr80211->FC.PwrMgmt = (pAd->StaCfg.Psm == PWR_SAVE);
-
-					// Send using priority queue
-					MiniportMMRequest(pAd, 0, pOutBuffer, sizeof(HEADER_802_11));
-					DBGPRINT(RT_DEBUG_TRACE, ("%s -- Send PSM Data frame\n", __FUNCTION__));
-					MlmeFreeMemory(pAd, pOutBuffer);
-					RTMPusecDelay(5000);
-				}
+				RTMPSendNullFrame(pAd, 
+								  pAd->CommonCfg.TxRate, 
+								  (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_WMM_INUSED) ? TRUE:FALSE));
+				DBGPRINT(RT_DEBUG_TRACE, ("%s -- Send PSM Data frame\n", __FUNCTION__));
 			}
 
 			// keep the latest scan channel, could be 0 for scan complete, or other channel
@@ -604,6 +601,9 @@ VOID ScanNextChannel(
 				MlmeEnqueue(pAd, MLME_CNTL_STATE_MACHINE, MT2_SCAN_CONF, 2, &Status, 0);
 
 				RTMPSendWirelessEvent(pAd, IW_SCAN_COMPLETED_EVENT_FLAG, NULL, BSS0, 0);
+#ifdef WPA_SUPPLICANT_SUPPORT
+				RtmpOSWrielessEventSend(pAd, SIOCGIWSCAN, -1, NULL, NULL, 0);
+#endif // WPA_SUPPLICANT_SUPPORT //
 			}
 
 #ifdef LINUX
@@ -926,7 +926,7 @@ VOID ScanNextChannel(
 					if( (pWscBuf = kmalloc(512, GFP_ATOMIC)) != NULL)
 					{
 						NdisZeroMemory(pWscBuf, 512);
-						WscMakeProbeReqIE(pAd, pWscBuf, &WscIeLen);
+						WscBuildProbeReqIE(pAd, pWscBuf, &WscIeLen);
 
 						MakeOutgoingFrame(pOutBuffer + FrameLen,              &WscTmpLen,
 										WscIeLen,                             pWscBuf,
@@ -970,15 +970,9 @@ VOID ScanNextChannel(
 					(INFRA_ON(pAd)) &&
 					(pAd->CommonCfg.Channel == pAd->MlmeAux.Channel))
 				{
-					NdisZeroMemory(pOutBuffer, MGMT_DMA_BUFFER_SIZE);
-					pHdr80211 = (PHEADER_802_11) pOutBuffer;
-					MgtMacHeaderInit(pAd, pHdr80211, SUBTYPE_NULL_FUNC, 1, pAd->CommonCfg.Bssid, pAd->CommonCfg.Bssid);
-					pHdr80211->Duration = 0;
-					pHdr80211->FC.Type = BTYPE_DATA;
-					pHdr80211->FC.PwrMgmt = PWR_ACTIVE;
-
-					// Send using priority queue
-					MiniportMMRequest(pAd, 0, pOutBuffer, sizeof(HEADER_802_11));
+					RTMPSendNullFrame(pAd, 
+								  pAd->CommonCfg.TxRate, 
+								  (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_WMM_INUSED) ? TRUE:FALSE));
 					DBGPRINT(RT_DEBUG_TRACE, ("ScanNextChannel():Send PWA NullData frame to notify the associated AP!\n"));
 				}
 			}
@@ -1026,4 +1020,21 @@ VOID Handle_BSS_Width_Trigger_Events(
 }
 #endif // DOT11_N_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
+
+BOOLEAN ScanRunning(
+		IN PRTMP_ADAPTER pAd)
+{
+	BOOLEAN	rv = FALSE;
+
+#ifdef CONFIG_STA_SUPPORT
+		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+			rv = ((pAd->Mlme.SyncMachine.CurrState == SCAN_LISTEN) ? TRUE : FALSE);
+#endif // CONFIG_STA_SUPPORT //
+#ifdef CONFIG_AP_SUPPORT
+		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+			rv = ((pAd->Mlme.ApSyncMachine.CurrState == AP_SCAN_LISTEN) ? TRUE : FALSE);
+#endif // CONFIG_AP_SUPPORT //
+
+	return rv;
+}
 

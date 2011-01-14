@@ -362,10 +362,9 @@ VOID MlmeAssocReqAction(
 
 #if defined(DOT11N_DRAFT3) || defined(DOT11V_WNM_SUPPORT)
 		{
-			ULONG TmpLen;//, infoPos;
+			ULONG TmpLen;
 			EXT_CAP_INFO_ELEMENT	extCapInfo;
 			UCHAR extInfoLen;
-			//PUCHAR pInfo;
 
 
 			extInfoLen = sizeof(EXT_CAP_INFO_ELEMENT);
@@ -473,7 +472,8 @@ VOID MlmeAssocReqAction(
 #ifdef WSC_STA_SUPPORT
 			&& ((pAd->StaCfg.WscControl.WscConfMode == WSC_DISABLE) || 
 			    ((pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE) && 
-			     !(pAd->StaCfg.WscControl.bWscTrigger)))
+			     !(pAd->StaCfg.WscControl.bWscTrigger 
+			       )))
 #endif // WSC_STA_SUPPORT //
             )          
 		{
@@ -599,7 +599,8 @@ VOID MlmeAssocReqAction(
 		// Add WSC IE if we are connecting to WSC AP
 		if ((pAd->StaCfg.WscControl.WscEnAssociateIE) && 
 			(pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE) &&
-			(pAd->StaCfg.WscControl.bWscTrigger))
+			(pAd->StaCfg.WscControl.bWscTrigger 
+			))
 		{
 			UCHAR		*pWscBuf = NULL, WscIeLen = 0;
 			ULONG 		WscTmpLen = 0;
@@ -1690,6 +1691,9 @@ BOOLEAN StaAddMacTableEntry(
 #ifdef DOT11_N_SUPPORT
 	NdisZeroMemory(&pEntry->HTCapability, sizeof(pEntry->HTCapability));
 	// If this Entry supports 802.11n, upgrade to HT rate. 
+	if (((pAd->StaCfg.WepStatus != Ndis802_11WEPEnabled) && (pAd->StaCfg.WepStatus != Ndis802_11Encryption2Enabled))
+				|| (pAd->CommonCfg.HT_DisallowTKIP == FALSE))
+	{		
 	if ((pAd->StaCfg.BssType == BSS_INFRA) && 
 		(HtCapabilityLen != 0) && 
 		(pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
@@ -1699,6 +1703,7 @@ BOOLEAN StaAddMacTableEntry(
 		(HtCapabilityLen != 0) && 
 		(pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 		bSupportN = TRUE;
+	}	
 	if (bSupportN)
 	{
 		UCHAR	j, bitmask; //k,bitmask;
@@ -1718,8 +1723,7 @@ BOOLEAN StaAddMacTableEntry(
 		}
 
 		if ((pHtCapability->HtCapInfo.ChannelWidth) && 
-			(pAd->CommonCfg.DesiredHtPhy.ChannelWidth) &&
-			((pAd->StaCfg.BssType == BSS_INFRA) || ((pAd->StaCfg.BssType == BSS_ADHOC) && (pAddHtInfo->AddHtInfo.ExtChanOffset == pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset))))
+			(pAd->CommonCfg.DesiredHtPhy.ChannelWidth))
 		{
 			pEntry->MaxHTPhyMode.field.BW= BW_40;
 			pEntry->MaxHTPhyMode.field.ShortGI = ((pAd->CommonCfg.DesiredHtPhy.ShortGIfor40)&(pHtCapability->HtCapInfo.ShortGIfor40));
@@ -1731,10 +1735,8 @@ BOOLEAN StaAddMacTableEntry(
 			pAd->MacTab.fAnyStation20Only = TRUE;
 		}
 		
-#ifdef TXBF_SUPPORT
-		pEntry->MaxHTPhyMode.field.eTxBF =
-				clientSupportsETxBF(pAd, &pHtCapability->TxBFCap)? pAd->CommonCfg.RegTransmitSetting.field.TxBF: 0;
-#endif // TXBF_SUPPORT //
+#ifdef RTMP_RBUS_SUPPORT
+#endif // RTMP_RBUS_SUPPORT //
 
 		// find max fixed rate
 		for (i=23; i>=0; i--) // 3*3
@@ -1793,8 +1795,6 @@ BOOLEAN StaAddMacTableEntry(
 		if (pHtCapability->ExtHtCapInfo.MCSFeedback == 0x03)
 			CLIENT_STATUS_SET_FLAG(pEntry, fCLIENT_STATUS_MCSFEEDBACK_CAPABLE);		
 		NdisMoveMemory(&pEntry->HTCapability, pHtCapability, HtCapabilityLen);
-
-		assoc_ht_info_debugshow(pAd, pEntry, HtCapabilityLen, pHtCapability);
 	}
 	else
 	{
@@ -1804,87 +1804,7 @@ BOOLEAN StaAddMacTableEntry(
 
 	pEntry->HTPhyMode.word = pEntry->MaxHTPhyMode.word;
 	pEntry->CurrTxRate = pEntry->MaxSupportedRate;
-
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef TXBF_SUPPORT
-	pEntry->HTPhyMode.field.iTxBF = pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn;
-	if (pAd->CommonCfg.TxStream == 1)
-		pEntry->iTxBfEn = 0;
-#endif // TXBF_SUPPORT //
-
-#ifdef NEW_RATE_ADAPT_SUPPORT
-#ifdef DOT11N_SS3_SUPPORT
-	if (((pAd->MACVersion == RALINK_2883_VERSION) || (pAd->MACVersion == RALINK_3883_VERSION)) &&
-		(pEntry->HTCapability.MCSSet[2] == 0xff) &&
-		(pAd->CommonCfg.TxStream == 3))
-		pEntry->mcsGroup = 3;
-	 else
-#endif // DOT11N_SS3_SUPPORT //
-	 if ((pEntry->HTCapability.MCSSet[0] == 0xff) &&
-	 	(pEntry->HTCapability.MCSSet[1] == 0xff) &&
-	 	(pAd->CommonCfg.TxStream > 1) && 
-		((pAd->CommonCfg.TxStream == 2) || (pEntry->HTCapability.MCSSet[2] == 0x0)))
-		pEntry->mcsGroup = 2;
-	else
-		pEntry->mcsGroup = 1;
-
-	pEntry->lastRateIdx = 1;
-	pEntry->fewPktsCnt = 0;
-	pEntry->perThrdAdj = PER_THRD_ADJ;
-#endif // NEW_RATE_ADAPT_SUPPORT //
-
-#ifdef MFB_SUPPORT
-	pEntry->lastLegalMfb = 0;
-	pEntry->isMfbChanged = FALSE;
-	pEntry->fLastChangeAccordingMfb = FALSE;
-
-	pEntry->toTxMrq = TRUE;
-	pEntry->msiToTx = 0;//has to increment whenever a mrq is sent
-	pEntry->mrqCnt = 0;
-
-	pEntry->pendingMfsi = 0;
-
-	pEntry->toTxMfb = FALSE;
-	pEntry->mfbToTx = 0;
-	pEntry->mfb0 = 0;
-	pEntry->mfb1 = 0;
-#endif	// MFB_SUPPORT //
-#ifdef NEW_RATE_ADAPT_SUPPORT
-	pEntry->useNewRateAdapt = 1;
-#else
-	pEntry->useNewRateAdapt = 0;
-#endif // NEW_RATE_ADAPT_SUPPORT //
-
-#ifdef TXBF_SUPPORT
-	pEntry->bfState = READY_FOR_SNDG0;
-	pEntry->sndgMcs = 0;
-	pEntry->sndgRateIdx = 0;
-	//record the result of the first sndg
-	pEntry->sndg0Mcs = 0;
-	pEntry->sndg0RateIdx = 0;
-	pEntry->sndg0Snr0 = 0;
-	pEntry->sndg0Snr1 = 0;
-	pEntry->sndg0Snr2 = 0;
-	pEntry->sndg1Mcs = 0;
-	pEntry->sndg1RateIdx = 0;
-	pEntry->sndg1Snr0 = 0;
-	pEntry->sndg1Snr1 = 0;
-	pEntry->sndg1Snr2 = 0;
-	pEntry->bf0Mcs = 0;
-	pEntry->bf0RateIdx = 0;
-	pEntry->bf1Mcs = 0;
-	pEntry->bf1RateIdx = 0;
-	pEntry->noSndgCnt = 0;
-	pEntry->eTxBfEnCond = pEntry->MaxHTPhyMode.field.eTxBF==0? 0: pAd->CommonCfg.ETxBfEnCond;
-	if (pAd->CommonCfg.TxStream == 1)
-		pEntry->eTxBfEnCond = 0;
-	pEntry->noSndgCntThrd = NO_SNDG_CNT_THRD;
-	pEntry->ndpSndgStreams = pAd->Antenna.field.TxPath;
-
-	RTMPInitTimer(pAd, &pEntry->eTxBfProbeTimer, GET_TIMER_FUNCTION(eTxBfProbeTimerExec), pEntry, FALSE);
-#endif // TXBF_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
-
+	
 	// Set asic auto fall back
 	if (pAd->StaCfg.bAutoTxRateSwitch == TRUE)
 	{

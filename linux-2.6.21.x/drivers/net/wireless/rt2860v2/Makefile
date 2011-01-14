@@ -27,6 +27,7 @@ PLATFORM = PC
 #PLATFORM = INF_TWINPASS
 #PLATFORM = INF_DANUBE
 #PLATFORM = INF_AR9
+#PLATFORM = INF_VR9
 #PLATFORM = BRCM_6358
 #PLATFORM = INF_AMAZON_SE
 #PLATFORM = CAVM_OCTEON
@@ -40,6 +41,11 @@ PLATFORM = PC
 #PLATFORM = DM6446
 #PLATFORM = FREESCALE8377
 #PLATFORM = BL2348
+#PLATFORM = BLUBB
+#PLATFORM = BLPMP
+#PLATFORM = MT85XX
+#PLATFORM = NXP_TV550
+#PLATFORM = MVL5
 
 #RELEASE Package
 RELEASE = DPA
@@ -122,14 +128,23 @@ LINUX_SRC = /home/sample/Customers/BroadLight/bl234x-linux-2.6.21-small-v29
 CROSS_COMPILE = mips-wrs-linux-gnu-
 endif
 
+ifeq ($(PLATFORM),BLUBB)
+LINUX_SRC = /home/sample/Customers/BroadLight/UBB/gmp20/linux-2.6.21-small
+CROSS_COMPILE = mips-wrs-linux-gnu-
+endif
+
+ifeq ($(PLATFORM),BLPMP)
+LINUX_SRC = /home/sample/Customers/BroadLight/UBB/pmp16/bl234x-linux-2.6.21-small-v30.2
+CROSS_COMPILE = mips-wrs-linux-gnu-
+endif
 
 ifeq ($(PLATFORM),PC)
 # Linux 2.6
-LINUX_SRC = /home/arvint/RalinkSDK_3883_PreRelease_Test/RT288x_SDK/source/linux-2.6.21.x/
+LINUX_SRC = /lib/modules/$(shell uname -r)/build
 # Linux 2.4 Change to your local setting
 #LINUX_SRC = /usr/src/linux-2.4
 LINUX_SRC_MODULE = /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/
-CROSS_COMPILE = /opt/buildroot-gcc342/bin/mipsel-linux-
+CROSS_COMPILE = 
 endif
 
 ifeq ($(PLATFORM),IXP)
@@ -155,6 +170,11 @@ endif
 ifeq ($(PLATFORM),INF_AR9)
 LINUX_SRC = /root/ar9/xR9_BSP1.2.2.0/source/kernel/opensource/linux-2.6.20/
 CROSS_COMPILE = /root/ar9/ifx-lxdb26-1.0.2/gcc-3.4.4/toolchain-mips/bin/
+endif
+
+ifeq ($(PLATFORM),INF_VR9)
+LINUX_SRC = /home/public/lantiq/VR9/UGW-4.2/build_dir/linux-ifxcpe_platform_vr9/linux-2.6.20.19
+CROSS_COMPILE = /home/public/lantiq/VR9/UGW-4.2/staging_dir/toolchain-mips_gcc-3.4.6_uClibc-0.9.29/bin/mips-linux-
 endif
 
 ifeq ($(PLATFORM),BRCM_6358)
@@ -202,6 +222,22 @@ endif
 
 ifeq ($(PLATFORM),DM6446)
 LINUX_SRC = /home/fonchi/work/soc/ti-davinci
+endif
+
+ifeq ($(PLATFORM),MT85XX)
+LINUX_SRC = /home/john/MTK/BDP_Linux/linux-2.6.27
+CROSS_COMPILE = armv6z-mediatek-linux-gnueabi-
+endif
+
+ifeq ($(PLATFORM),NXP_TV550) 
+LINUX_SRC = /data/tv550/kernel/linux-2.6.28.9
+LINUX_SRC_MODULE = /data/tv550/kernel/linux-2.6.28.9/drivers/net/wireless
+CROSS_COMPILE = /opt/embeddedalley/nxp_tv550/bin/mipsel-linux-
+endif
+
+ifeq ($(PLATFORM),MVL5)
+LINUX_SRC = /home2/charlestu/AP-VT3426/linux-2.6.18
+CROSS_COMPILE = /opt/montavista/pro/devkit/arm/v5t_le_mvl5/bin/arm_v5t_le-
 endif
 
 export OSABL RT28xx_DIR RT28xx_MODE LINUX_SRC CROSS_COMPILE CROSS_COMPILE_INCLUDE PLATFORM RELEASE CHIPSET RTMP_SRC_DIR LINUX_SRC_MODULE TARGET
@@ -405,4 +441,6 @@ libautoprovision:
 
 # Declare the contents of the .PHONY variable as phony.  We keep that information in a variable
 .PHONY: $(PHONY)
+
+
 

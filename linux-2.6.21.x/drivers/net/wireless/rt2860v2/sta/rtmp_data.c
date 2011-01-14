@@ -46,7 +46,8 @@ VOID STARxEAPOLFrameIndicate(
 		// TBD : process fragmented EAPol frames
 		{
 			// In 802.1x mode, if the received frame is EAP-SUCCESS packet, turn on the PortSecured variable
-			if ( pAd->StaCfg.IEEE8021X == TRUE &&
+			if ( (pAd->StaCfg.IEEE8021X == TRUE) &&
+				 (pAd->StaCfg.WepStatus == Ndis802_11WEPEnabled) &&
 				 (EAP_CODE_SUCCESS == WpaCheckEapCode(pAd, pRxBlk->pData, pRxBlk->DataSize, LENGTH_802_1_H)))
 			{
 				PUCHAR	Key; 			
@@ -73,7 +74,7 @@ VOID STARxEAPOLFrameIndicate(
 						// Assign pairwise key info
 						RTMP_SET_WCID_SEC_INFO(pAd, BSS0, idx, CipherAlg, BSSID_WCID, SHAREDKEYTABLE);
 
-                        pAd->IndicateMediaState = NdisMediaStateConnected;
+						RTMP_IndicateMediaState(pAd, NdisMediaStateConnected);
                         pAd->ExtraInfo = GENERAL_LINK_UP;
 						        
 						// For Preventing ShardKey Table is cleared by remove key procedure.
@@ -276,30 +277,6 @@ BOOLEAN STACheckTkipMICValue(
 
 
 #ifdef RTMP_RBUS_SUPPORT
-#if defined (RT2883) || defined (RT3883)
-// STASelectPktDetAntenna - Selects antenna with best RSSI to be used for packet detection
-VOID STASelectPktDetAntenna(
-	IN	PRTMP_ADAPTER	pAd)
-{
-	UCHAR rxAnts = ((pAd->StaCfg.BBPR3>>3) & 0x3) + 1;
-	UCHAR antValue;
-	
-	// Use antenna with best RSSI. Last RSSI is negative number. Find largest value
-	if (pAd->CommonCfg.PreAntSwitch) {
-		if (pAd->StaCfg.RssiSample.LastRssi0>-80 || rxAnts==1)
-			antValue = 0;
-		else if (pAd->StaCfg.RssiSample.LastRssi1 > pAd->StaCfg.RssiSample.LastRssi0)
-				antValue = (rxAnts==3 && pAd->StaCfg.RssiSample.LastRssi2>pAd->StaCfg.RssiSample.LastRssi1)? 2: 1;
-		else
-			antValue = (rxAnts==3 && pAd->StaCfg.RssiSample.LastRssi2>pAd->StaCfg.RssiSample.LastRssi0)? 2: 0;
-
-		if ((pAd->StaCfg.BBPR3 & 0x03) != antValue) {
-			pAd->StaCfg.BBPR3 = (pAd->StaCfg.BBPR3 & ~0x03) | antValue;
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, pAd->StaCfg.BBPR3);
-		}
-	}
-}
-#endif // defined (RT2883) || defined (RT3883) //
 #endif // RTMP_RBUS_SUPPORT //
 
 
@@ -585,7 +562,7 @@ VOID STAHandleRxDataFrame(
 	}
 #endif // DOT11_N_SUPPORT //
 
-//#ifdef SOFT_ENCRYPT
+#if defined(SOFT_ENCRYPT) || defined(ADHOC_WPA2PSK_SUPPORT)
 	/* Use software to decrypt the encrypted frame if necessary.
 	   If a received "encrypted" unicast packet(its WEP bit as 1) 
 	   and it's passed to driver with "Decrypted" marked as 0 in RxD. */
@@ -620,7 +597,7 @@ VOID STAHandleRxDataFrame(
    		/* Record the Decrypted bit as 1 */
    		pRxD->Decrypted = 1;
     }
-//#endif // SOFT_ENCRYPT //
+#endif // SOFT_ENCRYPT || ADHOC_WPA2PSK_SUPPORT //
 		
 
 	// 
@@ -661,7 +638,7 @@ VOID STAHandleRxDataFrame(
 	}					
 	else if (pRxD->U2M)
 	{
-		pAd->LastRxRate = (USHORT)((pRxWI->MCS) + (pRxWI->BW <<7) + (pRxWI->ShortGI <<8) + (pRxWI->STBC <<9) + (pRxWI->PHYMODE <<14));
+		pAd->LastRxRate = (USHORT)((pRxWI->MCS) + (pRxWI->BW <<7) + (pRxWI->ShortGI <<8)+ (pRxWI->PHYMODE <<14)) ;
 
 
 #if defined(DOT11Z_TDLS_SUPPORT) || defined(QOS_DLS_SUPPORT)
@@ -696,21 +673,13 @@ VOID STAHandleRxDataFrame(
 		pAd->StaCfg.LastSNR0 = (UCHAR)(pRxWI->SNR0);
 		pAd->StaCfg.LastSNR1 = (UCHAR)(pRxWI->SNR1);
 
-#ifdef DOT11N_SS3_SUPPORT
-			pAd->StaCfg.LastSNR2 = (UCHAR)(pRxWI->SNR2);				
-#endif // DOT11N_SS3_SUPPORT //
-#if defined (RT2883) || defined (RT3883)
-		pAd->StaCfg.BF_SNR[0] = BF_SNR_OFFSET + pRxWI->BF_SNR0;
-		pAd->StaCfg.BF_SNR[1] = BF_SNR_OFFSET + pRxWI->BF_SNR1;
-		pAd->StaCfg.BF_SNR[2] = BF_SNR_OFFSET + pRxWI->BF_SNR2;
-#endif // defined (RT2883) || defined (RT3883) //
+	
+#ifdef RTMP_RBUS_SUPPORT
+#endif // RTMP_RBUS_SUPPORT //
 
 		pAd->RalinkCounters.OneSecRxOkDataCnt++;
 
 #ifdef RTMP_RBUS_SUPPORT	
-#if defined (RT2883) || defined (RT3883)
-		STASelectPktDetAntenna(pAd);
-#endif // defined (RT2883) || defined (RT3883) //
 #endif // RTMP_RBUS_SUPPORT //
 
     	if (!((pHeader->Frag == 0) && (pHeader->FC.MoreFrag == 0)))
@@ -766,6 +735,9 @@ VOID STAHandleRxMgmtFrame(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	RX_BLK			*pRxBlk)
 {
+#ifdef ANT_DIVERSITY_SUPPORT
+	PRT28XX_RXD_STRUC	pRxD = &(pRxBlk->RxD);
+#endif // ANT_DIVERSITY_SUPPORT //
 	PRXWI_STRUC		pRxWI = pRxBlk->pRxWI;
 	PHEADER_802_11	pHeader = pRxBlk->pHeader;
 	PNDIS_PACKET	pRxPacket = pRxBlk->pRxPacket;
@@ -798,10 +770,6 @@ VOID STAHandleRxMgmtFrame(
 			pAd->StaCfg.LastSNR0 = (UCHAR)(pRxWI->SNR0);
 			pAd->StaCfg.LastSNR1 = (UCHAR)(pRxWI->SNR1);
 #ifdef RTMP_RBUS_SUPPORT
-#if defined (RT2883) || defined (RT3883)
-			pAd->StaCfg.LastSNR2 = (UCHAR)(pRxWI->SNR2);
-			STASelectPktDetAntenna(pAd);
-#endif // defined (RT2883) || defined (RT3883) //
 #endif // RTMP_RBUS_SUPPORT //
 		}
 
@@ -830,39 +798,6 @@ VOID STAHandleRxMgmtFrame(
 		*/
 		REPORT_MGMT_FRAME_TO_MLME(pAd, pRxWI->WirelessCliID, pHeader, pRxWI->MPDUtotalByteCount, 
 									pRxWI->RSSI0, pRxWI->RSSI1, pRxWI->RSSI2, MinSNR);
-
-#ifdef TXBF_SUPPORT
-		//ys
-		//according to Roger, WDS_SUPPORT has nothing to do with management frame
-/*		if ( FALSE
-#ifdef WDS_SUPPORT
-			|| bWdsPacket
-#endif // WDS_SUPPORT //
-			)
-		{
-			pRxBlk->pData += LENGTH_802_11_WITH_ADDR4;
-			pRxBlk->DataSize -= LENGTH_802_11_WITH_ADDR4;
-		}
-		else*/
-		{
-			pRxBlk->pData += LENGTH_802_11;
-			pRxBlk->DataSize -= LENGTH_802_11;
-		}
-
-		if (pHeader->FC.Order) {
-			//handleHtcField(pAd, pRxBlk);	// Ignore MCS FB
-			pRxBlk->pData += 4;
-			pRxBlk->DataSize -= 4;
-		}
-
-		// Check for compressed or non-compressed Sounding Response
-		if ( (pHeader->FC.SubType==SUBTYPE_ACTION || pHeader->FC.SubType==SUBTYPE_ACTION_NO_ACK) &&
-			  pRxBlk->pData[0]==CATEGORY_HT &&
-			 (pRxBlk->pData[1]==MIMO_N_BEACONFORM || pRxBlk->pData[1]==MIMO_BEACONFORM) )
-		{
-			handleBfFb(pAd, pRxBlk);
-		}
-#endif
 	} while (FALSE);
 
 	RELEASE_NDIS_PACKET(pAd, pRxPacket, NDIS_STATUS_SUCCESS);
@@ -985,11 +920,6 @@ BOOLEAN STARxDoneInterruptHandle(
 		RTMPWIEndianChange((PUCHAR)pRxWI, TYPE_RXWI);
 #endif
 
-#ifdef INCLUDE_DEBUG_QUEUE
-		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_RXWI)
-			dbQueueEnqueueRxFrame(pData, (UCHAR *)pHeader, pAd->CommonCfg.DebugFlags);
-#endif // INCLUDE_DEBUG_QUEUE //
-
 		// build RxCell
 		RxCell.pRxWI = pRxWI;
 		RxCell.pHeader = pHeader;
@@ -1022,57 +952,15 @@ BOOLEAN STARxDoneInterruptHandle(
 		{
 			pAd->ate.RxCntPerSec++;
 			ATESampleRssi(pAd, pRxWI);
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 			if (pAd->ate.bQARxStart == TRUE)
 			{
 				/* (*pRxD) has been swapped in GetPacketFromRxRing() */
 				ATE_QA_Statistics(pAd, pRxWI, pRxD,	pHeader);
 			}
 #ifdef RTMP_RBUS_SUPPORT
-#if defined(RT2883) || defined(RT3883)
-			// Check sounding frame
-			if (pHeader->FC.Type == BTYPE_MGMT)
-			{
-				RX_BLK			*pRxBlk = &RxCell;
-
-				pRxBlk->pData += LENGTH_802_11;
-				pRxBlk->DataSize -= LENGTH_802_11;
-
-				if (pHeader->FC.Order) {
-					pRxBlk->pData += 4;
-					pRxBlk->DataSize -= 4;
-					
-				}
-
-				if ((((pHeader->FC.SubType == SUBTYPE_ACTION) || (pHeader->FC.SubType == SUBTYPE_ACTION_NO_ACK)) 
-					&&  (pRxBlk ->pData)[ 0] == CATEGORY_HT 
-					&&  ((pRxBlk ->pData)[ 1] == MIMO_N_BEACONFORM //non-compressed beamforming report
-					|| (pRxBlk ->pData)[1] == MIMO_BEACONFORM)  )) //compressed beamforming report
-				{
-					// sounding frame
-					//printk("Receive sounding response\n");
-					if (pAd->ate.sounding == 1) {
-						int i, Nc = ((pRxBlk ->pData)[2] & 0x3) + 1;
-						pAd->ate.soundingSNR[0] = (CHAR)((pRxBlk ->pData)[8]);
-						pAd->ate.soundingSNR[1] = (Nc<2)? 0: (CHAR)((pRxBlk ->pData)[9]);
-						pAd->ate.soundingSNR[2] = (Nc<3)? 0: (CHAR)((pRxBlk ->pData)[10]);
-						pAd->ate.sounding = 2;
-						pAd->ate.soundingRespSize = pRxBlk->DataSize;
-						for (i=0; i<pRxBlk->DataSize && i<sizeof(pAd->ate.soundingResp); i++)
-							pAd->ate.soundingResp[i] = pRxBlk->pData[i];
-					}
-				}
-				// Roger Debug : Fix Me
-				else
-				{
-					if (pHeader->FC.Order)
-						DBGPRINT( RT_DEBUG_WARN, ("fcsubtype=%x\ndata[0]=%x\ndata[1]=%x\n", pHeader->FC.SubType, (pRxBlk ->pData)[ 0], (pRxBlk ->pData)[1]));
-				}
-
-			}
-#endif // defined(RT2883) || defined(RT3883) //
 #endif // RTMP_RBUS_SUPPORT //
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 			RELEASE_NDIS_PACKET(pAd, pRxPacket, NDIS_STATUS_SUCCESS);
 			continue;
 		}
@@ -1084,6 +972,7 @@ BOOLEAN STARxDoneInterruptHandle(
 		// Handle the received frame
 		if (Status == NDIS_STATUS_SUCCESS)
 		{
+
 			switch (pHeader->FC.Type)
 			{
 				// CASE I, receive a DATA frame
@@ -1372,6 +1261,15 @@ NDIS_STATUS STASendPacket(
 	QueIdx		 = QID_AC_BE;
 	RTMPCheckEtherType(pAd, pPacket, pEntry, &UserPriority, &QueIdx);
 
+#ifdef RTMP_RBUS_SUPPORT
+	// Debug Option: Force AC_VI
+	if (pAd->CommonCfg.DebugFlags & DBF_FORCE_AC_VI) {
+		UserPriority = 5;
+		QueIdx		 = QID_AC_VI;
+	}
+#endif // RTMP_RBUS_SUPPORT //
+
+	
 #ifdef WAPI_SUPPORT	
 	// Check the status of the controlled port and filter the outgoing frame for WAPI
 	if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWAICERT) || 
@@ -1407,6 +1305,18 @@ NDIS_STATUS STASendPacket(
 
 		return (NDIS_STATUS_FAILURE);
 	}
+
+#ifdef WSC_STA_SUPPORT
+	if ((pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE) &&
+		(pAd->StaCfg.WscControl.bWscTrigger == TRUE) &&
+		(RTMP_GET_PACKET_EAPOL(pPacket)== FALSE))
+	{
+		DBGPRINT(RT_DEBUG_TRACE,("STASendPacket --> Drop packet before WPS process completed !!!\n"));
+		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+
+		return (NDIS_STATUS_FAILURE);
+	}
+#endif // WSC_STA_SUPPORT //
 
 
 	// STEP 1. Decide number of fragments required to deliver this MSDU. 
@@ -1748,6 +1658,15 @@ VOID STAFindCipherAlgorithm(
 
 		if (KeyIdx == 0xff)
 			CipherAlg = CIPHER_NONE;
+#ifdef ADHOC_WPA2PSK_SUPPORT
+		else if ((ADHOC_ON(pAd)) 
+           && (Cipher == Ndis802_11Encryption3Enabled) 
+           && (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK) 
+           && (pAd->StaCfg.PortSecured == WPA_802_1X_PORT_SECURED)) {
+                CipherAlg = CIPHER_AES;
+    			pKey = &pAd->SharedKey[BSS0][KeyIdx];
+		} 
+#endif // ADHOC_WPA2PSK_SUPPORT //
 		else if ((Cipher == Ndis802_11EncryptionDisabled) || (pAd->SharedKey[BSS0][KeyIdx].KeyLen == 0))
 			CipherAlg = CIPHER_NONE;
 #ifdef WPA_SUPPLICANT_SUPPORT
@@ -2101,7 +2020,6 @@ VOID STA_AMPDU_Frame_Tx(
 	MAC_TABLE_ENTRY	*pMacEntry;
 	BOOLEAN			bVLANPkt;
 	PQUEUE_ENTRY	pQEntry;
-	BOOLEAN			bHTCPlus;
 	
 	ASSERT(pTxBlk);
 
@@ -2118,11 +2036,7 @@ VOID STA_AMPDU_Frame_Tx(
 		bVLANPkt = (RTMP_GET_PACKET_VLAN(pTxBlk->pPacket) ? TRUE : FALSE);
 		
 		pMacEntry = pTxBlk->pMacEntry;
-		if ((pMacEntry->isCached)
-#ifdef TXBF_SUPPORT
-			&& (pMacEntry->TxSndgType == SNDG_TYPE_DISABLE)
-#endif // TXBF_SUPPORT //
-		)
+		if (pMacEntry->isCached)
 		{
 			// NOTE: Please make sure the size of pMacEntry->CachedBuf[] is smaller than pTxBlk->HeaderBuf[]!!!!
 #ifndef VENDOR_FEATURE1_SUPPORT
@@ -2166,9 +2080,6 @@ VOID STA_AMPDU_Frame_Tx(
 #ifdef SOFT_ENCRYPT
 			&& !TX_BLK_TEST_FLAG(pTxBlk, fTX_bSwEncrypt)
 #endif // SOFT_ENCRYPT //
-#ifdef TXBF_SUPPORT
-			&& (pMacEntry->TxSndgType == SNDG_TYPE_DISABLE)
-#endif // TXBF_SUPPORT //
 		)
 		{
 			pHeader_802_11 = (HEADER_802_11 *) pHeaderBufPtr;
@@ -2214,16 +2125,9 @@ VOID STA_AMPDU_Frame_Tx(
 
 			//
 			// build HTC+ 
-			// HTC control field following QoS field
+			// HTC control filed following QoS field
 			// 
-			bHTCPlus = FALSE;
-			
-			if ((pAd->CommonCfg.bRdg == TRUE) 
-				&& CLIENT_STATUS_TEST_FLAG(pTxBlk->pMacEntry, fCLIENT_STATUS_RDG_CAPABLE)
-#ifdef TXBF_SUPPORT
-				&& (pMacEntry->TxSndgType != SNDG_TYPE_NDP)
-#endif
-			)
+			if ((pAd->CommonCfg.bRdg == TRUE) && CLIENT_STATUS_TEST_FLAG(pTxBlk->pMacEntry, fCLIENT_STATUS_RDG_CAPABLE))
 			{
 				if (pMacEntry->isCached == FALSE)
 				{
@@ -2233,91 +2137,6 @@ VOID STA_AMPDU_Frame_Tx(
 					NdisZeroMemory(pHeaderBufPtr, 4);
 					*(pHeaderBufPtr+3) |= 0x80;
 				}
-				
-				bHTCPlus = TRUE;
-			}
-
-#ifdef TXBF_SUPPORT
-			pTxBlk->TxSndgPkt = SNDG_TYPE_DISABLE;
-
-			NdisAcquireSpinLock(&pMacEntry->TxSndgLock);	
-			if (pMacEntry->TxSndgType >= SNDG_TYPE_SOUNGING)
-			{
-				DBGPRINT(RT_DEBUG_TRACE, ("--Sounding in AMPDU: TxSndgType=%d, MCS=%d\n",
-								pMacEntry->TxSndgType,
-								pMacEntry->TxSndgType==SNDG_TYPE_NDP? pMacEntry->sndgMcs: pTxBlk->pTransmit->field.MCS));
-
-				// Set HTC bit
-				if (bHTCPlus == FALSE)
-				{
-					bHTCPlus = TRUE;
-					NdisZeroMemory(pHeaderBufPtr, 4);
-				}
-	
-				if (pMacEntry->TxSndgType == SNDG_TYPE_SOUNGING)
-				{
-					// Select compress if supported. Otherwise select noncompress
-					if (pAd->CommonCfg.ETxBfNoncompress==0 &&
-						(pMacEntry->HTCapability.TxBFCap.ExpComBF>0) )
-						*(pHeaderBufPtr+2) |= 0xC0;
-					else
-						*(pHeaderBufPtr+2) |= 0x80;
-
-				}
-				else if (pMacEntry->TxSndgType == SNDG_TYPE_NDP)
-				{
-					// Select compress if supported. Otherwise select noncompress
-					if (pAd->CommonCfg.ETxBfNoncompress==0 &&
-						(pMacEntry->HTCapability.TxBFCap.ExpComBF>0) &&
-						(pMacEntry->HTCapability.TxBFCap.ComSteerBFAntSup >= (pMacEntry->sndgMcs/8))
-						)
-						*(pHeaderBufPtr+2) |= 0xC0;
-					else
-						*(pHeaderBufPtr+2) |= 0x80;
-
-					// Set NDP Announcement
-					*(pHeaderBufPtr+3) |= 0x01;
-
-					pTxBlk->TxNDPSndgBW = pMacEntry->sndgBW;
-					pTxBlk->TxNDPSndgMcs = pMacEntry->sndgMcs;
-				}
-	
-				pTxBlk->TxSndgPkt = pMacEntry->TxSndgType;
-				pMacEntry->TxSndgType = SNDG_TYPE_DISABLE;
-			}
-			
-			NdisReleaseSpinLock(&pMacEntry->TxSndgLock);
-				
-#ifdef MFB_SUPPORT
-#if defined(MRQ_FORCE_TX)//have to replace this by the correct condition!!!
-			pMacEntry->HTCapability.ExtHtCapInfo.MCSFeedback = MCSFBK_MRQ;
-#endif
-			if ((pMacEntry->HTCapability.ExtHtCapInfo.MCSFeedback >=MCSFBK_MRQ) &&
-					(pTxBlk->TxSndgPkt == SNDG_TYPE_DISABLE))//because the signal format of sounding frmae may be different from normal data frame, which may result in different MFB
-			{
-				if (bHTCPlus == FALSE)
-				{
-					bHTCPlus = TRUE;
-					NdisZeroMemory(pHeaderBufPtr, 4);
-				}					
-				MFB_PerPareMRQ(pAd, pHeaderBufPtr, pMacEntry);
-			}
-			if (pAd->CommonCfg.HtCapability.ExtHtCapInfo.MCSFeedback >=MCSFBK_MRQ && pMacEntry->toTxMfb == 1)
-			{
-				if (bHTCPlus == FALSE)
-				{
-					bHTCPlus = TRUE;
-					NdisZeroMemory(pHeaderBufPtr, 4);
-				}
-				MFB_PerPareMFB(pAd, pHeaderBufPtr, pMacEntry);// not complete yet!!!
-				pMacEntry->toTxMfb = 0;
-			}
-#endif // MFB_SUPPORT //
-#endif // TXBF_SUPPORT //
-
-			if (bHTCPlus)
-			{
-				pHeader_802_11->FC.Order = 1;
 				pHeaderBufPtr += 4;
 				pTxBlk->MpduHeaderLen += 4;
 			}
@@ -2417,11 +2236,7 @@ VOID STA_AMPDU_Frame_Tx(
 #endif // VENDOR_FEATURE1_SUPPORT //
 		}
 
-		if ((pMacEntry->isCached)
-#ifdef TXBF_SUPPORT
-			&& (pTxBlk->TxSndgPkt == SNDG_TYPE_DISABLE)
-#endif // TXBF_SUPPORT //
-		)
+		if (pMacEntry->isCached)
 		{
 			RTMPWriteTxWI_Cache(pAd, (PTXWI_STRUC)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), pTxBlk);
 		}
@@ -2441,11 +2256,6 @@ VOID STA_AMPDU_Frame_Tx(
 			pMacEntry->isCached = TRUE;
 		}
 
-#ifdef TXBF_SUPPORT
-		if (pTxBlk->TxSndgPkt != SNDG_TYPE_DISABLE)
-			pMacEntry->isCached = FALSE;
-#endif // TXBF_SUPPORT //
-
 #ifdef STATS_COUNT_SUPPORT
 		// calculate Transmitted AMPDU count and ByteCount 	
 		{
@@ -2457,11 +2267,6 @@ VOID STA_AMPDU_Frame_Tx(
 		//FreeNumber = GET_TXRING_FREENO(pAd, QueIdx);
 
 		HAL_WriteTxResource(pAd, pTxBlk, TRUE, &FreeNumber);
-
-#ifdef INCLUDE_DEBUG_QUEUE
-		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFRAME)
-			dbQueueEnqueueTxFrame((UCHAR *)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), (UCHAR *)pHeader_802_11);
-#endif
 
 		//
 		// Kick out Tx
@@ -2585,11 +2390,6 @@ VOID STA_AMSDU_Frame_Tx(
 		else
 			LastTxIdx = HAL_WriteMultiTxResource(pAd, pTxBlk, frameNum, &FreeNumber);
 		
-#ifdef INCLUDE_DEBUG_QUEUE
-		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFRAME)
-			dbQueueEnqueueTxFrame((UCHAR *)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), NULL);
-#endif
-
 		frameNum++;
 
 		pAd->RalinkCounters.KickTxCount++;
@@ -2772,15 +2572,17 @@ VOID STA_Legacy_Frame_Tx(
 
 	}
 
-	if (ADHOC_ON(pAd) 
+#ifdef ADHOC_WPA2PSK_SUPPORT
+	if (ADHOC_ON(pAd)     
         && (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)
         && (pAd->StaCfg.GroupCipher == Ndis802_11Encryption3Enabled)
         && (!pTxBlk->pMacEntry))
 	{
 		// use Wcid as Hardware Key Index
 		GET_GroupKey_WCID(pTxBlk->Wcid, BSS0);
-	}
-    
+	}        
+#endif // ADHOC_WPA2PSK_SUPPORT //
+        
 	//
 	// prepare for TXWI
 	// use Wcid as Key Index
@@ -2791,11 +2593,6 @@ VOID STA_Legacy_Frame_Tx(
 	//FreeNumber = GET_TXRING_FREENO(pAd, QueIdx);
 
 	HAL_WriteTxResource(pAd, pTxBlk, TRUE, &FreeNumber);
-	
-#ifdef INCLUDE_DEBUG_QUEUE
-	if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFRAME)
-		dbQueueEnqueueTxFrame((UCHAR *)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), (UCHAR *)pHeader_802_11);
-#endif
 	
 	pAd->RalinkCounters.KickTxCount++;
 	pAd->RalinkCounters.OneSecTxDoneCount++;
@@ -2901,11 +2698,6 @@ VOID STA_ARalink_Frame_Tx(
 			FirstTx = HAL_WriteMultiTxResource(pAd, pTxBlk, frameNum, &FreeNumber);
 		else
 			LastTxIdx = HAL_WriteMultiTxResource(pAd, pTxBlk, frameNum, &FreeNumber);
-
-#ifdef INCLUDE_DEBUG_QUEUE
-		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFRAME)
-			dbQueueEnqueueTxFrame((UCHAR *)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), NULL);
-#endif
 
 		frameNum++;
 		
@@ -3215,10 +3007,6 @@ VOID STA_Fragment_Frame_Tx(
 		
 		HAL_WriteFragTxResource(pAd, pTxBlk, fragNum, &FreeNumber);
 		
-#ifdef INCLUDE_DEBUG_QUEUE
-		if (pAd->CommonCfg.DebugFlags & DBF_DBQ_TXFRAME)
-			dbQueueEnqueueTxFrame((UCHAR *)(&pTxBlk->HeaderBuf[TXINFO_SIZE]), (UCHAR *)pHeader_802_11);
-#endif
 		pAd->RalinkCounters.KickTxCount++;
 		pAd->RalinkCounters.OneSecTxDoneCount++;
 

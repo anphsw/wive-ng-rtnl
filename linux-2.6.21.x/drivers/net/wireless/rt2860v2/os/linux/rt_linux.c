@@ -49,6 +49,7 @@ char const *pWirelessSysEventText[IW_SYS_EVENT_TYPE_NUM] = {
 	"Scanning",												/* IW_SCANNING_EVENT_FLAG */
 	"Start a new IBSS",										/* IW_START_IBSS_FLAG */
 	"Join the IBSS",										/* IW_JOIN_IBSS_FLAG */
+	"Shared WEP fail",										/* IW_SHARED_WEP_FAIL*/
 	};
 
 #ifdef IDS_SUPPORT
@@ -772,11 +773,6 @@ void wlan_802_11_to_802_3_packet(
 #endif // CONFIG_STA_SUPPORT //
 	}
 
-#ifdef CONFIG_AP_SUPPORT
-#ifdef BG_FT_SUPPORT
-extern UINT32 BG_FTPH_PacketFromApHandle(IN PNDIS_PACKET pPacket);
-#endif
-#endif
 
 void announce_802_3_packet(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -809,6 +805,17 @@ void announce_802_3_packet(
 #endif // CONFIG_STA_SUPPORT //
 
     /* Push up the protocol stack */
+#ifdef CONFIG_AP_SUPPORT
+#ifdef PLATFORM_BL2348
+{
+	extern int (*pToUpperLayerPktSent)(struct sk_buff *pSkb);
+	pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
+	pToUpperLayerPktSent(pRxPkt);
+	return;
+}
+#endif // PLATFORM_BL2348 //
+#endif // CONFIG_AP_SUPPORT //
+
 #ifdef IKANOS_VX_1X0
 	IKANOS_DataFrameRx(pAd, pRxPkt->dev, pRxPkt, pRxPkt->len);
 #else
@@ -850,38 +857,39 @@ void announce_802_3_packet(
 		ra_classifier_hook_rx(pRxPkt, classifier_cur_cycle);
 		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
-#endif // CONFIG_RA_CLASSIFIER //
+#endif // defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE) //
 
 #if !defined(CONFIG_RA_NAT_NONE)
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
-	FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
+       FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
 #endif // defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE) //
 
 	/*
-	 * ra_sw_nat_hook_rx return 1 --> continue
-	 * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
-	*/
+	  * ra_sw_nat_hook_rx return 1 --> continue
+	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
+	 */
 
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
 		unsigned int flags;
+		
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 
-		if(ra_sw_nat_hook_rx(pRxPkt))
+		if(ra_sw_nat_hook_rx(pRxPkt)) 
 		{
 			netif_rx(pRxPkt);
 		}
 
 		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
-	else
+	else 
 #else
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		FOE_AI(pRxPkt)=UN_HIT;
 #endif // defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) //
 #endif // !defined(CONFIG_RA_NAT_NONE) // 
-#endif // RTMP_RBUS_SUPPORT //
+ #endif // RTMP_RBUS_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT
 #ifdef BG_FT_SUPPORT
@@ -1293,7 +1301,14 @@ void send_monitor_packets(
 		/* data_rate is the rate index in the wireshark rate table */
 	  	if (pRxBlk->pRxWI->PHYMODE >= MODE_HTMIX)
 	  	{
-	     	if (pRxBlk->pRxWI->MCS > 15)
+			if (pRxBlk->pRxWI->MCS == 32)
+			{
+				if (pRxBlk->pRxWI->ShortGI)
+					ph_11n33->data_rate = 16;
+				else
+					ph_11n33->data_rate = 4;    
+			}
+			else if (pRxBlk->pRxWI->MCS > 15)
 	     		ph_11n33->data_rate = (16*4 + ((UCHAR)pRxBlk->pRxWI->BW *16) + ((UCHAR)pRxBlk->pRxWI->ShortGI *32) + ((UCHAR)pRxBlk->pRxWI->MCS));                          
 	     	else
 	     		ph_11n33->data_rate = 16 + ((UCHAR)pRxBlk->pRxWI->BW *16) + ((UCHAR)pRxBlk->pRxWI->ShortGI *32) + ((UCHAR)pRxBlk->pRxWI->MCS);
@@ -1508,7 +1523,6 @@ void RtmpOSTaskCustomize(
 #endif
 }
 
-
 NDIS_STATUS RtmpOSTaskAttach(
 	IN RTMP_OS_TASK *pTask,
 	IN RTMP_OS_TASK_CALLBACK fn, 
@@ -1522,11 +1536,11 @@ NDIS_STATUS RtmpOSTaskAttach(
 #ifdef KTHREAD_SUPPORT
 	pTask->task_killed = 0;
 	pTask->kthread_task = NULL;
-	pTask->kthread_task = kthread_run(fn, (void *)arg, pTask->taskName);
+	pTask->kthread_task = kthread_run((cast_fn)fn, (void *)arg, pTask->taskName);
 	if (IS_ERR(pTask->kthread_task))
 		status = NDIS_STATUS_FAILURE;
 #else
-	pid_number = kernel_thread(fn, (void *)arg, RTMP_OS_MGMT_TASK_FLAGS);
+	pid_number = kernel_thread((cast_fn)fn, (void *)arg, RTMP_OS_MGMT_TASK_FLAGS);
 	if (pid_number < 0) 
 	{
 		DBGPRINT (RT_DEBUG_ERROR, ("Attach task(%s) failed!\n", pTask->taskName));
@@ -1573,9 +1587,11 @@ NDIS_STATUS RtmpOSTaskInit(
 
 
 void RTMP_IndicateMediaState(
-	IN	PRTMP_ADAPTER	pAd)
-{
+	IN	PRTMP_ADAPTER		pAd,
+	IN  NDIS_MEDIA_STATE	media_state)
+{	
 #ifdef SYSTEM_LOG_SUPPORT
+		pAd->IndicateMediaState = media_state;
 		if (pAd->IndicateMediaState == NdisMediaStateConnected)
 		{
 			RTMPSendWirelessEvent(pAd, IW_STA_LINKUP_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0);
@@ -1583,7 +1599,7 @@ void RTMP_IndicateMediaState(
 		else
 		{							
 			RTMPSendWirelessEvent(pAd, IW_STA_LINKDOWN_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0); 		
-		}
+		}	
 #endif // SYSTEM_LOG_SUPPORT //
 }
 
@@ -2191,9 +2207,6 @@ NDIS_STATUS AdapterBlockAllocateMemory(
 	IN PVOID	handle,
 	OUT	PVOID	*ppAd)
 {
-#ifdef WORKQUEUE_BH
-	POS_COOKIE cookie;
-#endif // WORKQUEUE_BH //
 
 
 	*ppAd = (PVOID)vmalloc(sizeof(RTMP_ADAPTER)); //pci_alloc_consistent(pci_dev, sizeof(RTMP_ADAPTER), phy_addr);
@@ -2202,10 +2215,6 @@ NDIS_STATUS AdapterBlockAllocateMemory(
 	{
 		NdisZeroMemory(*ppAd, sizeof(RTMP_ADAPTER));
 		((PRTMP_ADAPTER)*ppAd)->OS_Cookie = handle;
-#ifdef WORKQUEUE_BH
-		cookie = (POS_COOKIE)(((PRTMP_ADAPTER)*ppAd)->OS_Cookie);
-		cookie->pAd_va = *ppAd;
-#endif // WORKQUEUE_BH //
 
 		return (NDIS_STATUS_SUCCESS);
 	} else {
@@ -2281,6 +2290,10 @@ EXPORT_SYMBOL(RtmpOSWrielessEventSend);
 #ifdef CONFIG_AP_SUPPORT
 EXPORT_SYMBOL(duplicate_pkt_with_VLAN);
 EXPORT_SYMBOL(VLAN_8023_Header_Copy);
+#ifdef BG_FT_SUPPORT
+EXPORT_SYMBOL(BG_FTPH_Init);
+EXPORT_SYMBOL(BG_FTPH_Remove);
+#endif // BG_FT_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
@@ -2312,11 +2325,4 @@ EXPORT_SYMBOL(RTMPPCIeLinkCtrlSetting);
 EXPORT_SYMBOL(RtmpFlashRead);
 EXPORT_SYMBOL(RtmpFlashWrite);
 #endif // RTMP_RBUS_SUPPORT //
-
-//#ifdef CONFIG_AP_SUPPORT
-//#ifdef NEW_DFS
-//EXPORT_SYMBOL(schedule_dfs_task);
-//#endif // NEW_DFS //
-//#endif // CONFIG_AP_SUPPORT //
-
 #endif // OS_ABL_SUPPORT //

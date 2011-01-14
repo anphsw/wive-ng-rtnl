@@ -515,9 +515,5 @@ void ChgSignalStrengthLed(
 	RTMP_IO_WRITE32(pAd, GPIO_DAT, (GPIOPolarity ? SignalStrength : ~SignalStrength));
 }
 
-#ifdef OS_ABL_SUPPORT
-EXPORT_SYMBOL(LedCheckTimer);
-EXPORT_SYMBOL(CheckTimerEbl);
-#endif // OS_ABL_SUPPORT //
 #endif
 

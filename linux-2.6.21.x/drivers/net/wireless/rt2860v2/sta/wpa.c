@@ -347,7 +347,6 @@ VOID WpaStaPairwiseKeySetting(
 						SHAREDKEYTABLE);
 
 	RTMP_SET_PORT_SECURED(pAd);
-	pAd->IndicateMediaState = NdisMediaStateConnected;
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("%s : AID(%d) port secured\n", __FUNCTION__, pEntry->Aid));
 

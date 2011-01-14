@@ -289,8 +289,9 @@ INT	Set_PollTime_Proc(
 	IN	PSTRING			arg);
 
 INT	Set_WidthShift_Proc(
-	IN	PRTMP_ADAPTER	pAd,
+	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
+
 
 #ifdef DFS_DEBUG
 INT	Set_CEPrintDebug_Proc(
@@ -303,37 +304,32 @@ INT	Set_PrintBusyIdle_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
-INT	Set_RadarSim_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
-
 INT	Set_BusyIdleRatio_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
-
 INT	Set_DfsRssiHigh_Proc(
-	IN	PRTMP_ADAPTER	pAd,
+	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
 INT	Set_DfsRssiLow_Proc(
-	IN	PRTMP_ADAPTER	pAd,
+	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
 INT	Set_Ch0EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
+	IN      PSTRING                 arg); 
 
 INT	Set_Ch1EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
+	IN      PSTRING                 arg); 
 
 INT	Set_Ch2EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
+	IN      PSTRING                 arg); 
 
 INT	Set_Ch3EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg); 
+	IN      PSTRING                 arg); 
 #endif // DFS_SUPPORT //
 
 INT	Set_CEPrint_Proc(
@@ -380,9 +376,6 @@ INT	Set_HWDFSDisabled_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
-INT	Set_CeSwCheck_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
 #endif // DFS_HARDWARE_SUPPORT //
 #endif // defined(RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 
@@ -562,6 +555,11 @@ INT	Show_MacTable_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 	
+
+INT	Show_StaCount_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
 INT	Show_StaSecurityInfo_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
@@ -733,9 +731,14 @@ INT	Set_AP_WscPinCode_Proc(
 	IN	PSTRING			arg);
 
 INT Set_AP_WscSecurityMode_Proc(    
-	IN  PRTMP_ADAPTER   pAd,     
-	IN  PSTRING          arg);
+	IN  PRTMP_ADAPTER   pAdapter,     
+	IN  PSTRING         arg);
+
+INT Set_AP_WscMultiByteCheck_Proc(    
+	IN  PRTMP_ADAPTER   pAd,
+	IN  PSTRING         arg);
 #endif // WSC_AP_SUPPORT //
+
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef MCAST_RATE_SPECIFIC
@@ -752,24 +755,6 @@ INT Set_OBSSScanParam_Proc(
 INT Set_AP2040ReScan_Proc(
 	IN PRTMP_ADAPTER   pAd,
 	IN PSTRING arg);
-
-#ifdef DOT11N_PF_DEBUG
-INT Set_HT_BssCoexNotify_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam);
-
-INT Set_HT_MaxBa_Proc(
-	IN PRTMP_ADAPTER pAd,
-	IN PSTRING	pParam);
-
-INT Set_HT_McsSet_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam);
-
-INT Set_HT_BssBWFallback_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam);
-#endif // DOT11N_PF_DEBUG //
 #endif // DOT11N_DRAFT3 //
 
 INT Set_EntryLifeCheck_Proc(
@@ -784,6 +769,11 @@ INT Set_WlanLed_Proc(
 #endif
 #endif // RTMP_RBUS_SUPPORT //
 
+#ifdef ANT_DIVERSITY_SUPPORT
+INT	Set_Antenna_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PUCHAR			arg);
+#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef AP_QLOAD_SUPPORT
 INT	Set_QloadClr_Proc(
@@ -800,12 +790,6 @@ INT	Set_QloadAlarmNumThreshold_Proc(
 	IN	PSTRING			Arg);
 #endif // AP_QLOAD_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
-
-#ifdef RT3883
-INT Set_CwCTest_Proc(
-		IN PRTMP_ADAPTER pAd, 
-		IN PSTRING   arg);
-#endif // RT3883 //
 
 INT	Set_MemDebug_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -977,10 +961,9 @@ static struct {
 	{"CEPrint",						Set_CEPrint_Proc},
 
 #ifdef DFS_SUPPORT
-	{"RadarSim",					Set_RadarSim_Proc},
 	{"PrintBusyIdle",				Set_PrintBusyIdle_Proc},
 	{"BusyIdleRatio",				Set_BusyIdleRatio_Proc},
-	{"DfsRssiHigh",   				Set_DfsRssiHigh_Proc},
+        {"DfsRssiHigh",   				Set_DfsRssiHigh_Proc},
 	{"DfsRssiLow",					Set_DfsRssiLow_Proc},
 	{"Ch0EventExpire",				Set_Ch0EventExpire_Proc},
 	{"Ch1EventExpire",				Set_Ch1EventExpire_Proc},
@@ -1002,7 +985,6 @@ static struct {
 	{"DeclareThres",				Set_DeclareThres_Proc},
 	{"CEStagCheck",					Set_CEStagCheck_Proc},
 	{"HWDFSDisabled",				Set_HWDFSDisabled_Proc},
-	{"CeSwCheck",					Set_CeSwCheck_Proc},
 #endif // DFS_HARDWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 
@@ -1029,17 +1011,19 @@ static struct {
 	{"ATESA",						Set_ATE_SA_Proc},
 	{"ATEBSSID",					Set_ATE_BSSID_Proc},
 	{"ATECHANNEL",				Set_ATE_CHANNEL_Proc},
-	{"ATEINITCHAN",				Set_ATE_INIT_CHAN_Proc},
+//2010/01/27:Rorscha add to support INTERNAL_TX_ALC<--
+#ifdef RTMP_INTERNAL_TX_ALC
+	{"ATETSSICBA",				Set_ATE_TSSI_CALIBRATION_Proc},
+#endif // RTMP_INTERNAL_TX_ALC //
+//2010/01/27:Rorscha add to support INTERNAL_TX_ALC-->
 	{"ATETXPOW0",				Set_ATE_TX_POWER0_Proc},
 	{"ATETXPOW1",				Set_ATE_TX_POWER1_Proc},
-#ifdef DOT11N_SS3_SUPPORT
-	{"ATETXPOW2",				Set_ATE_TX_POWER2_Proc},
-#endif // DOT11N_SS3_SUPPORT //
 	{"ATETXANT",					Set_ATE_TX_Antenna_Proc},
 	{"ATERXANT",					Set_ATE_RX_Antenna_Proc},
 #ifdef RT3350
 	{"ATEPABIAS",				Set_ATE_PA_Bias_Proc},
 #endif // RT3350 //
+
 	{"ATETXFREQOFFSET",			Set_ATE_TX_FREQOFFSET_Proc},
 	{"ATETXBW",					Set_ATE_TX_BW_Proc},
 	{"ATETXLEN",					Set_ATE_TX_LENGTH_Proc},
@@ -1062,22 +1046,9 @@ static struct {
 	{"ATEAUTOALC",					Set_ATE_AUTO_ALC_Proc},
 	{"ATEIPG",						Set_ATE_IPG_Proc},
 	{"ATEPAYLOAD",					Set_ATE_Payload_Proc},
-#ifdef TXBF_SUPPORT
-	{"ATETXBF",						Set_ATE_TXBF_Proc},
-	{"ATETXSOUNDING",				Set_ATE_TXSOUNDING_Proc},
-	{"ATETXBFDIVCAL",				Set_ATE_TXBF_DIVCAL_Proc},
-	{"ATETXBFLNACAL",				Set_ATE_TXBF_LNACAL_Proc},
-	{"ATETxBfInit",					Set_ATE_TXBF_INIT_Proc},
-	{"ATETxBfCal",					Set_ATE_TXBF_CAL_Proc},
-	{"ATETxBfGolden",					Set_ATE_TXBF_GOLDEN_Proc},
-	{"ATETxBfVerify",					Set_ATE_TXBF_VERIFY_Proc},
-	{"ATETxBfVerifyN",					Set_ATE_TXBF_VERIFY_NoComp_Proc},
-	{"ATEForceBBP",					Set_ATE_ForceBBP_Proc},
-#endif // TXBF_SUPPORT //
 	{"ATESHOW",					Set_ATE_Show_Proc},
 	{"ATEHELP",					Set_ATE_Help_Proc},
-
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 	{"TxStop",					Set_TxStop_Proc},
 	{"RxStop",					Set_RxStop_Proc},
 #ifdef DBG
@@ -1086,7 +1057,7 @@ static struct {
 	{"BBPRead",						Set_BBPRead_Proc},
 	{"BBPWrite",					Set_BBPWrite_Proc},
 #endif // DBG //
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 #endif // RALINK_ATE //
 
 #ifdef APCLI_SUPPORT
@@ -1118,6 +1089,7 @@ static struct {
 	{"WscGenPinCode",               		Set_WscGenPinCode_Proc},
 	{"WscVendorPinCode",            Set_WscVendorPinCode_Proc},
 	{"WscSecurityMode",				Set_AP_WscSecurityMode_Proc},
+	{"WscMultiByteCheck",			Set_AP_WscMultiByteCheck_Proc},
 #endif // WSC_AP_SUPPORT //
 #ifdef UAPSD_AP_SUPPORT
 	{"UAPSDCapable",				Set_UAPSD_Proc},
@@ -1154,51 +1126,13 @@ static struct {
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
-#ifdef TXBF_SUPPORT
-	{"TxBfTag",				        Set_TxBfTag_Proc},
-	{"ReadITxBf",				    Set_ReadITxBf_Proc},
-	{"WriteITxBf",				    Set_WriteITxBf_Proc},
-	{"StatITxBf",				    Set_StatITxBf_Proc},
-	{"ReadETxBf",				    Set_ReadETxBf_Proc},
-	{"WriteETxBf",				    Set_WriteETxBf_Proc},
-	{"StatETxBf",				    Set_StatETxBf_Proc},
-	{"ITxBfTimeout",		        Set_ITxBfTimeout_Proc},
-	{"ETxBfTimeout",		        Set_ETxBfTimeout_Proc},
-	{"InvTxBfTag",				    Set_InvTxBfTag_Proc},
-	{"ITxBfCal",				    Set_ITxBfCal_Proc},
-	{"ITxBfDivCal",				    Set_ITxBfDivCal_Proc},
-	{"ITxBfLnaCal",				    Set_ITxBfLnaCal_Proc},
-
-	{"ITxBfEn",						Set_ITxBfEn_Proc},
-	{"ETxBfEnCond",					Set_ETxBfEnCond_Proc},
-	{"ETxBfCodebook",				Set_ETxBfCodebook_Proc},
-	{"ETxBfCoefficient",			Set_ETxBfCoefficient_Proc},
-	{"ETxBfGrouping",				Set_ETxBfGrouping_Proc},
-	{"ETxBfNoncompress",			Set_ETxBfNoncompress_Proc},
-	{"NoSndgCntThrd",				Set_NoSndgCntThrd_Proc},		
-	{"NdpSndgStreams",				Set_NdpSndgStreams_Proc},		
-	{"TriggerSounding",				Set_Trigger_Sounding_Proc},
-#endif // TXBF_SUPPORT //
 
 #ifdef NEW_RATE_ADAPT_SUPPORT
 	{"PerThrdAdj",					Set_PerThrdAdj_Proc},
 #endif // NEW_RATE_ADAPT_SUPPORT //
 
-#if defined (RT2883) || defined (RT3883)
-	{"PreAntSwitch",		        Set_PreAntSwitch_Proc},
-	{"PhyRateLimit",				Set_PhyRateLimit_Proc},
-	{"FixedRate",					Set_FixedRate_Proc},
-#endif // defined (RT2883) || defined (RT3883) //
-
-#ifdef STREAM_MODE_SUPPORT
-	{"StreamMode",					Set_StreamMode_Proc},
-	{"StreamModeMac",				Set_StreamModeMac_Proc},
-#endif // STREAM_MODE_SUPPORT //
 
 	{"DebugFlags",					Set_DebugFlags_Proc},
-#ifdef INCLUDE_DEBUG_QUEUE
-	{"DebugQueue",					Set_DebugQueue_Proc},
-#endif
 #endif // RTMP_RBUS_SUPPORT //
 
 	{"LongRetry",	        		Set_LongRetryLimit_Proc},
@@ -1219,13 +1153,6 @@ static struct {
 	{"AP2040Rescan",				Set_AP2040ReScan_Proc},
 	{"HtBssCoex",						Set_HT_BssCoex_Proc},
 	{"HtBssCoexApCntThr",				Set_HT_BssCoexApCntThr_Proc},
-#ifdef DOT11N_PF_DEBUG
-	{"HtBssFallback", 					Set_HT_BssBWFallback_Proc},
-	{"HtMaxBa",						Set_HT_MaxBa_Proc},
-	{"HtMcsSet",						Set_HT_McsSet_Proc},
-	{"HtBssCoexNotify",				Set_HT_BssCoexNotify_Proc},
-#endif // DOT11N_PF_DEBUG //
-
 #endif // DOT11N_DRAFT3 //
 	{"EntryLifeCheck",				Set_EntryLifeCheck_Proc},
 #ifdef WMM_ACM_SUPPORT
@@ -1236,10 +1163,6 @@ static struct {
 #ifdef WLAN_LED
 	{"WlanLed",					Set_WlanLed_Proc},
 #endif // WLAN_LED //
-#ifdef RT3883
-	{"VCORecalibrationThreshold",		Set_VCORecalibrationThreshold_Proc},
-	{"VCORecalibration",				Set_VCORecalibration_Proc},
-#endif // RT3883 //
 #endif // RTMP_RBUS_SUPPORT //
 
 #ifdef AP_QLOAD_SUPPORT
@@ -1250,6 +1173,12 @@ static struct {
 
 	{"memdebug",					Set_MemDebug_Proc},
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef MBSS_SUPPORT
+	{"MBSSWirelessMode",			Set_MBSS_WirelessMode_Proc},
+#endif // MBSS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
+
 	{NULL,}
 };
 
@@ -1259,6 +1188,7 @@ static struct {
 	INT (*set_proc)(PRTMP_ADAPTER pAdapter, PSTRING arg);
 } *PRTMP_PRIVATE_SHOW_PROC, RTMP_PRIVATE_SHOW_SUPPORT_PROC[] = {
 	{"stainfo",			Show_MacTable_Proc},
+	{"stacountinfo",			Show_StaCount_Proc},
 	{"stasecinfo", 			Show_StaSecurityInfo_Proc},	
 	{"descinfo",			Show_DescInfo_Proc},
 	{"driverinfo", 			Show_DriverInfo_Proc},
@@ -1291,6 +1221,9 @@ static struct {
 #ifdef APCLI_SUPPORT
 	{"connStatus",			RTMPIoctlConnStatus},
 #endif
+#ifdef MBSS_SUPPORT
+	{"mbss",			Show_MbssInfo_Display_Proc},
+#endif // MBSS_SUPPORT //
 	{NULL,}
 };
 
@@ -1463,10 +1396,8 @@ INT RTMPAPSetInformation(
 	struct ieee80211req_del_key			delkey;
 	ULONG								KeyIdx;
 	PMULTISSID_STRUCT	pMbss ;
-#ifdef WSC_AP_SUPPORT
 	WSC_LV_INFO            WscIEBeacon;
    	WSC_LV_INFO            WscIEProbeResp;
-#endif //WSC_AP_SUPPORT//
 	int i;
 #endif //HOSTAPD_SUPPORT//
 
@@ -1539,22 +1470,24 @@ INT RTMPAPSetInformation(
 			break;
 		case RT_SET_DEL_MAC_ENTRY:
     		if (copy_from_user(Addr, wrq->u.data.pointer, wrq->u.data.length))
-			{
+		{
 				Status = -EFAULT; 	
-			}
+		}
     		else
     		{
-				MAC_TABLE_ENTRY *pEntry = NULL;
+			UCHAR HashIdx;
+			MAC_TABLE_ENTRY *pEntry = NULL;
 			
-				DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_DEL_MAC_ENTRY::(%02x:%02x:%02x:%02x:%02x:%02x)\n", Addr[0],Addr[1],Addr[2],Addr[3],Addr[4],Addr[5]));
+			DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_DEL_MAC_ENTRY::(%02x:%02x:%02x:%02x:%02x:%02x)\n", Addr[0],Addr[1],Addr[2],Addr[3],Addr[4],Addr[5]));
 
-				pEntry = MacTableLookup(pAd, Addr);
+			HashIdx = MAC_ADDR_HASH_INDEX(Addr);
+			pEntry = pAd->MacTab.Hash[HashIdx];
 			
-				if (pEntry)
-				{
-					MlmeDeAuthAction(pAd, pEntry, REASON_DISASSOC_STA_LEAVING, FALSE);
+			if (pEntry)
+			{
+				MlmeDeAuthAction(pAd, pEntry, REASON_DISASSOC_STA_LEAVING, FALSE);
 //					MacTableDeleteEntry(pAd, pEntry->Aid, Addr);				
-				}
+			}
     		}
 			break;
 #ifdef WSC_AP_SUPPORT
@@ -2086,8 +2019,8 @@ INT RTMPAPSetInformation(
 
 			Status  = -EINVAL;
 			UCHAR	apidx;
-			POS_COOKIE pObj;
-			pObj = (POS_COOKIE) pAd->OS_Cookie;
+			//POS_COOKIE pObj;
+			//pObj = (POS_COOKIE) pAd->OS_Cookie;
 			apidx = pObj->ioctl_if;
 			if(wrq->u.data.length != sizeof(struct ieee80211req_key) || !wrq->u.data.pointer)
 				break;
@@ -2413,30 +2346,31 @@ INT RTMPAPSetInformation(
 			}
 			break;
 
-	case HOSTAPD_OID_SET_WPS_BEACON_IE://pure 1x is enabled.
-#ifdef WSC_AP_SUPPORT
-				DBGPRINT(RT_DEBUG_TRACE,("HOSTAPD_OID_SET_WPS_BEACON_IE\n"));
-				if (wrq->u.data.length != sizeof(WSC_LV_INFO))
+	case HOSTAPD_OID_SET_WPS_BEACON_IE:
+			DBGPRINT(RT_DEBUG_TRACE,("HOSTAPD_OID_SET_WPS_BEACON_IE\n"));
+			if (wrq->u.data.length != sizeof(WSC_LV_INFO))
+			{
+				Status  = -EINVAL;
+			}
+			else
+			{	
+				pAd->ApCfg.HostapdWPS = TRUE;
+				MULTISSID_STRUCT *pMBSSStruct;
+				NdisZeroMemory(&WscIEBeacon,sizeof(WSC_LV_INFO));
+				Status = copy_from_user(&WscIEBeacon, wrq->u.data.pointer, wrq->u.data.length);
+				if ((Status == NDIS_STATUS_SUCCESS) && (WscIEBeacon.ValueLen > 0))
 				{
-					Status  = -EINVAL;
-				}
-				else
-				{	
-					pAd->ApCfg.HostapdWPS = TRUE;
-					MULTISSID_STRUCT *pMBSSStruct;
-					NdisZeroMemory(&WscIEBeacon,sizeof(WSC_LV_INFO));
-					Status = copy_from_user(&WscIEBeacon, wrq->u.data.pointer, wrq->u.data.length);
-					pMBSSStruct = &pAd->ApCfg.MBSSID[0];
+					hex_dump("WPS IE", WscIEBeacon.Value, WscIEBeacon.ValueLen);
+					pMBSSStruct = &pAd->ApCfg.MBSSID[pObj->ioctl_if];
 					NdisMoveMemory(pMBSSStruct->WscIEBeacon.Value,WscIEBeacon.Value, WscIEBeacon.ValueLen);
 					pMBSSStruct->WscIEBeacon.ValueLen=WscIEBeacon.ValueLen;
 					APMakeAllBssBeacon(pAd);
-					APUpdateAllBeaconFrame(pAd);									
+					APUpdateAllBeaconFrame(pAd);
 				}
-#endif
+			}
 			break;
 
-	case HOSTAPD_OID_SET_WPS_PROBE_RESP_IE://pure 1x is enabled.
-#ifdef WSC_AP_SUPPORT
+	case HOSTAPD_OID_SET_WPS_PROBE_RESP_IE:
 				DBGPRINT(RT_DEBUG_TRACE,("HOSTAPD_OID_SET_WPS_PROBE_RESP_IE\n"));
 				if (wrq->u.data.length != sizeof(WSC_LV_INFO))
 				{
@@ -2457,7 +2391,6 @@ INT RTMPAPSetInformation(
 					APUpdateAllBeaconFrame(pAd);
 									
 				}
-#endif
 			break;
 #endif //HOSTAPD_SUPPORT//
 
@@ -2514,6 +2447,7 @@ INT RTMPAPQueryInformation(
 	NDIS_802_11_STATISTICS	*pStatistics;
 	ULONG ulInfo;
 #endif // RTMP_RBUS_SUPPORT //
+
 
     switch(cmd)
     {
@@ -2913,27 +2847,6 @@ INT RTMPAPQueryInformation(
             break;
 
 #ifdef DOT11_N_SUPPORT
-#ifdef TXBF_SUPPORT
-		case RT_OID_802_11_QUERY_TXBF_TABLE:
-			{
-				INT i;
-				RT_802_11_TXBF_TABLE MacTab;
-
-				MacTab.Num = 0;
-				for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
-				{
-					if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]) && (pAd->MacTab.Content[i].Sst == SST_ASSOC))
-					{
-						memcpy(&MacTab.Entry[MacTab.Num], &pAd->MacTab.Content[i].TxBFCounters, sizeof(RT_COUNTER_TXBF));
-						MacTab.Num++;
-					}
-				}
-
-				wrq->u.data.length = sizeof(RT_802_11_TXBF_TABLE);
-				Status = copy_to_user(wrq->u.data.pointer, &MacTab, wrq->u.data.length);
-			}
-			break;
-#endif // TXBF_SUPPORT //
 #endif // DOT11_N_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
@@ -3146,11 +3059,7 @@ INT RTMPAPQueryInformation(
 		case RT_OID_802_11_SNR_0:
 			if ((pAd->ApCfg.LastSNR0 > 0))
 			{
-#ifdef DOT11N_SS3_SUPPORT
-				ulInfo = (pAd->ApCfg.LastSNR0 * 3 + 8) >> 4;
-#else
 				ulInfo = ((0xeb	- pAd->ApCfg.LastSNR0) * 3) >> 4 ;
-#endif // DOT11N_SS3_SUPPORT//
 				wrq->u.data.length = sizeof(ulInfo);
 				Status = copy_to_user(wrq->u.data.pointer, &ulInfo,	wrq->u.data.length);
 				DBGPRINT(RT_DEBUG_TRACE, ("Query::RT_OID_802_11_SNR_0(0x=%lx)\n", ulInfo));
@@ -3162,11 +3071,7 @@ INT RTMPAPQueryInformation(
 			if ((pAd->Antenna.field.RxPath	> 1) && 
                 (pAd->ApCfg.LastSNR1 > 0))
 			{
-#ifdef DOT11N_SS3_SUPPORT
-				ulInfo = (pAd->ApCfg.LastSNR1 * 3 + 8) >> 4;
-#else
 				ulInfo = ((0xeb	- pAd->ApCfg.LastSNR1) * 3) >> 4 ;
-#endif // DOT11N_SS3_SUPPORT //
 				wrq->u.data.length = sizeof(ulInfo);
 				Status = copy_to_user(wrq->u.data.pointer, &ulInfo,	wrq->u.data.length);
 				DBGPRINT(RT_DEBUG_TRACE,("Query::RT_OID_802_11_SNR_1(0x=%lx)\n",ulInfo));
@@ -3175,22 +3080,8 @@ INT RTMPAPQueryInformation(
 				Status = -EFAULT;
             DBGPRINT(RT_DEBUG_TRACE,("Query::RT_OID_802_11_SNR_1(pAd->ApCfg.LastSNR1=%d)\n",pAd->ApCfg.LastSNR1));
 			break;
-#ifdef DOT11N_SS3_SUPPORT
-		case RT_OID_802_11_SNR_2:
-			if ((pAd->Antenna.field.RxPath	> 2) && 
-                (pAd->ApCfg.LastSNR2 > 0))
-			{
-				ulInfo = (pAd->ApCfg.LastSNR2 * 3 + 8) >> 4;
-				wrq->u.data.length = sizeof(ulInfo);
-				Status = copy_to_user(wrq->u.data.pointer, &ulInfo,	wrq->u.data.length);
-				DBGPRINT(RT_DEBUG_TRACE,("Query::RT_OID_802_11_SNR_2(0x=%lx)\n",ulInfo));
-			}
-			else
-				Status = -EFAULT;
-            DBGPRINT(RT_DEBUG_TRACE,("Query::RT_OID_802_11_SNR_2(pAd->ApCfg.LastSNR2=%d)\n",pAd->ApCfg.LastSNR2));
-			break;
-#endif // DOT11N_SS3_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
+
 
    		default:
 			DBGPRINT(RT_DEBUG_TRACE, ("Query::unknown IOCTL's subcmd = 0x%08x, apidx=%d\n", cmd, apidx));
@@ -3567,11 +3458,15 @@ INT Set_BasicRate_Proc(
 	IN	PSTRING			arg)
 {
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
+	ULONG BasicRateBitmap;
 
-    pAd->CommonCfg.BasicRateBitmap = (ULONG) simple_strtol(arg, 0, 10);
+    BasicRateBitmap = (ULONG) simple_strtol(arg, 0, 10);
 
-    if (pAd->CommonCfg.BasicRateBitmap > 4095) // (2 ^ MAX_LEN_OF_SUPPORTED_RATES) -1
+    if (BasicRateBitmap > 4095) // (2 ^ MAX_LEN_OF_SUPPORTED_RATES) -1
         return FALSE;
+
+    pAd->CommonCfg.BasicRateBitmap = BasicRateBitmap;
+    pAd->CommonCfg.BasicRateBitmapOld = BasicRateBitmap;
 
     MlmeUpdateTxRates(pAd, FALSE, (UCHAR)pObj->ioctl_if);
 
@@ -3669,11 +3564,9 @@ INT	Set_RadarShow_Proc(
 		printk("Ch0HErr = %d\n", pAd->CommonCfg.dfs_width_ch0_err_H);
 		printk("Ch1Shift = %d\n", pAd->CommonCfg.dfs_width_diff_ch1_Shift);
 		printk("Ch2Shift = %d\n", pAd->CommonCfg.dfs_width_diff_ch2_Shift);
-		printk("CeSwCheck = %d\n", pAd->CommonCfg.ce_sw_check);
+		printk("CEStagCheck = %d\n", pAd->CommonCfg.ce_staggered_check);
 		printk("HWDFSDisabled = %d\n", pAd->CommonCfg.hw_dfs_disabled);
-		printk("WidthDiffShift = %d\n", pAd->CommonCfg.dfs_width_diff_Shift);
-		printk("DfsRssiHigh = %d\n", pAd->CommonCfg.DfsRssiHigh);
-		printk("DfsRssiLow = %d\n", pAd->CommonCfg.DfsRssiLow);
+		printk("WidthDiffShift = %d\n", pAd->CommonCfg.dfs_width_diff_Shift);	
 		
 		printk("CheckLoop = %d\n", pAd->CommonCfg.dfs_check_loop);
 		printk("DeclareThres = %d\n", pAd->CommonCfg.dfs_declare_thres);
@@ -3746,28 +3639,26 @@ INT	Set_RadarShow_Proc(
 #ifdef DFS_SUPPORT
 /* 	0 = Switch Channel when Radar Hit (Normal mode) 
 	1 = Don't Switch Channel when Radar Hit */
-#ifdef DFS_HARDWARE_SUPPORT
 INT	Set_RadarDebug_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
 	pAd->CommonCfg.McuRadarDebug = simple_strtol(arg, 0, 16);
-
+	
 	if (pAd->CommonCfg.McuRadarDebug & RADAR_DONT_SWITCH)
 		printk("Dont Switch Channel\n");
 
 	if (pAd->CommonCfg.McuRadarDebug & RADAR_DEBUG_SILENCE)
 		printk("Silence\n");
-
+	
 	if (pAd->CommonCfg.McuRadarDebug & RADAR_DEBUG_EVENT)
 		printk("Show Long pulse Event\n");
-
+	
 	if (pAd->CommonCfg.McuRadarDebug & RADAR_DEBUG_SW_SILENCE)
 		printk("SW detection Silence\n");
 
 	return TRUE;
 }
-#endif // DFS_HARDWARE_SUPPORT //
 
 INT	Set_RadarHit_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -3925,10 +3816,8 @@ INT	Set_RadarLog_Proc(
 		pAd->CommonCfg.McuRadarDebug &= ~RADAR_LOG;
 	else if (a == 1)
 		pAd->CommonCfg.McuRadarDebug |= RADAR_LOG;
-#ifdef RTMP_RBUS_SUPPORT
 	else if (a == 2)
 		DFS_Dump(pAd);
-#endif // RTMP_RBUS_SUPPORT //
 #endif // DFS_HARDWARE_SUPPORT //
 
 	return TRUE;
@@ -4133,7 +4022,7 @@ INT	Set_PollTime_Proc(
 }
 
 INT	Set_WidthShift_Proc(
-	IN	PRTMP_ADAPTER	pAd,
+	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
 	pAd->CommonCfg.dfs_width_diff_Shift = simple_strtol(arg, 0, 10);
@@ -4222,14 +4111,6 @@ INT	Set_HWDFSDisabled_Proc(
 	return TRUE;
 }
 
-INT	Set_CeSwCheck_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg)
-{
-	pAd->CommonCfg.ce_sw_check = simple_strtol(arg, 0, 10);
-	return TRUE;
-}
-
 #ifdef DFS_SUPPORT
 #ifdef DFS_DEBUG
 INT	Set_CEPrintDebug_Proc(
@@ -4263,37 +4144,6 @@ INT	Set_CEPrintDebug_Proc(
 }
 #endif // DFS_DEBUG //
 
-INT	Set_RadarSim_Proc(
-IN	PRTMP_ADAPTER	pAd,
-IN	PSTRING			arg)
-{
-int i=0, id=0;
-int dfs_data[] = {		208, 142172,
-					160, 260514,
-					208, 363873,
-					160, 482216,
-					208, 585575,
-					164, 703918,
-					208, 807277,
-					160, 925620,
-					208, 1028979,
-					164, 1147321};
-
-	pAd->CommonCfg.dfs_w_counter++;
-	for (i = 0; i < 10; i++)
-	{
-		pAd->CommonCfg.DFS_W[id][pAd->CommonCfg.dfs_w_idx[id]].counter = pAd->CommonCfg.dfs_w_counter;
-		pAd->CommonCfg.DFS_W[id][pAd->CommonCfg.dfs_w_idx[id]].timestamp = dfs_data[2*i+1];
-		pAd->CommonCfg.DFS_W[id][pAd->CommonCfg.dfs_w_idx[id]].width = dfs_data[2*i];
-		pAd->CommonCfg.dfs_w_last_idx[id] = pAd->CommonCfg.dfs_w_idx[id];
-		pAd->CommonCfg.dfs_w_idx[id]++;
-		if (pAd->CommonCfg.dfs_w_idx[id] >= NEW_DFS_DBG_PORT_ENT_NUM)
-			pAd->CommonCfg.dfs_w_idx[id] = 0;	
-	}
-	pAd->CommonCfg.hw_idx[0] = pAd->CommonCfg.dfs_w_idx[0];
-	SWRadarCheck(pAd, 0);
-	return TRUE;
-}
 INT	Set_PrintBusyIdle_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
@@ -4331,7 +4181,7 @@ INT	Set_DfsRssiLow_Proc(
 
 INT	Set_Ch0EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg) 
+	IN      PSTRING                 arg) 
 {
 	 ULONG a = 0;
          PSTRING p;
@@ -4373,7 +4223,7 @@ INT	Set_Ch0EventExpire_Proc(
 
 INT	Set_Ch1EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg) 
+	IN      PSTRING                 arg) 
 {
 	 ULONG a = 0;
          PSTRING p;
@@ -4415,7 +4265,7 @@ INT	Set_Ch1EventExpire_Proc(
 
 INT	Set_Ch2EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg) 
+	IN      PSTRING                 arg) 
 {
 	 ULONG a = 0;
          PSTRING p;
@@ -4457,7 +4307,7 @@ INT	Set_Ch2EventExpire_Proc(
 
 INT	Set_Ch3EventExpire_Proc(
 	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg) 
+	IN      PSTRING                 arg) 
 {
 	 ULONG a = 0;
          PSTRING p;
@@ -4502,7 +4352,7 @@ INT	Set_CEPrint_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
-	int i,j, id = simple_strtol(arg, 0, 10);
+	int i, id = simple_strtol(arg, 0, 10);
 	int n = pAd->CommonCfg.dfs_w_last_idx[id];
 
 	if ((id >= 0) && (id <= 3))
@@ -4513,8 +4363,6 @@ INT	Set_CEPrint_Proc(
 			printk("Cnt=%u, w= %u  Time=%u\n", (unsigned int)(pAd->CommonCfg.DFS_W[id][i].counter),
 			pAd->CommonCfg.DFS_W[id][i].width,
 			(unsigned int)pAd->CommonCfg.DFS_W[id][i].timestamp);
-			if (pAd->CommonCfg.DFS_W[id][i].counter == 0)
-				break;
 		}
 	}
 		
@@ -4526,31 +4374,10 @@ INT	Set_CEPrint_Proc(
 			printk("T=%u, w1= %u(%u), w2= %u(%u)\n", (unsigned int)(pAd->CommonCfg.DFS_T[id][i].period),
 			pAd->CommonCfg.DFS_T[id][i].width, pAd->CommonCfg.DFS_T[id][i].idx,
 			pAd->CommonCfg.DFS_T[id][i].width2, pAd->CommonCfg.DFS_T[id][i].idx2);
-			if (pAd->CommonCfg.DFS_T[id][i].period == 0)
-				break;
 		}
 		
 	}
-	if (id == 77)
-	{
-		for (i = 0; i < 4; i++)
-		{
-			for (j = 0; j < NEW_DFS_DBG_PORT_ENT_NUM; j++)
-			{
-				pAd->CommonCfg.DFS_W[i][j].counter = 0;
-				pAd->CommonCfg.DFS_W[i][j].width = 0;
-				pAd->CommonCfg.DFS_W[i][j].timestamp = 0;
-			}
-			for (j = 0; j < NEW_DFS_MPERIOD_ENT_NUM; j++)
-			{
-				pAd->CommonCfg.DFS_T[i][j].period = 0;	
-				pAd->CommonCfg.DFS_T[i][j].width = 0;
-				pAd->CommonCfg.DFS_T[i][j].width2 = 0;	
-				pAd->CommonCfg.DFS_T[i][j].idx = 0;
-				pAd->CommonCfg.DFS_T[i][j].idx2 = 0;
-			}
-		}
-	}
+	
 #ifdef DFS_DEBUG	
 	if (id > 20)
 	{
@@ -4576,7 +4403,7 @@ INT	Set_CEPrint_Proc(
 
 	}
 #endif // DFS_DEBUG //
-
+	
 	return TRUE;
 }
 #endif // DFS_HARDWARE_SUPPORT //
@@ -5416,6 +5243,12 @@ INT	Set_ACLAddEntry_Proc(
 	BOOLEAN					isDuplicate=FALSE;
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
 
+	if (pAd->ApCfg.MBSSID[pObj->ioctl_if].AccessControlList.Num >= (MAX_NUM_OF_ACL_LIST - 1))
+    {
+		DBGPRINT(RT_DEBUG_WARN, ("The AccessControlList is full, and no more entry can join the list!\n"));		
+		return FALSE;
+	}
+
 	NdisZeroMemory(&acl, sizeof(RT_802_11_ACL));
 	NdisMoveMemory(&acl, &pAd->ApCfg.MBSSID[pObj->ioctl_if].AccessControlList, sizeof(RT_802_11_ACL));
 	
@@ -5474,7 +5307,7 @@ INT	Set_ACLAddEntry_Proc(
 		}
 	}
 	
-	ASSERT(acl.Num <= MAX_NUM_OF_ACL_LIST);
+	ASSERT(acl.Num < MAX_NUM_OF_ACL_LIST);
 
 	NdisZeroMemory(&pAd->ApCfg.MBSSID[pObj->ioctl_if].AccessControlList, sizeof(RT_802_11_ACL));
 	NdisMoveMemory(&pAd->ApCfg.MBSSID[pObj->ioctl_if].AccessControlList, &acl, sizeof(RT_802_11_ACL));
@@ -6049,6 +5882,48 @@ INT	Show_MacTable_Proc(
 	return TRUE;
 }
 
+INT	Show_StaCount_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg)
+{
+	INT i;//, QueIdx=0;
+    	UINT32 RegValue;
+	
+	printk("\n");
+	RTMP_IO_READ32(pAd, BKOFF_SLOT_CFG, &RegValue);
+	printk("BackOff Slot      : %s slot time, BKOFF_SLOT_CFG(0x1104) = 0x%08x\n", 
+			OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_SHORT_SLOT_INUSED) ? "short" : "long",
+ 			RegValue);
+
+#ifdef DOT11_N_SUPPORT
+	printk("HT Operating Mode : %d\n", pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode);
+	printk("\n");
+#endif // DOT11_N_SUPPORT //
+	
+	printk("\n%-19s%-4s%-12s%-12s%-12s%-12s\n",
+		   "MAC", "AID","TxPackets","RxPackets","TxBytes","RxBytes");
+	
+	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
+	{
+		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[i];
+		if ((IS_ENTRY_CLIENT(pEntry) || IS_ENTRY_APCLI(pEntry))
+			&& (pEntry->Sst == SST_ASSOC))
+		{
+			printk("%02X:%02X:%02X:%02X:%02X:%02X  ",
+				pEntry->Addr[0], pEntry->Addr[1], pEntry->Addr[2],
+				pEntry->Addr[3], pEntry->Addr[4], pEntry->Addr[5]);
+			printk("%-4d", (int)pEntry->Aid);
+			printk("%-12ld",(ULONG)pEntry->TxPackets.QuadPart);
+			printk("%-12ld", (ULONG)pEntry->RxPackets.QuadPart);
+			printk("%-12ld", (ULONG)pEntry->TxBytes);
+			printk("%-12ld", (ULONG)pEntry->RxBytes);
+			printk("\n");
+		}
+	} 
+
+	return TRUE;
+}
+
 INT	Show_StaSecurityInfo_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
@@ -6278,10 +6153,6 @@ INT Show_Diag_Proc(
 	unsigned long		irqFlags;
 	UCHAR			McsMaxIdx = 16;
 	
-#ifdef DOT11N_SS3_SUPPORT
-	if (IS_RT2883(pAd) || IS_RT3883(pAd))
-	McsMaxIdx = 24;
-#endif // DOT11N_SS3_SUPPORT //
 	pDiag = &pAd->DiagStruct;
 	
 	if (pDiag->inited == FALSE)
@@ -6486,10 +6357,6 @@ INT	Show_Sat_Proc(
 	int i, j, k, maxMcs = 15;
 	PMAC_TABLE_ENTRY pEntry;
 
-#ifdef DOT11N_SS3_SUPPORT
-	if (IS_RT2883(pAd) || IS_RT3883(pAd))
-		maxMcs = 23;
-#endif // DOT11N_SS3_SUPPORT //
 
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
@@ -7216,7 +7083,7 @@ VOID RTMPAPIoctlBBP(
 #endif // VXWORKS // 
 	)
 	*/
-	if (argLen > 0)
+	if (argLen > 1)
 	{
 		NdisMoveMemory(arg, wrq->u.data.pointer, (argLen > 255) ? 255 : argLen);
 		ptr = arg;
@@ -7254,7 +7121,7 @@ VOID RTMPAPIoctlBBP(
 							// according to Andy, Gary, David require.
 							// the command bbp shall read BBP register directly for dubug.
 							BBP_IO_READ8_BY_REG_ID(pAdapter, bbpId, &regBBP);
-							sprintf(msg+strlen(msg), "R%02d[0x%02X]:%02X\n", bbpId, bbpId, regBBP);
+							sprintf(msg+strlen(msg), "R%02d[0x%02x]:%02X  ", bbpId, bbpId, regBBP);
 						}
 					}
 					else
@@ -7345,12 +7212,12 @@ VOID RTMPAPIoctlBBP(
 			else
 #endif // RALINK_ATE //
 			{
-			// according to Andy, Gary, David require.
-			// the command bbp shall read/write BBP register directly for dubug.
+				// according to Andy, Gary, David require.
+				// the command bbp shall read/write BBP register directly for dubug.
 				BBP_IO_READ8_BY_REG_ID(pAdapter, bbpId, &regBBP);
-			sprintf(msg+strlen(msg), "R%02d[0x%02X]:%02X    ", bbpId, bbpId, regBBP);
-			if (bbpId%5 == 4)
-				sprintf(msg+strlen(msg), "\n");
+				sprintf(msg+strlen(msg), "R%02d[0x%02X]:%02X    ", bbpId, bbpId, regBBP);
+				if (bbpId%5 == 4)
+					sprintf(msg+strlen(msg), "\n");
 			}
 		}
 	}
@@ -7634,10 +7501,6 @@ VOID RTMPAPIoctlRF(
 	BOOLEAN				bIsPrintAllRF = FALSE, bFromUI;
 	INT					memLen = sizeof(CHAR) * (2048+256+12);
 	
-#if defined (RT3883) || defined (RT3352)
-	//if (IS_RT3883(pAdapter))
-		maxRFIdx = 63;
-#endif // RT3883 //		
 		
 	mpool = (PSTRING)kmalloc(memLen, MEM_ALLOC_FLAG);
 	if (mpool == NULL) {
@@ -7669,11 +7532,7 @@ VOID RTMPAPIoctlRF(
 			{ //Read
 				if (sscanf(this_char, "%d", &(rfId)) == 1)
 				{
-#if defined (RT3883) || defined (RT3352)
-					if (rfId <= 63)
-#else
 					if (rfId <= 31)
-#endif // defined (RT3883) || defined (RT3352) //
 					{
 #ifdef RALINK_ATE
 						/*
@@ -7715,11 +7574,7 @@ VOID RTMPAPIoctlRF(
 			{ //Write
 				if ((sscanf(this_char, "%d", &(rfId)) == 1) && (sscanf(value, "%lx", &(rfValue)) == 1))
 				{
-#if defined (RT3883) || defined (RT3352)
-					if (rfId <= 63)
-#else
 					if (rfId <= 31)
-#endif // defined (RT3883) || defined (RT3352) //
 					{
 #ifdef RALINK_ATE
 						/*
@@ -7997,8 +7852,7 @@ VOID RTMPAPIoctlE2PROM(
 		{
 			RT28xx_EEPROM_READ16(pAdapter, eepAddr, eepValue);
 			sprintf(msg+strlen(msg), "[0x%04X]:%04X  ", eepAddr , eepValue);
-			//if ((eepAddr & 0x7) == 0x7)
-			if (eepAddr % 12 == 10)
+			if ((eepAddr & 0x7) == 0x7)
 				sprintf(msg+strlen(msg), "\n");
 		}
 	}
@@ -8022,9 +7876,6 @@ done:
     if (wrq->u.data.flags != RT_OID_802_11_HARDWARE_REGISTER)	
 	DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlE2PROM\n"));
 }
-
-
-//#define ENHANCED_STAT_DISPLAY	// Display PER and PLR statistics
 
 
 /* 
@@ -8052,10 +7903,6 @@ VOID RTMPIoctlStatistics(
 #ifdef WSC_AP_SUPPORT
     UCHAR               idx = 0;
 #endif // WSC_AP_SUPPORT //
-	ULONG txCount = 0;
-#ifdef ENHANCED_STAT_DISPLAY
-	ULONG per, plr;
-#endif
 
 	msg = (PSTRING)kmalloc(sizeof(CHAR)*(2048), MEM_ALLOC_FLAG);
 	if (msg == NULL) {
@@ -8069,39 +7916,22 @@ VOID RTMPIoctlStatistics(
 #ifdef RALINK_ATE
 	if(ATE_ON(pAd))
 	{
-		txCount = pAd->ate.TxDoneCount;
+	    sprintf(msg+strlen(msg), "Tx success                    = %ld\n", (ULONG)pAd->ate.TxDoneCount);
+	    //sprintf(msg+strlen(msg), "Tx success without retry        = %ld\n", (ULONG)pAd->ate.TxDoneCount);
 	}
 	else
 #endif // RALINK_ATE //
 	{
-		txCount = pAd->WlanCounters.TransmittedFragmentCount.u.LowPart;
+    sprintf(msg+strlen(msg), "Tx success                        = %ld\n", (ULONG)pAd->WlanCounters.TransmittedFragmentCount.u.LowPart);
+    //sprintf(msg+strlen(msg), "Tx success without retry        = %ld\n", (ULONG)pAd->WlanCounters.TransmittedFragmentCount.u.LowPart - (ULONG)pAd->WlanCounters.RetryCount.u.LowPart);
 	}
-
-    sprintf(msg+strlen(msg), "Tx success                      = %ld\n", txCount);
-#ifdef ENHANCED_STAT_DISPLAY
-	per = txCount==0? 0: 1000*(pAd->WlanCounters.RetryCount.u.LowPart+pAd->WlanCounters.FailedCount.u.LowPart)/(pAd->WlanCounters.RetryCount.u.LowPart+pAd->WlanCounters.FailedCount.u.LowPart+txCount);
-    sprintf(msg+strlen(msg), "Tx retry count                  = %ld, PER=%ld.%1ld%%\n",
-									(ULONG)pAd->WlanCounters.RetryCount.u.LowPart,
-									per/10, per % 10);
-	plr = txCount==0? 0: 10000*pAd->WlanCounters.FailedCount.u.LowPart/(pAd->WlanCounters.FailedCount.u.LowPart+txCount);
-    sprintf(msg+strlen(msg), "Tx fail to Rcv ACK after retry  = %ld, PLR=%ld.%02ld%%\n",
-									(ULONG)pAd->WlanCounters.FailedCount.u.LowPart, plr/100, plr%100);
-#else
-    sprintf(msg+strlen(msg), "Tx retry count          			= %ld\n", (ULONG)pAd->WlanCounters.RetryCount.u.LowPart);
+    sprintf(msg+strlen(msg), "Tx retry count                  = %ld\n", (ULONG)pAd->WlanCounters.RetryCount.u.LowPart);
     sprintf(msg+strlen(msg), "Tx fail to Rcv ACK after retry  = %ld\n", (ULONG)pAd->WlanCounters.FailedCount.u.LowPart);
-#endif // ENHANCED_STAT_DISPLAY //
     sprintf(msg+strlen(msg), "RTS Success Rcv CTS             = %ld\n", (ULONG)pAd->WlanCounters.RTSSuccessCount.u.LowPart);
     sprintf(msg+strlen(msg), "RTS Fail Rcv CTS                = %ld\n", (ULONG)pAd->WlanCounters.RTSFailureCount.u.LowPart);
 
-#ifdef ENHANCED_STAT_DISPLAY
-    sprintf(msg+strlen(msg), "Rx success                      = %ld\n", (ULONG)pAd->WlanCounters.ReceivedFragmentCount.QuadPart);
-	per = pAd->WlanCounters.ReceivedFragmentCount.u.LowPart==0? 0: 1000*(pAd->WlanCounters.FCSErrorCount.u.LowPart)/(pAd->WlanCounters.FCSErrorCount.u.LowPart+pAd->WlanCounters.ReceivedFragmentCount.u.LowPart);
-    sprintf(msg+strlen(msg), "Rx with CRC                     = %ld, PER=%ld.%1ld%%\n",
-										(ULONG)pAd->WlanCounters.FCSErrorCount.u.LowPart, per/10, per % 10);
-#else
     sprintf(msg+strlen(msg), "Rx success                      = %ld\n", (ULONG)pAd->WlanCounters.ReceivedFragmentCount.QuadPart);
     sprintf(msg+strlen(msg), "Rx with CRC                     = %ld\n", (ULONG)pAd->WlanCounters.FCSErrorCount.u.LowPart);
-#endif // ENHANCED_STAT_DISPLAY //
     sprintf(msg+strlen(msg), "Rx drop due to out of resource  = %ld\n", (ULONG)pAd->Counters8023.RxNoBuffer);
     sprintf(msg+strlen(msg), "Rx duplicate frame              = %ld\n", (ULONG)pAd->WlanCounters.FrameDuplicateCount.u.LowPart);
 
@@ -9121,7 +8951,7 @@ INT	Set_AP_WscGetConf_Proc(
 		if (bFromApCli == FALSE)
 		{
 			WscPBCSessionOverlapCheck(pAd);			
-			if (pAd->ApCfg.WscPBCOverlap == TRUE)
+			if (pAd->CommonCfg.WscPBCOverlap == TRUE)
 			{
 				// PBC session overlap
 				pWscControl->WscStatus = STATUS_WSC_PBC_SESSION_OVERLAP;
@@ -9963,7 +9793,52 @@ INT	Set_AP_WscSecurityMode_Proc(
 	
 	return TRUE;
 }
+
+INT Set_AP_WscMultiByteCheck_Proc(    
+	IN  PRTMP_ADAPTER   pAd,
+	IN  PSTRING         arg)
+{
+	POS_COOKIE 		pObj = (POS_COOKIE) pAd->OS_Cookie;	
+	UCHAR			apidx = pObj->ioctl_if;	
+	BOOLEAN			bEnable = FALSE;
+	PWSC_CTRL		pWpsCtrl = NULL;
+	BOOLEAN     	bFromApCli = FALSE;
+
+#ifdef APCLI_SUPPORT
+    if (pObj->ioctl_if_type == INT_APCLI)
+    {
+        bFromApCli = TRUE;
+        pWpsCtrl = &pAd->ApCfg.ApCliTab[apidx].WscControl;
+        DBGPRINT(RT_DEBUG_TRACE, ("IF(apcli%d) Set_WscConfMode_Proc:: This command is from apcli interface now.\n", apidx));
+    }
+    else
+#endif // APCLI_SUPPORT //
+    {
+        bFromApCli = FALSE;
+        pWpsCtrl = &pAd->ApCfg.MBSSID[apidx].WscControl;
+        DBGPRINT(RT_DEBUG_TRACE, ("IF(ra%d) Set_WscConfMode_Proc:: This command is from ra interface now.\n", apidx));
+    }
+
+	if (strcmp(arg, "0") == 0)		
+		bEnable = FALSE;
+	else if (strcmp(arg, "1") == 0)		
+		bEnable = TRUE;
+	else		
+		return FALSE;	
+
+	if (pWpsCtrl->bCheckMultiByte != bEnable)
+	{
+		pWpsCtrl->bCheckMultiByte = bEnable;
+	}
+	
+	DBGPRINT(RT_DEBUG_TRACE, ("IF(ra%d) Set_AP_WscMultiByteCheck_Proc::(bCheckMultiByte=%d)\n", 
+		apidx, pWpsCtrl->bCheckMultiByte));
+	
+	return TRUE;
+}
+
 #endif // WSC_AP_SUPPORT //
+
 
 
 #ifdef IAPP_SUPPORT
@@ -9991,6 +9866,7 @@ INT	Set_DisConnectSta_Proc(
 	UCHAR					macAddr[MAC_ADDR_LEN];
 	PSTRING					value;
 	INT						i;
+	UCHAR HashIdx;
 	MAC_TABLE_ENTRY *pEntry = NULL;
 
 	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17
@@ -10004,7 +9880,9 @@ INT	Set_DisConnectSta_Proc(
 		AtoH(value, &macAddr[i++], 1);
 	}
 
-	pEntry = MacTableLookup(pAd, macAddr);
+	HashIdx = MAC_ADDR_HASH_INDEX(macAddr);
+	pEntry = pAd->MacTab.Hash[HashIdx];
+
 	if (pEntry)
 	{
 		MlmeDeAuthAction(pAd, pEntry, REASON_DISASSOC_STA_LEAVING, FALSE);
@@ -10434,116 +10312,7 @@ INT	Set_AP2040ReScan_Proc(
 
 	return TRUE;
 }
-
 #endif // DOT11N_DRAFT3 //
-
-#ifdef DOT11N_PF_DEBUG
-INT Set_HT_BssCoexNotify_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam)
-{
-	UCHAR bBssCoexNotify = simple_strtol(pParam, 0, 10);
-
-	pAd->CommonCfg.bBssCoexNotify = ((bBssCoexNotify == 1) ? TRUE: FALSE);
-
-	DBGPRINT(RT_DEBUG_TRACE, ("Set bBssCoexNotify=%d!\n", pAd->CommonCfg.bBssCoexNotify));
-	
-	return TRUE;
-}
-
-
-INT Set_HT_MaxBa_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam)
-{
-	UCHAR BaMaxSize = simple_strtol(pParam, 0, 10);
-
-	if (BaMaxSize < 64)
-	{
-		pAd->CommonCfg.BAMaxSize = BaMaxSize;
-		DBGPRINT(RT_DEBUG_TRACE, ("Set the MaxBaSize=%d!\n", pAd->CommonCfg.BAMaxSize));
-	}
-	
-	return TRUE;
-}
-
-
-INT Set_HT_McsSet_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam)
-{
-	UCHAR mcsSet = simple_strtol(pParam, 0, 10);
-	BOOLEAN needRestart;
-	
-	/* 
-		HtMcsSet value     Meaning
-		0                        disable fixMCSSet
-		1                        enable MCS 0~7
-		2                        enable MCS 8~15
-		4                        enable MCS 16~23
-	*/
-
-	if (mcsSet > 7)
-	{
-		DBGPRINT(RT_DEBUG_ERROR, ("%s():Invalid MCSSet(%d)", __FUNCTION__, mcsSet));
-		return FALSE;
-	}
-
-	needRestart = (pAd->CommonCfg.fixRxMcsSet != mcsSet);
-	pAd->CommonCfg.fixRxMcsSet = mcsSet;
-	if (needRestart)
-	{
-		/* We need to restart the AP to make sure all data */
-		APStop(pAd);
-		APStartUp(pAd);
-	}
-	
-	return TRUE;
-}
-
-
-INT Set_HT_BssBWFallback_Proc(
-	IN	PRTMP_ADAPTER		pAd,
-	IN	PSTRING				pParam)
-{
-	BOOLEAN bBssFallBack = simple_strtol(pParam, 0, 10);
-
-	if (bBssFallBack)
-	{
-		//int apidx;
-		BSS_2040_COEXIST_IE bssCoexistIe;
-			
-		memset(&bssCoexistIe, 0, sizeof(BSS_2040_COEXIST_IE));
-		bssCoexistIe.field.Intolerant40 = 1;
-		bssCoexistIe.field.BSS20WidthReq = 1;
-						
-		NdisMoveMemory((PUCHAR)&pAd->CommonCfg.LastBSSCoexist2040, (PUCHAR)&bssCoexistIe, sizeof(BSS_2040_COEXIST_IE));
-		pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_INFO_SYNC;
-
-		if (!(pAd->CommonCfg.Bss2040CoexistFlag & BSS_2040_COEXIST_TIMER_FIRED))
-		{	
-			DBGPRINT(RT_DEBUG_TRACE, ("Fire the Bss2040CoexistTimer with timeout=%ld!\n", 
-						pAd->CommonCfg.Dot11BssWidthChanTranDelay));
-
-			pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_TIMER_FIRED;
-			// More 5 sec for the scan report of STAs.
-			RTMPSetTimer(&pAd->CommonCfg.Bss2040CoexistTimer,  (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
-		}
-		else
-		{
-			DBGPRINT(RT_DEBUG_TRACE, ("Already fallback to 20MHz, Extend the timeout of Bss2040CoexistTimer!\n"));
-			// More 5 sec for the scan report of STAs.
-			RTMPSetTimer(&pAd->CommonCfg.Bss2040CoexistTimer, (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
-		}
-		
-		//for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
-		//	SendBSS2040CoexistMgmtAction(pAd, MCAST_WCID, apidx, 0);
-	}
-
-	return TRUE;
-}
-#endif // DOT11N_PF_DEBUG //
-
 #endif // DOT11_N_SUPPORT //
 
 INT Set_EntryLifeCheck_Proc(
@@ -10654,55 +10423,39 @@ INT Set_WlanLed_Proc(
 #endif // WLAN_LED //
 #endif // RTMP_RBUS_SUPPORT //
 
-
-#ifdef RT3883
-INT Set_CwCTest_Proc(
-		IN PRTMP_ADAPTER pAd, 
-		IN PSTRING   arg)
+#ifdef ANT_DIVERSITY_SUPPORT
+INT	Set_Antenna_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg)
 {
-	UINT32 MacReg;
-	long x = simple_strtol(arg, 0, 10);
-	if (x == 0)
-	{
-		pAd->FlgCWC = x;
-		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
-		MacReg &= 0xffff0000;
-		MacReg |= 0x1f0f;
-		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
+    UCHAR UsedAnt;
+	DBGPRINT(RT_DEBUG_TRACE, ("==> Set_Antenna_Proc *******************\n"));
 
-		RTMP_IO_READ32(pAd, XIFS_TIME_CFG, &MacReg);
-		MacReg &= 0xffff0000;
-		MacReg |= 0x1010;
-		RTMP_IO_WRITE32(pAd, XIFS_TIME_CFG, MacReg);
-		DBGPRINT(RT_DEBUG_OFF, ("CwC OFF\n"));
-	}
-	else if (x == 1)
-	{
-		pAd->FlgCWC = x;
-		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
-		MacReg &= 0xffff0000;
-		MacReg |= 0x3f3f;
-		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
+    if(simple_strtol(arg, 0, 10) <= 3)
+        UsedAnt = simple_strtol(arg, 0, 10);
 
-		RTMP_IO_READ32(pAd, XIFS_TIME_CFG, &MacReg);
-		MacReg &= 0xffff0000;
-		MacReg |= 0x0e0e;
-		RTMP_IO_WRITE32(pAd, XIFS_TIME_CFG, MacReg);
-		DBGPRINT(RT_DEBUG_OFF, ("CwC ON\n"));
-	}
-	else if (x == 2)
-	{
-		pAd->FlgCWC = x;
-		DBGPRINT(RT_DEBUG_OFF, ("CwC Auto\n"));
-	}
-	else
-	{
-		DBGPRINT(RT_DEBUG_OFF, ("current FlgCWC = %d\n", pAd->FlgCWC));
-	}
+    pAd->CommonCfg.bRxAntDiversity = UsedAnt; // Auto switch
+    if (UsedAnt == ANT_DIVERSITY_ENABLE)
+    {
+            pAd->RxAnt.EvaluateStableCnt = 0;
+            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Auto Switch Mode), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
+    }
+    /* 2: Fix in the PHY Antenna CON1*/
+    if (UsedAnt == ANT_FIX_ANT1)
+    {
+            AsicSetRxAnt(pAd, 0);
+            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON1), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
+    }
+    /* 3: Fix in the PHY Antenna CON2*/
+    if (UsedAnt == ANT_FIX_ANT2)
+    {
+            AsicSetRxAnt(pAd, 1);
+            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON2), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
+    }
 
 	return TRUE;
 }
-#endif // RT3883 //
+#endif // ANT_DIVERSITY_SUPPORT //
 
 INT	Set_MemDebug_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
@@ -10715,3 +10468,101 @@ INT	Set_MemDebug_Proc(
 #endif // VENDOR_FEATURE2_SUPPORT //
 	return TRUE;
 }
+
+
+#ifdef MBSS_SUPPORT
+/*
+========================================================================
+Routine Description:
+	Show MBSS information.
+
+Arguments:
+	pAd					- WLAN control block pointer
+	Arg					- Input arguments
+
+Return Value:
+	None
+
+Note:
+========================================================================
+*/
+INT	Show_MbssInfo_Display_Proc(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	PSTRING			arg)
+{
+	UINT32 IdBss;
+	UCHAR PhyMode;
+
+
+	DBGPRINT(RT_DEBUG_ERROR, ("\n\tBSS Idx\t\tPhy Mode\n"));
+
+	for(IdBss=0; IdBss<=pAd->ApCfg.BssidNum; IdBss++)
+	{
+		if (IdBss == 0)
+		{
+			PhyMode = pAd->CommonCfg.PhyMode;
+			DBGPRINT(RT_DEBUG_ERROR, ("\tMAX\t\t"));
+		}
+		else
+		{
+			PhyMode = pAd->ApCfg.MBSSID[IdBss-1].PhyMode;
+			DBGPRINT(RT_DEBUG_ERROR, ("\t%d\t\t", IdBss-1));
+		} /* End of if */
+
+		switch(PhyMode)
+		{
+			case PHY_11BG_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("BG Mixed\n"));
+				break;
+
+			case PHY_11B:
+				DBGPRINT(RT_DEBUG_ERROR, ("B Only\n"));
+				break;
+
+			case PHY_11A:
+				DBGPRINT(RT_DEBUG_ERROR, ("A Only\n"));
+				break;
+
+			case PHY_11ABG_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("ABG Mixed ==> BG Mixed\n"));
+				break;
+
+			case PHY_11G:
+				DBGPRINT(RT_DEBUG_ERROR, ("G Only\n"));
+				break;
+
+			case PHY_11ABGN_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("ABGN Mixed ==> BGN Mixed\n"));
+				break;
+
+			case PHY_11N_2_4G:
+				DBGPRINT(RT_DEBUG_ERROR, ("2.4G N Only\n"));
+				break;
+
+			case PHY_11GN_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("GN Mixed\n"));
+				break;
+
+			case PHY_11AN_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("AN Mixed\n"));
+				break;
+
+			case PHY_11BGN_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("BGN Mixed\n"));
+				break;
+
+			case PHY_11AGN_MIXED:
+				DBGPRINT(RT_DEBUG_ERROR, ("AGN Mixed\n"));
+				break;
+
+			case PHY_11N_5G:
+				DBGPRINT(RT_DEBUG_ERROR, ("5G N Only\n"));
+				break;
+		} /* End of switch */
+	} /* End of for */
+
+	DBGPRINT(RT_DEBUG_ERROR, ("\n"));
+
+	return TRUE;
+} /* End of Show_MbssInfo_Display_Proc */
+#endif // MBSS_SUPPORT //

@@ -62,7 +62,7 @@ int rt_ioctl_setparam(struct net_device *dev, struct iw_request_info *info,
 
 int rt_ioctl_siwscan(struct net_device *dev,
 			struct iw_request_info *info,
-			struct iw_point *data, char *extra);
+			union iwreq_data *wreq, char *extra);
 #endif // CONFIG_STA_SUPPORT //
 
 void  getRate(HTTRANSMIT_SETTING HTSetting, ULONG* fLastTxRxRate);

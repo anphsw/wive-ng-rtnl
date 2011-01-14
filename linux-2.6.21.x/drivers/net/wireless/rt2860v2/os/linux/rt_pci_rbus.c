@@ -37,16 +37,6 @@ rt2860_interrupt(int irq, void *dev_instance);
 rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs);
 #endif
 
-#ifdef WORKQUEUE_BH
-static void rx_done_workq(struct work_struct *work);
-static void mgmt_dma_done_workq(struct work_struct *work);
-static void ac0_dma_done_workq(struct work_struct *work);
-static void ac1_dma_done_workq(struct work_struct *work);
-static void ac2_dma_done_workq(struct work_struct *work);
-static void ac3_dma_done_workq(struct work_struct *work);
-static void hcca_dma_done_workq(struct work_struct *work);
-static void fifo_statistic_full_workq(struct work_struct *work);
-#else
 static void rx_done_tasklet(unsigned long data);
 static void mgmt_dma_done_tasklet(unsigned long data);
 static void ac0_dma_done_tasklet(unsigned long data);
@@ -58,15 +48,10 @@ static void ac2_dma_done_tasklet(unsigned long data);
 static void ac3_dma_done_tasklet(unsigned long data);
 static void hcca_dma_done_tasklet(unsigned long data);
 static void fifo_statistic_full_tasklet(unsigned long data);
-#endif // WORKQUEUE_BH //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
-#ifdef WORKQUEUE_BH
-static void uapsd_eosp_sent_workq(struct work_struct *work);
-#else
 static void uapsd_eosp_sent_tasklet(unsigned long data);
-#endif // WORKQUEUE_BH //
 #endif // UAPSD_AP_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
@@ -83,12 +68,9 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define RT2860_INT_AC3_DMA_DONE			(1<<6)		// bit 6
 #define RT2860_INT_HCCA_DMA_DONE		(1<<7)		// bit 7
 #define RT2860_INT_MGMT_DONE			(1<<8)		// bit 8
-#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
-#if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 #define RT2860_INT_TONE_RADAR			(1<<20)		// bit 20
-#endif // defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT)  //
-#endif // defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
-
+#endif // defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 
 #define INT_RX			RT2860_INT_RX_DONE
 
@@ -98,12 +80,9 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define INT_AC3_DLY		(RT2860_INT_AC3_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_HCCA_DLY 	(RT2860_INT_HCCA_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_MGMT_DLY	RT2860_INT_MGMT_DONE
-#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
-#if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 #define INT_TONE_RADAR	(RT2860_INT_TONE_RADAR)
-#endif // defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT)  //
-#endif // defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
-
+#endif // defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 
 
 /***************************************************************************
@@ -131,37 +110,6 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
 	
-#ifdef WORKQUEUE_BH
-	INIT_WORK(&pObj->rx_done_work, rx_done_workq);
-	INIT_WORK(&pObj->mgmt_dma_done_work, mgmt_dma_done_workq);
-	INIT_WORK(&pObj->ac0_dma_done_work, ac0_dma_done_workq);
-	INIT_WORK(&pObj->ac1_dma_done_work, ac1_dma_done_workq);
-	INIT_WORK(&pObj->ac2_dma_done_work, ac2_dma_done_workq);
-	INIT_WORK(&pObj->ac3_dma_done_work, ac3_dma_done_workq);
-	INIT_WORK(&pObj->hcca_dma_done_work, hcca_dma_done_workq);
-	INIT_WORK(&pObj->tbtt_work, tbtt_workq);
-	INIT_WORK(&pObj->fifo_statistic_full_work, fifo_statistic_full_workq);
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-#ifdef UAPSD_AP_SUPPORT	
-		INIT_WORK(&pObj->uapsd_eosp_sent_work, uapsd_eosp_sent_workq);
-#endif // UAPSD_AP_SUPPORT //
-
-#ifdef DFS_SUPPORT
-		INIT_WORK(&pObj->pulse_radar_detect_work, pulse_radar_detect_workq);
-		INIT_WORK(&pObj->width_radar_detect_work, width_radar_detect_workq);
-#endif // DFS_SUPPORT //
-#ifdef CARRIER_DETECTION_SUPPORT
-		INIT_WORK(&pObj->carrier_sense_work, carrier_sense_workq);
-#endif // CARRIER_DETECTION_SUPPORT //
-
-#ifdef DFS_HARDWARE_SUPPORT
-		INIT_WORK(&pObj->dfs_work, dfs_workq);
-#endif // DFS_HARDWARE_SUPPORT //
-	}
-#endif // CONFIG_AP_SUPPORT //
-#else	
 	tasklet_init(&pObj->rx_done_task, rx_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->mgmt_dma_done_task, mgmt_dma_done_tasklet, (unsigned long)pAd);
 	tasklet_init(&pObj->ac0_dma_done_task, ac0_dma_done_tasklet, (unsigned long)pAd);
@@ -196,7 +144,6 @@ NDIS_STATUS RtmpNetTaskInit(IN RTMP_ADAPTER *pAd)
 #endif // DFS_HARDWARE_SUPPORT //
 	}
 #endif // CONFIG_AP_SUPPORT //
-#endif // WORKQUEUE_BH //
 
 	return NDIS_STATUS_SUCCESS;
 }
@@ -208,7 +155,6 @@ void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 
 	pObj = (POS_COOKIE) pAd->OS_Cookie;
 
-#ifndef WORKQUEUE_BH
 	tasklet_kill(&pObj->rx_done_task);
 	tasklet_kill(&pObj->mgmt_dma_done_task);
 	tasklet_kill(&pObj->ac0_dma_done_task);
@@ -244,7 +190,6 @@ void RtmpNetTaskExit(IN RTMP_ADAPTER *pAd)
 
 	}
 #endif // CONFIG_AP_SUPPORT //
-#endif // WORKQUEUE_BH //
 }
 
 
@@ -361,21 +306,12 @@ static inline void rt2860_int_disable(PRTMP_ADAPTER pAd, unsigned int mode)
   *	tasklet related procedures.
   *
   **************************************************************************/
-#ifdef WORKQUEUE_BH
-static void mgmt_dma_done_workq(struct work_struct *work)
-#else
 static void mgmt_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
     INT_SOURCE_CSR_STRUC	IntSource;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, mgmt_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -397,11 +333,7 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 	 */
 	if (pAd->int_pending & INT_MGMT_DLY) 
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->mgmt_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->mgmt_dma_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -412,21 +344,12 @@ static void mgmt_dma_done_tasklet(unsigned long data)
 }
 
 
-#ifdef WORKQUEUE_BH
-static void rx_done_workq(struct work_struct *work)
-#else
 static void rx_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	BOOLEAN	bReschedule = 0;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, rx_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -459,11 +382,7 @@ static void rx_done_tasklet(unsigned long data)
 	 */
 	if (pAd->int_pending & INT_RX || bReschedule) 
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->rx_done_work);
-#else
 		tasklet_hi_schedule(&pObj->rx_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -474,20 +393,11 @@ static void rx_done_tasklet(unsigned long data)
 
 }
 
-#ifdef WORKQUEUE_BH
-void fifo_statistic_full_workq(struct work_struct *work)
-#else
 void fifo_statistic_full_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, fifo_statistic_full_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -505,11 +415,7 @@ void fifo_statistic_full_tasklet(unsigned long data)
 	 */
 	if (pAd->int_pending & FifoStaFullInt) 
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->fifo_statistic_full_work);
-#else
 		tasklet_hi_schedule(&pObj->fifo_statistic_full_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -521,21 +427,12 @@ void fifo_statistic_full_tasklet(unsigned long data)
 
 }
 
-#ifdef WORKQUEUE_BH
-static void hcca_dma_done_workq(struct work_struct *work)
-#else
 static void hcca_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
     INT_SOURCE_CSR_STRUC	IntSource;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, hcca_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -557,11 +454,7 @@ static void hcca_dma_done_tasklet(unsigned long data)
 	 */
 	if (pAd->int_pending & INT_HCCA_DLY)
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->hcca_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->hcca_dma_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -571,22 +464,13 @@ static void hcca_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
 
-#ifdef WORKQUEUE_BH
-static void ac3_dma_done_workq(struct work_struct *work)
-#else
 static void ac3_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
     INT_SOURCE_CSR_STRUC	IntSource;
 	BOOLEAN bReschedule = 0;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, ac3_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -608,11 +492,7 @@ static void ac3_dma_done_tasklet(unsigned long data)
 	 */
 	if ((pAd->int_pending & INT_AC3_DLY) || bReschedule)
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->ac3_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->ac3_dma_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -622,22 +502,13 @@ static void ac3_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
 
-#ifdef WORKQUEUE_BH
-static void ac2_dma_done_workq(struct work_struct *work)
-#else
 static void ac2_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
     INT_SOURCE_CSR_STRUC	IntSource;
 	BOOLEAN bReschedule = 0;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, ac2_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 	
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -659,11 +530,7 @@ static void ac2_dma_done_tasklet(unsigned long data)
 	 */
 	if ((pAd->int_pending & INT_AC2_DLY) || bReschedule) 
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->ac2_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->ac2_dma_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -673,22 +540,13 @@ static void ac2_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
 
-#ifdef WORKQUEUE_BH
-static void ac1_dma_done_workq(struct work_struct *work)
-#else
 static void ac1_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	BOOLEAN bReschedule = 0;
     INT_SOURCE_CSR_STRUC	IntSource;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, ac1_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -710,11 +568,7 @@ static void ac1_dma_done_tasklet(unsigned long data)
 	 */
 	if ((pAd->int_pending & INT_AC1_DLY) || bReschedule) 
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->ac1_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->ac1_dma_done_task);
-#endif // WORKQUEUE_BH //
 
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
@@ -725,22 +579,13 @@ static void ac1_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
 
-#ifdef WORKQUEUE_BH
-static void ac0_dma_done_workq(struct work_struct *work)
-#else
 static void ac0_dma_done_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 	unsigned long flags;
 	INT_SOURCE_CSR_STRUC	IntSource;
 	BOOLEAN bReschedule = 0;
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, ac0_dma_done_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 	POS_COOKIE pObj;
-#endif // WORKQUEUE_BH //
 
 	// Do nothing if the driver is starting halt state.
 	// This might happen when timer already been fired before cancel timer with mlmehalt
@@ -763,11 +608,7 @@ static void ac0_dma_done_tasklet(unsigned long data)
 	 */
 	if ((pAd->int_pending & INT_AC0_DLY) || bReschedule)
 	{
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->ac0_dma_done_work);
-#else
 		tasklet_hi_schedule(&pObj->ac0_dma_done_task);
-#endif // WORKQUEUE_BH //
 		RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 		return;
 	}
@@ -777,12 +618,14 @@ static void ac0_dma_done_tasklet(unsigned long data)
 	RTMP_INT_UNLOCK(&pAd->irq_lock, flags);    
 }
 
+
 #ifdef RALINK_ATE
 static void ate_ac0_dma_done_tasklet(unsigned long data)
 {
 	return;
 }
 #endif // RALINK_ATE //
+
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
@@ -800,22 +643,12 @@ Return Value:
 Note:
 ========================================================================
 */
-#ifdef WORKQUEUE_BH
-static void uapsd_eosp_sent_workq(struct work_struct *work)
-{
-	POS_COOKIE pObj = container_of(work, struct os_cookie, uapsd_eosp_sent_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-	
-	RTMPDeQueuePacket(pAd, FALSE, NUM_OF_TX_RING, MAX_TX_PROCESS);
-}
-#else
 static void uapsd_eosp_sent_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
 
 	RTMPDeQueuePacket(pAd, FALSE, NUM_OF_TX_RING, MAX_TX_PROCESS);
 }
-#endif // WORKQUEUE_BH //
 #endif // UAPSD_AP_SUPPORT //
 
 
@@ -825,25 +658,12 @@ void schedule_dfs_task(PRTMP_ADAPTER pAd)
 	POS_COOKIE pObj;
 	
     pObj = (POS_COOKIE) pAd->OS_Cookie;
-#ifdef WORKQUEUE_BH
-	schedule_work(&pObj->dfs_work);
-#else
 	tasklet_hi_schedule(&pObj->dfs_task);
-#endif // WORKQUEUE_BH //
 }
 
-#ifdef WORKQUEUE_BH
-void dfs_workq(struct work_struct *work)
-#else
 void dfs_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, dfs_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
-#endif // WORKQUEUE_BH //
 	
 	if (pAd->CommonCfg.DFSAPRestart == 1)
 	{
@@ -871,7 +691,6 @@ void dfs_tasklet(unsigned long data)
 		
 #ifdef DFS_HWTIMER_SUPPORT
 		int idx;
-		
 		if (pAd->CommonCfg.radarDeclared == 0)
 		{
 			for (idx = 0; idx < 3; idx++)
@@ -987,6 +806,9 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 
 #endif
 		
+#ifdef  INF_VR9_HW_INT_WORKAROUND	
+redo: 
+#endif 
 
 	pAd->bPCIclkOff = FALSE;
 
@@ -1023,11 +845,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask FifoStaFullInt */
 			rt2860_int_disable(pAd, FifoStaFullInt);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->fifo_statistic_full_work);
-#else
 			tasklet_hi_schedule(&pObj->fifo_statistic_full_task);
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= FifoStaFullInt; 
 	}
@@ -1037,11 +855,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		if ((pAd->int_disable_mask & INT_MGMT_DLY) ==0 )
 		{
 			rt2860_int_disable(pAd, INT_MGMT_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->mgmt_dma_done_work);
-#else
 			tasklet_hi_schedule(&pObj->mgmt_dma_done_task);			
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= INT_MGMT_DLY ;
 	}
@@ -1059,11 +873,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 
 			/* mask RxINT */
 			rt2860_int_disable(pAd, INT_RX);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->rx_done_work);
-#else
 			tasklet_hi_schedule(&pObj->rx_done_task);
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= INT_RX; 		
 	}
@@ -1075,11 +885,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask TxDataInt */
 			rt2860_int_disable(pAd, INT_HCCA_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->hcca_dma_done_work);
-#else
 			tasklet_hi_schedule(&pObj->hcca_dma_done_task);
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= INT_HCCA_DLY;						
 	}
@@ -1091,11 +897,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask TxDataInt */
 			rt2860_int_disable(pAd, INT_AC3_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->ac3_dma_done_work);
-#else
 			tasklet_hi_schedule(&pObj->ac3_dma_done_task);
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= INT_AC3_DLY;						
 	}
@@ -1107,11 +909,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask TxDataInt */
 			rt2860_int_disable(pAd, INT_AC2_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->ac2_dma_done_work);
-#else
 			tasklet_hi_schedule(&pObj->ac2_dma_done_task);
-#endif // WORKQUEUE_BH //
 		}
 		pAd->int_pending |= INT_AC2_DLY;						
 	}
@@ -1125,11 +923,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask TxDataInt */
 			rt2860_int_disable(pAd, INT_AC1_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->ac1_dma_done_work);		
-#else
 			tasklet_hi_schedule(&pObj->ac1_dma_done_task);
-#endif // WORKQUEUE_BH //
 		}
 		
 	}
@@ -1150,11 +944,7 @@ rt2860_interrupt(int irq, void *dev_instance, struct pt_regs *regs)
 		{
 			/* mask TxDataInt */
 			rt2860_int_disable(pAd, INT_AC0_DLY);
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->ac0_dma_done_work);
-#else
 			tasklet_hi_schedule(&pObj->ac0_dma_done_task);
-#endif // WORKQUEUE_BH //
 		}
 	}
 
@@ -1199,6 +989,7 @@ if (IntSource.word & GPTimeOutInt)
 			RTMPHandleMcuInterrupt(pAd);
 		}
 	}
+
 #endif // CONFIG_AP_SUPPORT //
 
 
@@ -1209,6 +1000,24 @@ if (IntSource.word & GPTimeOutInt)
 			RTMPHandleTwakeupInterrupt(pAd);
 	}
 #endif // CONFIG_STA_SUPPORT //
+
+#ifdef  INF_VR9_HW_INT_WORKAROUND
+	/*
+		We found the VR9 Demo board provide from Lantiq at 2010.3.8 will miss interrup sometime caused of Rx-Ring Full
+		and our driver no longer receive any packet after the interrupt missing.
+		Below patch was recommand by Lantiq for temp workaround.
+		And shall be remove in next VR9 platform.
+	*/
+	IntSource.word = 0x00000000L;
+	{
+		RTMP_IO_READ32(pAd, INT_SOURCE_CSR, &IntSource.word);
+		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, IntSource.word); // write 1 to clear
+	}	
+	if (IntSource.word != 0) 
+	{		
+		goto redo;
+	}	
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	return  IRQ_HANDLED;

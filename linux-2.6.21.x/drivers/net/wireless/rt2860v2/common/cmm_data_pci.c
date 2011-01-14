@@ -80,23 +80,11 @@ USHORT RtmpPCI_WriteSingleTxResource(
 
 	pTxD->SDPtr0 = BufBasePaLow;
 	pTxD->SDLen0 = TXINFO_SIZE + TXWI_SIZE + hwHeaderLen; // include padding
-	pTxD->SDPtr1 = PCI_MAP_SINGLE(pAd, pTxBlk, 0, 1, PCI_DMA_TODEVICE);
+	pTxD->SDPtr1 = PCI_MAP_SINGLE(pAd, pTxBlk, 0, 1, PCI_DMA_TODEVICE);;
 	pTxD->SDLen1 = pTxBlk->SrcBufLen;
-	if (pTxD->SDLen1 > 0)
-	{
 	pTxD->LastSec0 = 0;
 	pTxD->LastSec1 = (bIsLast) ? 1 : 0;
-	}
-	else
-	{
-		if (bIsLast != TRUE)
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("%s():BufLen=%d but bIsLast=%d!\n", 
-						__FUNCTION__, pTxBlk->SrcBufLen, bIsLast));
-		}
-		pTxD->LastSec0 = 1;
-		pTxD->LastSec1 = 0;
-	}
+
 	RTMPWriteTxDescriptor(pAd, pTxD, FALSE, FIFO_EDCA);
 #ifdef RT_BIG_ENDIAN
 	RTMPWIEndianChange((PUCHAR)(pDMAHeaderBufVA + TXINFO_SIZE), TYPE_TXWI);
@@ -188,21 +176,9 @@ USHORT RtmpPCI_WriteMultiTxResource(
 	pTxD->SDLen0 = firstDMALen; // include padding
 	pTxD->SDPtr1 = PCI_MAP_SINGLE(pAd, pTxBlk, 0, 1, PCI_DMA_TODEVICE);;
 	pTxD->SDLen1 = pTxBlk->SrcBufLen;
-	if (pTxD->SDLen1 > 0)
-	{
 	pTxD->LastSec0 = 0;
 	pTxD->LastSec1 = (bIsLast) ? 1 : 0;
-	}
-	else
-	{
-		if (bIsLast != TRUE)
-		{
-			DBGPRINT(RT_DEBUG_ERROR, ("%s():BufLen=%d but bIsLast=%d!\n", 
-						__FUNCTION__, pTxBlk->SrcBufLen, bIsLast));
-		}
-		pTxD->LastSec0 = 1;
-		pTxD->LastSec1 = 0;
-	}
+
 	RTMPWriteTxDescriptor(pAd, pTxD, FALSE, FIFO_EDCA);
 
 #ifdef RT_BIG_ENDIAN
@@ -310,16 +286,9 @@ USHORT	RtmpPCI_WriteFragTxResource(
 	pTxD->SDLen0 = firstDMALen; // include padding
 	pTxD->SDPtr1 = PCI_MAP_SINGLE(pAd, pTxBlk, 0, 1, PCI_DMA_TODEVICE);
 	pTxD->SDLen1 = pTxBlk->SrcBufLen;
-	if (pTxD->SDLen1 > 0)
-	{
 	pTxD->LastSec0 = 0;
 	pTxD->LastSec1 = 1;
-	}
-	else
-	{
-		pTxD->LastSec0 = 1;
-		pTxD->LastSec1 = 0;
-	}
+
 	RTMPWriteTxDescriptor(pAd, pTxD, FALSE, FIFO_EDCA);
 
 #ifdef RT_BIG_ENDIAN
@@ -571,7 +540,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 	{
 //		RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
 #ifdef RALINK_ATE
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 		PHEADER_802_11	pHeader80211;
 
 		if ((ATE_ON(pAd)) && (pAd->ate.bQATxStart == TRUE))
@@ -649,7 +618,7 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 				continue;
 			}
 		}
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 #endif // RALINK_ATE //
 
 		// static rate also need NICUpdateFifoStaCounters() function.
@@ -751,9 +720,9 @@ BOOLEAN  RTMPFreeTXDUponTxDmaDone(
 #endif
 
 #ifdef RALINK_ATE
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 kick_out:
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 
 		/*
 			ATE_TXCONT mode also need to send some normal frames, so let it in.
@@ -1002,11 +971,7 @@ VOID	RTMPHandleTBTTInterrupt(
 	{
 		ReSyncBeaconTime(pAd);
 
-#ifdef WORKQUEUE_BH	
-		schedule_work(&pObj->tbtt_work);
-#else
 		tasklet_hi_schedule(&pObj->tbtt_task);
-#endif // WORKQUEUE_BH //
 
 		if ((pAd->CommonCfg.Channel > 14)
 			&& (pAd->CommonCfg.bIEEE80211H == 1)
@@ -1123,11 +1088,7 @@ VOID RTMPHandleMcuInterrupt(
 		// pulse radar signal Int.
 		if (McuIntSrc & 0x40)
 		{
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->pulse_radar_detect_work);
-#else
 			tasklet_hi_schedule(&pObj->pulse_radar_detect_task);
-#endif // WORKQUEUE_BH //
 		}
 
 		// width radar signal Int.
@@ -1135,11 +1096,7 @@ VOID RTMPHandleMcuInterrupt(
 				|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W56))
 			&& (McuIntSrc & 0x80))
 		{
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->width_radar_detect_work);
-#else
 			tasklet_hi_schedule(&pObj->width_radar_detect_task);
-#endif // WORKQUEUE_BH //
 		}
 
 		// long pulse radar signal detection.
@@ -1148,11 +1105,7 @@ VOID RTMPHandleMcuInterrupt(
 				|| (JapRadarType(pAd) == JAP_W56))
 		&& (McuIntSrc & 0x10))
 		{
-#ifdef WORKQUEUE_BH
-			schedule_work(&pObj->width_radar_detect_work);
-#else
 			tasklet_hi_schedule(&pObj->width_radar_detect_task);
-#endif // WORKQUEUE_BH //
 		}
 	}
 #endif // DFS_SOFTWARE_SUPPORT //
@@ -1162,11 +1115,7 @@ VOID RTMPHandleMcuInterrupt(
 		&& (McuIntSrc & 0x04))
 	{
 		POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
-#ifdef WORKQUEUE_BH
-		schedule_work(&pObj->carrier_sense_work);
-#else	
 		tasklet_hi_schedule(&pObj->carrier_sense_task);
-#endif // WORKQUEUE_BH //
 	}
 #endif // CARRIER_DETECTION_SUPPORT //
 }
@@ -1305,7 +1254,6 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 	//HTTRANSMIT_SETTING	MlmeTransmit;   //Rate for this MGMT frame.
 	ULONG	 FreeNum;
 	MAC_TABLE_ENTRY	*pMacEntry = NULL;
-	UCHAR PID;
 
 
 	RTMP_QueryPacketInfo(pPacket, &PacketInfo, &pSrcBufVA, &SrcBufLen);
@@ -1330,13 +1278,13 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 
 	SwIdx = pAd->TxRing[QueIdx].TxCpuIdx;
 
-#ifdef RT_BIG_ENDIAN
+#ifndef RT_BIG_ENDIAN
+	pTxD  = (PTXD_STRUC) pAd->TxRing[QueIdx].Cell[SwIdx].AllocVa;
+#else
     pDestTxD  = (PTXD_STRUC)pAd->TxRing[QueIdx].Cell[SwIdx].AllocVa;
     TxD = *pDestTxD;
     pTxD = &TxD;
     RTMPDescriptorEndianChange((PUCHAR)pTxD, TYPE_TXD);
-#else
-	pTxD  = (PTXD_STRUC) pAd->TxRing[QueIdx].Cell[SwIdx].AllocVa;
 #endif
 
 	if (pAd->TxRing[QueIdx].Cell[SwIdx].pNdisPacket)
@@ -1356,9 +1304,9 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 			AsicForceWakeup(pAd, TRUE);
 	}
 #endif // CONFIG_STA_SUPPORT //
+	pFirstTxWI	=(PTXWI_STRUC)pSrcBufVA;
 	
-	pFirstTxWI =(PTXWI_STRUC)(pSrcBufVA + TXINFO_SIZE);
-	pHeader_802_11 = (PHEADER_802_11) (pSrcBufVA + TXINFO_SIZE + TXWI_SIZE); //TXWI_SIZE);
+	pHeader_802_11 = (PHEADER_802_11) (pSrcBufVA + TXWI_SIZE);
 	if (pHeader_802_11->Addr1[0] & 0x01)
 	{
 		MlmeRate = pAd->CommonCfg.BasicMlmeRate;
@@ -1368,95 +1316,41 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 		MlmeRate = pAd->CommonCfg.MlmeRate;
 	}
 	
-	// Verify Mlme rate for a / g bands.
-	if ((pAd->LatchRfRegs.Channel > 14) && (MlmeRate < RATE_6)) // 11A band
-		MlmeRate = RATE_6;
-
 	if ((pHeader_802_11->FC.Type == BTYPE_DATA) &&
 		(pHeader_802_11->FC.SubType == SUBTYPE_QOS_NULL))
 	{
 		pMacEntry = MacTableLookup(pAd, pHeader_802_11->Addr1);
 	}
 
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	{
-		// Fixed W52 with Activity scan issue in ABG_MIXED and ABGN_MIXED mode.
-		if (pAd->CommonCfg.PhyMode == PHY_11ABG_MIXED
-#ifdef DOT11_N_SUPPORT
-				|| pAd->CommonCfg.PhyMode == PHY_11ABGN_MIXED
-#endif // DOT11_N_SUPPORT //		
-			)
-			{
-				if (pAd->LatchRfRegs.Channel > 14)
-					pAd->CommonCfg.MlmeTransmit.field.MODE = 1;
-				else
-					pAd->CommonCfg.MlmeTransmit.field.MODE = 0;
-			}
-	}
-#endif // CONFIG_STA_SUPPORT //
+	// Verify Mlme rate for a / g bands.
+	if ((pAd->LatchRfRegs.Channel > 14) && (MlmeRate < RATE_6)) // 11A band
+		MlmeRate = RATE_6;
 
 	//
 	// Should not be hard code to set PwrMgmt to 0 (PWR_ACTIVE)
 	// Snice it's been set to 0 while on MgtMacHeaderInit
 	// By the way this will cause frame to be send on PWR_SAVE failed.
 	//
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	{
-		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
-		{
-			// We are in scan progress, just let the PwrMgmt bit keep as it orginally should be.
-		}
-		else
-#endif // CONFIG_STA_SUPPORT //
-			pHeader_802_11->FC.PwrMgmt = PWR_ACTIVE; // (pAd->StaCfg.Psm == PWR_SAVE);
-#ifdef CONFIG_STA_SUPPORT	
-	}
-#endif // CONFIG_STA_SUPPORT //
-
-#ifdef CONFIG_STA_SUPPORT
 	//
 	// In WMM-UAPSD, mlme frame should be set psm as power saving but probe request frame
+#ifdef CONFIG_STA_SUPPORT
     // Data-Null packets alse pass through MMRequest in RT2860, however, we hope control the psm bit to pass APSD
-	//if (pHeader_802_11->FC.Type != BTYPE_DATA)
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+	if (pHeader_802_11->FC.Type != BTYPE_DATA)
     {
-		if ((pHeader_802_11->FC.SubType == SUBTYPE_ACTION) ||
-			((pHeader_802_11->FC.Type == BTYPE_DATA) &&	
-			((pHeader_802_11->FC.SubType == SUBTYPE_QOS_NULL) ||
-			(pHeader_802_11->FC.SubType == SUBTYPE_NULL_FUNC))))
-		{
-			if (pAd->StaCfg.Psm == PWR_SAVE)
-				pHeader_802_11->FC.PwrMgmt = PWR_SAVE;
-			else if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) &&
-					INFRA_ON(pAd) &&
-					RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
+    	if ((pHeader_802_11->FC.SubType == SUBTYPE_PROBE_REQ) || !(pAd->CommonCfg.bAPSDCapable && pAd->CommonCfg.APEdcaParm.bAPSDCapable))
     	{
-				// We are in scan progress, just let the PwrMgmt bit keep as it orginally should be.
+    		pHeader_802_11->FC.PwrMgmt = PWR_ACTIVE;
     	}
     	else
     	{
     		pHeader_802_11->FC.PwrMgmt = pAd->CommonCfg.bAPSDForcePowerSave;
     	}
     }
-	}
 #endif // CONFIG_STA_SUPPORT //
 	
-#ifdef CONFIG_AP_SUPPORT
-	pHeader_802_11->FC.MoreData = RTMP_GET_PACKET_MOREDATA(pPacket);
-#endif // CONFIG_AP_SUPPORT //
-
 	bInsertTimestamp = FALSE;
 	if (pHeader_802_11->FC.Type == BTYPE_CNTL) // must be PS-POLL
 	{
-#ifdef CONFIG_STA_SUPPORT
-		//Set PM bit in ps-poll, to fix WLK 1.2  PowerSaveMode_ext failure issue.
-		if ((pAd->OpMode == OPMODE_STA) && (pHeader_802_11->FC.SubType == SUBTYPE_PS_POLL))
-		{
-			pHeader_802_11->FC.PwrMgmt = PWR_SAVE;
-		}
-#endif // CONFIG_STA_SUPPORT //
 		bAckRequired = FALSE;
 	}
 	else // BTYPE_MGMT or BTYPE_DATA(must be NULL frame)
@@ -1470,15 +1364,9 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 		{
 			bAckRequired = TRUE;
 			pHeader_802_11->Duration = RTMPCalcDuration(pAd, MlmeRate, 14);
-			//if (pHeader_802_11->FC.SubType == SUBTYPE_PROBE_RSP)
-			if ((pHeader_802_11->FC.SubType == SUBTYPE_PROBE_RSP) && (pHeader_802_11->FC.Type == BTYPE_MGMT))
+			if (pHeader_802_11->FC.SubType == SUBTYPE_PROBE_RSP)
 			{
 				bInsertTimestamp = TRUE;
-				bAckRequired = FALSE; // Disable ACK to prevent retry 0x1f for Probe Response
-			}
-			else if ((pHeader_802_11->FC.SubType == SUBTYPE_PROBE_REQ) && (pHeader_802_11->FC.Type == BTYPE_MGMT))
-			{
-				bAckRequired = FALSE; // Disable ACK to prevent retry 0x1f for Probe Request
 			}
 		}
 	}
@@ -1512,19 +1400,17 @@ NDIS_STATUS MlmeHardTransmitTxRing(
 //	pAd->CommonCfg.MlmeTransmit.field.MODE = 1;
 	
 // management frame doesn't need encryption. so use RESERVED_WCID no matter u are sending to specific wcid or not.
-	PID = PID_MGMT;
-
+	// Only beacon use Nseq=TRUE. So here we use Nseq=FALSE.
 	if (pMacEntry == NULL)
 	{
-		RTMPWriteTxWI(pAd, pFirstTxWI, FALSE, FALSE, bInsertTimestamp, FALSE, bAckRequired, FALSE,
-						0, RESERVED_WCID, (SrcBufLen - TXINFO_SIZE - TXWI_SIZE), PID, 0,  (UCHAR)pAd->CommonCfg.MlmeTransmit.field.MCS, IFS_BACKOFF, FALSE, &pAd->CommonCfg.MlmeTransmit);
+	RTMPWriteTxWI(pAd, pFirstTxWI, FALSE, FALSE, bInsertTimestamp, FALSE, bAckRequired, FALSE,
+		0, RESERVED_WCID, (SrcBufLen - TXWI_SIZE), PID_MGMT, 0,  (UCHAR)pAd->CommonCfg.MlmeTransmit.field.MCS, IFS_BACKOFF, FALSE, &pAd->CommonCfg.MlmeTransmit);
 	}
 	else
 	{
-		/* dont use low rate to send QoS Null data frame */
 		RTMPWriteTxWI(pAd, pFirstTxWI, FALSE, FALSE,
 					bInsertTimestamp, FALSE, bAckRequired, FALSE,
-					0, pMacEntry->Aid, (SrcBufLen - TXINFO_SIZE - TXWI_SIZE),
+					0, pMacEntry->Aid, (SrcBufLen - TXWI_SIZE),
 					pMacEntry->MaxHTPhyMode.field.MCS, 0,
 					(UCHAR)pMacEntry->MaxHTPhyMode.field.MCS,
 					IFS_BACKOFF, FALSE, &pMacEntry->MaxHTPhyMode);

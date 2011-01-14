@@ -183,6 +183,7 @@ VOID ap_cmm_peer_assoc_req_action(
 	UINT8				pmkid_count = 0;
 #endif // DOT1X_SUPPORT //	
 	EXT_CAP_INFO_ELEMENT	ExtCapInfo;
+	UCHAR SupRateLen, PhyMode, FlgIs11bSta;
 
 	NdisZeroMemory(&ExtCapInfo, sizeof(EXT_CAP_INFO_ELEMENT));
 	RTMPZeroMemory(&HTCapability, sizeof(HT_CAPABILITY_IE));
@@ -213,6 +214,21 @@ VOID ap_cmm_peer_assoc_req_action(
     if (!pEntry) {
 		DBGPRINT(RT_DEBUG_ERROR, ("NoAuth MAC - %02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(Addr2)));
 		return;
+	}
+
+	PhyMode = pAd->ApCfg.MBSSID[pEntry->apidx].PhyMode;
+
+	FlgIs11bSta = 1;
+	for(i=0; i<SupportedRatesLen; i++)
+	{
+		if (((SupportedRates[i] & 0x7F) != 2) &&
+			((SupportedRates[i] & 0x7F) != 4) &&
+			((SupportedRates[i] & 0x7F) != 11) &&
+			((SupportedRates[i] & 0x7F) != 22))
+		{
+			FlgIs11bSta = 0;
+			break;
+		}
 	}
     
 	// clear the previous Pairwise key table
@@ -252,13 +268,12 @@ VOID ap_cmm_peer_assoc_req_action(
 #ifdef WSC_AP_SUPPORT
     // since sta has been left, ap should receive EapolStart and EapRspId again.
     pEntry->Receive_EapolStart_EapRspId = 0;
-    // only support WSC in ra0 now, 2006.11.10
     if (pEntry->apidx < pAd->ApCfg.BssidNum)
     {
         if (MAC_ADDR_EQUAL(pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr))
         {
             BOOLEAN Cancelled;
-            memset(pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr, 0, MAC_ADDR_LEN);
+	        RTMPZeroMemory(pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr, MAC_ADDR_LEN);
             RTMPCancelTimer(&pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EapolTimer, &Cancelled);
             pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EapolTimerRunning = FALSE;
             DBGPRINT(RT_DEBUG_TRACE, ("Reset EntryApIdx to WSC_INIT_ENTRY_APIDX.\n"));
@@ -324,6 +339,12 @@ VOID ap_cmm_peer_assoc_req_action(
 #endif // WSC_AP_SUPPORT //
 	
 	// fail in ACL checking => send an Assoc-Fail resp.
+	SupRateLen = pAd->CommonCfg.SupRateLen;
+
+	/* TODO: need to check rate in support rate element, not number */
+	if (FlgIs11bSta == 1)
+		SupRateLen = 4;
+
 	if (bACLReject == TRUE)
 	{
 	    MgtMacHeaderInit(pAd, &AssocRspHdr, SubType, 0, Addr2, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid);
@@ -334,8 +355,8 @@ VOID ap_cmm_peer_assoc_req_action(
 	                      2,                        &StatusCode,
 	                      2,                        &Aid,
 	                      1,                        &SupRateIe,
-	                      1,                        &pAd->CommonCfg.SupRateLen,
-	                      pAd->CommonCfg.SupRateLen,    pAd->CommonCfg.SupRate,
+	                      1,                        &SupRateLen,
+	                      SupRateLen,               pAd->CommonCfg.SupRate,
 	                      END_OF_ARGS);
 		MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, (PVOID) pOutBuffer);
@@ -352,11 +373,11 @@ VOID ap_cmm_peer_assoc_req_action(
                       2,                        &StatusCode,
                       2,                        &Aid,
                       1,                        &SupRateIe,
-                      1,                        &pAd->CommonCfg.SupRateLen,
-                      pAd->CommonCfg.SupRateLen,    pAd->CommonCfg.SupRate,
+                      1,                        &SupRateLen,
+                      SupRateLen,               pAd->CommonCfg.SupRate,
                       END_OF_ARGS);
 
-    if (pAd->CommonCfg.ExtRateLen)
+    if ((pAd->CommonCfg.ExtRateLen) && (PhyMode != PHY_11B) && (FlgIs11bSta == 1))
     {
     	// The ERPIE should not be included in association response, so remove it.
 //        UCHAR ErpIeLen = 1;
@@ -602,16 +623,6 @@ VOID ap_cmm_peer_assoc_req_action(
 						9,						 RalinkSpecificIe,
 						END_OF_ARGS);
 	FrameLen += TmpLen;
-
-#ifdef RT3883
-	while(FrameLen < 150)
-	{
-		MakeOutgoingFrame(pOutBuffer+FrameLen,		 &TmpLen,
-							9,						 RalinkSpecificIe,
-							END_OF_ARGS);
-		FrameLen += TmpLen;
-	}
-#endif // RT3883 //
 }
   
   
@@ -621,6 +632,8 @@ VOID ap_cmm_peer_assoc_req_action(
 	// set up BA session
 	if (StatusCode == MLME_SUCCESS)
 	{
+		pEntry->PsMode = PWR_ACTIVE;
+
 #ifdef IAPP_SUPPORT
 		//PFRAME_802_11 Fr = (PFRAME_802_11)Elem->Msg;
 //		POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
@@ -764,9 +777,8 @@ VOID ap_cmm_peer_assoc_req_action(
 	    	}
 			
 #ifdef WSC_AP_SUPPORT
-            if ((pAd->ApCfg.MBSSID[MAIN_MBSSID].WscControl.WscConfMode != WSC_DISABLE) &&
-                (pEntry->apidx == MAIN_MBSSID) &&
-                MAC_ADDR_EQUAL(pEntry->Addr, pAd->ApCfg.MBSSID[MAIN_MBSSID].WscControl.EntryAddr))
+            if ((pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.WscConfMode != WSC_DISABLE) &&
+                MAC_ADDR_EQUAL(pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr))
             {
                 if (!pEntry->EnqueueEapolStartTimerForWscRunning)
                 {
@@ -1473,10 +1485,8 @@ USHORT APBuildAssociation(
 					pAd->MacTab.fAnyStation20Only = TRUE;
 				}
 				
-#ifdef TXBF_SUPPORT
-				pEntry->MaxHTPhyMode.field.eTxBF =
-						clientSupportsETxBF(pAd, &pHtCapability->TxBFCap)? pAd->CommonCfg.RegTransmitSetting.field.TxBF: 0;
-#endif // TXBF_SUPPORT //
+#ifdef RTMP_RBUS_SUPPORT
+#endif // RTMP_RBUS_SUPPORT //
 
 				// find max fixed rate
 //				for (i=15; i>=0; i--)
@@ -1516,10 +1526,10 @@ USHORT APBuildAssociation(
 				}
 
 				pEntry->MaxHTPhyMode.field.STBC = (pHtCapability->HtCapInfo.RxSTBC & (pAd->CommonCfg.DesiredHtPhy.TxSTBC));
-				if (pHtCapability->HtCapParm.MpduDensity < 5)
-					pEntry->MpduDensity = 5;
+				if (pHtCapability->HtCapParm.MpduDensity < 4)
+					pEntry->MpduDensity = 4;
 				else
-					pEntry->MpduDensity = pHtCapability->HtCapParm.MpduDensity;
+				pEntry->MpduDensity = pHtCapability->HtCapParm.MpduDensity;
 				pEntry->MaxRAmpduFactor = pHtCapability->HtCapParm.MaxRAmpduFactor;
 				pEntry->MmpsMode = (UCHAR)pHtCapability->HtCapInfo.MimoPs;
 				pEntry->AMsduSize = (UCHAR)pHtCapability->HtCapInfo.AMsduSize;
@@ -1556,21 +1566,20 @@ USHORT APBuildAssociation(
 			pEntry->CurrTxRate = pEntry->MaxSupportedRate;
 			
 #ifdef RTMP_RBUS_SUPPORT
-#ifdef TXBF_SUPPORT
-			pEntry->HTPhyMode.field.iTxBF = pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn;
-			pEntry->iTxBfEn = pEntry->HTPhyMode.field.iTxBF;
-			if (pAd->Antenna.field.TxPath == 1)
-				pEntry->iTxBfEn = 0;
-#endif // TXBF_SUPPORT //
 
 #ifdef NEW_RATE_ADAPT_SUPPORT
-			MlmeSetMcsGroup(pAd, pEntry);
+			 if ((pEntry->HTCapability.MCSSet[0] == 0xff) &&
+			 	(pEntry->HTCapability.MCSSet[1] == 0xff) &&
+			 	(pAd->CommonCfg.TxStream > 1) && 
+				((pAd->CommonCfg.TxStream == 2) || (pEntry->HTCapability.MCSSet[2] == 0x0)))
+				pEntry->mcsGroup = 2;
+			else
+				pEntry->mcsGroup = 1;
 
 			pEntry->lastRateIdx = 1;
 			pEntry->fewPktsCnt = 0;
 			pEntry->perThrdAdj = PER_THRD_ADJ;
 #endif // NEW_RATE_ADAPT_SUPPORT //
-#ifdef MFB_SUPPORT
 			pEntry->lastLegalMfb = 0;
 			pEntry->isMfbChanged = FALSE;
 			pEntry->fLastChangeAccordingMfb = FALSE;
@@ -1585,39 +1594,12 @@ USHORT APBuildAssociation(
 			pEntry->mfbToTx = 0;
 			pEntry->mfb0 = 0;
 			pEntry->mfb1 = 0;
-#endif	// MFB_SUPPORT //
 #ifdef NEW_RATE_ADAPT_SUPPORT
 			pEntry->useNewRateAdapt = 1;
 #else
 			pEntry->useNewRateAdapt = 0;
 #endif // NEW_RATE_ADAPT_SUPPORT //
 
-#ifdef TXBF_SUPPORT
-			pEntry->bfState = READY_FOR_SNDG0;
-			pEntry->sndgMcs = 0;
-			pEntry->sndgRateIdx = 0;
-			//record the result of the first sndg
-			pEntry->sndg0Mcs = 0;
-			pEntry->sndg0RateIdx = 0;
-			pEntry->sndg0Snr0 = 0;
-			pEntry->sndg0Snr1 = 0;
-			pEntry->sndg0Snr2 = 0;
-			pEntry->sndg1Mcs = 0;
-			pEntry->sndg1RateIdx = 0;
-			pEntry->sndg1Snr0 = 0;
-			pEntry->sndg1Snr1 = 0;
-			pEntry->sndg1Snr2 = 0;
-			pEntry->bf0Mcs = 0;
-			pEntry->bf0RateIdx = 0;
-			pEntry->bf1Mcs = 0;
-			pEntry->bf1RateIdx = 0;
-			pEntry->noSndgCnt = 0;
-			pEntry->eTxBfEnCond = pEntry->MaxHTPhyMode.field.eTxBF==0? 0: pAd->CommonCfg.ETxBfEnCond;
-			if (pAd->Antenna.field.TxPath == 1)
-				pEntry->eTxBfEnCond = 0;
-			pEntry->noSndgCntThrd = NO_SNDG_CNT_THRD;
-			pEntry->ndpSndgStreams = pAd->Antenna.field.TxPath;
-#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
 			// Set asic auto fall back
@@ -1720,7 +1702,16 @@ static void ap_assoc_info_debugshow(
 	IN  UCHAR				HTCapability_Len,
 	IN	HT_CAPABILITY_IE	*pHTCapability)
 {
+//#ifdef DBG
 	PUCHAR	sAssoc = isReassoc ? (PUCHAR)"ReASSOC" : (PUCHAR)"ASSOC";
+//#endif // DBG //
+
+#ifdef DOT11_N_SUPPORT
+	HT_CAP_INFO			*pHTCap;
+	HT_CAP_PARM			*pHTCapParm;
+	EXT_HT_CAP_INFO		*pExtHT;
+#endif // DOT11_N_SUPPORT //
+
 
 	printk("%s - \n\tAssign AID=%d to STA %02x:%02x:%02x:%02x:%02x:%02x\n",
 		sAssoc, pEntry->Aid, PRINT_MAC(pEntry->Addr));
@@ -1729,14 +1720,45 @@ static void ap_assoc_info_debugshow(
 #ifdef DOT11_N_SUPPORT
 	if (HTCapability_Len && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 	{
-		assoc_ht_info_debugshow(pAd, pEntry, HTCapability_Len, pHTCapability);
+		ASSERT(pHTCapability);
+
+		pHTCap = &pHTCapability->HtCapInfo;
+		pHTCapParm = &pHTCapability->HtCapParm;
+		pExtHT = &pHTCapability->ExtHtCapInfo;
+
+		DBGPRINT(RT_DEBUG_TRACE, ("%s - 11n HT STA\n", sAssoc));
+		DBGPRINT(RT_DEBUG_TRACE, ("\tHT Cap Info: \n"));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t AdvCode(%d), BW(%d), MIMOPS(%d), GF(%d), ShortGI_20(%d), ShortGI_40(%d)\n",
+			pHTCap->AdvCoding, pHTCap->ChannelWidth, pHTCap->MimoPs, pHTCap->GF,
+			pHTCap->ShortGIfor20, pHTCap->ShortGIfor40));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t TxSTBC(%d), RxSTBC(%d), DelayedBA(%d), A-MSDU(%d), CCK_40(%d)\n",
+			pHTCap->TxSTBC, pHTCap->RxSTBC, pHTCap->DelayedBA, pHTCap->AMsduSize, pHTCap->CCKmodein40));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t PSMP(%d), Forty_Mhz_Intolerant(%d), L-SIG(%d)\n",
+			pHTCap->PSMP, pHTCap->Forty_Mhz_Intolerant, pHTCap->LSIGTxopProSup));
+
+		DBGPRINT(RT_DEBUG_TRACE, ("\tHT Parm Info: \n"));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t MaxRx A-MPDU Factor(%d), MPDU Density(%d)\n",
+			pHTCapParm->MaxRAmpduFactor, pHTCapParm->MpduDensity));
+
+		DBGPRINT(RT_DEBUG_TRACE, ("\tHT MCS set: \n"));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t %02x %02x %02x %02x %02x\n", pHTCapability->MCSSet[0],
+			pHTCapability->MCSSet[1], pHTCapability->MCSSet[2],
+			pHTCapability->MCSSet[3], pHTCapability->MCSSet[4]));
+
+        DBGPRINT(RT_DEBUG_TRACE, ("\tExt HT Cap Info: \n"));
+		DBGPRINT(RT_DEBUG_TRACE, ("\t\t PCO(%d), TransTime(%d), MCSFeedback(%d), +HTC(%d), RDG(%d)\n",
+			pExtHT->Pco, pExtHT->TranTime, pExtHT->MCSFeedback, pExtHT->PlusHTC, pExtHT->RDGSupport));
+
+		DBGPRINT(RT_DEBUG_TRACE, ("\n%s - MODE=%d, BW=%d, MCS=%d, ShortGI=%d, MaxRxFactor=%d, MpduDensity=%d, MIMOPS=%d, AMSDU=%d\n",
+			sAssoc,
+			pEntry->HTPhyMode.field.MODE, pEntry->HTPhyMode.field.BW,
+			pEntry->HTPhyMode.field.MCS, pEntry->HTPhyMode.field.ShortGI,
+			pEntry->MaxRAmpduFactor, pEntry->MpduDensity,
+			pEntry->MmpsMode, pEntry->AMsduSize));
 
 		DBGPRINT(RT_DEBUG_TRACE, ("\n%s - Update AP OperaionMode=%d , fAnyStationIsLegacy=%d, fAnyStation20Only=%d, fAnyStationNonGF=%d\n\n",
-					sAssoc, 
-					pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode, 
-					pAd->MacTab.fAnyStationIsLegacy,
-					pAd->MacTab.fAnyStation20Only, 
-					pAd->MacTab.fAnyStationNonGF));
+		sAssoc, pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode, pAd->MacTab.fAnyStationIsLegacy,
+		pAd->MacTab.fAnyStation20Only, pAd->MacTab.fAnyStationNonGF));
 
 #ifdef DOT11N_DRAFT3
 		DBGPRINT(RT_DEBUG_TRACE, ("\tExt Cap Info: \n"));

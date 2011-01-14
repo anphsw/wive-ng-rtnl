@@ -146,6 +146,11 @@ INT	Show_WpsPbcBand_Proc(
 INT	Show_WPAPSK_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	OUT	PSTRING			pBuf);
+
+INT	Show_AutoReconnect_Proc(
+	IN	PRTMP_ADAPTER	pAd,
+	OUT	PSTRING			pBuf);
+
 #endif // CONFIG_STA_SUPPORT //
 
 INT	Show_AuthMode_Proc(
@@ -243,6 +248,7 @@ static struct {
     {"WpsApBand",				Show_WpsPbcBand_Proc},
 #endif // WSC_STA_SUPPORT //
 	{"WPAPSK",					Show_WPAPSK_Proc},
+	{"AutoReconnect", 			Show_AutoReconnect_Proc},
 #endif // CONFIG_STA_SUPPORT //
 	{"AuthMode",				Show_AuthMode_Proc},           
 	{"EncrypType",				Show_EncrypType_Proc},         
@@ -345,34 +351,51 @@ INT Set_CountryRegionABand_Proc(
 }
 
 
-/* 
-    ==========================================================================
-    Description:
-        Set Wireless Mode
-    Return:
-        TRUE if all parameters are OK, FALSE otherwise
-    ==========================================================================
-*/
-INT	Set_WirelessMode_Proc(
+INT	Set_Cmm_WirelessMode_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
+	IN	PSTRING			arg,
+	IN	BOOLEAN			FlgIsDiffMbssModeUsed)
 {
 	INT	success = TRUE;
 
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef MBSS_SUPPORT
+#ifdef DEBUG
+	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
+#endif
+	UINT32 i;
+
+	if (FlgIsDiffMbssModeUsed == 0)
+		success = RT_CfgSetWirelessMode(pAd, arg);
+	else
+		success = RT_CfgSetMbssWirelessMode(pAd, arg);
+#else
 	success = RT_CfgSetWirelessMode(pAd, arg);
+#endif // MBSS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+	success = RT_CfgSetWirelessMode(pAd, arg);
+#endif // CONFIG_STA_SUPPORT //
+
 	if (success)
 	{
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
-			UINT32 i;
-
-
 			/* recover Wmm Capable for "each" BSS */
+			/* all phy mode of MBSS are the same */
 			for(i=0; i<pAd->ApCfg.BssidNum; i++)
 			{
 				pAd->ApCfg.MBSSID[i].bWmmCapable = \
 										pAd->ApCfg.MBSSID[i].bWmmCapableOrg;
+
+#ifdef MBSS_SUPPORT
+				/* In Same-MBSS Mode, all phy modes are the same */
+				if (FlgIsDiffMbssModeUsed == 0)
+					pAd->ApCfg.MBSSID[i].PhyMode = pAd->CommonCfg.PhyMode;
+#endif // MBSS_SUPPORT //
 			}
 
 			// TODO: Is the function BuildChannelList() still necessary here, due to it also been called in RTMPSetPhyMode()!
@@ -462,7 +485,7 @@ INT	Set_WirelessMode_Proc(
 		else
 		{
 			USHORT i;
-		        USHORT value;
+		    USHORT value;
 			UCHAR  rf_offset;
 			UCHAR  rf_value;
 
@@ -499,7 +522,27 @@ INT	Set_WirelessMode_Proc(
 		}
 #endif
 
+#ifdef CONFIG_AP_SUPPORT
+#ifdef MBSS_SUPPORT
 		DBGPRINT(RT_DEBUG_TRACE, ("Set_WirelessMode_Proc::(=%d)\n", pAd->CommonCfg.PhyMode));
+#ifdef DEBUG
+		DBGPRINT(RT_DEBUG_TRACE, ("Set_WirelessMode_Proc::(BSS%d=%d)\n",
+				pObj->ioctl_if, pAd->ApCfg.MBSSID[pObj->ioctl_if].PhyMode));
+#endif
+
+		for(i=0; i<pAd->ApCfg.BssidNum; i++)
+		{
+			/*
+				When last mode is not 11B-only, new mode is 11B, we need to re-make
+				beacon frame content.
+
+				Because we put support rate/extend support rate element in
+				APMakeBssBeacon(), not APUpdateBeaconFrame().
+			*/
+			APMakeBssBeacon(pAd, i);
+		}
+#endif // MBSS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
 	}
 	else
 	{
@@ -507,6 +550,71 @@ INT	Set_WirelessMode_Proc(
 	}
 	
 	return success;
+}
+
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef MBSS_SUPPORT
+/* 
+    ==========================================================================
+    Description:
+        Set Wireless Mode for MBSS
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+*/
+INT	Set_MBSS_WirelessMode_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg)
+{
+	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
+	INT MaxPhyMode = PHY_11G;
+	LONG WirelessMode;
+
+
+	/* sanity check */
+#ifdef DOT11_N_SUPPORT
+	if (!RTMP_TEST_MORE_FLAG(pAd, fRTMP_ADAPTER_DISABLE_DOT_11N))
+		MaxPhyMode = PHY_11N_5G;
+#endif // DOT11_N_SUPPORT //
+
+	WirelessMode = simple_strtol(arg, 0, 10);
+	if (WirelessMode > MaxPhyMode)
+		return FALSE; /* out of range */
+
+	if ((WirelessMode == PHY_11ABG_MIXED) ||
+		(WirelessMode == PHY_11ABGN_MIXED) ||
+		(WirelessMode == PHY_11AGN_MIXED))
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("mbss> Wrong phy mode for AP!\n"));
+		return FALSE;
+	}
+
+	/* assign wireless mode for the BSS */
+	pAd->ApCfg.MBSSID[pObj->ioctl_if].PhyMode = WirelessMode;
+
+	/*
+		If the band is different with other BSS, we will correct it in
+		RT_CfgSetMbssWirelessMode()
+	*/
+	return Set_Cmm_WirelessMode_Proc(pAd, arg, 1);
+}
+#endif // MBSS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
+
+/* 
+    ==========================================================================
+    Description:
+        Set Wireless Mode
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+*/
+INT	Set_WirelessMode_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg)
+{
+	return Set_Cmm_WirelessMode_Proc(pAd, arg, 0);
 }
 
 /* 
@@ -535,7 +643,12 @@ INT	Set_Channel_Proc(
 #ifdef CONFIG_STA_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 		{
-			pAd->CommonCfg.Channel = Channel;        
+			pAd->CommonCfg.Channel = Channel;
+
+			/*
+				Save the channel on MlmeAux for CntlOidRTBssidProc used.
+			*/
+			pAd->MlmeAux.Channel = pAd->CommonCfg.Channel;
 
 			if (MONITOR_ON(pAd))
 			{
@@ -545,8 +658,8 @@ INT	Set_Channel_Proc(
 					pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40)
 				{
 					N_SetCenCh(pAd);
-						AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
-						AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
+					AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
+					AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 					DBGPRINT(RT_DEBUG_TRACE, ("BW_40, control_channel(%d), CentralChannel(%d) \n", 
 								pAd->CommonCfg.Channel, pAd->CommonCfg.CentralChannel));
 				}
@@ -1241,7 +1354,7 @@ INT	Show_DescInfo_Proc(
         Reset statistics counter
 
     Arguments:
-        pAd		Pointer to our adapter
+        pAdapter            Pointer to our adapter
         arg                 
 
     Return:
@@ -1252,6 +1365,9 @@ INT	Set_ResetStatCounter_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
+	//UCHAR           i;
+	//MAC_TABLE_ENTRY *pEntry;
+    
 	DBGPRINT(RT_DEBUG_TRACE, ("==>Set_ResetStatCounter_Proc\n"));
 
 	// add the most up-to-date h/w raw counters into software counters
@@ -1267,13 +1383,6 @@ INT	Set_ResetStatCounter_Proc(
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
-#ifdef TXBF_SUPPORT
-	{
-		int i;
-		for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
-			NdisZeroMemory(&pAd->MacTab.Content[i].TxBFCounters, sizeof(pAd->MacTab.Content[i].TxBFCounters));
-	}
-#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
 	return TRUE;
@@ -1308,7 +1417,7 @@ BOOLEAN RTMPCheckStrPrintAble(
     
     for (i=0; i<strLen; i++)
     {
-        if ((pInPutStr[i] < 0x21) ||
+        if ((pInPutStr[i] < 0x20) ||
             (pInPutStr[i] > 0x7E))
             return FALSE;
     }
@@ -1799,70 +1908,6 @@ VOID	RTMPSetPhyMode(
 
 
 #ifdef DOT11_N_SUPPORT
-
-#ifdef DOT11N_PF_DEBUG
-VOID HtMcsSetAdjust(
-	IN RTMP_ADAPTER *pAd)
-{
-	UCHAR Idx;
-	UCHAR origMcsSet[4];
-	HT_CAPABILITY_IE *pHtCapability;
-	HT_MCS_SET	*pMcsSet;
-	HT_MCS_SET_TX_SUBFIELD *pMcsSetTxSubField;
-	
-	if (pAd->CommonCfg.fixRxMcsSet == FALSE)
-		return;
-
-	pHtCapability = &pAd->CommonCfg.HtCapability;
-	hex_dump("The Original MCSSet is", &pHtCapability->MCSSet[0], sizeof(pHtCapability->MCSSet));
-	DBGPRINT(RT_DEBUG_TRACE, ("fixRxMcsSet = 0x%x\n", pAd->CommonCfg.fixRxMcsSet));
-	
-	NdisCopyMemory(&origMcsSet[0], &pHtCapability->MCSSet[0], 4);
-	NdisZeroMemory(&pHtCapability->MCSSet[0], 4);
-	
-	/* 
-		Currently we only support MCS 0~ MCS 31 and don't care about MCS 32, 
-		so we only need to check 4 times.
-	*/
-	Idx = 0;
-	do{
-		if ((pAd->CommonCfg.fixRxMcsSet & (1 << Idx)) == (1 << Idx))
-			pHtCapability->MCSSet[Idx] = 0xff;
-		Idx++;
-	}while(Idx < 3);
-
-	if ((NdisEqualMemory(&pHtCapability->MCSSet[0], origMcsSet, 4)) != TRUE)
-	{
-		pMcsSet = (HT_MCS_SET *)&pHtCapability->MCSSet[0];
-		pMcsSetTxSubField = &pMcsSet->TxSubfield;
-		/* 
-			Tx Support Rate is different from Rx MCS support Rate, We need to set 
-			the "Tx MCS Set Defined(BIT 96)" as true. i.e., in bit 7 of McsSet[11];
-		*/
-		pMcsSetTxSubField->TxMCSSetDefined = 1;
-		//pHtCapability->MCSSet[11] |= (1 <<7);
-		
-		/* 
-			"Tx Rx MCS Set Not Qqual(BIT 97)" should be set as 1 when Tx/Rx MCS 
-			set is different, i.e., in bit 6 of McsSet[11] 
-		*/
-		pMcsSetTxSubField->TxRxNotEqual = 1;
-		//pHtCapability->MCSSet[11] |= (1 << 6);
-		
-		/* 
-			We need to set the Tx Maximum Number SS support in BIT 98~ BIT 99, 
-			i.e., in bit 5~4 of McsSet[11]
-		*/
-		pMcsSetTxSubField->TxMaxStream = (pAd->CommonCfg.TxStream -1);
-		//pHtCapability->MCSSet[11] |= (pAd->CommonCfg.TxStream << 4);
-	}
-	
-	hex_dump("The updated MCSSet is", &pHtCapability->MCSSet[0], sizeof(pHtCapability->MCSSet));
-
-}
-#endif // DOT11N_PF_DEBUG //
-
-
 /*
 	========================================================================
 	Routine Description:
@@ -1941,20 +1986,6 @@ VOID	RTMPSetHT(
 	pAd->CommonCfg.HtCapability.HtCapParm.MaxRAmpduFactor = 3;
 	pAd->CommonCfg.DesiredHtPhy.MaxRAmpduFactor = 3;
 
-#ifdef DOT11N_PF_DEBUG
-	if (pAd->WIFItestbed.maxAMPDUExp < 3)
-	{
-		UINT32 macRegVal;
-		
-		pAd->CommonCfg.HtCapability.HtCapParm.MaxRAmpduFactor = pAd->WIFItestbed.maxAMPDUExp;
-		pAd->CommonCfg.DesiredHtPhy.MaxRAmpduFactor = pAd->WIFItestbed.maxAMPDUExp;
-		RTMP_IO_READ32(pAd, MAX_LEN_CFG, &macRegVal);
-		macRegVal &= 0x0fff;
-		macRegVal |= (pAd->WIFItestbed.maxAMPDUExp << 12);
-		RTMP_IO_WRITE32(pAd, MAX_LEN_CFG, macRegVal);
-	}
-#endif // DOT11N_PF_DEBUG //
-
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPSetHT : RxBAWinLimit = %d\n", pAd->CommonCfg.BACapability.field.RxBAWinLimit));
 
 	// Mimo power save, A-MSDU size, 
@@ -2000,10 +2031,6 @@ VOID	RTMPSetHT(
 			pAd->CommonCfg.HtCapability.MCSSet[2] =  0xff;
 			break;
 	}
-
-#ifdef DOT11N_PF_DEBUG
-	HtMcsSetAdjust(pAd);
-#endif // DOT11N_PF_DEBUG //
 
 	if (pAd->CommonCfg.bForty_Mhz_Intolerant && (pHTPhyMode->BW == BW_40) /* && (pAd->CommonCfg.Channel <= 14)*/)
 	{
@@ -2186,11 +2213,8 @@ VOID	RTMPSetHT(
 		pAd->CommonCfg.DesiredHtPhy.ShortGIfor40 = 0;
 	}
 	
-#if defined(RT2883) || defined(RT3883)
 	// We support link adaptation for unsolicit MCS feedback, set to 2.
-	pAd->CommonCfg.HtCapability.ExtHtCapInfo.MCSFeedback = MCSFBK_NONE;
-	//pAd->CommonCfg.HtCapability.ExtHtCapInfo.MCSFeedback = MCSFBK_MRQ;
-#endif // definde(RT2883) || defined(RT3883) //
+	//pAd->CommonCfg.HtCapability.ExtHtCapInfo.MCSFeedback = MCSFBK_NONE; //MCSFBK_UNSOLICIT;
 	pAd->CommonCfg.AddHTInfo.ControlChan = pAd->CommonCfg.Channel;
 	// 1, the extension channel above the control channel. 
 	
@@ -2242,16 +2266,6 @@ VOID	RTMPSetHT(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef TXBF_SUPPORT	
-	/* Set ETxBF */
-	setETxBFCap(pAd, &pAd->CommonCfg.HtCapability.TxBFCap);
-
-	/* Check ITxBF */
-	pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn &= rtmp_chk_itxbf_calibration(pAd);
-
-	/* Apply to ASIC */
-	rtmp_asic_set_bf(pAd);
-#endif // TXBF_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -2360,7 +2374,7 @@ VOID	RTMPSetIndividualHT(
 		DBGPRINT(RT_DEBUG_WARN, ("RTMPSetIndividualHT: MCS_32 is only supported in 40-MHz, reset it as MCS_0\n"));
 		DesiredMcs = MCS_0;		
 	}
-	   		
+
 #ifdef CONFIG_STA_SUPPORT
 	if ((pAd->OpMode == OPMODE_STA) && (pAd->StaCfg.BssType == BSS_INFRA) && (apidx == MIN_NET_DEVICE_FOR_MBSSID))
 		;
@@ -2442,18 +2456,7 @@ VOID	RTMPSetIndividualHT(
 	if(pAd->CommonCfg.DesiredHtPhy.ChannelWidth == BW_40)
 	{
 		if (DesiredMcs == MCS_AUTO || DesiredMcs == MCS_32)
-		{
 			pDesired_ht_phy->MCSSet[4] = 0x1;
-#ifdef DOT11N_PF_DEBUG
-			pAd->CommonCfg.HtCapability.MCSSet[4] = 0x1; // MCS 32
-#endif // DOT11N_PF_DEBUG //
-		}
-#ifdef DOT11N_PF_DEBUG
-		else
-		{
-			pAd->CommonCfg.HtCapability.MCSSet[4] = 0x0; // MCS 32
-		}
-#endif // DOT11N_PF_DEBUG //
 	}
 
 	// update HT Rate setting				
@@ -2477,7 +2480,9 @@ VOID RTMPDisableDesiredHtInfo(
 {
 #ifdef CONFIG_AP_SUPPORT
 	UINT8				apidx = 0;
+#endif // CONFIG_AP_SUPPORT //
 
+#ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
 		for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
@@ -3113,54 +3118,36 @@ VOID RTMPIoctlGetMacTableStaInfo(
 {
 	INT i;
 	RT_802_11_MAC_TABLE MacTab;
-	PRT_802_11_MAC_ENTRY pDst;
-	MAC_TABLE_ENTRY *pEntry;
 
-	memset(&MacTab, 0, sizeof(RT_802_11_MAC_TABLE));
+	MacTab.Num = 0;
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
-		pEntry = &(pAd->MacTab.Content[i]);
-		if (IS_ENTRY_CLIENT(pEntry) && (pEntry->Sst == SST_ASSOC))
+		if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]) && (pAd->MacTab.Content[i].Sst == SST_ASSOC))
 		{
-			pDst = &(MacTab.Entry[MacTab.Num]);
-
-			pDst->ApIdx = pEntry->apidx;
-			COPY_MAC_ADDR(pDst->Addr, &pEntry->Addr);
-			pDst->Aid = (UCHAR)pEntry->Aid;
-			pDst->Psm = pEntry->PsMode;
-
+			COPY_MAC_ADDR(MacTab.Entry[MacTab.Num].Addr, &pAd->MacTab.Content[i].Addr);
+			MacTab.Entry[MacTab.Num].Aid = (UCHAR)pAd->MacTab.Content[i].Aid;
+			MacTab.Entry[MacTab.Num].Psm = pAd->MacTab.Content[i].PsMode;
 #ifdef DOT11_N_SUPPORT
-			pDst->MimoPs = pEntry->MmpsMode;
+			MacTab.Entry[MacTab.Num].MimoPs = pAd->MacTab.Content[i].MmpsMode;
 #endif // DOT11_N_SUPPORT //
 
 			// Fill in RSSI per entry
-			pDst->AvgRssi0 = pEntry->RssiSample.AvgRssi0;
-			pDst->AvgRssi1 = pEntry->RssiSample.AvgRssi1;
-			pDst->AvgRssi2 = pEntry->RssiSample.AvgRssi2;
+			MacTab.Entry[MacTab.Num].AvgRssi0 = pAd->MacTab.Content[i].RssiSample.AvgRssi0;
+			MacTab.Entry[MacTab.Num].AvgRssi1 = pAd->MacTab.Content[i].RssiSample.AvgRssi1;
+			MacTab.Entry[MacTab.Num].AvgRssi2 = pAd->MacTab.Content[i].RssiSample.AvgRssi2;
 
 			// the connected time per entry
-			pDst->ConnectedTime = pEntry->StaConnectTime;
-			pDst->TxRate.field.MCS = pEntry->HTPhyMode.field.MCS;
-			pDst->TxRate.field.BW = pEntry->HTPhyMode.field.BW;
-			pDst->TxRate.field.ShortGI = pEntry->HTPhyMode.field.ShortGI;
-			pDst->TxRate.field.STBC = pEntry->HTPhyMode.field.STBC;
-			pDst->TxRate.field.rsv = pEntry->HTPhyMode.field.rsv;
-			pDst->TxRate.field.MODE = pEntry->HTPhyMode.field.MODE;
-			pDst->TxRate.word = pEntry->HTPhyMode.word;
-
-			pDst->LastRxRate = pEntry->LastRxRate;
-#if defined (RT2883) || defined (RT3883)
-			pDst->StreamSnr[0] = pEntry->BF_SNR[0];
-			pDst->StreamSnr[1] = pEntry->BF_SNR[1];
-			pDst->StreamSnr[2] = pEntry->BF_SNR[2];
-#ifdef TXBF_SUPPORT
-			pDst->SoundingRespSnr[0] = pEntry->sndg0Snr0;
-			pDst->SoundingRespSnr[1] = pEntry->sndg0Snr1;
-			pDst->SoundingRespSnr[2] = pEntry->sndg0Snr2;
-#endif // TXBF_SUPPORT //
-//			pDst->TxPER = pEntry->SaveTxPER;
-#endif // defined (RT2883) || defined (RT3883) //
-
+			MacTab.Entry[MacTab.Num].ConnectedTime = pAd->MacTab.Content[i].StaConnectTime;
+			MacTab.Entry[MacTab.Num].TxRate.field.MCS = pAd->MacTab.Content[i].HTPhyMode.field.MCS;
+			MacTab.Entry[MacTab.Num].TxRate.field.BW = pAd->MacTab.Content[i].HTPhyMode.field.BW;
+			MacTab.Entry[MacTab.Num].TxRate.field.ShortGI = pAd->MacTab.Content[i].HTPhyMode.field.ShortGI;
+			MacTab.Entry[MacTab.Num].TxRate.field.STBC = pAd->MacTab.Content[i].HTPhyMode.field.STBC;
+			MacTab.Entry[MacTab.Num].TxRate.field.rsv = pAd->MacTab.Content[i].HTPhyMode.field.rsv;
+			MacTab.Entry[MacTab.Num].TxRate.field.MODE = pAd->MacTab.Content[i].HTPhyMode.field.MODE;
+			MacTab.Entry[MacTab.Num].TxRate.word = pAd->MacTab.Content[i].HTPhyMode.word;
+#ifdef RTMP_RBUS_SUPPORT
+			MacTab.Entry[MacTab.Num].LastRxRate = pAd->MacTab.Content[i].LastRxRate;
+#endif // RTMP_RBUS_SUPPORT //
 
 			MacTab.Num += 1;
 		}
@@ -3183,54 +3170,38 @@ VOID RTMPIoctlGetMacTable(
 {
 	INT i;
 	RT_802_11_MAC_TABLE MacTab;
-	RT_802_11_MAC_ENTRY *pDst;
-	MAC_TABLE_ENTRY *pEntry;
 	char *msg;
 
-	memset(&MacTab, 0, sizeof(RT_802_11_MAC_TABLE));
+	MacTab.Num = 0;
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
-		pEntry = &(pAd->MacTab.Content[i]);
-		if (IS_ENTRY_CLIENT(pEntry) && (pEntry->Sst == SST_ASSOC))
+		if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]) && (pAd->MacTab.Content[i].Sst == SST_ASSOC))
 		{
-			pDst = &(MacTab.Entry[MacTab.Num]);
-			
-			pDst->ApIdx = (UCHAR)pEntry->apidx;
-			COPY_MAC_ADDR(pDst->Addr, &pEntry->Addr);
-			pDst->Aid = (UCHAR)pEntry->Aid;
-			pDst->Psm = pEntry->PsMode;
+			MacTab.Entry[MacTab.Num].ApIdx = (UCHAR)pAd->MacTab.Content[i].apidx;
+			COPY_MAC_ADDR(MacTab.Entry[MacTab.Num].Addr, &pAd->MacTab.Content[i].Addr);
+			MacTab.Entry[MacTab.Num].Aid = (UCHAR)pAd->MacTab.Content[i].Aid;
+			MacTab.Entry[MacTab.Num].Psm = pAd->MacTab.Content[i].PsMode;
 #ifdef DOT11_N_SUPPORT
-			pDst->MimoPs = pEntry->MmpsMode;
+			MacTab.Entry[MacTab.Num].MimoPs = pAd->MacTab.Content[i].MmpsMode;
 #endif // DOT11_N_SUPPORT //
 
 			// Fill in RSSI per entry
-			pDst->AvgRssi0 = pEntry->RssiSample.AvgRssi0;
-			pDst->AvgRssi1 = pEntry->RssiSample.AvgRssi1;
-			pDst->AvgRssi2 = pEntry->RssiSample.AvgRssi2;
+			MacTab.Entry[MacTab.Num].AvgRssi0 = pAd->MacTab.Content[i].RssiSample.AvgRssi0;
+			MacTab.Entry[MacTab.Num].AvgRssi1 = pAd->MacTab.Content[i].RssiSample.AvgRssi1;
+			MacTab.Entry[MacTab.Num].AvgRssi2 = pAd->MacTab.Content[i].RssiSample.AvgRssi2;
 
 			// the connected time per entry
-			pDst->ConnectedTime = pEntry->StaConnectTime;
-			pDst->TxRate.field.MCS = pEntry->HTPhyMode.field.MCS;
-			pDst->TxRate.field.BW = pEntry->HTPhyMode.field.BW;
-			pDst->TxRate.field.ShortGI = pEntry->HTPhyMode.field.ShortGI;
-			pDst->TxRate.field.STBC = pEntry->HTPhyMode.field.STBC;
-			pDst->TxRate.field.rsv = pEntry->HTPhyMode.field.rsv;
-			pDst->TxRate.field.MODE = pEntry->HTPhyMode.field.MODE;
-			pDst->TxRate.word = pEntry->HTPhyMode.word;
+			MacTab.Entry[MacTab.Num].ConnectedTime = pAd->MacTab.Content[i].StaConnectTime;
+			MacTab.Entry[MacTab.Num].TxRate.field.MCS = pAd->MacTab.Content[i].HTPhyMode.field.MCS;
+			MacTab.Entry[MacTab.Num].TxRate.field.BW = pAd->MacTab.Content[i].HTPhyMode.field.BW;
+			MacTab.Entry[MacTab.Num].TxRate.field.ShortGI = pAd->MacTab.Content[i].HTPhyMode.field.ShortGI;
+			MacTab.Entry[MacTab.Num].TxRate.field.STBC = pAd->MacTab.Content[i].HTPhyMode.field.STBC;
+			MacTab.Entry[MacTab.Num].TxRate.field.rsv = pAd->MacTab.Content[i].HTPhyMode.field.rsv;
+			MacTab.Entry[MacTab.Num].TxRate.field.MODE = pAd->MacTab.Content[i].HTPhyMode.field.MODE;
+			MacTab.Entry[MacTab.Num].TxRate.word = pAd->MacTab.Content[i].HTPhyMode.word;
 									
 #ifdef RTMP_RBUS_SUPPORT
-			pDst->LastRxRate = pEntry->LastRxRate;
-#if defined(RT2883) || defined(RT3883)
-			pDst->StreamSnr[0] = pEntry->BF_SNR[0];
-			pDst->StreamSnr[1] = pEntry->BF_SNR[1];
-			pDst->StreamSnr[2] = pEntry->BF_SNR[2];
-#ifdef TXBF_SUPPORT
-			pDst->SoundingRespSnr[0] = pEntry->sndg0Snr0;
-			pDst->SoundingRespSnr[1] = pEntry->sndg0Snr1;
-			pDst->SoundingRespSnr[2] = pEntry->sndg0Snr2;
-#endif // TXBF_SUPPORT //
-#endif // defined(RT2883) || defined(RT3883) //
-//			pDst->TxPER = pEntry->SaveTxPER;
+			MacTab.Entry[MacTab.Num].LastRxRate = pAd->MacTab.Content[i].LastRxRate;
 #endif // RTMP_RBUS_SUPPORT //
 									
 			MacTab.Num += 1;
@@ -3257,7 +3228,7 @@ VOID RTMPIoctlGetMacTable(
 	
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
-		pEntry = &pAd->MacTab.Content[i];
+		PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[i];
 		if (IS_ENTRY_CLIENT(pEntry) && (pEntry->Sst == SST_ASSOC))
 		{
 			if((strlen(msg)+MAC_LINE_LEN ) >= (MAX_LEN_OF_MAC_TABLE*MAC_LINE_LEN) )
@@ -3467,7 +3438,8 @@ INT	Set_BASetup_Proc(
 	if ((token != NULL) && (strlen(token)>1))
 	{
 		tid = (UCHAR) simple_strtol((token+1), 0, 10);
-		if (tid > 15)
+		/* tid is 0 ~ 7; Or kernel will crash in BAOriSessionSetUp() */
+		if (tid > (NUM_OF_TID-1))
 			return FALSE;
 		
 		*token = '\0';
@@ -3546,7 +3518,8 @@ INT	Set_BAOriTearDown_Proc(
 	if ((token != NULL) && (strlen(token)>1))
 	{
 		tid = simple_strtol((token+1), 0, 10);
-		if (tid > NUM_OF_TID)
+		/* tid will be 0 ~ 7; Or kernel will crash in BAOriSessionTearDown() */
+		if (tid > (NUM_OF_TID-1))
 			return FALSE;
 		
 		*token = '\0';
@@ -3599,7 +3572,8 @@ INT	Set_BARecTearDown_Proc(
 	if ((token != NULL) && (strlen(token)>1))
 	{
 		tid = simple_strtol((token+1), 0, 10);
-		if (tid > NUM_OF_TID)
+		/* tid will be 0 ~ 7; Or kernel will crash in BARecSessionTearDown() */
+		if (tid > (NUM_OF_TID-1))
 			return FALSE;
 		
 		*token = '\0';
@@ -3662,10 +3636,6 @@ INT	Set_HtMcs_Proc(
     BOOLEAN bAutoRate = FALSE;
 #endif // CONFIG_STA_SUPPORT //
 
-#if defined(RT2883) || defined(RT3883)
-	if (IS_RT2883(pAd) || IS_RT3883(pAd))
-	ValidMcs = 23;
-#endif // defined(RT2883) || defined(RT3883) //
 
 	Mcs_tmp = simple_strtol(arg, 0, 10);
 		
@@ -3674,29 +3644,6 @@ INT	Set_HtMcs_Proc(
 	else
 		HtMcs = MCS_AUTO;	
 
-#ifdef DOT11N_PF_DEBUG
-	/* 
-		Depends on Paul's comment, for fix MCS, we also need to fix the Hw fallback. 
-	*/
-	if (HtMcs != MCS_AUTO)
-	{
-		UINT32 fallBackReg;//, longRetry, shortRetry;
-
-		/* For Hw rate fallback, we need to reset the following registers */
-		RTMP_IO_READ32(pAd, TX_RTY_CFG, &fallBackReg);
-		fallBackReg &= 0xbfffffff;
-		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, fallBackReg);
-	}
-	else
-	{
-		UINT32 fallBackReg;
-		
-		RTMP_IO_READ32(pAd, TX_RTY_CFG, &fallBackReg);
-		fallBackReg |= 0x40000000;
-		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, fallBackReg);
-	}
-#endif // DOT11N_PF_DEBUG //
-	
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
@@ -4168,7 +4115,7 @@ INT	Set_HtTxStream_Proc(
 		pAd->CommonCfg.TxStream = pAd->Antenna.field.TxPath;
 
 	if ((pAd->MACVersion < RALINK_2883_VERSION) &&
-		(pAd->CommonCfg.TxStream > 2))
+		(pAd->CommonCfg.TxStream > 3))
 	{
 		pAd->CommonCfg.TxStream = 2; // only 2 TX streams for RT2860 series
 	}
@@ -4396,8 +4343,8 @@ INT	Set_OpMode_Proc(
 }
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 
-
 #ifdef RTMP_RBUS_SUPPORT
+
 #ifdef INCLUDE_DEBUG_QUEUE
 // ---------------------- DEBUG QUEUE ------------------------
 
@@ -4419,8 +4366,7 @@ struct {
 #define DBQ_TYPE_TXFIFO	0x73		// TX Stat FIFO
 #define DBQ_TYPE_RXWI	0x78		// RXWI uses 0x78 to 0x7A for 5 longs
 #define DBQ_TYPE_RXHDR	0x7B		// RX Header
-#define DBQ_TYPE_TXQHTC	0x7c		// TX Qos+HT Control field
-#define DBQ_TYPE_RXQHTC	0x7d		// RX Qos+HT Control field
+#define DBQ_TYPE_RXQHTC	0x7c		// RX Qos+HT Control field
 
 #define DBQ_INIT_SIG	0x4442484E	// 'DBIN' - dbqInit initialized flag
 #define DBQ_ENA_SIG		0x4442454E	// 'DBEN' - dbqEnable enabled flag
@@ -4469,39 +4415,6 @@ void dbQueueEnqueue(UCHAR type, UCHAR *data)
 	memcpy(oldTail->data, data, DBQ_DATA_LENGTH);
 }
 
-void dbQueueEnqueueTxFrame(UCHAR *pTxWI, UCHAR *pHeader_802_11)
-{
-	dbQueueEnqueue(DBQ_TYPE_TXWI, pTxWI);
-
-	// 802.11 Header
-	if (pHeader_802_11 != NULL) {
-		dbQueueEnqueue(DBQ_TYPE_TXHDR, pHeader_802_11);
-
-		// Qos+HT Control field
-		if ((pHeader_802_11[0] & 0x08) && (pHeader_802_11[1] & 0x80))
-			dbQueueEnqueue(DBQ_TYPE_TXQHTC, pHeader_802_11+24);
-	}
-}
-
-void dbQueueEnqueueRxFrame(UCHAR *pRxWI, UCHAR *pHeader_802_11, ULONG flags)
-{
-	// RXWI
-	dbQueueEnqueue(DBQ_TYPE_RXWI, pRxWI);
-	if (flags & DBF_DBQ_RXWI_FULL) {
-		dbQueueEnqueue(0x79, pRxWI+8);
-		dbQueueEnqueue(0x7A, pRxWI+16);
-	}
-
-	// 802.11 Header
-	dbQueueEnqueue(DBQ_TYPE_RXHDR, (UCHAR *)pHeader_802_11);
-
-	// Qos+HT Control field
-	if ((pHeader_802_11[0] & 0x08) &&
-		(pHeader_802_11[1] & 0x80))
-		dbQueueEnqueue(DBQ_TYPE_RXQHTC, pHeader_802_11+24);
-
-}
-
 // dbQueueDump - dump contents of debug queue
 void dbQueueDump(void)
 {
@@ -4525,7 +4438,7 @@ void dbQueueDump(void)
 		switch (oldTail->type) {
 		case 0x70:	// TXWI - 2 longs, MSB to LSB
 		case 0x78:	// RXWI - 2 longs, MSB to LSB
-			DBGPRINT(RT_DEBUG_OFF, ("\n%cxWI %02X%02X %02X%02X-%02X%02X %02X%02X---",
+			DBGPRINT(RT_DEBUG_OFF, ("%cxWI %02X%02X %02X%02X-%02X%02X %02X%02X---", 
 					oldTail->type==0x70? 'T': 'R',
 					oldTail->data[3], oldTail->data[2], oldTail->data[1], oldTail->data[0],
 					oldTail->data[7], oldTail->data[6], oldTail->data[5], oldTail->data[4]) );
@@ -4536,10 +4449,8 @@ void dbQueueDump(void)
 					oldTail->data[3], oldTail->data[2], oldTail->data[1], oldTail->data[0],
 					oldTail->data[7], oldTail->data[6], oldTail->data[5], oldTail->data[4]) );
 			break;
-		case 0x7c:	// TX HTC+QoS, 6 bytes, MSB to LSB
-		case 0x7d:	// RX HTC+QoS, 6 bytes, MSB to LSB
-			DBGPRINT(RT_DEBUG_OFF, ("%cxHTC  H:%02X%02X%02X%02X Q:%02X%02X   ",
-					oldTail->type==0x7c? 'T': 'R',
+		case 0x7c:	// RX Qos+HTC, 6 bytes, MSB to LSB
+			DBGPRINT(RT_DEBUG_OFF, ("RxHTC  H:%02X%02X%02X%02X Q:%02X%02X   ",
 					oldTail->data[5], oldTail->data[4], oldTail->data[3], oldTail->data[2],
 					oldTail->data[1], oldTail->data[0]) );
 			break;
@@ -4584,16 +4495,13 @@ void dbQueueDump(void)
 			succMCS = (oldTail->data[2] & 0x7F);
 			if (succMCS>origMCS && origMCS<8)
 				origMCS += 16;
-			DBGPRINT(RT_DEBUG_OFF, ("TxFI %02X%02X%02X%02X=%c%c%2s%c M%02d/%02d%c%c",
-					oldTail->data[3], oldTail->data[2],
-					oldTail->data[1], oldTail->data[0],
-					(oldTail->data[3] & 0x20)? 'I':					// Beamforming:  E or I or _
-							((oldTail->data[3] & 0x08)? 'E': '_'),
+			DBGPRINT(RT_DEBUG_OFF, ("TxFI %02X%02X%02X%02X=%c%c%2s M%02d/%02d%c%c ", 
+					oldTail->data[3], oldTail->data[2], oldTail->data[1], oldTail->data[0],
+					(oldTail->data[3] & 0x20)? 'I': ((oldTail->data[3] & 0x08)? 'E': '_'),	// Beamforming:  E or I or _
 					(oldTail->data[3] & 0x01)? 'S': 'L',									// Guard Int:    S or L
 					(oldTail->data[3] & 0x02)? "st": "__",									// STBC:         st or __
-					(oldTail->data[0] & 0x40)? 'A': '_',			// Aggregated:   A or _
 					succMCS, origMCS,														// MCS:          <Final>/<orig>
-					succMCS==origMCS? ' ': '*',						// Retry:        '*' if MCS doesn't match
+					succMCS==origMCS? ' ': '*',												// Retry:        * if MCS doesn't match
 					(oldTail->data[0] & 0x20)? ' ': 'F') );									// Success/Fail  _ or F
 			break;
 		default:
@@ -4641,7 +4549,7 @@ INT Set_DebugQueue_Proc(
 		dbQueueInit();
 		break;
 	default:
-		return FALSE;
+		break;
 	}
 
 	return TRUE;
@@ -4649,131 +4557,12 @@ INT Set_DebugQueue_Proc(
 #endif // INCLUDE_DEBUG_QUEUE //
 
 
-#ifdef STREAM_MODE_SUPPORT
-/*
-	========================================================================
-	Routine Description:
-		Set the enable/disable the stream mode
-		
-	Arguments:
-		1:	enable for 1SS 
-		2:	enable for 2SS
-		3:	enable for 1SS and 2SS
-		0:	disable
-
-	Notes:
-		Currently only support 1SS
-	========================================================================
-*/
-INT Set_StreamMode_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-    ULONG streamWord;
-    UINT32 reg;
-
-    pAd->CommonCfg.StreamMode = (simple_strtol(arg, 0, 10) & 0x3);
-    DBGPRINT(RT_DEBUG_TRACE, ("%s():StreamMode=%d\n", __FUNCTION__, pAd->CommonCfg.StreamMode));
-
-	switch (pAd->CommonCfg.StreamMode)
-    {
-		case 1:
-			streamWord = 0x030000;
-			break;
-		case 2:
-			streamWord = 0x0c0000;
-			break;
-		case 3:
-			streamWord = 0x0f0000;
-			break;
-		default:
-			streamWord = 0x0;
-			break;
-    }
-
-    RTMP_IO_READ32(pAd, TX_CHAIN_ADDR0_H, &reg);
-    reg &= (~0xF0000);
-    RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR0_H, streamWord | reg);
-    RTMP_IO_READ32(pAd, TX_CHAIN_ADDR1_H, &reg);
-    reg &= (~0xF0000);
-    RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR1_H, streamWord | reg);
-    RTMP_IO_READ32(pAd, TX_CHAIN_ADDR2_H, &reg);
-    reg &= (~0xF0000);
-    RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR2_H, streamWord | reg);
-    RTMP_IO_READ32(pAd, TX_CHAIN_ADDR3_H, &reg);
-    reg &= (~0xF0000);
-    RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR3_H, streamWord | reg);
-
-	return TRUE;
-}
-
-
-/*
-	
-*/
-INT Set_StreamModeMac_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-
-	return FALSE;
-}
-
-#endif // STREAM_MODE_SUPPORT //
-
-
-#if defined(RT2883) || defined(RT3883)
-INT Set_PreAntSwitch_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING          arg)
-{
-    pAd->CommonCfg.PreAntSwitch = simple_strtol(arg, 0, 10)!=0;
-    DBGPRINT(RT_DEBUG_TRACE, ("Set_PreAntSwitch_Proc::(PreAntSwitch=%d)\n", pAd->CommonCfg.PreAntSwitch));
-	return TRUE;
-}
-
-
-// Set_PhyRateLimit_Proc - limit max PHY rate
-//		usage: iwpriv ra0 set PhyRateLimit=<PHY rate in Mbps>
-INT Set_PhyRateLimit_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING          arg)
-{
-    pAd->CommonCfg.PhyRateLimit = simple_strtol(arg, 0, 10);
-    DBGPRINT(RT_DEBUG_TRACE, ("Set_PhyRateLimit_Proc::(PhyRateLimit=%ld)\n", pAd->CommonCfg.PhyRateLimit));
-	return TRUE;
-}
-
-// Set_FixedRate_Proc - Use fixed MCS
-//		usage: iwpriv ra0 set PhyRateLimit=<Item in RateSwitch table> or -1 to disable
-//		Parameter is ItemNo that is used to index into the RateSwitch table
-INT Set_FixedRate_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	int rate;
-    
-	rate = simple_strtol(arg, 0, 10);
-	if (rate<-1 || rate>24)
-		return FALSE;
-    pAd->CommonCfg.FixedRate = rate;
-    DBGPRINT(RT_DEBUG_TRACE, ("Set_FixedRate_Proc::(FixedRate=%d)\n", pAd->CommonCfg.FixedRate));
-	return TRUE;
-}
-#endif // defined(RT2883) || defined(RT3883) //
-
 
 INT Set_DebugFlags_Proc(
     IN  PRTMP_ADAPTER   pAd, 
     IN  PSTRING          arg)
 {
     pAd->CommonCfg.DebugFlags = simple_strtol(arg, 0, 16);
-    // Handle immediate
-    if (pAd->CommonCfg.DebugFlags & DBF_RESET_RXDMA)
-    {
-    	RTMPRingCleanUp(pAd, QID_RX);
-    	pAd->CommonCfg.DebugFlags &= ~DBF_RESET_RXDMA;
-    }
     DBGPRINT(RT_DEBUG_TRACE, ("Set_DebugFlags_Proc::(DebugFlags=%02lX)\n", pAd->CommonCfg.DebugFlags));
 	return TRUE;
 }
@@ -4904,9 +4693,8 @@ INT RTMPShowCfgValue(
 
 	if(PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC->name == NULL)
 	{
-		sprintf(pBuf, "\n");
 		for (PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC = RTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC; PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC->name; PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC++)
-			sprintf(pBuf, "%s%s\n", pBuf, PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC->name);
+			sprintf(pBuf, "\n%s\n", PRTMP_PRIVATE_STA_SHOW_CFG_VALUE_PROC->name);
 	}
 	
 	return Status;
@@ -5330,6 +5118,15 @@ INT	Show_WPAPSK_Proc(
 
 	return 0;
 }
+
+INT	Show_AutoReconnect_Proc(
+	IN	PRTMP_ADAPTER	pAd,
+	OUT	PSTRING			pBuf)
+{
+	sprintf(pBuf, "\tAutoReconnect = %d", pAd->StaCfg.bAutoReconnect);
+	return 0;
+}
+
 #endif // CONFIG_STA_SUPPORT //
 
 INT	Show_AuthMode_Proc(
@@ -5505,61 +5302,25 @@ INT	Show_PMK_Proc(
 }
 
 
-#ifdef RT3883
-/* 
-    ==========================================================================
-    Description:
-        Set VCO Re-Calibration threshold
-    Return:
-        TRUE if all parameters are OK, FALSE otherwise
-    ==========================================================================
-*/
-INT	Set_VCORecalibrationThreshold_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	ULONG 	Value;	
-		
-	Value = simple_strtol(arg, 0, 10);
-	
-	pAd->CommonCfg.VCORecalibrationThreshold = Value;
-
-	DBGPRINT(RT_DEBUG_TRACE, ("Set_VCORecalibrationThreshold_Proc: Threshold=%d)\n", pAd->CommonCfg.VCORecalibrationThreshold));
-		
-	return TRUE;
-}
-
-INT	Set_VCORecalibration_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	ULONG 	Value;	
-		
-	Value = simple_strtol(arg, 0, 10);
-
-	if (Value == 0)
-		pAd->EnableVCOCal = FALSE;
-	else
-		pAd->EnableVCOCal = TRUE;
-	
-	return TRUE;
-}
-
-#endif // RT3883 //
 
 
 #ifdef RTMP_RBUS_SUPPORT
+
 #ifdef NEW_RATE_ADAPT_SUPPORT
 INT	Set_PerThrdAdj_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
+	// insert code here
 	UCHAR i;
+	MAC_TABLE_ENTRY		*pEntry = NULL;	
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++){
-		pAd->MacTab.Content[i].perThrdAdj = simple_strtol(arg, 0, 10);
+		pEntry =	&pAd->MacTab.Content[i];
+		pEntry->perThrdAdj = simple_strtol(arg, 0, 10);
 	}
 	return TRUE;	
 }
+
 #endif // NEW_RATE_ADAPT_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
@@ -5661,873 +5422,3 @@ void  getRate(HTTRANSMIT_SETTING HTSetting, ULONG* fLastTxRxRate)
 	*fLastTxRxRate=(ULONG)value;
 	return;
 }
-
-
-#ifdef TXBF_SUPPORT
-
-// Set_ReadITxBf_Proc - Read Implicit BF profile and display it
-//		iwpriv ra0 set ReadITxBf=<profile number>
-INT	Set_ReadITxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int profileNum = simple_strtol(arg, 0, 10);
-	int scIndex, i, maxCarriers;
-
-	Read_TxBfProfile(pAd, &profData, profileNum, TRUE);
-
-	// Display profile. Note: each column is displayed as a row. This shortens the display
-	DBGPRINT(RT_DEBUG_OFF, ("---ITxBF Profile: %d - %dx%d, %dMHz\n",
-		profileNum, profData.rows, profData.columns, profData.fortyMHz? 40: 20));
-
-	maxCarriers = profData.fortyMHz? PROFILE_MAX_CARRIERS_40: PROFILE_MAX_CARRIERS_20;
-
-	for (scIndex=0; scIndex<maxCarriers; scIndex++) {
-		for (i=0; i<profData.rows; i++) {
-			DBGPRINT(RT_DEBUG_OFF, ("%d %d    ", Unpack_IBFValue(profData.data[scIndex], 2*i+1), Unpack_IBFValue(profData.data[scIndex], 2*i)));
-		}
-		DBGPRINT(RT_DEBUG_OFF, ("\n"));
-
-		if (profData.columns>1) {
-			for (i=0; i<profData.rows; i++) {
-				DBGPRINT(RT_DEBUG_OFF, ("%d %d    ", Unpack_IBFValue(profData.data[scIndex], 2*i+7), Unpack_IBFValue(profData.data[scIndex], 2*i+6)));
-			}
-			DBGPRINT(RT_DEBUG_OFF, ("\n"));
-		}
-	}
-
-	return TRUE;
-}
-
-// Set_ReadETxBf_Proc - Read Explicit BF profile and display it
-//		usage: iwpriv ra0 set ReadETxBf=<profile number>
-INT	Set_ReadETxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int profileNum = simple_strtol(arg, 0, 10);
-	int scIndex, i, maxCarriers;
-
-	Read_TxBfProfile(pAd, &profData, profileNum, FALSE);
-
-	// Dump ETxBF profile values. Note: each column is displayed as a row. This shortens the display
-	DBGPRINT(RT_DEBUG_OFF, ("---ETxBF Profile: %d - %dx%d, %dMHz, grp=%d\n",
-		profileNum, profData.rows, profData.columns, profData.fortyMHz? 40: 20, profData.grouping));
-
-	maxCarriers = profData.fortyMHz? PROFILE_MAX_CARRIERS_40: PROFILE_MAX_CARRIERS_20;
-
-	for (scIndex=0; scIndex<maxCarriers; scIndex++) {
-		for (i=0; i<profData.rows; i++) {
-			DBGPRINT(RT_DEBUG_OFF, ("%d %d\t", (CHAR)(profData.data[scIndex][6*i]), (CHAR)(profData.data[scIndex][6*i+1]) ));
-		}
-		DBGPRINT(RT_DEBUG_OFF, ("\n"));
-
-		if (profData.columns>1) {
-			for (i=0; i<profData.rows; i++) {
-				DBGPRINT(RT_DEBUG_OFF, ("%d %d    ", (CHAR)(profData.data[scIndex][6*i+2]), (CHAR)(profData.data[scIndex][6*i+3]) ));
-			}
-			DBGPRINT(RT_DEBUG_OFF, ("\n"));
-		}
-
-		if (profData.columns>2) {
-			for (i=0; i<profData.rows; i++) {
-				DBGPRINT(RT_DEBUG_OFF, ("%d %d    ", (CHAR)(profData.data[scIndex][6*i+4]), (CHAR)(profData.data[scIndex][6*i+5]) ));
-			}
-			DBGPRINT(RT_DEBUG_OFF, ("\n"));
-		}
-	}
-
-	return TRUE;
-}
-
-
-// Set_WriteITxBf_Proc - Write Implicit BF matrix
-//		usage: iwpriv ra0 set WriteITxBf=<profile number>
-//		Assumes profData contains a valid Implicit Profile
-INT	Set_WriteITxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int profileNum = simple_strtol(arg, 0, 10);
-
-	if (!profData.impProfile)
-		return FALSE;
-
-	Write_TxBfProfile(pAd, &profData, profileNum);
-
-	return TRUE;
-}
-
-
-// Set_WriteETxBf_Proc - Write Explicit BF matrix
-//		usage: iwpriv ra0 set WriteETxBf=<profile number>
-//		Assumes profData contains a valid Explicit Profile
-INT	Set_WriteETxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int profileNum = simple_strtol(arg, 0, 10);
-
-	if (profData.impProfile)
-		return FALSE;
-
-	Write_TxBfProfile(pAd, &profData, profileNum);
-
-	return TRUE;
-}
-
-
-// Set_StatITxBf_Proc - Compute power of each chain in Implicit BF matrix
-//		usage: iwpriv ra0 set StatITxBf=<profile number>
-INT	Set_StatITxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int scIndex, maxCarriers, i;
-	unsigned long col1Power[3] = {0,0,0}, col2Power[3] = {0,0,0};
-	int profileNum = simple_strtol(arg, 0, 10);
-	PROFILE_DATA *pProfData;
-
-	pProfData = (PROFILE_DATA *)kmalloc(sizeof(PROFILE_DATA), MEM_ALLOC_FLAG);
-	if (pProfData == NULL)
-	{
-		DBGPRINT(RT_DEBUG_OFF, ("Set_StatITxBf_Proc: kmalloc failed\n"));
-		return FALSE;
-	}
-
-	Read_TxBfProfile(pAd, pProfData, profileNum, TRUE);
-
-	maxCarriers = pProfData->fortyMHz? PROFILE_MAX_CARRIERS_40: PROFILE_MAX_CARRIERS_20;
-
-	for (scIndex=0; scIndex<maxCarriers; scIndex++) {
-		for (i=0; i<pProfData->rows; i++) {
-			int ival = Unpack_IBFValue(pProfData->data[scIndex], 2*i+1);
-			int qval = Unpack_IBFValue(pProfData->data[scIndex], 2*i);
-			col1Power[i] += ival*ival+qval*qval;
-
-			if (pProfData->columns==2) {
-				ival = Unpack_IBFValue(pProfData->data[scIndex], 2*i+7);
-				qval = Unpack_IBFValue(pProfData->data[scIndex], 2*i+6);
-				col2Power[i] += ival*ival+qval*qval;
-			}
-		}
-	}
-
-	// Remove implied scale factor of 2^-16. Convert to thousandths
-	for (i=0; i<pProfData->rows; i++) {
-		col1Power[i] >>= 12;
-		col1Power[i] = ((col1Power[i]*1000)/maxCarriers)>>4;
-		col2Power[i] >>= 12;
-		col2Power[i] = ((col2Power[i]*1000)/maxCarriers)>>4;
-	}
-
-	// Display stats
-	DBGPRINT(RT_DEBUG_OFF, ("ITxBF Stats:\n  %dx1=[0.%03lu 0.%03lu, 0.%03lu]\n",
-				pProfData->rows, col1Power[0], col1Power[1], col1Power[2]));
-	if (pProfData->columns==2) {
-		DBGPRINT(RT_DEBUG_OFF, ("  %dx2=[0.%03lu 0.%03lu, 0.%03lu]\n",
-					pProfData->rows, (col1Power[0]+col2Power[0])/2, (col1Power[1]+col2Power[1])/2,
-					(col1Power[2]+col2Power[2])/2) );
-	}
-
-	kfree(pProfData);
-
-	return TRUE;
-}
-
-// Set_StatETxBf_Proc - Compute power of each chain in Explicit BF matrix
-//		usage: iwpriv ra0 set StatETxBf=<profile number>
-INT	Set_StatETxBf_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	int scIndex, maxCarriers, i;
-	unsigned long col1Power[3] = {0,0,0}, col2Power[3] = {0,0,0}, col3Power[3] = {0,0,0};
-	int profileNum = simple_strtol(arg, 0, 10);
-	PROFILE_DATA *pProfData;
-
-	pProfData = (PROFILE_DATA *)kmalloc(sizeof(PROFILE_DATA), MEM_ALLOC_FLAG);
-	if (pProfData == NULL)
-	{
-		DBGPRINT(RT_DEBUG_OFF, ("Set_StatETxBf_Proc: kmalloc failed\n"));
-		return FALSE;
-	}
-
-	Read_TxBfProfile(pAd, pProfData, profileNum, FALSE);
-
-	maxCarriers = pProfData->fortyMHz? PROFILE_MAX_CARRIERS_40: PROFILE_MAX_CARRIERS_20;
-
-	for (scIndex=0; scIndex<maxCarriers; scIndex++) {
-		for (i=0; i<pProfData->rows; i++) {
-			int ival = (CHAR)(pProfData->data[scIndex][6*i]);
-			int qval = (CHAR)(pProfData->data[scIndex][6*i+1]);
-			col1Power[i] += ival*ival+qval*qval;
-
-			if (pProfData->columns>1) {
-				ival = (CHAR)(pProfData->data[scIndex][6*i+2]);
-				qval = (CHAR)(pProfData->data[scIndex][6*i+3]);
-				col2Power[i] += ival*ival+qval*qval;
-			}
-
-			if (pProfData->columns>2) {
-				ival = (CHAR)(pProfData->data[scIndex][6*i+4]);
-				qval = (CHAR)(pProfData->data[scIndex][6*i+5]);
-				col3Power[i] += ival*ival+qval*qval;
-			}
-		}
-	}
-
-	// Remove implied scale factor of 2^-14. Convert to thousandths
-	for (i=0; i<pProfData->rows; i++) {
-		col1Power[i] >>= 10;
-		col1Power[i] = ((col1Power[i]*1000)/maxCarriers)>>4;
-		col2Power[i] >>= 10;
-		col2Power[i] = ((col2Power[i]*1000)/maxCarriers)>>4;
-		col3Power[i] >>= 10;
-		col3Power[i] = ((col3Power[i]*1000)/maxCarriers)>>4;
-	}
-
-	// Display stats
-	DBGPRINT(RT_DEBUG_OFF, ("ETxBF Stats:\n  %dx1=[0.%03lu 0.%03lu, 0.%03lu]\n",
-				pProfData->rows, col1Power[0], col1Power[1], col1Power[2]));
-	if (pProfData->columns==2) {
-		DBGPRINT(RT_DEBUG_OFF, ("  %dx2=[0.%03lu 0.%03lu, 0.%03lu]\n",
-					pProfData->rows, (col1Power[0]+col2Power[0])/2,
-					(col1Power[1]+col2Power[1])/2, (col1Power[2]+col2Power[2])/2) );
-		}
-	if (pProfData->columns==3) {
-		DBGPRINT(RT_DEBUG_OFF, ("  %dx3=[0.%03lu 0.%03lu, 0.%03lu]\n",
-					pProfData->rows, (col1Power[0]+col2Power[0]+col3Power[0])/3,
-					(col1Power[1]+col2Power[1]+col3Power[1])/3,
-					(col1Power[2]+col2Power[2]+col3Power[2])/3) );
-	}
-
-	kfree(pProfData);
-
-	return TRUE;
-}
-
-
-// Set_TxBfTag_Proc - Display BF Profile Tags
-//	usage: "iwpriv ra0 set TxBfTag=n"
-INT	Set_TxBfTag_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-    IN  PSTRING         arg)
-{
-	int profileNum;
-
-	// Display Explicit tagfield
-	DBGPRINT(RT_DEBUG_OFF, ("---Explicit TxBfTag:\n"));
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 4);
-	for (profileNum=0; profileNum<4; profileNum++)
-		displayTagfield(pAd, profileNum, FALSE);
-
-	// Display Implicit tagfield
-	DBGPRINT(RT_DEBUG_OFF, ("---Implicit TxBfTag:\n"));
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0);
-	for (profileNum=0; profileNum<4; profileNum++)
-		displayTagfield(pAd, profileNum, TRUE);
-
-	return TRUE;
-}
-
-// Set_InvTxBfTag_Proc - Invalidate BF Profile Tags
-//	usage: "iwpriv ra0 set InvTxBfTag=n"
-//		Reset Valid bit and zero out MAC address of each profile. The next profile will be stored in profile 0
-INT	Set_InvTxBfTag_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-    IN  PSTRING         arg)
-{
-	int profileNum;
-	UCHAR row[EXP_MAX_BYTES];;
-
-	// Invalidate Implicit tags
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0);
-	for (profileNum=0; profileNum<4; profileNum++) {
-		Read_TagField(pAd, row, profileNum);
-		row[0] &= 0x7F;
-		row[1] = row[2] = row[3] = row[4] = row[5] = row[6] = 0xAA;
-		Write_TagField(pAd, row, profileNum);
-	}
-
-	// Invalidate Explicit tags
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 4);
-	for (profileNum=0; profileNum<4; profileNum++) {
-		Read_TagField(pAd, row, profileNum);
-		row[0] &= 0x7F;
-		row[1] = row[2] = row[3] = row[4] = row[5] = row[6] = 0x55;
-		Write_TagField(pAd, row, profileNum);
-	}
-
-	return TRUE;
-}
-
-// Set_ITxBfTimeout_Proc - Set ITxBF timeout value
-//		usage: iwpriv ra0 set ITxBfTimeout=<decimal timeout in units of 25 microsecs>
-INT Set_ITxBfTimeout_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 65535) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ITxBfTimeout_Proc: value > 65535!\n"));
-		return FALSE;
-	}
-
-    pAd->CommonCfg.ITxBfTimeout = t;
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0x02);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 0);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, pAd->CommonCfg.ITxBfTimeout & 0xFF);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 1);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, (pAd->CommonCfg.ITxBfTimeout>>8) & 0xFF);
-	
-    DBGPRINT(RT_DEBUG_TRACE, ("Set_ITxBfTimeout_Proc::(ITxBfTimeout=%d)\n", (int)pAd->CommonCfg.ITxBfTimeout));
-	return TRUE;
-}
-
-// Set_ETxBfTimeout_Proc - Set ITxBF timeout value
-//		usage: iwpriv ra0 set ETxBfTimeout=<decimal timeout in units of 25 microsecs>
-INT Set_ETxBfTimeout_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 65535) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ETxBfTimeout_Proc: value > 65535!\n"));
-		return FALSE;
-	}
-
-    pAd->CommonCfg.ETxBfTimeout = t;
-	RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_3, pAd->CommonCfg.ETxBfTimeout);
-    DBGPRINT(RT_DEBUG_TRACE, ("Set_ETxBfTimeout_Proc::(ETxBfTimeout=%d)\n", (int)pAd->CommonCfg.ETxBfTimeout));
-	return TRUE;
-}
-
-// Set_ETxBfCodebook_Proc - Set ETxBf Codebook 
-//		usage: iwpriv ra0 set ETxBfCodebook=0 to 3
-INT Set_ETxBfCodebook_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	TX_TXBF_CFG_0_STRUC regValue;
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 3) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ETxBfCodebook_Proc: value > 3!\n"));
-		return FALSE;
-	}
-
-	RTMP_IO_READ32(pAd, TX_TXBF_CFG_0, &regValue.word);
-	regValue.field.EtxbfFbkCode = t;
-	RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_0, regValue.word);
-	return TRUE;
-}
-
-// Set_ETxBfCoefficient_Proc - Set ETxBf Coefficient 
-//		usage: iwpriv ra0 set ETxBfCoefficient=0 to 3
-INT Set_ETxBfCoefficient_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	TX_TXBF_CFG_0_STRUC regValue;
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 3) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ETxBfCoefficient_Proc: value > 3!\n"));
-		return FALSE;
-	}
-
-	RTMP_IO_READ32(pAd, TX_TXBF_CFG_0, &regValue.word);
-	regValue.field.EtxbfFbkCoef = t;
-	RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_0, regValue.word);
-	return TRUE;
-}
-
-// Set_ETxBfGrouping_Proc - Set ETxBf Grouping 
-//		usage: iwpriv ra0 set ETxBfGrouping=0 to 2
-INT Set_ETxBfGrouping_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	TX_TXBF_CFG_0_STRUC regValue;
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 2) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ETxBfGrouping_Proc: value > 2!\n"));
-		return FALSE;
-	}
-
-	RTMP_IO_READ32(pAd, TX_TXBF_CFG_0, &regValue.word);
-	regValue.field.EtxbfFbkNg = t;
-	RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_0, regValue.word);
-	return TRUE;
-}
-
-// Set_ETxBfNoncompress_Proc - Set ETxBf Noncompress option 
-//		usage: iwpriv ra0 set ETxBfNoncompress=0 or 1
-INT Set_ETxBfNoncompress_Proc(
-    IN  PRTMP_ADAPTER   pAd, 
-    IN  PSTRING         arg)
-{
-	ULONG t = simple_strtol(arg, 0, 10);
-
-	if (t > 1) {
-		DBGPRINT(RT_DEBUG_ERROR, ("Set_ETxBfNoncompress_Proc: value > 1!\n"));
-		return FALSE;
-	}
-
-	pAd->CommonCfg.ETxBfNoncompress = t;
-	return TRUE;
-}
-
-
-// Set_ITxBfDivCal_Proc - Calculate ITxBf Divider Calibration parameters
-//	usage: iwpriv ra0 set ITxBfDivCal=dd
-//			0=>display calibration parameters
-//			1=>update EEPROM values
-//			2=>update BBP R176
-//			10=>display calibration parameters and dump capture data
-//			11=>Skip divider calibration, just capture and dump capture data
-INT	Set_ITxBfDivCal_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-    IN  PSTRING         arg)
-{
-	int calFunction;
-
-	calFunction = simple_strtol(arg, 0, 10);
-
-	return ITxBFDividerCalibration(pAd, calFunction, 0, NULL);
-}
-
-
-// Set_ITxBfLNACal_Proc - Calculate ITxBf LNA Calibration parameters
-//	usage: iwpriv ra0 set ITxBfLnaCal=dd
-//			0=>display calibration parameters
-//			1=>update EEPROM values
-//			2=>update BBP R174
-//			10=>display calibration parameters and dump capture data
-INT	Set_ITxBfLnaCal_Proc(
-	IN	PRTMP_ADAPTER	pAd,
-    IN  PSTRING         arg)
-{
-	UCHAR channel = pAd->CommonCfg.Channel;
-	int calFunction;
-
-#ifdef RALINK_ATE
-	if (ATE_ON(pAd))
-		channel = pAd->ate.Channel;
-#endif // RALINK_ATE //
-
-	calFunction = simple_strtol(arg, 0, 10);
-
-	return ITxBFLNACalibration(pAd, calFunction, 0, channel<=14);
-}
-
-// Set_ITxBfCal_Proc - Calculate ITxBf Calibration parameters
-//	usage: "iwpriv ra0 set ITxBfCal=[0 | 1]"
-//			0=>calculate values, 1=>update BBP and EEPROM
-INT	Set_ITxBfCal_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-    IN  PSTRING         arg)
-{
-	int calFunction = simple_strtol(arg, 0, 10);
-	int calParams[2];
-	int ret;
-	UCHAR channel = pAd->CommonCfg.Channel;
-
-#ifdef RALINK_ATE
-	if (ATE_ON(pAd))
-		channel = pAd->ate.Channel;
-#endif // RALINK_ATE //
-
-	ret = iCalcCalibration(pAd, calParams, 0);
-	if (ret < 0) {
-		if (ret == -3)
-			DBGPRINT(RT_DEBUG_OFF, ("Set_ITxBfCal_Proc: kmalloc failed\n"));
-		else if (ret == -2)
-		DBGPRINT(RT_DEBUG_OFF, ("Set_ITxBfCal_Proc: MAC Address mismatch\n"));
-		else
-		DBGPRINT(RT_DEBUG_OFF, ("Set_ITxBfCal_Proc: Invalid profiles\n"));
-		return FALSE;
-	}
-
-	// Display result
-	DBGPRINT((calFunction==0? RT_DEBUG_OFF: RT_DEBUG_WARN),
-				("ITxBfCal Result = [0x%02x 0x%02x]\n", calParams[0], calParams[1]));
-
-#ifdef RALINK_ATE
-	pAd->ate.calParams[0] = (UCHAR)calParams[0];
-	pAd->ate.calParams[1] = (UCHAR)calParams[1];
-
-	// Dobule check
-	DBGPRINT((calFunction==0? RT_DEBUG_OFF: RT_DEBUG_WARN),
-				("ITxBfCal Result in ATE = [0x%02x 0x%02x]\n", pAd->ate.calParams[0], pAd->ate.calParams[1]));
-#endif // RALINK_ATE //
-
-	// Update BBP R176 and EEPROM for Ant 0 and 2
-	if (calFunction == 1) {
-		UCHAR r27Value, r173Value;
-		ITXBF_PHASE_PARAMS phaseParams;
-		UCHAR divPhase[2], phaseValues[2];
-
-		// Read R173 to see if Phase compensation is already enabled
-		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R173, &r173Value);
-
-		// Select Ant 0
-		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &r27Value);
-		r27Value &= ~0x60;
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, r27Value);
-
-		// Update R176
-		if (r173Value & 0x08) {
-			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R176, &phaseValues[0]);
-			phaseValues[0] += calParams[0];
-		}
-		else
-			phaseValues[0] = calParams[0];
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, phaseValues[0]);
-
-		// Select Ant 2
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, r27Value | 0x40);
-
-		// Update R176
-		if (r173Value & 0x08) {
-			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R176, &phaseValues[1]);
-			phaseValues[1] += calParams[1];
-		}
-		else
-			phaseValues[1] = calParams[1];
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, phaseValues[1]);
-
-		// Enable TX Phase Compensation
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R173, r173Value | 0x08);
-
-		// Remove Divider phase
-		ITxBFDividerCalibration(pAd, 3, 0, divPhase);
-		phaseValues[0] -= divPhase[0];
-		phaseValues[1] -= divPhase[1];
-
-		// Update EEPROM
-
-		ITxBFGetEEPROM(pAd, &phaseParams, 0, 0);
-
-		// Only allow calibration on specific channels
-		if (channel == 1) {
-			phaseParams.gBeg[0] = phaseValues[0];
-			phaseParams.gBeg[1] = phaseValues[1];
-		}
-		else if (channel == 14) {
-			phaseParams.gEnd[0] = phaseValues[0];
-			phaseParams.gEnd[1] = phaseValues[1];
-		}
-		else if (channel == 36) {
-			phaseParams.aLowBeg[0] = phaseValues[0];
-			phaseParams.aLowBeg[1] = phaseValues[1];
-		}
-		else if (channel == 64) {
-			phaseParams.aLowEnd[0] = phaseValues[0];
-			phaseParams.aLowEnd[1] = phaseValues[1];
-		}
-		else if (channel == 100) {
-			phaseParams.aMidBeg[0] = phaseValues[0];
-			phaseParams.aMidBeg[1] = phaseValues[1];
-		}
-		else if (channel == 128) {
-			phaseParams.aMidEnd[0] = phaseValues[0];
-			phaseParams.aMidEnd[1] = phaseValues[1];
-		}
-		else if (channel == 132) {
-			phaseParams.aHighBeg[0] = phaseValues[0];
-			phaseParams.aHighBeg[1] = phaseValues[1];
-		}
-		else if (channel == 165) {
-			phaseParams.aHighEnd[0] = phaseValues[0];
-			phaseParams.aHighEnd[1] = phaseValues[1];
-		}
-		else {
-			DBGPRINT(RT_DEBUG_OFF,
-					("Invalid channel: %d\nMust calibrate channel 1, 14, 36, 64, 100, 128, 132 or 165", channel) );
-			return FALSE;
-		}
-		ITxBFSetEEPROM(pAd, &phaseParams, 0, 0);
-
-		DBGPRINT(RT_DEBUG_WARN, ("Set_ITxBfCal_Proc: Calibration Parameters updated\n"));
-	}
-
-	return TRUE;
-}
-
-
-// Set_ETxBfEnCond_Proc - enable/disable ETxBF
-//	usage: iwpriv ra0 set ETxBfEnCond=dd
-//		0=>disable, 1=>enable
-// Note: After use this command, need to re-run apStartup()/LinkUp() operations to sync all status.
-INT	Set_ETxBfEnCond_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	UCHAR i, enableETxBf;
-	MAC_TABLE_ENTRY		*pEntry;
-	UINT8	byteValue;
-
-	enableETxBf = simple_strtol(arg, 0, 10);
-
-	if (enableETxBf > 1)
-		return FALSE;
-
-	pAd->CommonCfg.ETxBfEnCond = enableETxBf;
-	pAd->CommonCfg.RegTransmitSetting.field.TxBF = enableETxBf==0? 0: 1;
-
-	setETxBFCap(pAd, &pAd->CommonCfg.HtCapability.TxBFCap);
-	rtmp_asic_set_bf(pAd);
-
-	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
-	{
-		pEntry = &pAd->MacTab.Content[i];
-		if ((!IS_ENTRY_NONE(pEntry)) && (pAd->Antenna.field.TxPath > 1))
-		{
-			pEntry->eTxBfEnCond = clientSupportsETxBF(pAd, &pEntry->HTCapability.TxBFCap)? enableETxBf: 0;
-			pEntry->HTPhyMode.field.eTxBF = pEntry->eTxBfEnCond==0? 0: 1;
-			pEntry->bfState = READY_FOR_SNDG0;
-		}
-	}
-
-
-	if (pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn || enableETxBf)
-	{
-		RT30xxReadRFRegister(pAd, RF_R39, (PUCHAR)&byteValue);
-		byteValue |= 0x40;
-		RT30xxWriteRFRegister(pAd, RF_R39, (UCHAR)byteValue);
-
-		RT30xxReadRFRegister(pAd, RF_R49, (PUCHAR)&byteValue);
-		byteValue |= 0x20;
-		RT30xxWriteRFRegister(pAd, RF_R49, (UCHAR)byteValue);
-	}
-	else
-	{
-		// depends on Gary Tsao's comments. we shall disable it
-		if (pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn == 0)
-		{
-		RT30xxReadRFRegister(pAd, RF_R39, (PUCHAR)&byteValue);
-			byteValue &= (~0x40);
-		RT30xxWriteRFRegister(pAd, RF_R39, (UCHAR)byteValue);
-
-		RT30xxReadRFRegister(pAd, RF_R49, (PUCHAR)&byteValue);
-			byteValue &= (~0x20);
-		RT30xxWriteRFRegister(pAd, RF_R49, (UCHAR)byteValue);
-		}
-	}
-
-
-	return TRUE;	
-}
-
-INT	Set_NoSndgCntThrd_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	UCHAR i;
-	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++){
-		pAd->MacTab.Content[i].noSndgCntThrd = simple_strtol(arg, 0, 10);
-	}
-	return TRUE;	
-}
-
-INT	Set_NdpSndgStreams_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	UCHAR i;
-	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++){
-		pAd->MacTab.Content[i].ndpSndgStreams = simple_strtol(arg, 0, 10);
-	}
-	return TRUE;	
-}
-
-
-INT	Set_Trigger_Sounding_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	UCHAR					macAddr[MAC_ADDR_LEN];
-	CHAR					*value;
-	INT						i;
-	MAC_TABLE_ENTRY *pEntry;
-
-	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17
-		return FALSE;
-
-	for (i=0, value = rstrtok(arg,":"); value; value = rstrtok(NULL,":")) 
-	{
-		if((strlen(value) != 2) || (!isxdigit(*value)) || (!isxdigit(*(value+1))) ) 
-			return FALSE;  //Invalid
-
-		AtoH(value, &macAddr[i++], 1);
-	}
-
-	//DBGPRINT(RT_DEBUG_TRACE, ("TriggerSounding=%02x:%02x:%02x:%02x:%02x:%02x\n",
-	//		macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5], macAddr[6]) );
-	pEntry = MacTableLookup(pAd, macAddr);
-	if (pEntry==NULL)
-		return FALSE;
-
-	Trigger_Sounding_Packet(pAd, SNDG_TYPE_SOUNGING, 0, pEntry->sndgMcs, pEntry);
-
-	return TRUE;
-}
-
-// Set_ITxBfEn_Proc - enable/disable ITxBF
-//	usage: iwpriv ra0 set ITxBfEn=dd
-//		0=>disable, 1=>enable
-INT	Set_ITxBfEn_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-	UCHAR i;
-	UCHAR enableITxBF;
-	BOOLEAN bCalibrated;
-	UINT8 byteValue;
-
-	enableITxBF = simple_strtol(arg, 0, 10);
-
-	if (enableITxBF > 1)
-		return FALSE;
-
-	bCalibrated = rtmp_chk_itxbf_calibration(pAd);
-	DBGPRINT(RT_DEBUG_TRACE, ("Set ITxBfEn=%d, calibration of ITxBF=%d, so enableITxBF=%d!\n", 
-					enableITxBF , bCalibrated, (enableITxBF & bCalibrated)));
-	
-	enableITxBF &= bCalibrated;
-	
-	pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn = enableITxBF;
-
-	rtmp_asic_set_bf(pAd);
-
-	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
-	{
-		MAC_TABLE_ENTRY *pMacEntry = &pAd->MacTab.Content[i];
-		if ((!IS_ENTRY_NONE(pMacEntry)) && (pAd->Antenna.field.TxPath> 1))
-			pMacEntry->iTxBfEn = enableITxBF;
-	}
-
-	if (enableITxBF || pAd->CommonCfg.ETxBfEnCond)
-	{
-		RT30xxReadRFRegister(pAd, RF_R39, (PUCHAR)&byteValue);
-		byteValue |= 0x40;
-		RT30xxWriteRFRegister(pAd, RF_R39, (UCHAR)byteValue);
-
-		RT30xxReadRFRegister(pAd, RF_R49, (PUCHAR)&byteValue);
-		byteValue |= 0x20;
-		RT30xxWriteRFRegister(pAd, RF_R49, (UCHAR)byteValue);
-	}
-	
-	// If enabling ITxBF then set LNA compensation, do a Divider Calibration and update BBP registers
-	if (enableITxBF) {
-		ITxBFLoadLNAComp(pAd);
-		ITxBFDividerCalibration(pAd, 2, 0, NULL);
-	}
-	else
-	{
-		// depends on Gary Tsao's comments.
-		if (pAd->CommonCfg.ETxBfEnCond == 0)
-		{
-		RT30xxReadRFRegister(pAd, RF_R39, (PUCHAR)&byteValue);
-			byteValue &= (~0x40);
-		RT30xxWriteRFRegister(pAd, RF_R39, (UCHAR)byteValue);
-
-		RT30xxReadRFRegister(pAd, RF_R49, (PUCHAR)&byteValue);
-			byteValue &= (~0x20);
-		RT30xxWriteRFRegister(pAd, RF_R49, (UCHAR)byteValue);
-	}
-	
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R173, 0);
-
-		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R27, &byteValue);
-		byteValue &= ~0x60;
-		for ( i = 0; i < 3; i++)
-		{	
-			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R27, (byteValue & (i << 5)));
-			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R174, 0);
-			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R176, 0);
-		}
-	}
-	return TRUE;	
-}
-#endif // TXBF_SUPPORT //
-
-
-#ifdef DOT11_N_SUPPORT
-void assoc_ht_info_debugshow(
-	IN PRTMP_ADAPTER pAd,
-	IN MAC_TABLE_ENTRY *pEntry,
-	IN UCHAR HTCapability_Len,
-	IN HT_CAPABILITY_IE *pHTCapability)
-{
-	HT_CAP_INFO			*pHTCap;
-	HT_CAP_PARM			*pHTCapParm;
-	EXT_HT_CAP_INFO		*pExtHT;
-#ifdef TXBF_SUPPORT
-	HT_BF_CAP			*pBFCap;
-#endif // TXBF_SUPPORT //
-
-
-	if (pHTCapability && (HTCapability_Len > 0))
-	{
-		pHTCap = &pHTCapability->HtCapInfo;
-		pHTCapParm = &pHTCapability->HtCapParm;
-		pExtHT = &pHTCapability->ExtHtCapInfo;
-#ifdef TXBF_SUPPORT
-		pBFCap = &pHTCapability->TxBFCap;
-#endif // TXBF_SUPPORT //
-
-		DBGPRINT(RT_DEBUG_TRACE, ("Peer - 11n HT Info\n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\tHT Cap Info: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t AdvCode(%d), BW(%d), MIMOPS(%d), GF(%d), ShortGI_20(%d), ShortGI_40(%d)\n",
-			pHTCap->AdvCoding, pHTCap->ChannelWidth, pHTCap->MimoPs, pHTCap->GF,
-			pHTCap->ShortGIfor20, pHTCap->ShortGIfor40));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t TxSTBC(%d), RxSTBC(%d), DelayedBA(%d), A-MSDU(%d), CCK_40(%d)\n",
-			pHTCap->TxSTBC, pHTCap->RxSTBC, pHTCap->DelayedBA, pHTCap->AMsduSize, pHTCap->CCKmodein40));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t PSMP(%d), Forty_Mhz_Intolerant(%d), L-SIG(%d)\n",
-			pHTCap->PSMP, pHTCap->Forty_Mhz_Intolerant, pHTCap->LSIGTxopProSup));
-
-		DBGPRINT(RT_DEBUG_TRACE, ("\tHT Parm Info: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t MaxRx A-MPDU Factor(%d), MPDU Density(%d)\n",
-			pHTCapParm->MaxRAmpduFactor, pHTCapParm->MpduDensity));
-
-		DBGPRINT(RT_DEBUG_TRACE, ("\tHT MCS set: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t %02x %02x %02x %02x %02x\n", pHTCapability->MCSSet[0],
-			pHTCapability->MCSSet[1], pHTCapability->MCSSet[2],
-			pHTCapability->MCSSet[3], pHTCapability->MCSSet[4]));
-
-		DBGPRINT(RT_DEBUG_TRACE, ("\tExt HT Cap Info: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t PCO(%d), TransTime(%d), MCSFeedback(%d), +HTC(%d), RDG(%d)\n",
-			pExtHT->Pco, pExtHT->TranTime, pExtHT->MCSFeedback, pExtHT->PlusHTC, pExtHT->RDGSupport));
-
-#ifdef TXBF_SUPPORT
-        	DBGPRINT(RT_DEBUG_TRACE, ("\tTX BF Cap: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t ImpRxCap(%d), RXStagSnd(%d), TXStagSnd(%d), RxNDP(%d), TxNDP(%d) ImpTxCap(%d)\n",
-			pBFCap->TxBFRecCapable, pBFCap->RxSoundCapable, pBFCap->TxSoundCapable,
-			pBFCap->RxNDPCapable, pBFCap->TxNDPCapable, pBFCap->ImpTxBFCapable));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t Calibration(%d), ExpCSICapable(%d), ExpComSteerCapable(%d), ExpCSIFbk(%d), ExpNoComBF(%d) ExpComBF(%d)\n",
-			pBFCap->Calibration, pBFCap->ExpCSICapable, pBFCap->ExpComSteerCapable,
-			pBFCap->ExpCSIFbk, pBFCap->ExpNoComBF, pBFCap->ExpComBF));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\t MinGrouping(%d), CSIBFAntSup(%d), NoComSteerBFAntSup(%d), ComSteerBFAntSup(%d), CSIRowBFSup(%d) ChanEstimation(%d)\n",
-			pBFCap->MinGrouping, pBFCap->CSIBFAntSup, pBFCap->NoComSteerBFAntSup,
-			pBFCap->ComSteerBFAntSup, pBFCap->CSIRowBFSup, pBFCap->ChanEstimation));
-#endif // TXBF_SUPPORT //
-
-		DBGPRINT(RT_DEBUG_TRACE, ("\nPeer - MODE=%d, BW=%d, MCS=%d, ShortGI=%d, MaxRxFactor=%d, MpduDensity=%d, MIMOPS=%d, AMSDU=%d\n",
-			pEntry->HTPhyMode.field.MODE, pEntry->HTPhyMode.field.BW,
-			pEntry->HTPhyMode.field.MCS, pEntry->HTPhyMode.field.ShortGI,
-			pEntry->MaxRAmpduFactor, pEntry->MpduDensity,
-			pEntry->MmpsMode, pEntry->AMsduSize));
-
-#ifdef DOT11N_DRAFT3
-		DBGPRINT(RT_DEBUG_TRACE, ("\tExt Cap Info: \n"));
-		DBGPRINT(RT_DEBUG_TRACE, ("\t\tBss2040CoexistMgmt=%d\n", pEntry->BSS2040CoexistenceMgmtSupport));
-#endif // DOT11N_DRAFT3 //
-	}
-}
-#endif // DOT11_N_SUPPORT //

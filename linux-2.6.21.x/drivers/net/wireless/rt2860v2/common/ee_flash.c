@@ -45,14 +45,6 @@ static USHORT EE_FLASH_ID_LIST[]={
 #ifdef RT2880
 	0x2880, 
 #endif // RT2880 //
-#ifdef RT2883
-	0x2883,
-	0x2880,
-#endif // RT2883 //
-#ifdef RT3883
-	0x3662,
-	0x3883,
-#endif // RT3883 //
 #ifdef RT305x
 	0x3052,
 	0x3051,

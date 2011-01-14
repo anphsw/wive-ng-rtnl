@@ -529,6 +529,7 @@ static inline UCHAR SelectClearChannelCCA(
 
 		if (pChannelInfo->dirtyness[channel_idx] == TRUE)
 			continue;
+
 		if (pChannelInfo->FalseCCA[channel_idx] > CCA_THRESHOLD)
 		{
 			UINT32 falsecca = pChannelInfo->FalseCCA[channel_idx] + pChannelInfo->dirtyness[channel_idx];
@@ -583,7 +584,6 @@ static inline UCHAR SelectClearChannelCCA(
 	
 		if (AutoChannelSkipListCheck(pAd, ch))
 			continue;
-
 		if (RadarChannelCheck(pAd, ch)
 			&&(pAd->ApCfg.bAvoidDfsChannel == TRUE)
 			&&(pChannelInfo->IsABand == TRUE))
@@ -628,6 +628,7 @@ static inline UCHAR SelectClearChannelApCnt(
 	
 	for (channel_index=0 ; channel_index < pAd->ChannelListNum ; channel_index++)
 	{
+
 		if (pChannelInfo->ApCnt[channel_index] > 0)
 	    {
 		    INT ll;

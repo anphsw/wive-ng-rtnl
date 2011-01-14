@@ -173,9 +173,6 @@ VOID MlmeScanReqAction(
 	BOOLEAN        TimerCancelled;
 	ULONG		   Now;
 	USHORT         Status;
-	PHEADER_802_11 pHdr80211;
-	PUCHAR         pOutBuffer = NULL;	
-	NDIS_STATUS    NStatus;
 
 	// Check the total scan tries for one single OID command
 	// If this is the CCX 2.0 Case, skip that!
@@ -227,22 +224,12 @@ VOID MlmeScanReqAction(
 		//
 		if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) && (INFRA_ON(pAd)))
 		{
-			NStatus = MlmeAllocateMemory(pAd, (PVOID)&pOutBuffer);
-			if (NStatus	== NDIS_STATUS_SUCCESS)
-			{
-				pHdr80211 = (PHEADER_802_11) pOutBuffer;
-				MgtMacHeaderInit(pAd, pHdr80211, SUBTYPE_NULL_FUNC, 1, pAd->CommonCfg.Bssid, pAd->CommonCfg.Bssid);
-				pHdr80211->Duration = 0;
-				pHdr80211->FC.Type = BTYPE_DATA;
-				pHdr80211->FC.PwrMgmt = PWR_SAVE;
-
-				// Send using priority queue
-				MiniportMMRequest(pAd, 0, pOutBuffer, sizeof(HEADER_802_11));
-				DBGPRINT(RT_DEBUG_TRACE, ("MlmeScanReqAction -- Send PSM Data frame for off channel RM, SCAN_IN_PROGRESS=%d!\n",
+			RTMPSendNullFrame(pAd, 
+							  pAd->CommonCfg.TxRate, 
+							  (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_WMM_INUSED) ? TRUE:FALSE));
+			DBGPRINT(RT_DEBUG_TRACE, ("MlmeScanReqAction -- Send PSM Data frame for off channel RM, SCAN_IN_PROGRESS=%d!\n",
 											RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS)));
-				MlmeFreeMemory(pAd, pOutBuffer);
 				OS_WAIT(20);
-			}
 		}
 		
 			RTMPSendWirelessEvent(pAd, IW_SCANNING_EVENT_FLAG, NULL, BSS0, 0);
@@ -469,13 +456,14 @@ VOID MlmeJoinReqAction(
 		// Append WSC information in probe request if WSC state is running
 		if ((pAd->StaCfg.WscControl.WscEnProbeReqIE) && 
 			(pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE) &&
-			(pAd->StaCfg.WscControl.bWscTrigger))
+			(pAd->StaCfg.WscControl.bWscTrigger
+			))
 		{
 			UCHAR		WscBuf[256], WscIeLen = 0;
 			ULONG 		WscTmpLen = 0;
 
 			NdisZeroMemory(WscBuf, 256);
-			WscMakeProbeReqIE(pAd, &WscBuf[0], &WscIeLen);
+			WscBuildProbeReqIE(pAd, &WscBuf[0], &WscIeLen);
 
 			MakeOutgoingFrame(pOutBuffer + FrameLen,              &WscTmpLen,
 							WscIeLen,                             &WscBuf,
@@ -845,7 +833,7 @@ VOID PeerBeaconAtJoinAction(
     RTMPZeroMemory(&HtCapability, sizeof(HtCapability));
 	RTMPZeroMemory(&AddHtInfo, sizeof(ADD_HT_INFO_IE));
 
-
+	EdcaParm.bValid = FALSE;
 	if (PeerBeaconAndProbeRspSanity(pAd, 
 								Elem->Msg, 
 								Elem->MsgLen, 
@@ -949,13 +937,37 @@ VOID PeerBeaconAtJoinAction(
 				}
 				else
 				{
+#ifdef WSC_STA_SUPPORT
+					if (pAd->StaCfg.WscControl.WscState == WSC_STATE_OFF)
+					{
+#endif // WSC_STA_SUPPORT //
+
+						// Check if AP privacy is different Staion, if yes, 
+						// start a new scan and ignore the frame 
+						// (often happen during AP change privacy at short time)
+						if ((((pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled) << 4) ^
+							CapabilityInfo) &
+							0x0010)
+						{	
+							MLME_SCAN_REQ_STRUCT ScanReq;
+							DBGPRINT(RT_DEBUG_TRACE, ("%s:AP privacy %d is differenct from STA privacy%d\n", __FUNCTION__, (CapabilityInfo & 0x0010) >> 4 ,pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled));
+							ScanParmFill(pAd, &ScanReq, (PSTRING) pAd->MlmeAux.Ssid, pAd->MlmeAux.SsidLen, BSS_ANY, SCAN_ACTIVE);
+							MlmeEnqueue(pAd, SYNC_STATE_MACHINE, MT2_MLME_SCAN_REQ, sizeof(MLME_SCAN_REQ_STRUCT), &ScanReq, 0);
+							pAd->Mlme.CntlMachine.CurrState = CNTL_WAIT_OID_LIST_SCAN;
+							NdisGetSystemUpTime(&pAd->StaCfg.LastScanTime);
+							return;
+						}
+#ifdef WSC_STA_SUPPORT
+					}
+#endif // WSC_STA_SUPPORT //
+
 					//
 					// Multiple SSID case, used correct CapabilityInfo
 					//
 					CapabilityInfo = pAd->ScanTab.BssEntry[Idx].CapabilityInfo;
 				}
 			}
-			NdisMoveMemory(pAd->MlmeAux.Bssid, Bssid, MAC_ADDR_LEN);
+			/*NdisMoveMemory(pAd->MlmeAux.Bssid, Bssid, MAC_ADDR_LEN);*/
 			pAd->MlmeAux.CapabilityInfo = CapabilityInfo & SUPPORTED_CAPABILITY_INFO;
 			pAd->MlmeAux.BssType = BssType;
 			pAd->MlmeAux.BeaconPeriod = BeaconPeriod;
@@ -1085,7 +1097,13 @@ VOID PeerBeaconAtJoinAction(
 			else  //Used the default TX Power Percentage.
 				pAd->CommonCfg.TxPowerPercentage = pAd->CommonCfg.TxPowerDefault;
 
-			InitChannelRelatedValue(pAd);
+			if (pAd->StaCfg.BssType == BSS_INFRA)
+			{
+				/*
+					Ad-hoc call this function in LinkUp
+				*/
+				InitChannelRelatedValue(pAd);
+			}
 
 			pAd->Mlme.SyncMachine.CurrState = SYNC_IDLE;
 			Status = MLME_SUCCESS;
@@ -1216,7 +1234,7 @@ VOID PeerBeacon(
 
 
 		// ignore BEACON not for my SSID
-		if ((! is_my_ssid) && (! is_my_bssid))
+		if (((SsidLen > 0) && !is_my_ssid) || (!is_my_bssid))
 			return;
 
 		// It means STA waits disassoc completely from this AP, ignores this beacon.
@@ -1319,13 +1337,35 @@ VOID PeerBeacon(
 			}
 		}
 
+#ifdef WSC_STA_SUPPORT
+		if (pAd->StaCfg.WscControl.WscState == WSC_STATE_OFF)
+		{
+#endif // WSC_STA_SUPPORT //
+			if ((((pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled) << 4) ^
+				CapabilityInfo) &
+				0x0010)
+			{
+				DBGPRINT(RT_DEBUG_TRACE, ("%s:AP privacy:%x is differenct from STA privacy:%x\n", __FUNCTION__, (CapabilityInfo & 0x0010) >> 4 , pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled));
+				if (INFRA_ON(pAd))
+				{
+					LinkDown(pAd,FALSE);
+					BssTableInit(&pAd->ScanTab);
+				}
+				return;
+			}
+#ifdef WSC_STA_SUPPORT
+		}
+#endif // WSC_STA_SUPPORT //
+
+	
 		// if the ssid matched & bssid unmatched, we should select the bssid with large value.
 		// This might happened when two STA start at the same time
 		if ((! is_my_bssid) && ADHOC_ON(pAd))
 		{
 			INT	i;
 			// Add the safeguard against the mismatch of adhoc wep status
-			if (pAd->StaCfg.WepStatus != pAd->ScanTab.BssEntry[Bssidx].WepStatus)
+			if ((pAd->StaCfg.WepStatus != pAd->ScanTab.BssEntry[Bssidx].WepStatus) ||
+				(pAd->StaCfg.AuthMode != pAd->ScanTab.BssEntry[Bssidx].AuthMode))
 			{
 				return;
 			}
@@ -1386,6 +1426,7 @@ VOID PeerBeacon(
 			RxWI.RSSI0 = Elem->Rssi0;
 			RxWI.RSSI1 = Elem->Rssi1;
 			RxWI.RSSI2 = Elem->Rssi2;
+			RxWI.PHYMODE = 0; //Prevent SNR calculate error
 
 			Update_Rssi_Sample(pAd, &pAd->StaCfg.RssiSample, &RxWI);
 
@@ -1417,6 +1458,9 @@ VOID PeerBeacon(
 				UCHAR			MaxSupportedRateIn500Kbps = 0;
 				UCHAR			idx;
 				MAC_TABLE_ENTRY *pEntry;
+#ifdef WSC_STA_SUPPORT
+				PWSC_CTRL		pWpsCtrl = &pAd->StaCfg.WscControl;
+#endif // WSC_STA_SUPPORT //
 	
 				// supported rates array may not be sorted. sort it and find the maximum rate
 			    for (idx=0; idx<SupRateLen; idx++)
@@ -1437,8 +1481,8 @@ VOID PeerBeacon(
 				// Ad-hoc mode is using MAC address as BA session. So we need to continuously find newly joined adhoc station by receiving beacon.
 				// To prevent always check this, we use wcid == RESERVED_WCID to recognize it as newly joined adhoc station.
 				if ((ADHOC_ON(pAd) && (Elem->Wcid == RESERVED_WCID)) ||
-					(pEntry && ((pEntry->LastBeaconRxTime + ADHOC_ENTRY_BEACON_LOST_TIME) < Now)))
-						{
+					(pEntry && RTMP_TIME_AFTER(Now, pEntry->LastBeaconRxTime + ADHOC_ENTRY_BEACON_LOST_TIME)))
+				{
 					if (pEntry == NULL)
 						// Another adhoc joining, add to our MAC table. 
 						pEntry = MacTableInsertEntry(pAd, Addr2, BSS0, FALSE);
@@ -1455,10 +1499,12 @@ VOID PeerBeacon(
 						DBGPRINT(RT_DEBUG_TRACE, ("ADHOC - Add Entry failed.\n"));
 						return;
 					}
+					pEntry->LastBeaconRxTime = 0;
 
+#ifdef ADHOC_WPA2PSK_SUPPORT
                     //Adhoc support WPA2PSK by Eddy
                     if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK) 
-                        && (!pEntry->pWPA_Authenticator))
+                        && (pEntry->WPA_Authenticator.WpaState < AS_INITPSK))                        
                     {
         				INT               len;
         				PEID_STRUCT         pEid;
@@ -1477,14 +1523,20 @@ VOID PeerBeacon(
         					pVIE2 += (pEid->Len + 2);
         					len  -= (pEid->Len + 2);
         				}
-                        pEntry->WpaRole = WPA_BOTH;
                 		pEntry->PortSecured = WPA_802_1X_PORT_NOT_SECURED;
+                        NdisZeroMemory(&pEntry->WPA_Supplicant.ReplayCounter, LEN_KEY_DESC_REPLAY);                        
+                        NdisZeroMemory(&pEntry->WPA_Authenticator.ReplayCounter, LEN_KEY_DESC_REPLAY);                        
+                        pEntry->WPA_Authenticator.WpaState = AS_INITPSK;
+                        pEntry->WPA_Supplicant.WpaState = AS_INITPSK;
                 		pEntry->EnqueueEapolStartTimerRunning = EAPOL_START_PSK;
-                		RTMPSetTimer(&pEntry->EnqueueStartForPSKTimer, ENQUEUE_EAPOL_START_TIMER);
-                    } else {
+                		RTMPSetTimer(&pEntry->EnqueueStartForPSKTimer, ENQUEUE_EAPOL_START_TIMER);                        
+                    }
+					else 
+					{
                 		pEntry->PortSecured = WPA_802_1X_PORT_SECURED;
                     }
-				
+#endif // ADHOC_WPA2PSK_SUPPORT //
+
 					if (pEntry &&
 						(Elem->Wcid == RESERVED_WCID))
 					{
@@ -1503,16 +1555,20 @@ VOID PeerBeacon(
 				if (!OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED))
 				{
 					OPSTATUS_SET_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED); 
-					pAd->IndicateMediaState = NdisMediaStateConnected;
-					RTMP_IndicateMediaState(pAd);
+					RTMP_IndicateMediaState(pAd, NdisMediaStateConnected);
 	                pAd->ExtraInfo = GENERAL_LINK_UP;
 					DBGPRINT(RT_DEBUG_TRACE, ("ADHOC  fOP_STATUS_MEDIA_STATE_CONNECTED.\n"));
 				}	
 #ifdef WSC_STA_SUPPORT
-				if ((pAd->StaCfg.WscControl.WscState == WSC_STATE_START) &&
-					(pAd->StaCfg.WscControl.WscConfMode == WSC_ENROLLEE))
+				if (pEntry &&
+					(pWpsCtrl->WscState == WSC_STATE_START) &&
+					(pWpsCtrl->WscConfMode == WSC_ENROLLEE))
 				{
-					WscSendEapolStart(pAd, pAd->StaCfg.WscControl.WscPeerMAC);
+					WscInitEntryFunc(pEntry);
+					pWpsCtrl->WscState = WSC_STATE_LINK_UP;
+					pWpsCtrl->WscStatus = STATUS_WSC_LINK_UP;
+					RTMPusecDelay(100000); // 100 ms
+					WscSendEapolStart(pAd, pWpsCtrl->WscPeerMAC);
 				}
 #endif // WSC_STA_SUPPORT 
 			}
@@ -1525,6 +1581,12 @@ VOID PeerBeacon(
 				//      1. long slot (20 us) or short slot (9 us) time
 				//      2. turn on/off RTS/CTS and/or CTS-to-self protection
 				//      3. short preamble
+
+#ifdef WMM_ACM_SUPPORT
+				ACMP_BandwidthInfoSet(pAd, QbssLoad.StaNum,
+										QbssLoad.ChannelUtilization,
+										QbssLoad.RemainingAdmissionControl);
+#endif // WMM_ACM_SUPPORT //
 					
 				//bUseShortSlot = pAd->CommonCfg.bUseShortSlotTime && CAP_IS_SHORT_SLOT(CapabilityInfo);
 				bUseShortSlot = CAP_IS_SHORT_SLOT(CapabilityInfo);
@@ -1694,11 +1756,9 @@ VOID PeerBeacon(
 						{
 							/* wake up and send a NULL frame with PM = 0 to the AP */
 							RTMP_SET_PSM_BIT(pAd, PWR_ACTIVE);
-
-							if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_WMM_INUSED))
-								RTMPSendNullFrame(pAd, pAd->CommonCfg.TxRate, TRUE);
-							else
-								RTMPSendNullFrame(pAd, pAd->CommonCfg.TxRate, FALSE);
+							RTMPSendNullFrame(pAd, 
+											  pAd->CommonCfg.TxRate, 
+											  (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_WMM_INUSED) ? TRUE:FALSE));
 						}
 						else
 						{
@@ -1782,8 +1842,7 @@ VOID PeerBeacon(
 						{
 							// Set a flag to go to sleep . Then after parse this RxDoneInterrupt, will go to sleep mode.
 							pAd->ThisTbttNumToNextWakeUp = TbttNumToNextWakeUp;
-		                                        AsicSleepThenAutoWakeup(pAd, pAd->ThisTbttNumToNextWakeUp);
-							
+		                    AsicSleepThenAutoWakeup(pAd, pAd->ThisTbttNumToNextWakeUp);
 						}
 					}
 				}
@@ -1873,14 +1932,19 @@ VOID PeerProbeReqAction(
 
         	// Modify by Eddy, support WPA2PSK in Adhoc mode
         	if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPANone)
-                || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK))
+#ifdef ADHOC_WPA2PSK_SUPPORT
+                || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)
+#endif // ADHOC_WPA2PSK_SUPPORT //
+                )
         	{
-        	    UCHAR   RSNIe = IE_WPA;
         		ULONG   tmp;
+       	        UCHAR   RSNIe = IE_WPA;
 
+#ifdef ADHOC_WPA2PSK_SUPPORT
                 RTMPMakeRSNIE(pAd, pAd->StaCfg.AuthMode, pAd->StaCfg.WepStatus, BSS0);
             	if (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)
                     RSNIe = IE_RSN;
+#endif // ADHOC_WPA2PSK_SUPPORT //
                 
         		MakeOutgoingFrame(pOutBuffer + FrameLen,        	&tmp,
         						  1,                              	&RSNIe,
@@ -1894,6 +1958,7 @@ VOID PeerProbeReqAction(
 			if (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED)
 			{
 				ULONG TmpLen;
+				USHORT  epigram_ie_len;
 				UCHAR	BROADCOM[4] = {0x0, 0x90, 0x4c, 0x33};
 				HtLen = sizeof(pAd->CommonCfg.HtCapability);
 				AddHtLen = sizeof(pAd->CommonCfg.AddHTInfo);
@@ -1901,8 +1966,10 @@ VOID PeerProbeReqAction(
 				//New extension channel offset IE is included in Beacon, Probe Rsp or channel Switch Announcement Frame
 				if (pAd->bBroadComHT == TRUE)
 				{
+					epigram_ie_len = pAd->MlmeAux.HtCapabilityLen + 4;
 					MakeOutgoingFrame(pOutBuffer + FrameLen,            &TmpLen,
 								  1,                                &WpaIe,
+								  1,          						&epigram_ie_len,
 								  4,                                &BROADCOM[0],
 								 pAd->MlmeAux.HtCapabilityLen,          &pAd->MlmeAux.HtCapability, 
 								  END_OF_ARGS);
@@ -2362,10 +2429,4 @@ VOID CntlChannelWidth(
 
 #endif // DOT11N_DRAFT3 //
 #endif // DOT11_N_SUPPORT //
-
-BOOLEAN ScanRunning(
-		IN PRTMP_ADAPTER pAd)
-{
-	return (pAd->Mlme.SyncMachine.CurrState == SCAN_LISTEN) ? TRUE : FALSE;
-}
 

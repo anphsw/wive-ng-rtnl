@@ -38,6 +38,10 @@
 
 //#define MONITOR_FLAG_11N_SNIFFER_SUPPORT
 
+#ifdef CONFIG_STA_SUPPORT
+//#define AGS_SUPPORT
+#endif // CONFIG_STA_SUPPORT //
+
 #ifdef VENDOR_FEATURE3_SUPPORT 
 #ifdef DOT1X_SUPPORT
 #undef DOT1X_SUPPORT
@@ -69,11 +73,18 @@
 #include "rtmp_chip.h"
 #include "rtmp_timer.h"
 
+
 #ifdef LINUX
 #ifdef RT_CFG80211_SUPPORT
 #include "cfg80211extr.h"
 #endif // RT_CFG80211_SUPPORT //
 #endif // LINUX //
+
+#ifdef CONFIG_STA_SUPPORT
+#ifdef AGS_SUPPORT
+#include "ags.h"
+#endif // AGS_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //
 
 #include "oid.h"
 #include "mlme.h"
@@ -161,11 +172,11 @@
 #endif // LINUX //
 #endif // RALINK_ATE //
 
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 #ifndef RALINK_ATE
 #error "For supporting QA GUI, please set HAS_ATE=y and HAS_QA_SUPPORT=y."
 #endif // RALINK_ATE //
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 
 
 #ifdef RTMP_RBUS_SUPPORT
@@ -205,7 +216,6 @@
 #ifdef WSC_INCLUDED
 #include "crypt_biginteger.h"
 #include "crypt_dh.h"
-#include "wsc.h"
 #include "wsc_tlv.h"
 #endif // WSC_INCLUDED //
 
@@ -230,6 +240,10 @@
 #ifdef RT_CFG80211_SUPPORT
 #include "cfg80211.h"
 #endif // RT_CFG80211_SUPPORT //
+
+#ifdef BG_FT_SUPPORT
+#include "br_ftph.h"
+#endif // BG_FT_SUPPORT //
 #endif // LINUX //
 
 
@@ -238,17 +252,11 @@
 #include "video.h"
 #endif // VIDEO_TURBINE_SUPPORT //
 
-#ifdef WORKQUEUE_BH
-#include <linux/workqueue.h>
-#endif // WORKQUEUE_BH /
 #endif // RTMP_RBUS_SUPPORT //
 
 #ifdef WLAN_LED
 #include	"led.h"
 #endif // WLAN_LED //
 
-#ifdef TXBF_SUPPORT
-#include "rt_txbf.h"
-#endif // TXBF_SUPPORT //
 #endif	// __RT_CONFIG_H__
 

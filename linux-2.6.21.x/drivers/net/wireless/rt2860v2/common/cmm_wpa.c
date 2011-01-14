@@ -144,6 +144,7 @@ VOID WpaEAPOLStartAction(
     PHEADER_802_11      pHeader;
 
 #ifdef CONFIG_STA_SUPPORT
+#ifdef ADHOC_WPA2PSK_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{			    
     	if (ADHOC_ON(pAd)) {
@@ -151,6 +152,7 @@ VOID WpaEAPOLStartAction(
             return;
         }
     }        
+#endif // ADHOC_WPA2PSK_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //    
 
     DBGPRINT(RT_DEBUG_TRACE, ("WpaEAPOLStartAction ===> \n"));
@@ -224,6 +226,7 @@ VOID WpaEAPOLKeyAction(
 	UINT				eapol_len;
 
 #ifdef CONFIG_STA_SUPPORT
+#ifdef ADHOC_WPA2PSK_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{			    
     	if (ADHOC_ON(pAd)) {
@@ -231,6 +234,7 @@ VOID WpaEAPOLKeyAction(
             return;
         }
     }
+#endif // ADHOC_WPA2PSK_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //   
 
     DBGPRINT(RT_DEBUG_TRACE, ("WpaEAPOLKeyAction ===>\n"));
@@ -784,6 +788,18 @@ VOID WPAStart4WayHS(
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR			apidx = 0;
 #endif // CONFIG_AP_SUPPORT //
+
+#ifdef CONFIG_STA_SUPPORT
+#ifdef ADHOC_WPA2PSK_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+	{			
+        if (ADHOC_ON(pAd)) {
+            Adhoc_WpaStart4WayHS(pAd, pEntry, TimeInterval);
+            return;
+        }
+    }        
+#endif // ADHOC_WPA2PSK_SUPPORT //
+#endif // CONFIG_STA_SUPPORT //  
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> WPAStart4WayHS\n"));
 
@@ -1364,8 +1380,6 @@ VOID PeerPairMsg3Action(
 
 #ifdef CONFIG_STA_SUPPORT
 		STA_PORT_SECURED(pAd);
-	    // Indicate Connected for GUI
-	    pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
 		DBGPRINT(RT_DEBUG_TRACE, ("PeerPairMsg3Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
 									GetAuthMode(pEntry->AuthMode),
@@ -1419,8 +1433,8 @@ VOID PeerPairMsg4Action(
     PHEADER_802_11      pHeader;
     UINT            	MsgLen;
     BOOLEAN             Cancelled;
-#if defined(DBG) || defined(CONFIG_AP_SUPPORT)
-    UCHAR		group_cipher = Ndis802_11WEPDisabled;
+#ifdef CONFIG_AP_SUPPORT
+    UCHAR				group_cipher = Ndis802_11WEPDisabled;
 #endif
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg4Action\n"));
@@ -1500,11 +1514,13 @@ VOID PeerPairMsg4Action(
 
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
+/*	ASUS EXT. noisy...
 	        DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 									pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 									pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 									group_cipher, 
 									GetEncryptType(group_cipher)));
+*/
 		}
 		else
 		{
@@ -1731,8 +1747,6 @@ VOID	PeerGroupMsg1Action(
 
 #ifdef CONFIG_STA_SUPPORT
 	STA_PORT_SECURED(pAd);
-    // Indicate Connected for GUI
-    pAd->IndicateMediaState = NdisMediaStateConnected;
 #endif // CONFIG_STA_SUPPORT //
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("PeerGroupMsg1Action: AuthMode(%s) PairwiseCipher(%s) GroupCipher(%s) \n",
@@ -1874,8 +1888,9 @@ VOID PeerGroupMsg2Action(
     PUCHAR          	pData;
     BOOLEAN         	Cancelled;
     PEAPOL_PACKET       pMsg2;	
-#if defined(DBG) || defined(CONFIG_AP_SUPPORT)
-    UCHAR				group_cipher = Ndis802_11WEPDisabled;	
+
+#ifdef CONFIG_AP_SUPPORT
+	UCHAR				group_cipher = Ndis802_11WEPDisabled;	
 #endif
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerGroupMsg2Action \n"));
@@ -1924,19 +1939,23 @@ VOID PeerGroupMsg2Action(
 		{
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
+/*	ASUS EXT. noisy...
 			DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
+*/
 		}
 		else
 		{
 			// send wireless event - for set key done WPA
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA1_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
+/*	ASUS EXT. noisy...
         	DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA1, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
+*/
 		}	
     }while(FALSE);  
 }
@@ -2116,23 +2135,25 @@ VOID	PRF(
 static void F(char *password, unsigned char *ssid, int ssidlength, int iterations, int count, unsigned char *output) 
 { 
     unsigned char digest[36], digest1[SHA1_DIGEST_SIZE]; 
-    int i, j; 
-
+    int i, j, len; 
+	
+	len = strlen(password);
+		
     /* U1 = PRF(P, S || int(i)) */ 
     memcpy(digest, ssid, ssidlength); 
     digest[ssidlength] = (unsigned char)((count>>24) & 0xff); 
     digest[ssidlength+1] = (unsigned char)((count>>16) & 0xff); 
     digest[ssidlength+2] = (unsigned char)((count>>8) & 0xff); 
     digest[ssidlength+3] = (unsigned char)(count & 0xff); 
-    RT_HMAC_SHA1((unsigned char*) password, (int) strlen(password), digest, ssidlength+4, digest1, SHA1_DIGEST_SIZE); // for WPA update
+    RT_HMAC_SHA1((unsigned char*) password, len, digest, ssidlength+4, digest1, SHA1_DIGEST_SIZE); // for WPA update
 
     /* output = U1 */ 
     memcpy(output, digest1, SHA1_DIGEST_SIZE); 
-
     for (i = 1; i < iterations; i++) 
     { 
+    
         /* Un = PRF(P, Un-1) */ 
-        RT_HMAC_SHA1((unsigned char*) password, (int) strlen(password), digest1, SHA1_DIGEST_SIZE, digest, SHA1_DIGEST_SIZE); // for WPA update
+        RT_HMAC_SHA1((unsigned char*) password, len, digest1, SHA1_DIGEST_SIZE, digest, SHA1_DIGEST_SIZE); // for WPA update
         memcpy(digest1, digest, SHA1_DIGEST_SIZE); 
 
         /* output = output xor Un */ 
@@ -2151,7 +2172,7 @@ static void F(char *password, unsigned char *ssid, int ssidlength, int iteration
 */ 
 int RtmpPasswordHash(PSTRING password, PUCHAR ssid, INT ssidlength, PUCHAR output) 
 { 
-    if ((strlen(password) > 63) || (ssidlength > 32)) 
+    if ((strlen(password) > 63) || (ssidlength > 32))
         return 0; 
 
     F(password, ssid, ssidlength, 4096, 1, output); 
@@ -3395,6 +3416,7 @@ BOOLEAN RTMPParseEapolKeyData(
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{			
+#ifdef ADHOC_WPA2PSK_SUPPORT	
         if (ADHOC_ON(pAd)) {
             if (pAd->StaCfg.GroupCipher == Ndis802_11Encryption3Enabled) {
                 NdisZeroMemory(&pEntry->RxGTK, sizeof(CIPHER_KEY));                                
@@ -3402,7 +3424,9 @@ BOOLEAN RTMPParseEapolKeyData(
                 pEntry->RxGTK.CipherAlg = CIPHER_AES;
                 pEntry->RxGTK.KeyLen= LEN_TK;
             }                
-        } else {                        
+        } else 
+#endif // ADHOC_WPA2PSK_SUPPORT //        
+        {                        
     		// set key material, TxMic and RxMic		
     		NdisMoveMemory(pAd->StaCfg.GTK, GTK, GTKLEN);
     		pAd->StaCfg.DefaultKeyId = DefaultIdx;
@@ -3983,9 +4007,11 @@ PCIPHER_KEY RTMPSwCipherKeySelection(
 			pKey = &pEntry->PairwiseKey;
 		else {
 #ifdef CONFIG_STA_SUPPORT
+#ifdef ADHOC_WPA2PSK_SUPPORT
             if (ADHOC_ON(pAd))
     			pKey = &pEntry->RxGTK;
             else
+#endif // ADHOC_WPA2PSK_SUPPORT //                
 #endif // CONFIG_STA_SUPPORT //	    	                
 		    	pKey = &pAd->SharedKey[pEntry->apidx][keyIdx];
         }

@@ -43,13 +43,7 @@
 #include "chip/rt2880.h"
 #endif // RT2880 //
 
-#ifdef RT2883
-#include "chip/rt2883.h"
-#endif // RT2883 //
 
-#ifdef RT3883
-#include "chip/rt3883.h"
-#endif // RT3883 //
 
 
 #ifdef RT305x
@@ -71,7 +65,7 @@
 #define IS_RT2860(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28600000)
 #define IS_RT2872(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28720000)
 
-#define IS_RT30xx(_pAd)		(((_pAd)->MACVersion & 0xfff00000) == 0x30700000||IS_RT3090A(_pAd))
+#define IS_RT30xx(_pAd)		(((_pAd)->MACVersion & 0xfff00000) == 0x30700000||IS_RT3090A(_pAd)||IS_RT3390(_pAd))
 //#define IS_RT305X(_pAd)		((_pAd)->MACVersion == 0x28720200)
 
 /* RT3572, 3592, 3562, 3062 share the same MAC version */
@@ -137,136 +131,58 @@
 #define EEPROM_NIC1_OFFSET          0x34		// The address is from NIC config 0, not BBP register ID
 #define EEPROM_NIC2_OFFSET          0x36		// The address is from NIC config 1, not BBP register ID
 
-#if defined(RT2883) || defined(RT3883)
-#define	EEPROM_NIC3_OFFSET          0x38		// The address is from NIC config 2, not BBP register ID
-#endif // defined(RT2883) || defined(RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_COUNTRY_REGION		0x3e
-#else
 #define EEPROM_COUNTRY_REGION			0x38
-#endif // defined(RT2883) || defined(RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_DEFINE_MAX_TXPWR		0x40
-#else
 #define EEPROM_DEFINE_MAX_TXPWR			0x4e
-#endif // defined(RT2883) || defined(RT3883) //
 
-#ifdef RT2883
-#define	EEPROM_FREQ_OFFSET			0x42
-#define EEPROM_LED1_OFFSET			0x44
-#define EEPROM_LED2_OFFSET			0x46
-#define EEPROM_LED3_OFFSET			0x48
-#elif defined(RT3883)
-#define	EEPROM_FREQ_OFFSET			0x44
-#define EEPROM_LED1_OFFSET			0x46
-#define EEPROM_LED2_OFFSET			0x48
-#define EEPROM_LED3_OFFSET			0x4a
-#else
 #define EEPROM_FREQ_OFFSET			0x3a
 #define EEPROM_LED1_OFFSET			0x3c
 #define EEPROM_LED2_OFFSET			0x3e
 #define EEPROM_LED3_OFFSET			0x40
-#endif
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_LNA_OFFSET			0x4c
-#define EEPROM_LNA_OFFSET2			0x4e
-#else
 #define EEPROM_LNA_OFFSET			0x44
-#endif // defined (RT2883) || defined (RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_RSSI_BG_OFFSET		0x50
-#define EEPROM_RSSI_A_OFFSET		0x54
-#else
 #define EEPROM_RSSI_BG_OFFSET			0x46
 #define EEPROM_RSSI_A_OFFSET			0x4a
 #define EEPROM_TXMIXER_GAIN_2_4G		0x48
 #define EEPROM_TXMIXER_GAIN_5G			0x4c
-#endif // defined(RT2883) || defined(RT3883) //
 
 #define EEPROM_TXPOWER_DELTA			0x50	// 20MHZ AND 40 MHZ use different power. This is delta in 40MHZ.
 
 
-#if defined(RT2883) || defined(RT3883)
-#define	EEPROM_G_TX_PWR_OFFSET		0x60
-#define	EEPROM_G_TX2_PWR_OFFSET		0x6e
-#define	EEPROM_G_TX3_PWR_OFFSET		0x7c
-#else
 #define EEPROM_G_TX_PWR_OFFSET			0x52
 #define EEPROM_G_TX2_PWR_OFFSET			0x60
-#endif // defined(RT2883) || defined(RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_G_TSSI_BOUND1		0x8a
-#define EEPROM_G_TSSI_BOUND2		0x8c
-#define EEPROM_G_TSSI_BOUND3		0x8e
-#define EEPROM_G_TSSI_BOUND4		0x90
-#define EEPROM_G_TSSI_BOUND5		0x92
-#else
 #define EEPROM_G_TSSI_BOUND1			0x6e
 #define EEPROM_G_TSSI_BOUND2			0x70
 #define EEPROM_G_TSSI_BOUND3			0x72
 #define EEPROM_G_TSSI_BOUND4			0x74
 #define EEPROM_G_TSSI_BOUND5			0x76
-#endif // defined(RT2883) || defined(RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_A_TX_PWR_OFFSET      0x96
-#define EEPROM_A_TX2_PWR_OFFSET     0xca
-#define EEPROM_A_TX3_PWR_OFFSET     0xfe
-#else
 #define EEPROM_A_TX_PWR_OFFSET      		0x78
 #define EEPROM_A_TX2_PWR_OFFSET			0xa6
-#endif // defined (RT2883) || defined (RT3883) //
 
-#if defined(RT2883) || defined(RT3883)
-#define EEPROM_A_TSSI_BOUND1				0x134
-#define EEPROM_A_TSSI_BOUND2				0x136
-#define EEPROM_A_TSSI_BOUND3				0x138
-#define EEPROM_A_TSSI_BOUND4				0x13a
-#define EEPROM_A_TSSI_BOUND5				0x13c
-#else
 #define EEPROM_A_TSSI_BOUND1		0xd4
 #define EEPROM_A_TSSI_BOUND2		0xd6
 #define EEPROM_A_TSSI_BOUND3		0xd8
 #define EEPROM_A_TSSI_BOUND4		0xda
 #define EEPROM_A_TSSI_BOUND5		0xdc
-#endif // defined(RT2883) || defined(RT3883) //
 
-// ITxBF calibration values EEPROM locations 0x1a0 to 0x1ab
-#define EEPROM_ITXBF_CAL				0x1a0
+#define EEPROM_ITXBF_CAL_RX0			0x1a0
+#define EEPROM_ITXBF_CAL_TX0			0x1a2
+#define EEPROM_ITXBF_CAL_RX1			0x1a4
+#define EEPROM_ITXBF_CAL_TX1			0x1a6
+#define EEPROM_ITXBF_CAL_RX2			0x1a8
+#define EEPROM_ITXBF_CAL_TX2			0x1aa
 
-#if defined(RT2883)
-#define EEPROM_TXPOWER_BYRATE_CCK_OFDM		0x140
-#define EEPROM_TXPOWER_BYRATE_20MHZ_2_4G	0x146	// 20MHZ 2.4G tx power.
-#define EEPROM_TXPOWER_BYRATE_40MHZ_2_4G	0x156	// 40MHZ 2.4G tx power.
-#define EEPROM_TXPOWER_BYRATE_20MHZ_5G		0x166	// 20MHZ 5G tx power.
-#define EEPROM_TXPOWER_BYRATE_40MHZ_5G		0x176	// 40MHZ 5G tx power.
-#elif defined(RT3883)
-#define EEPROM_TXPOWER_BYRATE_CCK_OFDM		0x140
-#define EEPROM_TXPOWER_BYRATE_40MHZ_OFDM_2_4G	0x150
-#define EEPROM_TXPOWER_BYRATE_20MHZ_OFDM_5G	0x160
-#define EEPROM_TXPOWER_BYRATE_40MHZ_OFDM_5G	0x170
-#define EEPROM_TXPOWER_BYRATE_20MHZ_2_4G	0x144	// 20MHZ 2.4G tx power.
-#define EEPROM_TXPOWER_BYRATE_40MHZ_2_4G	0x154	// 40MHZ 2.4G tx power.
-#define EEPROM_TXPOWER_BYRATE_20MHZ_5G		0x164	// 20MHZ 5G tx power.
-#define EEPROM_TXPOWER_BYRATE_40MHZ_5G		0x174	// 40MHZ 5G tx power.
-#else
 #define EEPROM_TXPOWER_BYRATE 			0xde	// 20MHZ power. 
 #define EEPROM_TXPOWER_BYRATE_20MHZ_2_4G	0xde	// 20MHZ 2.4G tx power.
 #define EEPROM_TXPOWER_BYRATE_40MHZ_2_4G	0xee	// 40MHZ 2.4G tx power.
 #define EEPROM_TXPOWER_BYRATE_20MHZ_5G		0xfa	// 20MHZ 5G tx power.
 #define EEPROM_TXPOWER_BYRATE_40MHZ_5G		0x10a	// 40MHZ 5G tx power.
-#endif // RT2883 //
 
-#if defined(RT2883) || defined(RT3883)
-#define	EEPROM_BBP_BASE_OFFSET			0x186
-#else
 #define EEPROM_BBP_BASE_OFFSET			0xf0	// The address is from NIC config 0, not BBP register ID
-#endif // defined(RT2883) || defined(RT3883) //
 
 //
 // Bit mask for the Tx ALC and the Tx fine power control
@@ -391,7 +307,7 @@ typedef	union	_EEPROM_ANTENNA_STRUC	{
 typedef	union _EEPROM_NIC_CINFIG2_STRUC	{
 	struct	{
 		USHORT		DACTestBit:1;			// control if driver should patch the DAC issue
-		USHORT		BTCoexist:1;			// Wi-Fi / Bluetooth coexistence
+		USHORT		CoexBit:1;
 		USHORT		bInternalTxALC:1; // Internal Tx ALC
 		USHORT		AntOpt:1; // Fix Antenna Option: 0:Main; 1: Aux
 		USHORT		AntDiversity:1;			// Antenna diversity
@@ -426,7 +342,7 @@ typedef	union _EEPROM_NIC_CINFIG2_STRUC	{
 		USHORT		AntDiversity:1;			// Antenna diversity
 		USHORT		AntOpt:1; // Fix Antenna Option: 0:Main; 1: Aux
 		USHORT		bInternalTxALC:1; // Internal Tx ALC
-		USHORT		BTCoexist:1;			// Wi-Fi / Bluetooth coexistence
+		USHORT		CoexBit:1;
 		USHORT		DACTestBit:1;			// control if driver should patch the DAC issue
 	}	field;
 	USHORT			word;

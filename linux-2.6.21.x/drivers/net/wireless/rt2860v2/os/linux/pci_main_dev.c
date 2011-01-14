@@ -348,6 +348,8 @@ static INT __devinit   rt2860_probe(
 		goto err_out_iounmap;
 	}
 
+	memset(handle, 0, sizeof(struct os_cookie));
+
 	((POS_COOKIE)handle)->pci_dev = pci_dev;
 	
 	rv = RTMPAllocAdapterBlock(handle, &pAd);	//shiang: we may need the pci_dev for allocate structure of "RTMP_ADAPTER"
@@ -476,8 +478,11 @@ static VOID __devexit rt2860_remove_one(
 	RtmpOSNetDevFree(net_dev);
 
 #ifdef VENDOR_FEATURE4_SUPPORT
-	DBGPRINT(RT_DEBUG_TRACE, ("OS_NumOfMemAlloc = %d, OS_NumOfMemFree = %d\n",
+{
+	extern ULONG OS_NumOfMemAlloc, OS_NumOfMemFree;
+	DBGPRINT(RT_DEBUG_TRACE, ("OS_NumOfMemAlloc = %ld, OS_NumOfMemFree = %ld\n",
 			OS_NumOfMemAlloc, OS_NumOfMemFree));
+}
 #endif // VENDOR_FEATURE4_SUPPORT //
 }
  

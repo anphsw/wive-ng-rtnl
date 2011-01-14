@@ -3,16 +3,16 @@ include $(RT28xx_DIR)/os/linux/config.mk
 #ifdef CONFIG_AP_SUPPORT
 ifeq ($(RT28xx_MODE),AP)
 MOD_NAME = rt$(CHIPSET)ap
-DAT_PATH = /etc/Wireless/RT$(CHIPSET)AP
-DAT_FILE_NAME = RT$(CHIPSET)AP.dat
+DAT_PATH = /etc/Wireless/RT$(CHIPSET_DAT)AP
+DAT_FILE_NAME = RT$(CHIPSET_DAT)AP.dat
 endif
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 ifeq ($(RT28xx_MODE), STA)
 MOD_NAME = rt$(CHIPSET)sta
-DAT_PATH = /etc/Wireless/RT$(CHIPSET)STA
-DAT_FILE_NAME = RT$(CHIPSET)STA.dat
+DAT_PATH = /etc/Wireless/RT$(CHIPSET_DAT)STA
+DAT_FILE_NAME = RT$(CHIPSET_DAT)STA.dat
 endif
 #endif // CONFIG_STA_SUPPORT //
 
@@ -83,9 +83,11 @@ endif
 #endif // DOT11_N_SUPPORT //
 
 #ifdef BG_FT_SUPPORT
+ifeq ($(OSABL),NO)
 ifeq ($(HAS_BGFP_SUPPORT),y)
 rt$(CHIPSET)ap-objs += \
-	../../common/br_ftph.o
+	../../os/linux/br_ftph.o
+endif
 endif
 #endif // BG_FT_SUPPORT //
 
@@ -165,13 +167,9 @@ rt$(CHIPSET)ap-objs += \
 	../../common/wsc_ufd.o\
 	../../common/crypt_biginteger.o\
 	../../common/crypt_dh.o	
-ifeq ($(HAS_SAMSUNG_EASY_CONFIG_SUPPORT),y)
-ifneq ($(PLATFORM),RALINK_3052)
-rt$(CHIPSET)ap-objs += ../../common/auto_provision.o
-endif
-endif
 endif
 #endif // WSC_INCLUDED //
+
 
 
 ifeq ($(HAS_WDS),y)
@@ -235,6 +233,12 @@ ifeq ($(PLATFORM),IKANOS_V180)
 rt$(CHIPSET)ap-objs += ../../os/linux/vr_ikans.o
 endif
 
+ifeq ($(PLATFORM),BL2348)
+ifeq ($(OSABL),NO)
+rt$(CHIPSET)ap-objs += ../../os/linux/vr_bdlt.o
+endif
+endif
+
 
 #ifdef WAPI_SUPPORT
 ifeq ($(HAS_WAPI_SUPPORT),y)
@@ -252,7 +256,7 @@ rt$(CHIPSET)ap-objs += \
 	../../common/client_wds.o
 endif
 
-ifeq ($(HAS_SAMSUNG_EASY_CONFIG_SUPPORT),y)
+ifeq ($(HAS_EASY_CONFIG_SETUP_SUPPORT),y)
 ifeq ($(PLATFORM),RALINK_3052)
 rt$(CHIPSET)ap-objs += lib.a
 endif
@@ -279,7 +283,6 @@ rt$(CHIPSET)sta-y := \
 	../../common/cmm_info.o\
 	../../common/cmm_cfg.o\
 	../../common/cmm_wpa.o\
-	../../common/cmm_wpa_adhoc.o\
 	../../common/dfs.o\
 	../../common/spectrum.o\
 	../../common/rtmp_timer.o\
@@ -295,6 +298,7 @@ rt$(CHIPSET)sta-y := \
 	../../sta/rtmp_data.o\
 	../../sta/connect.o\
 	../../sta/wpa.o\
+	../../sta/ags.o\
 	../../sta/sta_cfg.o
 
 ifeq ($(OSABL),NO)
@@ -322,6 +326,11 @@ rt$(CHIPSET)sta-y += \
 	../../common/cmm_mat_ipv6.o
 endif
 #endif // ETH_CONVERT //
+
+#ifdef ADHOC_WPA2PSK_SUPPORT
+rt$(CHIPSET)sta-objs += \
+	../../common/cmm_wpa_adhoc.o
+#endif // ADHOC_WPA2PSK_SUPPORT //
 
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
@@ -474,6 +483,7 @@ rt$(CHIPSET)apsta-y := \
 	../../sta/rtmp_data.o\
 	../../sta/connect.o\
 	../../sta/wpa.o\
+	../../sta/ags.o\
 	../../ap/ap_autoChSel.o\
 	../../ap/ap_qload.o\
 	../../ap/ap_cfg.o\

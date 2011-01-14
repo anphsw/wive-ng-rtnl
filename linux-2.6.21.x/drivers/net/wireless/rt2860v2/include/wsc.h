@@ -30,6 +30,78 @@
 #ifndef	__WSC_H__
 #define	__WSC_H__
 
+// WSC OUI SMI
+#define WSC_OUI				0x0050f204
+#define	WSC_SMI				0x00372A
+#define	WSC_VENDOR_TYPE		0x00000001
+
+// EAP code
+#define	EAP_CODE_REQ		0x01
+#define	EAP_CODE_RSP		0x02
+#define	EAP_CODE_FAIL		0x04
+#define EAP_TYPE_ID			0x01
+#define EAP_TYPE_NOTIFY		0x02
+#define	EAP_TYPE_WSC		0xfe
+
+// structure to store Simple Config Attributes Info
+typedef struct GNU_PACKED _WSC_LV_INFO {
+    USHORT  ValueLen;
+    UCHAR   Value[512];
+} WSC_LV_INFO;
+
+typedef struct GNU_PACKED _WSC_IE_HEADER {
+	UCHAR elemId;
+	UCHAR length;
+	UCHAR oui[4];
+} WSC_IE_HEADER;
+
+// WSC IE structure
+typedef	struct GNU_PACKED	_WSC_IE
+{
+	USHORT	Type;
+	USHORT	Length;
+	UCHAR	Data[1];	// variable length data
+}	WSC_IE, *PWSC_IE;
+
+// WSC fixed information within EAP
+typedef	struct GNU_PACKED	_WSC_FRAME	{
+	UCHAR	SMI[3];
+	UINT	VendorType;
+	UCHAR	OpCode;
+	UCHAR	Flags;
+}	WSC_FRAME, *PWSC_FRAME;
+
+// EAP frame format
+typedef	struct GNU_PACKED	_EAP_FRAME	{
+	UCHAR	Code;						// 1 = Request, 2 = Response
+	UCHAR	Id;
+	USHORT	Length;
+	UCHAR	Type;						// 1 = Identity, 0xfe = reserved, used by WSC
+}	EAP_FRAME, *PEAP_FRAME;
+
+static inline BOOLEAN WscCheckWSCHeader(
+    IN  PUCHAR              pData)
+{
+    PWSC_FRAME			pWsc;
+
+	pWsc = (PWSC_FRAME) pData;
+
+    // Verify SMI first
+	if (((pWsc->SMI[0] * 256 + pWsc->SMI[1]) * 256 + pWsc->SMI[2]) != WSC_SMI)
+	{
+		// Wrong WSC SMI Vendor ID, Update WSC status
+		return  FALSE;
+	}
+    
+    // Verify Vendor Type
+	if (cpu2be32(get_unaligned(&pWsc->VendorType)) != WSC_VENDOR_TYPE)
+	{
+		// Wrong WSC Vendor Type, Update WSC status
+		return  FALSE;
+	}
+    return TRUE;
+}
+#ifdef WSC_INCLUDED
 
 // WSC HDR PSH BTN FUNC //
 /* WSC hardware push button function 0811 */
@@ -82,19 +154,6 @@
 #define	WSC_EAPOL_UPNP_MSG		36
 
 #define	MAX_WSC_MSG			    3
-
-// WSC OUI SMI
-#define WSC_OUI				0x0050f204
-#define	WSC_SMI				0x00372A
-#define	WSC_VENDOR_TYPE		0x00000001
-
-// EAP code
-#define	EAP_CODE_REQ		0x01
-#define	EAP_CODE_RSP		0x02
-#define	EAP_CODE_FAIL		0x04
-#define EAP_TYPE_ID			0x01
-#define EAP_TYPE_NOTIFY		0x02
-#define	EAP_TYPE_WSC		0xfe
 
 // WSC Opcode
 #define	WSC_OPCODE_START		0x01
@@ -316,22 +375,6 @@ typedef struct _WSC_UUID_T{
 	UCHAR  node[6];
 }WSC_UUID_T;
 
-// EAP frame format
-typedef	struct GNU_PACKED	_EAP_FRAME	{
-	UCHAR	Code;						// 1 = Request, 2 = Response
-	UCHAR	Id;
-	USHORT	Length;
-	UCHAR	Type;						// 1 = Identity, 0xfe = reserved, used by WSC
-}	EAP_FRAME, *PEAP_FRAME;
-
-// WSC fixed information within EAP
-typedef	struct GNU_PACKED	_WSC_FRAME	{
-	UCHAR	SMI[3];
-	UINT	VendorType;
-	UCHAR	OpCode;
-	UCHAR	Flags;
-}	WSC_FRAME, *PWSC_FRAME;
-
 // For WSC state machine states.
 // We simplified it
 typedef	enum	_WscState
@@ -365,14 +408,6 @@ typedef	enum	_WscState
 	WSC_STATE_WAIT_EAPFAIL,
 	WSC_STATE_WAIT_DISCONN
 }	WSC_STATE;
-
-// WSC IE structure
-typedef	struct GNU_PACKED	_WSC_IE
-{
-	USHORT	Type;
-	USHORT	Length;
-	UCHAR	Data[1];	// variable length data
-}	WSC_IE, *PWSC_IE;
 
 // WSC saved message
 typedef	struct	_WSC_MESSAGE
@@ -477,15 +512,15 @@ typedef struct _WSC_UPNP_NODE_INFO{
 	RALINK_TIMER_STRUCT   UPnPM2DTimer;
 }WSC_UPNP_NODE_INFO, *PWSC_UPNP_NODE_INFO;
 
-#ifdef CONFIG_AP_SUPPORT
 #define MAX_PBC_STA_TABLE_SIZE	4
 typedef struct _WSC_STA_PBC_PROBE_INFO {
     UCHAR				WscPBCStaProbeCount;
     UCHAR   			StaMacAddr[MAX_PBC_STA_TABLE_SIZE][MAC_ADDR_LEN];
 	ULONG				ReciveTime[MAX_PBC_STA_TABLE_SIZE];
 } WSC_STA_PBC_PROBE_INFO, *PWSC_STA_PBC_PROBE_INFO;
-#endif // CONFIG_AP_SUPPORT //
 
+#ifdef CONFIG_STA_SUPPORT
+#endif // CONFIG_STA_SUPPORT //
 
 typedef struct GNU_PACKED _WSC_PEER_DEV_INFO {
 	UCHAR	WscPeerDeviceName[32];
@@ -574,28 +609,16 @@ typedef	struct	_WSC_CTRL
 #endif // CONFIG_AP_SUPPORT //
 	INT					WscKeyASCII; 		//WscKeyASCII (0:Hex, 1:ASCII(random length), others: ASCII length(8~63, default 8))
 	INT					WscActionMode;
-	UCHAR                   Wsc_Uuid_E[UUID_LEN_HEX];
-	UCHAR                   Wsc_Uuid_Str[UUID_LEN_STR];
+	UCHAR				Wsc_Uuid_E[UUID_LEN_HEX];
+	UCHAR				Wsc_Uuid_Str[UUID_LEN_STR];
 
 	UCHAR				WpsApBand; // Preferred WPS AP PHY type. Ref: PREFERRED_WPS_AP_PHY_TYPE
 //add by woody
 	UCHAR Flags;
 
-
 	WSC_PEER_DEV_INFO	WscPeerInfo;
+	BOOLEAN				bCheckMultiByte;
 }	WSC_CTRL, *PWSC_CTRL;
-
-// structure to store Simple Config Attributes Info
-typedef struct GNU_PACKED _WSC_LV_INFO {
-    USHORT  ValueLen;
-    UCHAR   Value[512];
-} WSC_LV_INFO;
-
-typedef struct GNU_PACKED _WSC_IE_HEADER {
-	UCHAR elemId;
-	UCHAR length;
-	UCHAR oui[4];
-} WSC_IE_HEADER;
 
 typedef struct GNU_PACKED _WSC_CONFIGURED_VALUE {
 	USHORT WscConfigured; // 1 un-configured; 2 configured
@@ -725,6 +748,8 @@ typedef enum _WscSecurityMode{
 	WPAPSKAES,
 	WPAPSKTKIP,
 }WSC_SECURITY_MODE;
+
+#endif // WSC_INCLUDED //
 
 #endif	// __WSC_H__
 

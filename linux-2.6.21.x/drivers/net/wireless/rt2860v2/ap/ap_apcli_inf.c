@@ -99,22 +99,8 @@ VOID RT28xx_ApCli_Init(
 		/* init MAC address of virtual network interface */
 		COPY_MAC_ADDR(pApCliEntry->CurrentAddress, ad_p->CurrentAddress);
 
-#ifdef NEW_MBSSID_MODE
-		if (ad_p->ApCfg.BssidNum > 0 || MAX_MESH_NUM > 0) 
-		{
-			/* 	
-				Refer to HW definition - 
-					Bit1 of MAC address Byte0 is local administration bit 
-					and should be set to 1 in extended multiple BSSIDs'
-					Bit3~ of MAC address Byte0 is extended multiple BSSID index.
-			 */ 
-			pApCliEntry->CurrentAddress[0] += 2; 	
-			pApCliEntry->CurrentAddress[0] += (((ad_p->ApCfg.BssidNum + MAX_MESH_NUM) - 1) << 2);
-		}
-#else
 		pApCliEntry->CurrentAddress[ETH_LENGTH_OF_ADDRESS - 1] =
 			(pApCliEntry->CurrentAddress[ETH_LENGTH_OF_ADDRESS - 1] + ad_p->ApCfg.BssidNum + MAX_MESH_NUM) & 0xFF;
-#endif // NEW_MBSSID_MODE //
 
 		/* init operation functions */
 		NdisZeroMemory(&netDevOpHook, sizeof(RTMP_OS_NETDEV_OP_HOOK));
@@ -131,12 +117,12 @@ VOID RT28xx_ApCli_Init(
 
 		/* backup our virtual network interface */
 		pApCliEntry->dev = new_dev_p;
-
+        
 #ifdef WSC_AP_SUPPORT
 		pApCliEntry->WscControl.pAd = ad_p;        
-		if (pApCliEntry->WscControl.WscEnrolleePinCode == 0)
-			pApCliEntry->WscControl.WscEnrolleePinCode = GenerateWpsPinCode(ad_p, TRUE, 0);
 		NdisZeroMemory(pApCliEntry->WscControl.EntryAddr, MAC_ADDR_LEN);
+		pApCliEntry->WscControl.WscConfigMethods= 0x008C;
+		WscGenerateUUID(ad_p, &pApCliEntry->WscControl.Wsc_Uuid_E[0], &pApCliEntry->WscControl.Wsc_Uuid_Str[0], 0, FALSE);
         WscInit(ad_p, TRUE, apcli_index);
 #endif // WSC_AP_SUPPORT //
 	} /* End of for */

@@ -517,7 +517,7 @@ BOOLEAN ApCliLinkUp(
 				//2008/12/17:KH modified to fix the low throughput of AP-Client on Big-Endian Platform<--
 
 				//for (i=15; i>=0; i--)
-				for (i=23; i>=0; i--)	// 3*3
+				for (i=23; i>=0; i--)	//3*3
 				//2008/12/17:KH modified to fix the low throughput of AP-Client on Big-Endian Platform-->
 				{	
 					j = i/8;	
@@ -630,7 +630,7 @@ BOOLEAN ApCliLinkUp(
 					OPSTATUS_SET_FLAG(pAd, fOP_STATUS_AGGREGATION_INUSED);
 					CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_AGGREGATION_CAPABLE);
 					CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_PIGGYBACK_CAPABLE);
-					RTMPSetPiggyBack(pAd, TRUE);
+                	RTMPSetPiggyBack(pAd, TRUE);
 					DBGPRINT(RT_DEBUG_TRACE, ("Turn on Piggy-Back\n"));
 				}
 				else if (pAd->MlmeAux.APRalinkIe & 0x00000001)
@@ -1630,7 +1630,8 @@ BOOLEAN 	ApCliValidateRSNIE(
 	
 	// Check AuthMode and WPA_AuthModeAux for matching, in case AP support dual-AuthMode
 	// WPAPSK
-	if (WPA_AuthMode == pApCliEntry->AuthMode || WPA_AuthModeAux == pApCliEntry->AuthMode)
+	if ((WPA_AuthMode == pApCliEntry->AuthMode) || 
+		((WPA_AuthModeAux != Ndis802_11AuthModeOpen) && (WPA_AuthModeAux == pApCliEntry->AuthMode)))
 	{
 		// Check cipher suite, AP must have more secured cipher than station setting
 		if (WPA.bMixMode == FALSE)
@@ -1663,7 +1664,8 @@ BOOLEAN 	ApCliValidateRSNIE(
 		Sanity |= 0x1;
 	}
 	// WPA2PSK
-	else if (WPA2_AuthMode == pApCliEntry->AuthMode || WPA2_AuthModeAux == pApCliEntry->AuthMode)
+	else if ((WPA2_AuthMode == pApCliEntry->AuthMode) || 
+			 ((WPA2_AuthModeAux != Ndis802_11AuthModeOpen) && (WPA2_AuthModeAux == pApCliEntry->AuthMode)))
 	{
 		// Check cipher suite, AP must have more secured cipher than station setting
 		if (WPA2.bMixMode == FALSE)

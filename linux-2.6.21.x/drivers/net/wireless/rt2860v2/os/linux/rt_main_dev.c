@@ -116,7 +116,6 @@ int MainVirtualIF_close(IN struct net_device *net_dev)
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		BOOLEAN 		Cancelled;
 #ifdef QOS_DLS_SUPPORT
 		// send DLS-TEAR_DOWN message, 
 		if (pAd->CommonCfg.bDLSCapable)
@@ -175,9 +174,6 @@ int MainVirtualIF_close(IN struct net_device *net_dev)
 			
 			RTMPusecDelay(1000);
 		}
-
-		RTMPCancelTimer(&pAd->StaCfg.StaQuickResponeForRateUpTimer, &Cancelled);
-		RTMPCancelTimer(&pAd->StaCfg.WpaDisassocAndBlockAssocTimer, &Cancelled);
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 #ifndef NATIVE_WPA_SUPPLICANT_SUPPORT
@@ -285,9 +281,9 @@ extern VOID BG_FTPH_Remove(VOID);
 int rt28xx_close(IN PNET_DEV dev)
 {
 	struct net_device * net_dev = (struct net_device *)dev;
-    RTMP_ADAPTER	*pAd = NULL;
-	BOOLEAN 		Cancelled;
+	RTMP_ADAPTER	*pAd = NULL;
 	UINT32			i = 0;
+	BOOLEAN                 Cancelled;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
@@ -304,21 +300,11 @@ int rt28xx_close(IN PNET_DEV dev)
 	if (pAd == NULL)
 		return 0; // close ok
 
-#ifdef WMM_ACM_SUPPORT
-	/* must call first */
-	ACMP_Release(pAd);
-#endif // WMM_ACM_SUPPORT //
-
-
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 	RT3XXX_AntDiversity_Fini(pAd);
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
-
-#ifdef WDS_SUPPORT
-	WdsDown(pAd);
-#endif // WDS_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
@@ -335,7 +321,6 @@ int rt28xx_close(IN PNET_DEV dev)
         }
 
 
-		//MlmeRadioOff(pAd);
 #ifdef RTMP_MAC_PCI
 		pAd->bPCIclkOff = FALSE;    
 #endif // RTMP_MAC_PCI //
@@ -343,6 +328,16 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // CONFIG_STA_SUPPORT //
 
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
+
+#ifdef WMM_ACM_SUPPORT
+	/* must call first */
+	ACMP_Release(pAd);
+#endif // WMM_ACM_SUPPORT //
+
+
+#ifdef WDS_SUPPORT
+	WdsDown(pAd);
+#endif // WDS_SUPPORT //
 
 	for (i = 0 ; i < NUM_OF_TX_RING; i++)
 	{
@@ -423,7 +418,10 @@ int rt28xx_close(IN PNET_DEV dev)
 	{
 		INT ap_idx;
 		for (ap_idx = 0; ap_idx < pAd->ApCfg.BssidNum; ap_idx++)
-			WscStop(pAd, FALSE, &pAd->ApCfg.MBSSID[ap_idx].WscControl);
+		{
+			PWSC_CTRL	pWpsCtrl = &pAd->ApCfg.MBSSID[ap_idx].WscControl;
+			WscStop(pAd, FALSE, pWpsCtrl);
+		}
 #ifdef APCLI_SUPPORT
 		WscStop(pAd, TRUE, &pAd->ApCfg.ApCliTab[BSS0].WscControl);
 #endif // APCLI_SUPPORT //
@@ -471,7 +469,6 @@ int rt28xx_close(IN PNET_DEV dev)
 			//RTMPHandleRxDoneInterrupt(pAd);
 			// put to radio off to save power when driver unload.  After radiooff, can't write /read register.  So need to finish all 
 			// register access before Radio off.
-
 #ifdef RTMP_PCI_SUPPORT
 			brc=RT28xxPciAsicRadioOff(pAd, RTMP_HALT, 0);
 
@@ -656,6 +653,7 @@ int rt28xx_open(IN PNET_DEV dev)
         RTMPInitPCIeLinkCtrlValue(pAd);
 #endif // PCIE_PS_SUPPORT //
 
+
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -664,6 +662,15 @@ int rt28xx_open(IN PNET_DEV dev)
 #endif // BG_FT_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
 
+
+#ifdef CONFIG_STA_SUPPORT
+	/*
+		To reduce connection time, 
+		do auto reconnect here instead of waiting STAMlmePeriodicExec to do auto reconnect.
+	*/
+	if (pAd->OpMode == OPMODE_STA)
+		MlmeAutoReconnectLastSSID(pAd);
+#endif // CONFIG_STA_SUPPORT //
 
 #ifdef VENDOR_FEATURE2_SUPPORT
 	printk("Number of Packet Allocated in open = %d\n", pAd->NumOfPktAlloc);
@@ -736,11 +743,6 @@ PNET_DEV RtmpPhyNetDevInit(
 #ifdef CONFIG_AP_SUPPORT
 	pAd->ApCfg.MBSSID[MAIN_MBSSID].MSSIDDev = net_dev;
 #endif // CONFIG_AP_SUPPORT //
-
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
-	SET_MODULE_OWNER(net_dev);
-#endif 
 
 	netif_stop_queue(net_dev);
 
@@ -952,9 +954,9 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 	if (pAd->OpMode == OPMODE_STA)
 	{
 		pAd->iw_stats.qual.level =
-			RTMPMaxRssi(pAd, pAd->StaCfg.RssiSample.LastRssi0,
-							pAd->StaCfg.RssiSample.LastRssi1,
-							pAd->StaCfg.RssiSample.LastRssi2);
+			RTMPMaxRssi(pAd, pAd->StaCfg.RssiSample.AvgRssi0,
+							pAd->StaCfg.RssiSample.AvgRssi1,
+							pAd->StaCfg.RssiSample.AvgRssi2);
 	}
 #endif // CONFIG_STA_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
@@ -962,15 +964,27 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 	{
 		if (pMacEntry != NULL)
 			pAd->iw_stats.qual.level =
-				RTMPMaxRssi(pAd, pMacEntry->RssiSample.LastRssi0,
-								pMacEntry->RssiSample.LastRssi1,
-								pMacEntry->RssiSample.LastRssi2);
+				RTMPMaxRssi(pAd, pMacEntry->RssiSample.AvgRssi0,
+								pMacEntry->RssiSample.AvgRssi1,
+								pMacEntry->RssiSample.AvgRssi2);
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-	pAd->iw_stats.qual.noise = pAd->BbpWriteLatch[66]; // noise level (dBm)
-	
-	pAd->iw_stats.qual.noise += 256 - 143;
+#ifdef CONFIG_AP_SUPPORT
+	pAd->iw_stats.qual.noise = RTMPMaxRssi(pAd, pAd->ApCfg.RssiSample.AvgRssi0,
+                                                        pAd->ApCfg.RssiSample.AvgRssi1,
+                                                        pAd->ApCfg.RssiSample.AvgRssi2) -
+                                                        RTMPMinSnr(pAd, pAd->ApCfg.RssiSample.AvgSnr0,
+                                                        pAd->ApCfg.RssiSample.AvgSnr1);
+#endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+	pAd->iw_stats.qual.noise = RTMPMaxRssi(pAd, pAd->StaCfg.RssiSample.AvgRssi0,
+							pAd->StaCfg.RssiSample.AvgRssi1,
+							pAd->StaCfg.RssiSample.AvgRssi2) - 
+							RTMPMinSnr(pAd, pAd->StaCfg.RssiSample.AvgSnr0, 
+							pAd->StaCfg.RssiSample.AvgSnr1);
+#endif // CONFIG_STA_SUPPORT //
+
 	pAd->iw_stats.qual.updated = 1;     // Flags to know if updated
 #ifdef IW_QUAL_DBM
 	pAd->iw_stats.qual.updated |= IW_QUAL_DBM;	// Level + Noise are dBm
@@ -985,21 +999,12 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 #endif // WIRELESS_EXT //
 
 
-#ifdef WORKQUEUE_BH
-void tbtt_workq(struct work_struct *work)
-#else
 void tbtt_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
 {
 //#define MAX_TX_IN_TBTT		(16)
 
 #ifdef CONFIG_AP_SUPPORT
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, tbtt_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
 		PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
-#endif // WORKQUEUE_BH //
 
 #ifdef RTMP_MAC_PCI
 	if (pAd->OpMode == OPMODE_AP)
@@ -1231,7 +1236,10 @@ BOOLEAN RtmpPhyNetDevExit(
  *******************************************************************************/
 int RtmpOSIRQRequest(IN PNET_DEV pNetDev)
 {
+#if defined(RTMP_PCI_SUPPORT) || defined(RTMP_RBUS_SUPPORT)
 	struct net_device *net_dev = pNetDev;
+#endif
+
 	PRTMP_ADAPTER pAd = NULL;
 	int retval = 0;
 	

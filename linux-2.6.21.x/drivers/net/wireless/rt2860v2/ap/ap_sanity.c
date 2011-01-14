@@ -37,10 +37,8 @@ extern UCHAR	WME_PARM_ELEM[];
 extern UCHAR	RALINK_OUI[];
 
 extern UCHAR 	BROADCOM_OUI[]; 
-
-#ifdef WSC_AP_SUPPORT
 extern UCHAR    WPS_OUI[];
-#endif // WSC_AP_SUPPORT //
+
 /* 
     ==========================================================================
     Description:
@@ -234,13 +232,13 @@ BOOLEAN PeerAssocReqCmmSanity(
             case IE_WPA:    // same as IE_VENDOR_SPECIFIC
             case IE_WPA2:
 
-#ifdef WSC_AP_SUPPORT                
 				if (NdisEqualMemory(eid_ptr->Octet, WPS_OUI, 4))
 				{
+#ifdef WSC_AP_SUPPORT
 				    *pWscCapable = TRUE;
+#endif // WSC_AP_SUPPORT //
 				    break;
 				}
-#endif // WSC_AP_SUPPORT //
 
 				/* Handle Atheros and Broadcom draft 11n STAs */
 				if (NdisEqualMemory(eid_ptr->Octet, BROADCOM_OUI, 3))

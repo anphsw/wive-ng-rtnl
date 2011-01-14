@@ -5816,10 +5816,6 @@ INT ACM_Ioctl(
 	UINT32 Command;
 	INT32 Argc;
 
-#ifdef CONFIG_STA_SUPPORT
-	if (pAd->OpMode == OPMODE_STA)
-		return FALSE;
-#endif // CONFIG_STA_SUPPORT //
 
 	/* init */
 	pArgv = (CHAR *)pArgvIn;
@@ -5975,17 +5971,17 @@ INT ACM_Ioctl(
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef ACM_CC_FUNC_ACL
-		case ACM_CMD_ACL_ADD:
+		case ACM_CMD_ACL_ADD: /* 22 wmm acl add */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> add a ACL station entry\n"));
 			AcmCmdAclAdd(pAd, Argc, pArgv);
 			break;
 
-		case ACM_CMD_ACL_DEL:
+		case ACM_CMD_ACL_DEL: /* 23 wmm acl del */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> del a ACL station entry\n"));
 			AcmCmdAclDel(pAd, Argc, pArgv);
 			break;
 
-		case ACM_CMD_ACL_CTRL:
+		case ACM_CMD_ACL_CTRL: /* 24 wmm acl control */
 			ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_cmd> control ACL function\n"));
 			AcmCmdAclCtrl(pAd, Argc, pArgv);
 			break;

@@ -19,7 +19,7 @@ RT2860_OBJ = md5.o mlme.o rtmp_wep.o action.o ba_action.o cmm_data.o cmm_data_pc
 EXTRA_CFLAGS = -I../rt2860v2/include -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX \
 	       -Wall -Wstrict-prototypes -Wno-trigraphs
 
-EXTRA_CFLAGS += -DCONFIG_STA_SUPPORT -DDBG -DRALINK_ATE -DRALINK_28xx_QA -DRT2860 #-DBLOCK_NET_IF 
+EXTRA_CFLAGS += -DCONFIG_STA_SUPPORT -DDBG -DRALINK_ATE -DRALINK_QA -DRT2860 #-DBLOCK_NET_IF 
 
 ifeq ($(CONFIG_RT2860V2_STA_CARRIER),y)
 RT2860_OBJ += dfs.o dfs_mcu.o 

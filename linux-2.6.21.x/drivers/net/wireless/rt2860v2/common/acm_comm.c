@@ -32,21 +32,30 @@
 				ACMP_DataNullHandle().
 			(3) No need TCLAS UP check in ACMP_DataNullHandle().
 		3. 2009/11/09	Sample Lin
-			(1) Add some TODO in the fucture.
+			(1) Add some TODO notes in the fucture.
 		4. 2009/12/15	Sample Lin
-			(1) Fix bugs in CPU 64bit.
+			(1) Fix bugs in CPU 64bit. Can not use (UINT32)pAd.
 		5. 2009/12/22	Sample Lin
 			(1) Fix bugs for big-endian mode in acm_extr.h.
 		6. 2010/01/07	Sample Lin
 			(1) Add function: ACL list. (admit control list)
 				Only accept ACM request in the list.
 			(2) Add function: Aggregation (AMSDU)
-				Take care about aggregation in tx time fomula.
 			(3) Fix bug: LenDataId --
 				No need to do "LenDataId --" when getting LenDataId.
 				EX: Data Size = 64, LenDataId will be 64 >> 5 = 2
 				So the tx time of 64B will be same as the tx time of 95B.
 				(64+32-1 = 95B)
+		7. 2010/01/25	Sample Lin
+			(1) Fix bug: Minimum physical rate infinite loop when rate is
+				not one of supported rates.
+		8. 2010/02/20	Sample Lin
+			(1) Fix bug: Minimum physical rate of TSPEC must meet support
+				rate list, but the rule is error for 5.5Mbps.
+			(2) Fix bug: Bandwidth check for bi-directional TSPEC replacement.
+				The problem will occur when the available ACM capacity is less.
+			(3) Fix bug: Only station mode, update QBSS Load from AP.
+				The problem will only influence the OBSS load element in beacon.
 
 ***************************************************************************/
 
@@ -128,6 +137,8 @@ UINT16 gAcmMCS_OFDM[8][2] =
 	};
 
 #ifndef ACM_CC_FUNC_AUX_TX_TIME
+/* use approximation method to calculate packet transmission time */
+
 static UINT16 gAcmTxTimeBody[ACM_RATE_MAX_NUM][ACM_PRE_TIME_DATA_SIZE_NUM];
 
 static UINT16 gAcmTxTimeOthers[ACM_RATE_MAX_NUM][2][5];
@@ -522,6 +533,7 @@ LabelSemErr:
 } /* End of ACMP_BandwidthInfoGet */
 
 
+#ifdef CONFIG_STA_SUPPORT
 /*
 ========================================================================
 Routine Description:
@@ -560,6 +572,10 @@ ACM_FUNC_STATUS ACMP_BandwidthInfoSet(
 		return ACM_RTN_FAIL;
 	} /* End of if */
 
+	if (!ACMR_IS_ASSOCIATED(pAd))
+		return ACM_RTN_FAIL;
+	/* End of if */
+
 	/* get management semaphore */
 	ACM_TSPEC_SEM_LOCK_CHK_RTN(pAd, SplFlags, LabelSemErr, ACM_RTN_FAIL);
 
@@ -577,6 +593,7 @@ ACM_FUNC_STATUS ACMP_BandwidthInfoSet(
 LabelSemErr:
 	return ACM_RTN_FAIL;
 } /* End of ACMP_BandwidthInfoSet */
+#endif // CONFIG_STA_SUPPORT //
 
 
 /*
@@ -898,6 +915,9 @@ VOID ACMP_DataNullHandle(
 	*/
 //	if (!ACMR_IS_ENABLED(pAd))
 //		return;
+	/* End of if */
+	if (ACMR_CB == NULL)
+		return;
 	/* End of if */
 
 	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
@@ -3637,7 +3657,7 @@ UINT32 ACMP_StreamNumGet(
 					break;
 				/* End of if */
 
-				/* copy output and input TS information */
+				/* copy output TS information */
 				ppAcmStmList = (ACM_STREAM **)ACM_StationTspecListGet(
 										pAd, MAC, ACM_PEER_TSPEC_OUTPUT_GET);
 
@@ -4456,7 +4476,7 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 	} /* End of if */
 
 	/* check if QSTA is in ASSOCIATION state */
-	if (!ACMR_STA_IS_ASSOC(pCdb))
+	if (!ACMR_IS_ASSOCIATED(pAd))
 	{
 		/* QSTA yet associate to the QAP */
 		/* QSTA can send ADDTS request only when it associates to a AP */
@@ -4492,6 +4512,19 @@ ACM_FUNC_STATUS ACMP_WME_TC_Request(
 					("acm_err> Minimum Phy Rate > Mean Data Rate!\n"));
 		return ACM_RTN_INVALID_PARAM;
 	} /* End of if */
+
+	if (((pTspecSrc->MinDataRate != 0) &&
+		(pTspecSrc->MeanDataRate != 0) &&
+		(pTspecSrc->MinDataRate > pTspecSrc->MeanDataRate)) ||
+		((pTspecSrc->PeakDataRate != 0) &&
+		(pTspecSrc->MeanDataRate != 0) &&
+		(pTspecSrc->MeanDataRate > pTspecSrc->PeakDataRate)))
+	{
+		ACMR_DEBUG(ACMR_DEBUG_TRACE,
+					("acm_err> Min/Mean Data Rate > Mean/Peak Data Rate!\n"));
+		return ACM_RTN_INVALID_PARAM;
+	} /* End of if */
+
 
 #ifdef ACM_CC_FUNC_TCLAS
 	/* maximum TCLASS number is limited */
@@ -5128,7 +5161,8 @@ Arguments:
 							ACM_DIRECTION_BIDIREC_LINK
 	AcmTimeOld			- old used time of the same stream, unit: microsecond
 	AcmTimeNew			- the requested time of new stream, unit: microsecond
-	*pTimeOffset			- the insufficient time when check result is fail
+	AcmTimeOldBi		- old used time for bidirectional, unit: microsecond
+	*pTimeOffset		- the insufficient time when check result is fail
 	*pDatlAc			- the borrowed AC ID, 0 ~ 3
 	*pDatlBw			- the borrowed bandwidth from a AC, unit: microsecond
 
@@ -5155,6 +5189,7 @@ STATIC ACM_FUNC_STATUS ACM_BandwidthCheck(
 	ACM_PARAM_IN	UINT32					Direction,
 	ACM_PARAM_IN	UINT32					AcmTimeOld,
 	ACM_PARAM_IN	UINT32					AcmTimeNew,
+	ACM_PARAM_IN	UINT32					AcmTimeOldBi,
 	ACM_PARAM_OUT	UINT32					*pTimeOffset,
 	ACM_PARAM_OUT	UINT32					*pDatlAc,
 	ACM_PARAM_OUT	UINT32					*pDatlBw)
@@ -5162,6 +5197,8 @@ STATIC ACM_FUNC_STATUS ACM_BandwidthCheck(
 	UINT32 TimeResidual;
 	UINT32 TimeAc10;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	*pDatlAc = ACM_DATL_NO_BORROW;
@@ -5176,13 +5213,17 @@ STATIC ACM_FUNC_STATUS ACM_BandwidthCheck(
 	if (Direction == ACM_DIRECTION_BIDIREC_LINK)
 	{
 		/*
-			double medium time for uplink and dnlink because bidirectional
+			double medium time for bidirectional because bidirectional
 			link = uplink + dnlink
 
 			Only for new time because
 			AcmTimeOld = pOldStreamIn+pOldStreamOut+pOldStreamDiffAc
+
+			But when old stream is bidirectional TSPEC for the same AC,
+			we need to double the old time.
 		*/
 		AcmTimeNew = AcmTimeNew << 1;
+		AcmTimeOld += AcmTimeOldBi;
 	} /* End of if */
 
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
@@ -5317,6 +5358,8 @@ STATIC ACM_FUNC_STATUS ACM_DATL_Handle(
 	UINT32 BwBorAc[ACM_DEV_NUM_OF_AC][ACM_DEV_NUM_OF_AC];
 	UINT32 IdAcNum, IdAcOther;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if ((AcmTimeOld != 0) && (AcmTimeNew <= AcmTimeOld))
@@ -5478,6 +5521,8 @@ STATIC VOID ACM_DATL_Update(
 	UINT32 IdAcNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
 
@@ -5540,6 +5585,8 @@ STATIC UINT32 ACM_EncryptExtraLenGet(
 	UINT32 DataExtraLen;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (pCdb == NULL)
 		return 0; /* error */
 	/* End of if */
@@ -5597,6 +5644,8 @@ STATIC UINT32 ACM_FrameAddtsReqMakeUp(
 	ULONG				FrameLen;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	FrameLen = 0;
 
@@ -5653,6 +5702,8 @@ STATIC UINT32 ACM_FrameDeltsToApMakeUp(
 	ACMR_WLAN_HEADER	HdrActionFrame;
 	ULONG				FrameLen;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	FrameLen = 0;
@@ -5712,6 +5763,8 @@ STATIC UINT32 ACM_FrameDeltsToStaMakeUp(
 	ACMR_WLAN_HEADER	HdrActionFrame;
 	ULONG				FrameLen;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	FrameLen = 0;
@@ -5773,6 +5826,8 @@ STATIC VOID ACM_LinkNumCtrl(
 	UINT32 *pNumStm;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (AccessPolicy == ACM_ACCESS_POLICY_EDCA)
 		pNumStm = pAcLinkNum[Dir];
 	else
@@ -5830,13 +5885,14 @@ STATIC VOID ACM_PacketPhyModeMCSSet(
 	ACMR_STA_DB *pCdb;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if (pStream->pTspec->MinPhyRate == 0)
 		return;
 	/* End of if */
 
 	/* init */
-	MinPhyRate = pStream->pTspec->MinPhyRate;
 	PhyModeMin = ACMR_PHY_NONE;
 	McsMin = 0;
 	PreambleId = 0; /* 0: long preamble, 1: short preamble */
@@ -5849,6 +5905,8 @@ STATIC VOID ACM_PacketPhyModeMCSSet(
 	/* find the phy mode & mcs based on minimum physical rate */
 	while(1)
 	{
+		MinPhyRate = pStream->pTspec->MinPhyRate;
+
 		for(RateId=0; RateId<ACM_RATE_B_NUM; RateId++)
 		{
 			if (MinPhyRate == \
@@ -5904,11 +5962,17 @@ STATIC VOID ACM_PacketPhyModeMCSSet(
 #endif // ACM_CC_FUNC_11N //
 
 		if (PhyModeMin != ACMR_PHY_NONE)
+		{
+			/* correct MIN PHY rate */
 			break;
-		/* End of if */
+		} /* End of if */
 
 
 		/* should not be here */
+		ACMR_DEBUG(ACMR_DEBUG_TRACE,
+					("acm_msg> MIN PHY Rate %d bps is not "
+					"our supported rate!\n",
+					MinPhyRate));
 
 		/* the rate does not belong to any specified rate */
 		/* we need to choose one as the minimum physical rate */
@@ -5956,12 +6020,16 @@ STATIC VOID ACM_PacketPhyModeMCSSet(
 				} /* End of if */
 			} /* End of for */
 
-			MinPhyRate = McsRateMin;
+			MinPhyRate = McsRateMin / ACM_RATE_UNIT;
 		} /* End of if */
 #endif // ACM_CC_FUNC_11N //
 
 		/* adjust the minimum physical rate to the correct rate number */
 		pStream->pTspec->MinPhyRate = MinPhyRate * ACM_RATE_UNIT;
+
+		ACMR_DEBUG(ACMR_DEBUG_TRACE,
+					("acm_msg> Correct MIN PHY Rate to %d bps!\n",
+					pStream->pTspec->MinPhyRate));
 	} /* End of while */
 
 	/* assign minimum phy mode & mcs to the stream */
@@ -5999,6 +6067,8 @@ STATIC ACM_FUNC_STATUS ACM_PeerDeviceMacGetNext(
 	ACMR_STA_DB *pCdb;
 	UINT32 IdDevNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pCdb = NULL; /* initial value must be NULL */
@@ -6044,6 +6114,8 @@ STATIC VOID ACM_PS_ActiveOn(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd)
 {
 #ifndef ACM_CC_FUNC_PS_MGMT_FME
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	ACMR_STA_PS_MODE_ACTIVE(pAd);
 
 	ACMR_DEBUG(ACMR_DEBUG_TRACE,
@@ -6090,7 +6162,9 @@ STATIC UCHAR ACM_Rate_Mapping(
 	UINT32 RateIndex;
 
 
-	RateIndex = ACM_RATE_MAX_NUM-1; /* default use maximum rate */
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
+	RateIndex = ACM_RATE_MAX_NUM - 1; /* default use maximum rate */
 
 	ACMR_CLIENT_PHY_MODE_MCS_GET(pCdb, PhyMode, MCS);
 
@@ -6135,6 +6209,8 @@ STATIC UCHAR **ACM_StationTspecListGet(
 	ACM_ENTRY_INFO *pStaAcmInfo;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	pCdb = ACMR_STA_ENTRY_GET(pAd, pDevMac);
 	if (pCdb == NULL)
 	{
@@ -6175,6 +6251,8 @@ STATIC UCHAR ACM_TSID_Get(
 	PUCHAR pBufSrc;
 	UCHAR TSID;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	TSID = 0; /* TSID = default BE */
 
@@ -6267,6 +6345,8 @@ STATIC ACM_FUNC_STATUS ACM_PeerDeviceAdd(
 	ACM_PEER_DEV_LIST *pAcmStmList, *pStmLast;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pAcmStmList = ACMR_CB->pDevListPeer;
 
@@ -6342,6 +6422,8 @@ STATIC VOID ACM_PeerDeviceDel(
 	ACM_PEER_DEV_LIST *pDevList, *pDevNext;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	pDevList = ACMR_CB->pDevListPeer;
 
 	while(1)
@@ -6403,6 +6485,8 @@ STATIC ACM_FUNC_STATUS ACM_PeerDeviceGetNext(
 	ACM_PEER_DEV_LIST *pDevNext;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (*ppDevicePeer == NULL)
 	{
 		/* get first peer */
@@ -6454,6 +6538,8 @@ STATIC VOID ACM_PeerDeviceAllFree(
 	ACM_PEER_DEV_LIST *pDevList, *pDevNext;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	pDevList = ACMR_CB->pDevListPeer;
 
 	while(pDevList)
@@ -6490,6 +6576,8 @@ STATIC VOID ACM_PeerDeviceMaintain(
 	ACM_ENTRY_INFO *pStaAcmInfo;
 	UINT32 IdTidNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* get device entry */
 	pCdb = ACMR_STA_ENTRY_GET(pAd, pDevMac);
@@ -6548,6 +6636,8 @@ STATIC BOOLEAN ACM_STM_IdleCheck(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
 	ACM_PARAM_IN	ACM_STREAM			*pStream)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* check current stream status */
 	if ((pStream->Status != TSPEC_STATUS_ACTIVE) &&
 		(pStream->Status != TSPEC_STATUS_ACTIVE_SUSPENSION))
@@ -6608,6 +6698,9 @@ STATIC VOID ACM_STM_InfoCopy(
 	UINT32 IdTclasNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
+	/* copy information */
 	ACM_TSPEC_COPY((&(pStreamInfoDst->Tspec)), pStreamSrc->pTspec);
 
 	for(IdTclasNum=0; IdTclasNum<ACM_TSPEC_TCLAS_MAX_NUM; IdTclasNum++)
@@ -6670,6 +6763,8 @@ STATIC VOID ACM_TASK_STM_Check(
 	UINT32 IdTidNum, IdLinkNum, AcId;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pAd = (ACMR_PWLAN_STRUC) Data;
@@ -6813,6 +6908,8 @@ VOID ACM_TR_STM_Check(
 	ACMR_PWLAN_STRUC pAd = (ACMR_PWLAN_STRUC) Data;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check for enable flag */
 	if (ACMR_CB->FlgStreamAliveCheckEnable == 0)
 	{
@@ -6857,6 +6954,8 @@ UINT32 ACM_SurplusFactorDecimalBin2Dec(
 	UINT32 ValueMax, Bit1Index, Base, ValueDec, ValueCarry;
 	UINT32 IdBitNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	ValueMax = 1;
 	ValueMax <<= ACM_SURPLUS_DEC_BIT_NUM;
@@ -6915,6 +7014,8 @@ STATIC UINT32 ACM_SurplusFactorDecimalDec2Bin(
 	UINT32 NumBit, TempValueDec;
 	UINT32 IdBitNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	Bin1Index = 1;
 	Bin1Index <<= (ACM_SURPLUS_DEC_BIT_NUM-1);
@@ -6980,6 +7081,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_Active(
 	UCHAR StmAcId;
 	UCHAR TSID;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> TC_Active()!\n"));
 
@@ -7090,6 +7193,8 @@ STATIC VOID ACM_TC_ActRemove(
 	UCHAR TSID;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	pCdb = pStream->pCdb;
 	if (pCdb == NULL)
@@ -7159,6 +7264,8 @@ STATIC BOOLEAN ACM_TC_Delete(
 {
 	ACM_STREAM *pTspecDup;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	if ((pStream->Status == TSPEC_STATUS_REQ_DELETING) ||
 		(pStream->Status == TSPEC_STATUS_ACT_DELETING))
@@ -7268,6 +7375,8 @@ STATIC VOID ACM_TC_Destroy(
 	UINT32 Direction;
 	UCHAR FlgIsActStm;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check whether the request exists in the failed list */
 	FlgIsActStm = 0;
@@ -7425,6 +7534,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_DestroyBy_TS_Info(
 	ULONG SplFlags;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pCdb = NULL;
 	StmAcId = 0;
@@ -7508,6 +7619,8 @@ STATIC VOID ACM_TC_Discard(
 	UCHAR FlgIsActStm;
 	UINT32 Direction;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	FlgIsActStm = 0;
@@ -7595,6 +7708,8 @@ STATIC ACM_STREAM *ACM_TC_Duplicate(
 #endif // ACM_CC_FUNC_TCLAS //
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* allocate & copy the stream */
 	ACMR_MEM_ALLOC(pTspecDup, sizeof(ACM_STREAM), (ACM_STREAM *));
 
@@ -7679,6 +7794,8 @@ STATIC ACM_STREAM *ACM_TC_Find(
 	ACM_STREAM *pStream;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if (pDevMac == NULL)
 		return NULL;
@@ -7728,10 +7845,14 @@ STATIC ACM_STREAM *ACM_TC_FindInPeer(
 	UINT32 IdTidNum, IdLinkNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
+	/* sanity check */
 	if (pDevMac == NULL)
 		return NULL;
 	/* End of if */
 
+	/* try to find it */
 	for(IdLinkNum=0; IdLinkNum<2; IdLinkNum++)
 	{
 		ppAcmStmList = (ACM_STREAM **)ACM_StationTspecListGet(
@@ -7787,6 +7908,8 @@ STATIC ACM_STREAM *ACM_TC_FindInReq(
 	ACM_STREAM *pStream;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	pStream = ACMR_CB->TspecListReq.pHead;
 
 	while(pStream != NULL)
@@ -7825,6 +7948,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_Free(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
 	ACM_PARAM_IN	ACM_STREAM			*pStream)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	if (pStream == NULL)
 		return ACM_RTN_FAIL;
@@ -7891,6 +8016,8 @@ STATIC VOID ACM_TC_Rearrange(
 	ACM_STREAM *pStmPrev, *pStmNext;
 	UINT32 TimeoutNew;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* reset the timeout & retry count */
 	switch(pReqNew->Status)
@@ -8035,6 +8162,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_RenegotiationCheck(
 	BOOLEAN FlgIsFindSameTspec;
 	UINT32 IdTidNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	FlgIsFindSameTspec = FALSE;
@@ -8303,6 +8432,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReplacementCheck(
 	UINT32 IdTidNum, IdDirNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pCdb = ACMR_STA_ENTRY_GET(pAd, pDevMac);
 	if (pCdb == NULL)
@@ -8362,6 +8493,8 @@ STATIC VOID ACM_TC_Req_ADDTS2DELTS(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd,
 	ACM_PARAM_IN	ACM_STREAM			*pStreamReq)
 {
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* change its state to deleting mode */
 	pStreamReq->Status = TSPEC_STATUS_REQ_DELETING;
 	pStreamReq->TimeoutAction = ACM_TC_TIMEOUT_ACTION_DELTS;
@@ -8396,6 +8529,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqCheck(
 {
 	ACM_STREAM *pAcmStmList;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	pAcmStmList = ACMR_CB->TspecListReq.pHead;
 
@@ -8434,9 +8569,12 @@ Note:
 STATIC VOID ACM_TC_ReqAllFree(
  	ACM_PARAM_IN	ACMR_PWLAN_STRUC	pAd)
 {
-	ACM_TSPEC_REQ_LIST *pStmReqList = &ACMR_CB->TspecListReq;
+	ACM_TSPEC_REQ_LIST *pStmReqList;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
+	pStmReqList = &ACMR_CB->TspecListReq;
 	ACM_LIST_ALL_FREE(pAd, pStmReqList);
 } /* End of ACM_TC_ReqAllFree */
 
@@ -8463,6 +8601,8 @@ STATIC VOID ACM_TC_ReqDeviceFree(
 	ACM_TSPEC_REQ_LIST *pStmReqList;
 	ACM_STREAM *pStreamReq, *pStreamReqNext;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pStmReqList = &ACMR_CB->TspecListReq;
@@ -8513,6 +8653,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqInsert(
 	ACM_STREAM *pStmSwapUse;
 	UINT32 NumTimeout;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pStmReqList = &ACMR_CB->TspecListReq;
@@ -8616,6 +8758,8 @@ STATIC VOID ACM_TC_ReqRemove(
 	ACM_STREAM *pAcmStmList;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	pStmReqList = &ACMR_CB->TspecListReq;
 	pAcmStmList = pStmReqList->pHead;
@@ -8702,6 +8846,8 @@ STATIC VOID ACM_TC_ReleaseAll(
 	UCHAR MAC[ACM_MAC_ADDR_LEN];
 	UINT32 IdTidNum, IdLinkNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* sanity check */
 	if (ACMR_ADAPTER_DB == NULL)
@@ -8793,6 +8939,8 @@ STATIC VOID ACM_TASK_General(
 
 	pAd = pAd; /* avoid compile warning */
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 #ifdef ACM_CC_FUNC_MBSS
 	ACMR_CB->TimeoutMbssAcm ++;
 
@@ -8880,6 +9028,8 @@ STATIC VOID ACM_TASK_TC_ReqCheck(
 	UINT32 FrameLen;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* get management semaphore */
 	ACM_TSPEC_IRQ_LOCK_CHK(pAd, SplFlags, LabelSemErr);
@@ -9119,6 +9269,8 @@ STATIC ACM_FUNC_STATUS ACM_TCLAS_IP_INFO_Get(
 	UINT16 *pPortSrc;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	Type = *(UINT16 *)pPkt;
 
 	if (Type != ACMR_HTONS(0x0800)) /* 0800: IP packet type */
@@ -9162,6 +9314,8 @@ STATIC ACM_FUNC_STATUS ACM_TCLAS_VLAN_INFO_Get(
 {
 	UINT16 Type;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	Type = *(UINT16 *)pPkt;
 
@@ -9282,6 +9436,8 @@ STATIC VOID ACM_TC_TASK_CU_Mon(
 	UINT32 CUmax;
 	UINT32 IdAcNum;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pEdcaParam = &ACMR_CB->EdcaCtrlParam;
@@ -9415,6 +9571,8 @@ STATIC VOID ACM_FrameBwAnnSend(
 	UINT32				IdAcNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* sanity check */
 	pEdcaParam = &ACMR_CB->EdcaCtrlParam;
 
@@ -9505,6 +9663,8 @@ STATIC VOID ACM_MBSS_BwAnnForward(
 	ACMR_WLAN_HEADER *pHeader;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (ACMR_IS_ASSOCIATED(pAd))
 	{
 		pHeader = (ACMR_WLAN_HEADER *)pMblk;
@@ -9547,6 +9707,8 @@ STATIC ACM_FUNC_STATUS ACM_MBSS_BwAnnHandle(
 	UINT32 IdMbssNum;
 	UCHAR FlgIsNewAnn;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	pFrameAnn = (ACM_BW_ANN_FRAME *)pActFrame;
@@ -9648,6 +9810,8 @@ STATIC VOID ACM_MBSS_BwReCalculate(
 	UINT32 IdMbssNum, IdAcNum;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	ACMR_CB->MbssTotalUsedTime = 0;
 
 	for(IdAcNum=0; IdAcNum<ACM_DEV_NUM_OF_AC; IdAcNum++)
@@ -9699,6 +9863,8 @@ STATIC VOID ACM_TC_TASK_BwAnn(
 	UINT32 IdMbssNum;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* broadcast our bandwidth */
 	ACM_FrameBwAnnSend(pAd, TRUE);
@@ -9814,6 +9980,8 @@ UINT32 ACM_TX_TimeCal(
 	UINT32 DataExtraLen, LenFrag, LenLastFrag, NumFrag;
 	UCHAR  FlgIsNeedHardwareFrag;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	LenHeader = ACMR_FME_QOS_HEADER_SIZE + 4; /* 4: FCS size */
@@ -10400,6 +10568,8 @@ UINT32 ACM_TX_TimeCalHT(
 	UINT32 Nss;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* init */
 	LenHeader = ACMR_FME_QOS_N_HEADER_SIZE;
 	TxTime = 0;
@@ -10621,6 +10791,8 @@ UINT32 ACM_TX_TimeCalOnFly(
 	UINT32 RateRtsCtsId;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	LenDataId = BodyLen >> ACM_PRE_TIME_DATA_SIZE_OFFSET;
 
 	if (RateIndex > ACM_PRE_TIME_ID_54M)
@@ -10731,6 +10903,8 @@ UINT32 ACM_TX_TimeCalOnFlyHT(
 	UINT32 TimeOffset;
 	UINT8 NumOfBaWinSize;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	TimeOffset = (UINT32)(Timestamp - pStream->TxTimestampMarkEnqueue);
 
@@ -10938,6 +11112,8 @@ VOID ACM_TX_TimeCalPre(
 #endif // ACM_CC_FUNC_11N //
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* for all rates */
 	ACMR_DEBUG(ACMR_DEBUG_TRACE, ("acm_msg> calculate frame body tx time...\n"));
 
@@ -11104,6 +11280,8 @@ STATIC UINT16 ACM_TX_TimePlcpCal(
 	UINT32 PLCP;
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	if (FlgIsGmode)
 	{
 		PLCP = (BodyLen << 3) + 22; /* need to add 22 bits in 11g */
@@ -11157,6 +11335,8 @@ STATIC UINT16 ACM_TX_TimePlcpCalHT(
 	UINT32 N_ELTF[4] = { 0, 1, 2, 4 };
 	UINT32 N_SYM_1_NUM; /* numerator of N_SYM */
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	T_LEG_PREAMBLE = 16;
@@ -11259,6 +11439,8 @@ STATIC VOID ACM_ActionHandleByQAP(
 	UCHAR StatusCode;
 	UINT16 MediumTime;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* points to the action frame WLAN header */
 	pActFrame = (UCHAR *)pMblk;
@@ -11464,6 +11646,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_ReqHandle(
 	UINT32 MinServInt;
 #endif // ACM_CC_FUNC_HCCA //
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* ---- Sanity check for input parameters ---- */
 	*pStatusCode = ACM_STATUS_CODE_UNSPECIFIED_FAILURE;
@@ -12101,6 +12285,8 @@ STATIC VOID ACM_ActionHandleByQSTA(
 	UINT16 MediumTime; /* no use */
 
 
+	WMM_ACM_FUNC_NAME_PRINT("IN");
+
 	/* points to the action frame WLAN header */
 	pActFrame = (UCHAR *)pMblk;
 
@@ -12248,6 +12434,8 @@ STATIC ACM_FUNC_STATUS ACM_TC_RspHandle(
 	UCHAR StmAcId, ApsdAcId, FlgIsApsdEnable;
 	ULONG SplFlags;
 
+
+	WMM_ACM_FUNC_NAME_PRINT("IN");
 
 	/* init */
 	*pStatusCode = ACM_STATUS_CODE_SUCCESS;

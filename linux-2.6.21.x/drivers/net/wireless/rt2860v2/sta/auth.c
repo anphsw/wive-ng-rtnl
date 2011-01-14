@@ -156,7 +156,6 @@ VOID PeerAuthRspAtSeq2Action(
 	UCHAR		  ChallengeIe = IE_CHALLENGE_TEXT;
 	UCHAR		  len_challengeText = CIPHER_TEXT_LEN;
 
-
 	/* allocate memory */
 	os_alloc_mem(NULL, (UCHAR **)&ChlgText, CIPHER_TEXT_LEN);
 	if (ChlgText == NULL)
@@ -169,7 +168,6 @@ VOID PeerAuthRspAtSeq2Action(
 	if (CyperChlgText == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s: CyperChlgText Allocate memory fail!!!\n", __FUNCTION__));
-		os_free_mem(NULL, ChlgText);
 		return;
 	}
 
@@ -321,6 +319,7 @@ VOID PeerAuthRspAtSeq4Action(
             {
                 pAd->StaCfg.AuthFailReason = Status;
                 COPY_MAC_ADDR(pAd->StaCfg.AuthFailSta, Addr2);
+				RTMPSendWirelessEvent(pAd, IW_SHARED_WEP_FAIL, NULL, BSS0, 0); 
             }                
 
             pAd->Mlme.AuthMachine.CurrState = AUTH_REQ_IDLE;

@@ -233,13 +233,13 @@ INT rt28xx_ap_ioctl(
 	switch(cmd)
 	{
 #ifdef RALINK_ATE
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 		case RTPRIV_IOCTL_ATE:
 			{
 				RtmpDoAte(pAd, wrq);
 			}
 			break;
-#endif // RALINK_28xx_QA // 
+#endif // RALINK_QA // 
 #endif // RALINK_ATE //
         case SIOCGIFHWADDR:
 			DBGPRINT(RT_DEBUG_TRACE, ("IOCTLIOCTLIOCTL::SIOCGIFHWADDR\n"));
@@ -310,21 +310,27 @@ INT rt28xx_ap_ioctl(
 		case SIOCGIWRATE:  //get default bit rate (bps)
             {
 
-				PHTTRANSMIT_SETTING		pHtPhyMode;
+				HTTRANSMIT_SETTING		HtPhyMode;
+
 #ifdef APCLI_SUPPORT
 				if (net_dev->priv_flags == INT_APCLI)
-					pHtPhyMode = &pAd->ApCfg.ApCliTab[pObj->ioctl_if].HTPhyMode;
+					HtPhyMode = pAd->ApCfg.ApCliTab[pObj->ioctl_if].HTPhyMode;
 				else
 #endif // APCLI_SUPPORT //
 #ifdef WDS_SUPPORT
 				if (net_dev->priv_flags == INT_WDS)
-					pHtPhyMode = &pAd->WdsTab.WdsEntry[pObj->ioctl_if].HTPhyMode;
+					HtPhyMode = pAd->WdsTab.WdsEntry[pObj->ioctl_if].HTPhyMode;
 				else
 #endif // WDS_SUPPORT //
-					pHtPhyMode = &pAd->ApCfg.MBSSID[pObj->ioctl_if].HTPhyMode;
+					HtPhyMode = pAd->ApCfg.MBSSID[pObj->ioctl_if].HTPhyMode;
+
+#ifdef MBSS_SUPPORT
+				/* reset phy mode for MBSS */
+				MBSS_PHY_MODE_RESET(pObj->ioctl_if, HtPhyMode);
+#endif // MBSS_SUPPORT //
 
 
-			RT28XX_IOCTL_MaxRateGet(pAd, pHtPhyMode, (UINT32 *)&wrq->u.bitrate.value);
+			RT28XX_IOCTL_MaxRateGet(pAd, &HtPhyMode, (UINT32 *)&wrq->u.bitrate.value);
 			wrq->u.bitrate.disabled = 0;
             }
 			break;

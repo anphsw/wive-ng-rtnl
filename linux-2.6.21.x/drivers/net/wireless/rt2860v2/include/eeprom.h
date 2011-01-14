@@ -29,11 +29,7 @@
 #define __EEPROM_H__
 
 #ifdef RTMP_MAC_PCI
-#ifdef RT3883
-#define EEPROM_SIZE					0x400
-#else
 #define EEPROM_SIZE					0x200
-#endif // RT3883 //
 #endif // RTMP_MAC_PCI //
 
 

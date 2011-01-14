@@ -113,6 +113,7 @@ VOID PeerDeauthAction(
     UCHAR       Addr2[MAC_ADDR_LEN];
 	UCHAR       Addr3[MAC_ADDR_LEN];
     USHORT      Reason;
+	BOOLEAN		bDoIterate = FALSE;
 
     if (PeerDeauthSanity(pAd, Elem->Msg, Elem->MsgLen, Addr1, Addr2, Addr3, &Reason)) 
     {
@@ -139,12 +140,12 @@ VOID PeerDeauthAction(
 #endif // WAPI_SUPPORT //
 
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-		RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+			RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
             
 
 			// send wireless event - for deauthentication
-				RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, NULL, BSS0, 0); 
+			RTMPSendWirelessEvent(pAd, IW_DEAUTH_EVENT_FLAG, NULL, BSS0, 0); 
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 			if ((pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE) &&
@@ -153,8 +154,28 @@ VOID PeerDeauthAction(
 				pAd->StaCfg.bLostAp = TRUE;
 #endif // WPA_SUPPLICANT_SUPPORT //
 
+			/*
+				Some customer would set AP1 & AP2 same SSID, AuthMode & EncrypType but different WPAPSK,
+				therefore we need to do iterate here.
+			*/
+			if ((pAd->StaCfg.PortSecured == WPA_802_1X_PORT_NOT_SECURED)
+				&& ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPAPSK) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK))
+#ifdef WSC_STA_SUPPORT
+				&& (pAd->StaCfg.WscControl.WscState < WSC_STATE_LINK_UP)
+#endif // WSC_STA_SUPPORT //
+				)
+				bDoIterate  = TRUE;
+
             LinkDown(pAd, TRUE);
+			
+			if (bDoIterate)
+			{
+				pAd->MlmeAux.BssIdx++;
+				IterateOnBssTab(pAd);
+			}
+
         }
+#ifdef ADHOC_WPA2PSK_SUPPORT
         else if (ADHOC_ON(pAd)
             && (MAC_ADDR_EQUAL(Addr1, pAd->CurrentAddress) || MAC_ADDR_EQUAL(Addr1, BROADCAST_ADDR)))
         {
@@ -166,6 +187,7 @@ VOID PeerDeauthAction(
 
             DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from %02x:%02x:%02x:%02x:%02x:%02x \n", PRINT_MAC(Addr2)));            
         }        
+#endif // ADHOC_WPA2PSK_SUPPORT //
     }
     else
     {

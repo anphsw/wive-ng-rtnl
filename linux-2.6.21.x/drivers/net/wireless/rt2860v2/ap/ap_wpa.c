@@ -1112,29 +1112,28 @@ VOID RTMPGetTxTscFromAsic(
 	/* Initial value */
 	NdisZeroMemory(IvEiv, 8);
 	NdisZeroMemory(pTxTsc, 6);
-
 	// Get apidx for this BSSID
 	GET_GroupKey_WCID(Wcid, apidx);	
-
-	/* When the group rekey action is triggered, a count-down(3 seconds) is started. 
-	   During the count-down, use the initial PN as TSC.
-	   Otherwise, get the IVEIV from ASIC. */
+	/* When the group rekey action is triggered, a count-down(3 seconds) is started.
+		During the count-down, use the initial PN as TSC.
+		Otherwise, get the IVEIV from ASIC.
+	*/
 	if (pAd->ApCfg.MBSSID[apidx].RekeyCountDown > 0)
 	{
-		/*
-		In IEEE 802.11-2007 8.3.3.4.3 described :
-		The PN shall be implemented as a 48-bit monotonically incrementing
-		non-negative integer, initialized to 1 when the corresponding 
-		temporal key is initialized or refreshed. */	
+		/*		In IEEE 802.11-2007 8.3.3.4.3 described :
+				The PN shall be implemented as a 48-bit monotonically incrementing
+				non-negative integer, initialized to 1 when the corresponding
+				temporal key is initialized or refreshed.
+		*/
 		IvEiv[0] = 1;
 	}
 	else
 	{
-	// Read IVEIV from Asic
-	offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
-	for (i=0 ; i < 8; i++)
-		RTMP_IO_READ8(pAd, offset+i, &IvEiv[i]); 
-	}
+		// Read IVEIV from Asic
+		offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
+		for (i=0 ; i < 8; i++)
+			RTMP_IO_READ8(pAd, offset+i, &IvEiv[i]); 
+	} 
 
 	// Record current TxTsc	
 	if (pAd->ApCfg.MBSSID[apidx].GroupKeyWepStatus == Ndis802_11Encryption3Enabled)
@@ -1320,7 +1319,8 @@ VOID RTMPHandleSTAKey(
     }
     else
     {
-        RT_HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey,  MICMsgLen, mic, SHA1_DIGEST_SIZE);
+        RT_HMAC_SHA1(pAd->ApCfg.MBSSID[pEntry->apidx].DlsPTK, LEN_PTK_KCK, (PUCHAR)pSTAKey,  MICMsgLen, digest, SHA1_DIGEST_SIZE);
+		NdisMoveMemory(mic, digest, LEN_KEY_DESC_MIC);
     }
     if (!RTMPEqualMemory(rcv_mic, mic, LEN_KEY_DESC_MIC))
     {

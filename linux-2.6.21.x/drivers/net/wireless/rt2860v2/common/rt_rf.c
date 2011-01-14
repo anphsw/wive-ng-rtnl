@@ -70,7 +70,7 @@ NDIS_STATUS RT30xxWriteRFRegister(
 		}
 		else
 		{
-			ASSERT((regID <= 31)); // R0~R31
+		ASSERT((regID <= 31)); // R0~R31
 		}
 
 		do
@@ -141,7 +141,7 @@ NDIS_STATUS RT30xxReadRFRegister(
 		}
 		else
 		{
-			ASSERT((regID <= 31)); // R0~R31
+		ASSERT((regID <= 31)); // R0~R31
 		}
 
 		for (i=0; i<MAX_BUSY_COUNT; i++)
@@ -212,32 +212,12 @@ VOID RtmpChipOpsRFHook(
 	{
 		pChipOps->pRFRegTable = RT305x_RFRegTable;
 		pChipOps->pBBPRegTable = RT305x_BBPRegTable;
-		//pChipOps->bbpRegTbSize = (sizeof(RT305x_BBPRegTable) / sizeof(REG_PAIR));
 		pChipOps->bbpRegTbSize = RT305x_NUM_BBP_REG_PARMS;
 		pChipOps->AsicRfInit = NICInitRT305xRFRegisters;
 	}
 #endif // RT305x //
 
-#ifdef RT3883
-        if (IS_RT3883(pAd) && (pAd->infType == RTMP_DEV_INF_RBUS))
-        {
-		pChipOps->pRFRegTable = RT3883_RFRegTable;
-		pChipOps->pBBPRegTable = RT3883_BBPRegTable;
-		pChipOps->bbpRegTbSize = RT3883_NUM_BBP_REG_PARMS;
-		pChipOps->AsicRfInit = NICInitRT3883RFRegisters;
-		pChipOps->AsicHaltAction = RT3883HaltAction;
-		pChipOps->AsicRfTurnOff = RT3883LoadRFSleepModeSetup;
-		pChipOps->AsicReverseRfFromSleepMode = RT3883ReverseRFSleepModeSetup;
-	}
-#endif // RT3883 //
 
-#ifdef RT2883
-        if (IS_RT2883(pAd) && (pAd->infType == RTMP_DEV_INF_RBUS))
-        {
-		pChipOps->pBBPRegTable = RT2883_BBPRegTable;
-		pChipOps->bbpRegTbSize = (sizeof(RT2883_BBPRegTable) / sizeof(REG_PAIR));
-	}
-#endif // RT2883 //
 
 
 	DBGPRINT(RT_DEBUG_TRACE, ("Chip specific bbpRegTbSize=%d!\n", pChipOps->bbpRegTbSize));

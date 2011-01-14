@@ -404,10 +404,7 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	IN	PRTMP_ADAPTER	pAd)
 {
 	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
-#ifdef DBG
-	INT			index=0;
-#endif
-	INT			num=0;
+	INT			num;
 	ULONG			ErrorValue = 0;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPAllocTxRxRingMemory\n"));
@@ -419,7 +416,8 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 		// issue, I intentional set them all to 64 bytes.
 		//
 		for (num=0; num<NUM_OF_TX_RING; num++)
-		{			
+		{
+			
 			// 
 			// Allocate Tx ring descriptor's memory (5 TX rings = 4 ACs + 1 HCCA)
 			//
@@ -1334,7 +1332,7 @@ VOID RT28xx_UpdateBeaconToAsic(
 	{
 #ifdef SPECIFIC_BCN_BUF_SUPPORT
 		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
+#endif // SPECIFIC_BCN_BUF_SUPPORT //	
 
 		/* when the ra interface is down, do not send its beacon frame */
 		/* clear all zero */
@@ -1343,7 +1341,7 @@ VOID RT28xx_UpdateBeaconToAsic(
 
 #ifdef SPECIFIC_BCN_BUF_SUPPORT
 		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
+#endif // SPECIFIC_BCN_BUF_SUPPORT //		
 	}
 	else
 	{
@@ -1790,38 +1788,41 @@ BOOLEAN RT28xxPciAsicRadioOff(
 	WPDMA_GLO_CFG_STRUC	DmaCfg;
 	UCHAR		i, tempBBP_R3 = 0;
 #ifdef PCIE_PS_SUPPORT	
-	ULONG		BeaconPeriodTime;
+    ULONG		BeaconPeriodTime;
 	UINT32		PsPollTime = 0/*, MACValue*/;
 	UINT32		TbTTTime = 0;
 	BOOLEAN		Cancelled;
 #endif // PCIE_PS_SUPPORT //	
 #endif // CONFIG_STA_SUPPORT //
 #ifdef RT2860
+#if defined(CONFIG_STA_SUPPORT) || defined(RT2860)
 	BOOLEAN		brc = FALSE;
+#endif // defined(CONFIG_STA_SUPPORT) || defined(RT2860) //
 #endif
-	UINT32		RxDmaIdx, RxCpuIdx;
+    UINT32		RxDmaIdx, RxCpuIdx;
 	DBGPRINT(RT_DEBUG_TRACE, ("%s ===> Lv= %d, TxCpuIdx = %d, TxDmaIdx = %d. RxCpuIdx = %d, RxDmaIdx = %d.\n", 
 								__FUNCTION__, Level,pAd->TxRing[0].TxCpuIdx, pAd->TxRing[0].TxDmaIdx, pAd->RxRing.RxCpuIdx, pAd->RxRing.RxDmaIdx));
 
-	if (pAd->OpMode == OPMODE_AP && Level==DOT11POWERSAVE)
+	if ((pAd->OpMode == OPMODE_AP) && (Level == DOT11POWERSAVE))
 		return FALSE;
 
 	if (Level == DOT11POWERSAVE)
 	{
-    	// Check Rx DMA busy status, if more than half is occupied, give up this radio off.
-		RTMP_IO_READ32(pAd, RX_DRX_IDX , &RxDmaIdx);
-		RTMP_IO_READ32(pAd, RX_CRX_IDX , &RxCpuIdx);
-		if ((RxDmaIdx > RxCpuIdx) && ((RxDmaIdx - RxCpuIdx) > RX_RING_SIZE/3))
-		{
-			DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return1. RxDmaIdx = %d ,  RxCpuIdx = %d. \n", RxDmaIdx, RxCpuIdx));
-			return FALSE;
-		}
-		else if ((RxCpuIdx >= RxDmaIdx) && ((RxCpuIdx - RxDmaIdx) < RX_RING_SIZE/3))
-		{
-			DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return2.  RxCpuIdx = %d. RxDmaIdx = %d ,  \n", RxCpuIdx, RxDmaIdx));
-			return FALSE;
-		}
+    // Check Rx DMA busy status, if more than half is occupied, give up this radio off.
+	RTMP_IO_READ32(pAd, RX_DRX_IDX , &RxDmaIdx);
+	RTMP_IO_READ32(pAd, RX_CRX_IDX , &RxCpuIdx);
+	if ((RxDmaIdx > RxCpuIdx) && ((RxDmaIdx - RxCpuIdx) > RX_RING_SIZE/3))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return1. RxDmaIdx = %d ,  RxCpuIdx = %d. \n", RxDmaIdx, RxCpuIdx));
+		return FALSE;
 	}
+	else if ((RxCpuIdx >= RxDmaIdx) && ((RxCpuIdx - RxDmaIdx) < RX_RING_SIZE/3))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("AsicRadioOff ===> return2.  RxCpuIdx = %d. RxDmaIdx = %d ,  \n", RxCpuIdx, RxDmaIdx));
+		return FALSE;
+	}
+	}
+
     // Once go into this function, disable tx because don't want too many packets in queue to prevent HW stops.
 	//pAd->bPCIclkOffDisableTx = TRUE;
 #ifdef CONFIG_STA_SUPPORT
@@ -1898,16 +1899,15 @@ BOOLEAN RT28xxPciAsicRadioOff(
 	if (Level != RTMP_HALT)
 	{
 		// Change Interrupt bitmask.
-    	// When PCI clock is off, don't want to service interrupt.
-		RTMP_IO_WRITE32(pAd, INT_MASK_CSR, AutoWakeupInt);
+    // When PCI clock is off, don't want to service interrupt.
+	RTMP_IO_WRITE32(pAd, INT_MASK_CSR, AutoWakeupInt);
 	}
 	else
 	{
 		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE))
-			RTMP_ASIC_INTERRUPT_DISABLE(pAd);
+		RTMP_ASIC_INTERRUPT_DISABLE(pAd);
 	}
 
-    
 	RTMP_IO_WRITE32(pAd, RX_CRX_IDX, pAd->RxRing.RxCpuIdx);
 	//  2. Send Sleep command 
 	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_STATUS, 0xffffffff);
@@ -2104,7 +2104,7 @@ VOID RT28xxPciMlmeRadioOFF(
     
     if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF))
     	return;
-
+    
     DBGPRINT(RT_DEBUG_TRACE,("%s===>\n", __FUNCTION__));
 
 	// Set Radio off flag
@@ -2120,9 +2120,10 @@ VOID RT28xxPciMlmeRadioOFF(
 			RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS);
     	}
 
-#ifdef PCIE_PS_SUPPORT
+#ifdef PCIE_PS_SUPPORT		
 		// If during power safe mode.
-		if (pAd->StaCfg.bRadio == TRUE)
+		if ((pAd->StaCfg.bRadio == TRUE)
+			&& (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_ADVANCE_POWER_SAVE_PCIE_DEVICE)&&pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
 		{
 			DBGPRINT(RT_DEBUG_TRACE,("-->MlmeRadioOff() return on bRadio == TRUE; \n"));
 			return;
@@ -2130,8 +2131,7 @@ VOID RT28xxPciMlmeRadioOFF(
 #endif // PCIE_PS_SUPPORT //
 
 		// Always radio on since the NIC needs to set the MCU command (LED_RADIO_OFF).
-		if (IDLE_ON(pAd) &&
-			(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF)))
+		if (IDLE_ON(pAd) && (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF)))
 		{
 			RT28xxPciAsicRadioOn(pAd, GUI_IDLE_POWER_SAVE);
 		}
@@ -2182,16 +2182,15 @@ if (pAd->OpMode == OPMODE_STA&&
 else 
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
-
 #ifdef RTMP_PCI_SUPPORT
 	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
-	{
+{
 		brc=RT28xxPciAsicRadioOff(pAd, GUIRADIO_OFF, 0);
-		if (brc==FALSE)
-		{
-			DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
-		}
+	if (brc==FALSE)
+	{
+		DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
 	}
+}
 #endif // RTMP_PCI_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
@@ -2214,7 +2213,7 @@ else
 		RTMP_IO_WRITE32(pAd, PWR_PIN_CFG, 0);
 		
 		// TX_PIN_CFG => value = 0x0 => 20mA
-		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, 0x00010000);
+		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, 0);
 
 		if (pAd->CommonCfg.BBPCurrentBW == BW_40)
 		{	

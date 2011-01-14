@@ -37,14 +37,13 @@ extern UCHAR	RALINK_OUI[];
 extern UCHAR	BROADCOM_OUI[];
 extern UCHAR    WPS_OUI[];
 
-#ifdef WSC_AP_SUPPORT
 typedef struct wsc_ie_probreq_data
 {
 	UCHAR	ssid[32];
 	UCHAR	macAddr[6];
 	UCHAR	data[2];
 } WSC_IE_PROBREQ_DATA;
-#endif // WSC_AP_SUPPORT //
+
 /* 
     ==========================================================================
     Description:
@@ -598,26 +597,6 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
             // Wifi WMM use the same IE vale, need to parse that too
             // case IE_WPA:
             case IE_VENDOR_SPECIFIC:
-                // Check Broadcom/Atheros 802.11n OUI version, for HT Capability IE. 
-                // This HT IE is before IEEE draft set HT IE value.2006-09-28 by Jan. 
-                /*if (NdisEqualMemory(pEid->Octet, BROADCOM_OUI, 3) && (pEid->Len >= 4))
-                {
-                	if ((pEid->Octet[3] == OUI_BROADCOM_HT) && (pEid->Len >= 30))
-            		{
-				{
-					NdisMoveMemory(pHtCapability, &pEid->Octet[4], sizeof(HT_CAPABILITY_IE));
-					*pHtCapabilityLen = SIZE_HT_CAP_IE;	// Nnow we only support 26 bytes.
-				}
-         		}
-                	if ((pEid->Octet[3] == OUI_BROADCOM_HT) && (pEid->Len >= 26))
-            		{
-				{
-					NdisMoveMemory(AddHtInfo, &pEid->Octet[4], sizeof(ADD_HT_INFO_IE));
-					*AddHtInfoLen = SIZE_ADD_HT_INFO_IE;	// Nnow we only support 26 bytes.
-				}
-         		}
-                }
-				*/
                 // Check the OUI version, filter out non-standard usage
                 if (NdisEqualMemory(pEid->Octet, RALINK_OUI, 3) && (pEid->Len == 7))
                 {
@@ -811,11 +790,6 @@ BOOLEAN PeerBeaconAndProbeRspSanity(
                     pQbssLoad->ChannelUtilization = pEid->Octet[2];
                     pQbssLoad->RemainingAdmissionControl = pEid->Octet[3] + pEid->Octet[4] * 256;
 
-#ifdef WMM_ACM_SUPPORT
-					ACMP_BandwidthInfoSet(pAd, pQbssLoad->StaNum,
-											pQbssLoad->ChannelUtilization,
-											pQbssLoad->RemainingAdmissionControl);
-#endif // WMM_ACM_SUPPORT //
 					// Copy to pVIE
                     Ptr = (PUCHAR) pVIE;
                     NdisMoveMemory(Ptr + *LengthVIE, &pEid->Eid, pEid->Len + 2);
@@ -1153,7 +1127,7 @@ BOOLEAN MlmeAuthReqSanity(
     {
 #ifdef CONFIG_STA_SUPPORT
 #ifdef WSC_INCLUDED
-		if (pAd->StaCfg.WscControl.bWscTrigger && pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE)
+		if (pAd->StaCfg.WscControl.bWscTrigger && (pAd->StaCfg.WscControl.WscConfMode != WSC_DISABLE))
 			*pAlg = AUTH_MODE_OPEN;
 #endif // WSC_INCLUDED //
 #endif // // CONFIG_STA_SUPPORT //
@@ -1636,13 +1610,14 @@ BOOLEAN PeerProbeReqSanity(
     UCHAR		*Ptr;
     UCHAR		eid =0, eid_len = 0, *eid_data;
 #ifdef CONFIG_AP_SUPPORT
-    UCHAR       apidx = MAIN_MBSSID;
+    UCHAR       apidx;
 	UCHAR       Addr1[MAC_ADDR_LEN];
 #endif // CONFIG_AP_SUPPORT //
 	UINT		total_ie_len = 0;	
-#ifdef WSC_INCLUDED
-	UINT		WpsOui = 0;
-#endif // WSC_INCLUDED //
+
+#ifdef CONFIG_AP_SUPPORT
+	apidx = MAIN_MBSSID;
+#endif // CONFIG_AP_SUPPORT //
 
     // to prevent caller from using garbage output value
     *SsidLen = 0;
@@ -1658,6 +1633,10 @@ BOOLEAN PeerProbeReqSanity(
     *SsidLen = Fr->Octet[1];
     NdisMoveMemory(Ssid, &Fr->Octet[2], *SsidLen);
 	
+#ifdef CONFIG_AP_SUPPORT
+	COPY_MAC_ADDR(Addr1, &Fr->Hdr.Addr1);
+#endif // CONFIG_AP_SUPPORT //
+
     Ptr = Fr->Octet;
     eid = Ptr[0];
     eid_len = Ptr[1];
@@ -1681,18 +1660,20 @@ BOOLEAN PeerProbeReqSanity(
                 }
 #endif // RSSI_FEEDBACK //
 
-#ifdef WSC_INCLUDED
-				NdisMoveMemory(&WpsOui, eid_data, sizeof(UINT));
-                if (be2cpu32(WpsOui) == WSC_OUI)
+                if (NdisEqualMemory(eid_data, WPS_OUI, 4))
                 {
-
-
 #ifdef CONFIG_AP_SUPPORT
+#endif // CONFIG_AP_SUPPORT //
+
+#ifdef WSC_INCLUDED
+
                     /*if (pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE)*/
-    				{	    				
+    				{	
+#ifdef CONFIG_AP_SUPPORT    				
     					int bufLen = 0;
     					PUCHAR pBuf = NULL;
     					WSC_IE_PROBREQ_DATA	*pprobreq = NULL;
+#endif // CONFIG_AP_SUPPORT // 
 						WSC_IE				*pWscIE;
 						PUCHAR				pData = NULL;
 						INT					Len = 0;
@@ -1727,6 +1708,7 @@ BOOLEAN PeerProbeReqSanity(
 							Len   -= (be2cpu16(pWscIE->Length) + 4);
 						}
 
+#ifdef CONFIG_AP_SUPPORT
 						for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
 						{
 							if (NdisEqualMemory(Addr1, pAd->ApCfg.MBSSID[apidx].Bssid, MAC_ADDR_LEN))
@@ -1764,11 +1746,11 @@ BOOLEAN PeerProbeReqSanity(
 								kfree(pBuf);
 						}
                 		break;
-    				}
 #endif // CONFIG_AP_SUPPORT //
-                    break;
-                }                
+    				}
 #endif // WSC_INCLUDED //
+                    break;
+                }
 
             default:
                 break;

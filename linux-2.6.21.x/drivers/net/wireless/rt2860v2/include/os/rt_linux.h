@@ -119,7 +119,7 @@
 #define AP_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/rf.bin"
 #define AP_PROFILE_PATH			"/etc/Wireless/RT2860AP/RT2860AP.dat"
 #define AP_NIC_DEVICE_NAME		"RT2860AP"
-#define AP_DRIVER_VERSION		"2.4.3.3"
+#define AP_DRIVER_VERSION		"2.5.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860AP/RT2860APCard.dat"
 #endif // MULTIPLE_CARD_SUPPORT //
@@ -138,7 +138,7 @@
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
 #define STA_PROFILE_PATH		"/etc/Wireless/RT2860STA/RT2860STA.dat"
-#define STA_DRIVER_VERSION		"2.3.3.3"
+#define STA_DRIVER_VERSION		"2.4.0.0"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860STA/RT2860STACard.dat"
 #endif // MULTIPLE_CARD_SUPPORT //
@@ -299,7 +299,7 @@ typedef struct _RTMP_OS_FS_INFO_
 	mm_segment_t	fs;
 }RTMP_OS_FS_INFO;
 
-#define IS_FILE_OPEN_ERR(_fd) 	IS_ERR((_fd))
+#define IS_FILE_OPEN_ERR(_fd) 	((_fd == NULL) || IS_ERR((_fd)))
 
 
 /***********************************************************************************
@@ -506,6 +506,7 @@ typedef	pid_t	THREAD_PID;
 #define KILL_THREAD_PID(_A, _B, _C)	kill_proc((_A), (_B), (_C))
 #endif
 
+typedef int (*cast_fn)(void *);
 typedef INT (*RTMP_OS_TASK_CALLBACK)(ULONG);
 typedef struct tasklet_struct  RTMP_NET_TASK_STRUCT;
 typedef struct tasklet_struct  *PRTMP_NET_TASK_STRUCT;
@@ -584,20 +585,6 @@ struct os_cookie {
 #endif // RTMP_MAC_PCI //
 
 
-#ifdef WORKQUEUE_BH
-	UINT32		     pAd_va;
-
-	struct work_struct   rx_done_work;
-	struct work_struct   mgmt_dma_done_work;
-	struct work_struct   ac0_dma_done_work;
-	struct work_struct   ac1_dma_done_work;
-	struct work_struct   ac2_dma_done_work;
-	struct work_struct   ac3_dma_done_work;
-	struct work_struct   hcca_dma_done_work;
-	
-	struct work_struct   tbtt_work;
-
-#else
 	RTMP_NET_TASK_STRUCT rx_done_task;
 	RTMP_NET_TASK_STRUCT mgmt_dma_done_task;
 	RTMP_NET_TASK_STRUCT ac0_dma_done_task;
@@ -609,51 +596,29 @@ struct os_cookie {
 	RTMP_NET_TASK_STRUCT ac3_dma_done_task;
 	RTMP_NET_TASK_STRUCT hcca_dma_done_task;
 	RTMP_NET_TASK_STRUCT tbtt_task;
-#endif // WORKQUEUE_BH //
 
 #ifdef RTMP_MAC_PCI
-#ifdef WORKQUEUE_BH
-	struct work_struct   fifo_statistic_full_work;
-#else
 	RTMP_NET_TASK_STRUCT fifo_statistic_full_task;
-#endif // WORKQUEUE_BH //
 #endif // RTMP_MAC_PCI //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
-#ifdef WORKQUEUE_BH
-	struct work_struct   uapsd_eosp_sent_work;
-#else
 	RTMP_NET_TASK_STRUCT uapsd_eosp_sent_task;
-#endif // WORKQUEUE_BH //
 #endif // UAPSD_AP_SUPPORT //
 
 #ifdef DFS_SUPPORT
 #ifdef DFS_SOFTWARE_SUPPORT
-#ifdef WORKQUEUE_BH
-	struct work_struct   pulse_radar_detect_work;
-	struct work_struct   width_radar_detect_work;
-#else
 	RTMP_NET_TASK_STRUCT pulse_radar_detect_task;
 	RTMP_NET_TASK_STRUCT width_radar_detect_task;
-#endif // WORKQUEUE_BH //
 #endif // DFS_SOFTWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 
 #ifdef CARRIER_DETECTION_SUPPORT
-#ifdef WORKQUEUE_BH
-	struct work_struct   carrier_sense_work;
-#else
 	RTMP_NET_TASK_STRUCT carrier_sense_task;
-#endif // WORKQUEUE_BH //
 #endif // CARRIER_DETECTION_SUPPORT //
 
 #ifdef DFS_HARDWARE_SUPPORT
-#ifdef WORKQUEUE_BH
-	struct work_struct  	dfs_work;
-#else
 	struct tasklet_struct	dfs_task;
-#endif // WORKQUEUE_BH //
 #endif // DFS_HARDWARE_SUPPORT //
 
 #endif // CONFIG_AP_SUPPORT //
@@ -812,25 +777,25 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #if defined(INF_TWINPASS) || defined(INF_DANUBE) || defined(INF_AR9) || defined(IKANOS_VX_1X0)
 #define RTMP_IO_FORCE_READ32(_A, _R, _pV)									\
 {																	\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
-	(*(_pV) = SWAP32(*((UINT32 *)(_pV))));                           \
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
+	(*_pV = SWAP32(*((UINT32 *)(_pV))));                           \
 }
 
 #define RTMP_IO_READ32(_A, _R, _pV)									\
 {																	\
     if ((_A)->bPCIclkOff == FALSE)                                      \
     {                                                                   \
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
-	(*(_pV) = SWAP32(*((UINT32 *)(_pV))));                           \
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
+	(*_pV = SWAP32(*((UINT32 *)(_pV))));                           \
     }                                                                   \
 }
 
 #define RTMP_IO_READ8(_A, _R, _pV)									\
 {																	\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
-	(*(_pV) = readb((void *)((_A)->CSRBaseAddress + (_R))));			\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+	(*_pV = readb((void *)((_A)->CSRBaseAddress + (_R))));			\
 }
 
 #define _RTMP_IO_WRITE32(_A, _R, _V)									\
@@ -844,12 +809,28 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
     }                                                                   \
 }
 
+#ifdef INF_VR9
+#define RTMP_IO_WRITE8(_A, _R, _V)            \
+{                    \
+        ULONG Val;                \
+        UCHAR _i;                \
+	UINT32 _Val;		\
+        _i = ((_R) & 0x3);             \
+        Val = readl((void *)((_A)->CSRBaseAddress + ((_R) - _i)));   \
+	Val = SWAP32(Val);				\
+        Val = Val & (~(0x000000ff << ((_i)*8)));         \
+        Val = Val | ((ULONG)(_V) << ((_i)*8));         \
+	Val = SWAP32(Val);				\
+        writel((Val), (void *)((_A)->CSRBaseAddress + ((_R) - _i)));    \
+}
+#else
 #define RTMP_IO_WRITE8(_A, _R, _V)									\
 {																	\
 	UINT	Val;													\
 	Val = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0));		\
 	writeb((_V), (PUCHAR)((_A)->CSRBaseAddress + (_R)));			\
 }
+#endif
 
 #define RTMP_IO_WRITE16(_A, _R, _V)									\
 {																	\
@@ -858,28 +839,33 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 	writew(SWAP16((_V)), (PUSHORT)((_A)->CSRBaseAddress + (_R)));	\
 }
 #else
+#define RTMP_IO_FORCE_READ32(_A, _R, _pV)								\
+{																\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
+}
 
 #define RTMP_IO_READ32(_A, _R, _pV)								\
 {																\
     if ((_A)->bPCIclkOff == FALSE)                                  \
     {                                                               \
-		(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
-		(*(_pV) = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
+		(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+		(*_pV = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
     }                                                               \
     else															\
-		*(_pV) = 0;													\
+		*_pV = 0;													\
 }
 
 #define RTMP_IO_FORCE_READ32(_A, _R, _pV)							\
 {																	\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));		\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + (_R))));			\
 }
 
 #define RTMP_IO_READ8(_A, _R, _pV)								\
 {																\
-	(*(_pV) = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));			\
-	(*(_pV) = readb((void *)((_A)->CSRBaseAddress + (_R))));				\
+	(*_pV = readl((void *)((_A)->CSRBaseAddress + MAC_CSR0)));			\
+	(*_pV = readb((void *)((_A)->CSRBaseAddress + (_R))));				\
 }
 
 #define _RTMP_IO_WRITE32(_A, _R, _V)												\
@@ -903,7 +889,7 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 // This is actually system IO
 #define RTMP_SYS_IO_READ32(_R, _pV)		\
 {										\
-	(*(_pV) = readl((void *)(_R)));			\
+	(*_pV = readl((void *)(_R)));			\
 }
 
 #define RTMP_SYS_IO_WRITE32(_R, _V)		\
@@ -1206,6 +1192,8 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #define RTMP_SET_PACKET_CLEAR_EAP_FRAME(_p, _flg)   (RTPKT_TO_OSPKT(_p)->cb[CB_OFF+12] = _flg)
 #define RTMP_GET_PACKET_CLEAR_EAP_FRAME(_p)         (RTPKT_TO_OSPKT(_p)->cb[CB_OFF+12])
 
+
+#define MAX_PACKETS_IN_QUEUE				(512)
 
 #ifdef WMM_ACM_SUPPORT
 /* total [CB_OFF+15] ~ [CB_OFF+19] 5B */

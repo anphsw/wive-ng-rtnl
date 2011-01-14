@@ -203,8 +203,8 @@
 14) Drop unused, dead and potentional buggy code<br>
 15) Full cycle of retraining flash on command fs cleanall<br>
 16) Increase kernel padded size. Try fix crash mapping<br>
-17) Update AP driver from 2.3.0.0 to 2.4.3.3 version<br>
-18) Update STA driver from 2.2.0.0 to 2.3.3.3 version<br>
+17) Update AP driver from 2.3.0.0 to 2.5.0.0 version<br>
+18) Update STA driver from 2.2.0.0 to 2.4.0.0 version<br>
 19) Update HW_NAT kernel code and add hw_nat userspace utils<br>
 20) Add LCP echo adaptive options on VPN page. Default on<br>
 21) Use opensource toolchain at 4.2.4 gcc for build all coe in project. No binary from Ralink needed<br>

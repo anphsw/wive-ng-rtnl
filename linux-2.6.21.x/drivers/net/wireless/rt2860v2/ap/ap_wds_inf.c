@@ -33,7 +33,7 @@
 #include "rt_config.h"
 
 static struct net_device_stats *RT28xx_get_wds_ether_stats(
-    IN  struct net_device *net_dev);
+    IN  PNET_DEV net_dev);
 
 
 // Register WDS interface
@@ -226,7 +226,7 @@ INT WdsVirtualIF_ioctl(
     ========================================================================
 */
 static struct net_device_stats *RT28xx_get_wds_ether_stats(
-    IN  struct net_device *net_dev)
+    IN PNET_DEV net_dev)
 {
     RTMP_ADAPTER *pAd = NULL;
 	INT WDS_apidx = 0,index;

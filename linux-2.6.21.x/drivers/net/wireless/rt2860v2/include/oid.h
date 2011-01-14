@@ -215,8 +215,8 @@
 #define	RT_OID_802_11_SNR_2							0x067A
 
 #ifdef RTMP_RBUS_SUPPORT
-#define	RT_OID_802_11_STREAM_SNR					0x067B
-#define	RT_OID_802_11_QUERY_TXBF_TABLE				0x067C
+#define	RT_OID_802_11_STREAM_SNR					0x064b
+#define	RT_OID_802_11_QUERY_TXBF_TABLE				0x0650
 #define OID_802_11_QUERY_WirelessMode				0x0718
 #endif // RTMP_RBUS_SUPPORT //
 
@@ -952,6 +952,7 @@ enum {
 	WSC_STOP = 15,
 	WSC_GEN_PIN_CODE = 16,
 	WSC_AP_BAND = 17,
+	WSC_SET_BSSID = 18,
 };
 #endif // WSC_STA_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
@@ -1098,7 +1099,7 @@ enum {
 typedef union  _HTTRANSMIT_SETTING {
 #ifdef RT_BIG_ENDIAN
 	struct	{
-	USHORT		MODE:2;	// Use definition MODE_xxx.   
+	USHORT		MODE:2;	// Use definition MODE_xxx.  
 	USHORT		iTxBF:1;
 	USHORT		rsv:1;
 	USHORT		eTxBF:1;
@@ -1144,6 +1145,21 @@ typedef enum _RT_802_11_PHY_MODE {
 	PHY_11N_5G,			// 11n-only with 5G band		11
 #endif // DOT11_N_SUPPORT //
 } RT_802_11_PHY_MODE;
+
+#ifdef DOT11_N_SUPPORT
+#define PHY_MODE_IS_5G_BAND(__Mode)	\
+	((__Mode == PHY_11A) ||			\
+	(__Mode == PHY_11ABG_MIXED) ||	\
+	(__Mode == PHY_11ABGN_MIXED) ||	\
+	(__Mode == PHY_11AN_MIXED) ||	\
+	(__Mode == PHY_11AGN_MIXED) ||	\
+	(__Mode == PHY_11N_5G))
+#else
+
+#define PHY_MODE_IS_5G_BAND(__Mode)	\
+	((__Mode == PHY_11A) ||			\
+	(__Mode == PHY_11ABG_MIXED))
+#endif // DOT11_N_SUPPORT //
 
 
 // put all proprietery for-query objects here to reduce # of Query_OID
@@ -1195,10 +1211,8 @@ typedef struct _RT_802_11_MAC_ENTRY {
     MACHTTRANSMIT_SETTING	TxRate;
 #ifdef RTMP_RBUS_SUPPORT
 	UINT32		LastRxRate;
-	SHORT		StreamSnr[3];				// BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed
-	SHORT		SoundingRespSnr[3];			// SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed
-//	SHORT		TxPER;						// TX PER over the last second. Percent
-//	SHORT		reserved;
+	INT32		StreamSnr[3];
+	INT32		SoundingRespSnr[3];
 #endif // RTMP_RBUS_SUPPORT //
 } RT_802_11_MAC_ENTRY, *PRT_802_11_MAC_ENTRY;
 
@@ -1209,26 +1223,6 @@ typedef struct _RT_802_11_MAC_TABLE {
 
 
 #ifdef DOT11_N_SUPPORT
-#ifdef TXBF_SUPPORT
-typedef
-struct {
-	ULONG			TxSuccessCount;
-	ULONG			TxRetryCount;
-	ULONG			TxFailCount;
-	ULONG			ETxSuccessCount;
-	ULONG			ETxRetryCount;
-	ULONG			ETxFailCount;
-	ULONG			ITxSuccessCount;
-	ULONG			ITxRetryCount;
-	ULONG			ITxFailCount;
-} RT_COUNTER_TXBF;
-
-typedef
-struct {
-	ULONG			Num;
-	RT_COUNTER_TXBF	Entry[MAX_NUMBER_OF_MAC];
-} RT_802_11_TXBF_TABLE;
-#endif // TXBF_SUPPORT //
 #endif // DOT11_N_SUPPORT //
 
 

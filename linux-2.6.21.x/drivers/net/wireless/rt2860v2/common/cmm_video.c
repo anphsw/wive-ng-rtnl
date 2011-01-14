@@ -37,17 +37,17 @@ void VideoTurbineUpdate(
 {
 	if (UpdateFromGlobal == TRUE) 
 	{
-		pAd->VideoTurbine.Enable = GLOBAL_AP_VIDEO_CONFIG.Enable;
-		pAd->VideoTurbine.ClassifierEnable = GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable;
-		pAd->VideoTurbine.HighTxMode = GLOBAL_AP_VIDEO_CONFIG.HighTxMode;
-		pAd->VideoTurbine.TxPwr = GLOBAL_AP_VIDEO_CONFIG.TxPwr;
-		pAd->VideoTurbine.VideoMCSEnable = GLOBAL_AP_VIDEO_CONFIG.VideoMCSEnable;
-		pAd->VideoTurbine.VideoMCS = GLOBAL_AP_VIDEO_CONFIG.VideoMCS;
-		pAd->VideoTurbine.TxBASize = GLOBAL_AP_VIDEO_CONFIG.TxBASize;
-		pAd->VideoTurbine.TxLifeTimeMode = GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode;
-		pAd->VideoTurbine.TxLifeTime = GLOBAL_AP_VIDEO_CONFIG.TxLifeTime;
-		pAd->VideoTurbine.TxRetryLimit = GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit;
-	}
+	pAd->VideoTurbine.Enable = GLOBAL_AP_VIDEO_CONFIG.Enable;
+	pAd->VideoTurbine.ClassifierEnable = GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable;
+	pAd->VideoTurbine.HighTxMode = GLOBAL_AP_VIDEO_CONFIG.HighTxMode;
+	pAd->VideoTurbine.TxPwr = GLOBAL_AP_VIDEO_CONFIG.TxPwr;
+	pAd->VideoTurbine.VideoMCSEnable = GLOBAL_AP_VIDEO_CONFIG.VideoMCSEnable;
+	pAd->VideoTurbine.VideoMCS = GLOBAL_AP_VIDEO_CONFIG.VideoMCS;
+	pAd->VideoTurbine.TxBASize = GLOBAL_AP_VIDEO_CONFIG.TxBASize;
+	pAd->VideoTurbine.TxLifeTimeMode = GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode;
+	pAd->VideoTurbine.TxLifeTime = GLOBAL_AP_VIDEO_CONFIG.TxLifeTime;
+	pAd->VideoTurbine.TxRetryLimit = GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit;
+}
 }
 
 VOID VideoTurbineDynamicTune(
@@ -55,44 +55,24 @@ VOID VideoTurbineDynamicTune(
 {
 	if (pAd->VideoTurbine.Enable == TRUE) 
 	{
-		UINT32 MacReg = 0;
+			UINT32 MacReg = 0;
 
-#ifdef RT3883
-		RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
-		MacReg = 0x0f1f0f0f;
-		RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
-
-		RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
-		MacReg = 0x06000003;
-		RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
-#else
 		/* Tx retry limit = 2F,1F */
 		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
 		MacReg &= 0xFFFF0000;
-		MacReg |= GetAsicVideoRetry(pAd);
+			MacReg |= GetAsicVideoRetry(pAd);
 		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
-#endif // RT3883 //
 
 		pAd->VideoTurbine.TxBASize = GetAsicVideoTxBA(pAd);
 	}
 	else 
 	{
-		UINT32 MacReg = 0;
-
-#ifdef RT3883
-		RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
-		MacReg = 0x07070707;
-		RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
-	
-		RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
-		MacReg = 0x0;
-		RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
-#endif // RT3883 //
+			UINT32 MacReg = 0;
 
 		/* Default Tx retry limit = 1F,0F */
 		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
 		MacReg &= 0xFFFF0000;
-		MacReg |= GetAsicDefaultRetry(pAd);
+			MacReg |= GetAsicDefaultRetry(pAd);
 		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
 
 		pAd->VideoTurbine.TxBASize = GetAsicDefaultTxBA(pAd);

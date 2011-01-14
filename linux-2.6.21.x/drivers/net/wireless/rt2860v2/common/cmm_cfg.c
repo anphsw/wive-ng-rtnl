@@ -51,9 +51,7 @@ INT ComputeChecksum(
 
 UINT GenerateWpsPinCode(
 	IN	PRTMP_ADAPTER	pAd,
-#ifdef CONFIG_AP_SUPPORT
     IN  BOOLEAN         bFromApcli,	
-#endif // CONFIG_AP_SUPPORT //	
 	IN	UCHAR			apidx)
 {
 	UCHAR	macAddr[MAC_ADDR_LEN];
@@ -162,7 +160,8 @@ INT RT_CfgSetCountryRegion(
 	}
 
 	if((region >= 0) && 
-	   (((band == BAND_24G) && ((region <= REGION_MAXIMUM_BG_BAND) || (region == REGION_31_BG_BAND))) || 
+	   (((band == BAND_24G) &&((region <= REGION_MAXIMUM_BG_BAND) || 
+	   (region == REGION_31_BG_BAND) || (region == REGION_32_BG_BAND) || (region == REGION_33_BG_BAND) )) || 
 	    ((band == BAND_5G) && (region <= REGION_MAXIMUM_A_BAND) ))
 	  )
 	{
@@ -198,8 +197,21 @@ INT RT_CfgSetWirelessMode(
 	if (!RTMP_TEST_MORE_FLAG(pAd, fRTMP_ADAPTER_DISABLE_DOT_11N))
 		MaxPhyMode = PHY_11N_5G;
 #endif // DOT11_N_SUPPORT //
-		
+
 	WirelessMode = simple_strtol(arg, 0, 10);
+
+	/* check if chip support 5G band when WirelessMode is 5G band */
+	if (PHY_MODE_IS_5G_BAND(WirelessMode))
+	{
+		if (!RFIC_IS_5G_BAND(pAd))
+		{
+			DBGPRINT(RT_DEBUG_ERROR,
+					("phy mode> Error! The chip does not support 5G band %d!\n",
+					pAd->RfIcType));
+			return FALSE;
+		}
+	}
+
 	if (WirelessMode <= MaxPhyMode)
 	{
 		pAd->CommonCfg.PhyMode = WirelessMode;
@@ -210,6 +222,261 @@ INT RT_CfgSetWirelessMode(
 	return FALSE;
 	
 }
+
+
+/* maybe can be moved to GPL code, ap_mbss.c, but the code will be open */
+#ifdef CONFIG_AP_SUPPORT
+#ifdef MBSS_SUPPORT
+BOOLEAN RT_CfgMbssWirelessModeSameBand(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			WirelessModeNew)
+{
+	BOOLEAN FlgIsOldMode24G = TRUE;
+	BOOLEAN FlgIsNewMode24G = TRUE;
+
+
+	if ((pAd->CommonCfg.PhyMode == PHY_11A) ||
+		(pAd->CommonCfg.PhyMode == PHY_11AN_MIXED) ||
+		(pAd->CommonCfg.PhyMode == PHY_11N_5G))
+	{
+		FlgIsOldMode24G = FALSE;
+	}
+
+	if ((WirelessModeNew == PHY_11A) ||
+		(WirelessModeNew == PHY_11AN_MIXED) ||
+		(WirelessModeNew == PHY_11N_5G))
+	{
+		FlgIsNewMode24G = FALSE;
+	}
+
+	DBGPRINT(RT_DEBUG_TRACE,
+			("mbss> Old phy mode %d, New phy mode %d!\n",
+			pAd->CommonCfg.PhyMode, WirelessModeNew));
+
+	if (FlgIsOldMode24G != FlgIsNewMode24G)
+		return FALSE; /* different phy band */
+
+	return TRUE; /* same phy band */
+}
+
+
+UCHAR RT_CfgMbssWirelessModeMaxGet(
+	IN	PRTMP_ADAPTER	pAd)
+{
+	MULTISSID_STRUCT *pMbss;
+	UCHAR MaxPhyMode = PHY_11G, WirelessMode;
+	UINT32 IdBss;
+	BOOLEAN IsAnyB = FALSE; /* any b mode exist */
+	BOOLEAN IsAnyG = FALSE; /* any g mode exist */
+	BOOLEAN IsAnyA = FALSE; /* any a mode exist */
+	BOOLEAN IsAny24N = FALSE; /* any n mode in 2.4G band exist */
+	BOOLEAN IsAny5N = FALSE; /* any n mode in 5G band exist */
+	BOOLEAN IsAny5 = FALSE; /* any 5G mode */
+
+
+#ifdef DOT11_N_SUPPORT
+	if (!RTMP_TEST_MORE_FLAG(pAd, fRTMP_ADAPTER_DISABLE_DOT_11N))
+		MaxPhyMode = PHY_11N_5G;
+#endif // DOT11_N_SUPPORT //
+
+	for(IdBss=0; IdBss<pAd->ApCfg.BssidNum; IdBss++)
+	{
+		pMbss = &pAd->ApCfg.MBSSID[IdBss];
+
+		/* check if the phy mode is out of range */
+		if (pMbss->PhyMode > MaxPhyMode)
+			pMbss->PhyMode = PHY_11BG_MIXED; /* default */
+
+		/* check if the phy mode is legal */
+		if (pMbss->PhyMode == PHY_11ABG_MIXED)
+			pMbss->PhyMode = PHY_11BG_MIXED;
+
+		if (pMbss->PhyMode == PHY_11ABGN_MIXED)
+			pMbss->PhyMode = PHY_11BGN_MIXED;
+
+		if (pMbss->PhyMode == PHY_11AGN_MIXED)
+			pMbss->PhyMode = PHY_11GN_MIXED;
+
+		/* record the legacy phy mode */
+		/*
+			Not use array to avoid the value of PHY_11B is changed in the future
+			If any code size problem, we can use array to replace if check.
+		*/
+		if (pMbss->PhyMode == PHY_11B)
+			IsAnyB = TRUE;
+
+		if (pMbss->PhyMode == PHY_11G)
+			IsAnyG = TRUE;
+
+		if (pMbss->PhyMode == PHY_11BG_MIXED)
+		{
+			IsAnyB = TRUE;
+			IsAnyG = TRUE;
+		}
+
+		if (pMbss->PhyMode == PHY_11A)
+		{
+			IsAnyA = TRUE;
+			IsAny5 = TRUE;
+		}
+
+#ifdef DOT11_N_SUPPORT
+		/* record the N phy mode */
+		if (pMbss->PhyMode == PHY_11N_5G)
+		{
+			IsAny5N = TRUE;
+			IsAny5 = TRUE;
+		}
+
+		if (pMbss->PhyMode == PHY_11AN_MIXED)
+		{
+			IsAnyA = TRUE;
+			IsAny5N = TRUE;
+			IsAny5 = TRUE;
+		}
+
+		if (pMbss->PhyMode == PHY_11N_2_4G)
+			IsAny24N = TRUE;
+
+		if (pMbss->PhyMode == PHY_11BGN_MIXED)
+		{
+			IsAnyB = TRUE;
+			IsAnyG = TRUE;
+			IsAny24N = TRUE;
+		}
+#endif // DOT11_N_SUPPORT //
+	}
+
+	DBGPRINT(RT_DEBUG_TRACE,
+			("mbss> b g a 2.4n 5n %d %d %d %d %d\n",
+			IsAnyB, IsAnyG, IsAnyA, IsAny24N, IsAny5N));
+
+	if (IsAny5 == 0)
+	{
+		if (IsAny24N == 0)
+		{
+			/* no N phy exists */
+			if ((IsAnyB == 1) && (IsAnyG == 1))
+				WirelessMode = PHY_11BG_MIXED; /* B & G phy exists */
+			else if (IsAnyG == 1)
+				WirelessMode = PHY_11G; /* no B phy exists */
+			else
+				WirelessMode = PHY_11B; /* no G phy exists */
+		}
+#ifdef DOT11_N_SUPPORT
+		else
+		{
+			/* N phy exists */
+			if ((IsAnyB == 1) && (IsAnyG == 1))
+				WirelessMode = PHY_11BGN_MIXED; /* B & G phy exists */
+			else if (IsAnyG == 1)
+				WirelessMode = PHY_11GN_MIXED; /* no B phy exists */
+			else
+				WirelessMode = PHY_11N_2_4G; /* no G phy exists */
+		}
+#endif // DOT11_N_SUPPORT //
+	}
+	else
+	{
+		if (IsAny5N == 0)
+		{
+			/* no N phy exists */
+			WirelessMode = PHY_11A; /* A phy exists */
+		}
+#ifdef DOT11_N_SUPPORT
+		else
+		{
+			/* N phy exists */
+			if (IsAnyA == 1)
+				WirelessMode = PHY_11AN_MIXED; /* A phy exists */
+			else
+				WirelessMode = PHY_11N_5G;
+		}
+#endif // DOT11_N_SUPPORT //
+	} /* End of if */
+
+	DBGPRINT(RT_DEBUG_TRACE, ("mbss> Get WirelessMode = %d\n", WirelessMode));
+	return WirelessMode;
+}
+
+
+/* 
+    ==========================================================================
+    Description:
+        Set Wireless Mode for MBSS
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+*/
+INT RT_CfgSetMbssWirelessMode(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg)
+{
+	UINT32	MaxPhyMode = PHY_11G;
+	UINT32	WirelessMode;
+	
+#ifdef DOT11_N_SUPPORT
+	if (!RTMP_TEST_MORE_FLAG(pAd, fRTMP_ADAPTER_DISABLE_DOT_11N))
+		MaxPhyMode = PHY_11N_5G;
+#endif // DOT11_N_SUPPORT //
+
+	WirelessMode = simple_strtol(arg, 0, 10);
+
+	if ((WirelessMode == PHY_11ABG_MIXED) ||
+		(WirelessMode == PHY_11ABGN_MIXED) ||
+		(WirelessMode == PHY_11AGN_MIXED))
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("mbss> Wrong phy mode for AP!\n"));
+		return FALSE;
+	}
+
+	/* check if chip support 5G band when WirelessMode is 5G band */
+	if (PHY_MODE_IS_5G_BAND(WirelessMode))
+	{
+		if (!RFIC_IS_5G_BAND(pAd))
+		{
+			DBGPRINT(RT_DEBUG_ERROR,
+					("phy mode> Error! The chip does not support 5G band!\n"));
+			return FALSE;
+		}
+	}
+
+	if (WirelessMode <= MaxPhyMode)
+	{
+		if (pAd->ApCfg.BssidNum > 1)
+		{
+			/* pAd->CommonCfg.PhyMode = maximum capability of all MBSS */
+			if (RT_CfgMbssWirelessModeSameBand(pAd, WirelessMode) == TRUE)
+			{
+				WirelessMode = RT_CfgMbssWirelessModeMaxGet(pAd);
+
+				DBGPRINT(RT_DEBUG_TRACE,
+						("mbss> Maximum phy mode = %d!\n", WirelessMode));
+			}
+			else
+			{
+				UINT32 IdBss;
+
+				/* replace all phy mode with the one with different band */
+				DBGPRINT(RT_DEBUG_TRACE,
+						("mbss> Different band with the current one!\n"));
+				DBGPRINT(RT_DEBUG_TRACE,
+						("mbss> Reset band of all BSS to the new one!\n"));
+
+				for(IdBss=0; IdBss<pAd->ApCfg.BssidNum; IdBss++)
+					pAd->ApCfg.MBSSID[IdBss].PhyMode = WirelessMode;
+			}
+		}
+
+		pAd->CommonCfg.PhyMode = WirelessMode;
+		pAd->CommonCfg.DesiredPhyMode = WirelessMode;
+		return TRUE;
+	}
+	
+	return FALSE;
+}
+#endif // MBSS_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
 
 
 INT RT_CfgSetShortSlot(

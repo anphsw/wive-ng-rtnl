@@ -23,6 +23,7 @@
 
 /* only for UAPSD_TIMING_RECORD */
 
+//#define UAPSD_CC_FUNC_PS_MGMT_TO_LEGACY	/* Allow to put PS man frame in legacy */
 //#define UAPSD_TIMING_RECORD_FUNC
 
 #define UAPSD_TIMING_RECORD_MAX				1000

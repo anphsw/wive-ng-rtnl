@@ -74,7 +74,7 @@ int rt2880_module_init(VOID)
 		goto err_out;
 	}
 
-	NdisZeroMemory(handle, sizeof(struct os_cookie));
+	memset(handle, 0, sizeof(struct os_cookie));
 
 	rv = RTMPAllocAdapterBlock(handle, &pAd);
 	if (rv != NDIS_STATUS_SUCCESS)
@@ -97,7 +97,7 @@ int rt2880_module_init(VOID)
 	// Here are the net_device structure with pci-bus specific parameters.
 	net_dev->irq = dev_irq;			// Interrupt IRQ number
 	net_dev->base_addr = csr_addr;		// Save CSR virtual address and irq to device structure
-	((POS_COOKIE)handle)->pci_dev = (struct pci_dev *)net_dev;
+	((POS_COOKIE)handle)->pci_dev = net_dev;
 
 #ifdef CONFIG_STA_SUPPORT
     pAd->StaCfg.OriDevType = net_dev->type;
@@ -116,7 +116,7 @@ int rt2880_module_init(VOID)
 
 	// due to we didn't have any hook point when do module remove, we use this static as our hook point.
 	rt2880_dev = net_dev;
-
+	
 	wl_proc_init();
 
 	DBGPRINT(RT_DEBUG_TRACE, ("%s: at CSR addr 0x%1lx, IRQ %d. \n", net_dev->name, (ULONG)csr_addr, net_dev->irq));
@@ -157,8 +157,8 @@ VOID rt2880_module_exit(VOID)
 	if (pAd != NULL)
 	{
 #ifdef WLAN_LED
-	//extern RALINK_TIMER_STRUCT LedCheckTimer;
-	//extern unsigned char CheckTimerEbl;
+	extern RALINK_TIMER_STRUCT LedCheckTimer;
+	extern unsigned char CheckTimerEbl;
 	{
 		BOOLEAN  Cancelled;
 		RTMPCancelTimer(&LedCheckTimer, &Cancelled);
@@ -178,9 +178,9 @@ VOID rt2880_module_exit(VOID)
 	RtmpOSNetDevFree(net_dev);
 	
 #if defined(CONFIG_RA_CLASSIFIER)&&(!defined(CONFIG_RA_CLASSIFIER_MODULE)) 	 
-	proc_ptr = proc_ralink_wl_video; 	 
-	if(ra_classifier_release_func!=NULL) 	 
-		ra_classifier_release_func(); 	 
+    proc_ptr = proc_ralink_wl_video; 	 
+    if(ra_classifier_release_func!=NULL) 	 
+	    ra_classifier_release_func(); 	 
 #endif
 
 	wl_proc_exit();

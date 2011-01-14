@@ -1385,6 +1385,24 @@ static int CFG80211_Disconnect(
 #endif // CONFIG_STA_SUPPORT //
 #endif // LINUX_VERSION_CODE //
 
+#ifdef RFKILL_SUPPORT
+static int CFG80211_RFKill(
+	IN struct wiphy						*pWiphy)
+{
+	PRTMP_ADAPTER	pAd;
+	UINT32			data = 0;
+	BOOLEAN			active;
+
+	MAC80211_PAD_GET(pAd, pWiphy);
+
+	// Read GPIO pin2 as Hardware controlled radio state
+	RTMP_IO_READ32(pAd, GPIO_CTRL_CFG, &data);
+	active = !!(data & 0x04);
+	wiphy_rfkill_set_hw_state(pWiphy, !active);
+	
+	return active;
+}
+#endif // RFKILL_SUPPORT //
 
 static struct cfg80211_ops CFG80211_Ops = {
 	.set_channel			= CFG80211_OpsSetChannel,
@@ -1419,6 +1437,9 @@ static struct cfg80211_ops CFG80211_Ops = {
 	.disconnect				= CFG80211_Disconnect,
 #endif // CONFIG_STA_SUPPORT //
 #endif // LINUX_VERSION_CODE //
+#ifdef RFKILL_SUPPORT
+	.rfkill_poll			= CFG80211_RFKill,
+#endif // RFKILL_SUPPORT //
 };
 
 
@@ -1595,6 +1616,10 @@ VOID CFG80211_Register(
 	/* init API function pointers */
 	RT_CFG80211_API_INIT(pAd);
 
+#ifdef RFKILL_SUPPORT
+	wiphy_rfkill_start_polling(CFG80211CB->pCfg80211_Wdev->wiphy);
+#endif // RFKILL_SUPPORT //
+
 	CFG80211DBG(RT_DEBUG_ERROR, ("80211> CFG80211_Register\n"));
 } /* End of CFG80211_Register */
 
@@ -1646,6 +1671,10 @@ VOID CFG80211_UnRegister(
 			Must unregister, or you will suffer problem when you change
 			regulatory domain by using iw.
 		*/
+		
+#ifdef RFKILL_SUPPORT
+		wiphy_rfkill_stop_polling(CFG80211CB->pCfg80211_Wdev->wiphy);
+#endif // RFKILL_SUPPORT //
 		wiphy_unregister(CFG80211CB->pCfg80211_Wdev->wiphy);
 		wiphy_free(CFG80211CB->pCfg80211_Wdev->wiphy);
 		os_free_mem(NULL, CFG80211CB->pCfg80211_Wdev);
@@ -2720,6 +2749,7 @@ static BOOLEAN CFG80211_SupBandInit(
 	}
 	else
 	{
+		pWiphy->bands[IEEE80211_BAND_2GHZ] = NULL;
 		pBand->channels = NULL;
 		pBand->bitrates = NULL;
 	} /* End of if */
@@ -2771,6 +2801,7 @@ static BOOLEAN CFG80211_SupBandInit(
 	}
 	else
 	{
+		pWiphy->bands[IEEE80211_BAND_5GHZ] = NULL;
 		pBand->channels = NULL;
 		pBand->bitrates = NULL;
 	} /* End of if */

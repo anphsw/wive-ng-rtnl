@@ -970,7 +970,6 @@ static VOID ChBandCheck(
 		case PHY_11A:
 #ifdef DOT11_N_SUPPORT
 		case PHY_11AN_MIXED:
-		case PHY_11N_5G:
 #endif // DOT11_N_SUPPORT //
 			*pChType = BAND_5G;
 			break;
@@ -1005,16 +1004,16 @@ static UCHAR FillChList(
 //New FCC spec restrict the used channel under DFS 
 #ifdef CONFIG_AP_SUPPORT	
 #ifdef DFS_SUPPORT
-		if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == FALSE))
+		if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 1))
 		{
-			if((channel >= 116) && (channel <=128))
+			if ((channel >= 116) && (channel <=128))
 				continue;
 		}
-		else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSOutdoor == TRUE))
+		else if ((pAd->CommonCfg.bIEEE80211H == 1) && (pAd->CommonCfg.RadarDetect.RDDurRegion == FCC) && (pAd->CommonCfg.bDFSIndoor == 0))
 		{
-			if((channel >= 100) && (channel <= 140))
+			if ((channel >= 100) && (channel <= 140))
 				continue;
-		}
+		}			
 
 #endif // DFS_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
@@ -1024,9 +1023,6 @@ static UCHAR FillChList(
 			{
 				pAd->ChannelList[j].Power = pAd->TxPower[l].Power;
 				pAd->ChannelList[j].Power2 = pAd->TxPower[l].Power2;
-#ifdef DOT11N_SS3_SUPPORT
-					pAd->ChannelList[j].Power3 = pAd->TxPower[l].Power3;
-#endif // DOT11N_SS3_SUPPORT //
 				break;
 			}
 		}
@@ -1302,8 +1298,7 @@ UINT8 GetCuntryMaxTxPwr(
 			/* FCC should maintain 20/40 Bandwidth, and without antenna gain */
 #ifdef DOT11_N_SUPPORT
 			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
-				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40) &&
-				((channel == 1) || (channel == 11)))
+				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40))
 				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.BandedgeDelta - deltaTxStreamPwr);
 			else
 #endif // DOT11_N_SUPPORT //
@@ -1313,8 +1308,7 @@ UINT8 GetCuntryMaxTxPwr(
 		{
 			return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain - deltaTxStreamPwr);
 		}
-		else
-			return 0xff;
+		else ;
 	}
 	else
 #endif // SINGLE_SKU //

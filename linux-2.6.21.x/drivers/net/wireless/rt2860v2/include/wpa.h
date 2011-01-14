@@ -403,36 +403,53 @@ VOID	CalculateMIC(
 PSTRING GetEapolMsgType(CHAR msg);
 
 #ifdef CONFIG_STA_SUPPORT
+#ifdef ADHOC_WPA2PSK_SUPPORT
 /* 
  =====================================	
  	function prototype in cmm_wpa_adhoc.c
  =====================================	
 */
-VOID WpaProfileInit(
-	IN PRTMP_ADAPTER    pAd, 
-    IN MAC_TABLE_ENTRY  *pEntry);
-
-VOID WpaProfileRelease(
-	IN PRTMP_ADAPTER    pAd, 
-    IN MAC_TABLE_ENTRY  *pEntry);
-
-VOID WpaProfileReset(
-	IN PRTMP_ADAPTER    pAd, 
-    IN MAC_TABLE_ENTRY  *pEntry,
-    IN PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile);
-
-VOID WpaProfileDataHook(
-	IN PRTMP_ADAPTER    pAd, 
-    IN MAC_TABLE_ENTRY  *pEntry,
-    IN PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile);
-    
 VOID Adhoc_WpaEAPOLStartAction(
     IN PRTMP_ADAPTER    pAd, 
     IN MLME_QUEUE_ELEM  *Elem);
 
 VOID Adhoc_WpaEAPOLKeyAction(
     IN PRTMP_ADAPTER    pAd, 
+    IN MLME_QUEUE_ELEM  *Elem);    
+
+VOID Adhoc_WpaStart4WayHS(
+    IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN ULONG			TimeInterval);    
+
+VOID Adhoc_PeerPairMsg1Action(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
     IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_PeerPairMsg2Action(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_PeerPairMsg3Action(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_PeerPairMsg4Action(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_PeerGroupMsg1Action(
+	IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry,
+    IN MLME_QUEUE_ELEM  *Elem);
+
+VOID Adhoc_Wpa4WayComplete(
+    IN PRTMP_ADAPTER    pAd, 
+    IN MAC_TABLE_ENTRY  *pEntry);    
     
 VOID Adhoc_WpaRetryExec(
     IN PVOID SystemSpecific1, 
@@ -465,6 +482,7 @@ VOID Adhoc_ConstructEapolKeyData(
 	IN  PFOUR_WAY_HANDSHAKE_PROFILE p4WayProfile,	
 	OUT PEAPOL_PACKET   pMsg);
 
+#endif // ADHOC_WPA2PSK_SUPPORT //
 #endif // CONFIG_STA_SUPPORT // 
 
 /* 

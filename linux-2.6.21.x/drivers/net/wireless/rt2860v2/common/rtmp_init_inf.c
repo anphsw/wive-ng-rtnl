@@ -208,7 +208,15 @@ int rt28xx_init(
 		goto err6;
 	}	
 
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{
+	}
+#endif // CONFIG_AP_SUPPORT //
+
 	// Read parameters from Config File 
+	/* unknown, it will be updated in NICReadEEPROMParameters */
+	pAd->RfIcType = RFIC_UNKNOWN;
 	Status = RTMPReadParametersHook(pAd);
 
 	DBGPRINT(RT_DEBUG_OFF, ("1. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
@@ -251,6 +259,7 @@ int rt28xx_init(
 
 	NICInitAsicFromEEPROM(pAd); //rt2860b
 	
+
 #ifdef RTMP_INTERNAL_TX_ALC
 	//
 	// Initialize the desired TSSI table
@@ -288,6 +297,9 @@ int rt28xx_init(
 		QBSS_LoadInit(pAd);
 #endif // AP_QLOAD_SUPPORT //
 
+//#ifdef DOT11K_RRM_SUPPORT
+//		RRM_CfgInit(pAd);
+//#endif // DOT11K_RRM_SUPPORT //
 	}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -298,11 +310,16 @@ int rt28xx_init(
 #endif // IKANOS_VX_1X0 //
 
 
-		//
+#ifdef CONFIG_AP_SUPPORT
+	//
 	// Initialize RF register to default value
 	//
-	AsicSwitchChannel(pAd, pAd->CommonCfg.Channel, FALSE);
-	AsicLockChannel(pAd, pAd->CommonCfg.Channel);		
+	if (pAd->OpMode == OPMODE_AP)
+	{
+		AsicSwitchChannel(pAd, pAd->CommonCfg.Channel, FALSE);
+		AsicLockChannel(pAd, pAd->CommonCfg.Channel);
+	}
+#endif // CONFIG_AP_SUPPORT //
 
 	/*
 		Some modules init must be called before APStartUp().
@@ -339,7 +356,6 @@ int rt28xx_init(
 	{
 		// Microsoft HCT require driver send a disconnect event after driver initialization.
 		OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
-//		pAd->IndicateMediaState = NdisMediaStateDisconnected;
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_MEDIA_STATE_CHANGE);
 
 		DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event B!\n"));
@@ -353,7 +369,6 @@ int rt28xx_init(
 				
 				// Enable Interrupt first due to we need to scan channel to receive beacons.
 				RTMP_IRQ_ENABLE(pAd);
-
 				// Now Enable RxTx
 				RTMPEnableRxTx(pAd);
 				RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_START_UP);
@@ -397,12 +412,6 @@ int rt28xx_init(
 //			RTMPInitTimer(pAd, &pAd->CommonCfg.Bss2040CoexistTimer, GET_TIMER_FUNCTION(Bss2040CoexistTimeOut), pAd, FALSE);
 #endif // DOT11N_DRAFT3 //
 #endif // DOT11_N_SUPPORT //
-#ifdef RELASE_EXCLUDE
-	/*
-	3090, 3090A and 3390 all support hadware tone radar function. But the soluation of those are different.
-	3090 is the old one.
-	*/
-#endif // RELASE_EXCLUDE //
 			APStartUp(pAd);
 			DBGPRINT(RT_DEBUG_OFF, ("Main bssid = %02x:%02x:%02x:%02x:%02x:%02x\n", 
 									PRINT_MAC(pAd->ApCfg.MBSSID[BSS0].Bssid)));
@@ -427,20 +436,12 @@ int rt28xx_init(
 		{
 			PWSC_CTRL pWscControl;
 			UCHAR zeros16[16]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
+			
 			pWscControl = &pAd->ApCfg.MBSSID[apidx].WscControl;
 			DBGPRINT(RT_DEBUG_TRACE, ("Generate UUID for apidx(%d)\n", apidx));
-
 			if (NdisEqualMemory(&pWscControl->Wsc_Uuid_E[0], zeros16, UUID_LEN_HEX))
 				WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], apidx, FALSE);
-
 			WscInit(pAd, FALSE, apidx);
-
-			if (pWscControl->WscEnrolleePinCode == 0)
-			{
-				pWscControl->WscEnrolleePinCode = GenerateWpsPinCode(pAd, FALSE, apidx);
-				pWscControl->WscEnrolleePinCodeLen = 8;
-			}
 		}
 	}
 #endif // CONFIG_AP_SUPPORT //
@@ -451,12 +452,7 @@ int rt28xx_init(
 		PWSC_CTRL pWscControl = &pAd->StaCfg.WscControl;
 		
 		WscGenerateUUID(pAd, &pWscControl->Wsc_Uuid_E[0], &pWscControl->Wsc_Uuid_Str[0], 0, FALSE);
-		WscInit(pAd, BSS0);
-		if (pWscControl->WscEnrolleePinCode == 0)
-		{
-			pWscControl->WscEnrolleePinCode = GenerateWpsPinCode(pAd, BSS0);
-			pWscControl->WscEnrolleePinCodeLen = 8;
-		}
+		WscInit(pAd, FALSE, BSS0);
 	}
 #endif // CONFIG_STA_SUPPORT //
 
@@ -488,12 +484,6 @@ int rt28xx_init(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
-
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef VIDEO_TURBINE_SUPPORT
-	VideoTurbineDynamicTune(pAd);
-#endif // VIDEO_TURBINE_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
@@ -531,94 +521,10 @@ int rt28xx_init(
 	}
 #endif // CONFIG_STA_SUPPORT //
 
-#if defined(RT2883) || defined(RT3883)
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-		if (IS_RT2883(pAd)  || IS_RT3883(pAd))
-		{
-			RTMP_IO_WRITE32(pAd, TX_FBK_CFG_3S_0, 0x12111008);
-			RTMP_IO_WRITE32(pAd, TX_FBK_CFG_3S_1, 0x16151413);
-		}
 
-#ifdef STREAM_MODE_SUPPORT
-		if (pAd->CommonCfg.StreamMode > 0)
-		{
-			ULONG streamWord;
-			
-			// Enable Stream mode for first three entries in MAC table
-			switch (pAd->CommonCfg.StreamMode)
-			{
-				case 1:
-					streamWord = 0x030000;
-					break;
-				case 2:
-					streamWord = 0x0c0000;
-					break;
-				case 3:
-					streamWord = 0x0f0000;
-					break;
-				default:
-					streamWord = 0x0;
-					break;
-			}
-
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR0_L, (ULONG)(pAd->CommonCfg.StreamModeMac[0][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][1] << 8)  | 
-							(ULONG)(pAd->CommonCfg.StreamModeMac[0][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][3] << 24));
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR0_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[0][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[0][5] << 8));
-			
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR1_L, (ULONG)(pAd->CommonCfg.StreamModeMac[1][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][1] << 8)  | 
-						(ULONG)(pAd->CommonCfg.StreamModeMac[1][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][3] << 24));
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR1_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[1][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[1][5] << 8));
-
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR2_L, (ULONG)(pAd->CommonCfg.StreamModeMac[2][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][1] << 8)  | 
-						(ULONG)(pAd->CommonCfg.StreamModeMac[2][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][3] << 24));
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR2_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[2][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[2][5] << 8));
-
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR3_L, (ULONG)(pAd->CommonCfg.StreamModeMac[3][0]) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][1] << 8)  | 
-						(ULONG)(pAd->CommonCfg.StreamModeMac[3][2] << 16) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][3] << 24));
-			RTMP_IO_WRITE32(pAd, TX_CHAIN_ADDR3_H, streamWord | (ULONG)(pAd->CommonCfg.StreamModeMac[3][4]) | (ULONG)(pAd->CommonCfg.StreamModeMac[3][5] << 8));
-
-		}
-#endif // STREAM_MODE_SUPPORT //
-	
-	}
-#endif // CONFIG_AP_SUPPORT //
-
-	if (pAd->CommonCfg.FineAGC)
-	{
-		UINT8 BBPValue = 0;
-		BBP_IO_READ8_BY_REG_ID(pAd, BBP_R65, &BBPValue);
-		BBPValue |= 0x40; // turn on fine AGC
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R65, BBPValue);
-	}
-	else
-	{
-		UINT8 BBPValue = 0;
-		BBP_IO_READ8_BY_REG_ID(pAd, BBP_R65, &BBPValue);
-		BBPValue &= ~0x40; // turn off fine AGC
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R65, BBPValue);
-	}
-	
-#endif // defined(RT2883) || defined(RT3883) //
 
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef DOT11_N_SUPPORT
-#ifdef TXBF_SUPPORT
-	if (pAd->CommonCfg.ITxBfTimeout)
-	{
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0x02);
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 0);
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, pAd->CommonCfg.ITxBfTimeout & 0xFF);
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 1);
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, (pAd->CommonCfg.ITxBfTimeout>>8) & 0xFF);
-	}
-
-	if (pAd->CommonCfg.ETxBfTimeout)
-	{
-		RTMP_IO_WRITE32(pAd, TX_TXBF_CFG_3, pAd->CommonCfg.ETxBfTimeout);
-	}
-#endif // TXBF_SUPPORT //
 #endif // DOT11_N_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
@@ -733,7 +639,8 @@ int rt28xx_init(
 		RT30xxWriteRFRegister(pAd, RF_R24, (UCHAR)value);
 
 	}
-	
+
+
 #endif // RT3350 //
 
 

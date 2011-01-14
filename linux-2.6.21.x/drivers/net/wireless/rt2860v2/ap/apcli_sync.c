@@ -305,7 +305,7 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 		if (matchFlag)
 		{
 			// Validate RSN IE if necessary, then copy store this information
-			if (LenVIE > 0 
+			if ((LenVIE > 0) 
 #ifdef WSC_AP_SUPPORT
                 && ((pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode == WSC_DISABLE) || 
                 	(pAd->ApCfg.ApCliTab[ifIndex].WscControl.bWscTrigger == FALSE))
@@ -451,6 +451,30 @@ static VOID ApCliPeerProbeRspAtJoinAction(
 			else  //Used the default TX Power Percentage.
 				pAd->CommonCfg.TxPowerPercentage = pAd->CommonCfg.TxPowerDefault;
 
+#ifdef WSC_AP_SUPPORT
+#ifdef DOT11_N_SUPPORT
+			if ((pAd->ApCfg.ApCliTab[ifIndex].WscControl.WscConfMode != WSC_DISABLE) &&
+                (pAd->ApCfg.ApCliTab[ifIndex].WscControl.bWscTrigger == TRUE))
+			{
+				ADD_HTINFO	RootApHtInfo, ApHtInfo;
+				ApHtInfo = pAd->CommonCfg.AddHTInfo.AddHtInfo;
+				RootApHtInfo = AddHtInfo.AddHtInfo;
+				if ((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40) &&
+					(RootApHtInfo.RecomWidth) &&
+					(RootApHtInfo.ExtChanOffset != ApHtInfo.ExtChanOffset))
+				{
+					//STRING	ChStr[5] = {0};
+					
+					if (RootApHtInfo.ExtChanOffset == EXTCHA_ABOVE)
+						Set_HtExtcha_Proc(pAd, "1");
+					else
+						Set_HtExtcha_Proc(pAd, "0");
+
+					return;
+				}				
+			}
+#endif // DOT11_N_SUPPORT //
+#endif // WSC_AP_SUPPORT //
 			if(bssidEqualFlag == TRUE)
 			{
 				*pCurrState = APCLI_SYNC_IDLE;
@@ -573,17 +597,15 @@ static VOID ApCliEnqueueProbeRequest(
 		/* Add the extended rate IE */
 		if (pAd->MlmeAux.ExtRateLen != 0)
 		{
-			ULONG	tmp;
-
-			MakeOutgoingFrame(pOutBuffer + FrameLen,	&tmp,
-								1,						&ExtRateIe,
-								1,						&pAd->MlmeAux.ExtRateLen,
-								pAd->MlmeAux.ExtRateLen,  pAd->MlmeAux.ExtRate,                           
-                                END_OF_ARGS);
-
+			ULONG            tmp;
+		
+			MakeOutgoingFrame(pOutBuffer + FrameLen,    &tmp,
+				1,                        &ExtRateIe,
+				1,                        &pAd->MlmeAux.ExtRateLen,
+				pAd->MlmeAux.ExtRateLen,  pAd->MlmeAux.ExtRate,                           
+				END_OF_ARGS);
 			FrameLen += tmp;
 		}
-
 		MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 		MlmeFreeMemory(pAd, pOutBuffer);
 	}

@@ -119,13 +119,17 @@
 #define TXWI_SIZE               16
 #define RXD_SIZE               	16
 #define RXWI_SIZE             	16
-#if defined(RT2883) || defined(RT3883) || defined(RT3593)
-#undef	RXWI_SIZE
-#define RXWI_SIZE             	20
-#endif // defined(RT2883) || defined(RT3883) || defined(RT3593) //
 // TXINFO_SIZE + TXWI_SIZE + 802.11 Header Size + AMSDU sub frame header
 #define TX_DMA_1ST_BUFFER_SIZE  96    // only the 1st physical buffer is pre-allocated
-#define MGMT_DMA_BUFFER_SIZE    1536 //2048
+
+//#define MGMT_DMA_BUFFER_SIZE    1536 //2048
+/*
+	Note 20100212 by SampleLin: do not set MGMT_DMA_BUFFER_SIZE smaller than
+	1600; Or kernel will crash in deaggregate_AMSDU_announce() for EAPOL packet
+	in enterprise WPA mode.
+*/
+#define MGMT_DMA_BUFFER_SIZE    1600 //2048
+
 #define RX_BUFFER_AGGRESIZE     3840 //3904 //3968 //4096 //2048 //4096
 #define RX_BUFFER_NORMSIZE      3840 //3904 //3968 //4096 //2048 //4096
 #define TX_BUFFER_NORMSIZE		RX_BUFFER_NORMSIZE
@@ -158,8 +162,6 @@
 	And in rt_main_end.c, clConfig.clNum = RX_RING_SIZE * 3; is changed to
 	clConfig.clNum = RX_RING_SIZE * 4;
 */
-// TODO: For VxWorks the size is 256. Shall we cahnge the value as 256 for all OS?????
-#define MAX_PACKETS_IN_QUEUE				(512) //(512)    // to pass WMM A5-WPAPSK
 
 #define MAX_PACKETS_IN_MCAST_PS_QUEUE		32	 
 #define MAX_PACKETS_IN_PS_QUEUE				128	//32
@@ -184,6 +186,8 @@
 #define EFUSE_BUFFER_PATH						"/tmp/RT30xxEEPROM.bin"
 //2008/09/11:KH add to support efuse-->
 #endif // RTMP_EFUSE_SUPPORT //
+
+#define MAX_AGG_3SS_BALIMIT		31
 
 // RxFilter
 #define STANORMAL	 0x17f97
@@ -496,7 +500,7 @@
 #define HASH_TABLE_SIZE                 256  /* Size of hash tab must be power of 2. */
 #define MAX_VIE_LEN                     1024   // New for WPA cipher suite variable IE sizes.
 #define MAX_SUPPORT_MCS             32    
-#define MAX_NUM_OF_BBP_LATCH             140
+#define MAX_NUM_OF_BBP_LATCH             255
 //============================================================
 // ASIC WCID Table definition.
 //============================================================
@@ -729,7 +733,6 @@
 #define AIRONET_STATE_MACHINE           8
 #define ACTION_STATE_MACHINE           9
 
-
 // AP MLME state machines
 #define AP_ASSOC_STATE_MACHINE          11
 #define AP_AUTH_STATE_MACHINE           12
@@ -754,9 +757,17 @@
 #define DLS_STATE_MACHINE               26
 #endif // QOS_DLS_SUPPORT //
 
+
 #ifdef DOT11Z_TDLS_SUPPORT
 #define TDLS_STATE_MACHINE               29
 #endif // DOT11Z_TDLS_SUPPORT //
+
+
+#ifdef WPSE_SUPPORT
+#define WPSE_STATE_MACHINE				31
+#endif // WPSE_SUPPORT //
+
+
 
 //
 // STA's CONTROL/CONNECT state machine: states, events, total function #
@@ -902,7 +913,7 @@
 #define ACTION_DSE_MEASUREMENT_REPORT		6	// 11y D9.0
 #define ACTION_MEASUREMENT_PILOT_ACTION		7  	// 11y D9.0
 #define ACTION_DSE_POWER_CONSTRAINT			8	// 11y D9.0
-
+#define ACTION_VENDOR_USAGE					221
 
 //HT  Action field value
 #define NOTIFY_BW_ACTION				0
@@ -1148,6 +1159,9 @@
 
 #endif	// APCLI_SUPPORT //
 
+#ifdef CONFIG_STA_SUPPORT
+#endif // CONFIG_STA_SUPPORT //
+
 // =============================================================================
 
 // value domain of 802.11 header FC.Tyte, which is b3..b2 of the 1st-byte of MAC header
@@ -1390,6 +1404,8 @@
 #define REGION_6_BG_BAND                  6       // 3-9
 #define REGION_7_BG_BAND                  7       // 5-13
 #define REGION_31_BG_BAND                 31       // 5-13
+#define REGION_32_BG_BAND                 32	// 1 - 13
+#define REGION_33_BG_BAND                 33	// 1 - 14
 #define REGION_MAXIMUM_BG_BAND            7
 
 #define REGION_MINIMUM_A_BAND             0
@@ -1533,9 +1549,6 @@
 #define MAX_BARECI_SESSION   16
 #endif // CONFIG_AP_SUPPORT //
 
-#ifdef RT3883
-#define DEFAULT_VCO_RECALIBRATION_THRESHOLD	10
-#endif // RT3883 //
 
 // definition of Recipient or Originator
 #define I_RECIPIENT                  TRUE
@@ -1677,7 +1690,7 @@
 #define	ATE_TXFRAME                 (fATE_TX_ENABLE)   
 /* Receive Frames */
 #define	ATE_RXFRAME                 (fATE_RX_ENABLE)   
-#ifdef RALINK_28xx_QA
+#ifdef RALINK_QA
 /* Stop Transmition */
 #define ATE_TXSTOP                  ((~(fATE_TX_ENABLE))&(~(fATE_TXCONT_ENABLE))&(~(fATE_TXCARR_ENABLE))&(~(fATE_TXCARRSUPP_ENABLE)))   
 /* Stop receiving Frames */
@@ -1690,7 +1703,7 @@
 #define	BBP24_TXCONT                0x00   /* Continuous Transmit */
 #define	BBP24_CARRSUPP              0x01   /* Carrier Suppression */
 /* NOTE : may be different with chipset in the future -- */
-#endif // RALINK_28xx_QA //
+#endif // RALINK_QA //
 #endif // RALINK_ATE //
 
 // WEP Key TYPE
@@ -1731,9 +1744,10 @@
 #define IW_SCANNING_EVENT_FLAG						0x0217
 #define IW_START_IBSS_FLAG							0x0218
 #define IW_JOIN_IBSS_FLAG							0x0219
-#define IW_SHARED_WEP_FAIL							0x021a
+#define IW_SHARED_WEP_FAIL							0x021A
+#define IW_WPS_END_EVENT_FLAG						0x021B
 // if add new system event flag, please upadte the IW_SYS_EVENT_FLAG_END
-#define	IW_SYS_EVENT_FLAG_END                       0x021a
+#define	IW_SYS_EVENT_FLAG_END                       0x021B
 #define	IW_SYS_EVENT_TYPE_NUM						(IW_SYS_EVENT_FLAG_END - IW_SYS_EVENT_FLAG_START + 1)
 // For system event - end 
 
@@ -1805,7 +1819,8 @@
 #define	IW_WSC_RECEIVE_ACK         					0x051d
 #define	IW_WSC_RECEIVE_NACK        					0x051e
 #define	IW_WSC_MANY_CANDIDATE 						0x051f
-#define	IW_WSC_EVENT_FLAG_END                   	0x051f
+#define IW_WSC_NEXT_CANDIDATE						0x0520
+#define	IW_WSC_EVENT_FLAG_END                   	0x0520
 #define	IW_WSC_EVENT_TYPE_NUM						(IW_WSC_EVENT_FLAG_END - IW_WSC_EVENT_FLAG_START + 1)
 // For WSC wireless event - end
 #endif // WSC_INCLUDED //
@@ -1853,6 +1868,17 @@
 #define	WPA_SUPPLICANT_ENABLE_WPS			0x80
 
 // definition for Antenna Diversity flag
+#ifdef ANT_DIVERSITY_SUPPORT
+enum ANT_DIVERSITY_TYPE {
+    ANT_DIVERSITY_DISABLE = 0,
+    ANT_DIVERSITY_ENABLE = 1,
+    ANT_FIX_ANT1 = 2,
+    ANT_FIX_ANT2 = 3
+};
+#endif // ANT_DIVERSITY_SUPPORT //
+
+#ifdef RTMP_RBUS_SUPPORT
+#endif // RTMP_RBUS_SUPPORT //
 
 // Endian byte swapping codes
 #define SWAP16(x) \

@@ -357,7 +357,7 @@ static VOID	WscParseEncrSettings(
 		
 	========================================================================
 */
-static VOID	WscProcessCredential(
+static BOOLEAN	WscProcessCredential(
 	IN	PRTMP_ADAPTER		pAdapter, 
 	IN	PUCHAR				pPlainData,
 	IN	INT					PlainLength,
@@ -406,7 +406,10 @@ static VOID	WscProcessCredential(
 						break;
 				}
 				pProfile->Profile[CurrentIdx].SSID.SsidLength = Idx;
-				NdisMoveMemory(pProfile->Profile[CurrentIdx].SSID.Ssid, pData, pProfile->Profile[CurrentIdx].SSID.SsidLength);
+				if (RTMPCheckStrPrintAble(pData, Idx) || (pWscControl->bCheckMultiByte == FALSE))
+					NdisMoveMemory(pProfile->Profile[CurrentIdx].SSID.Ssid, pData, pProfile->Profile[CurrentIdx].SSID.SsidLength);
+				else
+					return FALSE;
 				break;
 								
 			case WSC_ID_AUTH_TYPE:
@@ -428,18 +431,21 @@ static VOID	WscProcessCredential(
 				if (WscLen == 0)
 					break;
 				
-				pProfile->Profile[CurrentIdx].KeyLength = WscLen;
-				NdisMoveMemory(pProfile->Profile[CurrentIdx].Key, pData, pProfile->Profile[CurrentIdx].KeyLength);
+				if (RTMPCheckStrPrintAble(pData, WscLen) || (pWscControl->bCheckMultiByte == FALSE))
+				{
+					pProfile->Profile[CurrentIdx].KeyLength = WscLen;
+					NdisMoveMemory(pProfile->Profile[CurrentIdx].Key, pData, pProfile->Profile[CurrentIdx].KeyLength);
+				}
+				else
+					return FALSE;
 				break;
 				
 			case WSC_ID_MAC_ADDR:
-#ifdef CONFIG_STA_SUPPORT
-				if ((pAdapter->OpMode == OPMODE_STA) &&
-					(RTMPCompareMemory(pData, pAdapter->MlmeAux.Bssid, MAC_ADDR_LEN) != 0))
-					RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pAdapter->MlmeAux.Bssid, MAC_ADDR_LEN);
-				else
-#endif // CONFIG_STA_SUPPORT //
-					RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pData, MAC_ADDR_LEN);
+				/*
+					Some AP (ex. Buffalo WHR-G300N WPS AP) would change BSSID during WPS processing.
+					STA shall not change MacAddr of credential form AP.
+				*/
+				RTMPMoveMemory(pProfile->Profile[CurrentIdx].MacAddr, pData, MAC_ADDR_LEN);
 				break;
 				
 			case WSC_ID_KEY_WRAP_AUTH:
@@ -465,6 +471,7 @@ static VOID	WscProcessCredential(
 	// Svae the total number
 	pProfile->ProfileCnt = (UINT)Cnt;
 	DBGPRINT(RT_DEBUG_TRACE, ("WscProcessCredential --> %d profile retrieved from credential\n", Cnt));
+	return TRUE;
 }
 
 // return 0  to success ,1 to failed
@@ -539,7 +546,7 @@ int BuildMessageM1(
 	OUT	VOID *pbuf)
 {
 	UCHAR				TB[1];
-	INT					Len = 0, templen = 0;
+	INT					Len = 0, templen = 0, idx = 0;
 	PUCHAR				pData = (PUCHAR)pbuf;
 	PWSC_REG_DATA		pReg = (PWSC_REG_DATA) &pWscControl->RegData;
     
@@ -565,6 +572,12 @@ int BuildMessageM1(
 	pData += templen;
 	Len   += templen;
 
+	// Enrollee Nonce, first generate and save to Wsc Control Block	
+	for (idx = 0; idx < 16; idx++)
+	{
+		pReg->SelfNonce[idx] = RandomByte(pAdapter);
+		pReg->EnrolleeNonce[idx] = pReg->SelfNonce[idx];
+	}
 	// 5. Enrollee Nonce, first generate and save to Wsc Control Block
 	NdisMoveMemory(pReg->EnrolleeNonce, pReg->SelfNonce, 16);
 	templen = AppendWSCTLV(WSC_ID_ENROLLEE_NONCE, pData, pReg->SelfNonce, 0);
@@ -661,6 +674,7 @@ int BuildMessageM1(
 	pData += templen;
 	Len   += templen;
 
+
     // Fixed WCN vista logo 2 registrar test item issue.
     // Also prevent that WCN GetDeviceInfo disturbs EAP processing.
 	if (pWscControl->WscUPnPNodeInfo.bUPnPMsgTimerRunning ||
@@ -753,87 +767,87 @@ int BuildMessageM2(
 	pData += templen;
 	Len   += templen;
 
-	// 5.
+	// UUID, 16 bytes
 	templen = AppendWSCTLV(WSC_ID_UUID_R, pData, pReg->SelfInfo.Uuid, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 6.
+	// Publikc Key
 	templen = AppendWSCTLV(WSC_ID_PUBLIC_KEY, pData, pReg->Pkr, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 7. Authentication Type Flags
+	// Authentication Type Flags
 	templen = AppendWSCTLV(WSC_ID_AUTH_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.AuthTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 8.
+	// Encrypt Type
 	templen = AppendWSCTLV(WSC_ID_ENCR_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.EncrTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 9.
+	// Connection Type
 	templen = AppendWSCTLV(WSC_ID_CONN_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.ConnTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 10.
+	// Config Method
 	templen = AppendWSCTLV(WSC_ID_CONFIG_METHODS, pData, (UINT8 *)&pReg->SelfInfo.ConfigMethods, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 11.
-	templen = AppendWSCTLV(WSC_ID_MANUFACTURER, pData, pReg->SelfInfo.Manufacturer, 0);
+	// Manufacture Name
+	templen = AppendWSCTLV(WSC_ID_MANUFACTURER, pData, pReg->SelfInfo.Manufacturer, strlen((PSTRING) pReg->SelfInfo.Manufacturer));
 	pData += templen;
 	Len   += templen;
 
-	// 12.
-	templen = AppendWSCTLV(WSC_ID_MODEL_NAME, pData, pReg->SelfInfo.ModelName, 0);
+	// Model Name
+	templen = AppendWSCTLV(WSC_ID_MODEL_NAME, pData, pReg->SelfInfo.ModelName, strlen((PSTRING) pReg->SelfInfo.ModelName));
 	pData += templen;
 	Len   += templen;
 
-	// 13.
-	templen = AppendWSCTLV(WSC_ID_MODEL_NUMBER, pData, pReg->SelfInfo.ModelNumber, 0);
+	// Model Number
+	templen = AppendWSCTLV(WSC_ID_MODEL_NUMBER, pData, pReg->SelfInfo.ModelNumber, strlen((PSTRING) pReg->SelfInfo.ModelNumber));
 	pData += templen;
 	Len   += templen;
 
-	// 14.
-	templen = AppendWSCTLV(WSC_ID_SERIAL_NUM, pData, pReg->SelfInfo.SerialNumber, 0);
+	// Serial Number
+	templen = AppendWSCTLV(WSC_ID_SERIAL_NUM, pData, pReg->SelfInfo.SerialNumber, strlen((PSTRING) pReg->SelfInfo.SerialNumber));
 	pData += templen;
 	Len   += templen;
 
-	// 15.
+	// Prime Device Type
 	templen = AppendWSCTLV(WSC_ID_PRIM_DEV_TYPE, pData, pReg->SelfInfo.PriDeviceType, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 16.
-	templen = AppendWSCTLV(WSC_ID_DEVICE_NAME, pData, pReg->SelfInfo.DeviceName, 0);
+	// Device Name
+	templen = AppendWSCTLV(WSC_ID_DEVICE_NAME, pData, pReg->SelfInfo.DeviceName, strlen((PSTRING) pReg->SelfInfo.DeviceName));
 	pData += templen;
 	Len   += templen;
 
-	// 17. RF Band
+	// RF Band
 	templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&pReg->SelfInfo.RfBand, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 18.
+	// Assoc State
 	templen = AppendWSCTLV(WSC_ID_ASSOC_STATE, pData, (UINT8 *)&pReg->SelfInfo.AssocState, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 19.
+	// Config Error
 	templen = AppendWSCTLV(WSC_ID_CONFIG_ERROR, pData, (UINT8 *)&pReg->SelfInfo.ConfigError, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 20. Device Password ID
+	// Device Password ID
 	templen = AppendWSCTLV(WSC_ID_DEVICE_PWD_ID, pData, (UINT8 *)&pReg->SelfInfo.DevPwdId, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 21.
+	// OS Version
 	templen = AppendWSCTLV(WSC_ID_OS_VERSION, pData, (UINT8 *)&pReg->SelfInfo.OsVersion, 0);
 	pData += templen;
 	Len   += templen;
@@ -935,82 +949,79 @@ int BuildMessageM2D(
 	pData += templen;
 	Len   += templen;
 
-	// 5.
+	// UUID, 16 bytes
 	templen = AppendWSCTLV(WSC_ID_UUID_R, pData, pReg->SelfInfo.Uuid, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 6.WSC_ID_PUBLIC_KEY
 
 	// 7. Authentication Type Flags
 	templen = AppendWSCTLV(WSC_ID_AUTH_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.AuthTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 8.
+	// Encrypt Type
 	templen = AppendWSCTLV(WSC_ID_ENCR_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.EncrTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 9.
+	// Connection Type
 	templen = AppendWSCTLV(WSC_ID_CONN_TYPE_FLAGS, pData, (UINT8 *)&pReg->SelfInfo.ConnTypeFlags, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 10.
+	// Config Methods
 	templen = AppendWSCTLV(WSC_ID_CONFIG_METHODS, pData, (UINT8 *)&pReg->SelfInfo.ConfigMethods, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 11.
-	templen = AppendWSCTLV(WSC_ID_MANUFACTURER, pData, pReg->PeerInfo.Manufacturer, 0);
+	// Manufacturer Name
+	templen = AppendWSCTLV(WSC_ID_MANUFACTURER, pData, pReg->SelfInfo.Manufacturer, strlen((PSTRING) pReg->SelfInfo.Manufacturer));
 	pData += templen;
 	Len   += templen;
 
-	// 12.
-	templen = AppendWSCTLV(WSC_ID_MODEL_NAME, pData, pReg->PeerInfo.ModelName, 0);
+	// Model Name
+	templen = AppendWSCTLV(WSC_ID_MODEL_NAME, pData, pReg->SelfInfo.ModelName, strlen((PSTRING) pReg->SelfInfo.ModelName));
 	pData += templen;
 	Len   += templen;
 
-	// 13.
-	templen = AppendWSCTLV(WSC_ID_MODEL_NUMBER, pData, pReg->PeerInfo.ModelNumber, 0);
+	// Model Number
+	templen = AppendWSCTLV(WSC_ID_MODEL_NUMBER, pData, pReg->SelfInfo.ModelNumber, strlen((PSTRING) pReg->SelfInfo.ModelNumber));
 	pData += templen;
 	Len   += templen;
 
-	// 14.
-	templen = AppendWSCTLV(WSC_ID_SERIAL_NUM, pData, pReg->PeerInfo.SerialNumber, 0);
+	// Serial Number
+	templen = AppendWSCTLV(WSC_ID_SERIAL_NUM, pData, pReg->SelfInfo.SerialNumber, strlen((PSTRING) pReg->SelfInfo.SerialNumber));
 	pData += templen;
 	Len   += templen;
 
-	// 15.
-	templen = AppendWSCTLV(WSC_ID_PRIM_DEV_TYPE, pData, pReg->PeerInfo.PriDeviceType, 0);
+	// Prime Device Type
+	templen = AppendWSCTLV(WSC_ID_PRIM_DEV_TYPE, pData, pReg->SelfInfo.PriDeviceType, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 16.
-	templen = AppendWSCTLV(WSC_ID_DEVICE_NAME, pData, pReg->PeerInfo.DeviceName, 0);
+	// Device Name
+	templen = AppendWSCTLV(WSC_ID_DEVICE_NAME, pData, pReg->SelfInfo.DeviceName, strlen((PSTRING) pReg->SelfInfo.DeviceName));
 	pData += templen;
 	Len   += templen;
 
-	// 17. RF Band
-	templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&pReg->PeerInfo.RfBand, 0);
+	// RF Band
+	templen = AppendWSCTLV(WSC_ID_RF_BAND, pData, (UINT8 *)&pReg->SelfInfo.RfBand, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 18.
-	templen = AppendWSCTLV(WSC_ID_ASSOC_STATE, pData, (UINT8 *)&pReg->PeerInfo.AssocState, 0);
+	// Assoc State
+	templen = AppendWSCTLV(WSC_ID_ASSOC_STATE, pData, (UINT8 *)&pReg->SelfInfo.AssocState, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 19.
-	templen = AppendWSCTLV(WSC_ID_CONFIG_ERROR, pData, (UINT8 *)&pReg->PeerInfo.ConfigError, 0);
+	// Config Error
+	templen = AppendWSCTLV(WSC_ID_CONFIG_ERROR, pData, (UINT8 *)&pReg->SelfInfo.ConfigError, 0);
 	pData += templen;
 	Len   += templen;
 
-	// 20.WSC_ID_DEVICE_PWD_ID
-
-	// 21.
-	templen = AppendWSCTLV(WSC_ID_OS_VERSION, pData, (UINT8 *)&pReg->PeerInfo.OsVersion, 0);
+	// OS Version
+	templen = AppendWSCTLV(WSC_ID_OS_VERSION, pData, (UINT8 *)&pReg->SelfInfo.OsVersion, 0);
 	pData += templen;
 	Len   += templen;
 
@@ -1122,8 +1133,10 @@ int BuildMessageM3(
 	pData += templen;
 	Len   += templen;
 
-	// 6. Generate authenticator
-	// Combine last TX & RX message contents and validate the HMAC
+	/*
+		Generate authenticator
+		Combine last TX & RX message contents and validate the HMAC
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1272,9 +1285,10 @@ int BuildMessageM4(
 	pData += templen;
 	Len   += templen;
 
-	// 7.
-	// Combine last TX & RX message contents and validate the HMAC
-	// We have to exclude last 12 bytes from last receive since it's authenticator value
+	/*
+		Combine last TX & RX message contents and validate the HMAC
+		We have to exclude last 12 bytes from last receive since it's authenticator value
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1371,8 +1385,10 @@ int BuildMessageM5(
 	pData += templen;
 	Len   += templen;
 
-	// 5. Generate authenticator
-	// Combine last TX & RX message contents and validate the HMAC
+	/*
+		Generate authenticator
+		Combine last TX & RX message contents and validate the HMAC
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1429,7 +1445,6 @@ int BuildMessageM6(
 	INT					Len = 0, templen = 0;
 	PUCHAR				pData = (PUCHAR)pbuf, pAuth;
 	PWSC_REG_DATA		pReg = (PWSC_REG_DATA) &pWscControl->RegData;
-
 	INT				    HmacLen;
 	UCHAR				KDK[32];
 	UCHAR				Plain[128], IV_EncrData[144];//IV len 16,EncrData len 128
@@ -1467,9 +1482,10 @@ int BuildMessageM6(
 	pData += templen;
 	Len   += templen;
 
-	// 5.
-	// Combine last TX & RX message contents and validate the HMAC
-	// We have to exclude last 12 bytes from last receive since it's authenticator value
+	/*
+		Combine last TX & RX message contents and validate the HMAC
+		We have to exclude last 12 bytes from last receive since it's authenticator value
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1560,7 +1576,6 @@ int BuildMessageM7(
 
     // Marvell WPS AP doesn't accept STA includes profile in M7. 20070604
 #ifdef CONFIG_AP_SUPPORT
-    //if(pAdapter->ApCfg.MBSSID[apidx].WscControl.WscConfStatus == WSC_SCSTATE_CONFIGURED)
     IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
     {
         USHORT  authType;
@@ -1571,7 +1586,7 @@ int BuildMessageM7(
             WscCreateProfileFromCfg(pAdapter, AP_CLIENT_MODE, pWscControl, &pWscControl->WscProfile);
         else
 #endif // APCLI_SUPPORT //
-			WscCreateProfileFromCfg(pAdapter, ENROLLEE_ACTION | AP_MODE, pWscControl, &pWscControl->WscProfile);
+            WscCreateProfileFromCfg(pAdapter, ENROLLEE_ACTION | AP_MODE, pWscControl, &pWscControl->WscProfile);
         authType = cpu2be16(pCredential->AuthType);
         encyType = cpu2be16(pCredential->EncrType);
         PlainLen += AppendWSCTLV(WSC_ID_SSID, &Plain[PlainLen], pCredential->SSID.Ssid, pCredential->SSID.SsidLength);
@@ -1595,8 +1610,10 @@ int BuildMessageM7(
 	pData += templen;
 	Len   += templen;
 
-	// 5. Generate authenticator
-	// Combine last TX & RX message contents and validate the HMAC
+	/*
+		Generate authenticator
+		Combine last TX & RX message contents and validate the HMAC
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1746,9 +1763,10 @@ int BuildMessageM8(
 	pData += templen;
 	Len   += templen;
 
-	// 5.
-	// Combine last TX & RX message contents and validate the HMAC
-	// We have to exclude last 12 bytes from last receive since it's authenticator value
+	/*
+		Combine last TX & RX message contents and validate the HMAC
+		We have to exclude last 12 bytes from last receive since it's authenticator value
+	*/
 	HmacLen = Len + pReg->LastRx.Length;
     if (pAdapter->pHmacData)
     {
@@ -1854,7 +1872,6 @@ int BuildMessageNACK(
 	INT					Len = 0, templen = 0;
 	PUCHAR				pData = (PUCHAR)pbuf;
 	PWSC_REG_DATA		pReg = (PWSC_REG_DATA) &pWscControl->RegData;
-
     USHORT              ConfigError = htons(pReg->SelfInfo.ConfigError);
 
 	// 1. Version
@@ -1927,6 +1944,7 @@ int ProcessMessageM1(
 	// Enrollee 192 random bytes for DH key generation
 	for (idx = 0; idx < 192; idx++)
 		pWscControl->RegData.EnrolleeRandom[idx] = RandomByte(pAdapter);
+
 	RT_DH_PublicKey_Generate (
         WPS_DH_G_VALUE, sizeof(WPS_DH_G_VALUE),
 	    WPS_DH_P_VALUE, sizeof(WPS_DH_P_VALUE),
@@ -1960,7 +1978,7 @@ int ProcessMessageM1(
 	pReg->LastRx.Length = Length;		
 	NdisMoveMemory(pReg->LastRx.Data, precv, Length);
 	pData = pReg->LastRx.Data;
-
+		
 	NdisZeroMemory(&pWscControl->WscPeerInfo, sizeof(WSC_PEER_DEV_INFO));
 
 	// Start to process WSC IEs
@@ -2166,7 +2184,7 @@ int ProcessMessageM2(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32];
 	UCHAR				DHKey[32], KdkInput[38], KdfKey[80];
 	INT					DH_Len;
 	PUCHAR				pData = NULL;
@@ -2174,6 +2192,7 @@ int ProcessMessageM2(
 	MAC_TABLE_ENTRY		*pEntry = NULL;
 	PWSC_CTRL			pWscControl = NULL;
 	
+	RTMPZeroMemory(KDK, 32);
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_VERSION))] |= (1 << WSC_TLV_BYTE1(WSC_ID_VERSION));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_MSG_TYPE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_MSG_TYPE));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_ENROLLEE_NONCE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_ENROLLEE_NONCE));
@@ -2201,7 +2220,7 @@ int ProcessMessageM2(
 	pReg->LastRx.Length = Length;		
 	NdisMoveMemory(pReg->LastRx.Data, precv, Length);
 	pData = pReg->LastRx.Data;
-
+		
 	pEntry = MacTableLookup(pAdapter, pReg->PeerInfo.MacAddr);
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
@@ -2224,7 +2243,6 @@ int ProcessMessageM2(
 #endif // CONFIG_STA_SUPPORT //
 
 	NdisZeroMemory(&pWscControl->WscPeerInfo, sizeof(WSC_PEER_DEV_INFO));
-
 
 	// Start to process WSC IEs
 	while (Length > 4)
@@ -2650,10 +2668,11 @@ int ProcessMessageM3(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32];
 	PUCHAR				pData = NULL;
 	USHORT				WscType, WscLen, FieldCheck[7]={0,0,0,0,0,0,0};
 	
+	RTMPZeroMemory(KDK, 32);
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_VERSION))] |= (1 << WSC_TLV_BYTE1(WSC_ID_VERSION));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_MSG_TYPE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_MSG_TYPE));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_REGISTRAR_NONCE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_REGISTRAR_NONCE));
@@ -2782,13 +2801,14 @@ int ProcessMessageM4(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32], RHash[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32], RHash[32];
 	INT					EncrLen;
 	PUCHAR				pData = NULL;
 	UCHAR				*IV_DecrData=NULL;//IV len 16 ,DecrData len 
 	UCHAR				*pHash=NULL;//Reuse IV_DecrData memory
 	USHORT				WscType, WscLen, FieldCheck[7]={0,0,0,0,0,0,0};
 	
+	RTMPZeroMemory(KDK, 32);
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_VERSION))] |= (1 << WSC_TLV_BYTE1(WSC_ID_VERSION));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_MSG_TYPE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_MSG_TYPE));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_ENROLLEE_NONCE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_ENROLLEE_NONCE));
@@ -2967,13 +2987,14 @@ int ProcessMessageM5(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32], EHash[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32], EHash[32];
 	INT					EncrLen;
 	PUCHAR				pData = NULL;
 	UCHAR				*IV_DecrData=NULL;//IV len 16 ,DecrData len 
 	UCHAR				*pHash=NULL;//Reuse IV_DecrData memory
 	USHORT				WscType, WscLen, FieldCheck[7]={0,0,0,0,0,0,0};
 	
+	RTMPZeroMemory(KDK, 32);
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_VERSION))] |= (1 << WSC_TLV_BYTE1(WSC_ID_VERSION));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_MSG_TYPE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_MSG_TYPE));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_REGISTRAR_NONCE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_REGISTRAR_NONCE));
@@ -3139,13 +3160,14 @@ int ProcessMessageM6(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32], RHash[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32], RHash[32];
 	INT					EncrLen;
 	PUCHAR				pData = NULL;
 	UCHAR				*IV_DecrData=NULL;//IV len 16 ,DecrData len 
 	UCHAR				*pHash=NULL;//Reuse IV_DecrData memory
 	USHORT				WscType, WscLen, FieldCheck[7]={0,0,0,0,0,0,0};
 	
+	RTMPZeroMemory(KDK, 32);
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_VERSION))] |= (1 << WSC_TLV_BYTE1(WSC_ID_VERSION));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_MSG_TYPE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_MSG_TYPE));
 	FieldCheck[(WSC_TLV_BYTE2(WSC_ID_ENROLLEE_NONCE))] |= (1 << WSC_TLV_BYTE1(WSC_ID_ENROLLEE_NONCE));
@@ -3313,12 +3335,13 @@ int ProcessMessageM7(
 {
 	int					ret = WSC_ERROR_NO_ERROR;
 	INT				    HmacLen;
-	UCHAR				Hmac[8], KDK[32];
+	UCHAR				Hmac[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff }, KDK[32];
 	INT					EncrLen;
 	PUCHAR				pData = NULL;
 	USHORT				WscType, WscLen;
 	UCHAR				*IV_DecrData=NULL;//IV len 16 ,DecrData len 
 
+	RTMPZeroMemory(KDK, 32);
 	IV_DecrData = kmalloc(1024, MEM_ALLOC_FLAG);
 	if(NULL == IV_DecrData)
 	{
@@ -3525,7 +3548,10 @@ int ProcessMessageM8(
 				DBGPRINT(RT_DEBUG_TRACE, ("M8 ApEncrSettings len = %d\n ", EncrLen));
 
 				// Parse encryption settings
-				WscProcessCredential(pAdapter, pReg->ApEncrSettings, EncrLen, pWscControl);
+				if (WscProcessCredential(pAdapter, pReg->ApEncrSettings, EncrLen, pWscControl) == FALSE)
+				{
+					return WSC_ERROR_SETUP_LOCKED;
+				}
 				break;
 				
 			case WSC_ID_AUTHENTICATOR:

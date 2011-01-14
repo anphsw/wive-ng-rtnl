@@ -218,12 +218,30 @@ if (((__pEntry)) != NULL) \
 	(__pEntry)->OneSecTxNoRetryOkCount = 0; \
 }
 
-#ifdef RTMP_RBUS_SUPPORT
+//#ifdef RTMP_RBUS_SUPPORT
 #ifdef NEW_RATE_ADAPT_SUPPORT
+//added ys
+//added for rate adaptation by ys
+//#define NEW_RATE_ADAPT_SUPPORT//3T3R always use the new rate adaptation algorithm, regardless whether this is defined
+//#define CCK_SUPPORT
+//#define USE_NEW_THRD//not useful when (NEW_RATE_ADAPT_SUPPORT is not defined) and (2T2R)
+#define USE_GREATER_UP_MCS //rate(upMcs)> rate(thisMcs) if this is defined. otherwise, rate(upMcs)>= rate(thisMcs); meaningful when (NEW_RATE_ADAPT_SUPPORT is supported) or 3T3R
 #define PER_THRD_ADJ			1
+#define RA_PER_LOW_THRD			8
 #define FEW_PKTS_CNT_THRD 1
+//#define RA_PER_HIGH_THRD_FACTOR 90 //high thrd = 1 - (rate of lower MCS) * factor/100/(rate of this MCS), useful when NEW_RATE_ADAPT_SUPPORT and USE_NEW_THRD are defined
+
+//#if !defined(NEW_RATE_ADAPT_SUPPORT)
+//	#undef USE_NEW_THRD//actually, whether this is defined doesn't matter when !defined(NEW_RATE_ADAPT_SUPPORT). This is just for clarification.
+//	#undef USE_GREATER_UP_MCS //actually, whether this is defined doesn't matter when !defined(NEW_RATE_ADAPT_SUPPORT). This is just for clarification.
+//#endif
+//#define MAX_STREAMS 2, this information is now determined by pAd->MACVersion >= RALINK_2883_VERSION
+//#if MAX_STREAMS==3
+//	#define NEW_RATE_ADAPT_SUPPORT
+//#endif
 #endif // NEW_RATE_ADAPT_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
+//#endif // RTMP_RBUS_SUPPORT //
+
 
 
 //
@@ -277,29 +295,23 @@ typedef struct GNU_PACKED {
 #endif /* !RT_BIG_ENDIAN */
 } HT_CAP_PARM, *PHT_CAP_PARM;
 
-
-typedef struct GNU_PACKED {
-#ifdef RT_BIG_ENDIAN
-	UCHAR	TxMCSSetDefined:1; 
-	UCHAR	TxRxNotEqual:1;
-	UCHAR	TxMaxStream:2;
-	UCHAR	TxUnqualModulation:1;
-	UCHAR	rsv:3;
-#else
-	UCHAR	rsv:3;
-	UCHAR	TxUnqualModulation:1;
-	UCHAR	TxMaxStream:2;
-	UCHAR	TxRxNotEqual:1;
-	UCHAR	TxMCSSetDefined:1;
-#endif // RT_BIG_ENDIAN //
-}HT_MCS_SET_TX_SUBFIELD, *PHT_MCS_SET_TX_SUBFIELD;
-
-
 //  HT Capability INFO field in HT Cap IE .   
 typedef struct GNU_PACKED {
 	UCHAR	MCSSet[10];
 	UCHAR	SupRate[2];  // unit : 1Mbps
-	HT_MCS_SET_TX_SUBFIELD TxSubfield;
+#ifdef RT_BIG_ENDIAN
+	UCHAR	rsv:3;
+	UCHAR	MpduDensity:1;
+	UCHAR	TxStream:2;
+	UCHAR	TxRxNotEqual:1;
+	UCHAR	TxMCSSetDefined:1; 
+#else
+	UCHAR	TxMCSSetDefined:1; 
+	UCHAR	TxRxNotEqual:1;
+	UCHAR	TxStream:2;
+	UCHAR	MpduDensity:1;
+	UCHAR	rsv:3;
+#endif // RT_BIG_ENDIAN //
 	UCHAR	rsv3[3];  
 } HT_MCS_SET, *PHT_MCS_SET;
 
@@ -323,12 +335,6 @@ typedef struct GNU_PACKED {
 	USHORT	rsv2:4;
 #endif /* RT_BIG_ENDIAN */
 } EXT_HT_CAP_INFO, *PEXT_HT_CAP_INFO;
-
-// HT Explicit Beamforming Feedback Capable
-#define HT_ExBF_FB_CAP_NONE			0
-#define HT_ExBF_FB_CAP_DELAYED		1
-#define HT_ExBF_FB_CAP_IMMEDIATE		2
-#define HT_ExBF_FB_CAP_BOTH			3
 
 //  HT Beamforming field in HT Cap IE .   
 typedef struct GNU_PACKED _HT_BF_CAP{
@@ -1136,12 +1142,10 @@ typedef struct {
 #ifdef CONFIG_STA_SUPPORT
     WPA_IE_     WpaIE;
     WPA_IE_     RsnIE;
+	WPA_IE_ 	WpsIE;
 #ifdef WAPI_SUPPORT
 	WPA_IE_     WapiIE;
 #endif // WAPI_SUPPORT //
-#ifdef WSC_INCLUDED
-	WPA_IE_     WpsIE;
-#endif // WSC_INCLUDED //
 
 #ifdef EXT_BUILD_CHANNEL_LIST
 	UCHAR		CountryString[3];
@@ -1394,7 +1398,7 @@ typedef struct GNU_PACKED _RTMP_TX_RATE_SWITCH
 	UCHAR   TrainDown;
 } RRTMP_TX_RATE_SWITCH, *PRTMP_TX_RATE_SWITCH;
 
-#ifdef RTMP_RBUS_SUPPORT
+//#ifdef RTMP_RBUS_SUPPORT
 typedef struct  _RTMP_TX_RATE_SWITCH_3S
 {
 	UCHAR   ItemNo;
@@ -1422,7 +1426,7 @@ typedef struct  _RTMP_TX_RATE_SWITCH_3S
 	UCHAR	upMcs1;
 	UCHAR	dataRate;
 } RRTMP_TX_RATE_SWITCH_3S, *PRTMP_TX_RATE_SWITCH_3S;
-#endif // RTMP_RBUS_SUPPORT //
+//#endif // RTMP_RBUS_SUPPORT //
 
 // ========================== AP mlme.h ===============================
 #define TBTT_PRELOAD_TIME       384        // usec. LomgPreamble + 24-byte at 1Mbps

@@ -372,9 +372,9 @@ static inline unsigned short int icmpv6_csum(
 	
 	for (i = 0; i < len; i += 4)
 	{
-		csum += *((UINT32 *)(&pICMPMsg[i]));
-		carry = (csum < (*((UINT32 *)(&pICMPMsg[i]))));
-		csum += carry;
+		csum += get_unaligned(((UINT32 *)&pICMPMsg[i]));
+		carry = (csum < get_unaligned(((UINT32 *)&pICMPMsg[i])));
+		csum += carry;	
 	}
 
 	while (csum>>16)

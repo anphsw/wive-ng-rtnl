@@ -106,12 +106,13 @@ ACM_FUNC_STATUS ACM_EDCA_InfomationChange(
 	ULONG SplFlags;
 
 
+	/* init */
+	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
+
 	/* change EDCA parameters */
 	ACM_TSPEC_SEM_LOCK_CHK_RTN(pAd, SplFlags, LabelSemErr, ACM_RTN_FAIL);
 
 	/* copy new settings to new parameters */
-	pEdcaParam = &(ACMR_CB->EdcaCtrlParam);
-
 	if ((CpNu > 0) && (CpDe > 0))
 	{
 		pEdcaParam->CP_MinNu = CpNu;
@@ -339,11 +340,15 @@ STATIC VOID ACM_EDCA_AllocatedTimeReturn(
 #define ACM_LMR_TIME_INCREASE(time, value)	\
 	time += value;
 
-	ACM_CTRL_PARAM *pEdca = &ACMR_CB->EdcaCtrlParam;
-	ACM_TSPEC *pTspec = pStream->pTspec;
+	ACM_CTRL_PARAM *pEdca;
+	ACM_TSPEC *pTspec;
 	UINT32 TimeUsed, AcId;
 	UINT32 Direction;
 
+
+	/* init */
+	pEdca = &ACMR_CB->EdcaCtrlParam;
+	pTspec = pStream->pTspec;
 
 	/* check if the stream is EDCA */
 	if (pTspec->TsInfo.AccessPolicy != ACM_ACCESS_POLICY_EDCA)
@@ -541,6 +546,7 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 	UINT32 MpduExgTime;		/* unit: microseconds */
 	UINT32 MediumTime;		/* unit: 32 microseconds */
 	UINT32 MediumTimeOld;
+	UINT32 AcmTimeOldBi;
 	UINT32 AcId;
 	UCHAR  Direction;
 	UINT16 NormSize;
@@ -563,6 +569,7 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 	Direction = pTspec->TsInfo.Direction;
 	MediumTime = 0;
 	MediumTimeOld = 0;
+	AcmTimeOldBi = 0;
 
 	/* get minimum TXOP, maybe a packet tx time will excess the TXOP */
 	/* currently we do not use the field, TxopLimit */
@@ -726,8 +733,13 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 		/* End of if */
 
 		if (pOldStreamOut != NULL)
+		{
 			MediumTimeOld += pOldStreamOut->pTspec->MediumTime << 5;
-		/* End of if */
+
+			if (Direction == ACM_DIRECTION_BIDIREC_LINK)
+				AcmTimeOldBi = pOldStreamOut->pTspec->MediumTime << 5;
+			/* End of if */
+		} /* End of if */
 
 		if (pOldStreamDiffAc != NULL)
 			MediumTimeOld += pOldStreamDiffAc->pTspec->MediumTime << 5;
@@ -742,6 +754,7 @@ STATIC UCHAR ACM_EDCA_ReqHandle(
 									Direction,
 									MediumTimeOld,	/* old used time */
 									MediumTime,		/* new used time */
+									AcmTimeOldBi,	/* old used time */
 									NULL,
 									&DatlAcId,
 									&DatlBandwidth);
@@ -1120,7 +1133,7 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 						("acm_err> packet length %d is too small %d! "
 						"WME_11E_TSPEC_TCLAS_Translate()\n",
 						BodyLen, (ACM_ELM_ID_LEN_SIZE+ElmLen)));
-			goto label_parsing_err;
+			goto LabelParseErr;
 		} /* End of if */
 
 		/* not check *(pElm+1) = element length and
@@ -1152,7 +1165,7 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 				if (ACM_WME_11E_TSPEC_Translate(pTspec,
 												pETspec) != ACM_RTN_OK)
 				{
-					goto label_parsing_err;
+					goto LabelParseErr;
 				} /* End of if */
 				break;
 
@@ -1163,7 +1176,7 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 
 				/* sanity check for TCLAS number & element length */
 				if ((*pTclasNum) >= ACM_TCLAS_MAX_NUM)
-					goto label_parsing_err;
+					goto LabelParseErr;
 				/* End of if */
 
 				/* skip element id/len, OUI header, user priority */
@@ -1173,24 +1186,24 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 				{
 					case ACM_TCLAS_TYPE_ETHERNET:
 						if (ElmLen != ACM_TCLAS_TYPE_WME_ETHERNET_LEN)
-							goto label_parsing_err;
+							goto LabelParseErr;
 						/* End of if */
 						break;
 
 					case ACM_TCLAS_TYPE_IP_V4:
 						if (ElmLen != ACM_TCLAS_TYPE_WME_IP_V4_LEN)
-							goto label_parsing_err;
+							goto LabelParseErr;
 						/* End of if */
 						break;
 
 					case ACM_TCLAS_TYPE_8021DQ:
 						if (ElmLen != ACM_TCLAS_TYPE_WME_8021DQ_LEN)
-							goto label_parsing_err;
+							goto LabelParseErr;
 						/* End of if */
 						break;
 
 					default:
-						goto label_parsing_err;
+						goto LabelParseErr;
 				} /* End of switch */
 
 				pElmTclas = (ACM_ELM_WME_TCLAS *)pElm;
@@ -1199,7 +1212,7 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 
 			case ACM_WSM_OUI_SUBTYPE_TCLAS_PROCESSING: /* TCLASS Processing */
 				if (ElmLen != ACM_ELM_WME_TCLAS_PROCESSING_LEN)
-					goto label_parsing_err;
+					goto LabelParseErr;
 				/* End of if */
 
 				ACMR_DEBUG(ACMR_DEBUG_TRACE,
@@ -1218,7 +1231,7 @@ STATIC ACM_FUNC_STATUS ACM_WME_11E_TSPEC_TCLAS_Translate(
 
 	return ACM_RTN_OK;
 
-label_parsing_err:
+LabelParseErr:
 	return ACM_RTN_FAIL;
 } /* End of ACM_WME_11E_TSPEC_TCLAS_Translate */
 

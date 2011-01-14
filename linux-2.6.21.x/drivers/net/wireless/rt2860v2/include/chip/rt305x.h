@@ -49,9 +49,9 @@
 
 
 extern REG_PAIR   RT305x_RFRegTable[];
-extern REG_PAIR   RT305x_BBPRegTable[];
-extern UCHAR 	RT305x_NUM_BBP_REG_PARMS;
 
+extern REG_PAIR   RT305x_BBPRegTable[];
+extern UCHAR RT305x_NUM_BBP_REG_PARMS;
 
 #ifdef CARRIER_DETECTION_SUPPORT
 #define TONE_RADAR_DETECT_SUPPORT

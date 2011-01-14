@@ -313,7 +313,9 @@
 	/* update new available ACM time */
 #define ACMR_AVAIL_ACM_TIME_UPDATE(__pAd, __Time)		        		\
 		(__pAd)->AcmAvalCap = (UINT16)(ACM_TIME_BASE >> 5);				\
-		(__pAd)->AcmAvalCap -= (UINT16)((__Time)>>5);
+		(__pAd)->AcmAvalCap -= (UINT16)((__Time)>>5);					\
+		((ACM_CTRL_BLOCK *)pAd->pACM_Ctrl_BK)->EdcaCtrlParam.AvalAdmCap = \
+			(__pAd)->AcmAvalCap;
 
 	/* get original settings for AIFSN */
 #define ACMR_AIFSN_DEFAULT_GET(__pAd, __AifsnAp, __AifsnBss)				\
@@ -341,7 +343,7 @@
 	/* check if the rate is a supported rate for non-11n */
 #define ACMR_SUP_RATE_CHECK(__pAd, __Rate, __FlgIsSupRate)				\
 		{																\
-			UCHAR __RateIndex = ((__Rate) / 1000000) << 1;				\
+			UCHAR __RateIndex = ((__Rate << 1) / 1000000);				\
 			UCHAR __IdRate, __RateLen;									\
 			UCHAR *__pRateSup, *__pRateExt;								\
 			__FlgIsSupRate = 0;											\
@@ -1806,6 +1808,7 @@ ACM_EXTERN ACM_FUNC_STATUS ACMP_BandwidthInfoGet(
 	ACM_PARAM_IN	ACMR_PWLAN_STRUC		pAd,
 	ACM_PARAM_OUT	ACM_BANDWIDTH_INFO		*pInfo);
 
+#ifdef CONFIG_STA_SUPPORT
 /*
 ========================================================================
 Routine Description:
@@ -1829,6 +1832,7 @@ ACM_EXTERN ACM_FUNC_STATUS ACMP_BandwidthInfoSet(
 	ACM_PARAM_IN	UINT16					StationCount,
 	ACM_PARAM_IN	UINT8					ChanUtil,
 	ACM_PARAM_IN	UINT16					AvalAdmCap);
+#endif // CONFIG_STA_SUPPORT //
 
 /*
 ========================================================================

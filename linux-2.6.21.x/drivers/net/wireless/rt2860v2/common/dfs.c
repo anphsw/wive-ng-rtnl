@@ -111,8 +111,8 @@ UCHAR RdIdleTimeTable[MAX_RD_REGION][4] =
 };
 
 #ifdef TONE_RADAR_DETECT_SUPPORT
-void ToneRadarProgram(PRTMP_ADAPTER pAd);
-void ToneRadarEnable(PRTMP_ADAPTER pAd);
+static void ToneRadarProgram(PRTMP_ADAPTER pAd);
+static void ToneRadarEnable(PRTMP_ADAPTER pAd);
 #endif // TONE_RADAR_DETECT_SUPPORT //
 
 #ifdef DFS_SUPPORT
@@ -160,6 +160,8 @@ VOID BbpRadarDetectionStart(
 		{
 			pAd->CommonCfg.RadarDetect.DfsSessionTime = 15;
 		}
+
+
 	}
 #endif // RTMP_RBUS_SUPPORT //
 
@@ -635,7 +637,6 @@ VOID RadarDetectPeriodic(
 #endif // DFS_SUPPORT //
 		}
 #endif // CONFIG_AP_SUPPORT //
-
 		return;
 	}
 
@@ -876,6 +877,7 @@ void RadarSMDetect(
 }
 
 #ifdef RTMP_RBUS_SUPPORT
+
 VOID AdaptRadarDetection(
 	IN PRTMP_ADAPTER pAd)
 {
@@ -1071,9 +1073,9 @@ VOID AdaptRadarDetection(
 		
 	RadarDetectionStart(pAd, CtsProtect, RadarPeriod);
 }
+
 #endif // RTMP_RBUS_SUPPORT //
 #endif // DFS_SOFTWARE_SUPPORT //
-
 
 VOID DFSStartTrigger(
 	IN PRTMP_ADAPTER pAd)
@@ -1116,7 +1118,6 @@ INT Set_FastDfs_Proc(
 
 	return TRUE;
 }
-
 #ifdef DFS_SOFTWARE_SUPPORT
 static BOOLEAN RadarSignalDetermination(
 	IN PRTMP_ADAPTER pAd,
@@ -1265,16 +1266,14 @@ static ULONG cd_idx=0;
 #endif // CARRIER_DETECTION_SUPPORT //
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #if defined (DFS_SUPPORT) || defined (CARRIER_DETECTION_SUPPORT)
-#if defined (TONE_RADAR_DETECT_SUPPORT) || defined (RTMP_RBUS_SUPPORT) || defined (DFS_INTERRUPT_SUPPORT)
+#if defined (TONE_RADAR_DETECT_SUPPORT) || defined (DFS_INTERRUPT_SUPPORT)
 
 void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd)
 {
 #ifdef CARRIER_DETECTION_SUPPORT
 #ifdef TONE_RADAR_DETECT_SUPPORT 
 	UINT32 value, delta;
-#ifdef TONE_RADAR_DETECT_V2 
 	UCHAR bbp=0;
-#endif // TONE_RADAR_DETECT_V2 //
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 #ifdef DFS_SUPPORT
@@ -1379,6 +1378,7 @@ VOID CarrierDetectionFsm(
 	IN UINT32 CurFalseCCA)
 {
 #define CAR_SAMPLE_NUM 3
+
 
 	INT i;
 	BOOLEAN bCarExist = TRUE;
@@ -1596,7 +1596,6 @@ INT Set_CarrierDetect_Proc(
 
 	return TRUE;
 }
-
 #ifdef TONE_RADAR_DETECT_SUPPORT
 INT Set_CarrierCriteria_Proc(
 	IN PRTMP_ADAPTER 	pAd, 
@@ -1624,42 +1623,47 @@ INT Set_CarrierReCheck_Proc(
 	return TRUE;
 }
 
-void ToneRadarProgram(PRTMP_ADAPTER pAd)
+
+
+
+
+
+
+static void ToneRadarProgram(PRTMP_ADAPTER pAd)
 {
 	UCHAR bbp;
 
 #ifdef TONE_RADAR_DETECT_V1
-	if(pAd->CommonCfg.carrier_func==TONE_RADAR_V1)
-	{
-		// programe delta delay & division bit
-		DBGPRINT(RT_DEBUG_TRACE, ("3090 ToneRadarProgram\n"));
+		if(pAd->CommonCfg.carrier_func==TONE_RADAR_V1)
+		{	// programe delta delay & division bit
+	DBGPRINT(RT_DEBUG_TRACE, ("3090 ToneRadarProgram\n"));
 
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0xf0);
-		bbp = pAd->CommonCfg.CarrierDetect.delta << 4;
-		bbp |= (pAd->CommonCfg.CarrierDetect.div_flag & 0x1) << 3;
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, bbp);
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0xf0);
+	bbp = pAd->CommonCfg.CarrierDetect.delta << 4;
+	bbp |= (pAd->CommonCfg.CarrierDetect.div_flag & 0x1) << 3;
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, bbp);
+	
+	// program threshold
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x34);
+			BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff000000) >> 24);
+	
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x24);
+			BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff0000) >> 16);
+	
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x14);
+			BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff00) >> 8);
 
-		// program threshold
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x34);
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff000000) >> 24);
-
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x24);
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff0000) >> 16);
-
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x14);
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff00) >> 8);
-
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x04);
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.threshold & 0xff);
-	}
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x04);
+			BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.threshold & 0xff);
+		}
 #endif // TONE_RADAR_DETECT_V1 //
 
 
 #ifdef TONE_RADAR_DETECT_V2
 	if(pAd->CommonCfg.carrier_func==TONE_RADAR_V2)
 	{
-	
-	
+
+
 	// programe delta delay & division bit
 		DBGPRINT(RT_DEBUG_TRACE, ("3390/3090A ToneRadarProgram\n"));
 	
@@ -1668,23 +1672,23 @@ void ToneRadarProgram(PRTMP_ADAPTER pAd)
 		bbp |= 0x10<<4;
 		bbp |= (pAd->CommonCfg.CarrierDetect.div_flag & 0x1) << 6;
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, bbp);
-		// program *_mask
+	// program *_mask
 		//RTMP_CARRIER_IO_WRITE8(pAd, 2, pAd->CommonCfg.CarrierDetect.VGA_Mask);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x02);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.VGA_Mask);
 		//RTMP_CARRIER_IO_WRITE8(pAd, 3, pAd->CommonCfg.CarrierDetect.Packet_End_Mask);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x03);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.Packet_End_Mask);
-
+	
 		//RTMP_CARRIER_IO_WRITE8(pAd, 4, pAd->CommonCfg.CarrierDetect.Rx_PE_Mask);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x04);
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.Rx_PE_Mask);
-
 	
+
 	// program threshold
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x09);
 	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff000000) >> 24);
-	
+
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x08);
 	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, (pAd->CommonCfg.CarrierDetect.threshold & 0xff0000) >> 16);
 	
@@ -1694,20 +1698,21 @@ void ToneRadarProgram(PRTMP_ADAPTER pAd)
 		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x06);
 	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R185, pAd->CommonCfg.CarrierDetect.threshold & 0xff);
 	}
-
+	
 #endif // TONE_RADAR_DETECT_V2 //
 
 }
 
-void ToneRadarEnable(PRTMP_ADAPTER pAd)
+static void ToneRadarEnable(PRTMP_ADAPTER pAd)
 {
 
 #ifdef TONE_RADAR_DETECT_V1
-	if(pAd->CommonCfg.carrier_func==TONE_RADAR_V1)
-	{
-		BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x05);
-		DBGPRINT(RT_DEBUG_TRACE, ("3090 ToneRadarEnable\n"));
-	}
+if(pAd->CommonCfg.carrier_func==TONE_RADAR_V1)
+{
+	BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R184, 0x05);
+	DBGPRINT(RT_DEBUG_TRACE, ("3090 ToneRadarEnable\n"));
+
+}
 #endif // TONE_RADAR_DETECT_V1 //
 
 #ifdef TONE_RADAR_DETECT_V2
@@ -1760,24 +1765,6 @@ void NewCarrierDetectionStart(PRTMP_ADAPTER pAd)
 
 #ifdef DFS_SUPPORT
 #ifdef DFS_SOFTWARE_SUPPORT
-#ifdef WORKQUEUE_BH
-void pulse_radar_detect_workq(struct work_struct *work)
-{
-	POS_COOKIE pObj = container_of(work, struct os_cookie, pulse_radar_detect_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-	
-	RadarSMDetect(pAd, RADAR_PULSE);
-}
-
-
-void width_radar_detect_workq(struct work_struct *work)
-{
-	POS_COOKIE pObj = container_of(work, struct os_cookie, width_radar_detect_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-	
-	RadarSMDetect(pAd, RADAR_WIDTH);
-}
-#else
 void pulse_radar_detect_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
@@ -1797,21 +1784,11 @@ void width_radar_detect_tasklet(unsigned long data)
 
 	RadarSMDetect(pAd, RADAR_WIDTH);
 }
-#endif // WORKQUEUE_BH //
 #endif // DFS_SOFTWARE_SUPPORT //
 #endif // DFS_SUPPORT //
 
 
 #ifdef CARRIER_DETECTION_SUPPORT
-#ifdef WORKQUEUE_BH
-void carrier_sense_workq(struct work_struct *work)
-{
-	POS_COOKIE pObj = container_of(work, POS_COOKIE, carrier_sense_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-	
-	CarrierDetectionCheck(pAd);
-}
-#else
 void carrier_sense_tasklet(unsigned long data)
 {
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
@@ -1821,7 +1798,6 @@ void carrier_sense_tasklet(unsigned long data)
 
 	CarrierDetectionCheck(pAd);
 }
-#endif // WORKQUEUE_BH //
 #endif // CARRIER_DETECTION_SUPPORT //
 
 

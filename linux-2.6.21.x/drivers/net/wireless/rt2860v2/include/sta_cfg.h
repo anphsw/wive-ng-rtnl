@@ -36,11 +36,5 @@ INT RTMPSTAPrivIoctlSet(
 	IN PSTRING SetProcName,
 	IN PSTRING ProcArg);
 
-#ifdef RTMP_RF_RW_SUPPORT
-VOID RTMPIoctlRF(
-	IN	PRTMP_ADAPTER	pAdapter, 
-	IN	struct iwreq	*wrq);
-#endif // RTMP_RF_RW_SUPPORT //
-
 #endif // __STA_CFG_H__ //
 

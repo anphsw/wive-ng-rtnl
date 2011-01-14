@@ -192,17 +192,11 @@ dma_addr_t linux_pci_map_single(void *handle, void *ptr, size_t size, int sd_idx
 	{
 		PTX_BLK		pTxBlk;
 		pTxBlk = (PTX_BLK)ptr;
-		if (pTxBlk->SrcBufLen > 0)
 		return pci_map_single(pObj->pci_dev, pTxBlk->pSrcBufData, pTxBlk->SrcBufLen, direction);
-		else
-			return (dma_addr_t)NULL;
 	}
 	else
 	{
-		if (size > 0)
 		return pci_map_single(pObj->pci_dev, ptr, size, direction);
-		else
-			return (dma_addr_t)NULL;
 	}
 
 }

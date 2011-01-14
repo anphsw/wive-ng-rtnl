@@ -60,6 +60,11 @@ NDIS_STATUS APSendPacket(
     IN  PRTMP_ADAPTER   pAd,
     IN  PNDIS_PACKET    pPacket);
 
+NDIS_STATUS APInsertPsQueue(
+	IN PRTMP_ADAPTER pAd,
+	IN PNDIS_PACKET pPacket,
+	IN MAC_TABLE_ENTRY *pMacEntry,
+	IN UCHAR QueIdx);
 
 NDIS_STATUS APHardTransmit(
 	IN	PRTMP_ADAPTER	pAd,
@@ -292,6 +297,12 @@ VOID APMlmeSetTxRate(
 	IN PMAC_TABLE_ENTRY		pEntry,
 	IN PRTMP_TX_RATE_SWITCH	pTxRate);
 
+VOID APMlmeSelectRateSwitchTable11N3SReplacement(
+	IN PUCHAR	*ppTable);
+
+#ifdef RTMP_RBUS_SUPPORT
+#endif // RTMP_RBUS_SUPPORT //
+
 VOID APMlmeDynamicTxRateSwitching(
     IN PRTMP_ADAPTER pAd);
 
@@ -312,7 +323,6 @@ VOID APQuickResponeForRateUpExec(
     IN PVOID FunctionContext, 
     IN PVOID SystemSpecific2, 
     IN PVOID SystemSpecific3);
-
 
 #ifdef NEW_RATE_ADAPT_SUPPORT
 VOID APMlmeDynamicTxRateSwitchingAdapt(
@@ -511,8 +521,7 @@ BOOLEAN DOT1X_EapTriggerAction(
 #ifdef DOT11_N_SUPPORT
 #ifdef GREENAP_SUPPORT
 VOID EnableAPMIMOPS(
-    IN PRTMP_ADAPTER pAd,
-    IN BOOLEAN ReduceCorePower);
+    IN PRTMP_ADAPTER pAd, IN BOOLEAN ReduceCorePower);
 
 VOID DisableAPMIMOPS(
     IN PRTMP_ADAPTER pAd);

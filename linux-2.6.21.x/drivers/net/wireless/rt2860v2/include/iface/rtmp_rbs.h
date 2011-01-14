@@ -104,8 +104,10 @@ extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 
 #ifdef DFS_SUPPORT
 // TODO: Check these functions.
+#ifdef RTMP_RBUS_SUPPORT
 extern void unregister_tmr_service(void);
 extern void request_tmr_service(int, void *, void *);
+#endif // RTMP_RBUS_SUPPORT //
 
 #endif // DFS_SUPPORT //
 
