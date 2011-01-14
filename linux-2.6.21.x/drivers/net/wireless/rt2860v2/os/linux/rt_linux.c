@@ -1590,8 +1590,8 @@ void RTMP_IndicateMediaState(
 	IN	PRTMP_ADAPTER		pAd,
 	IN  NDIS_MEDIA_STATE	media_state)
 {	
-#ifdef SYSTEM_LOG_SUPPORT
 		pAd->IndicateMediaState = media_state;
+#ifdef SYSTEM_LOG_SUPPORT
 		if (pAd->IndicateMediaState == NdisMediaStateConnected)
 		{
 			RTMPSendWirelessEvent(pAd, IW_STA_LINKUP_EVENT_FLAG, pAd->MacTab.Content[BSSID_WCID].Addr, BSS0, 0);
