@@ -69,7 +69,7 @@ check_nvram()
 	nvram_set 2860 SmbString "$SmbString"
     fi
     #if check mac in nvram set to not NO and web not start
-    if [ $CHECKMAC != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
+    if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
  	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
 	    $LOG "First start MAC generate"
     	    macinc1=`cat /dev/urandom | hexdump | head -n 1 | cut -c10,10`
