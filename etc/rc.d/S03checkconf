@@ -25,6 +25,7 @@ get_param() {
     WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
     LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`
     HOSTNAME_NVRAM=`nvram_get 2860 HostName`
+    CHECKMAC=`nvram_get 2860 CHECKMAC`
 }
 
 check_nvram()
