@@ -1,5 +1,5 @@
 VPATH = src
-CFLAGS += -Os -pipe -mips32 -mtune=mips32 -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+CFLAGS += -Os -pipe -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
 LD= $(CC)
 OS_LAYER = osl-linux.c
 

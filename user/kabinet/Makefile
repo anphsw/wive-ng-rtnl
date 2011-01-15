@@ -3,10 +3,10 @@
 LDFLAGS += -s
 LIBS = md5.o rmd160.o
 lanauth: lanauth.o $(LIBS)
-	$(CC) $(CCFLAGS) $(LDFLAGS) lanauth.o -o lanauth $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) lanauth.o -o lanauth $(LIBS)
 
 %.o: %.c
-	$(CC) $(CCFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 clean:
 	rm -f *.o lanauth

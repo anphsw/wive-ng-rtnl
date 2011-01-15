@@ -65,11 +65,6 @@ NOEXT_TRAFFIC=y
 # HAS_SHADOW=y
 # USE_PAM=y
 
-ifdef CONFIG_IPV6                                                                                                            
- CFLAGS += -DINET6                                                                                                           
- HAVE_INET6=y                                                                                                                
-endif    
-
 # persist for wive
 # EMBPERSIST=y
 
@@ -94,8 +89,12 @@ endif
 
 COMPILE_FLAGS= -DHAVE_PATHS_H -DIPX_CHANGE -DHAVE_MMAP
 
-CFLAGS= $(COPTS) $(COMPILE_FLAGS) $(INCLUDE_DIRS) '-DDESTDIR="@DESTDIR@"'
+CFLAGS += $(COPTS) $(COMPILE_FLAGS) $(INCLUDE_DIRS) '-DDESTDIR="@DESTDIR@"'
 
+ifdef CONFIG_IPV6
+CFLAGS += -DINET6
+HAVE_INET6=y
+endif    
 ifdef CHAPMS
 CFLAGS   += -DCHAPMS=1
 NEEDDES=y

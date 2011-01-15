@@ -25,8 +25,8 @@ INSTALL	= install
 # Version is set ONLY IN THE MAKEFILE!  Don't delete this!
 RP_VERSION=3.10p
 
-COPTS=-Os -g
-CFLAGS=$(COPTS) -I../../../include '-DRP_VERSION="$(RP_VERSION)"'
+CFLAGS += $(COPTS) -I../../../include '-DRP_VERSION="$(RP_VERSION)"'
+
 all: rp-pppoe.so pppoe-discovery
 
 pppoe-discovery: pppoe-discovery.o debug.o

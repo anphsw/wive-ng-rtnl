@@ -1,6 +1,4 @@
-#CC	= gcc
-COPTS	= -Os -g
-CFLAGS	= $(COPTS) -I. -I../.. -I../../../include -fPIC
+CFLAGS	+= $(COPTS) -I. -I../.. -I../../../include -fPIC
 LDFLAGS	= -shared
 INSTALL	= install
 

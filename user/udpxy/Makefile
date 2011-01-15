@@ -26,7 +26,7 @@ UDPXREC := udpxrec
 
 MKDEPOPT := -M
 DEBUG_ON := -g
-CFLAGS = -Os --pedantic -W -Wall $(INCLUDES)
+CFLAGS += -Os --pedantic -W -Wall $(INCLUDES)
 # -Werror
 SYSTEM=$(shell uname 2>/dev/null)
 ifeq ($(SYSTEM), FreeBSD)

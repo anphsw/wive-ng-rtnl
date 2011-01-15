@@ -37,8 +37,8 @@ PPPOE_RELAY=pppoe-relay
 SHDIR = $(ROOTDIR)/user/shared
 USERDIR = $(ROOTDIR)/user
 
-CFLAGS= -s -Os -I. -DVERSION=3.5
-CFLAGS  += -I. -I$(SHDIR)/include -I$(ROOTDIR)/linux-2.6.21.x/include
+CFLAGS += -s -Os -I. -DVERSION=3.5
+CFLAGS += -I. -I$(SHDIR)/include -I$(ROOTDIR)/linux-2.6.21.x/include
 TARGET=pppoe-relay
 
 all: $(TARGET)

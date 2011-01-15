@@ -939,4 +939,13 @@ extern void (*snoop_send_hook) __P((unsigned char *p, int len));
 #define offsetof(type, member) ((size_t) &((type *)0)->member)
 #endif
 
+#ifndef PPP_EAP                                                                                                                             
+#define PPP_EAP         0xc227  /* Extensible Authentication Protocol */                                                                    
+#endif
+#ifndef PPP_ECP
+#define PPP_ECP         0x8053  /* Encryption Control Protocol */
+#endif
+#ifndef PPP_FCS
+#define PPP_FCS(fcs, c) (((fcs) >> 8) ^ fcstab[((fcs) ^ (c)) & 0xff])
+#endif
 #endif /* __PPP_H__ */

@@ -38,10 +38,9 @@ INCDIR:=$(PREFIX)/include
 # directory for new iptables releases
 RELEASE_DIR:=/tmp
 
-#COPT_FLAGS:=-Os
-#CFLAGS:=$(COPT_FLAGS) -Wall -Wunused -I$(KERNEL_DIR)/include -Iinclude/ -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" #-g -DDEBUG #-pg # -DIPTC_DEBUG
-CFLAGS := -Wall -Wunused -I$(ROOTDIR)/linux-2.6.21.x/include -Iinclude/ -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" -Os
-#$(CFLAGS)
+CFLAGS := -Wall -Wunused -mips32r2 -mtune=24kec
+CFLAGS +=  -I$(ROOTDIR)/linux-2.6.21.x/include  -Iinclude/ 
+CFLAGS += -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\" -Os
 
 ifdef NO_SHARED_LIBS
 CFLAGS += -DNO_SHARED_LIBS=1

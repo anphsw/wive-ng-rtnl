@@ -1,5 +1,4 @@
-#CC = mipsel-linux-gcc
-CFLAGS = -Wall -W
+CFLAGS += -Wall -W
 COPTS=-DNO_IPV6
 
 OBJS = cache.o rfc1035.o util.o option.o forward.o network.o \
