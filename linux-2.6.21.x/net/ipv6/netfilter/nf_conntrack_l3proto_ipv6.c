@@ -36,8 +36,10 @@
 #include <net/netfilter/nf_conntrack_l4proto.h>
 #include <net/netfilter/nf_conntrack_l3proto.h>
 #include <net/netfilter/nf_conntrack_core.h>
+
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../../nat/hw_nat/ra_nat.h"
+#endif
 
 #if 0
 #define DEBUGP printk
