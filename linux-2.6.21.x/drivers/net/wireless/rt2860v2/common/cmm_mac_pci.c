@@ -405,6 +405,9 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 {
 	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
 	INT			num;
+#ifdef DEBUG
+	INT			index = 0;
+#endif
 	ULONG			ErrorValue = 0;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPAllocTxRxRingMemory\n"));
@@ -458,7 +461,9 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 				break;
 			}
 
+#ifdef DEBUG
 			DBGPRINT(RT_DEBUG_TRACE, ("TxRing[%d]: total %d entry allocated\n", num, index));
+#endif
 		}
 		if (Status == NDIS_STATUS_RESOURCES)
 			break;
@@ -481,8 +486,9 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 			Status = NDIS_STATUS_RESOURCES;
 			break;
 		}
+#ifdef DEBUG
 		DBGPRINT(RT_DEBUG_TRACE, ("MGMT Ring: total %d entry allocated\n", index));
-
+#endif
 
 		//
 		// Allocate RX ring descriptor's memory except Tx ring which allocated eariler
@@ -502,7 +508,9 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 			Status = NDIS_STATUS_RESOURCES;
 			break;
 		}
+#ifdef DEBUG
 		DBGPRINT(RT_DEBUG_TRACE, ("Rx Ring: total %d entry allocated\n", index));
+#endif
 
 	}	while (FALSE);
 
@@ -556,7 +564,6 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
 	PRTMP_TX_RING	pTxRing;
 	PRTMP_DMABUF	pDmaBuf;
 	PNDIS_PACKET	pPacket;
-//	PRTMP_REORDERBUF	pReorderBuf;
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> RTMPAllocTxRxRingMemory\n"));
 	do

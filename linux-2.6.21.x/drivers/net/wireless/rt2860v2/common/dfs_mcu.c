@@ -897,10 +897,7 @@ NewDFSValidRadar NewDFSValidTable[] =
 
 static void dfs_sw_init(PRTMP_ADAPTER pAd);
 
-
-
-#ifdef DFS_1_SUPPORT 
-
+#ifdef DFS_1_SUPPORT
 typedef struct _NewDFSProgParam
 {
 	UCHAR channel;
@@ -916,14 +913,11 @@ typedef struct _NewDFSProgParam
 	USHORT EpsilonT;
 }NewDFSProgParam, *pNewDFSProgParam;
 
-
 typedef struct _NewDFSTable
 {
 	USHORT type;
 	NewDFSProgParam entry[NEW_DFS_MAX_CHANNEL];
 }NewDFSTable, *pNewDFSTable;
-
-
 
 static NewDFSTable NewDFSTable1[] = 
 {
@@ -966,7 +960,6 @@ static NewDFSTable NewDFSTable1[] =
 
 };
 
-
 #define NEW_DFS_BANDWITH_MONITOR_TIME (NEW_DFS_CHECK_TIME / NEW_DFS_CHECK_TIME_TASKLET)
 #define NEW_DFS_CHECK_TIME			300
 #define NEW_DFS_CHECK_TIME_TASKLET		2
@@ -978,6 +971,7 @@ static NewDFSTable NewDFSTable1[] =
 
 #define DFS_SW_RADAR_CH0_ERR		8
 #define DFS_SW_RADAR_PERIOD_ERR		4
+#define DFS_SW_RADAR_SHIFT              3
 
 #define CE_STAGGERED_RADAR_CH0_H_ERR		(DFS_SW_RADAR_CH0_ERR + 16) // the step is 16 for every 0.1 us different in width
 #define CE_STAGGERED_RADAR_PERIOD_MAX		(133333 + 125000 + 117647 + 1000)
@@ -2901,10 +2895,7 @@ int SWRadarCheck(
 }
 #endif // DFS_1_SUPPORT
 
-
 #ifdef DFS_2_SUPPORT
-
-
 typedef struct _NewDFSProgParam
 {
 
@@ -2939,9 +2930,46 @@ typedef struct _NewDFSTable
 	NewDFSProgParam entry[NEW_DFS_MAX_CHANNEL];
 }NewDFSTable, *pNewDFSTable;
 
+static NewDFSTable NewDFSTable1[] = 
+{
+	{
+		NEW_DFS_FCC,
+		{
+		{0, 0,  20,  18,  26,   10, 2000, 1,  3000, 30000, 5},
+		{1, 0, 100, 100, 140,   12, 2000, 3,  2500, 30000, 5},
+		{2, 0, 100,  60, 120,   12, 2000, 3,  3000, 30000, 5},
+		{3, 2, 200,  20, 150, 300, 2000,  50, 15000, 45000, 200},
+		}
+	},
+	{
+		NEW_DFS_EU,
+		{
+		{0, 0, 12,	16,	20,	10,	1000,	1, 4900, 101000, 5},
+		{1, 0, 70,	80,110, 20, 2000,	3, 4900, 101000, 5},
+		{2, 0, 80,	60, 120, 20, 3000,	3, 4900, 101000, 5},
+		{3, 3, 250,	20, 200, 300,4000,	50, 4900, 10100, 200},
+		}
+	},
+	{
+		NEW_DFS_JAP,
+		{
+		{0, 0, 10,  10,  16,   3,  2000,  1,  2990, 85000, 10},
+		{1, 0, 70, 80, 110,   20, 2000, 3,  2990, 85000, 10},
+		{2, 0, 80,  60, 120,   20, 2000, 3,  2990, 85000, 10},
+		{3, 2, 200,  60, 160, 320, 2000,  50, 15000, 45000, 200},
+		}
+	},
+	{
+		NEW_DFS_JAP_W53,
+		{
+		{0, 0, 12,  10,  16,   12,  2000,  1,  28000, 85000, 10},
+		{1, 0, 32, 30, 40,   20, 2000, 3,  28000, 85000, 10},
+		{2, 0, 80,  60, 120,   20, 2000, 3,  28000, 85000, 10},
+		{3, 2, 200,  20, 150, 300, 2000,  50, 15000, 45000, 200},
+		}
+	},
 
-
-
+};
 
 #define NEW_DFS_BANDWITH_MONITOR_TIME (NEW_DFS_CHECK_TIME / NEW_DFS_CHECK_TIME_TASKLET)
 #define NEW_DFS_CHECK_TIME			300
@@ -2969,7 +2997,7 @@ typedef struct _NewDFSTable
  	IN PRTMP_ADAPTER pAd)
 
 {
-#ifndef DFS_INTERRUPT_SUPPORT
+#if 0
 	PRTMP_ADAPTER pAd = (PRTMP_ADAPTER)FunctionContext;
 #endif // RTMP_RBUS_SUPPORT //
 	UCHAR channel=0;

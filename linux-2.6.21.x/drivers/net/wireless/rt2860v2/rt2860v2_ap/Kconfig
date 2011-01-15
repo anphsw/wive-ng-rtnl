@@ -73,8 +73,8 @@ config  RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY
 	bool "Antenna Diversity Support"
 	depends on RT2860V2_AP
 
-config  RT2860V2_AP_COC
-	bool "CoC Support"
+config  RT2860V2_AP_GREENAP
+	bool "Green AP mode support"
 	depends on RT2860V2_AP
 
 config  RT2860V2_AP_MEMORY_OPTIMIZATION

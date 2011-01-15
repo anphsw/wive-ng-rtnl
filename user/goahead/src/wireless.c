@@ -58,7 +58,7 @@ int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* 
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
 static int  isAntennaDiversityBuilt(int eid, webs_t wp, int argc, char_t **argv);
-#ifdef CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY
+#if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 static void AntennaDiversity(webs_t wp, char_t *path, char_t *query);
 static void getAntenna(webs_t wp, char_t *path, char_t *query);
 #endif
@@ -86,7 +86,7 @@ void formDefineWireless(void) {
 #ifdef CONFIG_RT2860V2_AP_MESH
 	websAspDefine(T("ShowMeshState"), ShowMeshState);
 #endif
-#ifdef CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY
+#if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 	websFormDefine(T("AntennaDiversity"), AntennaDiversity);
 	websFormDefine(T("getAntenna"), getAntenna);
 #endif
@@ -1891,7 +1891,7 @@ static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-#ifdef CONFIG_RT2860V2_RT3XXX_ANTENNA_DIVERSITY
+#if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 void AntennaDiversityInit(void)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "AntennaDiversity");

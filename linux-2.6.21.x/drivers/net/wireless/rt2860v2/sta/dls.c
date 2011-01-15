@@ -2096,8 +2096,9 @@ INT Set_DlsEntryInfo_Display_Proc(
 	{
 		if ((pAd->StaCfg.DLSEntry[i].Valid) && (pAd->StaCfg.DLSEntry[i].Status == DLS_FINISH))
 		{
+#ifdef DEBUG
 			PMAC_TABLE_ENTRY pEntry = &pAd->MacTab.Content[pAd->StaCfg.DLSEntry[i].MacTabMatchWCID];
-
+#endif
 			DBGPRINT(RT_DEBUG_OFF, ("%02x:%02x:%02x:%02x:%02x:%02x  ",
 				pAd->StaCfg.DLSEntry[i].MacAddr[0], pAd->StaCfg.DLSEntry[i].MacAddr[1], pAd->StaCfg.DLSEntry[i].MacAddr[2],
 				pAd->StaCfg.DLSEntry[i].MacAddr[3], pAd->StaCfg.DLSEntry[i].MacAddr[4], pAd->StaCfg.DLSEntry[i].MacAddr[5]));
@@ -2108,6 +2109,7 @@ INT Set_DlsEntryInfo_Display_Proc(
 #ifdef DOT11_N_SUPPORT			
 			DBGPRINT(RT_DEBUG_OFF, ("%-8s%-10s%-6s%-6s%-6s%-6s", "MIMOPS", "PhMd", "BW", "MCS", "SGI", "STBC"));
 #endif // DOT11_N_SUPPORT //
+#ifdef DEBUG
 			DBGPRINT(RT_DEBUG_OFF, ("\n%02X:%02X:%02X:%02X:%02X:%02X  ",
 				pEntry->Addr[0], pEntry->Addr[1], pEntry->Addr[2],
 				pEntry->Addr[3], pEntry->Addr[4], pEntry->Addr[5]));
@@ -2129,7 +2131,7 @@ INT Set_DlsEntryInfo_Display_Proc(
 			DBGPRINT(RT_DEBUG_OFF, ("%-10d, %d, %d%%\n", pEntry->DebugFIFOCount, pEntry->DebugTxCount, 
 						(pEntry->DebugTxCount) ? ((pEntry->DebugTxCount-pEntry->DebugFIFOCount)*100/pEntry->DebugTxCount) : 0));
 			DBGPRINT(RT_DEBUG_OFF, ("\n"));
-
+#endif
 		}
 	}
 

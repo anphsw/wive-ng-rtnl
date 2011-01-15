@@ -562,6 +562,7 @@ VOID RT3XXX_AntDiversity_Init(IN PRTMP_ADAPTER pAd)
 		printk (KERN_ERR "%s() unable to init kernel thread\n", __FUNCTION__);
 	return;
 }
+EXPORT_SYMBOL(RT3XXX_AntDiversity_Init);
 
 VOID RT3XXX_AntDiversity_Fini(IN PRTMP_ADAPTER pAd)
 {
@@ -569,5 +570,4 @@ VOID RT3XXX_AntDiversity_Fini(IN PRTMP_ADAPTER pAd)
     RtmpOSTaskKill(&pAd->ADTask);
 	return;
 }
-
-
+EXPORT_SYMBOL(RT3XXX_AntDiversity_Fini);

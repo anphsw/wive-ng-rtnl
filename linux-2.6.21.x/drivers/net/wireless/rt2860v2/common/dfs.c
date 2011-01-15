@@ -111,8 +111,8 @@ UCHAR RdIdleTimeTable[MAX_RD_REGION][4] =
 };
 
 #ifdef TONE_RADAR_DETECT_SUPPORT
-static void ToneRadarProgram(PRTMP_ADAPTER pAd);
-static void ToneRadarEnable(PRTMP_ADAPTER pAd);
+void ToneRadarProgram(PRTMP_ADAPTER pAd);
+void ToneRadarEnable(PRTMP_ADAPTER pAd);
 #endif // TONE_RADAR_DETECT_SUPPORT //
 
 #ifdef DFS_SUPPORT
@@ -1273,7 +1273,9 @@ void RTMPHandleRadarInterrupt(PRTMP_ADAPTER  pAd)
 #ifdef CARRIER_DETECTION_SUPPORT
 #ifdef TONE_RADAR_DETECT_SUPPORT 
 	UINT32 value, delta;
+#ifdef TONE_RADAR_DETECT_V2 
 	UCHAR bbp=0;
+#endif
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 #ifdef DFS_SUPPORT
@@ -1623,13 +1625,7 @@ INT Set_CarrierReCheck_Proc(
 	return TRUE;
 }
 
-
-
-
-
-
-
-static void ToneRadarProgram(PRTMP_ADAPTER pAd)
+void ToneRadarProgram(PRTMP_ADAPTER pAd)
 {
 	UCHAR bbp;
 
@@ -1703,7 +1699,7 @@ static void ToneRadarProgram(PRTMP_ADAPTER pAd)
 
 }
 
-static void ToneRadarEnable(PRTMP_ADAPTER pAd)
+void ToneRadarEnable(PRTMP_ADAPTER pAd)
 {
 
 #ifdef TONE_RADAR_DETECT_V1
