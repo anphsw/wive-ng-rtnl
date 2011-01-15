@@ -112,15 +112,14 @@ VOID BG_FTPH_Remove(VOID)
 } /* End of BG_FTPH_Init */
 
 
-
-
 /*
 ========================================================================
 Routine Description:
-	Forward the received packet.
+	Pass the packet to the port directly or bridge layer.
 
 Arguments:
-	pPacket			- the received packet
+	pAd				- WLAN control block pointer
+	skb_p			- the received packet
 
 Return Value:
 	None
@@ -128,6 +127,13 @@ Return Value:
 Note:
 ========================================================================
 */
+static inline unsigned packet_length(const struct sk_buff *skb)
+{
+#define VLAN_HLEN	4
+	return skb->len - (skb->protocol == htons(ETH_P_8021Q) ? VLAN_HLEN : 0);
+}
+
+
 UINT32 BG_FTPH_PacketFromApHandle(
 	IN		PNDIS_PACKET	pPacket)
 {

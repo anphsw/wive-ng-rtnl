@@ -68,6 +68,7 @@ TxPreamble=1
 RTSThreshold=2347
 FragThreshold=2346
 TxBurst=1
+ForceTxBurst=0
 PktAggregate=1
 TurboRate=0
 WmmCapable=0

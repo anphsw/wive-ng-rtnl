@@ -178,12 +178,11 @@
 #endif // RALINK_ATE //
 #endif // RALINK_QA //
 
-
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 #include "ap_diversity.h"
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
+#endif
 
 #ifdef WAPI_SUPPORT
 #include "wapi.h"
