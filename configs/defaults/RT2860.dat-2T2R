@@ -176,7 +176,6 @@ EAPifname=
 PreAuthifname=
 session_timeout_interval=0
 quiet_interval=0
-staWirelessMode=9
 AutoConnect=1
 FastConnect=1
 AutoRoaming=0

@@ -171,7 +171,6 @@ RADIUS_Acct_Port=1813
 RADIUS_Acct_Key=
 session_timeout_interval=0
 quiet_interval=0
-staWirelessMode=9
 AutoConnect=1
 FastConnect=1
 AutoRoaming=0

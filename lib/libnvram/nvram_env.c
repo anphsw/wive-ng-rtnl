@@ -755,7 +755,6 @@ int gen_wifi_config(int mode)
 #endif
 
 		FPRINT_NUM(WirelessMode);
-		FPRINT_NUM(staWirelessMode);
 		FPRINT_NUM(AutoConnect);
 		FPRINT_NUM(FastConnect);
 		FPRINT_NUM(AutoRoaming);
