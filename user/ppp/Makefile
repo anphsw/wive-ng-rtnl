@@ -58,8 +58,8 @@ clean:
 	cd chat; $(MAKE) clean
 	cd pppd/plugins; $(MAKE) clean
 	cd pppd; $(MAKE) clean
-#	cd pppstats; $(MAKE) clean
-#	cd pppdump; $(MAKE) clean
+	cd pppstats; $(MAKE) clean
+	cd pppdump; $(MAKE) clean
 
 dist-clean:	clean
 	rm -f Makefile `find . -name Makefile -print`
