@@ -172,6 +172,7 @@ load-$(CONFIG_RALINK_RT2883)	+= 0x80000000
 #
 core-$(CONFIG_RALINK_RT3052)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_RT3052)	+= -Iinclude/asm-mips/rt2880
+cflags-$(CONFIG_RALINK_RT3052)	+= -mtune=24kec
 load-$(CONFIG_RALINK_RT3052)	+= 0x80000000
 
 #

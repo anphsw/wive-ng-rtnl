@@ -28,6 +28,6 @@ CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 #KERNEL_CROSS_COMPILE       = $(TOOLCHAINDIR)/kernel/bin/mipsel-kernel-linux-gnu-
 
 CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += -Os -pipe -mips32 -mtune=mips32
-UOPT    += -Os -pipe -mips32 -mtune=mips32
-LOPT    += -Os -pipe -mips32 -mtune=mips32
+CFLAGS  += -Os -pipe -mips32r2 -mtune=24kec
+UOPT    += -Os -pipe -mips32r2 -mtune=24kec 
+LOPT    += -Os -pipe -mips32r2 -mtune=24kec

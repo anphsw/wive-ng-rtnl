@@ -30,6 +30,8 @@ config RALINK_RT2880
 	select IRQ_CPU
 	select HW_HAS_PCI
 	select SWAP_IO_SPACE
+	select CPU_MIPSR1
+	select CPU_MIPS32_R1
 	select SYS_HAS_CPU_MIPS32_R1
 	select SYS_SUPPORTS_LITTLE_ENDIAN
 	select BOOT_ELF32
@@ -43,6 +45,8 @@ config RALINK_RT2880
 	select DMA_NONCOHERENT
 	select IRQ_CPU
 	select SWAP_IO_SPACE
+	select CPU_MIPSR2
+	select CPU_MIPS32_R2
 	select SYS_HAS_CPU_MIPS32_R1
 	select SYS_HAS_CPU_MIPS32_R2
 	select SYS_SUPPORTS_LITTLE_ENDIAN
@@ -58,6 +62,8 @@ config RALINK_RT3883
 	select IRQ_CPU
 	select HW_HAS_PCI
 	select SWAP_IO_SPACE
+	select CPU_MIPSR2
+	select CPU_MIPS32_R2
 	select SYS_HAS_CPU_MIPS32_R1
 	select SYS_HAS_CPU_MIPS32_R2
 	select SYS_SUPPORTS_LITTLE_ENDIAN
@@ -408,7 +414,6 @@ config CPU_MIPS32_R2
 	select CPU_HAS_LLSC
 	select CPU_HAS_PREFETCH
 	select CPU_SUPPORTS_32BIT_KERNEL
-	select CPU_SUPPORTS_HIGHMEM
 	help
 	  Choose this option to build a kernel for release 2 or later of the
 	  MIPS32 architecture.  Most modern embedded systems with a 32-bit
@@ -423,7 +428,6 @@ config CPU_MIPS64_R1
 	select CPU_HAS_PREFETCH
 	select CPU_SUPPORTS_32BIT_KERNEL
 	select CPU_SUPPORTS_64BIT_KERNEL
-	select CPU_SUPPORTS_HIGHMEM
 	help
 	  Choose this option to build a kernel for release 1 or later of the
 	  MIPS64 architecture.  Many modern embedded systems with a 64-bit
@@ -442,7 +446,6 @@ config CPU_MIPS64_R2
 	select CPU_HAS_PREFETCH
 	select CPU_SUPPORTS_32BIT_KERNEL
 	select CPU_SUPPORTS_64BIT_KERNEL
-	select CPU_SUPPORTS_HIGHMEM
 	help
 	  Choose this option to build a kernel for release 2 or later of the
 	  MIPS64 architecture.  Many modern embedded systems with a 64-bit
@@ -455,7 +458,6 @@ config CPU_R3000
 	depends on SYS_HAS_CPU_R3000
 	select CPU_HAS_WB
 	select CPU_SUPPORTS_32BIT_KERNEL
-	select CPU_SUPPORTS_HIGHMEM
 	help
 	  Please make sure to pick the right CPU type. Linux/MIPS is not
 	  designed to be generic, i.e. Kernels compiled for R3000 CPUs will

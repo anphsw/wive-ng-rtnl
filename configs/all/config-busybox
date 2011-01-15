@@ -62,7 +62,7 @@ CONFIG_FEATURE_HAVE_RPC=y
 # CONFIG_FEATURE_SHARED_BUSYBOX is not set
 # CONFIG_LFS is not set
 CONFIG_CROSS_COMPILER_PREFIX="../../toolchain/bin/mipsel-linux-uclibc-"
-CONFIG_EXTRA_CFLAGS="-Os -mips32 -mtune=mips32"
+CONFIG_EXTRA_CFLAGS="-Os"
 
 #
 # Debugging Options
