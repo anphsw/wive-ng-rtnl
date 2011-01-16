@@ -14,7 +14,7 @@ MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-p
 #          -fprefetch-loop-arrays  -ftree-vect-loop-version
 
 ###########-O3 OPTIONS####################################################
-MOREOPTIMIZE += -finline-functions -funswitch-loops -ftree-vectorize
+#MOREOPTIMIZE += -finline-functions -funswitch-loops -ftree-vectorize
 #	    -finline-functions -funswitch-loops -fpredictive-commoning -fgcse-after-reload
 #	    -ftree-vectorize -fipa-cp-clone
 
