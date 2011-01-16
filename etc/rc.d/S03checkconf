@@ -37,16 +37,20 @@ check_nvram()
 	else
 	    $LOG ">>>> RESTORE NVRAM <<<<"
 	    if [ -f /etc/backup/nvram_backup.dat ]; then
+		$LOG ">>>> BACKUP MODE <<<<"
 		$LOG "Burn RF template to flash"
 		fs burnrf
 		$LOG "Load backuped setting to nvram."
 	        fs load_nvram
 	    else
+		$LOG ">>>> CLEAN MODE <<<<"
 		$LOG "Burn RF template to flash"
 		fs burnrf
 		$LOG "Clear and load defaults to nvram !!!"
 	        fs nvramreset
 	    fi
+	  $LOG "Get new variables..."
+	  get_param
 	  $LOG "Reset OK... boot..."
 	fi
     #user and password need set
