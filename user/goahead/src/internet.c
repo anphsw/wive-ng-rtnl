@@ -97,11 +97,11 @@ static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv);
-#if defined CONFIG_USER_KABINET
+
+// BEGIN KABINET PROVIDER
 static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getLANAUTH_START(int eid, webs_t wp, int argc, char_t **argv);
-static int LANAUTH_ACCESS_List(int eid, webs_t wp, int argc, char_t **argv);
-#endif
+// END KABINET PROVIDER
+
 static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
@@ -175,11 +175,9 @@ void formDefineInternet(void) {
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
 	websAspDefine(T("getDATEBuilt"), getDATEBuilt);
 	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
-#if defined CONFIG_USER_KABINET
+
 	websAspDefine(T("getLANAUTHBuilt"), getLANAUTHBuilt);
-	websAspDefine(T("getLANAUTH_START"), getLANAUTH_START);
-	websAspDefine(T("LANAUTH_ACCESS_List"), LANAUTH_ACCESS_List);
-#endif
+
 	websAspDefine(T("getSysLogBuilt"), getSysLogBuilt);
 	websAspDefine(T("getETHTOOLBuilt"), getETHTOOLBuilt);
 
@@ -495,6 +493,16 @@ const vpn_fetch_t vpn_args[] =
 	{ NULL, 0, 0 } // Terminator
 };
 
+const vpn_fetch_t lanauth_args[] =
+{
+	{ T("vpn_type"),               "vpnType",              0 },
+	{ T("vpn_pass"),               "vpnPassword",          0 },
+	{ T("lanauth_access"),         "LANAUTH_LVL",          0 },
+	{ T("lanauth_start"),          "LANAUTH_START",        1 },
+	
+	{ NULL, 0, 0 } // Terminator
+};
+
 /*
  * VPN statuses
  */
@@ -514,10 +522,11 @@ const vpn_status_t vpn_statuses[] =
 const vpn_status_t lanauth_statuses[] =
 {
 
-	{ "disabled/not started",0x808080	},
-	{ "offline",		0xff0000	},
-	{ "kabinet networks",	0x33bb33	},
-	{ "full access",	0x00ff00	}
+	{ "disabled",           0x808080        },
+	{ "not started",        0x808080        },
+	{ "offline",            0xff0000        },
+	{ "kabinet networks",   0x33bb33        },
+	{ "full access",        0x00ff00        }
 };
 #endif
 
@@ -623,8 +632,10 @@ static int get_LANAUTHState()
 	fp = popen("ps|grep lanaut[h]", "r");
 	fgets(result, sizeof(result), fp);
 	pclose(fp);
-	for (i=0,state=0,r=result;*r && i<sizeof(result);i++,r++) {
-		switch(state) {
+	for (i=0, state=0, r=result; *r && i<sizeof(result) ;i++,r++)
+	{
+		switch(state)
+		{
 			case 0:
 				if (*r == '-')
 					state++;
@@ -664,6 +675,7 @@ static int get_LANAUTHState()
 static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int status = 0; // Status is 'disabled'
+	const vpn_status_t *st_table = vpn_statuses;
 
 	// Get value
 	char *vpn_enabled = nvram_get(RT2860_NVRAM, "vpnEnabled");
@@ -674,73 +686,77 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 	// Do not perform other checks if VPN is turned off
 	if (strcmp(vpn_enabled, "on")==0)
 	{
-		// Status is at least 'offline' now
-		status++;
-		
-		// Try to find pppd or xl2tpd
-		int found = procps_count("pppd");
-		if (found==0)
-			found = procps_count("xl2tpd");
-		
-		if (found>0)
+#ifdef CONFIG_USER_KABINET
+		if (strcmp(vpn_type, "6") == 0)
 		{
-			// Now status is at least 'connecting'
+			status = (get_LANAUTHState() + 1) % 5;
+			st_table = lanauth_statuses;
+		}
+		else
+		{
+#endif
+			// Status is at least 'offline' now
 			status++;
 			
-			// Try to search for 'pppXX' device
-			FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
-			
-			if (fd != NULL)
+			// Try to find pppd or xl2tpd
+			int found = procps_count("pppd");
+			if (found==0)
+				found = procps_count("xl2tpd");
+		
+			if (found>0)
 			{
-				int ppp_id;
-				char_t line[256];
-				
-				// Read all ifaces and check match
-				while (fgets(line, 255, fd)!=NULL)
+				// Now status is at least 'connecting'
+				status++;
+			
+				// Try to search for 'pppXX' device
+				FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
+			
+				if (fd != NULL)
 				{
-					// Filter only 'pppXX'
-					if (sscanf(line, " ppp%d", &ppp_id)==1)
+					int ppp_id;
+					char_t line[256];
+				
+					// Read all ifaces and check match
+					while (fgets(line, 255, fd)!=NULL)
 					{
-						// Check if ppp interface has number at least 8
-						if ((ppp_id >= 0) && (ppp_id <= 8))
+						// Filter only 'pppXX'
+						if (sscanf(line, " ppp%d", &ppp_id)==1)
 						{
-							status++; // Status is set to 'connected'
-							break; // Do not search more
+							// Check if ppp interface has number at least 8
+							if ((ppp_id >= 0) && (ppp_id <= 8))
+							{
+								status++; // Status is set to 'connected'
+								break; // Do not search more
+							}
 						}
 					}
+					
+					fclose(fd);
 				}
-				
-				fclose(fd);
+				else
+				{
+					fprintf(stderr, "Warning: cannot open %s (%s).\n",
+						_PATH_PROCNET_DEV, strerror(errno));
+				}
 			}
-			else
+			else if (found<0)
 			{
-				fprintf(stderr, "Warning: cannot open %s (%s).\n",
-					_PATH_PROCNET_DEV, strerror(errno));
+				fprintf(stderr, "Warning: cannot serach process 'pppd' or 'xl2tpd': %s\n",
+						strerror(-found));
 			}
+#ifdef CONFIG_USER_KABINET
 		}
-		else if (found<0)
-		{
-			fprintf(stderr, "Warning: cannot serach process 'pppd' or 'xl2tpd': %s\n",
-					strerror(-found));
-		}
-	} // strcmp
-	
-	// Now write status
-#if defined CONFIG_USER_KABINET
-	if (strcmp(vpn_type, "6")) {
 #endif
-		const vpn_status_t *st = &vpn_statuses[status];
-		websWrite(wp, T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
-			st->color, st->status);
-#if defined CONFIG_USER_KABINET
-	} else {
-		status = get_LANAUTHState();
-		const vpn_status_t *st = &lanauth_statuses[status & 0x03];
-		websWrite(wp,
-			T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
-			st->color, st->status);
 	}
-#endif
+	
+	// Output connection status
+	const vpn_status_t *st = &st_table[status];
+	websWrite(
+		wp,
+		T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
+		st->color, st->status
+	);
+	
 	return 0;
 }
 
@@ -846,9 +862,7 @@ void vpnStoreRouting(const char *rt_config)
 void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 {
 	char_t  *vpn_enabled, *submitUrl;
-#if defined CONFIG_USER_KABINET
-	char_t	*vpn_type, *lanauth_v;
-#endif
+
 	vpn_enabled = websGetVar(wp, T("vpn_enabled"), T(""));
 	if (vpn_enabled[0] == '\0')
 		vpn_enabled="off";
@@ -861,26 +875,24 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 
 	nvram_init(RT2860_NVRAM);
 
-
 	// Now store VPN_ENABLED flag
 	// Do not set other params if VPN is turned off
 	if (!strcmp(vpn_enabled, "on"))
 	{
-		char_t *str;
 		const vpn_fetch_t *fetch = vpn_args;
 
-		printf("vpn_enabled value : %s\n", vpn_enabled);
-#if defined CONFIG_USER_KABINET
-		vpn_type = websGetVar(wp, T("vpn_type"), T(""));
-		if (!strcmp(vpn_type,"6") ) {
-			nvram_bufset(RT2860_NVRAM, "vpnType", "6");
-			goto kabinet;
-		}
+#ifdef CONFIG_USER_KABINET
+		char_t *vpn_type = websGetVar(wp, T("vpn_type"), T(""));
+		if (strcmp(vpn_type, "6") == 0)
+			fetch = lanauth_args;
 #endif
+
+		printf("vpn_enabled value : %s\n", vpn_enabled);
+
 		while (fetch->web_param != NULL)
 		{
 			// Get variable
-			str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
+			char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
 			if (fetch->is_switch) // Check if need update a switch
 			{
 				if (str[0]=='\0')
@@ -907,24 +919,8 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 			if (vpn_rt != NULL)
 				vpnStoreRouting(vpn_rt);
 		}
-	
-#if defined CONFIG_USER_KABINET
-		goto commit;
-	kabinet:
-		lanauth_v = websGetVar(wp, T("lanauth_access"),T(""));
-		nvram_bufset(RT2860_NVRAM, "LANAUTH_LVL", lanauth_v);
-		lanauth_v = websGetVar(wp, T("lanauth_start"),T(""));
-		nvram_bufset(RT2860_NVRAM, "LANAUTH_START", lanauth_v);
-		lanauth_v = websGetVar(wp, T("lanauth_pass_changed"),T(""));
-		if (!strcmp(lanauth_v,"changed")) {
-			lanauth_v = websGetVar(wp, T("lanauth_pass"),T(""));
-			nvram_bufset(RT2860_NVRAM, "LANAUTH_PWD", lanauth_v);
-		}
 	}
-	commit:
-#else
-	}
-#endif
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -1261,7 +1257,7 @@ static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_KABINET
+#ifdef CONFIG_USER_KABINET
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1285,39 +1281,6 @@ static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("0"));
 #endif
 }
-
-#if defined CONFIG_USER_KABINET
-static int getLANAUTH_START(int eid, webs_t wp, int argc, char_t **argv)
-{
-	char_t *s = nvram_get(RT2860_NVRAM,"LANAUTH_START");
-
-	if (strcmp(s,"on") == 0)
-		websWrite(wp,"on");
-	else
-		websWrite(wp,"");
-	return 0;
-}
-
-static int LANAUTH_ACCESS_List(int eid, webs_t wp, int argc, char_t **argv)
-{
-	char_t *lvl = nvram_get(RT2860_NVRAM,"LANAUTH_LVL");
-	char *options[] = {"offline", "kabinet", "full"};
-	int i,s=0;
-
-	if (!lvl || strlen(lvl) == 0)
-		s = 0;
-	else if (strcmp(lvl,"1") == 0)
-		s = 1;
-	else if (strcmp(lvl,"2") == 0)
-		s = 2;
-	for (i=0;i<3;i++)
-		websWrite(wp, T("<option value=\"%d\"%s>%s</option>\n"),
-			i,
-			i == s ? " selected=\"selected\"" : "",
-			options[i]);
-	return 0; 
-}
-#endif
 
 /*
  * description: write LAN ip address accordingly

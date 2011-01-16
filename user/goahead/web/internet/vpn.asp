@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/js/share.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 
 <script language="javascript">
@@ -20,9 +21,7 @@ var pptpServerIP = (pptpType != '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : 
 var pptpACName   = (pptpType == '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
 var pptpRoutingTable = [];
 var currentRoute = undefined;
-</script>
 
-<script language="javascript">
 function rememberRoutingTable(form)
 {
 	var table = "";
@@ -98,7 +97,7 @@ function showHint(key)
 			text += 'Enable adaptive LCP echo interval.';
 		else if (key=='vpn_type')
 		{
-			text += 'Specify PPTP mode.<p class="val">';
+			text += 'Specify VPN access mode.<p class="val">';
 			
 			if (form.vpn_type.value == "0")
 				text += '<b>PPPoE</b> (see RFC #2516) means encapsulating Point-to-Point Protocol (PPP) frames ' +
@@ -122,10 +121,16 @@ function showHint(key)
 				text += '<b>Modem GPRS</b> means connection to Internet via GPRS/EDGE in GSM mobile networks.';
 			else if (form.vpn_type.value == "5")
 				text += '<b>Modem CDMA</b> means connection to Internet via UMTS in CDMA mobile networks.';
+			else if (form.vpn_type.value == "6")
+				text += '<b>Kabinet Authorization</b> means connection to KABINET provider network.';
 			text += '</p>';
 		}
 		else if (key=='vpn_routing')
 			text += 'Enable this option to add additional routes when VPN connection is established.';
+		else if (key=='vpn_lanauth_access')
+			text += 'Specify access mode to KABINET provider network.';
+		else if (key=='vpn_lanauth_start')
+			text += 'Turn this flag on if you want to enable KABINET authorization on boot.';
 		else if (form.vpn_routing_enabled.checked)
 		{
 			if (key=='vpn_route_attrs')
@@ -199,6 +204,8 @@ function vpnSwitchClick(form)
 	form.vpn_type.disabled         = dis;
 	form.vpn_lcp.disabled          = dis;
 	form.vpn_routing_enabled.disabled = dis;
+	form.lanauth_access.disabled   = dis;
+	form.lanauth_start.disabled    = dis;
 	
 	routingSwitchClick(form);
 }
@@ -351,19 +358,27 @@ function bodyOnLoad(form)
 
 function selectType(form)
 {
-	var pppoe_row = document.getElementById("vpn_type_pppoe");
-	var l2tp_row  = document.getElementById("vpn_l2tp_range");
 	var vpn_server_col = document.getElementById("vpn_server_col");
-	var mppe_row  = document.getElementById("vpn_mppe_row");
-	var table_vpn = document.getElementById("table_vpn");
-	var table_lanauth = document.getElementById("table_lanauth");
-	var table_vpn_routing = document.getElementById("table_vpn_routing");
-	var table_vpn_params = document.getElementById("table_vpn_params");
-	var lanauth_savepwd = document.getElementById("lanauth_savepwd");
 
-	pppoe_row.style.display = (form.vpn_type.value == '0') ? '' : 'none';
-	mppe_row.style.display = (form.vpn_type.value == '3') ? 'none' : '';
-	l2tp_row.style.display  = (form.vpn_type.value == '3') ? '' : 'none';
+	var pppoe_on = form.vpn_type.value == '0';
+	var l2tp_server_on = form.vpn_type.value == '3';
+	var kabinet_on = form.vpn_type.value == '6';
+
+	// Display mode-dependent elements
+	displayElement('vpn_pppoe_iface_row', !kabinet_on);
+	displayElement('vpn_server_row', !kabinet_on);
+	displayElement('vpn_l2tp_range', !kabinet_on);
+	displayElement('vpn_auth_type_row', !kabinet_on);
+	displayElement('vpn_user_row', !kabinet_on);
+	displayElement('vpn_mtu_row', !kabinet_on);
+	displayElement('vpn_dgw_row', !kabinet_on);
+	displayElement('vpn_lanauth_lvl_row', kabinet_on);
+	displayElement('vpn_lanauth_start_row', kabinet_on);
+	displayElement('table_vpn_params', !kabinet_on);
+
+	displayElement('vpn_pppoe_row', pppoe_on);
+	displayElement('vpn_mppe_row', !l2tp_server_on);
+	displayElement('vpn_l2tp_range', l2tp_server_on);
 
 	var vpn_server = 'Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name';
 	if (form.vpn_type.value == '0') // PPPoE
@@ -380,19 +395,6 @@ function selectType(form)
 	else
 		form.vpn_server.value = pptpACName;
 	
-	if (form.vpn_type.value == '6') {
-		table_lanauth.style.display='';
-		lanauth_savepwd.style.display='';
-		table_vpn.style.display='none';
-		table_vpn_routing.style.display='none';
-		table_vpn_params.style.display='none';
-	} else {
-		table_lanauth.style.display='none';
-		lanauth_savepwd.style.display='none';
-		table_vpn.style.display='';
-		table_vpn_routing.style.display='';
-		table_vpn_params.style.display='';
-	}
 	vpn_server_col.innerHTML = '<b>' + vpn_server + ':</b>';
 }
 
@@ -405,20 +407,22 @@ function resetClick(form)
 
 function submitClick(form)
 {
-	if (form.vpn_user.value.match(/[\s\$]/))
-	{
-		alert("User name can not contain spaces or dollar ('$') sign!");
-		return false;
-	}
-	
 	if (form.vpn_pass.value.match(/[\s\$]/))
 	{
 		alert("Password can not contain spaces or dollar ('$') sign!");
+		form.vpn_pass.focus();
 		return false;
 	}
 	
-	if (form.vpn_type.value != "0" && form.vpn_type.value != "6")
+	if ((form.vpn_type.value != "0") && (form.vpn_type.value != "6"))
 	{
+		if (form.vpn_user.value.match(/[\s\$]/))
+		{
+			alert("User name can not contain spaces or dollar ('$') sign!");
+			form.vpn_user.focus();
+			return false;
+		}
+		
 		if ((!validateIP(form.vpn_server, false)) && (!validateDNS(form.vpn_server, false)))
 		{
 			alert("Invalid IP address or domain name!");
@@ -429,19 +433,6 @@ function submitClick(form)
 
 	rememberRoutingTable(form); // Remember routing table
 
-	return true;
-}
-
-function pwdClick(form)
-{
-	if (form.lanauth_pass.value.match(/[\s\$]/))
-	{
-		alert("Password can not contain spaces or dollar ('$') sign!");
-		return false;
-	}
-	if (form.lanauth_pass.value == "")
-		alert("Empty password. Authorizator will not be started");
-	form.lanauth_pass_changed.value = "changed";
 	return true;
 }
 
@@ -457,7 +448,19 @@ function initializeForm(form)
 	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
 	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
 	var lcp        = '<% getCfgGeneral(1, "vpnEnableLCP"); %>';
-	var lanauth_start    = '<% getCfgGeneral(1, "LANAUTH_START"); %>';
+
+	var kabinet_built = '<% getLANAUTHBuilt(); %>';
+
+	if (kabinet_built != '0')
+	{
+		var lanauth_start    = '<% getCfgGeneral(1, "LANAUTH_START"); %>';
+		var lanauth_access   = '<% getCfgGeneral(1, "LANAUTH_LVL"); %>';
+		
+		// Add specific option
+		form.vpn_type.options[form.vpn_type.options.length] = new Option('KABINET Authorization', '6');
+		form.lanauth_start.checked     = (lanauth_start == 'on');
+		form.lanauth_access.value      = lanauth_access;
+	}
 
 	form.vpn_enabled.checked = (vpnEnabled == 'on');
 	form.vpn_routing_enabled.checked = (routingOn == 'on');
@@ -469,13 +472,17 @@ function initializeForm(form)
 	form.vpn_dgw.value       = dgw;
 	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_auth_type.value = vpn_auth;
-	form.lanauth_start.checked     = (lanauth_start == 'on');
 }
 
 function showVPNStatus()
 {
-	ajaxLoadElement("vpn_status_col", "/internet/vpn_status.asp");
-	setTimeout('showVPNStatus();', 5000);
+	var reset_timer = function() { setTimeout('showVPNStatus();', 5000); };
+
+	ajaxLoadElement(
+		'vpn_status_col',
+		'/internet/vpn_status.asp',
+		reset_timer
+	);
 }
 
 </script>
@@ -501,7 +508,6 @@ tunnel on your Router.
 			<b>Enable <acronym title="Virtual Private Network">VPN</acronym></b>
 		</td>
 		<td onMouseOver="showHint('vpn_vpn_status')" onMouseOut="hideHint('vpn_vpn_status')" id="vpn_status_col">
-			<!-- <% vpnShowVPNStatus(); %> -->
 		</td>
 	</tr>
 	<tr onMouseOver="showHint('vpn_type')" onMouseOut="hideHint('vpn_type')" >
@@ -515,14 +521,10 @@ tunnel on your Router.
 				<option value="2">L2TP  client</option>
 				<!-- No L2TP support now
 				<option value="3">L2TP  server</option> -->
-				<option value="6">KABINET Authorizator</option>
 			</select>
 		</td>
 	</tr>
-</table>
-
-<table id="table_vpn" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
-	<tr id="vpn_type_pppoe" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
+	<tr id="vpn_pppoe_iface_row" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
 		<td width="50%"><b>PPPoE interface:</b></td>
 		<td width="50%">
 			<select disabled="disabled" name="vpn_pppoe_iface" class="mid" >
@@ -530,7 +532,7 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_server')" onMouseOut="hideHint('vpn_server')">
+	<tr id="vpn_server_row" onMouseOver="showHint('vpn_server')" onMouseOut="hideHint('vpn_server')">
 		<td width="50%" id="vpn_server_col">
 			<b>Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name:</b>
 		</td>
@@ -540,7 +542,7 @@ tunnel on your Router.
 		<td width="50%"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>
 		<td width="50%"><input name="vpn_range" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnRange"); %>" disabled="disabled" type="text"></td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_auth_type')" onMouseOut="hideHint('vpn_auth_type')" >
+	<tr id="vpn_auth_type_row" onMouseOver="showHint('vpn_auth_type')" onMouseOut="hideHint('vpn_auth_type')" >
 		<td width="50%"><b>Authentication method:</b></td>
 		<td width="50%">
 			<select id="vpn_auth_type_select" disabled="disabled" name="vpn_auth_type" class="mid">
@@ -551,7 +553,21 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_user')" onMouseOut="hideHint('vpn_user')" >
+	<tr id="vpn_lanauth_lvl_row" onMouseOver="showHint('vpn_lanauth_access')" onMouseOut="hideHint('vpn_lanauth_access')">
+		<td width="50%"><b>KABINET access level:</b></td>
+		<td width="50%">
+			<select name="lanauth_access" class="mid" disabled="disabled">
+				<option value="0">offline</option>
+				<option value="1">kabinet</option>
+				<option value="2">full</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="vpn_lanauth_start_row" onmouseover="showHint('vpn_lanauth_start')" onmouseout="hideHint('vpn_lanauth_start')">
+		<td width="50%"><b>Start authorization on boot:</b></td>
+		<td width="50%"><input name="lanauth_start" type="checkbox" disabled="disabled"></td>
+	</tr>
+	<tr id="vpn_user_row" onMouseOver="showHint('vpn_user')" onMouseOut="hideHint('vpn_user')" >
 		<td width="50%"><b>User name:</b></td>
 		<td width="50%"><input name="vpn_user" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnUser"); %>" disabled="disabled" type="text"></td>
 	</tr>
@@ -559,7 +575,7 @@ tunnel on your Router.
 		<td width="50%"><b>Password:</b></td>
 		<td width="50%"><input name="vpn_pass" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnPassword"); %>" disabled="disabled" type="password"></td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_mtu')" onMouseOut="hideHint('vpn_mtu')" >
+	<tr id="vpn_mtu_row" onMouseOver="showHint('vpn_mtu')" onMouseOut="hideHint('vpn_mtu')" >
 		<td width="50%"><b><acronym title="Maximum Transfer Unit">MTU</acronym>/<acronym title="Maximum Recieve Unit">MRU:</acronym></b></td>
 		<td width="50%">
 			<input id="vpn_mtu_field" name="vpn_mtu" maxlength="4" disabled="disabled" type="text" class="half" style="display:none; " value="<% getCfgGeneral(1, "vpnMTU"); %>" >
@@ -577,8 +593,8 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_dgw')" onMouseOut="hideHint('vpn_dgw')" >
-		<td width="50%" >
+	<tr id="vpn_dgw_row" onMouseOver="showHint('vpn_dgw')" onMouseOut="hideHint('vpn_dgw')" >
+		<td width="50%">
 			<b>Default gateway:</b>
 		</td>
 		<td width="50%">
@@ -588,29 +604,7 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-</table>
 
-<table id="table_lanauth" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
-
-	<tr id="vpn_lanauth_lvl" onMouseOver="showHint('vpn_lanauth_access')" onMouseOut="hideHint('vpn_lanauth_access')">
-		<td width="50%"><b>KABINET access level:</b></td>
-		<td width="50%">
-			<select name="lanauth_access" class="mid" >
-				<% LANAUTH_ACCESS_List(); %>
-			</select>
-		</td>
-	</tr>
-	<tr onmouseover="showHint('vpn_lanauth_start')" onmouseout="hideHint('vpn_lanauth_start')">
-		<td />
-		<td>
-			<input name="lanauth_start" type="checkbox">
-			<b>Start authorizator ob boot</b>
-		</td>
-	</tr>
-	<tr id="vpn_lanauth_pwd" onMouseOver="showHint('vpn_lanauth_pwd')" onMouseOut="hideHint('vpn_lanauth_pwd')">
-		<td width="50%"><b>Authorizator password:</b></td>
-		<td width="50%"><input name="lanauth_pass" class="mid" size="25" maxlength="60" value="" type="password"></td>
-	</tr>
 </table>
 
 <table id="table_vpn_routing" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
@@ -655,7 +649,8 @@ tunnel on your Router.
 		<td></td>
 	</tr>
 </table>
-<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4">
+
+<table width="500" border="0" cellpadding="0" cellspacing="4">
 	<tr height="32px"><td colspan="2"></td></tr>
 	<tr>
 		<td colspan="2">
@@ -663,7 +658,6 @@ tunnel on your Router.
 			<input name="lanauth_pass_changed" type="hidden">
 			<input value="/internet/vpn.asp" name="submit-url" type="hidden">
 			<input style="none" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
-			<input id="lanauth_savepwd" style="display:none" value="Change password" name="savepwd" type="submit" onclick="return pwdClick(this.form);" >&nbsp;&nbsp;
 			<input style="none" value="Reset" name="reset_button" onclick="resetClick(this.form);" type="button">
 		</td>
 	</tr>

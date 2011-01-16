@@ -36,8 +36,8 @@ reload() {
 }
 
 get_param() {
+  pwd=`nvram_get 2860 vpnPassword`
   lvl=`nvram_get 2860 LANAUTH_LVL`
-  pwd=`nvram_get 2860 LANAUTH_PWD`
   start_on_boot=`nvram_get 2860 LANAUTH_START`
 }
 
