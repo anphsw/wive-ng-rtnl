@@ -1,238 +1,239 @@
 <b>Changes:</b><br>
 <b>1.0.x</b><br>
-1) Fix configs scripts for support bash >=4 and change product name<br>
-2) Kernel version up to 2.6.21.7<br>
-3) Redesign filesystem. Busybox up to 1.15.3<br>
-4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc<br>
-5) Add ACELL-PPTP Kernel support<br>
-6) Mount ramfs particions in kernel mode<br>
-7) BGIDGE: Pause frames shouldn't be passed up by driver anyway<br>
-8) Add ESFQ support<br>
-9) Initial auto detect memory size (fix me 32bit mode support)<br>
-10) Add udpxy<br>
-11) Code cleanup<br>
-12) Remove ASUS Code<br>
-13) Original Ralink gui now work<br>
-14) pptp/l2tp/pppoe tun now works<br>
-15) Full rc scrips is write in rwfs<br>
-16) RT3052F embed switch full work now<br>
-17) Rewrite pptp/l2tp/pppoe scripts to support buggy nas (corbina etc)<br>
-18) miniupnpd now work too<br>
-19) Add rwfs support (fs save | fs restore | fs load)<br>
-20) Auto set mss size<br>
-21) Masqrade now work correctly<br>
-22) IMQ support added<br>
-23) Initial shaper scripts (default priomap and esfq for decrase torrents prio)<br>
-24) Kernel ip account support added<br>
-25) Fix crash on sta list<br>
-26) Update userspace daemons and utility<br>
-27) Some busybox fixes<br>
-28) Auto generate UUID for UPNP service on first upnpd start<br>
-29) Check if ppp is up do not change ip from dhcp<br>
-30) Regenerate mac if drop to defaults<br>
-31) Some services start only then start goahead<br>
-32) Replace some code from original Ralink SDK version 3.3<br>
-33) Integrate new web gui in current sources tree <br>
-34) Static routes get from dhcp server (options 79)<br>
-35) busybox update to 1.16.0 version<br>
-36) Replace ntpclient to ntpd from new busybox<br>
-37) Add multiple default gateway support for load balacing<br>
-38) Fix boot on 4/16 devices<br>
-39) RootFS on flash work OK<br>
-40) Fix resolve server ip for pptp/l2tp<br>
-41) Add support others type falsh<br>
-42) Job control fix<br>
-43) Fix some daemons crash with error build in future<br>
-44) fs save now save current date and time to rwfs<br>
-45) Fix configure esw mode and more modes add<br>
-46) Fix pppoe reconnect<br>
-47) Fix pppoe long discovery<br>
-48) Restore default gateway after VPN down<br>
-49) WPS wscd daemon now work<br>
-50) Fix dhcp lease parse<br>
-51) busybox update to 1.16.1 version<br>
-52) Fix pptp/pppoe/l2tp redials<br>
-53) Radvd up to 1.6 version<br>
-54) Masqrade for vpn move to ip-up/ip-down scripts<br>
-55) NAT to ISP local net parallel then vpn work now<br>
-56) Never increase MSS, even when setting it<br>
-57) Backport small bridge patch<br>
-58) Backport sock memalloc skb size from 2.6.23.4 kernel<br>
-59) ACCEL-PPTP add module param description and mtu parametr<br>
-60) Patch to fix cut end symbol at hostname in udhcpd lease<br>
-61) Backport jhash3 patch from upstream<br>
-62) More ipv6 fixes<br>
-63) Improve pppoe perf<br>
-64) pptp module patches from wl500 project<br>
-65) More user/password length to pptp/l2tp mode<br>
-66) More clean init.d scripts<br>
-67) Fix kernel crash on recive multicast<br>
-68) Autodetect RAM size (16-64) work now for all devices<br>
-69) UDPXY work now<br>
-70) Igmpproxy work now<br>
-71) Use TMPFS instead RAMFS. Save memory and increase speed<br>
-72) Fix restore nvram after flash at new device<br>
-73) LZMA crash fix<br>
-74) Mtdblock crash and memory leak fix<br>
-75) Remove cifs. User ssh scp instead<br>
-76) Update wifi driver to 2.3.0.0 version from Ralink<br>
-77) More fix build enviroment<br>
-78) Bridge code fixup and more fast<br>
+1) Fix configs scripts for support bash >=4 and change product name.<br>
+2) Kernel version up to 2.6.21.7.<br>
+3) Redesign filesystem. Busybox up to 1.15.3.<br>
+4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc.<br>
+5) Add ACELL-PPTP Kernel support.<br>
+6) Mount ramfs particions in kernel mode.<br>
+7) BGIDGE: Pause frames shouldn't be passed up by driver anyway.<br>
+8) Add ESFQ support.<br>
+9) Initial auto detect memory size (fix me 32bit mode support).<br>
+10) Add udpxy.<br>
+11) Code cleanup.<br>
+12) Remove ASUS Code.<br>
+13) Original Ralink gui now work.<br>
+14) pptp/l2tp/pppoe tun now works.<br>
+15) Full rc scrips is write in rwfs.<br>
+16) RT3052F embed switch full work now.<br>
+17) Rewrite pptp/l2tp/pppoe scripts to support buggy nas (corbina etc).<br>
+18) miniupnpd now work too.<br>
+19) Add rwfs support (fs save | fs restore | fs load).<br>
+20) Auto set mss size.<br>
+21) Masqrade now work correctly.<br>
+22) IMQ support added.<br>
+23) Initial shaper scripts (default priomap and esfq for decrase torrents prio).<br>
+24) Kernel ip account support added.<br>
+25) Fix crash on sta list.<br>
+26) Update userspace daemons and utility.<br>
+27) Some busybox fixes.<br>
+28) Auto generate UUID for UPNP service on first upnpd start.<br>
+29) Check if ppp is up do not change ip from dhcp.<br>
+30) Regenerate mac if drop to defaults.<br>
+31) Some services start only then start goahead.<br>
+32) Replace some code from original Ralink SDK version 3.3.<br>
+33) Integrate new web gui in current sources tree.<br>
+34) Static routes get from dhcp server (options 79).<br>
+35) busybox update to 1.16.0 version.<br>
+36) Replace ntpclient to ntpd from new busybox.<br>
+37) Add multiple default gateway support for load balacing.<br>
+38) Fix boot on 4/16 devices.<br>
+39) RootFS on flash work OK.<br>
+40) Fix resolve server ip for pptp/l2tp.<br>
+41) Add support others type falsh.<br>
+42) Job control fix.<br>
+43) Fix some daemons crash with error build in future.<br>
+44) fs save now save current date and time to rwfs.<br>
+45) Fix configure esw mode and more modes add.<br>
+46) Fix pppoe reconnect.<br>
+47) Fix pppoe long discovery.<br>
+48) Restore default gateway after VPN down.<br>
+49) WPS wscd daemon now work.<br>
+50) Fix dhcp lease parse.<br>
+51) busybox update to 1.16.1 version.<br>
+52) Fix pptp/pppoe/l2tp redials.<br>
+53) Radvd up to 1.6 version.<br>
+54) Masqrade for vpn move to ip-up/ip-down scripts.<br>
+55) NAT to ISP local net parallel then vpn work now.<br>
+56) Never increase MSS, even when setting it.<br>
+57) Backport small bridge patch.<br>
+58) Backport sock memalloc skb size from 2.6.23.4 kernel.<br>
+59) ACCEL-PPTP add module param description and mtu parametr.<br>
+60) Patch to fix cut end symbol at hostname in udhcpd lease.<br>
+61) Backport jhash3 patch from upstream.<br>
+62) More ipv6 fixes.<br>
+63) Improve pppoe perf.<br>
+64) pptp module patches from wl500 project.<br>
+65) More user/password length to pptp/l2tp mode.<br>
+66) More clean init.d scripts.<br>
+67) Fix kernel crash on recive multicast.<br>
+68) Autodetect RAM size (16-64) work now for all devices.<br>
+69) UDPXY work now.<br>
+70) Igmpproxy work now.<br>
+71) Use TMPFS instead RAMFS. Save memory and increase speed.<br>
+72) Fix restore nvram after flash at new device.<br>
+73) LZMA crash fix.<br>
+74) Mtdblock crash and memory leak fix.<br>
+75) Remove cifs. User ssh scp instead.<br>
+76) Update wifi driver to 2.3.0.0 version from Ralink.<br>
+77) More fix build enviroment.<br>
+78) Bridge code fixup and more fast.<br>
 <br>
 <b>1.1.x</b><br>
-1) New WebUI based on goahead<br>
+1) New WebUI based on goahead.<br>
 2) New wifi driver, correct work with broadcom wifi based adapters, WMM, etc...<br>
-3) Set of corrections in a kernel (netfiler/routing/ipv6)<br>
-4) Rewrite logic in init.d for speedup<br>
-5) Add simple software conntrack fastpath<br>
-6) Cleannat module support for clear conntrack table<br>
-7) More connrack helpers and protocol support<br>
-8) Kernel backport fixes from stable tree<br>
-9) Busybox update to 1.17.x tree<br>
-10) Some scrits rewrite for speedup<br>
-11) Remove hldc and vj support for pppd<br>
-12) ppp connection optimization in kernel<br>
-13) DMZ must works<br>
-14) Sync from 3.4.0.1 RalinkSDK from trandnet TEW-691GR GPL code<br>
-15) libnvram fix crash on reliad settings and some leaks<br>
-16) Fix freeze in 802.11n mode change in EthernetConverterMode<br>
-17) ppp use metric 10 for dgw replace<br>
-18) add more workaround for buggy nas<br>
-19) Portforward work now<br>
-20) MAC/IP/PORT filterd work now<br>
-21) pptp/l2tp now work with new corbina bras<br>
-22) Get staticroutes and msstatic routes from dhcp server work now<br>
-23) WebUI Add watchdog enable/disable function<br>
-24) Fix reboot at apply change in ethernet converter mode<br>
-25) Fix lldt control in webui<br>
-26) Add interface select for macip filter and port forward in WebUI<br>
-27) Add 802.11g/n mixed mode and set default<br>
-28) Add samba for smb and wins services<br>
-29) portforward and ipport filter scripts now reboot at start<br>
-30) Content filters based on webstr now works<br>
-31) Use WLAN_MAC_ADDR, WAN_MAC_ADDR, LAN_MAC_ADDR variable in nvram for set macs to interfaces<br>
-32) STA profiles now works<br>
-33) Add netmask for ip filter pages<br>
-34) Add asus rt-g32 full support<br>
-35) Fix part table in SPI and nand flash types<br>
-36) pppd up to current git src 24 Aug 2010<br>
-37) xl2tpd up to 1.2.7 version<br>
-38) Fix conntrack flush<br>
-39) Wireless pages split and optimize<br>
-40) VPN page add auth type select<br>
-41) Fix trunclate nvram values at aplly change and device mode select<br>
-42) Fix restart nvram_daemon<br>
-43) Kernel fix lock in mtdchar, more small fixes and cleanups<br>
-44) Fix keep mac adresses at push reset button<br>
-45) libnvram use mtdblock instead mtdchar for write/read function<br>
-46) Fix unlocked kernel write to mtd. Use kernel_lock for fix concurrent write issue<br>
-47) Some scripts rewrite<br>
-48) nvram_daemon and gpio utility no more needed<br>
-49) Add backup nvram to rwfs logic add<br>
-50) Rewrite logic in libnvram and goahead for correct nvram init/close<br>
-51) More optimization init logic and cleanup goahead code<br>
-52) Fix renew ip from dhcp at profile activate<br>
-53) New logic for corbina workaround<br>
-54) Samba fixup to correct build new gcc and others<br>
-55) Some kernel backports and fix needed for correct wifi drivers work<br>
-56) Fix radvd skipping multiple interfaces when UnicastOnly is on or AdvSendAdvert is off<br>
-57) Update pppd from git<br>
-58) Fix gen_wifi config<br>
-59) Fix 40Mhz mode in eth converter mode select<br>
-60) Tune wifi modes for speedup<br>
-61) Fix memory alloc in wifi driver<br>
-62) Fix some errors on libnvram<br>
-63) Fix init gpio for leds and button at wps mode enabled<br>
-64) Some cleanups and review kernel code to fix potentional errors<br>
-65) More kernel backports fixes<br>
-66) Fix compile procedure from clean git copy<br>
-67) Always use v22 wireless extensions at all application and kerenl code<br>
-68) Fix up/down raX interface in sta mode<br>
-69) Backports tmpfs critical fixes<br>
-70) Backports memory critical allocator fixes<br>
-71) Backports tty critical fixes<br>
-72) Backports netfilter fixup from upstream<br>
-73) WebUI fix power set in ethernet converter mode<br>
-74) WebUI fix update firmware and upload settings<br>
-75) In wifi driver fix BW mode on reconnect<br>
-76) In wifi driver fix memory leaks<br>
-77) inet_hash fixup<br>
-78) Fix init logic in goahead<br>
-79) Fix WebUI apply in wireless advanced for googe chrome<br>
-80) Fix memleak in tty driver code<br>
-81) Workaround for badmem devices<br>
-82) Update netsched and netfilter code<br>
-83) Fix corbina dhcp work<br>
-84) Fix restore dns at reconnect VPN<br>
-85) Speedup ppp_generic, ipv4, sys_time, hrtimer kernel code<br>
+3) Set of corrections in a kernel (netfiler/routing/ipv6).<br>
+4) Rewrite logic in init.d for speedup.<br>
+5) Add simple software conntrack fastpath.<br>
+6) Cleannat module support for clear conntrack table.<br>
+7) More connrack helpers and protocol support.<br>
+8) Kernel backport fixes from stable tree.<br>
+9) Busybox update to 1.17.x tree.<br>
+10) Some scrits rewrite for speedup.<br>
+11) Remove hldc and vj support for pppd.<br>
+12) ppp connection optimization in kernel.<br>
+13) DMZ must works.<br>
+14) Sync from 3.4.0.1 RalinkSDK from trandnet TEW-691GR GPL code.<br>
+15) libnvram fix crash on reliad settings and some leaks.<br>
+16) Fix freeze in 802.11n mode change in EthernetConverterMode.<br>
+17) ppp use metric 10 for dgw replace.<br>
+18) add more workaround for buggy nas.<br>
+19) Portforward work now.<br>
+20) MAC/IP/PORT filterd work now.<br>
+21) pptp/l2tp now work with new corbina bras.<br>
+22) Get staticroutes and msstatic routes from dhcp server work now.<br>
+23) WebUI Add watchdog enable/disable function.<br>
+24) Fix reboot at apply change in ethernet converter mode.<br>
+25) Fix lldt control in webui.<br>
+26) Add interface select for macip filter and port forward in WebUI.<br>
+27) Add 802.11g/n mixed mode and set default.<br>
+28) Add samba for smb and wins services.<br>
+29) portforward and ipport filter scripts now reboot at start.<br>
+30) Content filters based on webstr now works.<br>
+31) Use WLAN_MAC_ADDR, WAN_MAC_ADDR, LAN_MAC_ADDR variable in nvram for set macs to interfaces.<br>
+32) STA profiles now works.<br>
+33) Add netmask for ip filter pages.<br>
+34) Add asus rt-g32 full support.<br>
+35) Fix part table in SPI and nand flash types.<br>
+36) pppd up to current git src 24 Aug 2010.<br>
+37) xl2tpd up to 1.2.7 version.<br>
+38) Fix conntrack flush.<br>
+39) Wireless pages split and optimize.<br>
+40) VPN page add auth type select.<br>
+41) Fix trunclate nvram values at aplly change and device mode select.<br>
+42) Fix restart nvram_daemon.<br>
+43) Kernel fix lock in mtdchar, more small fixes and cleanups.<br>
+44) Fix keep mac adresses at push reset button.<br>
+45) libnvram use mtdblock instead mtdchar for write/read function.<br>
+46) Fix unlocked kernel write to mtd. Use kernel_lock for fix concurrent write issue.<br>
+47) Some scripts rewrite.<br>
+48) nvram_daemon and gpio utility no more needed.<br>
+49) Add backup nvram to rwfs logic add.<br>
+50) Rewrite logic in libnvram and goahead for correct nvram init/close.<br>
+51) More optimization init logic and cleanup goahead code.<br>
+52) Fix renew ip from dhcp at profile activate.<br>
+53) New logic for corbina workaround.<br>
+54) Samba fixup to correct build new gcc and others.<br>
+55) Some kernel backports and fix needed for correct wifi drivers work.<br>
+56) Fix radvd skipping multiple interfaces when UnicastOnly is on or AdvSendAdvert is off.<br>
+57) Update pppd from git.<br>
+58) Fix gen_wifi config.<br>
+59) Fix 40Mhz mode in eth converter mode select.<br>
+60) Tune wifi modes for speedup.<br>
+61) Fix memory alloc in wifi driver.<br>
+62) Fix some errors on libnvram.<br>
+63) Fix init gpio for leds and button at wps mode enabled.<br>
+64) Some cleanups and review kernel code to fix potentional errors.<br>
+65) More kernel backports fixes.<br>
+66) Fix compile procedure from clean git copy.<br>
+67) Always use v22 wireless extensions at all application and kerenl code.<br>
+68) Fix up/down raX interface in sta mode.<br>
+69) Backports tmpfs critical fixes.<br>
+70) Backports memory critical allocator fixes.<br>
+71) Backports tty critical fixes.<br>
+72) Backports netfilter fixup from upstream.<br>
+73) WebUI fix power set in ethernet converter mode.<br>
+74) WebUI fix update firmware and upload settings.<br>
+75) In wifi driver fix BW mode on reconnect.<br>
+76) In wifi driver fix memory leaks.<br>
+77) inet_hash fixup.<br>
+78) Fix init logic in goahead.<br>
+79) Fix WebUI apply in wireless advanced for googe chrome.<br>
+80) Fix memleak in tty driver code.<br>
+81) Workaround for badmem devices.<br>
+82) Update netsched and netfilter code.<br>
+83) Fix corbina dhcp work.<br>
+84) Fix restore dns at reconnect VPN.<br>
+85) Speedup ppp_generic, ipv4, sys_time, hrtimer kernel code.<br>
 <br>
 <b>1.2.x</b><br>
-1) More backports from upstream<br>
-2) More wifi driver fixup<br>
-3) Some WebUI rewrite<br>
-4) New buggy ISP support<br>
-5) More speedup<br>
-6) Add select WAN port mode in web<br>
-7) Some fixes for support Google Chrome<br>
-8) Rewrite some init.d logic for speedup<br>
-9) Fix wlan client mode + VPN work correct<br>
-10) Fix apply kay at wlan page<br>
-11) Fix rcu locks speed issue<br>
-12) Some optimization<br>
-13) Fix some race condition bug<br>
-14) Fix init phy on buggy devices as D-link DIR-300NRU<br>
-15) More speed init.d<br>
-16) Always use long preamble for CCK. This need to correct work mixed mode<br>
-17) Fix ssh and samba work after login name change<br>
-18) Uclibc fix wchar issue<br>
+1) More backports from upstream.<br>
+2) More wifi driver fixup.<br>
+3) Some WebUI rewrite.<br>
+4) New buggy ISP support.<br>
+5) More speedup.<br>
+6) Add select WAN port mode in web.<br>
+7) Some fixes for support Google Chrome.<br>
+8) Rewrite some init.d logic for speedup.<br>
+9) Fix wlan client mode + VPN work correct.<br>
+10) Fix apply kay at wlan page.<br>
+11) Fix rcu locks speed issue.<br>
+12) Some optimization.<br>
+13) Fix some race condition bug.<br>
+14) Fix init phy on buggy devices as D-link DIR-300NRU.<br>
+15) More speed init.d.<br>
+16) Always use long preamble for CCK. This need to correct work mixed mode.<br>
+17) Fix ssh and samba work after login name change.<br>
+18) Uclibc fix wchar issue.<br>
 <br>
 <b>1.3.x</b><br>
-1) More correct mount tmpfs and decrase mem usadge<br>
-2) Fix some compile warnings<br>
-3) Add autodetect flash type NOR->SPI<br>
-4) Fix race in libnvram<br>
-5) Use kernel native string functions in wifi driver<br>
-6) Some fix iptables code<br>
-7) Fix defaults for init wifi<br>
-8) Fix update firmware at small memory device<br>
-9) Some potentional leak fix<br>
-10) Remove dead code in wifi and nvram<br>
-11) Some wifi function now works in native mode<br>
-12) Fix build if all wifi driver options is set<br>
-13) Full kernel code review and cleanup<br>
-14) Drop unused, dead and potentional buggy code<br>
-15) Full cycle of retraining flash on command fs cleanall<br>
-16) Increase kernel padded size. Try fix crash mapping<br>
-17) Update AP driver from 2.3.0.0 to 2.5.0.0 version<br>
-18) Update STA driver from 2.2.0.0 to 2.4.0.0 version<br>
-19) Update HW_NAT kernel code and add hw_nat userspace utils<br>
-20) Add LCP echo adaptive options on VPN page. Default on<br>
-21) Use opensource toolchain at 4.5.2 gcc for build all coe in project. No binary from Ralink needed<br>
-22) Update boot code<br>
-23) Some optimization and fix in scripts<br>
-24) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC<br>
-25) Drop noatime function for small devices save CPU ticks<br>
-26) Uboot code compile and works now OK<br>
+1) More correct mount tmpfs and decrase mem usadge.<br>
+2) Fix some compile warnings.<br>
+3) Add autodetect flash type NOR->SPI.<br>
+4) Fix race in libnvram.<br>
+5) Use kernel native string functions in wifi driver.<br>
+6) Some fix iptables code.<br>
+7) Fix defaults for init wifi.<br>
+8) Fix update firmware at small memory device.<br>
+9) Some potentional leak fix.<br>
+10) Remove dead code in wifi and nvram.<br>
+11) Some wifi function now works in native mode.<br>
+12) Fix build if all wifi driver options is set.<br>
+13) Full kernel code review and cleanup.<br>
+14) Drop unused, dead and potentional buggy code.<br>
+15) Full cycle of retraining flash on command fs cleanall.<br>
+16) Increase kernel padded size. Try fix crash mapping.<br>
+17) Update AP driver from 2.3.0.0 to 2.5.0.0 version.<br>
+18) Update STA driver from 2.2.0.0 to 2.4.0.0 version.<br>
+19) Update HW_NAT kernel code and add hw_nat userspace utils.<br>
+20) Add LCP echo adaptive options on VPN page. Default on.<br>
+21) Use opensource toolchain at 4.5.2 gcc for build all coe in project. No binary from Ralink needed.<br>
+22) Update boot code.<br>
+23) Some optimization and fix in scripts.<br>
+24) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC.<br>
+25) Drop noatime function for small devices save CPU ticks.<br>
+26) Uboot code compile and works now OK.<br>
 27) Add conntrack reservation. 400 records in list must be reserved for high priority pors.<br>
-28) Add fulldump makefile to create single image (boot+kernel+rootfs) for write direct to the flash<br>
+28) Add fulldump makefile to create single image (boot+kernel+rootfs) for write direct to the flash.<br>
 29) Integrate kernel mode pppoe/ipv6 pass through. Default disable.<br>
-30) Wifi more small step for power regulation. Default 30. (values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB)<br>
+30) Wifi more small step for power regulation. Default 30. (values=5,10,20,30,35,40,45,50,60,70,80,90,100% = reduce 12..0dB).<br>
 31) STA mode - add AutoRoaming=1/0 variable. Enable disable connect migration over wifi ap based by SNR. Disable default.<br>
 32) STA mode - add AutoConnect=1/0 variable. Enable connect to first AP is SSID to connect = NULL. Enable default.<br>
 33) STA mode - add FastConnect=1/0 variable. Enable fast connect procedure to AP. Enable default.<br>
 34) Update busybox to 1.18.x stable tree.<br>
 35) Add support classful routes and rewrite (ms)staticroutes parser code.<br>
 36) No more need restart services if ip no change at dhcp renew.<br>
-37) Fix calculate some sysctl tune parametrs<br>
-38) Fix resource leak (no socket close) station mode code in goahead<br>
-39) Add auto try auto reconnect to AP if lease fail<br>
-40) Add iwlist util for manual rescan (use iwlist ra0 scanning)<br>
+37) Fix calculate some sysctl tune parametrs.<br>
+38) Fix resource leak (no socket close) station mode code in goahead.<br>
+39) Add auto try auto reconnect to AP if lease fail.<br>
+40) Add iwlist util for manual rescan (use iwlist ra0 scanning).<br>
 41) Add kabinet auth to WebUI in VPN page.<br>
 42) Kabinet auth works OK. Thanks Dmitry Novgorodov.<br>
-43) Add switch reinit mode at lease fail (need add in gui dhcpSwReset=0/1 default 0)<br>
-44) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat. Default enable. (need add in gui)<br>
-45) Enable/Disable Cron variable CrondEnable=1/0. Default disable. (need add in gui)<br>
-46) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0)<br>
+43) Add switch reinit mode at lease fail (need add in gui dhcpSwReset=0/1 default 0).<br>
+44) Enable/Disable NAT fastpath with net.ipv4.netfilter.ip_conntrack_fastnat. Default enable.(need add in gui).<br>
+45) Enable/Disable Cron variable CrondEnable=1/0. Default disable. (need add in gui).<br>
+46) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0).<br>
+47) Fix restore backup settings.<br>
 
 <br><br>
 <b>For support see:</b><br>
