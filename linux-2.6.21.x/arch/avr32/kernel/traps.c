@@ -194,6 +194,7 @@ void __die(const char *str, struct pt_regs *regs, unsigned long err,
 	}
 
 	bust_spinlocks(0);
+	add_taint(TAINT_DIE);
 	spin_unlock_irq(&die_lock);
 	do_exit(SIGSEGV);
 }
