@@ -1,6 +1,6 @@
-/* $Id: natpmp.c,v 1.12 2009/12/19 14:10:09 nanard Exp $ */
+/* $Id: natpmp.c,v 1.13 2011/01/03 17:31:03 nanard Exp $ */
 /* libnatpmp
- * Copyright (c) 2007-2009, Thomas BERNARD <miniupnp@free.fr>
+ * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -41,7 +41,7 @@
 #include "natpmp.h"
 #include "getgateway.h"
 
-LIBSPEC int initnatpmp(natpmp_t * p)
+LIBSPEC int initnatpmp(natpmp_t * p, int forcegw, in_addr_t forcedgw)
 {
 #ifdef WIN32
 	u_long ioctlArg = 1;
@@ -65,8 +65,12 @@ LIBSPEC int initnatpmp(natpmp_t * p)
 		return NATPMP_ERR_FCNTLERROR;
 #endif
 
-	if(getdefaultgateway(&(p->gateway)) < 0)
-		return NATPMP_ERR_CANNOTGETGATEWAY;
+	if(forcegw) {
+		p->gateway = forcedgw;
+	} else {
+		if(getdefaultgateway(&(p->gateway)) < 0)
+			return NATPMP_ERR_CANNOTGETGATEWAY;
+	}
 	
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;

@@ -1,6 +1,6 @@
-/* $Id: natpmpc.c,v 1.7 2009/12/19 12:00:00 nanard Exp $ */
+/* $Id: natpmpc.c,v 1.8 2011/01/03 17:31:03 nanard Exp $ */
 /* libnatpmp
- * Copyright (c) 2007-2008, Thomas BERNARD <miniupnp@free.fr>
+ * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -37,12 +37,15 @@
 void usage(FILE * out, const char * argv0)
 {
 	fprintf(out, "Usage :\n");
-	fprintf(out, "  %s\n", argv0);
+	fprintf(out, "  %s [options]\n", argv0);
 	fprintf(out, "\tdisplay the public IP address.\n");
 	fprintf(out, "  %s -h\n", argv0);
 	fprintf(out, "\tdisplay this help screen.\n");
-	fprintf(out, "  %s -a <public port> <private port> <protocol> [lifetime]\n", argv0);
+	fprintf(out, "  %s [options] -a <public port> <private port> <protocol> [lifetime]\n", argv0);
 	fprintf(out, "\tadd a port mapping.\n");
+	fprintf(out, "\nOption available :\n");
+	fprintf(out, "  -g ipv4address\n");
+	fprintf(out, "\tforce the gateway to be used as destination for NAT-PMP commands.\n");
 	fprintf(out, "\n  In order to remove a mapping, set it with a lifetime of 0 seconds.\n");
 	fprintf(out, "  To remove all mappings for your machine, use 0 as private port and lifetime.\n");
 }
@@ -62,6 +65,8 @@ int main(int argc, char * * argv)
 	uint16_t publicport = 0;
 	uint32_t lifetime = 3600;
 	int command = 0;
+	int forcegw = 0;
+	in_addr_t gateway = 0;
 
 #ifdef WIN32
 	WSADATA wsaData;
@@ -80,10 +85,18 @@ int main(int argc, char * * argv)
 			case 'h':
 				usage(stdout, argv[0]);
 				return 0;
+			case 'g':
+				forcegw = 1;
+				if(argc < i + 1) {
+					fprintf(stderr, "Not enough arguments for option -%c\n", argv[i][1]);
+					return 1;
+				}
+				gateway = inet_addr(argv[++i]);
+				break;
 			case 'a':
 				command = 'a';
 				if(argc < i + 3) {
-					fprintf(stderr, "Not enough arguments for option -a\n");
+					fprintf(stderr, "Not enough arguments for option -%c\n", argv[i][1]);
 					return 1;
 				}
 				i++;
@@ -125,10 +138,12 @@ int main(int argc, char * * argv)
 	}
 
 	/* initnatpmp() */
-	r = initnatpmp(&natpmp);
+	r = initnatpmp(&natpmp, forcegw, gateway);
 	printf("initnatpmp() returned %d (%s)\n", r, r?"FAILED":"SUCCESS");
 	if(r<0)
 		return 1;
+
+	printf("using gateway : %s\n", inet_ntoa(*((struct in_addr *)&natpmp.gateway)));
 
 	/* sendpublicaddressrequest() */
 	r = sendpublicaddressrequest(&natpmp);

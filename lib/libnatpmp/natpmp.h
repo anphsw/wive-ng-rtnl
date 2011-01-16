@@ -1,6 +1,6 @@
-/* $Id: natpmp.h,v 1.13 2010/04/12 16:15:09 nanard Exp $ */
+/* $Id: natpmp.h,v 1.14 2011/01/03 17:31:03 nanard Exp $ */
 /* libnatpmp
- * Copyright (c) 2007-2008, Thomas BERNARD <miniupnp@free.fr>
+ * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -121,6 +121,7 @@ extern "C" {
 
 /* initnatpmp()
  * initialize a natpmp_t object
+ * With forcegw=1 the gateway is not detected automaticaly.
  * Return values :
  * 0 = OK
  * NATPMP_ERR_INVALIDARGS
@@ -128,7 +129,7 @@ extern "C" {
  * NATPMP_ERR_FCNTLERROR
  * NATPMP_ERR_CANNOTGETGATEWAY
  * NATPMP_ERR_CONNECTERR */
-LIBSPEC int initnatpmp(natpmp_t * p);
+LIBSPEC int initnatpmp(natpmp_t * p, int forcegw, in_addr_t forcedgw);
 
 /* closenatpmp()
  * close resources associated with a natpmp_t object

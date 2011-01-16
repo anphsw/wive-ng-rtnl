@@ -1,6 +1,6 @@
-/* $Id: libnatpmpmodule.c,v 1.3 2009/12/19 12:00:00 nanard Exp $ */
+/* $Id: libnatpmpmodule.c,v 1.4 2011/01/03 17:31:03 nanard Exp $ */
 /* libnatpmp
- * Copyright (c) 2007-2008, Thomas BERNARD <miniupnp@free.fr>
+ * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -62,7 +62,7 @@ NATPMPObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
   
   self = (NATPMPObject *)type->tp_alloc(type, 0);
   if (self) {
-    initnatpmp(&self->natpmp);
+    initnatpmp(&self->natpmp, 0, 0);
   }
 
   return (PyObject *)self;

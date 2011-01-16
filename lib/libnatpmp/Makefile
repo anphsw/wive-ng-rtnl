@@ -1,15 +1,17 @@
-# $Id: Makefile,v 1.14 2010/11/30 11:20:55 nanard Exp $
+# $Id: Makefile,v 1.16 2011/01/03 17:31:03 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
-# (c) 2007-2009 Thomas Bernard
+# (c) 2007-2011 Thomas Bernard
 # http://miniupnp.free.fr/libnatpmp.html
 
+OS = $(shell uname -s)
+CC ?= gcc
 INSTALL = install
 
 # APIVERSION is used in soname
-APIVERSION = 0
+APIVERSION = 1
 LDFLAGS = --no-undefined
-CFLAGS = -Os -fPIC -Wall -DENABLE_STRNATPMPERR
+CFLAGS  += -I../include -fPIC -Wall -DENABLE_STRNATPMPERR
 
 LIBOBJS = natpmp.o getgateway.o
 
@@ -59,6 +61,7 @@ install:	$(HEADERS) $(STATICLIB) $(SHAREDLIB) natpmpc-shared
 	$(INSTALL) -d $(INSTALLDIRLIB)
 	$(INSTALL) -m 644 $(STATICLIB) $(INSTALLDIRLIB)
 	$(INSTALL) -m 644 $(SHAREDLIB) $(INSTALLDIRLIB)/$(SONAME)
+	$(INSTALL) -d $(INSTALLDIRBIN)
 	$(INSTALL) -m 755 natpmpc-shared $(INSTALLDIRBIN)/natpmpc
 	ln -s -f $(SONAME) $(INSTALLDIRLIB)/$(SHAREDLIB)
 
@@ -80,13 +83,17 @@ $(STATICLIB):	$(LIBOBJS)
 	$(AR) crs $@ $?
 
 $(SHAREDLIB):	$(LIBOBJS)
+ifeq ($(OS), Darwin)
+	$(CC) -dynamiclib -Wl,-install_name,$(SONAME) -o $@ $^
+else
 	$(CC) -shared -Wl,-soname,$(SONAME) -o $@ $^
+endif
 
-shared:	$(SHAREDLIB)
+shared: $(SHAREDLIB)
 
 # DO NOT DELETE
 
-natpmp.o: natpmp.h getgateway.h
-getgateway.o: getgateway.h
-testgetgateway.o: getgateway.h
+natpmp.o: natpmp.h getgateway.h declspec.h
+getgateway.o: getgateway.h declspec.h
+testgetgateway.o: getgateway.h declspec.h
 natpmpc.o: natpmp.h
