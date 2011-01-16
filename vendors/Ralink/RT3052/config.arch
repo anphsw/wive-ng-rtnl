@@ -17,6 +17,7 @@ HWH4			   = "0.0"
 
 MACHINE			   = mips
 ARCH		           = mips
+OPTS			   = -Os -pipe -mips32r2 -mtune=24kec
 ROOTDIR			   ?= /opt/Wive-RTNL
 include $(ROOTDIR)/vendors/config/mips/config.arch
 
@@ -25,9 +26,8 @@ LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
 TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
-#KERNEL_CROSS_COMPILE       = $(TOOLCHAINDIR)/kernel/bin/mipsel-kernel-linux-gnu-
 
 CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += -Os -pipe -mips32r2 -mtune=24kec
-UOPT    += -Os -pipe -mips32r2 -mtune=24kec 
-LOPT    += -Os -pipe -mips32r2 -mtune=24kec
+CFLAGS  += $(OPTS)
+UOPT    += $(OPTS)
+LOPT    += $(OPTS)
