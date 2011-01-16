@@ -6,6 +6,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Advanced Wireless Settings</title>
@@ -27,18 +28,7 @@ var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "M2UEnabled"); %>';
 var carrierib = '<% getCarrierBuilt(); %>';
 var txPower = '<% getCfgZero(1, "TxPower"); %>';
-
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
+var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 
 function initTranslation()
 {
@@ -253,6 +243,8 @@ function initValue()
 			form.m2u_enable[0].checked = false;
 			form.m2u_enable[1].checked = true;
 		}
+		
+		form.McastMcs.value = mcastMcs;
 	}
 	
 	// Set-up TX power combo
@@ -458,7 +450,6 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
-		<!--input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>"> <font color="#808080" id="advTxPWRange">(range 1 - 100, default 100)</font-->
 		<select name="tx_power">
 			<option value="5">5%</option>
 			<option value="10">10%</option>
@@ -574,6 +565,29 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="radio" name="m2u_enable" value="1"><font id="advMul2UniEnable">Enable</font>&nbsp;
 		<input type="radio" name="m2u_enable" value="0"><font id="advMul2UniDisable">Disable</font>
+	</td>
+</tr>
+<tr>
+	<td class="head">User specific TX rate for IGMP Snooping</td>
+	<td>
+		<select name="McastMcs" class="half">
+			<option value="0">0</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+		</select>
 	</td>
 </tr>
 </table>

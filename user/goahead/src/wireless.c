@@ -875,9 +875,13 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
-	char_t	*m2u_enable, *rd_region, *carrier_detect;
+	char_t	*rd_region, *carrier_detect;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
+
+#ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
+	char_t	*m2u_enable, *mcast_mcs;
+#endif
 
 	//fetch from web input
 	bg_protection = websGetVar(wp, T("bg_protection"), T("0"));
@@ -896,8 +900,12 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	wmm_capable = websGetVar(wp, T("wmm_capable"), T("0"));
 	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
 	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
-	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
+
+#ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
+	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
+	mcast_mcs = websGetVar(wp, T("McastMcs"), T("0"));
+#endif
 
 	if (NULL != nvram_get(RT2860_NVRAM, "BssidNum"))
 		ssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
@@ -925,7 +933,11 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
 	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
 	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
+	
+#ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);
+	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
+#endif
 
 	bzero(wmm_enable, sizeof(char)*16);
 	for (i = 0; i < ssid_num; i++)
@@ -974,7 +986,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "CountryCode", "");
 	}
 	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);	
+	nvram_close(RT2860_NVRAM);
 
     //debug print
     websHeader(wp);
@@ -996,6 +1008,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
     websWrite(wp, T("countrycode: %s<br>\n"), countrycode);
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
     websWrite(wp, T("m2u_enable: %s<br>\n"), m2u_enable);
+    websWrite(wp, T("mcast_mcs: %s<br>\n"), mcast_mcs);
 #endif
     websFooter(wp);
     websDone(wp, 200);

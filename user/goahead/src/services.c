@@ -164,6 +164,9 @@ const service_flag_t service_misc_flags[] =
 	{ T("pingWANEnbl"), "WANPingFilter", T("0") },
 	{ T("krnlPppoePass"), "pppoe_pass", T("0") },
 	{ T("krnlIpv6Pass"), "ipv6_pass", T("0") },
+	{ T("dhcpSwReset"), "dhcpSwReset", T("0") },
+	{ T("natFastpath"), "natFastpath", T("1") },
+	{ T("CronEnable"), "CronEnable", T("0") },
 	{ NULL, NULL, NULL } // Terminator
 };
 

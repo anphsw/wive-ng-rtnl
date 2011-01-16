@@ -121,6 +121,9 @@ function initValue()
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
+	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
+	form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+	form.CronEnable.value = defaultNumber("<% getCfgGeneral(1, "CronEnable"); %>", "0");
 
 	if (lltdb == "0")
 	{
@@ -165,7 +168,7 @@ function CheckValue()
 <body onLoad="initValue()">
 <table class="body"><tr><td>
 
-<h1 id="lTitle"></h1>
+<h1 id="lTitle">Miscellaneous Services Setup</h1>
 <p id="lIntroduction"></p>
 <hr />
 
@@ -307,6 +310,33 @@ function CheckValue()
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">Reinit on DHCP lease fail</td>
+<td>
+	<select name="dhcpSwReset" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">NAT fastpath</td>
+<td>
+	<select name="natFastpath" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<td class="head">CRON</td>
+<td>
+	<select name="CronEnable" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+
 </table>
 
 <table width="95%" cellpadding="2" cellspacing="1">
