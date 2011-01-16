@@ -48,9 +48,9 @@ installpythonmodule: pythonmodule
 	python setup.py install
 
 clean:
-	$(RM) $(OBJS) $(EXECUTABLES) $(STATICLIB) $(SHAREDLIB)
-	$(RM) pythonmodule
-	$(RM) -r build/ dist/
+	$(RM) -f $(OBJS) $(EXECUTABLES) $(STATICLIB) $(SHAREDLIB)
+	$(RM) -f pythonmodule
+	$(RM) -f -r build/ dist/
 
 depend:
 	makedepend -f$(MAKEFILE_LIST) -Y $(OBJS:.o=.c) 2>/dev/null

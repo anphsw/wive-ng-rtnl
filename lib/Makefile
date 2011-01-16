@@ -443,6 +443,9 @@ clean:
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	$(MAKE) -C libgmp clean
 endif
+ifeq ($(CONFIG_LIB_NAT),y)
+	$(MAKE) -C libnatpmp clean
+endif
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \
 		$(RM) include/sys/$$i; \
