@@ -494,9 +494,9 @@ else
 CFLAGS		+= -fomit-frame-pointer
 endif
 
-CFLAGS		+= -gdwarf-2
 ifdef CONFIG_DEBUG_INFO
 CFLAGS		+= -g
+CFLAGS		+= -gdwarf-2
 endif
 
 # Force gcc to behave correct even for buggy distributions
