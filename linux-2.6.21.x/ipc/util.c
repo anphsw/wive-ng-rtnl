@@ -191,8 +191,8 @@ void __ipc_init ipc_init_ids(struct ipc_ids* ids, int size)
 	ids->seq = 0;
 	{
 		int seq_limit = INT_MAX/SEQ_MULTIPLIER;
-		if(seq_limit > USHRT_MAX)
-			ids->seq_max = USHRT_MAX;
+		if (seq_limit > USHORT_MAX)
+			ids->seq_max = USHORT_MAX;
 		 else
 		 	ids->seq_max = seq_limit;
 	}

@@ -10,7 +10,6 @@
 #ifndef _IPC_UTIL_H
 #define _IPC_UTIL_H
 
-#define USHRT_MAX 0xffff
 #define SEQ_MULTIPLIER	(IPCMNI)
 
 void sem_init (void);
