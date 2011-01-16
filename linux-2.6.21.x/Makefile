@@ -1,5 +1,4 @@
 VERSION = 2
-
 PATCHLEVEL = 6
 SUBLEVEL = 21
 EXTRAVERSION = .7
@@ -310,8 +309,11 @@ LINUXINCLUDE    := -Iinclude \
 
 CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
-CFLAGS          := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -fno-strict-aliasing -fno-common $(MOREOPTIMIZE)
+CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+                   -fno-strict-aliasing -fno-common \
+                   -Werror-implicit-function-declaration \
+                   -Wno-format-security \
+                   -fno-delete-null-pointer-checks
 AFLAGS          := -D__ASSEMBLY__
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
@@ -483,8 +485,6 @@ endif # $(dot-config)
 # This allow a user to issue only 'make' to build a kernel including modules
 # Defaults vmlinux but it is usually overridden in the arch makefile
 all: vmlinux
-
-CFLAGS		+= -Os
 
 include $(srctree)/arch/$(ARCH)/Makefile
 
