@@ -87,7 +87,7 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/ethtool/missing --run automake-1.10
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
 CCDEPMODE = depmode=gcc3
-CFLAGS = -Os -pipe -mips32r2 -mtune=24kec  -Os -pipe -mips32r2 -mtune=24kec  -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec
+CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CPPFLAGS = 
 CYGPATH_W = echo
