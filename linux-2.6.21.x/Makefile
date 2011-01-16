@@ -4,6 +4,20 @@ SUBLEVEL = 21
 EXTRAVERSION = .7
 NAME = Nocturnal Monster Puppy
 
+MAKEFLAGS += -rR --no-print-directory
+MOREOPTIMIZE = -Os
+
+###########-O2 OPTIONS####################################################
+MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition 
+#          -falign-functions  -falign-jumps  -falign-loops 
+#          -falign-labels  -freorder-blocks  -freorder-blocks-and-partition 
+#          -fprefetch-loop-arrays  -ftree-vect-loop-version
+
+###########-O3 OPTIONS####################################################
+MOREOPTIMIZE += -finline-functions -funswitch-loops -ftree-vectorize
+#	    -finline-functions -funswitch-loops -fpredictive-commoning -fgcse-after-reload
+#	    -ftree-vectorize -fipa-cp-clone
+
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
@@ -14,8 +28,6 @@ NAME = Nocturnal Monster Puppy
 # o  use make's built-in rules and variables
 #    (this increases performance and avoid hard-to-debug behavour);
 # o  print "Entering directory ...";
-MAKEFLAGS += -rR --no-print-directory
-MOREOPTIMIZE = -Os
 
 # We are using a recursive build, so we need to do a little thinking
 # to get the ordering right.
