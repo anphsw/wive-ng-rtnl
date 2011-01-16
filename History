@@ -207,7 +207,7 @@
 18) Update STA driver from 2.2.0.0 to 2.4.0.0 version<br>
 19) Update HW_NAT kernel code and add hw_nat userspace utils<br>
 20) Add LCP echo adaptive options on VPN page. Default on<br>
-21) Use opensource toolchain at 4.2.4 gcc for build all coe in project. No binary from Ralink needed<br>
+21) Use opensource toolchain at 4.5.2 gcc for build all coe in project. No binary from Ralink needed<br>
 22) Update boot code<br>
 23) Some optimization and fix in scripts<br>
 24) Wifi bridge fastpath work OK in RT305x SOC to. Save 10% CPU at RT3050 SOC<br>
