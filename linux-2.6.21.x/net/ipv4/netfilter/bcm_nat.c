@@ -1,38 +1,11 @@
 /*
- * Packet matching code.
- *
- * Copyright (C) 1999 Paul `Rusty' Russell & Michael J. Neuling
- * Copyright (C) 2009-2002 Netfilter core team <coreteam@netfilter.org>
- *
- * 19 Jan 2002 Harald Welte <laforge@gnumonks.org>
- * 	- increase module usage count as soon as we have rules inside
- * 	  a table
+ * Packet matching code. Fastpath for NAT speedup.
  */
-#include <linux/config.h>
-#include <linux/cache.h>
-#include <linux/skbuff.h>
-#include <linux/kmod.h>
-#include <linux/vmalloc.h>
-#include <linux/netdevice.h>
-#include <linux/module.h>
-#include <linux/ip.h>
-#include <net/route.h>
-#include <net/ip.h>
-#include <linux/netfilter.h>
-#include <linux/netfilter_ipv4.h>
-#include <net/netfilter/nf_nat_core.h>
-#include <net/netfilter/nf_conntrack.h>
-#include <net/netfilter/nf_conntrack_core.h>
-#include <linux/netfilter/nf_conntrack_common.h>
-#include <linux/netfilter_ipv4/ip_tables.h>
-#ifdef HNDCTF
-#include <typedefs.h>
-extern bool ip_conntrack_is_ipc_allowed(struct sk_buff *skb, u_int32_t hooknum);
-extern void ip_conntrack_ipct_add(struct sk_buff *skb, u_int32_t hooknum,
-                                  struct nf_conn *ct, enum ip_conntrack_info ci,
-                                  struct nf_conntrack_tuple *manip);
-#endif /* HNDCTF */
 
+#include <linux/module.h>
+#include <net/ip.h> 
+#include <net/route.h>
+#include <net/netfilter/nf_conntrack_core.h>
 
 #define DEBUGP(format, args...)
 
@@ -126,9 +99,6 @@ bcm_do_bindings(struct nf_conn *ct,
 	unsigned int i;
 	static int hn[2] = {NF_IP_PRE_ROUTING, NF_IP_POST_ROUTING};
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
-#ifdef HNDCTF
-	bool enabled = ip_conntrack_is_ipc_allowed(*pskb, NF_IP_PRE_ROUTING);
-#endif /* HNDCTF */
 
 	for (i = 0; i < 2; i++) {
 		enum nf_nat_manip_type mtype = HOOK2MANIP(hn[i]);
@@ -165,10 +135,7 @@ bcm_do_bindings(struct nf_conn *ct,
 
 			/* We are aiming to look like inverse of other direction. */
 			nf_ct_invert_tuple(&target, &ct->tuplehash[!dir].tuple, l3proto, l4proto);
-#ifdef HNDCTF
-			if (enabled)
-				ip_conntrack_ipct_add(*pskb, hn[i], ct, ctinfo, &target);
-#endif /* HNDCTF */
+
 			if (!bcm_manip_pkt(target.dst.protonum, pskb, 0, &target, mtype))
 				return NF_DROP;
 		}
