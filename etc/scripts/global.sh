@@ -177,10 +177,16 @@ fi
 resetLanWan()
 {
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-    $LOG "Reinit power mode for all switch ports" #workaroud for dir-300NRU
-    config-vlan.sh 2 FFFFF
     echo "##### restore to dump switch #####"
     config-vlan.sh $SWITCH_MODE 0
+fi
+}
+
+resetPhy()
+{
+if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    $LOG "Reinit power mode for all switch ports" #workaroud for dir-300NRU
+    config-vlan.sh 2 FFFFF
 fi
 }
 

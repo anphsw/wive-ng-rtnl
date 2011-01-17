@@ -23,6 +23,7 @@ start() {
 	    #in gate mode configure vlans
 	    setLanWan
 	fi
+	resetPhy
 	#load modules for basic start
 	modprobe -q crypto_algapi
 	modprobe -q cryptomgr
