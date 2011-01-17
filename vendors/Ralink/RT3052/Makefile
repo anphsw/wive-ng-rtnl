@@ -77,16 +77,19 @@ endif
 	#===========================================
 endif
 	# Pack final image and write headers
-	@cd $(IMAGEDIR) ;
-ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),y)
-	ISIZE=`wc -c $(KERNELZ).$(COMP) | awk '{print $$1}'` ; \
-	RSIZE=`wc -c $(RAMDISK) | awk '{print $$1}'` ; \
-	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
-	ENTRY=`readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
-	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 -e $$ENTRY -k $$KRN_SIZE \
-	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
-else
+ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
+	@cd $(IMAGEDIR) ; \
 	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
 	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
 	-n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
+else
+	# For No padded need write kernel size in image header 
+	# to correct mount particion in mtd drivers adress
+	@cd $(IMAGEDIR) ; \
+	ISIZE=`wc -c $(KERNELZ).$(COMP) | awk '{print $$1}'` ; \
+	RSIZE=`wc -c $(RAMDISK) | awk '{print $$1}'` ; \
+	KRN_SIZE=`expr $$ISIZE - $$RSIZE + 64` ; \
+	$(CUR_DIR)/mkimage -A mips -O linux -T kernel -C $(COMP) -a 80000000 \
+	-e $(shell readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}') \
+	-k $$KRN_SIZE -n $(PRODUCTID) -d $(KERNELZ).$(COMP) $(IMAGE)
 endif

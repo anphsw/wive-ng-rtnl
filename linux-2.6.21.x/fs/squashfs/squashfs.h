@@ -28,6 +28,8 @@
 #undef CONFIG_SQUASHFS_2_0_COMPATIBILITY
 #endif
 
+#define SQUASHFS_TRACE
+
 #ifdef SQUASHFS_TRACE
 #define TRACE(s, args...)	printk(KERN_NOTICE "SQUASHFS: "s, ## args)
 #else
