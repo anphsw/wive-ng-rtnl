@@ -8,20 +8,18 @@ MAKEFLAGS     = -rR --no-print-directory
 MOREOPTIMIZE  = -Os
 
 ###########-O2 OPTIONS####################################################
-MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks 
-MOREOPTIMIZE += -freorder-blocks-and-partition -falign-jumps
-MOREOPTIMIZE += -ftree-builtin-call-dce -fipa-sra
+MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition
 #          -falign-functions -falign-loops -fipa-sra -fprefetch-loop-arrays
 #          -falign-labels -freorder-blocks -freorder-blocks-and-partition 
 #          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################
-MOREOPTIMIZE += -finline-functions -funswitch-loops
+MOREOPTIMIZE += -finline-functions -funswitch-loops -ftree-vectorize
 #	    -finline-functions -funswitch-loops -fpredictive-commoning
 #	    -ftree-vectorize -fipa-cp-clone -fgcse-after-reload
 
 ###########AGRESSIVE OPTIMIZE OPTIONS#####################################
-MOREOPTIMIZE += -findirect-inlining -funroll-loops
+MOREOPTIMIZE += -findirect-inlining
                        
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
