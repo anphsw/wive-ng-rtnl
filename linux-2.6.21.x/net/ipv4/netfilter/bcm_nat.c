@@ -1,5 +1,5 @@
 /*
- * Packet matching code. Fastpath for NAT speedup.
+ *  Fastpath module for NAT speedup.
  */
 
 #include <linux/module.h>
@@ -10,18 +10,17 @@
 #define DEBUGP(format, args...)
 
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
-extern int bcm_nat_hit_hook_func(bcmNatHitHook hook_func);
+typedef int (*bcmNatBindHook)(struct nf_conn *ct, enum ip_conntrack_info ctinfo, unsigned int hooknum, struct sk_buff **pskb);
 
-typedef int (*bcmNatBindHook)(struct nf_conn *ct,enum ip_conntrack_info ctinfo,
-	    						unsigned int hooknum, struct sk_buff **pskb);
+extern int bcm_nat_hit_hook_func(bcmNatHitHook hook_func);
 extern int bcm_nat_bind_hook_func(bcmNatBindHook hook_func);
 
-extern int
-bcm_manip_pkt(u_int16_t proto,
-	  struct sk_buff **pskb,
-	  unsigned int iphdroff,
-	  const struct nf_conntrack_tuple *target,
-	  enum nf_nat_manip_type maniptype);
+extern inline int
+	bcm_manip_pkt(u_int16_t proto,
+	struct sk_buff **pskb,
+	unsigned int iphdroff,
+	const struct nf_conntrack_tuple *target,
+	enum nf_nat_manip_type maniptype);
 
 /* 
  * Send packets to output.

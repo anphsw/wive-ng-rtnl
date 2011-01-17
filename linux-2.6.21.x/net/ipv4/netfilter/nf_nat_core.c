@@ -397,12 +397,12 @@ manip_pkt(u_int16_t proto,
 }
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-int
-bcm_manip_pkt(u_int16_t proto,
-	  struct sk_buff **pskb,
-	  unsigned int iphdroff,
-	  const struct nf_conntrack_tuple *target,
-	  enum nf_nat_manip_type maniptype)
+inline int 
+	bcm_manip_pkt(u_int16_t proto,
+	struct sk_buff **pskb,
+	unsigned int iphdroff,
+	const struct nf_conntrack_tuple *target,
+	enum nf_nat_manip_type maniptype)
 {
 	return manip_pkt(proto, pskb, iphdroff, target, maniptype);
 }
