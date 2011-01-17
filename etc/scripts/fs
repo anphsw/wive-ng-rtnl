@@ -12,11 +12,7 @@
 TGZfs_size=131072
 BLOCKS=2
 KEEPMAC=YES
-if [ "$CONFIG_ROOTFS_IN_FLASH_NO_PADDING" != "" ]; then
-    MTDRWFS=/dev/mtdblock4
-else
-    MTDRWFS=/dev/mtdblock5
-fi
+MTDRWFS=/dev/mtdblock5
 MTD2CFG=/dev/mtdblock1
 MTD2FAC=/dev/mtdblock2
 

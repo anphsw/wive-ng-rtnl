@@ -451,14 +451,18 @@ int add_mtd_partitions(struct mtd_info *master,
 			/* Doesn't start on a boundary of major erase size */
 			/* FIXME: Let it be writable if it is on a boundary of _minor_ erase size though */
 			slave->mtd.flags &= ~MTD_WRITEABLE;
-			printk ("mtd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n",
-				parts[i].name);
+#ifndef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+			//virtual particions in no padded mode not need align to erase, is ro particions
+			printk ("mtd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n", parts[i].name);
+#endif
 		}
 		if ((slave->mtd.flags & MTD_WRITEABLE) &&
 		    (slave->mtd.size % slave->mtd.erasesize)) {
 			slave->mtd.flags &= ~MTD_WRITEABLE;
-			printk ("mtd: partition \"%s\" doesn't end on an erase block -- force read-only\n",
-				parts[i].name);
+#ifndef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+			//virtual particions in no padded mode not need align to erase, is ro particions
+			printk ("mtd: partition \"%s\" doesn't end on an erase block -- force read-only\n", parts[i].name);
+#endif
 		}
 
 		slave->mtd.ecclayout = master->ecclayout;

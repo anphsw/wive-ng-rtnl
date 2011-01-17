@@ -2,7 +2,6 @@
 
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
-. /etc/scripts/config.sh 
 
 LOG="echo INIT: "
 
@@ -20,11 +19,7 @@ fi
 
 TGZfs_size=131072
 BLOCKS=2
-if [ "$CONFIG_ROOTFS_IN_FLASH_NO_PADDING" != "" ]; then
-    MTDDEVICE=/dev/mtdblock4
-else
-    MTDDEVICE=/dev/mtdblock5
-fi
+MTDDEVICE=/dev/mtdblock5
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2

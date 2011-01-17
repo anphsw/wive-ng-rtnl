@@ -67,4 +67,6 @@
 #endif
 #endif
 
+#define MTD_RWFS_PART_OFFSET   IMAGE1_SIZE - MTD_RWFS_PART_SIZE
+
 #endif //__RALINK_FLASH_H__

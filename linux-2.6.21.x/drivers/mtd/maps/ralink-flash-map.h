@@ -34,7 +34,7 @@ static struct mtd_partition rt2880_partitions[] = {
 	}, {
                 name:           "RW-FS", /* mtdblock4 */
                 size:           MTD_RWFS_PART_SIZE, /* 128K */
-                offset:         MTDPART_OFS_APPEND,
+                offset:         MTD_RWFS_PART_OFFSET,
 #ifdef CONFIG_DUAL_IMAGE
 	}, {
 		name:		"Kernel2", /* mtdblock5 */
@@ -65,6 +65,10 @@ static struct mtd_partition rt2880_partitions[] = {
                 offset:         MTDPART_OFS_APPEND
 #if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) && defined(CONFIG_ROOTFS_IN_FLASH_NO_PADDING) 
         }, {
+                name:           "Stubfs", /* mtdblock3 */
+                size:           CONFIG_MTD_KERNEL_PART_SIZ,
+		offset:         MTDPART_OFS_APPEND,
+        }, {
                 name:           "Kernel_RootFS", /* mtdblock3 */
                 size:           MTD_ROOTFS_PART_SIZE,
 		offset:         MTDPART_OFS_APPEND,
@@ -83,7 +87,7 @@ static struct mtd_partition rt2880_partitions[] = {
 	}, {
                 name:           "RW-FS",	/* mtdblock4/5 */ 
                 size:           MTD_RWFS_PART_SIZE,	/* 128K */
-                offset:         MTDPART_OFS_APPEND,
+                offset:         MTD_RWFS_PART_OFFSET,
 
 #ifdef CONFIG_DUAL_IMAGE
 	}, {
