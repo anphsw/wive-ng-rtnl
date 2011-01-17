@@ -4,20 +4,25 @@ SUBLEVEL = 21
 EXTRAVERSION = .7
 NAME = Nocturnal Monster Puppy
 
-MAKEFLAGS += -rR --no-print-directory
-MOREOPTIMIZE = -Os
+MAKEFLAGS     = -rR --no-print-directory
+MOREOPTIMIZE  = -Os
 
 ###########-O2 OPTIONS####################################################
-MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition 
-#          -falign-functions  -falign-jumps  -falign-loops 
-#          -falign-labels  -freorder-blocks  -freorder-blocks-and-partition 
-#          -fprefetch-loop-arrays  -ftree-vect-loop-version
+MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks 
+MOREOPTIMIZE += -freorder-blocks-and-partition -falign-jumps
+MOREOPTIMIZE += -ftree-builtin-call-dce -fipa-sra
+#          -falign-functions -falign-loops -fipa-sra -fprefetch-loop-arrays
+#          -falign-labels -freorder-blocks -freorder-blocks-and-partition 
+#          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################
-MOREOPTIMIZE += -finline-functions -funswitch-loops -ftree-vectorize
-#	    -finline-functions -funswitch-loops -fpredictive-commoning -fgcse-after-reload
-#	    -ftree-vectorize -fipa-cp-clone
+MOREOPTIMIZE += -finline-functions -funswitch-loops
+#	    -finline-functions -funswitch-loops -fpredictive-commoning
+#	    -ftree-vectorize -fipa-cp-clone -fgcse-after-reload
 
+###########AGRESSIVE OPTIMIZE OPTIONS#####################################
+MOREOPTIMIZE += -findirect-inlining -funroll-loops
+                       
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
 # More info can be located in ./README
