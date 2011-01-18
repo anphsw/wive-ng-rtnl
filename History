@@ -234,6 +234,9 @@
 45) Enable/Disable Cron variable CrondEnable=1/0. Default disable. (need add in gui).<br>
 46) Add support user specific tx rate of mcast pkt for igmp snooping (need add in gui McastMcs=0..15 default 0).<br>
 47) Fix restore backup settings.<br>
+48) Move to kernel_rootfs nopadded mode. Economy ~64Kb not compressed flash.<br>
+49) Fixed RWFS on mtd position at 2 blocks and of mtd device.<br>
+50) Fix update firmware in nopadded kernel_rootfs mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
