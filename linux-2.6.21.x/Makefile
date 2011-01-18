@@ -5,21 +5,24 @@ EXTRAVERSION = .7
 NAME = Nocturnal Monster Puppy
 
 MAKEFLAGS     = -rR --no-print-directory
-MOREOPTIMIZE  = -Os
+
+# More optimization flag only for kernel if flash size = 4MB.
+# Or for kernel and modules if flash size > 4MB
+MOREOPTIMIZE  = -O2
 
 ###########-O2 OPTIONS####################################################
-MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition
+#MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition
 #          -falign-functions -falign-loops -fipa-sra -fprefetch-loop-arrays
 #          -falign-labels -freorder-blocks -freorder-blocks-and-partition 
 #          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################
-MOREOPTIMIZE += -finline-functions -funswitch-loops
+#MOREOPTIMIZE += -finline-functions -funswitch-loops
 #	    -finline-functions -funswitch-loops -fpredictive-commoning
 #	    -ftree-vectorize -fipa-cp-clone -fgcse-after-reload
 
 ###########AGRESSIVE OPTIMIZE OPTIONS#####################################
-MOREOPTIMIZE += -findirect-inlining
+#MOREOPTIMIZE += -findirect-inlining
                        
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
@@ -309,9 +312,10 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
 MODFLAGS	= -DMODULE
-CFLAGS_MODULE   = $(MODFLAGS) $(MOREOPTIMIZE)
+
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r
+# for kernel always use full version optimization
 CFLAGS_KERNEL	=  $(MOREOPTIMIZE)
 AFLAGS_KERNEL	=
 
@@ -501,6 +505,14 @@ endif # $(dot-config)
 all: vmlinux
 
 include $(srctree)/arch/$(ARCH)/Makefile
+
+ifdef CONFIG_RT2880_FLASH_4M
+# if flash size is small use optimize for size
+CFLAGS_MODULE   = $(MODFLAGS) -Os
+else
+# if flash size big use full optimize for speed
+CFLAGS_MODULE   = $(MODFLAGS) $(MOREOPTIMIZE)
+endif
 
 ifdef CONFIG_FRAME_POINTER
 CFLAGS		+= -fno-omit-frame-pointer $(call cc-option,-fno-optimize-sibling-calls,)
