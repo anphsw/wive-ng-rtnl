@@ -65,11 +65,11 @@ static struct mtd_partition rt2880_partitions[] = {
                 offset:         MTDPART_OFS_APPEND
 #if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) && defined(CONFIG_ROOTFS_IN_FLASH_NO_PADDING) 
         }, {
-                name:           "Stubfs", /* mtdblock3 */
-                size:           CONFIG_MTD_KERNEL_PART_SIZ,
+                name:           "Kernel_stub", /* mtdblock3 */
+                size:           0,
 		offset:         MTDPART_OFS_APPEND,
         }, {
-                name:           "Kernel_RootFS", /* mtdblock3 */
+                name:           "RootFS_stub", /* mtdblock3 */
                 size:           MTD_ROOTFS_PART_SIZE,
 		offset:         MTDPART_OFS_APPEND,
 #else
@@ -85,18 +85,23 @@ static struct mtd_partition rt2880_partitions[] = {
 #endif
 #endif
 	}, {
-                name:           "RW-FS",	/* mtdblock4/5 */ 
+                name:           "RW-FS",	/* mtdblock5 */ 
                 size:           MTD_RWFS_PART_SIZE,	/* 128K */
                 offset:         MTD_RWFS_PART_OFFSET,
-
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) && defined(CONFIG_ROOTFS_IN_FLASH_NO_PADDING) 
+        }, {	// Only for update firmware in not padded mode
+                name:           "Kernel_RootFS", /* mtdblock6 */
+                size:           UPD_RWFS_PART_SIZE,
+		offset:         UPD_RWFS_PART_OFFSET,
+#endif
 #ifdef CONFIG_DUAL_IMAGE
 	}, {
-		name:		"Kernel2", /* mtdblock5/6 */
+		name:		"Kernel2", /* mtdblock6/7 */
 		size:		MTD_KERN2_PART_SIZE, 
 		offset:		MTD_KERN2_PART_OFFSET,
 #ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
 	}, {
-                name:           "RootFS2", /* mtdblock6/7 */
+                name:           "RootFS2", /* mtdblock7/8 */
                 size:           MTD_ROOTFS2_PART_SIZE,
                 offset:         MTD_ROOTFS2_PART_OFFSET,
 #endif

@@ -122,27 +122,33 @@ mtd_unlock(const char *mtd)
 	return 0;
 }
 
-int
-mtd_open(const char *mtd, int flags)
+int 
+mtd_open(const char *name, int flags)
 {
 	FILE *fp;
-	char dev[PATH_MAX];
-	int i;
-	int ret;
+	char dev[80];
+	int i, ret;
 
 	if ((fp = fopen("/proc/mtd", "r"))) {
 		while (fgets(dev, sizeof(dev), fp)) {
-			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, mtd)) {
-				    snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
-				    ret=open(dev, flags);
+			if (sscanf(dev, "mtd%d:", &i) && strstr(dev, name)) {
+#ifdef CONFIG_MTD_BLOCK
+				snprintf(dev, sizeof(dev), "/dev/mtdblock%d", i);
+#else
+				snprintf(dev, sizeof(dev), "/dev/mtd/%d", i);
+#endif
+				ret = open(dev, flags);
+				if (ret < 0) {
+					snprintf(dev, sizeof(dev), "/dev/mtd%d", i);
+					ret = open(dev, flags);
+				}
 				fclose(fp);
 				return ret;
 			}
 		}
 		fclose(fp);
 	}
-
-	return open(mtd, flags);
+	return -1;
 }
 
 
