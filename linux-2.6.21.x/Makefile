@@ -18,7 +18,7 @@ MOREOPTIMIZE  = -O2
 #          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################
-MOREOPTIMIZE += -finline-functions -funswitch-loops
+#MOREOPTIMIZE += -finline-functions -funswitch-loops
 #	    -finline-functions -funswitch-loops -fpredictive-commoning
 #	    -ftree-vectorize -fipa-cp-clone -fgcse-after-reload
 
