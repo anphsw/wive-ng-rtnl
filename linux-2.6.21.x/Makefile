@@ -8,6 +8,7 @@ MAKEFLAGS     = -rR --no-print-directory
 
 # More optimization flag only for kernel if flash size = 4MB.
 # Or for kernel and modules if flash size > 4MB
+# Use -O2 for kernel code. Route/NAT speed up ~15-20% more -Os.
 MOREOPTIMIZE  = -O2
 
 ###########-O2 OPTIONS####################################################
@@ -17,7 +18,7 @@ MOREOPTIMIZE  = -O2
 #          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################
-#MOREOPTIMIZE += -finline-functions -funswitch-loops
+MOREOPTIMIZE += -finline-functions -funswitch-loops
 #	    -finline-functions -funswitch-loops -fpredictive-commoning
 #	    -ftree-vectorize -fipa-cp-clone -fgcse-after-reload
 
