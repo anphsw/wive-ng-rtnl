@@ -180,7 +180,12 @@ int cfi_varsize_frob(struct mtd_info *mtd, varsize_frob_t frob,
 	i--;
 
 	if ((ofs + len) & (regions[i].erasesize-1)){
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+		//disable end boundry check 
+		len = (len + (regions[i].erasesize-1)) & ~(regions[i].erasesize-1);
+#else
 		return -EINVAL;
+#endif
 	}
 
 	chipnum = ofs >> cfi->chipshift;
@@ -193,9 +198,8 @@ int cfi_varsize_frob(struct mtd_info *mtd, varsize_frob_t frob,
 
 		ret = (*frob)(map, &cfi->chips[chipnum], adr, size, thunk);
 
-		if (ret){
+		if (ret)
 			return ret;
-		}
 
 		adr += size;
 		ofs += size;
