@@ -16,6 +16,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     set_def
 
     $LOG "Load modules."
+    #netsched modules
     modprobe -q sch_htb
     modprobe -q cls_u32
     modprobe -q act_gact  
@@ -27,6 +28,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     modprobe -q cls_fw      
     modprobe -q cls_u32      
     modprobe -q em_nbyte 
+    #iptables modules
 
     if [ "$QoSEnable" = "1" ]; then
 	modprobe -q sch_sfq

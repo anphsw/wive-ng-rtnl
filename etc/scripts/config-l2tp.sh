@@ -83,7 +83,10 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     if [ "$MPPE" = "on" ] ; then
-	modprobe ppp_mppe > /dev/null 2>&1
+	modprobe -q crypto_algapi
+	modprobe -q cryptomgr
+	modprobe -q blkcipher
+	modprobe -q ppp_mppe
         MPPE=allow-mppe-128
         else
         MPPE=

@@ -24,10 +24,6 @@ start() {
 	    setLanWan
 	fi
 	resetPhy
-	#load modules for basic start
-	modprobe -q crypto_algapi
-	modprobe -q cryptomgr
-	modprobe -q blkcipher
 	#load conntrack helpers
 	modprobe -q nf_conntrack_tftp
 	modprobe -q nf_conntrack_sip
