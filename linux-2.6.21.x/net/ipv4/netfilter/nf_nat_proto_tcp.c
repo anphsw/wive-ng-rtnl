@@ -77,7 +77,13 @@ tcp_unique_tuple(struct nf_conntrack_tuple *tuple,
 	}
 
 	if (range->flags & IP_NAT_RANGE_PROTO_RANDOM)
-		port =  net_random();
+		port = secure_ipv4_port_ephemeral(tuple->src.u3.ip,
+						tuple->dst.u3.ip,
+						maniptype == IP_NAT_MANIP_SRC
+						? tuple->dst.u.all
+						: tuple->src.u.all);
+	else
+		port = *portptr;
 
 	for (i = 0; i < range_size; i++, port++) {
 		*portptr = htons(min + port % range_size);

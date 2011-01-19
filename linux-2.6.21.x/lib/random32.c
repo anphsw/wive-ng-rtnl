@@ -56,23 +56,12 @@ static u32 __random32(struct rnd_state *state)
 	return (state->s1 ^ state->s2 ^ state->s3);
 }
 
-static void __set_random32(struct rnd_state *state, unsigned long s)
+/*
+ * Handle minimum values for seeds
+ */
+static inline u32 __seed(u32 x, u32 m)
 {
-	if (s == 0)
-		s = 1;      /* default seed is 1 */
-
-#define LCG(n) (69069 * n)
-	state->s1 = LCG(s);
-	state->s2 = LCG(state->s1);
-	state->s3 = LCG(state->s2);
-
-	/* "warm it up" */
-	__random32(state);
-	__random32(state);
-	__random32(state);
-	__random32(state);
-	__random32(state);
-	__random32(state);
+	return (x < m) ? x + m : x;
 }
 
 /**
@@ -102,7 +91,7 @@ EXPORT_SYMBOL(random32);
 void srandom32(u32 entropy)
 {
 	struct rnd_state *state = &get_cpu_var(net_rand_state);
-	__set_random32(state, state->s1 ^ entropy);
+	state->s1 = __seed(state->s1 ^ entropy, 1);
 	put_cpu_var(state);
 }
 EXPORT_SYMBOL(srandom32);
@@ -117,7 +106,19 @@ static int __init random32_init(void)
 
 	for_each_possible_cpu(i) {
 		struct rnd_state *state = &per_cpu(net_rand_state,i);
-		__set_random32(state, i + jiffies);
+
+#define LCG(x)	((x) * 69069)	/* super-duper LCG */
+		state->s1 = __seed(LCG(i + jiffies), 1);
+		state->s2 = __seed(LCG(state->s1), 7);
+		state->s3 = __seed(LCG(state->s2), 15);
+
+		/* "warm it up" */
+		__random32(state);
+		__random32(state);
+		__random32(state);
+		__random32(state);
+		__random32(state);
+		__random32(state);
 	}
 	return 0;
 }
@@ -130,13 +131,18 @@ core_initcall(random32_init);
 static int __init random32_reseed(void)
 {
 	int i;
-	unsigned long seed;
 
 	for_each_possible_cpu(i) {
 		struct rnd_state *state = &per_cpu(net_rand_state,i);
+		u32 seeds[3];
 
-		get_random_bytes(&seed, sizeof(seed));
-		__set_random32(state, seed);
+		get_random_bytes(&seeds, sizeof(seeds));
+		state->s1 = __seed(seeds[0], 1);
+		state->s2 = __seed(seeds[1], 7);
+		state->s3 = __seed(seeds[2], 15);
+
+		/* mix it in */
+		__random32(state);
 	}
 	return 0;
 }

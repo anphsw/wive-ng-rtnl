@@ -91,6 +91,11 @@ static int do_mlock(unsigned long start, size_t len, int on)
 	if (start > vma->vm_start)
 		prev = vma;
 
+	/* We don't try to access the guard page of a stack vma */
+	if (vma->vm_flags & VM_GROWSDOWN)
+		if (start == vma->vm_start)
+			start += PAGE_SIZE;
+
 	for (nstart = start ; ; ) {
 		unsigned int newflags;
 

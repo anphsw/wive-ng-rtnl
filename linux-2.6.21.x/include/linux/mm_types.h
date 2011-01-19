@@ -47,7 +47,11 @@ struct page {
 						 */
 	    };
 #if NR_CPUS >= CONFIG_SPLIT_PTLOCK_CPUS
+#ifndef CONFIG_PREEMPT_RT
 	    spinlock_t ptl;
+#else
+	    spinlock_t *ptl;
+#endif
 #endif
 	    struct {			/* SLUB uses */
 		struct page *first_page;	/* Compound pages */

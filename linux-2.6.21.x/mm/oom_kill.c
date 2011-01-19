@@ -314,6 +314,16 @@ static void __oom_kill_task(struct task_struct *p, int verbose)
 	set_tsk_thread_flag(p, TIF_MEMDIE);
 
 	force_sig(SIGKILL, p);
+	/*
+	 * Speed up the recovery by boosting the dying task priority to the
+	 * lowest FIFO priority, if the task is not already running at RT prio.
+	 * That helps with the recovery and avoids interfering with RT tasks.
+	 */
+	if (!rt_task(p)) {
+		struct sched_param param;
+		param.sched_priority = 1;
+		sched_setscheduler(p, SCHED_FIFO, &param);
+	}
 }
 
 static int oom_kill_task(struct task_struct *p)

@@ -46,6 +46,7 @@ long time_adjust;
 
 static void ntp_update_frequency(void)
 {
+	u64 old_tick_length_base = tick_length_base;
 	u64 second_length = (u64)(tick_usec * NSEC_PER_USEC * USER_HZ)
 				<< TICK_LENGTH_SHIFT;
 	second_length += (s64)CLOCK_TICK_ADJUST << TICK_LENGTH_SHIFT;
@@ -57,6 +58,13 @@ static void ntp_update_frequency(void)
 	tick_nsec = second_length >> TICK_LENGTH_SHIFT;
 
 	do_div(tick_length_base, NTP_INTERVAL_FREQ);
+
+	/* 
+	 * Don't wait for the next second_overflow, apply
+	 * the change to the tick length immediately
+	 */
+	tick_length += tick_length_base - old_tick_length_base;
+
 }
 
 /**

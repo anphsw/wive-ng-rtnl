@@ -911,6 +911,9 @@ static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 	if (unlikely(!(out->f_mode & FMODE_WRITE)))
 		return -EBADF;
 
+	if (unlikely(out->f_flags & O_APPEND))
+		return -EINVAL;
+
 	ret = rw_verify_area(WRITE, out, ppos, len);
 	if (unlikely(ret < 0))
 		return ret;
@@ -1174,6 +1177,9 @@ static int get_iovec_page_array(const struct iovec __user *iov,
 			break;
 		error = -EFAULT;
 		if (unlikely(!base))
+			break;
+
+		if (unlikely(!access_ok(VERIFY_READ, base, len)))
 			break;
 
 		/*

@@ -636,8 +636,15 @@ asmlinkage long sys_umount(char __user * name, int flags)
 {
 	struct nameidata nd;
 	int retval;
+	int lookup_flags = 0;
 
-	retval = __user_walk(name, LOOKUP_FOLLOW, &nd);
+	if (flags & ~(MNT_FORCE | MNT_DETACH | MNT_EXPIRE | UMOUNT_NOFOLLOW))
+		return -EINVAL;
+
+	if (!(flags & UMOUNT_NOFOLLOW))
+		lookup_flags |= LOOKUP_FOLLOW;
+
+	retval = __user_walk(name, lookup_flags, &nd);
 	if (retval)
 		goto out;
 	retval = -EINVAL;

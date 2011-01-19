@@ -1131,26 +1131,36 @@ static struct tty_driver *get_tty_driver(dev_t device, int *index)
  *	not in the foreground, send a SIGTTOU.  If the signal is blocked or
  *	ignored, go ahead and perform the operation.  (POSIX 7.2)
  *
- *	Locking: none
+ *	Locking: ctrl_lock - FIXME: review this
  */
 
 int tty_check_change(struct tty_struct * tty)
 {
+	unsigned long flags;
+	int ret = 0;
+
 	if (current->signal->tty != tty)
 		return 0;
+	spin_lock_irqsave(&tty->ctrl_lock, flags);
+
 	if (!tty->pgrp) {
 		printk(KERN_WARNING "tty_check_change: tty->pgrp == NULL!\n");
-		return 0;
+		goto out;
 	}
 	if (task_pgrp(current) == tty->pgrp)
-		return 0;
+		goto out;
 	if (is_ignored(SIGTTOU))
-		return 0;
-	if (is_current_pgrp_orphaned())
-		return -EIO;
+		goto out;
+	if (is_current_pgrp_orphaned()) {
+		ret = -EIO;
+		goto out;
+	}
 	kill_pgrp(task_pgrp(current), SIGTTOU, 1);
 	set_thread_flag(TIF_SIGPENDING);
-	return -ERESTARTSYS;
+	ret = -ERESTARTSYS;
+out:
+	spin_unlock_irqrestore(&tty->ctrl_lock, flags);
+	return ret;
 }
 
 EXPORT_SYMBOL(tty_check_change);
@@ -1330,6 +1340,7 @@ static void do_tty_hangup(struct work_struct *work)
 	struct task_struct *p;
 	struct tty_ldisc *ld;
 	int    closecount = 0, n;
+	unsigned long flags;
 
 	if (!tty)
 		return;
@@ -1407,19 +1418,24 @@ static void do_tty_hangup(struct work_struct *work)
 			__group_send_sig_info(SIGHUP, SEND_SIG_PRIV, p);
 			__group_send_sig_info(SIGCONT, SEND_SIG_PRIV, p);
 			put_pid(p->signal->tty_old_pgrp);  /* A noop */
+			spin_lock_irqsave(&tty->ctrl_lock, flags);
 			if (tty->pgrp)
 				p->signal->tty_old_pgrp = get_pid(tty->pgrp);
+			spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 			spin_unlock_irq(&p->sighand->siglock);
 		} while_each_pid_task(tty->session, PIDTYPE_SID, p);
 	}
 	read_unlock(&tasklist_lock);
 
+	spin_lock_irqsave(&tty->ctrl_lock, flags);
 	tty->flags = 0;
 	put_pid(tty->session);
 	put_pid(tty->pgrp);
 	tty->session = NULL;
 	tty->pgrp = NULL;
 	tty->ctrl_status = 0;
+	spin_unlock_irqrestore(&tty->ctrl_lock, flags);
+
 	/*
 	 *	If one of the devices matches a console pointer, we
 	 *	cannot just call hangup() because that will cause
@@ -1581,10 +1597,13 @@ void disassociate_ctty(int on_exit)
 	/* It is possible that do_tty_hangup has free'd this tty */
 	tty = get_current_tty();
 	if (tty) {
+		unsigned long flags;
+		spin_lock_irqsave(&tty->ctrl_lock, flags);
 		put_pid(tty->session);
 		put_pid(tty->pgrp);
 		tty->session = NULL;
 		tty->pgrp = NULL;
+		spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 	} else {
 #ifdef TTY_DEBUG_HANGUP
 		printk(KERN_DEBUG "error attempted to write to tty [0x%p]"
@@ -1690,10 +1709,8 @@ EXPORT_SYMBOL(start_tty);
  *	for hung up devices before calling the line discipline method.
  *
  *	Locking:
- *		Locks the line discipline internally while needed
- *		For historical reasons the line discipline read method is
- *	invoked under the BKL. This will go away in time so do not rely on it
- *	in new code. Multiple read calls may be outstanding in parallel.
+ *		Locks the line discipline internally while needed. Multiple
+ *	read calls may be outstanding in parallel.
  */
 
 static ssize_t tty_read(struct file * file, char __user * buf, size_t count, 
@@ -2785,6 +2802,7 @@ static unsigned int tty_poll(struct file * filp, poll_table * wait)
 static int tty_fasync(int fd, struct file * filp, int on)
 {
 	struct tty_struct * tty;
+	unsigned long flags;
 	int retval;
 
 	tty = (struct tty_struct *)filp->private_data;
@@ -2800,6 +2818,7 @@ static int tty_fasync(int fd, struct file * filp, int on)
 		struct pid *pid;
 		if (!waitqueue_active(&tty->read_wait))
 			tty->minimum_to_wake = 1;
+		spin_lock_irqsave(&tty->ctrl_lock, flags);
 		if (tty->pgrp) {
 			pid = tty->pgrp;
 			type = PIDTYPE_PGID;
@@ -2807,7 +2826,10 @@ static int tty_fasync(int fd, struct file * filp, int on)
 			pid = task_pid(current);
 			type = PIDTYPE_PID;
 		}
+		get_pid(pid);
+		spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 		retval = __f_setown(filp, pid, type, 0);
+		put_pid(pid);
 		if (retval)
 			return retval;
 	} else {
@@ -2892,6 +2914,8 @@ static int tiocswinsz(struct tty_struct *tty, struct tty_struct *real_tty,
 	struct winsize __user * arg)
 {
 	struct winsize tmp_ws;
+	struct pid *pgrp, *rpgrp;
+	unsigned long flags;
 
 	if (copy_from_user(&tmp_ws, arg, sizeof(*arg)))
 		return -EFAULT;
@@ -2909,10 +2933,22 @@ static int tiocswinsz(struct tty_struct *tty, struct tty_struct *real_tty,
 		}
 	}
 #endif
-	if (tty->pgrp)
-		kill_pgrp(tty->pgrp, SIGWINCH, 1);
-	if ((real_tty->pgrp != tty->pgrp) && real_tty->pgrp)
-		kill_pgrp(real_tty->pgrp, SIGWINCH, 1);
+	/* Get the PID values and reference them so we can
+	   avoid holding the tty ctrl lock while sending signals */
+	spin_lock_irqsave(&tty->ctrl_lock, flags);
+	pgrp = get_pid(tty->pgrp);
+	rpgrp = get_pid(real_tty->pgrp);
+	spin_unlock_irqrestore(&tty->ctrl_lock, flags);
+
+	if (pgrp)
+		kill_pgrp(pgrp, SIGWINCH, 1);
+	if (rpgrp != pgrp && rpgrp)
+		kill_pgrp(rpgrp, SIGWINCH, 1);
+
+	put_pid(pgrp);
+	put_pid(rpgrp);
+
+
 	tty->winsize = tmp_ws;
 	real_tty->winsize = tmp_ws;
 done:
@@ -3065,7 +3101,7 @@ static int tiocgpgrp(struct tty_struct *tty, struct tty_struct *real_tty, pid_t 
  *	Set the process group of the tty to the session passed. Only
  *	permitted where the tty session is our session.
  *
- *	Locking: None
+ *	Locking: RCU, ctrl lock
  */
 
 static int tiocspgrp(struct tty_struct *tty, struct tty_struct *real_tty, pid_t __user *p)
@@ -3073,6 +3109,7 @@ static int tiocspgrp(struct tty_struct *tty, struct tty_struct *real_tty, pid_t 
 	struct pid *pgrp;
 	pid_t pgrp_nr;
 	int retval = tty_check_change(real_tty);
+	unsigned long flags;
 
 	if (retval == -EIO)
 		return -ENOTTY;
@@ -3095,8 +3132,10 @@ static int tiocspgrp(struct tty_struct *tty, struct tty_struct *real_tty, pid_t 
 	if (session_of_pgrp(pgrp) != task_session(current))
 		goto out_unlock;
 	retval = 0;
+	spin_lock_irqsave(&tty->ctrl_lock, flags);
 	put_pid(real_tty->pgrp);
 	real_tty->pgrp = get_pid(pgrp);
+	spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 out_unlock:
 	rcu_read_unlock();
 	return retval;
@@ -3919,14 +3958,19 @@ void proc_clear_tty(struct task_struct *p)
 }
 EXPORT_SYMBOL(proc_clear_tty);
 
+/* Called under the sighand lock */
+
 static void __proc_set_tty(struct task_struct *tsk, struct tty_struct *tty)
 {
 	if (tty) {
-		/* We should not have a session or pgrp to here but.... */
+		unsigned long flags;
+		/* We should not have a session or pgrp to put here but.... */
+		spin_lock_irqsave(&tty->ctrl_lock, flags);
 		put_pid(tty->session);
 		put_pid(tty->pgrp);
-		tty->session = get_pid(task_session(tsk));
 		tty->pgrp = get_pid(task_pgrp(tsk));
+		spin_unlock_irqrestore(&tty->ctrl_lock, flags);
+		tty->session = get_pid(task_session(tsk));
 	}
 	put_pid(tsk->signal->tty_old_pgrp);
 	tsk->signal->tty = tty;

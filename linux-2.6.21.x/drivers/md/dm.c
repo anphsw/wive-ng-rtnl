@@ -867,16 +867,20 @@ static void dm_unplug_all(request_queue_t *q)
 
 static int dm_any_congested(void *congested_data, int bdi_bits)
 {
-	int r;
+	int r = bdi_bits;
 	struct mapped_device *md = (struct mapped_device *) congested_data;
-	struct dm_table *map = dm_get_table(md);
+	struct dm_table *map;
 
-	if (!map || test_bit(DMF_BLOCK_IO, &md->flags))
-		r = bdi_bits;
-	else
-		r = dm_table_any_congested(map, bdi_bits);
-
-	dm_table_put(map);
+	atomic_inc(&md->pending);
+	if (!test_bit(DMF_BLOCK_IO, &md->flags)) {
+		map = dm_get_table(md);
+		if (map) {
+			r = dm_table_any_congested(map, bdi_bits);
+			dm_table_put(map);
+		}
+	}
+	if (!atomic_dec_return(&md->pending))
+		wake_up(&md->wait);
 	return r;
 }
 
