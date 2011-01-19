@@ -150,7 +150,6 @@ set_def() {
 get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     nm=`nvram_get 2860 lan_netmask`
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
     QoSEnable=`nvram_get 2860 QoSEnable`
 
     #if ppp is up shaper to ppp0 else to wan_if

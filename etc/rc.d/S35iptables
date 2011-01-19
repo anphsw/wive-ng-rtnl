@@ -273,7 +273,6 @@ get_param() {
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     NAT=`nvram_get 2860 natEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
     vpnType=`nvram_get 2860 vpnType`
     vpnNAT=`nvram_get 2860 vpnNAT`
     UDPXY=`nvram_get 2860 UDPXYMode`

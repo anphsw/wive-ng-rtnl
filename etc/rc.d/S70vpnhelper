@@ -12,7 +12,6 @@ wait_connect
 LOG="echo VPN: $1"
 
 start() {
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
     if [ "$vpnEnabled" = "on" ]; then
      $LOG "Start vpnhelper"
       get_param

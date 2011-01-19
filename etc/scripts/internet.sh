@@ -144,7 +144,6 @@ if [ "$MODE" != "connect_sta" ]; then
 	if [ "$MODE" = "wifionly" ] && [ "$stamode" = "y" ]; then
 	    #Need stop tun before reload drivers
 	    #this need for prevent loop in routes
-	    vpnEnabled=`nvram_get 2860 vpnEnabled`
 	    if [ "$vpnEnabled" = "on" ]; then
 		ip route del default > /dev/null 2>&1
 		ip route flush cache > /dev/null 2>&1

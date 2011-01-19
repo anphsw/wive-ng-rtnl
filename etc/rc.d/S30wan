@@ -96,7 +96,6 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
     gw=`nvram_get 2860 wan_gateway`
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
     pppoe_pass=`nvram_get 2860 pppoe_pass`
     ipv6_pass=`nvram_get 2860 ipv6_pass`
     natFastpath=`nvram_get 2860 natFastpath`
