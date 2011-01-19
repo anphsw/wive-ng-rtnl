@@ -2705,7 +2705,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	NDIS_802_11_CONFIGURATION	Configuration;
 	unsigned long				CurrentWirelessMode;
 
-	//fprintf(stderr, "sta_connection()\n");
+	fprintf(stderr, "sta_connection()\n");
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 ) {
@@ -3034,7 +3034,6 @@ void initStaConnection(void)
  */
 static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char tmpImg[40];
 	int i = 0, s;
 
 	NDIS_802_11_SSID                SsidQuery;
@@ -3042,6 +3041,8 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 	NDIS_802_11_WEP_STATUS          Encryp = Ndis802_11WEPDisabled;
 	NDIS_802_11_AUTHENTICATION_MODE AuthenType = Ndis802_11AuthModeOpen;
 	NDIS_802_11_NETWORK_INFRASTRUCTURE      NetworkType = Ndis802_11Infrastructure;
+
+	printf("getStaProfile()\n");
 
 	initStaProfile();
 	if (G_staProfileNum == 0)
@@ -3051,10 +3052,15 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 
 	currentProfileSetting = headerProfileSetting;
 	do {
-		memset(tmpImg, 0x00, sizeof(tmpImg));
+		int backgroundColor = 0xffffff;
+		int fontColor = 0;
+	
 		// check activate function for the profile
 		if (currentProfileSetting->Active)
 		{
+			fontColor = 0xffffff;
+			backgroundColor = 0x800000;
+			
 			// get connected SSID
 			s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -3071,8 +3077,9 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				close(s);
 				return 0;
 			}
-			//fprintf(stderr,"ConnectStatus=%d\n", ConnectStatus );
-			if (ConnectStatus == 1 && G_bRadio)
+			
+			printf("ConnectStatus=%d, G_bRadio=%d\n", ConnectStatus, G_bRadio );
+			if ((ConnectStatus == 1) && G_bRadio)
 			{
 				OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
 				OidQueryInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &AuthenType, sizeof(AuthenType));
@@ -3087,10 +3094,8 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 						currentProfileSetting->NetworkType == NetworkType)
 				{
 					memcpy(&G_SSID, &SsidQuery, sizeof(NDIS_802_11_SSID));
-					sprintf(tmpImg, "<img src=\"/graphics/checkmrk.gif\">");
+					backgroundColor=0x008000;
 				}
-				else
-					sprintf(tmpImg, "<img src=\"/graphics/uncheckmrk.gif\">");
 			}
 			else if (G_bRadio)
 			{
@@ -3132,7 +3137,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				strcpy(tmp_key2, (char *)currentProfileSetting->Key2);
 				strcpy(tmp_key3, (char *)currentProfileSetting->Key3);
 				strcpy(tmp_key4, (char *)currentProfileSetting->Key4);
-
+/*
 				unsigned char Bssid[6];
 #ifdef WPA_SUPPLICANT_SUPPORT
 				if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
@@ -3154,77 +3159,76 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				else
 #endif
 					sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
+*/
 
 				/*NDIS_802_11_SSID SSID;
 				  memset(&SSID, 0x00, sizeof(SSID));
 				  strcpy((char *)SSID.Ssid ,(char *)currentProfileSetting->SSID);
 				  SSID.SsidLength = strlen((char *)currentProfileSetting->SSID);
 				  OidSetInformation(OID_802_11_SSID, s, "ra0", &SSID, sizeof(NDIS_802_11_SSID));*/
-				sprintf(tmpImg, "<img src=\"/graphics/uncheckmrk.gif\">");
 			}
-			else
-				sprintf(tmpImg, "<img src=\"/graphics/uncheckmrk.gif\">");
+
 			close(s);
 		}
-
-		websWrite(wp, "<tr>");
+		
+		// Row begin
+		websWrite(wp, "<tr style=\"background-color: #%06x; color:#%06x;\">", backgroundColor, fontColor);
 
 		// Radio
-		websWrite(wp, "<td><input type=radio name=selectedProfile value=%d onClick=\"selectedProfileChange()\">%s</td>",
-				i+1, tmpImg);
+		websWrite(wp, "<td style=\"color:#%06x;\"><input type=\"radio\" name=\"selectedProfile\" value=\"%d\" onClick=\"selectedProfileChange();\"></td>",
+			fontColor, i+1);
 
 		// Profile 
-		websWrite(wp, "<td>%s</td>", currentProfileSetting->Profile);
-		websWrite(wp, "<td>%s</td>", currentProfileSetting->SSID);
+		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, currentProfileSetting->Profile);
+		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, currentProfileSetting->SSID);
 
 		// Channel
 		if (currentProfileSetting->Channel <= 0)
-			websWrite(wp, "<td>%s</td>", "Auto");
+			websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, "Auto");
 		else
-			websWrite(wp, "<td>%d</td>", currentProfileSetting->Channel);
+			websWrite(wp, "<td style=\"color:#%06x;\">%d</td>", fontColor, currentProfileSetting->Channel);
 
 		// Auth
-		if (currentProfileSetting->Authentication == Ndis802_11AuthModeOpen)
-			websWrite(wp, "<td>%s</td>","OPEN");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeShared)
-			websWrite(wp, "<td>%s</td>", "SHARED");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPAPSK)
-			websWrite(wp, "<td>%s</td>", "WPA-PSK");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA2PSK)
-			websWrite(wp, "<td>%s</td>", "WPA2-PSK");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPANone)
-			websWrite(wp, "<td>%s</td>", "WPA-NONE");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA)
-			websWrite(wp, "<td>%s</td>", "WPA");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA2)
-			websWrite(wp, "<td>%s</td>", "WPA2");
-		else if (currentProfileSetting->Authentication == Ndis802_11AuthModeMax) //802.1x
-			websWrite(wp, "<td>%s</td>", "OPEN");
-		else
-			websWrite(wp, "<td>%s</td>", "unknown");
+		const char *auth_mode = "unknown";
+		
+		switch (currentProfileSetting->Authentication)
+		{
+			case Ndis802_11AuthModeOpen: auth_mode = "OPEN"; break;
+			case Ndis802_11AuthModeShared: auth_mode = "SHARED"; break;
+			case Ndis802_11AuthModeWPAPSK: auth_mode = "WPA-PSK"; break;
+			case Ndis802_11AuthModeWPA2PSK: auth_mode = "WPA2-PSK"; break;
+			case Ndis802_11AuthModeWPANone: auth_mode = "WPA-NONE"; break;
+			case Ndis802_11AuthModeWPA: auth_mode = "WPA"; break;
+			case Ndis802_11AuthModeWPA2: auth_mode = "WPA2"; break;
+			case Ndis802_11AuthModeMax: auth_mode = "OPEN"; break;
+		}
 
+		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, auth_mode);
+		
 		// Encryption
-		if (currentProfileSetting->Encryption == Ndis802_11WEPEnabled)
-			websWrite(wp, "<td>%s</td>", "WEP");
-		else if (currentProfileSetting->Encryption == Ndis802_11WEPDisabled)
-			websWrite(wp, "<td>%s</td>", "NONE");
-		else if (currentProfileSetting->Encryption == Ndis802_11Encryption2Enabled)
-			websWrite(wp, "<td>%s</td>", "TKIP");
-		else if (currentProfileSetting->Encryption == Ndis802_11Encryption3Enabled)
-			websWrite(wp, "<td>%s</td>", "AES");
-		else
-			websWrite(wp, "<td>%s</td>", "unknown");
+		const char *encryption = "unknown";
+		switch (currentProfileSetting->Encryption)
+		{
+			case Ndis802_11WEPEnabled: encryption = "WEP"; break;
+			case Ndis802_11WEPDisabled: encryption = "NONE"; break;
+			case Ndis802_11Encryption2Enabled: encryption = "TKIP"; break;
+			case Ndis802_11Encryption3Enabled: encryption = "AES"; break;
+		}
+		
+		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, encryption);
 
 		// NetworkType
-		if (currentProfileSetting->NetworkType == Ndis802_11Infrastructure)
-			websWrite(wp, "<td>%s</td>", "Infrastructure");
-		else
-			websWrite(wp, "<td>%s</td>", "Ad Hoc");
+		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>",
+				fontColor,
+				(currentProfileSetting->NetworkType == Ndis802_11Infrastructure) ?
+					"Infrastructure" : "Ad Hoc"
+			);
 
 		websWrite(wp, "</tr>\n");
 		currentProfileSetting = currentProfileSetting->Next;
 		i++;
 	} while (currentProfileSetting != NULL );
+
 	return 0;
 }
 
@@ -4759,6 +4763,8 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	// step 1, modify info on selectedProfileSetting
 
+	printf("editStaProfile()\n");
+
 	value = websGetVar(wp, T("profile_name"), T(""));
 	if (strcmp(value, "") != 0)
 		strcpy((char *)selectedProfileSetting->Profile, value);
@@ -5352,6 +5358,8 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 #endif 
 	char_t *value;
 
+	printf("setStaConnect()\n");
+
 	tmp_auth  = Ndis802_11AuthModeOpen;
 	tmp_encry = Ndis802_11WEPDisabled;
 
@@ -5552,6 +5560,8 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 	PRT_PROFILE_SETTING	previousProfileSetting = NULL;
 	int selectedProfile=0 , i=0;
 	char_t *value;
+	
+	printf("setStaProfile()\n");
 	
 	if (headerProfileSetting == NULL) {
 		error(E_L, E_LOG, T("headerProfileSetting is NULL"));

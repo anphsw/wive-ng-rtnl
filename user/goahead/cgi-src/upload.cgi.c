@@ -237,7 +237,7 @@ int main (int argc, char *argv[])
 #error "no upload support defined!"
 #endif
 
-	html_success("45000");
+	html_success("65000");
 	free(boundary);
 	fflush(stdout);
 	fclose(stdout);
