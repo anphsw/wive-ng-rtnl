@@ -55,10 +55,10 @@ start() {
     else
 	#reload global
 	. /etc/scripts/global.sh
-	if [ "$stamode" = "y" ] && [ ! -f /tmp/sta_connected ]; then
-	    $LOG "Wait connect to sta."
-	    exit 0
-	fi
+
+	#wait sta connected
+	wait_connect
+
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     fi
