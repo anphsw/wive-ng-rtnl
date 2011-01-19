@@ -237,6 +237,7 @@
 48) Move to kernel_rootfs nopadded mode. Economy ~64Kb not compressed flash.<br>
 49) Fixed RWFS on mtd position at 2 blocks and of mtd device.<br>
 50) Fix update firmware in nopadded kernel_rootfs mode.<br>
+51) Fix profile settings at STA disconnected from AP.<br>
 
 <br><br>
 <b>For support see:</b><br>
