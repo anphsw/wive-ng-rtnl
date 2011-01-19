@@ -190,6 +190,22 @@ if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
 fi
 }
 
+vpn_deadloop_fix()
+{
+    #L2TP and PPTP kernel dead-loop fix
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
+    if [ "$vpnEnabled" = "on" ]; then
+	vpnType=`nvram_get 2860 vpnType`
+	if [ "$vpnType" != "0" ]; then
+	    # First vpn stop.. 
+	    # Auto start later renew/bound
+	    service vpnhelper stop > /dev/null 2>&1
+	fi
+    fi
+    ip route flush cache > /dev/null 2>&1
+    echo 1 > /proc/sys/net/nf_conntrack_flush
+}
+
 #set default
 ethconv="n"
 stamode="n"

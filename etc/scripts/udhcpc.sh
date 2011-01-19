@@ -19,6 +19,7 @@ ROUTELIST=""
 
 case "$1" in
     deconfig)
+    vpn_deadloop_fix
     ip addr flush dev $interface
     if [ "$CONFIG_IPV6" != "" ]; then
 	ip -6 addr flush dev $interface
@@ -29,14 +30,7 @@ case "$1" in
     leasefail)
     # Try reconnect at lease failed
     # Workaround for infinite OFFER wait
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
-    if [ "$vpnEnabled" = "on" ]; then
-	# First vpn stop.. 
-	# Auto start later renew/bound
-	service vpnhelper stop > /dev/null 2>&1
-    fi
-    ip route flush cache > /dev/null 2>&1
-    echo 1 > /proc/sys/net/nf_conntrack_flush
+    vpn_deadloop_fix
     if [ "$stamode" = "y" ]; then
 	# Wait connect and get SSID
 	wait_connect
