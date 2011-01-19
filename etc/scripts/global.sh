@@ -193,7 +193,6 @@ fi
 vpn_deadloop_fix()
 {
     #L2TP and PPTP kernel dead-loop fix
-    vpnEnabled=`nvram_get 2860 vpnEnabled`
     if [ "$vpnEnabled" = "on" ]; then
 	vpnType=`nvram_get 2860 vpnType`
 	if [ "$vpnType" != "0" ]; then
