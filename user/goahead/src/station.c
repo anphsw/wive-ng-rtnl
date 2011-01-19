@@ -3042,8 +3042,6 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 	NDIS_802_11_AUTHENTICATION_MODE AuthenType = Ndis802_11AuthModeOpen;
 	NDIS_802_11_NETWORK_INFRASTRUCTURE      NetworkType = Ndis802_11Infrastructure;
 
-	printf("getStaProfile()\n");
-
 	initStaProfile();
 	if (G_staProfileNum == 0)
 		return 0;
