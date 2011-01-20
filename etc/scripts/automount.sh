@@ -35,5 +35,5 @@ echo "A/media/$1"
 fi
 
 # Goahead need to know the event happened.
-killall -SIGTTIN goahead
+killall -q -SIGTTIN goahead
 exit 0

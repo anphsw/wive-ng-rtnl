@@ -23,10 +23,10 @@ reload() {
     then
 	if [ "$lvl" = "1" ]
 	then
-	    killall -USR1 lanauth
+	    killall -q -USR1 lanauth
 	elif [ "$lvl" = "2" ]
 	then
-	    killall -USR2 lanauth
+	    killall -q -USR2 lanauth
 	else
 	    stop
 	fi

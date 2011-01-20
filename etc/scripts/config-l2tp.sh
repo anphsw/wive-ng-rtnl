@@ -17,8 +17,8 @@ DEBUG=`nvram_get 2860 vpnDebug`
 AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
 LCPECHO=`nvram_get 2860 vpnEnableLCP`
 
-killall -q pppd > /dev/null 2>&1
-killall -q xl2tpd > /dev/null 2>&1
+killall -q pppd
+killall -q xl2tpd
 
 modprobe -q ppp_generic > /dev/null 2>&1
 modprobe -q pppox > /dev/null 2>&1
