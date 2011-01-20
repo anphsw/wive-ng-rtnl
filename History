@@ -240,6 +240,7 @@
 51) Fix profile settings at STA disconnected from AP.<br>
 52) Add workaround for broadcom clients (WPA+dhcp).<br>
 53) Add option 57 for dhcp support.<br>
+54) Fix pptp/gre nat helpers support.<br>
 
 <br><br>
 <b>For support see:</b><br>
