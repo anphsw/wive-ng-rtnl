@@ -24,6 +24,8 @@ endif
 ifeq ($(CONFIG_NF_NAT),)
 ip_conntrack_pptp-objs	:= ip_conntrack_helper_pptp.o ip_conntrack_proto_gre.o
 ip_nat_pptp-objs	:= ip_nat_helper_pptp.o ip_nat_proto_gre.o
+else
+obj-$(CONFIG_NF_NAT_PROTO_GRE) += nf_nat_proto_gre.o
 endif
 
 ip_conntrack_h323-objs := ip_conntrack_helper_h323.o ../../netfilter/nf_conntrack_h323_asn1.o
@@ -88,8 +90,8 @@ obj-$(CONFIG_NF_NAT_TFTP) += nf_nat_tftp.o
 # NAT protocols (nf_nat)
 ifeq ($(CONFIG_NF_NAT),)
 obj-$(CONFIG_IP_NF_PPTP) += ip_conntrack_pptp.o
+else
 obj-$(CONFIG_NF_NAT_PPTP) += nf_nat_pptp.o
-obj-$(CONFIG_NF_NAT_PROTO_GRE) += nf_nat_proto_gre.o
 endif
 
 # generic IP tables 
@@ -121,7 +123,6 @@ obj-$(CONFIG_IP_NF_MATCH_SET) += ipt_set.o
 obj-$(CONFIG_IP_NF_MATCH_ADDRTYPE) += ipt_addrtype.o
 
 # targets
-obj-$(CONFIG_IP_NF_TARGET_TRIGGER) += ipt_TRIGGER.o
 obj-$(CONFIG_IP_NF_TARGET_REJECT) += ipt_REJECT.o
 obj-$(CONFIG_IP_NF_TARGET_TARPIT) += ipt_TARPIT.o
 obj-$(CONFIG_IP_NF_TARGET_TOS) += ipt_TOS.o
