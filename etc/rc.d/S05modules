@@ -33,6 +33,8 @@ start() {
 	modprobe -q nf_nat_ftp
 	modprobe -q nf_nat_h323
 	modprobe -q nf_nat_sip
+	modprobe -q nf_nat_proto_gre
+	modprobe -q nf_nat_pptp
     else
 	#not load module before goahead start
 	web_wait
