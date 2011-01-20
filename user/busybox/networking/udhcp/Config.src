@@ -130,3 +130,14 @@ config UDHCPC_SLACK_FOR_BUGGY_SERVERS
 	    maximum size of entire IP packet, and sends packets which are
 	    28 bytes too large.
 	  Seednet (ISP) VDSL: sends packets 2 bytes too large.
+
+config FEATURE_UDHCPD_BUGGY_WIFI_SOC
+	bool "Always send DHCP packets in two mode (bcast/ucast)"
+	default n
+	depends on UDHCPD
+	help
+	    Some sheaves Wifi SoC + some WiFi clients 
+	    (example AP=RTL8672+RTL8187SU and broadcom clients)  
+	    don't received broadcast the message from DHCP at switched 
+	    on WPA enciphering.  Use this options for DHCPD use two type
+	    packets to send client. It`s workaround.
