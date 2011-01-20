@@ -43,9 +43,7 @@ struct list {
 	int	 selected;
 }; 
 
-#define DEBUG(x) do{fprintf(stderr, #x); \
-					fprintf(stderr, ": %s\n", x); \
-				 }while(0)
+#define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 
 //struct status media_state = {"\0", "\0", "\0", "\0", "30", "0"};
 struct status media_state;

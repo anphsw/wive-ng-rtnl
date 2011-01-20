@@ -35,9 +35,7 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
 static void storageSmbSrv(webs_t wp, char_t *path, char_t *query);
 static int GetNthNullUser();
 
-#define DEBUG(x) do{fprintf(stderr, #x); \
-					fprintf(stderr, ": %s\n", x); \
-				 }while(0)
+#define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 
 void formDefineStorage(void) {
 	websFormDefine(T("storageAdm"), storageAdm);

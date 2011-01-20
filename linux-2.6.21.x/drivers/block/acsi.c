@@ -77,7 +77,7 @@ static struct request_queue *acsi_queue;
 #define QUEUE (acsi_queue)
 #define CURRENT elv_next_request(acsi_queue)
 
-#define DEBUG
+//#define DEBUG
 #undef DEBUG_DETECT
 #undef NO_WRITE
 

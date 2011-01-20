@@ -31,7 +31,7 @@
 #include <asm/semaphore.h>
 #include <asm/uaccess.h>
 
-#define DEBUG 
+//#define DEBUG 
 
 static int gs_debug;
 

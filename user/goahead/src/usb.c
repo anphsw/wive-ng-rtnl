@@ -60,9 +60,7 @@ static void printersrv(webs_t wp, char_t *path, char_t *query);
 #define USB_STORAGE_PATH    "/media"
 #define USB_STORAGE_SIGN    "/media/sd"
 
-#define DEBUG(x) do{fprintf(stderr, #x); \
-					fprintf(stderr, ": %s\n", x); \
-				 }while(0)
+#define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 
 char firmware_path[1024] = {0};
 

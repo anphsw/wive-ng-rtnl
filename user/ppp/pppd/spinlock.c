@@ -35,7 +35,7 @@
 #include "tdb.h"
 #include "spinlock.h"
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef USE_SPINLOCKS
 
