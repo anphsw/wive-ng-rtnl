@@ -25,7 +25,7 @@ start() {
 	fi
 	resetPhy
 	#not load nf_nat helpers in bridge mode
-	if [ "$opmode" = "0" ]; then
+	if [ "$opmode" != "0" ]; then
 	    #load conntrack helpers
 	    modprobe -q nf_conntrack_tftp
 	    modprobe -q nf_conntrack_sip
