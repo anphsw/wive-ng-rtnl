@@ -24,17 +24,20 @@ start() {
 	    setLanWan
 	fi
 	resetPhy
-	#load conntrack helpers
-	modprobe -q nf_conntrack_tftp
-	modprobe -q nf_conntrack_sip
-	modprobe -q nf_conntrack_gre
-	modprobe -q nf_conntrack_pptp
-	modprobe -q nf_conntrack_h323
-	modprobe -q nf_nat_ftp
-	modprobe -q nf_nat_h323
-	modprobe -q nf_nat_sip
-	modprobe -q nf_nat_proto_gre
-	modprobe -q nf_nat_pptp
+	#not load nf_nat helpers in bridge mode
+	if [ "$opmode" = "0" ]; then
+	    #load conntrack helpers
+	    modprobe -q nf_conntrack_tftp
+	    modprobe -q nf_conntrack_sip
+	    modprobe -q nf_conntrack_gre
+	    modprobe -q nf_conntrack_pptp
+	    modprobe -q nf_conntrack_h323
+	    modprobe -q nf_nat_ftp
+	    modprobe -q nf_nat_h323
+	    modprobe -q nf_nat_sip
+	    modprobe -q nf_nat_proto_gre
+	    modprobe -q nf_nat_pptp
+	fi
     else
 	#not load module before goahead start
 	web_wait
