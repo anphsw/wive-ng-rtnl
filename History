@@ -238,6 +238,8 @@
 49) Fixed RWFS on mtd position at 2 blocks and of mtd device.<br>
 50) Fix update firmware in nopadded kernel_rootfs mode.<br>
 51) Fix profile settings at STA disconnected from AP.<br>
+52) Add workaround for broadcom clients (WPA+dhcp).<br>
+53) Add option 57 for dhcp support.<br>
 
 <br><br>
 <b>For support see:</b><br>
