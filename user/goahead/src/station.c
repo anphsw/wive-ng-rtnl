@@ -2433,8 +2433,11 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 	unsigned char wpa_supplicant_support = 2, ieee8021x_support = 1;
 	NDIS_802_11_SSID Ssid;
 
-	system("killall wpa_supplicant");
+	system("killall -q wpa_supplicant");
 	sleep(1);
+	system("killall -q -9 wpa_supplicant");
+	sleep(1);
+
 	//fprintf(stderr, "exec_WPASupplicant()\n");
 	memset(&Ssid, 0x00, sizeof(NDIS_802_11_SSID));
 	strcpy((char *)Ssid.Ssid ,ssid);
@@ -2729,8 +2732,11 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	{
 		int wpa_supplicant_support = 0 ,ieee8021x_support = 0;
 
-		doSystem("killall wpa_supplicant");
-		sleep(2);
+		doSystem("killall -q wpa_supplicant");
+		sleep(1);
+		doSystem("killall -q -9 wpa_supplicant");
+		sleep(1);
+
 		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
 		if (ret < 0)
 			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
