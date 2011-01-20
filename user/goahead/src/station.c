@@ -2708,7 +2708,6 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	NDIS_802_11_CONFIGURATION	Configuration;
 	unsigned long				CurrentWirelessMode;
 
-	fprintf(stderr, "sta_connection()\n");
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
 	if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 ) {
@@ -3082,7 +3081,6 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				return 0;
 			}
 			
-			printf("ConnectStatus=%d, G_bRadio=%d\n", ConnectStatus, G_bRadio );
 			if ((ConnectStatus == 1) && G_bRadio)
 			{
 				OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
