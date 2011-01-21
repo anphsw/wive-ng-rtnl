@@ -664,7 +664,8 @@ static void __init do_initcalls(void)
 	initcall_t *call;
 	int count = preempt_count();
 
-	for (call = __early_initcall_end; call < __initcall_end; call++)
+	for (call = __early_initcall_end; call < __initcall_end; call++) {
+
 		char *msg = NULL;
 		char msgbuf[40];
 		int result;
@@ -730,10 +731,6 @@ __setup("nosoftlockup", nosoftlockup_setup);
 
 static void __init __do_pre_smp_initcalls(void)
 {
-	initcall_t *call;
-
-	for (call = __initcall_start; call < __early_initcall_end; call++)
-		do_one_initcall(*call);
 }
 
 static void __init do_pre_smp_initcalls(void)
