@@ -119,7 +119,7 @@ function PageInit()
   <tr>
     <td class="title" colspan="2" id="linkHT">HT</td>
   </tr><% getStaHT(); %><tr>
-    <td class="head"><font id="linkSNR">SNR</font>0</td>
+    <td class="head"><font id="linkSNR">SNR</font></td>
     <td><% getStaSNR(); %></td>
   </tr>
 </table>
