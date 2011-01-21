@@ -729,10 +729,6 @@ static int __init nosoftlockup_setup(char *str)
 }
 __setup("nosoftlockup", nosoftlockup_setup);
 
-static void __init __do_pre_smp_initcalls(void)
-{
-}
-
 static void __init do_pre_smp_initcalls(void)
 {
 	extern int spawn_ksoftirqd(void);
@@ -866,7 +862,6 @@ static int __init init(void * unused)
 
 	smp_prepare_cpus(max_cpus);
 
-	__do_pre_smp_initcalls();
 	do_pre_smp_initcalls();
 
 	smp_init();
