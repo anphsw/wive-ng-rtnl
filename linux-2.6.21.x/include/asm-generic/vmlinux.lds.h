@@ -211,6 +211,8 @@
 		.notes : { *(.note.*) } :note
 
 #define INITCALLS							\
+	*(.initcallearly.init)						\
+	__early_initcall_end = .;					\
   	*(.initcall0.init)						\
   	*(.initcall0s.init)						\
   	*(.initcall1.init)						\
