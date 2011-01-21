@@ -179,7 +179,7 @@ function CheckValue()
 </tr>
 
 <tr>
-<td class="head">Kernel mode PPPOE pass through</td>
+<td class="head">PPPOE pass through</td>
 <td>
 	<select name="krnlPppoePass" class="half">
 		<option value="0">Disable</option>
@@ -189,7 +189,7 @@ function CheckValue()
 </tr>
 
 <tr>
-<td class="head">Kernel mode IPv6 pass through</td>
+<td class="head">IPv6 pass through</td>
 <td>
 	<select name="krnlIpv6Pass" class="half">
 		<option value="0">Disable</option>
@@ -208,7 +208,7 @@ function CheckValue()
 </td>
 </tr>
 <tr id="lltd">
-<td class="head" id="lLltd">LLTD</td>
+<td class="head" id="lLltd">LLTD daemon</td>
 <td>
 	<select name="lltdEnbl" class="half">
 		<option value="0" id="lLltdD">Disable</option>
@@ -226,7 +226,7 @@ function CheckValue()
 </td>
 </tr>
 <tr id="upnp">
-<td class="head" id="lUpnp">UPNP</td>
+<td class="head" id="lUpnp">UPNP support</td>
 <td>
 	<select name="upnpEnbl" class="half">
 		<option value="0" id="lUpnpD">Disable</option>
@@ -253,7 +253,7 @@ function CheckValue()
 </td>
 </tr>
 <tr id="dnsproxy">
-<td class="head" id="lDnsp">DNS proxy</td>
+<td class="head" id="lDnsp">DNS cached proxy</td>
 <td>
 	<select name="dnspEnbl" class="half">
 		<option value="0">Disable</option>
@@ -283,7 +283,7 @@ function CheckValue()
 </tr>
 <tr>
 <td class="head" id="sysfwPingFrmWANFilterHead">
-	Ping from WAN
+		Accept ping from WAN
 </td>
 <td>
 	<select name="pingWANEnbl" class="half">
@@ -292,7 +292,7 @@ function CheckValue()
 	</select>
 </td>
 <tr>
-<td class="head">UDPXY</td>
+<td class="head">Multicast to http proxy (udpxy)</td>
 <td>
 	<select name="udpxyMode" class="half">
 		<option value="0">Disable</option>
@@ -311,7 +311,7 @@ function CheckValue()
 </td>
 </tr>
 <tr>
-<td class="head">Reinit on DHCP lease fail</td>
+<td class="head">Switch reinit on DHCP lease fail</td>
 <td>
 	<select name="dhcpSwReset" class="half">
 		<option value="0">Disable</option>
@@ -328,7 +328,7 @@ function CheckValue()
 	</select>
 </td>
 </tr>
-<td class="head">CRON</td>
+<td class="head">Cron daemon</td>
 <td>
 	<select name="CronEnable" class="half">
 		<option value="0">Disable</option>
