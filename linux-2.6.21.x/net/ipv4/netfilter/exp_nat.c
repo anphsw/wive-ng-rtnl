@@ -40,13 +40,14 @@ MODULE_DESCRIPTION("Fast Path Nat kernel module.");
 MODULE_LICENSE("GPL");
 
 /* Config options */
-#define PRINT_NAT_TABLE             /* Proc table dumping support */
-//#define DEBUG                       /* Debug messages */
-#define TIMEOUTS                    /* Compile connection timeout support */
-#define OPTIMISE_FOR_SHORT_CONNECTIONS /* Static timeout */
-//#define OPTIMISE_FOR_LONG_CONNECTIONS /* Timeout refreshed */
-#define ALG_COMPATIBLE              /* Consult Conntrack database for ALG */
-#define NO_XLR8_RELATED 0          /*Should Related connections be xlr8ed?*/
+#define PRINT_NAT_TABLE			/* Proc table dumping support */
+#define DEBUG				/* Debug messages */
+#define TIMEOUTS			/* Compile connection timeout support */
+#define FAST_OUTPUT			/*  Fast mode send packets to output. */
+#define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout */
+//#define OPTIMISE_FOR_LONG_CONNECTIONS	/* Timeout refreshed */
+#define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
+#define NO_XLR8_RELATED 0		/*Should Related connections be xlr8ed?*/
 
 #ifdef DEBUG
 #define DEBUGP printk
@@ -197,8 +198,9 @@ static struct file_operations proc_nat_status_file_ops = {
 };
 #endif /* PRINT_NAT_TABLE */
 
-/* Stolen from linux kernel -- */
-static inline int exp_fas_tpath_output(struct sk_buff *skb)
+#ifndef FAST_OUTPUT
+/*  Send packets to output. */
+static inline int exp_fast_path_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct hh_cache *hh = dst->hh;
@@ -237,6 +239,61 @@ static inline int exp_fas_tpath_output(struct sk_buff *skb)
 	kfree_skb(skb);
 	return -EINVAL;
 }
+#else 
+static inline int exp_fast_path_output2(struct sk_buff *skb)
+{
+	int ret = 0;
+	struct dst_entry *dst = skb->dst;
+	struct hh_cache *hh = dst->hh;
+
+	if (hh) {
+		unsigned seq;
+		int hh_len;
+
+		do {
+			int hh_alen;
+			seq = read_seqbegin(&hh->hh_lock);
+			hh_len = hh->hh_len;
+			hh_alen = HH_DATA_ALIGN(hh_len);
+			memcpy(skb->data - hh_alen, hh->hh_data, hh_alen);
+			} while (read_seqretry(&hh->hh_lock, seq));
+
+			skb_push(skb, hh_len);
+		ret = hh->hh_output(skb); 
+		if (ret==1) 
+			return 0; /* Don't return 1 */
+	} else if (dst->neighbour) {
+		ret = dst->neighbour->output(skb);  
+		if (ret==1) 
+			return 0; /* Don't return 1 */
+	}
+	return ret;
+}
+
+static inline int exp_fast_path_output(struct sk_buff *skb)
+{
+	if (skb->dst == NULL) {
+		struct iphdr *iph = ip_hdr(skb);
+		struct net_device *dev = skb->dev;
+
+		if (ip_route_input(skb, iph->daddr, iph->saddr, iph->tos, dev)) {
+			return NF_DROP;
+		}
+		/*  Change skb owner to output device */
+		skb->dev = skb->dst->dev;
+	}
+
+	if (skb->dst) {
+		if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+			return ip_fragment(skb, exp_fast_path_output2);
+		else
+			return exp_fast_path_output2(skb);
+	}
+
+	kfree_skb(skb);
+	return -EINVAL;
+}
+#endif
 
 /* Calculate hash from PacketInfo*/
 uint32_t inline hashfromkey(PacketInfo *info)
@@ -603,7 +660,7 @@ conntrack_hook_pre_early(unsigned int hooknum, struct sk_buff **pskb,
         nat_timeout_refresh(&nat->timeout);
         do_nat((*pskb),&nat->post);
         
-        if(exp_fas_tpath_output(*pskb) == 0)
+        if(exp_fast_path_output(*pskb) == 0)
             {
             return NF_STOLEN;
             }
