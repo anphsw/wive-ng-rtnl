@@ -6,15 +6,15 @@
 OUTPUT_ARCH(mips)
 ENTRY(kernel_entry)
 
-ifdef CONFIG_32BIT
-	ifdef CONFIG_CPU_LITTLE_ENDIAN
+#ifdef CONFIG_32BIT
+	#ifdef CONFIG_CPU_LITTLE_ENDIAN
 		jiffies  = jiffies_64;
-	else
+	#else
 		jiffies  = jiffies_64 + 4;
-	endif
-else
+	#endif
+#else
 	jiffies  = jiffies_64;
-endif
+#endif
 
 SECTIONS
 {
