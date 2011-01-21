@@ -127,12 +127,10 @@ static void delete_nat_entry(unsigned long ul_set_hash)
 {
 	struct hash_table *set_hash = (void *)ul_set_hash;
 
-//	WRITE_HASH_LOCK(&nf_conntrack_lock);
 	WRITE_HASH_LOCK(&hash_table_lock);
 	list_del(&set_hash->list);
 	kfree(set_hash);
 	WRITE_HASH_UNLOCK(&hash_table_lock);
-//	WRITE_HASH_UNLOCK(&nf_conntrack_lock);
 }
 #endif /* TIMEOUTS */
 
@@ -421,9 +419,9 @@ static inline int hash_table_add (PacketInfo *pre, PacketInfo *post)
 #endif /* TIMEOUTS */
 
 	    WRITE_HASH_LOCK(&hash_table_lock);
-		list_add(&set_hash->list, &global_set_hash[key].list);
-    	WRITE_HASH_UNLOCK(&hash_table_lock);
-	    }     
+	    list_add(&set_hash->list, &global_set_hash[key].list);
+    	    WRITE_HASH_UNLOCK(&hash_table_lock);
+	}     
 unlock:
 	return ret;
 }
@@ -717,23 +715,23 @@ static void __exit fini(void)
 	remove_proc_entry("entries", proc_net_fast_nat);
 #endif /* PRINT_NAT_TABLE */
 
-    nf_unregister_hook(&conntrack_ops_post);
-    nf_unregister_hook(&conntrack_ops_pre_early);
+	nf_unregister_hook(&conntrack_ops_post);
+	nf_unregister_hook(&conntrack_ops_pre_early);
 
 	WRITE_HASH_LOCK(&hash_table_lock);
 
     for (key = 0; key < max_hash_size; key++)
-		list_for_each_entry_safe(set_hash,temp, 
-                                 &global_set_hash[key].list, list)
-        {
+	    list_for_each_entry_safe(set_hash,temp, &global_set_hash[key].list, list)
+	{
 #ifdef TIMEOUTS
         del_timer(&set_hash->timeout);
 #endif /*TIMEOUTS*/
         list_del(&set_hash->list);
         kfree(set_hash);
-        }
-    DEBUGP(KERN_CRIT "Freeing Global DB\n");
-    kfree(global_set_hash);
+	}
+
+	DEBUGP(KERN_CRIT "Freeing Global DB\n");
+	kfree(global_set_hash);
 	WRITE_HASH_UNLOCK(&hash_table_lock);
     }
 
