@@ -34,8 +34,8 @@ MODULE_DESCRIPTION("Fast Path Nat kernel module.");
 MODULE_LICENSE("GPL");
 
 /* Config options */
-#define PRINT_NAT_TABLE			/* Proc table dumping support */
 #define DEBUG				/* Debug messages */
+#define PRINT_NAT_TABLE			/* Proc table dumping support */
 #define TIMEOUTS			/* Compile connection timeout support */
 #define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout. Else timeout refreshed */
