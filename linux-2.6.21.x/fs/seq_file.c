@@ -370,18 +370,18 @@ int seq_path(struct seq_file *m,
 }
 EXPORT_SYMBOL(seq_path);
 
-static void *single_start(struct seq_file *p, loff_t *pos)
+void *single_start(struct seq_file *p, loff_t *pos)
 {
 	return NULL + (*pos == 0);
 }
 
-static void *single_next(struct seq_file *p, void *v, loff_t *pos)
+void *single_next(struct seq_file *p, void *v, loff_t *pos)
 {
 	++*pos;
 	return NULL;
 }
 
-static void single_stop(struct seq_file *p, void *v)
+void single_stop(struct seq_file *p, void *v)
 {
 }
 
