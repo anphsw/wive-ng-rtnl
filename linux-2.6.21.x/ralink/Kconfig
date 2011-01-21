@@ -72,6 +72,14 @@ config BCM_NAT
                 This helps packets pass through netfilter faster when a packet
                 is an established or reply traffic.
 
+config EXP_NAT
+        tristate "Express NAT offload support"
+        depends on NF_CONNTRACK && NF_NAT
+        default m
+        help
+                This helps packets pass through netfilter faster when a packet
+                is an established or reply traffic.
+
 if RA_NAT_HW
 menu "Ralink RT3xx/RT28xx NAT Acell support."
 source "net/nat/hw_nat/Kconfig"

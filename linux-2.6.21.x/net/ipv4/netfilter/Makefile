@@ -162,4 +162,5 @@ obj-$(CONFIG_IP_NF_QUEUE) += ip_queue.o
 
 # Broadcom NAT
 obj-$(CONFIG_BCM_NAT) += bcm_nat.o
+obj-$(CONFIG_EXP_NAT) += exp_nat.o
 

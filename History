@@ -241,6 +241,7 @@
 52) Add workaround for broadcom clients (WPA+dhcp).<br>
 53) Add option 57 for dhcp support.<br>
 54) Fix pptp/gre nat helpers support.<br>
+55) Add module expressnat offload ported for independed conntrack. Need fix some bug in code.<br>
 
 <br><br>
 <b>For support see:</b><br>
