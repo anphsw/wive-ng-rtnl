@@ -34,8 +34,8 @@ MODULE_DESCRIPTION("Fast Path Nat kernel module.");
 MODULE_LICENSE("GPL");
 
 /* Config options */
-#define DEBUG				/* Debug messages */
-#define PRINT_NAT_TABLE			/* Proc table dumping support */
+//#define DEBUG				/* Debug messages */
+//#define PRINT_NAT_TABLE			/* Proc table dumping support */
 #define TIMEOUTS			/* Compile connection timeout support */
 #define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout. Else timeout refreshed */
@@ -94,7 +94,7 @@ MODULE_LICENSE("GPL");
 
 static DEFINE_RWLOCK(hash_table_lock);
  
-const uint32_t max_hash_size = 1024;
+const uint32_t max_hash_size = 2048;
 
 /* Packet info structure (stored at the bottom of the packet buffer) */
 typedef struct {
@@ -749,8 +749,7 @@ static int __init init(void)
         }
 #endif /* PRINT_NAT_TABLE */
 
-    global_set_hash = kmalloc(sizeof(struct hash_table) * max_hash_size,
-                              GFP_KERNEL);
+    global_set_hash = kzalloc(sizeof(struct hash_table) * max_hash_size, GFP_KERNEL);
     DEBUGP(KERN_CRIT "Allocating hash mem\n");
 
     for (key = 0; key < max_hash_size; key++)
