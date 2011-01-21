@@ -43,7 +43,7 @@ MODULE_LICENSE("GPL");
 #define PRINT_NAT_TABLE			/* Proc table dumping support */
 #define DEBUG				/* Debug messages */
 #define TIMEOUTS			/* Compile connection timeout support */
-#define FAST_OUTPUT			/*  Fast mode send packets to output. */
+#define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout */
 //#define OPTIMISE_FOR_LONG_CONNECTIONS	/* Timeout refreshed */
 #define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
@@ -198,8 +198,8 @@ static struct file_operations proc_nat_status_file_ops = {
 };
 #endif /* PRINT_NAT_TABLE */
 
-#ifndef FAST_OUTPUT
 /*  Send packets to output. */
+#ifndef PARANOID_OUTPUT
 static inline int exp_fast_path_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
@@ -240,6 +240,14 @@ static inline int exp_fast_path_output(struct sk_buff *skb)
 	return -EINVAL;
 }
 #else 
+static inline int ip_skb_dst_mtu(struct sk_buff *skb)
+{
+	struct inet_sock *inet = skb->sk ? inet_sk(skb->sk) : NULL;
+
+	return (inet && inet->pmtudisc == IP_PMTUDISC_PROBE) ?
+	       skb->dst->dev->mtu : dst_mtu(skb->dst);
+}
+
 static inline int exp_fast_path_output2(struct sk_buff *skb)
 {
 	int ret = 0;
