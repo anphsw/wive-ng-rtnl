@@ -68,15 +68,6 @@ extern u32 mips_cpu_feq;
 
 void mips_timer_interrupt(void)
 {
-	/*
-	if ((timer_tick_count++ % HZ) == 0) {
-		mips_display_message(&display_string[display_count++]);
-		if (display_count == MAX_DISPLAY_COUNT)
-		        display_count = 0;
-
-	}
-	*/
-
 	ll_timer_interrupt(RALINK_CPU_TIMER_IRQ);
 }
 

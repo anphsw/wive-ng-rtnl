@@ -211,9 +211,9 @@ void __init prom_meminit(void)
 
 void __init prom_free_prom_memory(void)
 {
+#ifdef DEBUG
 	/* Nothing to do! Need only for DEBUG.	  */
 	/* This is may be corrupt working memory. */
-#ifdef DEBUG
         unsigned long addr;
         int i;
 

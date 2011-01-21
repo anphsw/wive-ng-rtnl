@@ -293,6 +293,9 @@ static void prom_init_sysclk(void)
 ** To get the correct baud_base value, prom_init_sysclk() must be called before
 ** this function is called.
 */
+#ifdef CONFIG_SERIAL_CORE
+extern int early_serial_setup(struct uart_port *port);
+#endif
 static struct uart_port serial_req[2];
 static int prom_init_serial_port(void)
 {
@@ -431,9 +434,6 @@ int serial_init(unsigned long wBaud)
         return (0);
 }
 
-#ifdef CONFIG_SERIAL_CORE
-extern int early_serial_setup(struct uart_port *port);
-#endif
 __init void prom_init(void)
 {
 	mips_machgroup = MACH_GROUP_RT2880;
