@@ -35,11 +35,11 @@ MODULE_LICENSE("GPL");
 
 /* Config options */
 //#define DEBUG				/* Debug messages */
-//#define PRINT_NAT_TABLE			/* Proc table dumping support */
+#define PRINT_NAT_TABLE			/* Proc table dumping support */
 #define TIMEOUTS			/* Compile connection timeout support */
 #define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout. Else timeout refreshed */
-#define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
+//#define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
 #define NO_XLR8_RELATED 0		/* Should Related connections be xlr8ed? */
 
 #ifdef DEBUG
@@ -74,20 +74,16 @@ MODULE_LICENSE("GPL");
 
 #define EXPNAT_MAGIC_COOKIE    0xdeadbeef
 
-#define IS_ICMP(skb) (((struct iphdr*) skb->nh.iph)->protocol == IPPROTO_ICMP)
-#define IS_TCP(skb) (((struct iphdr*) skb->nh.iph)->protocol ==  IPPROTO_TCP )
-#define IS_UDP(skb) (((struct iphdr*) skb->nh.iph)->protocol ==  IPPROTO_UDP )
-#define IS_NOT_LOCAL(skb) (skb->sk == NULL)
-#define IS_FRAG(skb) ((skb->nh.iph->frag_off == 0) || (skb->nh.iph->frag_off == 1<<14)) 
-#define IS_NOT_FRAG(skb) ! IS_FRAG(skb)
+#define IS_ICMP(skb)		(skb->nh.iph->protocol == IPPROTO_ICMP)
+#define IS_TCP(skb)		(skb->nh.iph->protocol == IPPROTO_TCP)
+#define IS_FRAG(skb)		((skb->nh.iph->frag_off == 0) || (skb->nh.iph->frag_off == 1<<14)) 
 
-#define WRITE_HASH_LOCK(x)         write_lock_bh(x)
-#define WRITE_HASH_UNLOCK(x)       write_unlock_bh(x)
-#define READ_HASH_LOCK(x)          read_lock_bh(x)
-#define READ_HASH_UNLOCK(x)        read_unlock_bh(x)
+#define WRITE_HASH_LOCK(x)	write_lock_bh(x)
+#define WRITE_HASH_UNLOCK(x)	write_unlock_bh(x)
+#define READ_HASH_LOCK(x)	read_lock_bh(x)
+#define READ_HASH_UNLOCK(x)	read_unlock_bh(x)
 
 #define MATCH_TYPE uint8_t
-
 #define MATCH_TYPE_NOMATCH 0
 #define MATCH_TYPE_EXACT   1
 #define MATCH_TYPE_APPROX  2
@@ -153,8 +149,7 @@ proc_nat_status_entry_show (struct seq_file *s, void *v)
     READ_HASH_LOCK(&hash_table_lock);
     for (key = 0; key < max_hash_size; key++)
         {
-        list_for_each_entry_safe(node,tmp_item, 
-                                 &global_set_hash[key].list, list)
+        list_for_each_entry_safe(node,tmp_item, &global_set_hash[key].list, list)
             {
             seq_printf(s, "  %u.%u.%u.%u       %u        %u.%u.%u.%u       %u        "
                           "  %u.%u.%u.%u       %u        %u.%u.%u.%u       %u     %ul\n",
@@ -316,7 +311,7 @@ uint32_t inline hashfromkey(PacketInfo *info)
 static inline uint16_t
 getPort(const struct sk_buff *skb, uint16_t *ports)
 {
-	struct iphdr *iph = (struct iphdr * )skb->data;
+    struct iphdr *iph = skb->nh.iph;
 
     switch (iph->protocol) 
         {
@@ -349,7 +344,7 @@ getPort(const struct sk_buff *skb, uint16_t *ports)
 static inline uint16_t
 setPorts(const struct sk_buff *skb, PacketInfo *info)
 {
-	struct iphdr *iph = (struct iphdr * )skb->data;
+    struct iphdr *iph = skb->nh.iph;
 
     switch (iph->protocol) 
         {
@@ -425,8 +420,8 @@ out:
 static inline int hash_table_add (PacketInfo *pre, PacketInfo *post)
 {
 
-	struct hash_table *set_hash;
-	int ret = 0;
+    struct hash_table *set_hash;
+    int ret = 0;
     uint32_t key ;
     MATCH_TYPE matchType;
 
@@ -457,23 +452,24 @@ static inline int hash_table_add (PacketInfo *pre, PacketInfo *post)
 
 	if (matchType != MATCH_TYPE_EXACT ) 
         {
-        set_hash = kmalloc(sizeof(struct hash_table),GFP_ATOMIC);
+        set_hash = kzalloc(sizeof(struct hash_table),GFP_ATOMIC);
 
-		if (!set_hash) 
-            {
-			ret = -ENOMEM;
-			goto unlock;
-		    }
-		INIT_LIST_HEAD(&set_hash->list);
-        memcpy(&set_hash->pre,pre,sizeof(PacketInfo));
-        memcpy(&set_hash->post,post,sizeof(PacketInfo));
+	    if (!set_hash) {
+		ret = -ENOMEM;
+		goto unlock;
+	    }
+
+	    INIT_LIST_HEAD(&set_hash->list);
+
+	    memcpy(&set_hash->pre,pre,sizeof(PacketInfo));
+	    memcpy(&set_hash->post,post,sizeof(PacketInfo));
 
 #ifdef TIMEOUTS
-        init_timer(&set_hash->timeout);   
-        set_hash->timeout.function = delete_nat_entry; 
-        set_hash->timeout.data     = (unsigned long) set_hash;
-        set_hash->timeout.expires  = jiffies + (60 * HZ);
-        add_timer(&set_hash->timeout);
+	    init_timer(&set_hash->timeout);   
+	    set_hash->timeout.function = delete_nat_entry; 
+	    set_hash->timeout.data     = (unsigned long) set_hash;
+	    set_hash->timeout.expires  = jiffies + (60 * HZ);
+	    add_timer(&set_hash->timeout);
 #endif /* TIMEOUTS */
 
 	    WRITE_HASH_LOCK(&hash_table_lock);
@@ -487,11 +483,11 @@ unlock:
 /* Does the nat */
 void inline do_nat(struct sk_buff *skb , PacketInfo *post)
     {
-    struct iphdr *iph = (struct iphdr *)skb->data;
-	uint16_t	check;
+    struct iphdr *iph = skb->nh.iph;
+    uint16_t	check;
 
     u32 odaddr = iph->daddr;
-	u32 osaddr = iph->saddr;
+    u32 osaddr = iph->saddr;
 
     /* increase reference count ? */
     skb->dev    = post->dev;
@@ -504,7 +500,7 @@ void inline do_nat(struct sk_buff *skb , PacketInfo *post)
     iph->check = 0;
     iph->ttl  -= 1;  
 
-	iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
+    iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
    
 	if (!(iph->frag_off & htons(IP_OFFSET))) 
         {
@@ -550,7 +546,8 @@ void inline do_nat(struct sk_buff *skb , PacketInfo *post)
 /* Fill PacketInfo struct from skbuff*/
 void inline skb_to_info(struct sk_buff *skb , PacketInfo *info)
     {
-    struct iphdr *ip = (struct iphdr*) skb->nh.iph;
+    struct iphdr *ip = skb->nh.iph;
+
     uint16_t ports[DST_PORT+1];
     
     info->srcIp  = ip->saddr;
@@ -589,14 +586,14 @@ void inline mark_packet_late(struct sk_buff *skb)
 int inline trafficSelect(struct sk_buff *skb)
     {
     /*if(strcmp(skb->dev->name,"lo"))*/
-    if(IS_NOT_FRAG(skb) )
+    if(!IS_FRAG(skb))
             return (IS_TCP(skb));
     return 0;
     }
 
 int inline trafficSelectPre(struct sk_buff *skb)
     {
-    return (IS_NOT_FRAG(skb) && ! IS_ICMP(skb));
+    return ((!IS_FRAG(skb)) && (!IS_ICMP(skb)));
     }
 
 int inline isPacketMarked(struct sk_buff *skb)
@@ -739,8 +736,7 @@ static int __init init(void)
     proc_net_fast_nat->owner = THIS_MODULE;
 
     /* Create /proc/net/fast_nat/entries */
-    proc_net_ipt_nat_status = create_proc_entry ("entries", 0644,
-                                                proc_net_fast_nat);
+    proc_net_ipt_nat_status = create_proc_entry ("entries", 0644, proc_net_fast_nat);
 
     if (proc_net_ipt_nat_status) 
         {
@@ -763,7 +759,7 @@ static int __init init(void)
     }
 
 static void __exit fini(void)
-    {
+{
     uint32_t key=0;
     struct hash_table *set_hash = NULL , *temp;
 
@@ -777,15 +773,15 @@ static void __exit fini(void)
 
 	WRITE_HASH_LOCK(&hash_table_lock);
 
-    for (key = 0; key < max_hash_size; key++)
-	    list_for_each_entry_safe(set_hash,temp, &global_set_hash[key].list, list)
-	{
+	for (key = 0; key < max_hash_size; key++)
+	    list_for_each_entry_safe(set_hash, temp, &global_set_hash[key].list, list)
+
 #ifdef TIMEOUTS
-        del_timer(&set_hash->timeout);
+	del_timer(&set_hash->timeout);
 #endif /*TIMEOUTS*/
-        list_del(&set_hash->list);
-        kfree(set_hash);
-	}
+
+    	list_del(&set_hash->list);
+    	kfree(set_hash);
 
 	DEBUGP(KERN_CRIT "Freeing Global DB\n");
 	kfree(global_set_hash);
