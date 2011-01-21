@@ -7,8 +7,7 @@
 #ifdef MODULE
 #define __NO_VERSION__
 #endif
-#include <linux/version.h>
-#include <linux/config.h>
+
 #include <linux/types.h>
 #include <linux/netdevice.h>
 #include <linux/ip.h>
@@ -17,19 +16,14 @@
 #include <linux/module.h>
 #include <linux/skbuff.h>
 #include <linux/proc_fs.h>
-#include <linux/vmalloc.h>
-#include <net/checksum.h>
 #include <linux/stddef.h>
-#include <linux/sysctl.h>
-#include <linux/slab.h>
 #include <linux/fs.h>
 #include <net/ip.h>
+#include <net/route.h>
+#include <net/checksum.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
 #include <linux/list.h>
-#include <asm/semaphore.h>
-#include <linux/delay.h>
-#include <net/route.h>
 
 #include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack_core.h>
@@ -44,10 +38,9 @@ MODULE_LICENSE("GPL");
 #define DEBUG				/* Debug messages */
 #define TIMEOUTS			/* Compile connection timeout support */
 #define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
-#define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout */
-//#define OPTIMISE_FOR_LONG_CONNECTIONS	/* Timeout refreshed */
+#define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout. Else timeout refreshed */
 #define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
-#define NO_XLR8_RELATED 0		/*Should Related connections be xlr8ed?*/
+#define NO_XLR8_RELATED 0		/* Should Related connections be xlr8ed? */
 
 #ifdef DEBUG
 #define DEBUGP printk
