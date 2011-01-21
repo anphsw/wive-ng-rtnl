@@ -198,7 +198,7 @@ static struct file_operations proc_nat_status_file_ops = {
 #endif /* PRINT_NAT_TABLE */
 
 /* Stolen from linux kernel -- */
-static inline int ip_finish_output2(struct sk_buff *skb)
+static inline int exp_fas_tpath_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct hh_cache *hh = dst->hh;
@@ -603,7 +603,7 @@ conntrack_hook_pre_early(unsigned int hooknum, struct sk_buff **pskb,
         nat_timeout_refresh(&nat->timeout);
         do_nat((*pskb),&nat->post);
         
-        if(ip_finish_output2(*pskb) == 0)
+        if(exp_fas_tpath_output(*pskb) == 0)
             {
             return NF_STOLEN;
             }
