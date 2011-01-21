@@ -299,7 +299,6 @@ void __init arch_init_irq(void)
 	}
 
 	/* Enable global interrupt bit */
-//	surfboard_hw0_icregs->intDisable = 0xffffffff;
 	surfboard_hw0_icregs->intEnable = M_SURFBOARD_GLOBAL_INT;
 
 #ifdef CONFIG_RALINK_GPIO
@@ -343,14 +342,6 @@ void rt2880_irqdispatch(void)
 	/* from high to low priority */
 	irq = 4;
 	pci_order^=1;
-
-#ifdef CONFIG_RAETH_ROUTER
-//	if(irq_x & 0x08)
-//		do_IRQ(irq, regs);
-#else
-	//if(irq_x & 0x10)
-	//	do_IRQ(irq, regs);
-#endif
 
 	for (i = 0; i< 5; i++) {
 		if(irq_x & 0x10)

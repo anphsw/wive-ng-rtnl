@@ -75,8 +75,6 @@ struct serial_state prom_rs_table[] = {
  */
 #define prom_envp(index) ((char *)(((int *)(int)_prom_envp)[(index)]))
 
-int init_debug = 0;
-
 char *prom_getenv(char *envname)
 {
 	/*
@@ -128,6 +126,9 @@ static inline void str2eaddr(unsigned char *ea, unsigned char *str)
 int get_ethernet_addr(char *ethernet_addr)
 {
         char *ethaddr_str;
+#ifdef DEBUG
+        int i;
+#endif
 
         ethaddr_str = prom_getenv("ethaddr");
 	if (!ethaddr_str) {
@@ -136,18 +137,17 @@ int get_ethernet_addr(char *ethernet_addr)
 	}
 	str2eaddr(ethernet_addr, ethaddr_str);
 
-	if (init_debug > 1) {
-	        int i;
-		printk("get_ethernet_addr: ");
-	        for (i=0; i<5; i++)
-		        printk("%02x:", (unsigned char)*(ethernet_addr+i));
-		printk("%02x\n", *(ethernet_addr+i));
-	}
+#ifdef DEBUG
+	printk("get_ethernet_addr: ");
+        for (i=0; i<5; i++)
+	    printk("%02x:", (unsigned char)*(ethernet_addr+i));
 
+	printk("%02x\n", *(ethernet_addr+i));
+#endif
 	return 0;
 }
 
-void prom_init_sysclk(void)
+static void prom_init_sysclk(void)
 {
 	u32 	reg;
         u8      clk_sel;
@@ -288,13 +288,13 @@ void prom_init_sysclk(void)
 
 /*
 ** This function sets up the local prom_rs_table used only for the fake console
-** console (mainly prom_printf for debug display and no input processing)
+** console (mainly printk for debug display and no input processing)
 ** and also sets up the global rs_table used for the actual serial console.
 ** To get the correct baud_base value, prom_init_sysclk() must be called before
 ** this function is called.
 */
 static struct uart_port serial_req[2];
-int prom_init_serial_port(void)
+static int prom_init_serial_port(void)
 {
 
   /*
@@ -332,8 +332,15 @@ int prom_init_serial_port(void)
 #else
   serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #endif
+#ifdef CONFIG_SERIAL_CORE
+	/* Switch UART LITE/UART BASE 
+	  mode must after prom_meminit	*/
+	early_serial_setup(&serial_req[0]);
+	early_serial_setup(&serial_req[1]);
+#endif
 
-  return(0);
+  return 0;
+
 }
 
 int prom_get_ttysnum(void)
@@ -341,7 +348,7 @@ int prom_get_ttysnum(void)
 	char *argptr;
 	int ttys_num = 0;       /* default */
 
-	/* get ttys_num to use with the fake console/prom_printf */
+	/* get ttys_num to use with the fake console/printk */
 	argptr = prom_getcmdline();
 
 	if ((argptr = strstr(argptr, "console=ttyS")) != NULL)
@@ -417,7 +424,6 @@ static void serial_setbrg(unsigned long wBaud)
 
 }
 
-
 int serial_init(unsigned long wBaud)
 {
         serial_setbrg(wBaud);
@@ -446,21 +452,14 @@ __init void prom_init(void)
 
 	serial_init(SURFBOARD_DEFAULT_BAUD);	/* Kernel driver serial init */
 	prom_init_serial_port();		/* Set rate. Needed for Serial Console */
-	prom_setup_printf(prom_get_ttysnum());	/* Get tty name and init prompt */
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 
-#ifdef CONFIG_SERIAL_CORE
-	/* Switch UART LITE/UART BASE 
-	  mode must after prom_meminit	*/
-	early_serial_setup(&serial_req[0]);
-	early_serial_setup(&serial_req[1]);
-#endif
 #if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) || defined(CONFIG_RT3883_FPGA)
-	prom_printf("FPGA mode LINUX started...\n");
+	printk("FPGA mode LINUX started...\n");
 #elif defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC)
-	prom_printf("ASIC mode LINUX started...\n");
+	printk("ASIC mode LINUX started...\n");
 #else
-	prom_printf("LINUX started...\n");
+	printk("LINUX started...\n");
 #endif
-	prom_printf("The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
+	printk("The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
 }

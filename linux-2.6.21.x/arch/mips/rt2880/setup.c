@@ -100,7 +100,7 @@ void __init rt2880_setup(void)
 			i++;
 		strcpy(serial_console, "ttyS1,");
 		strncpy(serial_console + 6, s, i);
-		prom_printf("Config serial console: %s\n", serial_console);
+		printk("Config serial console: %s\n", serial_console);
 		console_setup(serial_console, NULL);
 	}
 #endif
@@ -127,7 +127,7 @@ void __init rt2880_setup(void)
 			generic_getDebugChar = saa9730_getDebugChar;
 		}
 
-		prom_printf("KGDB: Using serial line /dev/ttyS%d for session, "
+		printk("KGDB: Using serial line /dev/ttyS%d for session, "
 			    "please connect your debugger\n", line ? 1 : 0);
 
 		remote_debug = 1;
@@ -154,5 +154,5 @@ void __init plat_mem_setup(void)
 #else
     printk("Fixed Ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 #endif
-  rt2880_setup();
+    rt2880_setup();
 }

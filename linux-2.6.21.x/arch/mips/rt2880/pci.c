@@ -466,7 +466,6 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
   	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
   	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
  	printk("BAR0 at slot 0 = %x\n", val);
-//  	dev->irq = 0;
  	printk("bus=0, slot = 0x%x\n", slot);
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
@@ -512,7 +511,6 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
   	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
   	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
  	printk("BAR0 at slot 0 = %x\n", val);
-//  	dev->irq = 0;
  	printk("bus=0, slot = 0x%x\n", slot);
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
@@ -574,7 +572,6 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 #endif
   pci_write_config_word(dev, PCI_COMMAND, cmd);
   pci_write_config_byte(dev, PCI_INTERRUPT_LINE, dev->irq);
-  //pci_write_config_byte(dev, PCI_INTERRUPT_PIN, dev->irq);
   return (dev->irq);
 }
 
@@ -635,7 +632,6 @@ int init_rt2880pci(void)
 #endif
 
 #ifdef CONFIG_RALINK_RT2880
-	//pci_probe_only = 1;
 	RALINK_PCI_PCICFG_ADDR = 0;
 #elif CONFIG_RALINK_RT2883
 	RALINK_PCI_PCICFG_ADDR = 0;
@@ -643,7 +639,6 @@ int init_rt2880pci(void)
 
 #ifdef CONFIG_PCIE_ONLY
 	RALINK_PCI_PCICFG_ADDR = 0;
-	//RALINK_PCI_PCICFG_ADDR |= (1<<16);
 #elif CONFIG_PCI_ONLY
 	RALINK_PCI_PCICFG_ADDR = 0;
 	RALINK_PCI_PCICFG_ADDR |= (1<<16);
@@ -753,11 +748,6 @@ int init_rt2880pci(void)
 #elif CONFIG_RALINK_RT2883
 	read_config(0, 0, 0, 0x4, &val);
 	write_config(0, 0, 0, 0x4, val|0x7);
-	//FIXME
-	////write_config(0, 0, 0, 0x18, 0x10100);
-	//write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
-	//read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val); 
-	////printk("BAR0 at slot 0 = %x\n", val); 
 #else 
 	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE); 
 	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
@@ -778,8 +768,6 @@ int pcibios_plat_dev_init(struct pci_dev *dev)
 }
 
 struct pci_fixup pcibios_fixups[] = {
-//	{PCI_ANY_ID, PCI_ANY_ID, pcibios_fixup_resources },
 	{0}
 };
-//DECLARE_PCI_FIXUP_FINAL(PCI_ANY_ID, PCI_ANY_ID, pcibios_fixup_resources)
 #endif	/* CONFIG_PCI */

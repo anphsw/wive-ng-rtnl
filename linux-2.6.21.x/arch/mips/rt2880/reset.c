@@ -70,6 +70,5 @@ void mips_reboot_setup(void)
 {
 	_machine_restart = mips_machine_restart;
 	_machine_halt = mips_machine_halt;
-	//_machine_power_off = mips_machine_power_off;
 	pm_power_off = mips_machine_power_off;
 }

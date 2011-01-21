@@ -78,23 +78,23 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 	env_str = prom_getenv("ramsize");
 	if (!env_str) {
 		ramsize = RAM_SIZE;
-		prom_printf("maximum ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
+		printk("maximum ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 	} else {
-		prom_printf("maximum ramsize = %s\n", env_str);
+		printk("maximum ramsize = %s\n", env_str);
 		ramsize = simple_strtol(env_str, NULL, 0);
 	}
 
 	env_str = prom_getenv("rambase");
 	if (!env_str) {
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-		prom_printf("rambase not set, set to default (0x08000000)\n");
+		printk("rambase not set, set to default (0x08000000)\n");
 		rambase = 0x08000000;
 #else
-		prom_printf("rambase not set, set to default (0x00000000)\n");
+		printk("rambase not set, set to default (0x00000000)\n");
 		rambase = 0x00000000;
 #endif 
 	} else {
-		prom_printf("rambase = %s\n", env_str);
+		printk("rambase = %s\n", env_str);
 		rambase = simple_strtol(env_str, NULL, 0);
 	}
 
@@ -195,11 +195,11 @@ void __init prom_meminit(void)
 
 #ifdef DEBUG
 	p = prom_getmdesc();
-	prom_printf("MEMORY DESCRIPTOR dump:\n");
+	printk("MEMORY DESCRIPTOR dump:\n");
 	psave = p;	/* Save p */
 	while (p->size) {
 		int i = 0;
-		prom_printf("[%d,%p]: base<%08lx> size<%08lx> type<%s>\n",
+		printk("[%d,%p]: base<%08lx> size<%08lx> type<%s>\n",
 			    i, p, p->base, p->size, mtypes[p->type]);
 		p++;
 		i++;
