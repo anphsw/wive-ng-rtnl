@@ -138,6 +138,7 @@ static void send_reset(struct sk_buff *oldskb, int hook)
 	   )
 		addr_type = RTN_LOCAL;
 
+	nskb->protocol = htons(ETH_P_IP);
 	if (ip_route_me_harder(&nskb, addr_type))
 		goto free_nskb;
 
