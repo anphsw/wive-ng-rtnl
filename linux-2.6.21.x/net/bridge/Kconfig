@@ -83,3 +83,9 @@ config BRIDGE_IGMPP_PROCFS_DEBUG
 	depends on BRIDGE_IGMPP_PROCFS
 	---help---
 
+config CONFIG_BRIDGE_FASTPATH
+	bool "Bridge offload engine support"
+	depends on BRIDGE
+	default y
+	---help---
+	  Fastest bridge operation support. WARNING CONFLICT WITH BR_NETFILTER

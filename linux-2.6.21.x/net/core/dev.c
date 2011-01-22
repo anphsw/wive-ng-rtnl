@@ -129,6 +129,14 @@ extern void pthrough_remove_proc_entry(void);
 int config_raeth_mcast=1;
 EXPORT_SYMBOL(config_raeth_mcast);
 
+#ifdef CONFIG_BRIDGE_FASTPATH
+#ifndef CONFIG_BRIDGE_NETFILTER
+#include "../bridge/br_private.h"
+extern void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,  const unsigned char *addr);
+extern struct net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br, unsigned char *addr);
+#endif
+#endif
+
 /*
  *	The list of packet types we will receive (as opposed to discard)
  *	and the routines to invoke.
@@ -1579,6 +1587,36 @@ int netif_rx(struct sk_buff *skb)
 {
 	struct softnet_data *queue;
 	unsigned long flags;
+
+#ifdef CONFIG_BRIDGE_FASTPATH
+#ifndef CONFIG_BRIDGE_NETFILTER
+	struct net_bridge_port *p;
+	struct net_bridge *br = NULL;
+	struct net_bridge_fdb_entry *dst;
+	struct net_device *dev;
+	unsigned char *dest = eth_hdr(skb)->h_dest;
+
+	p = skb->dev->br_port;
+	if((p!=NULL) && (p->br!=NULL)){
+		br=p->br;
+	}else{
+		//printk("!!!! bridge null!! <%s %d>\n",__FUNCTION__,__LINE__);
+		goto SKIP_FAST_BRIDGE;
+	}
+	
+	br_fdb_update(br, p, eth_hdr(skb)->h_source);
+	dst = br_fdb_get(br, dest);
+
+	if((dst!=NULL) && (dst->dst->dev!=NULL) && !dst->is_local){
+		skb->dev = dst->dst->dev;
+		skb_push(skb, ETH_HLEN);
+		dev = skb->dev;
+		dev->hard_start_xmit(skb, dev);
+		return NET_RX_SUCCESS;
+	}
+SKIP_FAST_BRIDGE:
+#endif /* CONFIG_BRIDGE_NETFILTER */
+#endif /* CONFIG_BRIDGE_FASTPATH */
 
 	/* if netpoll wants it, pretend we never saw it */
 	if (netpoll_rx(skb))
