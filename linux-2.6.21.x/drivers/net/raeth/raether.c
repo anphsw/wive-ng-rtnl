@@ -1192,7 +1192,10 @@ static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int
 		} else
 #endif
 			ei_local->stat.tx_dropped++;
-		printk("tx_ring_full, drop packet\n");
+
+		if (net_ratelimit())
+		    printk(KERN_WARNING "raeth: tx_ring_full, drop packet\n");
+
 		kfree_skb(skb);
 		spin_unlock_irqrestore(&ei_local->page_lock, flags);
 		return 0;
