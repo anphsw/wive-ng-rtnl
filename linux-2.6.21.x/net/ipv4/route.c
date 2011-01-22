@@ -1006,7 +1006,7 @@ restart:
 	   route or unicast forwarding path.
 	 */
 
-	rt->dst.flags |= DST_NOCACHE;
+	rth->u.dst.flags |= DST_NOCACHE;
 	if (rt->rt_type == RTN_UNICAST || rt->fl.iif == 0) {
 		int err = arp_bind_neighbour(&rt->u.dst);
 		if (err) {
