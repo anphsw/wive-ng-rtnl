@@ -39,7 +39,8 @@ MODULE_LICENSE("GPL");
 #define TIMEOUTS			/* Compile connection timeout support */
 #define PARANOID_OUTPUT			/* Paranoid mode  send packets to output. */
 #define OPTIMISE_FOR_SHORT_CONNECTIONS	/* Static timeout. Else timeout refreshed */
-//#define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
+#define TRAFFILTER			/* Use harded filter traffic type move to express nat */
+#define ALG_COMPATIBLE			/* Consult Conntrack database for ALG */
 #define NO_XLR8_RELATED 0		/* Should Related connections be xlr8ed? */
 
 #ifdef DEBUG
@@ -76,6 +77,7 @@ MODULE_LICENSE("GPL");
 
 #define IS_ICMP(skb)		(skb->nh.iph->protocol == IPPROTO_ICMP)
 #define IS_TCP(skb)		(skb->nh.iph->protocol == IPPROTO_TCP)
+#define IS_UDP(skb)		(skb->nh.iph->protocol == IPPROTO_UDP)
 #define IS_FRAG(skb)		((skb->nh.iph->frag_off == 0) || (skb->nh.iph->frag_off == 1<<14)) 
 
 #define WRITE_HASH_LOCK(x)	write_lock_bh(x)
@@ -430,6 +432,10 @@ static inline int hash_table_add (PacketInfo *pre, PacketInfo *post)
 
     if(!strcmp(pre->dev->name,"lo")  || 
        !strcmp(post->dev->name,"lo") || 
+#ifdef TRAFFILTER
+       !strcmp(pre->dev->name,"ppp")  || 
+       !strcmp(post->dev->name,"ppp") ||
+#endif
        !strcmp(pre->dev->name , post->dev->name))
             {
             return -EINVAL;
@@ -587,13 +593,17 @@ int inline trafficSelect(struct sk_buff *skb)
     {
     /*if(strcmp(skb->dev->name,"lo"))*/
     if(!IS_FRAG(skb))
-            return (IS_TCP(skb));
+            return (IS_TCP(skb) || IS_UDP(skb));
     return 0;
     }
 
 int inline trafficSelectPre(struct sk_buff *skb)
     {
+#ifndef TRAFFILTER
     return ((!IS_FRAG(skb)) && (!IS_ICMP(skb)));
+#else
+    return ((!IS_FRAG(skb)) && (!IS_ICMP(skb)) && (IS_TCP(skb) || IS_UDP(skb)));
+#endif
     }
 
 int inline isPacketMarked(struct sk_buff *skb)
@@ -686,6 +696,12 @@ conntrack_hook_post(unsigned int hooknum, struct sk_buff **pskb,
                (*okfn)(struct sk_buff *))
     {
 
+#ifdef TRAFFILTER
+    /*We dont need this coz the mark is enough to tell us if traffic is selected. */
+    if(trafficSelect(*pskb) == 0)
+        goto post_routing_done; 
+#endif
+
     if(isPacketMarked(*pskb))
         {
         PacketInfo post;
@@ -697,6 +713,7 @@ conntrack_hook_post(unsigned int hooknum, struct sk_buff **pskb,
         else
             DEBUGP(KERN_CRIT "ALG test failed - not adding\n");
         }
+post_routing_done:
     return NF_ACCEPT;
     }
 
