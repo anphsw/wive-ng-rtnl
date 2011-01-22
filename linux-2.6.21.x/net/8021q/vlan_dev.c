@@ -760,7 +760,7 @@ static void vlan_flush_mc_list(struct net_device *dev)
 
 int vlan_dev_open(struct net_device *dev)
 {
-	if (!(VLAN_DEV_INFO(dev)->real_dev->flags & IFF_UP))
+	if (!(VLAN_DEV_INFO(dev)->real_dev->flags & ~(IFF_UP | IFF_PROMISC | IFF_ALLMULTI)))
 		return -ENETDOWN;
 
 	return 0;
