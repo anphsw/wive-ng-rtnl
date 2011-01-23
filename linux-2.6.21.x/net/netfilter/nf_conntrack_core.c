@@ -778,21 +778,6 @@ static int early_drop(struct list_head *chain)
 	return dropped;
 }
 
-int drop_target(struct nf_conntrack_tuple_hash* h)
-{
-	if(ntohs(h->tuple.dst.u.all) == 80 ||
-           ntohs(h->tuple.dst.u.all) == 53 ||
-           ntohs(h->tuple.dst.u.all) == 18017 ||
-           ntohs(h->tuple.dst.u.all) == 18018 ||
-           ntohs(h->tuple.src.u.all) == 80 ||
-           ntohs(h->tuple.src.u.all) == 53 ||
-           ntohs(h->tuple.src.u.all) == 18017 || 
-           ntohs(h->tuple.src.u.all) == 18018)
-		return 1;
-	else
-		return 0;
-}
-
 static struct nf_conn *
 __nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 		     const struct nf_conntrack_tuple *repl,
