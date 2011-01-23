@@ -526,8 +526,11 @@ CFLAGS		+= -g
 CFLAGS		+= -gdwarf-2
 endif
 
-# Force gcc to behave correct even for buggy distributions
+# force gcc to behave correct even for buggy distributions
 CFLAGS          += $(call cc-option, -fno-stack-protector)
+
+# conserve stack if available
+CFLAGS		+= $(call cc-option, -fconserve-stack)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
