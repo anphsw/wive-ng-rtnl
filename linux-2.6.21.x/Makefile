@@ -539,8 +539,6 @@ CHECKFLAGS     += $(NOSTDINC_FLAGS)
 CFLAGS += $(call cc-option,-membedded-data,)
 CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
 
-CFLAGS += $(call cc-option,-funit-at-a-time,)
-
 # improve gcc optimization
 CFLAGS += $(call cc-option,-funit-at-a-time,)
 
