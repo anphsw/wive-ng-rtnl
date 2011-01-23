@@ -21,7 +21,7 @@ if [ -f /bin/igmpproxy ]; then
 	echo 1 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 1 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 	ip route replace 224.0.0.0/4 dev $wan_if
-	if [ "$CONFIG_WAN_AT_P0" = "y" ]; then
+	if [ "$wan_port" = "4" ]; then
     	    igmpproxy -s /etc/igmpproxy.conf &
 	else
     	    igmpproxy -sw /etc/igmpproxy.conf &
