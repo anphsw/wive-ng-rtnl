@@ -249,7 +249,7 @@ static int get_futex_key(u32 __user *uaddr, union futex_key *key)
  */
 static inline void get_key_refs(union futex_key *key)
 {
-	if (key->both.ptr != 0) {
+	if (key->both.ptr) {
 		if (key->both.offset & 1)
 			atomic_inc(&key->shared.inode->i_count);
 		else
@@ -957,7 +957,7 @@ static int unqueue_me(struct futex_q *q)
  retry:
 	lock_ptr = q->lock_ptr;
 	barrier();
-	if (lock_ptr != 0) {
+	if (lock_ptr != NULL) {
 		spin_lock(lock_ptr);
 		/*
 		 * q->lock_ptr can change between reading it and
