@@ -33,6 +33,8 @@ else
 64bit-emul		= elf64btsmip
 endif
 
+cflags-y += $(call cc-option, -mno-check-zero-division)
+
 ifdef CONFIG_32BIT
 tool-prefix		= $(32bit-tool-prefix)
 UTS_MACHINE		:= mips
