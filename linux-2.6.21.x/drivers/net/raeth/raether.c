@@ -1375,12 +1375,16 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 
 #ifdef CONFIG_RAETH_NAPI
         dev->poll = &raeth_clean;
+#ifdef CONFIG_CONFIG_BRIDGE_FASTPATH
+	dev->weight = 64;
+#else
 #if defined (CONFIG_RAETH_ROUTER)
 	dev->weight = 32;
 #elif defined (CONFIG_RT_3052_ESW)
 	dev->weight = 32;
 #else
 	dev->weight = 128;
+#endif
 #endif
 #endif
 
@@ -2082,12 +2086,16 @@ int __init ra2882eth_init(void)
 
 ///////////////WORKAROUD INIT////////////
 	dev->mtu  = DEFAULT_MTU;
+#ifdef CONFIG_CONFIG_BRIDGE_FASTPATH
+	dev->weight = 64;
+#else
 #if defined (CONFIG_RAETH_ROUTER)
 	dev->weight = 32;
 #elif defined (CONFIG_RT_3052_ESW)
 	dev->weight = 32;
 #else
 	dev->weight = 128;
+#endif
 #endif
 //////////////////////////////////////////
 
