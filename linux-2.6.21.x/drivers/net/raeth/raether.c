@@ -1060,7 +1060,9 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 #endif
 
 		schedule_work(&ei_local->kill_sig_wq);
+#if 0
 out:
+#endif
 		stat = stat_curr;
 	}
 	sysRegWrite(RALINK_ETH_SW_BASE, reg_int_val);
