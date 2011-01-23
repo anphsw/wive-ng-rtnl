@@ -676,18 +676,13 @@ __nf_conntrack_confirm(struct sk_buff **pskb)
 
 	write_lock_bh(&nf_conntrack_lock);
 
-	if (unlikely(nf_ct_is_dying(ct))) {
-		spin_unlock_bh(&nf_conntrack_lock);
-		return NF_ACCEPT;
-	}
-
 	/* We have to check the DYING flag inside the lock to prevent
 	   a race against nf_ct_get_next_corpse() possibly called from
 	   user context, else we insert an already 'dead' hash, blocking
 	   further use of that particular connection -JM */
 
 	if (unlikely(nf_ct_is_dying(ct))) {
-		spin_unlock_bh(&nf_conntrack_lock);
+		write_unlock_bh(&nf_conntrack_lock);
 		return NF_ACCEPT;
 	}
 
