@@ -1196,8 +1196,7 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct hlist_head udptable[],
 	struct udphdr *uh = skb->h.uh;
 	unsigned short ulen;
 	struct rtable *rt = (struct rtable*)skb->dst;
-	__be32 saddr = skb->nh.iph->saddr;
-	__be32 daddr = skb->nh.iph->daddr;
+	__be32 saddr, daddr;
 
 	/*
 	 *  Validate the packet.
@@ -1221,6 +1220,9 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct hlist_head udptable[],
 		if (udplite4_csum_init(skb, uh))
 			goto csum_error;
 	}
+
+	saddr = ip_hdr(skb)->saddr;
+	daddr = ip_hdr(skb)->daddr;
 
 	if(rt->rt_flags & (RTCF_BROADCAST|RTCF_MULTICAST))
 		return __udp4_lib_mcast_deliver(skb, uh, saddr, daddr, udptable);
