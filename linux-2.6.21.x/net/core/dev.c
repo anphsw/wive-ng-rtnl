@@ -2556,7 +2556,7 @@ static int dev_ifsioc(struct ifreq *ifr, unsigned int cmd)
 
 	switch (cmd) {
 		case SIOCGIFFLAGS:	/* Get interface flags */
-			ifr->ifr_flags = dev_get_flags(dev);
+			ifr->ifr_flags = (short) dev_get_flags(dev);
 			return 0;
 
 		case SIOCSIFFLAGS:	/* Set interface flags */
