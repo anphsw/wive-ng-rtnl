@@ -536,21 +536,25 @@ else
 CFLAGS		+= $(call cc-option, -fconserve-stack)
 endif
 
-# arch Makefile may override CC so keep this after arch Makefile is included
-NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
-CHECKFLAGS     += $(NOSTDINC_FLAGS)
-
-CFLAGS += $(call cc-option,-membedded-data,)
-CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
 
 # improve gcc optimization
 CFLAGS += $(call cc-option,-funit-at-a-time,)
+CFLAGS += $(call cc-option,-membedded-data,)
+CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
+
+# crazy optimizations                                                                                                                       
+CFLAGS  += $(call cc-option,-ffast-math,)
+CFLAGS  += $(call cc-option,-fforce-addr,)
 
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 CFLAGS += $(call cc-option,-Wno-pointer-sign,)
+
+# arch Makefile may override CC so keep this after arch Makefile is included
+NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
+CHECKFLAGS     += $(NOSTDINC_FLAGS)
 
 ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
 LDFLAGS_vmlinux	+= $(call ld-option, -X,)
