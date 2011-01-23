@@ -1048,6 +1048,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		printk("RT305x_ESW: Link Status Changed\n");
 
 		stat_curr = *((volatile u32 *)(RALINK_ETH_SW_BASE+0x80));
+#if 0
 #ifdef CONFIG_WAN_AT_P0
 		//if Port0 link down --> link up
 		if ((stat & (1<<25)) || !(stat_curr & (1<<25)))
@@ -1056,6 +1057,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		if ((stat & (1<<29)) || !(stat_curr & (1<<29)))
 #endif
 			goto out;
+#endif
 
 		schedule_work(&ei_local->kill_sig_wq);
 out:
