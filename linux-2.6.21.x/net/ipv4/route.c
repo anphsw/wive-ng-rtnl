@@ -3181,11 +3181,7 @@ int __init ip_rt_init(void)
 				  SLAB_HWCACHE_ALIGN|SLAB_PANIC, NULL, NULL);
 
 	rt_hash_table = (struct rt_hash_bucket *)
-		alloc_large_system_hash("IP route cache",
-					sizeof(struct rt_hash_bucket),
-					rhash_entries,
-					//(num_physpages >= 128 * 1024) ?
-					//15 : 17,
+		alloc_large_system_hash("IP route cache", sizeof(struct rt_hash_bucket), rhash_entries,
 					32,	/* SpeedMod: goal=32 gives 16384 buckets for 4K page size */
 					0,
 					&rt_hash_log,
@@ -3195,7 +3191,7 @@ int __init ip_rt_init(void)
 	rt_hash_lock_init();
 
 	ipv4_dst_ops.gc_thresh = (rt_hash_mask + 1);
-	ip_rt_max_size = (rt_hash_mask + 1) * 8; //normal speed and normal stability sfstudio
+	ip_rt_max_size = (rt_hash_mask + 1) * 8; /* normal speed and normal stability */
 
 	devinet_init();
 	ip_fib_init();
