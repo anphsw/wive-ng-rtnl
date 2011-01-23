@@ -95,7 +95,7 @@ gre_unique_tuple(struct nf_conntrack_tuple *tuple,
 
 	for (i = 0; ; ++key) {
 		*keyptr = htons(min + key % range_size);
-		if (++i == range_size || !nf_nat_used_tuple(tuple, ct))
+		if (++i == range_size || !nf_nat_used_tuple(tuple, conntrack))
 			return 1;
 	}
 
