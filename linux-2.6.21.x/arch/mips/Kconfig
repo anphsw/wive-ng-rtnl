@@ -116,10 +116,6 @@ config GENERIC_TIME
 	bool
 	default y
 
-config SCHED_NO_NO_OMIT_FRAME_POINTER
-	bool
-	default y
-
 config GENERIC_HARDIRQS_NO__DO_IRQ
 	bool
 	default n

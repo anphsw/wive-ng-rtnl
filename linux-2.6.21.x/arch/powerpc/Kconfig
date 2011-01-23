@@ -83,10 +83,6 @@ config GENERIC_NVRAM
 	bool
 	default y if PPC32
 
-config SCHED_NO_NO_OMIT_FRAME_POINTER
-	bool
-	default y
-
 config ARCH_MAY_HAVE_PC_FDC
 	bool
 	default y

@@ -529,8 +529,12 @@ endif
 # force gcc to behave correct even for buggy distributions
 CFLAGS          += $(call cc-option, -fno-stack-protector)
 
-# conserve stack if available
+# conserve stack if available on nonmips
+ifdef CONFIG_MIPS
+CFLAGS		+= $(call cc-option, -fnconserve-stack)
+else
 CFLAGS		+= $(call cc-option, -fconserve-stack)
+endif
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)

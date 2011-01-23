@@ -73,10 +73,6 @@ config GENERIC_IOMAP
 	bool
 	default y
 
-config SCHED_NO_NO_OMIT_FRAME_POINTER
-	bool
-	default y
-
 config IA64_UNCACHED_ALLOCATOR
 	bool
 	select GENERIC_ALLOCATOR
