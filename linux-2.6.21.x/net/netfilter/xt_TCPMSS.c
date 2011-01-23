@@ -91,13 +91,6 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 
 			oldmss = (opt[i+2] << 8) | opt[i+3];
 
-                        /* Never increase MSS, even when setting it, as
-                         * doing so results in problems for hosts that rely
-                         * on MSS being set correctly.
-                         */
-                        if (oldmss <= newmss)
-                                return 0;
-
 			/* Never increase MSS, even when setting it, as
 			 * doing so results in problems for hosts that rely
 			 * on MSS being set correctly.
@@ -113,12 +106,6 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 			return 0;
 		}
 	}
-
-	/* There is data after the header so the option can't be added
-	   without moving it, and doing so may make the SYN packet
-	   itself too large. Accept the packet unmodified instead. */
-	if (tcplen > tcph->doff*4)
-		return 0;
 
 	/* There is data after the header so the option can't be added
 	   without moving it, and doing so may make the SYN packet
