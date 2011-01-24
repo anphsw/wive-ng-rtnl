@@ -652,7 +652,6 @@ static struct node *resize(struct trie *t, struct tnode *tn)
 
 static struct tnode *inflate(struct trie *t, struct tnode *tn)
 {
-	struct tnode *inode;
 	struct tnode *oldtnode = tn;
 	int olen = tnode_child_length(tn);
 	int i;
@@ -700,6 +699,7 @@ static struct tnode *inflate(struct trie *t, struct tnode *tn)
 	}
 
 	for (i = 0; i < olen; i++) {
+		struct tnode *inode;
 		struct node *node = tnode_get_child(oldtnode, i);
 		struct tnode *left, *right;
 		int size, j;
@@ -1036,8 +1036,7 @@ static struct list_head *fib_insert_node(struct trie *t, u32 key, int plen)
 	/* Case 1: n is a leaf. Compare prefixes */
 
 	if (n != NULL && IS_LEAF(n) && tkey_equals(key, n->key)) {
-		struct leaf *l = (struct leaf *) n;
-
+		l = (struct leaf *) n;
 		li = leaf_info_new(plen);
 
 		if (!li)
@@ -2228,6 +2227,7 @@ static struct node *fib_trie_get_idx(struct fib_trie_iter *iter,
 }
 
 static void *fib_trie_seq_start(struct seq_file *seq, loff_t *pos)
+	__acquires(RCU)
 {
 	struct fib_trie_iter *iter = seq->private;
 	struct fib_table *tb;
@@ -2270,6 +2270,7 @@ static void *fib_trie_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 }
 
 static void fib_trie_seq_stop(struct seq_file *seq, void *v)
+	__releases(RCU)
 {
 	rcu_read_unlock();
 }
