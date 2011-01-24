@@ -1,6 +1,8 @@
 # PPP top-level Makefile for Linux.
 #include ../../config.arch
 
+CFLAGS += -O2
+
 DESTDIR = $(INSTROOT)@DESTDIR@
 BINDIR = $(DESTDIR)/sbin
 INCDIR = $(DESTDIR)/include
