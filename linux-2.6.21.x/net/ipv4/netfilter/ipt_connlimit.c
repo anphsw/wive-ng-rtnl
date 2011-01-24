@@ -165,12 +165,11 @@ static int count_them(struct ipt_connlimit_data *data,
 #endif
 
 #endif
-		conn = kmalloc(sizeof(*conn),GFP_ATOMIC);
+		conn = kzalloc(sizeof(*conn),GFP_ATOMIC);
 		if (NULL == conn) {
 			spin_unlock_bh(&data->lock);
 			return -1;
 		}
-		memset(conn,0,sizeof(*conn));
 		INIT_LIST_HEAD(&conn->list);
 		conn->tuple = tuple;
 		list_add(&conn->list,hash);

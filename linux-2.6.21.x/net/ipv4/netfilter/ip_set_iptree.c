@@ -406,13 +406,12 @@ static int create(struct ip_set *set, const void *data, size_t size)
 		return -EINVAL;
 	}
 
-	map = kmalloc(sizeof(struct ip_set_iptree), GFP_KERNEL);
+	map = kzalloc(sizeof(struct ip_set_iptree), GFP_KERNEL);
 	if (!map) {
 		DP("out of memory for %d bytes",
 		   sizeof(struct ip_set_iptree));
 		return -ENOMEM;
 	}
-	memset(map, 0, sizeof(*map));
 	map->timeout = req->timeout;
 	map->elements = 0;
 	set->data = map;
