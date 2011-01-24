@@ -96,13 +96,13 @@ typedef unsigned int t_key;
 #define IS_LEAF(n) (n->parent & T_LEAF)
 
 struct node {
-	t_key key;
 	unsigned long parent;
+	t_key key;
 };
 
 struct leaf {
-	t_key key;
 	unsigned long parent;
+	t_key key;
 	struct hlist_head list;
 	struct rcu_head rcu;
 };
@@ -115,12 +115,12 @@ struct leaf_info {
 };
 
 struct tnode {
-	t_key key;
 	unsigned long parent;
+	t_key key;
 	unsigned char pos;		/* 2log(KEYLENGTH) bits needed */
 	unsigned char bits;		/* 2log(KEYLENGTH) bits needed */
-	unsigned short full_children;	/* KEYLENGTH bits needed */
-	unsigned short empty_children;	/* KEYLENGTH bits needed */
+	unsigned int full_children;	/* KEYLENGTH bits needed */
+	unsigned int empty_children;	/* KEYLENGTH bits needed */
 	struct rcu_head rcu;
 	struct node *child[0];
 };
@@ -328,12 +328,12 @@ static inline void free_leaf_info(struct leaf_info *leaf)
 	call_rcu(&leaf->rcu, __leaf_info_free_rcu);
 }
 
-static struct tnode *tnode_alloc(unsigned int size)
+static struct tnode *tnode_alloc(size_t size)
 {
 	struct page *pages;
 
 	if (size <= PAGE_SIZE)
-		return kcalloc(size, 1, GFP_KERNEL);
+		return kzalloc(size, GFP_KERNEL);
 
 	pages = alloc_pages(GFP_KERNEL|__GFP_ZERO, get_order(size));
 	if (!pages)
@@ -345,8 +345,8 @@ static struct tnode *tnode_alloc(unsigned int size)
 static void __tnode_free_rcu(struct rcu_head *head)
 {
 	struct tnode *tn = container_of(head, struct tnode, rcu);
-	unsigned int size = sizeof(struct tnode) +
-		(1 << tn->bits) * sizeof(struct node *);
+	size_t size = sizeof(struct tnode) +
+		      (sizeof(struct node *) << tn->bits);
 
 	if (size <= PAGE_SIZE)
 		kfree(tn);
@@ -385,8 +385,7 @@ static struct leaf_info *leaf_info_new(int plen)
 
 static struct tnode* tnode_new(t_key key, int pos, int bits)
 {
-	int nchildren = 1<<bits;
-	int sz = sizeof(struct tnode) + nchildren * sizeof(struct node *);
+	size_t sz = sizeof(struct tnode) + (sizeof(struct node *) << bits);
 	struct tnode *tn = tnode_alloc(sz);
 
 	if (tn) {
@@ -398,8 +397,8 @@ static struct tnode* tnode_new(t_key key, int pos, int bits)
 		tn->empty_children = 1<<bits;
 	}
 
-	pr_debug("AT %p s=%u %u\n", tn, (unsigned int) sizeof(struct tnode),
-		 (unsigned int) (sizeof(struct node) * 1<<bits));
+	pr_debug("AT %p s=%u %lu\n", tn, (unsigned int) sizeof(struct tnode),
+		 (unsigned long) (sizeof(struct node) << bits));
 	return tn;
 }
 
@@ -2279,10 +2278,8 @@ static void seq_indent(struct seq_file *seq, int n)
 	while (n-- > 0) seq_puts(seq, "   ");
 }
 
-static inline const char *rtn_scope(enum rt_scope_t s)
+static inline const char *rtn_scope(char *buf, size_t len, enum rt_scope_t s)
 {
-	static char buf[32];
-
 	switch (s) {
 	case RT_SCOPE_UNIVERSE: return "universe";
 	case RT_SCOPE_SITE:	return "site";
@@ -2290,7 +2287,7 @@ static inline const char *rtn_scope(enum rt_scope_t s)
 	case RT_SCOPE_HOST:	return "host";
 	case RT_SCOPE_NOWHERE:	return "nowhere";
 	default:
-		snprintf(buf, sizeof(buf), "scope=%d", s);
+		snprintf(buf, len, "scope=%d", s);
 		return buf;
 	}
 }
@@ -2310,13 +2307,11 @@ static const char *rtn_type_names[__RTN_MAX] = {
 	[RTN_XRESOLVE] = "XRESOLVE",
 };
 
-static inline const char *rtn_type(unsigned t)
+static inline const char *rtn_type(char *buf, size_t len, unsigned t)
 {
-	static char buf[32];
-
 	if (t < __RTN_MAX && rtn_type_names[t])
 		return rtn_type_names[t];
-	snprintf(buf, sizeof(buf), "type %u", t);
+	snprintf(buf, len, "type %u", t);
 	return buf;
 }
 
@@ -2354,13 +2349,19 @@ static int fib_trie_seq_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "  |-- %d.%d.%d.%d\n", NIPQUAD(val));
 		for (i = 32; i >= 0; i--) {
 			struct leaf_info *li = find_leaf_info(l, i);
+
 			if (li) {
 				struct fib_alias *fa;
+
 				list_for_each_entry_rcu(fa, &li->falh, fa_list) {
+					char buf1[32], buf2[32];
+
 					seq_indent(seq, iter->depth+1);
 					seq_printf(seq, "  /%d %s %s", i,
-						   rtn_scope(fa->fa_scope),
-						   rtn_type(fa->fa_type));
+						   rtn_scope(buf1, sizeof(buf1),
+							     fa->fa_scope),
+						   rtn_type(buf2, sizeof(buf2),
+							     fa->fa_type));
 					if (fa->fa_tos)
 						seq_printf(seq, "tos =%d\n",
 							   fa->fa_tos);
