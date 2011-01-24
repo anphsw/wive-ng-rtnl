@@ -303,7 +303,7 @@ static void ipmr_destroy_unres(struct mfc_cache *c)
 
 	atomic_dec(&cache_resolve_queue_len);
 
-	while((skb=skb_dequeue(&c->mfc_un.unres.unresolved))) {
+	while ((skb=skb_dequeue(&c->mfc_un.unres.unresolved))) {
 		if (skb->nh.iph->version == 0) {
 			struct nlmsghdr *nlh = (struct nlmsghdr *)skb_pull(skb, sizeof(struct iphdr));
 			nlh->nlmsg_type = NLMSG_ERROR;
@@ -480,7 +480,7 @@ static struct mfc_cache *ipmr_cache_find(__be32 origin, __be32 mcastgrp)
 static struct mfc_cache *ipmr_cache_alloc(void)
 {
 	struct mfc_cache *c=kmem_cache_zalloc(mrt_cachep, GFP_KERNEL);
-	if(c==NULL)
+	if (c==NULL)
 		return NULL;
 	c->mfc_un.res.minvif = MAXVIFS;
 	return c;
@@ -489,7 +489,7 @@ static struct mfc_cache *ipmr_cache_alloc(void)
 static struct mfc_cache *ipmr_cache_alloc_unres(void)
 {
 	struct mfc_cache *c=kmem_cache_zalloc(mrt_cachep, GFP_ATOMIC);
-	if(c==NULL)
+	if (c==NULL)
 		return NULL;
 	skb_queue_head_init(&c->mfc_un.unres.unresolved);
 	c->mfc_un.unres.expires = jiffies + 10*HZ;
@@ -509,7 +509,7 @@ static void ipmr_cache_resolve(struct mfc_cache *uc, struct mfc_cache *c)
 	 *	Play the pending entries through our router
 	 */
 
-	while((skb=__skb_dequeue(&uc->mfc_un.unres.unresolved))) {
+	while ((skb=__skb_dequeue(&uc->mfc_un.unres.unresolved))) {
 		if (skb->nh.iph->version == 0) {
 			struct nlmsghdr *nlh = (struct nlmsghdr *)skb_pull(skb, sizeof(struct iphdr));
 
@@ -552,7 +552,7 @@ static int ipmr_cache_report(struct sk_buff *pkt, vifi_t vifi, int assert)
 #endif
 		skb = alloc_skb(128, GFP_ATOMIC);
 
-	if(!skb)
+	if (!skb)
 		return -ENOBUFS;
 
 #ifdef CONFIG_IP_PIMSM
@@ -790,7 +790,7 @@ static void mroute_clean_tables(struct sock *sk)
 	/*
 	 *	Shut down all active vif entries
 	 */
-	for(i=0; i<maxvif; i++) {
+	for (i=0; i<maxvif; i++) {
 		if (!(vif_table[i].flags&VIFF_STATIC))
 			vif_delete(i);
 	}
@@ -860,119 +860,117 @@ int ip_mroute_setsockopt(struct sock *sk,int optname,char __user *optval,int opt
 	struct vifctl vif;
 	struct mfcctl mfc;
 
-	if(optname!=MRT_INIT)
-	{
-		if(sk!=mroute_socket && !capable(CAP_NET_ADMIN))
+	if (optname != MRT_INIT) {
+		if (sk != mroute_socket && !capable(CAP_NET_ADMIN))
 			return -EACCES;
 	}
 
-	switch(optname)
-	{
-		case MRT_INIT:
-			if (sk->sk_type != SOCK_RAW ||
-			    inet_sk(sk)->num != IPPROTO_IGMP)
-				return -EOPNOTSUPP;
-			if(optlen!=sizeof(int))
-				return -ENOPROTOOPT;
+	switch (optname) {
+	case MRT_INIT:
+		if (sk->sk_type != SOCK_RAW ||
+		    inet_sk(sk)->num != IPPROTO_IGMP)
+			return -EOPNOTSUPP;
+		if (optlen!=sizeof(int))
+			return -ENOPROTOOPT;
 
-			rtnl_lock();
-			if (mroute_socket) {
-				rtnl_unlock();
-				return -EADDRINUSE;
-			}
-
-			ret = ip_ra_control(sk, 1, mrtsock_destruct);
-			if (ret == 0) {
-				write_lock_bh(&mrt_lock);
-				mroute_socket=sk;
-				write_unlock_bh(&mrt_lock);
-
-				ipv4_devconf.mc_forwarding++;
-			}
+		rtnl_lock();
+		if (mroute_socket) {
 			rtnl_unlock();
-			return ret;
-		case MRT_DONE:
-			if (sk!=mroute_socket)
-				return -EACCES;
-			return ip_ra_control(sk, 0, NULL);
-		case MRT_ADD_VIF:
-		case MRT_DEL_VIF:
-			if(optlen!=sizeof(vif))
-				return -EINVAL;
-			if (copy_from_user(&vif,optval,sizeof(vif)))
-				return -EFAULT;
-			if(vif.vifc_vifi >= MAXVIFS)
-				return -ENFILE;
-			rtnl_lock();
-			if (optname==MRT_ADD_VIF) {
-				ret = vif_add(&vif, sk==mroute_socket);
-			} else {
-				ret = vif_delete(vif.vifc_vifi);
-			}
-			rtnl_unlock();
-			return ret;
+			return -EADDRINUSE;
+		}
+
+		ret = ip_ra_control(sk, 1, mrtsock_destruct);
+		if (ret == 0) {
+			write_lock_bh(&mrt_lock);
+			mroute_socket=sk;
+			write_unlock_bh(&mrt_lock);
+
+			ipv4_devconf.mc_forwarding++;
+		}
+		rtnl_unlock();
+		return ret;
+	case MRT_DONE:
+		if (sk!=mroute_socket)
+			return -EACCES;
+		return ip_ra_control(sk, 0, NULL);
+	case MRT_ADD_VIF:
+	case MRT_DEL_VIF:
+		if (optlen!=sizeof(vif))
+			return -EINVAL;
+		if (copy_from_user(&vif,optval,sizeof(vif)))
+			return -EFAULT;
+		if (vif.vifc_vifi >= MAXVIFS)
+			return -ENFILE;
+		rtnl_lock();
+		if (optname==MRT_ADD_VIF) {
+			ret = vif_add(&vif, sk==mroute_socket);
+		} else {
+			ret = vif_delete(vif.vifc_vifi);
+		}
+		rtnl_unlock();
+		return ret;
 
 		/*
 		 *	Manipulate the forwarding caches. These live
 		 *	in a sort of kernel/user symbiosis.
 		 */
-		case MRT_ADD_MFC:
-		case MRT_DEL_MFC:
-			if(optlen!=sizeof(mfc))
-				return -EINVAL;
-			if (copy_from_user(&mfc,optval, sizeof(mfc)))
-				return -EFAULT;
-			rtnl_lock();
-			if (optname==MRT_DEL_MFC)
-				ret = ipmr_mfc_delete(&mfc);
-			else
-				ret = ipmr_mfc_add(&mfc, sk==mroute_socket);
-			rtnl_unlock();
-			return ret;
+	case MRT_ADD_MFC:
+	case MRT_DEL_MFC:
+		if (optlen!=sizeof(mfc))
+			return -EINVAL;
+		if (copy_from_user(&mfc,optval, sizeof(mfc)))
+			return -EFAULT;
+		rtnl_lock();
+		if (optname==MRT_DEL_MFC)
+			ret = ipmr_mfc_delete(&mfc);
+		else
+			ret = ipmr_mfc_add(&mfc, sk==mroute_socket);
+		rtnl_unlock();
+		return ret;
 		/*
 		 *	Control PIM assert.
 		 */
-		case MRT_ASSERT:
-		{
-			int v;
-			if(get_user(v,(int __user *)optval))
-				return -EFAULT;
-			mroute_do_assert=(v)?1:0;
-			return 0;
-		}
+	case MRT_ASSERT:
+	{
+		int v;
+		if (get_user(v,(int __user *)optval))
+			return -EFAULT;
+		mroute_do_assert=(v)?1:0;
+		return 0;
+	}
 #ifdef CONFIG_IP_PIMSM
-		case MRT_PIM:
-		{
-			int v, ret;
-			if(get_user(v,(int __user *)optval))
-				return -EFAULT;
-			v = (v)?1:0;
-			rtnl_lock();
-			ret = 0;
-			if (v != mroute_do_pim) {
-				mroute_do_pim = v;
-				mroute_do_assert = v;
+	case MRT_PIM:
+	{
+		int v, ret;
+		if (get_user(v,(int __user *)optval))
+			return -EFAULT;
+		v = (v)?1:0;
+		rtnl_lock();
+		ret = 0;
+		if (v != mroute_do_pim) {
+			mroute_do_pim = v;
+			mroute_do_assert = v;
 #ifdef CONFIG_IP_PIMSM_V2
-				if (mroute_do_pim)
-					ret = inet_add_protocol(&pim_protocol,
-								IPPROTO_PIM);
-				else
-					ret = inet_del_protocol(&pim_protocol,
-								IPPROTO_PIM);
-				if (ret < 0)
-					ret = -EAGAIN;
+			if (mroute_do_pim)
+				ret = inet_add_protocol(&pim_protocol,
+							IPPROTO_PIM);
+			else
+				ret = inet_del_protocol(&pim_protocol,
+							IPPROTO_PIM);
+			if (ret < 0)
+				ret = -EAGAIN;
 #endif
-			}
-			rtnl_unlock();
-			return ret;
 		}
+		rtnl_unlock();
+		return ret;
+	}
 #endif
-		/*
-		 *	Spurious command, or MRT_VERSION which you cannot
-		 *	set.
-		 */
-		default:
-			return -ENOPROTOOPT;
+	/*
+	 *	Spurious command, or MRT_VERSION which you cannot
+	 *	set.
+	 */
+	default:
+		return -ENOPROTOOPT;
 	}
 }
 
@@ -985,7 +983,7 @@ int ip_mroute_getsockopt(struct sock *sk,int optname,char __user *optval,int __u
 	int olr;
 	int val;
 
-	if(optname!=MRT_VERSION &&
+	if (optname!=MRT_VERSION &&
 #ifdef CONFIG_IP_PIMSM
 	   optname!=MRT_PIM &&
 #endif
@@ -999,17 +997,17 @@ int ip_mroute_getsockopt(struct sock *sk,int optname,char __user *optval,int __u
 	if (olr < 0)
 		return -EINVAL;
 
-	if(put_user(olr,optlen))
+	if (put_user(olr,optlen))
 		return -EFAULT;
-	if(optname==MRT_VERSION)
+	if (optname==MRT_VERSION)
 		val=0x0305;
 #ifdef CONFIG_IP_PIMSM
-	else if(optname==MRT_PIM)
+	else if (optname==MRT_PIM)
 		val=mroute_do_pim;
 #endif
 	else
 		val=mroute_do_assert;
-	if(copy_to_user(optval,&val,olr))
+	if (copy_to_user(optval,&val,olr))
 		return -EFAULT;
 	return 0;
 }
@@ -1025,48 +1023,47 @@ int ipmr_ioctl(struct sock *sk, int cmd, void __user *arg)
 	struct vif_device *vif;
 	struct mfc_cache *c;
 
-	switch(cmd)
-	{
-		case SIOCGETVIFCNT:
-			if (copy_from_user(&vr,arg,sizeof(vr)))
-				return -EFAULT;
-			if(vr.vifi>=maxvif)
-				return -EINVAL;
-			read_lock(&mrt_lock);
-			vif=&vif_table[vr.vifi];
-			if(VIF_EXISTS(vr.vifi))	{
-				vr.icount=vif->pkt_in;
-				vr.ocount=vif->pkt_out;
-				vr.ibytes=vif->bytes_in;
-				vr.obytes=vif->bytes_out;
-				read_unlock(&mrt_lock);
-
-				if (copy_to_user(arg,&vr,sizeof(vr)))
-					return -EFAULT;
-				return 0;
-			}
+	switch (cmd) {
+	case SIOCGETVIFCNT:
+		if (copy_from_user(&vr,arg,sizeof(vr)))
+			return -EFAULT;
+		if (vr.vifi>=maxvif)
+			return -EINVAL;
+		read_lock(&mrt_lock);
+		vif=&vif_table[vr.vifi];
+		if (VIF_EXISTS(vr.vifi))	{
+			vr.icount=vif->pkt_in;
+			vr.ocount=vif->pkt_out;
+			vr.ibytes=vif->bytes_in;
+			vr.obytes=vif->bytes_out;
 			read_unlock(&mrt_lock);
-			return -EADDRNOTAVAIL;
-		case SIOCGETSGCNT:
-			if (copy_from_user(&sr,arg,sizeof(sr)))
+
+			if (copy_to_user(arg,&vr,sizeof(vr)))
 				return -EFAULT;
+			return 0;
+		}
+		read_unlock(&mrt_lock);
+		return -EADDRNOTAVAIL;
+	case SIOCGETSGCNT:
+		if (copy_from_user(&sr,arg,sizeof(sr)))
+			return -EFAULT;
 
-			read_lock(&mrt_lock);
-			c = ipmr_cache_find(sr.src.s_addr, sr.grp.s_addr);
-			if (c) {
-				sr.pktcnt = c->mfc_un.res.pkt;
-				sr.bytecnt = c->mfc_un.res.bytes;
-				sr.wrong_if = c->mfc_un.res.wrong_if;
-				read_unlock(&mrt_lock);
-
-				if (copy_to_user(arg,&sr,sizeof(sr)))
-					return -EFAULT;
-				return 0;
-			}
+		read_lock(&mrt_lock);
+		c = ipmr_cache_find(sr.src.s_addr, sr.grp.s_addr);
+		if (c) {
+			sr.pktcnt = c->mfc_un.res.pkt;
+			sr.bytecnt = c->mfc_un.res.bytes;
+			sr.wrong_if = c->mfc_un.res.wrong_if;
 			read_unlock(&mrt_lock);
-			return -EADDRNOTAVAIL;
-		default:
-			return -ENOIOCTLCMD;
+
+			if (copy_to_user(arg,&sr,sizeof(sr)))
+				return -EFAULT;
+			return 0;
+		}
+		read_unlock(&mrt_lock);
+		return -EADDRNOTAVAIL;
+	default:
+		return -ENOIOCTLCMD;
 	}
 }
 
@@ -1078,7 +1075,7 @@ static int ipmr_device_event(struct notifier_block *this, unsigned long event, v
 	if (event != NETDEV_UNREGISTER)
 		return NOTIFY_DONE;
 	v=&vif_table[0];
-	for(ct=0;ct<maxvif;ct++,v++) {
+	for (ct=0;ct<maxvif;ct++,v++) {
 		if (v->dev==ptr)
 			vif_delete(ct);
 	}
@@ -1627,7 +1624,7 @@ static struct vif_device *ipmr_vif_seq_idx(struct ipmr_vif_iter *iter,
 					   loff_t pos)
 {
 	for (iter->ct = 0; iter->ct < maxvif; ++iter->ct) {
-		if(!VIF_EXISTS(iter->ct))
+		if (!VIF_EXISTS(iter->ct))
 			continue;
 		if (pos-- == 0)
 			return &vif_table[iter->ct];
@@ -1651,7 +1648,7 @@ static void *ipmr_vif_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 		return ipmr_vif_seq_idx(iter, 0);
 
 	while (++iter->ct < maxvif) {
-		if(!VIF_EXISTS(iter->ct))
+		if (!VIF_EXISTS(iter->ct))
 			continue;
 		return &vif_table[iter->ct];
 	}
@@ -1682,7 +1679,7 @@ static int ipmr_vif_seq_show(struct seq_file *seq, void *v)
 	return 0;
 }
 
-static struct seq_operations ipmr_vif_seq_ops = {
+static const struct seq_operations ipmr_vif_seq_ops = {
 	.start = ipmr_vif_seq_start,
 	.next  = ipmr_vif_seq_next,
 	.stop  = ipmr_vif_seq_stop,
@@ -1734,14 +1731,14 @@ static struct mfc_cache *ipmr_mfc_seq_idx(struct ipmr_mfc_iter *it, loff_t pos)
 	it->cache = mfc_cache_array;
 	read_lock(&mrt_lock);
 	for (it->ct = 0; it->ct < MFC_LINES; it->ct++)
-		for(mfc = mfc_cache_array[it->ct]; mfc; mfc = mfc->next)
+		for (mfc = mfc_cache_array[it->ct]; mfc; mfc = mfc->next)
 			if (pos-- == 0)
 				return mfc;
 	read_unlock(&mrt_lock);
 
 	it->cache = &mfc_unres_queue;
 	spin_lock_bh(&mfc_unres_lock);
-	for(mfc = mfc_unres_queue; mfc; mfc = mfc->next)
+	for (mfc = mfc_unres_queue; mfc; mfc = mfc->next)
 		if (pos-- == 0)
 			return mfc;
 	spin_unlock_bh(&mfc_unres_lock);
@@ -1831,9 +1828,9 @@ static int ipmr_mfc_seq_show(struct seq_file *seq, void *v)
 			   mfc->mfc_un.res.wrong_if);
 
 		if (it->cache != &mfc_unres_queue) {
-			for(n = mfc->mfc_un.res.minvif;
-			    n < mfc->mfc_un.res.maxvif; n++ ) {
-				if(VIF_EXISTS(n)
+			for (n = mfc->mfc_un.res.minvif;
+			     n < mfc->mfc_un.res.maxvif; n++ ) {
+				if (VIF_EXISTS(n)
 				   && mfc->mfc_un.res.ttls[n] < 255)
 				seq_printf(seq,
 					   " %2d:%-3d",
@@ -1845,7 +1842,7 @@ static int ipmr_mfc_seq_show(struct seq_file *seq, void *v)
 	return 0;
 }
 
-static struct seq_operations ipmr_mfc_seq_ops = {
+static const struct seq_operations ipmr_mfc_seq_ops = {
 	.start = ipmr_mfc_seq_start,
 	.next  = ipmr_mfc_seq_next,
 	.stop  = ipmr_mfc_seq_stop,

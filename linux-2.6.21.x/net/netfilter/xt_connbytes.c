@@ -11,13 +11,13 @@
  *
  */
 #include <linux/module.h>
+#include <linux/bitops.h>
 #include <linux/skbuff.h>
 #include <net/netfilter/nf_conntrack_compat.h>
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_connbytes.h>
 
 #include <asm/div64.h>
-#include <asm/bitops.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
