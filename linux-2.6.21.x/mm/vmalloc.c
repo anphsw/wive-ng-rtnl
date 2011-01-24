@@ -528,8 +528,7 @@ void *vmalloc_user(unsigned long size)
 	struct vm_struct *area;
 	void *ret;
 
-	ret = __vmalloc_node(size, GFP_KERNEL | __GFP_HIGHMEM | __GFP_ZERO,
-			     PAGE_KERNEL, -1, __builtin_return_address(0));
+	ret = __vmalloc(size, GFP_KERNEL | __GFP_HIGHMEM | __GFP_ZERO, PAGE_KERNEL);
 	if (ret) {
 		write_lock(&vmlist_lock);
 		area = __find_vm_area(ret);
@@ -575,8 +574,7 @@ EXPORT_SYMBOL(vmalloc_node);
 
 void *vmalloc_exec(unsigned long size)
 {
-	return __vmalloc_node(size, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL_EXEC,
-			      -1, __builtin_return_address(0));
+	return __vmalloc(size, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL_EXEC);
 }
 
 /**
@@ -588,8 +586,7 @@ void *vmalloc_exec(unsigned long size)
  */
 void *vmalloc_32(unsigned long size)
 {
-	return __vmalloc_node(size, GFP_KERNEL, PAGE_KERNEL,
-			      -1, __builtin_return_address(0));
+	return __vmalloc(size, GFP_KERNEL, PAGE_KERNEL);
 }
 EXPORT_SYMBOL(vmalloc_32);
 
@@ -605,8 +602,7 @@ void *vmalloc_32_user(unsigned long size)
 	struct vm_struct *area;
 	void *ret;
 
-	ret = __vmalloc_node(size, GFP_KERNEL | __GFP_ZERO, PAGE_KERNEL,
-			     -1, __builtin_return_address(0));
+	ret = __vmalloc(size, GFP_KERNEL | __GFP_ZERO, PAGE_KERNEL);
 	if (ret) {
 		write_lock(&vmlist_lock);
 		area = __find_vm_area(ret);
