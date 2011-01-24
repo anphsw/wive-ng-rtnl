@@ -33,6 +33,4 @@ static inline void clear_node_cpumask(int cpu)
 #define clear_node_cpumask(cpu) do {} while (0)
 #endif
 
-#define NUMA_NO_NODE 0xff
-
 #endif

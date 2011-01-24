@@ -1,10 +1,8 @@
 /*
  *	Routines having to do with the 'struct sk_buff' memory handlers.
  *
- *	Authors:	Alan Cox <iiitac@pyr.swan.ac.uk>
+ *	Authors:	Alan Cox <alan@lxorguk.ukuu.org.uk>
  *			Florian La Roche <rzsfl@rz.uni-sb.de>
- *
- *	Version:	$Id: skbuff.c,v 1.1.1.1 2007-05-25 06:50:00 bruce Exp $
  *
  *	Fixes:
  *		Alan Cox	:	Fixed the worst of the load
@@ -84,11 +82,12 @@ static struct kmem_cache *skbuff_fclone_cache __read_mostly;
  *
  *	Out of line support code for skb_put(). Not user callable.
  */
-void skb_over_panic(struct sk_buff *skb, int sz, void *here)
+static void skb_over_panic(struct sk_buff *skb, int sz, void *here)
 {
 	printk(KERN_EMERG "skb_over_panic: text:%p len:%d put:%d head:%p "
-			  "data:%p tail:%p end:%p dev:%s\n",
-	       here, skb->len, sz, skb->head, skb->data, skb->tail, skb->end,
+			  "data:%p tail:%#lx end:%#lx dev:%s\n",
+	       here, skb->len, sz, skb->head, skb->data,
+	       (unsigned long)skb->tail, (unsigned long)skb->end,
 	       skb->dev ? skb->dev->name : "<NULL>");
 	BUG();
 }
@@ -102,11 +101,12 @@ void skb_over_panic(struct sk_buff *skb, int sz, void *here)
  *	Out of line support code for skb_push(). Not user callable.
  */
 
-void skb_under_panic(struct sk_buff *skb, int sz, void *here)
+static void skb_under_panic(struct sk_buff *skb, int sz, void *here)
 {
 	printk(KERN_EMERG "skb_under_panic: text:%p len:%d put:%d head:%p "
-			  "data:%p tail:%p end:%p dev:%s\n",
-	       here, skb->len, sz, skb->head, skb->data, skb->tail, skb->end,
+			  "data:%p tail:%#lx end:%#lx dev:%s\n",
+	       here, skb->len, sz, skb->head, skb->data,
+	       (unsigned long)skb->tail, (unsigned long)skb->end,
 	       skb->dev ? skb->dev->name : "<NULL>");
 	BUG();
 }
@@ -156,13 +156,18 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 		goto nodata;
 	prefetchw(data + size);
 
-	memset(skb, 0, offsetof(struct sk_buff, truesize));
+	/*
+	 * Only clear those fields we need to clear, not those that we will
+	 * actually initialise below. Hence, don't put any more fields after
+	 * the tail pointer in struct sk_buff!
+	 */
+	memset(skb, 0, offsetof(struct sk_buff, tail));
 	skb->truesize = size + sizeof(struct sk_buff);
 	atomic_set(&skb->users, 1);
 	skb->head = data;
 	skb->data = data;
 	skb->tail = data;
-	skb->end  = data + size;
+	skb->end  = skb->tail + size;
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
 	memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
@@ -201,10 +206,9 @@ nodata:
 struct sk_buff *__netdev_alloc_skb(struct net_device *dev,
 		unsigned int length, gfp_t gfp_mask)
 {
-	int node = dev->dev.parent ? dev_to_node(dev->dev.parent) : -1;
 	struct sk_buff *skb;
 
-	skb = __alloc_skb(length + NET_SKB_PAD, gfp_mask, 0, node);
+	skb = __alloc_skb(length + NET_SKB_PAD, gfp_mask, 0, NUMA_NO_NODE);
 	if (likely(skb)) {
 		skb_reserve(skb, NET_SKB_PAD);
 		skb->dev = dev;
@@ -301,14 +305,12 @@ static void skb_release_all(struct sk_buff *skb)
 		WARN_ON(in_irq());
 		skb->destructor(skb);
 	}
-#ifdef CONFIG_NETFILTER
-	nf_conntrack_put(skb->nfct);
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+	nf_conntrack_put(skb->nfct);
 	nf_conntrack_put_reasm(skb->nfct_reasm);
 #endif
 #ifdef CONFIG_BRIDGE_NETFILTER
 	nf_bridge_put(skb->nf_bridge);
-#endif
 #endif
 /* XXX: IS this still necessary? - JHS */
 #ifdef CONFIG_NET_SCHED
@@ -708,7 +710,6 @@ struct sk_buff *skb_realloc_headroom(struct sk_buff *skb, unsigned int headroom)
 	return skb2;
 }
 
-
 /**
  *	skb_copy_expand	-	copy and expand sk_buff
  *	@skb: buffer to copy
@@ -764,6 +765,59 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 	copy_skb_header(n, skb);
 
 	return n;
+}
+
+/**
+ *	skb_put - add data to a buffer
+ *	@skb: buffer to use
+ *	@len: amount of data to add
+ *
+ *	This function extends the used data area of the buffer. If this would
+ *	exceed the total buffer size the kernel will panic. A pointer to the
+ *	first byte of the extra data is returned.
+ */
+inline unsigned char *skb_put(struct sk_buff *skb, unsigned int len)
+{
+	unsigned char *tmp = skb->tail;
+	SKB_LINEAR_ASSERT(skb);
+	skb->tail += len;
+	skb->len  += len;
+	if (unlikely(skb->tail>skb->end))
+		skb_over_panic(skb, len, current_text_addr());
+	return tmp;
+}
+
+/**
+ *	skb_push - add data to the start of a buffer
+ *	@skb: buffer to use
+ *	@len: amount of data to add
+ *
+ *	This function extends the used data area of the buffer at the buffer
+ *	start. If this would exceed the total buffer headroom the kernel will
+ *	panic. A pointer to the first byte of the extra data is returned.
+ */
+inline unsigned char *skb_push(struct sk_buff *skb, unsigned int len)
+{
+	skb->data -= len;
+	skb->len  += len;
+	if (unlikely(skb->data<skb->head))
+		skb_under_panic(skb, len, current_text_addr());
+	return skb->data;
+}
+
+/**
+ *	skb_pull - remove data from the start of a buffer
+ *	@skb: buffer to use
+ *	@len: amount of data to remove
+ *
+ *	This function removes data from the start of a buffer, returning
+ *	the memory to the headroom. A pointer to the next data in the buffer
+ *	is returned. Once the data has been pulled future pushes will overwrite
+ *	the old data.
+ */
+inline unsigned char *skb_pull(struct sk_buff *skb, unsigned int len)
+{
+        return skb_pull_inline(skb, len);
 }
 
 /**
@@ -2031,6 +2085,9 @@ EXPORT_SYMBOL(skb_copy_bits);
 EXPORT_SYMBOL(skb_copy_expand);
 EXPORT_SYMBOL(skb_over_panic);
 EXPORT_SYMBOL(skb_pad);
+EXPORT_SYMBOL(skb_put);
+EXPORT_SYMBOL(skb_push);
+EXPORT_SYMBOL(skb_pull);
 EXPORT_SYMBOL(skb_realloc_headroom);
 EXPORT_SYMBOL(skb_under_panic);
 EXPORT_SYMBOL(skb_dequeue);
