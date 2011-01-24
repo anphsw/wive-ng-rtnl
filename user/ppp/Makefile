@@ -1,6 +1,8 @@
 # PPP top-level Makefile for Linux.
 #include ../../config.arch
 
+CFLAGS += -O2
+
 DESTDIR = $(INSTROOT)/opt/Wive-RTNL/user/ppp/filesystem
 BINDIR = $(DESTDIR)/sbin
 INCDIR = $(DESTDIR)/include

@@ -116,8 +116,6 @@ pfc:
 	$(CC) $(CFLAGS) -c contrib/pfc.c
 	$(CC) $(LDFLAGS) -lpcap $(LDLIBS) -o pfc pfc.o
 
-romfs:
-	$(ROMFSINST) /bin/$(EXEC)
 
 install: ${EXEC}
 # pfc
@@ -139,8 +137,9 @@ install: ${EXEC}
 # openbsd
 #	install -d -m 0755 /var/run/xl2tpd
 #	mkfifo /var/run/l2tp-control
+
 romfs:
-	cp -fv ./xl2tpd $(ROOTDIR)/romfs/bin/xl2tpd
+	$(ROMFSINST) /bin/$(EXEC)
 
 TAGS:	${SRCS}
 	etags ${SRCS}

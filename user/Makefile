@@ -61,7 +61,6 @@ dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_USER_TC)                  	    += iproute2
-dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
 dir_$(CONFIG_USER_PPPD)                	    += pppd
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
@@ -81,6 +80,7 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
+dir_$(CONFIG_USER_RADVD)               	    += radvd
 
 #alwayse make service utility
 #dir_y                                       += getBoardID
@@ -136,10 +136,9 @@ clean:
 		fi; \
 	done
 	echo "Full cleanUP"
-	@set -e; for i in $(SUBDIRS_APP); do \
-	$(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; \
-	done
-	make -C busybox mrproper
+	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i mrproper; done
+	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i dist-clean; done
+	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
 
 prune:
 	-for i in $(sort $(dir_n) $(dir_)) ; do \

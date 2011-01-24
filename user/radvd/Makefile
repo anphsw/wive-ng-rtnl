@@ -382,25 +382,25 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/device-bsd44.Po
-include ./$(DEPDIR)/device-common.Po
-include ./$(DEPDIR)/device-linux.Po
-include ./$(DEPDIR)/device.Po
-include ./$(DEPDIR)/gram.Po
-include ./$(DEPDIR)/interface.Po
-include ./$(DEPDIR)/log.Po
-include ./$(DEPDIR)/privsep-bsd44.Po
-include ./$(DEPDIR)/privsep-linux.Po
-include ./$(DEPDIR)/privsep.Po
-include ./$(DEPDIR)/process.Po
-include ./$(DEPDIR)/radvd.Po
-include ./$(DEPDIR)/radvdump.Po
-include ./$(DEPDIR)/recv.Po
-include ./$(DEPDIR)/scanner.Po
-include ./$(DEPDIR)/send.Po
-include ./$(DEPDIR)/socket.Po
-include ./$(DEPDIR)/timer.Po
-include ./$(DEPDIR)/util.Po
+-include ./$(DEPDIR)/device-bsd44.Po
+-include ./$(DEPDIR)/device-common.Po
+-include ./$(DEPDIR)/device-linux.Po
+-include ./$(DEPDIR)/device.Po
+-include ./$(DEPDIR)/gram.Po
+-include ./$(DEPDIR)/interface.Po
+-include ./$(DEPDIR)/log.Po
+-include ./$(DEPDIR)/privsep-bsd44.Po
+-include ./$(DEPDIR)/privsep-linux.Po
+-include ./$(DEPDIR)/privsep.Po
+-include ./$(DEPDIR)/process.Po
+-include ./$(DEPDIR)/radvd.Po
+-=include ./$(DEPDIR)/radvdump.Po
+-include ./$(DEPDIR)/recv.Po
+-include ./$(DEPDIR)/scanner.Po
+-include ./$(DEPDIR)/send.Po
+-include ./$(DEPDIR)/socket.Po
+-include ./$(DEPDIR)/timer.Po
+-include ./$(DEPDIR)/util.Po
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
