@@ -846,7 +846,7 @@ end:
 static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 {
 	struct pppox_sock *po = pppox_sk(sk);
-	struct pppoe_hdr hdr;
+	struct net_device *dev = po->pppoe_dev;
 	struct pppoe_hdr *ph;
 	int headroom = skb_headroom(skb);
 	int data_len = skb->len;
