@@ -41,9 +41,9 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 			hh_len = hh->hh_len;
 			hh_alen = HH_DATA_ALIGN(hh_len);
 			memcpy(skb->data - hh_alen, hh->hh_data, hh_alen);
-			} while (read_seqretry(&hh->hh_lock, seq));
+		} while (read_seqretry(&hh->hh_lock, seq));
 
-			skb_push(skb, hh_len);
+		skb_push(skb, hh_len);
 		ret = hh->hh_output(skb); 
 		if (ret==1) 
 			return 0; /* Don't return 1 */
