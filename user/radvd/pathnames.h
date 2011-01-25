@@ -1,11 +1,11 @@
 /*
- *   $Id: pathnames.h,v 1.2 2007-10-25 09:01:59 winfred Exp $
+ *   $Id: pathnames.h,v 1.9 2010/12/14 11:58:21 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
- *    Lars Fenneberg		<lf@elemental.net>	 
+ *    Lars Fenneberg		<lf@elemental.net>
  *
- *   This software is Copyright 1996,1997 by the above mentioned author(s), 
+ *   This software is Copyright 1996,1997 by the above mentioned author(s),
  *   All Rights Reserved.
  *
  *   The license which is distributed with this software in the file COPYRIGHT
@@ -26,7 +26,7 @@
 #endif
 
 #ifndef PATH_RADVD_LOG
-#define PATH_RADVD_LOG "/var/radvd.log"
+#define PATH_RADVD_LOG "/var/log/radvd.log"
 #endif
 
 #define PATH_PROC_NET_IF_INET6 "/proc/net/if_inet6"

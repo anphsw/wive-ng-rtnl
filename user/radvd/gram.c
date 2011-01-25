@@ -1,9 +1,9 @@
-/* A Bison parser, made by GNU Bison 2.4.2.  */
+/* A Bison parser, made by GNU Bison 2.4.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2006, 2009-2010 Free Software
-   Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2009, 2010 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.2"
+#define YYBISON_VERSION "2.4.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -69,16 +69,17 @@
 /* Line 189 of yacc.c  */
 #line 16 "gram.y"
 
-#include <config.h>
-#include <includes.h>
-#include <radvd.h>
-#include <defaults.h>
+#include "config.h"
+#include "includes.h"
+#include "radvd.h"
+#include "defaults.h"
 
 extern struct Interface *IfaceList;
 struct Interface *iface = NULL;
 struct AdvPrefix *prefix = NULL;
 struct AdvRoute *route = NULL;
 struct AdvRDNSS *rdnss = NULL;
+struct AdvDNSSL *dnssl = NULL;
 
 extern char *conf_file;
 extern int num_lines;
@@ -114,7 +115,7 @@ static void yyerror(char *msg);
 
 
 /* Line 189 of yacc.c  */
-#line 118 "y.tab.c"
+#line 119 "gram.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -145,47 +146,49 @@ static void yyerror(char *msg);
      T_PREFIX = 259,
      T_ROUTE = 260,
      T_RDNSS = 261,
-     T_CLIENTS = 262,
-     STRING = 263,
-     NUMBER = 264,
-     SIGNEDNUMBER = 265,
-     DECIMAL = 266,
-     SWITCH = 267,
-     IPV6ADDR = 268,
-     INFINITY = 269,
-     T_IgnoreIfMissing = 270,
-     T_AdvSendAdvert = 271,
-     T_MaxRtrAdvInterval = 272,
-     T_MinRtrAdvInterval = 273,
-     T_MinDelayBetweenRAs = 274,
-     T_AdvManagedFlag = 275,
-     T_AdvOtherConfigFlag = 276,
-     T_AdvLinkMTU = 277,
-     T_AdvReachableTime = 278,
-     T_AdvRetransTimer = 279,
-     T_AdvCurHopLimit = 280,
-     T_AdvDefaultLifetime = 281,
-     T_AdvDefaultPreference = 282,
-     T_AdvSourceLLAddress = 283,
-     T_AdvOnLink = 284,
-     T_AdvAutonomous = 285,
-     T_AdvValidLifetime = 286,
-     T_AdvPreferredLifetime = 287,
-     T_AdvRouterAddr = 288,
-     T_AdvHomeAgentFlag = 289,
-     T_AdvIntervalOpt = 290,
-     T_AdvHomeAgentInfo = 291,
-     T_Base6to4Interface = 292,
-     T_UnicastOnly = 293,
-     T_HomeAgentPreference = 294,
-     T_HomeAgentLifetime = 295,
-     T_AdvRoutePreference = 296,
-     T_AdvRouteLifetime = 297,
-     T_AdvRDNSSPreference = 298,
-     T_AdvRDNSSOpenFlag = 299,
-     T_AdvRDNSSLifetime = 300,
-     T_AdvMobRtrSupportFlag = 301,
-     T_BAD_TOKEN = 302
+     T_DNSSL = 262,
+     T_CLIENTS = 263,
+     STRING = 264,
+     NUMBER = 265,
+     SIGNEDNUMBER = 266,
+     DECIMAL = 267,
+     SWITCH = 268,
+     IPV6ADDR = 269,
+     INFINITY = 270,
+     T_IgnoreIfMissing = 271,
+     T_AdvSendAdvert = 272,
+     T_MaxRtrAdvInterval = 273,
+     T_MinRtrAdvInterval = 274,
+     T_MinDelayBetweenRAs = 275,
+     T_AdvManagedFlag = 276,
+     T_AdvOtherConfigFlag = 277,
+     T_AdvLinkMTU = 278,
+     T_AdvReachableTime = 279,
+     T_AdvRetransTimer = 280,
+     T_AdvCurHopLimit = 281,
+     T_AdvDefaultLifetime = 282,
+     T_AdvDefaultPreference = 283,
+     T_AdvSourceLLAddress = 284,
+     T_AdvOnLink = 285,
+     T_AdvAutonomous = 286,
+     T_AdvValidLifetime = 287,
+     T_AdvPreferredLifetime = 288,
+     T_AdvRouterAddr = 289,
+     T_AdvHomeAgentFlag = 290,
+     T_AdvIntervalOpt = 291,
+     T_AdvHomeAgentInfo = 292,
+     T_Base6to4Interface = 293,
+     T_UnicastOnly = 294,
+     T_HomeAgentPreference = 295,
+     T_HomeAgentLifetime = 296,
+     T_AdvRoutePreference = 297,
+     T_AdvRouteLifetime = 298,
+     T_AdvRDNSSPreference = 299,
+     T_AdvRDNSSOpenFlag = 300,
+     T_AdvRDNSSLifetime = 301,
+     T_AdvDNSSLLifetime = 302,
+     T_AdvMobRtrSupportFlag = 303,
+     T_BAD_TOKEN = 304
    };
 #endif
 /* Tokens.  */
@@ -193,47 +196,49 @@ static void yyerror(char *msg);
 #define T_PREFIX 259
 #define T_ROUTE 260
 #define T_RDNSS 261
-#define T_CLIENTS 262
-#define STRING 263
-#define NUMBER 264
-#define SIGNEDNUMBER 265
-#define DECIMAL 266
-#define SWITCH 267
-#define IPV6ADDR 268
-#define INFINITY 269
-#define T_IgnoreIfMissing 270
-#define T_AdvSendAdvert 271
-#define T_MaxRtrAdvInterval 272
-#define T_MinRtrAdvInterval 273
-#define T_MinDelayBetweenRAs 274
-#define T_AdvManagedFlag 275
-#define T_AdvOtherConfigFlag 276
-#define T_AdvLinkMTU 277
-#define T_AdvReachableTime 278
-#define T_AdvRetransTimer 279
-#define T_AdvCurHopLimit 280
-#define T_AdvDefaultLifetime 281
-#define T_AdvDefaultPreference 282
-#define T_AdvSourceLLAddress 283
-#define T_AdvOnLink 284
-#define T_AdvAutonomous 285
-#define T_AdvValidLifetime 286
-#define T_AdvPreferredLifetime 287
-#define T_AdvRouterAddr 288
-#define T_AdvHomeAgentFlag 289
-#define T_AdvIntervalOpt 290
-#define T_AdvHomeAgentInfo 291
-#define T_Base6to4Interface 292
-#define T_UnicastOnly 293
-#define T_HomeAgentPreference 294
-#define T_HomeAgentLifetime 295
-#define T_AdvRoutePreference 296
-#define T_AdvRouteLifetime 297
-#define T_AdvRDNSSPreference 298
-#define T_AdvRDNSSOpenFlag 299
-#define T_AdvRDNSSLifetime 300
-#define T_AdvMobRtrSupportFlag 301
-#define T_BAD_TOKEN 302
+#define T_DNSSL 262
+#define T_CLIENTS 263
+#define STRING 264
+#define NUMBER 265
+#define SIGNEDNUMBER 266
+#define DECIMAL 267
+#define SWITCH 268
+#define IPV6ADDR 269
+#define INFINITY 270
+#define T_IgnoreIfMissing 271
+#define T_AdvSendAdvert 272
+#define T_MaxRtrAdvInterval 273
+#define T_MinRtrAdvInterval 274
+#define T_MinDelayBetweenRAs 275
+#define T_AdvManagedFlag 276
+#define T_AdvOtherConfigFlag 277
+#define T_AdvLinkMTU 278
+#define T_AdvReachableTime 279
+#define T_AdvRetransTimer 280
+#define T_AdvCurHopLimit 281
+#define T_AdvDefaultLifetime 282
+#define T_AdvDefaultPreference 283
+#define T_AdvSourceLLAddress 284
+#define T_AdvOnLink 285
+#define T_AdvAutonomous 286
+#define T_AdvValidLifetime 287
+#define T_AdvPreferredLifetime 288
+#define T_AdvRouterAddr 289
+#define T_AdvHomeAgentFlag 290
+#define T_AdvIntervalOpt 291
+#define T_AdvHomeAgentInfo 292
+#define T_Base6to4Interface 293
+#define T_UnicastOnly 294
+#define T_HomeAgentPreference 295
+#define T_HomeAgentLifetime 296
+#define T_AdvRoutePreference 297
+#define T_AdvRouteLifetime 298
+#define T_AdvRDNSSPreference 299
+#define T_AdvRDNSSOpenFlag 300
+#define T_AdvRDNSSLifetime 301
+#define T_AdvDNSSLLifetime 302
+#define T_AdvMobRtrSupportFlag 303
+#define T_BAD_TOKEN 304
 
 
 
@@ -243,7 +248,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 124 "gram.y"
+#line 129 "gram.y"
 
 	unsigned int		num;
 	int			snum;
@@ -253,12 +258,13 @@ typedef union YYSTYPE
 	struct AdvPrefix	*pinfo;
 	struct AdvRoute		*rinfo;
 	struct AdvRDNSS		*rdnssinfo;
+	struct AdvDNSSL		*dnsslinfo;
 	struct Clients		*ainfo;
 
 
 
 /* Line 214 of yacc.c  */
-#line 262 "y.tab.c"
+#line 268 "gram.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -270,7 +276,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 274 "y.tab.c"
+#line 280 "gram.c"
 
 #ifdef short
 # undef short
@@ -485,20 +491,20 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  7
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   159
+#define YYLAST   171
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  52
+#define YYNTOKENS  54
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  28
+#define YYNNTS  35
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  74
+#define YYNRULES  85
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  170
+#define YYNSTATES  187
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   302
+#define YYMAXUTOK   304
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -510,15 +516,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,    51,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    50,
+       2,     2,     2,     2,     2,     2,     2,    53,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    52,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    48,     2,    49,     2,     2,     2,     2,
+       2,     2,     2,    50,     2,    51,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -536,66 +542,71 @@ static const yytype_uint8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47
+      45,    46,    47,    48,    49
 };
 
 #if YYDEBUG
 /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
    YYRHS.  */
-static const yytype_uint8 yyprhs[] =
+static const yytype_uint16 yyprhs[] =
 {
        0,     0,     3,     6,     8,    14,    17,    19,    20,    23,
-      25,    27,    29,    31,    33,    37,    41,    45,    49,    53,
-      57,    61,    65,    69,    73,    77,    81,    85,    89,    93,
-      97,   101,   105,   109,   113,   117,   121,   125,   129,   135,
-     138,   142,   148,   153,   154,   156,   159,   161,   165,   169,
-     173,   177,   181,   185,   191,   196,   197,   199,   202,   204,
-     208,   212,   218,   221,   223,   225,   228,   229,   231,   234,
-     236,   240,   244,   248,   250
+      25,    27,    29,    31,    33,    35,    39,    43,    47,    51,
+      55,    59,    63,    67,    71,    75,    79,    83,    87,    91,
+      95,    99,   103,   107,   111,   115,   119,   123,   127,   131,
+     137,   140,   144,   150,   155,   156,   158,   161,   163,   167,
+     171,   175,   179,   183,   187,   193,   198,   199,   201,   204,
+     206,   210,   214,   220,   223,   225,   227,   230,   231,   233,
+     236,   238,   242,   246,   250,   256,   259,   261,   263,   266,
+     267,   269,   272,   274,   278,   280
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      53,     0,    -1,    53,    54,    -1,    54,    -1,    55,    48,
-      57,    49,    50,    -1,     3,    56,    -1,     8,    -1,    -1,
-      58,    57,    -1,    59,    -1,    62,    -1,    60,    -1,    67,
-      -1,    72,    -1,    18,     9,    50,    -1,    17,     9,    50,
-      -1,    19,     9,    50,    -1,    18,    11,    50,    -1,    17,
-      11,    50,    -1,    19,    11,    50,    -1,    15,    12,    50,
-      -1,    16,    12,    50,    -1,    20,    12,    50,    -1,    21,
-      12,    50,    -1,    22,     9,    50,    -1,    23,     9,    50,
-      -1,    24,     9,    50,    -1,    26,     9,    50,    -1,    27,
-      10,    50,    -1,    25,     9,    50,    -1,    28,    12,    50,
-      -1,    35,    12,    50,    -1,    36,    12,    50,    -1,    34,
-      12,    50,    -1,    39,     9,    50,    -1,    40,     9,    50,
-      -1,    38,    12,    50,    -1,    46,    12,    50,    -1,     7,
-      48,    61,    49,    50,    -1,    13,    50,    -1,    61,    13,
-      50,    -1,    63,    48,    64,    49,    50,    -1,     4,    13,
-      51,     9,    -1,    -1,    65,    -1,    65,    66,    -1,    66,
-      -1,    29,    12,    50,    -1,    30,    12,    50,    -1,    33,
-      12,    50,    -1,    31,    79,    50,    -1,    32,    79,    50,
-      -1,    37,    56,    50,    -1,    68,    48,    69,    49,    50,
-      -1,     5,    13,    51,     9,    -1,    -1,    70,    -1,    70,
-      71,    -1,    71,    -1,    41,    10,    50,    -1,    42,    79,
-      50,    -1,    75,    48,    76,    49,    50,    -1,    73,    74,
-      -1,    74,    -1,    13,    -1,     6,    73,    -1,    -1,    77,
-      -1,    77,    78,    -1,    78,    -1,    43,     9,    50,    -1,
-      44,    12,    50,    -1,    45,    79,    50,    -1,     9,    -1,
-      14,    -1
+      55,     0,    -1,    55,    56,    -1,    56,    -1,    57,    50,
+      59,    51,    52,    -1,     3,    58,    -1,     9,    -1,    -1,
+      60,    59,    -1,    61,    -1,    64,    -1,    62,    -1,    69,
+      -1,    74,    -1,    81,    -1,    19,    10,    52,    -1,    18,
+      10,    52,    -1,    20,    10,    52,    -1,    19,    12,    52,
+      -1,    18,    12,    52,    -1,    20,    12,    52,    -1,    16,
+      13,    52,    -1,    17,    13,    52,    -1,    21,    13,    52,
+      -1,    22,    13,    52,    -1,    23,    10,    52,    -1,    24,
+      10,    52,    -1,    25,    10,    52,    -1,    27,    10,    52,
+      -1,    28,    11,    52,    -1,    26,    10,    52,    -1,    29,
+      13,    52,    -1,    36,    13,    52,    -1,    37,    13,    52,
+      -1,    35,    13,    52,    -1,    40,    10,    52,    -1,    41,
+      10,    52,    -1,    39,    13,    52,    -1,    48,    13,    52,
+      -1,     8,    50,    63,    51,    52,    -1,    14,    52,    -1,
+      63,    14,    52,    -1,    65,    50,    66,    51,    52,    -1,
+       4,    14,    53,    10,    -1,    -1,    67,    -1,    67,    68,
+      -1,    68,    -1,    30,    13,    52,    -1,    31,    13,    52,
+      -1,    34,    13,    52,    -1,    32,    88,    52,    -1,    33,
+      88,    52,    -1,    38,    58,    52,    -1,    70,    50,    71,
+      51,    52,    -1,     5,    14,    53,    10,    -1,    -1,    72,
+      -1,    72,    73,    -1,    73,    -1,    42,    11,    52,    -1,
+      43,    88,    52,    -1,    77,    50,    78,    51,    52,    -1,
+      75,    76,    -1,    76,    -1,    14,    -1,     6,    75,    -1,
+      -1,    79,    -1,    79,    80,    -1,    80,    -1,    44,    10,
+      52,    -1,    45,    13,    52,    -1,    46,    88,    52,    -1,
+      84,    50,    85,    51,    52,    -1,    82,    83,    -1,    83,
+      -1,     9,    -1,     7,    82,    -1,    -1,    86,    -1,    86,
+      87,    -1,    87,    -1,    47,    88,    52,    -1,    10,    -1,
+      15,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   138,   138,   139,   142,   188,   203,   210,   212,   215,
-     216,   217,   218,   219,   222,   226,   230,   234,   238,   242,
-     246,   250,   254,   258,   262,   266,   270,   274,   278,   282,
-     286,   290,   294,   298,   302,   306,   310,   314,   320,   326,
-     337,   352,   383,   446,   447,   450,   451,   454,   458,   462,
-     469,   473,   477,   489,   497,   521,   522,   525,   526,   530,
-     534,   540,   547,   548,   551,   586,   595,   596,   599,   600,
-     604,   608,   612,   625,   629
+       0,   144,   144,   145,   148,   194,   209,   216,   218,   221,
+     222,   223,   224,   225,   226,   229,   233,   237,   241,   245,
+     249,   253,   257,   261,   265,   269,   273,   277,   281,   285,
+     289,   293,   297,   301,   305,   309,   313,   317,   321,   327,
+     333,   344,   359,   390,   453,   454,   457,   458,   461,   465,
+     469,   476,   480,   484,   496,   504,   528,   529,   532,   533,
+     537,   541,   547,   554,   555,   558,   593,   602,   603,   606,
+     607,   611,   615,   619,   632,   639,   640,   643,   685,   694,
+     695,   698,   699,   703,   716,   720
 };
 #endif
 
@@ -605,25 +616,28 @@ static const yytype_uint16 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "T_INTERFACE", "T_PREFIX", "T_ROUTE",
-  "T_RDNSS", "T_CLIENTS", "STRING", "NUMBER", "SIGNEDNUMBER", "DECIMAL",
-  "SWITCH", "IPV6ADDR", "INFINITY", "T_IgnoreIfMissing", "T_AdvSendAdvert",
-  "T_MaxRtrAdvInterval", "T_MinRtrAdvInterval", "T_MinDelayBetweenRAs",
-  "T_AdvManagedFlag", "T_AdvOtherConfigFlag", "T_AdvLinkMTU",
-  "T_AdvReachableTime", "T_AdvRetransTimer", "T_AdvCurHopLimit",
-  "T_AdvDefaultLifetime", "T_AdvDefaultPreference", "T_AdvSourceLLAddress",
-  "T_AdvOnLink", "T_AdvAutonomous", "T_AdvValidLifetime",
-  "T_AdvPreferredLifetime", "T_AdvRouterAddr", "T_AdvHomeAgentFlag",
-  "T_AdvIntervalOpt", "T_AdvHomeAgentInfo", "T_Base6to4Interface",
-  "T_UnicastOnly", "T_HomeAgentPreference", "T_HomeAgentLifetime",
-  "T_AdvRoutePreference", "T_AdvRouteLifetime", "T_AdvRDNSSPreference",
-  "T_AdvRDNSSOpenFlag", "T_AdvRDNSSLifetime", "T_AdvMobRtrSupportFlag",
-  "T_BAD_TOKEN", "'{'", "'}'", "';'", "'/'", "$accept", "grammar",
-  "ifacedef", "ifacehead", "name", "ifaceparams", "ifaceparam", "ifaceval",
-  "clientslist", "v6addrlist", "prefixdef", "prefixhead",
-  "optional_prefixplist", "prefixplist", "prefixparms", "routedef",
-  "routehead", "optional_routeplist", "routeplist", "routeparms",
-  "rdnssdef", "rdnssaddrs", "rdnssaddr", "rdnsshead",
-  "optional_rdnssplist", "rdnssplist", "rdnssparms", "number_or_infinity", 0
+  "T_RDNSS", "T_DNSSL", "T_CLIENTS", "STRING", "NUMBER", "SIGNEDNUMBER",
+  "DECIMAL", "SWITCH", "IPV6ADDR", "INFINITY", "T_IgnoreIfMissing",
+  "T_AdvSendAdvert", "T_MaxRtrAdvInterval", "T_MinRtrAdvInterval",
+  "T_MinDelayBetweenRAs", "T_AdvManagedFlag", "T_AdvOtherConfigFlag",
+  "T_AdvLinkMTU", "T_AdvReachableTime", "T_AdvRetransTimer",
+  "T_AdvCurHopLimit", "T_AdvDefaultLifetime", "T_AdvDefaultPreference",
+  "T_AdvSourceLLAddress", "T_AdvOnLink", "T_AdvAutonomous",
+  "T_AdvValidLifetime", "T_AdvPreferredLifetime", "T_AdvRouterAddr",
+  "T_AdvHomeAgentFlag", "T_AdvIntervalOpt", "T_AdvHomeAgentInfo",
+  "T_Base6to4Interface", "T_UnicastOnly", "T_HomeAgentPreference",
+  "T_HomeAgentLifetime", "T_AdvRoutePreference", "T_AdvRouteLifetime",
+  "T_AdvRDNSSPreference", "T_AdvRDNSSOpenFlag", "T_AdvRDNSSLifetime",
+  "T_AdvDNSSLLifetime", "T_AdvMobRtrSupportFlag", "T_BAD_TOKEN", "'{'",
+  "'}'", "';'", "'/'", "$accept", "grammar", "ifacedef", "ifacehead",
+  "name", "ifaceparams", "ifaceparam", "ifaceval", "clientslist",
+  "v6addrlist", "prefixdef", "prefixhead", "optional_prefixplist",
+  "prefixplist", "prefixparms", "routedef", "routehead",
+  "optional_routeplist", "routeplist", "routeparms", "rdnssdef",
+  "rdnssaddrs", "rdnssaddr", "rdnsshead", "optional_rdnssplist",
+  "rdnssplist", "rdnssparms", "dnssldef", "dnsslsuffixes", "dnsslsuffix",
+  "dnsslhead", "optional_dnsslplist", "dnsslplist", "dnsslparms",
+  "number_or_infinity", 0
 };
 #endif
 
@@ -636,35 +650,37 @@ static const yytype_uint16 yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302,   123,   125,
-      59,    47
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     123,   125,    59,    47
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    52,    53,    53,    54,    55,    56,    57,    57,    58,
-      58,    58,    58,    58,    59,    59,    59,    59,    59,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    60,    61,
-      61,    62,    63,    64,    64,    65,    65,    66,    66,    66,
-      66,    66,    66,    67,    68,    69,    69,    70,    70,    71,
-      71,    72,    73,    73,    74,    75,    76,    76,    77,    77,
-      78,    78,    78,    79,    79
+       0,    54,    55,    55,    56,    57,    58,    59,    59,    60,
+      60,    60,    60,    60,    60,    61,    61,    61,    61,    61,
+      61,    61,    61,    61,    61,    61,    61,    61,    61,    61,
+      61,    61,    61,    61,    61,    61,    61,    61,    61,    62,
+      63,    63,    64,    65,    66,    66,    67,    67,    68,    68,
+      68,    68,    68,    68,    69,    70,    71,    71,    72,    72,
+      73,    73,    74,    75,    75,    76,    77,    78,    78,    79,
+      79,    80,    80,    80,    81,    82,    82,    83,    84,    85,
+      85,    86,    86,    87,    88,    88
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     2,     1,     5,     2,     1,     0,     2,     1,
-       1,     1,     1,     1,     3,     3,     3,     3,     3,     3,
+       1,     1,     1,     1,     1,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     5,     2,
-       3,     5,     4,     0,     1,     2,     1,     3,     3,     3,
-       3,     3,     3,     5,     4,     0,     1,     2,     1,     3,
-       3,     5,     2,     1,     1,     2,     0,     1,     2,     1,
-       3,     3,     3,     1,     1
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     5,
+       2,     3,     5,     4,     0,     1,     2,     1,     3,     3,
+       3,     3,     3,     3,     5,     4,     0,     1,     2,     1,
+       3,     3,     5,     2,     1,     1,     2,     0,     1,     2,
+       1,     3,     3,     3,     5,     2,     1,     1,     2,     0,
+       1,     2,     1,     3,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -675,28 +691,31 @@ static const yytype_uint8 yydefact[] =
        0,     0,     0,     3,     0,     6,     5,     1,     2,     7,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     7,     9,    11,    10,
-       0,    12,     0,    13,     0,     0,     0,    64,    65,    63,
+       0,     0,     0,     0,     0,     0,     0,     7,     9,    11,
+      10,     0,    12,     0,    13,     0,    14,     0,     0,     0,
+      65,    66,    64,    77,    78,    76,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     8,    43,    55,    66,
-       0,     0,    62,     0,     0,    20,    21,    15,    18,    14,
-      17,    16,    19,    22,    23,    24,    25,    26,    29,    27,
-      28,    30,    33,    31,    32,    36,    34,    35,    37,     4,
-       0,     0,     0,     0,     0,     0,     0,    44,    46,     0,
-       0,     0,    56,    58,     0,     0,     0,     0,    67,    69,
-      42,    54,    39,     0,     0,     0,     0,    73,    74,     0,
-       0,     0,     0,     0,    45,     0,     0,     0,    57,     0,
-       0,     0,     0,    68,    40,    38,    47,    48,    50,    51,
-      49,    52,    41,    59,    60,    53,    70,    71,    72,    61
+       0,     0,     8,    44,    56,    67,    79,     0,     0,    63,
+      75,     0,     0,    21,    22,    16,    19,    15,    18,    17,
+      20,    23,    24,    25,    26,    27,    30,    28,    29,    31,
+      34,    32,    33,    37,    35,    36,    38,     4,     0,     0,
+       0,     0,     0,     0,     0,    45,    47,     0,     0,     0,
+      57,    59,     0,     0,     0,     0,    68,    70,     0,     0,
+      80,    82,    43,    55,    40,     0,     0,     0,     0,    84,
+      85,     0,     0,     0,     0,     0,    46,     0,     0,     0,
+      58,     0,     0,     0,     0,    69,     0,     0,    81,    41,
+      39,    48,    49,    51,    52,    50,    53,    42,    60,    61,
+      54,    71,    72,    73,    62,    83,    74
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-      -1,     2,     3,     4,     6,    35,    36,    37,    38,    84,
-      39,    40,   116,   117,   118,    41,    42,   121,   122,   123,
-      43,    48,    49,    44,   127,   128,   129,   139
+      -1,     2,     3,     4,     6,    36,    37,    38,    39,    92,
+      40,    41,   124,   125,   126,    42,    43,   129,   130,   131,
+      44,    51,    52,    45,   135,   136,   137,    46,    54,    55,
+      47,   139,   140,   141,   151
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -704,31 +723,34 @@ static const yytype_int16 yydefgoto[] =
 #define YYPACT_NINF -88
 static const yytype_int8 yypact[] =
 {
-       3,     2,     5,   -88,   -23,   -88,   -88,   -88,   -88,    -4,
-      24,    25,    28,     1,    43,    47,    -2,    41,    45,    48,
-      49,    53,    54,    55,    56,    57,    58,    59,    60,    61,
-      62,    63,    67,    68,    66,    18,    -4,   -88,   -88,   -88,
-      21,   -88,    22,   -88,    31,    29,    30,   -88,    28,   -88,
-      69,    33,    34,    35,    36,    37,    38,    40,    42,    44,
-      46,    50,    51,    52,    64,    65,    70,    71,    72,    73,
-      74,    75,    76,    77,    78,    79,   -88,    14,    16,   -16,
-      80,    82,   -88,    81,    -9,   -88,   -88,   -88,   -88,   -88,
+       4,     2,     6,   -88,   -11,   -88,   -88,   -88,   -88,    -4,
+      26,    31,    35,    41,     8,    48,    49,    -2,    36,    47,
+      50,    51,    55,    56,    57,    58,    59,    60,    61,    62,
+      63,    64,    65,    69,    70,    68,    19,    -4,   -88,   -88,
+     -88,    23,   -88,    32,   -88,    33,   -88,    34,    37,    38,
+     -88,    35,   -88,   -88,    41,   -88,    71,    20,    40,    42,
+      43,    44,    45,    46,    52,    53,    54,    66,    67,    72,
+      73,    74,    75,    76,    77,    78,    79,    80,    81,    82,
+      83,    84,   -88,    22,   -13,   -18,    39,    89,    90,   -88,
+     -88,    85,    -9,   -88,   -88,   -88,   -88,   -88,   -88,   -88,
      -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,
+     -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,    88,    94,
+      28,    28,    95,     2,    87,    22,   -88,    91,    28,    92,
+     -13,   -88,    93,    96,    28,    97,   -18,   -88,    28,    98,
+      39,   -88,   -88,   -88,   -88,    99,   100,   101,   102,   -88,
+     -88,   103,   104,   105,   106,   107,   -88,   108,   109,   110,
+     -88,   111,   112,   113,   114,   -88,   115,   116,   -88,   -88,
      -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,
-      83,    85,    39,    39,    86,     2,    84,    14,   -88,    89,
-      39,    87,    16,   -88,    94,    92,    39,    88,   -16,   -88,
-     -88,   -88,   -88,    90,    91,    93,    95,   -88,   -88,    96,
-      97,    98,    99,   100,   -88,   101,   102,   103,   -88,   104,
-     105,   106,   107,   -88,   -88,   -88,   -88,   -88,   -88,   -88,
-     -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88,   -88
+     -88,   -88,   -88,   -88,   -88,   -88,   -88
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
+static const yytype_int16 yypgoto[] =
 {
-     -88,   -88,   108,   -88,   -22,   122,   -88,   -88,   -88,   -88,
-     -88,   -88,   -88,   -88,   -12,   -88,   -88,   -88,   -88,   -15,
-     -88,   -88,   111,   -88,   -88,   -88,   -20,   -87
+     -88,   -88,    86,   -88,   -36,   132,   -88,   -88,   -88,   -88,
+     -88,   -88,   -88,   -88,   -32,   -88,   -88,   -88,   -88,   -41,
+     -88,   -88,   119,   -88,   -88,   -88,   -26,   -88,   -88,   117,
+     -88,   -88,   -88,   -29,   -87
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -738,65 +760,71 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      10,    11,    12,    13,   133,     7,     1,    53,     1,    54,
-       5,    14,    15,    16,    17,    18,    19,    20,    21,    22,
-      23,    24,    25,    26,    27,     9,   140,   124,   125,   126,
-      28,    29,    30,   146,    31,    32,    33,    45,    46,   151,
-     134,    47,    34,   110,   111,   112,   113,   114,   137,    50,
-      55,   115,    56,   138,    57,    51,    58,   119,   120,    52,
-      59,    60,    61,    62,    63,    64,    65,    75,    66,    77,
-      78,    67,    68,    69,    70,    71,    72,    73,    74,    79,
-      80,    81,    83,    85,    86,    87,    88,    89,    90,   130,
-      91,   131,    92,   142,    93,   135,    94,   136,   141,   145,
-      95,    96,    97,   149,   150,   144,     0,   148,   153,     0,
-       8,     0,     0,     0,    98,    99,     0,     0,     0,     0,
-     100,   101,   102,   103,   104,   105,   106,   107,   108,   109,
-       0,   132,     0,   143,     0,     0,   147,   152,     0,     0,
-     154,   155,     0,   156,     0,   157,   158,   159,   160,   161,
-     162,   163,   164,   165,   166,   167,   168,   169,    76,    82
+      10,    11,    12,    13,    14,   145,     7,     1,    59,     1,
+      60,     5,    15,    16,    17,    18,    19,    20,    21,    22,
+      23,    24,    25,    26,    27,    28,   132,   133,   134,   127,
+     128,    29,    30,    31,   152,    32,    33,    34,   149,     9,
+      48,   158,   146,   150,    35,    49,    61,   163,    62,    50,
+      53,   166,   118,   119,   120,   121,   122,    63,    56,    64,
+     123,    57,    58,    65,    66,    67,    68,    69,    70,    71,
+      81,    72,    93,    83,    73,    74,    75,    76,    77,    78,
+      79,    80,    84,    85,    86,    91,   138,   154,     8,   160,
+      87,    88,    94,   156,    95,    96,    97,    98,    99,   142,
+     143,   147,   157,   161,   100,   101,   102,   148,   153,   162,
+     165,   168,     0,     0,     0,     0,     0,     0,   103,   104,
+       0,     0,     0,     0,   105,   106,   107,   108,   109,   110,
+     111,   112,   113,   114,   115,   116,   117,   144,   155,     0,
+       0,     0,     0,   159,     0,     0,     0,     0,   164,   167,
+       0,   169,   170,   171,   172,   173,   174,   175,   176,   177,
+     178,   179,   180,   181,   182,   183,   184,   185,   186,    82,
+      89,    90
 };
 
 static const yytype_int16 yycheck[] =
 {
-       4,     5,     6,     7,    13,     0,     3,     9,     3,    11,
-       8,    15,    16,    17,    18,    19,    20,    21,    22,    23,
-      24,    25,    26,    27,    28,    48,   113,    43,    44,    45,
-      34,    35,    36,   120,    38,    39,    40,    13,    13,   126,
-      49,    13,    46,    29,    30,    31,    32,    33,     9,    48,
-       9,    37,    11,    14,     9,    12,    11,    41,    42,    12,
-      12,    12,     9,     9,     9,     9,     9,    49,    10,    48,
-      48,    12,    12,    12,    12,    12,     9,     9,    12,    48,
-      51,    51,    13,    50,    50,    50,    50,    50,    50,     9,
-      50,     9,    50,   115,    50,    12,    50,    12,    12,    10,
-      50,    50,    50,     9,    12,   117,    -1,   122,   128,    -1,
-       2,    -1,    -1,    -1,    50,    50,    -1,    -1,    -1,    -1,
-      50,    50,    50,    50,    50,    50,    50,    50,    50,    50,
-      -1,    50,    -1,    49,    -1,    -1,    49,    49,    -1,    -1,
-      50,    50,    -1,    50,    -1,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    50,    36,    48
+       4,     5,     6,     7,     8,    14,     0,     3,    10,     3,
+      12,     9,    16,    17,    18,    19,    20,    21,    22,    23,
+      24,    25,    26,    27,    28,    29,    44,    45,    46,    42,
+      43,    35,    36,    37,   121,    39,    40,    41,    10,    50,
+      14,   128,    51,    15,    48,    14,    10,   134,    12,    14,
+       9,   138,    30,    31,    32,    33,    34,    10,    50,    12,
+      38,    13,    13,    13,    13,    10,    10,    10,    10,    10,
+      51,    11,    52,    50,    13,    13,    13,    13,    13,    10,
+      10,    13,    50,    50,    50,    14,    47,   123,     2,   130,
+      53,    53,    52,   125,    52,    52,    52,    52,    52,    10,
+      10,    13,    11,    10,    52,    52,    52,    13,    13,    13,
+     136,   140,    -1,    -1,    -1,    -1,    -1,    -1,    52,    52,
+      -1,    -1,    -1,    -1,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    51,    -1,
+      -1,    -1,    -1,    51,    -1,    -1,    -1,    -1,    51,    51,
+      -1,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    37,
+      51,    54
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    53,    54,    55,     8,    56,     0,    54,    48,
-       4,     5,     6,     7,    15,    16,    17,    18,    19,    20,
-      21,    22,    23,    24,    25,    26,    27,    28,    34,    35,
-      36,    38,    39,    40,    46,    57,    58,    59,    60,    62,
-      63,    67,    68,    72,    75,    13,    13,    13,    73,    74,
-      48,    12,    12,     9,    11,     9,    11,     9,    11,    12,
-      12,     9,     9,     9,     9,     9,    10,    12,    12,    12,
-      12,    12,     9,     9,    12,    49,    57,    48,    48,    48,
-      51,    51,    74,    13,    61,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    50,    50,    50,
-      29,    30,    31,    32,    33,    37,    64,    65,    66,    41,
-      42,    69,    70,    71,    43,    44,    45,    76,    77,    78,
-       9,     9,    50,    13,    49,    12,    12,     9,    14,    79,
-      79,    12,    56,    49,    66,    10,    79,    49,    71,     9,
-      12,    79,    49,    78,    50,    50,    50,    50,    50,    50,
-      50,    50,    50,    50,    50,    50,    50,    50,    50,    50
+       0,     3,    55,    56,    57,     9,    58,     0,    56,    50,
+       4,     5,     6,     7,     8,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,    28,    29,    35,
+      36,    37,    39,    40,    41,    48,    59,    60,    61,    62,
+      64,    65,    69,    70,    74,    77,    81,    84,    14,    14,
+      14,    75,    76,     9,    82,    83,    50,    13,    13,    10,
+      12,    10,    12,    10,    12,    13,    13,    10,    10,    10,
+      10,    10,    11,    13,    13,    13,    13,    13,    10,    10,
+      13,    51,    59,    50,    50,    50,    50,    53,    53,    76,
+      83,    14,    63,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    30,    31,
+      32,    33,    34,    38,    66,    67,    68,    42,    43,    71,
+      72,    73,    44,    45,    46,    78,    79,    80,    47,    85,
+      86,    87,    10,    10,    52,    14,    51,    13,    13,    10,
+      15,    88,    88,    13,    58,    51,    68,    11,    88,    51,
+      73,    10,    13,    88,    51,    80,    88,    51,    87,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1619,7 +1647,7 @@ yyreduce:
         case 4:
 
 /* Line 1464 of yacc.c  */
-#line 143 "gram.y"
+#line 149 "gram.y"
     {
 			struct Interface *iface2;
 
@@ -1633,7 +1661,7 @@ yyreduce:
 					ABORT;
 				}
 				iface2 = iface2->next;
-			}			
+			}
 
 			if (check_device(sock, iface) < 0) {
 				if (iface->IgnoreIfMissing) {
@@ -1669,7 +1697,7 @@ yyreduce:
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 189 "gram.y"
+#line 195 "gram.y"
     {
 			iface = malloc(sizeof(struct Interface));
 
@@ -1687,7 +1715,7 @@ yyreduce:
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 204 "gram.y"
+#line 210 "gram.y"
     {
 			/* check vality */
 			(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -1697,260 +1725,267 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 216 "gram.y"
+#line 222 "gram.y"
     { ADD_TO_LL(struct AdvPrefix, AdvPrefixList, (yyvsp[(1) - (1)].pinfo)); }
     break;
 
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 217 "gram.y"
+#line 223 "gram.y"
     { ADD_TO_LL(struct Clients, ClientList, (yyvsp[(1) - (1)].ainfo)); }
     break;
 
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 218 "gram.y"
+#line 224 "gram.y"
     { ADD_TO_LL(struct AdvRoute, AdvRouteList, (yyvsp[(1) - (1)].rinfo)); }
     break;
 
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 219 "gram.y"
+#line 225 "gram.y"
     { ADD_TO_LL(struct AdvRDNSS, AdvRDNSSList, (yyvsp[(1) - (1)].rdnssinfo)); }
     break;
 
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 223 "gram.y"
-    {
-			iface->MinRtrAdvInterval = (yyvsp[(2) - (3)].num);
-		}
+#line 226 "gram.y"
+    { ADD_TO_LL(struct AdvDNSSL, AdvDNSSLList, (yyvsp[(1) - (1)].dnsslinfo)); }
     break;
 
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 227 "gram.y"
+#line 230 "gram.y"
     {
-			iface->MaxRtrAdvInterval = (yyvsp[(2) - (3)].num);
+			iface->MinRtrAdvInterval = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 231 "gram.y"
+#line 234 "gram.y"
     {
-			iface->MinDelayBetweenRAs = (yyvsp[(2) - (3)].num);
+			iface->MaxRtrAdvInterval = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 235 "gram.y"
+#line 238 "gram.y"
     {
-			iface->MinRtrAdvInterval = (yyvsp[(2) - (3)].dec);
+			iface->MinDelayBetweenRAs = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 239 "gram.y"
+#line 242 "gram.y"
     {
-			iface->MaxRtrAdvInterval = (yyvsp[(2) - (3)].dec);
+			iface->MinRtrAdvInterval = (yyvsp[(2) - (3)].dec);
 		}
     break;
 
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 243 "gram.y"
+#line 246 "gram.y"
     {
-			iface->MinDelayBetweenRAs = (yyvsp[(2) - (3)].dec);
+			iface->MaxRtrAdvInterval = (yyvsp[(2) - (3)].dec);
 		}
     break;
 
   case 20:
 
 /* Line 1464 of yacc.c  */
-#line 247 "gram.y"
+#line 250 "gram.y"
     {
-			iface->IgnoreIfMissing = (yyvsp[(2) - (3)].num);
+			iface->MinDelayBetweenRAs = (yyvsp[(2) - (3)].dec);
 		}
     break;
 
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 251 "gram.y"
+#line 254 "gram.y"
     {
-			iface->AdvSendAdvert = (yyvsp[(2) - (3)].num);
+			iface->IgnoreIfMissing = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 255 "gram.y"
+#line 258 "gram.y"
     {
-			iface->AdvManagedFlag = (yyvsp[(2) - (3)].num);
+			iface->AdvSendAdvert = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 259 "gram.y"
+#line 262 "gram.y"
     {
-			iface->AdvOtherConfigFlag = (yyvsp[(2) - (3)].num);
+			iface->AdvManagedFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 263 "gram.y"
+#line 266 "gram.y"
     {
-			iface->AdvLinkMTU = (yyvsp[(2) - (3)].num);
+			iface->AdvOtherConfigFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 25:
 
 /* Line 1464 of yacc.c  */
-#line 267 "gram.y"
+#line 270 "gram.y"
     {
-			iface->AdvReachableTime = (yyvsp[(2) - (3)].num);
+			iface->AdvLinkMTU = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 26:
 
 /* Line 1464 of yacc.c  */
-#line 271 "gram.y"
+#line 274 "gram.y"
     {
-			iface->AdvRetransTimer = (yyvsp[(2) - (3)].num);
+			iface->AdvReachableTime = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 275 "gram.y"
+#line 278 "gram.y"
     {
-			iface->AdvDefaultLifetime = (yyvsp[(2) - (3)].num);
+			iface->AdvRetransTimer = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 279 "gram.y"
+#line 282 "gram.y"
     {
-			iface->AdvDefaultPreference = (yyvsp[(2) - (3)].snum);
+			iface->AdvDefaultLifetime = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 283 "gram.y"
+#line 286 "gram.y"
     {
-			iface->AdvCurHopLimit = (yyvsp[(2) - (3)].num);
+			iface->AdvDefaultPreference = (yyvsp[(2) - (3)].snum);
 		}
     break;
 
   case 30:
 
 /* Line 1464 of yacc.c  */
-#line 287 "gram.y"
+#line 290 "gram.y"
     {
-			iface->AdvSourceLLAddress = (yyvsp[(2) - (3)].num);
+			iface->AdvCurHopLimit = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 31:
 
 /* Line 1464 of yacc.c  */
-#line 291 "gram.y"
+#line 294 "gram.y"
     {
-			iface->AdvIntervalOpt = (yyvsp[(2) - (3)].num);
+			iface->AdvSourceLLAddress = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 32:
 
 /* Line 1464 of yacc.c  */
-#line 295 "gram.y"
+#line 298 "gram.y"
     {
-			iface->AdvHomeAgentInfo = (yyvsp[(2) - (3)].num);
+			iface->AdvIntervalOpt = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 33:
 
 /* Line 1464 of yacc.c  */
-#line 299 "gram.y"
+#line 302 "gram.y"
     {
-			iface->AdvHomeAgentFlag = (yyvsp[(2) - (3)].num);
+			iface->AdvHomeAgentInfo = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 34:
 
 /* Line 1464 of yacc.c  */
-#line 303 "gram.y"
+#line 306 "gram.y"
     {
-			iface->HomeAgentPreference = (yyvsp[(2) - (3)].num);
+			iface->AdvHomeAgentFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 35:
 
 /* Line 1464 of yacc.c  */
-#line 307 "gram.y"
+#line 310 "gram.y"
     {
-			iface->HomeAgentLifetime = (yyvsp[(2) - (3)].num);
+			iface->HomeAgentPreference = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 36:
 
 /* Line 1464 of yacc.c  */
-#line 311 "gram.y"
+#line 314 "gram.y"
     {
-			iface->UnicastOnly = (yyvsp[(2) - (3)].num);
+			iface->HomeAgentLifetime = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 37:
 
 /* Line 1464 of yacc.c  */
-#line 315 "gram.y"
+#line 318 "gram.y"
     {
-			iface->AdvMobRtrSupportFlag = (yyvsp[(2) - (3)].num);
+			iface->UnicastOnly = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 38:
 
 /* Line 1464 of yacc.c  */
-#line 321 "gram.y"
+#line 322 "gram.y"
     {
-			(yyval.ainfo) = (yyvsp[(3) - (5)].ainfo);
+			iface->AdvMobRtrSupportFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 39:
 
 /* Line 1464 of yacc.c  */
-#line 327 "gram.y"
+#line 328 "gram.y"
+    {
+			(yyval.ainfo) = (yyvsp[(3) - (5)].ainfo);
+		}
+    break;
+
+  case 40:
+
+/* Line 1464 of yacc.c  */
+#line 334 "gram.y"
     {
 			struct Clients *new = calloc(1, sizeof(struct Clients));
 			if (new == NULL) {
@@ -1963,10 +1998,10 @@ yyreduce:
 		}
     break;
 
-  case 40:
+  case 41:
 
 /* Line 1464 of yacc.c  */
-#line 338 "gram.y"
+#line 345 "gram.y"
     {
 			struct Clients *new = calloc(1, sizeof(struct Clients));
 			if (new == NULL) {
@@ -1980,10 +2015,10 @@ yyreduce:
 		}
     break;
 
-  case 41:
+  case 42:
 
 /* Line 1464 of yacc.c  */
-#line 353 "gram.y"
+#line 360 "gram.y"
     {
 			unsigned int dst;
 
@@ -1991,7 +2026,7 @@ yyreduce:
 			    prefix->AdvValidLifetime)
 			{
 				flog(LOG_ERR, "AdvValidLifeTime must be "
-					"greater than AdvPreferredLifetime in %s, line %d", 
+					"greater than AdvPreferredLifetime in %s, line %d",
 					conf_file, num_lines);
 				ABORT;
 			}
@@ -2014,14 +2049,14 @@ yyreduce:
 		}
     break;
 
-  case 42:
+  case 43:
 
 /* Line 1464 of yacc.c  */
-#line 384 "gram.y"
+#line 391 "gram.y"
     {
 			struct in6_addr zeroaddr;
 			prefix = malloc(sizeof(struct AdvPrefix));
-			
+
 			if (prefix == NULL) {
 				flog(LOG_CRIT, "malloc failed: %s", strerror(errno));
 				ABORT;
@@ -2041,7 +2076,7 @@ yyreduce:
 
 			memset(&zeroaddr, 0, sizeof(zeroaddr));
 			if (!memcmp((yyvsp[(2) - (4)].addr), &zeroaddr, sizeof(struct in6_addr))) {
-#ifndef HAVE_IFADDRS_H
+#if 1
 				flog(LOG_ERR, "invalid all-zeros prefix in %s, line %d", conf_file, num_lines);
 				ABORT;
 #else
@@ -2080,33 +2115,21 @@ yyreduce:
 		}
     break;
 
-  case 47:
-
-/* Line 1464 of yacc.c  */
-#line 455 "gram.y"
-    {
-			prefix->AdvOnLinkFlag = (yyvsp[(2) - (3)].num);
-		}
-    break;
-
   case 48:
 
 /* Line 1464 of yacc.c  */
-#line 459 "gram.y"
+#line 462 "gram.y"
     {
-			prefix->AdvAutonomousFlag = (yyvsp[(2) - (3)].num);
+			prefix->AdvOnLinkFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 49:
 
 /* Line 1464 of yacc.c  */
-#line 463 "gram.y"
+#line 466 "gram.y"
     {
-			if (prefix->AutoSelected && (yyvsp[(2) - (3)].num) == 0)
-				flog(LOG_WARNING, "prefix automatically selected, AdvRouterAddr always enabled, ignoring config line %d", num_lines);
-			else  
-				prefix->AdvRouterAddr = (yyvsp[(2) - (3)].num);
+			prefix->AdvAutonomousFlag = (yyvsp[(2) - (3)].num);
 		}
     break;
 
@@ -2115,23 +2138,35 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 470 "gram.y"
     {
-			prefix->AdvValidLifetime = (yyvsp[(2) - (3)].num);
+			if (prefix->AutoSelected && (yyvsp[(2) - (3)].num) == 0)
+				flog(LOG_WARNING, "prefix automatically selected, AdvRouterAddr always enabled, ignoring config line %d", num_lines);
+			else
+				prefix->AdvRouterAddr = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 51:
 
 /* Line 1464 of yacc.c  */
-#line 474 "gram.y"
+#line 477 "gram.y"
     {
-			prefix->AdvPreferredLifetime = (yyvsp[(2) - (3)].num);
+			prefix->AdvValidLifetime = (yyvsp[(2) - (3)].num);
 		}
     break;
 
   case 52:
 
 /* Line 1464 of yacc.c  */
-#line 478 "gram.y"
+#line 481 "gram.y"
+    {
+			prefix->AdvPreferredLifetime = (yyvsp[(2) - (3)].num);
+		}
+    break;
+
+  case 53:
+
+/* Line 1464 of yacc.c  */
+#line 485 "gram.y"
     {
 			if (prefix->AutoSelected) {
 				flog(LOG_ERR, "automatically selecting the prefix and Base6to4Interface are mutually exclusive");
@@ -2143,23 +2178,23 @@ yyreduce:
 		}
     break;
 
-  case 53:
+  case 54:
 
 /* Line 1464 of yacc.c  */
-#line 490 "gram.y"
+#line 497 "gram.y"
     {
 			(yyval.rinfo) = route;
 			route = NULL;
 		}
     break;
 
-  case 54:
+  case 55:
 
 /* Line 1464 of yacc.c  */
-#line 498 "gram.y"
+#line 505 "gram.y"
     {
 			route = malloc(sizeof(struct AdvRoute));
-			
+
 			if (route == NULL) {
 				flog(LOG_CRIT, "malloc failed: %s", strerror(errno));
 				ABORT;
@@ -2179,43 +2214,43 @@ yyreduce:
 		}
     break;
 
-  case 59:
-
-/* Line 1464 of yacc.c  */
-#line 531 "gram.y"
-    {
-			route->AdvRoutePreference = (yyvsp[(2) - (3)].snum);
-		}
-    break;
-
   case 60:
 
 /* Line 1464 of yacc.c  */
-#line 535 "gram.y"
+#line 538 "gram.y"
     {
-			route->AdvRouteLifetime = (yyvsp[(2) - (3)].num);
+			route->AdvRoutePreference = (yyvsp[(2) - (3)].snum);
 		}
     break;
 
   case 61:
 
 /* Line 1464 of yacc.c  */
-#line 541 "gram.y"
+#line 542 "gram.y"
+    {
+			route->AdvRouteLifetime = (yyvsp[(2) - (3)].num);
+		}
+    break;
+
+  case 62:
+
+/* Line 1464 of yacc.c  */
+#line 548 "gram.y"
     {
 			(yyval.rdnssinfo) = rdnss;
 			rdnss = NULL;
 		}
     break;
 
-  case 64:
+  case 65:
 
 /* Line 1464 of yacc.c  */
-#line 552 "gram.y"
+#line 559 "gram.y"
     {
 			if (!rdnss) {
 				/* first IP found */
 				rdnss = malloc(sizeof(struct AdvRDNSS));
-				
+
 				if (rdnss == NULL) {
 					flog(LOG_CRIT, "malloc failed: %s", strerror(errno));
 					ABORT;
@@ -2223,7 +2258,7 @@ yyreduce:
 
 				rdnss_init_defaults(rdnss, iface);
 			}
-			
+
 			switch (rdnss->AdvRDNSSNumber) {
 				case 0:
 					memcpy(&rdnss->AdvRDNSSAddr1, (yyvsp[(1) - (1)].addr), sizeof(struct in6_addr));
@@ -2241,14 +2276,14 @@ yyreduce:
 					flog(LOG_CRIT, "Too many addresses in RDNSS section");
 					ABORT;
 			}
-			
+
 		}
     break;
 
-  case 65:
+  case 66:
 
 /* Line 1464 of yacc.c  */
-#line 587 "gram.y"
+#line 594 "gram.y"
     {
 			if (!rdnss) {
 				flog(LOG_CRIT, "No address specified in RDNSS section");
@@ -2257,28 +2292,28 @@ yyreduce:
 		}
     break;
 
-  case 70:
-
-/* Line 1464 of yacc.c  */
-#line 605 "gram.y"
-    {
-			rdnss->AdvRDNSSPreference = (yyvsp[(2) - (3)].num);
-		}
-    break;
-
   case 71:
 
 /* Line 1464 of yacc.c  */
-#line 609 "gram.y"
+#line 612 "gram.y"
     {
-			rdnss->AdvRDNSSOpenFlag = (yyvsp[(2) - (3)].num);
+			flog(LOG_WARNING, "Ignoring deprecated RDNSS preference.");
 		}
     break;
 
   case 72:
 
 /* Line 1464 of yacc.c  */
-#line 613 "gram.y"
+#line 616 "gram.y"
+    {
+			flog(LOG_WARNING, "Ignoring deprecated RDNSS open flag.");
+		}
+    break;
+
+  case 73:
+
+/* Line 1464 of yacc.c  */
+#line 620 "gram.y"
     {
 			if ((yyvsp[(2) - (3)].num) < iface->MaxRtrAdvInterval && (yyvsp[(2) - (3)].num) != 0) {
 				flog(LOG_ERR, "AdvRDNSSLifetime must be at least MaxRtrAdvInterval");
@@ -2291,19 +2326,102 @@ yyreduce:
 		}
     break;
 
-  case 73:
-
-/* Line 1464 of yacc.c  */
-#line 626 "gram.y"
-    {
-                                (yyval.num) = (yyvsp[(1) - (1)].num); 
-                        }
-    break;
-
   case 74:
 
 /* Line 1464 of yacc.c  */
-#line 630 "gram.y"
+#line 633 "gram.y"
+    {
+			(yyval.dnsslinfo) = dnssl;
+			dnssl = NULL;
+		}
+    break;
+
+  case 77:
+
+/* Line 1464 of yacc.c  */
+#line 644 "gram.y"
+    {
+			char *ch;
+			for (ch = (yyvsp[(1) - (1)].str);*ch != '\0';ch++) {
+				if (*ch >= 'A' && *ch <= 'Z')
+					continue;
+				if (*ch >= 'a' && *ch <= 'z')
+					continue;
+				if (*ch >= '0' && *ch <= '9')
+					continue;
+				if (*ch == '-' || *ch == '.')
+					continue;
+
+				flog(LOG_CRIT, "Invalid domain suffix specified");
+				ABORT;
+			}
+
+			if (!dnssl) {
+				/* first domain found */
+				dnssl = malloc(sizeof(struct AdvDNSSL));
+
+				if (dnssl == NULL) {
+					flog(LOG_CRIT, "malloc failed: %s", strerror(errno));
+					ABORT;
+				}
+
+				dnssl_init_defaults(dnssl, iface);
+			}
+
+			dnssl->AdvDNSSLNumber++;
+			dnssl->AdvDNSSLSuffixes =
+				realloc(dnssl->AdvDNSSLSuffixes,
+					dnssl->AdvDNSSLNumber * sizeof(char*));
+			if (dnssl->AdvDNSSLSuffixes == NULL) {
+				flog(LOG_CRIT, "realloc failed: %s", strerror(errno));
+				ABORT;
+			}
+
+			dnssl->AdvDNSSLSuffixes[dnssl->AdvDNSSLNumber - 1] = strdup((yyvsp[(1) - (1)].str));
+		}
+    break;
+
+  case 78:
+
+/* Line 1464 of yacc.c  */
+#line 686 "gram.y"
+    {
+			if (!dnssl) {
+				flog(LOG_CRIT, "No domain specified in DNSSL section");
+				ABORT;
+			}
+		}
+    break;
+
+  case 83:
+
+/* Line 1464 of yacc.c  */
+#line 704 "gram.y"
+    {
+			if ((yyvsp[(2) - (3)].num) < iface->MaxRtrAdvInterval && (yyvsp[(2) - (3)].num) != 0) {
+				flog(LOG_ERR, "AdvDNSSLLifetime must be at least MaxRtrAdvInterval");
+				ABORT;
+			}
+			if ((yyvsp[(2) - (3)].num) > 2*(iface->MaxRtrAdvInterval))
+				flog(LOG_WARNING, "Warning: AdvDNSSLLifetime <= 2*MaxRtrAdvInterval would allow stale DNS suffixes to be deleted faster");
+
+			dnssl->AdvDNSSLLifetime = (yyvsp[(2) - (3)].num);
+		}
+    break;
+
+  case 84:
+
+/* Line 1464 of yacc.c  */
+#line 717 "gram.y"
+    {
+                                (yyval.num) = (yyvsp[(1) - (1)].num);
+                        }
+    break;
+
+  case 85:
+
+/* Line 1464 of yacc.c  */
+#line 721 "gram.y"
     {
                                 (yyval.num) = (uint32_t)~0;
                         }
@@ -2312,7 +2430,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 2316 "y.tab.c"
+#line 2434 "gram.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2524,7 +2642,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 635 "gram.y"
+#line 726 "gram.y"
 
 
 static
@@ -2532,7 +2650,7 @@ void cleanup(void)
 {
 	if (iface)
 		free(iface);
-	
+
 	if (prefix)
 		free(prefix);
 
@@ -2541,6 +2659,14 @@ void cleanup(void)
 
 	if (rdnss)
 		free(rdnss);
+
+	if (dnssl) {
+		int i;
+		for (i = 0;i < dnssl->AdvDNSSLNumber;i++)
+			free(dnssl->AdvDNSSLSuffixes[i]);
+		free(dnssl->AdvDNSSLSuffixes);
+		free(dnssl);
+	}
 }
 
 static void

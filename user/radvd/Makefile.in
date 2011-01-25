@@ -847,6 +847,7 @@ scanner.o: gram.h
 
 dist-clean:
 	rm -f Makefile
+	rm -f config.log
 	rm -rf .deps
 	rm -rf redhat
 	rm -rf autom4te.cache
