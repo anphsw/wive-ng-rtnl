@@ -350,7 +350,7 @@ static int pppoe_rcv_core(struct sock *sk, struct sk_buff *skb)
 	struct pppox_sock *relay_po = NULL;
 
 	if (sk->sk_state & PPPOX_BOUND) {
-		struct pppoe_hdr *ph = pppoe_hdr(skb);
+		struct pppoe_hdr *ph = (struct pppoe_hdr *) skb->nh.raw;
 		int len = ntohs(ph->length);
 		skb_pull_rcsum(skb, sizeof(struct pppoe_hdr));
 		if (pskb_trim_rcsum(skb, len))
@@ -404,7 +404,7 @@ static int pppoe_rcv(struct sk_buff *skb,
 	if (!pskb_may_pull(skb, sizeof(struct pppoe_hdr)))
 		goto drop;
 
-	ph = pppoe_hdr(skb);
+	ph = (struct pppoe_hdr *) skb->nh.raw;
 
 	po = get_item((unsigned long) ph->sid, eth_hdr(skb)->h_source, dev->ifindex);
 	if (po != NULL)
@@ -436,7 +436,7 @@ static int pppoe_disc_rcv(struct sk_buff *skb,
 	if (!(skb = skb_share_check(skb, GFP_ATOMIC)))
 		goto out;
 
-	ph = pppoe_hdr(skb);
+	ph = (struct pppoe_hdr *) skb->nh.raw;
 	if (ph->code != PADT_CODE)
 		goto abort;
 
@@ -847,6 +847,7 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 {
 	struct pppox_sock *po = pppox_sk(sk);
 	struct net_device *dev = po->pppoe_dev;
+	struct pppoe_hdr hdr;
 	struct pppoe_hdr *ph;
 	int headroom = skb_headroom(skb);
 	int data_len = skb->len;
@@ -854,6 +855,12 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED))
 		goto abort;
+
+	hdr.ver	= 1;
+	hdr.type = 1;
+	hdr.code = 0;
+	hdr.sid	= po->num;
+	hdr.length = htons(skb->len);
 
 	if (!dev)
 		goto abort;
@@ -879,17 +886,12 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 			goto abort;
 	}
 
-	__skb_push(skb, sizeof(*ph));
+	ph = (struct pppoe_hdr *) skb_push(skb2, sizeof(struct pppoe_hdr));
+	memcpy(ph, &hdr, sizeof(struct pppoe_hdr));
+	skb2->protocol = __constant_htons(ETH_P_PPP_SES);
+
 	skb2->nh.raw = skb2->data;
 
-	ph = pppoe_hdr(skb);
-	ph->ver	= 1;
-	ph->type = 1;
-	ph->code = 0;
-	ph->sid	= po->num;
-	ph->length = htons(data_len);
-
-	skb->protocol = __constant_htons(ETH_P_PPP_SES);
 	skb2->dev = dev;
 
 	dev->hard_header(skb2, dev, ETH_P_PPP_SES,
@@ -935,6 +937,8 @@ static int pppoe_recvmsg(struct kiocb *iocb, struct socket *sock,
 	struct sock *sk = sock->sk;
 	struct sk_buff *skb = NULL;
 	int error = 0;
+	int len;
+	struct pppoe_hdr *ph = NULL;
 
 	if (sk->sk_state & PPPOX_BOUND) {
 		error = -EIO;
@@ -951,15 +955,19 @@ static int pppoe_recvmsg(struct kiocb *iocb, struct socket *sock,
 	m->msg_namelen = 0;
 
 	if (skb) {
-		struct pppoe_hdr *ph = pppoe_hdr(skb);
-		const int len = ntohs(ph->length);
+		error = 0;
+		ph = (struct pppoe_hdr *) skb->nh.raw;
+		len = ntohs(ph->length);
 
 		error = memcpy_toiovec(m->msg_iov, (unsigned char *) &ph->tag[0], len);
-		if (error == 0)
-			error = len;
+		if (error < 0)
+			goto do_skb_free;
+		error = len;
 	}
 
-	kfree_skb(skb);
+do_skb_free:
+	if (skb)
+		kfree_skb(skb);
 end:
 	return error;
 }
