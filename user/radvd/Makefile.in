@@ -138,13 +138,13 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CC = @CC@
+CC ?= @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ -Wall -Wpointer-arith  -Wcast-qual -Wcast-align \
+CFLAGS ?= @CFLAGS@ -Wall -Wpointer-arith  -Wcast-qual -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
 
-CPP = @CPP@
-CPPFLAGS = @CPPFLAGS@
+CPP ?= @CPP@
+CPPFLAGS ?= @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = -DPATH_RADVD_CONF=\"$(PATH_RADVD_CONF)\" \
 	-DPATH_RADVD_LOG=\"$(PATH_RADVD_LOG)\" -DLOG_FACILITY=$(LOG_FACILITY) \
@@ -191,7 +191,7 @@ RM = @RM@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
-STRIP = @STRIP@
+STRIP ?= @STRIP@
 TAR = @TAR@
 VERSION = @VERSION@
 YACC = @YACC@
@@ -200,7 +200,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_CC = @ac_ct_CC@
+ac_ct_CC ?= @ac_ct_CC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -843,6 +843,12 @@ dist-hook:
 		$(srcdir)/redhat/radvd.sysconfig $(distdir)/redhat
 
 scanner.o: gram.h
+
+dist-clean:
+	rm -f Makefile
+	rm -rf .deps
+	rm -rf redhat
+	rm -rf autom4te.cache
 
 romfs:                                                                                                                       
 	for i in $(PROGRAMS) ; do $(ROMFSINST) /sbin/$$i ; done    
