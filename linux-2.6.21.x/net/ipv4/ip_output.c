@@ -1297,7 +1297,7 @@ error:
 /*
  *	Throw away all pending data on the socket.
  */
-void ip_flush_pending_frames(struct sock *sk)
+inline void ip_flush_pending_frames(struct sock *sk)
 {
 	struct inet_sock *inet = inet_sk(sk);
 	struct sk_buff *skb;
@@ -1318,7 +1318,7 @@ void ip_flush_pending_frames(struct sock *sk)
 /*
  *	Fetch data from kernel space and fill in checksum if needed.
  */
-static int ip_reply_glue_bits(void *dptr, char *to, int offset,
+static inline int ip_reply_glue_bits(void *dptr, char *to, int offset,
 			      int len, int odd, struct sk_buff *skb)
 {
 	__wsum csum;
