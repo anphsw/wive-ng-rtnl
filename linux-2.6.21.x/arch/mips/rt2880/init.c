@@ -461,5 +461,5 @@ __init void prom_init(void)
 #else
 	printk("LINUX started...\n");
 #endif
-	printk("The CPU feqenuce set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
+	printk("The CPU frequency set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
 }
