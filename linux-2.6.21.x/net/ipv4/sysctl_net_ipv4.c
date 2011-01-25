@@ -29,6 +29,13 @@ static int ip_local_port_range_min[] = { 1, 1 };
 static int ip_local_port_range_max[] = { 65535, 65535 };
 #endif
 
+#ifdef CONFIG_BRIDGE_FASTPATH
+/* bridge fastpath enabled per default */
+int bridge_fast_path_enabled=0;
+/* export for module support */
+EXPORT_SYMBOL(bridge_fast_path_enabled);
+#endif
+
 struct ipv4_config ipv4_config;
 
 #ifdef CONFIG_SYSCTL
@@ -807,6 +814,16 @@ ctl_table ipv4_table[] = {
 		.proc_handler   = &proc_allowed_congestion_control,
 		.strategy	= &strategy_allowed_congestion_control,
 	},
+#ifdef CONFIG_BRIDGE_FASTPATH
+	{
+		.ctl_name	= NET_TCP_ALLOWED_BRIDGE_FASTPATH,
+		.procname	= "bridge_fastpath",
+		.data		= &bridge_fast_path_enabled,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler   = &proc_dointvec
+	},
+#endif
 	{ .ctl_name = 0 }
 };
 

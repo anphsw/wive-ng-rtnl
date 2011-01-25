@@ -407,9 +407,7 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	if ((opt->ppp_flags & SC_COMP_PROT) && data[0]==0 && !islcp)
 		skb_pull(skb,1);
 
-	/*
-		* Put in the address/control bytes if necessary
-		*/
+	/* Put in the address/control bytes if necessary */
 	if ((opt->ppp_flags & SC_COMP_AC) == 0 || islcp) {
 		data=skb_push(skb,2);
 		data[0]=PPP_ALLSTATIONS;
@@ -422,7 +420,7 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
   
 	if (opt->ack_sent == seq_recv) header_len-=sizeof(hdr->ack);
 
-	// Push down and install GRE header
+	/* Push down and install GRE header */
 	skb_push(skb,header_len);
 	hdr=(struct pptp_gre_header *)(skb->data);
 

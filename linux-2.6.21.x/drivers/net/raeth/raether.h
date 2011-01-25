@@ -29,7 +29,7 @@
 #endif
 #define NUM_RX_MAX_PROCESS 64
 #else
-#ifdef CONFIG_CONFIG_BRIDGE_FASTPATH
+#ifdef CONFIG_BRIDGE_FASTPATH
 // To avoid driver tx ring full
 #define NUM_RX_DESC     512
 #define NUM_TX_DESC    	512

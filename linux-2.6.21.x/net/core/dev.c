@@ -1597,10 +1597,9 @@ int netif_rx(struct sk_buff *skb)
 	unsigned char *dest = eth_hdr(skb)->h_dest;
 
 	p = skb->dev->br_port;
-	if((p!=NULL) && (p->br!=NULL)){
+	if ((bridge_fast_path_enabled) && (((p!=NULL) && (p->br!=NULL)))) {
 		br=p->br;
-	}else{
-		//printk("!!!! bridge null!! <%s %d>\n",__FUNCTION__,__LINE__);
+	} else {
 		goto SKIP_FAST_BRIDGE;
 	}
 	
