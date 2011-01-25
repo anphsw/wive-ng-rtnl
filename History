@@ -244,9 +244,17 @@
 55) Add module expressnat offload ported for independed conntrack. Need fix some bug in code.<br>
 56) Fix crash goahead at ap get mac list (new driver add ApIdx in RT_802_11_MAC_ENTRY structure)<br>
 57) Fix igmpproxy wan port select<br>
-58) Some kernel code optimization<br>
+58) Some kernel code optimizations<br>
 59) Update radvd to 1.7 version at Jan 12, 2011.<br>
-60) More kernel/apps optimization and more clean build userlevel<br>
+60) More kernel/apps optimization and more clean build userlevel.<br>
+61) Fix ip fragmentation.<br>
+62) Not wait connect STA+PPPOE if PPPOE iface=lan.<br>
+63) Update fib and net kernel subsystem.<br>
+64) Memory subsystem speedup.<br>
+65) Tune raether buffers size for improve performance.<br>
+66) Random subsystem update and speedup.<br>
+67) Correctly handle 64-bit values on 32-bit architectures
+
 
 <br><br>
 <b>For support see:</b><br>
