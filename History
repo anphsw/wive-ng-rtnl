@@ -245,6 +245,8 @@
 56) Fix crash goahead at ap get mac list (new driver add ApIdx in RT_802_11_MAC_ENTRY structure)<br>
 57) Fix igmpproxy wan port select<br>
 58) Some kernel code optimization<br>
+59) Update radvd to 1.7 version at Jan 12, 2011.<br>
+60) More kernel/apps optimization and more clean build userlevel<br>
 
 <br><br>
 <b>For support see:</b><br>
