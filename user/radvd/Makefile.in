@@ -165,6 +165,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LDFLAGS += -L$(ROOTDIR)/lib/libflex
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
@@ -260,7 +261,7 @@ COMMON_SRC = log.c socket.c recv.c util.c radvd.h defaults.h pathnames.h \
 radvd_SOURCES = $(COMMON_SRC) radvd.c timer.c send.c process.c interface.c \
 	device.c device-common.c privsep.c gram.y gram.h scanner.l
 
-radvd_LDADD = -lfl
+radvd_LDADD = -L$(ROOTDIR)/lib/libflex -lfl
 EXTRA_radvd_SOURCES = device-linux.c device-bsd44.c privsep-linux.c privsep-bsd44.c
 radvdump_SOURCES = $(COMMON_SRC) radvdump.c
 man_MANS = radvd.8 radvdump.8 radvd.conf.5
