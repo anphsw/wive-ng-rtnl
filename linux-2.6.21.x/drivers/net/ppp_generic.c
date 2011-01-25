@@ -1009,7 +1009,7 @@ static void ppp_setup(struct net_device *dev)
  * Called to do any work queued up on the transmit side
  * that can now be done.
  */
-static void
+static inline void
 ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
@@ -1444,7 +1444,7 @@ static int ppp_mp_explode(struct ppp *ppp, struct sk_buff *skb)
 /*
  * Try to send data out on a channel.
  */
-static void
+static inline void
 ppp_channel_push(struct channel *pch)
 {
 	struct sk_buff *skb;
@@ -1740,7 +1740,6 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 static struct sk_buff *
 ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 {
-	//int proto = PPP_PROTO(skb);
 	unsigned int proto = PPP_PROTO(skb);
 	struct sk_buff *ns;
 	int len;
@@ -2075,7 +2074,7 @@ ppp_register_channel(struct ppp_channel *chan)
 /*
  * Return the index of a channel.
  */
-int ppp_channel_index(struct ppp_channel *chan)
+inline int ppp_channel_index(struct ppp_channel *chan)
 {
 	struct channel *pch = chan->ppp;
 
@@ -2087,7 +2086,7 @@ int ppp_channel_index(struct ppp_channel *chan)
 /*
  * Return the PPP unit number to which a channel is connected.
  */
-int ppp_unit_number(struct ppp_channel *chan)
+inline int ppp_unit_number(struct ppp_channel *chan)
 {
 	struct channel *pch = chan->ppp;
 	int unit = -1;
