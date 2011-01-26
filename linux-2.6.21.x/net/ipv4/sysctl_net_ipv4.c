@@ -31,7 +31,7 @@ static int ip_local_port_range_max[] = { 65535, 65535 };
 
 #ifdef CONFIG_BRIDGE_FASTPATH
 /* bridge fastpath enabled per default */
-int bridge_fast_path_enabled=0;
+int bridge_fast_path_enabled=1;
 /* export for module support */
 EXPORT_SYMBOL(bridge_fast_path_enabled);
 #endif

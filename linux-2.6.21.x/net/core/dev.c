@@ -1590,6 +1590,7 @@ int netif_rx(struct sk_buff *skb)
 
 #ifdef CONFIG_BRIDGE_FASTPATH
 #ifndef CONFIG_BRIDGE_NETFILTER
+	extern int bridge_fast_path_enabled;
 	struct net_bridge_port *p;
 	struct net_bridge *br = NULL;
 	struct net_bridge_fdb_entry *dst;
