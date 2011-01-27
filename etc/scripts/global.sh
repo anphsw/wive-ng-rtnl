@@ -165,7 +165,7 @@ setSwMode()
 	port_swmode=`nvram_get 2860 port"$i"_swmode`
 	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
 	    echo "Port$i set mode $port_swmode"
-	    let "phys_portN=$port_swmode-1"
+	    let "phys_portN=$i-1"
 	    if [ "$port_swmode" = "100f " ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x2100
 	    elif [ "$port_swmode" = "100h " ]; then
