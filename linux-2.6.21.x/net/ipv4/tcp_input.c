@@ -2014,7 +2014,7 @@ static void tcp_try_to_open(struct sock *sk, int flag)
 
 	tp->left_out = tp->sacked_out;
 
-	if (tp->retrans_out == 0)
+	if (!tp->frto_counter && tp->retrans_out == 0)
 		tp->retrans_stamp = 0;
 
 	if (flag&FLAG_ECE)
