@@ -161,11 +161,11 @@ udhcpc_opts()
 
 setSwMode()
 {
+    phys_portN=4
     for i in `seq 1 5`; do
 	port_swmode=`nvram_get 2860 port"$i"_swmode`
 	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-	    echo "Port$i set mode $port_swmode"
-	    let "phys_portN=$i-1"
+	    echo ">>> Port $phys_portN set mode $port_swmode <<<"
 	    if [ "$port_swmode" = "100f" ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x2100
 	    elif [ "$port_swmode" = "100h" ]; then
@@ -176,6 +176,7 @@ setSwMode()
 		mii_mgr -s -p$phys_portN -r0 -v 0x0000
 	    fi
 	fi
+	let "phys_portN=$phys_portN-1"
     done
 }
 
