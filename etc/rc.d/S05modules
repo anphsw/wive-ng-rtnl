@@ -24,6 +24,7 @@ start() {
 	    setLanWan
 	fi
 	resetPhy
+	setSwMode
 	#not load nf_nat helpers in bridge mode
 	if [ "$opmode" != "0" ]; then
 	    #load conntrack helpers

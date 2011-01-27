@@ -51,6 +51,7 @@ case "$1" in
 		# In gate mode configure vlans
 		setLanWan
 	    fi
+	    setSwMode
 	fi
     fi
     ;;
