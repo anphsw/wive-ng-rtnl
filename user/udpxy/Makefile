@@ -26,7 +26,7 @@ UDPXREC := udpxrec
 
 MKDEPOPT := -M
 DEBUG_ON := -g
-CFLAGS += -Os --pedantic -W -Wall $(INCLUDES)
+CFLAGS += --pedantic -W -Wall $(INCLUDES)
 # -Werror
 SYSTEM=$(shell uname 2>/dev/null)
 ifeq ($(SYSTEM), FreeBSD)
@@ -160,6 +160,7 @@ $(EXEC) : $(DEPFILE) $(OBJ)
 
 clean:
 	rm -f $(CORES) $(DEPFILE) $(OBJ) $(EXEC) $(UDPXREC)
+	rm -f udpxy.dep
 
 incbuild:
 	@expr `cat $(BUILDFILE)` + 1 > $(BUILDFILE)
