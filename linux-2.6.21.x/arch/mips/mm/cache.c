@@ -3,11 +3,14 @@
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (C) 1994 - 2003, 07 by Ralf Baechle (ralf@linux-mips.org)
+ * Copyright (C) 1994 - 2003, 06, 07 by Ralf Baechle (ralf@linux-mips.org)
  * Copyright (C) 2007 MIPS Technologies, Inc.
  */
+#include <linux/fs.h>
+#include <linux/fcntl.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/linkage.h>
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
@@ -28,6 +31,9 @@ void (*flush_cache_page)(struct vm_area_struct *vma, unsigned long page,
 	unsigned long pfn);
 void (*flush_icache_range)(unsigned long start, unsigned long end);
 
+void (*__flush_cache_vmap)(void);
+void (*__flush_cache_vunmap)(void);
+
 /* MIPS specific cache operations */
 void (*flush_cache_sigtramp)(unsigned long addr);
 void (*local_flush_data_cache_page)(void * addr);
@@ -45,8 +51,6 @@ void (*_dma_cache_wback)(unsigned long start, unsigned long size);
 void (*_dma_cache_inv)(unsigned long start, unsigned long size);
 
 EXPORT_SYMBOL(_dma_cache_wback_inv);
-EXPORT_SYMBOL(_dma_cache_wback);
-EXPORT_SYMBOL(_dma_cache_inv);
 
 #endif /* CONFIG_DMA_NONCOHERENT */
 
@@ -156,12 +160,14 @@ void __init cpu_cache_init(void)
 		tx39_cache_init();
 		return;
 	}
-	if (cpu_has_sb1_cache) {
-		extern void __weak sb1_cache_init(void);
-
-		sb1_cache_init();
-		return;
-	}
 
 	panic(cache_panic);
+}
+
+int __weak __uncached_access(struct file *file, unsigned long addr)
+{
+	if (file->f_flags & O_SYNC)
+		return 1;
+
+	return addr >= __pa(high_memory);
 }
