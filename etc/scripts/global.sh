@@ -166,13 +166,13 @@ setSwMode()
 	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
 	    echo "Port$i set mode $port_swmode"
 	    let "phys_portN=$i-1"
-	    if [ "$port_swmode" = "100f " ]; then
+	    if [ "$port_swmode" = "100f" ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x2100
-	    elif [ "$port_swmode" = "100h " ]; then
+	    elif [ "$port_swmode" = "100h" ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x2000
-	    elif [ "$port_swmode" = "10f " ]; then
+	    elif [ "$port_swmode" = "10f" ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x0100
-	    elif [ "$port_swmode" = "10h " ]; then
+	    elif [ "$port_swmode" = "10h" ]; then
 		mii_mgr -s -p$phys_portN -r0 -v 0x0000
 	    fi
 	fi
