@@ -253,7 +253,8 @@
 64) Memory subsystem speedup.<br>
 65) Tune raether buffers size for improve performance.<br>
 66) Random subsystem update and speedup.<br>
-67) Correctly handle 64-bit values on 32-bit architectures
+67) Correctly handle 64-bit values on 32-bit architectures.<br>
+68) Fix replace route in ppp on dhcp renew and fiw rewrite dns from dhcp at renew.<br>
 
 
 <br><br>
