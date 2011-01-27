@@ -1873,6 +1873,9 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 	struct sk_buff *skb;
 	int packet_cnt;
 
+	if (!tp->packets_out)
+		return;
+
 	if (tp->retransmit_skb_hint) {
 		skb = tp->retransmit_skb_hint;
 		packet_cnt = tp->retransmit_cnt_hint;
@@ -1902,14 +1905,17 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 
 			if (sacked & TCPCB_LOST) {
 				if (!(sacked&(TCPCB_SACKED_ACKED|TCPCB_SACKED_RETRANS))) {
+					int mib_idx;
+
 					if (tcp_retransmit_skb(sk, skb)) {
 						tp->retransmit_skb_hint = NULL;
 						return;
 					}
 					if (icsk->icsk_ca_state != TCP_CA_Loss)
-						NET_INC_STATS_BH(LINUX_MIB_TCPFASTRETRANS);
+						mib_idx = LINUX_MIB_TCPFASTRETRANS;
 					else
-						NET_INC_STATS_BH(LINUX_MIB_TCPSLOWSTARTRETRANS);
+						mib_idx = LINUX_MIB_TCPSLOWSTARTRETRANS;
+					NET_INC_STATS_BH(mib_idx);
 
 					if (skb ==
 					    skb_peek(&sk->sk_write_queue))
