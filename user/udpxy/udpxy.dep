@@ -1,0 +1,625 @@
+udpxy.o: udpxy.c osdef.h /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/net/if.h \
+ /opt/Wive-RTNL/lib/include/sys/wait.h \
+ /opt/Wive-RTNL/lib/include/signal.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/signum.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/siginfo.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigaction.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sgidefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigstack.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigthread.h \
+ /opt/Wive-RTNL/lib/include/sys/resource.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/resource.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/waitflags.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/waitstatus.h \
+ /opt/Wive-RTNL/lib/include/sys/stat.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stat.h \
+ /opt/Wive-RTNL/lib/include/sys/time.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/string.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/fcntl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/fcntl.h \
+ /opt/Wive-RTNL/lib/include/syslog.h \
+ /opt/Wive-RTNL/lib/include/sys/syslog.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h mtrace.h \
+ rparse.h util.h prbuf.h ifaddr.h udpxy.h ctx.h dpkt.h mkpg.h rtp.h \
+ uopt.h netop.h
+rparse.o: rparse.c /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/stdlib.h /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/assert.h rparse.h mtrace.h
+util.o: util.c /opt/Wive-RTNL/lib/include/sys/stat.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stat.h \
+ /opt/Wive-RTNL/lib/include/fcntl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/fcntl.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h /opt/Wive-RTNL/lib/include/time.h \
+ /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/signal.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/signum.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/siginfo.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigaction.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sgidefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigstack.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigthread.h \
+ /opt/Wive-RTNL/lib/include/stdlib.h /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/syslog.h \
+ /opt/Wive-RTNL/lib/include/sys/syslog.h \
+ /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/sys/time.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h \
+ /opt/Wive-RTNL/lib/include/ctype.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_touplow.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h util.h mtrace.h \
+ osdef.h /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h
+prbuf.o: prbuf.c /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/stdlib.h /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h prbuf.h
+ifaddr.o: ifaddr.c /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/sys/ioctl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/ioctls.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctls.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/ioctl-types.h \
+ /opt/Wive-RTNL/lib/include/sys/ttydefaults.h \
+ /opt/Wive-RTNL/lib/include/string.h /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/net/if.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/assert.h osdef.h ifaddr.h
+ctx.o: ctx.c osdef.h /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/sys/stat.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stat.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/net/if.h /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/fcntl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/fcntl.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h ctx.h udpxy.h \
+ dpkt.h util.h mtrace.h
+mkpg.o: mkpg.c /opt/Wive-RTNL/lib/include/time.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/string.h ctx.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h udpxy.h dpkt.h \
+ prbuf.h util.h mtrace.h statpg.h mkpg.h
+rtp.o: rtp.c /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/assert.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h /opt/Wive-RTNL/lib/include/time.h \
+ /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h rtp.h mtrace.h \
+ util.h
+uopt.o: uopt.c /opt/Wive-RTNL/lib/include/assert.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/alloca.h /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h udpxy.h uopt.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h util.h
+dpkt.o: dpkt.c /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/stdlib.h /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/lib/include/string.h /opt/Wive-RTNL/lib/include/strings.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h udpxy.h \
+ dpkt.h rtp.h util.h mtrace.h
+netop.o: netop.c /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/fcntl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/fcntl.h udpxy.h netop.h util.h \
+ mtrace.h osdef.h
+extrn.o: extrn.c /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/lib/include/time.h /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/signal.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/signum.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/siginfo.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigaction.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sgidefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigstack.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigthread.h \
+ /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h VERSION BUILD
+udpxrec.o: udpxrec.c /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h \
+ /opt/Wive-RTNL/lib/include/unistd.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix_opt.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/confname.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/getopt.h \
+ /opt/Wive-RTNL/lib/include/string.h /opt/Wive-RTNL/lib/include/strings.h \
+ /opt/Wive-RTNL/lib/include/signal.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigset.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/signum.h \
+ /opt/Wive-RTNL/lib/include/time.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/siginfo.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigaction.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sigcontext.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sgidefs.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigstack.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sigthread.h \
+ /opt/Wive-RTNL/lib/include/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/errno_values.h \
+ /opt/Wive-RTNL/lib/include/assert.h /opt/Wive-RTNL/lib/include/stdlib.h \
+ /opt/Wive-RTNL/lib/include/sys/types.h \
+ /opt/Wive-RTNL/lib/include/endian.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/endian.h \
+ /opt/Wive-RTNL/lib/include/sys/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/select.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/time.h \
+ /opt/Wive-RTNL/lib/include/sys/sysmacros.h \
+ /opt/Wive-RTNL/lib/include/alloca.h \
+ /opt/Wive-RTNL/lib/include/sys/socket.h \
+ /opt/Wive-RTNL/lib/include/sys/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/socket.h \
+ /opt/Wive-RTNL/lib/include/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wordsize.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix1_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/local_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/linux/limits.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/posix2_lim.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sockaddr.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/socket.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/sockios.h \
+ /opt/Wive-RTNL/toolchain/usr/include/asm/ioctl.h \
+ /opt/Wive-RTNL/lib/include/arpa/inet.h \
+ /opt/Wive-RTNL/lib/include/netinet/in.h \
+ /opt/Wive-RTNL/lib/include/stdint.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/in.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/byteswap.h \
+ /opt/Wive-RTNL/lib/include/sys/stat.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stat.h \
+ /opt/Wive-RTNL/lib/include/fcntl.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/fcntl.h osdef.h udpxy.h util.h \
+ uopt.h /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_clk_tck.h ctx.h \
+ dpkt.h mtrace.h netop.h ifaddr.h
+main.o: main.c /opt/Wive-RTNL/lib/include/string.h \
+ /opt/Wive-RTNL/lib/include/features.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_config.h \
+ /opt/Wive-RTNL/lib/include/sys/cdefs.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stddef.h \
+ /opt/Wive-RTNL/lib/include/libgen.h /opt/Wive-RTNL/lib/include/stdio.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/kernel_types.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/pthreadtypes.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/sched.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/uClibc_stdio.h \
+ /opt/Wive-RTNL/lib/include/wchar.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/wchar.h \
+ /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include/stdarg.h \
+ /opt/Wive-RTNL/toolchain/usr/include/bits/stdio_lim.h

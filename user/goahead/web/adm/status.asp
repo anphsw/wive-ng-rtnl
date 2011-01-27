@@ -125,27 +125,40 @@ function PageInit()
 	if (!((wan_port >= '0') && (wan_port <= '4')))
 		wan_port = '4';
 	
-	document.setWanForm.wan_port.value = wan_port;
+	var form = document.setWanForm;
+	
+	form.wan_port.value = wan_port;
+	
+	// Show port speeds
+	var port_swmode = [ '<% getCfgZero(1, "port1_swmode"); %>', '<% getCfgZero(1, "port2_swmode"); %>', '<% getCfgZero(1, "port3_swmode"); %>', '<% getCfgZero(1, "port4_swmode"); %>', '<% getCfgZero(1, "port5_swmode"); %>' ];
+
+	for (var i=0; i<port_swmode.length; )
+	{
+		var port_speed = port_swmode[i++]; // Port number is 1..n
+		var element = form.elements['port' + i + '_swmode'];
+		if (element != null)
+			element.value = port_speed;
+	}
 	
 	reloadPage();
 }
 
 function reloadPage()
 {
-	ajaxLoadElement("sysinfoTable", "/adm/sysinfo.asp", onPageReload);
-	timer = setTimeout('reloadPage();', 3000);
-}
+	var reloader = function()
+	{
+		initTranslation();
+		showOpMode();
+		showPortStatus();
+		timer = setTimeout('reloadPage();', 3000);
+	}
 
-function onPageReload()
-{
-	initTranslation();
-	showOpMode();
-	showPortStatus();
+	ajaxLoadElement("sysinfoTable", "/adm/sysinfo.asp", reloader);
 }
 
 function setWanPort(form)
 {
-	if (confirm('Changing WAN port needs to reboot you router. Do you want to proceed?'))
+	if (confirm('Port configuration changes need to reboot you router. Do you want to proceed?'))
 	{
 		clearTimeout(timer);
 		ajaxPostForm(null, form, 'setwanReloader', '/messages/rebooting.asp');
@@ -165,9 +178,11 @@ function setWanPort(form)
 
 <form name="setWanForm" method="POST" action="/goform/setWanPort">
 <table width="95%" border="1" cellpadding="2" cellspacing="1" id="sysinfoTable">
-	<td class="head">
-		Wan port
-	</td>
+<tr>
+	<td class="title" colspan="2">Port management</td>
+</tr>
+<tr>
+	<td class="head">Wan port</td>
 	<td>
 		<select name="wan_port" onchange="showPortStatus();" class="short">
 			<option value="0">1</option>
@@ -176,10 +191,71 @@ function setWanPort(form)
 			<option value="3">4</option>
 			<option value="4">5</option>
 		</select>
-		<input type="button" class="half" value="Change port" onclick="setWanPort(this.form);" />
 		<iframe id="setwanReloader" name="setwanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 	</td>
+</tr>
+<tr>
+	<td class="head">Port 1 mode</td>
+	<td>
+		<select name="port1_swmode" class="mid">
+			<option value="auto">auto</option>
+			<option value="100f">100 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="10h">10 mbit/s half duplex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head">Port 2 mode</td>
+	<td>
+		<select name="port2_swmode" class="mid">
+			<option value="auto">auto</option>
+			<option value="100f">100 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="10h">10 mbit/s half duplex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head">Port 3 mode</td>
+	<td>
+		<select name="port3_swmode" class="mid">
+			<option value="auto">auto</option>
+			<option value="100f">100 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="10h">10 mbit/s half duplex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head">Port 4 mode</td>
+	<td>
+		<select name="port4_swmode" class="mid">
+			<option value="auto">auto</option>
+			<option value="100f">100 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="10h">10 mbit/s half duplex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head">Port 5 mode</td>
+	<td>
+		<select name="port5_swmode" class="mid">
+			<option value="auto">auto</option>
+			<option value="100f">100 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="10h">10 mbit/s half duplex</option>
+		</select>
+	</td>
+</tr>
 </table>
+<input type="button" class="mid" value="Change port configuration" onclick="setWanPort(this.form);" />
 </form>
 
 </td></tr></table>

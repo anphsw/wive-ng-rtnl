@@ -255,6 +255,8 @@
 66) Random subsystem update and speedup.<br>
 67) Correctly handle 64-bit values on 32-bit architectures.<br>
 68) Fix replace route in ppp on dhcp renew and fiw rewrite dns from dhcp at renew.<br>
+69) Add switch mode speed select in WebUI<br>
+70) Add bridge fastpath enable/disable in WebUI<br>
 
 
 <br><br>

@@ -166,7 +166,8 @@ const service_flag_t service_misc_flags[] =
 	{ T("krnlIpv6Pass"), "ipv6_pass", T("0") },
 	{ T("dhcpSwReset"), "dhcpSwReset", T("0") },
 	{ T("natFastpath"), "natFastpath", T("1") },
-	{ T("CronEnable"), "CrondEnable", T("0") },
+	{ T("bridgeFastpath"), "bridgeFastpath", T("1") },
+	{ T("CrondEnable"), "CrondEnable", T("0") },
 	{ NULL, NULL, NULL } // Terminator
 };
 

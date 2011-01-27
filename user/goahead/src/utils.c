@@ -1316,15 +1316,36 @@ final:
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)
 {
-	char* wan_port = websGetVar(wp, T("wan_port"), T("0"));
+	int i;
+	char w_name[20];
+	char* w_port = websGetVar(wp, T("wan_port"), T("0"));
+	
+	nvram_init(RT2860_NVRAM);
 	
 	// Set-up WAN port
-	if ((wan_port != NULL) && (strlen(wan_port) == 1))
+	if ((w_port != NULL) && (strlen(w_port) == 1))
 	{
-		if ((wan_port[0] >= '0') && (wan_port[0] <= '4'))
-			nvram_set(RT2860_NVRAM, "wan_port", wan_port);
+		if ((w_port[0] >= '0') && (w_port[0] <= '4'))
+			nvram_bufset(RT2860_NVRAM, "wan_port", w_port);
 	}
+	
+	// Now test values
+	for (i=1; i<=5; i++)
+	{
+		snprintf(w_name, sizeof(w_name), "port%d_swmode", i);
+		w_port = websGetVar(wp, w_name, T("auto"));
+		if ((w_port != NULL) && (strlen(w_port)>0))
+		{
+			printf("%s = %s\n", w_name, w_port);
+			nvram_bufset(RT2860_NVRAM, w_name, w_port);
+		}
+	}
+	
+	// Commit & close NVRAM
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
 
+	// Output timer for reloading
 	outputTimerForReload(wp, 50000);
 
 	// Reboot

@@ -159,6 +159,26 @@ udhcpc_opts()
 		    -O routes -O staticroutes -O msstaticroutes -f &"
 }
 
+setSwMode()
+{
+    for i in `seq 1 5`; do
+	port_swmode=`nvram_get 2860 port"$i"_swmode`
+	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+	    echo "Port$i set mode $port_swmode"
+	    let "phys_portN=$port_swmode-1"
+	    if [ "$port_swmode" = "100f " ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x2100
+	    elif [ "$port_swmode" = "100h " ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x2000
+	    elif [ "$port_swmode" = "10f " ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x0100
+	    elif [ "$port_swmode" = "10h " ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x0000
+	    fi
+	fi
+    done
+}
+
 setLanWan()
 {
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
@@ -169,6 +189,9 @@ if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
 	    echo '##### config vlan partition (LLLLW) #####'
 	    config-vlan.sh $SWITCH_MODE LLLLW
     fi
+	#set speed swith mode
+	setSwMode
+
 	echo '######## clear switch mac table  ########'
         switch clear
 fi

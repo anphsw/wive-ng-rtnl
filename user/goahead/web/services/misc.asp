@@ -123,7 +123,8 @@ function initValue()
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 	form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
-	form.CronEnable.value = defaultNumber("<% getCfgGeneral(1, "CronEnable"); %>", "0");
+	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
+	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 
 	if (lltdb == "0")
 	{
@@ -328,9 +329,18 @@ function CheckValue()
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">Bridge fastpath</td>
+<td>
+	<select name="bridgeFastpath" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
 <td class="head">Cron daemon</td>
 <td>
-	<select name="CronEnable" class="half">
+	<select name="CrondEnable" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>
