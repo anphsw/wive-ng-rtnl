@@ -112,7 +112,11 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	dst = NULL;
 
-	if (is_multicast_ether_addr(dest)) { 
+	if (skb->protocol == htons(ETH_P_PAE)) {
+		skb2 = skb;
+		/* Do not forward 802.1x/EAP frames */
+		skb = NULL;
+	} else if (is_multicast_ether_addr(dest)) {
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 		spin_lock_bh(&br->lock); // bridge lock
 
