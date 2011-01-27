@@ -65,29 +65,25 @@ case "$1" in
 	#Get default gateway
 	if [ -n "$router" ]; then
 	    #default route with metric 0 is through $iface?
-	    def_iface=`ip route | grep "default" | grep -v "metric" | sed 's,.*dev \([^ ]*\) .*,\1,g'`
-	    if [ -n "$def_iface" -a "$def_iface" != "$interface" ]; then
-		metric=1
-		smetric=1
-	    else
-		metric=0
-		smetric=0
-	    fi
-	    $LOG "Deleting default route"
-	    while ip route del default dev $interface ; do
-		:
-	    done
+	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	    if [ -z "$dgw_otherif" ]; then
+		$LOG "Deleting default route"
+		while ip route del default dev $interface ; do
+		    :
+		done
 
-	    for i in $router ; do
-		$LOG "Add default route $i dev $interface metric $metric"
-		ROUTELIST="$ROUTELIST default:$router:$interface:$metric"
-		#save first dgw with metric=1 to use in corbina hack
-		if [ "$metric" = "$smetric" ]; then
-		    echo $i > /tmp/default.gw
-		    first_dgw="$i"
-		fi
-    		metric=`expr $metric + 1`
-	    done
+		metric=0
+		for i in $router ; do
+		    $LOG "Add default route $i dev $interface metric $metric"
+		    ROUTELIST="$ROUTELIST default:$router:$interface:$metric"
+		    #save first dgw with metric=1 to use in corbina hack
+		    if [ "$metric" = "0" ]; then
+			echo $i > /tmp/default.gw
+			first_dgw="$i"
+		    fi
+    		    metric=`expr $metric + 1`
+		done
+	    fi
 	fi
 
 	#classful routes
@@ -132,27 +128,27 @@ case "$1" in
 		ip route replace $IPCMD
 	done
 
-	#Get DNS servers
-	if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
-	    $LOG "Renew DNS from dhcp"
-	    rm -f $RESOLV_CONF
-            #get domain name
-    	    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
-	    #parce dnsservers
-	    for i in $dns ; do
-	        $LOG "DNS= $i"
-	        echo nameserver $i >> $RESOLV_CONF
-		ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-		if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
-		    $LOG "Add static route to DNS $ROUTE_NS dev $interface"
-		    REPLACE="ip route replace $ROUTE_NS dev $interface"
-		    $REPLACE
-		fi
-	    done
-	else
-	    $LOG "Use static DNS."
-	fi
         if [ "$OLD_IP" != "$CUR_IP" ]; then
+	    #Get DNS servers
+	    if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
+		$LOG "Renew DNS from dhcp"
+		rm -f $RESOLV_CONF
+        	#get domain name
+    		[ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+		#parce dnsservers
+		for i in $dns ; do
+	    	    $LOG "DNS= $i"
+	    	    echo nameserver $i >> $RESOLV_CONF
+		    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+		    if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
+			$LOG "Add static route to DNS $ROUTE_NS dev $interface"
+			REPLACE="ip route replace $ROUTE_NS dev $interface"
+			$REPLACE
+		    fi
+		done
+	    else
+		$LOG "Use static DNS."
+	    fi
 		$LOG "Restart needed services"
 		services_restart.sh dhcp
 	fi
