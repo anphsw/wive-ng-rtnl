@@ -2312,8 +2312,7 @@ static void tcp_cong_avoid(struct sock *sk, u32 ack, u32 rtt,
 /* Restart timer after forward progress on connection.
  * RFC2988 recommends to restart timer to now+rto.
  */
-
-static void tcp_ack_packets_out(struct sock *sk)
+static void tcp_rearm_rto(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
@@ -2476,7 +2475,7 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 
 	if (acked&FLAG_ACKED) {
 		tcp_ack_update_rtt(sk, acked, seq_rtt);
-		tcp_ack_packets_out(sk);
+		tcp_rearm_rto(sk);
 
 		if (IsReno(tp))
 			tcp_remove_reno_sacks(sk, pkts_acked);
@@ -2493,7 +2492,7 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 	WARN_ON((int)tp->lost_out < 0);
 	WARN_ON((int)tp->retrans_out < 0);
 	if (!tp->packets_out && tp->rx_opt.sack_ok) {
-		const struct inet_connection_sock *icsk = inet_csk(sk);
+		icsk = inet_csk(sk);
 		if (tp->lost_out) {
 			printk(KERN_DEBUG "Leak l=%u %d\n",
 			       tp->lost_out, icsk->icsk_ca_state);
@@ -4222,7 +4221,8 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 					goto no_ack;
 			}
 
-			__tcp_ack_snd_check(sk, 0);
+			if (!copied_early || tp->rcv_nxt != tp->rcv_wup)
+				__tcp_ack_snd_check(sk, 0);
 no_ack:
 #ifdef CONFIG_NET_DMA
 			if (copied_early)

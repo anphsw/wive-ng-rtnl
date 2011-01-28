@@ -2494,6 +2494,7 @@ static unsigned int scan_ip6(const char *s, char ip[16])
 	unsigned int prefixlen = 0;
 	unsigned int suffixlen = 0;
 	__be32 tmp;
+	char *pos;
 
 	for (i = 0; i < 16; i++)
 		ip[i] = 0;
@@ -2508,12 +2509,9 @@ static unsigned int scan_ip6(const char *s, char ip[16])
 			}
 			s++;
 		}
-		{
-			char *tmp;
-			u = simple_strtoul(s, &tmp, 16);
-			i = tmp - s;
-		}
 
+		u = simple_strtoul(s, &pos, 16);
+		i = pos - s;
 		if (!i)
 			return 0;
 		if (prefixlen == 12 && s[i] == '.') {
@@ -2541,11 +2539,9 @@ static unsigned int scan_ip6(const char *s, char ip[16])
 			len++;
 		} else if (suffixlen != 0)
 			break;
-		{
-			char *tmp;
-			u = simple_strtol(s, &tmp, 16);
-			i = tmp - s;
-		}
+
+		u = simple_strtol(s, &pos, 16);
+		i = pos - s;
 		if (!i) {
 			if (*s)
 				len--;
