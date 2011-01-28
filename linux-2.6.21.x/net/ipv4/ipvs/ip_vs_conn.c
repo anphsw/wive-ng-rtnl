@@ -32,8 +32,11 @@
 #include <linux/vmalloc.h>
 #include <linux/proc_fs.h>		/* for proc_net_* */
 #include <linux/seq_file.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 #include <linux/random.h>
 
 #include <net/ip_vs.h>

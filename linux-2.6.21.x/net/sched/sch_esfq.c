@@ -49,8 +49,11 @@
 #include <linux/skbuff.h>
 #include <net/sock.h>
 #include <net/pkt_sched.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 #include <net/netfilter/nf_conntrack.h>
 
 /*	Stochastic Fairness Queuing algorithm.

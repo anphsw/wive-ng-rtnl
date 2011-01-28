@@ -19,8 +19,11 @@
 #include <linux/in6.h>
 #include <linux/ipv6.h>
 #include <linux/types.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 
 #include <net/inet_sock.h>
 

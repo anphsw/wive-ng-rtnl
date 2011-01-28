@@ -25,7 +25,9 @@
  * any bugs present are surely my fault.  -DaveM
  */
 
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#endif
 
 /* NOTE: Arguments are modified. */
 #define __jhash_mix(a, b, c) \

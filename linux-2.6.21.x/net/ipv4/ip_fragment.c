@@ -32,8 +32,11 @@
 #include <linux/ip.h>
 #include <linux/icmp.h>
 #include <linux/netdevice.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 #include <linux/random.h>
 #include <net/sock.h>
 #include <net/ip.h>

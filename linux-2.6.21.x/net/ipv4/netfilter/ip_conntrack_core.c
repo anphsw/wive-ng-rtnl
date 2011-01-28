@@ -35,8 +35,11 @@
 #include <linux/sysctl.h>
 #include <linux/slab.h>
 #include <linux/random.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 #include <linux/err.h>
 #include <linux/percpu.h>
 #include <linux/moduleparam.h>

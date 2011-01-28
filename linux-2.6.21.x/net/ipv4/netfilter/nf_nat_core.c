@@ -19,8 +19,11 @@
 #include <net/tcp.h>  /* For tcp_prot in getorigdst */
 #include <linux/icmp.h>
 #include <linux/udp.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 
 #include <linux/netfilter_ipv4.h>
 #include <net/netfilter/nf_conntrack.h>

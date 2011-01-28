@@ -11,8 +11,11 @@
  */
 #include <linux/module.h>
 #include <linux/proc_fs.h>
-#include <linux/jhash.h>
+#ifdef CONFIG_NET_SFHASH
 #include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 #include <linux/bitops.h>
 #include <linux/skbuff.h>
 #include <linux/ip.h>

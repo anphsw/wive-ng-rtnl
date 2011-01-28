@@ -90,7 +90,11 @@
 #include <linux/mroute.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/random.h>
+#ifdef CONFIG_NET_SFHASH
+#include <linux/sfhash.h>
+#else
 #include <linux/jhash.h>
+#endif
 #include <linux/rcupdate.h>
 #include <linux/times.h>
 #include <net/protocol.h>
@@ -256,9 +260,15 @@ static DEFINE_PER_CPU(struct rt_cache_stat, rt_cache_stat);
 static int rt_intern_hash(unsigned hash, struct rtable *rth,
 				struct rtable **res);
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)                                                                                       
+#endif
+
 static inline unsigned int rt_hash(__be32 daddr, __be32 saddr, int idx)
 {
-	return jhash_3words((__force u32)(__be32)(daddr),
+	return HASH_3WORDS((__force u32)(__be32)(daddr),
 			    (__force u32)(__be32)(saddr),
 			    idx, rt_hash_rnd)
 		& rt_hash_mask;
