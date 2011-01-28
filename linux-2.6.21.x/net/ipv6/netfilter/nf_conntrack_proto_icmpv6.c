@@ -95,19 +95,10 @@ static int icmpv6_packet(struct nf_conn *ct,
 		       int pf,
 		       unsigned int hooknum)
 {
-	/* Try to delete connection immediately after all replies:
-	   won't actually vanish as we still have skb, and del_timer
-	   means this will only run once even if count hits zero twice
-	   (theoretically possible with SMP) */
-	if (CTINFO2DIR(ctinfo) == IP_CT_DIR_REPLY) {
-		if (atomic_dec_and_test(&ct->proto.icmp.count)
-		    && del_timer(&ct->timeout))
-			ct->timeout.function((unsigned long)ct);
-	} else {
-		atomic_inc(&ct->proto.icmp.count);
-		nf_conntrack_event_cache(IPCT_PROTOINFO_VOLATILE, skb);
-		nf_ct_refresh_acct(ct, ctinfo, skb, nf_ct_icmpv6_timeout);
-	}
+	/* Do not immediately delete the connection after the first
+	   successful reply to avoid excessive conntrackd traffic
+	   and also to handle correctly ICMP echo reply duplicates. */
+	nf_ct_refresh_acct(ct, ctinfo, skb, nf_ct_icmpv6_timeout);
 
 	return NF_ACCEPT;
 }
@@ -130,7 +121,6 @@ static int icmpv6_new(struct nf_conn *conntrack,
 		NF_CT_DUMP_TUPLE(&conntrack->tuplehash[0].tuple);
 		return 0;
 	}
-	atomic_set(&conntrack->proto.icmp.count, 0);
 	return 1;
 }
 
