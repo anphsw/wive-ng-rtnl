@@ -152,6 +152,11 @@ case "$1" in
 	    fi
 		$LOG "Restart needed services"
 		services_restart.sh dhcp
+		#reconnect vpn only if renew ip
+		if [ "$OLD_IP" != "$CUR_IP" ]; then
+		    #if dhcp disables restart must from internet.sh
+		    service vpnhelper start
+		fi
 	fi
 	$LOG "Renew OK.."
     ;;

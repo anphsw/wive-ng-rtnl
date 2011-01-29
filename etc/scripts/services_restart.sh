@@ -74,10 +74,3 @@ if [ "$MODE" = "pppd" ] || [ "$vpnEnabled" != "on" ]; then
     service ntp restart
     service ddns restart
 fi
-if [ "$MODE" = "dhcp" ]; then 
-    # restart from dhcp script. 
-    # if dhcp disables restart must from internet.sh
-    service vpnhelper start
-fi
-
-$LOG "All OK!. Mode $MODE"
