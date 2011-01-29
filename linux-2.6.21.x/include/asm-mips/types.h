@@ -11,6 +11,8 @@
 
 #ifndef __ASSEMBLY__
 
+#include <asm/sgidefs.h>
+
 typedef unsigned short umode_t;
 
 /*
@@ -48,7 +50,12 @@ typedef unsigned long long __u64;
  */
 #ifdef __KERNEL__
 
-#define BITS_PER_LONG _MIPS_SZLONG
+#if (_MIPS_SZLONG == 64)
+#define BITS_PER_LONG 64
+#else
+#define BITS_PER_LONG 32
+#endif
+
 
 #ifndef __ASSEMBLY__
 

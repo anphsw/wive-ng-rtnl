@@ -9,7 +9,6 @@
 # include <asm/types.h>
 #else
 
-#ifdef	__KERNEL__
 
 #define BITS_TO_LONGS(bits) \
 	(((bits)+BITS_PER_LONG-1)/BITS_PER_LONG)
@@ -17,7 +16,6 @@
 	unsigned long name[BITS_TO_LONGS(bits)]
 
 #define BITS_PER_BYTE 8
-#endif
 
 #include <linux/posix_types.h>
 #include <asm/types.h>

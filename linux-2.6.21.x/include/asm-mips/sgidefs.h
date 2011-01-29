@@ -14,7 +14,7 @@
  * Using a Linux compiler for building Linux seems logic but not to
  * everybody.
  */
-#ifndef __linux__
+#if !defined(__linux__) && !defined(__GNUC__)
 #error Use a Linux compiler or give up.
 #endif
 
@@ -40,5 +40,15 @@
 #define _MIPS_SIM_ABI32		1
 #define _MIPS_SIM_NABI32	2
 #define _MIPS_SIM_ABI64		3
+
+#ifndef _MIPS_SZINT
+#define _MIPS_SZINT     32
+#endif
+#ifndef _MIPS_SZLONG
+#define _MIPS_SZLONG    32
+#endif
+#ifndef _MIPS_SZPTR
+#define _MIPS_SZPTR     32
+#endif
 
 #endif /* __ASM_SGIDEFS_H */
