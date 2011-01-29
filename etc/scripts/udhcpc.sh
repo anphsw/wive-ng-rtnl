@@ -57,7 +57,6 @@ case "$1" in
     ;;
 
     renew|bound)
-    #no change routes if pppd is started
     $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
     OLD_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
     ifconfig $interface $ip $BROADCAST $NETMASK
@@ -153,10 +152,14 @@ case "$1" in
 		$LOG "Restart needed services"
 		#reconnect vpn only if renew ip
 		if [ "$OLD_IP" != "$CUR_IP" ]; then
+		    PPPD=`pidof pppd`
+		    XL2TPD=`pidof pppd`
 		    #if dhcp disables restart must from internet.sh
 		    service vpnhelper stop
 		    #wait ip-down script work
-		    sleep 10
+		    if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
+			sleep 10
+		    fi
 		fi
 		services_restart.sh dhcp
 		#reconnect vpn only if renew ip
