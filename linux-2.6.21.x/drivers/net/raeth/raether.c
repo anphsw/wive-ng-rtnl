@@ -792,7 +792,8 @@ void kill_sig_workq(struct work_struct *work)
 	char pid[8];
 	struct task_struct *p = NULL;
 
-	if (!send_sigusr_dhcpc)
+	//if 9 - disable send signal to dhcpc
+	if (send_sigusr_dhcpc != 9)
 	    return;
 
 	//read udhcpc pid from file, and send signal USR2,USR1 to get a new IP
