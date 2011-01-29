@@ -1229,7 +1229,7 @@ config RWSEM_GENERIC_SPINLOCK
 
 config LOCKDEP_SUPPORT
 	bool
-	default y
+	default n
 
 config STACKTRACE_SUPPORT
 	bool
