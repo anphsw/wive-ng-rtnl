@@ -3248,8 +3248,7 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *name,
 		return NULL;
 	}
 
-	dev = (struct net_device *)
-		(((long)p + NETDEV_ALIGN_CONST) & ~NETDEV_ALIGN_CONST);
+	dev = PTR_ALIGN(p, NETDEV_ALIGN);
 	dev->padded = (char *)dev - (char *)p;
 
 	if (sizeof_priv)
