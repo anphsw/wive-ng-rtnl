@@ -792,7 +792,7 @@ void kill_sig_workq(struct work_struct *work)
 	char pid[8];
 	struct task_struct *p = NULL;
 
-	//if 9 - disable send signal to dhcpc
+	//if 9 Disable touch dhcp
 	if (send_sigusr_dhcpc == 9)
 	    return;
 
@@ -1050,35 +1050,34 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 	struct net_device *dev = (struct net_device *) dev_id;
 	static u32 stat;
 	u32 stat_curr;
-
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+	int port_offset;
+#endif
 	END_DEVICE *ei_local = netdev_priv(dev);
 	spin_lock_irqsave(&(ei_local->page_lock), flags);
 	reg_int_val = (*((volatile u32 *)(RALINK_ETH_SW_BASE))); //Interrupt Status Register
 
 	if (reg_int_val & PORT_ST_CHG) {
-		printk("RT305x_ESW: Link Status Changed\n");
-
 		stat_curr = *((volatile u32 *)(RALINK_ETH_SW_BASE+0x80));
-
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 		/*
-		 * 0 - Left port as WAN
-		 * 4 - Right port as WAN
-		 * 9 - Disable touch dhcp
-		 * Other - ALL port
+		 * 0-4	- Left2Rigth select port as WAN
+		 * 8	- ALL port touch dhcp
+		 * 9	- Disable touch dhcp
 		*/
-		if ((send_sigusr_dhcpc != 9) && ((send_sigusr_dhcpc != 0) && (send_sigusr_dhcpc != 4)))
-			goto all;
+		if (send_sigusr_dhcpc != 8)
+		{
+		    //if  link down --> link up
+		    port_offset=29-send_sigusr_dhcpc; //ports offset is 25..29 = 4..0
+		    if ((stat & (1<<port_offset)) || !(stat_curr & (1<<port_offset)))
+		    {
+			    printk(KERN_INFO "RT305x_ESW: Link Status Changed\n");
+			    goto out;
+		    }
+		  printk(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");	
+		}
 
-		//if !Port0 (Right port) link down --> link up
-		if ((send_sigusr_dhcpc == 4) && ((stat & (1<<25)) || !(stat_curr & (1<<25))))
-			goto out;
-
-		//if !Port4 (Left port)  link down --> link up
-		if ((send_sigusr_dhcpc == 0) && ((stat & (1<<29)) || !(stat_curr & (1<<29))))
-			goto out;
-all:
-		//send sigusr to dhcp client
+		//send SIGUSR1 to dhcp client
 		schedule_work(&ei_local->kill_sig_wq);
 out:
 #endif
