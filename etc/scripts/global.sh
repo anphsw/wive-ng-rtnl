@@ -153,6 +153,15 @@ udhcpc_opts()
 	CL_SLEEP=1
 	if [ "$stamode" = "y" ]; then
 	    CL_SLEEP=5
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=0
+	else
+	    ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
+	    if [ "$ForceRenewDHCP" != "0" ] &&  [ "$wan_port" != "" ]; then
+		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+	    else
+		sysctl -w net.ipv4.send_sigusr_dhcpc=0
+	    fi
+
 	fi
 	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \

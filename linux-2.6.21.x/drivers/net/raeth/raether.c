@@ -1065,7 +1065,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		 * 5 - Right port as WAN
 		 * Other - ALL port
 		*/
-		if ((send_sigusr_dhcpc != 0) && ((send_sigusr_dhcpc != 1) && (send_sigusr_dhcpc != 5))
+		if ((send_sigusr_dhcpc != 0) && ((send_sigusr_dhcpc != 1) && (send_sigusr_dhcpc != 5)))
 			goto all
 
 		//if !Port0 (LAN5) link down --> link up
