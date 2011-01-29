@@ -150,23 +150,18 @@ case "$1" in
 		$LOG "Use static DNS."
 	    fi
 		$LOG "Restart needed services"
-		#reconnect vpn only if renew ip
-		if [ "$OLD_IP" != "$CUR_IP" ]; then
-		    PPPD=`pidof pppd`
-		    XL2TPD=`pidof pppd`
-		    #if dhcp disables restart must from internet.sh
-		    service vpnhelper stop
-		    #wait ip-down script work
-		    if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
-			sleep 10
-		    fi
+		PPPD=`pidof pppd`
+		XL2TPD=`pidof pppd`
+		#if dhcp disables restart must from internet.sh
+		service vpnhelper stop
+		#wait ip-down script work
+		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
+		    sleep 10
 		fi
+		#restart need services
 		services_restart.sh dhcp
-		#reconnect vpn only if renew ip
-		if [ "$OLD_IP" != "$CUR_IP" ]; then
-		    #if dhcp disables restart must from internet.sh
-		    service vpnhelper start
-		fi
+		#if dhcp disables restart must from internet.sh
+		service vpnhelper start
 	fi
 	$LOG "Renew OK.."
     ;;
