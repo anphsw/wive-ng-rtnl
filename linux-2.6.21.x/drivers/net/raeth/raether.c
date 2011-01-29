@@ -35,6 +35,10 @@
 #include "../../../net/nat/hw_nat/ra_nat.h"
 #endif
 
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+/* for auto lease renew at cable connect */
+extern int send_sigusr_dhcpc;
+#endif
 
 #ifdef CONFIG_RAETH_NAPI
 static int raeth_clean(struct net_device *dev, int *budget);
@@ -787,7 +791,6 @@ void kill_sig_workq(struct work_struct *work)
 	struct file *fp;
 	char pid[8];
 	struct task_struct *p = NULL;
-	extern int send_sigusr_dhcpc;
 
 	if (!send_sigusr_dhcpc)
 	    return;
@@ -1055,19 +1058,26 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		printk("RT305x_ESW: Link Status Changed\n");
 
 		stat_curr = *((volatile u32 *)(RALINK_ETH_SW_BASE+0x80));
-#if 0
-#ifdef CONFIG_WAN_AT_P0
-		//if Port0 link down --> link up
-		if ((stat & (1<<25)) || !(stat_curr & (1<<25)))
-#else
-		//if Port4 link down --> link up
-		if ((stat & (1<<29)) || !(stat_curr & (1<<29)))
-#endif
-			goto out;
-#endif
 
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+		/* 0 - Disable touch dhcp
+		 * 1 - Left port as WAN
+		 * 5 - Right port as WAN
+		 * Other - ALL port
+		*/
+		if ((send_sigusr_dhcpc != 0) && ((send_sigusr_dhcpc != 1) && (send_sigusr_dhcpc != 5))
+			goto all
+
+		//if !Port0 (LAN5) link down --> link up
+		if ((send_sigusr_dhcpc == 5) && ((stat & (1<<25)) || !(stat_curr & (1<<25))))
+			goto out;
+
+		//if !Port4 (LAN0) link down --> link up
+		if ((send_sigusr_dhcpc == 1) && ((stat & (1<<29)) || !(stat_curr & (1<<29))))
+			goto out;
+all:
+		//send sigusr to dhcp cliend
 		schedule_work(&ei_local->kill_sig_wq);
-#if 0
 out:
 #endif
 		stat = stat_curr;
