@@ -38,7 +38,7 @@ EXPORT_SYMBOL(bridge_fast_path_enabled);
 
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 /* send sigusr to dhcpc at media state change */
-int send_sigusr_dhcpc=0
+int send_sigusr_dhcpc=0;
 /* export for module support */
 EXPORT_SYMBOL(send_sigusr_dhcpc);
 #endif
