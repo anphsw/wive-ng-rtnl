@@ -125,6 +125,7 @@ function initValue()
 	form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
 	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
+	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 
 	if (lltdb == "0")
 	{
@@ -283,9 +284,7 @@ function CheckValue()
 </td>
 </tr>
 <tr>
-<td class="head" id="sysfwPingFrmWANFilterHead">
-		Accept ping from WAN
-</td>
+<td class="head" id="sysfwPingFrmWANFilterHead">Accept ping from WAN</td>
 <td>
 	<select name="pingWANEnbl" class="half">
 		<option value="0">Disable</option>
@@ -315,6 +314,15 @@ function CheckValue()
 <td class="head">Switch reinit on DHCP lease fail</td>
 <td>
 	<select name="dhcpSwReset" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Force DHCP renew lease at lan/wan port status change</td>
+<td>
+	<select name="ForceRenewDHCP" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>
