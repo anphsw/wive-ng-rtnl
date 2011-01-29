@@ -11,11 +11,6 @@ MODE=$1
 
 $LOG "Restart needed services and scripts. Mode $MODE"
 # stop needed services
-if [ "$MODE" = "dhcp" ]; then 
-    # restart from dhcp script. 
-    # if dhcp disables restart must from internet.sh
-    service vpnhelper stop
-fi
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
     service pppoe-relay stop
