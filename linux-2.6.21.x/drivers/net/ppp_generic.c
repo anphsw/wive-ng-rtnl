@@ -25,6 +25,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/kmod.h>
+#include <linux/mm.h>
 #include <linux/init.h>
 #include <linux/list.h>
 #include <linux/netdevice.h>

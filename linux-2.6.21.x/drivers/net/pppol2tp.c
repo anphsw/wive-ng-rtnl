@@ -68,6 +68,7 @@
 #include <asm/uaccess.h>
 
 #include <linux/kernel.h>
+#include <linux/mm.h>
 #include <linux/spinlock.h>
 #include <linux/kthread.h>
 #include <linux/sched.h>

@@ -2,6 +2,7 @@
 #include <linux/version.h>
 
 #include <linux/kernel.h>
+#include <linux/mm.h>
 #include <linux/sched.h>
 
 #include <linux/netdevice.h>

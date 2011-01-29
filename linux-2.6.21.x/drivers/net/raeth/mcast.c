@@ -3,6 +3,7 @@
 #include <linux/module.h>
 #include <linux/skbuff.h>
 #include <linux/kernel.h>
+#include <linux/mm.h>
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/netdevice.h>
