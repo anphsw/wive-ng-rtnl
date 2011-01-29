@@ -59,6 +59,9 @@ start() {
 	#wait sta connected
 	wait_connect
 
+	#get udhcp param
+	udhcpc_opts
+
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     fi

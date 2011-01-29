@@ -256,4 +256,3 @@ getEthConv
 getStaMode
 getSwType
 getHostName
-udhcpc_opts
