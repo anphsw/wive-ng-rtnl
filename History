@@ -258,6 +258,8 @@
 69) Add switch mode speed select in WebUI.<br>
 70) Add bridge fastpath enable/disable in WebUI.<br>
 71) Fix speed regression (non correct align at memalloc in dev.c).<br>
+72) Fix ip timestamp issue.<br>
+73) Small route speedup.<br>
 
 
 <br><br>
