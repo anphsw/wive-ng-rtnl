@@ -1078,7 +1078,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		if ((send_sigusr_dhcpc == 0) && ((stat & (1<<29)) || !(stat_curr & (1<<29))))
 			goto out;
 all:
-		//send sigusr to dhcp cliend
+		//send sigusr to dhcp client
 		schedule_work(&ei_local->kill_sig_wq);
 out:
 #endif
