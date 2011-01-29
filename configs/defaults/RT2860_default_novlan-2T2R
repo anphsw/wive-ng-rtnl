@@ -185,6 +185,7 @@ pppoe_pass=0
 ipv6_pass=0
 natFastpath=1
 bridgeFastpath=1
+ForceRenewDHCP=1
 dnsPEnabled=1
 M2UEnabled=1
 macCloneEnabled=0
