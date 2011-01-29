@@ -153,13 +153,16 @@ udhcpc_opts()
 	CL_SLEEP=1
 	if [ "$stamode" = "y" ]; then
 	    CL_SLEEP=5
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=0
+	    #disable dhcp renew from driver
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	else
 	    ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
 	    if [ "$ForceRenewDHCP" != "0" ] &&  [ "$wan_port" != "" ]; then
+		#configure event wait port
 		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
 	    else
-		sysctl -w net.ipv4.send_sigusr_dhcpc=0
+		#disable dhcp renew from driver
+		sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	    fi
 
 	fi
