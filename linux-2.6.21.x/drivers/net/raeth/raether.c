@@ -780,12 +780,17 @@ struct net_device_stats *ra_get_stats(struct net_device *dev)
 	return &ei_local->stat;
 }
 
+#ifdef CONFIG_RAETH_DHCP_TOUCH
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352)
 void kill_sig_workq(struct work_struct *work)
 {
 	struct file *fp;
 	char pid[8];
 	struct task_struct *p = NULL;
+	extern int send_sigusr_dhcpc;
+
+	if (!send_sigusr_dhcpc)
+	    return;
 
 	//read udhcpc pid from file, and send signal USR2,USR1 to get a new IP
 	fp = filp_open("/var/run/udhcpc.pid", O_RDONLY, 0);
@@ -796,7 +801,7 @@ void kill_sig_workq(struct work_struct *work)
 	    if (fp->f_op->read(fp, pid, 8, &fp->f_pos) > 0) {
 		p = find_task_by_pid(simple_strtoul(pid, NULL, 10));
 		if (NULL != p) {
-		    send_sig(SIGUSR2, p, 0);
+		    //send_sig(SIGUSR2, p, 0); no need manual release sfstudio
 		    send_sig(SIGUSR1, p, 0);
 		}
 	    }
@@ -804,6 +809,7 @@ void kill_sig_workq(struct work_struct *work)
 	filp_close(fp, NULL);
 
 }
+#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////
@@ -1772,7 +1778,9 @@ int ei_open(struct net_device *dev)
 	//INTENA: Interrupt enabled for ESW
 	*((volatile u32 *)(RALINK_INTCL_BASE + 0x34)) = (1<<17);
 	*((volatile u32 *)(RALINK_ETH_SW_BASE + 0x04)) &= ~(ESW_INT_ALL);
+#ifdef CONFIG_RAETH_DHCP_TOUCH
 	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
+#endif
 	request_irq(SURFBOARDINT_ESW, esw_interrupt, SA_INTERRUPT, "Ralink_ESW", dev);
 #endif // CONFIG_RALINK_RT3052 || CONFIG_RALINK_RT3352 //
 

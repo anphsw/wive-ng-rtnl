@@ -187,3 +187,9 @@ config RAETH_GMAC2
 	bool "Pseudo GMAC2 support"
 	depends on RAETH
 	default n
+
+config RAETH_DHCP_TOUCH
+	bool "Send SIGUSR1/2 to dhcpc at media state changed."
+	depends on RAETH
+	default n
+

@@ -260,6 +260,7 @@
 71) Fix speed regression (non correct align at memalloc in dev.c).<br>
 72) Fix ip timestamp issue.<br>
 73) Small route speedup.<br>
+74) Add send_sigusr_dhcpc sysctl param. Need add in GUI.<br>
 
 
 <br><br>

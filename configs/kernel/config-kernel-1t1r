@@ -1132,6 +1132,7 @@ CONFIG_RT_3052_ESW=y
 # CONFIG_RAETH_HAS_PORT5 is not set
 # CONFIG_RAETH_GMAC2 is not set
 # CONFIG_LAN_WAN_SUPPORT is not set
+CONFIG_RAETH_DHCP_TOUCH=y
 
 #
 # Platform config for  Ralink RT3xx/RT28xx.

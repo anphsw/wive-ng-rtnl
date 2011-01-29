@@ -36,6 +36,13 @@ int bridge_fast_path_enabled=1;
 EXPORT_SYMBOL(bridge_fast_path_enabled);
 #endif
 
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+/* send sigusr to dhcpc at media state change */
+int send_sigusr_dhcpc=0
+/* export for module support */
+EXPORT_SYMBOL(send_sigusr_dhcpc);
+#endif
+
 struct ipv4_config ipv4_config;
 
 #ifdef CONFIG_SYSCTL
@@ -819,6 +826,16 @@ ctl_table ipv4_table[] = {
 		.ctl_name	= NET_TCP_ALLOWED_BRIDGE_FASTPATH,
 		.procname	= "bridge_fastpath",
 		.data		= &bridge_fast_path_enabled,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler   = &proc_dointvec
+	},
+#endif
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+	{
+		.ctl_name	= NET_TCP_SEND_SIGUSR_DHCPC,
+		.procname	= "send_sigusr_dhcpc",
+		.data		= &send_sigusr_dhcpc,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler   = &proc_dointvec

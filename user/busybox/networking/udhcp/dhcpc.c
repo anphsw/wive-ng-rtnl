@@ -802,7 +802,7 @@ static void perform_renew(void)
 		state = RENEW_REQUESTED;
 		break;
 	case RENEW_REQUESTED: /* impatient are we? fine, square 1 */
-		udhcp_run_script(NULL, "deconfig");
+		//udhcp_run_script(NULL, "deconfig"); no need deconfig at media state chancged and SIGUSR1 signal
 	case REQUESTING:
 	case RELEASED:
 		change_listen_mode(LISTEN_RAW);
