@@ -307,7 +307,7 @@ void dev_add_pack(struct packet_type *pt)
  */
 void __dev_remove_pack(struct packet_type *pt)
 {
-	struct list_head *head = ptype_head(pt)
+	struct list_head *head = ptype_head(pt);
 	struct packet_type *pt1;
 
 	spin_lock(&ptype_lock);
