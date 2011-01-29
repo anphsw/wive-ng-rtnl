@@ -1066,7 +1066,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		 * 9 - Disable touch dhcp
 		 * Other - ALL port
 		*/
-		if ((send_sigusr_dhcpc != 9) && ((send_sigusr_dhcpc != 1) && (send_sigusr_dhcpc != 4)))
+		if ((send_sigusr_dhcpc != 9) && ((send_sigusr_dhcpc != 0) && (send_sigusr_dhcpc != 4)))
 			goto all;
 
 		//if !Port0 (Right port) link down --> link up
