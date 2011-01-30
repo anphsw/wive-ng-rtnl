@@ -1008,11 +1008,27 @@ static inline int tcp_fin_time(const struct sock *sk)
 	return fin_timeout;
 }
 
-static inline int tcp_paws_check(const struct tcp_options_received *rx_opt, int rst)
+static inline int tcp_paws_check(const struct tcp_options_received *rx_opt,
+				 int paws_win)
 {
-	if ((s32)(rx_opt->rcv_tsval - rx_opt->ts_recent) >= 0)
-		return 0;
-	if (xtime.tv_sec >= rx_opt->ts_recent_stamp + TCP_PAWS_24DAYS)
+	if ((s32)(rx_opt->ts_recent - rx_opt->rcv_tsval) <= paws_win)
+		return 1;
+	if (unlikely(get_seconds() >= rx_opt->ts_recent_stamp + TCP_PAWS_24DAYS))
+		return 1;
+	/*
+	 * Some OSes send SYN and SYNACK messages with tsval=0 tsecr=0,
+	 * then following tcp messages have valid values. Ignore 0 value,
+	 * or else 'negative' tsval might forbid us to accept their packets.
+	 */
+	if (!rx_opt->ts_recent)
+		return 1;
+	return 0;
+}
+
+static inline int tcp_paws_reject(const struct tcp_options_received *rx_opt,
+				  int rst)
+{
+	if (tcp_paws_check(rx_opt, 0))
 		return 0;
 
 	/* RST segments are not recommended to carry timestamp,
@@ -1027,7 +1043,7 @@ static inline int tcp_paws_check(const struct tcp_options_received *rx_opt, int 
 
 	   However, we can relax time bounds for RST segments to MSL.
 	 */
-	if (rst && xtime.tv_sec >= rx_opt->ts_recent_stamp + TCP_PAWS_MSL)
+	if (rst && get_seconds() >= rx_opt->ts_recent_stamp + TCP_PAWS_MSL)
 		return 0;
 	return 1;
 }

@@ -2895,7 +2895,7 @@ static int tcp_fast_parse_options(struct sk_buff *skb, struct tcphdr *th,
 static inline void tcp_store_ts_recent(struct tcp_sock *tp)
 {
 	tp->rx_opt.ts_recent = tp->rx_opt.rcv_tsval;
-	tp->rx_opt.ts_recent_stamp = xtime.tv_sec;
+	tp->rx_opt.ts_recent_stamp = get_seconds();
 }
 
 static inline void tcp_replace_ts_recent(struct tcp_sock *tp, u32 seq)
@@ -2908,8 +2908,7 @@ static inline void tcp_replace_ts_recent(struct tcp_sock *tp, u32 seq)
 		 * Not only, also it occurs for expired timestamps.
 		 */
 
-		if((s32)(tp->rx_opt.rcv_tsval - tp->rx_opt.ts_recent) >= 0 ||
-		   xtime.tv_sec >= tp->rx_opt.ts_recent_stamp + TCP_PAWS_24DAYS)
+		if (tcp_paws_check(&tp->rx_opt, 0))
 			tcp_store_ts_recent(tp);
 	}
 }
@@ -2960,9 +2959,9 @@ static int tcp_disordered_ack(const struct sock *sk, const struct sk_buff *skb)
 static inline int tcp_paws_discard(const struct sock *sk, const struct sk_buff *skb)
 {
 	const struct tcp_sock *tp = tcp_sk(sk);
-	return ((s32)(tp->rx_opt.ts_recent - tp->rx_opt.rcv_tsval) > TCP_PAWS_WINDOW &&
-		xtime.tv_sec < tp->rx_opt.ts_recent_stamp + TCP_PAWS_24DAYS &&
-		!tcp_disordered_ack(sk, skb));
+
+	return !tcp_paws_check(&tp->rx_opt, TCP_PAWS_WINDOW) &&
+	       !tcp_disordered_ack(sk, skb);
 }
 
 /* Check segment sequence number for validity.
@@ -4488,7 +4487,8 @@ discard:
 	}
 
 	/* PAWS check. */
-	if (tp->rx_opt.ts_recent_stamp && tp->rx_opt.saw_tstamp && tcp_paws_check(&tp->rx_opt, 0))
+	if (tp->rx_opt.ts_recent_stamp && tp->rx_opt.saw_tstamp &&
+	    tcp_paws_reject(&tp->rx_opt, 0))
 		goto discard_and_undo;
 
 	if (th->syn) {
