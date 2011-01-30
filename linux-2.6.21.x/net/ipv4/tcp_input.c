@@ -711,7 +711,7 @@ void tcp_update_metrics(struct sock *sk)
 					(dst->metrics[RTAX_RTTVAR-1] - m)>>2;
 		}
 
-		if (tp->snd_ssthresh >= 0xFFFF) {
+		if (tcp_in_initial_slowstart(tp)) {
 			/* Slow start still did not finish. */
 			if (dst_metric(dst, RTAX_SSTHRESH) &&
 			    !dst_metric_locked(dst, RTAX_SSTHRESH) &&

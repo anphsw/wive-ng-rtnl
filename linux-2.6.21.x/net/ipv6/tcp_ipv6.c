@@ -1904,7 +1904,7 @@ static int tcp_v6_init_sock(struct sock *sk)
 	/* See draft-stevens-tcpca-spec-01 for discussion of the
 	 * initialization of these values.
 	 */
-	tp->snd_ssthresh = 0x7fffffff;
+	tp->snd_ssthresh = TCP_INFINITE_SSTHRESH;
 	tp->snd_cwnd_clamp = ~0;
 	tp->mss_cache = 536;
 
@@ -2024,7 +2024,8 @@ static void get_tcp6_sock(struct seq_file *seq, struct sock *sp, int i)
 		   icsk->icsk_rto,
 		   icsk->icsk_ack.ato,
 		   (icsk->icsk_ack.quick << 1 ) | icsk->icsk_ack.pingpong,
-		   tp->snd_cwnd, tp->snd_ssthresh>=0xFFFF?-1:tp->snd_ssthresh
+		   tp->snd_cwnd,
+		   tcp_in_initial_slowstart(tp) ? -1 : tp->snd_ssthresh
 		   );
 }
 
