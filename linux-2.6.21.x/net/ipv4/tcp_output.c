@@ -707,7 +707,7 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 
 	/* Link BUFF into the send queue. */
 	skb_header_release(buff);
-	__skb_append(skb, buff, &sk->sk_write_queue);
+	__skb_queue_after(&sk->sk_write_queue, skb, buff);
 
 	return 0;
 }
@@ -1146,7 +1146,7 @@ static int tso_fragment(struct sock *sk, struct sk_buff *skb, unsigned int len, 
 
 	/* Link BUFF into the send queue. */
 	skb_header_release(buff);
-	__skb_append(skb, buff, &sk->sk_write_queue);
+	__skb_queue_after(&sk->sk_write_queue, skb, buff);
 
 	return 0;
 }

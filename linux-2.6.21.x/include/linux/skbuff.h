@@ -752,6 +752,9 @@ static inline void __skb_queue_after(struct sk_buff_head *list,
 	__skb_insert(newsk, prev, prev->next, list);
 }
 
+extern void skb_append(struct sk_buff *old, struct sk_buff *newsk,
+		       struct sk_buff_head *list);
+
 /**
  *	__skb_queue_head - queue a buffer at the list head
  *	@list: list to use
@@ -827,17 +830,6 @@ static inline struct sk_buff *__skb_dequeue(struct sk_buff_head *list)
 		__skb_unlink(skb, list);
 	return skb;
 }
-
-
-/*
- *	Place a packet after a given packet in a list.
- */
-extern void	   skb_append(struct sk_buff *old, struct sk_buff *newsk, struct sk_buff_head *list);
-static inline void __skb_append(struct sk_buff *old, struct sk_buff *newsk, struct sk_buff_head *list)
-{
-	__skb_insert(newsk, old, old->next, list);
-}
-
 
 /* XXX: more streamlined implementation */
 
