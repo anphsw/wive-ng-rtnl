@@ -149,7 +149,6 @@ start() {
 		if [ "$Lan2Enabled" = "1" ]; then
 		    iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan2_ip_acc"/"$lan2_ip_prf" --ashort
 		fi
-		echo "reset" > /proc/net/ipt_account/mynetwork
 		echo "show=src" > /proc/net/ipt_account/mynetwork
 		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
 	    fi
