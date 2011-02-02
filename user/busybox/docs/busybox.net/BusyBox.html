@@ -120,16 +120,16 @@ been enabled, more detailed usage information will also be available.</p>
         dnsdomainname, du, dumpleases, echo, egrep, env, ether-wake, expand,
         expr, false, fgrep, find, flock, free, ftpget, ftpput, fuser, grep,
         gunzip, gzip, halt, hd, head, hexdump, hostid, hostname, id,
-        ifconfig, inetd, init, insmod, ip, ipaddr, iplink, iproute, iprule,
-        iptunnel, kill, killall, killall5, klogd, length, linuxrc, ln,
-        logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir, mknod,
-        modinfo, modprobe, more, mount, mv, netstat, nice, nslookup, ntpd,
-        passwd, pgrep, pidof, ping, poweroff, printenv, printf, ps, pwd,
-        rdate, reboot, renice, rev, rm, rmdir, rmmod, route, run-parts, sed,
-        seq, sh, sleep, sort, split, stat, sum, switch_root, sync, sysctl,
-        syslogd, tail, tar, test, time, top, touch, traceroute, true,
-        udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig, vi,
-        watch, watchdog, wc, wget, which, yes, zcat</pre>
+        ifconfig, inetd, init, insmod, ip, ipaddr, ipcalc, iplink, iproute,
+        iprule, iptunnel, kill, killall, killall5, klogd, length, linuxrc,
+        ln, logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir,
+        mknod, modinfo, modprobe, more, mount, mv, netstat, nice, nslookup,
+        ntpd, passwd, pgrep, pidof, ping, poweroff, printenv, printf, ps,
+        pwd, rdate, reboot, renice, rev, rm, rmdir, rmmod, route, run-parts,
+        sed, seq, sh, sleep, sort, split, stat, sum, switch_root, sync,
+        sysctl, syslogd, tail, tar, test, time, top, touch, traceroute,
+        true, udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig,
+        vi, watch, watchdog, wc, wget, which, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -883,6 +883,20 @@ ipaddr {show|flush} [dev STRING] [scope SCOPE-ID]
 	[broadcast ADDR] [anycast ADDR]
 	[label STRING] [scope SCOPE-ID]
 	SCOPE-ID := [host | link | global | NUMBER]</p>
+</dd>
+<dt><strong><a name="ipcalc" class="item"><strong>ipcalc</strong></a></strong></dt>
+
+<dd>
+<p>ipcalc [OPTIONS] ADDRESS[[/]NETMASK] [NETMASK]</p>
+<p>Calculate IP network settings from a IP address</p>
+<p>Options:</p>
+<pre>
+        -b,--broadcast  Display calculated broadcast address
+        -n,--network    Display calculated network address
+        -m,--netmask    Display default netmask for IP
+        -p,--prefix     Display the prefix for IP/NETMASK
+        -h,--hostname   Display first resolved host name
+        -s,--silent     Don't ever display error messages</pre>
 </dd>
 <dt><strong><a name="iplink" class="item"><strong>iplink</strong></a></strong></dt>
 

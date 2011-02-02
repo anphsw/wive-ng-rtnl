@@ -139,6 +139,22 @@ start() {
 	    $LOG "Set forward rules"
             #enable forward for all interfaces
 	    sysctl -w net.ipv4.ip_forward=1
+
+	    #ipt_account need first rules in FORWARD
+	    if [ "$ipt_account" = "1" ]; then
+		$LOG "Start ipt_accounting"
+		modprobe -q ipt_account
+		iptables -N ipaccount
+		iptables -A FORWARD -j ipaccount
+		iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan_ip_ac"c/"$lan_ip_prf" --ashort
+		if [ "$Lan2Enabled" = "1" ]; then
+		    iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan2_ip_ac"c/"$lan2_ip_prf" --ashort
+		fi
+		echo "reset" > /proc/net/ipt_account/mynetwork
+		echo "show=src-and-dst" > /proc/net/ipt_account/mynetwork
+		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
+	    fi
+
 	    #accept my packets
 	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 	    #tune mss size for tranzit packets
@@ -176,7 +192,7 @@ start() {
 
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
-	if [ "$NAT" = "1" ] || [ "$vpnNAT" != "off" ]; then
+	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		$LOG "Add portforward rules"
@@ -192,7 +208,7 @@ start() {
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
 
-	  if [ "$OperationMode" != "0" ] && [ "$NAT" = "1" ]; then
+	  if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ]; then
 	    #for ISP localnet alya dualacess
     	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
 	    #wireless ISP net dual dual acess....gyyy
@@ -262,26 +278,37 @@ stop() {
 }
 
 get_param() {
+    #network config
+    #first lan ip
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
+    lan_ip_acc=`ipcalc "$lan_ip" -m "$lan_nm" -n -p | grep "NETWORK" | cut -f 2- -d =`
+    lan_ip_prf=`ipcalc "$lan_ip" -m "$lan_nm" -n -p | grep "PREFIX" | cut -f 2- -d =`
+    #second lan ip
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
+    lan2_ip_acc=`ipcalc "$lan2_ipaddr" -m "$lan2_netmask" -n -p | grep "NETWORK" | cut -f 2- -d =`
+    lan2_ip_prf=`ipcalc "$lan2_ipaddr" -m "$lan2_netmask" -n -p | grep "PREFIX" | cut -f 2- -d =`
+    #mode and netfilter conf
     OperationMode=`nvram_get 2860 OperationMode`
-    upnp=`nvram_get 2860 upnpEnabled`
-    WANPingFilter=`nvram_get 2860 WANPingFilter`
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
-    NAT=`nvram_get 2860 natEnabled`
-    igmpen=`nvram_get 2860 igmpEnabled`
-    vpnType=`nvram_get 2860 vpnType`
-    vpnNAT=`nvram_get 2860 vpnNAT`
-    UDPXY=`nvram_get 2860 UDPXYMode`
-    RemoteSSH=`nvram_get 2860 RemoteSSH`
-    RemoteManagement=`nvram_get 2860 RemoteManagement`
+    natEnabled=`nvram_get 2860 natEnabled`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
     DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
     IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
+    WANPingFilter=`nvram_get 2860 WANPingFilter`
+    RemoteSSH=`nvram_get 2860 RemoteSSH`
+    RemoteManagement=`nvram_get 2860 RemoteManagement`
+    ipt_account=`nvram_get 2860 ipt_account`
+    #vpn configs
+    vpnType=`nvram_get 2860 vpnType`
+    vpnNAT=`nvram_get 2860 vpnNAT`
+    #all needed variable
+    upnp=`nvram_get 2860 upnpEnabled`
+    igmpen=`nvram_get 2860 igmpEnabled`
+    UDPXY=`nvram_get 2860 UDPXYMode`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
 }
 
