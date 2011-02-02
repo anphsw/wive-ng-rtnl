@@ -1394,9 +1394,6 @@ void __init set_handler(unsigned long offset, void *addr, unsigned long size)
 	flush_icache_range(ebase + offset, ebase + offset + size);
 }
 
-static char panic_null_cerr[] __initdata =
-	"Trying to set NULL cache error exception handler";
-
 /* Install uncached CPU exception handler */
 void __init set_uncached_handler(unsigned long offset, void *addr, unsigned long size)
 {
@@ -1406,9 +1403,6 @@ void __init set_uncached_handler(unsigned long offset, void *addr, unsigned long
 #ifdef CONFIG_64BIT
 	unsigned long uncached_ebase = TO_UNCAC(ebase);
 #endif
-
-	if (!addr)
-		panic(panic_null_cerr);
 
 	memcpy((void *)(uncached_ebase + offset), addr, size);
 }
