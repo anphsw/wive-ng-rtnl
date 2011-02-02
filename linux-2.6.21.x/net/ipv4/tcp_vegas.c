@@ -162,13 +162,13 @@ static void tcp_vegas_cwnd_event(struct sock *sk, enum tcp_ca_event event)
 }
 
 static void tcp_vegas_cong_avoid(struct sock *sk, u32 ack,
-				 u32 seq_rtt, u32 in_flight, int flag)
+				 u32 in_flight, int flag)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct vegas *vegas = inet_csk_ca(sk);
 
 	if (!vegas->doing_vegas_now)
-		return tcp_reno_cong_avoid(sk, ack, seq_rtt, in_flight, flag);
+		return tcp_reno_cong_avoid(sk, ack, in_flight, flag);
 
 	/* The key players are v_beg_snd_una and v_beg_snd_nxt.
 	 *
@@ -227,7 +227,7 @@ static void tcp_vegas_cong_avoid(struct sock *sk, u32 ack,
 			/* We don't have enough RTT samples to do the Vegas
 			 * calculation, so we'll behave like Reno.
 			 */
-			tcp_reno_cong_avoid(sk, ack, seq_rtt, in_flight, flag);
+			tcp_reno_cong_avoid(sk, ack, in_flight, flag);
 		} else {
 			u32 rtt, target_cwnd, diff;
 
