@@ -39,6 +39,9 @@ start() {
 	    modprobe -q nf_nat_proto_gre
 	    modprobe -q nf_nat_pptp
 	fi
+        if [ "$ipt_account" = "1" ]; then
+	    modprobe -q ipt_account
+	fi
     else
 	#not load module before goahead start
 	web_wait
@@ -109,6 +112,7 @@ ra0flushadress()
 get_param() {
     clone_en=`nvram_get 2860 macCloneEnabled`
     clone_mac=`nvram_get 2860 macCloneMac`
+    ipt_account=`nvram_get 2860 ipt_account`
 }
 
 gen_wifi_config()

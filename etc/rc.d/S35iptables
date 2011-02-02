@@ -143,7 +143,6 @@ start() {
 	    #ipt_account need first rules in FORWARD
 	    if [ "$ipt_account" = "1" ]; then
 		$LOG "Start ipt_accounting"
-		modprobe -q ipt_account
 		iptables -N ipaccount
 		iptables -A FORWARD -j ipaccount
 		iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan_ip_acc"/"$lan_ip_prf" --ashort
@@ -151,7 +150,7 @@ start() {
 		    iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan2_ip_acc"/"$lan2_ip_prf" --ashort
 		fi
 		echo "reset" > /proc/net/ipt_account/mynetwork
-		echo "show=src-and-dst" > /proc/net/ipt_account/mynetwork
+		echo "show=src" > /proc/net/ipt_account/mynetwork
 		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
 	    fi
 
