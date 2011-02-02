@@ -118,7 +118,7 @@ ipv4_prepare(struct sk_buff **pskb, unsigned int hooknum, unsigned int *dataoff,
 
 static u_int32_t ipv4_get_features(const struct nf_conntrack_tuple *tuple)
 {
-	return NF_CT_F_NAT;
+	return NF_CT_F_BASIC;
 }
 
 static unsigned int ipv4_confirm(unsigned int hooknum,
