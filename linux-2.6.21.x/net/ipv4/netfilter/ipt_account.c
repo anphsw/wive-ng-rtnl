@@ -31,7 +31,7 @@ MODULE_LICENSE("GPL");
 #include <linux/netfilter_ipv4/ipt_account.h>
 
 /* defaults, can be overriden */
-static unsigned int netmask = 24; /* Safe netmask, if you try to create table
+static unsigned int netmask = 16; /* Safe netmask, if you try to create table
                                      for larger netblock you will get error. 
                                      Increase by command line only when you
                                      known what are you doing. */
