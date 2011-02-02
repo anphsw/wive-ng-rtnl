@@ -1175,11 +1175,31 @@ out:
 static int arp_netdev_event(struct notifier_block *this, unsigned long event, void *ptr)
 {
 	struct net_device *dev = ptr;
+#ifdef CONFIG_ARP_NOTIFY_MEDIA_STATE
+	struct in_device *in_dev;
+	struct in_ifaddr *ifa;
+#endif
 
 	switch (event) {
+#ifdef CONFIG_ARP_NOTIFY_MEDIA_STATE
+	case NETDEV_CHANGE:
+#endif
 	case NETDEV_CHANGEADDR:
 		neigh_changeaddr(&arp_tbl, dev);
 		rt_cache_flush(0);
+#ifdef CONFIG_ARP_NOTIFY_MEDIA_STATE
+		/* Send bcast  ARP in neighbours to update arp tables */
+		rcu_read_lock();
+		in_dev = __in_dev_get_rcu(dev);
+		if (!in_dev)
+		    goto out;
+
+		for (ifa = in_dev->ifa_list; ifa; ifa = ifa->ifa_next)
+		    arp_send(ARPOP_REQUEST, ETH_P_ARP, ifa->ifa_address, 
+			    dev, ifa->ifa_address, NULL, dev->dev_addr, NULL);
+out:
+		rcu_read_unlock();
+#endif
 		break;
 	default:
 		break;

@@ -335,6 +335,15 @@ config ARPD
 	  and you should also say Y to "Kernel/User network link driver",
 	  below. If unsure, say N.
 
+config ARP_NOTIFY_MEDIA_STATE
+	bool "At media or adress change send arp broadcast packet for arp table update."
+	default y
+	---help---
+	  Forcedly to update the table arp and to send the notification to higher 
+	  switches at change of adjustments or the status of the network interface.
+	  This is workaroud for bad switches as D-Link D1005 baset at IC+ and some
+	  WLAN clients as RTL8187SE/BCM41**
+
 config SYN_COOKIES
 	bool "IP: TCP syncookie support (disabled per default)"
 	---help---
