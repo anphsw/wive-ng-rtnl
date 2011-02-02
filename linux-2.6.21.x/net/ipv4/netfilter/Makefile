@@ -122,6 +122,8 @@ obj-$(CONFIG_IP_NF_MATCH_TTL) += ipt_ttl.o
 obj-$(CONFIG_IP_NF_MATCH_SET) += ipt_set.o
 obj-$(CONFIG_IP_NF_MATCH_ADDRTYPE) += ipt_addrtype.o
 
+obj-$(CONFIG_IP_NF_MATCH_ACCOUNT) += ipt_account.o
+
 # targets
 obj-$(CONFIG_IP_NF_TARGET_REJECT) += ipt_REJECT.o
 obj-$(CONFIG_IP_NF_TARGET_TARPIT) += ipt_TARPIT.o
