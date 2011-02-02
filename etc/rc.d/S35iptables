@@ -146,9 +146,9 @@ start() {
 		modprobe -q ipt_account
 		iptables -N ipaccount
 		iptables -A FORWARD -j ipaccount
-		iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan_ip_ac"/"$lan_ip_prf" --ashort
+		iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan_ip_acc"/"$lan_ip_prf" --ashort
 		if [ "$Lan2Enabled" = "1" ]; then
-		    iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan2_ip_ac"/"$lan2_ip_prf" --ashort
+		    iptables -A ipaccount -m account --aname mynetwork --aaddr "$lan2_ip_acc"/"$lan2_ip_prf" --ashort
 		fi
 		echo "reset" > /proc/net/ipt_account/mynetwork
 		echo "show=src-and-dst" > /proc/net/ipt_account/mynetwork
