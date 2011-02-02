@@ -116,6 +116,11 @@ ipv4_prepare(struct sk_buff **pskb, unsigned int hooknum, unsigned int *dataoff,
 	return NF_ACCEPT;
 }
 
+static u_int32_t ipv4_get_features(const struct nf_conntrack_tuple *tuple)
+{
+	return NF_CT_F_NAT;
+}
+
 static unsigned int ipv4_confirm(unsigned int hooknum,
 				 struct sk_buff **pskb,
 				 const struct net_device *in,
@@ -444,6 +449,7 @@ struct nf_conntrack_l3proto nf_conntrack_l3proto_ipv4 = {
 	.invert_tuple	 = ipv4_invert_tuple,
 	.print_tuple	 = ipv4_print_tuple,
 	.prepare	 = ipv4_prepare,
+	.get_features	 = ipv4_get_features,
 #if defined(CONFIG_NF_CT_NETLINK) || defined(CONFIG_NF_CT_NETLINK_MODULE)
 	.tuple_to_nfattr = ipv4_tuple_to_nfattr,
 	.nfattr_to_tuple = ipv4_nfattr_to_tuple,
