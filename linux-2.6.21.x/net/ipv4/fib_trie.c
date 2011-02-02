@@ -1632,7 +1632,7 @@ static int fn_trie_delete(struct fib_table *tb, struct fib_config *cfg)
 	return 0;
 }
 
-static int trie_flush_list(struct trie *t, struct list_head *head)
+static int trie_flush_list(struct list_head *head)
 {
 	struct fib_alias *fa, *fa_node;
 	int found = 0;
@@ -1650,7 +1650,7 @@ static int trie_flush_list(struct trie *t, struct list_head *head)
 	return found;
 }
 
-static int trie_flush_leaf(struct trie *t, struct leaf *l)
+static int trie_flush_leaf(struct leaf *l)
 {
 	int found = 0;
 	struct hlist_head *lih = &l->list;
@@ -1658,7 +1658,7 @@ static int trie_flush_leaf(struct trie *t, struct leaf *l)
 	struct leaf_info *li = NULL;
 
 	hlist_for_each_entry_safe(li, node, tmp, lih, hlist) {
-		found += trie_flush_list(t, &li->falh);
+		found += trie_flush_list(&li->falh);
 
 		if (list_empty(&li->falh)) {
 			hlist_del_rcu(&li->hlist);
@@ -1738,7 +1738,7 @@ static int fn_trie_flush(struct fib_table *tb)
 	int found = 0, h;
 
 	for (h = 0; (l = nextleaf(t, l)) != NULL; h++) {
-		found += trie_flush_leaf(t, l);
+		found += trie_flush_leaf(l);
 
 		if (ll && hlist_empty(&ll->list))
 			trie_leaf_remove(t, ll->key);
