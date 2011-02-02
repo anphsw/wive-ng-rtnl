@@ -83,8 +83,6 @@ extern unsigned int nf_nat_setup_info(struct nf_conn *ct,
 extern int nf_nat_used_tuple(const struct nf_conntrack_tuple *tuple,
 			     const struct nf_conn *ignored_conntrack);
 
-extern int nf_nat_module_is_loaded;
-
 #else  /* !__KERNEL__: iptables wants this to compile. */
 #define nf_nat_multi_range nf_nat_multi_range_compat
 #endif /*__KERNEL__*/
