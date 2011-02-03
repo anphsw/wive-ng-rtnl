@@ -80,8 +80,8 @@ case "$1" in
 		metric=0
 		for i in $router ; do
 		    $LOG "Add default route $i dev $interface metric $metric"
-		    ROUTELIST_FGW="$ROUTELIST_FGW $router/32:0.0.0.0:$interface:"
-		    ROUTELIST_DGW="$ROUTELIST_DGW default:$router:$interface:$metric"
+		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
+		    ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 		    #save first dgw with metric=1 to use in corbina hack
 		    if [ "$metric" = "0" ]; then
 			echo $i > /tmp/default.gw
