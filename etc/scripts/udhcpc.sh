@@ -12,8 +12,12 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STATICDNS=`nvram_get 2860 wan_static_dns`
+# Full route list
 ROUTELIST=""
+# Default gateway list
 ROUTELIST_DGW=""
+# Stub for first hop`s dgw
+ROUTELIST_FGW=""
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -76,6 +80,7 @@ case "$1" in
 		metric=0
 		for i in $router ; do
 		    $LOG "Add default route $i dev $interface metric $metric"
+		    ROUTELIST_FGW="$ROUTELIST_FGW $router/32:0.0.0.0:$interface:"
 		    ROUTELIST_DGW="$ROUTELIST_DGW default:$router:$interface:$metric"
 		    #save first dgw with metric=1 to use in corbina hack
 		    if [ "$metric" = "0" ]; then
@@ -122,8 +127,9 @@ case "$1" in
 	    done
 	fi
 
-	#default gateways need replase/add after all static routes
-	ROUTELIST="$ROUTELIST $ROUTELIST_DGW"
+	#first add stub for routesm next add static routes and
+	#default gateways need replace/add at end route parces
+	ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
 	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
