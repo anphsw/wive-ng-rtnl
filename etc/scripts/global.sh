@@ -227,15 +227,15 @@ vpn_deadloop_fix()
 {
     #L2TP and PPTP kernel dead-loop fix
     if [ "$vpnEnabled" = "on" ]; then
+	getStaMode
 	vpnType=`nvram_get 2860 vpnType`
-	if [ "$vpnType" != "0" ]; then
+	if [ "$vpnType" != "0" ] || [ "$stamode" = "y" ]; then
 	    # First vpn stop.. 
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1
+	    ip route flush cache > /dev/null 2>&1
 	fi
     fi
-    ip route flush cache > /dev/null 2>&1
-    echo 1 > /proc/sys/net/nf_conntrack_flush
 }
 
 #set default
