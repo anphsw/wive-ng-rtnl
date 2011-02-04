@@ -1482,7 +1482,6 @@ static int pppol2tp_release(struct socket *sock)
 	/* Purge any queued data */
 	skb_queue_purge(&sk->sk_receive_queue);
 	skb_queue_purge(&sk->sk_write_queue);
-#ifdef UDP_ENCAP_L2TPINUDP
 	if (session != NULL) {
 		struct sk_buff *skb;
 		while ((skb = skb_dequeue(&session->reorder_q))) {
@@ -1491,7 +1490,6 @@ static int pppol2tp_release(struct socket *sock)
 		}
 		sock_put(sk);
 	}
-#endif
 
 	release_sock(sk);
 
