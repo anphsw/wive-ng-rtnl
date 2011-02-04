@@ -5,7 +5,7 @@
  * PPPoL2TP --- PPP over L2TP (RFC 2661)
  *
  *
- * Version:    0.17.0
+ * Version:    0.17.1
  *
  * 251003 :	Copied from pppoe.c version 0.6.9.
  *
@@ -256,7 +256,9 @@ struct pppol2tp_tunnel
 	char			name[12];	/* "tunl xxxxx" */
 	struct pppol2tp_ioc_stats stats;
 
+#ifndef UDP_ENCAP_L2TPINUDP
 	void (*old_data_ready)(struct sock *, int);
+#endif
 	void (*old_sk_destruct)(struct sock *);
 
 	struct sock		*sock;		/* Parent socket */
@@ -490,7 +492,9 @@ static void pppol2tp_recv_dequeue(struct pppol2tp_session *session)
 			       skb_queue_len(&session->reorder_q));
 			skb_unlink(skb, &session->reorder_q);
 			kfree_skb(skb);
+
 			sock_put(session->sock);
+
 			goto again;
 		}
 
@@ -528,7 +532,12 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	unsigned char *ptr;
 	u16 hdrflags;
 	u16 tunnel_id, session_id;
+#ifndef UDP_ENCAP_L2TPINUDP
 	int length;
+#else
+	int length, i;
+	struct udphdr *uh;
+#endif
 
 	ENTER_FUNCTION;
 
@@ -541,23 +550,42 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 		goto end;
 	}
 
+	/* Get length of L2TP packet */
+#ifdef UDP_ENCAP_L2TPINUDP
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+	uh = (struct udphdr *) skb->h.raw;
+#else
+	uh = (struct udphdr *) skb_transport_header(skb);
+#endif
+	length = ntohs(uh->len) - sizeof(struct udphdr);
+#endif
+
 	/* Point to L2TP header */
 	ptr = skb->data + sizeof(struct udphdr);
 
+#ifndef UDP_ENCAP_L2TPINUDP
 	/* Get L2TP header flags */
 	hdrflags = ntohs(*(u16*)ptr);
+#endif
 
 	/* Trace packet contents, if enabled */
 	if (tunnel->debug & PPPOL2TP_MSG_DATA) {
 		printk(KERN_DEBUG "%s: recv: ", tunnel->name);
 
+#ifndef UDP_ENCAP_L2TPINUDP
 		for (length = 0; length < 16; length++)
 			printk(" %02X", ptr[length]);
+#else
+		for (i = 0; i < length && i < 16; i++)
+			printk(" %02X", ptr[i]);
+#endif
 		printk("\n");
 	}
 
+#ifndef UDP_ENCAP_L2TPINUDP
 	/* Get length of L2TP packet */
 	length = ntohs(skb->h.uh->len) - sizeof(struct udphdr);
+#endif
 
 	/* Too short? */
 	if (length < 12) {
@@ -565,6 +593,11 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 		       "%s: recv short L2TP packet (len=%d)\n", tunnel->name, length);
 		goto end;
 	}
+
+#ifdef UDP_ENCAP_L2TPINUDP
+	/* Get L2TP header flags */
+	hdrflags = ntohs(*(u16*)ptr);
+#endif
 
 	/* If type is control packet, it is handled by userspace. */
 	if (hdrflags & L2TP_HDRFLAG_T) {
@@ -751,6 +784,7 @@ end:
 	return 1;
 }
 
+#ifndef UDP_ENCAP_L2TPINUDP
 /* The data_ready hook on the UDP socket. Scan the incoming packet list for
  * packets to process. Only control or bad data packets are delivered to
  * userspace.
@@ -783,6 +817,36 @@ end:
 	EXIT_FUNCTION;
 	return;
 }
+
+#else
+/* UDP encapsulation receive handler. See net/ipv4/udp.c.
+ * Return codes:
+ * 0 : success.
+ * <0: error
+ * >0: skb should be passed up to userspace as UDP.
+ */
+static int pppol2tp_udp_encap_recv(struct sock *sk, struct sk_buff *skb)
+{
+	int err;
+	struct pppol2tp_tunnel *tunnel;
+
+	ENTER_FUNCTION;
+	SOCK_2_TUNNEL(sk, tunnel, err, -EBADF, pass_up, 0);
+
+	PRINTK(tunnel->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
+	       "%s: received %d bytes\n", tunnel->name, skb->len);
+
+	if (pppol2tp_recv_core(sk, skb))
+		goto pass_up;
+
+	EXIT_FUNCTION;
+	return 0;
+
+pass_up:
+	EXIT_FUNCTION;
+	return 1;
+}
+#endif
 
 /* Receive message. This is the recvmsg for the PPPoL2TP socket.
  */
@@ -1218,8 +1282,10 @@ static void pppol2tp_tunnel_closeall(struct pppol2tp_tunnel *tunnel)
 
 	for (hash = 0; hash < PPPOL2TP_HASH_SIZE; hash++) {
 		hlist_for_each_safe(walk, tmp, &tunnel->session_hlist[hash]) {
+#ifdef UDP_ENCAP_L2TPINUDP
 			struct sk_buff *skb;
 
+#endif
 			session = hlist_entry(walk, struct pppol2tp_session, hlist);
 
 			sk = session->sock;
@@ -1244,10 +1310,12 @@ static void pppol2tp_tunnel_closeall(struct pppol2tp_tunnel *tunnel)
 			/* Purge any queued data */
 			skb_queue_purge(&sk->sk_receive_queue);
 			skb_queue_purge(&sk->sk_write_queue);
+#ifdef UDP_ENCAP_L2TPINUDP
 			while ((skb = skb_dequeue(&session->reorder_q))) {
 				kfree_skb(skb);
 				sock_put(sk);
 			}
+#endif
 
 			release_sock(sk);
 
@@ -1273,7 +1341,14 @@ static void pppol2tp_tunnel_free(struct pppol2tp_tunnel *tunnel)
 	list_del_init(&tunnel->list);
 
 	sk->sk_prot = tunnel->old_proto;
+#ifndef UDP_ENCAP_L2TPINUDP
        	sk->sk_data_ready = tunnel->old_data_ready;
+#else
+	/* No longer an encapsulation socket. See net/ipv4/udp.c */
+	(udp_sk(sk))->encap_type = 0;
+	(udp_sk(sk))->encap_rcv = NULL;
+#endif
+
 	sk->sk_destruct = tunnel->old_sk_destruct;
 	sk->sk_user_data = NULL;
 
@@ -1411,6 +1486,7 @@ static int pppol2tp_release(struct socket *sock)
 	/* Purge any queued data */
 	skb_queue_purge(&sk->sk_receive_queue);
 	skb_queue_purge(&sk->sk_write_queue);
+#ifdef UDP_ENCAP_L2TPINUDP
 	if (session != NULL) {
 		struct sk_buff *skb;
 		while ((skb = skb_dequeue(&session->reorder_q))) {
@@ -1419,6 +1495,7 @@ static int pppol2tp_release(struct socket *sock)
 		}
 		sock_put(sk);
 	}
+#endif
 
 	release_sock(sk);
 
@@ -1578,8 +1655,14 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 
 	sk->sk_prot = &tunnel->l2tp_proto;
 
+#ifndef UDP_ENCAP_L2TPINUDP
 	tunnel->old_data_ready = sk->sk_data_ready;
 	sk->sk_data_ready = &pppol2tp_data_ready;
+#else
+	/* Mark socket as an encapsulation socket. See net/ipv4/udp.c */
+	(udp_sk(sk))->encap_type = UDP_ENCAP_L2TPINUDP;
+	(udp_sk(sk))->encap_rcv = pppol2tp_udp_encap_recv;
+#endif
 
 	tunnel->old_sk_destruct = sk->sk_destruct;
 	sk->sk_destruct = &pppol2tp_tunnel_destruct;
