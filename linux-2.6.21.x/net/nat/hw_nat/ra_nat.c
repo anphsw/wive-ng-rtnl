@@ -87,9 +87,6 @@ struct net_device  *DstPort[MAX_IF_NUM];
 uint32_t	    DebugLevel=0;
 uint32_t	    ChipVer=0;
 uint32_t	    ChipId=0;
-#if 0  //we cannot use GPL-only symbol
-struct class	   *hnat_class;
-#endif
 
 uint16_t GLOBAL_PRE_ACL_STR  = DFL_PRE_ACL_STR; 
 uint16_t GLOBAL_PRE_ACL_END  = DFL_PRE_ACL_END; 
@@ -102,7 +99,7 @@ uint16_t GLOBAL_POST_MTR_END = DFL_POST_MTR_END;
 uint16_t GLOBAL_POST_AC_STR  = DFL_POST_AC_STR; 
 uint16_t GLOBAL_POST_AC_END  = DFL_POST_AC_END; 
 
-#if 0
+#ifdef HWNAT_DEBUG
 void skb_dump(struct sk_buff* sk) {
         unsigned int i;
 
@@ -229,7 +226,8 @@ static uint8_t *ShowCpuReason(struct sk_buff *skb)
 
 uint32_t FoeDumpPkt(struct sk_buff *skb)
 {
-#if 0  //dump related info from packet
+//dump related info from packet
+#ifdef HWNAT_DEBUG
     struct ethhdr *eth = NULL;
     struct vlan_hdr *vh1 = NULL;
     struct vlan_hdr *vh2 = NULL;
@@ -1292,7 +1290,7 @@ static void  PpeSetUserPriority(void)
     RegWrite(DSCP48_55_MAP_UP, DFL_DSCP48_55_UP);
     RegWrite(DSCP56_63_MAP_UP, DFL_DSCP56_63_UP);
    
-#if 0 
+#ifdef HWNAT_USER_AUTO
     /* Set boundary and range of auto user priority */ 
     RegModifyBits(AUTO_UP_CFG1, DFL_ATUP_BND1, 16, 14);
     RegModifyBits(AUTO_UP_CFG2, DFL_ATUP_BND2, 0, 14);
@@ -1667,14 +1665,6 @@ static int32_t PpeInitMod(void)
     /* Set GMAC fowrards packet to PPE */
     SetGdmaFwd(1);
 
-#if 0  //we cannot use GPL-only symbol
-    hnat_class = class_create(THIS_MODULE, "hnat");
-    class_device_create(hnat_class, NULL, MKDEV(220, 0), NULL, "hwnat0");
-    class_device_create(hnat_class, NULL, MKDEV(230, 0), NULL, "acl0");
-    class_device_create(hnat_class, NULL, MKDEV(240, 0), NULL, "ac0");
-    class_device_create(hnat_class, NULL, MKDEV(250, 0), NULL, "mtr0");
-#endif
-
     return 0;
 }
 
@@ -1700,14 +1690,6 @@ static void PpeCleanupMod(void)
 
     //Release net_device structure of Dest Port 
     PpeSetDstPort(0);
-
-#if 0  //we cannot use GPL-only symbol
-    class_device_destroy(hnat_class, MKDEV(220, 0));
-    class_device_destroy(hnat_class, MKDEV(230, 0));
-    class_device_destroy(hnat_class, MKDEV(240, 0));
-    class_device_destroy(hnat_class, MKDEV(250, 0));
-    class_destroy(hnat_class);
-#endif
 }
 
 /*HNAT QOS*/
