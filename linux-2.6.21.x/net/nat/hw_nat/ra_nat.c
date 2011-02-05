@@ -390,8 +390,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 
     if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
-
-	    NAT_PRINT("Packet from WLAN/PCI");
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
@@ -474,7 +472,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
      * rax<->raix binded traffic: HIT_BIND_FORCE_TO_CPU + FOE_AIS=1 + FOE_SP = 0 or 6
      */
     if((FOE_AI(skb)==HIT_BIND_FORCE_TO_CPU)) {
-	    NAT_PRINT("Force to CPU");
 	    skb->dev = DstPort[foe_entry->iblk2.act_dp];
 	    skb_push(skb, ETH_HLEN); //pointer to layer2 header
 	    skb->dev->hard_start_xmit(skb, skb->dev);
@@ -512,7 +509,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	//recover to right incoming interface
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
-	    NAT_PRINT("Recover...");
 	}else {
 	    printk("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
 	}
@@ -541,8 +537,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
-	    NAT_PRINT("Keepalive.");
-
 	  /* FIXME:	 
 	   * Recover to original SMAC/DMAC, but we don't know that.
 	   * just swap SMAC and DMAC to avoid "received packet with  own address as source address" error.
