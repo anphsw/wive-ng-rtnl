@@ -353,8 +353,7 @@ int32_t FoeHashFun(struct FoePriKey *key,enum FoeEntryState TargetState)
 	uint32_t buf[3];
 	struct FoeEntry *entry;
 
-#ifdef CONFIG_RA_HW_NAT_HASH0
-
+#if defined(CONFIG_RA_HW_NAT_HASH0)
 	if(key->fmt == IPV4_NAPT) {
             buf[0] = (key->ipv4.sip & FOE_HASH_MASK);
             buf[0] += (key->ipv4.dip & FOE_HASH_MASK);
@@ -393,7 +392,7 @@ int32_t FoeHashFun(struct FoePriKey *key,enum FoeEntryState TargetState)
 		return -1;
 	}
 
-#elif CONFIG_RA_HW_NAT_HASH1
+#elif defined(CONFIG_RA_HW_NAT_HASH1)
 	if(key->fmt == IPV4_NAPT) {
 	    buf[0] = key->ipv4.sport<<16 | key->ipv4.dport;
 	    buf[1] = key->ipv4.dip;
