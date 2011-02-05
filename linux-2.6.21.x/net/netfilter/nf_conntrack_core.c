@@ -1217,10 +1217,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (nfct_help(ct)->helper) {
-            if( (skb_headroom(*pskb) >=4)  &&
-                    ((FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_PCI) ||
-                     (FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_WLAN) ||
-                     (FOE_MAGIC_TAG(*pskb) == FOE_MAGIC_GE))){
+            if ((skb_headroom(*pskb) >=4) && IS_MAGIC_TAG_VALID(pskb)) {
                     FOE_ALG_RXIF(*pskb)=1;
 	    }
 	}

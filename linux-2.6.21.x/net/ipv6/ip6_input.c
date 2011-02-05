@@ -227,10 +227,7 @@ discard:
 int ip6_input(struct sk_buff *skb)
 {
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-            if( (skb_headroom(skb) >=4)  &&
-                    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
-                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN) ||
-                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE))){
+            if ((skb_headroom(skb) >=4) && IS_MAGIC_TAG_VALID(skb)) {
                     FOE_ALG_RXIF(skb)=1;
             }
 #endif
