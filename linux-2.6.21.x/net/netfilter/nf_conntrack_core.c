@@ -1218,7 +1218,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (nfct_help(ct)->helper) {
-            if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(pskb)) {
+            if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(*pskb)) {
                     FOE_ALG_RXIF(*pskb)=1;
 	    }
 	}
