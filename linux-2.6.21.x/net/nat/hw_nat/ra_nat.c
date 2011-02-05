@@ -84,7 +84,11 @@ extern int (*ra_sw_nat_hook_tx) (struct sk_buff * skb, int gmac_no);
 struct FoeEntry    *PpeFoeBase;
 dma_addr_t	    PpePhyFoeBase;
 struct net_device  *DstPort[MAX_IF_NUM];
-uint32_t	    DebugLevel=0;
+#ifdef HWNAT_DEBUG
+uint32_t	    DebugLevel=1;
+#else
+uint32_t	    DebugLevel=1;
+#endif
 uint32_t	    ChipVer=0;
 uint32_t	    ChipId=0;
 
