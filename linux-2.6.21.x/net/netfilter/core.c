@@ -118,7 +118,7 @@ EXPORT_SYMBOL(nf_register_hooks);
 void nf_unregister_hooks(struct nf_hook_ops *reg, unsigned int n)
 {
 	while (n-- > 0)
-		nf_unregister_hook(&reg[i]);
+		nf_unregister_hook(&reg[n]);
 }
 EXPORT_SYMBOL(nf_unregister_hooks);
 
