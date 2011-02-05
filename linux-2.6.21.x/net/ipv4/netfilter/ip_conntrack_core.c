@@ -51,9 +51,6 @@
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 #include <linux/netfilter_ipv4/ip_conntrack_helper.h>
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../../nat/hw_nat/ra_nat.h"
-#endif
 
 #define IP_CONNTRACK_VERSION	"2.4"
 

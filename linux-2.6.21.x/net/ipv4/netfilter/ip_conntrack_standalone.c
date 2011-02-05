@@ -33,11 +33,6 @@
 #include <linux/netfilter_ipv4/ip_conntrack_core.h>
 #include <linux/netfilter_ipv4/ip_conntrack_helper.h>
 
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include <linux/if_vlan.h>
-#include "../../nat/hw_nat/ra_nat.h"
-#endif
-
 #if 0
 #define DEBUGP printk
 #else
@@ -423,12 +418,6 @@ static unsigned int ip_conntrack_help(unsigned int hooknum,
 	ct = ip_conntrack_get(*pskb, &ctinfo);
 	if (ct && ct->helper && ctinfo != IP_CT_RELATED + IP_CT_IS_REPLY) {
 		unsigned int ret;
-
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-            if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(*pskb)) {
-                    FOE_ALG_RXIF(*pskb)=1;
-            }
-#endif
 
 		ret = ct->helper->help(pskb, ct, ctinfo);
 		if (ret != NF_ACCEPT)

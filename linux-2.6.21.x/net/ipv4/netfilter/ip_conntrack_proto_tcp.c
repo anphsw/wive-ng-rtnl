@@ -34,11 +34,6 @@
 #include <linux/netfilter_ipv4/ip_conntrack.h>
 #include <linux/netfilter_ipv4/ip_conntrack_protocol.h>
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-#include "../../nat/hw_nat/ra_nat.h"
-#include "../../nat/hw_nat/frame_engine.h"
-#endif
-
 #if 0
 #define DEBUGP printk
 #define DEBUGP_VARS
@@ -1175,7 +1170,3 @@ struct ip_conntrack_protocol ip_conntrack_protocol_tcp =
 	.nfattr_to_tuple	= ip_ct_port_nfattr_to_tuple,
 #endif
 };
-
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-EXPORT_SYMBOL(PpeFoeExp);
-#endif
