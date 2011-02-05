@@ -45,11 +45,6 @@
 #include <net/netfilter/nf_conntrack_l4proto.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)                                                                         
-#include "../nat/hw_nat/ra_nat.h"                                                                                                        
-#include "../nat/hw_nat/frame_engine.h"                                                                                                  
-#endif
-
 #if 0
 #define DEBUGP printk
 #define DEBUGP_VARS
@@ -852,9 +847,6 @@ static int tcp_packet(struct nf_conn *conntrack,
 	struct tcphdr *th, _tcph;
 	unsigned long timeout;
 	unsigned int index;
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	struct iphdr *iph = skb->nh.iph;
-#endif
 
 	th = skb_header_pointer(skb, dataoff, sizeof(_tcph), &_tcph);
 	BUG_ON(th == NULL);
