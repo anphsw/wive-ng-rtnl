@@ -57,5 +57,7 @@ obj-y                           += nat/foe_hook/
 endif
 
 obj-$(CONFIG_RA_NAT_HW)         += nat/hw_nat/
-obj-$(CONFIG_RA_CLASSIFIER)	+= ra_classifier/hook.obj
-obj-$(CONFIG_RA_CLASSIFIER)	+= ra_classifier/cls.obj
+ifeq ($(CONFIG_RA_CLASSIFIER),y)
+obj-y				+= ra_classifier/hook.obj
+obj-y				+= ra_classifier/cls.obj
+endif
