@@ -377,9 +377,9 @@ enum FoeCpuReason {
 /* 
  * PPE_FOE_CFG 
  */
-#ifdef CONFIG_RA_HW_NAT_HASH0
+#if defined(CONFIG_RA_HW_NAT_HASH0)
 #define DFL_FOE_HASH_MODE	0
-#elif CONFIG_RA_HW_NAT_HASH1
+#elif defined (CONFIG_RA_HW_NAT_HASH1)
 #define DFL_FOE_HASH_MODE	1
 #endif
 
