@@ -87,7 +87,7 @@ struct net_device  *DstPort[MAX_IF_NUM];
 #ifdef HWNAT_DEBUG
 uint32_t	    DebugLevel=1;
 #else
-uint32_t	    DebugLevel=1;
+uint32_t	    DebugLevel=0;
 #endif
 uint32_t	    ChipVer=0;
 uint32_t	    ChipId=0;
@@ -231,7 +231,7 @@ static uint8_t *ShowCpuReason(struct sk_buff *skb)
 uint32_t FoeDumpPkt(struct sk_buff *skb)
 {
 //dump related info from packet
-#ifdef HWNAT_DEBUG
+#ifdef HWNAT_DEBUG_PKT_PARSE
     struct ethhdr *eth = NULL;
     struct vlan_hdr *vh1 = NULL;
     struct vlan_hdr *vh2 = NULL;
@@ -389,11 +389,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
        FoeDumpPkt(skb);
     }
 
-    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
-			    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
+    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
 
+	    NAT_PRINT("Packet from WLAN/PCI");
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
 	    else if(skb->dev == DstPort[DP_RA1]) { VirIfIdx=DP_RA1; }
@@ -475,6 +474,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
      * rax<->raix binded traffic: HIT_BIND_FORCE_TO_CPU + FOE_AIS=1 + FOE_SP = 0 or 6
      */
     if((FOE_AI(skb)==HIT_BIND_FORCE_TO_CPU)) {
+	    NAT_PRINT("Force to CPU");
 	    skb->dev = DstPort[foe_entry->iblk2.act_dp];
 	    skb_push(skb, ETH_HLEN); //pointer to layer2 header
 	    skb->dev->hard_start_xmit(skb, skb->dev);
@@ -505,14 +505,14 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if((FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && \
-	FOE_AI(skb)!=HIT_BIND_KEEPALIVE) {
+    if((FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && FOE_AI(skb)!=HIT_BIND_KEEPALIVE) {
 
 	VirIfIdx = RemoveVlanTag(skb);
 
 	//recover to right incoming interface
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
+	    NAT_PRINT("Recover...");
 	}else {
 	    printk("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
 	}
@@ -541,7 +541,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
-
+	    NAT_PRINT("Keepalive.");
 
 	  /* FIXME:	 
 	   * Recover to original SMAC/DMAC, but we don't know that.
