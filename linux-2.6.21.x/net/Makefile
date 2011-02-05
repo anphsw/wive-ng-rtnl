@@ -55,4 +55,7 @@ endif
 ifneq ($(CONFIG_RA_NAT_NONE),y)
 obj-y                           += nat/foe_hook/
 endif
+
 obj-$(CONFIG_RA_NAT_HW)         += nat/hw_nat/
+obj-$(CONFIG_RA_CLASSIFIER)	+= ra_classifier/hook.obj
+obj-$(CONFIG_RA_CLASSIFIER)	+= ra_classifier/cls.obj
