@@ -51,6 +51,7 @@
 #include <linux/in.h>
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include <linux/if_vlan.h>
 #include "../nat/hw_nat/ra_nat.h"
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
@@ -1217,7 +1218,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (nfct_help(ct)->helper) {
-            if ((skb_headroom(*pskb) >=4) && IS_MAGIC_TAG_VALID(pskb)) {
+            if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(pskb)) {
                     FOE_ALG_RXIF(*pskb)=1;
 	    }
 	}

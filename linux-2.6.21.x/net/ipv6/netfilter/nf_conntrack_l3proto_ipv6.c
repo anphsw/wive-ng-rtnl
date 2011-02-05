@@ -38,6 +38,7 @@
 #include <net/netfilter/nf_conntrack_core.h>
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include <linux/if_vlan.h>
 #include "../../nat/hw_nat/ra_nat.h"
 #endif
 
@@ -200,7 +201,7 @@ static unsigned int ipv6_confirm(unsigned int hooknum,
 	}
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if ((skb_headroom(*pskb) >=4) && IS_MAGIC_TAG_VALID(pskb)) {
+	if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(pskb)) {
 	    FOE_ALG_RXIF(*pskb)=1;
 	}
 #endif

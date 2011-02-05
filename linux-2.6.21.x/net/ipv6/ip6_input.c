@@ -46,6 +46,7 @@
 #include <net/xfrm.h>
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include <linux/if_vlan.h>
 #include "../nat/hw_nat/ra_nat.h"
 #endif
 
@@ -227,7 +228,7 @@ discard:
 int ip6_input(struct sk_buff *skb)
 {
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-            if ((skb_headroom(skb) >=4) && IS_MAGIC_TAG_VALID(skb)) {
+            if ((skb_headroom(skb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(skb)) {
                     FOE_ALG_RXIF(skb)=1;
             }
 #endif

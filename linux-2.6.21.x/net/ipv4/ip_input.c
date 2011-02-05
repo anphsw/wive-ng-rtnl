@@ -147,6 +147,7 @@
 #include <linux/netlink.h>
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include <linux/if_vlan.h>
 #include "../nat/hw_nat/ra_nat.h"
 #endif
 
@@ -269,7 +270,7 @@ int ip_local_deliver(struct sk_buff *skb)
 
 /* patch from Ralink to fix HW NAT LAN<->LAN binding */ 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if ((skb_headroom(skb) >=4) && IS_MAGIC_TAG_VALID(skb)) {
+        if ((skb_headroom(skb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(skb)) {
                 FOE_ALG_RXIF(skb)=1;
         }
 #endif

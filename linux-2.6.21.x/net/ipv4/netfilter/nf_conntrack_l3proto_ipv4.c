@@ -31,7 +31,9 @@
 #include <net/netfilter/nf_conntrack_l3proto.h>
 #include <net/netfilter/nf_conntrack_core.h>
 #include <net/netfilter/ipv4/nf_conntrack_ipv4.h>
+
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include <linux/if_vlan.h>
 #include "../../nat/hw_nat/ra_nat.h"
 #endif
 
@@ -157,7 +159,7 @@ static unsigned int ipv4_conntrack_help(unsigned int hooknum,
 		return NF_ACCEPT;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-            if ((skb_headroom(*pskb) >=4) && IS_MAGIC_TAG_VALID(pskb)) {
+            if ((skb_headroom(*pskb) >= VLAN_HLEN) && IS_MAGIC_TAG_VALID(pskb)) {
                     FOE_ALG_RXIF(*pskb)=1;
             }
 #endif
