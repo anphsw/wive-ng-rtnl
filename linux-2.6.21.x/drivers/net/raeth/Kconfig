@@ -92,7 +92,7 @@ endchoice
 
 config	RALINK_VISTA_BASIC
 	bool 'Vista Basic Logo for IC+ 175C'
-        depends on LAN_WAN_SUPPORT && !RALINK_RT3052 && !RALINK_RT3352
+        depends on !RALINK_RT3052 && !RALINK_RT3352
 
 config	ESW_DOUBLE_VLAN_TAG
 	bool
@@ -124,7 +124,7 @@ config  MAC_TO_GIGAPHY_MODE_ADDR
 
 config RAETH_GMAC2
         bool "GMAC2 Support"
-        depends on RAETH && RALINK_RT3883
+        depends on RAETH
 
 choice
         prompt "GMAC2 is connected to"
@@ -152,16 +152,17 @@ config  GE2_RGMII_AN
         bool "RGMII_AN (GigaPhy)"
         depends on !RALINK_RT3052 && !RALINK_RT3352
 
+config  PSEUDO_SUPPORT
+	bool "Preudo interface for raeth."
+	depends on RAETH
+	default n
+
 endchoice
 
 config  MAC_TO_GIGAPHY_MODE_ADDR2
         hex "Phy Address"
 	default 0x1E
         depends on GE2_MII_AN || GE2_RGMII_AN 
-
-config LAN_WAN_SUPPORT
-        bool "LAN/WAN Partition"
-        depends on RAETH_ROUTER || RT_3052_ESW
 
 #force 100M
 config RAETH_ROUTER
@@ -183,13 +184,8 @@ config 100PHY
 bool
 default y if GE1_MII_AN || GE2_MII_AN
 
-config RAETH_GMAC2
-	bool "Pseudo GMAC2 support"
-	depends on RAETH
-	default n
-
 config RAETH_DHCP_TOUCH
 	bool "Send SIGUSR1/2 to dhcpc at media state changed."
 	depends on RAETH
 	default n
-
+	
