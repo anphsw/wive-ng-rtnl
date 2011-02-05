@@ -6,7 +6,8 @@
 # Copyright (c) 2001, Lineo
 #
 
-VERSIONPKG = 3.3.0
+-include  version
+
 VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
 
 ############################################################################
@@ -19,7 +20,7 @@ include .config
 
 #changed by Steven Liu
 #all: ucfront cksum subdirs romfs image
-all: tools lib_only uClibc++_only user_only modules romfs linux image
+all: tools linux lib_only uClibc++_only user_only modules romfs image
 else
 all: config_error
 endif
@@ -84,7 +85,7 @@ DIRS    =  $(ROOTDIR)/vendors include uClibc++ user lib
 
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
 export CONFIG_CONFIG LINUX_CONFIG MODULES_CONFIG ROMFSDIR SCRIPTSDIR
-export VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES TFTPDIR
+export RT288X_SDK_VERSION VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES TFTPDIR
 export BUILD_START_STRING
 export HOST_NCPU
 
