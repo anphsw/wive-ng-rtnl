@@ -768,10 +768,6 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 
 	copy_skb_header(n, skb);
 
-	n->transport_header += off;
-	n->network_header   += off;
-	n->mac_header	    += off;
-
 	return n;
 }
 
