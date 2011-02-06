@@ -569,10 +569,7 @@ static int tcp_in_window(struct ip_ct_tcp *state,
 {
 	struct ip_ct_tcp_state *sender = &state->seen[dir];
 	struct ip_ct_tcp_state *receiver = &state->seen[!dir];
-	__u32 seq, ack, sack, end, win;
-#if defined (CONFIG_RA_NAT_NONE)
-	__u32 swin;
-#endif
+	__u32 seq, ack, sack, end, win, swin;
 	int res;
 
 	/*
@@ -693,7 +690,6 @@ static int tcp_in_window(struct ip_ct_tcp *state,
 		before(sack, receiver->td_end + 1),
 		after(ack, receiver->td_end - MAXACKWINDOW(sender)));
 
-#if defined (CONFIG_RA_NAT_NONE)
 	if (before(seq, sender->td_maxend + 1) &&
 	    after(end, sender->td_end - receiver->td_maxwin - 1) &&
 	    before(sack, receiver->td_end + 1) &&
@@ -760,9 +756,6 @@ static int tcp_in_window(struct ip_ct_tcp *state,
 			: "SEQ is under the lower bound (already ACKed data retransmitted)"
 			: "SEQ is over the upper bound (over the window of the receiver)");
 	}
-#else
-	res = 1;
-#endif
 
 	DEBUGP("tcp_in_window: res=%i sender end=%u maxend=%u maxwin=%u "
 	       "receiver end=%u maxend=%u maxwin=%u\n",
