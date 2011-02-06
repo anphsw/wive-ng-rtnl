@@ -407,6 +407,7 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	C(mac_len);
 	C(csum);
 	C(local_df);
+	n->hdr_len = skb->nohdr ? skb_headroom(skb) : skb->hdr_len;
 	n->cloned = 1;
 	n->nohdr = 0;
 	C(pkt_type);
@@ -682,6 +683,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->h.raw   += off;
 	skb->nh.raw  += off;
 	skb->cloned   = 0;
+	skb->hdr_len  = 0;
 	skb->nohdr    = 0;
 	atomic_set(&skb_shinfo(skb)->dataref, 1);
 	return 0;
@@ -740,7 +742,9 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 	 */
 	struct sk_buff *n = alloc_skb(newheadroom + skb->len + newtailroom,
 				      gfp_mask);
+	int oldheadroom = skb_headroom(skb);
 	int head_copy_len, head_copy_off;
+	int off = 0;
 
 	if (!n)
 		return NULL;
@@ -750,7 +754,7 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 	/* Set the tail pointer and length */
 	skb_put(n, skb->len);
 
-	head_copy_len = skb_headroom(skb);
+	head_copy_len = oldheadroom;
 	head_copy_off = 0;
 	if (newheadroom <= head_copy_len)
 		head_copy_len = newheadroom;
@@ -763,6 +767,10 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 		BUG();
 
 	copy_skb_header(n, skb);
+
+	n->transport_header += off;
+	n->network_header   += off;
+	n->mac_header	    += off;
 
 	return n;
 }
