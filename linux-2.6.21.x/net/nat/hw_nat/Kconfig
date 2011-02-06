@@ -302,8 +302,8 @@ config  RA_HW_NAT_NONE2UP
 	depends on RA_HW_NAT
 	bool "No Remark Helper"
 
+endchoice
+
 config  RA_HW_NAT_MINIMAL
 	depends on RA_HW_NAT
 	bool "Only minimal hw_nat code support. No ACL/AC/MTR"
-
-endchoice
