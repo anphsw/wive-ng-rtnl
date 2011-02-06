@@ -672,7 +672,7 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;
-		memcpy(rx_skb->head+2,&rx_ring[rx_dma_owner_idx0].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
+		memcpy(FOE_INFO_START_ADDR(rx_skb)+2,&rx_ring[rx_dma_owner_idx0].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
 #endif
 
 		/* We have to check the free memory size is big enough
