@@ -5,6 +5,7 @@
 menu "DMA Engine support"
 
 config DMA_ENGINE
+	depends on HAS_DMA
 	bool "Support for DMA engines"
 	---help---
 	  DMA engines offload copy operations from the CPU to dedicated

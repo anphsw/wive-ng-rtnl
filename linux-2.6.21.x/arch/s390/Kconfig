@@ -44,6 +44,9 @@ config GENERIC_TIME
 config NO_IOMEM
 	def_bool y
 
+config NO_DMA
+	def_bool y
+
 mainmenu "Linux Kernel Configuration"
 
 config S390
