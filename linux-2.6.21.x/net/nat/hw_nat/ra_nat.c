@@ -1359,7 +1359,7 @@ static int32_t PpeEngStart(void)
 	PpeSetFoeHashMode(DFL_FOE_HASH_MODE);
 
 	/* Set default index in policy table */
-#ifndef RA_HW_NAT_MINIMAL
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
 	PpeSetPostMtrEbl(0);
@@ -1395,7 +1395,7 @@ static int32_t PpeEngStop(void)
 	PpeSetFoeEbl(0);
 	
 	/* Set default index in policy table */
-#ifndef RA_HW_NAT_MINIMAL
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
 	PpeSetPostMtrEbl(0);
@@ -1652,7 +1652,7 @@ static int32_t PpeInitMod(void)
 
     /* Register ioctl handler */
     PpeRegIoctlHandler();
-#ifndef RA_HW_NAT_MINIMAL
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
     AclRegIoctlHandler();
     AcRegIoctlHandler();
     MtrRegIoctlHandler();
@@ -1687,7 +1687,7 @@ static void PpeCleanupMod(void)
 
     /* Unregister ioctl handler */
     PpeUnRegIoctlHandler();
-#ifndef RA_HW_NAT_MINIMAL
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
     AclUnRegIoctlHandler();
     AcUnRegIoctlHandler();
     MtrUnRegIoctlHandler();
