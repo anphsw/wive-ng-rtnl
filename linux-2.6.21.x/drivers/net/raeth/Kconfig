@@ -96,7 +96,6 @@ config	RALINK_VISTA_BASIC
 
 config	ESW_DOUBLE_VLAN_TAG
 	bool
-	default n if RT_3052_ESW
 
 config RAETH_HAS_PORT5
         bool "Port 5 Support"
