@@ -31,26 +31,14 @@
 #define _FE_WANTED
 
 #include <linux/version.h>
+#include <asm/rt2880/rt_mmap.h>
 
 /*
  * DEFINITIONS AND MACROS
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-#include <asm/rt2880/rt_mmap.h>
+
 #define FE_BASE		    RALINK_FRAME_ENGINE_BASE
 #define SYS_CTRL_BASE       RALINK_SYSCTL_BASE
-#else
-#if defined(CONFIG_RALINK_RT2880_SHUTTLE)
-#define FE_BASE		   0xA0310000
-#define SYS_CTRL_BASE      0xA0300000
-#elif defined (CONFIG_RALINK_RT2880_MP)
-#define FE_BASE		   0xA0400000
-#define SYS_CTRL_BASE      0xA0300000
-#else
-#error Please Choose Chip Version 
-#endif
-#endif
-
 
 #define CHIPID		    SYS_CTRL_BASE + 0x00
 #define REVID		    SYS_CTRL_BASE + 0x0C

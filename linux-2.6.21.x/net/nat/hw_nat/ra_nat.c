@@ -1359,11 +1359,13 @@ static int32_t PpeEngStart(void)
 	PpeSetFoeHashMode(DFL_FOE_HASH_MODE);
 
 	/* Set default index in policy table */
+#ifndef RA_HW_NAT_MINIMAL
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
 	PpeSetPostMtrEbl(0);
 	PpeSetPreAcEbl(0);
 	PpeSetPostAcEbl(0);
+#endif
 
 	/* Set Auto Age-Out Function */
 	PpeSetAgeOut();
@@ -1393,12 +1395,13 @@ static int32_t PpeEngStop(void)
 	PpeSetFoeEbl(0);
 	
 	/* Set default index in policy table */
+#ifndef RA_HW_NAT_MINIMAL
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
 	PpeSetPostMtrEbl(0);
 	PpeSetPreAcEbl(0);
 	PpeSetPostAcEbl(0);
-
+#endif
 	/* Free FOE table */ 
 	FoeFreeTbl(FOE_4TB_SIZ);
 
@@ -1649,9 +1652,11 @@ static int32_t PpeInitMod(void)
 
     /* Register ioctl handler */
     PpeRegIoctlHandler();
+#ifndef RA_HW_NAT_MINIMAL
     AclRegIoctlHandler();
     AcRegIoctlHandler();
     MtrRegIoctlHandler();
+#endif
 
     /* Initialize PPE related register */
     PpeEngStart();
@@ -1682,9 +1687,11 @@ static void PpeCleanupMod(void)
 
     /* Unregister ioctl handler */
     PpeUnRegIoctlHandler();
+#ifndef RA_HW_NAT_MINIMAL
     AclUnRegIoctlHandler();
     AcUnRegIoctlHandler();
     MtrUnRegIoctlHandler();
+#endif
 
     //Release net_device structure of Dest Port 
     PpeSetDstPort(0);

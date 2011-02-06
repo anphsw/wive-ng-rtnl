@@ -299,6 +299,11 @@ config  RA_HW_NAT_DSCP2UP_HELPER
 	"use FoE UP to remark DSCP value"
 
 config  RA_HW_NAT_NONE2UP
+	depends on RA_HW_NAT
 	bool "No Remark Helper"
+
+config  RA_HW_NAT_MINIMAL
+	depends on RA_HW_NAT
+	bool "Only minimal hw_nat code support. No ACL/AC/MTR"
 
 endchoice
