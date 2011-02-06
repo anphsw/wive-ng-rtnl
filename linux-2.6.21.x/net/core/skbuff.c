@@ -744,7 +744,6 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 				      gfp_mask);
 	int oldheadroom = skb_headroom(skb);
 	int head_copy_len, head_copy_off;
-	int off = 0;
 
 	if (!n)
 		return NULL;
