@@ -1,7 +1,8 @@
-include config.arch
-include ../../../linux-2.6.21.x/drivers/mtd/maps/ralink-flash.h
-include ../../../sdk_version.h
-include ../../../version
+
+-include config.arch
+-include ../../../linux-2.6.21.x/drivers/mtd/maps/ralink-flash.h
+-include ../../../sdk_version.h
+-include ../../../version
 
 KERNELZ = $(IMAGEDIR)/zImage
 RAMDISK  = $(IMAGEDIR)/ramdisk

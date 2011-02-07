@@ -86,7 +86,7 @@ AUTOHEADER = ${SHELL} /opt/Wive-RTNL/user/ethtool/missing --run autoheader
 AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/ethtool/missing --run automake-1.10
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CPPFLAGS = 
@@ -262,30 +262,30 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/amd8111e.Po
-include ./$(DEPDIR)/de2104x.Po
-include ./$(DEPDIR)/e100.Po
-include ./$(DEPDIR)/e1000.Po
-include ./$(DEPDIR)/ethtool.Po
-include ./$(DEPDIR)/fec_8xx.Po
-include ./$(DEPDIR)/natsemi.Po
-include ./$(DEPDIR)/pcnet32.Po
-include ./$(DEPDIR)/realtek.Po
-include ./$(DEPDIR)/tg3.Po
+#include ./$(DEPDIR)/amd8111e.Po
+#include ./$(DEPDIR)/de2104x.Po
+#include ./$(DEPDIR)/e100.Po
+#include ./$(DEPDIR)/e1000.Po
+#include ./$(DEPDIR)/ethtool.Po
+#include ./$(DEPDIR)/fec_8xx.Po
+#include ./$(DEPDIR)/natsemi.Po
+#include ./$(DEPDIR)/pcnet32.Po
+#include ./$(DEPDIR)/realtek.Po
+#include ./$(DEPDIR)/tg3.Po
 
 .c.o:
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+#	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 install-man8: $(man8_MANS) $(man_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man8dir)" || $(MKDIR_P) "$(DESTDIR)$(man8dir)"

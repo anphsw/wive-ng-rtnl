@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Sat Feb  5 20:23:55 2011
 #
 CONFIG_MIPS=y
 
@@ -1107,6 +1106,7 @@ CONFIG_TEXTSEARCH_FSM=m
 CONFIG_PLIST=y
 CONFIG_HAS_IOMEM=y
 CONFIG_HAS_IOPORT=y
+CONFIG_HAS_DMA=y
 
 #
 # Ralink Module

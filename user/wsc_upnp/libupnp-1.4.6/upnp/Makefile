@@ -200,8 +200,8 @@ CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missing --run aclocal-1.9
-AMDEP_FALSE = #
-AMDEP_TRUE = 
+AMDEP_FALSE = 
+AMDEP_TRUE = #
 AMTAR = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missing --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AUTOCONF = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missing --run autoconf
@@ -209,13 +209,13 @@ AUTOHEADER = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/miss
 AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missing --run automake-1.9
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
@@ -277,10 +277,10 @@ ac_ct_CC =
 ac_ct_CXX = 
 ac_ct_F77 = gfortran
 acx_pthread_config = 
-am__fastdepCC_FALSE = #
-am__fastdepCC_TRUE = 
-am__fastdepCXX_FALSE = #
-am__fastdepCXX_TRUE = 
+am__fastdepCC_FALSE = 
+am__fastdepCC_TRUE = #
+am__fastdepCXX_FALSE = 
+am__fastdepCXX_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 
@@ -786,361 +786,361 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po
-include sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po
-include sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po
-include sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po
-include sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po
-include sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po
-include src/api/$(DEPDIR)/libupnp_la-upnpapi.Plo
-include src/api/$(DEPDIR)/libupnp_la-upnpdebug.Plo
-include src/api/$(DEPDIR)/libupnp_la-upnptools.Plo
-include src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Plo
-include src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Plo
-include src/gena/$(DEPDIR)/libupnp_la-gena_device.Plo
-include src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Plo
-include src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Plo
-include src/genlib/net/$(DEPDIR)/libupnp_la-sock.Plo
-include src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Plo
-include src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Plo
-include src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Plo
-include src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Plo
-include src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Plo
-include src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Plo
-include src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Plo
-include src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Plo
-include src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Plo
-include src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Plo
-include src/genlib/util/$(DEPDIR)/libupnp_la-util.Plo
-include src/soap/$(DEPDIR)/libupnp_la-soap_common.Plo
-include src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Plo
-include src/soap/$(DEPDIR)/libupnp_la-soap_device.Plo
-include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Plo
-include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Plo
-include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Plo
-include src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Plo
-include src/uuid/$(DEPDIR)/libupnp_la-md5.Plo
-include src/uuid/$(DEPDIR)/libupnp_la-sysdep.Plo
-include src/uuid/$(DEPDIR)/libupnp_la-uuid.Plo
-include test/$(DEPDIR)/test_init.Po
+#include sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po
+#include sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po
+#include sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po
+#include sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po
+#include sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po
+#include sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po
+#include src/api/$(DEPDIR)/libupnp_la-upnpapi.Plo
+#include src/api/$(DEPDIR)/libupnp_la-upnpdebug.Plo
+#include src/api/$(DEPDIR)/libupnp_la-upnptools.Plo
+#include src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Plo
+#include src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Plo
+#include src/gena/$(DEPDIR)/libupnp_la-gena_device.Plo
+#include src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Plo
+#include src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Plo
+#include src/genlib/net/$(DEPDIR)/libupnp_la-sock.Plo
+#include src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Plo
+#include src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Plo
+#include src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Plo
+#include src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Plo
+#include src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Plo
+#include src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Plo
+#include src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Plo
+#include src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Plo
+#include src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Plo
+#include src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Plo
+#include src/genlib/util/$(DEPDIR)/libupnp_la-util.Plo
+#include src/soap/$(DEPDIR)/libupnp_la-soap_common.Plo
+#include src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Plo
+#include src/soap/$(DEPDIR)/libupnp_la-soap_device.Plo
+#include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Plo
+#include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Plo
+#include src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Plo
+#include src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Plo
+#include src/uuid/$(DEPDIR)/libupnp_la-md5.Plo
+#include src/uuid/$(DEPDIR)/libupnp_la-sysdep.Plo
+#include src/uuid/$(DEPDIR)/libupnp_la-uuid.Plo
+#include test/$(DEPDIR)/test_init.Po
 
 .c.o:
-	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`; \
-	if $(COMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ $<; \
-	then mv -f "$$depbase.Tpo" "$$depbase.Po"; else rm -f "$$depbase.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c -o $@ $<
+#	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`; \
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ $<; \
+#	then mv -f "$$depbase.Tpo" "$$depbase.Po"; else rm -f "$$depbase.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c -o $@ $<
 
 .c.obj:
-	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`; \
-	if $(COMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-	then mv -f "$$depbase.Tpo" "$$depbase.Po"; else rm -f "$$depbase.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+#	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`; \
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+#	then mv -f "$$depbase.Tpo" "$$depbase.Po"; else rm -f "$$depbase.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`; \
-	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ $<; \
-	then mv -f "$$depbase.Tpo" "$$depbase.Plo"; else rm -f "$$depbase.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`; \
+#	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$$depbase.Tpo" -c -o $@ $<; \
+#	then mv -f "$$depbase.Tpo" "$$depbase.Plo"; else rm -f "$$depbase.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 src/ssdp/libupnp_la-ssdp_device.lo: src/ssdp/ssdp_device.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_device.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo" -c -o src/ssdp/libupnp_la-ssdp_device.lo `test -f 'src/ssdp/ssdp_device.c' || echo '$(srcdir)/'`src/ssdp/ssdp_device.c; \
-	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo"; exit 1; fi
-#	source='src/ssdp/ssdp_device.c' object='src/ssdp/libupnp_la-ssdp_device.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_device.lo `test -f 'src/ssdp/ssdp_device.c' || echo '$(srcdir)/'`src/ssdp/ssdp_device.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_device.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo" -c -o src/ssdp/libupnp_la-ssdp_device.lo `test -f 'src/ssdp/ssdp_device.c' || echo '$(srcdir)/'`src/ssdp/ssdp_device.c; \
+#	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_device.Tpo"; exit 1; fi
+#	source='src/ssdp/ssdp_device.c' object='src/ssdp/libupnp_la-ssdp_device.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_device.lo `test -f 'src/ssdp/ssdp_device.c' || echo '$(srcdir)/'`src/ssdp/ssdp_device.c
 
 src/ssdp/libupnp_la-ssdp_ctrlpt.lo: src/ssdp/ssdp_ctrlpt.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_ctrlpt.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo" -c -o src/ssdp/libupnp_la-ssdp_ctrlpt.lo `test -f 'src/ssdp/ssdp_ctrlpt.c' || echo '$(srcdir)/'`src/ssdp/ssdp_ctrlpt.c; \
-	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo"; exit 1; fi
-#	source='src/ssdp/ssdp_ctrlpt.c' object='src/ssdp/libupnp_la-ssdp_ctrlpt.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_ctrlpt.lo `test -f 'src/ssdp/ssdp_ctrlpt.c' || echo '$(srcdir)/'`src/ssdp/ssdp_ctrlpt.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_ctrlpt.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo" -c -o src/ssdp/libupnp_la-ssdp_ctrlpt.lo `test -f 'src/ssdp/ssdp_ctrlpt.c' || echo '$(srcdir)/'`src/ssdp/ssdp_ctrlpt.c; \
+#	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_ctrlpt.Tpo"; exit 1; fi
+#	source='src/ssdp/ssdp_ctrlpt.c' object='src/ssdp/libupnp_la-ssdp_ctrlpt.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_ctrlpt.lo `test -f 'src/ssdp/ssdp_ctrlpt.c' || echo '$(srcdir)/'`src/ssdp/ssdp_ctrlpt.c
 
 src/ssdp/libupnp_la-ssdp_server.lo: src/ssdp/ssdp_server.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_server.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo" -c -o src/ssdp/libupnp_la-ssdp_server.lo `test -f 'src/ssdp/ssdp_server.c' || echo '$(srcdir)/'`src/ssdp/ssdp_server.c; \
-	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo"; exit 1; fi
-#	source='src/ssdp/ssdp_server.c' object='src/ssdp/libupnp_la-ssdp_server.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_server.lo `test -f 'src/ssdp/ssdp_server.c' || echo '$(srcdir)/'`src/ssdp/ssdp_server.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/ssdp/libupnp_la-ssdp_server.lo -MD -MP -MF "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo" -c -o src/ssdp/libupnp_la-ssdp_server.lo `test -f 'src/ssdp/ssdp_server.c' || echo '$(srcdir)/'`src/ssdp/ssdp_server.c; \
+#	then mv -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo" "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Plo"; else rm -f "src/ssdp/$(DEPDIR)/libupnp_la-ssdp_server.Tpo"; exit 1; fi
+#	source='src/ssdp/ssdp_server.c' object='src/ssdp/libupnp_la-ssdp_server.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/ssdp/libupnp_la-ssdp_server.lo `test -f 'src/ssdp/ssdp_server.c' || echo '$(srcdir)/'`src/ssdp/ssdp_server.c
 
 src/soap/libupnp_la-soap_device.lo: src/soap/soap_device.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_device.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo" -c -o src/soap/libupnp_la-soap_device.lo `test -f 'src/soap/soap_device.c' || echo '$(srcdir)/'`src/soap/soap_device.c; \
-	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_device.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo"; exit 1; fi
-#	source='src/soap/soap_device.c' object='src/soap/libupnp_la-soap_device.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_device.lo `test -f 'src/soap/soap_device.c' || echo '$(srcdir)/'`src/soap/soap_device.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_device.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo" -c -o src/soap/libupnp_la-soap_device.lo `test -f 'src/soap/soap_device.c' || echo '$(srcdir)/'`src/soap/soap_device.c; \
+#	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_device.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_device.Tpo"; exit 1; fi
+#	source='src/soap/soap_device.c' object='src/soap/libupnp_la-soap_device.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_device.lo `test -f 'src/soap/soap_device.c' || echo '$(srcdir)/'`src/soap/soap_device.c
 
 src/soap/libupnp_la-soap_ctrlpt.lo: src/soap/soap_ctrlpt.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_ctrlpt.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo" -c -o src/soap/libupnp_la-soap_ctrlpt.lo `test -f 'src/soap/soap_ctrlpt.c' || echo '$(srcdir)/'`src/soap/soap_ctrlpt.c; \
-	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo"; exit 1; fi
-#	source='src/soap/soap_ctrlpt.c' object='src/soap/libupnp_la-soap_ctrlpt.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_ctrlpt.lo `test -f 'src/soap/soap_ctrlpt.c' || echo '$(srcdir)/'`src/soap/soap_ctrlpt.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_ctrlpt.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo" -c -o src/soap/libupnp_la-soap_ctrlpt.lo `test -f 'src/soap/soap_ctrlpt.c' || echo '$(srcdir)/'`src/soap/soap_ctrlpt.c; \
+#	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_ctrlpt.Tpo"; exit 1; fi
+#	source='src/soap/soap_ctrlpt.c' object='src/soap/libupnp_la-soap_ctrlpt.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_ctrlpt.lo `test -f 'src/soap/soap_ctrlpt.c' || echo '$(srcdir)/'`src/soap/soap_ctrlpt.c
 
 src/soap/libupnp_la-soap_common.lo: src/soap/soap_common.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_common.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo" -c -o src/soap/libupnp_la-soap_common.lo `test -f 'src/soap/soap_common.c' || echo '$(srcdir)/'`src/soap/soap_common.c; \
-	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_common.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo"; exit 1; fi
-#	source='src/soap/soap_common.c' object='src/soap/libupnp_la-soap_common.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_common.lo `test -f 'src/soap/soap_common.c' || echo '$(srcdir)/'`src/soap/soap_common.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/soap/libupnp_la-soap_common.lo -MD -MP -MF "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo" -c -o src/soap/libupnp_la-soap_common.lo `test -f 'src/soap/soap_common.c' || echo '$(srcdir)/'`src/soap/soap_common.c; \
+#	then mv -f "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo" "src/soap/$(DEPDIR)/libupnp_la-soap_common.Plo"; else rm -f "src/soap/$(DEPDIR)/libupnp_la-soap_common.Tpo"; exit 1; fi
+#	source='src/soap/soap_common.c' object='src/soap/libupnp_la-soap_common.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/soap/libupnp_la-soap_common.lo `test -f 'src/soap/soap_common.c' || echo '$(srcdir)/'`src/soap/soap_common.c
 
 src/genlib/miniserver/libupnp_la-miniserver.lo: src/genlib/miniserver/miniserver.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/miniserver/libupnp_la-miniserver.lo -MD -MP -MF "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo" -c -o src/genlib/miniserver/libupnp_la-miniserver.lo `test -f 'src/genlib/miniserver/miniserver.c' || echo '$(srcdir)/'`src/genlib/miniserver/miniserver.c; \
-	then mv -f "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo" "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Plo"; else rm -f "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo"; exit 1; fi
-#	source='src/genlib/miniserver/miniserver.c' object='src/genlib/miniserver/libupnp_la-miniserver.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/miniserver/libupnp_la-miniserver.lo `test -f 'src/genlib/miniserver/miniserver.c' || echo '$(srcdir)/'`src/genlib/miniserver/miniserver.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/miniserver/libupnp_la-miniserver.lo -MD -MP -MF "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo" -c -o src/genlib/miniserver/libupnp_la-miniserver.lo `test -f 'src/genlib/miniserver/miniserver.c' || echo '$(srcdir)/'`src/genlib/miniserver/miniserver.c; \
+#	then mv -f "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo" "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Plo"; else rm -f "src/genlib/miniserver/$(DEPDIR)/libupnp_la-miniserver.Tpo"; exit 1; fi
+#	source='src/genlib/miniserver/miniserver.c' object='src/genlib/miniserver/libupnp_la-miniserver.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/miniserver/libupnp_la-miniserver.lo `test -f 'src/genlib/miniserver/miniserver.c' || echo '$(srcdir)/'`src/genlib/miniserver/miniserver.c
 
 src/genlib/service_table/libupnp_la-service_table.lo: src/genlib/service_table/service_table.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/service_table/libupnp_la-service_table.lo -MD -MP -MF "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo" -c -o src/genlib/service_table/libupnp_la-service_table.lo `test -f 'src/genlib/service_table/service_table.c' || echo '$(srcdir)/'`src/genlib/service_table/service_table.c; \
-	then mv -f "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo" "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Plo"; else rm -f "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo"; exit 1; fi
-#	source='src/genlib/service_table/service_table.c' object='src/genlib/service_table/libupnp_la-service_table.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/service_table/libupnp_la-service_table.lo `test -f 'src/genlib/service_table/service_table.c' || echo '$(srcdir)/'`src/genlib/service_table/service_table.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/service_table/libupnp_la-service_table.lo -MD -MP -MF "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo" -c -o src/genlib/service_table/libupnp_la-service_table.lo `test -f 'src/genlib/service_table/service_table.c' || echo '$(srcdir)/'`src/genlib/service_table/service_table.c; \
+#	then mv -f "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo" "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Plo"; else rm -f "src/genlib/service_table/$(DEPDIR)/libupnp_la-service_table.Tpo"; exit 1; fi
+#	source='src/genlib/service_table/service_table.c' object='src/genlib/service_table/libupnp_la-service_table.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/service_table/libupnp_la-service_table.lo `test -f 'src/genlib/service_table/service_table.c' || echo '$(srcdir)/'`src/genlib/service_table/service_table.c
 
 src/genlib/util/libupnp_la-membuffer.lo: src/genlib/util/membuffer.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-membuffer.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo" -c -o src/genlib/util/libupnp_la-membuffer.lo `test -f 'src/genlib/util/membuffer.c' || echo '$(srcdir)/'`src/genlib/util/membuffer.c; \
-	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo"; exit 1; fi
-#	source='src/genlib/util/membuffer.c' object='src/genlib/util/libupnp_la-membuffer.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-membuffer.lo `test -f 'src/genlib/util/membuffer.c' || echo '$(srcdir)/'`src/genlib/util/membuffer.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-membuffer.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo" -c -o src/genlib/util/libupnp_la-membuffer.lo `test -f 'src/genlib/util/membuffer.c' || echo '$(srcdir)/'`src/genlib/util/membuffer.c; \
+#	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-membuffer.Tpo"; exit 1; fi
+#	source='src/genlib/util/membuffer.c' object='src/genlib/util/libupnp_la-membuffer.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-membuffer.lo `test -f 'src/genlib/util/membuffer.c' || echo '$(srcdir)/'`src/genlib/util/membuffer.c
 
 src/genlib/util/libupnp_la-strintmap.lo: src/genlib/util/strintmap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-strintmap.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo" -c -o src/genlib/util/libupnp_la-strintmap.lo `test -f 'src/genlib/util/strintmap.c' || echo '$(srcdir)/'`src/genlib/util/strintmap.c; \
-	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo"; exit 1; fi
-#	source='src/genlib/util/strintmap.c' object='src/genlib/util/libupnp_la-strintmap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-strintmap.lo `test -f 'src/genlib/util/strintmap.c' || echo '$(srcdir)/'`src/genlib/util/strintmap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-strintmap.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo" -c -o src/genlib/util/libupnp_la-strintmap.lo `test -f 'src/genlib/util/strintmap.c' || echo '$(srcdir)/'`src/genlib/util/strintmap.c; \
+#	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-strintmap.Tpo"; exit 1; fi
+#	source='src/genlib/util/strintmap.c' object='src/genlib/util/libupnp_la-strintmap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-strintmap.lo `test -f 'src/genlib/util/strintmap.c' || echo '$(srcdir)/'`src/genlib/util/strintmap.c
 
 src/genlib/util/libupnp_la-upnp_timeout.lo: src/genlib/util/upnp_timeout.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-upnp_timeout.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo" -c -o src/genlib/util/libupnp_la-upnp_timeout.lo `test -f 'src/genlib/util/upnp_timeout.c' || echo '$(srcdir)/'`src/genlib/util/upnp_timeout.c; \
-	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo"; exit 1; fi
-#	source='src/genlib/util/upnp_timeout.c' object='src/genlib/util/libupnp_la-upnp_timeout.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-upnp_timeout.lo `test -f 'src/genlib/util/upnp_timeout.c' || echo '$(srcdir)/'`src/genlib/util/upnp_timeout.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-upnp_timeout.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo" -c -o src/genlib/util/libupnp_la-upnp_timeout.lo `test -f 'src/genlib/util/upnp_timeout.c' || echo '$(srcdir)/'`src/genlib/util/upnp_timeout.c; \
+#	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-upnp_timeout.Tpo"; exit 1; fi
+#	source='src/genlib/util/upnp_timeout.c' object='src/genlib/util/libupnp_la-upnp_timeout.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-upnp_timeout.lo `test -f 'src/genlib/util/upnp_timeout.c' || echo '$(srcdir)/'`src/genlib/util/upnp_timeout.c
 
 src/genlib/util/libupnp_la-util.lo: src/genlib/util/util.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-util.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo" -c -o src/genlib/util/libupnp_la-util.lo `test -f 'src/genlib/util/util.c' || echo '$(srcdir)/'`src/genlib/util/util.c; \
-	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-util.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo"; exit 1; fi
-#	source='src/genlib/util/util.c' object='src/genlib/util/libupnp_la-util.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-util.lo `test -f 'src/genlib/util/util.c' || echo '$(srcdir)/'`src/genlib/util/util.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/util/libupnp_la-util.lo -MD -MP -MF "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo" -c -o src/genlib/util/libupnp_la-util.lo `test -f 'src/genlib/util/util.c' || echo '$(srcdir)/'`src/genlib/util/util.c; \
+#	then mv -f "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo" "src/genlib/util/$(DEPDIR)/libupnp_la-util.Plo"; else rm -f "src/genlib/util/$(DEPDIR)/libupnp_la-util.Tpo"; exit 1; fi
+#	source='src/genlib/util/util.c' object='src/genlib/util/libupnp_la-util.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/util/libupnp_la-util.lo `test -f 'src/genlib/util/util.c' || echo '$(srcdir)/'`src/genlib/util/util.c
 
 src/genlib/client_table/libupnp_la-client_table.lo: src/genlib/client_table/client_table.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/client_table/libupnp_la-client_table.lo -MD -MP -MF "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo" -c -o src/genlib/client_table/libupnp_la-client_table.lo `test -f 'src/genlib/client_table/client_table.c' || echo '$(srcdir)/'`src/genlib/client_table/client_table.c; \
-	then mv -f "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo" "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Plo"; else rm -f "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo"; exit 1; fi
-#	source='src/genlib/client_table/client_table.c' object='src/genlib/client_table/libupnp_la-client_table.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/client_table/libupnp_la-client_table.lo `test -f 'src/genlib/client_table/client_table.c' || echo '$(srcdir)/'`src/genlib/client_table/client_table.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/client_table/libupnp_la-client_table.lo -MD -MP -MF "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo" -c -o src/genlib/client_table/libupnp_la-client_table.lo `test -f 'src/genlib/client_table/client_table.c' || echo '$(srcdir)/'`src/genlib/client_table/client_table.c; \
+#	then mv -f "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo" "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Plo"; else rm -f "src/genlib/client_table/$(DEPDIR)/libupnp_la-client_table.Tpo"; exit 1; fi
+#	source='src/genlib/client_table/client_table.c' object='src/genlib/client_table/libupnp_la-client_table.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/client_table/libupnp_la-client_table.lo `test -f 'src/genlib/client_table/client_table.c' || echo '$(srcdir)/'`src/genlib/client_table/client_table.c
 
 src/genlib/net/libupnp_la-sock.lo: src/genlib/net/sock.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/libupnp_la-sock.lo -MD -MP -MF "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo" -c -o src/genlib/net/libupnp_la-sock.lo `test -f 'src/genlib/net/sock.c' || echo '$(srcdir)/'`src/genlib/net/sock.c; \
-	then mv -f "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo" "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Plo"; else rm -f "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo"; exit 1; fi
-#	source='src/genlib/net/sock.c' object='src/genlib/net/libupnp_la-sock.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/libupnp_la-sock.lo `test -f 'src/genlib/net/sock.c' || echo '$(srcdir)/'`src/genlib/net/sock.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/libupnp_la-sock.lo -MD -MP -MF "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo" -c -o src/genlib/net/libupnp_la-sock.lo `test -f 'src/genlib/net/sock.c' || echo '$(srcdir)/'`src/genlib/net/sock.c; \
+#	then mv -f "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo" "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Plo"; else rm -f "src/genlib/net/$(DEPDIR)/libupnp_la-sock.Tpo"; exit 1; fi
+#	source='src/genlib/net/sock.c' object='src/genlib/net/libupnp_la-sock.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/libupnp_la-sock.lo `test -f 'src/genlib/net/sock.c' || echo '$(srcdir)/'`src/genlib/net/sock.c
 
 src/genlib/net/http/libupnp_la-httpparser.lo: src/genlib/net/http/httpparser.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-httpparser.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo" -c -o src/genlib/net/http/libupnp_la-httpparser.lo `test -f 'src/genlib/net/http/httpparser.c' || echo '$(srcdir)/'`src/genlib/net/http/httpparser.c; \
-	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo"; exit 1; fi
-#	source='src/genlib/net/http/httpparser.c' object='src/genlib/net/http/libupnp_la-httpparser.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-httpparser.lo `test -f 'src/genlib/net/http/httpparser.c' || echo '$(srcdir)/'`src/genlib/net/http/httpparser.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-httpparser.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo" -c -o src/genlib/net/http/libupnp_la-httpparser.lo `test -f 'src/genlib/net/http/httpparser.c' || echo '$(srcdir)/'`src/genlib/net/http/httpparser.c; \
+#	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpparser.Tpo"; exit 1; fi
+#	source='src/genlib/net/http/httpparser.c' object='src/genlib/net/http/libupnp_la-httpparser.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-httpparser.lo `test -f 'src/genlib/net/http/httpparser.c' || echo '$(srcdir)/'`src/genlib/net/http/httpparser.c
 
 src/genlib/net/http/libupnp_la-httpreadwrite.lo: src/genlib/net/http/httpreadwrite.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-httpreadwrite.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo" -c -o src/genlib/net/http/libupnp_la-httpreadwrite.lo `test -f 'src/genlib/net/http/httpreadwrite.c' || echo '$(srcdir)/'`src/genlib/net/http/httpreadwrite.c; \
-	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo"; exit 1; fi
-#	source='src/genlib/net/http/httpreadwrite.c' object='src/genlib/net/http/libupnp_la-httpreadwrite.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-httpreadwrite.lo `test -f 'src/genlib/net/http/httpreadwrite.c' || echo '$(srcdir)/'`src/genlib/net/http/httpreadwrite.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-httpreadwrite.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo" -c -o src/genlib/net/http/libupnp_la-httpreadwrite.lo `test -f 'src/genlib/net/http/httpreadwrite.c' || echo '$(srcdir)/'`src/genlib/net/http/httpreadwrite.c; \
+#	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-httpreadwrite.Tpo"; exit 1; fi
+#	source='src/genlib/net/http/httpreadwrite.c' object='src/genlib/net/http/libupnp_la-httpreadwrite.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-httpreadwrite.lo `test -f 'src/genlib/net/http/httpreadwrite.c' || echo '$(srcdir)/'`src/genlib/net/http/httpreadwrite.c
 
 src/genlib/net/http/libupnp_la-statcodes.lo: src/genlib/net/http/statcodes.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-statcodes.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo" -c -o src/genlib/net/http/libupnp_la-statcodes.lo `test -f 'src/genlib/net/http/statcodes.c' || echo '$(srcdir)/'`src/genlib/net/http/statcodes.c; \
-	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo"; exit 1; fi
-#	source='src/genlib/net/http/statcodes.c' object='src/genlib/net/http/libupnp_la-statcodes.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-statcodes.lo `test -f 'src/genlib/net/http/statcodes.c' || echo '$(srcdir)/'`src/genlib/net/http/statcodes.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-statcodes.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo" -c -o src/genlib/net/http/libupnp_la-statcodes.lo `test -f 'src/genlib/net/http/statcodes.c' || echo '$(srcdir)/'`src/genlib/net/http/statcodes.c; \
+#	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-statcodes.Tpo"; exit 1; fi
+#	source='src/genlib/net/http/statcodes.c' object='src/genlib/net/http/libupnp_la-statcodes.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-statcodes.lo `test -f 'src/genlib/net/http/statcodes.c' || echo '$(srcdir)/'`src/genlib/net/http/statcodes.c
 
 src/genlib/net/http/libupnp_la-webserver.lo: src/genlib/net/http/webserver.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-webserver.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo" -c -o src/genlib/net/http/libupnp_la-webserver.lo `test -f 'src/genlib/net/http/webserver.c' || echo '$(srcdir)/'`src/genlib/net/http/webserver.c; \
-	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo"; exit 1; fi
-#	source='src/genlib/net/http/webserver.c' object='src/genlib/net/http/libupnp_la-webserver.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-webserver.lo `test -f 'src/genlib/net/http/webserver.c' || echo '$(srcdir)/'`src/genlib/net/http/webserver.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-webserver.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo" -c -o src/genlib/net/http/libupnp_la-webserver.lo `test -f 'src/genlib/net/http/webserver.c' || echo '$(srcdir)/'`src/genlib/net/http/webserver.c; \
+#	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-webserver.Tpo"; exit 1; fi
+#	source='src/genlib/net/http/webserver.c' object='src/genlib/net/http/libupnp_la-webserver.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-webserver.lo `test -f 'src/genlib/net/http/webserver.c' || echo '$(srcdir)/'`src/genlib/net/http/webserver.c
 
 src/genlib/net/http/libupnp_la-parsetools.lo: src/genlib/net/http/parsetools.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-parsetools.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo" -c -o src/genlib/net/http/libupnp_la-parsetools.lo `test -f 'src/genlib/net/http/parsetools.c' || echo '$(srcdir)/'`src/genlib/net/http/parsetools.c; \
-	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo"; exit 1; fi
-#	source='src/genlib/net/http/parsetools.c' object='src/genlib/net/http/libupnp_la-parsetools.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-parsetools.lo `test -f 'src/genlib/net/http/parsetools.c' || echo '$(srcdir)/'`src/genlib/net/http/parsetools.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/http/libupnp_la-parsetools.lo -MD -MP -MF "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo" -c -o src/genlib/net/http/libupnp_la-parsetools.lo `test -f 'src/genlib/net/http/parsetools.c' || echo '$(srcdir)/'`src/genlib/net/http/parsetools.c; \
+#	then mv -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo" "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Plo"; else rm -f "src/genlib/net/http/$(DEPDIR)/libupnp_la-parsetools.Tpo"; exit 1; fi
+#	source='src/genlib/net/http/parsetools.c' object='src/genlib/net/http/libupnp_la-parsetools.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/http/libupnp_la-parsetools.lo `test -f 'src/genlib/net/http/parsetools.c' || echo '$(srcdir)/'`src/genlib/net/http/parsetools.c
 
 src/genlib/net/uri/libupnp_la-uri.lo: src/genlib/net/uri/uri.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/uri/libupnp_la-uri.lo -MD -MP -MF "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo" -c -o src/genlib/net/uri/libupnp_la-uri.lo `test -f 'src/genlib/net/uri/uri.c' || echo '$(srcdir)/'`src/genlib/net/uri/uri.c; \
-	then mv -f "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo" "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Plo"; else rm -f "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo"; exit 1; fi
-#	source='src/genlib/net/uri/uri.c' object='src/genlib/net/uri/libupnp_la-uri.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/uri/libupnp_la-uri.lo `test -f 'src/genlib/net/uri/uri.c' || echo '$(srcdir)/'`src/genlib/net/uri/uri.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/genlib/net/uri/libupnp_la-uri.lo -MD -MP -MF "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo" -c -o src/genlib/net/uri/libupnp_la-uri.lo `test -f 'src/genlib/net/uri/uri.c' || echo '$(srcdir)/'`src/genlib/net/uri/uri.c; \
+#	then mv -f "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo" "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Plo"; else rm -f "src/genlib/net/uri/$(DEPDIR)/libupnp_la-uri.Tpo"; exit 1; fi
+#	source='src/genlib/net/uri/uri.c' object='src/genlib/net/uri/libupnp_la-uri.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/genlib/net/uri/libupnp_la-uri.lo `test -f 'src/genlib/net/uri/uri.c' || echo '$(srcdir)/'`src/genlib/net/uri/uri.c
 
 src/gena/libupnp_la-gena_device.lo: src/gena/gena_device.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_device.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo" -c -o src/gena/libupnp_la-gena_device.lo `test -f 'src/gena/gena_device.c' || echo '$(srcdir)/'`src/gena/gena_device.c; \
-	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_device.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo"; exit 1; fi
-#	source='src/gena/gena_device.c' object='src/gena/libupnp_la-gena_device.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_device.lo `test -f 'src/gena/gena_device.c' || echo '$(srcdir)/'`src/gena/gena_device.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_device.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo" -c -o src/gena/libupnp_la-gena_device.lo `test -f 'src/gena/gena_device.c' || echo '$(srcdir)/'`src/gena/gena_device.c; \
+#	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_device.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_device.Tpo"; exit 1; fi
+#	source='src/gena/gena_device.c' object='src/gena/libupnp_la-gena_device.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_device.lo `test -f 'src/gena/gena_device.c' || echo '$(srcdir)/'`src/gena/gena_device.c
 
 src/gena/libupnp_la-gena_ctrlpt.lo: src/gena/gena_ctrlpt.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_ctrlpt.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo" -c -o src/gena/libupnp_la-gena_ctrlpt.lo `test -f 'src/gena/gena_ctrlpt.c' || echo '$(srcdir)/'`src/gena/gena_ctrlpt.c; \
-	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo"; exit 1; fi
-#	source='src/gena/gena_ctrlpt.c' object='src/gena/libupnp_la-gena_ctrlpt.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_ctrlpt.lo `test -f 'src/gena/gena_ctrlpt.c' || echo '$(srcdir)/'`src/gena/gena_ctrlpt.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_ctrlpt.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo" -c -o src/gena/libupnp_la-gena_ctrlpt.lo `test -f 'src/gena/gena_ctrlpt.c' || echo '$(srcdir)/'`src/gena/gena_ctrlpt.c; \
+#	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_ctrlpt.Tpo"; exit 1; fi
+#	source='src/gena/gena_ctrlpt.c' object='src/gena/libupnp_la-gena_ctrlpt.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_ctrlpt.lo `test -f 'src/gena/gena_ctrlpt.c' || echo '$(srcdir)/'`src/gena/gena_ctrlpt.c
 
 src/gena/libupnp_la-gena_callback2.lo: src/gena/gena_callback2.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_callback2.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo" -c -o src/gena/libupnp_la-gena_callback2.lo `test -f 'src/gena/gena_callback2.c' || echo '$(srcdir)/'`src/gena/gena_callback2.c; \
-	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo"; exit 1; fi
-#	source='src/gena/gena_callback2.c' object='src/gena/libupnp_la-gena_callback2.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_callback2.lo `test -f 'src/gena/gena_callback2.c' || echo '$(srcdir)/'`src/gena/gena_callback2.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/gena/libupnp_la-gena_callback2.lo -MD -MP -MF "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo" -c -o src/gena/libupnp_la-gena_callback2.lo `test -f 'src/gena/gena_callback2.c' || echo '$(srcdir)/'`src/gena/gena_callback2.c; \
+#	then mv -f "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo" "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Plo"; else rm -f "src/gena/$(DEPDIR)/libupnp_la-gena_callback2.Tpo"; exit 1; fi
+#	source='src/gena/gena_callback2.c' object='src/gena/libupnp_la-gena_callback2.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/gena/libupnp_la-gena_callback2.lo `test -f 'src/gena/gena_callback2.c' || echo '$(srcdir)/'`src/gena/gena_callback2.c
 
 src/api/libupnp_la-upnpapi.lo: src/api/upnpapi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnpapi.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo" -c -o src/api/libupnp_la-upnpapi.lo `test -f 'src/api/upnpapi.c' || echo '$(srcdir)/'`src/api/upnpapi.c; \
-	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnpapi.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo"; exit 1; fi
-#	source='src/api/upnpapi.c' object='src/api/libupnp_la-upnpapi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnpapi.lo `test -f 'src/api/upnpapi.c' || echo '$(srcdir)/'`src/api/upnpapi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnpapi.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo" -c -o src/api/libupnp_la-upnpapi.lo `test -f 'src/api/upnpapi.c' || echo '$(srcdir)/'`src/api/upnpapi.c; \
+#	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnpapi.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnpapi.Tpo"; exit 1; fi
+#	source='src/api/upnpapi.c' object='src/api/libupnp_la-upnpapi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnpapi.lo `test -f 'src/api/upnpapi.c' || echo '$(srcdir)/'`src/api/upnpapi.c
 
 src/api/libupnp_la-upnptools.lo: src/api/upnptools.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnptools.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo" -c -o src/api/libupnp_la-upnptools.lo `test -f 'src/api/upnptools.c' || echo '$(srcdir)/'`src/api/upnptools.c; \
-	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnptools.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo"; exit 1; fi
-#	source='src/api/upnptools.c' object='src/api/libupnp_la-upnptools.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnptools.lo `test -f 'src/api/upnptools.c' || echo '$(srcdir)/'`src/api/upnptools.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnptools.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo" -c -o src/api/libupnp_la-upnptools.lo `test -f 'src/api/upnptools.c' || echo '$(srcdir)/'`src/api/upnptools.c; \
+#	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnptools.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnptools.Tpo"; exit 1; fi
+#	source='src/api/upnptools.c' object='src/api/libupnp_la-upnptools.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnptools.lo `test -f 'src/api/upnptools.c' || echo '$(srcdir)/'`src/api/upnptools.c
 
 src/api/libupnp_la-upnpdebug.lo: src/api/upnpdebug.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnpdebug.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo" -c -o src/api/libupnp_la-upnpdebug.lo `test -f 'src/api/upnpdebug.c' || echo '$(srcdir)/'`src/api/upnpdebug.c; \
-	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo"; exit 1; fi
-#	source='src/api/upnpdebug.c' object='src/api/libupnp_la-upnpdebug.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnpdebug.lo `test -f 'src/api/upnpdebug.c' || echo '$(srcdir)/'`src/api/upnpdebug.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/api/libupnp_la-upnpdebug.lo -MD -MP -MF "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo" -c -o src/api/libupnp_la-upnpdebug.lo `test -f 'src/api/upnpdebug.c' || echo '$(srcdir)/'`src/api/upnpdebug.c; \
+#	then mv -f "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo" "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Plo"; else rm -f "src/api/$(DEPDIR)/libupnp_la-upnpdebug.Tpo"; exit 1; fi
+#	source='src/api/upnpdebug.c' object='src/api/libupnp_la-upnpdebug.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/api/libupnp_la-upnpdebug.lo `test -f 'src/api/upnpdebug.c' || echo '$(srcdir)/'`src/api/upnpdebug.c
 
 src/uuid/libupnp_la-md5.lo: src/uuid/md5.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-md5.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo" -c -o src/uuid/libupnp_la-md5.lo `test -f 'src/uuid/md5.c' || echo '$(srcdir)/'`src/uuid/md5.c; \
-	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-md5.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo"; exit 1; fi
-#	source='src/uuid/md5.c' object='src/uuid/libupnp_la-md5.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-md5.lo `test -f 'src/uuid/md5.c' || echo '$(srcdir)/'`src/uuid/md5.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-md5.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo" -c -o src/uuid/libupnp_la-md5.lo `test -f 'src/uuid/md5.c' || echo '$(srcdir)/'`src/uuid/md5.c; \
+#	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-md5.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-md5.Tpo"; exit 1; fi
+#	source='src/uuid/md5.c' object='src/uuid/libupnp_la-md5.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-md5.lo `test -f 'src/uuid/md5.c' || echo '$(srcdir)/'`src/uuid/md5.c
 
 src/uuid/libupnp_la-sysdep.lo: src/uuid/sysdep.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-sysdep.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo" -c -o src/uuid/libupnp_la-sysdep.lo `test -f 'src/uuid/sysdep.c' || echo '$(srcdir)/'`src/uuid/sysdep.c; \
-	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo"; exit 1; fi
-#	source='src/uuid/sysdep.c' object='src/uuid/libupnp_la-sysdep.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-sysdep.lo `test -f 'src/uuid/sysdep.c' || echo '$(srcdir)/'`src/uuid/sysdep.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-sysdep.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo" -c -o src/uuid/libupnp_la-sysdep.lo `test -f 'src/uuid/sysdep.c' || echo '$(srcdir)/'`src/uuid/sysdep.c; \
+#	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-sysdep.Tpo"; exit 1; fi
+#	source='src/uuid/sysdep.c' object='src/uuid/libupnp_la-sysdep.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-sysdep.lo `test -f 'src/uuid/sysdep.c' || echo '$(srcdir)/'`src/uuid/sysdep.c
 
 src/uuid/libupnp_la-uuid.lo: src/uuid/uuid.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-uuid.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo" -c -o src/uuid/libupnp_la-uuid.lo `test -f 'src/uuid/uuid.c' || echo '$(srcdir)/'`src/uuid/uuid.c; \
-	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-uuid.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo"; exit 1; fi
-#	source='src/uuid/uuid.c' object='src/uuid/libupnp_la-uuid.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-uuid.lo `test -f 'src/uuid/uuid.c' || echo '$(srcdir)/'`src/uuid/uuid.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/uuid/libupnp_la-uuid.lo -MD -MP -MF "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo" -c -o src/uuid/libupnp_la-uuid.lo `test -f 'src/uuid/uuid.c' || echo '$(srcdir)/'`src/uuid/uuid.c; \
+#	then mv -f "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo" "src/uuid/$(DEPDIR)/libupnp_la-uuid.Plo"; else rm -f "src/uuid/$(DEPDIR)/libupnp_la-uuid.Tpo"; exit 1; fi
+#	source='src/uuid/uuid.c' object='src/uuid/libupnp_la-uuid.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/uuid/libupnp_la-uuid.lo `test -f 'src/uuid/uuid.c' || echo '$(srcdir)/'`src/uuid/uuid.c
 
 src/urlconfig/libupnp_la-urlconfig.lo: src/urlconfig/urlconfig.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/urlconfig/libupnp_la-urlconfig.lo -MD -MP -MF "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo" -c -o src/urlconfig/libupnp_la-urlconfig.lo `test -f 'src/urlconfig/urlconfig.c' || echo '$(srcdir)/'`src/urlconfig/urlconfig.c; \
-	then mv -f "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo" "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Plo"; else rm -f "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo"; exit 1; fi
-#	source='src/urlconfig/urlconfig.c' object='src/urlconfig/libupnp_la-urlconfig.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/urlconfig/libupnp_la-urlconfig.lo `test -f 'src/urlconfig/urlconfig.c' || echo '$(srcdir)/'`src/urlconfig/urlconfig.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/urlconfig/libupnp_la-urlconfig.lo -MD -MP -MF "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo" -c -o src/urlconfig/libupnp_la-urlconfig.lo `test -f 'src/urlconfig/urlconfig.c' || echo '$(srcdir)/'`src/urlconfig/urlconfig.c; \
+#	then mv -f "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo" "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Plo"; else rm -f "src/urlconfig/$(DEPDIR)/libupnp_la-urlconfig.Tpo"; exit 1; fi
+#	source='src/urlconfig/urlconfig.c' object='src/urlconfig/libupnp_la-urlconfig.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libupnp_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/urlconfig/libupnp_la-urlconfig.lo `test -f 'src/urlconfig/urlconfig.c' || echo '$(srcdir)/'`src/urlconfig/urlconfig.c
 
 sample/common/upnp_tv_ctrlpt-sample_util.o: sample/common/sample_util.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_ctrlpt-sample_util.o -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" -c -o sample/common/upnp_tv_ctrlpt-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c; \
-	then mv -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo"; exit 1; fi
-#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_ctrlpt-sample_util.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_ctrlpt-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_ctrlpt-sample_util.o -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" -c -o sample/common/upnp_tv_ctrlpt-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c; \
+#	then mv -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo"; exit 1; fi
+#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_ctrlpt-sample_util.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_ctrlpt-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c
 
 sample/common/upnp_tv_ctrlpt-sample_util.obj: sample/common/sample_util.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_ctrlpt-sample_util.obj -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" -c -o sample/common/upnp_tv_ctrlpt-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`; \
-	then mv -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo"; exit 1; fi
-#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_ctrlpt-sample_util.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_ctrlpt-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_ctrlpt-sample_util.obj -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" -c -o sample/common/upnp_tv_ctrlpt-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`; \
+#	then mv -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_ctrlpt-sample_util.Tpo"; exit 1; fi
+#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_ctrlpt-sample_util.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_ctrlpt-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`
 
 sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o: sample/tvctrlpt/upnp_tv_ctrlpt.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o -MD -MP -MF "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o `test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c' || echo '$(srcdir)/'`sample/tvctrlpt/upnp_tv_ctrlpt.c; \
-	then mv -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po"; else rm -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo"; exit 1; fi
-#	source='sample/tvctrlpt/upnp_tv_ctrlpt.c' object='sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o `test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c' || echo '$(srcdir)/'`sample/tvctrlpt/upnp_tv_ctrlpt.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o -MD -MP -MF "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o `test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c' || echo '$(srcdir)/'`sample/tvctrlpt/upnp_tv_ctrlpt.c; \
+#	then mv -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po"; else rm -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo"; exit 1; fi
+#	source='sample/tvctrlpt/upnp_tv_ctrlpt.c' object='sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.o `test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c' || echo '$(srcdir)/'`sample/tvctrlpt/upnp_tv_ctrlpt.c
 
 sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj: sample/tvctrlpt/upnp_tv_ctrlpt.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj -MD -MP -MF "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj `if test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; then $(CYGPATH_W) 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/upnp_tv_ctrlpt.c'; fi`; \
-	then mv -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po"; else rm -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo"; exit 1; fi
-#	source='sample/tvctrlpt/upnp_tv_ctrlpt.c' object='sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj `if test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; then $(CYGPATH_W) 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/upnp_tv_ctrlpt.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj -MD -MP -MF "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj `if test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; then $(CYGPATH_W) 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/upnp_tv_ctrlpt.c'; fi`; \
+#	then mv -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo" "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Po"; else rm -f "sample/tvctrlpt/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt.Tpo"; exit 1; fi
+#	source='sample/tvctrlpt/upnp_tv_ctrlpt.c' object='sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/upnp_tv_ctrlpt-upnp_tv_ctrlpt.obj `if test -f 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; then $(CYGPATH_W) 'sample/tvctrlpt/upnp_tv_ctrlpt.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/upnp_tv_ctrlpt.c'; fi`
 
 sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o: sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o -MD -MP -MF "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o `test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' || echo '$(srcdir)/'`sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c; \
-	then mv -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po"; else rm -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo"; exit 1; fi
-#	source='sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' object='sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o `test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' || echo '$(srcdir)/'`sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o -MD -MP -MF "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o `test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' || echo '$(srcdir)/'`sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c; \
+#	then mv -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po"; else rm -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo"; exit 1; fi
+#	source='sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' object='sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.o `test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' || echo '$(srcdir)/'`sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c
 
 sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj: sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj -MD -MP -MF "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj `if test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; then $(CYGPATH_W) 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; fi`; \
-	then mv -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po"; else rm -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo"; exit 1; fi
-#	source='sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' object='sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj `if test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; then $(CYGPATH_W) 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj -MD -MP -MF "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj `if test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; then $(CYGPATH_W) 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; fi`; \
+#	then mv -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo" "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Po"; else rm -f "sample/tvctrlpt/linux/$(DEPDIR)/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.Tpo"; exit 1; fi
+#	source='sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c' object='sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_ctrlpt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvctrlpt/linux/upnp_tv_ctrlpt-upnp_tv_ctrlpt_main.obj `if test -f 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; then $(CYGPATH_W) 'sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvctrlpt/linux/upnp_tv_ctrlpt_main.c'; fi`
 
 sample/common/upnp_tv_device-sample_util.o: sample/common/sample_util.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_device-sample_util.o -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" -c -o sample/common/upnp_tv_device-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c; \
-	then mv -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo"; exit 1; fi
-#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_device-sample_util.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_device-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_device-sample_util.o -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" -c -o sample/common/upnp_tv_device-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c; \
+#	then mv -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo"; exit 1; fi
+#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_device-sample_util.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_device-sample_util.o `test -f 'sample/common/sample_util.c' || echo '$(srcdir)/'`sample/common/sample_util.c
 
 sample/common/upnp_tv_device-sample_util.obj: sample/common/sample_util.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_device-sample_util.obj -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" -c -o sample/common/upnp_tv_device-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`; \
-	then mv -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo"; exit 1; fi
-#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_device-sample_util.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_device-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/common/upnp_tv_device-sample_util.obj -MD -MP -MF "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" -c -o sample/common/upnp_tv_device-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`; \
+#	then mv -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo" "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Po"; else rm -f "sample/common/$(DEPDIR)/upnp_tv_device-sample_util.Tpo"; exit 1; fi
+#	source='sample/common/sample_util.c' object='sample/common/upnp_tv_device-sample_util.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/common/upnp_tv_device-sample_util.obj `if test -f 'sample/common/sample_util.c'; then $(CYGPATH_W) 'sample/common/sample_util.c'; else $(CYGPATH_W) '$(srcdir)/sample/common/sample_util.c'; fi`
 
 sample/tvdevice/upnp_tv_device-upnp_tv_device.o: sample/tvdevice/upnp_tv_device.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/upnp_tv_device-upnp_tv_device.o -MD -MP -MF "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.o `test -f 'sample/tvdevice/upnp_tv_device.c' || echo '$(srcdir)/'`sample/tvdevice/upnp_tv_device.c; \
-	then mv -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po"; else rm -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo"; exit 1; fi
-#	source='sample/tvdevice/upnp_tv_device.c' object='sample/tvdevice/upnp_tv_device-upnp_tv_device.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.o `test -f 'sample/tvdevice/upnp_tv_device.c' || echo '$(srcdir)/'`sample/tvdevice/upnp_tv_device.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/upnp_tv_device-upnp_tv_device.o -MD -MP -MF "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.o `test -f 'sample/tvdevice/upnp_tv_device.c' || echo '$(srcdir)/'`sample/tvdevice/upnp_tv_device.c; \
+#	then mv -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po"; else rm -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo"; exit 1; fi
+#	source='sample/tvdevice/upnp_tv_device.c' object='sample/tvdevice/upnp_tv_device-upnp_tv_device.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.o `test -f 'sample/tvdevice/upnp_tv_device.c' || echo '$(srcdir)/'`sample/tvdevice/upnp_tv_device.c
 
 sample/tvdevice/upnp_tv_device-upnp_tv_device.obj: sample/tvdevice/upnp_tv_device.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/upnp_tv_device-upnp_tv_device.obj -MD -MP -MF "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.obj `if test -f 'sample/tvdevice/upnp_tv_device.c'; then $(CYGPATH_W) 'sample/tvdevice/upnp_tv_device.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/upnp_tv_device.c'; fi`; \
-	then mv -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po"; else rm -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo"; exit 1; fi
-#	source='sample/tvdevice/upnp_tv_device.c' object='sample/tvdevice/upnp_tv_device-upnp_tv_device.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.obj `if test -f 'sample/tvdevice/upnp_tv_device.c'; then $(CYGPATH_W) 'sample/tvdevice/upnp_tv_device.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/upnp_tv_device.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/upnp_tv_device-upnp_tv_device.obj -MD -MP -MF "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.obj `if test -f 'sample/tvdevice/upnp_tv_device.c'; then $(CYGPATH_W) 'sample/tvdevice/upnp_tv_device.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/upnp_tv_device.c'; fi`; \
+#	then mv -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo" "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Po"; else rm -f "sample/tvdevice/$(DEPDIR)/upnp_tv_device-upnp_tv_device.Tpo"; exit 1; fi
+#	source='sample/tvdevice/upnp_tv_device.c' object='sample/tvdevice/upnp_tv_device-upnp_tv_device.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/upnp_tv_device-upnp_tv_device.obj `if test -f 'sample/tvdevice/upnp_tv_device.c'; then $(CYGPATH_W) 'sample/tvdevice/upnp_tv_device.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/upnp_tv_device.c'; fi`
 
 sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o: sample/tvdevice/linux/upnp_tv_device_main.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o -MD -MP -MF "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o `test -f 'sample/tvdevice/linux/upnp_tv_device_main.c' || echo '$(srcdir)/'`sample/tvdevice/linux/upnp_tv_device_main.c; \
-	then mv -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po"; else rm -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo"; exit 1; fi
-#	source='sample/tvdevice/linux/upnp_tv_device_main.c' object='sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o `test -f 'sample/tvdevice/linux/upnp_tv_device_main.c' || echo '$(srcdir)/'`sample/tvdevice/linux/upnp_tv_device_main.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o -MD -MP -MF "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o `test -f 'sample/tvdevice/linux/upnp_tv_device_main.c' || echo '$(srcdir)/'`sample/tvdevice/linux/upnp_tv_device_main.c; \
+#	then mv -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po"; else rm -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo"; exit 1; fi
+#	source='sample/tvdevice/linux/upnp_tv_device_main.c' object='sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.o `test -f 'sample/tvdevice/linux/upnp_tv_device_main.c' || echo '$(srcdir)/'`sample/tvdevice/linux/upnp_tv_device_main.c
 
 sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj: sample/tvdevice/linux/upnp_tv_device_main.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj -MD -MP -MF "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj `if test -f 'sample/tvdevice/linux/upnp_tv_device_main.c'; then $(CYGPATH_W) 'sample/tvdevice/linux/upnp_tv_device_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/linux/upnp_tv_device_main.c'; fi`; \
-	then mv -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po"; else rm -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo"; exit 1; fi
-#	source='sample/tvdevice/linux/upnp_tv_device_main.c' object='sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj `if test -f 'sample/tvdevice/linux/upnp_tv_device_main.c'; then $(CYGPATH_W) 'sample/tvdevice/linux/upnp_tv_device_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/linux/upnp_tv_device_main.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj -MD -MP -MF "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj `if test -f 'sample/tvdevice/linux/upnp_tv_device_main.c'; then $(CYGPATH_W) 'sample/tvdevice/linux/upnp_tv_device_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/linux/upnp_tv_device_main.c'; fi`; \
+#	then mv -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo" "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Po"; else rm -f "sample/tvdevice/linux/$(DEPDIR)/upnp_tv_device-upnp_tv_device_main.Tpo"; exit 1; fi
+#	source='sample/tvdevice/linux/upnp_tv_device_main.c' object='sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(upnp_tv_device_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sample/tvdevice/linux/upnp_tv_device-upnp_tv_device_main.obj `if test -f 'sample/tvdevice/linux/upnp_tv_device_main.c'; then $(CYGPATH_W) 'sample/tvdevice/linux/upnp_tv_device_main.c'; else $(CYGPATH_W) '$(srcdir)/sample/tvdevice/linux/upnp_tv_device_main.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
