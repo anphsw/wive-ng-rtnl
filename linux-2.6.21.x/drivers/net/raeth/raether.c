@@ -1674,9 +1674,10 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
     int i = 0;
     char slot_name[16];
     struct net_device *device;
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
     struct sockaddr addr;
     unsigned char zero[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-
+#endif
     for (index = 0; index < MAX_PSEUDO_ENTRY; index++) {
 
 	dev = alloc_etherdev(sizeof(PSEUDO_ADAPTER));
@@ -1714,8 +1715,8 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 		memcpy(addr.sa_data, mac_addr01234, 5);
 		addr.sa_data[5] = net_random()&0xFF;
 	}
-#endif
 	ei_set_mac2_addr(dev, &addr);
+#endif
 	ether_setup(dev);
 	pPseudoAd = dev->priv;
 
