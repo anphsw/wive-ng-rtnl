@@ -1732,7 +1732,7 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 	dev->set_mac_address = ei_set_mac2_addr;
 	dev->get_stats = VirtualIF_get_stats;
 	dev->change_mtu = ei_change_mtu;
-	dev->mtu = 1500;
+	dev->mtu = DEFAULT_MTU;
 
 	// Register this device
 	register_netdevice(dev);
