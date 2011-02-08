@@ -457,19 +457,25 @@ static int rt2880_eth_setup(struct net_device *dev)
 		ei_local->skb_free[i]=0;
 	}
 	ei_local->free_idx =0;
-    	ei_local->tx_ring0 = pci_alloc_consistent(NULL, NUM_TX_DESC * sizeof(struct PDMA_txdesc), &ei_local->phy_tx_ring0);
- 	printk("\nphy_tx_ring = 0x%08x, tx_ring = 0x%p\n", ei_local->phy_tx_ring0, ei_local->tx_ring0);
-
+    	ei_local->tx_ring0 = dma_alloc_coherent(NULL, NUM_TX_DESC * sizeof(struct PDMA_txdesc), &ei_local->phy_tx_ring0, GFP_KERNEL);
+	if (ei_local->tx_ring0 == NULL) {
+		printk("RAETH: tx ring allocation failed\n");
+		return 0;
+	}
 	for (i=0; i < NUM_TX_DESC; i++) {
 		memset(&ei_local->tx_ring0[i],0,sizeof(struct PDMA_txdesc));
 		ei_local->tx_ring0[i].txd_info2.LS0_bit = 1;
 		ei_local->tx_ring0[i].txd_info2.DDONE_bit = 1;
-
 	}
+ 	printk("\nphy_tx_ring = 0x%08x, tx_ring = 0x%p\n", ei_local->phy_tx_ring0, ei_local->tx_ring0);
 #endif // CONFIG_RAETH_QOS
 
 	/* Initial RX Ring */
-	rx_ring = pci_alloc_consistent(NULL, NUM_RX_DESC * sizeof(struct PDMA_rxdesc), &phy_rx_ring);
+	rx_ring = dma_alloc_coherent(NULL, NUM_RX_DESC * sizeof(struct PDMA_rxdesc), &phy_rx_ring, GFP_KERNEL);
+	if (rx_ring == NULL) {
+		printk("RAETH: rx ring allocation failed\n");
+		return 0;
+	}
 	for (i = 0; i < NUM_RX_DESC; i++) {
 		memset(&rx_ring[i],0,sizeof(struct PDMA_rxdesc));
 	    	rx_ring[i].rxd_info2.DDONE_bit = 0;
@@ -1876,26 +1882,26 @@ int ei_close(struct net_device *dev)
 
 #if defined (CONFIG_RAETH_QOS)
        if (ei_local->tx_ring0 != NULL) {
-	   pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring0, ei_local->phy_tx_ring0);
+	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring0, ei_local->phy_tx_ring0);
        }
 
        if (ei_local->tx_ring1 != NULL) {
-	   pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring1, ei_local->phy_tx_ring1);
+	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring1, ei_local->phy_tx_ring1);
        }
 
 #if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined(CONFIG_RALINK_RT3883)
        if (ei_local->tx_ring2 != NULL) {
-	   pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring2, ei_local->phy_tx_ring2);
+	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring2, ei_local->phy_tx_ring2);
        }
 
        if (ei_local->tx_ring3 != NULL) {
-	   pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring3, ei_local->phy_tx_ring3);
+	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring3, ei_local->phy_tx_ring3);
        }
 #endif
 #else
-	pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring0, ei_local->phy_tx_ring0);
+	dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring0, ei_local->phy_tx_ring0);
 #endif
-        pci_free_consistent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), rx_ring, phy_rx_ring);
+        dma_free_coherent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), rx_ring, phy_rx_ring);
 	printk("Free TX/RX Ring Memory!\n");
 
 #ifdef CONFIG_RAETH_NAPI

@@ -241,7 +241,13 @@ int fe_tx_desc_init(struct net_device *dev, unsigned int ring_no, unsigned int q
 		return 0;
 	}
 
-	tx_desc = pci_alloc_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), &phy_tx_ring);
+	tx_desc = dma_alloc_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), &phy_tx_ring, GFP_KERNEL);
+	if ( tx_desc == NULL)
+	{
+		printk("ra_qos: tx desc allocation failed!\n");
+		return 0;
+	}
+
 	ei_local->tx_cpu_owner_idx0 = tx_cpu_owner_idx;
 	
 	switch (ring_no) {
@@ -263,15 +269,10 @@ int fe_tx_desc_init(struct net_device *dev, unsigned int ring_no, unsigned int q
 			break;
 		default:
 			printk("ring_no input error! %d\n", ring_no);
-			pci_free_consistent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), tx_desc, phy_tx_ring);
+			dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), tx_desc, phy_tx_ring);
 			return 0;
 	};	
 
-	if ( tx_desc == NULL)
-	{
-		printk("tx desc allocation failed!\n");
-		return 0;
-	}
 
 	for( i = 0; i < NUM_TX_DESC; i++) {
 		memset( &tx_desc[i], 0, sizeof(struct PDMA_txdesc));
