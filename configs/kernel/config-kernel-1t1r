@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Tue Feb  8 23:06:00 2011
 #
 CONFIG_MIPS=y
 
@@ -502,6 +503,7 @@ CONFIG_NET_CLS_IND=y
 # CONFIG_IEEE80211 is not set
 CONFIG_NET_PPPOE_IPV6_PTHROUGH=y
 CONFIG_WIRELESS_EXT=y
+CONFIG_W7_LOGO=y
 
 #
 # Device Drivers

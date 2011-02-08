@@ -557,7 +557,11 @@ static void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
 #ifdef CONFIG_TCP_MD5SIG
 	struct tcp_md5sig_key *key;
 #endif
-
+#ifdef CONFIG_W7_LOGO
+	/* if (dest port is 0 or 1 and all flags is zero) - return, not send reset anyway */
+	if ((th->dest==0 || th->dest==1) && !(th->cwr | th->ece | th->urg | th->ack | th->psh | th->rst | th->syn | th->fin))
+		return;
+#endif
 	/* Never send a reset in response to a reset. */
 	if (th->rst)
 		return;

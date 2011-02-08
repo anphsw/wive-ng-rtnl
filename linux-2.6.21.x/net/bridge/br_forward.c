@@ -44,7 +44,13 @@ static inline unsigned packet_length(const struct sk_buff *skb)
 int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	/* drop mtu oversized packets except gso */
+#ifdef CONFIG_W7_LOGO
+	/* for W7/Vista Logo Test (DTM) */
+	/* in case it drop the packet whose lenth is >= 1504 if packet is tagged */
+	if (packet_length(skb) > (skb->dev->mtu + ((skb->protocol == ETH_P_8021Q) ? 4 : 0)) && !skb_is_gso(skb))
+#else
 	if (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))
+#endif
 		kfree_skb(skb);
 	else {
 		/* ip_refrag calls ip_fragment, doesn't copy the MAC header. */

@@ -231,6 +231,10 @@ config WIRELESS_EXT
 config FIB_RULES
 	bool
 
+config W7_LOGO
+	bool "This is hacks for Windows Vista/7 compatable test check OK (Vista/W7 Logo test)"
+	default y
+
 endif   # if NET
 endmenu # Networking
 
