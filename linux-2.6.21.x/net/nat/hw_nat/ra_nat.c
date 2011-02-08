@@ -164,7 +164,7 @@ static void FoeAllocTbl(uint32_t NumOfEntry)
     PpeFoeBase = dma_alloc_coherent(NULL, FoeTblSize, &PpePhyFoeBase, GFP_KERNEL);
     if(PpeFoeBase == NULL) {
 	    printk("FoeAllocTbl() failed to allocate foe mem.");
-	    return -ENOMEM;
+	    return;
     }
     RegWrite(PPE_FOE_BASE, PpePhyFoeBase);
     memset(PpeFoeBase, 0, FoeTblSize);
