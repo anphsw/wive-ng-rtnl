@@ -233,7 +233,6 @@ vpn_deadloop_fix()
 ethconv="n"
 stamode="n"
 wan_if="br0"
-wan_ppp_if="br0"
 lan_if="br0"
 lan2_if="br0:9"
 
