@@ -15,6 +15,14 @@ web_wait()
 #include kernel config
 . /etc/scripts/config.sh
 
+# set default variables
+ethconv="n"
+stamode="n"
+wan_if="eth2.2"
+lan_if="br0"
+lan2_if="br0:9"
+wan_upnp_if="eth2.2"
+
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
 
@@ -229,14 +237,7 @@ vpn_deadloop_fix()
     fi
 }
 
-#set default
-ethconv="n"
-stamode="n"
-wan_if="br0"
-lan_if="br0"
-lan2_if="br0:9"
-
-#get param
+# get params
 getLanIfName
 getLan2IfName
 getWanIfName
