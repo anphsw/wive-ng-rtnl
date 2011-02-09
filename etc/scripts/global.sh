@@ -19,9 +19,9 @@ web_wait()
 ethconv="n"
 stamode="n"
 wan_if="eth2.2"
+wan_upnp_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
-wan_upnp_if="eth2.2"
 
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
