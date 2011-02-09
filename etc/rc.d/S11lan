@@ -9,6 +9,7 @@ LOG="echo LAN: "
 start() {
 $LOG "Start network interfaces..."
 get_param
+getMacIf
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ "$brset" = "0" ]; then

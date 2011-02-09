@@ -30,9 +30,12 @@ opmode=`nvram_get 2860 OperationMode`
 vpnEnabled=`nvram_get 2860 vpnEnabled`
 
 #get wireless, wan and lan mac adresses
-WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
-WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
-LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+getMacIf()
+{
+    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
+    WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
+    LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+}
 
 # WAN interface name -> $wan_if
 getWanIfName()
@@ -159,6 +162,7 @@ udhcpc_opts()
 	    fi
 
 	fi
+	getHostName
 	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
 		    -O routes -O staticroutes -O msstaticroutes -f &"
@@ -240,4 +244,3 @@ getWanUpnpIfName
 getEthConv
 getStaMode
 getSwType
-getHostName
