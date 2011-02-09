@@ -32,9 +32,6 @@ wanmode=`nvram_get 2860 wanConnectionMode`
 #get vpn mode
 vpnEnabled=`nvram_get 2860 vpnEnabled`
 
-#get current config wan port
-wan_port=`nvram_get 2860 wan_port`
-
 #get wireless, wan and lan mac adresses
 WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
 WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
@@ -156,6 +153,7 @@ udhcpc_opts()
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	else
 	    ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
+	    wan_port=`nvram_get 2860 wan_port`
 	    if [ "$ForceRenewDHCP" != "0" ] &&  [ "$wan_port" != "" ]; then
 		#configure event wait port
 		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
@@ -194,6 +192,7 @@ setSwMode()
 setLanWan()
 {
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    wan_port=`nvram_get 2860 wan_port`
     if [ "$wan_port" = "0" ]; then
 	    echo '##### config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL

@@ -43,29 +43,37 @@ config3052()
 	switch reg w 98 7f3f
 	switch reg w e4 3f
 
+	#default wan_portN=0
+	wan_portN=0
+
 	if [ "$1" = "WLLLL" ]; then
+		wan_portN=0
 		switch reg w 40 1001
 		switch reg w 44 1001
 		switch reg w 48 1002
 		switch reg w 70 ffff506f
 	elif [ "$1" = "LLLLW" ]; then
+		wan_portN=4
 		switch reg w 40 1002
 		switch reg w 44 1001
 		switch reg w 48 1001
 		switch reg w 70 ffff417e
         elif [ "$1" = "W1234" ]; then
+		wan_portN=0
                 switch reg w 40 1005
                 switch reg w 44 3002
                 switch reg w 48 1004
                 switch reg w 70 50484442
                 switch reg w 74 ffffff41
         elif [ "$1" = "12345" ]; then
+		wan_portN=5
                 switch reg w 40 2001
                 switch reg w 44 4003
                 switch reg w 48 1005
                 switch reg w 70 7e7e7e41
                 switch reg w 74 ffffff7e
 	elif [ "$1" = "GW" ]; then
+		wan_portN=5
 		switch reg w 40 1001
 		switch reg w 44 1001
 		switch reg w 48 2001
@@ -172,7 +180,7 @@ reset_all_phys()
 	echo "Reset all phy port"
 	if [ "$opmode" = "1" ]; then
 	    #Ports down skip WAN port
-	    if [ "$wan_port" = "0" ]; then
+	    if [ "$wan_portN" = "0" ]; then
 		start=0
 		end=3
 	    else

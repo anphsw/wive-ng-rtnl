@@ -45,6 +45,7 @@ stop() {
 get_param() {
     igmpen=`nvram_get 2860 igmpEnabled`
     OperationMode=`nvram_get 2860 OperationMode`
+    wan_port=`nvram_get 2860 wan_port`
 }
 
 case "$1" in
