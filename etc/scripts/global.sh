@@ -241,7 +241,6 @@ vpn_deadloop_fix()
 getLanIfName
 getLan2IfName
 getWanIfName
-getWanPppIfName
 getWanUpnpIfName
 getEthConv
 getStaMode
