@@ -52,15 +52,6 @@ getWanIfName()
     fi
 }
 
-getWanPppIfName()
-{
-    if [ "$vpnEnabled" = "on"  ]; then
-	wan_ppp_if="ppp0"
-    else
-	wan_ppp_if=$wan_if
-    fi
-}
-
 getWanUpnpIfName()
 {
     if [ "$vpnEnabled" = "on" ]; then

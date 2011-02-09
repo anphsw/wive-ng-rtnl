@@ -234,7 +234,7 @@ start() {
             iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
             iptables -t filter -N MINIUPNPD
             iptables -t filter -F MINIUPNPD
-            iptables -t filter -A FORWARD -i $wan_upnp_if -o ! $wan_ppp_if -j MINIUPNPD
+            iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
         fi
 ############################################VPNRULES#######################################
 	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on"  ]; then
