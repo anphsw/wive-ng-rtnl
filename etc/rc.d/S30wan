@@ -108,6 +108,7 @@ get_param() {
     pppoe_pass=`nvram_get 2860 pppoe_pass`
     ipv6_pass=`nvram_get 2860 ipv6_pass`
     natFastpath=`nvram_get 2860 natFastpath`
+    wanmode=`nvram_get 2860 wanConnectionMode`
 }
 
 case "$1" in

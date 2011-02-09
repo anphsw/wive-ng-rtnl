@@ -26,9 +26,6 @@ lan2_if="br0:9"
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
 
-#get wan mode
-wanmode=`nvram_get 2860 wanConnectionMode`
-
 #get vpn mode
 vpnEnabled=`nvram_get 2860 vpnEnabled`
 
@@ -36,7 +33,6 @@ vpnEnabled=`nvram_get 2860 vpnEnabled`
 WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
 WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
 LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
-
 
 # WAN interface name -> $wan_if
 getWanIfName()
