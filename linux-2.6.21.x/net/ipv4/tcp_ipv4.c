@@ -506,10 +506,16 @@ void tcp_v4_send_check(struct sock *sk, int len, struct sk_buff *skb)
 					  inet->daddr, 0);
 		skb->csum_offset = offsetof(struct tcphdr, check);
 	} else {
+#ifdef CONFIG_W7_LOGO
+		/* it's seem that the skb->csum is wrong */
+		__wsum tmp = csum_partial(th, len, 0);
+		th->check = tcp_v4_check(len, inet->saddr, inet->daddr, tmp);
+#else
 		th->check = tcp_v4_check(len, inet->saddr, inet->daddr,
 					 csum_partial((char *)th,
 						      th->doff << 2,
 						      skb->csum));
+#endif
 	}
 }
 
