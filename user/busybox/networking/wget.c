@@ -446,7 +446,7 @@ static FILE* prepare_ftp_session(FILE **dfpp, struct host_info *target, len_and_
 
 static void NOINLINE retrieve_file_data(FILE *dfp, int output_fd)
 {
-	char buf[512];
+	char buf[4*1024]; /* made bigger to speed up local xfers */
 #if ENABLE_FEATURE_WGET_STATUSBAR || ENABLE_FEATURE_WGET_TIMEOUT
 # if ENABLE_FEATURE_WGET_TIMEOUT
 	unsigned second_cnt;
