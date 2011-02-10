@@ -84,7 +84,7 @@ config FLASH_REMAP_NEED
        default y if (RALINK_RT2880)
 choice
        prompt "DRAM Size"
-       default RT2880_DRAM_16M
+       default RT2880_DRAM_64M
 
 config RT2880_DRAM_8M
        bool "8M"
@@ -147,6 +147,7 @@ config  DUAL_IMAGE
 
 config  RAM_SIZE_AUTO
         bool "Autodetect RAM size"
+	default y
 
 config  RALINK_RAM_SIZE
 	int 
@@ -183,7 +184,7 @@ config MTD_PHYSMAP_BUSWIDTH
 
 choice
 	prompt "Root File System Type"
-	default RT2880_ROOTFS_IN_RAM
+	default RT2880_ROOTFS_IN_FLASH
 
 config  RT2880_ROOTFS_IN_RAM
         bool "RootFS_in_RAM"
@@ -205,7 +206,7 @@ config	LZMARAMFS
 
 config ROOTFS_IN_FLASH_NO_PADDING
 	bool 'No Padding between Kernel and RootFS'
-	default n
+	default y
 	depends on RT2880_ROOTFS_IN_FLASH && !RT2880_FLASH_32M && !DUAL_IMAGE
 
 config MTD_KERNEL_PART_SIZ

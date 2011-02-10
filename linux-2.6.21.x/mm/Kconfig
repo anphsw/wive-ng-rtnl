@@ -173,7 +173,7 @@ config OOM_EMBEDDED
 
 config OOM_EMBEDDED_REBOOT
 	bool "Deterministic OOM force reboot"
-	def_bool y
+	def_bool n
 	depends on SYSCTL
 	help
 	  Saying yes here if you prefer to force a reboot instead of panic
