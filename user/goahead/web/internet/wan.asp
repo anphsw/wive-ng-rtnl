@@ -16,28 +16,32 @@ function connectionTypeSwitch()
 	staticTable.style.display    = (document.wanCfg.connectionType.value == "STATIC") ? "" : "none";
 }
 
-function CheckValue()
+function CheckValue(form)
 {
-	if (document.wanCfg.connectionType.selectedIndex == 0) // STATIC
+	if (form.connectionType.value == 'STATIC') // STATIC
 	{
-		if (!validateIP(document.wanCfg.staticIp, true))
+		if (!validateIP(form.staticIp, true))
 			return false;
-		if (!validateIPMask(document.wanCfg.staticNetmask, true))
+		if (!validateIPMask(form.staticNetmask, true))
 			return false;
-		if (document.wanCfg.staticGateway.value != "")
-			if (!validateIP(document.wanCfg.staticGateway, true))
+		if (form.staticGateway.value != "")
+			if (!validateIP(form.staticGateway, true))
 				return false;
-		if (document.wanCfg.staticPriDns.value != "")
-			if (!validateIP(document.wanCfg.staticPriDns, true))
+		if (form.staticPriDns.value != "")
+			if (!validateIP(form.staticPriDns, true))
 				return false;
-		if (document.wanCfg.staticSecDns.value != "")
-			if (!validateIP(document.wanCfg.staticSecDns, true))
+		if (form.staticSecDns.value != "")
+			if (!validateIP(form.staticSecDns, true))
 				return false;
-		if (document.wanCfg.macCloneEnbl.options.selectedIndex == 1)
-		{
-			if (!validateMAC(document.wanCfg.macCloneMac.value, true))
+		if (form.macCloneEnbl.options.selectedIndex == 1)
+			if (!validateMAC(form.macCloneMac.value, true))
 				return false;
-		}
+	}
+	else if (form.connectionType.value == 'DHCP')
+	{
+		if (form.dhcpReqIP != "")
+			if (!validateIP(form.dhcpReqIP, true))
+				return false;
 	}
 	
 	return true;
@@ -114,7 +118,7 @@ function dnsSwitchClick(form)
 <p id="wIntroduction"></p>
 <hr>
 
-<form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue();">
+<form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue(this);">
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -156,6 +160,10 @@ function dnsSwitchClick(form)
 <tr>
 	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
 	<td><input type="text" name="hostname" size="28" maxlength="32" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+</tr>
+<tr>
+	<td class="head">Request IP from DHCP server</td>
+	<td><input type="text" name="dhcpReqIP" size="28" maxlength="32" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>

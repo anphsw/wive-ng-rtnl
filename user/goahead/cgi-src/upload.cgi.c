@@ -42,7 +42,7 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 		close(ifd);
 		sprintf (err_msg, "Can't mmap %s: %s\n", imagefile, strerror(errno));
 		return 0;
-    }
+	}
 	ptr += offset;
 
 	/*
@@ -127,126 +127,143 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	return 1;
 }
 
-
 #endif /* UPLOAD_FIRMWARE_SUPPORT */
 
 int main (int argc, char *argv[])
 {
-	int file_begin, file_end;
-	int line_begin, line_end;
 	char err_msg[256];
-	char *boundary; int boundary_len;
-	char *filename = getenv("UPLOAD_FILENAME");
-
-	html_header();
-
-	line_begin = 0;
-	if ((line_end = findStrInFile(filename, line_begin, "\r\n", 2)) == -1)
+	long file_size = 0;
+	long file_begin = 0, file_end = 0;
+	
+	// Get multipart file data separator
+	char separator[MAX_SEPARATOR_LEN];
+	
+	if (get_content_separator(separator, sizeof(separator), &file_size) < 0)
 	{
 		html_error(RFC_ERROR);
 		return -1;
 	}
 
-	boundary_len = line_end - line_begin;
-	boundary = getMemInFile(filename, line_begin, boundary_len);
-
-	// sth like this..
-	// Content-Disposition: form-data; name="filename"; filename="\\192.168.3.171\tftpboot\a.out"
-	//
-	char *line, *semicolon, *user_filename;
-	line_begin = line_end + 2;
-	if ((line_end = findStrInFile(filename, line_begin, "\r\n", 2)) == -1)
+	html_header();
+	
+	// Get multipart file name
+	char *filename = getenv("UPLOAD_FILENAME");
+	if (filename == NULL)
 	{
 		html_error(RFC_ERROR);
-		goto err;
+		return -1;
 	}
-
-	line = getMemInFile(filename, line_begin, line_end - line_begin);
-	if (strncasecmp(line, "content-disposition: form-data;", strlen("content-disposition: form-data;")))
+	
+	// Wait until file is completely uploaded
+	int tries = 0;
+	while (tries>5)
+	{
+		struct stat filestat;
+		if (stat(filename, &filestat)>0)
+		{
+			if (filestat.st_size >= file_size) // Size ok?
+				break;
+		}
+		
+		sleep(1000);
+		tries++;
+	}
+	
+	// Open file
+	FILE *fd = fopen(filename, "r");
+	if (fd == NULL)
 	{
 		html_error(RFC_ERROR);
-		goto err;
+		//return -1;
+		while (1) { sleep(1000); }
 	}
-
-	semicolon = line + strlen("content-disposition: form-data;") + 1;
-	if (!(semicolon = strchr(semicolon, ';')))
+	
+	// Parse parameters
+	parameter_t *params;
+	if (read_parameters(fd, separator, &params)<0)
 	{
-		html_error("We dont support multi-field upload.");
-		goto err;
-	}
-
-	user_filename = semicolon + 2;
-	if (strncasecmp(user_filename, "filename=", strlen("filename=")))
-	{
+		fclose(fd);
 		html_error(RFC_ERROR);
-		goto err;
+		//return -1;
+		while (1) { sleep(1000); }
 	}
-
-	user_filename += strlen("filename=");
-	//until now we dont care about what the true filename is.
-	free(line);
-
-	// We may check a string  "Content-Type: application/octet-stream" here,
-	// but if our firmware extension name is the same with other known ones, 
-	// the browser would use other content-type instead.
-	// So we dont check Content-type here...
-	line_begin = line_end + 2;
-
-	if ((line_end = findStrInFile(filename, line_begin, "\r\n", 2)) == -1)
+	
+	fclose(fd);
+	
+	// Find parameter containing NVRAM reset flag
+	parameter_t *find = find_parameter(params, "reset_rwfs");
+	int reset_rwfs = 0;
+	if (find != NULL)
 	{
-		html_error(RFC_ERROR);
-		goto err;
+		if (find->value != NULL)
+			reset_rwfs = (strcasecmp(find->value, "on")==0);
 	}
 
-	line_begin = line_end + 2;
-	if ((line_end = findStrInFile(filename, line_begin, "\r\n", 2)) == -1)
+	// Find parameter containing file
+	find = find_parameter(params, "filename");
+	if (find != NULL)
 	{
-		html_error(RFC_ERROR);
-		goto err;
-	}
+		// Check if parameter is correct
+		if (find->content_type == NULL)
+		{
+			html_error(RFC_ERROR);
+			return -1;
+		}
+		if (strcasecmp(find->content_type, "application/octet-stream")!=0)
+		{
+			html_error(RFC_ERROR);
+			return -1;
+		}
 
-	file_begin = line_end + 2;
-	if ((file_end = findStrInFile(filename, file_begin, boundary, boundary_len)) == -1)
+		file_begin = find->start_pos;
+		file_end   = find->end_pos;
+	}
+	else
 	{
-		html_error(RFC_ERROR);
-		goto err;
+		html_error("No firmware binary file");
+		return -1;
 	}
 
-	file_end -= 2;		// back 2 chars.(\r\n);
-
+	release_parameters(params);
+	
 	sync();
 
-    // examination
+	// examination
 #if defined (UPLOAD_FIRMWARE_SUPPORT)
-	if (!check(filename, file_begin, file_end - file_begin, err_msg) )
+
+	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg) )
 	{
 		html_error("Not a valid firmware.");
-		goto err;
+		return -1;
 	}
-
+	
 	// flash write
-	if ( mtd_write_firmware(filename, file_begin, file_end - file_begin) == -1)
+	if ( mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin) == -1))
 	{
 		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
-		goto err;
+		return -1;
 	}
-
+	
 #elif defined (UPLOAD_BOOTLOADER_SUPPORT)
-	mtd_write_bootloader(filename, file_begin, file_end - file_begin);
+	mtd_write_bootloader(filename, (int)file_begin, (int)(file_end - file_begin));
 #else
 #error "no upload support defined!"
 #endif
-
-	html_success("65000");
-	free(boundary);
-	fflush(stdout);
-	fclose(stdout);
+	
+	// Reset NVRAM if needed
+	if (reset_rwfs)
+	{
+		html_success("100000");
+		fflush(stdout);
+		system("echo \"1234567890\" > /dev/mtdblock5");
+	}
+	else
+	{
+		html_success("65000");
+		fflush(stdout);
+	}
 
 	system("sleep 5 && reboot &");
-	exit(0);
-
-err:
-	free(boundary);
-	exit(-1);
+	return 0;
 }
 

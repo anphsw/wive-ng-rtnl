@@ -19,6 +19,8 @@
   <message msgid="treeapp vpn" msgstr="VPN setup" />
   <message msgid="treeapp routing" msgstr="Routing" />
   <message msgid="treeapp dhcp clients" msgstr="DHCP clients" />
+  <message msgid="treeapp samba" msgstr="Samba/CIFS" />
+  <message msgid="treeapp accounting" msgstr="Accounting" />
   <message msgid="treeapp wireless settings" msgstr="Wireless Settings" />
   <message msgid="treeapp inic settings" msgstr="I-NIC Settings" />
   <message msgid="treeapp legacy settings" msgstr="Legacy Settings" />

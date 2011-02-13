@@ -262,8 +262,10 @@
 73) Small route speedup.<br>
 74) Add send_sigusr_dhcpc sysctl param. Enabled by default. Renew dhcp lease at WAN port status change.<br>
 75) More correct vpn restart at WAN dhcp mode.<br>
-76) Add ipt_account support. Need write webui.<br>
+76) Add ipt_account support. Full work only NatFastpath disabled.<br>
 77) Fix add default gateway over static routes.<br>
+78) Add Request IP parametr in dhcp client.<br>
+79) Add rwfs autoclean at firmware update.<br>
 
 
 <br><br>

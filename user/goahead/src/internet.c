@@ -2288,6 +2288,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
+	char	*req_ip = nvram_get(RT2860_NVRAM, "dhcpReqIP");
 
 	ctype = ip = nm = gw = eth = user = pass =
 	vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
@@ -2349,7 +2350,13 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (!strncmp(ctype, "DHCP", 5))
 	{
-		nvram_set(RT2860_NVRAM, "wanConnectionMode", ctype);
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
+		nvram_bufset(RT2860_NVRAM, "dhcpRequestIP", req_ip);
+		printf("dhcpRequestIP = %s\n", req_ip);
+		printf("wanConnectionMode = %s\n", ctype);
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
 	}
 	else
 	{

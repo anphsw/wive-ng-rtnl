@@ -47,7 +47,6 @@ function initTranslation()
 {
 	_TR("lTitle", "services misc title");
 	_TR("lIntroduction", "services misc introduction");
-	_TR("lSetup", "services misc setup");
 
 	_TR("lStp", "lan stp");
 	_TR("lStpD", "inet disable");
@@ -177,9 +176,54 @@ function CheckValue()
 <form method=post name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue()">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
-	<td class="title" colspan="2" id="lSetup">Miscellaneous Services Setup</td>
+	<td class="title" colspan="2">Offload engine</td>
+</tr>
+<tr>
+<td class="head"><a name="nat_fastpath_ref"></a>NAT fastpath</td>
+<td>
+	<select name="natFastpath" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Bridge fastpath</td>
+<td>
+	<select name="bridgeFastpath" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
 </tr>
 
+<tr>
+	<td class="title" colspan="2">Remote management</td>
+</tr>
+<tr>
+<td class="head">HTTP Remote Management</td>
+<td>
+	<select name="rmtHTTP" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">SSH Remote Management</td>
+<td>
+	<select name="rmtSSH" class="half">
+		<option value="0">Disable</option>
+		<option value="1">LAN</option>
+		<option value="2">LAN &amp; WAN</option>
+	</select>
+</td>
+</tr>
+
+<tr>
+	<td class="title" colspan="2">Pass Through</td>
+</tr>
 <tr>
 <td class="head">PPPOE pass through</td>
 <td>
@@ -189,7 +233,6 @@ function CheckValue()
 	</select>
 </td>
 </tr>
-
 <tr>
 <td class="head">IPv6 pass through</td>
 <td>
@@ -201,13 +244,7 @@ function CheckValue()
 </tr>
 
 <tr>
-<td class="head" id="lStp">802.1d Spanning Tree</td>
-<td>
-	<select name="stpEnbl" class="half">
-		<option value="0" id="lStpD">Disable</option>
-		<option value="1" id="lStpE">Enable</option>
-	</select>
-</td>
+	<td class="title" colspan="2">Services</td>
 </tr>
 <tr id="lltd">
 <td class="head" id="lLltd">LLTD daemon</td>
@@ -264,34 +301,6 @@ function CheckValue()
 </td>
 </tr>
 <tr>
-<td class="head">HTTP Remote Management</td>
-<td>
-	<select name="rmtHTTP" class="half">
-		<option value="0">Disable</option>
-		<option value="1">LAN</option>
-		<option value="2">LAN &amp; WAN</option>
-	</select>
-</td>
-</tr>
-<tr>
-<td class="head">SSH Remote Management</td>
-<td>
-	<select name="rmtSSH" class="half">
-		<option value="0">Disable</option>
-		<option value="1">LAN</option>
-		<option value="2">LAN &amp; WAN</option>
-	</select>
-</td>
-</tr>
-<tr>
-<td class="head" id="sysfwPingFrmWANFilterHead">Accept ping from WAN</td>
-<td>
-	<select name="pingWANEnbl" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-<tr>
 <td class="head">Multicast to http proxy (udpxy)</td>
 <td>
 	<select name="udpxyMode" class="half">
@@ -311,6 +320,19 @@ function CheckValue()
 </td>
 </tr>
 <tr>
+<td class="head">Cron daemon</td>
+<td>
+	<select name="CrondEnable" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+
+<tr>
+	<td class="title" colspan="2">Others</td>
+</tr>
+<tr>
 <td class="head">Switch reinit on DHCP lease fail</td>
 <td>
 	<select name="dhcpSwReset" class="half">
@@ -320,7 +342,7 @@ function CheckValue()
 </td>
 </tr>
 <tr>
-<td class="head">Force DHCP renew lease at lan/wan port status change</td>
+<td class="head">Force DHCP renew lease at WAN port status change</td>
 <td>
 	<select name="ForceRenewDHCP" class="half">
 		<option value="0">Disable</option>
@@ -329,28 +351,20 @@ function CheckValue()
 </td>
 </tr>
 <tr>
-<td class="head">NAT fastpath</td>
+<td class="head" id="sysfwPingFrmWANFilterHead">Accept ping from WAN</td>
 <td>
-	<select name="natFastpath" class="half">
+	<select name="pingWANEnbl" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>
 </td>
 </tr>
 <tr>
-<td class="head">Bridge fastpath</td>
+<td class="head" id="lStp">802.1d Spanning Tree</td>
 <td>
-	<select name="bridgeFastpath" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-</tr>
-<td class="head">Cron daemon</td>
-<td>
-	<select name="CrondEnable" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
+	<select name="stpEnbl" class="half">
+		<option value="0" id="lStpD">Disable</option>
+		<option value="1" id="lStpE">Enable</option>
 	</select>
 </td>
 </tr>
