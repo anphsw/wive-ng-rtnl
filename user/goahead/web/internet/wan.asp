@@ -158,11 +158,11 @@ function dnsSwitchClick(form)
 	<td class="title" colspan="2">Additional Options</td>
 </tr>
 <tr>
-	<td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
+	<td class="head"><div id="wDhcpHost">Host Name (optional)</div></td>
 	<td><input type="text" name="hostname" size="28" maxlength="32" value="<% getCfgGeneral(1, "HostName"); %>"></td>
 </tr>
 <tr>
-	<td class="head">Request IP from DHCP server</td>
+	<td class="head">Request IP from DHCP (optional)</td>
 	<td><input type="text" name="dhcpReqIP" size="28" maxlength="32" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
 </tr>
 <tr>

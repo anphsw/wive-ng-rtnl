@@ -720,7 +720,7 @@ function initValue()
   <td class="title" colspan="2" id="wDhcpMode">DHCP Mode</td>
 </tr>
 <tr>
-  <td class="head"><div id="wDhcpHost">Host Name</div> (optional)</td>
+  <td class="head"><div id="wDhcpHost">Host Name (optional)</div></td>
   <td><input type=text name="hostname" size=28 maxlength=32 value=""></td>
 </tr>
 </table>
