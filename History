@@ -265,7 +265,8 @@
 76) Add ipt_account support. Full work only NatFastpath disabled.<br>
 77) Fix add default gateway over static routes.<br>
 78) Add Request IP parametr in dhcp client.<br>
-79) Add rwfs autoclean at firmware update.<br>
+79) Add rwfs autoclean at firmware update support.<br>
+80) Update dnsmasq to 2.56 version.<br>
 
 
 <br><br>
