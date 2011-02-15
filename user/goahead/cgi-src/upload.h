@@ -394,6 +394,31 @@ const char* headers[] =
 	"Content-Type: "
 };
 
+const char* valid_content_type[]=
+{
+	"application/mac-binary",
+	"application/macbinary",
+	"application/octet-stream",
+	"application/x-binary",
+	"application/x-macbinary",
+	NULL
+};
+
+int check_binary_content_type(const char *content_type)
+{
+	const char **ptr = valid_content_type;
+	while (*ptr != NULL)
+	{
+		// Check content type validity
+		if (strcasecmp(*ptr, content_type)==0)
+			return 1;
+		
+		ptr++;
+	}
+	
+	return 0;
+}
+
 int read_parameters(FILE *fd, const char *separator, parameter_t **result_params)
 {
 	char start[MAX_SEPARATOR_LEN+8], end[MAX_SEPARATOR_LEN+8], middle[MAX_SEPARATOR_LEN+8];

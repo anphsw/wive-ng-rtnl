@@ -138,13 +138,13 @@ int main (int argc, char *argv[])
 	// Get multipart file data separator
 	char separator[MAX_SEPARATOR_LEN];
 	
+	html_header();
+	
 	if (get_content_separator(separator, sizeof(separator), &file_size) < 0)
 	{
 		html_error(RFC_ERROR);
 		return -1;
 	}
-
-	html_header();
 	
 	// Get multipart file name
 	char *filename = getenv("UPLOAD_FILENAME");
@@ -174,8 +174,7 @@ int main (int argc, char *argv[])
 	if (fd == NULL)
 	{
 		html_error(RFC_ERROR);
-		//return -1;
-		while (1) { sleep(1000); }
+		return -1;
 	}
 	
 	// Parse parameters
@@ -184,8 +183,7 @@ int main (int argc, char *argv[])
 	{
 		fclose(fd);
 		html_error(RFC_ERROR);
-		//return -1;
-		while (1) { sleep(1000); }
+		return -1;
 	}
 	
 	fclose(fd);
@@ -209,9 +207,10 @@ int main (int argc, char *argv[])
 			html_error(RFC_ERROR);
 			return -1;
 		}
-		if (strcasecmp(find->content_type, "application/octet-stream")!=0)
+		if (!check_binary_content_type(find->content_type))
 		{
-			html_error(RFC_ERROR);
+			sprintf(err_msg, "Unsupported content-type for binary data: %s", find->content_type);
+			html_error(err_msg);
 			return -1;
 		}
 

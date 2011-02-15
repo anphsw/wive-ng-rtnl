@@ -6,14 +6,16 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <script language="JavaScript" type="text/javascript">
 var http_request = false;
 Butterlate.setTextDomain("internet");
 
-function connectionTypeSwitch()
+function connectionTypeSwitch(form)
 {
-	var staticTable = document.getElementById("staticDHCP");
-	staticTable.style.display    = (document.wanCfg.connectionType.value == "STATIC") ? "" : "none";
+	var static = form.connectionType.value == "STATIC"
+	displayElement('staticDHCP', static);
+	displayElement('dhcpReqIPRow', !static);
 }
 
 function CheckValue(form)
@@ -39,7 +41,7 @@ function CheckValue(form)
 	}
 	else if (form.connectionType.value == 'DHCP')
 	{
-		if (form.dhcpReqIP != "")
+		if (form.dhcpReqIP != '')
 			if (!validateIP(form.dhcpReqIP, true))
 				return false;
 	}
@@ -64,7 +66,6 @@ function initTranslation()
 	_TR("wStaticSecDns", "inet sec dns");
 
 	_TR("wDhcpMode", "wan dhcp mode");
-	_TR("wDhcpHost", "inet hostname");
 
 	_TRV("wApply", "inet apply");
 	_TRV("wCancel", "inet cancel");
@@ -93,7 +94,7 @@ function initValue()
 		form.connectionType.options.selectedIndex = 0;
 	form.wStaticDnsEnable.checked = (static_dns == "on");
 	
-	connectionTypeSwitch();
+	connectionTypeSwitch(form);
 	
 	dnsSwitchClick(form);
 }
@@ -123,7 +124,7 @@ function dnsSwitchClick(form)
 <tr align="center">
 	<td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td>
-		<select name="connectionType" onChange="connectionTypeSwitch();">
+		<select name="connectionType" onChange="connectionTypeSwitch(this.form);">
 			<option value="STATIC" id="wConnTypeStatic">Static Mode (fixed IP)</option>
 			<option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
 		</select>
@@ -157,13 +158,9 @@ function dnsSwitchClick(form)
 <tr>
 	<td class="title" colspan="2">Additional Options</td>
 </tr>
-<tr>
-	<td class="head"><div id="wDhcpHost">Host Name (optional)</div></td>
-	<td><input type="text" name="hostname" size="28" maxlength="32" value="<% getCfgGeneral(1, "HostName"); %>"></td>
-</tr>
-<tr>
+<tr id="dhcpReqIPRow">
 	<td class="head">Request IP from DHCP (optional)</td>
-	<td><input type="text" name="dhcpReqIP" size="28" maxlength="32" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
+	<td><input name="dhcpReqIP" size="28" maxlength="32" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>

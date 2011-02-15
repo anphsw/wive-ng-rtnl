@@ -1029,9 +1029,13 @@ static int getDns(int eid, webs_t wp, int argc, char_t **argv)
 	fp = fopen("/etc/resolv.conf", "r");
 	if (NULL == fp)
 		return websWrite(wp, T(""));
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
-		if (sscanf(buf, "%s%s", ns_str, dns) != 2)
+	while (fgets(buf, sizeof(buf), fp) != NULL)
+	{
+		if (sscanf(buf, "%s %s", ns_str, dns) != 2)
 			continue;
+		if (strcasecmp(ns_str, "nameserver") != 0)
+			continue;
+		
 		idx++;
 		if (idx == req) {
 			websWrite(wp, T("%s"), dns);
@@ -2276,7 +2280,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 /* goform/setWan */
 static void setWan(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*ctype;
+	char_t	*ctype, *req_ip;
 	char_t	*ip, *nm, *gw;
 	char_t	*eth, *user, *pass;
 	char_t	*nat_enable;
@@ -2288,12 +2292,13 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
-	char	*req_ip = nvram_get(RT2860_NVRAM, "dhcpReqIP");
 
 	ctype = ip = nm = gw = eth = user = pass =
 	vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
+	req_ip = websGetVar(wp, T("dhcpReqIP"), T("")); 
+	
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
 	{
 		//always treat bridge mode having static wan connection
@@ -2348,7 +2353,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
-	else if (!strncmp(ctype, "DHCP", 5))
+	else if (strncmp(ctype, "DHCP", 5) == 0)
 	{
 		nvram_init(RT2860_NVRAM);
 		nvram_bufset(RT2860_NVRAM, "wanConnectionMode", ctype);
@@ -2371,13 +2376,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
 	char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
 	char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
-	char_t *host = websGetVar(wp, T("hostname"), T(""));
 	
-	printf("st_en = %s, pd = %s, sd = %s, hostname=%s\n", st_en, pd, sd, host);
+	printf("st_en = %s, pd = %s, sd = %s\n", st_en, pd, sd);
 	
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
-	nvram_bufset(RT2860_NVRAM, "HostName", host);
 	
 	if (strcmp(st_en, "on") == 0)
 	{
