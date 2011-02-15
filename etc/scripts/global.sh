@@ -162,8 +162,14 @@ udhcpc_opts()
 	    fi
 
 	fi
+	dhcpRequestIP=`nvram_get 2860 dhcpRequestIP`
+	if [ "$dhcpRequestIP" != "" ]; then
+	    REQIP="-r $dhcpRequestIP"
+	else
+	    REQIP=""
+	fi
 	getHostName
-	UDHCPCOPTS="-i $wan_if -H $HOSTNAME -S -R -T 5 -a \
+	UDHCPCOPTS="-i $wan_if -H $HOSTNAME $REQIP -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
 		    -O routes -O staticroutes -O msstaticroutes -f &"
 }
