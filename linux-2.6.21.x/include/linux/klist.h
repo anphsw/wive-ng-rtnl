@@ -23,7 +23,7 @@ struct klist {
 	struct list_head	k_list;
 	void			(*get)(struct klist_node *);
 	void			(*put)(struct klist_node *);
-};
+} __attribute__ ((aligned (sizeof(void *))));
 
 
 extern void klist_init(struct klist * k, void (*get)(struct klist_node *),
