@@ -18,7 +18,14 @@ BINDIR = ${PREFIX}/sbin
 MANDIR = ${PREFIX}/share/man
 LOCALEDIR = ${PREFIX}/share/locale
 
-COPTS=-DNO_DHCP -DNO_TFTP -DNO_IPV6
+-include $(LINUX_CONFIG)
+
+ifndef CONFIG_IPV6
+COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_IPV6 -Os -fPIC -fomit-frame-pointer -mno-memcpy
+CFLAGS = -DNO_IPV6
+else
+COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -Os -fPIC -fomit-frame-pointer -mno-memcpy
+endif    
 
 SRC = src
 PO = po
