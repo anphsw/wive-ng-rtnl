@@ -3224,11 +3224,15 @@ void read_opts(int argc, char **argv, char *compile_opts)
 #endif
       
       if (option == -1)
+#if 0
 	{
 	  if (optind < argc)
 	    die(_("junk found in command line"), NULL, EC_BADCONF);
 	  break;
 	}
+#esle
+	 break;
+#endif
 
       /* Copy optarg so that argv doesn't get changed */
       if (optarg)
