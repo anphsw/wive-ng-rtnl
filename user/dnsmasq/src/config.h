@@ -16,17 +16,17 @@
 
 #define VERSION "2.56"
 
-#define FTABSIZ 150 /* max number of outstanding requests (default) */
-#define MAX_PROCS 20 /* max no children for TCP requests */
+#define FTABSIZ 50 /* max number of outstanding requests (default) */
+#define MAX_PROCS 10 /* max no children for TCP requests */
 #define CHILD_LIFETIME 150 /* secs 'till terminated (RFC1035 suggests > 120s) */
 #define EDNS_PKTSZ 4096 /* default max EDNS.0 UDP packet from RFC5625 */
 #define TIMEOUT 10 /* drop UDP queries after TIMEOUT seconds */
-#define FORWARD_TEST 50 /* try all servers every 50 queries */
-#define FORWARD_TIME 20 /* or 20 seconds */
+#define FORWARD_TEST 250 /* try all servers every 250 queries */
+#define FORWARD_TIME 60 /* or 60 seconds */
 #define RANDOM_SOCKS 64 /* max simultaneous random ports */
 #define LEASE_RETRY 60 /* on error, retry writing leasefile after LEASE_RETRY seconds */
-#define CACHESIZ 150 /* default cache size */
-#define MAXLEASES 1000 /* maximum number of DHCP leases */
+#define CACHESIZ 100 /* default cache size */
+#define MAXLEASES 100 /* maximum number of DHCP leases */
 #define PING_WAIT 3 /* wait for ping address-in-use test */
 #define PING_CACHE_TIME 30 /* Ping test assumed to be valid this long. */
 #define DECLINE_BACKOFF 600 /* disable DECLINEd static addresses for this long */
@@ -39,8 +39,8 @@
 #define LEASEFILE "/var/lib/misc/dnsmasq.leases"
 #define CONFFILE "/etc/dnsmasq.conf"
 #define DEFLEASE 3600 /* default lease time, 1 hour */
-#define CHUSER "root"
-#define CHGRP "root"
+#define CHUSER "Admin"
+#define CHGRP "Admin"
 #define DHCP_SERVER_PORT 67
 #define DHCP_CLIENT_PORT 68
 #define DHCP_SERVER_ALTPORT 1067
@@ -149,8 +149,8 @@ NOTES:
 #define HAVE_BROKEN_RTC
 #define NO_TFTP
 #define NO_DHCP
-#define NO_HAVE_DBUS
 
+//#define NO_HAVE_DBUS
 /* #define HAVE_BROKEN_RTC */
 /* #define HAVE_DBUS */
 
