@@ -46,7 +46,7 @@ typedef unsigned long long _u64;
 #ifndef PPPD
 #define PPPD		"/sbin/pppd"
 #endif
-#define CALL_PPP_OPTS "defaultroute"
+#define CALL_PPP_OPTS ""
 #define FIRMWARE_REV	0x0690  /* Revision of our firmware (software, in this case) */
 
 #define HELLO_DELAY 60          /* How often to send a Hello message */
