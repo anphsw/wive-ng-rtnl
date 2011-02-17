@@ -175,6 +175,9 @@ void dethrottle (void *call)
 	} */
 }
 
+void foo (void *bar) {
+}
+
 void control_xmit (void *b)
 {
     struct buffer *buf = (struct buffer *) b;
@@ -226,6 +229,9 @@ void control_xmit (void *b)
                      t->ourtid);
                 t->self->needclose = 0;
                 t->self->closing = -1;
+        tv.tv_sec = 1;
+            tv.tv_usec = 0;
+            schedule (tv, foo, t);
             }
             else
             {
@@ -234,6 +240,9 @@ void control_xmit (void *b)
                      t->ourtid);
                 strcpy (t->self->errormsg, "Timeout");
                 t->self->needclose = -1;
+        tv.tv_sec = 1;
+            tv.tv_usec = 0;
+            schedule (tv, foo, t);
             }
         }
 	free(buf->rstart);

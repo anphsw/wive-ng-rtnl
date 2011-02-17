@@ -616,6 +616,19 @@ void destroy_tunnel (struct tunnel *t)
     free (me);
 }
 
+void schedule_redial(struct lac *lac)
+{
+    struct timeval tv;
+    if (lac->redial && (lac->rtimeout > 0) && !lac->rsched)
+    {
+        l2tp_log (LOG_INFO, "Network is broken now. Will redial in %d seconds\n", lac->rtimeout);
+        tv.tv_sec = lac->rtimeout;
+        tv.tv_usec = 0;
+        lac->rsched = schedule (tv, magic_lac_dial, lac);
+    }
+}
+
+
 struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
                           struct lns *lns)
 {
@@ -632,6 +645,7 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     {
         l2tp_log (LOG_WARNING, "Host name lookup failed for %s.\n",
              host);
+    schedule_redial(lac);
         return NULL;
     }
     bcopy (hp->h_addr, &addr, hp->h_length);
@@ -647,6 +661,7 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     {
         l2tp_log (LOG_WARNING, "%s: Unable to create tunnel to %s.\n", __FUNCTION__,
              host);
+    schedule_redial(lac);
         return NULL;
     }
     tmp->container->tid = 0;
