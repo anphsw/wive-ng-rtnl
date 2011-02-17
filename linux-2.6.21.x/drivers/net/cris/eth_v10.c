@@ -1379,7 +1379,6 @@ e100_rx(struct net_device *dev)
 		myNextRxDesc->descr.buf = L1_CACHE_ALIGN(virt_to_phys(myNextRxDesc->skb->data));
 	}
 
-	skb->dev = dev;
 	skb->protocol = eth_type_trans(skb, dev);
 
 	/* Send the packet to the upper layers */
