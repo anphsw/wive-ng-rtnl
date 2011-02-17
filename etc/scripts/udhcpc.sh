@@ -165,20 +165,21 @@ case "$1" in
 		services_restart.sh dhcp
 	fi
 
+	#if dhcp disables restart must from internet.sh
         if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
-		#if dhcp disables restart must from internet.sh
 		service vpnhelper stop
 		#wait ip-down script work
 		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ] || [ "$PPP_DEAD" != "0" ]; then
 		    sleep 10
+		    if [ "$PPP_DEAD" != "0" ]; then
+			service syslog restart
+			sleep 2
+			$LOG "PPP dead. Need restart vpnhelper.."
+		    fi
 		fi
-		if [ "$PPP_DEAD" != "0" ]; then
-		    service syslog restart
-		    $LOG "PPP dead. Need restart vpnhelper.."
-		fi
-		#if dhcp disables restart must from internet.sh
+		$LOG "Restart vpnhelper.."
 		service vpnhelper start
 	fi
 	$LOG "End renew procedure..."
