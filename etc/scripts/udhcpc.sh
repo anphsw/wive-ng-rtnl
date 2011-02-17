@@ -18,7 +18,8 @@ ROUTELIST=""
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
-# Count PPPD signal 11 dead
+# Count PPPD signal 11 dead for workaround dead tunnel on 
+# uplink cable down. Fix me later.
 PPP_DEAD=`cat /var/log/messages | grep "Fatal signal 11" -c`
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
@@ -163,7 +164,7 @@ case "$1" in
 		$LOG "Restart needed services"
 		services_restart.sh dhcp
 	fi
-	# ppp dead at signal 11 workaround
+
         if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
@@ -180,6 +181,6 @@ case "$1" in
 		#if dhcp disables restart must from internet.sh
 		service vpnhelper start
 	fi
-	$LOG "Renew OK.."
+	$LOG "End renew procedure..."
     ;;
 esac
