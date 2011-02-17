@@ -78,6 +78,7 @@
 #include <linux/poll.h>
 #include <linux/module.h>
 #include <linux/init.h>
+#include <linux/if_vlan.h>
 
 #ifdef CONFIG_INET
 #include <net/inet_common.h>
@@ -380,7 +381,7 @@ static int packet_sendmsg_spkt(struct kiocb *iocb, struct socket *sock,
 	 */
 
 	err = -EMSGSIZE;
-	if (len > dev->mtu + dev->hard_header_len)
+	if (len > dev->mtu + dev->hard_header_len + VLAN_HLEN)
 		goto out_unlock;
 
 	err = -ENOBUFS;
@@ -392,8 +393,22 @@ static int packet_sendmsg_spkt(struct kiocb *iocb, struct socket *sock,
 	 *	more flexible.
 	 */
 
-	if (skb == NULL)
+	if (!skb)
 		goto out_unlock;
+
+	if (len > (dev->mtu + dev->hard_header_len)) {
+		/* Earlier code assumed this would be a VLAN pkt,
+		 * double-check this now that we have the actual
+		 * packet in hand.
+		 */
+		struct ethhdr *ehdr;
+		skb_reset_mac_header(skb);
+		ehdr = eth_hdr(skb);
+		if (ehdr->h_proto != htons(ETH_P_8021Q)) {
+			err = -EMSGSIZE;
+			goto out_unlock;
+		}
+	}
 
 	/*
 	 *	Fill it in
@@ -513,7 +528,7 @@ static int packet_rcv(struct sk_buff *skb, struct net_device *dev, struct packet
 
 	if (skb_shared(skb)) {
 		struct sk_buff *nskb = skb_clone(skb, GFP_ATOMIC);
-		if (nskb == NULL)
+		if (!nskb)
 			goto drop_n_acct;
 
 		if (skb_head != skb->data) {
@@ -763,7 +778,7 @@ static int packet_sendmsg(struct kiocb *iocb, struct socket *sock,
 		goto out_unlock;
 
 	err = -EMSGSIZE;
-	if (len > dev->mtu+reserve)
+	if (len > dev->mtu + reserve + VLAN_HLEN)
 		goto out_unlock;
 
 	skb = sock_alloc_send_skb(sk, len + LL_ALLOCATED_SPACE(dev),
@@ -789,6 +804,20 @@ static int packet_sendmsg(struct kiocb *iocb, struct socket *sock,
 	err = memcpy_fromiovec(skb_put(skb,len), msg->msg_iov, len);
 	if (err)
 		goto out_free;
+
+	if (len > dev->mtu + reserve) {
+		/* Earlier code assumed this would be a VLAN pkt,
+		 * double-check this now that we have the actual
+		 * packet in hand.
+		 */
+		struct ethhdr *ehdr;
+		skb_reset_mac_header(skb);
+		ehdr = eth_hdr(skb);
+		if (ehdr->h_proto != htons(ETH_P_8021Q)) {
+			err = -EMSGSIZE;
+			goto out_free;
+		}
+	}
 
 	skb->protocol = proto;
 	skb->dev = dev;
@@ -1106,7 +1135,7 @@ static int packet_recvmsg(struct kiocb *iocb, struct socket *sock,
 	 *	retries.
 	 */
 
-	if (skb == NULL)
+	if (!skb)
 		goto out;
 
 	/*
