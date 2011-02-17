@@ -5,7 +5,7 @@
  *
  *		IPv4 Forwarding Information Base: FIB frontend.
  *
- * Version:	$Id: fib_frontend.c,v 1.1.1.1 2007-05-25 06:50:00 bruce Exp $
+ * Version:	$Id: fib_frontend.c,v 1.26 2001/10/31 21:55:54 davem Exp $
  *
  * Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru>
  *
@@ -34,7 +34,6 @@
 #include <linux/if_addr.h>
 #include <linux/if_arp.h>
 #include <linux/skbuff.h>
-#include <linux/netlink.h>
 #include <linux/init.h>
 #include <linux/list.h>
 
@@ -57,11 +56,7 @@ struct fib_table *ip_fib_main_table;
 #define FIB_TABLE_HASHSZ 1
 static struct hlist_head fib_table_hash[FIB_TABLE_HASHSZ];
 
-#define FIB_RES_TABLE(r) (RT_TABLE_MAIN)
-
 #else
-
-#define FIB_RES_TABLE(r) (fib_result_table(r))
 
 #define FIB_TABLE_HASHSZ 256
 static struct hlist_head fib_table_hash[FIB_TABLE_HASHSZ];
@@ -155,9 +150,9 @@ unsigned inet_addr_type(__be32 addr)
 	struct fib_result	res;
 	unsigned ret = RTN_BROADCAST;
 
-	if (ipv4_is_zeronet(addr) || ipv4_is_badclass(addr))
+	if (ZERONET(addr) || BADCLASS(addr))
 		return RTN_BROADCAST;
-	if (ipv4_is_multicast(addr))
+	if (MULTICAST(addr))
 		return RTN_MULTICAST;
 
 #ifdef CONFIG_IP_MULTIPLE_TABLES
@@ -193,9 +188,6 @@ int fib_validate_source(__be32 src, __be32 dst, u8 tos, int oif,
 					.tos = tos } },
 			    .iif = oif };
 	struct fib_result res;
-	int table;
-	unsigned char prefixlen;
-	unsigned char scope;
 	int no_addr, rpf;
 	int ret;
 
@@ -217,35 +209,31 @@ int fib_validate_source(__be32 src, __be32 dst, u8 tos, int oif,
 		goto e_inval_res;
 	*spec_dst = FIB_RES_PREFSRC(res);
 	fib_combine_itag(itag, &res);
+#ifdef CONFIG_IP_ROUTE_MULTIPATH
+	if (FIB_RES_DEV(res) == dev || res.fi->fib_nhs > 1)
+#else
 	if (FIB_RES_DEV(res) == dev)
+#endif
 	{
 		ret = FIB_RES_NH(res).nh_scope >= RT_SCOPE_HOST;
 		fib_res_put(&res);
 		return ret;
 	}
-	table = FIB_RES_TABLE(&res);
-	prefixlen = res.prefixlen;
-	scope = res.scope;
 	fib_res_put(&res);
 	if (no_addr)
 		goto last_resort;
+	if (rpf)
+		goto e_inval;
 	fl.oif = dev->ifindex;
 
 	ret = 0;
 	if (fib_lookup(&fl, &res) == 0) {
-		if (res.type == RTN_UNICAST &&
-		    ((table == FIB_RES_TABLE(&res) &&
-		      res.prefixlen >= prefixlen && res.scope >= scope) ||
-		     !rpf)) {
+		if (res.type == RTN_UNICAST) {
 			*spec_dst = FIB_RES_PREFSRC(res);
 			ret = FIB_RES_NH(res).nh_scope >= RT_SCOPE_HOST;
-			fib_res_put(&res);
-			return ret;
 		}
 		fib_res_put(&res);
 	}
-	if (rpf)
-		goto e_inval;
 	return ret;
 
 last_resort:
@@ -510,7 +498,7 @@ static int rtm_to_fib_config(struct sk_buff *skb, struct nlmsghdr *nlh,
 	}
 
 	nlmsg_for_each_attr(attr, nlh, sizeof(struct rtmsg), remaining) {
-		switch (nla_type(attr)) {
+		switch (attr->nla_type) {
 		case RTA_DST:
 			cfg->fc_dst = nla_get_be32(attr);
 			break;
@@ -697,7 +685,7 @@ void fib_add_ifaddr(struct in_ifaddr *ifa)
 	if (ifa->ifa_broadcast && ifa->ifa_broadcast != htonl(0xFFFFFFFF))
 		fib_magic(RTM_NEWROUTE, RTN_BROADCAST, ifa->ifa_broadcast, 32, prim);
 
-	if (!ipv4_is_zeronet(prefix) && !(ifa->ifa_flags&IFA_F_SECONDARY) &&
+	if (!ZERONET(prefix) && !(ifa->ifa_flags&IFA_F_SECONDARY) &&
 	    (prefix != addr || ifa->ifa_prefixlen < 32)) {
 		fib_magic(RTM_NEWROUTE, dev->flags&IFF_LOOPBACK ? RTN_LOCAL :
 			  RTN_UNICAST, prefix, ifa->ifa_prefixlen, prim);
@@ -860,7 +848,9 @@ static int fib_inetaddr_event(struct notifier_block *this, unsigned long event, 
 	switch (event) {
 	case NETDEV_UP:
 		fib_add_ifaddr(ifa);
+#ifdef CONFIG_IP_ROUTE_MULTIPATH
 		fib_sync_up(ifa->ifa_dev->dev);
+#endif
 		rt_cache_flush(-1);
 		break;
 	case NETDEV_DOWN:
@@ -896,7 +886,9 @@ static int fib_netdev_event(struct notifier_block *this, unsigned long event, vo
 		for_ifa(in_dev) {
 			fib_add_ifaddr(ifa);
 		} endfor_ifa(in_dev);
+#ifdef CONFIG_IP_ROUTE_MULTIPATH
 		fib_sync_up(dev);
+#endif
 		rt_cache_flush(-1);
 		break;
 	case NETDEV_DOWN:
