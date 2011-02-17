@@ -915,7 +915,6 @@ static void ip6_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 			dst->metrics[RTAX_FEATURES-1] |= RTAX_FEATURE_ALLFRAG;
 		}
 		dst->metrics[RTAX_MTU-1] = mtu;
-		call_netevent_notifiers(NETEVENT_PMTU_UPDATE, dst);
 	}
 }
 

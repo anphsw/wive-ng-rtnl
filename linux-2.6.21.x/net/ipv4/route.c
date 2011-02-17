@@ -1477,7 +1477,6 @@ static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 		}
 		dst->metrics[RTAX_MTU-1] = mtu;
 		dst_set_expires(dst, ip_rt_mtu_expires);
-		call_netevent_notifiers(NETEVENT_PMTU_UPDATE, dst);
 	}
 }
 
