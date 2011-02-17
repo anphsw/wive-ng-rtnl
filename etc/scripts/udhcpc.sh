@@ -161,19 +161,18 @@ case "$1" in
 		$LOG "Use static DNS."
 	    fi
 		$LOG "Restart needed services"
+		services_restart.sh dhcp
+	fi
+	# ppp dead at signal 11 workaround
+        if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
 		#if dhcp disables restart must from internet.sh
 		service vpnhelper stop
 		#wait ip-down script work
-		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
+		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ] || [ "$PPP_DEAD" != "0" ]; then
 		    sleep 10
 		fi
-		#restart need services
-		services_restart.sh dhcp
-	fi
-	# ppp dead at signal 11 workaround
-        if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		if [ "$PPP_DEAD" != "0" ]; then
 		    service syslog restart
 		    $LOG "PPP dead. Need restart vpnhelper.."
