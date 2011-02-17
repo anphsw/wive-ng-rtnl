@@ -18,6 +18,8 @@ ROUTELIST=""
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
+# Count PPPD signal 11 dead
+PPP_DEAD=`cat /var/log/messages | grep "Fatal signal 11" -c`
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -169,6 +171,13 @@ case "$1" in
 		fi
 		#restart need services
 		services_restart.sh dhcp
+	fi
+	# ppp dead at signal 11 workaround
+        if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
+		if [ "$PPP_DEAD" != "0" ]; then
+		    service syslog restart
+		    $LOG "PPP dead. Need restart vpnhelper.."
+		fi
 		#if dhcp disables restart must from internet.sh
 		service vpnhelper start
 	fi
