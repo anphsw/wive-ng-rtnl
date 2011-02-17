@@ -196,6 +196,9 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 #define TCP_NAGLE_CORK		2	/* Socket is corked	    */
 #define TCP_NAGLE_PUSH		4	/* Cork is overridden for already queued data */
 
+/* TCP initial congestion window */
+#define TCP_INIT_CWND          10
+
 extern struct inet_timewait_death_row tcp_death_row;
 
 /* sysctl variables for tcp */
