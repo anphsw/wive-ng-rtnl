@@ -213,7 +213,8 @@ static int getNums(char *value, char delimit)
  */
 static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_address,
 	char *sip, char *sim, int sprf_int, int sprt_int, 
-	char *dip, char *dim, int dprf_int, int dprt_int, int proto, int action)
+	char *dip, char *dim, int dprf_int, int dprt_int,
+	int proto, int action, const char *chain)
 {
 	int rc = 0;
 	char *pos = buf;
@@ -223,11 +224,11 @@ static void makeIPPortFilterRule(char *buf, int len, char *iface, char *mac_addr
 	{
 		case ACTION_DROP:
 			rc = (atoi(spifw) == 0) ? 
-				snprintf(pos, len, "iptables -A %s ", IPPORT_FILTER_CHAIN) :
-				snprintf(pos, len, "iptables -A %s -m state --state NEW,INVALID ", IPPORT_FILTER_CHAIN);
+				snprintf(pos, len, "iptables -A %s ", chain) :
+				snprintf(pos, len, "iptables -A %s -m state --state NEW,INVALID ", chain);
 			break;
 		case ACTION_ACCEPT:
-			rc = snprintf(pos, len, "iptables -A %s ", IPPORT_FILTER_CHAIN);
+			rc = snprintf(pos, len, "iptables -A %s ", chain);
 			break;
 	}
 	pos += rc;
@@ -420,23 +421,35 @@ static void iptablesIPPortFilterBuildScript(void)
 	char sip[32], dip[32], sim[32], dim[32];
 	char *rule, *c_if;
 	char *firewall_enable, *default_policy;
+	char *wan_nat_ena, *vpn_nat_ena;
+	int nat_ena = 0;
 	
 	// Check that IP/port filter is enabled
 	firewall_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
-	if (!firewall_enable)
+	if (firewall_enable == NULL)
 	{
 		printf("Warning: can't find \"IPPortFilterEnable\" in flash.\n");
 		return;
 	}
 	mode = atoi(firewall_enable);
-	if(!mode)
+	if (mode == NULL)
 		return;
 
 	rule = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
-	if(!rule){
+	if (rule == NULL)
+	{
 		printf("Warning: can't find \"IPPortFilterRules\" in flash.\n");
 		return;
 	}
+	
+	// NAT check
+	wan_nat_ena = nvram_get(RT2860_NVRAM, "natEnabled");
+	if (wan_nat_ena == NULL)
+		wan_nat_ena = "0";
+	vpn_nat_ena = nvram_get(RT2860_NVRAM, "");
+	if (vpn_nat_ena == NULL)
+		vpn_nat_ena = "0";
+	nat_ena = ((strcmp(wan_nat_ena, "1") == 0) || (strcasecmp(vpn_nat_ena, "on") == 0)) ? 1 : 0;
 
 	default_policy = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	// add the default policy to the end of FORWARD chain
@@ -451,8 +464,14 @@ static void iptablesIPPortFilterBuildScript(void)
 	if (fd != NULL)
 	{
 		fputs("#!/bin/sh\n\n", fd);
-		fputs("iptables -t filter -N macipport_filter\n", fd);
-		fputs("iptables -t filter -A FORWARD -j macipport_filter\n\n", fd);
+		fprintf(fd, "iptables -t filter -N %s\n", IPPORT_FILTER_CHAIN);
+		fprintf(fd, "iptables -t filter -I FORWARD -j %s\n\n", IPPORT_FILTER_CHAIN);
+		
+		if (nat_ena)
+		{
+			fprintf(fd, "iptables -t nat -N %s\n", IPPORT_NAT_FILTER_CHAIN);
+			fprintf(fd, "iptables -t nat -I PREROUTING -j %s\n\n", IPPORT_NAT_FILTER_CHAIN);
+		}
 		
 		while ( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
 		{
@@ -547,8 +566,20 @@ static void iptablesIPPortFilterBuildScript(void)
 
 			action = atoi(action_str);
 
-			makeIPPortFilterRule(cmd, sizeof(cmd), c_if, mac_address, sip, sim, sprf_int, sprt_int, dip, dim, dprf_int, dprt_int, proto, action);
+			// Output regular rule
+			makeIPPortFilterRule(
+				cmd, sizeof(cmd), c_if, mac_address, sip, sim, sprf_int,
+				sprt_int, dip, dim, dprf_int, dprt_int, proto, action, IPPORT_FILTER_CHAIN);
 			fputs(cmd, fd);
+			
+			// Output additional rule
+			if (nat_ena)
+			{
+				makeIPPortFilterRule(
+					cmd, sizeof(cmd), c_if, mac_address, sip, sim, sprf_int,
+					sprt_int, dip, dim, dprf_int, dprt_int, proto, action, IPPORT_NAT_FILTER_CHAIN);
+				fputs(cmd, fd);
+			}
 		}
 
 		//close file

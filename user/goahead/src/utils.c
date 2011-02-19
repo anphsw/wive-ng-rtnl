@@ -38,6 +38,7 @@ static int  getPlatform(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStationBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysBuildTime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
+static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
@@ -556,6 +557,7 @@ void formDefineUtilities(void)
 	websAspDefine(T("getStationBuilt"), getStationBuilt);
 	websAspDefine(T("getSysBuildTime"), getSysBuildTime);
 	websAspDefine(T("getSdkVersion"), getSdkVersion);
+	websAspDefine(T("getMemAmount"), getMemAmount);
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
@@ -955,6 +957,35 @@ static int getSysBuildTime(int eid, webs_t wp, int argc, char_t **argv)
 static int getSdkVersion(int eid, webs_t wp, int argc, char_t **argv)
 {
 	return websWrite(wp, T("%s"), RT288X_SDK_VERSION);
+}
+
+/*
+ * description: check ram size
+ */
+static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char line[256];
+	char key[64];
+	long long value;
+	
+	FILE *fd = fopen("/proc/meminfo", "r");
+	
+	// Now open /proc/meminfo and output neccessary information
+	if (fd != NULL)
+	{
+		while (fgets(line, 255, fd) != NULL)
+		{
+			if (sscanf(line, "%s %lld", &key, &value) == 2)
+			{
+				if (strcmp(key, "MemTotal:") == 0)
+					return websWrite(wp, T("%ld"), (long)value);
+			}
+		}
+		
+		fclose(fd);
+	}
+
+	return websWrite(wp, T("0"), RT288X_SDK_VERSION);
 }
 
 /*

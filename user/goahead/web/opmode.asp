@@ -67,9 +67,12 @@ function initValue()
 	var gwb = "<% getGWBuilt(); %>";
 	var apcli = "<% getWlanApcliBuilt(); %>";
 	var sta = "<% getStationBuilt(); %>";
+	var mem_size = <% getMemAmount(); %>;
 	var form = document.opmode;
 
 	initTranslation();
+	
+	displayElement("ram_caution", mem_size < 30000);
 
 	if (gwb == "0")
 	{
@@ -114,6 +117,7 @@ function msg()
 <p id="oIntroduction"></p>
 <hr>
 <p>Current Firmware Version: <% getSdkVersion(); %> (<% getSysBuildTime(); %>)</p>
+<p style="display: none;" id="ram_caution"><span style="color: #ff0000;"><b>CAUTION!</b></span> Your device has less than 32 MB RAM, seems to have some working problems.</p>
 <p>Please select device operation mode:</p>
 
 <form method="POST" name="opmode" action="/goform/setOpMode">
