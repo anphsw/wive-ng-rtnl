@@ -270,6 +270,7 @@
 81) Fix redial pptp/l2tp at uplink physical disconnect to small time<br>
 82) Speedup route<br>
 83) Some updates in network kernel code<br>
+84) Fix connect to new l2tp brases by Juniper<br>
 
 
 <br><br>
