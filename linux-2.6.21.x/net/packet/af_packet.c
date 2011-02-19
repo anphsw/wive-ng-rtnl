@@ -578,7 +578,7 @@ static int packet_rcv(struct sk_buff *skb, struct net_device *dev, struct packet
 	sll->sll_hatype = dev->type;
 	sll->sll_protocol = skb->protocol;
 	sll->sll_pkttype = skb->pkt_type;
-	if (unlikely(po->origdev) && skb->pkt_type == PACKET_HOST)
+	if (unlikely(po->origdev))
 		sll->sll_ifindex = orig_dev->ifindex;
 	else
 		sll->sll_ifindex = dev->ifindex;
@@ -752,7 +752,7 @@ static int tpacket_rcv(struct sk_buff *skb, struct net_device *dev, struct packe
 	sll->sll_hatype = dev->type;
 	sll->sll_protocol = skb->protocol;
 	sll->sll_pkttype = skb->pkt_type;
-	if (unlikely(po->origdev) && skb->pkt_type == PACKET_HOST)
+	if (unlikely(po->origdev))
 		sll->sll_ifindex = orig_dev->ifindex;
 	else
 		sll->sll_ifindex = dev->ifindex;
@@ -994,20 +994,14 @@ static int packet_do_bind(struct sock *sk, struct net_device *dev, __be16 protoc
 	if (protocol == 0)
 		goto out_unlock;
 
-	if (dev) {
-		if (dev->flags&IFF_UP) {
-			dev_add_pack(&po->prot_hook);
-			sock_hold(sk);
-			po->running = 1;
-		} else {
-			sk->sk_err = ENETDOWN;
-			if (!sock_flag(sk, SOCK_DEAD))
-				sk->sk_error_report(sk);
-		}
-	} else {
+	if (!dev || (dev->flags & IFF_UP)) {
 		dev_add_pack(&po->prot_hook);
 		sock_hold(sk);
 		po->running = 1;
+	} else {
+		sk->sk_err = ENETDOWN;
+		if (!sock_flag(sk, SOCK_DEAD))
+			sk->sk_error_report(sk);
 	}
 
 out_unlock:
@@ -1844,7 +1838,7 @@ static int packet_set_ring(struct sock *sk, struct tpacket_req *req, int closing
 	int err = 0;
 
 	if (req->tp_block_nr) {
-		int i, l;
+		int i;
 
 		/* Sanity tests and some calculations */
 
@@ -1883,7 +1877,6 @@ static int packet_set_ring(struct sock *sk, struct tpacket_req *req, int closing
 		if (unlikely(!pg_vec))
 			goto out;
 
-		l = 0;
 		for (i = 0; i < req->tp_block_nr; i++) {
 			void *ptr = pg_vec[i];
 			int k;
