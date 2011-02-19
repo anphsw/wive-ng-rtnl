@@ -65,13 +65,17 @@ start() {
 	fi
 
 	$LOG "Link wifi up..."
+	get_txqlen
 	if [ "$opmode" != "3" ]; then
-	    ifconfig ra0 hw ether    "$WMAC"
+	    ifconfig ra0 hw ether	"$WMAC"
+	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	else
-	    ifconfig ra0 hw ether    "$WANMAC"
+	    ifconfig ra0 hw ether	"$WANMAC"
+	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
-	    ifconfig apcli0 hw ether "$WMAC"
+	    ifconfig apcli0 hw ether	"$WMAC"
+	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
 	fi
     fi

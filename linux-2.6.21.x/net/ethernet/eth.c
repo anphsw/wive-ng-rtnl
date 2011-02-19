@@ -307,7 +307,15 @@ void ether_setup(struct net_device *dev)
 	dev->hard_header_len 	= ETH_HLEN;
 	dev->mtu		= ETH_DATA_LEN;
 	dev->addr_len		= ETH_ALEN;
+#if defined(CONFIG_RAM_SIZE_AUTO)
+	dev->tx_queue_len	= 100;	/* increase from userspace if needed */
+#elif defined(CONFIG_RT2880_DRAM_16M)
+	dev->tx_queue_len	= 10;	/* save memory */
+#elif defined(CONFIG_RT2880_DRAM_8M)
+	dev->tx_queue_len	= 0;	/* save memory */
+#else
 	dev->tx_queue_len	= 1000;	/* Ethernet wants good queues */
+#endif
 	dev->flags		= IFF_BROADCAST|IFF_MULTICAST;
 
 	memset(dev->broadcast, 0xFF, ETH_ALEN);

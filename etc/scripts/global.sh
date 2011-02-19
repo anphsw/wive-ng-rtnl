@@ -242,6 +242,17 @@ vpn_deadloop_fix()
     fi
 }
 
+get_txqlen()
+{
+    #for memory save 16m device uses txqueuelen=100
+    if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+	txqueuelen="1000"
+    else
+	txqueuelen="100"
+    fi
+}
+
+
 # get params
 getLanIfName
 getLan2IfName

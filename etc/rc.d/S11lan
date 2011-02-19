@@ -10,6 +10,7 @@ start() {
 $LOG "Start network interfaces..."
 get_param
 getMacIf
+get_txqlen
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ "$brset" = "0" ]; then
@@ -17,13 +18,14 @@ getMacIf
 	    brctl addbr br0
         fi
 	$LOG "-==BR0_MACADDR $LANMAC==-"
-	ifconfig br0 hw ether $LANMAC
+	ifconfig br0 hw ether "$LANMAC"
 	$LOG "-==Up bridge interface==-"
 	ip link set br0 up
     fi
     if [ "$lanisup" = "0" ]; then
 	$LOG "-==ETH2_MACADDR $LANMAC==-"
-	ifconfig eth2 hw ether $LANMAC
+	ifconfig eth2 hw ether "$LANMAC"
+	ifconfig eth2 txqueuelen "$txqueuelen"
 	$LOG "-==Up vlan root interface==-"
 	ip link set eth2 up
 	vlanisconfig=0
@@ -33,9 +35,9 @@ getMacIf
 	vconfig add eth2 1
 	vconfig add eth2 2
 	$LOG "-==ETH2.1_MACADDR $LANMAC==-"
-	ifconfig eth2.1 hw ether $LANMAC
+	ifconfig eth2.1 hw ether "$LANMAC"
 	$LOG "-==ETH2.2_MACADDR $WANMAC==-"
-	ifconfig eth2.2 hw ether $WANMAC
+	ifconfig eth2.2 hw ether "$WANMAC"
     fi
 
     #eth2.1 always up

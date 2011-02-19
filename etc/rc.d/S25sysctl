@@ -3,32 +3,23 @@
 LOG="echo SYSCTL: "
 
 start() {
- $LOG "Tune with sysctl: "
+    $LOG "Tune with sysctl: "
     sysctl -w -p /etc/sysctl.conf > /dev/null 2>&1
 
-  $LOG "Tune network stack and memory usadge fo small memory devices"
-    # tcp buff size
-    MAX_MEM=`free | grep -i mem: | awk '{ print ($4-1228)*1024 }'`
-    let "CMAX_MEM=$MAX_MEM/4"
-
-    # set sysctl
-    sysctl -w net.core.rmem_max=$CMAX_MEM
-    sysctl -w net.core.wmem_max=$CMAX_MEM
-
-    MEM_SIZE=`free | grep -i mem: | awk '{ print $2/10000 }' | cut -d '.' -f1`
+    $LOG "Tune network stack and memory usadge fo small memory devices"
     MINPORT=3072
-    if [ "$MEM_SIZE" = "1" ]; then
-        #16mb
-        CONNTRACK_MAX=1024
-        let "HASHSIZE=$CONNTRACK_MAX/6"
-        let "ROUTEMAX=$CONNTRACK_MAX*2"
-	sysctl -w vm.min_free_kbytes=1536
-    else
-        #32mb
+    if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+        #>16mb
         CONNTRACK_MAX=4096
         let "HASHSIZE=$CONNTRACK_MAX/2"
         let "ROUTEMAX=$CONNTRACK_MAX*4"
 	sysctl -w vm.min_free_kbytes=2304
+    else
+        #=16mb
+        CONNTRACK_MAX=1024
+        let "HASHSIZE=$CONNTRACK_MAX/6"
+        let "ROUTEMAX=$CONNTRACK_MAX*2"
+	sysctl -w vm.min_free_kbytes=1536
     fi
     let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     let "CONNGEN=$CONNTRACK_MAX-400"
