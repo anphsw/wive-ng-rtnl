@@ -1460,11 +1460,13 @@ void __init trap_init(void)
 	/*
 	 * Initialise interrupt handlers
 	 */
+#ifdef CONFIG_CPU_MIPSR2_SRS
 	if (cpu_has_veic || cpu_has_vint) {
 		int nvec = cpu_has_veic ? 64 : 8;
 		for (i = 0; i < nvec; i++)
 			set_vi_handler(i, NULL);
 	}
+#endif
 	else if (cpu_has_divec)
 		set_handler(0x200, &except_vec4, 0x8);
 
