@@ -59,7 +59,11 @@ struct vlan_hdr {
    __be16               h_vlan_encapsulated_proto; /* packet type ID field (or len) */
 };
 
-#define VLAN_VID_MASK	0xfff
+#define VLAN_PRIO_MASK		0xe000 /* Priority Code Point */
+#define VLAN_PRIO_SHIFT		13
+#define VLAN_CFI_MASK		0x1000 /* Canonical Format Indicator */
+#define VLAN_TAG_PRESENT	VLAN_CFI_MASK
+#define VLAN_VID_MASK		0x0fff /* VLAN Identifier */
 
 /* found in socket.c */
 extern void vlan_ioctl_set(int (*hook)(void __user *));
