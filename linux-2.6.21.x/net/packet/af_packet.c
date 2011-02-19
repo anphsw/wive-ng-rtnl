@@ -85,8 +85,6 @@
 #include <net/inet_common.h>
 #endif
 
-#define CONFIG_SOCK_PACKET	1
-
 /*
    Proposed replacement for SIOC{ADD,DEL}MULTI and
    IFF_PROMISC, IFF_ALLMULTI flags.
@@ -299,7 +297,6 @@ static void packet_sock_destruct(struct sock *sk)
 
 static const struct proto_ops packet_ops;
 
-#ifdef CONFIG_SOCK_PACKET
 static const struct proto_ops packet_ops_spkt;
 
 static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,  struct packet_type *pt, struct net_device *orig_dev)
@@ -487,7 +484,6 @@ out_unlock:
 		dev_put(dev);
 	return err;
 }
-#endif
 
 static inline unsigned int run_filter(struct sk_buff *skb, struct sock *sk,
 				      unsigned int res)
@@ -1024,8 +1020,6 @@ out_unlock:
  *	Bind a packet socket to a device
  */
 
-#ifdef CONFIG_SOCK_PACKET
-
 static int packet_bind_spkt(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
 	struct sock *sk=sock->sk;
@@ -1048,7 +1042,6 @@ static int packet_bind_spkt(struct socket *sock, struct sockaddr *uaddr, int add
 	}
 	return err;
 }
-#endif
 
 static int packet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
@@ -1100,11 +1093,8 @@ static int packet_create(struct socket *sock, int protocol)
 
 	if (!capable(CAP_NET_RAW))
 		return -EPERM;
-	if (sock->type != SOCK_DGRAM && sock->type != SOCK_RAW
-#ifdef CONFIG_SOCK_PACKET
-	    && sock->type != SOCK_PACKET
-#endif
-	    )
+	if (sock->type != SOCK_DGRAM && sock->type != SOCK_RAW &&
+	    sock->type != SOCK_PACKET)
 		return -ESOCKTNOSUPPORT;
 
 	sock->state = SS_UNCONNECTED;
@@ -1115,10 +1105,9 @@ static int packet_create(struct socket *sock, int protocol)
 		goto out;
 
 	sock->ops = &packet_ops;
-#ifdef CONFIG_SOCK_PACKET
 	if (sock->type == SOCK_PACKET)
 		sock->ops = &packet_ops_spkt;
-#endif
+
 	sock_init_data(sock, sk);
 
 	po = pkt_sk(sk);
@@ -1137,10 +1126,9 @@ static int packet_create(struct socket *sock, int protocol)
 	po->prot_hook.func = packet_rcv;
 	po->pkt_type = PACKET_MASK_ANY & ~(1 << PACKET_LOOPBACK);
 
-#ifdef CONFIG_SOCK_PACKET
 	if (sock->type == SOCK_PACKET)
 		po->prot_hook.func = packet_rcv_spkt;
-#endif
+
 	po->prot_hook.af_packet_priv = sk;
 
 	if (proto) {
@@ -1260,7 +1248,6 @@ out:
 	return err;
 }
 
-#ifdef CONFIG_SOCK_PACKET
 static int packet_getname_spkt(struct socket *sock, struct sockaddr *uaddr,
 			       int *uaddr_len, int peer)
 {
@@ -1281,7 +1268,6 @@ static int packet_getname_spkt(struct socket *sock, struct sockaddr *uaddr,
 
 	return 0;
 }
-#endif
 
 static int packet_getname(struct socket *sock, struct sockaddr *uaddr,
 			  int *uaddr_len, int peer)
@@ -2012,7 +1998,6 @@ out:
 	return err;
 }
 
-#ifdef CONFIG_SOCK_PACKET
 static const struct proto_ops packet_ops_spkt = {
 	.family =	PF_PACKET,
 	.owner =	THIS_MODULE,
@@ -2033,7 +2018,6 @@ static const struct proto_ops packet_ops_spkt = {
 	.mmap =		sock_no_mmap,
 	.sendpage =	sock_no_sendpage,
 };
-#endif
 
 static const struct proto_ops packet_ops = {
 	.family =	PF_PACKET,
