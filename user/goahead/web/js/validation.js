@@ -75,6 +75,28 @@ function validateIP(ip, info)
 	return true;
 }
 
+function validateIPList(array)
+{
+	try
+	{
+		for (var i=0; i<array.length; i++)
+		{
+			if (!validateIP(array[i], true))
+			{
+				array[i].focus();
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	catch (e)
+	{
+		alert(e);
+		return false;
+	}
+}
+
 function validateIPMask(ip, info)
 {
 	var re = /^(?:(?:0|128|192|224|240|248|252|254)\.0+\.0+\.0+|255\.(?:(?:0|128|192|224|240|248|252|254)\.0+\.0+|255\.(?:(?:0|128|192|224|240|248|252|254)\.0+|255\.(?:0|128|192|224|240|248|252|254|255))))$/;
@@ -93,6 +115,61 @@ function validateIPMask(ip, info)
 	}
 	
 	return true;
+}
+
+function validateIPMaskList(array)
+{
+	try
+	{
+		for (var i=0; i<array.length; i++)
+		{
+			if (!validateIPMask(array[i], true))
+			{
+				array[i].focus();
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	catch (e)
+	{
+		alert(e);
+		return false;
+	}
+}
+
+function validateRegexpList(array, regexp, message, match_result)
+{
+	try
+	{
+		for (var i=0; i<array.length; i++)
+		{
+			if (regexp.test(array[i].value) == match_result)
+			{
+				alert(message);
+				array[i].focus();
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	catch (e)
+	{
+		alert(e);
+		return false;
+	}
+}
+
+function validateBlanksList(array)
+{
+	return validateRegexpList(array, /\s+/, 'Blank characters are not allowed!', true);
+}
+
+function validateNumberList(array)
+{
+	return validateRegexpList(array, /^\d+$/, 'Bad number value specified!', false);
 }
 
 function validateDNS(dns, info)

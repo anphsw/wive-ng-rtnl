@@ -103,31 +103,28 @@ function CheckValue()
 {
 	var form = document.lanCfg;
 
-	if (form.hostname.value.indexOf(" ") >= 0)
-	{
-		alert('Don\'t enter Blank Space in this field');
-		document.lanCfg.hostname.focus();
-		document.lanCfg.hostname.select();
+	if (!validateBlanksList( [ form.hostname ] ))
 		return false;
-	}
+
 	if (!validateIP(form.lanIp, true))
 	{
 		form.lanIp.focus();
 		return false;
 	}
-	if (!validateIP(form.lanNetmask, true))
+	if (!validateIPMask(form.lanNetmask, true))
 	{
 		form.lanNetmask.focus();
 		return false;
 	}
+	
 	if (document.lanCfg.lan2enabled[0].checked)
 	{
-		if (!validateIP(form.lan2Ip.value, true))
+		if (!validateIP(form.lan2Ip, true))
 		{
 			form.lan2Ip.focus();
 			return false;
 		}
-		if (!validateIP(form.lan2Netmask.value, true))
+		if (!validateIPMask(form.lan2Netmask, true))
 		{
 			form.lan2Netmask.focus();
 			return false;
