@@ -65,31 +65,6 @@ start() {
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     fi
-
-    #----Direct pass from kernel--------------------------------
-    if [ "$pppoe_pass" = "1" ]; then
-	echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
-    else
-	echo "null,null" > /proc/pthrough/pppoe
-    fi
-    if [ "$ipv6_pass" = "1" ]; then
-	echo "$lan_if,$wan_if" > /proc/pthrough/ipv6
-    else
-	echo "null,null" > /proc/pthrough/ipv6
-    fi
-    #----Fastpath for nat enable--------------------------------
-    if [ "$natFastpath" != "0" ]; then
-	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
-    else
-	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
-    fi
-    #----Fastpath for bridge enable--------------------------------
-    if [ "$bridgeFastpath" != "0" ]; then
-	sysctl -w net.ipv4.bridge_fastpath=1
-    else
-	sysctl -w net.ipv4.bridge_fastpath=0
-    fi
-
 }
 
 stop() {
@@ -105,9 +80,6 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
     gw=`nvram_get 2860 wan_gateway`
-    pppoe_pass=`nvram_get 2860 pppoe_pass`
-    ipv6_pass=`nvram_get 2860 ipv6_pass`
-    natFastpath=`nvram_get 2860 natFastpath`
     wanmode=`nvram_get 2860 wanConnectionMode`
 }
 

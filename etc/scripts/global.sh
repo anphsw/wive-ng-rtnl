@@ -252,6 +252,38 @@ get_txqlen()
     fi
 }
 
+kernel_ext_en()
+{
+    pppoe_pass=`nvram_get 2860 pppoe_pass`
+    ipv6_pass=`nvram_get 2860 ipv6_pass`
+    natFastpath=`nvram_get 2860 natFastpath`
+    bridgeFastpath=`nvram_get 2860 bridgeFastpath`
+    getLanIfName
+    getWanIfName
+    #----Direct pass from kernel--------------------------------
+    if [ "$pppoe_pass" = "1" ]; then
+	echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
+    else
+	echo "null,null" > /proc/pthrough/pppoe
+    fi
+    if [ "$ipv6_pass" = "1" ]; then
+	echo "$lan_if,$wan_if" > /proc/pthrough/ipv6
+    else
+	echo "null,null" > /proc/pthrough/ipv6
+    fi
+    #----Fastpath for nat enable--------------------------------
+    if [ "$natFastpath" != "0" ]; then
+	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+    else
+	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+    fi
+    #----Fastpath for bridge enable--------------------------------
+    if [ "$bridgeFastpath" != "0" ]; then
+	sysctl -w net.ipv4.bridge_fastpath=1
+    else
+	sysctl -w net.ipv4.bridge_fastpath=0
+    fi
+}
 
 # get params
 getLanIfName

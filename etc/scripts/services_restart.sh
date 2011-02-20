@@ -28,7 +28,10 @@ fi
 ##########################################################
 # This is services restart always                       #
 ##########################################################
+$LOG "Resolv config generate..."
 service resolv start
+$LOG "Fastpath, passthrouth and othes mode set..."
+kernel_ext_en
 $LOG "Reload iptables rules..."
 service iptables restart
 $LOG "Reload shaper rules..."
