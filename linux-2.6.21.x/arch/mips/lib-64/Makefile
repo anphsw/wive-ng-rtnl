@@ -1,8 +1,3 @@
-#
-# Makefile for MIPS-specific library files..
-#
-
-lib-y	+= watch.o
 
 obj-$(CONFIG_CPU_MIPS32)	+= dump_tlb.o
 obj-$(CONFIG_CPU_MIPS64)	+= dump_tlb.o
