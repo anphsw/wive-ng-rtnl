@@ -861,6 +861,7 @@ asmlinkage void do_watch(struct pt_regs *regs)
 	 * We use the watch exception where available to detect stack
 	 * overflows.
 	 */
+	dump_tlb_all();
 	show_regs(regs);
 	panic("Caught WATCH exception - probably caused by stack overflow.");
 }
@@ -879,6 +880,7 @@ asmlinkage void do_mcheck(struct pt_regs *regs)
 		printk("EntryLo0: %0*lx\n", field, read_c0_entrylo0());
 		printk("EntryLo1: %0*lx\n", field, read_c0_entrylo1());
 		printk("\n");
+		dump_tlb_all();
 	}
 
 	show_code((unsigned int *) regs->cp0_epc);
