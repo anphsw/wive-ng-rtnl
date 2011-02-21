@@ -399,8 +399,9 @@ static int ipip6_rcv(struct sk_buff *skb)
 		return 0;
 	}
 
-	icmp_send(skb, ICMP_DEST_UNREACH, ICMP_PORT_UNREACH, 0);
+	/* no tunnel matched,  let upstream know, ipsec may handle it */
 	read_unlock(&ipip6_lock);
+	return 1;
 out:
 	kfree_skb(skb);
 	return 0;
@@ -432,6 +433,7 @@ static int ipip6_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
 	struct iphdr  *tiph = &tunnel->parms.iph;
 	struct ipv6hdr *iph6 = skb->nh.ipv6h;
 	u8     tos = tunnel->parms.iph.tos;
+	__be16 df = tiph->frag_off;
 	struct rtable *rt;     			/* Route to the other host */
 	struct net_device *tdev;			/* Device to other host */
 	struct iphdr  *iph;			/* Our new IP header */
@@ -503,25 +505,28 @@ static int ipip6_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
 		goto tx_error;
 	}
 
-	if (tiph->frag_off)
+ 	if (df) {
 		mtu = dst_mtu(&rt->u.dst) - sizeof(struct iphdr);
-	else
-		mtu = skb->dst ? dst_mtu(skb->dst) : dev->mtu;
 
-	if (mtu < 68) {
-		tunnel->stat.collisions++;
-		ip_rt_put(rt);
-		goto tx_error;
-	}
-	if (mtu < IPV6_MIN_MTU)
-		mtu = IPV6_MIN_MTU;
-	if (tunnel->parms.iph.daddr && skb->dst)
-		skb->dst->ops->update_pmtu(skb->dst, mtu);
+		if (mtu < 68) {
+			tunnel->stat.collisions++;
+			ip_rt_put(rt);
+			goto tx_error;
+		}
 
-	if (skb->len > mtu) {
-		icmpv6_send(skb, ICMPV6_PKT_TOOBIG, 0, mtu, dev);
-		ip_rt_put(rt);
-		goto tx_error;
+		if (mtu < IPV6_MIN_MTU) {
+			mtu = IPV6_MIN_MTU;
+			df = 0;
+		}
+
+		if (tunnel->parms.iph.daddr && skb->dst)
+			skb->dst->ops->update_pmtu(skb->dst, mtu);
+
+		if (skb->len > mtu) {
+			icmpv6_send(skb, ICMPV6_PKT_TOOBIG, 0, mtu, dev);
+			ip_rt_put(rt);
+			goto tx_error;
+		}
 	}
 
 	if (tunnel->err_count > 0) {
@@ -567,11 +572,7 @@ static int ipip6_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
 	iph 			=	skb->nh.iph;
 	iph->version		=	4;
 	iph->ihl		=	sizeof(struct iphdr)>>2;
-	if (mtu > IPV6_MIN_MTU)
-		iph->frag_off	=	htons(IP_DF);
-	else
-		iph->frag_off	=	0;
-
+	iph->frag_off		=	df;
 	iph->protocol		=	IPPROTO_IPV6;
 	iph->tos		=	INET_ECN_encapsulate(tos, ipv6_get_dsfield(iph6));
 	iph->daddr		=	rt->rt_dst;
