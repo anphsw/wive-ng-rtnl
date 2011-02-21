@@ -45,6 +45,7 @@ start() {
 	    $LOG "LANAUTH calling..."
 	    (sleep 5 && /etc/scripts/config-lanauth.sh) &
 	else
+	    $LOG "LANAUTH call reload..."
 	    /etc/scripts/config-lanauth.sh reload &
 	fi
       fi
