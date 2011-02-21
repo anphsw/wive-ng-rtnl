@@ -10,13 +10,11 @@ LOG="logger -t services"
 MODE=$1
 
 $LOG "Restart needed services and scripts. Mode $MODE"
-# stop needed services
+
+#Stop needed services
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
     service pppoe-relay stop
-fi
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
-    service stp stop
 fi
 if [ "$MODE" != "pppd" ]; then 
     service udpxy stop
@@ -25,25 +23,26 @@ if [ "$MODE" != "pppd" ]; then
     service samba stop
 fi
 
+#Configure kernel Extensions
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    $LOG "Fastpath, passthrouth, stp and othes mode set..."
+    kernel_ext_en
+fi
+
 ##########################################################
 # This is services restart always                       #
 ##########################################################
 $LOG "Resolv config generate..."
 service resolv start
-$LOG "Fastpath, passthrouth and othes mode set..."
-kernel_ext_en
 $LOG "Reload iptables rules..."
 service iptables restart
 $LOG "Reload shaper rules..."
 service shaper restart
 
-#start needed services
+#Start needed services
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
     service pppoe-relay start
-fi
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
-    service stp start
 fi
 if [ "$MODE" != "pppd" ]; then 
     service lld2d start

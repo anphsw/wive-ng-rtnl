@@ -260,6 +260,18 @@ kernel_ext_en()
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
     getLanIfName
     getWanIfName
+
+    #----Bridge STP---------------------------------------------
+    if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
+        stp=`nvram_get 2860 stpEnabled`
+        if [ "$stp" = "1" ]; then
+                brctl setfd br0 15
+                brctl stp br0 1
+        else
+                brctl setfd br0 1
+                brctl stp br0 0
+        fi
+    fi
     #----Direct pass from kernel--------------------------------
     if [ "$pppoe_pass" = "1" ]; then
 	echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
