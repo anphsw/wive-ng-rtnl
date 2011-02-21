@@ -71,7 +71,7 @@ stop() {
     killall -q -9 pppd
 
     #Kill lanauth only if vpn disable
-    if [ "$vpnEnabled" = "off" ]; then
+    if [ "$vpnEnabled" = "off" ] || [ "$vpnType" != "6" ]; then
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
@@ -89,8 +89,6 @@ stop() {
 }
 
 get_param() {
-    #get param
-    vpnType=`nvram_get 2860 vpnType`
     IFACE=`nvram_get 2860 vpnInterface`
     USER=`nvram_get 2860 vpnUser`
     PASSWORD=`nvram_get 2860 vpnPassword`

@@ -26,8 +26,9 @@ lan2_if="br0:9"
 #first get operation mode
 opmode=`nvram_get 2860 OperationMode`
 
-#get vpn mode
+#get vpn mode and type
 vpnEnabled=`nvram_get 2860 vpnEnabled`
+vpnType=`nvram_get 2860 vpnType`
 
 #get wireless, wan and lan mac adresses
 getMacIf()
@@ -232,7 +233,6 @@ vpn_deadloop_fix()
     #L2TP and PPTP kernel dead-loop fix
     if [ "$vpnEnabled" = "on" ]; then
 	getStaMode
-	vpnType=`nvram_get 2860 vpnType`
 	if [ "$vpnType" != "0" ] || [ "$stamode" = "y" ]; then
 	    # First vpn stop.. 
 	    # Auto start later renew/bound
