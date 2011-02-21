@@ -65,6 +65,11 @@ stop() {
     killall -q pppd
     killall -q -9 pppd
 
+    #kill lanauth only if vpn disable
+    if [ "$vpnEnabled" = "off" ]; then
+	    /etc/scripts/config-lanauth.sh stop
+    fi
+
     #remove modules
     rmmod ppp_mppe > /dev/null 2>&1
     rmmod blkcipher > /dev/null 2>&1

@@ -10,9 +10,9 @@ start() {
 }
 
 stop() {
- $LOG "Stopping lanauth "
- killall -q lanauth
- killall -q -9 lanauth
+    $LOG "Stopping lanauth "
+    killall -q lanauth
+    killall -q -9 lanauth
 }
 
 reload() {
