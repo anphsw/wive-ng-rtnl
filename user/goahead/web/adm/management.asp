@@ -5,6 +5,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <link rel="stylesheet" href="/style/windows.css" type="text/css">
@@ -80,6 +81,30 @@ function setLanguage()
 	return true;
 }
 
+function onUploadFirmwareSubmit(form)
+{
+	if (checkFilePresent(form.filename))
+		ajaxPostForm(
+			'Do not turn off power while upgrading firmware! ' + 
+			'That can cause situation that device will not work. ' + 
+			'Do you really want to proceed?',
+			form,
+			'firmwareReloader',
+			'/messages/wait_firmware.asp',
+			ajaxShowProgress);
+}
+
+function onImportSettings(form)
+{
+	if (checkFilePresent(form.filename))
+		ajaxPostForm(
+			'Proceed uploading settings?',
+			form,
+			'setmanReloader',
+			'/messages/wait_config.asp',
+			ajaxShowProgress);
+}
+
 </script>
 
 </head>
@@ -150,7 +175,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 		<input type="checkbox" name="reset_rwfs" checked="checked">Reset RWFS on update
 		<br>
 		<input name="filename" size="20" maxlength="256" type="file">
-		<input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onclick="ajaxPostForm('Do not turn off power while upgrading firmware! That can cause situation that device will not work. Do you really want to proceed?', this.form, 'firmwareReloader', '/messages/wait_firmware.asp', ajaxShowProgress);">
+		<input type="button" value="Update" id="uploadFWApply" class="half" name="UploadFirmwareSubmit" onclick="onUploadFirmwareSubmit(this.form);">
 		<br>
 		<iframe id="firmwareReloader" name="firmwareReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 	</form>
@@ -177,7 +202,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 	<td>
 		<form method="POST" name="ImportSettings" action="/cgi-bin/upload_settings.cgi" enctype="multipart/form-data">
 			<input type="file" name="filename" maxlength="256">
-			<input type="button" value="Load" id="setmanImpSetImport" class="half" onclick="ajaxPostForm('Proceed uploading settings?', this.form, 'setmanReloader', '/messages/wait_config.asp', ajaxShowProgress);">
+			<input type="button" value="Load" id="setmanImpSetImport" class="half" onclick="onImportSettings(this.form);">
 			<iframe id="setmanReloader" name="setmanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 		</form>
 	</td>

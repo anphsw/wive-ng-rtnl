@@ -204,3 +204,14 @@ function checkDigitRange(value, start, stop)
 	
 	return false;
 }
+
+function checkFilePresent(filename)
+{
+	if ((filename.value == null) || (filename.value == ''))
+	{
+		alert('Please specify file to upload!');
+		return false;
+	}
+	
+	return true;
+}

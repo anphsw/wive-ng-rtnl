@@ -367,7 +367,6 @@ function selectType(form)
 	// Display mode-dependent elements
 	displayElement('vpn_pppoe_iface_row', !kabinet_on);
 	displayElement('vpn_server_row', !kabinet_on);
-	displayElement('vpn_l2tp_range', !kabinet_on);
 	displayElement('vpn_auth_type_row', !kabinet_on);
 	displayElement('vpn_user_row', !kabinet_on);
 	displayElement('vpn_mtu_row', !kabinet_on);
@@ -524,7 +523,7 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr id="vpn_pppoe_iface_row" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
+	<tr id="vpn_pppoe_row" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
 		<td width="50%"><b>PPPoE interface:</b></td>
 		<td width="50%">
 			<select disabled="disabled" name="vpn_pppoe_iface" class="mid" >

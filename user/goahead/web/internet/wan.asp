@@ -2,6 +2,7 @@
 <head>
 <title>Wide Area Network (WAN) Settings</title>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
@@ -26,14 +27,8 @@ function CheckValue(form)
 			return false;
 		if (!validateIPMask(form.staticNetmask, true))
 			return false;
-		if (form.staticGateway.value != "")
+		if (form.staticGateway.value != '')
 			if (!validateIP(form.staticGateway, true))
-				return false;
-		if (form.staticPriDns.value != "")
-			if (!validateIP(form.staticPriDns, true))
-				return false;
-		if (form.staticSecDns.value != "")
-			if (!validateIP(form.staticSecDns, true))
 				return false;
 		if (form.macCloneEnbl.options.selectedIndex == 1)
 			if (!validateMAC(form.macCloneMac.value, true))
@@ -41,8 +36,18 @@ function CheckValue(form)
 	}
 	else if (form.connectionType.value == 'DHCP')
 	{
-		if (form.dhcpReqIP != '')
+		if (form.dhcpReqIP.value != '')
 			if (!validateIP(form.dhcpReqIP, true))
+				return false;
+	}
+
+	if (form.wStaticDnsEnable.checked)
+	{
+		if (form.staticPriDns.value != '')
+			if (!validateIP(form.staticPriDns, true))
+				return false;
+		if (form.staticSecDns.value != '')
+			if (!validateIP(form.staticSecDns, true))
 				return false;
 	}
 	
@@ -160,7 +165,7 @@ function dnsSwitchClick(form)
 </tr>
 <tr id="dhcpReqIPRow">
 	<td class="head">Request IP from DHCP (optional)</td>
-	<td><input name="dhcpReqIP" size="28" maxlength="32" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
+	<td><input name="dhcpReqIP" style="mid" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>
@@ -168,11 +173,11 @@ function dnsSwitchClick(form)
 </tr>
 <tr id="priDNSrow" style="display:none;" >
 	<td class="head" id="wStaticPriDns">Primary DNS Server</td>
-	<td><input name="staticPriDns" maxlength="15" value="<% getDns(1); %>"></td>
+	<td><input name="staticPriDns" style="mid" value="<% getDns(1); %>"></td>
 </tr>
 <tr id="secDNSrow" style="display:none;" >
 	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
-	<td><input name="staticSecDns" maxlength="15" value="<% getDns(2); %>"></td>
+	<td><input name="staticSecDns" style="mid" value="<% getDns(2); %>"></td>
 </tr>
 <tr id="natRowDisplay">
 	<td class="head" id="wMacAddressClone">Enable NAT</td>
