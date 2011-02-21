@@ -273,6 +273,7 @@
 84) Fix connect to new l2tp brases by Juniper.<br>
 85) Correct mac/ip filters in NAT mode.<br>
 86) Use extra interrupt in CPU.<br>
+87) Rewrite init scripts for lanauth.<br>
 
 <br><br>
 <b>For support see:</b><br>
