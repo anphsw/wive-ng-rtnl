@@ -54,23 +54,28 @@ start() {
 
 stop() {
  $LOG "Stop vpnhelper"
+    #Kill helpers
     killall -q config-pppoe.sh
     killall -q config-l2tp.sh
     killall -q config-pptp.sh
+    killall -q config-lanauth.sh
     killall -q -9 config-pppoe.sh
     killall -q -9 config-l2tp.sh
     killall -q -9 config-pptp.sh
+    killall -q -9 config-lanauth.sh
+
+    #Kill daemons
     killall -q xl2tpd
     killall -q -9 xl2tpd
     killall -q pppd
     killall -q -9 pppd
 
-    #kill lanauth only if vpn disable
+    #Kill lanauth only if vpn disable
     if [ "$vpnEnabled" = "off" ]; then
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
-    #remove modules
+    #Remove modules
     rmmod ppp_mppe > /dev/null 2>&1
     rmmod blkcipher > /dev/null 2>&1
     rmmod cryptomgr > /dev/null 2>&1
@@ -79,7 +84,7 @@ stop() {
     rmmod pptp     > /dev/null 2>&1
     rmmod ppp_generic     > /dev/null 2>&1
 
-    #remove VPN server IP file
+    #Remove VPN server IP file
     rm -f /tmp/vpnip
 }
 
