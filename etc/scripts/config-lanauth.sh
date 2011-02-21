@@ -2,13 +2,16 @@
 
 LOG="echo LANAUTH: "
 
+#include global
+. /etc/scripts/global.sh
+
 start() {
     get_param
-    if [ -x /sbin/lanauth ] && [ "$pwd" ] && [ "$lvl" ]; then
-       if [ "$1" ] || [ "$start_on_boot" ] ; then
-             $LOG "Starting lanauth $1"
-             /sbin/lanauth -v 2 -l $lvl -p $pwd -A 0
-       fi
+    if [ "$1" ] || [ "$vpnEnabled" = "on" ]; then
+	if [ -x /bin/lanauth ] && [ "$pwd" ] && [ "$lvl" ]; then
+             $LOG "Starting lanauth $1 mode $lvl"
+             lanauth -v 2 -l $lvl -p $pwd -A 0 &
+	fi
     fi
 }
 
@@ -38,7 +41,6 @@ reload() {
 get_param() {
   pwd=`nvram_get 2860 vpnPassword`
   lvl=`nvram_get 2860 LANAUTH_LVL`
-  start_on_boot=`nvram_get 2860 LANAUTH_START`
 }
 
 
