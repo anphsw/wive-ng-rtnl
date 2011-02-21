@@ -61,6 +61,8 @@ do {									\
 #define switch_to(prev,next,last)					\
 do {									\
 	(last) = resume(prev, next, task_thread_info(next));		\
+	if (cpu_has_userlocal)						\
+		write_c0_userlocal(task_thread_info(current)->tp_value);\
 } while(0)
 #endif
 
