@@ -64,8 +64,6 @@ stop() {
     killall -q -9 xl2tpd
     killall -q pppd
     killall -q -9 pppd
-    killall -q lanauth
-    killall -q -9 lanauth
 
     #remove modules
     rmmod ppp_mppe > /dev/null 2>&1
