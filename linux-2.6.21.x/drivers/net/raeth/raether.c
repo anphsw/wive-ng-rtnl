@@ -1102,8 +1102,8 @@ static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int
 	unsigned long flags;
 	unsigned long tx_cpu_owner_idx;
 	unsigned int tx_cpu_owner_idx_next;
-	unsigned int tx_cpu_owner_idx_next2;
 #if	!defined(CONFIG_RAETH_QOS)
+	unsigned int tx_cpu_owner_idx_next2;
 	struct PDMA_txdesc* tx_desc;
 #else
 	int ring_no, queue_no, port_no;
