@@ -41,12 +41,12 @@ start() {
 	$LOG "L2TP calling..."
 	(sleep 5 && /etc/scripts/config-l2tp.sh) &
       elif [ "$vpnType" = "6" ]; then
-	if [ "$lanauthpid" = "0" ]; then
-	    $LOG "LANAUTH calling..."
-	    (sleep 5 && /etc/scripts/config-lanauth.sh) &
-	else
+	if [ "$lanauthpid" != "" ]; then
 	    $LOG "LANAUTH call reload..."
 	    /etc/scripts/config-lanauth.sh reload &
+	else
+	    $LOG "LANAUTH calling..."
+	    (sleep 5 && /etc/scripts/config-lanauth.sh) &
 	fi
       fi
     fi

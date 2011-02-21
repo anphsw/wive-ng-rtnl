@@ -18,7 +18,7 @@ stop() {
 reload() {
     get_param
     if  [ "$pwd"  != "" ] && [ "$lvl" != "" ]; then
-	if [ "$pid" != "0" ]; then
+	if [ "$pid" != "" ]; then
 	    if [ "$lvl" = "1" ]; then
 		killall -q -USR1 lanauth
 	    elif [ "$lvl" = "2" ]; then
