@@ -2,10 +2,8 @@
 
 LOG="echo LANAUTH: "
 
-#include global
-. /etc/scripts/global.sh
-
 start() {
+    vpnEnabled=`nvram_get 2860 vpnEnabled`
     if [ -x /bin/lanauth ] && [ "$vpnEnabled" = "on" ]; then
 	    reload
     fi
@@ -64,5 +62,3 @@ case "$1" in
            echo $"Usage: $0 {start|stop|restart|reload}"
            exit 1
 esac
-
-
