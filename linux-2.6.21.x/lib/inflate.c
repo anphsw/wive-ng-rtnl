@@ -314,12 +314,7 @@ STATIC int INIT huft_build(
 DEBG("huft1 ");
 
   /* Generate counts for each bit length */
-#if 1 //cfho 2008-1107, ref from tiny linux
-       for (i = 0; i < BMAX + 1; i++)
-               c[i] = 0;
-#else
-    memzero(c, sizeof(c));
-#endif
+  memzero(c, sizeof(c));
   p = b;  i = n;
   do {
     Tracecv(*p, (stderr, (n-i >= ' ' && n-i <= '~' ? "%c %d\n" : "0x%x %d\n"), 

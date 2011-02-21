@@ -72,6 +72,7 @@ struct cpuinfo_mips {
 	struct cache_desc	dcache;	/* Primary D or combined I/D cache */
 	struct cache_desc	scache;	/* Secondary cache */
 	struct cache_desc	tcache;	/* Tertiary/split secondary cache */
+	int			srsets;	/* Shadow register sets */
 #if defined(CONFIG_MIPS_MT_SMTC)
 	/*
 	 * In the MIPS MT "SMTC" model, each TC is considered
@@ -91,5 +92,8 @@ extern struct cpuinfo_mips cpu_data[];
 
 extern void cpu_probe(void);
 extern void cpu_report(void);
+
+extern const char *__cpu_name[];
+#define cpu_name_string()	__cpu_name[smp_processor_id()]
 
 #endif /* __ASM_CPU_INFO_H */

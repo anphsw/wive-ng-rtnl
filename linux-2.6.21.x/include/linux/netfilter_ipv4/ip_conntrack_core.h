@@ -1,10 +1,7 @@
 #ifndef _IP_CONNTRACK_CORE_H
 #define _IP_CONNTRACK_CORE_H
 #include <linux/netfilter.h>
-
-#if 1 //cfho 2008-1117
 #include <linux/netfilter_ipv4/ip_conntrack.h>
-#endif
 
 #define MAX_IP_CT_PROTO 256
 extern struct ip_conntrack_protocol *ip_ct_protos[MAX_IP_CT_PROTO];
