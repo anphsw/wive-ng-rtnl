@@ -6,12 +6,8 @@ LOG="echo LANAUTH: "
 . /etc/scripts/global.sh
 
 start() {
-    get_param
-    if [ "$1" ] || [ "$vpnEnabled" = "on" ]; then
-	if [ -x /bin/lanauth ] && [ "$pwd" ] && [ "$lvl" ]; then
-             $LOG "Starting lanauth $1 mode $lvl"
-             lanauth -v 2 -l $lvl -p $pwd -A 0 &
-	fi
+    if [ -x /bin/lanauth ] && [ "$vpnEnabled" = "on" ]; then
+	    reload
     fi
 }
 
@@ -22,25 +18,27 @@ stop() {
 }
 
 reload() {
-    if [ ps | grep -q lanaut[h] ]
-    then
-	if [ "$lvl" = "1" ]
-	then
-	    killall -q -USR1 lanauth
-	elif [ "$lvl" = "2" ]
-	then
-	    killall -q -USR2 lanauth
+    get_param
+    if  [ "$pwd"  != "" ] && [ "$lvl" != "" ]; then
+	if [ "$pid" != "0" ]; then
+	    if [ "$lvl" = "1" ]; then
+		killall -q -USR1 lanauth
+	    elif [ "$lvl" = "2" ]; then
+		killall -q -USR2 lanauth
+	    else
+		stop
+	    fi
 	else
-	    stop
+    	    $LOG "Starting lanauth mode $lvl"
+    	    lanauth -v 2 -l $lvl -p $pwd -A 0 &
 	fi
-    else
-	start force
     fi
 }
 
 get_param() {
-  pwd=`nvram_get 2860 vpnPassword`
-  lvl=`nvram_get 2860 LANAUTH_LVL`
+    pwd=`nvram_get 2860 vpnPassword`
+    lvl=`nvram_get 2860 LANAUTH_LVL`
+    pid=`pidof lanauth`
 }
 
 
@@ -55,7 +53,7 @@ case "$1" in
 
        restart)
            stop
-           start force
+           start
            ;;
 
 	reload)
