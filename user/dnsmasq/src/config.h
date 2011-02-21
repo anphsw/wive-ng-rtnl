@@ -14,7 +14,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define VERSION "2.56"
+#define VERSION "2.57"
 
 #define FTABSIZ 50 /* max number of outstanding requests (default) */
 #define MAX_PROCS 10 /* max no children for TCP requests */
@@ -41,6 +41,7 @@
 #define DEFLEASE 3600 /* default lease time, 1 hour */
 #define CHUSER "Admin"
 #define CHGRP "Admin"
+#define NAMESERVER_PORT 53
 #define DHCP_SERVER_PORT 67
 #define DHCP_CLIENT_PORT 68
 #define DHCP_SERVER_ALTPORT 1067
@@ -56,29 +57,6 @@
 /* DBUS interface specifics */
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq"
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
-
-/* A small collection of RR-types which are missing on some platforms */
-
-#ifndef T_SIG
-#  define T_SIG 24
-#endif
-
-#ifndef T_SRV
-#  define T_SRV 33
-#endif
-
-#ifndef T_OPT
-#  define T_OPT 41
-#endif
-
-#ifndef T_TKEY
-#  define T_TKEY 249
-#endif
-
-#ifndef T_TSIG
-#  define T_TSIG 250
-#endif
-
 
 /* Follows system specific switches. If you run on a 
    new system, you may want to edit these. 
@@ -123,9 +101,15 @@ HAVE_SOCKADDR_SA_LEN
    define this if struct sockaddr has sa_len field (*BSD) 
 
 HAVE_DBUS
-   Define this if you want to link against libdbus, and have dnsmasq
-   define some methods to allow (re)configuration of the upstream DNS 
+   define this if you want to link against libdbus, and have dnsmasq
+   support some methods to allow (re)configuration of the upstream DNS 
    servers via DBus.
+
+HAVE_IDN
+   define this if you want international domain name support.
+   NOTE: for backwards compatibility, IDN support is automatically 
+         included when internationalisation support is built, using the 
+	 *-i18n makefile targets, even if HAVE_IDN is not explicitly set.
 
 NOTES:
    For Linux you should define 
@@ -153,6 +137,7 @@ NOTES:
 //#define NO_HAVE_DBUS
 /* #define HAVE_BROKEN_RTC */
 /* #define HAVE_DBUS */
+/* #define HAVE_IDN */
 
 /* Allow TFTP to be disabled with COPTS=-DNO_TFTP */
 #ifdef NO_TFTP

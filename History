@@ -266,7 +266,7 @@
 77) Fix add default gateway over static routes.<br>
 78) Add Request IP parametr in dhcp client.<br>
 79) Add rwfs autoclean at firmware update support.<br>
-80) Update dnsmasq to 2.56 version.<br>
+80) Update dnsmasq to 2.57 version.<br>
 81) Fix redial pptp/l2tp at uplink physical disconnect to small time.<br>
 82) Speedup route.<br>
 83) Some updates in network kernel code.<br>
