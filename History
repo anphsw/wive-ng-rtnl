@@ -274,6 +274,7 @@
 85) Correct mac/ip filters in NAT mode.<br>
 86) Use extra interrupt in CPU.<br>
 87) Rewrite init scripts for lanauth.<br>
+88) Add chillispot code in sourcetree and modify webui.<br>
 
 <br><br>
 <b>For support see:</b><br>
