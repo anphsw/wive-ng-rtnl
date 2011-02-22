@@ -45,6 +45,7 @@
 #include "lcp.h"
 #include "ipcp.h"
 #include "ccp.h"
+#include "util.h"
 #include "pathnames.h"
 #include "pptp_callmgr.h"
 #include "if_pppox.h"
