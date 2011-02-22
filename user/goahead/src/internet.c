@@ -2408,8 +2408,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
 	char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
 	
-	printf("st_en = %s, pd = %s, sd = %s\n", st_en, pd, sd);
-	
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
 	
@@ -2420,7 +2418,6 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 
 	// NAT
-	printf("opmode = %s\n");
 	if (strcmp(opmode, "0") != 0)
 	{
 		nat_enable = websGetVar(wp, T("natEnabled"), T("off"));
@@ -2433,21 +2430,27 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	// debug print
-	websHeader(wp);
-	websWrite(wp, T("<h2>Mode: %s</h2><br>\n"), ctype);
-	if (!strncmp(ctype, "STATIC", 7))
+	const char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl == NULL)
 	{
-		websWrite(wp, T("IP Address: %s<br>\n"), ip);
-		websWrite(wp, T("Subnet Mask: %s<br>\n"), nm);
-		websWrite(wp, T("Default Gateway: %s<br>\n"), gw);
-	}
-	else if (!strncmp(ctype, "DHCP", 5))
-	{
-	}
+		// debug print
+		websHeader(wp);
+		websWrite(wp, T("<h2>Mode: %s</h2><br>\n"), ctype);
+		if (!strncmp(ctype, "STATIC", 7))
+		{
+			websWrite(wp, T("IP Address: %s<br>\n"), ip);
+			websWrite(wp, T("Subnet Mask: %s<br>\n"), nm);
+			websWrite(wp, T("Default Gateway: %s<br>\n"), gw);
+		}
+		else if (!strncmp(ctype, "DHCP", 5))
+		{
+		}
 
-	websFooter(wp);
-	websDone(wp, 200);
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 
 	initInternet();
 }

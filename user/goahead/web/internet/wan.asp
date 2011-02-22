@@ -191,6 +191,7 @@ function dnsSwitchClick(form)
 	<td>
 		<input type="submit" class="half" value="Apply" id="wApply">&nbsp;&nbsp;
 		<input type="reset" class="half" value="Cancel" id="wCancel" onClick="window.location.reload();">
+		<input type="hidden" value="/internet/wan.asp" name="submit-url">
 	</td>
 </tr>
 </table>
