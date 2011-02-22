@@ -449,12 +449,10 @@ function initializeForm(form)
 
 	if (kabinet_built != '0')
 	{
-		var lanauth_start    = '<% getCfgGeneral(1, "LANAUTH_START"); %>';
 		var lanauth_access   = '<% getCfgGeneral(1, "LANAUTH_LVL"); %>';
 		
 		// Add specific option
 		form.vpn_type.options[form.vpn_type.options.length] = new Option('KABINET Authorization', '6');
-		form.lanauth_start.checked     = (lanauth_start == 'on');
 		form.lanauth_access.value      = lanauth_access;
 	}
 
@@ -468,6 +466,8 @@ function initializeForm(form)
 	form.vpn_dgw.value       = dgw;
 	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_auth_type.value = vpn_auth;
+	
+	selectType(form);
 }
 
 function showVPNStatus()
