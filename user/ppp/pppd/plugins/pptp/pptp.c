@@ -333,7 +333,7 @@ route_ctrl(int ctrl, struct rtentry *rt)
 
 	/* Open a raw socket to the kernel */
 	if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ||	ioctl(s, ctrl, rt) < 0)
-	        warn("route_ctrl: %s", strerror(errno));
+	        log("route_ctrl: %s", strerror(errno));
 	else errno = 0;
 
 	close(s);
