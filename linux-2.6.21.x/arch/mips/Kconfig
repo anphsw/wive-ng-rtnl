@@ -1,8 +1,10 @@
 config MIPS
 	bool
 	default y
-	# Horrible source of confusion.  Die, die, die ...
 	select EMBEDDED
+	select HAVE_GENERIC_DMA_COHERENT
+        select HAVE_GENERIC_HARDIRQS
+        select GENERIC_IRQ_PROBE
 
 
 mainmenu "Linux/MIPS Kernel Configuration"

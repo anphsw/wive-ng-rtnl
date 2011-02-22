@@ -673,6 +673,10 @@ endchoice
 
 endmenu		# General setup
 
+config HAVE_GENERIC_DMA_COHERENT
+	bool
+	default n
+
 config RT_MUTEXES
 	boolean
 	select PLIST

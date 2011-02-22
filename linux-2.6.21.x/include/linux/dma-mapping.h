@@ -49,7 +49,7 @@ extern u64 dma_get_required_mask(struct device *dev);
 #define DMA_MEMORY_INCLUDES_CHILDREN	0x04
 #define DMA_MEMORY_EXCLUSIVE		0x08
 
-#ifndef ARCH_HAS_DMA_DECLARE_COHERENT_MEMORY
+#if !defined(ARCH_HAS_DMA_DECLARE_COHERENT_MEMORY) && !defined(CONFIG_HAVE_GENERIC_DMA_COHERENT)
 static inline int
 dma_declare_coherent_memory(struct device *dev, dma_addr_t bus_addr,
 			    dma_addr_t device_addr, size_t size, int flags)
