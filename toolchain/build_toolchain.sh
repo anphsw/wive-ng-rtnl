@@ -34,6 +34,8 @@ mkdir -p $WDIR
 cd $WDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
+rm -rf build-*
+
 if [ "$UNPACK" = "YES" ]; then
     echo "=================EXTRACT-KERNEL-HEADERS================="
     tar xjf $KERNELHDRS.tar.bz2

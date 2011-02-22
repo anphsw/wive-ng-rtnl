@@ -114,6 +114,9 @@ a.add(303, 300, _("treeapp vpn"),                   "javascript:go('internet/vpn
 if (opmode != '0')
 	a.add(304, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
 
+if (opmode == '4')
+	a.add(305, 300, _("treeapp hotspot"),       "javascript:go('internet/hotspot.asp');");
+
 if (swqos == '1')
 	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
 
@@ -154,7 +157,8 @@ else
 
 // Services
 a.add(500, 0,   _("treeapp services"),          "javascript:a.oo(500);");
-a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
+if (opmode != '4')
+	a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
 a.add(502, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
 a.add(503, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
 //a.add(504, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");

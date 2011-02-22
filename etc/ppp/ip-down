@@ -17,10 +17,12 @@ nm=`nvram_get 2860 lan_netmask`
 Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
+chilli_net=`nvram_get 2860 chilli_net` 
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
     iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1

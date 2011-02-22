@@ -15,6 +15,7 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd stop
     service pppoe-relay stop
+    service chillispot stop
 fi
 if [ "$MODE" != "pppd" ]; then 
     service udpxy stop
@@ -43,6 +44,7 @@ service shaper restart
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
     service pppoe-relay start
+    service chillispot start
 fi
 if [ "$MODE" != "pppd" ]; then 
     service lld2d start

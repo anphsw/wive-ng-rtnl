@@ -138,6 +138,15 @@ apcli_config() {
 	brctl addif br0 eth2
 }
 
+spot_config() {
+	$LOG "HotSpot OperationMode: $opmode"
+	addMBSSID
+	addBr0
+	brctl addif br0 eth2.1
+	addWds2Br0
+	addMesh2Br0
+}
+
 #clear conntrack tables
 echo 1 > /proc/sys/net/nf_conntrack_flush
 
@@ -185,6 +194,8 @@ elif [ "$opmode" = "2" ]; then
 
 elif [ "$opmode" = "3" ]; then
     apcli_config
+elif [ "$opmode" = "4" ]; then
+    spot_config
 else
     $LOG "unknown OperationMode use gate_config: $opmode"
     opmode=1

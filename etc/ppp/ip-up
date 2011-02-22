@@ -23,6 +23,7 @@ NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnType=`nvram_get 2860 vpnType`
+chilli_net=`nvram_get 2860 chilli_net`
 
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
@@ -95,6 +96,9 @@ vpnType=`nvram_get 2860 vpnType`
     #NAT in vpn
     if [ "$NAT" = "on" ]  && [ "$OperationMode" != "0" ]; then
 	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE" >> /etc/ppp_firewall
+	if [ "$opmode" = 4 ]; then
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
+	fi
 	#lan2
 	if [ "$Lan2Enabled" = "1" ]; then
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall

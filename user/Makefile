@@ -72,6 +72,7 @@ dir_$(CONFIG_USER_WIVE)			    += wive-utils
 dir_$(CONFIG_USER_KABINET)		    += kabinet
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
+dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
 
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app

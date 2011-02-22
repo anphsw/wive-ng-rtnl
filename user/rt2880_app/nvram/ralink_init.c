@@ -134,6 +134,7 @@ void usage(char *cmd)
 int main(int argc, char *argv[])
 {
 	char *cmd;
+	int index;
 
 	if (argc < 2)
 		usage(argv[0]);
@@ -183,8 +184,13 @@ int main(int argc, char *argv[])
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				nvram_show(UBOOT_NVRAM);
 #endif
-			else
-				nvram_show(RT2860_NVRAM); //default show 2860
+			else {
+				if ((index = getNvramIndex(argv[2])) == -1) {
+					fprintf(stderr,"%s: Error: \"%s\" flash zone not existed\n", argv[0], argv[2]);
+					usage(argv[0]);
+				} else
+					nvram_show(index);
+			}
 
 		} else if(!strncasecmp(argv[1], "clear", 6)) {
 			if (!strncmp(argv[2], "2860", 5) || 

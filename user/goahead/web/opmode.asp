@@ -50,6 +50,8 @@ function initTranslation()
 	_TR("stadd", "opmode mode e intro");
 	_TR("oModeA", "opmode mode a");
 	_TR("apclidd", "opmode mode a intro");
+	_TR("oModeS", "opmode mode s");
+	_TR("spotdd", "opmode mode s intro");
 
 	_TR("oEthConv", "opmode eth conv");
 	_TR("oEthConvD", "main disable");
@@ -67,6 +69,7 @@ function initValue()
 	var gwb = "<% getGWBuilt(); %>";
 	var apcli = "<% getWlanApcliBuilt(); %>";
 	var sta = "<% getStationBuilt(); %>";
+	var spot = "<% getSpotBuilt(); %>";
 	var mem_size = <% getMemAmount(); %>;
 	var form = document.opmode;
 
@@ -89,6 +92,11 @@ function initValue()
 		hideElement("stadt");
 		hideElement("stadd");
 	}
+	if (spot == "0")
+	{
+		hideElement("spotdt");
+		hideElement("spotdd");
+	}
 
 	if (opmode == "1")
 		form.opMode[1].checked = true;
@@ -96,6 +104,8 @@ function initValue()
 		form.opMode[2].checked = true;
 	else if (opmode == "3")
 		form.opMode[3].checked = true;
+	else if (opmode == "4")
+		form.opMode[4].checked = true;
 	else
 		form.opMode[0].checked = true;
 	changeMode();
@@ -138,6 +148,10 @@ function msg()
 		<input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()"><b id="oModeA">AP Client:</b>
 	</dt>
 	<dd id="apclidd"></dd>
+	<dt id="spotdt">
+		<input type="radio" name="opMode" id="opMode" value="4" onClick="changeMode()"><b id="oModeS">Hotspot:</b>
+	</dt>
+	<dd id="spotdd"></dd>
 </dl>
 <table id="eth_conv" border="0" cellpadding="2" cellspacing="1">
 <tr>

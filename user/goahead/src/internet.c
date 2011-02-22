@@ -10,6 +10,9 @@
 #include	<stdlib.h>
 #include	<sys/ioctl.h>
 #include	<net/if.h>
+#include	<sys/socket.h>
+#include	<netinet/in.h>
+#include	<arpa/inet.h>
 #include	<net/route.h>
 #include	<string.h>
 #include	<dirent.h>
@@ -97,6 +100,7 @@ static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
 // BEGIN KABINET PROVIDER
 static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -128,6 +132,12 @@ static void delRouting(webs_t wp, char_t *path, char_t *query);
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
 void ripdRestart(void);
+
+#ifdef CONFIG_USER_CHILLISPOT
+static int getSpotIp(int eid, webs_t wp, int argc, char_t **argv);
+static int getSpotNetmask(int eid, webs_t wp, int argc, char_t **argv);
+static void setHotspot(webs_t wp, char_t *path, char_t *query);
+#endif
 
 void formDefineInternet(void) {
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
@@ -175,6 +185,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
 	websAspDefine(T("getDATEBuilt"), getDATEBuilt);
 	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
+	websAspDefine(T("getSpotBuilt"), getSpotBuilt);
 
 	websAspDefine(T("getLANAUTHBuilt"), getLANAUTHBuilt);
 
@@ -186,6 +197,12 @@ void formDefineInternet(void) {
 	websAspDefine(T("vpnShowVPNStatus"), vpnShowVPNStatus);
 	websAspDefine(T("vpnIfaceList"), vpnIfaceList);
 	websFormDefine(T("formVPNSetup"), formVPNSetup);
+
+#ifdef CONFIG_USER_CHILLISPOT
+	websAspDefine(T("getSpotIp"), getSpotIp);
+	websAspDefine(T("getSpotNetmask"), getSpotNetmask);
+	websFormDefine(T("setHotspot"), setHotspot);
+#endif
 }
 
 /*
@@ -952,6 +969,11 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	int i;
 	struct in_addr addr;
 	int64_t written_at, curr, expired_abs;
+	
+	//if DHCP is disabled - just exit
+	char* dhcpEnabled = nvram_get(RT2860_NVRAM, "dhcpEnabled");
+	if (!strncmp(dhcpEnabled, "0", 2))
+		return 0;
 
 	doSystem("killall -q -USR1 udhcpd");
 
@@ -1382,6 +1404,15 @@ static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_MINIUPNPD
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_CHILLISPOT
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -2420,3 +2451,130 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 
 	initInternet();
 }
+
+#ifdef CONFIG_USER_CHILLISPOT
+// ChilliSpot variables
+const vpn_fetch_t chilli_vars[] =
+{
+	{ T("sPriDns"),			"chilli_dns1",			0 },
+	{ T("sSecDns"),			"chilli_dns2",			0 },
+	{ T("sDomain"),			"chilli_domain",		0 },
+	{ T("sLease"),			"chilli_lease",			0 },
+	{ T("sRadServer1"),		"chilli_radiusserver1",		0 },
+	{ T("sRadServer2"),		"chilli_radiusserver2",		0 },
+	{ T("sRadSecret"),		"chilli_radiussecret",		0 },
+	{ T("sNasId"),			"chilli_radiusnasid",		0 },
+	{ T("sRadLocationId"),		"chilli_radiuslocationid",	0 },
+	{ T("sRadLocationName"),	"chilli_radiuslocationname",	0 },
+	{ T("sRadCoaPort"),		"chilli_coaport",		0 },
+	{ T("sRadCoaNoIpCheck"),	"chilli_coanoipcheck",		1 },
+	{ T("sUamServer"),		"chilli_uamserver",		0 },
+	{ T("sUamHomepage"),		"chilli_uamhomepage",		0 },
+	{ T("sUamSecret"),		"chilli_uamsecret",		0 },
+	{ T("sUamAllowed"),		"chilli_uamallowed",		0 },
+	{ T("sUamAnyDns"),		"chilli_uamanydns",		1 },
+	{ T("sMacAllowed"),		"chilli_macallowed",		0 },
+	{ NULL, 0, 0 } // Terminator
+};
+
+
+/*
+ * description: write hotspot network ip address
+ */
+static int getSpotIp(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char_t *nvdata = nvram_get(RT2860_NVRAM, "chilli_net");
+	
+	char* slashPos = strchr(nvdata, '/');
+	if (slashPos == NULL) {
+		return websWrite(wp, T("172.16.0.0"));
+	}
+	slashPos[0] = '\0';
+	return websWrite(wp, T("%s"), nvdata);
+}
+
+/*
+ * description: write hotspot network netmask
+ */
+static int getSpotNetmask(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char_t *nvdata = nvram_get(RT2860_NVRAM, "chilli_net");
+	unsigned int imask;
+	struct in_addr mask;
+	
+	char* slashPos = strchr(nvdata, '/');
+	if (slashPos == NULL) {
+		return websWrite(wp, T("255.255.255.0"));
+	}
+	imask = atoi(slashPos+1);
+	if (!imask)
+		imask = 24;
+	mask.s_addr = ntohl(0 - (1 << (32 - imask)));
+	
+	return websWrite(wp, T("%s"), inet_ntoa(mask));
+}
+
+/* goform/setHotspot */
+static void setHotspot(webs_t wp, char_t *path, char_t *query)
+{
+	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
+
+	fprintf(stderr, "goform/setHotspot: opmode %s", opmode);
+	websHeader(wp);
+	//Re-check operation mode before any changes
+	if (!strcmp(opmode, "4"))
+	{
+		nvram_init(RT2860_NVRAM);
+		char_t *ip = websGetVar(wp, T("sIp"), T(""));
+		char_t *amask = websGetVar(wp, T("sNetmask"), T(""));
+		
+		struct in_addr iip;
+		struct in_addr imask;
+		iip.s_addr = inet_addr(ip);
+		imask.s_addr = inet_addr(amask);
+		int h_mask=ntohl(imask.s_addr);
+		int i;
+		for (i = 30; i > 0; i--) {
+			if (h_mask >= 0 - (1 << (32 - i)))
+				break;
+		}
+		if (!i) i = 24;
+		iip.s_addr &= ntohl(0 - (1 << (32 - i)));
+		
+		char_t subnet[20];
+		sprintf(subnet, "%s/%d", inet_ntoa(iip), i);
+		if (nvram_bufset(RT2860_NVRAM, "chilli_net", (void *)subnet)!=0) //!!!
+			printf("Set chilli_net nvram error!");
+		
+		const vpn_fetch_t *fetch = chilli_vars;
+		while (fetch->web_param != NULL)
+		{
+			// Get variable
+			char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
+			if (fetch->is_switch) // Check if need update a switch
+			{
+				if (str[0]=='\0')
+					str = "off";
+			}
+			
+			if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
+				printf("Set %s nvram error!", fetch->nvram_param);
+			
+			printf("%s value : %s\n", fetch->nvram_param, str);
+			fetch++;
+		}
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
+		websWrite(wp, T("<h3>Hotspot configuration done.</h3><br>\n"));
+		websWrite(wp, T("Wait till device will be reconfigured...<br>\n"), ip);
+		websFooter(wp);
+		websDone(wp, 200);
+		doSystem("internet.sh lanonly");
+	} else {
+		websWrite(wp, T("<h3>Error, try again</h3><br>\n"));
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	return;
+}
+#endif //CONFIG_USER_CHILLISPOT

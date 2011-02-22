@@ -908,6 +908,12 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	if (!strncmp(lang, "en", 3))
 		return websWrite(wp, T("1"));
+	else if (!strncmp(lang, "ru", 3))
+#ifdef CONFIG_USER_GOAHEAD_LANG_RU
+		return websWrite(wp, T("1"));
+#else
+		return websWrite(wp, T("0"));
+#endif
 	else if (!strncmp(lang, "zhtw", 5))
 #ifdef CONFIG_USER_GOAHEAD_LANG_ZHTW
 		return websWrite(wp, T("1"));
@@ -1292,7 +1298,12 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	if (strncmp(mode, old_mode, 2))
 	{
 		nvram_bufset(RT2860_NVRAM, "OperationMode", mode);
-
+#ifdef CONFIG_USER_CHILLISPOT
+		if (!strncmp(mode, "4", 2)) {
+			nvram_bufset(RT2860_NVRAM, "natFastpath", "0");
+			nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
+		}
+#endif
 		//from or to ap client mode
 		if (!strncmp(mode, "3", 2))
 			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
