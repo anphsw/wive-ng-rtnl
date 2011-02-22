@@ -515,7 +515,6 @@ const vpn_fetch_t lanauth_args[] =
 	{ T("vpn_type"),               "vpnType",              0 },
 	{ T("vpn_pass"),               "vpnPassword",          0 },
 	{ T("lanauth_access"),         "LANAUTH_LVL",          0 },
-	{ T("lanauth_start"),          "LANAUTH_START",        1 },
 	
 	{ NULL, 0, 0 } // Terminator
 };

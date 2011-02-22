@@ -98,6 +98,7 @@ var ad = '<% isAntennaDiversityBuilt(); %>';
 a = new dTree('a');
 a.config.useStatusText=true;
 a.config.useCookies=false;
+a.config.closeSameLevel=true;
 
 //  nodeID, parent nodeID,  Name,  URL
 a.add(000,  -1, _("treeapp router"),                "javascript:go('overview.asp');");

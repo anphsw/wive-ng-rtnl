@@ -129,8 +129,6 @@ function showHint(key)
 			text += 'Enable this option to add additional routes when VPN connection is established.';
 		else if (key=='vpn_lanauth_access')
 			text += 'Specify access mode to KABINET provider network.';
-		else if (key=='vpn_lanauth_start')
-			text += 'Turn this flag on if you want to enable KABINET authorization on boot.';
 		else if (form.vpn_routing_enabled.checked)
 		{
 			if (key=='vpn_route_attrs')
@@ -372,7 +370,6 @@ function selectType(form)
 	displayElement('vpn_mtu_row', !kabinet_on);
 	displayElement('vpn_dgw_row', !kabinet_on);
 	displayElement('vpn_lanauth_lvl_row', kabinet_on);
-	displayElement('vpn_lanauth_start_row', kabinet_on);
 	displayElement('table_vpn_params', !kabinet_on);
 
 	displayElement('vpn_pppoe_row', pppoe_on);
@@ -561,10 +558,6 @@ tunnel on your Router.
 				<option value="2">full</option>
 			</select>
 		</td>
-	</tr>
-	<tr id="vpn_lanauth_start_row" onmouseover="showHint('vpn_lanauth_start')" onmouseout="hideHint('vpn_lanauth_start')">
-		<td width="50%"><b>Start authorization on boot:</b></td>
-		<td width="50%"><input name="lanauth_start" type="checkbox" disabled="disabled"></td>
 	</tr>
 	<tr id="vpn_user_row" onMouseOver="showHint('vpn_user')" onMouseOut="hideHint('vpn_user')" >
 		<td width="50%"><b>User name:</b></td>

@@ -65,12 +65,12 @@
   <message msgid="man gap time" msgstr="Duration" />
   <message msgid="man gap action" msgstr="Action" />
 
-  <message msgid="man ddns setting" msgstr="DDNS Settings" />
+  <message msgid="man ddns setting" msgstr="Dynamic DNS" />
   <message msgid="man ddns provider" msgstr="Dynamic DNS Provider" />
   <message msgid="man ddns none" msgstr="None" />
   <message msgid="man ddns account" msgstr="Account" />
   <message msgid="man ddns passwd" msgstr="Password" />
-  <message msgid="man ddns" msgstr="DDNS" />
+  <message msgid="man ddns" msgstr="Dynamic DNS" />
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
   <message msgid="upload introduction1" msgstr="Upgrade the WR-NL firmware to obtain new functionality. " />
