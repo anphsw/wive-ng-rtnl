@@ -2911,7 +2911,7 @@ static int dev_new_index(void)
 static int dev_boot_phase = 1;
 
 /* Delayed registration/unregisteration */
-static LIST_HEAD(net_todo_list);
+static struct list_head net_todo_list = LIST_HEAD_INIT(net_todo_list);
 
 static void net_set_todo(struct net_device *dev)
 {

@@ -60,7 +60,7 @@ attribute_container_classdev_to_container(struct class_device *classdev)
 }
 EXPORT_SYMBOL_GPL(attribute_container_classdev_to_container);
 
-static LIST_HEAD(attribute_container_list);
+static struct list_head attribute_container_list;
 
 static DECLARE_MUTEX(attribute_container_mutex);
 
@@ -428,3 +428,10 @@ attribute_container_find_class_device(struct attribute_container *cont,
 	return cdev;
 }
 EXPORT_SYMBOL_GPL(attribute_container_find_class_device);
+
+int __init
+attribute_container_init(void)
+{
+	INIT_LIST_HEAD(&attribute_container_list);
+	return 0;
+}
