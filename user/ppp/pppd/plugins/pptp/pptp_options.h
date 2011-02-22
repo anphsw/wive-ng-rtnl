@@ -4,7 +4,11 @@
  *
  * $Id: pptp_options.h,v 1.3 2004/11/09 01:42:32 quozl Exp $
  */
+
+#ifdef CONFIG_PPP_DEBUG
 #undef CONFIG_PPP_DEBUG
+#endif
+
 #ifndef INC_PPTP_OPTIONS_H
 #define INC_PPTP_OPTIONS_H
 
@@ -12,8 +16,6 @@
 #undef  PPTP_FIRMWARE_VERSION
 #define PPTP_BUF_MAX 65536
 #define PPTP_TIMEOUT 120 /* seconds */
-extern int idle_wait;
-extern int max_echo_wait;
 #define PPTP_CONNECT_SPEED 10000000
 #define PPTP_WINDOW 3
 #define PPTP_DELAY  0
@@ -37,5 +39,8 @@ extern int max_echo_wait;
 #define PPTP_FRAME_CAP  2
 #define PPTP_BEARER_CAP 1
 #endif
+
+extern int idle_wait;
+extern int max_echo_wait;
 
 #endif /* INC_PPTP_OPTIONS_H */

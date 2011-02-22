@@ -15,4 +15,5 @@
 
 int daemon(int nochdir, int noclose);
 int openpty(int *amaster, int *aslave, char *name, struct termios *termp, struct winsize * winp); 
+
 #endif /* Solaris */

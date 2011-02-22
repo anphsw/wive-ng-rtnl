@@ -12,8 +12,6 @@
 #include "pptp_ctrl.h"
 #include "util.h"
 
-
-
 /* return 0 on success, non zero otherwise */
 int
 orckit_atur3_build_hook(struct pptp_out_call_rqst* packet)
@@ -82,5 +80,3 @@ orckit_atur3_start_ctrl_conn_hook(struct pptp_start_ctrl_conn* packet)
     memcpy(packet, &fixed_packet, sizeof(*packet));
     return 0;
 }
-
-

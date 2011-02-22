@@ -6,6 +6,7 @@
 
 #ifndef INC_PPTP_CTRL_H
 #define INC_PPTP_CTRL_H
+
 #include <sys/types.h>
 #include "pptp_compat.h"
 

@@ -10,6 +10,7 @@
 /* Grab definitions of int16, int32, etc. */
 #include <sys/types.h>
 #include "pptp_compat.h"
+
 /* define "portable" htons, etc. */
 #define hton8(x)  (x)
 #define ntoh8(x)  (x)

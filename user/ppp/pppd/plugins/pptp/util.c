@@ -11,10 +11,6 @@
 #include <stdlib.h>
 #include "util.h"
 
-#ifndef PROGRAM_NAME
-#define PROGRAM_NAME "pptp"
-#endif
-
 /* implementation of log_string, defined as extern in util.h */
 char *log_string = "anon";
 
@@ -26,13 +22,12 @@ va_list ap;						\
 char buf[256], string[256];				\
 va_start(ap, format);					\
 vsnprintf(buf, sizeof(buf), format, ap);		\
-snprintf(string, sizeof(string), "%s %s[%s:%s:%d]: %s",	\
-	 log_string, label, func, file, line, buf);	\
+snprintf(string, sizeof(string), "%s",	buf);		\
 va_end(ap)
 
 /*** open log *****************************************************************/
 static void open_log(void) {
-    openlog(PROGRAM_NAME, LOG_PID, LOG_DAEMON);
+    openlog("pptp", LOG_PID, LOG_DAEMON);
 }
 
 /*** close log ****************************************************************/
@@ -44,8 +39,11 @@ static void close_log(void)
 /*** print a message to syslog ************************************************/
 void _log(const char *func, const char *file, int line, const char *format, ...)
 {
-    MAKE_STRING("log");
-    syslog(LOG_NOTICE, "%s", string);
+    if (log_level > 0)
+    {
+	MAKE_STRING("log");
+	syslog(LOG_NOTICE, "%s", string);
+    }
 }
 
 /*** print a warning to syslog ************************************************/
@@ -151,4 +149,3 @@ void sigpipe_close()
   close(sigpipe[0]);
   close(sigpipe[1]);
 }
-
