@@ -141,7 +141,8 @@ static int pptp_start_client(void)
 		if (connect(sock,(struct sockaddr*)&addr,sizeof(addr)))
 		{
 			close(sock);
-			error("PPTP: connect failed (%s)\n",strerror(errno));
+			error("PPTP: connect failed (%s). Wait 15 seconds and try again.\n",strerror(errno));
+			sleep(15);
 			return -1;
 		}
 		getsockname(sock,(struct sockaddr*)&addr,&len);

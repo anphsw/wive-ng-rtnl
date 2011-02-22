@@ -135,9 +135,8 @@ int callmgr_main(int argc, char **argv, char **envp)
      log("IP: %s\n",inet_ntoa(inetaddr));
     /* Step 1: Open sockets. */
     while ((inet_sock = open_inetsock(inetaddr)) < 0){
-        info("Could not open control connection to %s", argv[1]);
-	log("Wait 30 seconds");
-	sleep(30);
+        info("Could not open control connection to %s. Wait 15 seconds and try again.", argv[1]);
+	sleep(15);
     }
 
     log("control connection");
