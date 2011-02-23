@@ -33,6 +33,7 @@ else
 64bit-emul		= elf64btsmip
 endif
 
+cflags-y += -ffunction-sections
 cflags-y += $(call cc-option, -mno-check-zero-division)
 
 ifdef CONFIG_32BIT
