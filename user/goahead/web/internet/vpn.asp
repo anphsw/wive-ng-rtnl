@@ -203,7 +203,6 @@ function vpnSwitchClick(form)
 	form.vpn_lcp.disabled          = dis;
 	form.vpn_routing_enabled.disabled = dis;
 	form.lanauth_access.disabled   = dis;
-	form.lanauth_start.disabled    = dis;
 	
 	routingSwitchClick(form);
 }
