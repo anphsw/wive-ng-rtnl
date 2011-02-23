@@ -21,6 +21,7 @@ start() {
     rm -f /etc/websfilter
     rm -f /etc/portforward
     rm -f /etc/ppp_firewall
+    rm -f /etc/resolv_conf.bak
 
     $LOG "Mount all filesystems"
     mount -a
