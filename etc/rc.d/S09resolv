@@ -15,7 +15,8 @@ if [ ! -f /var/run/goahead.pid ] || [ "$static" = "on" ] ; then
 	echo "nameserver 127.0.0.1" > $fname
     else
 	#drop current DNS
-	echo > $fname
+	rm -f $fname
+	touch $fname
         #add new records
 	if [ "$pd" != "" ]; then
 	    echo "nameserver $pd" >> $fname
