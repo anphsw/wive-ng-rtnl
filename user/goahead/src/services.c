@@ -19,9 +19,11 @@
 #include	"management.h"
 #include	"station.h"
 #include	"firewall.h"
+#include	"helpers.h"
 
 #define _PATH_DHCP_ALIAS_FILE "/etc/dhcpd_static.conf"
 #define _PATH_IPT_ACCOUNTING_FILE "/proc/net/ipt_account/mynetwork"
+#define IPT_SHORT_ACCOUNT
 
 static void setDhcp(webs_t wp, char_t *path, char_t *query);
 static void setMiscServices(webs_t wp, char_t *path, char_t *query);
@@ -291,7 +293,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 		{
 			lines++;
 #ifdef IPT_SHORT_ACCOUNT
-			sscanf(line,
+			int found = sscanf(line,
 				"%*s %*s %s "   // IP
 				"%*s %*s %lld "  // bytes_src
 				"%*s %*s %lld "  // packets_src
@@ -299,7 +301,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				"%*s %*s %lld "  // packets_dst
 				"%*s %*s %lld ", // time
 				ip, &b_src[0], &p_src[0], &b_dst[0], &p_dst[0], &time);
-
+			
 			websWrite(wp, T(
 				"<tr class=\"grey\">\n"
 				"<td width=\"30%%\" align=\"center\">%s</td>\n"),
@@ -307,19 +309,20 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			
 			const char *src_sz = normalizeSize(&b_src[0]);
 			const char *dst_sz = normalizeSize(&b_dst[0]);
+			
 			websWrite(wp, T(
-				"<td width=\"15%%\" align=\"center\">%lld %s</td>\n"
-				"<td width=\"15%%\" align=\"center\">%lld</td>\n"
-				"<td width=\"15%%\" align=\"center\">%lld %s</td>\n"
-				"<td width=\"15%%\" align=\"center\">%lld</td>\n"
+				"<td width=\"15%%\" align=\"center\">%ld %s</td>\n"
+				"<td width=\"15%%\" align=\"center\">%ld</td>\n"
+				"<td width=\"15%%\" align=\"center\">%ld %s</td>\n"
+				"<td width=\"15%%\" align=\"center\">%ld</td>\n"
 				),
-				b_src[0], src_sz, p_src[0], b_dst[0], dst_sz, p_dst[0]
+				(long)b_src[0], src_sz, (long)p_src[0], (long)b_dst[0], dst_sz, (long)p_dst[0]
 				);
-				
+			
 			websWrite(wp, T(
-				"<td width=\"10%%\" align=\"center\">%lld</td>\n"
+				"<td width=\"10%%\" align=\"center\">%ld</td>\n"
 				"</tr>\n"),
-				time);
+				(long)time);
 #else
 			sscanf(line,
 				"%*s %*s %s "   // IP
