@@ -8,51 +8,98 @@
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 
-<script language="Javascript" type="text/javascript">
-function initValue()
+<script language="Javascript">
+function initValue(form)
 {
-	var form = document.formWins;
+	var smbEnabled = defaultNumber("<% getCfgZero(1, "ipt_account"); %>", '0');
 	
-	/*
-	form.iptEnable.value = defaultNumber("<% getCfgZero(1, "ipt_account"); %>", '0');
-	var nat_fastpath = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
-	displayElement('fastpath_warning', nat_fastpath != '0');
-	*/
+	form.SmbEnabled.value = (smbEnabled != '1') ? '0' : '1';
 }
+
+function smbEnabledSwitch(form)
+{
+	disableElement( [ form.WorkGroup, form.SmbNetBIOS, form.SmbString, form.SmbOsLevel  ] , form.SmbEnabled.value != '1');
+}
+
+function checkForm(form)
+{
+	if (form.SmbEnabled.value = '1')
+	{
+		if (form.WorkGroup.value == '')
+		{
+			alert('Workgroup not specified.');
+			form.WorkGroup.focus();
+			return false;
+		}
+		
+		if (form.SmbNetBIOS.value == '')
+		{
+			alert('NetBIOS name not specified.');
+			form.SmbNetBIOS.focus();
+			return false;
+		}
+		
+		// Check OS level
+		var os_level = -1;
+		if (validateNum(form.SmbOsLevel.value, false))
+			os_level = 1*form.SmbOsLevel.value;
+		
+		if ((os_level < 0) || (os_level > 255))
+		{
+			alert('Invalid OS level value [0-255].');
+			form.SmbOsLevel.focus();
+			return false;
+		}
+	}
+	return true;
+}
+
 </script>
 </head>
 
-<body onLoad="initValue()">
+<body onLoad="initValue(document.formSamba);">
 <table class="body"><tr><td>
 
 <h1>Samba/CIFS setup</h1>
 <p>This page contains Samba/CIFS service configuration setup.</p>
 <hr>
 
-<!-- IP Accounting -->
-<h2>WINS</h2>
-
-<p>Here you can configure WINS (Windows Internet Name Service).</p>
-
-<form action="/goform/formWins" method="POST" name="formWins" >
+<form action="/goform/formSamba" method="POST" name="formSamba" onsubmit="return checkForm(this);" >
 <table width="95%" border="1" cellspacing="1" cellpadding="2">
 <tr>
-	<td class="title" colspan="2">WINS Settings</td>
+	<td class="title" colspan="2">Samba/CIFS Settings</td>
 </tr>
 <tr>
-	<td class="head">Enable WINS</td>
+	<td class="head">Enable Samba</td>
 	<td>
-		<select name="winsEnable" class="half">
+		<select name="SmbEnabled" class="half" onchange="smbEnabledSwitch(this.form);">
 			<option value="0">Disable</option>
 			<option value="1">Enable</option>
 		</select>
 	</td>
+</tr>
+<tr>
+	<td class="head">Workgroup</td>
+	<td><input name="WorkGroup" class="mid" value="<% getCfgGeneral(1, "WorkGroup"); %>" ></td>
+</tr>
+<tr>
+	<td class="head">Netbios name</td>
+	<td><input name="SmbNetBIOS" class="mid" value="<% getCfgGeneral(1, "SmbNetBIOS"); %>" ></td>
+</tr>
+<tr>
+	<td class="head">Server string</td>
+	<td><input name="SmbString" class="mid" value="<% getCfgGeneral(1, "SmbString"); %>" ></td>
+</tr>
+<tr>
+	<td class="head">OS level</td>
+	<td><input name="SmbOsLevel" class="half" value="<% getCfgGeneral(1, "SmbOsLevel"); %>" ></td>
 </tr>
 </table>
 
 <br>
 <input type="hidden" value="/services/samba.asp" name="submit-url">
 <input type="submit" value="Apply">
+<br><br>
 </form>
 
 </td></tr></table>

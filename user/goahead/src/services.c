@@ -26,6 +26,7 @@
 #define IPT_SHORT_ACCOUNT
 
 static void setDhcp(webs_t wp, char_t *path, char_t *query);
+static void setSamba(webs_t wp, char_t *path, char_t *query);
 static void setMiscServices(webs_t wp, char_t *path, char_t *query);
 static void formIptAccounting(webs_t wp, char_t *path, char_t *query);
 static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv);
@@ -35,7 +36,7 @@ void formDefineServices(void)
 {
 	// Define forms
 	websFormDefine(T("setDhcp"), setDhcp);
-	websFormDefine(T("setDhcp"), setDhcp);
+	websFormDefine(T("formSamba"), setSamba);
 	websFormDefine(T("setMiscServices"), setMiscServices);
 	websFormDefine(T("formIptAccounting"), formIptAccounting);
 	
@@ -102,7 +103,7 @@ void dhcpStoreAliases(const char *dhcp_config)
 static void setDhcp(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*dhcp_tp;
-	char_t	*dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l;
+	char_t	*dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l, *dhcp_domain;
 	char_t	*static_leases;
 
 	dhcp_tp = websGetVar(wp, T("lanDhcpType"), T("DISABLE"));
@@ -113,6 +114,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	dhcp_sd = websGetVar(wp, T("dhcpSecDns"), T(""));
 	dhcp_g = websGetVar(wp, T("dhcpGateway"), T(""));
 	dhcp_l = websGetVar(wp, T("dhcpLease"), T("86400"));
+	dhcp_domain = websGetVar(wp, T("dhcpDomain"), T("localdomain"));
 	static_leases = websGetVar(wp, T("dhcpAssignIP"), T(""));
 
 	// configure gateway and dns (WAN) at bridge mode
@@ -142,14 +144,22 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
 		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
 		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
+		nvram_bufset(RT2860_NVRAM, "dhcpDomain", dhcp_domain);
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 		dhcpStoreAliases(static_leases);
-	} else 	if (strncmp(dhcp_tp, "DISABLE", 8)==0)
+	}
+	else if (strncmp(dhcp_tp, "DISABLE", 8)==0)
 		nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
 	
 	// Restart DHCP service
 	doSystem("service dhcpd restart &");
+	
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 
 typedef struct service_flag_t
@@ -201,13 +211,63 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 
 	//restart some services instead full reload
 	doSystem("services_restart.sh misc &");
+	
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}
+
+//------------------------------------------------------------------------------
+// Samba/CIFS setup
+const service_flag_t service_samba_flags[] =
+{
+	{ T("WorkGroup"), "WorkGroup", T("") },
+	{ T("SmbNetBIOS"), "SmbNetBIOS", T("") },
+	{ T("SmbString"), "SmbString", T("") },
+	{ T("SmbOsLevel"), "SmbOsLevel", T("") },
+	{ NULL, NULL, NULL } // Terminator
+};
+
+static void setSamba(webs_t wp, char_t *path, char_t *query)
+{
+	const service_flag_t *p;
+
+	char_t *smb_enabled = websGetVar(wp, T("SmbEnabled"), T("0"));
+	if (smb_enabled == NULL)
+		smb_enabled = "0";
+
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb_enabled);
+	
+	if (strcmp(smb_enabled, "1")==0)
+	{
+		for (p = service_samba_flags; p->web != NULL; p++)
+		{
+			char_t *var = websGetVar(wp, p->web, p->deflt);
+			if (var != NULL)
+				nvram_bufset(RT2860_NVRAM, p->nvram, var);
+		}
+	}
+	
+	nvram_close(RT2860_NVRAM);
+
+	//restart some services instead full reload
+	doSystem("service samba restart &");
+	
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 
 //------------------------------------------------------------------------------
 // IPT Accounting
 void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *strValue, *submitUrl;
+	char_t *strValue;
 	int reset_ipt = 0;
 
 	strValue = websGetVar(wp, T("iptEnable"), T("0"));	//reset stats
@@ -233,10 +293,11 @@ void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 
 	doSystem("service iptables restart");
 
-	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-
-	if (submitUrl[0])
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 
 #ifndef IPT_SHORT_ACCOUNT

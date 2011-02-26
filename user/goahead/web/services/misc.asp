@@ -382,6 +382,7 @@ function CheckValue()
 <td>
 	<input type="submit" class="normal" value="Apply"  id="lApply"  onClick="TimeoutReload(20)">&nbsp;
 	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload()">
+	<input type="hidden" value="/services/misc.asp" name="submit-url">
 </td>
 </tr>
 </table>

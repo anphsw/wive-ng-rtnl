@@ -24,31 +24,49 @@ function CheckValue(form)
 	if (form.connectionType.value == 'STATIC') // STATIC
 	{
 		if (!validateIP(form.staticIp, true))
+		{
+			form.staticIp.focus();
 			return false;
+		}
 		if (!validateIPMask(form.staticNetmask, true))
+		{
+			form.staticNetmask.focus();
 			return false;
+		}
 		if (form.staticGateway.value != '')
 			if (!validateIP(form.staticGateway, true))
+			{
+				form.staticGateway.focus();
 				return false;
-		if (form.macCloneEnbl.options.selectedIndex == 1)
+			}
+/*		if (form.macCloneEnbl.options.selectedIndex == 1)
 			if (!validateMAC(form.macCloneMac.value, true))
-				return false;
+				return false;*/
 	}
 	else if (form.connectionType.value == 'DHCP')
 	{
 		if (form.dhcpReqIP.value != '')
 			if (!validateIP(form.dhcpReqIP, true))
+			{
+				form.dhcpReqIP.focus();
 				return false;
+			}
 	}
 
 	if (form.wStaticDnsEnable.checked)
 	{
-		if (form.staticPriDns.value != '')
-			if (!validateIP(form.staticPriDns, true))
-				return false;
+		if (!validateIP(form.staticPriDns, true))
+		{
+			form.staticPriDns.focus();
+			return false;
+		}
+
 		if (form.staticSecDns.value != '')
 			if (!validateIP(form.staticSecDns, true))
+			{
+				form.staticSecDns.focus();
 				return false;
+			}
 	}
 	
 	return true;

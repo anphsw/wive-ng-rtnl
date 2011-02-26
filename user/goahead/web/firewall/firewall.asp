@@ -93,7 +93,7 @@ function genRulesTable()
 	// Controls
 	table +=
 		'<tr>'+
-		'<td rowspan="2"><select name="fwdIface" tabindex="1"><option value="LAN" selected="selected">LAN</option><option value="WAN">WAN</option><option value="VPN">VPN</option></select></td>' +
+		'<td rowspan="2"><select name="fwdIface" tabindex="1"><option value="LAN">LAN</option><option value="WAN" selected="selected">WAN</option><option value="VPN">VPN</option></select></td>' +
 		'<td rowspan="2"><select name="protocol" tabindex="2"><option value="3" selected="selected">TCP&amp;UDP</option><option value="1">TCP</option><option value="2">UDP</option></select></td>' +
 		'<td><input type="text" class="short" name="fromPort" tabindex="3"></td>' + 
 		'<td rowspan="2"><input type="text" class="normal" name="ip_address" tabindex="5"></td>' +
@@ -169,7 +169,7 @@ function genFilteringTable()
 	// Controls
 	table +=
 		'<tr>'+
-		'<td rowspan="2"><select name="interface" tabindex="10"><option value="LAN" selected="selected">LAN</option><option value="WAN">WAN</option><option value="VPN">VPN</option></select></td>' +
+		'<td rowspan="2"><select name="interface" tabindex="10"><option value="LAN">LAN</option><option value="WAN" selected="selected">WAN</option><option value="VPN">VPN</option></select></td>' +
 		'<td rowspan="2"><select name="protocol" tabindex="11" onchange="javascript:protocolChange(this.form);"><option value="5">None</option><option value="1">TCP</option><option value="2">UDP</option><option value="4">ICMP</option></select></td>' +
 		'<td rowspan="2"><input type="text" tabindex="12" class="normal" name="mac_address"></td>' +
 		'<td><input type="text" tabindex="13" class="normal" name="sip_address"></td>' +

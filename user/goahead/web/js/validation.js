@@ -62,13 +62,19 @@ function validateIP(ip, info)
 	if (ip.value == "")
 	{
 		if (info)
+		{
 			alert("Error. IP address is empty.");
+			ip.focus();
+		}
 		return false;
 	}
 	if (!re.test(ip.value))
 	{
 		if (info)
+		{
 			alert("Error. Invalid IP address format! (0-255.0-255.0-255.0-255)");
+			ip.focus();
+		}
 		return false;
 	}
 	
@@ -104,13 +110,19 @@ function validateIPMask(ip, info)
 	if (ip.value == "")
 	{
 		if (info)
+		{
 			alert("Error. Mask is empty.");
+			ip.focus();
+		}
 		return false;
 	}
 	if (!re.test(ip.value))
 	{
 		if (info)
+		{
 			alert("Error. Invalid IP mask format!");
+			ip.focus();
+		}
 		return false;
 	}
 	

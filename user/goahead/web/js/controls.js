@@ -61,3 +61,20 @@ function displayElement(elementID, visible)
 	else
 		hideElement(elementID);
 }
+
+function disableElement(element, disabled)
+{
+	if (typeof(element) == 'string')
+	{
+		element = document.getElementById(element);
+		if (element != null)
+			element.disabled = disabled;
+	}
+	else if (element instanceof Array)
+	{
+		for (var i=0; i<element.length; i++)
+			disableElement(element[i], disabled);
+	}
+	else if (typeof(element) == 'object')
+		element.disabled = disabled;
+}
