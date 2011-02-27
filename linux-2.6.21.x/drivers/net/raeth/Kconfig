@@ -154,7 +154,6 @@ config  GE2_RGMII_AN
 config  PSEUDO_SUPPORT
 	bool "Preudo interface for raeth."
 	depends on RAETH
-	default n
 
 endchoice
 

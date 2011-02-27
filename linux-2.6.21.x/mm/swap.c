@@ -105,33 +105,21 @@ EXPORT_SYMBOL(put_pages_list);
  * set, this function will clear PG_writeback before performing the page
  * motion.  Do that inside the lru lock because once PG_writeback is cleared
  * we may not touch the page.
- *
- * Returns zero if it cleared PG_writeback.
  */
-int rotate_reclaimable_page(struct page *page)
+void rotate_reclaimable_page(struct page *page)
 {
-	struct zone *zone;
-	unsigned long flags;
+       if (!PageLocked(page) && !PageDirty(page) && !PageActive(page) &&
+           PageLRU(page)) {
 
-	if (PageLocked(page))
-		return 1;
-	if (PageDirty(page))
-		return 1;
-	if (PageActive(page))
-		return 1;
-	if (!PageLRU(page))
-		return 1;
+	    struct zone *zone;
+	    unsigned long flags;
 
-	zone = page_zone(page);
-	spin_lock_irqsave(&zone->lru_lock, flags);
-	if (PageLRU(page) && !PageActive(page)) {
-		list_move_tail(&page->lru, &zone->inactive_list);
-		__count_vm_event(PGROTATED);
+	    zone = page_zone(page);
+	    spin_lock_irqsave(&zone->lru_lock, flags);
+		    list_move_tail(&page->lru, &zone->inactive_list);
+		    __count_vm_event(PGROTATED);
+	    spin_unlock_irqrestore(&zone->lru_lock, flags);
 	}
-	if (!test_clear_page_writeback(page))
-		BUG();
-	spin_unlock_irqrestore(&zone->lru_lock, flags);
-	return 0;
 }
 
 /*
@@ -215,7 +203,6 @@ void lru_add_drain(void)
 	put_cpu();
 }
 
-#ifdef CONFIG_NUMA
 static void lru_add_drain_per_cpu(struct work_struct *dummy)
 {
 	lru_add_drain();
@@ -228,18 +215,6 @@ int lru_add_drain_all(void)
 {
 	return schedule_on_each_cpu(lru_add_drain_per_cpu);
 }
-
-#else
-
-/*
- * Returns 0 for success
- */
-int lru_add_drain_all(void)
-{
-	lru_add_drain();
-	return 0;
-}
-#endif
 
 /*
  * Batched page_cache_release().  Decrement the reference count on all the

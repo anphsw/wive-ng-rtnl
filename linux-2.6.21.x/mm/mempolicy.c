@@ -333,12 +333,6 @@ check_range(struct mm_struct *mm, unsigned long start, unsigned long end,
 	int err;
 	struct vm_area_struct *first, *vma, *prev;
 
-	if (flags & (MPOL_MF_MOVE | MPOL_MF_MOVE_ALL)) {
-
-		err = migrate_prep();
-		if (err)
-			return ERR_PTR(err);
-	}
 
 	first = find_vma(mm, start);
 	if (!first)
@@ -630,8 +624,12 @@ int do_migrate_pages(struct mm_struct *mm,
 {
 	LIST_HEAD(pagelist);
 	int busy = 0;
-	int err = 0;
+	int err;
 	nodemask_t tmp;
+
+	err = migrate_prep();
+	if (err)
+		return err;
 
   	down_read(&mm->mmap_sem);
 
@@ -780,6 +778,12 @@ long do_mbind(unsigned long start, unsigned long len,
 	PDprintk("mbind %lx-%lx mode:%ld nodes:%lx\n",start,start+len,
 			mode,nodes_addr(nodes)[0]);
 
+	if (flags & (MPOL_MF_MOVE | MPOL_MF_MOVE_ALL)) {
+
+		err = migrate_prep();
+		if (err)
+			return err;
+	}
 	down_write(&mm->mmap_sem);
 	vma = check_range(mm, start, end, nmask,
 			  flags | MPOL_MF_INVERT, &pagelist);

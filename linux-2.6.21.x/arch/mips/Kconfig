@@ -3,7 +3,6 @@ config MIPS
 	default y
 	select EMBEDDED
 	select HAVE_GENERIC_DMA_COHERENT
-        select HAVE_GENERIC_HARDIRQS
         select GENERIC_IRQ_PROBE
 
 

@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Mon Feb 28 05:19:30 2011
 #
 CONFIG_MIPS=y
 
@@ -195,6 +196,7 @@ CONFIG_BINFMT_ELF_AOUT=y
 CONFIG_SLAB=y
 # CONFIG_SLUB is not set
 # CONFIG_SLOB is not set
+CONFIG_HAVE_GENERIC_DMA_COHERENT=y
 CONFIG_RT_MUTEXES=y
 CONFIG_BASE_SMALL=1
 
