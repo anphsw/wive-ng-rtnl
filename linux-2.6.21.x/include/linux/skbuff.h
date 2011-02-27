@@ -229,6 +229,7 @@ enum {
  *	@dma_cookie: a cookie to one of several possible DMA operations
  *		done by skb DMA functions
  *	@secmark: security marking
+ *	@vlan_tci: vlan tag control information
  */
 
 struct sk_buff {
@@ -325,6 +326,8 @@ struct sk_buff {
 
 	unsigned int		truesize;
 	atomic_t		users;
+
+	__u16                   vlan_tci;
 	unsigned char		*head,
 				*data,
 				*tail,
