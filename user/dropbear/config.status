@@ -517,7 +517,7 @@ s,@DEFS@,|#_!!_#|-DHAVE_CONFIG_H,g
 s,@ECHO_C@,|#_!!_#|,g
 s,@ECHO_N@,|#_!!_#|-n,g
 s,@ECHO_T@,|#_!!_#|,g
-s,@LIBS@,|#_!!_#| -lcrypt,g
+s,@LIBS@,|#_!!_#|,g
 s,@build_alias@,|#_!!_#|,g
 s,@host_alias@,|#_!!_#|mipsel-linux,g
 s,@target_alias@,|#_!!_#|,g
@@ -545,6 +545,8 @@ s,@INSTALL@,|#_!!_#|install,g
 s,@CPP@,|#_!!_#|/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E,g
 s,@GREP@,|#_!!_#|/bin/grep,g
 s,@EGREP@,|#_!!_#|/bin/grep -E,g
+s,@CRYPTLIB@,|#_!!_#|-lcrypt,g
+s,@BUNDLED_LIBTOM@,|#_!!_#|1,g
 s,@LIBOBJS@,|#_!!_#| ${LIBOBJDIR}${LIBOBJDIR}${LIBOBJDIR}memcmp$U.o,g
 s,@LTLIBOBJS@,|#_!!_#| ${LIBOBJDIR}${LIBOBJDIR}${LIBOBJDIR}memcmp$U.lo,g
 :end
@@ -866,6 +868,7 @@ s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_PUTUTLINE\)[	 (].*,\1define\2 1 ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_SETUTENT\)[	 (].*,\1define\2 1 ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_UTMPNAME\)[	 (].*,\1define\2 1 ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_UPDWTMP\)[	 (].*,\1define\2 1 ,
+s,^\([	 #]*\)[^	 ]*\([	 ]*BUNDLED_LIBTOM\)[	 (].*,\1define\2  ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*DISABLE_LASTLOG\)[	 (].*,\1define\2  ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*DISABLE_UTMP\)[	 (].*,\1define\2  ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*DISABLE_UTMPX\)[	 (].*,\1define\2  ,
@@ -899,10 +902,18 @@ s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_FREEADDRINFO\)[	 (].*,\1define\2 1 ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_GETNAMEINFO\)[	 (].*,\1define\2 1 ,
 s,^\([	 #]*\)[^	 ]*\([	 ]*HAVE_BASENAME\)[	 (].*,\1define\2 1 ,
 s/ $//
-s,^[	 #]*u.*,/* & */,
 CEOF
     sed -f "$tmp/defines.sed" "$tmp/out1" >"$tmp/out2"
-ac_result="$tmp/out2"
+    # First, check the format of the line:
+    cat >"$tmp/defines.sed" <<\CEOF
+/^[	 ]*#[	 ]*undef[	 ][	 ]*[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*[	 ]*$/b def
+/^[	 ]*#[	 ]*define[	 ][	 ]*[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*[(	 ]/b def
+b
+:def
+s,^[	 #]*u.*,/* & */,
+CEOF
+    sed -f "$tmp/defines.sed" "$tmp/out2" >"$tmp/out1"
+ac_result="$tmp/out1"
   if test x"$ac_file" != x-; then
     echo "/* $configure_input  */" >"$tmp/config.h"
     cat "$ac_result" >>"$tmp/config.h"

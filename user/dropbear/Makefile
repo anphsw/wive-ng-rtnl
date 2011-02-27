@@ -17,20 +17,27 @@ endif
 LTC=libtomcrypt/libtomcrypt.a
 LTM=libtommath/libtommath.a
 
+ifeq (1, 1)
+LIBTOM_DEPS=$(LTC) $(LTM)
+CFLAGS+=-I$(srcdir)/libtomcrypt/src/headers/ 
+LIBS+=$(LTC) $(LTM)
+endif
+
 COMMONOBJS=dbutil.o buffer.o \
 		dss.o bignum.o \
 		signkey.o rsa.o random.o \
 		queue.o \
-		atomicio.o compat.o  fake-rfc2553.o
+		atomicio.o compat.o  fake-rfc2553.o 
 
 SVROBJS=svr-kex.o svr-algo.o svr-auth.o sshpty.o \
 		svr-authpasswd.o svr-authpubkey.o svr-authpubkeyoptions.o svr-session.o svr-service.o \
 		svr-chansession.o svr-runopts.o svr-agentfwd.o svr-main.o svr-x11fwd.o\
-		svr-tcpfwd.o svr-authpam.o
+		svr-tcpfwd.o svr-authpam.o -lcrypt
 
 CLIOBJS=cli-algo.o cli-main.o cli-auth.o cli-authpasswd.o cli-kex.o \
 		cli-session.o cli-service.o cli-runopts.o cli-chansession.o \
-		cli-authpubkey.o cli-tcpfwd.o cli-channel.o cli-authinteract.o
+		cli-authpubkey.o cli-tcpfwd.o cli-channel.o cli-authinteract.o \
+		cli-agentfwd.o list.o
 
 CLISVROBJS=common-session.o packet.o common-algo.o common-kex.o \
 			common-channel.o common-chansession.o termcodes.o loginrec.o \
@@ -41,7 +48,7 @@ KEYOBJS=dropbearkey.o gendss.o genrsa.o
 
 CONVERTOBJS=dropbearconvert.o keyimport.o
 
-SCPOBJS=scp.o progressmeter.o atomicio.o scpmisc.o
+SCPOBJS=scp.o progressmeter.o atomicio.o scpmisc.o compat.o
 
 HEADERS=options.h dbutil.h session.h packet.h algo.h ssh.h buffer.h kex.h \
 		dss.h bignum.h signkey.h rsa.h random.h service.h auth.h \
@@ -71,7 +78,7 @@ STRIP=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip
 INSTALL=install
 CPPFLAGS=
 CFLAGS=-I. -I$(srcdir) -I$(srcdir)/libtomcrypt/src/headers/ $(CPPFLAGS) -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec
-LIBS=$(LTC) $(LTM)  -lcrypt
+LIBS=$(LTC) $(LTM) 
 LDFLAGS=-Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 
 EXEEXT=
@@ -106,10 +113,6 @@ endif
 ifeq ($(SCPPROGRESS), 1)
 	CFLAGS+=-DPROGRESS_METER
 endif
-
-#%: $(HEADERS)
-#%: $(HEADERS) Makefile
-# TODO
 
 all: $(TARGETS)
 
@@ -154,8 +157,7 @@ dbclient: $(dbclientobjs)
 dropbearkey: $(dropbearkeyobjs)
 dropbearconvert: $(dropbearconvertobjs)
 
-dropbear dbclient dropbearkey dropbearconvert: $(HEADERS)  $(LTC) $(LTM) \
-													Makefile
+dropbear dbclient dropbearkey dropbearconvert: $(HEADERS) $(LIBTOM_DEPS) Makefile
 	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBS)
 
 # scp doesn't use the libs so is special.
@@ -172,7 +174,7 @@ endif
 
 dropbearmulti: multilink 
 
-multibinary: $(HEADERS) $(MULTIOBJS) $(LTC) $(LTM) Makefile
+multibinary: $(HEADERS) $(MULTIOBJS) $(LIBTOM_DEPS) Makefile
 	$(CC) $(LDFLAGS) -o dropbearmulti$(EXEEXT) $(MULTIOBJS) $(LIBS)
 
 multilink: multibinary $(addprefix link, $(PROGRAMS))

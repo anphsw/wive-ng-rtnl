@@ -956,7 +956,7 @@ static void close_chan_fd(struct Channel *channel, int fd, int how) {
 }
 
 
-#if defined(USING_LISTENERS) || defined(DROPBEAR_CLIENT)
+//#if defined(USING_LISTENERS) || defined(DROPBEAR_CLIENT)
 /* Create a new channel, and start the open request. This is intended
  * for X11, agent, tcp forwarding, and should be filled with channel-specific
  * options, with the calling function calling encrypt_packet() after
@@ -1044,4 +1044,4 @@ void recv_msg_channel_open_failure() {
 
 	remove_channel(channel);
 }
-#endif /* USING_LISTENERS */
+//#endif /* USING_LISTENERS */

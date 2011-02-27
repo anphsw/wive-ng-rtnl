@@ -54,6 +54,10 @@ much traffic. */
 /* Enable X11 Forwarding - server only */
 #define DISABLE_X11FWD
 
+/* Enable Authentication Agent Forwarding - server only for now */
+#define DISABLE_SVR_AGENTFWD
+#define DISABLE_CLI_AGENTFWD
+
 /* Enable TCP Fowarding */
 /* 'Local' is "-L" style (client listening port forwarded via server)
  * 'Remote' is "-R" style (server listening port forwarded via client) */

@@ -64,11 +64,11 @@ struct ChanSess {
 	unsigned char x11singleconn;
 #endif
 
-#ifdef ENABLE_SVR_AGENTFWD
+//#ifdef ENABLE_SVR_AGENTFWD
 	struct Listener * agentlistener;
 	char * agentfile;
 	char * agentdir;
-#endif
+//#endif
 };
 
 struct ChildPid {
