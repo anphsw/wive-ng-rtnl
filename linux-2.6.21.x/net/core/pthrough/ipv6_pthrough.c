@@ -10,7 +10,7 @@
 #define ETH_TYPE_IPV6	0x86dd
 
 extern struct net_device *dev_get_by_name(const char *name);
-extern void dev_set_promiscuity(struct net_device *dev, int inc);
+extern int dev_set_promiscuity(struct net_device *dev, int inc);
 extern int dev_queue_xmit(struct sk_buff *skb);
 
 int ipv6_pt_enable = 0;
