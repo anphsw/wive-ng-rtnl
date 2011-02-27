@@ -31,6 +31,9 @@ start() {
 		if [ "$lease" != "" ]; then
 			config-udhcpd.sh -t $lease
 		fi
+		if [ "$dhcpDomain" != "" ]; then
+			config-udhcpd.sh -D $dhcpDomain
+		fi
 		if [ "$SmbEnabled" = "1" ]; then
 			config-udhcpd.sh -w $lan_ip
 		fi
@@ -53,6 +56,7 @@ stop() {
 }
 
 get_param() {
+	dhcpDomain=`nvram_get 2860 dhcpDomain`
 	start=`nvram_get 2860 dhcpStart`
 	end=`nvram_get 2860 dhcpEnd`
 	mask=`nvram_get 2860 dhcpMask`

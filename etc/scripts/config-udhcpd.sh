@@ -45,6 +45,9 @@ config () {
     "-d")
       sed -e '/option *dns/d' $fname > $fbak
       echo "option dns $2 $3" >> $fbak ;;
+    "-D")
+      sed -e '/option *domain/d' $fname > $fbak
+      echo "opt domain $2" >> $fbak ;;
     "-m")
       sed -e '/option *subnet/d' $fname > $fbak
       echo "option subnet $2" >> $fbak ;;

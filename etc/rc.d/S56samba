@@ -18,6 +18,7 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    workgroup = $WorkGroup" >> $CONFIG
     echo "    netbios name = $SmbNetBIOS" >> $CONFIG
     echo "    server string = $SmbString" >> $CONFIG
+    echo "    os level = $SmbOsLevel" >> $CONFIG
     echo "    interfaces = $lan_if" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
     echo "    force group = Administrator" >> $CONFIG
@@ -57,6 +58,7 @@ get_param() {
     WorkGroup=`nvram_get 2860  WorkGroup`
     SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
     SmbString=`nvram_get 2860  SmbString`
+    SmbOsLevel=`nvram_get 2860  SmbOsLevel`
     Login=`nvram_get 2860 Login`
     CONFIG="/etc/smb.conf"
 }
