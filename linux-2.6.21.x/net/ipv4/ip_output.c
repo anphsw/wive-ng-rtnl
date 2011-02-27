@@ -407,6 +407,7 @@ static void ip_copy_metadata(struct sk_buff *to, struct sk_buff *from)
 	nf_bridge_put(to->nf_bridge);
 	to->nf_bridge = from->nf_bridge;
 	nf_bridge_get(to->nf_bridge);
+
 #endif
 #endif
 	skb_copy_secmark(to, from);
