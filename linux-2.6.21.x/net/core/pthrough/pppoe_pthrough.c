@@ -12,7 +12,7 @@
 #define PTABLE_SIZE 			16
 
 extern struct net_device *dev_get_by_name(const char *name);
-extern void dev_set_promiscuity(struct net_device *dev, int inc);
+extern int dev_set_promiscuity(struct net_device *dev, int inc);
 extern int dev_queue_xmit(struct sk_buff *skb);
 
 int pppoe_pt_enable = 0;
