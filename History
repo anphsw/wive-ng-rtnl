@@ -275,6 +275,14 @@
 86) Use extra interrupt in CPU.<br>
 87) Rewrite init scripts for lanauth.<br>
 88) Add chillispot code in sourcetree and modify webui.<br>
+89) Add samba/wins webui.<br>
+90) Add dhcp domain oprion support.<br>
+91) Update dropbear to 0.53 version.<br>
+92) Fix ipt_account webui.<br>
+93) Some pppd fixes.<br>
+94) Some kernel network/netfilter subsystem fixes.<br>
+95) Usb fix some buggy device support.<br>
+96) More correct gcc flags for mips arch.<br> 
 
 <br><br>
 <b>For support see:</b><br>
