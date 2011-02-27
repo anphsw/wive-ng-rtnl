@@ -21,6 +21,7 @@ usage () {
   echo "  -e ipaddr       : set ipaddr as end of the IP lease block"
   echo "  -i ifc          : set ifc as the interface that udhcpd will use"
   echo "  -d dns1 [dns2]  : set dns1 and dns2 as DNS"
+  echo "  -D domain	  : set domain name"
   echo "  -m mask         : set mask as subnet netmask"
   echo "  -g gateway      : set gateway as router's IP address"
   echo "  -w wins	  : set wins server IP address"
@@ -100,6 +101,7 @@ case "$1" in
   "-e") config "$1" "$2";;
   "-i") config "$1" "$2";;
   "-d") config "$1" "$2" "$3";;
+  "-D") config "$1" "$2";;
   "-m") config "$1" "$2";;
   "-g") config "$1" "$2";;
   "-w") config "$1" "$2";;
