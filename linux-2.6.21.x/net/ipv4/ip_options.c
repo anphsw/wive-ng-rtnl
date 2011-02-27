@@ -260,18 +260,14 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 	unsigned char * optptr;
 	int optlen;
 	unsigned char * pp_ptr = NULL;
-	struct rtable *rt = skb ? (struct rtable*)skb->dst : NULL;
+	struct rtable *rt = NULL;
 
-	if (!opt) {
-		opt = &(IPCB(skb)->opt);
-		iph = skb->nh.raw;
-		opt->optlen = ((struct iphdr *)iph)->ihl*4 - sizeof(struct iphdr);
-		optptr = iph + sizeof(struct iphdr);
-		opt->is_data = 0;
-	} else {
+	if (skb != NULL) {
+		rt = (struct rtable*)skb->dst;
+		optptr = (unsigned char *)&(ip_hdr(skb)[1]);
+	} else
 		optptr = opt->__data;
-		iph = optptr - sizeof(struct iphdr);
-	}
+	iph = optptr - sizeof(struct iphdr);
 
 	for (l = opt->optlen; l > 0; ) {
 		switch (*optptr) {
