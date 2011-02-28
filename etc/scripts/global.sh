@@ -297,6 +297,10 @@ kernel_ext_en()
 	else
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
+    else
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	    echo "null,null" > /proc/pthrough/pppoe
+	    echo "null,null" > /proc/pthrough/ipv6
     fi
 }
 
