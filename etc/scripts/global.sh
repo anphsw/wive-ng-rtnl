@@ -261,8 +261,15 @@ kernel_ext_en()
     getLanIfName
     getWanIfName
 
-    #----Bridge STP---------------------------------------------
+    #This is set only if wan or lan in bridge------------------------
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
+	#----Fastpath for bridge enable------------------------------
+	if [ "$bridgeFastpath" != "0" ]; then
+	    sysctl -w net.ipv4.bridge_fastpath=1
+	else
+	    sysctl -w net.ipv4.bridge_fastpath=0
+	fi
+	#----Bridge STP----------------------------------------------
         stp=`nvram_get 2860 stpEnabled`
         if [ "$stp" = "1" ]; then
                 brctl setfd br0 15
@@ -271,12 +278,8 @@ kernel_ext_en()
                 brctl setfd br0 1
                 brctl stp br0 0
         fi
-    fi
-    #----Fastpath for bridge enable--------------------------------
-    if [ "$bridgeFastpath" != "0" ]; then
-	sysctl -w net.ipv4.bridge_fastpath=1
     else
-	sysctl -w net.ipv4.bridge_fastpath=0
+	    sysctl -w net.ipv4.bridge_fastpath=0
     fi
     #----In bridge and chillispot mode not fastnat and passth use---
     if [ "$opmode" != "0" ] || [ "$opmode" != "4" ]; then
