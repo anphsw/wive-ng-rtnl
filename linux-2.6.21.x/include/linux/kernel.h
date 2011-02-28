@@ -132,7 +132,7 @@ NORET_TYPE static inline void panic(const char * fmt, ...) {}
 
 #ifdef CONFIG_FULL_PANIC
 NORET_TYPE void panic(const char * fmt, ...)
-	__attribute__ ((NORET_AND format (printf, 1, 2)));
+	__attribute__ ((NORET_AND format (printf, 1, 2))) __cold;
 #else
 #define panic(fmt, ...) tiny_panic(0, ## __VA_ARGS__)
 NORET_TYPE void tiny_panic(int a, ...) ATTRIB_NORET;
@@ -244,7 +244,7 @@ extern enum system_states {
 #define TAINT_USER			(1<<6)
 #define TAINT_DIE			(1<<7)
 
-extern void dump_stack(void);
+extern void dump_stack(void) __cold;
 
 enum {
 	DUMP_PREFIX_NONE,
