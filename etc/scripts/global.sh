@@ -278,8 +278,8 @@ kernel_ext_en()
     else
 	sysctl -w net.ipv4.bridge_fastpath=0
     fi
-    #----In bridge mode not enable fastnat and direct pass not use--
-    if [ "$opmode" != "0" ]; then
+    #----In bridge and chillispot mode not fastnat and passth use---
+    if [ "$opmode" != "0" ] || [ "$opmode" != "4" ]; then
 	#----Fastpath for nat enable--------------------------------
 	if [ "$natFastpath" != "0" ]; then
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
