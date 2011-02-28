@@ -272,28 +272,31 @@ kernel_ext_en()
                 brctl stp br0 0
         fi
     fi
-    #----Direct pass from kernel--------------------------------
-    if [ "$pppoe_pass" = "1" ]; then
-	echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
-    else
-	echo "null,null" > /proc/pthrough/pppoe
-    fi
-    if [ "$ipv6_pass" = "1" ]; then
-	echo "$lan_if,$wan_if" > /proc/pthrough/ipv6
-    else
-	echo "null,null" > /proc/pthrough/ipv6
-    fi
-    #----Fastpath for nat enable--------------------------------
-    if [ "$natFastpath" != "0" ]; then
-	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
-    else
-	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
-    fi
     #----Fastpath for bridge enable--------------------------------
     if [ "$bridgeFastpath" != "0" ]; then
 	sysctl -w net.ipv4.bridge_fastpath=1
     else
 	sysctl -w net.ipv4.bridge_fastpath=0
+    fi
+    #----In bridge mode not enable fastnat and direct pass not use--
+    if [ "$opmode" != "0" ]; then
+	#----Fastpath for nat enable--------------------------------
+	if [ "$natFastpath" != "0" ]; then
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	else
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	fi
+	#----Direct pass from kernel--------------------------------
+	if [ "$pppoe_pass" = "1" ]; then
+	    echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
+	else
+	    echo "null,null" > /proc/pthrough/pppoe
+	fi
+	if [ "$ipv6_pass" = "1" ]; then
+	    echo "$lan_if,$wan_if" > /proc/pthrough/ipv6
+	else
+	    echo "null,null" > /proc/pthrough/ipv6
+	fi
     fi
 }
 
