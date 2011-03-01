@@ -192,7 +192,6 @@ next_hook:
 			     outdev, &elem, okfn, hook_thresh);
 	if (verdict == NF_ACCEPT || verdict == NF_STOP) {
 		ret = 1;
-		goto unlock;
 	} else if (verdict == NF_DROP) {
 		kfree_skb(*pskb);
 		ret = -EPERM;
@@ -213,7 +212,6 @@ next_hook:
 		}
 	}
 #endif
-unlock:
 	rcu_read_unlock();
 	return ret;
 }
