@@ -17,8 +17,7 @@ static int RaWdgAlive;
 static int WdgLoadValue;
 extern u32 get_surfboard_sysclk(void);
 
-
-#define WATCHDOG_TIMEOUT 240		/* 120 sec default timeout */
+#define WATCHDOG_TIMEOUT 120		/* 120 sec default timeout */
 
 #ifdef CONFIG_WATCHDOG_NOWAYOUT
 static int nowayout = WATCHDOG_NOWAYOUT;
@@ -219,6 +218,10 @@ static int ralink_ioctl(struct inode *inode, struct file *file,
 		case WDIOC_GETBOOTSTATUS:
 			return put_user(0,(int *)arg);
 		case WDIOC_KEEPALIVE:
+			RaWdgReload();
+			return 0;
+		case WDIOC_SETTIMEOUT:
+			/* In future need set timiout from userspace Fix me. */
 			RaWdgReload();
 			return 0;
 		case WDIOC_GETTIMEOUT:

@@ -53,6 +53,7 @@
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../nat/hw_nat/ra_nat.h"
 #endif
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #define	BCM_FASTNAT_DENY	1
 #include <net/ip.h>
@@ -132,6 +133,7 @@ int bcm_nat_bind_hook_func(bcmNatBindHook hook_func) {
 	bcm_nat_bind_hook = hook_func;
 	return 1;
 };
+EXPORT_SYMBOL(bcm_nat_bind_hook_func);
 
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
 bcmNatHitHook bcm_nat_hit_hook = NULL;
@@ -139,6 +141,7 @@ int bcm_nat_hit_hook_func(bcmNatHitHook hook_func) {
 	bcm_nat_hit_hook = hook_func;
 	return 1;
 };
+EXPORT_SYMBOL(bcm_nat_hit_hook_func);
 #endif
 
 /*

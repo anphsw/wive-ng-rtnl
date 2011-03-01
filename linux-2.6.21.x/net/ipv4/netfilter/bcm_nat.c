@@ -1,13 +1,20 @@
 /*
  *  Fastpath module for NAT speedup.
+ *  This module write BCM LTD and use some GPLv2 code blocks.
+ *  It grants the right to change the license on GPL.
+ *  Some code clenup and rewrite - Tomato and Wive projects.
+ *
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
+ *
  */
 
 #include <linux/module.h>
 #include <net/ip.h> 
 #include <net/route.h>
 #include <net/netfilter/nf_conntrack_core.h>
-
-#define DEBUGP(format, args...)
 
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
 typedef int (*bcmNatBindHook)(struct nf_conn *ct, enum ip_conntrack_info ctinfo, unsigned int hooknum, struct sk_buff **pskb);
@@ -21,16 +28,6 @@ manip_pkt(u_int16_t proto,
 	  unsigned int iphdroff,
 	  const struct nf_conntrack_tuple *target,
 	  enum nf_nat_manip_type maniptype);
-
-inline int 
-	bcm_manip_pkt(u_int16_t proto,
-	struct sk_buff **pskb,
-	unsigned int iphdroff,
-	const struct nf_conntrack_tuple *target,
-	enum nf_nat_manip_type maniptype)
-{
-	return manip_pkt(proto, pskb, iphdroff, target, maniptype);
-}
 
 /* 
  * Send packets to output.
@@ -145,7 +142,7 @@ bcm_do_bindings(struct nf_conn *ct,
 			/* We are aiming to look like inverse of other direction. */
 			nf_ct_invert_tuple(&target, &ct->tuplehash[!dir].tuple, l3proto, l4proto);
 
-			if (!bcm_manip_pkt(target.dst.protonum, pskb, 0, &target, mtype))
+			if (!manip_pkt(target.dst.protonum, pskb, 0, &target, mtype))
 				return NF_DROP;
 		}
 	}
@@ -157,7 +154,7 @@ static int __init bcm_nat_init(void)
 {
 	bcm_nat_hit_hook_func (bcm_fast_path);
 	bcm_nat_bind_hook_func ((bcmNatBindHook)bcm_do_bindings);
-	printk("BCM fast NAT: INIT\n");
+	printk("NAT Fastpat init.\n");
 	return 0;
 }
 
@@ -169,4 +166,7 @@ static void __exit bcm_nat_fini(void)
 
 module_init(bcm_nat_init);
 module_exit(bcm_nat_fini);
-MODULE_LICENSE("Proprietary");
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Broadcom Corporation");
+MODULE_DESCRIPTION("Broadcom fastpath module for NAT offload.\n");
