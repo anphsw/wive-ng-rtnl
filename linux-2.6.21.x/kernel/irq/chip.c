@@ -266,8 +266,10 @@ static inline void mask_ack_irq(struct irq_desc *desc, int irq)
 	if (desc->chip->mask_ack)
 		desc->chip->mask_ack(irq);
 	else {
-		desc->chip->mask(irq);
-		desc->chip->ack(irq);
+		if (desc->chip->mask)
+			desc->chip->mask(irq);
+		if (desc->chip->ack)
+			desc->chip->ack(irq);
 	}
 }
 
@@ -339,8 +341,10 @@ handle_level_irq(unsigned int irq, struct irq_desc *desc)
 	spin_lock(&desc->lock);
 	mask_ack_irq(desc, irq);
 
-	if (unlikely(desc->status & IRQ_INPROGRESS))
+	if (unlikely(desc->status & IRQ_INPROGRESS)) {
+		desc->status |= IRQ_PENDING;
 		goto out_unlock;
+	}
 	desc->status &= ~(IRQ_REPLAY | IRQ_WAITING);
 	kstat_cpu(cpu).irqs[irq]++;
 
@@ -499,6 +503,8 @@ handle_edge_irq(unsigned int irq, struct irq_desc *desc)
 	} while ((desc->status & (IRQ_PENDING | IRQ_DISABLED)) == IRQ_PENDING);
 
 	desc->status &= ~IRQ_INPROGRESS;
+	if (!(desc->status & IRQ_DISABLED) && desc->chip->unmask)
+		desc->chip->unmask(irq);
 out_unlock:
 	spin_unlock(&desc->lock);
 }

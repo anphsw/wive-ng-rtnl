@@ -783,23 +783,19 @@ static void __init setup_nr_node_ids(void) {}
  */
 void drain_zone_pages(struct zone *zone, struct per_cpu_pages *pcp)
 {
-	unsigned long flags;
 	int to_drain;
 
-	local_irq_save(flags);
 	if (pcp->count >= pcp->batch)
 		to_drain = pcp->batch;
 	else
 		to_drain = pcp->count;
 	free_pages_bulk(zone, to_drain, &pcp->list, 0);
 	pcp->count -= to_drain;
-	local_irq_restore(flags);
 }
 #endif
 
 static void __drain_pages(unsigned int cpu)
 {
-	unsigned long flags;
 	struct zone *zone;
 	int i;
 
@@ -810,14 +806,16 @@ static void __drain_pages(unsigned int cpu)
 			continue;
 
 		pset = zone_pcp(zone, cpu);
+		if (!pset) {
+			WARN_ON(1);
+			continue;
+		}
 		for (i = 0; i < ARRAY_SIZE(pset->pcp); i++) {
 			struct per_cpu_pages *pcp;
 
 			pcp = &pset->pcp[i];
-			local_irq_save(flags);
 			free_pages_bulk(zone, pcp->count, &pcp->list, 0);
 			pcp->count = 0;
-			local_irq_restore(flags);
 		}
 	}
 }
@@ -3699,6 +3697,14 @@ void *__init alloc_large_system_hash(const char *tablename,
 
 	if (numentries > max)
 		numentries = max;
+
+	/*
+	 * we will allocate at least a page (even on low memory systems)
+	 * so do a fixup here to ensure we utilise the space that will be
+	 * allocated,  this also prevents us reporting -ve orders
+	 */
+	if (bucketsize * numentries < PAGE_SIZE)
+		numentries = (PAGE_SIZE + bucketsize - 1) / bucketsize;
 
 	log2qty = ilog2(numentries);
 

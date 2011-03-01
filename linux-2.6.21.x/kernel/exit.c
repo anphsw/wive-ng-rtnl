@@ -61,7 +61,9 @@ static void __unhash_process(struct task_struct *p)
 		detach_pid(p, PIDTYPE_SID);
 
 		list_del_rcu(&p->tasks);
+		preempt_disable();
 		__get_cpu_var(process_counts)--;
+		preempt_enable();
 	}
 	list_del_rcu(&p->thread_group);
 	remove_parent(p);

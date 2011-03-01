@@ -59,7 +59,7 @@ static int stopmachine(void *cpu)
 		/* Yield in first stage: migration threads need to
 		 * help our sisters onto their CPUs. */
 		if (!prepared && !irqs_disabled)
-			yield();
+			__yield();
 		else
 			cpu_relax();
 	}
@@ -109,7 +109,7 @@ static int stop_machine(void)
 
 	/* Wait for them all to come to life. */
 	while (atomic_read(&stopmachine_thread_ack) != stopmachine_num_threads)
-		yield();
+		__yield();
 
 	/* If some failed, kill them all. */
 	if (ret < 0) {
@@ -132,7 +132,7 @@ static void restart_machine(void)
 {
 	stopmachine_set_state(STOPMACHINE_EXIT);
 	local_irq_enable();
-	preempt_enable_no_resched();
+	__preempt_enable_no_resched();
 }
 
 struct stop_machine_data

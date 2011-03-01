@@ -35,21 +35,24 @@ static DECLARE_MUTEX(kernel_sem);
  * about recursion, both due to the down() and due to the enabling of
  * preemption. schedule() will re-check the preemption flag after
  * reacquiring the semaphore.
+ *
+ * Called with interrupts disabled.
  */
 int __lockfunc __reacquire_kernel_lock(void)
 {
 	struct task_struct *task = current;
 	int saved_lock_depth = task->lock_depth;
 
+	local_irq_enable();
 	BUG_ON(saved_lock_depth < 0);
 
 	task->lock_depth = -1;
-	preempt_enable_no_resched();
 
 	down(&kernel_sem);
 
-	preempt_disable();
 	task->lock_depth = saved_lock_depth;
+
+	local_irq_disable();
 
 	return 0;
 }
