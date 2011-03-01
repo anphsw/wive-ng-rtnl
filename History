@@ -283,6 +283,8 @@
 94) Some kernel network/netfilter subsystem fixes.<br>
 95) Usb fix some buggy device support.<br>
 96) More correct gcc flags for mips arch.<br> 
+97) Support __cold gcc attribute in kernel.<br>
+98) More fixes for memory subsystem.<br>
 
 <br><br>
 <b>For support see:</b><br>

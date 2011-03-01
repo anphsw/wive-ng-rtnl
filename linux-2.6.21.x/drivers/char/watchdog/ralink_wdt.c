@@ -18,8 +18,7 @@ static int WdgLoadValue;
 extern u32 get_surfboard_sysclk(void);
 
 
-#define WATCHDOG_TIMEOUT 120		/* 120 sec default timeout */
-
+#define WATCHDOG_TIMEOUT 240		/* 120 sec default timeout */
 
 #ifdef CONFIG_WATCHDOG_NOWAYOUT
 static int nowayout = WATCHDOG_NOWAYOUT;
@@ -41,10 +40,9 @@ void SetWdgTimerEbl(unsigned int timer, unsigned int ebl)
 
     sysRegWrite(timer,result);
 
-  //timer1 used for watchdog timer
 #if defined (CONFIG_RALINK_TIMER_WDG_RESET_OUTPUT)
-
 #if defined (CONFIG_RALINK_RT2880)
+    //timer1 used for watchdog timer
     if(timer==TMR1CTL) {
         result=sysRegRead(CLKCFG);
 

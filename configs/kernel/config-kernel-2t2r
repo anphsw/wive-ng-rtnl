@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Mon Feb 28 05:19:14 2011
 #
 CONFIG_MIPS=y
 
@@ -1195,5 +1194,4 @@ CONFIG_RT2860V2_STA_LED=y
 # CONFIG_RA_NAT_HW is not set
 CONFIG_RA_NAT_NONE=y
 CONFIG_BCM_NAT=y
-# CONFIG_EXP_NAT is not set
 # CONFIG_DWC_OTG is not set
