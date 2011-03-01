@@ -280,11 +280,14 @@
 91) Update dropbear to 0.53 version.<br>
 92) Fix ipt_account webui.<br>
 93) Some pppd fixes.<br>
-94) Some kernel network/netfilter subsystem fixes.<br>
-95) Usb fix some buggy device support.<br>
-96) More correct gcc flags for mips arch.<br> 
-97) Support __cold gcc attribute in kernel.<br>
-98) More fixes for memory subsystem.<br>
+<br>
+<b>1.4.x</b><br>
+1) Some kernel network/netfilter subsystem fixes.<br>
+2) Usb fix some buggy device support.<br>
+3) More correct gcc flags for mips arch.<br> 
+4) Support __cold gcc attribute in kernel.<br>
+5) More fixes for memory subsystem.<br>
+6) Small patch for more preempt and speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>
