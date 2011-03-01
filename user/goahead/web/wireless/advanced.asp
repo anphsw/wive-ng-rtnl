@@ -208,24 +208,7 @@ function initValue()
 		}
 	}
 
-	if (countrycode == "US")
-		form.country_code.options.selectedIndex = 0;
-	else if (countrycode == "JP")
-		form.country_code.options.selectedIndex = 1;
-	else if (countrycode == "RU")
-		form.country_code.options.selectedIndex = 2;
-	else if (countrycode == "FR")
-		form.country_code.options.selectedIndex = 3;
-	else if (countrycode == "TW")
-		form.country_code.options.selectedIndex = 4;
-	else if (countrycode == "IE")
-		form.country_code.options.selectedIndex = 5;
-	else if (countrycode == "HK")
-		form.country_code.options.selectedIndex = 6;
-	else if (countrycode == "NONE")
-		form.country_code.options.selectedIndex = 7;
-	else
-		form.country_code.options.selectedIndex = 8;
+	form.country_code.value = countrycode;
 
 	//multicase to unicast converter
 	hideElement('div_m2u');

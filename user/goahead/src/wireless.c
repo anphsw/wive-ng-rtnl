@@ -864,7 +864,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	short_slot = websGetVar(wp, T("short_slot"), T("0"));
 	tx_burst = websGetVar(wp, T("tx_burst"), T("0"));
 	pkt_aggregate = websGetVar(wp, T("pkt_aggregate"), T("0"));
-	rd_region = websGetVar(wp, T("rd_region"), T(""));
+	rd_region = websGetVar(wp, T("rd_region"), T("CE"));
 	carrier_detect = websGetVar(wp, T("carrier_detect"), T("0"));
 	wmm_capable = websGetVar(wp, T("wmm_capable"), T("0"));
 	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
@@ -883,7 +883,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	wlan_mode = atoi(nvram_get(RT2860_NVRAM, "WirelessMode"));
 
 	//Radar Detect region
-	if (!rd_region || !strlen(rd_region))
+	if ((rd_region == NULL) || (strlen(rd_region)<=0))
 		rd_region = "CE";
 
 	//set to nvram

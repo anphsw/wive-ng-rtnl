@@ -152,7 +152,7 @@ function addOption(list, text, value)
 
 function insertExtChannelOption()
 {
-	var wmode = document.wireless_basic.wirelessmode.value;
+	var wmode = document.wireless_basic.wirelessmode.value * 1;
 	var option_length;
 
 	if (wmode >= 5)
@@ -165,9 +165,7 @@ function insertExtChannelOption()
 		var option_length = document.wireless_basic.sz11gChannel.options.length;
 
 		if ((CurrentCh >=1) && (CurrentCh <= 4))
-		{
-			addOption(x, ChannelList_24G[CurrentCh + 4 - 1], 0);
-		}
+			addOption(x, ChannelList_24G[CurrentCh + 4 - 1], 1);
 		else if ((CurrentCh >= 5) && (CurrentCh <= 7))
 		{
 			addOption(x, ChannelList_24G[CurrentCh - 4 - 1], 0);
@@ -188,13 +186,9 @@ function insertExtChannelOption()
 				addOption(x, ChannelList_24G[CurrentCh + 4 - 1], 1);
 		}
 		else if (CurrentCh >= 11)
-		{
 			addOption(x, ChannelList_24G[CurrentCh - 4 - 1], 0);
-		}
 		else
-		{
 			addOption(x, "Auto Select", 0);
-		}
 		
 		x.value = tmp_value;
 	}

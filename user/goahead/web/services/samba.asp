@@ -11,9 +11,10 @@
 <script language="Javascript">
 function initValue(form)
 {
-	var smbEnabled = defaultNumber("<% getCfgZero(1, "ipt_account"); %>", '0');
+	var smbEnabled = defaultNumber("<% getCfgZero(1, "SmbEnabled"); %>", '0');
 	
 	form.SmbEnabled.value = (smbEnabled != '1') ? '0' : '1';
+	smbEnabledSwitch(form);
 }
 
 function smbEnabledSwitch(form)
@@ -23,7 +24,7 @@ function smbEnabledSwitch(form)
 
 function checkForm(form)
 {
-	if (form.SmbEnabled.value = '1')
+	if (form.SmbEnabled.value == '1')
 	{
 		if (form.WorkGroup.value == '')
 		{
