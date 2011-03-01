@@ -16,11 +16,21 @@ extern int bcm_nat_hit_hook_func(bcmNatHitHook hook_func);
 extern int bcm_nat_bind_hook_func(bcmNatBindHook hook_func);
 
 extern inline int
+manip_pkt(u_int16_t proto,
+	  struct sk_buff **pskb,
+	  unsigned int iphdroff,
+	  const struct nf_conntrack_tuple *target,
+	  enum nf_nat_manip_type maniptype);
+
+inline int 
 	bcm_manip_pkt(u_int16_t proto,
 	struct sk_buff **pskb,
 	unsigned int iphdroff,
 	const struct nf_conntrack_tuple *target,
-	enum nf_nat_manip_type maniptype);
+	enum nf_nat_manip_type maniptype)
+{
+	return manip_pkt(proto, pskb, iphdroff, target, maniptype);
+}
 
 /* 
  * Send packets to output.

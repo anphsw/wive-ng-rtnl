@@ -54,6 +54,7 @@
 #include "../nat/hw_nat/ra_nat.h"
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#define	BCM_FASTNAT_DENY	1
 #include <net/ip.h>
 #endif
 
@@ -118,7 +119,6 @@ DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#define	BCM_FASTNAT_DENY	1
 extern int ipv4_conntrack_fastnat;
 
 typedef int (*bcmNatBindHook)(struct nf_conn *ct,
