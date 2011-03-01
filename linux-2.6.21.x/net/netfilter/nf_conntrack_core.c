@@ -1149,6 +1149,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	int ret;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_nat *nat;
+#endif
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
+    defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
 #endif
 	/* Previously seen (loopback or untracked)?  Ignore. */
@@ -1219,7 +1222,8 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (nfct_help(ct)->helper) {
+	help = nfct_help(ct);
+	if (help->helper) {
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
                     FOE_ALG_RXIF(*pskb)=1;
 	    }
