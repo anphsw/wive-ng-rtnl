@@ -1032,7 +1032,7 @@ static inline void skb_reset_mac_header(struct sk_buff *skb)
  * The networking layer reserves some headroom in skb data (via
  * dev_alloc_skb). This is used to avoid having to reallocate skb data when
  * the header has to grow. In the default case, if the header has to grow
- * 16 bytes or less we avoid the reallocation.
+ * 32 bytes or less we avoid the reallocation.
  *
  * Unfortunately this headroom changes the DMA alignment of the resulting
  * network packet. As for NET_IP_ALIGN, this unaligned DMA is expensive
@@ -1040,11 +1040,16 @@ static inline void skb_reset_mac_header(struct sk_buff *skb)
  * perhaps setting it to a cacheline in size (since that will maintain
  * cacheline alignment of the DMA). It must be a power of 2.
  *
- * Various parts of the networking layer expect at least 16 bytes of
+ * Various parts of the networking layer expect at least 32 bytes of
  * headroom, you should not reduce this.
+ *
+ * Using max(32, L1_CACHE_BYTES) makes sense (especially with RPS)
+ * to reduce average number of cache lines per packet.
+ * get_rps_cpus() for example only access one 64 bytes aligned block :
+ * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
  */
 #ifndef NET_SKB_PAD
-#define NET_SKB_PAD	16
+#define NET_SKB_PAD	max(32, L1_CACHE_BYTES)
 #endif
 
 extern int ___pskb_trim(struct sk_buff *skb, unsigned int len);
