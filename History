@@ -288,6 +288,8 @@
 4) Support __cold gcc attribute in kernel.<br>
 5) More fixes for memory subsystem.<br>
 6) Small patch for more preempt and speedup.<br>
+7) Fix subchannel and country code change.<br>
+8) Fix wins webui.<br>
 
 <br><br>
 <b>For support see:</b><br>
