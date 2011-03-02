@@ -735,6 +735,8 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 	__LED_ON(12);
 #elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
 	__LED_ON(9);
+#elif defined (CONFI__RALINK_RT3883)
+	__LED_ON(0);
 #endif
 
 #if RALINK_GPIO_LED_LOW_ACT
