@@ -336,6 +336,7 @@ static void change_termios(struct tty_struct * tty, struct ktermios * new_termio
 	int canon_change;
 	struct ktermios old_termios = *tty->termios;
 	struct tty_ldisc *ld;
+	unsigned long flags;
 	
 	/*
 	 *	Perform the actual termios internal changes under lock.
@@ -371,11 +372,13 @@ static void change_termios(struct tty_struct * tty, struct ktermios * new_termio
 				STOP_CHAR(tty) == '\023' &&
 				START_CHAR(tty) == '\021');
 		if (old_flow != new_flow) {
+			spin_lock_irqsave(&tty->ctrl_lock, flags);
 			tty->ctrl_status &= ~(TIOCPKT_DOSTOP | TIOCPKT_NOSTOP);
 			if (new_flow)
 				tty->ctrl_status |= TIOCPKT_DOSTOP;
 			else
 				tty->ctrl_status |= TIOCPKT_NOSTOP;
+			spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 			wake_up_interruptible(&tty->link->read_wait);
 		}
 	}
@@ -811,6 +814,7 @@ int n_tty_ioctl(struct tty_struct * tty, struct file * file,
 		       unsigned int cmd, unsigned long arg)
 {
 	struct tty_struct * real_tty;
+	unsigned long flags;
 	int retval;
 
 	if (tty->driver->type == TTY_DRIVER_TYPE_PTY &&
@@ -881,6 +885,7 @@ int n_tty_ioctl(struct tty_struct * tty, struct file * file,
 				return -ENOTTY;
 			if (get_user(pktmode, (int __user *) arg))
 				return -EFAULT;
+			spin_lock_irqsave(&tty->ctrl_lock, flags);
 			if (pktmode) {
 				if (!tty->packet) {
 					tty->packet = 1;
@@ -888,6 +893,7 @@ int n_tty_ioctl(struct tty_struct * tty, struct file * file,
 				}
 			} else
 				tty->packet = 0;
+			spin_unlock_irqrestore(&tty->ctrl_lock, flags);
 			return 0;
 		}
 		default:

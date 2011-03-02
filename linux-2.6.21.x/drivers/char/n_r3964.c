@@ -1081,12 +1081,15 @@ static ssize_t r3964_read(struct tty_struct *tty, struct file *file,
 
 	TRACE_L("read()");
 
+	lock_kernel();
+
 	pClient = findClient(pInfo, task_pid(current));
 	if (pClient) {
 		pMsg = remove_msg(pInfo, pClient);
 		if (pMsg == NULL) {
 			/* no messages available. */
 			if (file->f_flags & O_NONBLOCK) {
+				unlock_kernel();
 				return -EAGAIN;
 			}
 			/* block until there is a message: */
@@ -1104,8 +1107,10 @@ repeat:
 
 		/* If we still haven't got a message, we must have been signalled */
 
-		if (!pMsg)
+		if (!pMsg) {
+			unlock_kernel();
 			return -EINTR;
+		}
 
 		/* deliver msg to client process: */
 		theMsg.msg_id = pMsg->msg_id;
@@ -1116,12 +1121,15 @@ repeat:
 		kfree(pMsg);
 		TRACE_M("r3964_read - msg kfree %p", pMsg);
 
-		if (copy_to_user(buf, &theMsg, count))
+		if (copy_to_user(buf, &theMsg, count)) {
+			unlock_kernel();
 			return -EFAULT;
+		}
 
 		TRACE_PS("read - return %d", count);
 		return count;
 	}
+	unlock_kernel();
 	return -EPERM;
 }
 
@@ -1170,6 +1178,8 @@ static ssize_t r3964_write(struct tty_struct *tty, struct file *file,
 	pHeader->locks = 0;
 	pHeader->owner = NULL;
 
+	lock_kernel();
+
 	pClient = findClient(pInfo, task_pid(current));
 	if (pClient) {
 		pHeader->owner = pClient;
@@ -1186,6 +1196,8 @@ static ssize_t r3964_write(struct tty_struct *tty, struct file *file,
  */
 	add_tx_queue(pInfo, pHeader);
 	trigger_transmit(pInfo);
+
+	unlock_kernel();
 
 	return 0;
 }
