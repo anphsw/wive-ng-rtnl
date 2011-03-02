@@ -237,8 +237,9 @@ struct sk_buff {
 	struct sk_buff		*next;
 	struct sk_buff		*prev;
 
-	struct sock		*sk;
 	ktime_t			tstamp;
+
+	struct sock		*sk;
 	struct net_device	*dev;
 	int			iif;
 	/* 4 byte hole on 64 bit*/
@@ -272,7 +273,7 @@ struct sk_buff {
 	 * want to keep them across layers you have to do a skb_clone()
 	 * first. This is owned by whoever has the skb queued ATM.
 	 */
-	char			cb[48];
+	char			cb[48] __aligned(8);
 
 	unsigned int		len,
 				data_len;
