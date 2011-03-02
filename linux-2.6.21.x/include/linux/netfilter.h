@@ -295,7 +295,7 @@ extern void nf_invalidate_cache(int pf);
 /* Call this before modifying an existing packet: ensures it is
    modifiable and linear to the point you care about (writable_len).
    Returns true or false. */
-extern int skb_make_writable(struct sk_buff **pskb, unsigned int writable_len);
+extern int skb_make_writable(struct sk_buff *skb, unsigned int writable_len);
 
 #define nf_csum_replace4	csum_replace4
 #define nf_csum_replace2	csum_replace2

@@ -385,7 +385,7 @@ int manip_pkt(u_int16_t proto,
 	struct iphdr *iph;
 	const struct nf_nat_protocol *p;
 
-	if (!skb_make_writable(pskb, iphdroff + sizeof(*iph)))
+	if (!skb_make_writable(*pskb, iphdroff + sizeof(*iph)))
 		return 0;
 
 	iph = (void *)(*pskb)->data + iphdroff;
@@ -460,7 +460,7 @@ int nf_nat_icmp_reply_translation(struct nf_conn *ct,
 	unsigned long statusbit;
 	enum nf_nat_manip_type manip = HOOK2MANIP(hooknum);
 
-	if (!skb_make_writable(pskb, hdrlen + sizeof(*inside)))
+	if (!skb_make_writable(*pskb, hdrlen + sizeof(*inside)))
 		return 0;
 
 	inside = (void *)(*pskb)->data + hdrlen;
