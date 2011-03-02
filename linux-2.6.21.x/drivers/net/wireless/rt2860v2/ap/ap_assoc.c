@@ -1712,11 +1712,9 @@ static void ap_assoc_info_debugshow(
 	EXT_HT_CAP_INFO		*pExtHT;
 #endif // DOT11_N_SUPPORT //
 
+	printk("%s - Assign AID=%d to STA %02x:%02x:%02x:%02x:%02x:%02x\n", sAssoc, pEntry->Aid, PRINT_MAC(pEntry->Addr));
+	printk(HTCapability_Len ? "%s - 11n HT STA\n" : "%s - legacy STA\n", sAssoc);
 
-	printk("%s - \n\tAssign AID=%d to STA %02x:%02x:%02x:%02x:%02x:%02x\n",
-		sAssoc, pEntry->Aid, PRINT_MAC(pEntry->Addr));
-		
-	//DBGPRINT(RT_DEBUG_TRACE, (HTCapability_Len ? "%s - 11n HT STA\n" : "%s - legacy STA\n", sAssoc));
 #ifdef DOT11_N_SUPPORT
 	if (HTCapability_Len && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 	{
