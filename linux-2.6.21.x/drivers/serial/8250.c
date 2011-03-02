@@ -2414,7 +2414,12 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 *	Finally, wait for transmitter to become empty
 	 *	and restore the IER
 	 */
-	//wait_for_xmitr(up, BOTH_EMPTY);
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+	udelay(1);
+#else
+	wait_for_xmitr(up, BOTH_EMPTY);
+#endif
 	serial_out(up, UART_IER, ier);
 
 	if (locked)
