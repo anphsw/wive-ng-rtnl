@@ -1702,15 +1702,14 @@ static void ap_assoc_info_debugshow(
 	IN  UCHAR				HTCapability_Len,
 	IN	HT_CAPABILITY_IE	*pHTCapability)
 {
-//#ifdef DBG
-	PUCHAR	sAssoc = isReassoc ? (PUCHAR)"ReASSOC" : (PUCHAR)"ASSOC";
-//#endif // DBG //
 
 #ifdef DOT11_N_SUPPORT
 	HT_CAP_INFO			*pHTCap;
 	HT_CAP_PARM			*pHTCapParm;
 	EXT_HT_CAP_INFO		*pExtHT;
 #endif // DOT11_N_SUPPORT //
+
+	PUCHAR	sAssoc = isReassoc ? (PUCHAR)"ReASSOC" : (PUCHAR)"ASSOC";
 
 	printk("%s - Assign AID=%d to STA %02x:%02x:%02x:%02x:%02x:%02x\n", sAssoc, pEntry->Aid, PRINT_MAC(pEntry->Addr));
 	printk(HTCapability_Len ? "%s - 11n HT STA\n" : "%s - legacy STA\n", sAssoc);
