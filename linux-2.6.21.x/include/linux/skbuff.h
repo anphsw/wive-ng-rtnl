@@ -1050,7 +1050,12 @@ static inline void skb_reset_mac_header(struct sk_buff *skb)
  * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
  */
 #ifndef NET_SKB_PAD
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#define NET_SKB_PAD	16 /* This is hack need for RalinkSOC wireless driver */
+#else
 #define NET_SKB_PAD	max(32, L1_CACHE_BYTES)
+#endif
 #endif
 
 extern int ___pskb_trim(struct sk_buff *skb, unsigned int len);
