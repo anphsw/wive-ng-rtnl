@@ -149,10 +149,11 @@ static void RaWdgStop(void)
 	printk(KERN_INFO "Stopped WatchDog Timer.\n");
 }
 
-static void RaWdgReload(void)
+void RaWdgReload(void)
 {
 	 sysRegWrite(TMR1LOAD, WdgLoadValue);
 }
+EXPORT_SYMBOL(RaWdgReload);
 
 /*
  *	Allow only one person to hold it open

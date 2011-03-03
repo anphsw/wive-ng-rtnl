@@ -290,6 +290,8 @@
 6) Small patch for more preempt and speedup.<br>
 7) Fix subchannel and country code change.<br>
 8) Fix wins webui.<br>
+9) Prevent watchdog reset device at serial in/out (poll timer from serial driver).<br>
+10) Prevent watchdog reset device at lan rx (poll timer from raeth driver).<br>
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

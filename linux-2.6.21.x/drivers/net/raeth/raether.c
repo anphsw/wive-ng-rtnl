@@ -591,6 +591,10 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 }
 #endif
 
+#ifdef CONFIG_RALINK_WATCHDOG
+extern void RaWdgReload(void);
+#endif
+
 #ifdef CONFIG_RAETH_NAPI
 static inline int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
 #else
@@ -747,6 +751,10 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 
 
 #endif  // CONFIG_RA_NAT_NONE //
+#ifdef CONFIG_RALINK_WATCHDOG
+    		 /* Refresh Ralink hardware watchdog timer */
+    		RaWdgReload();
+#endif
 		rx_ring[rx_dma_owner_idx0].rxd_info2.DDONE_bit = 0;
 		netrx_skbuf[rx_dma_owner_idx0] = skb;
 		rx_ring[rx_dma_owner_idx0].rxd_info1.PDP0 = dma_map_single(NULL, skb->data, MAX_RX_LENGTH, PCI_DMA_FROMDEVICE);

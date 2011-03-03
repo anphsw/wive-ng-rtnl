@@ -2373,6 +2373,13 @@ static void serial8250_console_putchar(struct uart_port *port, int ch)
 	serial_out(up, UART_TX, ch);
 }
 
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#ifdef CONFIG_RALINK_WATCHDOG
+extern void RaWdgReload(void);
+#endif
+#endif
+
 /*
  *	Print a string to the serial port trying not to disturb
  *	any possible real use of the port...
@@ -2416,6 +2423,10 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 */
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#ifdef CONFIG_RALINK_WATCHDOG
+	/* Refresh Ralink hardware watchdog timer */
+	RaWdgReload();
+#endif
 	udelay(1);
 #else
 	wait_for_xmitr(up, BOTH_EMPTY);
