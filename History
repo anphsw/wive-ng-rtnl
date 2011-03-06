@@ -293,6 +293,7 @@
 9) Prevent watchdog reset device at serial in/out (poll timer from serial driver).<br>
 10) Prevent watchdog reset device at lan rx (poll timer from raeth driver).<br>
 11) Update bropbear to 0.53.1 version.<br>
+12) Fix restore MAC adresses after "hardware" reset.<br>
 
 <br><br>
 <b>For support see:</b><br>

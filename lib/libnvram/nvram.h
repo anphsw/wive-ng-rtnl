@@ -2,6 +2,21 @@
 #define _NVRAM_H 	1
 
 #include <linux/autoconf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define BUFSZ			1024
+
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+#include <pthread.h>
+#endif
+
+#define MAX_NV_VALUE_LEN	64
+#define NV_BUFFERS_COUNT	128
+#endif
 
 #ifdef CONFIG_DUAL_IMAGE
 #define UBOOT_NVRAM	0

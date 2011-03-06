@@ -1,21 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "nvram.h"
 #include "nvram_env.h"
 #include "flash_api.h"
-
-#include <linux/autoconf.h>
-
-#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
-#ifdef CONFIG_LIB_PTHREAD_FORCE
-#include <pthread.h>
-#endif
-
-#define MAX_NV_VALUE_LEN	64
-#define NV_BUFFERS_COUNT	128
-#endif
 
 //#define DEBUG
 
@@ -407,7 +392,7 @@ int nvram_commit(int index)
 	fb[index].env.data = (char *)malloc(len);
 	if (fb[index].env.data == NULL) {
 		LIBNV_ERROR("nvram_commit(%d): not enough memory!", index);
-		return;
+		return 0;
 	}
 	bzero(fb[index].env.data, len);
 	p = fb[index].env.data;
@@ -461,7 +446,7 @@ int nvram_clear(int index)
 	fb[index].env.data = (char *)malloc(len);
 	if (fb[index].env.data == NULL) {
 		LIBNV_ERROR("nvram_clear(%d): not enough memory!", index);
-		return;
+		return 0;
 	}
 	memset(fb[index].env.data, 0xFF, len);
 
@@ -552,11 +537,7 @@ void toggleNvramDebug()
 int renew_nvram(int mode, char *fname)
 {
 	FILE *fp;
-#define BUFSZ 1024
 	char buf[BUFSZ], *p;
-#ifndef CONFIG_RALINK_RT3052
-	unsigned wan_mac[32];
-#endif
 	int found = 0, need_commit = 0;
 
 	fp = fopen(fname, "ro");
@@ -602,8 +583,8 @@ int renew_nvram(int mode, char *fname)
 	if (need_commit)
 	    nvram_commit(mode);
 out:
-	nvram_close(mode);
 	fclose(fp);
+	nvram_close(mode);
 	return 0;
 }
 
@@ -634,33 +615,38 @@ int nvram_show(int mode)
 	return 0;
 }
 
-int nvram_load_default(void)
-
+int isMacValid(char *str)
 {
+	int i, len = strlen(str);
+	if(len != 17)
+		return 0;
+
+	for(i=0; i<5; i++){
+		if( (!isxdigit( str[i*3])) || (!isxdigit( str[i*3+1])) || (str[i*3+2] != ':') )
+			return 0;
+	}
+	return (isxdigit(str[15]) && isxdigit(str[16])) ? 1: 0;
+}
+
+int nvram_load_default(void)
+{
+	//default macs is OK
+	int mac_ok=1;
+
 	//store macs
-	char    *WLAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "WLAN_MAC_ADDR");
-        char    *WAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
-        char    *LAN_MAC_ADDR = nvram_get(RT2860_NVRAM, "LAN_MAC_ADDR");
-        char    *CHECKMAC = nvram_get(RT2860_NVRAM, "CHECKMAC");
+	char *WLAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WLAN_MAC_ADDR");
+        char *WAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
+        char *LAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "LAN_MAC_ADDR");
+        char *CHECKMAC		= nvram_get(RT2860_NVRAM, "CHECKMAC");
 
 	//clear flash and load defaults
 	nvram_clear(RT2860_NVRAM);
 	renew_nvram(RT2860_NVRAM, "/etc/default/RT2860_default_novlan");
 
-	//restore mac adresses
+	//reinit nvram before commit
 	nvram_init(RT2860_NVRAM);
-	if (!WLAN_MAC_ADDR)
-    	    nvram_bufset(RT2860_NVRAM, "WLAN_MAC_ADDR", WLAN_MAC_ADDR);
-	if (!WAN_MAC_ADDR)
-    	    nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR",  WAN_MAC_ADDR);
-	if (!LAN_MAC_ADDR)
-    	    nvram_bufset(RT2860_NVRAM, "LAN_MAC_ADDR",  LAN_MAC_ADDR);
-	if ((!WLAN_MAC_ADDR) || (!WAN_MAC_ADDR) ||(!LAN_MAC_ADDR))
-    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
-	else
-    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", CHECKMAC);
 
-	//set default cip type
+	//set default chip type
 #if defined(CONFIG_RALINK_RT3050_1T1R)
         nvram_bufset(RT2860_NVRAM, "RFICType", "5");
 #elif defined(CONFIG_RALINK_RT3051_1T2R)
@@ -670,6 +656,29 @@ int nvram_load_default(void)
 #else
         nvram_bufset(RT2860_NVRAM, "RFICType", "5");
 #endif
+	LIBNV_PRINT("Restore old macs...");
+	if ((strlen(WLAN_MAC_ADDR) > 0) && isMacValid(WLAN_MAC_ADDR))
+	    nvram_bufset(RT2860_NVRAM, "WLAN_MAC_ADDR", WLAN_MAC_ADDR);
+	else
+	    mac_ok=0;
+	if ((strlen(WAN_MAC_ADDR) > 0) && isMacValid(WAN_MAC_ADDR))
+    	    nvram_bufset(RT2860_NVRAM, "WAN_MAC_ADDR",  WAN_MAC_ADDR);
+	else
+	    mac_ok=0;
+	if ((strlen(LAN_MAC_ADDR) > 0) && isMacValid(LAN_MAC_ADDR))
+    	    nvram_bufset(RT2860_NVRAM, "LAN_MAC_ADDR",  LAN_MAC_ADDR);
+	else
+	    mac_ok=0;
+
+	//all restore ok ?
+	if (mac_ok == 1) {
+	    LIBNV_PRINT("Restore checkmac atribute.");
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", CHECKMAC);
+	} else {
+	    LIBNV_PRINT("Set checkmac atribute.");
+    	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
+	}
+
 	//set wive flag
         nvram_bufset(RT2860_NVRAM, "IS_WIVE", "YES");
 	nvram_commit(RT2860_NVRAM);
