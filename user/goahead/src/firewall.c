@@ -432,7 +432,7 @@ static void iptablesIPPortFilterBuildScript(void)
 		return;
 	}
 	mode = atoi(firewall_enable);
-	if (mode == NULL)
+	if (mode == 0)
 		return;
 
 	rule = nvram_get(RT2860_NVRAM, "IPPortFilterRules");
