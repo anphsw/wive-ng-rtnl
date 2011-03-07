@@ -1909,7 +1909,7 @@ int ei_close(struct net_device *dev)
 #endif
 	spin_unlock_irqrestore(&(ei_local->page_lock), flags);
 
-	MOD_DEC_USE_COUNT;
+	module_put(THIS_MODULE);
 	return 0;
 }
 
