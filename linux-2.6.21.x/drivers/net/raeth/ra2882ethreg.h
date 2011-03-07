@@ -15,7 +15,7 @@
 
 #ifndef BIT
 #define BIT(x)	((1 << x))
-#dendif
+#endif
 
 #ifndef ETHER_ADDR_LEN
 #define ETHER_ADDR_LEN  6
