@@ -736,10 +736,6 @@ match(const struct sk_buff *skb,
 #endif
       const void *matchinfo,
       int offset,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-      const void *hdr,
-      u_int16_t datalen,
-#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
       unsigned int protoff,
 #endif
@@ -861,14 +857,6 @@ checkentry(const char *tablename,
 static struct xt_match ipp2p_match = {
 #else
 static struct ipt_match ipp2p_match = { 
-#endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	{ NULL, NULL }, 
-	"ipp2p", 
-	&ipp2p_match, 
-	&ipp2p_checkentry, 
-	NULL, 
-	THIS_MODULE
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 	.name		= "ipp2p",

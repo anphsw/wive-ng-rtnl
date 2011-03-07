@@ -12,12 +12,7 @@
 #include <linux/fs.h>
 #include <asm/uaccess.h>
 #include <asm/rt2880/surfboardint.h>
-
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 #include <asm/rt2880/rt_mmap.h>
-#else
-#include <linux/libata-compat.h>
-#endif
 
 #include "ra2882ethreg.h"
 #include "raether.h"
@@ -1768,15 +1763,11 @@ int ei_open(struct net_device *dev)
 	int i;
 	unsigned long flags;
 	END_DEVICE *ei_local;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	if (!try_module_get(THIS_MODULE))
 	{
 		printk("%s: Cannot reserve module\n", __FUNCTION__);
 		return -1;
 	}
-#else
-	MOD_INC_USE_COUNT;
-#endif
 
   	ei_local = netdev_priv(dev); // get device pointer from System
 	// unsigned int flags;
@@ -1918,11 +1909,7 @@ int ei_close(struct net_device *dev)
 #endif
 	spin_unlock_irqrestore(&(ei_local->page_lock), flags);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-	module_put(THIS_MODULE);
-#else
 	MOD_DEC_USE_COUNT;
-#endif
 	return 0;
 }
 

@@ -353,76 +353,12 @@ static inline int _kc_pci_dma_mapping_error(dma_addr_t dma_addr)
 #endif /* 2.6.5 => 2.6.0 */
 
 /*****************************************************************************/
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-/*
- * initialize a work-struct's func and data pointers:
- */
-#define PREPARE_WORK(_work, _func, _data)			\
-	do {							\
-		(_work)->func = _func;				\
-		(_work)->data = _data;				\
-	} while (0)
-
-#endif
-/*****************************************************************************/
 /* 2.6.4 => 2.6.0 */
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,4,25) || \
     ( LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0) && \
       LINUX_VERSION_CODE < KERNEL_VERSION(2,6,4) ) )
 #define ETHTOOL_OPS_COMPAT
 #endif /* 2.6.4 => 2.6.0 */
-
-/*****************************************************************************/
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-#undef ethtool_ops
-#define ethtool_ops _kc_ethtool_ops
-
-struct _kc_ethtool_ops {
-	int  (*get_settings)(struct net_device *, struct ethtool_cmd *);
-	int  (*set_settings)(struct net_device *, struct ethtool_cmd *);
-	void (*get_drvinfo)(struct net_device *, struct ethtool_drvinfo *);
-	int  (*get_regs_len)(struct net_device *);
-	void (*get_regs)(struct net_device *, struct ethtool_regs *, void *);
-	void (*get_wol)(struct net_device *, struct ethtool_wolinfo *);
-	int  (*set_wol)(struct net_device *, struct ethtool_wolinfo *);
-	u32  (*get_msglevel)(struct net_device *);
-	void (*set_msglevel)(struct net_device *, u32);
-	int  (*nway_reset)(struct net_device *);
-	u32  (*get_link)(struct net_device *);
-	int  (*get_eeprom_len)(struct net_device *);
-	int  (*get_eeprom)(struct net_device *, struct ethtool_eeprom *, u8 *);
-	int  (*set_eeprom)(struct net_device *, struct ethtool_eeprom *, u8 *);
-	int  (*get_coalesce)(struct net_device *, struct ethtool_coalesce *);
-	int  (*set_coalesce)(struct net_device *, struct ethtool_coalesce *);
-	void (*get_ringparam)(struct net_device *, struct ethtool_ringparam *);
-	int  (*set_ringparam)(struct net_device *, struct ethtool_ringparam *);
-	void (*get_pauseparam)(struct net_device *,
-	                       struct ethtool_pauseparam*);
-	int  (*set_pauseparam)(struct net_device *,
-	                       struct ethtool_pauseparam*);
-	u32  (*get_rx_csum)(struct net_device *);
-	int  (*set_rx_csum)(struct net_device *, u32);
-	u32  (*get_tx_csum)(struct net_device *);
-	int  (*set_tx_csum)(struct net_device *, u32);
-	u32  (*get_sg)(struct net_device *);
-	int  (*set_sg)(struct net_device *, u32);
-	u32  (*get_tso)(struct net_device *);
-	int  (*set_tso)(struct net_device *, u32);
-	int  (*self_test_count)(struct net_device *);
-	void (*self_test)(struct net_device *, struct ethtool_test *, u64 *);
-	void (*get_strings)(struct net_device *, u32 stringset, u8 *);
-	int  (*phys_id)(struct net_device *, u32);
-	int  (*get_stats_count)(struct net_device *);
-	void (*get_ethtool_stats)(struct net_device *, struct ethtool_stats *,
-	                          u64 *);
-} *ethtool_ops = NULL;
-
-#undef SET_ETHTOOL_OPS
-#define SET_ETHTOOL_OPS(netdev, ops) (ethtool_ops = (ops))
-
-#endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 
 /*****************************************************************************/
 /* Installations with ethtool version without eeprom, adapter id, or statistics

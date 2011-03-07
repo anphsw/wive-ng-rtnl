@@ -4658,9 +4658,6 @@ static int __init gdth_detect(Scsi_Host_Template *shtp)
             ha->virt_bus = hdr_channel;
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-            scsi_set_pci_device(shp, pcistr[ctr].pdev);
-#endif
             if (!(ha->cache_feat & ha->raw_feat & ha->screen_feat &GDT_64BIT)||
                 /* 64-bit DMA only supported from FW >= x.43 */
                 (!ha->dma64_support)) {
@@ -5669,12 +5666,6 @@ static Scsi_Host_Template driver_template = {
         .cmd_per_lun            = GDTH_MAXC_P_L,
         .unchecked_isa_dma      = 1,
         .use_clustering         = ENABLE_CLUSTERING,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-        .use_new_eh_code        = 1,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,20)
-        .highmem_io             = 1,
-#endif
-#endif
 };
 
 #include "scsi_module.c"

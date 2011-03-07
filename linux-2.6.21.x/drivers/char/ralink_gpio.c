@@ -361,21 +361,13 @@ int ralink_gpio_ioctl(struct inode *inode, struct file *file, unsigned int req,
 
 int ralink_gpio_open(struct inode *inode, struct file *file)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	MOD_INC_USE_COUNT;
-#else
 	try_module_get(THIS_MODULE);
-#endif
 	return 0;
 }
 
 int ralink_gpio_release(struct inode *inode, struct file *file)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	MOD_DEC_USE_COUNT;
-#else
 	module_put(THIS_MODULE);
-#endif
 	return 0;
 }
 
@@ -981,11 +973,7 @@ void ralink_gpio_save_clear_intp(void)
 #endif
 }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-void ralink_gpio_irq_handler(unsigned int irq, struct irqaction *irqaction)
-#else
 irqreturn_t ralink_gpio_irq_handler(int irq, void *irqaction)
-#endif
 {
 	struct gpio_time_record {
 		unsigned long falling;

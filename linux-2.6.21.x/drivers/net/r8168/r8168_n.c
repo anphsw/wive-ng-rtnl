@@ -48,10 +48,8 @@
 #include <linux/init.h>
 #include <linux/rtnetlink.h>
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 #include <linux/dma-mapping.h>
 #include <linux/moduleparam.h>
-#endif//LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 
 #include <asm/io.h>
 #include <asm/irq.h>
@@ -183,10 +181,8 @@ MODULE_PARM_DESC(rx_copybreak, "Copy breakpoint for copy-only-tiny-frames");
 module_param(use_dac, int, 0);
 MODULE_PARM_DESC(use_dac, "Enable PCI DAC. Unsafe on 32 bit PCI slot.");
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 module_param_named(debug, debug.msg_enable, int, 0);
 MODULE_PARM_DESC(debug, "Debug verbosity level (0=none, ..., 16=all)");
-#endif//LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 
 MODULE_LICENSE("GPL");
 
@@ -2789,10 +2785,8 @@ rtl8168_init_board(struct pci_dev *pdev,
 	/* dev zeroed in alloc_etherdev */
 	dev = alloc_etherdev(sizeof (*tp));
 	if (dev == NULL) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_drv(&debug))
 			dev_err(&pdev->dev, "unable to alloc new ethernet\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		goto err_out;
 	}
 
@@ -2805,10 +2799,8 @@ rtl8168_init_board(struct pci_dev *pdev,
 	/* enable device (incl. PCI PM wakeup and hotplug setup) */
 	rc = pci_enable_device(pdev);
 	if (rc < 0) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp))
 			dev_err(&pdev->dev, "enable failure\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		goto err_out_free_dev;
 	}
 
@@ -2824,41 +2816,30 @@ rtl8168_init_board(struct pci_dev *pdev,
 		pci_read_config_word(pdev, pm_cap + PCI_PM_CTRL, &pwr_command);
 		acpi_idle_state = pwr_command & PCI_PM_CTRL_STATE_MASK;
 	} else {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp)) {
 			dev_err(&pdev->dev, "PowerManagement capability not found.\n");
 		}
-#else
-		printk("PowerManagement capability not found.\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
-
 	}
 
 	/* make sure PCI base addr 1 is MMIO */
 	if (!(pci_resource_flags(pdev, 2) & IORESOURCE_MEM)) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp))
 			dev_err(&pdev->dev, "region #1 not an MMIO resource, aborting\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		rc = -ENODEV;
 		goto err_out_mwi;
 	}
 	/* check for weird/broken PCI region reporting */
 	if (pci_resource_len(pdev, 2) < R8168_REGS_SIZE) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp))
 			dev_err(&pdev->dev, "Invalid PCI region size(s), aborting\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		rc = -ENODEV;
 		goto err_out_mwi;
 	}
 
 	rc = pci_request_regions(pdev, MODULENAME);
 	if (rc < 0) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp))
 			dev_err(&pdev->dev, "could not request regions.\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		goto err_out_mwi;
 	}
 
@@ -2868,10 +2849,8 @@ rtl8168_init_board(struct pci_dev *pdev,
 	} else {
 		rc = pci_set_dma_mask(pdev, DMA_32BIT_MASK);
 		if (rc < 0) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 			if (netif_msg_probe(tp))
 				dev_err(&pdev->dev, "DMA configuration failed.\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 			goto err_out_free_res;
 		}
 	}
@@ -2881,10 +2860,8 @@ rtl8168_init_board(struct pci_dev *pdev,
 	/* ioremap MMIO region */
 	ioaddr = ioremap(pci_resource_start(pdev, 2), R8168_REGS_SIZE);
 	if (ioaddr == NULL) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp))
 			dev_err(&pdev->dev, "cannot remap MMIO, aborting\n");
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		rc = -EIO;
 		goto err_out_free_res;
 	}
@@ -2901,13 +2878,9 @@ rtl8168_init_board(struct pci_dev *pdev,
 		
 	if (i < 0) {
 		/* Unknown chip: assume array element #0, original RTL-8168 */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		if (netif_msg_probe(tp)) {
 			dev_printk(KERN_DEBUG, &pdev->dev, "unknown chip version, assuming %s\n", rtl_chip_info[0].name);
 		}
-#else
-		printk("Realtek unknown chip version, assuming %s\n", rtl_chip_info[0].name);
-#endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 		i++;
 	}
 	
@@ -3276,9 +3249,7 @@ rtl8168_open(struct net_device *dev)
 #endif
 
 #ifdef	CONFIG_R8168_NAPI
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	RTL_NAPI_ENABLE(dev, &tp->napi);
-#endif
 #endif
 
 	rtl8168_hw_start(dev);
@@ -3945,9 +3916,7 @@ rtl8168_change_mtu(struct net_device *dev,
 		goto out;
 
 #ifdef CONFIG_R8168_NAPI
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	RTL_NAPI_ENABLE(dev, &tp->napi);
-#endif
 #endif//CONFIG_R8168_NAPI 
 
 	rtl8168_hw_start(dev);
@@ -4176,12 +4145,10 @@ rtl8168_tx_clear(struct rtl8168_private *tp)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 static void rtl8168_schedule_work(struct net_device *dev, void (*task)(void *))
 {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	struct rtl8168_private *tp = netdev_priv(dev);
 
 	PREPARE_WORK(&tp->task, task, dev);
 	schedule_delayed_work(&tp->task, 4);
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 }
 #else
 static void rtl8168_schedule_work(struct net_device *dev, work_func_t task)
@@ -4203,17 +4170,13 @@ rtl8168_wait_for_quiescence(struct net_device *dev)
 
 	/* Wait for any pending NAPI task to complete */
 #ifdef CONFIG_R8168_NAPI
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	RTL_NAPI_DISABLE(dev, &tp->napi);
-#endif
 #endif//CONFIG_R8168_NAPI
 
 	rtl8168_irq_mask_and_ack(ioaddr);
 
 #ifdef CONFIG_R8168_NAPI
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	RTL_NAPI_ENABLE(dev, &tp->napi);
-#endif
 #endif//CONFIG_R8168_NAPI
 }
 
@@ -4343,14 +4306,12 @@ static inline u32
 rtl8168_tso(struct sk_buff *skb, 
 	    struct net_device *dev)
 {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	if (dev->features & NETIF_F_TSO) {
 		u32 mss = skb_shinfo(skb)->gso_size;
 
 		if (mss)
 			return LargeSend | ((mss & MSSMask) << MSSShift);
 	}
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 
 	return 0;
 }
@@ -4374,9 +4335,7 @@ rtl8168_tx_csum(struct sk_buff *skb,
 		else if (ip->protocol == IPPROTO_IP)
 			return tp->tx_ip_csum_cmd;
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 		WARN_ON(1);	/* we need a WARN() */
-#endif
 	}
 
 	return 0;
@@ -4834,11 +4793,7 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance)
 out:
 	RTL_W16(IntrMask, tp->intr_mask);
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	return IRQ_RETVAL(handled);
-#else
-	return;
-#endif
 }
 
 #ifdef CONFIG_R8168_NAPI
@@ -5145,11 +5100,7 @@ static struct pci_driver rtl8168_pci_driver = {
 static int __init
 rtl8168_init_module(void)
 {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 	return pci_register_driver(&rtl8168_pci_driver);
-#else
-	return pci_module_init(&rtl8168_pci_driver);
-#endif
 }
 
 static void __exit

@@ -132,11 +132,7 @@ static int i2s_open(struct inode *inode, struct file *filp)
 	if (minor >= I2S_MAX_DEV)
 		return -ENODEV;
 	
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	MOD_INC_USE_COUNT;
-#else
 	try_module_get(THIS_MODULE);
-#endif
 
 	if (filp->f_flags & O_NONBLOCK) {
 		MSG("filep->f_flags O_NONBLOCK set\n");
@@ -196,11 +192,7 @@ static int i2s_release(struct inode *inode, struct file *filp)
 	i2s_config_type* ptri2s_config;
 	
 	/* decrement usage count */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	MOD_DEC_USE_COUNT;
-#else
 	module_put(THIS_MODULE);
-#endif
 
 	free_irq(SURFBOARDINT_I2S, NULL);
 	

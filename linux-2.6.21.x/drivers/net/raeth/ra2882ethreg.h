@@ -1,26 +1,32 @@
 #ifndef RA2882ETHREG_H
 #define RA2882ETHREG_H
 
-#include <linux/mii.h>		// for struct mii_if_info in ra2882ethreg.h
+#include <linux/mii.h>		/* for struct mii_if_info in ra2882ethreg.h */
 #include <linux/version.h>	/* check linux version for 2.4 and 2.6 compatibility */
+#include <linux/cache.h>	/* for L1 cacheline size */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 #include <asm/rt2880/rt_mmap.h>
-#endif
 #include "raether.h"
 
 #ifdef WORKQUEUE_BH
 #include <linux/workqueue.h>
 #endif // WORKQUEUE_BH //
 
+
+#ifndef BIT
+#define BIT(x)	((1 << x))
+#dendif
+
+#ifndef ETHER_ADDR_LEN
+#define ETHER_ADDR_LEN  6
+#endif
+
 #define MAX_PACKET_SIZE	1514
 #define	MIN_PACKET_SIZE 60
 
 #define phys_to_bus(a) (a & 0x1FFFFFFF)
-
-#define BIT(x)	((1 << x))
 #define RT2880_BIT(x)	((1 << x))
-#define ETHER_ADDR_LEN  6
+
 
 /*  Phy Vender ID list */
 
@@ -78,10 +84,8 @@
 
 #endif // CONFIG_RALINK_RT3052 || CONFIG_RALINK_RT3352 //
 
-#define RX_BUF_ALLOC_SIZE	2000
-#define FASTPATH_HEADROOM   	64
-
-#define ETHER_BUFFER_ALIGN	32		///// Align on a cache line
+/*  Align on a cache line */
+#define ETHER_BUFFER_ALIGN	L1_CACHE_BYTES
 
 #define ETHER_ALIGNED_RX_SKB_ADDR(addr) \
         ((((unsigned long)(addr) + ETHER_BUFFER_ALIGN - 1) & \
@@ -97,17 +101,8 @@ typedef struct _PSEUDO_ADAPTER {
 #define MAX_PSEUDO_ENTRY               1
 #endif
 
-
 /* Register Map, Ref to Frame Engine Design Spec, chap2 */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 #define RA2882ETH_BASE  RALINK_FRAME_ENGINE_BASE
-#else
-#if defined(CONFIG_RALINK_RT2880_SHUTTLE)
-#define RA2882ETH_BASE  (0xA0310000)
-#else
-#error Please Choice Chip Version (Shuttle/MP)
-#endif
-#endif
 
 /* Register Categories Definition */
 #define RAFRAMEENGINE_OFFSET	0x0000
