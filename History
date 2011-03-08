@@ -294,6 +294,9 @@
 10) Prevent watchdog reset device at lan rx (poll timer from raeth driver).<br>
 11) Update bropbear to 0.53.1 version.<br>
 12) Fix restore MAC adresses after "hardware" reset.<br>
+13) Fix align in raeth code.<br>
+14) Drop code compat with 2.4.x kernel and cleanup.<br>
+15) Prevent deadloop at WAN apply change if VPN started.<br>
 
 <br><br>
 <b>For support see:</b><br>
