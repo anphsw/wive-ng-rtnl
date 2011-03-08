@@ -21,7 +21,7 @@ LIBDIR = $(DESTDIR)/lib/pppd/$(PPPDVERSION)
 
 PPPDVERSION = $(shell awk -F '"' '/VERSION/ { print $$2; }' ../../patchlevel.h)
 
-CFLAGS += $(COPTS) -I.. -I../.. -I../../../include/linux -I../../../include -fPIC
+CFLAGS +=  -I.. -I../.. -I../../../include/linux -I../../../include $(COPTS)
 
 LDFLAGS	= -shared
 

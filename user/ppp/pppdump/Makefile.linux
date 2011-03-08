@@ -6,7 +6,7 @@ MANDIR = $(DESTDIR)/share/man/man8
 DO_BSD_COMPRESS=y
 HAVE_ZLIB=y
 
-OPTS := -Os -Wall
+OPTS +=
 CFLAGS := -I../include/net
 OBJS := pppdump.o
 LIBS :=

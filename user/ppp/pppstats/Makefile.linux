@@ -9,14 +9,11 @@ MANDIR = $(DESTDIR)/share/man/man8
 PPPSTATSRCS = pppstats.c
 PPPSTATOBJS = pppstats.o
 
-#CC = gcc
-COPTS = -O
 COMPILE_FLAGS = -I../include
-LIBS =
 
 INSTALL= install
 
-CFLAGS = $(COPTS) $(COMPILE_FLAGS)
+CFLAGS = $(COMPILE_FLAGS) $(COPTS)
 
 all: pppstats
 
@@ -33,4 +30,3 @@ clean:
 
 depend:
 	cpp -M $(CFLAGS) $(PPPSTATSRCS) >.depend
-#	makedepend $(CFLAGS) $(PPPSTATSRCS)

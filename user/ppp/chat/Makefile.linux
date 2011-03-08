@@ -10,7 +10,8 @@ CDEF3=	-UNO_SLEEP			# Use the usleep function
 CDEF4=	-DFNDELAY=O_NDELAY		# Old name value
 CDEFS=	$(CDEF1) $(CDEF2) $(CDEF3) $(CDEF4)
 
-CFLAGS +=	$(COPTS) $(CDEFS)
+#This is not criticl speed need always -Os
+CFLAGS += $(CDEFS) -fPIC -Os
 
 INSTALL= install
 

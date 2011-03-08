@@ -1,7 +1,11 @@
-# PPP top-level Makefile for Linux.
-#include ../../config.arch
+.EXPORT_ALL_VARIABLES:
 
-CFLAGS += -O2
+# PPP top-level Makefile for Linux.
+-include ../../config.arch
+
+CC 	?= gcc                                                                                                                                   
+COPTS	 = -fPIC -O2
+LIBS	 =
 
 DESTDIR = $(INSTROOT)/opt/Wive-RTNL/user/ppp/filesystem
 BINDIR = $(DESTDIR)/sbin
@@ -65,9 +69,6 @@ clean:
 
 dist-clean:	clean
 	rm -f Makefile `find . -name Makefile -print`
-
-#kernel:
-#	cd linux; ./kinstall.sh
 
 # no tests yet, one day...
 installcheck:

@@ -32,11 +32,6 @@ ifeq (.depend,$(wildcard .depend))
 include .depend
 endif
 
-# CC = gcc
-#
-COPTS = -Os -pipe -Wall -g
-LIBS =
-
 # Uncomment the next 2 lines to include support for Microsoft's
 # MS-CHAP authentication protocol.  Also, edit plugins/radius/Makefile.linux.
 CHAPMS=y
@@ -89,7 +84,7 @@ endif
 
 COMPILE_FLAGS= -DHAVE_PATHS_H -DIPX_CHANGE -DHAVE_MMAP
 
-CFLAGS += $(COPTS) $(COMPILE_FLAGS) $(INCLUDE_DIRS) '-DDESTDIR="@DESTDIR@"'
+CFLAGS += $(COMPILE_FLAGS) $(INCLUDE_DIRS) $(COPTS) '-DDESTDIR="@DESTDIR@"'
 
 ifdef CONFIG_IPV6
 CFLAGS += -DINET6

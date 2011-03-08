@@ -1,4 +1,4 @@
-CFLAGS	+= $(COPTS) -I.. -I../../include -fPIC
+CFLAGS	+=  -I.. -I../../include $(COPTS)
 LDFLAGS	= -shared
 INSTALL	= install
 
