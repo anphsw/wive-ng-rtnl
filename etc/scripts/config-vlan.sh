@@ -26,10 +26,10 @@ usage()
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 RRRRR - config RT3052 Reset all ports"
 	echo "  $0 2 FFFFF - config RT3052 Full reinit switch"
-	echo "  $0 2 LLLLW - config RT3052 with VLAN and WAN at port 4"
-	echo "  $0 2 WLLLL - config RT3052 with VLAN and WAN at port 0"
-        echo "  $0 2 W1234 - config RT3052 with VLAN 5 at port 0 and individual VLAN 1~4 at port 1~4"
+	echo "  $0 2 LLLLW - config RT3052 with VLAN 1 at ports 0-3 and WAN (Vlan 2) at port 4"
+	echo "  $0 2 WLLLL - config RT3052 with VLAN 1 at ports 1-4 and WAN (Vlan 2) at port 0"
         echo "  $0 2 12345 - config RT3052 with individual VLAN 1~5 at port 0~4"
+        echo "  $0 2 xxxxx - config RT3052 with user defined VLAN(1-6): 112345,443124 on ports 0-4 and Gigabit"
 	echo "  $0 2 GW - config RT3052 with WAN at Giga port"
 	echo "  $0 2 GS - config RT3052 with Giga port connecting to an external switch"
 	exit 0
@@ -43,42 +43,51 @@ config3052()
 	switch reg w 98 7f3f
 	switch reg w e4 3f
 
-	#default wan_portN=0
-	wan_portN=0
+	# Calculating PVID on ports 1 and 0
+	r40=`printf "%x" $((($2<<12)|$1))`
 
-	if [ "$1" = "WLLLL" ]; then
-		wan_portN=0
-		switch reg w 40 1001
-		switch reg w 44 1001
-		switch reg w 48 1002
-		switch reg w 70 ffff506f
-	elif [ "$1" = "LLLLW" ]; then
-		wan_portN=4
-		switch reg w 40 1002
-		switch reg w 44 1001
-		switch reg w 48 1001
-		switch reg w 70 ffff417e
-        elif [ "$1" = "W1234" ]; then
-		wan_portN=0
-                switch reg w 40 1005
-                switch reg w 44 3002
-                switch reg w 48 1004
-                switch reg w 70 50484442
-                switch reg w 74 ffffff41
-        elif [ "$1" = "12345" ]; then
-		wan_portN=5
-                switch reg w 40 2001
-                switch reg w 44 4003
-                switch reg w 48 1005
-                switch reg w 70 7e7e7e41
-                switch reg w 74 ffffff7e
-	elif [ "$1" = "GW" ]; then
-		wan_portN=5
-		switch reg w 40 1001
-		switch reg w 44 1001
-		switch reg w 48 2001
-		switch reg w 70 ffff605f
+	# Calculating PVID on ports 3 and 2
+	r44=`printf "%x" $((($4<<12)|$3))`
+
+	# Calculating PVID on port 4 and Gigabit (P5) if it exists
+	if [ $# -lt 6 ]; then
+		r48=`printf "%x" $5`
+	else
+		r48=`printf "%x" $((($6<<12)|$5))`
 	fi
+
+	# Writing configuration
+	switch reg w 40 $r40
+	switch reg w 44 $r44
+	switch reg w 48 $r48
+
+	# Calculating accessory of every port to different vlan
+
+	# Each Vlan contains P6 (system port)
+	r70=$(((1<<6)|(1<<14)|(1<<22)|(1<<30)))
+	r74=$r70
+
+
+	j=0
+
+	# Calculating bitmasks
+	for i 
+		do
+		if [ $i -lt 5 ]; then
+			r70=$(($r70|(1<<(j+8*($i-1)))))
+		else
+			r74=$(($r74|(1<<(j+8*($i-5)))))
+		fi
+		j=$(($j+1))
+	done
+
+	# Translating to hex
+	r70=`printf "%x" $r70`
+	r74=`printf "%x" $r74`
+
+	# Writing configuration
+	switch reg w 70 $r70
+	switch reg w 74 $r74
 }
 
 restore3052()
@@ -377,22 +386,31 @@ elif [ "$1" = "2" ]; then
 	elif [ "$2" = "FFFFF" ]; then
 		reinit_all_phys
 	elif [ "$2" = "LLLLW" ]; then
-		config3052 LLLLW
+		wan_portN=4
+		config3052 1 1 1 1 2 1
 	elif [ "$2" = "WLLLL" ]; then
-		config3052 WLLLL
+		wan_portN=0
+		config3052 2 1 1 1 1 1
         elif [ "$2" = "W1234" ]; then
-                config3052 W1234
+		wan_portN=0
+                config3052 5 1 2 3 4
         elif [ "$2" = "12345" ]; then
-                config3052 12345
+		wan_portN=5
+                config3052 1 2 3 4 5
 	elif [ "$2" = "GW" ]; then
-		config3052 GW
+		wan_portN=5
+		config3052 1 1 1 1 1 2
 	elif [ "$2" = "GS" ]; then
 		restore3052
 		switch reg w e4 3f
 	else
-		echo "unknown vlan type $2"
-		echo ""
-		usage $0
+		a1=`echo $2| sed 's/^//'| sed 's/.....$//'`
+		a2=`echo $2| sed 's/^.//'| sed 's/....$//'`
+		a3=`echo $2| sed 's/^..//'| sed 's/...$//'`
+		a4=`echo $2| sed 's/^...//'| sed 's/..$//'`
+		a5=`echo $2| sed 's/^....//'| sed 's/.$//'`
+		a6=`echo $2| sed 's/^.....//'| sed 's/$//'`
+		config3052 $a1 $a2 $a3 $a4 $a5 $a6
 	fi
 else
 	echo "unknown swith type $1"
