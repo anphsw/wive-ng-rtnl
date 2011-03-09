@@ -10,6 +10,7 @@ OperationMode=1
 Platform=Acorp WR-NL
 wanConnectionMode=DHCP
 wan_port=4
+tv_port=0
 wan_ipaddr=10.7.0.233
 wan_netmask=255.0.0.0
 wan_gateway=0.0.0.0

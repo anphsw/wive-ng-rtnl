@@ -26,8 +26,10 @@ usage()
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 RRRRR - config RT3052 Reset all ports"
 	echo "  $0 2 FFFFF - config RT3052 Full reinit switch"
-	echo "  $0 2 LLLLW - config RT3052 with VLAN 1 at ports 0-3 and WAN (Vlan 2) at port 4"
-	echo "  $0 2 WLLLL - config RT3052 with VLAN 1 at ports 1-4 and WAN (Vlan 2) at port 0"
+	echo "  $0 2 LLLLW - config RT3052 with LAN at ports 0-3 and WAN at port 4"
+	echo "  $0 2 WLLLL - config RT3052 with LAN at ports 1-4 and WAN at port 0"
+	echo "  $0 2 LLLWW - config RT3052 with LAN at ports 0-2 and WAN at port 3-4"
+	echo "  $0 2 WWLLL - config RT3052 with LAN at ports 2-4 and WAN at port 0-1"
         echo "  $0 2 12345 - config RT3052 with individual VLAN 1~5 at port 0~4"
         echo "  $0 2 xxxxx - config RT3052 with user defined VLAN(1-6): 112345,443124 on ports 0-4 and Gigabit"
 	echo "  $0 2 GW - config RT3052 with WAN at Giga port"
@@ -387,10 +389,16 @@ elif [ "$1" = "2" ]; then
 		reinit_all_phys
 	elif [ "$2" = "LLLLW" ]; then
 		wan_portN=4
-		config3052 1 1 1 1 2 1
+		config3052 2 1 1 1 1 1
 	elif [ "$2" = "WLLLL" ]; then
 		wan_portN=0
-		config3052 2 1 1 1 1 1
+		config3052 1 1 1 1 2 1
+	elif [ "$2" = "LLLWW" ]; then
+		wan_portN=4
+		config3052 2 2 1 1 1 1
+	elif [ "$2" = "WWLLL" ]; then
+		wan_portN=0
+		config3052 1 1 1 2 2 1
         elif [ "$2" = "W1234" ]; then
 		wan_portN=0
                 config3052 5 1 2 3 4
@@ -404,13 +412,12 @@ elif [ "$1" = "2" ]; then
 		restore3052
 		switch reg w e4 3f
 	else
-		a1=`echo $2| sed 's/^//'| sed 's/.....$//'`
-		a2=`echo $2| sed 's/^.//'| sed 's/....$//'`
-		a3=`echo $2| sed 's/^..//'| sed 's/...$//'`
-		a4=`echo $2| sed 's/^...//'| sed 's/..$//'`
-		a5=`echo $2| sed 's/^....//'| sed 's/.$//'`
-		a6=`echo $2| sed 's/^.....//'| sed 's/$//'`
-		config3052 $a1 $a2 $a3 $a4 $a5 $a6
+		a1=`echo $2| sed 's/^//'| sed 's/....$//'`
+		a2=`echo $2| sed 's/^.//'| sed 's/...$//'`
+		a3=`echo $2| sed 's/^..//'| sed 's/..$//'`
+		a4=`echo $2| sed 's/^...//'| sed 's/.$//'`
+		a5=`echo $2| sed 's/^....//'| sed 's/$//'`
+		config3052 $a1 $a2 $a3 $a4 $a5 1
 	fi
 else
 	echo "unknown swith type $1"

@@ -297,6 +297,7 @@
 13) Fix align in raeth code.<br>
 14) Drop code compat with 2.4.x kernel and cleanup.<br>
 15) Prevent deadloop at WAN apply change if VPN started.<br>
+16) Add tvport support. Variable tv_port=0/1 (need add in webUI).<br>
 
 <br><br>
 <b>For support see:</b><br>

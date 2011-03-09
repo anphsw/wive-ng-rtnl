@@ -200,12 +200,23 @@ setLanWan()
 {
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
     wan_port=`nvram_get 2860 wan_port`
+    tv_port=`nvram_get 2860 tv_port`
     if [ "$wan_port" = "0" ]; then
+	if [ "$tv_port" = "1" ]; then
+	    echo '##### config vlan partition (WWLLL) #####'
+	    config-vlan.sh $SWITCH_MODE WWLLL
+	else
 	    echo '##### config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL
+	fi
     else
+	if [ "$tv_port" = "1" ]; then
+	    echo '##### config vlan partition (LLLWW) #####'
+	    config-vlan.sh $SWITCH_MODE LLLWW
+	else
 	    echo '##### config vlan partition (LLLLW) #####'
 	    config-vlan.sh $SWITCH_MODE LLLLW
+	fi
     fi
 	echo '######## clear switch mac table  ########'
         switch clear
