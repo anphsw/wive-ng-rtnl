@@ -3267,7 +3267,7 @@ struct net_device *alloc_netdev_mq(int sizeof_priv, const char *name,
 	struct net_device *dev;
 	int alloc_size;
 
-	BUG_ON(strlen(name) >= sizeof(dev->name));
+	BUG_ON(strlen(name) >= IFNAMSIZ);
 
 	alloc_size = sizeof(struct net_device);
 	if (sizeof_priv) {
@@ -3287,13 +3287,8 @@ struct net_device *alloc_netdev_mq(int sizeof_priv, const char *name,
 	dev = PTR_ALIGN(p, NETDEV_ALIGN);
 	dev->padded = (char *)dev - (char *)p;
 
-	if (sizeof_priv) {
-		dev->priv = ((char *)dev +
-			     ((sizeof(struct net_device) +
-			       (sizeof(struct net_device_subqueue) *
-				queue_count) + NETDEV_ALIGN_CONST)
-			      & ~NETDEV_ALIGN_CONST));
-	}
+	if (sizeof_priv)
+		dev->priv = netdev_priv(dev);
 
 	dev->egress_subqueue_count = queue_count;
 
