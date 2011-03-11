@@ -1081,7 +1081,7 @@ static inline void udp4_csum_init(struct sk_buff *skb, struct udphdr *uh)
 				      skb->len, IPPROTO_UDP, skb->csum       ))
 			skb->ip_summed = CHECKSUM_UNNECESSARY;
 	}
-	if (skb->ip_summed != CHECKSUM_UNNECESSARY)
+	if (!skb_csum_unnecessary(skb))
 		skb->csum = csum_tcpudp_nofold(skb->nh.iph->saddr,
 					       skb->nh.iph->daddr,
 					       skb->len, IPPROTO_UDP, 0);
