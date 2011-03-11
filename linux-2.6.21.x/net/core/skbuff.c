@@ -420,23 +420,11 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	C(protocol);
 	n->destructor = NULL;
 	C(mark);
-#ifdef CONFIG_NETFILTER
-	C(nfct);
-	nf_conntrack_get(skb->nfct);
-	C(nfctinfo);
-#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-	C(nfct_reasm);
-	nf_conntrack_get_reasm(skb->nfct_reasm);
-#endif
+	__nf_copy(n, skb);
 #if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 	C(imq_flags);
 	C(nf_info);
 #endif /*CONFIG_IMQ*/
-#ifdef CONFIG_BRIDGE_NETFILTER
-	C(nf_bridge);
-	nf_bridge_get(skb->nf_bridge);
-#endif
-#endif /*CONFIG_NETFILTER*/
 #ifdef CONFIG_NET_SCHED
 	C(tc_index);
 #ifdef CONFIG_NET_CLS_ACT
@@ -492,25 +480,13 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->destructor = NULL;
 	new->mark	= old->mark;
 	new->iif        = old->iif;
-#ifdef CONFIG_NETFILTER
-	new->nfct	= old->nfct;
-	nf_conntrack_get(old->nfct);
-	new->nfctinfo	= old->nfctinfo;
-#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-	new->nfct_reasm = old->nfct_reasm;
-	nf_conntrack_get_reasm(old->nfct_reasm);
-#endif
-#if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
-	new->ipvs_property = old->ipvs_property;
-#endif
+	 __nf_copy(new, old);
 #if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 	new->imq_flags	= old->imq_flags;
 	new->nf_info	= old->nf_info;
 #endif /*CONFIG_IMQ*/
-#ifdef CONFIG_BRIDGE_NETFILTER
-	new->nf_bridge	= old->nf_bridge;
-	nf_bridge_get(old->nf_bridge);
-#endif
+#if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
+	new->ipvs_property = old->ipvs_property;
 #endif
 #ifdef CONFIG_NET_SCHED
 #ifdef CONFIG_NET_CLS_ACT
