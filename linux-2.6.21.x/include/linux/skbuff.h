@@ -29,9 +29,6 @@
 #include <linux/hrtimer.h>
 #include <linux/compat_skbuff.h>
 
-#define HAVE_ALLOC_SKB		/* For the drivers to know */
-#define HAVE_ALIGNABLE_SKB	/* Ditto 8)		   */
-
 /* Don't change this without changing skb_csum_unnecessary! */
 #define CHECKSUM_NONE 0
 #define CHECKSUM_UNNECESSARY 1
@@ -81,6 +78,7 @@
  *			  TCP/UDP over IPv4. Sigh. Vendors like this
  *			  way by an unknown reason. Though, see comment above
  *			  about CHECKSUM_UNNECESSARY. 8)
+ *	NETIF_F_IPV6_CSUM about as dumb as the last one but does IPv6 instead.
  *
  *	Any questions? No questions, good. 		--ANK
  */
