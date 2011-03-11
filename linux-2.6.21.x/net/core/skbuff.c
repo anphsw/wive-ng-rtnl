@@ -421,6 +421,10 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	n->destructor = NULL;
 	C(mark);
 	__nf_copy(n, skb);
+#if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
+    defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
+	C(nf_trace);
+#endif
 #if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 	C(imq_flags);
 	C(nf_info);
@@ -481,6 +485,10 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->mark	= old->mark;
 	new->iif        = old->iif;
 	 __nf_copy(new, old);
+#if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
+    defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
+        new->nf_trace   = old->nf_trace;
+#endif
 #if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 	new->imq_flags	= old->imq_flags;
 	new->nf_info	= old->nf_info;
