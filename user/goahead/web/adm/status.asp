@@ -52,7 +52,7 @@ function showPortStatus()
 	var el = document.getElementById('inpWanPort');
 	if (el == null)
 		return;
-	
+
 	var pstatus = el.value.split(';');
 
 	if (pstatus.length <= 0)
@@ -61,7 +61,10 @@ function showPortStatus()
 		return;
 	}
 	
-	var wan = 1 * document.setWanForm.wan_port.value;
+	var form = document.setWanForm;
+	var wan = 1 * form.wan_port.value;
+	var stb_port = (!form.tv_stbEnabled.checked) ? -1 :
+			(wan == 0) ? 1 : wan - 1;
 	var content = '';
 
 	for (i=0; i<pstatus.length; i++)
@@ -82,7 +85,12 @@ function showPortStatus()
 				image += '_h';
 		}
 		
-		var text = (i == wan) ? 'WAN' : (i+1);
+		var text = i+1;
+		if (i == wan)
+			text = '<span style="color: #000080;">WAN</span>';
+		else if (i == stb_port)
+			text = '<span style="color: #800000;">TV</span>';
+
 		content = content + '<td class="port_status" style="background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
 	
@@ -119,15 +127,22 @@ function initTranslation()
 function PageInit()
 {
 	var ethtoolb = "<% getETHTOOLBuilt(); %>";
+	var tv_stb   = "<% getCfgZero(1, "tv_port"); %>"; // TV/STB
+
 	if (ethtoolb == "1")
 		showElement('div_ethtool');
-	
+
 	if (!((wan_port >= '0') && (wan_port <= '4')))
+		wan_port = '4';
+
+	// Only WLLLL, WWLLL, LLLWW, LLLLW modes supported now
+	if ((wan_port != '0') && (wan_port != '4'))
 		wan_port = '4';
 	
 	var form = document.setWanForm;
 	
 	form.wan_port.value = wan_port;
+	form.tv_stbEnabled.checked = (tv_stb == '1');
 	
 	// Show port speeds
 	var port_swmode = [ '<% getCfgZero(1, "port1_swmode"); %>', '<% getCfgZero(1, "port2_swmode"); %>', '<% getCfgZero(1, "port3_swmode"); %>', '<% getCfgZero(1, "port4_swmode"); %>', '<% getCfgZero(1, "port5_swmode"); %>' ];
@@ -186,13 +201,17 @@ function setWanPort(form)
 	<td>
 		<select name="wan_port" onchange="showPortStatus();" class="short">
 			<option value="0">1</option>
-			<option value="1">2</option>
+<!--			<option value="1">2</option>
 			<option value="2">3</option>
-			<option value="3">4</option>
+			<option value="3">4</option> -->
 			<option value="4">5</option>
 		</select>
 		<iframe id="setwanReloader" name="setwanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 	</td>
+</tr>
+<tr>
+	<td class="head" id="wMacAddressClone">TV/STB</td>
+	<td><input name="tv_stbEnabled" type="checkbox" onchange="showPortStatus();"></td>
 </tr>
 <tr>
 	<td class="head">Port 1 mode</td>

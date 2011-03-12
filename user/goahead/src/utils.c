@@ -1361,6 +1361,7 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 	int i;
 	char w_name[20];
 	char* w_port = websGetVar(wp, T("wan_port"), T("0"));
+	char* tv_port = websGetVar(wp, T("tv_stbEnabled"), T("off"));
 	
 	nvram_init(RT2860_NVRAM);
 	
@@ -1382,6 +1383,8 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, w_name, w_port);
 		}
 	}
+	
+	nvram_bufset(RT2860_NVRAM, "tv_port", (strcmp(tv_port, "on")==0) ? "1" : "0");
 	
 	// Commit & close NVRAM
 	nvram_commit(RT2860_NVRAM);
