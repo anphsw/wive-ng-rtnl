@@ -471,7 +471,7 @@ function initializeForm(form)
 
 function showVPNStatus()
 {
-	var reset_timer = function() { setTimeout('showVPNStatus();', 5000); };
+	var reset_timer = function() { self.setTimeout('showVPNStatus();', 5000); };
 
 	ajaxLoadElement(
 		'vpn_status_col',
@@ -483,7 +483,7 @@ function showVPNStatus()
 </script>
 </head>
 
-<body onload="bodyOnLoad(document.formVPNSetup)">
+<body onload="bodyOnLoad(document.formVPNSetup);">
 <table class="body">
 <tr><td>
 <h1>Virtual Private Network setup</h1>

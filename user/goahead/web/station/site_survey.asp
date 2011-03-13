@@ -22,7 +22,7 @@ function countTime()
 	//var connectstatus = '<!--#include ssi=getStaConnectionStatus() -->';
 
 	//if (connectstatus == 1)  // 0 is NdisMediaStateConnected, 1 is NdisMediaStateDisconnected
-		setTimeout("window.location.reload();", 1000*4);
+		self.setTimeout("window.location.reload();", 1000*4);
 }
 
 function selectedSSIDChange(ssid, bssid, networktype, channel, encry, auth)

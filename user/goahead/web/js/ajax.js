@@ -112,7 +112,7 @@ function ajaxLoadElement(elementID, url, onLoadAction)
 	}
 	
 	xmlHttp.open("GET", url, true);
-	xmlHttp.send(null);
+	xmlHttp.send();
 }
 
 function ajaxLoadScript(scriptFile)
@@ -156,22 +156,14 @@ function ajaxPopupWindow(popupID, url, onLoadAction)
 
 	var doc = document; //(parent != null) ? parent.document : document;
 
-	// Disable scrolling
-	doc.body.oldOnScroll = doc.body.onscroll;
-	doc.body.onscroll = function()
-	{
-		scroll(0, 0);
-	};
-
-	doc.body.onscroll();
-
 	// Produce window popup
-	var popup = doc.createElement('div');
-	popup.id = popupID + "Background";
-	popup.className = 'popup_window';
-	doc.body.appendChild(popup);
+	var background = document.createElement('div');
+	background.id = popupID + "Background";
+	background.className = 'popup_window';
+	background.style.display = 'none';
+	document.body.appendChild(background);
 
-	popup = doc.createElement('div');
+	var popup = doc.createElement('div');
 	popup.id = popupID + "Border";
 	popup.className = 'popup_window_border';
 	popup.style.display = 'none';
@@ -185,14 +177,32 @@ function ajaxPopupWindow(popupID, url, onLoadAction)
 		{
 			if (xmlHttp.status == 200)
 			{
+				// Store innerHTML
 				popup.innerHTML = xmlHttp.responseText;
+				
+				// Show background
+				var b_height = (document.body.innerHeight != null) ? document.body.innerHeight : document.body.clientHeight;
+				var c_width =
+					(window.innerWidth != null) ? window.innerWidth :
+					(document.body.innerWidth != null) ? document.body.innerWidth :
+					(window.clientWidth != null) ? window.clientWidth : document.body.clientWidth;
+				var c_height =
+					(window.innerHeight != null) ? window.innerHeight :
+					(document.body.innerHeight != null) ? document.body.innerHeight :
+					(window.clientHeight != null) ? window.clientHeight : document.body.clientHeight;
+
+				background.style.height = Math.max(b_height, c_height) + 'px';
+				background.style.display = '';
+
+				// Show popup
 				popup.style.display = '';
 
 				var d_width = popup.offsetWidth;
 				var d_height = popup.offsetHeight;
-
-				var x = Math.round((doc.body.clientWidth - d_width)/2);
-				var y = Math.round((doc.body.clientHeight - d_height)/2);
+				var x = Math.round((c_width - d_width)/2);
+				var y = Math.round((c_height - d_height)/2);
+				if (x<0) x = 0;
+				if (y<0) y = 0;
 
 				popup.style.left = x + 'px';
 				popup.style.top  = y + 'px';

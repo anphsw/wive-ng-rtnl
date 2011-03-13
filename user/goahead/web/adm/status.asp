@@ -165,7 +165,7 @@ function reloadPage()
 		initTranslation();
 		showOpMode();
 		showPortStatus();
-		timer = setTimeout('reloadPage();', 3000);
+		timer = self.setTimeout('reloadPage();', 3000);
 	}
 
 	ajaxLoadElement("sysinfoTable", "/adm/sysinfo.asp", reloader);
@@ -183,7 +183,7 @@ function setWanPort(form)
 </script>
 </head>
 
-<body onload="PageInit()">
+<body onload="PageInit();">
 <table class="body"><tr><td>
 <H1 id="statusTitle">Access Point Status</H1>
 <P id="statusIntroduction">Let's take a look at the status. </P>
