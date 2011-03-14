@@ -1,4 +1,40 @@
-$Id: Changelog.txt,v 1.200 2011/01/01 20:17:43 nanard Exp $
+$Id: Changelog.txt,v 1.211 2011/03/09 15:27:41 nanard Exp $
+
+2011/03/09:
+  Some modifications thanks to Daniel Dickinson to improve OpenWRT
+  build.
+  Fixed some warnings.
+
+2011/03/03:
+  Added code to generate devices/services descriptions for IGD v2
+  (to be continued)
+
+2011/03/02:
+  improved netfilter/delete_redirect_and_filter_rules() in order
+  to remove the right filter rule, even if it has another index than
+  the nat rule.
+
+2011/03/01:
+  clean up an fixes to make netfilter/testiptcrdr compile
+
+2011/02/21:
+  Make "Makefile" work under Mac OS X with bsdmake.
+  added get_portmappings_in_range() in ipfwrdr.c
+
+2011/02/07:
+  added get_portmappings_in_range() / upnp_get_portmappings_in_range()
+
+2011/02/06:
+  Implementation of GetListOfPortMappings
+
+2011/01/27:
+  Reverting "fixes" done in linux/iptables code the 2010/09/27.
+  see http://miniupnp.tuxfamily.org/forum/viewtopic.php?t=741
+
+2011/01/04:
+  added MINIUPNPD_VERSION in config.h. Taken from VERSION file.
+
+VERSION 1.5 : released the 2011/01/01
 
 2011/01/01:
   Started to implement some of the new methods from WANIPConnection v2
