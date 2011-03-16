@@ -19,12 +19,8 @@
 #include <net/ip.h>
 #include <net/checksum.h>
 #include <net/route.h>
-#include <linux/netfilter_ipv4.h>
-#ifdef CONFIG_NF_NAT_NEEDED
 #include <net/netfilter/nf_nat_rule.h>
-#else
-#include <linux/netfilter_ipv4/ip_nat_rule.h>
-#endif
+#include <linux/netfilter_ipv4.h>
 #include <linux/netfilter/x_tables.h>
 
 MODULE_LICENSE("GPL");
@@ -45,7 +41,7 @@ masquerade_check(const char *tablename,
 		 void *targinfo,
 		 unsigned int hook_mask)
 {
-	const struct ip_nat_multi_range_compat *mr = targinfo;
+	const struct nf_nat_multi_range_compat *mr = targinfo;
 
 	if (mr->range[0].flags & IP_NAT_RANGE_MAP_IPS) {
 		DEBUGP("masquerade_check: bad MAP_IPS.\n");
@@ -66,33 +62,26 @@ masquerade_target(struct sk_buff **pskb,
 		  const struct xt_target *target,
 		  const void *targinfo)
 {
-#ifdef CONFIG_NF_NAT_NEEDED
+	struct nf_conn *ct;
 	struct nf_conn_nat *nat;
-#endif
-	struct ip_conntrack *ct;
 	enum ip_conntrack_info ctinfo;
-	struct ip_nat_range newrange;
-	const struct ip_nat_multi_range_compat *mr;
+	struct nf_nat_range newrange;
+	const struct nf_nat_multi_range_compat *mr;
 	struct rtable *rt;
 	__be32 newsrc;
 
-	IP_NF_ASSERT(hooknum == NF_IP_POST_ROUTING);
+	NF_CT_ASSERT(hooknum == NF_IP_POST_ROUTING);
 
-	ct = ip_conntrack_get(*pskb, &ctinfo);
-#ifdef CONFIG_NF_NAT_NEEDED
+	ct = nf_ct_get(*pskb, &ctinfo);
 	nat = nfct_nat(ct);
-#endif
-	IP_NF_ASSERT(ct && (ctinfo == IP_CT_NEW || ctinfo == IP_CT_RELATED
+
+	NF_CT_ASSERT(ct && (ctinfo == IP_CT_NEW || ctinfo == IP_CT_RELATED
 			    || ctinfo == IP_CT_RELATED + IP_CT_IS_REPLY));
 
 	/* Source address is 0.0.0.0 - locally generated packet that is
 	 * probably not supposed to be masqueraded.
 	 */
-#ifdef CONFIG_NF_NAT_NEEDED
 	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.ip == 0)
-#else
-	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.ip == 0)
-#endif
 		return NF_ACCEPT;
 
 	mr = targinfo;
@@ -119,35 +108,26 @@ masquerade_target(struct sk_buff **pskb,
 	DEBUGP("newsrc = %u.%u.%u.%u\n", NIPQUAD(newsrc));
 	ip_rt_put(rt);
 
-#ifdef CONFIG_NF_NAT_NEEDED
 	nat->masq_index = out->ifindex;
-#else
-	ct->nat.masq_index = out->ifindex;
-#endif
+
 	/* Transfer from original range. */
-	newrange = ((struct ip_nat_range)
+	newrange = ((struct nf_nat_range)
 		{ mr->range[0].flags | IP_NAT_RANGE_MAP_IPS,
 		  newsrc, newsrc,
 		  mr->range[0].min, mr->range[0].max });
 
 	/* Hand modified range to generic setup. */
-	return ip_nat_setup_info(ct, &newrange, hooknum);
+	return nf_nat_setup_info(ct, &newrange, hooknum);
 }
 
 static inline int
-device_cmp(struct ip_conntrack *i, void *ifindex)
+device_cmp(struct nf_conn *i, void *ifindex)
 {
-#ifdef CONFIG_NF_NAT_NEEDED
 	struct nf_conn_nat *nat = nfct_nat(i);
 
 	if (!nat)
 		return 0;
-#endif
-#ifdef CONFIG_NF_NAT_NEEDED
 	return nat->masq_index == (int)(long)ifindex;
-#else
-	return i->nat.masq_index == (int)(long)ifindex;
-#endif
 }
 
 static int masq_device_event(struct notifier_block *this,
@@ -160,9 +140,9 @@ static int masq_device_event(struct notifier_block *this,
 		/* Device was downed.  Search entire table for
 		   conntracks which were associated with that device,
 		   and forget them. */
-		IP_NF_ASSERT(dev->ifindex != 0);
+		NF_CT_ASSERT(dev->ifindex != 0);
 
-		ip_ct_iterate_cleanup(device_cmp, (void *)(long)dev->ifindex);
+		nf_ct_iterate_cleanup(device_cmp, (void *)(long)dev->ifindex);
 	}
 
 	return NOTIFY_DONE;
@@ -188,7 +168,7 @@ static struct xt_target masquerade = {
 	.name		= "MASQUERADE",
 	.family		= AF_INET,
 	.target		= masquerade_target,
-	.targetsize	= sizeof(struct ip_nat_multi_range_compat),
+	.targetsize	= sizeof(struct nf_nat_multi_range_compat),
 	.table		= "nat",
 	.hooks		= 1 << NF_IP_POST_ROUTING,
 	.checkentry	= masquerade_check,

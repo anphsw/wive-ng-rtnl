@@ -40,9 +40,4 @@ obj-$(CONFIG_NET_EMATCH_NBYTE)	+= em_nbyte.o
 obj-$(CONFIG_NET_EMATCH_U32)	+= em_u32.o
 obj-$(CONFIG_NET_EMATCH_META)	+= em_meta.o
 obj-$(CONFIG_NET_EMATCH_TEXT)	+= em_text.o
-
-ifeq ($(CONFIG_NF_CONNTRACK_SUPPORT),y)
 obj-$(CONFIG_NET_SCH_ESFQ)	+= sch_esfq.o
-else
-obj-$(CONFIG_NET_SCH_ESFQ)	+= sch_esfq_ip_no_track.o
-endif

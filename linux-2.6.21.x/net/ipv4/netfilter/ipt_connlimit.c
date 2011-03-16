@@ -19,20 +19,9 @@
 #error Please use the xt_connlimit match
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
-#define CONFIG_NF_CONNTRACK_SUPPORT
-#endif
-
-#ifdef CONFIG_NF_CONNTRACK_SUPPORT
 #include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack_core.h>
 #include <linux/netfilter/nf_conntrack_tcp.h>
-#else
-#include <linux/netfilter_ipv4/ip_conntrack.h>
-#include <linux/netfilter_ipv4/ip_conntrack_core.h>
-#include <linux/netfilter_ipv4/ip_conntrack_tcp.h>
-#endif
-
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_connlimit.h>
 
@@ -42,11 +31,7 @@ MODULE_LICENSE("GPL");
 struct ipt_connlimit_conn
 {
         struct list_head list;
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-	struct ip_conntrack_tuple tuple;
-#else
 	struct nf_conntrack_tuple tuple;
-#endif
 };
 
 struct ipt_connlimit_data {
@@ -61,12 +46,7 @@ static inline unsigned ipt_iphash(const unsigned addr)
 
 static int count_them(struct ipt_connlimit_data *data,
 		      u_int32_t addr, u_int32_t mask,
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		      struct ip_conntrack *ct)
-#else
 		      struct nf_conn *ct)
-#endif
-
 {
 #ifdef DEBUG
 	const static char *tcp[] = { "none", "established", "syn_sent", "syn_recv",
@@ -74,13 +54,8 @@ static int count_them(struct ipt_connlimit_data *data,
 				     "last_ack", "listen" };
 #endif
 	int addit = 1, matches = 0;
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-	struct ip_conntrack_tuple tuple;
-	struct ip_conntrack_tuple_hash *found;
-#else
 	struct nf_conntrack_tuple tuple;
 	struct nf_conntrack_tuple_hash *found;
-#endif
 	struct ipt_connlimit_conn *conn;
 	struct list_head *hash,*lh;
 
@@ -90,22 +65,12 @@ static int count_them(struct ipt_connlimit_data *data,
 
 	/* check the saved connections */
 	for (lh = hash->next; lh != hash; lh = lh->next) {
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		struct ip_conntrack *found_ct = NULL;
-		conn = list_entry(lh, struct ipt_connlimit_conn, list);
-		found = ip_conntrack_find_get(&conn->tuple, ct);
-#else
 		struct nf_conn *found_ct = NULL;
 		conn = list_entry(lh, struct ipt_connlimit_conn, list);
 		found = nf_conntrack_find_get(&conn->tuple, ct);
-#endif
 
 		 if (found != NULL 
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		     && (found_ct = tuplehash_to_ctrack(found)) != NULL
-#else
 		     && (found_ct = nf_ct_tuplehash_to_ctrack(found)) != NULL
-#endif
 		     && 0 == memcmp(&conn->tuple,&tuple,sizeof(tuple)) 
 		     && found_ct->proto.tcp.state != TCP_CONNTRACK_TIME_WAIT) {
 			/* Just to be sure we have it only once in the list.
@@ -116,13 +81,8 @@ static int count_them(struct ipt_connlimit_data *data,
 #ifdef DEBUG
 		printk("ipt_connlimit [%d]: src=%u.%u.%u.%u:%d dst=%u.%u.%u.%u:%d %s\n",
 		       ipt_iphash(addr & mask),
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		       NIPQUAD(conn->tuple.src.ip), ntohs(conn->tuple.src.u.tcp.port),
-		       NIPQUAD(conn->tuple.dst.ip), ntohs(conn->tuple.dst.u.tcp.port),
-#else
 		       NIPQUAD(conn->tuple.src.u3.ip), ntohs(conn->tuple.src.u.tcp.port),
 		       NIPQUAD(conn->tuple.dst.u3.ip), ntohs(conn->tuple.dst.u.tcp.port),
-#endif
 		       (NULL != found) ? tcp[found_ct->proto.tcp.state] : "gone");
 #endif
 		if (NULL == found) {
@@ -141,11 +101,7 @@ static int count_them(struct ipt_connlimit_data *data,
 			nf_conntrack_put(&found_ct->ct_general);
 			continue;
 		}
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		if ((addr & mask) == (conn->tuple.src.ip & mask)) {
-#else
 		if ((addr & mask) == (conn->tuple.src.u3.ip & mask)) {
-#endif
 			/* same source IP address -> be counted! */
 			matches++;
 		}
@@ -156,14 +112,8 @@ static int count_them(struct ipt_connlimit_data *data,
 #ifdef DEBUG
 		printk("ipt_connlimit [%d]: src=%u.%u.%u.%u:%d dst=%u.%u.%u.%u:%d new\n",
 		       ipt_iphash(addr & mask),
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-		       NIPQUAD(tuple.src.ip), ntohs(tuple.src.u.tcp.port),
-		       NIPQUAD(tuple.dst.ip), ntohs(tuple.dst.u.tcp.port));
-#else
 		       NIPQUAD(tuple.src.u3.ip), ntohs(tuple.src.u.tcp.port),
 		       NIPQUAD(tuple.dst.u3.ip), ntohs(tuple.dst.u.tcp.port));
-#endif
-
 #endif
 		conn = kzalloc(sizeof(*conn),GFP_ATOMIC);
 		if (NULL == conn) {
@@ -195,17 +145,10 @@ match(const struct sk_buff *skb,
 {
 	const struct ipt_connlimit_info *info = matchinfo;
 	int connections, rv;
-#ifndef CONFIG_NF_CONNTRACK_SUPPORT
-	struct ip_conntrack *ct;
-	enum ip_conntrack_info ctinfo;
-
-	ct = ip_conntrack_get((struct sk_buff *)skb, &ctinfo);
-#else
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
 
 	ct = nf_ct_get((struct sk_buff *)skb, &ctinfo);
-#endif
 	if (NULL == ct) {
 		//printk("ipt_connlimit: Oops: invalid ct state ?\n");
 		*hotdrop = 1;

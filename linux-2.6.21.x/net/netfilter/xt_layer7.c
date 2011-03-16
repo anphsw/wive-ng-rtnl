@@ -26,7 +26,6 @@
 #include <net/netfilter/nf_conntrack_core.h>
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_layer7.h>
-#include <net/netfilter/nf_conntrack_compat.h>
 #include <linux/ctype.h>
 #include <linux/proc_fs.h>
 

@@ -1481,13 +1481,11 @@ static int kill_all(struct nf_conn *i, void *data)
 	return 1;
 }
 
-#ifdef CONFIG_NF_CONNTRACK_SUPPORT
 void ip_conntrack_flush(void)
 {
 	nf_ct_iterate_cleanup(kill_all, NULL);
 }
 EXPORT_SYMBOL_GPL(ip_conntrack_flush);
-#endif
 
 void ip_ct_record_cleanup(void)
 {

@@ -29,10 +29,7 @@ target(struct sk_buff **pskb,
 	struct ip_options *opt;
 	unsigned char *optiph;
 	int l;
-	
-	if (!skb_ip_make_writable(pskb, (*pskb)->len))
-		return NF_DROP;
- 
+	 
 	skb = (*pskb);
 	iph = (*pskb)->nh.iph;
 	optiph = skb->nh.raw;
@@ -67,7 +64,7 @@ checkentry(const char *tablename,
 	return 1;
 }
 
-static struct ipt_target ipt_ipv4optsstrip_reg = { 
+static struct xt_target xt_ipv4optsstrip_reg = { 
 	.name = "IPV4OPTSSTRIP",
 	.target = target,
 	.checkentry = checkentry,
@@ -75,12 +72,12 @@ static struct ipt_target ipt_ipv4optsstrip_reg = {
 
 static int __init init(void)
 {
-	return ipt_register_target(&ipt_ipv4optsstrip_reg);
+	return xt_register_target(&xt_ipv4optsstrip_reg);
 }
 
 static void __exit fini(void)
 {
-	ipt_unregister_target(&ipt_ipv4optsstrip_reg);
+	xt_unregister_target(&xt_ipv4optsstrip_reg);
 }
 
 module_init(init);

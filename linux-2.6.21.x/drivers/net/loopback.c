@@ -50,12 +50,10 @@
 #include <linux/etherdevice.h>
 #include <linux/skbuff.h>
 #include <linux/ethtool.h>
-#include <net/sock.h>
 #include <net/checksum.h>
 #include <linux/if_ether.h>	/* For the statistics structure. */
 #include <linux/if_arp.h>	/* For ARPHRD_ETHER */
 #include <linux/ip.h>
-#include <linux/tcp.h>
 #include <linux/percpu.h>
 
 struct pcpu_lstats {

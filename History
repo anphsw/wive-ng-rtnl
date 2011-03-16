@@ -6,7 +6,7 @@
 4) PPPD up to 2.4.5 with more patches as acell-ptpp/l2tp/gigaworld/allow-mppe/etc.<br>
 5) Add ACELL-PPTP Kernel support.<br>
 6) Mount ramfs particions in kernel mode.<br>
-7) BGIDGE: Pause frames shouldn't be passed up by driver anyway.<br>
+7) BRIDGE: Pause frames shouldn't be passed up by driver anyway.<br>
 8) Add ESFQ support.<br>
 9) Initial auto detect memory size (fix me 32bit mode support).<br>
 10) Add udpxy.<br>
@@ -299,6 +299,9 @@
 15) Prevent deadloop at WAN apply change if VPN started.<br>
 17) Add tvport support.<br>
 18) Route code speedup.<br>
+19) Backport new jhash implementation.<br>
+20) Some IE compat fixes.<br>
+21) Rework and cleanup netfilter code.<br>
 
 <br><br>
 <b>For support see:</b><br>
