@@ -154,7 +154,7 @@ static int __init bcm_nat_init(void)
 {
 	bcm_nat_hit_hook_func (bcm_fast_path);
 	bcm_nat_bind_hook_func ((bcmNatBindHook)bcm_do_bindings);
-	printk("NAT Fastpat init.\n");
+	printk("NAT Fastpath init.\n");
 	return 0;
 }
 
