@@ -15,3 +15,14 @@ filesystem
 /user/wsc_upnp/libupnp-1.4.6/upnp/doc/Makefile
 /etc/compile-date
 /etc/scripts/config.sh
+/user/ppp/Makefile
+/user/ppp/chat/Makefile
+/user/ppp/pppd/Makefile
+/user/ppp/pppd/plugins/Makefile
+/user/ppp/pppd/plugins/pppoatm/Makefile
+/user/ppp/pppd/plugins/pppol2tp/Makefile
+/user/ppp/pppd/plugins/pptp/Makefile
+/user/ppp/pppd/plugins/radius/Makefile
+/user/ppp/pppd/plugins/rp-pppoe/Makefile
+/user/ppp/pppstats/Makefile
+/user/dropbear/Makefile
