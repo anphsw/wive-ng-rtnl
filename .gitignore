@@ -4,6 +4,9 @@ romfs
 fulldump
 filesystem
 /lib/.config
+/etc/compile-date
+/etc/scripts/config.sh
+/user/wsc_upnp/libupnp-1.4.6/libtool
 /user/wsc_upnp/libupnp-1.4.6/Makefile
 /user/wsc_upnp/libupnp-1.4.6/config.status
 /user/wsc_upnp/libupnp-1.4.6/docs/dist/Makefile
@@ -13,8 +16,6 @@ filesystem
 /user/wsc_upnp/libupnp-1.4.6/threadutil/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/doc/Makefile
-/etc/compile-date
-/etc/scripts/config.sh
 /user/ppp/Makefile
 /user/ppp/chat/Makefile
 /user/ppp/pppd/Makefile
