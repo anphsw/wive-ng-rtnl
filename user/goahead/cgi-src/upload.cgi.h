@@ -87,8 +87,6 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
   #else
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset,  CONFIG_MTD_KERNEL_PART_SIZ, filename);
     status = system(cmd);
-	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-		return -1;
     if(len > CONFIG_MTD_KERNEL_PART_SIZ ){
 		snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s RootFS", offset + CONFIG_MTD_KERNEL_PART_SIZ, len - CONFIG_MTD_KERNEL_PART_SIZ, filename);
 		status = system(cmd);
@@ -97,8 +95,6 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
 #else
     fprintf(stderr, "goahead: no CONFIG_RT2880_ROOTFS defined!");
 #endif
-	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-		return -1;
     return 0;
 }
 

@@ -352,8 +352,6 @@ void websCgiCleanup()
 				bfreeSafe(B_L, cgip);
 
 				if(wp->has_firmware_upload_clean){
-					if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) != 0)
-						return;
 					sync();
 					doSystem("sleep 3 && reboot &");
 				}
