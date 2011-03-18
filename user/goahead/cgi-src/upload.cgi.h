@@ -70,10 +70,12 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
     int status;
 
 #if defined (CONFIG_RT2880_FLASH_8M) || defined (CONFIG_RT2880_FLASH_16M)
+#ifdef CONFIG_RT2880_FLASH_TEST
     /* workaround: erase 8k sector by myself instead of mtd_erase */
     /* this is for bottom 8M NOR flash only */
     snprintf(cmd, sizeof(cmd), "/bin/flash -f 0x400000 -l 0x40ffff");
     system(cmd);
+#endif
 #endif
 #if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
