@@ -75,20 +75,19 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int
 extern void defaultErrorHandler(int etype, char_t *msg);
 extern void defaultTraceHandler(int level, char_t *buf);
 extern void ripdRestart(void);
+extern void WPSAPPBCStartAll(void);
+extern void WPSSingleTriggerHandler(int);
+
 #ifdef B_STATS
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
-extern void WPSAPPBCStartAll(void);
-extern void WPSSingleTriggerHandler(int);
 #if defined CONFIG_USB
 extern void hotPluglerHandler(int);
 #endif
-
 #ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSSTAPBCStartEnr(void);
 #endif
-
 #ifdef CONFIG_DUAL_IMAGE
 static int set_stable_flag(void);
 #endif
@@ -115,7 +114,6 @@ int main(int argc, char** argv)
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
-
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
@@ -133,7 +131,6 @@ int main(int argc, char** argv)
 #endif
 	/* Registr signals */
 	InitSignals(0);
-
 
         /* Start needed services */
 	initInternet();
@@ -156,7 +153,6 @@ int main(int argc, char** argv)
 #ifdef WEBS_SSL_SUPPORT
 	websSSLOpen();
 #endif
-
 	//backup nvram setting and save rwfs
 	system("(sleep 20 && fs backup_nvram && fs save) &");
 	
