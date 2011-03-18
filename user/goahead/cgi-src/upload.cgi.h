@@ -68,7 +68,7 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
 {
     char cmd[512];
     int status;
-    int err=0
+    int err=0;
 
 #if defined (CONFIG_RT2880_FLASH_8M) || defined (CONFIG_RT2880_FLASH_16M)
 #ifdef CONFIG_RT2880_FLASH_TEST
@@ -77,30 +77,30 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
     snprintf(cmd, sizeof(cmd), "/bin/flash -f 0x400000 -l 0x40ffff");
     status = system(cmd);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	err++
+	err++;
 #endif
 #endif
 #if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
     status = system(cmd);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	err++
+	err++;
 #elif defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel_RootFS", offset, len, filename);
     status = system(cmd);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	err++
+	err++;
   #else
     snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset,  CONFIG_MTD_KERNEL_PART_SIZ, filename);
     status = system(cmd);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	err++
+	err++;
     if(len > CONFIG_MTD_KERNEL_PART_SIZ ){
 		snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s RootFS", offset + CONFIG_MTD_KERNEL_PART_SIZ, len - CONFIG_MTD_KERNEL_PART_SIZ, filename);
 		status = system(cmd);
 		if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-		    err++
+		    err++;
     }
   #endif
 #else

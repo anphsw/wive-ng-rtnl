@@ -230,14 +230,14 @@ int main (int argc, char *argv[])
 	// examination
 #if defined (UPLOAD_FIRMWARE_SUPPORT)
 
-	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg) )
+	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg))
 	{
 		html_error("Not a valid firmware.");
 		return -1;
 	}
 	
 	// flash write
-	if ( mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin) == -1))
+	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
 	{
 		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
 		return -1;
@@ -248,7 +248,6 @@ int main (int argc, char *argv[])
 #else
 #error "no upload support defined!"
 #endif
-	
 	// Reset NVRAM if needed
 	if (reset_rwfs)
 	{
