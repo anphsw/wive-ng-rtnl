@@ -111,6 +111,7 @@ int main(int argc, char** argv)
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
+	//Boot = Orange ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
@@ -158,6 +159,7 @@ int main(int argc, char** argv)
 	//backup nvram setting and save rwfs
 	system("(sleep 20 && fs backup_nvram && fs save) &");
 	
+	//Work - Green ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
 
@@ -196,6 +198,11 @@ int main(int argc, char** argv)
 	memLeaks();
 #endif
 	bclose();
+
+	//Exit - Orange ON
+	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
+	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
+
 	return 0;
 }
 
