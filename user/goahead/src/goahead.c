@@ -115,6 +115,7 @@ int main(int argc, char** argv)
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
+
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
@@ -197,12 +198,11 @@ int main(int argc, char** argv)
 #ifdef B_STATS
 	memLeaks();
 #endif
-	bclose();
-
 	//Exit - Orange ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
+	bclose();
 	return 0;
 }
 
