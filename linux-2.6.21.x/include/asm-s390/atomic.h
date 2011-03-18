@@ -67,7 +67,7 @@ typedef struct {
 
 #endif /* __GNUC__ */
 
-#define atomic_read(v)          ((v)->counter)
+#define atomic_read(v)          (*(volatile int *)&(v)->counter)
 #define atomic_set(v,i)         (((v)->counter) = (i))
 
 static __inline__ int atomic_add_return(int i, atomic_t * v)

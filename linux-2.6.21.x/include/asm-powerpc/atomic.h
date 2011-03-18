@@ -14,7 +14,7 @@ typedef struct { volatile int counter; } atomic_t;
 
 #define ATOMIC_INIT(i)		{ (i) }
 
-#define atomic_read(v)		((v)->counter)
+#define atomic_read(v)         (*(volatile int *)&(v)->counter)
 #define atomic_set(v,i)		(((v)->counter) = (i))
 
 static __inline__ void atomic_add(int a, atomic_t *v)

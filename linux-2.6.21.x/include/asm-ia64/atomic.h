@@ -27,7 +27,8 @@ typedef struct { volatile __s64 counter; } atomic64_t;
 #define ATOMIC64_INIT(i)	((atomic64_t) { (i) })
 
 #define atomic_read(v)		((v)->counter)
-#define atomic64_read(v)	((v)->counter)
+#define atomic_read(v)          (*(volatile int *)&(v)->counter)
+#define atomic64_read(v)        (*(volatile long *)&(v)->counter)
 
 #define atomic_set(v,i)		(((v)->counter) = (i))
 #define atomic64_set(v,i)	(((v)->counter) = (i))

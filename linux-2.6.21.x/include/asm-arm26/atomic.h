@@ -32,7 +32,7 @@ typedef struct { volatile int counter; } atomic_t;
 #ifdef __KERNEL__
 #include <asm/system.h>
 
-#define atomic_read(v) ((v)->counter)
+#define atomic_read(v) (*(volatile int *)&(v)->counter)
 #define atomic_set(v,i)	(((v)->counter) = (i))
 
 static inline int atomic_add_return(int i, atomic_t *v)

@@ -19,7 +19,7 @@ typedef struct { volatile int counter; } atomic_t;
 
 #ifdef __KERNEL__
 
-#define atomic_read(v)	((v)->counter)
+#define atomic_read(v)  (*(volatile int *)&(v)->counter)
 
 #if __LINUX_ARM_ARCH__ >= 6
 
