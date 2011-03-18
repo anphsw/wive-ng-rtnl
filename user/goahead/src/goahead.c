@@ -111,6 +111,9 @@ int main(int argc, char** argv)
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 
+	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
+	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
+
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
@@ -129,8 +132,6 @@ int main(int argc, char** argv)
 	/* Registr signals */
 	InitSignals(0);
 
-	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
-	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
         /* Start needed services */
 	initInternet();
@@ -155,7 +156,7 @@ int main(int argc, char** argv)
 #endif
 
 	//backup nvram setting and save rwfs
-	system("(sleep 30 && fs backup_nvram && fs save) &");
+	system("(sleep 20 && fs backup_nvram && fs save) &");
 	
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
