@@ -354,7 +354,7 @@ static void tcp_vegas_get_info(struct sock *sk, u32 ext,
 	}
 }
 
-static struct tcp_congestion_ops tcp_vegas = {
+static struct tcp_congestion_ops tcp_vegas __read_mostly = {
 	.init		= tcp_vegas_init,
 	.ssthresh	= tcp_reno_ssthresh,
 	.cong_avoid	= tcp_vegas_cong_avoid,
