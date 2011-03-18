@@ -2116,7 +2116,7 @@ static int __mkroute_output(struct rtable **result,
 	rth->fl.mark    = oldflp->mark;
 	rth->rt_dst	= fl->fl4_dst;
 	rth->rt_src	= fl->fl4_src;
-	rth->rt_iif	= oldflp->oif ? : dev_out->ifindex;
+	rth->rt_iif	= 0;
 	/* get references to the devices that are to be hold by the routing
 	   cache entry */
 	rth->u.dst.dev	= dev_out;
