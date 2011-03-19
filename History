@@ -302,6 +302,10 @@
 19) Backport new jhash implementation.<br>
 20) Some IE compat fixes.<br>
 21) Rework and cleanup netfilter code.<br>
+22) Fix update firmware on 8Mb FLASH devices.<br>
+23) More correct error handling in the course of firmware update.<br>
+24) Extended LED boot indication.<br>
+25) bridge, route and others speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>
