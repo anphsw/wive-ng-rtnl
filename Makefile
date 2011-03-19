@@ -6,7 +6,7 @@
 # Copyright (c) 2001, Lineo
 #
 
--include  version
+-include version
 
 VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
 
@@ -16,7 +16,11 @@ VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
 #
 
 ifeq (.config,$(wildcard .config))
-include .config
+-include .config
+
+ifeq ($(ROOTDIR),)
+ROOTDIR=.
+endif
 
 #changed by Steven Liu
 #all: ucfront cksum subdirs romfs image
@@ -396,17 +400,19 @@ clean: modules_clean
 	make mrproper -C Uboot
 	make clean -C fulldump
 	make clean -C tools
-	find $(ROOTDIR) -name 'config.log' | xargs rm -f
-	find $(ROOTDIR)/user -name '*.o' | xargs rm -f
-	find $(ROOTDIR)/user -name '*.so' | xargs rm -f
-	find $(ROOTDIR)/lib -name '*.o' | xargs rm -f
-	find $(ROOTDIR)/lib -name '*.so' | xargs rm -f
-	find $(ROOTDIR) -name '*.ko' | xargs rm -f
-	find $(ROOTDIR) -name '*.old' | xargs rm -f
-	find $(ROOTDIR) -name '*.log' | xargs rm -f
-	find $(ROOTDIR) -name '.dep' | xargs rm -rf
-	find $(ROOTDIR) -name '.deps' | xargs rm -rf
-	find $(ROOTDIR) -name CVS -type d | xargs rm -rf
+	find $(ROOTDIR) -type f -name  'config.log' | xargs rm -f
+	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
+	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
+	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f
+	find $(ROOTDIR)/lib -type f -name '*.so' | xargs rm -f
+	find $(ROOTDIR) -type f -name '*.ko' | xargs rm -f
+	find $(ROOTDIR) -type f -name '*.old' | xargs rm -f
+	find $(ROOTDIR) -type f -name '*.log' | xargs rm -f
+	find $(ROOTDIR) -type f -name cvs -type d | xargs rm -rf
+	find $(ROOTDIR) -type d -name CVS -type d | xargs rm -rf
+	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
+	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
+	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
 
 real_clean mrproper: clean
 	make -C linux mrproper
