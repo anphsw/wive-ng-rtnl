@@ -83,17 +83,16 @@ static void QoSAFAttribute(webs_t wp, char_t *path, char_t *query)
 
 	QoSRestart();
 
-    websWrite(wp, T("HTTP/1.0 200 OK\n"));
-    websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
-    websWrite(wp, T("Pragma: no-cache\n"));
-    websWrite(wp, T("Cache-control: no-cache\n"));
-    websWrite(wp, T("Content-Type: text/html\n"));
-    websWrite(wp, T("\n"));
-    websWrite(wp, T("<html>\n<head>\n"));
-    websWrite(wp, T("<title>QoS</title>"));
-    websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
-    websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"));
-    websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
+	websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("Content-Type: text/html\n"));
+	websWrite(wp, T("\n"));
+	websWrite(wp, T("<html>\n<head>\n"));
+	websWrite(wp, T("<title>QoS</title>"));
+	websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
+	websWrite(wp, T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">"));
+	websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
 
 	websFooter(wp);
 	websDone(wp, 200);
@@ -264,15 +263,14 @@ static void qosClassifier(webs_t wp, char_t *path, char_t *query)
 //	websHeader(wp);
         websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
-        websWrite(wp, T("Pragma: no-cache\n"));
-        websWrite(wp, T("Cache-control: no-cache\n"));
-        websWrite(wp, T("Content-Type: text/html\n"));
-        websWrite(wp, T("\n"));
-        websWrite(wp, T("<html>\n<head>\n"));
-        websWrite(wp, T("<title>QoS</title>"));
-        websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
-        websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"));
-        websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("Content-Type: text/html\n"));
+	websWrite(wp, T("\n"));
+	websWrite(wp, T("<html>\n<head>\n"));
+	websWrite(wp, T("<title>QoS</title>"));
+	websWrite(wp, T("<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">"));
+	websWrite(wp, T("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"));
+	websWrite(wp, T("</head>\n<body onload=\"opener.location.reload();window.close();\">\n"));
 
 	websWrite(wp, T("name: %s<br>\n"), comment);
 	websWrite(wp, T("mac: %s<br>\n"), mac_address);
@@ -327,9 +325,11 @@ static void QoSDelete(webs_t wp, char_t *path, char_t *query)
 
 err:
 
-    websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
-    websWrite(wp, T("success\n"));
-    websDone(wp, 200);
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
+	websWrite(wp, T("success\n"));
+	websDone(wp, 200);
 }
 
 static void QoSDeleteRules(webs_t wp, char_t *path, char_t *query)

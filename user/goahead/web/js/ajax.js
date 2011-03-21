@@ -40,6 +40,19 @@ function createXMLHttp()
 	return xmlHttp;
 }
 
+function genRandomParam(uri)
+{
+	if (uri == null)
+		uri = '';
+	if (navigator.userAgent.indexOf('MSIE') < 0)
+		return uri;
+
+	var d = new Date();
+	var res = (uri.indexOf('?') < 0) ? uri + '?' : uri + '&';
+
+	return res + "msieSucks=" + d.getTime() + "." + Math.round(Math.random()*100000000.0);
+}
+
 function ajaxPerformRequest(uri)
 {
 	var xmlHttp = createXMLHttp();
@@ -56,7 +69,7 @@ function ajaxPerformRequest(uri)
 		}
 	}
 	
-	xmlHttp.open("GET", uri, true);
+	xmlHttp.open("GET", genRandomParam(uri), true);
 	xmlHttp.send(null);
 }
 
@@ -78,7 +91,7 @@ function ajaxPostRequest(uri, content, refresh)
 		}
 	}
 	
-	xmlHttp.open("POST", uri, true);
+	xmlHttp.open("POST", genRandomParam(uri), true);
 	xmlHttp.send(content);
 }
 
@@ -97,8 +110,13 @@ function ajaxLoadElement(elementID, url, onLoadAction)
 	{
 		if (xmlHttp.readyState == 4)
 		{
+			var text = xmlHttp.responseText;
+			
 			if (xmlHttp.status == 200)
-				element.innerHTML = xmlHttp.responseText;
+			{
+				element.innerHTML = '';
+				element.innerHTML = text;
+			}
 			else
 				element.innerHTML = '<b>' + xmlHttp.statusText + '</b>';
 			
@@ -111,7 +129,7 @@ function ajaxLoadElement(elementID, url, onLoadAction)
 		}
 	}
 	
-	xmlHttp.open("GET", url, true);
+	xmlHttp.open("GET", genRandomParam(url), true);
 	xmlHttp.send();
 }
 
@@ -143,7 +161,7 @@ function ajaxLoadScript(scriptFile)
 		}
 	}
 	
-	xmlHttp.open("GET", scriptFile, true);
+	xmlHttp.open("GET", genRandomParam(scriptFile), true);
 	xmlHttp.send(null);
 }
 
@@ -225,7 +243,7 @@ function ajaxPopupWindow(popupID, url, onLoadAction)
 		}
 	};
 
-	xmlHttp.open("GET", url, true);
+	xmlHttp.open("GET", genRandomParam(url), true);
 	xmlHttp.send(null);
 }
 

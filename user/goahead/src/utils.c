@@ -1105,7 +1105,9 @@ static int isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv)
 
 void redirect_wholepage(webs_t wp, const char *url)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/html\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/html\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("<html><head><script language=\"JavaScript\">"));
 	websWrite(wp, T("parent.location.replace(\"%s\");"), url);
 	websWrite(wp, T("</script></head></html>"));

@@ -1,8 +1,11 @@
 <html><head>
+<title>PPTP tunnel setup</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="PRAGMA" content="NO-CACHE">
-<title>PPTP tunnel setup</title>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Pragma" content="no-cache">
+
+
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/js/share.js"></script>

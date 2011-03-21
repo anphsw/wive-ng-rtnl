@@ -1300,7 +1300,9 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 		}
 	}
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("%s"), result);
 	websDone(wp, 200);
 
@@ -1679,7 +1681,9 @@ void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	default_shown_mbssid[nvram] = mbssid;
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("ok done"));
 	websDone(wp, 200);
 	
@@ -1929,7 +1933,9 @@ static void getAntenna(webs_t wp, char_t *path, char_t *query)
 		fgets(buf, 32, fp);
 		fclose(fp);
 	}
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, "%s", buf);
 	websDone(wp, 200);
 }

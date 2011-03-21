@@ -73,6 +73,8 @@
 #define CGI_UPLOAD				T("upload")
 #define CGI_FIRMWARE_UPLOAD		T("upload.cgi")
 
+#define WEBS_CACHE_CONTROL_STRING	T("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0\r\nPragma: no-cache\r\n")
+
 /*
  *	URL handler flags
  */

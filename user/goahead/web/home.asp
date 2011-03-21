@@ -2,9 +2,10 @@
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Pragma" content="no-cache">
+
 <script type="text/javascript" src="/js/ajax.js"></script>
 
 <script language="JavaScript" type="text/javascript">

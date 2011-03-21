@@ -1364,8 +1364,9 @@ void setFirmwarePath(void)
 
 static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
-
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, "%s", firmware_path);
 	websDone(wp, 200);
 }

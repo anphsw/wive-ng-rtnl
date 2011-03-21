@@ -1,10 +1,15 @@
 <html>
 <head>
 <title>Access Point Status</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Pragma" content="no-cache">
+
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <link rel="stylesheet" href="/style/windows.css" type="text/css">
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
@@ -188,11 +193,13 @@ function setWanPort(form)
 <H1 id="statusTitle">Access Point Status</H1>
 <P id="statusIntroduction">Let's take a look at the status. </P>
 
-<table width="95%" border="1" cellpadding="2" cellspacing="1" id="sysinfoTable">
+<div id="sysinfoTable">
+<table width="95%" border="1" cellpadding="2" cellspacing="1">
 </table>
+</div>
 
 <form name="setWanForm" method="POST" action="/goform/setWanPort">
-<table width="95%" border="1" cellpadding="2" cellspacing="1" id="sysinfoTable">
+<table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2">Port management</td>
 </tr>

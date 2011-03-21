@@ -162,7 +162,9 @@ static void NTPSyncWithHost(webs_t wp, char_t *path, char_t *query)
 
 	doSystem("date -s %s", query);
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("n/a"));
 	websDone(wp, 200);
 }
@@ -682,7 +684,9 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 	FILE *fp = NULL;
 	char *log;
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	fp = popen("cat /var/log/messages", "r");
 

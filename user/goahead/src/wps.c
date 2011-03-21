@@ -289,7 +289,9 @@ void updateWPS( webs_t wp, char_t *path, char_t *query)
 //	getWscProfile(interface, &result, sizeof(WSC_CONFIGURED_VALUE));
 	getWscProfile("ra0", &result, sizeof(WSC_CONFIGURED_VALUE));
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	//1. WPSConfigured
 	websWrite(wp, T("%d\n"), result.WscConfigured);
@@ -1709,9 +1711,11 @@ void WPSSTAEnrolleeTimerHandler(int signo)
 static void updateWPSStaStatus(webs_t wp, char_t *path, char_t *query)
 {
 	char interface[] = "ra0";
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("%s"), getWscStatusStr(getWscStatus(interface)));
-    websDone(wp, 200);
+	websDone(wp, 200);
 	return;
 }
 
@@ -1724,9 +1728,11 @@ static void WPSSTAStop(webs_t wp, char_t *path, char_t *query)
 	resetTimerAll();
 	doSystem("iwpriv ra0 wsc_stop");
 
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("%s"), getWscStatusStr(getWscStatus(interface)));
-    websDone(wp, 200);	
+	websDone(wp, 200);
 	return;
 }
 
@@ -1734,12 +1740,15 @@ static void WPSSTAGenNewPIN(webs_t wp, char_t *path, char_t *query)
 {
 	char pin[16];
 	doSystem("iwpriv ra0 wsc_gen_pincode");
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
+
 	if(!getSTAEnrolleePIN(pin))
 		websWrite(wp, T("error"));
 	else
 		websWrite(wp, T("%s"), pin);
-    websDone(wp, 200);
+	websDone(wp, 200);
 }
 
 /*
@@ -1748,12 +1757,14 @@ static void WPSSTAGenNewPIN(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPINEnr(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPINStartEnr(query);
 	websWrite(wp, T("Enrollee PIN..."));
-    websDone(wp, 200);	
+	websDone(wp, 200);
 }
 
 /*
@@ -1762,12 +1773,14 @@ static void WPSSTAPINEnr(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPBCEnr(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPBCStartEnr();
 	websWrite(wp, T("Enrollee PBC..."));
-    websDone(wp, 200);	
+	websDone(wp, 200);
 }
  
 /*
@@ -1779,7 +1792,9 @@ static void WPSSTAPINReg(webs_t wp, char_t *path, char_t *query)
 	int pin_int;
 	char ssid[33], pin[16];
 	char_t *sp;
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	if(!query)
 		return;
@@ -1803,12 +1818,14 @@ static void WPSSTAPINReg(webs_t wp, char_t *path, char_t *query)
  */
 static void WPSSTAPBCReg(webs_t wp, char_t *path, char_t *query)
 {
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 
 	printf("Query = %s\n", query);
 	WPSSTAPBCStartReg();
 	websWrite(wp, T("Registrar PBC..."));
-    websDone(wp, 200);	
+	websDone(wp, 200);
 }
 
 
@@ -1816,7 +1833,9 @@ static void WPSSTARegistrarSetupSSID(webs_t wp, char_t *path, char_t *query)
 {
 	nvram_set(RT2860_NVRAM, "staRegSSID", query);
 	
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("WPS STA Registrar settings: SSID done\n"));
 	websDone(wp, 200);
 
@@ -1826,7 +1845,9 @@ static void WPSSTARegistrarSetupKey(webs_t wp, char_t *path, char_t *query)
 {
 	nvram_set(RT2860_NVRAM, "staRegKey", query);
 	
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("WPS STA Registrar settings: Key done\n"));
 	websDone(wp, 200);
 }
@@ -1847,7 +1868,9 @@ static void WPSSTARegistrarSetupRest(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 	
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("WPS STA Registrar settings: rest all done\n"));
 	websDone(wp, 200);
 }
@@ -1861,7 +1884,9 @@ static void WPSSTAMode(webs_t wp, char_t *path, char_t *query)
 	else
 		return;
 	
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\nPragma: no-cache\nCache-Control: no-cache\n\n"));
+	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
+	websWrite(wp, T("\n"));
 	websWrite(wp, T("WPS STA mode setting done\n"));
 	websDone(wp, 200);
 }

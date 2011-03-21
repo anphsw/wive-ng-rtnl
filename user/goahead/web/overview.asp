@@ -1,10 +1,11 @@
 <HTML>
 <HEAD>
 <TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Pragma" content="no-cache">
+
 <LINK REL="stylesheet" HREF="style/normal_ws.css" TYPE="text/css">
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript">

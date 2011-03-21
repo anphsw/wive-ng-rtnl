@@ -136,8 +136,7 @@ void websHeader(webs_t wp)
  */
 	websWrite(wp, T("Server: %s\r\n"), WEBS_NAME);
 
-	websWrite(wp, T("Pragma: no-cache\n"));
-	websWrite(wp, T("Cache-control: no-cache\n"));
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("Content-Type: text/html\n"));
 	websWrite(wp, T("\n"));
 	websWrite(wp, T("<html>\n<head>\n"));

@@ -1,21 +1,13 @@
-!
-!
-!
-!           This file will be removed and we keep it now for ref.
-!
-!
-
-
 <!-- Copyright 2006, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 
 <% wscRedirectUIPageASP(); %>
 
-<META HTTP-EQUIV="Expires" CONTENT="-1">
-<META http-equiv="Content-Type" content="text/html; charset=utf-8">
-<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
-<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Pragma" content="no-cache">
+
 <link href="css.css" rel="stylesheet" type="text/css">
 <title>Ralink Wireless Access Point</title>
 

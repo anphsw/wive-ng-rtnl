@@ -166,8 +166,6 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
  */
 	if (flags & WEBS_ASP) {
 		bytes = 0;
-		websWrite(wp, T("Pragma: no-cache\r\nCache-Control: no-cache\r\n"));
-
 	} else {
 		if ((date = websGetDateString(&sbuf)) != NULL) {
 			websWrite(wp, T("Last-modified: %s\r\n"), date);
@@ -185,6 +183,8 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 	if ((flags & WEBS_KEEP_ALIVE) && !(flags & WEBS_ASP)) {
 		websWrite(wp, T("Connection: keep-alive\r\n"));
 	}
+	
+	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("\r\n"));
 
 /*
