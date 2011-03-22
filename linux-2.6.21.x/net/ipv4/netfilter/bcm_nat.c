@@ -122,14 +122,8 @@ bcm_do_bindings(struct nf_conn *ct,
 		if (ct->status & statusbit) {
 			struct nf_conntrack_tuple target;
 
-			if (skb_cloned(*pskb) && !(*pskb)->sk) {
-				struct sk_buff *nskb = skb_copy(*pskb, GFP_ATOMIC);
-				if (!nskb)
-					return NF_DROP;
-
-				kfree_skb(*pskb);
-				*pskb = nskb;
-			}
+			if (!skb_make_writable(pskb, 0))
+				return NF_DROP;
 
 			if ((*pskb)->dst == NULL && mtype == IP_NAT_MANIP_SRC) {
 				struct net_device *dev = (*pskb)->dev;
