@@ -309,7 +309,8 @@
 26) Workaround for no-cache in IE.<br>
 27) Backport network fixes from upstream.<br>
 28) Consolidate fastnat code.<br>
-29) Fix for full disable fastnat mode if need.<br> 
+29) Fix for full disable fastnat mode if need.<br>
+30) Fix Cone NAT implementation.<br> 
 
 <br><br>
 <b>For support see:</b><br>
