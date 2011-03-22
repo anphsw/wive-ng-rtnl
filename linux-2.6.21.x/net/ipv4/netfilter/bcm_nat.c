@@ -120,7 +120,7 @@ bcm_do_bindings(struct nf_conn *ct,
 		if (ct->status & statusbit) {
 			struct nf_conntrack_tuple target;
 
-			if (!skb_make_writable(pskb, 0))
+			if (!skb_make_writable(*pskb, 0))
 				return NF_DROP;
 
 			if ((*pskb)->dst == NULL && mtype == IP_NAT_MANIP_SRC) {
