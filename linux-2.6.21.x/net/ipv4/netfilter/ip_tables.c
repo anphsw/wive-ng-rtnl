@@ -1374,6 +1374,7 @@ add_counter_to_entry(struct ipt_entry *e,
 	wan_dev = __dev_get_by_name("eth2.2");
 	f = ipt_get_target(e);
 
+	//MASQ
         if(strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
                 if (strcmp(e->ip.outiface, "eth2.2") == 0) {
                         memset(wan_name, 0, sizeof(wan_name));
@@ -1383,7 +1384,9 @@ add_counter_to_entry(struct ipt_entry *e,
 			memset(wan_ppp, 0, sizeof(wan_ppp));
                         memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
 			dprintf("ip_table: set wan_ppp=%s\n",wan_name);
-        	} else if(strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
+        	} 
+	//SNAT
+	} else if(strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
 			wan_dev = __dev_get_by_name(e->ip.outiface);
 			dprintf("ip_table: SNAT set wan_dev's name=%s\n",e->ip.outiface);
                 }
