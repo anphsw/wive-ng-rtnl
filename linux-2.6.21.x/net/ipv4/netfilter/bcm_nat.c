@@ -102,11 +102,11 @@ bcm_do_bindings(struct nf_conn *ct,
 		struct nf_conntrack_l4proto *l4proto)
 {
 	struct iphdr *iph = ip_hdr(*pskb);
-	unsigned int i;
 	static int hn[2] = {NF_IP_PRE_ROUTING, NF_IP_POST_ROUTING};
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
+	unsigned int i = 1;
 
-	for (i = 0; i < 2; i++) {
+	do {
 		enum nf_nat_manip_type mtype = HOOK2MANIP(hn[i]);
 		unsigned long statusbit;
 
@@ -139,7 +139,7 @@ bcm_do_bindings(struct nf_conn *ct,
 			if (!manip_pkt(target.dst.protonum, pskb, 0, &target, mtype))
 				return NF_DROP;
 		}
-	}
+	} while (i++ < 2);
 
 	return NF_FAST_NAT;
 }
