@@ -72,12 +72,7 @@ static inline int ip_skb_dst_mtu(struct sk_buff *skb)
 
 static inline int bcm_fast_path(struct sk_buff *skb)
 {
-	if (skb->dst) {
-		if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
-			return ip_fragment(skb, bcm_fast_path_output);
-		else
-			return bcm_fast_path_output(skb);
-	} else {
+	if (skb->dst == NULL) {
 		struct iphdr *iph = ip_hdr(skb);
 		struct net_device *dev = skb->dev;
 
@@ -86,6 +81,13 @@ static inline int bcm_fast_path(struct sk_buff *skb)
 		}
 		/*  Change skb owner to output device */
 		skb->dev = skb->dst->dev;
+	}
+
+	if (skb->dst) {
+		if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+			return ip_fragment(skb, bcm_fast_path_output);
+		else
+			return bcm_fast_path_output(skb);
 	}
 
 	kfree_skb(skb);
