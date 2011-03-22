@@ -1371,24 +1371,27 @@ add_counter_to_entry(struct ipt_entry *e,
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 	struct ipt_entry_target *f;
 
+	//set default wan dev to eth2.2
 	wan_dev = __dev_get_by_name("eth2.2");
+
 	f = ipt_get_target(e);
 
-	//MASQ
-        if(strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
+	//MASQ target
+        if (strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
                 if (strcmp(e->ip.outiface, "eth2.2") == 0) {
                         memset(wan_name, 0, sizeof(wan_name));
                         memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
-			dprintf("ip_table: set wan_name=%s\n",wan_name);
+			dprintf("ip_table: set wan_name=%s\n", wan_name);
 		} else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
 			memset(wan_ppp, 0, sizeof(wan_ppp));
                         memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
-			dprintf("ip_table: set wan_ppp=%s\n",wan_name);
+			dprintf("ip_table: set wan_ppp=%s\n", wan_ppp);
         	} 
-	//SNAT
-	} else if(strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
+	} else {
+	//SNAT target
+		if (strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
 			wan_dev = __dev_get_by_name(e->ip.outiface);
-			dprintf("ip_table: SNAT set wan_dev's name=%s\n",e->ip.outiface);
+			dprintf("ip_table: SNAT set wan_dev's name=%s\n", e->ip.outiface);
                 }
         }
 #endif
