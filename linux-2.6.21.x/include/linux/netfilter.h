@@ -8,6 +8,10 @@
 #include <linux/if.h>
 #include <linux/wait.h>
 #include <linux/list.h>
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#define	NF_FAST_NAT_DENY	1
+#include <net/ip.h>
+#endif
 #endif
 #include <linux/types.h>
 #include <linux/compiler.h>

@@ -83,7 +83,7 @@ static int ipv4_print_tuple(struct seq_file *s,
 #if !defined(CONFIG_BCM_NAT) && !defined(CONFIG_BCM_NAT_MODULE)
 static
 #endif
- struct sk_buff *
+struct sk_buff *
 nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
 {
 	skb_orphan(skb);
