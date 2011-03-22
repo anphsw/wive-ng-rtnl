@@ -52,14 +52,14 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 
 		skb_push(skb, hh_len);
 		ret = hh->hh_output(skb); 
-		if (ret==1) 
-			return 0; /* Don't return 1 */
-	} else if (dst->neighbour) {
+	} else if (dst->neighbour)
 		ret = dst->neighbour->output(skb);  
-		if (ret==1) 
-			return 0; /* Don't return 1 */
-	}
-	return ret;
+
+	/* Don't return 1 */	
+	if (ret==1) 
+	    return 0;
+	else
+	    return ret;
 }
 
 static inline int ip_skb_dst_mtu(struct sk_buff *skb)
