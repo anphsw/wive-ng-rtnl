@@ -1291,7 +1291,7 @@ static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
+#ifdef CONFIG_SYSLOGD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

@@ -670,13 +670,12 @@ static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
     system("fs restore");
 }
 
-#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
+#ifdef CONFIG_SYSLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
 	doSystem("service syslog restart &");
 	websRedirect(wp, "adm/syslog.asp");
 }
-#endif
 
 #define LOG_MAX (16384)
 static void syslog(webs_t wp, char_t *path, char_t *query)
@@ -710,6 +709,7 @@ error:
 		pclose(fp);
 	websDone(wp, 200);
 }
+#endif
 
 static int getGAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
@@ -750,8 +750,8 @@ void formDefineManagement(void)
 
 	websFormDefine(T("LoadDefaultSettings"), LoadDefaultSettings);
 
+#ifdef CONFIG_SYSLOGD
 	websFormDefine(T("syslog"), syslog);
-#if defined CONFIG_LOGREAD && defined CONFIG_KLOGD
 	websFormDefine(T("clearlog"), clearlog);
 #endif
 	formDefineWPS();
