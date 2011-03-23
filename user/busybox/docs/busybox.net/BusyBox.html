@@ -114,22 +114,23 @@ been enabled, more detailed usage information will also be available.</p>
 <h1><a name="commands">COMMANDS</a></h1>
 <p>Currently available applets include:</p>
 <pre>
-        [, [[, adduser, arp, arping, ash, awk, base64, bash, brctl, bunzip2,
-        bzcat, bzip2, cat, chattr, chmod, chown, chpasswd, clear, cp, crond,
-        crontab, cut, date, dd, deluser, depmod, df, dhcprelay, dmesg,
-        dnsdomainname, du, dumpleases, echo, egrep, env, ether-wake, expand,
-        expr, false, fgrep, find, flock, free, ftpget, ftpput, fuser, grep,
-        gunzip, gzip, halt, hd, head, hexdump, hostid, hostname, id,
-        ifconfig, inetd, init, insmod, ip, ipaddr, ipcalc, iplink, iproute,
-        iprule, iptunnel, kill, killall, killall5, klogd, length, linuxrc,
-        ln, logger, login, logread, ls, lsmod, md5sum, mdev, mesg, mkdir,
-        mknod, modinfo, modprobe, more, mount, mv, netstat, nice, nslookup,
-        ntpd, passwd, pgrep, pidof, ping, poweroff, printenv, printf, ps,
-        pwd, rdate, reboot, renice, rev, rm, rmdir, rmmod, route, run-parts,
-        sed, seq, sh, sleep, sort, split, stat, sum, switch_root, sync,
-        sysctl, syslogd, tail, tar, test, time, top, touch, traceroute,
-        true, udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig,
-        vi, watch, watchdog, wc, wget, which, yes, zcat</pre>
+        [, [[, adduser, arp, arping, ash, awk, base64, basename, bash,
+        brctl, bunzip2, bzcat, bzip2, cat, chattr, chmod, chown, chpasswd,
+        clear, cp, crond, crontab, cut, date, dd, deluser, depmod, df,
+        dhcprelay, dmesg, dnsdomainname, du, dumpleases, echo, egrep, env,
+        ether-wake, expand, expr, false, fgrep, find, flock, free, ftpget,
+        ftpput, fuser, grep, gunzip, gzip, halt, hd, head, hexdump, hostid,
+        hostname, id, ifconfig, inetd, init, insmod, ip, ipaddr, ipcalc,
+        iplink, iproute, iprule, iptunnel, kill, killall, killall5, klogd,
+        length, linuxrc, ln, logger, login, ls, lsmod, md5sum, mdev, mesg,
+        mkdir, mknod, modinfo, modprobe, more, mount, mv, netstat, nice,
+        nslookup, ntpd, passwd, pgrep, pidof, ping, poweroff, printenv,
+        printf, ps, pwd, rdate, reboot, renice, rev, rm, rmdir, rmmod,
+        route, run-parts, sed, seq, sh, sleep, sort, split, stat, sum,
+        switch_root, sync, sysctl, syslogd, tail, tar, test, time, top,
+        touch, traceroute, true, udhcpc, udhcpd, umount, uname, uniq,
+        uptime, usleep, vconfig, vi, watch, watchdog, wc, wget, which, yes,
+        zcat</pre>
 <p>
 </p>
 <hr />
@@ -210,6 +211,12 @@ been enabled, more detailed usage information will also be available.</p>
 Options:</p>
 <pre>
         -d      Decode data</pre>
+</dd>
+<dt><strong><a name="basename" class="item"><strong>basename</strong></a></strong></dt>
+
+<dd>
+<p>basename FILE [SUFFIX]</p>
+<p>Strip directory path and .SUFFIX from FILE</p>
 </dd>
 <dt><strong><a name="brctl" class="item"><strong>brctl</strong></a></strong></dt>
 
@@ -1022,15 +1029,6 @@ iproute { add | del | change | append | replace | monitor } ROUTE
         -f      Don't authenticate (user already authenticated)
         -h      Name of the remote host
         -p      Preserve environment</pre>
-</dd>
-<dt><strong><a name="logread" class="item"><strong>logread</strong></a></strong></dt>
-
-<dd>
-<p>logread [-f]</p>
-<p>Show messages in syslogd's circular buffer</p>
-<p>Options:</p>
-<pre>
-        -f      Output data as log grows</pre>
 </dd>
 <dt><strong><a name="ls" class="item"><strong>ls</strong></a></strong></dt>
 
