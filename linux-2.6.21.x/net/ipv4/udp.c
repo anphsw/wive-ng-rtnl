@@ -1555,7 +1555,7 @@ int udp_proc_register(struct udp_seq_afinfo *afinfo)
 	afinfo->seq_ops.next            = udp_seq_next;
 	afinfo->seq_ops.stop            = udp_seq_stop;
 
-	p = proc_net_fops_create(net, afinfo->name, S_IRUGO, &afinfo->seq_fops);
+	p = proc_net_fops_create(afinfo->name, S_IRUGO, &afinfo->seq_fops);
 	if (p)
 		p->data = afinfo;
 	else
