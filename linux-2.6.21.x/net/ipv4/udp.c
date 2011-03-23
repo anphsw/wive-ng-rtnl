@@ -1523,12 +1523,8 @@ static int udp_seq_open(struct inode *inode, struct file *file)
 		goto out;
 	s->family		= afinfo->family;
 	s->hashtable		= afinfo->hashtable;
-	s->seq_ops.start	= udp_seq_start;
-	s->seq_ops.next		= udp_seq_next;
-	s->seq_ops.show		= afinfo->seq_show;
-	s->seq_ops.stop		= udp_seq_stop;
 
-	rc = seq_open(file, &s->seq_ops);
+	rc = seq_open(file, &afinfo->seq_ops);
 	if (rc)
 		goto out_kfree;
 
@@ -1554,6 +1550,10 @@ int udp_proc_register(struct udp_seq_afinfo *afinfo)
 	afinfo->seq_fops->read		= seq_read;
 	afinfo->seq_fops->llseek	= seq_lseek;
 	afinfo->seq_fops->release	= seq_release_private;
+
+	afinfo->seq_ops.start           = udp_seq_start;
+	afinfo->seq_ops.next            = udp_seq_next;
+	afinfo->seq_ops.stop            = udp_seq_stop;
 
 	p = proc_net_fops_create(afinfo->name, S_IRUGO, afinfo->seq_fops);
 	if (p)
@@ -1613,8 +1613,10 @@ static struct udp_seq_afinfo udp4_seq_afinfo = {
 	.name		= "udp",
 	.family		= AF_INET,
 	.hashtable	= udp_hash,
-	.seq_show	= udp4_seq_show,
 	.seq_fops	= &udp4_seq_fops,
+	.seq_ops	= {
+		.show		= udp4_seq_show,
+	},
 };
 
 int __init udp4_proc_init(void)
