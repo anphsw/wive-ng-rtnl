@@ -1545,17 +1545,17 @@ int udp_proc_register(struct udp_seq_afinfo *afinfo)
 
 	if (!afinfo)
 		return -EINVAL;
-	afinfo->seq_fops->owner		= afinfo->owner;
-	afinfo->seq_fops->open		= udp_seq_open;
-	afinfo->seq_fops->read		= seq_read;
-	afinfo->seq_fops->llseek	= seq_lseek;
-	afinfo->seq_fops->release	= seq_release_private;
+	afinfo->seq_fops.owner		= afinfo->owner;
+	afinfo->seq_fops.open		= udp_seq_open;
+	afinfo->seq_fops.read		= seq_read;
+	afinfo->seq_fops.llseek		= seq_lseek;
+	afinfo->seq_fops.release	= seq_release_private;
 
 	afinfo->seq_ops.start           = udp_seq_start;
 	afinfo->seq_ops.next            = udp_seq_next;
 	afinfo->seq_ops.stop            = udp_seq_stop;
 
-	p = proc_net_fops_create(afinfo->name, S_IRUGO, afinfo->seq_fops);
+	p = proc_net_fops_create(net, afinfo->name, S_IRUGO, &afinfo->seq_fops);
 	if (p)
 		p->data = afinfo;
 	else
@@ -1568,7 +1568,6 @@ void udp_proc_unregister(struct udp_seq_afinfo *afinfo)
 	if (!afinfo)
 		return;
 	proc_net_remove(afinfo->name);
-	memset(afinfo->seq_fops, 0, sizeof(*afinfo->seq_fops));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1607,13 +1606,11 @@ int udp4_seq_show(struct seq_file *seq, void *v)
 }
 
 /* ------------------------------------------------------------------------ */
-static struct file_operations udp4_seq_fops;
 static struct udp_seq_afinfo udp4_seq_afinfo = {
 	.owner		= THIS_MODULE,
 	.name		= "udp",
 	.family		= AF_INET,
 	.hashtable	= udp_hash,
-	.seq_fops	= &udp4_seq_fops,
 	.seq_ops	= {
 		.show		= udp4_seq_show,
 	},
