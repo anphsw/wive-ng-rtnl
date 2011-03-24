@@ -101,7 +101,11 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	br = p->br;
 	br_fdb_update(br, p, eth_hdr(skb)->h_source);
 
+#ifdef CONFIG_BRIDGE_EAP
+	if ((p->state == BR_STATE_LEARNING) && skb->protocol != htons(ETH_P_PAE))
+#else
 	if (p->state == BR_STATE_LEARNING)
+#endif
 		goto drop;
 
 	/* The packet skb2 goes to the local host (NULL to skip). */                                                                        
@@ -112,6 +116,13 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	dst = NULL;
 
+#ifdef CONFIG_BRIDGE_EAP
+	if (skb->protocol == htons(ETH_P_PAE)) {
+		skb2 = skb;
+		/* Do not forward 802.1x/EAP frames */
+		skb = NULL;
+	} else 
+#endif
 	if (is_multicast_ether_addr(dest)) { 
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 		spin_lock_bh(&br->lock); // bridge lock

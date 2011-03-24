@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Fri Mar 25 03:01:03 2011
 #
 CONFIG_MIPS=y
 
@@ -425,6 +426,7 @@ CONFIG_BRIDGE_PORT_FORWARD=y
 CONFIG_BRIDGE_IGMPP_PROCFS=y
 # CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG is not set
 CONFIG_BRIDGE_FASTPATH=y
+CONFIG_BRIDGE_EAP=y
 CONFIG_VLAN_8021Q=y
 # CONFIG_DECNET is not set
 CONFIG_LLC=y

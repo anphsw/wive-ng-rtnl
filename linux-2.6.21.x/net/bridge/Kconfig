@@ -89,3 +89,10 @@ config BRIDGE_FASTPATH
 	default y
 	---help---
 	  Fastest bridge operation support. WARNING CONFLICT WITH BR_NETFILTER
+
+config BRIDGE_EAP
+	bool "Bridge 802.1x/EAP hacks from openwrt."
+	depends on BRIDGE
+	default y
+	---help---
+	  Bridge do not forward 802.1x/EAP frames and always accept eap to local.
