@@ -405,7 +405,7 @@ int vlan_dev_hard_header(struct sk_buff *skb, struct net_device *dev,
 int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct net_device_stats *stats = vlan_dev_get_stats(dev);
-#if !defined (CONFIG_ESW_DOUBLE_VLAN_TAG) || defined (VLAN_DEBUG)
+#if !defined (CONFIG_VLAN_8021Q_DOUBLE_TAG) || defined (VLAN_DEBUG)
 	struct vlan_ethhdr *veth = (struct vlan_ethhdr *)(skb->data);
 #endif
 
@@ -415,7 +415,7 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 * OTHER THINGS LIKE FDDI/TokenRing/802.3 SNAPs...
 	 */
 
-#ifndef CONFIG_ESW_DOUBLE_VLAN_TAG
+#ifndef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	if (veth->h_vlan_proto != __constant_htons(ETH_P_8021Q) || 
 		VLAN_DEV_INFO(dev)->flags & 1 /* VLAN_FLAG_REORDER_HDR */){
 #endif
@@ -447,7 +447,7 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		if (orig_headroom < VLAN_HLEN) {
 			VLAN_DEV_INFO(dev)->cnt_inc_headroom_on_tx++;
 		}
-#ifndef CONFIG_ESW_DOUBLE_VLAN_TAG
+#ifndef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	}
 #endif
 

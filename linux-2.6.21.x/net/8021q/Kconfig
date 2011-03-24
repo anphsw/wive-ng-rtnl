@@ -17,3 +17,8 @@ config VLAN_8021Q
 	  will be called 8021q.
 
 	  If unsure, say N.
+
+config	VLAN_8021Q_DOUBLE_TAG
+	bool "Double vlan tag support."
+	---help---
+	  Support QinQ double vlan tag.

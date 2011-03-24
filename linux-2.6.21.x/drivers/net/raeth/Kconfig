@@ -94,9 +94,6 @@ config	RALINK_VISTA_BASIC
 	bool "Vista Basic Logo for IC+ 175C"
         depends on !RALINK_RT3052 && !RALINK_RT3352
 
-config	ESW_DOUBLE_VLAN_TAG
-	bool "Double vlan tag support."
-
 config RAETH_HAS_PORT5
         bool "Port 5 Support"
         depends on RAETH && (RALINK_RT3052 || RALINK_RT3352)
