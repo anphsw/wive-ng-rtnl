@@ -20,5 +20,6 @@ config VLAN_8021Q
 
 config	VLAN_8021Q_DOUBLE_TAG
 	bool "Double vlan tag support."
+	depends on VLAN_8021Q
 	---help---
 	  Support QinQ double vlan tag.
