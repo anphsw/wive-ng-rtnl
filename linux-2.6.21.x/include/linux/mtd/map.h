@@ -303,6 +303,7 @@ static inline map_word map_word_load(struct map_info *map, const void *ptr)
 {
 	map_word r;
 
+	memset(r.x, 0, sizeof(r.x));
 	if (map_bankwidth_is_1(map))
 		r.x[0] = *(unsigned char *)ptr;
 	else if (map_bankwidth_is_2(map))
