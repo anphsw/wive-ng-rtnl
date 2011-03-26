@@ -4,6 +4,7 @@
 #urpmi -a libgmpxx-devel --download-all --allow-force
 #urpmi -a libmpc- --download-all --allow-force
 #urpmi -a mpfr- --download-all --allow-force
+#urpmi -a texinfo- --download-all --allow-force
 
 DIR=`pwd`
 ROOTDIR=$DIR
@@ -11,14 +12,30 @@ ROOTDIR=$DIR
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.20.1
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.5.2
+GCCVER=gcc-4.6.0
 
 UNPACK=YES
 HEADERS=YES
 BINUTILS=YES
 GCC=YES
-GCCCPP=YES
 UCLIB=YES
+GCCCPP=YES
+
+export LC_PAPER=en_EN.UTF-8
+export LC_ADDRESS=en_EN.UTF-8
+export LC_MONETARY=en_EN.UTF-8
+export LC_TELEPHONE=en_EN.UTF-8
+export LC_IDENTIFICATION=en_EN.UTF-8
+export LC_MEASUREMENT=en_EN.UTF-8
+export LANGUAGE=en_EN.UTF-8:en                                                                                                              
+export LC_NAME=en_EN.UTF-8
+
+export LC_COLLATE=
+export LC_NUMERIC=
+export LC_MESSAGES=
+export LC_CTYPE=
+export LC_TIME=
+export LC_ALL=C
 
 export WDIR=$DIR/tmp
 export TARGET=mipsel-linux-uclibc
@@ -34,7 +51,10 @@ mkdir -p $WDIR
 cd $WDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
-rm -rf build-*
+if [ "$UNPACK" = "YES" ]; then
+    echo "=================REMOVE-OLD-BUILD-TREE=================="
+    rm -rf build-*
+fi
 
 if [ "$UNPACK" = "YES" ]; then
     echo "=================EXTRACT-KERNEL-HEADERS================="
@@ -62,7 +82,7 @@ if [ "$BINUTILS" = "YES" ]; then
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX && \
-    make -j3 KERNEL_HEADERS=$TARGET_DIR/include && \
+    make KERNEL_HEADERS=$TARGET_DIR/include && \
     make install) || exit 1
     cd ..
 fi
@@ -74,7 +94,7 @@ if [ "$GCC" = "YES" ]; then
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
 	--disable-shared \
-	--disable-tls --disable-libmudflap --disable-libssp \
+	--disable-tls --disable-libmudflap --disable-libssp --disable-libquadmath \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
 	--enable-languages=c && \
@@ -99,7 +119,7 @@ if [ "$GCCCPP" = "YES" ]; then
     (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
-	--disable-tls --disable-libmudflap --disable-libssp \
+	--disable-tls --disable-libmudflap --disable-libssp --disable-libquadmath \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
 	--enable-languages=c++ && \

@@ -1,12 +1,12 @@
 This is doc/cpp.info, produced by makeinfo version 4.13 from
-../../gcc-4.5.2/gcc/doc/cpp.texi.
+../../gcc-4.6.0/gcc/doc/cpp.texi.
 
 Copyright (C) 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+2010, 2011 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation.  A copy of
 the license is included in the section entitled "GNU Free Documentation
 License".
@@ -136,10 +136,10 @@ Obsolete Features
 
    Copyright (C) 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+2010, 2011 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation.  A copy of
 the license is included in the section entitled "GNU Free Documentation
 License".
@@ -197,9 +197,10 @@ Standard C.  In its default mode, the GNU C preprocessor does not do a
 few things required by the standard.  These are features which are
 rarely, if ever, used, and may cause surprising changes to the meaning
 of a program which does not expect them.  To get strict ISO Standard C,
-you should use the `-std=c90' or `-std=c99' options, depending on which
-version of the standard you want.  To get all the mandatory
-diagnostics, you must also use `-pedantic'.  *Note Invocation::.
+you should use the `-std=c90', `-std=c99' or `-std=c1x' options,
+depending on which version of the standard you want.  To get all the
+mandatory diagnostics, you must also use `-pedantic'.  *Note
+Invocation::.
 
    This manual describes the behavior of the ISO preprocessor.  To
 minimize gratuitous differences, where the ISO preprocessor's behavior
@@ -2065,6 +2066,33 @@ double underscores.
      `long', `long long', `short', `void *', `float', `double', `long
      double', `size_t', `wchar_t', `wint_t' and `ptrdiff_t'.
 
+`__BYTE_ORDER__'
+`__ORDER_LITTLE_ENDIAN__'
+`__ORDER_BIG_ENDIAN__'
+`__ORDER_PDP_ENDIAN__'
+     `__BYTE_ORDER__' is defined to one of the values
+     `__ORDER_LITTLE_ENDIAN__', `__ORDER_BIG_ENDIAN__', or
+     `__ORDER_PDP_ENDIAN__' to reflect the layout of multi-byte and
+     multi-word quantities in memory.  If `__BYTE_ORDER__' is equal to
+     `__ORDER_LITTLE_ENDIAN__' or `__ORDER_BIG_ENDIAN__', then
+     multi-byte and multi-word quantities are laid out identically: the
+     byte (word) at the lowest address is the least significant or most
+     significant byte (word) of the quantity, respectively.  If
+     `__BYTE_ORDER__' is equal to `__ORDER_PDP_ENDIAN__', then bytes in
+     16-bit words are laid out in a little-endian fashion, whereas the
+     16-bit subwords of a 32-bit quantity are laid out in big-endian
+     fashion.
+
+     You should use these macros for testing like this:
+
+          /* Test for a little-endian machine */
+          #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+
+`__FLOAT_WORD_ORDER__'
+     `__FLOAT_WORD_ORDER__' is defined to one of the values
+     `__ORDER_LITTLE_ENDIAN__' or `__ORDER_BIG_ENDIAN__' to reflect the
+     layout of the words of multi-word floating-point quantities.
+
 `__DEPRECATED'
      This macro is defined, with value 1, when compiling a C++ source
      file with warnings about deprecated constructs enabled.  These
@@ -2148,6 +2176,14 @@ double underscores.
      This macro is defined when the compiler is emitting Dwarf2 CFI
      directives to the assembler.  When this is defined, it is possible
      to emit those same directives in inline assembly.
+
+`__FP_FAST_FMA'
+`__FP_FAST_FMAF'
+`__FP_FAST_FMAL'
+     These macros are defined with value 1 if the backend supports the
+     `fma', `fmaf', and `fmal' builtin functions, so that the include
+     file `math.h' can define the macros `FP_FAST_FMA', `FP_FAST_FMAF',
+     and `FP_FAST_FMAL' for compatibility with the 1999 C standard.
 
 
 File: cpp.info,  Node: System-specific Predefined Macros,  Next: C++ Named Operators,  Prev: Common Predefined Macros,  Up: Predefined Macros
@@ -3812,12 +3848,12 @@ program will run on.  Assertions are usually predefined, but you can
 define them with preprocessing directives or command-line options.
 
    Assertions were intended to provide a more systematic way to describe
-the compiler's target system.  However, in practice they are just as
-unpredictable as the system-specific predefined macros.  In addition,
-they are not part of any standard, and only a few compilers support
-them.  Therefore, the use of assertions is *less* portable than the use
-of system-specific predefined macros.  We recommend you do not use them
-at all.
+the compiler's target system and we added them for compatibility with
+existing compilers.  In practice they are just as unpredictable as the
+system-specific predefined macros.  In addition, they are not part of
+any standard, and only a few compilers support them.  Therefore, the
+use of assertions is *less* portable than the use of system-specific
+predefined macros.  We recommend you do not use them at all.
 
    An assertion looks like this:
 
@@ -4117,10 +4153,6 @@ single-letter options may _not_ be grouped: `-dM' is very different from
      Make all warnings into hard errors.  Source code which triggers
      warnings will be rejected.
 
-     at item -Werror-maybe-reset  at opindex Werror-maybe-reset Act
-     like `-Wno-error' if the `GCC_NO_WERROR' environment variable is
-     set to anything other than 0 or empty.
-
 `-Wsystem-headers'
      Issue warnings for code in system headers.  These are normally
      unhelpful in finding bugs in your own code, therefore suppressed.
@@ -4293,6 +4325,10 @@ single-letter options may _not_ be grouped: `-dM' is very different from
           The revised ISO C standard, published in December 1999.
           Before publication, this was known as C9X.
 
+    `c1x'
+          The next version of the ISO C standard, still under
+          development.
+
     `gnu90'
     `gnu89'
           The 1990 C standard plus GNU extensions.  This is the default.
@@ -4300,6 +4336,10 @@ single-letter options may _not_ be grouped: `-dM' is very different from
     `gnu99'
     `gnu9x'
           The 1999 C standard plus GNU extensions.
+
+    `gnu1x'
+          The next version of the ISO C standard, still under
+          development, plus GNU extensions.
 
     `c++98'
           The 1998 ISO C++ standard plus amendments.
@@ -4371,7 +4411,9 @@ single-letter options may _not_ be grouped: `-dM' is very different from
 
 `-isysroot DIR'
      This option is like the `--sysroot' option, but applies only to
-     header files.  See the `--sysroot' option for more information.
+     header files (except for Darwin targets, where it applies to both
+     header files and libraries).  See the `--sysroot' option for more
+     information.
 
 `-imultilib DIR'
      Use DIR as a subdirectory of the directory containing
@@ -4674,10 +4716,10 @@ File: cpp.info,  Node: GNU Free Documentation License,  Next: Index of Directive
 GNU Free Documentation License
 ******************************
 
-                      Version 1.2, November 2002
+                     Version 1.3, 3 November 2008
 
-     Copyright (C) 2000,2001,2002 Free Software Foundation, Inc.
-     51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+     Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     `http://fsf.org/'
 
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
@@ -4778,6 +4820,9 @@ GNU Free Documentation License
      works in formats which do not have any title page as such, "Title
      Page" means the text near the most prominent appearance of the
      work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
 
      A section "Entitled XYZ" means a named subunit of the Document
      whose title either is precisely XYZ or contains XYZ in parentheses
@@ -5044,12 +5089,29 @@ GNU Free Documentation License
   9. TERMINATION
 
      You may not copy, modify, sublicense, or distribute the Document
-     except as expressly provided for under this License.  Any other
-     attempt to copy, modify, sublicense or distribute the Document is
-     void, and will automatically terminate your rights under this
-     License.  However, parties who have received copies, or rights,
-     from you under this License will not have their licenses
-     terminated so long as such parties remain in full compliance.
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly
+     and finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from
+     you under this License.  If your rights have been terminated and
+     not permanently reinstated, receipt of a copy of some or all of
+     the same material does not give you any rights to use it.
 
  10. FUTURE REVISIONS OF THIS LICENSE
 
@@ -5067,7 +5129,41 @@ GNU Free Documentation License
      published (not as a draft) by the Free Software Foundation.  If
      the Document does not specify a version number of this License,
      you may choose any version ever published (not as a draft) by the
-     Free Software Foundation.
+     Free Software Foundation.  If the Document specifies that a proxy
+     can decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+ 11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
 
 ADDENDUM: How to use this License for your documents
 ====================================================
@@ -5078,7 +5174,7 @@ notices just after the title page:
 
        Copyright (C)  YEAR  YOUR NAME.
        Permission is granted to copy, distribute and/or modify this document
-       under the terms of the GNU Free Documentation License, Version 1.2
+       under the terms of the GNU Free Documentation License, Version 1.3
        or any later version published by the Free Software Foundation;
        with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
        Texts.  A copy of the license is included in the section entitled ``GNU
@@ -5146,9 +5242,9 @@ without any initial `-' or `--'.
  [index ]
 * Menu:
 
-* A:                                     Invocation.          (line 528)
-* ansi:                                  Invocation.          (line 312)
-* C:                                     Invocation.          (line 587)
+* A:                                     Invocation.          (line 534)
+* ansi:                                  Invocation.          (line 308)
+* C:                                     Invocation.          (line 593)
 * C_INCLUDE_PATH:                        Environment Variables.
                                                               (line  16)
 * CPATH:                                 Environment Variables.
@@ -5156,78 +5252,78 @@ without any initial `-' or `--'.
 * CPLUS_INCLUDE_PATH:                    Environment Variables.
                                                               (line  17)
 * D:                                     Invocation.          (line  39)
-* dD:                                    Invocation.          (line 560)
+* dD:                                    Invocation.          (line 566)
 * DEPENDENCIES_OUTPUT:                   Environment Variables.
                                                               (line  44)
-* dI:                                    Invocation.          (line 569)
-* dM:                                    Invocation.          (line 544)
-* dN:                                    Invocation.          (line 566)
-* dU:                                    Invocation.          (line 573)
-* fdirectives-only:                      Invocation.          (line 436)
-* fdollars-in-identifiers:               Invocation.          (line 458)
-* fexec-charset:                         Invocation.          (line 485)
-* fextended-identifiers:                 Invocation.          (line 461)
-* finput-charset:                        Invocation.          (line 498)
-* fno-show-column:                       Invocation.          (line 523)
-* fno-working-directory:                 Invocation.          (line 508)
-* fpreprocessed:                         Invocation.          (line 466)
-* ftabstop:                              Invocation.          (line 479)
-* fwide-exec-charset:                    Invocation.          (line 490)
-* fworking-directory:                    Invocation.          (line 508)
-* H:                                     Invocation.          (line 632)
-* help:                                  Invocation.          (line 624)
+* dI:                                    Invocation.          (line 575)
+* dM:                                    Invocation.          (line 550)
+* dN:                                    Invocation.          (line 572)
+* dU:                                    Invocation.          (line 579)
+* fdirectives-only:                      Invocation.          (line 442)
+* fdollars-in-identifiers:               Invocation.          (line 464)
+* fexec-charset:                         Invocation.          (line 491)
+* fextended-identifiers:                 Invocation.          (line 467)
+* finput-charset:                        Invocation.          (line 504)
+* fno-show-column:                       Invocation.          (line 529)
+* fno-working-directory:                 Invocation.          (line 514)
+* fpreprocessed:                         Invocation.          (line 472)
+* ftabstop:                              Invocation.          (line 485)
+* fwide-exec-charset:                    Invocation.          (line 496)
+* fworking-directory:                    Invocation.          (line 514)
+* H:                                     Invocation.          (line 638)
+* help:                                  Invocation.          (line 630)
 * I:                                     Invocation.          (line  71)
-* I-:                                    Invocation.          (line 351)
-* idirafter:                             Invocation.          (line 393)
-* imacros:                               Invocation.          (line 384)
-* imultilib:                             Invocation.          (line 416)
-* include:                               Invocation.          (line 373)
-* iprefix:                               Invocation.          (line 400)
-* iquote:                                Invocation.          (line 428)
-* isysroot:                              Invocation.          (line 412)
-* isystem:                               Invocation.          (line 420)
-* iwithprefix:                           Invocation.          (line 406)
-* iwithprefixbefore:                     Invocation.          (line 406)
-* M:                                     Invocation.          (line 184)
-* MD:                                    Invocation.          (line 273)
-* MF:                                    Invocation.          (line 219)
-* MG:                                    Invocation.          (line 228)
-* MM:                                    Invocation.          (line 209)
-* MMD:                                   Invocation.          (line 289)
-* MP:                                    Invocation.          (line 238)
-* MQ:                                    Invocation.          (line 264)
-* MT:                                    Invocation.          (line 250)
-* nostdinc:                              Invocation.          (line 363)
-* nostdinc++:                            Invocation.          (line 368)
+* I-:                                    Invocation.          (line 355)
+* idirafter:                             Invocation.          (line 397)
+* imacros:                               Invocation.          (line 388)
+* imultilib:                             Invocation.          (line 422)
+* include:                               Invocation.          (line 377)
+* iprefix:                               Invocation.          (line 404)
+* iquote:                                Invocation.          (line 434)
+* isysroot:                              Invocation.          (line 416)
+* isystem:                               Invocation.          (line 426)
+* iwithprefix:                           Invocation.          (line 410)
+* iwithprefixbefore:                     Invocation.          (line 410)
+* M:                                     Invocation.          (line 180)
+* MD:                                    Invocation.          (line 269)
+* MF:                                    Invocation.          (line 215)
+* MG:                                    Invocation.          (line 224)
+* MM:                                    Invocation.          (line 205)
+* MMD:                                   Invocation.          (line 285)
+* MP:                                    Invocation.          (line 234)
+* MQ:                                    Invocation.          (line 260)
+* MT:                                    Invocation.          (line 246)
+* nostdinc:                              Invocation.          (line 367)
+* nostdinc++:                            Invocation.          (line 372)
 * o:                                     Invocation.          (line  82)
 * OBJC_INCLUDE_PATH:                     Environment Variables.
                                                               (line  18)
-* P:                                     Invocation.          (line 580)
-* pedantic:                              Invocation.          (line 174)
-* pedantic-errors:                       Invocation.          (line 179)
-* remap:                                 Invocation.          (line 619)
-* std=:                                  Invocation.          (line 312)
+* P:                                     Invocation.          (line 586)
+* pedantic:                              Invocation.          (line 170)
+* pedantic-errors:                       Invocation.          (line 175)
+* remap:                                 Invocation.          (line 625)
+* std=:                                  Invocation.          (line 308)
 * SUNPRO_DEPENDENCIES:                   Environment Variables.
                                                               (line  60)
-* target-help:                           Invocation.          (line 624)
-* traditional-cpp:                       Invocation.          (line 612)
-* trigraphs:                             Invocation.          (line 616)
+* target-help:                           Invocation.          (line 630)
+* traditional-cpp:                       Invocation.          (line 618)
+* trigraphs:                             Invocation.          (line 622)
 * U:                                     Invocation.          (line  62)
 * undef:                                 Invocation.          (line  66)
-* v:                                     Invocation.          (line 628)
-* version:                               Invocation.          (line 641)
-* w:                                     Invocation.          (line 170)
+* v:                                     Invocation.          (line 634)
+* version:                               Invocation.          (line 647)
+* w:                                     Invocation.          (line 166)
 * Wall:                                  Invocation.          (line  88)
 * Wcomment:                              Invocation.          (line  96)
 * Wcomments:                             Invocation.          (line  96)
 * Wendif-labels:                         Invocation.          (line 143)
 * Werror:                                Invocation.          (line 156)
-* Wsystem-headers:                       Invocation.          (line 164)
+* Wsystem-headers:                       Invocation.          (line 160)
 * Wtraditional:                          Invocation.          (line 113)
 * Wtrigraphs:                            Invocation.          (line 101)
 * Wundef:                                Invocation.          (line 119)
 * Wunused-macros:                        Invocation.          (line 124)
-* x:                                     Invocation.          (line 296)
+* x:                                     Invocation.          (line 292)
 
 
 File: cpp.info,  Node: Concept Index,  Prev: Option Index,  Up: Top
@@ -5250,9 +5346,9 @@ Concept Index
 * block comments:                        Initial processing.  (line  77)
 * C++ named operators:                   C++ Named Operators. (line   6)
 * character constants:                   Tokenization.        (line  85)
-* character set, execution:              Invocation.          (line 485)
-* character set, input:                  Invocation.          (line 498)
-* character set, wide execution:         Invocation.          (line 490)
+* character set, execution:              Invocation.          (line 491)
+* character set, input:                  Invocation.          (line 504)
+* character set, wide execution:         Invocation.          (line 496)
 * command line:                          Invocation.          (line   6)
 * commenting out code:                   Deleted Code.        (line   6)
 * comments:                              Initial processing.  (line  77)
@@ -5267,7 +5363,7 @@ Concept Index
 * defined:                               Defined.             (line   6)
 * dependencies for make as output:       Environment Variables.
                                                               (line  45)
-* dependencies, make:                    Invocation.          (line 184)
+* dependencies, make:                    Invocation.          (line 180)
 * diagnostic:                            Diagnostics.         (line   6)
 * differences from previous versions:    Differences from previous versions.
                                                               (line   6)
@@ -5308,7 +5404,7 @@ Concept Index
 * macros in include:                     Computed Includes.   (line   6)
 * macros with arguments:                 Macro Arguments.     (line   6)
 * macros with variable arguments:        Variadic Macros.     (line   6)
-* make:                                  Invocation.          (line 184)
+* make:                                  Invocation.          (line 180)
 * manifest constants:                    Object-like Macros.  (line   6)
 * named operators:                       C++ Named Operators. (line   6)
 * newlines in macro arguments:           Newlines in Arguments.
@@ -5375,79 +5471,79 @@ Concept Index
 
 
 Tag Table:
-Node: Top1096
-Node: Overview3822
-Node: Character sets6643
-Ref: Character sets-Footnote-18826
-Node: Initial processing9007
-Ref: trigraphs10566
-Node: Tokenization14768
-Ref: Tokenization-Footnote-121904
-Node: The preprocessing language22015
-Node: Header Files24893
-Node: Include Syntax26809
-Node: Include Operation28446
-Node: Search Path30294
-Node: Once-Only Headers33484
-Node: Alternatives to Wrapper #ifndef35143
-Node: Computed Includes36886
-Node: Wrapper Headers40044
-Node: System Headers42470
-Node: Macros44520
-Node: Object-like Macros45661
-Node: Function-like Macros49251
-Node: Macro Arguments50867
-Node: Stringification55012
-Node: Concatenation58218
-Node: Variadic Macros61326
-Node: Predefined Macros66113
-Node: Standard Predefined Macros66701
-Node: Common Predefined Macros72638
-Node: System-specific Predefined Macros88585
-Node: C++ Named Operators90606
-Node: Undefining and Redefining Macros91570
-Node: Directives Within Macro Arguments93674
-Node: Macro Pitfalls95222
-Node: Misnesting95755
-Node: Operator Precedence Problems96867
-Node: Swallowing the Semicolon98733
-Node: Duplication of Side Effects100756
-Node: Self-Referential Macros102939
-Node: Argument Prescan105348
-Node: Newlines in Arguments109102
-Node: Conditionals110053
-Node: Conditional Uses111883
-Node: Conditional Syntax113241
-Node: Ifdef113561
-Node: If116722
-Node: Defined119026
-Node: Else120309
-Node: Elif120879
-Node: Deleted Code122168
-Node: Diagnostics123415
-Node: Line Control125032
-Node: Pragmas128836
-Node: Other Directives133153
-Node: Preprocessor Output134203
-Node: Traditional Mode137404
-Node: Traditional lexical analysis138462
-Node: Traditional macros140965
-Node: Traditional miscellany144767
-Node: Traditional warnings145764
-Node: Implementation Details147961
-Node: Implementation-defined behavior148582
-Ref: Identifier characters149334
-Node: Implementation limits152412
-Node: Obsolete Features155086
-Node: Differences from previous versions157923
-Node: Invocation162131
-Ref: Wtrigraphs166583
-Ref: dashMF171541
-Ref: fdollars-in-identifiers180946
-Node: Environment Variables189109
-Node: GNU Free Documentation License192075
-Node: Index of Directives214508
-Node: Option Index216442
-Node: Concept Index222626
+Node: Top1102
+Node: Overview3834
+Node: Character sets6667
+Ref: Character sets-Footnote-18850
+Node: Initial processing9031
+Ref: trigraphs10590
+Node: Tokenization14792
+Ref: Tokenization-Footnote-121928
+Node: The preprocessing language22039
+Node: Header Files24917
+Node: Include Syntax26833
+Node: Include Operation28470
+Node: Search Path30318
+Node: Once-Only Headers33508
+Node: Alternatives to Wrapper #ifndef35167
+Node: Computed Includes36910
+Node: Wrapper Headers40068
+Node: System Headers42494
+Node: Macros44544
+Node: Object-like Macros45685
+Node: Function-like Macros49275
+Node: Macro Arguments50891
+Node: Stringification55036
+Node: Concatenation58242
+Node: Variadic Macros61350
+Node: Predefined Macros66137
+Node: Standard Predefined Macros66725
+Node: Common Predefined Macros72662
+Node: System-specific Predefined Macros90165
+Node: C++ Named Operators92186
+Node: Undefining and Redefining Macros93150
+Node: Directives Within Macro Arguments95254
+Node: Macro Pitfalls96802
+Node: Misnesting97335
+Node: Operator Precedence Problems98447
+Node: Swallowing the Semicolon100313
+Node: Duplication of Side Effects102336
+Node: Self-Referential Macros104519
+Node: Argument Prescan106928
+Node: Newlines in Arguments110682
+Node: Conditionals111633
+Node: Conditional Uses113463
+Node: Conditional Syntax114821
+Node: Ifdef115141
+Node: If118302
+Node: Defined120606
+Node: Else121889
+Node: Elif122459
+Node: Deleted Code123748
+Node: Diagnostics124995
+Node: Line Control126612
+Node: Pragmas130416
+Node: Other Directives134733
+Node: Preprocessor Output135783
+Node: Traditional Mode138984
+Node: Traditional lexical analysis140042
+Node: Traditional macros142545
+Node: Traditional miscellany146347
+Node: Traditional warnings147344
+Node: Implementation Details149541
+Node: Implementation-defined behavior150162
+Ref: Identifier characters150914
+Node: Implementation limits153992
+Node: Obsolete Features156666
+Node: Differences from previous versions159554
+Node: Invocation163762
+Ref: Wtrigraphs168214
+Ref: dashMF172989
+Ref: fdollars-in-identifiers182700
+Node: Environment Variables190863
+Node: GNU Free Documentation License193829
+Node: Index of Directives218993
+Node: Option Index220927
+Node: Concept Index227111
 
 End Tag Table
