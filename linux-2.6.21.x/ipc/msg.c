@@ -395,6 +395,11 @@ asmlinkage long sys_msgctl(int msqid, int cmd, struct msqid_ds __user *buf)
 	if (msqid < 0 || cmd < 0)
 		return -EINVAL;
 
+	memset(&setbuf.mode,	0, sizeof(setbuf.mode));
+	memset(&setbuf.gid,	0, sizeof(setbuf.gid));
+	memset(&setbuf.uid,	0, sizeof(setbuf.uid));
+	memset(&setbuf.qbytes,	0, sizeof(setbuf.qbytes));
+
 	version = ipc_parse_version(&cmd);
 	ns = current->nsproxy->ipc_ns;
 

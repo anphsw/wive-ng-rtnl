@@ -861,6 +861,10 @@ static int semctl_down(struct ipc_namespace *ns, int semid, int semnum,
 	struct sem_setbuf setbuf;
 	struct kern_ipc_perm *ipcp;
 
+        memset(&setbuf.mode,	0, sizeof(setbuf.mode));
+        memset(&setbuf.gid,	0, sizeof(setbuf.gid));
+        memset(&setbuf.uid,	0, sizeof(setbuf.uid));
+
 	if(cmd == IPC_SET) {
 		if(copy_semid_from_user (&setbuf, arg.buf, version))
 			return -EFAULT;
