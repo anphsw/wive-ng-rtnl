@@ -544,7 +544,7 @@ static int already_uses(struct module *a, struct module *b)
 static int use_module(struct module *a, struct module *b)
 {
 	struct module_use *use;
-	int no_warn, err;
+	int err;
 
 	if (b == NULL || already_uses(a, b)) return 1;
 
@@ -571,7 +571,7 @@ static int use_module(struct module *a, struct module *b)
 
 	use->module_which_uses = a;
 	list_add(&use->list, &b->modules_which_use_me);
-	no_warn = sysfs_create_link(b->holders_dir, &a->mkobj.kobj, a->name);
+	sysfs_create_link(b->holders_dir, &a->mkobj.kobj, a->name);
 	return 1;
 }
 
@@ -2422,7 +2422,6 @@ static void module_create_drivers_dir(struct module_kobject *mk)
 void module_add_driver(struct module *mod, struct device_driver *drv)
 {
 	char *driver_name;
-	int no_warn;
 	struct module_kobject *mk = NULL;
 
 	if (!drv)
@@ -2448,11 +2447,11 @@ void module_add_driver(struct module *mod, struct device_driver *drv)
 		return;
 
 	/* Don't check return codes; these calls are idempotent */
-	no_warn = sysfs_create_link(&drv->kobj, &mk->kobj, "module");
+	sysfs_create_link(&drv->kobj, &mk->kobj, "module");
 	driver_name = make_driver_name(drv);
 	if (driver_name) {
 		module_create_drivers_dir(mk);
-		no_warn = sysfs_create_link(mk->drivers_dir, &drv->kobj,
+		sysfs_create_link(mk->drivers_dir, &drv->kobj,
 					    driver_name);
 		kfree(driver_name);
 	}

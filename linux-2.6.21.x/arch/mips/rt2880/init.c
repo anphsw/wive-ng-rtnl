@@ -369,9 +369,7 @@ int prom_get_ttysnum(void)
 
 static void serial_setbrg(unsigned long wBaud)
 {
-        unsigned int clock_divisor = 0;
 #ifdef CONFIG_SERIAL_CONSOLE
-        clock_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV);
 /////////////////////CLASSIC INIT////////////////////////////////////////////////////////////////////////////////////////////
 #include "serial_rt2880.h"
 	//fix at SURFBOARD_DEFAULT_BAUD 8 n 1 n
@@ -395,6 +393,7 @@ static void serial_setbrg(unsigned long wBaud)
 #else
 /////////////////////UBOOT INIT////////////////////////////////////////////////////////////////////////////////////////////
 #include "serial_uboot.h"
+        unsigned int clock_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV);
 	//reset uart lite and uart full
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
 	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<12);
@@ -408,7 +407,6 @@ static void serial_setbrg(unsigned long wBaud)
 #endif
 	/* RST Control change from W1C to W1W0 to reset, update 20080812 */
 	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = 0;
-	//clock_divisor = (CPU_CLOCK_RATE / SERIAL_CLOCK_DIVISOR / gd->baudrate);
 #if defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA) || \
     defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA)
 	clock_divisor = (40*1000*1000/ SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);

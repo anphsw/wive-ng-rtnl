@@ -737,7 +737,7 @@ retry:
 
 	op_ret = futex_atomic_op_inuser(op, uaddr2);
 	if (unlikely(op_ret < 0)) {
-		u32 dummy;
+		u32 dummy __maybe_unused;
 
 		spin_unlock(&hb1->lock);
 		if (hb1 != hb2)

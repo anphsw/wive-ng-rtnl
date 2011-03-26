@@ -238,6 +238,7 @@ static inline void fault_in_pages_readable(const char __user *uaddr, int size)
 		if (((unsigned long)uaddr & PAGE_MASK) !=
 				((unsigned long)end & PAGE_MASK))
 		 	__get_user(c, end);
+			(void)c;
 	}
 }
 

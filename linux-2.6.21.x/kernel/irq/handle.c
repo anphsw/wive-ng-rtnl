@@ -167,19 +167,17 @@ irqreturn_t handle_IRQ_event(unsigned int irq, struct irqaction *action)
 fastcall unsigned int __do_IRQ(unsigned int irq)
 {
 	struct irq_desc *desc = irq_desc + irq;
-	struct irqaction *action;
+	struct irqaction *action __maybe_unused;
 	unsigned int status;
 
 	kstat_this_cpu.irqs[irq]++;
 	if (CHECK_IRQ_PER_CPU(desc->status)) {
-		irqreturn_t action_ret;
-
 		/*
 		 * No locking required for CPU-local interrupts:
 		 */
 		if (desc->chip->ack)
 			desc->chip->ack(irq);
-		action_ret = handle_IRQ_event(irq, desc->action);
+		handle_IRQ_event(irq, desc->action);
 		desc->chip->end(irq);
 		return 1;
 	}

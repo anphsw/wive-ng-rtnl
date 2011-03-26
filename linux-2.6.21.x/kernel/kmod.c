@@ -130,7 +130,7 @@ struct subprocess_info {
 static int ____call_usermodehelper(void *data)
 {
 	struct subprocess_info *sub_info = data;
-	struct key *new_session, *old_session;
+	struct key *new_session __maybe_unused, *old_session __maybe_unused;
 	int retval;
 
 	/* Unblock all signals and set the session keyring. */

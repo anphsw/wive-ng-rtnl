@@ -206,7 +206,6 @@ static inline int ls1bit32(unsigned int x)
 
 void surfboard_hw0_irqdispatch(void)
 {
-	struct irqaction *action;
 	unsigned long int_status;
 	int irq;
 
@@ -252,7 +251,6 @@ void surfboard_hw0_irqdispatch(void)
 		irq = SURFBOARDINT_UART;
 	}
 
-	action = irq_desc[irq].action;
 	do_IRQ(irq);
 	return;
 }

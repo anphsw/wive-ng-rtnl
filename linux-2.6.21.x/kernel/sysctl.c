@@ -1125,7 +1125,7 @@ struct ctl_table_header *sysctl_head_next(struct ctl_table_header *prev)
 }
 
 #ifdef CONFIG_SYSCTL_SYSCALL
-int do_sysctl(int __user *name, int nlen, void __user *oldval, size_t __user *oldlenp,
+static int do_sysctl(int __user *name, int nlen, void __user *oldval, size_t __user *oldlenp,
 	       void __user *newval, size_t newlen)
 {
 	struct ctl_table_header *head;
@@ -1134,7 +1134,7 @@ int do_sysctl(int __user *name, int nlen, void __user *oldval, size_t __user *ol
 	if (nlen <= 0 || nlen >= CTL_MAXNAME)
 		return -ENOTDIR;
 	if (oldval) {
-		int old_len;
+		int old_len __maybe_unused;
 		if (!oldlenp || get_user(old_len, oldlenp))
 			return -EFAULT;
 	}

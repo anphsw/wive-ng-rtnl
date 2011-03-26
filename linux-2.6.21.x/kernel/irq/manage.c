@@ -256,7 +256,6 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 {
 	struct irq_desc *desc = irq_desc + irq;
 	struct irqaction *old, **p;
-	const char *old_name = NULL;
 	unsigned long flags;
 	int shared = 0;
 
@@ -297,6 +296,7 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 		 */
 		if (!((old->flags & new->flags) & IRQF_SHARED) ||
 		    ((old->flags ^ new->flags) & IRQF_TRIGGER_MASK)) {
+			const char *old_name __maybe_unused = NULL;
 			old_name = old->name;
 			goto mismatch;
 		}
@@ -403,7 +403,7 @@ void free_irq(unsigned int irq, void *dev_id)
 	struct irq_desc *desc;
 	struct irqaction **p;
 	unsigned long flags;
-	irqreturn_t (*handler)(int, void *) = NULL;
+	irqreturn_t (*handler)(int, void *) __maybe_unused = NULL;
 
 	WARN_ON(in_interrupt());
 	if (irq >= NR_IRQS)

@@ -285,11 +285,10 @@ ktime_t ktime_add_ns(const ktime_t kt, u64 nsec)
  */
 unsigned long ktime_divns(const ktime_t kt, s64 div)
 {
-	u64 dclc, inc, dns;
+	u64 dclc, dns;
 	int sft = 0;
 
 	dclc = dns = ktime_to_ns(kt);
-	inc = div;
 	/* Make sure the divisor is less than 2^32: */
 	while (div >> 32) {
 		sft++;
