@@ -24,6 +24,9 @@ extern long __strlen_user_asm(const char *s);
 extern long __strnlen_user_nocheck_asm(const char *s);
 extern long __strnlen_user_asm(const char *s);
 
+extern void __lshrdi3(void);
+EXPORT_SYMBOL(__lshrdi3);
+
 /*
  * String functions
  */

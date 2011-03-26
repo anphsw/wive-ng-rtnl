@@ -331,7 +331,7 @@ CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fno-strict-aliasing -fno-common \
-                   -Wno-format-security -Wunused-but-set-variable \
+                   -Wno-format-security -Wno-unused-but-set-variable \
                    -fno-delete-null-pointer-checks
 AFLAGS          := -D__ASSEMBLY__
 
