@@ -314,7 +314,7 @@
 31) Fix syslog in webui without CONFIG_LOGREAD in busybox.<br>
 <br>
 <b>1.5.x</b><br>
-1) Move to 4.6.0 gcc
+1) Move to 4.6.0 gcc.<br>
 2) Fix EAP in bridge/mbssid mode.<br>
 3) Enable double vlan tag support per default.<br>
 4) Fix net/ipv6 fib metrics.<br>
