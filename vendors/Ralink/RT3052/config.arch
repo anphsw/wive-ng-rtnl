@@ -28,6 +28,7 @@ LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 
 CFLAGS  += -I$(ROOTDIR)
+CFLAGS  += -Wno-unused-but-set-variable
 CFLAGS  += $(OPTS)
 UOPT    += $(OPTS)
 LOPT    += $(OPTS)

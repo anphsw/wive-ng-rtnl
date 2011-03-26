@@ -312,8 +312,13 @@
 29) Fix for full disable fastnat mode if need.<br>
 30) Fix Cone NAT implementation.<br>
 31) Fix syslog in webui without CONFIG_LOGREAD in busybox.<br>
-32) Fix EAP in bridge/mbssid mode.<br>
-33) Enable double vlan tag support per default.<br> 
+<br>
+<b>1.5.x</b><br>
+1) Move to 4.6.0 gcc
+2) Fix EAP in bridge/mbssid mode.<br>
+3) Enable double vlan tag support per default.<br>
+4) Fix net/ipv6 fib metrics.<br>
+5) Zebra suspended (not build with gcc4.6.0).<br>
 
 <br><br>
 <b>For support see:</b><br>

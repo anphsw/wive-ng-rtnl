@@ -61,7 +61,6 @@ dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_USER_TC)                  	    += iproute2
-dir_$(CONFIG_USER_ZEBRA)		    += zebra
 dir_$(CONFIG_USER_PPPD)                	    += pppd
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
@@ -82,6 +81,7 @@ dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 dir_$(CONFIG_USER_RADVD)               	    += radvd
+dir_$(CONFIG_USER_ZEBRA)		    += zebra
 
 #alwayse make service utility
 #dir_y                                       += getBoardID

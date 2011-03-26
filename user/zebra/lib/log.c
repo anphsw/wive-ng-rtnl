@@ -178,8 +178,8 @@ zlog_err (const char *format, ...)
 void
 zlog_warn (const char *format, ...)
 {
-  va_list args[ZLOG_MAX_INDEX];
   int index;
+  va_list args[ZLOG_MAX_INDEX];
 
   for (index = 0; index < ZLOG_MAX_INDEX; index++)
     va_start(args[index], format);
@@ -193,8 +193,8 @@ zlog_warn (const char *format, ...)
 void
 zlog_info (const char *format, ...)
 {
-  va_list args[ZLOG_MAX_INDEX];
   int index;
+  va_list args[ZLOG_MAX_INDEX];
 
   for (index = 0; index < ZLOG_MAX_INDEX; index++)
     va_start(args[index], format);
