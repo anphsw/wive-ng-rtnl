@@ -331,7 +331,7 @@ CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fno-strict-aliasing -fno-common \
-                   -Wno-format-security -Wno-unused-but-set-variable \
+                   -Wno-format-security \
                    -fno-delete-null-pointer-checks
 AFLAGS          := -D__ASSEMBLY__
 
@@ -543,14 +543,20 @@ CFLAGS += $(call cc-option,-membedded-data,)
 CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
 
 # crazy optimizations                                                                                                                       
-CFLAGS  += $(call cc-option,-ffast-math,)
-CFLAGS  += $(call cc-option,-fforce-addr,)
+CFLAGS += $(call cc-option,-ffast-math,)
+CFLAGS += $(call cc-option,-fforce-addr,)
+
+# try fix performance regerssion in 4.6.0
+CFLAGS += $(call cc-option,-fschedule-insns,)
 
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 CFLAGS += $(call cc-option,-Wno-pointer-sign,)
+
+# disable variable unused warnings in gcc 4.6.0
+CFLAGS += $(call cc-option,-Wno-unused-but-set-variable,)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
