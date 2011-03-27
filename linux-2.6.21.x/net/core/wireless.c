@@ -1625,7 +1625,6 @@ static inline int rtnetlink_private_set(struct net_device *	dev,
 	int				hdr_len;
 	char *				extra = NULL;
 	int				extra_size = 0;
-	int				offset = 0;	/* For sub-ioctls */
 	struct iw_request_info		info;
 	int				i;
 	int				ret = -EINVAL;
@@ -1648,11 +1647,6 @@ static inline int rtnetlink_private_set(struct net_device *	dev,
 #endif	/* WE_RTNETLINK_DEBUG */
 
 	/* Compute the size of the set arguments */
-	/* Check for sub-ioctl handler */
-	if(descr->name[0] == '\0')
-		/* Reserve one int for sub-ioctl index */
-		offset = sizeof(__u32);
-
 	/* Size of set arguments */
 	extra_size = get_priv_size(descr->set_args);
 

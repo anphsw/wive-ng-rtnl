@@ -508,7 +508,7 @@ conntrack_pptp_help(struct sk_buff **pskb, unsigned int protoff,
 	union pptp_ctrl_union _pptpReq, *pptpReq;
 	unsigned int tcplen = (*pskb)->len - protoff;
 	unsigned int datalen, reqlen, nexthdr_off;
-	int oldsstate, oldcstate;
+	int oldsstate __maybe_unused, oldcstate __maybe_unused;
 	int ret;
 	u_int16_t msg;
 

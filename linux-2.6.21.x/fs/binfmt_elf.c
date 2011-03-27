@@ -551,7 +551,9 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
 	unsigned int size;
 	unsigned long elf_entry, interp_load_addr = 0;
 	unsigned long start_code, end_code, start_data, end_data;
-	unsigned long reloc_func_desc = 0;
+#ifdef ELF_PLAT_INIT
+	unsigned long reloc_func_desc __maybe_unused = 0;
+#endif
 #ifdef CONFIG_BINFMT_ELF_AOUT
 	char passed_fileno[6];
 #endif
@@ -898,7 +900,9 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
 				load_bias += error -
 				             ELF_PAGESTART(load_bias + vaddr);
 				load_addr += load_bias;
+#ifdef ELF_PLAT_INIT
 				reloc_func_desc = load_bias;
+#endif
 			}
 		}
 		k = elf_ppnt->p_vaddr;
@@ -973,7 +977,9 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
 					(int)elf_entry : -EINVAL;
 			goto out_free_dentry;
 		}
+#ifdef ELF_PLAT_INIT
 		reloc_func_desc = interp_load_addr;
+#endif
 
 		allow_write_access(interpreter);
 		fput(interpreter);

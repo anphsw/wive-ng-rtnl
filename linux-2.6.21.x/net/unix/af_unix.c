@@ -730,9 +730,9 @@ static struct sock *unix_find_other(struct sockaddr_un *sunname, int len,
 		err = -ECONNREFUSED;
 		u=unix_find_socket_byname(sunname, len, type, hash);
 		if (u) {
+#ifndef CONFIG_FS_ALL_NOATIME
 			struct dentry *dentry;
 			dentry = unix_sk(u)->dentry;
-#ifndef CONFIG_FS_ALL_NOATIME
 			if (dentry)
 				touch_atime(unix_sk(u)->mnt, dentry);
 #endif

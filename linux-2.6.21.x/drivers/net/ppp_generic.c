@@ -557,7 +557,10 @@ static int ppp_ioctl(struct inode *unused, struct file *file, unsigned int cmd, 
 {
 	struct ppp_file *pf = file->private_data;
 	struct ppp *ppp;
-	int err = -EFAULT, val, val2, i;
+	int err = -EFAULT, val, i;
+#ifdef CONFIG_SLHC
+	int val2;
+#endif
 	struct ppp_idle idle;
 	struct npioctl npi;
 	int unit, cflags;
@@ -693,9 +696,13 @@ static int ppp_ioctl(struct inode *unused, struct file *file, unsigned int cmd, 
 	case PPPIOCSMAXCID:
 		if (get_user(val, p))
 			break;
+#ifdef CONFIG_SLHC
 		val2 = 15;
+#endif
 		if ((val >> 16) != 0) {
+#ifdef CONFIG_SLHC
 			val2 = val >> 16;
+#endif
 			val &= 0xffff;
 		}
 #ifdef CONFIG_SLHC

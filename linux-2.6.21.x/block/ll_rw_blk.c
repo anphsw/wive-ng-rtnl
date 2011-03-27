@@ -3130,7 +3130,7 @@ void generic_make_request(struct bio *bio)
 	sector_t maxsector;
 	sector_t old_sector;
 	int ret, nr_sectors = bio_sectors(bio);
-	dev_t old_dev;
+	dev_t old_dev __maybe_unused;
 
 	might_sleep();
 	/* Test device or partition size, when known. */

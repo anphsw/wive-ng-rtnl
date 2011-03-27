@@ -455,7 +455,6 @@ static void tnode_put_child_reorg(struct tnode *tn, int i, struct node *n, int w
 static struct node *resize(struct trie *t, struct tnode *tn)
 {
 	int i;
-	int err = 0;
 	struct tnode *old_tn;
 	int inflate_threshold_use;
 	int halve_threshold_use;
@@ -558,7 +557,6 @@ static struct node *resize(struct trie *t, struct tnode *tn)
 	else
 		inflate_threshold_use = inflate_threshold;
 
-	err = 0;
 	while ((tn->full_children > 0 &&
 	       50 * (tn->full_children + tnode_child_length(tn) - tn->empty_children) >=
 				inflate_threshold_use * tnode_child_length(tn))) {
@@ -589,7 +587,6 @@ static struct node *resize(struct trie *t, struct tnode *tn)
 	else
 		halve_threshold_use = halve_threshold;
 
-	err = 0;
 	while (tn->bits > 1 &&
 	       100 * (tnode_child_length(tn) - tn->empty_children) <
 	       halve_threshold_use * tnode_child_length(tn)) {

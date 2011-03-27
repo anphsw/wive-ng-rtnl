@@ -1252,7 +1252,9 @@ void ip_rt_send_redirect(struct sk_buff *skb)
 {
 	struct rtable *rt = (struct rtable*)skb->dst;
 	struct in_device *in_dev;
+#ifdef CONFIG_IP_ROUTE_VERBOSE
 	int log_martians;
+#endif
 
 	rcu_read_lock();
 	in_dev = __in_dev_get_rcu(rt->u.dst.dev);
@@ -1260,7 +1262,9 @@ void ip_rt_send_redirect(struct sk_buff *skb)
 		rcu_read_unlock();
 		return;
 	}
+#ifdef CONFIG_IP_ROUTE_VERBOSE
 	log_martians = IN_DEV_LOG_MARTIANS(in_dev);
+#endif
 	rcu_read_unlock();
 
 	/* No redirected packets during ip_rt_redirect_silence;

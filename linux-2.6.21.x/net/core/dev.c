@@ -1959,7 +1959,7 @@ static void net_rx_action(struct softirq_action *h)
 	struct softnet_data *queue = &__get_cpu_var(softnet_data);
 	unsigned long start_time = jiffies;
 	int budget = netdev_budget;
-	void *have;
+	void *have __maybe_unused;
 
 	local_irq_disable();
 

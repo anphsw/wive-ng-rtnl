@@ -23,8 +23,6 @@ char ipv6_pt_wandev[IFNAMSIZ];
 int ipv6_pthrough(struct sk_buff *skb)
 {
 	unsigned short proto;
-	unsigned char *smac;
-	unsigned char *dmac;
 	struct net_device *dev;
 
 	/* check if ipv6 pass through enabled or not
@@ -34,8 +32,6 @@ int ipv6_pthrough(struct sk_buff *skb)
 	
 	// check and forward packets
 	proto = 0x100*(skb->mac.raw[12]) + skb->mac.raw[13];
-	dmac = skb->mac.raw;
-	smac = dmac + 6;
 
 	if (proto == ETH_TYPE_IPV6) {
 		if (strcmp(skb->dev->name, ipv6_pt_landev) == 0) {

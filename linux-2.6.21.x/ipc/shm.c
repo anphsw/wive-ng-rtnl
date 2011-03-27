@@ -312,7 +312,7 @@ int is_file_shm_hugepages(struct file *file)
 	int ret = 0;
 
 	if (file->f_op == &shm_file_operations) {
-		struct shm_file_data *sfd;
+		struct shm_file_data *sfd __maybe_unused;
 		sfd = shm_file_data(file);
 		ret = is_file_hugepages(sfd->file);
 	}

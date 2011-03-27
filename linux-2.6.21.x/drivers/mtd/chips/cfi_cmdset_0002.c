@@ -990,7 +990,6 @@ static int cfi_amdstd_read (struct mtd_info *mtd, loff_t from, size_t len, size_
 static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chip, loff_t adr, size_t len, u_char *buf)
 {
 	DECLARE_WAITQUEUE(wait, current);
-	unsigned long timeo = jiffies + HZ;
 	struct cfi_private *cfi = map->fldrv_priv;
 
  retry:
@@ -1011,8 +1010,6 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 		if(signal_pending(current))
 			return -EINTR;
 #endif
-		timeo = jiffies + HZ;
-
 		goto retry;
 	}
 

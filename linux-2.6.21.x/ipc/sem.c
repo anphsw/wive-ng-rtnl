@@ -497,7 +497,6 @@ static void freeary (struct ipc_namespace *ns, struct sem_array *sma, int id)
 {
 	struct sem_undo *un;
 	struct sem_queue *q;
-	int size;
 
 	/* Invalidate the existing undo structures for this semaphore set.
 	 * (They will be freed without any further action in exit_sem()
@@ -525,7 +524,6 @@ static void freeary (struct ipc_namespace *ns, struct sem_array *sma, int id)
 	sem_unlock(sma);
 
 	ns->used_sems -= sma->sem_nsems;
-	size = sizeof (*sma) + sma->sem_nsems * sizeof (struct sem);
 	security_sem_free(sma);
 	ipc_rcu_putref(sma);
 }

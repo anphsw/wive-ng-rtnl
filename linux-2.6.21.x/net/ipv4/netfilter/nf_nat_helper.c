@@ -44,7 +44,7 @@ adjust_tcp_sequence(u32 seq,
 		    enum ip_conntrack_info ctinfo)
 {
 	int dir;
-	struct nf_nat_seq *this_way, *other_way;
+	struct nf_nat_seq *this_way;
 	struct nf_conn_nat *nat = nfct_nat(ct);
 
 	DEBUGP("nf_nat_resize_packet: old_size = %u, new_size = %u\n",
@@ -53,7 +53,6 @@ adjust_tcp_sequence(u32 seq,
 	dir = CTINFO2DIR(ctinfo);
 
 	this_way = &nat->info.seq[dir];
-	other_way = &nat->info.seq[!dir];
 
 	DEBUGP("nf_nat_resize_packet: Seq_offset before: ");
 	DUMP_OFFSET(this_way);

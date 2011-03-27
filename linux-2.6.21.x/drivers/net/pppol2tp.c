@@ -527,7 +527,7 @@ out:
 static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 {
 	struct pppol2tp_session *session = NULL;
-	int error = 0;
+	int error __maybe_unused = 0;
 	struct pppol2tp_tunnel *tunnel;
 	unsigned char *ptr;
 	u16 hdrflags;
@@ -827,7 +827,7 @@ end:
  */
 static int pppol2tp_udp_encap_recv(struct sock *sk, struct sk_buff *skb)
 {
-	int err;
+	int err __maybe_unused;
 	struct pppol2tp_tunnel *tunnel;
 
 	ENTER_FUNCTION;
@@ -1364,7 +1364,7 @@ static void pppol2tp_tunnel_free(struct pppol2tp_tunnel *tunnel)
 static void pppol2tp_tunnel_destruct(struct sock *sk)
 {
 	struct pppol2tp_tunnel *tunnel;
-	int error = 0;
+	int error __maybe_unused = 0;
 	ENTER_FUNCTION;
 
 	SOCK_2_TUNNEL(sk, tunnel, error, -EBADF, end, 0);
@@ -1384,7 +1384,7 @@ end:
 static void pppol2tp_session_destruct(struct sock *sk)
 {
 	struct pppol2tp_session *session = NULL;
-	int error = 0;
+	int error __maybe_unused = 0;
 
 	ENTER_FUNCTION;
 

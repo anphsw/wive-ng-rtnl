@@ -598,14 +598,14 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 {
 	struct sk_buff	*skb, *rx_skb;
 	unsigned int	length = 0;
-	unsigned long	RxProcessed;
+#ifndef CONFIG_RAETH_NAPI
+	unsigned long	RxProcessed = 0;
+#endif
 	int bReschedule = 0;
 	END_DEVICE* 	ei_local = netdev_priv(dev);
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
 #endif
-
-	RxProcessed = 0;
 
 	for ( ; ; ) {
 
@@ -1107,7 +1107,6 @@ static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int
 	unsigned int tx_cpu_owner_idx_next;
 #if	!defined(CONFIG_RAETH_QOS)
 	unsigned int tx_cpu_owner_idx_next2;
-	struct PDMA_txdesc* tx_desc;
 #else
 	int ring_no, queue_no, port_no;
 #endif
@@ -1231,7 +1230,6 @@ static inline int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int
 		spin_unlock_irqrestore(&ei_local->page_lock, flags);
 		return 0;
 	}
-	tx_desc = ei_local->tx_ring0;
 	ei_local->skb_free[tx_cpu_owner_idx] = skb;
 
 	*(unsigned long*)TX_CTX_IDX0 = ((tx_cpu_owner_idx+1) % NUM_TX_DESC);
@@ -1535,7 +1533,9 @@ void ei_xmit_housekeeping(unsigned long unused)
     END_DEVICE *ei_local = netdev_priv(dev);
     struct PDMA_txdesc *tx_desc;
     unsigned long skb_free_idx;
+#ifdef CONFIG_RAETH_QOS
     unsigned long tx_dtx_idx;
+#endif
 #ifndef CONFIG_RAETH_NAPI
     unsigned long reg_int_mask=0;
 #endif
@@ -1561,7 +1561,6 @@ void ei_xmit_housekeeping(unsigned long unused)
 	ei_local->free_idx[i] = skb_free_idx;
     }
 #else
-	tx_dtx_idx = *(unsigned long*)TX_DTX_IDX0;
 	tx_desc = ei_local->tx_ring0;
 	skb_free_idx = ei_local->free_idx;
 	if ((ei_local->skb_free[skb_free_idx]) != 0) {

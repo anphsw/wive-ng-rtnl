@@ -417,15 +417,12 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 	struct iphdr *iph;
 	int raw = 0;
 	int ptr;
-	struct net_device *dev;
 	struct sk_buff *skb2;
 	unsigned int mtu, hlen, left, len, ll_rs, pad;
 	int offset;
 	__be16 not_last_frag;
 	struct rtable *rt = (struct rtable*)skb->dst;
 	int err = 0;
-
-	dev = rt->u.dst.dev;
 
 	/*
 	 *	Point into the IP datagram header.

@@ -255,8 +255,10 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 	}
 
 	if (compressed) {
+#ifndef CONFIG_SQUASHFS_NOERROR
 		int zlib_err = Z_STREAM_END;
-		int rest, start;
+#endif
+		int rest;
 		enum {Src, Dst};
 		struct sized_buf sbuf[2];
 		struct sqlzma *percpu;
@@ -284,7 +286,6 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 		if (!avail_bytes)
 			goto block_release; // nothing to be process
 
-		start = k;
 		/* it disables preemption */
 		percpu = get_cpu_var(sqlzma);
 #ifdef KeepPreemptive
@@ -311,7 +312,12 @@ SQSH_EXTERN unsigned int squashfs_read_data(struct super_block *s, char *buffer,
 		dpri_un(&percpu->un);
 		dpri("src %d %p, dst %d %p\n", sbuf[Src].sz, sbuf[Src].buf,
 		     sbuf[Dst].sz, sbuf[Dst].buf);
+#ifndef CONFIG_SQUASHFS_NOERROR
 		zlib_err = sqlzma_un(&percpu->un, sbuf + Src, sbuf + Dst);
+#else
+		sqlzma_un(&percpu->un, sbuf + Src, sbuf + Dst);
+#endif
+
 		bytes = percpu->un.un_reslen;
 
 #ifdef KeepPreemptive
