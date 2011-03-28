@@ -12,7 +12,7 @@
 int set_usage(char *aout)
 {
 #ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
-	int i, num;
+	int i;
 
 	printf("Usage example: \n");
 	for (i = 0; i < getNvramNum(); i++){
@@ -40,7 +40,7 @@ int get_usage(char *aout)
 int ra_nv_set(int argc,char **argv)
 {
 	int index, rc;
-	char *fz, *key, *value;
+	char *fz = "", *key = "", *value = "";
 
 	if (argc == 1 || argc > 5)
 		return set_usage(argv[0]);
@@ -72,7 +72,6 @@ int ra_nv_get(int argc, char *argv[])
 {
 	char *fz;
 	char *key;
-	char *value;
 	char *rc;
 
 	int index, ret;
@@ -133,14 +132,14 @@ void usage(char *cmd)
 
 int main(int argc, char *argv[])
 {
-	char *cmd;
+	char *cmd = "";
 	int index;
 
 	if (argc < 2)
 		usage(argv[0]);
 
 	//call nvram_get, nvram_set or nvram_show
-	if (cmd = strrchr(argv[0], '/'))
+	if (cmd == strrchr(argv[0], '/'))
 		cmd++;
 	else
 		cmd = argv[0];

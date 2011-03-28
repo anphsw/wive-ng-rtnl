@@ -65,6 +65,9 @@
 #define BUFSIZE (1 * 1024)
 #define MAX_ARGS 3
 
+//libnvram
+extern int mtd_open(const char *name, int flags);
+
 char *buf;
 int buflen;
 int quiet;
@@ -217,13 +220,11 @@ mtd_erase(const char *mtd)
 int
 mtd_write(int imagefd, int offset, int len, const char *mtd)
 {
-	int fd, i, result;
+	int fd, result, statistic = 0;;
 	size_t r, w, e;
 	struct mtd_info_user mtdInfo;
 	struct erase_info_user mtdEraseInfo;
-	int ret = 0, statistic = 0;
 	unsigned char *test_buf;
-	unsigned int erase_test_char = 256, erase_begin_pos;
 
 	fd = mtd_open(mtd, O_RDWR | O_SYNC);
 	if(fd < 0) {
@@ -296,7 +297,6 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 			}
 		}
 
-#if 1
 		/*
 		 * Post-FlashWrite check
 		 */
@@ -332,7 +332,6 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
  			}
  			free(test_buf);
  		}
-#endif
 
 		if(verbose == 1){
 			fprintf(stdout, "%d\n", statistic);
@@ -391,8 +390,8 @@ int getFileSize(char *filename)
 
 int main (int argc, char **argv)
 {
-	int ch, i, boot, unlock, imagefd, unlocked, offset, len;
-	char *erase[MAX_ARGS], *device, *imagefile, *tmp;
+	int ch, i, boot, unlocked, offset, len, imagefd = 0;
+	char *erase[MAX_ARGS], *device, *imagefile = "";
 	enum {
 		CMD_ERASE,
 		CMD_WRITE,

@@ -63,7 +63,6 @@ char EeBuffer1[len] = {
 	
 void mtd_erase(void){
 	
-	int i;
 	struct mtd_info_user mtdInfo;
 	struct erase_info_user mtdEraseInfo;
 
@@ -96,7 +95,6 @@ void mtd_erase(void){
 void mtd_write(void){
 	
 	int val = 0;
-	int i;
 	char pbuf[len];
 	
 	fd = open(mtd_d, O_RDWR | O_SYNC);
