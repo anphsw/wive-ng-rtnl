@@ -384,6 +384,10 @@ int activateRoute(uint32_t group, uint32_t originAddr) {
     return result;
 }
 
+#ifdef RT3052_SUPPORT
+extern void sweap_no_report_members(void);
+extern void remove_multicast_ip(uint32 m_ip_addr);
+#endif
 
 /**
 *   This function loops through all routes, and updates the age 

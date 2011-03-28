@@ -358,7 +358,7 @@ static int sock_attach_fd(struct socket *sock, struct file *file)
 	char name[32];
 
 	this.len = sprintf(name, "[%lu]", SOCK_INODE(sock)->i_ino);
-	this.name = name;
+	this.name = (unsigned char *)name;
 	this.hash = 0;
 
 	file->f_path.dentry = d_alloc(sock_mnt->mnt_sb->s_root, &this);

@@ -119,9 +119,9 @@ static struct nf_hook_ops imq_egress_ipv6 = {
 #endif
 
 #if defined(CONFIG_IMQ_NUM_DEVS)
-static unsigned int numdevs = CONFIG_IMQ_NUM_DEVS;
+static int numdevs = CONFIG_IMQ_NUM_DEVS;
 #else
-static unsigned int numdevs = 2;
+static int numdevs = 2;
 #endif
 
 static struct net_device *imq_devs;

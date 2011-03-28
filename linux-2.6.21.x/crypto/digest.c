@@ -101,8 +101,8 @@ static int update2(struct hash_desc *desc,
 			unsigned int bytes_from_page = min(l, ((unsigned int)
 							   (PAGE_SIZE)) - 
 							   offset);
-			char *src = crypto_kmap(pg, 0);
-			char *p = src + offset;
+			unsigned char *src = crypto_kmap(pg, 0);
+			unsigned char *p = src + offset;
 
 			if (unlikely(offset & alignmask)) {
 				unsigned int bytes =

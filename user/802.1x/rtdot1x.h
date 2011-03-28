@@ -82,7 +82,7 @@
 #define DEFAULT_IDLE_INTERVAL 				60
 
 
-#if DBG
+#ifdef DBG
 extern u32 	RTDebugLevel;	
 #define DBGPRINT(Level, fmt, args...) 					\
 {                                   \

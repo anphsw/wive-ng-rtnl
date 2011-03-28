@@ -46,7 +46,7 @@ int getdata(FILE *fp, struct stats *st)
 
 	if (fseek(fp, 0, SEEK_SET) < 0)
 		return(-1);
-	fscanf(fp, "%s %d %d %d %d %d %d %d", &buf[0],
+	fscanf(fp, "%s %d %d %d %d %d %d %d %d", &buf[0],
 			&st->user, &st->nice, &st->system, &st->idle,
 			&st->iowait, &st->irq, &st->softirq, &st->steal);
 

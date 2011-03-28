@@ -272,7 +272,7 @@ static uint8_t * hex2dec(char *ch)
 	if ( *ch == 'D' || *ch == 'd')	*ch=13;
 	if ( *ch == 'E' || *ch == 'e')	*ch=14;
 	if ( *ch == 'F' || *ch == 'f')	*ch=15;
-	return ch;
+	return (uint8_t *)ch;
 }
 
 /* Add MAC */

@@ -36,7 +36,7 @@
 #include "upnpconfig.h"
 
 // Function declarations only if debug compiled into the library
-#if UPNP_HAVE_DEBUG
+#ifdef UPNP_HAVE_DEBUG
 
 #include <stdio.h>
 

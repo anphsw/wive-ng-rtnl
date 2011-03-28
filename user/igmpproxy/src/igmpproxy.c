@@ -66,6 +66,10 @@ static int sighandled = 0;
 // The upstream VIF index
 int         upStreamVif;   
 
+#ifdef RT3052_SUPPORT
+extern void rt3052_init(void);
+extern void rt3052_fini(void);
+#endif
 /**
 *   Program main method. Is invoked when the program is started
 *   on commandline. The number of commandline arguments, and a
@@ -100,7 +104,7 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         }
     }
-
+    
     if (optind != ArgCn - 1) {
 	fputs("You must specify the configuration file.\n", stderr);
 	exit(1);

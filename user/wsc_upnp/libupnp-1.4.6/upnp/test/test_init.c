@@ -34,7 +34,7 @@
 #include "upnp.h"
 #include <stdio.h>
 #include <stdlib.h>
-#if UPNP_HAVE_TOOLS
+#ifdef UPNP_HAVE_TOOLS
 #	include "upnptools.h"
 #endif
 
@@ -70,31 +70,31 @@ main (int argc, char* argv[])
 	 */
 	printf ("\n");
 	
-#if UPNP_HAVE_DEBUG
+#ifdef UPNP_HAVE_DEBUG
 	printf ("UPNP_HAVE_DEBUG \t= yes\n");
 #else
 	printf ("UPNP_HAVE_DEBUG \t= no\n");
 #endif
 	
-#if UPNP_HAVE_CLIENT
+#ifdef UPNP_HAVE_CLIENT
 	printf ("UPNP_HAVE_CLIENT\t= yes\n");
 #else
 	printf ("UPNP_HAVE_CLIENT\t= no\n");
 #endif
 	
-#if UPNP_HAVE_DEVICE
+#ifdef UPNP_HAVE_DEVICE
 	printf ("UPNP_HAVE_DEVICE\t= yes\n");
 #else
 	printf ("UPNP_HAVE_DEVICE\t= no\n");
 #endif
 	
-#if UPNP_HAVE_WEBSERVER
+#ifdef UPNP_HAVE_WEBSERVER
 	printf ("UPNP_HAVE_WEBSERVER\t= yes\n");
 #else
 	printf ("UPNP_HAVE_WEBSERVER\t= no\n");
 #endif
 
-#if UPNP_HAVE_TOOLS
+#ifdef UPNP_HAVE_TOOLS
 	printf ("UPNP_HAVE_TOOLS \t= yes\n");
 #else
 	printf ("UPNP_HAVE_TOOLS \t= no\n");
@@ -115,7 +115,7 @@ main (int argc, char* argv[])
 			(ip_address ? ip_address : "UNKNOWN"), port);
 	} else {
 		printf ("** ERROR UpnpInit(): %d", rc);
-#if UPNP_HAVE_TOOLS
+#ifdef UPNP_HAVE_TOOLS
 		printf (" %s", UpnpGetErrorMessage (rc));
 #endif
 		printf ("\n");

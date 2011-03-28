@@ -101,7 +101,7 @@ static inline int cmp_2_addr(struct pppoe_addr *a, struct pppoe_addr *b)
 		(memcmp(a->remote, b->remote, ETH_ALEN) == 0));
 }
 
-static inline int cmp_addr(struct pppoe_addr *a, unsigned long sid, char *addr)
+static inline int cmp_addr(struct pppoe_addr *a, unsigned long sid, unsigned char *addr)
 {
 	return (a->sid == sid &&
 		(memcmp(a->remote,addr,ETH_ALEN) == 0));
@@ -169,7 +169,7 @@ static int __set_item(struct pppox_sock *po)
 	return 0;
 }
 
-static struct pppox_sock *__delete_item(unsigned long sid, char *addr, int ifindex)
+static struct pppox_sock *__delete_item(unsigned long sid, unsigned char *addr, int ifindex)
 {
 	int hash = hash_item(sid, addr);
 	struct pppox_sock *ret, **src;
@@ -236,7 +236,7 @@ static inline int set_item(struct pppox_sock *po)
 	return i;
 }
 
-static inline struct pppox_sock *delete_item(unsigned long sid, char *addr, int ifindex)
+static inline struct pppox_sock *delete_item(unsigned long sid, unsigned char *addr, int ifindex)
 {
 	struct pppox_sock *ret;
 
@@ -777,7 +777,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	struct pppoe_hdr hdr;
 	struct pppoe_hdr *ph;
 	struct net_device *dev;
-	char *start;
+	unsigned char *start;
 
 	lock_sock(sk);
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED)) {
@@ -814,7 +814,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	skb->protocol = __constant_htons(ETH_P_PPP_SES);
 
 	ph = (struct pppoe_hdr *) skb_put(skb, total_len + sizeof(struct pppoe_hdr));
-	start = (char *) &ph->tag[0];
+	start = (unsigned char *)&ph->tag[0];
 
 	error = memcpy_fromiovec(start, m->msg_iov, total_len);
 

@@ -60,7 +60,6 @@ static int addr_fprint(char *addr)
 static int addr_list_fprint(char **h_addr_list)
 {
 	int i, j;
-	char *addr_string = "";
 	for (i = 0, j = 0; h_addr_list[i]; i++, j++) {
 		addr_fprint(h_addr_list[i]);
 
@@ -76,11 +75,10 @@ static int addr_list_fprint(char **h_addr_list)
 /* print the results as nslookup would */
 static struct hostent *hostent_fprint(struct hostent *host, int is_server)
 {
-        char *format="";                                                                                                        
-        if (host) {                                                                                                          
-                addr_list_fprint(host->h_addr_list);                                                                         
-        }                                                                                                                    
-        return host;        
+        if (host) {
+                addr_list_fprint(host->h_addr_list);
+        }
+        return host;
 }
 
 /* changes a c-string matching the perl regex \d+\.\d+\.\d+\.\d+
@@ -114,7 +112,6 @@ static struct hostent *gethostbyaddr_wrapper(const char *address)
 static inline void server_print(void)
 {
 	struct sockaddr_in def = _res.nsaddr_list[0];
-	char *ip = inet_ntoa(def.sin_addr);
 }
 
 /* naive function to check whether char *s is an ip address */

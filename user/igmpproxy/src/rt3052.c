@@ -73,6 +73,7 @@
 #define DELETED				1
 #define ZEROED				2
 
+extern unsigned int rareg(int mode, unsigned int addr, long long int new_value);
 uint32_t WanPort = 0x1;
 
 typedef struct rt3052_esw_reg {
@@ -187,7 +188,6 @@ static void dump_entry(void)
 static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 {
 	unsigned char 		a1, a2, a3;
-	struct in_addr 		tmp;
 	struct group 		*new_entry;
 
 	static int group_count = 0;
@@ -288,7 +288,6 @@ static void insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_add
 {
 	struct in_addr 		tmp;
 	struct group_member *new_member;
-	struct group_member *pos = entry->members;
 
 	if(entry->members != NULL){
 		struct group_member *member = lookup_member(entry, m_ip_addr, u_ip_addr);
@@ -522,7 +521,7 @@ static void destory_all_hosts_rule()
  */
 static void sync_internal_mac_table(void *argu)
 {
-	unsigned int value, mac1, mac2, i = 0;
+	unsigned int value, mac2, i = 0;
 
 	HOOK_CHECK;
 
@@ -692,7 +691,7 @@ static inline int reg_write(int offset, int value)
     return 0;
 }
 
-static inline wait_switch_done(void)
+static inline void wait_switch_done(void)
 {
 	int i, value;
 	for (i = 0; i < 20; i++) {
@@ -713,7 +712,7 @@ static inline wait_switch_done(void)
  */
 static void updateMacTable(struct group *entry, int delay_delete)
 {
-	int i, value;
+	int value;
 	char wholestr[13];
 	char tmpstr[9];
 

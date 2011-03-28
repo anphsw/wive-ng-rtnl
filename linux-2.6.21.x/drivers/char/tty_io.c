@@ -577,7 +577,7 @@ EXPORT_SYMBOL(tty_schedule_flip);
  *	Locking: May call functions taking tty->buf.lock
  */
 
-int tty_prepare_flip_string(struct tty_struct *tty, unsigned char **chars, size_t size)
+int tty_prepare_flip_string(struct tty_struct *tty, char **chars, size_t size)
 {
 	int space = tty_buffer_request_room(tty, size);
 	if (likely(space)) {
@@ -607,7 +607,7 @@ EXPORT_SYMBOL_GPL(tty_prepare_flip_string);
  *	Locking: May call functions taking tty->buf.lock
  */
 
-int tty_prepare_flip_string_flags(struct tty_struct *tty, unsigned char **chars, char **flags, size_t size)
+int tty_prepare_flip_string_flags(struct tty_struct *tty, char **chars, char **flags, size_t size)
 {
 	int space = tty_buffer_request_room(tty, size);
 	if (likely(space)) {

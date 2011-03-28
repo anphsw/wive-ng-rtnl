@@ -68,7 +68,7 @@ static void sha1_update(struct crypto_tfm *tfm, const u8 *data,
 		}
 
 		do {
-			sha_transform(sctx->state, src, temp);
+			sha_transform(sctx->state, (const char*)src, temp);
 			done += 64;
 			src = data + done;
 		} while (done + 63 < len);

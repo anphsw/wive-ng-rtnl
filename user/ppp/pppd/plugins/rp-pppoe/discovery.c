@@ -114,7 +114,6 @@ parsePADOTags(UINT16_t type, UINT16_t len, unsigned char *data,
     struct PacketCriteria *pc = (struct PacketCriteria *) extra;
     PPPoEConnection *conn = pc->conn;
     UINT16_t mru;
-    int i;
 
     switch(type) {
     case TAG_AC_NAME:

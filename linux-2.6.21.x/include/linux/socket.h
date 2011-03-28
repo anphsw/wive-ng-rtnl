@@ -296,9 +296,9 @@ struct ucred {
 
 #ifdef __KERNEL__
 extern int memcpy_fromiovec(unsigned char *kdata, struct iovec *iov, int len);
-extern int memcpy_fromiovecend(unsigned char *kdata, struct iovec *iov, 
+extern int memcpy_fromiovecend(char *kdata, struct iovec *iov, 
 				int offset, int len);
-extern int csum_partial_copy_fromiovecend(unsigned char *kdata, 
+extern int csum_partial_copy_fromiovecend(char *kdata, 
 					  struct iovec *iov, 
 					  int offset, 
 					  unsigned int len, __wsum *csump);

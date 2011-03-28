@@ -123,7 +123,7 @@ int memcpy_fromiovec(unsigned char *kdata, struct iovec *iov, int len)
 /*
  *	For use with ip_build_xmit
  */
-int memcpy_fromiovecend(unsigned char *kdata, struct iovec *iov, int offset,
+int memcpy_fromiovecend(char *kdata, struct iovec *iov, int offset,
 			int len)
 {
 	/* Skip over the finished iovecs */
@@ -155,7 +155,7 @@ int memcpy_fromiovecend(unsigned char *kdata, struct iovec *iov, int offset,
  *	ip_build_xmit must ensure that when fragmenting only the last
  *	call to this function will be unaligned also.
  */
-int csum_partial_copy_fromiovecend(unsigned char *kdata, struct iovec *iov,
+int csum_partial_copy_fromiovecend(char *kdata, struct iovec *iov,
 				 int offset, unsigned int len, __wsum *csump)
 {
 	__wsum csum = *csump;

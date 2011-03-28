@@ -24,7 +24,7 @@
 #include <fcntl.h> 
 #include <errno.h>
 
-#define PAGE_SIZE		0x1000 	/* 4096 */
+#define PAGE_SIZE	0x1000 	/* 4096 */
 
 #define READMODE	0x0
 #define WRITEMODE	0x1

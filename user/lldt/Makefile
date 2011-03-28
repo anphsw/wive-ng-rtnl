@@ -1,5 +1,5 @@
 VPATH = src
-CFLAGS += -Os -pipe -Wall -Wno-unused -s -fpack-struct -Wpadded  -D__LITTLE_ENDIAN
+CFLAGS += -Os -pipe -Wall -Wno-unused -s -fpack-struct -Wpadded
 LD= $(CC)
 OS_LAYER = osl-linux.c
 

@@ -259,7 +259,7 @@ int handle_challenge (struct tunnel *t, struct challenge *chal)
         return -1;
     }
 
-#if DEBUG_AUTH
+#ifdef DEBUG_AUTH
     l2tp_log (LOG_DEBUG, "*%s: Here comes the chal->ss:\n", __FUNCTION__);
     bufferDump (&chal->ss, 1);
 
@@ -403,7 +403,7 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
     previous_segment = ptr;
     while (ptr < end)
     {
-#if DEBUG_HIDDEN
+#ifdef DEBUG_HIDDEN
         l2tp_log (LOG_DEBUG, "%s: The digest to be XOR'ed\n", __FUNCTION__);
         bufferDump (digest, MD_SIG_SIZE);
         l2tp_log (LOG_DEBUG, "%s: The plaintext to be XOR'ed\n", __FUNCTION__);
@@ -413,7 +413,7 @@ void encrypt_avp (struct buffer *buf, _u16 len, struct tunnel *t)
         {
             *ptr = *ptr ^ digest[cnt];
         }
-#if DEBUG_HIDDEN
+#ifdef DEBUG_HIDDEN
         l2tp_log (LOG_DEBUG, "%s: The result of XOR\n", __FUNCTION__);
         bufferDump (previous_segment, MD_SIG_SIZE);
 #endif
