@@ -317,11 +317,12 @@
 1) Move to 4.6.0 gcc.<br>
 2) Fix EAP in bridge/mbssid mode.<br>
 3) Enable double vlan tag support per default.<br>
-4) Fix net/ipv6 fib metrics.<br>
+4) Fix net/ip fib metrics.<br>
 5) Zebra suspended (not build with gcc4.6.0).<br>
 6) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
 7) Try workaround speed regresion in mips32r2 at RT3050 rev P0.<br>
-
+8) Remove some dead code.<br>
+9) Fix some leaks.<br>
 
 <br><br>
 <b>For support see:</b><br>
