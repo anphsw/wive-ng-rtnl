@@ -1080,7 +1080,7 @@ EXPORT_SYMBOL(unregister_console);
 void tty_write_message(struct tty_struct *tty, char *msg)
 {
 	if (tty && tty->driver->write)
-		tty->driver->write(tty, msg, strlen(msg));
+		tty->driver->write(tty, (const unsigned char*)msg, strlen(msg));
 	return;
 }
 

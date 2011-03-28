@@ -429,7 +429,6 @@ static int raspi_erase_sector(u32 offset)
 
 int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 {
-	u32 page_offset;
 	int retval;
 
 	/*  */
@@ -450,8 +449,6 @@ int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 		if (retval < 0) {
 			return -EIO;
 		}
-			
-		page_offset = (to & (mtd->erasesize-1));
 
 		len -= mtd->erasesize;
 		to += mtd->erasesize;

@@ -97,7 +97,7 @@ static void et_get_pauseparam(struct net_device *dev, struct ethtool_pauseparam 
 	END_DEVICE *ei_local = dev->priv;
 
 	// get mii auto-negotiation register
-	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, &mii_an_reg);
+	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT,(u32*) &mii_an_reg);
 	epause->autoneg = (mii_an_reg & AN_PAUSE) ? 1 : 0; //get autonet_enable flag bit
 	
 	mdio_cfg_reg = sysRegRead(MDIO_CFG);
@@ -116,7 +116,7 @@ static int et_set_pauseparam(struct net_device *dev, struct ethtool_pauseparam *
 	//printk("et_set_pauseparam(): autoneg=%d, tx_pause=%d, rx_pause=%d\n", epause->autoneg, epause->tx_pause, epause->rx_pause);
 
 	// auto-neg pause
-	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, &mii_an_reg);
+	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, (u32*)&mii_an_reg);
 	if(epause->autoneg)
 		mii_an_reg |= AN_PAUSE;
 	else

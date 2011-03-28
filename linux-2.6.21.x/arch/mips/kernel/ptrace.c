@@ -402,11 +402,11 @@ long arch_ptrace(struct task_struct *child, long request, long addr, long data)
 		}
 
 	case PTRACE_GETREGS:
-		ret = ptrace_getregs(child, (__u64 __user *) data);
+		ret = ptrace_getregs(child, (__s64 __user *) data);
 		break;
 
 	case PTRACE_SETREGS:
-		ret = ptrace_setregs(child, (__u64 __user *) data);
+		ret = ptrace_setregs(child, (__s64 __user *) data);
 		break;
 
 	case PTRACE_GETFPREGS:

@@ -1682,7 +1682,7 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
 			break;
 		case PR_SET_NAME: {
 			struct task_struct *me = current;
-			unsigned char ncomm[sizeof(me->comm)];
+			char ncomm[sizeof(me->comm)];
 
 			ncomm[sizeof(me->comm)-1] = 0;
 			if (strncpy_from_user(ncomm, (char __user *)arg2,
@@ -1693,7 +1693,7 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
 		}
 		case PR_GET_NAME: {
 			struct task_struct *me = current;
-			unsigned char tcomm[sizeof(me->comm)];
+			char tcomm[sizeof(me->comm)];
 
 			get_task_comm(tcomm, me);
 			if (copy_to_user((char __user *)arg2, tcomm, sizeof(tcomm)))

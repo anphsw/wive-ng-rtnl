@@ -1916,7 +1916,7 @@ int ei_close(struct net_device *dev)
 void rt305x_esw_init(void)
 {
 	int i=0;
-	u32 phy_val=0, phy_val2;
+	int phy_val=0, phy_val2;
 
 	/*
 	 * FC_RLS_TH=200, FC_SET_TH=160
@@ -2016,7 +2016,7 @@ void rt305x_esw_init(void)
         mii_mgr_write(0, 31, 0x8000); //select local register
 	for(i=0;i<5;i++){
 		//LSB=1 enable PHY
-		mii_mgr_read(i, 26, &phy_val);
+		mii_mgr_read(i, 26, (u32*)&phy_val);
 		phy_val |= 0x0001;
 		mii_mgr_write(i, 26, phy_val);
 	}

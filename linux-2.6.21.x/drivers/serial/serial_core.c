@@ -172,7 +172,7 @@ static int uart_startup(struct uart_state *state, int init_hw)
 		if (!page)
 			return -ENOMEM;
 
-		info->xmit.buf = (unsigned char *) page;
+		info->xmit.buf = (char *) page;
 		uart_circ_clear(&info->xmit);
 	}
 

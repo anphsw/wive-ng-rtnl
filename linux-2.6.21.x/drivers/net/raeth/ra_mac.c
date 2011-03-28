@@ -151,7 +151,7 @@ void ra2880EnableInterrupt()
 	sysRegWrite(FE_INT_ENABLE, regValue);
 }
 
-void ra2880MacAddressSet(MAC_INFO *MACInfo, unsigned char p[6])
+void ra2880MacAddressSet(MAC_INFO *MACInfo, char p[6])
 {
         unsigned long regValue=0; 
 	int ok=0;
@@ -176,7 +176,7 @@ void ra2880MacAddressSet(MAC_INFO *MACInfo, unsigned char p[6])
     return;
 }
 
-void ra2880Mac2AddressSet(MAC_INFO *MACInfo, unsigned char p[6])
+void ra2880Mac2AddressSet(MAC_INFO *MACInfo, char p[6])
 {
         unsigned long regValue=0; 
 	int ok=0;

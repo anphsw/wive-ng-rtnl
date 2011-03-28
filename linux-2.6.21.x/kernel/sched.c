@@ -3291,7 +3291,7 @@ asmlinkage void __sched schedule(void)
 	unsigned long long now;
 	unsigned long run_time;
 	int cpu, idx, new_prio;
-	long *switch_count;
+	unsigned long *switch_count;
 	struct rq *rq;
 
 	/*
