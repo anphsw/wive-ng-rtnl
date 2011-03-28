@@ -319,6 +319,8 @@
 3) Enable double vlan tag support per default.<br>
 4) Fix net/ipv6 fib metrics.<br>
 5) Zebra suspended (not build with gcc4.6.0).<br>
+6) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
+7) Try workaround speed regresion in mips32r2 at RT3050 rev P0.<br>
 
 
 <br><br>
