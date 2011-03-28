@@ -18,6 +18,10 @@
 #include	"internet.h"
 #include	"wireless.h"
 
+#ifdef CONFIG_USER_802_1X
+#include 	"wps.h"
+#endif
+
 #if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
 extern void setFirmwarePath(void);
 #endif
@@ -589,7 +593,7 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	value = nvram_get(RT2860_NVRAM, field);
 
 	//if get lang not return true info set Lang=en
-	if ((field == "Language") && (value = "")) {
+	if ((field = "Language") && (value = "")) {
 	    printf(" Unknown lang %s. Set lang to en.", value);
 	    value = "en";
 	}

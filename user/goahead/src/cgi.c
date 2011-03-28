@@ -20,6 +20,7 @@
 
 /*********************************** Includes *********************************/
 #include	"wsIntrn.h"
+#include	"utils.h"
 #include	<sys/types.h>
 #include	<sys/wait.h>
 #ifdef UEMF

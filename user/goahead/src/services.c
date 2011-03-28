@@ -311,7 +311,7 @@ const char *iptProtocolNames[]=
 int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fd;
-	char_t ip[32], line[256], tmp[32];
+	char_t ip[32], line[256];
 	long long b_src[5], p_src[5], b_dst[5], p_dst[5], time;
 	int lines = 0;
 	
@@ -354,7 +354,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 		{
 			lines++;
 #ifdef IPT_SHORT_ACCOUNT
-			int found = sscanf(line,
+			sscanf(line,
 				"%*s %*s %s "   // IP
 				"%*s %*s %lld "  // bytes_src
 				"%*s %*s %lld "  // packets_src
@@ -442,6 +442,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				7
 #endif
 			);
+    return 0;
 }
 
 

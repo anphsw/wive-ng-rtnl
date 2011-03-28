@@ -64,4 +64,3 @@ void websLongWrite(webs_t wp, char *longstr);
 int netmask_aton(const char *ip);
 inline int getOnePortOnly(void);
 void STFs(int nvram, int index, char *flash_key, char *value);
-

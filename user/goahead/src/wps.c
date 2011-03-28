@@ -451,31 +451,6 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 
-static int getAPMac(char *ifname, char *if_hw)
-{
-    struct ifreq ifr;
-    char *ptr;
-    int skfd;
-
-    if((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        error(E_L, E_LOG, T("getAPMac: open socket error"));
-        return -1;
-    }
-
-    strncpy(ifr.ifr_name, ifname, 16);
-    if(ioctl(skfd, SIOCGIFHWADDR, &ifr) < 0) {
-        error(E_L, E_LOG, T("getAPMac: ioctl SIOCGIFHWADDR error for %s"),
-                    ifname);
-        return -1;
-    }
-
-    ptr = (char *)&ifr.ifr_addr.sa_data;
-    sprintf(if_hw, "%02X%02X%02X", (ptr[3] & 0377), (ptr[4] & 0377), (ptr[5] & 0377));
-
-    close(skfd);
-    return 0;
-}
-
 static void GenPIN(webs_t wp, char_t *path, char_t *query)
 {
 	doSystem("iwpriv ra0 set WscGenPinCode");

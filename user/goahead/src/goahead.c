@@ -22,6 +22,7 @@
 #include	<unistd.h> 
 #include	<sys/types.h>
 #include	<sys/wait.h>
+#include        <sys/ioctl.h>
 
 #include	"utils.h"
 #include	"uemf.h"
@@ -68,7 +69,6 @@ static int		finished;				/* Finished flag */
 
 static int writeGoPid(void);
 static void InitSignals(int helper);
-static void goaSigReset(int signum);
 static void goaSigWPSHlpr(int signum);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
@@ -77,7 +77,11 @@ extern void defaultTraceHandler(int level, char_t *buf);
 extern void ripdRestart(void);
 extern void WPSAPPBCStartAll(void);
 extern void WPSSingleTriggerHandler(int);
+extern void formDefineWireless(void);
 
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+static void goaSigReset(int signum);
+#endif
 #ifdef B_STATS
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
@@ -105,7 +109,9 @@ int main(int argc, char** argv)
  *	60KB allows for several concurrent page requests.  If more space
  *	is required, malloc will be used for the overflow.
  */
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	int pid;
+#endif
 
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
@@ -651,10 +657,12 @@ static int set_stable_flag(void)
 }
 #endif
 
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum)
 {
 	system("reboot");
 }
+#endif
 
 static void goaSigWPSHlpr(int signum)
 {

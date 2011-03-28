@@ -141,6 +141,7 @@ int freeHTMLBuffer(html_buffer_t *buf)
 {
 	if (buf->data!=NULL)
 		free(buf->data);
+    return 0;
 }
 
 int checkFileExists(const char *fname)

@@ -155,46 +155,6 @@ static int getDMZEnableASP(int eid, webs_t wp, int argc, char_t **argv)
 	return -1;
 }
 
-static int getPortForwardEnableASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int type, value;
-	char *pfe = nvram_get(RT2860_NVRAM, "PortForwardEnable");
-
-	if(pfe)
-		value = atoi(pfe);
-	else
-		value = 0;
-
-	if( ejArgs(argc, argv, T("%d"), &type) == 1){
-		if(type == value)
-			websWrite(wp, T("selected"));
-		else
-			websWrite(wp, T(" "));
-		return 0;
-	}
-	return -1;
-}
-
-static int  getIPPortFilterEnableASP(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int type, value;
-	char *pfe = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
-
-	if(pfe)
-		value = atoi(pfe);
-	else
-		value = 0;
-
-	if( ejArgs(argc, argv, T("%d"), &type) == 1){
-		if(type == value)
-			websWrite(wp, T("selected"));
-		else
-			websWrite(wp, T(" "));
-		return 0;
-	}
-	return -1;
-}
-
 static int getNums(char *value, char delimit)
 {
 	char *pos = value;

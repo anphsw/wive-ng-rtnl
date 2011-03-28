@@ -25,6 +25,10 @@
 #include	"station.h"
 #include	"wireless.h"
 
+#ifdef CONFIG_USER_802_1X
+#include	"wps.h"
+#endif
+
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
 #define _PATH_VPN_RT           "/etc"
 #define _PATH_VPN_RT_FILE      _PATH_VPN_RT "/routes_ppp"
@@ -2436,7 +2440,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	const char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl == NULL)
 	{
 		// debug print

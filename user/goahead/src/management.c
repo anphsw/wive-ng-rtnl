@@ -539,7 +539,6 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	while (fgets(buf, 1024, fp))
 	{
 		char *ifname, *semiColon;
-		long long if_rc;
 		if (skip_line != 0)
 		{
 			skip_line--;

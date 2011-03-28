@@ -20,6 +20,8 @@
 #include "upload.cgi.h"
 #include "../options.h"
 
+extern unsigned long crc32 (unsigned long, const unsigned char *, unsigned int);
+
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {
 	unsigned char *bl = (unsigned char *)byte_line;
@@ -134,8 +136,6 @@ void html_header()
 
 void html_success(const char *timeout)
 {
-	char buf[64];
-	
 	printf
 	(
 		"<p>Done</p>\n"
@@ -149,8 +149,6 @@ void html_success(const char *timeout)
 
 void html_error(const char *s)
 {
-	char buf[64];
-	
 	printf
 	(
 		"<p>%s</p>\n"
@@ -236,7 +234,6 @@ int search_data(FILE *fd, long start, long *found_offset, const void *buffer, in
 	int offset = sizeof(buf);     // buffer offset
 	int found  = 0;               // number of chars matched
 	int read   = 0;               // buffer size
-	long pos   = 0;               // file position
 	long flpos = 0;               // file last read position
 	long lmatch= start;           // position of first character in match sequence
 

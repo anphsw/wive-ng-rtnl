@@ -119,8 +119,12 @@ void getWPSAuthMode(WSC_CONFIGURED_VALUE *result, char *ret_str);
 void getWPSEncrypType(WSC_CONFIGURED_VALUE *result, char *ret_str);
 int getWscStatus(char *interface);
 char *getWscStatusStr(int status);
-int getAPMac(char *ifname, char *if_hw);
 void RaixWPSRestart();
+#endif
+
+#ifdef CONFIG_USER_802_1X
+void restart8021XDaemon(int nvram);
+void updateFlash8021x(int nvram);
 #endif
 
 void resetTimerAll(void);
