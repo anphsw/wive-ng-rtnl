@@ -75,7 +75,7 @@ struct serial_state prom_rs_table[] = {
  */
 #define prom_envp(index) ((char *)(((int *)(int)_prom_envp)[(index)]))
 
-char *prom_getenv(char *envname)
+unsigned char *prom_getenv(char *envname)
 {
 	/*
 	 * Return a pointer to the given environment variable.
@@ -83,10 +83,9 @@ char *prom_getenv(char *envname)
 	 * in the PROM structures are only 32-bit, so we need some
 	 * workarounds, if we are running in 64-bit mode.
 	 */
+
+#ifdef DEBUG
 	int i, index=0;
-	// Dennis Lee +
-	return NULL;
-	// 
 	i = strlen(envname);
 
 	while (prom_envp(index)) {
@@ -95,7 +94,7 @@ char *prom_getenv(char *envname)
 		}
 		index += 2;
 	}
-
+#endif
 	return NULL;
 }
 
@@ -123,9 +122,9 @@ static inline void str2eaddr(unsigned char *ea, unsigned char *str)
 	}
 }
 
-int get_ethernet_addr(char *ethernet_addr)
+int get_ethernet_addr(unsigned char *ethernet_addr)
 {
-        char *ethaddr_str;
+        unsigned char *ethaddr_str;
 #ifdef DEBUG
         int i;
 #endif

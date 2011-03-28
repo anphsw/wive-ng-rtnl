@@ -27,11 +27,11 @@
 #define _MIPS_PROM_H
 
 extern char *prom_getcmdline(void);
-extern char *prom_getenv(char *name);
+extern unsigned char *prom_getenv(char *name);
 extern void prom_init_cmdline(void);
 extern void prom_meminit(void);
 extern void prom_free_prom_memory(void);
-extern int get_ethernet_addr(char *ethernet_addr);
+extern int get_ethernet_addr(unsigned char *ethernet_addr);
 
 #ifdef DEBUG
 /* Memory descriptor management. */
