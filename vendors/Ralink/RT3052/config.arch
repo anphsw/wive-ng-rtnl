@@ -17,7 +17,12 @@ HWH4			   = "0.0"
 
 MACHINE			   = mips
 ARCH		           = mips
-OPTS			   = -Os -pipe -mips32r2 -mtune=24kec
+
+OPTS			   = -Os -pipe 
+OPTS			  += -mips32r2 -mtune=24kec
+OPTS			  += -fno-caller-saves
+OPTS			  += -Wno-unused-but-set-variable
+
 ROOTDIR			   ?= /opt/Wive-RTNL
 include $(ROOTDIR)/vendors/config/mips/config.arch
 
@@ -28,7 +33,6 @@ LINUXINCDIR                = $(FIRMROOT)/linux-2.6.21.x/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 
 CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += -Wno-unused-but-set-variable
 CFLAGS  += $(OPTS)
 UOPT    += $(OPTS)
 LOPT    += $(OPTS)

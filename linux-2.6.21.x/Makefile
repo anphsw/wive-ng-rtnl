@@ -546,6 +546,9 @@ CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
 CFLAGS += $(call cc-option,-ffast-math,)
 CFLAGS += $(call cc-option,-fforce-addr,)
 
+# improves compression ratio for generated code
+CFLAGS += $(call cc-option,-fno-caller-saves,)
+
 # try fix performance regerssion in 4.6.0
 CFLAGS += $(call cc-option,-fschedule-insns,)
 
