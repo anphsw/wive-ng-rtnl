@@ -1313,6 +1313,7 @@ static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query)
 	return getSecurity(RT2860_NVRAM, wp, path, query);
 }
 
+#ifdef CONFIG_USER_802_1X
 void updateFlash8021x(int nvram)
 {
 	char lan_if_addr[16];
@@ -1362,7 +1363,7 @@ out:
     nvram_close(RT2860_NVRAM);
     return;
 }
-
+#endif
 
 int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 {
@@ -1402,8 +1403,7 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 	return 0;
 }
 
-
-
+#ifdef CONFIG_USER_802_1X 
 void conf8021x(int nvram, webs_t wp, int mbssid)
 {
 	char_t *RadiusServerIP, *RadiusServerPort, *RadiusServerSecret, *RadiusServerSessionTimeout;//, *RadiusServerIdleTimeout;
@@ -1425,10 +1425,9 @@ void conf8021x(int nvram, webs_t wp, int mbssid)
 	nvram_close(RT2860_NVRAM);
 
 	updateFlash8021x(nvram);
-#ifdef CONFIG_USER_802_1X 
 	restart8021XDaemon(nvram);
-#endif
 }
+#endif
 
 void confWEP(int nvram, webs_t wp, int mbssid)
 {
@@ -1550,25 +1549,27 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		LFW(security_shared_mode, security_shared_mode);
 
 		STFs(nvram, mbssid, "AuthMode", security_mode);
-		if(!strcmp(security_shared_mode, "None"))
+		if( !strcmp(security_shared_mode, "None"))
 			STFs(nvram, mbssid, "EncrypType", "NONE");
 		else
 			STFs(nvram, mbssid, "EncrypType", "WEP");
 
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-	}else if( !strcmp(security_mode, "WEPAUTO")){ // !------------------       WEP Auto Mode ----------------
+	}else if( !strcmp(security_mode, "WEPAUTO")){ 			// !------------------       WEP Auto Mode ----------------
 		confWEP(nvram, wp, mbssid);
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "EncrypType", "WEP");
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-	}else if(	!strcmp(security_mode, "WPA") ||  
+	}else if( !strcmp(security_mode, "WPA") ||  
 				!strcmp(security_mode, "WPA1WPA2") ){	// !------------------		WPA Enterprise Mode ----------------
-		conf8021x(nvram, wp, mbssid);							// !------------------		WPA1WPA2 mixed mode
+#ifdef CONFIG_USER_802_1X
+		conf8021x(nvram, wp, mbssid);				// !------------------		WPA1WPA2 mixed mode
+#endif
 		confWPAGeneral(nvram, wp, mbssid);
 
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-	}else if( !strcmp(security_mode, "WPAPSK")){ // !------------------       WPA Personal Mode ----------------
+	}else if( !strcmp(security_mode, "WPAPSK")){ 			// !------------------       WPA Personal Mode ----------------
 		char *pass_phrase_str;
 
 		confWPAGeneral(nvram, wp, mbssid);
@@ -1581,7 +1582,9 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		char *PMKCachePeriod;
 		char *PreAuth;
 
+#ifdef CONFIG_USER_802_1X
 		conf8021x(nvram, wp, mbssid);
+#endif
 		confWPAGeneral(nvram, wp, mbssid);
 
 		LFW(pass_phrase_str, passphrase);
@@ -1606,7 +1609,9 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}else if( !strcmp(security_mode, "IEEE8021X")){	// !------------------ 802.1X WEP Mode ----------------
 		char *ieee8021x_wep;
 
+#ifdef CONFIG_USER_802_1X
 		conf8021x(nvram, wp, mbssid);
+#endif
 		STFs(nvram, mbssid, "IEEE8021X", "1");
 		STFs(nvram, mbssid, "AuthMode", "OPEN");
 
