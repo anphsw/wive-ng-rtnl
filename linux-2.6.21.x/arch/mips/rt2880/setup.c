@@ -95,7 +95,7 @@ void __init rt2880_setup(void)
 	argptr = prom_getcmdline();
 	if ((argptr = strstr(argptr, "console=ttyS")) == NULL) {
 		int i = 0;
-		char *s = prom_getenv("modetty0");
+		char *s =(char *) prom_getenv("modetty0");
 		while(s[i] >= '0' && s[i] <= '9')
 			i++;
 		strcpy(serial_console, "ttyS1,");
