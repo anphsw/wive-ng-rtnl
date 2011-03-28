@@ -5,18 +5,24 @@
 . /etc/scripts/global.sh
 
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
+
 ########################################ALLMODE param##########################
-iwpriv ra0 set HiPower=0
+HiPower=`nvram_get 2860 HiPower`
+if [ "$HiPower" = "1" ]; then
+    iwpriv ra0 set HiPower=1
+else
+    iwpriv ra0 set HiPower=0
+fi
 
 ########################################STAMODE param##########################
-if [ "$stamode" = "y" ]; then
+AutoConnect=`nvram_get 2860 AutoConnect`
+if [ "$stamode" = "y" ] && [ "$AutoConnect" = "1"]; then
     iwpriv ra0 set AutoReconnect=1
     exit 0
 fi
 
 #########################################ON/OFF param##########################
 radio_off=`nvram_get 2860 RadioOff`
-
 if [ "$radio_off" = "1" ]; then
     iwpriv ra0 set RadioOn=0
     echo ">>>> WIFI DISABLED <<<<"
@@ -27,25 +33,24 @@ fi
 
 ###############################################Others#############################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
-Channel=`nvram_get Channel`
 if [ "$AutoChannelSelect" = "0" ]; then
+    Channel=`nvram_get Channel`
     iwpriv ra0 set Channel=$Channel
 fi
 
 ########################################MULTICAST param###########################
-m2uenabled=`nvram_get 2860 M2UEnabled`
-McastPhyMode=`nvram_get 2860 McastPhyMode`
-McastMcs=`nvram_get 2860 McastMcs`
-
 if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     if [ "$CONFIG_RT2860V2_MCAST_RATE_SPECIFIC" != "" ]; then
+	McastPhyMode=`nvram_get 2860 McastPhyMode`
         if [ "$McastPhyMode" != "" ]; then
 	    iwpriv ra0 set McastPhyMode=$McastPhyMode
 	fi
+	McastMcs=`nvram_get 2860 McastMcs`
 	if [ "$McastMcs" != "" ]; then
     	    iwpriv ra0 set  McastMcs="$McastMcs"
 	fi
     fi
+    m2uenabled=`nvram_get 2860 M2UEnabled`
     if [ "$m2uenabled" != "" ]; then
 	iwpriv ra0 set IgmpSnEnable="$m2uenabled"
     fi
@@ -54,9 +59,8 @@ fi
 ########################################MESH mode param###########################
 if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
     meshenabled=`nvram_get 2860 MeshEnabled`
-    meshhostname=`nvram_get 2860 MeshHostName` 
-
     if [ "$meshenabled" = "1" ]; then
+        meshhostname=`nvram_get 2860 MeshHostName` 
 	iwpriv mesh0 set  MeshHostName="$meshhostname"
     fi
 fi

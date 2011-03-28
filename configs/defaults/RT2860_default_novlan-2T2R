@@ -175,6 +175,7 @@ session_timeout_interval=0
 quiet_interval=0
 AutoConnect=1
 FastConnect=1
+HiPower=0
 AutoRoaming=0
 staPolicy=1
 WLAN_MAC_ADDR=00:0C:43:30:52:65

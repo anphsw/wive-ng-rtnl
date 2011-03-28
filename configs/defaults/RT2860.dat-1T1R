@@ -179,6 +179,7 @@ quiet_interval=0
 AutoConnect=1
 FastConnect=1
 AutoRoaming=0
+HiPower=0
 TGnWifiTest=0
 RadioOn=1
 SSID=
