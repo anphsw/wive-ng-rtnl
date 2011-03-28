@@ -14,31 +14,14 @@
 <script type="text/javascript" src="/js/validation.js"></script>
 
 <script language="javascript">
-var pptpResetRoutingTable =
-[
-	<% vpnInitRoutingTable(); %>
-];
-
 var pptpType     = '<% getCfgGeneral(1, "vpnType"); %>';
 var pptpServerIP = (pptpType != '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
 var pptpACName   = (pptpType == '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
-var pptpRoutingTable = [];
-var currentRoute = undefined;
 
-function rememberRoutingTable(form)
+function hideHint(ctl)
 {
-	var table = "";
-	for (var i=0; i<pptpRoutingTable.length; i++)
-		table += pptpRoutingTable[i].join(" ") + "\n";
-	
-	form.vpn_routing_table.value = table;
-}
-
-function resetRoutingTable(form)
-{
-	pptpRoutingTable = [];
-	for (var i=0; i< pptpResetRoutingTable.length; i++)
-		pptpRoutingTable[i] = pptpResetRoutingTable[i];
+	var row = document.getElementById("vpn_hint_row");
+	row.innerHTML = '';
 }
 
 function showHint(key)
@@ -128,38 +111,8 @@ function showHint(key)
 				text += '<b>Kabinet Authorization</b> means connection to KABINET provider network.';
 			text += '</p>';
 		}
-		else if (key=='vpn_routing')
-			text += 'Enable this option to add additional routes when VPN connection is established.';
 		else if (key=='vpn_lanauth_access')
 			text += 'Specify access mode to KABINET provider network.';
-		else if (form.vpn_routing_enabled.checked)
-		{
-			if (key=='vpn_route_attrs')
-				text += "Route attributes: \n" +
-					'<p class="val"><b>Network</b> means network address to add to routing table</p>' +
-					'<p class="val"><b>Netmask</b> means network mask to add to routing table</p>' +
-					'<p class="val"><b>Metric</b> means a metric (priority) assigned to route</p>' +
-					'<p class="val"><b>Interface</b> describes interface to pass packets for specified network</p>' +
-					'<p class="val"><b>Gateway</b> can declare IP address of gateway to pass packets</p>';
-			else if (key=='vpn_route_net')
-				text += 'Specify network address.';
-			else if (key=='vpn_route_mask')
-				text += 'Specify network mask.';
-			else if (key=='vpn_route_via')
-				text += 'Specify gateway IP address to use (optional feature).';
-			else if (key=='vpn_route_metric')
-				text += 'Specify metric for route.';
-			else if (key=='vpn_route_iface')
-				text += 'Specify interface to associate with network.';
-			else if (key=='vpn_add_route')
-				text += 'Add new route to routing table.';
-			else if (key=='vpn_del_route')
-				text += "Remove route from list: \n<p class=\"val\">\"" + getRouteName(currentRoute) + '"</p>';
-			else if (key=='vpn_show_route')
-				text += "Add route on success VPN connection: \n<p class=\"val\">\"" + getRouteName(currentRoute) + '"</p>';
-			else
-				show = false;
-		}
 		else
 			show = false;
 	}
@@ -171,18 +124,6 @@ function showHint(key)
 		text += '</div>';
 		row.innerHTML = text;
 	}
-}
-
-function showRoutingHint(key, route)
-{
-	currentRoute = route;
-	showHint(key);
-}
-
-function hideHint(ctl)
-{
-	var row = document.getElementById("vpn_hint_row");
-	row.innerHTML = '';
 }
 
 function vpnSwitchClick(form)
@@ -204,116 +145,7 @@ function vpnSwitchClick(form)
 	form.vpn_pppoe_iface.disabled  = dis;
 	form.vpn_type.disabled         = dis;
 	form.vpn_lcp.disabled          = dis;
-	form.vpn_routing_enabled.disabled = dis;
 	form.lanauth_access.disabled   = dis;
-	
-	routingSwitchClick(form);
-}
-
-function addRouteClick(form)
-{
-	var via = (form.vpn_route_via.value.match(/^(\s|\*)*$/)) ? '*' : form.vpn_route_via.value;
-	var row = [ form.vpn_route_net.value, form.vpn_route_mask.value, form.vpn_route_metric.value,
-			form.vpn_route_iface.value, via ];
-	
-	if (!validateIP(form.vpn_route_net, 1))
-		return;
-	if (!validateIPMask(form.vpn_route_mask, 1))
-		return;
-	if ((via!='*') && (!validateIP(form.vpn_route_via, 1)))
-		return;
-	
-	if (!checkDigitRange(form.vpn_route_metric.value, 0, 1500))
-	{
-		alert("Metric must be between 0 and 1500");
-		return;
-	}
-
-	pptpRoutingTable[pptpRoutingTable.length] = row;
-	
-	form.vpn_route_net.value = '';
-	form.vpn_route_mask.value = '';
-	form.vpn_route_iface.value = '';
-	form.vpn_route_metric.value = '0';
-	form.vpn_route_via.value = '';
-
-	routingSwitchClick(form);
-}
-
-function getRouteName(route)
-{
-	var row = pptpRoutingTable[route];
-	var name = 'network ' + row[0] + ', netmask ' + row[1] + ', metric ' + row[2];
-	if (row[3] != '*')
-		name += ' via interface ' + row[3];
-	if (row[4] != '*')
-		name += ' via gateway ' + row[4];
-	return name;
-}
-
-function delRouteClick(form, route)
-{
-	if (form.vpn_enabled.checked)
-	{
-		if (confirm("Do you want to delete: \n \"" + getRouteName(route) + "\"?"))
-		{
-			pptpRoutingTable.splice(route, 1);
-			routingSwitchClick(form);
-		}
-	}
-}
-
-function genRoutingTable(form)
-{
-	var vpn_routing_table = document.getElementById("vpn_routing_table");
-
-	var table = '<table class="small"><tr onmouseover="showHint(\'vpn_route_attrs\');" onmouseout="hideHint(\'vpn_route_attrs\');" >' +
-		'<th>Destination IP</th><th>Mask</th><th style="text-align: center;">Metric</th>' + 
-		'<th style="text-align: center;">Interface</th><th>Gateway</th><th style="text-align: center;">Actions</th>' +
-		'</tr>';
-	
-	var disabled = (form.vpn_enabled.checked) ? '' : 'disabled="disabled"';
-	
-	for (var i=0; i < pptpRoutingTable.length; i++)
-	{
-		var row = pptpRoutingTable[i];
-		table += '<tr>';
-		for (var j=0; j<row.length; j++)
-		{
-			var align = ((j==2) || (j==3) || (j==5)) ? 'align="center"' : '';
-			table += '<td ' + align + ' onmouseover="showRoutingHint(\'vpn_show_route\',' + i + ');" '
-			table += 'onmouseout="hideHint(\'vpn_show_route\');" >' + row[j] + '</td>';
-		}
-		table += '<td align="center"><a onclick="delRouteClick(' + form.name +',' + i + ');" style="cursor: pointer; color: red;" ';
-		table += 'onmouseover="showRoutingHint(\'vpn_del_route\',' + i + ');" onmouseout="hideHint(\'vpn_del_route\');">[X]</a></td></tr>';
-	}
-	
-	// Add new route row
-	table += '<tr>';
-	table += '<td align="center"><input name="vpn_route_net" style="width: 110px;" onmouseover="showHint(\'vpn_route_net\');" onmouseout="hideHint(\'vpn_route_net\');" ' + disabled +'></td>';
-	table += '<td align="center"><input name="vpn_route_mask" style="width: 110px;" onmouseover="showHint(\'vpn_route_mask\');" onmouseout="hideHint(\'vpn_route_mask\');" ' + disabled +'></td>';
-	table += '<td align="center"><input name="vpn_route_metric" style="width: 50px;" value="0" onmouseover="showHint(\'vpn_route_metric\');" onmouseout="hideHint(\'vpn_route_metric\');" ' + disabled +'></td>';
-	table += '<td align="center"><select name="vpn_route_iface" class="half" onmouseover="showHint(\'vpn_route_iface\');" onmouseout="hideHint(\'vpn_route_iface\');" ' + disabled + '>'+
-		'<% vpnRouteIfaceList(); %>';
-	table += '<td align="center"><input name="vpn_route_via" style="width: 110px;" onmouseover="showHint(\'vpn_route_via\');" onmouseout="hideHint(\'vpn_route_via\');" ' + disabled +'></td>';
-	table += '<td align="center"><input type="button" value="Add" onclick="addRouteClick(this.form);" onmouseover="showHint(\'vpn_add_route\');" onmouseout="hideHint(\'vpn_add_route\');" ' + disabled +'></td>';
-	table += '<tr>';
-
-	table += '</table>';
-	vpn_routing_table.innerHTML = table;
-}
-
-function routingSwitchClick(form)
-{
-	var vpn_routing_row = document.getElementById("vpn_routing_row");
-	if (form.vpn_routing_enabled.checked)
-	{
-		genRoutingTable(form);
-		vpn_routing_row.style.display='';
-		return;
-	}
-	
-	vpn_routing_row.style.display='none';
 }
 
 function mtuChange(form)
@@ -338,7 +170,6 @@ function mtuChange(form)
 function bodyOnLoad(form)
 {
 	initializeForm(form);
-	resetRoutingTable(form);
 	
 	/* Check if option was set */
 	var vpn_mtu_select = document.getElementById('vpn_mtu_select');
@@ -429,8 +260,6 @@ function submitClick(form)
 		}
 	}
 
-	rememberRoutingTable(form); // Remember routing table
-
 	return true;
 }
 
@@ -438,7 +267,6 @@ function initializeForm(form)
 {
 	var vpnEnabled = '<% getCfgGeneral(1, "vpnEnabled"); %>';
 	var pptpType   = '<% getCfgGeneral(1, "vpnType"); %>';
-	var routingOn  = '<% getCfgGeneral(1, "vpnRoutingEnabled"); %>';
 	var mppe       = '<% getCfgGeneral(1, "vpnMPPE"); %>';
 	var peerdns    = '<% getCfgGeneral(1, "vpnPeerDNS"); %>';
 	var debug      = '<% getCfgGeneral(1, "vpnDebug"); %>';
@@ -459,7 +287,6 @@ function initializeForm(form)
 	}
 
 	form.vpn_enabled.checked = (vpnEnabled == 'on');
-	form.vpn_routing_enabled.checked = (routingOn == 'on');
 	form.vpn_mppe.checked    = (mppe == 'on');
 	form.vpn_peerdns.checked = (peerdns == 'on');
 	form.vpn_debug.checked   = (debug == 'on');
@@ -598,20 +425,6 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-
-</table>
-
-<table id="table_vpn_routing" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none" >
-	<tr onmouseover="showHint('vpn_routing')" onmouseout="hideHint('vpn_routing')">
-		<td colspan="2">
-			<input name="vpn_routing_enabled" onclick="routingSwitchClick(this.form);" type="checkbox">
-			<b>Enable routing</b>
-		</td>
-	</tr>
-	<tr id="vpn_routing_row" style="display: none;">
-		<td colspan="2" id="vpn_routing_table">
-		</td>
-	</tr>
 </table>
 
 <table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none">
@@ -648,7 +461,6 @@ tunnel on your Router.
 	<tr height="32px"><td colspan="2"></td></tr>
 	<tr>
 		<td colspan="2">
-			<input name="vpn_routing_table" type="hidden">
 			<input name="lanauth_pass_changed" type="hidden">
 			<input value="/internet/vpn.asp" name="submit-url" type="hidden">
 			<input style="none" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;

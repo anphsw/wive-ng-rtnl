@@ -196,8 +196,6 @@ void formDefineInternet(void) {
 	websAspDefine(T("getSysLogBuilt"), getSysLogBuilt);
 	websAspDefine(T("getETHTOOLBuilt"), getETHTOOLBuilt);
 
-	websAspDefine(T("vpnInitRoutingTable"), vpnInitRoutingTable);
-	websAspDefine(T("vpnRouteIfaceList"), vpnRouteIfaceList);
 	websAspDefine(T("vpnShowVPNStatus"), vpnShowVPNStatus);
 	websAspDefine(T("vpnIfaceList"), vpnIfaceList);
 	websFormDefine(T("formVPNSetup"), formVPNSetup);
@@ -510,7 +508,6 @@ const vpn_fetch_t vpn_args[] =
 	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
 	{ T("vpn_auth_type"),          "vpnAuthProtocol",      1 },
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
-	{ T("vpn_routing_enabled"),    "vpnRoutingEnabled",    1 },
 	{ NULL, 0, 0 } // Terminator
 };
 
@@ -550,95 +547,6 @@ const vpn_status_t lanauth_statuses[] =
 };
 #endif
 
-
-/*
- * Read routing table and output it to web form
- */
-static int vpnInitRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE *fd;
-	char line[256];
-	char ip[32], netmask[32], iface[32], gateway[32];
-	long metric;
-	int args, first = 1;
-	
-	if ((fd = fopen(_PATH_VPN_RT_FILE, "r")) != NULL)
-	{
-		// Output routing table
-		while (fgets(line, 255, fd)!=NULL)
-		{
-			// Read routing line
-			args = sscanf(line,
-				"%s %s %ld %s %s",    // IP, netmask, metric, iface, gateway
-				ip, netmask, &metric, iface, gateway);
-
-			if (args >= 5)
-			{
-				if (!first)
-					websWrite(wp, T(",\n"));
-				else
-					first = 0;
-
-				websWrite(wp, T("\t[ '%s', '%s', '%d', '%s', '%s' ]"),
-					ip, netmask, metric, iface, gateway );
-			}
-		}
-		
-		fclose(fd);
-	}
-	
-	return 0;
-}
-
-/*
- * List interfaces to make available routes
- */
-static int vpnRouteIfaceList(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
-	
-	if (fd != NULL)
-	{
-		char_t curr_if[32];
-		char_t line[256];
-		
-		// Add "*" virtual iface
-		websWrite(wp, T("<option value=\"*\">*</option>"));
-		
-		// Read all ifaces and check match
-		while (fgets(line, 255, fd)!=NULL)
-		{
-			if (sscanf(line, " %[a-zA-Z0-9]", curr_if)==1)
-			{
-				// filer only "brXX" && "vcXX" && "pppXXX" ifaces
-				int found = strncmp(curr_if, "br", 2)==0;
-				if (!found)
-					found = strncmp(curr_if, "vc", 2)==0;
-				if (!found)
-					found = strncmp(curr_if, "ppp", 3)==0;
-				if (found)
-				{
-					// Write iface to output if it was found
-					websWrite(wp, T("<option value=\"%s\">%s</option>"),
-						curr_if, curr_if
-					);
-				}
-			}
-		}
-		
-		// Add "ppp+" virtual iface
-		websWrite(wp, T("<option value=\"ppp+\">ppp+</option>"));
-		
-		fclose(fd);
-	}
-	else
-	{
-		fprintf(stderr, "Warning: cannot open %s (%s).\n",
-			_PATH_PROCNET_DEV, strerror(errno));
-	}
-	
-	return 0;
-}
 
 #if defined CONFIG_USER_KABINET
 /* returns actual lanauth state+1 or 0 if lanauth process not found
@@ -815,70 +723,6 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-void vpnStoreRouting(const char *rt_config)
-{
-	// Create directory without check
-	mkdir(_PATH_VPN_RT, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-	// Open file
-	FILE *fd = fopen(_PATH_VPN_RT_FILE, "w+");
-	
-	if (fd != NULL)
-	{
-		// Output routing table to file
-		fputs(rt_config, fd);
-		fseek(fd, 0, SEEK_SET);
-		
-		// Now read line-by-line and generate script
-		FILE *scr = fopen(_PATH_VPN_RT_SCRIPT, "w");
-		
-		if (scr != NULL)
-		{
-			char line[256];
-			char ip[32], netmask[32], iface[32], gateway[32];
-			long metric;
-			int args;
-			
-			fputs("#!/bin/sh\n\n", scr);
-			
-			// Read routing table from file line-by-line and generate script
-			while (fgets(line, 255, fd) != NULL)
-			{
-				// Read routing line
-				args = sscanf(line,
-					"%s %s %ld %s %s",    // IP, netmask, metric, iface, gateway
-					ip, netmask, &metric, iface, gateway);
-				
-				if (args >= 5)
-				{
-					fprintf(scr, "/bin/ip route $2 %s/%s", ip, netmask);
-					if (strcmp(iface, "*")!=0)
-					{
-						if (strcmp(iface, "ppp+")!=0)
-							fprintf(scr, " dev %s", iface);
-						else
-							fputs(" dev $1", scr);
-					}
-					fprintf(scr, " metric %ld", metric);
-					if (strcmp(gateway, "*")!=0)
-						fprintf(scr, " via %s", gateway);
-					fputc('\n', scr); // And end-of-line
-				}
-			}
-			
-			fclose(scr);
-		}
-		
-		fclose(fd);
-		sync();
-		
-		// Call rwfs to store data
-		system("fs save &");
-	}
-	else
-		printf("Failed to open file %s\n", _PATH_VPN_RT_FILE);
-}
-
 void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 {
 	char_t  *vpn_enabled, *submitUrl;
@@ -930,15 +774,6 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T(""));
 		if (vpn_rt_enabled[0] == '\0')
 			vpn_rt_enabled="off";
-		
-		// Routing table is enabled, store it
-		if (!strcmp(vpn_rt_enabled, "on"))
-		{
-			char *vpn_rt = websGetVar(wp, T("vpn_routing_table"), T(""));
-			
-			if (vpn_rt != NULL)
-				vpnStoreRouting(vpn_rt);
-		}
 	}
 
 	nvram_commit(RT2860_NVRAM);

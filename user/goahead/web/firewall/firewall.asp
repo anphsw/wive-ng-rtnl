@@ -91,7 +91,7 @@ function genRulesTable()
 	}
 	
 	if (portForwardingRules.length <= 0)
-		table += '<tr><td colspan="7" style="text-align: left;">No port forwarding rules yet</td></tr>';
+		table += '<tr><td colspan="8" style="text-align: left;">No port forwarding rules yet</td></tr>';
 	
 	// Controls
 	table +=
