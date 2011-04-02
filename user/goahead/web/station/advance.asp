@@ -153,6 +153,7 @@ function initValue()
 	var staAR = '<% getCfgZero(1, "AutoRoaming"); %>';
 	var staAC = '<% getCfgZero(1, "AutoConnect"); %>';
 	var staFC = '<% getCfgZero(1, "FastConnect"); %>';
+	var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 	var txPower = '<% getCfgZero(1, "TxPower"); %>';
 	
 	var form = document.sta_advance;
@@ -180,6 +181,7 @@ function initValue()
 	form.staAutoRoaming.checked = (staAR == '1');
 	form.staAutoConnect.checked = (staAC == '1');
 	form.staFastConnect.checked = (staFC == '1');
+	form.lnaGainEnable.checked  = (lnaGain == '1');
 	
 	// Set-up TX power combo
 	for (var i=0; i<form.tx_power.options.length; i++)
@@ -341,6 +343,10 @@ function init11NValues()
 <tr>
 	<td class="head">Fast Connect</td>
 	<td><input type="checkbox" name="staFastConnect">enable</td>
+</tr>
+<tr> 
+	<td class="head">Increase LNA gain</td>
+	<td><input type="checkbox" name="lnaGainEnable">enable</td>
 </tr>
 <tr> 
 	<td class="head" id="advTxPW">TX Power</td>

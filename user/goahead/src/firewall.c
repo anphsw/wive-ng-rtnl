@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "firewall.h"
 #include "internet.h"
+#include "helpers.h"
 
 #define _PATH_PFW           "/etc"
 #define _PATH_PFW_FILE      _PATH_PFW "/portforward"
@@ -748,9 +749,9 @@ static int checkIfUnderBridgeModeASP(int eid, webs_t wp, int argc, char_t **argv
 {
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
 
-	if(!mode)
+	if (!mode)
 		return -1;	// fatal error, make ASP engine complained.
-	if(atoi(mode) == 0)	// bridge mode
+	if (atoi(mode) == 0)	// bridge mode
 		websWrite(wp, T(HTML_NO_FIREWALL_UNDER_BRIDGE_MODE));
 	return 0;
 }
@@ -1264,202 +1265,33 @@ void iptablesWebsFilterRun(void)
   return;
 }
 
-
-static void websURLFilterDelete(webs_t wp, char_t *path, char_t *query)
+const parameter_fetch_t content_filtering_args[] =
 {
-	int i, j, rule_count;
-	char_t name_buf[16];
-	char_t *value;
-	int *deleArray;
+	{ T("urlFiltering"),           "websURLFilters",       0 },
+	{ T("hostFiltering"),          "websHostFilters",      0 },
+	{ T("websFilterProxy"),        "websFilterProxy",      2 },
+	{ T("websFilterJava"),         "websFilterJava",       2 },
+	{ T("websFilterActivex"),      "websFilterActivex",    2 },
+	{ T("websFilterCookies"),      "websFilterCookies",    2 },
 
-	char *rules = nvram_get(RT2860_NVRAM, "websURLFilters");
-	if(!rules || !strlen(rules) )
-		return;
+	{ NULL, 0, 0 } // Terminator
+};
 
-	rule_count = getRuleNums(rules);
-	if(!rule_count)
-		return;
-
-	deleArray = (int *)malloc(rule_count * sizeof(int));
-
-	for (i=0, j=0; i< rule_count; i++)
-	{
-		snprintf(name_buf, 16, "DR%d", i);
-		value = websGetVar(wp, name_buf, NULL);
-		if (value)
-			deleArray[j++] = i;
-	}
-	if (!j)
-	{
-		websHeader(wp);
-		websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
-		websFooter(wp);
-		websDone(wp, 200);
-		return;
-	}
-
-	deleteNthValueMulti(deleArray, rule_count, rules, ';');
-	free(deleArray);
-
-	nvram_set(RT2860_NVRAM, "websURLFilters", rules);
+static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
+{
+	// Store firewall parameters
+	setupParameters(wp, content_filtering_args, 1);
 	
-
-	websHeader(wp);
-	websWrite(wp, T("Delete : success<br>\n") );
-	websFooter(wp);
-	websDone(wp, 200);
-
 	//call iptables
 	firewall_rebuild();
-
-	return;
-}
-
-static void websHostFilterDelete(webs_t wp, char_t *path, char_t *query)
-{
-	int i, j, rule_count;
-	char_t name_buf[16];
-	char_t *value;
-	int *deleArray;
-
-	char *rules = nvram_get(RT2860_NVRAM, "websHostFilters");
-	if(!rules || !strlen(rules) )
-		return;
-
-	rule_count = getRuleNums(rules);
-	if(!rule_count)
-		return;
-
-	deleArray = (int *)malloc(rule_count * sizeof(int));
-
-	for(i=0, j=0; i< rule_count; i++){
-		snprintf(name_buf, 16, "DR%d", i);
-		value = websGetVar(wp, name_buf, NULL);
-		if(value){
-			deleArray[j++] = i;
-		}
-	}
-	if(!j){
-	    websHeader(wp);
-	    websWrite(wp, T("You didn't select any rules to delete.<br>\n"));
-	    websFooter(wp);
-	    websDone(wp, 200);		
-		return;
-	}
-
-	deleteNthValueMulti(deleArray, rule_count, rules, ';');
-	free(deleArray);
-
-	nvram_set(RT2860_NVRAM, "websHostFilters", rules);
 	
-
-	websHeader(wp);
-	websWrite(wp, T("Delete : success<br>\n") );
-	websFooter(wp);
-	websDone(wp, 200);
-
-	//call iptables
-	firewall_rebuild();
-
-	return;
-}
-
-static void webContentFilter(webs_t wp, char_t *path, char_t *query)
-{
-	char *proxy = websGetVar(wp, T("websFilterProxy"), T(""));
-	char *java = websGetVar(wp, T("websFilterJava"), T(""));
-	char *activex = websGetVar(wp, T("websFilterActivex"), T(""));
-	char *cookies = websGetVar(wp, T("websFilterCookies"), T(""));
-
-	// someone use malform page.....
-	if(!proxy || !java || !activex || !cookies)
-		return;
-
-	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "websFilterProxy",   atoi(proxy)   ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterJava",    atoi(java)    ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterActivex", atoi(activex) ? "1" : "0" );
-	nvram_bufset(RT2860_NVRAM, "websFilterCookies", atoi(cookies) ? "1" : "0" );
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-	
-	websHeader(wp);
-	websWrite(wp, T("Proxy: %s<br>\n"),  atoi(proxy) ? "enable" : "disable");
-	websWrite(wp, T("Java: %s<br>\n"),   atoi(java) ? "enable" : "disable");
-	websWrite(wp, T("Activex: %s<br>\n"), atoi(activex) ? "enable" : "disable");
-	websWrite(wp, T("Cookies: %s<br>\n"), atoi(cookies) ? "enable" : "disable");
-	websFooter(wp);
-	websDone(wp, 200);
-
-	//call iptables
-	firewall_rebuild();
-}
-
-static void websURLFilter(webs_t wp, char_t *path, char_t *query)
-{
-	char *urlfilters = nvram_get(RT2860_NVRAM, "websURLFilters");
-	char *rule = websGetVar(wp, T("addURLFilter"), T(""));
-	char *new_urlfilters;
-	if(!rule)
-		return;
-	if(strchr(rule, ';'))
-		return;
-
-	if(!urlfilters || !strlen(urlfilters))
-		nvram_set(RT2860_NVRAM, "websURLFilters", rule);
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if ((submitUrl != NULL) && (submitUrl[0]))
+		websRedirect(wp, submitUrl);
 	else
-	{
-		if(! (new_urlfilters = (char *)malloc(sizeof(char) * (strlen(urlfilters)+strlen(rule)+1))))
-			return;
-		new_urlfilters[0] = '\0';
-		strcat(new_urlfilters, urlfilters);
-		strcat(new_urlfilters, ";");
-		strcat(new_urlfilters, rule);
-		nvram_set(RT2860_NVRAM, "websURLFilters", new_urlfilters);
-		free(new_urlfilters);
-	}
-	
+		websDone(wp, 200);
 
-
-	websHeader(wp);
-	websWrite(wp, T("add URL filter: %s<br>\n"), rule);
-	websFooter(wp);
-	websDone(wp, 200);
-
-	//call iptables
-	firewall_rebuild();
-}
-
-static void websHostFilter(webs_t wp, char_t *path, char_t *query)
-{
-	char *hostfilters = nvram_get(RT2860_NVRAM, "websHostFilters");
-	char *rule = websGetVar(wp, T("addHostFilter"), T(""));
-	char *new_hostfilters;
-	if(!rule)
-		return;
-	if(strchr(rule, ';'))
-		return;
-
-	if(!hostfilters || !strlen(hostfilters))
-		nvram_set(RT2860_NVRAM, "websHostFilters", rule);
-	else{
-		if(! (new_hostfilters = (char *)malloc(sizeof(char) * (strlen(hostfilters)+strlen(rule)+1))))
-			return;
-		new_hostfilters[0] = '\0';
-		strcat(new_hostfilters, hostfilters);
-		strcat(new_hostfilters, ";");
-		strcat(new_hostfilters, rule);
-		nvram_set(RT2860_NVRAM, "websHostFilters", new_hostfilters);
-		free(new_hostfilters);
-	}
-	
-	websHeader(wp);
-	websWrite(wp, T("add Host filter: %s<br>\n"), rule);
-	websFooter(wp);
-	websDone(wp, 200);
-
-	//call iptables
-	firewall_rebuild();
+	return 0;
 }
 
 char *getNameIntroFromPat(char *filename)
@@ -1568,11 +1400,7 @@ void formDefineFirewall(void)
 	websFormDefine(T("portForward"), portForward);
 
 	websFormDefine(T("websSysFirewall"), websSysFirewall);
-	websFormDefine(T("webContentFilter"), webContentFilter);
-	websFormDefine(T("websURLFilterDelete"), websURLFilterDelete);
-	websFormDefine(T("websHostFilterDelete"), websHostFilterDelete);
-	websFormDefine(T("websHostFilter"), websHostFilter);
-	websFormDefine(T("websURLFilter"), websURLFilter);
+	websFormDefine(T("webContentFilterSetup"), webContentFilterSetup);
 
 	websAspDefine(T("getLayer7FiltersASP"), getLayer7FiltersASP);
 

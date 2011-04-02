@@ -2,6 +2,7 @@
 #define HELPERS_H_
 
 #include <sys/types.h>
+#include "webs.h"
 
 #define HTML_BUFFER_QUANTITY    1024
 
@@ -25,6 +26,13 @@ typedef struct html_replacement_t
 	const char     *replacement;
 } html_replacement_t;
 
+typedef struct parameter_fetch_t
+{
+	const char *web_param;
+	const char *nvram_param;
+	int is_switch;
+} parameter_fetch_t;
+
 extern const char *replaceWords(const char *key, const replacement_t *table);
 extern const char *normalizeSize(long long *size);
 extern long readUnsigned(const char *str);
@@ -35,6 +43,9 @@ extern int encodeHTMLContent(const char *data, html_buffer_t *buf);
 extern int freeHTMLBuffer(html_buffer_t *buf);
 
 extern int checkFileExists(const char *argv);
+
+// Set-up parameters in NVRAM
+extern void setupParameters(webs_t wp, const parameter_fetch_t *fetch, int transaction);
 
 #endif /* HELPERS_H_ */
 

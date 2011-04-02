@@ -323,7 +323,9 @@
 7) Try workaround speed regresion in mips32r2 at RT3050 rev P0.<br>
 8) Remove some dead code.<br>
 9) Fix some leaks.<br>
-10) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life. (Need add in webui).<br>
+10) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
+11) Rewrite content filter page.<br>
+12) Fix anntena numbers.<br>
 
 <br><br>
 <b>For support see:</b><br>

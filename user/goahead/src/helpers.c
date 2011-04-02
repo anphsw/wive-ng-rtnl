@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
+#include	"utils.h"
+
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
 
 // Sizes table
@@ -151,4 +153,35 @@ int checkFileExists(const char *fname)
 
 	// Return success if stat OK
 	return (stat_res == 0) ? 1 : 0;
+}
+
+void setupParameters(webs_t wp, const parameter_fetch_t *fetch, int transaction)
+{
+	if (transaction)
+		nvram_init(RT2860_NVRAM);
+	
+	while (fetch->web_param != NULL)
+	{
+		// Get variable
+		char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
+		if (fetch->is_switch) // Check if need update a switch
+		{
+			if (strcmp(str, "on") != 0)
+				str = "off";
+			if (fetch->is_switch == 2)
+				str = (strcmp(str, "on") == 0) ? "1" : "0";
+		}
+		
+		if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
+			printf("Set %s nvram error!", fetch->nvram_param);
+		
+		printf("%s value : %s\n", fetch->nvram_param, str);
+		fetch++;
+	}
+	
+	if (transaction)
+	{
+		nvram_commit(RT2860_NVRAM);
+		nvram_close(RT2860_NVRAM);
+	}
 }

@@ -844,7 +844,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
-	char_t	*rd_region, *carrier_detect;
+	char_t	*rd_region, *carrier_detect, *lna_gain;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
 
@@ -870,6 +870,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
 	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
+	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("off"));
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
@@ -902,6 +903,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
 	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
 	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
+	nvram_bufset(RT2860_NVRAM, "HiPower", (strcmp(lna_gain, "on")==0) ? "1" : "0");
 	
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);
@@ -975,6 +977,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
     websWrite(wp, T("apsd_capable: %s<br>\n"), apsd_capable);
     websWrite(wp, T("dls_capable: %s<br>\n"), dls_capable);
     websWrite(wp, T("countrycode: %s<br>\n"), countrycode);
+    websWrite(wp, T("lna_gain: %s<br>\n"), lna_gain);
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
     websWrite(wp, T("m2u_enable: %s<br>\n"), m2u_enable);
     websWrite(wp, T("mcast_mcs: %s<br>\n"), mcast_mcs);
@@ -1829,7 +1832,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 	
-	for(i=0;i<neighbor->num;i++)
+	for (i=0; i<neighbor->num; i++)
 	{
 		websWrite(wp, T("<tr align=\"center\">"));
 		if (1 == neighbor->Entry[i].Status)

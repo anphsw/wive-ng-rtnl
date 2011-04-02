@@ -78,3 +78,39 @@ function disableElement(element, disabled)
 	else if (typeof(element) == 'object')
 		element.disabled = disabled;
 }
+
+self.getElementValue = function(element)
+{
+	if (typeof(element) == 'string')
+		element = document.getElementById(element);
+	if (element == null)
+		return null;
+	return element.value;
+}
+
+self.setElementValue = function(element, value)
+{
+	if (typeof(element) == 'string')
+		element = document.getElementById(element);
+	if (element == null)
+		return null;
+	return element.value = value;
+}
+
+self.getElementChecked = function(element)
+{
+	if (typeof(element) == 'string')
+		element = document.getElementById(element);
+	if (element == null)
+		return null;
+	return element.checked;
+}
+
+self.setElementChecked = function(element, checked)
+{
+	if (typeof(element) == 'string')
+		element = document.getElementById(element);
+	if (element == null)
+		return null;
+	return element.checked = checked;
+}

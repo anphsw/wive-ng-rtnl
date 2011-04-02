@@ -59,6 +59,8 @@ static int	getStaStatsTx(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv);
 
+static int	getStaTrModes(int eid, webs_t wp, int argc, char_t **argv);
+
 static void addStaProfile(webs_t wp, char_t *path, char_t *query);
 static void editStaProfile(webs_t wp, char_t *path, char_t *query);
 static void resetStaCounters(webs_t wp, char_t *path, char_t *query);
@@ -115,6 +117,7 @@ void formDefineStation(void)
 	websAspDefine(T("getStaWirelessMode"), getStaWirelessMode);
 	websAspDefine(T("getStaDLSTimeout"), getStaDLSTimeout);
 	websAspDefine(T("getStaDLSMacAddress"), getStaDLSMacAddress);
+	websAspDefine(T("getStaTrModes"), getStaTrModes);
 
 	websFormDefine(T("addStaProfile"), addStaProfile);
 	websFormDefine(T("editStaProfile"), editStaProfile);
@@ -519,10 +522,10 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	else
 	{
-		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID], tmpRSSI[16], tmpChannel[16], tmpAuth[32], tmpEncry[20], tmpNetworkType[24], tmpImg[40];
+		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID], tmpRSSI[16], tmpChannel[16], tmpAuth[32], tmpEncry[20], tmpNetworkType[24];
 		unsigned char tmpSSIDII[NDIS_802_11_LENGTH_SSID+1];
 		/*
-		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID*4], tmpRSSI[60], tmpChannel[16], tmpAuth[32], tmpEncry[52], tmpNetworkType[24], tmpImg[40];
+		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID*4], tmpRSSI[60], tmpChannel[16], tmpAuth[32], tmpEncry[52], tmpNetworkType[24];
 		unsigned char tmpSSIDII[(NDIS_802_11_LENGTH_SSID+1)*4];
 		*/
 		int i=0, j=0;
@@ -544,17 +547,18 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			memset(tmpEncry, 0x00, sizeof(tmpEncry));
 			memset(tmpNetworkType, 0x00, sizeof(tmpNetworkType));
 			memset(tmpBSSIDII, 0x00, sizeof(tmpBSSIDII));
-			memset(tmpImg, 0x00, sizeof(tmpImg));
 			memset(tmpSSIDII, 0x00, sizeof(tmpSSIDII));
 
 			// compare BSSID with connected bssid
-			if (memcmp(BssidQuery, pBssid->MacAddress, 6) == 0)
+			char *hsStyle=(memcmp(BssidQuery, pBssid->MacAddress, 6) == 0) ?
+				" style=\"color: #ffffff; background-color: #008000;\"" : "";
+/*			if (memcmp(BssidQuery, pBssid->MacAddress, 6) == 0)
 				sprintf((char *)tmpImg, "<img src=\"/graphics/handshake.gif\"> ");
 			else
-				sprintf((char *)tmpImg, " ");
+				sprintf((char *)tmpImg, " ");*/
 
 			if (strcmp((char *)pBssid->Ssid.Ssid, "") == 0)
-				sprintf((char *)tmpSSID, "<td>%s%s</td>", tmpImg, "&nbsp;");
+				sprintf((char *)tmpSSID, "&nbsp;");
 			else {
 				int i = 0;
 				do {
@@ -565,10 +569,10 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 					}
 					i++;
 				} while(i < pBssid->Ssid.SsidLength-1);
-				sprintf((char *)tmpSSID, "<td>%s%s</td>", tmpImg, pBssid->Ssid.Ssid);
+				sprintf((char *)tmpSSID, "%s", pBssid->Ssid.Ssid);
 			}
 
-			sprintf((char *)tmpBSSID, "<td>%02X-%02X-%02X-%02X-%02X-%02X</td>",
+			sprintf((char *)tmpBSSID, "%02X-%02X-%02X-%02X-%02X-%02X",
 				pBssid->MacAddress[0], pBssid->MacAddress[1], pBssid->MacAddress[2],
 				pBssid->MacAddress[3], pBssid->MacAddress[4], pBssid->MacAddress[5]);
 
@@ -577,7 +581,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				pBssid->MacAddress[3], pBssid->MacAddress[4], pBssid->MacAddress[5]);
 
 			nSigQua = ConvertRssiToSignalQuality(pBssid->Rssi);
-			sprintf((char *)tmpRSSI,"<td>%d%%</td>", nSigQua);
+			sprintf((char *)tmpRSSI,"%d%%", nSigQua);
 
 			nChannel = -1;	
 			for(j = 0; j < G_nChanFreqCount; j++)
@@ -592,11 +596,11 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			if (nChannel == -1)
 				continue;
 
-			sprintf((char *)tmpChannel, "<td>%u</td>", nChannel);
+			sprintf((char *)tmpChannel, "%u", nChannel);
 			if (pBssid->InfrastructureMode == Ndis802_11Infrastructure)
-				sprintf((char *)tmpNetworkType, "<td>%s</td>", "Infrastructure");
+				sprintf((char *)tmpNetworkType, "%s", "Infrastructure");
 			else
-				sprintf((char *)tmpNetworkType, "<td>%s</td>", "Ad Hoc");
+				sprintf((char *)tmpNetworkType, "%s", "Ad Hoc");
 			
 			// work with NDIS_WLAN_BSSID_EX
 			unsigned char bTKIP = FALSE;
@@ -781,7 +785,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 									else
 										bWPA2NONE = TRUE;
 								}
-							}					
+							}
 							plAuthenKey++;
 						}
 					}
@@ -798,9 +802,9 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			memset( strAuth, 0x00, sizeof(strAuth) );
 			memset( strEncry, 0x00, sizeof(strEncry) );
 			if (bCCKM)
-				strcpy(strAuth, "CCKM; ");
+				strcat(strAuth, "CCKM; ");
 			if (bWPA)
-				strcpy(strAuth, "WPA; ");
+				strcat(strAuth, "WPA; ");
 			if (bWPAPSK)
 				strcat(strAuth, "WPA-PSK; ");
 			if (bWPANONE)
@@ -839,8 +843,8 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				}
 			}
 
-			sprintf((char *)tmpAuth, "<td>%s</td>", strAuth);
-			sprintf((char *)tmpEncry, "<td>%s</td>", strEncry);
+			sprintf((char *)tmpAuth, "%s", strAuth);
+			sprintf((char *)tmpEncry, "%s", strEncry);
 
 			strcpy((char *)tmpSSIDII, pBssid->Ssid.Ssid);
 			if (strlen(G_SSID.Ssid)>0 && strcmp(pBssid->Ssid.Ssid, G_SSID.Ssid) == 0)
@@ -848,8 +852,17 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			else
 				strcpy(radiocheck, "");
 
-			sprintf((char *)tmpRadio, "<td><input type=radio name=selectedSSID %s onClick=\"selectedSSIDChange('%s','%s',%d,%d,'%s','%s')\"></td>", radiocheck, tmpSSIDII, tmpBSSIDII, pBssid->InfrastructureMode, nChannel, strEncry, strAuth);
-			websWrite(wp, "<tr> %s %s %s %s %s %s %s %s </tr>\n", tmpRadio, tmpSSID, tmpBSSID, tmpRSSI, tmpChannel, tmpEncry, tmpAuth, tmpNetworkType);
+			sprintf((char *)tmpRadio, "<input type=\"radio\" name=\"selectedSSID\" %s onClick=\"selectedSSIDChange('%s','%s',%d,%d,'%s','%s')\">", radiocheck, tmpSSIDII, tmpBSSIDII, pBssid->InfrastructureMode, nChannel, strEncry, strAuth);
+			websWrite(wp, "<tr%s><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td></tr>\n",
+				hsStyle,
+				hsStyle, tmpRadio,
+				hsStyle, tmpSSID,
+				hsStyle, tmpBSSID,
+				hsStyle, tmpRSSI,
+				hsStyle, tmpChannel,
+				hsStyle, tmpEncry,
+				hsStyle, tmpAuth,
+				hsStyle, tmpNetworkType);
 			pBssid = (PNDIS_WLAN_BSSID_EX)((char *)pBssid + pBssid->Length);
 		}
 	}
@@ -5065,7 +5078,7 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
-	char_t *ht, *bw, *gi, *mcs, *rf, *tx_power, *sta_ar, *sta_ac, *sta_fc;
+	char_t *ht, *bw, *gi, *mcs, *rf, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
 
 	int s, ret, country_region_a=0, country_region_bg=0;
 	int tx_burst=0, short_slot_time=0, wireless_mode=0, tx_rate=0;
@@ -5091,6 +5104,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	sta_ar = websGetVar(wp, T("staAutoRoaming"), T("off"));
 	sta_ac = websGetVar(wp, T("staAutoConnect"), T("off"));
 	sta_fc = websGetVar(wp, T("staFastConnect"), T("off"));
+	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("off"));
 
         // mac clone && sta roaming atts
 	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
@@ -5110,6 +5124,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "AutoConnect", (strcmp(sta_ac, "on")==0) ? "1" : "0");
 	printf("sta_fc =%s\n", sta_fc);
 	nvram_bufset(RT2860_NVRAM, "FastConnect", (strcmp(sta_fc, "on")==0) ? "1" : "0");
+	printf("lna_gain =%s\n", lna_gain);
+	nvram_bufset(RT2860_NVRAM, "HiPower", (strcmp(lna_gain, "on")==0) ? "1" : "0");
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -6017,4 +6033,15 @@ static int getStaDLSMacAddress(int eid, webs_t wp, int argc, char_t **argv)
 
 	close(s);
 	return 0;
+}
+
+static int getStaTrModes(int eid, webs_t wp, int argc, char_t **argv)
+{
+	char_t *result= "0";
+#if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R)
+	result = "1";
+#elif defined(CONFIG_RALINK_RT3052_2T2R)
+	result = "2";
+#endif
+	return websWrite(wp, T("%s"), result);
 }

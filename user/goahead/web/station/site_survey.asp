@@ -179,38 +179,42 @@ function PageInit()
 
 <form method=post name="sta_site_survey">
 <table width="90%" border="1" cellpadding="2" cellspacing="1">
-  <tr>
-    <td class="title" colspan="8" id="scanSiteSurvey">Site Survey</td>
-  </tr>
-  <tr>
-    <td bgcolor="#E8F8FF" id="scanSelect">&nbsp;</td>
-    <td bgcolor="#E8F8FF" id="scanSSID">SSID</td>
-    <td bgcolor="#E8F8FF" id="scanBSSID">BSSID</td>
-    <td bgcolor="#E8F8FF" id="scanRSSI">RSSI</td>
-    <td bgcolor="#E8F8FF" id="scanChannel">Channel</td>
-    <td bgcolor="#E8F8FF" id="scanEncryp">Encryption</td>
-    <td bgcolor="#E8F8FF" id="scanAuth">Authentication</td>
-    <td bgcolor="#E8F8FF" id="scanNetType">Network Type</td>
-  </tr>
-  <% getStaBSSIDList(); %>
+<tr>
+	<td class="title" colspan="8" id="scanSiteSurvey">Site Survey</td>
+</tr>
+<tr>
+	<td bgcolor="#E8F8FF" id="scanSelect">&nbsp;</td>
+	<td bgcolor="#E8F8FF" id="scanSSID">SSID</td>
+	<td bgcolor="#E8F8FF" id="scanBSSID">BSSID</td>
+	<td bgcolor="#E8F8FF" id="scanRSSI">RSSI</td>
+	<td bgcolor="#E8F8FF" id="scanChannel">Channel</td>
+	<td bgcolor="#E8F8FF" id="scanEncryp">Encryption</td>
+	<td bgcolor="#E8F8FF" id="scanAuth">Authentication</td>
+	<td bgcolor="#E8F8FF" id="scanNetType">Network Type</td>
+</tr>
+<% getStaBSSIDList(); %>
+</table>
 
-  <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-    <tr>
-      <td>
-	<input type=text name="connectedssid" size=28 value="<% getStaConnectionSSID(); %>" disabled>&nbsp;&nbsp;&nbsp;
-	<input type=button style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" disabled onClick="open_connection_page()">&nbsp;
-	<input type=button style="{width:100px;}" value="Rescan" id="scanRescan" onClick="location.href=location.href">&nbsp;
+<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<tr>
+	<td>
+		<input type=text name="connectedssid" size=28 value="<% getStaConnectionSSID(); %>" disabled>
+	</td>
+</tr>
+<tr>
+	<td>
+		<input type=button style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" disabled onClick="open_connection_page()">&nbsp;
+		<input type=button style="{width:100px;}" value="Rescan" id="scanRescan" onClick="location.href=location.href">&nbsp;
 	<!--
 	<input type=button style="{width:100px;}" value="Rescan" onClick="location.href=location.href">&nbsp; 
 	<input type=button style="{width:100px;}" value="Rescan" onClick="window.location.reload()">&nbsp;
 	-->
-	<input type=button style="{width:100px;}" name="addProfileButton" value="Add Profile" id="scanAddProfile" disabled onClick="open_profile_page()">
-      </td>
-    </tr>
-  </table>
+		<input type=button style="{width:100px;}" name="addProfileButton" value="Add Profile" id="scanAddProfile" disabled onClick="open_profile_page()">
+	</td>
+</tr>
 </table>
-</form>
 
+</form>
 
 </td></tr></table>
 </body>

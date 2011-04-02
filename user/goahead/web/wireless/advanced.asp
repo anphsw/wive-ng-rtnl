@@ -31,6 +31,7 @@ var m2uEnabled = '<% getCfgZero(1, "M2UEnabled"); %>';
 var carrierib = '<% getCarrierBuilt(); %>';
 var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
+var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 
 function initTranslation()
 {
@@ -239,6 +240,8 @@ function initValue()
 			break;
 		form.tx_power.options.selectedIndex = i;
 	}
+	
+	form.lnaGainEnable.checked  = (lnaGain == '1');
 }
 
 function CheckValue()
@@ -420,19 +423,23 @@ function wmm_capable_enable_switch()
 		<input type="text" name="dtim" size="5" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
 	</td>
 </tr>
-<tr> 
+<tr>
 	<td class="head" id="advFrag">Fragment Threshold</td>
 	<td>
 		<input type="text" name="fragment" size="5" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
 	</td>
 </tr>
-<tr> 
+<tr>
 	<td class="head" id="advRTS">RTS Threshold</td>
 	<td>
 		<input type="text" name="rts" size="5" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
 	</td>
 </tr>
-<tr> 
+<tr>
+	<td class="head">Increase LNA gain</td>
+	<td><input type="checkbox" name="lnaGainEnable">enable</td>
+</tr>
+<tr>
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
 		<select name="tx_power">

@@ -247,31 +247,31 @@ function CheckValue()
 	<td><input name="dhcpDomain" class="mid" value="<% getCfgGeneral(1, "dhcpDomain"); %>"></td>
 </tr>
 <tr id="start">
-	<td class="head" id="lDhcpStart" align="right">DHCP Pool Start IP</td>
+	<td class="head" id="lDhcpStart">DHCP Pool Start IP</td>
 	<td><input name="dhcpStart" class="mid" value="<% getCfgGeneral(1, "dhcpStart"); %>"></td>
 </tr>
 <tr id="end">
-	<td class="head" id="lDhcpEnd" align="right">DHCP Pool End IP</td>
+	<td class="head" id="lDhcpEnd">DHCP Pool End IP</td>
 	<td><input name="dhcpEnd" class="mid" value="<% getCfgGeneral(1, "dhcpEnd"); %>"></td>
 </tr>
 <tr id="mask">
-	<td class="head" id="lDhcpNetmask" align="right">DHCP Subnet Mask</td>
+	<td class="head" id="lDhcpNetmask">DHCP Subnet Mask</td>
 	<td><input name="dhcpMask" class="mid" value="<% getCfgGeneral(1, "dhcpMask"); %>"></td>
 </tr>
 <tr id="pridns">
-	<td class="head" id="lDhcpPriDns" align="right">DHCP Primary DNS</td>
+	<td class="head" id="lDhcpPriDns">DHCP Primary DNS</td>
 	<td><input name="dhcpPriDns" class="mid" value="<% getCfgGeneral(1, "dhcpPriDns"); %>"></td>
 </tr>
 <tr id="secdns">
-	<td class="head" id="lDhcpSecDns" align="right">DHCP Secondary DNS</td>
+	<td class="head" id="lDhcpSecDns">DHCP Secondary DNS</td>
 	<td><input name="dhcpSecDns" class="mid" value="<% getCfgGeneral(1, "dhcpSecDns"); %>"></td>
 </tr>
 <tr id="gateway">
-	<td class="head" id="lDhcpGateway" align="right">DHCP Default Gateway</td>
+	<td class="head" id="lDhcpGateway">DHCP Default Gateway</td>
 	<td><input name="dhcpGateway" class="mid" value="<% getCfgGeneral(1, "dhcpGateway"); %>"></td>
 </tr>
 <tr id="lease">
-	<td class="head" id="lDhcpLease" align="right">DHCP Lease Time (in seconds)</td>
+	<td class="head" id="lDhcpLease">DHCP Lease Time (in seconds)</td>
 	<td><input name="dhcpLease" class="mid" value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
 </tr>
 <tr>
