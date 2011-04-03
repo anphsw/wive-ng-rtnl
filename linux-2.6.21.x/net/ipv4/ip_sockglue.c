@@ -195,6 +195,7 @@ int ip_cmsg_send(struct msghdr *msg, struct ipcm_cookie *ipc)
 	}
 	return 0;
 }
+EXPORT_SYMBOL(ip_cmsg_send);
 
 
 /* Special input handler for packets caught by router alert option.

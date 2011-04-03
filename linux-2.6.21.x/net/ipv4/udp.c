@@ -1631,6 +1631,7 @@ void udp4_proc_exit(void)
 }
 #endif /* CONFIG_PROC_FS */
 
+EXPORT_SYMBOL(udp_statistics);
 EXPORT_SYMBOL(udp_disconnect);
 EXPORT_SYMBOL(udp_hash);
 EXPORT_SYMBOL(udp_hash_lock);

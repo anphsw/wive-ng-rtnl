@@ -240,6 +240,7 @@ static atomic_t channel_count = ATOMIC_INIT(0);
 #define seq_after(a, b)		((s32)((a) - (b)) > 0)
 
 /* Prototypes. */
+void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb);
 static int ppp_unattached_ioctl(struct ppp_file *pf, struct file *file,
 				unsigned int cmd, unsigned long arg);
 static void ppp_xmit_process(struct ppp *ppp);
@@ -1500,6 +1501,16 @@ ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 	else
 		kfree_skb(skb);
 	ppp_recv_unlock(ppp);
+}
+
+void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb) {
+	struct channel *pch = chan->ppp;
+	
+	if (pch == 0 || pch->ppp == 0 || skb->len == 0 ) return;
+	
+	skb->dev = pch->ppp->dev;
+	pch->ppp->stats.rx_packets++;
+	pch->ppp->stats.rx_bytes += skb->len;
 }
 
 unsigned int dbg_print = 0;
@@ -2868,6 +2879,7 @@ static void cardmap_destroy(struct cardmap **pmap)
 module_init(ppp_init);
 module_exit(ppp_cleanup);
 
+EXPORT_SYMBOL(ppp_stat_add);
 EXPORT_SYMBOL(ppp_register_channel);
 EXPORT_SYMBOL(ppp_unregister_channel);
 EXPORT_SYMBOL(ppp_channel_index);

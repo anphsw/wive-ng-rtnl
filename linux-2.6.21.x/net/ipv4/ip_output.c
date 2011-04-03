@@ -1406,6 +1406,9 @@ void __init ip_init(void)
 #endif
 }
 
+EXPORT_SYMBOL(ip_push_pending_frames);
+EXPORT_SYMBOL(ip_flush_pending_frames);
+EXPORT_SYMBOL(ip_append_data);
 EXPORT_SYMBOL(ip_generic_getfrag);
 EXPORT_SYMBOL(ip_queue_xmit);
 EXPORT_SYMBOL(ip_send_check);

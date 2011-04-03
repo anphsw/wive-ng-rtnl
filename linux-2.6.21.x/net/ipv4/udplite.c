@@ -116,6 +116,7 @@ out_register_err:
 	printk(KERN_CRIT "%s: Cannot add UDP-Lite protocol.\n", __FUNCTION__);
 }
 
+EXPORT_SYMBOL(udplite_statistics);
 EXPORT_SYMBOL(udplite_hash);
 EXPORT_SYMBOL(udplite_prot);
 EXPORT_SYMBOL(udplite_get_port);
