@@ -677,7 +677,9 @@ do_append_data:
 	release_sock(sk);
 
 out:
-	ip_rt_put(rt);
+	/* check rt on NULL */ 
+	if(rt)
+		ip_rt_put(rt);
 	if (free)
 		kfree(ipc.opt);
 	if (!err) {
