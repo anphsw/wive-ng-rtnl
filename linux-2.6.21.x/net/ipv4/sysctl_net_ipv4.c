@@ -45,9 +45,9 @@ EXPORT_SYMBOL(send_sigusr_dhcpc);
 
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 /* QinQ support hack */
-int 8021q_double_tag=0;
+int vlan_double_tag=0;
 /* export for module support */
-EXPORT_SYMBOL(8021q_double_tag);
+EXPORT_SYMBOL(vlan_double_tag);
 #endif
 
 struct ipv4_config ipv4_config;
@@ -848,11 +848,11 @@ ctl_table ipv4_table[] = {
 		.proc_handler   = &proc_dointvec
 	},
 #endif
-#ifdef CONFIG_RAETH_DHCP_TOUCH
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	{
-		.ctl_name	= NET_VLAN_8021Q_DOUBLE_TAG,
-		.procname	= "8021q_double_tag",
-		.data		= &8021q_double_tag,
+		.ctl_name	= NET_TCP_VLAN_8021Q_DOUBLE_TAG,
+		.procname	= "vlan_double_tag",
+		.data		= &vlan_double_tag,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler   = &proc_dointvec

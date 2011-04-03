@@ -39,7 +39,7 @@
 
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 /* QinQ support hack */
-extern int 8021q_double_tag=0;
+extern int vlan_double_tag=0;
 #endif
 
 /*
@@ -419,8 +419,8 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 */
 
 	if (
-#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	    8021q_double_tag ||
+#ifdef CONFIG_VLAN_vlan_double_tag
+	    vlan_double_tag ||
 #endif
 	    veth->h_vlan_proto != __constant_htons(ETH_P_8021Q) ||
 	    VLAN_DEV_INFO(dev)->flags & 1 /* VLAN_FLAG_REORDER_HDR */){
