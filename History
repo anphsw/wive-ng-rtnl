@@ -320,12 +320,18 @@
 4) Fix net/ip fib metrics.<br>
 5) Zebra suspended (not build with gcc4.6.0).<br>
 6) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
-7) Try workaround speed regresion in mips32r2 at RT3050 rev P0.<br>
+7) Try workaround speed regression in mips32r2 at RT3050 rev P0.<br>
 8) Remove some dead code.<br>
 9) Fix some leaks.<br>
 10) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
 11) Rewrite content filter page.<br>
 12) Fix anntena numbers.<br>
+13) Add sysctl net.ipv4.vlan_double_tag variable for enable/disable double tag support.<br>
+14) Netdevice code and some increase counters resolutions for network interfaces statistic.<br>
+15) PPPOE more correct ignore PADT packets whose destination address isn't ours patch. Need check in recive path to.<br>
+16) In udp.c need check rt != NULL for prevent use after free.<br>
+17) Fix continuos allocation memory for modules.<br>
+18) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
 
 <br><br>
 <b>For support see:</b><br>
