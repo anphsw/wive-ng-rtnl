@@ -408,7 +408,7 @@ static int pppoe_rcv(struct sk_buff *skb,
 	ph = (struct pppoe_hdr *) skb->nh.raw;
 
 	po = get_item((unsigned long) ph->sid, eth_hdr(skb)->h_source, dev->ifindex);
-	if (po != NULL)
+	if (po && !memcmp(eth_hdr(skb)->h_dest, dev->dev_addr, ETH_ALEN))
 		return sk_receive_skb(sk_pppox(po), skb, 0);
 drop:
 	kfree_skb(skb);
