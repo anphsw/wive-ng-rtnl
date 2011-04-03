@@ -782,12 +782,6 @@ int ip_append_data(struct sock *sk,
 	if (flags&MSG_PROBE)
 		return 0;
 
-	/* bug fix for udp_sendmsg */
-	if (unlikely(rt == NULL))
-		return -EFAULT;
-	if (unlikely(inet == NULL))
-		return -EFAULT;
-	
 	if (skb_queue_empty(&sk->sk_write_queue)) {
 		/*
 		 * setup for corking.
@@ -819,12 +813,9 @@ int ip_append_data(struct sock *sk,
 		}
 	} else {
 		rt = inet->cork.rt;
-		if(!rt)
-		    return -EFAULT;
-		if (inet->cork.flags & IPCORK_OPT) {
-			if(inet->cork.opt)
-			    opt = inet->cork.opt;
-		}
+		if (inet->cork.flags & IPCORK_OPT)
+			opt = inet->cork.opt;
+
 		transhdrlen = 0;
 		exthdrlen = 0;
 		mtu = inet->cork.fragsize;
@@ -1212,9 +1203,6 @@ int ip_push_pending_frames(struct sock *sk)
 	__u8 ttl;
 	int err = 0;
 
-	if (unlikely(rt == NULL))
-		goto out;
-	
 	if ((skb = __skb_dequeue(&sk->sk_write_queue)) == NULL)
 		goto out;
 	tail_skb = &(skb_shinfo(skb)->frag_list);
