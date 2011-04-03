@@ -39,7 +39,7 @@
 
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 /* QinQ support hack */
-extern int vlan_double_tag=0;
+extern int vlan_double_tag;
 #endif
 
 /*
