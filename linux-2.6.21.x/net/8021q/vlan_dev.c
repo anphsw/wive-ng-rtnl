@@ -37,6 +37,11 @@
 #include <linux/if_vlan.h>
 #include <net/ip.h>
 
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+/* QinQ support hack */
+extern int 8021q_double_tag=0;
+#endif
+
 /*
  *	Rebuild the Ethernet MAC header. This is called after an ARP
  *	(or in future other address resolution) has completed on this
@@ -405,9 +410,7 @@ int vlan_dev_hard_header(struct sk_buff *skb, struct net_device *dev,
 int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct net_device_stats *stats = vlan_dev_get_stats(dev);
-#if !defined (CONFIG_VLAN_8021Q_DOUBLE_TAG) || defined (VLAN_DEBUG)
 	struct vlan_ethhdr *veth = (struct vlan_ethhdr *)(skb->data);
-#endif
 
 	/* Handle non-VLAN frames if they are sent to us, for example by DHCP.
 	 *
@@ -415,10 +418,13 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 * OTHER THINGS LIKE FDDI/TokenRing/802.3 SNAPs...
 	 */
 
-#ifndef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if (veth->h_vlan_proto != __constant_htons(ETH_P_8021Q) || 
-		VLAN_DEV_INFO(dev)->flags & 1 /* VLAN_FLAG_REORDER_HDR */){
+	if (
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	    8021q_double_tag ||
 #endif
+	    veth->h_vlan_proto != __constant_htons(ETH_P_8021Q) ||
+	    VLAN_DEV_INFO(dev)->flags & 1 /* VLAN_FLAG_REORDER_HDR */){
+
 		int orig_headroom = skb_headroom(skb);
 		unsigned short veth_TCI;
 
@@ -447,9 +453,7 @@ int vlan_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		if (orig_headroom < VLAN_HLEN) {
 			VLAN_DEV_INFO(dev)->cnt_inc_headroom_on_tx++;
 		}
-#ifndef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	}
-#endif
 
 #ifdef VLAN_DEBUG
 	printk(VLAN_DBG "%s: about to send skb: %p to dev: %s\n",

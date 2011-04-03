@@ -43,6 +43,13 @@ int send_sigusr_dhcpc=9;
 EXPORT_SYMBOL(send_sigusr_dhcpc);
 #endif
 
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+/* QinQ support hack */
+int 8021q_double_tag=0;
+/* export for module support */
+EXPORT_SYMBOL(8021q_double_tag);
+#endif
+
 struct ipv4_config ipv4_config;
 
 #ifdef CONFIG_SYSCTL
@@ -836,6 +843,16 @@ ctl_table ipv4_table[] = {
 		.ctl_name	= NET_TCP_SEND_SIGUSR_DHCPC,
 		.procname	= "send_sigusr_dhcpc",
 		.data		= &send_sigusr_dhcpc,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler   = &proc_dointvec
+	},
+#endif
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+	{
+		.ctl_name	= NET_VLAN_8021Q_DOUBLE_TAG,
+		.procname	= "8021q_double_tag",
+		.data		= &8021q_double_tag,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler   = &proc_dointvec
