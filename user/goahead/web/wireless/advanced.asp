@@ -241,7 +241,16 @@ function initValue()
 		form.tx_power.options.selectedIndex = i;
 	}
 	
-	form.lnaGainEnable.checked  = (lnaGain == '1');
+	if (lnaGain == '1')
+	{
+		form.lnaGainEnable[0].checked = true;
+		form.lnaGainEnable[1].checked = false;
+	}
+	else
+	{
+		form.lnaGainEnable[0].checked = false;
+		form.lnaGainEnable[1].checked = true;
+	}
 }
 
 function CheckValue()
@@ -395,8 +404,7 @@ function wmm_capable_enable_switch()
 <hr>
 
 
-
-<form method=post name=wireless_advanced action="/goform/wirelessAdvanced" onSubmit="return CheckValue()">
+<form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue()">
 <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
@@ -434,10 +442,6 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="text" name="rts" size="5" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
 	</td>
-</tr>
-<tr>
-	<td class="head">Increase LNA gain</td>
-	<td><input type="checkbox" name="lnaGainEnable">enable</td>
 </tr>
 <tr>
 	<td class="head" id="advTxPW">TX Power</td>
@@ -485,6 +489,13 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="radio" name="pkt_aggregate" value="1"><font id="advPktAggrEnable">Enable</font>&nbsp;
 		<input type="radio" name="pkt_aggregate" value="0" checked><font id="advPktAggrDisable">Disable</font>
+	</td>
+</tr>
+<tr>
+	<td class="head">Increase LNA gain</td>
+	<td>
+		<input type="radio" name="lnaGainEnable" value="1">Enable&nbsp;
+		<input type="radio" name="lnaGainEnable" value="0" checked>Disable
 	</td>
 </tr>
 <tr> 
@@ -560,7 +571,7 @@ function wmm_capable_enable_switch()
 	</td>
 </tr>
 <tr>
-	<td class="head">User specific TX rate for IGMP Snooping</td>
+	<td class="head">Multicast TX rate</td>
 	<td>
 		<select name="McastMcs" class="half">
 			<option value="0">0</option>

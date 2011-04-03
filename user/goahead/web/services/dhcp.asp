@@ -243,7 +243,7 @@ function CheckValue()
 	</td>
 </tr>
 <tr>
-	<td class="head" align="right">DHCP Domain</td>
+	<td class="head">DHCP Domain</td>
 	<td><input name="dhcpDomain" class="mid" value="<% getCfgGeneral(1, "dhcpDomain"); %>"></td>
 </tr>
 <tr id="start">

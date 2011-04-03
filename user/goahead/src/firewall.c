@@ -370,6 +370,18 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	rc = snprintf(pos, len, "\n");
 }
 
+static int checkNatEnabled()
+{
+	// NAT check
+	char *wan_nat_ena = nvram_get(RT2860_NVRAM, "natEnabled");
+	if (wan_nat_ena == NULL)
+		wan_nat_ena = "0";
+	char *vpn_nat_ena = nvram_get(RT2860_NVRAM, "");
+	if (vpn_nat_ena == NULL)
+		vpn_nat_ena = "0";
+	return ((strcmp(wan_nat_ena, "1") == 0) || (strcasecmp(vpn_nat_ena, "on") == 0)) ? 1 : 0;
+}
+
 static void iptablesIPPortFilterBuildScript(void)
 {
 	int i=0;
@@ -382,8 +394,6 @@ static void iptablesIPPortFilterBuildScript(void)
 	char sip[32], dip[32], sim[32], dim[32];
 	char *rule, *c_if;
 	char *firewall_enable, *default_policy;
-	char *wan_nat_ena, *vpn_nat_ena;
-	int nat_ena = 0;
 	
 	// Check that IP/port filter is enabled
 	firewall_enable = nvram_get(RT2860_NVRAM, "IPPortFilterEnable");
@@ -404,13 +414,7 @@ static void iptablesIPPortFilterBuildScript(void)
 	}
 	
 	// NAT check
-	wan_nat_ena = nvram_get(RT2860_NVRAM, "natEnabled");
-	if (wan_nat_ena == NULL)
-		wan_nat_ena = "0";
-	vpn_nat_ena = nvram_get(RT2860_NVRAM, "");
-	if (vpn_nat_ena == NULL)
-		vpn_nat_ena = "0";
-	nat_ena = ((strcmp(wan_nat_ena, "1") == 0) || (strcasecmp(vpn_nat_ena, "on") == 0)) ? 1 : 0;
+	int nat_ena = checkNatEnabled();
 
 	default_policy = nvram_get(RT2860_NVRAM, "DefaultFirewallPolicy");
 	// add the default policy to the end of FORWARD chain
@@ -1193,76 +1197,98 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 #define BLK_PROXY               0x08
 void iptablesWebsFilterRun(void)
 {
-    int i, content_filter = 0;
-    char entry[256], buff[4096]; //need long buffer for utf domain name encoding support 
-    char *proxy		= nvram_get(RT2860_NVRAM, "websFilterProxy");
-    char *java		= nvram_get(RT2860_NVRAM, "websFilterJava");
-    char *activex	= nvram_get(RT2860_NVRAM, "websFilterActivex");
-    char *cookies	= nvram_get(RT2860_NVRAM, "websFilterCookies");
-    char *url_filter	= nvram_get(RT2860_NVRAM, "websURLFilters");
-    char *host_filter	= nvram_get(RT2860_NVRAM, "websHostFilters");
-    
-    if ((url_filter && strlen(url_filter) && getRuleNums(url_filter)) || 
-	(host_filter && strlen(host_filter) && getRuleNums(host_filter)) || 
-		atoi(proxy) || atoi(java) || atoi(activex) || atoi(cookies)) {
+	int i, content_filter = 0;
+	char entry[256]; //need long buffer for utf domain name encoding support 
+	char *proxy		= nvram_get(RT2860_NVRAM, "websFilterProxy");
+	char *java		= nvram_get(RT2860_NVRAM, "websFilterJava");
+	char *activex	= nvram_get(RT2860_NVRAM, "websFilterActivex");
+	char *cookies	= nvram_get(RT2860_NVRAM, "websFilterCookies");
+	char *url_filter	= nvram_get(RT2860_NVRAM, "websURLFilters");
+	char *host_filter	= nvram_get(RT2860_NVRAM, "websHostFilters");
 
-	// Content filter
-	if(atoi(java))
-	    content_filter += BLK_JAVA;
-	if(atoi(activex))
-	    content_filter += BLK_ACTIVE;
-	if(atoi(cookies))
-	    content_filter += BLK_COOKIE;
-	if(atoi(proxy))
-	    content_filter += BLK_PROXY;
+	if ((url_filter && strlen(url_filter) && getRuleNums(url_filter)) || 
+		(host_filter && strlen(host_filter) && getRuleNums(host_filter)) || 
+			atoi(proxy) || atoi(java) || atoi(activex) || atoi(cookies))
+	{
+		// NAT check
+		int nat_ena = checkNatEnabled();
 
-	//Generate portforward script file
-	FILE *fd = fopen(_PATH_WEBS_FILE, "w");
-	if (fd != NULL) {
-	    fputs("#!/bin/sh\n\n", fd);
-	    fputs("iptables -t filter -N web_filter\n", fd);
-	    fputs("iptables -t filter -A FORWARD -j web_filter\n", fd);
+		// Content filter
+		if(atoi(java))
+			content_filter += BLK_JAVA;
+		if(atoi(activex))
+			content_filter += BLK_ACTIVE;
+		if(atoi(cookies))
+			content_filter += BLK_COOKIE;
+		if(atoi(proxy))
+			content_filter += BLK_PROXY;
 
-	    if (content_filter) {
-		// Why only 3 ports are inspected?(This idea is from CyberTAN source code)
-		// TODO: use layer7 to inspect HTTP
-		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
-		fputs(buff, fd);
-		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 3128 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
-		fputs(buff, fd);
-		sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp --dport 8080 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", content_filter);
-		fputs(buff, fd);
-	    }
+		//Generate portforward script file
+		FILE *fd = fopen(_PATH_WEBS_FILE, "w");
+		
+		if (fd != NULL)
+		{
+			fputs("#!/bin/sh\n\n", fd);
+			fprintf(fd, "iptables -t filter -N %s\n", WEB_FILTER_CHAIN);
+			fprintf(fd, "iptables -t filter -A FORWARD -j %s\n", WEB_FILTER_CHAIN);
+			
+			if (nat_ena)
+			{
+				fprintf(fd, "iptables -t filter -N %s\n", WEB_FILTER_PRE_CHAIN);
+				fprintf(fd, "iptables -t filter -A PREROUTING -j %s\n", WEB_FILTER_PRE_CHAIN);
+			}
 
-	    // URL filter
-	    i=0;
-	    while ((i < getRuleNums(url_filter)) && (getNthValueSafe(i, url_filter, ';', entry, sizeof(entry)) != -1)) {
-		if (strlen(entry)) {
-		    if(!strncasecmp(entry, "http://", strlen("http://")))
-			strcpy(entry, entry + strlen("http://"));
-		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", entry);
-		    fputs(buff, fd);
+			if (content_filter)
+			{
+				// Why only 3 ports are inspected?(This idea is from CyberTAN source code)
+				// TODO: use layer7 to inspect HTTP
+				fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, content_filter);
+				fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 3128 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, content_filter);
+				fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 8080 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, content_filter);
+				
+				if (nat_ena)
+				{
+					fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 80   -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, content_filter);
+					fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 3128 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, content_filter);
+					fprintf(fd, "iptables -A %s -p tcp -m tcp --dport 8080 -m webstr --content %d -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, content_filter);
+				}
+			}
+
+			// URL filter
+			i=0;
+			while ((i < getRuleNums(url_filter)) && (getNthValueSafe(i, url_filter, ';', entry, sizeof(entry)) != -1))
+			{
+				if (strlen(entry))
+				{
+					if (!strncasecmp(entry, "http://", strlen("http://")))
+						strcpy(entry, entry + strlen("http://"));
+					
+					printf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, entry);
+					if (nat_ena)
+						printf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, entry);
+				}
+				i++;
+			}
+
+			// HOST(Keyword) filter
+			i=0;
+			while ((i < getRuleNums(host_filter)) && (getNthValueSafe(i, host_filter, ';', entry, sizeof(entry)) != -1))
+			{
+				if (strlen(entry))
+				{
+					fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, entry);
+					if (nat_ena)
+						fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, entry);
+				}
+				i++;
+			}
+			
+			//closefile
+			fclose(fd);
 		}
-	    i++;
-	    }
-
-	    // HOST(Keyword) filter
-	    i=0;
-	    while ((i < getRuleNums(host_filter)) && (getNthValueSafe(i, host_filter, ';', entry, sizeof(entry)) != -1)) {
-		if (strlen(entry)) {
-		    sprintf(buff, "iptables -A " WEB_FILTER_CHAIN " -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", entry);
-		    fputs(buff, fd);
-		}
-	    i++;
-	    }
-	    //closefile
-	    fclose(fd);
 	}
-    } else {
-	printf("Content filter disabled.\n");
-	return;
-    }
-  return;
+	else
+		printf("Content filter disabled.\n");
 }
 
 const parameter_fetch_t content_filtering_args[] =

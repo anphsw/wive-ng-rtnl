@@ -870,7 +870,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
 	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
-	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("off"));
+	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("0"));
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
@@ -903,7 +903,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
 	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
 	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
-	nvram_bufset(RT2860_NVRAM, "HiPower", (strcmp(lna_gain, "on")==0) ? "1" : "0");
+	nvram_bufset(RT2860_NVRAM, "HiPower", lna_gain);
 	
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);

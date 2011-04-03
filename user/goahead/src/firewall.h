@@ -23,6 +23,7 @@
 #define ACTION_ACCEPT	1
 
 #define WEB_FILTER_CHAIN	"web_filter"
+#define WEB_FILTER_PRE_CHAIN	"web_filter_preroute"
 #define IPPORT_FILTER_CHAIN	"macipport_filter"
 #define IPPORT_NAT_FILTER_CHAIN	"macipport_filter_preroute"
 
