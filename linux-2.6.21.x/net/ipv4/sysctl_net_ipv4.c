@@ -850,7 +850,7 @@ ctl_table ipv4_table[] = {
 #endif
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	{
-		.ctl_name	= NET_TCP_VLAN_8021Q_DOUBLE_TAG,
+		.ctl_name	= NET_TCP_8021Q_DOUBLE_TAG,
 		.procname	= "vlan_double_tag",
 		.data		= &vlan_double_tag,
 		.maxlen		= sizeof(int),
