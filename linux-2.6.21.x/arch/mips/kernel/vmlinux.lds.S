@@ -155,6 +155,7 @@ SECTIONS
     *(.cod1)
     *(.dec0)
     *(.dec1)
+    . = (ALIGN(_PAGE_SIZE) - .) < 8 ? ALIGN(_PAGE_SIZE) + 4 : .        ;                                                                   
   }
   __bss_stop = .;
 
