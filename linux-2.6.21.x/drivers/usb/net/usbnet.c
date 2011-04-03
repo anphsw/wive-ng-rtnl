@@ -558,7 +558,7 @@ static int usbnet_stop (struct net_device *net)
 	netif_stop_queue (net);
 
 	if (netif_msg_ifdown (dev))
-		devinfo (dev, "stop stats: rx/tx %ld/%ld, errs %ld/%ld",
+		devinfo (dev, "stop stats: rx/tx %lld/%lld, errs %ld/%ld",
 			dev->stats.rx_packets, dev->stats.tx_packets,
 			dev->stats.rx_errors, dev->stats.tx_errors
 			);
