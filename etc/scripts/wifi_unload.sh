@@ -117,15 +117,24 @@ fi
 
 unload_modules
 
-#This drop unneded caches to free more ram. 
-sysctl -w vm.min_free_kbytes=3192
-drop_caches
-sysctl -w vm.min_free_kbytes=1024
-
 echo "Disable swaps."
 if [ -f /bin/swapoff ]; then
     swapoff -a
 fi
+
+echo "Umount external drives."
+mounted=`mount | grep "/dev/sd" | cut -f1 -d" " | cut -f3 -d "/"`
+if [ -n "$mounted" ]; then
+	for disk in $mounted; do
+	    (sync && umount -l /dev/$disk ) &
+	done
+    sleep 2
+fi
+
+#This drop unneded caches to free more ram. 
+sysctl -w vm.min_free_kbytes=3192
+drop_caches
+sysctl -w vm.min_free_kbytes=1024
 
 echo "Wait 3 seconds."
 sleep 3
