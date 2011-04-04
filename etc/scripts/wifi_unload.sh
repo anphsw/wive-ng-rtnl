@@ -118,13 +118,17 @@ fi
 unload_modules
 
 #This drop unneded caches to free more ram. 
-#Work exelent!
 sysctl -w vm.min_free_kbytes=3192
 drop_caches
 sysctl -w vm.min_free_kbytes=1024
 
-echo "Wait 5 seconds."
-sleep 5
+echo "Disable swaps."
+if [ -f /bin/swapoff ]; then
+    swapoff -a
+fi
+
+echo "Wait 3 seconds."
+sleep 3
 
 echo "Prepare for burn OK..."
 
