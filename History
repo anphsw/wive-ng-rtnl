@@ -333,6 +333,7 @@
 17) Fix continuos allocation memory for modules.<br>
 18) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
 19) Some symbols need export for compat with new code.<br>
+20) Rework build system.<br>
 
 <br><br>
 <b>For support see:</b><br>
