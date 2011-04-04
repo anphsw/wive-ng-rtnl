@@ -32,20 +32,21 @@ endif
 # Get the core stuff worked out
 #
 
-LINUXDIR	:= $(CONFIG_LINUXDIR)
-LIBCDIR		:= $(CONFIG_LIBCDIR)
 ROOTDIR		:= $(shell pwd)
-PATH		:= $(PATH):$(ROOTDIR)/tools
-IMAGEDIR	:= $(ROOTDIR)/images
-ROMFSDIR	:= $(ROOTDIR)/romfs
-SCRIPTSDIR	:= $(ROOTDIR)/config/scripts
-LINUX_CONFIG	:= $(ROOTDIR)/$(LINUXDIR)/.config
-CONFIG_CONFIG	:= $(ROOTDIR)/config/.config
-MODULES_CONFIG	:= $(ROOTDIR)/modules/.config
-
 HOSTCC		:= gcc
 ROMFSINST	:= romfs-inst.sh
 TFTPDIR		:= /tftpboot
+PATH		:= $(PATH):$(ROOTDIR)/tools
+
+LINUXDIR	= $(CONFIG_LINUXDIR)
+LIBCDIR		= $(CONFIG_LIBCDIR)
+IMAGEDIR	= $(ROOTDIR)/images
+ROMFSDIR	= $(ROOTDIR)/romfs
+SCRIPTSDIR	= $(ROOTDIR)/config/scripts
+LINUX_CONFIG	= $(ROOTDIR)/$(LINUXDIR)/.config
+CONFIG_CONFIG	= $(ROOTDIR)/config/.config
+MODULES_CONFIG	= $(ROOTDIR)/modules/.config
+
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	= 1
@@ -400,6 +401,7 @@ clean: modules_clean
 	make clean -C fulldump
 	make clean -C tools
 	find $(ROOTDIR) -type f -name  'config.log' | xargs rm -f
+	find $(ROOTDIR) -type f -name  '.sgbuilt_user' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f

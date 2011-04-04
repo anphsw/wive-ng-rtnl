@@ -119,15 +119,13 @@ romfs:
 
 clean:
 	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do \
-		if [ -f $$i/.sgbuilt_user ]; then \
-			$(MAKE) -C $$i clean ; \
-			rm -f $$i/.sgbuilt_user; \
-		fi; \
+		$(MAKE) -C $$i clean ; \
+		rm -f $$i/.sgbuilt_user; \
 	done
 	echo "Full cleanUP"
-	-@set -e; for i in $(SUBDIRS_APP); do make -C $$i clean; rm -rf $$i/filesystem/*; done
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i mrproper; done
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i dist-clean; done
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i mrproper; done
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
+	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
 
 prune:
 	-for i in $(sort $(dir_n) $(dir_)) ; do \
