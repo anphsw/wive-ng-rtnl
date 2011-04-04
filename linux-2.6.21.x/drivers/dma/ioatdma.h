@@ -28,6 +28,14 @@
 #include <linux/cache.h>
 #include <linux/pci_ids.h>
 
+enum ioat_interrupt {
+	none = 0,
+	msix_multi_vector = 1,
+	msix_single_vector = 2,
+	msi = 3,
+	intx = 4,
+};
+
 #define IOAT_LOW_COMPLETION_MASK	0xffffffc0
 
 extern struct list_head dma_device_list;
@@ -98,6 +106,7 @@ struct ioat_dma_chan {
 			u32 high;
 		};
 	} *completion_virt;
+	struct tasklet_struct cleanup_task;
 };
 
 /* wrapper around hardware descriptor format + additional software fields */

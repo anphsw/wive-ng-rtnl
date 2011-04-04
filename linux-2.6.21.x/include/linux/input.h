@@ -910,7 +910,6 @@ struct ff_effect {
 #include <linux/mod_devicetable.h>
 
 #define NBITS(x) (((x)/BITS_PER_LONG)+1)
-#define BIT(x)	(1UL<<((x)%BITS_PER_LONG))
 #define LONG(x) ((x)/BITS_PER_LONG)
 
 #define INPUT_KEYCODE(dev, scancode) ((dev->keycodesize == 1) ? ((u8*)dev->keycode)[scancode] : \
