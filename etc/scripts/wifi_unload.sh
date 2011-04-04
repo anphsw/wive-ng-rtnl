@@ -117,15 +117,15 @@ fi
 
 unload_modules
 
-echo "Disable swaps."
 if [ -f /bin/swapoff ]; then
+    echo "Disable swaps."
     swapoff -a
 fi
 
-echo "Umount external drives."
 mounted=`mount | grep "/dev/sd" | cut -f1 -d" " | cut -f3 -d "/"`
 if [ -n "$mounted" ]; then
 	for disk in $mounted; do
+	    echo "Umount external drive /dev/$disk."
 	    (sync && umount -l /dev/$disk ) &
 	done
     sleep 2
