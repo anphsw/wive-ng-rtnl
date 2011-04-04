@@ -206,7 +206,6 @@ vpnEnableLCP=on
 vpnAuthProtocol=0
 vpnInterface=WAN
 vpnServer=192.168.200.1
-vpnServerIP=
 vpnRange=192.168.200.2-192.168.200.254
 vpnUser=vpn_user
 vpnPassword=vpn_password

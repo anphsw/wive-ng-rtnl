@@ -61,7 +61,7 @@ function showHint(key)
 		else if (key=='vpn_mtu')
 			text += 'Specify Maximum Transfer Unit/Maximum Recieve Unit size in octets.';
 		else if (key=='vpn_mppe')
-			text += 'Enable automatic Microsoft Point-to-Point Encryption (MPPE) mode for VPN.';
+			text += 'Enable automatic Microsoft Point-to-Point Encryption (MPPE) mode. Need set authentication method to mschap.';
 		else if (key=='vpn_dgw')
 		{
 			text += 'Manage default gateway replacing in routing table.</p><p class="val">';
