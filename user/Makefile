@@ -83,6 +83,7 @@ dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
 
 all: config
+	echo ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 ifeq ($(CONFIG_USER_OPENSSL),y)
 	CC=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-gcc ; \
 	AR=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ar ; \
@@ -94,6 +95,7 @@ endif
 	for i in $(dir_y) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
 	done
+	echo ">>>>>>>>>>>>>>>>  MAKE USERSPACE  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU); cd .. ) fi \
 	done
@@ -118,11 +120,12 @@ romfs:
 	done
 
 clean:
+	echo ">>>>>>>>>>>>>>>> START CLEANUP <<<<<<<<<<<<<<<<<<<<<<"
 	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do \
 		$(MAKE) -C $$i clean ; \
 		rm -f $$i/.sgbuilt_user; \
 	done
-	echo "Full cleanUP"
+	echo ">>>>>>>>>>>>>>>> FULL CLEANUP  <<<<<<<<<<<<<<<<<<<<<<"
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i mrproper; done
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
 	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
