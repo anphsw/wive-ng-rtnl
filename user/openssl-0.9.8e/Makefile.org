@@ -23,8 +23,8 @@ HERE=.
 # INSTALL_PREFIX is for package builders so that they can configure
 # for, say, /usr/ and yet have everything installed to /tmp/somedir/usr/.
 # Normally it is left empty.
-INSTALL_PREFIX=
-INSTALLTOP=/usr/local/ssl
+INSTALL_PREFIX=./filesystem
+INSTALLTOP=$(INSTALL_PREFIX)/usr/ssl
 
 # Do not edit this manually. Use Configure --openssldir=DIR do change this!
 OPENSSLDIR=/usr/local/ssl
@@ -57,8 +57,8 @@ OPENSSLDIR=/usr/local/ssl
 # equal 4.
 # PKCS1_CHECK - pkcs1 tests.
 
-CC= cc
-CFLAG= -O
+CC ?= /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
+CFLAG ?= -Os
 DEPFLAG= 
 PEX_LIBS= 
 EX_LIBS= 
@@ -104,7 +104,8 @@ LIBKRB5=
 ZLIB_INCLUDE=
 LIBZLIB=
 
-DIRS=   crypto ssl engines apps test tools
+DIRS	 =	crypto ssl  apps 
+DIRS	+=	engines test tools
 SHLIBDIRS= crypto ssl
 
 # dirs in crypto to build
@@ -150,7 +151,7 @@ WTARFILE=       $(NAME)-win.tar
 EXHEADER=       e_os2.h
 HEADER=         e_os.h
 
-all: Makefile build_all openssl.pc libssl.pc libcrypto.pc
+all: build_all openssl.pc libssl.pc libcrypto.pc
 
 # as we stick to -e, CLEARENV ensures that local variables in lower
 # Makefiles remain local and variable. $${VAR+VAR} is tribute to Korn
@@ -337,11 +338,6 @@ openssl.pc: Makefile
 	    echo 'Libs: -L$${libdir} -lssl -lcrypto $(EX_LIBS)'; \
 	    echo 'Cflags: -I$${includedir} $(KRB5_INCLUDES)' ) > openssl.pc
 
-Makefile: Makefile.org Configure config
-	@echo "Makefile is older than Makefile.org, Configure or config."
-	@echo "Reconfigure the source tree (via './config' or 'perl Configure'), please."
-#	@false
-
 libclean:
 	rm -f *.map *.so *.so.* *.dll engines/*.so engines/*.dll *.a engines/*.a */lib */*/lib
 
@@ -472,6 +468,13 @@ dist:
 
 dist_pem_h:
 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+
+romfs:
+	$(ROMFSINST) -e CONFIG_USER_OPENSSL apps/openssl /bin/openssl
+	$(ROMFSINST) -e CONFIG_USER_OPENSSL libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so.$(SHLIB_VERSION_NUMBER)
+	$(ROMFSINST) -e CONFIG_USER_OPENSSL libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.$(SHLIB_VERSION_NUMBER)
+	$(ROMFSINST) -e CONFIG_USER_OPENSSL -s libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so
+	$(ROMFSINST) -e CONFIG_USER_OPENSSL -s libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.so
 
 install: all install_docs install_sw
 

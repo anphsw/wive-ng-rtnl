@@ -22,8 +22,6 @@ ifeq ($(ROOTDIR),)
 ROOTDIR=.
 endif
 
-#changed by Steven Liu
-#all: ucfront cksum subdirs romfs image
 all: tools linux lib_only uClibc++_only user_only modules romfs image
 else
 all: config_error
@@ -34,34 +32,27 @@ endif
 # Get the core stuff worked out
 #
 
-LINUXDIR = $(CONFIG_LINUXDIR)
-LIBCDIR  = $(CONFIG_LIBCDIR)
-ROOTDIR  = $(shell pwd)
-PATH	 := $(PATH):$(ROOTDIR)/tools
-HOSTCC   = cc
-IMAGEDIR = $(ROOTDIR)/images
-ROMFSDIR = $(ROOTDIR)/romfs
-ROMFSINST= romfs-inst.sh
-SCRIPTSDIR = $(ROOTDIR)/config/scripts
-TFTPDIR    = /tftpboot
+LINUXDIR	:= $(CONFIG_LINUXDIR)
+LIBCDIR		:= $(CONFIG_LIBCDIR)
+ROOTDIR		:= $(shell pwd)
+PATH		:= $(PATH):$(ROOTDIR)/tools
+IMAGEDIR	:= $(ROOTDIR)/images
+ROMFSDIR	:= $(ROOTDIR)/romfs
+SCRIPTSDIR	:= $(ROOTDIR)/config/scripts
+LINUX_CONFIG	:= $(ROOTDIR)/$(LINUXDIR)/.config
+CONFIG_CONFIG	:= $(ROOTDIR)/config/.config
+MODULES_CONFIG	:= $(ROOTDIR)/modules/.config
+
+HOSTCC		:= gcc
+ROMFSINST	:= romfs-inst.sh
+TFTPDIR		:= /tftpboot
+
+#NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
+CPU_OVERLOAD	= 1
+HOST_NCPU	= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
+
+
 BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
-
-#Added by Steven 
-# In linux-2.6, it do not support VPATH in Makefile.
-# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.
-# Workaround: Don't build ap and sta driver at the same time.
-
-ifeq ($(LINUXDIR),linux-2.6.21.x)
-HOST_NCPU := 1 
-else 
-HOST_NCPU := $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* 2; else echo $$n; fi; else echo 1; fi)  
-endif
-#--
-
-LINUX_CONFIG  = $(ROOTDIR)/$(LINUXDIR)/.config
-CONFIG_CONFIG = $(ROOTDIR)/config/.config
-MODULES_CONFIG = $(ROOTDIR)/modules/.config
-
 
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
@@ -338,7 +329,15 @@ linux linux%_only:
 		echo "ERROR: you need to do a 'make dep' first" ; \
 		exit 1 ; \
 	fi
+	# Added by Steven@Ralink FIXME!!!                                                                                                           
+	# In linux-2.6, it do not support VPATH in Makefile.                                                                                        
+	# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.                                                              
+	# Workaround: Don't build ap and sta driver at the same time.                                                                               
+ifeq ($(CONFIG_VENDOR),Ralink)
+	$(MAKEARCH_KERNEL) -j1 -C $(LINUXDIR) $(LINUXTARGET) || exit 1
+else
 	$(MAKEARCH_KERNEL) -j$(HOST_NCPU) -C $(LINUXDIR) $(LINUXTARGET) || exit 1
+endif
 	if [ -f $(LINUXDIR)/vmlinux ]; then \
 		ln -f $(LINUXDIR)/vmlinux $(LINUXDIR)/linux ; \
 	fi

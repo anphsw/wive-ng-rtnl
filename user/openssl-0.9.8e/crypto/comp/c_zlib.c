@@ -38,7 +38,7 @@ static COMP_METHOD zlib_method_nozlib={
 #undef ZLIB_SHARED
 #else
 
-#include <zlib.h>
+#include <zlib.h">
 
 static int zlib_stateful_init(COMP_CTX *ctx);
 static void zlib_stateful_finish(COMP_CTX *ctx);

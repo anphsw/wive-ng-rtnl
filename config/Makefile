@@ -14,8 +14,7 @@ clean:
 # The config stuff
 #
 
-config.tk: Makefile config.in $(SCRIPTSDIR)/header.tk $(SCRIPTSDIR)/tail.tk \
-		$(wildcard $(ROOTDIR)/prop/config.in)
+config.tk: Makefile config.in $(SCRIPTSDIR)/header.tk $(SCRIPTSDIR)/tail.tk)
 	$(MAKE) -C $(SCRIPTSDIR) tkparse
 	ARCH=m68knommu $(SCRIPTSDIR)/tkparse < config.in > config.tmp
 	@if [ -f /usr/local/bin/wish ];	then \

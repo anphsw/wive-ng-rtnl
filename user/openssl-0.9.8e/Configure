@@ -1,4 +1,4 @@
-:
+#!/usr/bin/perl
 eval 'exec perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 ##
@@ -171,8 +171,10 @@ my %table=(
 # Basic configs that should work on any (32 and less bit) box
 #dlfcn:linux-shared:-fPIC::.so
 #config-string	$cc : $cflags : $unistd : $thread_cflag : $sys_id : $lflags : $bn_ops : $cpuid_obj : $bn_obj : $des_obj : $aes_obj : $bf_obj : $md5_obj : $sha1_obj : $cast_obj : $rc4_obj : $rmd160_obj : $rc5_obj : $dso_scheme : $shared_target : $shared_cflag : $shared_ldflag : $shared_extension : $ranlib : $arflags
-#YYHuang@Ralink (for RT2880 config)
-"RT2880",	"mipsel-linux-gcc:-Os -DL_ENDIAN -mips2 -mno-branch-likely -G 0 -fno-builtin -msoft-float -DCPU=MIPS32 -DMIPSEL -DNO_STRINGS_H::::::${no_asm}::gnu::-fPIC:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):mipsel-linux-ranlib:",
+
+# RT2880/RT305x/RTxxx config
+"RT2880",	"/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc:-Os -DL_ENDIAN -mips32r2 -mno-branch-likely -G 0 -fno-builtin -DCPU=MIPS32 -DMIPSEL -DNO_STRINGS_H::::::${no_asm}::gnu::-fPIC:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ranlib:",
+
 "gcc",		"gcc:-O3::(unknown):::BN_LLONG:::",
 "cc",		"cc:-O::(unknown)::::::",
 
@@ -570,7 +572,7 @@ my $install_prefix="";
 my $no_threads=0;
 my $threads=0;
 my $no_shared=0; # but "no-shared" is default
-my $zlib=1;      # but "no-zlib" is default
+my $zlib=0;      # but "no-zlib" is default
 my $no_krb5=0;   # but "no-krb5" is implied unless "--with-krb5-..." is used
 my $no_rfc3779=1; # but "no-rfc3779" is default
 my $no_asm=0;
@@ -1648,6 +1650,11 @@ EOF
 	close(OUT);
   }
   
+# ugly hack to disable engines
+if($target eq "mingwx") {
+	system("sed -e s/^LIB/XLIB/g -i engines/Makefile");
+}
+
 print <<EOF;
 
 Configured for $target.

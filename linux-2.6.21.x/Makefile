@@ -4,6 +4,7 @@ SUBLEVEL = 21
 EXTRAVERSION = .7
 NAME = Nocturnal Monster Puppy
 
+# Default make flags
 MAKEFLAGS     = -rR --no-print-directory
 
 # More optimization flag only for kernel if flash size = 4MB.

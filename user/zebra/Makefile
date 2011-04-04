@@ -399,7 +399,7 @@ distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 distclean-am: clean-am distclean-generic distclean-hdr distclean-tags
 
-romfs:
+romfs: install
 	cp -fv ./filesystem/sbin/zebra $(ROOTDIR)/romfs/bin/zebra
 	cp -fv ./filesystem/sbin/ripd $(ROOTDIR)/romfs/bin/ripd
 

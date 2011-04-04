@@ -4,7 +4,7 @@ DIRS = src cgi-src
 ROOT_DIRECTORY = /web
 
 all:
-	for i in $(DIRS) ; do make -C $$i $@ || exit $?; done
+	for i in $(DIRS) ; do make -j$(HOST_NCPU) -C $$i $@ || exit $?; done
 
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)

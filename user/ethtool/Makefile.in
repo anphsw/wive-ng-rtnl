@@ -555,7 +555,7 @@ distclean: distclean-am
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
 
-romfs:
+romfs: install
 	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
 
 dvi: dvi-am

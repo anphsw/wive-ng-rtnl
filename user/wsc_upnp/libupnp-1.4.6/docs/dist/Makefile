@@ -73,13 +73,13 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missin
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Wno-unused-but-set-variable -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT
+CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Wno-unused-but-set-variable -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
 CXXDEPMODE = depmode=none
-CXXFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Wno-unused-but-set-variable 
+CXXFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Wno-unused-but-set-variable 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -108,7 +108,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
+LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool

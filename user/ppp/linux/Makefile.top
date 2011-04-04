@@ -52,7 +52,7 @@ $(MANDIR)/man8:
 $(ETCDIR):
 	$(INSTALL) -d -m 755 $@
 
-romfs:
+romfs: install
 	cp -fv ./filesystem/lib/pppd/2.4.5/* $(ROOTDIR)/romfs/lib
 	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
 

@@ -31,7 +31,7 @@ UCLINUX_BUILD_USER=1
 VEND=$(ROOTDIR)/vendors
 
 #for all cleanap
-SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool getBoardID
+SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
 SUBDIRS_APP += openssl-0.9.8e
@@ -40,7 +40,6 @@ SUBDIRS_APP += openssl-0.9.8e
 # must run the vendor build first
 #
 dir_v = $(VEND)/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)/.
-dir_p = $(ROOTDIR)/prop
 
 dir_y = 
 dir_n =
@@ -61,7 +60,7 @@ dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_USER_TC)                  	    += iproute2
-dir_$(CONFIG_USER_PPPD)                	    += pppd
+dir_$(CONFIG_USER_PPPD)                	    += ppp
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
@@ -83,33 +82,28 @@ dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
 
-#alwayse make service utility
-#dir_y                                       += getBoardID
-
 all: config
-ifeq ($(CONFIG_USER_RADVD),y)
-	cd radvd && ./configure-command && cd ..
+ifeq ($(CONFIG_USER_OPENSSL),y)
+	CC=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-gcc ; \
+	AR=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ar ; \
+	LD=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ld ; \
+	RANLIB=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ranlib ; \
+	cd openssl-0.9.8e ; ./Configure RT2880 ; $(MAKE) ; \
+	cd ..
 endif
-ifeq ($(CONFIG_USER_PPPD),y)
-	cd ppp && ./DoConfigure.sh && make && make install && cd ..
-endif
-ifeq ($(CONFIG_USER_DROPBEAR),y)
-	cd dropbear  && ./DoConfigure.sh && make && make install && cd ..
-endif
-ifeq ($(CONFIG_USER_ZEBRA),y)
-	cd zebra  && ./DoConfigure.sh && make && make install && cd ..
-endif
-ifeq ($(CONFIG_USER_ETHTOOL),y)
-	cd ethtool  && ./DoConfigure.sh && make && make install && cd ..
-endif
-	$(MAKE) -j$(HOST_NCPU) $(dir_y) $(dir_v) $(dir_p) || exit $$?	
+	for i in $(dir_y) ; do \
+	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
+	done
+	for i in $(dir_y) ; do \
+	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU); cd .. ) fi \
+	done
 
 #
 # add directory dependancies here
 #
-.PHONY: $(sort $(dir_y) $(dir_p))
+.PHONY: $(sort $(dir_y))
 
-$(sort $(dir_y) $(dir_p)):  config
+$(sort $(dir_y)):  config
 	[ ! -d "$@" ] || ( touch $@/.sgbuilt_user && $(MAKE) -C $@ ) || exit $$?
 
 %_only:
@@ -119,26 +113,20 @@ $(sort $(dir_y) $(dir_p)):  config
 	$(MAKE) -C $(@:_clean=) clean; rm -f $(@:_clean=)/.sgbuilt_user; true
 
 romfs:
-	for i in $(sort $(dir_y)) $(dir_p) ; do \
+	for i in $(sort $(dir_y)) ; do \
 		[ ! -d $$i ] || $(MAKE) -C $$i romfs || exit $$? ; \
 	done
-ifeq ($(CONFIG_USER_PPPD),y)
-	cd ppp && make romfs && cd ..
-endif
-ifeq ($(CONFIG_USER_MINIUPNPD),y)
-	cd miniupnp  && ./genconfig.sh && make && make install && cd ..
-endif
 
 clean:
-	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) $(dir_p) ; do \
+	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do \
 		if [ -f $$i/.sgbuilt_user ]; then \
 			$(MAKE) -C $$i clean ; \
 			rm -f $$i/.sgbuilt_user; \
 		fi; \
 	done
 	echo "Full cleanUP"
-	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i mrproper; done
-	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || make -C $$i dist-clean; done
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i mrproper; done
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
 	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
 
 prune:
@@ -150,8 +138,8 @@ prune:
 			fi; \
 		done; \
 		if [ $$found == 0 ]; then \
-			[ "$$i" = "freeswan" ] && make prune_freeswan; \
-			[ "$$i" = "openswan" ] && make prune_openswan; \
+			[ "$$i" = "freeswan" ] && $(MAKE) prune_freeswan; \
+			[ "$$i" = "openswan" ] && $(MAKE) prune_openswan; \
 			rm -fr $$i; \
 		fi; \
 	done
