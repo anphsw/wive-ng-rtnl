@@ -37,6 +37,7 @@
 #define DGRAM_PORT 138
 #define SMB_PORT 139
 
+#define Undefined (-1)
 #define False (0)
 #define True (1)
 #define BOOLSTR(b) ((b) ? "Yes" : "No")

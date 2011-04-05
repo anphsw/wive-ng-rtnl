@@ -597,7 +597,6 @@ static int padit(char *buf, int bufsize, int padsize)
 	return berr;
 }
 
-
 static void do_setrattr(char *name, uint16 attr, int set)
 {
 	uint16 oldattr;
@@ -906,79 +905,72 @@ static void unfixtarname(char *tptr, char *fp, int l, BOOL first)
   }
 }
 
-
 /****************************************************************************
 Move to the next block in the buffer, which may mean read in another set of
 blocks. FIXME, we should allow more than one block to be skipped.
 ****************************************************************************/
+
 static int next_block(char *ltarbuf, char **bufferp, int bufsiz)
 {
-  int bufread, total = 0;
+	int bufread, total = 0;
 
-  DEBUG(5, ("Advancing to next block: %0lx\n", (unsigned long)*bufferp));
-  *bufferp += TBLOCK;
-  total = TBLOCK;
+	DEBUG(5, ("Advancing to next block: %0lx\n", (unsigned long)*bufferp));
+	*bufferp += TBLOCK;
+	total = TBLOCK;
 
-  if (*bufferp >= (ltarbuf + bufsiz)) {
+	if (*bufferp >= (ltarbuf + bufsiz)) {
 
-    DEBUG(5, ("Reading more data into ltarbuf ...\n"));
+		DEBUG(5, ("Reading more data into ltarbuf ...\n"));
 
-    /*
-     * Bugfix from Bob Boehmer <boehmer@worldnet.att.net>
-     * Fixes bug where read can return short if coming from
-     * a pipe.
-     */
+		/*
+		 * Bugfix from Bob Boehmer <boehmer@worldnet.att.net>
+		 * Fixes bug where read can return short if coming from
+		 * a pipe.
+		 */
 
-    bufread = read(tarhandle, ltarbuf, bufsiz);
-    total = bufread;
+		bufread = read(tarhandle, ltarbuf, bufsiz);
+		total = bufread;
 
-    while (total < bufsiz) {
-      if (bufread < 0) { /* An error, return false */
-        return (total > 0 ? -2 : bufread);
-      }
-      if (bufread == 0) {
-        if (total <= 0) {
-            return -2;
-        }
-        break;
-      }
-      bufread = read(tarhandle, &ltarbuf[total], bufsiz - total);
-      total += bufread;
-    }
+		while (total < bufsiz) {
+			if (bufread < 0) { /* An error, return false */
+				return (total > 0 ? -2 : bufread);
+			}
+			if (bufread == 0) {
+				if (total <= 0) {
+					return -2;
+				}
+				break;
+			}
+			bufread = read(tarhandle, &ltarbuf[total], bufsiz - total);
+			total += bufread;
+		}
 
-    DEBUG(5, ("Total bytes read ... %i\n", total));
+		DEBUG(5, ("Total bytes read ... %i\n", total));
 
-    *bufferp = ltarbuf;
+		*bufferp = ltarbuf;
+	}
 
-  }
-
-  return(total);
-
+	return(total);
 }
 
 /* Skip a file, even if it includes a long file name? */
 static int skip_file(int skipsize)
 {
-  int dsize = skipsize;
+	int dsize = skipsize;
 
-  DEBUG(5, ("Skiping file. Size = %i\n", skipsize));
+	DEBUG(5, ("Skiping file. Size = %i\n", skipsize));
 
-  /* FIXME, we should skip more than one block at a time */
+	/* FIXME, we should skip more than one block at a time */
 
-  while (dsize > 0) {
+	while (dsize > 0) {
+		if (next_block(tarbuf, &buffer_p, tbufsiz) <= 0) {
+			DEBUG(0, ("Empty file, short tar file, or read error: %s\n", strerror(errno)));
+			return(False);
+		}
+		dsize -= TBLOCK;
+	}
 
-    if (next_block(tarbuf, &buffer_p, tbufsiz) <= 0) {
-
-	DEBUG(0, ("Empty file, short tar file, or read error: %s\n", strerror(errno)));
-	return(False);
-
-    }
-
-    dsize -= TBLOCK;
-
-  }
-
-  return(True);
+	return(True);
 }
 
 /*************************************************************

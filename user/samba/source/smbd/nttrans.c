@@ -2710,9 +2710,6 @@ due to being in oplock break state.\n" ));
 
   if(setup) {
     DEBUG(10,("reply_nttrans: setup_count = %d\n", setup_count));
-    if ((smb_nt_SetupStart + setup_count < smb_nt_SetupStart) ||
-	(smb_nt_SetupStart + setup_count < setup_count))
-      goto bad_param;
     if (smb_nt_SetupStart + setup_count > length)
       goto bad_param;
     

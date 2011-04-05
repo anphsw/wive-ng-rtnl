@@ -57,17 +57,17 @@ static void free_blocking_lock_record(blocking_lock_record *blr)
 
 static files_struct *get_fsp_from_pkt(char *inbuf)
 {
-  switch(CVAL(inbuf,smb_com)) {
-  case SMBlock:
-  case SMBlockread:
-    return file_fsp(inbuf,smb_vwv0);
-  case SMBlockingX:
-    return file_fsp(inbuf,smb_vwv2);
-  default:
-    DEBUG(0,("get_fsp_from_pkt: PANIC - unknown type on blocking lock queue - exiting.!\n"));
-    exit_server("PANIC - unknown type on blocking lock queue");
-  }
-  return NULL; /* Keep compiler happy. */
+	switch(CVAL(inbuf,smb_com)) {
+		case SMBlock:
+		case SMBlockread:
+			return file_fsp(inbuf,smb_vwv0);
+		case SMBlockingX:
+			return file_fsp(inbuf,smb_vwv2);
+		default:
+			DEBUG(0,("get_fsp_from_pkt: PANIC - unknown type on blocking lock queue - exiting.!\n"));
+			exit_server("PANIC - unknown type on blocking lock queue");
+	}
+	return NULL; /* Keep compiler happy. */
 }
 
 /****************************************************************************
@@ -76,7 +76,7 @@ static files_struct *get_fsp_from_pkt(char *inbuf)
 
 static BOOL in_chained_smb(void)
 {
-  return (chain_size != 0);
+	return (chain_size != 0);
 }
 
 /****************************************************************************
@@ -143,27 +143,27 @@ static void send_blocking_reply(char *outbuf, int outsize)
 
 static void reply_lockingX_success(blocking_lock_record *blr)
 {
-  char *outbuf = OutBuffer;
-  int bufsize = BUFFER_SIZE;
-  char *inbuf = blr->inbuf;
-  int outsize = 0;
+	char *outbuf = OutBuffer;
+	int bufsize = BUFFER_SIZE;
+	char *inbuf = blr->inbuf;
+	int outsize = 0;
 
-  construct_reply_common(inbuf, outbuf);
-  set_message(outbuf,2,0,True);
+	construct_reply_common(inbuf, outbuf);
+	set_message(outbuf,2,0,True);
 
-  /*
-   * As this message is a lockingX call we must handle
-   * any following chained message correctly.
-   * This is normally handled in construct_reply(),
-   * but as that calls switch_message, we can't use
-   * that here and must set up the chain info manually.
-   */
+	/*
+	 * As this message is a lockingX call we must handle
+	 * any following chained message correctly.
+	 * This is normally handled in construct_reply(),
+	 * but as that calls switch_message, we can't use
+	 * that here and must set up the chain info manually.
+	 */
 
-  outsize = chain_reply(inbuf,outbuf,blr->length,bufsize);
+	outsize = chain_reply(inbuf,outbuf,blr->length,bufsize);
 
-  outsize += chain_size;
+	outsize += chain_size;
 
-  send_blocking_reply(outbuf,outsize);
+	send_blocking_reply(outbuf,outsize);
 }
 
 /****************************************************************************
@@ -460,18 +460,18 @@ Waiting....\n", blr->lock_num, num_locks, fsp->fsp_name, fsp->fnum));
 
 static BOOL blocking_lock_record_process(blocking_lock_record *blr)
 {
-  switch(blr->com_type) {
-  case SMBlock:
-    return process_lock(blr);
-  case SMBlockread:
-    return process_lockread(blr);
-  case SMBlockingX:
-    return process_lockingX(blr);
-  default:
-    DEBUG(0,("blocking_lock_record_process: PANIC - unknown type on blocking lock queue - exiting.!\n"));
-    exit_server("PANIC - unknown type on blocking lock queue");
-  }
-  return False; /* Keep compiler happy. */
+	switch(blr->com_type) {
+		case SMBlock:
+			return process_lock(blr);
+		case SMBlockread:
+			return process_lockread(blr);
+		case SMBlockingX:
+			return process_lockingX(blr);
+		default:
+			DEBUG(0,("blocking_lock_record_process: PANIC - unknown type on blocking lock queue - exiting.!\n"));
+			exit_server("PANIC - unknown type on blocking lock queue");
+	}
+	return False; /* Keep compiler happy. */
 }
 
 /****************************************************************************

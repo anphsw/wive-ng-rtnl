@@ -153,11 +153,11 @@ static int TimeZoneFaster(time_t t)
     
       /* no entry will cover more than 6 months */
       low = t - MAX_DST_WIDTH/2;
-      if (t < low)
+      if (low < TIME_T_MIN)
 	low = TIME_T_MIN;
       
       high = t + MAX_DST_WIDTH/2;
-      if (high < t)
+      if (high > TIME_T_MAX)
 	high = TIME_T_MAX;
       
       /* widen the new entry using two bisection searches */

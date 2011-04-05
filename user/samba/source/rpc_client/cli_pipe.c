@@ -7,6 +7,7 @@
  *  Copyright (C) Luke Kenneth Casson Leighton 1996-1998,
  *  Copyright (C) Paul Ashton                       1998.
  *  Copyright (C) Jeremy Allison                    1999.
+ *  Copyright (C) Andrew Bartlett                   2003.
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

@@ -442,7 +442,8 @@ static void add_to_do_list_queue(const char* entry)
 	}
 	if (do_list_queue)
 	{
-		pstrcpy(do_list_queue + do_list_queue_end, entry);
+		safe_strcpy_base(do_list_queue + do_list_queue_end, 
+				 entry, do_list_queue, do_list_queue_size);
 		do_list_queue_end = new_end;
 		DEBUG(4,("added %s to do_list_queue (start=%d, end=%d)\n",
 			 entry, (int)do_list_queue_start, (int)do_list_queue_end));
@@ -484,6 +485,11 @@ static void do_list_helper(file_info *f, const char *mask)
 		    !strequal(f->name,"..")) {
 			pstring mask2;
 			char *p;
+
+			if (!f->name[0]) {
+				d_printf("Empty dir name returned. Possible server misconfiguration.\n");
+				return;
+			}
 
 			pstrcpy(mask2, mask);
 			p = strrchr(mask2,'\\');

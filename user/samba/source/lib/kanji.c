@@ -999,6 +999,9 @@ static char *sj_to_sj(char *from, BOOL overwrite)
     }
 }
 
+extern smb_ucs2_t doscp2ucs2(int w);                                                                                                                
+extern int ucs2doscp(smb_ucs2_t w);
+
 /*******************************************************************
  cp to utf8
 ********************************************************************/

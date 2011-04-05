@@ -528,6 +528,8 @@ BOOL check_lanman_password(char *user, uchar *pass1,
  Code to change the lanman hashed password.
  It nulls out the NT hashed password as it will
  no longer be valid.
+ NOTE this function is designed to be called as root. Check the old password
+ is correct before calling. JRA.
 ************************************************************/
 
 BOOL change_lanman_password(struct smb_passwd *smbpw, uchar *pass1, uchar *pass2)

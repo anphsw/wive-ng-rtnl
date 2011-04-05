@@ -60,9 +60,9 @@ extern int max_send;
 ****************************************************************************/
 
 typedef struct {
-   ubi_slNode msg_next;
-   char *msg_buf;
-   int msg_len;
+	ubi_slNode msg_next;
+	char *msg_buf;
+	int msg_len;
 } pending_message_list;
 
 static ubi_slList smb_oplock_queue = { NULL, (ubi_slNodePtr)&smb_oplock_queue, 0};
@@ -827,17 +827,16 @@ static int setup_select_timeout(void)
 
 void check_reload(int t)
 {
-  static time_t last_smb_conf_reload_time = 0;
+	static time_t last_smb_conf_reload_time = 0;
 
-  if(last_smb_conf_reload_time == 0)
-    last_smb_conf_reload_time = t;
+	if(last_smb_conf_reload_time == 0)
+		last_smb_conf_reload_time = t;
 
-  if (reload_after_sighup || (t >= last_smb_conf_reload_time+SMBD_RELOAD_CHECK))
-  {
-    reload_services(True);
-    reload_after_sighup = False;
-    last_smb_conf_reload_time = t;
-  }
+	if (reload_after_sighup || (t >= last_smb_conf_reload_time+SMBD_RELOAD_CHECK)) {
+		reload_services(True);
+		reload_after_sighup = False;
+		last_smb_conf_reload_time = t;
+	}
 }
 
 /****************************************************************************

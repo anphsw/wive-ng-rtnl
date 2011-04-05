@@ -542,7 +542,7 @@ static void samr_reply_query_dispinfo(SAMR_Q_QUERY_DISPINFO *q_u,
 	SAM_USER_INFO_21 pass[MAX_SAM_ENTRIES];
 	int num_entries = 0;
 	int total_entries = 0;
-	BOOL got_pwds;
+	BOOL got_pwds = False;
 	uint16 switch_level = 0x0;
 
 	ZERO_STRUCT(r_e);

@@ -64,6 +64,8 @@ static void disk_norm(BOOL small_query, SMB_BIG_UINT *bsize,SMB_BIG_UINT *dfree,
 /* Return the number of TOSIZE-byte blocks used by
    BLOCKS FROMSIZE-byte blocks, rounding away from zero.
 */
+#if defined(STAT_STATVFS) || defined(STAT_STATVFS64) || defined(STAT_STATFS3_OSF1) || defined(STAT_STATFS2_FS_DATA) \
+    || defined(STAT_STATFS2_BSIZE) || defined(STAT_STATFS2_FSIZE) || defined(STAT_STATFS4)
 static SMB_BIG_UINT adjust_blocks(SMB_BIG_UINT blocks, SMB_BIG_UINT fromsize, SMB_BIG_UINT tosize)
 {
 	if (fromsize == tosize)	/* e.g., from 512 to 512 */
@@ -73,6 +75,7 @@ static SMB_BIG_UINT adjust_blocks(SMB_BIG_UINT blocks, SMB_BIG_UINT fromsize, SM
 	else				/* e.g., from 256 to 512 */
 		return (blocks + 1) / (tosize / fromsize);
 }
+#endif
 
 /* this does all of the system specific guff to get the free disk space.
    It is derived from code in the GNU fileutils package, but has been

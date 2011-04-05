@@ -404,7 +404,7 @@ BOOL send_keepalive(int client)
 }
 
 /****************************************************************************
-  read data from the client, reading exactly N bytes. 
+ Read data from the client, reading exactly N bytes. 
 ****************************************************************************/
 
 ssize_t read_data(int fd,char *buffer,size_t N)
@@ -548,7 +548,7 @@ ssize_t write_socket_data(int fd,char *buffer,size_t N)
 }
 
 /****************************************************************************
-write to a socket
+ Write to a socket.
 ****************************************************************************/
 
 ssize_t write_socket(int fd,char *buf,size_t len)
@@ -569,11 +569,11 @@ ssize_t write_socket(int fd,char *buf,size_t len)
 }
 
 /****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
-store the result in the buffer
-This version of the function will return a length of zero on receiving
-a keepalive packet.
-timeout is in milliseconds.
+ Read 4 bytes of a smb packet and return the smb length of the packet.
+ Store the result in the buffer.
+ This version of the function will return a length of zero on receiving
+ a keepalive packet.
+ Timeout is in milliseconds.
 ****************************************************************************/
 
 static ssize_t read_smb_length_return_keepalive(int fd,char *inbuf,unsigned int timeout)
@@ -605,10 +605,10 @@ static ssize_t read_smb_length_return_keepalive(int fd,char *inbuf,unsigned int 
 }
 
 /****************************************************************************
-read 4 bytes of a smb packet and return the smb length of the packet
-store the result in the buffer. This version of the function will
-never return a session keepalive (length of zero).
-timeout is in milliseconds.
+ Read 4 bytes of a smb packet and return the smb length of the packet.
+ Store the result in the buffer. This version of the function will
+ never return a session keepalive (length of zero).
+ Timeout is in milliseconds.
 ****************************************************************************/
 
 ssize_t read_smb_length(int fd,char *inbuf,unsigned int timeout)
@@ -633,11 +633,10 @@ ssize_t read_smb_length(int fd,char *inbuf,unsigned int timeout)
 }
 
 /****************************************************************************
-  read an smb from a fd. Note that the buffer *MUST* be of size
-  BUFFER_SIZE+SAFETY_MARGIN.
-  The timeout is in milliseconds. 
-  This function will return on a
-  receipt of a session keepalive packet.
+ Read an smb from a fd. Note that the buffer *MUST* be of size
+ BUFFER_SIZE+SAFETY_MARGIN.
+ The timeout is in milliseconds. 
+ This function will return on receipt of a session keepalive packet.
 ****************************************************************************/
 
 BOOL receive_smb(int fd,char *buffer, unsigned int timeout)
@@ -961,7 +960,6 @@ connect_again:
 
   return res;
 }
-
 
 /*******************************************************************
  Reset the 'done' variables so after a client process is created

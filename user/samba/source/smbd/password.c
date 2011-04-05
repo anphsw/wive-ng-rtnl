@@ -95,10 +95,11 @@ static user_struct *validated_users = NULL;
 static int num_validated_users = 0;
 
 /****************************************************************************
-check if a uid has been validated, and return an pointer to the user_struct
-if it has. NULL if not. vuid is biased by an offset. This allows us to
-tell random client vuid's (normally zero) from valid vuids.
+ Check if a uid has been validated, and return an pointer to the user_struct
+ if it has. NULL if not. vuid is biased by an offset. This allows us to
+ tell random client vuid's (normally zero) from valid vuids.
 ****************************************************************************/
+
 user_struct *get_valid_user_struct(uint16 vuid)
 {
   if (vuid == UID_FIELD_INVALID)
@@ -111,8 +112,9 @@ user_struct *get_valid_user_struct(uint16 vuid)
 }
 
 /****************************************************************************
-invalidate a uid
+ Invalidate a uid.
 ****************************************************************************/
+
 void invalidate_vuid(uint16 vuid)
 {
   user_struct *vuser = get_valid_user_struct(vuid);
@@ -295,7 +297,7 @@ void add_session_user(char *user)
 
   if (!Get_Pwnam(suser,True)) return;
 
-  if (suser && *suser && !in_list(suser,session_users,False))
+  if (*suser && !in_list(suser,session_users,False))
     {
       if (strlen(suser) + strlen(session_users) + 2 >= sizeof(pstring))
 	DEBUG(1,("Too many session users??\n"));
@@ -574,7 +576,7 @@ BOOL user_ok(char *user,int snum)
 	
 	ret = !user_in_list(user,invalid);
 	
-	if (ret && valid && *valid) {
+	if (ret && *valid) {
 		ret = user_in_list(user,valid);
 	}
 

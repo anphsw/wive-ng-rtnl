@@ -287,7 +287,6 @@ char *dos2unix_format(char *str, BOOL overwrite)
   }
 }
 
-
 /*
  * Interpret character set.
  */
