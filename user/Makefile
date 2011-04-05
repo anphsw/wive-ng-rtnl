@@ -45,6 +45,7 @@ dir_y =
 dir_n =
 dir_  =
 
+dir_$(CONFIG_USER_SAMBA)		    += samba
 #base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
