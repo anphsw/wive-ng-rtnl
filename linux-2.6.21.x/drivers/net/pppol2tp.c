@@ -955,7 +955,7 @@ static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 		csum = udp_csum_outgoing(sk, skb);
 		#else
-		__wsum csum = csum_partial(skb->h.raw, sizeof(struct udphdr), 0); 
+		csum = csum_partial(skb->h.raw, sizeof(struct udphdr), 0); 
 		skb_queue_walk(&sk->sk_write_queue, skb) { 
 		    csum = csum_add(csum, skb->csum); 
 		}
