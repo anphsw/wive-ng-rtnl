@@ -97,7 +97,6 @@ int _dl_parse_relocation_information(struct dyn_elf *xpnt,
 	unsigned long i;
 	unsigned long *got;
 	unsigned long *reloc_addr=NULL;
-	unsigned long symbol_addr;
 	int reloc_type, symtab_index;
 	struct elf_resolve *tpnt = xpnt->dyn;
 #if defined (__SUPPORT_LD_DEBUG__)
@@ -117,7 +116,6 @@ int _dl_parse_relocation_information(struct dyn_elf *xpnt,
 			(unsigned long) rpnt->r_offset);
 		reloc_type = ELF_R_TYPE(rpnt->r_info);
 		symtab_index = ELF_R_SYM(rpnt->r_info);
-		symbol_addr = 0;
 
 		debug_sym(symtab,strtab,symtab_index);
 		debug_reloc(symtab,strtab,rpnt);

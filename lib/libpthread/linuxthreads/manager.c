@@ -479,7 +479,6 @@ static int pthread_handle_create(pthread_t *thread, const pthread_attr_t *attr,
   char *guardaddr = NULL;
   size_t guardsize = 0;
   int pagesize = __getpagesize();
-  int saved_errno = 0;
 
   /* First check whether we have to change the policy and if yes, whether
      we can  do this.  Normally this should be done by examining the
@@ -582,7 +581,6 @@ static int pthread_handle_create(pthread_t *thread, const pthread_attr_t *attr,
 			CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND |
 			__pthread_sig_cancel, new_thread);
 
-	  saved_errno = errno;
 	  if (pid != -1)
 	    {
 	      /* Now fill in the information about the new thread in
@@ -612,7 +610,6 @@ static int pthread_handle_create(pthread_t *thread, const pthread_attr_t *attr,
       pid = clone(pthread_start_thread, (void **) new_thread,
 		    CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND |
 		    __pthread_sig_cancel, new_thread);
-      saved_errno = errno;
     }
   /* Check if cloning succeeded */
   if (pid == -1) {
@@ -677,13 +674,17 @@ static void pthread_free(pthread_descr th)
 {
   pthread_handle handle;
   pthread_readlock_info *iter, *next;
+#ifndef __ARCH_HAS_MMU__
   char *h_bottom_save;
+#endif
 
   ASSERT(th->p_exited);
   /* Make the handle invalid */
   handle =  thread_handle(th->p_tid);
   __pthread_lock(&handle->h_lock, NULL);
+#ifndef __ARCH_HAS_MMU__
   h_bottom_save = handle->h_bottom;
+#endif
   handle->h_descr = NULL;
   handle->h_bottom = (char *)(-1L);
   __pthread_unlock(&handle->h_lock);

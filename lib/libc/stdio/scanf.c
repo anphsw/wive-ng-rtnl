@@ -1142,7 +1142,9 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 #endif /* L_vfwscanf */
 
 #ifdef __UCLIBC_HAS_WCHAR__
+#if defined(__UCLIBC_HAS_LOCALE__) && !defined(L_vfwscanf)
 	mbstate_t mbstate;
+#endif
 #endif /* __UCLIBC_HAS_WCHAR__ */
 
 	struct scan_cookie sc;
@@ -1157,10 +1159,13 @@ int VFSCANF (FILE *__restrict fp, const Wchar *__restrict format, va_list arg)
 	unsigned char buf[MAX_DIGITS+2];
 #ifdef L_vfscanf
 	unsigned char scanset[UCHAR_MAX + 1];
-	unsigned char invert;		/* Careful!  Meaning changes. */
+	unsigned char invert = "";		/* Careful!  Meaning changes. */
 #endif /* L_vfscanf */
 	unsigned char fail;
 	unsigned char zero_conversions = 1;
+#ifndef L_vfscanf
+	mbstate_t mbstate;                      /* vfscanf */
+#endif
 	__STDIO_AUTO_THREADLOCK_VAR;
 
 #ifdef __UCLIBC_MJN3_ONLY__

@@ -1469,6 +1469,8 @@ static int _do_one_spec(FILE * __restrict stream,
 	 * eventually this should be handled robustly. */
 	char buf[128];
 
+	memset(argptr, 0, sizeof(argptr));
+
 #ifdef NDEBUG
 	_ppfs_parsespec(ppfs);
 #else

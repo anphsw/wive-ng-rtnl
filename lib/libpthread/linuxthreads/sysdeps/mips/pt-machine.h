@@ -25,10 +25,14 @@
 
 #include <features.h>
 
+#ifndef PT_EI
+# define PT_EI extern inline
+#endif
+
 /* Copyright (C) 2000, 2002 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Maciej W. Rozycki <macro@ds2.pg.gda.pl>, 2000.  */
-static inline int
+PT_EI int
 _test_and_set (int *p, int v) __THROW
 {
   int r, t;
@@ -54,9 +58,6 @@ _test_and_set (int *p, int v) __THROW
 }
 
 
-#ifndef PT_EI
-# define PT_EI extern inline
-#endif
 
 extern long int testandset (int *spinlock);
 extern int __compare_and_swap (long int *p, long int oldval, long int newval);

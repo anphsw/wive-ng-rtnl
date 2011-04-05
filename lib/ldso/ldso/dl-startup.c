@@ -234,7 +234,7 @@ static void * __attribute_used__ _dl_start(unsigned long args)
 		for (indx = 0; indx < INDX_MAX; indx++) {
 			unsigned int i;
 			unsigned long *reloc_addr;
-			unsigned long symbol_addr;
+			unsigned long symbol_addr __maybe_unused;
 			int symtab_index;
 			ElfW(Sym) *sym;
 			ELF_RELOC *rpnt;

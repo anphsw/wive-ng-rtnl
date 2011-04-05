@@ -2974,6 +2974,13 @@ config PPPOL2TP
           and session setup). One such daemon is OpenL2TP
           (http://openl2tp.sourceforge.net/).
 
+config PPPOL2TP_FASTPATH
+	bool "L2TP send frames offload."
+        depends on PPPOL2TP
+	help
+	  L2TP use udp_sendmsg without lock_sock and release_sock functions 
+	  speedup L2TP tunneling.
+
 config PPTP
         tristate "PPTP (Point-to-Point Tunneling Protocol)"
         depends on PPP

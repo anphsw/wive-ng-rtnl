@@ -22,7 +22,7 @@ int __libc_open(const char *file, int flags, ...)
 {
 	/* gcc may warn about mode being uninitialized.
 	 * Just ignore that, since gcc is wrong. */
-	mode_t mode;
+	mode_t mode = 0;
 
 	if (flags & O_CREAT) {
 		va_list ap;

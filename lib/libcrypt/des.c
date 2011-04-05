@@ -456,7 +456,7 @@ do_des(	u_int32_t l_in, u_int32_t r_in, u_int32_t *l_out, u_int32_t *r_out, int 
 	/*
 	 *	l_in, r_in, l_out, and r_out are in pseudo-"big-endian" format.
 	 */
-	u_int32_t	l, r, *kl, *kr, *kl1, *kr1;
+	u_int32_t	l=0, r=0, *kl, *kr, *kl1, *kr1;
 	u_int32_t	f, r48l, r48r;
 	int		round;
 

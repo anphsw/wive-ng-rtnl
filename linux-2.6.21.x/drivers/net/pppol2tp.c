@@ -93,13 +93,17 @@
 #include <net/dst.h>
 #include <net/ip.h>
 #include <net/udp.h>
+#include <net/udplite.h>
 #include <net/xfrm.h>
 
 #include <asm/byteorder.h>
 #include <asm/atomic.h>
 
-
+#ifdef CONFIG_PPPOL2TP_FASTPATH
+#define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
+#else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
+#endif
 
 /* Developer debug code. */
 #if 0
@@ -802,7 +806,7 @@ static void pppol2tp_data_ready(struct sock *sk, int len)
 	       "%s: received %d bytes\n", tunnel->name, len);
 
 	skb = skb_dequeue(&sk->sk_receive_queue);
-	if (skb != NULL) {
+	if (skb) {
 		if (pppol2tp_recv_core(sk, skb)) {
 			DPRINTK(tunnel->debug, "%s: packet passing to userspace\n",
 				tunnel->name);
@@ -891,6 +895,283 @@ error:
  * Transmit handling
  ***********************************************************************/
 
+#ifdef CONFIG_PPPOL2TP_FASTPATH
+static void pppol2tp_udp4_hwcsum_outgoing(struct sock *sk, struct sk_buff *skb, __be32 src, __be32 dst, int len      )
+{
+	unsigned int offset;
+	struct udphdr *uh = skb->h.uh;
+	__wsum csum = 0;
+
+	/*
+	 * HW-checksum won't work as there are two or more
+	 * fragments on the socket so that all csums of sk_buffs
+	 * should be together
+	 */
+	offset = skb->h.raw - skb->data;
+	skb->csum = skb_checksum(skb, offset, skb->len - offset, 0);
+
+	skb->ip_summed = CHECKSUM_NONE;
+
+	skb_queue_walk(&sk->sk_write_queue, skb) {
+		csum = csum_add(csum, skb->csum);
+	}
+
+	uh->check = csum_tcpudp_magic(src, dst, len, IPPROTO_UDP, csum);
+	if (uh->check == 0)
+		uh->check = CSUM_MANGLED_0;
+}
+
+/* Push out all pending data as one UDP datagram. Standart method. */
+static int pppol2tp_udp_push_pending_frames(struct sock *sk)
+{
+	struct udp_sock  *up = udp_sk(sk);
+	struct inet_sock *inet = inet_sk(sk);
+	struct flowi *fl = &inet->cork.fl;
+	struct sk_buff *skb;
+	struct udphdr *uh;
+	int err = 0;
+	__wsum csum = 0;
+
+	/* Grab the skbuff where UDP header space exists. */
+	if ((skb = skb_peek(&sk->sk_write_queue)) == NULL)
+		goto out;
+
+	/*
+	 * Create a UDP header
+	 */
+	uh = skb->h.uh;
+	uh->source = fl->fl_ip_sport;
+	uh->dest = fl->fl_ip_dport;
+	uh->len = htons(up->len);
+	uh->check = 0;
+
+	if (sk->sk_no_check == UDP_CSUM_NOXMIT) {   /* UDP csum disabled */
+		skb->ip_summed = CHECKSUM_NONE;
+		goto send;
+	} else if (skb->ip_summed == CHECKSUM_PARTIAL) { /* UDP hardware csum */
+		pppol2tp_udp4_hwcsum_outgoing(sk, skb, fl->fl4_src,fl->fl4_dst, up->len);
+		goto send;
+	} else						 /*   `normal' UDP    */
+		csum = udp_csum_outgoing(sk, skb);
+
+	/* add protocol-dependent pseudo-header */
+	uh->check = csum_tcpudp_magic(fl->fl4_src, fl->fl4_dst, up->len, sk->sk_protocol, csum );
+	if (uh->check == 0)
+		uh->check = CSUM_MANGLED_0;
+send:
+	err = ip_push_pending_frames(sk);
+out:
+	up->len = 0;
+	up->pending = 0;
+	if (!err)
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, up->pcflag);
+	return err;
+}
+
+/* udp_sendmsg without lock_sock and release_sock functions for fast speed */
+static int pppol2tp_udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg, size_t len)
+{
+	struct inet_sock *inet = inet_sk(sk);
+	struct udp_sock *up = udp_sk(sk);
+	int ulen = len;
+	int free = 0, connected = 0;
+	int err, is_udplite = up->pcflag;
+	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
+	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
+	struct ipcm_cookie ipc;
+	struct rtable *rt = NULL;
+	__be32 daddr, faddr, saddr;
+	__be16 dport;
+	u8  tos;
+
+	if (len > 0xFFFF)
+		return -EMSGSIZE;
+
+	/* Check the flags. */
+	if (msg->msg_flags&MSG_OOB)	/* Mirror BSD error message compatibility */
+		return -EOPNOTSUPP;
+
+	ipc.opt = NULL;
+
+	if (up->pending) {
+		if (likely(up->pending)) {
+			if (unlikely(up->pending != AF_INET)) {
+				return -EINVAL;
+			}
+			goto do_append_data;
+		}
+	}
+	ulen += sizeof(struct udphdr);
+
+	/* Get and verify the address. */
+	if (msg->msg_name) {
+		struct sockaddr_in * usin = (struct sockaddr_in*)msg->msg_name;
+		if (msg->msg_namelen < sizeof(*usin))
+			return -EINVAL;
+		if (usin->sin_family != AF_INET) {
+			if (usin->sin_family != AF_UNSPEC)
+				return -EAFNOSUPPORT;
+		}
+
+		daddr = usin->sin_addr.s_addr;
+		dport = usin->sin_port;
+		if (dport == 0)
+			return -EINVAL;
+	} else {
+		if (sk->sk_state != TCP_ESTABLISHED)
+			return -EDESTADDRREQ;
+		daddr = inet->daddr;
+		dport = inet->dport;
+		/* Open fast path for connected socket.
+		   Route will not be used, if at least one option is set. */
+		connected = 1;
+	}
+	ipc.addr = inet->saddr;
+
+	ipc.oif = sk->sk_bound_dev_if;
+	if (msg->msg_controllen) {
+		err = ip_cmsg_send(msg, &ipc);
+		if (err)
+			return err;
+		if (ipc.opt)
+			free = 1;
+		connected = 0;
+	}
+	if (!ipc.opt)
+		ipc.opt = inet->opt;
+
+	saddr = ipc.addr;
+	ipc.addr = faddr = daddr;
+
+	if (ipc.opt && ipc.opt->srr) {
+		if (!daddr)
+			return -EINVAL;
+		faddr = ipc.opt->faddr;
+		connected = 0;
+	}
+	tos = RT_TOS(inet->tos);
+	if (sock_flag(sk, SOCK_LOCALROUTE) ||
+	    (msg->msg_flags & MSG_DONTROUTE) ||
+	    (ipc.opt && ipc.opt->is_strictroute)) {
+		tos |= RTO_ONLINK;
+		connected = 0;
+	}
+
+	if (MULTICAST(daddr)) {
+		if (!ipc.oif)
+			ipc.oif = inet->mc_index;
+		if (!saddr)
+			saddr = inet->mc_addr;
+		connected = 0;
+	}
+
+	if (connected)
+		rt = (struct rtable*)sk_dst_check(sk, 0);
+
+	if (!rt) {
+		struct flowi fl = { .oif = ipc.oif,
+				    .nl_u = { .ip4_u =
+					      { .daddr = faddr,
+						.saddr = saddr,
+						.tos = tos } },
+				    .proto = sk->sk_protocol,
+				    .uli_u = { .ports =
+					       { .sport = inet->sport,
+						 .dport = dport } } };
+
+		security_sk_classify_flow(sk, &fl);
+		err = ip_route_output_flow(&rt, &fl, sk, 1);
+		if (err) {
+			if (err == -ENETUNREACH)
+				IP_INC_STATS_BH(IPSTATS_MIB_OUTNOROUTES);
+			goto out;
+		}
+
+		err = -EACCES;
+		if ((rt->rt_flags & RTCF_BROADCAST) &&
+		    !sock_flag(sk, SOCK_BROADCAST))
+			goto out;
+		if (connected)
+			sk_dst_set(sk, dst_clone(&rt->u.dst));
+	}
+
+	if (msg->msg_flags&MSG_CONFIRM)
+		goto do_confirm;
+back_from_confirm:
+
+	saddr = rt->rt_src;
+	if (!ipc.addr)
+		daddr = ipc.addr = rt->rt_dst;
+
+	if (unlikely(up->pending)) {
+		/* The socket is already corked while preparing it.
+		    ... which is an evident application bug. --ANK */
+		LIMIT_NETDEBUG(KERN_DEBUG "udp cork app bug 2\n");
+		err = -EINVAL;
+		goto out;
+	}
+
+	/* Now cork the socket to pend data. */
+	inet->cork.fl.fl4_dst = daddr;
+	inet->cork.fl.fl_ip_dport = dport;
+	inet->cork.fl.fl4_src = saddr;
+	inet->cork.fl.fl_ip_sport = inet->sport;
+	up->pending = AF_INET;
+
+do_append_data:
+	up->len += ulen;
+	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+	err = ip_append_data(sk, getfrag, msg->msg_iov, ulen,
+			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+			sizeof(struct udphdr), &ipc, rt,
+			#else
+			sizeof(struct udphdr), &ipc, &rt,
+			#endif
+			corkreq ? msg->msg_flags|MSG_MORE : msg->msg_flags);
+	if (err) {
+	    #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+	    pppol2tp_udp_flush_pending_frames(sk);
+	    #else
+	    struct udp_sock *up = udp_sk(sk);
+	    if (up->pending) {
+		up->len = 0;
+		up->pending = 0;
+		ip_flush_pending_frames(sk);
+	    }
+	    #endif
+	}
+	else if (!corkreq)
+		err = pppol2tp_udp_push_pending_frames(sk);
+	else if (unlikely(skb_queue_empty(&sk->sk_write_queue)))
+		up->pending = 0;
+out:
+	if (rt)
+		ip_rt_put(rt);
+	if (free)
+		kfree(ipc.opt);
+	if (!err)
+		return len;
+	/*
+	 * ENOBUFS = no kernel mem, SOCK_NOSPACE = no sndbuf space.  Reporting
+	 * ENOBUFS might not be good (it's not tunable per se), but otherwise
+	 * we don't have a good statistic (IpOutDiscards but it can be too many
+	 * things).  We could add another new stat but at least for now that
+	 * seems like overkill.
+	 */
+	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
+		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+	}
+	return err;
+
+do_confirm:
+	dst_confirm(&rt->u.dst);
+	if (!(msg->msg_flags&MSG_PROBE) || len)
+		goto back_from_confirm;
+	err = 0;
+	goto out;
+}
+#endif
+
 /* Internal UDP socket transmission
  */
 static int pppol2tp_udp_sock_send(struct kiocb *iocb,
@@ -932,7 +1213,11 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 	set_fs(get_ds());
 
 	/* The actual sendmsg() call... */
+#ifdef CONFIG_PPPOL2TP_FASTPATH
+	error = pppol2tp_udp_sendmsg(iocb, session->tunnel_sock, msg, total_len);
+#else
 	error = tunnel->old_proto->sendmsg(iocb, session->tunnel_sock, msg, total_len);
+#endif
 	if (error == -EIOCBQUEUED)
 		error = wait_on_sync_kiocb(iocb);
 
@@ -1054,7 +1339,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	 * struct msghdr and insert the headers as the first iovecs.
 	 */
 	msg = kmalloc(sizeof(struct msghdr), GFP_ATOMIC);
-	if (msg == NULL) {
+	if (!msg) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
@@ -1063,7 +1348,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 
 	msg->msg_iov = kmalloc((m->msg_iovlen + 2) * sizeof(struct iovec),
 			       GFP_ATOMIC);
-	if (msg->msg_iov == NULL) {
+	if (!msg->msg_iov) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
@@ -1165,7 +1450,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	SOCK_2_TUNNEL(session->tunnel_sock, tunnel, error, -EBADF, end, 0);
 
 	send = kmalloc(sizeof(struct pppol2tp_send), GFP_ATOMIC);
-	if (send == NULL) {
+	if (!send) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
@@ -1202,7 +1487,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	 * and use sendmsg
 	 */
 	msg = kmalloc(sizeof(struct msghdr), GFP_ATOMIC);
-	if (msg == NULL) {
+	if (!msg) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
@@ -1210,7 +1495,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	}
 
 	msg->msg_iov = kmalloc(3 * sizeof(struct iovec), GFP_ATOMIC);
-	if (msg->msg_iov == NULL) {
+	if (!msg->msg_iov) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
@@ -1248,9 +1533,9 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	return 1;
 
 end:
-	if (msg != NULL)
+	if (msg)
 		kfree(msg);
-	if (send != NULL)
+	if (send)
 		kfree(send);
 
 	EXIT_FUNCTION;
@@ -1274,7 +1559,7 @@ static void pppol2tp_tunnel_closeall(struct pppol2tp_tunnel *tunnel)
 
 	ENTER_FUNCTION;
 
-	if (tunnel == NULL)
+	if (!tunnel)
 		BUG();
 
 	PRINTK(tunnel->debug, PPPOL2TP_MSG_CONTROL, KERN_INFO,
@@ -1388,7 +1673,7 @@ static void pppol2tp_session_destruct(struct sock *sk)
 
 	ENTER_FUNCTION;
 
-	if (sk->sk_user_data != NULL) {
+	if (sk->sk_user_data) {
 		struct pppol2tp_tunnel *tunnel;
 
 		SOCK_2_SESSION(sk, session, error, -EBADF, out, 0);
@@ -1400,7 +1685,7 @@ static void pppol2tp_session_destruct(struct sock *sk)
 		 * private tunnel ptr instead.
 		 */
 		tunnel = session->tunnel;
-		if (tunnel != NULL) {
+		if (tunnel) {
 			if (tunnel->magic != L2TP_TUNNEL_MAGIC) {
 				printk(KERN_ERR "%s: %s:%d: BAD TUNNEL MAGIC "
 				       "( tunnel=%p magic=%x )\n",
@@ -1422,7 +1707,7 @@ static void pppol2tp_session_destruct(struct sock *sk)
 		}
 	}
 
-	if (session != NULL)
+	if (session)
 		kfree(session);
 
 out:
@@ -1454,7 +1739,7 @@ static int pppol2tp_release(struct socket *sock)
 		 * private tunnel ptr instead.
 		 */
 		tunnel = session->tunnel;
-		if (tunnel != NULL) {
+		if (tunnel) {
 			if (tunnel->magic == L2TP_TUNNEL_MAGIC) {
 				/* Delete the session socket from the hash */
 				write_lock_bh(&tunnel->hlist_lock);
@@ -1482,7 +1767,7 @@ static int pppol2tp_release(struct socket *sock)
 	/* Purge any queued data */
 	skb_queue_purge(&sk->sk_receive_queue);
 	skb_queue_purge(&sk->sk_write_queue);
-	if (session != NULL) {
+	if (session) {
 		struct sk_buff *skb;
 		while ((skb = skb_dequeue(&session->reorder_q))) {
 			kfree_skb(skb);
@@ -1493,7 +1778,7 @@ static int pppol2tp_release(struct socket *sock)
 
 	release_sock(sk);
 
-	if (session != NULL)
+	if (session)
 		DPRINTK(session->debug, "calling sock_put; refcnt=%d\n",
 			session->sock->sk_refcnt.counter);
 	sock_put(sk);
@@ -1513,7 +1798,7 @@ static struct file *pppol2tp_fget(pid_t pid, unsigned int fd)
 
 	if (pid != 0) {
 		struct task_struct *tsk = find_task_by_pid(pid);
-		if (tsk == NULL)
+		if (!tsk)
 			return NULL;
 		files = tsk->files;
 	}
@@ -1600,7 +1885,7 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 
 	/* Check if this socket has already been prepped */
 	tunnel = (struct pppol2tp_tunnel *)sk->sk_user_data;
-	if (tunnel != NULL) {
+	if (tunnel) {
 		/* User-data field already set */
 		err = -EBUSY;
 		if (tunnel->magic != L2TP_TUNNEL_MAGIC) {
@@ -1620,7 +1905,7 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 	 * context and init it.
 	 */
 	sk->sk_user_data = tunnel = kmalloc(sizeof(struct pppol2tp_tunnel), GFP_KERNEL);
-	if (sk->sk_user_data == NULL) {
+	if (!sk->sk_user_data) {
 		err = -ENOMEM;
 		goto err;
 	}
@@ -1774,14 +2059,14 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 						     sp->pppol2tp.fd,
 						     sp->pppol2tp.s_tunnel,
 						     &error);
-	if (tunnel_sock == NULL)
+	if (!tunnel_sock)
 		goto end;
 	tunnel = tunnel_sock->sk_user_data;
 
 	/* Allocate and initialize a new session context.
 	 */
 	session = kmalloc(sizeof(struct pppol2tp_session), GFP_KERNEL);
-	if (session == NULL) {
+	if (!session) {
 		error = -ENOMEM;
 		goto end;
 	}
@@ -1814,7 +2099,7 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 
 	/* If PMTU discovery was enabled, use the MTU that was discovered */
 	dst = sk_dst_get(sk);
-	if (dst != NULL) {
+	if (dst) {
 		u32 pmtu = dst_mtu(__sk_dst_get(sk));
 		if (pmtu != 0) {
 			session->mtu = session->mru = pmtu -
@@ -2090,7 +2375,7 @@ static int pppol2tp_tunnel_ioctl(struct pppol2tp_tunnel *tunnel,
 			/* resend to session ioctl handler */
 			struct pppol2tp_session *session =
 				pppol2tp_session_find(tunnel, stats_req.session_id);
-			if (session != NULL)
+			if (session)
 				err = pppol2tp_session_ioctl(session, cmd, arg);
 			else
 				err = -EBADR;
@@ -2138,7 +2423,7 @@ static int pppol2tp_ioctl(struct socket *sock, unsigned int cmd,
 	if (sock_flag(sk, SOCK_DEAD) != 0)
 		return -EBADF;
 
-	if ((sk->sk_user_data == NULL) ||
+	if (!(sk->sk_user_data) ||
 	    (!(sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND)))) {
 		err = -ENOTCONN;
 		DPRINTK(-1, "ioctl: socket %p not connected.\n", sk);
@@ -2291,7 +2576,7 @@ static int pppol2tp_setsockopt(struct socket *sock, int level, int optname,
 	if (get_user(val, (int __user *)optval))
 		return -EFAULT;
 
-	if (sk->sk_user_data == NULL) {
+	if (!sk->sk_user_data) {
 		err = -ENOTCONN;
 		DPRINTK(-1, "setsockopt: socket %p not connected.\n", sk);
 		goto end;
@@ -2409,7 +2694,7 @@ static int pppol2tp_getsockopt(struct socket *sock, int level,
 	if (len < 0)
 		return -EINVAL;
 
-	if (sk->sk_user_data == NULL) {
+	if (!sk->sk_user_data) {
 		err = -ENOTCONN;
 		DPRINTK(-1, "getsockopt: socket %p not connected.\n", sk);
 		goto end;
@@ -2550,7 +2835,7 @@ static void pppol2tp_proc_stop(struct seq_file *p, void *v)
 
 	ENTER_FUNCTION;
 
-	if (tunnel != NULL)
+	if (tunnel)
 		sock_put(tunnel->sock);
 
 	EXIT_FUNCTION;
