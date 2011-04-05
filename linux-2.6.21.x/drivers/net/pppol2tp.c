@@ -1537,11 +1537,8 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 		session->stats.tx_errors++;
 		goto end;
 	}
-#ifndef DISABLE_WORKQUEUE
 	msg->msg_iov = kmalloc(3 * sizeof(struct iovec), GFP_ATOMIC);
-#else
-	msg->msg_iov = kmalloc(2 * sizeof(struct iovec), GFP_ATOMIC);
-#endif
+
 	if (!msg->msg_iov) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
