@@ -101,6 +101,8 @@
 
 #ifdef CONFIG_PPPOL2TP_FASTPATH
 #define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
+#define UDP_LITE_DISABLE
+#define DISABLE_WORKQUEUE
 #else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
 #endif
@@ -180,6 +182,7 @@
 #define PPPOL2TP_L2TP_HDR_SIZE_SEQ		10
 #define PPPOL2TP_L2TP_HDR_SIZE_NOSEQ		6
 
+#ifndef DISABLE_WORKQUEUE
 struct pppol2tp_send {
 	struct pppol2tp_session *session;
 	struct pppol2tp_tunnel *tunnel;
@@ -193,6 +196,7 @@ struct pppol2tp_send {
         struct sock_iocb siocb;
 	u8 hdr[PPPOL2TP_L2TP_HDR_SIZE_SEQ];
 };
+#endif
 
 struct pppol2tp_tunnel;
 
@@ -247,7 +251,9 @@ struct pppol2tp_tunnel
 {
 	int			magic;		/* Should be L2TP_TUNNEL_MAGIC */
 
+#ifndef DISABLE_WORKQUEUE
 	struct workqueue_struct	*wq;		/* Per-tunnel work queue */
+#endif
 
 	struct proto		*old_proto;	/* original proto */
 	struct proto		l2tp_proto;	/* L2TP proto */
@@ -988,7 +994,7 @@ static int pppol2tp_udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msgh
 	int ulen = len;
 	int free = 0, connected = 0;
 	int err;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
 	int is_udplite = up->pcflag;
 #endif
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
@@ -1136,7 +1142,7 @@ back_from_confirm:
 do_append_data:
 	up->len += ulen;
 
-	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
 	#else
 	getfrag  =  ip_generic_getfrag;
@@ -1180,8 +1186,10 @@ out:
 	 * seems like overkill.
 	 */
 	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
 		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+		#elif LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
 		#else
 		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS);
 		#endif
@@ -1408,6 +1416,7 @@ end:
 	return error;
 }
 
+#ifndef DISABLE_WORKQUEUE
 /* Work queue handler for pppol2tp_xmit().
  */
 static void pppol2tp_wq_send(struct work_struct *work)
@@ -1442,6 +1451,7 @@ static void pppol2tp_wq_send(struct work_struct *work)
 	kfree_skb(send->skb);
 	kfree(send);
 }
+#endif
 
 /* Transmit function called by generic PPP driver.  Sends PPP frame over
  * PPPoL2TP socket.
@@ -1460,7 +1470,13 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	struct msghdr *msg = NULL;
 	struct pppol2tp_session *session;
 	struct pppol2tp_tunnel *tunnel;
+#ifndef DISABLE_WORKQUEUE
 	struct pppol2tp_send *send = NULL;
+#else
+        u8 hdr[PPPOL2TP_L2TP_HDR_SIZE_SEQ];
+        struct kiocb iocb;
+        struct sock_iocb siocb;
+#endif
 
 	ENTER_FUNCTION;
 
@@ -1474,6 +1490,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	SOCK_2_SESSION(sk, session, error, -EBADF, end, 0);
 	SOCK_2_TUNNEL(session->tunnel_sock, tunnel, error, -EBADF, end, 0);
 
+#ifndef DISABLE_WORKQUEUE
 	send = kmalloc(sizeof(struct pppol2tp_send), GFP_ATOMIC);
 	if (!send) {
 		error = -ENOBUFS;
@@ -1484,7 +1501,9 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 
 	/* Setup L2TP header */
 	hdr_len = pppol2tp_build_l2tp_header(session, &send->hdr);
-
+#else
+	hdr_len = pppol2tp_build_l2tp_header(session, &hdr);
+#endif
 	if (session->send_seq)
 		PRINTK(session->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
 		       "%s: send %d bytes, ns=%hu\n",
@@ -1518,15 +1537,22 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 		session->stats.tx_errors++;
 		goto end;
 	}
-
+#ifndef DISABLE_WORKQUEUE
 	msg->msg_iov = kmalloc(3 * sizeof(struct iovec), GFP_ATOMIC);
+#else
+	msg->msg_iov = kmalloc(2 * sizeof(struct iovec), GFP_ATOMIC);
+#endif
 	if (!msg->msg_iov) {
 		error = -ENOBUFS;
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
 		goto end;
 	}
+#ifndef DISABLE_WORKQUEUE
 	msg->msg_iov[0].iov_base = &send->hdr;
+#else
+	msg->msg_iov[0].iov_base = &hdr;
+#endif
 	msg->msg_iov[0].iov_len	 = hdr_len;
 	/* FIXME: do we need to handle skb fragments here? */
         msg->msg_iov[1].iov_base = &ppph;
@@ -1543,6 +1569,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	msg->msg_controllen = 0;
 	msg->msg_flags	    = MSG_DONTWAIT;	/* Need this to prevent blocking */
 
+#ifndef DISABLE_WORKQUEUE
 	send->session = session;
 	send->tunnel = tunnel;
 	send->msg = msg;
@@ -1556,13 +1583,20 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	INIT_WORK(&send->send_task, pppol2tp_wq_send);
 	queue_work(tunnel->wq, &send->send_task);
 	return 1;
+#else
+	init_sync_kiocb(&iocb, NULL);
+        iocb.private = &siocb;
 
+        error = pppol2tp_udp_sock_send(&iocb, session, tunnel, msg, skb->len + hdr_len + sizeof(ppph));                                                                 
+        kfree_skb(skb);
+#endif
 end:
+#ifndef DISABLE_WORKQUEUE
 	if (msg)
 		kfree(msg);
 	if (send)
 		kfree(send);
-
+#endif
 	EXIT_FUNCTION;
 	return error;
 }
@@ -1658,8 +1692,10 @@ static void pppol2tp_tunnel_free(struct pppol2tp_tunnel *tunnel)
 	sk->sk_destruct = tunnel->old_sk_destruct;
 	sk->sk_user_data = NULL;
 
+#ifndef DISABLE_WORKQUEUE
 	flush_workqueue(tunnel->wq);
 	destroy_workqueue(tunnel->wq);
+#endif
 
 	DPRINTK(tunnel->debug, "%s: MOD_DEC_USE_COUNT\n", tunnel->name);
 	kfree(tunnel);
@@ -1947,12 +1983,13 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 	DPRINTK(tunnel->debug, "tunl %hu: allocated tunnel=%p, sk=%p, sock=%p\n",
 		tunnel_id, tunnel, sk, sock);
 
+#ifndef DISABLE_WORKQUEUE
 	tunnel->wq = create_workqueue("kl2tpd");
 	if (!tunnel->wq) {
 		err = -ENOMEM;
 		goto err_free_tunnel;
 	}
-
+#endif
 	/* Setup the new protocol stuff */
 	tunnel->old_proto  = sk->sk_prot;
 	tunnel->l2tp_proto = *sk->sk_prot;
@@ -1990,8 +2027,10 @@ out:
 
 	return ret;
 
+#ifndef DISABLE_WORKQUEUE
 err_free_tunnel:
 	kfree(tunnel);
+#endif
 err:
 	*error = err;
 	goto out;
