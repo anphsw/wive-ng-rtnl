@@ -951,8 +951,16 @@ static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 	} else if (skb->ip_summed == CHECKSUM_PARTIAL) { /* UDP hardware csum */
 		pppol2tp_udp4_hwcsum_outgoing(sk, skb, fl->fl4_src,fl->fl4_dst, up->len);
 		goto send;
-	} else						 /*   `normal' UDP    */
+	} else {						 /*   `normal' UDP    */
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 		csum = udp_csum_outgoing(sk, skb);
+		#else
+		__wsum csum = csum_partial(skb->h.raw, sizeof(struct udphdr), 0); 
+		skb_queue_walk(&sk->sk_write_queue, skb) { 
+		    csum = csum_add(csum, skb->csum); 
+		}
+		#endif
+	}
 
 	/* add protocol-dependent pseudo-header */
 	uh->check = csum_tcpudp_magic(fl->fl4_src, fl->fl4_dst, up->len, sk->sk_protocol, csum );
@@ -964,7 +972,11 @@ out:
 	up->len = 0;
 	up->pending = 0;
 	if (!err)
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, up->pcflag);
+		#else
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS);
+		#endif
 	return err;
 }
 
@@ -975,7 +987,10 @@ static int pppol2tp_udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msgh
 	struct udp_sock *up = udp_sk(sk);
 	int ulen = len;
 	int free = 0, connected = 0;
-	int err, is_udplite = up->pcflag;
+	int err;
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+	int is_udplite = up->pcflag;
+#endif
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
 	struct ipcm_cookie ipc;
@@ -1120,7 +1135,13 @@ back_from_confirm:
 
 do_append_data:
 	up->len += ulen;
+
+	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+	#else
+	getfrag  =  ip_generic_getfrag;
+	#endif
+
 	err = ip_append_data(sk, getfrag, msg->msg_iov, ulen,
 			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
 			sizeof(struct udphdr), &ipc, rt,
@@ -1159,7 +1180,11 @@ out:
 	 * seems like overkill.
 	 */
 	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
 		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+		#else
+		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS);
+		#endif
 	}
 	return err;
 
