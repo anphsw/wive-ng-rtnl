@@ -210,25 +210,35 @@ start() {
 	    fi
 
 	  if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ]; then
-	    #for ISP localnet alya dualacess
-    	    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
-	    #wireless ISP net dual dual acess....gyyy
-	    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$lan_nm -j MASQUERADE
-	    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-		iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
-	    fi
-	    if [ "$OperationMode" = "4" ]; then
+	    if [ "$vpnPurePPPOE" != "1" ]; then
 		#for ISP localnet alya dualacess
-		iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
-	    fi
-	    #second lan
-	    if [ "$Lan2Enabled" = "1" ]; then
-		#for ISP localnet alya dualacess
-    		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		#wireless ISP net dual dual acess....gyyy
-		iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+    		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
+		if [ "$OperationMode" = "2" ]; then
+		    #wireless ISP net dual dual acess
+		    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$lan_nm -j MASQUERADE
+		fi
 		if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-		    iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		    if [ "$OperationMode" = "3" ]; then
+			iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
+		    fi
+		fi
+		if [ "$OperationMode" = "4" ]; then
+		    #for ISP localnet alya dualacess
+		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
+		fi
+		#second lan
+		if [ "$Lan2Enabled" = "1" ]; then
+		    #for ISP localnet alya dualacess
+    		    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		    if [ "$OperationMode" = "2" ]; then
+			#wireless ISP net dual dual acess....gyyy
+			iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+		    fi
+		    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+			if [ "$OperationMode" = "3" ]; then
+			    iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+			fi
+		    fi
 		fi
 	    fi
 	 fi
@@ -316,6 +326,7 @@ get_param() {
     UDPXY=`nvram_get 2860 UDPXYMode`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
+    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
 }
 
 case "$1" in
