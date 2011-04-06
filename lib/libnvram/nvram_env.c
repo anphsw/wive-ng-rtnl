@@ -413,7 +413,7 @@ int nvram_commit(int index)
 
 	//calculate crc
 	fb[index].env.crc = (unsigned long)crc32(0, (unsigned char *)fb[index].env.data, len);
-	printf("Commit crc = %x\n", (unsigned int)fb[index].env.crc);
+	LIBNV_PRINT("Commit crc = %x\n", (unsigned int)fb[index].env.crc);
 
 	//write crc to flash
 	to = fb[index].flash_offset;
