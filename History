@@ -334,7 +334,7 @@
 18) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
 19) Some symbols need export for compat with new code.<br>
 20) Rework build system.<br>
-21) Add L2TP fastpath.<br>
+21) Add L2TP fastpath. (~20% speedup of old revision and more 10% of acell-pptp).<br>
 
 <br><br>
 <b>For support see:</b><br>
