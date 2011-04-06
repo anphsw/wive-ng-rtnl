@@ -12,6 +12,7 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 STATICDNS=`nvram_get 2860 wan_static_dns`
+wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
 # Full route list
 ROUTELIST=""
 # Default gateway list
@@ -72,6 +73,7 @@ case "$1" in
 
 	#Get MTU from dhcp server
 	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
+	    $LOG "Set MTU from dhcp server."
 	    ip link set mtu $mtu dev $interface
 	fi
 
