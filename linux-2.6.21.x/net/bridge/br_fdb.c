@@ -292,8 +292,21 @@ int br_fdb_fillbuf(struct net_bridge *br, void *buf,
 	return num;
 }
 
-static inline struct net_bridge_fdb_entry *fdb_find(struct hlist_head *head,
-						    const unsigned char *addr)
+static struct net_bridge_fdb_entry *fdb_find(struct hlist_head *head,
+					     const unsigned char *addr)
+{
+	struct hlist_node *h;
+	struct net_bridge_fdb_entry *fdb;
+
+	hlist_for_each_entry(fdb, h, head, hlist) {
+		if (!compare_ether_addr(fdb->addr.addr, addr))
+			return fdb;
+	}
+	return NULL;
+}
+
+static struct net_bridge_fdb_entry *fdb_find_rcu(struct hlist_head *head,
+						 const unsigned char *addr)
 {
 	struct hlist_node *h;
 	struct net_bridge_fdb_entry *fdb;
@@ -307,8 +320,7 @@ static inline struct net_bridge_fdb_entry *fdb_find(struct hlist_head *head,
 
 static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 					       struct net_bridge_port *source,
-					       const unsigned char *addr,
-					       int is_local)
+					       const unsigned char *addr)
 {
 	struct net_bridge_fdb_entry *fdb;
 
@@ -332,10 +344,9 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 		atomic_set(&fdb->use_count, 1);
 
 		fdb->dst = source;
-		fdb->is_local = is_local;
-		fdb->is_static = is_local;
+		fdb->is_local = 0;
+		fdb->is_static = 0;
 		fdb->ageing_timer = jiffies;
-
 		hlist_add_head_rcu(&fdb->hlist, head);
 	}
 	return fdb;
@@ -364,12 +375,15 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		fdb_delete(fdb);
 	}
 
-	if (!fdb_create(head, source, addr, 1))
+	fdb = fdb_create(head, source, addr);
+	if (!fdb)
 		return -ENOMEM;
 
+	fdb->is_local = fdb->is_static = 1;
 	return 0;
 }
 
+/* Add entry for local address of interface */
 int br_fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		  const unsigned char *addr)
 {
@@ -396,7 +410,7 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 	      source->state == BR_STATE_FORWARDING))
 		return;
 
-	fdb = fdb_find(head, addr);
+	fdb = fdb_find_rcu(head, addr);
 	if (likely(fdb)) {
 		/* attempt to update an entry for a local interface */
 		if (unlikely(fdb->is_local)) {
@@ -411,8 +425,9 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		}
 	} else {
 		spin_lock(&br->hash_lock);
-		if (!fdb_find(head, addr))
-			fdb_create(head, source, addr, 0);
+		if (likely(!fdb_find(head, addr)))
+			fdb_create(head, source, addr);
+
 		/* else  we lose race and someone else inserts
 		 * it first, don't bother updating
 		 */
