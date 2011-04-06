@@ -212,6 +212,7 @@ vpnUser=vpn_user
 vpnPassword=vpn_password
 vpnMTU=AUTO
 vpnDGW=1
+vpnPurePPPOE=0
 WatchdogEnabled=0
 CrondEnable=0
 SmbEnabled=0
