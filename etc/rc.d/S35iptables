@@ -210,7 +210,7 @@ start() {
 	    fi
 
 	  if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ]; then
-	    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" != "1" ]; then
+	    if [ "$vpnPurePPPOE" != "1" ]; then
 		#for ISP localnet alya dualacess
     		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
 		if [ "$OperationMode" = "2" ]; then
