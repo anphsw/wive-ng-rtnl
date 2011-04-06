@@ -28,6 +28,13 @@ start() {
     echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts
     echo "$wan_ip	$HOSTNAME.lo" >> /etc/hosts
 
+    if [ "$opmode" != "0" ]; then
+	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
+	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
+	    ifconfig $wan_if mtu $wan_manual_mtu
+	fi
+    fi
+
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then
 	if [ "$opmode" != "0" ]; then
 	    #lan and wan ip should not be the same except in bridge mode
@@ -73,6 +80,7 @@ stop() {
 
 get_param() {
     #get parametrs
+    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
     clone_en=`nvram_get 2860 macCloneEnabled`
     clone_mac=`nvram_get 2860 macCloneMac`
     wan_ip=`nvram_get 2860 wan_ipaddr`
