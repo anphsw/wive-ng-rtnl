@@ -170,7 +170,7 @@ udhcpc_opts()
 	    REQIP=""
 	fi
 	wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
-	if [ "$wan_manual_mtu" = "1" ]; then
+	if [ "$wan_manual_mtu" = "0" ]; then
 	    GETMTU="-O mtu"
 	else
 	    GETMTU=""
