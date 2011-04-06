@@ -1101,8 +1101,6 @@ void usbnet_disconnect (struct usb_interface *intf)
 			dev->driver_info->description);
 
 	net = dev->net;
-	/* Remove dev from devfs */
-	devfs_remove("usb%s", net->name);
 	unregister_netdev (net);
 
 	/* we don't hold rtnl here ... */
@@ -1264,7 +1262,6 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 	
 	/* Register dev as class for mdev */	
 	usb_register_dev(udev, &fake_usb_class);
-	devfs_mk_cdev(MKDEV(USB_MAJOR, udev->minor), S_IFCHR | S_IRUGO | S_IWUGO, "usb%s", net->name);
 	
 	return 0;
 
