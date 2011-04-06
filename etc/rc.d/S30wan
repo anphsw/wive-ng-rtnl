@@ -31,7 +31,7 @@ start() {
     if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" != "1"] ; then
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
 	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
-	    ifconfig $wan_if mtu $wan_manual_mtu
+	    ip link set mtu $wan_manual_mtu dev $wan_if
 	fi
     fi
     if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" = "1"] ; then

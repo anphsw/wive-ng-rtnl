@@ -169,10 +169,16 @@ udhcpc_opts()
 	else
 	    REQIP=""
 	fi
+	wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
+	if [ "$wan_manual_mtu" = "1" ]; then
+	    GETMTU="-O mtu"
+	else
+	    GETMTU=""
+	fi
 	getHostName
 	UDHCPCOPTS="-i $wan_if -H $HOSTNAME $REQIP -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
-		    -O routes -O staticroutes -O msstaticroutes -f &"
+		    -O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
 setSwMode()

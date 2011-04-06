@@ -335,7 +335,7 @@
 19) Some symbols need export for compat with new code.<br>
 20) Rework build system.<br>
 21) Add L2TP fastpath. (~20% speedup of old revision and more 10% of acell-pptp).<br>
-22) Add wan_manual_mtu variable 0/value default 0=auto. (Neen add in WebUI WAN setup).<br>
+22) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server. (Neen add in WebUI WAN setup).<br>
 23) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode. (Need add in WebUI VPN/PPPOE setup.)<br>
 
 <br><br>

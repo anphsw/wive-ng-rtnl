@@ -70,6 +70,11 @@ case "$1" in
     ifconfig $interface $ip $BROADCAST $NETMASK
     CUR_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
 
+	#Get MTU from dhcp server
+	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
+	    ip link set mtu $mtu dev $interface
+	fi
+
 	#Get default gateway
 	if [ -n "$router" ]; then
 	    #default route with metric 0 is through $iface?
