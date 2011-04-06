@@ -34,7 +34,7 @@ start() {
 	    ip link set mtu $wan_manual_mtu dev $wan_if
 	fi
     fi
-    if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
+    if [ "$opmode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    $LOG "PURE PPPOE Mode. Do need start dhcpc or config wan!"
 	    ip addr flush dev $wan_if
 	    ip link set $wan_if up
