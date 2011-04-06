@@ -73,7 +73,7 @@ case "$1" in
 
 	#Get MTU from dhcp server
 	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
-	    $LOG "Set MTU from dhcp server."
+	    $LOG "Set MTU to $mtu bytes from dhcp server"
 	    ip link set mtu $mtu dev $interface
 	fi
 
