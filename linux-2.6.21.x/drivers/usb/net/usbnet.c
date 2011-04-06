@@ -1067,8 +1067,18 @@ static void usbnet_bh (unsigned long param)
  *
  *-------------------------------------------------------------------------*/
 
-// precondition: never called in_interrupt
+/* Structs fake usb class driver for mdev */
+static const struct file_operations fake_fops = {
+    .owner =    THIS_MODULE,
+};
 
+static struct usb_class_driver fake_usb_class = {
+    .name =        "usbeth%d",
+	.fops =         &fake_fops,
+	.minor_base =   0,
+};
+
+// precondition: never called in_interrupt
 void usbnet_disconnect (struct usb_interface *intf)
 {
 	struct usbnet		*dev;
@@ -1079,6 +1089,8 @@ void usbnet_disconnect (struct usb_interface *intf)
 	usb_set_intfdata(intf, NULL);
 	if (!dev)
 		return;
+	/* Deregister dev for mdev */
+	usb_deregister_dev(intf, &fake_usb_class);
 
 	xdev = interface_to_usbdev (intf);
 
@@ -1089,6 +1101,8 @@ void usbnet_disconnect (struct usb_interface *intf)
 			dev->driver_info->description);
 
 	net = dev->net;
+	/* Remove dev from devfs */
+	devfs_remove("usb%s", net->name);
 	unregister_netdev (net);
 
 	/* we don't hold rtnl here ... */
@@ -1189,7 +1203,19 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		// can rename the link if it knows better.
 		if ((dev->driver_info->flags & FLAG_ETHER) != 0
 				&& (net->dev_addr [0] & 0x02) == 0)
-			strcpy (net->name, "eth%d");
+		{
+			/* Check wimax devices */
+			//printk("usbnet: VID = 0x%04x, PID = 0x%04x\n", xdev->descriptor.idVendor, xdev->descriptor.idProduct); 
+			if(((xdev->descriptor.idProduct == 0x7112) && (xdev->descriptor.idVendor == 0x0e8d)) || /* ZyXEL on MTK */
+			   ((xdev->descriptor.idProduct == 0x7708) && (xdev->descriptor.idVendor == 0x1076)) || ((xdev->descriptor.idProduct == 0xa4a2) && (xdev->descriptor.idVendor == 0x0525))) /* Yota Key */
+			{
+				strcpy (net->name, "wimax%d");
+				fake_usb_class.name = "usbwimax%d";
+			} else {
+				strcpy (net->name, "eth%d");
+				fake_usb_class.name = "usbeth%d";
+			}
+		}
 
 		/* maybe the remote can't receive an Ethernet MTU */
 		if (net->mtu > (dev->hard_mtu - net->hard_header_len))
@@ -1235,7 +1261,11 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 
 	// start as if the link is up
 	netif_device_attach (net);
-
+	
+	/* Register dev as class for mdev */	
+	usb_register_dev(udev, &fake_usb_class);
+	devfs_mk_cdev(MKDEV(USB_MAJOR, udev->minor), S_IFCHR | S_IRUGO | S_IWUGO, "usb%s", net->name);
+	
 	return 0;
 
 out3:
