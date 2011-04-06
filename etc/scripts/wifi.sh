@@ -16,7 +16,7 @@ fi
 
 ########################################STAMODE param##########################
 AutoConnect=`nvram_get 2860 AutoConnect`
-if [ "$stamode" = "y" ] && [ "$AutoConnect" = "1"]; then
+if [ "$stamode" = "y" ] && [ "$AutoConnect" = "1" ]; then
     iwpriv ra0 set AutoReconnect=1
     exit 0
 fi
