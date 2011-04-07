@@ -12,7 +12,7 @@ ROOTDIR=$DIR
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.20.1
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.6.0
+GCCVER=gcc-4.5.2
 
 UNPACK=YES
 HEADERS=YES
@@ -20,6 +20,7 @@ BINUTILS=YES
 GCC=YES
 UCLIB=YES
 GCCCPP=YES
+
 
 export LC_PAPER=en_EN.UTF-8
 export LC_ADDRESS=en_EN.UTF-8
@@ -50,6 +51,20 @@ mkdir -p $WDIR
 
 cd $WDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
+
+##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
+
+HOSTGCCVER=`gcc --version | grep "(GCC)" | awk {' print $3 '}`
+if [ "$HOSTGCCVER" = "4.6.0" ]; then
+    export CFLAGS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
+fi
+
+EXT_OPT=""
+if [ "$GCCVER" = "gcc-4.6.0" ]; then                              
+    EXT_OPT="--disable-libquadmath"                               
+fi                                                                
+								  
+#########################################################################################################
 
 if [ "$UNPACK" = "YES" ]; then
     echo "=================REMOVE-OLD-BUILD-TREE=================="
@@ -94,7 +109,7 @@ if [ "$GCC" = "YES" ]; then
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
 	--disable-shared \
-	--disable-tls --disable-libmudflap --disable-libssp --disable-libquadmath \
+	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
 	--enable-languages=c && \
@@ -119,7 +134,7 @@ if [ "$GCCCPP" = "YES" ]; then
     (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
-	--disable-tls --disable-libmudflap --disable-libssp --disable-libquadmath \
+	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
 	--enable-languages=c++ && \

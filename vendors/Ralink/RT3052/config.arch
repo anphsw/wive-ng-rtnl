@@ -48,7 +48,7 @@ CFLAGS += -Wall -Wno-trigraphs -Wno-long-long
 CFLAGS += -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
-CFLAGS += -Wno-unused-but-set-variable
+#CFLAGS += -Wno-unused-but-set-variable
 
 ###########################################################################
 

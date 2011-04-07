@@ -560,7 +560,7 @@ CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 CFLAGS += $(call cc-option,-Wno-pointer-sign,)
 
 # disable variable unused warnings in gcc 4.6.0
-CFLAGS += $(call cc-option,-Wno-unused-but-set-variable,)
+#CFLAGS += $(call cc-option,-Wno-unused-but-set-variable,)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)

@@ -314,30 +314,29 @@
 31) Fix syslog in webui without CONFIG_LOGREAD in busybox.<br>
 <br>
 <b>1.5.x</b><br>
-1) Move to 4.6.0 gcc.<br>
-2) Fix EAP in bridge/mbssid mode.<br>
-3) Enable double vlan tag support per default.<br>
-4) Fix net/ip fib metrics.<br>
-5) Zebra suspended (not build with gcc4.6.0).<br>
-6) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
-7) Try workaround speed regression in mips32r2 at RT3050 rev P0.<br>
-8) Remove some dead code.<br>
-9) Fix some leaks.<br>
-10) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
-11) Rewrite content filter page.<br>
-12) Fix anntena numbers.<br>
-13) Add sysctl net.ipv4.vlan_double_tag variable for enable/disable double tag support.<br>
-14) Netdevice code and some increase counters resolutions for network interfaces statistic.<br>
-15) PPPOE more correct ignore PADT packets whose destination address isn't ours patch. Need check in recive path to.<br>
-16) In udp.c need check rt != NULL for prevent use after free.<br>
-17) Fix continuos allocation memory for modules.<br>
-18) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
-19) Some symbols need export for compat with new code.<br>
-20) Rework build system.<br>
-21) Add L2TP fastpath. (~20% speedup of old revision and more 10% of acell-pptp).<br>
-22) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server. (Neen add in WebUI WAN setup).<br>
-23) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode. (Need add in WebUI VPN/PPPOE setup).<br>
-24) Initial PPPOE Fastpath for mem and cpu save.<br>
+1) Fix EAP in bridge/mbssid mode.<br>
+2) Enable double vlan tag support per default.<br>
+3) Fix net/ip fib metrics.<br>
+4) Zebra suspended (not build with gcc4.6.0).<br>
+5) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
+6) Try workaround speed regression in mips32r2 at RT3050 rev P0.<br>
+7) Remove some dead code.<br>
+8) Fix some leaks.<br>
+9) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
+10) Rewrite content filter page.<br>
+11) Fix anntena numbers.<br>
+12) Add sysctl net.ipv4.vlan_double_tag variable for enable/disable double tag support.<br>
+13) Netdevice code and some increase counters resolutions for network interfaces statistic.<br>
+14) PPPOE more correct ignore PADT packets whose destination address isn't ours patch. Need check in recive path to.<br>
+15) In udp.c need check rt != NULL for prevent use after free.<br>
+16) Fix continuos allocation memory for modules.<br>
+17) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
+18) Some symbols need export for compat with new code.<br>
+19) Rework build system.<br>
+20) Add L2TP fastpath. (~20% speedup of old revision and more 10% of acell-pptp).<br>
+21) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server. (Neen add in WebUI WAN setup).<br>
+22) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode. (Need add in WebUI VPN/PPPOE setup).<br>
+23) Initial PPPOE Fastpath for mem and cpu save.<br>
 
 <br><br>
 <b>For support see:</b><br>
