@@ -2952,6 +2952,12 @@ config PPPOE
 	  which contains instruction on how to use this driver (under 
 	  the heading "Kernel mode PPPoE").
 
+config PPPOE_FASTPATH
+	bool "PPPOE offload path"
+	depends on PPPOE
+	help
+	  Initial offload and memory save function for PPPOE
+
 config PPPOATM
 	tristate "PPP over ATM"
 	depends on ATM && PPP

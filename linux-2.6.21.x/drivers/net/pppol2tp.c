@@ -103,6 +103,9 @@
 #define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
 #define UDP_LITE_DISABLE
 #define DISABLE_WORKQUEUE
+#ifdef CONFIG_PROC_FS
+#undef CONFIG_PROC_FS
+#endif
 #else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
 #endif
@@ -902,31 +905,6 @@ error:
  ***********************************************************************/
 
 #ifdef CONFIG_PPPOL2TP_FASTPATH
-static void pppol2tp_udp4_hwcsum_outgoing(struct sock *sk, struct sk_buff *skb, __be32 src, __be32 dst, int len      )
-{
-	unsigned int offset;
-	struct udphdr *uh = skb->h.uh;
-	__wsum csum = 0;
-
-	/*
-	 * HW-checksum won't work as there are two or more
-	 * fragments on the socket so that all csums of sk_buffs
-	 * should be together
-	 */
-	offset = skb->h.raw - skb->data;
-	skb->csum = skb_checksum(skb, offset, skb->len - offset, 0);
-
-	skb->ip_summed = CHECKSUM_NONE;
-
-	skb_queue_walk(&sk->sk_write_queue, skb) {
-		csum = csum_add(csum, skb->csum);
-	}
-
-	uh->check = csum_tcpudp_magic(src, dst, len, IPPROTO_UDP, csum);
-	if (uh->check == 0)
-		uh->check = CSUM_MANGLED_0;
-}
-
 /* Push out all pending data as one UDP datagram. Standart method. */
 static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 {
@@ -936,7 +914,6 @@ static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 	struct sk_buff *skb;
 	struct udphdr *uh;
 	int err = 0;
-	__wsum csum = 0;
 
 	/* Grab the skbuff where UDP header space exists. */
 	if ((skb = skb_peek(&sk->sk_write_queue)) == NULL)
@@ -951,28 +928,8 @@ static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 	uh->len = htons(up->len);
 	uh->check = 0;
 
-	if (sk->sk_no_check == UDP_CSUM_NOXMIT) {   /* UDP csum disabled */
-		skb->ip_summed = CHECKSUM_NONE;
-		goto send;
-	} else if (skb->ip_summed == CHECKSUM_PARTIAL) { /* UDP hardware csum */
-		pppol2tp_udp4_hwcsum_outgoing(sk, skb, fl->fl4_src,fl->fl4_dst, up->len);
-		goto send;
-	} else {						 /*   `normal' UDP    */
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
-		csum = udp_csum_outgoing(sk, skb);
-		#else
-		csum = csum_partial(skb->h.raw, sizeof(struct udphdr), 0); 
-		skb_queue_walk(&sk->sk_write_queue, skb) { 
-		    csum = csum_add(csum, skb->csum); 
-		}
-		#endif
-	}
+	skb->ip_summed = CHECKSUM_NONE;
 
-	/* add protocol-dependent pseudo-header */
-	uh->check = csum_tcpudp_magic(fl->fl4_src, fl->fl4_dst, up->len, sk->sk_protocol, csum );
-	if (uh->check == 0)
-		uh->check = CSUM_MANGLED_0;
-send:
 	err = ip_push_pending_frames(sk);
 out:
 	up->len = 0;
@@ -3046,7 +3003,9 @@ int __init pppol2tp_init(void)
 out:
 	return err;
 
+#ifdef CONFIG_PROC_FS
 out_unregister_pppox_proto:
+#endif
 	unregister_pppox_proto(PX_PROTO_OL2TP);
 out_unregister_pppol2tp_proto:
 	proto_unregister(&pppol2tp_sk_proto);

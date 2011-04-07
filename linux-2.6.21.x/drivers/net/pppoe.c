@@ -83,6 +83,12 @@
 
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_PPPOE_FASTPATH
+#ifdef CONFIG_PROC_FS
+#undef CONFIG_PROC_FS
+#endif
+#endif
+
 #define PPPOE_HASH_BITS 4
 #define PPPOE_HASH_SIZE (1<<PPPOE_HASH_BITS)
 
