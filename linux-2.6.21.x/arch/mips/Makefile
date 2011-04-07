@@ -168,7 +168,7 @@ libs-$(CONFIG_SIBYTE_CFE)	+= arch/mips/sibyte/cfe/
 #
 core-$(CONFIG_RALINK_RT2883)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_RT2883)	+= -Iinclude/asm-mips/rt2880
-cflags-$(CONFIG_RALINK_RT3052)	+= -mtune=24kec -D__MIPSEL__
+cflags-$(CONFIG_RALINK_RT2883)	+= -mtune=24kec -D__MIPSEL__
 load-$(CONFIG_RALINK_RT2883)	+= 0x80000000
 
 #
@@ -184,7 +184,7 @@ load-$(CONFIG_RALINK_RT3052)	+= 0x80000000
 #
 core-$(CONFIG_RALINK_RT3352)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_RT3352)	+= -Iinclude/asm-mips/rt2880
-cflags-$(CONFIG_RALINK_RT3052)	+= -mtune=24kec -D__MIPSEL__
+cflags-$(CONFIG_RALINK_RT3352)	+= -mtune=24kec -D__MIPSEL__
 load-$(CONFIG_RALINK_RT3352)	+= 0x80000000
 
 #
@@ -192,7 +192,7 @@ load-$(CONFIG_RALINK_RT3352)	+= 0x80000000
 #
 core-$(CONFIG_RALINK_RT3883)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_RT3883)	+= -Iinclude/asm-mips/rt2880
-cflags-$(CONFIG_RALINK_RT3052)	+= -mtune=24kec -D__MIPSEL__
+cflags-$(CONFIG_RALINK_RT3883)	+= -mtune=24kec -D__MIPSEL__
 load-$(CONFIG_RALINK_RT3883)	+= 0x80000000
 
 #
