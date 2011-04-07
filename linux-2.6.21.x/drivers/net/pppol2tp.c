@@ -908,20 +908,18 @@ error:
 /* Push out all pending data as one UDP datagram. Standart method. */
 static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 {
+	int err = 0;
 	struct udp_sock  *up = udp_sk(sk);
 	struct inet_sock *inet = inet_sk(sk);
 	struct flowi *fl = &inet->cork.fl;
 	struct sk_buff *skb;
 	struct udphdr *uh;
-	int err = 0;
 
 	/* Grab the skbuff where UDP header space exists. */
 	if ((skb = skb_peek(&sk->sk_write_queue)) == NULL)
 		goto out;
 
-	/*
-	 * Create a UDP header
-	 */
+	/* Create a UDP header */
 	uh = skb->h.uh;
 	uh->source = fl->fl_ip_sport;
 	uh->dest = fl->fl_ip_dport;
@@ -929,7 +927,6 @@ static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 	uh->check = 0;
 
 	skb->ip_summed = CHECKSUM_NONE;
-
 	err = ip_push_pending_frames(sk);
 out:
 	up->len = 0;
