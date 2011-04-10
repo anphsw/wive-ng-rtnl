@@ -103,6 +103,7 @@
 #define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
 #define UDP_LITE_DISABLE
 //#define DISABLE_WORKQUEUE
+#define DISABLE_GET_FS
 #ifdef CONFIG_PROC_FS
 #undef CONFIG_PROC_FS
 #endif
@@ -1166,7 +1167,9 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 				  struct pppol2tp_tunnel *tunnel,
 				  struct msghdr *msg, int total_len)
 {
+#ifndef DISABLE_GET_FS
 	mm_segment_t fs;
+#endif
 	int error;
 
 	ENTER_FUNCTION;
@@ -1193,11 +1196,13 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 	}
 #endif /* DEBUG */
 
+#ifndef DISABLE_GET_FS
 	/* Set to userspace data segment while we do a sendmsg() call.	We're
 	 * actually calling a userspace API from the kernel here...
 	 */
 	fs = get_fs();
 	set_fs(get_ds());
+#endif
 
 	/* The actual sendmsg() call... */
 #ifdef CONFIG_PPPOL2TP_FASTPATH
@@ -1208,8 +1213,10 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 	if (error == -EIOCBQUEUED)
 		error = wait_on_sync_kiocb(iocb);
 
+#ifndef DISABLE_GET_FS
 	/* Back to kernel space */
 	set_fs(fs);
+#endif
 
 	if (error >= 0) {
 		tunnel->stats.tx_packets++;
@@ -1377,18 +1384,21 @@ static void pppol2tp_wq_send(struct work_struct *work)
 {
 	struct pppol2tp_send *send = container_of(work, struct pppol2tp_send, send_task);
 	int error;
+#ifndef DISABLE_GET_FS
 	mm_segment_t oldfs;
 
 	oldfs = get_fs();
         set_fs(KERNEL_DS);
-
+#endif
         error = send->tunnel->old_proto->sendmsg(&send->iocb,
 						 send->session->tunnel_sock,
 						 send->msg, send->total_len);
 	if (error == -EIOCBQUEUED)
 		error = wait_on_sync_kiocb(&send->iocb);
 
+#ifndef DISABLE_GET_FS
         set_fs(oldfs);
+#endif
 
 	if (error >= 0) {
 		send->tunnel->stats.tx_packets++;
