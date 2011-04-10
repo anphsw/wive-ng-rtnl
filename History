@@ -333,10 +333,12 @@
 17) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
 18) Some symbols need export for compat with new code.<br>
 19) Rework build system.<br>
-20) Add L2TP fastpath. (~20% speedup of old revision and more 10% of acell-pptp).<br>
-21) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server. (Neen add in WebUI WAN setup).<br>
-22) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode. (Need add in WebUI VPN/PPPOE setup).<br>
+20) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server.<br>
+21) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode.<br>
+22) Initial L2TP fastpath. Need more test and works.<br>
 23) Initial PPPOE Fastpath for mem and cpu save.<br>
+24) Fix Color WPS LED.<br>
+25) Some scripts rewrite for speedup and save flash space.<br>
 
 <br><br>
 <b>For support see:</b><br>
