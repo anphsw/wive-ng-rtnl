@@ -28,16 +28,34 @@ start() {
 	#not load nf_nat helpers in bridge mode
 	if [ "$opmode" != "0" ]; then
 	    #load conntrack helpers
-	    modprobe -q nf_conntrack_tftp
-	    modprobe -q nf_conntrack_sip
-	    modprobe -q nf_conntrack_gre
-	    modprobe -q nf_conntrack_pptp
-	    modprobe -q nf_conntrack_h323
-	    modprobe -q nf_nat_ftp
-	    modprobe -q nf_nat_h323
-	    modprobe -q nf_nat_sip
-	    modprobe -q nf_nat_proto_gre
-	    modprobe -q nf_nat_pptp
+	    fwAlgTFTP=`nvram_get 2860 fwAlgTFTP`
+	    if [ "$fwAlgTFTP" != "0" ]; then
+		modprobe -q nf_conntrack_tftp
+	    fi
+	    fwAlgSIP=`nvram_get 2860 fwAlgSIP`
+	    if [ "$fwAlgSIP" != "0" ]; then
+		modprobe -q nf_conntrack_sip
+		modprobe -q nf_nat_sip
+	    fi
+	    fwAlgGRE=`nvram_get 2860 fwAlgGRE`
+	    if [ "$fwAlgGRE" != "0" ]; then
+		modprobe -q nf_conntrack_gre
+		modprobe -q nf_nat_proto_gre
+	    fi
+	    fwAlgPPTP=`nvram_get 2860 fwAlgPPTP`
+	    if [ "$fwAlgPPTP" != "0" ]; then
+		modprobe -q nf_conntrack_pptp
+	        modprobe -q nf_nat_pptp
+	    fi
+	    fwAlgH323=`nvram_get 2860 fwAlgH323`
+	    if [ "$fwAlgH323" != "0" ]; then
+		modprobe -q nf_conntrack_h323
+		modprobe -q nf_nat_h323
+	    fi
+	    fwAlgFTP=`nvram_get 2860 fwAlgFTP`
+	    if [ "$fwAlgFTP" != "0" ]; then
+		modprobe -q nf_nat_ftp
+	    fi
 	fi
         if [ "$ipt_account" = "1" ]; then
 	    modprobe -q ipt_account
