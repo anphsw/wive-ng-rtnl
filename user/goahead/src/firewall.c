@@ -1326,8 +1326,6 @@ const parameter_fetch_t alg_params[] =
 	{ "alg_ftp",		T("fwAlgFTP"),			2 },
 	{ "alg_gre",		T("fwAlgGRE"),			2 },
 	{ "alg_h323",		T("fwAlgH323"),			2 },
-	{ "alg_ipsec",		T("fwAlgIPSec"),		2 },
-	{ "alg_l2tp",		T("fwAlgL2TP"),			2 },
 	{ "alg_pptp",		T("fwAlgPPTP"),			2 },
 	{ "alg_sip",		T("fwAlgSIP"),			2 },
 	{ "alg_tftp",		T("fwAlgTFTP"),			2 },

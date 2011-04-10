@@ -55,14 +55,6 @@ function updateState()
 	<td><input type="checkbox" id="alg_h323" name="alg_h323"></td>
 </tr>
 <tr>
-	<td class="head">IPSec</td>
-	<td><input type="checkbox" id="alg_ipsec" name="alg_ipsec"></td>
-</tr>
-<tr>
-	<td class="head">L2TP</td>
-	<td><input type="checkbox" id="alg_l2tp" name="alg_l2tp"></td>
-</tr>
-<tr>
 	<td class="head">PPTP</td>
 	<td><input type="checkbox" id="alg_pptp" name="alg_pptp"></td>
 </tr>
