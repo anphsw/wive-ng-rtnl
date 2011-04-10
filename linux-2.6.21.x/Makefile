@@ -548,10 +548,10 @@ CFLAGS += $(call cc-option,-ffast-math,)
 CFLAGS += $(call cc-option,-fforce-addr,)
 
 # improves compression ratio for generated code
-CFLAGS += $(call cc-option,-fno-caller-saves,)
+#CFLAGS += $(call cc-option,-fno-caller-saves,)
 
 # try fix performance regerssion in 4.6.0
-CFLAGS += $(call cc-option,-fschedule-insns,)
+#CFLAGS += $(call cc-option,-fschedule-insns,)
 
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
