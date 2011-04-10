@@ -66,11 +66,9 @@ save(){
 }
 
 restore(){
-  echo "Clear rwfs and reboot. Please go smoke..."
-  dd if=/dev/urandom of=$MTDRWFS bs=64k count=$BLOCKS
-  echo "123456789">$MTDRWFS 
-  echo "Restoring defaults..."
-  reboot
+    echo "Clear rwfs and reboot. Please go smoke..."
+    dd if=/dev/urandom of=$MTDRWFS bs=64k count=$BLOCKS
+    reboot
 }
 
 nvramreset(){
@@ -113,23 +111,23 @@ cleanall(){
 }
 
 fullreset(){
-  service modules stop
-  echo "Reset rwfs and nvram...."
-  nvramreset
-  restore
+    service modules stop
+    echo "Reset rwfs and nvram...."
+    nvramreset
+    restore
 }
 
 backup_nvram(){
-  mkdir -p /etc/backup
-  echo "Store settings to backup file...."
-  echo "#The following line must not be removed." > "$BACKUPCGF"
-  echo "Default" >> "$BACKUPCGF"
-  ralink_init show 2860 >> "$BACKUPCGF"
+    mkdir -p /etc/backup
+    echo "Store settings to backup file...."
+    echo "#The following line must not be removed." > "$BACKUPCGF"
+    echo "Default" >> "$BACKUPCGF"
+    ralink_init show 2860 >> "$BACKUPCGF"
 }
 
 load_nvram(){
-  echo "Load settings from backup file...."
-  ralink_init renew 2860 "$BACKUPCGF"
+    echo "Load settings from backup file...."
+    ralink_init renew 2860 "$BACKUPCGF"
 }
 
 main(){
