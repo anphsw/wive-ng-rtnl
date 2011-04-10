@@ -81,6 +81,8 @@ function showHint(key)
 			text += 'Add Network Address Translation to new VPN connection.';
 		else if (key=='vpn_lcp')
 			text += 'Enable adaptive LCP echo interval.';
+		else if (key=='vpn_pure_pppoe')
+			text += 'Enable pure WAN+PPPoE mode.';
 		else if (key=='vpn_type')
 		{
 			text += 'Specify VPN access mode.<p class="val">';
@@ -128,24 +130,13 @@ function showHint(key)
 
 function vpnSwitchClick(form)
 {
-	var dis = !form.vpn_enabled.checked;
-
-	form.vpn_server.disabled       = dis;
-	form.vpn_range.disabled        = dis;
-	form.vpn_auth_type.disabled    = dis;
-	form.vpn_user.disabled         = dis;
-	form.vpn_pass.disabled         = dis;
-	form.vpn_mtu.disabled          = dis;
-	form.vpn_mppe.disabled         = dis;
-	form.vpn_peerdns.disabled      = dis;
-	form.vpn_debug.disabled        = dis;
-	form.vpn_nat.disabled          = dis;
-	form.vpn_dgw.disabled          = dis;
-	form.vpn_mtu_type.disabled     = dis;
-	form.vpn_pppoe_iface.disabled  = dis;
-	form.vpn_type.disabled         = dis;
-	form.vpn_lcp.disabled          = dis;
-	form.lanauth_access.disabled   = dis;
+	enableElements( [
+		form.vpn_server, form.vpn_range, form.vpn_auth_type,
+		form.vpn_user, form.vpn_pass, form.vpn_mtu, form.vpn_mppe,
+		form.vpn_peerdns, form.vpn_debug, form.vpn_nat, form.vpn_dgw,
+		form.vpn_mtu_type, form.vpn_pppoe_iface, form.vpn_type,
+		form.vpn_lcp, form.lanauth_access, form.vpn_pure_pppoe
+		], form.vpn_enabled.checked );
 }
 
 function mtuChange(form)
@@ -196,6 +187,7 @@ function selectType(form)
 	var kabinet_on = form.vpn_type.value == '6';
 
 	// Display mode-dependent elements
+	displayElement('vpn_pure_pppoe_cell', pppoe_on);
 	displayElement('vpn_pppoe_iface_row', !kabinet_on);
 	displayElement('vpn_server_row', !kabinet_on);
 	displayElement('vpn_auth_type_row', !kabinet_on);
@@ -274,6 +266,7 @@ function initializeForm(form)
 	var dgw        = '<% getCfgGeneral(1, "vpnDGW"); %>';
 	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
 	var lcp        = '<% getCfgGeneral(1, "vpnEnableLCP"); %>';
+	var pure_pppoe = '<% getCfgGeneral(1, "vpnPurePPPOE"); %>';
 
 	var kabinet_built = '<% getLANAUTHBuilt(); %>';
 
@@ -294,6 +287,7 @@ function initializeForm(form)
 	form.vpn_type.value      = pptpType;
 	form.vpn_dgw.value       = dgw;
 	form.vpn_lcp.checked     = (lcp == 'on');
+	form.vpn_pure_pppoe.checked = (pure_pppoe == '1');
 	form.vpn_auth_type.value = vpn_auth;
 	
 	selectType(form);
@@ -453,7 +447,12 @@ tunnel on your Router.
 			<input disabled="disabled" name="vpn_lcp" type="checkbox">
 			<b>Adaptive LCP</b>
 		</td>
-		<td></td>
+		<td width="50%" onMouseOver="showHint('vpn_pure_pppoe')" onMouseOut="hideHint('vpn_pure_pppoe')" >
+			<div id="vpn_pure_pppoe_cell">
+				<input disabled="disabled" name="vpn_pure_pppoe" type="checkbox">
+				<b>Pure PPPoE</b>
+			</div>
+		</td>
 	</tr>
 </table>
 

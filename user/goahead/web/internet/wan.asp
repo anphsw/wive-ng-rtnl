@@ -13,6 +13,7 @@
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
+
 <script language="JavaScript" type="text/javascript">
 var http_request = false;
 Butterlate.setTextDomain("internet");
@@ -74,6 +75,21 @@ function CheckValue(form)
 			}
 	}
 	
+	// Validate MTU
+	if (!validateNum(form.wan_mtu.value))
+	{
+		alert("Invalid MTU value");
+		form.wan_mtu_type.focus();
+		return false;
+	}
+	
+	var wan_mtu = form.wan_mtu.value * 1;
+	if ((wan_mtu < 80) && (wan_mtu != 0))
+	{
+		alert("Invalid MTU value");
+		return false;
+	}
+	
 	return true;
 }
 
@@ -106,6 +122,7 @@ function initValue()
 	var nat = "<% getCfgZero(1, "natEnabled"); %>";
 	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
+	var wan_mtu = defaultNumber("<% getCfgGeneral(1, "wan_manual_mtu"); %>", '0');
 	var form = document.wanCfg;
 	
 	form.natEnabled.checked = (nat == "1");
@@ -122,9 +139,18 @@ function initValue()
 		form.connectionType.options.selectedIndex = 0;
 	form.wStaticDnsEnable.checked = (static_dns == "on");
 	
-	connectionTypeSwitch(form);
+	/* Check if option was set */
+	form.wan_mtu.value = wan_mtu;
+	for (var i=0; i < form.wan_mtu_type.options.length; i++)
+		if (form.wan_mtu_type.options[i].value == wan_mtu)
+		{
+			form.wan_mtu_type.value = form.wan_mtu_type.options[i].value;
+			break;
+		}
 	
+	connectionTypeSwitch(form);
 	dnsSwitchClick(form);
+	wanMtuChange(form);
 }
 
 function dnsSwitchClick(form)
@@ -134,6 +160,22 @@ function dnsSwitchClick(form)
 	row.style.display = visible;
 	row = document.getElementById("secDNSrow");
 	row.style.display = visible;
+}
+
+function wanMtuChange(form)
+{
+	if (form.wan_mtu_type.value == '1')
+	{
+		form.wan_mtu.style.display = '';
+		form.wan_mtu.setAttribute('class', 'half');
+		form.wan_mtu_type.setAttribute('class', 'half');
+	}
+	else
+	{
+		form.wan_mtu_type.setAttribute('class', 'mid');
+		form.wan_mtu.style.display = 'none';
+		form.wan_mtu.value = form.wan_mtu_type.value;
+	}
 }
 
 </script>
@@ -188,7 +230,25 @@ function dnsSwitchClick(form)
 </tr>
 <tr id="dhcpReqIPRow">
 	<td class="head">Request IP from DHCP (optional)</td>
-	<td><input name="dhcpReqIP" style="mid" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
+	<td><input name="dhcpReqIP" class="mid" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
+</tr>
+<tr>
+	<td class="head">WAN MTU</td>
+	<td>
+		<input name="wan_mtu" type="text" class="half" style="display:none;">
+		<select name="wan_mtu_type" onChange="wanMtuChange(this.form);" class="half">
+			<option value="0">AUTO</option>
+			<option value="1" selected="selected">Custom</option>
+			<option value="1500">1500</option>
+			<option value="1492">1492</option>
+			<option value="1440">1440</option>
+			<option value="1400">1400</option>
+			<option value="1300">1300</option>
+			<option value="1200">1200</option>
+			<option value="1100">1100</option>
+			<option value="1000">1000</option>
+		</select>
+	</td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>
@@ -196,11 +256,11 @@ function dnsSwitchClick(form)
 </tr>
 <tr id="priDNSrow" style="display:none;" >
 	<td class="head" id="wStaticPriDns">Primary DNS Server</td>
-	<td><input name="staticPriDns" style="mid" value="<% getDns(1); %>"></td>
+	<td><input name="staticPriDns" class="mid" value="<% getDns(1); %>"></td>
 </tr>
 <tr id="secDNSrow" style="display:none;" >
 	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
-	<td><input name="staticSecDns" style="mid" value="<% getDns(2); %>"></td>
+	<td><input name="staticSecDns" class="mid" value="<% getDns(2); %>"></td>
 </tr>
 <tr id="natRowDisplay">
 	<td class="head" id="wMacAddressClone">Enable NAT</td>

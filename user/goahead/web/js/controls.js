@@ -114,3 +114,25 @@ self.setElementChecked = function(element, checked)
 		return null;
 	return element.checked = checked;
 }
+
+self.enableElements = function(elements, enable)
+{
+	if (elements == null)
+		return;
+	if (enable == null)
+		enable = true;
+	if (typeof(elements) == 'string')
+	{
+		elements = document.getElementById(elements);
+		if (elements == null)
+			return;
+	}
+
+	if (elements instanceof Array)
+	{
+		for (var i=0; i<elements.length; i++)
+			enableElements(elements[i], enable);
+	}
+	else // Object
+		elements.disabled = (enable) ? false : true;
+}

@@ -1320,6 +1320,37 @@ static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
 	return 0;
 }
 
+/* goform/setFirewallAlg */
+const parameter_fetch_t alg_params[] =
+{
+	{ "alg_ftp",		T("fwAlgFTP"),			2 },
+	{ "alg_gpe",		T("fwAlgGPE"),			2 },
+	{ "alg_h323",		T("fwAlgH323"),			2 },
+	{ "alg_ipsec",		T("fwAlgIPSec"),		2 },
+	{ "alg_l2tp",		T("fwAlgL2TP"),			2 },
+	{ "alg_pptp",		T("fwAlgPPTP"),			2 },
+	{ "alg_sip",		T("fwAlgSIP"),			2 },
+	{ "alg_tftp",		T("fwAlgTFTP"),			2 },
+	{ NULL, 0, 0 } // Terminator
+};
+
+static void setFirewallAlg(webs_t wp, char_t *path, char_t *query)
+{
+	// Store firewall parameters
+	setupParameters(wp, alg_params, 1);
+	
+	//call iptables
+	firewall_rebuild();
+	
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if ((submitUrl != NULL) && (submitUrl[0]))
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+
+	return 0;
+}
+
 char *getNameIntroFromPat(char *filename)
 {
 	static char result[512];
@@ -1421,6 +1452,8 @@ void formDefineFirewall(void)
 	websFormDefine(T("DMZ"), DMZ);
 	websAspDefine(T("getDMZEnableASP"), getDMZEnableASP);
 	websAspDefine(T("showDMZIPAddressASP"), showDMZIPAddressASP);
+
+	websFormDefine(T("setFirewallAlg"), setFirewallAlg);
 
 	websAspDefine(T("getPortForwardRules"), getPortForwardRules);
 	websFormDefine(T("portForward"), portForward);

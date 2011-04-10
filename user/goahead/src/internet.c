@@ -24,6 +24,7 @@
 #include	"management.h"
 #include	"station.h"
 #include	"wireless.h"
+#include	"helpers.h"
 
 #ifdef CONFIG_USER_802_1X
 #include	"wps.h"
@@ -74,8 +75,6 @@ struct dyn_lease {
 #include      "qos.h"
 #endif
 
-static int vpnInitRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
-static int vpnRouteIfaceList(int eid, webs_t wp, int argc, char_t **argv);
 static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv);
 static void formVPNSetup(webs_t wp, char_t *path, char_t *query);
@@ -485,14 +484,7 @@ char *getLanWanNamebyIf(char *ifname)
 	return ifname;
 }
 
-typedef struct vpn_fetch_t
-{
-	const char *web_param;
-	const char *nvram_param;
-	int is_switch;
-} vpn_fetch_t;
-
-const vpn_fetch_t vpn_args[] =
+const parameter_fetch_t vpn_args[] =
 {
 	{ T("vpn_server"),             "vpnServer",            0 },
 	{ T("vpn_range"),              "vpnRange",             0 },
@@ -508,10 +500,11 @@ const vpn_fetch_t vpn_args[] =
 	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
 	{ T("vpn_auth_type"),          "vpnAuthProtocol",      1 },
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
+	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2 },
 	{ NULL, 0, 0 } // Terminator
 };
 
-const vpn_fetch_t lanauth_args[] =
+const parameter_fetch_t lanauth_args[] =
 {
 	{ T("vpn_type"),               "vpnType",              0 },
 	{ T("vpn_pass"),               "vpnPassword",          0 },
@@ -743,17 +736,17 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	// Do not set other params if VPN is turned off
 	if (!strcmp(vpn_enabled, "on"))
 	{
-		const vpn_fetch_t *fetch = vpn_args;
+		const parameter_fetch_t *fetch = vpn_args;
 
 #ifdef CONFIG_USER_KABINET
-		char_t *vpn_type = websGetVar(wp, T("vpn_type"), T(""));
+		char_t *vpn_type = websGetVar(wp, T("vpn_type"), T("0"));
 		if (strcmp(vpn_type, "6") == 0)
 			fetch = lanauth_args;
 #endif
-
 		printf("vpn_enabled value : %s\n", vpn_enabled);
 
-		while (fetch->web_param != NULL)
+		setupParameters(wp, fetch, 0);
+/*		while (fetch->web_param != NULL)
 		{
 			// Get variable
 			char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
@@ -768,10 +761,10 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 			
 			printf("%s value : %s\n", fetch->nvram_param, str);
 			fetch++;
-		}
+		}*/
 		
 		// Check if routing table is enabled
-		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T(""));
+		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T("off"));
 		if (vpn_rt_enabled[0] == '\0')
 			vpn_rt_enabled="off";
 	}
@@ -2266,11 +2259,13 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(opmode, "0") != 0)
 	{
 		nat_enable = websGetVar(wp, T("natEnabled"), T("off"));
-		printf("nat_enable = %s\n", nat_enable);
 		nat_enable = (strcmp(nat_enable, "on") == 0) ? "1" : "0";
-		printf("nat_enable = %s\n", nat_enable);
 		nvram_bufset(RT2860_NVRAM, "natEnabled", nat_enable);
 	}
+	
+	// MTU for WAN
+	char *wan_mtu = websGetVar(wp, T("wan_mtu"), T("0"));
+	nvram_bufset(RT2860_NVRAM, "wan_manual_mtu", wan_mtu);
 	
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -2304,7 +2299,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 
 #ifdef CONFIG_USER_CHILLISPOT
 // ChilliSpot variables
-const vpn_fetch_t chilli_vars[] =
+const parameter_fetch_t chilli_vars[] =
 {
 	{ T("sPriDns"),			"chilli_dns1",			0 },
 	{ T("sSecDns"),			"chilli_dns2",			0 },
@@ -2396,23 +2391,8 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query)
 		if (nvram_bufset(RT2860_NVRAM, "chilli_net", (void *)subnet)!=0) //!!!
 			printf("Set chilli_net nvram error!");
 		
-		const vpn_fetch_t *fetch = chilli_vars;
-		while (fetch->web_param != NULL)
-		{
-			// Get variable
-			char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
-			if (fetch->is_switch) // Check if need update a switch
-			{
-				if (str[0]=='\0')
-					str = "off";
-			}
-			
-			if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
-				printf("Set %s nvram error!", fetch->nvram_param);
-			
-			printf("%s value : %s\n", fetch->nvram_param, str);
-			fetch++;
-		}
+		setupParameters(wp, chilli_vars, 0);
+		
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 		websWrite(wp, T("<h3>Hotspot configuration done.</h3><br>\n"));
@@ -2428,3 +2408,4 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 #endif //CONFIG_USER_CHILLISPOT
+

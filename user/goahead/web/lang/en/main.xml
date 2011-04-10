@@ -49,6 +49,7 @@
   <message msgid="treeapp firewall" msgstr="Firewall" />
   <message msgid="treeapp ip/port filtering" msgstr="MAC/IP/Port Filtering" />
   <message msgid="treeapp port forwarding" msgstr="Port Forwarding" />
+  <message msgid="treeapp alg" msgstr="ALG" />
   <message msgid="treeapp dmz" msgstr="DMZ" />
   <message msgid="treeapp content filtering" msgstr="Content Filtering" />
   <message msgid="treeapp administration" msgstr="Administration" />

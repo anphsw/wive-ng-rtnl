@@ -197,9 +197,12 @@ function makeRequest(url, content, handler) {
 	http_request.send(content);
 }
 
-function securityHandler() {
-	if (http_request.readyState == 4) {
-		if (http_request.status == 200) {
+function securityHandler()
+{
+	if (http_request.readyState == 4)
+	{
+		if (http_request.status == 200)
+		{
 			parseAllData(http_request.responseText);
 			UpdateMBSSIDList();
 			LoadFields(defaultShownMBSSID);
@@ -361,57 +364,57 @@ function checkData()
 
 function check_wpa()
 {
-		if(document.security_form.cipher[0].checked != true && 
+	if(document.security_form.cipher[0].checked != true && 
 		   document.security_form.cipher[1].checked != true &&
-   		   document.security_form.cipher[2].checked != true){
-   		   alert('Please choose a WPA Algorithms.');
-   		   return false;
-		}
+		   document.security_form.cipher[2].checked != true){
+		   alert('Please choose a WPA Algorithms.');
+		   return false;
+	}
 
-		if(checkAllNum(document.security_form.keyRenewalInterval.value) == false){
-			alert('Please input a valid key renewal interval');
-			return false;
-		}
-		if(document.security_form.keyRenewalInterval.value < 60){
-			alert('Warning: A short key renewal interval.');
-			// return false;
-		}
-		return true;
+	if(checkAllNum(document.security_form.keyRenewalInterval.value) == false){
+		alert('Please input a valid key renewal interval');
+		return false;
+	}
+	if(document.security_form.keyRenewalInterval.value < 60){
+		alert('Warning: A short key renewal interval.');
+		// return false;
+	}
+	return true;
 }
 
 function check_radius()
 {
 	if(!document.security_form.RadiusServerIP.value.length){
 		alert('Please input the radius server ip address.');
-		return false;		
+		return false;
 	}
 	if(!document.security_form.RadiusServerPort.value.length){
 		alert('Please input the radius server port number.');
-		return false;		
+		return false;
 	}
 	if(!document.security_form.RadiusServerSecret.value.length){
 		alert('Please input the radius server shared secret.');
-		return false;		
+		return false;
 	}
 
 	if(checkIpAddr(document.security_form.RadiusServerIP) == false){
 		alert('Please input a valid radius server ip address.');
-		return false;		
+		return false;
 	}
 	if( (checkRange(document.security_form.RadiusServerPort.value, 1, 1, 65535)==false) ||
 		(checkAllNum(document.security_form.RadiusServerPort.value)==false)){
 		alert('Please input a valid radius server port number.');
-		return false;		
+		return false;
 	}
 	if(checkStrictInjection(document.security_form.RadiusServerSecret.value)==false){
 		alert('The shared secret contains invalid characters.');
-		return false;		
+		return false;
 	}
 
 	if(document.security_form.RadiusServerSessionTimeout.value.length){
 		if(checkAllNum(document.security_form.RadiusServerSessionTimeout.value)==false){
 			alert('Please input a valid session timeout number or u may left it empty.');
-			return false;	
+			return false;
 		}	
 	}
 
@@ -422,11 +425,9 @@ function securityMode(c_f)
 {
 	var security_mode;
 
-
 	changed = c_f;
 
 	hideWep();
-
 
 	document.getElementById("div_security_shared_mode").style.visibility = "hidden";
 	document.getElementById("div_security_shared_mode").style.display = "none";
@@ -460,7 +461,7 @@ function securityMode(c_f)
 	document.security_form.RadiusServerPort.disable = true;
 	document.security_form.RadiusServerSecret.disable = true;	
 	document.security_form.RadiusServerSessionTimeout.disable = true;
-	document.security_form.RadiusServerIdleTimeout.disable = true;	
+	document.security_form.RadiusServerIdleTimeout.disable = true;
 
 	security_mode = document.security_form.security_mode.value;
 
@@ -696,13 +697,12 @@ function check_Wep(securitymode)
 	
 function submit_apply()
 {
-
-	if (checkData() == true){
+	if (checkData() == true)
+	{
 		changed = 0;
-
-		document.security_form.submit();
-//		opener.location.reload();
+		return true;
 	}
+	return false;
 }
 
 function LoadFields(MBSSID)
@@ -713,22 +713,29 @@ function LoadFields(MBSSID)
 
 	sp_select.options.length = 0;
 
-    sp_select.options[sp_select.length] = new Option("Disable",	"Disable",	false, AuthMode[MBSSID] == "Disable");
-    sp_select.options[sp_select.length] = new Option("OPEN",	"OPEN",		false, AuthMode[MBSSID] == "OPEN");
-    sp_select.options[sp_select.length] = new Option("SHARED",	"SHARED", 	false, AuthMode[MBSSID] == "SHARED");
-    sp_select.options[sp_select.length] = new Option("WEPAUTO", "WEPAUTO",	false, AuthMode[MBSSID] == "WEPAUTO");
-    sp_select.options[sp_select.length] = new Option("WPA",		"WPA",		false, AuthMode[MBSSID] == "WPA");
-    sp_select.options[sp_select.length] = new Option("WPA-PSK", "WPAPSK",	false, AuthMode[MBSSID] == "WPAPSK");
-    sp_select.options[sp_select.length] = new Option("WPA2",	"WPA2",		false, AuthMode[MBSSID] == "WPA2");
-    sp_select.options[sp_select.length] = new Option("WPA2-PSK","WPA2PSK",	false, AuthMode[MBSSID] == "WPA2PSK");
-    sp_select.options[sp_select.length] = new Option("WPAPSKWPA2PSK","WPAPSKWPA2PSK",	false, AuthMode[MBSSID] == "WPAPSKWPA2PSK");
-    sp_select.options[sp_select.length] = new Option("WPA1WPA2","WPA1WPA2",	false, AuthMode[MBSSID] == "WPA1WPA2");
+	sp_select.options.add(new Option("Disable", "Disable"));
+	sp_select.options.add(new Option("OPEN", "OPEN"));
+	sp_select.options.add(new Option("SHARED", "SHARED"));
+	sp_select.options.add(new Option("WEPAUTO", "WEPAUTO"));
+	sp_select.options.add(new Option("WPA", "WPA"));
+	sp_select.options.add(new Option("WPA-PSK", "WPAPSK"));
+	sp_select.options.add(new Option("WPA2", "WPA2"));
+	sp_select.options.add(new Option("WPA2-PSK", "WPA2PSK"));
+	sp_select.options.add(new Option("WPAPSKWPA2PSK", "WPAPSKWPA2PSK"));
+	sp_select.options.add(new Option("WPA1WPA2", "WPA1WPA2"));
 
 	/* 
 	 * until now we only support 8021X WEP for MBSSID[0]
 	 */
 	if(MBSSID == 0)
-		sp_select.options[sp_select.length] = new Option("802.1X",	"IEEE8021X",false, AuthMode[MBSSID] == "IEEE8021X");
+		sp_select.options.add(new Option("802.1X", "IEEE8021X"));
+
+	for (var i=0; i<sp_select.options.length; i++)
+		if (sp_select.options[i].value == AuthMode[MBSSID])
+		{
+			sp_select.options[i].selected = true;
+			break;
+		}
 
 	// WEP
 	document.getElementById("WEP1").value = Key1Str[MBSSID];
@@ -776,11 +783,10 @@ function LoadFields(MBSSID)
 	
 	document.getElementById("RadiusServerIP").value = RADIUS_Server[MBSSID];
 	document.getElementById("RadiusServerPort").value = RADIUS_Port[MBSSID];
-	document.getElementById("RadiusServerSecret").value = RADIUS_Key[MBSSID];			
+	document.getElementById("RadiusServerSecret").value = RADIUS_Key[MBSSID];
 	document.getElementById("RadiusServerSessionTimeout").value = session_timeout_interval[MBSSID];
 	
 	securityMode(0);
-
 }
 
 
@@ -888,105 +894,60 @@ function delap(mbssid, num)
 
 function initTranslation()
 {
-	var e = document.getElementById("secureSelectSSID");
-	e.innerHTML = _("secure select ssid");
-	e = document.getElementById("secureSSIDChoice");
-	e.innerHTML = _("secure ssid choice");
+	_TR("secureSelectSSID", "secure select ssid");
+	_TR("secureSSIDChoice", "secure ssid choice");
 
-	e = document.getElementById("securityTitle");
-	e.innerHTML = _("secure ssid title");
-	e = document.getElementById("securityIntroduction");
-	e.innerHTML = _("secure ssid introduction");
-	e = document.getElementById("sp_title");
-	e.innerHTML = _("secure security policy");
-	e = document.getElementById("secureSecureMode");
-	e.innerHTML = _("secure security mode");
-	e = document.getElementById("secureEncrypType");
-	e.innerHTML = _("secure encryp type");
-	e = document.getElementById("secureEncrypTypeNone");
-	e.innerHTML = _("wireless none");
+	_TR("securityTitle", "secure ssid title");
+	_TR("securityIntroduction", "secure ssid introduction");
+	_TR("sp_title", "secure security policy");
+	_TR("secureSecureMode", "secure security mode");
+	_TR("secureEncrypType", "secure encryp type");
+	_TR("secureEncrypTypeNone", "wireless none");
 
-	e = document.getElementById("secureWEP");
-	e.innerHTML = _("secure wep");
-	e = document.getElementById("secureWEPDefaultKey");
-	e.innerHTML = _("secure wep default key");
-	e = document.getElementById("secureWEPDefaultKey1");
-	e.innerHTML = _("secure wep default key1");
-	e = document.getElementById("secureWEPDefaultKey2");
-	e.innerHTML = _("secure wep default key2");
-	e = document.getElementById("secureWEPDefaultKey3");
-	e.innerHTML = _("secure wep default key3");
-	e = document.getElementById("secureWEPDefaultKey4");
-	e.innerHTML = _("secure wep default key4");
-	e = document.getElementById("secureWEPKey");
-	e.innerHTML = _("secure wep key");
-	e = document.getElementById("secureWEPKey1");
-	e.innerHTML = _("secure wep key1");
-	e = document.getElementById("secureWEPKey2");
-	e.innerHTML = _("secure wep key2");
-	e = document.getElementById("secureWEPKey3");
-	e.innerHTML = _("secure wep key3");
-	e = document.getElementById("secureWEPKey4");
-	e.innerHTML = _("secure wep key4");
+	_TR("secureWEP", "secure wep");
+	_TR("secureWEPDefaultKey", "secure wep default key");
+	_TR("secureWEPDefaultKey1", "secure wep default key1");
+	_TR("secureWEPDefaultKey2", "secure wep default key2");
+	_TR("secureWEPDefaultKey3", "secure wep default key3");
+	_TR("secureWEPDefaultKey4", "secure wep default key4");
+	_TR("secureWEPKey", "secure wep key");
+	_TR("secureWEPKey1", "secure wep key1");
+	_TR("secureWEPKey2", "secure wep key2");
+	_TR("secureWEPKey3", "secure wep key3");
+	_TR("secureWEPKey4", "secure wep key4");
 	
-	e = document.getElementById("secreWPA");
-	e.innerHTML = _("secure wpa");
-	e = document.getElementById("secureWPAAlgorithm");
-	e.innerHTML = _("secure wpa algorithm");
-	e = document.getElementById("secureWPAPassPhrase");
-	e.innerHTML = _("secure wpa pass phrase");
-	e = document.getElementById("secureWPAKeyRenewInterval");
-	e.innerHTML = _("secure wpa key renew interval");
-	e = document.getElementById("secureWPAPMKCachePeriod");
-	e.innerHTML = _("secure wpa pmk cache period");
-	e = document.getElementById("secureWPAPreAuth");
-	e.innerHTML = _("secure wpa preauth");
-	e = document.getElementById("secureWPAPreAuthDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("secureWPAPreAuthEnable");
-	e.innerHTML = _("wireless enable");
+	_TR("secreWPA", "secure wpa");
+	_TR("secureWPAAlgorithm", "secure wpa algorithm");
+	_TR("secureWPAPassPhrase", "secure wpa pass phrase");
+	_TR("secureWPAKeyRenewInterval", "secure wpa key renew interval");
+	_TR("secureWPAPMKCachePeriod", "secure wpa pmk cache period");
+	_TR("secureWPAPreAuth", "secure wpa preauth");
+	_TR("secureWPAPreAuthDisable", "wireless disable");
+	_TR("secureWPAPreAuthEnable", "wireless enable");
 	
-	e = document.getElementById("secure8021XWEP");
-	e.innerHTML = _("secure 8021x wep");
-	e = document.getElementById("secure1XWEP");
-	e.innerHTML = _("secure 1x wep");
-	e = document.getElementById("secure1XWEPDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("secure1XWEPEnable");
-	e.innerHTML = _("wireless enable");
+	_TR("secure8021XWEP", "secure 8021x wep");
+	_TR("secure1XWEP", "secure 1x wep");
+	_TR("secure1XWEPDisable", "wireless disable");
+	_TR("secure1XWEPEnable", "wireless enable");
 	
-	e = document.getElementById("secureRadius");
-	e.innerHTML = _("secure radius");
-	e = document.getElementById("secureRadiusIPAddr");
-	e.innerHTML = _("secure radius ipaddr");
-	e = document.getElementById("secureRadiusPort");
-	e.innerHTML = _("secure radius port");
-	e = document.getElementById("secureRadiusSharedSecret");
-	e.innerHTML = _("secure radius shared secret");
-	e = document.getElementById("secureRadiusSessionTimeout");
-	e.innerHTML = _("secure radius session timeout");
-	e = document.getElementById("secureRadiusIdleTimeout");
-	e.innerHTML = _("secure radius idle timeout");
+	_TR("secureRadius", "secure radius");
+	_TR("secureRadiusIPAddr", "secure radius ipaddr");
+	_TR("secureRadiusPort", "secure radius port");
+	_TR("secureRadiusSharedSecret", "secure radius shared secret");
+	_TR("secureRadiusSessionTimeout", "secure radius session timeout");
+	_TR("secureRadiusIdleTimeout", "secure radius idle timeout");
 
 	/*
-	e = document.getElementById("secureAccessPolicy");
-	e.innerHTML = _("secure access policy");
-	e = document.getElementById("secureAccessPolicyCapable");
-	e.innerHTML = _("secure access policy capable");
-	e = document.getElementById("secureAccessPolicyCapableDisable");
-	e.innerHTML = _("wireless disable");
-	e = document.getElementById("secureAccessPolicyCapableAllow");
-	e.innerHTML = _("wireless allow");
-	e = document.getElementById("secureAccessPolicyCapableReject");
-	e.innerHTML = _("wireless reject ");
-	e = document.getElementById("secureAccessPolicyNew");
-	e.innerHTML = _("secure access policy new");
+	_TR("secureAccessPolicy", "secure access policy");
+	_TR("secureAccessPolicyCapable", "secure access policy capable");
+	_TR("secureAccessPolicyCapableDisable", "wireless disable");
+	_TR("secureAccessPolicyCapableAllow", "wireless allow");
+	_TR("secureAccessPolicyCapableReject", "wireless reject ");
+	_TR("secureAccessPolicyNew", "secure access policy new");
 	*/
 	
-	e = document.getElementById("secureApply");
-	e.value = _("wireless apply");
-	e = document.getElementById("secureCancel");
-	e.value = _("wireless cancel");
+	_TRV("secureApply", "wireless apply");
+	_TRV("secureCancel", "wireless cancel");
 }
 
 function initAll()
@@ -1040,7 +1001,8 @@ function onPreAuthenticationClick(type)
 
 </script>
 </head>
-<body onload="initAll()">
+
+<body onload="initAll();">
 <table class="body"><tbody><tr><td>
 
 <h1 id="securityTitle">Wireless Security/Encryption Settings </h1>
@@ -1048,198 +1010,192 @@ function onPreAuthenticationClick(type)
 <hr />
 
 
-<form method="post" name="security_form" action="/goform/APSecurity">
+<form method="post" name="security_form" action="/goform/APSecurity" onsubmit="return submit_apply();">
 
 <!-- ---------------------  MBSSID Selection  --------------------- -->
 <table border="1" cellpadding="2" cellspacing="1" width="90%">
-<tbody><tr>
-  <td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
+<tr>
+	<td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
 </tr>
-  <tr>
-    <td class="head" id="secureSSIDChoice">SSID choice</td>
-    <td>
-      <select name="ssidIndex" size="1" onchange="selectMBSSIDChanged()">
+<tr>
+	<td class="head" id="secureSSIDChoice">SSID choice</td>
+	<td>
+		<select name="ssidIndex" size="1" onchange="selectMBSSIDChanged();">
 			<!-- ....Javascript will update options.... -->
-      </select>
-    </td>
-  </tr>
-</tbody></table>
+		</select>
+	</td>
+</tr>
+</table>
 
-<hr />
+<hr>
 
 <table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
-  <tbody><tr>
-
-    <td class="title" colspan="2"> <span id="sp_title">Security Policy </span></td>
-  </tr>
-  <tr id="div_security_infra_mode" name="div_security_infra_mode"> 
-    <td class="head" id="secureSecureMode">Security Mode</td>
-    <td>
-      <select name="security_mode" id="security_mode" size="1" onchange="securityMode(1)">
+<tr>
+	<td class="title" colspan="2"> <span id="sp_title">Security Policy </span></td>
+</tr>
+<tr id="div_security_infra_mode" name="div_security_infra_mode"> 
+	<td class="head" id="secureSecureMode">Security Mode</td>
+	<td>
+		<select name="security_mode" id="security_mode" size="1" onchange="securityMode(1)">
 			<!-- ....Javascript will update options.... -->
-      </select>
+		</select>
+	</td>
+</tr>
+<tr id="div_security_shared_mode" name="div_security_shared_mode" style="visibility: hidden;"> 
+	<td class="head" id="secureEncrypType">Encrypt Type</td>
+	<td>
+		<select name="security_shared_mode" id="security_shared_mode" size="1" onchange="securityMode(1)">
+			<option value=WEP>WEP</option>
+			<option value=None id="secureEncrypTypeNone">None</option>
+		</select>
+	</td>
+</tr>
+</table>
 
-    </td>
-  </tr>
-  <tr id="div_security_shared_mode" name="div_security_shared_mode" style="visibility: hidden;"> 
-    <td class="head" id="secureEncrypType">Encrypt Type</td>
-    <td>
-      <select name="security_shared_mode" id="security_shared_mode" size="1" onchange="securityMode(1)">
-		<option value=WEP>WEP</option>
-		<option value=None id="secureEncrypTypeNone">None</option>
-      </select>
-
-    </td>
-  </tr>
-
-</tbody></table>
 <br>
 
 <!-- WEP -->
 <table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
-  <tbody><tr> 
-    <td class="title" colspan="4" id="secureWEP">Wire Equivalence Protection (WEP)</td>
-  </tr>
+<tr>
+	<td class="title" colspan="4" id="secureWEP">Wire Equivalence Protection (WEP)</td>
+</tr>
+<tr> 
+	<td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>
+	<td colspan="2">
+		<select name="wep_default_key" id="wep_default_key" size="1" onchange="setChange(1)">
+			<option value="1" id="secureWEPDefaultKey1">Key 1</option>
+			<option value="2" id="secureWEPDefaultKey2">Key 2</option>
+			<option value="3" id="secureWEPDefaultKey3">Key 3</option>
+			<option value="4" id="secureWEPDefaultKey4">Key 4</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head1" rowspan="4" id="secureWEPKey">WEP Keys</td>
+	<td class="head2" id="secureWEPKey1">WEP Key 1 :</td>
+	<td><input name="wep_key_1" id="WEP1" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+	<td>
+		<select id="WEP1Select" name="WEP1Select" onchange="setChange(1)">
+			<option value="1">ASCII</option>
+			<option value="0">Hex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head2" id="secureWEPKey2">WEP Key 2 : </td>
+	<td><input name="wep_key_2" id="WEP2" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+	<td>
+		<select id="WEP2Select" name="WEP2Select" onchange="setChange(1)">
+			<option value="1">ASCII</option>
+			<option value="0">Hex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head2" id="secureWEPKey3">WEP Key 3 : </td>
+	<td><input name="wep_key_3" id="WEP3" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+	<td>
+		<select id="WEP3Select" name="WEP3Select" onchange="setChange(1)">
+			<option value="1">ASCII</option>
+			<option value="0">Hex</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head2" id="secureWEPKey4">WEP Key 4 : </td>
+	<td><input name="wep_key_4" id="WEP4" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+	<td>
+		<select id="WEP4Select" name="WEP4Select" onchange="setChange(1)">
+			<option value="1">ASCII</option>
+			<option value="0">Hex</option>
+		</select>
+	</td>
+</tr>
+</table>
 
-  <tr> 
-    <td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>
-    <td colspan="2">
-      <select name="wep_default_key" id="wep_default_key" size="1" onchange="setChange(1)">
-	<option value="1" id="secureWEPDefaultKey1">Key 1</option>
-	<option value="2" id="secureWEPDefaultKey2">Key 2</option>
-	<option value="3" id="secureWEPDefaultKey3">Key 3</option>
-	<option value="4" id="secureWEPDefaultKey4">Key 4</option>
-      </select>
-    </td>
-  </tr>
-  
-  <tr> 
-    <td class="head1" rowspan="4" id="secureWEPKey">WEP Keys</td>
-    <td class="head2" id="secureWEPKey1">WEP Key 1 :</td>
-    <td><input name="wep_key_1" id="WEP1" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-    <td><select id="WEP1Select" name="WEP1Select" onchange="setChange(1)"> 
-		<option value="1">ASCII</option>
-		<option value="0">Hex</option>
-		</select></td>
-  </tr>
-
-  <tr> 
-    <td class="head2" id="secureWEPKey2">WEP Key 2 : </td>
-    <td><input name="wep_key_2" id="WEP2" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-    <td><select id="WEP2Select" name="WEP2Select" onchange="setChange(1)">
-		<option value="1">ASCII</option>
-		<option value="0">Hex</option>
-		</select></td>
-  </tr>
-  <tr> 
-    <td class="head2" id="secureWEPKey3">WEP Key 3 : </td>
-    <td><input name="wep_key_3" id="WEP3" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-    <td><select id="WEP3Select" name="WEP3Select" onchange="setChange(1)">
-		<option value="1">ASCII</option>
-		<option value="0">Hex</option>
-		</select></td>
-  </tr>
-  <tr> 
-    <td class="head2" id="secureWEPKey4">WEP Key 4 : </td>
-    <td><input name="wep_key_4" id="WEP4" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-    <td><select id="WEP4Select" name="WEP4Select" onchange="setChange(1)">
-		<option value="1">ASCII</option>
-		<option value="0">Hex</option>
-		</select></td>
-  </tr>
-
-</tbody></table>
-<!-- <br /> -->
+<!-- <br> -->
 
 <!-- WPA -->
 <table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
-
-  <tbody><tr>
-    <td class="title" colspan="2" id="secreWPA">WPA</td>
-  </tr>
-  <tr id="div_wpa_algorithms" name="div_wpa_algorithms" style="visibility: hidden;"> 
-    <td class="head" id="secureWPAAlgorithm">WPA Algorithms</td>
-    <td>
-      <input name="cipher" id="cipher" value="0" type="radio" onClick="onWPAAlgorithmsClick(0)">TKIP &nbsp;
-      <input name="cipher" id="cipher" value="1" type="radio" onClick="onWPAAlgorithmsClick(1)">AES &nbsp;
-      <input name="cipher" id="cipher" value="2" type="radio" onClick="onWPAAlgorithmsClick(2)">TKIPAES &nbsp;
-    </td>
-  </tr>
-  <tr id="wpa_passphrase" name="wpa_passphrase" style="visibility: hidden;">
-    <td class="head" id="secureWPAPassPhrase">Pass Phrase</td>
-    <td>
-      <input name="passphrase" id="passphrase" size="28" maxlength="64" value="" onKeyUp="setChange(1)">
-    </td>
-  </tr>
-
-  <tr id="wpa_key_renewal_interval" name="wpa_key_renewal_interval" style="visibility: hidden;">
-    <td class="head" id="secureWPAKeyRenewInterval">Key Renewal Interval</td>
-    <td>
-      <input name="keyRenewalInterval" id="keyRenewalInterval" size="4" maxlength="4" value="3600" onKeyUp="setChange(1)"> seconds
-    </td>
-  </tr>
-
-  <tr id="wpa_PMK_Cache_Period" name="wpa_PMK_Cache_Period" style="visibility: hidden;">
-    <td class="head" id="secureWPAPMKCachePeriod">PMK Cache Period</td>
-    <td>
-      <input name="PMKCachePeriod" id="PMKCachePeriod" size="4" maxlength="4" value="" onKeyUp="setChange(1)"> minute
-    </td>
-  </tr>
-
-  <tr id="wpa_preAuthentication" name="wpa_preAuthentication" style="visibility: hidden;">
-    <td class="head" id="secureWPAPreAuth">Pre-Authentication</td>
-    <td>
-      <input name="PreAuthentication" id="PreAuthentication" value="0" type="radio" onClick="onPreAuthenticationClick(0)"><font id="secureWPAPreAuthDisable">Disable &nbsp;</font>
-      <input name="PreAuthentication" id="PreAuthentication" value="1" type="radio" onClick="onPreAuthenticationClick(1)"><font id="secureWPAPreAuthEnable">Enable &nbsp;</font>
-    </td>
-  </tr>
-</tbody></table>
-
+<tr>
+	<td class="title" colspan="2" id="secreWPA">WPA</td>
+</tr>
+<tr id="div_wpa_algorithms" name="div_wpa_algorithms" style="visibility: hidden;"> 
+	<td class="head" id="secureWPAAlgorithm">WPA Algorithms</td>
+	<td>
+		<input name="cipher" id="cipher" value="0" type="radio" onClick="onWPAAlgorithmsClick(0)">TKIP &nbsp;
+		<input name="cipher" id="cipher" value="1" type="radio" onClick="onWPAAlgorithmsClick(1)">AES &nbsp;
+		<input name="cipher" id="cipher" value="2" type="radio" onClick="onWPAAlgorithmsClick(2)">TKIPAES &nbsp;
+	</td>
+</tr>
+<tr id="wpa_passphrase" name="wpa_passphrase" style="visibility: hidden;">
+	<td class="head" id="secureWPAPassPhrase">Pass Phrase</td>
+	<td>
+		<input name="passphrase" id="passphrase" size="28" maxlength="64" value="" onKeyUp="setChange(1)">
+	</td>
+</tr>
+<tr id="wpa_key_renewal_interval" name="wpa_key_renewal_interval" style="visibility: hidden;">
+	<td class="head" id="secureWPAKeyRenewInterval">Key Renewal Interval</td>
+	<td>
+		<input name="keyRenewalInterval" id="keyRenewalInterval" size="4" maxlength="4" value="3600" onKeyUp="setChange(1)"> seconds
+	</td>
+</tr>
+<tr id="wpa_PMK_Cache_Period" name="wpa_PMK_Cache_Period" style="visibility: hidden;">
+	<td class="head" id="secureWPAPMKCachePeriod">PMK Cache Period</td>
+	<td>
+		<input name="PMKCachePeriod" id="PMKCachePeriod" size="4" maxlength="4" value="" onKeyUp="setChange(1)"> minute
+	</td>
+</tr>
+<tr id="wpa_preAuthentication" name="wpa_preAuthentication" style="visibility: hidden;">
+	<td class="head" id="secureWPAPreAuth">Pre-Authentication</td>
+	<td>
+		<input name="PreAuthentication" id="PreAuthentication" value="0" type="radio" onClick="onPreAuthenticationClick(0)"><font id="secureWPAPreAuthDisable">Disable &nbsp;</font>
+		<input name="PreAuthentication" id="PreAuthentication" value="1" type="radio" onClick="onPreAuthenticationClick(1)"><font id="secureWPAPreAuthEnable">Enable &nbsp;</font>
+	</td>
+</tr>
+</table>
 
 <!-- 802.1x -->
 <!-- WEP  -->
-<table id="div_8021x_wep" name="div_8021x_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="640" style="visibility: hidden;">
-  <tbody>
-  <tr>
-    <td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
-  </tr>
-  <tr>
-		<td class="head" id="secure1XWEP"> WEP </td>
-		<td>
-	      <input name="ieee8021x_wep" id="ieee8021x_wep" value="0" type="radio" onClick="onIEEE8021XWEPClick(0)"><font id="secure1XWEPDisable">Disable &nbsp;</font>
-    	  <input name="ieee8021x_wep" id="ieee8021x_wep" value="1" type="radio" onClick="onIEEE8021XWEPClick(1)"><font id="secure1XWEPEnable">Enable</font>
-		</td>
-  </tr>
-</tbody></table>
+<table id="div_8021x_wep" name="div_8021x_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
+<tr>
+	<td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
+</tr>
+<tr>
+	<td class="head" id="secure1XWEP">WEP</td>
+	<td>
+		<input name="ieee8021x_wep" id="ieee8021x_wep" value="0" type="radio" onClick="onIEEE8021XWEPClick(0)"><span id="secure1XWEPDisable">Disable &nbsp;</span>
+		<input name="ieee8021x_wep" id="ieee8021x_wep" value="1" type="radio" onClick="onIEEE8021XWEPClick(1)"><span id="secure1XWEPEnable">Enable</span>
+	</td>
+</tr>
+</table>
 
 <br>
 <table id="div_radius_server" name="div_radius_server" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
-<tbody>
-   <tr>
-    <td class="title" colspan="2" id="secureRadius">Radius Server</td>
-   </tr>
-    <tr> 
-		<td bgcolor="#E8F8FF"  class="head" id="secureRadiusIPAddr"> IP Address </td>
-		<td> <input name="RadiusServerIP" id="RadiusServerIP" size="16" maxlength="32" value="" onKeyUp="setChange(1)"> </td>
-	</tr>
-    <tr> 
-		<td bgcolor="#E8F8FF"  class="head" id="secureRadiusPort"> Port </td>
-		<td> <input name="RadiusServerPort" id="RadiusServerPort" size="5" maxlength="5" value="" onKeyUp="setChange(1)"> </td>
-	</tr>
-    <tr> 
-		<td bgcolor="#E8F8FF"  class="head" id="secureRadiusSharedSecret"> Shared Secret </td>
-		<td> <input name="RadiusServerSecret" id="RadiusServerSecret" size="16" maxlength="64" value="" onKeyUp="setChange(1)"> </td>
-	</tr>
-    <tr> 
-		<td bgcolor="#E8F8FF"  class="head" id="secureRadiusSessionTimeout"> Session Timeout </td>
-		<td> <input name="RadiusServerSessionTimeout" id="RadiusServerSessionTimeout" size="3" maxlength="4" value="0" onKeyUp="setChange(1)"> </td>
-	</tr>
-    <tr> 
-		<td bgcolor="#E8F8FF"  class="head" id="secureRadiusIdleTimeout"> Idle Timeout </td>
-		<td> <input name="RadiusServerIdleTimeout" id="RadiusServerIdleTimeout" size="3" maxlength="4" value="" onKeyUp="setChange(1)" readonly> </td>
-	</tr>
-
-</tbody></table>
+<tr>
+	<td class="title" colspan="2" id="secureRadius">Radius Server</td>
+</tr>
+<tr>
+	<td class="head" id="secureRadiusIPAddr"> IP Address </td>
+	<td> <input name="RadiusServerIP" id="RadiusServerIP" size="16" maxlength="32" value="" onKeyUp="setChange(1)"> </td>
+</tr>
+<tr>
+	<td class="head" id="secureRadiusPort"> Port </td>
+	<td> <input name="RadiusServerPort" id="RadiusServerPort" size="5" maxlength="5" value="" onKeyUp="setChange(1)"> </td>
+</tr>
+<tr>
+	<td class="head" id="secureRadiusSharedSecret"> Shared Secret </td>
+	<td> <input name="RadiusServerSecret" id="RadiusServerSecret" size="16" maxlength="64" value="" onKeyUp="setChange(1)"> </td>
+</tr>
+<tr>
+	<td class="head" id="secureRadiusSessionTimeout"> Session Timeout </td>
+	<td> <input name="RadiusServerSessionTimeout" id="RadiusServerSessionTimeout" size="3" maxlength="4" value="0" onKeyUp="setChange(1)"> </td>
+</tr>
+<tr>
+	<td class="head" id="secureRadiusIdleTimeout"> Idle Timeout </td>
+	<td> <input name="RadiusServerIdleTimeout" id="RadiusServerIdleTimeout" size="3" maxlength="4" value="" onKeyUp="setChange(1)" readonly> </td>
+</tr>
+</table>
 
 
 <!--									-->
@@ -1249,8 +1205,9 @@ function onPreAuthenticationClick(type)
 <script language="JavaScript" type="text/javascript">
 var aptable;
 
-for(aptable = 0; aptable < MBSSID_MAX; aptable++){
-	document.write(" <table id=AccessPolicy_"+ aptable +" border=1 bordercolor=#9babbd cellpadding=3 cellspacing=1 hspace=2 vspace=2 width=540>");
+for (aptable = 0; aptable < MBSSID_MAX; aptable++)
+{
+	document.write(" <table id=\"AccessPolicy_"+ aptable +"\" border=\"1\" bordercolor=\"#9babbd\" cellpadding=3 cellspacing=1 hspace=2 vspace=2 width=540>");
 	document.write(" <tbody> <tr> <td class=title colspan=2 >"+_("secure access policy")+"</td></tr>");
 	document.write(" <tr> <td bgcolor=#E8F8FF class=head >"+_("secure access policy capable")+"</td>");
 	document.write(" <td> <select name=apselect_"+ aptable + " id=apselect_"+aptable+" size=1 onchange=\"setChange(1)\">");
@@ -1281,23 +1238,23 @@ for(aptable = 0; aptable < MBSSID_MAX; aptable++){
 		document.write(" size=16 maxlength=20 readonly></td> </tr>");
 	}
 
-	document.write("<tr><td bgcolor=#E8F8FF class=head  >"+_("secure access policy new")+"</td>");
-	document.write("	<td>	<input name=newap_text_"+aptable+" id=newap_text_"+aptable+" size=16 maxlength=20>	</td>	</tr> </tbody></table>");
+	document.write("<tr><td class=\"head\">"+_("secure access policy new")+"</td>");
+	document.write("	<td><input name=\"newap_text_"+aptable+"\" id=\"newap_text_"+aptable+"\" size=\"16\" maxlength=\"20\"></td></tr></tbody></table>");
 }
 </script>
 
-<!-- <br /> -->
+<!-- <br> -->
 <table border="0" cellpadding="2" cellspacing="1" width="90%">
-  <tbody><tr align="center">
+<tr align="center">
+	<td>
+		<input style="width: 120px;" value="Apply" id="secureApply" type="submit"> &nbsp; &nbsp;
+		<input style="width: 120px;" value="Cancel" id="secureCancel" type="reset" onClick="window.location.reload();" >
+	</td>
+</tr>
+</table>
 
-    <td>
-      <input style="width: 120px;" value="Apply" id="secureApply" onclick="submit_apply()" type="button"> &nbsp; &nbsp;
-      <input style="width: 120px;" value="Cancel" id="secureCancel" type="reset" onClick="window.location.reload()" >
-    </td>
-  </tr>
-</tbody></table>
 </form>
 
 </td></tr></tbody></table>
 </body></html>
- 
+
