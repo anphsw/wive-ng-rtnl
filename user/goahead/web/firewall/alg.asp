@@ -14,7 +14,7 @@ function updateState()
 {
 	var st = {
 		'ftp': '<% getCfgZero(1, "fwAlgFTP"); %>',
-		'gpe': '<% getCfgZero(1, "fwAlgGRE"); %>',
+		'gre': '<% getCfgZero(1, "fwAlgGRE"); %>',
 		'h323': '<% getCfgZero(1, "fwAlgH323"); %>',
 		'ipsec': '<% getCfgZero(1, "fwAlgIPSec"); %>',
 		'l2tp': '<% getCfgZero(1, "fwAlgL2TP"); %>',
