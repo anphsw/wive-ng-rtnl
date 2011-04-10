@@ -16,8 +16,8 @@
 	#define WPS_LED_GREEN	9
 #else
 /*Salim:Orange for failure, Green for success*/
-#define WPS_LED_ORANGE	11
-#define WPS_LED_GREEN	14
+#define WPS_LED_ORANGE	13
+#define WPS_LED_GREEN	13
 #endif
 
 #define LedReset()                  {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET);}
