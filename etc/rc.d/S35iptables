@@ -185,6 +185,10 @@ start() {
 	    if [ "$OperationMode" = "4" ]; then
 		iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 	    fi
+	    if [ "$OperationMode" = "4" ]; then
+		#for ISP localnet alya dualacess
+		iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
+	    fi
 	    #second lan
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
