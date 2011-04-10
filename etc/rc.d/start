@@ -20,6 +20,7 @@ fi
 TGZfs_size=131072
 BLOCKS=2
 MTDDEVICE=/dev/mtdblock5
+ROOTDEVICE=/dev/mtdblock4
 
 get_size(){
   ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
@@ -27,6 +28,7 @@ get_size(){
 
 $LOG "Prepare start init!"
 export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+
 $LOG "Init DEV particion"
 zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
 
@@ -36,9 +38,12 @@ zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
   else
+    mkdir /tmp/rootfs
+    mount $ROOTDEVICE /tmp/rootfs -o ro
     $LOG "File system is clear or poor."
-    zcat /rwfs.gz | tar xf - -C / >>/dev/null
-
+    cp -a /tmp/rootfs/etc/* /etc
+    umount /tmp/rootfs
+    rm -rf /tmp/rootfs
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
 fi
