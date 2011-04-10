@@ -100,7 +100,7 @@ static int ip_dev_loopback_xmit(struct sk_buff *newskb)
 	newskb->pkt_type = PACKET_LOOPBACK;
 	newskb->ip_summed = CHECKSUM_UNNECESSARY;
 	WARN_ON(!newskb->dst);
-	netif_rx(newskb);
+	netif_rx_ni(newskb);
 	return 0;
 }
 
@@ -812,6 +812,11 @@ int ip_append_data(struct sock *sk,
 			transhdrlen += exthdrlen;
 		}
 	} else {
+		if (inet->cork.rt) {
+            	    LIMIT_NETDEBUG(KERN_INFO "ip_append_data: cork.rt empty !!!\n");
+		    return -EFAULT;
+		}
+
 		rt = inet->cork.rt;
 		if (inet->cork.flags & IPCORK_OPT)
 			opt = inet->cork.opt;
