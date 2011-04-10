@@ -291,7 +291,6 @@ romfs.post:
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
-	tar -cp --gzip etc > $(ROMFSDIR)/rwfs.gz
 	tar -zxvf dev.tgz
 	cp -vf dev.tgz $(ROMFSDIR)/dev.gz
 	cp -rfv dev/* $(ROMFSDIR)/dev
