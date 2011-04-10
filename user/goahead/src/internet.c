@@ -1244,7 +1244,11 @@ static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_CHILLISPOT
-	return websWrite(wp, T("1"));
+	char* spot_en = nvram_get(RT2860_NVRAM, "HotspotEnabled");
+	fprintf(stderr, "goahead: spot_en = %s\n", spot_en);
+	if (strncmp(spot_en, "1", 2) != 0) 
+	    spot_en = "0";
+	return websWrite(wp, T(spot_en));
 #else
 	return websWrite(wp, T("0"));
 #endif
