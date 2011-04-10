@@ -14,7 +14,7 @@ function updateState()
 {
 	var st = {
 		'ftp': '<% getCfgZero(1, "fwAlgFTP"); %>',
-		'gpe': '<% getCfgZero(1, "fwAlgGPE"); %>',
+		'gpe': '<% getCfgZero(1, "fwAlgGRE"); %>',
 		'h323': '<% getCfgZero(1, "fwAlgH323"); %>',
 		'ipsec': '<% getCfgZero(1, "fwAlgIPSec"); %>',
 		'l2tp': '<% getCfgZero(1, "fwAlgL2TP"); %>',
@@ -47,8 +47,8 @@ function updateState()
 	<td><input type="checkbox" id="alg_ftp" name="alg_ftp"></td>
 </tr>
 <tr>
-	<td class="head">GPE</td>
-	<td><input type="checkbox" id="alg_gpe" name="alg_gpe"></td>
+	<td class="head">GRE</td>
+	<td><input type="checkbox" id="alg_gre" name="alg_gre"></td>
 </tr>
 <tr>
 	<td class="head">H.323</td>

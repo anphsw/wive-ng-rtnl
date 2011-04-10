@@ -1324,7 +1324,7 @@ static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
 const parameter_fetch_t alg_params[] =
 {
 	{ "alg_ftp",		T("fwAlgFTP"),			2 },
-	{ "alg_gpe",		T("fwAlgGPE"),			2 },
+	{ "alg_gre",		T("fwAlgGRE"),			2 },
 	{ "alg_h323",		T("fwAlgH323"),			2 },
 	{ "alg_ipsec",		T("fwAlgIPSec"),		2 },
 	{ "alg_l2tp",		T("fwAlgL2TP"),			2 },
