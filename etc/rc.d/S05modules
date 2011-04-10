@@ -56,9 +56,9 @@ start() {
 	    if [ "$fwAlgFTP" != "0" ]; then
 		modprobe -q nf_nat_ftp
 	    fi
-	fi
-        if [ "$ipt_account" = "1" ]; then
-	    modprobe -q ipt_account
+    	    if [ "$ipt_account" = "1" ]; then
+		modprobe -q ipt_account
+	    fi
 	fi
     else
 	#not load module before goahead start
