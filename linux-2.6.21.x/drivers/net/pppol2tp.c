@@ -102,13 +102,14 @@
 #ifdef CONFIG_PPPOL2TP_FASTPATH
 #define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
 #define UDP_LITE_DISABLE
-//#define DISABLE_WORKQUEUE
+#define DISABLE_WORKQUEUE
 #define DISABLE_GET_FS
-#ifdef CONFIG_PROC_FS
-#undef CONFIG_PROC_FS
-#endif
 #else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
+#endif
+
+#ifdef CONFIG_PROC_FS
+#undef CONFIG_PROC_FS
 #endif
 
 /* Developer debug code. */

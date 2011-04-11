@@ -1145,6 +1145,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
+        unsigned int is_helper = 0;
 #endif
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
@@ -1216,10 +1217,12 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	help = nfct_help(ct);
+	if (help && help->helper)
+                is_helper = 1;
 #endif
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (help->helper || protonum == IPPROTO_GRE || hooknum == NF_IP_LOCAL_OUT) {
+	if (is_helper || protonum == IPPROTO_GRE || hooknum == NF_IP_LOCAL_OUT) {
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
                     FOE_ALG(*pskb)=1;
 	    }
@@ -1228,8 +1231,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	nat = nfct_nat(ct);
-	if (ipv4_conntrack_fastnat && pf == PF_INET && bcm_nat_bind_hook) {
-		if (!(nat->info.nat_type & NF_FAST_NAT_DENY) && !help->helper
+	if (ipv4_conntrack_fastnat && bcm_nat_bind_hook && nat && pf == PF_INET) {
+		if (!(nat->info.nat_type & NF_FAST_NAT_DENY) 
+		    && !is_helper
 		    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_IS_REPLY)
 		    && (hooknum == NF_IP_PRE_ROUTING) && 
 		    (protonum == IPPROTO_TCP || protonum == IPPROTO_UDP)) {

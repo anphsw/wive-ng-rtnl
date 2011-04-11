@@ -318,27 +318,29 @@
 2) Enable double vlan tag support per default.<br>
 3) Fix net/ip fib metrics.<br>
 4) Zebra suspended (not build with gcc4.6.0).<br>
-5) Try use new optimization in 4.6.0 gcc. Small code more speed.<br>
-6) Try workaround speed regression in mips32r2 at RT3050 rev P0.<br>
-7) Remove some dead code.<br>
-8) Fix some leaks.<br>
-9) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
-10) Rewrite content filter page.<br>
-11) Fix anntena numbers.<br>
-12) Add sysctl net.ipv4.vlan_double_tag variable for enable/disable double tag support.<br>
-13) Netdevice code and some increase counters resolutions for network interfaces statistic.<br>
-14) PPPOE more correct ignore PADT packets whose destination address isn't ours patch. Need check in recive path to.<br>
-15) In udp.c need check rt != NULL for prevent use after free.<br>
-16) Fix continuos allocation memory for modules.<br>
-17) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
-18) Some symbols need export for compat with new code.<br>
-19) Rework build system.<br>
-20) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server.<br>
-21) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode.<br>
-22) Initial L2TP fastpath. Need more test and works.<br>
-23) Initial PPPOE Fastpath for mem and cpu save.<br>
-24) Fix Color WPS LED.<br>
-25) Some scripts rewrite for speedup and save flash space.<br>
+5) Try workaround speed regression in mips32r2 at RT3050 rev P0.<br>
+6) Remove some dead code.<br>
+7) Fix some leaks.<br>
+8) Add HiPower variable. Use for increase LNA gain. DANGEROUS. Reduces RF module life.<br>
+9) Rewrite content filter page.<br>
+10) Fix anntena numbers.<br>
+11) Add sysctl net.ipv4.vlan_double_tag variable for enable/disable double tag support.<br>
+12) Netdevice code and some increase counters resolutions for network interfaces statistic.<br>
+13) PPPOE more correct ignore PADT packets whose destination address isn't ours patch. Need check in recive path to.<br>
+14) In udp.c need check rt != NULL for prevent use after free.<br>
+15) Fix continuos allocation memory for modules.<br>
+16) Kernel start time set to Apr-03-2011 instead 2000Y.<br>
+17) Some symbols need export for compat with new code.<br>
+18) Rework build system.<br>
+19) Add wan_manual_mtu variable 0/value default 0=auto,get from dhcp server.<br>
+20) Add vpnPurePPPOE variable 0/1 default 0=full WAN+PPPOE mode.<br>
+21) Initial PPPOE Fastpath for mem and cpu save.<br>
+22) Fix Color WPS LED.<br>
+23) Some scripts rewrite for speedup and save flash space.<br>
+24) More chek for prevent crashes in fastnat.<br>
+25) Consolidate some bridge code for more optimize.<br>
+
+**) Initial L2TP fastpath. Susoended... Need sine rewrites.<br>
 
 <br><br>
 <b>For support see:</b><br>
