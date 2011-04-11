@@ -59,8 +59,12 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
-	$LOG "Add route to $SERVER via $newdgw"
-	ip route replace $SERVER via $newdgw metric 5
+	dgw_net=`ipcalc "$newdgw" -n | cut -f 2- -d =`
+	srv_net=`ipcalc "$SERVER" -n | cut -f 2- -d =`
+	if [ "$dgw_net" != "$srv_net" ]; then
+	    $LOG "Add route to $SERVER via $newdgw"
+	    ip route replace $SERVER via $newdgw
+	fi
     fi
 
     while [ $reachable -eq 0 ]; do
