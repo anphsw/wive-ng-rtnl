@@ -564,6 +564,8 @@ slow_path:
 	pad = nf_bridge_pad(skb);
 	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, pad);
 	mtu -= pad;
+#else
+	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, 0);
 #endif
 
 	/*
