@@ -1598,21 +1598,18 @@ int netif_rx(struct sk_buff *skb)
 	p = skb->dev->br_port;
 	if ((bridge_fast_path_enabled) && (((p!=NULL) && (p->br!=NULL)))) {
 		br=p->br;
-	} else {
-		goto SKIP_FAST_BRIDGE;
+		br_fdb_update(br, p, eth_hdr(skb)->h_source);
+		dst = br_fdb_get(br, dest);
+
+		if((dst!=NULL) && (dst->dst->dev!=NULL) && !dst->is_local){
+		    skb->dev = dst->dst->dev;
+		    skb_push(skb, ETH_HLEN);
+		    dev = skb->dev;
+		    dev->hard_start_xmit(skb, dev);
+		    return NET_RX_SUCCESS;
+		}
 	}
 	
-	br_fdb_update(br, p, eth_hdr(skb)->h_source);
-	dst = br_fdb_get(br, dest);
-
-	if((dst!=NULL) && (dst->dst->dev!=NULL) && !dst->is_local){
-		skb->dev = dst->dst->dev;
-		skb_push(skb, ETH_HLEN);
-		dev = skb->dev;
-		dev->hard_start_xmit(skb, dev);
-		return NET_RX_SUCCESS;
-	}
-SKIP_FAST_BRIDGE:
 #endif /* CONFIG_BRIDGE_NETFILTER */
 #endif /* CONFIG_BRIDGE_FASTPATH */
 
@@ -1632,17 +1629,6 @@ SKIP_FAST_BRIDGE:
 
 	__get_cpu_var(netdev_rx_stat).total++;
 
-#ifdef CONFIG_BRIDGE_FASTPATH
-	/* Optimisation for framebursting (allow interleaving of pkts by
-	 * immediately processing the rx pkt instead of Qing the pkt and deferring
-	 * the processing). Only optimise for bridging and guard against non
-	 * TASKLET based netif_rx calls.
-	 */
-	if ((bridge_fast_path_enabled) && !in_irq() && (skb->dev->br_port != NULL) && br_handle_frame_hook != NULL) {
-		local_irq_restore(flags);
-		return netif_receive_skb(skb);
-	}
-#endif		
 	if (queue->input_pkt_queue.qlen <= netdev_max_backlog) {
 		if (queue->input_pkt_queue.qlen) {
 enqueue:
