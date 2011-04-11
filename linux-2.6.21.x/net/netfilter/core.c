@@ -133,6 +133,12 @@ unsigned int nf_iterate(struct list_head *head,
 {
 	unsigned int verdict;
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	if(!skb) {
+		NFDEBUG("nf_hook_slow, skb is empty return NF_STOP\n");
+		return NF_STOP;
+        }
+#enfi
 	/*
 	 * The caller must not block between calls to this
 	 * function because of risk of continuing from deleted element.
@@ -141,16 +147,9 @@ unsigned int nf_iterate(struct list_head *head,
 		struct nf_hook_ops *elem = (struct nf_hook_ops *)*i;
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if (((elem == NULL) || (elem->hook == NULL)) && (*skb != NULL))
-		{
+    		if (!elem->hook) {
 			NFDEBUG("nf_hook_slow: elem is empty return NF_DROP\n");
 			return NF_DROP;
-		}
-		
-		if(*skb == NULL)
-		{
-			NFDEBUG("nf_hook_slow, skb is empty return NF_STOP\n");
-			return NF_STOP;
 		}
 #endif
 
