@@ -12,9 +12,6 @@
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <linux/rtnetlink.h>
-#include <linux/netfilter_ipv4.h>
-#include <linux/netfilter_ipv6.h>
-#include <linux/netfilter.h>
 #include <linux/smp.h>
 #include <net/pkt_sched.h>
 #include <asm/byteorder.h>
@@ -41,15 +38,6 @@
 
 
 #define PRIV(sch) qdisc_priv(sch)
-
-
-/* Thanks to Doron Oz for this hack
-*/
-#ifndef CONFIG_NET_CLS_ACT
-#ifdef CONFIG_NETFILTER
-static int nf_registered;
-#endif
-#endif
 
 struct ingress_qdisc_data {
 	struct Qdisc		*q;
@@ -146,11 +134,7 @@ static int ingress_enqueue(struct sk_buff *skb,struct Qdisc *sch)
 	D2PRINTK("ingress_enqueue(skb %p,sch %p,[qdisc %p])\n", skb, sch, p);
 	result = tc_classify(skb, p->filter_list, &res);
 	D2PRINTK("result %d class 0x%04x\n", result, res.classid);
-	/*
-	 * Unlike normal "enqueue" functions, ingress_enqueue returns a
-	 * firewall FW_* code.
-	 */
-#ifdef CONFIG_NET_CLS_ACT
+
 	sch->bstats.packets++;
 	sch->bstats.bytes += skb->len;
 	switch (result) {
@@ -170,31 +154,6 @@ static int ingress_enqueue(struct sk_buff *skb,struct Qdisc *sch)
 			result = TC_ACT_OK;
 			break;
 	};
-/* backward compat */
-#else
-#ifdef	CONFIG_NET_CLS_POLICE
-	switch (result) {
-		case TC_POLICE_SHOT:
-		result = NF_DROP;
-		sch->qstats.drops++;
-		break;
-		case TC_POLICE_RECLASSIFY: /* DSCP remarking here ? */
-		case TC_POLICE_OK:
-		case TC_POLICE_UNSPEC:
-		default:
-		sch->bstats.packets++;
-		sch->bstats.bytes += skb->len;
-		result = NF_ACCEPT;
-		break;
-	};
-
-#else
-	D2PRINTK("Overriding result to ACCEPT\n");
-	result = NF_ACCEPT;
-	sch->bstats.packets++;
-	sch->bstats.bytes += skb->len;
-#endif
-#endif
 
 	return result;
 }
@@ -227,99 +186,6 @@ static unsigned int ingress_drop(struct Qdisc *sch)
 	DPRINTK("ingress_drop(sch %p,[qdisc %p])\n", sch, p);
 	return 0;
 }
-
-#ifndef CONFIG_NET_CLS_ACT
-#ifdef CONFIG_NETFILTER
-static unsigned int
-ing_hook(unsigned int hook, struct sk_buff **pskb,
-			     const struct net_device *indev,
-			     const struct net_device *outdev,
-			     int (*okfn)(struct sk_buff *))
-{
-
-	struct Qdisc *q;
-	struct sk_buff *skb = *pskb;
-	struct net_device *dev = skb->dev;
-	int fwres=NF_ACCEPT;
-
-	DPRINTK("ing_hook: skb %s dev=%s len=%u\n",
-		skb->sk ? "(owned)" : "(unowned)",
-		skb->dev ? (*pskb)->dev->name : "(no dev)",
-		skb->len);
-
-/*
-revisit later: Use a private since lock dev->queue_lock is also
-used on the egress (might slow things for an iota)
-*/
-
-	if (dev->qdisc_ingress) {
-		spin_lock(&dev->queue_lock);
-		if ((q = dev->qdisc_ingress) != NULL)
-			fwres = q->enqueue(skb, q);
-		spin_unlock(&dev->queue_lock);
-	}
-
-	return fwres;
-}
-
-/* after ipt_filter */
-static struct nf_hook_ops ing_ops = {
-	.hook           = ing_hook,
-	.owner		= THIS_MODULE,
-	.pf             = PF_INET,
-	.hooknum        = NF_IP_PRE_ROUTING,
-	.priority       = NF_IP_PRI_FILTER + 1,
-};
-
-static struct nf_hook_ops ing6_ops = {
-	.hook           = ing_hook,
-	.owner		= THIS_MODULE,
-	.pf             = PF_INET6,
-	.hooknum        = NF_IP6_PRE_ROUTING,
-	.priority       = NF_IP6_PRI_FILTER + 1,
-};
-
-#endif
-#endif
-
-static int ingress_init(struct Qdisc *sch,struct rtattr *opt)
-{
-	struct ingress_qdisc_data *p = PRIV(sch);
-
-/* Make sure either netfilter or preferably CLS_ACT is
-* compiled in */
-#ifndef CONFIG_NET_CLS_ACT
-#ifndef CONFIG_NETFILTER
-	printk("You MUST compile classifier actions into the kernel\n");
-	return -EINVAL;
-#else
-	printk("Ingress scheduler: Classifier actions prefered over netfilter\n");
-#endif
-#endif
-
-#ifndef CONFIG_NET_CLS_ACT
-#ifdef CONFIG_NETFILTER
-	if (!nf_registered) {
-		if (nf_register_hook(&ing_ops) < 0) {
-			printk("ingress qdisc registration error \n");
-			return -EINVAL;
-		}
-		nf_registered++;
-
-		if (nf_register_hook(&ing6_ops) < 0) {
-			printk("IPv6 ingress qdisc registration error, " \
-			    "disabling IPv6 support.\n");
-		} else
-			nf_registered++;
-	}
-#endif
-#endif
-
-	DPRINTK("ingress_init(sch %p,[qdisc %p],opt %p)\n",sch,p,opt);
-	p->q = &noop_qdisc;
-	return 0;
-}
-
 
 static void ingress_reset(struct Qdisc *sch)
 {
@@ -398,7 +264,6 @@ static struct Qdisc_ops ingress_qdisc_ops = {
 	.dequeue	=	ingress_dequeue,
 	.requeue	=	ingress_requeue,
 	.drop		=	ingress_drop,
-	.init		=	ingress_init,
 	.reset		=	ingress_reset,
 	.destroy	=	ingress_destroy,
 	.change		=	NULL,
@@ -420,15 +285,6 @@ static int __init ingress_module_init(void)
 static void __exit ingress_module_exit(void)
 {
 	unregister_qdisc(&ingress_qdisc_ops);
-#ifndef CONFIG_NET_CLS_ACT
-#ifdef CONFIG_NETFILTER
-	if (nf_registered) {
-		nf_unregister_hook(&ing_ops);
-		if (nf_registered > 1)
-			nf_unregister_hook(&ing6_ops);
-	}
-#endif
-#endif
 }
 module_init(ingress_module_init)
 module_exit(ingress_module_exit)
