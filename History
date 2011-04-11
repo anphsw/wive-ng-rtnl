@@ -339,6 +339,7 @@
 23) Some scripts rewrite for speedup and save flash space.<br>
 24) More chek for prevent crashes in fastnat.<br>
 25) Consolidate some bridge code for more optimize.<br>
+26) Packet scheduler clock source set to jiffers for save cpu time.<br>
 
 **) Initial L2TP fastpath. Suspended... Need some rewrites.<br>
 
