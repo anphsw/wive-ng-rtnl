@@ -1219,9 +1219,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (help->helper) {
+	if (help->helper || protonum == IPPROTO_GRE || hooknum == NF_IP_LOCAL_OUT) {
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
-                    FOE_ALG_RXIF(*pskb)=1;
+                    FOE_ALG(*pskb)=1;
 	    }
 	}
 #endif

@@ -173,7 +173,7 @@ int fe_qos_packet_send(struct net_device *dev, struct sk_buff* skb, unsigned int
 	
 	//tell hwnat module, which is incoming interface of this packet
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3052)
-	tx_desc[tx_cpu_owner_idx].txd_info4.RXIF = FOE_ALG_RXIF(skb); /* 0: WLAN, 1: PCI */
+	tx_desc[tx_cpu_owner_idx].txd_info4.RXIF = FOE_ALG(skb); /* 0: WLAN, 1: PCI */
 #else
 	tx_desc[tx_cpu_owner_idx].txd_info4.UDF = FOE_UDF(skb); 
 #endif

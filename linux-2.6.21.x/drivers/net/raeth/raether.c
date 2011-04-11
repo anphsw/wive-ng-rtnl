@@ -556,7 +556,7 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.PN = 6; /* PPE */
 	}
 
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.RXIF = FOE_ALG_RXIF(skb); /* 0: WLAN, 1: PCI */
+	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.RXIF = FOE_ALG(skb); /* 0: WLAN, 1: PCI */
 #endif
 
     	tx_cpu_owner_idx0 = (tx_cpu_owner_idx0+1) % NUM_TX_DESC;

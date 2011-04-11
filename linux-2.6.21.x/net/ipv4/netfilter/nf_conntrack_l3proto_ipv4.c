@@ -159,7 +159,7 @@ static unsigned int ipv4_conntrack_help(unsigned int hooknum,
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
-                    FOE_ALG_RXIF(*pskb)=1;
+                    FOE_ALG(*pskb)=1;
             }
 #endif
 
