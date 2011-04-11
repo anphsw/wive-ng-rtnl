@@ -138,7 +138,7 @@ unsigned int nf_iterate(struct list_head *head,
 		NFDEBUG("nf_hook_slow, skb is empty return NF_STOP\n");
 		return NF_STOP;
         }
-#enfi
+#endif
 	/*
 	 * The caller must not block between calls to this
 	 * function because of risk of continuing from deleted element.
