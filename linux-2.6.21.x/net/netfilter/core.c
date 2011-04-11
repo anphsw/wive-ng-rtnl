@@ -140,6 +140,20 @@ unsigned int nf_iterate(struct list_head *head,
 	list_for_each_continue_rcu(*i, head) {
 		struct nf_hook_ops *elem = (struct nf_hook_ops *)*i;
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+		if (((elem == NULL) || (elem->hook == NULL)) && (*skb != NULL))
+		{
+			NFDEBUG("nf_hook_slow: elem is empty return NF_DROP\n");
+			return NF_DROP;
+		}
+		
+		if(*skb == NULL)
+		{
+			NFDEBUG("nf_hook_slow, skb is empty return NF_STOP\n");
+			return NF_STOP;
+		}
+#endif
+
 		if (hook_thresh > elem->priority)
 			continue;
 
