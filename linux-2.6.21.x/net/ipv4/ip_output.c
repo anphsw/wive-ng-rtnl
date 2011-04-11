@@ -418,7 +418,10 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 	int raw = 0;
 	int ptr;
 	struct sk_buff *skb2;
-	unsigned int mtu, hlen, left, len, ll_rs, pad;
+	unsigned int mtu, hlen, left, len, ll_rs;
+#ifdef CONFIG_BRIDGE_NETFILTER
+	unsigned int pad;
+#endif
 	int offset;
 	__be16 not_last_frag;
 	struct rtable *rt = (struct rtable*)skb->dst;
@@ -557,9 +560,11 @@ slow_path:
 	/* for bridged IP traffic encapsulated inside f.e. a vlan header,
 	 * we need to make room for the encapsulating header
 	 */
+#ifdef CONFIG_BRIDGE_NETFILTER
 	pad = nf_bridge_pad(skb);
 	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, pad);
 	mtu -= pad;
+#endif
 
 	/*
 	 *	Fragment the datagram.

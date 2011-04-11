@@ -132,29 +132,6 @@ static inline void nf_bridge_save_header(struct sk_buff *skb)
 	memcpy(skb->nf_bridge->data, skb->data - header_size, header_size);
 }
 
-/*
- * When forwarding bridge frames, we save a copy of the original
- * header before processing.
- */
-int nf_bridge_copy_header(struct sk_buff *skb)
-{
-	int err;
-	int header_size = ETH_HLEN;
-
-	if (skb->protocol == htons(ETH_P_8021Q))
-		header_size += VLAN_HLEN;
-
-	err = skb_cow(skb, header_size);
-	if (err)
-		return err;
-
-	memcpy(skb->data - header_size, skb->nf_bridge->data, header_size);
-
-	if (skb->protocol == htons(ETH_P_8021Q))
-		__skb_push(skb, VLAN_HLEN);
-	return 0;
-}
-
 /* PF_BRIDGE/PRE_ROUTING *********************************************/
 /* Undo the changes made for ip6tables PREROUTING and continue the
  * bridge PRE_ROUTING hook. */

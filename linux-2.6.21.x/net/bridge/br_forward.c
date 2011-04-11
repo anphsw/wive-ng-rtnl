@@ -41,7 +41,40 @@ static inline unsigned packet_length(const struct sk_buff *skb)
 	return skb->len - (skb->protocol == htons(ETH_P_8021Q) ? VLAN_HLEN : 0);
 }
 
-int br_dev_queue_push_xmit(struct sk_buff *skb)
+/*
+ * When forwarding bridge frames, we save a copy of the original
+ * header before processing.
+ */
+#ifdef CONFIG_BRIDGE_NETFILTER
+static inline int nf_bridge_copy_header(struct sk_buff *skb)
+{
+	int err;
+	int header_size = ETH_HLEN;
+
+	if (skb->protocol == htons(ETH_P_8021Q))
+		header_size += VLAN_HLEN;
+
+	err = skb_cow(skb, header_size);
+	if (err)
+		return err;
+
+	memcpy(skb->data - header_size, skb->nf_bridge->data, header_size);
+
+	if (skb->protocol == htons(ETH_P_8021Q))
+		__skb_push(skb, VLAN_HLEN);
+	return 0;
+}
+
+static inline int nf_bridge_maybe_copy_header(struct sk_buff *skb)
+{
+	if (skb->nf_bridge &&
+            skb->nf_bridge->mask & (BRNF_BRIDGED | BRNF_BRIDGED_DNAT))
+		return nf_bridge_copy_header(skb);
+  	return 0;
+}
+#endif
+
+inline int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	/* drop mtu oversized packets except gso */
 #ifdef CONFIG_W7_LOGO
@@ -53,14 +86,17 @@ int br_dev_queue_push_xmit(struct sk_buff *skb)
 #endif
 		kfree_skb(skb);
 	else {
+#ifdef CONFIG_BRIDGE_NETFILTER
 		/* ip_refrag calls ip_fragment, doesn't copy the MAC header. */
 		if (nf_bridge_maybe_copy_header(skb))
 			kfree_skb(skb);
 		else {
+#endif
 			skb_push(skb, ETH_HLEN);
-
 			dev_queue_xmit(skb);
+#ifdef CONFIG_BRIDGE_NETFILTER
 		}
+#endif
 	}
 
 	return 0;
