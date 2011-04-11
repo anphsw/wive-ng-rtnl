@@ -63,8 +63,8 @@ static int __init br_init(void)
 err_out2:
 #ifdef CONFIG_BRIDGE_NETFILTER
 	br_netfilter_fini();
-#endif
 err_out1:
+#endif
 	br_fdb_fini();
 err_out:
 	llc_sap_put(br_stp_sap);
