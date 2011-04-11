@@ -1379,11 +1379,14 @@ add_counter_to_entry(struct ipt_entry *e,
                         memset(wan_name, 0, sizeof(wan_name));
                         memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
 			dprintf("ip_table: set wan_name=%s\n", wan_name);
-		} else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
+		} 
+#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
+		else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
 			memset(wan_ppp, 0, sizeof(wan_ppp));
                         memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
 			dprintf("ip_table: set wan_ppp=%s\n", wan_ppp);
         	} 
+#endif
 	} else {
 	//SNAT target
 		if (strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
