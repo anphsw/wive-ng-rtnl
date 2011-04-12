@@ -101,20 +101,24 @@ static void __init early_serial8250_write(struct console *console, const char *s
 static unsigned int __init probe_baud(struct uart_port *port)
 {
 	unsigned int lcr;
-#if !defined (CONFIG_RALINK_RT2883) && \
+	unsigned int quot;
+#if !defined (CONFIG_RALINK_RT2880) && \
+    !defined (CONFIG_RALINK_RT2883) && \
     !defined (CONFIG_RALINK_RT3883) && \
     !defined (CONFIG_RALINK_RT3352) && \
-    !defined (CONFIG_RALINK_RT3052)
+    !defined (CONFIG_RALINK_RT3052) && \
+    !defined (CONFIG_RALINK_RT5350)
 	unsigned int dll=0, dlm=0;
 #endif
-	unsigned int quot;
 
 	lcr = serial_in(port, UART_LCR);
 	serial_out(port, UART_LCR, lcr | UART_LCR_DLAB);
-#if defined (CONFIG_RALINK_RT2883) || \
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052)
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 	quot= serial_in(port, UART_DLL);
 #else
 	dll = serial_in(port, UART_DLL);

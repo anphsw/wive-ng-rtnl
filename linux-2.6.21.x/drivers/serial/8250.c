@@ -329,8 +329,12 @@ static unsigned int serial_in(struct uart_8250_port *up, int offset)
 			return readb(up->port.membase + offset);
 
 	default:
-#if defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052)
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 		return (*(int*)(up->port.iobase + offset));
 #else
 		return inb(up->port.iobase + offset);
@@ -372,9 +376,8 @@ serial_out(struct uart_8250_port *up, int offset, int value)
     defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052)
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 		*(int*)(up->port.iobase + offset) = value;
 #else
 		outb(value, up->port.iobase + offset);
@@ -421,8 +424,12 @@ static inline void _serial_dl_write(struct uart_8250_port *up, int value)
 	serial_outp(up, UART_DLM, value >> 8 & 0xff);
 }
 
-#if defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052)
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 /* Ralink haven't got a standard divisor latch */
 static int serial_dl_read(struct uart_8250_port *up)
 {
@@ -608,11 +615,14 @@ static unsigned int autoconfig_read_divisor_id(struct uart_8250_port *p)
 {
 	unsigned int id;
 	unsigned old_lcr;
+
 #if defined (CONFIG_RALINK_RT2880) || \
     defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052)
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+
 	unsigned short old_dl;
 
 	old_dl = serial_dl_read(p);
@@ -2373,8 +2383,12 @@ static void serial8250_console_putchar(struct uart_port *port, int ch)
 	serial_out(up, UART_TX, ch);
 }
 
-#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_RALINK_WATCHDOG
 extern void RaWdgReload(void);
 #endif
@@ -2421,8 +2435,12 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 *	Finally, wait for transmitter to become empty
 	 *	and restore the IER
 	 */
-#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_RALINK_WATCHDOG
 	/* Refresh Ralink hardware watchdog timer */
 	RaWdgReload();

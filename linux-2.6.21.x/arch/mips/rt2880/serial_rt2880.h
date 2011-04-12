@@ -42,7 +42,8 @@
 #if defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052)
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
 
 #define UART_RX		0	/* In:  Receive buffer (DLAB=0) */
 

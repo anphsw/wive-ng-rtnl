@@ -1,7 +1,3 @@
-config RT_FULL_DEVICE_NAME
-        string "Original device name"
-        default "Acorp WR-N"
-
 if RALINK_RT3052
 
 choice
@@ -14,17 +10,10 @@ config  RT3052_ASIC
         bool "RT305x/RT3350-ASIC"
 endchoice
 
-if RT3052_ASIC
-config  UMEDIA_WAP356L
-        bool "U-Media WAP-356L PCBA"
-endif
-
 config RALINK_RT3350
 	bool "Ralink RT3350 chipset"
 
 endif
-
-#---------------------------
 
 if RALINK_RT3352
 
@@ -32,10 +21,11 @@ choice
         prompt "Soc Hardware Type"
 	default RT3352_ASIC
 
-config  RT3352_FPGA 
-        bool "RT3352-FPGA"
 config  RT3352_ASIC 
-        bool "RT3352-ASIC"
+	bool "RT3352-ASIC"
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+
 endchoice
 
 endif
@@ -46,20 +36,13 @@ if RALINK_RT3883
 
 choice
         prompt "Soc Hardware Type"
-	default RT3883_FPGA
+	default RT3883_ASIC
 
-config  RT3883_FPGA 
-        bool "RT3883/RT3662-FPGA"
 config  RT3883_ASIC 
-        bool "RT3883/RT3662-ASIC"
+	bool "RT3883/RT3662-ASIC"
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
 endchoice
-
-#Ricky Cao: Below are added to define CONFIG_UMEDIA_WRT393L for separeate code for WRT-393L in kernel.
-if RT3883_ASIC
-config  UMEDIA_WRT393L
-        bool "U-Media WRT-393L PCBA"
-endif
-#Ricky Cao: Above are added to define CONFIG_UMEDIA_WRT393L for separeate code for WRT-393L in kernel.
 
 choice
         prompt "RT3883 PCI architecture"
@@ -73,6 +56,23 @@ config PCI_ONLY
         bool "PCI HOST ONLY"
 config PCIE_PCI_NONE
         bool "Non-support PCI/PCIe"
+endchoice
+
+endif
+
+#---------------------------
+
+if RALINK_RT5350
+
+choice
+	prompt "Soc Hardware Type"
+	default RT5350_ASIC
+
+config	RT5350_ASIC 
+	bool "RT5350-ASIC"
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+
 endchoice
 
 endif
@@ -126,10 +126,6 @@ endmenu
 choice
        prompt "Flash Size"
        default RT2880_FLASH_4M
-
-config RT2880_FLASH_2M
-       bool "2M"
-       depends on  !DUAL_IMAGE
 
 config RT2880_FLASH_4M
        bool "4M"
@@ -214,6 +210,11 @@ config MTD_KERNEL_PART_SIZ
 	default 0xD0000
 	depends on RT2880_ROOTFS_IN_FLASH && !ROOTFS_IN_FLASH_NO_PADDING
 
-
 config  RALINK_TIMER_DFS
         bool "Ralink DFS Timer"
+
+config RT3XXX_EHCI_OHCI
+	bool "Ralink USB EHCI/OHCI controller support"
+        depends on (RALINK_RT3883 || RALINK_RT3352)
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI

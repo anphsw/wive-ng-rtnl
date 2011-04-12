@@ -110,7 +110,7 @@ PCI1 --> PCIe
 #define RALINK_PCI1_SUBID 		*(volatile u32 *)(RALINK_PCI_BASE + RT3883_PCIE_OFFSET + 0x0038)
 #define RALINK_PCI1_STATUS		*(volatile u32 *)(RALINK_PCI_BASE + RT3883_PCIE_OFFSET + 0x0050)
 
-#elif defined(CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3352)
+#elif defined(CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3352) || defined(CONFIG_RALINK_RT5350)
 #else
 #error "undefined in PCI"
 #endif

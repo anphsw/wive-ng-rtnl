@@ -19,6 +19,10 @@ config RALINK_RT2880_SHUTTLE
 	bool
 config RALINK_RT3052_MP2
 	bool
+config RALINK_RT3352_MP
+	bool
+config RALINK_RT5350_MP
+	bool
 config RALINK_RT3883_MP
 	bool
 
@@ -57,6 +61,23 @@ config RALINK_RT2880
 	select RALINK_RT3052_MP2 if !RALINK_RT3350
         help
          Ralink evaluation board based on RT3052
+
+ config RALINK_RT3352
+        bool "Ralink RT3352 board"
+	select DMA_NONCOHERENT
+	select IRQ_CPU
+	select SWAP_IO_SPACE
+	select SYS_HAS_CPU_MIPS32_R1
+        select SYS_HAS_CPU_MIPS32_R2
+	select CPU_MIPSR2
+	select CPU_MIPS32_R2
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select BOOT_ELF32
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select CPU_MIPSR2_IRQ_EI
+	select RALINK_RT3352_MP
+        help
+         Ralink evaluation board based on RT3352
 
 config RALINK_RT3883
 	bool "Ralink RT3883 board"

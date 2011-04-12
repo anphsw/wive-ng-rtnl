@@ -725,7 +725,9 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 	//always turn the power LED on
 #ifdef CONFIG_RALINK_RT2880
 	__LED_ON(12);
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
+      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
+      defined (CONFIG_RALINK_RT5350)
 	__LED_ON(9);
 #elif defined (CONFI__RALINK_RT3883)
 	__LED_ON(0);
@@ -831,55 +833,8 @@ int __init ralink_gpio_init(void)
 	gpiomode &= ~0x1C;  //clear bit[2:4]UARTF_SHARE_MODE
 #endif
 	gpiomode |= RALINK_GPIOMODE_DFT;
-//Ricky Cao: Below is for WRT-393L need GPIO9 and GPIO10 be used, so configure them to GPIO mode
-#ifdef CONFIG_UMEDIA_WRT393L
-	gpiomode &= ~(0xC);
-#endif
-//Ricky Cao: Above is for WRT-393L need GPIO9 and GPIO10 be used, so configure them to GPIO mode
-	//printk("====== GPIO Mode: 0x%0X ======\n", gpiomode); //Ricky Cao: for debug
+	//printk("====== GPIO Mode: 0x%0X ======\n", gpiomode);
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
-
-//Ricky Cao: I create an item on the kernel configuration of menuconfig for PCBA identify
-//           This is used to create definition for the code to do something for specific PCBA.
-//			 This item is created in linux-2.6.21.x/arch/mips/rt2880/Kconfig.
-//Ricky Cao: Below is added for WRT-393L
-#ifdef CONFIG_UMEDIA_WRT393L
-	u32 tmp=0;
-
-	//Ricky Cao: Below is for debug
-	/*tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
-	printk("====== DIR for GPIO 0~24: 0x%0X ======\n", tmp);
-	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODATA));
-	printk("====== DATA for GPIO 0~24: 0x%0X ======\n", tmp);*/
-	//Ricky Cao: Above is for debug
-
-	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
-	//Ricky Cao: GPIO0, GPIO3 and GPIO10 are for RF Switch, WPS button and Reset button separately, 
-	//           so configure these GPIO pins to INPUT.
-	//			 And GPIO9 is for WPS LED, so configure it to OUTPUT.
-	tmp &= ~1;
-	tmp &= ~(1<<3);
-	tmp &= ~(1<<10);
-	tmp |= (1<<9);
-	*(volatile u32 *)(RALINK_REG_PIODIR) = cpu_to_le32(tmp);
-	
-	//Ricky Cao: Below is for debug
-	/*tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
-	printk("====== DIR for GPIO 0~24: 0x%0X ======\n", tmp);
-	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODATA));
-	printk("====== DATA for GPIO 0~24: 0x%0X ======\n", tmp);*/
-	//Ricky Cao: Above is for debug
-#endif
-//Ricky Cao: Above is added for WRT-393L
-
-#ifdef CONFIG_UMEDIA_WAP356L
-	u32 tmp=0;
-
-	tmp = le32_to_cpu(*(volatile u32 *)(RALINK_REG_PIODIR));
-	tmp &= ~1; //set GPIO 0 to 0 (input) for WPS button
-	tmp &= ~(1<<10); //set GPIO 10 to 0 (input) for Reset button
-	*(volatile u32 *)(RALINK_REG_PIODIR) = cpu_to_le32(tmp);
-#endif
 
 	//enable gpio interrupt
 	*(volatile u32 *)(RALINK_REG_INTENA) = cpu_to_le32(RALINK_INTCTL_PIO);
