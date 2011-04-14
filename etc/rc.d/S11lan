@@ -88,7 +88,7 @@ get_param() {
  lan2enabled=`nvram_get 2860 Lan2Enabled`
  CHECKMAC=`nvram_get 2860 CHECKMAC`
  brset=`brctl show  | grep br0 -c`
- vlanisconfig=`ip link show | grep @ -c` > /dev/null 2>&1
+ vlanisconfig=`cat /proc/net/vlan/config | grep eth -c` > /dev/null 2>&1
  brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
  lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
