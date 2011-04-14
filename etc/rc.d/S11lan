@@ -38,6 +38,7 @@ get_txqlen
 	ifconfig eth2.1 hw ether "$LANMAC"
 	$LOG "-==ETH2.2_MACADDR $WANMAC==-"
 	ifconfig eth2.2 hw ether "$WANMAC"
+	vlanisconfig=2
     fi
 
     #eth2.1 always up
