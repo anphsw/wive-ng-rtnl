@@ -82,26 +82,27 @@ $LOG "Stop network interfaces..."
 }
 
 get_param() {
- lan_ip=`nvram_get 2860 lan_ipaddr`
- lan_nm=`nvram_get 2860 lan_netmask`
- lan_ip_2=`nvram_get 2860 lan2_ipaddr`
- lan_nm_2=`nvram_get 2860 lan2_netmask`
- lan2enabled=`nvram_get 2860 Lan2Enabled`
- CHECKMAC=`nvram_get 2860 CHECKMAC`
- brset=`brctl show  | grep br0 -c`
- vlanisconfig=`cat /proc/net/vlan/config | grep eth -c` > /dev/null 2>&1
- brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
- lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    lan_nm=`nvram_get 2860 lan_netmask`
+    lan_ip_2=`nvram_get 2860 lan2_ipaddr`
+    lan_nm_2=`nvram_get 2860 lan2_netmask`
+    lan2enabled=`nvram_get 2860 Lan2Enabled`
+    CHECKMAC=`nvram_get 2860 CHECKMAC`
+    brset=`brctl show  | grep br0 -c`
+    vlanisconfig=`cat /proc/net/vlan/config | grep eth -c` > /dev/null 2>&1
+    brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
+    lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
 
 addr_flush() {
     #drop adresses
-    ip addr flush dev eth2.1
-    ip addr flush dev eth2.2
-    if [ "$CONFIG_IPV6" != "" ] ; then
-	ip -6 addr flush dev eth2.1
-	ip -6 addr flush dev eth2.2
-    fi
+    dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
+    for i in $dev; do
+	ip addr flush dev $i > /dev/null 2>&1
+	if [ "$CONFIG_IPV6" != "" ] ; then
+	    ip -6 addr flush dev $i > /dev/null 2>&1
+	fi
+    done
 }
 
 case "$1" in
