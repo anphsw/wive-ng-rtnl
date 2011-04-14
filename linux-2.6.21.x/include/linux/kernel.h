@@ -283,6 +283,18 @@ extern void hex2bin(u8 *dst, const char *src, size_t count);
 	({ if (0) printk(KERN_DEBUG fmt, ##arg); 0; })
 #endif
 
+#define pr_emerg(fmt,arg...) \
+        printk(KERN_EMERG fmt, ##arg)
+#define pr_alert(fmt,arg...) \
+        printk(KERN_ALERT fmt, ##arg)
+#define pr_crit(fmt,arg...) \
+        printk(KERN_CRIT fmt, ##arg)
+#define pr_err(fmt,arg...) \
+        printk(KERN_ERR fmt, ##arg)
+#define pr_warning(fmt,arg...) \
+        printk(KERN_WARNING fmt, ##arg)
+#define pr_notice(fmt,arg...) \
+        printk(KERN_NOTICE fmt, ##arg)
 #define pr_info(fmt,arg...) \
 	printk(KERN_INFO fmt,##arg)
 
