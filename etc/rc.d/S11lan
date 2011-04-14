@@ -70,10 +70,11 @@ get_txqlen
 
 stop() {
 $LOG "Stop network interfaces..."
-    ip link set eth2.2 down > /dev/null 2>&1
-    ip link set eth2.1 down > /dev/null 2>&1
-    vconfig rem eth2.1 > /dev/null 2>&1
-    vconfig rem eth2.2 > /dev/null 2>&1
+    dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
+    for i in $dev; do
+	ip link set $i down > /dev/null 2>&1
+	vconfig rem $i > /dev/null 2>&1
+    done
     ip link set br0 down > /dev/null 2>&1
     ip link set $lan_if down > /dev/null 2>&1
     ip link set $lan2_if down > /dev/null 2>&1
