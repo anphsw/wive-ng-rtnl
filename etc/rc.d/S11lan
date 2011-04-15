@@ -26,11 +26,6 @@ get_txqlen
 	$LOG "-==ETH2_MACADDR $LANMAC==-"
 	ifconfig eth2 hw ether "$LANMAC"
 	ifconfig eth2 txqueuelen "$txqueuelen"
-	if [ "$vlan_double_tag" = "1" ]; then
-	    sysctl -w net.ipv4.vlan_double_tag=1
-	else
-	    sysctl -w net.ipv4.vlan_double_tag=0
-	fi
 	$LOG "-==Up vlan root interface==-"
 	ip link set eth2 up
 	vlanisconfig=0
@@ -93,7 +88,6 @@ get_param() {
     lan_ip_2=`nvram_get 2860 lan2_ipaddr`
     lan_nm_2=`nvram_get 2860 lan2_netmask`
     lan2enabled=`nvram_get 2860 Lan2Enabled`
-    vlan_double_tag=`nvram_get 2860 vlan_double_tag`
     brset=`brctl show  | grep br0 -c`
     vlanisconfig=`cat /proc/net/vlan/config | grep eth -c` > /dev/null 2>&1
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
