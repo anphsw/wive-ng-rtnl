@@ -36,9 +36,7 @@ const char *yaffs_fs_c_version =
 extern const char *yaffs_guts_c_version;
 
 #include <linux/version.h>
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
-#include <linux/config.h>
-#endif
+#include <linux/autoconf.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>

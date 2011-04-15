@@ -20,7 +20,7 @@
 #ifndef __ASM_SIBYTE_64BIT_H
 #define __ASM_SIBYTE_64BIT_H
 
-#include <linux/config.h>
+#include <linux/autoconf.h>
 #include <linux/types.h>
 
 #ifdef CONFIG_MIPS32

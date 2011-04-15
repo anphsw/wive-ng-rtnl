@@ -3,7 +3,7 @@
 
 #include <linux/blkdev.h>
 #include <linux/locks.h>
-#include <linux/config.h>
+#include <linux/autoconf.h>
 #include <linux/spinlock.h>
 
 /*

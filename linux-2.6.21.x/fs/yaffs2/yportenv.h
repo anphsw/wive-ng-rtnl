@@ -27,9 +27,7 @@
 
 /* Linux kernel */
 #include <linux/version.h>
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
-#include <linux/config.h>
-#endif
+#include <linux/autoconf.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/sched.h>

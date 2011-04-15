@@ -42,7 +42,7 @@
     Steven Liu  2007-07-04      Initial version
 */
 
-#include <linux/config.h>
+#include <linux/autoconf.h>
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/types.h>

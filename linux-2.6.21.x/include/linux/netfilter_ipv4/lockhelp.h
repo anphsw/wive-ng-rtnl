@@ -1,6 +1,6 @@
 #ifndef _LOCKHELP_H
 #define _LOCKHELP_H
-#include <linux/config.h>
+#include <linux/autoconf.h>
 
 #include <linux/spinlock.h>
 #include <asm/atomic.h>

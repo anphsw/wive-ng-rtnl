@@ -9,7 +9,7 @@ Here is the problem:
 
     Suppose that drivers/net/foo.c has the following lines:
 
-	#include <linux/config.h>
+	#include <linux/autoconf.h>
 
 	...
 
