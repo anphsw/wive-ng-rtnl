@@ -35,6 +35,11 @@
 extern int send_sigusr_dhcpc;
 #endif
 
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+/* QinQ support hack */
+extern int vlan_double_tag;
+#endif
+
 #ifdef CONFIG_RAETH_NAPI
 static int raeth_clean(struct net_device *dev, int *budget);
 static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do);
@@ -1750,8 +1755,6 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 }
 #endif
 
-
-
 /**
  * ei_open - Open/Initialize the ethernet port.
  * @dev: network device to initialize
@@ -1838,6 +1841,11 @@ int ei_open(struct net_device *dev)
 	VirtualIF_open(ei_local->PseudoDev);
 #endif
 	forward_config(dev);
+#if defined(CONFIG_RT_3052_ESW) && defined(CONFIG_VLAN_8021Q_DOUBLE_TAG)
+	/* Enable double vlan support */
+	if(vlan_double_tag)
+	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0x3f);
+#endif
 	return 0;
 }
 
