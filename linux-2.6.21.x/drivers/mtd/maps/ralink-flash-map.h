@@ -1,7 +1,21 @@
-/* this is mapping flash definition */
-
+/* Include defines */
 #include "ralink-flash.h"
 
+/* For autodetect flash type */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+
+    #define BOOT_FROM_NOR   0
+    #define BOOT_FROM_NAND  2
+    #define BOOT_FROM_SPI   3
+    extern int ra_check_flash_type(void);
+#endif
+
+/* this is mapping flash definition */
 #if defined (CONFIG_RT2880_FLASH_32M)
 static struct mtd_partition rt2880_partitions[] = {
         {

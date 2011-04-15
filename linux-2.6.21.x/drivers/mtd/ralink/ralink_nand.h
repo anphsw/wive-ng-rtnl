@@ -166,10 +166,8 @@ struct ra_nand_chip {
 	int 	erase_shift;
 	int 	oob_shift;
 	int	badblockpos;
-#if !defined (__UBOOT__)
 	struct mutex hwcontrol;
 	struct mutex *controller;
-#endif
 	struct nand_ecclayout	*oob;
 	int 	state;
 	unsigned int 	buffers_page;

@@ -1,31 +1,3 @@
-#if defined (__UBOOT__)
-#include <common.h>
-#include <malloc.h>
-#include <linux/stddef.h> 
-#include <linux/mtd/compat.h> 
-
-#include <linux/mtd/mtd.h>
-#include <linux/mtd/mtd-abi.h>
-#include <linux/mtd/partitions.h>
-#include "ralink_nand.h"
-#include "../maps/ralink-flash.h"
-
-#define	EIO		 5	/* I/O error */
-#define	EINVAL		22	/* Invalid argument */
-#define	ENOMEM		12	/* Out of memory */
-
-#define NULL_DEFINED( ... )		do{}while(0)
-#define NULL_DEF_RET_1( ... ) 	(1)
-#define NULL_DEF_RET_0( ... )	(0)
-#define __devinit 
-#define __devexit
-
-#define HZ 1
-#define schedule_timeout(a) 	udelay(1000000*(a))
-#define cond_resched()		NULL_DEF_RET_0()
-
-#else // !defined (__UBOOT__)
-
 #define DEBUG
 #include <linux/device.h>
 #undef DEBUG
@@ -42,8 +14,6 @@
 #include "ralink_nand.h"
 #include "../maps/ralink-flash.h"
 
-#endif// !defined (__UBOOT__)
-
 #define READ_STATUS_RETRY	1000
 
 struct mtd_info *ranfc_mtd = NULL;
@@ -53,11 +23,9 @@ int ranfc_debug = 1;
 static int ranfc_bbt = 1;
 static int ranfc_verify = 1;
 
-#if !defined (__UBOOT__)
 module_param(ranfc_debug, int, 0644);
 module_param(ranfc_bbt, int, 0644);
 module_param(ranfc_verify, int, 0644);
-#endif
 
 #if 0
 #define ra_dbg(args...) do { if (ranfc_debug) printk(args); } while(0)
@@ -907,9 +875,7 @@ static void nand_release_device(struct ra_nand_chip *ra)
 	/* Release the controller and the chip */
 	ra->state = FL_READY;
 
-#if !defined (__UBOOT__)
 	mutex_unlock(ra->controller);
-#endif ///
 }
 
 /**
@@ -925,9 +891,7 @@ nand_get_device(struct ra_nand_chip *ra, int new_state)
 {
 	int ret = 0;
 
-#if !defined (__UBOOT__)
 	ret = mutex_lock_interruptible(ra->controller);
-#endif ///
 	if (!ret) 
 		ra->state = new_state;
 
@@ -1176,11 +1140,9 @@ int nand_erase_nand(struct ra_nand_chip *ra, struct erase_info *instr)
 erase_exit:
 
 	ret = ((instr->state == MTD_ERASE_DONE) ? 0 : -EIO);
-#if !defined  (__UBOOT__)
 	/* Do call back function */
 	if (!ret)
 		mtd_erase_callback(instr);
-#endif
 
 	if (ret) {
 		nand_bbt_set(ra, addr >> ra->erase_shift, BBT_TAG_BAD);
@@ -1895,18 +1857,12 @@ static void __devexit ra_nand_remove(void)
 		ra = (struct ra_nand_chip  *)ranfc_mtd->priv;
 
 		/* Deregister partitions */
-#if !defined (__UBOOT__)
 		del_mtd_partitions(ranfc_mtd);
 		kfree(ra);
-#else
-		free(ra);
-#endif
 	}
 }
 
-#if !defined (__UBOOT__) 
 rootfs_initcall(ra_nand_init);
 module_exit(ra_nand_remove);
 
 MODULE_LICENSE("GPL");
-#endif

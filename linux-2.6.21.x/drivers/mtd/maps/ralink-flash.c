@@ -25,7 +25,6 @@
 #include <asm/io.h>
 #include <asm/addrspace.h>
 #include <asm/rt2880/rt_mmap.h>
-#include "ralink-flash.h"
 #include "ralink-flash-map.h"
 
 #ifndef CONFIG_RT2880_FLASH_32M 

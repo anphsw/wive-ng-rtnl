@@ -25,7 +25,6 @@
 #include <asm/semaphore.h>
 #include <linux/delay.h>
 #include "ralink_spi.h"
-#include "../maps/ralink-flash.h"
 #include "../maps/ralink-flash-map.h"
 
 extern u32 get_surfboard_sysclk(void) ;
