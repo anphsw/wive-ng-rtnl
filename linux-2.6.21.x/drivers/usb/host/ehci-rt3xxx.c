@@ -13,8 +13,6 @@
 #include <linux/platform_device.h>
 #include <asm/rt2880/rt_mmap.h>
 
-
-
 #define SYSCFG1			(RALINK_SYSCTL_BASE + 0x14)
 #define USB0_HOST_MODE	(1UL<<10)
 
@@ -24,8 +22,6 @@
 #define USB_PS			(RALINK_SYSCTL_BASE + 0x5C)
 #define USB_PS_PORT0	(1UL<<0)
 #define USB_PS_PORT1	(1UL<<1)
-
-
 
 void static inline rt_writel(u32 val, unsigned long reg)
 {
@@ -73,7 +69,6 @@ static int rt3xxx_ehci_init(struct usb_hcd *hcd)
 
 	ehci_port_power(ehci, 0);
 
-
 	return retval;
 }
 
@@ -99,6 +94,23 @@ static const struct hc_driver rt3xxx_ehci_hc_driver = {
 #endif
 };
 
+static void try_wake_up(void)
+{
+	u32 val;
+
+	val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
+	//if(val & 0x00040000)
+	//	return;		// Someone(OHCI?) has waked it up, then just return.
+	val = val | 0x00140000;
+	*(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+	udelay(10000);	// enable port0 & port1 Phy clock
+
+	val = le32_to_cpu(*(volatile u_long *)(0xB0000034));
+	val = val & 0xFDBFFFFF;
+	*(volatile u_long *)(0xB0000034) = cpu_to_le32(val);
+	udelay(10000);	// toggle reset bit 25 & 22 to 0
+}
+
 static int rt3xxx_ehci_probe(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd;
@@ -106,6 +118,7 @@ static int rt3xxx_ehci_probe(struct platform_device *pdev)
 	struct resource *res;
 	int irq;
 	int retval;
+
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -146,7 +159,10 @@ static int rt3xxx_ehci_probe(struct platform_device *pdev)
 	}
 
 	// reset host controller
-	rt_usbhost_reset();
+	//rt_usbhost_reset();
+
+	// wake up usb module from power saving mode...
+	try_wake_up();
 
 	// change port0 to host mode
 	rt_set_host();
@@ -168,14 +184,36 @@ fail_create_hcd:
 	return retval;
 }
 
+static void try_sleep(void)
+{
+    u32 val;
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
+    val = val & 0xFFEBFFFF;
+    *(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+    udelay(10000);  // disable port0 & port1 Phy clock
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000034));
+    val = val | 0x02400000;
+    *(volatile u_long *)(0xB0000034) = cpu_to_le32(val);
+    udelay(10000);  // toggle reset bit 25 & 22 to 1
+}
+
 static int rt3xxx_ehci_remove(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
+
+	/* ehci_shutdown() is supposed to be called implicitly in 
+	   ehci-hcd common code while removing module, but it isn't. */
+	ehci_shutdown(hcd);
 
 	usb_remove_hcd(hcd);
 	iounmap(hcd->regs);
 	release_mem_region(hcd->rsrc_start, hcd->rsrc_len);
 	usb_put_hcd(hcd);
+
+	if(!usb_find_device(0x0, 0x0)) // No any other USB host controller.
+		try_sleep();
 
 	return 0;
 }
@@ -185,7 +223,10 @@ MODULE_ALIAS("rt3xxx-ehci");
 static struct platform_driver rt3xxx_ehci_driver = {
 	.probe = rt3xxx_ehci_probe,
 	.remove = rt3xxx_ehci_remove,
+	.shutdown = usb_hcd_platform_shutdown,
 	.driver = {
 		.name = "rt3xxx-ehci",
 	},
 };
+
+

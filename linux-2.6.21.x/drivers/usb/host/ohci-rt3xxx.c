@@ -3,7 +3,7 @@
  *
  * (C) Copyright 2009 Ralink Tech Company
  *
- * Bus Glue for RT3883.
+ * Bus Glue for Ralink OHCI controller.
  *
  * Written by YYHuang <yy_huang@ralinktech.com.tw>
  * Based on fragments of previous driver by Russell King et al.
@@ -16,8 +16,39 @@
 #include <linux/signal.h>
 #include <linux/platform_device.h>
 
-static int usb_hcd_rt3xxx_probe(const struct hc_driver *driver,
-			 struct platform_device *pdev)
+static void try_wake_up(void)
+{
+    u32 val;
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
+    //if(val & 0x00040000)
+    //  return;     // Someone(OHCI?) has waked it up, then just return.
+    val = val | 0x00140000;
+    *(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+    udelay(10000);  // enable port0 & port1 Phy clock
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000034));
+    val = val & 0xFDBFFFFF;
+    *(volatile u_long *)(0xB0000034) = cpu_to_le32(val);
+    udelay(10000);  // toggle reset bit 25 & 22 to 0
+}
+
+static void try_sleep(void)
+{
+    u32 val;
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
+    val = val & 0xFFEBFFFF;
+    *(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+    udelay(10000);  // disable port0 & port1 Phy clock
+
+    val = le32_to_cpu(*(volatile u_long *)(0xB0000034));
+    val = val | 0x02400000;
+    *(volatile u_long *)(0xB0000034) = cpu_to_le32(val);
+    udelay(10000);  // toggle reset bit 25 & 22 to 1
+}
+
+static int usb_hcd_rt3xxx_probe(const struct hc_driver *driver, struct platform_device *pdev)
 {
 	int retval;
 	struct usb_hcd *hcd;
@@ -48,6 +79,8 @@ static int usb_hcd_rt3xxx_probe(const struct hc_driver *driver,
 
 //	usb_host_clock = clk_get(&pdev->dev, "usb_host");
 //	ep93xx_start_hc(&pdev->dev);
+
+	try_wake_up();
 
 	ohci_hcd_init(hcd_to_ohci(hcd));
 
@@ -116,11 +149,13 @@ static struct hc_driver ohci_rt3xxx_hc_driver = {
 
 extern int usb_disabled(void);
 
+
 static int ohci_hcd_rt3xxx_drv_probe(struct platform_device *pdev)
 {
 	int ret;
 
 	ret = -ENODEV;
+
 	if (!usb_disabled())
 		ret = usb_hcd_rt3xxx_probe(&ohci_rt3xxx_hc_driver, pdev);
 
@@ -132,6 +167,9 @@ static int ohci_hcd_rt3xxx_drv_remove(struct platform_device *pdev)
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
 
 	usb_hcd_rt3xxx_remove(hcd, pdev);
+
+	if(!usb_find_device(0x0, 0x0)) // No any other USB host controller.
+		try_sleep();
 
 	return 0;
 }
