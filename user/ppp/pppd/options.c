@@ -329,12 +329,13 @@ option_t general_options[] = {
       "Enable multilink operation", OPT_PRIOSUB | OPT_ALIAS | 1 },
     { "nomultilink", o_bool, &multilink,
       "Disable multilink operation", OPT_PRIOSUB | 0 },
-    { "nomp", o_bool, &multilink,
-      "Disable multilink operation", OPT_PRIOSUB | OPT_ALIAS | 0 },
 
     { "bundle", o_string, &bundle_name,
       "Bundle name for multilink", OPT_PRIO },
 #endif /* HAVE_MULTILINK */
+
+    { "nomp", o_bool, &multilink,
+      "Disable multilink operation", OPT_PRIOSUB | OPT_ALIAS | 0 },
 
 #ifdef PLUGIN
     { "plugin", o_special, (void *)loadplugin,
