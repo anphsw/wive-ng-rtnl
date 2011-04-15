@@ -340,6 +340,14 @@
 24) More chek for prevent crashes in fastnat.<br>
 25) Consolidate some bridge code for more optimize.<br>
 26) Packet scheduler clock source set to jiffers for save cpu time.<br>
+27) Add vlan_double_tag nvram variable for enable/disable QinQ support.<br>
+28) Auto enable double vlan tag in switch at eth2 up.<br>
+29) PPP Disable multilink operation by default.<br>
+30) Fix h323: bug in parsing of ASN1 SEQOF field.<br>
+31) Initial RT5330 support.<br>
+32) Fix use ipcalc for ipt_accounting.<br>
+33) l2tp/pptp only if server and gw in different subnets need add route to server via gw.<br>
+34) Netfilter core optimize nf_hook_slow workaroudn.<br>
 
 **) Initial L2TP fastpath. Suspended... Need some rewrites.<br>
 
