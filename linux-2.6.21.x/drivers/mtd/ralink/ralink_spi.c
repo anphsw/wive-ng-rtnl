@@ -751,7 +751,16 @@ static int __devinit raspi_prob(void)
 		uint32_t ih_ksz;
 	} hdr;
 #endif
-	
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+        if(ra_check_flash_type()!=BOOT_FROM_SPI) { /* SPI */
+            return 0;
+        }
+#endif
 	chip = chip_prob();
 	
 	flash = kzalloc(sizeof *flash, GFP_KERNEL);

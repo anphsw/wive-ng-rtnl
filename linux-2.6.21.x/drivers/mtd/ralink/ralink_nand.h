@@ -2,17 +2,7 @@
 #define RT2880_NAND_H
 #include <linux/mtd/mtd.h>
 
-#if !defined (__UBOOT__)
 #include <asm/rt2880/rt_mmap.h>
-#else
-#include <rt_mmap.h>
-#define	EIO		 5	/* I/O error */
-#define	EINVAL		22	/* Invalid argument */
-#define	ENOMEM		12	/* Out of memory */
-#define	EBADMSG		74	/* Not a data message */
-#define	EUCLEAN		117	/* Structure needs cleaning */
-#endif
-
 #include "gdma.h"
 
 #define ra_inl(addr)  (*(volatile unsigned int *)(addr))

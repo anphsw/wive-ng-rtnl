@@ -24,6 +24,7 @@
 #include <linux/mtd/partitions.h>
 #include <asm/io.h>
 #include <asm/addrspace.h>
+#include <asm/rt2880/rt_mmap.h>
 #include "ralink-flash.h"
 #include "ralink-flash-map.h"
 
@@ -39,6 +40,75 @@
 #endif
 
 #define BUSWIDTH		CONFIG_MTD_PHYSMAP_BUSWIDTH
+
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+int ra_check_flash_type(void)
+{
+
+    uint8_t Id[10];
+    int syscfg=0;
+    int boot_from=0;
+    int chip_mode=0;
+
+    memset(Id, 0, sizeof(Id));
+    strncpy(Id, (char *)RALINK_SYSCTL_BASE, 6);
+    syscfg = (*((int *)(RALINK_SYSCTL_BASE + 0x10)));
+
+    if((strcmp(Id,"RT3052")==0) || (strcmp(Id, "RT3350")==0)) {
+	boot_from = (syscfg >> 16) & 0x3; 
+	switch(boot_from)
+	{
+	case 0:
+	case 1:
+	    boot_from=BOOT_FROM_NOR;
+	    break;
+	case 2:
+	    boot_from=BOOT_FROM_NAND;
+	    break;
+	case 3:
+	    boot_from=BOOT_FROM_SPI;
+	    break;
+	}
+    }else if(strcmp(Id,"RT3883")==0) {
+	boot_from = (syscfg >> 4) & 0x3; 
+	switch(boot_from)
+	{
+	case 0:
+	case 1:
+	    boot_from=BOOT_FROM_NOR;
+	    break;
+	case 2:
+	case 3:
+	    chip_mode = syscfg & 0xF;
+	    if((chip_mode==0) || (chip_mode==7)) {
+		boot_from = BOOT_FROM_SPI;
+	    }else if(chip_mode==8) {
+		boot_from = BOOT_FROM_NAND;
+	    }else {
+		printk("unknow chip_mode=%d\n",chip_mode);
+	    }
+	    break;
+	}
+    }else if(strcmp(Id,"RT3352")==0) {
+	boot_from = BOOT_FROM_SPI;
+    }else if(strcmp(Id,"RT5350")==0) {
+	boot_from = BOOT_FROM_SPI;
+    }else if(strcmp(Id,"RT2880")==0) {
+	boot_from = BOOT_FROM_NOR;
+    } else {
+	printk("%s: %s is not supported\n",__FUNCTION__, Id);
+    }
+
+    return boot_from;
+
+
+}
+#endif
 
 #ifdef CONFIG_MTD_NOR_RALINK
 static struct mtd_info *ralink_mtd[NUM_FLASH_BANKS];
@@ -109,7 +179,16 @@ int __init rt2880_mtd_init(void)
 				ntohl(hdr.ih_ksz));
 	}
 #endif
-
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+        if(ra_check_flash_type()!=BOOT_FROM_NOR) { /* NOR */
+            return 0;
+        }
+#endif
 	for (i = 0; i < NUM_FLASH_BANKS; i++) {
 		printk(KERN_NOTICE "ralink flash device: 0x%x at 0x%x\n",  (unsigned int)ralink_map[i].size, ralink_map[i].phys);
 

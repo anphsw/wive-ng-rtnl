@@ -1,25 +1,10 @@
 #ifndef __SPIC_H__
 #define __SPIC_H__
 
-#if !defined (__UBOOT__)
 #include <asm/rt2880/rt_mmap.h>
 
-
 #define RT2880_RSTCTRL_REG		(RALINK_SYSCTL_BASE+0x34)
-
-#else //__UBOOT__
-
-#include <rt_mmap.h>
-#define	EIO		 5	/* I/O error */
-#define	EINVAL		22	/* Invalid argument */
-#define	ENOMEM		12	/* Out of memory */
-#define	EBADMSG		74	/* Not a data message */
-#define	EUCLEAN		117	/* Structure needs cleaning */
-#define RALINK_SPI_RST			(1<<11)
-#endif  //__UBOOT__
-
 #define RSTCTRL_SPI_RESET		RALINK_SPI_RST
-
 #define RT2880_SPI_REG_BASE		(RALINK_SPI_BASE)
 #define RT2880_SPISTAT_REG		(RT2880_SPI_REG_BASE+0x00)
 #define RT2880_SPICFG_REG		(RT2880_SPI_REG_BASE+0x10)
@@ -79,6 +64,8 @@
 
 #define ENABLE	1
 #define DISABLE	0
+
+#define CFG_CLK_DIV SPICFG_SPICLK_DIV8
 
 #define RALINK_SYSCTL_ADDR		RALINK_SYSCTL_BASE	// system control
 #define RALINK_REG_GPIOMODE		(RALINK_SYSCTL_ADDR + 0x60)

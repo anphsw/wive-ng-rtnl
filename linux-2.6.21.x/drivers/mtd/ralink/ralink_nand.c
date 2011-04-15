@@ -68,6 +68,8 @@ module_param(ranfc_verify, int, 0644);
 #define CLEAR_INT_STATUS() 	ra_outl(NFC_INT_ST, ra_inl(NFC_INT_ST))
 #define NFC_TRANS_DONE() 	(ra_inl(NFC_INT_ST) & INT_ST_ND_DONE)
 
+#define ALIGNE_16(a) (((unsigned long)(a)+15) & ~15)
+
 //include map flash
 #include "../maps/ralink-flash-map.h"
 
@@ -1766,6 +1768,7 @@ int __devinit ra_nand_init(void)
 {
 	struct ra_nand_chip *ra;
 	int alloc_size, bbt_size, buffers_size;
+	unsigned i;
 #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	loff_t offs;
 	struct __image_header {
@@ -1773,8 +1776,16 @@ int __devinit ra_nand_init(void)
 		uint32_t ih_ksz;
 	} hdr;
 #endif
-	
-#define ALIGNE_16(a) (((unsigned long)(a)+15) & ~15)
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+        if(ra_check_flash_type()!=BOOT_FROM_NAND) { /* NAND */
+                return 0;
+        }
+#endif	
 	buffers_size = ALIGNE_16((1<<CONFIG_PAGE_SIZE_BIT) + (1<<CONFIG_OOBSIZE_PER_PAGE_BIT)); //ra->buffers
 	bbt_size = BBTTAG_BITS * (1<<(CONFIG_CHIP_SIZE_BIT - (CONFIG_PAGE_SIZE_BIT + CONFIG_NUMPAGE_PER_BLOCK_BIT))) / 8; //ra->bbt
 	bbt_size = ALIGNE_16(bbt_size);
@@ -1787,11 +1798,8 @@ int __devinit ra_nand_init(void)
 	//make sure gpio-0 is input
 	ra_outl(RALINK_PIO_BASE+0x24, ra_inl(RALINK_PIO_BASE+0x24) & ~0x01);
 
-#if !defined (__UBOOT__)
 	ra = (struct ra_nand_chip *)kzalloc(alloc_size, GFP_KERNEL | GFP_DMA);
-#else
-	ra = (struct ra_nand_chip *)malloc(alloc_size);
-#endif
+
 	if (!ra) {
 		printk("%s: mem alloc fail \n", __func__);
 		return -ENOMEM;
@@ -1855,7 +1863,6 @@ int __devinit ra_nand_init(void)
 	//ranfc_mtd->get_device; ranfc_mtd->put_device
 	ranfc_mtd->priv = ra;
 
-#if !defined (__UBOOT__)
 	ranfc_mtd->owner = THIS_MODULE;
 	ra->controller = &ra->hwcontrol;
 	mutex_init(ra->controller);
@@ -1878,9 +1885,6 @@ int __devinit ra_nand_init(void)
 	add_mtd_partitions(ranfc_mtd, rt2880_partitions, ARRAY_SIZE(rt2880_partitions));
 
 	return 0;
-#else
-	return ranfc_mtd;
-#endif
 }
 
 static void __devexit ra_nand_remove(void)

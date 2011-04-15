@@ -1,6 +1,20 @@
 #ifndef __RALINK_FLASH_H__
 #define __RALINK_FLASH_H__
 
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+
+    /* For autodetect flash type */
+    #define BOOT_FROM_NOR   0
+    #define BOOT_FROM_NAND  2
+    #define BOOT_FROM_SPI   3
+    extern int ra_check_flash_type(void);
+#endif
+
 #if defined (CONFIG_RT2880_FLASH_32M)
 #define MTD_BOOT_PART_SIZE	0x40000
 #define	MTD_CONFIG_PART_SIZE	0x20000
