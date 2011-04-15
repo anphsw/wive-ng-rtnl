@@ -43,7 +43,15 @@ config3052()
 	switch reg w 14 405555
 	switch reg w 50 2001
 	switch reg w 98 7f3f
-	switch reg w e4 3f
+
+	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
+        if [ "$vlan_double_tag" = "1" ]; then
+	    switch reg w e4 3f
+            sysctl -w net.ipv4.vlan_double_tag=1
+        else
+	    switch reg w e4 0
+            sysctl -w net.ipv4.vlan_double_tag=0
+        fi
 
 	# Calculating PVID on ports 1 and 0
 	r40=`printf "%x" $((($2<<12)|$1))`
