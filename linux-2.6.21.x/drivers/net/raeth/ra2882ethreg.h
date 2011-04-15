@@ -654,7 +654,7 @@ typedef struct end_device
     struct net_device *PseudoDev;
     unsigned int isPseudo;
 #endif
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 	struct mii_if_info	mii_info;
 #endif
 } END_DEVICE, *pEND_DEVICE;

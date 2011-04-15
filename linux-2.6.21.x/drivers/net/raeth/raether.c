@@ -98,7 +98,7 @@ static unsigned int		phy_rx_ring;
 static unsigned long tx_ring_full=0;
 #endif
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 extern struct ethtool_ops	ra_ethtool_ops;
 #endif
 
@@ -1420,7 +1420,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 #endif
 #endif
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 	dev->ethtool_ops	= &ra_ethtool_ops;
 #endif
 	dev->do_ioctl		= ei_ioctl;

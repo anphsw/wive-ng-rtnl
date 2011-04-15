@@ -14,6 +14,10 @@ else
 ifeq ($(CONFIG_RT_3052_ESW),y)
 raeth-objs += ra_ethtool.o
 endif
+else
+ifeq ($(CONFIG_RALINK_RT3883),y)
+raeth-objs += ra_ethtool.o
+endif
 endif
 endif
 

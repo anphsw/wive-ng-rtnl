@@ -201,7 +201,7 @@ void ra2880Mac2AddressSet(MAC_INFO *MACInfo, char p[6])
     return;
 }
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 /*
  *	mii_mgr_read wrapper for mii.o ethtool
  */
@@ -249,7 +249,7 @@ void hard_init(struct net_device *dev)
 	else
 		printk("HWnetInit() failed!!!\n");
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 	// init mii structure
 	ei_local->mii_info.dev = dev;
 	ei_local->mii_info.mdio_read = mdio_read;
@@ -461,7 +461,7 @@ void dump_reg()
 	printk("GDMA_RX_LERCNT0(0x%08x)     : 0x%08x\n", GDMA_RX_LERCNT0, sysRegRead(GDMA_RX_LERCNT0));
 	printk("GDMA_RX_CERCNT0(0x%08x)     : 0x%08x\n\n", GDMA_RX_CERCNT0, sysRegRead(GDMA_RX_CERCNT0));	
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 	// just for debug
 	printk("The current PHY address selected by ethtool is %d\n", get_current_phy_address());
 #endif
@@ -539,7 +539,7 @@ int RaQOSRegRead(void)
 }
 #endif
 
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 /*
  * proc write procedure
  */
@@ -574,7 +574,7 @@ int debug_proc_init(void)
    
     if ((procGmac = create_proc_entry(PROCREG_GMAC, 0, procRegDir))){
 	 procGmac->read_proc = (read_proc_t*)&RegReadMain;
-#if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
+#if defined (CONFIG_ETHTOOL)
 	 procGmac->write_proc = (write_proc_t*)&change_phyid;
 #endif
 	}
