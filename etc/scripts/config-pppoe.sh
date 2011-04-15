@@ -112,6 +112,7 @@ fi
 cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
+nomp
 lcp-echo-failure 10
 lcp-echo-interval 5
 $LCPECHO

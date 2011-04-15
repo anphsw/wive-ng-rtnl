@@ -165,6 +165,7 @@ echo "==================START-L2TP-CLIENT======================="
     $PAP
     $CHAP
     noipx
+    nomp
     noproxyarp
     $MTU
     $MRU
