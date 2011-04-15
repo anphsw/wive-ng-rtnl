@@ -8,7 +8,6 @@
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350)
 
-    /* For autodetect flash type */
     #define BOOT_FROM_NOR   0
     #define BOOT_FROM_NAND  2
     #define BOOT_FROM_SPI   3
