@@ -89,7 +89,9 @@ static int rx_wants_alloc_idx0;   /* Point to the next RXD CPU wants to allocate
 
 static struct PDMA_rxdesc	*rx_ring;
 static unsigned int		phy_rx_ring;
+#ifndef CONFIG_RAETH_QOS
 static unsigned long tx_ring_full=0;
+#endif
 
 #if defined (CONFIG_ETHTOOL) && ( defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW) )
 extern struct ethtool_ops	ra_ethtool_ops;
