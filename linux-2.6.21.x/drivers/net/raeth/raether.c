@@ -1082,10 +1082,10 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		    port_offset=29-send_sigusr_dhcpc; //ports offset is 25..29 = 4..0
 		    if ((stat & (1<<port_offset)) || !(stat_curr & (1<<port_offset)))
 		    {
-			    printk(KERN_INFO "RT305x_ESW: Link Status Changed\n");
+			    RAETH_PRINT(KERN_INFO "RT305x_ESW: Link Status Changed\n");
 			    goto out;
 		    }
-		  printk(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");	
+		  RAETH_PRINT(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");	
 		}
 
 		//send SIGUSR1 to dhcp client
