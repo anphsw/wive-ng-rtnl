@@ -1845,6 +1845,8 @@ int ei_open(struct net_device *dev)
 	/* Enable double vlan support */
 	if(vlan_double_tag)
 	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0x3f);
+	else
+	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0);
 #endif
 	return 0;
 }
