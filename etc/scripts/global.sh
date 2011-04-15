@@ -240,11 +240,14 @@ fi
 resetPhy()
 {
 if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    $LOG "Reinit power mode for all switch ports"
     wan_port=`nvram_get 2860 wan_port`
     if [ "$wan_port" = "0" ]; then
-	$LOG "Reinit power mode for all switch ports"
 	#workaroud for dir-300NRU
 	config-vlan.sh 2 FFFFF
+    else
+	#only link up/down
+	config-vlan.sh 2 RRRRR
     fi
 fi
 }
