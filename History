@@ -352,6 +352,11 @@
 36) More clean autodetect procedure of 2 stage.<br>
 37) Add autodetect for NAND flash type. Now single image may be work at all flash types.<br>
 
+<br>
+<b>1.5.x</b><br>
+1) PPE now work. Initial HW_NAT mode support.<br>
+2) For natFastpath nvram_variable add some modes (0-disable,1-SoftwareFastnatOnly,2-HardwareFastNatOnly,3-ComplexFastnat).<br>
+
 **) Initial L2TP fastpath. Suspended... Need some rewrites.<br>
 
 <br><br>
