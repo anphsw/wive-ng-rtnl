@@ -316,7 +316,7 @@ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(C
 MODFLAGS	= -DMODULE
 
 AFLAGS_MODULE   = $(MODFLAGS)
-LDFLAGS_MODULE  = -r
+LDFLAGS_MODULE  = -r --strip-discarded
 # for kernel always use full version optimization
 CFLAGS_KERNEL	=  $(MOREOPTIMIZE)
 AFLAGS_KERNEL	=
