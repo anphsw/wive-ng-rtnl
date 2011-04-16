@@ -14,7 +14,7 @@ kill_apps="smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslo
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
 	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq"
 
-rmmod_mod="ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
+rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \
 	    act_gact act_police cls_tcindex em_cmp em_u32 sch_gred sch_red act_ipt cls_fw cls_u32 \
 	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm"
