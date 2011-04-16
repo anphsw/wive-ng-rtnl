@@ -84,7 +84,7 @@ choice
 
 config  RA_NAT_HW
 	select RA_HW_NAT
-        bool "Hardware NAT acceleration"
+        tristate "Hardware NAT acceleration"
 
 config RA_NAT_NONE
         bool "Disable NAT acceleration"
