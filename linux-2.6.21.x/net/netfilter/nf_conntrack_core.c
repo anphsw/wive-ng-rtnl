@@ -1221,14 +1221,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
                 is_helper = 1;
 #endif
 
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (is_helper || protonum == IPPROTO_GRE || hooknum == NF_IP_LOCAL_OUT) {
-            if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
-                    FOE_ALG(*pskb)=1;
-	    }
-	}
-#endif
-
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	nat = nfct_nat(ct);
 	if (ipv4_conntrack_fastnat && bcm_nat_bind_hook && nat && pf == PF_INET) {
@@ -1248,6 +1240,14 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 			ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 		    }
 		}
+	}
+#endif
+
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	if (is_helper || protonum == IPPROTO_GRE || hooknum == NF_IP_LOCAL_OUT) {
+            if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
+                    FOE_ALG(*pskb)=1;
+	    }
 	}
 #endif
 
