@@ -313,11 +313,11 @@ kernel_ext_en()
 	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
 	    $LOG "Nat mode SW_FASTPATH"
-	else if [ "$natFastpath" = "2" ]; then
+	elif [ "$natFastpath" = "2" ]; then
 	    modprobe -q hw_nat
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	    $LOG "Nat mode HW_NAT"
-	else if [ "$natFastpath" = "3" ]; then
+	elif [ "$natFastpath" = "3" ]; then
 	    modprobe -q hw_nat
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
 	    $LOG "Nat mode COMPLEX"
