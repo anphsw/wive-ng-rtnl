@@ -144,7 +144,7 @@ static void crypto_larval_kill(struct crypto_alg *alg)
 	down_write(&crypto_alg_sem);
 	list_del(&alg->cra_list);
 	up_write(&crypto_alg_sem);
-	complete(&larval->completion);
+	complete_all(&larval->completion);
 	crypto_alg_put(alg);
 }
 
@@ -423,21 +423,6 @@ void crypto_free_tfm(struct crypto_tfm *tfm)
 
 EXPORT_SYMBOL_GPL(crypto_free_tfm);
 
-int crypto_has_alg(const char *name, u32 type, u32 mask)
-{
-	int ret = 0;
-	struct crypto_alg *alg = crypto_alg_mod_lookup(name, type, mask);
-	
-	if (!IS_ERR(alg)) {
-		crypto_mod_put(alg);
-		ret = 1;
-	}
-	
-	return ret;
-}
-
-EXPORT_SYMBOL_GPL(crypto_has_alg);
-
 int crypto_alg_available(const char *name, u32 flags)
 {
 	int ret = 0;
@@ -453,3 +438,18 @@ int crypto_alg_available(const char *name, u32 flags)
 }
 
 EXPORT_SYMBOL_GPL(crypto_alg_available);
+
+
+int crypto_has_alg(const char *name, u32 type, u32 mask)
+{
+	int ret = 0;
+	struct crypto_alg *alg = crypto_alg_mod_lookup(name, type, mask);
+	
+	if (!IS_ERR(alg)) {
+		crypto_mod_put(alg);
+		ret = 1;
+	}
+	
+	return ret;
+}
+EXPORT_SYMBOL_GPL(crypto_has_alg);
