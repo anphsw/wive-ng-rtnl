@@ -42,35 +42,6 @@ typedef struct vpn_status_t
 	long          color;
 } vpn_status_t;
 
-/*** Busybox leases.h ***/
-
-static inline uint64_t hton64(uint64_t v)
-{
-        return (((uint64_t)htonl(v)) << 32) | htonl(v >> 32);
-}
-
-#define ntoh64(v) hton64(v)
-typedef uint32_t leasetime_t;
-typedef int32_t signed_leasetime_t;
-
-struct dyn_lease {
-	/* "nip": IP in network order */
-	/* Unix time when lease expires. Kept in memory in host order.
-	 * When written to file, converted to network order
-	 * and adjusted (current time subtracted) */
-	leasetime_t expires;
-	uint32_t lease_nip;
-	/* We use lease_mac[6], since e.g. ARP probing uses
-	 * only 6 first bytes anyway. We check received dhcp packets
-	 * that their hlen == 6 and thus chaddr has only 6 significant bytes
-	 * (dhcp packet has chaddr[16], not [6])
-	 */
-	uint8_t lease_mac[6];
-	char hostname[20];
-	uint8_t pad[2];
-	/* total size is a multiply of 4 */
-} __attribute__((__packed__));
-
 #ifdef CONFIG_NET_SCHED
 #include      "qos.h"
 #endif
@@ -112,7 +83,6 @@ static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
-static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv);
 static int getDns(int eid, webs_t wp, int argc, char_t **argv);
 static int getHostSupp(int eid, webs_t wp, int argc, char_t **argv);
 static int getIfLiveWeb(int eid, webs_t wp, int argc, char_t **argv);
@@ -143,7 +113,6 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query);
 #endif
 
 void formDefineInternet(void) {
-	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDns"), getDns);
 	websAspDefine(T("getHostSupp"), getHostSupp);
 	websAspDefine(T("getIfLiveWeb"), getIfLiveWeb);
@@ -786,77 +755,6 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 	else
 		websDone(wp, 200);
-}
-
-
-/*
- * description: write DHCP client list
- */
-static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
-{
-	FILE *fp;
-	struct dyn_lease lease;
-
-	int i;
-	struct in_addr addr;
-	int64_t written_at, curr, expired_abs;
-	
-	//if DHCP is disabled - just exit
-	char* dhcpEnabled = nvram_get(RT2860_NVRAM, "dhcpEnabled");
-	if (!strncmp(dhcpEnabled, "0", 2))
-		return 0;
-
-	doSystem("killall -q -USR1 udhcpd");
-
-	fp = fopen("/var/udhcpd.leases", "r");
-	if (NULL == fp)
-		return websWrite(wp, T(""));
-
-	/* Read header of dhcpleases */
-	if (fread(&written_at, 1, sizeof(written_at), fp) != sizeof(written_at))
-		return 0;
-	written_at = ntoh64(written_at);
-	curr = time(NULL);
-	if (curr < written_at)
-		written_at = curr; /* lease file from future! :) */
-	
-	/* Output leases file */
-	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease))
-	{
-		// Output structure
-		// Host
-		websWrite(wp, T("<tr><td>%s</td>"), lease.hostname);
-		// MAC
-		websWrite(wp, T("<td>%02X"), lease.lease_mac[0]);
-		for (i = 1; i < 6; i++)
-			websWrite(wp, T(":%02X"), lease.lease_mac[i]);
-		// IP
-		addr.s_addr = lease.lease_nip;
-		websWrite(wp, T("</td><td>%s</td><td>"), inet_ntoa(addr));
-
-		// Expire Date
-		expired_abs = ntohl(lease.expires) + written_at;
-		if (expired_abs > curr)
-		{
-			leasetime_t expires = expired_abs - curr;
-			unsigned d = expires / (24*60*60);
-			expires %= (24*60*60);
-			unsigned h = expires / (60*60);
-			expires %= (60*60);
-			unsigned m = expires / 60;
-			expires %= 60;
-
-			if (d>0)
-				websWrite(wp, T("%u days "), d);
-			websWrite(wp, T("%02u:%02u:%02u</td>"), h, m, (unsigned)expires);
-		}
-		else
-			websWrite(wp, T("expired</td>"));
-		websWrite(wp, "</tr>\n");
-	}
-
-	fclose(fp);
-	return 0;
 }
 
 /*

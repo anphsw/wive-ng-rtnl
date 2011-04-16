@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
 <script language="JavaScript" type="text/javascript">
 
 Butterlate.setTextDomain("internet");
@@ -59,8 +60,7 @@ function addIPItem(form)
 		return;
 	if (!validateIP(form.dhcpStaticIP, true))
 		return;
-	var row = [ form.dhcpStaticMAC.value, form.dhcpStaticIP.value ];
-	dhcpList[dhcpList.length] = row;
+	dhcpList.push( [ form.dhcpStaticMAC.value, form.dhcpStaticIP.value ] );
 	genTable();
 }
 
@@ -68,7 +68,14 @@ function deleteIPItem(index)
 {
 	if ((index>=0) && (index < dhcpList.length))
 	{
+		var row = dhcpList[index];
 		dhcpList.splice(index, 1);
+		
+		// Update DHCP table
+		var tbl = document.getElementById('dhcpClientsTable');
+		if (tbl != null)
+			updateDhcpClientsList(tbl);
+		
 		genTable();
 	}
 }
@@ -133,12 +140,6 @@ function initTranslation()
 	_TR("lDhcpGateway", "inet gateway");
 	_TR("lDhcpLease", "lan dhcp lease");
 	
-	_TR("dClients", "dhcp clients");
-	_TR("dHostname", "inet hostname");
-	_TR("dMac", "inet mac");
-	_TR("dIp", "inet ip");
-	_TR("dExpr", "dhcp expire");
-	
 	_TRV("lApply", "inet apply");
 	_TRV("lCancel", "inet cancel");
 }
@@ -152,6 +153,8 @@ function initValue()
 
 	form.lanDhcpType.options.selectedIndex = 1*dhcp;
 	dhcpTypeSwitch();
+	
+	loadDhcpClientsList();
 }
 
 function CheckValue()
@@ -203,28 +206,113 @@ function CheckValue()
 	return true;
 }
 
+function updateDhcpClientsList(element)
+{
+	// Update all checkboxes
+	var rows = element.getElementsByTagName('INPUT');
+	for (var i=0; i<rows.length; i++)
+	{
+		// Get check ID
+		var id = rows[i].id;
+		if (id == null)
+			next;
+		// Get values
+		var ip = document.getElementById(id + '_ip');
+		if (ip == null)
+			next;
+		ip = ip.innerHTML;
+		var mac = document.getElementById(id + '_mac');
+		if (mac == null)
+			next;
+		mac = mac.innerHTML;
+		
+		// Set-up checked value
+		rows[i].checked = (findEntry(mac, ip) > 0);
+	}
+}
+
+function loadDhcpClientsList()
+{
+	var reloader = function(element)
+	{
+		initTranslation();
+		updateDhcpClientsList(element);
+		self.setTimeout('loadDhcpClientsList();', 5000);
+	}
+
+	ajaxLoadElement("dhcpClientsTable", "/services/dhcp_clist.asp", reloader);
+}
+
+function findEntry(mac, ip)
+{
+	// Check if item not exists
+	for (var i=0; i<dhcpList.length; i++)
+	{
+		var row = dhcpList[i];
+		if ((row[0] == mac) && (row[1] == ip))
+			return i;
+	}
+	
+	return -1;
+}
+
+function toggleDhcpTable(check)
+{
+	// Get check ID
+	var id = check.id;
+	if (id == null)
+		return;
+	// Get values
+	var ip = document.getElementById(id + '_ip');
+	if (ip == null)
+		return;
+	ip = ip.innerHTML;
+	var mac = document.getElementById(id + '_mac');
+	if (mac == null)
+		return;
+	mac = mac.innerHTML;
+	
+	// Check action
+	if (check.checked) // Add item to list
+	{
+		if (!validateMAC(mac, true))
+			return;
+		if (!validateIP(ip, true))
+			return;
+
+		if (findEntry(mac, ip) < 0)
+		{
+			dhcpList.push( [ mac, ip ] );
+			genTable();
+		}
+	}
+	else // Remove item from list
+	{
+		for (var i=0; i<dhcpList.length; i++)
+		{
+			var row = dhcpList[i];
+			if ((row[0] == mac) && (row[1] == ip))
+			{
+				dhcpList.splice(i, 1);
+				genTable();
+				return;
+			}
+		}
+	}
+}
+
 </script>
 </head>
 
-<body onLoad="initValue()">
+<body onLoad="initValue();">
 <table class="body"><tr><td>
 
 <h1 id="lTitle"></h1>
 <p id="lIntroduction"></p>
 <hr>
 
-<table width="95%" border="1" cellspacing="1" cellpadding="2">
-<tr>
-	<td class="title" colspan="4" id="dClients">DHCP Clients</td>
-</tr>
-<tr style="background-color: #E8F8FF">
-	<td id="dHostname">Hostname</td>
-	<td id="dMac">MAC Address</td>
-	<td id="dIp">IP Address</td>
-	<td id="dExpr">Expires in</td>
-</tr>
-	<% getDhcpCliList(); %>
-</table>
+<div id="dhcpClientsTable">
+</div>
 
 <form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue()">
 

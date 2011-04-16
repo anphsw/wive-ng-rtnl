@@ -126,10 +126,10 @@ function initValue()
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 	if (opmode == "4")
 	{
-	    form.natFastpath.value = defaultNumber("0", "1");
-	    form.natFastpath.disabled = true;
+		form.natFastpath.value = defaultNumber("0", "1");
+		form.natFastpath.disabled = true;
 	} else {
-	    form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+		form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
 	}
 	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
@@ -192,7 +192,9 @@ function CheckValue()
 <td>
 	<select name="natFastpath" class="half">
 		<option value="0">Disable</option>
-		<option value="1">Enable</option>
+		<option value="1">Software</option>
+		<option value="2">Hardware</option>
+		<option value="3">Complex</option>
 	</select>
 </td>
 </tr>

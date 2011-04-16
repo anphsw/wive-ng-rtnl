@@ -53,7 +53,7 @@ function genRandomParam(uri)
 	return res + "msieSucks=" + d.getTime() + "." + Math.round(Math.random()*100000000.0);
 }
 
-function ajaxPerformRequest(uri)
+function ajaxPerformRequest(uri, handler)
 {
 	var xmlHttp = createXMLHttp();
 	if (xmlHttp == null)
@@ -63,6 +63,12 @@ function ajaxPerformRequest(uri)
 	{
 		if (xmlHttp.readyState == 4)
 		{
+			if (handler != null)
+			{
+				handler(xmlHttp.responseText);
+				handler = null;
+			}
+			
 			// Free resources
 			xmlHttp.onreadystatechange = null;
 			xmlHttp = null;
@@ -125,7 +131,7 @@ function ajaxLoadElement(elementID, url, onLoadAction)
 			xmlHttp = null;
 
 			if (onLoadAction != null)
-				onLoadAction();
+				onLoadAction(element);
 		}
 	}
 	

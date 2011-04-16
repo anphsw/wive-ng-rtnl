@@ -58,22 +58,26 @@ function validateMAC(mac, info)
 function validateIP(ip, info)
 {
 	var re = /^(?:(?:0|1\d{0,2}|2([0-4]\d?|5[0-5]?|[6-9]?)|[3-9]\d?)\.){3}(?:0|1\d{0,2}|2([0-4]\d?|5[0-5]?|[6-9]?)|[3-9]\d?)$/;
+	var is_string = typeof(ip) == 'string';
+	var value = (is_string) ? ip : ip.value;
 	
-	if (ip.value == "")
+	if (value == "")
 	{
 		if (info)
 		{
 			alert("Error. IP address is empty.");
-			ip.focus();
+			if (!is_string)
+				ip.focus();
 		}
 		return false;
 	}
-	if (!re.test(ip.value))
+	if (!re.test(value))
 	{
 		if (info)
 		{
 			alert("Error. Invalid IP address format! (0-255.0-255.0-255.0-255)");
-			ip.focus();
+			if (!is_string)
+				ip.focus();
 		}
 		return false;
 	}
