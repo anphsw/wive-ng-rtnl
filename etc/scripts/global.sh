@@ -284,6 +284,7 @@ kernel_ext_en()
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
     getLanIfName
     getWanIfName
+    LOG="echo KERNEL_EXT: "
 
     #This is set only if wan or lan in bridge------------------------
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
@@ -308,9 +309,21 @@ kernel_ext_en()
     #----In bridge and chillispot mode not fastnat and passth use---
     if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
 	#----Fastpath for nat enable--------------------------------
-	if [ "$natFastpath" != "0" ]; then
+	if [ "$natFastpath" = "1" ]; then
+	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	    $LOG "Nat mode SW_FASTPATH"
+	else if [ "$natFastpath" = "2" ]; then
+	    modprobe -q hw_nat
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	    $LOG "Nat mode HW_NAT"
+	else if [ "$natFastpath" = "3" ]; then
+	    modprobe -q hw_nat
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	    $LOG "Nat mode COMPLEX"
 	else
+	    $LOG "Nat mode DISABLE"
+	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	fi
 	#----Direct pass from kernel--------------------------------
@@ -325,7 +338,9 @@ kernel_ext_en()
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
     else
+	    $LOG "Nat mode DISABLE"
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	    rmmod hw_nat > /dev/null 2>&1
 	    echo "null,null" > /proc/pthrough/pppoe
 	    echo "null,null" > /proc/pthrough/ipv6
     fi
