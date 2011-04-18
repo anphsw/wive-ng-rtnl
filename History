@@ -354,7 +354,7 @@
 
 <br>
 <b>1.6.x</b><br>
-1) PPE now work. Initial HW_NAT mode support.<br>
+1) PPE now work. Initial HW_NAT and PPPOE Offload mode support.<br>
 2) For natFastpath nvram_variable add some modes (0-disable,1-SoftwareFastnatOnly,2-HardwareFastNatOnly,3-ComplexFastnat).<br>
 3) Add select leases dress for static leases from list.<br>
 
