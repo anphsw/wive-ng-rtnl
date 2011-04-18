@@ -39,12 +39,6 @@ int __init rt2880_module_init(VOID);
 module_init(rt2880_module_init);
 module_exit(rt2880_module_exit);
 
-#if defined(CONFIG_RA_CLASSIFIER)&&(!defined(CONFIG_RA_CLASSIFIER_MODULE)) 	 
-extern int (*ra_classifier_init_func) (void) ; 	 
-extern void (*ra_classifier_release_func) (void) ; 	 
-extern struct proc_dir_entry *proc_ptr, *proc_ralink_wl_video;	 
-#endif
-
 int rt2880_module_init(VOID)
 {
 	struct  net_device		*net_dev;
@@ -123,12 +117,6 @@ int rt2880_module_init(VOID)
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2880_probe\n"));
 
-#if defined(CONFIG_RA_CLASSIFIER)&&(!defined(CONFIG_RA_CLASSIFIER_MODULE)) 	 
-    proc_ptr = proc_ralink_wl_video; 	 
-    if(ra_classifier_init_func!=NULL) 	 
-	    ra_classifier_init_func(); 	 
-#endif
-
 	return 0;
 
 err_out_free_netdev:
@@ -177,12 +165,6 @@ VOID rt2880_module_exit(VOID)
 	// Free the root net_device.
 	RtmpOSNetDevFree(net_dev);
 	
-#if defined(CONFIG_RA_CLASSIFIER)&&(!defined(CONFIG_RA_CLASSIFIER_MODULE)) 	 
-    proc_ptr = proc_ralink_wl_video; 	 
-    if(ra_classifier_release_func!=NULL) 	 
-	    ra_classifier_release_func(); 	 
-#endif
-
 	wl_proc_exit();
 }
 

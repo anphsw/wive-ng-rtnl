@@ -54,13 +54,6 @@ extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
 
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-/* Qwert+
- */
-#include <asm/mipsregs.h>
-extern int (*ra_classifier_hook_rx)(struct sk_buff *skb, unsigned long cur_cycle);
-#endif /* CONFIG_RA_CLASSIFIER */
-
 #if defined (CONFIG_RALINK_RT3052_MP2)
 int32_t mcast_rx(struct sk_buff * skb);
 int32_t mcast_tx(struct sk_buff * skb);
@@ -672,15 +665,6 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 #ifdef CONFIG_RT2880_BRIDGING_ONLY
 		rx_skb->cb[22]=0xa8;
 #endif
-
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-		/* Qwert+
-		 */
-		if(ra_classifier_hook_rx!= NULL)
-		{
-			ra_classifier_hook_rx(rx_skb, read_c0_count());
-		}
-#endif /* CONFIG_RA_CLASSIFIER */
 
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;

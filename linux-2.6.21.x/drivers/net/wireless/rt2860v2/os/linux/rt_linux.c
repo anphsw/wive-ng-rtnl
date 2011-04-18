@@ -3,11 +3,6 @@
 ULONG	RTDebugLevel = RT_DEBUG_ERROR;
 
 #ifdef RTMP_RBUS_SUPPORT
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-extern int (*ra_classifier_hook_rx) (struct sk_buff * skb, unsigned long cycle);
-extern volatile unsigned long classifier_cur_cycle;
-#endif // CONFIG_RA_CLASSIFIER //
-
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../../../../../../net/nat/hw_nat/ra_nat.h"
 #include "../../../../../../net/nat/hw_nat/frame_engine.h"
@@ -847,17 +842,6 @@ void announce_802_3_packet(
 #ifdef CONFIG_RT2880_BRIDGING_ONLY
 	pRxPkt->cb[22]=0xa8;
 #endif // CONFIG_RT2880_BRIDGING_ONLY //
-
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-	if(ra_classifier_hook_rx!= NULL)
-	{
-		unsigned int flags;
-		
-		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
-		ra_classifier_hook_rx(pRxPkt, classifier_cur_cycle);
-		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
-	}
-#endif // defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE) //
 
 #if !defined(CONFIG_RA_NAT_NONE)
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)

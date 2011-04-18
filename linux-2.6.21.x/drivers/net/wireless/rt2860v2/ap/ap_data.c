@@ -35,14 +35,6 @@
 #define IS_MULTICAST_MAC_ADDR(Addr)			((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) != 0xff))
 #define IS_BROADCAST_MAC_ADDR(Addr)			((((Addr[0]) & 0xff) == 0xff))
 
-#ifdef LINUX
-#ifdef RTMP_RBUS_SUPPORT
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-extern volatile unsigned long classifier_cur_cycle;
-#endif // CONFIG_RA_CLASSIFIER //
-#endif // RTMP_RBUS_SUPPORT //
-#endif // LINUX //
-
 static VOID APFindCipherAlgorithm(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk);
@@ -4060,18 +4052,6 @@ BOOLEAN APRxDoneInterruptHandle(
 #ifdef WDS_SUPPORT
 	MAC_TABLE_ENTRY	    			*pEntry = NULL;
 #endif
-
-#ifdef LINUX
-#ifdef RTMP_RBUS_SUPPORT
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
-#if defined(CONFIG_RALINK_EXTERNAL_TIMER)
-	classifier_cur_cycle = (*((volatile u32 *)(0xB0000D08))&0x0FFFF);
-#else
-	classifier_cur_cycle = read_c0_count();
-#endif // CONFIG_RALINK_EXTERNAL_TIMER //
-#endif // CONFIG_RA_CLASSIFIER //
-#endif // RTMP_RBUS_SUPPORT //
-#endif // LINUX //
 
 	RxProcessed = RxPending = 0;
 
