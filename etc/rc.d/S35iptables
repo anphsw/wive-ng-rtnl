@@ -162,11 +162,15 @@ start() {
 		$LOG "Set macipport_filter rules"
 		chmod 777 /etc/macipfilter
 		/etc/macipfilter
-		if [ "$DefaultFirewallPolicy" = "1" ]; then
+		if [ "$DefaultFirewallPolicy" = "1" ] && [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
 		    $LOG "Default policy macipport_filter DROP"
 		    iptables -t filter -A macipport_filter -j DROP
 		else
-		    $LOG "Default policy macipport_filter ACCEPT"
+		    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
+			$LOG "Default policy macipport_filter ACCEPT"
+		    else
+			$LOG "HW_NAT ENABLED. Forward DP-ACCEPT"
+		    fi
 		    iptables -t filter -A macipport_filter -j ACCEPT
 		fi
 	    fi
@@ -331,6 +335,7 @@ get_param() {
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
+    natFastpath=`nvram_get 2860 natFastpath`
 }
 
 case "$1" in

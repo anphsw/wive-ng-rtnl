@@ -359,7 +359,7 @@
 3) Add select leases adress for static leases from list.<br>
 4) Fix freez at reload wifi modules. Need remove hw_nat first.<br>
 5) Revert workaround for some not correct configured in uboot devices as DIR-300NRU.<br>
-
+6) Fix ipmacfilter in HardwareFastNatOnly and ComplexFastnat mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
