@@ -360,6 +360,8 @@
 4) Fix freez at reload wifi modules. Need remove hw_nat first.<br>
 5) Revert workaround for some not correct configured in uboot devices as DIR-300NRU.<br>
 6) Fix ipmacfilter in HardwareFastNatOnly and ComplexFastnat mode.<br>
+7) Use states for servicelimit incoming connections and some macros in iptables script for readable.<br>
+8) Default INPUT policy now set to DROP.<br>
 
 <br><br>
 <b>For support see:</b><br>

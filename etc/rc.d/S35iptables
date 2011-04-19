@@ -17,7 +17,7 @@ start() {
 #########################################DEFAULTRULES###################################
 	#default filters
 	$LOG "Set default filters"
-	iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
 	#only eth2.2 WAN interface recived multicast
 	if [ "$OperationMode" != "0" ]; then    
@@ -44,65 +44,65 @@ start() {
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
 	$LOG "web limit"
 	if [ "$RemoteManagement" != "0" ]; then
-    	    iptables -A servicelimit -p tcp --dport 80 -m connlimit --connlimit-above 8 -j REJECT
+    	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 8 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
-    		    iptables -A servicelimit -i $wan_if -p tcp --dport 80 -j DROP
-    		    iptables -A servicelimit -i ppp+ -p tcp --dport 80 -j DROP
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
+    		    iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 80 -j DROP
 		fi
-    		iptables -A servicelimit -i $lan_if -p tcp --dport 80 -j ACCEPT
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 80 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if -p tcp --dport 80 -j ACCEPT
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 80 -j ACCEPT
 	     fi
 	    elif [ "$RemoteManagement" = "2" ]; then
-    		iptables -A servicelimit -p tcp --dport 80 -j ACCEPT
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport 80 -j ACCEPT
 	    fi
 	else	    
-    	    iptables -A servicelimit -p tcp --dport 80 -j DROP
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 80 -j DROP
 	fi
 	$LOG "ssh limit"
 	if [ "$RemoteSSH" != "0" ]; then
-    	    iptables -A servicelimit -p tcp --dport 22 -m connlimit --connlimit-above 4 -j REJECT
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
-    		    iptables -A servicelimit -i $wan_if -p tcp --dport 22 -j DROP
-    		    iptables -A servicelimit -i ppp+ -p tcp --dport 22 -j DROP
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
+    		    iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
 		fi
-    		iptables -A servicelimit -i $lan_if -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	     fi
 	    elif [ "$RemoteSSH" = "2" ]; then
-    		iptables -A servicelimit -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	    fi
 	else	    
-    	    iptables -A servicelimit -p tcp --dport 22 -j DROP
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j DROP
 	fi
 	$LOG "udpxy limit"
 	if [ "$UDPXY" != "0" ]; then
-    	    iptables -A servicelimit -p tcp --dport 81 -m connlimit --connlimit-above 8 -j REJECT
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
-    		    iptables -A servicelimit -i $wan_if -p tcp --dport 81 -j DROP
-    		    iptables -A servicelimit -i ppp+ -p tcp --dport 81 -j DROP
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 81 -j DROP
+    		    iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 81 -j DROP
 		fi
-    		iptables -A servicelimit -i $lan_if -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 81 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 81 -j ACCEPT
 	     fi
 	    elif [ "$UDPXY" = "2" ]; then
-    		iptables -A servicelimit -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j ACCEPT
 	    fi	    
 	else	    
-    	    iptables -A servicelimit -p tcp --dport 81 -j DROP
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j DROP
 	fi
 	$LOG "samba"
 	if [ "$SmbEnabled" = "1" ]; then
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
-	    iptables -A servicelimit -i $lan_if -p tcp --dport 139 -j DROP
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j DROP
 	fi
         $LOG "icmp limit"
 	if [ "$WANPingFilter" = "0" ]; then
@@ -162,20 +162,22 @@ start() {
 		/etc/macipfilter
 		if [ "$DefaultFirewallPolicy" = "1" ] && [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
 		    $LOG "Default policy macipport_filter DROP"
-		    iptables -t filter -A macipport_filter -j DROP
+		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j DROP
+		    iptables -t filter -p udp -A macipport_filter -j DROP
 		else
 		    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
 			$LOG "Default policy macipport_filter ACCEPT"
 		    else
 			$LOG "HW_NAT ENABLED. Forward DP-ACCEPT"
 		    fi
-		    iptables -t filter -A macipport_filter -j ACCEPT
+		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j ACCEPT
+		    iptables -t filter -p udp -A macipport_filter -j ACCEPT
 		fi
 		#accept my packets
-		iptables -I macipport_filter -m state --state ESTABLISHED,RELATED -j ACCEPT
+		iptables -I macipport_filter $STATE_EST -j ACCEPT
 	    else
 		#accept my packets
-		iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+		iptables -A FORWARD $STATE_EST -j ACCEPT
 	    fi
 
 	    if [ -f /etc/websfilter ]; then
@@ -223,19 +225,19 @@ start() {
 	  if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ]; then
 	    if [ "$vpnPurePPPOE" != "1" ]; then
 		#for ISP localnet alya dualacess
-    		iptables -t nat -A POSTROUTING -o eth2.2  -s $lan_ip/$lan_nm -j MASQUERADE
+    		iptables -t nat -A POSTROUTING -o eth2.2 -s $lan_ip/$lan_nm -j MASQUERADE
 		if [ "$OperationMode" = "2" ]; then
 		    #wireless ISP net dual dual acess
-		    iptables -t nat -A POSTROUTING -o ra+     -s $lan_ip/$lan_nm -j MASQUERADE
+		    iptables -t nat -A POSTROUTING -o ra+ -s $lan_ip/$lan_nm -j MASQUERADE
 		fi
 		if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 		    if [ "$OperationMode" = "3" ]; then
-			iptables -t nat -A POSTROUTING -o apcli+  -s $lan_ip/$lan_nm -j MASQUERADE
+			iptables -t nat -A POSTROUTING -o apcli+ -s $lan_ip/$lan_nm -j MASQUERADE
 		    fi
 		fi
 		if [ "$OperationMode" = "4" ]; then
 		    #for ISP localnet alya dualacess
-		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
+		    iptables -t nat -A POSTROUTING -o eth2.2 -s $chilli_net -j MASQUERADE
 		fi
 		#second lan
 		if [ "$Lan2Enabled" = "1" ]; then
@@ -298,7 +300,7 @@ stop() {
 
 	#default actions
 	iptables -P FORWARD DROP > /dev/null 2>&1
-	iptables -P INPUT ACCEPT > /dev/null 2>&1
+	iptables -P INPUT   DROP > /dev/null 2>&1
 	iptables -P OUTPUT ACCEPT > /dev/null 2>&1
 
 }
@@ -339,6 +341,10 @@ get_param() {
     chilli_net=`nvram_get 2860 chilli_net`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     natFastpath=`nvram_get 2860 natFastpath`
+    #macros
+    STATE_NEW="-m state --state NEW"
+    STATE_EST="-m state --state ESTABLISHED,RELATED"
+    CONNLIMIT="-m connlimit --connlimit-above"
 }
 
 case "$1" in
