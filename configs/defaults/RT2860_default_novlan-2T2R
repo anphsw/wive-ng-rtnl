@@ -233,5 +233,6 @@ fwAlgPPTP=0
 fwAlgSIP=0
 fwAlgTFTP=0
 vlan_double_tag=0
+simple_qos=0
 IS_WIVE=YES
 CHECKMAC=YES

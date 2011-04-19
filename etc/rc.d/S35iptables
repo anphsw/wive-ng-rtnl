@@ -44,7 +44,7 @@ start() {
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
 	if [ "$RemoteManagement" != "0" ]; then
 	    $LOG "web limit"
-    	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 8 -j REJECT
+    	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 16 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
@@ -216,7 +216,10 @@ start() {
     		iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 	    fi
 	fi
-
+###########################################QOS-SIMPLE######################################
+	if [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
+	    qos
+	fi
 ###########################################NAT-NAPTM#######################################
 	#masqrade for wan interfaces
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
@@ -358,11 +361,53 @@ get_param() {
     chilli_net=`nvram_get 2860 chilli_net`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     natFastpath=`nvram_get 2860 natFastpath`
+    simple_qos=`nvram_get 2860 simple_qos`
     #macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
     CONNLIMIT="-m connlimit --connlimit-above"
 }
+
+qos()
+{
+    $LOG "Simple QoS Enable"
+
+    modprobe -q ipt_TOS
+
+    MIN_DEL="-j TOS --set-tos Minimize-Delay"
+    MAX_THR="-j TOS --set-tos Maximize-Throughput"
+
+    MIN_DEL_UDP_P="53 1720 5060"
+    MIN_DEL_TCP_P="22 23 53 80 110 443 4190 1720 5060 5190:5193 5222:5223 5269:5270 8080"
+    MAX_THR_TCP_P="20 25 21 8010"
+
+	# increase queue length
+	ifconfig $wan_if txqueuelen 1000
+	ifconfig $lan_if txqueuelen 1000
+
+	iptables -A PREROUTING -t mangle -p icmp $MIN_DEL
+	iptables -A PREROUTING -t mangle -p igmp $MIN_DEL
+	iptables -A OUTPUT -t mangle -p icmp $MIN_DEL
+	iptables -A OUTPUT -t mangle -p igmp $MIN_DEL
+
+	for port in $MIN_DEL_UDP_P
+	do
+	    iptables -A PREROUTING -t mangle -p udp --sport $port $MIN_DEL
+	    iptables -A OUTPUT -t mangle -p udp --dport $port $MIN_DEL
+	done
+
+	for port in $MIN_DEL_TCP_P
+	do
+	    iptables -A PREROUTING -t mangle -p tcp --sport $port $MIN_DEL
+	    iptables -A OUTPUT -t mangle -p tcp --dport $port $MIN_DEL
+	done
+
+	for port in $MAX_THR_TCP_P
+	do
+	    iptables -A PREROUTING -t mangle -p tcp --sport $port $MAX_THR
+	    iptables -A OUTPUT -t mangle -p tcp --dport $port $MAX_THR
+	done
+ }
 
 case "$1" in
         start)
@@ -371,6 +416,10 @@ case "$1" in
 
         stop)
             stop
+            ;;
+
+        qos)
+            qos
             ;;
 
         restart)

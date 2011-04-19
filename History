@@ -362,6 +362,7 @@
 6) Fix ipmacfilter in HardwareFastNatOnly and ComplexFastnat mode.<br>
 7) Use states for servicelimit incoming connections and some macros in iptables script for readable.<br>
 8) Default INPUT policy now set to DROP.<br>
+9) Simple QoS suport. TOS based QoS for auto prio some ports and minimize delay for interactive applications. (simple_qos variable, need add in WebUI).<br>
 
 <br><br>
 <b>For support see:</b><br>
