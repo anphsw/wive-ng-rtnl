@@ -342,7 +342,7 @@ get_param() {
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     RemoteSSH=`nvram_get 2860 RemoteSSH`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
-    dnsPEnabled==`nvram_get 2860 dnsPEnabled`
+    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     ipt_account=`nvram_get 2860 ipt_account`
     #vpn configs
     vpnType=`nvram_get 2860 vpnType`
