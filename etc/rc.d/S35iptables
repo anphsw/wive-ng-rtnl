@@ -104,6 +104,14 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j DROP
 	fi
+	$LOG "dnsproxy"
+	if [ "$dnsPEnabled" = "1" ]; then
+	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
+	else
+	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
+	fi
         $LOG "icmp limit"
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
@@ -329,6 +337,7 @@ get_param() {
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     RemoteSSH=`nvram_get 2860 RemoteSSH`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
+    dnsPEnabled==`nvram_get 2860 dnsPEnabled`
     ipt_account=`nvram_get 2860 ipt_account`
     #vpn configs
     vpnType=`nvram_get 2860 vpnType`
