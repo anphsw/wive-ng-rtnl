@@ -153,8 +153,6 @@ start() {
 		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
 	    fi
 
-	    #accept my packets
-	    iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 	    #tune mss size for tranzit packets
 	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
@@ -173,6 +171,11 @@ start() {
 		    fi
 		    iptables -t filter -A macipport_filter -j ACCEPT
 		fi
+		#accept my packets
+		iptables -I macipport_filter -m state --state ESTABLISHED,RELATED -j ACCEPT
+	    else
+		#accept my packets
+		iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 	    fi
 
 	    if [ -f /etc/websfilter ]; then
