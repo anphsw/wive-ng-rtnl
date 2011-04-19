@@ -42,8 +42,8 @@ start() {
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
-	$LOG "web limit"
 	if [ "$RemoteManagement" != "0" ]; then
+	    $LOG "web limit"
     	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 8 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
@@ -60,8 +60,8 @@ start() {
 	else	    
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 80 -j DROP
 	fi
-	$LOG "ssh limit"
 	if [ "$RemoteSSH" != "0" ]; then
+	    $LOG "ssh limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
@@ -78,8 +78,8 @@ start() {
 	else	    
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j DROP
 	fi
-	$LOG "udpxy limit"
 	if [ "$UDPXY" != "0" ]; then
+	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
@@ -96,26 +96,31 @@ start() {
 	else	    
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j DROP
 	fi
-	$LOG "samba"
 	if [ "$SmbEnabled" = "1" ]; then
+	    $LOG "samba"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j DROP
 	fi
-	$LOG "dnsproxy"
 	if [ "$dnsPEnabled" = "1" ]; then
+	    $LOG "dnsproxy"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
 	fi
-        $LOG "icmp limit"
+	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
+	    $LOG "upnp"
+	    #not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp -m multiport --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 1024:65535 -j ACCEPT
+	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
-		$LOG "Drop ping from wan $wan_if"
+    		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
     		iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
