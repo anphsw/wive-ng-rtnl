@@ -278,6 +278,7 @@ kernel_ext_en()
     natFastpath=`nvram_get 2860 natFastpath`
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
     simple_qos=`nvram_get 2860 simple_qos`
+    hw_nat_bind=`nvram_get 2860 hw_nat_bind`
     getLanIfName
     getWanIfName
     LOG="echo KERNEL_EXT: "
@@ -311,10 +312,18 @@ kernel_ext_en()
 	    $LOG "Nat mode SW_FASTPATH"
 	elif [ "$natFastpath" = "2" ]; then
 	    modprobe -q hw_nat
+	    if [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
+		#set binding threshold
+		hw_nat -N $hw_nat_bind
+	    fi
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	    $LOG "Nat mode HW_NAT"
 	elif [ "$natFastpath" = "3" ]; then
 	    modprobe -q hw_nat
+	    if [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
+		#set binding threshold
+		hw_nat -N $hw_nat_bind
+	    fi
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
 	    $LOG "Nat mode COMPLEX"
 	else
