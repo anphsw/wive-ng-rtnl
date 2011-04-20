@@ -366,6 +366,7 @@
 10) Auto disable SoftwareFastpath and increase binding threshold for HW_NAT if QoS Enabled.<br> (need add in WebUI).<br>
 11) Add hw_nat_bind variable to set binding threshold per second for HW_NAT (1~500 more value = more normal path and load cpu. Default 30. Need add in WebUI).<br>
 12) Rework logic for portforward. Auto enable forward direct if ipportfilter disabled.<br>
+13) Some fix for dns server select in some situation.<br>
 
 <br><br>
 <b>For support see:</b><br>
