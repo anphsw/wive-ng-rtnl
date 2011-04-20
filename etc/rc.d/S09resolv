@@ -11,7 +11,7 @@ if [ ! -f /var/run/goahead.pid ] || [ "$static" = "on" ] ; then
     sed -e '/nameserver/d' $fname > $fbak
 
     # if nameservers is null add 127.0.0.1
-    if  [ "$pd" = "" ] && [ "$sd" = "" ]; then
+    if  [ "$pd" = ""  &&  "$sd" = "" ] || [ "$dnsPEnabled" = "1" ]; then
 	echo "nameserver 127.0.0.1" > $fname
     else
 	#drop current DNS
@@ -39,6 +39,7 @@ get_param() {
     static=`nvram_get 2860 wan_static_dns`
     pd=`nvram_get 2860 wan_primary_dns`
     sd=`nvram_get 2860 wan_secondary_dns`
+    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     fname="/etc/resolv.conf"
     fbak="/etc/resolv_conf.bak"
 
