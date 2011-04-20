@@ -277,6 +277,7 @@ kernel_ext_en()
     ipv6_pass=`nvram_get 2860 ipv6_pass`
     natFastpath=`nvram_get 2860 natFastpath`
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
+    simple_qos=`nvram_get 2860 simple_qos`
     getLanIfName
     getWanIfName
     LOG="echo KERNEL_EXT: "
@@ -320,6 +321,16 @@ kernel_ext_en()
 	    $LOG "Nat mode DISABLE"
 	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	fi
+	#----Workaround for simple QoS mode support-----------------
+	if [ "$simple_qos" != "" ] && [ "$simple_qos" != "0" ]; then
+	    if [ "$natFastpath" = "2" ] && [ "$natFastpath" = "3" ]; then
+		#increase binding threshold
+		hw_nat -N 500
+	    fi  
+	    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "0" ]; then
+		sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	    fi
 	fi
 	#----Direct pass from kernel--------------------------------
 	if [ "$pppoe_pass" = "1" ]; then
