@@ -278,6 +278,7 @@ kernel_ext_en()
     natFastpath=`nvram_get 2860 natFastpath`
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
     simple_qos=`nvram_get 2860 simple_qos`
+    QoSEnable=`nvram_get 2860 QoSEnable`
     hw_nat_bind=`nvram_get 2860 hw_nat_bind`
     getLanIfName
     getWanIfName
@@ -309,35 +310,43 @@ kernel_ext_en()
 	if [ "$natFastpath" = "1" ]; then
 	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
-	    $LOG "Nat mode SW_FASTPATH"
+	    $LOG "NAT Offload mode SW_FASTPATH"
 	elif [ "$natFastpath" = "2" ]; then
 	    modprobe -q hw_nat
 	    if [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
 		#set binding threshold
-		hw_nat -N $hw_nat_bind
+		hw_nat -N $hw_nat_bind  > /dev/null 2>&1
 	    fi
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
-	    $LOG "Nat mode HW_NAT"
+	    $LOG "NAT Offload mode HW_NAT"
 	elif [ "$natFastpath" = "3" ]; then
 	    modprobe -q hw_nat
 	    if [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
 		#set binding threshold
-		hw_nat -N $hw_nat_bind
+		hw_nat -N $hw_nat_bind > /dev/null 2>&1
 	    fi
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
-	    $LOG "Nat mode COMPLEX"
+	    $LOG "NAT Offload mode COMPLEX"
 	else
-	    $LOG "Nat mode DISABLE"
+	    $LOG "NAT Offload mode DISABLE"
 	    rmmod hw_nat > /dev/null 2>&1
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	fi
 	#----Workaround for simple QoS mode support-----------------
+	if [ "$QoSEnable" != "" ] || [ "$QoSEnable" != "0" ]; then
+	    simple_qos=1
+	    if [ "$QoSEnable" = "3" ]; then
+		$LOG "IMQ shaper - HW NAT Offload mode DISABLE"
+		rmmod hw_nat > /dev/null 2>&1
+	    fi
+	fi
 	if [ "$simple_qos" != "" ] && [ "$simple_qos" != "0" ]; then
 	    if [ "$natFastpath" = "2" ] && [ "$natFastpath" = "3" ]; then
 		#increase binding threshold
-		hw_nat -N 250
+		hw_nat -N 250 > /dev/null 2>&1
 	    fi  
 	    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "0" ]; then
+		$LOG "QoS enabled - SF NAT Offload mode DISABLE"
 		sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	    fi
 	fi
@@ -353,7 +362,7 @@ kernel_ext_en()
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
     else
-	    $LOG "Nat mode DISABLE"
+	    $LOG "NAT Offload mode DISABLE"
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	    rmmod hw_nat > /dev/null 2>&1
 	    echo "null,null" > /proc/pthrough/pppoe
