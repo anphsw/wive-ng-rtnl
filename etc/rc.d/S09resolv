@@ -16,7 +16,7 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ] ; then
     else
 	#drop current DNS
 	rm -f $fname
-	thentouch $fname
+	touch $fname
 	fi
         #add new records
 	if [ "$pd" != "" ]; then
