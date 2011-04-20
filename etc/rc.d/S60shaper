@@ -15,40 +15,46 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     $LOG "Set default rules."
     set_def
 
-    $LOG "Load modules."
-    #netsched modules
-    modprobe -q cls_u32
-    modprobe -q cls_tcindex  
-    modprobe -q cls_fw      
-    modprobe -q cls_u32      
-    modprobe -q act_gact  
-    modprobe -q act_police  
-    modprobe -q act_ipt
-    modprobe -q em_cmp    
-    modprobe -q em_u32    
-    modprobe -q em_nbyte 
-    modprobe -q sch_htb
-    modprobe -q sch_dsmark
-    #iptables modules
-    modprobe -q xt_connmark
-    modprobe -q xt_conntrack
-    modprobe -q xt_dscp
-    modprobe -q xt_mark
-    modprobe -q xt_DSCP
-    modprobe -q xt_MARK
-    modprobe -q xt_DSCP
-    modprobe -q xt_MARK
-    modprobe -q ipt_TOS
+    # increase queue length
+    ifconfig $wan_if txqueuelen 1000
+    ifconfig $lan_if txqueuelen 1000
 
     if [ "$QoSEnable" = "1" ]; then
+	$LOG "Load netsched  modules."
+	#netsched modules
+	modprobe -q cls_u32
+	modprobe -q cls_tcindex  
+	modprobe -q cls_fw      
+	modprobe -q act_gact  
+	modprobe -q act_police  
+	modprobe -q act_ipt
+	modprobe -q em_cmp    
+	modprobe -q em_u32    
+	modprobe -q em_nbyte 
+	modprobe -q sch_htb
+	modprobe -q sch_dsmark
+	#iptables modules
+	modprobe -q xt_connmark
+	modprobe -q xt_conntrack
+	modprobe -q xt_dscp
+	modprobe -q xt_mark
+	modprobe -q xt_DSCP
+	modprobe -q xt_MARK
+	modprobe -q xt_DSCP
+	modprobe -q xt_MARK
+	modprobe -q ipt_TOS
 	modprobe -q sch_sfq
 	modprobe -q sch_red
 	modprobe -q sch_gred
 	$LOG "--------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
+	    $LOG "--------------PRIO-QOS------------------------"
+	    $LOG "Load netsched  modules."
 	    modprobe -q sch_esfq
 	    modprobe -q sch_sfq
+	    modprobe -q cls_u32
+	    modprobe -q em_u32    
 
 	    #PRIOMAP+ESQ2LAN
 	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
@@ -66,10 +72,6 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	    HIG_P="22 23 53 80 443 1720 5060"
 	    MED_P="110 4190 1720 5190 5191 5192 5193 5222 5223 5269 5270 8080"
 	    LOW_P="20 25 21 8010"
-
-	    # increase queue length
-	    ifconfig $wan_if txqueuelen 1000
-	    ifconfig $lan_if txqueuelen 1000
 
 	    for port in $HIG_P
 	    do
@@ -103,6 +105,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	    tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip protocol 17 0xff flowid 1:2
     elif [ "$QoSEnable" = "3" ]; then
 	    $LOG "-----------------IMQ-FULL-------------------------"
+	    $LOG "Load netsched  modules."
 	    modprobe -q imq > /dev/null 2>&1
 	    modprobe -q ipt_IMQ > /dev/null 2>&1
 	    ip link set imq0 up > /dev/null 2>&1
