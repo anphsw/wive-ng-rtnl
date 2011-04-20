@@ -15,6 +15,7 @@ web_wait
 start() {
  $LOG "Starting IPTABLES: "
  get_param
+ stop
 #########################################DEFAULTRULES###################################
 	#default filters
 	$LOG "Set default filters"
@@ -220,8 +221,8 @@ start() {
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
-		if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then
-		    iptables -A FORWARD -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
+		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
 		fi
 		$LOG "Add portforward rules"
 		chmod 777 /etc/portforward
