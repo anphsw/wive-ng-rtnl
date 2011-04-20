@@ -4,7 +4,7 @@ LOG="echo RESOLVE: "
 
 start() {
 get_param
-if [ ! -f /var/run/goahead.pid ] || [ "$static" = "on" ] ; then
+if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ] ; then
  $LOG "Generate resolve: "
 
     # backup file without nameserver part
@@ -36,7 +36,7 @@ stop() {
 }
 
 get_param() {
-    static=`nvram_get 2860 wan_static_dns`
+    wan_static_dns=`nvram_get 2860 wan_static_dns`
     pd=`nvram_get 2860 wan_primary_dns`
     sd=`nvram_get 2860 wan_secondary_dns`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`

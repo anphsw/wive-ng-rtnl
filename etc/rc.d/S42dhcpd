@@ -23,7 +23,13 @@ start() {
 		config-udhcpd.sh -m $mask
 
 		if [ "$pd" != "" ] || [ "$sd" != "" ]; then
+		    if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
+			#use dnsmasq as relay or static dns
 			config-udhcpd.sh -d $pd $sd
+		    else
+			#use google public dns
+			config-udhcpd.sh -d 8.8.8.8 8.8.4.4
+		    fi
 		fi
 		if [ "$gw" != "" ]; then
 			config-udhcpd.sh -g $gw
@@ -67,6 +73,8 @@ get_param() {
 	static1=`nvram_get 2860 dhcpStatic1`
 	lan_ip=`nvram_get 2860 lan_ipaddr`
 	SmbEnabled=`nvram_get 2860 SmbEnabled`
+	dnsPEnabled=`nvram_get 2860 dnsPEnabled`
+	wan_static_dns=`nvram_get 2860 wan_static_dns`
 }
 
 case "$1" in

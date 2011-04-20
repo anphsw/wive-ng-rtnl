@@ -11,7 +11,7 @@
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
-STATICDNS=`nvram_get 2860 wan_static_dns`
+wan_static_dns=`nvram_get 2860 wan_static_dns`
 wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
 # Full route list
 ROUTELIST=""
@@ -149,7 +149,7 @@ case "$1" in
 
         if [ "$OLD_IP" != "$CUR_IP" ]; then
 	    #Get DNS servers
-	    if [ "$STATICDNS" != "on" ] && [ "$dns" ]; then
+	    if [ "$wan_static_dns" != "on" ] && [ "$dns" ]; then
 		$LOG "Renew DNS from dhcp"
 		rm -f $RESOLV_CONF
         	#get domain name
