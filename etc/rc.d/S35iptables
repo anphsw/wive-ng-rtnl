@@ -373,13 +373,10 @@ qos()
     $LOG "Simple QoS Enable"
     modprobe -q ipt_TOS
 
-    iptables -N simple_qos_out -t mangle > /dev/null 2>&1
-    iptables -F simple_qos_out -t mangle > /dev/null 2>&1
-    iptables -A OUTPUT -j simple_qos_out -t mangle > /dev/null 2>&1
-
-    iptables -N simple_qos_pre -t mangle > /dev/null 2>&1
-    iptables -F simple_qos_pre -t mangle > /dev/null 2>&1
-    iptables -A PREROUTING -j simple_qos_pre -t mangle > /dev/null 2>&1
+    iptables -N simple_qos -t mangle > /dev/null 2>&1
+    iptables -F simple_qos -t mangle > /dev/null 2>&1
+    iptables -A OUTPUT -j simple_qos -t mangle > /dev/null 2>&1
+    iptables -A PREROUTING -j simple_qos -t mangle > /dev/null 2>&1
 
     MIN_DEL="-j TOS --set-tos Minimize-Delay"
     MAX_THR="-j TOS --set-tos Maximize-Throughput"
@@ -392,27 +389,22 @@ qos()
 	ifconfig $wan_if txqueuelen 1000
 	ifconfig $lan_if txqueuelen 1000
 
-	iptables -A simple_qos_pre -t mangle -p icmp $MIN_DEL
-	iptables -A simple_qos_pre -t mangle -p igmp $MIN_DEL
-	iptables -A simple_qos_out -t mangle -p icmp $MIN_DEL
-	iptables -A simple_qos_out -t mangle -p igmp $MIN_DEL
+	iptables -A simple_qos -t mangle -p icmp $MIN_DEL
+	iptables -A simple_qos -t mangle -p igmp $MIN_DEL
 
 	for port in $MIN_DEL_UDP_P
 	do
-	    iptables -A simple_qos_pre -t mangle -p udp --sport $port $MIN_DEL
-	    iptables -A simple_qos_out -t mangle -p udp --dport $port $MIN_DEL
+	    iptables -A simple_qos -t mangle -p udp --dport $port $MIN_DEL
 	done
 
 	for port in $MIN_DEL_TCP_P
 	do
-	    iptables -A simple_qos_pre -t mangle -p tcp --sport $port $MIN_DEL
-	    iptables -A simple_qos_out -t mangle -p tcp --dport $port $MIN_DEL
+	    iptables -A simple_qos -t mangle -p tcp --dport $port $MIN_DEL
 	done
 
 	for port in $MAX_THR_TCP_P
 	do
-	    iptables -A simple_qos_pre -t mangle -p tcp --sport $port $MAX_THR
-	    iptables -A simple_qos_out -t mangle -p tcp --dport $port $MAX_THR
+	    iptables -A simple_qos -t mangle -p tcp --dport $port $MAX_THR
 	done
  }
 
