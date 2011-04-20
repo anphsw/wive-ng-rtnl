@@ -86,7 +86,7 @@ echo "==================START-L2TP-CLIENT======================="
 	PEERDNS=
     fi
 
-    if [ "$MPPE" = "on" ] ; then
+    if [ "$MPPE" = "on" ]; then
 	modprobe -q crypto_algapi
 	modprobe -q cryptomgr
 	modprobe -q blkcipher
@@ -96,13 +96,13 @@ echo "==================START-L2TP-CLIENT======================="
         MPPE=
     fi
 
-    if [ "$DEBUG" = "on" ] ; then
+    if [ "$DEBUG" = "on" ]; then
         DEBUG="-D"
     else
         DEBUG=""
     fi
 
-    if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ] ; then
+    if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ]; then
         MTU=""
         MRU=""
         else
@@ -132,7 +132,7 @@ echo "==================START-L2TP-CLIENT======================="
 	CHAP=""
     fi
 
-    if [ "$LCPECHO" = "on" ] ; then
+    if [ "$LCPECHO" = "on" ]; then
         LCPECHO="lcp-echo-adaptive"
     else
 	LCPECHO=""

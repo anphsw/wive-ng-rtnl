@@ -6,10 +6,10 @@
 LOG="echo HOTPLUG: "
 
 start() {
-if [ -f /bin/mdev ] ; then
+if [ -f /bin/mdev ]; then
     #create device in /dev
     mdev -s
-    if [ -f /proc/sys/kernel/hotplug ] ; then
+    if [ -f /proc/sys/kernel/hotplug ]; then
 	$LOG "Start mdev for support HOTPLUG"
 	printf "
 		# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
@@ -17,7 +17,7 @@ if [ -f /bin/mdev ] ; then
 		# @ Run after creating the device.
 		# $ Run before removing the device.
 		# * Run both after creating and before removing the device." > /etc/mdev.conf
-	if [ "$CONFIG_USB_STORAGE" != "" ] ; then
+	if [ "$CONFIG_USB_STORAGE" != "" ]; then
 		echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
 	fi
 	echo "/sbin/mdev" > /proc/sys/kernel/hotplug

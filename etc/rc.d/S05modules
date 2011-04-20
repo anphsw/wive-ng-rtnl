@@ -125,7 +125,7 @@ ra0flushadress()
     if [ "$opmode" = "3" ]; then
 	ip addr flush dev apcli0  > /dev/null 2>&1
     fi
-    if [ "$CONFIG_IPV6" != "" ] ; then
+    if [ "$CONFIG_IPV6" != "" ]; then
         ip -6 addr flush dev ra0 > /dev/null 2>&1
 	if [ "$opmode" = "3" ]; then
 	    ip -6 addr flush dev apcli0  > /dev/null 2>&1

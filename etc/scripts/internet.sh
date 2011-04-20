@@ -82,7 +82,7 @@ addMBSSID()
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    for i in `seq 1 $bssidnum`; do
     		ip addr flush dev ra$i
-		if [ "$CONFIG_IPV6" != "" ] ; then
+		if [ "$CONFIG_IPV6" != "" ]; then
     		    ip -6 addr flush dev ra$i
 		fi
 		#workaround for apcli mode

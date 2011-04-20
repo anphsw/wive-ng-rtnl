@@ -99,7 +99,7 @@ addr_flush() {
     dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
     for i in $dev; do
 	ip addr flush dev $i > /dev/null 2>&1
-	if [ "$CONFIG_IPV6" != "" ] ; then
+	if [ "$CONFIG_IPV6" != "" ]; then
 	    ip -6 addr flush dev $i > /dev/null 2>&1
 	fi
     done

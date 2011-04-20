@@ -56,7 +56,7 @@ fi
 ##########################################################
 # This is services restart always                       #
 ##########################################################
-if [ "$CONFIG_IPV6" != "" ] ; then
+if [ "$CONFIG_IPV6" != "" ]; then
     service radvd restart
 fi
     service ripd restart

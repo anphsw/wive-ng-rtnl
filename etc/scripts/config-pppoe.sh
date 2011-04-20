@@ -53,7 +53,7 @@ if [ "$IFACE" != "br0" ] && [ "$IN_BR" = "1" ]; then
     $LOG "$PPPOE_IFACE in bridge. Set pppoe interface to br0"
 fi
 
-if [ "$SERVER" != "" ] ; then
+if [ "$SERVER" != "" ]; then
     SERVER="rp_pppoe_ac $SERVER"
 else
     SERVER=""
@@ -65,7 +65,7 @@ else
     PEERDNS=
 fi
 
-if [ "$MPPE" = "on" ] ; then
+if [ "$MPPE" = "on" ]; then
     modprobe -q crypto_algapi
     modprobe -q cryptomgr
     modprobe -q blkcipher
@@ -75,7 +75,7 @@ else
     MPPE=
 fi 
 
-if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ] ; then
+if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ]; then
     MTU=""
     MRU=""
 else
@@ -83,7 +83,7 @@ else
     MTU="mtu $MTU"
 fi
 
-if [ "$DEBUG" = "on" ] ; then
+if [ "$DEBUG" = "on" ]; then
     DEBUG="debug"
 else
     DEBUG=""
@@ -103,7 +103,7 @@ else
     CHAP=""
 fi
 
-if [ "$LCPECHO" = "on" ] ; then
+if [ "$LCPECHO" = "on" ]; then
     LCPECHO="lcp-echo-adaptive"
 else
     LCPECHO=""
