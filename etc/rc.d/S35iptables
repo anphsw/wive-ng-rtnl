@@ -276,7 +276,7 @@ start() {
             iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
         fi
 #########################################ACCEPT_ESTABLISHED################################
-	iptables -A INPUT $STATE_EST -j ACCEPT
+	iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################VPNRULES#######################################
 	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on"  ]; then
 	    $LOG "Call to add VPN netfilter rules"
