@@ -173,24 +173,14 @@ start() {
 		$LOG "Set macipport_filter rules"
 		chmod 777 /etc/macipfilter
 		/etc/macipfilter
-		if [ "$DefaultFirewallPolicy" = "1" ] && [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
+		if [ "$DefaultFirewallPolicy" = "1" ]; then
 		    $LOG "Default policy macipport_filter DROP"
 		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j DROP
 		    iptables -t filter -p udp -A macipport_filter -j DROP
 		else
-		    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "3" ]; then
-			$LOG "Default policy macipport_filter ACCEPT"
-		    else
-			$LOG "HW_NAT ENABLED. Forward DP-ACCEPT"
-		    fi
 		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j ACCEPT
 		    iptables -t filter -p udp -A macipport_filter -j ACCEPT
 		fi
-		#accept my packets
-		iptables -I macipport_filter $STATE_EST -j RETURN
-	    else
-		#accept my packets
-		iptables -A FORWARD $STATE_EST -j ACCEPT
 	    fi
 
 	    if [ -f /etc/websfilter ]; then
@@ -199,6 +189,9 @@ start() {
 		chmod 777 /etc/websfilter
     		/etc/websfilter
 	    fi
+
+	    #try accept my packets
+	    iptables -t filter -A FORWARD $STATE_EST -j ACCEPT
 
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
