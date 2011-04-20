@@ -169,7 +169,14 @@ start() {
 	    #tune mss size for tranzit packets
 	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
-	    if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then    
+	    if [ -f /etc/websfilter ]; then
+        	$LOG "Add rules for content filters"
+		modprobe -q xt_webstr
+		chmod 777 /etc/websfilter
+    		/etc/websfilter
+	    fi
+
+	    if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then
 		$LOG "Set macipport_filter rules"
 		chmod 777 /etc/macipfilter
 		/etc/macipfilter
@@ -178,20 +185,10 @@ start() {
 		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j DROP
 		    iptables -t filter -p udp -A macipport_filter -j DROP
 		else
-		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j ACCEPT
-		    iptables -t filter -p udp -A macipport_filter -j ACCEPT
+		    iptables -t filter -p tcp $STATE_NEW -A macipport_filter -j RETURN
+		    iptables -t filter -p udp -A macipport_filter -j RETURN
 		fi
 	    fi
-
-	    if [ -f /etc/websfilter ]; then
-        	$LOG "Add rules for content filters"
-		modprobe -q xt_webstr
-		chmod 777 /etc/websfilter
-    		/etc/websfilter
-	    fi
-
-	    #try accept my packets
-	    iptables -t filter -A FORWARD $STATE_EST -j ACCEPT
 
 	    #enable forward only from local network to wan/ppp
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
@@ -218,6 +215,9 @@ start() {
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add masqrade rules"
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
+		if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then
+		    iptables -A FORWARD -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+		fi
 		$LOG "Add portforward rules"
 		chmod 777 /etc/portforward
 		/etc/portforward
