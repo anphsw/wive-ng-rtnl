@@ -24,6 +24,7 @@ start() {
 #########################################DEFAULTRULES###################################
 	#default filters
 	$LOG "Set default filters"
+	iptables -I INPUT -i lo -j ACCEPT
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
 	#only eth2.2 WAN interface recived multicast
