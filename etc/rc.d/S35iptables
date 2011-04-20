@@ -13,12 +13,6 @@ web_wait
  LOG="echo IPTABLES: "
 
 start() {
- #prevent double start
- if [ -f /var/run/iptables_work ]; then
-    sleep 5
- fi
- touch /var/run/iptables_work
-
  $LOG "Starting IPTABLES: "
  get_param
 #########################################DEFAULTRULES###################################
@@ -295,7 +289,6 @@ start() {
 	fi
 ############################################ENDRULES#######################################
 	$LOG "Iptables rules add OK..."
-	rm -f /var/run/iptables_work
 }
 
 
