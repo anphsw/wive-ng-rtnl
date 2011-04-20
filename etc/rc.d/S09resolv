@@ -4,7 +4,7 @@ LOG="echo RESOLVE: "
 
 start() {
 get_param
-if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ] ; then
+if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
  $LOG "Generate resolve: "
 
     # backup file without nameserver part
@@ -17,7 +17,6 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ] ; then
 	#drop current DNS
 	rm -f $fname
 	touch $fname
-	fi
         #add new records
 	if [ "$pd" != "" ]; then
 	    echo "nameserver $pd" >> $fname
