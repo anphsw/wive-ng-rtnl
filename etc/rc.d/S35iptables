@@ -187,7 +187,7 @@ start() {
 		    iptables -t filter -p udp -A macipport_filter -j ACCEPT
 		fi
 		#accept my packets
-		iptables -I macipport_filter $STATE_EST -j ACCEPT
+		iptables -I macipport_filter $STATE_EST -j RETURN
 	    else
 		#accept my packets
 		iptables -A FORWARD $STATE_EST -j ACCEPT
