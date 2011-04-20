@@ -335,7 +335,7 @@ kernel_ext_en()
 	if [ "$simple_qos" != "" ] && [ "$simple_qos" != "0" ]; then
 	    if [ "$natFastpath" = "2" ] && [ "$natFastpath" = "3" ]; then
 		#increase binding threshold
-		hw_nat -N 500
+		hw_nat -N 250
 	    fi  
 	    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "0" ]; then
 		sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
