@@ -400,6 +400,7 @@ void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 
+	doSystem("modprobe -q ipt_account");
 	doSystem("service iptables restart");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
