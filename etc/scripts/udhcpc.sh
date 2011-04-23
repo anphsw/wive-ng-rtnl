@@ -198,8 +198,10 @@ case "$1" in
 			$LOG "PPP dead. Need restart vpnhelper.."
 		    fi
 		fi
-		$LOG "Restart vpnhelper.."
-		service vpnhelper start
+		if [ "$vpnEnabled" = "on" ]; then
+		    $LOG "Restart vpnhelper.."
+		    service vpnhelper start
+		fi
 	fi
 	$LOG "End renew procedure..."
     ;;
