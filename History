@@ -367,6 +367,9 @@
 11) Add hw_nat_bind variable to set binding threshold per second for HW_NAT (1~500 more value = more normal path and load cpu. Default 30. Need add in WebUI).<br>
 12) Rework logic for portforward. Auto enable forward direct if ipportfilter disabled.<br>
 13) Some fix for dns server select in some situation.<br>
+14) icmp service limit fix.<br>
+15) pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
+16) ip: ip_options_compile() resilient to NULL skb route.<br>
 
 <br><br>
 <b>For support see:</b><br>
