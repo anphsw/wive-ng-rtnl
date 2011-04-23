@@ -447,6 +447,19 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "QoSUploadBandwidth", upload_bandwidth);
 		nvram_bufset(RT2860_NVRAM, "QoSDownloadBandwidth", download_bandwidth);
 	}
+	
+	// Need to switch NAT fastpath mode
+	if (strcmp(qos_enable, "0") != 0)
+	{
+		char *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
+		if (nat_fp != NULL)
+		{
+			if (strcmp(nat_fp, "1")==0)
+				nvram_bufset(RT2860_NVRAM, "natFastpath", "0");
+			else if (strcmp(nat_fp, "3")==0)
+				nvram_bufset(RT2860_NVRAM, "natFastpath", "2");
+		}
+	}
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -459,7 +472,7 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("upload bandwidth: %s<br>\n"), upload_bandwidth);
 	websWrite(wp, T("download bandwidth: %s<br>\n"), download_bandwidth);
 	websFooter(wp);
-	websDone(wp, 200);	
+	websDone(wp, 200);
 }
 
 void formDefineQoS()

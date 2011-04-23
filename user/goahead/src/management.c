@@ -285,13 +285,16 @@ char* getField(char *a_line, char *delim, int count)
 	int i=0;
 	char *tok;
 	tok = strtok(a_line, delim);
-	while(tok){
-		if(i == count)
+	
+	while (tok)
+	{
+		if (i == count)
 			break;
-        i++;
+		i++;
 		tok = strtok(NULL, delim);
-    }
-    if(tok && isdigit(*tok))
+	}
+	
+	if(tok && isdigit(*tok))
 		return tok;
 
 	return NULL;
@@ -388,12 +391,12 @@ int getIfStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	while (fgets(buf, 1024, fp))
 	{
 		char *ifname;
-		if(skip_line != 0)
+		if (skip_line != 0)
 		{
 			skip_line--;
 			continue;
 		}
-		if(! (semiColon = strchr(buf, ':'))  )
+		if (!(semiColon = strchr(buf, ':')))
 			continue;
 		*semiColon = '\0';
 		ifname = buf;
@@ -507,32 +510,26 @@ int getLANTxPacketASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/*
- * This ASP function is for javascript usage, ex:
- *
- * <script type="text/javascript">
- *   var a = new Array();
- *   a = [<% getAllNICStatisticASP(); %>];         //ex: a = ["lo","10","1000", "20", "2000","eth2"];
- *   document.write(a)
- * </script>
- *
- * Javascript could get info with  getAllNICStatisticASP().
- *
- * We dont produce table-related tag in this ASP function .It's
- * more extensive since ASP just handle data and Javascript present them,
- * although the data form is only for Javascript now.
- *
- * TODO: a lot, there are many ASP functions binding with table-relted tag...
- */
 int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char result[1024];
 	char buf[1024];
-	int rc = 0, pos = 0, skip_line = 2;
-	int first_time_flag = 1;
+	char tmp[1024];
+	int skip_line = 2;
+	const char *field;
+	struct ifreq ifr;
+	int skfd;
+	
 	FILE *fp = fopen(PROC_IF_STATISTIC, "r");
-	if(!fp){
+	if (fp == NULL)
+	{
 		printf("no proc?\n");
+		return -1;
+	}
+	
+	if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+		printf("open socket failed\n");
+		fclose(fp);
 		return -1;
 	}
 
@@ -546,7 +543,7 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		if (!(semiColon = strchr(buf, ':')))
 			continue;
-		*semiColon = '\0';
+		*(semiColon++) = '\0';
 
 		ifname = buf;
 		ifname = strip_space(ifname);
@@ -554,39 +551,44 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 		// Filter 'lo' interface
 		if (strcmp(ifname, "lo")==0)
 			continue;
-
-		/* try to get statistics data */
-		if (getIfStatistic(ifname, RXPACKET) >= 0)
+		
+		// Check that interface is up
+		strcpy(ifr.ifr_name, ifname);
+		if (ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0)
 		{
-			/* a success try */
-			if (first_time_flag)
-			{
-				pos = snprintf(result+rc, 1024-rc, "\"%s\"", ifname);
-				rc += pos;
-				first_time_flag = 0;
-			}
-			else
-			{
-				pos = snprintf(result+rc, 1024-rc, ",\"%s\"", ifname);
-				rc += pos;
-			}
-
-		}
-		else	/* failed and just skip */
+			printf("ioctl() error\n");
 			continue;
+		}
+		
+		if ((ifr.ifr_flags & IFF_UP) == 0) // Interface is down?
+			continue;
+		
+		// Now output statistics
+		websWrite(wp, T("<tr>"));
+		websWrite(wp, T("<td class=\"head\" colspan=\"2\">%s</td>"), ifname);
 
-		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, RXPACKET));
-		rc += pos;
-		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, RXBYTE));
-		rc += pos;
-		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, TXPACKET));
-		rc += pos;
-		pos = snprintf(result+rc, 1024-rc, ",\"%lld\"", getIfStatistic(ifname, TXBYTE));
-		rc += pos;
+		// strtok causes string to rewrite with '\0', perform temporary buffer
+		strcpy(tmp, semiColon);
+		websWrite(wp, T("<td>%s</td>"),
+			(field = getField(tmp, " ", 1)) ? field : "n/a");
+
+		strcpy(tmp, semiColon);
+		websWrite(wp, T("<td>%s</td>"),
+			(field = getField(tmp, " ", 0)) ? field : "n/a");
+
+		strcpy(tmp, semiColon);
+		websWrite(wp, T("<td>%s</td>"),
+			(field = getField(tmp, " ", 9)) ? field : "n/a");
+
+		strcpy(tmp, semiColon);
+		websWrite(wp, T("<td>%s</td>"),
+			(field = getField(tmp, " ", 8)) ? field : "n/a");
+		websWrite(wp, T("</tr>\n"));
 	}
+	
+	close(skfd);
 	fclose(fp);
 
-	websWrite(wp, T("%s"), result);
 	return 0;
 }
 

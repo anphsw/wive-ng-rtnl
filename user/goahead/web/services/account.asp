@@ -23,8 +23,11 @@ function initValue()
 	var form = document.formIptAccounting;
 	
 	form.iptEnable.value = defaultNumber("<% getCfgZero(1, "ipt_account"); %>", '0');
-	var nat_fastpath = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
-	displayElement('fastpath_warning', nat_fastpath != '0');
+	var nat_fp = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+	var fp_on = nat_fp != '0';
+	
+	displayElement('fastpath_warning', fp_on);
+	displayElement('fastpath_form', !fp_on);
 }
 </script>
 </head>
@@ -39,11 +42,18 @@ function initValue()
 <!-- IP Accounting -->
 <h2>IP Accounting</h2>
 
-<p style="display:none;" id="fastpath_warning"><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>NAT fastpath option is turned on.
-To gather correct statistics you need to shut down <b>NAT fastpath</b> option on <a href="/services/misc.asp#nat_fastpath_ref">MISC Services</a>
-configuration page. Disabling <b>NAT Fastpath</b> will grow CPU load up to 50%.</p>
+<div style="display:none;" id="fastpath_warning">
+<p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
+NAT fastpath option is turned on.</p>
+<p>For some technical and software reasons there is no ability to gather correct statistics for NAT fastpath mode now.</p>
+<p>That's why IPT accounting configuration ability is now locked.</p>
+<p>To get correct statistics you need to shut down <b>NAT fastpath</b> option on
+<a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
+<p>Please remember that turned off option <b>NAT Fastpath</b> will grow CPU load up to 50%.</p>
+<p style="color: #000080; margin-top: 20px;"><a href="http://www.metallica.com/" target="_blank">Sad&nbsp;but&nbsp;true...</a></p>
+</div>
 
-<form action="/goform/formIptAccounting" method="POST" name="formIptAccounting" >
+<form action="/goform/formIptAccounting" method="POST" name="formIptAccounting" id="fastpath_form">
 <table width="95%" border="1" cellspacing="1" cellpadding="2">
 <tr>
 	<td class="title" colspan="2">IP Accounting Settings</td>

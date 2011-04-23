@@ -316,6 +316,14 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, p->nvram, var);
 	}
 	
+	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
+	if ((nat_fp != NULL) && (strcmp(nat_fp, "2") == 0))
+	{
+		char_t *nat_th = websGetVar(wp, "hwnatThreshold", "30");
+		if (nat_th != NULL)
+			nvram_bufset(RT2860_NVRAM, "hw_nat_bind", nat_th);
+	}
+	
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
@@ -424,6 +432,17 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 	char_t ip[32], line[256];
 	long long b_src[5], p_src[5], b_dst[5], p_dst[5], time;
 	int lines = 0;
+	
+	// Do not show anything if nat_fastpath is set
+	char* nat_fp = nvram_get(RT2860_NVRAM, "natFastpath");
+	if (nat_fp != NULL)
+	{
+		if (strcmp(nat_fp, "0") != 0)
+		{
+			websWrite(wp, T("<tr><td>No IPT accounting allowed</td></tr>\n"));
+			return 0;
+		}
+	}
 	
 	websWrite(wp, T("<tr><td class=\"title\" colspan=\"%d\">IP Accounting table</td></tr>\n"),
 #ifdef IPT_SHORT_ACCOUNT
@@ -552,7 +571,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				7
 #endif
 			);
-    return 0;
+	return 0;
 }
 
 

@@ -124,13 +124,7 @@ function initValue()
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
-	if (opmode == "4")
-	{
-		form.natFastpath.value = defaultNumber("0", "1");
-		form.natFastpath.disabled = true;
-	} else {
-		form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
-	}
+
 	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
@@ -165,11 +159,54 @@ function initValue()
 		hideElement("dnsproxy");
 		form.dnspEnbl.options.selectedIndex = 0;
 	}
+	
+	// Set-up NAT fastpath
+	var qos_en = defaultNumber("<% getCfgGeneral(1, "QoSEnable"); %>", "0");
+	if (qos_en == '0')
+	{
+		form.natFastpath.options.add(new Option('Software', '1'));
+		form.natFastpath.options.add(new Option('Complex', '3'));
+	}
+	
+	if (opmode == "4")
+	{
+		form.natFastpath.value = defaultNumber("0", "1");
+		form.natFastpath.disabled = true;
+	}
+	else
+		form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+
+	natFastpathSelect(form);
 }
 
-function CheckValue()
+function CheckValue(form)
 {
+	var thresh = form.natFastpath.value;
+	
+	if ((thresh == '2') || (thresh == '3'))
+	{
+		// Check threshold
+		if (!validateNum(form.hwnatThreshold.value, false))
+		{
+			alert("Hardware NAT threshold must be a number");
+			form.hwnatThreshold.focus();
+			return false;
+		}
+		var thr = form.hwnatThreshold.value * 1;
+		if ((thr < 0) || (thr >500))
+		{
+			alert("Hardware NAT threshold must be a value between 0 and 500");
+			form.hwnatThreshold.focus();
+			return false;
+		}
+	}
 	return true;
+}
+
+function natFastpathSelect(form)
+{
+	var thresh = form.natFastpath.value;
+	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
 }
 
 </script>
@@ -180,9 +217,9 @@ function CheckValue()
 
 <h1 id="lTitle">Miscellaneous Services Setup</h1>
 <p id="lIntroduction"></p>
-<hr />
+<hr>
 
-<form method=post name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue()">
+<form method=post name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue(this);">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2">Offload engine</td>
@@ -190,12 +227,17 @@ function CheckValue()
 <tr>
 <td class="head"><a name="nat_fastpath_ref"></a>NAT fastpath</td>
 <td>
-	<select name="natFastpath" class="half">
+	<select name="natFastpath" class="half" onchange="natFastpathSelect(this.form);">
 		<option value="0">Disable</option>
-		<option value="1">Software</option>
 		<option value="2">Hardware</option>
-		<option value="3">Complex</option>
 	</select>
+</td>
+</tr>
+<tr id="hwnat_threshold_row" style="display: none;">
+<td class="head">NAT Binding Threshold</td>
+<td>
+	<input name="hwnatThreshold" value="<% getCfgZero(1, "hw_nat_bind"); %>" class="half">&nbsp;
+	<span style="color: #c0c0c0;">(0-500)</span>
 </td>
 </tr>
 <tr>

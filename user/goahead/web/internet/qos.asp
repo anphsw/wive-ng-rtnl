@@ -493,13 +493,13 @@ function checkNum(str)
 	</td>
 
 	<td>
-	<select name="QoSSelect" size="1" onChange="QoSSelectChange()">
-	<option value=0 id="QoSDisableStr">Disable</option>
-	<option value=1 id="QoSEnableStr">User WEB</option>
-	<option value=2 id="QoSEnableStr">User Console</option>
-	<option value=3 id="QoSEnableStr">User Console IMQ</option>
+	<select name="QoSSelect" size="1" onChange="QoSSelectChange();">
+		<option value="0" id="QoSDisableStr">Disable</option>
+		<option value="1" id="QoSEnableStr">User WEB</option>
+		<option value="2" id="QoSEnableStr">User Console</option>
+		<option value="3" id="QoSEnableStr">User Console IMQ</option>
 <!--
-	<option value=2 id="QoSDSCPMakerOnlyStr">DSCP mark only</option>
+		<option value="2" id="QoSDSCPMakerOnlyStr">DSCP mark only</option>
 -->
 	</select>
 	</td>

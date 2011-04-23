@@ -8,6 +8,9 @@
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
@@ -36,7 +39,13 @@ function initTranslation()
 function PageInit()
 {
 	initTranslation();
+	showLoadedElements();
 	
+	loadStatistics();
+}
+
+function showLoadedElements()
+{
 	var opmode = '<% getCfgZero(1, "OperationMode"); %>';
 	var dpbsta = '<% getDpbSta(); %>';
 	var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
@@ -47,6 +56,9 @@ function PageInit()
 		showElement("wirelessDriverVersion");
 		showElement("wirelessMacAddr");
 	}
+	
+	var nat_fp = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+	displayElement('fastpath_warning', nat_fp == '2');
 }
 
 function formCheck()
@@ -60,6 +72,18 @@ function formCheck()
 	return true;
 }
 
+function loadStatistics()
+{
+	var reloader = function(element)
+	{
+		initTranslation();
+		showLoadedElements();
+		self.setTimeout(loadStatistics, 5000);
+	}
+
+	ajaxLoadElement("statistics_table", "/adm/statistic_table.asp", reloader);
+}
+
 </script>
 
 </head>
@@ -69,113 +93,17 @@ function formCheck()
 <h1 id="statisticTitle">Statistic</h1>
 <p id="statisticIntroduction"> Take a look at the CPE statistics </p>
 
+<div style="display:none;" id="fastpath_warning">
+<p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
+NAT fastpath option is turned into '<b>Hardware NAT Fastpath</b>'.</p>
+<p>For some technical and software reasons there is no guarantee that gathered statistics for
+interfaces in '<b>Hardware NAT Fastpath</b>' mode is correct now.</p>
+<p>To get correct statistics you need to shut down '<b>Hardware NAT Fastpath</b>' option on
+<a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
+</div>
 
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody>
-
-<tr id="wirelessAbout" style="display:none;">
-	<td class="title" colspan="2">Wireless About</td>
-</tr>
-<tr id="wirelessDriverVersion" style="display:none;">
-	<td class="head">Driver Version</td>
-	<td><% getStaDriverVer(); %></td>
-</tr>
-<tr id="wirelessMacAddr" style="display:none;">
-	<td class="head">Mac Address</td>
-	<td><% getStaMacAddr(); %></td>
-</tr>
-
-<!-- =================  MEMORY  ================= -->
-<tr>
-  <td class="title" colspan="2" id="statisticMM">Memory</td>
-</tr>
-<tr>
-  <td class="head" id="statisticMMTotal">Memory total: </td>
-  <td> <% getMemTotalASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticMMLeft">Memory left: </td>
-  <td> <% getMemLeftASP(); %></td>
-</tr>
-
-
-<!-- =================  WAN/LAN  ================== -->
-<tr>
-  <td class="title" colspan="2" id="statisticWANLAN">WAN/LAN</td>
-</tr>
-<tr>
-  <td class="head" id="statisticWANRxPkt">WAN Rx packets: </td>
-  <td> <% getWANRxPacketASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticWANRxBytes">WAN Rx bytes: </td>
-  <td> <% getWANRxByteASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticWANTxPkt">WAN Tx packets: </td>
-  <td> <% getWANTxPacketASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticWANTxBytes">WAN Tx bytes: </td>
-  <td> <% getWANTxByteASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticLANRxPkt">LAN Rx packets: &nbsp; &nbsp; &nbsp; &nbsp;</td>
-  <td> <% getLANRxPacketASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticLANRxBytes">LAN Rx bytes: </td>
-  <td> <% getLANRxByteASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticLANTxPkt">LAN Tx packets: </td>
-  <td> <% getLANTxPacketASP(); %></td>
-</tr>
-<tr>
-  <td class="head" id="statisticLANTxBytes">LAN Tx bytes: </td>
-  <td> <% getLANTxByteASP(); %></td>
-</tr>
-
-<!-- =================  ALL  ================= -->
-<tr>
-  <td class="title" colspan="2" id="statisticAllIF">All interfaces</td>
-<tr>
-
-<script type="text/javascript">
-var i;
-var a = [<% getAllNICStatisticASP(); %>];
-for(i=0; i<a.length; i+=5)
-{
-	// name
-	document.write("<tr> <td class=head> Name </td><td class=head>");
-	document.write(a[i]);
-	document.write("</td></tr>");
-
-	// Order is important! rxpacket->rxbyte->txpacket->txbyte
-	// rxpacket
-	document.write("<tr> <td class=head> Rx Packet </td><td>");
-	document.write(a[i+1]);
-	document.write("</td></tr>");
-
-	// rxbyte
-	document.write("<tr> <td class=head> Rx Byte </td><td>");
-	document.write(a[i+2]);
-	document.write("</td></tr>");
-
-	// txpacket
-	document.write("<tr> <td class=head> Tx Packet </td><td>");
-	document.write(a[i+3]);
-	document.write("</td></tr>");
-
-	// txbyte
-	document.write("<tr> <td class=head> Tx Byte </td><td>");
-	document.write(a[i+4]);
-	document.write("</td></tr>");
-}
-</script>
-
-</tbody>
-</table>
+<div id="statistics_table" >
+</div>
 
 </td></tr></table>
 </body></html>
