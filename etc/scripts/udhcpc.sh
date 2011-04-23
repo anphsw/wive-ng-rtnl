@@ -84,7 +84,7 @@ case "$1" in
 	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
 	    if [ -z "$dgw_otherif" ]; then
 		#If pppoe mode and dgw in pppoe no need replace default gw
-		if [ "$vpnDGW" = "1" ] && [ "$vpnType" != "0" ]; then
+		if [ "$vpnEnabled" != "on" ] || [ "$vpnDGW" = "1" && "$vpnType" != "0" ]; then
 		    $LOG "Deleting default route"
 		    while ip route del default dev $interface ; do
 			:
@@ -96,7 +96,7 @@ case "$1" in
 		    $LOG "Add default route $i dev $interface metric $metric"
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
 		    #If pppoe mode and dgw in pppoe no need replace default gw
-		    if [ "$vpnDGW" = "1" ] && [ "$vpnType" != "0" ]; then
+		    if [ "$vpnEnabled" != "on" ] || [ "$vpnDGW" = "1" && "$vpnType" != "0" ]; then
 			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 		    fi
 		    #save first dgw with metric=1 to use in corbina hack
@@ -147,7 +147,7 @@ case "$1" in
 	#first add stub for routesm next add static routes and
 	#default gateways need replace/add at end route parces
 	#if pppoe mode and dgw in pppoe no need replace default gw
-	if [ "$vpnDGW" = "1" ] && [ "$vpnType" != "0" ]; then
+	if [ "$vpnEnabled" != "on" ] || [ "$vpnDGW" = "1" && "$vpnType" != "0" ]; then
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
 	else
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
