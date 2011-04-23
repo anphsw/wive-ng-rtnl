@@ -15,8 +15,13 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     $LOG "Set default rules."
     set_def
 
+    #chek wan is up
+    wan_up=`ip link show $wan_if up | grep -c ""` > /dev/null 2>&1
+
     # increase queue length
-    ifconfig $wan_if txqueuelen 1000
+    if [ "$wan_up" != "0" ]; then
+	ifconfig $wan_if txqueuelen 1000
+    fi
     ifconfig $lan_if txqueuelen 1000
 
     if [ "$QoSEnable" = "1" ]; then
@@ -55,9 +60,6 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	    modprobe -q sch_sfq
 	    modprobe -q cls_u32
 	    modprobe -q em_u32    
-
-	    #chek wan is up
-	    wan_up=`ip link show $wan_if up | grep -c ""` > /dev/null 2>&1
 
 	    #PRIOMAP+ESQ2LAN
 	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
