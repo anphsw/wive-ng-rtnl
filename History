@@ -362,15 +362,16 @@
 6) Fix ipmacfilter in HardwareFastNatOnly and ComplexFastnat mode.<br>
 7) Use states for servicelimit incoming connections and some macros in iptables script for readable.<br>
 8) Default INPUT policy now set to DROP.<br>
-9) Simple QoS suport. TOS based QoS for auto prio some ports and minimize delay for interactive applications. (simple_qos variable, need add in WebUI).<br>
-10) Auto disable SoftwareFastpath and increase binding threshold for HW_NAT if QoS Enabled.<br> (need add in WebUI).<br>
-11) Add hw_nat_bind variable to set binding threshold per second for HW_NAT (1~500 more value = more normal path and load cpu. Default 30. Need add in WebUI).<br>
+9) Simple QoS suport. TOS based QoS for auto prio some ports and minimize delay for interactive applications. (simple_qos variable).<br>
+10) Auto disable SoftwareFastpath and increase binding threshold for HW_NAT if QoS Enabled..<br>
+11) Add hw_nat_bind variable to set binding threshold per second for HW_NAT (1~500 more value = more normal path and load cpu. Default 30).<br>
 12) Rework logic for portforward. Auto enable forward direct if ipportfilter disabled.<br>
 13) Some fix for dns server select in some situation.<br>
 14) icmp service limit fix.<br>
 15) pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
 16) ip: ip_options_compile() resilient to NULL skb route.<br>
 17) Fix replace pppoe dgw on lease renew.<br>
+18) Some webui fixes for Fastnat mode set and QoS.<br>
 
 <br><br>
 <b>For support see:</b><br>
