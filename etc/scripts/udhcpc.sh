@@ -22,6 +22,8 @@ ROUTELIST_FGW=""
 # Count PPPD signal 11 dead for workaround dead tunnel on 
 # uplink cable down. Fix me later.
 PPP_DEAD=`cat /var/log/messages | grep "Fatal signal 11" -c`
+# Get VPN DGW mode
+vpnDGW=`nvram_get 2860 vpnDGW`
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
 [ -n "$subnet" ] && NETMASK="netmask $subnet"
@@ -76,22 +78,27 @@ case "$1" in
 	    $LOG "Set MTU to $mtu bytes from dhcp server"
 	    ip link set mtu $mtu dev $interface
 	fi
-
 	#Get default gateway
 	if [ -n "$router" ]; then
 	    #default route with metric 0 is through $iface?
 	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
 	    if [ -z "$dgw_otherif" ]; then
-		$LOG "Deleting default route"
-		while ip route del default dev $interface ; do
-		    :
-		done
+		#If pppoe mode and dgw in pppoe no need replace default gw
+		if [ "$vpnDGW" = "1" ]&& [ "$vpnType" != "0" ]; then
+		    $LOG "Deleting default route"
+		    while ip route del default dev $interface ; do
+			:
+		    done
+		fi
 
 		metric=0
 		for i in $router ; do
 		    $LOG "Add default route $i dev $interface metric $metric"
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
-		    ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
+		    #If pppoe mode and dgw in pppoe no need replace default gw
+		    if [ "$vpnDGW" = "1" ]&& [ "$vpnType" != "0" ]; then
+			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
+		    fi
 		    #save first dgw with metric=1 to use in corbina hack
 		    if [ "$metric" = "0" ]; then
 			echo $i > /tmp/default.gw
@@ -139,7 +146,12 @@ case "$1" in
 
 	#first add stub for routesm next add static routes and
 	#default gateways need replace/add at end route parces
-	ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
+	#if pppoe mode and dgw in pppoe no need replace default gw
+	if [ "$vpnDGW" = "1" ]&& [ "$vpnType" != "0" ]; then
+	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
+	else
+	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
+	fi
 	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \

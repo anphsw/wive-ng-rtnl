@@ -370,6 +370,7 @@
 14) icmp service limit fix.<br>
 15) pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
 16) ip: ip_options_compile() resilient to NULL skb route.<br>
+17) Fix replace pppoe dgw on lease renew.<br>
 
 <br><br>
 <b>For support see:</b><br>
