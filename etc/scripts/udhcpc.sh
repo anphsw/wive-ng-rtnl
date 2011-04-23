@@ -185,7 +185,9 @@ case "$1" in
 	fi
 
 	#if dhcp disables restart must from internet.sh
-        if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
+	#this is restart vpn and others if need
+	if [ "$vpnEnabled" = "on" ]; then
+    	    if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
 		service vpnhelper stop
@@ -198,11 +200,11 @@ case "$1" in
 			$LOG "PPP dead. Need restart vpnhelper.."
 		    fi
 		fi
-		if [ "$vpnEnabled" = "on" ]; then
-		    $LOG "Restart vpnhelper.."
-		    service vpnhelper start
-		fi
+		$LOG "Restart vpnhelper.."
+		service vpnhelper start
+	    fi
 	fi
+
 	$LOG "End renew procedure..."
     ;;
 esac
