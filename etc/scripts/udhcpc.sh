@@ -11,20 +11,22 @@
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
+
 wan_static_dns=`nvram_get 2860 wan_static_dns`
 wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
+
 # Full route list
 ROUTELIST=""
 # Default gateway list
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
+
 # Count PPPD signal 11 dead for workaround dead tunnel on 
 # uplink cable down. Fix me later.
 PPP_DEAD=`cat /var/log/messages | grep "Fatal signal 11" -c`
 # Get VPN DGW mode
 vpnDGW=`nvram_get 2860 vpnDGW`
-
 #If pppoe mode and dgw in pppoe no need replace default gw
 replace_dgw=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
