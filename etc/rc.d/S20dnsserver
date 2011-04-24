@@ -9,9 +9,6 @@ start() {
     get_param
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsPEnabled" = "1" ]; then
         $LOG "Starting DNSMASQ: "
-	chmod 644 "$cname"
-	chmod 644 "$fname"
-	chmod 644 "$hname"
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f -I "$wan_if" &
     fi
@@ -30,6 +27,9 @@ get_param() {
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     fname="/etc/hosts"
+    chmod 644 "$cname" > /dev/null 2>&1
+    chmod 644 "$fname" > /dev/null 2>&1
+    chmod 644 "$hname" > /dev/null 2>&1
 }
 
 case "$1" in
