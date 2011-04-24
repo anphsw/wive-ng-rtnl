@@ -7,7 +7,7 @@ start() {
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsPEnabled" = "1" ]; then
         $LOG "Starting DNSMASQ: "
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
-	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f -I "$wan_if" &
+	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
 
