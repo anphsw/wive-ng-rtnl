@@ -10,7 +10,7 @@ start() {
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsp" = "1" ]; then
         $LOG "Starting DNSMASQ: "
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
-	    -u $admID -g $admID -C /etc/dnsmasq.conf -r $fname -H /etc/hosts -f -I $wan_if &
+	    -u "$admID" -g nobody -C /etc/dnsmasq.conf -r "$fname" -H /etc/hosts -f -I "$wan_if" &
     fi
 }
 
