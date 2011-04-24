@@ -31,13 +31,6 @@ else
     iwpriv ra0 set RadioOn=1
 fi
 
-###############################################Others#############################
-AutoChannelSelect=`nvram_get AutoChannelSelect`
-if [ "$AutoChannelSelect" = "0" ]; then
-    Channel=`nvram_get Channel`
-    iwpriv ra0 set Channel=$Channel
-fi
-
 ########################################MULTICAST param###########################
 if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     if [ "$CONFIG_RT2860V2_MCAST_RATE_SPECIFIC" != "" ]; then
@@ -63,4 +56,22 @@ if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]
         meshhostname=`nvram_get 2860 MeshHostName` 
 	iwpriv mesh0 set  MeshHostName="$meshhostname"
     fi
+fi
+
+###############################################Others#############################
+AutoChannelSelect=`nvram_get AutoChannelSelect`
+if [ "$AutoChannelSelect" = "0" ]; then
+    Channel=`nvram_get Channel`
+    iwpriv ra0 set Channel=$Channel
+fi
+
+HT_BSSCoexApCntThr=`nvram_get HT_BSSCoexApCntThr`
+if [ "$HtBssCoexApCntThr" != "0" ]; then
+    iwpriv ra0 set HtBssCoexApCntThr=$HT_BSSCoexApCntThr
+fi
+
+###########################################ALWAYS END#############################
+AP2040Rescan=`nvram_get AP2040Rescan`
+if [ "$AP2040Rescan" != "0" ]; then
+    iwpriv ra0 set AP2040Rescan=1
 fi

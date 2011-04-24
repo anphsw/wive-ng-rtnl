@@ -150,6 +150,7 @@ HT_MIMOPSEnable=1
 HT_MIMOPSMode=3
 HT_40MHZ_INTOLERANT=0
 HT_DisableReordering=0
+HT_BSSCoexApCntThr=0
 HT_TxStream=2
 HT_RxStream=2
 TXPath=2
