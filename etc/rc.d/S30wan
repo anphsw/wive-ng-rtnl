@@ -27,6 +27,8 @@ start() {
     echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
     echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts
     echo "$wan_ip	$HOSTNAME.lo" >> /etc/hosts
+    # read for all write by root
+    chmod 644 /etc/hosts > /dev/null 2>&1
 
     if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" != "1" ]; then
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
