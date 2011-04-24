@@ -209,16 +209,16 @@ function wanMtuChange(form)
 </tr>
 <tr>
 	<td class="head" id="wStaticIp">IP Address</td>
-	<td><input name="staticIp" maxlength="15" value="<% getWanIp(); %>"></td>
+	<td><input name="staticIp" maxlength="15" value="<% getCfgZero(1, "wan_ipaddr"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wStaticNetmask">Subnet Mask</td>
-	<td><input name="staticNetmask" maxlength="15" value="<% getWanNetmask(); %>">
+	<td><input name="staticNetmask" maxlength="15" value="<% getCfgZero(1, "wan_netmask"); %>">
 </td>
 </tr>
 <tr>
 	<td class="head" id="wStaticGateway">Default Gateway</td>
-	<td><input name="staticGateway" maxlength="15" value="<% getWanGateway(); %>">
+	<td><input name="staticGateway" maxlength="15" value="<% getCfgZero(1, "wan_gateway"); %>">
 </td>
 </tr>
 </table>
