@@ -9,10 +9,11 @@ start() {
     get_param
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsp" = "1" ]; then
         $LOG "Starting DNSMASQ: "
+	chmod 644 "$cname"
 	chmod 644 "$fname"
 	chmod 644 "$hname"
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
-	    -u nobody -g nobody -C /etc/dnsmasq.conf -r "$fname" -H "$hname" -f -I "$wan_if" &
+	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f -I "$wan_if" &
     fi
 }
 
@@ -26,6 +27,7 @@ stop() {
 
 get_param() {
     dnsp=`nvram_get 2860 dnsPEnabled`
+    cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     fname="/etc/hosts"
 }
