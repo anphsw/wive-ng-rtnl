@@ -28,6 +28,7 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
 
     cat $fbak >> $fname
     rm -f $fbak
+    # read for all write by root
     chmod 644 "$fname" > /dev/null 2>&1
 fi
 }
