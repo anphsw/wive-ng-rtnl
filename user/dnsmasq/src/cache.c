@@ -758,7 +758,8 @@ static int read_hostsfile(char *filename, int index, int cache_size)
 
   if (!f)
     {
-      my_syslog(LOG_ERR, _("failed to load names from %s: %s"), filename, strerror(errno));
+      if (option_bool(OPT_DEBUG))
+        my_syslog(LOG_ERR, _("failed to load names from %s: %s"), filename, strerror(errno));
       return 0;
     }
   
