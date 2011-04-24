@@ -7,7 +7,7 @@ LOG="echo DNSSERVER: "
 
 start() {
     get_param
-    if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsp" = "1" ]; then
+    if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsPEnabled" = "1" ]; then
         $LOG "Starting DNSMASQ: "
 	chmod 644 "$cname"
 	chmod 644 "$fname"
@@ -26,7 +26,7 @@ stop() {
 }
 
 get_param() {
-    dnsp=`nvram_get 2860 dnsPEnabled`
+    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     fname="/etc/hosts"
