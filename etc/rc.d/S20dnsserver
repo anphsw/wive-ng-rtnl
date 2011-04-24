@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#get params
-. /etc/scripts/global.sh
-
 LOG="echo DNSSERVER: "
 
 start() {

@@ -75,8 +75,7 @@ chilli_net=`nvram_get 2860 chilli_net`
     cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
     cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
     cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
-    fname="/etc/resolv.conf"
-    chmod 644 "$fname" > /dev/null 2>&1
+    chmod 644 /etc/resolv.conf > /dev/null 2>&1
 
     #Replace default route to ppp tunnel
     if [ "$DGW" = "1" ]; then

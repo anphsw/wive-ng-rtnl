@@ -186,7 +186,7 @@ case "$1" in
 		$LOG "Use static DNS."
 	    fi
 		fname="/etc/resolv.conf"
-		chmod 644 "$fname" > /dev/null 2>&1
+		chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
 		$LOG "Restart needed services"
 		services_restart.sh dhcp
 	fi
