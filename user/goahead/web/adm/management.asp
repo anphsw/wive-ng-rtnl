@@ -22,16 +22,21 @@ function SubmitForm(message, form)
 		form.submit();
 }
 
-function AdmFormCheck()
+function AdmFormCheck(form)
 {
-	if (document.Adm.admuser.value == "")
+	var re_login = /^[a-zA-Z0-9_]+$/;
+	if (!re_login.test(form.admuser.value))
 	{
-		alert("Please specify the administrator account.");
+		alert("Please specify correct administrator account (a-z, A-Z, 0-9, _).");
+		form.admuser.focus();
 		return false;
 	}
-	if (document.Adm.admpass.value == "")
+	
+	var re_pass = /^[a-zA-Z0-9_\{\}\[\];:\'\"\,\.\/\?<>\-\=\+\\\!\~\`\|\@\#\%^\&\*\(\~`)]+$/;
+	if (!re_pass.test(form.admpass.value))
 	{
-		alert("Please specify the administrator password.");
+		alert("Please specify correct administrator password (spaces and dollar sign are disallowed).");
+		form.admpass.focus();
 		return false;
 	}
 	return true;
@@ -144,7 +149,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 </table>
 
 <!-- ================= Adm Settings ================= -->
-<form method="POST" name="Adm" action="/goform/setSysAdm">
+<form method="POST" name="Adm" action="/goform/setSysAdm" onsubmit="return AdmFormCheck(this);">
 <table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
@@ -159,7 +164,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 </tr>
 <tr>
 	<td class="head">Apply new login/password</td>
-	<td><input type="submit" class="half" value="Apply" id="manAdmApply" onClick="return AdmFormCheck();"></td>
+	<td><input type="submit" class="half" value="Apply" id="manAdmApply"></td>
 </tr>
 </table>
 </form>
