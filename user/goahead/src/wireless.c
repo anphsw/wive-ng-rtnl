@@ -844,7 +844,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
-	char_t	*rd_region, *carrier_detect, *lna_gain;
+	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
 
@@ -871,6 +871,8 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
 	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("0"));
+	ht_noise_thresh = websGetVar(wp, T("HT_BSSCoexApCntThr"), T("0"));
+	ap2040_rescan = websGetVar(wp, T("AP2040Rescan"), T("0"));
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
@@ -904,6 +906,8 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
 	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
 	nvram_bufset(RT2860_NVRAM, "HiPower", lna_gain);
+	nvram_bufset(RT2860_NVRAM, "HT_BSSCoexApCntThr", ht_noise_thresh);
+	nvram_bufset(RT2860_NVRAM, "AP2040Rescan", ap2040_rescan);
 	
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);

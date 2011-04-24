@@ -32,6 +32,8 @@ var carrierib = '<% getCarrierBuilt(); %>';
 var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
+var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
+var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
 
 function initTranslation()
 {
@@ -250,6 +252,28 @@ function initValue()
 	{
 		form.lnaGainEnable[0].checked = false;
 		form.lnaGainEnable[1].checked = true;
+	}
+	
+	if (htNoiseThresh == '1')
+	{
+		form.HT_BSSCoexApCntThr[0].checked = true;
+		form.HT_BSSCoexApCntThr[1].checked = false;
+	}
+	else
+	{
+		form.HT_BSSCoexApCntThr[0].checked = false;
+		form.HT_BSSCoexApCntThr[1].checked = true;
+	}
+	
+	if (ap2040Rescan == '1')
+	{
+		form.AP2040Rescan[0].checked = true;
+		form.AP2040Rescan[1].checked = false;
+	}
+	else
+	{
+		form.AP2040Rescan[0].checked = false;
+		form.AP2040Rescan[1].checked = true;
 	}
 }
 
@@ -498,6 +522,20 @@ function wmm_capable_enable_switch()
 		<input type="radio" name="lnaGainEnable" value="0" checked>Disable
 	</td>
 </tr>
+<tr>
+	<td class="head">HT Noise Threshold</td>
+	<td>
+		<input type="radio" name="HT_BSSCoexApCntThr" value="1">Enable&nbsp;
+		<input type="radio" name="HT_BSSCoexApCntThr" value="0" checked>Disable
+	</td>
+</tr>
+<tr>
+	<td class="head">Rescan HT Mode</td>
+	<td>
+		<input type="radio" name="AP2040Rescan" value="1">Enable&nbsp;
+		<input type="radio" name="AP2040Rescan" value="0" checked>Disable
+	</td>
+</tr>
 <tr> 
 	<td class="head" id="advCountryCode">Country Code</td>
 	<td>
@@ -520,6 +558,7 @@ function wmm_capable_enable_switch()
 		<input type="radio" name="carrier_detect" value="0" checked><font id="advCarrierDetectDisable">Disable</font>
 	</td>
 </tr>
+
 </table>
 
 <hr>
