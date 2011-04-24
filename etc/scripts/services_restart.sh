@@ -61,6 +61,7 @@ if [ "$CONFIG_IPV6" != "" ]; then
 fi
     service ripd restart
     service zebra restart
+    service inetd restart
     service dnsserver restart
 
 ##########################################################
