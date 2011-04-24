@@ -372,8 +372,9 @@
 16) ip: ip_options_compile() resilient to NULL skb route.<br>
 17) Fix replace pppoe dgw on lease renew.<br>
 18) Some webui fixes for Fastnat mode set and QoS.<br>
-19) Add AP2040Rescan variable allows to scan forcedly a state of an ether after a configuration of radio of the unit in AP mode.
-20) Add HT_BSSCoexApCntThr variable Allows to install manually a switch-off threshold 40MHz mode wifi. Default 0. A range 0-255.
+19) Fix show gateway in wan config after VPN up.<br>
+20) Add AP2040Rescan variable allows to scan forcedly a state of an ether after a configuration of radio of the unit in AP mode.<br>
+21) Add HT_BSSCoexApCntThr variable Allows to install manually a switch-off threshold 40MHz mode wifi. Default 0. A range 0-255.<br>
 
 <br><br>
 <b>For support see:</b><br>
