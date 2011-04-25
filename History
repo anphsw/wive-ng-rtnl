@@ -380,6 +380,7 @@
 24) Some cleanup and optimize init scripts.<br>
 25) init.d now log to syslog.<br>
 26) Boot speedup and save memory at first stage.<br>
+27) Fix SoftwareFastpath enable in Complex offload mode. Is regression.<br>
 
 <br><br>
 <b>For support see:</b><br>
