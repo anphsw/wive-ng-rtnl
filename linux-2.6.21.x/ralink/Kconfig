@@ -86,7 +86,7 @@ config  RA_NAT_HW
         tristate "Hardware NAT acceleration"
 
 config RA_NAT_NONE
-        bool "Disable NAT acceleration"
+        tristate "Disable NAT acceleration"
 endchoice
 
 config BCM_NAT
