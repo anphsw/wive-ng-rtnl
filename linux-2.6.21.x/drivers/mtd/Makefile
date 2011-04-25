@@ -23,8 +23,10 @@ obj-$(CONFIG_NFTL)		+= nftl.o
 obj-$(CONFIG_INFTL)		+= inftl.o
 obj-$(CONFIG_RFD_FTL)		+= rfd_ftl.o
 obj-$(CONFIG_SSFDC)		+= ssfdc.o
+obj-$(CONFIG_MTD_RALINK)	+= ralink/
 
-nftl-objs		:= nftlcore.o nftlmount.o
-inftl-objs		:= inftlcore.o inftlmount.o
+nftl-objs			:= nftlcore.o nftlmount.o
+inftl-objs			:= inftlcore.o inftlmount.o
 
-obj-y		+= chips/ maps/ devices/ nand/ onenand/ ralink/
+obj-y				+= chips/ maps/ devices/ nand/ onenand/
+

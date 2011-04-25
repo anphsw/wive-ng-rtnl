@@ -12,7 +12,7 @@
 #include <linux/delay.h>
 #include <linux/sched.h>
 #include "ralink_nand.h"
-#include "../maps/ralink-flash.h"
+#include "ralink-flash.h"
 
 #define READ_STATUS_RETRY	1000
 
@@ -39,7 +39,7 @@ module_param(ranfc_verify, int, 0644);
 #define ALIGNE_16(a) (((unsigned long)(a)+15) & ~15)
 
 //include map flash
-#include "../maps/ralink-flash-map.h"
+#include "ralink-flash-map.h"
 
 /*************************************************************
  * nfc functions 
