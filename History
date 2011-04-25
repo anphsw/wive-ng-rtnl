@@ -377,6 +377,7 @@
 21) Add HT_BSSCoexApCntThr variable Allows to install manually a switch-off threshold 40MHz mode wifi. Default 0. A range 0-255.<br>
 22) Dnsmasq start as nobody for more secure and fix some buggy situation.<br>
 23) Add check symbols in admin password and login.<br>
+24) Some cleanup and optimize init scripts.<br>
 
 <br><br>
 <b>For support see:</b><br>
