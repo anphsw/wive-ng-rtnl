@@ -80,7 +80,6 @@ menu "Nat acell mode"
 choice                                                                                                                                      
         prompt "Hardware nat mode"
         depends on RALINK_RT3052
-        default RA_NAT_NONE
 
 config  RA_NAT_HW
 	select RA_HW_NAT
