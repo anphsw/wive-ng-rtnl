@@ -7,18 +7,18 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t LLD2D"
+LOG="logger -t lld2d"
 
 start() {
     get_param
     if [ -f /bin/lld2d ] && [ "$lltd" = "1" ]; then
-	$LOG "Starting LLD2D: "
+	$LOG "Starting LLD2D"
 	lld2d $lan_if
     fi
 }
 
 stop() {
-    $LOG "Stopping LLD2D: "
+    $LOG "Stopping LLD2D"
     killall -q lld2d
     killall -q -9 lld2d
     rm -rf /var/run/lld2d-* > /dev/null 2>&1

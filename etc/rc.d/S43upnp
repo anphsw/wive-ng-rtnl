@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t UPNPD"
+LOG="logger -t upnpd"
 
 start() {
 if [ -f /bin/miniupnpd ]; then

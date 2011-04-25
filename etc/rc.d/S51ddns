@@ -7,13 +7,13 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t DYNDNS"
+LOG="logger -t dyndns"
 
 start() {
 if [ -f /bin/inadyn ]; then
     get_param
-    if [ "$srv" != "" ] && [ "$srv" != "none" ] && [ "$ddns" != "" ] && [ "$u" != "" ] && [ "$pw" != "" ]; then
-	    $LOG "Starting DynDNS: "
+    if  [ "$ddns" != "" ] && [ "$srv" != "" ] && [ "$srv" != "none" ] && [ "$u" != "" ] && [ "$pw" != "" ]; then
+	    $LOG "Starting DynDNS"
 	if [ "$srv" = "dyndns.org" ]; then
 	    inadyn -u $u -p $pw -a $ddns --dyndns_system dyndns@$srv --update_period_sec $update_period --background --syslog
 	elif [ "$srv" = "freedns.afraid.org" ] || [ "$srv" = "zoneedit.com" ] || [ "$srv" = "no-ip.com" ]; then
@@ -22,8 +22,6 @@ if [ -f /bin/inadyn ]; then
 	    $LOG "Unknown DDNS provider: $srv"
 	    exit 1
 	fi
-    else
-	$LOG "Some parametrs needed..."
     fi
 fi
 }
@@ -37,7 +35,7 @@ get_param() {
 }
 
 stop() {
- $LOG "Stopping DynDns: "
+ $LOG "Stopping DynDns"
     killall -q inadyn
     killall -q -9 inadyn
 }

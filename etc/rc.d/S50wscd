@@ -7,13 +7,13 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t WSCD"
+LOG="logger -t wscd"
 
 start() {
 if [ -f /bin/wscd ]; then
     get_param
     if [ "$wsc" = "1" ]; then
-      $LOG "Starting WPS: "
+      $LOG "Starting WPS"
 	if [ "$opmode" = "0" ]; then
 	    wscd -m 1 -a $lan_ip -i ra0 -D &
 	else
@@ -24,7 +24,7 @@ fi
 }
 
 stop() {
- $LOG "Stopping WPS: "
+ $LOG "Stopping WPS"
     killall -q wscd
     killall -q -9 wscd
 }

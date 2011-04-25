@@ -7,20 +7,20 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t RIPD"
+LOG="logger -t ripd"
 
 start() {
 RIPEnable=`nvram_get 2860 RIPEnable`
 if [ -f /bin/ripd ] && [ "$RIPEnable" = "1" ]; then
  if [ -f /etc/ripd.conf ]; then
-    $LOG "Starting RIPD: "
+    $LOG "Starting RIPD"
     ripd -f /etc/ripd.conf -d
  fi 
 fi
 }
 
 stop() {
- $LOG "Stopping RIPD: "
+ $LOG "Stopping RIPD"
   killall -q ripd
   killall -q -9 ripd
 }

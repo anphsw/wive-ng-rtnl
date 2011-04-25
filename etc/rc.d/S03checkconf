@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo CHECKCONF: "
+LOG="echo CHECKCONF"
 
 start() {
     get_param

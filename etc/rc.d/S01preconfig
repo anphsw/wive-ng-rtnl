@@ -5,7 +5,7 @@ if [ -f /var/run/goahead.pid ]; then
     exit 0
 fi
 
-LOG="echo PRECONFIG: "
+LOG="echo PRECONFIG"
 
 start() {
  $LOG "Preconfigure..."

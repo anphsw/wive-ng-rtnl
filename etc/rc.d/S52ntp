@@ -7,12 +7,12 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t NTP"
+LOG="logger -t ntp"
 
 start() {
     get_param
 
-    $LOG "Set timezone: "
+    $LOG "Set timezone"
     backup_time=`date +%T`
     sync=`expr $sync \* 3600`
 
@@ -28,13 +28,13 @@ start() {
     date +%T -s $backup_time
 
     if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ] && [ -f /bin/ntpd ]; then
-	$LOG "Starting NTPD: "
+	$LOG "Starting NTPD"
 	ntpd -d -p $srv &
     fi
 }
 
 stop() {
- $LOG "Stopping NTPD: "
+ $LOG "Stopping NTPD"
     killall -q ntpd
     killall -q -9 ntpd
 }

@@ -7,10 +7,10 @@ web_wait
 #include global config
 . /etc/scripts/global.sh
 
-LOG="logger -t IPTABLES"
+LOG="logger -t iptables"
 
 start() {
- $LOG "Starting IPTABLES: "
+ $LOG "Starting IPTABLES"
  get_param
  stop
 #########################################DEFAULTRULES###################################

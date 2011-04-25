@@ -1,11 +1,11 @@
 #!/bin/sh
 
-LOG="logger -t INETD"
+LOG="logger -t inetd"
 
 start() {
     get_param
     if [ -f /sbin/inetd ] && [ "$admID" != "" ]; then
-      $LOG "Starting inetd: "
+      $LOG "Starting inetd"
       echo > /etc/inetd.conf
 	if [ -f /bin/dropbear ] && [ "$RemoteSSH" != "" ] && [ "$RemoteSSH" != "0" ]; then
 	    echo "ssh     stream  tcp     nowait  $admID    /bin/dropbear       /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
@@ -15,7 +15,7 @@ start() {
 }
 
 stop() {
- $LOG "Stopping inetd: "
+ $LOG "Stopping inetd"
  killall -q inetd
  killall -q -9 inetd
 }

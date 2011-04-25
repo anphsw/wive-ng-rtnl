@@ -3,7 +3,7 @@
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
 
-LOG="echo INIT: "
+LOG="echo INIT"
 
 tmpfs_av=`cat /proc/filesystems | grep tmpfs -c`
 if [ "$tmpfs_av" != "0" ]; then

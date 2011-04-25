@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t WATCHDOG"
+LOG="logger -t watchdog"
 
 start() {
     WatchdogEnabled=`nvram_get 2860 WatchdogEnabled`

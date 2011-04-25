@@ -29,7 +29,7 @@ get_params() {
 start() {
 if [ -f /bin/chilli ] && [ "$opmode" = "4" ]; then
  if [ -f /etc/chilli.conf ]; then
-    $LOG "Starting ChilliSpot: "
+    $LOG "Starting ChilliSpot"
     get_params
     modprobe tun
     chilli $PARLINE
@@ -38,7 +38,7 @@ fi
 }
 
 stop() {
- $LOG "Stopping ChilliSpot: "
+ $LOG "Stopping ChilliSpot"
   killall -q chilli
   killall -q -9 chilli
 }

@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t VPN"
+LOG="logger -t vpnhelper"
 
 start() {
     if [ "$vpnEnabled" = "on" ]; then

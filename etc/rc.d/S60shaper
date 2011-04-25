@@ -7,7 +7,7 @@ web_wait
 #include functions and env
 . /etc/scripts/global.sh
 
-LOG="logger -t SHAPER"
+LOG="logger -t shaper"
 
 start() {
 get_param
@@ -133,7 +133,7 @@ fi
 }
 
 stop() {
- $LOG "Stopping SHAPER: "
+ $LOG "Stopping SHAPER"
  get_param
  set_def
 

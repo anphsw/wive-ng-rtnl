@@ -3,7 +3,7 @@
 #get params                                                                                                                                 
 . /etc/scripts/global.sh
 
-LOG="echo MODULES: "
+LOG="echo MODULES"
 
 start() {
     get_param

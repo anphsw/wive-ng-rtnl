@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo HOTPLUG: "
+LOG="echo HOTPLUG"
 
 start() {
 if [ -f /bin/mdev ]; then

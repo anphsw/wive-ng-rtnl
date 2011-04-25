@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t RADVD"
+LOG="logger -t radvd"
 
 start() {
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
@@ -20,7 +20,7 @@ if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     ip -6 link set sit0 down
     echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
     if [ "$radvd" = "1" ]; then
-      $LOG "Starting radvd: "
+      $LOG "Starting radvd"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
 	$LOG "Up sit0 interface"
 	ip -6 link set sit0 up

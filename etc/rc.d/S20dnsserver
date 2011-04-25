@@ -1,18 +1,18 @@
 #!/bin/sh
 
-LOG="logger -t DNSSERVER"
+LOG="logger -t dnsserver"
 
 start() {
     get_param
     if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsPEnabled" = "1" ]; then
-        $LOG "Starting DNSMASQ: "
+        $LOG "Starting DNSMASQ"
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
 
 stop() {
-    $LOG "Stopping DNSMASQ: "
+    $LOG "Stopping DNSMASQ"
     killall -q dnsmasq
     dnsmasqpid=`pidof dnsmasq`
     if [ "$dnsmasqpid" != "" ]; then

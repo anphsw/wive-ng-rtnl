@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t WAN"
+LOG="logger -t wan"
 
 start() {
  $LOG "Start wan config"

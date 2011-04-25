@@ -1,17 +1,17 @@
 #!/bin/sh
 
-LOG="logger -t CRON"
+LOG="logger -t cron"
 
 start() {
     CrondEnable=`nvram_get 2860 CrondEnable`
     if [ "$CrondEnable" = "1" ]; then
-	$LOG "Starting crontab: "
+	$LOG "Starting crontab"
 	 /sbin/crond -l 0 -L /var/log/cron.log
     fi
 }
 
 stop() {
-    $LOG "Stopping crontab: "
+    $LOG "Stopping crontab"
     killall -q crond
     killall -q -9 crond
 }

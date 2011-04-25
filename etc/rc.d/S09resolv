@@ -1,11 +1,11 @@
 #!/bin/sh
 
-LOG="logger -t RESOLVE"
+LOG="logger -t resolv"
 
 start() {
 get_param
 if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
- $LOG "Generate resolve: "
+ $LOG "Generate resolve"
 
     # backup file without nameserver part
     sed -e '/nameserver/d' $fname > $fbak

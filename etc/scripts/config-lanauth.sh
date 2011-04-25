@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t LANAUTH"
+LOG="logger -t lanauth"
 
 start() {
     vpnEnabled=`nvram_get 2860 vpnEnabled`

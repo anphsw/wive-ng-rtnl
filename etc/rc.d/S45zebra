@@ -7,20 +7,20 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t ZEBRA"
+LOG="logger -t zebra"
 
 start() {
 RIPEnable=`nvram_get 2860 RIPEnable`
 if [ -f /bin/zebra ] && [ "$RIPEnable" = "1" ]; then
  if [ -f /etc/zebra.conf ]; then
-    $LOG "Starting ZEBRA: "
+    $LOG "Starting ZEBRA"
     zebra -d -f /etc/zebra.conf
  fi
 fi
 }
 
 stop() {
- $LOG "Stopping ZEBRA: "
+ $LOG "Stopping ZEBRA"
   killall -q zebra
   killall -q -9 zebra
 }

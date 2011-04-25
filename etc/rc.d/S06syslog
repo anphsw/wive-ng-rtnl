@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo SYSLOG: "
+LOG="echo SYSLOG"
 
 start() {
  $LOG "Start klogd"

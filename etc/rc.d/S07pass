@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t PASSWD"
+LOG="logger -t pass"
 
 start() {
  $LOG "Set current password"

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-LOG="logger -t SYSCTL"
+LOG="logger -t sysctl"
 
 start() {
-    $LOG "Tune with sysctl: "
+    $LOG "Tune with sysctl"
     sysctl -w -p /etc/sysctl.conf > /dev/null 2>&1
 
     $LOG "Tune network stack and memory usadge fo small memory devices"
@@ -48,7 +48,7 @@ start() {
 }
 
 stop() {
- $LOG "Stopping sysctl: "
+ $LOG "Stopping sysctl"
 }
 
 case "$1" in
