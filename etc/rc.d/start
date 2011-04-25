@@ -5,10 +5,8 @@
 
 LOG="echo INIT: "
 
-#include kernel config --- IN BIN...
-. /bin/config.sh
-
-if [ "$CONFIG_TMPFS" != "" ]; then
+tmpfs_av=`cat /proc/filesystems | grep tmpfs -c`
+if [ "$tmpfs_av" != "0" ]; then
     #mount /tmp /etc in /var
     mkdir -p /var/tmpfs
     mount -o bind /var/tmpfs /tmp
