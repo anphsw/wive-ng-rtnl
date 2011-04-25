@@ -13,29 +13,29 @@ get_txqlen
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ "$brset" = "0" ]; then
-	    $LOG "-==Add bridge in the system==-"
+	    $LOG "Add bridge in the system"
 	    brctl addbr br0
         fi
-	$LOG "-==BR0_MACADDR $LANMAC==-"
+	$LOG "BR0_MACADDR $LANMAC"
 	ifconfig br0 hw ether "$LANMAC"
-	$LOG "-==Up bridge interface==-"
+	$LOG "Up bridge interface"
 	ip link set br0 up
     fi
     if [ "$lanisup" = "0" ]; then
-	$LOG "-==ETH2_MACADDR $LANMAC==-"
+	$LOG "ETH2_MACADDR $LANMAC"
 	ifconfig eth2 hw ether "$LANMAC"
 	ifconfig eth2 txqueuelen "$txqueuelen"
-	$LOG "-==Up vlan root interface==-"
+	$LOG "Up vlan root interface"
 	ip link set eth2 up
 	vlanisconfig=0
     fi
     if [ "$vlanisconfig" != "2" ]; then
-        $LOG "-==Add vlans and config==-"
+        $LOG "Add vlans and config"
 	vconfig add eth2 1
 	vconfig add eth2 2
-	$LOG "-==ETH2.1_MACADDR $LANMAC==-"
+	$LOG "ETH2.1_MACADDR $LANMAC"
 	ifconfig eth2.1 hw ether "$LANMAC"
-	$LOG "-==ETH2.2_MACADDR $WANMAC==-"
+	$LOG "ETH2.2_MACADDR $WANMAC"
 	ifconfig eth2.2 hw ether "$WANMAC"
 	vlanisconfig=2
     fi
@@ -58,7 +58,7 @@ get_txqlen
     else
 	ifconfig $lan_if 0.0.0.0 up	
     fi
-    $LOG ">>>>> Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip <<<<<"
+    $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip"
 
      #-------------------LAN2----------------
     if [ "$lan2enabled" = "1" ]; then
