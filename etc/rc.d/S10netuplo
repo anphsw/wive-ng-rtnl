@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t LOOPBACK: "
+LOG="logger -t LOOPBACK"
 
 start() {
  $LOG "Start loopback interface..."

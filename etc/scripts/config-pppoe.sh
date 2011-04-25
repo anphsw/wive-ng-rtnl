@@ -26,7 +26,7 @@ modprobe -q ppp_generic > /dev/null 2>&1
 modprobe -q pppox > /dev/null 2>&1
 modprobe -q pppoe > /dev/null 2>&1
 
-LOG="logger -t vpnhelper"
+LOG="logger -t vpnhelper-pppoe"
 
 echo "==================START-PPPOE-CLIENT======================="
 

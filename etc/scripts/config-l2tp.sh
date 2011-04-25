@@ -24,7 +24,7 @@ modprobe -q ppp_generic > /dev/null 2>&1
 modprobe -q pppox > /dev/null 2>&1
 modprobe -q pppol2tp > /dev/null 2>&1
 
-LOG="logger -t vpnhelper"
+LOG="logger -t vpnhelper-l2tp"
 
 check_param() {
     if [ "$SERVERNM" = "" ] || [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then

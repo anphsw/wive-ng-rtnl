@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t CRON: "
+LOG="logger -t CRON"
 
 start() {
     CrondEnable=`nvram_get 2860 CrondEnable`

@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t RADVD: "
+LOG="logger -t RADVD"
 
 start() {
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then

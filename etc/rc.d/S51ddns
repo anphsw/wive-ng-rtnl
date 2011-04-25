@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t DYNDNS: "
+LOG="logger -t DYNDNS"
 
 start() {
 if [ -f /bin/inadyn ]; then

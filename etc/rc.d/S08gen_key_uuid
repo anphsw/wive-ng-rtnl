@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t GENKEY: "
+LOG="logger -t GENKEY"
 
 start() {
     if [ -f /etc/dropbear/dropbear_dss_host_key ]; then

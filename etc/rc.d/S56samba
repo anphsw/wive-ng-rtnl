@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t SAMBA: "
+LOG="logger -t SAMBA"
 
 start() {
 SmbEnabled=`nvram_get 2860 SmbEnabled`

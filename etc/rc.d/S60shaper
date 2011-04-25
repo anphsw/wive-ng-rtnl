@@ -7,7 +7,7 @@ web_wait
 #include functions and env
 . /etc/scripts/global.sh
 
-LOG="logger -t SHAPER: "
+LOG="logger -t SHAPER"
 
 start() {
 get_param

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t SYSCTL: "
+LOG="logger -t SYSCTL"
 
 start() {
     $LOG "Tune with sysctl: "

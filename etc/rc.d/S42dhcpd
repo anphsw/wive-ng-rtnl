@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t DHCPSERVER: "
+LOG="logger -t DHCPSERVER"
 
 start() {
 	dhcp=`nvram_get 2860 dhcpEnabled`

@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t IGMPPROXY: "
+LOG="logger -t IGMPPROXY"
 
 start() {
 if [ -f /bin/igmpproxy ]; then

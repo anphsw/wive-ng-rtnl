@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t LLD2D: "
+LOG="logger -t LLD2D"
 
 start() {
     get_param

@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t ChilliSpot: "
+LOG="logger -t ChilliSpot"
 PARAMS="net dns1 dns2 domain radiuslisten radiusserver1 radiusserver2 \
     radiussecret radiusnasid radiusnasip radiuslocationid radiuslocationname \
     radiusnasporttype coaport lease uamserver uamhomepage uamsecret \

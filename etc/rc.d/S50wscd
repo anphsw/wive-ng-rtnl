@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t WSCD: "
+LOG="logger -t WSCD"
 
 start() {
 if [ -f /bin/wscd ]; then

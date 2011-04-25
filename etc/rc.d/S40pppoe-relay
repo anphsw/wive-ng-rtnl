@@ -7,7 +7,7 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-LOG="logger -t PPPOERELAY: "
+LOG="logger -t PPPOERELAY"
 
 start() {
 if [ -f /bin/pppoe-relay ]; then

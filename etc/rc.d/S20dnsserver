@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="logger -t DNSSERVER: "
+LOG="logger -t DNSSERVER"
 
 start() {
     get_param
