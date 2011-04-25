@@ -61,7 +61,7 @@ start() {
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	fi
 	#----Workaround for simple QoS mode support-----------------
-	if [ "$QoSEnable" != "" ] || [ "$QoSEnable" != "0" ]; then
+	if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	    simple_qos=1
 	    if [ "$QoSEnable" = "3" ]; then
 		$LOG "IMQ shaper - HW NAT Offload mode DISABLE"
