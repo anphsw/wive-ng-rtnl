@@ -378,6 +378,8 @@
 22) Dnsmasq start as nobody for more secure and fix some buggy situation.<br>
 23) Add check symbols in admin password and login.<br>
 24) Some cleanup and optimize init scripts.<br>
+25) init.d now log to syslog.<br>
+26) Boot speedup and save memory at first stage.<br>
 
 <br><br>
 <b>For support see:</b><br>
