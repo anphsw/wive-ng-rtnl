@@ -62,6 +62,7 @@ getWanUpnpIfName()
     if [ "$vpnEnabled" = "on" ]; then
         wan_upnp_if="ppp0"
     else
+	getWanIfName
         wan_upnp_if=$wan_if
     fi
 }
@@ -374,7 +375,6 @@ kernel_ext_en()
 getLanIfName
 getLan2IfName
 getWanIfName
-getWanUpnpIfName
 getEthConv
 getStaMode
 getSwType

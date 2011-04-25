@@ -14,7 +14,8 @@ if [ -f /bin/miniupnpd ]; then
  if [ "$upnp" != "1" ]; then
     exit 0
  fi
-    if [ "$opmode" = "0" ] || [ "$opmode" = "1" ] || [ "$vpnEnabled" = "on" ]; then
+    if [ "$opmode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
+	getWanUpnpIfName
 	EXTIP="`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`"
         if [ "$EXTIP" != "" ]; then
 	  $LOG "Start upnp at $EXTIP"
