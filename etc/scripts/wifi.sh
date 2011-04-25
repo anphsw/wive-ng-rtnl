@@ -1,7 +1,6 @@
 #!/bin/sh
 
-#include kernel config and global
-. /etc/scripts/config.sh
+#include global config
 . /etc/scripts/global.sh
 
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"

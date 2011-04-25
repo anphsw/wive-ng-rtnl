@@ -4,8 +4,7 @@
 # internet.sh - reconfigure network helper for goahead #
 ########################################################
 
-#include kernel config and global
-. /etc/scripts/config.sh
+#include global config
 . /etc/scripts/global.sh
 
 #restart mode

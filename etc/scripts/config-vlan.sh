@@ -8,8 +8,7 @@
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
  
-#include kernel and global config
-. /etc/scripts/config.sh
+#include global config
 . /etc/scripts/global.sh
 
 usage()
