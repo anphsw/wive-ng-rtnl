@@ -26,7 +26,7 @@ fi
 #Configure kernel Extensions
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
     $LOG "Fastpath, passthrouth, stp and othes mode set..."
-    kernel_ext_en
+    service kext start
 fi
 
 ##########################################################
