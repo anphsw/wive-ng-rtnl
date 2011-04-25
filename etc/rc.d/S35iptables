@@ -2,10 +2,8 @@
 
 #get params
 
-#include kernel and global config
+#include global config
 . /etc/scripts/global.sh
-. /etc/scripts/config.sh
-
 
 #wait to start web and run from goahead code
 web_wait
@@ -245,10 +243,8 @@ start() {
 		    #wireless ISP net dual dual acess
 		    iptables -t nat -A POSTROUTING -o ra+ -s $lan_ip/$lan_nm -j MASQUERADE
 		fi
-		if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-		    if [ "$OperationMode" = "3" ]; then
-			iptables -t nat -A POSTROUTING -o apcli+ -s $lan_ip/$lan_nm -j MASQUERADE
-		    fi
+		if [ "$OperationMode" = "3" ]; then
+		    iptables -t nat -A POSTROUTING -o apcli+ -s $lan_ip/$lan_nm -j MASQUERADE
 		fi
 		if [ "$OperationMode" = "4" ]; then
 		    #for ISP localnet alya dualacess
@@ -262,10 +258,8 @@ start() {
 			#wireless ISP net dual dual acess....gyyy
 			iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		    fi
-		    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-			if [ "$OperationMode" = "3" ]; then
-			    iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-			fi
+		    if [ "$OperationMode" = "3" ]; then
+		        iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		    fi
 		fi
 	    fi
