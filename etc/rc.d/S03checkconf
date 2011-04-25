@@ -1,8 +1,6 @@
 #!/bin/sh
 
 LOG="echo CHECKCONF: "
-#include kernel config
-. /etc/scripts/config.sh
 
 start() {
     get_param
@@ -31,6 +29,9 @@ get_param() {
 check_nvram()
 {
  if [ ! -f /tmp/nvram_checked ]; then
+	#include kernel config
+	. /etc/scripts/config.sh
+
 	echo "Check firmware update or clean boot."
 	if [ "$IS_WIVE" = "YES" ]; then
 	    $LOG ">>>> NORMAL BOOT <<<<"
