@@ -191,7 +191,7 @@ link_up()
 
 reset_all_phys()
 {
-	if [ "$CONFIG_RAETH_ROUTER" != "y" ] && [ "$CONFIG_RT_3052_ESW" != "y" ]; then
+	if [ "$SWITCH_MODE" != "0" ] && [ "$SWITCH_MODE" != "2" ]; then
 		return
 	fi
 
@@ -246,11 +246,7 @@ config175C()
 		mii_mgr -s -p 29 -r 27 -v 0x1
 		mii_mgr -s -p 29 -r 28 -v 0x2
 		mii_mgr -s -p 30 -r 9 -v 0x1089
-		if [ "$CONFIG_RALINK_VISTA_BASIC" == "y" ]; then
-			mii_mgr -s -p 30 -r 1 -v 0x2f3f
-		else
-			mii_mgr -s -p 30 -r 1 -v 0x2f00
-		fi
+		mii_mgr -s -p 30 -r 1 -v 0x2f00
 		mii_mgr -s -p 30 -r 2 -v 0x0030
 	elif [ "$1" = "WLLLL" ]; then
 		mii_mgr -s -p 29 -r 24 -v 0x2
@@ -259,11 +255,7 @@ config175C()
 		mii_mgr -s -p 29 -r 27 -v 0x1
 		mii_mgr -s -p 29 -r 28 -v 0x1
 		mii_mgr -s -p 30 -r 9 -v 0x0189
-		if [ "$CONFIG_RALINK_VISTA_BASIC" == "y" ]; then
-			mii_mgr -s -p 30 -r 1 -v 0x3e3f
-		else
-			mii_mgr -s -p 30 -r 1 -v 0x3e00
-		fi
+		mii_mgr -s -p 30 -r 1 -v 0x3e00
 		mii_mgr -s -p 30 -r 2 -v 0x0021
 	else
 		echo "LAN WAN layout $0 is not suported"
