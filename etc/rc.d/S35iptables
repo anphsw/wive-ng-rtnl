@@ -1,14 +1,13 @@
 #!/bin/sh
 
-#get params
+#wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
 
 #include global config
 . /etc/scripts/global.sh
 
-#wait to start web and run from goahead code
-web_wait
-
- LOG="logger -t IPTABLES: "
+LOG="logger -t IPTABLES: "
 
 start() {
  $LOG "Starting IPTABLES: "

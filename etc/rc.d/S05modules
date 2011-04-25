@@ -59,6 +59,7 @@ start() {
 	fi
     else
 	#not load module before goahead start
+	. /etc/scripts/web_wait.sh
 	web_wait
 
 	$LOG "Prepare wifi config..."

@@ -1,10 +1,11 @@
 #!/bin/sh
 
+#wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
 #get params
 . /etc/scripts/global.sh
-
-#wait to start web and run from goahead code
-web_wait
 
 LOG="logger -t RADVD: "
 
