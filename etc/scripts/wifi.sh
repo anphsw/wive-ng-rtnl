@@ -66,7 +66,7 @@ if [ "$AutoChannelSelect" = "0" ]; then
 fi
 
 HT_BSSCoexApCntThr=`nvram_get HT_BSSCoexApCntThr`
-if [ "$HtBssCoexApCntThr" != "0" ]; then
+if [ "$HT_BSSCoexApCntThr" != "0" ]; then
     iwpriv ra0 set HtBssCoexApCntThr=$HT_BSSCoexApCntThr
 fi
 
