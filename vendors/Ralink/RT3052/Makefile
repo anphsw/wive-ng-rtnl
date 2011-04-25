@@ -1,6 +1,6 @@
 
 -include config.arch
--include ../../../linux-2.6.21.x/drivers/mtd/maps/ralink-flash.h
+-include ../../../linux-2.6.21.x/drivers/mtd/ralink/ralink-flash.h
 -include ../../../sdk_version.h
 -include ../../../version
 
