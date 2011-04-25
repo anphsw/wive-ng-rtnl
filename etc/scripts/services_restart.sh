@@ -2,8 +2,7 @@
 
 # This scipt restart needed services
 
-#include global and kernel
-. /etc/scripts/config.sh
+#include global config
 . /etc/scripts/global.sh
 
 LOG="logger -t services"
@@ -56,7 +55,7 @@ fi
 ##########################################################
 # This is services restart always                       #
 ##########################################################
-if [ "$CONFIG_IPV6" != "" ]; then
+if [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
     service ripd restart

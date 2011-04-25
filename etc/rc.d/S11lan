@@ -2,7 +2,6 @@
 
 #get params
 . /etc/scripts/global.sh
-. /etc/scripts/config.sh
 
 LOG="echo LAN: "
 
@@ -99,7 +98,7 @@ addr_flush() {
     dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
     for i in $dev; do
 	ip addr flush dev $i > /dev/null 2>&1
-	if [ "$CONFIG_IPV6" != "" ]; then
+	if [ -d /proc/sys/net/ipv6 ]; then
 	    ip -6 addr flush dev $i > /dev/null 2>&1
 	fi
     done

@@ -4,8 +4,7 @@
 # config-udhcpd.sh - configure DHCP server helper #
 ###################################################
 
-#include kernel config and global
-. /etc/scripts/config.sh
+#include global
 . /etc/scripts/global.sh
 
 fname="/etc/udhcpd.conf"

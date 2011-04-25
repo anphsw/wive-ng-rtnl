@@ -7,8 +7,6 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU GPL v2 or later.
 
-. /etc/scripts/config.sh
-
 TGZfs_size=131072
 BLOCKS=2
 KEEPMAC=YES

@@ -2,8 +2,6 @@
 
 # Wive-NG  udhcpc script
 
-#include kernel config
-. /etc/scripts/config.sh
 #include global config
 . /etc/scripts/global.sh
 
@@ -40,7 +38,7 @@ case "$1" in
     deconfig)
     vpn_deadloop_fix
     ip addr flush dev $interface
-    if [ "$CONFIG_IPV6" != "" ]; then
+    if [ -d /proc/sys/net/ipv6 ]; then
 	ip -6 addr flush dev $interface
     fi
     ip link set $interface up

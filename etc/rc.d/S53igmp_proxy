@@ -2,8 +2,6 @@
 
 #get params
 . /etc/scripts/global.sh
-#include kernel config                                                                                                                      
-. /etc/scripts/config.sh
 
 #wait to start web and run from goahead code
 web_wait

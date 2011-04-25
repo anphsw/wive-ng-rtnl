@@ -4,7 +4,7 @@
 # config-pppoe.sh - configure PPPOE client helper #
 ###################################################
 
-#include global
+#include global config
 . /etc/scripts/global.sh
 
 SERVER=`nvram_get 2860 vpnServer`

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#include kernel config
-. /etc/scripts/config.sh
 
 LOG="echo HOTPLUG: "
 
@@ -17,6 +15,8 @@ if [ -f /bin/mdev ]; then
 		# @ Run after creating the device.
 		# $ Run before removing the device.
 		# * Run both after creating and before removing the device.\n" > /etc/mdev.conf
+	#include kernel config
+	. /etc/scripts/config.sh
 	if [ "$CONFIG_USB_STORAGE" != "" ]; then
 		mount -t tmpfs tmpfs /media
 		# Check & load ext2 here or in automount.sh (else only ntfs-3g works) ?

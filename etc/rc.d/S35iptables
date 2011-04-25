@@ -1,9 +1,9 @@
 #!/bin/sh
 
 #get params
-. /etc/scripts/global.sh
 
-#include kernel config
+#include kernel and global config
+. /etc/scripts/global.sh
 . /etc/scripts/config.sh
 
 

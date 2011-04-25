@@ -2,7 +2,6 @@
 
 #get params
 . /etc/scripts/global.sh
-. /etc/scripts/config.sh
 
 #wait to start web and run from goahead code
 web_wait
@@ -10,7 +9,7 @@ web_wait
 LOG="echo RADVD: "
 
 start() {
-if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
+if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
  fi
@@ -80,7 +79,7 @@ fi
 
 stop() {
  $LOG  "Stop radvd daemon..."
-if [ -f /bin/radvd ] && [ "$CONFIG_IPV6" != "" ]; then
+if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
   killall -q radvd > /dev/null 2>&1
   killall -q -9 radvd > /dev/null 2>&1
   ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     

@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#include kernel config
-. /etc/scripts/config.sh
-
 #only clean load start this
 if [ -f /var/run/goahead.pid ]; then
     exit 0

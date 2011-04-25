@@ -1,7 +1,6 @@
 #!/bin/sh
 
-#include kernel config
-. /bin/config.sh
+#include global config
 . /etc/scripts/global.sh
 
 PPP_IFACE="$1"

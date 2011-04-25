@@ -4,7 +4,7 @@
 # config-l2tp.sh - configure L2TP client helper #
 #################################################
 
-#include global
+#include global config
 . /etc/scripts/global.sh
 
 SERVERNM=`nvram_get 2860 vpnServer`
