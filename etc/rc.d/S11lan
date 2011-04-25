@@ -3,7 +3,7 @@
 #get params
 . /etc/scripts/global.sh
 
-LOG="echo LAN: "
+LOG="logger -t LAN: "
 
 start() {
 $LOG "Start network interfaces..."

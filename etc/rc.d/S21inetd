@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo INETD: "
+LOG="logger -t INETD: "
 
 start() {
     get_param

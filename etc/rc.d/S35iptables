@@ -8,7 +8,7 @@
 #wait to start web and run from goahead code
 web_wait
 
- LOG="echo IPTABLES: "
+ LOG="logger -t IPTABLES: "
 
 start() {
  $LOG "Starting IPTABLES: "

@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo ChilliSpot: "
+LOG="logger -t ChilliSpot: "
 PARAMS="net dns1 dns2 domain radiuslisten radiusserver1 radiusserver2 \
     radiussecret radiusnasid radiusnasip radiuslocationid radiuslocationname \
     radiusnasporttype coaport lease uamserver uamhomepage uamsecret \

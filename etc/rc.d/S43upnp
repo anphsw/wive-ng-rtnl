@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo UPNPD: "
+LOG="logger -t UPNPD: "
 
 start() {
 if [ -f /bin/miniupnpd ]; then

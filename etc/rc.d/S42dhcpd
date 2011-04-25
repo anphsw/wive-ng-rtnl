@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo DHCPSERVER: "
+LOG="logger -t DHCPSERVER: "
 
 start() {
 	dhcp=`nvram_get 2860 dhcpEnabled`

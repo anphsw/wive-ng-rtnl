@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo WAN: "
+LOG="logger -t WAN: "
 
 start() {
  $LOG "Start wan config"

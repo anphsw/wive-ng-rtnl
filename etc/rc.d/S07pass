@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo PASSWD: "
+LOG="logger -t PASSWD: "
 
 start() {
  $LOG "Set current password"
@@ -20,7 +20,7 @@ start() {
 }
 
 stop() {
- echo "" > /dev/null
+    echo "" > /dev/null
 }
 
 get_param() {

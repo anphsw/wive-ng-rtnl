@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo NTP: "
+LOG="logger -t NTP: "
 
 start() {
     get_param

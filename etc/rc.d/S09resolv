@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo RESOLVE: "
+LOG="logger -t RESOLVE: "
 
 start() {
 get_param

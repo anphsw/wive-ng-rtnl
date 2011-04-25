@@ -6,7 +6,7 @@
 #wait to start web and run from goahead code
 web_wait
 
-LOG="echo WSCD: "
+LOG="logger -t WSCD: "
 
 start() {
 if [ -f /bin/wscd ]; then

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LOG="echo GOAHEADWEBSERVER: "
+LOG="logger -t GOAHEADWEBSERVER: "
 
 start() {
  $LOG "Start goahead"
