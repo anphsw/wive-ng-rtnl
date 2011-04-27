@@ -16,7 +16,7 @@ start() {
 	    get_param
 
 		> /etc/udhcpd.conf
-		> /var/udhcpd.leases
+		touch /var/udhcpd.leases
 
 		config-udhcpd.sh -s $start
 		config-udhcpd.sh -e $end
