@@ -109,8 +109,10 @@ case "$1" in
   "-r")
  
     killall -q udhcpd
+    killall -q -9 udhcpd
     rm -f $pidfile
     touch $leases
+    touch $fname
     echo "lease_file $leases" >> $fname
     udhcpd -S $fname &
     ;;
