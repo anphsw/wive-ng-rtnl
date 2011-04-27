@@ -1317,7 +1317,6 @@ static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
 	else
 		websDone(wp, 200);
 
-	return 0;
 }
 
 /* goform/setFirewallAlg */
@@ -1346,7 +1345,6 @@ static void setFirewallAlg(webs_t wp, char_t *path, char_t *query)
 	else
 		websDone(wp, 200);
 
-	return 0;
 }
 
 char *getNameIntroFromPat(char *filename)
