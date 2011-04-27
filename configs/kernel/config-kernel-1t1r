@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Thu Apr 28 02:29:21 2011
 #
 CONFIG_MIPS=y
 
@@ -1192,6 +1193,11 @@ CONFIG_RT2860V2_STA_LED=y
 # CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY is not set
 # CONFIG_RT2860V2_STA_VIDEO_TURBINE is not set
 # CONFIG_RALINK_RT2880_STA_DBG is not set
+
+#
+# 802.11a wireless driver.
+#
+# CONFIG_RT3090_AP is not set
 
 #
 # Nat acell mode
