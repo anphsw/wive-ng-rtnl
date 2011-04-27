@@ -381,6 +381,7 @@
 25) init.d now log to syslog.<br>
 26) Boot speedup and save memory at first stage.<br>
 27) Fix SoftwareFastpath not enable in Complex offload mode. Is regression.<br>
+28) Add initial RT3662/RT3883 + RT309x support.<br>
 
 <br><br>
 <b>For support see:</b><br>
