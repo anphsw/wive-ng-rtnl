@@ -8,9 +8,6 @@
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
  
-#include global config
-. /etc/scripts/global.sh
-
 usage()
 {
 	echo "Usage:"
@@ -196,8 +193,10 @@ reset_all_phys()
 	fi
 
 	echo "Reset all phy port"
+        opmode=`nvram_get 2860 OperationMode`
 	if [ "$opmode" = "1" ]; then
 	    #Ports down skip WAN port
+	    wan_port=`nvram_get 2860 wan_port`
 	    if [ "$wan_portN" = "0" ]; then
 		start=0
 		end=3
@@ -340,6 +339,7 @@ restoreVtss()
 }
 
 if [ "$1" = "0" ]; then
+	SWITCH_MODE=0
 	#isc is used to distinguish between 175C and 175D
 	isc=`mii_mgr -g -p 29 -r 31`
 	if [ "$2" = "0" ]; then
@@ -365,6 +365,7 @@ if [ "$1" = "0" ]; then
 		usage $0
 	fi
 elif [ "$1" = "1" ]; then
+	SWITCH_MODE=1
 	if [ "$2" = "0" ]; then
 		restoreVtss
 	elif [ "$2" = "1" ]; then
@@ -374,6 +375,7 @@ elif [ "$1" = "1" ]; then
 		usage $0
 	fi
 elif [ "$1" = "2" ]; then
+	SWITCH_MODE=2
 	if [ "$2" = "0" ]; then
 		restore3052
 	elif [ "$2" = "EEEEE" ]; then
