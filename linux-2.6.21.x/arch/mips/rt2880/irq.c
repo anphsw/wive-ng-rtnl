@@ -256,6 +256,7 @@ void surfboard_hw0_irqdispatch(void)
 }
 
 
+#ifndef CONFIG_RALINK_RT3883
 static void enable_rt2880_cp_int(unsigned int IP_X)
 {
 	unsigned long int_status;
@@ -272,6 +273,7 @@ static void disable_rt2880_cp_int(unsigned int IP_X)
 	int_status = int_status & ~(IP_X);
 	write_32bit_cp0_register(CP0_STATUS, int_status);
 }
+#endif
 
 void __init arch_init_irq(void)
 {

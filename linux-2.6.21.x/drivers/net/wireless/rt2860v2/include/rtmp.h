@@ -52,15 +52,11 @@
 #include "mat.h"
 #endif // MAT_SUPPORT //
 
-
 #ifdef WAPI_SUPPORT
 #include "wapi_def.h"
 #endif // WAPI_SUPPORT //
 
 #include "rtmp_chip.h"
-
-
-
 
 #ifdef DOT11Z_TDLS_SUPPORT
 #include "tdls_cmm.h"
@@ -69,9 +65,6 @@
 #ifdef CLIENT_WDS
 #include "client_wds_cmm.h"
 #endif // CLIENT_WDS //
-
-
-
 
 typedef struct _RTMP_ADAPTER		RTMP_ADAPTER;
 typedef struct _RTMP_ADAPTER		*PRTMP_ADAPTER;
@@ -1001,6 +994,9 @@ typedef struct _CHANNEL_TX_POWER {
 #endif // DOT11N_DRAFT3 //
 	CHAR       Power;
 	CHAR       Power2;
+#if defined(RT2883) || defined(RT3883)
+	CHAR       Power3;
+#endif
 	UCHAR      MaxTxPwr;
 	UCHAR      DfsReq;
 	UCHAR	   RegulatoryDomain;

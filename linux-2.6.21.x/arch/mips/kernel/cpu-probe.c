@@ -67,7 +67,7 @@ static void r4k_wait(void)
  * interrupt is requested" restriction in the MIPS32/MIPS64 architecture makes
  * using this version a gamble.
  */
-#ifndef CONFIG_RALINK_RT3052_MP2
+#ifndef CONFIG_RALINK_RT3052
 static void r4k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -77,11 +77,19 @@ static void r4k_wait_irqoff(void)
 			"	.set	mips0		\n");
 	local_irq_enable();
 }
+#endif
 
 /*
  * The RM7000 variant has to handle erratum 38.  The workaround is to not
  * have any pending stores when the WAIT instruction is executed.
  */
+#if !defined (CONFIG_RALINK_RT2880) && \
+    !defined (CONFIG_RALINK_RT2883) && \
+    !defined (CONFIG_RALINK_RT3883) && \
+    !defined (CONFIG_RALINK_RT3352) && \
+    !defined (CONFIG_RALINK_RT3052) && \
+    !defined (CONFIG_RALINK_RT5350)
+
 static void rm7k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -98,9 +106,11 @@ static void rm7k_wait_irqoff(void)
 		"	.set	pop					\n");
 	local_irq_enable();
 }
+#endif
 
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
+#ifndef CONFIG_RALINK_RT3052
 int allow_au1k_wait;
 
 static void au1k_wait(void)
@@ -341,7 +351,12 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 			     MIPS_CPU_LLSC;
 		c->tlbsize = 48;
 		break;
-	#ifndef CONFIG_RALINK_RT3052_MP2
+#if !defined (CONFIG_RALINK_RT2880) && \
+    !defined (CONFIG_RALINK_RT2883) && \
+    !defined (CONFIG_RALINK_RT3883) && \
+    !defined (CONFIG_RALINK_RT3352) && \
+    !defined (CONFIG_RALINK_RT3052) && \
+    !defined (CONFIG_RALINK_RT5350)
  	case PRID_IMP_R4650:
 		/*
 		 * This processor doesn't have an MMU, so it's not
@@ -354,7 +369,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 		c->options = R4K_OPTS | MIPS_CPU_FPU | MIPS_CPU_LLSC;
 	        c->tlbsize = 48;
 		break;
-	#endif
+#endif
 	case PRID_IMP_TX39:
 		c->isa_level = MIPS_CPU_ISA_I;
 		c->options = MIPS_CPU_TLB | MIPS_CPU_TX39_CACHE;
@@ -834,7 +849,13 @@ __init void cpu_probe(void)
 	c->processor_id = read_c0_prid();
 
         switch (c->processor_id & 0xff0000) {
-#ifdef CONFIG_RALINK_RT3052_MP2 /* cfho 2009-1020, we only probe MIPs CPU without FPU */
+/* We only probe MIPs CPU without FPU */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
         case PRID_COMP_MIPS:
                 cpu_probe_mips(c);
                 break;

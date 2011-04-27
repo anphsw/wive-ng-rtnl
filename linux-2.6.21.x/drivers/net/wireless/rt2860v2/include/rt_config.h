@@ -73,7 +73,6 @@
 #include "rtmp_chip.h"
 #include "rtmp_timer.h"
 
-
 #ifdef LINUX
 #ifdef RT_CFG80211_SUPPORT
 #include "cfg80211extr.h"

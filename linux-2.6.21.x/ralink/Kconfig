@@ -75,6 +75,9 @@ endmenu
 menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
 source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
 endmenu
+menu "802.11a wireless driver."
+source "drivers/net/wireless/RT3090_ap/Kconfig"
+endmenu
 
 menu "Nat acell mode"
 choice                                                                                                                                      

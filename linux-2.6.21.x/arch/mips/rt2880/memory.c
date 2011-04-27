@@ -49,9 +49,20 @@
 #include <asm/rt2880/prom.h>
 
 //#define DEBUG
-#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024 /* Fixed SDRAM SIZE */
-#define MAX_SDRAM_SIZE  (64*1024*1024)			 /* Maximumum SDRAM size */
-#define MIN_SDRAM_SIZE  (16*1024*1024)			 /* Minimumum SDRAM size */
+#define RAM_SIZE        CONFIG_RALINK_RAM_SIZE*1024*1024	/* Fixed SDRAM SIZE */
+#define MIN_SDRAM_SIZE  (16*1024*1024)				/* Minimumum SDRAM size */
+								/* Maximumum SDRAM size */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+#define MAX_SDRAM_SIZE  (64*1024*1024)
+#elif defined (CONFIG_RALINK_RT2883) || \
+      defined (CONFIG_RALINK_RT3883)
+#define MAX_SDRAM_SIZE  (128*1024*1024)	
+#else
+#define MAX_SDRAM_SIZE  (64*1024*1024)
+#endif
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
 unsigned long detect_ram_sequence[4];

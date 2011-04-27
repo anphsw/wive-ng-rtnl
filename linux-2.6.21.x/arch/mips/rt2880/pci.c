@@ -436,14 +436,14 @@ void __inline__ write_config(unsigned long bus, unsigned long dev, unsigned long
 }
 
 
-int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
+int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 {
   u16 cmd;
   u32 val;
   struct resource *res;
   int i;
-  int irq;
-#ifdef CONFIG_RALINK_RT2883	
+  int irq=0;
+#if defined(CONFIG_RALINK_RT2883)
   if (dev->bus->number > 1) {
     printk("bus>1\n");
     return 0;
@@ -452,15 +452,14 @@ int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
     printk("slot=%d >0\n", slot);
     return 0;
   }
-#elif CONFIG_RALINK_RT2880
+#elif defined(CONFIG_RALINK_RT2880)
   if (dev->bus->number != 0) {
     return 0;
   }
-#else
 #endif
 
   //printk("** bus= %x, slot=0x%x\n",dev->bus->number,  slot);
-#ifdef CONFIG_RALINK_RT3883	
+#if defined(CONFIG_RALINK_RT3883)
   if((dev->bus->number ==0) && (slot == 0)) {
 	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
 	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
@@ -508,7 +507,7 @@ int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
   }else{
   	return 0;
   }	
-#elif CONFIG_RALINK_RT2883	
+#elif defined(CONFIG_RALINK_RT2883)
   if((dev->bus->number ==0) && (slot == 0)) {
 	RALINK_PCI_BAR0SETUP_ADDR = 0x01FF0001;	//open 1FF:32M; ENABLE
   	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
@@ -581,7 +580,7 @@ int __init pcibios_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 int init_rt2880pci(void)
 {
 	unsigned long val = 0;
-	int i, j;
+	int i;
 #if defined(CONFIG_PCIE_ONLY) || defined(CONFIG_PCIE_PCI_CONCURRENT)
 	RALINK_RSTCTRL = (RALINK_RSTCTRL | RALINK_PCIE_RST);
 	RALINK_SYSCFG1 &= ~(0x30);
@@ -606,18 +605,18 @@ int init_rt2880pci(void)
 	printk("**************************\n");
 #endif
 
-#ifdef CONFIG_PCI_ONLY
+#if defined(CONFIG_PCI_ONLY)
 //PCI host only, 330T
 	RALINK_GPIOMODE = (RALINK_GPIOMODE & ~(0x3800) | PCI_SLOTx2);
 	RALINK_SYSCFG1 = (RALINK_SYSCFG1 | RALINK_PCI_HOST_MODE_EN | RALINK_PCIE_RC_MODE_EN);
 	RALINK_RSTCTRL = (RALINK_RSTCTRL | RALINK_PCIE_RST);
 	RALINK_CLKCFG1 = (RALINK_CLKCFG1 & ~RALINK_PCIE_CLK_EN);
-#elif CONFIG_PCIE_ONLY
+#elif defined(CONFIG_PCIE_ONLY)
 //PCIe RC only, 220T
 	RALINK_SYSCFG1 = (RALINK_SYSCFG1 | RALINK_PCIE_RC_MODE_EN | RALINK_PCI_HOST_MODE_EN);
 	RALINK_RSTCTRL = (RALINK_RSTCTRL | RALINK_PCI_RST);
 	RALINK_CLKCFG1 = (RALINK_CLKCFG1 & ~RALINK_PCI_CLK_EN);
-#elif CONFIG_PCIE_PCI_CONCURRENT
+#elif defined(CONFIG_PCIE_PCI_CONCURRENT)
 //PCIe PCI co-exist
 	RALINK_GPIOMODE = (RALINK_GPIOMODE & ~(0x3800) | PCI_SLOTx2);
 	RALINK_SYSCFG1 = (RALINK_SYSCFG1 | RALINK_PCI_HOST_MODE_EN | RALINK_PCIE_RC_MODE_EN);
@@ -636,18 +635,18 @@ int init_rt2880pci(void)
 #endif
 #endif
 
-#ifdef CONFIG_RALINK_RT2880
+#if defined(CONFIG_RALINK_RT2880)
 	RALINK_PCI_PCICFG_ADDR = 0;
-#elif CONFIG_RALINK_RT2883
+#elif defined(CONFIG_RALINK_RT2883)
 	RALINK_PCI_PCICFG_ADDR = 0;
-#elif CONFIG_RALINK_RT3883
+#elif defined(CONFIG_RALINK_RT3883)
 
-#ifdef CONFIG_PCIE_ONLY
+#if defined(CONFIG_PCIE_ONLY)
 	RALINK_PCI_PCICFG_ADDR = 0;
-#elif CONFIG_PCI_ONLY
+#elif defined(CONFIG_PCI_ONLY)
 	RALINK_PCI_PCICFG_ADDR = 0;
 	RALINK_PCI_PCICFG_ADDR |= (1<<16);
-#elif CONFIG_PCIE_PCI_CONCURRENT
+#elif defined(CONFIG_PCIE_PCI_CONCURRENT)
 	RALINK_PCI_PCICFG_ADDR = 0;
 	RALINK_PCI_PCICFG_ADDR |= (1<<16);
 #endif
@@ -656,7 +655,7 @@ int init_rt2880pci(void)
 #endif
 	printk("RALINK_PCI_PCICFG_ADDR = %x\n", RALINK_PCI_PCICFG_ADDR);
 
-#ifdef CONFIG_RALINK_RT3883
+#if defined(CONFIG_RALINK_RT3883)
 	printk("\n*************** Ralink PCIe RC mode *************\n");
 	mdelay(500);
 	if(RALINK_SYSCFG1 & RALINK_PCIE_RC_MODE_EN){
@@ -665,17 +664,17 @@ int init_rt2880pci(void)
 			printk(" RALINK_PCI1_STATUS = %x\n", RALINK_PCI1_STATUS );
 			for(i=0;i<16;i++){
 				read_config(0, 1, 0, i<<2, &val);
-				printk("pci-to-pci 0x%02x = %08x\n", i<<2, val);
+				printk("pci-to-pci 0x%02x = %08lx\n", i<<2, val);
 			}
 #ifdef CONFIG_PCIE_ONLY
 			printk("reset PCIe and turn off PCIe clock\n");
 			RALINK_RSTCTRL = (RALINK_RSTCTRL | RALINK_PCIE_RST);
 			RALINK_RSTCTRL = (RALINK_RSTCTRL & ~RALINK_PCIE_RST);
 			RALINK_CLKCFG1 = (RALINK_CLKCFG1 & ~RALINK_PCIE_CLK_EN);
-			printk("RALINK_CLKCFG1 = %x\n", RALINK_CLKCFG1);
+			printk("RALINK_CLKCFG1 = %lx\n", RALINK_CLKCFG1);
 			//cgrstb, cgpdb, pexdrven0, pexdrven1, cgpllrstb, cgpllpdb, pexclken
 			RALINK_PCIE_CLK_GEN &= 0x0fff3f7f;
-			printk("RALINK_PCIE_CLK_GEN= %x\n", RALINK_PCIE_CLK_GEN);
+			printk("RALINK_PCIE_CLK_GEN= %lx\n", RALINK_PCIE_CLK_GEN);
 			return 0;
 #else
 			RALINK_CLKCFG1 = (RALINK_CLKCFG1 & ~RALINK_PCIE_CLK_EN);
@@ -686,7 +685,7 @@ int init_rt2880pci(void)
 		RALINK_PCI_ARBCTL = 0x79;
 	}
 
-#elif CONFIG_RALINK_RT2883
+#elif defined(CONFIG_RALINK_RT2883)
 	printk("\n*************** Ralink PCIe RC mode *************\n");
 	mdelay(500);
 	if(( RALINK_PCI_STATUS & 0x1) == 0)
@@ -713,19 +712,19 @@ int init_rt2880pci(void)
 	RALINK_PCI_MEMBASE = 0xffffffff; //RALINK_PCI_MM_MAP_BASE;
 	RALINK_PCI_IOBASE = RALINK_PCI_IO_MAP_BASE;
 
-#ifdef CONFIG_RALINK_RT2880
+#if defined(CONFIG_RALINK_RT2880)
 	RALINK_PCI_BAR0SETUP_ADDR = 0x07FF0000;	//open 1FF:32M; DISABLE
 	RALINK_PCI_IMBASEBAR0_ADDR = MEMORY_BASE;
 	RALINK_PCI_ID = 0x08021814;
 	RALINK_PCI_CLASS = 0x00800001;
 	RALINK_PCI_SUBID = 0x28801814;
-#elif CONFIG_RALINK_RT2883
+#elif defined(CONFIG_RALINK_RT2883)
 	RALINK_PCI_BAR0SETUP_ADDR = 0x01FF0000;	//open 1FF:32M; DISABLE
 	RALINK_PCI_IMBASEBAR0_ADDR = MEMORY_BASE;
 	RALINK_PCI_ID = 0x08021814;
 	RALINK_PCI_CLASS = 0x06040001;
 	RALINK_PCI_SUBID = 0x28801814;
-#elif CONFIG_RALINK_RT3883
+#elif defined(CONFIG_RALINK_RT3883)
 	//PCI
 	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0000;	//open 3FF:64M; DISABLE
 	RALINK_PCI0_IMBASEBAR0_ADDR = MEMORY_BASE;
@@ -747,14 +746,14 @@ int init_rt2880pci(void)
 	RALINK_PCI_PCIMSK_ADDR = 0x000c0000; // enable pci interrupt
 #endif
 
-#ifdef CONFIG_RALINK_RT3883
+#if defined(CONFIG_RALINK_RT3883)
 	//PCIe
 	read_config(0, 1, 0, 0x4, &val);
 	write_config(0, 1, 0, 0x4, val|0x7);
 	//PCI
 	read_config(0, 0, 0, 0x4, &val);
 	write_config(0, 0, 0, 0x4, val|0x7);
-#elif CONFIG_RALINK_RT2883
+#elif defined(CONFIG_RALINK_RT2883)
 	read_config(0, 0, 0, 0x4, &val);
 	write_config(0, 0, 0, 0x4, val|0x7);
 #else 
