@@ -523,7 +523,7 @@ function wmm_capable_enable_switch()
 	</td>
 </tr>
 <tr>
-	<td class="head">BT Coex Noise Threshold</td>
+	<td class="head">40Mhz coexistence threshold</td>
 	<td>
 		<input type="radio" name="HT_BSSCoexApCntThr" value="1">Enable&nbsp;
 		<input type="radio" name="HT_BSSCoexApCntThr" value="0" checked>Disable

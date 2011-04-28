@@ -381,8 +381,8 @@
 25) Boot speedup and save memory at first stage.<br>
 26) Fix SoftwareFastpath not enable in Complex offload mode. Is regression.<br>
 27) Add initial RT3662/RT3883 + RT309x support.<br>
-28) Wi-Fi / Bluetooth coexistence disable per default. (variable HT_BSSCoexistence 0/1 need Add WebUI)<br>
-29) Add HT_BSSCoexApCntThr variable Allows to install manually a switch-off threshold 40MHz mode wifi. Default 0. A range 0-255.<br>
+28) Wi-Fi coexistence disable per default. (variable HT_BSSCoexistence 0/1 need Add WebUI)<br>
+29) Add HT_BSSCoexApCntThr variable to install manually a switch-off threshold 40MHz mode wifi. If AP on air > HT_BSSCoexApCntThr.<br>
 
 <br><br>
 <b>For support see:</b><br>
