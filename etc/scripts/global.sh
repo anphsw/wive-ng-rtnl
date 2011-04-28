@@ -236,7 +236,7 @@ if [ "$SWITCH_MODE" = "2" ]; then
     # workaroud for dir-300NRU and some devices
     # with not correct configured from uboot
     $LOG "Reinit power mode for all switch ports"
-    config-vlan.sh 2 FFFFF
+    config-vlan.sh $SWITCH_MODE FFFFF
 fi
 }
 
