@@ -197,7 +197,7 @@ setSwMode()
 
 setLanWan()
 {
-if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+if [ "$SWITCH_MODE" = "2" ]; then
     wan_port=`nvram_get 2860 wan_port`
     tv_port=`nvram_get 2860 tv_port`
     if [ "$wan_port" = "0" ]; then
@@ -224,7 +224,7 @@ fi
 
 resetLanWan()
 {
-if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+if [ "$SWITCH_MODE" = "2" ]; then
     echo "##### restore to dump switch #####"
     config-vlan.sh $SWITCH_MODE 0
 fi
@@ -232,7 +232,7 @@ fi
 
 resetPhy()
 {
-if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+if [ "$SWITCH_MODE" = "2" ]; then
     # workaroud for dir-300NRU and some devices
     # with not correct configured from uboot
     $LOG "Reinit power mode for all switch ports"
