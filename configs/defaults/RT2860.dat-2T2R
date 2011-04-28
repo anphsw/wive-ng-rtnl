@@ -141,6 +141,7 @@ HT_40MHZ_INTOLERANT=0
 HT_MIMOPSEnable=1
 HT_MIMOPSMode=3
 HT_DisableReordering=0
+HT_BSSCoexistence=0
 HT_BSSCoexApCntThr=0
 AP2040Rescan=0
 WscConfMode=0

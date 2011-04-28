@@ -1050,6 +1050,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_MIMOPSEnable);
 		FPRINT_NUM(HT_MIMOPSMode);
 		FPRINT_NUM(HT_DisableReordering);
+		FPRINT_NUM(HT_BSSCoexistence);
 		FPRINT_NUM(HT_BSSCoexApCntThr);
 
 		FPRINT_NUM(WscConfMode);

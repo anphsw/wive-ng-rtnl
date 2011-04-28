@@ -1,6 +1,6 @@
 #The word of "Default" must not be removed
 Default
-RFICType=5
+RFICType=8
 CountryRegion=5
 CountryRegionABand=0
 CountryCode=RU
@@ -134,8 +134,8 @@ HT_BAWinSize=64
 HT_GI=1
 HT_STBC=1
 HT_MCS=33
-HT_TxStream=1
-HT_RxStream=1
+HT_TxStream=2
+HT_RxStream=3
 HT_PROTECT=1
 HT_40MHZ_INTOLERANT=0
 HT_MIMOPSEnable=1
@@ -181,8 +181,8 @@ session_timeout_interval=0
 quiet_interval=0
 AutoConnect=1
 FastConnect=1
-AutoRoaming=0
 HiPower=0
+AutoRoaming=0
 TGnWifiTest=0
 RadioOn=1
 SSID=

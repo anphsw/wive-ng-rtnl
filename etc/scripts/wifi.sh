@@ -64,11 +64,6 @@ if [ "$AutoChannelSelect" = "0" ]; then
     iwpriv ra0 set Channel=$Channel
 fi
 
-HT_BSSCoexApCntThr=`nvram_get HT_BSSCoexApCntThr`
-if [ "$HT_BSSCoexApCntThr" != "0" ]; then
-    iwpriv ra0 set HtBssCoexApCntThr=$HT_BSSCoexApCntThr
-fi
-
 ###########################################ALWAYS END#############################
 AP2040Rescan=`nvram_get AP2040Rescan`
 if [ "$AP2040Rescan" != "0" ]; then
