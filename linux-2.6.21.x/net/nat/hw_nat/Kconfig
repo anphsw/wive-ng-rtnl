@@ -307,3 +307,9 @@ endchoice
 config  RA_HW_NAT_MINIMAL
 	depends on RA_HW_NAT
 	bool "Only minimal hw_nat code support. No ACL/AC/MTR"
+
+config  RA_HW_NAT_SAFE
+	depends on RA_HW_NAT
+	bool "Safe mode hw_nat. No send multicast and broadcast to PPE."
+	help 
+	"This is more correct and more cpu load..."

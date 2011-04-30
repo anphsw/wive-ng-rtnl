@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Thu Apr 28 02:29:21 2011
+# Sat Apr 30 14:54:22 2011
 #
 CONFIG_MIPS=y
 
@@ -1241,4 +1241,5 @@ CONFIG_RA_HW_NAT_FIN_DLTA=5
 # CONFIG_RA_HW_NAT_DSCP2UP_HELPER is not set
 CONFIG_RA_HW_NAT_NONE2UP=y
 # CONFIG_RA_HW_NAT_MINIMAL is not set
+CONFIG_RA_HW_NAT_SAFE=y
 # CONFIG_DWC_OTG is not set

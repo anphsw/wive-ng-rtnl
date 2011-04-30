@@ -31,6 +31,8 @@
 #define _RA_NAT_WANTED
 
 #include "foe_fdb.h"
+#include <linux/etherdevice.h>
+#include <linux/if_ether.h>
 
 /*
  * TYPEDEFS AND STRUCTURES
@@ -170,11 +172,17 @@ typedef struct
 #define FOE_AIS(skb)		    ((PdmaRxDescInfo4 *)(&(skb)->cb[40]))->AIS
 #endif
 
+#ifdef CONFIG_RA_HW_NAT_SAFE
+#define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || \
+				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
+				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)) && \
+				    (is_valid_ether_addr(eth_hdr(skb)->h_dest)) && \
+				    (!is_broadcast_ether_addr(eth_hdr(skb)->h_dest))
+#else
 #define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))
-
-
+#endif
 /* 
  * HW_NAT module will modify mss field in tcp option header 
  * to avoid fragmentation in WAN port.
