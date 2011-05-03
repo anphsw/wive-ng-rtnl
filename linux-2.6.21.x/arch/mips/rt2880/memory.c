@@ -57,11 +57,14 @@
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350)
 #define MAX_SDRAM_SIZE  (64*1024*1024)
+#define TEST_OFFSET	63
 #elif defined (CONFIG_RALINK_RT2883) || \
       defined (CONFIG_RALINK_RT3883)
 #define MAX_SDRAM_SIZE  (128*1024*1024)	
+#define TEST_OFFSET	127
 #else
 #define MAX_SDRAM_SIZE  (64*1024*1024)
+#define TEST_OFFSET	63
 #endif
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
@@ -156,7 +159,7 @@ void __init prom_meminit(void)
 	}
 
        //SECOND PASS Test to be sure in RAM capacity
-       before = ((unsigned long) &prom_init) & (127 << 20);
+       before = ((unsigned long) &prom_init) & (TEST_OFFSET << 20);
        offset = ((unsigned long) &prom_init) - before;
 
        for (mem = before + (1 << 20); mem < (reg_mem << 20); mem += (1 << 20))
