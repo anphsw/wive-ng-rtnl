@@ -190,7 +190,7 @@ int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 		return 1;
 
 	/* Now we can get the pointers */
-	uh = udp_hdr(skb);
+	uh =  skb->h.uh;
 	udpdata = (__u8 *)uh + sizeof(struct udphdr);
 	udpdata32 = (__be32 *)udpdata;
 
@@ -244,7 +244,7 @@ int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 	 * for later.
 	 */
 	__skb_pull(skb, len);
-	skb_reset_transport_header(skb);
+	skb->h.raw = skb->data;
 
 	/* modify the protocol (it's ESP!) */
 	iph->protocol = IPPROTO_ESP;
