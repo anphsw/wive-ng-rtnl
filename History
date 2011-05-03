@@ -388,6 +388,9 @@
 30) Some init scrips more correct use some variable.<br>
 31) Do not send multicast and broadcast to PPE. Workaround for work IpTv in some configuration. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
 32) Only packet has valid ethernet adress need send to PPE. Need for correct track uncknown sessions. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
+33) Smal fix in memory size autodetect.<br>
+34) Fix xfrm build.<br>
+35) Backport some fixes from vanilla kernel.<br>
 
 <br><br>
 <b>For support see:</b><br>
