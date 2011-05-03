@@ -212,11 +212,11 @@ ipt_recent_match(const struct sk_buff *skb,
 		recent_entry_remove(t, e);
 		ret ^= 1;
 	} else if (info->check_set & (IPT_RECENT_CHECK | IPT_RECENT_UPDATE)) {
-		unsigned long t = jiffies - info->seconds * HZ;
+		unsigned long time = jiffies - info->seconds * HZ;
 		unsigned int i, hits = 0;
 
 		for (i = 0; i < e->nstamps; i++) {
-			if (info->seconds && time_after(t, e->stamps[i]))
+			if (info->seconds && time_after(time, e->stamps[i]))
 				continue;
 			if (info->hit_count && ++hits >= info->hit_count) {
 				ret ^= 1;
@@ -321,6 +321,7 @@ struct recent_iter_state {
 };
 
 static void *recent_seq_start(struct seq_file *seq, loff_t *pos)
+	__acquires(recent_lock)
 {
 	struct recent_iter_state *st = seq->private;
 	struct recent_table *t = st->table;
@@ -355,6 +356,7 @@ static void *recent_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 }
 
 static void recent_seq_stop(struct seq_file *s, void *v)
+	__releases(recent_lock)
 {
 	spin_unlock_bh(&recent_lock);
 }
