@@ -1970,9 +1970,6 @@ struct fib_table * __init fib_hash_init(u32 id)
 	else if (id == RT_TABLE_MAIN)
 		trie_main = t;
 
-	if (id == RT_TABLE_LOCAL)
-		printk(KERN_INFO "IPv4 FIB: Using LC-trie version %s\n", VERSION);
-
 	return tb;
 }
 
