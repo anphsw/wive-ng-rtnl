@@ -104,9 +104,11 @@ SECTIONS
   __init_begin = .;
 #ifdef CONFIG_RALINK_RT3052
 #ifdef CONFIG_MTD_SPI_RALINK
+#ifdef CONFIG_RT2880_FLASH_4M
   /* This hack need for SPI devices work only */
   /* init need start > 0x80220000 */
   . = 0x80220000;
+#endif
 #endif
 #endif
   .init.text : {
