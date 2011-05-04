@@ -161,7 +161,6 @@ CONFIG_USER_IPROUTE2_TC=y
 CONFIG_RT3052_SWITCH=y
 # CONFIG_RALINKAPP_I2S is not set
 # CONFIG_RALINKAPP_PCM is not set
-# CONFIG_ASUS_NTFS3G is not set
 
 #
 # Windows Rally Program
