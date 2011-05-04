@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Wed May  4 17:50:04 2011
+# Wed May  4 17:53:25 2011
 #
 CONFIG_MIPS=y
 
@@ -151,7 +151,7 @@ CONFIG_EMBEDDED=y
 CONFIG_SYSCTL_SYSCALL=y
 # CONFIG_KALLSYMS is not set
 CONFIG_STRIP_ASM_SYMS=y
-# CONFIG_HOTPLUG is not set
+CONFIG_HOTPLUG=y
 CONFIG_PRINTK_FUNC=y
 CONFIG_PRINTK=y
 CONFIG_BUG=y
@@ -224,6 +224,7 @@ CONFIG_MMU=y
 #
 # PCCARD (PCMCIA/CardBus) support
 #
+# CONFIG_PCCARD is not set
 
 #
 # PCI Hotplug Support
@@ -534,6 +535,7 @@ CONFIG_W7_LOGO=y
 #
 # CONFIG_STANDALONE is not set
 # CONFIG_PREVENT_FIRMWARE_BUILD is not set
+# CONFIG_FW_LOADER is not set
 # CONFIG_SYS_HYPERVISOR is not set
 
 #
