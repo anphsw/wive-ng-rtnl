@@ -27,3 +27,7 @@ filesystem
 /user/ppp/pppd/plugins/rp-pppoe/Makefile
 /user/ppp/pppstats/Makefile
 /user/dropbear/Makefile
+/user/busybox/docs/busybox.net/BusyBox.html
+/user/busybox/include/NUM_APPLETS.h
+/user/busybox/include/bbconfigopts_bz2.h
+/user/radvd/config.status
