@@ -118,19 +118,20 @@ been enabled, more detailed usage information will also be available.</p>
         brctl, bunzip2, bzcat, bzip2, cat, chattr, chmod, chown, chpasswd,
         clear, cp, crond, crontab, cut, date, dd, deluser, depmod, df,
         dhcprelay, dmesg, dnsdomainname, du, dumpleases, echo, egrep, env,
-        ether-wake, expand, expr, false, fgrep, find, flock, free, ftpget,
-        ftpput, fuser, grep, gunzip, gzip, halt, hd, head, hexdump, hostid,
-        hostname, id, ifconfig, inetd, init, insmod, ip, ipaddr, ipcalc,
-        iplink, iproute, iprule, iptunnel, kill, killall, killall5, klogd,
-        length, linuxrc, ln, logger, login, ls, lsmod, md5sum, mdev, mesg,
-        mkdir, mknod, modinfo, modprobe, more, mount, mv, netstat, nice,
-        nslookup, ntpd, passwd, pgrep, pidof, ping, poweroff, printenv,
-        printf, ps, pwd, rdate, reboot, renice, rev, rm, rmdir, rmmod,
-        route, run-parts, sed, seq, sh, sleep, sort, split, stat, sum,
-        switch_root, sync, sysctl, syslogd, tail, tar, test, time, top,
-        touch, traceroute, true, udhcpc, udhcpd, umount, uname, uniq,
-        uptime, usleep, vconfig, vi, watch, watchdog, wc, wget, which, yes,
-        zcat</pre>
+        ether-wake, expand, expr, false, fdisk, fgrep, find, flock, free,
+        fsck, ftpget, ftpput, fuser, grep, gunzip, gzip, halt, hd, head,
+        hexdump, hostid, hostname, id, ifconfig, inetd, init, insmod, ip,
+        ipaddr, ipcalc, iplink, iproute, iprule, iptunnel, kill, killall,
+        killall5, klogd, length, linuxrc, ln, logger, login, lpd, lpq, lpr,
+        ls, lsattr, lsmod, lsusb, md5sum, mdev, mesg, mkdir, mkdosfs,
+        mke2fs, mkfs.ext2, mkfs.vfat, mknod, modinfo, modprobe, more, mount,
+        mv, netstat, nice, nslookup, ntpd, passwd, pgrep, pidof, ping,
+        poweroff, printenv, printf, ps, pwd, rdate, reboot, renice, rev, rm,
+        rmdir, rmmod, route, run-parts, sed, seq, sh, sleep, sort, split,
+        stat, sum, swapoff, swapon, switch_root, sync, sysctl, syslogd,
+        tail, tar, test, time, top, touch, traceroute, true, tune2fs,
+        udhcpc, udhcpd, umount, uname, uniq, uptime, usleep, vconfig, vi,
+        watch, watchdog, wc, wget, which, yes, zcat</pre>
 <p>
 </p>
 <hr />
@@ -598,6 +599,20 @@ of characters matched or 0.</p>
 <p>false</p>
 <p>Return an exit code of FALSE (1)</p>
 </dd>
+<dt><strong><a name="fdisk" class="item"><strong>fdisk</strong></a></strong></dt>
+
+<dd>
+<p>fdisk [-ul] [-C CYLINDERS] [-H HEADS] [-S SECTORS] [-b SSZ] DISK</p>
+<p>Change partition table</p>
+<p>Options:</p>
+<pre>
+        -u              Start and End are in sectors (instead of cylinders)
+        -l              Show partition table for each DISK, then exit
+        -b 2048         (for certain MO disks) use 2048-byte sectors
+        -C CYLINDERS    Set number of cylinders/heads/sectors
+        -H HEADS
+        -S SECTORS</pre>
+</dd>
 <dt><strong><a name="find" class="item"><strong>find</strong></a></strong></dt>
 
 <dd>
@@ -657,6 +672,22 @@ default EXPRESSION is '-print'</p>
 <dd>
 <p>free</p>
 <p>Display the amount of free and used system memory</p>
+</dd>
+<dt><strong><a name="fsck" class="item"><strong>fsck</strong></a></strong></dt>
+
+<dd>
+<p>fsck [-ANPRTV] [-C FD] [-t FSTYPE] [FS_OPTS] [BLOCKDEV]...</p>
+<p>Check and repair filesystems</p>
+<p>Options:</p>
+<pre>
+        -A      Walk /etc/fstab and check all filesystems
+        -N      Don't execute, just show what would be done
+        -P      With -A, check filesystems in parallel
+        -R      With -A, skip the root filesystem
+        -T      Don't show title on startup
+        -V      Verbose
+        -C n    Write status information to specified filedescriptor
+        -t TYPE List of filesystem types to check</pre>
 </dd>
 <dt><strong><a name="ftpget" class="item"><strong>ftpget</strong></a></strong></dt>
 
@@ -1030,6 +1061,41 @@ iproute { add | del | change | append | replace | monitor } ROUTE
         -h      Name of the remote host
         -p      Preserve environment</pre>
 </dd>
+<dt><strong><a name="lpd" class="item"><strong>lpd</strong></a></strong></dt>
+
+<dd>
+<p>lpd SPOOLDIR [HELPER [ARGS]]</p>
+<p>SPOOLDIR must contain (symlinks to) device nodes or directories
+with names matching print queue names. In the first case, jobs are
+sent directly to the device. Otherwise each job is stored in queue
+directory and HELPER program is called. Name of file to print
+is passed in $DATAFILE variable.
+Example:</p>
+<pre>
+        tcpsvd -E 0 515 softlimit -m 999999 lpd /var/spool ./print</pre>
+</dd>
+<dt><strong><a name="lpq" class="item"><strong>lpq</strong></a></strong></dt>
+
+<dd>
+<p>lpq [-P queue[@host[:port]]] [-U USERNAME] [-d JOBID]... [-fs]</p>
+<p>Options:</p>
+<pre>
+        -P      lp service to connect to (else uses $PRINTER)
+        -d      Delete jobs
+        -f      Force any waiting job to be printed
+        -s      Short display</pre>
+</dd>
+<dt><strong><a name="lpr" class="item"><strong>lpr</strong></a></strong></dt>
+
+<dd>
+<p>lpr -P queue[@host[:port]] -U USERNAME -J TITLE -Vmh [FILE]...</p>
+<p>Options:</p>
+<pre>
+        -P      lp service to connect to (else uses $PRINTER)
+        -m      Send mail on completion
+        -h      Print banner page too
+        -V      Verbose</pre>
+</dd>
 <dt><strong><a name="ls" class="item"><strong>ls</strong></a></strong></dt>
 
 <dd>
@@ -1063,6 +1129,19 @@ iproute { add | del | change | append | replace | monitor } ROUTE
         -x      List by lines
         -X      Sort by extension
         -h      List sizes in human readable format (1K 243M 2G)</pre>
+</dd>
+<dt><strong><a name="lsattr" class="item"><strong>lsattr</strong></a></strong></dt>
+
+<dd>
+<p>lsattr [-Radlv] [FILE]...</p>
+<p>List file attributes on an ext2 fs</p>
+<p>Options:</p>
+<pre>
+        -R      Recurse
+        -a      Don't hide entries starting with .
+        -d      List directory entries instead of contents
+        -l      List long flag names
+        -v      List the file's version/generation number</pre>
 </dd>
 <dt><strong><a name="lsmod" class="item"><strong>lsmod</strong></a></strong></dt>
 
@@ -1110,6 +1189,52 @@ It uses /etc/mdev.conf with lines
 <pre>
         -m MODE Mode
         -p      No error if exists; make parent directories as needed</pre>
+</dd>
+<dt><strong><a name="mkdosfs" class="item"><strong>mkdosfs</strong></a></strong></dt>
+
+<dd>
+<p>mkdosfs [-v] [-n LABEL] BLOCKDEV [KBYTES]</p>
+<p>Make a FAT32 filesystem</p>
+<p>Options:</p>
+<pre>
+        -v      Verbose
+        -n LBL  Volume label</pre>
+</dd>
+<dt><strong><a name="mke2fs" class="item"><strong>mke2fs</strong></a></strong></dt>
+
+<dd>
+<p>mke2fs [-Fn] [-b BLK_SIZE] [-i INODE_RATIO] [-I INODE_SIZE] [-m RESERVED_PERCENT] [-L LABEL] BLOCKDEV [KBYTES]</p>
+<pre>
+        -b BLK_SIZE     Block size, bytes
+        -F              Force
+        -i RATIO        Max number of files is filesystem_size / RATIO
+        -I BYTES        Inode size (min 128)
+        -L LBL          Volume label
+        -m PERCENT      Percent of blocks to reserve for admin
+        -n              Dry run</pre>
+</dd>
+<dt><strong><a name="mkfs_ext2" class="item"><strong>mkfs.ext2</strong></a></strong></dt>
+
+<dd>
+<p>mkfs.ext2 [-Fn] [-b BLK_SIZE] [-i INODE_RATIO] [-I INODE_SIZE] [-m RESERVED_PERCENT] [-L LABEL] BLOCKDEV [KBYTES]</p>
+<pre>
+        -b BLK_SIZE     Block size, bytes
+        -F              Force
+        -i RATIO        Max number of files is filesystem_size / RATIO
+        -I BYTES        Inode size (min 128)
+        -L LBL          Volume label
+        -m PERCENT      Percent of blocks to reserve for admin
+        -n              Dry run</pre>
+</dd>
+<dt><strong><a name="mkfs_vfat" class="item"><strong>mkfs.vfat</strong></a></strong></dt>
+
+<dd>
+<p>mkfs.vfat [-v] [-n LABEL] BLOCKDEV [KBYTES]</p>
+<p>Make a FAT32 filesystem</p>
+<p>Options:</p>
+<pre>
+        -v      Verbose
+        -n LBL  Volume label</pre>
 </dd>
 <dt><strong><a name="mknod" class="item"><strong>mknod</strong></a></strong></dt>
 
@@ -1576,6 +1701,25 @@ have an optional suffix of (s)econds, (m)inutes, (h)ours, or (d)ays</p>
         -r      Use BSD sum algorithm (1K blocks)
         -s      Use System V sum algorithm (512byte blocks)</pre>
 </dd>
+<dt><strong><a name="swapoff" class="item"><strong>swapoff</strong></a></strong></dt>
+
+<dd>
+<p>swapoff [-a] [DEVICE]</p>
+<p>Stop swapping on DEVICE</p>
+<p>Options:</p>
+<pre>
+        -a      Stop swapping on all swap devices</pre>
+</dd>
+<dt><strong><a name="swapon" class="item"><strong>swapon</strong></a></strong></dt>
+
+<dd>
+<p>swapon [-a] [-p PRI] [DEVICE]</p>
+<p>Start swapping on DEVICE</p>
+<p>Options:</p>
+<pre>
+        -a      Start swapping on all swap devices
+        -p PRI  Set swap device priority</pre>
+</dd>
 <dt><strong><a name="switch_root" class="item"><strong>switch_root</strong></a></strong></dt>
 
 <dd>
@@ -1731,6 +1875,12 @@ and display a screenful of them.</p>
 <dd>
 <p>true</p>
 <p>Return an exit code of TRUE (0)</p>
+</dd>
+<dt><strong><a name="tune2fs" class="item"><strong>tune2fs</strong></a></strong></dt>
+
+<dd>
+<p>tune2fs [-c MOUNT_CNT] [-i DAYS] [-L LABEL] BLOCKDEV</p>
+<p>Adjust filesystem options on ext[23] filesystems</p>
 </dd>
 <dt><strong><a name="udhcpc" class="item"><strong>udhcpc</strong></a></strong></dt>
 
