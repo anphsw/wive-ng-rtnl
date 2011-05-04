@@ -33,6 +33,7 @@ var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
+var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
 var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
 
 function initTranslation()
@@ -254,133 +255,136 @@ function initValue()
 		form.lnaGainEnable[1].checked = true;
 	}
 	
-	if (htNoiseThresh == '1')
-	{
-		form.HT_BSSCoexApCntThr[0].checked = true;
-		form.HT_BSSCoexApCntThr[1].checked = false;
-	}
-	else
-	{
-		form.HT_BSSCoexApCntThr[0].checked = false;
-		form.HT_BSSCoexApCntThr[1].checked = true;
-	}
+	form.HT_BSSCoexApCntThr.value = htNoiseThresh;
+	form.HT_BSSCoexistence[0].checked = (htNoiseCoex == '1');
+	form.HT_BSSCoexistence[1].checked = (htNoiseCoex != '1');
+	form.AP2040Rescan[0].checked = (ap2040Rescan == '1');
+	form.AP2040Rescan[1].checked = (ap2040Rescan != '1');
 	
-	if (ap2040Rescan == '1')
-	{
-		form.AP2040Rescan[0].checked = true;
-		form.AP2040Rescan[1].checked = false;
-	}
-	else
-	{
-		form.AP2040Rescan[0].checked = false;
-		form.AP2040Rescan[1].checked = true;
-	}
+	wifiCoexThrChange(form);
 }
 
-function CheckValue()
+function wifiCoexThrChange(form)
 {
-	if (document.wireless_advanced.beacon.value == "")
+	displayElement('wifi_coex_thr_row', form.HT_BSSCoexistence[0].checked);
+}
+
+function CheckValue(form)
+{
+	if (form.beacon.value == "")
 	{
 		alert('Please specify Beacon Interval');
-		document.wireless_advanced.beacon.focus();
-		document.wireless_advanced.beacon.select();
+		form.beacon.focus();
+		form.beacon.select();
 		return false;
 	}
 
-	if (isNaN(document.wireless_advanced.beacon.value) || document.wireless_advanced.beacon.value < 20 || document.wireless_advanced.beacon.value > 999)
+	if (isNaN(form.beacon.value) || form.beacon.value < 20 || form.beacon.value > 999)
 	{
 		alert('Invalid Beacon Interval');
-		document.wireless_advanced.beacon.focus();
-		document.wireless_advanced.beacon.select();
+		form.beacon.focus();
+		form.beacon.select();
 		return false;
 	}
 
-	if (document.wireless_advanced.dtim.value == "" )
+	if (form.dtim.value == "" )
 	{
 		alert('Please specify DTIM Interval');
-		document.wireless_advanced.dtim.focus();
-		document.wireless_advanced.dtim.select();
+		form.dtim.focus();
+		form.dtim.select();
 		return false;
 	}
 
-	if (isNaN(document.wireless_advanced.dtim.value) || document.wireless_advanced.dtim.value < 1 || document.wireless_advanced.dtim.value > 255)
+	if (isNaN(form.dtim.value) || form.dtim.value < 1 || form.dtim.value > 255)
 	{
 		alert('Invalid DTIM Interval');
-		document.wireless_advanced.dtim.focus();
-		document.wireless_advanced.dtim.select();
+		form.dtim.focus();
+		form.dtim.select();
 		return false;
 	}
 
-	if (document.wireless_advanced.fragment.value == "" )
+	if (form.fragment.value == "" )
 	{
 		alert('Please specify Fragmentation Length');
-		document.wireless_advanced.fragment.focus();
-		document.wireless_advanced.fragment.select();
+		form.fragment.focus();
+		form.fragment.select();
 		return false;
 	}
 
-	if (isNaN(document.wireless_advanced.fragment.value) || document.wireless_advanced.fragment.value < 1 || document.wireless_advanced.fragment.value > 2346)
+	if (isNaN(form.fragment.value) || form.fragment.value < 1 || form.fragment.value > 2346)
 	{
 		alert('Invalid Fragmentation Length');
-		document.wireless_advanced.fragment.focus();
-		document.wireless_advanced.fragment.select();
+		form.fragment.focus();
+		form.fragment.select();
 		return false;
 	}
 
-	if (document.wireless_advanced.rts.value == "" )
+	if (form.rts.value == "" )
 	{
 		alert('Please specify RTS Threshold');
-		document.wireless_advanced.rts.focus();
-		document.wireless_advanced.rts.select();
+		form.rts.focus();
+		form.rts.select();
 		return false;
 	}
 
-	if (isNaN(document.wireless_advanced.rts.value) || document.wireless_advanced.rts.value < 1 || document.wireless_advanced.rts.value > 2347)
+	if (isNaN(form.rts.value) || form.rts.value < 1 || form.rts.value > 2347)
 	{
 		alert('Invalid RTS Threshold');
-		document.wireless_advanced.rts.focus();
-		document.wireless_advanced.rts.select();
+		form.rts.focus();
+		form.rts.select();
 		return false;
 	}
 
 	DLSBuilt = 1*DLSBuilt;
-	if (document.wireless_advanced.wmm_capable[0].checked == true)
+	if (form.wmm_capable[0].checked)
 	{
 		if (1*wmmCapable == 0)
-			document.wireless_advanced.rebootAP.value = 1;
+			form.rebootAP.value = 1;
 	}
 	else
 	{
-		document.wireless_advanced.apsd_capable[1].checked = true;
+		form.apsd_capable[1].checked = true;
 		if (DLSBuilt == 1)
-			document.wireless_advanced.dls_capable[1].checked = true;
+			form.dls_capable[1].checked = true;
 
 		if (1*wmmCapable == 1)
-			document.wireless_advanced.rebootAP.value = 1;
+			form.rebootAP.value = 1;
 	}
 
-	if (document.wireless_advanced.apsd_capable[0].checked == true)
+	if (form.apsd_capable[0].checked == true)
 	{
 		if (1*APSDCapable == 0)
-			document.wireless_advanced.rebootAP.value = 1;
+			form.rebootAP.value = 1;
 	}
 	else
 	{
 		if (1*APSDCapable == 1)
-			document.wireless_advanced.rebootAP.value = 1;
+			form.rebootAP.value = 1;
 	}
 
 	if (DLSBuilt == 1)
 	{
-		if (document.wireless_advanced.dls_capable[0].checked == true)
+		if (form.dls_capable[0].checked == true)
 		{
 			if (1*DLSCapable == 0)
-				document.wireless_advanced.rebootAP.value = 1;
+				form.rebootAP.value = 1;
 		}
 		else
 		{
 			if (1*DLSCapable == 1)
-				document.wireless_advanced.rebootAP.value = 1;
+				form.rebootAP.value = 1;
+		}
+	}
+	
+	if (form.HT_BSSCoexistence[0].checked)
+	{
+		var v = form.HT_BSSCoexApCntThr.value;
+		if ((isNaN(v)) || ((v*1) < 0) || ((v*1) > 255))
+		{
+			alert('Please specify correct 40Mhz coexistence threshold value');
+			form.HT_BSSCoexApCntThr.focus();
+			form.HT_BSSCoexApCntThr.select();
+			return false;
 		}
 	}
 
@@ -428,7 +432,7 @@ function wmm_capable_enable_switch()
 <hr>
 
 
-<form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue()">
+<form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue(this)">
 <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
@@ -446,25 +450,38 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advBeaconInterval">Beacon Interval</td>
 	<td>
-		<input type="text" name="beacon" size="5" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
+		<input type="text" name="beacon" class="half" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
 	<td>
-		<input type="text" name="dtim" size="5" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
+		<input type="text" name="dtim" class="half" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advFrag">Fragment Threshold</td>
 	<td>
-		<input type="text" name="fragment" size="5" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
+		<input type="text" name="fragment" class="half" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advRTS">RTS Threshold</td>
 	<td>
-		<input type="text" name="rts" size="5" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
+		<input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
+	</td>
+</tr>
+<tr> 
+	<td class="head">Wi-Fi coexistence</td>
+	<td>
+		<input type="radio" name="HT_BSSCoexistence" value="1" onchange="wifiCoexThrChange(this.form);">Enable&nbsp;
+		<input type="radio" name="HT_BSSCoexistence" value="0" onchange="wifiCoexThrChange(this.form);" checked>Disable
+	</td>
+</tr>
+<tr id="wifi_coex_thr_row" style="display: none;">
+	<td class="head">40Mhz coexistence threshold</td>
+	<td>
+		<input name="HT_BSSCoexApCntThr" class="half" value=""><span style="color: #808080">&nbsp;(range 0 - 255, 0 = auto)</span>
 	</td>
 </tr>
 <tr>
@@ -520,13 +537,6 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="radio" name="lnaGainEnable" value="1">Enable&nbsp;
 		<input type="radio" name="lnaGainEnable" value="0" checked>Disable
-	</td>
-</tr>
-<tr>
-	<td class="head">40Mhz coexistence threshold</td>
-	<td>
-		<input type="radio" name="HT_BSSCoexApCntThr" value="1">Enable&nbsp;
-		<input type="radio" name="HT_BSSCoexApCntThr" value="0" checked>Disable
 	</td>
 </tr>
 <tr>
