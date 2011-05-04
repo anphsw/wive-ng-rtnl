@@ -10,9 +10,9 @@ export ROOTDIR=$ROOTDIR
 
 #----WR-NL---WR-NL(LITE)----#
 if [ "$1" = "" ]; then
-    #MODE=USB
     #MODE=2T3R
     MODE=2T2R
+    #MODE=2T2R-USB
     #MODE=1T1R
 else
     MODE=$1
@@ -20,11 +20,17 @@ fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "2T2R" ]; then
+if [ "$MODE" = "2T2R-USB" ]; then
+    DEVNAME=WR-U
+elif [ "$MODE" = "2T2R" ]; then
     DEVNAME=WR-N
-else
+elif [ "$MODE" = "1T1R" ]; then
     DEVNAME=WR-NL
+else
+    echo "Not support mode."
+    exit 1
 fi
+
 echo "" > sdk_version.h
 echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
@@ -63,27 +69,27 @@ if [ "$MODE" = "1T1R" ] ; then
     cp -fv ./configs/defaults/RT2860_default_novlan-1T1R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-1T1R			./etc/Wireless/RT2860/RT2860.dat
     ln -sf RT3050_AP_1T1R_V1_0.bin 				./etc/Wireless/rf.bin
-fi
-if [ "$MODE" = "2T2R" ] ; then
+elif [ "$MODE" = "2T2R" ] ; then
     cp -fv ./configs/kernel/config-kernel-2t2r			./linux/.config
     cp -fv ./configs/all/config-config				./config/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-2T2R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-2T2R			./etc/Wireless/RT2860/RT2860.dat
     ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
-fi
-if [ "$MODE" = "2T3R" ] ; then
+elif [ "$MODE" = "2T3R" ] ; then
     cp -fv ./configs/kernel/config-kernel-2t3r			./linux/.config
     cp -fv ./configs/all/config-config				./config/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-2T3R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-2T3R			./etc/Wireless/RT2860/RT2860.dat
     ln -sf RT3662_AP_2T2R_V0_0.bin 				./etc/Wireless/rf.bin
-fi
-if [ "$MODE" = "USB" ] ; then
+elif [ "$MODE" = "2T2R-USB" ] ; then
     cp -fv ./configs/kernel/config-kernel-2t2r-USB-IPV6-8M	./linux/.config
     cp -fv ./configs/all/config-config-USB-IPV6-8M		./config/.config
     cp -fv ./configs/defaults/RT2860_default_novlan-2T2R	./etc/default/RT2860_default_novlan
     cp -fv ./configs/defaults/RT2860.dat-2T2R			./etc/Wireless/RT2860/RT2860.dat
     ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
+else
+    echo "Configs not found."
+    exit 1
 fi
 
 #for wantusoid`s like.
