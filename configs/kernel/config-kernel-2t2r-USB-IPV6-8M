@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Wed May  4 17:40:32 2011
+# Wed May  4 17:50:04 2011
 #
 CONFIG_MIPS=y
 
@@ -134,7 +134,7 @@ CONFIG_INIT_ENV_ARG_LIMIT=32
 #
 CONFIG_LOCALVERSION=""
 # CONFIG_LOCALVERSION_AUTO is not set
-# CONFIG_SWAP is not set
+CONFIG_SWAP=y
 CONFIG_SYSVIPC=y
 # CONFIG_IPC_NS is not set
 CONFIG_SYSVIPC_SYSCTL=y
@@ -1113,9 +1113,9 @@ CONFIG_EXT3_FS_XATTR=y
 # CONFIG_EXT3_FS_POSIX_ACL is not set
 # CONFIG_EXT3_FS_SECURITY is not set
 # CONFIG_EXT4DEV_FS is not set
-CONFIG_JBD=y
+CONFIG_JBD=m
 # CONFIG_JBD_DEBUG is not set
-CONFIG_FS_MBCACHE=y
+CONFIG_FS_MBCACHE=m
 # CONFIG_REISERFS_FS is not set
 # CONFIG_JFS_FS is not set
 # CONFIG_FS_POSIX_ACL is not set
