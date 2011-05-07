@@ -10,32 +10,6 @@ MODE=$1
 
 $LOG "Restart needed services and scripts. Mode $MODE"
 
-#Stop needed services
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
-    service dhcpd stop
-    service pppoe-relay stop
-    service chillispot stop
-fi
-if [ "$MODE" != "pppd" ]; then 
-    service udpxy stop
-    service igmp_proxy stop
-    service lld2d stop
-    service samba stop
-fi
-
-#Start needed services
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
-    service dhcpd start
-    service pppoe-relay start
-    service chillispot start
-fi
-if [ "$MODE" != "pppd" ]; then 
-    service lld2d start
-    service igmp_proxy start
-    service udpxy start
-    service samba start
-fi
-
 ##########################################################
 # This is services restart always                       #
 ##########################################################
@@ -45,7 +19,6 @@ fi
     service iptables restart
     $LOG "Reload shaper rules..."
     service shaper restart
-
 if [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
@@ -60,6 +33,15 @@ fi
 # 2) if call not from dhcp script			 #
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    service lld2d restart
+    service igmp_proxy restart
+    service udpxy restart
+    service samba restart
+    if [ "$MODE" != "misc" ]; then 
+	service dhcpd restart
+	service pppoe-relay restart
+	service chillispot restart
+    fi
     $LOG "Fastpath, passthrouth, stp and othes mode set..."
     service kext start
 fi
