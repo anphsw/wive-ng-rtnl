@@ -43,6 +43,20 @@ if [ "$MODE" != "pppd" ]; then
 fi
 
 ##########################################################
+# This is services restart always                       #
+##########################################################
+    service resolv start
+    service iptables restart
+    service shaper restart
+if [ -d /proc/sys/net/ipv6 ]; then
+    service radvd restart
+fi
+    service ripd restart
+    service zebra restart
+    service inetd restart
+    service dnsserver restart
+
+##########################################################
 # Need restart this servieces only:                    	#
 # 1) if not VPN enable                               	#
 # 2) if VPN enable and this scripts called from ip-up	#
@@ -52,17 +66,3 @@ if [ "$MODE" = "pppd" ] || [ "$vpnEnabled" != "on" ]; then
     service ntp restart
     service ddns restart
 fi
-
-##########################################################
-# This is services restart always                       #
-##########################################################
-if [ -d /proc/sys/net/ipv6 ]; then
-    service radvd restart
-fi
-    service ripd restart
-    service zebra restart
-    service inetd restart
-    service dnsserver restart
-    service resolv start
-    service iptables restart
-    service shaper restart
