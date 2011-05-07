@@ -68,21 +68,9 @@ choice
 endchoice
 endmenu
 
-# split driver in one dir
-menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
-source "drivers/net/wireless/rt2860v2/rt2860v2_ap/Kconfig"
-endmenu
-menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
-source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
-endmenu
-menu "802.11a wireless driver."
-source "drivers/net/wireless/RT3090_ap/Kconfig"
-endmenu
-
 menu "Nat acell mode"
 choice                                                                                                                                      
         prompt "Hardware nat mode"
-        depends on RALINK_RT3052
 
 config  RA_NAT_HW
 	select RA_HW_NAT
@@ -107,6 +95,18 @@ endmenu
 endif
 endmenu
 
+# split driver in one dir
+menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
+source "drivers/net/wireless/rt2860v2/rt2860v2_ap/Kconfig"
+endmenu
+menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
+source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
+endmenu
+menu "802.11a wireless driver."
+source "drivers/net/wireless/RT3090_ap/Kconfig"
+endmenu
+
+menu "Ralink DEVICES."
 config RTDEV_USB
 bool
 default y if RT305x_INIC_USB || RT3572_AP
@@ -118,6 +118,7 @@ default y if RT2880v2_INIC_MII || RT305x_INIC_MII
 config RTDEV_PCI
 bool
 default y if RT2880v2_INIC_PCI || RT3090_AP
+endmenu
 
 #######
 # USB
