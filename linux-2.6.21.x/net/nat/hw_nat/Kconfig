@@ -334,6 +334,10 @@ config  RA_HW_NAT_NONE2UP
 
 endchoice
 
+config  RA_HW_NAT_WIFI
+	depends on RA_HW_NAT
+	bool "Speed up WiFi traffic by HNAT"
+
 config  RA_HW_NAT_MINIMAL
 	depends on RA_HW_NAT
 	bool "Only minimal hw_nat code support. No ACL/AC/MTR"
