@@ -1411,7 +1411,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 }
 
 
-#define TX_TIMEOUT (20*HZ/100)
+#define TX_TIMEOUT (2*HZ/100)
 void ei_tx_timeout(struct net_device *dev)
 {
 	END_DEVICE* ei_local = netdev_priv(dev);
