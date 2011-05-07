@@ -394,6 +394,8 @@
 9) Backport some fixes from vanilla kernel.<br>
 10) Add config target for USB 2T2R devices at 8Mb Flash.<br>
 11) Try fix regression for Asus RT-32G rev b1.<br>
+12) Update HW_NAT code to 0.9 version.<br>
+13) Fix send error in raeth (decrease tx timeout).<br>
 
 <br><br>
 <b>For support see:</b><br>
