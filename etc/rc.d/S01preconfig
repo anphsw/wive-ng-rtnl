@@ -54,7 +54,6 @@ start() {
     chmod 777 /tmp
 
     #ralink depended
-    mknod /dev/flash0 c 200 0
     mknod /dev/hwnat0 c 220 0
     mknod /dev/swnat0 c 210 0
 
@@ -72,11 +71,6 @@ start() {
 
     mknod /dev/rdm0 c 254 0
     mknod /dev/PCM c 233 0
-    mknod /dev/spiS0 c 217 0
-    mknod /dev/spi0 c 153 0
-    mknod /dev/spi1 c 153 1
-    mknod /dev/spi2 c 153 2
-    mknod /dev/spi3 c 153 3
 
 #if compile date fille is exist
 if [ -f /etc/compile-date ]; then

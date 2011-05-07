@@ -393,6 +393,7 @@
 8) Fix xfrm build.<br>
 9) Backport some fixes from vanilla kernel.<br>
 10) Add config target for USB 2T2R devices at 8Mb Flash.<br>
+11) Try fix regression for Asus RT-32G rev b1.<br>
 
 <br><br>
 <b>For support see:</b><br>
