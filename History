@@ -396,6 +396,7 @@
 11) Try fix regression for Asus RT-32G rev b1.<br>
 12) Update HW_NAT code to 0.9 version.<br>
 13) Fix send error in raeth (decrease tx timeout).<br>
+14) Optimize service restart script for speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>
