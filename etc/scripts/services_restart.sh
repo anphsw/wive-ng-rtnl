@@ -23,12 +23,6 @@ if [ "$MODE" != "pppd" ]; then
     service samba stop
 fi
 
-#Configure kernel Extensions
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
-    $LOG "Fastpath, passthrouth, stp and othes mode set..."
-    service kext start
-fi
-
 #Start needed services
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ] && [ "$MODE" != "misc" ]; then 
     service dhcpd start
@@ -59,6 +53,16 @@ fi
     service zebra restart
     service inetd restart
     service dnsserver restart
+
+##########################################################
+# Need restart this servieces only:			 #
+# 1) if call not from ip-up				 #
+# 2) if call not from dhcp script			 #
+##########################################################
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    $LOG "Fastpath, passthrouth, stp and othes mode set..."
+    service kext start
+fi
 
 ##########################################################
 # Need restart this servieces only:                    	#
