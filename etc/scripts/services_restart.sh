@@ -45,9 +45,13 @@ fi
 ##########################################################
 # This is services restart always                       #
 ##########################################################
+    $LOG "Resolv config generate..."
     service resolv start
+    $LOG "Reload iptables rules..."
     service iptables restart
+    $LOG "Reload shaper rules..."
     service shaper restart
+
 if [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
