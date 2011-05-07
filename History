@@ -381,17 +381,18 @@
 25) Boot speedup and save memory at first stage.<br>
 26) Fix SoftwareFastpath not enable in Complex offload mode. Is regression.<br>
 
-1.7.x
-27) Add initial RT3662/RT3883 + RT309x support.<br>
-28) Wi-Fi coexistence now disable per default. (variable HT_BSSCoexistence 0/1<br>
-29) Add HT_BSSCoexApCntThr variable to install manually a switch-off threshold 40MHz mode wifi. If AP on air > HT_BSSCoexApCntThr.<br>
-30) Some init scrips more correct use some variable.<br>
-31) Do not send multicast and broadcast to PPE. Workaround for work IpTv in some configuration. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
-32) Only packet has valid ethernet adress need send to PPE. Need for correct track uncknown sessions. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
-33) Smal fix in memory size autodetect.<br>
-34) Fix xfrm build.<br>
-35) Backport some fixes from vanilla kernel.<br>
-36) Add config target for USB 2T2R devices at 8Mb Flash.<br>
+<br>
+<b>1.7.x</b><br>
+1) Add initial RT3662/RT3883 + RT309x support.<br>
+2) Wi-Fi coexistence now disable per default. (variable HT_BSSCoexistence 0/1<br>
+3) Add HT_BSSCoexApCntThr variable to install manually a switch-off threshold 40MHz mode wifi. If AP on air > HT_BSSCoexApCntThr.<br>
+4) Some init scrips more correct use some variable.<br>
+5) Do not send multicast and broadcast to PPE. Workaround for work IpTv in some configuration. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
+6) Only packet has valid ethernet adress need send to PPE. Need for correct track uncknown sessions. Use CONFIG_RA_HW_NAT_SAFE for build.<br>
+7) Smal fix in memory size autodetect.<br>
+8) Fix xfrm build.<br>
+9) Backport some fixes from vanilla kernel.<br>
+10) Add config target for USB 2T2R devices at 8Mb Flash.<br>
 
 <br><br>
 <b>For support see:</b><br>
