@@ -164,6 +164,7 @@ AccessPolicy7=0
 AccessControlList7=
 WdsEnable=0
 WdsPhyMode=htmix
+WdsTxMcs=33
 WdsEncrypType=NONE
 WdsList=
 WdsKey=
