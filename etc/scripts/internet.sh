@@ -152,18 +152,7 @@ echo 1 > /proc/sys/net/nf_conntrack_flush
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "lanonly" ]; then
-	if [ "$MODE" = "wifionly" ] && [ "$stamode" = "y" ]; then
-	    #Need stop tun before reload drivers
-	    #this need for prevent loop in routes
-	    if [ "$vpnEnabled" = "on" ]; then
-		ip route del default > /dev/null 2>&1
-		ip route flush cache > /dev/null 2>&1
-		service vpnhelper stop
-		sleep 20
-		ip route del default > /dev/null 2>&1
-		ip route flush cache > /dev/null 2>&1
-	    fi
-	fi
+	vpn_deadloop_fix
 	$LOG "Shutdown wireless interfaces."
 	ifRaxWdsxDown
 	$LOG "Reload modules drivers for current mode."
