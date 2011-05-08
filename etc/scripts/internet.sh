@@ -213,7 +213,7 @@ services_restart.sh all
 # service restart from dhcp script
 wanmode=`nvram_get 2860 wanConnectionMode`
 if [ "$wanmode" != "DHCP" ]; then
-    (sleep 2 && service vpnhelper stop && service vpnhelper start) &
+    (service vpnhelper stop && sleep 2 && service vpnhelper start) &
 fi
 
 exit 0
