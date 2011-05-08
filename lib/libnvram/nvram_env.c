@@ -1101,8 +1101,8 @@ int gen_wifi_config(int mode)
 #endif
 
 		FPRINT_NUM(WdsEnable);
+		FPRINT_STR(WdsPhyMode);
 		FPRINT_STR(WdsTxMcs);
-		FPRINT_NUM(WdsEnable);
 		FPRINT_STR(WdsEncrypType);
 		FPRINT_STR(WdsList);
 		FPRINT_STR(Wds0Key);
