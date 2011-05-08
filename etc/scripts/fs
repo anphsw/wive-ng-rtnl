@@ -65,7 +65,7 @@ save(){
 
 restore(){
     echo "Clear rwfs and reboot. Please go smoke..."
-    dd if=/dev/urandom of=$MTDRWFS bs=64k count=$BLOCKS
+    echo "1234567890" > $MTDRWFS
     reboot
 }
 
