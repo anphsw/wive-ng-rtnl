@@ -61,7 +61,7 @@ else
 fi
 
 if [ "$SERVICE" != "" ]; then
-    SERVICE="rp_pppoe_service $SERVER"
+    SERVICE="rp_pppoe_service $SERVICE"
 else
     SERVICE=""
 fi
