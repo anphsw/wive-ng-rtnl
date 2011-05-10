@@ -8,6 +8,7 @@
 . /etc/scripts/global.sh
 
 SERVER=`nvram_get 2860 vpnServer`
+SERVICE=`nvram_get 2860 vpnService`
 USER=`nvram_get 2860 vpnUser`
 PASSWORD=`nvram_get 2860 vpnPassword`
 MTU=`nvram_get 2860 vpnMTU`
@@ -57,6 +58,12 @@ if [ "$SERVER" != "" ]; then
     SERVER="rp_pppoe_ac $SERVER"
 else
     SERVER=""
+fi
+
+if [ "$SERVICE" != "" ]; then
+    SERVICE="rp_pppoe_service $SERVER"
+else
+    SERVICE=""
 fi
 
 if [ "$PEERDNS" = "on" ]; then
@@ -123,8 +130,8 @@ $CHAP
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
 # PPPoE invocation
-PPPOE_CMD="$IFACE $SERVER user $USER password $PASSWORD"
+PPPOE_CMD="$IFACE $SERVER $SERVICE user $USER password $PASSWORD"
 
-$LOG "Start pppd at $IFACE to $SERVER mode PPPOE"
+$LOG "Start pppd at $IFACE to $SERVER $SERVICE mode PPPOE"
 FULLOPT="file $OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &
