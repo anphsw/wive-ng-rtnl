@@ -220,6 +220,9 @@ start() {
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
 		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+		    if [ "$vpnNAT" != "off" ]; then
+			iptables -A FORWARD -i ppp+ -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+		    fi
 		fi
 		$LOG "Add portforward rules"
 		chmod 777 /etc/portforward
