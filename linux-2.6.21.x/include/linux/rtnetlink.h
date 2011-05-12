@@ -706,6 +706,17 @@ extern void rtnl_lock(void);
 extern void rtnl_unlock(void);
 extern int rtnl_trylock(void);
 
+/**
+ * rcu_dereference_rtnl - rcu_dereference with debug checking
+ * @p: The pointer to read, prior to dereferencing
+ *
+ * Do an rcu_dereference(p), but check caller either holds rcu_read_lock()
+ * or RTNL
+ */
+#define rcu_dereference_rtnl(p)					\
+	rcu_dereference_check(p, rcu_read_lock_held() ||	\
+				 lockdep_rtnl_is_held())
+
 extern void rtnetlink_init(void);
 extern void __rtnl_unlock(void);
 
