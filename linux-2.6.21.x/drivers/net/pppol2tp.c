@@ -231,11 +231,11 @@ struct pppol2tp_session
 	int			mru;
 	int			flags;		/* accessed by PPPIOCGFLAGS.
 						 * Unused. */
-	int			recv_seq:1;	/* expect receive packets with
+	unsigned		recv_seq:1;	/* expect receive packets with
 						 * sequence numbers? */
-	int			send_seq:1;	/* send packets with sequence
+	unsigned		send_seq:1;	/* send packets with sequence
 						 * numbers? */
-	int			lns_mode:1;	/* behave as LNS? LAC enables
+	unsigned		lns_mode:1;	/* behave as LNS? LAC enables
 						 * sequence numbers under
 						 * control of LNS. */
 	int			debug;		/* bitmask of debug message
@@ -288,8 +288,8 @@ struct pppol2tp_tunnel
 struct pppol2tp_skb_cb {
 	u16			ns;
 	u16			nr;
-	int			has_seq;
-	int			length;
+	u16			has_seq;
+	u16			length;
 	unsigned long		expires;
 };
 
@@ -629,9 +629,9 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 		ptr += 2;
 
 	/* Extract tunnel and session ID */
-	tunnel_id = ntohs(*(u16 *) ptr);
+	tunnel_id = ntohs(*(__be16 *) ptr);
 	ptr += 2;
-	session_id = ntohs(*(u16 *) ptr);
+	session_id = ntohs(*(__be16 *) ptr);
 	ptr += 2;
 
 	/* Find the session context */
@@ -660,9 +660,9 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	 */
 	if (hdrflags & L2TP_HDRFLAG_S) {
 		u16 ns, nr;
-		ns = ntohs(*(u16 *) ptr);
+		ns = ntohs(*(__be16 *) ptr);
 		ptr += 2;
-		nr = ntohs(*(u16 *) ptr);
+		nr = ntohs(*(__be16 *) ptr);
 		ptr += 2;
 
 		/* Received a packet with sequence numbers. If we're the LNS,
@@ -693,7 +693,6 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 			       "%s: recv data has no seq numbers when required. "
 			       "Discarding\n", session->name);
 			session->stats.rx_seq_discards++;
-			session->stats.rx_errors++;
 			goto discard;
 		}
 
@@ -712,7 +711,6 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 			       "%s: recv data has no seq numbers when required. "
 			       "Discarding\n", session->name);
 			session->stats.rx_seq_discards++;
-			session->stats.rx_errors++;
 			goto discard;
 		}
 
@@ -722,7 +720,7 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 
 	/* If offset bit set, skip it. */
 	if (hdrflags & L2TP_HDRFLAG_O)
-		ptr += 2 + ntohs(*(u16 *) ptr);
+		ptr += 2 + ntohs(*(__be16 *)ptr);
 
 	skb_pull(skb, ptr - skb->data);
 
@@ -760,9 +758,9 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 			 */
 			if (PPPOL2TP_SKB_CB(skb)->ns != session->nr) {
 				session->stats.rx_seq_discards++;
-				session->stats.rx_errors++;
 				PRINTK(session->debug, PPPOL2TP_MSG_SEQ, KERN_DEBUG,
-				       "%s: oos pkt %hu len %d discarded, waiting for %hu, reorder_q_len=%d\n",
+				       "%s: oos pkt %hu len %d discarded, "
+				       "waiting for %hu, reorder_q_len=%d\n",
 				       session->name, PPPOL2TP_SKB_CB(skb)->ns,
 				       PPPOL2TP_SKB_CB(skb)->length, session->nr,
 				       skb_queue_len(&session->reorder_q));
@@ -786,6 +784,7 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 
 discard:
 	DPRINTK(session->debug, "discarding skb, len=%d\n", skb->len);
+	session->stats.rx_errors++;
 	kfree_skb(skb);
 
 	DPRINTK(session->debug, "calling sock_put; refcnt=%d\n",
@@ -2253,11 +2252,11 @@ static int pppol2tp_session_ioctl(struct pppol2tp_session *session,
 	struct sock *sk = session->sock;
 	int val = (int) arg;
 
-	sock_hold(sk);
-
 	PRINTK(session->debug, PPPOL2TP_MSG_CONTROL, KERN_DEBUG,
 	       "%s: pppol2tp_session_ioctl(cmd=%#x, arg=%#lx)\n",
 	       session->name, cmd, arg);
+
+	sock_hold(sk);
 
 	switch (cmd) {
 	case SIOCGIFMTU:
@@ -2287,7 +2286,7 @@ static int pppol2tp_session_ioctl(struct pppol2tp_session *session,
 			break;
 
 		session->mtu = ifr.ifr_mtu;
-;
+
 		PRINTK(session->debug, PPPOL2TP_MSG_CONTROL, KERN_INFO,
 		       "%s: set mtu=%d\n", session->name, session->mtu);
 		err = 0;
@@ -2344,7 +2343,6 @@ static int pppol2tp_session_ioctl(struct pppol2tp_session *session,
 
 	case PPPIOCGL2TPSTATS:
 		err = -ENXIO;
-
 		if (!(sk->sk_state & PPPOX_CONNECTED))
 			break;
 
@@ -2379,16 +2377,15 @@ static int pppol2tp_tunnel_ioctl(struct pppol2tp_tunnel *tunnel,
 	struct sock *sk = tunnel->sock;
 	struct pppol2tp_ioc_stats stats_req;
 
-	sock_hold(sk);
-
 	PRINTK(tunnel->debug, PPPOL2TP_MSG_CONTROL, KERN_DEBUG,
 	       "%s: pppol2tp_tunnel_ioctl(cmd=%#x, arg=%#lx)\n", tunnel->name,
 	       cmd, arg);
 
+	sock_hold(sk);
+
 	switch (cmd) {
 	case PPPIOCGL2TPSTATS:
 		err = -ENXIO;
-
 		if (!(sk->sk_state & PPPOX_CONNECTED))
 			break;
 
@@ -3033,7 +3030,8 @@ void __exit pppol2tp_exit(void)
 module_init(pppol2tp_init);
 module_exit(pppol2tp_exit);
 
-MODULE_AUTHOR("Martijn van Oosterhout <kleptog@svana.org>");
+MODULE_AUTHOR("Martijn van Oosterhout <kleptog@svana.org>,"
+	      "James Chapman <jchapman@katalix.com>");
 MODULE_DESCRIPTION("PPP over L2TP over UDP");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(PPPOL2TP_DRV_VERSION);
