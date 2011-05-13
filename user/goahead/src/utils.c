@@ -36,7 +36,6 @@ static int  getCfg2Zero(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfg2NthZero(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfg3General(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv);
-static int  getDpbSta(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLangBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPlatform(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStationBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -555,7 +554,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("getCfg2NthZero"), getCfg2NthZero);
 	websAspDefine(T("getCfg3General"), getCfg3General);
 	websAspDefine(T("getCfg3Zero"), getCfg3Zero);
-	websAspDefine(T("getDpbSta"), getDpbSta);
 	websAspDefine(T("getLangBuilt"), getLangBuilt);
 	websAspDefine(T("getPlatform"), getPlatform);
 	websAspDefine(T("getStationBuilt"), getStationBuilt);
@@ -895,15 +893,6 @@ static int getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-static int getDpbSta(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_RT2860V2_STA_DPB
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
 static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t *lang;
@@ -1213,9 +1202,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #else
 	char	*wan_ip, *lan_ip;
 #endif
-#ifdef CONFIG_RT2860V2_STA_DPB
-	char_t	*econv = "";
-#endif
 	mode = websGetVar(wp, T("opMode"), T("0")); 
 	
 	nvram_init(RT2860_NVRAM);
@@ -1276,30 +1262,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #endif
 		}
 	}
-
-#ifdef CONFIG_RT2860V2_STA_DPB
-	if (!strncmp(mode, "0", 2)) {
-		char *old;
-
-		econv = websGetVar(wp, T("ethConv"), T("0"));
-		old = nvram_bufget(RT2860_NVRAM, "ethConvert");
-		if (strncmp(old, econv, 2))
-		{
-			nvram_bufset(RT2860_NVRAM, "ethConvert", econv);
-			need_commit = 1;
-		}
-		if (!strncmp(econv, "1", 2))
-		{
-			//disable dhcp server in this mode
-			old = nvram_bufget(RT2860_NVRAM, "dhcpEnabled");
-			if (!strncmp(old, "1", 2))
-			{
-				nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
-				need_commit = 1;
-			}
-		}
-	}
-#endif
 
 	//new OperationMode
 	if (strncmp(mode, old_mode, 2))
