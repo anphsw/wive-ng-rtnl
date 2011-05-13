@@ -19,22 +19,13 @@ var old_mode;
 
 function changeMode()
 {
-	var dpbsta = "<% getDpbSta(); %>";
 	var ec_en = "<% getCfgZero(1, "ethConvert"); %>";
 	var form = document.opmode;
 
 	hideElement("eth_conv");
 
 	if (document.opmode.opMode[0].checked)
-	{
 		opmode = 0;
-		if (dpbsta == "1")
-		{
-			showElement("eth_conv");
-			if (ec_en == "1")
-				form.ethConv.options.selectedIndex = 1;
-		}
-	}
 	else if (form.opMode[1].checked || form.opMode[3].checked)
 		opmode = 1;
 	else if (form.opMode[2].checked)

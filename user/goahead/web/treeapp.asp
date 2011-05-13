@@ -78,7 +78,6 @@ function refresh(){
 
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
-var dpbsta = '<% getDpbSta(); %>';
 var vpnen = '<% getVPNBuilt(); %>';
 var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
 var meshb = '<% getMeshBuilt(); %>';
@@ -122,7 +121,7 @@ if (opmode == '4')
 if (swqos == '1')
 	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
 
-if ((opmode == '0' && dpbsta == '1' && ethconv == '1') || opmode == '2')
+if ((opmode == '0' && ethconv == '1') || opmode == '2')
 {
 	a.add(400,   0, _("treeapp wireless settings"),     "javascript:a.oo(400);");
 	a.add(401, 400, _("treeapp profile"),               "javascript:go('station/profile.asp');");

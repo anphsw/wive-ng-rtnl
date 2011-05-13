@@ -47,10 +47,9 @@ function PageInit()
 function showLoadedElements()
 {
 	var opmode = '<% getCfgZero(1, "OperationMode"); %>';
-	var dpbsta = '<% getDpbSta(); %>';
 	var ethconv = '<% getCfgZero(1, "ethConvert"); %>';
 	
-	if (((opmode == '0') && (dpbsta == '1') && (ethconv == '1')) || (opmode == '2'))
+	if (((opmode == '0') && (ethconv == '1')) || (opmode == '2'))
 	{
 		showElement("wirelessAbout");
 		showElement("wirelessDriverVersion");
