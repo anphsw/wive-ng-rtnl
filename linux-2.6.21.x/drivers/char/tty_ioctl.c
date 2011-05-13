@@ -221,8 +221,6 @@ speed_t tty_termios_input_baud_rate(struct ktermios *termios)
 
 EXPORT_SYMBOL(tty_termios_input_baud_rate);
 
-#ifdef BOTHER
-
 /**
  *	tty_termios_encode_baud_rate
  *	@termios: ktermios structure holding user requested state
@@ -252,6 +250,7 @@ void tty_termios_encode_baud_rate(struct ktermios *termios, speed_t ibaud, speed
 	termios->c_ispeed = ibaud;
 	termios->c_ospeed = obaud;
 
+#ifdef BOTHER
 	/* If the user asked for a precise weird speed give a precise weird
 	   answer. If they asked for a Bfoo speed they many have problems
 	   digesting non-exact replies so fuzz a bit */
@@ -262,6 +261,7 @@ void tty_termios_encode_baud_rate(struct ktermios *termios, speed_t ibaud, speed
 		iclose = 0;
 	if ((termios->c_cflag >> IBSHIFT) & CBAUD)
 		ibinput = 1;	/* An input speed was specified */
+#endif
 
 	termios->c_cflag &= ~CBAUD;
 
@@ -272,23 +272,41 @@ void tty_termios_encode_baud_rate(struct ktermios *termios, speed_t ibaud, speed
 		}
 		if (ibaud - iclose >= baud_table[i] && ibaud + iclose <= baud_table[i]) {
 			/* For the case input == output don't set IBAUD bits if the user didn't do so */
-			if (ofound != i || ibinput)
+			if (ofound == i && !ibinput)
+				ifound  = i;
+#ifdef IBSHIFT
+			else {
+				ifound = i;
 				termios->c_cflag |= (baud_bits[i] << IBSHIFT);
-			ifound = i;
+			}
+#endif
 		}
 	}
 	while(++i < n_baud_table);
+#ifdef BOTHER
 	if (ofound == -1)
 		termios->c_cflag |= BOTHER;
 	/* Set exact input bits only if the input and output differ or the
 	   user already did */
 	if (ifound == -1 && (ibaud != obaud  || ibinput))
 		termios->c_cflag |= (BOTHER << IBSHIFT);
+#else
+	if (ifound == -1 || ofound == -1) {
+		static int warned;
+		if (!warned++)
+			printk(KERN_WARNING "tty: Unable to return correct "
+			  "speed data as your architecture needs updating.\n");
+	}
+#endif
 }
 
 EXPORT_SYMBOL_GPL(tty_termios_encode_baud_rate);
 
-#endif
+void tty_encode_baud_rate(struct tty_struct *tty, speed_t ibaud, speed_t obaud)
+{
+	tty_termios_encode_baud_rate(tty->termios, ibaud, obaud);
+}
+EXPORT_SYMBOL_GPL(tty_encode_baud_rate);
 
 /**
  *	tty_get_baud_rate	-	get tty bit rates
@@ -318,6 +336,29 @@ speed_t tty_get_baud_rate(struct tty_struct *tty)
 }
 
 EXPORT_SYMBOL(tty_get_baud_rate);
+
+/**
+ *	tty_termios_copy_hw	-	copy hardware settings
+ *	@new: New termios
+ *	@old: Old termios
+ *
+ *	Propogate the hardware specific terminal setting bits from
+ *	the old termios structure to the new one. This is used in cases
+ *	where the hardware does not support reconfiguration or as a helper
+ *	in some cases where only minimal reconfiguration is supported
+*/
+
+void tty_termios_copy_hw(struct ktermios *new, struct ktermios *old)
+{
+	/* The bits a dumb device handles in software. Smart devices need
+	   to always provide a set_termios method */
+	new->c_cflag &= HUPCL | CREAD | CLOCAL;
+	new->c_cflag |= old->c_cflag & ~(HUPCL | CREAD | CLOCAL);
+	new->c_ispeed = old->c_ispeed;
+	new->c_ospeed = old->c_ospeed;
+}
+
+EXPORT_SYMBOL(tty_termios_copy_hw);
 
 /**
  *	change_termios		-	update termios values
