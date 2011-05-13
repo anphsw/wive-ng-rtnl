@@ -19,7 +19,6 @@ var old_mode;
 
 function changeMode()
 {
-	var ec_en = "<% getCfgZero(1, "ethConvert"); %>";
 	var form = document.opmode;
 
 	hideElement("eth_conv");
