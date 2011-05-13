@@ -202,7 +202,6 @@ int usb_register_dev(struct usb_interface *intf,
 		spin_unlock (&minor_lock);
 		retval = PTR_ERR(intf->usb_dev);
 	}
-exit:
 	return retval;
 }
 EXPORT_SYMBOL(usb_register_dev);
