@@ -106,7 +106,7 @@
 #endif
 
 /* Old L2TP daemons semi-compatibility */
-//#define PPPOL2TP_UDP_CONNECT
+#define PPPOL2TP_UDP_CONNECT
 
 /* Pre 2.6.22 kernels compatibility */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
