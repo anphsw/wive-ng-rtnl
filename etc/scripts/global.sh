@@ -8,8 +8,6 @@
 . /etc/scripts/config.sh
 
 # set default variables
-ethconv="n"
-stamode="n"
 wan_if="eth2.2"
 wan_upnp_if="eth2.2"
 lan_if="br0"
@@ -79,27 +77,6 @@ getLan2IfName()
     fi
 }
 
-# ethernet converter enabled -> $ethconv "y"
-getEthConv()
-{
-    ec=`nvram_get 2860 ethConvert`
-    if [ "$opmode" = "0" ] && [ "$ec" = "1" ]; then
-	ethconv="y"
-    else
-	ethconv="n"
-    fi
-}
-
-# station driver loaded -> $stamode "y"
-getStaMode()
-{
-    if [ "$opmode" = "2" ] || [ "$ethconv" = "y" ]; then
-	stamode="y"
-    else
-	stamode="n"
-    fi
-}
-
 #select switch type from config
 getSwType()
 {
@@ -126,8 +103,7 @@ getHostName()
 wait_connect()
 #wait connect to ap
 {
-    getStaMode
-    if [ "$stamode" = "y" ]; then
+    if [ "$opmode" = "2" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
 	    staCur_SSID=""
@@ -140,7 +116,7 @@ wait_connect()
 udhcpc_opts()
 {
 	CL_SLEEP=1
-	if [ "$stamode" = "y" ]; then
+	if [ "$opmode" = "2" ]; then
 	    CL_SLEEP=5
 	    #disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
@@ -244,8 +220,7 @@ vpn_deadloop_fix()
 {
     #L2TP and PPTP kernel dead-loop fix
     if [ "$vpnEnabled" = "on" ]; then
-	getStaMode
-	if [ "$vpnType" != "0" ] || [ "$stamode" = "y" ]; then
+	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
 	    # First vpn stop.. 
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1
@@ -268,6 +243,4 @@ get_txqlen()
 getLanIfName
 getLan2IfName
 getWanIfName
-getEthConv
-getStaMode
 getSwType

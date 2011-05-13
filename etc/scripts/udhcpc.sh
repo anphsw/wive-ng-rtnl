@@ -48,7 +48,7 @@ case "$1" in
     # Try reconnect at lease failed
     # Workaround for infinite OFFER wait
     vpn_deadloop_fix
-    if [ "$stamode" = "y" ]; then
+    if [ "$opmode" = "2" ]; then
 	# Wait connect and get SSID
 	wait_connect
 	if [ "$staCur_SSID" != "" ]; then
