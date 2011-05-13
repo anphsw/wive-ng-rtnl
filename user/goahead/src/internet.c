@@ -1918,7 +1918,7 @@ void initInternet(void)
 //automatically connect to AP according to the active profile
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
-	if (!strcmp(opmode, "2") || (!strcmp(opmode, "0") && !strcmp("1",  nvram_get(RT2860_NVRAM, "ethConver")))) {
+	if (!strcmp(opmode, "2")) {
 		if (initStaProfile() != -1)
 			    initStaConnection();
 	}

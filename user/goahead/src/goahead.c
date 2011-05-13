@@ -233,7 +233,7 @@ static void goaSigHandler(int signum)
 #endif
 
 #ifdef CONFIG_RT2860V2_STA_WSC
-	if(!strcmp(opmode, "2") || !strcmp(opmode, "0")) // wireless isp mode
+	if (!strcmp(opmode, "2"))	// wireless sta isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
 #endif
