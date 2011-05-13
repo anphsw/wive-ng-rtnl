@@ -399,7 +399,8 @@
 14) Optimize service restart script for speedup.<br>
 15) Correct some defaults for WDS mode.<br>
 16) Fix portforward at vpn enabled.<br>
-17) Add vpnService variabe to select PPPOE service name to connect. (Need add in webui only PPPOE mode).<br>
+17) Backport ch341 serial driver.<br>
+18) Add vpnService variabe to select PPPOE service name to connect. (Need add in webui only PPPOE mode).<br>
 
 <br><br>
 <b>For support see:</b><br>
