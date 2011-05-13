@@ -51,7 +51,7 @@ start() {
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
-		    if [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 80 -j DROP
 		    fi
 		fi
@@ -71,7 +71,7 @@ start() {
 	    if [ "$RemoteSSH" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
-		    if [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
 		    fi
 		fi
@@ -91,7 +91,7 @@ start() {
 	    if [ "$UDPXY" = "1" ]; then
 		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 81 -j DROP
-		    if [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 81 -j DROP
 		    fi
 		fi
@@ -132,7 +132,7 @@ start() {
     		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
-		if [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp -j DROP
@@ -228,7 +228,7 @@ start() {
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
 		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
-		    if [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
 			iptables -A FORWARD -i ppp+ -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
 		    fi
 		fi
