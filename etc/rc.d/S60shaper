@@ -52,10 +52,10 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	modprobe -q sch_sfq
 	modprobe -q sch_red
 	modprobe -q sch_gred
-	$LOG "--------------RALINK-QOS------------------------"
+	$LOG " --------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
-	    $LOG "--------------PRIO-QOS------------------------"
+	    $LOG " --------------PRIO-QOS------------------------"
 	    $LOG "Load netsched  modules."
 	    modprobe -q sch_esfq
 	    modprobe -q sch_sfq
@@ -122,7 +122,7 @@ if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 		tc filter add dev $wan_if parent 1:0 protocol ip prio 2 u32 match ip protocol 17 0xff flowid 1:2
 	    fi
     elif [ "$QoSEnable" = "3" ]; then
-	    $LOG "-----------------IMQ-FULL-------------------------"
+	    $LOG " -----------------IMQ-FULL-------------------------"
 	    $LOG "Load netsched  modules."
 	    modprobe -q imq > /dev/null 2>&1
 	    modprobe -q ipt_IMQ > /dev/null 2>&1
