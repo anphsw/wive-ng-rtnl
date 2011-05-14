@@ -14,6 +14,7 @@ start() {
     $LOG "Mount all filesystems"
     mount -t devpts /dev/pts /dev/pts
     mount -a
+    chmod 777 /tmp
 
     $LOG "Delete old config"
     rm_conf="zebra.conf ripd.conf macipfilter websfilter portforward ppp_firewall resolv_conf.bak"
@@ -44,9 +45,6 @@ start() {
 
     mkdir -p /dev/misc
     mknod /dev/misc/rtc   c       10      135
-
-    #modify permissions
-    chmod 777 /tmp
 
     #ralink depended
     mknod /dev/hwnat0 c 220 0
