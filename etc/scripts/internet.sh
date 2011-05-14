@@ -173,13 +173,10 @@ fi
 #
 if [ "$opmode" = "0" ]; then
     bridge_config
-
 elif [ "$opmode" = "1" ]; then
     gate_config
-
 elif [ "$opmode" = "2" ]; then
     ethcv_config
-
 elif [ "$opmode" = "3" ]; then
     apcli_config
 elif [ "$opmode" = "4" ]; then
