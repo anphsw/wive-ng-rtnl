@@ -317,7 +317,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	}
 	
 	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
-	if ((nat_fp != NULL) && (strcmp(nat_fp, "2") == 0))
+	if ((nat_fp != NULL) && ((strcmp(nat_fp, "2") == 0) || (strcmp(nat_fp, "3") == 0)))
 	{
 		char_t *nat_th = websGetVar(wp, "hwnatThreshold", "30");
 		if (nat_th != NULL)

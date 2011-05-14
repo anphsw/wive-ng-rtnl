@@ -469,6 +469,7 @@ const parameter_fetch_t vpn_args[] =
 	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
 	{ T("vpn_auth_type"),          "vpnAuthProtocol",      1 },
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
+	{ T("vpn_pppoe_service"),      "vpnService",           0 },
 	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2 },
 	{ NULL, 0, 0 } // Terminator
 };
@@ -715,22 +716,6 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 		printf("vpn_enabled value : %s\n", vpn_enabled);
 
 		setupParameters(wp, fetch, 0);
-/*		while (fetch->web_param != NULL)
-		{
-			// Get variable
-			char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
-			if (fetch->is_switch) // Check if need update a switch
-			{
-				if (str[0]=='\0')
-					str = "off";
-			}
-			
-			if (nvram_bufset(RT2860_NVRAM, (char_t *)fetch->nvram_param, (void *)str)!=0) //!!!
-				printf("Set %s nvram error!", fetch->nvram_param);
-			
-			printf("%s value : %s\n", fetch->nvram_param, str);
-			fetch++;
-		}*/
 		
 		// Check if routing table is enabled
 		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T("off"));

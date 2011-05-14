@@ -45,6 +45,8 @@ function showHint(key)
 			text += 'Select VPN authentication protocol type.';
 		else if (key=='vpn_pppoe_iface')
 			text += 'Select available interface for PPPoE.';
+		else if (key=='vpn_pppoe_service')
+			text += 'Some internet providers need to set up special PPPoE service name. You can specify it here.';
 		else if (key=='vpn_server')
 		{
 			if (form.vpn_type.value == '0') // PPPoE
@@ -135,7 +137,8 @@ function vpnSwitchClick(form)
 		form.vpn_user, form.vpn_pass, form.vpn_mtu, form.vpn_mppe,
 		form.vpn_peerdns, form.vpn_debug, form.vpn_nat, form.vpn_dgw,
 		form.vpn_mtu_type, form.vpn_pppoe_iface, form.vpn_type,
-		form.vpn_lcp, form.lanauth_access, form.vpn_pure_pppoe
+		form.vpn_lcp, form.lanauth_access, form.vpn_pure_pppoe,
+		form.vpn_pppoe_service
 		], form.vpn_enabled.checked );
 }
 
@@ -187,17 +190,9 @@ function selectType(form)
 	var kabinet_on = form.vpn_type.value == '6';
 
 	// Display mode-dependent elements
-	displayElement('vpn_pure_pppoe_cell', pppoe_on);
-	displayElement('vpn_pppoe_iface_row', !kabinet_on);
-	displayElement('vpn_server_row', !kabinet_on);
-	displayElement('vpn_auth_type_row', !kabinet_on);
-	displayElement('vpn_user_row', !kabinet_on);
-	displayElement('vpn_mtu_row', !kabinet_on);
-	displayElement('vpn_dgw_row', !kabinet_on);
+	displayElement([ 'vpn_pure_pppoe_cell', 'vpn_pppoe_service_row', 'vpn_pppoe_row' ], pppoe_on);
+	displayElement([ 'vpn_pppoe_iface_row', 'vpn_server_row', 'vpn_auth_type_row', 'vpn_user_row', 'vpn_mtu_row', 'vpn_dgw_row', 'table_vpn_params'], !kabinet_on);
 	displayElement('vpn_lanauth_lvl_row', kabinet_on);
-	displayElement('table_vpn_params', !kabinet_on);
-
-	displayElement('vpn_pppoe_row', pppoe_on);
 	displayElement('vpn_mppe_row', !l2tp_server_on);
 	displayElement('vpn_l2tp_range', l2tp_server_on);
 
@@ -355,7 +350,11 @@ tunnel on your Router.
 		<td width="50%" id="vpn_server_col">
 			<b>Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name:</b>
 		</td>
-		<td width="50%"><input name="vpn_server" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
+		<td width="50%"><input name="vpn_server" class="mid" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
+	</tr>
+	<tr id="vpn_pppoe_service_row" onMouseOver="showHint('vpn_pppoe_service')" onMouseOut="hideHint('vpn_pppoe_service')">
+		<td width="50%"><b>PPPoE service name:</b></td>
+		<td width="50%"><input name="vpn_pppoe_service" class="mid" value="<% getCfgGeneral(1, "vpnService"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_l2tp_range" onMouseOver="showHint('vpn_range')" onMouseOut="hideHint('vpn_range')" style="display: none;" >
 		<td width="50%"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>

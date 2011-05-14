@@ -21,35 +21,53 @@ function style_display_on()
 	}
 }
 
-function showElement(elementID)
+function showElement(elementID, display)
 {
-	var item = (typeof(elementID)=='object') ? 
-		elementID : document.getElementById(elementID);
-	if (item != null)
+	if (elementID == null)
+		return;
+	var item = (typeof(elementID)=='string') ? 
+		document.getElementById(elementID) : elementID;
+	if (item == null)
+		return;
+	if (display == null)
+		display = '';
+	
+	if (item instanceof Array)
 	{
-		item.style.display = "";
-		item.style.visibility = "visible";
+		for (var i=0; i<item.length; i++)
+			showElement(item[i], display);
 	}
-}
-
-function showElementEx(elementID, display)
-{
-	var item = (typeof(elementID)=='object') ? 
-		elementID : document.getElementById(elementID);
-	if (item != null)
+	else
 	{
 		item.style.display = display;
 		item.style.visibility = "visible";
 	}
 }
 
-function hideElement(elementID)
+function showElementEx(elementID, display)
 {
-	var item = (typeof(elementID)=='object') ? 
-		elementID : document.getElementById(elementID);
-	if (item != null)
+	return showElement(elementID, display);
+}
+
+function hideElement(elementID, display)
+{
+	if (elementID == null)
+		return;
+	var item = (typeof(elementID)=='string') ? 
+		document.getElementById(elementID) : elementID;
+	if (item == null)
+		return;
+	if (display == null)
+		display = 'none';
+	
+	if (item instanceof Array)
 	{
-		item.style.display = "none";
+		for (var i=0; i<item.length; i++)
+			hideElement(item[i], display);
+	}
+	else
+	{
+		item.style.display = display;
 		item.style.visibility = "hidden";
 	}
 }
@@ -117,22 +135,20 @@ self.setElementChecked = function(element, checked)
 
 self.enableElements = function(elements, enable)
 {
-	if (elements == null)
-		return;
 	if (enable == null)
 		enable = true;
-	if (typeof(elements) == 'string')
+	if (elements == null)
+		return;
+	var item = (typeof(elements)=='string') ? 
+		document.getElementById(elements) : elements;
+	if (item == null)
+		return;
+	
+	if (item instanceof Array)
 	{
-		elements = document.getElementById(elements);
-		if (elements == null)
-			return;
+		for (var i=0; i<item.length; i++)
+			enableElements(item[i], enable);
 	}
-
-	if (elements instanceof Array)
-	{
-		for (var i=0; i<elements.length; i++)
-			enableElements(elements[i], enable);
-	}
-	else // Object
+	else
 		elements.disabled = (enable) ? false : true;
 }
