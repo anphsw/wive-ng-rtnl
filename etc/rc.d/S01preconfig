@@ -11,29 +11,24 @@ start() {
  $LOG "Preconfigure..."
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
-    $LOG "Delete old config"
-    rm -f /etc/zebra.conf
-    rm -f /etc/ripd.conf
-    rm -f /etc/macipfilter
-    rm -f /etc/websfilter
-    rm -f /etc/portforward
-    rm -f /etc/ppp_firewall
-    rm -f /etc/resolv_conf.bak
-
     $LOG "Mount all filesystems"
-    mount -a
     mount -t devpts /dev/pts /dev/pts
-    mknod /dev/ptmx c 5 2
+    mount -a
+
+    $LOG "Delete old config"
+    rm_conf="zebra.conf ripd.conf macipfilter websfilter portforward ppp_firewall resolv_conf.bak"
+    for file in $rm_conf ; do
+	rm -f /etc/$file
+    done
     
     $LOG "Create some folders"
-    mkdir -p /var/run
-    mkdir -p /var/lock
-    mkdir -p /var/lock/subsys
-    mkdir -p /var/log
-    mkdir -p /var/tmp
-    mkdir -p /var/run/xl2tpd
-    mkdir -p /etc/ppp/ip-up.d
-    mkdir -p /etc/ppp/ip-down.d
+    ndirs="/var/run /var/lock /var/lock/subsys /var/log /var/tmp /var/run/xl2tpd /etc/ppp/ip-up.d /etc/ppp/ip-down.d"
+    for dir in $ndirs ; do
+        mkdir -p "$dir" 2> /dev/null
+    done
+
+    $LOG "Create need device node"
+    mknod /dev/ptmx c 5 2
 
     mkdir -p /dev/pty
     for i in `seq 0 15`; do
