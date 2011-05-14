@@ -98,11 +98,11 @@ rt2860v2_ap-objs += ../ap/apcli_assoc.o
 rt2860v2_ap-objs += ../ap/apcli_auth.o
 rt2860v2_ap-objs += ../ap/apcli_ctrl.o
 rt2860v2_ap-objs += ../ap/apcli_sync.o
+endif
 rt2860v2_ap-objs += ../common/cmm_mat.o
 rt2860v2_ap-objs += ../common/cmm_mat_iparp.o
 rt2860v2_ap-objs += ../common/cmm_mat_pppoe.o
 rt2860v2_ap-objs += ../common/cmm_mat_ipv6.o
-endif
 
 ifeq ($(CONFIG_RT2860V2_AP_IGMP_SNOOP),y)
 rt2860v2_ap-objs += ../common/igmp_snoop.o
@@ -272,8 +272,8 @@ endif
 
 ifeq ($(CONFIG_RT2860V2_AP_APCLI),y)
 EXTRA_CFLAGS += -DAPCLI_SUPPORT
-EXTRA_CFLAGS += -DMAT_SUPPORT
 endif
+EXTRA_CFLAGS += -DMAT_SUPPORT
 
 ifeq ($(CONFIG_RT2860V2_AP_IGMP_SNOOP),y)
 EXTRA_CFLAGS += -DIGMP_SNOOP_SUPPORT

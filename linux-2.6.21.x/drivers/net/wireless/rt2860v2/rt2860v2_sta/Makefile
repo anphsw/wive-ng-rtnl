@@ -116,6 +116,11 @@ rt2860v2_sta-y +=  ../common/cmm_txbf.o
 rt2860v2_sta-y +=  ../common/cmm_txbf_cal.o
 endif
 
+rt2860v2_sta-y += ../common/cmm_mat.o
+rt2860v2_sta-y += ../common/cmm_mat_iparp.o
+rt2860v2_sta-y += ../common/cmm_mat_pppoe.o
+rt2860v2_sta-y += ../common/cmm_mat_ipv6.o
+
 ###################
 #  CFLAGS
 ##################
@@ -125,6 +130,7 @@ EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX
 EXTRA_CFLAGS += -DCONFIG_STA_SUPPORT  -DRTMP_RBUS_SUPPORT -DRTMP_MAC_PCI -DDOT11_N_SUPPORT -DRELASE_EXCLUDE
 EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCONT
 EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC -DRALINK_ATE -DRALINK_28xx_QA
+EXTRA_CFLAGS += -DMAT_SUPPORT
 
 ifeq ($(CONFIG_RALINK_RT2880_STA_DBG),y)
 EXTRA_CFLAGS += -DDBG
