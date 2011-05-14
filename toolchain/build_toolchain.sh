@@ -5,6 +5,7 @@
 #urpmi -a libmpc- --download-all --allow-force
 #urpmi -a mpfr- --download-all --allow-force
 #urpmi -a texinfo- --download-all --allow-force
+#urpmi -a gcc-gfortran --download-all --allow-force
 
 DIR=`pwd`
 ROOTDIR=$DIR
