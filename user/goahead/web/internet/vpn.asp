@@ -353,7 +353,7 @@ tunnel on your Router.
 		<td width="50%"><input name="vpn_server" class="mid" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_pppoe_service_row" onMouseOver="showHint('vpn_pppoe_service')" onMouseOut="hideHint('vpn_pppoe_service')">
-		<td width="50%"><b>PPPoE service name:</b></td>
+		<td width="50%"><b>Service name:</b></td>
 		<td width="50%"><input name="vpn_pppoe_service" class="mid" value="<% getCfgGeneral(1, "vpnService"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_l2tp_range" onMouseOver="showHint('vpn_range')" onMouseOut="hideHint('vpn_range')" style="display: none;" >
