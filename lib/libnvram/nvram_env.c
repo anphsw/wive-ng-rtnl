@@ -1133,7 +1133,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(RADIUS_Acct_Port);
 		FPRINT_STR(RADIUS_Acct_Key);
 		FPRINT_STR(own_ip_addr);
-		FPRINT_STR(Ethifname);
 		FPRINT_STR(EAPifname);
 		FPRINT_STR(PreAuthifname);
 		FPRINT_NUM(session_timeout_interval);

@@ -175,7 +175,6 @@ RADIUS_Acct_Server=
 RADIUS_Acct_Port=1813
 RADIUS_Acct_Key=
 own_ip_addr=
-Ethifname=
 EAPifname=
 PreAuthifname=
 session_timeout_interval=0
