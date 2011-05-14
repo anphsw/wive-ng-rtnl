@@ -408,12 +408,14 @@ static void QoSLoadDefaultProfile(webs_t wp, char_t *path, char_t *query)
 
 static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *qos_enable, *upload_bandwidth, *download_bandwidth, *upload_bandwidth_custom, *download_bandwidth_custom;
+	char_t *qos_enable, *upload_bandwidth, *download_bandwidth,
+		*upload_bandwidth_custom, *download_bandwidth_custom, *simple_qos;
 	qos_enable = websGetVar(wp, T("QoSSelect"), T(""));
 	upload_bandwidth = websGetVar(wp, T("UploadBandwidth"), T(""));
 	download_bandwidth = websGetVar(wp, T("DownloadBandwidth"), T(""));
 	upload_bandwidth_custom = websGetVar(wp, T("UploadBandwidth_Custom"), T(""));
 	download_bandwidth_custom = websGetVar(wp, T("DownloadBandwidth_Custom"), T(""));
+	simple_qos = websGetVar(wp, T("simple_qos"), T("off"));
 
 	if(!qos_enable || !strlen(qos_enable) || !upload_bandwidth || !download_bandwidth)
 		return;
@@ -432,6 +434,10 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "QoSEnable", qos_enable);
+
+	// Simple qos
+	simple_qos = ((simple_qos == NULL) || (strcmp(simple_qos, "on") != NULL)) ? "0" : "1";
+	nvram_bufset(RT2860_NVRAM, "simple_qos", simple_qos);
 
 	if(!strcmp(qos_enable, "1") /*|| !strcmp(qos_enable, "2")*/)
 	{

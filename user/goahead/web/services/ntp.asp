@@ -151,65 +151,66 @@ function ntpChange(form)
 	<td class="head" id="manNTPTimeZone">Time Zone:</td>
 	<td>
 		<select name="time_zone">
-			<option value="UCT_-11" id="manNTPMidIsland">(GMT-11:00) Midway Island, Samoa</option>
-			<option value="UCT_-10" id="manNTPHawaii">(GMT-10:00) Hawaii</option>
-			<option value="NAS_-09" id="manNTPAlaska">(GMT-09:00) Alaska</option>
-			<option value="PST_-08" id="manNTPPacific">(GMT-08:00) Pacific Time</option>
-			<option value="MST_-07" id="manNTPMountain">(GMT-07:00) Mountain Time</option>
-			<option value="MST_-07" id="manNTPArizona">(GMT-07:00) Arizona</option>
-			<option value="CST_-06" id="manNTPCentral">(GMT-06:00) Central Time</option>
-			<option value="UCT_-06" id="manNTPMidUS">(GMT-06:00) Middle America</option>
-			<option value="UCT_-05" id="manNTPIndianaEast">(GMT-05:00) Indiana East, Colombia</option>
-			<option value="EST_-05" id="manNTPEastern">(GMT-05:00) Eastern Time</option>
-			<option value="AST_-04" id="manNTPAtlantic">(GMT-04:00) Atlantic Time, Brazil West</option>
-			<option value="UCT_-04" id="manNTPBolivia">(GMT-04:00) Bolivia, Venezuela</option>
-			<option value="UCT_-03" id="manNTPGuyana">(GMT-03:00) Guyana</option>
-			<option value="EBS_-03" id="manNTPBrazilEast">(GMT-03:00) Brazil East, Greenland</option>
-			<option value="NOR_-02" id="manNTPMidAtlantic">(GMT-02:00) Mid-Atlantic</option>
-			<option value="EUT_-01" id="manNTPAzoresIslands">(GMT-01:00) Azores Islands</option>
-			<option value="UCT_000" id="manNTPGambia">(GMT) Gambia, Liberia, Morocco</option>
-			<option value="GMT_000" id="manNTPEngland">(GMT) England</option>
-			<option value="MET_001" id="manNTPCzechRepublic">(GMT+01:00) Czech Republic, N</option>
-			<option value="MEZ_001" id="manNTPGermany">(GMT+01:00) Germany</option>
-			<option value="UCT_001" id="manNTPTunisia">(GMT+01:00) Tunisia</option>
-			<option value="EET_002" id="manNTPGreece">(GMT+02:00) Greece, Turkey</option>
-			<option value="EET-2EEST,M3.5.0/3,M10.5.0/4" id="">(GMT+02:00) Ukraine (Kiev), Latvia (Riga)</option>
-			<option value="EET-2EEST,M3.5.0,M10.5.0/3" id="">(GMT+02:00) Russia (Kaliningrad), Belorussia (Minsk)</option>
-			<option value="SAS_002" id="manNTPSouthAfrica">(GMT+02:00) South Africa</option>
-			<option value="IDDT">(GMT+02:00) Israel (Tel Aviv)</option>
-			<option value="IST_003" id="manNTPIraq">(GMT+03:00) Iraq, Jordan, Kuwait</option>
-			<option value="MSK-3MSD,M3.5.0,M10.5.0/3" id="manNTPMoscowWinter">(GMT+03:00) Russia (Moscow)</option>
-			<option value="MST-3MDT,M3.5.0/2,M10.5.0/3">(GMT+03:00) Russia (St.-Petersburg)</option>
-			<option value="AMT-4AMST,M3.5.0,M10.5.0/3" id="manNTPArmenia">(GMT+04:00) Armenia (Yerevan)</option>
-			<option value="AZT-4AZST,M3.5.0/4,M10.5.0/5">(GMT+04:00) Azebaydzhan (Baku)</option>
-			<option value="GET-4">(GMT+04:00) Georgia (Tbilisi)</option>
-			<option value="TMT-5">(GMT+05:00) Ashgabad</option>
-			<option value="UZT-5">(GMT+05:00) Samarkand, Russia (Tashkent)</option>
-			<option value="UCT_005" id="manNTPPakistan">(GMT+05:00) Pakistan</option>
-			<option value="YEKT-5YEKST,M3.5.0,M10.5.0/3">(GMT+05:00) Russia (Yekaterinburg)</option>
-			<option value="UCT_006" id="manNTPBangladesh">(GMT+06:00) Bangladesh</option>
-			<option value="KGT-6" id="manNTPBangladesh">(GMT+06:00) Kyrgyzstan (Bishkek)</option>
-			<option value="NOVT-6NOVST,M3.5.0,M10.5.0/3">(GMT+06:00) Russia (Novosibirsk)</option>
-			<option value="OMST-6OMSST,M3.5.0,M10.5.0/3">(GMT+06:00) Russia (Omsk)</option>
-			<option value="UCT_007" id="manNTPThailand">(GMT+07:00) Thailand, Russia</option>
-			<option value="CST_008" id="manNTPChinaCoast">(GMT+08:00) China Coast, Hong Kong</option>
-			<option value="CCT_008" id="manNTPTaipei">(GMT+08:00) Taipei</option>
-			<option value="SST_008" id="manNTPSingapore">(GMT+08:00) Singapore</option>
-			<option value="AWS_008" id="manNTPAustraliaWA">(GMT+08:00) Australia (WA)</option>
-			<option value="IRKT-8IRKST,M3.5.0,M10.5.0/3">(GMT+08:00) Russia (Irkutsk)</option>
-			<option value="ULAT-8">(GMT+08:00) Russia (Ulan-Bator)</option>
-			<option value="JST_009" id="manNTPJapan">(GMT+09:00) Japan, Korea</option>
-			<option value="KST_009" id="manNTPKorean">(GMT+09:00) Korean</option>
-			<option value="YAKT-9YAKST,M3.5.0,M10.5.0/3">(GMT+09:00) Russian (Yakutsk)</option>
-			<option value="UCT_010" id="manNTPGuam">(GMT+10:00) Guam</option>
-			<option value="SAKT-10SAKST,M3.5.0,M10.5.0/3">(GMT+10:00) Russia (Sakhalin)</option>
-			<option value="VLAT-10VLAST,M3.5.0,M10.5.0/3">(GMT+10:00) Russia (Vladivostok)</option>
-			<option value="AES_010" id="manNTPAustraliaQLD">(GMT+10:00) Australia (QLD, TAS,NSW,ACT,VIC)</option>
-			<option value="UCT_011" id="manNTPSolomonIslands">(GMT+11:00) Solomon Islands</option>
-			<option value="MAGT-11MAGST,M3.5.0,M10.5.0/3">(GMT+11:00) Russia (Magadan)</option>
-			<option value="UCT_012" id="manNTPFiji">(GMT+12:00) Fiji</option>
-			<option value="NZS_012" id="manNTPNewZealand">(GMT+12:00) New Zealand</option>
-			<option value="PETT-12PETST,M3.5.0,M10.5.0/3">(GMT+12:00) Russia (Kamchatka)</option>
+			<option value="UCT_-11" id="manNTPMidIsland">(UTC-11:00) Midway Island, Samoa</option>
+			<option value="UCT_-10" id="manNTPHawaii">(UTC-10:00) Hawaii</option>
+			<option value="NAS_-09" id="manNTPAlaska">(UTC-09:00) Alaska</option>
+			<option value="PST_-08" id="manNTPPacific">(UTC-08:00) Pacific Time</option>
+			<option value="MST_-07" id="manNTPMountain">(UTC-07:00) Mountain Time</option>
+			<option value="MST_-07" id="manNTPArizona">(UTC-07:00) Arizona</option>
+			<option value="CST_-06" id="manNTPCentral">(UTC-06:00) Central Time</option>
+			<option value="UCT_-06" id="manNTPMidUS">(UTC-06:00) Middle America</option>
+			<option value="UCT_-05" id="manNTPIndianaEast">(UTC-05:00) Indiana East, Colombia</option>
+			<option value="EST_-05" id="manNTPEastern">(UTC-05:00) Eastern Time</option>
+			<option value="AST_-04" id="manNTPAtlantic">(UTC-04:00) Atlantic Time, Brazil West</option>
+			<option value="UCT_-04" id="manNTPBolivia">(UTC-04:00) Bolivia, Venezuela</option>
+			<option value="UCT_-03" id="manNTPGuyana">(UTC-03:00) Guyana</option>
+			<option value="EBS_-03" id="manNTPBrazilEast">(UTC-03:00) Brazil East, Greenland</option>
+			<option value="NOR_-02" id="manNTPMidAtlantic">(UTC-02:00) Mid-Atlantic</option>
+			<option value="EUT_-01" id="manNTPAzoresIslands">(UTC-01:00) Azores Islands</option>
+			<option value="UCT_000" id="manNTPGambia">(UTC) Gambia, Liberia, Morocco</option>
+			<option value="GMT_000" id="manNTPEngland">(UTC) England</option>
+			<option value="MET_001" id="manNTPCzechRepublic">(UTC+01:00) Czech Republic, N</option>
+			<option value="MEZ_001" id="manNTPGermany">(UTC+01:00) Germany</option>
+			<option value="UCT_001" id="manNTPTunisia">(UTC+01:00) Tunisia</option>
+			<option value="EET_002" id="manNTPGreece">(UTC+02:00) Greece, Turkey</option>
+			<option value="EET-2EEST,M3.5.0/3,M10.5.0/4" id="">(UTC+02:00) Ukraine (Kiev), Latvia (Riga)</option>
+			<option value="EET-2EEST,M3.5.0,M10.5.0/3" id="">(UTC+02:00) Belorussia (Minsk)</option>
+			<option value="SAS_002" id="manNTPSouthAfrica">(UTC+02:00) South Africa</option>
+			<option value="IDDT">(UTC+02:00) Israel (Tel Aviv)</option>
+			<option value="IST_003" id="manNTPIraq">(UTC+03:00) Iraq, Jordan, Kuwait</option>
+			<option value="EEST" id="">(UTC+03:00) Russia (Kaliningrad)</option>
+			<option value="MSD" id="manNTPMoscowWinter">(UTC+04:00) Russia (Moscow, St.-Petersburg)</option>
+			<option value="AMT-4AMST,M3.5.0,M10.5.0/3" id="manNTPArmenia">(UTC+04:00) Armenia (Yerevan)</option>
+			<option value="AZT-4AZST,M3.5.0/4,M10.5.0/5">(UTC+04:00) Azebaydzhan (Baku)</option>
+			<option value="GET-4">(UTC+04:00) Georgia (Tbilisi)</option>
+			<option value="TMT-5">(UTC+05:00) Ashgabad</option>
+			<option value="UZT-5">(UTC+05:00) Samarkand, Russia (Tashkent)</option>
+			<option value="UCT_005" id="manNTPPakistan">(UTC+05:00) Pakistan</option>
+			<option value="YEKST">(UTC+06:00) Russia (Yekaterinburg)</option>
+			<option value="UCT_006" id="manNTPBangladesh">(UTC+06:00) Bangladesh</option>
+			<option value="KGT-6" id="manNTPBangladesh">(UTC+06:00) Kyrgyzstan (Bishkek)</option>
+			<option value="NOVST">(UTC+07:00) Russia (Novosibirsk)</option>
+			<option value="OMSST">(UTC+07:00) Russia (Omsk)</option>
+			<option value="UCT_007" id="manNTPThailand">(UTC+07:00) Thailand, Russia</option>
+			<option value="KRAST" id="manNTPAustraliaWA">(UTC+08:00) Russia (Krasnoyarsk)</option>
+			<option value="CST_008" id="manNTPChinaCoast">(UTC+08:00) China Coast, Hong Kong</option>
+			<option value="CCT_008" id="manNTPTaipei">(UTC+08:00) Taipei</option>
+			<option value="SST_008" id="manNTPSingapore">(UTC+08:00) Singapore</option>
+			<option value="AWS_008" id="manNTPAustraliaWA">(UTC+08:00) Australia (WA)</option>
+			<option value="ULAT-8">(UTC+08:00) Mongolia (Ulan-Bator)</option>
+			<option value="IRKST">(UTC+09:00) Russia (Irkutsk)</option>
+			<option value="JST_009" id="manNTPJapan">(UTC+09:00) Japan</option>
+			<option value="KST_009" id="manNTPKorean">(UTC+09:00) North Korea, South Korea</option>
+			<option value="YAKST">(UTC+10:00) Russia (Yakutsk)</option>
+			<option value="UCT_010" id="manNTPGuam">(UTC+10:00) Guam</option>
+			<option value="SAKST">(UTC+11:00) Russia (Sakhalin)</option>
+			<option value="VLAST">(UTC+11:00) Russia (Vladivostok)</option>
+			<option value="AES_010" id="manNTPAustraliaQLD">(UTC+10:00) Australia (QLD, TAS,NSW,ACT,VIC)</option>
+			<option value="UCT_011" id="manNTPSolomonIslands">(UTC+11:00) Solomon Islands</option>
+			<option value="MAGST">(UTC+12:00) Russia (Magadan)</option>
+			<option value="PETST">(UTC+12:00) Russia (Kamchatka)</option>
+			<option value="UCT_012" id="manNTPFiji">(UTC+12:00) Fiji</option>
+			<option value="NZS_012" id="manNTPNewZealand">(UTC+12:00) New Zealand</option>
 		</select>
 	</td>
 </tr>
@@ -233,8 +234,8 @@ function ntpChange(form)
 <tr align="center">
 	<td>
 		<input type="hidden" value="shit" name="stub_shit">
-		<input type=submit style="{width:120px;}" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
-		<input type=reset  style="{width:120px;}" value="Cancel" id="manNTPCancel" onclick="window.location.reload()">
+		<input type="submit" style="{width:120px;}" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
+		<input type="reset"  style="{width:120px;}" value="Cancel" id="manNTPCancel" onclick="window.location.reload();">
 	</td>
 </tr>
 </table>

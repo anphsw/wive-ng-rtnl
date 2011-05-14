@@ -14,6 +14,7 @@ var QOS_MAX_HARD_LIMITED = "60M";						// Our max bandwidth that we can deal wit
 var QOS_MIN_HARD_LIMITED = "32k";						// Our min bandwidth that we hope.
 
 var QoS = "<% getCfgGeneral(1, "QoSEnable"); %>";
+var simple_qos = "<% getCfgGeneral(1, "simple_qos"); %>";
 var uploadBandwidth = "<% getCfgGeneral(1, "QoSUploadBandwidth"); %>";
 var downloadBandwidth = "<% getCfgGeneral(1, "QoSDownloadBandwidth"); %>";
 var uploadBandwidth_custom = "<% getCfgGeneral(1, "QoSUploadBandwidth_custom"); %>";
@@ -93,78 +94,42 @@ function AddRule()
 
 function initTranslation()
 {
-	var e;
-
-	e = document.getElementById("QoSTitleStr");
-	e.innerHTML = _("qos title");
-	e = document.getElementById("QoSIntroStr");
-	e.innerHTML = _("qos intro");
-	e = document.getElementById("QoSSetupStr");
-	e.innerHTML = _("qos setup");
-	e = document.getElementById("QoSStr");
-	e.innerHTML = _("qos str");
-	e = document.getElementById("QoSDisableStr");
-	e.innerHTML = _("qos disable");
-	e = document.getElementById("QoSEnableStr");
-	e.innerHTML = _("qos enable");
-/*	e = document.getElementById("QoSDSCPMakerOnlyStr");
-	e.innerHTML = _("qos dscpmarkeronly");
-*/	e = document.getElementById("QoSUpBWStr");
-	e.innerHTML = _("qos upload bandwidth");
-	e = document.getElementById("QoSBWCustomStr");
-	e.innerHTML = _("qos bandwidth custom");
-	e = document.getElementById("QoSBWCustomStr2");
-	e.innerHTML = _("qos bandwidth custom");
-	e = document.getElementById("QoSDownBWStr");
-	e.innerHTML = _("qos download bandwidth");
-	e = document.getElementById("QoSSetupSubmitStr");
-	e.value = _("qos setup submit");
-/*	e = document.getElementById("QoSSetupResetStr");
-	e.value = _("qos setup reset");
-*/	e = document.getElementById("QoSGroupStr");
-	e.innerHTML = _("qos group");
-	e = document.getElementById("QoSGroupAttrStr");
-	e.innerHTML = _("qos group attr");
-	e = document.getElementById("QoSGroupModifyStr5");
-	e.value = _("qos group modify");
-	e = document.getElementById("QoSGroupModifyStr2");
-	e.value = _("qos group modify");
-	e = document.getElementById("QoSGroupModifyStr6");
-	e.value = _("qos group modify");
-	e = document.getElementById("QoSGroupModifyStr1");
-	e.value = _("qos group modify");
-	e = document.getElementById("QoSRuleNoStr");
-	e.innerHTML = _("qos rule no");
-	e = document.getElementById("QoSRuleNameStr");
-	e.innerHTML = _("qos rule name");
-	e = document.getElementById("QoSRulePrioStr");
-	e.innerHTML = _("qos rule prio");
-	e = document.getElementById("QoSRuleInfoStr");
-	e.innerHTML = _("qos rule info");
-	e = document.getElementById("QoSRuleAddStr");
-	e.value = _("qos rule add");
-	e = document.getElementById("QoSRuleDelStr");
-	e.value = _("qos rule del");
-	e = document.getElementById("QoSLoadProfileStr");
-	e.value = _("qos loaddefault");
-	/*
-		_("qos Rate")
-		_("qos Ceil")
-	*/
+	_TR("QoSTitleStr", "qos title");
+	_TR("QoSIntroStr", "qos intro");
+	_TR("QoSSetupStr", "qos setup");
+	_TR("QoSStr", "qos str");
+	_TR("QoSUpBWStr", "qos upload bandwidth");
+	_TR("QoSBWCustomStr", "qos bandwidth custom");
+	_TR("QoSBWCustomStr2", "qos bandwidth custom");
+	_TR("QoSDownBWStr", "qos download bandwidth");
+	_TR("QoSSetupSubmitStr", "qos setup submit");
+	_TR("QoSGroupAttrStr", "qos group attr");
+	_TRV("QoSGroupModifyStr5", "qos group modify");
+	_TRV("QoSGroupModifyStr2", "qos group modify");
+	_TRV("QoSGroupModifyStr6", "qos group modify");
+	_TRV("QoSGroupModifyStr1", "qos group modify");
+	_TR("QoSRuleNoStr", "qos rule no");
+	_TR("QoSRuleNameStr", "qos rule name");
+	_TR("QoSRulePrioStr", "qos rule prio");
+	_TR("QoSRuleInfoStr", "qos rule info");
+	_TR("QoSRuleAddStr", "qos rule add");
+	_TR("QoSRuleDelStr", "qos rule del");
+	_TR("QoSLoadProfileStr", "qos loaddefault");
 }
 
 function onInit()
 {
 	initTranslation();
+	var form = document.QoSSetup;
 
-	document.QoSSetup.UploadBandwidth_Custom.disabled = true;
-	document.QoSSetup.DownloadBandwidth_Custom.disabled = true;
-	document.QoSSetup.UploadBandwidth_Custom.style.display = 'none';
-	document.QoSSetup.DownloadBandwidth_Custom.style.display = 'none';
+	form.UploadBandwidth_Custom.disabled = true;
+	form.DownloadBandwidth_Custom.disabled = true;
+	form.UploadBandwidth_Custom.style.display = 'none';
+	form.DownloadBandwidth_Custom.style.display = 'none';
 
 	if(QoS == "0"){
-		document.QoSSetup.UploadBandwidth.disabled = true;
-		document.QoSSetup.DownloadBandwidth.disabled = true;
+		form.UploadBandwidth.disabled = true;
+		form.DownloadBandwidth.disabled = true;
 		document.getElementById("div_qos_group").style.visibility = "hidden";
 		document.getElementById("div_qos_group").style.display = "none";
 		document.getElementById("div_qos_rules").style.visibility = "hidden";
@@ -175,8 +140,8 @@ function onInit()
 		document.QoSDeleteRules.add_rule.style.display = 'none';
 		document.QoSDeleteRules.del_rule.style.display = 'none';
 	}else{
-		document.QoSSetup.UploadBandwidth.disabled = false;
-		document.QoSSetup.DownloadBandwidth.disabled = false;
+		form.UploadBandwidth.disabled = false;
+		form.DownloadBandwidth.disabled = false;
 		document.getElementById("div_qos_group").style.visibility = "visible";
 		document.getElementById("div_qos_rules").style.visibility = "visible";
 		document.getElementById("div_qos_loaddefault").style.visibility = "visible";
@@ -193,39 +158,33 @@ function onInit()
 		document.QoSDeleteRules.del_rule.style.display = '';
 
 		if(uploadBandwidth == "custom"){
-			document.QoSSetup.UploadBandwidth_Custom.disabled = false;
-			document.QoSSetup.UploadBandwidth_Custom.style.display = '';
-			document.QoSSetup.UploadBandwidth_Custom.value = uploadBandwidth_custom;
+			form.UploadBandwidth_Custom.disabled = false;
+			form.UploadBandwidth_Custom.style.display = '';
+			form.UploadBandwidth_Custom.value = uploadBandwidth_custom;
 		}else{
-			for(var i=0; i< document.QoSSetup.UploadBandwidth.length; i++){
-				if(document.QoSSetup.UploadBandwidth.options[i].value == uploadBandwidth){
-					document.QoSSetup.UploadBandwidth.options.selectedIndex = i;
+			for(var i=0; i< form.UploadBandwidth.length; i++){
+				if(form.UploadBandwidth.options[i].value == uploadBandwidth){
+					form.UploadBandwidth.options.selectedIndex = i;
 					break;
 				}
 			}
 		}
 		if(downloadBandwidth == "custom"){
-			document.QoSSetup.DownloadBandwidth_Custom.disabled = false;
-			document.QoSSetup.DownloadBandwidth_Custom.style.display = '';
-			document.QoSSetup.DownloadBandwidth_Custom.value = downloadBandwidth_custom;
+			form.DownloadBandwidth_Custom.disabled = false;
+			form.DownloadBandwidth_Custom.style.display = '';
+			form.DownloadBandwidth_Custom.value = downloadBandwidth_custom;
 		}else{
-			for(var i=0; i< document.QoSSetup.DownloadBandwidth.length; i++){
-				if(document.QoSSetup.DownloadBandwidth.options[i].value == downloadBandwidth){
-					document.QoSSetup.DownloadBandwidth.options.selectedIndex = i;
+			for(var i=0; i< form.DownloadBandwidth.length; i++){
+				if(form.DownloadBandwidth.options[i].value == downloadBandwidth){
+					form.DownloadBandwidth.options.selectedIndex = i;
 					break;
 				}
 			}
 		}
 	}
 
-	if(QoS == "0")
-		document.QoSSetup.QoSSelect.options.selectedIndex = 0;
-	else if(QoS == "1")
-		document.QoSSetup.QoSSelect.options.selectedIndex = 1;
-	else if(QoS == "2")
-		document.QoSSetup.QoSSelect.options.selectedIndex = 2;
-	else if(QoS == "3")
-		document.QoSSetup.QoSSelect.options.selectedIndex = 3;
+	form.QoSSelect.value = QoS;
+	form.simple_qos.checked = (simple_qos == '1');
 }
 
 function QoSSetupCheck()
@@ -488,21 +447,19 @@ function checkNum(str)
 	<td class="title" colspan="2" id="QoSSetupStr">QoS Setup </td>
 </tr>
 <tr>
-	<td class="head" id="QoSStr">
-		Quality of Service
-	</td>
-
+	<td class="head" id="QoSStr">Type of QoS</td>
 	<td>
-	<select name="QoSSelect" size="1" onChange="QoSSelectChange();">
-		<option value="0" id="QoSDisableStr">Disable</option>
-		<option value="1" id="QoSEnableStr">User WEB</option>
-		<option value="2" id="QoSEnableStr">User Console</option>
-		<option value="3" id="QoSEnableStr">User Console IMQ</option>
-<!--
-		<option value="2" id="QoSDSCPMakerOnlyStr">DSCP mark only</option>
--->
+	<select name="QoSSelect" onChange="QoSSelectChange();">
+		<option value="0">Disable</option>
+		<option value="1">Ralink</option>
+		<option value="2">Priority-based</option>
+		<option value="3">User-mode</option>
 	</select>
 	</td>
+</tr>
+<tr>
+	<td class="head">Simple QoS</td>
+	<td><input type="checkbox" name="simple_qos"></td>
 </tr>
 <tr>
 	<td class="head" id="QoSUpBWStr">

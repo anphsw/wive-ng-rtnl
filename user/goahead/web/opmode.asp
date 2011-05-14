@@ -21,8 +21,6 @@ function changeMode()
 {
 	var form = document.opmode;
 
-	hideElement("eth_conv");
-
 	if (document.opmode.opMode[0].checked)
 		opmode = 0;
 	else if (form.opMode[1].checked || form.opMode[3].checked)
@@ -147,16 +145,6 @@ function msg()
 	</dt>
 	<dd id="spotdd"></dd>
 </dl>
-<table id="eth_conv" border="0" cellpadding="2" cellspacing="1">
-<tr>
-	<td id="oEthConv">Ethernet Converter Enabled:<td>
-	<td>
-		<select id="ethConv" name="ethConv" size="1">
-			<option value="0" id="oEthConvD">Disable</option>
-			<option value="1" id="oEthConvE">Enable</option>
-		</select>
-	</td>
-</tr>
 </table>
 
 <p></p>
