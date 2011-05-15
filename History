@@ -401,6 +401,10 @@
 16) Fix portforward at vpn enabled.<br>
 17) Backport ch341 serial driver.<br>
 18) Add vpnService variabe to select PPPOE service name to connect.<br>
+19) Improve kernel sched performance.<br>
+20) Rework QoS WebUI.<br>
+21) Fix boot.img build.<br>
+22) Kernel irq code cleanup.<br>
 
 <br><br>
 <b>For support see:</b><br>
