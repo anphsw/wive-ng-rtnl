@@ -22,6 +22,8 @@ config)
 		echo $ip > "$IP.$interface"
 	fi
 	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
+	# need restart all local services to new address set
+	services_restart.sh all
 	exit 0
 	;;
 deconfig)
