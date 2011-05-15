@@ -248,7 +248,7 @@ zero_conf()
 	wan_is_not_null=`ip addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
 	    $LOG "Call zeroconf for get wan ip address."
-	    zcip -q $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	    zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
 	fi
     fi
 }

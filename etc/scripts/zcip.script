@@ -1,9 +1,11 @@
 #!/bin/sh
 
+#include global
+. /etc/scripts/global.sh
+
 # only for use as a "zcip" callback script
-if [ "x$interface" = x ]
-then
-	exit 1
+if [ "x$interface" = x ]; then
+	exit 0
 fi
 
 # zcip should start on boot/resume and various media changes
@@ -15,19 +17,22 @@ init)
 	exit 0
 	;;
 config)
-	if [ "x$ip" = x ]
-	then
-		exit 1
+	if [ "x$ip" = x ]; then
+		exit 0
 	fi
 	# remember $ip for $interface, to use on restart
-	if [ "x$IP" != x -a -w "$IP.$interface" ]
-	then
+	if [ "x$IP" != x -a -w "$IP.$interface" ]; then
 		echo $ip > "$IP.$interface"
 	fi
 	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
+	exit 0
 	;;
 deconfig)
+	if [ x$ip = x ]; then
+	    exit 0
+	fi
+	exec ip address del dev $interface local $ip > /dev/null 2>&1
 	exit 0
 	;;
 esac
-exit 1
+exit 0
