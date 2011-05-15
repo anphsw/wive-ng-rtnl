@@ -12,7 +12,7 @@ PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
 lan_ip=`nvram_get 2860 lan_ipaddr`                                                                                       
-nm=`nvram_get 2860 lan_netmask`     
+lan_nm=`nvram_get 2860 lan_netmask`     
 Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask`   
@@ -95,7 +95,7 @@ chilli_net=`nvram_get 2860 chilli_net`
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
     if [ "$NAT" = "on" ]  && [ "$opmode" != "0" ]; then
-	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$nm -j MASQUERADE" >> /etc/ppp_firewall
+	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE" >> /etc/ppp_firewall
 	if [ "$opmode" = 4 ]; then
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
 	fi

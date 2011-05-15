@@ -52,7 +52,7 @@ get_txqlen
     $LOG "Add LAN1 iface"
     if [ "$lan_ip" != "" ]; then
 	if [ "$lan_nm" = "" ]; then
-	    nm="255.0.0.0"
+	    lan_nm="255.0.0.0"
 	fi
 	ifconfig $lan_if $lan_ip netmask $lan_nm up
     else

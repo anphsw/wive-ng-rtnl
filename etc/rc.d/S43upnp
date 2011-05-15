@@ -23,7 +23,7 @@ if [ -f /bin/miniupnpd ]; then
 	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
-            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $ip &
+            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $lan_ip &
 	fi
     fi
 fi
@@ -37,7 +37,7 @@ stop() {
 }
 
 get_param() {
-    ip=`nvram_get 2860 lan_ipaddr`
+    lan_ip=`nvram_get 2860 lan_ipaddr`
     upnp=`nvram_get 2860 upnpEnabled`
 }
 
