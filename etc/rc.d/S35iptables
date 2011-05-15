@@ -20,7 +20,7 @@ start() {
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
 	#only eth2.2 WAN interface recived multicast
-	if [ "$OperationMode" != "0" ]; then    
+	if [ "$opmode" != "0" ]; then    
 	    #INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
 		$LOG "Set igmp input rules"
@@ -49,7 +49,7 @@ start() {
 	    $LOG "web limit"
     	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 16 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
-		if [ "$OperationMode" != "0" ]; then
+		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
 		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 80 -j DROP
@@ -69,7 +69,7 @@ start() {
 	    $LOG "ssh limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
-		if [ "$OperationMode" != "0" ]; then
+		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
 		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
@@ -89,7 +89,7 @@ start() {
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
-		if [ "$OperationMode" != "0" ]; then
+		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 81 -j DROP
 		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 81 -j DROP
@@ -121,14 +121,14 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
 	fi
-	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
+	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
 	    $LOG "upnp"
 	    #not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp -m multiport --dport 1024:65535 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 1024:65535 -j ACCEPT
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
-	    if [ "$OperationMode" != "0" ]; then
+	    if [ "$opmode" != "0" ]; then
     		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
@@ -159,7 +159,7 @@ start() {
 	    fi
 	fi
 ###########################################FORWARD#######################################
-	if [ "$OperationMode" != "0" ]; then
+	if [ "$opmode" != "0" ]; then
 	    $LOG "Set forward rules"
             #enable forward for all interfaces
 	    sysctl -w net.ipv4.ip_forward=1
@@ -205,10 +205,10 @@ start() {
 	    iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
 	    iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
 	    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
-	    if [ "$OperationMode" = "4" ]; then
+	    if [ "$opmode" = "4" ]; then
 		iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 	    fi
-	    if [ "$OperationMode" = "4" ]; then
+	    if [ "$opmode" = "4" ]; then
 		#for ISP localnet alya dualacess
 		iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
 	    fi
@@ -218,7 +218,7 @@ start() {
 	    fi
 	fi
 ###########################################QOS-SIMPLE######################################
-	if [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
+	if [ "$simple_qos" = "1" ] && [ "$opmode" != "0" ]; then
 	    qos
 	fi
 ###########################################NAT-NAPTM#######################################
@@ -245,18 +245,18 @@ start() {
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
 
-	  if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ]; then
+	  if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
 	    if [ "$vpnPurePPPOE" != "1" ]; then
 		#for ISP localnet alya dualacess
     		iptables -t nat -A POSTROUTING -o eth2.2 -s $lan_ip/$lan_nm -j MASQUERADE
-		if [ "$OperationMode" = "2" ]; then
+		if [ "$opmode" = "2" ]; then
 		    #wireless ISP net dual dual acess
 		    iptables -t nat -A POSTROUTING -o ra+ -s $lan_ip/$lan_nm -j MASQUERADE
 		fi
-		if [ "$OperationMode" = "3" ]; then
+		if [ "$opmode" = "3" ]; then
 		    iptables -t nat -A POSTROUTING -o apcli+ -s $lan_ip/$lan_nm -j MASQUERADE
 		fi
-		if [ "$OperationMode" = "4" ]; then
+		if [ "$opmode" = "4" ]; then
 		    #for ISP localnet alya dualacess
 		    iptables -t nat -A POSTROUTING -o eth2.2 -s $chilli_net -j MASQUERADE
 		fi
@@ -264,11 +264,11 @@ start() {
 		if [ "$Lan2Enabled" = "1" ]; then
 		    #for ISP localnet alya dualacess
     		    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		    if [ "$OperationMode" = "2" ]; then
+		    if [ "$opmode" = "2" ]; then
 			#wireless ISP net dual dual acess....gyyy
 			iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		    fi
-		    if [ "$OperationMode" = "3" ]; then
+		    if [ "$opmode" = "3" ]; then
 		        iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
 		    fi
 		fi
@@ -277,7 +277,7 @@ start() {
 	fi
 ###########################################UPNPRULES#######################################
         #rules for upnp
-	if [ "$upnp" = "1" ] && [ "$OperationMode" != "0" ]; then
+	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
             iptables -t nat -N MINIUPNPD
             iptables -t nat -F MINIUPNPD
             iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
@@ -334,8 +334,9 @@ get_param() {
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
-    #mode and netfilter conf
-    OperationMode=`nvram_get 2860 OperationMode`
+    #vpn configs
+    vpnType=`nvram_get 2860 vpnType`
+    vpnNAT=`nvram_get 2860 vpnNAT`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     if [ "$vpnPurePPPOE" != "1" ]; then
 	natEnabled=`nvram_get 2860 natEnabled`
@@ -343,6 +344,7 @@ get_param() {
 	#In pppoe pure mode no need add MASQ rules to localnet
 	natEnabled=0
     fi
+    #netfilter conf
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
@@ -363,9 +365,6 @@ get_param() {
 	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -p -s | cut -f 2- -d =`
 	fi
     fi
-    #vpn configs
-    vpnType=`nvram_get 2860 vpnType`
-    vpnNAT=`nvram_get 2860 vpnNAT`
     #all needed variable
     upnp=`nvram_get 2860 upnpEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`

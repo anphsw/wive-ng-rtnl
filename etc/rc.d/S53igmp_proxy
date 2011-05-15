@@ -14,7 +14,7 @@ if [ -f /bin/igmpproxy ]; then
     #if igmpproxy enable and mode not full bridge
     get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
-    if [ "$igmpen" = "1" ] && [ "$OperationMode" != "0" ]; then
+    if [ "$igmpen" = "1" ] && [ "$opmode" != "0" ]; then
       $LOG "Starting IGMPPROXY"
 	zero_conf
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
@@ -44,7 +44,6 @@ stop() {
 
 get_param() {
     igmpen=`nvram_get 2860 igmpEnabled`
-    OperationMode=`nvram_get 2860 OperationMode`
     wan_port=`nvram_get 2860 wan_port`
 }
 
