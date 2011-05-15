@@ -24,15 +24,10 @@ config)
 	then
 		echo $ip > "$IP.$interface"
 	fi
-	exec ip address add dev $interface \
-		scope link local "$ip/16" broadcast +
+	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
 	;;
 deconfig)
-	if [ x$ip = x ]
-	then
-		exit 1
-	fi
-	exec ip address del dev $interface local $ip
+	exit 0
 	;;
 esac
 exit 1
