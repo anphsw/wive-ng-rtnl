@@ -13,8 +13,9 @@ wan_upnp_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
 
-#first get operation mode
+#first get operation mode and wan mode
 opmode=`nvram_get 2860 OperationMode`
+wanmode=`nvram_get 2860 wanConnectionMode`
 
 #get vpn mode and type
 vpnEnabled=`nvram_get 2860 vpnEnabled`
@@ -242,7 +243,7 @@ get_txqlen()
 zero_conf()
 {
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    if [ "$vpnPurePPPOE" = "1" ]; then
+    if [ "$vpnPurePPPOE" = "1" ] || [ "$wanmode" = "ZERO" ]; then
 	wait_connect
 	wan_is_not_null=`ip addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then

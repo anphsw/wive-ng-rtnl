@@ -68,7 +68,7 @@ start() {
     		ip route replace default dev br0
 	    fi
         fi
-    else
+    elif [ "$wanmode" = "DHCP" ]; then
 	#reload global
 	. /etc/scripts/global.sh
 
@@ -80,6 +80,10 @@ start() {
 
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
+    elif [ "$wanmode" = "ZERO" ]; then
+	zero_conf
+    else
+	$LOG "Unknown mode. Please reset device."
     fi
 }
 
@@ -98,7 +102,6 @@ get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
     gw=`nvram_get 2860 wan_gateway`
-    wanmode=`nvram_get 2860 wanConnectionMode`
 }
 
 case "$1" in
