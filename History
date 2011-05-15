@@ -407,7 +407,7 @@
 22) Kernel irq code cleanup.<br>
 23) In pppoe pure mode no need add MASQ rules to localnet.<br>
 24) Use zeroconf for obtain ip adress for wan in pure pppoe mode. Need for correct igmpproxy work.<br>
-25) Add zeroconf mode for WAN wanConnectionMode=ZERO (Need Add in WebUI).<br>
+25) Add zeroconf mode for WAN wanConnectionMode=ZERO.<br>
 
 <br><br>
 <b>For support see:</b><br>
