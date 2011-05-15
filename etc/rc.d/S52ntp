@@ -14,10 +14,9 @@ start() {
 
     $LOG "Set timezone"
     backup_time=`date +%T`
-    sync=`expr $sync \* 3600`
 
     if [ "$tz" = "" ]; then
-        tz="UCT_000"
+        tz="MSD"
     fi
 
     echo $tz > /etc/tmpTZ
@@ -42,7 +41,6 @@ stop() {
 get_param() {
     NTPEnabled=`nvram_get 2860 NTPEnabled`
     srv=`nvram_get 2860 NTPServerIP`
-    sync=`nvram_get 2860 NTPSync`
     tz=`nvram_get 2860 TZ`
 }
 
