@@ -237,17 +237,6 @@ int can_request_irq(unsigned int irq, unsigned long irqflags)
 	return !action;
 }
 
-void compat_irq_chip_set_default_handler(struct irq_desc *desc)
-{
-	/*
-	 * If the architecture still has not overriden
-	 * the flow handler then zap the default. This
-	 * should catch incorrect flow-type setting.
-	 */
-	if (desc->handle_irq == &handle_bad_irq)
-		desc->handle_irq = NULL;
-}
-
 /*
  * Internal function to register an irqaction - typically used to
  * allocate special interrupts that are part of the architecture.
@@ -342,8 +331,7 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 				       "function for IRQ %d (%s)\n", irq,
 				       desc->chip ? desc->chip->name :
 				       "unknown");
-		} else
-			compat_irq_chip_set_default_handler(desc);
+		}
 
 		desc->status &= ~(IRQ_AUTODETECT | IRQ_WAITING |
 				  IRQ_INPROGRESS);
