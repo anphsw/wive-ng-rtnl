@@ -552,12 +552,8 @@ __set_irq_handler(unsigned int irq, irq_flow_handler_t handle, int is_chained,
 
 	desc = irq_desc + irq;
 
-	if (!handle) {
+	if (!handle)
 		handle = handle_bad_irq;
-	} else {
-		if (WARN_ON(desc->irq_data.chip == &no_irq_chip))
-			return;
-	}
 
 	spin_lock_irqsave(&desc->lock, flags);
 
