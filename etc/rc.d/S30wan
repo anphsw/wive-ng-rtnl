@@ -95,8 +95,6 @@ get_param() {
     #get parametrs
     wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    clone_en=`nvram_get 2860 macCloneEnabled`
-    clone_mac=`nvram_get 2860 macCloneMac`
     wan_ip=`nvram_get 2860 wan_ipaddr`
     wan_nm=`nvram_get 2860 wan_netmask`
     lan_ip=`nvram_get 2860 lan_ipaddr`
