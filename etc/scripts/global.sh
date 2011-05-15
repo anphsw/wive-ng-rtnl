@@ -241,12 +241,14 @@ get_txqlen()
 
 zero_conf()
 {
-    wait_connect
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    wan_is_not_null=`ip addr show $wan_if | grep inet -c`
-    if [ "$wan_is_not_null" = "0" ] || [ "$vpnPurePPPOE" = "1" ]; then
-	$LOG "Call zeroconf for get wan ip address."
-	zcip -q $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+    if [ "$vpnPurePPPOE" = "1" ]; then
+	wait_connect
+	wan_is_not_null=`ip addr show $wan_if | grep inet -c`
+	if [ "$wan_is_not_null" = "0" ]; then
+	    $LOG "Call zeroconf for get wan ip address."
+	    zcip -q $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	fi
     fi
 }
 
