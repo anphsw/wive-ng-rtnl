@@ -16,6 +16,7 @@ if [ -f /bin/igmpproxy ]; then
     sysctl -w net.ipv4.igmp_max_memberships=5
     if [ "$igmpen" = "1" ] && [ "$OperationMode" != "0" ]; then
       $LOG "Starting IGMPPROXY"
+	zero_conf
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
 	echo 1 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 1 > /proc/sys/net/ipv4/conf/default/mc_forwarding

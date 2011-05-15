@@ -405,6 +405,8 @@
 20) Rework QoS WebUI.<br>
 21) Fix boot.img build.<br>
 22) Kernel irq code cleanup.<br>
+23) In pppoe pure mode no need add MASQ rules to localnet.<br>
+24) Use zeroconf for obtain ip adress for wan in pure pppoe mode. Need for correct igmpproxy work.<br>
 
 <br><br>
 <b>For support see:</b><br>
