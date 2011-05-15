@@ -250,8 +250,8 @@ zero_conf()
 	    $LOG "Call zeroconf for get wan ip address."
 	    killall -q zcip
 	    killall -q -9 zcip
-	    sleep 1
 	    zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	    sleep 10
 	fi
     fi
 }
