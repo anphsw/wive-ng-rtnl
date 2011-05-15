@@ -336,8 +336,14 @@ get_param() {
     lan2_netmask=`nvram_get 2860 lan2_netmask`
     #mode and netfilter conf
     OperationMode=`nvram_get 2860 OperationMode`
+    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
+    if [ "$vpnPurePPPOE" != "1" ]; then
+	natEnabled=`nvram_get 2860 natEnabled`
+    else
+	#In pppoe pure mode no need add MASQ rules to localnet
+	natEnabled=0
+    fi
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
-    natEnabled=`nvram_get 2860 natEnabled`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
     DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
@@ -366,7 +372,6 @@ get_param() {
     UDPXY=`nvram_get 2860 UDPXYMode`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     natFastpath=`nvram_get 2860 natFastpath`
     simple_qos=`nvram_get 2860 simple_qos`
     #macros
