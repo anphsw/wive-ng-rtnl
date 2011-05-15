@@ -1609,7 +1609,7 @@ static void addRouting(webs_t wp, char_t *path, char_t *query)
 
 	dest = websGetVar(wp, T("dest"), T(""));
 	hostnet = websGetVar(wp, T("hostnet"), T(""));
-	netmask = websGetVar(wp, T("netmask"), T(""));	
+	netmask = websGetVar(wp, T("netmask"), T(""));
 	gateway = websGetVar(wp, T("gateway"), T(""));
 	interface = websGetVar(wp, T("interface"), T(""));
 	custom_interface = websGetVar(wp, T("custom_interface"), T(""));
@@ -2115,6 +2115,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		printf("wanConnectionMode = %s\n", ctype);
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
+	}
+	else if (strncmp(ctype, "ZERO", 5) == 0)
+	{
+		nvram_set(RT2860_NVRAM, "wanConnectionMode", ctype);
+		printf("wanConnectionMode = %s\n", ctype);
 	}
 	else
 	{

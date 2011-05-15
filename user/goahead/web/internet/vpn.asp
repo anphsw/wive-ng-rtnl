@@ -299,6 +299,12 @@ function showVPNStatus()
 	);
 }
 
+function formCheck(form)
+{
+	if (form.vpn_type != '0')
+		form.vpn_pure_pppoe.checked = false;
+}
+
 </script>
 </head>
 
@@ -311,7 +317,7 @@ This page is used to configure the <acronym title="Virtual Private Network">VPN<
 tunnel on your Router.
 </p>
 
-<form action="/goform/formVPNSetup" method="POST" name="formVPNSetup">
+<form action="/goform/formVPNSetup" method="POST" name="formVPNSetup" onsubmit="return formCheck(this);">
 <table width="500" border="0" cellpadding="0" cellspacing="4">
 	<tr>
 		<td colspan="2"><hr></td>

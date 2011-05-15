@@ -20,14 +20,19 @@ Butterlate.setTextDomain("internet");
 
 function connectionTypeSwitch(form)
 {
-	var static = form.connectionType.value == "STATIC"
-	displayElement('staticDHCP', static);
-	displayElement('dhcpReqIPRow', !static);
+	var conn_type = form.connectionType.value;
+	displayElement('staticDHCP', conn_type == 'STATIC');
+	displayElement('dhcpReqIPRow', conn_type == 'DHCP');
+	displayElement('staticDNSAssignRow', conn_type != 'ZERO');
+	
+	dnsSwitchClick(form);
 }
 
 function CheckValue(form)
 {
-	if (form.connectionType.value == 'STATIC') // STATIC
+	var c_type = form.connectionType.value;
+
+	if (c_type == 'STATIC') // STATIC
 	{
 		if (!validateIP(form.staticIp, true))
 		{
@@ -49,7 +54,7 @@ function CheckValue(form)
 			if (!validateMAC(form.macCloneMac.value, true))
 				return false;*/
 	}
-	else if (form.connectionType.value == 'DHCP')
+	else if (c_type == 'DHCP')
 	{
 		if (form.dhcpReqIP.value != '')
 			if (!validateIP(form.dhcpReqIP, true))
@@ -58,6 +63,8 @@ function CheckValue(form)
 				return false;
 			}
 	}
+	else if (c_type == 'ZERO')
+		form.wStaticDnsEnable.checked = true;
 
 	if (form.wStaticDnsEnable.checked)
 	{
@@ -131,12 +138,8 @@ function initValue()
 		element.style.display = (opmode != "0") ? "" : "none";
 	
 	initTranslation();
-	if (mode == "STATIC")
-		form.connectionType.options.selectedIndex = 0;
-	else if (mode == "DHCP")
-		form.connectionType.options.selectedIndex = 1;
-	else
-		form.connectionType.options.selectedIndex = 0;
+	
+	form.connectionType.value = mode;
 	form.wStaticDnsEnable.checked = (static_dns == "on");
 	
 	/* Check if option was set */
@@ -149,17 +152,14 @@ function initValue()
 		}
 	
 	connectionTypeSwitch(form);
-	dnsSwitchClick(form);
 	wanMtuChange(form);
 }
 
 function dnsSwitchClick(form)
 {
 	var visible = (form.wStaticDnsEnable.checked) ? '' : 'none';
-	var row = document.getElementById("priDNSrow");
-	row.style.display = visible;
-	row = document.getElementById("secDNSrow");
-	row.style.display = visible;
+	displayElement( ['priDNSrow', 'secDNSrow' ],
+		(form.wStaticDnsEnable.checked) || (form.connectionType.value == 'ZERO'));
 }
 
 function wanMtuChange(form)
@@ -195,8 +195,9 @@ function wanMtuChange(form)
 	<td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td>
 		<select name="connectionType" onChange="connectionTypeSwitch(this.form);">
-			<option value="STATIC" id="wConnTypeStatic">Static Mode (fixed IP)</option>
+			<option value="STATIC" id="wConnTypeStatic" selected="selected">Static Mode (fixed IP)</option>
 			<option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
+			<option value="ZERO" id="wConnTypeDhcp">Zeroconf</option>
 		</select>
 	</td>
 </tr>
@@ -250,7 +251,7 @@ function wanMtuChange(form)
 		</select>
 	</td>
 </tr>
-<tr>
+<tr id="staticDNSAssignRow">
 	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>
 	<td><input name="wStaticDnsEnable" type="checkbox" onclick="dnsSwitchClick(this.form);" ></td>
 </tr>

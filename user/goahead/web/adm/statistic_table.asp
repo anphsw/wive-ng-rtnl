@@ -2,15 +2,15 @@
 <tbody>
 
 <tr id="wirelessAbout" style="display:none;">
-	<td class="title" colspan="3">Wireless About</td>
+	<td class="title" colspan="6">Wireless About</td>
 </tr>
 <tr id="wirelessDriverVersion" style="display:none;">
-	<td class="head">Driver Version</td>
-	<td><% getStaDriverVer(); %></td>
+	<td class="head" colspan="3">Driver Version</td>
+	<td colspan="3"><% getStaDriverVer(); %></td>
 </tr>
 <tr id="wirelessMacAddr" style="display:none;">
-	<td class="head">Mac Address</td>
-	<td><% getStaMacAddr(); %></td>
+	<td class="head" colspan="3">Mac Address</td>
+	<td colspan="3"><% getStaMacAddr(); %></td>
 </tr>
 
 <!-- =================  MEMORY  ================= -->
