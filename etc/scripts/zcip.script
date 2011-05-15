@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#include global
-. /etc/scripts/global.sh
-
 # only for use as a "zcip" callback script
 if [ "x$interface" = x ]; then
 	exit 0
