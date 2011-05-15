@@ -372,7 +372,6 @@ get_param() {
     UDPXY=`nvram_get 2860 UDPXYMode`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
-    natFastpath=`nvram_get 2860 natFastpath`
     simple_qos=`nvram_get 2860 simple_qos`
     #macros
     STATE_NEW="-m state --state NEW"
