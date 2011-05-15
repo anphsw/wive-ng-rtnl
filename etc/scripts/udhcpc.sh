@@ -75,9 +75,9 @@ case "$1" in
 
     renew|bound)
     $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
-    OLD_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
+    OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
     ifconfig $interface $ip $BROADCAST $NETMASK
-    CUR_IP=`ip addr show dev $interface | awk '/inet / {print $2}'`
+    CUR_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
 
 	#Get MTU from dhcp server
 	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
