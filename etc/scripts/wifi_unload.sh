@@ -30,13 +30,6 @@ echo 1 > /proc/sys/net/nf_conntrack_flush
 #clear route cache
 ip route flush cache
 
-bssidnum=`nvram_get 2860 BssidNum`
-is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
-is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
-is_usb0_in_br0=`brctl show | sed -n '/usb0/p'`
-
-br0_mirror=eth2
-
 unload_ra0()
 {
     ip link set ra0 down > /dev/null 2>&1
@@ -55,12 +48,16 @@ unload_ra0br0()
 	ip link set br0 down > /dev/null 2>&1
 	brctl delbr br0 > /dev/null 2>&1
 
+	#disable WAN and WLAN
 	unload_ra0
-	#mirror br0 to eth2x
-	ip link set $1 down > /dev/null 2>&1
-	ifconfig $1 hw ether $br0_mac
-	ifconfig $1 $br0_ip netmask $br0_netmask
-	ip link set $1 up
+
+	if [ "$1" != "" ]; then
+	    #mirror br0 to eth2x
+	    ip link set $1 down > /dev/null 2>&1
+	    ifconfig $1 hw ether $br0_mac
+	    ifconfig $1 $br0_ip netmask $br0_netmask
+	    ip link set $1 up
+	fi
     else
 	unload_ra0
     fi
@@ -107,12 +104,14 @@ drop_caches(){
 
 unload_apps
 
+is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
+is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
+
 # unload wifi driver
 if [ "$is_ra0_in_br0" == "" ]; then
     unload_ra0
 elif [ "$is_eth21_in_br0" != "" ]; then
-    br0_mirror=eth2.1
-    unload_ra0br0 $br0_mirror
+    unload_ra0br0 eth2.1
 fi
 
 unload_modules
