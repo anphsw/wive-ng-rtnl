@@ -80,7 +80,7 @@ start() {
 
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
-    elif [ "$wanmode" = "ZERO" ]; then
+    elif [ "$wanmode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
 	zero_conf
     else
 	$LOG "Unknown mode. Please reset device."
