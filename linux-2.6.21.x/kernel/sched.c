@@ -1582,7 +1582,7 @@ static void task_running_tick(struct rq *rq, struct task_struct *p);
  * Perform scheduler related setup for a newly forked process p.
  * p is forked by current.
  */
-void fastcall sched_fork(struct task_struct *p, int clone_flags)
+void fastcall sched_fork(struct task_struct *p)
 {
 	int cpu = get_cpu();
 
@@ -1651,7 +1651,7 @@ void fastcall sched_fork(struct task_struct *p, int clone_flags)
  * that must be done for every newly created context, then puts the task
  * on the runqueue and wakes it.
  */
-void fastcall wake_up_new_task(struct task_struct *p, unsigned long clone_flags)
+void fastcall wake_up_new_task(struct task_struct *p)
 {
 	struct rq *rq, *this_rq;
 	unsigned long flags;

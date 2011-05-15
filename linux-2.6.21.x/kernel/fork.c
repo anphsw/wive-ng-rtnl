@@ -1171,7 +1171,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	INIT_LIST_HEAD(&p->ptrace_list);
 
 	/* Perform scheduler related setup. Assign this task to a CPU. */
-	sched_fork(p, clone_flags);
+	sched_fork(p);
 
 	/* Need tasklist lock for parent etc handling! */
 	write_lock_irq(&tasklist_lock);
@@ -1392,7 +1392,7 @@ long do_fork(unsigned long clone_flags,
 		}
 
 		if (!(clone_flags & CLONE_STOPPED))
-			wake_up_new_task(p, clone_flags);
+			wake_up_new_task(p);
 		else
 			p->state = TASK_STOPPED;
 
