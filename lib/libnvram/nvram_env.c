@@ -741,6 +741,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(Channel);
 		FPRINT_NUM(AutoChannelSelect);
 
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_NUM(BssidNum);
 		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
 
@@ -761,6 +762,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(SSID14);
 		FPRINT_STR(SSID15);
 		FPRINT_STR(SSID16);
+#endif
 #endif
 
 		FPRINT_NUM(WirelessMode);
@@ -794,7 +796,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(FragThreshold);
 		FPRINT_NUM(TxBurst);
 		FPRINT_NUM(PktAggregate);
-		FPRINT_NUM(AutoProvisionEn);
 		FPRINT_NUM(FreqDelta);
 		fprintf(fp, "TurboRate=0\n");
 
@@ -837,25 +838,12 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(IEEE8021X);
 		FPRINT_NUM(IEEE80211H);
 		FPRINT_NUM(CarrierDetect);
-
-		FPRINT_NUM(ITxBfEn);
-		FPRINT_STR(PreAntSwitch);
-		FPRINT_NUM(PhyRateLimit);
 		FPRINT_NUM(DebugFlags);
-		FPRINT_NUM(ETxBfEnCond);
-		FPRINT_NUM(ITxBfTimeout);
-		FPRINT_NUM(ETxBfTimeout);
-		FPRINT_NUM(FineAGC);
-		FPRINT_NUM(StreamMode);
-		FPRINT_STR(StreamModeMac0);
-		FPRINT_STR(StreamModeMac1);
-		FPRINT_STR(StreamModeMac2);
-		FPRINT_STR(StreamModeMac3);
-
-
 		FPRINT_NUM(CSPeriod);
 		FPRINT_STR(RDRegion);
 		FPRINT_NUM(StationKeepAlive);
+
+#if defined (CONFIG_RT2860V2_AP_DFS) || defined (CONFIG_RT2860V2_STA_DFS)
 		FPRINT_NUM(DfsLowerLimit);
 		FPRINT_NUM(DfsUpperLimit);
 		FPRINT_NUM(DfsIndoor);
@@ -881,6 +869,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(AvgRssiReq);
 		FPRINT_NUM(DFS_R66);
 		FPRINT_STR(BlockCh);
+#endif
 
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
@@ -890,6 +879,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(RekeyInterval);
 		FPRINT_STR(PMKCachePeriod);
 
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 #if defined(CONFIG_RT2860V2_STA_WAPI) || defined(CONFIG_RT2860V2_AP_WAPI)
 		/*kurtis: WAPI*/
 		FPRINT_STR(WapiPsk1);
@@ -910,6 +900,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WapiPsk15);
 		FPRINT_STR(WapiPsk16);
 #endif 
+#endif
 		FPRINT_STR(WapiPskType);
 		FPRINT_STR(Wapiifname);
 		FPRINT_STR(WapiAsCertPath);
@@ -926,6 +917,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(MeshWPAKEY);
 		FPRINT_STR(MeshId);
 #endif
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		//WPAPSK
 		FPRINT_STR(WPAPSK1);
 		FPRINT_STR(WPAPSK2);
@@ -945,8 +937,9 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WPAPSK15);
 		FPRINT_STR(WPAPSK16);
 #endif
-
+#endif
 		FPRINT_STR(DefaultKeyID);
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_STR(Key1Type);
 		FPRINT_STR(Key1Str1);
 		FPRINT_STR(Key1Str2);
@@ -1024,6 +1017,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key4Str15);
 		FPRINT_STR(Key4Str16);
 #endif
+#endif
 		FPRINT_NUM(HSCounter);
 
 		//MIMO
@@ -1065,6 +1059,7 @@ int gen_wifi_config(int mode)
 
 		FPRINT_NUM(WCNTest);
 
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_NUM(AccessPolicy0);
 		FPRINT_STR(AccessControlList0);
 		FPRINT_NUM(AccessPolicy1);
@@ -1099,6 +1094,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(AccessPolicy15);
 		FPRINT_STR(AccessControlList15);
 #endif
+#endif
 
 		FPRINT_NUM(WdsEnable);
 		FPRINT_STR(WdsPhyMode);
@@ -1111,6 +1107,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Wds3Key);
 		FPRINT_STR(RADIUS_Server);
 		FPRINT_STR(RADIUS_Port);
+#if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_STR(RADIUS_Key1);
 		FPRINT_STR(RADIUS_Key2);
 		FPRINT_STR(RADIUS_Key3);
@@ -1129,9 +1126,8 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(RADIUS_Key15);
 		FPRINT_STR(RADIUS_Key16);
 #endif
-		FPRINT_STR(RADIUS_Acct_Server);
-		FPRINT_NUM(RADIUS_Acct_Port);
-		FPRINT_STR(RADIUS_Acct_Key);
+#endif
+
 		FPRINT_STR(own_ip_addr);
 		FPRINT_STR(EAPifname);
 		FPRINT_STR(PreAuthifname);
