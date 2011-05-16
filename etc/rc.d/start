@@ -3,7 +3,14 @@
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
 
+TGZfs_size=131072
+BLOCKS=2
+MTDDEVICE=/dev/mtdblock5
+ROOTDEVICE=/dev/mtdblock4
+
 LOG="echo INIT"
+
+export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
 tmpfs_av=`cat /proc/filesystems | grep tmpfs -c`
 if [ "$tmpfs_av" != "0" ]; then
@@ -15,20 +22,57 @@ if [ "$tmpfs_av" != "0" ]; then
     mount -o bind /var/rwfs /etc
 fi
 
-TGZfs_size=131072
-BLOCKS=2
-MTDDEVICE=/dev/mtdblock5
-ROOTDEVICE=/dev/mtdblock4
+if [ -f /bin/mdev ]; then
+    mdev -s
+else
+    mknod /dev/tty		c	5	0
+    mknod /dev/ttyS0	c	4	64
+    mknod /dev/ttyS1	c	4	65
+    for i in `seq 0 8`; do
+	mknod /dev/mtdblock$i c 31 $i
+    done
+fi
 
-get_size(){
-  ls -sk $1 |  sed -e "s/ \+/ /g" | cut -d" " -f2
-}
+$LOG "Create some folders in dev."
+ndirs="/dev/pty /dev/tts /dev/cua /dev/misc"
+for dir in $ndirs ; do
+    mkdir -p "$dir" 2> /dev/null
+done
 
-$LOG "Prepare start init!"
-export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+mknod /dev/ptmx		c	5	2
+mknod /dev/tts/0	c	4	64
+mknod /dev/tts/1	c	4	65
+mknod /dev/cua/0	c	5	64
+mknod /dev/misc/rtc	c	10	135
+
+#ralink depended
+mknod /dev/hwnat0	c	220	0
+mknod /dev/swnat0	c	210	0
+mknod /dev/rdm0	c	254	0
+mknod /dev/PCM	c	233	0
+mknod /dev/i2cM0	c	218	0
+mknod /dev/I2S	c	234	0
+mknod /dev/ac0	c	240	0
+mknod /dev/acl0	c	230	0
+mknod /dev/gpio	c	252	0
+
+for i in `seq 0 15`; do
+    mknod /dev/pty/m$i c 2 $i
+done
+
+for i in `seq 0 3`; do
+    mknod /dev/aci$i c 254 $i
+done
+for i in `seq 0 1`; do
+    mknod /dev/gpio$i c 252 $i
+done
+
+$LOG "Mount /tmp/rootfs"
+mkdir /tmp/rootfs
+mount $ROOTDEVICE /tmp/rootfs -o ro
 
 $LOG "Init DEV particion"
-zcat /dev.gz | /bin/tar xf - -C / > /dev/null 2>&1
+cp -rpf /tmp/rootfs/dev/* /dev
 
 $LOG "Init RW particion"
 zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
@@ -36,15 +80,15 @@ zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
   else
-    mkdir /tmp/rootfs
-    mount $ROOTDEVICE /tmp/rootfs -o ro
     $LOG "File system is clear or poor."
     cp -a /tmp/rootfs/etc/* /etc
-    umount /tmp/rootfs
-    rm -rf /tmp/rootfs
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
 fi
+
+$LOG "Umount /tmp/rootfs"
+umount /tmp/rootfs
+rm -rf /tmp/rootfs
 
 $LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &

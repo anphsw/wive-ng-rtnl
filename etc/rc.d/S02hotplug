@@ -4,8 +4,6 @@ LOG="echo HOTPLUG"
 
 start() {
 if [ -f /bin/mdev ]; then
-    #create device in /dev
-    mdev -s
     if [ -f /proc/sys/kernel/hotplug ]; then
 	$LOG "Start mdev for support HOTPLUG"
 	printf "

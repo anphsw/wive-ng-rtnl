@@ -292,7 +292,6 @@ romfs.post:
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	tar -zxvf dev.tgz
-	cp -vf dev.tgz $(ROMFSDIR)/dev.gz
 	cp -rfv dev/* $(ROMFSDIR)/dev
 	rm -fr $(ROOTDIR)/dev
 	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)

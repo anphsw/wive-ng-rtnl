@@ -9,9 +9,9 @@ LOG="echo PRECONFIG"
 
 start() {
  $LOG "Preconfigure..."
+
     export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
-    $LOG "Mount all filesystems."
     mount -t devpts /dev/pts /dev/pts
     mount -a
     chmod 777 /tmp
@@ -25,62 +25,25 @@ start() {
     $LOG "Create some folders in var and etc."
     ndirs="/var/run /var/lock /var/lock/subsys /var/log /var/tmp /var/run/xl2tpd /etc/ppp/ip-up.d /etc/ppp/ip-down.d"
     for dir in $ndirs ; do
-        mkdir -p "$dir" 2> /dev/null
+	mkdir -p "$dir" 2> /dev/null
     done
 
-    $LOG "Create some folders in dev."
-    ndirs="/dev/pty /dev/tts /dev/cua /dev/misc"
-    for dir in $ndirs ; do
-        mkdir -p "$dir" 2> /dev/null
-    done
-
-    $LOG "Create need device node."
-    for i in `seq 0 15`; do
-	mknod /dev/pty/m$i c 2 $i
-    done
-
-    mknod /dev/ptmx	c	5	2
-    mknod /dev/tts/0	c	4	64
-    mknod /dev/tts/1	c	4	65
-    mknod /dev/cua/0	c	5	64
-    mknod /dev/misc/rtc	c	10	135
-
-    #ralink depended
-    mknod /dev/hwnat0	c	220	0
-    mknod /dev/swnat0	c	210	0
-    mknod /dev/rdm0	c	254	0
-    mknod /dev/PCM	c	233	0
-    mknod /dev/i2cM0	c	218	0
-    mknod /dev/I2S	c	234	0
-    mknod /dev/ac0	c	240	0
-    mknod /dev/acl0	c	230	0
-    mknod /dev/gpio	c	252	0
-
-    for i in `seq 0 3`; do
-	mknod /dev/aci$i c 254 $i
-    done
-    for i in `seq 0 1`; do
-	mknod /dev/gpio$i c 252 $i
-    done
-
-#if compile date fille is exist
-if [ -f /etc/compile-date ]; then
-    $LOG "Restore time to build time or save time."
-    BUILDDATE=`cat /etc/compile-date`
-    if [ "$BUILDDATE" != "" ]; then
-	date -s $BUILDDATE
+    if [ -f /etc/compile-date ]; then
+        $LOG "Restore time to build time or save time."
+	BUILDDATE=`cat /etc/compile-date`
+        if [ "$BUILDDATE" != "" ]; then
+	    date -s $BUILDDATE
+        fi
     fi
-fi
 
-if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
-    $LOG "Copy web pages to tmpfs."
-    mkdir -p /tmp/web
-    cp -rpf /web/* /tmp/web
-else
-    $LOG "16M device detected, creating symlink for web pages in tmpfs."
-    ln -s /web /tmp/web
-fi
-
+    if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+	$LOG "Copy web pages to tmpfs."
+        mkdir -p /tmp/web
+        cp -rpf /web/* /tmp/web
+    else
+	$LOG "16M device detected, creating symlink for web pages in tmpfs."
+        ln -s /web /tmp/web
+    fi
 }
 
 stop() {
