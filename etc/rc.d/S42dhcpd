@@ -18,31 +18,31 @@ start() {
 		> /etc/udhcpd.conf
 		touch /var/udhcpd.leases
 
-		config-udhcpd.sh -s $start
-		config-udhcpd.sh -e $end
-		config-udhcpd.sh -i $lan_if
-		config-udhcpd.sh -m $mask
+		config-udhcpd.sh -s "$start"
+		config-udhcpd.sh -e "$end"
+		config-udhcpd.sh -i "$lan_if"
+		config-udhcpd.sh -m "$mask"
 
 		if [ "$pd" != "" ] || [ "$sd" != "" ]; then
 		    if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
 			#use dnsmasq as relay or static dns
-			config-udhcpd.sh -d $pd $sd
+			config-udhcpd.sh -d "$pd" "$sd"
 		    else
 			#use google public dns
-			config-udhcpd.sh -d 8.8.8.8 8.8.4.4
+			config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
 		    fi
 		fi
 		if [ "$gw" != "" ]; then
-			config-udhcpd.sh -g $gw
+			config-udhcpd.sh -g "$gw"
 		fi
 		if [ "$lease" != "" ]; then
-			config-udhcpd.sh -t $lease
+			config-udhcpd.sh -t "$lease"
 		fi
 		if [ "$dhcpDomain" != "" ]; then
-			config-udhcpd.sh -D $dhcpDomain
+			config-udhcpd.sh -D "$dhcpDomain"
 		fi
 		if [ "$SmbEnabled" = "1" ]; then
-			config-udhcpd.sh -w $lan_ip
+			config-udhcpd.sh -w "$lan_ip"
 		fi
 
 		# Write static DHCP leases
