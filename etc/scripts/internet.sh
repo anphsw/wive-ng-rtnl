@@ -146,12 +146,11 @@ spot_config() {
 	addMesh2Br0
 }
 
-#clear conntrack tables
-echo 1 > /proc/sys/net/nf_conntrack_flush
 
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "lanonly" ]; then
+	echo 1 > /proc/sys/net/nf_conntrack_flush
 	vpn_deadloop_fix
 	$LOG "Shutdown wireless interfaces."
 	ifRaxWdsxDown
