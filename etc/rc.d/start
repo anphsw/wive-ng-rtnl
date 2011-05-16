@@ -25,7 +25,7 @@ fi
 if [ -f /bin/mdev ]; then
     mdev -s
 else
-    mknod /dev/tty		c	5	0
+    mknod /dev/tty	c	5	0
     mknod /dev/ttyS0	c	4	64
     mknod /dev/ttyS1	c	4	65
     for i in `seq 0 8`; do
@@ -39,6 +39,7 @@ for dir in $ndirs ; do
     mkdir -p "$dir" 2> /dev/null
 done
 
+$LOG "Create some persistent nodes in dev."
 mknod /dev/ptmx		c	5	2
 mknod /dev/tts/0	c	4	64
 mknod /dev/tts/1	c	4	65
