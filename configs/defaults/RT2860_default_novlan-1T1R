@@ -151,6 +151,7 @@ HT_40MHZ_INTOLERANT=0
 HT_DisableReordering=0
 HT_BSSCoexistence=0
 HT_BSSCoexApCntThr=16
+HT_DisallowTKIP=0
 HT_TxStream=1
 HT_RxStream=1
 TXPath=1

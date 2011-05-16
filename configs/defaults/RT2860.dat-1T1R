@@ -134,6 +134,7 @@ HT_BAWinSize=64
 HT_GI=1
 HT_STBC=1
 HT_MCS=33
+HT_DisallowTKIP=0
 HT_TxStream=1
 HT_RxStream=1
 HT_PROTECT=1
