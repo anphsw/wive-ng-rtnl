@@ -58,6 +58,7 @@ config RALINK_RT2880
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
+	select GENERIC_HARDIRQS_NO__DO_IRQ
 	select RALINK_RT3052_MP2 if !RALINK_RT3350
         help
          Ralink evaluation board based on RT3052
@@ -75,6 +76,7 @@ config RALINK_RT2880
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
+	select GENERIC_HARDIRQS_NO__DO_IRQ
 	select RALINK_RT3352_MP
         help
          Ralink evaluation board based on RT3352
@@ -93,6 +95,7 @@ config RALINK_RT3883
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
+	select GENERIC_HARDIRQS_NO__DO_IRQ
 	select RALINK_RT3883_MP
 	help
 	 Ralink evaluation board based on RT3883
