@@ -7,7 +7,9 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/parse.js"></script>
+<script type="text/javascript" src="/js/sprintf.js"></script>
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>System Management</title>
@@ -15,43 +17,6 @@
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 Butterlate.setTextDomain("services");
-
-function style_display_on()
-{
-	if (window.ActiveXObject) // IE
-		return "block";
-	else if (window.XMLHttpRequest) // Mozilla, Safari, ...
-		return "table-row";
-}
-
-function NTPFormCheck()
-{
-	var form = document.NTP;
-	
-	if (form.ntp_enabled.checked)
-	{
-		if ((form.NTPServerIP.value != "") && (form.NTPSync.value == ""))
-		{
-			alert("Please specify a value for the interval of synchronization.");
-			form.NTPSync.focus();
-			return false;
-		}
-		if (validateNum(form.NTPSync.value, false) == 0)
-		{
-			alert("Invalid NTP synchronization value.");
-			form.NTPSync.focus();
-			return false;
-		}
-		if (parseAtoi(form.NTPSync.value, 1) > 300)
-		{
-			alert("The synchronization value is too big.(1~300)");
-			form.NTPSync.focus();
-			return false;
-		}
-	}
-	
-	return true;
-}
 
 function initTranslation()
 {
@@ -62,7 +27,6 @@ function initTranslation()
 	_TR("manNTPTimeZone", "man ntp timezone");
 
 	_TR("manNTPServer", "man ntp server");
-	_TR("manNTPSync", "man ntp sync");
 	_TR("manNTPCurrentTime", "man ntp current time");
 
 	_TRV("manNTPApply", "admin apply");
@@ -81,14 +45,12 @@ function initValue()
 
 	if (dateb == "1")
 	{
-		document.getElementById("div_date").style.visibility = "visible";
-		document.getElementById("div_date").style.display = style_display_on();
+		showElement('div_date');
 		form.ntpcurrenttime.disabled = false;
 	} 
 	else
 	{
-		document.getElementById("div_date").style.visibility = "hidden";
-		document.getElementById("div_date").style.display = "none";
+		hideElement('div_date');
 		form.ntpcurrenttime.disabled = true;
 	}
 
@@ -102,7 +64,7 @@ function syncWithHost()
 {
 	var cTime = new Date();
 	
-	var tmp = sprintf('%04d%02d%02d%02d%02d%02d',
+	var tmp = sprintf('%04d%02d%02d%02d%02d.%02d',
 			cTime.getFullYear(), cTime.getMonth()+1, cTime.getDay(),
 			cTime.getHours(), cTime.getMinutes(), cTime.getSeconds());
 	
@@ -116,7 +78,6 @@ function ntpChange(form)
 	form.manNTPSyncWithHost.disabled = dis;
 	form.time_zone.disabled = dis;
 	form.NTPServerIP.disabled = dis;
-	form.NTPSync.disabled = dis;
 }
 
 </script>
@@ -129,7 +90,7 @@ function ntpChange(form)
 <hr />
 
 <!-- ================= NTP Settings ================= -->
-<form method="POST" name="NTP" action="/goform/NTP" onsubmit="return NTPFormCheck();" >
+<form method="POST" name="NTP" action="/goform/NTP" >
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tbody><tr>
 	<td class="title" colspan="2" id="manNTPSet">NTP Settings</td>
@@ -222,10 +183,6 @@ function ntpChange(form)
 		<br>&nbsp;&nbsp;<font color="#808080">&nbsp;&nbsp;&nbsp;&nbsp;ntp0.broad.mit.edu</font>
 		<br>&nbsp;&nbsp;<font color="#808080">&nbsp;&nbsp;&nbsp;&nbsp;time.stdtime.gov.tw</font>
 	</td>
-</tr>
-<tr>
-	<td class="head" id="manNTPSync">NTP synchronization</td>
-	<td><input size="4" name="NTPSync" value="<% getCfgGeneral(1, "NTPSync"); %>" type="text"> </td>
 </tr>
 </tbody>
 </table>

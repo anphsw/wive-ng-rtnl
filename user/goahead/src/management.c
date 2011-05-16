@@ -89,7 +89,7 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("<h2>Language Selection</h2><br>\n"));
 	websWrite(wp, T("language: %s<br>\n"), lang);
 	websFooter(wp);
-	websDone(wp, 200);        
+	websDone(wp, 200);
 }
 
 /*
@@ -97,11 +97,10 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
  */
 static void NTP(webs_t wp, char_t *path, char_t *query)
 {
-	char *tz, *ntpServer, *ntpSync, *ntpEnabled;
+	char *tz, *ntpServer, *ntpEnabled;
 
 	tz = websGetVar(wp, T("time_zone"), T(""));
 	ntpServer = websGetVar(wp, T("NTPServerIP"), T(""));
-	ntpSync = websGetVar(wp, T("NTPSync"), T(""));
 	ntpEnabled = websGetVar(wp, T("ntp_enabled"), T("off"));
 
 	nvram_init(RT2860_NVRAM);
@@ -109,21 +108,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	{
 		if ((strlen(tz)>0) && (!checkSemicolon(tz)))
 		{
-			if (strlen(ntpServer)==0)
-			{
-				// user choose to make  NTP server disable
-				nvram_bufset(RT2860_NVRAM, "NTPServerIP", "");
-				nvram_bufset(RT2860_NVRAM, "NTPSync", "");
-			}
-			else
-			{
-				if ((!checkSemicolon(ntpServer)) && (strlen(ntpSync)>0) && (atoi(ntpSync)<=300))
-				{
-					nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
-					nvram_bufset(RT2860_NVRAM, "NTPSync", ntpSync);
-				}
-			}
-
+			nvram_bufset(RT2860_NVRAM, "NTPServerIP", ntpServer);
 			nvram_bufset(RT2860_NVRAM, "TZ", tz);
 		}
 	}
@@ -142,7 +127,6 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("NTPEnabled: %s<br>\n"), ntpEnabled);
 	websWrite(wp, T("NTPserver: %s<br>\n"), ntpServer);
 	websWrite(wp, T("TZ: %s<br>\n"), tz);
-	websWrite(wp, T("NTPSync: %s<br>\n"), ntpSync);
 	websFooter(wp);
 	websDone(wp, 200);
 }

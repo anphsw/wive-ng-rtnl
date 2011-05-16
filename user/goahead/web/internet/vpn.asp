@@ -301,7 +301,7 @@ function showVPNStatus()
 
 function formCheck(form)
 {
-	if (form.vpn_type != '0')
+	if ((form.vpn_type.value != '0') || (!form.vpn_enabled.checked))
 		form.vpn_pure_pppoe.checked = false;
 }
 
