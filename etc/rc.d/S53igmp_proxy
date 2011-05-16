@@ -15,13 +15,14 @@ if [ -f /bin/igmpproxy ]; then
     get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
     if [ "$igmpen" = "1" ] && [ "$opmode" != "0" ]; then
-	workaround=0
+        $LOG "Starting IGMPPROXY"
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
-	    workaround=1
-	    ifconfig $wan_if 169.254.254.254
+    	    $LOG "Wait for adress get..."
+	    sleep 20
+	    killall -q igmpproxy
+	    killall -q -9 igmpproxy
 	fi
-        $LOG "Starting IGMPPROXY"
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
 	echo 1 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 1 > /proc/sys/net/ipv4/conf/default/mc_forwarding
@@ -30,9 +31,6 @@ if [ -f /bin/igmpproxy ]; then
     	    igmpproxy -s /etc/igmpproxy.conf &
 	else
     	    igmpproxy -sw /etc/igmpproxy.conf &
-	fi
-	if [ "$workaround" = "1" ]; then
-	    ifconfig $wan_if 0.0.0.0
 	fi
     else
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding

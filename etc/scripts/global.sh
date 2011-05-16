@@ -249,6 +249,8 @@ zero_conf()
 	killall -q zcip
 	killall -q -9 zcip
 	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	$LOG "Wait zeroconf for get wan ip address."
+	sleep 10
     fi
 }
 
