@@ -243,7 +243,6 @@ get_txqlen()
 zero_conf()
 {
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    ip link set $wan_if up
     wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
     if [ "$wan_is_not_null" = "0" ]; then
 	$LOG "Call zeroconf for get wan ip address."
