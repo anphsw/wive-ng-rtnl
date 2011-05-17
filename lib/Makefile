@@ -164,7 +164,7 @@ include/bits/uClibc_config.h: .config
 	@if [ ! -x ./extra/config/conf ] ; then \
 	    $(MAKE) -C extra/config conf; \
 	fi;
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -o extra/Configs/Config.in
 
@@ -326,7 +326,7 @@ endif
 	-@for i in `find  $(PREFIX)$(DEVEL_PREFIX) -type d` ; do \
 	    chmod 755 $$i; chmod 644 $$i/*.h > /dev/null 2>&1; \
 	done;
-	-find $(PREFIX)$(DEVEL_PREFIX) -name .svn | xargs $(RM) -r;
+	-find $(PREFIX)$(DEVEL_PREFIX) -name .svn | xargs $(RM) -rf;
 	-chown -R `id | sed 's/^uid=\([0-9]*\).*gid=\([0-9]*\).*$$/\1:\2/'` $(PREFIX)$(DEVEL_PREFIX)
 ifeq ($(strip $(HAVE_SHARED)),y)
 	for i in `find lib/ -type l -name 'lib[a-zA-Z]*.so' | \
@@ -410,27 +410,27 @@ extra/config/mconf:
 	$(MAKE) -C extra/config ncurses mconf
 
 menuconfig: extra/config/mconf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/mconf extra/Configs/Config.in
 
 config: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf extra/Configs/Config.in
 
 oldconfig: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -o extra/Configs/Config.in
 
 randconfig: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -r extra/Configs/Config.in
 
 allyesconfig: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -y extra/Configs/Config.in
 	sed -i -e "s/^DODEBUG=.*/# DODEBUG is not set/" .config
@@ -441,33 +441,33 @@ allyesconfig: extra/config/conf
 	@./extra/config/conf -o extra/Configs/Config.in
 
 allnoconfig: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -n extra/Configs/Config.in
 
 defconfig: extra/config/conf
-	$(RM) -r include/bits
+	$(RM) -rf include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -d extra/Configs/Config.in
 
 clean:
 	- find . \( -name \*.o -o -name \*.a -o -name \*.so -o -name core -o -name .\#\* \) -exec $(RM) {} \;
-	@$(RM) -r tmp lib include/bits libc/tmp _install lib_optim
+	@$(RM) -rf tmp lib include/bits libc/tmp _install lib_optim
 	$(RM) libc/obj.* headers lib_diff
-	$(MAKE) -C test clean
-	$(MAKE) -C ldso clean
-	$(MAKE) -C libc/misc/internals clean
-	$(MAKE) -C libc/misc/wchar clean
-	$(MAKE) -C libc/unistd clean
-	$(MAKE) -C libc/sysdeps/linux/common clean
-	$(MAKE) -C extra/locale clean
-	$(MAKE) -C utils clean
-	$(MAKE) -C extra clean
-	$(MAKE) -C libnatpmp clean
-	$(MAKE) -C libevent clean
-	$(MAKE) -C libcurl clean
+	-$(MAKE) -C test clean
+	-$(MAKE) -C ldso clean
+	-$(MAKE) -C libc/misc/internals clean
+	-$(MAKE) -C libc/misc/wchar clean
+	-$(MAKE) -C libc/unistd clean
+	-$(MAKE) -C libc/sysdeps/linux/common clean
+	-$(MAKE) -C extra/locale clean
+	-$(MAKE) -C utils clean
+	-$(MAKE) -C extra clean
+	-$(MAKE) -C libnatpmp clean
+	-$(MAKE) -C libevent clean
+	-$(MAKE) -C libcurl clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
-	$(MAKE) -C libgmp clean
+	-$(MAKE) -C libgmp clean
 endif
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \
@@ -488,12 +488,12 @@ distclean: clean
 
 release: distclean
 	cd ..;					\
-	$(RM) -r uClibc-$(VERSION);		\
+	$(RM) -rf uClibc-$(VERSION);		\
 	cp -dRf uClibc uClibc-$(VERSION);	\
 	find uClibc-$(VERSION)/ -type f		\
-	    -name .\#* -exec $(RM) -r {} \; ;	\
+	    -name .\#* -exec $(RM) -rf {} \; ;	\
 	find uClibc-$(VERSION)/ -type d		\
-	    -name .svn -exec $(RM) -r {} \; ;	\
+	    -name .svn -exec $(RM) -rf {} \; ;	\
 						\
 	tar -cvzf uClibc-$(VERSION).tar.gz uClibc-$(VERSION)/;
 
