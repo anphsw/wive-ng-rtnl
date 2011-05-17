@@ -9,12 +9,12 @@
 # Include architecture specific build rules.
 #
 
--include ../config.arch                                                                                                       
--include $(LINUX_CONFIG) 
+-include ../config.arch
+-include $(LINUX_CONFIG)
 
-ifndef ROOTDIR                                                                                                                              
-ROOTDIR=..                                                                                                                                  
-endif 
+ifndef ROOTDIR
+ROOTDIR=..
+endif
 
 ifndef CONFIG_IPV6
 CFLAGS += DNO_IPV6
@@ -34,8 +34,7 @@ VEND=$(ROOTDIR)/vendors
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
-SUBDIRS_APP += openssl-0.9.8e
-
+SUBDIRS_APP += ntfs-3g p910nd openssl-0.9.8e
 #
 # must run the vendor build first
 #
@@ -45,7 +44,6 @@ dir_y =
 dir_n =
 dir_  =
 
-dir_$(CONFIG_USER_SAMBA)		    += samba
 #base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
@@ -71,6 +69,11 @@ dir_$(CONFIG_USER_WIVE)			    += wive-utils
 dir_$(CONFIG_USER_KABINET)		    += kabinet
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
+dir_$(CONFIG_USER_RADVD)               	    += radvd
+dir_$(CONFIG_USER_ZEBRA)		    += zebra
+dir_$(CONFIG_USER_P910ND)		    += p910nd
+dir_$(CONFIG_USER_NTFS3G)		    += ntfs-3g
+dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
 
 #only ralink apps and scripts
@@ -78,10 +81,7 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
-dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
-dir_$(CONFIG_USER_RADVD)               	    += radvd
-dir_$(CONFIG_USER_ZEBRA)		    += zebra
 
 all: config
 	echo ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"

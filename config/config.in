@@ -141,7 +141,6 @@ bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
 bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
 bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 
-
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
 dep_bool '  radvd dump'			        CONFIG_USER_RADVD_DUMP $CONFIG_USER_RADVD
 bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
