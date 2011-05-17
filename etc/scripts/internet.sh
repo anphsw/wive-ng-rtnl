@@ -194,9 +194,9 @@ fi
 #some daemons need restart
 services_restart.sh all
 
-# in dhcp client mode restart
-# service restart from dhcp script
-if [ "$wanmode" != "DHCP" ]; then
+# in dhcp client mode restart from dhcp script
+# in static/zeroconf or pure pppoe mode need restart anyway
+if [ "$wanmode" != "DHCP" ] || [ "$vpnPurePPPOE" = "1" ]; then
     (service vpnhelper stop && sleep 2 && service vpnhelper start) &
 fi
 
