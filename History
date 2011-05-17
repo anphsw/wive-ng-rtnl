@@ -410,7 +410,7 @@
 25) Add zeroconf mode for WAN wanConnectionMode=ZERO.<br>
 26) No more need dev.tgz in rootfs. Save flash size and more speed.<br>
 27) Add ntfs-3g p910nd to buildtree (8Mb devices with USB).<br>
-
+28) Fix auto start vpnhelper in pure pppoe mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
