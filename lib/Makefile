@@ -80,6 +80,9 @@ endif
 ifeq ($(CONFIG_LIB_EVENT),y)
     DIRS += libevent
 endif
+ifeq ($(CONFIG_LIB_CURL),y)
+    DIRS += libcurl
+endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
 all: headers pregen config subdirs shared finished
@@ -142,6 +145,9 @@ ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 endif
 ifeq ($(strip $(CONFIG_LIB_EVENT)),y)
 	@$(MAKE) -C libevent install
+endif
+ifeq ($(strip $(CONFIG_LIB_CURL)),y)
+	@$(MAKE) -C libcurl install
 endif
 else
 	$(SECHO)
@@ -244,6 +250,9 @@ install: install_runtime install_dev finished2
 romfs: install_runtime
 ifeq ($(CONFIG_LIB_EVENT),y)
 	make -C libevent romfs
+endif
+ifeq ($(CONFIG_LIB_CURL),y)
+	make -C libcurl romfs
 endif
 
 RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=$(shell extra/scripts/relative_path.sh $(DEVEL_PREFIX)lib $(RUNTIME_PREFIX)lib)
@@ -456,6 +465,7 @@ clean:
 	$(MAKE) -C extra clean
 	$(MAKE) -C libnatpmp clean
 	$(MAKE) -C libevent clean
+	$(MAKE) -C libcurl clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	$(MAKE) -C libgmp clean
 endif
