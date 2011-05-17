@@ -28,6 +28,9 @@ TOPDIR=./
 include Rules.mak
 -include $(CONFIG_CONFIG)
 
+#Need direct include for easy porting some libs
+CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
+
 DIRS = ldso libc
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
     DIRS += libintl
@@ -74,9 +77,12 @@ endif
 ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
     DIRS += libntfs-3g
 endif
+ifeq ($(CONFIG_LIB_EVENT),y)
+    DIRS += libevent
+endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
-all: headers pregen subdirs shared finished
+all: headers pregen config subdirs shared finished
 
 # In this section, we need .config
 -include .config.cmd
@@ -134,6 +140,9 @@ endif
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 	@$(MAKE) -C libintl shared
 endif
+ifeq ($(strip $(CONFIG_LIB_EVENT)),y)
+	@$(MAKE) -C libevent install
+endif
 else
 	$(SECHO)
 	$(SECHO) Not building shared libraries ...
@@ -152,6 +161,11 @@ include/bits/uClibc_config.h: .config
 	$(RM) -r include/bits
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -o extra/Configs/Config.in
+
+config:
+	for i in $(DIRS) ; do \
+	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
+	done
 
 # For the moment, we have to keep re-running this target 
 # because the fix includes scripts rely on pre-processers 
@@ -227,10 +241,10 @@ tags:
 
 install: install_runtime install_dev finished2
 
-#added by Steven Liu
 romfs: install_runtime
-#--
-
+ifeq ($(CONFIG_LIB_EVENT),y)
+	make -C libevent romfs
+endif
 
 RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=$(shell extra/scripts/relative_path.sh $(DEVEL_PREFIX)lib $(RUNTIME_PREFIX)lib)
 
@@ -440,11 +454,10 @@ clean:
 	$(MAKE) -C extra/locale clean
 	$(MAKE) -C utils clean
 	$(MAKE) -C extra clean
+	$(MAKE) -C libnatpmp clean
+	$(MAKE) -C libevent clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	$(MAKE) -C libgmp clean
-endif
-ifeq ($(CONFIG_LIB_NAT),y)
-	$(MAKE) -C libnatpmp clean
 endif
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \

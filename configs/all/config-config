@@ -19,6 +19,7 @@ CONFIG_LIB_LIBNVRAM_SSTRDUP=y
 # CONFIG_LIB_USB is not set
 CONFIG_LIB_NAT=y
 CONFIG_LIB_FLEX=y
+# CONFIG_LIB_EVENT is not set
 
 #
 # Force build extra libraries in uClibc

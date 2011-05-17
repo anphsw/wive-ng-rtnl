@@ -44,6 +44,7 @@ dir_y =
 dir_n =
 dir_  =
 
+ifdef FFF
 #base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
@@ -82,6 +83,7 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
+endif
 
 all: config
 	echo ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"

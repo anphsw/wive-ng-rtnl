@@ -14,6 +14,7 @@ bool 'Build uClibc (libstdc++)'	CONFIG_LIB_LIBSTDC_PLUS_FORCE
 bool 'Build libusb'		CONFIG_LIB_USB
 bool 'Build libnatpmp'		CONFIG_LIB_NAT
 bool 'Build libflex'		CONFIG_LIB_FLEX
+bool 'Build libevent'		CONFIG_LIB_EVENT
 
 comment 'Force build extra libraries in uClibc'
 bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE
