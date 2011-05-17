@@ -185,8 +185,8 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run aclocal-1.9
-AMDEP_FALSE = #
-AMDEP_TRUE = 
+AMDEP_FALSE = 
+AMDEP_TRUE = #
 AMTAR = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AS = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as 
@@ -197,9 +197,9 @@ AWK = gawk
 BUILD_LIBHOSTNAME_FALSE = #
 BUILD_LIBHOSTNAME_TRUE = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/lib/libssl -g0 -Wno-system-headers
-CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
+CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CROSSCOMPILING_FALSE = #
@@ -323,8 +323,8 @@ VERSION = 7.21.4
 VERSIONNUM = 071504
 ac_ct_CC = 
 ac_ct_DUMPBIN = link -dump -symbols
-am__fastdepCC_FALSE = #
-am__fastdepCC_TRUE = 
+am__fastdepCC_FALSE = 
+am__fastdepCC_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 
@@ -617,1515 +617,1515 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/libcurl_la-axtls.Plo
-include ./$(DEPDIR)/libcurl_la-base64.Plo
-include ./$(DEPDIR)/libcurl_la-connect.Plo
-include ./$(DEPDIR)/libcurl_la-content_encoding.Plo
-include ./$(DEPDIR)/libcurl_la-cookie.Plo
-include ./$(DEPDIR)/libcurl_la-curl_addrinfo.Plo
-include ./$(DEPDIR)/libcurl_la-curl_fnmatch.Plo
-include ./$(DEPDIR)/libcurl_la-curl_gethostname.Plo
-include ./$(DEPDIR)/libcurl_la-curl_memrchr.Plo
-include ./$(DEPDIR)/libcurl_la-curl_rand.Plo
-include ./$(DEPDIR)/libcurl_la-curl_rtmp.Plo
-include ./$(DEPDIR)/libcurl_la-curl_sspi.Plo
-include ./$(DEPDIR)/libcurl_la-curl_threads.Plo
-include ./$(DEPDIR)/libcurl_la-dict.Plo
-include ./$(DEPDIR)/libcurl_la-easy.Plo
-include ./$(DEPDIR)/libcurl_la-escape.Plo
-include ./$(DEPDIR)/libcurl_la-file.Plo
-include ./$(DEPDIR)/libcurl_la-fileinfo.Plo
-include ./$(DEPDIR)/libcurl_la-formdata.Plo
-include ./$(DEPDIR)/libcurl_la-ftp.Plo
-include ./$(DEPDIR)/libcurl_la-ftplistparser.Plo
-include ./$(DEPDIR)/libcurl_la-getenv.Plo
-include ./$(DEPDIR)/libcurl_la-getinfo.Plo
-include ./$(DEPDIR)/libcurl_la-gopher.Plo
-include ./$(DEPDIR)/libcurl_la-gtls.Plo
-include ./$(DEPDIR)/libcurl_la-hash.Plo
-include ./$(DEPDIR)/libcurl_la-hmac.Plo
-include ./$(DEPDIR)/libcurl_la-hostares.Plo
-include ./$(DEPDIR)/libcurl_la-hostasyn.Plo
-include ./$(DEPDIR)/libcurl_la-hostip.Plo
-include ./$(DEPDIR)/libcurl_la-hostip4.Plo
-include ./$(DEPDIR)/libcurl_la-hostip6.Plo
-include ./$(DEPDIR)/libcurl_la-hostsyn.Plo
-include ./$(DEPDIR)/libcurl_la-hostthre.Plo
-include ./$(DEPDIR)/libcurl_la-http.Plo
-include ./$(DEPDIR)/libcurl_la-http_chunks.Plo
-include ./$(DEPDIR)/libcurl_la-http_digest.Plo
-include ./$(DEPDIR)/libcurl_la-http_negotiate.Plo
-include ./$(DEPDIR)/libcurl_la-http_negotiate_sspi.Plo
-include ./$(DEPDIR)/libcurl_la-http_ntlm.Plo
-include ./$(DEPDIR)/libcurl_la-idn_win32.Plo
-include ./$(DEPDIR)/libcurl_la-if2ip.Plo
-include ./$(DEPDIR)/libcurl_la-imap.Plo
-include ./$(DEPDIR)/libcurl_la-inet_ntop.Plo
-include ./$(DEPDIR)/libcurl_la-inet_pton.Plo
-include ./$(DEPDIR)/libcurl_la-krb4.Plo
-include ./$(DEPDIR)/libcurl_la-krb5.Plo
-include ./$(DEPDIR)/libcurl_la-ldap.Plo
-include ./$(DEPDIR)/libcurl_la-llist.Plo
-include ./$(DEPDIR)/libcurl_la-md4.Plo
-include ./$(DEPDIR)/libcurl_la-md5.Plo
-include ./$(DEPDIR)/libcurl_la-memdebug.Plo
-include ./$(DEPDIR)/libcurl_la-mprintf.Plo
-include ./$(DEPDIR)/libcurl_la-multi.Plo
-include ./$(DEPDIR)/libcurl_la-netrc.Plo
-include ./$(DEPDIR)/libcurl_la-nonblock.Plo
-include ./$(DEPDIR)/libcurl_la-nss.Plo
-include ./$(DEPDIR)/libcurl_la-openldap.Plo
-include ./$(DEPDIR)/libcurl_la-parsedate.Plo
-include ./$(DEPDIR)/libcurl_la-pingpong.Plo
-include ./$(DEPDIR)/libcurl_la-polarssl.Plo
-include ./$(DEPDIR)/libcurl_la-pop3.Plo
-include ./$(DEPDIR)/libcurl_la-progress.Plo
-include ./$(DEPDIR)/libcurl_la-qssl.Plo
-include ./$(DEPDIR)/libcurl_la-rawstr.Plo
-include ./$(DEPDIR)/libcurl_la-rtsp.Plo
-include ./$(DEPDIR)/libcurl_la-security.Plo
-include ./$(DEPDIR)/libcurl_la-select.Plo
-include ./$(DEPDIR)/libcurl_la-sendf.Plo
-include ./$(DEPDIR)/libcurl_la-share.Plo
-include ./$(DEPDIR)/libcurl_la-slist.Plo
-include ./$(DEPDIR)/libcurl_la-smtp.Plo
-include ./$(DEPDIR)/libcurl_la-socks.Plo
-include ./$(DEPDIR)/libcurl_la-socks_gssapi.Plo
-include ./$(DEPDIR)/libcurl_la-socks_sspi.Plo
-include ./$(DEPDIR)/libcurl_la-speedcheck.Plo
-include ./$(DEPDIR)/libcurl_la-splay.Plo
-include ./$(DEPDIR)/libcurl_la-ssh.Plo
-include ./$(DEPDIR)/libcurl_la-sslgen.Plo
-include ./$(DEPDIR)/libcurl_la-ssluse.Plo
-include ./$(DEPDIR)/libcurl_la-strdup.Plo
-include ./$(DEPDIR)/libcurl_la-strequal.Plo
-include ./$(DEPDIR)/libcurl_la-strerror.Plo
-include ./$(DEPDIR)/libcurl_la-strtok.Plo
-include ./$(DEPDIR)/libcurl_la-strtoofft.Plo
-include ./$(DEPDIR)/libcurl_la-telnet.Plo
-include ./$(DEPDIR)/libcurl_la-tftp.Plo
-include ./$(DEPDIR)/libcurl_la-timeval.Plo
-include ./$(DEPDIR)/libcurl_la-transfer.Plo
-include ./$(DEPDIR)/libcurl_la-url.Plo
-include ./$(DEPDIR)/libcurl_la-version.Plo
-include ./$(DEPDIR)/libcurl_la-warnless.Plo
-include ./$(DEPDIR)/libcurl_la-wildcard.Plo
-include ./$(DEPDIR)/libcurlu_la-axtls.Plo
-include ./$(DEPDIR)/libcurlu_la-base64.Plo
-include ./$(DEPDIR)/libcurlu_la-connect.Plo
-include ./$(DEPDIR)/libcurlu_la-content_encoding.Plo
-include ./$(DEPDIR)/libcurlu_la-cookie.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_addrinfo.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_fnmatch.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_gethostname.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_memrchr.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_rand.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_rtmp.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_sspi.Plo
-include ./$(DEPDIR)/libcurlu_la-curl_threads.Plo
-include ./$(DEPDIR)/libcurlu_la-dict.Plo
-include ./$(DEPDIR)/libcurlu_la-easy.Plo
-include ./$(DEPDIR)/libcurlu_la-escape.Plo
-include ./$(DEPDIR)/libcurlu_la-file.Plo
-include ./$(DEPDIR)/libcurlu_la-fileinfo.Plo
-include ./$(DEPDIR)/libcurlu_la-formdata.Plo
-include ./$(DEPDIR)/libcurlu_la-ftp.Plo
-include ./$(DEPDIR)/libcurlu_la-ftplistparser.Plo
-include ./$(DEPDIR)/libcurlu_la-getenv.Plo
-include ./$(DEPDIR)/libcurlu_la-getinfo.Plo
-include ./$(DEPDIR)/libcurlu_la-gopher.Plo
-include ./$(DEPDIR)/libcurlu_la-gtls.Plo
-include ./$(DEPDIR)/libcurlu_la-hash.Plo
-include ./$(DEPDIR)/libcurlu_la-hmac.Plo
-include ./$(DEPDIR)/libcurlu_la-hostares.Plo
-include ./$(DEPDIR)/libcurlu_la-hostasyn.Plo
-include ./$(DEPDIR)/libcurlu_la-hostip.Plo
-include ./$(DEPDIR)/libcurlu_la-hostip4.Plo
-include ./$(DEPDIR)/libcurlu_la-hostip6.Plo
-include ./$(DEPDIR)/libcurlu_la-hostsyn.Plo
-include ./$(DEPDIR)/libcurlu_la-hostthre.Plo
-include ./$(DEPDIR)/libcurlu_la-http.Plo
-include ./$(DEPDIR)/libcurlu_la-http_chunks.Plo
-include ./$(DEPDIR)/libcurlu_la-http_digest.Plo
-include ./$(DEPDIR)/libcurlu_la-http_negotiate.Plo
-include ./$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Plo
-include ./$(DEPDIR)/libcurlu_la-http_ntlm.Plo
-include ./$(DEPDIR)/libcurlu_la-idn_win32.Plo
-include ./$(DEPDIR)/libcurlu_la-if2ip.Plo
-include ./$(DEPDIR)/libcurlu_la-imap.Plo
-include ./$(DEPDIR)/libcurlu_la-inet_ntop.Plo
-include ./$(DEPDIR)/libcurlu_la-inet_pton.Plo
-include ./$(DEPDIR)/libcurlu_la-krb4.Plo
-include ./$(DEPDIR)/libcurlu_la-krb5.Plo
-include ./$(DEPDIR)/libcurlu_la-ldap.Plo
-include ./$(DEPDIR)/libcurlu_la-llist.Plo
-include ./$(DEPDIR)/libcurlu_la-md4.Plo
-include ./$(DEPDIR)/libcurlu_la-md5.Plo
-include ./$(DEPDIR)/libcurlu_la-memdebug.Plo
-include ./$(DEPDIR)/libcurlu_la-mprintf.Plo
-include ./$(DEPDIR)/libcurlu_la-multi.Plo
-include ./$(DEPDIR)/libcurlu_la-netrc.Plo
-include ./$(DEPDIR)/libcurlu_la-nonblock.Plo
-include ./$(DEPDIR)/libcurlu_la-nss.Plo
-include ./$(DEPDIR)/libcurlu_la-openldap.Plo
-include ./$(DEPDIR)/libcurlu_la-parsedate.Plo
-include ./$(DEPDIR)/libcurlu_la-pingpong.Plo
-include ./$(DEPDIR)/libcurlu_la-polarssl.Plo
-include ./$(DEPDIR)/libcurlu_la-pop3.Plo
-include ./$(DEPDIR)/libcurlu_la-progress.Plo
-include ./$(DEPDIR)/libcurlu_la-qssl.Plo
-include ./$(DEPDIR)/libcurlu_la-rawstr.Plo
-include ./$(DEPDIR)/libcurlu_la-rtsp.Plo
-include ./$(DEPDIR)/libcurlu_la-security.Plo
-include ./$(DEPDIR)/libcurlu_la-select.Plo
-include ./$(DEPDIR)/libcurlu_la-sendf.Plo
-include ./$(DEPDIR)/libcurlu_la-share.Plo
-include ./$(DEPDIR)/libcurlu_la-slist.Plo
-include ./$(DEPDIR)/libcurlu_la-smtp.Plo
-include ./$(DEPDIR)/libcurlu_la-socks.Plo
-include ./$(DEPDIR)/libcurlu_la-socks_gssapi.Plo
-include ./$(DEPDIR)/libcurlu_la-socks_sspi.Plo
-include ./$(DEPDIR)/libcurlu_la-speedcheck.Plo
-include ./$(DEPDIR)/libcurlu_la-splay.Plo
-include ./$(DEPDIR)/libcurlu_la-ssh.Plo
-include ./$(DEPDIR)/libcurlu_la-sslgen.Plo
-include ./$(DEPDIR)/libcurlu_la-ssluse.Plo
-include ./$(DEPDIR)/libcurlu_la-strdup.Plo
-include ./$(DEPDIR)/libcurlu_la-strequal.Plo
-include ./$(DEPDIR)/libcurlu_la-strerror.Plo
-include ./$(DEPDIR)/libcurlu_la-strtok.Plo
-include ./$(DEPDIR)/libcurlu_la-strtoofft.Plo
-include ./$(DEPDIR)/libcurlu_la-telnet.Plo
-include ./$(DEPDIR)/libcurlu_la-tftp.Plo
-include ./$(DEPDIR)/libcurlu_la-timeval.Plo
-include ./$(DEPDIR)/libcurlu_la-transfer.Plo
-include ./$(DEPDIR)/libcurlu_la-url.Plo
-include ./$(DEPDIR)/libcurlu_la-version.Plo
-include ./$(DEPDIR)/libcurlu_la-warnless.Plo
-include ./$(DEPDIR)/libcurlu_la-wildcard.Plo
+#include ./$(DEPDIR)/libcurl_la-axtls.Plo
+#include ./$(DEPDIR)/libcurl_la-base64.Plo
+#include ./$(DEPDIR)/libcurl_la-connect.Plo
+#include ./$(DEPDIR)/libcurl_la-content_encoding.Plo
+#include ./$(DEPDIR)/libcurl_la-cookie.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_addrinfo.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_fnmatch.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_gethostname.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_memrchr.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_rand.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_rtmp.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_sspi.Plo
+#include ./$(DEPDIR)/libcurl_la-curl_threads.Plo
+#include ./$(DEPDIR)/libcurl_la-dict.Plo
+#include ./$(DEPDIR)/libcurl_la-easy.Plo
+#include ./$(DEPDIR)/libcurl_la-escape.Plo
+#include ./$(DEPDIR)/libcurl_la-file.Plo
+#include ./$(DEPDIR)/libcurl_la-fileinfo.Plo
+#include ./$(DEPDIR)/libcurl_la-formdata.Plo
+#include ./$(DEPDIR)/libcurl_la-ftp.Plo
+#include ./$(DEPDIR)/libcurl_la-ftplistparser.Plo
+#include ./$(DEPDIR)/libcurl_la-getenv.Plo
+#include ./$(DEPDIR)/libcurl_la-getinfo.Plo
+#include ./$(DEPDIR)/libcurl_la-gopher.Plo
+#include ./$(DEPDIR)/libcurl_la-gtls.Plo
+#include ./$(DEPDIR)/libcurl_la-hash.Plo
+#include ./$(DEPDIR)/libcurl_la-hmac.Plo
+#include ./$(DEPDIR)/libcurl_la-hostares.Plo
+#include ./$(DEPDIR)/libcurl_la-hostasyn.Plo
+#include ./$(DEPDIR)/libcurl_la-hostip.Plo
+#include ./$(DEPDIR)/libcurl_la-hostip4.Plo
+#include ./$(DEPDIR)/libcurl_la-hostip6.Plo
+#include ./$(DEPDIR)/libcurl_la-hostsyn.Plo
+#include ./$(DEPDIR)/libcurl_la-hostthre.Plo
+#include ./$(DEPDIR)/libcurl_la-http.Plo
+#include ./$(DEPDIR)/libcurl_la-http_chunks.Plo
+#include ./$(DEPDIR)/libcurl_la-http_digest.Plo
+#include ./$(DEPDIR)/libcurl_la-http_negotiate.Plo
+#include ./$(DEPDIR)/libcurl_la-http_negotiate_sspi.Plo
+#include ./$(DEPDIR)/libcurl_la-http_ntlm.Plo
+#include ./$(DEPDIR)/libcurl_la-idn_win32.Plo
+#include ./$(DEPDIR)/libcurl_la-if2ip.Plo
+#include ./$(DEPDIR)/libcurl_la-imap.Plo
+#include ./$(DEPDIR)/libcurl_la-inet_ntop.Plo
+#include ./$(DEPDIR)/libcurl_la-inet_pton.Plo
+#include ./$(DEPDIR)/libcurl_la-krb4.Plo
+#include ./$(DEPDIR)/libcurl_la-krb5.Plo
+#include ./$(DEPDIR)/libcurl_la-ldap.Plo
+#include ./$(DEPDIR)/libcurl_la-llist.Plo
+#include ./$(DEPDIR)/libcurl_la-md4.Plo
+#include ./$(DEPDIR)/libcurl_la-md5.Plo
+#include ./$(DEPDIR)/libcurl_la-memdebug.Plo
+#include ./$(DEPDIR)/libcurl_la-mprintf.Plo
+#include ./$(DEPDIR)/libcurl_la-multi.Plo
+#include ./$(DEPDIR)/libcurl_la-netrc.Plo
+#include ./$(DEPDIR)/libcurl_la-nonblock.Plo
+#include ./$(DEPDIR)/libcurl_la-nss.Plo
+#include ./$(DEPDIR)/libcurl_la-openldap.Plo
+#include ./$(DEPDIR)/libcurl_la-parsedate.Plo
+#include ./$(DEPDIR)/libcurl_la-pingpong.Plo
+#include ./$(DEPDIR)/libcurl_la-polarssl.Plo
+#include ./$(DEPDIR)/libcurl_la-pop3.Plo
+#include ./$(DEPDIR)/libcurl_la-progress.Plo
+#include ./$(DEPDIR)/libcurl_la-qssl.Plo
+#include ./$(DEPDIR)/libcurl_la-rawstr.Plo
+#include ./$(DEPDIR)/libcurl_la-rtsp.Plo
+#include ./$(DEPDIR)/libcurl_la-security.Plo
+#include ./$(DEPDIR)/libcurl_la-select.Plo
+#include ./$(DEPDIR)/libcurl_la-sendf.Plo
+#include ./$(DEPDIR)/libcurl_la-share.Plo
+#include ./$(DEPDIR)/libcurl_la-slist.Plo
+#include ./$(DEPDIR)/libcurl_la-smtp.Plo
+#include ./$(DEPDIR)/libcurl_la-socks.Plo
+#include ./$(DEPDIR)/libcurl_la-socks_gssapi.Plo
+#include ./$(DEPDIR)/libcurl_la-socks_sspi.Plo
+#include ./$(DEPDIR)/libcurl_la-speedcheck.Plo
+#include ./$(DEPDIR)/libcurl_la-splay.Plo
+#include ./$(DEPDIR)/libcurl_la-ssh.Plo
+#include ./$(DEPDIR)/libcurl_la-sslgen.Plo
+#include ./$(DEPDIR)/libcurl_la-ssluse.Plo
+#include ./$(DEPDIR)/libcurl_la-strdup.Plo
+#include ./$(DEPDIR)/libcurl_la-strequal.Plo
+#include ./$(DEPDIR)/libcurl_la-strerror.Plo
+#include ./$(DEPDIR)/libcurl_la-strtok.Plo
+#include ./$(DEPDIR)/libcurl_la-strtoofft.Plo
+#include ./$(DEPDIR)/libcurl_la-telnet.Plo
+#include ./$(DEPDIR)/libcurl_la-tftp.Plo
+#include ./$(DEPDIR)/libcurl_la-timeval.Plo
+#include ./$(DEPDIR)/libcurl_la-transfer.Plo
+#include ./$(DEPDIR)/libcurl_la-url.Plo
+#include ./$(DEPDIR)/libcurl_la-version.Plo
+#include ./$(DEPDIR)/libcurl_la-warnless.Plo
+#include ./$(DEPDIR)/libcurl_la-wildcard.Plo
+#include ./$(DEPDIR)/libcurlu_la-axtls.Plo
+#include ./$(DEPDIR)/libcurlu_la-base64.Plo
+#include ./$(DEPDIR)/libcurlu_la-connect.Plo
+#include ./$(DEPDIR)/libcurlu_la-content_encoding.Plo
+#include ./$(DEPDIR)/libcurlu_la-cookie.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_addrinfo.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_fnmatch.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_gethostname.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_memrchr.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_rand.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_rtmp.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_sspi.Plo
+#include ./$(DEPDIR)/libcurlu_la-curl_threads.Plo
+#include ./$(DEPDIR)/libcurlu_la-dict.Plo
+#include ./$(DEPDIR)/libcurlu_la-easy.Plo
+#include ./$(DEPDIR)/libcurlu_la-escape.Plo
+#include ./$(DEPDIR)/libcurlu_la-file.Plo
+#include ./$(DEPDIR)/libcurlu_la-fileinfo.Plo
+#include ./$(DEPDIR)/libcurlu_la-formdata.Plo
+#include ./$(DEPDIR)/libcurlu_la-ftp.Plo
+#include ./$(DEPDIR)/libcurlu_la-ftplistparser.Plo
+#include ./$(DEPDIR)/libcurlu_la-getenv.Plo
+#include ./$(DEPDIR)/libcurlu_la-getinfo.Plo
+#include ./$(DEPDIR)/libcurlu_la-gopher.Plo
+#include ./$(DEPDIR)/libcurlu_la-gtls.Plo
+#include ./$(DEPDIR)/libcurlu_la-hash.Plo
+#include ./$(DEPDIR)/libcurlu_la-hmac.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostares.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostasyn.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostip.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostip4.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostip6.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostsyn.Plo
+#include ./$(DEPDIR)/libcurlu_la-hostthre.Plo
+#include ./$(DEPDIR)/libcurlu_la-http.Plo
+#include ./$(DEPDIR)/libcurlu_la-http_chunks.Plo
+#include ./$(DEPDIR)/libcurlu_la-http_digest.Plo
+#include ./$(DEPDIR)/libcurlu_la-http_negotiate.Plo
+#include ./$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Plo
+#include ./$(DEPDIR)/libcurlu_la-http_ntlm.Plo
+#include ./$(DEPDIR)/libcurlu_la-idn_win32.Plo
+#include ./$(DEPDIR)/libcurlu_la-if2ip.Plo
+#include ./$(DEPDIR)/libcurlu_la-imap.Plo
+#include ./$(DEPDIR)/libcurlu_la-inet_ntop.Plo
+#include ./$(DEPDIR)/libcurlu_la-inet_pton.Plo
+#include ./$(DEPDIR)/libcurlu_la-krb4.Plo
+#include ./$(DEPDIR)/libcurlu_la-krb5.Plo
+#include ./$(DEPDIR)/libcurlu_la-ldap.Plo
+#include ./$(DEPDIR)/libcurlu_la-llist.Plo
+#include ./$(DEPDIR)/libcurlu_la-md4.Plo
+#include ./$(DEPDIR)/libcurlu_la-md5.Plo
+#include ./$(DEPDIR)/libcurlu_la-memdebug.Plo
+#include ./$(DEPDIR)/libcurlu_la-mprintf.Plo
+#include ./$(DEPDIR)/libcurlu_la-multi.Plo
+#include ./$(DEPDIR)/libcurlu_la-netrc.Plo
+#include ./$(DEPDIR)/libcurlu_la-nonblock.Plo
+#include ./$(DEPDIR)/libcurlu_la-nss.Plo
+#include ./$(DEPDIR)/libcurlu_la-openldap.Plo
+#include ./$(DEPDIR)/libcurlu_la-parsedate.Plo
+#include ./$(DEPDIR)/libcurlu_la-pingpong.Plo
+#include ./$(DEPDIR)/libcurlu_la-polarssl.Plo
+#include ./$(DEPDIR)/libcurlu_la-pop3.Plo
+#include ./$(DEPDIR)/libcurlu_la-progress.Plo
+#include ./$(DEPDIR)/libcurlu_la-qssl.Plo
+#include ./$(DEPDIR)/libcurlu_la-rawstr.Plo
+#include ./$(DEPDIR)/libcurlu_la-rtsp.Plo
+#include ./$(DEPDIR)/libcurlu_la-security.Plo
+#include ./$(DEPDIR)/libcurlu_la-select.Plo
+#include ./$(DEPDIR)/libcurlu_la-sendf.Plo
+#include ./$(DEPDIR)/libcurlu_la-share.Plo
+#include ./$(DEPDIR)/libcurlu_la-slist.Plo
+#include ./$(DEPDIR)/libcurlu_la-smtp.Plo
+#include ./$(DEPDIR)/libcurlu_la-socks.Plo
+#include ./$(DEPDIR)/libcurlu_la-socks_gssapi.Plo
+#include ./$(DEPDIR)/libcurlu_la-socks_sspi.Plo
+#include ./$(DEPDIR)/libcurlu_la-speedcheck.Plo
+#include ./$(DEPDIR)/libcurlu_la-splay.Plo
+#include ./$(DEPDIR)/libcurlu_la-ssh.Plo
+#include ./$(DEPDIR)/libcurlu_la-sslgen.Plo
+#include ./$(DEPDIR)/libcurlu_la-ssluse.Plo
+#include ./$(DEPDIR)/libcurlu_la-strdup.Plo
+#include ./$(DEPDIR)/libcurlu_la-strequal.Plo
+#include ./$(DEPDIR)/libcurlu_la-strerror.Plo
+#include ./$(DEPDIR)/libcurlu_la-strtok.Plo
+#include ./$(DEPDIR)/libcurlu_la-strtoofft.Plo
+#include ./$(DEPDIR)/libcurlu_la-telnet.Plo
+#include ./$(DEPDIR)/libcurlu_la-tftp.Plo
+#include ./$(DEPDIR)/libcurlu_la-timeval.Plo
+#include ./$(DEPDIR)/libcurlu_la-transfer.Plo
+#include ./$(DEPDIR)/libcurlu_la-url.Plo
+#include ./$(DEPDIR)/libcurlu_la-version.Plo
+#include ./$(DEPDIR)/libcurlu_la-warnless.Plo
+#include ./$(DEPDIR)/libcurlu_la-wildcard.Plo
 
 .c.o:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 libcurl_la-file.lo: file.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-file.Tpo" -c -o libcurl_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-file.Tpo" "$(DEPDIR)/libcurl_la-file.Plo"; else rm -f "$(DEPDIR)/libcurl_la-file.Tpo"; exit 1; fi
-#	source='file.c' object='libcurl_la-file.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-file.Tpo" -c -o libcurl_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-file.Tpo" "$(DEPDIR)/libcurl_la-file.Plo"; else rm -f "$(DEPDIR)/libcurl_la-file.Tpo"; exit 1; fi
+#	source='file.c' object='libcurl_la-file.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c
 
 libcurl_la-timeval.lo: timeval.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-timeval.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-timeval.Tpo" -c -o libcurl_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-timeval.Tpo" "$(DEPDIR)/libcurl_la-timeval.Plo"; else rm -f "$(DEPDIR)/libcurl_la-timeval.Tpo"; exit 1; fi
-#	source='timeval.c' object='libcurl_la-timeval.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-timeval.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-timeval.Tpo" -c -o libcurl_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-timeval.Tpo" "$(DEPDIR)/libcurl_la-timeval.Plo"; else rm -f "$(DEPDIR)/libcurl_la-timeval.Tpo"; exit 1; fi
+#	source='timeval.c' object='libcurl_la-timeval.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c
 
 libcurl_la-base64.lo: base64.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-base64.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-base64.Tpo" -c -o libcurl_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-base64.Tpo" "$(DEPDIR)/libcurl_la-base64.Plo"; else rm -f "$(DEPDIR)/libcurl_la-base64.Tpo"; exit 1; fi
-#	source='base64.c' object='libcurl_la-base64.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-base64.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-base64.Tpo" -c -o libcurl_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-base64.Tpo" "$(DEPDIR)/libcurl_la-base64.Plo"; else rm -f "$(DEPDIR)/libcurl_la-base64.Tpo"; exit 1; fi
+#	source='base64.c' object='libcurl_la-base64.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
 
 libcurl_la-hostip.lo: hostip.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip.Tpo" -c -o libcurl_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostip.Tpo" "$(DEPDIR)/libcurl_la-hostip.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip.Tpo"; exit 1; fi
-#	source='hostip.c' object='libcurl_la-hostip.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip.Tpo" -c -o libcurl_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostip.Tpo" "$(DEPDIR)/libcurl_la-hostip.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip.Tpo"; exit 1; fi
+#	source='hostip.c' object='libcurl_la-hostip.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c
 
 libcurl_la-progress.lo: progress.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-progress.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-progress.Tpo" -c -o libcurl_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-progress.Tpo" "$(DEPDIR)/libcurl_la-progress.Plo"; else rm -f "$(DEPDIR)/libcurl_la-progress.Tpo"; exit 1; fi
-#	source='progress.c' object='libcurl_la-progress.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-progress.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-progress.Tpo" -c -o libcurl_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-progress.Tpo" "$(DEPDIR)/libcurl_la-progress.Plo"; else rm -f "$(DEPDIR)/libcurl_la-progress.Tpo"; exit 1; fi
+#	source='progress.c' object='libcurl_la-progress.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c
 
 libcurl_la-formdata.lo: formdata.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-formdata.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-formdata.Tpo" -c -o libcurl_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-formdata.Tpo" "$(DEPDIR)/libcurl_la-formdata.Plo"; else rm -f "$(DEPDIR)/libcurl_la-formdata.Tpo"; exit 1; fi
-#	source='formdata.c' object='libcurl_la-formdata.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-formdata.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-formdata.Tpo" -c -o libcurl_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-formdata.Tpo" "$(DEPDIR)/libcurl_la-formdata.Plo"; else rm -f "$(DEPDIR)/libcurl_la-formdata.Tpo"; exit 1; fi
+#	source='formdata.c' object='libcurl_la-formdata.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c
 
 libcurl_la-cookie.lo: cookie.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-cookie.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-cookie.Tpo" -c -o libcurl_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-cookie.Tpo" "$(DEPDIR)/libcurl_la-cookie.Plo"; else rm -f "$(DEPDIR)/libcurl_la-cookie.Tpo"; exit 1; fi
-#	source='cookie.c' object='libcurl_la-cookie.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-cookie.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-cookie.Tpo" -c -o libcurl_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-cookie.Tpo" "$(DEPDIR)/libcurl_la-cookie.Plo"; else rm -f "$(DEPDIR)/libcurl_la-cookie.Tpo"; exit 1; fi
+#	source='cookie.c' object='libcurl_la-cookie.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c
 
 libcurl_la-http.lo: http.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http.Tpo" -c -o libcurl_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http.Tpo" "$(DEPDIR)/libcurl_la-http.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http.Tpo"; exit 1; fi
-#	source='http.c' object='libcurl_la-http.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http.Tpo" -c -o libcurl_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http.Tpo" "$(DEPDIR)/libcurl_la-http.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http.Tpo"; exit 1; fi
+#	source='http.c' object='libcurl_la-http.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c
 
 libcurl_la-sendf.lo: sendf.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-sendf.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-sendf.Tpo" -c -o libcurl_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-sendf.Tpo" "$(DEPDIR)/libcurl_la-sendf.Plo"; else rm -f "$(DEPDIR)/libcurl_la-sendf.Tpo"; exit 1; fi
-#	source='sendf.c' object='libcurl_la-sendf.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-sendf.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-sendf.Tpo" -c -o libcurl_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-sendf.Tpo" "$(DEPDIR)/libcurl_la-sendf.Plo"; else rm -f "$(DEPDIR)/libcurl_la-sendf.Tpo"; exit 1; fi
+#	source='sendf.c' object='libcurl_la-sendf.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c
 
 libcurl_la-ftp.lo: ftp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ftp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ftp.Tpo" -c -o libcurl_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-ftp.Tpo" "$(DEPDIR)/libcurl_la-ftp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ftp.Tpo"; exit 1; fi
-#	source='ftp.c' object='libcurl_la-ftp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ftp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ftp.Tpo" -c -o libcurl_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-ftp.Tpo" "$(DEPDIR)/libcurl_la-ftp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ftp.Tpo"; exit 1; fi
+#	source='ftp.c' object='libcurl_la-ftp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c
 
 libcurl_la-url.lo: url.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-url.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-url.Tpo" -c -o libcurl_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-url.Tpo" "$(DEPDIR)/libcurl_la-url.Plo"; else rm -f "$(DEPDIR)/libcurl_la-url.Tpo"; exit 1; fi
-#	source='url.c' object='libcurl_la-url.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-url.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-url.Tpo" -c -o libcurl_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-url.Tpo" "$(DEPDIR)/libcurl_la-url.Plo"; else rm -f "$(DEPDIR)/libcurl_la-url.Tpo"; exit 1; fi
+#	source='url.c' object='libcurl_la-url.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c
 
 libcurl_la-dict.lo: dict.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-dict.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-dict.Tpo" -c -o libcurl_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-dict.Tpo" "$(DEPDIR)/libcurl_la-dict.Plo"; else rm -f "$(DEPDIR)/libcurl_la-dict.Tpo"; exit 1; fi
-#	source='dict.c' object='libcurl_la-dict.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-dict.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-dict.Tpo" -c -o libcurl_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-dict.Tpo" "$(DEPDIR)/libcurl_la-dict.Plo"; else rm -f "$(DEPDIR)/libcurl_la-dict.Tpo"; exit 1; fi
+#	source='dict.c' object='libcurl_la-dict.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c
 
 libcurl_la-if2ip.lo: if2ip.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-if2ip.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-if2ip.Tpo" -c -o libcurl_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-if2ip.Tpo" "$(DEPDIR)/libcurl_la-if2ip.Plo"; else rm -f "$(DEPDIR)/libcurl_la-if2ip.Tpo"; exit 1; fi
-#	source='if2ip.c' object='libcurl_la-if2ip.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-if2ip.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-if2ip.Tpo" -c -o libcurl_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-if2ip.Tpo" "$(DEPDIR)/libcurl_la-if2ip.Plo"; else rm -f "$(DEPDIR)/libcurl_la-if2ip.Tpo"; exit 1; fi
+#	source='if2ip.c' object='libcurl_la-if2ip.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c
 
 libcurl_la-speedcheck.lo: speedcheck.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-speedcheck.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-speedcheck.Tpo" -c -o libcurl_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-speedcheck.Tpo" "$(DEPDIR)/libcurl_la-speedcheck.Plo"; else rm -f "$(DEPDIR)/libcurl_la-speedcheck.Tpo"; exit 1; fi
-#	source='speedcheck.c' object='libcurl_la-speedcheck.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-speedcheck.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-speedcheck.Tpo" -c -o libcurl_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-speedcheck.Tpo" "$(DEPDIR)/libcurl_la-speedcheck.Plo"; else rm -f "$(DEPDIR)/libcurl_la-speedcheck.Tpo"; exit 1; fi
+#	source='speedcheck.c' object='libcurl_la-speedcheck.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c
 
 libcurl_la-ldap.lo: ldap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ldap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ldap.Tpo" -c -o libcurl_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-ldap.Tpo" "$(DEPDIR)/libcurl_la-ldap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ldap.Tpo"; exit 1; fi
-#	source='ldap.c' object='libcurl_la-ldap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ldap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ldap.Tpo" -c -o libcurl_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-ldap.Tpo" "$(DEPDIR)/libcurl_la-ldap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ldap.Tpo"; exit 1; fi
+#	source='ldap.c' object='libcurl_la-ldap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c
 
 libcurl_la-ssluse.lo: ssluse.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ssluse.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ssluse.Tpo" -c -o libcurl_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-ssluse.Tpo" "$(DEPDIR)/libcurl_la-ssluse.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ssluse.Tpo"; exit 1; fi
-#	source='ssluse.c' object='libcurl_la-ssluse.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ssluse.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ssluse.Tpo" -c -o libcurl_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-ssluse.Tpo" "$(DEPDIR)/libcurl_la-ssluse.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ssluse.Tpo"; exit 1; fi
+#	source='ssluse.c' object='libcurl_la-ssluse.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c
 
 libcurl_la-version.lo: version.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-version.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-version.Tpo" -c -o libcurl_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-version.Tpo" "$(DEPDIR)/libcurl_la-version.Plo"; else rm -f "$(DEPDIR)/libcurl_la-version.Tpo"; exit 1; fi
-#	source='version.c' object='libcurl_la-version.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-version.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-version.Tpo" -c -o libcurl_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-version.Tpo" "$(DEPDIR)/libcurl_la-version.Plo"; else rm -f "$(DEPDIR)/libcurl_la-version.Tpo"; exit 1; fi
+#	source='version.c' object='libcurl_la-version.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c
 
 libcurl_la-getenv.lo: getenv.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-getenv.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-getenv.Tpo" -c -o libcurl_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-getenv.Tpo" "$(DEPDIR)/libcurl_la-getenv.Plo"; else rm -f "$(DEPDIR)/libcurl_la-getenv.Tpo"; exit 1; fi
-#	source='getenv.c' object='libcurl_la-getenv.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-getenv.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-getenv.Tpo" -c -o libcurl_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-getenv.Tpo" "$(DEPDIR)/libcurl_la-getenv.Plo"; else rm -f "$(DEPDIR)/libcurl_la-getenv.Tpo"; exit 1; fi
+#	source='getenv.c' object='libcurl_la-getenv.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c
 
 libcurl_la-escape.lo: escape.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-escape.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-escape.Tpo" -c -o libcurl_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-escape.Tpo" "$(DEPDIR)/libcurl_la-escape.Plo"; else rm -f "$(DEPDIR)/libcurl_la-escape.Tpo"; exit 1; fi
-#	source='escape.c' object='libcurl_la-escape.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-escape.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-escape.Tpo" -c -o libcurl_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-escape.Tpo" "$(DEPDIR)/libcurl_la-escape.Plo"; else rm -f "$(DEPDIR)/libcurl_la-escape.Tpo"; exit 1; fi
+#	source='escape.c' object='libcurl_la-escape.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c
 
 libcurl_la-mprintf.lo: mprintf.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-mprintf.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-mprintf.Tpo" -c -o libcurl_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-mprintf.Tpo" "$(DEPDIR)/libcurl_la-mprintf.Plo"; else rm -f "$(DEPDIR)/libcurl_la-mprintf.Tpo"; exit 1; fi
-#	source='mprintf.c' object='libcurl_la-mprintf.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-mprintf.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-mprintf.Tpo" -c -o libcurl_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-mprintf.Tpo" "$(DEPDIR)/libcurl_la-mprintf.Plo"; else rm -f "$(DEPDIR)/libcurl_la-mprintf.Tpo"; exit 1; fi
+#	source='mprintf.c' object='libcurl_la-mprintf.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c
 
 libcurl_la-telnet.lo: telnet.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-telnet.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-telnet.Tpo" -c -o libcurl_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-telnet.Tpo" "$(DEPDIR)/libcurl_la-telnet.Plo"; else rm -f "$(DEPDIR)/libcurl_la-telnet.Tpo"; exit 1; fi
-#	source='telnet.c' object='libcurl_la-telnet.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-telnet.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-telnet.Tpo" -c -o libcurl_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-telnet.Tpo" "$(DEPDIR)/libcurl_la-telnet.Plo"; else rm -f "$(DEPDIR)/libcurl_la-telnet.Tpo"; exit 1; fi
+#	source='telnet.c' object='libcurl_la-telnet.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c
 
 libcurl_la-netrc.lo: netrc.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-netrc.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-netrc.Tpo" -c -o libcurl_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-netrc.Tpo" "$(DEPDIR)/libcurl_la-netrc.Plo"; else rm -f "$(DEPDIR)/libcurl_la-netrc.Tpo"; exit 1; fi
-#	source='netrc.c' object='libcurl_la-netrc.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-netrc.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-netrc.Tpo" -c -o libcurl_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-netrc.Tpo" "$(DEPDIR)/libcurl_la-netrc.Plo"; else rm -f "$(DEPDIR)/libcurl_la-netrc.Tpo"; exit 1; fi
+#	source='netrc.c' object='libcurl_la-netrc.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c
 
 libcurl_la-getinfo.lo: getinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-getinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-getinfo.Tpo" -c -o libcurl_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-getinfo.Tpo" "$(DEPDIR)/libcurl_la-getinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-getinfo.Tpo"; exit 1; fi
-#	source='getinfo.c' object='libcurl_la-getinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-getinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-getinfo.Tpo" -c -o libcurl_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-getinfo.Tpo" "$(DEPDIR)/libcurl_la-getinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-getinfo.Tpo"; exit 1; fi
+#	source='getinfo.c' object='libcurl_la-getinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c
 
 libcurl_la-transfer.lo: transfer.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-transfer.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-transfer.Tpo" -c -o libcurl_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-transfer.Tpo" "$(DEPDIR)/libcurl_la-transfer.Plo"; else rm -f "$(DEPDIR)/libcurl_la-transfer.Tpo"; exit 1; fi
-#	source='transfer.c' object='libcurl_la-transfer.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-transfer.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-transfer.Tpo" -c -o libcurl_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-transfer.Tpo" "$(DEPDIR)/libcurl_la-transfer.Plo"; else rm -f "$(DEPDIR)/libcurl_la-transfer.Tpo"; exit 1; fi
+#	source='transfer.c' object='libcurl_la-transfer.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c
 
 libcurl_la-strequal.lo: strequal.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strequal.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strequal.Tpo" -c -o libcurl_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-strequal.Tpo" "$(DEPDIR)/libcurl_la-strequal.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strequal.Tpo"; exit 1; fi
-#	source='strequal.c' object='libcurl_la-strequal.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strequal.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strequal.Tpo" -c -o libcurl_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-strequal.Tpo" "$(DEPDIR)/libcurl_la-strequal.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strequal.Tpo"; exit 1; fi
+#	source='strequal.c' object='libcurl_la-strequal.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c
 
 libcurl_la-easy.lo: easy.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-easy.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-easy.Tpo" -c -o libcurl_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-easy.Tpo" "$(DEPDIR)/libcurl_la-easy.Plo"; else rm -f "$(DEPDIR)/libcurl_la-easy.Tpo"; exit 1; fi
-#	source='easy.c' object='libcurl_la-easy.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-easy.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-easy.Tpo" -c -o libcurl_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-easy.Tpo" "$(DEPDIR)/libcurl_la-easy.Plo"; else rm -f "$(DEPDIR)/libcurl_la-easy.Tpo"; exit 1; fi
+#	source='easy.c' object='libcurl_la-easy.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c
 
 libcurl_la-security.lo: security.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-security.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-security.Tpo" -c -o libcurl_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-security.Tpo" "$(DEPDIR)/libcurl_la-security.Plo"; else rm -f "$(DEPDIR)/libcurl_la-security.Tpo"; exit 1; fi
-#	source='security.c' object='libcurl_la-security.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-security.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-security.Tpo" -c -o libcurl_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-security.Tpo" "$(DEPDIR)/libcurl_la-security.Plo"; else rm -f "$(DEPDIR)/libcurl_la-security.Tpo"; exit 1; fi
+#	source='security.c' object='libcurl_la-security.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c
 
 libcurl_la-krb4.lo: krb4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-krb4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-krb4.Tpo" -c -o libcurl_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-krb4.Tpo" "$(DEPDIR)/libcurl_la-krb4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-krb4.Tpo"; exit 1; fi
-#	source='krb4.c' object='libcurl_la-krb4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-krb4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-krb4.Tpo" -c -o libcurl_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-krb4.Tpo" "$(DEPDIR)/libcurl_la-krb4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-krb4.Tpo"; exit 1; fi
+#	source='krb4.c' object='libcurl_la-krb4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c
 
 libcurl_la-curl_fnmatch.lo: curl_fnmatch.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_fnmatch.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo" -c -o libcurl_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo" "$(DEPDIR)/libcurl_la-curl_fnmatch.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo"; exit 1; fi
-#	source='curl_fnmatch.c' object='libcurl_la-curl_fnmatch.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_fnmatch.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo" -c -o libcurl_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo" "$(DEPDIR)/libcurl_la-curl_fnmatch.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_fnmatch.Tpo"; exit 1; fi
+#	source='curl_fnmatch.c' object='libcurl_la-curl_fnmatch.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c
 
 libcurl_la-fileinfo.lo: fileinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-fileinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-fileinfo.Tpo" -c -o libcurl_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-fileinfo.Tpo" "$(DEPDIR)/libcurl_la-fileinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-fileinfo.Tpo"; exit 1; fi
-#	source='fileinfo.c' object='libcurl_la-fileinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-fileinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-fileinfo.Tpo" -c -o libcurl_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-fileinfo.Tpo" "$(DEPDIR)/libcurl_la-fileinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-fileinfo.Tpo"; exit 1; fi
+#	source='fileinfo.c' object='libcurl_la-fileinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c
 
 libcurl_la-ftplistparser.lo: ftplistparser.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ftplistparser.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ftplistparser.Tpo" -c -o libcurl_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-ftplistparser.Tpo" "$(DEPDIR)/libcurl_la-ftplistparser.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ftplistparser.Tpo"; exit 1; fi
-#	source='ftplistparser.c' object='libcurl_la-ftplistparser.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ftplistparser.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ftplistparser.Tpo" -c -o libcurl_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-ftplistparser.Tpo" "$(DEPDIR)/libcurl_la-ftplistparser.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ftplistparser.Tpo"; exit 1; fi
+#	source='ftplistparser.c' object='libcurl_la-ftplistparser.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c
 
 libcurl_la-wildcard.lo: wildcard.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-wildcard.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-wildcard.Tpo" -c -o libcurl_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-wildcard.Tpo" "$(DEPDIR)/libcurl_la-wildcard.Plo"; else rm -f "$(DEPDIR)/libcurl_la-wildcard.Tpo"; exit 1; fi
-#	source='wildcard.c' object='libcurl_la-wildcard.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-wildcard.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-wildcard.Tpo" -c -o libcurl_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-wildcard.Tpo" "$(DEPDIR)/libcurl_la-wildcard.Plo"; else rm -f "$(DEPDIR)/libcurl_la-wildcard.Tpo"; exit 1; fi
+#	source='wildcard.c' object='libcurl_la-wildcard.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c
 
 libcurl_la-krb5.lo: krb5.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-krb5.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-krb5.Tpo" -c -o libcurl_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-krb5.Tpo" "$(DEPDIR)/libcurl_la-krb5.Plo"; else rm -f "$(DEPDIR)/libcurl_la-krb5.Tpo"; exit 1; fi
-#	source='krb5.c' object='libcurl_la-krb5.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-krb5.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-krb5.Tpo" -c -o libcurl_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-krb5.Tpo" "$(DEPDIR)/libcurl_la-krb5.Plo"; else rm -f "$(DEPDIR)/libcurl_la-krb5.Tpo"; exit 1; fi
+#	source='krb5.c' object='libcurl_la-krb5.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c
 
 libcurl_la-memdebug.lo: memdebug.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-memdebug.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-memdebug.Tpo" -c -o libcurl_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-memdebug.Tpo" "$(DEPDIR)/libcurl_la-memdebug.Plo"; else rm -f "$(DEPDIR)/libcurl_la-memdebug.Tpo"; exit 1; fi
-#	source='memdebug.c' object='libcurl_la-memdebug.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-memdebug.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-memdebug.Tpo" -c -o libcurl_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-memdebug.Tpo" "$(DEPDIR)/libcurl_la-memdebug.Plo"; else rm -f "$(DEPDIR)/libcurl_la-memdebug.Tpo"; exit 1; fi
+#	source='memdebug.c' object='libcurl_la-memdebug.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c
 
 libcurl_la-http_chunks.lo: http_chunks.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_chunks.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_chunks.Tpo" -c -o libcurl_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http_chunks.Tpo" "$(DEPDIR)/libcurl_la-http_chunks.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_chunks.Tpo"; exit 1; fi
-#	source='http_chunks.c' object='libcurl_la-http_chunks.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_chunks.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_chunks.Tpo" -c -o libcurl_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http_chunks.Tpo" "$(DEPDIR)/libcurl_la-http_chunks.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_chunks.Tpo"; exit 1; fi
+#	source='http_chunks.c' object='libcurl_la-http_chunks.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c
 
 libcurl_la-strtok.lo: strtok.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strtok.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strtok.Tpo" -c -o libcurl_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-strtok.Tpo" "$(DEPDIR)/libcurl_la-strtok.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strtok.Tpo"; exit 1; fi
-#	source='strtok.c' object='libcurl_la-strtok.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strtok.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strtok.Tpo" -c -o libcurl_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-strtok.Tpo" "$(DEPDIR)/libcurl_la-strtok.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strtok.Tpo"; exit 1; fi
+#	source='strtok.c' object='libcurl_la-strtok.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c
 
 libcurl_la-connect.lo: connect.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-connect.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-connect.Tpo" -c -o libcurl_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-connect.Tpo" "$(DEPDIR)/libcurl_la-connect.Plo"; else rm -f "$(DEPDIR)/libcurl_la-connect.Tpo"; exit 1; fi
-#	source='connect.c' object='libcurl_la-connect.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-connect.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-connect.Tpo" -c -o libcurl_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-connect.Tpo" "$(DEPDIR)/libcurl_la-connect.Plo"; else rm -f "$(DEPDIR)/libcurl_la-connect.Tpo"; exit 1; fi
+#	source='connect.c' object='libcurl_la-connect.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c
 
 libcurl_la-llist.lo: llist.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-llist.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-llist.Tpo" -c -o libcurl_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-llist.Tpo" "$(DEPDIR)/libcurl_la-llist.Plo"; else rm -f "$(DEPDIR)/libcurl_la-llist.Tpo"; exit 1; fi
-#	source='llist.c' object='libcurl_la-llist.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-llist.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-llist.Tpo" -c -o libcurl_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-llist.Tpo" "$(DEPDIR)/libcurl_la-llist.Plo"; else rm -f "$(DEPDIR)/libcurl_la-llist.Tpo"; exit 1; fi
+#	source='llist.c' object='libcurl_la-llist.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c
 
 libcurl_la-hash.lo: hash.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hash.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hash.Tpo" -c -o libcurl_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hash.Tpo" "$(DEPDIR)/libcurl_la-hash.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hash.Tpo"; exit 1; fi
-#	source='hash.c' object='libcurl_la-hash.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hash.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hash.Tpo" -c -o libcurl_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hash.Tpo" "$(DEPDIR)/libcurl_la-hash.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hash.Tpo"; exit 1; fi
+#	source='hash.c' object='libcurl_la-hash.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
 
 libcurl_la-multi.lo: multi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-multi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-multi.Tpo" -c -o libcurl_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-multi.Tpo" "$(DEPDIR)/libcurl_la-multi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-multi.Tpo"; exit 1; fi
-#	source='multi.c' object='libcurl_la-multi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-multi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-multi.Tpo" -c -o libcurl_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-multi.Tpo" "$(DEPDIR)/libcurl_la-multi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-multi.Tpo"; exit 1; fi
+#	source='multi.c' object='libcurl_la-multi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c
 
 libcurl_la-content_encoding.lo: content_encoding.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-content_encoding.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-content_encoding.Tpo" -c -o libcurl_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-content_encoding.Tpo" "$(DEPDIR)/libcurl_la-content_encoding.Plo"; else rm -f "$(DEPDIR)/libcurl_la-content_encoding.Tpo"; exit 1; fi
-#	source='content_encoding.c' object='libcurl_la-content_encoding.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-content_encoding.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-content_encoding.Tpo" -c -o libcurl_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-content_encoding.Tpo" "$(DEPDIR)/libcurl_la-content_encoding.Plo"; else rm -f "$(DEPDIR)/libcurl_la-content_encoding.Tpo"; exit 1; fi
+#	source='content_encoding.c' object='libcurl_la-content_encoding.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c
 
 libcurl_la-share.lo: share.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-share.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-share.Tpo" -c -o libcurl_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-share.Tpo" "$(DEPDIR)/libcurl_la-share.Plo"; else rm -f "$(DEPDIR)/libcurl_la-share.Tpo"; exit 1; fi
-#	source='share.c' object='libcurl_la-share.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-share.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-share.Tpo" -c -o libcurl_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-share.Tpo" "$(DEPDIR)/libcurl_la-share.Plo"; else rm -f "$(DEPDIR)/libcurl_la-share.Tpo"; exit 1; fi
+#	source='share.c' object='libcurl_la-share.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c
 
 libcurl_la-http_digest.lo: http_digest.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_digest.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_digest.Tpo" -c -o libcurl_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http_digest.Tpo" "$(DEPDIR)/libcurl_la-http_digest.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_digest.Tpo"; exit 1; fi
-#	source='http_digest.c' object='libcurl_la-http_digest.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_digest.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_digest.Tpo" -c -o libcurl_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http_digest.Tpo" "$(DEPDIR)/libcurl_la-http_digest.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_digest.Tpo"; exit 1; fi
+#	source='http_digest.c' object='libcurl_la-http_digest.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c
 
 libcurl_la-md4.lo: md4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-md4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-md4.Tpo" -c -o libcurl_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-md4.Tpo" "$(DEPDIR)/libcurl_la-md4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-md4.Tpo"; exit 1; fi
-#	source='md4.c' object='libcurl_la-md4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-md4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-md4.Tpo" -c -o libcurl_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-md4.Tpo" "$(DEPDIR)/libcurl_la-md4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-md4.Tpo"; exit 1; fi
+#	source='md4.c' object='libcurl_la-md4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c
 
 libcurl_la-md5.lo: md5.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-md5.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-md5.Tpo" -c -o libcurl_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-md5.Tpo" "$(DEPDIR)/libcurl_la-md5.Plo"; else rm -f "$(DEPDIR)/libcurl_la-md5.Tpo"; exit 1; fi
-#	source='md5.c' object='libcurl_la-md5.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-md5.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-md5.Tpo" -c -o libcurl_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-md5.Tpo" "$(DEPDIR)/libcurl_la-md5.Plo"; else rm -f "$(DEPDIR)/libcurl_la-md5.Tpo"; exit 1; fi
+#	source='md5.c' object='libcurl_la-md5.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
 
 libcurl_la-curl_rand.lo: curl_rand.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_rand.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_rand.Tpo" -c -o libcurl_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_rand.Tpo" "$(DEPDIR)/libcurl_la-curl_rand.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_rand.Tpo"; exit 1; fi
-#	source='curl_rand.c' object='libcurl_la-curl_rand.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_rand.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_rand.Tpo" -c -o libcurl_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_rand.Tpo" "$(DEPDIR)/libcurl_la-curl_rand.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_rand.Tpo"; exit 1; fi
+#	source='curl_rand.c' object='libcurl_la-curl_rand.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c
 
 libcurl_la-http_negotiate.lo: http_negotiate.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_negotiate.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_negotiate.Tpo" -c -o libcurl_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http_negotiate.Tpo" "$(DEPDIR)/libcurl_la-http_negotiate.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_negotiate.Tpo"; exit 1; fi
-#	source='http_negotiate.c' object='libcurl_la-http_negotiate.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_negotiate.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_negotiate.Tpo" -c -o libcurl_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http_negotiate.Tpo" "$(DEPDIR)/libcurl_la-http_negotiate.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_negotiate.Tpo"; exit 1; fi
+#	source='http_negotiate.c' object='libcurl_la-http_negotiate.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c
 
 libcurl_la-http_ntlm.lo: http_ntlm.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_ntlm.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_ntlm.Tpo" -c -o libcurl_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http_ntlm.Tpo" "$(DEPDIR)/libcurl_la-http_ntlm.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_ntlm.Tpo"; exit 1; fi
-#	source='http_ntlm.c' object='libcurl_la-http_ntlm.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_ntlm.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_ntlm.Tpo" -c -o libcurl_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http_ntlm.Tpo" "$(DEPDIR)/libcurl_la-http_ntlm.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_ntlm.Tpo"; exit 1; fi
+#	source='http_ntlm.c' object='libcurl_la-http_ntlm.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c
 
 libcurl_la-inet_pton.lo: inet_pton.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-inet_pton.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-inet_pton.Tpo" -c -o libcurl_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-inet_pton.Tpo" "$(DEPDIR)/libcurl_la-inet_pton.Plo"; else rm -f "$(DEPDIR)/libcurl_la-inet_pton.Tpo"; exit 1; fi
-#	source='inet_pton.c' object='libcurl_la-inet_pton.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-inet_pton.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-inet_pton.Tpo" -c -o libcurl_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-inet_pton.Tpo" "$(DEPDIR)/libcurl_la-inet_pton.Plo"; else rm -f "$(DEPDIR)/libcurl_la-inet_pton.Tpo"; exit 1; fi
+#	source='inet_pton.c' object='libcurl_la-inet_pton.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c
 
 libcurl_la-strtoofft.lo: strtoofft.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strtoofft.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strtoofft.Tpo" -c -o libcurl_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-strtoofft.Tpo" "$(DEPDIR)/libcurl_la-strtoofft.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strtoofft.Tpo"; exit 1; fi
-#	source='strtoofft.c' object='libcurl_la-strtoofft.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strtoofft.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strtoofft.Tpo" -c -o libcurl_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-strtoofft.Tpo" "$(DEPDIR)/libcurl_la-strtoofft.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strtoofft.Tpo"; exit 1; fi
+#	source='strtoofft.c' object='libcurl_la-strtoofft.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c
 
 libcurl_la-strerror.lo: strerror.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strerror.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strerror.Tpo" -c -o libcurl_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-strerror.Tpo" "$(DEPDIR)/libcurl_la-strerror.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strerror.Tpo"; exit 1; fi
-#	source='strerror.c' object='libcurl_la-strerror.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strerror.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strerror.Tpo" -c -o libcurl_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-strerror.Tpo" "$(DEPDIR)/libcurl_la-strerror.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strerror.Tpo"; exit 1; fi
+#	source='strerror.c' object='libcurl_la-strerror.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c
 
 libcurl_la-hostares.lo: hostares.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostares.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostares.Tpo" -c -o libcurl_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostares.Tpo" "$(DEPDIR)/libcurl_la-hostares.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostares.Tpo"; exit 1; fi
-#	source='hostares.c' object='libcurl_la-hostares.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostares.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostares.Tpo" -c -o libcurl_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostares.Tpo" "$(DEPDIR)/libcurl_la-hostares.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostares.Tpo"; exit 1; fi
+#	source='hostares.c' object='libcurl_la-hostares.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c
 
 libcurl_la-hostasyn.lo: hostasyn.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostasyn.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostasyn.Tpo" -c -o libcurl_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostasyn.Tpo" "$(DEPDIR)/libcurl_la-hostasyn.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostasyn.Tpo"; exit 1; fi
-#	source='hostasyn.c' object='libcurl_la-hostasyn.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostasyn.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostasyn.Tpo" -c -o libcurl_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostasyn.Tpo" "$(DEPDIR)/libcurl_la-hostasyn.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostasyn.Tpo"; exit 1; fi
+#	source='hostasyn.c' object='libcurl_la-hostasyn.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c
 
 libcurl_la-hostip4.lo: hostip4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip4.Tpo" -c -o libcurl_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostip4.Tpo" "$(DEPDIR)/libcurl_la-hostip4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip4.Tpo"; exit 1; fi
-#	source='hostip4.c' object='libcurl_la-hostip4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip4.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip4.Tpo" -c -o libcurl_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostip4.Tpo" "$(DEPDIR)/libcurl_la-hostip4.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip4.Tpo"; exit 1; fi
+#	source='hostip4.c' object='libcurl_la-hostip4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c
 
 libcurl_la-hostip6.lo: hostip6.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip6.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip6.Tpo" -c -o libcurl_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostip6.Tpo" "$(DEPDIR)/libcurl_la-hostip6.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip6.Tpo"; exit 1; fi
-#	source='hostip6.c' object='libcurl_la-hostip6.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostip6.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostip6.Tpo" -c -o libcurl_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostip6.Tpo" "$(DEPDIR)/libcurl_la-hostip6.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostip6.Tpo"; exit 1; fi
+#	source='hostip6.c' object='libcurl_la-hostip6.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c
 
 libcurl_la-hostsyn.lo: hostsyn.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostsyn.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostsyn.Tpo" -c -o libcurl_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostsyn.Tpo" "$(DEPDIR)/libcurl_la-hostsyn.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostsyn.Tpo"; exit 1; fi
-#	source='hostsyn.c' object='libcurl_la-hostsyn.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostsyn.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostsyn.Tpo" -c -o libcurl_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostsyn.Tpo" "$(DEPDIR)/libcurl_la-hostsyn.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostsyn.Tpo"; exit 1; fi
+#	source='hostsyn.c' object='libcurl_la-hostsyn.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c
 
 libcurl_la-hostthre.lo: hostthre.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostthre.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostthre.Tpo" -c -o libcurl_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hostthre.Tpo" "$(DEPDIR)/libcurl_la-hostthre.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostthre.Tpo"; exit 1; fi
-#	source='hostthre.c' object='libcurl_la-hostthre.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostthre.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostthre.Tpo" -c -o libcurl_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hostthre.Tpo" "$(DEPDIR)/libcurl_la-hostthre.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostthre.Tpo"; exit 1; fi
+#	source='hostthre.c' object='libcurl_la-hostthre.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c
 
 libcurl_la-inet_ntop.lo: inet_ntop.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-inet_ntop.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-inet_ntop.Tpo" -c -o libcurl_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-inet_ntop.Tpo" "$(DEPDIR)/libcurl_la-inet_ntop.Plo"; else rm -f "$(DEPDIR)/libcurl_la-inet_ntop.Tpo"; exit 1; fi
-#	source='inet_ntop.c' object='libcurl_la-inet_ntop.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-inet_ntop.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-inet_ntop.Tpo" -c -o libcurl_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-inet_ntop.Tpo" "$(DEPDIR)/libcurl_la-inet_ntop.Plo"; else rm -f "$(DEPDIR)/libcurl_la-inet_ntop.Tpo"; exit 1; fi
+#	source='inet_ntop.c' object='libcurl_la-inet_ntop.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c
 
 libcurl_la-parsedate.lo: parsedate.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-parsedate.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-parsedate.Tpo" -c -o libcurl_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-parsedate.Tpo" "$(DEPDIR)/libcurl_la-parsedate.Plo"; else rm -f "$(DEPDIR)/libcurl_la-parsedate.Tpo"; exit 1; fi
-#	source='parsedate.c' object='libcurl_la-parsedate.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-parsedate.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-parsedate.Tpo" -c -o libcurl_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-parsedate.Tpo" "$(DEPDIR)/libcurl_la-parsedate.Plo"; else rm -f "$(DEPDIR)/libcurl_la-parsedate.Tpo"; exit 1; fi
+#	source='parsedate.c' object='libcurl_la-parsedate.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c
 
 libcurl_la-select.lo: select.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-select.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-select.Tpo" -c -o libcurl_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-select.Tpo" "$(DEPDIR)/libcurl_la-select.Plo"; else rm -f "$(DEPDIR)/libcurl_la-select.Tpo"; exit 1; fi
-#	source='select.c' object='libcurl_la-select.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-select.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-select.Tpo" -c -o libcurl_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-select.Tpo" "$(DEPDIR)/libcurl_la-select.Plo"; else rm -f "$(DEPDIR)/libcurl_la-select.Tpo"; exit 1; fi
+#	source='select.c' object='libcurl_la-select.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c
 
 libcurl_la-gtls.lo: gtls.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-gtls.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-gtls.Tpo" -c -o libcurl_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-gtls.Tpo" "$(DEPDIR)/libcurl_la-gtls.Plo"; else rm -f "$(DEPDIR)/libcurl_la-gtls.Tpo"; exit 1; fi
-#	source='gtls.c' object='libcurl_la-gtls.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-gtls.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-gtls.Tpo" -c -o libcurl_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-gtls.Tpo" "$(DEPDIR)/libcurl_la-gtls.Plo"; else rm -f "$(DEPDIR)/libcurl_la-gtls.Tpo"; exit 1; fi
+#	source='gtls.c' object='libcurl_la-gtls.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c
 
 libcurl_la-sslgen.lo: sslgen.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-sslgen.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-sslgen.Tpo" -c -o libcurl_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-sslgen.Tpo" "$(DEPDIR)/libcurl_la-sslgen.Plo"; else rm -f "$(DEPDIR)/libcurl_la-sslgen.Tpo"; exit 1; fi
-#	source='sslgen.c' object='libcurl_la-sslgen.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-sslgen.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-sslgen.Tpo" -c -o libcurl_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-sslgen.Tpo" "$(DEPDIR)/libcurl_la-sslgen.Plo"; else rm -f "$(DEPDIR)/libcurl_la-sslgen.Tpo"; exit 1; fi
+#	source='sslgen.c' object='libcurl_la-sslgen.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c
 
 libcurl_la-tftp.lo: tftp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-tftp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-tftp.Tpo" -c -o libcurl_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-tftp.Tpo" "$(DEPDIR)/libcurl_la-tftp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-tftp.Tpo"; exit 1; fi
-#	source='tftp.c' object='libcurl_la-tftp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-tftp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-tftp.Tpo" -c -o libcurl_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-tftp.Tpo" "$(DEPDIR)/libcurl_la-tftp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-tftp.Tpo"; exit 1; fi
+#	source='tftp.c' object='libcurl_la-tftp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c
 
 libcurl_la-splay.lo: splay.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-splay.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-splay.Tpo" -c -o libcurl_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-splay.Tpo" "$(DEPDIR)/libcurl_la-splay.Plo"; else rm -f "$(DEPDIR)/libcurl_la-splay.Tpo"; exit 1; fi
-#	source='splay.c' object='libcurl_la-splay.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-splay.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-splay.Tpo" -c -o libcurl_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-splay.Tpo" "$(DEPDIR)/libcurl_la-splay.Plo"; else rm -f "$(DEPDIR)/libcurl_la-splay.Tpo"; exit 1; fi
+#	source='splay.c' object='libcurl_la-splay.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c
 
 libcurl_la-strdup.lo: strdup.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strdup.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strdup.Tpo" -c -o libcurl_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-strdup.Tpo" "$(DEPDIR)/libcurl_la-strdup.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strdup.Tpo"; exit 1; fi
-#	source='strdup.c' object='libcurl_la-strdup.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-strdup.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-strdup.Tpo" -c -o libcurl_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-strdup.Tpo" "$(DEPDIR)/libcurl_la-strdup.Plo"; else rm -f "$(DEPDIR)/libcurl_la-strdup.Tpo"; exit 1; fi
+#	source='strdup.c' object='libcurl_la-strdup.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c
 
 libcurl_la-socks.lo: socks.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks.Tpo" -c -o libcurl_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-socks.Tpo" "$(DEPDIR)/libcurl_la-socks.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks.Tpo"; exit 1; fi
-#	source='socks.c' object='libcurl_la-socks.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks.Tpo" -c -o libcurl_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-socks.Tpo" "$(DEPDIR)/libcurl_la-socks.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks.Tpo"; exit 1; fi
+#	source='socks.c' object='libcurl_la-socks.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c
 
 libcurl_la-ssh.lo: ssh.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ssh.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ssh.Tpo" -c -o libcurl_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-ssh.Tpo" "$(DEPDIR)/libcurl_la-ssh.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ssh.Tpo"; exit 1; fi
-#	source='ssh.c' object='libcurl_la-ssh.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-ssh.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-ssh.Tpo" -c -o libcurl_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-ssh.Tpo" "$(DEPDIR)/libcurl_la-ssh.Plo"; else rm -f "$(DEPDIR)/libcurl_la-ssh.Tpo"; exit 1; fi
+#	source='ssh.c' object='libcurl_la-ssh.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c
 
 libcurl_la-nss.lo: nss.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-nss.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-nss.Tpo" -c -o libcurl_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-nss.Tpo" "$(DEPDIR)/libcurl_la-nss.Plo"; else rm -f "$(DEPDIR)/libcurl_la-nss.Tpo"; exit 1; fi
-#	source='nss.c' object='libcurl_la-nss.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-nss.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-nss.Tpo" -c -o libcurl_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-nss.Tpo" "$(DEPDIR)/libcurl_la-nss.Plo"; else rm -f "$(DEPDIR)/libcurl_la-nss.Tpo"; exit 1; fi
+#	source='nss.c' object='libcurl_la-nss.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c
 
 libcurl_la-qssl.lo: qssl.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-qssl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-qssl.Tpo" -c -o libcurl_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-qssl.Tpo" "$(DEPDIR)/libcurl_la-qssl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-qssl.Tpo"; exit 1; fi
-#	source='qssl.c' object='libcurl_la-qssl.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-qssl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-qssl.Tpo" -c -o libcurl_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-qssl.Tpo" "$(DEPDIR)/libcurl_la-qssl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-qssl.Tpo"; exit 1; fi
+#	source='qssl.c' object='libcurl_la-qssl.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c
 
 libcurl_la-rawstr.lo: rawstr.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-rawstr.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-rawstr.Tpo" -c -o libcurl_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-rawstr.Tpo" "$(DEPDIR)/libcurl_la-rawstr.Plo"; else rm -f "$(DEPDIR)/libcurl_la-rawstr.Tpo"; exit 1; fi
-#	source='rawstr.c' object='libcurl_la-rawstr.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-rawstr.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-rawstr.Tpo" -c -o libcurl_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-rawstr.Tpo" "$(DEPDIR)/libcurl_la-rawstr.Plo"; else rm -f "$(DEPDIR)/libcurl_la-rawstr.Tpo"; exit 1; fi
+#	source='rawstr.c' object='libcurl_la-rawstr.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c
 
 libcurl_la-curl_addrinfo.lo: curl_addrinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_addrinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo" -c -o libcurl_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo" "$(DEPDIR)/libcurl_la-curl_addrinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo"; exit 1; fi
-#	source='curl_addrinfo.c' object='libcurl_la-curl_addrinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_addrinfo.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo" -c -o libcurl_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo" "$(DEPDIR)/libcurl_la-curl_addrinfo.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_addrinfo.Tpo"; exit 1; fi
+#	source='curl_addrinfo.c' object='libcurl_la-curl_addrinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c
 
 libcurl_la-socks_gssapi.lo: socks_gssapi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks_gssapi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo" -c -o libcurl_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo" "$(DEPDIR)/libcurl_la-socks_gssapi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo"; exit 1; fi
-#	source='socks_gssapi.c' object='libcurl_la-socks_gssapi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks_gssapi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo" -c -o libcurl_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo" "$(DEPDIR)/libcurl_la-socks_gssapi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks_gssapi.Tpo"; exit 1; fi
+#	source='socks_gssapi.c' object='libcurl_la-socks_gssapi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c
 
 libcurl_la-socks_sspi.lo: socks_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks_sspi.Tpo" -c -o libcurl_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-socks_sspi.Tpo" "$(DEPDIR)/libcurl_la-socks_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks_sspi.Tpo"; exit 1; fi
-#	source='socks_sspi.c' object='libcurl_la-socks_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-socks_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-socks_sspi.Tpo" -c -o libcurl_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-socks_sspi.Tpo" "$(DEPDIR)/libcurl_la-socks_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-socks_sspi.Tpo"; exit 1; fi
+#	source='socks_sspi.c' object='libcurl_la-socks_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c
 
 libcurl_la-curl_sspi.lo: curl_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_sspi.Tpo" -c -o libcurl_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_sspi.Tpo" "$(DEPDIR)/libcurl_la-curl_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_sspi.Tpo"; exit 1; fi
-#	source='curl_sspi.c' object='libcurl_la-curl_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_sspi.Tpo" -c -o libcurl_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_sspi.Tpo" "$(DEPDIR)/libcurl_la-curl_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_sspi.Tpo"; exit 1; fi
+#	source='curl_sspi.c' object='libcurl_la-curl_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c
 
 libcurl_la-slist.lo: slist.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-slist.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-slist.Tpo" -c -o libcurl_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-slist.Tpo" "$(DEPDIR)/libcurl_la-slist.Plo"; else rm -f "$(DEPDIR)/libcurl_la-slist.Tpo"; exit 1; fi
-#	source='slist.c' object='libcurl_la-slist.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-slist.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-slist.Tpo" -c -o libcurl_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-slist.Tpo" "$(DEPDIR)/libcurl_la-slist.Plo"; else rm -f "$(DEPDIR)/libcurl_la-slist.Tpo"; exit 1; fi
+#	source='slist.c' object='libcurl_la-slist.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c
 
 libcurl_la-nonblock.lo: nonblock.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-nonblock.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-nonblock.Tpo" -c -o libcurl_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-nonblock.Tpo" "$(DEPDIR)/libcurl_la-nonblock.Plo"; else rm -f "$(DEPDIR)/libcurl_la-nonblock.Tpo"; exit 1; fi
-#	source='nonblock.c' object='libcurl_la-nonblock.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-nonblock.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-nonblock.Tpo" -c -o libcurl_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-nonblock.Tpo" "$(DEPDIR)/libcurl_la-nonblock.Plo"; else rm -f "$(DEPDIR)/libcurl_la-nonblock.Tpo"; exit 1; fi
+#	source='nonblock.c' object='libcurl_la-nonblock.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c
 
 libcurl_la-curl_memrchr.lo: curl_memrchr.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_memrchr.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo" -c -o libcurl_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo" "$(DEPDIR)/libcurl_la-curl_memrchr.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo"; exit 1; fi
-#	source='curl_memrchr.c' object='libcurl_la-curl_memrchr.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_memrchr.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo" -c -o libcurl_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo" "$(DEPDIR)/libcurl_la-curl_memrchr.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_memrchr.Tpo"; exit 1; fi
+#	source='curl_memrchr.c' object='libcurl_la-curl_memrchr.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c
 
 libcurl_la-imap.lo: imap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-imap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-imap.Tpo" -c -o libcurl_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-imap.Tpo" "$(DEPDIR)/libcurl_la-imap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-imap.Tpo"; exit 1; fi
-#	source='imap.c' object='libcurl_la-imap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-imap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-imap.Tpo" -c -o libcurl_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-imap.Tpo" "$(DEPDIR)/libcurl_la-imap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-imap.Tpo"; exit 1; fi
+#	source='imap.c' object='libcurl_la-imap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c
 
 libcurl_la-pop3.lo: pop3.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-pop3.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-pop3.Tpo" -c -o libcurl_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-pop3.Tpo" "$(DEPDIR)/libcurl_la-pop3.Plo"; else rm -f "$(DEPDIR)/libcurl_la-pop3.Tpo"; exit 1; fi
-#	source='pop3.c' object='libcurl_la-pop3.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-pop3.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-pop3.Tpo" -c -o libcurl_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-pop3.Tpo" "$(DEPDIR)/libcurl_la-pop3.Plo"; else rm -f "$(DEPDIR)/libcurl_la-pop3.Tpo"; exit 1; fi
+#	source='pop3.c' object='libcurl_la-pop3.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c
 
 libcurl_la-smtp.lo: smtp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-smtp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-smtp.Tpo" -c -o libcurl_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-smtp.Tpo" "$(DEPDIR)/libcurl_la-smtp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-smtp.Tpo"; exit 1; fi
-#	source='smtp.c' object='libcurl_la-smtp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-smtp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-smtp.Tpo" -c -o libcurl_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-smtp.Tpo" "$(DEPDIR)/libcurl_la-smtp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-smtp.Tpo"; exit 1; fi
+#	source='smtp.c' object='libcurl_la-smtp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c
 
 libcurl_la-pingpong.lo: pingpong.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-pingpong.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-pingpong.Tpo" -c -o libcurl_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-pingpong.Tpo" "$(DEPDIR)/libcurl_la-pingpong.Plo"; else rm -f "$(DEPDIR)/libcurl_la-pingpong.Tpo"; exit 1; fi
-#	source='pingpong.c' object='libcurl_la-pingpong.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-pingpong.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-pingpong.Tpo" -c -o libcurl_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-pingpong.Tpo" "$(DEPDIR)/libcurl_la-pingpong.Plo"; else rm -f "$(DEPDIR)/libcurl_la-pingpong.Tpo"; exit 1; fi
+#	source='pingpong.c' object='libcurl_la-pingpong.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c
 
 libcurl_la-rtsp.lo: rtsp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-rtsp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-rtsp.Tpo" -c -o libcurl_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-rtsp.Tpo" "$(DEPDIR)/libcurl_la-rtsp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-rtsp.Tpo"; exit 1; fi
-#	source='rtsp.c' object='libcurl_la-rtsp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-rtsp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-rtsp.Tpo" -c -o libcurl_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-rtsp.Tpo" "$(DEPDIR)/libcurl_la-rtsp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-rtsp.Tpo"; exit 1; fi
+#	source='rtsp.c' object='libcurl_la-rtsp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c
 
 libcurl_la-curl_threads.lo: curl_threads.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_threads.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_threads.Tpo" -c -o libcurl_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_threads.Tpo" "$(DEPDIR)/libcurl_la-curl_threads.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_threads.Tpo"; exit 1; fi
-#	source='curl_threads.c' object='libcurl_la-curl_threads.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_threads.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_threads.Tpo" -c -o libcurl_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_threads.Tpo" "$(DEPDIR)/libcurl_la-curl_threads.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_threads.Tpo"; exit 1; fi
+#	source='curl_threads.c' object='libcurl_la-curl_threads.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c
 
 libcurl_la-warnless.lo: warnless.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-warnless.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-warnless.Tpo" -c -o libcurl_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-warnless.Tpo" "$(DEPDIR)/libcurl_la-warnless.Plo"; else rm -f "$(DEPDIR)/libcurl_la-warnless.Tpo"; exit 1; fi
-#	source='warnless.c' object='libcurl_la-warnless.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-warnless.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-warnless.Tpo" -c -o libcurl_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-warnless.Tpo" "$(DEPDIR)/libcurl_la-warnless.Plo"; else rm -f "$(DEPDIR)/libcurl_la-warnless.Tpo"; exit 1; fi
+#	source='warnless.c' object='libcurl_la-warnless.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c
 
 libcurl_la-hmac.lo: hmac.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hmac.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hmac.Tpo" -c -o libcurl_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-hmac.Tpo" "$(DEPDIR)/libcurl_la-hmac.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hmac.Tpo"; exit 1; fi
-#	source='hmac.c' object='libcurl_la-hmac.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hmac.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hmac.Tpo" -c -o libcurl_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-hmac.Tpo" "$(DEPDIR)/libcurl_la-hmac.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hmac.Tpo"; exit 1; fi
+#	source='hmac.c' object='libcurl_la-hmac.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
 
 libcurl_la-polarssl.lo: polarssl.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-polarssl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-polarssl.Tpo" -c -o libcurl_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-polarssl.Tpo" "$(DEPDIR)/libcurl_la-polarssl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-polarssl.Tpo"; exit 1; fi
-#	source='polarssl.c' object='libcurl_la-polarssl.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-polarssl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-polarssl.Tpo" -c -o libcurl_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-polarssl.Tpo" "$(DEPDIR)/libcurl_la-polarssl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-polarssl.Tpo"; exit 1; fi
+#	source='polarssl.c' object='libcurl_la-polarssl.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c
 
 libcurl_la-curl_rtmp.lo: curl_rtmp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_rtmp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo" -c -o libcurl_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo" "$(DEPDIR)/libcurl_la-curl_rtmp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo"; exit 1; fi
-#	source='curl_rtmp.c' object='libcurl_la-curl_rtmp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_rtmp.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo" -c -o libcurl_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo" "$(DEPDIR)/libcurl_la-curl_rtmp.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_rtmp.Tpo"; exit 1; fi
+#	source='curl_rtmp.c' object='libcurl_la-curl_rtmp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c
 
 libcurl_la-openldap.lo: openldap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-openldap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-openldap.Tpo" -c -o libcurl_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-openldap.Tpo" "$(DEPDIR)/libcurl_la-openldap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-openldap.Tpo"; exit 1; fi
-#	source='openldap.c' object='libcurl_la-openldap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-openldap.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-openldap.Tpo" -c -o libcurl_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-openldap.Tpo" "$(DEPDIR)/libcurl_la-openldap.Plo"; else rm -f "$(DEPDIR)/libcurl_la-openldap.Tpo"; exit 1; fi
+#	source='openldap.c' object='libcurl_la-openldap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c
 
 libcurl_la-curl_gethostname.lo: curl_gethostname.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_gethostname.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo" -c -o libcurl_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo" "$(DEPDIR)/libcurl_la-curl_gethostname.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo"; exit 1; fi
-#	source='curl_gethostname.c' object='libcurl_la-curl_gethostname.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_gethostname.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo" -c -o libcurl_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo" "$(DEPDIR)/libcurl_la-curl_gethostname.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_gethostname.Tpo"; exit 1; fi
+#	source='curl_gethostname.c' object='libcurl_la-curl_gethostname.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c
 
 libcurl_la-gopher.lo: gopher.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-gopher.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-gopher.Tpo" -c -o libcurl_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-gopher.Tpo" "$(DEPDIR)/libcurl_la-gopher.Plo"; else rm -f "$(DEPDIR)/libcurl_la-gopher.Tpo"; exit 1; fi
-#	source='gopher.c' object='libcurl_la-gopher.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-gopher.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-gopher.Tpo" -c -o libcurl_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-gopher.Tpo" "$(DEPDIR)/libcurl_la-gopher.Plo"; else rm -f "$(DEPDIR)/libcurl_la-gopher.Tpo"; exit 1; fi
+#	source='gopher.c' object='libcurl_la-gopher.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c
 
 libcurl_la-axtls.lo: axtls.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-axtls.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-axtls.Tpo" -c -o libcurl_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-axtls.Tpo" "$(DEPDIR)/libcurl_la-axtls.Plo"; else rm -f "$(DEPDIR)/libcurl_la-axtls.Tpo"; exit 1; fi
-#	source='axtls.c' object='libcurl_la-axtls.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-axtls.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-axtls.Tpo" -c -o libcurl_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-axtls.Tpo" "$(DEPDIR)/libcurl_la-axtls.Plo"; else rm -f "$(DEPDIR)/libcurl_la-axtls.Tpo"; exit 1; fi
+#	source='axtls.c' object='libcurl_la-axtls.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c
 
 libcurl_la-idn_win32.lo: idn_win32.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-idn_win32.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-idn_win32.Tpo" -c -o libcurl_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-idn_win32.Tpo" "$(DEPDIR)/libcurl_la-idn_win32.Plo"; else rm -f "$(DEPDIR)/libcurl_la-idn_win32.Tpo"; exit 1; fi
-#	source='idn_win32.c' object='libcurl_la-idn_win32.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-idn_win32.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-idn_win32.Tpo" -c -o libcurl_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-idn_win32.Tpo" "$(DEPDIR)/libcurl_la-idn_win32.Plo"; else rm -f "$(DEPDIR)/libcurl_la-idn_win32.Tpo"; exit 1; fi
+#	source='idn_win32.c' object='libcurl_la-idn_win32.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c
 
 libcurl_la-http_negotiate_sspi.lo: http_negotiate_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_negotiate_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo" -c -o libcurl_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo" "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo"; exit 1; fi
-#	source='http_negotiate_sspi.c' object='libcurl_la-http_negotiate_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-http_negotiate_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo" -c -o libcurl_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo" "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Plo"; else rm -f "$(DEPDIR)/libcurl_la-http_negotiate_sspi.Tpo"; exit 1; fi
+#	source='http_negotiate_sspi.c' object='libcurl_la-http_negotiate_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c
 
 libcurlu_la-file.lo: file.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-file.Tpo" -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-file.Tpo" "$(DEPDIR)/libcurlu_la-file.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-file.Tpo"; exit 1; fi
-#	source='file.c' object='libcurlu_la-file.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-file.Tpo" -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-file.Tpo" "$(DEPDIR)/libcurlu_la-file.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-file.Tpo"; exit 1; fi
+#	source='file.c' object='libcurlu_la-file.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c
 
 libcurlu_la-timeval.lo: timeval.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-timeval.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-timeval.Tpo" -c -o libcurlu_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-timeval.Tpo" "$(DEPDIR)/libcurlu_la-timeval.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-timeval.Tpo"; exit 1; fi
-#	source='timeval.c' object='libcurlu_la-timeval.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-timeval.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-timeval.Tpo" -c -o libcurlu_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-timeval.Tpo" "$(DEPDIR)/libcurlu_la-timeval.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-timeval.Tpo"; exit 1; fi
+#	source='timeval.c' object='libcurlu_la-timeval.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-timeval.lo `test -f 'timeval.c' || echo '$(srcdir)/'`timeval.c
 
 libcurlu_la-base64.lo: base64.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-base64.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-base64.Tpo" -c -o libcurlu_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-base64.Tpo" "$(DEPDIR)/libcurlu_la-base64.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-base64.Tpo"; exit 1; fi
-#	source='base64.c' object='libcurlu_la-base64.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-base64.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-base64.Tpo" -c -o libcurlu_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-base64.Tpo" "$(DEPDIR)/libcurlu_la-base64.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-base64.Tpo"; exit 1; fi
+#	source='base64.c' object='libcurlu_la-base64.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
 
 libcurlu_la-hostip.lo: hostip.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip.Tpo" -c -o libcurlu_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostip.Tpo" "$(DEPDIR)/libcurlu_la-hostip.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip.Tpo"; exit 1; fi
-#	source='hostip.c' object='libcurlu_la-hostip.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip.Tpo" -c -o libcurlu_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostip.Tpo" "$(DEPDIR)/libcurlu_la-hostip.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip.Tpo"; exit 1; fi
+#	source='hostip.c' object='libcurlu_la-hostip.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip.lo `test -f 'hostip.c' || echo '$(srcdir)/'`hostip.c
 
 libcurlu_la-progress.lo: progress.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-progress.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-progress.Tpo" -c -o libcurlu_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-progress.Tpo" "$(DEPDIR)/libcurlu_la-progress.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-progress.Tpo"; exit 1; fi
-#	source='progress.c' object='libcurlu_la-progress.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-progress.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-progress.Tpo" -c -o libcurlu_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-progress.Tpo" "$(DEPDIR)/libcurlu_la-progress.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-progress.Tpo"; exit 1; fi
+#	source='progress.c' object='libcurlu_la-progress.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-progress.lo `test -f 'progress.c' || echo '$(srcdir)/'`progress.c
 
 libcurlu_la-formdata.lo: formdata.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-formdata.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-formdata.Tpo" -c -o libcurlu_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-formdata.Tpo" "$(DEPDIR)/libcurlu_la-formdata.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-formdata.Tpo"; exit 1; fi
-#	source='formdata.c' object='libcurlu_la-formdata.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-formdata.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-formdata.Tpo" -c -o libcurlu_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-formdata.Tpo" "$(DEPDIR)/libcurlu_la-formdata.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-formdata.Tpo"; exit 1; fi
+#	source='formdata.c' object='libcurlu_la-formdata.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-formdata.lo `test -f 'formdata.c' || echo '$(srcdir)/'`formdata.c
 
 libcurlu_la-cookie.lo: cookie.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-cookie.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-cookie.Tpo" -c -o libcurlu_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-cookie.Tpo" "$(DEPDIR)/libcurlu_la-cookie.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-cookie.Tpo"; exit 1; fi
-#	source='cookie.c' object='libcurlu_la-cookie.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-cookie.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-cookie.Tpo" -c -o libcurlu_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-cookie.Tpo" "$(DEPDIR)/libcurlu_la-cookie.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-cookie.Tpo"; exit 1; fi
+#	source='cookie.c' object='libcurlu_la-cookie.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-cookie.lo `test -f 'cookie.c' || echo '$(srcdir)/'`cookie.c
 
 libcurlu_la-http.lo: http.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http.Tpo" -c -o libcurlu_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http.Tpo" "$(DEPDIR)/libcurlu_la-http.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http.Tpo"; exit 1; fi
-#	source='http.c' object='libcurlu_la-http.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http.Tpo" -c -o libcurlu_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http.Tpo" "$(DEPDIR)/libcurlu_la-http.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http.Tpo"; exit 1; fi
+#	source='http.c' object='libcurlu_la-http.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http.lo `test -f 'http.c' || echo '$(srcdir)/'`http.c
 
 libcurlu_la-sendf.lo: sendf.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-sendf.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-sendf.Tpo" -c -o libcurlu_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-sendf.Tpo" "$(DEPDIR)/libcurlu_la-sendf.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-sendf.Tpo"; exit 1; fi
-#	source='sendf.c' object='libcurlu_la-sendf.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-sendf.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-sendf.Tpo" -c -o libcurlu_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-sendf.Tpo" "$(DEPDIR)/libcurlu_la-sendf.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-sendf.Tpo"; exit 1; fi
+#	source='sendf.c' object='libcurlu_la-sendf.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-sendf.lo `test -f 'sendf.c' || echo '$(srcdir)/'`sendf.c
 
 libcurlu_la-ftp.lo: ftp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ftp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ftp.Tpo" -c -o libcurlu_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-ftp.Tpo" "$(DEPDIR)/libcurlu_la-ftp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ftp.Tpo"; exit 1; fi
-#	source='ftp.c' object='libcurlu_la-ftp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ftp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ftp.Tpo" -c -o libcurlu_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-ftp.Tpo" "$(DEPDIR)/libcurlu_la-ftp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ftp.Tpo"; exit 1; fi
+#	source='ftp.c' object='libcurlu_la-ftp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ftp.lo `test -f 'ftp.c' || echo '$(srcdir)/'`ftp.c
 
 libcurlu_la-url.lo: url.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-url.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-url.Tpo" -c -o libcurlu_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-url.Tpo" "$(DEPDIR)/libcurlu_la-url.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-url.Tpo"; exit 1; fi
-#	source='url.c' object='libcurlu_la-url.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-url.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-url.Tpo" -c -o libcurlu_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-url.Tpo" "$(DEPDIR)/libcurlu_la-url.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-url.Tpo"; exit 1; fi
+#	source='url.c' object='libcurlu_la-url.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-url.lo `test -f 'url.c' || echo '$(srcdir)/'`url.c
 
 libcurlu_la-dict.lo: dict.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-dict.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-dict.Tpo" -c -o libcurlu_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-dict.Tpo" "$(DEPDIR)/libcurlu_la-dict.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-dict.Tpo"; exit 1; fi
-#	source='dict.c' object='libcurlu_la-dict.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-dict.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-dict.Tpo" -c -o libcurlu_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-dict.Tpo" "$(DEPDIR)/libcurlu_la-dict.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-dict.Tpo"; exit 1; fi
+#	source='dict.c' object='libcurlu_la-dict.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-dict.lo `test -f 'dict.c' || echo '$(srcdir)/'`dict.c
 
 libcurlu_la-if2ip.lo: if2ip.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-if2ip.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-if2ip.Tpo" -c -o libcurlu_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-if2ip.Tpo" "$(DEPDIR)/libcurlu_la-if2ip.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-if2ip.Tpo"; exit 1; fi
-#	source='if2ip.c' object='libcurlu_la-if2ip.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-if2ip.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-if2ip.Tpo" -c -o libcurlu_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-if2ip.Tpo" "$(DEPDIR)/libcurlu_la-if2ip.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-if2ip.Tpo"; exit 1; fi
+#	source='if2ip.c' object='libcurlu_la-if2ip.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-if2ip.lo `test -f 'if2ip.c' || echo '$(srcdir)/'`if2ip.c
 
 libcurlu_la-speedcheck.lo: speedcheck.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-speedcheck.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-speedcheck.Tpo" -c -o libcurlu_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-speedcheck.Tpo" "$(DEPDIR)/libcurlu_la-speedcheck.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-speedcheck.Tpo"; exit 1; fi
-#	source='speedcheck.c' object='libcurlu_la-speedcheck.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-speedcheck.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-speedcheck.Tpo" -c -o libcurlu_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-speedcheck.Tpo" "$(DEPDIR)/libcurlu_la-speedcheck.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-speedcheck.Tpo"; exit 1; fi
+#	source='speedcheck.c' object='libcurlu_la-speedcheck.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-speedcheck.lo `test -f 'speedcheck.c' || echo '$(srcdir)/'`speedcheck.c
 
 libcurlu_la-ldap.lo: ldap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ldap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ldap.Tpo" -c -o libcurlu_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-ldap.Tpo" "$(DEPDIR)/libcurlu_la-ldap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ldap.Tpo"; exit 1; fi
-#	source='ldap.c' object='libcurlu_la-ldap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ldap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ldap.Tpo" -c -o libcurlu_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-ldap.Tpo" "$(DEPDIR)/libcurlu_la-ldap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ldap.Tpo"; exit 1; fi
+#	source='ldap.c' object='libcurlu_la-ldap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ldap.lo `test -f 'ldap.c' || echo '$(srcdir)/'`ldap.c
 
 libcurlu_la-ssluse.lo: ssluse.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ssluse.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ssluse.Tpo" -c -o libcurlu_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-ssluse.Tpo" "$(DEPDIR)/libcurlu_la-ssluse.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ssluse.Tpo"; exit 1; fi
-#	source='ssluse.c' object='libcurlu_la-ssluse.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ssluse.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ssluse.Tpo" -c -o libcurlu_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-ssluse.Tpo" "$(DEPDIR)/libcurlu_la-ssluse.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ssluse.Tpo"; exit 1; fi
+#	source='ssluse.c' object='libcurlu_la-ssluse.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ssluse.lo `test -f 'ssluse.c' || echo '$(srcdir)/'`ssluse.c
 
 libcurlu_la-version.lo: version.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-version.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-version.Tpo" -c -o libcurlu_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-version.Tpo" "$(DEPDIR)/libcurlu_la-version.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-version.Tpo"; exit 1; fi
-#	source='version.c' object='libcurlu_la-version.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-version.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-version.Tpo" -c -o libcurlu_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-version.Tpo" "$(DEPDIR)/libcurlu_la-version.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-version.Tpo"; exit 1; fi
+#	source='version.c' object='libcurlu_la-version.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c
 
 libcurlu_la-getenv.lo: getenv.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-getenv.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-getenv.Tpo" -c -o libcurlu_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-getenv.Tpo" "$(DEPDIR)/libcurlu_la-getenv.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-getenv.Tpo"; exit 1; fi
-#	source='getenv.c' object='libcurlu_la-getenv.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-getenv.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-getenv.Tpo" -c -o libcurlu_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-getenv.Tpo" "$(DEPDIR)/libcurlu_la-getenv.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-getenv.Tpo"; exit 1; fi
+#	source='getenv.c' object='libcurlu_la-getenv.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-getenv.lo `test -f 'getenv.c' || echo '$(srcdir)/'`getenv.c
 
 libcurlu_la-escape.lo: escape.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-escape.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-escape.Tpo" -c -o libcurlu_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-escape.Tpo" "$(DEPDIR)/libcurlu_la-escape.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-escape.Tpo"; exit 1; fi
-#	source='escape.c' object='libcurlu_la-escape.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-escape.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-escape.Tpo" -c -o libcurlu_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-escape.Tpo" "$(DEPDIR)/libcurlu_la-escape.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-escape.Tpo"; exit 1; fi
+#	source='escape.c' object='libcurlu_la-escape.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-escape.lo `test -f 'escape.c' || echo '$(srcdir)/'`escape.c
 
 libcurlu_la-mprintf.lo: mprintf.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-mprintf.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-mprintf.Tpo" -c -o libcurlu_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-mprintf.Tpo" "$(DEPDIR)/libcurlu_la-mprintf.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-mprintf.Tpo"; exit 1; fi
-#	source='mprintf.c' object='libcurlu_la-mprintf.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-mprintf.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-mprintf.Tpo" -c -o libcurlu_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-mprintf.Tpo" "$(DEPDIR)/libcurlu_la-mprintf.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-mprintf.Tpo"; exit 1; fi
+#	source='mprintf.c' object='libcurlu_la-mprintf.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-mprintf.lo `test -f 'mprintf.c' || echo '$(srcdir)/'`mprintf.c
 
 libcurlu_la-telnet.lo: telnet.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-telnet.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-telnet.Tpo" -c -o libcurlu_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-telnet.Tpo" "$(DEPDIR)/libcurlu_la-telnet.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-telnet.Tpo"; exit 1; fi
-#	source='telnet.c' object='libcurlu_la-telnet.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-telnet.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-telnet.Tpo" -c -o libcurlu_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-telnet.Tpo" "$(DEPDIR)/libcurlu_la-telnet.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-telnet.Tpo"; exit 1; fi
+#	source='telnet.c' object='libcurlu_la-telnet.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-telnet.lo `test -f 'telnet.c' || echo '$(srcdir)/'`telnet.c
 
 libcurlu_la-netrc.lo: netrc.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-netrc.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-netrc.Tpo" -c -o libcurlu_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-netrc.Tpo" "$(DEPDIR)/libcurlu_la-netrc.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-netrc.Tpo"; exit 1; fi
-#	source='netrc.c' object='libcurlu_la-netrc.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-netrc.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-netrc.Tpo" -c -o libcurlu_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-netrc.Tpo" "$(DEPDIR)/libcurlu_la-netrc.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-netrc.Tpo"; exit 1; fi
+#	source='netrc.c' object='libcurlu_la-netrc.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-netrc.lo `test -f 'netrc.c' || echo '$(srcdir)/'`netrc.c
 
 libcurlu_la-getinfo.lo: getinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-getinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-getinfo.Tpo" -c -o libcurlu_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-getinfo.Tpo" "$(DEPDIR)/libcurlu_la-getinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-getinfo.Tpo"; exit 1; fi
-#	source='getinfo.c' object='libcurlu_la-getinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-getinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-getinfo.Tpo" -c -o libcurlu_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-getinfo.Tpo" "$(DEPDIR)/libcurlu_la-getinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-getinfo.Tpo"; exit 1; fi
+#	source='getinfo.c' object='libcurlu_la-getinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-getinfo.lo `test -f 'getinfo.c' || echo '$(srcdir)/'`getinfo.c
 
 libcurlu_la-transfer.lo: transfer.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-transfer.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-transfer.Tpo" -c -o libcurlu_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-transfer.Tpo" "$(DEPDIR)/libcurlu_la-transfer.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-transfer.Tpo"; exit 1; fi
-#	source='transfer.c' object='libcurlu_la-transfer.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-transfer.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-transfer.Tpo" -c -o libcurlu_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-transfer.Tpo" "$(DEPDIR)/libcurlu_la-transfer.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-transfer.Tpo"; exit 1; fi
+#	source='transfer.c' object='libcurlu_la-transfer.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-transfer.lo `test -f 'transfer.c' || echo '$(srcdir)/'`transfer.c
 
 libcurlu_la-strequal.lo: strequal.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strequal.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strequal.Tpo" -c -o libcurlu_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-strequal.Tpo" "$(DEPDIR)/libcurlu_la-strequal.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strequal.Tpo"; exit 1; fi
-#	source='strequal.c' object='libcurlu_la-strequal.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strequal.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strequal.Tpo" -c -o libcurlu_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-strequal.Tpo" "$(DEPDIR)/libcurlu_la-strequal.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strequal.Tpo"; exit 1; fi
+#	source='strequal.c' object='libcurlu_la-strequal.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strequal.lo `test -f 'strequal.c' || echo '$(srcdir)/'`strequal.c
 
 libcurlu_la-easy.lo: easy.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-easy.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-easy.Tpo" -c -o libcurlu_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-easy.Tpo" "$(DEPDIR)/libcurlu_la-easy.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-easy.Tpo"; exit 1; fi
-#	source='easy.c' object='libcurlu_la-easy.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-easy.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-easy.Tpo" -c -o libcurlu_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-easy.Tpo" "$(DEPDIR)/libcurlu_la-easy.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-easy.Tpo"; exit 1; fi
+#	source='easy.c' object='libcurlu_la-easy.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-easy.lo `test -f 'easy.c' || echo '$(srcdir)/'`easy.c
 
 libcurlu_la-security.lo: security.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-security.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-security.Tpo" -c -o libcurlu_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-security.Tpo" "$(DEPDIR)/libcurlu_la-security.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-security.Tpo"; exit 1; fi
-#	source='security.c' object='libcurlu_la-security.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-security.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-security.Tpo" -c -o libcurlu_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-security.Tpo" "$(DEPDIR)/libcurlu_la-security.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-security.Tpo"; exit 1; fi
+#	source='security.c' object='libcurlu_la-security.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-security.lo `test -f 'security.c' || echo '$(srcdir)/'`security.c
 
 libcurlu_la-krb4.lo: krb4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-krb4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-krb4.Tpo" -c -o libcurlu_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-krb4.Tpo" "$(DEPDIR)/libcurlu_la-krb4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-krb4.Tpo"; exit 1; fi
-#	source='krb4.c' object='libcurlu_la-krb4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-krb4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-krb4.Tpo" -c -o libcurlu_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-krb4.Tpo" "$(DEPDIR)/libcurlu_la-krb4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-krb4.Tpo"; exit 1; fi
+#	source='krb4.c' object='libcurlu_la-krb4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-krb4.lo `test -f 'krb4.c' || echo '$(srcdir)/'`krb4.c
 
 libcurlu_la-curl_fnmatch.lo: curl_fnmatch.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_fnmatch.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo" -c -o libcurlu_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo" "$(DEPDIR)/libcurlu_la-curl_fnmatch.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo"; exit 1; fi
-#	source='curl_fnmatch.c' object='libcurlu_la-curl_fnmatch.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_fnmatch.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo" -c -o libcurlu_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo" "$(DEPDIR)/libcurlu_la-curl_fnmatch.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_fnmatch.Tpo"; exit 1; fi
+#	source='curl_fnmatch.c' object='libcurlu_la-curl_fnmatch.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_fnmatch.lo `test -f 'curl_fnmatch.c' || echo '$(srcdir)/'`curl_fnmatch.c
 
 libcurlu_la-fileinfo.lo: fileinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-fileinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-fileinfo.Tpo" -c -o libcurlu_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-fileinfo.Tpo" "$(DEPDIR)/libcurlu_la-fileinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-fileinfo.Tpo"; exit 1; fi
-#	source='fileinfo.c' object='libcurlu_la-fileinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-fileinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-fileinfo.Tpo" -c -o libcurlu_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-fileinfo.Tpo" "$(DEPDIR)/libcurlu_la-fileinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-fileinfo.Tpo"; exit 1; fi
+#	source='fileinfo.c' object='libcurlu_la-fileinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-fileinfo.lo `test -f 'fileinfo.c' || echo '$(srcdir)/'`fileinfo.c
 
 libcurlu_la-ftplistparser.lo: ftplistparser.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ftplistparser.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo" -c -o libcurlu_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo" "$(DEPDIR)/libcurlu_la-ftplistparser.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo"; exit 1; fi
-#	source='ftplistparser.c' object='libcurlu_la-ftplistparser.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ftplistparser.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo" -c -o libcurlu_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo" "$(DEPDIR)/libcurlu_la-ftplistparser.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ftplistparser.Tpo"; exit 1; fi
+#	source='ftplistparser.c' object='libcurlu_la-ftplistparser.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ftplistparser.lo `test -f 'ftplistparser.c' || echo '$(srcdir)/'`ftplistparser.c
 
 libcurlu_la-wildcard.lo: wildcard.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-wildcard.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-wildcard.Tpo" -c -o libcurlu_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-wildcard.Tpo" "$(DEPDIR)/libcurlu_la-wildcard.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-wildcard.Tpo"; exit 1; fi
-#	source='wildcard.c' object='libcurlu_la-wildcard.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-wildcard.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-wildcard.Tpo" -c -o libcurlu_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-wildcard.Tpo" "$(DEPDIR)/libcurlu_la-wildcard.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-wildcard.Tpo"; exit 1; fi
+#	source='wildcard.c' object='libcurlu_la-wildcard.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-wildcard.lo `test -f 'wildcard.c' || echo '$(srcdir)/'`wildcard.c
 
 libcurlu_la-krb5.lo: krb5.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-krb5.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-krb5.Tpo" -c -o libcurlu_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-krb5.Tpo" "$(DEPDIR)/libcurlu_la-krb5.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-krb5.Tpo"; exit 1; fi
-#	source='krb5.c' object='libcurlu_la-krb5.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-krb5.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-krb5.Tpo" -c -o libcurlu_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-krb5.Tpo" "$(DEPDIR)/libcurlu_la-krb5.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-krb5.Tpo"; exit 1; fi
+#	source='krb5.c' object='libcurlu_la-krb5.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-krb5.lo `test -f 'krb5.c' || echo '$(srcdir)/'`krb5.c
 
 libcurlu_la-memdebug.lo: memdebug.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-memdebug.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-memdebug.Tpo" -c -o libcurlu_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-memdebug.Tpo" "$(DEPDIR)/libcurlu_la-memdebug.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-memdebug.Tpo"; exit 1; fi
-#	source='memdebug.c' object='libcurlu_la-memdebug.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-memdebug.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-memdebug.Tpo" -c -o libcurlu_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-memdebug.Tpo" "$(DEPDIR)/libcurlu_la-memdebug.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-memdebug.Tpo"; exit 1; fi
+#	source='memdebug.c' object='libcurlu_la-memdebug.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-memdebug.lo `test -f 'memdebug.c' || echo '$(srcdir)/'`memdebug.c
 
 libcurlu_la-http_chunks.lo: http_chunks.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_chunks.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_chunks.Tpo" -c -o libcurlu_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http_chunks.Tpo" "$(DEPDIR)/libcurlu_la-http_chunks.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_chunks.Tpo"; exit 1; fi
-#	source='http_chunks.c' object='libcurlu_la-http_chunks.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_chunks.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_chunks.Tpo" -c -o libcurlu_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http_chunks.Tpo" "$(DEPDIR)/libcurlu_la-http_chunks.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_chunks.Tpo"; exit 1; fi
+#	source='http_chunks.c' object='libcurlu_la-http_chunks.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_chunks.lo `test -f 'http_chunks.c' || echo '$(srcdir)/'`http_chunks.c
 
 libcurlu_la-strtok.lo: strtok.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strtok.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strtok.Tpo" -c -o libcurlu_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-strtok.Tpo" "$(DEPDIR)/libcurlu_la-strtok.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strtok.Tpo"; exit 1; fi
-#	source='strtok.c' object='libcurlu_la-strtok.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strtok.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strtok.Tpo" -c -o libcurlu_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-strtok.Tpo" "$(DEPDIR)/libcurlu_la-strtok.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strtok.Tpo"; exit 1; fi
+#	source='strtok.c' object='libcurlu_la-strtok.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strtok.lo `test -f 'strtok.c' || echo '$(srcdir)/'`strtok.c
 
 libcurlu_la-connect.lo: connect.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-connect.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-connect.Tpo" -c -o libcurlu_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-connect.Tpo" "$(DEPDIR)/libcurlu_la-connect.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-connect.Tpo"; exit 1; fi
-#	source='connect.c' object='libcurlu_la-connect.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-connect.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-connect.Tpo" -c -o libcurlu_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-connect.Tpo" "$(DEPDIR)/libcurlu_la-connect.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-connect.Tpo"; exit 1; fi
+#	source='connect.c' object='libcurlu_la-connect.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-connect.lo `test -f 'connect.c' || echo '$(srcdir)/'`connect.c
 
 libcurlu_la-llist.lo: llist.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-llist.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-llist.Tpo" -c -o libcurlu_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-llist.Tpo" "$(DEPDIR)/libcurlu_la-llist.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-llist.Tpo"; exit 1; fi
-#	source='llist.c' object='libcurlu_la-llist.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-llist.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-llist.Tpo" -c -o libcurlu_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-llist.Tpo" "$(DEPDIR)/libcurlu_la-llist.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-llist.Tpo"; exit 1; fi
+#	source='llist.c' object='libcurlu_la-llist.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-llist.lo `test -f 'llist.c' || echo '$(srcdir)/'`llist.c
 
 libcurlu_la-hash.lo: hash.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hash.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hash.Tpo" -c -o libcurlu_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hash.Tpo" "$(DEPDIR)/libcurlu_la-hash.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hash.Tpo"; exit 1; fi
-#	source='hash.c' object='libcurlu_la-hash.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hash.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hash.Tpo" -c -o libcurlu_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hash.Tpo" "$(DEPDIR)/libcurlu_la-hash.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hash.Tpo"; exit 1; fi
+#	source='hash.c' object='libcurlu_la-hash.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
 
 libcurlu_la-multi.lo: multi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-multi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-multi.Tpo" -c -o libcurlu_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-multi.Tpo" "$(DEPDIR)/libcurlu_la-multi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-multi.Tpo"; exit 1; fi
-#	source='multi.c' object='libcurlu_la-multi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-multi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-multi.Tpo" -c -o libcurlu_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-multi.Tpo" "$(DEPDIR)/libcurlu_la-multi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-multi.Tpo"; exit 1; fi
+#	source='multi.c' object='libcurlu_la-multi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-multi.lo `test -f 'multi.c' || echo '$(srcdir)/'`multi.c
 
 libcurlu_la-content_encoding.lo: content_encoding.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-content_encoding.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-content_encoding.Tpo" -c -o libcurlu_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-content_encoding.Tpo" "$(DEPDIR)/libcurlu_la-content_encoding.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-content_encoding.Tpo"; exit 1; fi
-#	source='content_encoding.c' object='libcurlu_la-content_encoding.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-content_encoding.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-content_encoding.Tpo" -c -o libcurlu_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-content_encoding.Tpo" "$(DEPDIR)/libcurlu_la-content_encoding.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-content_encoding.Tpo"; exit 1; fi
+#	source='content_encoding.c' object='libcurlu_la-content_encoding.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-content_encoding.lo `test -f 'content_encoding.c' || echo '$(srcdir)/'`content_encoding.c
 
 libcurlu_la-share.lo: share.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-share.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-share.Tpo" -c -o libcurlu_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-share.Tpo" "$(DEPDIR)/libcurlu_la-share.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-share.Tpo"; exit 1; fi
-#	source='share.c' object='libcurlu_la-share.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-share.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-share.Tpo" -c -o libcurlu_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-share.Tpo" "$(DEPDIR)/libcurlu_la-share.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-share.Tpo"; exit 1; fi
+#	source='share.c' object='libcurlu_la-share.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-share.lo `test -f 'share.c' || echo '$(srcdir)/'`share.c
 
 libcurlu_la-http_digest.lo: http_digest.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_digest.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_digest.Tpo" -c -o libcurlu_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http_digest.Tpo" "$(DEPDIR)/libcurlu_la-http_digest.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_digest.Tpo"; exit 1; fi
-#	source='http_digest.c' object='libcurlu_la-http_digest.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_digest.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_digest.Tpo" -c -o libcurlu_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http_digest.Tpo" "$(DEPDIR)/libcurlu_la-http_digest.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_digest.Tpo"; exit 1; fi
+#	source='http_digest.c' object='libcurlu_la-http_digest.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_digest.lo `test -f 'http_digest.c' || echo '$(srcdir)/'`http_digest.c
 
 libcurlu_la-md4.lo: md4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-md4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-md4.Tpo" -c -o libcurlu_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-md4.Tpo" "$(DEPDIR)/libcurlu_la-md4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-md4.Tpo"; exit 1; fi
-#	source='md4.c' object='libcurlu_la-md4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-md4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-md4.Tpo" -c -o libcurlu_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-md4.Tpo" "$(DEPDIR)/libcurlu_la-md4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-md4.Tpo"; exit 1; fi
+#	source='md4.c' object='libcurlu_la-md4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-md4.lo `test -f 'md4.c' || echo '$(srcdir)/'`md4.c
 
 libcurlu_la-md5.lo: md5.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-md5.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-md5.Tpo" -c -o libcurlu_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-md5.Tpo" "$(DEPDIR)/libcurlu_la-md5.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-md5.Tpo"; exit 1; fi
-#	source='md5.c' object='libcurlu_la-md5.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-md5.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-md5.Tpo" -c -o libcurlu_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-md5.Tpo" "$(DEPDIR)/libcurlu_la-md5.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-md5.Tpo"; exit 1; fi
+#	source='md5.c' object='libcurlu_la-md5.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-md5.lo `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
 
 libcurlu_la-curl_rand.lo: curl_rand.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_rand.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_rand.Tpo" -c -o libcurlu_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_rand.Tpo" "$(DEPDIR)/libcurlu_la-curl_rand.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_rand.Tpo"; exit 1; fi
-#	source='curl_rand.c' object='libcurlu_la-curl_rand.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_rand.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_rand.Tpo" -c -o libcurlu_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_rand.Tpo" "$(DEPDIR)/libcurlu_la-curl_rand.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_rand.Tpo"; exit 1; fi
+#	source='curl_rand.c' object='libcurlu_la-curl_rand.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_rand.lo `test -f 'curl_rand.c' || echo '$(srcdir)/'`curl_rand.c
 
 libcurlu_la-http_negotiate.lo: http_negotiate.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_negotiate.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo" -c -o libcurlu_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo" "$(DEPDIR)/libcurlu_la-http_negotiate.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo"; exit 1; fi
-#	source='http_negotiate.c' object='libcurlu_la-http_negotiate.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_negotiate.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo" -c -o libcurlu_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo" "$(DEPDIR)/libcurlu_la-http_negotiate.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_negotiate.Tpo"; exit 1; fi
+#	source='http_negotiate.c' object='libcurlu_la-http_negotiate.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_negotiate.lo `test -f 'http_negotiate.c' || echo '$(srcdir)/'`http_negotiate.c
 
 libcurlu_la-http_ntlm.lo: http_ntlm.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_ntlm.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo" -c -o libcurlu_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo" "$(DEPDIR)/libcurlu_la-http_ntlm.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo"; exit 1; fi
-#	source='http_ntlm.c' object='libcurlu_la-http_ntlm.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_ntlm.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo" -c -o libcurlu_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo" "$(DEPDIR)/libcurlu_la-http_ntlm.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_ntlm.Tpo"; exit 1; fi
+#	source='http_ntlm.c' object='libcurlu_la-http_ntlm.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_ntlm.lo `test -f 'http_ntlm.c' || echo '$(srcdir)/'`http_ntlm.c
 
 libcurlu_la-inet_pton.lo: inet_pton.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-inet_pton.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-inet_pton.Tpo" -c -o libcurlu_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-inet_pton.Tpo" "$(DEPDIR)/libcurlu_la-inet_pton.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-inet_pton.Tpo"; exit 1; fi
-#	source='inet_pton.c' object='libcurlu_la-inet_pton.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-inet_pton.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-inet_pton.Tpo" -c -o libcurlu_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-inet_pton.Tpo" "$(DEPDIR)/libcurlu_la-inet_pton.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-inet_pton.Tpo"; exit 1; fi
+#	source='inet_pton.c' object='libcurlu_la-inet_pton.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-inet_pton.lo `test -f 'inet_pton.c' || echo '$(srcdir)/'`inet_pton.c
 
 libcurlu_la-strtoofft.lo: strtoofft.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strtoofft.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strtoofft.Tpo" -c -o libcurlu_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-strtoofft.Tpo" "$(DEPDIR)/libcurlu_la-strtoofft.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strtoofft.Tpo"; exit 1; fi
-#	source='strtoofft.c' object='libcurlu_la-strtoofft.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strtoofft.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strtoofft.Tpo" -c -o libcurlu_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-strtoofft.Tpo" "$(DEPDIR)/libcurlu_la-strtoofft.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strtoofft.Tpo"; exit 1; fi
+#	source='strtoofft.c' object='libcurlu_la-strtoofft.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strtoofft.lo `test -f 'strtoofft.c' || echo '$(srcdir)/'`strtoofft.c
 
 libcurlu_la-strerror.lo: strerror.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strerror.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strerror.Tpo" -c -o libcurlu_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-strerror.Tpo" "$(DEPDIR)/libcurlu_la-strerror.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strerror.Tpo"; exit 1; fi
-#	source='strerror.c' object='libcurlu_la-strerror.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strerror.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strerror.Tpo" -c -o libcurlu_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-strerror.Tpo" "$(DEPDIR)/libcurlu_la-strerror.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strerror.Tpo"; exit 1; fi
+#	source='strerror.c' object='libcurlu_la-strerror.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strerror.lo `test -f 'strerror.c' || echo '$(srcdir)/'`strerror.c
 
 libcurlu_la-hostares.lo: hostares.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostares.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostares.Tpo" -c -o libcurlu_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostares.Tpo" "$(DEPDIR)/libcurlu_la-hostares.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostares.Tpo"; exit 1; fi
-#	source='hostares.c' object='libcurlu_la-hostares.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostares.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostares.Tpo" -c -o libcurlu_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostares.Tpo" "$(DEPDIR)/libcurlu_la-hostares.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostares.Tpo"; exit 1; fi
+#	source='hostares.c' object='libcurlu_la-hostares.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostares.lo `test -f 'hostares.c' || echo '$(srcdir)/'`hostares.c
 
 libcurlu_la-hostasyn.lo: hostasyn.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostasyn.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostasyn.Tpo" -c -o libcurlu_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostasyn.Tpo" "$(DEPDIR)/libcurlu_la-hostasyn.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostasyn.Tpo"; exit 1; fi
-#	source='hostasyn.c' object='libcurlu_la-hostasyn.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostasyn.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostasyn.Tpo" -c -o libcurlu_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostasyn.Tpo" "$(DEPDIR)/libcurlu_la-hostasyn.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostasyn.Tpo"; exit 1; fi
+#	source='hostasyn.c' object='libcurlu_la-hostasyn.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostasyn.lo `test -f 'hostasyn.c' || echo '$(srcdir)/'`hostasyn.c
 
 libcurlu_la-hostip4.lo: hostip4.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip4.Tpo" -c -o libcurlu_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostip4.Tpo" "$(DEPDIR)/libcurlu_la-hostip4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip4.Tpo"; exit 1; fi
-#	source='hostip4.c' object='libcurlu_la-hostip4.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip4.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip4.Tpo" -c -o libcurlu_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostip4.Tpo" "$(DEPDIR)/libcurlu_la-hostip4.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip4.Tpo"; exit 1; fi
+#	source='hostip4.c' object='libcurlu_la-hostip4.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip4.lo `test -f 'hostip4.c' || echo '$(srcdir)/'`hostip4.c
 
 libcurlu_la-hostip6.lo: hostip6.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip6.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip6.Tpo" -c -o libcurlu_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostip6.Tpo" "$(DEPDIR)/libcurlu_la-hostip6.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip6.Tpo"; exit 1; fi
-#	source='hostip6.c' object='libcurlu_la-hostip6.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostip6.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostip6.Tpo" -c -o libcurlu_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostip6.Tpo" "$(DEPDIR)/libcurlu_la-hostip6.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostip6.Tpo"; exit 1; fi
+#	source='hostip6.c' object='libcurlu_la-hostip6.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostip6.lo `test -f 'hostip6.c' || echo '$(srcdir)/'`hostip6.c
 
 libcurlu_la-hostsyn.lo: hostsyn.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostsyn.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostsyn.Tpo" -c -o libcurlu_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostsyn.Tpo" "$(DEPDIR)/libcurlu_la-hostsyn.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostsyn.Tpo"; exit 1; fi
-#	source='hostsyn.c' object='libcurlu_la-hostsyn.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostsyn.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostsyn.Tpo" -c -o libcurlu_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostsyn.Tpo" "$(DEPDIR)/libcurlu_la-hostsyn.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostsyn.Tpo"; exit 1; fi
+#	source='hostsyn.c' object='libcurlu_la-hostsyn.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostsyn.lo `test -f 'hostsyn.c' || echo '$(srcdir)/'`hostsyn.c
 
 libcurlu_la-hostthre.lo: hostthre.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostthre.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostthre.Tpo" -c -o libcurlu_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hostthre.Tpo" "$(DEPDIR)/libcurlu_la-hostthre.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostthre.Tpo"; exit 1; fi
-#	source='hostthre.c' object='libcurlu_la-hostthre.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostthre.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostthre.Tpo" -c -o libcurlu_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hostthre.Tpo" "$(DEPDIR)/libcurlu_la-hostthre.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostthre.Tpo"; exit 1; fi
+#	source='hostthre.c' object='libcurlu_la-hostthre.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostthre.lo `test -f 'hostthre.c' || echo '$(srcdir)/'`hostthre.c
 
 libcurlu_la-inet_ntop.lo: inet_ntop.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-inet_ntop.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo" -c -o libcurlu_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo" "$(DEPDIR)/libcurlu_la-inet_ntop.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo"; exit 1; fi
-#	source='inet_ntop.c' object='libcurlu_la-inet_ntop.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-inet_ntop.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo" -c -o libcurlu_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo" "$(DEPDIR)/libcurlu_la-inet_ntop.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-inet_ntop.Tpo"; exit 1; fi
+#	source='inet_ntop.c' object='libcurlu_la-inet_ntop.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-inet_ntop.lo `test -f 'inet_ntop.c' || echo '$(srcdir)/'`inet_ntop.c
 
 libcurlu_la-parsedate.lo: parsedate.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-parsedate.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-parsedate.Tpo" -c -o libcurlu_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-parsedate.Tpo" "$(DEPDIR)/libcurlu_la-parsedate.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-parsedate.Tpo"; exit 1; fi
-#	source='parsedate.c' object='libcurlu_la-parsedate.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-parsedate.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-parsedate.Tpo" -c -o libcurlu_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-parsedate.Tpo" "$(DEPDIR)/libcurlu_la-parsedate.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-parsedate.Tpo"; exit 1; fi
+#	source='parsedate.c' object='libcurlu_la-parsedate.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-parsedate.lo `test -f 'parsedate.c' || echo '$(srcdir)/'`parsedate.c
 
 libcurlu_la-select.lo: select.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-select.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-select.Tpo" -c -o libcurlu_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-select.Tpo" "$(DEPDIR)/libcurlu_la-select.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-select.Tpo"; exit 1; fi
-#	source='select.c' object='libcurlu_la-select.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-select.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-select.Tpo" -c -o libcurlu_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-select.Tpo" "$(DEPDIR)/libcurlu_la-select.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-select.Tpo"; exit 1; fi
+#	source='select.c' object='libcurlu_la-select.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-select.lo `test -f 'select.c' || echo '$(srcdir)/'`select.c
 
 libcurlu_la-gtls.lo: gtls.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-gtls.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-gtls.Tpo" -c -o libcurlu_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-gtls.Tpo" "$(DEPDIR)/libcurlu_la-gtls.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-gtls.Tpo"; exit 1; fi
-#	source='gtls.c' object='libcurlu_la-gtls.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-gtls.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-gtls.Tpo" -c -o libcurlu_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-gtls.Tpo" "$(DEPDIR)/libcurlu_la-gtls.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-gtls.Tpo"; exit 1; fi
+#	source='gtls.c' object='libcurlu_la-gtls.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-gtls.lo `test -f 'gtls.c' || echo '$(srcdir)/'`gtls.c
 
 libcurlu_la-sslgen.lo: sslgen.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-sslgen.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-sslgen.Tpo" -c -o libcurlu_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-sslgen.Tpo" "$(DEPDIR)/libcurlu_la-sslgen.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-sslgen.Tpo"; exit 1; fi
-#	source='sslgen.c' object='libcurlu_la-sslgen.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-sslgen.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-sslgen.Tpo" -c -o libcurlu_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-sslgen.Tpo" "$(DEPDIR)/libcurlu_la-sslgen.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-sslgen.Tpo"; exit 1; fi
+#	source='sslgen.c' object='libcurlu_la-sslgen.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-sslgen.lo `test -f 'sslgen.c' || echo '$(srcdir)/'`sslgen.c
 
 libcurlu_la-tftp.lo: tftp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-tftp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-tftp.Tpo" -c -o libcurlu_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-tftp.Tpo" "$(DEPDIR)/libcurlu_la-tftp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-tftp.Tpo"; exit 1; fi
-#	source='tftp.c' object='libcurlu_la-tftp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-tftp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-tftp.Tpo" -c -o libcurlu_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-tftp.Tpo" "$(DEPDIR)/libcurlu_la-tftp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-tftp.Tpo"; exit 1; fi
+#	source='tftp.c' object='libcurlu_la-tftp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-tftp.lo `test -f 'tftp.c' || echo '$(srcdir)/'`tftp.c
 
 libcurlu_la-splay.lo: splay.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-splay.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-splay.Tpo" -c -o libcurlu_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-splay.Tpo" "$(DEPDIR)/libcurlu_la-splay.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-splay.Tpo"; exit 1; fi
-#	source='splay.c' object='libcurlu_la-splay.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-splay.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-splay.Tpo" -c -o libcurlu_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-splay.Tpo" "$(DEPDIR)/libcurlu_la-splay.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-splay.Tpo"; exit 1; fi
+#	source='splay.c' object='libcurlu_la-splay.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-splay.lo `test -f 'splay.c' || echo '$(srcdir)/'`splay.c
 
 libcurlu_la-strdup.lo: strdup.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strdup.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strdup.Tpo" -c -o libcurlu_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-strdup.Tpo" "$(DEPDIR)/libcurlu_la-strdup.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strdup.Tpo"; exit 1; fi
-#	source='strdup.c' object='libcurlu_la-strdup.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-strdup.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-strdup.Tpo" -c -o libcurlu_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-strdup.Tpo" "$(DEPDIR)/libcurlu_la-strdup.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-strdup.Tpo"; exit 1; fi
+#	source='strdup.c' object='libcurlu_la-strdup.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-strdup.lo `test -f 'strdup.c' || echo '$(srcdir)/'`strdup.c
 
 libcurlu_la-socks.lo: socks.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks.Tpo" -c -o libcurlu_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-socks.Tpo" "$(DEPDIR)/libcurlu_la-socks.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks.Tpo"; exit 1; fi
-#	source='socks.c' object='libcurlu_la-socks.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks.Tpo" -c -o libcurlu_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-socks.Tpo" "$(DEPDIR)/libcurlu_la-socks.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks.Tpo"; exit 1; fi
+#	source='socks.c' object='libcurlu_la-socks.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks.lo `test -f 'socks.c' || echo '$(srcdir)/'`socks.c
 
 libcurlu_la-ssh.lo: ssh.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ssh.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ssh.Tpo" -c -o libcurlu_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-ssh.Tpo" "$(DEPDIR)/libcurlu_la-ssh.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ssh.Tpo"; exit 1; fi
-#	source='ssh.c' object='libcurlu_la-ssh.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-ssh.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-ssh.Tpo" -c -o libcurlu_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-ssh.Tpo" "$(DEPDIR)/libcurlu_la-ssh.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-ssh.Tpo"; exit 1; fi
+#	source='ssh.c' object='libcurlu_la-ssh.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-ssh.lo `test -f 'ssh.c' || echo '$(srcdir)/'`ssh.c
 
 libcurlu_la-nss.lo: nss.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-nss.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-nss.Tpo" -c -o libcurlu_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-nss.Tpo" "$(DEPDIR)/libcurlu_la-nss.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-nss.Tpo"; exit 1; fi
-#	source='nss.c' object='libcurlu_la-nss.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-nss.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-nss.Tpo" -c -o libcurlu_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-nss.Tpo" "$(DEPDIR)/libcurlu_la-nss.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-nss.Tpo"; exit 1; fi
+#	source='nss.c' object='libcurlu_la-nss.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-nss.lo `test -f 'nss.c' || echo '$(srcdir)/'`nss.c
 
 libcurlu_la-qssl.lo: qssl.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-qssl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-qssl.Tpo" -c -o libcurlu_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-qssl.Tpo" "$(DEPDIR)/libcurlu_la-qssl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-qssl.Tpo"; exit 1; fi
-#	source='qssl.c' object='libcurlu_la-qssl.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-qssl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-qssl.Tpo" -c -o libcurlu_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-qssl.Tpo" "$(DEPDIR)/libcurlu_la-qssl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-qssl.Tpo"; exit 1; fi
+#	source='qssl.c' object='libcurlu_la-qssl.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-qssl.lo `test -f 'qssl.c' || echo '$(srcdir)/'`qssl.c
 
 libcurlu_la-rawstr.lo: rawstr.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-rawstr.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-rawstr.Tpo" -c -o libcurlu_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-rawstr.Tpo" "$(DEPDIR)/libcurlu_la-rawstr.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-rawstr.Tpo"; exit 1; fi
-#	source='rawstr.c' object='libcurlu_la-rawstr.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-rawstr.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-rawstr.Tpo" -c -o libcurlu_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-rawstr.Tpo" "$(DEPDIR)/libcurlu_la-rawstr.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-rawstr.Tpo"; exit 1; fi
+#	source='rawstr.c' object='libcurlu_la-rawstr.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-rawstr.lo `test -f 'rawstr.c' || echo '$(srcdir)/'`rawstr.c
 
 libcurlu_la-curl_addrinfo.lo: curl_addrinfo.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_addrinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo" -c -o libcurlu_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo" "$(DEPDIR)/libcurlu_la-curl_addrinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo"; exit 1; fi
-#	source='curl_addrinfo.c' object='libcurlu_la-curl_addrinfo.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_addrinfo.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo" -c -o libcurlu_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo" "$(DEPDIR)/libcurlu_la-curl_addrinfo.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_addrinfo.Tpo"; exit 1; fi
+#	source='curl_addrinfo.c' object='libcurlu_la-curl_addrinfo.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_addrinfo.lo `test -f 'curl_addrinfo.c' || echo '$(srcdir)/'`curl_addrinfo.c
 
 libcurlu_la-socks_gssapi.lo: socks_gssapi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks_gssapi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo" -c -o libcurlu_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo" "$(DEPDIR)/libcurlu_la-socks_gssapi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo"; exit 1; fi
-#	source='socks_gssapi.c' object='libcurlu_la-socks_gssapi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks_gssapi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo" -c -o libcurlu_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo" "$(DEPDIR)/libcurlu_la-socks_gssapi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks_gssapi.Tpo"; exit 1; fi
+#	source='socks_gssapi.c' object='libcurlu_la-socks_gssapi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks_gssapi.lo `test -f 'socks_gssapi.c' || echo '$(srcdir)/'`socks_gssapi.c
 
 libcurlu_la-socks_sspi.lo: socks_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo" -c -o libcurlu_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo" "$(DEPDIR)/libcurlu_la-socks_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo"; exit 1; fi
-#	source='socks_sspi.c' object='libcurlu_la-socks_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-socks_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo" -c -o libcurlu_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo" "$(DEPDIR)/libcurlu_la-socks_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-socks_sspi.Tpo"; exit 1; fi
+#	source='socks_sspi.c' object='libcurlu_la-socks_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-socks_sspi.lo `test -f 'socks_sspi.c' || echo '$(srcdir)/'`socks_sspi.c
 
 libcurlu_la-curl_sspi.lo: curl_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo" -c -o libcurlu_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo" "$(DEPDIR)/libcurlu_la-curl_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo"; exit 1; fi
-#	source='curl_sspi.c' object='libcurlu_la-curl_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo" -c -o libcurlu_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo" "$(DEPDIR)/libcurlu_la-curl_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_sspi.Tpo"; exit 1; fi
+#	source='curl_sspi.c' object='libcurlu_la-curl_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_sspi.lo `test -f 'curl_sspi.c' || echo '$(srcdir)/'`curl_sspi.c
 
 libcurlu_la-slist.lo: slist.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-slist.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-slist.Tpo" -c -o libcurlu_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-slist.Tpo" "$(DEPDIR)/libcurlu_la-slist.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-slist.Tpo"; exit 1; fi
-#	source='slist.c' object='libcurlu_la-slist.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-slist.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-slist.Tpo" -c -o libcurlu_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-slist.Tpo" "$(DEPDIR)/libcurlu_la-slist.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-slist.Tpo"; exit 1; fi
+#	source='slist.c' object='libcurlu_la-slist.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-slist.lo `test -f 'slist.c' || echo '$(srcdir)/'`slist.c
 
 libcurlu_la-nonblock.lo: nonblock.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-nonblock.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-nonblock.Tpo" -c -o libcurlu_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-nonblock.Tpo" "$(DEPDIR)/libcurlu_la-nonblock.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-nonblock.Tpo"; exit 1; fi
-#	source='nonblock.c' object='libcurlu_la-nonblock.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-nonblock.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-nonblock.Tpo" -c -o libcurlu_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-nonblock.Tpo" "$(DEPDIR)/libcurlu_la-nonblock.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-nonblock.Tpo"; exit 1; fi
+#	source='nonblock.c' object='libcurlu_la-nonblock.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-nonblock.lo `test -f 'nonblock.c' || echo '$(srcdir)/'`nonblock.c
 
 libcurlu_la-curl_memrchr.lo: curl_memrchr.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_memrchr.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo" -c -o libcurlu_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo" "$(DEPDIR)/libcurlu_la-curl_memrchr.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo"; exit 1; fi
-#	source='curl_memrchr.c' object='libcurlu_la-curl_memrchr.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_memrchr.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo" -c -o libcurlu_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo" "$(DEPDIR)/libcurlu_la-curl_memrchr.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_memrchr.Tpo"; exit 1; fi
+#	source='curl_memrchr.c' object='libcurlu_la-curl_memrchr.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_memrchr.lo `test -f 'curl_memrchr.c' || echo '$(srcdir)/'`curl_memrchr.c
 
 libcurlu_la-imap.lo: imap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-imap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-imap.Tpo" -c -o libcurlu_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-imap.Tpo" "$(DEPDIR)/libcurlu_la-imap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-imap.Tpo"; exit 1; fi
-#	source='imap.c' object='libcurlu_la-imap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-imap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-imap.Tpo" -c -o libcurlu_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-imap.Tpo" "$(DEPDIR)/libcurlu_la-imap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-imap.Tpo"; exit 1; fi
+#	source='imap.c' object='libcurlu_la-imap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-imap.lo `test -f 'imap.c' || echo '$(srcdir)/'`imap.c
 
 libcurlu_la-pop3.lo: pop3.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-pop3.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-pop3.Tpo" -c -o libcurlu_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-pop3.Tpo" "$(DEPDIR)/libcurlu_la-pop3.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-pop3.Tpo"; exit 1; fi
-#	source='pop3.c' object='libcurlu_la-pop3.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-pop3.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-pop3.Tpo" -c -o libcurlu_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-pop3.Tpo" "$(DEPDIR)/libcurlu_la-pop3.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-pop3.Tpo"; exit 1; fi
+#	source='pop3.c' object='libcurlu_la-pop3.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-pop3.lo `test -f 'pop3.c' || echo '$(srcdir)/'`pop3.c
 
 libcurlu_la-smtp.lo: smtp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-smtp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-smtp.Tpo" -c -o libcurlu_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-smtp.Tpo" "$(DEPDIR)/libcurlu_la-smtp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-smtp.Tpo"; exit 1; fi
-#	source='smtp.c' object='libcurlu_la-smtp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-smtp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-smtp.Tpo" -c -o libcurlu_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-smtp.Tpo" "$(DEPDIR)/libcurlu_la-smtp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-smtp.Tpo"; exit 1; fi
+#	source='smtp.c' object='libcurlu_la-smtp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-smtp.lo `test -f 'smtp.c' || echo '$(srcdir)/'`smtp.c
 
 libcurlu_la-pingpong.lo: pingpong.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-pingpong.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-pingpong.Tpo" -c -o libcurlu_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-pingpong.Tpo" "$(DEPDIR)/libcurlu_la-pingpong.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-pingpong.Tpo"; exit 1; fi
-#	source='pingpong.c' object='libcurlu_la-pingpong.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-pingpong.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-pingpong.Tpo" -c -o libcurlu_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-pingpong.Tpo" "$(DEPDIR)/libcurlu_la-pingpong.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-pingpong.Tpo"; exit 1; fi
+#	source='pingpong.c' object='libcurlu_la-pingpong.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-pingpong.lo `test -f 'pingpong.c' || echo '$(srcdir)/'`pingpong.c
 
 libcurlu_la-rtsp.lo: rtsp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-rtsp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-rtsp.Tpo" -c -o libcurlu_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-rtsp.Tpo" "$(DEPDIR)/libcurlu_la-rtsp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-rtsp.Tpo"; exit 1; fi
-#	source='rtsp.c' object='libcurlu_la-rtsp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-rtsp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-rtsp.Tpo" -c -o libcurlu_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-rtsp.Tpo" "$(DEPDIR)/libcurlu_la-rtsp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-rtsp.Tpo"; exit 1; fi
+#	source='rtsp.c' object='libcurlu_la-rtsp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-rtsp.lo `test -f 'rtsp.c' || echo '$(srcdir)/'`rtsp.c
 
 libcurlu_la-curl_threads.lo: curl_threads.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_threads.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_threads.Tpo" -c -o libcurlu_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_threads.Tpo" "$(DEPDIR)/libcurlu_la-curl_threads.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_threads.Tpo"; exit 1; fi
-#	source='curl_threads.c' object='libcurlu_la-curl_threads.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_threads.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_threads.Tpo" -c -o libcurlu_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_threads.Tpo" "$(DEPDIR)/libcurlu_la-curl_threads.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_threads.Tpo"; exit 1; fi
+#	source='curl_threads.c' object='libcurlu_la-curl_threads.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_threads.lo `test -f 'curl_threads.c' || echo '$(srcdir)/'`curl_threads.c
 
 libcurlu_la-warnless.lo: warnless.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-warnless.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-warnless.Tpo" -c -o libcurlu_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-warnless.Tpo" "$(DEPDIR)/libcurlu_la-warnless.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-warnless.Tpo"; exit 1; fi
-#	source='warnless.c' object='libcurlu_la-warnless.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-warnless.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-warnless.Tpo" -c -o libcurlu_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-warnless.Tpo" "$(DEPDIR)/libcurlu_la-warnless.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-warnless.Tpo"; exit 1; fi
+#	source='warnless.c' object='libcurlu_la-warnless.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-warnless.lo `test -f 'warnless.c' || echo '$(srcdir)/'`warnless.c
 
 libcurlu_la-hmac.lo: hmac.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hmac.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hmac.Tpo" -c -o libcurlu_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-hmac.Tpo" "$(DEPDIR)/libcurlu_la-hmac.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hmac.Tpo"; exit 1; fi
-#	source='hmac.c' object='libcurlu_la-hmac.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hmac.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hmac.Tpo" -c -o libcurlu_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-hmac.Tpo" "$(DEPDIR)/libcurlu_la-hmac.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hmac.Tpo"; exit 1; fi
+#	source='hmac.c' object='libcurlu_la-hmac.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hmac.lo `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
 
 libcurlu_la-polarssl.lo: polarssl.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-polarssl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-polarssl.Tpo" -c -o libcurlu_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-polarssl.Tpo" "$(DEPDIR)/libcurlu_la-polarssl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-polarssl.Tpo"; exit 1; fi
-#	source='polarssl.c' object='libcurlu_la-polarssl.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-polarssl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-polarssl.Tpo" -c -o libcurlu_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-polarssl.Tpo" "$(DEPDIR)/libcurlu_la-polarssl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-polarssl.Tpo"; exit 1; fi
+#	source='polarssl.c' object='libcurlu_la-polarssl.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-polarssl.lo `test -f 'polarssl.c' || echo '$(srcdir)/'`polarssl.c
 
 libcurlu_la-curl_rtmp.lo: curl_rtmp.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_rtmp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo" -c -o libcurlu_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo" "$(DEPDIR)/libcurlu_la-curl_rtmp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo"; exit 1; fi
-#	source='curl_rtmp.c' object='libcurlu_la-curl_rtmp.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_rtmp.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo" -c -o libcurlu_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo" "$(DEPDIR)/libcurlu_la-curl_rtmp.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_rtmp.Tpo"; exit 1; fi
+#	source='curl_rtmp.c' object='libcurlu_la-curl_rtmp.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_rtmp.lo `test -f 'curl_rtmp.c' || echo '$(srcdir)/'`curl_rtmp.c
 
 libcurlu_la-openldap.lo: openldap.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-openldap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-openldap.Tpo" -c -o libcurlu_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-openldap.Tpo" "$(DEPDIR)/libcurlu_la-openldap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-openldap.Tpo"; exit 1; fi
-#	source='openldap.c' object='libcurlu_la-openldap.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-openldap.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-openldap.Tpo" -c -o libcurlu_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-openldap.Tpo" "$(DEPDIR)/libcurlu_la-openldap.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-openldap.Tpo"; exit 1; fi
+#	source='openldap.c' object='libcurlu_la-openldap.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-openldap.lo `test -f 'openldap.c' || echo '$(srcdir)/'`openldap.c
 
 libcurlu_la-curl_gethostname.lo: curl_gethostname.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_gethostname.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo" -c -o libcurlu_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo" "$(DEPDIR)/libcurlu_la-curl_gethostname.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo"; exit 1; fi
-#	source='curl_gethostname.c' object='libcurlu_la-curl_gethostname.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_gethostname.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo" -c -o libcurlu_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo" "$(DEPDIR)/libcurlu_la-curl_gethostname.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_gethostname.Tpo"; exit 1; fi
+#	source='curl_gethostname.c' object='libcurlu_la-curl_gethostname.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_gethostname.lo `test -f 'curl_gethostname.c' || echo '$(srcdir)/'`curl_gethostname.c
 
 libcurlu_la-gopher.lo: gopher.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-gopher.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-gopher.Tpo" -c -o libcurlu_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-gopher.Tpo" "$(DEPDIR)/libcurlu_la-gopher.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-gopher.Tpo"; exit 1; fi
-#	source='gopher.c' object='libcurlu_la-gopher.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-gopher.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-gopher.Tpo" -c -o libcurlu_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-gopher.Tpo" "$(DEPDIR)/libcurlu_la-gopher.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-gopher.Tpo"; exit 1; fi
+#	source='gopher.c' object='libcurlu_la-gopher.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-gopher.lo `test -f 'gopher.c' || echo '$(srcdir)/'`gopher.c
 
 libcurlu_la-axtls.lo: axtls.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-axtls.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-axtls.Tpo" -c -o libcurlu_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-axtls.Tpo" "$(DEPDIR)/libcurlu_la-axtls.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-axtls.Tpo"; exit 1; fi
-#	source='axtls.c' object='libcurlu_la-axtls.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-axtls.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-axtls.Tpo" -c -o libcurlu_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-axtls.Tpo" "$(DEPDIR)/libcurlu_la-axtls.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-axtls.Tpo"; exit 1; fi
+#	source='axtls.c' object='libcurlu_la-axtls.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-axtls.lo `test -f 'axtls.c' || echo '$(srcdir)/'`axtls.c
 
 libcurlu_la-idn_win32.lo: idn_win32.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-idn_win32.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-idn_win32.Tpo" -c -o libcurlu_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-idn_win32.Tpo" "$(DEPDIR)/libcurlu_la-idn_win32.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-idn_win32.Tpo"; exit 1; fi
-#	source='idn_win32.c' object='libcurlu_la-idn_win32.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-idn_win32.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-idn_win32.Tpo" -c -o libcurlu_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-idn_win32.Tpo" "$(DEPDIR)/libcurlu_la-idn_win32.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-idn_win32.Tpo"; exit 1; fi
+#	source='idn_win32.c' object='libcurlu_la-idn_win32.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-idn_win32.lo `test -f 'idn_win32.c' || echo '$(srcdir)/'`idn_win32.c
 
 libcurlu_la-http_negotiate_sspi.lo: http_negotiate_sspi.c
-	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_negotiate_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo" -c -o libcurlu_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c; \
-	then mv -f "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo" "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo"; exit 1; fi
-#	source='http_negotiate_sspi.c' object='libcurlu_la-http_negotiate_sspi.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c
+#	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-http_negotiate_sspi.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo" -c -o libcurlu_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c; \
+#	then mv -f "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo" "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-http_negotiate_sspi.Tpo"; exit 1; fi
+#	source='http_negotiate_sspi.c' object='libcurlu_la-http_negotiate_sspi.lo' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-http_negotiate_sspi.lo `test -f 'http_negotiate_sspi.c' || echo '$(srcdir)/'`http_negotiate_sspi.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

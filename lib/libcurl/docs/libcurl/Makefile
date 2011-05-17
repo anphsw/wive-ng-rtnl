@@ -66,8 +66,8 @@ am__installdirs = "$(DESTDIR)$(man3dir)"
 MANS = $(man_MANS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run aclocal-1.9
-AMDEP_FALSE = #
-AMDEP_TRUE = 
+AMDEP_FALSE = 
+AMDEP_TRUE = #
 AMTAR = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AS = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as 
@@ -78,9 +78,9 @@ AWK = gawk
 BUILD_LIBHOSTNAME_FALSE = #
 BUILD_LIBHOSTNAME_TRUE = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/lib/libssl -g0 -Wno-system-headers
-CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
+CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CROSSCOMPILING_FALSE = #
@@ -204,8 +204,8 @@ VERSION = 7.21.4
 VERSIONNUM = 071504
 ac_ct_CC = 
 ac_ct_DUMPBIN = link -dump -symbols
-am__fastdepCC_FALSE = #
-am__fastdepCC_TRUE = 
+am__fastdepCC_FALSE = 
+am__fastdepCC_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 

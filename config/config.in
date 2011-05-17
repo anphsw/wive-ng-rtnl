@@ -55,9 +55,11 @@ mainmenu_option next_comment
 comment 'Network Applications'
 
 bool 'bigpond'					CONFIG_USER_BIGPOND
-bool 'ctorrent (lightweith BitTorrent Client)'	CONFIG_USER_CTORRENT
-if [ "$CONFIG_USER_CTORRENT" = "y" ]; then
-	define_bool CONFIG_LIB_LIBM_FORCE y
+bool 'Transmission (BitTorrent Client)'		CONFIG_USER_TRANSMISSION
+if [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
+    define_bool CONFIG_LIB_EVENT y
+    define_bool CONFIG_LIB_CURL y
+    define_bool CONFIG_USER_OPENSSL y
 fi
 bool 'dhcp6'					CONFIG_USER_DHCP6
 dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6

@@ -43,6 +43,9 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBSTDCPP	=	-Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
 	SLIBTHREADUTIL	=	-lthreadutil
 	SLIBPTHREAD	=	-lpthread
+	SLIBCURL	=	-lcurl
+	SLIBEVENT	=	-levent
+	SLIBUSB		=	-lusb
 	SLIBUPNP	=	-lupnp
 	SLIBZ		=	-lz
 
@@ -76,6 +79,9 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	LIBTCL		=	-ltcl
 	LIBTHREADUTIL	=	$(SLIBTHREADUTIL)
 	LIBPTHREAD	=	$(SLIBPTHREAD)
+	LIBEVENT	=	$(SLIBEVENT)
+	LIBUSB		=	$(SLIBUSB)
+	LIBCURL		=	$(SLIBCURL)
 	LIBUPNP		=	$(SLIBUPNP)
 	LIBZ		=	$(SLIBZ)
 	ifeq ($(findstring glibc,$(LIBCDIR)),glibc)

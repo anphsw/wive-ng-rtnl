@@ -18,7 +18,7 @@ endif
 
 ifndef CONFIG_IPV6
 CFLAGS += DNO_IPV6
-endif   
+endif
 
 export $(CFLAGS)
 
@@ -34,7 +34,7 @@ VEND=$(ROOTDIR)/vendors
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
-SUBDIRS_APP += ntfs-3g p910nd openssl-0.9.8e
+SUBDIRS_APP += ntfs-3g p910nd transmission openssl-0.9.8e
 #
 # must run the vendor build first
 #
@@ -44,7 +44,6 @@ dir_y =
 dir_n =
 dir_  =
 
-ifdef FFF
 #base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
@@ -54,9 +53,9 @@ dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_USER_LLTD)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
-dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
+dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
 dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_USER_TC)                  	    += iproute2
@@ -76,6 +75,7 @@ dir_$(CONFIG_USER_P910ND)		    += p910nd
 dir_$(CONFIG_USER_NTFS3G)		    += ntfs-3g
 dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
+dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
 
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
@@ -83,7 +83,6 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
-endif
 
 all: config
 	echo ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"

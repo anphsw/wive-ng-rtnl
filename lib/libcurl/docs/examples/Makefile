@@ -242,8 +242,8 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run aclocal-1.9
-AMDEP_FALSE = #
-AMDEP_TRUE = 
+AMDEP_FALSE = 
+AMDEP_TRUE = #
 AMTAR = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AS = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as 
@@ -254,9 +254,9 @@ AWK = gawk
 BUILD_LIBHOSTNAME_FALSE = #
 BUILD_LIBHOSTNAME_TRUE = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/lib/libssl -g0 -Wno-system-headers
-CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
+CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
 CROSSCOMPILING_FALSE = #
@@ -380,8 +380,8 @@ VERSION = 7.21.4
 VERSIONNUM = 071504
 ac_ct_CC = 
 ac_ct_DUMPBIN = link -dump -symbols
-am__fastdepCC_FALSE = #
-am__fastdepCC_TRUE = 
+am__fastdepCC_FALSE = 
+am__fastdepCC_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 
@@ -609,62 +609,62 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/10-at-a-time.Po
-include ./$(DEPDIR)/anyauthput.Po
-include ./$(DEPDIR)/certinfo.Po
-include ./$(DEPDIR)/chkspeed.Po
-include ./$(DEPDIR)/cookie_interface.Po
-include ./$(DEPDIR)/debug.Po
-include ./$(DEPDIR)/fileupload.Po
-include ./$(DEPDIR)/fopen.Po
-include ./$(DEPDIR)/ftp-wildcard.Po
-include ./$(DEPDIR)/ftpget.Po
-include ./$(DEPDIR)/ftpgetinfo.Po
-include ./$(DEPDIR)/ftpgetresp.Po
-include ./$(DEPDIR)/ftpupload.Po
-include ./$(DEPDIR)/getinfo.Po
-include ./$(DEPDIR)/getinmemory.Po
-include ./$(DEPDIR)/http-post.Po
-include ./$(DEPDIR)/httpcustomheader.Po
-include ./$(DEPDIR)/httpput.Po
-include ./$(DEPDIR)/https.Po
-include ./$(DEPDIR)/multi-app.Po
-include ./$(DEPDIR)/multi-debugcallback.Po
-include ./$(DEPDIR)/multi-double.Po
-include ./$(DEPDIR)/multi-post.Po
-include ./$(DEPDIR)/multi-single.Po
-include ./$(DEPDIR)/persistant.Po
-include ./$(DEPDIR)/post-callback.Po
-include ./$(DEPDIR)/postit2.Po
-include ./$(DEPDIR)/sendrecv.Po
-include ./$(DEPDIR)/sepheaders.Po
-include ./$(DEPDIR)/simple.Po
-include ./$(DEPDIR)/simplepost.Po
-include ./$(DEPDIR)/simplesmtp.Po
-include ./$(DEPDIR)/simplessl.Po
-include ./$(DEPDIR)/smtp-multi.Po
-include ./$(DEPDIR)/smtp-tls.Po
+#include ./$(DEPDIR)/10-at-a-time.Po
+#include ./$(DEPDIR)/anyauthput.Po
+#include ./$(DEPDIR)/certinfo.Po
+#include ./$(DEPDIR)/chkspeed.Po
+#include ./$(DEPDIR)/cookie_interface.Po
+#include ./$(DEPDIR)/debug.Po
+#include ./$(DEPDIR)/fileupload.Po
+#include ./$(DEPDIR)/fopen.Po
+#include ./$(DEPDIR)/ftp-wildcard.Po
+#include ./$(DEPDIR)/ftpget.Po
+#include ./$(DEPDIR)/ftpgetinfo.Po
+#include ./$(DEPDIR)/ftpgetresp.Po
+#include ./$(DEPDIR)/ftpupload.Po
+#include ./$(DEPDIR)/getinfo.Po
+#include ./$(DEPDIR)/getinmemory.Po
+#include ./$(DEPDIR)/http-post.Po
+#include ./$(DEPDIR)/httpcustomheader.Po
+#include ./$(DEPDIR)/httpput.Po
+#include ./$(DEPDIR)/https.Po
+#include ./$(DEPDIR)/multi-app.Po
+#include ./$(DEPDIR)/multi-debugcallback.Po
+#include ./$(DEPDIR)/multi-double.Po
+#include ./$(DEPDIR)/multi-post.Po
+#include ./$(DEPDIR)/multi-single.Po
+#include ./$(DEPDIR)/persistant.Po
+#include ./$(DEPDIR)/post-callback.Po
+#include ./$(DEPDIR)/postit2.Po
+#include ./$(DEPDIR)/sendrecv.Po
+#include ./$(DEPDIR)/sepheaders.Po
+#include ./$(DEPDIR)/simple.Po
+#include ./$(DEPDIR)/simplepost.Po
+#include ./$(DEPDIR)/simplesmtp.Po
+#include ./$(DEPDIR)/simplessl.Po
+#include ./$(DEPDIR)/smtp-multi.Po
+#include ./$(DEPDIR)/smtp-tls.Po
 
 .c.o:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

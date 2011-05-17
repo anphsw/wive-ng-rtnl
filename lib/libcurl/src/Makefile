@@ -94,8 +94,8 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run aclocal-1.9
-AMDEP_FALSE = #
-AMDEP_TRUE = 
+AMDEP_FALSE = 
+AMDEP_TRUE = #
 AMTAR = ${SHELL} "/opt/Wive-RTNL/lib/libcurl/missing" --run tar
 AR = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar
 AS = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-as 
@@ -106,11 +106,11 @@ AWK = gawk
 BUILD_LIBHOSTNAME_FALSE = #
 BUILD_LIBHOSTNAME_TRUE = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 
 # This might hold -Werror
 CFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/lib/libssl -g0 -Wno-system-headers 
-CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
+CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CROSSCOMPILING_FALSE = #
@@ -236,8 +236,8 @@ VERSION = 7.21.4
 VERSIONNUM = 071504
 ac_ct_CC = 
 ac_ct_DUMPBIN = link -dump -symbols
-am__fastdepCC_FALSE = #
-am__fastdepCC_TRUE = 
+am__fastdepCC_FALSE = 
+am__fastdepCC_TRUE = #
 am__include = include
 am__leading_dot = .
 am__quote = 
@@ -446,97 +446,97 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/curlutil.Po
-include ./$(DEPDIR)/getpass.Po
-include ./$(DEPDIR)/homedir.Po
-include ./$(DEPDIR)/hugehelp.Po
-include ./$(DEPDIR)/main.Po
-include ./$(DEPDIR)/nonblock.Po
-include ./$(DEPDIR)/os-specific.Po
-include ./$(DEPDIR)/rawstr.Po
-include ./$(DEPDIR)/strdup.Po
-include ./$(DEPDIR)/strtoofft.Po
-include ./$(DEPDIR)/urlglob.Po
-include ./$(DEPDIR)/writeenv.Po
-include ./$(DEPDIR)/writeout.Po
-include ./$(DEPDIR)/xattr.Po
+#include ./$(DEPDIR)/curlutil.Po
+#include ./$(DEPDIR)/getpass.Po
+#include ./$(DEPDIR)/homedir.Po
+#include ./$(DEPDIR)/hugehelp.Po
+#include ./$(DEPDIR)/main.Po
+#include ./$(DEPDIR)/nonblock.Po
+#include ./$(DEPDIR)/os-specific.Po
+#include ./$(DEPDIR)/rawstr.Po
+#include ./$(DEPDIR)/strdup.Po
+#include ./$(DEPDIR)/strtoofft.Po
+#include ./$(DEPDIR)/urlglob.Po
+#include ./$(DEPDIR)/writeenv.Po
+#include ./$(DEPDIR)/writeout.Po
+#include ./$(DEPDIR)/xattr.Po
 
 .c.o:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+#	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 strtoofft.o: $(top_srcdir)/lib/strtoofft.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strtoofft.o -MD -MP -MF "$(DEPDIR)/strtoofft.Tpo" -c -o strtoofft.o `test -f '$(top_srcdir)/lib/strtoofft.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strtoofft.c; \
-	then mv -f "$(DEPDIR)/strtoofft.Tpo" "$(DEPDIR)/strtoofft.Po"; else rm -f "$(DEPDIR)/strtoofft.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/strtoofft.c' object='strtoofft.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strtoofft.o `test -f '$(top_srcdir)/lib/strtoofft.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strtoofft.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strtoofft.o -MD -MP -MF "$(DEPDIR)/strtoofft.Tpo" -c -o strtoofft.o `test -f '$(top_srcdir)/lib/strtoofft.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strtoofft.c; \
+#	then mv -f "$(DEPDIR)/strtoofft.Tpo" "$(DEPDIR)/strtoofft.Po"; else rm -f "$(DEPDIR)/strtoofft.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/strtoofft.c' object='strtoofft.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strtoofft.o `test -f '$(top_srcdir)/lib/strtoofft.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strtoofft.c
 
 strtoofft.obj: $(top_srcdir)/lib/strtoofft.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strtoofft.obj -MD -MP -MF "$(DEPDIR)/strtoofft.Tpo" -c -o strtoofft.obj `if test -f '$(top_srcdir)/lib/strtoofft.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strtoofft.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strtoofft.c'; fi`; \
-	then mv -f "$(DEPDIR)/strtoofft.Tpo" "$(DEPDIR)/strtoofft.Po"; else rm -f "$(DEPDIR)/strtoofft.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/strtoofft.c' object='strtoofft.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strtoofft.obj `if test -f '$(top_srcdir)/lib/strtoofft.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strtoofft.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strtoofft.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strtoofft.obj -MD -MP -MF "$(DEPDIR)/strtoofft.Tpo" -c -o strtoofft.obj `if test -f '$(top_srcdir)/lib/strtoofft.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strtoofft.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strtoofft.c'; fi`; \
+#	then mv -f "$(DEPDIR)/strtoofft.Tpo" "$(DEPDIR)/strtoofft.Po"; else rm -f "$(DEPDIR)/strtoofft.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/strtoofft.c' object='strtoofft.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strtoofft.obj `if test -f '$(top_srcdir)/lib/strtoofft.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strtoofft.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strtoofft.c'; fi`
 
 strdup.o: $(top_srcdir)/lib/strdup.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strdup.o -MD -MP -MF "$(DEPDIR)/strdup.Tpo" -c -o strdup.o `test -f '$(top_srcdir)/lib/strdup.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strdup.c; \
-	then mv -f "$(DEPDIR)/strdup.Tpo" "$(DEPDIR)/strdup.Po"; else rm -f "$(DEPDIR)/strdup.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/strdup.c' object='strdup.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strdup.o `test -f '$(top_srcdir)/lib/strdup.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strdup.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strdup.o -MD -MP -MF "$(DEPDIR)/strdup.Tpo" -c -o strdup.o `test -f '$(top_srcdir)/lib/strdup.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strdup.c; \
+#	then mv -f "$(DEPDIR)/strdup.Tpo" "$(DEPDIR)/strdup.Po"; else rm -f "$(DEPDIR)/strdup.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/strdup.c' object='strdup.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strdup.o `test -f '$(top_srcdir)/lib/strdup.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/strdup.c
 
 strdup.obj: $(top_srcdir)/lib/strdup.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strdup.obj -MD -MP -MF "$(DEPDIR)/strdup.Tpo" -c -o strdup.obj `if test -f '$(top_srcdir)/lib/strdup.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strdup.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strdup.c'; fi`; \
-	then mv -f "$(DEPDIR)/strdup.Tpo" "$(DEPDIR)/strdup.Po"; else rm -f "$(DEPDIR)/strdup.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/strdup.c' object='strdup.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strdup.obj `if test -f '$(top_srcdir)/lib/strdup.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strdup.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strdup.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT strdup.obj -MD -MP -MF "$(DEPDIR)/strdup.Tpo" -c -o strdup.obj `if test -f '$(top_srcdir)/lib/strdup.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strdup.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strdup.c'; fi`; \
+#	then mv -f "$(DEPDIR)/strdup.Tpo" "$(DEPDIR)/strdup.Po"; else rm -f "$(DEPDIR)/strdup.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/strdup.c' object='strdup.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o strdup.obj `if test -f '$(top_srcdir)/lib/strdup.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/strdup.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/strdup.c'; fi`
 
 rawstr.o: $(top_srcdir)/lib/rawstr.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rawstr.o -MD -MP -MF "$(DEPDIR)/rawstr.Tpo" -c -o rawstr.o `test -f '$(top_srcdir)/lib/rawstr.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/rawstr.c; \
-	then mv -f "$(DEPDIR)/rawstr.Tpo" "$(DEPDIR)/rawstr.Po"; else rm -f "$(DEPDIR)/rawstr.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/rawstr.c' object='rawstr.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rawstr.o `test -f '$(top_srcdir)/lib/rawstr.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/rawstr.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rawstr.o -MD -MP -MF "$(DEPDIR)/rawstr.Tpo" -c -o rawstr.o `test -f '$(top_srcdir)/lib/rawstr.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/rawstr.c; \
+#	then mv -f "$(DEPDIR)/rawstr.Tpo" "$(DEPDIR)/rawstr.Po"; else rm -f "$(DEPDIR)/rawstr.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/rawstr.c' object='rawstr.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rawstr.o `test -f '$(top_srcdir)/lib/rawstr.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/rawstr.c
 
 rawstr.obj: $(top_srcdir)/lib/rawstr.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rawstr.obj -MD -MP -MF "$(DEPDIR)/rawstr.Tpo" -c -o rawstr.obj `if test -f '$(top_srcdir)/lib/rawstr.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/rawstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/rawstr.c'; fi`; \
-	then mv -f "$(DEPDIR)/rawstr.Tpo" "$(DEPDIR)/rawstr.Po"; else rm -f "$(DEPDIR)/rawstr.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/rawstr.c' object='rawstr.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rawstr.obj `if test -f '$(top_srcdir)/lib/rawstr.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/rawstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/rawstr.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rawstr.obj -MD -MP -MF "$(DEPDIR)/rawstr.Tpo" -c -o rawstr.obj `if test -f '$(top_srcdir)/lib/rawstr.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/rawstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/rawstr.c'; fi`; \
+#	then mv -f "$(DEPDIR)/rawstr.Tpo" "$(DEPDIR)/rawstr.Po"; else rm -f "$(DEPDIR)/rawstr.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/rawstr.c' object='rawstr.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rawstr.obj `if test -f '$(top_srcdir)/lib/rawstr.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/rawstr.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/rawstr.c'; fi`
 
 nonblock.o: $(top_srcdir)/lib/nonblock.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nonblock.o -MD -MP -MF "$(DEPDIR)/nonblock.Tpo" -c -o nonblock.o `test -f '$(top_srcdir)/lib/nonblock.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/nonblock.c; \
-	then mv -f "$(DEPDIR)/nonblock.Tpo" "$(DEPDIR)/nonblock.Po"; else rm -f "$(DEPDIR)/nonblock.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/nonblock.c' object='nonblock.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nonblock.o `test -f '$(top_srcdir)/lib/nonblock.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/nonblock.c
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nonblock.o -MD -MP -MF "$(DEPDIR)/nonblock.Tpo" -c -o nonblock.o `test -f '$(top_srcdir)/lib/nonblock.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/nonblock.c; \
+#	then mv -f "$(DEPDIR)/nonblock.Tpo" "$(DEPDIR)/nonblock.Po"; else rm -f "$(DEPDIR)/nonblock.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/nonblock.c' object='nonblock.o' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nonblock.o `test -f '$(top_srcdir)/lib/nonblock.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/nonblock.c
 
 nonblock.obj: $(top_srcdir)/lib/nonblock.c
-	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nonblock.obj -MD -MP -MF "$(DEPDIR)/nonblock.Tpo" -c -o nonblock.obj `if test -f '$(top_srcdir)/lib/nonblock.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/nonblock.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/nonblock.c'; fi`; \
-	then mv -f "$(DEPDIR)/nonblock.Tpo" "$(DEPDIR)/nonblock.Po"; else rm -f "$(DEPDIR)/nonblock.Tpo"; exit 1; fi
-#	source='$(top_srcdir)/lib/nonblock.c' object='nonblock.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nonblock.obj `if test -f '$(top_srcdir)/lib/nonblock.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/nonblock.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/nonblock.c'; fi`
+#	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nonblock.obj -MD -MP -MF "$(DEPDIR)/nonblock.Tpo" -c -o nonblock.obj `if test -f '$(top_srcdir)/lib/nonblock.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/nonblock.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/nonblock.c'; fi`; \
+#	then mv -f "$(DEPDIR)/nonblock.Tpo" "$(DEPDIR)/nonblock.Po"; else rm -f "$(DEPDIR)/nonblock.Tpo"; exit 1; fi
+#	source='$(top_srcdir)/lib/nonblock.c' object='nonblock.obj' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nonblock.obj `if test -f '$(top_srcdir)/lib/nonblock.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/nonblock.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/nonblock.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
