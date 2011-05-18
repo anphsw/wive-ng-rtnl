@@ -2,7 +2,7 @@
 #define _LINUX_INOTIFY_SYSCALLS_H
 
 #include <sys/syscall.h>
-
+extern long int syscall (long int __sysno, ...) __THROW;
 static inline int inotify_init (void)
 {
 	return syscall (__NR_inotify_init);
