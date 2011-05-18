@@ -42,9 +42,6 @@ TCLIB += tc_estimator.o
 CFLAGS += -DCONFIG_GACT -DCONFIG_GACT_PROB
 
 TCSO :=
-ifeq ($(TC_CONFIG_ATM),y)
-  TCSO += q_atm.so
-endif
 
 LDLIBS += -L. -ltc -lm -ldl -L../../lib/libflex
 
