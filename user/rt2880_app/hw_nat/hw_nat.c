@@ -116,10 +116,8 @@ int main(int argc, char *argv[])
 {
     int opt;
     char options[] = "abefg?c:A:B:C:D:E:F:G:H:I:J:K:L:M:R:S:d:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:N:O:P:Q:T:U";
-    int fd, method;
-    int i=0;
-    unsigned int entry_num;
-    unsigned int debug;
+    int fd, method=0;
+    unsigned int entry_num=0, debug=0;
     struct hwnat_args *args;
     struct hwnat_tuple args2;
     struct hwnat_qos_args args3;
