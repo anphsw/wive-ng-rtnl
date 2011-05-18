@@ -15,7 +15,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /tcpdump/master/libpcap/nlpid.h,v 1.2 2002-12-06 00:01:34 hannes Exp $ (Juniper)
+ * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/nlpid.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (Juniper)
  */
 
 /* Types missing from some systems */

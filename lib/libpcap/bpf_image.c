@@ -21,26 +21,12 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /tcpdump/master/libpcap/bpf_image.c,v 1.28 2008-01-02 04:16:46 guy Exp $ (LBL)";
+    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/bpf_image.c,v 1.1 2009/10/08 07:30:57 kaohj Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#ifdef WIN32
-#include <pcap-stdinc.h>
-#else /* WIN32 */
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
-#elif HAVE_STDINT_H
-#include <stdint.h>
-#endif
-#ifdef HAVE_SYS_BITYPES_H
-#include <sys/bitypes.h>
-#endif
-#include <sys/types.h>
-#endif /* WIN32 */
 
 #include <stdio.h>
 #include <string.h>
@@ -53,7 +39,7 @@ static const char rcsid[] _U_ =
 
 char *
 bpf_image(p, n)
-	const struct bpf_insn *p;
+	struct bpf_insn *p;
 	int n;
 {
 	int v;

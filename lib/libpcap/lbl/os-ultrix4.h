@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /tcpdump/master/libpcap/lbl/os-ultrix4.h,v 1.19 1999-10-07 23:46:41 mcr Exp $ (LBL)
+ * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/lbl/os-ultrix4.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL)
  */
 
 /* Prototypes missing in Ultrix 4 */

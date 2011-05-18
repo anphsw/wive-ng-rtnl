@@ -8,8 +8,8 @@
  * Authors: Gilbert HOYEK (gil_hoyek@hotmail.com), Elias M. KHOURY
  * (+961 3 485343);
  *
- * @(#) $Header: /tcpdump/master/libpcap/pcap-septel.h,v 1.2 2008-04-04 19:37:45 guy Exp $
+ * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/pcap-septel.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $
  */
 
-pcap_t *septel_create(const char *device, char *ebuf);
+pcap_t *septel_open_live(const char *device, int snaplen, int promisc, int to_ms, char *ebuf);
 

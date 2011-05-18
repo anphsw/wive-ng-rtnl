@@ -1,4 +1,4 @@
-/* @(#) $Header: /tcpdump/master/libpcap/ppp.h,v 1.12 2005-02-08 19:52:19 guy Exp $ (LBL) */
+/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/ppp.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL) */
 /*
  * Point to Point Protocol (PPP) RFC1331
  *

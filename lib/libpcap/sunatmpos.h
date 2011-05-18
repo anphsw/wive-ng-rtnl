@@ -29,7 +29,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @(#) $Header: /tcpdump/master/libpcap/sunatmpos.h,v 1.1 2002-07-11 09:06:47 guy Exp $ (LBL)
+ * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/sunatmpos.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL)
  */
 
 /* SunATM header for ATM packet */

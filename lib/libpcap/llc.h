@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /tcpdump/master/libpcap/llc.h,v 1.2 2001-01-28 09:44:50 guy Exp $ (LBL)
+ * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/llc.h,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL)
  */
 
 /*

@@ -24,16 +24,11 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /tcpdump/master/libpcap/nametoaddr.c,v 1.83 2008-02-06 10:21:30 guy Exp $ (LBL)";
+    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/nametoaddr.c,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#ifdef DECNETLIB
-#include <sys/types.h>
-#include <netdnet/dnetdb.h>
 #endif
 
 #ifdef WIN32
@@ -48,6 +43,13 @@ static const char rcsid[] _U_ =
 
 #include <netinet/in.h>
 #endif /* WIN32 */
+
+/*
+ * XXX - why was this included even on UNIX?
+ */
+#ifdef __MINGW32__
+#include "IP6_misc.h"
+#endif
 
 #ifndef WIN32
 #ifdef HAVE_ETHER_HOSTTON
@@ -78,7 +80,7 @@ struct rtentry;		/* declarations in <net/if.h> */
 #include "pcap-int.h"
 
 #include "gencode.h"
-#include <pcap/namedb.h>
+#include <pcap-namedb.h>
 
 #ifdef HAVE_OS_PROTO_H
 #include "os-proto.h"
@@ -396,15 +398,7 @@ __pcap_atodn(const char *s, bpf_u_int32 *addr)
 }
 
 /*
- * Convert 's', which can have the one of the forms:
- *
- *	"xx:xx:xx:xx:xx:xx"
- *	"xx.xx.xx.xx.xx.xx"
- *	"xx-xx-xx-xx-xx-xx"
- *	"xxxx.xxxx.xxxx"
- *	"xxxxxxxxxxxx"
- *
- * (or various mixes of ':', '.', and '-') into a new
+ * Convert 's' which has the form "xx:xx:xx:xx:xx:xx" into a new
  * ethernet address.  Assumes 's' is well formed.
  */
 u_char *
@@ -416,7 +410,7 @@ pcap_ether_aton(const char *s)
 	e = ep = (u_char *)malloc(6);
 
 	while (*s) {
-		if (*s == ':' || *s == '.' || *s == '-')
+		if (*s == ':')
 			s += 1;
 		d = xdtoi(*s++);
 		if (isxdigit((unsigned char)*s)) {
