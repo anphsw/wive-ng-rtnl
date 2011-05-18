@@ -913,7 +913,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "AP2040Rescan", ap2040_rescan);
 	
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
-	nvram_bufset(RT2860_NVRAM, "M2UEnabled", m2u_enable);
+	nvram_bufset(RT2860_NVRAM, "igmpEnabled", m2u_enable);
 	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
 #endif
 
