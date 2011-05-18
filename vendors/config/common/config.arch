@@ -44,6 +44,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBTHREADUTIL	=	-lthreadutil
 	SLIBPTHREAD	=	-lpthread
 	SLIBCURL	=	-lcurl
+	SLIBPCAP	=	-lpcap
 	SLIBEVENT	=	-levent
 	SLIBUSB		=	-lusb
 	SLIBUPNP	=	-lupnp
@@ -82,6 +83,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	LIBEVENT	=	$(SLIBEVENT)
 	LIBUSB		=	$(SLIBUSB)
 	LIBCURL		=	$(SLIBCURL)
+	LIBPCAP		=	$(SLIBPCAP)
 	LIBUPNP		=	$(SLIBUPNP)
 	LIBZ		=	$(SLIBZ)
 	ifeq ($(findstring glibc,$(LIBCDIR)),glibc)

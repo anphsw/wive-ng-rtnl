@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = 
 PACKAGE = transmission
-VERSION = 2.30
+VERSION = 2.31
 
 SHELL = /bin/sh
 
@@ -42,7 +42,7 @@ install_sh = ${SHELL} /opt/Wive-RTNL/user/transmission/install-sh
 mkdir_p = $(install_sh) -d
 
 INSTALL = /usr/bin/install -c
-INSTALL_DATA = ${INSTALL} -m 644
+INSTALL_DATA = /usr/bin/install -c -m 644
 
 GMSGFMT = 
 MSGFMT = 

@@ -83,6 +83,9 @@ endif
 ifeq ($(CONFIG_LIB_CURL),y)
     DIRS += libcurl
 endif
+ifeq ($(CONFIG_LIB_PCAP),y)
+    DIRS += libpcap
+endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
 all: headers pregen config subdirs shared finished
@@ -148,6 +151,9 @@ ifeq ($(strip $(CONFIG_LIB_EVENT)),y)
 endif
 ifeq ($(strip $(CONFIG_LIB_CURL)),y)
 	@$(MAKE) -C libcurl install
+endif
+ifeq ($(strip $(CONFIG_LIB_PCAP)),y)
+	@$(MAKE) -C libpcap install
 endif
 else
 	$(SECHO)
@@ -253,6 +259,9 @@ ifeq ($(CONFIG_LIB_EVENT),y)
 endif
 ifeq ($(CONFIG_LIB_CURL),y)
 	make -C libcurl romfs
+endif
+ifeq ($(CONFIG_LIB_PCAP),y)
+	make -C libpcap romfs
 endif
 
 RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=$(shell extra/scripts/relative_path.sh $(DEVEL_PREFIX)lib $(RUNTIME_PREFIX)lib)
@@ -466,6 +475,7 @@ clean:
 	-$(MAKE) -C libnatpmp clean
 	-$(MAKE) -C libevent clean
 	-$(MAKE) -C libcurl clean
+	-$(MAKE) -C libpcap clean
 	-$(MAKE) -C libusb clean
 	-$(MAKE) -C libntfs-3g clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
