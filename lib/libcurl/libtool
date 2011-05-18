@@ -138,7 +138,7 @@ old_postuninstall_cmds=""
 LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/lib/libssl -g0 -Wno-system-headers"
+LTCFLAGS="-Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux-2.6.21.x/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/user/openssl -g0 -Wno-system-headers"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe=""

@@ -6,7 +6,9 @@ VERSIONPKG="1.7.5.RU.`date +%d%m%Y`"
 
 #---Set_env_ROOTDIR_to_current_dir---#
 ROOTDIR=`pwd`                                                                                                                               
-export ROOTDIR=$ROOTDIR 
+export ROOTDIR=$ROOTDIR
+export FIRMROOT=$ROOTDIR
+export LINUXDIR=$ROOTDIR/linux
 
 #----WR-NL---WR-NL(LITE)----#
 if [ "$1" = "" ]; then

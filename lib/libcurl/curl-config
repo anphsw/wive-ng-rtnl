@@ -142,18 +142,18 @@ while test $# -gt 0; do
 	   CURLLIBDIR=""
 	fi
 	if test "Xno" = "Xyes"; then
-	  echo ${CURLLIBDIR}-lcurl -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl  
+	  echo ${CURLLIBDIR}-lcurl -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl  
 	else
-	  echo ${CURLLIBDIR}-lcurl -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl 
+	  echo ${CURLLIBDIR}-lcurl -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl 
 	fi
 	;;
 
     --static-libs)
-	echo ${exec_prefix}/lib/libcurl.a -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl  
+	echo ${exec_prefix}/lib/libcurl.a -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl  
 	;;
 
     --configure)
-      echo " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/lib/libssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/lib/libssl'"
+      echo " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux-2.6.21.x/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/user/openssl' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl'"
     ;;
 
     *)
