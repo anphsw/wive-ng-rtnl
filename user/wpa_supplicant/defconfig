@@ -34,7 +34,7 @@
 #CC=mipsel-uclibc-gcc
 #CC=/opt/brcm/hndtools-mipsel-uclibc/bin/mipsel-uclibc-gcc
 #CFLAGS += -Os
-#CPPFLAGS=-I../src/include -I../openssl-0.9.7d/include \
+#CPPFLAGS=-I../src/include -I../openssl/include \
 #	-I../WRT54GS/release/src/include
 #LIBS = -lssl
 ###############################################################################
