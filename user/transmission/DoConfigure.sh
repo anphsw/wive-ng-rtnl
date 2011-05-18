@@ -2,6 +2,10 @@
 
 echo "=====================CONFIGURE-TORRENT========================="
 APROOTDIR=`pwd`
+
+#prevent replace
+touch *
+
 PREFIX="--prefix=$APROOTDIR/filesystem"
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu \
 	    $PREFIX --disable-gtk --disable-nls --enable-lightweight --disable-utp \
