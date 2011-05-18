@@ -986,7 +986,6 @@ enable_libtool_lock
 with_zlib
 with_zlib_includes
 enable_largefile
-with_inotify
 with_kqueue
 enable_utp
 enable_gtk
@@ -1689,7 +1688,6 @@ Optional Packages:
   --with-zlib=DIR         search for ZLIB in DIR/include and DIR/lib
   --with-zlib-includes=DIR
                           search for ZLIB includes in DIR
-  --with-inotify          Enable inotify support (default=auto)
   --with-kqueue           Enable kqueue support (default=auto)
 
 Some influential environment variables:
@@ -4959,13 +4957,13 @@ if ${lt_cv_nm_interface+:} false; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4962: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4960: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4965: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4963: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4968: output\"" >&5)
+  (eval echo "\"\$as_me:4966: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6171,7 +6169,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6174 "configure"' > conftest.$ac_ext
+  echo '#line 6172 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7700,11 +7698,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7703: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7701: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7707: \$? = $ac_status" >&5
+   echo "$as_me:7705: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8039,11 +8037,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8042: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8040: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8046: \$? = $ac_status" >&5
+   echo "$as_me:8044: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8144,11 +8142,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8147: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8145: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8151: \$? = $ac_status" >&5
+   echo "$as_me:8149: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8199,11 +8197,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8202: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8200: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8206: \$? = $ac_status" >&5
+   echo "$as_me:8204: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10569,7 +10567,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10572 "configure"
+#line 10570 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10665,7 +10663,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10668 "configure"
+#line 10666 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14285,11 +14283,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14288: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14286: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14292: \$? = $ac_status" >&5
+   echo "$as_me:14290: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14384,11 +14382,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14387: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14385: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14391: \$? = $ac_status" >&5
+   echo "$as_me:14389: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14436,11 +14434,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14439: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14437: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14443: \$? = $ac_status" >&5
+   echo "$as_me:14441: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17041,37 +17039,6 @@ done
 
 
 
-
-ac_fn_c_check_header_mongrel "$LINENO" "sys/inotify.h" "ac_cv_header_sys_inotify_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_inotify_h" = xyes; then :
-  ac_fn_c_check_func "$LINENO" "inotify_init" "ac_cv_func_inotify_init"
-if test "x$ac_cv_func_inotify_init" = xyes; then :
-  have_inotify="yes"
-else
-  have_inotify="no"
-fi
-
-else
-  have_inotify="no"
-fi
-
-
-
-# Check whether --with-inotify was given.
-if test "${with_inotify+set}" = set; then :
-  withval=$with_inotify; want_inotify=${withval}
-else
-  want_inotify=${have_inotify}
-fi
-
-if test "x$want_inotify" = "xyes" ; then
-    if test "x$have_inotify" = "xyes"; then
-      $as_echo "#define WITH_INOTIFY 1" >>confdefs.h
-
-    else
-      as_fn_error $? "\"inotify not found!\"" "$LINENO" 5
-    fi
-fi
 
 ac_fn_c_check_header_mongrel "$LINENO" "sys/event.h" "ac_cv_header_sys_event_h" "$ac_includes_default"
 if test "x$ac_cv_header_sys_event_h" = xyes; then :

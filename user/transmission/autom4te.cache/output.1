@@ -986,7 +986,6 @@ enable_libtool_lock
 with_zlib
 with_zlib_includes
 enable_largefile
-with_inotify
 with_kqueue
 enable_utp
 enable_gtk
@@ -1689,7 +1688,6 @@ Optional Packages:
   --with-zlib=DIR         search for ZLIB in DIR/include and DIR/lib
   --with-zlib-includes=DIR 
                           search for ZLIB includes in DIR
-  --with-inotify          Enable inotify support (default=auto)
   --with-kqueue           Enable kqueue support (default=auto)
 
 Some influential environment variables:
@@ -17041,37 +17039,6 @@ done
 
 
 
-
-ac_fn_c_check_header_mongrel "$LINENO" "sys/inotify.h" "ac_cv_header_sys_inotify_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_inotify_h" = xyes; then :
-  ac_fn_c_check_func "$LINENO" "inotify_init" "ac_cv_func_inotify_init"
-if test "x$ac_cv_func_inotify_init" = xyes; then :
-  have_inotify="yes"
-else
-  have_inotify="no"
-fi
-
-else
-  have_inotify="no"
-fi
-
- 
-
-@%:@ Check whether --with-inotify was given.
-if test "${with_inotify+set}" = set; then :
-  withval=$with_inotify; want_inotify=${withval}
-else
-  want_inotify=${have_inotify}
-fi
- 
-if test "x$want_inotify" = "xyes" ; then 
-    if test "x$have_inotify" = "xyes"; then 
-      $as_echo "@%:@define WITH_INOTIFY 1" >>confdefs.h
- 
-    else 
-      as_fn_error $? "\"inotify not found!\"" "$LINENO" 5 
-    fi 
-fi 
  
 ac_fn_c_check_header_mongrel "$LINENO" "sys/event.h" "ac_cv_header_sys_event_h" "$ac_includes_default"
 if test "x$ac_cv_header_sys_event_h" = xyes; then :

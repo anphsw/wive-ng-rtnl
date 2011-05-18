@@ -144,21 +144,6 @@ AC_CHECK_FUNCS([posix_fadvise])
 dnl ----------------------------------------------------------------------------
 dnl
 dnl file monitoring for the daemon
-
-AC_CHECK_HEADER([sys/inotify.h], 
-                [AC_CHECK_FUNC([inotify_init],[have_inotify="yes"],[have_inotify="no"])], 
-                [have_inotify="no"]) 
-AC_ARG_WITH([inotify], 
-            [AS_HELP_STRING([--with-inotify],[Enable inotify support (default=auto)])], 
-            [want_inotify=${withval}], 
-            [want_inotify=${have_inotify}]) 
-if test "x$want_inotify" = "xyes" ; then 
-    if test "x$have_inotify" = "xyes"; then 
-      AC_DEFINE([WITH_INOTIFY],[1]) 
-    else 
-      AC_MSG_ERROR("inotify not found!") 
-    fi 
-fi 
  
 AC_CHECK_HEADER([sys/event.h], 
                 [AC_CHECK_FUNC([kqueue],[have_kqueue="yes"],[have_kqueue="no"])], 
