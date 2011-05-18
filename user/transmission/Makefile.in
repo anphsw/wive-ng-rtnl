@@ -812,6 +812,9 @@ uninstall-am:
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am tags tags-recursive uninstall uninstall-am
 
+romfs: install
+	cp -rfv filesystem/bin/transmission-daemon $(ROMFSDIR)/bin/transmission-daemon                                                      
+	cp -rfv filesystem/share/* $(ROMFSDIR)/share/
 
 dist-hook:
 	rm -rf `find $(distdir)/qt -name .svn`

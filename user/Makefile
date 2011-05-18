@@ -130,6 +130,7 @@ clean:
 	echo ">>>>>>>>>>>>>>>> FULL CLEANUP  <<<<<<<<<<<<<<<<<<<<<<"
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i mrproper; done
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i distclean; done
 	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
 
 prune:

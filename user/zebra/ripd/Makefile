@@ -221,16 +221,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/rip_debug.Po
-include ./$(DEPDIR)/rip_interface.Po
-include ./$(DEPDIR)/rip_main.Po
-include ./$(DEPDIR)/rip_offset.Po
-include ./$(DEPDIR)/rip_peer.Po
-include ./$(DEPDIR)/rip_routemap.Po
-include ./$(DEPDIR)/rip_snmp.Po
-include ./$(DEPDIR)/rip_zebra.Po
-include ./$(DEPDIR)/ripd.Po
-
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
 

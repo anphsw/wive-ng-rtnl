@@ -36,6 +36,10 @@ EXTRA_DIST = \
   update-version-h.sh \
   Transmission.xcodeproj/project.pbxproj
 
+romfs: install
+	cp -rfv filesystem/bin/transmission-daemon $(ROMFSDIR)/bin/transmission-daemon                                                      
+	cp -rfv filesystem/share/* $(ROMFSDIR)/share/
+
 dist-hook:
 	rm -rf `find $(distdir)/qt -name .svn`
 
