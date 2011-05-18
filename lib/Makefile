@@ -466,6 +466,8 @@ clean:
 	-$(MAKE) -C libnatpmp clean
 	-$(MAKE) -C libevent clean
 	-$(MAKE) -C libcurl clean
+	-$(MAKE) -C libusb clean
+	-$(MAKE) -C libntfs-3g clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	-$(MAKE) -C libgmp clean
 endif
