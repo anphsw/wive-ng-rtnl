@@ -118,7 +118,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	if (strcmp(ntpEnabled, "on")==0)
-		doSystem("service ntp start &");
+		doSystem("service ntp restart &");
 	else
 		doSystem("service ntp stop &");
 
@@ -191,7 +191,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 	
 
-	doSystem("service ddns start &");
+	doSystem("service ddns restart &");
 
 	websHeader(wp);
 	websWrite(wp, T("<h2>DDNS Settings</h2><br>\n"));
