@@ -827,7 +827,7 @@ dist-hook:
 	rm -rf `find $(distdir)/qt -name .svn`
 
 romfs: install
-	cp -rfv filesystem/bin/* $(ROMFSDIR)/bin/
+	cp -rfv filesystem/bin/transmission-daemon $(ROMFSDIR)/bin/transmission-daemon
 	cp -rfv filesystem/share/* $(ROMFSDIR)/share/
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
