@@ -75,6 +75,7 @@ dir_$(CONFIG_USER_P910ND)		    += p910nd
 dir_$(CONFIG_USER_NTFS3G)		    += ntfs-3g
 dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
+dir_$(CONFIG_USER_TCPDUMP)		    += tcpdump
 dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
 
 #only ralink apps and scripts
