@@ -34,7 +34,7 @@ VEND=$(ROOTDIR)/vendors
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
-SUBDIRS_APP += ntfs-3g p910nd transmission openssl-0.9.8e
+SUBDIRS_APP += ntfs-3g p910nd transmission openssl
 #
 # must run the vendor build first
 #
@@ -53,7 +53,7 @@ dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_USER_LLTD)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
-dir_$(CONFIG_USER_OPENSSL)	   	    += openssl-0.9.8e
+dir_$(CONFIG_USER_OPENSSL)	   	    += openssl
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
@@ -76,7 +76,6 @@ dir_$(CONFIG_USER_NTFS3G)		    += ntfs-3g
 dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
 dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
-
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 
@@ -91,7 +90,7 @@ ifeq ($(CONFIG_USER_OPENSSL),y)
 	AR=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ar ; \
 	LD=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ld ; \
 	RANLIB=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ranlib ; \
-	cd openssl-0.9.8e ; ./Configure RT2880 ; $(MAKE) ; \
+	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
 	cd ..
 endif
 	for i in $(dir_y) ; do \

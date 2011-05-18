@@ -414,6 +414,7 @@
 29) Add libcurl, libevent, transmission to 8Mb devices.<br>
 30) Correct lib alias.<br>
 31) WPA supplicatnt enable by default for 8Mb devices.<br>
+32) Openssl up to 0.9.8r version.<br>
 
 <br><br>
 <b>For support see:</b><br>
