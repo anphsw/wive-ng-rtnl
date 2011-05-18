@@ -74,6 +74,9 @@ endif
 ifeq ($(CONFIG_LIB_USB),y)
     DIRS += libusb
 endif
+ifeq ($(CONFIG_LIB_PCAP),y)
+    DIRS += libpcap
+endif
 ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
     DIRS += libntfs-3g
 endif
@@ -82,9 +85,6 @@ ifeq ($(CONFIG_LIB_EVENT),y)
 endif
 ifeq ($(CONFIG_LIB_CURL),y)
     DIRS += libcurl
-endif
-ifeq ($(CONFIG_LIB_PCAP),y)
-    DIRS += libpcap
 endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
@@ -146,14 +146,14 @@ endif
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 	@$(MAKE) -C libintl shared
 endif
+ifeq ($(strip $(CONFIG_LIB_PCAP)),y)
+	@$(MAKE) -C libpcap shared
 ifeq ($(strip $(CONFIG_LIB_EVENT)),y)
 	@$(MAKE) -C libevent install
 endif
 ifeq ($(strip $(CONFIG_LIB_CURL)),y)
 	@$(MAKE) -C libcurl install
 endif
-ifeq ($(strip $(CONFIG_LIB_PCAP)),y)
-	@$(MAKE) -C libpcap install
 endif
 else
 	$(SECHO)
