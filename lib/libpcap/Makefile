@@ -50,6 +50,7 @@ PROG=libpcap
 
 # Standard CFLAGS
 CFLAGS = $(CCOPT) $(INCLS) $(DEFS)
+CFLAGS += -fPIC
 
 INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL}

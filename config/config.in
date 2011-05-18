@@ -197,7 +197,7 @@ if [ "$CONFIG_USER_NTFS3G" = "n" ]; then
 	define_bool CONFIG_LIB_LIBNTFS3G_FORCE n
 fi
 bool 'strace'			CONFIG_USER_STRACE_STRACE
-bool 'tcpdump (Binary Only)'	CONFIG_USER_TCPDUMP
+bool 'tcpdump'			CONFIG_USER_TCPDUMP
 bool 'Chillispot'		CONFIG_USER_CHILLISPOT
 bool 'lspci'			CONFIG_USER_PCIUTIL_LSPCI
 bool 'setpci'			CONFIG_USER_PCIUTIL_SETPCI

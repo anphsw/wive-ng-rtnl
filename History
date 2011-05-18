@@ -415,7 +415,8 @@
 30) Correct lib alias.<br>
 31) WPA supplicatnt enable by default for 8Mb devices.<br>
 32) Openssl up to 0.9.8r version.<br>
-33) Add libpcap.<br>
+33) Add libpcap (8Mb devices).<br>
+34) Add tcpdump (8Mb devices). <br>
 
 <br><br>
 <b>For support see:</b><br>
