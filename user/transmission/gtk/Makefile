@@ -192,14 +192,14 @@ CANBERRA_MINIMUM = 0.10
 CATALOGS = 
 CATOBJEXT = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -std=gnu99 -ggdb3 -Wall -W -Wpointer-arith -Wformat-security -Wcast-align -Wundef -Wcast-align -Wstrict-prototypes -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wnested-externs -Wunused-parameter -Wwrite-strings -Winline -Wfloat-equal -Wextra -Wdeclaration-after-statement -Winit-self -Wvariadic-macros
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CPPFLAGS =  -DNDEBUG
 CURL_MINIMUM = 7.15.4
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign 
 CYGPATH_W = echo
 DATADIRNAME = 
@@ -277,7 +277,7 @@ NMEDIT =
 OBJDUMP = objdump
 OBJEXT = o
 OPENSSL_CFLAGS =  
-OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl-0.9.8e/libcrypto.a
+OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl/libcrypto.so.0.9.8
 OPENSSL_MINIMUM = 0.9.4
 OTOOL = 
 OTOOL64 = 
@@ -361,7 +361,7 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias = 
+target_alias = /opt/Wive-RTNL/user/openssl/libssl.so.0.9.8
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
@@ -457,7 +457,7 @@ transmission_gtk_LDADD =  \
 	$(top_builddir)/third-party/libnatpmp/libnatpmp.a \
 	  $(top_builddir)/third-party/dht/libdht.a  \
 	-pthread -Wl,--export-dynamic -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lm -lcairo -lpng12 -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0      \
-	/opt/Wive-RTNL/lib/libevent/filesystem/lib/libevent.so  /opt/Wive-RTNL/lib/libcurl/filesystem/lib/libcurl.so /opt/Wive-RTNL/user/openssl-0.9.8e/libcrypto.a \
+	/opt/Wive-RTNL/lib/libevent/filesystem/lib/libevent.so  /opt/Wive-RTNL/lib/libcurl/filesystem/lib/libcurl.so /opt/Wive-RTNL/user/openssl/libcrypto.so.0.9.8 \
 	-lm   $(am__append_2)
 DESKTOP_IN_FILES = transmission-gtk.desktop.in
 DESKTOP_FILES = $(DESKTOP_IN_FILES:.desktop.in=.desktop)
@@ -569,52 +569,52 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/actions.Po
-include ./$(DEPDIR)/conf.Po
-include ./$(DEPDIR)/details.Po
-include ./$(DEPDIR)/dialogs.Po
-include ./$(DEPDIR)/favicon.Po
-include ./$(DEPDIR)/file-list.Po
-include ./$(DEPDIR)/filter.Po
-include ./$(DEPDIR)/hig.Po
-include ./$(DEPDIR)/icons.Po
-include ./$(DEPDIR)/main.Po
-include ./$(DEPDIR)/makemeta-ui.Po
-include ./$(DEPDIR)/msgwin.Po
-include ./$(DEPDIR)/notify.Po
-include ./$(DEPDIR)/open-dialog.Po
-include ./$(DEPDIR)/relocate.Po
-include ./$(DEPDIR)/stats.Po
-include ./$(DEPDIR)/torrent-cell-renderer.Po
-include ./$(DEPDIR)/tr-core.Po
-include ./$(DEPDIR)/tr-icon.Po
-include ./$(DEPDIR)/tr-prefs.Po
-include ./$(DEPDIR)/tr-window.Po
-include ./$(DEPDIR)/util.Po
+#include ./$(DEPDIR)/actions.Po
+#include ./$(DEPDIR)/conf.Po
+#include ./$(DEPDIR)/details.Po
+#include ./$(DEPDIR)/dialogs.Po
+#include ./$(DEPDIR)/favicon.Po
+#include ./$(DEPDIR)/file-list.Po
+#include ./$(DEPDIR)/filter.Po
+#include ./$(DEPDIR)/hig.Po
+#include ./$(DEPDIR)/icons.Po
+#include ./$(DEPDIR)/main.Po
+#include ./$(DEPDIR)/makemeta-ui.Po
+#include ./$(DEPDIR)/msgwin.Po
+#include ./$(DEPDIR)/notify.Po
+#include ./$(DEPDIR)/open-dialog.Po
+#include ./$(DEPDIR)/relocate.Po
+#include ./$(DEPDIR)/stats.Po
+#include ./$(DEPDIR)/torrent-cell-renderer.Po
+#include ./$(DEPDIR)/tr-core.Po
+#include ./$(DEPDIR)/tr-icon.Po
+#include ./$(DEPDIR)/tr-prefs.Po
+#include ./$(DEPDIR)/tr-window.Po
+#include ./$(DEPDIR)/util.Po
 
 .c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

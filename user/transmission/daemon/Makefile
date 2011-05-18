@@ -142,7 +142,7 @@ CANBERRA_MINIMUM = 0.10
 CATALOGS = 
 CATOBJEXT = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS += -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -std=gnu99 -ggdb3 -Wall -W -Wpointer-arith -Wformat-security -Wcast-align -Wundef -Wcast-align -Wstrict-prototypes -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wnested-externs -Wunused-parameter -Wwrite-strings -Winline -Wfloat-equal -Wextra -Wdeclaration-after-statement -Winit-self -Wvariadic-macros
 CFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
@@ -151,7 +151,7 @@ CPPFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/
 CURL_MINIMUM = 7.15.4
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS += -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign 
 CYGPATH_W = echo
 DATADIRNAME = 
@@ -229,7 +229,7 @@ NMEDIT =
 OBJDUMP = objdump
 OBJEXT = o
 OPENSSL_CFLAGS +=  
-OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl-0.9.8e/libcrypto.a
+OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl/libcrypto.so.0.9.8
 OPENSSL_MINIMUM = 0.9.4
 OTOOL = 
 OTOOL64 = 
@@ -313,7 +313,7 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias = 
+target_alias = /opt/Wive-RTNL/user/openssl/libssl.so.0.9.8
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
@@ -341,7 +341,7 @@ LDADD = \
      \
     /opt/Wive-RTNL/lib/libevent/filesystem/lib/libevent.so \
     /opt/Wive-RTNL/lib/libcurl/filesystem/lib/libcurl.so \
-    /opt/Wive-RTNL/user/openssl-0.9.8e/libcrypto.a \
+    /opt/Wive-RTNL/user/openssl/libcrypto.so.0.9.8 \
      \
     -lm  \
     
@@ -441,33 +441,33 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/daemon.Po
-include ./$(DEPDIR)/remote.Po
-include ./$(DEPDIR)/watch.Po
+#include ./$(DEPDIR)/daemon.Po
+#include ./$(DEPDIR)/remote.Po
+#include ./$(DEPDIR)/watch.Po
 
 .c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c $<
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c $<
 
 .c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-#	$(AM_V_CC) \
-#	source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LTCOMPILE) -c -o $@ $<
+#	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC) \
+#	source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

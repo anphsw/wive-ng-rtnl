@@ -127,21 +127,21 @@ CANBERRA_MINIMUM = 0.10
 CATALOGS = 
 CATOBJEXT = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CFLAGS += -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -std=gnu99 -ggdb3 -Wall -W -Wpointer-arith -Wformat-security -Wcast-align -Wundef -Wcast-align -Wstrict-prototypes -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wnested-externs -Wunused-parameter -Wwrite-strings -Winline -Wfloat-equal -Wextra -Wdeclaration-after-statement -Winit-self -Wvariadic-macros
 CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
-CFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl-0.9.8e/include -I$(ROOTDIR)/lib/libcurl/include
+CFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl/include -I$(ROOTDIR)/lib/libcurl/include
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
 CPPFLAGS +=  -DNDEBUG
 CPPFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
-CPPFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl-0.9.8e/include -I$(ROOTDIR)/lib/libcurl/include
+CPPFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl/include -I$(ROOTDIR)/lib/libcurl/include
 CURL_MINIMUM = 7.15.4
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 
 CXXCPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++  -E
-CXXDEPMODE = depmode=gcc3
+CXXDEPMODE = depmode=none
 CXXFLAGS += -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign 
 CXXFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
-CXXFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl-0.9.8e/include -I$(ROOTDIR)/lib/libcurl/include
+CXXFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl/include -I$(ROOTDIR)/lib/libcurl/include
 CYGPATH_W = echo
 DATADIRNAME = 
 DBUS_BINDING_TOOL = 
@@ -152,7 +152,7 @@ DEFS = -DPACKAGE_NAME=\"transmission\" -DPACKAGE_TARNAME=\"transmission\" -DPACK
 DEPDIR = .deps
 DHT_CFLAGS += -I$(top_srcdir)/third-party/dht
 DHT_CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
-DHT_CFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl-0.9.8e/include -I$(ROOTDIR)/lib/libcurl/include
+DHT_CFLAGS += -I$(ROOTDIR)/lib/libevent/include -I$(ROOTDIR)/lib/libevent/include/event2 -I$(ROOTDIR)/user/openssl/include -I$(ROOTDIR)/lib/libcurl/include
 DHT_LIBS = $(top_builddir)/third-party/dht/libdht.a
 DSYMUTIL = 
 DUMPBIN = link -dump -symbols
@@ -220,7 +220,7 @@ NMEDIT =
 OBJDUMP = objdump
 OBJEXT = o
 OPENSSL_CFLAGS +=  
-OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl-0.9.8e/libcrypto.a
+OPENSSL_LIBS = /opt/Wive-RTNL/user/openssl/libcrypto.so.0.9.8
 OPENSSL_MINIMUM = 0.9.4
 OTOOL = 
 OTOOL64 = 
@@ -304,7 +304,7 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias = 
+target_alias = /opt/Wive-RTNL/user/openssl/libssl.so.0.9.8
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
