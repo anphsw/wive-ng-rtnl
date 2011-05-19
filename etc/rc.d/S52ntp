@@ -1,20 +1,12 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
-
-#get params
-. /etc/scripts/global.sh
-
 LOG="logger -t ntp"
 
 start() {
-    get_param
-
     $LOG "Set timezone"
     backup_time=`date +%T`
 
+    tz=`nvram_get 2860 TZ`
     if [ "$tz" = "" ]; then
         tz="MSD"
     fi
@@ -26,6 +18,12 @@ start() {
     rm -rf /etc/tmpTZ2
     date +%T -s $backup_time
 
+    #wait to start web and run from goahead code
+    . /etc/scripts/web_wait.sh
+    web_wait
+
+    NTPEnabled=`nvram_get 2860 NTPEnabled`
+    srv=`nvram_get 2860 NTPServerIP`
     if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ] && [ -f /bin/ntpd ]; then
 	$LOG "Starting NTPD"
 	ntpd -d -p "$srv" &
@@ -36,12 +34,6 @@ stop() {
  $LOG "Stopping NTPD"
     killall -q ntpd
     killall -q -9 ntpd
-}
-
-get_param() {
-    NTPEnabled=`nvram_get 2860 NTPEnabled`
-    srv=`nvram_get 2860 NTPServerIP`
-    tz=`nvram_get 2860 TZ`
 }
 
 case "$1" in
