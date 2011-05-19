@@ -60,7 +60,7 @@ start() {
     		AdvSendAdvert on;
     		MinRtrAdvInterval 30;
     		MaxRtrAdvInterval 100;
-    		prefix 3ffe:501:ffff:100::/64
+    		prefix ${ipv6prefix}:${ipv6subnet}::1/64
     		{
             		AdvOnLink on;
             		AdvAutonomous on;
