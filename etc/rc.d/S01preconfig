@@ -28,14 +28,6 @@ start() {
 	mkdir -p "$dir" 2> /dev/null
     done
 
-    if [ -f /etc/compile-date ]; then
-        $LOG "Restore time to build time or save time."
-	BUILDDATE=`cat /etc/compile-date`
-        if [ "$BUILDDATE" != "" ]; then
-	    date -s "$BUILDDATE"
-        fi
-    fi
-
     if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
 	$LOG "Copy web pages to tmpfs."
         mkdir -p /tmp/web
