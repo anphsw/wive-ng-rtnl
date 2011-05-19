@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
+# Thu May 19 10:06:47 2011
 #
 CONFIG_MIPS=y
 
@@ -1070,6 +1071,19 @@ CONFIG_USB_SERIAL_CH341=m
 # USB Gadget Support
 #
 # CONFIG_USB_GADGET is not set
+# CONFIG_USB_GADGET_NET2280 is not set
+# CONFIG_USB_GADGET_PXA2XX is not set
+# CONFIG_USB_GADGET_GOKU is not set
+# CONFIG_USB_GADGET_LH7A40X is not set
+# CONFIG_USB_GADGET_OMAP is not set
+# CONFIG_USB_GADGET_AT91 is not set
+# CONFIG_USB_GADGET_DUMMY_HCD is not set
+# CONFIG_USB_ZERO is not set
+# CONFIG_USB_ETH is not set
+# CONFIG_USB_GADGETFS is not set
+# CONFIG_USB_FILE_STORAGE is not set
+# CONFIG_USB_G_SERIAL is not set
+# CONFIG_USB_MIDI_GADGET is not set
 
 #
 # MMC/SD Card support
@@ -1541,4 +1555,7 @@ CONFIG_RT2860V2_STA_LED=y
 #
 # Ralink DEVICES.
 #
-# CONFIG_DWC_OTG is not set
+CONFIG_DWC_OTG=y
+CONFIG_DWC_OTG_HOST_ONLY=y
+# CONFIG_DWC_OTG_DEVICE_ONLY is not set
+# CONFIG_DWC_OTG_DEBUG is not set
