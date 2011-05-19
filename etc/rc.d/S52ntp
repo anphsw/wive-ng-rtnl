@@ -19,7 +19,7 @@ start() {
         tz="MSD"
     fi
 
-    echo $tz > /etc/tmpTZ
+    echo "$tz" > /etc/tmpTZ
     sed -e 's#.*_\(-*\)0*\(.*\)#GMT-\1\2#' /etc/tmpTZ > /etc/tmpTZ2
     sed -e 's#\(.*\)--\(.*\)#\1\2#' /etc/tmpTZ2 > /etc/TZ
     rm -rf /etc/tmpTZ
@@ -28,7 +28,7 @@ start() {
 
     if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ] && [ -f /bin/ntpd ]; then
 	$LOG "Starting NTPD"
-	ntpd -d -p $srv &
+	ntpd -d -p "$srv" &
     fi
 }
 
