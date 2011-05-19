@@ -16,7 +16,12 @@ start() {
     sed -e 's#\(.*\)--\(.*\)#\1\2#' /etc/tmpTZ2 > /etc/TZ
     rm -rf /etc/tmpTZ
     rm -rf /etc/tmpTZ2
-    date +%T -s $backup_time
+    date +%T -s $backup_time > /dev/null 2>&1
+
+    # if app not exist
+    if [ ! -f /bin/ntpd ]; then
+	exit 0
+    fi
 
     #wait to start web and run from goahead code
     . /etc/scripts/web_wait.sh
@@ -24,7 +29,7 @@ start() {
 
     NTPEnabled=`nvram_get 2860 NTPEnabled`
     srv=`nvram_get 2860 NTPServerIP`
-    if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ] && [ -f /bin/ntpd ]; then
+    if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ]; then
 	$LOG "Starting NTPD"
 	ntpd -d -p "$srv" &
     fi

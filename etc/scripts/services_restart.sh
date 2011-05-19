@@ -11,7 +11,7 @@ MODE=$1
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
-# This is services restart always                       #
+# This is services restart always                        #
 ##########################################################
     $LOG "Resolv config generate..."
     service resolv start
@@ -47,12 +47,13 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 fi
 
 ##########################################################
-# Need restart this servieces only:                    	#
-# 1) if not VPN enable                               	#
-# 2) if VPN enable and this scripts called from ip-up	#
+# Need restart this servieces only:                    	 #
+# 1) if not VPN enable                               	 #
+# 2) if VPN enable and this scripts called from ip-up	 #
+# 3) if restart mode = all				 #
 ##########################################################
-if [ "$MODE" = "pppd" ] || [ "$vpnEnabled" != "on" ]; then
+if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
     service upnp restart
-    service ntp restart
     service ddns restart
+    service ntp restart
 fi
