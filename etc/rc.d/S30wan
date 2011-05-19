@@ -58,7 +58,7 @@ start() {
 		exit 0
 	    fi
 	    #wan interface up and default gateway
-	    ifconfig $wan_if $wan_ip netmask $wan_nm
+	    ifconfig "$wan_if" "$wan_ip" netmask "$wan_nm"
 	    #always treat bridge mode having static wan connection
 	    #route mode
 	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then

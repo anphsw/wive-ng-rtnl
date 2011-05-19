@@ -1,10 +1,15 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /sbin/inetd ]; then
+    exit 0
+fi
+
 LOG="logger -t inetd"
 
 start() {
     get_param
-    if [ -f /sbin/inetd ] && [ "$admID" != "" ]; then
+    if [ "$admID" != "" ]; then
       $LOG "Starting inetd"
       echo > /etc/inetd.conf
 	if [ -f /bin/dropbear ] && [ "$RemoteSSH" != "" ] && [ "$RemoteSSH" != "0" ]; then

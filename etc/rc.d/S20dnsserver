@@ -1,10 +1,14 @@
 #!/bin/sh
 
+if [ ! -f /bin/dnsmasq ]; then
+    exit 0
+fi
+
 LOG="logger -t dnsserver"
 
 start() {
     get_param
-    if [ -f /bin/dnsmasq ] && [ -f /etc/dnsmasq.conf ] && [ "$dnsPEnabled" = "1" ]; then
+    if [ "$dnsPEnabled" = "1" ] && [ -f /etc/dnsmasq.conf ]; then
         $LOG "Starting DNSMASQ"
     	/bin/dnsmasq -c 100 -N --dns-forward-max=30 --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &

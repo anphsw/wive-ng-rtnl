@@ -62,7 +62,7 @@ check_nvram()
     #need hostname
     if [ "$HOSTNAME_NVRAM" = "" ]; then
 	HOSTNAME_NVRAM="Wive-RTNL"
-	nvram_set 2860 HostName $HOSTNAME_NVRAM
+	nvram_set 2860 HostName "$HOSTNAME_NVRAM"
     fi
     HOSTNAME="$HOSTNAME_NVRAM"
     #samba configs to
@@ -93,9 +93,9 @@ check_nvram()
     	    nvram_set 2860 WAN_MAC_ADDR "$WAN_MACADDR"
     	    nvram_set 2860 LAN_MAC_ADDR "$LAN_MACADDR"
     	    nvram_set 2860 WLAN_MAC_ADDR "$WLAN_MACADDR"
-    	    MAC=$WAN_MACADDR
-    	    WMAC=$WLAN_MACADDR
-    	    LANMAC=$LAN_MACADDR
+    	    MAC="$WAN_MACADDR"
+    	    WMAC="$WLAN_MACADDR"
+    	    LANMAC="$LAN_MACADDR"
 	fi
     fi
     # opmode adjustment:

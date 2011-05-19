@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/igmpproxy ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -12,7 +17,6 @@ wait_connect
 LOG="logger -t igmpproxy"
 
 start() {
-if [ -f /bin/igmpproxy ]; then
     #if igmpproxy enable and mode not full bridge
     get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
@@ -38,7 +42,6 @@ if [ -f /bin/igmpproxy ]; then
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
     fi
-fi
 }
 
 stop() {

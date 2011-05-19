@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/lld2d ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -11,7 +16,7 @@ LOG="logger -t lld2d"
 
 start() {
     get_param
-    if [ -f /bin/lld2d ] && [ "$lltd" = "1" ]; then
+    if [ "$lltd" = "1" ]; then
 	$LOG "Starting LLD2D"
 	lld2d $lan_if
     fi

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/zebra ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,13 +15,11 @@ web_wait
 LOG="logger -t zebra"
 
 start() {
-RIPEnable=`nvram_get 2860 RIPEnable`
-if [ -f /bin/zebra ] && [ "$RIPEnable" = "1" ]; then
- if [ -f /etc/zebra.conf ]; then
-    $LOG "Starting ZEBRA"
-    zebra -d -f /etc/zebra.conf
- fi
-fi
+    RIPEnable=`nvram_get 2860 RIPEnable`
+    if [ "$RIPEnable" = "1" ] && [ -f /etc/zebra.conf ]; then
+	$LOG "Starting ZEBRA"
+	zebra -d -f /etc/zebra.conf
+    fi
 }
 
 stop() {

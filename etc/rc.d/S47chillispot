@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/chilli ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -27,20 +32,18 @@ get_params() {
 }
 
 start() {
-if [ -f /bin/chilli ] && [ "$opmode" = "4" ]; then
- if [ -f /etc/chilli.conf ]; then
-    $LOG "Starting ChilliSpot"
-    get_params
-    modprobe tun
-    chilli $PARLINE
- fi
-fi
+    if [ "$opmode" = "4" ] &&  [ -f /etc/chilli.conf ]; then
+	$LOG "Starting ChilliSpot"
+	get_params
+	modprobe tun
+	chilli "$PARLINE"
+    fi
 }
 
 stop() {
- $LOG "Stopping ChilliSpot"
-  killall -q chilli
-  killall -q -9 chilli
+    $LOG "Stopping ChilliSpot"
+    killall -q chilli
+    killall -q -9 chilli
 }
 
 case "$1" in

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/inadyn ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,7 +15,6 @@ web_wait
 LOG="logger -t dyndns"
 
 start() {
-if [ -f /bin/inadyn ]; then
     get_param
     if  [ "$ddns" != "" ] && [ "$srv" != "" ] && [ "$srv" != "none" ] && [ "$u" != "" ] && [ "$pw" != "" ]; then
 	    $LOG "Starting DynDNS"
@@ -23,7 +27,6 @@ if [ -f /bin/inadyn ]; then
 	    exit 1
 	fi
     fi
-fi
 }
 
 get_param() {

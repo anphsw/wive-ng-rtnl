@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/radvd ] || [ ! -d /proc/sys/net/ipv6 ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,7 +15,6 @@ web_wait
 LOG="logger -t radvd"
 
 start() {
-if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
  fi
@@ -75,12 +79,10 @@ if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
 	$LOG "Set alias IP for $lan_if to pass RFC1981 and RFC4443"
 	ip -6 addr add 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev $lan_if:0
     fi
-fi
 }
 
 stop() {
  $LOG  "Stop radvd daemon..."
-if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
   killall -q radvd > /dev/null 2>&1
   killall -q -9 radvd > /dev/null 2>&1
   ip tunnel del tun6to4 > /dev/null 2>&1                                                                                                     
@@ -89,7 +91,6 @@ if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
   ip -6 addr flush dev sit0  > /dev/null 2>&1
   ip -6 link set sit0 down > /dev/null 2>&1
   echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
-fi
 }
 
 case "$1" in

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/ripd ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,19 +15,17 @@ web_wait
 LOG="logger -t ripd"
 
 start() {
-RIPEnable=`nvram_get 2860 RIPEnable`
-if [ -f /bin/ripd ] && [ "$RIPEnable" = "1" ]; then
- if [ -f /etc/ripd.conf ]; then
-    $LOG "Starting RIPD"
-    ripd -f /etc/ripd.conf -d
- fi 
-fi
+    RIPEnable=`nvram_get 2860 RIPEnable`
+    if [ "$RIPEnable" = "1" ] && [ -f /etc/ripd.conf ]; then
+	$LOG "Starting RIPD"
+	ripd -f /etc/ripd.conf -d
+    fi
 }
 
 stop() {
  $LOG "Stopping RIPD"
-  killall -q ripd
-  killall -q -9 ripd
+    killall -q ripd
+    killall -q -9 ripd
 }
 
 case "$1" in

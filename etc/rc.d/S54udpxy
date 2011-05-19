@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/udpxy ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,13 +15,11 @@ web_wait
 LOG="logger -t udpxy"
 
 start() {
-if [ -f /bin/udpxy ]; then
- UDPXY=`nvram_get 2860 UDPXYMode`
+     UDPXY=`nvram_get 2860 UDPXYMode`
     if [ "$UDPXY" != "0" ] && [ "$UDPXY" != "" ]; then
         $LOG "UDPXY start"
 	udpxy -m $wan_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi
-fi
 }
 
 stop() {

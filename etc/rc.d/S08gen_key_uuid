@@ -23,7 +23,7 @@ start() {
             if [ "$num" = "9" ] || [ "$num" = "19" ] || [ "$num" = "24" ]; then
 	        id="-"
             fi
-            outid=$outid$id
+            outid="$outid$id"
         done
         serial=`hostid`
         $LOG "UPNP UUID is $outid , serial is $serial"

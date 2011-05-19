@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/tc ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -11,7 +16,7 @@ LOG="logger -t shaper"
 
 start() {
 get_param
-if [ -f /bin/tc ] && [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
+if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
  $LOG "Starting... "
     $LOG "Set default rules."
     set_def

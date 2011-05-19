@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/pppoe-relay ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,13 +15,11 @@ web_wait
 LOG="logger -t pppoerelay"
 
 start() {
-if [ -f /bin/pppoe-relay ]; then
     pppr=`nvram_get 2860 pppoeREnabled`
     if [ "$pppr" = "1" ]; then
 	$LOG "Starting pppoe-relay"
         pppoe-relay -S $wan_if -B $lan_if
     fi
-fi
 }
 
 stop() {

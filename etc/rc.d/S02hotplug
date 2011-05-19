@@ -1,9 +1,13 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/mdev ]; then
+    exit 0
+fi
+
 LOG="echo HOTPLUG"
 
 start() {
-if [ -f /bin/mdev ]; then
     if [ -f /proc/sys/kernel/hotplug ]; then
 	$LOG "Start mdev for support HOTPLUG"
 	printf "
@@ -20,7 +24,6 @@ if [ -f /bin/mdev ]; then
 	fi
 	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
     fi
-fi
 }
 
 stop() {

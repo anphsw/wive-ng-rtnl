@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/smbd ] || [ ! -f /bin/nmbd ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -25,21 +30,19 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    force group = Administrator" >> $CONFIG
     cat /etc/smb.conf.template >> $CONFIG
 
-    if [ -f /bin/smbd ] && [ -f /bin/nmbd ]; then
-	if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
-	 $LOG "Already started... Stop WINS/SMB SERVER."
-	    killall -q smbd
-	    killall -q nmbd
-	    killall -q -9 smbd
-	    killall -q -9 nmbd
-        fi
-	$LOG "Starting WINS/SMB SERVER."
-	echo > /var/log/samba.log
-	echo > /var/log/nmbd.log
-	rm -f /var/lock/*mbd.pid
-	/bin/nmbd -s /etc/smb.conf -D &
-	/bin/smbd -s /etc/smb.conf -D &
+    if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
+	$LOG "Already started... Stop WINS/SMB SERVER."
+	killall -q smbd
+	killall -q nmbd
+	killall -q -9 smbd
+	killall -q -9 nmbd
     fi
+    $LOG "Starting WINS/SMB SERVER."
+    echo > /var/log/samba.log
+    echo > /var/log/nmbd.log
+    rm -f /var/lock/*mbd.pid
+    /bin/nmbd -s /etc/smb.conf -D &
+    /bin/smbd -s /etc/smb.conf -D &
 fi
 }
 
@@ -48,7 +51,6 @@ stop() {
      $LOG "Stop WINS/SMB SERVER."
       killall -q nmbd > /dev/null
       killall -q smbd > /dev/null
-      sleep 1
       killall -q -9 nmbd > /dev/null
       killall -q -9 smbd > /dev/null
       rm -f /var/lock/*mbd.pid

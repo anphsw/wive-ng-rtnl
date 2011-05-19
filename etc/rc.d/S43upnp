@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /bin/miniupnpd ]; then
+    exit 0
+fi
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -10,7 +15,6 @@ web_wait
 LOG="logger -t upnpd"
 
 start() {
-if [ -f /bin/miniupnpd ]; then
  get_param
  if [ "$upnp" != "1" ]; then
     exit 0
@@ -26,7 +30,6 @@ if [ -f /bin/miniupnpd ]; then
             miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $lan_ip &
 	fi
     fi
-fi
 }
 
 stop() {

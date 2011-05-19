@@ -54,9 +54,9 @@ get_txqlen
 	if [ "$lan_nm" = "" ]; then
 	    lan_nm="255.0.0.0"
 	fi
-	ifconfig $lan_if $lan_ip netmask $lan_nm up
+	ifconfig "$lan_if" "$lan_ip" netmask "$lan_nm" up
     else
-	ifconfig $lan_if 0.0.0.0 up	
+	ifconfig "$lan_if" 0.0.0.0 up	
     fi
     $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip"
 
@@ -76,8 +76,8 @@ $LOG "Stop network interfaces..."
 	vconfig rem $i > /dev/null 2>&1
     done
     ip link set br0 down > /dev/null 2>&1
-    ip link set $lan_if down > /dev/null 2>&1
-    ip link set $lan2_if down > /dev/null 2>&1
+    ip link set "$lan_if" down > /dev/null 2>&1
+    ip link set "$lan2_if" down > /dev/null 2>&1
     brctl delbr br0 > /dev/null 2>&1
 }
 

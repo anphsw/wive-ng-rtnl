@@ -51,7 +51,7 @@ start() {
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
-		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 80 -j DROP
 		    fi
 		fi
@@ -71,7 +71,7 @@ start() {
 	    if [ "$RemoteSSH" = "1" ]; then
 		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
-		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
 		    fi
 		fi
@@ -91,7 +91,7 @@ start() {
 	    if [ "$UDPXY" = "1" ]; then
 		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 81 -j DROP
-		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 81 -j DROP
 		    fi
 		fi
@@ -132,7 +132,7 @@ start() {
     		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
-		if [ "$vpnEnabled" = "on"  ] && [ "$vpnType" != "6" ]; then
+		if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp -j DROP
@@ -144,12 +144,12 @@ start() {
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j ACCEPT
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 ###########################################VPN-RULES##########################################
-	if [ "$vpnEnabled" = "on"  ]; then
+	if [ "$vpnEnabled" = "on" ]; then
 	    $LOG "Add vpnfilter rules"
-	    if [ "$vpnType" = "1"  ]; then
+	    if [ "$vpnType" = "1" ]; then
 		iptables -A servicelimit -p gre -j ACCEPT
 		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
-	    elif [ "$vpnType" = "2"  ]; then
+	    elif [ "$vpnType" = "2" ]; then
 		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
 		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
 		iptables -A servicelimit -p udp --sport 1701 -j ACCEPT
@@ -228,7 +228,7 @@ start() {
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
 		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
-		    if [ "$vpnEnabled" = "on"  ] && [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
 			iptables -A FORWARD -i ppp+ -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
 		    fi
 		fi
@@ -288,7 +288,7 @@ start() {
 #########################################ACCEPT_ESTABLISHED################################
 	iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################VPNRULES#######################################
-	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on"  ]; then
+	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
 	    $LOG "Call to add VPN netfilter rules"
 	    /etc/ppp_firewall
 	fi
