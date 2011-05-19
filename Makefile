@@ -294,7 +294,7 @@ romfs.post:
 	tar -zxvf dev.tgz
 	cp -rfv dev/* $(ROMFSDIR)/dev
 	rm -fr $(ROOTDIR)/dev
-	cd $(ROMFSDIR)/bin && ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
+	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	cp -avf $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
