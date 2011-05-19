@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# if app not exist
+if [ ! -f /sbin/crond ]; then
+    exit 0
+fi
+
 LOG="logger -t cron"
 
 start() {

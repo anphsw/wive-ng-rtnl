@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# if app not exist
 if [ ! -f /bin/dnsmasq ]; then
     exit 0
 fi
