@@ -4,9 +4,6 @@
 # config-udhcpd.sh - configure DHCP server helper #
 ###################################################
 
-#include global
-. /etc/scripts/global.sh
-
 fname="/etc/udhcpd.conf"
 fbak="/etc/udhcpd.conf_bak"
 pidfile="/var/run/udhcpd.pid"
