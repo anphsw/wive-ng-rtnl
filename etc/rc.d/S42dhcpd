@@ -23,15 +23,25 @@ start() {
 		config-udhcpd.sh -i "$lan_if"
 		config-udhcpd.sh -m "$mask"
 
-		if [ "$pd" != "" ] || [ "$sd" != "" ]; then
-		    if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
-			#use dnsmasq as relay or static dns
-			config-udhcpd.sh -d "$pd" "$sd"
+		if [ "$dnsPEnabled" = "1" ]; then
+		    # use dnsmasq for relay
+		    config-udhcpd.sh -d "$lan_ip" "$lan_ip"
+		else
+		    # client direct to dns
+		    if [ "$wan_static_dns" = "on" ]; then
+			if [ "$pd" != "" ] || [ "$sd" != "" ]; then
+			    config-udhcpd.sh -d "$pd" "$sd"
+			else
+			    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+			fi
 		    else
-			#use google public dns
-			config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+			pd=`cat  /etc/resolv.conf | grep nameserver | tail -q -n1 | awk {' print $2 '}`
+                        if [ "$pd" != "" ]; then
+			    config-udhcpd.sh -d "$pd" "$pd"
+			fi
 		    fi
 		fi
+
 		if [ "$gw" != "" ]; then
 			config-udhcpd.sh -g "$gw"
 		fi
