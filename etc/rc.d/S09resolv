@@ -5,25 +5,29 @@ LOG="logger -t resolv"
 start() {
 get_param
 if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
- $LOG "Generate resolve"
 
     # backup file without nameserver part
     sed -e '/nameserver/d' $fname > $fbak
 
+    # drop current
+    rm -f $fname
+    touch $fname
     # if nameservers is null add 127.0.0.1
-    if  [ "$pd" = "" ] && [ "$sd" = "" ] && [ "$dnsPEnabled" ="1" ]; then
-	echo "nameserver 127.0.0.1" > $fname
-    else
-	#drop current DNS
-	rm -f $fname
-	touch $fname
-        #add new records
+    if [ "$pd" != "" ] || [ "$sd" != "" ]; then
+	$LOG "Generate resolv DNS1: $pd DNS2: $sd"
 	if [ "$pd" != "" ]; then
 	    echo "nameserver $pd" >> $fname
 	fi
 	if [ "$sd" != "" ]; then
 	    echo "nameserver $sd" >> $fname
 	fi
+    elif  [ "$pd" = "" ] && [ "$sd" = "" ] && [ "$dnsPEnabled" = "1" ]; then
+	$LOG "Generate resolv at local."
+	echo "nameserver 127.0.0.1" > $fname
+    else
+	$LOG "Not correct DNS use Google dns"
+	echo "nameserver 8.8.8.8" >> $fname
+	echo "nameserver 8.8.4.4" >> $fname
     fi
 
     cat $fbak >> $fname
