@@ -416,7 +416,9 @@
 31) WPA supplicatnt enable by default for 8Mb devices.<br>
 32) Openssl up to 0.9.8r version.<br>
 33) Add libpcap (8Mb devices).<br>
-34) Add tcpdump (8Mb devices). <br>
+34) Add tcpdump (8Mb devices).<br>
+35) Fix IgmpSnooping enable/disable.<br>
+36) Fix VPN Peer DNS enable/disable.<br>
 
 <br><br>
 <b>For support see:</b><br>
