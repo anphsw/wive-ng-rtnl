@@ -52,6 +52,7 @@ start() {
 	else
 	    $LOG "No route to ip4v6 router..."
 	fi
+
 	$LOG "Configure radvd"
 	echo > /etc/radvd.conf
 	printf "
