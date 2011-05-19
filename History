@@ -419,6 +419,8 @@
 34) Add tcpdump (8Mb devices).<br>
 35) Fix IgmpSnooping enable/disable.<br>
 36) Fix VPN Peer DNS enable/disable.<br>
+37) Fix ntp date sync and some situations.<br>
+38) New init scripts structure for boot speedup and moe clean logs.<br>
 
 <br><br>
 <b>For support see:</b><br>
