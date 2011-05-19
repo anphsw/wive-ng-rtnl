@@ -4,7 +4,6 @@ LOG="logger -t ntp"
 
 start() {
     $LOG "Set timezone"
-    backup_time=`date +%T`
 
     tz=`nvram_get 2860 TZ`
     if [ "$tz" = "" ]; then
@@ -16,7 +15,6 @@ start() {
     sed -e 's#\(.*\)--\(.*\)#\1\2#' /etc/tmpTZ2 > /etc/TZ
     rm -rf /etc/tmpTZ
     rm -rf /etc/tmpTZ2
-    date +%T -s $backup_time > /dev/null 2>&1
 
     # if app not exist
     if [ ! -f /bin/ntpd ]; then
