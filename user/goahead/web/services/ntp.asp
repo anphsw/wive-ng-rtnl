@@ -139,37 +139,37 @@ function ntpChange(form)
 			<option value="SAS_002" id="manNTPSouthAfrica">(UTC+02:00) South Africa</option>
 			<option value="IDDT">(UTC+02:00) Israel (Tel Aviv)</option>
 			<option value="IST_003" id="manNTPIraq">(UTC+03:00) Iraq, Jordan, Kuwait</option>
-			<option value="EEST" id="">(UTC+03:00) Russia (Kaliningrad)</option>
-			<option value="MSD" id="manNTPMoscowWinter">(UTC+04:00) Russia (Moscow, St.-Petersburg)</option>
+			<option value="EET-2EEST-3" id="">(UTC+03:00) Russia (Kaliningrad)</option>
+			<option value="MSK-3MSD-4" id="manNTPMoscowWinter">(UTC+04:00) Russia (Moscow, St.-Petersburg)</option>
 			<option value="AMT-4AMST,M3.5.0,M10.5.0/3" id="manNTPArmenia">(UTC+04:00) Armenia (Yerevan)</option>
 			<option value="AZT-4AZST,M3.5.0/4,M10.5.0/5">(UTC+04:00) Azebaydzhan (Baku)</option>
 			<option value="GET-4">(UTC+04:00) Georgia (Tbilisi)</option>
 			<option value="TMT-5">(UTC+05:00) Ashgabad</option>
 			<option value="UZT-5">(UTC+05:00) Samarkand, Russia (Tashkent)</option>
 			<option value="UCT_005" id="manNTPPakistan">(UTC+05:00) Pakistan</option>
-			<option value="YEKST">(UTC+06:00) Russia (Yekaterinburg)</option>
+			<option value="YEKT-5YEKST-6">(UTC+06:00) Russia (Yekaterinburg)</option>
 			<option value="UCT_006" id="manNTPBangladesh">(UTC+06:00) Bangladesh</option>
 			<option value="KGT-6" id="manNTPBangladesh">(UTC+06:00) Kyrgyzstan (Bishkek)</option>
-			<option value="NOVST">(UTC+07:00) Russia (Novosibirsk)</option>
-			<option value="OMSST">(UTC+07:00) Russia (Omsk)</option>
-			<option value="UCT_007" id="manNTPThailand">(UTC+07:00) Thailand, Russia</option>
-			<option value="KRAST" id="manNTPAustraliaWA">(UTC+08:00) Russia (Krasnoyarsk)</option>
+			<option value="NOVT-6NOVST-7">(UTC+07:00) Russia (Novosibirsk)</option>
+			<option value="OMST-6OMSST-7">(UTC+07:00) Russia (Omsk)</option>
+			<option value="UCT_007" id="manNTPThailand">(UTC+07:00) Thailand</option>
+			<option value="KRAT-7KRAST-8" id="manNTPAustraliaWA">(UTC+08:00) Russia (Krasnoyarsk)</option>
 			<option value="CST_008" id="manNTPChinaCoast">(UTC+08:00) China Coast, Hong Kong</option>
 			<option value="CCT_008" id="manNTPTaipei">(UTC+08:00) Taipei</option>
 			<option value="SST_008" id="manNTPSingapore">(UTC+08:00) Singapore</option>
 			<option value="AWS_008" id="manNTPAustraliaWA">(UTC+08:00) Australia (WA)</option>
 			<option value="ULAT-8">(UTC+08:00) Mongolia (Ulan-Bator)</option>
-			<option value="IRKST">(UTC+09:00) Russia (Irkutsk)</option>
+			<option value="IRKT-8IRKST-9">(UTC+09:00) Russia (Irkutsk)</option>
 			<option value="JST_009" id="manNTPJapan">(UTC+09:00) Japan</option>
 			<option value="KST_009" id="manNTPKorean">(UTC+09:00) North Korea, South Korea</option>
-			<option value="YAKST">(UTC+10:00) Russia (Yakutsk)</option>
+			<option value="YAKT-9YAKST-10">(UTC+10:00) Russia (Yakutsk)</option>
 			<option value="UCT_010" id="manNTPGuam">(UTC+10:00) Guam</option>
-			<option value="SAKST">(UTC+11:00) Russia (Sakhalin)</option>
-			<option value="VLAST">(UTC+11:00) Russia (Vladivostok)</option>
+			<option value="SAKT-10SAKST-11">(UTC+11:00) Russia (Sakhalin)</option>
+			<option value="VLAT-10VLAST-11">(UTC+11:00) Russia (Vladivostok)</option>
 			<option value="AES_010" id="manNTPAustraliaQLD">(UTC+10:00) Australia (QLD, TAS,NSW,ACT,VIC)</option>
 			<option value="UCT_011" id="manNTPSolomonIslands">(UTC+11:00) Solomon Islands</option>
-			<option value="MAGST">(UTC+12:00) Russia (Magadan)</option>
-			<option value="PETST">(UTC+12:00) Russia (Kamchatka)</option>
+			<option value="MAGT-11MAGST-12">(UTC+12:00) Russia (Magadan)</option>
+			<option value="PETT-12PETST-13">(UTC+12:00) Russia (Kamchatka)</option>
 			<option value="UCT_012" id="manNTPFiji">(UTC+12:00) Fiji</option>
 			<option value="NZS_012" id="manNTPNewZealand">(UTC+12:00) New Zealand</option>
 		</select>
