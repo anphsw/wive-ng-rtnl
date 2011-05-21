@@ -1022,8 +1022,9 @@ S["PACKAGE_VERSION"]="-"
 S["PACKAGE_TARNAME"]="curl"
 S["PACKAGE_NAME"]="curl"
 S["SHELL"]="/bin/sh"
-S["PATH"]=".:.:.:/usr/share/colorgcc:/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin/:/usr/games:/usr/lib/qt4/bin:/home/sfstudio/bin:/bin:/sbin:/usr/bin:/usr/sbin:"\
-"/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/opt/Wive-RTNL/tools"
+S["PATH"]=".:.:.:.:/usr/share/colorgcc:/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin/:/usr/games:/usr/lib/qt4/bin:/bin:/sbin:/usr/bin:/usr/sbin:/home/sfstudio/bi"\
+"n:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:"\
+"/opt/Wive-RTNL/tools"
 S["PATH_SEPARATOR"]=":"
 _ACAWK
 cat >>"$tmp/subs1.awk" <<_ACAWK &&
