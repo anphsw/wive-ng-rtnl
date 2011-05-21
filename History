@@ -421,6 +421,8 @@
 36) Fix VPN Peer DNS enable/disable.<br>
 37) Fix ntp date sync and some situations.<br>
 38) New init scripts structure for boot speedup and moe clean logs.<br>
+39) Add libtr to romfs. Need for some application. 4K+.<br>
+40) Fix timezone.<br>
 
 <br><br>
 <b>For support see:</b><br>
