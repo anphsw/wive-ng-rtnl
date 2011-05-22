@@ -1,30 +1,29 @@
 #!/bin/sh
 
 # if app not exist
-if [ ! -f /bin/mdev ]; then
+if [ ! -f /bin/mdev ] || [ ! -f /proc/sys/kernel/hotplug ]; then
     exit 0
 fi
 
 LOG="echo HOTPLUG"
 
 start() {
-    if [ -f /proc/sys/kernel/hotplug ]; then
-	$LOG "Start mdev for support HOTPLUG"
-	printf "
-		# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
-		# The special characters have the meaning:
-		# @ Run after creating the device.
-		# $ Run before removing the device.
-		# * Run both after creating and before removing the device.\n" > /etc/mdev.conf
-	if [ -d /proc/bus/usb ]; then
-		mount -t tmpfs tmpfs /media
-		# Check & load ext2 here or in automount.sh (else only ntfs-3g works) ?
-		modprobe -q ext2
-		echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
-	fi
-	echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+    $LOG "Start mdev for support HOTPLUG"
+    printf "
+	# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
+	# The special characters have the meaning:
+	# @ Run after creating the device.
+	# $ Run before removing the device.
+	# * Run both after creating and before removing the device.\n" > /etc/mdev.conf
+    if [ -d /proc/bus/usb ]; then
+	mount -t tmpfs tmpfs /media
+	# Check & load ext2 here or in automount.sh (else only ntfs-3g works) ?
+	modprobe -q ext2
+	echo "sd[a-z][1-9] 0:0 0660 */sbin/automount.sh \$MDEV" >> /etc/mdev.conf
     fi
+    echo "/sbin/mdev" > /proc/sys/kernel/hotplug
 }
+
 
 stop() {
  $LOG "Stop mdev generate..."
