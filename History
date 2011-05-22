@@ -423,6 +423,7 @@
 38) New init scripts structure for boot speedup and moe clean logs.<br>
 39) Add libtr to romfs. Need for some application. 4K+.<br>
 40) Fix timezone.<br>
+41) Fix async_tty build for modems support.<br>
 
 <br><br>
 <b>For support see:</b><br>
