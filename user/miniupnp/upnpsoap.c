@@ -372,7 +372,7 @@ AddPortMapping(struct upnphttp * h, const char * action)
 		/* at the moment, lease duration is always infinite */
 		/* TODO : in order to be compliant with IGD v2, lease duration
 		 * support needs to be implemented */
-		syslog(LOG_WARNING, "NewLeaseDuration=%s not supported, ignored. (ip=%s, desc='%s')", leaseduration, int_ip, desc);
+		syslog(LOG_INFO, "NewLeaseDuration=%s not supported, ignored. (ip=%s, desc='%s')", leaseduration, int_ip, desc);
 	}
 
 	syslog(LOG_INFO, "%s: ext port %hu to %s:%hu protocol %s for: %s",

@@ -209,7 +209,7 @@ void ProcessIncomingNATPMPPacket(int s)
 					r = _upnp_delete_redir(eport, proto);
 					/*syslog(LOG_DEBUG, "%hu %d r=%d", eport, proto, r);*/
 					if(r<0) {
-						syslog(LOG_ERR, "Failed to remove NAT-PMP mapping eport %hu, protocol %s", eport, (proto==IPPROTO_TCP)?"TCP":"UDP");
+						//syslog(LOG_ERR, "Failed to remove NAT-PMP mapping eport %hu, protocol %s", eport, (proto==IPPROTO_TCP)?"TCP":"UDP");
 						resp[3] = 2;	/* Not Authorized/Refused */
 					}
 				}
@@ -328,7 +328,7 @@ int CleanExpiredNATPMP()
 	/* remove redirection then search for next one:) */
 	if(_upnp_delete_redir(nextnatpmptoclean_eport, nextnatpmptoclean_proto)<0)
 		return -1;
-	syslog(LOG_INFO, "Expired NAT-PMP mapping port %hu %s removed",
+	syslog(LOG_NOTICE, "Expired NAT-PMP mapping port %hu %s removed",
 	       nextnatpmptoclean_eport,
 	       nextnatpmptoclean_proto==IPPROTO_TCP?"TCP":"UDP");
 	return ScanNATPMPforExpiration();
