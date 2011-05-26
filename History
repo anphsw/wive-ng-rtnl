@@ -424,6 +424,7 @@
 39) Add libtr to romfs. Need for some application. 4K+.<br>
 40) Fix timezone.<br>
 41) Fix async_tty build for modems support.<br>
+42) Some fixes for miniupnpd.<br>
 
 <br><br>
 <b>For support see:</b><br>
