@@ -110,22 +110,26 @@ function validateIPList(array)
 function validateIPMask(ip, info)
 {
 	var re = /^(?:(?:0|128|192|224|240|248|252|254)\.0+\.0+\.0+|255\.(?:(?:0|128|192|224|240|248|252|254)\.0+\.0+|255\.(?:(?:0|128|192|224|240|248|252|254)\.0+|255\.(?:0|128|192|224|240|248|252|254|255))))$/;
+	var is_string = typeof(ip) == 'string';
+	var value = (is_string) ? ip : ip.value;
 	
-	if (ip.value == "")
+	if (value == "")
 	{
 		if (info)
 		{
 			alert("Error. Mask is empty.");
-			ip.focus();
+			if (!is_string)
+				ip.focus();
 		}
 		return false;
 	}
-	if (!re.test(ip.value))
+	if (!re.test(value))
 	{
 		if (info)
 		{
 			alert("Error. Invalid IP mask format!");
-			ip.focus();
+			if (!is_string)
+				ip.focus();
 		}
 		return false;
 	}

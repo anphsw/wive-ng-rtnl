@@ -152,3 +152,13 @@ self.enableElements = function(elements, enable)
 	else
 		elements.disabled = (enable) ? false : true;
 }
+
+self.setInnerHTML = function(elementID, text)
+{
+	var element = document.getElementById(elementID);
+	if (element == null)
+		return;
+
+	// Set inner HTML code
+	element.innerHTML = text;
+}

@@ -31,6 +31,7 @@
 #endif
 
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
+#define PATH_PPP_ROUTES        "/etc/routes_ppp_replace"
 
 /*** VPN statuses ***/
 typedef struct vpn_status_t
@@ -97,8 +98,9 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
 static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
-static void addRouting(webs_t wp, char_t *path, char_t *query);
-static void delRouting(webs_t wp, char_t *path, char_t *query);
+//static void addRouting(webs_t wp, char_t *path, char_t *query);
+//static void delRouting(webs_t wp, char_t *path, char_t *query);
+static void editRouting(webs_t wp, char_t *path, char_t *query);
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
 void ripdRestart(void);
@@ -147,8 +149,9 @@ void formDefineInternet(void) {
 	websFormDefine(T("setLan"), setLan);
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
-	websFormDefine(T("addRouting"), addRouting);
-	websFormDefine(T("delRouting"), delRouting);
+	websFormDefine(T("editRouting"), editRouting);
+//	websFormDefine(T("addRouting"), addRouting);
+//	websFormDefine(T("delRouting"), delRouting);
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
@@ -1270,54 +1273,49 @@ static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv)
 /*
  *
  */
-int getIndexOfRoutingRule(char *dest, char *netmask, char *interface)
+
+int findRoutingRule(char *rrs, char *buf, const char *dest, const char *netmask, const char* gw, const char *iface)
 {
-	int index=0;
-	char *rrs, one_rule[256];
-	char dest_f[32], netmask_f[32], interface_f[32];
+	char c_dest[32], c_netmask[32], c_iface[32], c_gw[32];
+	int index = 0;
 
-	rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
-	if(!rrs || !strlen(rrs))
-		return -1;
+	while (getNthValueSafe(index++, rrs, ';', buf, 256) != -1)
+	{
+		if ((getNthValueSafe(0, buf, ',', c_dest, sizeof(c_dest)) == -1))
+			continue;
+		if ((getNthValueSafe(1, buf, ',', c_netmask, sizeof(c_netmask)) == -1))
+			continue;
+		if ((getNthValueSafe(2, buf, ',', c_gw, sizeof(c_gw)) == -1))
+			continue;
+		if ((getNthValueSafe(4, buf, ',', c_iface, sizeof(c_iface)) == -1))
+			continue;
 
-	while( getNthValueSafe(index, rrs, ';', one_rule, 256) != -1 ){
-		if((getNthValueSafe(0, one_rule, ',', dest_f, sizeof(dest_f)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(1, one_rule, ',', netmask_f, sizeof(netmask_f)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(4, one_rule, ',', interface_f, sizeof(interface_f)) == -1)){
-			index++;
-			continue;
-		}
-		//printf("@@@@@ %s %s %s\n", dest_f, netmask_f, interface_f);
-		//printf("----- %s %s %s\n", dest, netmask, interface);
-		if( (!strcmp(dest, dest_f)) && (!strcmp(netmask, netmask_f)) && (!strcmp(interface, interface_f))){
-			return index;
-		}
-		index++;
+		if ((strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
+			(strcmp(iface, c_iface)==0) && (strcmp(gw, c_gw)==0))
+			return index-1;
 	}
 
 	return -1;
 }
 
-static void removeRoutingRule(char *dest, char *netmask, char *ifname)
+static void removeRoutingRule(char *dest, char *netmask, char *gw, char *ifname)
 {
 	char cmd[1024];
 	strcpy(cmd, "route del ");
 	
 	// host or net?
-	if(!strcmp(netmask, "255.255.255.255") )
-		strcat(cmd, "-host ");
+	if(strcmp(netmask, "255.255.255.255")==0)
+		strcat(cmd, "-host");
 	else
-		strcat(cmd, "-net ");
+		strcat(cmd, "-net");
 
 	// destination
 	strcat(cmd, dest);
 	strcat(cmd, " ");
+	
+	// gateway
+	if(strcmp(netmask, "0.0.0.0") != 0)
+		sprintf(cmd, "%s gw %s", cmd, gw);
 
 	// netmask
 	if(strcmp(netmask, "255.255.255.255"))
@@ -1328,117 +1326,315 @@ static void removeRoutingRule(char *dest, char *netmask, char *ifname)
 	doSystem(cmd);
 }
 
+static void removeRoutingRuleNvram(const char *iface, const char *dest, const char *netmask, const char *gw, const char *true_if)
+{
+	char rule[256];
+	char c_iface[32], c_dest[32], c_netmask[32], c_true_if[32], c_gw[32];
+	char *old = nvram_get(RT2860_NVRAM, "RoutingRules");
+	if (old == NULL) // Check that NVRAM contains variable
+		return;
+	
+	char *head = old;
+	char *tail = strchr(head, ';');
+	if (tail == NULL)
+		tail = head + strlen(head);
+	
+	while (tail != head)
+	{
+		do
+		{
+			// Create record
+			int count = tail-head;
+			memcpy(rule, head, count);
+			rule[count] = '\0';
+		
+			// Get destination
+			if ((getNthValueSafe(0, rule, ',', c_dest, sizeof(c_dest)) == -1))
+				continue;
+			// Get netmask
+			if ((getNthValueSafe(1, rule, ',', c_netmask, sizeof(c_netmask)) == -1))
+				continue;
+			// Get gateway
+			if ((getNthValueSafe(2, rule, ',', c_gw, sizeof(c_gw)) == -1))
+				continue;
+			// Get interface
+			if ((getNthValueSafe(3, rule, ',', c_iface, sizeof(c_iface)) == -1))
+				continue;
+			// Get true interface name
+			if ((getNthValueSafe(4, rule, ',', c_true_if, sizeof(c_true_if)) == -1))
+				continue;
+			
+			// Check if rule matches
+			if ((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
+				(strcmp(gw, c_gw)==0) && (strcmp(true_if, c_true_if)==0))
+			{
+				// Create temporary buffer
+				char *buf = (char *)calloc(1, strlen(old) - count + sizeof(char));
+				if (buf == NULL)
+					return;
+				char *p = buf;
+			
+				// Remove rule
+				if (old < head)
+				{
+					memcpy(p, old, head-old);
+					p += (head-old);
+				}
+				
+				if (tail[0] == ';')
+					tail++;
+				strcpy(p, tail);
+				nvram_set(RT2860_NVRAM, "RoutingRules", buf);
+				free(buf);
+				return;
+			}
+		} while (0);
+		
+		// Move pointer to next entry
+		head = tail;
+		if (head[0] == ';')
+			head++;
+		tail = strchr(head, ';');
+		if (tail == NULL)
+			tail = head + strlen(head);
+	}
+}
+
+static int addRoutingRule(char *buf, const char *dest, const char *netmask, const char *gw, const char *true_if)
+{
+	char cmd[256];
+
+	strcpy(cmd, "route add ");
+	
+	// host or net?
+	if (strcmp(netmask, "255.255.255.255")!=0)
+		strcat(cmd, "-net ");
+	else
+		strcat(cmd, "-host ");
+
+	// destination
+	strcat(cmd, dest);
+
+	// netmask
+	if (strcmp(netmask, "255.255.255.255") != 0)
+		sprintf(cmd, "%s netmask %s", cmd, netmask);
+
+	//gateway
+	if (strcmp(gw, "0.0.0.0") != 0)
+		sprintf(cmd, "%s gw %s", cmd, gw);
+
+	//interface
+	sprintf(cmd, "%s dev %s ", cmd, true_if);
+
+	if (buf != NULL)
+	{
+		strcpy(buf, cmd);
+		return 1;
+	}
+	else
+	{
+		strcat(cmd, "2>&1 ");
+		printf("%s\n", cmd);
+	
+		FILE *fp = popen(cmd, "r");
+		if (fp == NULL)
+			return 0;
+	
+		fgets(cmd, sizeof(cmd), fp);
+		pclose(fp);
+		return strlen(cmd)==0;
+	}
+}
+
+static void addRoutingRuleNvram(
+	const char *iface, const char *dest, const char *netmask,
+	const char *gw, const char *true_if, const char *cust_if, const char *comment)
+{
+	char cmd[256];
+
+	char *rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
+	if (rrs == NULL)
+		rrs = "";
+	
+	// Create new item
+	sprintf(cmd, "%s,%s,%s,%s,%s,%s,%s", dest, netmask, gw, iface, true_if, cust_if, comment);
+	
+	int len = strlen(rrs);
+	char *tmp = (char *)calloc(1, len + strlen(cmd) + sizeof(char)*2);
+	char *p = tmp;
+	if (tmp == NULL)
+		return 0;
+
+	// Write previous rules if exist
+	if (len > 0)
+	{
+		strcpy(tmp, rrs);
+		p += len;
+		*(p++) = ';';
+	}
+	
+	strcpy(p, cmd);
+	
+	// Set NVRAM variable
+	nvram_set(RT2860_NVRAM, "RoutingRules", tmp);
+
+	// Clear resource
+	free(tmp);
+}
+
+static void rebuildVPNRoutes(char *src_rrs)
+{
+	int nwritten=0, index=0;
+	char one_rule[256], iface[32], dest[32], netmask[32], gw[32];
+
+	char *rrs = (src_rrs != NULL) ? src_rrs : nvram_get(RT2860_NVRAM, "RoutingRules");
+	if (rrs == NULL)
+		return;
+
+	FILE *fd = fopen(PATH_PPP_ROUTES, "w");
+	if (fd == NULL)
+		return;
+	
+	fputs("#/bin/sh\n\n", fd);
+	
+	while (getNthValueSafe(index++, rrs, ';', one_rule, sizeof(one_rule)) != -1)
+	{
+		// Get record
+		if (getNthValueSafe(index, rrs, ';', one_rule, sizeof(one_rule)) == -1)
+			continue;
+		
+		// Get & check interface
+		if (getNthValueSafe(3, one_rule, ',', iface, sizeof(iface)) == -1)
+			continue;
+		if (strcmp(iface, "VPN") != 0)
+			continue;
+
+		// Get destination
+		if (getNthValueSafe(0, one_rule, ',', dest, sizeof(dest)) == -1)
+			continue;
+
+		// Get netmask
+		if (getNthValueSafe(1, one_rule, ',', netmask, sizeof(netmask)) == -1)
+			continue;
+
+		// Get gateway
+		if (getNthValueSafe(2, one_rule, ',', gw, sizeof(gw)) == -1)
+			continue;
+
+		addRoutingRule(one_rule, dest, netmask, gw, "$PPP_IFACE");
+		fprintf(fd, "%s\n", one_rule);
+		nwritten++;
+	}
+	
+	fclose(fd);
+
+	if (nwritten <= 0)
+		unlink(PATH_PPP_ROUTES);
+}
+
 void staticRoutingInit(void)
 {
-	int index=0;
-	char one_rule[256];
-	char *rrs;
-	struct in_addr dest_s, gw_s, netmask_s;
-	char dest[32], netmask[32], gw[32], interface[32], true_interface[32], custom_interface[32], comment[32];
-	int	flgs, ref, use, metric, nl=0;
-	unsigned long int d,g,m;
-	int isGatewayMode = (!strcmp("1", nvram_get(RT2860_NVRAM, "OperationMode"))) ? 1 : 0 ;
+	// Get routing rules
+	char *rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
+	if (rrs == NULL)
+		return;
 
 	// delete old user rules
 	FILE *fp = fopen("/proc/net/route", "r");
-	if(!fp)
+	if (fp == NULL)
 		return;
-
-	while (fgets(one_rule, sizeof(one_rule), fp) != NULL) {
-		if (nl) {
-			if (sscanf(one_rule, "%s%lx%lx%X%d%d%d%lx",
-					interface, &d, &g, &flgs, &ref, &use, &metric, &m) != 8) {
-				printf("format error\n");
-				fclose(fp);
-				return;
-			}
-			dest_s.s_addr = d;
-			gw_s.s_addr = g;
-			netmask_s.s_addr = m;
-
-			strncpy(dest, inet_ntoa(dest_s), sizeof(dest));
-			strncpy(gw, inet_ntoa(gw_s), sizeof(gw));
-			strncpy(netmask, inet_ntoa(netmask_s), sizeof(netmask));
-
-			// check if internal routing rules
-			if( (index=getIndexOfRoutingRule(dest, netmask, interface)) != -1){
-				removeRoutingRule(dest, netmask, interface);
-			}
-		}
-		nl++;
-	}
-	fclose(fp);
-
-	index = 0;
-	rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
-	if(!rrs|| !strlen(rrs))
-		return;
-
-	while( getNthValueSafe(index, rrs, ';', one_rule, 256) != -1 ){
-		char cmd[1024];
-
-		if((getNthValueSafe(0, one_rule, ',', dest, sizeof(dest)) == -1)){
-			index++;
+	
+	// Determine work mode
+	char *op_mode = nvram_get(RT2860_NVRAM, "OperationMode");
+	int isBridgeMode = (strcmp(op_mode, "0") == 0) ? 1 : 0;
+	
+	// Read current routing
+	char one_rule[256], interface[32], dest[32], gw[32], netmask[32], true_interface[32], custom_interface[32];
+	unsigned long d, g, m;
+	int flgs, ref, use, metric, nl = 0;
+	struct in_addr dest_s, gw_s, netmask_s;
+	
+	while (fgets(one_rule, sizeof(one_rule), fp) != NULL)
+	{
+		if ((nl++) <= 0)
 			continue;
-		}
-		if((getNthValueSafe(1, one_rule, ',', netmask, sizeof(netmask)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(2, one_rule, ',', gw, sizeof(gw)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(3, one_rule, ',', interface, sizeof(interface)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(4, one_rule, ',', true_interface, sizeof(true_interface)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(5, one_rule, ',', custom_interface, sizeof(custom_interface)) == -1)){
-			index++;
-			continue;
-		}
-		if((getNthValueSafe(6, one_rule, ',', comment, sizeof(comment)) == -1)){
-			index++;
-			continue;
-		}
-
-		strcpy(cmd, "route add ");
 		
-		// host or net?
-		if(!strcmp(netmask, "255.255.255.255") )
-			strcat(cmd, "-host ");
-		else
-			strcat(cmd, "-net ");
+		if (sscanf(one_rule, "%s%lx%lx%X%d%d%d%lx", interface, &d, &g, &flgs, &ref, &use, &metric, &m) != 8)
+		{
+			printf("format error\n");
+			fclose(fp);
+			return;
+		}
+		
+		dest_s.s_addr = d;
+		gw_s.s_addr = g;
+		netmask_s.s_addr = m;
 
-		// destination
-		strcat(cmd, dest);
-		strcat(cmd, " ");
+		strncpy(dest, inet_ntoa(dest_s), sizeof(dest));
+		strncpy(gw, inet_ntoa(gw_s), sizeof(gw));
+		strncpy(netmask, inet_ntoa(netmask_s), sizeof(netmask));
 
-		// netmask
-		if(strcmp(netmask, "255.255.255.255") )
-			sprintf(cmd, "%s netmask %s", cmd, netmask);
+		// check if internal routing rules
+		if (findRoutingRule(rrs, one_rule, dest, netmask, gw, interface)>=0)
+			removeRoutingRule(dest, netmask, gw, interface);
+	}
+	
+	fclose(fp);
+	
+	// Now create all custom routes
+	int index = 0;
 
-		// gateway
-		if(strcmp(gw, "0.0.0.0"))
-			sprintf(cmd, "%s gw %s", cmd, gw);
+	while (getNthValueSafe(index++, rrs, ';', one_rule, 256) != -1 )
+	{
+		if ((getNthValueSafe(0, one_rule, ',', dest, sizeof(dest)) == -1))
+			continue;
 
-		sprintf(cmd, "%s dev %s ", cmd, true_interface);
+		if ((getNthValueSafe(1, one_rule, ',', netmask, sizeof(netmask)) == -1))
+			continue;
 
-		strcat(cmd, "2>&1 ");
+		if ((getNthValueSafe(2, one_rule, ',', gw, sizeof(gw)) == -1))
+			continue;
 
-		if(strcmp(interface, "WAN") || (!strcmp(interface, "WAN") && isGatewayMode)  ){
-			doSystem(cmd);
-		}else{
-			printf("Skip WAN routing rule in the non-Gateway mode: %s\n", cmd);
+		if ((getNthValueSafe(3, one_rule, ',', interface, sizeof(interface)) == -1))
+			continue;
+		if (strcmp(interface, "VPN")==0)
+			continue;
+		else if ((strcmp(interface, "WAN")==0) && isBridgeMode)
+		{
+			printf("Skip WAN routing rule in the non-Gateway mode: %s\n", one_rule);
+			continue;
 		}
 
-		index++;
+		if ((getNthValueSafe(4, one_rule, ',', true_interface, sizeof(true_interface)) == -1))
+			continue;
+
+		if ((getNthValueSafe(5, one_rule, ',', custom_interface, sizeof(custom_interface)) == -1))
+			continue;
+		
+		// Check interface
+		strcpy(true_interface, custom_interface);
+		if (strcmp(interface, "WAN")==0)
+			strcpy(true_interface, getWanIfName());
+		else if (strcmp(interface, "LAN")==0)
+			strcpy(true_interface, getLanIfName());
+		else if (strcmp(interface, "Custom")==0)
+		{
+			if (strlen(true_interface)<=0)
+				strcpy(true_interface, getWanIfName());
+		}
+		else
+		{
+			strcpy(interface, "LAN");
+			strcpy(true_interface, getLanIfName());
+		}
+		
+		// Add routing rule
+		addRoutingRule(NULL, dest, netmask, gw, true_interface);
 	}
-	return;
+	
+	// And rebuild VPN routes
+	if (!isBridgeMode)
+		rebuildVPNRoutes(rrs);
 }
 
 void dynamicRoutingInit(void)
@@ -1471,96 +1667,93 @@ static inline int getNums(char *value, char delimit)
  */
 static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char   result[4096] = {0};
 	char   buff[512];
 	int    nl = 0, index;
 	char   ifname[32], interface[128];
 	struct in_addr dest, gw, netmask;
 	char   dest_str[32], gw_str[32], netmask_str[32], comment[32];
 	int    flgs, ref, use, metric;
-	int	   *running_rules = NULL;
+	int   *running_rules = NULL;
+	char   one_rule[256];
 	unsigned long int d,g,m;
 	char *rrs;
 	int  rule_count;
 	FILE *fp = fopen("/proc/net/route", "r");
-	if(!fp)
+	if (!fp)
 		return -1;
 
+	// Determine work mode
+	char *op_mode = nvram_get(RT2860_NVRAM, "OperationMode");
+	int isBridgeMode = (strcmp(op_mode, "0") == 0) ? 1 : 0;
+
+	// Get routing table
 	rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
+	if (rrs == NULL)
+		rrs = "";
 	rule_count = getNums(rrs, ';');
 
-	if(rule_count){
+	if (rule_count)
+	{
 		running_rules = calloc(1, sizeof(int) * rule_count);
-		if(!running_rules)
+		if (!running_rules)
 			return -1;
 	}
-		
-	strncat(result, "\"", sizeof(result));
-	while (fgets(buff, sizeof(buff), fp) != NULL) {
-		if (nl) {
-			if (sscanf(buff, "%s%lx%lx%X%d%d%d%lx",
-					ifname, &d, &g, &flgs, &ref, &use, &metric, &m) != 8) {
+
+	// true_interface[0], destination[1], gateway[2], netmask[3], flags[4], ref[5], use[6],
+	// metric[7], category[8], interface[9], idle[10], comment[11], new[12]
+	while (fgets(buff, sizeof(buff), fp) != NULL)
+	{
+		if (nl > 0)
+		{
+			if (sscanf(buff, "%s%lx%lx%X%d%d%d%lx", ifname, &d, &g, &flgs, &ref, &use, &metric, &m) != 8)
+			{
 				printf("format error\n");
 				fclose(fp);
-				return websWrite(wp, T(""));
+				return 0;
 			}
 			dest.s_addr = d;
 			gw.s_addr = g;
 			netmask.s_addr = m;
 
-			if(! (flgs & 0x1) )	// skip not usable
+			if (!(flgs & 0x1))	// skip not usable
 				continue;
 
 			strncpy(dest_str, inet_ntoa(dest), sizeof(dest_str));
 			strncpy(gw_str, inet_ntoa(gw), sizeof(gw_str));
 			strncpy(netmask_str, inet_ntoa(netmask), sizeof(netmask_str));
 
-			if(nl > 1)
-				strncat(result, ";", sizeof(result));
-			strncat(result, ifname, sizeof(result));		strncat(result, ",", sizeof(result));
-			strncat(result, dest_str, sizeof(result));		strncat(result, ",", sizeof(result));
-			strncat(result, gw_str, sizeof(result));			strncat(result, ",", sizeof(result));
-			strncat(result, netmask_str, sizeof(result) );	strncat(result, ",", sizeof(result));
-			snprintf(result, sizeof(result), "%s%d,%d,%d,%d,", result, flgs, ref, use, metric);
+			if (nl > 1)
+				websWrite(wp, T(",\n"));
+			websWrite(wp, T("[ '%s', '%s', '%s', '%s', %d, %d, %d, %d"), ifname, dest_str, gw_str, netmask_str, flgs, ref, use, metric); // 0-7
 
 			// check if internal routing rules
-			strcpy(comment, " ");
-			if( (index=getIndexOfRoutingRule(dest_str, netmask_str, ifname)) != -1){
-				char one_rule[256];
-
-				if(index < rule_count)
+			strcpy(comment, "");
+			if ((index=findRoutingRule(rrs, one_rule, dest_str, netmask_str, gw_str, ifname)) != -1)
+			{
+				if (index < rule_count)
 					running_rules[index] = 1;
 				else
 					printf("fatal error in %s\n", __FUNCTION__);
 
-				snprintf(result, sizeof(result), "%s%d,", result, index);
-				if(rrs && strlen(rrs)){
-					if( getNthValueSafe(index, rrs, ';', one_rule, sizeof(one_rule)) != -1){
-
-						if( getNthValueSafe(3, one_rule, ',', interface, sizeof(interface)) != -1){
-							strncat(result, interface, sizeof(result));
-							strncat(result, ",", sizeof(result));
-						}
-						if( getNthValueSafe(6, one_rule, ',', comment, sizeof(comment)) != -1){
-							// do nothing;
-						}
-					}
-				}
-			}else{
-				strncat(result, "-1,", sizeof(result));
-				strncat(result, getLanWanNamebyIf(ifname), sizeof(result));
-				strncat(result, ",", sizeof(result));
+				websWrite(wp, T(", %d, "), index); // 8
+				if (getNthValueSafe(3, one_rule, ',', interface, sizeof(interface)) != -1)
+					websWrite(wp, T("'%s'"), interface); // 9
+				else
+					websWrite(wp, T("'LAN'")); // 9
+				if (getNthValueSafe(6, one_rule, ',', comment, sizeof(comment)) == -1)
+					comment[0] = '\0';
 			}
-			strncat(result, "0,", sizeof(result));	// used rule
-			strncat(result, comment, sizeof(result));
+			else
+				websWrite(wp, T(", -1, '%s'"), getLanWanNamebyIf(ifname)); // 8-9
+
+			websWrite(wp, T(", 0, '%s', 0 ]"), comment); // 10-12
 		}
 		nl++;
 	}
 
-	for(index=0; index < rule_count; index++){
-		char one_rule[256];
-
-		if(running_rules[index])
+	for (index=0; index < rule_count; index++)
+	{
+		if (running_rules[index])
 			continue;
 
 		if(getNthValueSafe(index, rrs, ';', one_rule, sizeof(one_rule)) == -1)
@@ -1584,179 +1777,118 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
 		if(getNthValueSafe(6, one_rule, ',', comment, sizeof(comment)) == -1)
 			continue;
 
-		if(strlen(result))
-			strncat(result, ";", sizeof(result));
+		if (nl > 0)
+			websWrite(wp, T(",\n"));
 
-		snprintf(result, sizeof(result), "%s%s,%s,%s,%s,0,0,0,0,%d,%s,1,%s", result, ifname, dest_str, gw_str, netmask_str, index, interface, comment);
+		websWrite(wp, T("[ '%s', '%s', '%s', '%s', 0, 0, 0, 0, %d, '%s', %d, '%s', 0 ]"),
+			ifname, dest_str, gw_str, netmask_str, index, interface, 
+			((strcmp(interface, "VPN")==0) ? isBridgeMode : 1), 
+			comment);
+		nl++;
 	}
 
-	strcat(result, "\"");
-	websLongWrite(wp, result);
 	fclose(fp);
-	if(running_rules)
+
+	if (running_rules)
 		free(running_rules);
-	//printf("%s\n", result);
 	return 0;
 }
 
-static void addRouting(webs_t wp, char_t *path, char_t *query)
+
+
+static void editRouting(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *dest, *hostnet, *netmask, *gateway, *interface, *true_interface, *custom_interface, *comment;
-	char cmd[256] = {0};
-	char result[256] = {0};
-
-	FILE *fp;
-
-	dest = websGetVar(wp, T("dest"), T(""));
-	hostnet = websGetVar(wp, T("hostnet"), T(""));
-	netmask = websGetVar(wp, T("netmask"), T(""));
-	gateway = websGetVar(wp, T("gateway"), T(""));
-	interface = websGetVar(wp, T("interface"), T(""));
-	custom_interface = websGetVar(wp, T("custom_interface"), T(""));
-	comment = websGetVar(wp, T("comment"), T(""));
-
-	if( !dest)
-		return;
-
-	strcat(cmd, "route add ");
+	char_t *trans = websGetVar(wp, T("routingTableDiff"), T(""));
+	char rec[256];
+	char true_iface[32], destination[32], gateway[32], netmask[32], iface[32], c_iface[32], comment[64], action[4];
+	int i=0, rebuild_vpn=0, iaction;
 	
-	// host or net?
-	if(!gstrcmp(hostnet, "net"))
-		strcat(cmd, "-net ");
-	else
-		strcat(cmd, "-host ");
-
-	// destination
-	strcat(cmd, dest);
-	strcat(cmd, " ");
-
-	// netmask
-	if(gstrlen(netmask))
-		sprintf(cmd, "%s netmask %s", cmd, netmask);
-	else
-		netmask = "255.255.255.255";
-
-	//gateway
-	if(gstrlen(gateway))
-		sprintf(cmd, "%s gw %s", cmd, gateway);
-	else
-		gateway = "0.0.0.0";
-
-	//interface
-	if(gstrlen(interface)){
-		if (!gstrcmp(interface, "WAN")){
-			true_interface = getWanIfName();
-		}else if (!gstrcmp(interface, "Custom")){
-			if(!gstrlen(custom_interface))
-				return;
-			true_interface = custom_interface;
-		}else	// LAN & unknown
-			true_interface = getLanIfName();
-	}else{
-		interface = "LAN";
-		true_interface = getLanIfName();
-	}
-	sprintf(cmd, "%s dev %s ", cmd, true_interface);
-
-	strcat(cmd, "2>&1 ");
-
-	printf("%s\n", cmd);
-	fp = popen(cmd, "r");
-	fgets(result, sizeof(result), fp);
-	pclose(fp);
-
-	if (!strlen(result))
-	{
-		// success, write down to the flash
-		char tmp[1024];
-		char *rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
-		if (!rrs || !strlen(rrs))
-			memset(tmp, 0, sizeof(tmp));
-		else
-			strncpy(tmp, rrs, sizeof(tmp));
-
-		if(strlen(tmp))
-			strcat(tmp, ";");
-		sprintf(tmp, "%s%s,%s,%s,%s,%s,%s,%s", tmp, dest, netmask, gateway, interface, true_interface, custom_interface, comment);
-		nvram_set(RT2860_NVRAM, "RoutingRules", tmp);
-	}
-	else
-	{
-		websHeader(wp);
-		websWrite(wp, T("<h1>Add routing failed:<br> %s<h1>"), result);
-		websFooter(wp);
-		websDone(wp, 200);
-		return;
-	}
-
-	//debug print
 	websHeader(wp);
-	websWrite(wp, T("<h3>Add routing table:</h3><br>\n"));
-	if (strlen(result))
-		websWrite(wp, T("Success"));
-	else
-		websWrite(wp, T("%s"), result);
-
-	websWrite(wp, T("Destination: %s<br>\n"), dest);
-	websWrite(wp, T("Host/Net: %s<br>\n"), hostnet);
-	websWrite(wp, T("Netmask: %s<br>\n"), netmask);
-	websWrite(wp, T("Gateway: %s<br>\n"), gateway);
-	websWrite(wp, T("Interface: %s<br>\n"), interface);
-	websWrite(wp, T("True Interface: %s<br>\n"), true_interface);
-	if(strlen(custom_interface))
-		websWrite(wp, T("Custom_interface %s<br>\n"), custom_interface);
-	websWrite(wp, T("Comment: %s<br>\n"), comment);
-	websFooter(wp);
-	websDone(wp, 200);
-}
-
-static void delRouting(webs_t wp, char_t *path, char_t *query)
-{
-	int index, rule_count;
-	char_t *value, dest[256], netmask[256], true_interface[256];
-	char name_buf[16] = {0};
-	char *rrs;
-	int *deleArray, j=0;
+	websWrite(wp, T("<h3>Edit routing table:</h3><br>\n"));
 	
-	rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
-	if(!rrs || !strlen(rrs))
-		return;
-
-	rule_count = getNums(rrs, ';');
-	if(!rule_count)
-		return;
-
-	if(!(deleArray = malloc(sizeof(int) * rule_count) ) )
-		return;
+	while (getNthValueSafe(i++, trans, ';', rec, sizeof(rec)) != -1)
+	{
+		// Check length
+		if (strlen(rec)<=0)
+			break;
 		
-	websHeader(wp);
+		// Get true interface
+		if ((getNthValueSafe(0, rec, ',', c_iface, sizeof(c_iface)) == -1))
+			continue;
+		// Get destination
+		if ((getNthValueSafe(1, rec, ',', destination, sizeof(destination)) == -1))
+			continue;
+		// Get gateway
+		if ((getNthValueSafe(2, rec, ',', gateway, sizeof(gateway)) == -1))
+			continue;
+		// Get netmask
+		if ((getNthValueSafe(3, rec, ',', netmask, sizeof(netmask)) == -1))
+			continue;
+		// Get interface
+		if ((getNthValueSafe(9, rec, ',', iface, sizeof(iface)) == -1))
+			continue;
+		// Get comment
+		if ((getNthValueSafe(11, rec, ',', comment, sizeof(comment)) == -1))
+			continue;
+		// Get action
+		if ((getNthValueSafe(12, rec, ',', action, sizeof(action)) == -1))
+			continue;
+		
+		//printf("true_if = %s, dest = %s, gw = %s, netmask = %s, iface = %s, c_iface = %s, action = %s, comment = %s\n",
+		//	true_iface, destination, gateway, netmask, iface, c_iface, action, comment);
+		
+		// First assume that it is not a PPP route
+		int is_vpn = 0;
 
-	for (index=0; index< rule_count; index++)
-	{
-		snprintf(name_buf, sizeof(name_buf), "DR%d", index);
-		value = websGetVar(wp, name_buf, NULL);
-
-		if (value)
+		// Check action
+		iaction = atoi(action);
+		if (! ((iaction == 1) || (iaction == 2)))
+			continue;
+		
+		// Check interface
+		strcpy(true_iface, c_iface);
+		if (strcmp(iface, "WAN")==0)
+			strcpy(true_iface, getWanIfName());
+		else if (strcmp(iface, "LAN")==0)
+			strcpy(true_iface, getLanIfName());
+		else if (strcmp(iface, "Custom")==0)
 		{
-			deleArray[j++] = index;
-			if(strlen(value) > 256)
-				continue;
-			sscanf(value, "%s%s%s", dest, netmask, true_interface);
-			removeRoutingRule(dest, netmask, true_interface);
-			websWrite(wp, T("Delete entry: %s,%s,%s<br>\n"), dest, netmask, true_interface);
+			if (strlen(true_iface)<=0)
+				strcpy(true_iface, getWanIfName());
+		}
+		else if (strcmp(iface, "VPN")==0)
+		{
+			rebuild_vpn = 1;
+			is_vpn = 1;
+			strcpy(true_iface, "ppp+");
+		}
+		else
+		{
+			strcpy(iface, "LAN");
+			strcpy(true_iface, getLanIfName());
+		}
+		
+		if (iaction == 1) // Add route
+		{
+			if (!is_vpn)
+				addRoutingRule(NULL, destination, netmask, gateway, true_iface);
+			addRoutingRuleNvram(iface, destination, netmask, gateway, true_iface, c_iface, comment);
+			websWrite(wp, T("Add route: %s, %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway, true_iface);
+		}
+		else if (iaction == 2) // Remove route
+		{
+			if (!is_vpn)
+				removeRoutingRule(destination, netmask, gateway, true_iface);
+			removeRoutingRuleNvram(iface, destination, netmask, gateway, true_iface);
+			websWrite(wp, T("Delete route: %s, %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway, true_iface);
 		}
 	}
-
-	if (j>0)
-	{
-		deleteNthValueMulti(deleArray, j, rrs, ';');
-		nvram_set(RT2860_NVRAM, "RoutingRules", rrs);
-	}
-
+	
+	if (rebuild_vpn)
+		rebuildVPNRoutes(NULL);
+	
 	websFooter(wp);
 	websDone(wp, 200);
-
-	free(deleArray);
 }
 
 void ripdRestart(void)

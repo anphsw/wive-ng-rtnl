@@ -5,506 +5,321 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
+
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
 
 var opmode = "<% getCfgZero(1, "OperationMode"); %>";
-
-var destination = new Array();
-var gateway = new Array();
-var netmask = new Array();
-var flags = new Array();
-var metric = new Array();
-var ref = new Array();
-var use = new Array();
-var true_interface = new Array();
-var category = new Array();
-var interface = new Array();
-var idle = new Array();
-var comment = new Array();
-
-function deleteClick()
-{
-	return true;
-}
-
-function checkRange(str, num, min, max)
-{
-    d = atoi(str,num);
-    if(d > max || d < min)
-        return false;
-    return true;
-}
-
-function checkIpAddr(field)
-{
-    if(field.value == ""){
-        field.focus();
-        return false;
-    }
-
-    if ( isAllNum(field.value) == 0) {
-        field.focus();
-        return false;
-    }
-
-    if( (!checkRange(field.value,1,0,255)) ||
-        (!checkRange(field.value,2,0,255)) ||
-        (!checkRange(field.value,3,0,255)) ||
-        (!checkRange(field.value,4,0,255)) ){
-        field.focus();
-        return false;
-    }
-
-   return true;
-}
-
-
-function atoi(str, num)
-{
-	i=1;
-	if(num != 1 ){
-		while (i != num && str.length != 0){
-			if(str.charAt(0) == '.'){
-				i++;
-			}
-			str = str.substring(1);
-		}
-	  	if(i != num )
-			return -1;
-	}
-	
-	for(i=0; i<str.length; i++){
-		if(str.charAt(i) == '.'){
-			str = str.substring(0, i);
-			break;
-		}
-	}
-	if(str.length == 0)
-		return -1;
-	return parseInt(str, 10);
-}
-
-function isAllNum(str)
-{
-	for (var i=0; i<str.length; i++){
-	    if((str.charAt(i) >= '0' && str.charAt(i) <= '9') || (str.charAt(i) == '.' ))
-			continue;
-		return 0;
-	}
-	return 1;
-}
-
-function formCheck()
-{
-	if( document.addrouting.dest.value != "" && !checkIpAddr(document.addrouting.dest )){
-		alert("The destination has wrong format.");
-		return false;
-	}
-	if( document.addrouting.netmask.value != "" && !checkIpAddr(document.addrouting.netmask )){
-		alert("The netmask has wrong format.");
-		return false;
-	}
-	if( document.addrouting.gateway.value != "" && !checkIpAddr(document.addrouting.gateway)){
-		alert("The gateway has wrong format.");
-		return false;
-	}
-
-	if(	document.addrouting.dest.value == ""){
-		alert("please input the destination.");
-		return false;
-	}
-
-    if( document.addrouting.hostnet.selectedIndex == 1 &&
-		document.addrouting.netmask.value == ""){
-		alert("please input the netmask.");
-        return false;
-    }
-
-	if(document.addrouting.interface.value == "Custom" &&
-		document.addrouting.custom_interface.value == ""){
-		alert("please input custom interface name.");
-		return false;
-	}
-
-
-	return true;
-}
-
-
-function display_on()
-{
-  if(window.XMLHttpRequest){ // Mozilla, Firefox, Safari,...
-    return "table-row";
-  } else if(window.ActiveXObject){ // IE
-    return "block";
-  }
-}
-
-function disableTextField (field)
-{
-  if(document.all || document.getElementById)
-    field.disabled = true;
-  else {
-    field.oldOnFocus = field.onfocus;
-    field.onfocus = skip;
-  }
-}
-
-function enableTextField (field)
-{
-  if(document.all || document.getElementById)
-    field.disabled = false;
-  else {
-    field.onfocus = field.oldOnFocus;
-  }
-}
+var routingRules = [ <% getRoutingTable(); %> ];
 
 function initTranslation()
 {
-	var e;
-	e = document.getElementById("routingTitle");
-	e.innerHTML = _("routing title");
-	e = document.getElementById("routingIntroduction");
-	e.innerHTML = _("routing Introduction");
-	e = document.getElementById("routingAddRule");
-	e.innerHTML = _("routing add rule");
-	e = document.getElementById("routingDest");
-	e.innerHTML = _("routing routing dest");
-	e = document.getElementById("routingRange");
-	e.innerHTML = _("routing range");
-	e = document.getElementById("routingNetmask");
-	e.innerHTML = _("routing netmask");
-	e = document.getElementById("routingGateway");
-	e.innerHTML = _("routing gateway");
-	e = document.getElementById("routingInterface");
-	e.innerHTML = _("routing interface");
-	e = document.getElementById("routingCustom");
-	e.innerHTML = _("routing custom");
-	e = document.getElementById("routingComment");
-	e.innerHTML = _("routing comment");
-	e = document.getElementById("routingSubmit");
-	e.value = _("routing submit");
-	e = document.getElementById("routingReset");
-	e.value = _("routing reset");
-	e = document.getElementById("routingCurrentRoutingTableRules");
-	e.innerHTML = _("routing del title");
-	e = document.getElementById("routingNo");
-	e.innerHTML = _("routing Number");
-	e = document.getElementById("routingDelDest");
-	e.innerHTML = _("routing del dest");
-	e = document.getElementById("routingDelNetmask");
-	e.innerHTML = _("routing del netmask");
-	e = document.getElementById("routingDelGateway");
-	e.innerHTML = _("routing del gateway");
-	e = document.getElementById("routingDelFlags");
-	e.innerHTML = _("routing del flags");
-	e = document.getElementById("routingDelMetric");
-	e.innerHTML = _("routing del metric");
-	e = document.getElementById("routingDelRef");
-	e.innerHTML = _("routing del ref");
-	e = document.getElementById("routingDelUse");
-	e.innerHTML = _("routing del use");
-	e = document.getElementById("routingDelInterface");
-	e.innerHTML = _("routing del interface");
-	e = document.getElementById("routingDelComment");
-	e.innerHTML = _("routing del comment");
-	e = document.getElementById("routingDel");
-	e.value = _("routing del");
-	e = document.getElementById("routingDelReset");
-	e.value = _("routing del reset");
-	e = document.getElementById("routing host");
-	e.innerHTML = _("routing host");
-	e = document.getElementById("routing net");
-	e.innerHTML = _("routing net");
-	e = document.getElementById("routing LAN");
-	e.innerHTML = _("routing LAN");
-	if(document.getElementById("routing WAN")){
-		e = document.getElementById("routing WAN");
-		e.innerHTML = _("routing WAN");
-	}
-	e = document.getElementById("dynamicRoutingTitle");
-	e.innerHTML = _("routing dynamic Title");
-	e = document.getElementById("dynamicRoutingTitle2");
-	e.innerHTML = _("routing dynamic Title2");
-	e = document.getElementById("RIPDisable");
-	e.innerHTML = _("routing dynamic rip disable");
-	e = document.getElementById("RIPEnable");
-	e.innerHTML = _("routing dynamic rip enable");
-	e = document.getElementById("dynamicRoutingApply");
-	e.value = _("routing dynamic rip apply");
-	e = document.getElementById("dynamicRoutingReset");
-	e.value = _("routing dynamic rip reset");
+	_TR("routingTitle", "routing title");
+	_TR("routingIntroduction", "routing Introduction");
+	_TR("routingAddRule", "routing add rule");
+	_TR("routingDest", "routing routing dest");
+	_TR("routingRange", "routing range");
+	_TR("routingNetmask", "routing netmask");
+	_TR("routingGateway", "routing gateway");
+	_TR("routingInterface", "routing interface");
+	_TR("routingCustom", "routing custom");
+	_TR("routingComment", "routing comment");
+	_TRV("routingSubmit", "routing submit");
+	_TRV("routingReset", "routing reset");
+
+	_TR("routingCurrentRoutingTableRules", "routing del title");
+	_TR("routingNo", "routing Number");
+	_TR("routingDelDest", "routing del dest");
+	_TR("routingDelNetmask", "routing del netmask");
+	_TR("routingDelGateway", "routing del gateway");
+	_TR("routingDelFlags", "routing del flags");
+	_TR("routingDelMetric", "routing del metric");
+	_TR("routingDelRef", "routing del ref");
+	_TR("routingDelUse", "routing del use");
+	_TR("routingDelInterface", "routing del interface");
+	_TR("routingDelComment", "routing del comment");
+	_TRV("routingDel", "routing del");
+	_TRV("routingDelReset", "routing del reset");
+
+	_TR("routing host", "routing host");
+	_TR("routing net", "routing net");
+	_TR("routing LAN", "routing LAN");
+	_TR("routing WAN", "routing WAN");
+	_TR("dynamicRoutingTitle", "routing dynamic Title");
+	_TR("dynamicRoutingTitle2", "routing dynamic Title2");
+	_TR("RIPDisable", "routing dynamic rip disable");
+	_TR("RIPEnable", "routing dynamic rip enable");
+	_TR("dynamicRoutingApply", "routing dynamic rip apply");
+	_TR("dynamicRoutingReset", "routing dynamic rip reset");
 }
 
 function onInit()
 {
-	initTranslation();
+	var form = document.editRouting;
+	var dform = document.dynamicRouting;
+	var rip_ena = '<% getCfgZero(1, "RIPEnable"); %>';
+	var dr_built = '<% getDynamicRoutingBuilt(); %>';
 
-	document.addrouting.hostnet.selectedIndex = 0;
-
-	document.addrouting.netmask.readOnly = true;
-	document.getElementById("routingNetmaskRow").style.visibility = "hidden";
-	document.getElementById("routingNetmaskRow").style.display = "none";
-
-	document.addrouting.interface.selectedIndex = 0;
-	document.addrouting.custom_interface.value = "";
-	document.addrouting.custom_interface.readOnly = true;
-
-	document.dynamicRouting.RIPSelect.selectedIndex = <% getCfgZero(1, "RIPEnable"); %>;
-
-	mydiv = document.getElementById("dynamicRoutingDiv");
-	if(! <% getDynamicRoutingBuilt(); %>){
-		mydiv.style.display = "none";
-		mydiv.style.visibility = "hidden";
+	var ifc = form.interface.options;
+	ifc.add(new Option("LAN", "LAN"));
+	if (opmode != '0')
+	{
+		ifc.add(new Option("WAN", "WAN"));
+		ifc.add(new Option("VPN", "VPN"));
 	}
+	ifc.add(new Option("Custom", "Custom"));
 
+	form.hostnet.value = 'host';
+	form.interface.value = 'LAN';
+	hideElement('routingNetmaskRow');
+
+	// Dynamic routing
+	dform.RIPSelect.selectedIndex = (rip_ena == '1') ? 1 : 0;
+	displayElement('dynamicRoutingDiv', dr_built);
+
+	genRoutingTable();
+}
+
+function hostnetChange(form)
+{
+	displayElement('routingNetmaskRow', form.hostnet.value == 'net');
+}
+
+function interfaceChange(form)
+{
+	displayElement('customInterfaceRow', form.interface.value == 'Custom');
 }
 
 function wrapDel(str, idle)
 {
-	if(idle == 1){
-		document.write("<del>" + str + "</del>");
-	}else
-		document.write(str);
+	return (idle == 1) ? "<del>" + str + "</del>" : str;
 }
 
-function style_display_on()
+function genRoutingTable()
 {
-	if (window.ActiveXObject) { // IE
-		return "block";
+	var html = '<table border="1" cellpadding="2" cellspacing="1" width="500">';
+	
+	html += '<tr><td class="title" colspan="11" id="routingCurrentRoutingTableRules">Current Routing table in the system:</td></tr>'; // Header
+	html += '<tr><th id="routingNo">ID</th>' +
+		'<th id="routingDelDest" align="center">Destination</th>' + 
+		'<th id="routingDelNetmask" align="center">Netmask</th>' +
+		'<th id="routingDelGateway" align="center">Gateway</th>' +
+		'<th id="routingDelFlags" align="center">Flags</th>' +
+		'<th id="routingDelMetric" align="center">Metric</th>' +
+		'<th id="routingDelRef" align="center">Ref</th>' +
+		'<th id="routingDelUse" align="center">Use</th>' +
+		'<th id="routingDelInterface" align="center">Interface</th>'+
+		'<th id="routingDelComment" align="center">Comment</th>'+
+		'<th>Actions</th></tr>';
+	
+	for (var i=0; i<routingRules.length; i++)
+	{
+		var row = routingRules[i];
+		if (row[12] == 2) // Record was deleted?
+			continue;
+		
+		var style = (row[8] > -1) ? ' style="background-color: #cccccc;"' : ''; // Category
+		var d = row[10];
+		var iface = (row[9] == 'Custom') ? (row[9] + ' (' + row[0] + ')') : row[9];
+		
+		html += '<tr' + style + '>';
+		html += '<td>' + (i+1) + '</td>' + // rownum
+			'<td>' + wrapDel(row[1], d) + '</td>' + // destination
+			'<td>' + wrapDel(row[3], d) + '</td>' + // netmask
+			'<td>' + wrapDel(row[2], d) + '</td>' + // gateway
+			'<td>' + wrapDel(row[4], d) + '</td>' + // flags
+			'<td>' + wrapDel(row[7], d) + '</td>' + // metric
+			'<td>' + wrapDel(row[5], d) + '</td>' + // ref
+			'<td>' + wrapDel(row[6], d) + '</td>' + // use
+			'<td>' + wrapDel(iface, d) + '</td>' + // interface
+			'<td>' + wrapDel(row[11], d) + '&nbsp;</td>'; // comment
+		
+		html += (row[8] > -1) ?
+			'<td style="text-align: center;"><a style="color: #ff0000; cursor: pointer;" href="javascript:removeRoutingItem(' + i + ');"><b>[x]</b></a></td>' : '<td>&nbsp;</td>';
 	}
-	else if (window.XMLHttpRequest) { // Mozilla, Safari,...
-		return "table-row";
-	}
+	
+	html += '</table>';
+	
+	setInnerHTML('ajxCtxRoutingTable', html);
+	initTranslation();
 }
-function hostnetChange()
-{
-	if(document.addrouting.hostnet.selectedIndex == 1){
-		document.getElementById("routingNetmaskRow").style.visibility = "visible";
-		document.getElementById("routingNetmaskRow").style.display = style_display_on();
-		document.addrouting.netmask.readOnly = false;
-		document.addrouting.netmask.focus();
 
-	}else{
-		document.addrouting.netmask.value = "";
-		document.addrouting.netmask.readOnly = true;
-		document.getElementById("routingNetmaskRow").style.visibility = "hidden";
-		document.getElementById("routingNetmaskRow").style.display = "none";
-	}
-}
-function interfaceChange()
+function removeRoutingItem(index)
 {
-	if(document.addrouting.interface.selectedIndex == 2){
-		document.addrouting.custom_interface.readOnly = false;
-		document.addrouting.custom_interface.focus();
-	}else{
-		document.addrouting.custom_interface.value = "";
-		document.addrouting.custom_interface.readOnly = true;
+	if ((index<0) || (index >= routingRules.length))
+		return;
+	var row = routingRules[index];
+	if (row[8] > -1)
+	{
+		if (row[12] == 1)
+			routingRules.splice(index, 1); // Remove rule if was added, then deleted in same transaction
+		else
+			row[12] = 2; // Mark rule as deleted if existed
+		genRoutingTable();
 	}
 }
 
-</script><!--     body      --></head><body onload="onInit()">
+function addRoutingRule(form)
+{
+	var row = [ '', '0.0.0.0', '0.0.0.0', '0.0.0.0',  1, 0, 0, 0,  0, 'LAN', 0, '', 1 ]; // New rule
+	
+	// Destination
+	if (!validateIP(form.dest, true))
+	{
+		form.dest.focus();
+		return;
+	}
+	row[1] = form.dest.value;
+
+	// Netmask
+	if (form.hostnet.value == 'net')
+	{
+		if (!validateIPMask(form.netmask, true))
+		{
+			form.netmask.focus();
+			return;
+		}
+		row[3] = form.netmask.value;
+	}
+	else
+		row[3] = '255.255.255.255';
+
+	// Gateway
+	if (!validateIP(form.gateway, true))
+	{
+		form.gateway.focus();
+		return;
+	}
+	row[2] = form.gateway.value;
+
+	// Interface
+	row[9] = form.interface.value;
+	if (row[9] == 'Custom')
+		row[0] = form.custom_interface.value;
+	
+	// Comment
+	row[11] = form.comment.value;
+	if (row[11].indexOf(',') >= 0)
+	{
+		alert("Unsupported character in comment");
+		form.comment.focus();
+		return;
+	}
+	
+	// Clear values
+	form.dest.value = '';
+	form.hostnet.value = '';
+	form.gateway.value = '';
+	form.comment.value = '';
+
+	// Add row & rebuild table
+	routingRules.push(row);
+	genRoutingTable();
+}
+
+function formRoutingTable(form)
+{
+	var trans = [];
+	for (var i=0; i < routingRules.length; i++)
+	{
+		if (routingRules[i][12] != 0)
+			trans.push(routingRules[i]);
+	}
+	form.routingTableDiff.value = trans.join(';');
+	return true;
+}
+
+</script>
+</head>
+
+<body onload="onInit()">
 <table class="body"><tbody><tr><td>
 <h1 id="routingTitle">Static Routing  Settings </h1>
 <p id="routingIntroduction"> You may add or remote Internet routing rules here.</p>
 <hr>
 
-<form method="post" name="addrouting" action="/goform/addRouting">
+<form action="/goform/editRouting" method="post" name="editRouting" onsubmit="return formRoutingTable(this);">
+
+<!-- Rule adding -->
 <table border="1" cellpadding="2" cellspacing="1" width="400">
-<tbody><tr>
-  <td class="title" colspan="2" id="routingAddRule">Add a routing rule</td>
-</tr>
-
 <tr>
-	<td class="head" id="routingDest">
-		Destination
-	</td>
-	<td>
-  		<input size="16" name="dest" type="text">
-	</td>
+	<td class="title" colspan="2" id="routingAddRule">Add a routing rule</td>
 </tr>
-
 <tr>
-	<td class="head" id="routingRange">
-		Host/Net
-	</td>
+	<td class="head" id="routingDest">Destination</td>
+	<td><input class="mid" name="dest" type="text"></td>
+</tr>
+<tr>
+	<td class="head" id="routingRange">Host/Net</td>
 	<td>
-		<select name="hostnet" onChange="hostnetChange()">
-		<option select="" value="host" id="routing host">Host</option>
-		<option value="net"  id="routing net">Net</option>
+		<select class="mid" name="hostnet" onChange="hostnetChange(this.form);">
+			<option selected="selected" value="host" id="routing host">Host</option>
+			<option value="net" id="routing net">Net</option>
 		</select>
 	</td>
 </tr>
-
 <tr id="routingNetmaskRow">
-	<td class="head" id="routingNetmask">
-		Sub Netmask
-	</td>
-	<td>
-  		<input size="16" name="netmask" type="text">
-	</td>
+	<td class="head" id="routingNetmask">Sub Netmask</td>
+	<td><input class="mid" name="netmask" type="text"></td>
 </tr>
-
 <tr>
-	<td class="head" id="routingGateway">
-		Gateway
-	</td>
-	<td>
-  		<input size="16" name="gateway" type="text">
-	</td>
+	<td class="head" id="routingGateway">Gateway</td>
+	<td><input class="mid" name="gateway" type="text"></td>
 </tr>
-
 <tr>
-	<td class="head" id="routingInterface">
-		Interface
-	</td>
-	<td>
-		<select name="interface" onChange="interfaceChange()">
-		<option select="" value="LAN" id="routing LAN">LAN</option>
-
-		<script language="JavaScript" type="text/javascript">
-			if(opmode == "1")
-				document.write("<option value=\"WAN\" id=\"routing WAN\">WAN</option>");
-		</script>
-
-		<option value="Custom" id="routingCustom">Custom</option>
-		</select>
-		<input alias="right" size="16" name="custom_interface" type="text">
-	</td>
+	<td class="head" id="routingInterface">Interface</td>
+	<td><select class="mid" name="interface" onChange="interfaceChange(this.form);"></select></td>
 </tr>
-
+<tr id="customInterfaceRow" style="display: none;">
+	<td class="head">Interface Name</td>
+	<td><input alias="right" class="mid" name="custom_interface" type="text"></td>
+</tr>
 <tr>
-	<td class="head" id="routingComment">
-		Comment
-	</td>
-	<td>
-		<input name="comment" size="16" maxlength="32" type="text">
-	</td>
+	<td class="head" id="routingComment">Comment</td>
+	<td><input name="comment" class="mid" type="text"></td>
 </tr>
-</tbody></table>
+</table>
 
 <p>
-	<input value="Apply" id="routingSubmit" name="addFilterPort" onclick="return formCheck()" type="submit"> &nbsp;&nbsp;
-	<input value="Reset" id="routingReset" name="reset" type="reset">
+	<input value="Add" onclick="addRoutingRule(this.form);" type="button">
+</p>
+
+<!--  delete rules -->
+
+<div id="ajxCtxRoutingTable"></div>
+
+<p>
+	<input type="hidden" name="routingTableDiff" >
+	<input value="Apply" type="submit">
 </p>
 </form>
 
-<br>
-<hr>
-<!--  delete rules -->
-<form action="/goform/delRouting" method="post" name="delRouting">
-
-<table border="1" cellpadding="2" cellspacing="1" width="500">	
-	<tbody><tr>
-		<td class="title" colspan="10" id="routingCurrentRoutingTableRules">Current Routing table in the system: </td>
-	</tr>
-
-	<tr>
-		<td id="routingNo"> No.</td>
-		<td id="routingDelDest" align="center"> Destination </td>
-		<td id="routingDelNetmask" align="center"> Netmask</td>
-		<td id="routingDelGateway" align="center"> Gateway</td>
-		<td id="routingDelFlags" align="center"> Flags</td>
-		<td id="routingDelMetric" align="center"> Metric</td>
-		<td id="routingDelRef" align="center"> Ref</td>
-		<td id="routingDelUse" align="center"> Use</td>
-		<td id="routingDelInterface" align="center"> Interface</td>
-		<td id="routingDelComment" align="center"> Comment</td>
-	</tr>
-
-	<script language="JavaScript" type="text/javascript">
-	var i;
-	var entries = new Array();
-	var all_str = <% getRoutingTable(); %>;
-
-	entries = all_str.split(";");
-	for(i=0; i<entries.length; i++){
-		var one_entry = entries[i].split(",");
-
-
-		true_interface[i] = one_entry[0];
-		destination[i] = one_entry[1];
-		gateway[i] = one_entry[2];
-		netmask[i] = one_entry[3];
-		flags[i] = one_entry[4];
-		ref[i] = one_entry[5];
-		use[i] = one_entry[6];
-		metric[i] = one_entry[7];
-		category[i] = parseInt(one_entry[8]);
-		interface[i] = one_entry[9];
-		idle[i] = parseInt(one_entry[10]);
-		comment[i] = one_entry[11];
-		if(comment[i] == " " || comment[i] == "")
-			comment[i] = "&nbsp";
-	}
-
-	for(i=0; i<entries.length; i++){
-		if(category[i] > -1){
-			document.write("<tr bgcolor=#F1F1FF>");
-			document.write("<td>");
-			document.write(i+1);
-			document.write("<input type=checkbox name=DR"+ category[i] + 
-				" value=\""+ destination[i] + " " + netmask[i] + " " + true_interface[i] +"\">");
-			document.write("</td>");
-		}else{
-			document.write("<tr>");
-			document.write("<td>"); 	document.write(i+1);			 	document.write("</td>");
-		}
-
-		document.write("<td>"); 	wrapDel(destination[i], idle[i]); 	document.write("</td>");
-		document.write("<td>"); 	wrapDel(netmask[i], idle[i]);		document.write("</td>");
-		document.write("<td>"); 	wrapDel(gateway[i], idle[i]); 		document.write("</td>");
-		document.write("<td>"); 	wrapDel(flags[i], idle[i]);			document.write("</td>");
-		document.write("<td>"); 	wrapDel(metric[i], idle[i]);		document.write("</td>");
-		document.write("<td>"); 	wrapDel(ref[i], idle[i]);			document.write("</td>");
-		document.write("<td>"); 	wrapDel(use[i], idle[i]);			document.write("</td>");
-
-		if(interface[i] == "LAN")
-			interface[i] = _("routing LAN");
-		else if(interface[i] == "WAN")
-			interface[i] = _("routing WAN");
-		else if(interface[i] == "Custom")
-			interface[i] = _("routing custom");
-
-		document.write("<td>"); 	wrapDel(interface[i] + "(" +true_interface[i] + ")", idle[i]);		document.write("</td>");
-		document.write("<td>"); 	wrapDel(comment[i], idle[i]);		document.write("</td>");
-		document.write("</tr>\n");
-	}
-	</script>
-
-</tbody></table>
-<br>
-
-<input value="Delete Selected" id="routingDel" name="deleteSelPortForward" onclick="return deleteClick()" type="submit">&nbsp;&nbsp;
-<input value="Reset" id="routingDelReset" name="reset" type="reset">
-</form>
-
-<div id=dynamicRoutingDiv>
-<h1 id="dynamicRoutingTitle">Dynamic Routing Settings </h1>
-<form method=post name="dynamicRouting" action=/goform/dynamicRouting>
+<div id="dynamicRoutingDiv">
+<h1 id="dynamicRoutingTitle">Dynamic Routing Settings</h1>
+<form method="post" name="dynamicRouting" action="/goform/dynamicRouting">
 <table width="400" border="1" cellpadding="2" cellspacing="1">
 <tr>
 	<td class="title" colspan="2" id="dynamicRoutingTitle2">Dynamic routing</td>
 </tr>
 <tr>
-	<td class="head" id="RIP">
-		RIP
-	</td>
-
+	<td class="head" id="RIP">RIP</td>
 	<td>
-	<select name="RIPSelect" size="1">
-	<option value=0 id="RIPDisable">Disable</option>
-	<option value=1 id="RIPEnable">Enable</option>
-	</select>
+		<select name="RIPSelect" size="1">
+			<option value="0" id="RIPDisable">Disable</option>
+			<option value="1" id="RIPEnable">Enable</option>
+		</select>
 	</td>
 </tr>
 </table>
 
 <p>
-	<input type="submit" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply" > &nbsp;&nbsp;
+	<input type="submit" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
 	<input type="reset" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
 </p>
 </form>

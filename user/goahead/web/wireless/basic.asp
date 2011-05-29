@@ -1137,7 +1137,7 @@ function doRadioStatusChange(form)
 <hr>
 
 <form method="POST" name="wireless_basic" action="/goform/wirelessBasic" onSubmit="return CheckValue();">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table width="600" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tr> 
 	<td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
 </tr>
@@ -1320,7 +1320,7 @@ function doRadioStatusChange(form)
 </tr>
 </table>
 
-<table id="div_11n" name="div_11n" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">
+<table id="div_11n" name="div_11n" width="600" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" style="display:none">
 <tr> 
 	<td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
 </tr>
@@ -1410,7 +1410,7 @@ function doRadioStatusChange(form)
 
 <br>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "600" border = "0" cellpadding = "2" cellspacing = "1">
 <tr align="center">
 	<td>
 		<input type="submit" class="half" value="Apply" id="basicApply">&nbsp;&nbsp;

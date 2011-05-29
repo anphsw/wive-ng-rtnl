@@ -433,7 +433,7 @@ function wmm_capable_enable_switch()
 
 
 <form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue(this)">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
 </tr>
@@ -573,7 +573,7 @@ function wmm_capable_enable_switch()
 
 <hr>
 
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr> 
 	<td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
 </tr>
@@ -608,7 +608,7 @@ function wmm_capable_enable_switch()
 <input type="hidden" name="rebootAP" value="0">
 </table>
 
-<table id="div_m2u" name="div_m2u" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_m2u" name="div_m2u" width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
 <tr>
 	<td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter (IGMP Snooping)</td>
 </tr>
@@ -646,7 +646,7 @@ function wmm_capable_enable_switch()
 
 <br>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<table width = "600" border = "0" cellpadding = "2" cellspacing = "1">
 <tr align="center">
 	<td>
 		<input type="submit" class="half" value="Apply" id="advApply">&nbsp;&nbsp;
