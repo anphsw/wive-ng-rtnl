@@ -425,6 +425,12 @@
 40) Fix timezone.<br>
 41) Fix async_tty build for modems support.<br>
 42) Some fixes for miniupnpd.<br>
+43) Optimize cache page alloc.<br>
+44) Some fixes for igmp.<br>
+45) HTB and sys_signal upstream fixes backport.<br>
+46) Rewrite routes webui for full support VPN and others.<br>
+47) Sync to busybox current tree.<br>
+48) Decrease HW_NAT foe table size for 3050F devices of 16Mb. Try fix ooom at RT3050F <32Mb RAM devices.<br>
 
 <br><br>
 <b>For support see:</b><br>
