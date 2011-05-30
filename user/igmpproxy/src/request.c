@@ -201,7 +201,7 @@ void sendGroupSpecificMemberQuery(void *argument) {
 void sendGeneralMembershipQuery() {
     struct  Config  *conf = getCommonConfig();
     struct  IfDesc  *Dp;
-    int             Ix;
+    unsigned        Ix;
 
 #ifdef RT3052_SUPPORT
     clear_all_entries_report();
