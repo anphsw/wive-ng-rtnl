@@ -16,10 +16,10 @@ start() {
 	sysctl -w vm.min_free_kbytes=2304
     else
         #=16mb
-        CONNTRACK_MAX=1024
-        let "HASHSIZE=$CONNTRACK_MAX/6"
-        let "ROUTEMAX=$CONNTRACK_MAX*2"
-	sysctl -w vm.min_free_kbytes=1536
+        CONNTRACK_MAX=800
+        let "HASHSIZE=$CONNTRACK_MAX/8"
+        let "ROUTEMAX=$CONNTRACK_MAX"
+	sysctl -w vm.min_free_kbytes=1088
     fi
     let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     let "CONNGEN=$CONNTRACK_MAX-400"
