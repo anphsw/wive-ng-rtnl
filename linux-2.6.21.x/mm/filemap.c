@@ -670,6 +670,7 @@ struct page *find_or_create_page(struct address_space *mapping,
 	int err;
 repeat:
 	page = find_lock_page(mapping, index);
+
 	if (!page) {
 		if (!cached_page) {
 			cached_page = alloc_page(gfp_mask);
@@ -1835,6 +1836,9 @@ __grab_cache_page(struct address_space *mapping, unsigned long index,
 	struct page *page;
 repeat:
 	page = find_lock_page(mapping, index);
+	if (page)
+	    goto found;
+
 	if (!page) {
 		if (!*cached_page) {
 			*cached_page = page_cache_alloc(mapping);
@@ -1853,6 +1857,8 @@ repeat:
 			*cached_page = NULL;
 		}
 	}
+found:
+	wait_on_page_writeback(page);
 	return page;
 }
 
