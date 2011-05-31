@@ -179,6 +179,11 @@ config 100PHY
 bool
 default y if GE1_MII_AN || GE2_MII_AN
 
+config RAETH_MEMORY_OPTIMIZATION
+	bool "Decrease memory usadge. Need for <32Mb RAM devices. More CPU use."
+	depends on RAETH
+	default n
+
 config RAETH_DHCP_TOUCH
 	bool "Send SIGUSR1/2 to dhcpc at media state changed."
 	depends on RAETH

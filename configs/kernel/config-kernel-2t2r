@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Sun May  8 04:20:46 2011
 #
 CONFIG_MIPS=y
 
@@ -1140,6 +1139,7 @@ CONFIG_RAETH_CHECKSUM_OFFLOAD=y
 CONFIG_RT_3052_ESW=y
 # CONFIG_RAETH_HAS_PORT5 is not set
 # CONFIG_RAETH_GMAC2 is not set
+# CONFIG_RAETH_MEMORY_OPTIMIZATION is not set
 CONFIG_RAETH_DHCP_TOUCH=y
 
 #

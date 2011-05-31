@@ -16,7 +16,7 @@
 #define NUM_TX_RINGS 	4
 #endif
 
-#ifdef MEMORY_OPTIMIZATION
+#ifdef CONFIG_RAETH_MEMORY_OPTIMIZATION
 #ifdef CONFIG_RAETH_ROUTER
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC    	128
@@ -27,7 +27,6 @@
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC     128
 #endif
-#define NUM_RX_MAX_PROCESS 64
 #else
 #ifdef CONFIG_BRIDGE_FASTPATH
 // To avoid driver tx ring full
@@ -45,6 +44,9 @@
 #define NUM_TX_DESC     256
 #endif
 #endif
+#endif
+
+#ifndef CONFIG_RAETH_NAPI
 #ifdef CONFIG_RALINK_RT3883
 #define NUM_RX_MAX_PROCESS 2
 #else

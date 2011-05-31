@@ -33,6 +33,12 @@ else
     exit 1
 fi
 
+if [ "$2" = "" ]; then
+    SAVE_MEM=""
+else
+    SAVE_MEM="-savemem"
+fi
+
 echo "" > sdk_version.h
 echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
@@ -65,33 +71,33 @@ ln -fs config/autoconf.h autoconf.h
 
 #################################PER-DEVICES###########################
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv ./configs/kernel/config-kernel-1t1r			./linux/.config
-    cp -fv ./configs/all/config-config				./config/.config
-    cp -fv ./configs/all/config-busybox				./user/busybox/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan-1T1R	./etc/default/RT2860_default_novlan
-    cp -fv ./configs/defaults/RT2860.dat-1T1R			./etc/Wireless/RT2860/RT2860.dat
-    ln -sf RT3050_AP_1T1R_V1_0.bin 				./etc/Wireless/rf.bin
+    cp -fv ./configs/kernel/config-kernel-1t1r$SAVE_MEM			./linux/.config
+    cp -fv ./configs/all/config-config					./config/.config
+    cp -fv ./configs/all/config-busybox					./user/busybox/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan-1T1R		./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860.dat-1T1R				./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3050_AP_1T1R_V1_0.bin					./etc/Wireless/rf.bin
 elif [ "$MODE" = "2T2R" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t2r			./linux/.config
-    cp -fv ./configs/all/config-busybox				./user/busybox/.config
-    cp -fv ./configs/all/config-config				./config/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan-2T2R	./etc/default/RT2860_default_novlan
-    cp -fv ./configs/defaults/RT2860.dat-2T2R			./etc/Wireless/RT2860/RT2860.dat
-    ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
-elif [ "$MODE" = "2T3R" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t3r			./linux/.config
-    cp -fv ./configs/all/config-busybox				./user/busybox/.config
-    cp -fv ./configs/all/config-config				./config/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan-2T3R	./etc/default/RT2860_default_novlan
-    cp -fv ./configs/defaults/RT2860.dat-2T3R			./etc/Wireless/RT2860/RT2860.dat
-    ln -sf RT3662_AP_2T2R_V0_0.bin 				./etc/Wireless/rf.bin
+    cp -fv ./configs/kernel/config-kernel-2t2r$SAVE_MEM			./linux/.config
+    cp -fv ./configs/all/config-busybox					./user/busybox/.config
+    cp -fv ./configs/all/config-config					./config/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan-2T2R		./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860.dat-2T2R				./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3052_AP_2T2R_V1_1.bin					./etc/Wireless/rf.bin
 elif [ "$MODE" = "2T2R-USB" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t2r-USB-IPV6-8M	./linux/.config
-    cp -fv ./configs/all/config-busybox-USB-IPV6-8M		./user/busybox/.config
-    cp -fv ./configs/all/config-config-USB-IPV6-8M		./config/.config
-    cp -fv ./configs/defaults/RT2860_default_novlan-2T2R	./etc/default/RT2860_default_novlan
-    cp -fv ./configs/defaults/RT2860.dat-2T2R			./etc/Wireless/RT2860/RT2860.dat
-    ln -sf RT3052_AP_2T2R_V1_1.bin 				./etc/Wireless/rf.bin
+    cp -fv ./configs/kernel/config-kernel-2t2r-USB-IPV6-8M$SAVE_MEM	./linux/.config
+    cp -fv ./configs/all/config-busybox-USB-IPV6-8M			./user/busybox/.config
+    cp -fv ./configs/all/config-config-USB-IPV6-8M			./config/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan-2T2R		./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860.dat-2T2R				./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3052_AP_2T2R_V1_1.bin					./etc/Wireless/rf.bin
+elif [ "$MODE" = "2T3R" ] ; then
+    cp -fv ./configs/kernel/config-kernel-2t3r				./linux/.config
+    cp -fv ./configs/all/config-busybox					./user/busybox/.config
+    cp -fv ./configs/all/config-config					./config/.config
+    cp -fv ./configs/defaults/RT2860_default_novlan-2T3R		./etc/default/RT2860_default_novlan
+    cp -fv ./configs/defaults/RT2860.dat-2T3R				./etc/Wireless/RT2860/RT2860.dat
+    ln -sf RT3662_AP_2T2R_V0_0.bin					./etc/Wireless/rf.bin
 else
     echo "Configs not found."
     exit 1
