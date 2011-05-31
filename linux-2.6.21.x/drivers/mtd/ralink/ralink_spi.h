@@ -11,35 +11,32 @@
 #define RT2880_SPICTL_REG		(RT2880_SPI_REG_BASE+0x14)
 #define RT2880_SPIDATA_REG		(RT2880_SPI_REG_BASE+0x20)
 
-
 /* SPICFG register bit field */
-#define SPICFG_LSBFIRST				(0<<8)
-#define SPICFG_MSBFIRST				(1<<8)
-
+#define SPICFG_LSBFIRST			(0<<8)
+#define SPICFG_MSBFIRST			(1<<8)
 #define SPICFG_RXCLKEDGE_FALLING	(1<<5)		/* rx on the falling edge of the SPICLK signal */
 #define SPICFG_TXCLKEDGE_FALLING	(1<<4)		/* tx on the falling edge of the SPICLK signal */
 
-#define SPICFG_SPICLK_DIV2			(0<<0)		/* system clock rat / 2  */
-#define SPICFG_SPICLK_DIV4			(1<<0)		/* system clock rat / 4  */
-#define SPICFG_SPICLK_DIV8			(2<<0)		/* system clock rat / 8  */
-#define SPICFG_SPICLK_DIV16			(3<<0)		/* system clock rat / 16  */
-#define SPICFG_SPICLK_DIV32			(4<<0)		/* system clock rat / 32  */
-#define SPICFG_SPICLK_DIV64			(5<<0)		/* system clock rat / 64  */
+#define SPICFG_SPICLK_DIV2		(0<<0)		/* system clock rat / 2  */
+#define SPICFG_SPICLK_DIV4		(1<<0)		/* system clock rat / 4  */
+#define SPICFG_SPICLK_DIV8		(2<<0)		/* system clock rat / 8  */
+#define SPICFG_SPICLK_DIV16		(3<<0)		/* system clock rat / 16  */
+#define SPICFG_SPICLK_DIV32		(4<<0)		/* system clock rat / 32  */
+#define SPICFG_SPICLK_DIV64		(5<<0)		/* system clock rat / 64  */
 #define SPICFG_SPICLK_DIV128		(6<<0)		/* system clock rat / 128 */
 
 #define SPICFG_SPICLKPOL		(1<<6)		/* spi clk*/
 
 /* SPICTL register bit field */
-#define SPICTL_HIZSDO				(1<<3)
-#define SPICTL_STARTWR				(1<<2)
-#define SPICTL_STARTRD				(1<<1)
-#define SPICTL_SPIENA_LOW			(0<<0)		/* #cs low active */
-#define SPICTL_SPIENA_HIGH			(1<<0)
+#define SPICTL_HIZSDO			(1<<3)
+#define SPICTL_STARTWR			(1<<2)
+#define SPICTL_STARTRD			(1<<1)
+#define SPICTL_SPIENA_LOW		(0<<0)		/* #cs low active */
+#define SPICTL_SPIENA_HIGH		(1<<0)
 
 
 #define spi_busy_loop 3000
 #define max_ee_busy_loop 500
-
 
 /*
  * ATMEL AT25XXXX Serial EEPROM 
@@ -61,12 +58,10 @@
 #define BP1 3	/* Block Write Protect Bit */
 #define WPEN 7	/* Software Write Protect Enable Bit */
 
-
 #define ENABLE	1
 #define DISABLE	0
 
-#define CFG_CLK_DIV SPICFG_SPICLK_DIV8
-
+#define CFG_CLK_DIV			SPICFG_SPICLK_DIV8
 #define RALINK_SYSCTL_ADDR		RALINK_SYSCTL_BASE	// system control
 #define RALINK_REG_GPIOMODE		(RALINK_SYSCTL_ADDR + 0x60)
 
