@@ -22,7 +22,9 @@ fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "2T2R-USB" ]; then
+if [ "$MODE" = "2T3R" ] ; then
+    DEVNAME=WR-G
+elif [ "$MODE" = "2T2R-USB" ]; then
     DEVNAME=WR-U
 elif [ "$MODE" = "2T2R" ]; then
     DEVNAME=WR-N
@@ -122,5 +124,5 @@ echo -------------------------------MAKE-FULLDUMP-----------------------------
 fi
 
 echo -----------------------------------PACK----------------------------------
-mv -f images/*.bin "images/$MODE.$VERSIONPKG.bin"
-zip -r images/$MODE.$VERSIONPKG.bin.zip images/*.bin
+mv -f images/*.bin "images/$MODE$SAVE_MEM.$VERSIONPKG.bin"
+zip -r images/$MODE$SAVE_MEM.$VERSIONPKG.bin.zip images/*.bin
