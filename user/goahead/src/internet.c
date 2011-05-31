@@ -98,8 +98,6 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
 static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
-//static void addRouting(webs_t wp, char_t *path, char_t *query);
-//static void delRouting(webs_t wp, char_t *path, char_t *query);
 static void editRouting(webs_t wp, char_t *path, char_t *query);
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
@@ -150,8 +148,6 @@ void formDefineInternet(void) {
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
-//	websFormDefine(T("addRouting"), addRouting);
-//	websFormDefine(T("delRouting"), delRouting);
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
@@ -1463,7 +1459,7 @@ static void addRoutingRuleNvram(
 	char *tmp = (char *)calloc(1, len + strlen(cmd) + sizeof(char)*2);
 	char *p = tmp;
 	if (tmp == NULL)
-		return 0;
+		return;
 
 	// Write previous rules if exist
 	if (len > 0)

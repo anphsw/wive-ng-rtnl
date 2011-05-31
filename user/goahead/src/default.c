@@ -222,7 +222,7 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 }
 
 
-#ifdef WIN32
+#ifdef WIN
 
 static int badPath(char_t* path, char_t* badPath, int badLen)
 {
@@ -435,7 +435,7 @@ int websValidateUrl(webs_t wp, char_t *path)
 		token = gstrtok(NULL, T("/"));
 	}
 
-#ifdef WIN32
+#ifdef WIN
    if (isBadWindowsPath(parts, npart))
    {
       bfree(B_L, path);

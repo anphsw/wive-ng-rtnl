@@ -42,16 +42,12 @@
 #define PROCREG_GMAC             "/proc/rt2880/gmac"
 #endif
 
-int doKillPid(char_t *fmt, ...);
+void formDefineUtilities(void);
+int checkSemicolon(char *str);
 int doSystem(char_t *fmt, ...);
 char *getNthValue(int index, char *values);
 char *setNthValue(int index, char *old_values, char *new_value);
 int deleteNthValueMulti(int index[], int count, char *value, char delimit);
-int getValueCount(char *values);
-void formDefineUtilities(void);
-int checkSemicolon(char *str);
-int getModIns(char *modname);
-int isInLan(char *radius_ip_addr);
 int getNthValueSafe(int index, char *value, char delimit, char *result, int len);
 int setTimer(int mili, void ((*sigroutine)(int)));
 void stopTimer(void);
@@ -62,5 +58,4 @@ char *racat(char *s, int i);
 void arplookup(char *ip, char *arp);
 void websLongWrite(webs_t wp, char *longstr);
 int netmask_aton(const char *ip);
-inline int getOnePortOnly(void);
 void STFs(int nvram, int index, char *flash_key, char *value);

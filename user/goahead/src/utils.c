@@ -44,6 +44,7 @@ static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int  getOnePortOnly(void);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
 static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
@@ -78,33 +79,6 @@ void arplookup(char *ip, char *arp)
     return;
 }
 
-
-/*
- * description: kill process whose pid was recorded in file
- *              (va is supported)
- */
-int doKillPid(char_t *fmt, ...)
-{
-	va_list		vargs;
-	char_t		*pid_fname = NULL;
-	struct stat	st;
-
-	va_start(vargs, fmt);
-	if (fmtValloc(&pid_fname, WEBS_BUFSIZE, fmt, vargs) >= WEBS_BUFSIZE) {
-		trace(0, T("doKillPid: lost data, buffer overflow\n"));
-	}
-	va_end(vargs);
-
-	if (pid_fname) {
-		if (-1 == stat(pid_fname, &st)) //check the file existence
-			return 0;
-		doSystem("kill `cat %s`", pid_fname);
-		doSystem("rm -f %s", pid_fname);
-		bfree(B_L, pid_fname);
-	}
-	return 0;
-}
-
 /*
  * description: parse va and do system
  */
@@ -126,37 +100,6 @@ int doSystem(char_t *fmt, ...)
 		bfree(B_L, cmd);
 	}
 	return rc;
-}
-
-/*
- * arguments: modname - module name
- * description: test the insertion of module through /proc/modules
- * return: -1 = fopen error, 1 = module inserted, 0 = not inserted yet
- */
-int getModIns(char *modname)
-{
-	FILE *fp;
-	char buf[128];
-	int i;
-
-	if (NULL == (fp = fopen("/proc/modules", "r"))) {
-		error(E_L, E_LOG, T("getModIns: open /proc/modules error"));
-		return -1;
-	}
-
-	while (NULL != fgets(buf, 128, fp)) {
-		i = 0;
-		while (!isspace(buf[i++]))
-			;
-		buf[i - 1] = '\0';
-		if (!strcmp(buf, modname)) {
-			fclose(fp);
-			return 1;
-		}
-	}
-	fclose(fp);
-	//error(E_L, E_LOG, T("getModIns: module %s not inserted"), modname);
-	return 0;
 }
 
 /*
@@ -230,24 +173,6 @@ char *setNthValue(int index, char *old_values, char *new_value)
 }
 
 /*
- * arguments: values - values delimited by semicolon
- * description: parse values delimited by semicolon, and return the number of
- *              values
- */
-int getValueCount(char *values)
-{
-	int cnt = 0;
-
-	if (NULL == values)
-		return 0;
-	while (*values++ != '\0') {
-		if (*values == ';')
-			++cnt;
-	}
-	return (cnt + 1);
-}
-
-/*
  * check the existence of semicolon in str
  */
 int checkSemicolon(char *str)
@@ -256,46 +181,6 @@ int checkSemicolon(char *str)
 	if (c)
 		return 1;
 	return 0;
-}
-
-/*
- * argument: ip address
- * return: 1 = the given ip address is within LAN's scope
- *         0 = otherwise
- */
-int isInLan(char *radius_ip_addr)
-{
-    char lan_if_addr[16];
-    char lan_if_netmask[16];
-
-    struct in_addr lan_ip;
-    struct in_addr lan_netmask;
-    struct in_addr radius_ip;
-
-    if ((getIfIp(getLanIfName(), lan_if_addr)) == -1) {
-        printf("getLanIP error\n");
-        return 0;
-    }
-    if ((getIfNetmask(getLanIfName(), lan_if_netmask)) == -1) {
-        printf("getLanNetmask error\n");
-        return 0;
-    }
-
-    inet_aton(lan_if_addr, &lan_ip);
-    inet_aton(lan_if_netmask, &lan_netmask);
-    inet_aton(radius_ip_addr, &radius_ip);
-
-    printf("lan_ip:%08x\n", lan_ip.s_addr);
-    printf("lan_netmask:%08x\n", lan_netmask.s_addr);
-    printf("radius_ip:%08x\n", radius_ip.s_addr);
-
-    if ((lan_ip.s_addr & lan_netmask.s_addr) == (radius_ip.s_addr & lan_netmask.s_addr) ){
-        printf("in Lan\n");
-        return 1;
-    } else {
-        printf("not in lan\n");
-        return 0;
-    }
 }
 
 /*
@@ -1076,7 +961,7 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-inline int getOnePortOnly(void)
+static int getOnePortOnly(void)
 {
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
 	return 0;
