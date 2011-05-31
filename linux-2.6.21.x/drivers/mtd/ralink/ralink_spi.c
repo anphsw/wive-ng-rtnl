@@ -515,9 +515,8 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 {
 	size_t readlen;
 
-	//printk("%s: from:%llx len:%x\n", __func__, from, len);
 	/* sanity checks */
-	if (len == 0)
+	if (!len)
 		return 0;
 
 	if (from + len > flash->mtd.size)
@@ -591,16 +590,16 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 	u32 page_offset, page_size;
 	int retval;
 
-	//printk("%s: to:%llx len:%x\n", __func__, to, len);
-	if (retlen)
-		*retlen = 0;
-
 	/* sanity checks */
 	if (!len)
 		return(0);
 
 	if (to + len > flash->mtd.size)
 		return -EINVAL;
+
+	/* Byte count starts at zero. */
+	if (retlen)
+		*retlen = 0;
 
   	down(&flash->lock);
 
