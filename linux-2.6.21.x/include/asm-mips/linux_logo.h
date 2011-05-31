@@ -20,7 +20,7 @@
 
 #include <linux/init.h>
 #include <linux/version.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 
 #ifndef CONFIG_DECSTATION
 #	include <asm/linux_logo_sgi.h>

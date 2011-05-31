@@ -227,7 +227,8 @@ struct ip_fw_masq;
 #define IP_FW_MODE_ACCT_OUT	0x02	/* accounting (outgoing) */
 #define IP_FW_MODE_CHK		0x04	/* check requested by user */
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
+
 #ifdef CONFIG_IP_FIREWALL
 extern struct ip_fw *ip_fw_in_chain;
 extern struct ip_fw *ip_fw_out_chain;

@@ -39,7 +39,7 @@
 #endif
 #include <linux/types.h>
 #include <linux/version.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/mtio.h>
 
 #define FT_SECTOR(x)		(x+1)	/* sector offset into real sector */

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
+#include <linux/config.h>
 
 struct mtd_info_user {
 	u_char type;

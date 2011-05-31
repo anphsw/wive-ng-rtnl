@@ -44,7 +44,7 @@
  *
  *****************************************************************************/
 #include <linux/version.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/init.h>

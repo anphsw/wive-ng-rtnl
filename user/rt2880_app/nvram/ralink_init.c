@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include "nvram.h"
+#include <linux/config.h>
 
-#include <linux/autoconf.h>
+#include "nvram.h"
 
 #define DEFAULT_FLASH_ZONE_NAME "2860"
 

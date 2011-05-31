@@ -36,7 +36,7 @@ const char *yaffs_fs_c_version =
 extern const char *yaffs_guts_c_version;
 
 #include <linux/version.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>

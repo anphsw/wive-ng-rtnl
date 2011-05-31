@@ -21,7 +21,7 @@
 #ifndef _ASM_GT64120_GT64120_H
 #define _ASM_GT64120_GT64120_H
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <asm/addrspace.h>
 #include <asm/byteorder.h>
 

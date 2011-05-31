@@ -1,7 +1,7 @@
 #ifndef _NVRAM_H
 #define _NVRAM_H 	1
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

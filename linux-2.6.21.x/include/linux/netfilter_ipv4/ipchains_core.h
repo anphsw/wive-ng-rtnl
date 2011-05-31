@@ -176,7 +176,7 @@ extern int ip_fw_masq_timeouts(void *, int);
 
 #ifdef __KERNEL__
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0)
 #include <linux/init.h>

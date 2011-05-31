@@ -27,7 +27,7 @@
 
 /* Linux kernel */
 #include <linux/version.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/sched.h>

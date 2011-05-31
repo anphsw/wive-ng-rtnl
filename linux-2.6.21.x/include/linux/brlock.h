@@ -28,7 +28,7 @@ enum brlock_indices {
 	__BR_END
 };
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 
 #ifdef CONFIG_SMP
 

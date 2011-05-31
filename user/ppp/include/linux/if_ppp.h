@@ -37,7 +37,7 @@
 
 #include <linux/compiler.h>
 #ifdef __KERNEL__
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #endif
 /*
  * Packet sizes

@@ -10,7 +10,7 @@
 #ifndef _LINUX_TPQIC02_H
 #define _LINUX_TPQIC02_H
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 
 #if CONFIG_QIC02_TAPE || CONFIG_QIC02_TAPE_MODULE
 

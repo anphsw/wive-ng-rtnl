@@ -1,7 +1,7 @@
 #ifndef _LOCKHELP_H
 #define _LOCKHELP_H
-#include <linux/autoconf.h>
 
+#include <linux/config.h>
 #include <linux/spinlock.h>
 #include <asm/atomic.h>
 #include <linux/interrupt.h>

@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include "nvram.h"
 
 #ifdef CONFIG_RALINK_GPIO

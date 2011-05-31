@@ -1,6 +1,6 @@
 #ifndef _LISTHELP_H
 #define _LISTHELP_H
-#include <linux/autoconf.h>
+#include <linux/config.h>
 #include <linux/list.h>
 
 /* Header to do more comprehensive job than linux/list.h; assume list
