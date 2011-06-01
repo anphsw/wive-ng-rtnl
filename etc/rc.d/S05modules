@@ -62,6 +62,13 @@ start() {
 	. /etc/scripts/web_wait.sh
 	web_wait
 
+	#this is orkaround for small memory devices 
+	#and prevent memory fragmentation before load 
+	#large ralink wifi drivers
+	echo 1 > /proc/sys/net/nf_conntrack_flush
+	ip route flush cache
+	drop_caches
+
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
 	getMacIf

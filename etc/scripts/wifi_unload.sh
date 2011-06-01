@@ -94,14 +94,6 @@ unload_apps()
     done
 }
 
-drop_caches(){                                                                                                                              
-    echo "Drop caches"                                                                                                                      
-    for i in `seq 3 0`; do                                                                                                                  
-        echo $i > /proc/sys/vm/drop_caches                                                                                                  
-    done                                                                                                                                    
-    sync                                                                                                                                    
-} 
-
 unload_apps
 
 is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
