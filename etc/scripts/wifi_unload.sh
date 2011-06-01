@@ -124,7 +124,7 @@ fi
 
 #This drop unneded caches to free more ram. 
 sysctl -w vm.min_free_kbytes=3192
-drop_caches
+drop_disk_caches
 sysctl -w vm.min_free_kbytes=1024
 
 echo "Wait 3 seconds."

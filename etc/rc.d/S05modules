@@ -67,7 +67,7 @@ start() {
 	#large ralink wifi drivers
 	echo 1 > /proc/sys/net/nf_conntrack_flush
 	ip route flush cache
-	drop_caches
+	drop_disk_caches
 
 	$LOG "Prepare wifi config..."
 	gen_wifi_config

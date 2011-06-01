@@ -254,7 +254,7 @@ zero_conf()
     fi
 }
 
-drop_caches(){
+drop_disk_caches(){
     echo "Drop caches"
     for i in `seq 3 0`; do
         echo $i > /proc/sys/vm/drop_caches
