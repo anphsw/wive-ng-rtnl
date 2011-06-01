@@ -545,11 +545,9 @@ int parse_mtd_partitions(struct mtd_info *master, const char **types,
 		if (!parser && !request_module("%s", *types))
 				parser = get_partition_parser(*types);
 #endif
-		if (!parser) {
-			printk(KERN_NOTICE "%s partition parsing not available\n",
-			       *types);
+		if (!parser)
 			continue;
-		}
+
 		ret = (*parser->parse_fn)(master, pparts, origin);
 		if (ret > 0) {
 			printk(KERN_NOTICE "%d %s partitions found on MTD device %s\n",
