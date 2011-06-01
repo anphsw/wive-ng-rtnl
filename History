@@ -431,6 +431,11 @@
 46) Rewrite routes webui for full support VPN and others.<br>
 47) Sync to busybox current tree.<br>
 48) Decrease HW_NAT foe table size for 3050F devices of 16Mb. Try fix ooom at RT3050F <32Mb RAM devices.<br>
+49) Some workarounds for save memory at 16Mb devives in init scripts.<br>
+50) MTD subsystem some fixes and more more backport from current vanilla kernel.<br>
+51) Flash API always use mtd char device.<br>
+52) ralink_spi.c Fix sanity checks on rw.<br>
+53) goahead code cleanup.<br>
 
 <br><br>
 <b>For support see:</b><br>

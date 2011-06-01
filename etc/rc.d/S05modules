@@ -62,7 +62,7 @@ start() {
 	. /etc/scripts/web_wait.sh
 	web_wait
 
-	#this is orkaround for small memory devices 
+	#this is workaround for small memory devices 
 	#and prevent memory fragmentation before load 
 	#large ralink wifi drivers
 	echo 1 > /proc/sys/net/nf_conntrack_flush
