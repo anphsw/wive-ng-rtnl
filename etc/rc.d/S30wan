@@ -41,7 +41,7 @@ start() {
 
     #drop adress from wan
     if [ "$opmode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
-	    $LOG "PURE PPPOE Mode. Do need start dhcpc or config wan!"
+	    $LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
 	    ip addr flush dev $wan_if
     fi
 
