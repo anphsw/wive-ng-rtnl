@@ -146,7 +146,7 @@ static inline char *portspeed (int portstatus)
 #endif
 
 /* Note that hdev or one of its children must be locked! */
-static struct usb_hub *hdev_to_hub(struct usb_device *hdev
+static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 {
 	if (!hdev || !hdev->actconfig)
 		return NULL;
