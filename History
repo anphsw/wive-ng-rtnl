@@ -381,7 +381,7 @@
 25) Boot speedup and save memory at first stage.<br>
 26) Fix SoftwareFastpath not enable in Complex offload mode. Is regression.<br>
 
-<br>
+<br>         
 <b>1.7.x</b><br>
 1) Add initial RT3662/RT3883 + RT309x support.<br>
 2) Wi-Fi coexistence now disable per default. (variable HT_BSSCoexistence 0/1<br>
@@ -436,6 +436,8 @@
 51) Flash API always use mtd char device.<br>
 52) ralink_spi.c Fix sanity checks on rw.<br>
 53) goahead code cleanup.<br>
+54) Filter all unused CONFIGS options from kernel config on create images. Is speed up boot and save mem.<br>
+55) More usb support fixes and optiomizations.<br>
 
 <br><br>
 <b>For support see:</b><br>
