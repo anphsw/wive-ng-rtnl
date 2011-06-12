@@ -47,11 +47,9 @@ LINUX_CONFIG	= $(ROOTDIR)/$(LINUXDIR)/.config
 CONFIG_CONFIG	= $(ROOTDIR)/config/.config
 MODULES_CONFIG	= $(ROOTDIR)/modules/.config
 
-
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	= 1
 HOST_NCPU	= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
-
 
 BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
 
@@ -285,8 +283,6 @@ romfs.subdirs:
 .PHONY: romfs.post
 romfs.post:
 	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
-	cat $(ROOTDIR)/$(LINUXDIR)/.config | grep -v "not set" | grep "CONFIG" > $(ROOTDIR)/etc/scripts/config.sh
-	chmod 777 $(ROOTDIR)/etc/scripts/config.sh
 	cd $(ROOTDIR)
 	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
 	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS

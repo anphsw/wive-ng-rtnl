@@ -7,6 +7,21 @@ OBJCOPY="$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded"
 SSTRIP=./tools/sstrip/sstrip
 MODULES=`find romfs/lib/modules -type f | grep ".ko"`;
 
+echo --------------------------------GENERATE CONFIG-----------------------------
+. linux/.config
+[ ! -f $RO_ROOT/etc/scripts/config.sh ] || rm -f $RO_ROOT/etc/scripts/config.sh
+touch $RO_ROOT/etc/scripts/config.sh
+echo "Search parameters used"
+PARAMS=`find $RO_ROOT/etc -type f -print -exec cat {} \; | awk -v RS='"' '!(NR%2)' | sed '/$CONFIG_/!d; s///' | sort | uniq`
+for i in $PARAMS; do
+    var=$(eval "echo \$CONFIG_$i")
+    if [ $var ]; then
+	echo "Found CONFIG_$i"
+	echo "CONFIG_$i=$var" >> $RO_ROOT/etc/scripts/config.sh
+    fi
+done
+chmod 777 $RO_ROOT/etc/scripts/config.sh
+
 echo --------------------------------STRIP AND SSTRIP-----------------------------
 echo "FIND FILES TO STRIP"
 NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep -v "modules" | grep -v "icon" | grep -v "start" | grep -v "rc" | grep -v ".sh" | cut -d":" -f1`
