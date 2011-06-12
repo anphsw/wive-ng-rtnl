@@ -41,6 +41,8 @@
 #include <linux/usb.h>
 #include <linux/usb/serial.h>
 
+#define HAS_HUAWEI_3G_DEVICES
+
 /* Function prototypes */
 static int  option_open(struct usb_serial_port *port, struct file *filp);
 static void option_close(struct usb_serial_port *port, struct file *filp);
@@ -1540,7 +1542,8 @@ static int option_send_setup(struct usb_serial_port *port)
 
 	return 0;
 }
-#if HAS_HUAWEI_3G_DEVICES
+
+#ifdef HAS_HUAWEI_3G_DEVICES
 static void option_start_huawei(struct usb_serial *serial)
 {
        struct usb_device *dev = serial->dev;
@@ -1582,7 +1585,7 @@ static int option_startup(struct usb_serial *serial)
 
 	dbg("%s", __func__);
 
-#if HAS_HUAWEI_3G_DEVICES
+#ifdef HAS_HUAWEI_3G_DEVICES
     option_start_huawei(serial);
 #endif
 
