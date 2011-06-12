@@ -309,17 +309,17 @@ void ConverterStringToDisplay(char *str)
 
 unsigned int ConvertRssiToSignalQuality(long RSSI)
 {
-    unsigned int signal_quality;
-    if (RSSI >= -50)
-        signal_quality = 100;
-    else if (RSSI >= -80)    // between -50 ~ -80dbm
-        signal_quality = (unsigned int)(24 + (RSSI + 80) * 2.6);
-    else if (RSSI >= -90)   // between -80 ~ -90dbm
-        signal_quality = (unsigned int)((RSSI + 90) * 2.6);
-    else    // < -84 dbm
-        signal_quality = 0;
+	unsigned int signal_quality;
+	if (RSSI >= -50)
+		signal_quality = 100;
+	else if (RSSI >= -80)    // between -50 ~ -80dbm
+		signal_quality = (unsigned int)(24 + (RSSI + 80) * 2.6);
+	else if (RSSI >= -90)   // between -80 ~ -90dbm
+		signal_quality = (unsigned int)((RSSI + 90) * 2.6);
+	else    // < -84 dbm
+		signal_quality = 0;
 
-    return signal_quality;
+	return signal_quality;
 }
 
 /*
@@ -368,7 +368,7 @@ static int getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int                         s, ret, retry=1;
+	int                         s, ret, retry=1, rowcount=0;
 	unsigned int                lBufLen = 4096, we_version=16; // 64K
 	PNDIS_802_11_BSSID_LIST_EX	pBssidList;
 	PNDIS_WLAN_BSSID_EX  		pBssid;
@@ -382,7 +382,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	memset(pBssidList, 0x00, sizeof(char)*65536*2);
 
 	//step 1
-	while(ConnectStatus != NdisMediaStateConnected && QueryCount < 3)
+	while ((ConnectStatus != NdisMediaStateConnected) && (QueryCount < 3))
 	{
 		if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0)
 		{
@@ -404,7 +404,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	if (ConnectStatus == NdisMediaStateConnected && G_bRadio)
+	if ((ConnectStatus == NdisMediaStateConnected) && G_bRadio)
 	{
 		memset(&BssidQuery, 0x00, sizeof(BssidQuery));
 		OidQueryInformation(OID_802_11_BSSID, s, "ra0", &BssidQuery, sizeof(BssidQuery));
@@ -468,7 +468,9 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				retry++;
 				// fprintf(stderr,"lBufLen=%d\n",lBufLen);
 				continue;
-			} else {
+			}
+			else
+			{
 				websError(wp, 500, "Query OID_802_11_BSSID_LIST error! E2BIG");
 				free(pBssidList);
 				close(s);
@@ -486,30 +488,30 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 		switch(errno)
 		{
 			case EAGAIN:
-					do {
-						sleep(1);
-						ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-						retry++;
-					} while((errno == EAGAIN) && (ret < 0) && (retry < 5));
-					break;
+				do {
+					sleep(1);
+					ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
+					retry++;
+				} while((errno == EAGAIN) && (ret < 0) && (retry < 5));
+				break;
 
 			case E2BIG:
-					do {
-						lBufLen = lBufLen + 4096*retry;
-						free(pBssidList);
-						pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(lBufLen);
-						ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-						t++;
-					} while((errno == E2BIG) && (ret <0) && (retry < 10));
+				do {
+					lBufLen = lBufLen + 4096*retry;
+					free(pBssidList);
+					pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(lBufLen);
+					ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
+					t++;
+				} while((errno == E2BIG) && (ret <0) && (retry < 10));
 			default:
-					if (ret < 0) {
-						websError(wp, 500, "Query OID_802_11_BSSID_LIST error! return=%d", ret);
-						free(pBssidList);
-						close(s);
-						return;
-					}
-					else
-						break;
+				if (ret < 0) {
+					websError(wp, 500, "Query OID_802_11_BSSID_LIST error! return=%d", ret);
+					free(pBssidList);
+					close(s);
+					return;
+				}
+				else
+					break;
 		}
 #endif
 	}
@@ -522,12 +524,9 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	else
 	{
-		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID], tmpRSSI[16], tmpChannel[16], tmpAuth[32], tmpEncry[20], tmpNetworkType[24];
+		unsigned char tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID], tmpRSSI[16], tmpAuth[32], tmpEncry[20], tmpNetworkType[24];
 		unsigned char tmpSSIDII[NDIS_802_11_LENGTH_SSID+1];
-		/*
-		unsigned char tmpRadio[188], tmpBSSIDII[16], tmpBSSID[28], tmpSSID[64+NDIS_802_11_LENGTH_SSID*4], tmpRSSI[60], tmpChannel[16], tmpAuth[32], tmpEncry[52], tmpNetworkType[24];
-		unsigned char tmpSSIDII[(NDIS_802_11_LENGTH_SSID+1)*4];
-		*/
+
 		int i=0, j=0;
 		unsigned int nSigQua;
 		int nChannel = 1;
@@ -535,27 +534,18 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 
 		pBssid = (PNDIS_WLAN_BSSID_EX) pBssidList->Bssid;
 		G_ConnectStatus = NdisMediaStateDisconnected;
+
 		for (i = 0; i < pBssidList->NumberOfItems; i++)
 		{
 			memset(radiocheck, 0x00, sizeof(radiocheck));
-			memset(tmpRadio, 0x00, sizeof(tmpRadio));
 			memset(tmpBSSID, 0x00, sizeof(tmpBSSID));
 			memset(tmpRSSI, 0x00, sizeof(tmpRSSI));
 			memset(tmpSSID, 0x00, sizeof(tmpSSID));
-			memset(tmpChannel, 0x00, sizeof(tmpChannel));
 			memset(tmpAuth, 0x00, sizeof(tmpAuth));
 			memset(tmpEncry, 0x00, sizeof(tmpEncry));
 			memset(tmpNetworkType, 0x00, sizeof(tmpNetworkType));
 			memset(tmpBSSIDII, 0x00, sizeof(tmpBSSIDII));
 			memset(tmpSSIDII, 0x00, sizeof(tmpSSIDII));
-
-			// compare BSSID with connected bssid
-			char *hsStyle=(memcmp(BssidQuery, pBssid->MacAddress, 6) == 0) ?
-				" style=\"color: #ffffff; background-color: #008000;\"" : "";
-/*			if (memcmp(BssidQuery, pBssid->MacAddress, 6) == 0)
-				sprintf((char *)tmpImg, "<img src=\"/graphics/handshake.gif\"> ");
-			else
-				sprintf((char *)tmpImg, " ");*/
 
 			if (strcmp((char *)pBssid->Ssid.Ssid, "") == 0)
 				sprintf((char *)tmpSSID, "&nbsp;");
@@ -596,7 +586,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			if (nChannel == -1)
 				continue;
 
-			sprintf((char *)tmpChannel, "%u", nChannel);
 			if (pBssid->InfrastructureMode == Ndis802_11Infrastructure)
 				sprintf((char *)tmpNetworkType, "%s", "Infrastructure");
 			else
@@ -852,17 +841,20 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			else
 				strcpy(radiocheck, "");
 
-			sprintf((char *)tmpRadio, "<input type=\"radio\" name=\"selectedSSID\" %s onClick=\"selectedSSIDChange('%s','%s',%d,%d,'%s','%s')\">", radiocheck, tmpSSIDII, tmpBSSIDII, pBssid->InfrastructureMode, nChannel, strEncry, strAuth);
-			websWrite(wp, "<tr%s><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td><td%s>%s</td></tr>\n",
-				hsStyle,
-				hsStyle, tmpRadio,
-				hsStyle, tmpSSID,
-				hsStyle, tmpBSSID,
-				hsStyle, tmpRSSI,
-				hsStyle, tmpChannel,
-				hsStyle, tmpEncry,
-				hsStyle, tmpAuth,
-				hsStyle, tmpNetworkType);
+			websWrite(wp, "%s\n[ %d, '%s', '%s', %d, '%s', %u, '%s', '%s', '%s', %d ]", 
+				((rowcount++) == 0) ? "" : ",", 
+				(memcmp(BssidQuery, pBssid->MacAddress, 6) == 0) ? 1 : 0,
+				tmpSSID,
+				tmpBSSID,
+				pBssid->Rssi,
+				tmpRSSI,
+				nChannel,
+				tmpEncry,
+				tmpAuth,
+				tmpNetworkType,
+				pBssid->InfrastructureMode
+			);
+			
 			pBssid = (PNDIS_WLAN_BSSID_EX)((char *)pBssid + pBssid->Length);
 		}
 	}
@@ -3216,6 +3208,10 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 			case Ndis802_11AuthModeWPA: auth_mode = "WPA"; break;
 			case Ndis802_11AuthModeWPA2: auth_mode = "WPA2"; break;
 			case Ndis802_11AuthModeMax: auth_mode = "OPEN"; break;
+			case Ndis802_11AuthModeAutoSwitch: auth_mode = "AUTO"; break;
+			case Ndis802_11AuthModeWPA1WPA2: auth_mode = "WPA, WPA2"; break;
+			case Ndis802_11AuthModeWPA1PSKWPA2PSK: auth_mode = "WPA-PSK, WPA2-PSK"; break;
+			default: auth_mode = "unknown";
 		}
 
 		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, auth_mode);
@@ -3228,6 +3224,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 			case Ndis802_11WEPDisabled: encryption = "NONE"; break;
 			case Ndis802_11Encryption2Enabled: encryption = "TKIP"; break;
 			case Ndis802_11Encryption3Enabled: encryption = "AES"; break;
+			default: encryption="unknown";
 		}
 		
 		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, encryption);
@@ -4872,21 +4869,23 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	strcpy((char *)selectedProfileSetting->Key4, value);
 
 	value = websGetVar(wp, T("wep_key_entry_method"), T(""));
-	if (strcmp(value, "") != 0) {
+	if (strcmp(value, "") != 0)
+	{
 		selectedProfileSetting->Key1Type =
-			selectedProfileSetting->Key1Type =
-			selectedProfileSetting->Key1Type =
-			selectedProfileSetting->Key1Type =
-			atoi(value);
+		selectedProfileSetting->Key2Type =
+		selectedProfileSetting->Key3Type =
+		selectedProfileSetting->Key4Type =
+		atoi(value);
 	}
 
 	value = websGetVar(wp, T("wep_key_length"), T(""));
-	if (strcmp(value, "") != 0) {
+	if (strcmp(value, "") != 0)
+	{
 		selectedProfileSetting->Key1Length =
-			selectedProfileSetting->Key2Length =
-			selectedProfileSetting->Key3Length =
-			selectedProfileSetting->Key4Length =
-			atoi(value);
+		selectedProfileSetting->Key2Length =
+		selectedProfileSetting->Key3Length =
+		selectedProfileSetting->Key4Length =
+		atoi(value);
 	}
 
 	value = websGetVar(wp, T("wep_default_key"), T(""));

@@ -81,7 +81,7 @@ function onInit()
 
 	// Dynamic routing
 	dform.RIPSelect.selectedIndex = (rip_ena == '1') ? 1 : 0;
-	displayElement('dynamicRoutingDiv', dr_built);
+	displayElement('dynamicRoutingDiv', dr_built == '1');
 
 	genRoutingTable();
 }
@@ -300,7 +300,7 @@ function formRoutingTable(form)
 </p>
 </form>
 
-<div id="dynamicRoutingDiv">
+<div id="dynamicRoutingDiv" style="display:none;">
 <h1 id="dynamicRoutingTitle">Dynamic Routing Settings</h1>
 <form method="post" name="dynamicRouting" action="/goform/dynamicRouting">
 <table width="400" border="1" cellpadding="2" cellspacing="1">
