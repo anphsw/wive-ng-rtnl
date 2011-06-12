@@ -8,14 +8,12 @@ start() {
 
     $LOG "Tune network stack and memory usadge fo small memory devices"
     MINPORT=3072
-    if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
-        #>16mb
+    if [ -f /tmp/is_32ram_dev ]; then
         CONNTRACK_MAX=4096
         let "HASHSIZE=$CONNTRACK_MAX/2"
         let "ROUTEMAX=$CONNTRACK_MAX*4"
 	sysctl -w vm.min_free_kbytes=2304
     else
-        #=16mb
         CONNTRACK_MAX=800
         let "HASHSIZE=$CONNTRACK_MAX/8"
         let "ROUTEMAX=$CONNTRACK_MAX"

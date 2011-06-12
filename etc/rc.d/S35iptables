@@ -298,7 +298,6 @@ start() {
 
 
 stop() {
-	touch /var/run/iptables_work
 	iptables -F > /dev/null 2>&1
 	iptables -t nat -F > /dev/null 2>&1
         iptables -t filter -F > /dev/null 2>&1

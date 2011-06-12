@@ -91,5 +91,13 @@ $LOG "Umount /tmp/rootfs"
 umount /tmp/rootfs
 rm -rf /tmp/rootfs
 
+if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+#>16mb
+    touch /tmp/is_32ram_dev
+else
+#<=16mb
+    touch /tmp/is_16ram_dev
+fi
+
 $LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &
