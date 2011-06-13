@@ -46,7 +46,7 @@ int rdm_release(struct inode *inode, struct file *filp)
 
 
 int rdm_ioctl (struct inode *inode, struct file *filp,
-                     unsigned int cmd, unsigned long arg)
+                     unsigned int cmd, unsigned long *arg)
 {
 	unsigned int rtvalue, baseaddr, offset;
 	unsigned int addr=0,count=0;
@@ -55,14 +55,14 @@ int rdm_ioctl (struct inode *inode, struct file *filp,
 	baseaddr = register_control;
 	if (cmd == RT_RDM_CMD_SHOW)
 	{
-		rtvalue = le32_to_cpu(*(volatile u32 *)(baseaddr + arg));
+		rtvalue = le32_to_cpu(*(volatile u32 *)(baseaddr + (*(int *)arg)));
 		printk("0x%x\n", (int)rtvalue);
 	}
 	else if (cmd == RT_RDM_CMD_DUMP) 
 	{
 
 	        for (count=0; count < RT_RDM_DUMP_RANGE ; count++) {
-		    addr = baseaddr + arg + (count*16);
+		    addr = baseaddr + (*(int *)arg) + (count*16);
 		    printk("%08X: ", addr);
 		    printk("%08X %08X %08X %08X\n", 
 			        le32_to_cpu(*(volatile u32 *)(addr)),
@@ -94,15 +94,15 @@ int rdm_ioctl (struct inode *inode, struct file *filp,
 	}
 	else if (cmd == RT_RDM_CMD_SET_BASE)
 	{
-		register_control = arg;
+		register_control = (*(int *)arg);
 		printk("switch register base addr to 0x%08x\n", register_control);
 	}
 	else //RT_RDM_CMD_WRITE or RT_RDM_CMD_WRITE_SILENT
 	{
 		offset = cmd >> 16;
-		*(volatile u32 *)(baseaddr + offset) = cpu_to_le32(arg);
+		*(volatile u32 *)(baseaddr + offset) = cpu_to_le32((*(int *)arg));
 		if ((cmd & 0xffff) == RT_RDM_CMD_WRITE)
-			printk("write offset 0x%x, value 0x%x\n", offset, (unsigned int)arg);
+			printk("write offset 0x%x, value 0x%x\n", offset, (unsigned int)(*(int *)arg));
 	}
 
 	return 0;
