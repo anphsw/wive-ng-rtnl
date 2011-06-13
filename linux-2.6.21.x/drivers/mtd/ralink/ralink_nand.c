@@ -1735,7 +1735,6 @@ int __devinit ra_nand_init(void)
 {
 	struct ra_nand_chip *ra;
 	int alloc_size, bbt_size, buffers_size;
-	unsigned i;
 #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	loff_t offs;
 	struct __image_header {
