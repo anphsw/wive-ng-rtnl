@@ -842,9 +842,16 @@ int nfc_write_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 
 	if (flags & FLAG_VERIFY) { // verify and correct ecc
 		status = nfc_ecc_verify(ra, buf, page, FL_WRITING);
-	
 		if (status != 0) {
 			printk("%s: ecc_verify fail: ret:%x \n", __func__, status);
+			oob[ra->badblockpos] = 0x33;
+			page -= page % (CFG_BLOCKSIZE/pagesize);
+			printk("create a bad block at page %x\n", page);
+			status = nfc_write_oob(ra, page, ra->badblockpos, oob+ra->badblockpos, 1, flags);
+			if (status == 0)
+				printk("bad block acknowledged, please write again\n");
+			else
+				printk("failed to create a bad block\n");
 			return -EBADMSG;
 		}
 	}
@@ -1102,9 +1109,7 @@ int nand_erase_nand(struct ra_nand_chip *ra, struct erase_info *instr)
 			goto erase_exit;
 		}
 
-		/*
-		 * heck if we have a bad block, we do not erase bad blocks !
-		 */
+		/* if we have a bad block, we do not erase bad blocks */
 		if (nand_block_checkbad(ra, addr)) {
 			printk(KERN_WARNING "nand_erase: attempt to erase a "
 			       "bad block at 0x%08x\n", addr);
@@ -1834,7 +1839,8 @@ int __devinit ra_nand_init(void)
 
 #if defined (CONFIG_RT2880_ROOTFS_IN_FLASH) && defined (CONFIG_ROOTFS_IN_FLASH_NO_PADDING)
 	offs = MTD_BOOT_PART_SIZE + MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE;
-	ramtd_nand_read(ranfc_mtd, offs, sizeof(hdr), (size_t *)&i, (u_char *)(&hdr));
+	ramtd_nand_read(ranfc_mtd, offs, sizeof(hdr), (size_t *)&alloc_size, (u_char *)(&hdr));
+	//warning: reuse alloc_size for dummy returning length
 	if (hdr.ih_ksz != 0) {
 		rt2880_partitions[3].size = ntohl(hdr.ih_ksz);
 		rt2880_partitions[4].size = IMAGE1_SIZE - (MTD_BOOT_PART_SIZE +
