@@ -88,7 +88,19 @@ void SetWdgTimerEbl(unsigned int timer, unsigned int ebl)
             result &= ~(0x1<<21);
         }
 
-        sysRegWrite(SYSCFG1,result);
+        sysRegWrite(GPIOMODE,result);
+    }
+#elif defined (CONFIG_RALINK_RT5350)
+    if(timer==TMR1CTL) {
+        result=sysRegRead(GPIOMODE);
+
+        if(ebl==1){
+            result |= (0x1<<21); /* SPI_CS1 as watch dog reset */
+        }else {
+            result &= ~(0x1<<21);
+        }
+
+        sysRegWrite(GPIOMODE,result);
     }
 #endif
 #endif
