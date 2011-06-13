@@ -152,6 +152,15 @@ struct htb_class {
 				/* of un.leaf originals should be done. */
 };
 
+static inline long calc(int rate, int size)
+{
+	unsigned long long result = 1099511627776ULL;	/* 0x10000000000 */
+	do_div(result, rate);
+	result = result * size;
+	result = result >> 20;							/* div by 0x100000000000*/
+	return (long)result;
+}
+
 /* TODO: maybe compute rate when size is too large .. or drop ? */
 static inline long L2T(struct htb_class *cl, struct qdisc_rate_table *rate,
 			   int size)
@@ -160,6 +169,7 @@ static inline long L2T(struct htb_class *cl, struct qdisc_rate_table *rate,
 	if (slot > 255) {
 		cl->xstats.giants++;
 		slot = 255;
+		return calc(rate->rate.rate, size);
 	}
 	return rate->data[slot];
 }
