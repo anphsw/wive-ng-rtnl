@@ -35,7 +35,7 @@
 #define CONFIG_RT2880_ETH		1	/* Enable built-in 10/100 Ethernet */
 #define CONFIG_MIPS32		1	/* MIPS 4Kc CPU core	*/
 //CONFIG_INCA_IP
-#if defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || defined (RT2883_FPGA_BOARD) || defined (RT3883_FPGA_BOARD) 
+#if defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || defined (RT2883_FPGA_BOARD) || defined (RT3883_FPGA_BOARD)  || defined (RT5350_FPGA_BOARD)
 #define FPGA_BOARD_CLOCK_RATE 40000000
 #else
 #define FPGA_BOARD_CLOCK_RATE 25000000
@@ -119,6 +119,8 @@
 #define	CFG_PROMPT		"RT3352 # "
 #elif defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) 
 #define	CFG_PROMPT		"RT3883 # "
+#elif defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD) 
+#define	CFG_PROMPT		"RT5350 # "
 #else
 #define	CFG_PROMPT		"RTxxxx # "
 #endif
@@ -126,7 +128,7 @@
 #define	CFG_PBSIZE (CFG_CBSIZE+sizeof(CFG_PROMPT)+16)  /* Print Buffer Size */
 #define	CFG_MAXARGS		16		/* max number of command args*/
 
-#define CFG_MALLOC_LEN		128*1024
+#define CFG_MALLOC_LEN		256*1024
 
 #define CFG_BOOTPARAMS_LEN	128*1024
 
@@ -208,7 +210,8 @@
 #endif
 #elif defined (RT2883_FPGA_BOARD) || defined (RT2883_ASIC_BOARD) || \
       defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) || \
-      defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+      defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+      defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 #define PHYS_FLASH_START	0xBC000000 /* Flash Bank #2 */
 #define PHYS_FLASH_1		0xBC000000 /* Flash Bank #1 */
   #ifdef DUAL_IMAGE_SUPPORT
@@ -365,7 +368,7 @@
 #define RT2880_REG_PIODATA      (RT2880_PRGIO_ADDR + 0x20)
 #define RT2880_REG_PIODIR       (RT2880_PRGIO_ADDR + 0x24)
 
-#define RT2882_REG(x)		(*((volatile u32 *)(x)))	
+#define RALINK_REG(x)		(*((volatile u32 *)(x)))	
 
 #define RT2880_WDRST            (1<<1)
 #define RT2880_SWSYSRST         (1<<2)

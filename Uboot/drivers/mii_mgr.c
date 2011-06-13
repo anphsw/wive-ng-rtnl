@@ -8,7 +8,8 @@
 #define inw(address)            le32_to_cpu(*(volatile u32 *)(address))
 
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 #define PHY_CONTROL_0 		0xC0   
 #define PHY_CONTROL_1 		0xC4   
 #define MDIO_PHY_CONTROL_0	(RALINK_ETH_SW_BASE + PHY_CONTROL_0)
@@ -27,7 +28,8 @@
 #endif
 
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 void enable_mdio(int enable)
 {
 #if !defined (P5_MAC_TO_PHY_MODE)
@@ -56,7 +58,8 @@ u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data)
 	while(1)
 	{
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		// rd_rdy: read operation is complete
 		if(!( inw(MDIO_PHY_CONTROL_1) & (0x1 << 1))) 
 #else
@@ -73,7 +76,8 @@ u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data)
 	}
 	
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 	outw(MDIO_PHY_CONTROL_0 , (1<<14) | (phy_register << 8) | (phy_addr));
 #else
 	data  = (phy_addr << 24) | (phy_register << 16);
@@ -89,7 +93,8 @@ u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data)
 	while(1)
 	{
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		if( inw(MDIO_PHY_CONTROL_1) & (0x1 << 1))
 		{
 			status = inw(MDIO_PHY_CONTROL_1);
@@ -129,7 +134,8 @@ u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data)
 	while(1)
 	{
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		if(!( inw(MDIO_PHY_CONTROL_1) & (0x1 << 0)))
 #else
 		if (!( inw(MDIO_PHY_CONTROL_0) & (0x1 << 31))) 
@@ -146,7 +152,8 @@ u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data)
 	}
 
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 	data = ((write_data & 0xFFFF)<<16);
 	data |=  (phy_register << 8) | (phy_addr);
 	data |=  (1<<13);
@@ -165,7 +172,8 @@ u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data)
 	while(1)
 	{
 #if defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
-    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+    defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		if( inw(MDIO_PHY_CONTROL_1) & (0x1 << 0)) //wt_done ?= 1
 #else
 		if(!( inw(MDIO_PHY_CONTROL_0) & (0x1 << 31))) // 0 : Read/write operation complete

@@ -146,8 +146,12 @@ static inline void spi_chip_select(u8 enable)
 static void spi_master_init(void)
 {
 	/* try to reset again from Reset Control Register */
-	RT2880_REG(RT2880_RSTCTRL_REG) = RSTCTRL_SPI_RESET;
-	RT2880_REG(RT2880_RSTCTRL_REG) = 0;
+	u32 val = RT2880_REG(RT2880_RSTCTRL_REG);
+	val |= RSTCTRL_SPI_RESET;
+	RT2880_REG(RT2880_RSTCTRL_REG) = val;
+
+	val = val & ~(RSTCTRL_SPI_RESET);
+	RT2880_REG(RT2880_RSTCTRL_REG) = val;
 	udelay(500);
 
 	RT2880_REG(RT2880_SPICFG_REG) = SPICFG_MSBFIRST | 

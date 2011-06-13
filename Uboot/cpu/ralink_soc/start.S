@@ -34,7 +34,6 @@
 #define SDRAM_CFG1_SDRAM_INIT_START ( 1 << 31)
 #define SDRAM_CFG1_SDRAM_INIT_DONE ( 1 << 30)
 
-
 #define RVECENT(f,n) \
    b f; nop
 #define XVECENT(f,bev) \
@@ -216,6 +215,7 @@ reset:
 #if defined (RT2883_FPGA_BOARD) || defined (RT2883_ASIC_BOARD) || \
     defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
     defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD) || \
     defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD)
 	# Initialize the register file
 	# should not be required with good software practices
@@ -502,7 +502,6 @@ reset:
 15:
 
 #endif	
-
 #if defined(RT3350_ASIC_BOARD) 
 	// force SDRAM_MD_DRV and SDRAM_MA_DRV from 8mA --> 4mA
         li      t0, RALINK_SYSCTL_BASE + 0x10
@@ -566,6 +565,27 @@ DDR_READY:
 #endif
 	sw t2, 0(t1)
 	nop
+
+#ifdef RALINK_DDR_OPTIMIZATION
+	/* DDR: set Burst Length=4 in 32 bits dram bus for better performance
+	 *          Burst Length=8 in non 32 bits dram bus
+	 */
+	li	t0, RALINK_MEMCTRL_BASE + 0x48
+	lw	t1, 0(t0)
+	nop
+	and	t1, 0xffffff88
+	or	t1, (CAS_VALUE<<CAS_OFFSET)
+	or	t1, (BL_VALUE<<BL_OFFSET)
+	sw	t1, 0(t0)
+        nop
+
+	li	t0, RALINK_MEMCTRL_BASE + 0x4c
+	lw	t1, 0(t0)
+	nop
+	and	t1, 0xffffffc7
+	or	t1, (AdditiveLatency_VALUE<<AdditiveLatency_OFFSET)
+	sw	t1, 0(t0)
+#endif
 
 #if defined (RT3352_FPGA_BOARD) || defined (RT3883_FPGA_BOARD)
 	/* DDR initialization: DDR_CFG0 bit 12:0 (refresh interval) to 0x64
@@ -637,7 +657,7 @@ SDR_INIT:
 	lw t6, 0(t5)
 	nop
 	and t6, 0xF0000000
-#if defined (RT2880_FPGA_BOARD) || defined (RT2883_FPGA_BOARD) || defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || defined (RT3883_FPGA_BOARD)
+#ifdef FPGA_BOARD
 #ifdef RT2880_FPGA_BOARD
 #ifdef RT2880_MP
 	nop
@@ -648,13 +668,13 @@ SDR_INIT:
 	or t6, 0x91825282
 	//or t6, 0x91815282
 #endif
-#else //2883, 3052, 3352, 3883 fpga
+#else //2883, 3052, 3352, 3883, 5350 fpga
 	nop
-	or t6, 0xD1825282
+	or t6, 0xD1825272
 	//or t6, 0x01815282
 	nop	
 #endif
-#else //RT2880_ASIC_BOARD, RT2883_ASIC_BOARD, RT3052_ASIC_BOARD, RT3352_ASIC_BOARD
+#else //ASIC_BOARD
 	or t6, 0xD1825272
 #endif
 	nop
@@ -663,7 +683,7 @@ SDR_INIT:
 
 
 	li t5, SDRAM_CFG1_REG
-#if defined (RT2880_ASIC_BOARD) || defined (RT2883_ASIC_BOARD) || defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD) || defined (RT3883_ASIC_BOARD)
+#ifdef ASIC_BOARD
 /*
  *	Turn on SDRAM RBC (BIT 29 in SDRAM_CFG1, offset 0x4) in RT3052.
  *	  RT2880 RBC bit is Reserved bit, and change the same value for RT2880 and RT3052
@@ -675,7 +695,7 @@ SDR_INIT:
 #elif defined (ON_BOARD_128M_DRAM_COMPONENT)
 	li t6, 0xa1110600
 #elif defined (ON_BOARD_256M_DRAM_COMPONENT)
-	li t6, 0xa1120600
+	li t6, 0xa1120300
 #elif defined (ON_BOARD_512M_DRAM_COMPONENT)
 	li t6, 0xa1220600
 #elif defined (ON_BOARD_DDR)
@@ -696,7 +716,7 @@ SDR_INIT:
 #elif defined (ON_BOARD_128M_DRAM_COMPONENT)
 	li t6, 0xa1110096
 #elif defined (ON_BOARD_256M_DRAM_COMPONENT)
-	li t6, 0xa1120096
+	li t6, 0xa112004B
 #elif defined (ON_BOARD_512M_DRAM_COMPONENT)
 	li t6, 0xa1220096
 #else
@@ -711,6 +731,8 @@ SDR_INIT:
 	DRAM bus not defined
 #endif
 #endif
+
+
 
 DO_SDRINIT:
 	nop
@@ -727,22 +749,73 @@ WAIT_SDRAM_INIT_DOWN:
 SDRAM_INIT_DOWN:
 #endif
 
+#if 1
+#ifdef RT3352_ASIC_BOARD
+	/* set LDODIG 1.24V */
+
+            li t1, RALINK_SYSCTL_BASE + 0x8c
+	    li t2, 0x9B82
+	    sw t2, 0(t1)
+            nop
+#endif /* RT3352_ASIC_BOARD */
+#endif
+
+#if 1
+#ifdef RT3352_ASIC_BOARD
+	/* adjust the SW reg voltage level higher */
+
+            li t1, RALINK_SYSCTL_BASE + 0x88
+	    li t2, 0xECC340
+	    sw t2, 0(t1)
+            nop
+#endif /* RT3352_ASIC_BOARD */
+#endif
+
 #ifdef RT3352_ASIC_BOARD
 #ifdef ON_BOARD_DDR
+#if 0
 	/* DDR initialization:
 	 *   fpga: reg DDR_CFG3 -- disable DLL
 	 *   asic: reg DDR_CFG3 -- ODT disabled (bit 6,2)
 	 */
-	    li t1, RALINK_MEMCTRL_BASE + 0x4c
-	    lw t2, 0(t1)
-            and t2, ~(1<<6)
-	    sw t2, 0(t1)
-            nop
+	li t1, RALINK_MEMCTRL_BASE + 0x4c
+	lw t2, 0(t1)
+	and t2, ~(1<<6)
+	sw t2, 0(t1)
+	nop
+#endif
+#if 0
+	/*
+	 * DDR_PAD_DRV_1=00 (full drive)
+	 * DDR_PAD_DS=0 (DDR2 differential RX application)
+	 * DDR_PAD_LVCMO=0 (DDR default)
+	 * DDR_PAD_DRV_0=00 (full drive)
+	 */
+	li t1, RALINK_SYSCTL_BASE + 0x14
+	and t2, ~(0x33F00000) 
+	sw t2, 0(t1)
+	nop
+#endif
 #endif /* ON_BOARD_DDR */
 #endif /* RT3352_ASIC_BOARD */
 
-#if defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD)
+#if 0 //SSC value is TBD
+/* 
+ * Enable spreading spectrum clock 
+ * SSC_MODUMAG=15: +/-2.000% for center; -4.00% for down
+ */
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+	li t1, RALINK_SYSCTL_BASE + 0x54
+	li t2, 0xf1
+	nop
+	sw t2, 0(t1)
+	
+#endif
+#endif
+
+
 #ifdef ON_BOARD_DDR
+#if defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD)
 	/* get cpu frequency from SYSCFG0 bit 9:8, and adjust tRFC accordingly
 	 */
 	li	t0, RALINK_SYSCTL_BASE + 0x10
@@ -810,12 +883,30 @@ tRFC250:
 	DRAM Component not defined
 #endif
 
+#elif defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+
+#if defined (ON_BOARD_256M_DRAM_COMPONENT)
+	li t4, 0x2498E400
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+	li t4, 0x24992400
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+	li t4, 0x24996400
+#elif defined (ON_BOARD_2048M_DRAM_COMPONENT)
+	li t4, 0x249A2400
+#else
+	DRAM Component not defined
+#endif
+#endif // defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD) //
+
 tRFCinit:
 #if 0
 	li t3, RALINK_MEMCTRL_BASE + 0x40
 	sw t4, 0(t3)
 	nop
+#endif
 
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+#if 0	
 	/* DDR: enable self auto refresh for power saving
 	 * enable it by default for both RAM and ROM version (for CoC)
 	 */
@@ -823,7 +914,7 @@ tRFCinit:
 	lw	t1, 0(t0)
 	nop
 	and	t1, 0xff000000
-	or	t1, 0x40
+	or	t1, 0x01
 	sw	t1, 0(t0)
 	nop
 	li	t0, RALINK_MEMCTRL_BASE + 0x18
@@ -833,11 +924,60 @@ tRFCinit:
 	sw	t1, 0(t0)
 	nop
 #endif
+#endif // defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD) //
+#else // SDR //
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+	/* SDR:enable precharge power saving
+	 */
+	li	t0, RALINK_MEMCTRL_BASE + 0x1C
+	lw	t1, 0(t0)
+	nop
+	and	t1, 0xff000000
+	or	t1, 0x01
+	sw	t1, 0(t0)
+	nop
+	li	t0, RALINK_MEMCTRL_BASE + 0x04
+	lw	t1, 0(t0)
+	nop
+	or	t1, 0x10000000
+	sw	t1, 0(t0)
+	nop
+
+
+#endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+#endif // ON_BOARD_DDR //
+#if 0
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+	/* auto freq adjustment 3352,5350 support
+	 */
+	li	t0, RALINK_SYSCTL_BASE + 0x44
+	li	t1, 0x801f0f33
+	sw	t1, 0(t0)
+	nop
+#endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) //
 #endif
+	li t5, RALINK_SYSCTL_BASE + 0x0060
+	lw t6, 0(t5)
+	nop
+	or t6, 0x03
+
+#if defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD)
+	/* enable normal function i2c, spi, uartl, jtag, mdio, sdram */
+	and t6, ~(0x1<<0)
+	and t6, ~(0x1<<2)
+	and t6, ~(0x1<<3)
+	and t6, ~(0x1<<4)
+	and t6, ~(0x1<<5)
+	and t6, ~(0x1<<6)
+#else
+	/* enable normal function i2c, spi, uartl, jtag, mdio, ge1 */
+	and t6, ~(0xf<<7)
+	and t6, ~(0x3<<5)
+	and t6, ~(0x3)
+	/* LNA_G_SHARE_MODE and LNA_A_SHARE_MODE at normal function, not GPIO mode */
+	and t6, ~(0xf<<16)
 #endif
 
-	li t5, RALINK_SYSCTL_BASE + 0x0060
-	li t6, 0x3
 #if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)
 #if defined(P5_MAC_TO_PHY_MODE)
 	//set mdio pin to normal mode
@@ -881,13 +1021,13 @@ tRFCinit:
 	and t6, ~(7<<11)
 	or t6, 3<<11
 #endif
+
 #endif
 
 	//set GPIOMODE
 	nop
 	sw t6, 0(t5)
 	nop
-
 
 #ifdef PCI_AT_GPIO_FUNC
 	li t5, 0xa0300674
@@ -967,6 +1107,8 @@ tRFCinit:
 	sw t6, 0(t5)
 	nop
 #elif defined(RT3352_ASIC_BOARD)
+	//turn on power LED (GPIO ?)
+#elif defined(RT5350_ASIC_BOARD)
 	//turn on power LED (GPIO ?)
 #elif defined(RT3883_ASIC_BOARD)
 	//turn on power LED (GPIO ?)

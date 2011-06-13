@@ -36,6 +36,8 @@
 DECLARE_GLOBAL_DATA_PTR;
 #undef DEBUG
 
+#define SDRAM_CFG1_REG RALINK_SYSCTL_BASE + 0x0304
+
 int modifies= 0;
 
 #ifdef DEBUG
@@ -49,7 +51,7 @@ int modifies= 0;
 #else
 #define	TOTAL_MALLOC_LEN	CFG_MALLOC_LEN
 #endif
-#define ARGV_LEN  0x32
+#define ARGV_LEN  128
 
 
 extern int timer_init(void);
@@ -111,10 +113,10 @@ static char  file_name_space[ARGV_LEN];
 static void Init_System_Mode(void)
 {
 	u32 reg;
-#if defined(RT2880_ASIC_BOARD) || defined(RT2883_ASIC_BOARD) || defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT3883_ASIC_BOARD)
-	u8	clk_sel;
+#ifdef ASIC_BOARD
+	u8	clk_sel, clk_sel2;
 #endif
-	reg = RT2882_REG(RT2880_SYSCFG_REG);
+	reg = RALINK_REG(RT2880_SYSCFG_REG);
 		
 	/* 
 	 * CPU_CLK_SEL (bit 21:20)
@@ -122,7 +124,7 @@ static void Init_System_Mode(void)
 #ifdef RT2880_FPGA_BOARD
 	mips_cpu_feq = 25 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq/2;
-#elif defined (RT2883_FPGA_BOARD) || defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD)
+#elif defined (RT2883_FPGA_BOARD) || defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || defined (RT5350_FPGA_BOARD)
 	mips_cpu_feq = 40 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq/3;
 #elif defined (RT3883_FPGA_BOARD)
@@ -172,6 +174,26 @@ static void Init_System_Mode(void)
 			break;
 	}
 	mips_bus_feq = (133*1000*1000);
+#elif defined(RT5350_ASIC_BOARD)
+	clk_sel2 = (reg>>10) & 0x01;
+	clk_sel = ((reg>>8) & 0x01) + (clk_sel2 * 2);
+	switch(clk_sel) {
+		case 0:
+			mips_cpu_feq = (360*1000*1000);
+			mips_bus_feq = (120*1000*1000);
+			break;
+		case 1:
+			//reserved
+			break;
+		case 2:
+			mips_cpu_feq = (320*1000*1000);
+			mips_bus_feq = (80*1000*1000);
+			break;
+		case 3:
+			mips_cpu_feq = (300*1000*1000);
+			mips_bus_feq = (100*1000*1000);
+			break;
+	}
 #elif defined (RT3883_ASIC_BOARD) 
 	clk_sel = (reg>>8) & 0x03;
 	switch(clk_sel) {
@@ -289,7 +311,29 @@ static void Init_System_Mode(void)
 	mips_bus_feq = mips_cpu_feq/2;
 #endif
 
-   	//RT2882_REG(RT2880_SYSCFG_REG) = reg;
+   	//RALINK_REG(RT2880_SYSCFG_REG) = reg;
+
+	/* in general, the spec define 8192 refresh cycles/64ms
+	 * 64ms/8192 = 7.8us
+	 * 7.8us * 106.7Mhz(SDRAM clock) = 832
+	 * the value of refresh cycle shall smaller than 832. 
+	 * so we config it at 0x300 (suggested by ASIC)
+	 */
+#if defined(ON_BOARD_SDR) && defined(ON_BOARD_256M_DRAM_COMPONENT)
+	{
+	u32 tREF;
+	tREF = RALINK_REG(SDRAM_CFG1_REG);
+	tREF &= 0xffff0000;
+#if defined(ASIC_BOARD)
+	tREF |= 0x00000300;
+#elif defined(FPGA_BOARD) 
+	tREF |= 0x000004B;
+#else
+#error "not exist"
+#endif
+	RALINK_REG(SDRAM_CFG1_REG) = tREF;
+	}
+#endif
 
 }
 
@@ -323,7 +367,6 @@ void *sbrk (ptrdiff_t increment)
 	return ((void *) old);
 }
 
-
 static int init_func_ram (void)
 {
 
@@ -333,6 +376,23 @@ static int init_func_ram (void)
 	int board_type = 0;	/* use dummy arg */
 #endif
 	puts ("DRAM:  ");
+
+/*init dram config*/
+#ifdef RALINK_DDR_OPTIMIZATION
+#ifdef ON_BOARD_DDR
+/*optimize ddr parameter*/
+{	
+	u32 tDDR;
+	tDDR = RALINK_REG(DDR_CFG0_REG);
+
+        tDDR &= 0xf0780000; 
+	tDDR |=  RAS_VALUE << RAS_OFFSET;
+	tDDR |=  TRFC_VALUE << TRFC_OFFSET;
+	tDDR |=  TRFI_VALUE << TRFI_OFFSET;
+	RALINK_REG(DDR_CFG0_REG) = tDDR;
+}
+#endif
+#endif
 
 	if ((gd->ram_size = initdram (board_type)) > 0) {
 		print_size (gd->ram_size, "\n");
@@ -425,7 +485,7 @@ void board_init_f(ulong bootflag)
 	void copy_code (ulong); 
 #endif
 	//*pio_mode = 0xFFFF;
-		
+
 	/* Pointer is writable since we allocated a register for it.
 	 */
 	gd = &gd_data;
@@ -729,17 +789,17 @@ int tftp_config(int type, char *argv[])
 	return 0;
 }
 
-#ifdef GPIO14_RESET_MODE
 void trigger_hw_reset(void)
 {
+#ifdef GPIO14_RESET_MODE
         //set GPIO14 as output to trigger hw reset circuit
-        RT2882_REG(RT2880_REG_PIODIR)|=1<<14; //output mode
+        RALINK_REG(RT2880_REG_PIODIR)|=1<<14; //output mode
 
-        RT2882_REG(RT2880_REG_PIODATA)|=1<<14; //pull high
+        RALINK_REG(RT2880_REG_PIODATA)|=1<<14; //pull high
 	udelay(100);
-        RT2882_REG(RT2880_REG_PIODATA)&=~(1<<14); //pull low
-}
+        RALINK_REG(RT2880_REG_PIODATA)&=~(1<<14); //pull low
 #endif
+}
 
 #ifdef DUAL_IMAGE_SUPPORT
 
@@ -1082,36 +1142,54 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 	Init_System_Mode(); /*  Get CPU rate */
 
+#if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD)
+	//turn on all Ethernet LEDs around 0.5sec.
+#if 0
+	RALINK_REG(RALINK_ETH_SW_BASE+0xA4)=0xC;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xA8)=0xC;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xAC)=0xC;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xB0)=0xC;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xB4)=0xC;
+	udelay(500000);
+	RALINK_REG(RALINK_ETH_SW_BASE+0xA4)=0x5;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xA8)=0x5;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xAC)=0x5;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xB0)=0x5;
+	RALINK_REG(RALINK_ETH_SW_BASE+0xB4)=0x5;
+#endif
+#endif
+
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 	void config_usbotg(void);
 	config_usbotg();
+#elif defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD)
+	void config_usb_ehciohci(void);
+	config_usb_ehciohci();
 #endif
 
-#ifdef GPIO14_RESET_MODE
-	u32 reg = RT2882_REG(RT2880_RSTSTAT_REG);
+	u32 reg = RALINK_REG(RT2880_RSTSTAT_REG);
 	if(reg & RT2880_WDRST ){
 		printf("***********************\n");
 		printf("Watchdog Reset Occurred\n");
 		printf("***********************\n");
-		RT2882_REG(RT2880_RSTSTAT_REG)=RT2880_WDRST;
-		RT2882_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_WDRST;
+		RALINK_REG(RT2880_RSTSTAT_REG)=0;
 		trigger_hw_reset();
 	}else if(reg & RT2880_SWSYSRST){
 		printf("******************************\n");
 		printf("Software System Reset Occurred\n");
 		printf("******************************\n");
-		RT2882_REG(RT2880_RSTSTAT_REG)=RT2880_SWSYSRST;
-		RT2882_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_SWSYSRST;
+		RALINK_REG(RT2880_RSTSTAT_REG)=0;
 		trigger_hw_reset();
 	}else if (reg & RT2880_SWCPURST){
 		printf("***************************\n");
 		printf("Software CPU Reset Occurred\n");
 		printf("***************************\n");
-		RT2882_REG(RT2880_RSTSTAT_REG)=RT2880_SWCPURST;
-		RT2882_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_SWCPURST;
+		RALINK_REG(RT2880_RSTSTAT_REG)=0;
 		trigger_hw_reset();
 	}
-#endif
 
 #ifdef DEBUG
 	debug ("Now running in RAM - U-Boot at: %08lx\n", dest_addr);
@@ -1249,7 +1327,79 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #endif
 
 	/* RT2880 Boot Loader Menu */
+#if defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
+    defined(RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) || \
+    defined(RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
+
+#if defined(CFG_ENV_IS_IN_SPI) || defined (CFG_ENV_IS_IN_NAND)
+	{
+		int reg, boot_from_eeprom=0;
+		reg = RALINK_REG(RT2880_SYSCFG_REG);
+		/* Uboot Version and Configuration*/
+		printf("============================================ \n");
+		printf("Ralink UBoot Version: %s\n", RALINK_LOCAL_VERSION);
+		printf("-------------------------------------------- \n");
+		printf("%s %s %s\n",CHIP_TYPE, CHIP_VERSION, GMAC_MODE);
+		boot_from_eeprom = ((reg>>18) & 0x01);
+		if(boot_from_eeprom){
+		    printf("DRAM_CONF_FROM: EEPROM \n");
+		    printf("DRAM_SIZE: %d Mbits %s\n", DRAM_COMPONENT, DDR_INFO);
+		    printf("DRAM_TOTAL_WIDTH: %d bits\n", DRAM_BUS );
+		    printf("TOTAL_MEMORY_SIZE: %d MBytes\n", DRAM_SIZE);
+		}else{
+		int dram_width, is_ddr2, dram_total_width, total_size;
+		int _x = ((reg >> 12) & 0x7); 
+
+#if defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
+		int dram_size = (_x == 3)? 512 : (_x == 2)? 256 : (_x == 1)? 128 : \
+				(_x == 0)? 64 : 0; 
+#elif defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
+		int dram_size = (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
+				(_x == 1)? 64 : (_x == 0)? 16 : 0; 
+#elif defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD)
+		int dram_size = (_x == 6)? 2048 : (_x == 5)? 1024 : (_x == 4)? 512 : \
+				(_x == 3)? 256 : (_x == 2)? 128 : (_x == 1)? 64 : \
+				(_x == 0)? 16 : 0; 
+#endif
+		if(((reg >> 15) & 0x1)){
+		    dram_total_width = 32;
+		}else{
+		    dram_total_width = 16;
+		}
+
+		is_ddr2 = ((reg >> 17) & 0x1);
+		if(is_ddr2){
+		  if((reg >> 10) & 0x1){
+			dram_width = 16;
+		  }else{
+			dram_width = 8;
+		  }
+		}else{
+		  if((reg >> 10) & 0x1){
+			dram_width = 32;
+		  }else{
+			dram_width = 16;
+		  }
+		}
+		total_size = (dram_size*(dram_total_width/dram_width))/8;
+
+		printf("DRAM_CONF_FROM: %s \n", boot_from_eeprom ? "EEPROM":"Boot-Strapping");
+		printf("DRAM_TYPE: %s \n", is_ddr2 ? "DDR2":"SDRAM");
+		printf("DRAM_SIZE: %d Mbits\n", dram_size);
+		printf("DRAM_WIDTH: %d bits\n", dram_width);
+		printf("DRAM_TOTAL_WIDTH: %d bits\n", dram_total_width );
+		printf("TOTAL_MEMORY_SIZE: %d MBytes\n", total_size);
+		}
+		printf("%s\n", FLASH_MSG);
+		printf("%s\n", "Date:" __DATE__ "  Time:" __TIME__ );
+		printf("============================================ \n");
+	}
+#else
 	SHOW_VER_STR();
+#endif /* defined(CFG_ENV_IS_IN_SPI) || defined (CFG_ENV_IS_IN_NAND) */
+#else
+	SHOW_VER_STR();
+#endif /* defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || defined(RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) */
 
 #if defined (RT2880_FPGA_BOARD) || defined (RT2880_ASIC_BOARD)
 	value = read_32bit_cp0_register_with_select1(CP0_CONFIG);
@@ -1318,7 +1468,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 	debug("\n ##### The CPU freq = %d MHZ #### \n",mips_cpu_feq/1000/1000);
 
-
+/*
 	if(*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0304) & (1<< 24))
 	{
 		debug("\n SDRAM bus set to 32 bit \n");
@@ -1327,21 +1477,27 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	{
 		debug("\nSDRAM bus set to 16 bit \n");
 	}
-	debug(" SDRAM size =%d Mbytes\n",gd->ram_size /1024/1024 );
+*/
+	debug(" estimate memory size =%d Mbytes\n",gd->ram_size /1024/1024 );
 
 
 #if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD)  || \
-    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)
+    defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)  || \
+    defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD) 
 	rt305x_esw_init();
 #endif
-
-#ifndef RT3052_PHY_TEST
 	LANWANPartition();
-#endif
 
 #ifdef DUAL_IMAGE_SUPPORT
 	check_image_validation();
 #endif
+/*config bootdelay via environment parameter: bootdelay */
+	{
+	    char * s;
+	    s = getenv ("bootdelay");
+	    timer1 = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
+	}
+
 
 	OperationSelect();   
 
@@ -1649,7 +1805,7 @@ int rw_rf_reg(int write, int reg, int *data)
 	u32	rfcsr, i = 0;
 
 	while (1) {
-		rfcsr = RT2882_REG(RF_CSR_CFG);
+		rfcsr = RALINK_REG(RF_CSR_CFG);
 		if (! (rfcsr & (u32)RF_CSR_KICK) )
 			break;
 		if (++i > 10000) {
@@ -1662,11 +1818,11 @@ int rw_rf_reg(int write, int reg, int *data)
 	if (write)
 		rfcsr |= 0x10000;
 
-	RT2882_REG(RF_CSR_CFG) = cpu_to_le32(rfcsr);
+	RALINK_REG(RF_CSR_CFG) = cpu_to_le32(rfcsr);
 
 	i = 0;
 	while (1) {
-		rfcsr = RT2882_REG(RF_CSR_CFG);
+		rfcsr = RALINK_REG(RF_CSR_CFG);
 		if (! (rfcsr & (u32)RF_CSR_KICK) )
 			break;
 		if (++i > 10000) {
@@ -1675,7 +1831,7 @@ int rw_rf_reg(int write, int reg, int *data)
 		}
 	}
 
-	rfcsr = RT2882_REG(RF_CSR_CFG);
+	rfcsr = RALINK_REG(RF_CSR_CFG);
 
 	if (((rfcsr&0x1f00) >> 8) != (reg & 0x1f)) {
 		puts("Error: rw register failed\n");
@@ -1750,6 +1906,25 @@ void adjust_frequency(void)
 	rw_rf_reg(1, 23, &r23);
 }
 #endif
+
+#if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD)
+/*
+ * enter power saving mode
+ */
+void config_usb_ehciohci(void)
+{
+	u32 val;
+	
+	//printf("USB Phy is down.\n");
+	val = RALINK_REG(RT2880_RSTCTRL_REG);    // toggle host & device RST bit
+	val = val | RALINK_UHST_RST | RALINK_UDEV_RST;
+	RALINK_REG(RT2880_RSTCTRL_REG) = val;
+	
+	val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
+	val = val & 0xFFEBFFFF;  // disable USB port0 & port1 PHY. 
+	*(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+}
+#endif /* (RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD) */
 
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 int usbotg_host_suspend(void)
@@ -1845,8 +2020,13 @@ retry_suspend:
 	//printf("val = 0x%08x\n", val);
 	udelay(100000);
 
-	*(volatile u_long *)(0xB0000034) = 0x00400000;
-	*(volatile u_long *)(0xB0000034) = 0x0;
+	val = RALINK_REG(RT2880_RSTCTRL_REG);    // reset OTG
+	val = val | RALINK_OTG_RST;
+	RALINK_REG(RT2880_RSTCTRL_REG) = val;
+	val = val & ~(RALINK_OTG_RST);
+	RALINK_REG(RT2880_RSTCTRL_REG) = val;
+	udelay(200000);
+
 	udelay(200000);
 
 	return rc;
@@ -1860,14 +2040,14 @@ int usbotg_device_suspend(void)
 
 	printf(".");
 
-	RT2882_REG(0xB01C0E00) = 0xF;
+	RALINK_REG(0xB01C0E00) = 0xF;
 	udelay(100000);
 	val = le32_to_cpu(*(volatile u_long *)(0xB01C0808));
 	//printf("B01c0808 = 0x%08x\n", val);
 
-	RT2882_REG(0xB01C000C) = 0x40001408;    // force device mode
+	RALINK_REG(0xB01C000C) = 0x40001408;    // force device mode
 	udelay(50000);
-	RT2882_REG(0xB01C0E00) = 0x1;           // stop pclock
+	RALINK_REG(0xB01C0E00) = 0x1;           // stop pclock
 	udelay(100000);
 
 	/* Some layouts need more time. */
@@ -1882,8 +2062,11 @@ int usbotg_device_suspend(void)
 		udelay(1000);
 	}
 
-	RT2882_REG(0xB0000034) = 0x00400000;    // reset OTG
-	RT2882_REG(0xB0000034) = 0x0;
+	val = RALINK_REG(RT2880_RSTCTRL_REG);    // reset OTG
+	val = val | RALINK_OTG_RST;
+	RALINK_REG(RT2880_RSTCTRL_REG) = val;
+	val = val & ~(RALINK_OTG_RST);
+	RALINK_REG(RT2880_RSTCTRL_REG) = val;
 	udelay(200000);
 
 	return rc;
@@ -1904,7 +2087,7 @@ void config_usbotg(void)
 			break;
 	}
 	
-	RT2882_REG(0xB01C0E00) = 0xF;        //disable USB module, optimize for power-saving
+	RALINK_REG(0xB01C0E00) = 0xF;        //disable USB module, optimize for power-saving
 	printf("\n");
 	return;
 }

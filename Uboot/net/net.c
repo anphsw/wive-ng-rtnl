@@ -1188,6 +1188,7 @@ NetReceive(volatile uchar * inpkt, int len)
 	NetRxPktLen = len;
 	et = (Ethernet_t *)inpkt;
 
+
 	/* too small packet? */
 	if (len < ETHER_HDR_SIZE)
 	{

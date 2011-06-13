@@ -72,7 +72,6 @@ static int spic_busy_wait(void)
 static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 {
 	int retval = -1;
-
 	/*
 	ra_dbg("cmd(%x): %x %x %x %x , buf:%x len:%x, flag:%s \n",
 			n_cmd, cmd[0], cmd[1], cmd[2], cmd[3],
@@ -82,7 +81,7 @@ static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 
 	// assert CS and we are already CLK normal high
 	ra_and(RT2880_SPICTL_REG, ~(SPICTL_SPIENA_HIGH));
-
+	
 	// write command
 	for (retval = 0; retval < n_cmd; retval++) {
 		ra_outl(RT2880_SPIDATA_REG, cmd[retval]);
@@ -147,12 +146,12 @@ int spic_init(void)
 	ra_and(RT2880_RSTCTRL_REG, ~RSTCTRL_SPI_RESET);
 
 	// FIXME, clk_div should depend on spi-flash.
-	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | SPICFG_SPICLK_DIV16 | SPICFG_SPICLKPOL);
-
+	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | SPICFG_SPICLK_DIV4 | SPICFG_SPICLKPOL);
+								
 	// set idle state
 	ra_outl(RT2880_SPICTL_REG, SPICTL_HIZSDO | SPICTL_SPIENA_HIGH);
 
-	spi_wait_nsec = (8 * 1000 / ((mips_bus_feq / 1000 / 1000 / SPICFG_SPICLK_DIV16) )) >> 1 ;
+	spi_wait_nsec = (8 * 1000 / ((mips_bus_feq / 1000 / 1000 / SPICFG_SPICLK_DIV4) )) >> 1 ;
 
 	printf("spi_wait_nsec: %x \n", spi_wait_nsec);
 	return 0;
@@ -176,6 +175,8 @@ static struct chip_info chips_data [] = {
 	{ "FL016AIF",		0x01, 0x02140000, 64 * 1024, 32,  0 },
 	{ "MX25L1605D",		0xc2, 0x2015c220, 64 * 1024, 32,  0 },
 	{ "EN25F16",		0x1c, 0x31151c31, 64 * 1024, 32,  0 },
+	{ "EN25F32",            0x1c, 0x31161c31, 64 * 1024, 64,  0 },
+	{ "W25Q32BV",           0xef, 0x40160000, 64 * 1024, 64,  0 },
 #ifdef MX_4B_MODE 
 	{ "MX25L25635E",	0xc2, 0x2019c220, 64 * 1024, 512, 1 },
 #endif
@@ -604,15 +605,20 @@ int raspi_erase_write(char *buf, unsigned int offs, int count)
 			char *block;
 			unsigned int piece, blockaddr;
 			int piece_size;
-
+			char *temp;
+		
 			block = malloc(blocksize);
 			if (!block)
+				return -1;
+			temp = malloc(blocksize);
+			if (!temp)
 				return -1;
 
 			blockaddr = offs & ~blockmask;
 
 			if (raspi_read(block, blockaddr, blocksize) != blocksize) {
 				free(block);
+				free(temp);
 				return -2;
 			}
 
@@ -622,13 +628,35 @@ int raspi_erase_write(char *buf, unsigned int offs, int count)
 
 			if (raspi_erase(blockaddr, blocksize) != 0) {
 				free(block);
+				free(temp);
 				return -3;
 			}
 			if (raspi_write(block, blockaddr, blocksize) != blocksize) {
 				free(block);
+				free(temp);
 				return -4;
 			}
+#ifdef RALINK_SPI_UPGRADE_CHECK
+			if (raspi_read(temp, blockaddr, blocksize) != blocksize) {
+				free(block);
+				free(temp);
+				return -2;
+			}
 
+
+			if(memcmp(block, temp, blocksize) == 0)
+			{    
+			   // printf("block write ok!\n\r");
+			}
+			else
+			{
+				printf("block write incorrect!\n\r");
+				free(block);
+				free(temp);
+				return -2;
+			}
+#endif
+                        free(temp);
 			free(block);
 
 			buf += piece_size;
@@ -637,11 +665,45 @@ int raspi_erase_write(char *buf, unsigned int offs, int count)
 		}
 		else {
 			unsigned int aligned_size = count & ~blockmask;
+			char *temp;
+			int i;
+			temp = malloc(blocksize);
+			if (!temp)
+				return -1;
 
 			if (raspi_erase(offs, aligned_size) != 0)
+			{
+				free(temp);
 				return -1;
+			}
 			if (raspi_write(buf, offs, aligned_size) != aligned_size)
+			{
+				free(temp);
 				return -1;
+			}
+
+#ifdef RALINK_SPI_UPGRADE_CHECK
+			for( i=0; i< (aligned_size/blocksize); i++)
+			{
+				if (raspi_read(temp, offs+(i*blocksize), blocksize) != blocksize)
+				{
+					free(temp);
+					return -2;
+				}
+				if(memcmp(buf+(i*blocksize), temp, blocksize) == 0)
+				{
+				//	printf("blocksize write ok i=%d!\n\r", i);
+				}
+				else
+				{
+					printf("blocksize write incorrect block#=%d!\n\r",i);
+					free(temp);
+					return -2;
+				}
+			}
+#endif
+			free(temp);
+	
 			buf += aligned_size;
 			offs += aligned_size;
 			count -= aligned_size;

@@ -153,8 +153,12 @@ void i2c_master_init(void);
 void i2c_master_init(void)
 {
 	/* reset i2c block */
-	RT2880_REG(RT2880_RSTCTRL_REG) = RALINK_I2C_RST;
-	RT2880_REG(RT2880_RSTCTRL_REG) = 0;
+	u32 val = RT2880_REG(RT2880_RSTCTRL_REG);
+	val = val | RALINK_I2C_RST;
+	RT2880_REG(RT2880_RSTCTRL_REG) = val;
+
+	val = val & ~(RALINK_I2C_RST);
+	RT2880_REG(RT2880_RSTCTRL_REG) = val;
 	udelay(500);
 	
 	RT2880_REG(RT2880_I2C_CONFIG_REG) = I2C_CFG_DEFAULT;
