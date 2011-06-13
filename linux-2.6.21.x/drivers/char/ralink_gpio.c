@@ -829,7 +829,7 @@ int __init ralink_gpio_init(void)
 
 	//config these pins to gpio mode
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT5350)
 	gpiomode &= ~0x1C;  //clear bit[2:4]UARTF_SHARE_MODE
 #endif
 	gpiomode |= RALINK_GPIOMODE_DFT;
