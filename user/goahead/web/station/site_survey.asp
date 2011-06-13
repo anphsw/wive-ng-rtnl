@@ -66,8 +66,7 @@ function genStaTable()
 
 		html += '<tr' + style;
 		html += '<td style="background-color: #' + color + '">' +
-				'<input name="bssid_sel" type="radio"' + sel + ' value="' + (i+1) +
-				'" onchange="sta_select_change(this.form);"></td>' + // rownum
+				'<input name="bssid_sel" type="radio"' + sel + ' value="' + (i+1) + '"></td>' + // rownum
 			'<td' + style + row[1] + '</td>' + // SSID
 			'<td' + style + row[2] + '</td>' + // BSSID
 			'<td' + style + row[4] + '</td>' + // RSSI
@@ -93,6 +92,7 @@ function current_bssid()
 	return null;
 }
 
+/*
 function sta_select_change(form)
 {
 	var bssid = current_bssid();
@@ -100,6 +100,7 @@ function sta_select_change(form)
 	disableElement(form.connectionButton, dis);
 	disableElement(form.addProfileButton, dis);
 }
+*/
 
 function drawSVG(target, name, attributes, html)
 {
@@ -413,9 +414,9 @@ function showProfileSsid()
 </tr>
 <tr>
 	<td>
-		<input type="button" style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" disabled onClick="open_connection_page()">&nbsp;
+		<input type="button" style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" onClick="open_connection_page();">&nbsp;
 		<input type="button" style="{width:100px;}" value="Rescan" id="scanRescan" onClick="location.href=location.href;">&nbsp;
-		<input type="button" style="{width:100px;}" name="addProfileButton" value="Add Profile" id="scanAddProfile" disabled onClick="open_profile_page()">
+		<input type="button" style="{width:100px;}" name="addProfileButton" value="Add Profile" id="scanAddProfile" onClick="open_profile_page();">
 	</td>
 </tr>
 </table>
