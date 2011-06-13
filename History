@@ -440,6 +440,13 @@
 55) More usb support fixes and optiomizations.<br>
 56) Site Survey Access Point Graphical Diagram.<br>
 
+1.8.x
+1) Sync from 3.5.0.0 SDK.<br>
+2) Update Uboot code.<br>
+3) More base support RT5330 and full support RT33**.<br>
+4) Fix watchdog, rdm, usb drivers.<br>
+5) HTB fix rate select.<br>
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
