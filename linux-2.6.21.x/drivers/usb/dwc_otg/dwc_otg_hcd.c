@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.c $
- * $Revision: 1.5 $
- * $Date: 2009-06-16 05:39:10 $
+ * $Revision: 1.7 $
+ * $Date: 2010-03-22 07:12:28 $
  * $Change: 1064940 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -987,6 +987,16 @@ int dwc_otg_hcd_urb_dequeue(struct usb_hcd *hcd,
 
 	urb_qtd = (dwc_otg_qtd_t *)urb->hcpriv;
 	qh = (dwc_otg_qh_t *)ep->hcpriv;
+
+#if 1
+	/* Ralink: fix urb_qtd == NULL issue*/
+	if(!urb_qtd){
+		if (list_empty(&qh->qtd_list)) 
+			dwc_otg_hcd_qh_remove(dwc_otg_hcd, qh);
+		SPIN_UNLOCK_IRQRESTORE(&dwc_otg_hcd->lock, flags);
+		return 0;
+	}
+#endif
 
 #ifdef DEBUG
 	if (CHK_DEBUG_LEVEL(DBG_HCDV | DBG_HCD_URB)) {

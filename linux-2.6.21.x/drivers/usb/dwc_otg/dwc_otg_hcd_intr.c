@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_intr.c $
- * $Revision: 1.7 $
- * $Date: 2009-03-09 08:04:24 $
+ * $Revision: 1.11 $
+ * $Date: 2010-02-10 07:19:42 $
  * $Change: 1117667 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,

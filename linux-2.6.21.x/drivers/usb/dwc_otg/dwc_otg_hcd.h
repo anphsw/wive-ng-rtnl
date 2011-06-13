@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.h $
- * $Revision: 1.4 $
- * $Date: 2009-06-16 05:39:34 $
+ * $Revision: 1.5 $
+ * $Date: 2010-03-22 07:03:07 $
  * $Change: 1064918 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -151,6 +151,7 @@ typedef struct dwc_otg_qh {
 	 */
 	uint8_t			ep_type;
 	uint8_t			ep_is_in;
+    uint8_t       dev_speed;
 
 	/** wMaxPacketSize Field of Endpoint Descriptor. */
 	uint16_t		maxp;

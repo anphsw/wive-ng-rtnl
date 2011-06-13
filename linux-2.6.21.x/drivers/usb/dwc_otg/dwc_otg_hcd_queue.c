@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg_ipmate/linux/drivers/dwc_otg_hcd_queue.c $
- * $Revision: 1.6 $
- * $Date: 2009-06-16 05:39:48 $
+ * $Revision: 1.8 $
+ * $Date: 2010-03-22 07:07:37 $
  * $Change: 537387 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -132,6 +132,10 @@ void dwc_otg_hcd_qh_init(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, struct urb *urb)
     if(urb && urb->dev)
         usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
 
+	if(urb && urb->dev){
+		usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
+	}
+
 	/* Initialize QH */
 	switch (usb_pipetype(urb->pipe)) {
 	case PIPE_CONTROL:
@@ -229,20 +233,23 @@ void dwc_otg_hcd_qh_init(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, struct urb *urb)
 		    usb_pipeendpoint(urb->pipe),
 		    usb_pipein(urb->pipe) == USB_DIR_IN ? "IN" : "OUT");
 
-	switch(urb->dev->speed) {
-	case USB_SPEED_LOW: 
-		speed = "low";	
-		break;
-	case USB_SPEED_FULL: 
-		speed = "full";	
-		break;
-	case USB_SPEED_HIGH: 
-		speed = "high";	
-		break;
-	default: 
-		speed = "?";	
-		break;
-	}
+    switch(urb->dev->speed) {
+    case USB_SPEED_LOW:
+        qh->dev_speed = DWC_OTG_EP_SPEED_LOW;
+        speed = "low";
+        break;
+    case USB_SPEED_FULL:
+        qh->dev_speed = DWC_OTG_EP_SPEED_FULL;
+        speed = "full";
+        break;
+    case USB_SPEED_HIGH:
+        qh->dev_speed = DWC_OTG_EP_SPEED_HIGH;
+        speed = "high";
+        break;
+    default:
+        speed = "?";
+        break;
+    }
 	DWC_DEBUGPL(DBG_HCDV, "DWC OTG HCD QH  - Speed = %s\n", speed);
 	
 	switch (qh->ep_type) {
@@ -316,6 +323,7 @@ static int periodic_channel_available(dwc_otg_hcd_t *hcd)
  *
  * @return 0 if successful, negative error code otherwise.
  */
+#if 0
 static int check_periodic_bandwidth(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh)
 {
 	int 		status;
@@ -345,7 +353,39 @@ static int check_periodic_bandwidth(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh)
 
 	return status;
 }
-			
+#else
+
+static int check_periodic_bandwidth(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
+{
+    int status;
+    int16_t max_claimed_usecs;
+
+    status = 0;
+
+    if ((qh->dev_speed == DWC_OTG_EP_SPEED_HIGH) || qh->do_split) {
+        /*
+         * High speed mode.
+         * Max periodic usecs is 80% x 125 usec = 100 usec.
+         */
+        max_claimed_usecs = 100 - qh->usecs;
+    } else {
+        /*
+         * Full speed mode.
+         * Max periodic usecs is 90% x 1000 usec = 900 usec.
+         */
+        max_claimed_usecs = 900 - qh->usecs;
+    }
+
+    if (hcd->periodic_usecs > max_claimed_usecs) {
+        DWC_NOTICE("%s: already claimed usecs %d, required usecs %d\n",
+            __func__, hcd->periodic_usecs, qh->usecs);  //NOTICE
+        status = -ENOSPC;
+    }
+
+    return status;
+}
+
+#endif
 /**
  * Checks that the max transfer size allowed in a host channel is large enough
  * to handle the maximum data transfer in a single (micro)frame for a periodic
