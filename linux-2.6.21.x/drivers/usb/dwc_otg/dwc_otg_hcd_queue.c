@@ -129,9 +129,6 @@ void dwc_otg_hcd_qh_init(dwc_otg_hcd_t *hcd, dwc_otg_qh_t *qh, struct urb *urb)
 	memset (qh, 0, sizeof (dwc_otg_qh_t));
 
 	/* ralink 2010-03-19 usb patch for MAC issue */
-    if(urb && urb->dev)
-        usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
-
 	if(urb && urb->dev){
 		usb_settoggle (urb->dev, usb_pipeendpoint(urb->pipe), usb_pipeout(urb->pipe), 1);
 	}
