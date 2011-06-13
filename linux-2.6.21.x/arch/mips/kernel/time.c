@@ -35,6 +35,7 @@
 
 #ifdef CONFIG_RALINK_EXTERNAL_TIMER
 #include <asm/rt2880/rt_mmap.h>
+#define RALINK_16BIT_COUNT_CMP
 #endif
 
 /*

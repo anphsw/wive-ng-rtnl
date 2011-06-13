@@ -121,7 +121,7 @@ int request_tmr_service(int interval, void (*function)(unsigned long), unsigned 
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
     sysRegWrite(TMR0LOAD, interval* (get_surfboard_sysclk()/16384/1000));
-#else //RT3352
+#else //RT3352/RT5350
     sysRegWrite(TMR0LOAD, interval* (40000000/16384/1000)); //fixed at 40MHz
 #endif
 
