@@ -392,6 +392,8 @@ static int proc_get_usblpid(struct usblp *usblp)
 	int length, err;
 	int retval = 0;
 
+	strtmp="";
+
 	prn_info= &prn_info_tmp; // Added by JYWeng 20031212:
 
 	
@@ -683,7 +685,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct usblp *usblp = file->private_data;
 //JYWeng 20031212: set this as global	struct parport_splink_device_info prn_info_tmp, *prn_info; // Added by PaN
-	struct print_buffer user_buf_tmp, *user_buf; // Added by PaN
+	struct print_buffer *user_buf; // Added by PaN
 //JYWeng 20031212: set this as global	char *strtmp, *str_dev_id, *strunknown="unknown"; // Added by PaN
 	char *strtmp, *str_dev_id; // Added by PaN: JYWeng 20031212: modified from the above
 #if 0
@@ -695,6 +697,8 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	int status;
 	int twoints[2];
 	int retval = 0;
+
+	strtmp="";
 
 	mutex_lock (&usblp->mut);
 	if (!usblp->present) {
