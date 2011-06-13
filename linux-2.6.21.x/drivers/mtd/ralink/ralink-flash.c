@@ -166,7 +166,7 @@ int __init rt2880_mtd_init(void)
 
 #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	_ihdr_t hdr;
-	char *ptr = (char *)(CONFIG_MTD_PHYSMAP_START + MTD_BOOT_PART_SIZE +
+	char *ptr = (char *)CKSEG1ADDR(CONFIG_MTD_PHYSMAP_START + MTD_BOOT_PART_SIZE +
 			MTD_CONFIG_PART_SIZE + MTD_FACTORY_PART_SIZE);
 	memcpy(&hdr, ptr, sizeof(_ihdr_t));
 
