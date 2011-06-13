@@ -1926,6 +1926,86 @@ sitd_link_urb (
 #define	SITD_ERRS (SITD_STS_ERR | SITD_STS_DBE | SITD_STS_BABBLE \
 				| SITD_STS_XACT | SITD_STS_MMF)
 
+#define CONFIG_FIX_SITD
+#ifdef CONFIG_FIX_SITD
+static unsigned
+sitd_complete (
+	struct ehci_hcd		*ehci,
+	struct ehci_sitd	*sitd
+) {
+	struct urb				*urb = sitd->urb;
+	struct usb_iso_packet_descriptor	*desc;
+	u32					t;
+	int					urb_index = -1;
+	struct ehci_iso_stream			*stream = sitd->stream;
+	struct usb_device			*dev;
+	unsigned				retval = false;
+
+	urb_index = sitd->index;
+	desc = &urb->iso_frame_desc [urb_index];
+	t = le32_to_cpup (&sitd->hw_results);
+
+	/* report transfer status */
+	if (t & SITD_ERRS) {
+		urb->error_count++;
+		if (t & SITD_STS_DBE)
+			desc->status = usb_pipein (urb->pipe)
+				? -ENOSR  /* hc couldn't read */
+				: -ECOMM; /* hc couldn't write */
+		else if (t & SITD_STS_BABBLE)
+			desc->status = -EOVERFLOW;
+		else /* XACT, MMF, etc */
+			desc->status = -EPROTO;
+	} else {
+		desc->status = 0;
+		desc->actual_length = desc->length - SITD_LENGTH (t);
+	}
+
+	usb_put_urb (urb);
+	sitd->urb = NULL;
+	sitd->stream = NULL;
+	stream->depth -= stream->interval << 3;
+
+
+	/* handle completion now? */
+	if ((urb_index + 1) != urb->number_of_packets)
+		goto done;
+
+	/* ASSERT: it's really the last sitd for this urb
+	list_for_each_entry (sitd, &stream->td_list, sitd_list)
+		BUG_ON (sitd->urb == urb);
+	 */
+
+	/* give urb back to the driver */
+	dev = urb->dev;
+	ehci_urb_done (ehci, urb);
+	retval = true;
+	urb = NULL;
+
+	/* defer stopping schedule; completion can submit */
+	ehci->periodic_sched--;
+	if (!ehci->periodic_sched)
+		(void) disable_periodic (ehci);
+	ehci_to_hcd(ehci)->self.bandwidth_isoc_reqs--;
+
+	if (list_empty (&stream->td_list)) {
+		ehci_to_hcd(ehci)->self.bandwidth_allocated
+				-= stream->bandwidth;
+		ehci_vdbg (ehci,
+			"deschedule devp %s ep%d%s-iso\n",
+			dev->devpath, stream->bEndpointAddress & 0x0f,
+			(stream->bEndpointAddress & USB_DIR_IN) ? "in" : "out");
+	}
+	iso_stream_put (ehci, stream);
+
+done:
+	list_move (&sitd->sitd_list, &stream->free_list);
+	iso_stream_put (ehci, stream);
+	return retval;
+}
+
+#else
+
 static unsigned
 sitd_complete (
 	struct ehci_hcd		*ehci,
@@ -1997,7 +2077,7 @@ sitd_complete (
 
 	return 1;
 }
-
+#endif
 
 static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	gfp_t mem_flags)

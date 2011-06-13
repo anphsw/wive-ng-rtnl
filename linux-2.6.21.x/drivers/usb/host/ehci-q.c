@@ -1073,8 +1073,14 @@ static void scan_async (struct ehci_hcd *ehci)
 	struct ehci_qh		*qh;
 	enum ehci_timer_action	action = TIMER_IO_WATCHDOG;
 
+#if 1
+    ehci->stamp = ehci_readl(ehci, &ehci->regs->frame_index);
+#else
 	if (!++(ehci->stamp))
 		ehci->stamp++;
+#endif
+
+
 	timer_action_done (ehci, TIMER_ASYNC_SHRINK);
 rescan:
 	qh = ehci->async->qh_next.qh;
@@ -1106,11 +1112,19 @@ rescan:
 			 * (plus, avoids some kind of re-activation race.)
 			 */
 			if (list_empty (&qh->qtd_list)) {
+#if 1
+         if (!ehci->reclaim && ((ehci->stamp - qh->stamp) & 0x1fff)>= ( 10 /* EHCI_SHRINK_FRAMES == 5 */ * 8)
+         	 && (qh->qh_state == QH_STATE_LINKED || qh->qh_state == QH_STATE_UNLINK_WAIT) )
+             start_unlink_async(ehci, qh);
+         else
+             action = TIMER_ASYNC_SHRINK;
+#else
 				if (qh->stamp == ehci->stamp)
 					action = TIMER_ASYNC_SHRINK;
 				else if (!ehci->reclaim
 					    && qh->qh_state == QH_STATE_LINKED)
 					start_unlink_async (ehci, qh);
+#endif
 			}
 
 			qh = qh->qh_next.qh;
