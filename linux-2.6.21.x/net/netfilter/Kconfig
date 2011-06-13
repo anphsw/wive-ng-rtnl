@@ -16,6 +16,12 @@ choice
 
 endchoice
 
+config NETFILTER_RALINK_SWQOS_SUPPORT
+       bool "Netfilter Ralink SWQoS support"
+       help
+         To support Ralink SW QoS, please enable it.
+         If unsure, say N.
+
 config NETFILTER_NETLINK
        tristate "Netfilter netlink interface"
        help

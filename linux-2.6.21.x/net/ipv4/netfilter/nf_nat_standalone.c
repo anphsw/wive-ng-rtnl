@@ -260,7 +260,6 @@ nf_nat_adjust(unsigned int hooknum,
 }
 
 /* We must be after connection tracking and before packet filtering. */
-
 static struct nf_hook_ops nf_nat_ops[] = {
 	/* Before packet filtering, change destination */
 	{
@@ -268,7 +267,14 @@ static struct nf_hook_ops nf_nat_ops[] = {
 		.owner		= THIS_MODULE,
 		.pf		= PF_INET,
 		.hooknum	= NF_IP_PRE_ROUTING,
-		.priority	= NF_IP_PRI_NAT_DST,
+#ifdef CONFIG_NETFILTER_RALINK_SWQOS_SUPPORT
+		.priority	= NF_IP_PRI_NAT_DST_RALINK_QOS,	// Ralink: 
+													// Raise priority to make nat table has higher
+													// priority than mangle table.
+													// In other words, now NAT happenes before QoS marking.
+#else
+		.priority	= NF_IP_PRI_NAT_DST, 
+#endif
 	},
 	/* Before routing, route before mangling */
 	{
