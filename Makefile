@@ -22,7 +22,7 @@ ifeq ($(ROOTDIR),)
 ROOTDIR=.
 endif
 
-all: tools linux lib_only uClibc++_only user_only modules romfs image
+all: tools linux lib_only uClibc++_only user_only romfs image
 else
 all: config_error
 endif
@@ -223,13 +223,6 @@ oldconfig: config.in
 	@$(MAKE) oldconfig_config
 	@chmod u+x config/setconfig
 	@config/setconfig final
-
-.PHONY: modules
-modules:
-	. $(LINUXDIR)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
-		[ -d $(LINUXDIR)/modules ] || mkdir $(LINUXDIR)/modules; \
-		$(MAKEARCH_KERNEL) -C $(LINUXDIR) modules; \
-	fi
 
 .PHONY: modules_install
 modules_install:
