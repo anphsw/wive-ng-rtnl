@@ -106,7 +106,7 @@ void formDefineWireless(void) {
 }
 
 //Jacky.Yang 7-Jan-2007, get Country region code in eeprom 0x39
-#ifndef CONFIG_RALINK_RT3052
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)
 static int getEEPROMCountryCode(char *eeprom_addr)
 {
 	int socket_id, ret;
@@ -146,7 +146,7 @@ static int getEEPROMCountryCode(char *eeprom_addr)
  */
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifndef CONFIG_RALINK_RT3052
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)
 	int  idx = 0, channel, returnEEPROMValue=0;
 	char *value = nvram_get(RT2860_NVRAM,"CountryCode");
 	char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
