@@ -147,9 +147,7 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)
-	int  idx = 0, channel, returnEEPROMValue=0;
-	char *value = nvram_get(RT2860_NVRAM,"CountryCode");
-	char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
+	int  idx = 0, channel = 0, returnEEPROMValue=0;
 	char *RemoveDFSChannel = nvram_get(RT2860_NVRAM, "RemoveDFSChannel");
 
 #ifdef CONFIG_RALINK_RT3883
