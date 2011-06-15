@@ -4,7 +4,7 @@
  *
  * Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
- * $Id: stapriv.h,v 1.15.2.1 2010-02-26 06:42:02 chhung Exp $
+ * $Id: stapriv.h,v 1.18 2010-07-16 06:25:23 chhung Exp $
  */
 
 #include "linux/autoconf.h"
@@ -104,9 +104,7 @@ typedef union  _HTTRANSMIT_SETTING {
 		unsigned short  BW:1;           //channel bandwidth 20MHz or 40 MHz
 		unsigned short  ShortGI:1;
 		unsigned short  STBC:2;         //SPACE
-    		unsigned short  eTxBF:1;                                                                                                            
-    		unsigned short	rsv:1;                                                                                                              
-    		unsigned short	iTxBF:1;                                                                                                            
+		unsigned short  rsv:3;
 		unsigned short  MODE:2;         // 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
 	} field;
 	unsigned short  word;
@@ -228,8 +226,8 @@ typedef enum _NDIS_802_11_NETWORK_TYPE
 	Ndis802_11OFDM5,
 	Ndis802_11OFDM24,
 	Ndis802_11Automode,
-	Ndis802_11OFDM5_N,                                                                                                                      
-	Ndis802_11OFDM24_N,                                                                                                                     
+	Ndis802_11OFDM5_N,
+	Ndis802_11OFDM24_N,
 	Ndis802_11NetworkTypeMax    // not a real type, defined as an upper bound
 } NDIS_802_11_NETWORK_TYPE, *PNDIS_802_11_NETWORK_TYPE;
 
@@ -267,7 +265,7 @@ typedef struct PACKED _NDIS_WLAN_BSSID_EX
 	unsigned char                       MacAddress[6];      // BSSID
 	unsigned char                       Reserved[2];
 	NDIS_802_11_SSID                    Ssid;               // SSID
-	unsigned long                       Privacy;            // WEP encryption requirement
+	unsigned int						Privacy;            // WEP encryption requirement
 	NDIS_802_11_RSSI                    Rssi;               // receive signal
                                                             // strength in dBm
 	NDIS_802_11_NETWORK_TYPE            NetworkTypeInUse;
@@ -323,12 +321,12 @@ typedef enum _RT_802_11_PHY_MODE {
 	PHY_11ABG_MIXED,
 	PHY_11G,
 	PHY_11ABGN_MIXED,   // both band   5
-        PHY_11N_2_4G,       // 11n-only with 2.4G band      6                                                                           
+	PHY_11N_2_4G,       // 11n-only with 2.4G band      6
 	PHY_11GN_MIXED,     // 2.4G band      7
 	PHY_11AN_MIXED,     // 5G  band       8
 	PHY_11BGN_MIXED,    // if check 802.11b.      9
 	PHY_11AGN_MIXED,    // if check 802.11b.      10
-        PHY_11N_5G,         // 11n-only with 5G band                11
+	PHY_11N_5G,         // 11n-only with 5G band                11
 } RT_802_11_PHY_MODE;
 
 typedef struct {
@@ -374,9 +372,13 @@ typedef enum _NDIS_802_11_AUTHENTICATION_MODE
 	Ndis802_11AuthModeWPANone,
 	Ndis802_11AuthModeWPA2,
 	Ndis802_11AuthModeWPA2PSK,
-        Ndis802_11AuthModeWPA1WPA2,
-        Ndis802_11AuthModeWPA1PSKWPA2PSK,
-	Ndis802_11AuthModeMax               // Not a real mode, defined as upper bound
+	Ndis802_11AuthModeWPA1WPA2,
+	Ndis802_11AuthModeWPA1PSKWPA2PSK,
+#ifdef WAPI_SUPPORT
+	Ndis802_11AuthModeWAICERT,                      // WAI certificate authentication
+	Ndis802_11AuthModeWAIPSK,                       // WAI pre-shared key
+#endif // WAPI_SUPPORT //
+	Ndis802_11AuthModeMax           // Not a real mode, defined as upper bound
 } NDIS_802_11_AUTHENTICATION_MODE, *PNDIS_802_11_AUTHENTICATION_MODE;
 
 typedef enum _NDIS_802_11_WEP_STATUS
@@ -392,12 +394,7 @@ typedef enum _NDIS_802_11_WEP_STATUS
 	Ndis802_11Encryption2Enabled,
 	Ndis802_11Encryption2KeyAbsent,
 	Ndis802_11Encryption3Enabled,
-	Ndis802_11Encryption3KeyAbsent,
-        Ndis802_11Encryption4Enabled,       // TKIP or AES mix                                                                                  
-	Ndis802_11Encryption4KeyAbsent,                                                                                                         
-	Ndis802_11GroupWEP40Enabled,                                                                                                            
-        Ndis802_11GroupWEP104Enabled                  
-
+	Ndis802_11Encryption3KeyAbsent
 } NDIS_802_11_WEP_STATUS, *PNDIS_802_11_WEP_STATUS,
   NDIS_802_11_ENCRYPTION_STATUS, *PNDIS_802_11_ENCRYPTION_STATUS;
 
@@ -406,7 +403,6 @@ typedef enum _NDIS_802_11_POWER_MODE
 	Ndis802_11PowerModeCAM,
 	Ndis802_11PowerModeMAX_PSP,
 	Ndis802_11PowerModeFast_PSP,
-	Ndis802_11PowerModeLegacy_PSP,
 	Ndis802_11PowerModeMax      // not a real mode, defined as an upper bound
 } NDIS_802_11_POWER_MODE, *PNDIS_802_11_POWER_MODE;
 
@@ -518,7 +514,7 @@ typedef struct _NDIS_802_11_REMOVE_KEY
 // Key mapping keys require a BSSID
 typedef struct _NDIS_802_11_KEY
 {
-	unsigned int        Length;             // Length of this structure
+    unsigned int        Length;             // Length of this structure
 	unsigned int        KeyIndex;
 	unsigned int        KeyLength;          // length of key in bytes
 	unsigned char       BSSID[6];
@@ -535,40 +531,10 @@ typedef struct _NDIS_802_11_WEP                                                 
 
 typedef struct _NDIS_802_11_PASSPHRASE
 {
-       unsigned int          KeyLength;          // length of key in bytes
-       unsigned char         BSSID[6];
-       unsigned char         KeyMaterial[1];     // variable length depending on above field
+	unsigned int			KeyLength;          // length of key in bytes
+	unsigned char			BSSID[6];
+	unsigned char           KeyMaterial[1];     // variable length depending on above field
 } NDIS_802_11_PASSPHRASE, *PNDIS_802_11_PASSPHRASE;
 
-typedef union _MACHTTRANSMIT_SETTING {
-	struct  {
-		unsigned short  MCS:7;  // MCS
-		unsigned short  BW:1;   //channel bandwidth 20MHz or 40 MHz
-		unsigned short  ShortGI:1;
-		unsigned short  STBC:2; //SPACE
-		unsigned short  rsv:3;
-		unsigned short  MODE:2; // Use definition MODE_xxx.
-	} field;
-	unsigned short      word;
-} MACHTTRANSMIT_SETTING;
 
-typedef struct _RT_802_11_MAC_ENTRY {
-    unsigned char		ApIdx;
-    unsigned char       	Addr[6];
-    unsigned char       	Aid;
-    unsigned char       	Psm;     // 0:PWR_ACTIVE, 1:PWR_SAVE
-    unsigned char               MimoPs;  // 0:MMPS_STATIC, 1:MMPS_DYNAMIC, 3:MMPS_Enabled
-    char                	AvgRssi0;
-    char            		AvgRssi1;
-    char            		AvgRssi2;
-    unsigned int          	ConnectedTime;
-    MACHTTRANSMIT_SETTING       TxRate;
-    unsigned int          	LastRxRate;
-    int           		StreamSnr[3];
-    int           		SoundingRespSnr[3];
-} RT_802_11_MAC_ENTRY;
 
-typedef struct _RT_802_11_MAC_TABLE {
-	unsigned long            Num;
-	RT_802_11_MAC_ENTRY      Entry[32]; //MAX_LEN_OF_MAC_TABLE = 32
-} RT_802_11_MAC_TABLE;
