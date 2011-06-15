@@ -67,6 +67,15 @@ void usage(char *cmd)
 	printf(" %s filt [mac] [portmap]                 - add an SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan idx]      - add an SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan idx] [age]- add an SA filtering entry to switch table\n", cmd);
+#elif defined (CONFIG_RALINK_RT5350)
+	printf(" %s ingress-rate on [port] [Mbps]        - set ingress rate limit on port 0~4 \n", cmd);
+	printf(" %s egress-rate on [port] [Mbps]         - set egress rate limit on port 0~4 \n", cmd);
+	printf(" %s ingress-rate off [port]              - del ingress rate limit on port 0~4 \n", cmd);
+	printf(" %s egress-rate off [port]               - del egress rate limit on port 0~4\n", cmd);
+	printf(" %s filt [mac]                           - add an SA filtering entry (with portmap 1111111) to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap]                 - add an SA filtering entry to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap] [vlan idx]      - add an SA filtering entry to switch table\n", cmd);
+	printf(" %s filt [mac] [portmap] [vlan idx] [age]- add an SA filtering entry to switch table\n", cmd);
 #endif
 	printf(" %s del [mac]                            - delete an entry from switch table\n", cmd);
 	printf(" %s del [mac] [vlan idx]                 - delete an entry from switch table\n", cmd);
@@ -116,7 +125,7 @@ int reg_write(int offset, int value)
 }
 
 
-#ifdef CONFIG_RALINK_RT3352
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 
 int ingress_rate_set(int on_off, int port, int bw)
 {
@@ -538,7 +547,7 @@ int main(int argc, char *argv[])
 		else
 			usage(argv[0]);
 	}
-#ifdef CONFIG_RALINK_RT3352
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 	else if (!strncmp(argv[1], "ingress-rate", 6)) {
 		int port=0, bw=0;
 
