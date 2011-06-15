@@ -1,3 +1,19 @@
+/*
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation. See README and COPYING for
+ * more details.
+
+	Module Name:
+	ieee802_1x.c
+
+	Revision History:
+	Who 		When		  What
+	--------	----------	  ----------------------------------------------
+	Jan, Lee	Dec --2003	  modified
+
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +30,7 @@
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
 #include <linux/wireless.h>
 
-#include "rtdot1x.h"
+#include "rt2860apd.h"
 #include "ieee802_1x.h"
 #include "radius.h"
 #include "radius_client.h"
@@ -64,7 +80,7 @@ static void ieee802_1x_send(rtapd *rtapd, struct sta_info *sta, u8 type, u8 *dat
 	//If (ethertype==ETH_P_PRE_AUTH), this means the packet is to or from ehternet socket(WPA2, pre-auth)
 	if (sta->ethertype == ETH_P_PRE_AUTH)
 	{
-		if (send(rtapd->eth_sock, buf, len, 0) < 0)
+		if (send(sta->SockNum/*rtapd->eth_sock*/, buf, len, 0) < 0)
 			perror("send[WPA2 pre-auth]");
 		DBGPRINT(RT_DEBUG_INFO,"ieee802_1x_send::WPA2, pre-auth, len=%d\n", len);
 	}
@@ -605,11 +621,16 @@ void ieee802_1x_receive(
 	struct sta_info *sta;
 	struct ieee802_1x_hdr *hdr;
 	char SNAP_802_1H[] = {0xaa, 0xaa, 0x03, 0x00, 0x00, 0x00};
+	UCHAR 	RalinkIe[9] = {221, 7, 0x00, 0x0c, 0x43, 0x00, 0x00, 0x00, 0x00}; 
 	u16 datalen;
+	int bStop = 0;
 
 	DBGPRINT(RT_DEBUG_TRACE,"IEEE802_1X_RECEIVE : from Supplicant\n");
 	
-	sta = Ap_get_sta(rtapd, sa, apidx, ethertype, SockNum);
+	if (len == sizeof(RalinkIe) && RTMPCompareMemory(buf, RalinkIe, sizeof(RalinkIe)) == 0)
+		bStop = 1;
+	
+	sta = Ap_get_sta(rtapd, sa, apidx, ethertype, bStop, SockNum);
 	if (!sta)
 	{
 		return;
