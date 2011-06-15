@@ -34,7 +34,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: mtd.c,v 1.10 2008-09-17 07:59:46 winfred Exp $
+ * $Id: mtd.c,v 1.1.6.1 2010-08-03 08:38:31 winfred Exp $
  *
  * The code is based on the linux-mtd examples.
  */
@@ -62,7 +62,11 @@
 #include "linux/autoconf.h"
 #include "mtd.h"
 
+#ifdef CONFIG_MTD_NAND_RALINK
+#define BUFSIZE (0x4000)
+#else
 #define BUFSIZE (1 * 1024)
+#endif
 #define MAX_ARGS 3
 
 //libnvram
@@ -252,6 +256,27 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 	}
 
 	for (; len;) {
+#ifdef CONFIG_MTD_NAND_RALINK
+		struct mtd_oob_buf oob;
+		unsigned char oobd[mtdInfo.oobsize];
+		oob.start = (u_int32_t)e;
+		oob.length = mtdInfo.oobsize;
+		oob.ptr = oobd;
+		if (ioctl(fd, MEMREADOOB, &oob) != 0) {
+			fprintf(stderr, "Reading %s OOB failed: %x\n   ", mtd, e);
+		}
+		else if (oobd[4] != (unsigned char)0xff) { //CONFIG_BAD_BLOCK_POS
+			fprintf(stderr, "skip bad block %x\n   ", e);
+ 			if (lseek(fd, BUFSIZE, SEEK_CUR) == -1) {
+ 				fprintf(stderr, "lseek failed.\n");
+				free(buf);
+ 				exit(1);
+ 			}
+			e += BUFSIZE;
+			w += BUFSIZE;
+			continue;
+		}
+#endif
 		/* buffer may contain data already (from trx check) */
 		r = 0;
 		if( (BUFSIZE) > len ){
