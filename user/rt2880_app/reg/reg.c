@@ -33,6 +33,10 @@ int main(int argc, char *argv[])
 	{
 		method = RT_RDM_CMD_SHOW;
 	}
+	else if (*p == 'p')
+	{
+		method = RT_RDM_CMD_READ;
+	}
 	else if (*p == 'd')
 	{
 		method = RT_RDM_CMD_DUMP;
@@ -151,7 +155,10 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	ioctl(fd, method, offset);
+	ioctl(fd, method, &offset);
+	if (method == RT_RDM_CMD_READ) {
+		printf("0x%x\n", offset);	
+	}
 	
 	close(fd);
 
