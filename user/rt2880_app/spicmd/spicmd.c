@@ -79,10 +79,12 @@ int main(int argc, char *argv[])
 		vtss.reg = strtol(argv[5], NULL, 16);
 		if (!strncmp(argv[2], "read", 5)) {
 			ioctl(fd, RT2880_SPI_VTSS_READ, &vtss);
+			printf("r %x %x %x -> %x\n", vtss.blk, vtss.sub, vtss.reg, vtss.value);
 		}
 		else if (!strncmp(argv[2], "write", 6)) {
 			vtss.value = strtol(argv[6], NULL, 16);
 			ioctl(fd, RT2880_SPI_VTSS_WRITE, &vtss);
+			printf("w %x %x %x -> %x\n", vtss.blk, vtss.sub, vtss.reg, vtss.value);
 		}
 		close(fd);
 		return 0;
