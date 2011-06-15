@@ -18,18 +18,18 @@ void usage(char *cmd)
 
 int main(int argc, char *argv[])
 {
-	FILE* fp_pcm;
+	FILE* fp_pcm, *fp_record_pcm, *fp_playback_pcm;
 	int pcm_fd, nframe, nLen, chid;
-	int total = 0;
+	int total = 0, nloop;
 	if (argc < 2)
 		usage(argv[0]);
 	
-	pcm_fd = open("dev/PCM", O_RDWR); 
+	pcm_fd = open("/dev/pcm0", O_RDWR); 
 	if(pcm_fd < 0)
-    {
-    	printf("open pcm driver failed (%d)...exit\n",pcm_fd);
-    	return -1;
-    }
+    	{
+    		printf("open pcm driver failed (%d)...exit\n",pcm_fd);
+    		return -1;
+    	}	
     
 	switch (atoi(argv[1])) {
 	case 0:
@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
 			return -1;
 		}	
 		fp_pcm = fopen("/mnt/record.pcm","wb");
-	    if(fp_pcm==NULL)
-	    {
-	    	printf("open pcm file failed..exit\n");
-	    	return -1;
-	    }
+	    	if(fp_pcm==NULL)
+	    	{
+	    		printf("open pcm file failed..exit\n");
+	    		return -1;
+	    	}
 		ioctl(pcm_fd, PCM_SET_RECORD, chid);
 		nframe = 0;
 		while(nframe < total)
@@ -95,12 +95,12 @@ int main(int argc, char *argv[])
 			printf("mmap failed=%d\n",pcm_playback.pcmbuf);
 			return -1;
 		}	
-		fp_pcm = fopen("/mnt/record.pcm","rb");
-	    if(fp_pcm==NULL)
-	    {
-	    	printf("open pcm file failed..exit\n");
-	    	return -1;
-	    }
+		fp_pcm = fopen("/etc_ro/pb.pcm","rb");
+	    	if(fp_pcm==NULL)
+	    	{
+	    		printf("open pcm file failed..exit\n");
+	    		return -1;
+	    	}
 		ioctl(pcm_fd, PCM_SET_PLAYBACK, chid);
 		nframe = 0;
 		while(nframe < total)
@@ -126,7 +126,34 @@ int main(int argc, char *argv[])
 			param[1] = atoi(argv[3]);
 			ioctl(pcm_fd, PCM_SET_CODEC_TYPE, param);
 		}
-		break;					
+		break;
+	case 5:
+		ioctl(pcm_fd, PCM_EXT_LOOPBACK_ON, NULL);
+		break;
+	case 6:
+		ioctl(pcm_fd, PCM_EXT_LOOPBACK_OFF, NULL);
+		break;
+	case 7:
+		nloop = 2500;
+		fp_record_pcm = fopen("/mnt/rec.pcm","wb");
+		fp_playback_pcm = fopen("/etc_ro/pb.pcm","rb");
+		if(fp_playback_pcm==NULL)
+		{
+			break;	
+		}
+		ioctl(pcm_fd, PCM_START, 1);
+		while(nloop)
+		{
+			fread(buffer, 1, PCM_FIFO_SIZE, fp_playback_pcm);		
+			ioctl(pcm_fd, PCM_GETDATA, buffer+PCM_FIFO_SIZE);
+			fwrite(buffer+PCM_FIFO_SIZE, 1, PCM_FIFO_SIZE, fp_record_pcm);		
+			ioctl(pcm_fd, PCM_PUTDATA, buffer);
+			nloop--;
+		}	
+		fclose(fp_record_pcm);
+		fclose(fp_playback_pcm);
+		ioctl(pcm_fd, PCM_STOP, 1);
+		break;							
 	default:
 		{
 		usage(argv[0]);
