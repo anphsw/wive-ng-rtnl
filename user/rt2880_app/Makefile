@@ -19,6 +19,7 @@ ra_dir_$(CONFIG_RT3052_SWITCH)      += switch
 ra_dir_$(CONFIG_RALINKAPP_I2S)      += i2scmd
 ra_dir_$(CONFIG_RALINKAPP_PCM)      += pcmcmd
 ra_dir_$(CONFIG_RALINKAPP_SWQOS)    += sw_qos
+ra_dir_$(CONFIG_RALINKAPP_CLS)	    += clscmd
 
 all romfs:
 	for i in $(ra_dir_y) ; do make -C $$i $@ || exit $?; done
