@@ -263,7 +263,9 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 		oob.length = mtdInfo.oobsize;
 		oob.ptr = oobd;
 		if (ioctl(fd, MEMREADOOB, &oob) != 0) {
-			fprintf(stderr, "Reading %s OOB failed: %x\n   ", mtd, e);
+			//if Reading flash in not nand
+			//fprintf(stderr, "Reading %s OOB failed: %x\n   ", mtd, e);
+			goto not_nand;
 		}
 		else if (oobd[4] != (unsigned char)0xff) { //CONFIG_BAD_BLOCK_POS
 			fprintf(stderr, "skip bad block %x\n   ", e);
@@ -276,6 +278,7 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 			w += BUFSIZE;
 			continue;
 		}
+not_nand:
 #endif
 		/* buffer may contain data already (from trx check) */
 		r = 0;
