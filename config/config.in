@@ -260,3 +260,10 @@ comment 'Windows Rally Program'
 bool 'Link Layer Topology Discovery Protocol'		CONFIG_USER_LLTD
 endmenu
 
+mainmenu_option next_comment
+comment '3G support'
+bool 'usb-modeswitch'		CONFIG_USB_MODESWITCH
+if [ "$CONFIG_USB_MODESWITCH" = "y" ]; then
+	define_bool CONFIG_LIB_USB y
+fi
+endmenu

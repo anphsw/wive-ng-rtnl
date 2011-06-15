@@ -71,11 +71,14 @@ dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
+dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
+dir_$(CONFIG_USER_TCPDUMP)		    += tcpdump
+
+#for usb support
+dir_$(CONFIG_USB_MODESWITCH)                += usb_modeswitch
 dir_$(CONFIG_USER_P910ND)		    += p910nd
 dir_$(CONFIG_USER_NTFS3G)		    += ntfs-3g
 dir_$(CONFIG_USER_SAMBA)		    += samba
-dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
-dir_$(CONFIG_USER_TCPDUMP)		    += tcpdump
 dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
 
 #only ralink apps and scripts
@@ -84,6 +87,7 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
+
 
 all: config
 	echo ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"

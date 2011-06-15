@@ -447,6 +447,7 @@
 4) Fix watchdog, rdm, usb drivers.<br>
 5) HTB fix rate select.<br>
 6) busybox version up to 1.18.5.<br>
+7) Add usb_modeswitch.<br>
 
 <br><br>
 <b>For support see:</b><br>

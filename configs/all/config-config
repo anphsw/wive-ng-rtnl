@@ -168,3 +168,8 @@ CONFIG_RT3052_SWITCH=y
 # Windows Rally Program
 #
 CONFIG_USER_LLTD=y
+
+#
+# 3G support
+#
+# CONFIG_USB_MODESWITCH is not set
