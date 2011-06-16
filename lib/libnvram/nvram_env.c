@@ -789,8 +789,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(TxPower);
 		FPRINT_NUM(DisableOLBC);
 		FPRINT_NUM(BGProtection);
-		fprintf(fp, "TxAntenna=\n");
-		fprintf(fp, "RxAntenna=\n");
 		FPRINT_NUM(TxPreamble);
 		FPRINT_NUM(RTSThreshold);
 		FPRINT_NUM(FragThreshold);
