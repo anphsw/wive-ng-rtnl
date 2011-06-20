@@ -23,6 +23,7 @@
 EXEC := udpxy
 UPXC := upxc
 UDPXREC := udpxrec
+NO_UDPXREC := yes
 
 MKDEPOPT := -M
 DEBUG_ON := -g
@@ -75,8 +76,12 @@ ifeq ($(PROFTOOL),gprof)
 	CFLAGS += -pg
 endif
 
+
 BUILDFILE = BUILD
 BUILDNO := `cat $(BUILDFILE)`
+
+BTYPEFILE = BLDTYPE
+BTYPE := `cat $(BTYPEFILE) | tr -d '"'`
 
 VERSIONFILE = VERSION
 VERSION := `cat $(VERSIONFILE) | tr -d '"'`
@@ -89,12 +94,14 @@ DOCFILES := doc/udpxy-manual-RU.rtf
 INSTALLROOT := ./filesystem
 
 ARCDIR = ..
-ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION)-$(BUILDNO).tgz
+ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION)-$(BTYPE)$(BUILDNO).tgz
 
-COMMON_OPT :=
+ifneq (yes,$(NO_UDPXREC))
+COMMON_OPT := $(COMMON_OPT) -DUDPXREC_MOD
+endif
 DEBUG_OPT  := $(COMMON_OPT) $(DEBUG_ON) -DTRACE_MODULE
 PROD_OPT   := $(COMMON_OPT) -DNDEBUG -DTRACE_MODULE
-LEAN_OPT   := -DNDEBUG
+LEAN_OPT   := $(COMMON_OPT) -DNDEBUG $(USER_OPT)
 
 
 UTILDIR := util
@@ -102,7 +109,11 @@ MKDEP_SRC := $(UTILDIR)/mkdep.c
 MKDEP_TOOL := $(UTILDIR)/mkdep
 
 SRC := udpxy.c rparse.c util.c prbuf.c ifaddr.c ctx.c mkpg.c \
-	  rtp.c uopt.c dpkt.c netop.c extrn.c udpxrec.c main.c
+	  rtp.c uopt.c dpkt.c netop.c extrn.c main.c
+ifneq (yes,$(NO_UDPXREC))
+SRC := $(SRC) udpxrec.c
+endif
+
 OBJ := ${SRC:.c=.o}
 
 DEPFILE := $(EXEC).dep
@@ -155,8 +166,10 @@ $(EXEC) : $(DEPFILE) $(OBJ)
 	@rm -f $(EXEC)
 	$(CC) $(CFLAGS) $(COPT) -o $(EXEC) $(OBJ)
 	@ls -l $(EXEC)
+ifneq (yes, $(NO_UDPXREC))
 	@rm -f $(UDPXREC)
 	ln -sf $(EXEC) $(UDPXREC)
+endif
 
 clean:
 	rm -f $(CORES) $(DEPFILE) $(OBJ) $(EXEC) $(UDPXREC)
@@ -168,7 +181,7 @@ incbuild:
 	@$(MAKE) touch
 
 DISTRO_DIR := udpxy-$(VERSION)-$(BUILDNO)
-DISTRO_FILES := $(SRC) *.h Makefile *.txt $(BUILDFILE) \
+DISTRO_FILES := $(SRC) *.h Makefile *.txt $(BUILDFILE) $(BTYPEFILE) \
 	$(VERSIONFILE) $(CHANGEFILE) $(READMEFILE) $(DOCFILES)
 
 distro:

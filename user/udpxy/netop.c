@@ -1,6 +1,6 @@
 /* @(#) implementation of network operations for udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -284,6 +284,8 @@ set_timeouts( int rsock, int ssock,
                     __func__);
             return ERR_INTERNAL;
         }
+        TRACE( (void)tmfprintf (g_flog, "socket %d: RCV timeout set to %ld sec, %ld usec\n",
+                rsock, rtv.tv_sec, rtv.tv_usec) );
     }
 
     if( ssock ) {
@@ -294,6 +296,8 @@ set_timeouts( int rsock, int ssock,
             mperror(g_flog, errno, "%s: setsockopt - SO_SNDTIMEO", __func__);
             return ERR_INTERNAL;
         }
+        TRACE( (void)tmfprintf (g_flog, "socket %d: SEND timeout set to %ld sec, %ld usec\n",
+                rsock, rtv.tv_sec, rtv.tv_usec) );
     }
 
     return rc;

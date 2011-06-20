@@ -1,6 +1,6 @@
 /* @(#) main module: dispatches command to apps within udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov (pcherenkov@gmail.com)
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -22,24 +22,27 @@
 #include <libgen.h>
 #include <stdio.h>
 
+static const char UDPXY[]   = "udpxy";
 extern int udpxy_main( int argc, char* const argv[] );
+
+#ifdef UDPXREC_MOD
+static const char UDPXREC[] = "udpxrec";
 extern int udpxrec_main( int argc, char* const argv[] );
+#endif
 
 int
 main( int argc, char* const argv[] )
 {
-    static const char UDPXY[]   = "udpxy";
-    static const char UDPXREC[] = "udpxrec";
-
     const char* app = basename(argv[0]);
 
     if( 0 == strncmp( UDPXY, app, sizeof(UDPXY) ) )
         return udpxy_main( argc, argv );
+#ifdef UDPXREC_MOD
     else if( 0 == strncmp( UDPXREC, app, sizeof(UDPXREC) ) )
         return udpxrec_main( argc, argv );
+#endif
 
-    (void)fprintf( stderr, "Unsupported udpxy module [%s]\n"
-            "Supported modules are [%s,%s]", app, UDPXY, UDPXREC );
+    (void)fprintf( stderr, "Unsupported udpxy module [%s]\n", app);
     return 1;
 }
 

@@ -1,6 +1,6 @@
 /* @(#) define OS-specific types/constants
  *
- * Copyright 2008 Pavel V. Cherenkov (pcherenkov@gmail.com)
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com) (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -46,7 +46,6 @@
 #if defined(__linux)
     #define NO_SOCKADDR_SA_LEN
 #endif
-
 
 #ifndef HAS_SOCKLEN
     typedef int        a_socklen_t;

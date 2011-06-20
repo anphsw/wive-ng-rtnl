@@ -1,6 +1,6 @@
 /* @(#) udpxrec utility: main module
  *
- * Copyright 2008 Pavel V. Cherenkov (pcherenkov@gmail.com)
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -98,6 +98,7 @@ usage( const char* app, FILE* fp )
     extern const char  VERSION[];
     extern const int   BUILDNUM;
     extern const char  UDPXY_COPYRIGHT_NOTICE[];
+    extern const char  UDPXY_CONTACT[];
     extern const char  COMPILE_MODE[];
 
     (void) fprintf(fp, "%s %s (build %d) %s\n", app, VERSION, BUILDNUM,
@@ -135,7 +136,8 @@ usage( const char* app, FILE* fp )
             "\tset socket buffer to 64Kb; increment nice value by 2;\n"
             "\twrite captured video to /opt/video/tv5.mpg\n",
             g_udpxrec_app );
-    (void) fprintf( fp, "\n  %s\n\n", UDPXY_COPYRIGHT_NOTICE );
+    (void) fprintf( fp, "\n  %s\n", UDPXY_COPYRIGHT_NOTICE );
+    (void) fprintf( fp, "  %s\n\n", UDPXY_CONTACT );
     return;
 }
 
@@ -339,7 +341,8 @@ record()
             /* O_LARGEFILE is not defined under FreeBSD ??-7.1 */
             oflags |= O_LARGEFILE;
         # endif
-        destfd = open( g_recopt.dstfile, oflags );
+        destfd = open( g_recopt.dstfile, oflags,
+                (mode_t)(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
         if( -1 == destfd ) {
             mperror( g_flog, errno, "%s: cannot create destination file [%s]",
                      __func__, g_recopt.dstfile );
@@ -541,8 +544,7 @@ int udpxrec_main( int argc, char* const argv[] )
         return ERR_PARAM;
     }
 
-    init_recopt( &g_recopt );
-
+    rc = init_recopt( &g_recopt );
     while( (0 == rc) && (-1 != (ch = getopt( argc, argv, OPTMASK ))) ) {
         switch(ch) {
             case 'T':   no_daemon = 1; break;

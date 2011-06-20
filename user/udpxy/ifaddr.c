@@ -1,4 +1,23 @@
-/* @(#) interface/address conversion */
+/* @(#) interface/address conversion
+ *
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
+ *
+ *  This file is part of udpxy.
+ *
+ *  udpxy is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  udpxy is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with udpxy.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -17,6 +36,51 @@
 #include "osdef.h"
 #include "ifaddr.h"
 
+
+/* check if ifr contains info on the desired ifname
+ */
+static int
+chkifr( const struct ifreq* ifr, const char* ifname,
+        const size_t addrlen, size_t* offset )
+{
+    size_t sa_len = 0;
+
+    assert(ifr && ifname && offset);
+
+#ifdef NO_SOCKADDR_SA_LEN
+    switch( ifr->ifr_addr.sa_family )
+    {
+    #ifndef NO_INET6_SUPPORT
+        case AF_INET6: sa_len = sizeof(struct sockaddr_in6); break;
+   #endif
+        case AF_INET: sa_len = sizeof(struct sockaddr); break;
+        default: sa_len = 0; break;
+    }
+#else
+    sa_len = ifr->ifr_addr.sa_len;
+#endif
+
+    if( sa_len > 0 ) {
+        if ( (ifr->ifr_addr.sa_family == AF_INET) &&
+            (0 == strncmp(ifname, ifr->ifr_name, sizeof(struct ifreq))) &&
+            (addrlen >= sa_len) ) {
+            *offset = sa_len;
+            return 0;
+        }
+    }
+
+#if defined(__linux)
+    *offset = sizeof(*ifr);
+#else
+    *offset = (sa_len + sizeof( ifr->ifr_name ));
+    /* the above is per R. Stevens' book and not working on 64-bit Linux */
+#endif
+
+    return -1;
+}
+
+
+
 /* retrieve IPv4 address of the given network interface
  */
 int
@@ -25,7 +89,7 @@ if2addr( const char* ifname,
 {
     int rc, sockfd;
     char *buf, *rec;
-    size_t buflen, sa_len;
+    size_t buflen, offset;
     int last_len;
     struct ifconf  ifc;
     struct ifreq   ifr;
@@ -86,42 +150,15 @@ if2addr( const char* ifname,
     for( rec = ifc.ifc_buf; rec < (ifc.ifc_buf + ifc.ifc_len); ) {
         (void) memcpy( &ifr, rec, sizeof(struct ifreq) );
 
-        #ifdef NO_SOCKADDR_SA_LEN
-        switch( ifr.ifr_addr.sa_family )
-        {
-            case AF_INET:
-                sa_len = sizeof(struct sockaddr); break;
-#ifndef NO_INET6_SUPPORT
-            case AF_INET6:
-                sa_len = sizeof(struct sockaddr_in6); break;
-#endif
-            default:
-                rc = -1; break;
-        }
-        #else
-        sa_len = ifr.ifr_addr.sa_len;
-        #endif
-        if( 0 != rc ) break;
-
-        if( ifr.ifr_addr.sa_family != AF_INET )
-            continue;
-
-        if( 0 == strncmp(ifname, ifr.ifr_name, sizeof(struct ifreq)) ) {
-            if( addrlen < sa_len ) {
-                rc = -1;
-                break;
-            }
-
-            (void) memcpy( addr, &(ifr.ifr_addr), sa_len );
+        offset = 0;
+        rc = chkifr( &ifr, ifname, addrlen, &offset );
+        if ( 0 == rc ) {
+            (void) memcpy( addr, &(ifr.ifr_addr), offset );
             break;
         }
-        else {
-            /* rec += (sa_len + sizeof( ifr.ifr_name )); */
-            /**** the above is per R. Stevens' book and not working
-             **** on 64-bit Linux */
 
-            rec += sizeof(ifr);
-        }
+        if( 0 == offset ) break;
+        rec += offset;
     } /* for */
 
     if( rec >= (buf + ifc.ifc_len) ) {

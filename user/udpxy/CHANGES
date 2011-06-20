@@ -1,6 +1,6 @@
 # @(#) list changes to udpxy from build to build
 #
-# Copyright 2008 Pavel V. Cherenkov
+# Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
 #
 #  This file is part of udpxy.
 #
@@ -143,6 +143,34 @@ Build 13 (10-April-2009)
 
 Build 14 (23-Jul-2009)
     (*) ported to compile under FreeBSD 5.5 (32-bit)
+
+Build 15 (XX-Mar-2010)
+    (*) FIXED: not compiling with -O2/O3 flags under gcc (select additional options in USER_OPT env variable)
+    (*) FIXED: would not allow running more than one udpxy daemon
+
+Build 16 (21-Mar-2010)
+    (*) FIXED: hanging when specifying network interface by name
+
+Build 17 (27-Jun-2010)
+    (*) FIXED: server terminates on ECONNABORTED from accept()
+    (*) Dynamic memory allocation for HTTP status pages implemented - will not truncate pages
+
+Build 18 (9-Jan-2011)
+    (*) IP/port separator in HTTP request to udpxy can be any of those: ":%~+-^"
+
+Build 19 (9-Jan-2011)
+    (*) MAX limit of clients (-c option) upped to 5,000 (five thousand)
+
+Build 20 (18-Jun-2011)
+    (*) FIXED: player sends last request's traffic to any client with invalid request;
+    (*) FIXED: unsupported HTTP requests (those that the parser does not handle) are denied [ID: 3294265]
+
+    (*) Added UDPXY_SREAD_TMOUT, UDPXY_SWRITE_TMOUT evn parameters to set read/write timeouts on HTTP server's socket;
+    (*) Added UDPXY_HTTP200_FTR_LN, UDPXY_HTTP200_FTR_FILE env parameters to allow appending 1 line or contents
+        of a text file to HTTP 200 (successful request processing) response;
+    (*) Added Content-type entry to HTTP response;
+    (*) Added conditional compilation of udpxrec - use NO_UDPXREC=yes make [mode] to *NOT* build udpxrec into the udpxy
+        binary
 
 # __EOF__
 

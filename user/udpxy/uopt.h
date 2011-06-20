@@ -1,6 +1,6 @@
 /* @(#) option definitions and associated structures for udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -29,7 +29,7 @@
 #include "udpxy.h"
 
 static const int MIN_CLIENT_COUNT       = 1;
-static const int MAX_CLIENT_COUNT       = 16;
+static const int MAX_CLIENT_COUNT       = 5000;
 static const int DEFAULT_CLIENT_COUNT   = 3;
 
 static const ssize_t MIN_MCACHE_LEN    = 4 * 1024;
@@ -55,14 +55,20 @@ struct udpxy_opt {
     time_t  rcv_tmout;      /* receive (mcast) socket timeout           */
     time_t  dhold_tmout;    /* timeout to hold buffered data (milisec)  */
 
-    flag_t  nosync_sbuf,    /* do not alter source-socket's buffer size */
-            nosync_dbuf;    /* do not alter dest-socket's buffer size */
+    time_t  sr_tmout,       /* server READ/RCV  timeout (sec)           */
+            sw_tmout;       /* server WRITE/SND timeout (sec)           */
 
-    char*   srcfile;         /* file to read (video stream) from     */
-    char*   dstfile;         /* file to save (video stream) to       */
+    flag_t  nosync_sbuf,    /* do not alter source-socket's buffer size */
+            nosync_dbuf;    /* do not alter dest-socket's buffer size   */
+
+    char*   srcfile;         /* file to read (video stream) from        */
+    char*   dstfile;         /* file to save (video stream) to          */
+
+    char    h200_ftr[2048];  /* text to add to HTTP 200 response        */
 };
 
 
+#ifdef UDPXREC_MOD
 /* udpxrec options
  */
 struct udpxrec_opt {
@@ -74,24 +80,27 @@ struct udpxrec_opt {
     int64_t max_fsize;      /* max size of dest file (in bytes)     */
     ssize_t bufsize;        /* size of receiving socket buffer      */
     int     rbuf_msgs;      /* max number of messages to save
-                               in buffer (-1 = as many as would fit) */
+                               in buffer (-1 = as many as would fit)    */
 
-                            /* address of the multicast interface   */
+                            /* address of the multicast interface       */
     char    mcast_addr[ IPADDR_STR_SIZE ];
     char    rec_channel[ IPADDR_STR_SIZE ];
     int     rec_port;
     int     waitupd_sec;    /* update every N seconds while waiting 
                                to start recording */
 
-    time_t  rcv_tmout;      /* receive (mcast) socket timeout       */
+    time_t  rcv_tmout;      /* receive (mcast) socket timeout           */
+    time_t  sr_tmout,       /* server READ/RCV  timeout (sec)           */
+            sw_tmout;       /* server WRITE/SND timeout (sec)           */
 
     flag_t  nosync_sbuf,    /* do not alter source-socket's buffer size */
-            nosync_dbuf;    /* do not alter dest-socket's buffer size */
+            nosync_dbuf;    /* do not alter dest-socket's buffer size   */
 
 
-    char*   pidfile;        /* file to store app's PID              */
-    char*   dstfile;        /* file to save (video stream) to       */
+    char*   pidfile;        /* file to store app's PID                  */
+    char*   dstfile;        /* file to save (video stream) to           */
 };
+#endif /* UDPXREC_MOD */
 
 #ifdef __cplusplus
     extern "C" {
@@ -99,7 +108,7 @@ struct udpxrec_opt {
 
 /* populate udpxy options with default/initial values
  */
-void
+int
 init_uopt( struct udpxy_opt* uo );
 
 
@@ -109,9 +118,10 @@ void
 free_uopt( struct udpxy_opt* uo );
 
 
+#ifdef UDPXREC_MOD
 /* populate udpxrec options with default/initial values
  */
-void
+int
 init_recopt( struct udpxrec_opt* ro );
 
 
@@ -120,16 +130,17 @@ init_recopt( struct udpxrec_opt* ro );
 void
 free_recopt( struct udpxrec_opt* ro );
 
-/* set verbose output on
- */
-void
-set_verbose( flag_t* verbose );
-
-
 /* print udpxrec options to stream
  */
 void
 fprint_recopt( FILE* stream, struct udpxrec_opt* ro );
+
+#endif /* UDPXREC_MOD */
+
+/* set verbose output on
+ */
+void
+set_verbose( flag_t* verbose );
 
 
 #ifdef __cplusplus

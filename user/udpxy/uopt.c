@@ -1,6 +1,6 @@
 /* @(#) option-associated functions for udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -21,17 +21,42 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 #include "udpxy.h"
 #include "uopt.h"
 #include "util.h"
 
 
+static int
+read_http_footer (char* buf, size_t len)
+{
+    const char* ev = getenv ("UDPXY_HTTP200_FTR_LN");
+    ssize_t n = 0;
+
+    assert (buf && len);
+
+    /* if 1-line footer is specified */
+    if (ev) {
+        (void) strncpy (buf, ev, len-1);
+        buf[len-1] = '\0';
+        return 0;
+    }
+
+    if (NULL != (ev = getenv ("UDPXY_HTTP200_FTR_FILE"))) {
+        n = txtf_read (ev, buf, len, stderr);
+    }
+
+    return (n<0) ? 1 : 0;
+}
+
+
 /* populate options with default/initial values
  */
-void
+int
 init_uopt( struct udpxy_opt* uo )
 {
+    int rc = 0;
     assert( uo );
 
     uo->is_verbose      = uf_FALSE;
@@ -44,6 +69,8 @@ init_uopt( struct udpxy_opt* uo )
                                 RLY_SOCK_TIMEOUT );
     uo->dhold_tmout     = get_timeval( "UDPXY_DHOLD_TMOUT",
                                 DHOLD_TIMEOUT );
+    uo->sr_tmout        = get_timeval ( "UDPXY_SREAD_TMOUT", SRVSOCK_TIMEOUT  );
+    uo->sw_tmout        = get_timeval ( "UDPXY_SWRITE_TMOUT", SRVSOCK_TIMEOUT );
 
     uo->nosync_sbuf     = (u_short)get_flagval( "UDPXY_SSOCKBUF_NOSYNC", 0 );
     uo->nosync_dbuf     = (u_short)get_flagval( "UDPXY_DSOCKBUF_NOSYNC", 0 );
@@ -51,6 +78,11 @@ init_uopt( struct udpxy_opt* uo )
     uo->srcfile         = NULL;
     uo->dstfile         = NULL;
     uo->mcast_refresh   = DEFAULT_MCAST_REFRESH;
+
+    if (-1 == read_http_footer (uo->h200_ftr, sizeof(uo->h200_ftr))) {
+        rc = -1; /* modify rc only if there is an error */
+    }
+    return rc;
 }
 
 
@@ -71,11 +103,15 @@ free_uopt( struct udpxy_opt* uo )
 }
 
 
+#ifdef UDPXREC_MOD
+
 /* populate udpxrec options with default/initial values
  */
-void
+int
 init_recopt( struct udpxrec_opt* ro )
 {
+    int rc = 0;
+
     assert( ro );
 
     ro->is_verbose      = uf_FALSE;
@@ -100,6 +136,8 @@ init_recopt( struct udpxrec_opt* ro )
         (flag_t)get_flagval( "UDPXY_DSOCKBUF_NOSYNC", 0 );
 
     ro->rcv_tmout       = 0;
+
+    return rc;
 }
 
 
@@ -174,6 +212,7 @@ fprint_recopt( FILE* stream, struct udpxrec_opt* ro )
     return;
 }
 
+#endif /* UDPXREC_MOD */
 
 /* set verbose output on
  */

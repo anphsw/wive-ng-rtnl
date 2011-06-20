@@ -1,6 +1,6 @@
 /* @(#) interface to utility functions for udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -35,6 +35,11 @@ extern "C" {
 ssize_t
 save_buffer( const void* buf, size_t len, const char* filename );
 
+/* read text file into a buffer
+ *
+ */
+ssize_t
+txtf_read (const char* fpath, char* dst, size_t maxlen, FILE* log);
 
 /* start process as a daemon
  *
@@ -61,7 +66,7 @@ make_pidfile( const char* fpath, pid_t pid, FILE* log );
  * (fail of destination directory is not writable)
  */
 int
-set_pidfile( const char* appname, char* buf, size_t len );
+set_pidfile( const char* appname, int port, char* buf, size_t len );
 
 /* write buffer to designated socket/file
  * return number of bytes read/written or one of the error

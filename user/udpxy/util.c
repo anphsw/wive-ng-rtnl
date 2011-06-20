@@ -1,6 +1,6 @@
 /* @(#) implementation of utility functions for udpxy
  *
- * Copyright 2008 Pavel V. Cherenkov
+ * Copyright 2008-2011 Pavel V. Cherenkov (pcherenkov@gmail.com)
  *
  *  This file is part of udpxy.
  *
@@ -76,6 +76,47 @@ save_buffer( const void* buf, size_t len, const char* filename )
 
     (void)close(fd);
     return (rc ? -1 : ((ssize_t)len - left));
+}
+
+
+/* read text file into a buffer
+ *
+ */
+ssize_t
+txtf_read (const char* fpath, char* dst, size_t maxlen, FILE* log)
+{
+    int rc = 0, fd = -1;
+    ssize_t n = 0;
+    ssize_t left = maxlen - 1;
+    char *p = dst;
+
+    assert (fpath && dst && maxlen);
+    fd = open (fpath, O_RDONLY, 0);
+    if (-1 == fd) {
+        mperror (log, errno, "%s open %s", __func__, fpath);
+        return -1;
+    }
+
+    while (left > 0) {
+        n = read (fd, p, maxlen - 1);
+        if (!n) break;
+        if (n < 0) {
+            n = 0; rc = errno;
+            if (EINTR != rc) {
+                mperror (log, errno, "%s read %s", __func__, fpath);
+                break;
+            }
+            rc = 0;
+        }
+        left -= (size_t)n;
+        p += n;
+    }
+    if (!rc) *p = '\0';
+
+    if (-1 == close (fd)) {
+        mperror (log, errno, "%s close %s", __func__, fpath);
+    }
+    return (rc ? -1 : ((ssize_t)maxlen - left - 1));
 }
 
 
@@ -257,7 +298,7 @@ make_pidfile( const char* fpath, pid_t pid, FILE* log )
  * (fail if destination directory is not writable)
  */
 int
-set_pidfile( const char* appname, char* buf, size_t len )
+set_pidfile( const char* appname, int port, char* buf, size_t len )
 {
     int n = -1;
 
@@ -266,7 +307,7 @@ set_pidfile( const char* appname, char* buf, size_t len )
     if( -1 == access(PIDFILE_DIR, W_OK ) )
         return -1;
 
-    n = snprintf( buf, len, "%s/%s.pid", PIDFILE_DIR, appname );
+    n = snprintf( buf, len, "%s/%s%d.pid", PIDFILE_DIR, appname, port );
     if( n < 0 ) return EXIT_FAILURE;
 
     buf[ len - 1 ] = '\0';
@@ -843,12 +884,13 @@ Zasctime( const struct tm* tm )
 int
 set_nice( int val, FILE* log )
 {
+    int newval = 0;
     assert( log );
 
     if( 0 != val ) {
         errno = 0;
-        (void) nice( val );
-        if( 0 != errno ) {
+        newval = nice( val );
+        if( (-1 == newval) && (0 != errno) ) {
             mperror( log, errno, "%s: nice", __func__ );
             return -1;
         }
