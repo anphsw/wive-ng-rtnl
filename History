@@ -439,6 +439,7 @@
 54) Filter all unused CONFIGS options from kernel config on create images. Is speed up boot and save mem.<br>
 55) More usb support fixes and optiomizations.<br>
 56) Site Survey Access Point Graphical Diagram.<br>
+57) udpxy up to 1.0-20 version.<br>
 
 1.8.x
 1) Sync from 3.5.0.0 SDK.<br>
