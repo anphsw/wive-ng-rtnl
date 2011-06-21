@@ -1422,20 +1422,6 @@ config SQUASHFS_FRAGMENT_CACHE_SIZE
 	  Note there must be at least one cached fragment.  Anything
 	  much more than three will probably not make much difference.
 
-config SQUASHFS_VMALLOC
-	bool "Use Vmalloc rather than Kmalloc" if SQUASHFS_EMBEDDED
-	depends on SQUASHFS
-	default n
-	help
-	  By default SquashFS uses kmalloc to obtain fragment cache memory.
-	  Kmalloc memory is the standard kernel allocator, but it can fail
-	  on memory constrained systems.  Because of the way Vmalloc works,
-	  Vmalloc can succeed when kmalloc fails.  Specifying this option
-	  will make SquashFS always use Vmalloc to allocate the
-	  fragment cache memory.
-
-	  If unsure, say N.
-
 config SQUASHFS_NOERROR
 	bool "Disable uncompress error and oops. Very bad idea..."
 	depends on SQUASHFS

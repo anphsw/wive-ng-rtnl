@@ -1,13 +1,15 @@
 /*
- * Copyright (C) 2006, 2007 Junjiro Okajima
- * Copyright (C) 2006, 2007 Tomas Matejicek, slax.org
+ * Copyright (C) 2006-2008 Junjiro Okajima
+ * Copyright (C) 2006-2008 Tomas Matejicek, slax.org
  *
  * LICENSE follows the described one in lzma.txt.
  */
 
-/* $Id: uncomp.c,v 1.1 2007-06-05 09:34:05 steven Exp $ */
+/* $Id: uncomp.c,v 1.7 2008-03-12 16:58:34 jro Exp $ */
 
 /* extract some parts from lzma443/C/7zip/Compress/LZMA_C/LzmaTest.c */
+
+//#define __KERNEL__
 
 #ifndef __KERNEL__
 #include <stdio.h>
@@ -35,8 +37,8 @@
 #endif
 #endif /* __KERNEL__ */
 
-#include <linux/sqlzma.h>
-#include <linux/LzmaDecode.h>
+#include "linux/sqlzma.h"
+#include "linux/LzmaDecode.h"
 
 static int LzmaUncompress(struct sqlzma_un *un)
 {
@@ -49,8 +51,9 @@ static int LzmaUncompress(struct sqlzma_un *un)
 
 	/* Decode LZMA properties and allocate memory */
 	err = -EINVAL;
-	src = un->un_cmbuf;
-	ret = LzmaDecodeProperties(&state.Properties, src, LZMA_PROPERTIES_SIZE);
+	src = (void *)un->un_cmbuf;
+	ret = LzmaDecodeProperties(&state.Properties, src,
+				   LZMA_PROPERTIES_SIZE);
 	src += LZMA_PROPERTIES_SIZE;
 	if (unlikely(ret != LZMA_RESULT_OK))
 		goto out;
@@ -74,7 +77,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 			goto out;
 		sbuf->sz = i;
 	}
-	state.Probs = (void*)sbuf->buf;
+	state.Probs = (void *)sbuf->buf;
 
 	/* Read uncompressed size */
 	memcpy(a, src, sizeof(a));
@@ -118,8 +121,10 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 	}
 
 	err = zlib_inflateReset(&un->un_stream);
-	if (unlikely(err != Z_OK))
+	if (unlikely(err != Z_OK)) {
+		printk("%s: zlib_inflateReset %d\n", __func__, err);
 		goto out;
+	}
 	un->un_stream.next_in = src->buf;
 	un->un_stream.avail_in = src->sz;
 	un->un_stream.next_out = dst->buf;
@@ -142,9 +147,8 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 
 int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 {
-	int err=0;
+	int err = -ENOMEM;
 
-	err = -ENOMEM;
 	un->un_lzma = do_lzma;
 	memset(un->un_a, 0, sizeof(un->un_a));
 	un->un_a[SQUN_PROB].buf = un->un_prob;
@@ -159,7 +163,8 @@ int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 	un->un_stream.next_in = NULL;
 	un->un_stream.avail_in = 0;
 #ifdef __KERNEL__
-	un->un_stream.workspace = kzalloc(zlib_inflate_workspacesize(), GFP_KERNEL);
+	un->un_stream.workspace = kzalloc(zlib_inflate_workspacesize(),
+					  GFP_KERNEL);
 	if (unlikely(!un->un_stream.workspace))
 		return err;
 #else
@@ -203,8 +208,8 @@ module_exit(sqlzma_exit);
 #endif
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Junjiro Okajima <hooanon05 at yahoo dot co dot jp>");
-MODULE_VERSION("$Id: uncomp.c,v 1.1 2007-06-05 09:34:05 steven Exp $");
+MODULE_AUTHOR("Junjiro Okajima <sfjro at users dot sf dot net>");
+MODULE_VERSION("$Id: uncomp.c,v 1.7 2008-03-12 16:58:34 jro Exp $");
 MODULE_DESCRIPTION("LZMA uncompress for squashfs. "
 		   "Some functions for squashfs to support LZMA and "
 		   "a tiny wrapper for LzmaDecode.c in LZMA SDK from www.7-zip.org.");

@@ -4,8 +4,8 @@
 /*
  * Squashfs
  *
- * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007
- * Phillip Lougher <phillip@lougher.org.uk>
+ * Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008
+ * Phillip Lougher <phillip@lougher.demon.co.uk>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,16 +28,9 @@
 #define CONFIG_SQUASHFS_2_0_COMPATIBILITY
 #endif
 
-#ifdef	CONFIG_SQUASHFS_VMALLOC
-#define SQUASHFS_ALLOC(a)		vmalloc(a)
-#define SQUASHFS_FREE(a)		vfree(a)
-#else
-#define SQUASHFS_ALLOC(a)		kmalloc(a, GFP_KERNEL)
-#define SQUASHFS_FREE(a)		kfree(a)
-#endif
 #define SQUASHFS_CACHED_FRAGMENTS	CONFIG_SQUASHFS_FRAGMENT_CACHE_SIZE	
 #define SQUASHFS_MAJOR			3
-#define SQUASHFS_MINOR			0
+#define SQUASHFS_MINOR			1
 #define SQUASHFS_MAGIC			0x73717368
 #define SQUASHFS_MAGIC_LZMA             0x71736873
 #define SQUASHFS_MAGIC_SWAP		0x68737173
@@ -103,7 +96,7 @@
 						SQUASHFS_CHECK)
 
 #define SQUASHFS_MKFLAGS(noi, nod, check_data, nof, no_frag, always_frag, \
-		duplicate_checking, exortable)	(noi | (nod << 1) | (check_data << 2) \
+		duplicate_checking, exportable)	(noi | (nod << 1) | (check_data << 2) \
 		| (nof << 3) | (no_frag << 4) | (always_frag << 5) | \
 		(duplicate_checking << 6) | (exportable << 7))
 
@@ -133,9 +126,8 @@
 
 #define SQUASHFS_COMPRESSED_BIT_BLOCK		(1 << 24)
 
-#define SQUASHFS_COMPRESSED_SIZE_BLOCK(B)	(((B) & \
-	~SQUASHFS_COMPRESSED_BIT_BLOCK) ? (B) & \
-	~SQUASHFS_COMPRESSED_BIT_BLOCK : SQUASHFS_COMPRESSED_BIT_BLOCK)
+#define SQUASHFS_COMPRESSED_SIZE_BLOCK(B)	((B) & \
+	~SQUASHFS_COMPRESSED_BIT_BLOCK)
 
 #define SQUASHFS_COMPRESSED_BLOCK(B)	(!((B) & SQUASHFS_COMPRESSED_BIT_BLOCK))
 
@@ -191,9 +183,12 @@
 					sizeof(long long))
 
 /* cached data constants for filesystem */
-#define SQUASHFS_CACHED_BLKS		1
-#define SQUASHFS_MAX_FILE_SIZE_LOG	16
-#define SQUASHFS_MAX_FILE_SIZE		((long long) 1 << (SQUASHFS_MAX_FILE_SIZE_LOG - 2))
+#define SQUASHFS_CACHED_BLKS		8
+
+#define SQUASHFS_MAX_FILE_SIZE_LOG	64
+
+#define SQUASHFS_MAX_FILE_SIZE		((long long) 1 << \
+					(SQUASHFS_MAX_FILE_SIZE_LOG - 2))
 
 #define SQUASHFS_MARKER_BYTE		0xff
 
@@ -348,7 +343,7 @@ struct squashfs_dir_entry {
 	unsigned int		offset:13;
 	unsigned int		type:3;
 	unsigned int		size:8;
-	signed   int		inode_number:16;
+	signed int		inode_number:16; /* very important signedness */
 	char			name[0];
 } __attribute__ ((packed));
 
@@ -361,7 +356,7 @@ struct squashfs_dir_header {
 struct squashfs_fragment_entry {
 	long long		start_block;
 	unsigned int		size;
-	unsigned int		pending;
+	unsigned int		unused;
 } __attribute__ ((packed));
 
 extern int squashfs_uncompress_block(void *d, int dstlen, void *s, int srclen);
