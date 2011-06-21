@@ -439,8 +439,6 @@
 54) Filter all unused CONFIGS options from kernel config on create images. Is speed up boot and save mem.<br>
 55) More usb support fixes and optiomizations.<br>
 56) Site Survey Access Point Graphical Diagram.<br>
-57) udpxy up to 1.0-20 version.<br>
-58) Update squashfs to version 3.4 stable tree.<br>
 
 1.8.x
 1) Sync from 3.5.0.0 SDK.<br>
@@ -450,6 +448,15 @@
 5) HTB fix rate select.<br>
 6) busybox version up to 1.18.5.<br>
 7) Add usb_modeswitch.<br>
+8) udpxy up to 1.0-20 version.<br>
+9) Update squashfs to version 3.4 stable tree.<br>
+10) Some mips fixes backported.<br>
+11) Some usb fixes backported.<br>
+12) Speed up writeback of big dirty files.<br>
+13) Fix support RT3352 in libnvram and some nvram variables remove.<br>
+14) Driver core: check return code of sysfs_create_link.<br>
+15) Tune inetd options for more safe.<br>
+16) Always allocate at least 16 skb frags regardless of page size for speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>
