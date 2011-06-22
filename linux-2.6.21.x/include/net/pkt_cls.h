@@ -339,7 +339,7 @@ static inline int tcf_valid_offset(struct sk_buff *skb, unsigned char *ptr,
 {
 	return likely((ptr + len) <= skb->tail &&
 			ptr >= skb->head &&
-			(ptr <= (ptr + len)))
+			(ptr <= (ptr + len)));
 }
 
 #ifdef CONFIG_NET_CLS_IND
