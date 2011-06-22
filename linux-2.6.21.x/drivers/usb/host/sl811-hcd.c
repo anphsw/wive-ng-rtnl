@@ -46,6 +46,7 @@
 #include <linux/usb.h>
 #include <linux/usb/sl811.h>
 #include <linux/platform_device.h>
+#include <linux/prefetch.h>
 
 #include <asm/io.h>
 #include <asm/irq.h>

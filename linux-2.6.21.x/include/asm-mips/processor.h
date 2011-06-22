@@ -251,6 +251,9 @@ unsigned long get_wchan(struct task_struct *p);
 #define ARCH_HAS_PREFETCHW
 #define prefetchw(x) __builtin_prefetch((x), 1, 1)
 
+#define ARCH_HAS_SPINLOCK_PREFETCH
+#define spin_lock_prefetch(x)   prefetchw(x)
+
 #endif
 
 #endif /* _ASM_PROCESSOR_H */

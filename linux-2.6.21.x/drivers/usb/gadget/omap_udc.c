@@ -42,6 +42,7 @@
 #include <linux/usb/otg.h>
 #include <linux/dma-mapping.h>
 #include <linux/clk.h>
+#include <linux/prefetch.h>
 
 #include <asm/byteorder.h>
 #include <asm/io.h>

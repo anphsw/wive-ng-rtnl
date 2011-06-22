@@ -110,6 +110,7 @@
 #include	<linux/fault-inject.h>
 #include	<linux/rtmutex.h>
 #include	<linux/reciprocal_div.h>
+#include	<linux/prefetch.h>
 
 #include	<asm/cacheflush.h>
 #include	<asm/tlbflush.h>

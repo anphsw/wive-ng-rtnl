@@ -119,6 +119,7 @@
 #include <linux/dmaengine.h>
 #include <linux/err.h>
 #include <linux/ctype.h>
+#include <linux/prefetch.h>
 
 #ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
 extern int private_pthrough(struct sk_buff *skb);

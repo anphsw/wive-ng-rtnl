@@ -22,6 +22,7 @@
 #include <linux/bootmem.h>
 #include <linux/inotify.h>
 #include <linux/mount.h>
+#include <linux/prefetch.h>
 
 /*
  * This is needed for the following functions:

@@ -84,7 +84,7 @@
 #include <asm/irq.h>
 #include <asm/byteorder.h>
 #include <asm/uaccess.h>
-
+#include <linux/prefetch.h>
 
 #define DRV_NAME "acenic"
 

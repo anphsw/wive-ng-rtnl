@@ -53,6 +53,7 @@
 #include <linux/cache.h>
 #include <linux/rtnetlink.h>
 #include <linux/init.h>
+#include <linux/prefetch.h>
 
 #include <net/protocol.h>
 #include <net/dst.h>

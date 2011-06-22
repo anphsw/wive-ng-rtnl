@@ -8,6 +8,8 @@
 #include <linux/list.h>
 #include <linux/spinlock.h>
 
+struct task_struct;
+
 /*
  * Real Time signals may be queued.
  */

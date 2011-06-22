@@ -16,6 +16,7 @@
 #include <linux/skbuff.h>
 #include <linux/string.h>
 #include <linux/types.h>
+#include <linux/prefetch.h>
 
 #include <net/dst.h>
 
