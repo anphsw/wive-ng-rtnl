@@ -337,7 +337,9 @@ static inline unsigned char * tcf_get_base_ptr(struct sk_buff *skb, int layer)
 static inline int tcf_valid_offset(struct sk_buff *skb, unsigned char *ptr,
 				   int len)
 {
-	return unlikely((ptr + len) < skb->tail && ptr > skb->head);
+	return likely((ptr + len) <= skb->tail &&
+			ptr >= skb->head &&
+			(ptr <= (ptr + len)))
 }
 
 #ifdef CONFIG_NET_CLS_IND
