@@ -96,7 +96,7 @@ chilli_net=`nvram_get 2860 chilli_net`
 
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
-    if [ "$NAT" = "on" ]  && [ "$opmode" != "0" ]; then
+    if [ "$NAT" = "on" ] && [ "$opmode" != "0" ]; then
 	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE" >> /etc/ppp_firewall
 	if [ "$opmode" = 4 ]; then
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall

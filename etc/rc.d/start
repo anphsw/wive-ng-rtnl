@@ -12,7 +12,7 @@ LOG="echo INIT"
 
 export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 
-tmpfs_av=`cat /proc/filesystems | grep tmpfs -c`
+tmpfs_av=`grep tmpfs -c < /proc/filesystems`
 if [ "$tmpfs_av" != "0" ]; then
     #mount /tmp /etc in /var
     mkdir -p /var/tmpfs

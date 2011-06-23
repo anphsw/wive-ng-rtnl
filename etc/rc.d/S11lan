@@ -70,7 +70,7 @@ get_txqlen
 
 stop() {
 $LOG "Stop network interfaces..."
-    dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
+    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
     for i in $dev; do
 	ip link set $i down > /dev/null 2>&1
 	vconfig rem $i > /dev/null 2>&1
@@ -87,15 +87,15 @@ get_param() {
     lan_ip_2=`nvram_get 2860 lan2_ipaddr`
     lan_nm_2=`nvram_get 2860 lan2_netmask`
     lan2enabled=`nvram_get 2860 Lan2Enabled`
-    brset=`brctl show  | grep br0 -c`
-    vlanisconfig=`cat /proc/net/vlan/config | grep eth -c` > /dev/null 2>&1
+    brset=`brctl show | grep br0 -c`
+    vlanisconfig=`grep eth -c < /proc/net/vlan/config` > /dev/null 2>&1
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
 
 addr_flush() {
     #drop adresses
-    dev=`cat /proc/net/vlan/config | grep eth | cut -d' ' -f 1`
+    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
     for i in $dev; do
 	ip addr flush dev $i > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ]; then

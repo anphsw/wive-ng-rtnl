@@ -124,7 +124,7 @@ udhcpc_opts()
 	else
 	    ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
 	    wan_port=`nvram_get 2860 wan_port`
-	    if [ "$ForceRenewDHCP" != "0" ] &&  [ "$wan_port" != "" ]; then
+	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
 		#configure event wait port
 		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
 	    else

@@ -35,7 +35,7 @@ start() {
 			    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
 			fi
 		    else
-			pd=`cat  /etc/resolv.conf | grep nameserver | tail -q -n1 | awk {' print $2 '}`
+			pd=`grep nameserver < /etc/resolv.conf | tail -q -n1 | awk {' print $2 '}`
                         if [ "$pd" != "" ]; then
 			    config-udhcpd.sh -d "$pd"
 			else

@@ -22,7 +22,7 @@ ROUTELIST_FGW=""
 
 # Count PPPD signal 11 dead for workaround dead tunnel on 
 # uplink cable down. Fix me later.
-PPP_DEAD=`cat /var/log/messages | grep "Fatal signal 11" -c`
+PPP_DEAD=`grep "Fatal signal 11" -c < /var/log/messages`
 # Get VPN DGW mode
 vpnDGW=`nvram_get 2860 vpnDGW`
 #If pppoe mode and dgw in pppoe no need replace default gw

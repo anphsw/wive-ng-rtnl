@@ -18,7 +18,7 @@ fi
 }
 
 stop() {
- $LOG "Stop br0 and loopback interfaces..."
+ $LOG "Stop loopback interface..."
     ip link set lo down > /dev/null 2>&1
 }
 

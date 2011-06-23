@@ -32,7 +32,7 @@ get_params() {
 }
 
 start() {
-    if [ "$opmode" = "4" ] &&  [ -f /etc/chilli.conf ]; then
+    if [ "$opmode" = "4" ] && [ -f /etc/chilli.conf ]; then
 	$LOG "Starting ChilliSpot"
 	get_params
 	modprobe tun

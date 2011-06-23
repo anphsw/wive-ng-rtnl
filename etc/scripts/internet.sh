@@ -32,7 +32,7 @@ addBr0()
 {
     #if kernel build without bridge support - exit
     if [ "$CONFIG_BRIDGE" != "" ]; then
-	brset=`brctl show  | grep br0 -c`
+	brset=`brctl show | grep br0 -c`
 	if [ "$brset" = "0" ]; then
     	    $LOG "Add bridge in the system for ra0"
     	    brctl addbr br0
