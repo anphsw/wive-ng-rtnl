@@ -7,21 +7,23 @@
 #include global
 . /etc/scripts/global.sh
 
-SERVERNM=`nvram_get 2860 vpnServer`
-USER=`nvram_get 2860 vpnUser`
-PASSWORD=`nvram_get 2860 vpnPassword`
-MTU=`nvram_get 2860 vpnMTU`
-MPPE=`nvram_get 2860 vpnMPPE`
-PEERDNS=`nvram_get 2860 vpnPeerDNS`
-DEBUG=`nvram_get 2860 vpnDebug`
-AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
-LCPECHO=`nvram_get 2860 vpnEnableLCP`
-OPTFILE="/etc/ppp/options.pptp"
-
 killall -q pppd
 killall -q xl2tpd
 
 LOG="logger -t vpnhelper-pptp"
+
+get_param() {
+    SERVERNM=`nvram_get 2860 vpnServer`
+    USER=`nvram_get 2860 vpnUser`
+    PASSWORD=`nvram_get 2860 vpnPassword`
+    MTU=`nvram_get 2860 vpnMTU`
+    MPPE=`nvram_get 2860 vpnMPPE`
+    PEERDNS=`nvram_get 2860 vpnPeerDNS`
+    DEBUG=`nvram_get 2860 vpnDebug`
+    AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+    LCPECHO=`nvram_get 2860 vpnEnableLCP`
+    OPTFILE="/etc/ppp/options.pptp"
+}
 
 check_param() {
     if [ "$SERVERNM" = "" ] || [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
@@ -52,6 +54,7 @@ load_modules() {
 }
 
 echo "==================START-PPTP-CLIENT======================="
+    get_param
     check_param
     get_vpn_ip
     reachable=0;

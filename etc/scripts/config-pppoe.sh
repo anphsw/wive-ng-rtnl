@@ -7,25 +7,25 @@
 #include global config
 . /etc/scripts/global.sh
 
-SERVER=`nvram_get 2860 vpnServer`
-SERVICE=`nvram_get 2860 vpnService`
-USER=`nvram_get 2860 vpnUser`
-PASSWORD=`nvram_get 2860 vpnPassword`
-MTU=`nvram_get 2860 vpnMTU`
-MPPE=`nvram_get 2860 vpnMPPE`
-PEERDNS=`nvram_get 2860 vpnPeerDNS`
-DEBUG=`nvram_get 2860 vpnDebug`
-IFACE=`nvram_get 2860 vpnInterface`
-AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
-LCPECHO=`nvram_get 2860 vpnEnableLCP`
-OPTFILE="/etc/ppp/options.pppoe"
-
 killall -q pppd
 killall -q xl2tpd
 
 LOG="logger -t vpnhelper-pppoe"
 
-echo "==================START-PPPOE-CLIENT======================="
+get_param() {
+    SERVER=`nvram_get 2860 vpnServer`
+    SERVICE=`nvram_get 2860 vpnService`
+    USER=`nvram_get 2860 vpnUser`
+    PASSWORD=`nvram_get 2860 vpnPassword`
+    MTU=`nvram_get 2860 vpnMTU`
+    MPPE=`nvram_get 2860 vpnMPPE`
+    PEERDNS=`nvram_get 2860 vpnPeerDNS`
+    DEBUG=`nvram_get 2860 vpnDebug`
+    IFACE=`nvram_get 2860 vpnInterface`
+    AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
+    LCPECHO=`nvram_get 2860 vpnEnableLCP`
+    OPTFILE="/etc/ppp/options.pppoe"
+}
 
 check_param() {
     if [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
@@ -42,6 +42,8 @@ load_modules() {
     done
 }
 
+echo "==================START-PPPOE-CLIENT======================="
+get_param
 check_param
 load_modules
 
