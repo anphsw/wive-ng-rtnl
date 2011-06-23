@@ -12,7 +12,7 @@ start() {
 	#generate modules dep
 	if [ ! -f /etc/modules.dep ]; then
 	    $LOG "Start modules.dep generate..."
-	    depmod -a -n >  /etc/modules.dep
+	    depmod -a -n > /etc/modules.dep
 	fi
 	#configure switch
 	resetLanWan
