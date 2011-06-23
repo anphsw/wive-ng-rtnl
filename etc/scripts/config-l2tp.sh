@@ -20,12 +20,6 @@ LCPECHO=`nvram_get 2860 vpnEnableLCP`
 killall -q pppd
 killall -q xl2tpd
 
-mod="ppp_generic pppox pppol2tp"
-for module in $mod
-do
-    modprobe -q $module
-done
-
 LOG="logger -t vpnhelper-l2tp"
 
 check_param() {
@@ -46,6 +40,14 @@ get_vpn_ip() {
         SERVER=$SERVERNM
         $LOG "Not resolve adress for $SERVER"
     fi
+}
+
+load_modules() {
+    mod="ppp_generic pppox pppol2tp"
+    for module in $mod
+    do
+        modprobe -q $module
+    done
 }
 
 echo "==================START-L2TP-CLIENT======================="
@@ -81,6 +83,9 @@ echo "==================START-L2TP-CLIENT======================="
             reachable=0;
         fi
     done    
+
+    #load ppp* modules
+    load_modules
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns

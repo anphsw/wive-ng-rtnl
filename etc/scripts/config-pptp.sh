@@ -21,12 +21,6 @@ OPTFILE="/etc/ppp/options.pptp"
 killall -q pppd
 killall -q xl2tpd
 
-mod="ppp_generic pppox pptp"
-for module in $mod
-do
-    modprobe -q $module
-done
-
 LOG="logger -t vpnhelper-pptp"
 
 check_param() {
@@ -47,6 +41,14 @@ get_vpn_ip() {
         SERVER=$SERVERNM
         $LOG "Not resolve adress for $SERVER"
     fi
+}
+
+load_modules() {
+    mod="ppp_generic pppox pptp"
+    for module in $mod
+    do
+	modprobe -q $module
+    done
 }
 
 echo "==================START-PPTP-CLIENT======================="
@@ -82,6 +84,9 @@ echo "==================START-PPTP-CLIENT======================="
             reachable=0;
         fi
     done
+
+    #load ppp* modules
+    load_modules
 
     if [ "$PEERDNS" = "on" ]; then
 	PEERDNS=usepeerdns

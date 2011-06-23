@@ -23,12 +23,6 @@ OPTFILE="/etc/ppp/options.pppoe"
 killall -q pppd
 killall -q xl2tpd
 
-mod="ppp_generic pppox pppoe"
-for module in $mod
-do
-    modprobe -q $module
-done
-
 LOG="logger -t vpnhelper-pppoe"
 
 echo "==================START-PPPOE-CLIENT======================="
@@ -40,7 +34,16 @@ check_param() {
     fi
 }
 
+load_modules() {
+    mod="ppp_generic pppox pppoe"
+    for module in $mod
+    do
+        modprobe -q $module
+    done
+}
+
 check_param
+load_modules
 
 if [ "$IFACE" = "WAN" ]; then
     IFACE=$wan_if
