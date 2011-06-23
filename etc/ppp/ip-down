@@ -17,7 +17,10 @@ Lan2Enabled=`nvram_get 2860 Lan2Enabled`
 lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
 lan2_netmask=`nvram_get 2860 lan2_netmask` 
 vpnPeerDNS=`nvram_get 2860 vpnPeerDNS` 
-chilli_net=`nvram_get 2860 chilli_net` 
+chilli_net=`nvram_get 2860 chilli_net`
+
+    $LOG "Disable forwarding for $PPP_IFACE interface"
+    echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1

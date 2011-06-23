@@ -122,6 +122,9 @@ chilli_net=`nvram_get 2860 chilli_net`
     services_restart.sh pppd
     service shaper restart
 
+    $LOG "Enable forwarding for $PPP_IFACE interface"
+    echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+
 #run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
 if [ -d /etc/ppp/ip-up.d/ -a -x /bin/run-parts ]; then
