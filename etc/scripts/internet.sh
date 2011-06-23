@@ -101,7 +101,7 @@ addMBSSID()
 
 retune_wifi() {
     #preconfigure wifi and 40Mhz workaround
-    /etc/scripts/wifi.sh $MODE
+    /etc/scripts/wifi.sh
 }
 
 bridge_config() {
@@ -156,8 +156,10 @@ if [ "$MODE" != "connect_sta" ]; then
     service modules restart
     $LOG "Tune wifi modules."
     retune_wifi
-    #restart lan interfaces
-    service lan restart
+    if [ "$MODE" != "wifionly" ]; then
+	$LOG "Reconfigure lan..."
+	service lan restart
+    fi
 fi
 
 #
@@ -183,8 +185,10 @@ else
     gate_config
 fi
 
-$LOG "Reconfigure wan..."
-service wan restart
+if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
+    $LOG "Reconfigure wan..."
+    service wan restart
+fi
 
 #some daemons need restart
 services_restart.sh all
