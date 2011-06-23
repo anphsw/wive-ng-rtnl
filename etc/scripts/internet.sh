@@ -137,7 +137,9 @@ spot_config() {
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     echo 1 > /proc/sys/net/nf_conntrack_flush
-    vpn_deadloop_fix
+    if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
+	vpn_deadloop_fix
+    fi
     $LOG "Shutdown wireless interfaces."
     ifRaxWdsxDown
     $LOG "Reload modules drivers for current mode."
