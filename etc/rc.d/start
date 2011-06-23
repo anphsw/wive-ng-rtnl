@@ -56,7 +56,10 @@ mknod /dev/I2S	c	234	0
 mknod /dev/ac0	c	240	0
 mknod /dev/acl0	c	230	0
 mknod /dev/gpio	c	252	0
-
+mknod /dev/pcm0	c	233	0
+mknod /dev/i2s0	c	234	0
+mknod /dev/cls0	c	235	0
+                            
 for i in `seq 0 15`; do
     mknod /dev/pty/m$i c 2 $i
 done
