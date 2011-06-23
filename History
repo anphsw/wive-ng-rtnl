@@ -459,6 +459,9 @@
 16) Always allocate at least 16 skb frags regardless of page size for speedup.<br>
 17) Some init scripts optimize for speedup and more secure.<br>
 18) Some skb, net, rcu subsystems optimize.<br>
+19) Optimize VPN helpers for more readable and correct logic in STA mode.<br>
+20) More settings now apply without reboot device.<br>
+21) Decrease logic itaration overhead.<br>
 
 <br><br>
 <b>For support see:</b><br>
