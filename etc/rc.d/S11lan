@@ -12,7 +12,7 @@ getMacIf
 get_txqlen
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
-	if [ "$brset" = "0" ]; then
+	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
 	    $LOG "Add bridge in the system"
 	    brctl addbr br0
         fi
@@ -87,7 +87,6 @@ get_param() {
     lan_ip_2=`nvram_get 2860 lan2_ipaddr`
     lan_nm_2=`nvram_get 2860 lan2_netmask`
     lan2enabled=`nvram_get 2860 Lan2Enabled`
-    brset=`brctl show | grep br0 -c`
     vlanisconfig=`grep eth -c < /proc/net/vlan/config` > /dev/null 2>&1
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1

@@ -32,8 +32,7 @@ addBr0()
 {
     #if kernel build without bridge support - exit
     if [ "$CONFIG_BRIDGE" != "" ]; then
-	brset=`brctl show | grep br0 -c`
-	if [ "$brset" = "0" ]; then
+	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
     	    $LOG "Add bridge in the system for ra0"
     	    brctl addbr br0
 	fi
