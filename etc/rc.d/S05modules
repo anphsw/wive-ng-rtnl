@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#get params                                                                                                                                 
+#get params
 . /etc/scripts/global.sh
 
 LOG="echo MODULES"

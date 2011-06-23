@@ -133,7 +133,7 @@ case "$1" in
 
 	#MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
 	ROUTES="$staticroutes $msstaticroutes"
-	
+
 	if [ "$ROUTES" != " " ]; then
 	    set $ROUTES
 	    while [ -n "$1" ]; do

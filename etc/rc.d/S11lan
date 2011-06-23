@@ -59,9 +59,9 @@ get_txqlen
     $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip"
 
      #-------------------LAN2----------------
-    if [ "$lan2enabled" = "1" ]; then
-	$LOG "Add LAN2 iface $lan2_if $lan_ip_2 netmask $lan_nm_2"
-        ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2"
+    if [ "$Lan2Enabled" = "1" ]; then
+	$LOG "Add LAN2 iface $lan2_if $lan2_ipaddr netmask $lan2_netmask"
+        ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask"
     fi
 }
 
@@ -81,9 +81,9 @@ $LOG "Stop network interfaces..."
 get_param() {
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
-    lan_ip_2=`nvram_get 2860 lan2_ipaddr`
-    lan_nm_2=`nvram_get 2860 lan2_netmask`
-    lan2enabled=`nvram_get 2860 Lan2Enabled`
+    lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
+    lan2_netmask=`nvram_get 2860 lan2_netmask`
+    Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }

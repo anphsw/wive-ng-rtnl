@@ -21,7 +21,7 @@ start() {
     for file in $rm_conf ; do
 	rm -f /etc/$file
     done
-    
+
     $LOG "Create some folders in var and etc."
     ndirs="/var/run /var/lock /var/lock/subsys /var/log /var/tmp /var/run/xl2tpd /etc/ppp/ip-up.d /etc/ppp/ip-down.d"
     for dir in $ndirs ; do

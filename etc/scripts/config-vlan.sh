@@ -7,7 +7,7 @@
 #   switch_type: 0=IC+, 1=vtss, 2=esw3050x                 #
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
- 
+
 usage()
 {
 	echo "Usage:"
@@ -53,7 +53,7 @@ config3052()
 
 	# doble wlan tag config
 	config3052_dt
-                         
+
 	# Calculating PVID on ports 1 and 0
 	r40=`printf "%x" $((($2<<12)|$1))`
 
