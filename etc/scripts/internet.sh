@@ -94,21 +94,24 @@ retune_wifi() {
 
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
-	addMBSSID
-	brctl addif br0 ra0
-	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
+	#flush eth2 ip. workaround for change mode to bridge from ethernet converter
         ip addr flush dev eth2
+	#add wifi interface
+	brctl addif br0 ra0
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
+	addMBSSID
         addWds2Br0
         addMesh2Br0
 }
 
 gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
-	addMBSSID
+	#add wifi interface
 	brctl addif br0 ra0
+	#add lan interface
 	brctl addif br0 eth2.1
+	addMBSSID
 	addWds2Br0
 	addMesh2Br0
 }
@@ -119,16 +122,20 @@ ethcv_config() {
 
 apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
-	addMBSSID
+	#add wifi interface
 	brctl addif br0 ra0
+	#in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
+	addMBSSID
 }
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
-	addMBSSID
+	#add wifi interface
 	brctl addif br0 ra0
+	#add lan interface
 	brctl addif br0 eth2.1
+	addMBSSID
 	addWds2Br0
 	addMesh2Br0
 }
