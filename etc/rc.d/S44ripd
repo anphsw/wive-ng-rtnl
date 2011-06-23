@@ -12,6 +12,10 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
+if [ "$opmode" = "0" ]; then
+    exit 0
+fi
+
 LOG="logger -t ripd"
 
 start() {
