@@ -27,9 +27,8 @@ get_txqlen
 	ifconfig eth2 txqueuelen "$txqueuelen"
 	$LOG "Up vlan root interface"
 	ip link set eth2 up
-	vlanisconfig=0
     fi
-    if [ "$vlanisconfig" != "2" ]; then
+    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
         $LOG "Add vlans and config"
 	vconfig add eth2 1
 	vconfig add eth2 2
@@ -37,7 +36,6 @@ get_txqlen
 	ifconfig eth2.1 hw ether "$LANMAC"
 	$LOG "ETH2.2_MACADDR $WANMAC"
 	ifconfig eth2.2 hw ether "$WANMAC"
-	vlanisconfig=2
     fi
 
     #eth2.1 always up
@@ -87,7 +85,6 @@ get_param() {
     lan_ip_2=`nvram_get 2860 lan2_ipaddr`
     lan_nm_2=`nvram_get 2860 lan2_netmask`
     lan2enabled=`nvram_get 2860 Lan2Enabled`
-    vlanisconfig=`grep eth -c < /proc/net/vlan/config` > /dev/null 2>&1
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
