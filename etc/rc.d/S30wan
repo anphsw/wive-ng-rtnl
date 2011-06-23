@@ -48,6 +48,7 @@ start() {
     #if not bridge wan up    
     if [ "$opmode" != "0" ]; then
 	ip link set $wan_if up
+	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
     fi
 
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then

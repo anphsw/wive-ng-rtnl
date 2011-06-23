@@ -209,7 +209,7 @@ case "$1" in
 		service vpnhelper start
 	    fi
 	fi
-
+	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
 	$LOG "End renew procedure..."
     ;;
 esac

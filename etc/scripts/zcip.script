@@ -21,6 +21,7 @@ config)
 	if [ "x$IP" != x -a -w "$IP.$interface" ]; then
 		echo $ip > "$IP.$interface"
 	fi
+	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
 	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
 	exit 0
 	;;

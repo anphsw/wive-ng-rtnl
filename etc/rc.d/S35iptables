@@ -161,8 +161,9 @@ start() {
 ###########################################FORWARD#######################################
 	if [ "$opmode" != "0" ]; then
 	    $LOG "Set forward rules"
-            #enable forward for all interfaces
-	    sysctl -w net.ipv4.ip_forward=1
+            #enable forward for LAN/WAN interfaces
+	    echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
+	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
 
 	    #ipt_account need first rules in FORWARD
 	    if [ "$ipt_account" = "1" ]; then
