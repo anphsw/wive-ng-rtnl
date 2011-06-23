@@ -2150,7 +2150,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);
 
-	doSystem("service lan restart && sleep 3 && service wan restart");
+	doSystem("internet.sh");
 }
 
 /* goform/setWan */
@@ -2416,7 +2416,7 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("Wait till device will be reconfigured...<br>\n"), ip);
 		websFooter(wp);
 		websDone(wp, 200);
-		doSystem("service lan restart && sleep 3 && service wan restart");
+		doSystem("internet.sh");
 	} else {
 		websWrite(wp, T("<h3>Error, try again</h3><br>\n"));
 		websFooter(wp);
