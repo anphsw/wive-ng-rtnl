@@ -85,6 +85,8 @@ start() {
 	$LOG "Load wifi module..."
     	if [ "$opmode" = "2" ]; then
     	    modprobe -q rt2860v2_sta "$mac"
+	    #wait module read config from flash
+	    sleep 2
 	else
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
