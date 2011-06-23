@@ -226,6 +226,7 @@ vpn_deadloop_fix()
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1
 	    ip route flush cache > /dev/null 2>&1
+	    echo 1 > /proc/sys/net/nf_conntrack_flush
 	fi
     fi
 }
