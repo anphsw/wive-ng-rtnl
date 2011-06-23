@@ -60,9 +60,8 @@ get_txqlen
 
      #-------------------LAN2----------------
     if [ "$lan2enabled" = "1" ]; then
-	$LOG "Add LAN2 iface"
+	$LOG "Add LAN2 iface $lan2_if $lan_ip_2 netmask $lan_nm_2"
         ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2"
-        $LOG "ifconfig "$lan2_if" "$lan_ip_2" netmask "$lan_nm_2""
     fi
 }
 
