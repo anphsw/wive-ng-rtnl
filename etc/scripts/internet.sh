@@ -28,18 +28,6 @@ ifRaxWdsxDown()
     fi
 }
 
-addBr0()
-{
-    #if kernel build without bridge support - exit
-    if [ "$CONFIG_BRIDGE" != "" ]; then
-	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
-    	    $LOG "Add bridge in the system for ra0"
-    	    brctl addbr br0
-	fi
-	brctl addif br0 ra0
-    fi
-}
-
 addMesh2Br0()
 {
     #if kernel build without MESH support - exit
@@ -107,7 +95,7 @@ retune_wifi() {
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
 	addMBSSID
-	addBr0
+	brctl addif br0 ra0
 	#in flush eth2 ip. workaround for change mode to bridge from ethernet converter
         ip addr flush dev eth2
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
@@ -119,7 +107,7 @@ bridge_config() {
 gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
 	addMBSSID
-	addBr0
+	brctl addif br0 ra0
 	brctl addif br0 eth2.1
 	addWds2Br0
 	addMesh2Br0
@@ -132,14 +120,14 @@ ethcv_config() {
 apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
 	addMBSSID
-	addBr0
+	brctl addif br0 ra0
 	brctl addif br0 eth2
 }
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
 	addMBSSID
-	addBr0
+	brctl addif br0 ra0
 	brctl addif br0 eth2.1
 	addWds2Br0
 	addMesh2Br0
