@@ -148,16 +148,14 @@ spot_config() {
 
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
-    if [ "$MODE" != "lanonly" ]; then
-	echo 1 > /proc/sys/net/nf_conntrack_flush
-	vpn_deadloop_fix
-	$LOG "Shutdown wireless interfaces."
-	ifRaxWdsxDown
-	$LOG "Reload modules drivers for current mode."
-	service modules restart
-	$LOG "Tune wifi modules."
-	retune_wifi
-    fi
+    echo 1 > /proc/sys/net/nf_conntrack_flush
+    vpn_deadloop_fix
+    $LOG "Shutdown wireless interfaces."
+    ifRaxWdsxDown
+    $LOG "Reload modules drivers for current mode."
+    service modules restart
+    $LOG "Tune wifi modules."
+    retune_wifi
     #restart lan interfaces
     service lan restart
 fi
@@ -185,10 +183,8 @@ else
     gate_config
 fi
 
-if [ "$MODE" != "lanonly" ]; then
-    $LOG "Reconfigure wan..."
-    service wan restart
-fi
+$LOG "Reconfigure wan..."
+service wan restart
 
 #some daemons need restart
 services_restart.sh all
