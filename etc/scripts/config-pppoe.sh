@@ -23,9 +23,11 @@ OPTFILE="/etc/ppp/options.pppoe"
 killall -q pppd
 killall -q xl2tpd
 
-modprobe -q ppp_generic > /dev/null 2>&1
-modprobe -q pppox > /dev/null 2>&1
-modprobe -q pppoe > /dev/null 2>&1
+mod="ppp_generic pppox pppoe"
+for module in $mod
+do
+    modprobe -q $module
+done
 
 LOG="logger -t vpnhelper-pppoe"
 
@@ -73,10 +75,11 @@ else
 fi
 
 if [ "$MPPE" = "on" ]; then
-    modprobe -q crypto_algapi
-    modprobe -q cryptomgr
-    modprobe -q blkcipher
-    modprobe -q ppp_mppe
+    mod="crypto_algapi cryptomgr blkcipher ppp_mppe"
+    for module in $mod
+    do
+	modprobe -q $module
+    done
     MPPE=allow-mppe-128
 else
     MPPE=

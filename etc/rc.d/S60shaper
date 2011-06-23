@@ -37,39 +37,27 @@ if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     if [ "$QoSEnable" = "1" ]; then
 	$LOG "Load netsched  modules."
 	#netsched modules
-	modprobe -q cls_u32
-	modprobe -q cls_tcindex  
-	modprobe -q cls_fw      
-	modprobe -q act_gact  
-	modprobe -q act_police  
-	modprobe -q act_ipt
-	modprobe -q em_cmp    
-	modprobe -q em_u32    
-	modprobe -q em_nbyte 
-	modprobe -q sch_htb
-	modprobe -q sch_dsmark
+	sch_mod="cls_u32 cls_tcindex cls_fw act_gact act_police act_ipt em_cmp em_u32 em_nbyte sch_htb sch_dsmark"
+	for module in $sch_mod
+	do
+                modprobe -q $module
+        done
 	#iptables modules
-	modprobe -q xt_connmark
-	modprobe -q xt_conntrack
-	modprobe -q xt_dscp
-	modprobe -q xt_mark
-	modprobe -q xt_DSCP
-	modprobe -q xt_MARK
-	modprobe -q xt_DSCP
-	modprobe -q xt_MARK
-	modprobe -q ipt_TOS
-	modprobe -q sch_sfq
-	modprobe -q sch_red
-	modprobe -q sch_gred
+	ipt_mod="xt_connmark xt_conntrack xt_dscp xt_mark xt_DSCP xt_MARK xt_DSCP ipt_TOS sch_sfq sch_red sch_gred"
+	for module in $ipt_mod
+	do
+                modprobe -q $module
+        done
 	$LOG " --------------RALINK-QOS------------------------"
 	qos_run
     elif [ "$QoSEnable" = "2" ]; then
 	    $LOG " --------------PRIO-QOS------------------------"
 	    $LOG "Load netsched  modules."
-	    modprobe -q sch_esfq
-	    modprobe -q sch_sfq
-	    modprobe -q cls_u32
-	    modprobe -q em_u32    
+	    mod="sch_esfq sch_sfq cls_u32 em_u32"
+	    for module in $mod
+	    do
+        	    modprobe -q $module
+    	    done
 
 	    #PRIOMAP+ESQ2LAN
 	    tc qdisc add dev $lan_if root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
@@ -133,8 +121,11 @@ if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
     elif [ "$QoSEnable" = "3" ]; then
 	    $LOG " -----------------IMQ-FULL-------------------------"
 	    $LOG "Load netsched  modules."
-	    modprobe -q imq > /dev/null 2>&1
-	    modprobe -q ipt_IMQ > /dev/null 2>&1
+	    mod="imq ipt_IMQ"
+	    for module in $mod
+	    do
+        	    modprobe -q $module
+    	    done
 	    ip link set imq0 up > /dev/null 2>&1
 	    ip link set imq1 up > /dev/null 2>&1
     fi

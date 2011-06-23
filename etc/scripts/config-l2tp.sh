@@ -20,9 +20,11 @@ LCPECHO=`nvram_get 2860 vpnEnableLCP`
 killall -q pppd
 killall -q xl2tpd
 
-modprobe -q ppp_generic > /dev/null 2>&1
-modprobe -q pppox > /dev/null 2>&1
-modprobe -q pppol2tp > /dev/null 2>&1
+mod="ppp_generic pppox pppol2tp"
+for module in $mod
+do
+    modprobe -q $module
+done
 
 LOG="logger -t vpnhelper-l2tp"
 
@@ -87,12 +89,13 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     if [ "$MPPE" = "on" ]; then
-	modprobe -q crypto_algapi
-	modprobe -q cryptomgr
-	modprobe -q blkcipher
-	modprobe -q ppp_mppe
+	mod="crypto_algapi cryptomgr blkcipher ppp_mppe"
+	for module in $mod
+	do
+	    modprobe -q $module
+	done
         MPPE=allow-mppe-128
-        else
+    else
         MPPE=
     fi
 

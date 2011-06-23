@@ -77,13 +77,11 @@ stop() {
     fi
 
     #Remove modules
-    rmmod ppp_mppe > /dev/null 2>&1
-    rmmod blkcipher > /dev/null 2>&1
-    rmmod cryptomgr > /dev/null 2>&1
-    rmmod crypto_algapi > /dev/null 2>&1
-    rmmod pppol2tp > /dev/null 2>&1
-    rmmod pptp     > /dev/null 2>&1
-    rmmod ppp_generic     > /dev/null 2>&1
+    mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppol2tp pptp ppp_generic"
+    for module in $mod
+    do
+	rmmod $module > /dev/null 2>&1
+    done
 
     #Remove VPN server IP file
     rm -f /tmp/vpnip
