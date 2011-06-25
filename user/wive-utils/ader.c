@@ -5,7 +5,6 @@ int main(int argc, char **argv){
     fprintf(stderr, "ader {char num}\n");
     exit(2);
   }
-  //параметры
   char *str=argv[1];
   int num=atoi(argv[2]);
   int a;

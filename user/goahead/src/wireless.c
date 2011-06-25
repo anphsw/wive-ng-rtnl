@@ -1531,11 +1531,10 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	LFW(security_mode, security_mode);
 
-	//GPIO13 is belong to WPS PBC indicator.
 	if (!strcmp(security_mode, "Disable") || !strcmp(security_mode, "OPEN"))
-		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
+		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF); //turn off security LED
 	else
-		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
+		ledAlways(GPIO_LED_SEC_GREEN, LED_ON); //turn on security LED
 
 	//clear Radius settings
 	clearRadiusSetting(nvram, mbssid);

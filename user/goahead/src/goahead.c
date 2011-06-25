@@ -49,10 +49,6 @@
 void	formDefineUserMgmt(void);
 #endif
 
-#define GPIO_LED_WAN_GREEN	12
-#define GPIO_LED_WAN_ORANGE	14
-
-
 /*********************************** Locals ***********************************/
 /*
  *	Change configuration here

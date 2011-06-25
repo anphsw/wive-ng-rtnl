@@ -2021,9 +2021,9 @@ void initInternet(void)
 
 	//First Security LED init
 	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-		ledAlways(13, LED_OFF); //turn off security LED (gpio 13)
+		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF); //turn off security LED
 	else
-		ledAlways(13, LED_ON); //turn on security LED (gpio 13)
+		ledAlways(GPIO_LED_SEC_GREEN, LED_ON); //turn on security LED
 
 //automatically connect to AP according to the active profile
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)

@@ -34,7 +34,13 @@
 #ifndef __RALINK_GPIO_H__
 #define __RALINK_GPIO_H__
 
+#ifdef __KERNEL__
 #include <asm/rt2880/rt_mmap.h>
+#endif
+
+#define GPIO_LED_WAN_GREEN      12
+#define GPIO_LED_SEC_GREEN      13
+#define GPIO_LED_WAN_ORANGE     14
 
 #define RALINK_GPIO_HAS_5124            1
 //#define RALINK_GPIO_HAS_9524            1
