@@ -102,6 +102,7 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 	}
 
 	memset(&sockname, 0, sizeof(struct sockaddr_storage));
+#ifdef ENABLE_IPV6
 	if(ipv6) {
 		struct sockaddr_in6 * saddr = (struct sockaddr_in6 *)&sockname;
 		saddr->sin6_family = AF_INET6;
@@ -109,6 +110,7 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 		saddr->sin6_addr = in6addr_any;
 		sockname_len = sizeof(struct sockaddr_in6);
 	} else {
+#endif
 		struct sockaddr_in * saddr = (struct sockaddr_in *)&sockname;
 		saddr->sin_family = AF_INET;
 		saddr->sin_port = htons(SSDP_PORT);
@@ -117,7 +119,9 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 		saddr->sin_addr.s_addr = htonl(INADDR_ANY);
 		/*saddr->sin_addr.s_addr = inet_addr(ifaddr);*/
 		sockname_len = sizeof(struct sockaddr_in);
+#ifdef ENABLE_IPV6
 	}
+#endif
 
 	if(setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &j, sizeof(j)) < 0)
 	{

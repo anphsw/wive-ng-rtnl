@@ -11,6 +11,8 @@
 
 #define UPNP_VERSION	"20100125"
 #define USE_NETFILTER 1
+#define SUPPORT_REMOTEHOST
+
 #define OS_NAME		"Wifi-Router"
 #define OS_VERSION	"Wifi-Router/WIVE-RTN"
 #define OS_URL		"http://sadnet.ru"
@@ -55,13 +57,34 @@
 /*#define HAS_DUMMY_SERVICE*/
 #define ENABLE_L3F_SERVICE
 
-/* Experimental UPnP Events support. */
-/*#define ENABLE_EVENTS*/
+/* Enable IP v6 support */
+/*#define ENABLE_IPV6*/
+
+/* Enable the support of IGD v2 specification */
+/*#define IGD_V2*/
+
+#ifdef IGD_V2
+/* Enable DeviceProtection service (IGDv2) */
+#define ENABLE_DP_SERVICE
+
+/* Enable WANIPv6FirewallControl service (IGDv2). needs IPv6 */
+#ifdef ENABLE_IPV6
+#define ENABLE_6FC_SERVICE
+#endif /* ENABLE_IPV6 */
+#endif /* IGD_V2 */
+
+/* UPnP Events support. Working well enough to be enabled by default.
+ * It can be disabled to save a few bytes. */
+#define ENABLE_EVENTS
 
 /* include interface name in pf and ipf rules */
 #define USE_IFNAME_IN_RULES
 
 /* Experimental NFQUEUE support. */
 /*#define ENABLE_NFQUEUE*/
+
+/* Enable to make MiniUPnPd more strict about UPnP conformance
+ * and the messages it receive from control points */
+/*#define UPNP_STRICT*/
 
 #endif
