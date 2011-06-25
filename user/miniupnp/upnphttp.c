@@ -1,8 +1,8 @@
-/* $Id: upnphttp.c,v 1.57 2009/02/12 23:38:40 nanard Exp $ */
+/* $Id: upnphttp.c,v 1.60 2011/06/01 22:35:05 nanard Exp $ */
 /* Project :  miniupnp
  * Website :  http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * Author :   Thomas Bernard
- * Copyright (c) 2005-2008 Thomas Bernard
+ * Copyright (c) 2005-2011 Thomas Bernard
  * This software is subject to the conditions detailed in the
  * LICENCE file included in this distribution.
  * */
@@ -343,6 +343,7 @@ with HTTP error 412 Precondition Failed. */
 			if(renewSubscription(h->req_SID, h->req_SIDLen, h->req_Timeout) < 0) {
 				BuildResp2_upnphttp(h, 412, "Precondition Failed", 0, 0);
 			} else {
+				h->respflags = FLAG_TIMEOUT;
 				BuildResp_upnphttp(h, 0, 0);
 			}
 		}
@@ -427,6 +428,18 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
 		else if(strcasecmp(L3F_PATH, HttpUrl) == 0)
 		{
 			sendXMLdesc(h, genL3F);
+		}
+#endif
+#ifdef ENABLE_6FC_SERVICE
+		else if(strcasecmp(WANIP6FC_PATH, HttpUrl) == 0)
+		{
+			sendXMLdesc(h, gen6FC);
+		}
+#endif
+#ifdef ENABLE_DP_SERVICE
+		else if(strcasecmp(DP_PATH, HttpUrl) == 0)
+		{
+			sendXMLdesc(h, genDP);
 		}
 #endif
 		else

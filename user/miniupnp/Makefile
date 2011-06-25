@@ -1,21 +1,15 @@
-# $Id: Makefile.linux,v 1.54 2011/02/20 23:39:43 nanard Exp $
+# $Id: Makefile,v 1.59 2011/05/26 22:47:32 nanard Exp $
 # MiniUPnP project
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
-# Author : Thomas Bernard
-# for use with GNU Make
+# Author: Thomas Bernard
 #
-# To install use :
-# $ PREFIX=/dummyinstalldir make -f Makefile.linux install
-# or :
-# $ INSTALLPREFIX=/usr/local make -f Makefile.linux install
-# or :
-# $ make -f Makefile.linux install
+# Makefile for miniupnpd (MiniUPnP daemon)
 #
-# if your system hasn't iptables libiptc headers and binary correctly
-# installed, you need to get iptables sources from http://netfilter.org/
-# ./configure them and build them then miniupnpd will build using :
-# $ IPTABLESPATH=/path/to/iptables-1.4.1 make -f Makefile.linux
-#
+# This Makefile should work for *BSD and SunOS/Solaris.
+# On Mac OS X, use "bsdmake" to build.
+# This Makefile is NOT compatible with GNU Make.
+# Linux users, please use Makefile.linux :
+#  make -f Makefile.linux
 
 #NOT NEED FOR CROSSCOMPILE
 #CFLAGS = -Wall -O -D_GNU_SOURCE -g -DDEBUG
@@ -38,7 +32,7 @@ BASEOBJS = miniupnpd.o upnphttp.o upnpdescgen.o upnpsoap.o \
            upnpreplyparse.o minixml.o \
 		   upnpredirect.o getifaddr.o daemonize.o upnpglobalvars.o \
            options.o upnppermissions.o minissdp.o natpmp.o \
-           upnpevents.o
+           upnpevents.o upnpevents.o upnputils.o getconnstatus.o
 
 LNXOBJS = linux/getifstats.o
 NETFILTEROBJS = netfilter/iptcrdr.o
