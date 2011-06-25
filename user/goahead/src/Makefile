@@ -39,6 +39,7 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  webrom.o webs.o websuemf.o \
 				  internet.o services.o utils.o wireless.o \
 				  firewall.o management.o wps.o helpers.o procps.o $(NAME).o
+
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 DEPEND_FILES += storage.o
 endif
@@ -78,7 +79,6 @@ all:	$(NAME)
 #
 $(NAME): clean_inet $(DEPEND_FILES)
 	$(CC) -o $@ $(DEPEND_FILES) $(LDFLAGS) $(EXTRALIBS) $(LDLIBS)
-	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 romfs:
 	$(ROMFSINST) /bin/$(NAME)

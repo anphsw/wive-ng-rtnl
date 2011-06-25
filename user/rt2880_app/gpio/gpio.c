@@ -514,7 +514,7 @@ void usage(char *cmd)
 	printf("       %s r - reading test (input)\n", cmd);
 	printf("       %s i (<gpio>) - interrupt test for gpio number\n", cmd);
 	printf("       %s l <gpio> <on> <off> <blinks> <rests> <times>\n", cmd);
-	printf("            - set led on <gpio>(0~24) on/off interval, no. of blinking/resting cycles, times of blinking\n");
+	printf("            - set led on <gpio>(0~%d) on/off interval, no. of blinking/resting cycles, times of blinking\n", RALINK_GPIO_NUMBER);
 	printf("       %s W [byte] [flag]\n", cmd);
 	printf("       %s b [bit]\n", cmd);
 	printf("       %s s [bit] [val]\n", cmd);
