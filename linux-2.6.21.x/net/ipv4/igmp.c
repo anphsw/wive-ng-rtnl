@@ -282,6 +282,8 @@ igmp_scount(struct ip_mc_list *pmc, int type, int gdeleted, int sdeleted)
 	return scount;
 }
 
+#define igmp_skb_size(skb) (*(unsigned int *)((skb)->cb))
+
 static struct sk_buff *igmpv3_newpack(struct net_device *dev, int size)
 {
 	struct sk_buff *skb;
@@ -289,9 +291,16 @@ static struct sk_buff *igmpv3_newpack(struct net_device *dev, int size)
 	struct iphdr *pip;
 	struct igmpv3_report *pig;
 
-	skb = alloc_skb(size + LL_ALLOCATED_SPACE(dev), GFP_ATOMIC);
-	if (skb == NULL)
-		return NULL;
+	while (1) {
+		skb = alloc_skb(size + LL_ALLOCATED_SPACE(dev),
+				GFP_ATOMIC | __GFP_NOWARN);
+		if (skb)
+			break;
+		size >>= 1;
+		if (size < 256)
+			return NULL;
+	}
+	igmp_skb_size(skb) = size;
 
 	{
 		struct flowi fl = { .oif = dev->ifindex,
@@ -385,7 +394,7 @@ static struct sk_buff *add_grhead(struct sk_buff *skb, struct ip_mc_list *pmc,
 	return skb;
 }
 
-#define AVAILABLE(skb) ((skb) ? ((skb)->dev ? (skb)->dev->mtu - (skb)->len : \
+#define AVAILABLE(skb) ((skb) ? ((skb)->dev ? igmp_skb_size(skb) - (skb)->len : \
 	skb_tailroom(skb)) : 0)
 
 static struct sk_buff *add_grec(struct sk_buff *skb, struct ip_mc_list *pmc,
