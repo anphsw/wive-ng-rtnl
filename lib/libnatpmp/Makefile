@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2011/01/03 17:31:03 nanard Exp $
+# $Id: Makefile,v 1.17 2011/06/17 22:57:47 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
 # (c) 2007-2011 Thomas Bernard
@@ -10,7 +10,7 @@ INSTALL = install
 
 # APIVERSION is used in soname
 APIVERSION = 1
-#LDFLAGS = --no-undefined
+#LDFLAGS = -Wl,--no-undefined
 CFLAGS  += -I../include -fPIC -Wall -DENABLE_STRNATPMPERR
 
 LIBOBJS = natpmp.o getgateway.o
@@ -74,10 +74,10 @@ cleaninstall:
 testgetgateway:	testgetgateway.o getgateway.o
 
 natpmpc-static:	natpmpc.o $(STATICLIB)
-	$(CC) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 natpmpc-shared:	natpmpc.o $(SHAREDLIB)
-	$(CC) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 $(STATICLIB):	$(LIBOBJS)
 	$(AR) crs $@ $?

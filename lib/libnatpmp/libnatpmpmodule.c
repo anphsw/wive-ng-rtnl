@@ -1,4 +1,4 @@
-/* $Id: libnatpmpmodule.c,v 1.4 2011/01/03 17:31:03 nanard Exp $ */
+/* $Id: libnatpmpmodule.c,v 1.5 2011/05/19 19:19:52 nanard Exp $ */
 /* libnatpmp
  * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
@@ -181,7 +181,7 @@ NATPMP_deleteportmapping(NATPMPObject *self, PyObject *args)
   unsigned short iport;
   const char *protocol;
 
-  if (!PyArg_ParseTuple(args, "HsHI", &eport, &protocol, &iport))
+  if (!PyArg_ParseTuple(args, "HsH", &eport, &protocol, &iport))
     return NULL;
   
   return NATPMP_domapping(&self->natpmp, eport, iport, protocol, 0);

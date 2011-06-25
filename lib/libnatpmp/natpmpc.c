@@ -1,4 +1,4 @@
-/* $Id: natpmpc.c,v 1.8 2011/01/03 17:31:03 nanard Exp $ */
+/* $Id: natpmpc.c,v 1.9 2011/04/18 18:25:21 nanard Exp $ */
 /* libnatpmp
  * Copyright (c) 2007-2011, Thomas BERNARD <miniupnp@free.fr>
  * http://miniupnp.free.fr/libnatpmp.html
@@ -156,7 +156,11 @@ int main(int argc, char * * argv)
 		FD_ZERO(&fds);
 		FD_SET(natpmp.s, &fds);
 		getnatpmprequesttimeout(&natpmp, &timeout);
-		select(FD_SETSIZE, &fds, NULL, NULL, &timeout);
+		r = select(FD_SETSIZE, &fds, NULL, NULL, &timeout);
+		if(r<0) {
+			fprintf(stderr, "select()");
+			return 1;
+		}
 		r = readnatpmpresponseorretry(&natpmp, &response);
 		sav_errno = errno;
 		printf("readnatpmpresponseorretry returned %d (%s)\n",
