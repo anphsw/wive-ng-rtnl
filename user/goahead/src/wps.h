@@ -7,24 +7,11 @@
 
 #include "utils.h"
 
-//Ricky Cao: I create an item on the kernel configuration of menuconfig for PCBA identify
-//           This is used to create definition for the code to do something for specific PCBA.
-//			 This item is created in linux-2.6.21.x/arch/mips/rt2880/Kconfig.
-#if defined CONFIG_UMEDIA_WRT393L //Ricky Cao: set the GPIO pin for WPS LED of WRT-393L
-	//Ricky Cao: WRT-393L only has one LED for indicate WPS status.
-	#define WPS_LED_ORANGE	9
-	#define WPS_LED_GREEN	9
-#else
-/*Salim:Orange for failure, Green for success*/
-#define WPS_LED_ORANGE	13
-#define WPS_LED_GREEN	13
-#endif
-
-#define LedReset()                  {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET);}
-#define LedInProgress()             {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_PROGRESS);}
-#define LedError()                  {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_ORANGE, WPS_LED_ERROR);}
-#define LedSessionOverlapDetected() {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_ORANGE, WPS_LED_SESSION_OVERLAP);}
-#define LedSuccess()                {ledWps(WPS_LED_ORANGE, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_RESET); ledWps(WPS_LED_GREEN, WPS_LED_SUCCESS);}
+#define LedReset()                  {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET);}
+#define LedInProgress()             {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_PROGRESS);}
+#define LedError()                  {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_ERROR);}
+#define LedSessionOverlapDetected() {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_SESSION_OVERLAP);}
+#define LedSuccess()                {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_SUCCESS);}
 
 #define WSC_CONF_STATUS_STR "WscConfStatus"
 #define WSC_CONF_STATUS_UNCONFIGURED    1   /* these value are taken from 2860 driver Release Note document. */
