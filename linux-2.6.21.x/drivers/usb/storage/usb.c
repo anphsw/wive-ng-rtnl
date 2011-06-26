@@ -952,6 +952,10 @@ static int storage_probe(struct usb_interface *intf,
 	struct us_data *us;
 	int result;
 	struct task_struct *th;
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	int i;
+	int urb_num;
+#endif
 
 	if (usb_usual_check_type(id, USB_US_TYPE_STOR))
 		return -ENXIO;
@@ -1035,6 +1039,35 @@ static int storage_probe(struct usb_interface *intf,
 		goto BadDevice;
 	}
 
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	urb_num = host->hostt->sg_tablesize;
+	us->storage_urbs = kmalloc(urb_num * sizeof *(us->storage_urbs), GFP_ATOMIC);
+	if (!us->storage_urbs) {
+		printk(USB_STORAGE "unable to allocate storage_urbs!\n");
+		goto BadDevice;
+	}
+	//printk("storage_urbs needs: %d bytes\n", urb_num * sizeof *storage_urbs);
+
+	for(i=0; i<urb_num; i++) {
+		us->storage_urbs[i] = usb_alloc_urb(0, GFP_ATOMIC);
+		if (!us->storage_urbs[i]) {
+			printk(USB_STORAGE "unable to allocate storage_urbs[%d]!\n", i);
+			break;
+		}
+	}
+	//printk("storage_urbs[] needs: %d bytes\n", urb_num * sizeof(struct urb));
+
+	if(i != urb_num) {
+		printk(USB_STORAGE "free urbs when allocation fails\n");
+		do {
+			i--;
+			usb_free_urb(us->storage_urbs[i]);
+		} while(i != 0);
+		kfree(us->storage_urbs);
+		goto BadDevice;
+	}
+#endif
+
 	/* Take a reference to the host for the scanning thread and
 	 * count it among all the threads we have launched.  Then
 	 * start it up. */
@@ -1054,11 +1087,18 @@ BadDevice:
 static void storage_disconnect(struct usb_interface *intf)
 {
 	struct us_data *us = usb_get_intfdata(intf);
-
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	int i;
+	int urb_num = us_to_host(us)->hostt->sg_tablesize;
+	
+	for(i=0; i<urb_num; i++) {
+		usb_free_urb(us->storage_urbs[i]);
+	}
+	kfree(us->storage_urbs);
+#endif
 	US_DEBUGP("storage_disconnect() called\n");
 	quiesce_and_remove_host(us);
 	release_everything(us);
-	kill_proc(1, SIGTTIN, 1);
 }
 
 /***********************************************************************

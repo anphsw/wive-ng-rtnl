@@ -1400,6 +1400,9 @@ struct usb_sg_request {
 
 	int			count;
 	struct completion	complete;
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	unsigned char urb_free;		//if urb_free is set, urbs are not pre-allocated and should be free.
+#endif
 };
 
 int usb_sg_init (

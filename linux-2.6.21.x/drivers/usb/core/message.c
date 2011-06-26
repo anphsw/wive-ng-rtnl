@@ -238,7 +238,13 @@ static void sg_clean (struct usb_sg_request *io)
 {
 	if (io->urbs) {
 		while (io->entries--)
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+			if(io->urb_free)
+#endif
 			usb_free_urb (io->urbs [io->entries]);
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+		if(io->urb_free)
+#endif
 		kfree (io->urbs);
 		io->urbs = NULL;
 	}
@@ -378,8 +384,16 @@ int usb_sg_init (
 	/* initialize all the urbs we'll use */
 	if (io->entries <= 0)
 		return io->entries;
-
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	io->urb_free = 0;
+	if (!io->urbs) {
+		io->urb_free = 1;
+		printk("%s %d, not usb storage pre-allocate urb!\n", __func__, __LINE__);
+#endif
 	io->urbs = kmalloc (io->entries * sizeof *io->urbs, mem_flags);
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	}
+#endif
 	if (!io->urbs)
 		goto nomem;
 
@@ -390,12 +404,23 @@ int usb_sg_init (
 	for (i = 0; i < io->entries; i++) {
 		unsigned		len;
 
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+		if(!io->urbs[i]) {
+			printk("%s %d, not usb storage pre-allocated urb!\n", __func__, __LINE__);
+#endif
 		io->urbs [i] = usb_alloc_urb (0, mem_flags);
 		if (!io->urbs [i]) {
 			io->entries = i;
 			goto nomem;
 		}
 
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+		}
+		else if(io->urbs[i]->dev != NULL)
+			printk("%s %d, usb storage pre-allocated urb[%d] is in use!\n", __func__, __LINE__, i);
+		else
+			usb_init_urb(io->urbs[i]);
+#endif
 		io->urbs [i]->dev = NULL;
 		io->urbs [i]->pipe = pipe;
 		io->urbs [i]->interval = period;

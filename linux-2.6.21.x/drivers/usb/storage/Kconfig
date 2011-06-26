@@ -24,6 +24,14 @@ config USB_STORAGE
 	  To compile this driver as a module, choose M here: the
 	  module will be called usb-storage.
 
+config USB_STORAGE_PRE_ALLOCATE_URB
+	bool "Pre-allocate urb for data transfer"
+	depends on USB
+	help
+	  Pre-allocate urbs when probe a USB and free them after
+	  disconnection. These urbs are used in usb_sg_init and decrease
+	  the time to allocate urbs in every data transfer.
+
 config USB_STORAGE_DEBUG
 	bool "USB Mass Storage verbose debug"
 	depends on USB_STORAGE

@@ -426,9 +426,17 @@ static int usb_stor_bulk_transfer_sglist(struct us_data *us, unsigned int pipe,
 	/* initialize the scatter-gather request block */
 	US_DEBUGP("%s: xfer %u bytes, %d entries\n", __FUNCTION__,
 			length, num_sg);
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	if(us->storage_urbs)
+		us->current_sg.urbs = us->storage_urbs;
+#endif
 	result = usb_sg_init(&us->current_sg, us->pusb_dev, pipe, 0,
 			sg, num_sg, length, GFP_NOIO);
 	if (result) {
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+		if(us->current_sg.urbs)
+			us->current_sg.urbs = NULL;
+#endif
 		US_DEBUGP("usb_sg_init returned %d\n", result);
 		return USB_STOR_XFER_ERROR;
 	}

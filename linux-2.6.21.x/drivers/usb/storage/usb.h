@@ -156,6 +156,9 @@ struct us_data {
 #ifdef CONFIG_PM
 	pm_hook			suspend_resume_hook;
 #endif
+#ifdef CONFIG_USB_STORAGE_PRE_ALLOCATE_URB
+	struct urb **storage_urbs;
+#endif
 };
 
 /* Convert between us_data and the corresponding Scsi_Host */
