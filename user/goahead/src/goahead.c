@@ -108,6 +108,7 @@ int main(int argc, char** argv)
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	int pid;
 #endif
+	char *auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
@@ -115,6 +116,12 @@ int main(int argc, char** argv)
 	//Boot = Orange ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
+
+	//Security LED init
+	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
+		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//turn off security LED
+	else
+		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//turn on security LED
 
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)

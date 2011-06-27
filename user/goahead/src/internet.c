@@ -100,9 +100,11 @@ static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void editRouting(webs_t wp, char_t *path, char_t *query);
+#if defined CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
 void ripdRestart(void);
+#endif
 
 #ifdef CONFIG_USER_CHILLISPOT
 static int getSpotIp(int eid, webs_t wp, int argc, char_t **argv);
@@ -149,8 +151,10 @@ void formDefineInternet(void) {
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
+#if defined CONFIG_USER_ZEBRA
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
+#endif
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
 	websAspDefine(T("getDATEBuilt"), getDATEBuilt);
 	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
@@ -1598,16 +1602,20 @@ void staticRoutingInit(void)
 	rebuildVPNRoutes(rrs);
 }
 
+#if defined CONFIG_USER_ZEBRA
 void dynamicRoutingInit(void)
 {
 	zebraRestart();
 	ripdRestart();
 }
+#endif
 
 void RoutingInit(void)
 {
 	staticRoutingInit();
+#if defined CONFIG_USER_ZEBRA
 	dynamicRoutingInit();
+#endif
 }
 
 static inline int getNums(char *value, char delimit)
@@ -1849,6 +1857,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
+#if defined CONFIG_USER_ZEBRA
 void ripdRestart(void)
 {
 	char lan_ip[16], wan_ip[16], lan_mask[16], wan_mask[16];
@@ -1966,6 +1975,7 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);
 }
+#endif
 
 /*
  * description: setup internet according to nvram configurations
@@ -1974,18 +1984,15 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
  */
 void initInternet(void)
 {
-	char *auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
 	char *opmode;
 #endif
+	//first generate user routes files and fierwall script
+	staticRoutingInit();
 	firewall_rebuild_etc();
-	doSystem("internet.sh");
 
-	//First Security LED init
-	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF); //turn off security LED
-	else
-		ledAlways(GPIO_LED_SEC_GREEN, LED_ON); //turn on security LED
+	//configure system
+	doSystem("internet.sh");
 
 //automatically connect to AP according to the active profile
 #if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
@@ -2004,9 +2011,10 @@ void initInternet(void)
 #if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
 #endif
-
-//Routing and QoS in STA mode need set after connect to STA
-	RoutingInit();
+#if defined CONFIG_USER_ZEBRA
+	//Dynamic Routing and QoS in STA mode need set after connect to STA
+	dynamicRoutingInit();
+#endif
 #ifdef CONFIG_NET_SCHED
 	QoSInit();
 #endif
