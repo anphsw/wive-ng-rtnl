@@ -2294,11 +2294,11 @@ NDIS_STATUS	RTMPSetProfileParameters(
 	do
 	{
 		// set file parameter to portcfg
-		if (RTMPGetKeyParameter("MacAddress", tmpbuf, 25, pBuffer, TRUE))
+		if (RTMPGetKeyParameter("WLAN_MAC_ADDR", tmpbuf, 25, pBuffer, TRUE))
 		{					
 			retval = RT_CfgSetMacAddress(pAd, tmpbuf);
 			if (retval)
-				DBGPRINT(RT_DEBUG_TRACE, ("MacAddress = %02x:%02x:%02x:%02x:%02x:%02x\n", 
+				DBGPRINT(RT_DEBUG_TRACE, ("WLAN_MAC_ADDR = %02x:%02x:%02x:%02x:%02x:%02x\n", 
 											PRINT_MAC(pAd->CurrentAddress)));
 		}
 		//CountryRegion
