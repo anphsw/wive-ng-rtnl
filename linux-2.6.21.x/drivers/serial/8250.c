@@ -614,7 +614,6 @@ static int size_fifo(struct uart_8250_port *up)
 static unsigned int autoconfig_read_divisor_id(struct uart_8250_port *p)
 {
 	unsigned int id;
-	unsigned old_lcr;
 
 #if defined (CONFIG_RALINK_RT2880) || \
     defined (CONFIG_RALINK_RT2883) || \
@@ -623,17 +622,19 @@ static unsigned int autoconfig_read_divisor_id(struct uart_8250_port *p)
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350)
 
+	unsigned char old_lcr;
 	unsigned short old_dl;
+
+	old_lcr = serial_inp(p, UART_LCR);
+	serial_outp(p, UART_LCR, UART_LCR_DLAB);
 
 	old_dl = serial_dl_read(p);
 	serial_dl_write(p, 0);
 	id = serial_dl_read(p);
 	serial_dl_write(p, old_dl);
-
-	old_lcr = serial_inp(p, UART_LCR);
-	serial_outp(p, UART_LCR, UART_LCR_DLAB);
+	serial_outp(p, UART_LCR, old_lcr);
 #else
-	unsigned char old_dll, old_dlm;
+	unsigned char old_dll, old_dlm, old_lcr;
 	old_lcr = serial_inp(p, UART_LCR);
 	serial_outp(p, UART_LCR, UART_LCR_DLAB);
 
