@@ -466,6 +466,8 @@
 23) Update libnatpmp to 20110103 version.<br>
 24) MIMO Power Save Mode set to static scheme.<br>
 25) Int High Power mode disable MIMO PowerSave to.<br>
+26) Add device autoprobe support in kernel.<br>
+27) Cleanup nvram fields.<br>
 
 <br><br>
 <b>For support see:</b><br>
