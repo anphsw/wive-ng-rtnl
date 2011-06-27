@@ -168,19 +168,17 @@ int ralink_gpio_led_set(ralink_gpio_led_info led)
 }
 EXPORT_SYMBOL(ralink_gpio_led_set);
 
-int ralink_gpio_ioctl(struct inode *inode, struct file *file, unsigned int req,
-		unsigned long arg)
+long ralink_gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	unsigned long idx, tmp;
 	ralink_gpio_reg_info info;
 #ifdef CONFIG_RALINK_GPIO_LED
 	ralink_gpio_led_info led;
 #endif
+	idx = (cmd >> RALINK_GPIO_DATA_LEN) & 0xFFL;
+	cmd &= RALINK_GPIO_DATA_MASK;
 
-	idx = (req >> RALINK_GPIO_DATA_LEN) & 0xFFL;
-	req &= RALINK_GPIO_DATA_MASK;
-
-	switch(req) {
+	switch(cmd) {
 	case RALINK_GPIO_SET_DIR:
 		*(volatile u32 *)(RALINK_REG_PIODIR) = cpu_to_le32(arg);
 		break;
@@ -359,19 +357,19 @@ int ralink_gpio_ioctl(struct inode *inode, struct file *file, unsigned int req,
 	return 0;
 }
 
-int ralink_gpio_open(struct inode *inode, struct file *file)
+static int ralink_gpio_open(struct inode *inode, struct file *file)
 {
 	try_module_get(THIS_MODULE);
 	return 0;
 }
 
-int ralink_gpio_release(struct inode *inode, struct file *file)
+static int ralink_gpio_release(struct inode *inode, struct file *file)
 {
 	module_put(THIS_MODULE);
 	return 0;
 }
 
-struct file_operations ralink_gpio_fops =
+static struct file_operations ralink_gpio_fops =
 {
 	owner:		THIS_MODULE,
 	unlocked_ioctl:	ralink_gpio_ioctl,
