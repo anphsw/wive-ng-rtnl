@@ -464,6 +464,8 @@
 21) Decrease logic itaration overhead.<br>
 22) Up miniupnpd to 1.5.20110623 version.<br>
 23) Update libnatpmp to 20110103 version.<br>
+24) MIMO Power Save Mode set to static scheme.<br>
+25) Int High Power mode disable MIMO PowerSave to.<br>
 
 <br><br>
 <b>For support see:</b><br>
