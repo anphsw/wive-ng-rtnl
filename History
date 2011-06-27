@@ -469,6 +469,7 @@
 26) Add device autoprobe support in kernel.<br>
 27) Cleanup nvram fields.<br>
 28) Fix route loop at some VPN providers in static mode.<br>
+29) Rework logic add user routes.<br>
 
 <br><br>
 <b>For support see:</b><br>
