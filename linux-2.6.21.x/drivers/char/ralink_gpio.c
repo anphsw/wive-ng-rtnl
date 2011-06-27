@@ -374,7 +374,7 @@ int ralink_gpio_release(struct inode *inode, struct file *file)
 struct file_operations ralink_gpio_fops =
 {
 	owner:		THIS_MODULE,
-	ioctl:		ralink_gpio_ioctl,
+	unlocked_ioctl:	ralink_gpio_ioctl,
 	open:		ralink_gpio_open,
 	release:	ralink_gpio_release,
 };
