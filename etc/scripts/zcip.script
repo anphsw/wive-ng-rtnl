@@ -23,6 +23,11 @@ config)
 	fi
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
 	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
+	#add routes configured in web
+	if [ -f /etc/routes_replace ]; then
+	    $LOF "Add user routes."
+	    /etc/routes_replace replace $lan_if $wan_if
+	fi
 	exit 0
 	;;
 deconfig)

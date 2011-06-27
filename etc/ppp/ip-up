@@ -85,10 +85,9 @@ chilli_net=`nvram_get 2860 chilli_net`
     fi
 
     #user route add                                                                                                                             
-    if [ "$VPN_ROUTING_ENABLED" = "on" ]; then
+    if [ "$VPN_ROUTING_ENABLED" = "on" ] && [ -f /etc/routes_ppp_replace ]; then
         $LOG "Add user routes from ip-up for $PPP_IFACE"
-	chmod 777 /etc/routes_ppp_replace
-        /etc/routes_ppp_replace $PPP_IFACE replace
+        /etc/routes_ppp_replace replace $PPP_IFACE
     fi
 
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################

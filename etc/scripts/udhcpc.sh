@@ -162,6 +162,12 @@ case "$1" in
 		ip route replace $IPCMD
 	done
 
+	#add routes configured in web
+	if [ -f /etc/routes_replace ]; then
+	    $LOF "Add user routes."
+	    /etc/routes_replace replace $lan_if $wan_if
+	fi
+
         if [ "$OLD_IP" != "$CUR_IP" ]; then
 	    #Get DNS servers
 	    if [ "$wan_static_dns" != "on" ] && [ "$dns" ]; then

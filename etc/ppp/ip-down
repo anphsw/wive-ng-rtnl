@@ -39,7 +39,7 @@ chilli_net=`nvram_get 2860 chilli_net`
 
     if [ -f /etc/routes_ppp_replace ]; then
 	$LOG "Delete user routes"
-	/etc/routes_ppp_replace $PPP_IFACE del > /dev/null 2>&1
+	/etc/routes_ppp_replace del $PPP_IFACE > /dev/null 2>&1
     fi
     
     $LOG "Restore default gateway"
