@@ -734,6 +734,7 @@ int gen_wifi_config(int mode)
 #define FPRINT_STR(x) fprintf(fp, #x"=%s\n", nvram_bufget(mode, #x));
 
 	if (RT2860_NVRAM == mode) {
+		FPRINT_STR(WLAN_MAC_ADDR);
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
