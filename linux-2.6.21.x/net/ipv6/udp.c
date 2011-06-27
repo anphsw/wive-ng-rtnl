@@ -223,6 +223,12 @@ csum_copy_err:
 		UDP6_INC_STATS_USER(UDP_MIB_INERRORS, is_udplite);
 		return -EAGAIN;
 	}
+
+	if (noblock)
+		return -EAGAIN;
+
+	/* starting over for a new packet */
+	msg->msg_flags &= ~MSG_TRUNC;
 	goto try_again;
 }
 
