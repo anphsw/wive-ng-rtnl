@@ -8,9 +8,13 @@ echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 ########################################ALLMODE param##########################
 HiPower=`nvram_get 2860 HiPower`
 if [ "$HiPower" = "1" ]; then
+#Disable MIMO PowerSave and increase LNA gain
     iwpriv ra0 set HiPower=1
+    iwpriv ra0 set HtMimoPs=0
 else
+#Enable MIMO PowerSave and set LNA gain to default
     iwpriv ra0 set HiPower=0
+    iwpriv ra0 set HtMimoPs=1
 fi
 
 ########################################STAMODE param##########################
