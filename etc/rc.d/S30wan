@@ -62,15 +62,15 @@ start() {
 	    ifconfig "$wan_if" "$wan_ip" netmask "$wan_nm"
 	    #always treat bridge mode having static wan connection
 	    #route mode
-	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-		ip route replace default via $gw
+	    if [ "$wan_gateway" != "" ] && [ "$wan_gateway" != "0.0.0.0" ]; then
+		ip route replace default via $wan_gateway
 	    fi
 	else
 	    #wan interface up and default gateway
 	    ifconfig br0 $lan_ip netmask $lan_nm
 	    #if bridge mode dgw on dev br0 set
-	    if [ "$gw" != "" ] && [ "$gw" != "0.0.0.0" ]; then
-    		ip route replace default dev br0 via $gw
+	    if [ "$wan_gateway" != "" ] && [ "$wan_gateway" != "0.0.0.0" ]; then
+    		ip route replace default dev br0 via $wan_gateway
 	    else
     		ip route replace default dev br0
 	    fi
@@ -113,7 +113,7 @@ get_param() {
     wan_nm=`nvram_get 2860 wan_netmask`
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
-    gw=`nvram_get 2860 wan_gateway`
+    wan_gateway=`nvram_get 2860 wan_gateway`
 }
 
 case "$1" in

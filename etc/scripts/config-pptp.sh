@@ -60,10 +60,14 @@ echo "==================START-PPTP-CLIENT======================="
     reachable=0;
 
     $LOG "Set route to vpn server."
-    if [ -f /tmp/default.gw ]; then
-	newdgw=`cat /tmp/default.gw`
+    if [ "$wanmode" != "STATIC" ]; then
+	if [ -f /tmp/default.gw ]; then
+	    newdgw=`cat /tmp/default.gw`
+	else
+	    newdgw=""
+	fi
     else
-	newdgw=""
+	    newdgw=`nvram_get 2860 wan_gateway`
     fi
 
     if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then

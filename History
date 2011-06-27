@@ -468,6 +468,7 @@
 25) Int High Power mode disable MIMO PowerSave to.<br>
 26) Add device autoprobe support in kernel.<br>
 27) Cleanup nvram fields.<br>
+28) Fix route loop at some VPN providers in static mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
