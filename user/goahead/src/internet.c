@@ -45,10 +45,6 @@ typedef struct vpn_status_t
 #include      "qos.h"
 #endif
 
-static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv);
-static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv);
-static void formVPNSetup(webs_t wp, char_t *path, char_t *query);
-
 static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -74,14 +70,9 @@ static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv);
-
-// BEGIN KABINET PROVIDER
-static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv);
-// END KABINET PROVIDER
-
 static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv);
-
+static int getLANAUTHBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDns(int eid, webs_t wp, int argc, char_t **argv);
 static int getHostSupp(int eid, webs_t wp, int argc, char_t **argv);
 static int getIfLiveWeb(int eid, webs_t wp, int argc, char_t **argv);
@@ -96,10 +87,14 @@ static int getWanIfNameWeb(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv);
 static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv);
 static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv);
+static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv);
+static void formVPNSetup(webs_t wp, char_t *path, char_t *query);
 static void setLan(webs_t wp, char_t *path, char_t *query);
 static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void editRouting(webs_t wp, char_t *path, char_t *query);
+
 #if defined CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
@@ -153,8 +148,8 @@ void formDefineInternet(void) {
 	websFormDefine(T("editRouting"), editRouting);
 #if defined CONFIG_USER_ZEBRA
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
-	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
 #endif
+	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
 	websAspDefine(T("getSWQoSBuilt"), getSWQoSBuilt);
 	websAspDefine(T("getDATEBuilt"), getDATEBuilt);
 	websAspDefine(T("getDDNSBuilt"), getDDNSBuilt);
@@ -1930,7 +1925,9 @@ inline void zebraRestart(void)
 out:
 	doSystem("service zebra restart &");
 }
+#endif
 
+#if defined CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *rip;
