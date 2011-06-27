@@ -191,12 +191,15 @@ function addRoutingRule(form)
 		row[3] = '255.255.255.255';
 
 	// Gateway
-	if (!validateIP(form.gateway, true))
+	if (form.gateway.value != '')
 	{
-		form.gateway.focus();
-		return;
+		if (!validateIP(form.gateway, true))
+		{
+			form.gateway.focus();
+			return;
+		}
+		row[2] = form.gateway.value;
 	}
-	row[2] = form.gateway.value;
 
 	// Interface
 	row[9] = form.interface.value;
