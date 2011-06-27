@@ -67,7 +67,10 @@ echo "==================START-PPTP-CLIENT======================="
 	    newdgw=""
 	fi
     else
-	    newdgw=`nvram_get 2860 wan_gateway`
+	newdgw=`nvram_get 2860 wan_gateway`
+	if [ $newdgw = "0.0.0.0" ]; then
+	    newdgw=""
+	fi
     fi
 
     if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
