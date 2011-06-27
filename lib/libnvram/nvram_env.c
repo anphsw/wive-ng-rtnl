@@ -1017,7 +1017,6 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key4Str16);
 #endif
 #endif
-		FPRINT_NUM(HSCounter);
 
 		//MIMO
 		FPRINT_NUM(HT_HTC);
@@ -1040,7 +1039,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(GreenAP);
 		FPRINT_NUM(HT_40MHZ_INTOLERANT);
 		FPRINT_NUM(HT_MIMOPSMode);
-		FPRINT_NUM(HT_DisableReordering);
 		FPRINT_NUM(HT_BSSCoexistence);
 		FPRINT_NUM(HT_BSSCoexApCntThr);
 
