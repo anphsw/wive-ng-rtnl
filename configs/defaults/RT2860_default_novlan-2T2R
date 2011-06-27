@@ -132,7 +132,6 @@ Key4Str1=
 HSCounter=0
 HT_HTC=1
 HT_RDG=1
-HT_LinkAdapt=0
 HT_OpMode=0
 HT_MpduDensity=7
 HT_EXTCHA=0

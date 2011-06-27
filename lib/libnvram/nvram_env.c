@@ -1022,7 +1022,6 @@ int gen_wifi_config(int mode)
 		//MIMO
 		FPRINT_NUM(HT_HTC);
 		FPRINT_NUM(HT_RDG);
-		FPRINT_NUM(HT_LinkAdapt);
 		FPRINT_NUM(HT_OpMode);
 		FPRINT_NUM(HT_MpduDensity);
 		FPRINT_NUM(HT_EXTCHA);

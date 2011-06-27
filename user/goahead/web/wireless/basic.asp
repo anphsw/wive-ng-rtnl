@@ -25,7 +25,6 @@ var ht_stbc = '<% getCfgZero(1, "HT_STBC"); %>';
 var ht_mcs = '<% getCfgZero(1, "HT_MCS"); %>';
 var ht_htc = '<% getCfgZero(1, "HT_HTC"); %>';
 var ht_rdg = '<% getCfgZero(1, "HT_RDG"); %>';
-//var ht_linkadapt = '<% getCfgZero(1, "HT_LinkAdapt"); %>';
 var ht_extcha = '<% getCfgZero(1, "HT_EXTCHA"); %>';
 var ht_amsdu = '<% getCfgZero(1, "HT_AMSDU"); %>';
 var ht_autoba = '<% getCfgZero(1, "HT_AutoBA"); %>';
