@@ -332,7 +332,7 @@ char* getWanIfName(void)
 		return if_name;
 	if (!strncmp(mode, "0", 2))
 		if_name = "br0";
-	else if (!strncmp(mode, "1", 2)) {
+	else if (!strncmp(mode, "1", 2) || (!strncmp(mode, "4", 2)) { /* for gw and chillispot mode */
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
 		if_name = "eth2.2";
 #else /* MARVELL & CONFIG_ICPLUS_PHY */
@@ -346,6 +346,9 @@ char* getWanIfName(void)
 	return if_name;
 }
 
+/*
+ * description: return uplink interface name VPN or PhysWAN
+ */
 char* getWanIfNamePPP(void)
 {
     char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
