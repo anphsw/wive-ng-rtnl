@@ -242,6 +242,16 @@ start() {
 		iptables -t nat -N DMZ
 		iptables -t nat -A PREROUTING -j DMZ
 		$LOG "DMZ enabled for $DMZIPAddress"
+		if [ "$vpnEnabled" = "on" ]; then
+		    if [ "$vpnType" = "1" ]; then
+			#pptp
+			iptables -t nat -A DMZ -p tcp -d $DMZIPAddress --dport 1723 -j RETURN
+			iptables -t nat -A DMZ -p gre -d $DMZIPAddress -j RETURN
+		    elif [ "$vpnType" = "2" ]; then
+			#l2tp
+			iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
+		    fi
+		fi
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
