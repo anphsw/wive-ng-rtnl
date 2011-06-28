@@ -32,6 +32,9 @@
 #define PORT_FORWARD_PRE_CHAIN	"port_forward_pre" //for clean forward
 #define PORT_FORWARD_POST_CHAIN	"port_forward_post" //for reverse nat
 
+#define PORT_FORWARD_PRE_CHAIN_VPN	"port_forward_pre_vpn" //for clean forward
+#define PORT_FORWARD_POST_CHAIN_VPN	"port_forward_post_vpn" //for reverse nat
+
 
 #define MAGIC_NUM			"IPCHAINS"			
 

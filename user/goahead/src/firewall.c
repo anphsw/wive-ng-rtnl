@@ -23,6 +23,7 @@
 
 #define _PATH_PFW           "/etc"
 #define _PATH_PFW_FILE      _PATH_PFW "/portforward"
+#define _PATH_PFW_FILE_VPN  _PATH_PFW "/portforward_vpn"
 #define _PATH_MACIP_FILE    _PATH_PFW "/macipfilter"
 #define _PATH_WEBS_FILE     _PATH_PFW "/websfilter"
 
@@ -301,7 +302,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	if (inat_loopback)
 	{		
 		//DNAT
-		rc = snprintf(pos, len, "iptables -t nat -I %s -i %s -d $1 ", PORT_FORWARD_PRE_CHAIN, lan_if);
+		rc = snprintf(pos, len, "iptables -t nat -A %s -i %s -d $1 ", PORT_FORWARD_PRE_CHAIN, lan_if);
 		pos += rc;
 		len -= rc;
 		
@@ -329,7 +330,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		len -= rc;
 
 		//MASQ
-		rc = snprintf(pos, len, "iptables -t nat -I %s -s %s/%s -d %s ", PORT_FORWARD_POST_CHAIN, lan_ip, lan_nm, ip_address);
+		rc = snprintf(pos, len, "iptables -t nat -A %s -s %s/%s -d %s ", PORT_FORWARD_POST_CHAIN, lan_ip, lan_nm, ip_address);
 		pos += rc;
 		len -= rc;
 		
@@ -399,6 +400,119 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	
 	rc = snprintf(pos, len, "\n");
 }
+
+static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_address, int proto, int prf_int, int prt_int, int rprf_int, int rprt_int, int inat_loopback)
+{
+	int rc = 0;
+	char *pos = buf;
+
+	char *lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+	char *lan_nm = nvram_get(RT2860_NVRAM, "lan_netmask");
+	char *lan_if = getLanIfName();
+
+	// Add nat loopback
+	if (inat_loopback)
+	{		
+		//DNAT
+		rc = snprintf(pos, len, "iptables -t nat -$1 %s -i %s -d $3 ", PORT_FORWARD_PRE_CHAIN_VPN, lan_if);
+		pos += rc;
+		len -= rc;
+		
+		// write protocol type
+		if (proto == PROTO_TCP)
+			rc = snprintf(pos, len, "-p tcp ");
+		else if (proto == PROTO_UDP)
+			rc = snprintf(pos, len, "-p udp ");
+		else if (proto == PROTO_TCP_UDP)
+			rc = snprintf(pos, len, " ");
+		pos += rc;
+		len -= rc;
+
+		// write dst port
+		if (prf_int != 0)
+		{
+			rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+			snprintf(pos, len, "--dport %d ", prf_int);
+			pos += rc;
+			len -= rc;
+		}
+		rc = snprintf(pos, len, "-j DNAT --to-destination %s  > /dev/null 2>&1\n", ip_address);
+		pos += rc;
+		len -= rc;
+
+		//MASQ
+		rc = snprintf(pos, len, "iptables -t nat -$1 %s -s %s/%s -d %s ", PORT_FORWARD_POST_CHAIN_VPN, lan_ip, lan_nm, ip_address);
+		pos += rc;
+		len -= rc;
+		
+		// write protocol type
+		if (proto == PROTO_TCP)
+			rc = snprintf(pos, len, "-p tcp ");
+		else if (proto == PROTO_UDP)
+			rc = snprintf(pos, len, "-p udp ");
+		else if (proto == PROTO_TCP_UDP)
+			rc = snprintf(pos, len, " ");
+		pos += rc;
+		len -= rc;
+
+		// write dst port
+		if (prf_int != 0)
+		{
+			rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+			snprintf(pos, len, "--dport %d ", prf_int);
+			pos += rc;
+			len -= rc;
+		}
+		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
+		pos += rc;
+		len -= rc;
+	}
+
+	// Add forwarding rule
+	rc = snprintf(pos, len, "iptables -t nat -$1 %s -i %s -d ! %s/%s ", PORT_FORWARD_PRE_CHAIN_VPN, wan_name, lan_ip, lan_nm);
+	pos += rc;
+	len -= rc;
+
+	// write protocol type
+	if (proto == PROTO_TCP)
+		rc = snprintf(pos, len, "-p tcp ");
+	else if (proto == PROTO_UDP)
+		rc = snprintf(pos, len, "-p udp ");
+	else if (proto == PROTO_TCP_UDP)
+		rc = snprintf(pos, len, " ");
+	pos += rc;
+	len -= rc;
+
+	// write src port
+	if (prf_int != 0)
+	{
+		rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+			snprintf(pos, len, "--dport %d ", prf_int);
+		pos += rc;
+		len -= rc;
+	}
+
+	// write remote ip
+	rc = snprintf(pos, len, "-j DNAT --to-destination %s", ip_address);
+	pos += rc;
+	len -= rc;
+	
+	// write dst port
+	if (rprf_int != 0)
+	{
+		rc = (rprt_int != 0) ?
+			snprintf(pos, len, ":%d-%d ", rprf_int, rprt_int) :
+			snprintf(pos, len, ":%d ", rprf_int);
+		pos += rc;
+		len -= rc;
+	}
+	
+	rc = snprintf(pos, len, "\n");
+}
+
 
 static int checkNatEnabled()
 {
@@ -635,143 +749,190 @@ static void iptablesPortForwardBuildScript(void)
 	}
 	else
 		return;
+	
+	int nat_loopback_on = checkNatLoopback(rule);
 
 	// get wan name
 	strncpy(wan_name, getWanIfNamePPP(), sizeof(wan_name)-1);
 
 	// Generate portforward script file
 	FILE *fd = fopen(_PATH_PFW_FILE, "w");
-
-	if (fd != NULL)
-	{
-		fputs("#!/bin/sh\n\n", fd);
+	if (fd == NULL)
+		return;
+	
+	// Print header for WAN/LAN
+	fputs("#!/bin/sh\n\n", fd);
+	fprintf(fd, 
+		"iptables -t nat -N %s\n"
+		"iptables -t nat -A PREROUTING -j %s\n\n",
+		PORT_FORWARD_PRE_CHAIN, PORT_FORWARD_PRE_CHAIN);
+	
+	// Additional rules if port forwarding enabled
+	if (nat_loopback_on)
 		fprintf(fd, 
 			"iptables -t nat -N %s\n"
-			"iptables -t nat -A PREROUTING -j %s\n\n",
-			PORT_FORWARD_PRE_CHAIN, PORT_FORWARD_PRE_CHAIN);
+			"iptables -t nat -A POSTROUTING -j %s\n\n",
+			PORT_FORWARD_POST_CHAIN, PORT_FORWARD_POST_CHAIN);
+	
+	// Open file for VPN
+	FILE *fd_vpn = fopen(_PATH_PFW_FILE_VPN, "w");
+	if (fd_vpn == NULL)
+	{
+		fclose(fd);
+		return;
+	}
 
-		// Check if nat loopback is enabled
-		if (checkNatLoopback(rule))
-			fprintf(fd, 
-				"iptables -t nat -N %s\n"
-				"iptables -t nat -A POSTROUTING -j %s\n\n",
-				PORT_FORWARD_POST_CHAIN, PORT_FORWARD_POST_CHAIN);
+	// Print header for VPN
+	fputs("#!/bin/sh\n\n", fd_vpn);
+	fprintf(fd_vpn, 
+		"iptables -t nat -N %s\n"
+		"iptables -t nat -A PREROUTING -j %s\n\n",
+		PORT_FORWARD_PRE_CHAIN_VPN, PORT_FORWARD_PRE_CHAIN_VPN);
+	
+	// Additional rules if port forwarding enabled
+	if (nat_loopback_on)
+		fprintf(fd_vpn, 
+			"iptables -t nat -N %s\n"
+			"iptables -t nat -A POSTROUTING -j %s\n\n",
+			PORT_FORWARD_POST_CHAIN_VPN, PORT_FORWARD_POST_CHAIN_VPN);
 
-		while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
+	// Now write all rules
+	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
+	{
+		// get interface
+		if ((getNthValueSafe(0, rec, ',', interface, sizeof(interface)) == -1))
+			continue;
+	
+		// get protocol
+		if ((getNthValueSafe(1, rec, ',', protocol, sizeof(protocol)) == -1))
+			continue;
+
+		proto = atoi(protocol);
+		switch(proto)
 		{
-			// get interface
-			if ((getNthValueSafe(0, rec, ',', interface, sizeof(interface)) == -1))
+			case PROTO_TCP:
+			case PROTO_UDP:
+			case PROTO_TCP_UDP:
+				break;
+			default:
 				continue;
+		}
 		
-			// get protocol
-			if ((getNthValueSafe(1, rec, ',', protocol, sizeof(protocol)) == -1))
-				continue;
+		// get port range "from"
+		if ((getNthValueSafe(2, rec, ',', prf, sizeof(prf)) == -1))
+			continue;
 
-			proto = atoi(protocol);
-			switch(proto)
-			{
-				case PROTO_TCP:
-				case PROTO_UDP:
-				case PROTO_TCP_UDP:
-					break;
-				default:
-					continue;
-			}
+		if (strlen(prf) > 0)
+		{
+			if ((prf_int = atoi(prf)) == 0 || prf_int > 65535)
+				continue;
+		}
+		else
+			prf_int = 0;
+
+		// get port range "to"
+		if ((getNthValueSafe(3, rec, ',', prt, sizeof(prt)) == -1))
+			continue;
+
+		if (prt > 0)
+		{
+			if ((prt_int = atoi(prt)) > 65535)
+				continue;
+		}
+		else
+			prt_int = 0;
 		
-			// get port range "from"
-			if ((getNthValueSafe(2, rec, ',', prf, sizeof(prf)) == -1))
+		// get ip address
+		if ((getNthValueSafe(4, rec, ',', ip_address, sizeof(ip_address)) == -1))
+			continue;
+
+		if (!isIpValid(ip_address))
+			continue;
+
+		// get forward port range "from"
+		if ((getNthValueSafe(5, rec, ',', rprf, sizeof(rprf)) == -1))
+			continue;
+
+		if (strlen(rprf) > 0)
+		{
+			rprf_int = atoi(rprf);
+			if (rprf_int > 65535)
 				continue;
+		}
+		else
+			rprf_int = 0;
 
-			if (strlen(prf) > 0)
-			{
-				if ((prf_int = atoi(prf)) == 0 || prf_int > 65535)
-					continue;
-			}
-			else
-				prf_int = 0;
+		// get port range "to"
+		if ((getNthValueSafe(6, rec, ',', rprt, sizeof(rprt)) == -1))
+			continue;
 
-			// get port range "to"
-			if ((getNthValueSafe(3, rec, ',', prt, sizeof(prt)) == -1))
+		if (strlen(rprt) > 0)
+		{
+			if ((rprt_int = atoi(rprt)) > 65535)
 				continue;
-
-			if (prt > 0)
-			{
-				if ((prt_int = atoi(prt)) > 65535)
-					continue;
-			}
-			else
-				prt_int = 0;
+		}
+		else
+			rprt_int = 0;
 		
-			// get ip address
-			if ((getNthValueSafe(4, rec, ',', ip_address, sizeof(ip_address)) == -1))
-				continue;
+		// get Nat Loopback enable flag
+		if ((getNthValueSafe(7, rec, ',', nat_loopback, sizeof(nat_loopback)) == -1))
+			continue;
+		
+		if (strlen(nat_loopback) > 0)
+			inat_loopback = atoi(nat_loopback);
+		else
+			inat_loopback = 0;
 
-			if (!isIpValid(ip_address))
-				continue;
-
-			// get forward port range "from"
-			if ((getNthValueSafe(5, rec, ',', rprf, sizeof(rprf)) == -1))
-				continue;
-
-			if (strlen(rprf) > 0)
-			{
-				rprf_int = atoi(rprf);
-				if (rprf_int > 65535)
-					continue;
-			}
-			else
-				rprf_int = 0;
-
-			// get port range "to"
-			if ((getNthValueSafe(6, rec, ',', rprt, sizeof(rprt)) == -1))
-				continue;
-
-			if (strlen(rprt) > 0)
-			{
-				if ((rprt_int = atoi(rprt)) > 65535)
-					continue;
-			}
-			else
-				rprt_int = 0;
-			
-			// get Nat Loopback enable flag
-			if ((getNthValueSafe(7, rec, ',', nat_loopback, sizeof(nat_loopback)) == -1))
-				continue;
-			
-			if (strlen(nat_loopback) > 0)
-				inat_loopback = atoi(nat_loopback);
-			else
-				inat_loopback = 0;
-
-			
-			// Patch interface
-			if (strcmp(interface, "LAN")==0)
-				c_if = "br0";
-			else if (strcmp(interface, "VPN")==0)
-				c_if = "ppp+";
-			else
-				c_if = wan_name;
-			
-			switch(proto)
-			{
-				case PROTO_TCP:
-				case PROTO_UDP:
+		int is_vpn = 0;
+		// Patch interface
+		if (strcmp(interface, "LAN")==0)
+			c_if = "br0";
+		else if (strcmp(interface, "VPN")==0)
+		{
+			c_if = "$2";
+			is_vpn = 1;
+		}
+		else
+			c_if = wan_name;
+		
+		switch(proto)
+		{
+			case PROTO_TCP:
+			case PROTO_UDP:
+				if (is_vpn)
+				{
+					makePortForwardRuleVPN(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+					fputs(cmd, fd_vpn);
+				}
+				else
+				{
 					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, proto, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
-					break;
-				
-				case PROTO_TCP_UDP:
+				}
+				break;
+			
+			case PROTO_TCP_UDP:
+				if (is_vpn)
+				{
+					makePortForwardRuleVPN(cmd, sizeof(cmd), c_if, ip_address, PROTO_TCP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+					fputs(cmd, fd_vpn);
+					makePortForwardRuleVPN(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
+					fputs(cmd, fd_vpn);
+				}
+				else
+				{
 					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_TCP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
 					makePortForwardRule(cmd, sizeof(cmd), c_if, ip_address, PROTO_UDP, prf_int, prt_int, rprf_int, rprt_int, inat_loopback);
 					fputs(cmd, fd);
-					break;
-			}
+				}
+				break;
 		}
-		
-		//close file
-		fclose(fd);
 	}
+		
+	// Close files
+	fclose(fd_vpn);
+	fclose(fd);
 }
 
 inline int getRuleNums(char *rules)
@@ -1293,9 +1454,9 @@ void iptablesWebsFilterRun(void)
 					if (!strncasecmp(entry, "http://", strlen("http://")))
 						strcpy(entry, entry + strlen("http://"));
 					
-					printf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, entry);
+					fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, entry);
 					if (nat_ena)
-						printf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, entry);
+						fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --url  %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, entry);
 				}
 				i++;
 			}
