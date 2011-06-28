@@ -13,8 +13,10 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 ##########################################################
 # This is services restart always                        #
 ##########################################################
+if [ "$vpnEnabled" != "on" ] || [ "$MODE" != "pppd" ]; then 
     $LOG "Resolv config generate..."
     service resolv start
+fi
     $LOG "Reload iptables rules..."
     service iptables restart
     $LOG "Reload shaper rules..."
