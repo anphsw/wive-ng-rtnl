@@ -3782,7 +3782,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
 	tmpProfileSetting.Next = NULL;
 	
-	printf("query=%s\n", query);
+	//printf("query=%s\n", query);
 
 	//profile name
 	// TODO: to tell profile is duplication with other
