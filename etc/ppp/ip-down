@@ -24,11 +24,15 @@ chilli_net=`nvram_get 2860 chilli_net`
     
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+    iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
+
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
-    iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
+    iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
 
     if [ "$vpnPeerDNS" != "off" ]; then
 	$LOG "Restore DNS from pppd"                                                                                             

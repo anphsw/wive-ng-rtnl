@@ -223,9 +223,9 @@ start() {
 	    qos
 	fi
 ###########################################NAT-NAPTM#######################################
-	#masqrade for wan interfaces
+	#masqrade/nat for wan interfaces
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
-	    $LOG "Add masqrade rules"
+	    $LOG "Add NAT rules"
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
 		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
@@ -245,36 +245,34 @@ start() {
 		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
 		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	    fi
-
-	  if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
-	    if [ "$vpnPurePPPOE" != "1" ]; then
-		#for ISP localnet alya dualacess
-    		iptables -t nat -A POSTROUTING -o eth2.2 -s $lan_ip/$lan_nm -j MASQUERADE
-		if [ "$opmode" = "2" ]; then
-		    #wireless ISP net dual dual acess
-		    iptables -t nat -A POSTROUTING -o ra+ -s $lan_ip/$lan_nm -j MASQUERADE
-		fi
-		if [ "$opmode" = "3" ]; then
-		    iptables -t nat -A POSTROUTING -o apcli+ -s $lan_ip/$lan_nm -j MASQUERADE
-		fi
-		if [ "$opmode" = "4" ]; then
-		    #for ISP localnet alya dualacess
-		    iptables -t nat -A POSTROUTING -o eth2.2 -s $chilli_net -j MASQUERADE
-		fi
-		#second lan
-		if [ "$Lan2Enabled" = "1" ]; then
-		    #for ISP localnet alya dualacess
-    		    iptables -t nat -A POSTROUTING -o eth2.2  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		    if [ "$opmode" = "2" ]; then
-			#wireless ISP net dual dual acess....gyyy
-			iptables -t nat -A POSTROUTING -o ra+     -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
-		    fi
-		    if [ "$opmode" = "3" ]; then
-		        iptables -t nat -A POSTROUTING -o apcli+  -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE
+	    #######################NAT##################################
+	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
+		if [ "$vpnPurePPPOE" != "1" ]; then
+		    if [ "$opmode" != "4" ]; then
+			#lan gw/wireless client/apcli mode NAT
+			if  [ "$use_snat" = "1" ]; then
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j SNAT --to-source $wan_ipaddr
+			else
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j MASQUERADE
+			fi
+			if [ "$Lan2Enabled" = "1" ]; then
+			    #lan gw/wireless client/apcli mode NAT for second lan
+			    if  [ "$use_snat" = "1" ]; then
+				iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j SNAT --to-source $wan_ipaddr
+			    else
+				iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j MASQUERADE
+			    fi
+			fi
+		    else
+			#chillispot NAT
+			if  [ "$use_snat" = "1" ]; then
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j SNAT --to-source $wan_ipaddr
+			else
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j MASQUERADE
+			fi
 		    fi
 		fi
 	    fi
-	 fi
 	fi
 ###########################################UPNPRULES#######################################
         #rules for upnp
@@ -334,6 +332,20 @@ get_param() {
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
+
+    #get wan_ip for use SNAT
+    use_snat=`nvram_get 2860 use_snat`
+    if [ "$use_snat" = "1" ]; then
+	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+	if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+	    wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+	fi
+	#if wan ip not get
+	if [ "$wan_ipaddr" = "" ]; then
+	    use_snat=0
+	fi
+    fi
+
     #vpn configs
     vpnType=`nvram_get 2860 vpnType`
     vpnNAT=`nvram_get 2860 vpnNAT`

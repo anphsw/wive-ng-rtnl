@@ -22,6 +22,12 @@ DGW=`nvram_get 2860 vpnDGW`
 VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
 chilli_net=`nvram_get 2860 chilli_net`
+use_snat=`nvram_get 2860 use_snat`
+
+    #if wan ip not get
+    if [ "$PPP_LOCAL" = "" ]; then
+	use_snat=0
+    fi
 
     #disable multicast on ppp+ interface
     ifconfig $PPP_IFACE -allmulti
@@ -96,19 +102,28 @@ chilli_net=`nvram_get 2860 chilli_net`
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
     if [ "$NAT" = "on" ] && [ "$opmode" != "0" ]; then
-	echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE" >> /etc/ppp_firewall
-	if [ "$opmode" = 4 ]; then
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
-	fi
-	#lan2
-	if [ "$Lan2Enabled" = "1" ]; then
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
+	if  [ "$use_snat" = "1" ] && [ "$PPP_LOCAL" != "" ] ; then
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+	    if [ "$opmode" = 4 ]; then
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+	    fi
+	    if [ "$Lan2Enabled" = "1" ]; then
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+	    fi
+	else
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE" >> /etc/ppp_firewall
+	    if [ "$opmode" = 4 ]; then
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
+	    fi
+	    if [ "$Lan2Enabled" = "1" ]; then
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
+	    fi
 	fi
 	#rules for upnp
-	if [ "$upnp" = "1" ]; then                                                            
+	if [ "$upnp" = "1" ]; then
     	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
     	    echo "iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
-        fi                                         
+    	fi
     fi
     chmod 777 /etc/ppp_firewall
 

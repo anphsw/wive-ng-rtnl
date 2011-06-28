@@ -33,6 +33,7 @@ stpEnabled=0
 lltdEnabled=1
 igmpEnabled=0
 natEnabled=1
+use_snat=1
 IPPortFilterEnable=0
 IPPortFilterRules=
 PortForwardEnable=0

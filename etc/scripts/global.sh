@@ -45,6 +45,8 @@ getWanIfName()
 	    echo "Driver not support APCLI mode."
 	    wan_if="eth2.2"
 	fi
+    elif [ "$opmode" = "4" ]; then
+	    wan_if="eth2.2"
     fi
 }
 

@@ -470,6 +470,7 @@
 27) Cleanup nvram fields.<br>
 28) Fix route loop at some VPN providers in static mode.<br>
 29) Rework logic add user routes.<br>
+30) Use SNAT per default instead masquerade. This is more speed and decrease cpu load (to disable set use_snat=0).<br>
 
 <br><br>
 <b>For support see:</b><br>
