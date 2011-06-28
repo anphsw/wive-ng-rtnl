@@ -344,7 +344,7 @@
 28) Auto enable double vlan tag in switch at eth2 up.<br>
 29) PPP Disable multilink operation by default.<br>
 30) Fix h323: bug in parsing of ASN1 SEQOF field.<br>
-31) Initial RT5330 support.<br>
+31) Initial RT5350 support.<br>
 32) Fix use ipcalc for ipt_accounting.<br>
 33) l2tp/pptp only if server and gw in different subnets need add route to server via gw.<br>
 34) Netfilter core optimize nf_hook_slow workaroudn.<br>
@@ -440,10 +440,11 @@
 55) More usb support fixes and optiomizations.<br>
 56) Site Survey Access Point Graphical Diagram.<br>
 
-1.8.x
+<br>         
+<b>1.8.x</b><br>
 1) Sync from 3.5.0.0 SDK.<br>
 2) Update Uboot code.<br>
-3) More base support RT5330 and full support RT33**.<br>
+3) More base support RT5350 and full support RT33**.<br>
 4) Fix watchdog, rdm, usb drivers.<br>
 5) HTB fix rate select.<br>
 6) busybox version up to 1.18.5.<br>
@@ -465,13 +466,14 @@
 22) Up miniupnpd to 1.5.20110623 version.<br>
 23) Update libnatpmp to 20110103 version.<br>
 24) MIMO Power Save Mode set to static scheme.<br>
-25) Int High Power mode disable MIMO PowerSave to.<br>
+25) In High Power mode disable MIMO PowerSave to.<br>
 26) Add device autoprobe support in kernel.<br>
 27) Cleanup nvram fields.<br>
 28) Fix route loop at some VPN providers in static mode.<br>
 29) Rework logic add user routes.<br>
 30) Use SNAT per default instead masquerade. This is more speed and decrease cpu load (to disable set use_snat=0).<br>
 31) Add NAT loopback support.<br>
+32) Fix DMZ<=>VPN conflicts.<br>
 
 <br><br>
 <b>For support see:</b><br>
