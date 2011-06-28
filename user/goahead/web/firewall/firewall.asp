@@ -96,7 +96,7 @@ function genRulesTable()
 	// Controls
 	table +=
 		'<tr>'+
-		'<td rowspan="2"><select name="fwdIface" tabindex="1"><option value="LAN">LAN</option><option value="WAN" selected="selected">WAN</option><option value="VPN">VPN</option></select></td>' +
+		'<td rowspan="2"><select name="fwdIface" tabindex="1"><option value="WAN" selected="selected">WAN</option><option value="VPN">VPN</option></select></td>' +
 		'<td rowspan="2"><select name="protocol" tabindex="2"><option value="3" selected="selected">TCP&amp;UDP</option><option value="1">TCP</option><option value="2">UDP</option></select></td>' +
 		'<td><input type="text" class="short" name="fromPort" tabindex="3"></td>' + 
 		'<td rowspan="2"><input type="text" class="normal" name="ip_address" tabindex="5"></td>' +

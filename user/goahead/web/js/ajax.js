@@ -363,10 +363,10 @@ function ajaxShowProgress()
 	indicator();
 }
 
-function ajaxReloadDelayedPage(delay, url)
+function ajaxReloadDelayedPage(delay, url, local)
 {
 	var elem = ajaxSearchElementById("ajxCounterIndicator");
-	var pw = ajaxGetRootWindow();
+	var pw = (local) ? window : ajaxGetRootWindow();
 
 	delay /= 1000;
 	

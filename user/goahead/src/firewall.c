@@ -693,6 +693,7 @@ static void iptablesIPPortFilterBuildScript(void)
 
 		//close file
 		fclose(fd);
+		chmod(_PATH_MACIP_FILE, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
 	}
 }
 
@@ -774,6 +775,8 @@ static void iptablesPortForwardBuildScript(void)
 			"iptables -t nat -A POSTROUTING -j %s\n\n",
 			PORT_FORWARD_POST_CHAIN, PORT_FORWARD_POST_CHAIN);
 	
+	chmod(_PATH_PFW_FILE, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
+	
 	// Open file for VPN
 	FILE *fd_vpn = fopen(_PATH_PFW_FILE_VPN, "w");
 	if (fd_vpn == NULL)
@@ -795,6 +798,8 @@ static void iptablesPortForwardBuildScript(void)
 			"iptables -t nat -N %s\n"
 			"iptables -t nat -A POSTROUTING -j %s\n\n",
 			PORT_FORWARD_POST_CHAIN_VPN, PORT_FORWARD_POST_CHAIN_VPN);
+
+	chmod(_PATH_PFW_FILE_VPN, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
 
 	// Now write all rules
 	while( (getNthValueSafe(i++, rule, ';', rec, sizeof(rec)) != -1) )
@@ -1476,6 +1481,7 @@ void iptablesWebsFilterRun(void)
 			
 			//closefile
 			fclose(fd);
+			chmod(_PATH_WEBS_FILE, S_IXGRP | S_IXUSR | S_IRUSR | S_IWUSR | S_IRGRP);
 		}
 	}
 	else
