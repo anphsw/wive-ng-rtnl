@@ -328,7 +328,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	}
 
 	// Add forwarding rule
-	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s ", PORT_FORWARD_PRE_CHAIN, wan_name);
+	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s -d ! $1 ", PORT_FORWARD_PRE_CHAIN, wan_name);
 	pos += rc;
 	len -= rc;
 
