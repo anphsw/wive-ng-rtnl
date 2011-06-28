@@ -1475,10 +1475,6 @@ static void rebuildVPNRoutes(char *src_rrs)
 	
 	while (getNthValueSafe(index++, rrs, ';', one_rule, sizeof(one_rule)) != -1)
 	{
-		// Get record
-		if (getNthValueSafe(index, rrs, ';', one_rule, sizeof(one_rule)) == -1)
-			continue;
-		
 		// Get & check interface
 		if (getNthValueSafe(3, one_rule, ',', iface, sizeof(iface)) == -1)
 			continue;
