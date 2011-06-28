@@ -293,10 +293,43 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	int rc = 0;
 	char *pos = buf;
 
+	char *lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+	char *lan_nm = nvram_get(RT2860_NVRAM, "lan_netmask");
+	char *lan_if = getLanIfName();
+
 	// Add nat loopback
 	if (inat_loopback)
-	{
-		rc = snprintf(pos, len, "iptables -t nat -I %s -s $1 -d $2 ", PORT_FORWARD_POST_CHAIN);
+	{		
+		//DNAT
+		rc = snprintf(pos, len, "iptables -t nat -I %s -i %s -d $1 ", PORT_FORWARD_PRE_CHAIN, lan_if);
+		pos += rc;
+		len -= rc;
+		
+		// write protocol type
+		if (proto == PROTO_TCP)
+			rc = snprintf(pos, len, "-p tcp ");
+		else if (proto == PROTO_UDP)
+			rc = snprintf(pos, len, "-p udp ");
+		else if (proto == PROTO_TCP_UDP)
+			rc = snprintf(pos, len, " ");
+		pos += rc;
+		len -= rc;
+
+		// write dst port
+		if (prf_int != 0)
+		{
+			rc = (prt_int != 0) ?
+			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+			snprintf(pos, len, "--dport %d ", prf_int);
+			pos += rc;
+			len -= rc;
+		}
+		rc = snprintf(pos, len, "-j DNAT --to-destination %s  > /dev/null 2>&1\n", ip_address);
+		pos += rc;
+		len -= rc;
+
+		//MASQ
+		rc = snprintf(pos, len, "iptables -t nat -I %s -s %s/%s -d %s ", PORT_FORWARD_POST_CHAIN, lan_ip, lan_nm, ip_address);
 		pos += rc;
 		len -= rc;
 		
@@ -325,7 +358,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	}
 
 	// Add forwarding rule
-	rc = snprintf(pos, len, "iptables -t nat -A %s -j DNAT -i %s -d ! $1 ", PORT_FORWARD_PRE_CHAIN, wan_name);
+	rc = snprintf(pos, len, "iptables -t nat -A %s -i %s -d ! %s/%s ", PORT_FORWARD_PRE_CHAIN, wan_name, lan_ip, lan_nm);
 	pos += rc;
 	len -= rc;
 
@@ -350,7 +383,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	}
 
 	// write remote ip
-	rc = snprintf(pos, len, "--to %s", ip_address);
+	rc = snprintf(pos, len, "-j DNAT --to-destination %s", ip_address);
 	pos += rc;
 	len -= rc;
 	
