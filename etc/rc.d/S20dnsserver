@@ -16,7 +16,7 @@ start() {
 	    EXT_OPT="-c 32 --dns-forward-max=16"
 	fi
 	$LOG "Starting DNSMASQ"
-    	/bin/dnsmasq -N $EXT_OPT --clear-on-reload --leasefile-ro \
+    	/bin/dnsmasq -N $EXT_OPT --all-servers --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
