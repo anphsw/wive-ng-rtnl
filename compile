@@ -23,13 +23,13 @@ fi
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "2T3R" ] ; then
-    DEVNAME=WR-G
+    DEVNAME="Acorp_WR-450N"
 elif [ "$MODE" = "2T2R-USB" ]; then
-    DEVNAME=WR-U
+    DEVNAME="Acorp_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
-    DEVNAME=WR-N
+    DEVNAME="Acorp_WR-300N"
 elif [ "$MODE" = "1T1R" ]; then
-    DEVNAME=WR-NL
+    DEVNAME="Acorp_WR-150N"
 else
     echo "Not support mode."
     exit 1
@@ -46,6 +46,7 @@ echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
 echo "" >> sdk_version.h
 echo "" > version
 echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
+echo "DEVNAME = \"$DEVNAME\"" >> version
 echo "VERSIONPKG = \"$VERSIONPKG\"" >> version
 echo "" >> version
 
@@ -124,5 +125,5 @@ echo -------------------------------MAKE-FULLDUMP-----------------------------
 fi
 
 echo -----------------------------------PACK----------------------------------
-mv -f images/*.bin "images/$MODE$SAVE_MEM.$VERSIONPKG.bin"
-zip -r images/$MODE$SAVE_MEM.$VERSIONPKG.bin.zip images/*.bin
+mv -f images/*.bin "images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin"
+zip -r images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin.zip images/*.bin

@@ -39,7 +39,6 @@ static int  getCfg3Zero(int eid, webs_t wp, int argc, char_t **argv);
 static int  getLangBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPlatform(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStationBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int  getSysBuildTime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
@@ -442,7 +441,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("getLangBuilt"), getLangBuilt);
 	websAspDefine(T("getPlatform"), getPlatform);
 	websAspDefine(T("getStationBuilt"), getStationBuilt);
-	websAspDefine(T("getSysBuildTime"), getSysBuildTime);
 	websAspDefine(T("getSdkVersion"), getSdkVersion);
 	websAspDefine(T("getMemAmount"), getMemAmount);
 	websAspDefine(T("getSysUptime"), getSysUptime);
@@ -807,6 +805,7 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 {
+#ifndef DEVNAME
 #ifdef CONFIG_RALINK_RT3050_1T1R
     return websWrite(wp, T("RT3050 1T1R embedded switch"));
 #elif CONFIG_RALINK_RT3051_1T2R
@@ -815,6 +814,9 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
     return websWrite(wp, T("RT3052 2T2R embedded switch"));
 #else
     return websWrite(wp, T("Don`t detected RT3050 or RT3052 unknown switch mode"));
+#endif
+#else
+    return websWrite(wp, T("%s"), DEVNAME);
 #endif
     return 0;
 }
@@ -826,14 +828,6 @@ static int getStationBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #else
 	return websWrite(wp, T("0"));
 #endif
-}
-
-/*
- * description: write System build time
- */
-static int getSysBuildTime(int eid, webs_t wp, int argc, char_t **argv)
-{
-	return websWrite(wp, T("%s"), __DATE__);
 }
 
 /*
@@ -1083,8 +1077,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	char_t	*mode;
 
 	int	need_commit = 0;
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
-#else
+#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
 	char	*wan_ip, *lan_ip;
 #endif
 	mode = websGetVar(wp, T("opMode"), T("0")); 
@@ -1097,8 +1090,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (!strncmp(old_mode, "1", 2) || !strncmp(old_mode, "3", 2)) {
 		if (!strncmp(mode, "0", 2)) {
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
-#else
+#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
 			/*
 			 * mode: gateway (or ap-client) -> bridge
 			 * config: wan_ip(wired) overwrites lan_ip(bridge)
@@ -1109,8 +1101,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 #endif
 		}
 		if (!strncmp(mode, "2", 2)) {
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
-#else
+#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
 			/*
 			 * mode: gateway (or ap-client) -> ethernet-converter
 			 * config: wan_ip(wired) overwrites lan_ip(wired) 
@@ -1132,8 +1123,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			 */
 		}
 		else if (!strncmp(mode, "1", 2) || !strncmp(mode, "3", 2)) {
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW || defined CONFIG_ICPLUS_PHY
-#else
+#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
 			/*
 			 * mode: ethernet-converter -> gateway (or ap-client)
 			 * config: lan_ip(wired) overwrites wan_ip(wired) 

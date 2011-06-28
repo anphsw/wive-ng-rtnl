@@ -5,7 +5,7 @@
 </tr>
 <tr>
 	<td class="head" id="statusSDKVersion">Firmware Version</td>
-	<td><% getSdkVersion(); %> (<% getSysBuildTime(); %>)</td>
+	<td><% getSdkVersion(); %></td>
 </tr>
 <tr>
 	<td class="head" id="statusSysUpTime">System Time</td>
