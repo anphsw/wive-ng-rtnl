@@ -184,13 +184,11 @@ start() {
 	    if [ -f /etc/websfilter ]; then
         	$LOG "Add rules for content filters"
 		modprobe -q xt_webstr
-		chmod 777 /etc/websfilter
     		/etc/websfilter
 	    fi
 
 	    if [ "$IPPortFilterEnable" = "1" ] && [ -f /etc/macipfilter ]; then
 		$LOG "Set macipport_filter rules"
-		chmod 777 /etc/macipfilter
 		/etc/macipfilter
 		if [ "$DefaultFirewallPolicy" = "1" ]; then
 		    $LOG "Default policy macipport_filter DROP"
@@ -234,7 +232,6 @@ start() {
 		    fi
 		fi
 		$LOG "Add portforward rules"
-		chmod 777 /etc/portforward
 		/etc/portforward "$wan_ipaddr"
 	    fi
 	    #######################DMZ##################################

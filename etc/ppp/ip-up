@@ -141,7 +141,6 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 
     if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
 	$LOG "Add portforward rules"
-	chmod 777 /etc/portforward_vpn
 	/etc/portforward_vpn "A" "$PPP_IFACE" "$PPP_LOCAL"
     fi
 
