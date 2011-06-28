@@ -805,7 +805,6 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifndef DEVNAME
 #ifdef CONFIG_RALINK_RT3050_1T1R
     return websWrite(wp, T("RT3050 1T1R embedded switch"));
 #elif CONFIG_RALINK_RT3051_1T2R
@@ -814,9 +813,6 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
     return websWrite(wp, T("RT3052 2T2R embedded switch"));
 #else
     return websWrite(wp, T("Don`t detected RT3050 or RT3052 unknown switch mode"));
-#endif
-#else
-    return websWrite(wp, T("%s"), DEVNAME);
 #endif
     return 0;
 }
