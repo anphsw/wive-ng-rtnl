@@ -296,7 +296,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	// Add nat loopback
 	if (inat_loopback)
 	{
-		rc = snprintf(pos, len, "iptables -t nat -I %s -s $1 -d $2", PORT_FORWARD_POST_CHAIN);
+		rc = snprintf(pos, len, "iptables -t nat -I %s -s $1 -d $2 ", PORT_FORWARD_POST_CHAIN);
 		pos += rc;
 		len -= rc;
 		
