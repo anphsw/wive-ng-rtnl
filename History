@@ -471,7 +471,7 @@
 28) Fix route loop at some VPN providers in static mode.<br>
 29) Rework logic add user routes.<br>
 30) Use SNAT per default instead masquerade. This is more speed and decrease cpu load (to disable set use_snat=0).<br>
-31) Initial nat loopback support. Now only for ipoe connections (need small rewrite in goahead logic for support vpn).<br>
+31) Add NAT loopback support.<br>
 
 <br><br>
 <b>For support see:</b><br>

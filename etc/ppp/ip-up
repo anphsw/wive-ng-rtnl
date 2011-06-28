@@ -23,6 +23,7 @@ VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
 chilli_net=`nvram_get 2860 chilli_net`
 use_snat=`nvram_get 2860 use_snat`
+PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then
@@ -138,6 +139,12 @@ use_snat=`nvram_get 2860 use_snat`
 
     $LOG "Enable forwarding for $PPP_IFACE interface"
     echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+
+    if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
+	$LOG "Add portforward rules"
+	chmod 777 /etc/portforward_vpn
+	/etc/portforward_vpn "A" "$PPP_IFACE" "$PPP_LOCAL"
+    fi
 
 #run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
