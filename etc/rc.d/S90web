@@ -4,7 +4,11 @@ LOG="logger -t goahead"
 
 start() {
  $LOG "Start goahead"
-    /bin/goahead &
+    if [ -f /bin/goahead ]; then
+	/bin/goahead &
+    else
+	echo "GOAHEAD NOT FOUND!!! FIX THIS AND REBUILD FIRMWARE."
+    fi
 }
 
 stop() {
