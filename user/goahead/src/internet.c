@@ -415,7 +415,7 @@ char *getLanWanNamebyIf(char *ifname)
 		return ifname;
 	}
 
-	if (!strcmp(mode, "1")) {	// gateway mode
+	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	// gateway mode or chillispot
 #if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
