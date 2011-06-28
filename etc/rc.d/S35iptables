@@ -235,7 +235,7 @@ start() {
 		fi
 		$LOG "Add portforward rules"
 		chmod 777 /etc/portforward
-		/etc/portforward "$lan_ip/$lan_nm"
+		/etc/portforward "$lan_ip/$lan_nm" "$wan_ipaddr"
 	    fi
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
@@ -345,15 +345,13 @@ get_param() {
 
     #get wan_ip for use SNAT
     use_snat=`nvram_get 2860 use_snat`
-    if [ "$use_snat" = "1" ]; then
-	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
-	if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	    wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-	fi
-	#if wan ip not get
-	if [ "$wan_ipaddr" = "" ]; then
-	    use_snat=0
-	fi
+    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+    fi
+    #if wan ip not get
+    if [ "$wan_ipaddr" = "" ]; then
+	use_snat=0
     fi
 
     #vpn configs

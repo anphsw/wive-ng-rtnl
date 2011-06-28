@@ -296,9 +296,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 	// Add nat loopback
 	if (inat_loopback)
 	{
-		// write basic rules
-		rc = snprintf(pos, len, "# iptables -t nat -I %s -s %s -d %s", PORT_FORWARD_POST_CHAIN, 
-			"<адрес локалки куда смотрит роутер LANном>", "<адрес сервера в локалке для которого делаем форвард>" );
+		rc = snprintf(pos, len, "iptables -t nat -I %s -s $1 -d $2", PORT_FORWARD_POST_CHAIN);
 		pos += rc;
 		len -= rc;
 		
@@ -312,7 +310,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		pos += rc;
 		len -= rc;
 
-		// write src port
+		// write dst port
 		if (prf_int != 0)
 		{
 			rc = (prt_int != 0) ?
@@ -321,8 +319,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 			pos += rc;
 			len -= rc;
 		}
-		
-		rc = snprintf(pos, len, "--jump SNAT --to-source %s\n", "<внешний адрес роутера>");
+		rc = snprintf(pos, len, "-j MASQUERADE");
 		pos += rc;
 		len -= rc;
 	}
