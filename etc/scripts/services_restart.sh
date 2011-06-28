@@ -11,12 +11,21 @@ MODE=$1
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
-# This is services restart always                        #
+# Regenerate resolv only if !ppp                         #
 ##########################################################
-if [ "$vpnEnabled" != "on" ] || [ "$vpnPeerDNS" != "on" ] || [ "$MODE" != "pppd" ]; then 
+if [ "$vpnEnabled" = "on" ]; then
+    vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
+else
+    vpnPeerDNS=
+fi
+if [ "$vpnPeerDNS" != "on" ] || [ "$MODE" != "pppd" ]; then 
     $LOG "Resolv config generate..."
     service resolv start
 fi
+
+##########################################################
+# This is services restart always                        #
+##########################################################
     $LOG "Reload iptables rules..."
     service iptables restart
     $LOG "Reload shaper rules..."
