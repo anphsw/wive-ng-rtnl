@@ -319,7 +319,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 			pos += rc;
 			len -= rc;
 		}
-		rc = snprintf(pos, len, "-j MASQUERADE\n");
+		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
 		pos += rc;
 		len -= rc;
 	}
