@@ -393,6 +393,9 @@ char* getLanIfName(void)
 	else if (!strncmp(mode, "3", 2)) {
 		if_name = "br0";
 	}
+	else if (!strncmp(mode, "4", 2)) {
+		if_name = "br0";
+	}
 	return if_name;
 }
 
