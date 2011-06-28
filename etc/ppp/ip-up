@@ -19,7 +19,6 @@ lan2_netmask=`nvram_get 2860 lan2_netmask`
 upnp=`nvram_get 2860 upnpEnabled`
 NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
-VPN_ROUTING_ENABLED=`nvram_get 2860 vpnRoutingEnabled`
 vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
 chilli_net=`nvram_get 2860 chilli_net`
 use_snat=`nvram_get 2860 use_snat`
@@ -92,7 +91,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     fi
 
     #user route add                                                                                                                             
-    if [ "$VPN_ROUTING_ENABLED" = "on" ] && [ -f /etc/routes_ppp_replace ]; then
+    if [ -f /etc/routes_ppp_replace ]; then
         $LOG "Add user routes from ip-up for $PPP_IFACE"
         /etc/routes_ppp_replace replace $PPP_IFACE
     fi

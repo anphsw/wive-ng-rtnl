@@ -197,7 +197,6 @@ RemoteSSH=1
 UDPXYMode=0
 vpnEnabled=off
 vpnType=0
-vpnRoutingEnabled=off
 vpnMPPE=off
 vpnPeerDNS=on
 vpnDebug=off
