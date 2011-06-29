@@ -147,6 +147,7 @@ static struct inode *ext2_alloc_inode(struct super_block *sb)
 	ei->i_acl = EXT2_ACL_NOT_CACHED;
 	ei->i_default_acl = EXT2_ACL_NOT_CACHED;
 #endif
+	ei->i_block_alloc_info = NULL;
 	ei->vfs_inode.i_version = 1;
 	return &ei->vfs_inode;
 }
@@ -165,6 +166,7 @@ static void init_once(void * foo, struct kmem_cache * cachep, unsigned long flag
 #ifdef CONFIG_EXT2_FS_XATTR
 		init_rwsem(&ei->xattr_sem);
 #endif
+		mutex_init(&ei->truncate_mutex);
 		inode_init_once(&ei->vfs_inode);
 	}
 }
@@ -188,6 +190,7 @@ static void destroy_inodecache(void)
 
 static void ext2_clear_inode(struct inode *inode)
 {
+	struct ext2_block_alloc_info *rsv = EXT2_I(inode)->i_block_alloc_info;
 #ifdef CONFIG_EXT2_FS_POSIX_ACL
 	struct ext2_inode_info *ei = EXT2_I(inode);
 
@@ -200,6 +203,10 @@ static void ext2_clear_inode(struct inode *inode)
 		ei->i_default_acl = EXT2_ACL_NOT_CACHED;
 	}
 #endif
+	ext2_discard_reservation(inode);
+	EXT2_I(inode)->i_block_alloc_info = NULL;
+	if (unlikely(rsv))
+		kfree(rsv);
 }
 
 static int ext2_show_options(struct seq_file *seq, struct vfsmount *vfs)
@@ -235,7 +242,6 @@ static const struct super_operations ext2_sops = {
 	.destroy_inode	= ext2_destroy_inode,
 	.read_inode	= ext2_read_inode,
 	.write_inode	= ext2_write_inode,
-	.put_inode	= ext2_put_inode,
 	.delete_inode	= ext2_delete_inode,
 	.put_super	= ext2_put_super,
 	.write_super	= ext2_write_super,
@@ -323,7 +329,7 @@ enum {
 	Opt_err_ro, Opt_nouid32, Opt_nocheck, Opt_debug,
 	Opt_oldalloc, Opt_orlov, Opt_nobh, Opt_user_xattr, Opt_nouser_xattr,
 	Opt_acl, Opt_noacl, Opt_xip, Opt_ignore, Opt_err, Opt_quota,
-	Opt_usrquota, Opt_grpquota
+	Opt_usrquota, Opt_grpquota, Opt_reservation, Opt_noreservation
 };
 
 static match_table_t tokens = {
@@ -355,6 +361,8 @@ static match_table_t tokens = {
 	{Opt_ignore, "noquota"},
 	{Opt_quota, "quota"},
 	{Opt_usrquota, "usrquota"},
+	{Opt_reservation, "reservation"},
+	{Opt_noreservation, "noreservation"},
 	{Opt_err, NULL}
 };
 
@@ -487,6 +495,14 @@ static int parse_options (char * options,
 			break;
 #endif
 
+		case Opt_reservation:
+			set_opt(sbi->s_mount_opt, RESERVATION);
+			printk("reservations ON\n");
+			break;
+		case Opt_noreservation:
+			clear_opt(sbi->s_mount_opt, RESERVATION);
+			printk("reservations OFF\n");
+			break;
 		case Opt_ignore:
 			break;
 		default:
@@ -546,14 +562,15 @@ static int ext2_check_descriptors (struct super_block * sb)
 	int i;
 	int desc_block = 0;
 	struct ext2_sb_info *sbi = EXT2_SB(sb);
-	unsigned long first_block = le32_to_cpu(sbi->s_es->s_first_data_block);
-	unsigned long last_block;
 	struct ext2_group_desc * gdp = NULL;
 
 	ext2_debug ("Checking group descriptors");
 
 	for (i = 0; i < sbi->s_groups_count; i++)
 	{
+		ext2_fsblk_t first_block = ext2_group_first_block_no(sb, i);
+		ext2_fsblk_t last_block;
+
 		if (i == sbi->s_groups_count - 1)
 			last_block = le32_to_cpu(sbi->s_es->s_blocks_count) - 1;
 		else
@@ -590,7 +607,6 @@ static int ext2_check_descriptors (struct super_block * sb)
 				    i, (unsigned long) le32_to_cpu(gdp->bg_inode_table));
 			return 0;
 		}
-		first_block += EXT2_BLOCKS_PER_GROUP(sb);
 		gdp++;
 	}
 	return 1;
@@ -604,11 +620,31 @@ static int ext2_check_descriptors (struct super_block * sb)
 static loff_t ext2_max_size(int bits)
 {
 	loff_t res = EXT2_NDIR_BLOCKS;
-	/* This constant is calculated to be the largest file size for a
-	 * dense, 4k-blocksize file such that the total number of
+	int meta_blocks;
+	loff_t upper_limit;
+
+	/* This is calculated to be the largest file size for a
+	 * dense, file such that the total number of
 	 * sectors in the file, including data and all indirect blocks,
-	 * does not exceed 2^32. */
-	const loff_t upper_limit = 0x1ff7fffd000LL;
+	 * does not exceed 2^32 -1
+	 * __u32 i_blocks representing the total number of
+	 * 512 bytes blocks of the file
+	 */
+	upper_limit = (1LL << 32) - 1;
+
+	/* total blocks in file system block size */
+	upper_limit >>= (bits - 9);
+
+
+	/* indirect blocks */
+	meta_blocks = 1;
+	/* double indirect blocks */
+	meta_blocks += 1 + (1LL << (bits-2));
+	/* tripple indirect blocks */
+	meta_blocks += 1 + (1LL << (bits-2)) + (1LL << (2*(bits-2)));
+
+	upper_limit -= meta_blocks;
+	upper_limit <<= bits;
 
 	res += 1LL << (bits-2);
 	res += 1LL << (2*(bits-2));
@@ -616,6 +652,10 @@ static loff_t ext2_max_size(int bits)
 	res <<= bits;
 	if (res > upper_limit)
 		res = upper_limit;
+
+	if (res > MAX_LFS_FILESIZE)
+		res = MAX_LFS_FILESIZE;
+
 	return res;
 }
 
@@ -624,10 +664,9 @@ static unsigned long descriptor_loc(struct super_block *sb,
 				    int nr)
 {
 	struct ext2_sb_info *sbi = EXT2_SB(sb);
-	unsigned long bg, first_data_block, first_meta_bg;
+	unsigned long bg, first_meta_bg;
 	int has_super = 0;
 	
-	first_data_block = le32_to_cpu(sbi->s_es->s_first_data_block);
 	first_meta_bg = le32_to_cpu(sbi->s_es->s_first_meta_bg);
 
 	if (!EXT2_HAS_INCOMPAT_FEATURE(sb, EXT2_FEATURE_INCOMPAT_META_BG) ||
@@ -636,7 +675,8 @@ static unsigned long descriptor_loc(struct super_block *sb,
 	bg = sbi->s_desc_per_block * nr;
 	if (ext2_bg_has_super(sb, bg))
 		has_super = 1;
-	return (first_data_block + has_super + (bg * sbi->s_blocks_per_group));
+
+	return ext2_group_first_block_no(sb, bg) + has_super;
 }
 
 static int ext2_fill_super(struct super_block *sb, void *data, int silent)
@@ -726,6 +766,8 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_resuid = le16_to_cpu(es->s_def_resuid);
 	sbi->s_resgid = le16_to_cpu(es->s_def_resgid);
 	
+	set_opt(sbi->s_mount_opt, RESERVATION);
+
 	if (!parse_options ((char *) data, sbi))
 		goto failed_mount;
 
@@ -764,8 +806,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 
 	blocksize = BLOCK_SIZE << le32_to_cpu(sbi->s_es->s_log_block_size);
 
-	if ((ext2_use_xip(sb)) && ((blocksize != PAGE_SIZE) ||
-				  (sb->s_blocksize != blocksize))) {
+	if (ext2_use_xip(sb) && blocksize != PAGE_SIZE) {
 		if (!silent)
 			printk("XIP: Unsupported blocksize\n");
 		goto failed_mount;
@@ -907,6 +948,21 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	get_random_bytes(&sbi->s_next_generation, sizeof(u32));
 	spin_lock_init(&sbi->s_next_gen_lock);
 
+	/* per fileystem reservation list head & lock */
+	spin_lock_init(&sbi->s_rsv_window_lock);
+	sbi->s_rsv_window_root = RB_ROOT;
+	/*
+	 * Add a single, static dummy reservation to the start of the
+	 * reservation window list --- it gives us a placeholder for
+	 * append-at-start-of-list which makes the allocation logic
+	 * _much_ simpler.
+	 */
+	sbi->s_rsv_window_head.rsv_start = EXT2_RESERVE_WINDOW_NOT_ALLOCATED;
+	sbi->s_rsv_window_head.rsv_end = EXT2_RESERVE_WINDOW_NOT_ALLOCATED;
+	sbi->s_rsv_window_head.rsv_alloc_hit = 0;
+	sbi->s_rsv_window_head.rsv_goal_size = 0;
+	ext2_rsv_window_add(sb, &sbi->s_rsv_window_head);
+
 	percpu_counter_init(&sbi->s_freeblocks_counter,
 				ext2_count_free_blocks(sb));
 	percpu_counter_init(&sbi->s_freeinodes_counter,
@@ -961,9 +1017,30 @@ failed_sbi:
 	return -EINVAL;
 }
 
+static void ext2_clear_super_error(struct super_block *sb)
+{
+	struct buffer_head *sbh = EXT2_SB(sb)->s_sbh;
+
+	if (buffer_write_io_error(sbh)) {
+		/*
+		 * Oh, dear.  A previous attempt to write the
+		 * superblock failed.  This could happen because the
+		 * USB device was yanked out.  Or it could happen to
+		 * be a transient write error and maybe the block will
+		 * be remapped.  Nothing we can do but to retry the
+		 * write and hope for the best.
+		 */
+		printk(KERN_ERR "EXT2-fs: %s previous I/O error to "
+		       "superblock detected", sb->s_id);
+		clear_buffer_write_io_error(sbh);
+		set_buffer_uptodate(sbh);
+	}
+}
+
 static void ext2_commit_super (struct super_block * sb,
 			       struct ext2_super_block * es)
 {
+	ext2_clear_super_error(sb);
 	es->s_wtime = cpu_to_le32(get_seconds());
 	mark_buffer_dirty(EXT2_SB(sb)->s_sbh);
 	sb->s_dirt = 0;
@@ -971,6 +1048,7 @@ static void ext2_commit_super (struct super_block * sb,
 
 static void ext2_sync_super(struct super_block *sb, struct ext2_super_block *es)
 {
+	ext2_clear_super_error(sb);
 	es->s_free_blocks_count = cpu_to_le32(ext2_count_free_blocks(sb));
 	es->s_free_inodes_count = cpu_to_le32(ext2_count_free_inodes(sb));
 	es->s_wtime = cpu_to_le32(get_seconds());
@@ -1090,15 +1168,18 @@ static int ext2_statfs (struct dentry * dentry, struct kstatfs * buf)
 	struct super_block *sb = dentry->d_sb;
 	struct ext2_sb_info *sbi = EXT2_SB(sb);
 	struct ext2_super_block *es = sbi->s_es;
-	unsigned long overhead;
-	int i;
 	u64 fsid;
 
 	if (test_opt (sb, MINIX_DF))
-		overhead = 0;
-	else {
+		sbi->s_overhead_last = 0;
+	else if (sbi->s_blocks_last != le32_to_cpu(es->s_blocks_count)) {
+		unsigned long i, overhead = 0;
+		smp_rmb();
+
 		/*
-		 * Compute the overhead (FS structures)
+		 * Compute the overhead (FS structures). This is constant
+		 * for a given filesystem unless the number of block groups
+		 * changes so we cache the previous value until it does.
 		 */
 
 		/*
@@ -1122,17 +1203,22 @@ static int ext2_statfs (struct dentry * dentry, struct kstatfs * buf)
 		 */
 		overhead += (sbi->s_groups_count *
 			     (2 + sbi->s_itb_per_group));
+		sbi->s_overhead_last = overhead;
+		smp_wmb();
+		sbi->s_blocks_last = le32_to_cpu(es->s_blocks_count);
 	}
 
 	buf->f_type = EXT2_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
-	buf->f_blocks = le32_to_cpu(es->s_blocks_count) - overhead;
+	buf->f_blocks = le32_to_cpu(es->s_blocks_count) - sbi->s_overhead_last;
 	buf->f_bfree = ext2_count_free_blocks(sb);
+	es->s_free_blocks_count = cpu_to_le32(buf->f_bfree);
 	buf->f_bavail = buf->f_bfree - le32_to_cpu(es->s_r_blocks_count);
 	if (buf->f_bfree < le32_to_cpu(es->s_r_blocks_count))
 		buf->f_bavail = 0;
 	buf->f_files = le32_to_cpu(es->s_inodes_count);
 	buf->f_ffree = ext2_count_free_inodes(sb);
+	es->s_free_inodes_count = cpu_to_le32(buf->f_ffree);
 	buf->f_namelen = EXT2_NAME_LEN;
 	fsid = le64_to_cpup((void *)es->s_uuid) ^
 	       le64_to_cpup((void *)es->s_uuid + sizeof(u64));
@@ -1177,7 +1263,7 @@ static ssize_t ext2_quota_read(struct super_block *sb, int type, char *data,
 
 		tmp_bh.b_state = 0;
 		err = ext2_get_block(inode, blk, &tmp_bh, 0);
-		if (err)
+		if (err < 0)
 			return err;
 		if (!buffer_mapped(&tmp_bh))	/* A hole? */
 			memset(data, 0, tocopy);
@@ -1216,7 +1302,7 @@ static ssize_t ext2_quota_write(struct super_block *sb, int type,
 
 		tmp_bh.b_state = 0;
 		err = ext2_get_block(inode, blk, &tmp_bh, 1);
-		if (err)
+		if (err < 0)
 			goto out;
 		if (offset || tocopy != EXT2_BLOCK_SIZE(sb))
 			bh = sb_bread(sb, tmp_bh.b_blocknr);
