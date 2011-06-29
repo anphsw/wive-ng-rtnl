@@ -660,7 +660,7 @@ static void clearlog(webs_t wp, char_t *path, char_t *query)
 	websRedirect(wp, "adm/syslog.asp");
 }
 
-#define LOG_MAX (16384)
+#define LOG_MAX 32768
 static void syslog(webs_t wp, char_t *path, char_t *query)
 {
 	FILE *fp = NULL;
@@ -670,7 +670,7 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("\n"));
 
-	fp = popen("cat /var/log/messages", "r");
+	fp = popen("tail -c 32768 /var/log/messages", "r");
 
 	if(!fp){
 		websWrite(wp, "-1");
