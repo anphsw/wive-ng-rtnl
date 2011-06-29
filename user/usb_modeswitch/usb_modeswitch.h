@@ -2,7 +2,7 @@
   This file is part of usb_modeswitch, a mode switching tool for controlling
   flip flop (multiple device) USB gear
 
-  Version 1.1.7, 2011/02/27
+  Version 1.1.8, 2011/06/19
   Copyright (C) 2007 - 2011  Josua Dietze
 
   Config file parsing stuff borrowed from Guillaume Dargaud
@@ -35,6 +35,8 @@ void switchHuaweiMode();
 void switchSierraMode();
 void switchGCTMode();
 int switchKobilMode();
+int switchSequansMode();
+int switchActionMode();
 int switchSonyMode();
 int detachDriver();
 int checkSuccess();
