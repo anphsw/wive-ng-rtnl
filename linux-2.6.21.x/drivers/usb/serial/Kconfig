@@ -564,6 +564,12 @@ config USB_SERIAL_OMNINET
 	  To compile this driver as a module, choose M here: the
 	  module will be called omninet.
 
+config USB_SERIAL_HSO
+	tristate "USB driver for Option High Speed Mobile Devices"
+	depends on USB_SERIAL
+	help
+	  Driver for Option 3G modems
+
 config USB_SERIAL_DEBUG
 	tristate "USB Debugging Device"
 	depends on USB_SERIAL
@@ -580,6 +586,4 @@ config USB_EZUSB
 	depends on USB_SERIAL_KEYSPAN_PDA || USB_SERIAL_XIRCOM || USB_SERIAL_KEYSPAN || USB_SERIAL_WHITEHEAT
 	default y
 
-
 endmenu
-

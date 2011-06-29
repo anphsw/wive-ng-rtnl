@@ -434,7 +434,7 @@ static void dbg_dump(int line_count, const char *func_name, unsigned char *buf,
 }
 
 #define DUMP(buf_, len_)	\
-	dbg_dump(__LINE__, __func__, buf_, len_)
+	dbg_dump(__LINE__, __func__, (unsigned char *)buf_, len_)
 
 #define DUMP1(buf_, len_)			\
 	do {					\
@@ -448,13 +448,13 @@ static void dbg_dump(int line_count, const char *func_name, unsigned char *buf,
 
 /* module parameters */
 static int debug;
-static int tty_major = 245;
+static int tty_major;
 static int disable_net;
 
 /* driver info */
 static const char driver_name[] = "hso";
 static const char tty_filename[] = "ttyHS";
-static const char *version = __FILE__ ": " DRIVER_VERSION " " MOD_AUTHOR;
+static const char *version = __FILE__ ": " MOD_AUTHOR;
 /* the usb driver itself (registered in hso_init) */
 static struct usb_driver hso_driver;
 /* serial structures */
@@ -522,20 +522,46 @@ static const struct usb_device_id hso_ids[] = {
 	{icon321_port_device(0x0af0, 0xd033)},	/* Icon-322 */
 	{USB_DEVICE(0x0af0, 0x7301)},		/* GE40x */
 	{USB_DEVICE(0x0af0, 0x7361)},		/* GE40x */
+	{USB_DEVICE(0x0af0, 0x7381)},		/* GE40x */
 	{USB_DEVICE(0x0af0, 0x7401)},		/* GI 0401 */
 	{USB_DEVICE(0x0af0, 0x7501)},		/* GTM 382 */
 	{USB_DEVICE(0x0af0, 0x7601)},		/* GE40x */
+	{USB_DEVICE(0x0af0, 0x7701)},
+	{USB_DEVICE(0x0af0, 0x7706)},
+	{USB_DEVICE(0x0af0, 0x7801)},
+	{USB_DEVICE(0x0af0, 0x7901)},
+	{USB_DEVICE(0x0af0, 0x7A01)},
+	{USB_DEVICE(0x0af0, 0x7A05)},
+	{USB_DEVICE(0x0af0, 0x8200)},
+	{USB_DEVICE(0x0af0, 0x8201)},
+	{USB_DEVICE(0x0af0, 0x8300)},
+	{USB_DEVICE(0x0af0, 0x8302)},
+	{USB_DEVICE(0x0af0, 0x8304)},
+	{USB_DEVICE(0x0af0, 0x8400)},
+	{USB_DEVICE(0x0af0, 0x8600)},
+	{USB_DEVICE(0x0af0, 0x8800)},
+	{USB_DEVICE(0x0af0, 0x8900)},
+	{USB_DEVICE(0x0af0, 0x9000)},
+	{USB_DEVICE(0x0af0, 0xd035)},
+	{USB_DEVICE(0x0af0, 0xd055)},
+	{USB_DEVICE(0x0af0, 0xd155)},
+	{USB_DEVICE(0x0af0, 0xd255)},
+	{USB_DEVICE(0x0af0, 0xd057)},
+	{USB_DEVICE(0x0af0, 0xd157)},
+	{USB_DEVICE(0x0af0, 0xd257)},
+	{USB_DEVICE(0x0af0, 0xd357)},
+	{USB_DEVICE(0x0af0, 0xd058)},
+	{USB_DEVICE(0x0af0, 0xc100)},
 	{}
 };
 MODULE_DEVICE_TABLE(usb, hso_ids);
 
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 19))
 /* Sysfs attribute */
 static ssize_t hso_sysfs_show_porttype(struct device *dev,
 				       struct device_attribute *attr,
 				       char *buf)
 {
-	struct hso_device *hso_dev = dev->driver_data;
+	struct hso_device *hso_dev = dev_get_drvdata(dev);
 	char *port_name;
 
 	if (!hso_dev)
@@ -580,7 +606,6 @@ static ssize_t hso_sysfs_show_porttype(struct device *dev,
 	return sprintf(buf, "%s\n", port_name);
 }
 static DEVICE_ATTR(hsotype, S_IRUGO, hso_sysfs_show_porttype, NULL);
-#endif
 
 static int hso_urb_to_index(struct hso_serial *serial, struct urb *urb)
 {
@@ -656,9 +681,9 @@ static struct hso_serial *get_serial_by_shared_int_and_type(
 	port = hso_mux_to_port(mux);
 
 	for (i = 0; i < HSO_SERIAL_TTY_MINORS; i++) {
-		if (serial_table[i]
-		    && (dev2ser(serial_table[i])->shared_int == shared_int)
-		    && ((serial_table[i]->port_spec & HSO_PORT_MASK) == port)) {
+		if (serial_table[i] &&
+		    (dev2ser(serial_table[i])->shared_int == shared_int) &&
+		    ((serial_table[i]->port_spec & HSO_PORT_MASK) == port)) {
 			return dev2ser(serial_table[i]);
 		}
 	}
@@ -700,6 +725,7 @@ static int get_free_serial_index(void)
 static void set_serial_by_index(unsigned index, struct hso_serial *serial)
 {
 	unsigned long flags;
+
 	spin_lock_irqsave(&serial_table_lock, flags);
 	if (serial)
 		serial_table[index] = serial->parent;
@@ -781,7 +807,7 @@ static int hso_net_open(struct net_device *net)
 	unsigned long flags = 0;
 
 	if (!odev) {
-		netdev_err(net, "No net device !\n");
+		dev_err(&net->dev, "No net device !\n");
 		return -ENODEV;
 	}
 
@@ -794,10 +820,9 @@ static int hso_net_open(struct net_device *net)
 	odev->rx_buf_missing = sizeof(struct iphdr);
 	spin_unlock_irqrestore(&odev->net_lock, flags);
 
-	hso_start_net_device(odev->parent);
-
 	/* We are up and running. */
 	set_bit(HSO_NET_RUNNING, &odev->flags);
+	hso_start_net_device(odev->parent);
 
 	/* Tell the kernel we are ready to start receiving from it */
 	netif_start_queue(net);
@@ -934,7 +959,7 @@ static int hso_net_ioctl(struct net_device *net, struct ifreq *rq, int cmd)
 	case SIOCDEVPRIVATE + 1: /* Chose this one because */
 		/* SIOCDEVPRIVATE used somewhere else in this code. */
 		/* return the number of sent bytes */
-		D5("Transmitted: %lu", STATS(net).tx_bytes);
+		D5("Transmitted: %llu", STATS(net).tx_bytes);
 		rq->ifr_ifru.ifru_ivalue = STATS(net).tx_bytes;
 		return 0;
 	case SIOCETHTOOL:
@@ -1052,22 +1077,21 @@ static void packetizeRx(struct hso_net *odev, unsigned char *ip_pkt,
 
 				if ((frame_len > DEFAULT_MRU) ||
 				    (frame_len < sizeof(struct iphdr))) {
-					netdev_err(odev->net,
+					dev_err(&odev->net->dev,
 						"Invalid frame (%d) length\n",
 						frame_len);
 					odev->rx_parse_state = WAIT_SYNC;
 					continue;
 				}
 				/* Allocate an sk_buff */
-				odev->skb_rx_buf = dev_alloc_skb(frame_len);
+				odev->skb_rx_buf = netdev_alloc_skb(odev->net,
+								    frame_len);
 				if (!odev->skb_rx_buf) {
 					/* We got no receive buffer. */
 					D1("could not allocate memory");
 					odev->rx_parse_state = WAIT_SYNC;
 					return;
 				}
-				/* Here's where it came from */
-				odev->skb_rx_buf->dev = odev->net;
 
 				/* Copy what we got so far. make room for iphdr
 				 * after tail. */
@@ -1104,12 +1128,7 @@ static void packetizeRx(struct hso_net *odev, unsigned char *ip_pkt,
 			if (!odev->rx_buf_missing) {
 				/* Packet is complete. Inject into stack. */
 				/* We have IP packet here */
-				odev->skb_rx_buf->protocol =
-						__constant_htons(ETH_P_IP);
-				/* don't check it */
-				odev->skb_rx_buf->ip_summed =
-					CHECKSUM_UNNECESSARY;
-
+				odev->skb_rx_buf->protocol = cpu_to_be16(ETH_P_IP);
 				skb_reset_mac_header(odev->skb_rx_buf);
 
 				/* Ship it off to the kernel */
@@ -1118,9 +1137,9 @@ static void packetizeRx(struct hso_net *odev, unsigned char *ip_pkt,
 				odev->skb_rx_buf = NULL;
 
 				/* update out statistics */
-				STATS(odev->net).rx_packets++;
+				odev->net->stats.rx_packets++;
 
-				STATS(odev->net).rx_bytes += odev->rx_buf_size;
+				odev->net->stats.rx_bytes += odev->rx_buf_size;
 
 				odev->rx_buf_size = 0;
 				odev->rx_buf_missing = sizeof(struct iphdr);
@@ -1146,6 +1165,18 @@ static void packetizeRx(struct hso_net *odev, unsigned char *ip_pkt,
 			odev->rx_buf_size = 0;
 			odev->rx_buf_missing = sizeof(struct iphdr);
 		}
+	}
+}
+
+static void fix_crc_bug(struct urb *urb, __le16 max_packet_size)
+{
+	static const u8 crc_check[4] = { 0xDE, 0xAD, 0xBE, 0xEF };
+	u32 rest = urb->actual_length % le16_to_cpu(max_packet_size);
+
+	if (((rest == 5) || (rest == 6)) &&
+	    !memcmp(((u8 *)urb->transfer_buffer) + urb->actual_length - 4,
+		    crc_check, 4)) {
+		urb->actual_length -= 4;
 	}
 }
 
@@ -1178,16 +1209,8 @@ static void read_bulk_callback(CALLBACK_ARGS)
 		return;
 	}
 
-	if (odev->parent->port_spec & HSO_INFO_CRC_BUG) {
-		u32 rest;
-		u8 crc_check[4] = { 0xDE, 0xAD, 0xBE, 0xEF };
-		rest = urb->actual_length % odev->in_endp->wMaxPacketSize;
-		if (((rest == 5) || (rest == 6))
-		    && !memcmp(((u8 *) urb->transfer_buffer) +
-			       urb->actual_length - 4, crc_check, 4)) {
-			urb->actual_length -= 4;
-		}
-	}
+	if (odev->parent->port_spec & HSO_INFO_CRC_BUG)
+		fix_crc_bug(urb, odev->in_endp->wMaxPacketSize);
 
 	/* do we even have a packet? */
 	if (urb->actual_length) {
@@ -1375,18 +1398,8 @@ static void hso_std_serial_read_bulk_callback(CALLBACK_ARGS)
 		return;
 
 	if (status == 0) {
-		if (serial->parent->port_spec & HSO_INFO_CRC_BUG) {
-			u32 rest;
-			u8 crc_check[4] = { 0xDE, 0xAD, 0xBE, 0xEF };
-			rest =
-			    urb->actual_length %
-			    serial->in_endp->wMaxPacketSize;
-			if (((rest == 5) || (rest == 6))
-			    && !memcmp(((u8 *) urb->transfer_buffer) +
-				       urb->actual_length - 4, crc_check, 4)) {
-				urb->actual_length -= 4;
-			}
-		}
+		if (serial->parent->port_spec & HSO_INFO_CRC_BUG)
+			fix_crc_bug(urb, serial->in_endp->wMaxPacketSize);
 		/* Valid data, handle RX data */
 		spin_lock(&serial->serial_lock);
 		serial->rx_urb_filled[hso_urb_to_index(serial, urb)] = 1;
@@ -1623,7 +1636,6 @@ static void hso_serial_set_termios(struct tty_struct *tty, struct TERMIOS *old)
 	spin_unlock_irqrestore(&serial->serial_lock, flags);
 
 	/* done */
-	return;
 }
 
 /* how many characters in the buffer */
@@ -1677,6 +1689,10 @@ static int hso_serial_tiocmset(struct tty_struct *tty, struct file *file,
 		D1("no tty structures");
 		return -EINVAL;
 	}
+
+	if ((serial->parent->port_spec & HSO_PORT_MASK) != HSO_PORT_MODEM)
+		return -EINVAL;
+
 	if_num = serial->parent->interface->altsetting->desc.bInterfaceNumber;
 
 	spin_lock_irqsave(&serial->serial_lock, flags);
@@ -1804,8 +1820,8 @@ static int mux_device_request(struct hso_serial *serial, u8 type, u16 port,
 
 	/* initialize */
 	ctrl_req->wValue = 0;
-	ctrl_req->wIndex = hso_port_to_mux(port);
-	ctrl_req->wLength = size;
+	ctrl_req->wIndex = cpu_to_le16(hso_port_to_mux(port));
+	ctrl_req->wLength = cpu_to_le16(size);
 
 	if (type == USB_CDC_GET_ENCAPSULATED_RESPONSE) {
 		/* Reading command */
@@ -1905,7 +1921,8 @@ static void intr_callback(CALLBACK_ARGS)
 			if (serial != NULL) {
 				D1("Pending read interrupt on port %d\n", i);
 				spin_lock(&serial->serial_lock);
-				if (serial->rx_state == RX_IDLE) {
+				if (serial->rx_state == RX_IDLE &&
+					serial->open_count > 0) {
 					/* Setup and send a ctrl req read on
 					 * port i */
 					if (!serial->rx_urb_filled[0]) {
@@ -1914,8 +1931,8 @@ static void intr_callback(CALLBACK_ARGS)
 					} else
 						serial->rx_state = RX_PENDING;
 				} else {
-					D1("Already pending a read on "
-					   "port %d\n", i);
+					D1("Already a read pending on "
+					   "port %d or port not open\n", i);
 				}
 				spin_unlock(&serial->serial_lock);
 			}
@@ -2818,8 +2835,9 @@ struct hso_shared_int *hso_create_shared_int(struct usb_interface *interface)
 		dev_err(&interface->dev, "Could not allocate intr urb?\n");
 		goto exit;
 	}
-	mux->shared_intr_buf = kzalloc(mux->intr_endp->wMaxPacketSize,
-				       GFP_KERNEL);
+	mux->shared_intr_buf =
+		kzalloc(le16_to_cpu(mux->intr_endp->wMaxPacketSize),
+			GFP_KERNEL);
 	if (!mux->shared_intr_buf) {
 		dev_err(&interface->dev, "Could not allocate intr buf?\n");
 		goto exit;
@@ -2966,12 +2984,14 @@ static int hso_probe(struct usb_interface *interface,
 
 	case HSO_INTF_BULK:
 		/* It's a regular bulk interface */
-		if (((port_spec & HSO_PORT_MASK) == HSO_PORT_NETWORK)
-		    && !disable_net)
-			hso_dev = hso_create_net_device(interface);
-		else
+		if ((port_spec & HSO_PORT_MASK) == HSO_PORT_NETWORK) {
+			if (!disable_net)
+				hso_dev =
+				    hso_create_net_device(interface);
+		} else {
 			hso_dev =
 			    hso_create_bulk_serial_device(interface, port_spec);
+		}
 		if (!hso_dev)
 			goto exit;
 		break;
@@ -3348,10 +3368,10 @@ static void __exit hso_exit(void)
 /* Module definitions */
 module_init(hso_init);
 module_exit(hso_exit);
+
 MODULE_AUTHOR(MOD_AUTHOR);
 MODULE_DESCRIPTION(MOD_DESCRIPTION);
 MODULE_LICENSE(MOD_LICENSE);
-MODULE_INFO(Version, DRIVER_VERSION);
 
 /* change the debug level (eg: insmod hso.ko debug=0x04) */
 MODULE_PARM_DESC(debug, "Level of debug [0x01 | 0x02 | 0x04 | 0x08 | 0x10]");
@@ -3364,4 +3384,3 @@ module_param(tty_major, int, S_IRUGO | S_IWUSR);
 /* disable network interface (eg: insmod hso.ko disable_net=1) */
 MODULE_PARM_DESC(disable_net, "Disable the network interface");
 module_param(disable_net, int, S_IRUGO | S_IWUSR);
-MODULE_INFO(Flags, sCONFIG_HSO_AUTOPM  sCONFIG_HSO_DEBUG);

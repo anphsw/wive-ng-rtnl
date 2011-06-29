@@ -475,6 +475,7 @@
 31) Add NAT loopback support.<br>
 32) Fix DMZ<=>VPN conflicts.<br>
 33) usb_modeswitch up to 1.1.8 version.<br>
+34) HSO Backport some fixes and ID supported devices from upstream.<br>
 
 <br><br>
 <b>For support see:</b><br>
