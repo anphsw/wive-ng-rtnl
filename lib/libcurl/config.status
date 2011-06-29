@@ -566,8 +566,8 @@ host_os='linux-gnu'
 build_alias='i686-pc-linux-gnu'
 build='i686-pc-linux-gnu'
 build_os='linux-gnu'
-SED='/usr/local/bin/sed'
-Xsed='/usr/local/bin/sed -e 1s/^X//'
+SED='/bin/sed'
+Xsed='/bin/sed -e 1s/^X//'
 GREP='/bin/grep'
 EGREP='/bin/grep -E'
 FGREP='/bin/grep -F'
@@ -974,7 +974,7 @@ S["libext"]="a"
 S["AR"]="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ar"
 S["EGREP"]="/bin/grep -E"
 S["GREP"]="/bin/grep"
-S["SED"]="/usr/local/bin/sed"
+S["SED"]="/bin/sed"
 S["CURL_CFLAG_EXTRAS"]=""
 S["CONFIGURE_OPTIONS"]="\" '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-dependency"\
 "-tracking' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/b"\
@@ -1022,9 +1022,9 @@ S["PACKAGE_VERSION"]="-"
 S["PACKAGE_TARNAME"]="curl"
 S["PACKAGE_NAME"]="curl"
 S["SHELL"]="/bin/sh"
-S["PATH"]=".:.:.:.:/usr/share/colorgcc:/usr/local/bin:/bin:/usr/bin:/usr/games:/usr/lib/qt4/bin:/bin:/sbin:/usr/bin:/usr/sbin:/home/sfstudio/bin:/sbin:/usr/bin"\
-":/usr/sbin:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/opt/Wive-RTNL/t"\
-"ools"
+S["PATH"]=".:.:.:.:/usr/share/colorgcc:/usr/bin:/bin:/usr/local/bin:/usr/X11R6/bin/:/usr/games:/usr/lib/qt4/bin:/bin:/sbin:/usr/bin:/usr/sbin:/home/sfstudio/bi"\
+"n:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin:/usr/sbin:"\
+"/opt/Wive-RTNL/tools"
 S["PATH_SEPARATOR"]=":"
 _ACAWK
 cat >>"$tmp/subs1.awk" <<_ACAWK &&
