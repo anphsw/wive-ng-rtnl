@@ -362,6 +362,8 @@ void qdisc_tree_decrease_qlen(struct Qdisc *sch, unsigned int n)
 	if (n == 0)
 		return;
 	while ((parentid = sch->parent)) {
+		if (TC_H_MAJ(parentid) == TC_H_MAJ(TC_H_INGRESS))
+			return;
 		sch = __qdisc_lookup(sch->dev, TC_H_MAJ(parentid));
 		cops = sch->ops->cl_ops;
 		if (cops->qlen_notify) {
