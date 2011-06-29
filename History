@@ -462,7 +462,7 @@
 18) Some skb, net, rcu subsystems optimize.<br>
 19) Optimize VPN helpers for more readable and correct logic in STA mode.<br>
 20) More settings now apply without reboot device.<br>
-21) Decrease logic itaration overhead.<br>
+21) Decrease logic iteration overhead.<br>
 22) Up miniupnpd to 1.5.20110623 version.<br>
 23) Update libnatpmp to 20110103 version.<br>
 24) MIMO Power Save Mode set to static scheme.<br>
