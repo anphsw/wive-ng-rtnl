@@ -477,6 +477,7 @@
 33) usb_modeswitch up to 1.1.8 version.<br>
 34) HSO Backport some fixes and ID supported devices from upstream.<br>
 35) Fix TC HTB hanging.<br>
+36) Backport fixes for vfs/ext2/ext3/fuse from upstream (critical fixes and speedup).<br>
 
 <br><br>
 <b>For support see:</b><br>
