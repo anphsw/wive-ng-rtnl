@@ -476,6 +476,7 @@
 32) Fix DMZ<=>VPN conflicts.<br>
 33) usb_modeswitch up to 1.1.8 version.<br>
 34) HSO Backport some fixes and ID supported devices from upstream.<br>
+35) Fix TC HTB hanging.<br>
 
 <br><br>
 <b>For support see:</b><br>
