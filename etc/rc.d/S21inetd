@@ -17,11 +17,11 @@ start() {
 	    need_start=1
 	fi
 	if [ -f /bin/ftpd ]; then
-	    echo "ftp stream tcp nowait $Login /bin/ftpd ftpd -q" >> /rwfs/inetd.conf
+	    echo "ftp stream tcp nowait $Login /bin/ftpd ftpd -q" >> /etc/inetd.conf
 	    need_start=1
 	fi
 	if [ -f /bin/telnetd ]; then
-	    echo "telnet stream tcp nowait $Login /bin/telnetd telnetd -i" >> /rwfs/inetd.conf
+	    echo "telnet stream tcp nowait $Login /bin/telnetd telnetd -i" >> /etc/inetd.conf
 	    need_start=1
 	fi
 	if [ "$need_start" = "1" ]; then
