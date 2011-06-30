@@ -13,3 +13,4 @@ echo "--------------MRPROPER---------------"
 make mrproper
 mkdir -p $ROOTDIR/releases
 mkdir -p $ROOTDIR/images
+rm -f linux
