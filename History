@@ -478,7 +478,6 @@
 34) HSO Backport some fixes and ID supported devices from upstream.<br>
 35) Fix TC HTB hanging.<br>
 36) Backport fixes for vfs/ext2/ext3/fuse from upstream (critical fixes and speedup).<br>
-37) Add experimental ext4 support add.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -19,11 +19,12 @@ then
 	. ./.oldconfig
 fi
 
+ROOTDIR=`pwd`
 PASS="$1"
-VENDOR=""
-PRODUCT=""
-LANGUAGE=""
-LINUXDIR=""
+VENDOR="Ralink"
+PRODUCT="RT3052"
+LANGUAGE="`echo $LANGUAGE`"
+LINUXDIR="linux"
 LIBCDIR=""
 LIBCBASEDIR=""
 
