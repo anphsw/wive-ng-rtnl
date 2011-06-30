@@ -1,6 +1,6 @@
 NVDIR = $(ROOTDIR)/lib/libnvram
 CFLAGS += -I$(NVDIR)
-CFLAGS += -I$(ROOTDIR)/linux-2.6.21.x/include
+CFLAGS += -I$(ROOTDIR)/linux/include
 LDFLAGS += -lnvram
 EXEC = ated
 SRCS = ated.c

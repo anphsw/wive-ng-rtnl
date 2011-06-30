@@ -1,5 +1,6 @@
 *.dep
 .sgbuilt_user
+config.status
 romfs
 fulldump
 filesystem

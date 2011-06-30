@@ -348,7 +348,7 @@ dep:
 		echo "ERROR: you need to do a 'make config' first" ; \
 		exit 1 ; \
 	fi
-	@if [ $(LINUXDIR) = linux-2.6.21.x ] ; then \
+	@if [ $(LINUXDIR) = linux ] ; then \
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) prepare ; \
 	fi
 

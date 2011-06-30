@@ -14,7 +14,7 @@
 # written consent of Ralink Technology, Inc. is obtained.
 ############################################################################
 
-include ../linux-2.6.21.x/.config
+include ../linux/.config
 
 #
 # Change uboot/kernel size if necessary

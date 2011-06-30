@@ -275,10 +275,6 @@ ifdef CONFIG_IXP425_CODELET_DSPENG
 		ixDspCodeletModule,c,253,0
 endif
 
-ifneq ($(CONFIG_LINUXDIR),linux-2.6.x)
-	NON_LINUX_2_6_X = yes
-endif
-
 ifneq ($(CONFIG_LEGACY_PTYS)$(NON_LINUX_2_6_X),)
 DEVICE_PTY_16 = $(DEVICE_PTY) \
 	ptyp0,c,2,0    ptyp1,c,2,1        ptyp2,c,2,2      ptyp3,c,2,3 \

@@ -117,7 +117,7 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/wsc_upnp/libupnp-1.4.6/config.aux/missin
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux-2.6.21.x/include/ -DMULTIPLE_CARD_SUPPORT
+CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Os -Wall -D_REENTRANT -I. -Ilibupnp-1.4.6 -Ilibupnp-1.4.6/upnp/inc -Ilibupnp-1.4.6/upnp/src/inc -Ilibupnp-1.4.6/ixml/inc -Ilibupnp-1.4.6/ixml/src/inc  -Ilibupnp-1.4.6/threadutil/inc -I/opt/Wive-RTNL/linux/include/ -DMULTIPLE_CARD_SUPPORT
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CXX = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-g++ 

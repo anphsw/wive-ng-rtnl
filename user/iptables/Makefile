@@ -39,7 +39,7 @@ INCDIR:=$(PREFIX)/include
 RELEASE_DIR:=/tmp
 
 CFLAGS := 
-CFLAGS += -I$(ROOTDIR)/linux-2.6.21.x/include  -Iinclude/ 
+CFLAGS += -I$(ROOTDIR)/linux/include  -Iinclude/ 
 CFLAGS += -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\"
 CFLAGS += -Os -std=gnu99
 CFLAGS += -Wall -Wunused
