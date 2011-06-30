@@ -95,7 +95,7 @@ CROSS_COMPILE = /opt/buildroot-gdb/bin/mipsel-linux-
 endif
 
 ifeq ($(PLATFORM),RALINK_3052)
-LINUX_SRC = /home/peter/ap_soc/SDK_3_3_0_0/RT288x_SDK/source/linux-2.6.21.x
+LINUX_SRC = /home/peter/ap_soc/SDK_3_3_0_0/RT288x_SDK/source/linux
 CROSS_COMPILE = /opt/buildroot-gcc342/bin/mipsel-linux-uclibc-
 endif
 

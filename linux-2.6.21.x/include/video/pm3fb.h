@@ -8,7 +8,7 @@
  *  License. See the file COPYING in the main directory of this archive for
  *  more details.
  *
- *  $Header: /home/cvsroot/RT288x_SDK/source/linux-2.6.21.x/include/video/pm3fb.h,v 1.1.1.1 2007-05-25 06:50:13 bruce Exp $
+ *  $Header: /home/cvsroot/RT288x_SDK/source/linux/include/video/pm3fb.h,v 1.1.1.1 2007-05-25 06:50:13 bruce Exp $
  *
  */
 

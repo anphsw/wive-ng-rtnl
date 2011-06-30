@@ -16,7 +16,7 @@
  *  License. See the file COPYING in the main directory of this archive for
  *  more details.
  *
- *  $Header: /home/cvsroot/RT288x_SDK/source/linux-2.6.21.x/drivers/video/pm3fb.c,v 1.1.1.1 2007-05-25 06:50:08 bruce Exp $
+ *  $Header: /home/cvsroot/RT288x_SDK/source/linux/drivers/video/pm3fb.c,v 1.1.1.1 2007-05-25 06:50:08 bruce Exp $
  *
  *  CHANGELOG:
  *  Mon Feb 11 10:35:48 MET 2002, v 1.4.11B: Cosmetic update.
@@ -3508,7 +3508,7 @@ int __init pm3fb_init(void)
 {
 	DTRACE;
 
-	DPRINTK(2, "This is pm3fb.c, CVS version: $Header: /home/cvsroot/RT288x_SDK/source/linux-2.6.21.x/drivers/video/pm3fb.c,v 1.1.1.1 2007-05-25 06:50:08 bruce Exp $");
+	DPRINTK(2, "This is pm3fb.c, CVS version: $Header: /home/cvsroot/RT288x_SDK/source/linux/drivers/video/pm3fb.c,v 1.1.1.1 2007-05-25 06:50:08 bruce Exp $");
 
 	pm3fb_real_setup(g_options);
 
