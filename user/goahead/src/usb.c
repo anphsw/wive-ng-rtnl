@@ -955,20 +955,21 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 
 int initUSB(void)
 {
-	printf("\n##### USB init #####\n");
-	sleep(1);			// wait for sub-storage initiation
+#if defined(CONFIG_USB) && defined(CONFIG_USB_STORAGE)
 	setFirstPart();
 	doSystem("storage.sh admin");
-#if defined CONFIG_USER_STUPID_FTPD
+
+#if defined (CONFIG_FTPD)
 	doSystem("storage.sh ftp");
 #endif
-#if defined CONFIG_USER_SAMBA
+#if defined (CONFIG_USER_SAMBA)
 	fetchSmbConfig();
 	SetSambaSrv();
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#if defined(CONFIG_USER_USHARE)
 	fetchMediaConfig();
 	RunMediaSrv();
+#endif
 #endif
 #if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
 	printf("UVC init\n");
@@ -983,7 +984,7 @@ int initUSB(void)
 				  nvram_get(RT2860_NVRAM, "WebCamPort"));
 	}
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+#if defined(CONFIG_USB) && defined(CONFIG_USB_PRINTER) && defined(CONFIG_USER_P910ND)
 	printf("P910ND init\n");
 	char *printersrvebl = nvram_get(RT2860_NVRAM, "PrinterSrvEnabled");
 	doSystem("killall -q p910nd");
