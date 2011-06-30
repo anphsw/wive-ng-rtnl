@@ -738,12 +738,11 @@ static ssize_t fuse_dev_read(struct kiocb *iocb, const struct iovec *iov,
 	fuse_copy_finish(&cs);
 	spin_lock(&fc->lock);
 	req->locked = 0;
-	if (req->aborted) {
-		request_end(fc, req);
-		return -ENODEV;
-	}
+	if (!err && req->aborted)
+		err = -ENOENT;
 	if (err) {
-		req->out.h.error = -EIO;
+		if (!req->aborted)
+			req->out.h.error = -EIO;
 		request_end(fc, req);
 		return err;
 	}
