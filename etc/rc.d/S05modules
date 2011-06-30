@@ -128,7 +128,9 @@ stop() {
 	fi
 	for module in $mod
 	do
-	    rmmod $module > /dev/null 2>&1
+	    if [ -d /sys/module/$module ]; then
+		rmmod $module > /dev/null 2>&1
+	    fi
 	done
     fi
 }
