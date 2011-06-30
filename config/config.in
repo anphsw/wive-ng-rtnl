@@ -61,7 +61,9 @@ if [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
     define_bool CONFIG_LIB_EVENT y
     define_bool CONFIG_LIB_CURL y
     define_bool CONFIG_USER_OPENSSL y
+    define_bool CONFIG_LIB_ZLIB_FORCE y
 fi
+
 bool 'dhcp6'					CONFIG_USER_DHCP6
 dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
 dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
