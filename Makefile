@@ -385,6 +385,7 @@ clean: modules_clean
 	make clean -C fulldump
 	make clean -C tools
 	find $(ROOTDIR) -type f -name  'config.log' | xargs rm -f
+	find $(ROOTDIR) -type f -name  'config.status' | xargs rm -f
 	find $(ROOTDIR) -type f -name  '.sgbuilt_user' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
