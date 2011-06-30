@@ -478,6 +478,7 @@ clean:
 	-$(MAKE) -C libpcap clean
 	-$(MAKE) -C libusb clean
 	-$(MAKE) -C libntfs-3g clean
+	-$(MAKE) -C zlib clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	-$(MAKE) -C libgmp clean
 endif
