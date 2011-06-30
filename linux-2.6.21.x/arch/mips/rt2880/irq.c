@@ -49,9 +49,11 @@
 #include <asm/rt2880/surfboard.h>
 #include <asm/rt2880/surfboardint.h>
 #include <asm/rt2880/rt_mmap.h>
-#include <asm/gdb-stub.h>
-
 #include <asm/rt2880/eureka_ep430.h>
+
+#ifdef CONFIG_KGDB
+#include <asm/gdb-stub.h>
+#endif
 
 #define shutdown_surfboard_irq	disable_surfboard_irq
 #define mask_and_ack_surfboard_irq disable_surfboard_irq
