@@ -36,53 +36,56 @@ start() {
     if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
 	#----Fastpath for nat enable--------------------------------
 	if [ "$natFastpath" = "1" ]; then
-	    if [ -d /sys/module/hw_nat ]; then
-		rmmod hw_nat > /dev/null 2>&1
-	    fi
-	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	    hw_nat=0
+	    sw_nat=1
 	    $LOG "NAT Offload mode SW_FASTPATH"
 	elif [ "$natFastpath" = "2" ]; then
-		modprobe -q hw_nat
-	    if [ -d /sys/module/hw_nat ] && [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
-		#set binding threshold
-		hw_nat -N $hw_nat_bind  > /dev/null 2>&1
-	    fi
-	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	    hw_nat=1
+	    sw_nat=0
 	    $LOG "NAT Offload mode HW_NAT"
 	elif [ "$natFastpath" = "3" ]; then
-		modprobe -q hw_nat
-	    if [ -d /sys/module/hw_nat ] && [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
-		#set binding threshold
-		hw_nat -N $hw_nat_bind > /dev/null 2>&1
-	    fi
-	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	    hw_nat=1
+	    sw_nat=1
 	    $LOG "NAT Offload mode COMPLEX"
 	else
+	    hw_nat=0
+	    sw_nat=0
 	    $LOG "NAT Offload mode DISABLE"
+	fi
+	if [ "$QoSEnable" = "3" ]; then
+	    hw_nat=0
+	    $LOG "IMQ shaper - HW_NAT Offload mode must be DISABLE"
+	fi
+	if [ "$QoSEnable" = "2" ]; then
+	    sw_nat=0
+	    $LOG "QoS enabled - SW_NAT Offload mode DISABLE"
+	fi
+	if [ "$hw_nat" = "1" ]; then
+		modprobe -q hw_nat
+	else
 	    if [ -d /sys/module/hw_nat ]; then
 		rmmod hw_nat > /dev/null 2>&1
 	    fi
+	fi
+	if [ "$sw_nat" = "1" ]; then
+	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
+	else
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	fi
+	if [ -d /sys/module/hw_nat ] && [ "$hw_nat" = "1" ]; then
+	    if [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ] && [ "$simple_qos" != "1" ]; then
+		#if module hw_nat loaded set binding threshold
+		hw_nat -N $hw_nat_bind > /dev/null 2>&1
+	    fi
 	fi
 	#----Workaround for simple QoS mode support-----------------
 	if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
+	    #if any QoS/Shaper mode need increase binding threshold if hw_nat enabled
 	    simple_qos=1
-	    if [ "$QoSEnable" = "3" ]; then
-		$LOG "IMQ shaper - HW NAT Offload mode DISABLE"
-		if [ -d /sys/module/hw_nat ]; then
-		    rmmod hw_nat > /dev/null 2>&1
-		fi
-	    fi
 	fi
-	if [ "$simple_qos" != "" ] && [ "$simple_qos" != "0" ]; then
-	    if [ -d /sys/module/hw_nat ] && [ "$natFastpath" = "2" ] && [ "$natFastpath" = "3" ]; then
-		#increase binding threshold
-		hw_nat -N 250 > /dev/null 2>&1
-	    fi  
-	    if [ "$natFastpath" != "2" ] && [ "$natFastpath" != "0" ]; then
-		$LOG "QoS enabled - SF NAT Offload mode DISABLE"
-		sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
-	    fi
+	if [ "$simple_qos" = "1" ] && [ -d /sys/module/hw_nat ] && [ "$hw_nat" = "1" ]; then
+	    $LOG "QoS enabled - increase binding threshold to 250."
+	    hw_nat -N 250 > /dev/null 2>&1
 	fi
 	#----Direct pass from kernel--------------------------------
 	if [ "$pppoe_pass" = "1" ]; then
