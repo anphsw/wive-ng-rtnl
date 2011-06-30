@@ -69,7 +69,7 @@ void fuse_finish_open(struct inode *inode, struct file *file,
 	if (outarg->open_flags & FOPEN_DIRECT_IO)
 		file->f_op = &fuse_direct_io_file_operations;
 	if (!(outarg->open_flags & FOPEN_KEEP_CACHE))
-		invalidate_inode_pages2(inode->i_mapping);
+		invalidate_mapping_pages(inode->i_mapping, 0, -1);
 	ff->fh = outarg->fh;
 	file->private_data = ff;
 }
@@ -609,9 +609,7 @@ static ssize_t fuse_direct_write(struct file *file, const char __user *buf,
 	ssize_t res;
 	/* Don't allow parallel writes to the same file */
 	mutex_lock(&inode->i_mutex);
-	res = generic_write_checks(file, ppos, &count, 0);
-	if (!res)
-		res = fuse_direct_io(file, buf, count, ppos, 1);
+	res = fuse_direct_io(file, buf, count, ppos, 1);
 	mutex_unlock(&inode->i_mutex);
 	return res;
 }
