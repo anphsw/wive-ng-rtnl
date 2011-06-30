@@ -718,8 +718,8 @@ static int aac_bounds_32(struct aac_dev * dev, struct scsi_cmnd * cmd, u64 lba)
 			    ASENCODE_INTERNAL_TARGET_FAILURE, 0, 0,
 			    0, 0);
 		memcpy(cmd->sense_buffer, &dev->fsa_dev[cid].sense_data,
-		  (sizeof(dev->fsa_dev[cid].sense_data) > sizeof(cmd->sense_buffer))
-		    ? sizeof(cmd->sense_buffer)
+		  (sizeof(dev->fsa_dev[cid].sense_data) > SCSI_SENSE_BUFFERSIZE)
+		    ? SCSI_SENSE_BUFFERSIZE
 		    : sizeof(dev->fsa_dev[cid].sense_data));
 		cmd->scsi_done(cmd);
 		return 1;
@@ -1307,8 +1307,8 @@ static void io_callback(void *context, struct fib * fibptr)
 				    ASENCODE_INTERNAL_TARGET_FAILURE, 0, 0,
 				    0, 0);
 		memcpy(scsicmd->sense_buffer, &dev->fsa_dev[cid].sense_data,
-		  (sizeof(dev->fsa_dev[cid].sense_data) > sizeof(scsicmd->sense_buffer))
-		    ? sizeof(scsicmd->sense_buffer)
+		  (sizeof(dev->fsa_dev[cid].sense_data) > SCSI_SENSE_BUFFERSIZE)
+		    ? SCSI_SENSE_BUFFERSIZE
 		    : sizeof(dev->fsa_dev[cid].sense_data));
 	}
 	aac_fib_complete(fibptr);
@@ -1515,7 +1515,7 @@ static void synchronize_callback(void *context, struct fib *fibptr)
 				    0, 0);
 		memcpy(cmd->sense_buffer, &dev->fsa_dev[cid].sense_data,
 		  min(sizeof(dev->fsa_dev[cid].sense_data), 
-			  sizeof(cmd->sense_buffer)));
+			  SCSI_SENSE_BUFFERSIZE));
 	}
 
 	aac_fib_complete(fibptr);
@@ -1694,8 +1694,8 @@ int aac_scsi_cmd(struct scsi_cmnd * scsicmd)
 			    SENCODE_INVALID_COMMAND,
 			    ASENCODE_INVALID_COMMAND, 0, 0, 0, 0);
 		memcpy(scsicmd->sense_buffer, &dev->fsa_dev[cid].sense_data,
-		  (sizeof(dev->fsa_dev[cid].sense_data) > sizeof(scsicmd->sense_buffer))
-		    ? sizeof(scsicmd->sense_buffer)
+		  (sizeof(dev->fsa_dev[cid].sense_data) > SCSI_SENSE_BUFFERSIZE)
+		    ? SCSI_SENSE_BUFFERSIZE
 		    : sizeof(dev->fsa_dev[cid].sense_data));
 		scsicmd->scsi_done(scsicmd);
 		return 0;
@@ -1923,8 +1923,8 @@ int aac_scsi_cmd(struct scsi_cmnd * scsicmd)
 				ILLEGAL_REQUEST, SENCODE_INVALID_COMMAND,
 				ASENCODE_INVALID_COMMAND, 0, 0, 0, 0);
 			memcpy(scsicmd->sense_buffer, &dev->fsa_dev[cid].sense_data,
-			  (sizeof(dev->fsa_dev[cid].sense_data) > sizeof(scsicmd->sense_buffer))
-			    ? sizeof(scsicmd->sense_buffer)
+			  (sizeof(dev->fsa_dev[cid].sense_data) > SCSI_SENSE_BUFFERSIZE)
+			    ? SCSI_SENSE_BUFFERSIZE
 			    : sizeof(dev->fsa_dev[cid].sense_data));
 			scsicmd->scsi_done(scsicmd);
 			return 0;
@@ -2090,8 +2090,8 @@ static void aac_srb_callback(void *context, struct fib * fibptr)
 		int len;
 		printk(KERN_WARNING "aac_srb_callback: srb failed, status = %d\n", le32_to_cpu(srbreply->status));
 		len = (le32_to_cpu(srbreply->sense_data_size) > 
-				sizeof(scsicmd->sense_buffer)) ?
-				sizeof(scsicmd->sense_buffer) : 
+				SCSI_SENSE_BUFFERSIZE) ?
+				SCSI_SENSE_BUFFERSIZE :
 				le32_to_cpu(srbreply->sense_data_size);
 		scsicmd->result = DID_ERROR << 16 | COMMAND_COMPLETE << 8 | SAM_STAT_CHECK_CONDITION;
 		memcpy(scsicmd->sense_buffer, srbreply->sense_data, len);
@@ -2196,8 +2196,8 @@ static void aac_srb_callback(void *context, struct fib * fibptr)
 		int len;
 		scsicmd->result |= SAM_STAT_CHECK_CONDITION;
 		len = (le32_to_cpu(srbreply->sense_data_size) > 
-				sizeof(scsicmd->sense_buffer)) ?
-				sizeof(scsicmd->sense_buffer) :
+				SCSI_SENSE_BUFFERSIZE) ?
+				SCSI_SENSE_BUFFERSIZE :
 				le32_to_cpu(srbreply->sense_data_size);
 #ifdef AAC_DETAILED_STATUS_INFO
 		printk(KERN_WARNING "aac_srb_callback: check condition, status = %d len=%d\n",

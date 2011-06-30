@@ -151,22 +151,14 @@ void scsi_proc_host_rm(struct Scsi_Host *shost)
 
 static int proc_print_scsidevice(struct device *dev, void *data)
 {
-	struct scsi_device *sdev = to_scsi_device(dev);
+	struct scsi_device *sdev;
 	struct seq_file *s = data;
-	struct Scsi_Host *shost=sdev->host;
-	struct scsi_disk *sdkp;
-	//struct gendisk *gd;
 	int i;
 
-        sdkp=(struct scsi_disk*)dev->driver_data;	// ASUS_ADD
-        //gd=sdkp->disk;					// ASUS_ADD
+	if (!scsi_is_sdev_device(dev))
+		goto out;
 
-        //seq_printf(s, "Diskname: %s ", sdkp->disk->disk_name);	// ASUS_ADD
-        if (strncmp(scsi_device_type(sdev->type), "Direct-Access", 13)==0)	// ASUS ADD
-                seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, sdkp->disk->disk_name);
-        else
-                seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, "NONE");
-
+	sdev = to_scsi_device(dev);
 	seq_printf(s,
 		"Host: scsi%d Channel: %02d Id: %02d Lun: %02d\n  Vendor: ",
 		sdev->host->host_no, sdev->channel, sdev->id, sdev->lun);
@@ -203,6 +195,7 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	else
 		seq_printf(s, "\n");
 
+out:
 	return 0;
 }
 
@@ -212,8 +205,8 @@ static int scsi_add_single_device(uint host, uint channel, uint id, uint lun)
 	int error = -ENXIO;
 
 	shost = scsi_host_lookup(host);
-	if (IS_ERR(shost))
-		return PTR_ERR(shost);
+	if (!shost)
+		return error;
 
 	if (shost->transportt->user_scan)
 		error = shost->transportt->user_scan(shost, channel, id, lun);
@@ -230,8 +223,8 @@ static int scsi_remove_single_device(uint host, uint channel, uint id, uint lun)
 	int error = -ENXIO;
 
 	shost = scsi_host_lookup(host);
-	if (IS_ERR(shost))
-		return PTR_ERR(shost);
+	if (!shost)
+		return error;
 	sdev = scsi_device_lookup(shost, channel, id, lun);
 	if (sdev) {
 		scsi_remove_device(sdev);

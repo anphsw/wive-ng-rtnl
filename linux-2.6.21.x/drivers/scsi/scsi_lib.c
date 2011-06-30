@@ -443,7 +443,8 @@ EXPORT_SYMBOL_GPL(scsi_execute_async);
 static void scsi_init_cmd_errh(struct scsi_cmnd *cmd)
 {
 	cmd->serial_number = 0;
-	memset(cmd->sense_buffer, 0, sizeof cmd->sense_buffer);
+	cmd->resid = 0;
+	memset(cmd->sense_buffer, 0, SCSI_SENSE_BUFFERSIZE);
 	if (cmd->cmd_len == 0)
 		cmd->cmd_len = COMMAND_SIZE(cmd->cmnd[0]);
 }
@@ -598,8 +599,8 @@ static void scsi_requeue_command(struct request_queue *q, struct scsi_cmnd *cmd)
 	struct request *req = cmd->request;
 	unsigned long flags;
 
-	scsi_unprep_request(req);
 	spin_lock_irqsave(q->queue_lock, flags);
+	scsi_unprep_request(req);
 	blk_requeue_request(q, req);
 	spin_unlock_irqrestore(q->queue_lock, flags);
 
@@ -636,7 +637,7 @@ void scsi_run_host_queues(struct Scsi_Host *shost)
  *		of upper level post-processing and scsi_io_completion).
  *
  * Arguments:   cmd	 - command that is complete.
- *              uptodate - 1 if I/O indicates success, <= 0 for I/O error.
+ *              error    - 0 if I/O indicates success, < 0 for I/O error.
  *              bytes    - number of bytes of completed I/O
  *		requeue  - indicates whether we should requeue leftovers.
  *
@@ -651,26 +652,25 @@ void scsi_run_host_queues(struct Scsi_Host *shost)
  *		at some point during this call.
  * Notes:	If cmd was requeued, upon return it will be a stale pointer.
  */
-static struct scsi_cmnd *scsi_end_request(struct scsi_cmnd *cmd, int uptodate,
+static struct scsi_cmnd *scsi_end_request(struct scsi_cmnd *cmd, int error,
 					  int bytes, int requeue)
 {
 	request_queue_t *q = cmd->device->request_queue;
 	struct request *req = cmd->request;
-	unsigned long flags;
 
 	/*
 	 * If there are blocks left over at the end, set up the command
 	 * to queue the remainder of them.
 	 */
-	if (end_that_request_chunk(req, uptodate, bytes)) {
+	if (blk_end_request(req, error, bytes)) {
 		int leftover = (req->hard_nr_sectors << 9);
 
 		if (blk_pc_request(req))
 			leftover = req->data_len;
 
 		/* kill remainder if no retrys */
-		if (!uptodate && blk_noretry_request(req))
-			end_that_request_chunk(req, 0, leftover);
+		if (error && blk_noretry_request(req))
+			blk_end_request(req, error, leftover);
 		else {
 			if (requeue) {
 				/*
@@ -684,14 +684,6 @@ static struct scsi_cmnd *scsi_end_request(struct scsi_cmnd *cmd, int uptodate,
 			return cmd;
 		}
 	}
-
-	add_disk_randomness(req->rq_disk);
-
-	spin_lock_irqsave(q->queue_lock, flags);
-	if (blk_rq_tagged(req))
-		blk_queue_end_tag(q, req);
-	end_that_request_last(req, uptodate);
-	spin_unlock_irqrestore(q->queue_lock, flags);
 
 	/*
 	 * This will goose the queue request function at the end, so we don't
@@ -864,11 +856,30 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	if (clear_errors)
 		req->errors = 0;
 
-	/* A number of bytes were successfully read.  If there
+	/*
+	 * Recovered errors need reporting, but they're always treated
+	 * as success, so fiddle the result code here.  For BLOCK_PC
+	 * we already took a copy of the original into rq->errors which
+	 * is what gets returned to the user
+	 */
+	if (sense_valid && (sshdr.sense_key == RECOVERED_ERROR)) {
+		/* if ATA PASS-THROUGH INFORMATION AVAILABLE skip
+		 * print since caller wants ATA registers. Only occurs on
+		 * SCSI ATA PASS_THROUGH commands when CK_COND=1
+		 */
+		if ((sshdr.asc == 0x0) && (sshdr.ascq == 0x1d))
+			;
+		else if (!(req->cmd_flags & REQ_QUIET))
+			scsi_print_sense("", cmd);
+		result = 0;
+	}
+
+	/*
+	 * A number of bytes were successfully read.  If there
 	 * are leftovers and there is some kind of error
 	 * (result != 0), retry the rest.
 	 */
-	if (scsi_end_request(cmd, 1, good_bytes, result == 0) == NULL)
+	if (scsi_end_request(cmd, 0, good_bytes, result == 0) == NULL)
 		return;
 
 	/* good_bytes = 0, or (inclusive) there were leftovers and
@@ -882,7 +893,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				 * and quietly refuse further access.
 				 */
 				cmd->device->changed = 1;
-				scsi_end_request(cmd, 0, this_count, 1);
+				scsi_end_request(cmd, -EIO, this_count, 1);
 				return;
 			} else {
 				/* Must have been a power glitch, or a
@@ -914,7 +925,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				scsi_requeue_command(q, cmd);
 				return;
 			} else {
-				scsi_end_request(cmd, 0, this_count, 1);
+				scsi_end_request(cmd, -EIO, this_count, 1);
 				return;
 			}
 			break;
@@ -931,6 +942,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				case 0x07: /* operation in progress */
 				case 0x08: /* Long write in progress */
 				case 0x09: /* self test in progress */
+				case 0x14: /* space allocation in progress */
 					scsi_requeue_command(q, cmd);
 					return;
 				default:
@@ -942,7 +954,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 					    "Device not ready: ");
 				scsi_print_sense_hdr("", &sshdr);
 			}
-			scsi_end_request(cmd, 0, this_count, 1);
+			scsi_end_request(cmd, -EIO, this_count, 1);
 			return;
 		case VOLUME_OVERFLOW:
 			if (!(req->cmd_flags & REQ_QUIET)) {
@@ -952,7 +964,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				scsi_print_sense("", cmd);
 			}
 			/* See SSC3rXX or current. */
-			scsi_end_request(cmd, 0, this_count, 1);
+			scsi_end_request(cmd, -EIO, this_count, 1);
 			return;
 		default:
 			break;
@@ -975,7 +987,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				scsi_print_sense("", cmd);
 		}
 	}
-	scsi_end_request(cmd, 0, this_count, !result);
+	scsi_end_request(cmd, -EIO, this_count, !result);
 }
 EXPORT_SYMBOL(scsi_io_completion);
 
@@ -1345,8 +1357,8 @@ static inline int scsi_host_queue_ready(struct request_queue *q,
 static void scsi_kill_request(struct request *req, request_queue_t *q)
 {
 	struct scsi_cmnd *cmd = req->special;
-	struct scsi_device *sdev = cmd->device;
-	struct Scsi_Host *shost = sdev->host;
+	struct scsi_device *sdev;
+	struct Scsi_Host *shost;
 
 	blkdev_dequeue_request(req);
 
@@ -1356,6 +1368,8 @@ static void scsi_kill_request(struct request *req, request_queue_t *q)
 		BUG();
 	}
 
+	sdev = cmd->device;
+	shost = sdev->host;
 	scsi_init_cmd_errh(cmd);
 	cmd->result = DID_NO_CONNECT << 16;
 	atomic_inc(&cmd->device->iorequest_cnt);

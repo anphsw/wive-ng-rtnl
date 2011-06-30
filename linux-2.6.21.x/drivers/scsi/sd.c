@@ -48,6 +48,7 @@
 #include <linux/delay.h>
 #include <linux/mutex.h>
 #include <asm/uaccess.h>
+#include <asm/unaligned.h>
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -132,8 +133,7 @@ struct scsi_disk {
 #endif
 #define to_scsi_disk(obj) container_of(obj,struct scsi_disk,cdev)
 
-static DEFINE_IDR(sd_index_idr);
-static DEFINE_SPINLOCK(sd_index_lock);
+static DEFINE_IDA(sd_index_ida);
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -982,14 +982,16 @@ static void sd_rw_intr(struct scsi_cmnd * SCpnt)
 		good_bytes = (bad_lba - start_lba)*SCpnt->device->sector_size;
 		break;
 	case RECOVERED_ERROR:
+		good_bytes = xfer_size;
+		break;
 	case NO_SENSE:
-		/* Inform the user, but make sure that it's not treated
-		 * as a hard error.
+		/* This indicates a false check condition, so ignore it.  An
+		 * unknown amount of data was transferred so treat it as an
+		 * error.
 		 */
 		scsi_print_sense("sd", SCpnt);
 		SCpnt->result = 0;
 		memset(SCpnt->sense_buffer, 0, SCSI_SENSE_BUFFERSIZE);
-		good_bytes = xfer_size;
 		break;
 	case ILLEGAL_REQUEST:
 		if (SCpnt->device->use_10_for_rw &&
@@ -1237,8 +1239,7 @@ repeat:
 	}	
 	
 	if (!longrc) {
-		sector_size = (buffer[4] << 24) |
-			(buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
+		sector_size = get_unaligned_be32(&buffer[4]);
 		if (buffer[0] == 0xff && buffer[1] == 0xff &&
 		    buffer[2] == 0xff && buffer[3] == 0xff) {
 			if(sizeof(sdkp->capacity) > 4) {
@@ -1253,22 +1254,11 @@ repeat:
 			sdkp->capacity = 0;
 			goto got_data;
 		}
-		sdkp->capacity = 1 + (((sector_t)buffer[0] << 24) |
-			(buffer[1] << 16) |
-			(buffer[2] << 8) |
-			buffer[3]);			
+		sdkp->capacity = 1 + (sector_t)get_unaligned_be32(&buffer[0]);
 	} else {
-		sdkp->capacity = 1 + (((u64)buffer[0] << 56) |
-			((u64)buffer[1] << 48) |
-			((u64)buffer[2] << 40) |
-			((u64)buffer[3] << 32) |
-			((sector_t)buffer[4] << 24) |
-			((sector_t)buffer[5] << 16) |
-			((sector_t)buffer[6] << 8)  |
-			(sector_t)buffer[7]);
-			
-		sector_size = (buffer[8] << 24) |
-			(buffer[9] << 16) | (buffer[10] << 8) | buffer[11];
+		sdkp->capacity = 1 + get_unaligned_be64(&buffer[0]);
+
+		sector_size = get_unaligned_be32(&buffer[8]);
 	}	
 
 	/* Some devices return the total number of sectors, not the
@@ -1647,17 +1637,19 @@ static int sd_probe(struct device *dev)
 	if (!gd)
 		goto out_free;
 
-	if (!idr_pre_get(&sd_index_idr, GFP_KERNEL))
-		goto out_put;
+	do {
+		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
+			goto out_put;
 
-	spin_lock(&sd_index_lock);
-	error = idr_get_new(&sd_index_idr, NULL, &index);
-	spin_unlock(&sd_index_lock);
+		error = ida_get_new(&sd_index_ida, &index);
+	} while (error == -EAGAIN);
 
-	if (index >= SD_MAX_DISKS)
-		error = -EBUSY;
 	if (error)
 		goto out_put;
+
+	error = -EBUSY;
+	if (index >= SD_MAX_DISKS)
+		goto out_free_index;
 
 	sdkp->device = sdp;
 	sdkp->driver = &sd_template;
@@ -1678,7 +1670,7 @@ static int sd_probe(struct device *dev)
 	strncpy(sdkp->cdev.class_id, sdp->sdev_gendev.bus_id, BUS_ID_SIZE);
 
 	if (class_device_add(&sdkp->cdev))
-		goto out_put;
+		goto out_free_index;
 
 	get_device(&sdp->sdev_gendev);
 
@@ -1718,6 +1710,8 @@ static int sd_probe(struct device *dev)
 
 	return 0;
 
+ out_free_index:
+	ida_remove(&sd_index_ida, index);
  out_put:
 	put_disk(gd);
  out_free:
@@ -1767,9 +1761,7 @@ static void scsi_disk_release(struct class_device *cdev)
 	struct scsi_disk *sdkp = to_scsi_disk(cdev);
 	struct gendisk *disk = sdkp->disk;
 	
-	spin_lock(&sd_index_lock);
-	idr_remove(&sd_index_idr, sdkp->index);
-	spin_unlock(&sd_index_lock);
+	ida_remove(&sd_index_ida, sdkp->index);
 
 	disk->private_data = NULL;
 	put_disk(disk);
