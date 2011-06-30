@@ -19,6 +19,7 @@ config EXT2_FS
 config EXT2_FS_XATTR
 	bool "Ext2 extended attributes"
 	depends on EXT2_FS
+	default n
 	help
 	  Extended attributes are name:value pairs associated with inodes by
 	  the kernel or by users (see the attr(5) manual page, or visit
@@ -101,7 +102,7 @@ config EXT3_FS
 config EXT3_FS_XATTR
 	bool "Ext3 extended attributes"
 	depends on EXT3_FS
-	default y
+	default n
 	help
 	  Extended attributes are name:value pairs associated with inodes by
 	  the kernel or by users (see the attr(5) manual page, or visit
@@ -165,7 +166,7 @@ config EXT4DEV_FS
 config EXT4DEV_FS_XATTR
 	bool "Ext4dev extended attributes"
 	depends on EXT4DEV_FS
-	default y
+	default n
 	help
 	  Extended attributes are name:value pairs associated with inodes by
 	  the kernel or by users (see the attr(5) manual page, or visit
@@ -325,6 +326,7 @@ config REISERFS_PROC_INFO
 config REISERFS_FS_XATTR
 	bool "ReiserFS extended attributes"
 	depends on REISERFS_FS
+	default n
 	help
 	  Extended attributes are name:value pairs associated with inodes by
 	  the kernel or by users (see the attr(5) manual page, or visit
@@ -1954,6 +1956,7 @@ config CIFS_WEAK_PW_HASH
 config CIFS_XATTR
         bool "CIFS extended attributes"
         depends on CIFS
+	default n
         help
           Extended attributes are name:value pairs associated with inodes by
           the kernel or by users (see the attr(5) manual page, or visit
