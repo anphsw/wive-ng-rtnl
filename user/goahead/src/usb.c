@@ -82,7 +82,7 @@ void formDefineUSB(void) {
 	websFormDefine(T("storageDiskAdm"), storageDiskAdm);
 	websFormDefine(T("storageDiskPart"), storageDiskPart);
 	websFormDefine(T("storageGetFirmwarePath"), storageGetFirmwarePath);
-#if defined CONFIG_USER_STUPID_FTPD
+#if defined CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
 #if defined CONFIG_USER_SAMBA
@@ -440,7 +440,7 @@ static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 	fclose(fp_mount);
 }
 
-#if defined CONFIG_USER_STUPID_FTPD
+#if defined CONFIG_FTPD
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {

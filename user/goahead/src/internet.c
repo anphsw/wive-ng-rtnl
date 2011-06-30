@@ -919,7 +919,7 @@ static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_STUPID_FTPD
+#if defined CONFIG_FTPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

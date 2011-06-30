@@ -74,7 +74,6 @@ if [ "$CONFIG_USER_STORAGE" = "y" ]; then
 	define_bool CONFIG_USER_MKDOSFS y
 fi
 
-dep_bool 'stupid ftpd'				CONFIG_USER_STUPID_FTPD $CONFIG_USER_STORAGE
 dep_bool 'samba server'				CONFIG_USER_SAMBA
 if [ "$CONFIG_USER_SAMBA" = "y" ]; then
         define_bool CONFIG_USER_STORAGE
