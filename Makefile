@@ -314,10 +314,6 @@ vendor_%:
 
 .PHONY: linux
 linux linux%_only:
-	@if [ $(LINUXDIR) = linux-2.4.x -a ! -f $(LINUXDIR)/.depend ] ; then \
-		echo "ERROR: you need to do a 'make dep' first" ; \
-		exit 1 ; \
-	fi
 	# Added by Steven@Ralink FIXME!!!                                                                                                           
 	# In linux-2.6, it do not support VPATH in Makefile.                                                                                        
 	# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.                                                              

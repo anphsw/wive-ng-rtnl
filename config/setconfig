@@ -153,7 +153,7 @@ fi
 
 # get_kernel defines KERNEL for us
 if get_kernel; then
-	LINUXDIR="linux-${KERNEL}"
+	LINUXDIR="linux"
 else
 	echo "Unknown kernel configuration." >&2
 	exit 1

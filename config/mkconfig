@@ -40,7 +40,6 @@ echo "           8M/32M   CONFIG_DEFSETTING_8M32M "
 echo "	  \"" 
 echo "else"
 echo "choice   'Flash/SDRAM Size'\\"
-#echo "         \"2M/8M(AP)		  CONFIG_DEFSETTING_2M8M\\"
 echo "          \"2M/16M(AP)		  CONFIG_DEFSETTING_2M16M\\"
 echo "           4M/16M(AP+STA)		  CONFIG_DEFSETTING_4M16M\\"
 echo "           4M/32M(AP+NAS)		  CONFIG_DEFSETTING_4M32M\\"
@@ -48,6 +47,7 @@ echo "           8M/32M(AP+STA+NAS)       CONFIG_DEFSETTING_8M32M "
 echo "	  \"" 
 echo "fi"
 echo "endmenu"
+echo "define string CONFIG_VENDOR=Ralink"
 
 #############################################################################
 
