@@ -2,6 +2,7 @@
 
 ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
+ln -s linux-2.6.21.x linux
 
 echo "-------------CLEAN-ALL---------------"
 rm -rf $ROOTDIR/images
