@@ -119,8 +119,13 @@ stop() {
 	if [ "$opmode" = "3" ]; then
 	    ip link set apcli0 down > /dev/null 2>&1
 	fi
-	$LOG "Unload hw_nat and wireless modules..."
-	mod="hw_nat rt2860v2_ap rt2860v2_sta"
+	if [ -d /sys/module/hw_nat ]; then
+	    $LOG "Unload hw_nat and wireless modules..."
+	    mod="hw_nat rt2860v2_ap rt2860v2_sta"
+	else
+	    $LOG "Unload wireless modules..."
+	    mod="rt2860v2_ap rt2860v2_sta"
+	fi
 	for module in $mod
 	do
 	    rmmod $module > /dev/null 2>&1
