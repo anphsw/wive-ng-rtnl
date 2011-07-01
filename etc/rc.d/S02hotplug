@@ -24,17 +24,20 @@ start() {
 	#echo "lp[0-9] 0:0 0660		*/etc/scripts/p910.sh $MDEV" >> /etc/mdev.conf
     fi
 
+    #set mdev as kernel hotplug helper
     echo "/sbin/mdev" > /proc/sys/kernel/hotplug
 
-    #enable drivers autoprobe for all usb devices
-    if [ -f /sys/subsystem/usb/drivers_autoprobe ]; then
-	echo 1 > /sys/subsystem/usb/drivers_autoprobe
-    fi
+    if [ -d /proc/bus/usb ]; then
+	#enable drivers autoprobe for all usb devices
+	if [ -f /sys/subsystem/usb/drivers_autoprobe ]; then
+	    echo 1 > /sys/subsystem/usb/drivers_autoprobe
+	fi
 
-    #touch uevent for cold start usb and other hotplug devices allready connected to SOC at boot
-    find /sys -type f -name 'uevent' | while read dev_event; do
-        echo 1 > $dev_event
-    done
+	#touch uevent for cold start usb and other hotplug devices allready connected to SOC at boot
+	find /sys -type f -name 'uevent' | while read dev_event; do
+    	    echo 1 > $dev_event
+	done
+    fi
 }
 
 
