@@ -38,7 +38,7 @@
 #include <asm/rt2880/rt_mmap.h>
 #endif
 
-#if 1 /* BASE SDK CONFIG */
+#if 0 /* BASE SDK CONFIG */
 #define GPIO_LED_WAN_GREEN      12
 #define GPIO_LED_WAN_ORANGE     14
 #define GPIO_LED_SEC_GREEN      13
@@ -62,7 +62,7 @@
 #define GPIO_WPS_LED_ORANGE  	14
 #define GPIO_WPS_LED_GREEN   	14
 //power led
-#lif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
       defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
       defined (CONFIG_RALINK_RT5350)
 #define GPIO_POWER_LED		9
