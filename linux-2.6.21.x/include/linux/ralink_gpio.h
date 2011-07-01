@@ -55,8 +55,8 @@
 #define GPIO_POWER_LED		0
 #endif
 #else  /* FOR ACORP PRODUCT SECTION */
-#define GPIO_LED_WAN_GREEN      13
-#define GPIO_LED_WAN_ORANGE     13
+#define GPIO_LED_WAN_GREEN      12
+#define GPIO_LED_WAN_ORANGE     12
 #define GPIO_LED_SEC_GREEN      13
 //only one LED in WR-150N/300N for WPS
 #define GPIO_WPS_LED_ORANGE  	14
