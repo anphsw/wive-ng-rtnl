@@ -102,5 +102,11 @@ else
     touch /tmp/is_16ram_dev
 fi
 
+#need mount usbfs and /media for external devies mount
+if [ -d /proc/bus/usb ]; then
+    mount -t usbfs none /proc/bus/usb
+    mount -t tmpfs tmpfs /media
+fi
+
 $LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &

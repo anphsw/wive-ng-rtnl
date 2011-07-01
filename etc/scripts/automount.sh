@@ -5,6 +5,12 @@ if [ "$1" == "" ]; then
     exit 1
 fi
 
+#load supportted FS modeules
+modprobe -q ext2
+modprobe -q ext3
+modprobe -q fuse
+modprobe -q udf
+
 mounted=`mount | grep $1 | wc -l`
 # mounted, assume we umount
 if [ $mounted -ge 1 ]; then
