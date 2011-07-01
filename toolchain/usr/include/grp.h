@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,1992,1995-2001,2003,2004 Free Software Foundation, Inc.
+/* Copyright (C) 1991,92,95,96,97,98,99,2000,01 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@ __BEGIN_DECLS
 
 
 /* For the Single Unix specification we must define this type here.  */
-#if (defined __USE_XOPEN || defined __USE_XOPEN2K) && !defined __gid_t_defined
+#if defined __USE_XOPEN && !defined __gid_t_defined
 typedef __gid_t gid_t;
 # define __gid_t_defined
 #endif
@@ -56,57 +56,32 @@ struct group
 
 
 #if defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED
-/* Rewind the group-file stream.
+/* Rewind the group-file stream.  */
+extern void setgrent (void) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void setgrent (void);
+/* Close the group-file stream.  */
+extern void endgrent (void) __THROW;
 
-/* Close the group-file stream.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void endgrent (void);
-
-/* Read an entry from the group-file stream, opening it if necessary.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct group *getgrent (void);
+/* Read an entry from the group-file stream, opening it if necessary.  */
+extern struct group *getgrent (void) __THROW;
 #endif
 
 #ifdef	__USE_SVID
-/* Read a group entry from STREAM.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern struct group *fgetgrent (FILE *__stream);
+/* Read a group entry from STREAM.  */
+extern struct group *fgetgrent (FILE *__stream) __THROW;
 #endif
 
 #ifdef __USE_GNU
-/* Write the given entry onto the given stream.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+/* Write the given entry onto the given stream.  */
 extern int putgrent (__const struct group *__restrict __p,
-		     FILE *__restrict __f);
+		     FILE *__restrict __f) __THROW;
 #endif
 
-/* Search for an entry with a matching group ID.
+/* Search for an entry with a matching group ID.  */
+extern struct group *getgrgid (__gid_t __gid) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct group *getgrgid (__gid_t __gid);
-
-/* Search for an entry with a matching group name.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct group *getgrnam (__const char *__name);
+/* Search for an entry with a matching group name.  */
+extern struct group *getgrnam (__const char *__name) __THROW;
 
 #if defined __USE_POSIX || defined __USE_MISC
 
@@ -122,48 +97,32 @@ extern struct group *getgrnam (__const char *__name);
    The interface may change in later versions of this library.  But
    the interface is designed following the principals used for the
    other reentrant functions so the chances are good this is what the
-   POSIX people would choose.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   POSIX people would choose.  */
 
 # ifdef __USE_GNU
 extern int getgrent_r (struct group *__restrict __resultbuf,
 		       char *__restrict __buffer, size_t __buflen,
-		       struct group **__restrict __result);
+		       struct group **__restrict __result) __THROW;
 # endif
 
-/* Search for an entry with a matching group ID.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+/* Search for an entry with a matching group ID.  */
 extern int getgrgid_r (__gid_t __gid, struct group *__restrict __resultbuf,
 		       char *__restrict __buffer, size_t __buflen,
-		       struct group **__restrict __result);
+		       struct group **__restrict __result) __THROW;
 
-/* Search for an entry with a matching group name.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+/* Search for an entry with a matching group name.  */
 extern int getgrnam_r (__const char *__restrict __name,
 		       struct group *__restrict __resultbuf,
 		       char *__restrict __buffer, size_t __buflen,
-		       struct group **__restrict __result);
+		       struct group **__restrict __result) __THROW;
 
 # ifdef	__USE_SVID
 /* Read a group entry from STREAM.  This function is not standardized
-   an probably never will.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   an probably never will.  */
 extern int fgetgrent_r (FILE *__restrict __stream,
 			struct group *__restrict __resultbuf,
 			char *__restrict __buffer, size_t __buflen,
-			struct group **__restrict __result);
+			struct group **__restrict __result) __THROW;
 # endif
 
 #endif	/* POSIX or reentrant */
@@ -177,28 +136,10 @@ extern int fgetgrent_r (FILE *__restrict __stream,
 /* Set the group set for the current user to GROUPS (N of them).  */
 extern int setgroups (size_t __n, __const __gid_t *__groups) __THROW;
 
-#if 0
-/* Store at most *NGROUPS members of the group set for USER into
-   *GROUPS.  Also include GROUP.  The actual number of groups found is
-   returned in *NGROUPS.  Return -1 if the if *NGROUPS is too small.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int getgrouplist (__const char *__user, __gid_t __group,
-			 __gid_t *__groups, int *__ngroups);
-#endif
-
 /* Initialize the group set for the current user
    by reading the group database and using all groups
-   of which USER is a member.  Also include GROUP.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int initgroups (__const char *__user, __gid_t __group);
+   of which USER is a member.  Also include GROUP.  */
+extern int initgroups (__const char *__user, __gid_t __group) __THROW;
 
 #endif /* Use BSD.  */
 

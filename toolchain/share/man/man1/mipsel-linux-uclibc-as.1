@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "AS 1"
-.TH AS 1 "2010-03-01" "binutils-2.20.1" "GNU Development Tools"
+.TH AS 1 "2010-12-08" "binutils-2.21" "GNU Development Tools"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -142,6 +142,7 @@ AS \- the portable GNU assembler.
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
+ [\fB\-\-compress\-debug\-sections\fR]  [\fB\-\-nocompress\-debug\-sections\fR]
  [\fB\-\-debug\-prefix\-map\fR \fIold\fR=\fInew\fR]
  [\fB\-\-defsym\fR \fIsym\fR=\fIval\fR] [\fB\-f\fR] [\fB\-g\fR] [\fB\-\-gstabs\fR]
  [\fB\-\-gstabs+\fR] [\fB\-\-gdwarf\-2\fR] [\fB\-\-help\fR] [\fB\-I\fR \fIdir\fR] [\fB\-J\fR]
@@ -176,6 +177,12 @@ as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
    [\fB\-mapcs\-32\fR|\fB\-mapcs\-26\fR|\fB\-mapcs\-float\fR|
     \fB\-mapcs\-reentrant\fR]
    [\fB\-mthumb\-interwork\fR] [\fB\-k\fR]
+.PP
+\&\fITarget Blackfin options:\fR
+   [\fB\-mcpu\fR=\fIprocessor\fR[\-\fIsirevision\fR]]
+   [\fB\-mfdpic\fR]
+   [\fB\-mno\-fdpic\fR]
+   [\fB\-mnopic\fR]
 .PP
 \&\fITarget \s-1CRIS\s0 options:\fR
    [\fB\-\-underscore\fR | \fB\-\-no\-underscore\fR]
@@ -246,7 +253,6 @@ as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
    [\fB\-mips64\fR] [\fB\-mips64r2\fR]
    [\fB\-construct\-floats\fR] [\fB\-no\-construct\-floats\fR]
    [\fB\-trap\fR] [\fB\-no\-break\fR] [\fB\-break\fR] [\fB\-no\-trap\fR]
-   [\fB\-mfix7000\fR] [\fB\-mno\-fix7000\fR]
    [\fB\-mips16\fR] [\fB\-no\-mips16\fR]
    [\fB\-msmartmips\fR] [\fB\-mno\-smartmips\fR]
    [\fB\-mips3d\fR] [\fB\-no\-mips3d\fR]
@@ -254,6 +260,9 @@ as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
    [\fB\-mdsp\fR] [\fB\-mno\-dsp\fR]
    [\fB\-mdspr2\fR] [\fB\-mno\-dspr2\fR]
    [\fB\-mmt\fR] [\fB\-mno\-mt\fR]
+   [\fB\-mfix7000\fR] [\fB\-mno\-fix7000\fR]
+   [\fB\-mfix\-vr4120\fR] [\fB\-mno\-fix\-vr4120\fR]
+   [\fB\-mfix\-vr4130\fR] [\fB\-mno\-fix\-vr4130\fR]
    [\fB\-mdebug\fR] [\fB\-no\-mdebug\fR]
    [\fB\-mpdr\fR] [\fB\-mno\-pdr\fR]
 .PP
@@ -280,6 +289,11 @@ as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
    [\fB\-mlittle\fR|\fB\-mlittle\-endian\fR|\fB\-mbig\fR|\fB\-mbig\-endian\fR]
    [\fB\-msolaris\fR|\fB\-mno\-solaris\fR]
 .PP
+\&\fITarget \s-1RX\s0 options:\fR
+   [\fB\-mlittle\-endian\fR|\fB\-mbig\-endian\fR]
+   [\fB\-m32bit\-ints\fR|\fB\-m16bit\-ints\fR]
+   [\fB\-m32bit\-doubles\fR|\fB\-m64bit\-doubles\fR]
+.PP
 \&\fITarget s390 options:\fR
    [\fB\-m31\fR|\fB\-m64\fR] [\fB\-mesa\fR|\fB\-mzarch\fR] [\fB\-march\fR=\fI\s-1CPU\s0\fR]
    [\fB\-mregnames\fR|\fB\-mno\-regnames\fR]
@@ -298,8 +312,13 @@ as [\fB\-a\fR[\fBcdghlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
    [\fB\-32\fR|\fB\-64\fR]
 .PP
 \&\fITarget \s-1TIC54X\s0 options:\fR
- [\fB\-mcpu=54[123589]\fR|\fB\-mcpu=54[56]lp\fR] [\fB\-mfar\-mode\fR|\fB\-mf\fR] 
+ [\fB\-mcpu=54[123589]\fR|\fB\-mcpu=54[56]lp\fR] [\fB\-mfar\-mode\fR|\fB\-mf\fR]
  [\fB\-merrors\-to\-file\fR \fI<filename>\fR|\fB\-me\fR \fI<filename>\fR]
+.PP
+\&\fITarget \s-1TIC6X\s0 options:\fR
+   [\fB\-march=\fR\fIarch\fR] [\fB\-matomic\fR|\fB\-mno\-atomic\fR]
+   [\fB\-mbig\-endian\fR|\fB\-mlittle\-endian\fR] [\fB\-mdsbt\fR|\fB\-mno\-dsbt\fR]
+   [\fB\-mpid=no\fR|\fB\-mpid=near\fR|\fB\-mpid=far\fR] [\fB\-mpic\fR|\fB\-mno\-pic\fR]
 .PP
 \&\fITarget Z80 options:\fR
   [\fB\-z80\fR] [\fB\-r800\fR]
@@ -434,6 +453,14 @@ the last one.  By itself, \fB\-a\fR defaults to \fB\-ahls\fR.
 .IP "\fB\-\-alternate\fR" 4
 .IX Item "--alternate"
 Begin in alternate macro mode.
+.IP "\fB\-\-compress\-debug\-sections\fR" 4
+.IX Item "--compress-debug-sections"
+Compress \s-1DWARF\s0 debug sections using zlib.  The debug sections are renamed
+to begin with \fB.zdebug\fR, and the resulting object file may not be
+compatible with older linkers and object file utilities.
+.IP "\fB\-\-nocompress\-debug\-sections\fR" 4
+.IX Item "--nocompress-debug-sections"
+Do not compress \s-1DWARF\s0 debug sections.  This is the default.
 .IP "\fB\-D\fR" 4
 .IX Item "-D"
 Ignored.  This option is accepted for script compatibility with calls to
@@ -618,6 +645,23 @@ Specify that the code has been generated with interworking between Thumb and
 .IX Item "-k"
 Specify that \s-1PIC\s0 code has been generated.
 .PP
+The following options are available when as is configured for
+the Blackfin processor family.
+.IP "\fB\-mcpu=\fR\fIprocessor\fR[\fB\-\fR\fIsirevision\fR]" 4
+.IX Item "-mcpu=processor[-sirevision]"
+This option specifies the target processor.  The optional \fIsirevision\fR
+is not used in assembler.
+.IP "\fB\-mfdpic\fR" 4
+.IX Item "-mfdpic"
+Assemble for the \s-1FDPIC\s0 \s-1ABI\s0.
+.IP "\fB\-mno\-fdpic\fR" 4
+.IX Item "-mno-fdpic"
+.PD 0
+.IP "\fB\-mnopic\fR" 4
+.IX Item "-mnopic"
+.PD
+Disable \-mfdpic.
+.PP
 See the info pages for documentation of the CRIS-specific options.
 .PP
 The following options are available when as is configured for
@@ -688,7 +732,7 @@ Produce warning messages when questionable parallel constructs are
 encountered.
 .IP "\fB\-\-no\-warn\-explicit\-parallel\-conflicts or \-\-Wnp\fR" 4
 .IX Item "--no-warn-explicit-parallel-conflicts or --Wnp"
-Do not produce warning messages when questionable parallel constructs are 
+Do not produce warning messages when questionable parallel constructs are
 encountered.
 .PP
 The following options are available when as is configured for the
@@ -1073,6 +1117,8 @@ Assemble for a little endian target.
 .PP
 See the info pages for documentation of the MMIX-specific options.
 .PP
+See the info pages for documentation of the RX-specific options.
+.PP
 The following options are available when as is configured for the s390
 processor family.
 .IP "\fB\-m31\fR" 4
@@ -1105,6 +1151,81 @@ Allow or disallow symbolic names for registers.
 .IX Item "-mwarn-areg-zero"
 Warn whenever the operand for a base or index register has been specified
 but evaluates to zero.
+.PP
+The following options are available when as is configured for a
+\&\s-1TMS320C6000\s0 processor.
+.IP "\fB\-march=\fR\fIarch\fR" 4
+.IX Item "-march=arch"
+Enable (only) instructions from architecture \fIarch\fR.  By default,
+all instructions are permitted.
+.Sp
+The following values of \fIarch\fR are accepted: \f(CW\*(C`c62x\*(C'\fR,
+\&\f(CW\*(C`c64x\*(C'\fR, \f(CW\*(C`c64x+\*(C'\fR, \f(CW\*(C`c67x\*(C'\fR, \f(CW\*(C`c67x+\*(C'\fR, \f(CW\*(C`c674x\*(C'\fR.
+.IP "\fB\-matomic\fR" 4
+.IX Item "-matomic"
+.PD 0
+.IP "\fB\-mno\-atomic\fR" 4
+.IX Item "-mno-atomic"
+.PD
+Enable or disable the optional C64x+ atomic operation instructions.
+By default, they are enabled if no \fB\-march\fR option is given, or
+if an architecture is specified with \fB\-march\fR that implies
+these instructions are present (currently, there are no such
+architectures); they are disabled if an architecture is specified with
+\&\fB\-march\fR on which the instructions are optional or not
+present.  This option overrides such a default from the architecture,
+independent of the order in which the \fB\-march\fR or
+\&\fB\-matomic\fR or \fB\-mno\-atomic\fR options are passed.
+.IP "\fB\-mdsbt\fR" 4
+.IX Item "-mdsbt"
+.PD 0
+.IP "\fB\-mno\-dsbt\fR" 4
+.IX Item "-mno-dsbt"
+.PD
+The \fB\-mdsbt\fR option causes the assembler to generate the
+\&\f(CW\*(C`Tag_ABI_DSBT\*(C'\fR attribute with a value of 1, indicating that the
+code is using \s-1DSBT\s0 addressing.  The \fB\-mno\-dsbt\fR option, the
+default, causes the tag to have a value of 0, indicating that the code
+does not use \s-1DSBT\s0 addressing.  The linker will emit a warning if
+objects of different type (\s-1DSBT\s0 and non-DSBT) are linked together.
+.IP "\fB\-mpid=no\fR" 4
+.IX Item "-mpid=no"
+.PD 0
+.IP "\fB\-mpid=near\fR" 4
+.IX Item "-mpid=near"
+.IP "\fB\-mpid=far\fR" 4
+.IX Item "-mpid=far"
+.PD
+The \fB\-mpid=\fR option causes the assembler to generate the
+\&\f(CW\*(C`Tag_ABI_PID\*(C'\fR attribute with a value indicating the form of data
+addressing used by the code.  \fB\-mpid=no\fR, the default,
+indicates position-dependent data addressing, \fB\-mpid=near\fR
+indicates position-independent addressing with \s-1GOT\s0 accesses using near
+\&\s-1DP\s0 addressing, and \fB\-mpid=far\fR indicates position-independent
+addressing with \s-1GOT\s0 accesses using far \s-1DP\s0 addressing.  The linker will
+emit a warning if objects built with different settings of this option
+are linked together.
+.IP "\fB\-mpic\fR" 4
+.IX Item "-mpic"
+.PD 0
+.IP "\fB\-mno\-pic\fR" 4
+.IX Item "-mno-pic"
+.PD
+The \fB\-mpic\fR option causes the assembler to generate the
+\&\f(CW\*(C`Tag_ABI_PIC\*(C'\fR attribute with a value of 1, indicating that the
+code is using position-independent code addressing,  The
+\&\f(CW\*(C`\-mno\-pic\*(C'\fR option, the default, causes the tag to have a value of
+0, indicating position-dependent code addressing.  The linker will
+emit a warning if objects of different type (position-dependent and
+position-independent) are linked together.
+.IP "\fB\-mbig\-endian\fR" 4
+.IX Item "-mbig-endian"
+.PD 0
+.IP "\fB\-mlittle\-endian\fR" 4
+.IX Item "-mlittle-endian"
+.PD
+Generate code for the specified endianness.  The default is
+little-endian.
 .PP
 The following options are available when as is configured for
 an Xtensa processor.
@@ -1197,8 +1318,8 @@ Treat undocumented Z80 instructions that do not work on R800 as errors.
 \&\fIgcc\fR\|(1), \fIld\fR\|(1), and the Info entries for \fIbinutils\fR and \fIld\fR.
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
-Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+Copyright (c) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 .PP
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.3

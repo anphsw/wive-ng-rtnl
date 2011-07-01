@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1996,1997,1999,2000,2003 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -62,19 +62,13 @@ extern int msgctl (int __msqid, int __cmd, struct msqid_ds *__buf) __THROW;
 /* Get messages queue.  */
 extern int msgget (key_t __key, int __msgflg) __THROW;
 
-/* Receive message from message queue.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
+/* Receive message from message queue.  */
 extern int msgrcv (int __msqid, void *__msgp, size_t __msgsz,
-		   long int __msgtyp, int __msgflg);
+		   long int __msgtyp, int __msgflg) __THROW;
 
-/* Send message to message queue.
-
-   This function is a cancellation point and therefore not marked with
-   __THROW.  */
+/* Send message to message queue.  */
 extern int msgsnd (int __msqid, __const void *__msgp, size_t __msgsz,
-		   int __msgflg);
+		   int __msgflg) __THROW;
 
 __END_DECLS
 

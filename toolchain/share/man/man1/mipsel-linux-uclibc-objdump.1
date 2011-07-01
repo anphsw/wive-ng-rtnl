@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "OBJDUMP 1"
-.TH OBJDUMP 1 "2009-10-16" "binutils-2.20" "GNU Development Tools"
+.TH OBJDUMP 1 "2010-12-08" "binutils-2.21" "GNU Development Tools"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -164,8 +164,8 @@ objdump [\fB\-a\fR|\fB\-\-archive\-headers\fR]
         [\fB\-r\fR|\fB\-\-reloc\fR]
         [\fB\-R\fR|\fB\-\-dynamic\-reloc\fR]
         [\fB\-s\fR|\fB\-\-full\-contents\fR]
-        [\fB\-W[lLiaprmfFsoR]\fR|
-         \fB\-\-dwarf\fR[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames\-interp,=str,=loc,=Ranges]]
+        [\fB\-W[lLiaprmfFsoRt]\fR|
+         \fB\-\-dwarf\fR[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames\-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]]
         [\fB\-G\fR|\fB\-\-stabs\fR]
         [\fB\-t\fR|\fB\-\-syms\fR]
         [\fB\-T\fR|\fB\-\-dynamic\-syms\fR]
@@ -577,15 +577,18 @@ This is the default when \fB\-\-prefix\-addresses\fR is used.
 .IX Item "--insn-width=width"
 Display \fIwidth\fR bytes on a single line when disassembling
 instructions.
-.IP "\fB\-W[lLiaprmfFsoR]\fR" 4
-.IX Item "-W[lLiaprmfFsoR]"
+.IP "\fB\-W[lLiaprmfFsoRt]\fR" 4
+.IX Item "-W[lLiaprmfFsoRt]"
 .PD 0
-.IP "\fB\-\-dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames\-interp,=str,=loc,=Ranges]\fR" 4
-.IX Item "--dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]"
+.IP "\fB\-\-dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames\-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]\fR" 4
+.IX Item "--dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]"
 .PD
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
+.Sp
+Note that there is no single letter option to display the content of
+trace sections.
 .IP "\fB\-G\fR" 4
 .IX Item "-G"
 .PD 0
@@ -793,7 +796,8 @@ with a backslash.  The \fIfile\fR may itself contain additional
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
 Copyright (c) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+Free Software Foundation, Inc.
 .PP
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.3

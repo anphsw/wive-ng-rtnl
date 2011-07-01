@@ -1,5 +1,5 @@
 /* Definitions for getting information about a filesystem.
-   Copyright (C) 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -50,40 +50,36 @@ __BEGIN_DECLS
 /* Return information about the filesystem on which FILE resides.  */
 #ifndef __USE_FILE_OFFSET64
 extern int statvfs (__const char *__restrict __file,
-		    struct statvfs *__restrict __buf)
-     __THROW __nonnull ((1, 2));
+		    struct statvfs *__restrict __buf) __THROW;
 #else
 # ifdef __REDIRECT
 extern int __REDIRECT (statvfs,
-			   (__const char *__restrict __file,
-			    struct statvfs *__restrict __buf), statvfs64)
-     __nonnull ((1, 2));
+		       (__const char *__restrict __file,
+			struct statvfs *__restrict __buf) __THROW,
+		       statvfs64);
 # else
 #  define statvfs statvfs64
 # endif
 #endif
 #ifdef __USE_LARGEFILE64
 extern int statvfs64 (__const char *__restrict __file,
-		      struct statvfs64 *__restrict __buf)
-     __THROW __nonnull ((1, 2));
+		      struct statvfs64 *__restrict __buf) __THROW;
 #endif
 
 /* Return information about the filesystem containing the file FILDES
    refers to.  */
 #ifndef __USE_FILE_OFFSET64
-extern int fstatvfs (int __fildes, struct statvfs *__buf)
-     __THROW __nonnull ((2));
+extern int fstatvfs (int __fildes, struct statvfs *__buf) __THROW;
 #else
 # ifdef __REDIRECT
-extern int __REDIRECT (fstatvfs, (int __fildes, struct statvfs *__buf),
-			   fstatvfs64) __nonnull ((2));
+extern int __REDIRECT (fstatvfs, (int __fildes, struct statvfs *__buf) __THROW,
+		       fstatvfs64);
 # else
 #  define fstatvfs fstatvfs64
 # endif
 #endif
 #ifdef __USE_LARGEFILE64
-extern int fstatvfs64 (int __fildes, struct statvfs64 *__buf)
-     __THROW __nonnull ((2));
+extern int fstatvfs64 (int __fildes, struct statvfs64 *__buf) __THROW;
 #endif
 
 __END_DECLS

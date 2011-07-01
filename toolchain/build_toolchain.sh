@@ -1,6 +1,7 @@
 #!/bin/sh
 
 #need lib`s
+#urpmi -a glibc-
 #urpmi -a libgmpxx-devel --download-all --allow-force
 #urpmi -a libmpc- --download-all --allow-force
 #urpmi -a mpfr- --download-all --allow-force
@@ -11,9 +12,9 @@ DIR=`pwd`
 ROOTDIR=$DIR
 
 KERNELHDRS=kernel-headers
-BINUTILVER=binutils-2.20.1
+BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.5.2
+GCCVER=gcc-4.5.3
 
 UNPACK=YES
 HEADERS=YES
@@ -22,14 +23,13 @@ GCC=YES
 UCLIB=YES
 GCCCPP=YES
 
-
 export LC_PAPER=en_EN.UTF-8
 export LC_ADDRESS=en_EN.UTF-8
 export LC_MONETARY=en_EN.UTF-8
 export LC_TELEPHONE=en_EN.UTF-8
 export LC_IDENTIFICATION=en_EN.UTF-8
 export LC_MEASUREMENT=en_EN.UTF-8
-export LANGUAGE=en_EN.UTF-8:en                                                                                                              
+export LANGUAGE=en_EN.UTF-8:en
 export LC_NAME=en_EN.UTF-8
 
 export LC_COLLATE=
@@ -56,15 +56,15 @@ mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
 
 HOSTGCCVER=`gcc --version | grep "(GCC)" | awk {' print $3 '}`
-if [ "$HOSTGCCVER" = "4.6.0" ]; then
-    export CFLAGS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
+if [ "$HOSTGCCVER" = "4.6.0" ] || [ "$HOSTGCCVER" = "4.6.1" ]; then
+    export CFLAGS="-g -Os -Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
 fi
 
 EXT_OPT=""
-if [ "$GCCVER" = "gcc-4.6.0" ]; then                              
-    EXT_OPT="--disable-libquadmath"                               
-fi                                                                
-								  
+if [ "$GCCVER" = "gcc-4.6.0" ] || [ "$GCCVER" = "gcc-4.6.1" ]; then
+    EXT_OPT="--disable-lto --enable-ld=yes --enable-gold=no --disable-multilib --disable-libiberty"
+fi
+
 #########################################################################################################
 
 if [ "$UNPACK" = "YES" ]; then
@@ -98,7 +98,7 @@ if [ "$BINUTILS" = "YES" ]; then
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX && \
-    make KERNEL_HEADERS=$TARGET_DIR/include && \
+    make -j3 KERNEL_HEADERS=$TARGET_DIR/include && \
     make install) || exit 1
     cd ..
 fi

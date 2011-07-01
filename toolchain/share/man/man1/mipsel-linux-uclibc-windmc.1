@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "WINDMC 1"
-.TH WINDMC 1 "2009-10-16" "binutils-2.20" "GNU Development Tools"
+.TH WINDMC 1 "2010-12-08" "binutils-2.21" "GNU Development Tools"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -141,6 +141,7 @@
 windmc \- generates Windows message resources.
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
+windmc [options] input-file
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBwindmc\fR reads message definitions from an input file (.mc) and
@@ -178,7 +179,7 @@ Windows Message Compiler.
 .IP "\fB\-\-ascii_in\fR" 4
 .IX Item "--ascii_in"
 .PD
-Specifies that the input file specified is \s-1ANSI\s0. This is the default
+Specifies that the input file specified is \s-1ASCII\s0. This is the default
 behaviour.
 .IP "\fB\-A\fR" 4
 .IX Item "-A"
@@ -186,7 +187,7 @@ behaviour.
 .IP "\fB\-\-ascii_out\fR" 4
 .IX Item "--ascii_out"
 .PD
-Specifies that messages in the output \f(CW\*(C`bin\*(C'\fR files should be in \s-1ANSI\s0
+Specifies that messages in the output \f(CW\*(C`bin\*(C'\fR files should be in \s-1ASCII\s0
 format.
 .IP "\fB\-b\fR" 4
 .IX Item "-b"
@@ -349,7 +350,8 @@ the Info entries for \fIbinutils\fR.
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
 Copyright (c) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+Free Software Foundation, Inc.
 .PP
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.3

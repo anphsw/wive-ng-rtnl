@@ -482,6 +482,7 @@
 38) scsi subsystem backport fix errors and optimizations from vanilla kernel.<br>
 39) Fix kernel extension logic.<br>
 40) Add coldplug logic for init mdev event at boot time.<br>
+41) Update toolchain to 4.5.3 gcc version and 2.21 binutils version.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -55,16 +55,14 @@
 #define GPIO_POWER_LED		0
 #endif
 #else  /* FOR ACORP PRODUCT SECTION */
-#define GPIO_LED_WAN_GREEN      11
-#define GPIO_LED_WAN_ORANGE     12
+#define GPIO_LED_WAN_GREEN      13
+#define GPIO_LED_WAN_ORANGE     13
 #define GPIO_LED_SEC_GREEN      13
 //only one LED in WR-150N/300N for WPS
 #define GPIO_WPS_LED_ORANGE  	14
 #define GPIO_WPS_LED_GREEN   	14
 //power led
-#ifdef CONFIG_RALINK_RT2880
-#define GPIO_POWER_LED		12
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
+#lif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
       defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
       defined (CONFIG_RALINK_RT5350)
 #define GPIO_POWER_LED		9

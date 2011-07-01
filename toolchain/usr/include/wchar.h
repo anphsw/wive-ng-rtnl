@@ -180,8 +180,12 @@ extern int wcsncasecmp (__const wchar_t *__s1, __const wchar_t *__s2,
 
 extern int wcscasecmp_l (__const wchar_t *__s1, __const wchar_t *__s2,
 			 __locale_t __loc) __THROW;
+extern int __wcscasecmp_l (__const wchar_t *__s1, __const wchar_t *__s2,
+			 __locale_t __loc) __THROW;
 
 extern int wcsncasecmp_l (__const wchar_t *__s1, __const wchar_t *__s2,
+			  size_t __n, __locale_t __loc) __THROW;
+extern int __wcsncasecmp_l (__const wchar_t *__s1, __const wchar_t *__s2,
 			  size_t __n, __locale_t __loc) __THROW;
 #endif /* __UCLIBC_HAS_XLOCALE__ */
 #endif
@@ -206,11 +210,15 @@ __END_NAMESPACE_C99
    LC_COLLATE category of the given locale.  */
 extern int wcscoll_l (__const wchar_t *__s1, __const wchar_t *__s2,
 		      __locale_t __loc) __THROW;
+extern int __wcscoll_l (__const wchar_t *__s1, __const wchar_t *__s2,
+		      __locale_t __loc) __THROW;
 
 /* Transform S2 into array pointed to by S1 such that if wcscmp is
    applied to two transformed strings the result is the as applying
    `wcscoll' to the original strings.  */
 extern size_t wcsxfrm_l (wchar_t *__s1, __const wchar_t *__s2,
+			 size_t __n, __locale_t __loc) __THROW;
+extern size_t __wcsxfrm_l (wchar_t *__s1, __const wchar_t *__s2,
 			 size_t __n, __locale_t __loc) __THROW;
 
 #endif /* __UCLIBC_HAS_XLOCALE__ */
@@ -329,10 +337,8 @@ extern size_t wcrtomb (char *__restrict __s, wchar_t __wc,
 		       mbstate_t *__restrict __ps) __THROW;
 
 /* Return number of bytes in multibyte character pointed to by S.  */
-#if 0 /* uClibc: disabled */
 extern size_t __mbrlen (__const char *__restrict __s, size_t __n,
 			mbstate_t *__restrict __ps) __THROW;
-#endif
 extern size_t mbrlen (__const char *__restrict __s, size_t __n,
 		      mbstate_t *__restrict __ps) __THROW;
 
@@ -460,13 +466,23 @@ extern unsigned long long int wcstouq (__const wchar_t *__restrict __nptr,
 extern long int wcstol_l (__const wchar_t *__restrict __nptr,
 			  wchar_t **__restrict __endptr, int __base,
 			  __locale_t __loc) __THROW;
+extern long int __wcstol_l (__const wchar_t *__restrict __nptr,
+			  wchar_t **__restrict __endptr, int __base,
+			  __locale_t __loc) __THROW;
 
 extern unsigned long int wcstoul_l (__const wchar_t *__restrict __nptr,
+				    wchar_t **__restrict __endptr,
+				    int __base, __locale_t __loc) __THROW;
+extern unsigned long int __wcstoul_l (__const wchar_t *__restrict __nptr,
 				    wchar_t **__restrict __endptr,
 				    int __base, __locale_t __loc) __THROW;
 
 __extension__
 extern long long int wcstoll_l (__const wchar_t *__restrict __nptr,
+				wchar_t **__restrict __endptr,
+				int __base, __locale_t __loc) __THROW;
+__extension__
+extern long long int __wcstoll_l (__const wchar_t *__restrict __nptr,
 				wchar_t **__restrict __endptr,
 				int __base, __locale_t __loc) __THROW;
 
@@ -475,17 +491,31 @@ extern unsigned long long int wcstoull_l (__const wchar_t *__restrict __nptr,
 					  wchar_t **__restrict __endptr,
 					  int __base, __locale_t __loc)
      __THROW;
+__extension__
+extern unsigned long long int __wcstoull_l (__const wchar_t *__restrict __nptr,
+					  wchar_t **__restrict __endptr,
+					  int __base, __locale_t __loc)
+     __THROW;
 
 #ifdef __UCLIBC_HAS_FLOATS__
 extern double wcstod_l (__const wchar_t *__restrict __nptr,
+			wchar_t **__restrict __endptr, __locale_t __loc)
+     __THROW;
+extern double __wcstod_l (__const wchar_t *__restrict __nptr,
 			wchar_t **__restrict __endptr, __locale_t __loc)
      __THROW;
 
 extern float wcstof_l (__const wchar_t *__restrict __nptr,
 		       wchar_t **__restrict __endptr, __locale_t __loc)
      __THROW;
+extern float __wcstof_l (__const wchar_t *__restrict __nptr,
+		       wchar_t **__restrict __endptr, __locale_t __loc)
+     __THROW;
 
 extern long double wcstold_l (__const wchar_t *__restrict __nptr,
+			      wchar_t **__restrict __endptr,
+			      __locale_t __loc) __THROW;
+extern long double __wcstold_l (__const wchar_t *__restrict __nptr,
 			      wchar_t **__restrict __endptr,
 			      __locale_t __loc) __THROW;
 #endif /* __UCLIBC_HAS_FLOATS__ */
@@ -723,7 +753,8 @@ extern size_t wcsftime (wchar_t *__restrict __s, size_t __maxsize,
 			__const struct tm *__restrict __tp) __THROW;
 __END_NAMESPACE_C99
 
-# if defined __USE_GNU && defined __UCLIBC_HAS_XLOCALE__
+# ifdef __USE_GNU
+#ifdef __UCLIBC_HAS_XLOCALE__
 # include <xlocale.h>
 
 /* Similar to `wcsftime' but takes the information from
@@ -732,6 +763,11 @@ extern size_t wcsftime_l (wchar_t *__restrict __s, size_t __maxsize,
 			  __const wchar_t *__restrict __format,
 			  __const struct tm *__restrict __tp,
 			  __locale_t __loc) __THROW;
+extern size_t __wcsftime_l (wchar_t *__restrict __s, size_t __maxsize,
+			  __const wchar_t *__restrict __format,
+			  __const struct tm *__restrict __tp,
+			  __locale_t __loc) __THROW;
+#endif /* __UCLIBC_HAS_XLOCALE__ */
 # endif
 
 /* The X/Open standard demands that most of the functions defined in
