@@ -237,10 +237,8 @@ static void nfs_end_page_writeback(struct page *page)
 	struct nfs_server *nfss = NFS_SERVER(inode);
 
 	end_page_writeback(page);
-	if (atomic_dec_return(&nfss->writeback) < NFS_CONGESTION_OFF_THRESH) {
+	if (atomic_dec_return(&nfss->writeback) < NFS_CONGESTION_OFF_THRESH)
 		clear_bdi_congested(&nfss->backing_dev_info, WRITE);
-		congestion_end(WRITE);
-	}
 }
 
 /*
@@ -593,34 +591,6 @@ static inline int nfs_scan_commit(struct inode *inode, struct list_head *dst, un
 }
 #endif
 
-static int nfs_wait_on_write_congestion(struct address_space *mapping)
-{
-	struct inode *inode = mapping->host;
-	struct backing_dev_info *bdi = mapping->backing_dev_info;
-	int ret = 0;
-
-	might_sleep();
-
-	if (!bdi_write_congested(bdi))
-		return 0;
-
-	nfs_inc_stats(inode, NFSIOS_CONGESTIONWAIT);
-
-	do {
-		struct rpc_clnt *clnt = NFS_CLIENT(inode);
-		sigset_t oldset;
-
-		rpc_clnt_sigmask(clnt, &oldset);
-		ret = congestion_wait_interruptible(WRITE, HZ/10);
-		rpc_clnt_sigunmask(clnt, &oldset);
-		if (ret == -ERESTARTSYS)
-			break;
-		ret = 0;
-	} while (bdi_write_congested(bdi));
-
-	return ret;
-}
-
 /*
  * Try to update any existing write request, or create one if there is none.
  * In order to match, the request's credentials must match those of
@@ -639,8 +609,6 @@ static struct nfs_page * nfs_update_request(struct nfs_open_context* ctx,
 
 	end = offset + bytes;
 
-	if (nfs_wait_on_write_congestion(mapping))
-		return ERR_PTR(-ERESTARTSYS);
 	for (;;) {
 		/* Loop over all inode entries and see if we find
 		 * A request for the page we wish to update
