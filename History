@@ -479,6 +479,9 @@
 35) Fix TC HTB hanging.<br>
 36) Backport fixes for vfs/ext2/ext3/fuse from upstream (critical fixes and speedup).<br>
 37) Transmission update 2.23 version.<br>
+38) scsi subsystem backport fix errors and optimizations from vanilla kernel.<br>
+39) Fix kernel extension logic.<br>
+40) Add coldplug logic for init mdev event at boot time.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -26,9 +26,15 @@ start() {
 
     echo "/sbin/mdev" > /proc/sys/kernel/hotplug
 
+    #enable drivers autoprobe for all usb devices
     if [ -f /sys/subsystem/usb/drivers_autoprobe ]; then
 	echo 1 > /sys/subsystem/usb/drivers_autoprobe
     fi
+
+    #touch uevent for cold start usb and other hotplug devices allready connected to SOC at boot
+    find /sys -type f -name 'uevent' | while read dev_event; do
+        echo 1 > $dev_event
+    done
 }
 
 
