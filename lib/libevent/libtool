@@ -161,7 +161,7 @@ lock_old_archive_extraction=no
 LTCC="/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS=" -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -Wall -fno-strict-aliasing -pthread"
+LTCFLAGS=" -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.3/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -Wall -fno-strict-aliasing -pthread"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 \\2 \\2/p' | sed '/ __gnu_lto/d'"
@@ -269,7 +269,7 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.2 /opt/Wive-RTNL/toolchain/mipsel-linux-uclibc/lib /opt/Wive-RTNL/toolchain/lib "
+sys_lib_search_path_spec="/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.3 /opt/Wive-RTNL/toolchain/mipsel-linux-uclibc/lib /opt/Wive-RTNL/toolchain/lib "
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /usr/lib/qt3/lib "

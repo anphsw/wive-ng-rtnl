@@ -297,7 +297,7 @@
 #define HAVE_SYS_WAIT_H 1
 
 /* Define if TAILQ_FOREACH is defined in <sys/queue.h> */
-#define HAVE_TAILQFOREACH 1
+/* #undef HAVE_TAILQFOREACH */
 
 /* Define if timeradd is defined in <sys/time.h> */
 #define HAVE_TIMERADD 1
