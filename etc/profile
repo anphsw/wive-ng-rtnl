@@ -5,6 +5,8 @@ export TERM=vt102
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
 export HOME=${HOME:-/}
+export TMPDIR=/tmp/
+export TMP=/tmp/
 export PS1='[`hostname`@`echo $PWD`]# '
 
 #locale settings
@@ -25,7 +27,3 @@ export LC_ALL=
 
 #aliases
 [ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi
-
-#dirs
-export TMPDIR /tmp/
-export TMP /tmp/
