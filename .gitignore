@@ -7,6 +7,7 @@ filesystem
 /lib/.config
 /etc/compile-date
 /etc/scripts/config.sh
+/etc/Wireless/RT2860/RT2860.dat
 /user/wsc_upnp/libupnp-1.4.6/libtool
 /user/wsc_upnp/libupnp-1.4.6/Makefile
 /user/wsc_upnp/libupnp-1.4.6/config.status
