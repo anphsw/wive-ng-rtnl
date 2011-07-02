@@ -42,7 +42,7 @@ start() {
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
-	if [ "$dhcp" != "0" ]; then
+	if [ "$dhcpEnabled" != "0" ]; then
 	    iptables -A servicelimit -i $lan_if -p udp --dport 67 -j ACCEPT
 	fi
 	if [ "$RemoteManagement" != "0" ]; then
@@ -375,7 +375,7 @@ get_param() {
     RemoteSSH=`nvram_get 2860 RemoteSSH`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
-    dhcp=`nvram_get 2860 dhcpEnabled`
+    dhcpEnabled=`nvram_get 2860 dhcpEnabled`
     #ipt_acount info
     ipt_account=`nvram_get 2860 ipt_account`
     if [ "$ipt_account" = "1" ]; then

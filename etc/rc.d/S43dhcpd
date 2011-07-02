@@ -10,9 +10,9 @@ web_wait
 LOG="logger -t dhcpd"
 
 start() {
-	dhcp=`nvram_get 2860 dhcpEnabled`
-	if [ "$dhcp" = "1" ]; then
-	    $LOG "Start dhcpserver "
+	dhcpEnabled=`nvram_get 2860 dhcpEnabled`
+	if [ "$dhcpEnabled" = "1" ]; then
+	    $LOG "Start dhcpserver"
 	    get_param
 
 		> /etc/udhcpd.conf
@@ -63,15 +63,20 @@ start() {
 				config-udhcpd.sh -S $line;
 			done;
 		fi
-
 		config-udhcpd.sh -r
+
+	elif [ "$dhcpEnabled" = "2" ]; then
+		$LOG "Start dhcprelay"
+		dhcprelay $lan_if $wan_if &
 	fi
 }
 
 stop() {
 	$LOG "Stop dhcpserver "
 	killall -q udhcpd
+	killall -q dhcprelay
 	killall -q -9 udhcpd
+	killall -q -9 dhcprelay
 }
 
 get_param() {
