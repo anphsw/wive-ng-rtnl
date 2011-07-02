@@ -395,8 +395,8 @@ struct hso_device {
 	u8 is_active;
 	struct work_struct async_get_intf;
 	struct work_struct async_put_intf;
-#endif
 	struct work_struct reset_device;
+#endif
 
 	struct usb_device *usb;
 	struct usb_interface *interface;
@@ -920,8 +920,10 @@ static void handle_usb_error(int status, const char *function, struct hso_device
 	case -ETIME:
 	case -ETIMEDOUT:
 		explanation = "protocol error";
+#ifdef CONFIG_HSO_AUTOPM
 		if (hso_dev)
 			schedule_work(&hso_dev->reset_device);
+#endif
 		break;
 	default:
 		explanation = "unknown status";
