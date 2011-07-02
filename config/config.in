@@ -145,6 +145,7 @@ bool 'portmap'					CONFIG_USER_PORTMAP
 bool 'pppd'                             	CONFIG_USER_PPPD
 bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
 bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
+bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
 bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD

@@ -61,6 +61,7 @@ dir_$(CONFIG_USER_DROPBEAR)                 += dropbear
 dir_$(CONFIG_USER_TC)                  	    += iproute2
 dir_$(CONFIG_USER_PPPD)                	    += ppp
 dir_$(CONFIG_USER_PPPPOE_RELAY)             += pppoe-relay
+dir_$(CONFIG_USER_PARPROUTED)		    += parprouted
 dir_$(CONFIG_USER_XL2TPD)		    += xl2tpd
 dir_$(CONFIG_USER_IGMP_PROXY)               += igmpproxy
 dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
