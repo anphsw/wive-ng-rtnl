@@ -95,6 +95,7 @@ function initValue()
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
+	var arp_pt = "<% getCfgGeneral(1, "parproutedEnabled"); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
 	var upnpb = "<% getUpnpBuilt(); %>";
@@ -118,6 +119,7 @@ function initValue()
 	form.krnlPppoePass.options.selectedIndex = 1*krnl_pppoe;
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
 	form.pingWANEnbl.options.selectedIndex = (wpf == "1") ? 1 : 0;
+	form.arpPT.options.selectedIndex = (arp_pt == "1") ? 1 : 0;
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
@@ -290,6 +292,15 @@ function natFastpathSelect(form)
 <td class="head">IPv6 pass through</td>
 <td>
 	<select name="krnlIpv6Pass" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">ARP Proxy</td>
+<td>
+	<select name="arpPT" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>

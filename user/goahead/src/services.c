@@ -299,6 +299,7 @@ const service_flag_t service_misc_flags[] =
 	{ T("bridgeFastpath"), "bridgeFastpath", T("1") },
 	{ T("CrondEnable"), "CrondEnable", T("0") },
 	{ T("ForceRenewDHCP"), "ForceRenewDHCP", T("1") },
+	{ T("arpPT"), "parproutedEnabled", T("0") },
 	{ NULL, NULL, NULL } // Terminator
 };
 
