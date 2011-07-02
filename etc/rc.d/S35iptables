@@ -199,21 +199,25 @@ start() {
 		    iptables -t filter -p udp -A macipport_filter -j RETURN
 		fi
 	    fi
-
-	    #enable forward only from local network to wan/ppp
-	    iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
-	    iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
-	    iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
-	    if [ "$opmode" = "4" ]; then
-		iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
-	    fi
-	    if [ "$opmode" = "4" ]; then
-		#for ISP localnet alya dualacess
-		iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
-	    fi
-	    #second lan
-	    if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+	    if [ "$parproutedEnabled" != "1" ]; then
+		#enable forward only from local network to wan/ppp
+		iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
+		iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
+		iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
+		if [ "$opmode" = "4" ]; then
+		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
+		fi
+		if [ "$opmode" = "4" ]; then
+		    #for ISP localnet alya dualacess
+		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
+		fi
+		#second lan
+		if [ "$Lan2Enabled" = "1" ]; then
+    		    iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
+		fi
+	    else
+		#in proxy arp mode need all forward packets to acepted
+		iptables -I FORWARD -j ACCEPT
 	    fi
 	fi
 ###########################################QOS-SIMPLE######################################
@@ -389,6 +393,7 @@ get_param() {
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
     simple_qos=`nvram_get 2860 simple_qos`
+    parproutedEnabled=`nvram_get 2860 parproutedEnabled`
     #macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
