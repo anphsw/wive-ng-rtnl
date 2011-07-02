@@ -37,8 +37,6 @@
 
 #include "utils.h"
 
-const char *ntfs_home = 
-	"Ntfs-3g news, support and information:  http://ntfs-3g.org\n";
 const char *ntfs_gpl = "This program is free software, released under the GNU "
 	"General Public License\nand you are welcome to redistribute it under "
 	"certain conditions.  It comes with\nABSOLUTELY NO WARRANTY; for "

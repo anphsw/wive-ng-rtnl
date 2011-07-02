@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2000-2004 Anton Altaparmakov
  * Copyright (c) 2004-2005 Yura Pakhuchiy
- * Copyright (c) 2006 Szabolcs Szakacsits
+ * Copyright (c) 2006-2007 Szabolcs Szakacsits
  *
  * This program/include file is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -91,6 +91,8 @@ extern int ntfs_attr_lookup(const ATTR_TYPES type, const ntfschar *name,
 		const u32 name_len, const IGNORE_CASE_BOOL ic,
 		const VCN lowest_vcn, const u8 *val, const u32 val_len,
 		ntfs_attr_search_ctx *ctx);
+
+extern int ntfs_attr_position(const ATTR_TYPES type, ntfs_attr_search_ctx *ctx);
 
 extern ATTR_DEF *ntfs_attr_find_in_attrdef(const ntfs_volume *vol,
 		const ATTR_TYPES type);
@@ -185,7 +187,8 @@ struct _ntfs_attr {
 };
 
 /**
- * enum ntfs_attr_state_bits - bits for the state field in the ntfs_attr structure
+ * enum ntfs_attr_state_bits - bits for the state field in the ntfs_attr
+ * structure
  */
 typedef enum {
 	NA_Initialized,		/* 1: structure is initialized. */

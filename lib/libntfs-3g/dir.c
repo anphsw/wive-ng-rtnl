@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2002-2005 Anton Altaparmakov
  * Copyright (c) 2004-2005 Richard Russon
- * Copyright (c) 2004-2006 Szabolcs Szakacsits
- * Copyright (c) 2005-2006 Yura Pakhuchiy
+ * Copyright (c) 2004-2008 Szabolcs Szakacsits
+ * Copyright (c) 2005-2007 Yura Pakhuchiy
  *
  * This program/include file is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -134,7 +134,7 @@ u64 ntfs_inode_lookup_by_name(ntfs_inode *dir_ni, const ntfschar *uname,
 	if (ntfs_attr_lookup(AT_INDEX_ROOT, NTFS_INDEX_I30, 4, CASE_SENSITIVE, 0, NULL,
 			0, ctx)) {
 		ntfs_log_perror("Index root attribute missing in directory inode "
-				"0x%llx", (unsigned long long)dir_ni->mft_no);
+				"%lld", (unsigned long long)dir_ni->mft_no);
 		goto put_err_out;
 	}
 	/* Get to the index root value. */
@@ -143,7 +143,7 @@ u64 ntfs_inode_lookup_by_name(ntfs_inode *dir_ni, const ntfschar *uname,
 	index_block_size = le32_to_cpu(ir->index_block_size);
 	if (index_block_size < NTFS_BLOCK_SIZE ||
 			index_block_size & (index_block_size - 1)) {
-		ntfs_log_debug("Index block size %u is invalid.\n",
+		ntfs_log_error("Index block size %u is invalid.\n",
 				(unsigned)index_block_size);
 		goto put_err_out;
 	}
@@ -160,14 +160,23 @@ u64 ntfs_inode_lookup_by_name(ntfs_inode *dir_ni, const ntfschar *uname,
 		if ((u8*)ie < (u8*)ctx->mrec || (u8*)ie +
 				sizeof(INDEX_ENTRY_HEADER) > index_end ||
 				(u8*)ie + le16_to_cpu(ie->key_length) >
-				index_end)
+				index_end) {
+			ntfs_log_error("Index entry out of bounds in inode %lld"
+				       "\n", (unsigned long long)dir_ni->mft_no);
 			goto put_err_out;
+		}
 		/*
 		 * The last entry cannot contain a name. It can however contain
 		 * a pointer to a child node in the B+tree so we just break out.
 		 */
 		if (ie->ie_flags & INDEX_ENTRY_END)
 			break;
+		
+		if (!le16_to_cpu(ie->length)) {
+			ntfs_log_error("Zero length index entry in inode %lld"
+				       "\n", (unsigned long long)dir_ni->mft_no);
+			goto put_err_out;
+		}
 		/*
 		 * Not a perfect match, need to do full blown collation so we
 		 * know which way in the B+tree we have to go.
@@ -226,8 +235,7 @@ u64 ntfs_inode_lookup_by_name(ntfs_inode *dir_ni, const ntfschar *uname,
 	/* Open the index allocation attribute. */
 	ia_na = ntfs_attr_open(dir_ni, AT_INDEX_ALLOCATION, NTFS_INDEX_I30, 4);
 	if (!ia_na) {
-		ntfs_log_perror("Failed to open index allocation attribute. Directory "
-				"inode 0x%llx is corrupt or driver bug",
+		ntfs_log_perror("Failed to open index allocation (inode %lld)",
 				(unsigned long long)dir_ni->mft_no);
 		goto put_err_out;
 	}
@@ -265,7 +273,7 @@ descend_into_child_node:
 	}
 
 	if (sle64_to_cpu(ia->index_block_vcn) != vcn) {
-		ntfs_log_debug("Actual VCN (0x%llx) of index buffer is different "
+		ntfs_log_error("Actual VCN (0x%llx) of index buffer is different "
 				"from expected VCN (0x%llx).\n",
 				(long long)sle64_to_cpu(ia->index_block_vcn),
 				(long long)vcn);
@@ -273,7 +281,7 @@ descend_into_child_node:
 		goto close_err_out;
 	}
 	if (le32_to_cpu(ia->index.allocated_size) + 0x18 != index_block_size) {
-		ntfs_log_debug("Index buffer (VCN 0x%llx) of directory inode 0x%llx "
+		ntfs_log_error("Index buffer (VCN 0x%llx) of directory inode 0x%llx "
 				"has a size (%u) differing from the directory "
 				"specified size (%u).\n", (long long)vcn,
 				(unsigned long long)dir_ni->mft_no,
@@ -284,7 +292,7 @@ descend_into_child_node:
 	}
 	index_end = (u8*)&ia->index + le32_to_cpu(ia->index.index_length);
 	if (index_end > (u8*)ia + index_block_size) {
-		ntfs_log_debug("Size of index buffer (VCN 0x%llx) of directory inode "
+		ntfs_log_error("Size of index buffer (VCN 0x%llx) of directory inode "
 				"0x%llx exceeds maximum size.\n",
 				(long long)vcn, (unsigned long long)dir_ni->mft_no);
 		errno = EIO;
@@ -305,9 +313,9 @@ descend_into_child_node:
 				sizeof(INDEX_ENTRY_HEADER) > index_end ||
 				(u8*)ie + le16_to_cpu(ie->key_length) >
 				index_end) {
-			ntfs_log_debug("Index entry out of bounds in directory "
-					"inode 0x%llx.\n",
-					(unsigned long long)dir_ni->mft_no);
+			ntfs_log_error("Index entry out of bounds in directory "
+				       "inode %lld.\n", 
+				       (unsigned long long)dir_ni->mft_no);
 			errno = EIO;
 			goto close_err_out;
 		}
@@ -317,6 +325,13 @@ descend_into_child_node:
 		 */
 		if (ie->ie_flags & INDEX_ENTRY_END)
 			break;
+		
+		if (!le16_to_cpu(ie->length)) {
+			errno = EIO;
+			ntfs_log_error("Zero length index entry in inode %lld"
+				       "\n", (unsigned long long)dir_ni->mft_no);
+			goto close_err_out;
+		}
 		/*
 		 * Not a perfect match, need to do full blown collation so we
 		 * know which way in the B+tree we have to go.
@@ -361,8 +376,8 @@ descend_into_child_node:
 	 */
 	if (ie->ie_flags & INDEX_ENTRY_NODE) {
 		if ((ia->index.ih_flags & NODE_MASK) == LEAF_NODE) {
-			ntfs_log_debug("Index entry with child node found in a leaf "
-					"node in directory inode 0x%llx.\n",
+			ntfs_log_error("Index entry with child node found in a leaf "
+					"node in directory inode %lld.\n",
 					(unsigned long long)dir_ni->mft_no);
 			errno = EIO;
 			goto close_err_out;
@@ -371,8 +386,8 @@ descend_into_child_node:
 		vcn = sle64_to_cpup((u8*)ie + le16_to_cpu(ie->length) - 8);
 		if (vcn >= 0)
 			goto descend_into_child_node;
-		ntfs_log_debug("Negative child node vcn in directory inode "
-				"0x%llx.\n", (unsigned long long)dir_ni->mft_no);
+		ntfs_log_error("Negative child node vcn in directory inode "
+			       "0x%llx.\n", (unsigned long long)dir_ni->mft_no);
 		errno = EIO;
 		goto close_err_out;
 	}
@@ -448,7 +463,7 @@ ntfs_inode *ntfs_pathname_to_inode(ntfs_volume *vol, ntfs_inode *parent,
 
 	ascii = strdup(pathname);
 	if (!ascii) {
-		ntfs_log_debug("Out of memory.\n");
+		ntfs_log_error("Out of memory.\n");
 		err = ENOMEM;
 		goto close;
 	}
@@ -467,7 +482,8 @@ ntfs_inode *ntfs_pathname_to_inode(ntfs_volume *vol, ntfs_inode *parent,
 
 		len = ntfs_mbstoucs(p, &unicode);
 		if (len < 0) {
-			ntfs_log_debug("Couldn't convert name to Unicode: %s.\n", p);
+			ntfs_log_perror("Could not convert filename to Unicode:"
+					" '%s'", p);
 			err = errno;
 			goto close;
 		} else if (len > NTFS_MAX_NAME_LEN) {
@@ -625,21 +641,21 @@ static MFT_REF ntfs_mft_get_parent_ref(ntfs_inode *ni)
 	if (!ctx)
 		return ERR_MREF(-1);
 	if (ntfs_attr_lookup(AT_FILE_NAME, AT_UNNAMED, 0, 0, 0, NULL, 0, ctx)) {
-		ntfs_log_debug("No file name found in inode 0x%llx. Corrupt "
-				"inode.\n", (unsigned long long)ni->mft_no);
+		ntfs_log_error("No file name found in inode %lld\n", 
+			       (unsigned long long)ni->mft_no);
 		goto err_out;
 	}
 	if (ctx->attr->non_resident) {
-		ntfs_log_debug("File name attribute must be resident. Corrupt inode "
-				"0x%llx.\n", (unsigned long long)ni->mft_no);
+		ntfs_log_error("File name attribute must be resident (inode "
+			       "%lld)\n", (unsigned long long)ni->mft_no);
 		goto io_err_out;
 	}
 	fn = (FILE_NAME_ATTR*)((u8*)ctx->attr +
 			le16_to_cpu(ctx->attr->value_offset));
 	if ((u8*)fn +	le32_to_cpu(ctx->attr->value_length) >
 			(u8*)ctx->attr + le32_to_cpu(ctx->attr->length)) {
-		ntfs_log_debug("Corrupt file name attribute in inode 0x%llx.\n",
-				(unsigned long long)ni->mft_no);
+		ntfs_log_error("Corrupt file name attribute in inode %lld.\n",
+			       (unsigned long long)ni->mft_no);
 		goto io_err_out;
 	}
 	mref = le64_to_cpu(fn->parent_directory);
@@ -699,7 +715,7 @@ int ntfs_readdir(ntfs_inode *dir_ni, s64 *pos,
 
 	vol = dir_ni->vol;
 
-	ntfs_log_trace("Entering for inode 0x%llx, *pos 0x%llx.\n",
+	ntfs_log_trace("Entering for inode %lld, *pos 0x%llx.\n",
 			(unsigned long long)dir_ni->mft_no, (long long)*pos);
 
 	/* Open the index allocation attribute. */
@@ -707,7 +723,7 @@ int ntfs_readdir(ntfs_inode *dir_ni, s64 *pos,
 	if (!ia_na) {
 		if (errno != ENOENT) {
 			ntfs_log_perror("Failed to open index allocation attribute. "
-				"Directory inode 0x%llx is corrupt or bug",
+				"Directory inode %lld is corrupt or bug",
 				(unsigned long long)dir_ni->mft_no);
 			return -1;
 		}
@@ -757,7 +773,7 @@ int ntfs_readdir(ntfs_inode *dir_ni, s64 *pos,
 	if (ntfs_attr_lookup(AT_INDEX_ROOT, NTFS_INDEX_I30, 4, CASE_SENSITIVE, 0, NULL,
 			0, ctx)) {
 		ntfs_log_perror("Index root attribute missing in directory inode "
-				"0x%llx", (unsigned long long)dir_ni->mft_no);
+				"%lld", (unsigned long long)dir_ni->mft_no);
 		goto dir_err_out;
 	}
 	/* Get to the index root value. */
@@ -798,7 +814,7 @@ int ntfs_readdir(ntfs_inode *dir_ni, s64 *pos,
 	 * or signals an error (both covered by the rc test).
 	 */
 	for (;; ie = (INDEX_ENTRY*)((u8*)ie + le16_to_cpu(ie->length))) {
-		ntfs_log_debug("In index root, offset 0x%x.\n", (u8*)ie - (u8*)ir);
+		ntfs_log_debug("In index root, offset %d.\n", (int)((u8*)ie - (u8*)ir));
 		/* Bounds checks. */
 		if ((u8*)ie < (u8*)ctx->mrec || (u8*)ie +
 				sizeof(INDEX_ENTRY_HEADER) > index_end ||
@@ -808,6 +824,10 @@ int ntfs_readdir(ntfs_inode *dir_ni, s64 *pos,
 		/* The last entry cannot contain a name. */
 		if (ie->ie_flags & INDEX_ENTRY_END)
 			break;
+		
+		if (!le16_to_cpu(ie->length))
+			goto dir_err_out;
+		
 		/* Skip index root entry if continuing previous readdir. */
 		if (ir_pos > (u8*)ie - (u8*)ir)
 			continue;
@@ -920,7 +940,7 @@ find_next_index_buffer:
 		goto dir_err_out;
 	}
 	if (le32_to_cpu(ia->index.allocated_size) + 0x18 != index_block_size) {
-		ntfs_log_error("Index buffer (VCN 0x%llx) of directory inode 0x%llx "
+		ntfs_log_error("Index buffer (VCN 0x%llx) of directory inode %lld "
 				"has a size (%u) differing from the directory "
 				"specified size (%u).\n", (long long)ia_start >>
 				index_vcn_size_bits,
@@ -932,7 +952,7 @@ find_next_index_buffer:
 	index_end = (u8*)&ia->index + le32_to_cpu(ia->index.index_length);
 	if (index_end > (u8*)ia + index_block_size) {
 		ntfs_log_error("Size of index buffer (VCN 0x%llx) of directory inode "
-				"0x%llx exceeds maximum size.\n",
+				"%lld exceeds maximum size.\n",
 				(long long)ia_start >> index_vcn_size_bits,
 				(unsigned long long)dir_ni->mft_no);
 		goto dir_err_out;
@@ -954,12 +974,16 @@ find_next_index_buffer:
 				(u8*)ie + le16_to_cpu(ie->key_length) >
 				index_end) {
 			ntfs_log_error("Index entry out of bounds in directory inode "
-				"0x%llx.\n", (unsigned long long)dir_ni->mft_no);
+				"%lld.\n", (unsigned long long)dir_ni->mft_no);
 			goto dir_err_out;
 		}
 		/* The last entry cannot contain a name. */
 		if (ie->ie_flags & INDEX_ENTRY_END)
 			break;
+		
+		if (!le16_to_cpu(ie->length))
+			goto dir_err_out;
+		
 		/* Skip index entry if continuing previous readdir. */
 		if (ia_pos - ia_start > (u8*)ie - (u8*)ia)
 			continue;
@@ -1418,8 +1442,9 @@ search:
 		/* Ignore hard links from other directories */
 		if (dir_ni->mft_no != MREF_LE(fn->parent_directory)) {
 			ntfs_log_debug("MFT record numbers don't match "
-				       "(%llu != %llu)\n", dir_ni->mft_no, 
-				       MREF_LE(fn->parent_directory));
+				       "(%llu != %llu)\n", 
+				       (long long unsigned)dir_ni->mft_no, 
+				       (long long unsigned)MREF_LE(fn->parent_directory));
 			continue;
 		}
 		     

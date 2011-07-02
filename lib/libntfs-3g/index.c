@@ -82,7 +82,7 @@ static int ntfs_ib_write(ntfs_index_context *icx, INDEX_BLOCK *ib)
 {
 	s64 ret, vcn = sle64_to_cpu(ib->index_block_vcn);
 	
-	ntfs_log_trace("vcn: %lld\n", vcn);
+	ntfs_log_trace("vcn: %lld\n", (long long)vcn);
 	
 	ret = ntfs_attr_mst_pwrite(icx->ia_na, ntfs_ib_vcn_to_pos(icx, vcn),
 				   1, icx->block_size, ib);
@@ -220,7 +220,7 @@ static u8 *ntfs_ie_get_end(INDEX_HEADER *ih)
 
 static int ntfs_ie_end(INDEX_ENTRY *ie)
 {
-	return ie->ie_flags & INDEX_ENTRY_END;
+	return ie->ie_flags & INDEX_ENTRY_END || !ie->length;
 }
 
 /** 
@@ -301,11 +301,13 @@ static int ntfs_ih_numof_entries(INDEX_HEADER *ih)
 {
 	int n;
 	INDEX_ENTRY *ie;
+	u8 *end;
 	
 	ntfs_log_trace("Entering\n");
 	
+	end = ntfs_ie_get_end(ih);
 	ie = ntfs_ie_get_first(ih);
-	for (n = 0; !ntfs_ie_end(ie); n++)
+	for (n = 0; !ntfs_ie_end(ie) && (u8 *)ie < end; n++)
 		ie = ntfs_ie_get_next(ie);
 	return n;
 }
@@ -583,7 +585,7 @@ static int ntfs_ib_read(ntfs_index_context *icx, VCN vcn, INDEX_BLOCK *dst)
 {
 	s64 pos, ret;
 
-	ntfs_log_trace("vcn: %lld\n", vcn);
+	ntfs_log_trace("vcn: %lld\n", (long long)vcn);
 	
 	pos = ntfs_ib_vcn_to_pos(icx, vcn);
 
@@ -744,7 +746,7 @@ descend_into_child_node:
 	}
 	old_vcn = vcn;
 
-	ntfs_log_debug("Descend into node with VCN %lld.\n", vcn);
+	ntfs_log_debug("Descend into node with VCN %lld\n", (long long)vcn);
 	
 	if (ntfs_ib_read(icx, vcn, ib))
 		goto err_out;
@@ -795,7 +797,7 @@ static INDEX_BLOCK *ntfs_ib_alloc(VCN ib_vcn, u32 ib_size,
 	INDEX_BLOCK *ib;
 	int ih_size = sizeof(INDEX_HEADER);
 	
-	ntfs_log_trace("Entering ib_vcn = %lld ib_size = %u\n", ib_vcn, ib_size);
+	ntfs_log_trace("ib_vcn: %lld ib_size: %u\n", (long long)ib_vcn, ib_size);
 	
 	ib = ntfs_calloc(ib_size);
 	if (!ib)
@@ -891,7 +893,7 @@ static int ntfs_ibm_modify(ntfs_index_context *icx, VCN vcn, int set)
 	ntfs_attr *na;
 	int ret = STATUS_ERROR;
 
-	ntfs_log_trace("%s vcn: %lld\n", set ? "set" : "clear", vcn);
+	ntfs_log_trace("%s vcn: %lld\n", set ? "set" : "clear", (long long)vcn);
 	
 	na = ntfs_attr_open(icx->ni, AT_BITMAP,  icx->name, icx->name_len);
 	if (!na) {
@@ -968,7 +970,7 @@ static VCN ntfs_ibm_get_free(ntfs_index_context *icx)
 	
 	vcn = ntfs_ibm_pos_to_vcn(icx, size * 8);
 out:	
-	ntfs_log_trace("allocated vcn: %lld\n", vcn);
+	ntfs_log_trace("allocated vcn: %lld\n", (long long)vcn);
 
 	if (ntfs_ibm_set(icx, vcn))
 		vcn = (VCN)-1;
@@ -1226,16 +1228,16 @@ static int ntfs_ir_make_space(ntfs_index_context *icx, int data_size)
 	int ret;
 
 	ntfs_log_trace("Entering\n");
-	
+
 	ret = ntfs_ir_truncate(icx, data_size);
 	if (ret == STATUS_RESIDENT_ATTRIBUTE_FILLED_MFT) {
-		
+	
 		ret = ntfs_ir_reparent(icx);
 		if (ret == STATUS_OK)
 			ret = STATUS_KEEP_SEARCHING;
 		else
 			ntfs_log_perror("Failed to nodify INDEX_ROOT");
-	} 
+	}
 
 	return ret;
 }
@@ -1419,14 +1421,16 @@ static int ntfs_ib_split(ntfs_index_context *icx, INDEX_BLOCK *ib)
 
 static int ntfs_ie_add(ntfs_index_context *icx, INDEX_ENTRY *ie)
 {
-	char *fn;
 	INDEX_HEADER *ih;
 	int allocated_size, new_size;
 	int ret = STATUS_ERROR;
 	
+#ifdef DEBUG
+	char *fn;
 	fn = ntfs_ie_filename_get(ie);
 	ntfs_log_trace("file: '%s'\n", fn);
 	ntfs_attr_name_free(&fn);
+#endif
 	
 	while (1) {
 				

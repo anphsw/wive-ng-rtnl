@@ -3,7 +3,9 @@
  *
  * Copyright (c) 2005-2007 Yura Pakhuchiy
  * Copyright (c) 2005 Yuval Fledel
- * Copyright (c) 2006-2008 Szabolcs Szakacsits
+ * Copyright (c) 2006-2009 Szabolcs Szakacsits
+ * Copyright (c) 2007-2009 Jean-Pierre Andre
+ * Copyright (c) 2009 Erik Larsson
  *
  * This file is originated from the Linux-NTFS project.
  *
@@ -74,6 +76,14 @@
 #include <sys/xattr.h>
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_MKDEV_H
+#include <sys/mkdev.h>
+#endif
+
+#include "compat.h"
 #include "attrib.h"
 #include "inode.h"
 #include "volume.h"
@@ -81,14 +91,8 @@
 #include "unistr.h"
 #include "layout.h"
 #include "index.h"
-#include "utils.h"
-#include "version.h"
 #include "ntfstime.h"
 #include "misc.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
 
 typedef enum {
 	FSTYPE_NONE,
@@ -125,7 +129,7 @@ typedef struct {
 	BOOL ro;
 	BOOL show_sys_files;
 	BOOL silent;
-	BOOL force;
+	BOOL recover;
 	BOOL hiberfile;
 	BOOL debug;
 	BOOL no_detach;
@@ -145,25 +149,22 @@ static char def_opts[] = "silent,allow_other,nonempty,";
 static ntfs_fuse_context_t *ctx;
 static u32 ntfs_sequence;
 
-static const char *locale_msg =
-"WARNING: Couldn't set locale to '%s' thus some file names may not\n"
-"         be correct or visible. Please see the potential solution at\n"
-"         http://ntfs-3g.org/support.html#locale\n";
-
 static const char *usage_msg = 
 "\n"
 "%s %s %s %d - Third Generation NTFS Driver\n"
 "\n"
-"Copyright (C) 2006-2008 Szabolcs Szakacsits\n"
 "Copyright (C) 2005-2007 Yura Pakhuchiy\n"
+"Copyright (C) 2006-2009 Szabolcs Szakacsits\n"
+"Copyright (C) 2007-2009 Jean-Pierre Andre\n"
+"Copyright (C) 2009 Erik Larsson\n"
 "\n"
-"Usage:    %s <device|image_file> <mount_point> [-o option[,...]]\n"
+"Usage:    %s [-o option[,...]] <device|image_file> <mount_point>\n"
 "\n"
-"Options:  ro (read-only mount), force, remove_hiberfile, locale=,\n" 
-"          uid=, gid=, umask=, fmask=, dmask=, streams_interface=.\n"
-"          Please see the details in the manual.\n"
+"Options:  ro (read-only mount), remove_hiberfile, uid=, gid=,\n" 
+"          umask=, fmask=, dmask=, streams_interface=.\n"
+"          Please see the details in the manual (type: man ntfs-3g).\n"
 "\n"
-"Example:  ntfs-3g /dev/sda1 /mnt/win -o force\n"
+"Example: ntfs-3g /dev/sda1 /mnt/windows\n"
 "\n"
 "%s";
 
@@ -254,7 +255,10 @@ static int ntfs_fuse_statfs(const char *path __attribute__((unused)),
 	if (!vol)
 		return -ENODEV;
 	
-	/* File system block size, used for optimal transfer block size. */
+	/* 
+	 * File system block size. Used to calculate used/free space by df.
+	 * Incorrectly documented as "optimal transfer block size". 
+	 */
 	sfs->f_bsize = vol->cluster_size;
 	
 	/* Fundamental file system block size, used as the unit. */
@@ -338,22 +342,101 @@ static void set_fuse_error(int *err)
 		*err = -errno;
 }
 
+#if defined(__APPLE__) || defined(__DARWIN__)
+static void *ntfs_macfuse_init(struct fuse_conn_info *conn)
+{
+	FUSE_ENABLE_XTIMES(conn);
+	return NULL;
+}
+
+static int ntfs_macfuse_getxtimes(const char *org_path,
+		struct timespec *bkuptime, struct timespec *crtime)
+{
+	int res = 0;
+	ntfs_inode *ni;
+	char *path = NULL;
+	ntfschar *stream_name;
+	int stream_name_len;
+
+	stream_name_len = ntfs_fuse_parse_path(org_path, &path, &stream_name);
+	if (stream_name_len < 0)
+		return stream_name_len;
+	memset(bkuptime, 0, sizeof(struct timespec));
+	memset(crtime, 0, sizeof(struct timespec));
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
+	if (!ni) {
+		res = -errno;
+		goto exit;
+	}
+	
+	/* We have no backup timestamp in NTFS. */
+	crtime->tv_sec = ni->creation_time;
+exit:
+	if (ntfs_inode_close(ni))
+		set_fuse_error(&res);
+	free(path);
+	if (stream_name_len)
+		free(stream_name);
+	return res;
+}
+
+int ntfs_macfuse_setcrtime(const char *path, const struct timespec *tv)
+{
+	ntfs_inode *ni;
+	int res = 0;
+
+	if (ntfs_fuse_is_named_data_stream(path))
+		return -EINVAL; /* n/a for named data streams. */
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
+	if (!ni)
+		return -errno;
+	
+	if (tv) {
+		ni->creation_time = tv->tv_sec;
+		ntfs_fuse_update_times(ni, NTFS_UPDATE_CTIME);
+	}
+
+	if (ntfs_inode_close(ni))
+		set_fuse_error(&res);
+	return res;
+}
+
+int ntfs_macfuse_setbkuptime(const char *path, const struct timespec *tv)
+{
+	ntfs_inode *ni;
+	int res = 0;
+	
+	if (ntfs_fuse_is_named_data_stream(path))
+		return -EINVAL; /* n/a for named data streams. */
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
+	if (!ni)
+		return -errno;
+	
+	/* 
+	 * Doing nothing while pretending to do something. NTFS has no backup
+	 * time. If this function is not implemented then some apps break. 
+	 */
+	
+	if (ntfs_inode_close(ni))
+		set_fuse_error(&res);
+	return res;
+}
+#endif /* defined(__APPLE__) || defined(__DARWIN__) */
+
 static int ntfs_fuse_getattr(const char *org_path, struct stat *stbuf)
 {
 	int res = 0;
 	ntfs_inode *ni;
 	ntfs_attr *na;
-	ntfs_volume *vol;
 	char *path = NULL;
 	ntfschar *stream_name;
 	int stream_name_len;
 
-	vol = ctx->vol;
 	stream_name_len = ntfs_fuse_parse_path(org_path, &path, &stream_name);
 	if (stream_name_len < 0)
 		return stream_name_len;
 	memset(stbuf, 0, sizeof(struct stat));
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni) {
 		res = -errno;
 		goto exit;
@@ -551,11 +634,11 @@ static int ntfs_fuse_filler(ntfs_fuse_fill_context_t *fill_ctx,
 
 	if (name_type == FILE_NAME_DOS)
 		return 0;
-
+	
 	if (ntfs_ucstombs(name, name_len, &filename, 0) < 0) {
-		ntfs_log_perror("Skipping unrepresentable filename (inode %llu)",
+		ntfs_log_perror("Filename decoding failed (inode %llu)",
 				(unsigned long long)MREF(mref));
-		return 0;
+		return -1;
 	}
 	
 	if (ntfs_fuse_is_named_data_stream(filename)) {
@@ -587,15 +670,13 @@ static int ntfs_fuse_readdir(const char *path, void *buf,
 		struct fuse_file_info *fi __attribute__((unused)))
 {
 	ntfs_fuse_fill_context_t fill_ctx;
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	s64 pos = 0;
 	int err = 0;
 
-	vol = ctx->vol;
 	fill_ctx.filler = filler;
 	fill_ctx.buf = buf;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	if (ntfs_readdir(ni, &pos, &fill_ctx,
@@ -610,7 +691,6 @@ static int ntfs_fuse_readdir(const char *path, void *buf,
 static int ntfs_fuse_open(const char *org_path,
 		struct fuse_file_info *fi __attribute__((unused)))
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	ntfs_attr *na;
 	int res = 0;
@@ -621,8 +701,7 @@ static int ntfs_fuse_open(const char *org_path,
 	stream_name_len = ntfs_fuse_parse_path(org_path, &path, &stream_name);
 	if (stream_name_len < 0)
 		return stream_name_len;
-	vol = ctx->vol;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (ni) {
 		na = ntfs_attr_open(ni, AT_DATA, stream_name, stream_name_len);
 		if (na) {
@@ -703,7 +782,6 @@ exit:
 static int ntfs_fuse_write(const char *org_path, const char *buf, size_t size,
 		off_t offset, struct fuse_file_info *fi __attribute__((unused)))
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni = NULL;
 	ntfs_attr *na = NULL;
 	char *path = NULL;
@@ -715,8 +793,7 @@ static int ntfs_fuse_write(const char *org_path, const char *buf, size_t size,
 		res = stream_name_len;
 		goto out;
 	}
-	vol = ctx->vol;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni) {
 		res = -errno;
 		goto exit;
@@ -727,17 +804,18 @@ static int ntfs_fuse_write(const char *org_path, const char *buf, size_t size,
 		goto exit;
 	}
 	while (size) {
-		res = ntfs_attr_pwrite(na, offset, size, buf);
-		if (res < (s64)size)
-			ntfs_log_perror("ntfs_attr_pwrite partial write (%lld: "
-				"%lld <> %d)", (long long)offset, (long long)size, res);
-		if (res <= 0) {
+		s64 ret = ntfs_attr_pwrite(na, offset, size, buf);
+		if (0 <= ret && ret < (s64)size)
+			ntfs_log_perror("ntfs_attr_pwrite partial write to '%s'"
+				" (%lld: %lld <> %lld)", path, (long long)offset,
+				(long long)size, (long long)ret);
+		if (ret <= 0) {
 			res = -errno;
 			goto exit;
 		}
-		size -= res;
-		offset += res;
-		total += res;
+		size   -= ret;
+		offset += ret;
+		total  += ret;
 	}
 	res = total;
 	if (res > 0)
@@ -756,7 +834,6 @@ out:
 
 static int ntfs_fuse_truncate(const char *org_path, off_t size)
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni = NULL;
 	ntfs_attr *na = NULL;
 	int res;
@@ -767,8 +844,7 @@ static int ntfs_fuse_truncate(const char *org_path, off_t size)
 	stream_name_len = ntfs_fuse_parse_path(org_path, &path, &stream_name);
 	if (stream_name_len < 0)
 		return stream_name_len;
-	vol = ctx->vol;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		goto exit;
 
@@ -906,29 +982,7 @@ static int ntfs_fuse_create_stream(const char *path,
 	return res;
 }
 
-static int ntfs_fuse_create_file(const char *org_path, mode_t mode, 
-			struct fuse_file_info *fi __attribute__((unused)))
-{
-	char *path = NULL;
-	ntfschar *stream_name;
-	int stream_name_len;
-	int res;
-
-	stream_name_len = ntfs_fuse_parse_path(org_path, &path, &stream_name);
-	if (stream_name_len < 0)
-		return stream_name_len;
-	if (!stream_name_len)
-		res = ntfs_fuse_create(path, mode & S_IFMT, 0, NULL);
-	else
-		res = ntfs_fuse_create_stream(path, stream_name,
-				stream_name_len);
-	free(path);
-	if (stream_name_len)
-		free(stream_name);
-	return res;
-}
-
-static int ntfs_fuse_mknod(const char *org_path, mode_t mode, dev_t dev)
+static int ntfs_fuse_mknod_common(const char *org_path, mode_t mode, dev_t dev)
 {
 	char *path = NULL;
 	ntfschar *stream_name;
@@ -952,6 +1006,17 @@ exit:
 	if (stream_name_len)
 		free(stream_name);
 	return res;
+}
+
+static int ntfs_fuse_mknod(const char *path, mode_t mode, dev_t dev)
+{
+	return ntfs_fuse_mknod_common(path, mode, dev);
+}
+
+static int ntfs_fuse_create_file(const char *path, mode_t mode,
+			    struct fuse_file_info *fi __attribute__((unused)))
+{
+	return ntfs_fuse_mknod_common(path, mode, 0);
 }
 
 static int ntfs_fuse_symlink(const char *to, const char *from)
@@ -1308,17 +1373,13 @@ static const int nf_ns_xattr_preffix_len = 5;
 static int ntfs_fuse_listxattr(const char *path, char *list, size_t size)
 {
 	ntfs_attr_search_ctx *actx = NULL;
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	char *to = list;
 	int ret = 0;
 
 	if (ctx->streams != NF_STREAMS_INTERFACE_XATTR)
 		return -EOPNOTSUPP;
-	vol = ctx->vol;
-	if (!vol)
-		return -ENODEV;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	actx = ntfs_attr_get_search_ctx(ni, NULL);
@@ -1372,17 +1433,13 @@ static int ntfs_fuse_getxattr_windows(const char *path, const char *name,
 				char *value, size_t size)
 {
 	ntfs_attr_search_ctx *actx = NULL;
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	char *to = value;
 	int ret = 0;
 
 	if (strcmp(name, "ntfs.streams.list"))
 		return -EOPNOTSUPP;
-	vol = ctx->vol;
-	if (!vol)
-		return -ENODEV;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	actx = ntfs_attr_get_search_ctx(ni, NULL);
@@ -1438,7 +1495,6 @@ exit:
 static int ntfs_fuse_getxattr(const char *path, const char *name,
 				char *value, size_t size)
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	ntfs_attr *na = NULL;
 	ntfschar *lename = NULL;
@@ -1451,10 +1507,7 @@ static int ntfs_fuse_getxattr(const char *path, const char *name,
 	if (strncmp(name, nf_ns_xattr_preffix, nf_ns_xattr_preffix_len) ||
 			strlen(name) == (size_t)nf_ns_xattr_preffix_len)
 		return -ENODATA;
-	vol = ctx->vol;
-	if (!vol)
-		return -ENODEV;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	lename_len = ntfs_mbstoucs(name + nf_ns_xattr_preffix_len, &lename);
@@ -1488,7 +1541,6 @@ exit:
 static int ntfs_fuse_setxattr(const char *path, const char *name,
 				const char *value, size_t size, int flags)
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	ntfs_attr *na = NULL;
 	ntfschar *lename = NULL;
@@ -1498,11 +1550,8 @@ static int ntfs_fuse_setxattr(const char *path, const char *name,
 		return -EOPNOTSUPP;
 	if (strncmp(name, nf_ns_xattr_preffix, nf_ns_xattr_preffix_len) ||
 			strlen(name) == (size_t)nf_ns_xattr_preffix_len)
-		return -EACCES;
-	vol = ctx->vol;
-	if (!vol)
-		return -ENODEV;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+		return -EOPNOTSUPP;
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	lename_len = ntfs_mbstoucs(name + nf_ns_xattr_preffix_len, &lename);
@@ -1529,6 +1578,11 @@ static int ntfs_fuse_setxattr(const char *path, const char *name,
 			res = -errno;
 			goto exit;
 		}
+	} else {
+		if (ntfs_attr_truncate(na, (s64)size)) {
+			res = -errno;
+			goto exit;
+		}
 	}
 	res = ntfs_attr_pwrite(na, 0, size, value);
 	if (res != (s64) size)
@@ -1546,7 +1600,6 @@ exit:
 
 static int ntfs_fuse_removexattr(const char *path, const char *name)
 {
-	ntfs_volume *vol;
 	ntfs_inode *ni;
 	ntfschar *lename = NULL;
 	int res = 0, lename_len;
@@ -1557,10 +1610,7 @@ static int ntfs_fuse_removexattr(const char *path, const char *name)
 	if (strncmp(name, nf_ns_xattr_preffix, nf_ns_xattr_preffix_len) ||
 			strlen(name) == (size_t)nf_ns_xattr_preffix_len)
 		return -ENODATA;
-	vol = ctx->vol;
-	if (!vol)
-		return -ENODEV;
-	ni = ntfs_pathname_to_inode(vol, NULL, path);
+	ni = ntfs_pathname_to_inode(ctx->vol, NULL, path);
 	if (!ni)
 		return -errno;
 	lename_len = ntfs_mbstoucs(name + nf_ns_xattr_preffix_len, &lename);
@@ -1634,6 +1684,13 @@ static struct fuse_operations ntfs_3g_ops = {
 	.removexattr	= ntfs_fuse_removexattr,
 	.listxattr	= ntfs_fuse_listxattr,
 #endif /* HAVE_SETXATTR */
+#if defined(__APPLE__) || defined(__DARWIN__)
+	.init		= ntfs_macfuse_init,
+	/* MacFUSE extensions. */
+	.getxtimes	= ntfs_macfuse_getxtimes,
+	.setcrtime	= ntfs_macfuse_setcrtime,
+	.setbkuptime	= ntfs_macfuse_setbkuptime
+#endif /* defined(__APPLE__) || defined(__DARWIN__) */
 };
 
 static int ntfs_fuse_init(void)
@@ -1643,9 +1700,16 @@ static int ntfs_fuse_init(void)
 		return -1;
 	
 	*ctx = (ntfs_fuse_context_t) {
-		.uid = getuid(),
-		.gid = getgid(),
+		.uid     = getuid(),
+		.gid     = getgid(),
+#if defined(linux)			
+		.streams = NF_STREAMS_INTERFACE_XATTR,
+#else			
 		.streams = NF_STREAMS_INTERFACE_NONE,
+#endif			
+		.atime   = ATIME_DISABLED,
+		.silent  = TRUE,
+		.recover = TRUE
 	};
 	return 0;
 }
@@ -1658,8 +1722,8 @@ static int ntfs_open(const char *device)
 		flags |= MS_EXCLUSIVE;
 	if (ctx->ro)
 		flags |= MS_RDONLY;
-	if (ctx->force)
-		flags |= MS_FORCE;
+	if (ctx->recover)
+		flags |= MS_RECOVER;
 	if (ctx->hiberfile)
 		flags |= MS_IGNORE_HIBERFILE;
 
@@ -1759,9 +1823,6 @@ static char *parse_mount_options(const char *orig_opts)
 		return NULL;
 	}
 	
-	ctx->silent = TRUE;
-	ctx->atime  = ATIME_RELATIVE;
-	
 	s = options;
 	while (s && *s && (val = strsep(&s, ","))) {
 		opt = strsep(&val, "=");
@@ -1837,10 +1898,14 @@ static char *parse_mount_options(const char *orig_opts)
 			if (bogus_option_value(val, "silent"))
 				goto err_exit;
 			ctx->silent = TRUE;
-		} else if (!strcmp(opt, "force")) {
-			if (bogus_option_value(val, "force"))
+		} else if (!strcmp(opt, "recover")) {
+			if (bogus_option_value(val, "recover"))
 				goto err_exit;
-			ctx->force = TRUE;
+			ctx->recover = TRUE;
+		} else if (!strcmp(opt, "norecover")) {
+			if (bogus_option_value(val, "norecover"))
+				goto err_exit;
+			ctx->recover = FALSE;
 		} else if (!strcmp(opt, "remove_hiberfile")) {
 			if (bogus_option_value(val, "remove_hiberfile"))
 				goto err_exit;
@@ -1848,8 +1913,7 @@ static char *parse_mount_options(const char *orig_opts)
 		} else if (!strcmp(opt, "locale")) {
 			if (missing_option_value(val, "locale"))
 				goto err_exit;
-			if (!setlocale(LC_ALL, val))
-				ntfs_log_error(locale_msg, val);
+			setlocale(LC_ALL, val);
 		} else if (!strcmp(opt, "streams_interface")) {
 			if (missing_option_value(val, "streams_interface"))
 				goto err_exit;
@@ -1948,11 +2012,12 @@ static int parse_options(int argc, char *argv[])
 {
 	int c;
 
-	static const char *sopt = "-o:hv";
+	static const char *sopt = "-o:hvV";
 	static const struct option lopt[] = {
 		{ "options",	 required_argument,	NULL, 'o' },
 		{ "help",	 no_argument,		NULL, 'h' },
 		{ "verbose",	 no_argument,		NULL, 'v' },
+		{ "version",	 no_argument,		NULL, 'V' },
 		{ NULL,		 0,			NULL,  0  }
 	};
 
@@ -1999,6 +2064,10 @@ static int parse_options(int argc, char *argv[])
 			 * we don't use it because mount(8) passes it.
 			 */
 			break;
+		case 'V':
+			ntfs_log_info("%s %s %s %d\n", EXEC_NAME, VERSION, 
+				      FUSE_TYPE, fuse_version());
+			exit(0);
 		default:
 			ntfs_log_error("%s: Unknown option '%s'.\n", EXEC_NAME,
 				       argv[optind - 1]);
@@ -2026,8 +2095,7 @@ static const char *dev_fuse_msg =
 "      or insmod <path_to>/fuse.o'). Make also sure that the fuse device"
 "      exists. It's usually either /dev/fuse or /dev/misc/fuse.";
 
-static const char *fuse26_kmod_msg ="\n ";
-/*
+static const char *fuse26_kmod_msg =
 "WARNING: Deficient Linux kernel detected. Some driver features are\n"
 "         not available (swap file on NTFS, boot from NTFS by LILO), and\n"
 "         unmount is not safe unless it's made sure the ntfs-3g process\n"
@@ -2037,7 +2105,7 @@ static const char *fuse26_kmod_msg ="\n ";
 "         the kernel problem. The below web page has more information:\n"
 "         http://ntfs-3g.org/support.html#fuse26\n"
 "\n";
-*/
+
 static void mknod_dev_fuse(const char *dev)
 {
 	struct stat st;
@@ -2047,7 +2115,7 @@ static void mknod_dev_fuse(const char *dev)
 		if (mknod(dev, S_IFCHR | 0666, makedev(10, 229))) {
 			ntfs_log_perror("Failed to create '%s'", dev);
 			if (errno == EPERM)
-				ntfs_log_error(dev_fuse_msg);
+				ntfs_log_error("%s", dev_fuse_msg);
 		}
 		umask(mask);
 	}
@@ -2055,18 +2123,18 @@ static void mknod_dev_fuse(const char *dev)
 
 static void create_dev_fuse(void)
 {
-	mknod_dev_fuse("/var/fuse");
+	mknod_dev_fuse("/dev/fuse");
 
 #ifdef __UCLIBC__
 	{
 		struct stat st;
 		/* The fuse device is under /dev/misc using devfs. */
-		if (stat("/var/misc", &st) && (errno == ENOENT)) {
+		if (stat("/dev/misc", &st) && (errno == ENOENT)) {
 			mode_t mask = umask(0); 
-			mkdir("/var/misc", 0775);
+			mkdir("/dev/misc", 0775);
 			umask(mask);
 		}
-		mknod_dev_fuse("/var/misc/fuse");
+		mknod_dev_fuse("/dev/misc/fuse");
 	}
 #endif
 }
@@ -2222,7 +2290,7 @@ static void setup_logging(char *parsed_options)
 			opts.device, (ctx->ro) ? "Read-Only" : "Read-Write",
 			ctx->vol->vol_name, ctx->vol->major_ver,
 			ctx->vol->minor_ver);
-	ntfs_log_info("Cmdline options: %s\n", opts.options);
+	ntfs_log_info("Cmdline options: %s\n", opts.options ? opts.options : "");
 	ntfs_log_info("Mount options: %s\n", parsed_options);
 }
 
@@ -2232,7 +2300,17 @@ int main(int argc, char *argv[])
 	struct fuse *fh;
 	fuse_fstype fstype = FSTYPE_UNKNOWN;
 	struct stat sbuf;
-	int err;
+	int err, fd;
+
+	/*
+	 * Make sure file descriptors 0, 1 and 2 are open, 
+	 * otherwise chaos would ensue.
+	 */
+	do {
+		fd = open("/dev/null", O_RDWR);
+		if (fd > 2)
+			close(fd);
+	} while (fd >= 0 && fd <= 2);
 
 #ifndef FUSE_INTERNAL
 	if ((getuid() != geteuid()) || (getgid() != getegid())) {
@@ -2243,12 +2321,11 @@ int main(int argc, char *argv[])
 	if (drop_privs())
 		return NTFS_VOLUME_NO_PRIVILEGE;
 	
-	utils_set_locale();
+	ntfs_set_locale();
 	ntfs_log_set_handler(ntfs_log_handler_stderr);
 
 	if (parse_options(argc, argv)) {
-		ntfs_log_error("Please type '%s --help' for more "
-			       "information.\n", argv[0]);
+		usage();
 		return NTFS_VOLUME_SYNTAX_ERROR;
 	}
 
@@ -2278,15 +2355,17 @@ int main(int argc, char *argv[])
 	if (drop_privs())
 		goto err_out;
 #endif	
-	
 	if (stat(opts.device, &sbuf)) {
 		ntfs_log_perror("Failed to access '%s'", opts.device);
 		err = NTFS_VOLUME_NO_PRIVILEGE;
 		goto err_out;
 	}
+
+#if !(defined(__sun) && defined (__SVR4))
 	/* Always use fuseblk for block devices unless it's surely missing. */
 	if (S_ISBLK(sbuf.st_mode) && (fstype != FSTYPE_FUSE))
 		ctx->blkdev = TRUE;
+#endif
 
 #ifndef FUSE_INTERNAL
 	if (getuid() && ctx->blkdev) {
@@ -2312,7 +2391,7 @@ int main(int argc, char *argv[])
 
 #if defined(linux) || defined(__uClinux__)
 	if (S_ISBLK(sbuf.st_mode) && (fstype == FSTYPE_FUSE))
-		ntfs_log_info(fuse26_kmod_msg);
+		ntfs_log_info("%s", fuse26_kmod_msg);
 #endif	
 	setup_logging(parsed_options);
 	
@@ -2323,7 +2402,7 @@ int main(int argc, char *argv[])
 	fuse_unmount(opts.mnt_point, ctx->fc);
 	fuse_destroy(fh);
 err_out:
-	utils_mount_error(opts.device, opts.mnt_point, err);
+	ntfs_mount_error(opts.device, opts.mnt_point, err);
 err2:
 	ntfs_close();
 	free(ctx);

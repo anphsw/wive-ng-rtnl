@@ -2,7 +2,7 @@
  * volume.c - NTFS volume handling code. Originated from the Linux-NTFS project.
  *
  * Copyright (c) 2000-2006 Anton Altaparmakov
- * Copyright (c) 2002-2008 Szabolcs Szakacsits
+ * Copyright (c) 2002-2009 Szabolcs Szakacsits
  * Copyright (c) 2004-2005 Richard Russon
  *
  * This program/include file is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@
  * distribution in the file COPYING); if not, write to the Free Software
  * Foundation,Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -49,7 +48,11 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
 
+#include "compat.h"
 #include "volume.h"
 #include "attrib.h"
 #include "mft.h"
@@ -63,9 +66,51 @@
 #include "logging.h"
 #include "misc.h"
 
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
+const char *ntfs_home = 
+"Ntfs-3g news, support and information:  http://ntfs-3g.org\n";
+
+static const char *invalid_ntfs_msg =
+"The device '%s' doesn't seem to have a valid NTFS.\n"
+"Maybe the wrong device is used? Or the whole disk instead of a\n"
+"partition (e.g. /dev/sda, not /dev/sda1)? Or the other way around?\n";
+
+static const char *corrupt_volume_msg =
+"NTFS is either inconsistent, or there is a hardware fault, or it's a\n"
+"SoftRAID/FakeRAID hardware. In the first case run chkdsk /f on Windows\n"
+"then reboot into Windows twice. The usage of the /f parameter is very\n"
+"important! If the device is a SoftRAID/FakeRAID then first activate\n"
+"it and mount a different device under the /dev/mapper/ directory, (e.g.\n"
+"/dev/mapper/nvidia_eahaabcc1). Please see the 'dmraid' documentation\n"
+"for more details.\n";
+
+static const char *hibernated_volume_msg =
+"The NTFS partition is hibernated. Please resume and shutdown Windows\n"
+"properly, or mount the volume read-only with the 'ro' mount option, or\n"
+"mount the volume read-write with the 'remove_hiberfile' mount option.\n"
+"For example type on the command line:\n"
+"\n"
+"            mount -t ntfs-3g -o remove_hiberfile %s %s\n"
+"\n";
+
+static const char *unclean_journal_msg =
+"Write access is denied because the disk wasn't safely powered\n"
+"off and the 'norecover' mount option was specified.\n";
+
+static const char *opened_volume_msg =
+"Mount is denied because the NTFS volume is already exclusively opened.\n"
+"The volume may be already mounted, or another software may use it which\n"
+"could be identified for example by the help of the 'fuser' command.\n";
+
+static const char *fakeraid_msg =
+"Either the device is missing or it's powered down, or you have\n"
+"SoftRAID hardware and must use an activated, different device under\n" 
+"/dev/mapper/, (e.g. /dev/mapper/nvidia_eahaabcc1) to mount NTFS.\n"
+"Please see the 'dmraid' documentation for help.\n";
+
+static const char *access_denied_msg =
+"Please check '%s' and the ntfs-3g binary permissions,\n"
+"and the mounting user ID. More explanation is provided at\n"
+"http://ntfs-3g.org/support.html#unprivileged\n";
 
 /**
  * ntfs_volume_alloc - Create an NTFS volume object and initialise it
@@ -78,7 +123,6 @@ ntfs_volume *ntfs_volume_alloc(void)
 {
 	return ntfs_calloc(sizeof(ntfs_volume));
 }
-
 
 static void ntfs_attr_free(ntfs_attr **na)
 {
@@ -209,24 +253,14 @@ static int ntfs_mft_load(ntfs_volume *vol)
 		ntfs_log_perror("Error reading $MFT");
 		goto error_exit;
 	}
-	if (ntfs_is_baad_record(mb->magic)) {
-		ntfs_log_error("Incomplete multi sector transfer detected in "
-				"$MFT.\n");
-		goto io_error_exit;
-	}
-	if (!ntfs_is_mft_record(mb->magic)) {
-		ntfs_log_error("$MFT has invalid magic.\n");
-		goto io_error_exit;
-	}
+	
+	if (ntfs_mft_record_check(vol, 0, mb))
+		goto error_exit;
+	
 	ctx = ntfs_attr_get_search_ctx(vol->mft_ni, NULL);
 	if (!ctx)
 		goto error_exit;
 
-	if (p2n(ctx->attr) < p2n(mb) ||
-			(char*)ctx->attr > (char*)mb + vol->mft_record_size) {
-		ntfs_log_error("$MFT is corrupt.\n");
-		goto io_error_exit;
-	}
 	/* Find the $ATTRIBUTE_LIST attribute in $MFT if present. */
 	if (ntfs_attr_lookup(AT_ATTRIBUTE_LIST, AT_UNNAMED, 0, 0, 0, NULL, 0,
 			ctx)) {
@@ -490,9 +524,7 @@ ntfs_volume *ntfs_volume_startup(struct ntfs_device *dev, unsigned long flags)
 				"%s\n", strerror(errno));
 	
 	/* We now initialize the cluster allocator. */
-
-	mft_zone_size = min(vol->nr_clusters >> 3,      /* 12.5% */
-			    200 * 1000 * 1024 >> vol->cluster_size_bits);
+	mft_zone_size = vol->nr_clusters >> 3;      /* 12.5% */
 
 	/* Setup the mft zone. */
 	vol->mft_zone_start = vol->mft_zone_pos = vol->mft_lcn;
@@ -532,9 +564,9 @@ ntfs_volume *ntfs_volume_startup(struct ntfs_device *dev, unsigned long flags)
 	 * respective zone.
 	 */
 	vol->data1_zone_pos = vol->mft_zone_end;
-	ntfs_log_debug("data1_zone_pos = 0x%llx\n", vol->data1_zone_pos);
+	ntfs_log_debug("data1_zone_pos = %lld\n", (long long)vol->data1_zone_pos);
 	vol->data2_zone_pos = 0;
-	ntfs_log_debug("data2_zone_pos = 0x%llx\n", vol->data2_zone_pos);
+	ntfs_log_debug("data2_zone_pos = %lld\n", (long long)vol->data2_zone_pos);
 
 	/* Set the mft data allocation position to mft record 24. */
 	vol->mft_data_pos = 24;
@@ -854,13 +886,19 @@ ntfs_volume *ntfs_device_mount(struct ntfs_device *dev, unsigned long flags)
 		ntfs_log_perror("Failed to open inode FILE_Bitmap");
 		goto error_exit;
 	}
-	/* Get an ntfs attribute for $Bitmap/$DATA. */
+	
 	vol->lcnbmp_na = ntfs_attr_open(vol->lcnbmp_ni, AT_DATA, AT_UNNAMED, 0);
 	if (!vol->lcnbmp_na) {
 		ntfs_log_perror("Failed to open ntfs attribute");
 		goto error_exit;
 	}
-	/* Done with the $Bitmap mft record. */
+	
+	if (vol->lcnbmp_na->data_size > vol->lcnbmp_na->allocated_size) {
+		ntfs_log_error("Corrupt cluster map size (%lld > %lld)\n",
+				(long long)vol->lcnbmp_na->data_size, 
+				(long long)vol->lcnbmp_na->allocated_size);
+		goto io_error_exit;
+	}
 
 	/* Now load the upcase table from $UpCase. */
 	ntfs_log_debug("Loading $UpCase...\n");
@@ -1062,9 +1100,10 @@ ntfs_volume *ntfs_device_mount(struct ntfs_device *dev, unsigned long flags)
 		    ntfs_volume_check_hiberfile(vol, 1) < 0)
 			goto error_exit;
 		if (ntfs_volume_check_logfile(vol) < 0) {
-			if (!(flags & MS_FORCE))
+			if (!(flags & MS_RECOVER ))
 				goto error_exit;
-			ntfs_log_info("WARNING: Forced mount, reset $LogFile.\n");
+			ntfs_log_info("The file system wasn't safely "
+				      "closed on Windows. Fixing.\n");
 			if (ntfs_logfile_reset(vol))
 				goto error_exit;
 		}
@@ -1435,10 +1474,9 @@ int ntfs_volume_write_flags(ntfs_volume *vol, const u16 flags)
 	vol->flags = c->flags = flags & VOLUME_FLAGS_MASK;
 	/* Write them to disk. */
 	ntfs_inode_mark_dirty(vol->vol_ni);
-	if (ntfs_inode_sync(vol->vol_ni)) {
-		ntfs_log_perror("Error writing $Volume");
+	if (ntfs_inode_sync(vol->vol_ni))
 		goto err_out;
-	}
+
 	ret = 0; /* success */
 err_out:
 	ntfs_attr_put_search_ctx(ctx);
@@ -1479,5 +1517,47 @@ int ntfs_volume_error(int err)
 			break;
 	}
 	return ret;
+}
+
+
+void ntfs_mount_error(const char *volume, const char *mntpoint, int err)
+{
+	switch (err) {
+		case NTFS_VOLUME_NOT_NTFS:
+			ntfs_log_error(invalid_ntfs_msg, volume);
+			break;
+		case NTFS_VOLUME_CORRUPT:
+			ntfs_log_error("%s", corrupt_volume_msg);
+			break;
+		case NTFS_VOLUME_HIBERNATED:
+			ntfs_log_error(hibernated_volume_msg, volume, mntpoint);
+			break;
+		case NTFS_VOLUME_UNCLEAN_UNMOUNT:
+			ntfs_log_error("%s", unclean_journal_msg);
+			break;
+		case NTFS_VOLUME_LOCKED:
+			ntfs_log_error("%s", opened_volume_msg);
+			break;
+		case NTFS_VOLUME_RAID:
+			ntfs_log_error("%s", fakeraid_msg);
+			break;
+		case NTFS_VOLUME_NO_PRIVILEGE:
+			ntfs_log_error(access_denied_msg, volume);
+			break;
+	}
+}
+
+int ntfs_set_locale(void)
+{
+	const char *locale;
+
+	locale = setlocale(LC_ALL, "");
+	if (!locale) {
+		locale = setlocale(LC_ALL, NULL);
+		ntfs_log_error("Couldn't set local environment, using default "
+			       "'%s'.\n", locale);
+		return 1;
+	}
+	return 0;
 }
 

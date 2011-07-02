@@ -484,6 +484,7 @@
 40) Add coldplug logic for init mdev event at boot time.<br>
 41) Update toolchain to 4.5.3 gcc version and 2.21 binutils version.<br>
 42) Now set gpio default for NEW WR Acorp product by default.<br>
+43) Update libntfs-3 and ntfs-3 fuse driver/utils.<br>
 
 <br><br>
 <b>For support see:</b><br>

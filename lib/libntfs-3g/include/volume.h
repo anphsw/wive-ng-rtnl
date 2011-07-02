@@ -4,7 +4,7 @@
  * Copyright (c) 2000-2004 Anton Altaparmakov
  * Copyright (c) 2004-2005 Richard Russon
  * Copyright (c) 2005-2006 Yura Pakhuchiy
- * Copyright (c) 2005-2008 Szabolcs Szakacsits
+ * Copyright (c) 2005-2009 Szabolcs Szakacsits
  *
  * This program/include file is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -52,8 +52,8 @@
 
 #define MS_EXCLUSIVE 0x08000000
 
-#ifndef MS_FORCE
-#define MS_FORCE     0x10000000
+#ifndef MS_RECOVER
+#define MS_RECOVER   0x10000000
 #endif
 
 #define MS_IGNORE_HIBERFILE   0x20000000
@@ -217,12 +217,9 @@ struct _ntfs_volume {
 	s64 free_clusters; 	/* Track the number of free clusters which
 				   greatly improves statfs() performance */
 	s64 free_mft_records; 	/* Same for free mft records (see above) */
-
-	/* Temp: for directory handling */
-	void *private_data;	/* ntfs_dir for . */
-	void *private_bmp1;	/* ntfs_bmp for $MFT/$BITMAP */
-	void *private_bmp2;	/* ntfs_bmp for $Bitmap */
 };
+
+extern const char *ntfs_home;
 
 extern ntfs_volume *ntfs_volume_alloc(void);
 
@@ -242,6 +239,9 @@ extern int ntfs_logfile_reset(ntfs_volume *vol);
 extern int ntfs_volume_write_flags(ntfs_volume *vol, const u16 flags);
 
 extern int ntfs_volume_error(int err);
+extern void ntfs_mount_error(const char *vol, const char *mntpoint, int err);
+
+extern int ntfs_set_locale(void);
 
 #endif /* defined _NTFS_VOLUME_H */
 
