@@ -485,6 +485,7 @@
 41) Update toolchain to 4.5.3 gcc version and 2.21 binutils version.<br>
 42) Now set gpio default for NEW WR Acorp product by default.<br>
 43) Update libntfs-3 and ntfs-3 fuse driver/utils.<br>
+44) Add parprouted to build tree. Need for transparent LAN/WiFi segment agregation. (parproutedEnabled=0/1 need add in webui).
 
 <br><br>
 <b>For support see:</b><br>

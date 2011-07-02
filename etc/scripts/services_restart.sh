@@ -44,6 +44,7 @@ fi
 # 2) if call not from dhcp script			 #
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    service parprouted restart
     service lld2d restart
     service igmp_proxy restart
     service udpxy restart

@@ -183,6 +183,7 @@ LAN_MAC_ADDR=00:0C:43:30:52:67
 upnpEnabled=0
 radvdEnabled=0
 pppoeREnabled=0
+parproutedEnabled=0
 pppoe_pass=0
 ipv6_pass=0
 natFastpath=3

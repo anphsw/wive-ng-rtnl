@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# if app not exist
+if [ ! -f /bin/parprouted ]; then
+    exit 0
+fi
+
+#wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
+#get params
+. /etc/scripts/global.sh
+
+if [ "$opmode" = "0" ]; then
+    exit 0
+fi
+
+LOG="logger -t parprouted"
+
+start() {
+    parproutedEnabled=`nvram_get 2860 parproutedEnabled`
+    if [ "$parproutedEnabled" = "1" ]; then
+	$LOG "Starting parprouted"
+	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
+	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
+        parprouted $wan_if $lan_if &
+    fi
+}
+
+stop() {
+ $LOG "Stopping parprouted"
+    echo 0 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
+    echo 0 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
+    killall -q parprouted
+    killall -q -9 parprouted
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac
