@@ -341,7 +341,7 @@ static int prom_init_serial_port(void)
   serial_req[0].type       = PORT_16550A;
   serial_req[0].line       = 0;
   serial_req[0].irq        = SURFBOARDINT_UART;
-  serial_req[0].flags      = STD_COM_FLAGS;
+  serial_req[0].flags      = STD_COM_FLAGS | UPF_SKIP_TEST | UPF_FIXED_TYPE;
   serial_req[0].uartclk    = SURFBOARD_DEFAULT_BAUD *16;
   serial_req[0].iotype     = SERIAL_IO_PORT;
   serial_req[0].iobase	   = KSEG1ADDR(RALINK_UART_BASE);

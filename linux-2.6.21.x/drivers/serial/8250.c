@@ -2260,6 +2260,13 @@ static void serial8250_config_port(struct uart_port *port, int flags)
 	if (ret < 0)
 		probeflags &= ~PROBE_RSA;
 
+	if (flags & UPF_FIXED_TYPE) {
+		up->port.type = port->type;
+		up->port.fifosize = uart_config[port->type].fifo_size;
+		up->capabilities = uart_config[port->type].flags;
+		up->tx_loadsz = uart_config[port->type].tx_loadsz;
+	}
+
 	if (flags & UART_CONFIG_TYPE)
 		autoconfig(up, probeflags);
 	if (up->port.type != PORT_UNKNOWN && flags & UART_CONFIG_IRQ)
@@ -2598,6 +2605,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.flags	= p->flags;
 		port.mapbase	= p->mapbase;
 		port.hub6	= p->hub6;
+		port.type	= p->type;
 		port.dev	= &dev->dev;
 		if (share_irqs)
 			port.irqflags |= IRQF_SHARED;
