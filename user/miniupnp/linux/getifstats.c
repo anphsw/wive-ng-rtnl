@@ -85,7 +85,8 @@ getifstats(const char * ifname, struct ifdata * data)
 		r = 0;
 		break;
 	}
-	fclose(f);
+	fclose(f)
+#if 0 /* Disable get speed. In 2.6.21 kernel not supported this. */
 	/* get interface speed */
 	snprintf(fname, sizeof(fname), "/sys/class/net/%s/speed", ifname);
 	f = fopen(fname, "r");
@@ -97,6 +98,7 @@ getifstats(const char * ifname, struct ifdata * data)
 	} else {
 		syslog(LOG_WARNING, "cannot read %s file : %m", fname);
 	}
+#endif
 #ifdef ENABLE_GETIFSTATS_CACHING
 	if(r==0 && current_time!=((time_t)-1)) {
 		/* cache the new data */
