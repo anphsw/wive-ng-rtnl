@@ -28,7 +28,7 @@
 #include <sys/utsname.h>
 #include <grp.h>
 
-#define FUSE_DEV_NEW "/var/fuse"
+#define FUSE_DEV_NEW "/dev/fuse"
 
 #ifndef MS_DIRSYNC
 #define MS_DIRSYNC 128
