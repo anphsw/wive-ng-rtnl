@@ -101,10 +101,6 @@ static struct super_operations squashfs_export_super_ops = {
 	.read_inode = vfs_read_inode
 };
 
-static struct export_operations squashfs_export_ops = {
-	.get_parent = squashfs_get_parent
-};
-
 SQSH_EXTERN const struct address_space_operations squashfs_symlink_aops = {
 	.readpage = squashfs_symlink_readpage
 };
@@ -1289,7 +1285,6 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 		goto failed_mount;
 
 	s->s_op = &squashfs_export_super_ops;
-	s->s_export_op = &squashfs_export_ops;
 
 allocate_root:
 	dpri("alloate_root\n");
