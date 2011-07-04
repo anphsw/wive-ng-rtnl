@@ -93,14 +93,6 @@ static struct super_operations squashfs_super_ops = {
 	.remount_fs = squashfs_remount
 };
 
-static struct super_operations squashfs_export_super_ops = {
-	.alloc_inode = squashfs_alloc_inode,
-	.destroy_inode = squashfs_destroy_inode,
-	.statfs = squashfs_statfs,
-	.put_super = squashfs_put_super,
-	.read_inode = vfs_read_inode
-};
-
 SQSH_EXTERN const struct address_space_operations squashfs_symlink_aops = {
 	.readpage = squashfs_symlink_readpage
 };
@@ -1283,8 +1275,6 @@ static int squashfs_fill_super(struct super_block *s, void *data, int silent)
 	/* Allocate and read inode lookup table */
 	if (read_inode_lookup_table(s) == 0)
 		goto failed_mount;
-
-	s->s_op = &squashfs_export_super_ops;
 
 allocate_root:
 	dpri("alloate_root\n");
