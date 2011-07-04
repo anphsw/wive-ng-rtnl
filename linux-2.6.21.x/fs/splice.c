@@ -376,10 +376,11 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 			 * If in nonblock mode then dont block on waiting
 			 * for an in-flight io page
 			 */
-			if (flags & SPLICE_F_NONBLOCK)
-				break;
-
-			lock_page(page);
+			if (flags & SPLICE_F_NONBLOCK) {
+				if (TestSetPageLocked(page))
+					break;
+			} else
+				lock_page(page);
 
 			/*
 			 * page was truncated, stop here. if this isn't the
@@ -414,37 +415,37 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 
 				break;
 			}
+		}
+fill_it:
+		/*
+		 * i_size must be checked after PageUptodate.
+		 */
+		isize = i_size_read(mapping->host);
+		end_index = (isize - 1) >> PAGE_CACHE_SHIFT;
+		if (unlikely(!isize || index > end_index))
+			break;
+
+		/*
+		 * if this is the last page, see if we need to shrink
+		 * the length and stop
+		 */
+		if (end_index == index) {
+			unsigned int plen;
 
 			/*
-			 * i_size must be checked after ->readpage().
+			 * max good bytes in this page
 			 */
-			isize = i_size_read(mapping->host);
-			end_index = (isize - 1) >> PAGE_CACHE_SHIFT;
-			if (unlikely(!isize || index > end_index))
+			plen = ((isize - 1) & ~PAGE_CACHE_MASK) + 1;
+			if (plen <= loff)
 				break;
 
 			/*
-			 * if this is the last page, see if we need to shrink
-			 * the length and stop
+			 * force quit after adding this page
 			 */
-			if (end_index == index) {
-				unsigned int plen;
-
-				/*
-				 * max good bytes in this page
-				 */
-				plen = ((isize - 1) & ~PAGE_CACHE_MASK) + 1;
-				if (plen <= loff)
-					break;
-
-				/*
-				 * force quit after adding this page
-				 */
-				this_len = min(this_len, plen - loff);
-				len = this_len;
-			}
+			this_len = min(this_len, plen - loff);
+			len = this_len;
 		}
-fill_it:
+
 		partial[page_nr].offset = loff;
 		partial[page_nr].len = this_len;
 		len -= this_len;
@@ -481,10 +482,18 @@ ssize_t generic_file_splice_read(struct file *in, loff_t *ppos,
 {
 	ssize_t spliced;
 	int ret;
+	loff_t isize, left;
+
+	isize = i_size_read(in->f_mapping->host);
+	if (unlikely(*ppos >= isize))
+		return 0;
+
+	left = isize - *ppos;
+	if (unlikely(left < len))
+		len = left;
 
 	ret = 0;
 	spliced = 0;
-
 	while (len) {
 		ret = __generic_file_splice_read(in, ppos, pipe, len, flags);
 
@@ -928,7 +937,6 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 			 struct pipe_inode_info *pipe, size_t len,
 			 unsigned int flags)
 {
-	loff_t isize, left;
 	int ret;
 
 	if (unlikely(!in->f_op || !in->f_op->splice_read))
@@ -940,14 +948,6 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 	ret = rw_verify_area(READ, in, ppos, len);
 	if (unlikely(ret < 0))
 		return ret;
-
-	isize = i_size_read(in->f_mapping->host);
-	if (unlikely(*ppos >= isize))
-		return 0;
-	
-	left = isize - *ppos;
-	if (unlikely(left < len))
-		len = left;
 
 	return in->f_op->splice_read(in, ppos, pipe, len, flags);
 }
