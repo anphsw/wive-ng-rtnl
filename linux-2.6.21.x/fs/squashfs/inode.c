@@ -52,8 +52,6 @@ static DEFINE_PER_CPU(struct sqlzma *, sqlzma);
 			     (un)->un_a[1].sz, (un)->un_a[1].buf, \
 			     (un)->un_a[2].sz, (un)->un_a[2].buf)
 
-static void vfs_read_inode(struct inode *i);
-static struct dentry *squashfs_get_parent(struct dentry *child);
 static int squashfs_read_inode(struct inode *i, squashfs_inode_t inode);
 static int squashfs_statfs(struct dentry *, struct kstatfs *);
 static int squashfs_symlink_readpage(struct file *file, struct page *page);
@@ -635,70 +633,6 @@ static void squashfs_new_inode(struct squashfs_sb_info *msblk, struct inode *i,
 		i->i_gid = msblk->guid[inodeb->guid];
 }
 
-
-static squashfs_inode_t squashfs_inode_lookup(struct super_block *s, int ino)
-{
-	struct squashfs_sb_info *msblk = s->s_fs_info;
-	long long start = msblk->inode_lookup_table[SQUASHFS_LOOKUP_BLOCK(ino - 1)];
-	int offset = SQUASHFS_LOOKUP_BLOCK_OFFSET(ino - 1);
-	squashfs_inode_t inode;
-
-	TRACE("Entered squashfs_inode_lookup, inode_number = %d\n", ino);
-
-	if (msblk->swap) {
-		squashfs_inode_t sinode;
-
-		if (!squashfs_get_cached_block(s, &sinode, start, offset,
-					sizeof(sinode), &start, &offset))
-			goto out;
-		SQUASHFS_SWAP_INODE_T((&inode), &sinode);
-	} else if (!squashfs_get_cached_block(s, &inode, start, offset,
-					sizeof(inode), &start, &offset))
-			goto out;
-
-	TRACE("squashfs_inode_lookup, inode = 0x%llx\n", inode);
-
-	return inode;
-
-out:
-	return SQUASHFS_INVALID_BLK;
-}
-	
-
-static void vfs_read_inode(struct inode *i)
-{
-	struct squashfs_sb_info *msblk = i->i_sb->s_fs_info;
-	squashfs_inode_t inode = squashfs_inode_lookup(i->i_sb, i->i_ino);
-
-	TRACE("Entered vfs_read_inode\n");
-
-	if(inode != SQUASHFS_INVALID_BLK)
-		(msblk->read_inode)(i, inode);
-}
-
-
-static struct dentry *squashfs_get_parent(struct dentry *child)
-{
-	struct inode *i = child->d_inode;
-	struct inode *parent = iget(i->i_sb, SQUASHFS_I(i)->u.s2.parent_inode);
-	struct dentry *rv;
-
-	TRACE("Entered squashfs_get_parent\n");
-
-	if(parent == NULL) {
-		rv = ERR_PTR(-EACCES);
-		goto out;
-	}
-
-	rv = d_alloc_anon(parent);
-	if(rv == NULL)
-		rv = ERR_PTR(-ENOMEM);
-
-out:
-	return rv;
-}
-
-	
 SQSH_EXTERN struct inode *squashfs_iget(struct super_block *s,
 				squashfs_inode_t inode, unsigned int inode_number)
 {
