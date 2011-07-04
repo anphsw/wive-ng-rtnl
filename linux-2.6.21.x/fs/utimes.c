@@ -57,7 +57,7 @@ asmlinkage long sys_utime(char __user * filename, struct utimbuf __user * times)
                 if (IS_IMMUTABLE(inode))
                         goto dput_and_out;
 
-		if (current->fsuid != inode->i_uid &&
+		if (!is_owner_or_cap(inode) &&
 		    (error = vfs_permission(&nd, MAY_WRITE)) != 0)
 			goto dput_and_out;
 	}
@@ -110,7 +110,7 @@ long do_utimes(int dfd, char __user *filename, struct timeval *times)
                 if (IS_IMMUTABLE(inode))
                         goto dput_and_out;
 
-		if (current->fsuid != inode->i_uid &&
+		if (!is_owner_or_cap(inode) &&
 		    (error = vfs_permission(&nd, MAY_WRITE)) != 0)
 			goto dput_and_out;
 	}
