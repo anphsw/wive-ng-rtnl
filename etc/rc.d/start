@@ -17,9 +17,15 @@ if [ "$tmpfs_av" != "0" ]; then
     #mount /tmp /etc in /var
     mkdir -p /var/tmpfs
     mount -o bind /var/tmpfs /tmp
-    #make dir for rwfs
+    #make dir for rwfs and bind it
     mkdir -p /var/rwfs
     mount -o bind /var/rwfs /etc
+    #need mount usbfs and /media for external devies mount
+    if [ -d /proc/bus/usb ]; then
+	mount -t usbfs none /proc/bus/usb
+	mkdir -p /var/media
+	mount -o bind /var/media /media
+    fi
 fi
 
 if [ -f /bin/mdev ]; then
@@ -100,12 +106,6 @@ if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
 else
 #<=16mb
     touch /tmp/is_16ram_dev
-fi
-
-#need mount usbfs and /media for external devies mount
-if [ -d /proc/bus/usb ]; then
-    mount -t usbfs none /proc/bus/usb
-    mount -t tmpfs tmpfs /media
 fi
 
 $LOG "Start init now."

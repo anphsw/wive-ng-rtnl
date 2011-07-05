@@ -17,7 +17,7 @@ start() {
 	    need_start=1
 	fi
 	if [ -f /bin/ftpd ]; then
-	    echo "ftp stream tcp nowait $Login /bin/ftpd ftpd -q" >> /etc/inetd.conf
+	    echo "ftp stream tcp nowait $Login /bin/ftpd ftpd -wS /media" >> /etc/inetd.conf
 	    need_start=1
 	fi
 	if [ -f /bin/telnetd ]; then
