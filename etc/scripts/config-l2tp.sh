@@ -167,6 +167,7 @@ echo "==================START-L2TP-CLIENT======================="
     [lns default]
     tx bps = 100000000
     rx bps = 100000000
+    tunnel rws = 8
     [lac $SERVER]
     redial = yes
     redial timeout = 20
