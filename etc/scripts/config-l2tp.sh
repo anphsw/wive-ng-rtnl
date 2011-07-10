@@ -163,6 +163,7 @@ echo "==================START-L2TP-CLIENT======================="
 
     printf "[global]
     access control = yes
+    tx bps = 100000000
     [lac $SERVER]\n
     redial = yes
     redial timeout = 20
