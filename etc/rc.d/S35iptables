@@ -135,7 +135,6 @@ start() {
 		if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
-    		    iptables -A servicelimit -i ppp+ -p icmp -j DROP
 		fi
 	    fi
 	else
