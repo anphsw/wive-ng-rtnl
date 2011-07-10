@@ -163,8 +163,11 @@ echo "==================START-L2TP-CLIENT======================="
 
     printf "[global]
     access control = yes
+    rand source = dev
+    [lns default]
     tx bps = 100000000
-    [lac $SERVER]\n
+    rx bps = 100000000
+    [lac $SERVER]
     redial = yes
     redial timeout = 20
     $L2TPPAP
