@@ -37,3 +37,5 @@ uninstall:
 
 romfs:
 	$(ROMFSINST) /bin/$(PROG)
+	mkdir $(ROMFSDIR)/share/usb_modeswitch
+	cp -rfv usb_modeswitch.d/* $(ROMFSDIR)/share/usb_modeswitch
