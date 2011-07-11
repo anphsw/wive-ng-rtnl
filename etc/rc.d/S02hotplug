@@ -9,19 +9,20 @@ LOG="echo HOTPLUG"
 
 start() {
     $LOG "Start mdev for support HOTPLUG"
-    printf "
-	# <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
-	# The special characters have the meaning:
-	# @ Run after creating the device.
-	# $ Run before removing the device.
-	# * Run both after creating and before removing the device.\n" > /etc/mdev.conf
-    if [ -d /proc/bus/usb ]; then
-	echo "sd[a-z][1-9] 0:0 0660	*/etc/scripts/automount.sh \$MDEV" >> /etc/mdev.conf
-	#echo "sg[0-9] 0:0 0660		*/etc/scripts/modem-switch.sh $MDEV" >> /etc/mdev.conf
-	#echo "sr[0-9] 0:0 0660		*/etc/scripts/modem-switch.sh $MDEV" >> /etc/mdev.conf
-	#echo "ttyUSB[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
-	#echo "ttyACM[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
-	#echo "lp[0-9] 0:0 0660		*/etc/scripts/p910.sh $MDEV" >> /etc/mdev.conf
+    if [ ! -f /etc/mdev.conf ]; then
+	printf "
+	    # <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
+	    # The special characters have the meaning:
+	    # @ Run after creating the device.
+	    # $ Run before removing the device.
+	    # * Run both after creating and before removing the device.\n" > /etc/mdev.conf
+	if [ -d /proc/bus/usb ]; then
+	    echo "sd[a-z][1-9] 0:0 0660	*/etc/scripts/automount.sh" >> /etc/mdev.conf
+	    echo "1-.*:1.0 0:0 0000 @/etc/scripts/usbctrl.sh" >> /etc/mdev.conf
+	    #echo "ttyUSB[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
+	    #echo "ttyACM[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
+	    #echo "lp[0-9] 0:0 0660		*/etc/scripts/p910.sh $MDEV" >> /etc/mdev.conf
+	fi
     fi
 
     #set mdev as kernel hotplug helper
@@ -29,8 +30,8 @@ start() {
 
     if [ -d /proc/bus/usb ]; then
 	#enable drivers autoprobe for all usb devices
-	if [ -f /sys/subsystem/usb/drivers_autoprobe ]; then
-	    echo 1 > /sys/subsystem/usb/drivers_autoprobe
+	if [ -f /sys/bus/usb/drivers_autoprobe ]; then
+	    echo 1 > /sys/bus/usb/drivers_autoprobe
 	fi
 
 	#touch uevent for cold start usb and other hotplug devices allready connected to SOC at boot
