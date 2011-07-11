@@ -406,7 +406,7 @@ void network_thread ()
     unsigned int refme, refhim;
 
     /* set high priority */
-    if (setpriority(PRIO_PROCESS, 0, -20) < 0);
+    if (setpriority(PRIO_PROCESS, 0, -20) < 0)
 	warn("xl2tpd: can't set priority to high: %m");
 
     /* This one buffer can be recycled for everything except control packets */
