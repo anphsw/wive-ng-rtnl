@@ -6,10 +6,12 @@
  */
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -153,6 +155,8 @@ int callmgr_main(int argc, char **argv, char **envp)
         default: /* Parent. Return status to caller. */
             exit(0);
     }
+    /* set high priority */
+    setpriority(PRIO_PROCESS, 0, -20);
     /* re-open stderr as /dev/null to release it */
     file2fd("/dev/null", "wb", STDERR_FILENO);
     /* Step 1c: Clean up unix socket on TERM */
@@ -328,6 +332,10 @@ int open_inetsock(struct in_addr inetaddr)
 {
     struct sockaddr_in dest, src;
     int s;
+#ifdef USE_TCP_NODELAY
+    int value = 1;
+#endif
+
     dest.sin_family = AF_INET;
     dest.sin_port   = htons(PPTP_PORT);
     dest.sin_addr   = inetaddr;
@@ -344,6 +352,9 @@ int open_inetsock(struct in_addr inetaddr)
             close(s); return -1;
         }
     }
+#ifdef USE_TCP_NODELAY
+    setsockopt( s, SOL_TCP, TCP_NODELAY, &value, sizeof(value) );
+#endif
     if (connect(s, (struct sockaddr *) &dest, sizeof(dest)) < 0) {
         warn("connect: %s", strerror(errno));
         close(s); return -1;
