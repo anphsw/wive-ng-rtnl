@@ -1,23 +1,15 @@
+#include <asm/uaccess.h>
 #include <linux/init.h>
 #include <linux/version.h>
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/kernel.h>   
-#include <asm/uaccess.h>
-
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-#endif
-
 #include <linux/proc_fs.h>
 #include <linux/ralink_gpio.h>
 
 #define RDM_DEVNAME	    "ledctrl"
-#ifdef  CONFIG_DEVFS_FS
-static devfs_handle_t devfs_handle;
-#endif
-int led_ioctrl_major =  23;
 
+int led_ioctrl_major =  23;
 	
 //+++Eric add CLIENT_LED function 
 int clk=1;
@@ -340,15 +332,6 @@ static const struct file_operations led_ioctrl_fops = {
 
 static int led_ioctrl_init(void)
 {
-#ifdef  CONFIG_DEVFS_FS
-	if (devfs_register_chrdev(led_ioctrl_major, RDM_DEVNAME , &led_ioctrl_fops)) {
-		return -EIO;
-	}
-
-	devfs_handle = devfs_register(NULL, RDM_DEVNAME, DEVFS_FL_DEFAULT,
-			led_ioctrl_major, 0, S_IFCHR | S_IRUGO | S_IWUGO, &led_ioctrl_fops,
-			NULL);
-#else
 	int result=0;
 	result = register_chrdev(led_ioctrl_major, RDM_DEVNAME, &led_ioctrl_fops);
 	if (result < 0) {
@@ -358,21 +341,13 @@ static int led_ioctrl_init(void)
 	if (led_ioctrl_major == 0) {
 		led_ioctrl_major = result; /* dynamic */
 	}
-#endif
-
 	return 0;
 }
 
 static void led_ioctrl_exit(void)
 {
 	//printk(KERN_EMERG "gemtek_ledctrl_exit\n");
-#ifdef  CONFIG_DEVFS_FS
-	devfs_unregister_chrdev(led_ioctrl_major, RDM_DEVNAME);
-	devfs_unregister(devfs_handle);
-#else
 	unregister_chrdev(led_ioctrl_major, RDM_DEVNAME);
-#endif
-
 }
 
 module_init(led_ioctrl_init);

@@ -46,11 +46,6 @@
 #include "mtr_policy.h"
 #include "util.h"
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static	devfs_handle_t devfs_handle;
-#endif
-
 int	acl_major =  ACL_MAJOR;
 
 /* Rule Boundary Check */
@@ -188,16 +183,6 @@ struct file_operations acl_fops = {
 
 int AclRegIoctlHandler(void)
 {
-
-#ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(acl_major, ACL_DEVNAME , &acl_fops)) {
-	NAT_PRINT(KERN_WARNING " acl: can't create device node - %s\n",ACL_DEVNAME);
-	return -EIO;
-    }
-
-    devfs_handle = devfs_register(NULL, ACL_DEVNAME, DEVFS_FL_DEFAULT, acl_major, 0, 
-	    S_IFCHR | S_IRUGO | S_IWUGO, &acl_fops, NULL);
-#else
     int result=0;
     result = register_chrdev(acl_major, ACL_DEVNAME, &acl_fops);
     if (result < 0) {
@@ -208,20 +193,12 @@ int AclRegIoctlHandler(void)
     if (acl_major == 0) {
 	acl_major = result; /* dynamic */
     }
-#endif
 
     return 0;
 }
 
 void AclUnRegIoctlHandler(void)
 {
-
-#ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(acl_major, ACL_DEVNAME);
-    devfs_unregister(devfs_handle);
-#else
     unregister_chrdev(acl_major, ACL_DEVNAME);
-#endif
-
 }
 

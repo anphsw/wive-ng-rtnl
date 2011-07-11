@@ -45,11 +45,6 @@
 #include "ac_policy.h"
 #include "util.h"
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static	devfs_handle_t devfs_handle;
-#endif
-
 int	mtr_major =  MTR_MAJOR;
 extern  uint32_t ChipVer;
 extern  uint32_t ChipId;
@@ -203,16 +198,6 @@ ioctl:		     MtrIoctl,
 
 int MtrRegIoctlHandler(void)
 {
-
-#ifdef  CONFIG_DEVFS_FS
-	if(devfs_register_chrdev(mtr_major, MTR_DEVNAME , &mtr_fops)) {
-		NAT_PRINT(KERN_WARNING " mtr: can't create device node - %s\n",MTR_DEVNAME);
-		return -EIO;
-	}
-
-	devfs_handle = devfs_register(NULL, MTR_DEVNAME, DEVFS_FL_DEFAULT, mtr_major, 0, 
-			S_IFCHR | S_IRUGO | S_IWUGO, &mtr_fops, NULL);
-#else
 	int result=0;
 	result = register_chrdev(mtr_major, MTR_DEVNAME, &mtr_fops);
 	if (result < 0) {
@@ -223,18 +208,12 @@ int MtrRegIoctlHandler(void)
 	if (mtr_major == 0) {
 		mtr_major = result; /* dynamic */
 	}
-#endif
 
 	return 0;
 }
 
 void MtrUnRegIoctlHandler(void)
 {
-#ifdef  CONFIG_DEVFS_FS
-	devfs_unregister_chrdev(mtr_major, MTR_DEVNAME);
-	devfs_unregister(devfs_handle);
-#else
 	unregister_chrdev(mtr_major, MTR_DEVNAME);
-#endif
 }
 

@@ -46,11 +46,6 @@
 
 #include <asm/rt2880/surfboardint.h>
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static  devfs_handle_t devfs_handle;
-#endif
-
 #define NAME			"ralink_gpio"
 #define RALINK_GPIO_DEVNAME	"gpio"
 int ralink_gpio_major = 252;
@@ -793,16 +788,6 @@ int __init ralink_gpio_init(void)
 	unsigned int i;
 	u32 gpiomode;
 
-#ifdef  CONFIG_DEVFS_FS
-	if (devfs_register_chrdev(ralink_gpio_major, RALINK_GPIO_DEVNAME,
-				&ralink_gpio_fops)) {
-		printk(KERN_ERR NAME ": unable to register character device\n");
-		return -EIO;
-	}
-	devfs_handle = devfs_register(NULL, RALINK_GPIO_DEVNAME,
-			DEVFS_FL_DEFAULT, ralink_gpio_major, 0,
-			S_IFCHR | S_IRUGO | S_IWUGO, &ralink_gpio_fops, NULL);
-#else
 	int r = 0;
 	r = register_chrdev(ralink_gpio_major, RALINK_GPIO_DEVNAME,
 			&ralink_gpio_fops);
@@ -814,7 +799,6 @@ int __init ralink_gpio_init(void)
 		ralink_gpio_major = r;
 		printk(KERN_DEBUG NAME ": got dynamic major %d\n", r);
 	}
-#endif
 
 	//config these pins to gpio mode
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
@@ -842,13 +826,7 @@ int __init ralink_gpio_init(void)
 
 void __exit ralink_gpio_exit(void)
 {
-#ifdef  CONFIG_DEVFS_FS
-	devfs_unregister_chrdev(ralink_gpio_major, RALINK_GPIO_DEVNAME);
-	devfs_unregister(devfs_handle);
-#else
 	unregister_chrdev(ralink_gpio_major, RALINK_GPIO_DEVNAME);
-#endif
-
 	//config these pins to normal mode
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) &= ~RALINK_GPIOMODE_DFT;
 	//disable gpio interrupt

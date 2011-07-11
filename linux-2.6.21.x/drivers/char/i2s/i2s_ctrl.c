@@ -18,11 +18,6 @@
 #include <linux/ralink_gpio.h>
 #include <linux/ralink_gdma.h>
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static	devfs_handle_t devfs_handle;
-#endif
-
 #include "i2s_ctrl.h"
 #if defined(CONFIG_I2S_WM8750)
 #include "wm8750.h"
@@ -77,16 +72,7 @@ static const struct file_operations i2s_fops = {
 
 int __init i2s_mod_init(void)
 {
-	/* register device with kernel */
-#ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(i2sdrv_major, I2SDRV_DEVNAME , &i2s_fops)) {
-		printk(KERN_WARNING " i2s: can't create device node - %s\n", I2SDRV_DEVNAME);
-		return -EIO;
-    }
-	
-    devfs_handle = devfs_register(NULL, I2SDRV_DEVNAME, DEVFS_FL_DEFAULT, i2sdrv_major, 0, 
-	    S_IFCHR | S_IRUGO | S_IWUGO, &i2s_fops, NULL);
-#else
+    /* register device with kernel */
     int result=0;
     result = register_chrdev(i2sdrv_major, I2SDRV_DEVNAME, &i2s_fops);
     if (result < 0) {
@@ -97,7 +83,6 @@ int __init i2s_mod_init(void)
     if (i2sdrv_major == 0) {
 		i2sdrv_major = result; /* dynamic */
 	}
-#endif
 
 	i2smodule_class=class_create(THIS_MODULE, I2SDRV_DEVNAME);
 	if (IS_ERR(i2smodule_class)) 
@@ -110,17 +95,11 @@ int __init i2s_mod_init(void)
 void i2s_mod_exit(void)
 {
 	
-#ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(i2sdrv_major, I2SDRV_DEVNAME);
-    devfs_unregister(devfs_handle);
-#else
     unregister_chrdev(i2sdrv_major, I2SDRV_DEVNAME);
-#endif
+    device_destroy(i2smodule_class,MKDEV(i2sdrv_major, 0));
+    class_destroy(i2smodule_class); 
 
-	device_destroy(i2smodule_class,MKDEV(i2sdrv_major, 0));
-	class_destroy(i2smodule_class); 
-	
-	return ;
+    return ;
 }
 
 

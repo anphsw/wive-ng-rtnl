@@ -52,13 +52,6 @@
 #include "vtss.h"
 #endif
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-#endif
-
-#ifdef  CONFIG_DEVFS_FS
-static devfs_handle_t devfs_handle;
-#endif
 int spidrv_major =  217;
 int spi_device = 0;
 /*----------------------------------------------------------------------*/
@@ -701,16 +694,6 @@ struct file_operations spidrv_fops = {
 
 static int spidrv_init(void)
 {
-
-#ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(spidrv_major, SPI_DEV_NAME , &spidrv_fops)) {
-	printk(KERN_WARNING " spidrv: can't create device node\n");
-	return -EIO;
-    }
-
-    devfs_handle = devfs_register(NULL, SPI_DEV_NAME, DEVFS_FL_DEFAULT, spidrv_major, 0,
-				S_IFCHR | S_IRUGO | S_IWUGO, &spidrv_fops, NULL);
-#else
     int result=0;
     result = register_chrdev(spidrv_major, SPI_DEV_NAME, &spidrv_fops);
     if (result < 0) {
@@ -721,7 +704,6 @@ static int spidrv_init(void)
     if (spidrv_major == 0) {
 	spidrv_major = result; /* dynamic */
     }
-#endif
     //use normal(SPI) mode instead of GPIO mode
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352)
     RT2880_REG(RALINK_REG_GPIOMODE) &= ~(1 << 1);
@@ -740,13 +722,7 @@ static int spidrv_init(void)
 static void spidrv_exit(void)
 {
     printk("spi_drv exit\n");
-
-#ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(spidrv_major, SPI_DEV_NAME);
-    devfs_unregister(devfs_handle);
-#else
     unregister_chrdev(spidrv_major, SPI_DEV_NAME);
-#endif
 }
 
 

@@ -621,7 +621,6 @@ struct ff_effect {
  */
 
 #include <linux/sched.h>
-#include <linux/devfs_fs_kernel.h>
 
 #define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
 #define BIT(x)	(1UL<<((x)%BITS_PER_LONG))

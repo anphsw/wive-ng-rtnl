@@ -8,7 +8,6 @@
 
 #include <linux/poll.h>
 #include <linux/mm.h>
-#include <linux/devfs_fs_kernel.h>
 
 struct video_device
 {

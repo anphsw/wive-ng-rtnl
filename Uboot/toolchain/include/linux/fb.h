@@ -267,8 +267,6 @@ extern int GET_FB_IDX(kdev_t rdev);
 
 #include <linux/fs.h>
 #include <linux/init.h>
-#include <linux/devfs_fs_kernel.h>
-
 
 struct fb_info;
 struct fb_info_gen;

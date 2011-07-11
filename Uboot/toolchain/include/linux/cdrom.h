@@ -715,7 +715,6 @@ struct request_sense {
 };
 
 #ifdef __KERNEL__
-#include <linux/devfs_fs_kernel.h>
 
 struct cdrom_write_settings {
 	unsigned char fpacket;		/* fixed/variable packets */

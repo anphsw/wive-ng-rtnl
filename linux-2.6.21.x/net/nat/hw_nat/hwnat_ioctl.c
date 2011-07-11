@@ -46,11 +46,6 @@
 #include "util.h"
 #include "ra_nat.h"
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static	devfs_handle_t devfs_handle;
-#endif
-
 int	hw_nat_major =  HW_NAT_MAJOR;
 extern int DebugLevel;
 
@@ -168,16 +163,6 @@ struct file_operations hw_nat_fops = {
 
 int PpeRegIoctlHandler(void)
 {
-
-#ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(hw_nat_major, HW_NAT_DEVNAME , &hw_nat_fops)) {
-	NAT_PRINT(KERN_WARNING " hw_nat: can't create device node - %s\n",HW_NAT_DEVNAME);
-	return -EIO;
-    }
-
-    devfs_handle = devfs_register(NULL, HW_NAT_DEVNAME, DEVFS_FL_DEFAULT, hw_nat_major, 0, 
-	    S_IFCHR | S_IRUGO | S_IWUGO, &hw_nat_fops, NULL);
-#else
     int result=0;
     result = register_chrdev(hw_nat_major, HW_NAT_DEVNAME, &hw_nat_fops);
     if (result < 0) {
@@ -188,8 +173,6 @@ int PpeRegIoctlHandler(void)
     if (hw_nat_major == 0) {
 	hw_nat_major = result; /* dynamic */
     }
-#endif
-
     return 0;
 }
 
@@ -197,11 +180,6 @@ int PpeRegIoctlHandler(void)
 
 void PpeUnRegIoctlHandler(void)
 {
-#ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(hw_nat_major, HW_NAT_DEVNAME);
-    devfs_unregister(devfs_handle);
-#else
     unregister_chrdev(hw_nat_major, HW_NAT_DEVNAME);
-#endif
 }
 

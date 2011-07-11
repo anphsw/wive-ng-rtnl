@@ -491,6 +491,7 @@
 47) Add hack in xl2tp and fix config in l2tp_helper for support new beeline l2tp logic.<br>
 48) Iptables not need drop all icmp in vpn mode (fix ping frome wan in some situations).<br>
 49) Add hotplug logic for flash/hdd/modems support.<br>
+50) Remove dev_fs dead code from ralink drivers and others kernel subsystem/toolchain/boot.<br>
 
 <br><br>
 <b>For support see:</b><br>

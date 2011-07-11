@@ -12,16 +12,9 @@
 #include <linux/wireless.h>
 #include "rdm.h"
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-#endif
-
 #define RDM_WIRELESS_ADDR    RALINK_11N_MAC_BASE // wireless control
 #define RDM_DEVNAME	    "rdm0"
 static int register_control = RDM_WIRELESS_ADDR;
-#ifdef  CONFIG_DEVFS_FS
-static devfs_handle_t devfs_handle;
-#endif
 int rdm_major =  254;
 
 
@@ -111,16 +104,6 @@ int rdm_ioctl (struct inode *inode, struct file *filp,
 static int rdm_init(void)
 
 {
-
-#ifdef  CONFIG_DEVFS_FS
-    if(devfs_register_chrdev(rdm_major, RDM_DEVNAME , &rdm_fops)) {
-	printk(KERN_WARNING " ps: can't create device node - ps\n");
-	return -EIO;
-    }
-
-    devfs_handle = devfs_register(NULL, RDM_DEVNAME, DEVFS_FL_DEFAULT, rdm_major, 0, 
-				S_IFCHR | S_IRUGO | S_IWUGO, &rdm_fops, NULL);
-#else
     int result=0;
     result = register_chrdev(rdm_major, RDM_DEVNAME, &rdm_fops);
     if (result < 0) {
@@ -131,11 +114,8 @@ static int rdm_init(void)
     if (rdm_major == 0) {
 	rdm_major = result; /* dynamic */
     }
-#endif
-
     printk("rdm_major = %d\n", rdm_major);
     return 0;
-
 }
 
 
@@ -143,14 +123,7 @@ static int rdm_init(void)
 static void rdm_exit(void)
 {
     printk("rdm_exit\n");
-
-#ifdef  CONFIG_DEVFS_FS
-    devfs_unregister_chrdev(rdm_major, RDM_DEVNAME);
-    devfs_unregister(devfs_handle);
-#else
     unregister_chrdev(rdm_major, RDM_DEVNAME);
-#endif
-
 }
 
 module_init(rdm_init);
