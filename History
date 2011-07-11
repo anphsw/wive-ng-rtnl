@@ -490,6 +490,7 @@
 46) Backport fixes usb from new ralink sdk.<br>
 47) Add hack in xl2tp and fix config in l2tp_helper for support new beeline l2tp logic.<br>
 48) Iptables not need drop all icmp in vpn mode (fix ping frome wan in some situations).<br>
+49) Add hotplug logic for flash/hdd/modems support.<br>
 
 <br><br>
 <b>For support see:</b><br>
