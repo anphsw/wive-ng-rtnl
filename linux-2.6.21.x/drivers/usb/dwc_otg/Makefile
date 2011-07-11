@@ -2,9 +2,7 @@
 # Makefile for DWC_otg Highspeed USB controller driver
 #
 
-FAST_TRANSACTION=y
-
-ifeq ($(FAST_TRANSACTION),y)
+ifeq ($(CONFIG_DWC_OTG_FAST_TRANSACTION),y)
 EXTRA_CFLAGS   += -DFAST_TRANSACTION
 endif
 

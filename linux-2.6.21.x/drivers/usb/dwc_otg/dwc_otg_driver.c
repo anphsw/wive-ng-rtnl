@@ -79,6 +79,9 @@
 #include "dwc_otg_pcd.h"
 #include "dwc_otg_hcd.h"
 
+#define RSTCTRL_REG		(RALINK_SYSCTL_BASE+0x34)
+#define SoCreg(n)		(*((volatile u32 *)(n)))
+
 #define DWC_DRIVER_VERSION	"2.72a 24-JUN-2008"
 #define DWC_DRIVER_DESC		"HS OTG USB Controller driver"
 
@@ -847,13 +850,25 @@ static struct lm_driver dwc_otg_driver = {
  *
  * @return
  */
+
+
 static int __init dwc_otg_driver_init(void)
 {
 	int retval = 0;
 	struct lm_device *lmdev;
 	int error;
-	
+	unsigned long resetval = *(unsigned long *)(KSEG1ADDR(RSTCTRL_REG));
+	resetval &= ~(1<<22);
+#ifdef CONFIG_RT3352
+	resetval &= ~(1<<25);
+	// Fix problem with reset register inactive (RALINK_UDEV_RST and RALINK_UHST_RST flags shall be used)
+#endif
+	*(unsigned long *)(KSEG1ADDR(RSTCTRL_REG)) = resetval;
+#ifdef CONFIG_DWC_OTG_DEVICE_ONLY	
+	SoCreg(0xb0000014) &= 0xFFFFFBFF;
+#endif	
 	*(unsigned long *)(KSEG1ADDR(RALINK_USB_OTG_BASE+0xE00)) = 0x0; //Enable USB Port
+
 	lmdev = kzalloc(sizeof(struct lm_device), GFP_KERNEL);
 	if (!lmdev)
 	{
@@ -895,8 +910,12 @@ static void __exit dwc_otg_driver_cleanup(void)
 	driver_remove_file(&dwc_otg_driver.drv, &driver_attr_version);
 
 	lm_driver_unregister(&dwc_otg_driver);
+
 	*(unsigned long *)(KSEG1ADDR(RALINK_USB_OTG_BASE+0xE00)) = 0xF; //Disable USB Port
 	printk(KERN_INFO "%s module removed\n", dwc_driver_name);
+#ifdef CONFIG_DWC_OTG_DEVICE_ONLY	
+	SoCreg(0xb0000014) |= 0x400;
+#endif
 }
 module_exit(dwc_otg_driver_cleanup);
 
