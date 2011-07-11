@@ -54,8 +54,8 @@ int init_network (void)
     };
 
     arg=1;
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));                                                                
-    /* continue on error */
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
+    setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
 
     if (bind (server_socket, (struct sockaddr *) &server, sizeof (server)))
     {
