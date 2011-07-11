@@ -106,6 +106,7 @@
 #define DISABLE_GET_FS
 #else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
+#define DISABLE_GET_FS
 #endif
 
 #ifdef CONFIG_PROC_FS
