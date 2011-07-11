@@ -158,7 +158,7 @@ int callmgr_main(int argc, char **argv, char **envp)
 
     /* set high priority */
     if (setpriority(PRIO_PROCESS, 0, -20) < 0);
-	warn("pppd: can't set priority to high: %m");
+	warn("pptp_plugin: can't set priority to high: %m");
 
     /* re-open stderr as /dev/null to release it */
     file2fd("/dev/null", "wb", STDERR_FILENO);

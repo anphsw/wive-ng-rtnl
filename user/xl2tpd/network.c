@@ -25,6 +25,7 @@
 #ifndef LINUX
 # include <sys/uio.h>
 #endif
+#include <sys/resource.h>
 #include "l2tp.h"
 #include "ipsecmast.h"
 #include "misc.h"    /* for IPADDY macro */
@@ -405,8 +406,8 @@ void network_thread ()
     unsigned int refme, refhim;
 
     /* set high priority */
-    if (setpriority (setpriority(PRIO_PROCESS, 0, -20) < 0);
-	warn("pppd: can't set priority to high: %m");
+    if (setpriority(PRIO_PROCESS, 0, -20) < 0);
+	warn("xl2tpd: can't set priority to high: %m");
 
     /* This one buffer can be recycled for everything except control packets */
     buf = new_buf (MAX_RECV_SIZE);
