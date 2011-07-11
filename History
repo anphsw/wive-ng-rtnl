@@ -487,6 +487,9 @@
 43) Update libntfs-3 and ntfs-3 fuse driver/utils.<br>
 44) Add parprouted to build tree. Need for transparent LAN/WiFi segment agregation(parproutedEnabled=0/1).<br>
 45) HSO driver up to 1.14-Option version. (backported from new kernel verion).<br>
+46) Backport fixes usb from new ralink sdk.<br>
+47) Add hack in xl2tp and fix config in l2tp_helper for support new beeline l2tp logic.<br>
+48) Iptables not need drop all icmp in vpn mode (fix ping frome wan in some situations).<br>
 
 <br><br>
 <b>For support see:</b><br>
