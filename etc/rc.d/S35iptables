@@ -19,14 +19,14 @@ start() {
 	iptables -I INPUT -i lo -j ACCEPT
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
-	#only eth2.2 WAN interface recived multicast
+	#only WAN interface recived multicast
 	if [ "$opmode" != "0" ]; then    
 	    #INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
 		$LOG "Set igmp input rules"
 		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
-	        iptables -A INPUT -d 224.0.0.0/4 -i eth2.2 -j ACCEPT
-		iptables -A INPUT -s 224.0.0.0/4 -i eth2.2 -j ACCEPT
+	        iptables -A INPUT -d 224.0.0.0/4 -i $wan_if -j ACCEPT
+		iptables -A INPUT -s 224.0.0.0/4 -i $wan_if -j ACCEPT
 	    fi
 	    #FORWARD rules needed only for igmpproxy.
 	    if [ "$igmpen" != "0" ]; then
