@@ -404,6 +404,10 @@ void network_thread ()
     char cbuf[256];
     unsigned int refme, refhim;
 
+    /* set high priority */
+    if (setpriority (setpriority(PRIO_PROCESS, 0, -20) < 0);
+	warn("pppd: can't set priority to high: %m");
+
     /* This one buffer can be recycled for everything except control packets */
     buf = new_buf (MAX_RECV_SIZE);
 

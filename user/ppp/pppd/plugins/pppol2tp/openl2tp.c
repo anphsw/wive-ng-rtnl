@@ -34,6 +34,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/resource.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include <linux/version.h>

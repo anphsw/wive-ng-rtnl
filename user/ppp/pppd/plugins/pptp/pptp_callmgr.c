@@ -155,8 +155,11 @@ int callmgr_main(int argc, char **argv, char **envp)
         default: /* Parent. Return status to caller. */
             exit(0);
     }
+
     /* set high priority */
-    setpriority(PRIO_PROCESS, 0, -20);
+    if (setpriority(PRIO_PROCESS, 0, -20) < 0);
+	warn("pppd: can't set priority to high: %m");
+
     /* re-open stderr as /dev/null to release it */
     file2fd("/dev/null", "wb", STDERR_FILENO);
     /* Step 1c: Clean up unix socket on TERM */

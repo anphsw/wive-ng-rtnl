@@ -1870,6 +1870,10 @@ run_program(prog, args, must_exist, done, arg, wait)
     /* Force the priority back to zero if pppd is running higher. */
     if (setpriority (PRIO_PROCESS, 0, 0) < 0)
 	warn("can't reset priority to 0: %m");
+#else
+    /* set high priority */
+    if (setpriority(PRIO_PROCESS, 0, -20) < 0);
+	warn("pppd: can't set priority to high: %m");
 #endif
 
     /* run the program */
