@@ -893,7 +893,7 @@ out_chrdev:
 static int
 ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
-	struct ppp *ppp = netdev_priv(dev);
+	struct ppp *ppp = (struct ppp *) dev->priv;
 	int npi, proto;
 	unsigned char *pp;
 
@@ -945,7 +945,7 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 static struct net_device_stats *
 ppp_net_stats(struct net_device *dev)
 {
-	struct ppp *ppp = netdev_priv(dev);
+	struct ppp *ppp = (struct ppp *) dev->priv;
 
 	return &ppp->stats;
 }
@@ -953,7 +953,7 @@ ppp_net_stats(struct net_device *dev)
 static int
 ppp_net_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
-	struct ppp *ppp = netdev_priv(dev);
+	struct ppp *ppp = dev->priv;
 	int err = -EFAULT;
 	void __user *addr = (void __user *) ifr->ifr_ifru.ifru_data;
 	struct ppp_stats stats;

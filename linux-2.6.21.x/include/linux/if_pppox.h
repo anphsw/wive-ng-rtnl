@@ -1,6 +1,6 @@
 /***************************************************************************
  * Linux PPP over X - Generic PPP transport layer sockets
- * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516)
+ * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516) 
  *
  * This file supplies definitions required by the PPP over Ethernet driver
  * (pppox.c).  All version information wrt this file is located in pppox.c
@@ -17,15 +17,13 @@
 #define __LINUX_IF_PPPOX_H
 
 
-#include <asm/types.h>
+#include <linux/types.h>
 #include <asm/byteorder.h>
 
 #ifdef  __KERNEL__
-#include <linux/workqueue.h>
 #include <linux/if_ether.h>
 #include <linux/if.h>
 #include <linux/netdevice.h>
-#include <asm/semaphore.h>
 #include <linux/ppp_channel.h>
 #endif /* __KERNEL__ */
 #include <linux/if_pppol2tp.h>
@@ -41,37 +39,37 @@
 /************************************************************************ 
  * PPPoE addressing definition 
  */ 
-typedef __u16 sid_t; 
-struct pppoe_addr{ 
-       sid_t           sid;                    /* Session identifier */ 
-       unsigned char   remote[ETH_ALEN];       /* Remote address */ 
-       char            dev[IFNAMSIZ];          /* Local device to use */ 
+typedef __be16 sid_t;
+struct pppoe_addr {
+	sid_t         sid;                    /* Session identifier */
+	unsigned char remote[ETH_ALEN];       /* Remote address */
+	char          dev[IFNAMSIZ];          /* Local device to use */
 }; 
-
+ 
 /************************************************************************ 
  * PPTP addressing definition
  */
-struct pptp_addr{
-       __u16           call_id;
-       struct in_addr  sin_addr;
+struct pptp_addr {
+	__be16		call_id;
+	struct in_addr	sin_addr;
 };
- 
-/************************************************************************ 
- * Protocols supported by AF_PPPOX 
- */ 
+
+/************************************************************************
+ * Protocols supported by AF_PPPOX
+ */
 #define PX_PROTO_OE    0 /* Currently just PPPoE */
 #define PX_PROTO_OL2TP 1 /* Now L2TP also */
 #define PX_PROTO_PPTP  2
 #define PX_MAX_PROTO   3
 
 struct sockaddr_pppox {
-       sa_family_t     sa_family;            /* address family, AF_PPPOX */
-       unsigned int    sa_protocol;          /* protocol identifier */
-       union{
-               struct pppoe_addr       pppoe;
-                                struct pptp_addr        pptp;
-       }sa_addr;
-}__attribute__ ((packed));
+	sa_family_t     sa_family;            /* address family, AF_PPPOX */
+	unsigned int    sa_protocol;          /* protocol identifier */
+	union {
+		struct pppoe_addr  pppoe;
+		struct pptp_addr   pptp;
+	} sa_addr;
+} __attribute__((packed));
 
 /* The use of the above union isn't viable because the size of this
  * struct must stay fixed over time -- applications use sizeof(struct
@@ -101,22 +99,22 @@ struct sockaddr_pppol2tp {
 #define PADS_CODE	0x65
 #define PADT_CODE	0xa7
 struct pppoe_tag {
-	__u16 tag_type;
-	__u16 tag_len;
+	__be16 tag_type;
+	__be16 tag_len;
 	char tag_data[0];
-} __packed;
+} __attribute__ ((packed));
 
 /* Tag identifiers */
-#define PTT_EOL		__constant_htons(0x0000)
-#define PTT_SRV_NAME	__constant_htons(0x0101)
-#define PTT_AC_NAME	__constant_htons(0x0102)
-#define PTT_HOST_UNIQ	__constant_htons(0x0103)
-#define PTT_AC_COOKIE	__constant_htons(0x0104)
-#define PTT_VENDOR	__constant_htons(0x0105)
-#define PTT_RELAY_SID	__constant_htons(0x0110)
-#define PTT_SRV_ERR	__constant_htons(0x0201)
-#define PTT_SYS_ERR	__constant_htons(0x0202)
-#define PTT_GEN_ERR	__constant_htons(0x0203)
+#define PTT_EOL		__cpu_to_be16(0x0000)
+#define PTT_SRV_NAME	__cpu_to_be16(0x0101)
+#define PTT_AC_NAME	__cpu_to_be16(0x0102)
+#define PTT_HOST_UNIQ	__cpu_to_be16(0x0103)
+#define PTT_AC_COOKIE	__cpu_to_be16(0x0104)
+#define PTT_VENDOR 	__cpu_to_be16(0x0105)
+#define PTT_RELAY_SID	__cpu_to_be16(0x0110)
+#define PTT_SRV_ERR     __cpu_to_be16(0x0201)
+#define PTT_SYS_ERR  	__cpu_to_be16(0x0202)
+#define PTT_GEN_ERR  	__cpu_to_be16(0x0203)
 
 struct pppoe_hdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
@@ -129,8 +127,8 @@ struct pppoe_hdr {
 #error	"Please fix <asm/byteorder.h>"
 #endif
 	__u8 code;
-	__u16 sid;
-	__u16 length;
+	__be16 sid;
+	__be16 length;
 	struct pppoe_tag tag[0];
 } __attribute__ ((packed));
 
@@ -185,7 +183,7 @@ struct pppox_sock {
 		struct pppoe_opt pppoe;
 		struct pptp_opt pptp;
 	} proto;
-	unsigned short		num;
+	__be16		num;
 };
 #define pppoe_dev	proto.pppoe.dev
 #define pppoe_ifindex	proto.pppoe.ifindex
@@ -211,7 +209,7 @@ struct pppox_proto {
 	struct module	*owner;
 };
 
-extern int register_pppox_proto(int proto_num, struct pppox_proto *pp);
+extern int register_pppox_proto(int proto_num, const struct pppox_proto *pp);
 extern void unregister_pppox_proto(int proto_num);
 extern void pppox_unbind_sock(struct sock *sk);/* delete ppp-channel binding */
 extern int pppox_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
@@ -227,4 +225,5 @@ enum {
 };
 
 #endif /* __KERNEL__ */
+
 #endif /* !(__LINUX_IF_PPPOX_H) */
