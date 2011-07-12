@@ -47,6 +47,7 @@
 #ifdef CONFIG_SLHC
 #include <net/slhc_vj.h>
 #endif
+#include <asm/unaligned.h>
 #include <asm/atomic.h>
 
 #define PPP_VERSION	"2.4.2"
@@ -64,7 +65,6 @@
 
 #define MPHDRLEN	6	/* multilink protocol header length */
 #define MPHDRLEN_SSN	4	/* ditto with short sequence numbers */
-#define MIN_FRAG_SIZE	64
 
 /*
  * An instance of /dev/ppp can be associated with either a ppp
@@ -218,7 +218,7 @@ static int last_channel_index;
 static atomic_t channel_count = ATOMIC_INIT(0);
 
 /* Get the PPP protocol number from a skb */
-#define PPP_PROTO(skb)	(((skb)->data[0] << 8) + (skb)->data[1])
+#define PPP_PROTO(skb) get_unaligned_be16((skb)->data)
 
 /* We limit the length of ppp->file.rq to this (arbitrary) value */
 #define PPP_MAX_RQLEN	32
@@ -444,9 +444,9 @@ static ssize_t ppp_read(struct file *file, char __user *buf,
 	if (skb->len > count)
 		goto outf;
 	ret = -EFAULT;
-        iov.iov_base = buf;
-        iov.iov_len = count;
-        if (skb_copy_datagram_iovec(skb, 0, &iov, skb->len))
+	iov.iov_base = buf;
+	iov.iov_len = count;
+	if (skb_copy_datagram_iovec(skb, 0, &iov, skb->len))
 		goto outf;
 	ret = skb->len;
 
@@ -534,14 +534,9 @@ static int get_filter(void __user *arg, struct sock_filter **p)
 	}
 
 	len = uprog.len * sizeof(struct sock_filter);
-	code = kmalloc(len, GFP_KERNEL);
-	if (code == NULL)
-		return -ENOMEM;
-
-	if (copy_from_user(code, uprog.filter, len)) {
-		kfree(code);
-		return -EFAULT;
-	}
+	code = memdup_user(uprog.filter, len);
+	if (IS_ERR(code))
+		return PTR_ERR(code);
 
 	err = sk_chk_filter(code, uprog.len);
 	if (err) {
