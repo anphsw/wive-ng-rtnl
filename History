@@ -493,6 +493,7 @@
 49) Add hotplug logic for flash/hdd/modems support.<br>
 50) Remove dev_fs dead code from ralink drivers and others kernel subsystem/toolchain/boot.<br>
 51) Increase priority for pppd and xl2tpd for prevent disconnect at high cpu load.<br>
+52) Use clink for replacing identical files by symbolic links.<br>
 
 <br><br>
 <b>For support see:</b><br>
