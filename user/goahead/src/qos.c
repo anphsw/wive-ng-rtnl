@@ -35,23 +35,6 @@ inline void QoSRestart(void)
     doSystem("service iptables restart && service shaper restart && service kext restart");
 }
 
-inline void QoSInit(void)
-{
-	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
-
-	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
-#ifdef CONFIG_USER_3G
-		|| !strncmp(cm, "3G", 3)
-#endif
-	){
-		// Just return.
-		// The PPP daemon would trigger "qos_run" after dial up successfully, so do nothing here.
-		return;
-	}
-
-	QoSRestart();
-}
-
 static void QoSAFAttribute(webs_t wp, char_t *path, char_t *query)
 {
 	char tmp[512];

@@ -2021,9 +2021,6 @@ void initInternet(void)
 	//Dynamic Routing and QoS in STA mode need set after connect to STA
 	dynamicRoutingInit();
 #endif
-#ifdef CONFIG_NET_SCHED
-	QoSInit();
-#endif
 }
 
 static void getMyMAC(webs_t wp, char_t *path, char_t *query)

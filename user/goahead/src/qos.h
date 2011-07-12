@@ -26,8 +26,5 @@ struct entry_s{
 #define QOS_PROFILE_ENTRYS_MAX 16
 
 void formDefineQoS(void);
-inline void QoSInit(void);
-
-
 
 #endif
