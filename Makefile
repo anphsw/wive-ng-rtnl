@@ -286,7 +286,6 @@ romfs.post:
 	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	cp -avf $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	cp -avf $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
-	./clink.py $(ROMFSDIR)
 	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
