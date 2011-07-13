@@ -268,10 +268,7 @@ static struct nf_hook_ops nf_nat_ops[] = {
 		.pf		= PF_INET,
 		.hooknum	= NF_IP_PRE_ROUTING,
 #ifdef CONFIG_NETFILTER_RALINK_SWQOS_SUPPORT
-		.priority	= NF_IP_PRI_NAT_DST_RALINK_QOS,	// Ralink: 
-													// Raise priority to make nat table has higher
-													// priority than mangle table.
-													// In other words, now NAT happenes before QoS marking.
+		.priority	= NF_IP_PRI_NAT_DST_RALINK_QOS,
 #else
 		.priority	= NF_IP_PRI_NAT_DST, 
 #endif

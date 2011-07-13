@@ -19,6 +19,12 @@ endchoice
 config NETFILTER_RALINK_SWQOS_SUPPORT
        bool "Netfilter Ralink SWQoS support"
        help
+	 This Netfilter option must be enabled to support Ralink SW QoS, or the 
+	 classification of IP address may not work properly with HW_NAT or Software Fastpath enabled.
+	 If the Ralink SW QoS is not required, of course, it is t recommended to leave this option blank
+	 to keep the Linux Netfilter architecture unchanged and expected.
+	 Raise priority to make nat table has higher priority than mangle table.
+	 In other words, now NAT happenes before QoS marking.
          To support Ralink SW QoS, please enable it.
          If unsure, say N.
 
