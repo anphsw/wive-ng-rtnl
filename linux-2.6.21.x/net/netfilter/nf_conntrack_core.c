@@ -124,7 +124,7 @@ typedef int (*bcmNatBindHook)(struct nf_conn *ct,
 	struct nf_conntrack_l3proto *l3proto,
 	struct nf_conntrack_l4proto *l4proto);
 
-static bcmNatBindHook bcm_nat_bind_hook = NULL;
+static bcmNatBindHook bcm_nat_bind_hook __read_mostly = NULL;
 int bcm_nat_bind_hook_func(bcmNatBindHook hook_func) {
 	bcm_nat_bind_hook = hook_func;
 	return 1;
@@ -132,7 +132,7 @@ int bcm_nat_bind_hook_func(bcmNatBindHook hook_func) {
 EXPORT_SYMBOL(bcm_nat_bind_hook_func);
 
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
-bcmNatHitHook bcm_nat_hit_hook = NULL;
+bcmNatHitHook bcm_nat_hit_hook __read_mostly = NULL;
 int bcm_nat_hit_hook_func(bcmNatHitHook hook_func) {
 	bcm_nat_hit_hook = hook_func;
 	return 1;
@@ -1217,30 +1217,43 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	help = nfct_help(ct);
-	if (help && help->helper)
+	if (help && help->helper) {
                 is_helper = 1;
+		nat=NULL;
+	} else {
+                is_helper = 0;
+		nat = nfct_nat(ct);
+	}
 #endif
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	nat = nfct_nat(ct);
-	if (ipv4_conntrack_fastnat && bcm_nat_bind_hook && nat && pf == PF_INET) {
-		if (!(nat->info.nat_type & NF_FAST_NAT_DENY) 
-		    && !is_helper
-		    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_IS_REPLY)
+        if (ipv4_conntrack_fastnat && bcm_nat_bind_hook && pf == PF_INET) {
+		/* if need helper or nat type unknown/fast deny need skip packets */
+        	if (is_helper || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
+		    goto skip;
+
+		/* To do this code section may be used for skip some types traffic 
+		    ....
+		    ....
+		*/
+
+		/* Try send selected pakets to bcm_nat */
+		if ((ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_IS_REPLY)
 		    && (hooknum == NF_IP_PRE_ROUTING) && 
 		    (protonum == IPPROTO_TCP || protonum == IPPROTO_UDP)) {
 
 		    struct nf_conntrack_tuple *t1, *t2;
-		    t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
+    		    t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
 		    t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
 		    if (!(t1->dst.u3.ip == t2->src.u3.ip &&
 			t1->src.u3.ip == t2->dst.u3.ip &&
 			t1->dst.u.all == t2->src.u.all &&
 			t1->src.u.all == t2->dst.u.all)) {
 			ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
-		    }
 		}
+	    }
 	}
+skip:
 #endif
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
@@ -1253,7 +1266,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if (ipv4_conntrack_fastnat && pf == PF_INET && hooknum == NF_IP_LOCAL_OUT)
+		if (ipv4_conntrack_fastnat && pf == PF_INET && nat && hooknum == NF_IP_LOCAL_OUT)
 			nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
 		nf_conntrack_event_cache(IPCT_STATUS, *pskb);

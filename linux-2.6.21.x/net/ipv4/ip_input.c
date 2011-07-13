@@ -150,6 +150,10 @@
 #include "../nat/hw_nat/ra_nat.h"
 #endif
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+extern int ipv4_conntrack_fastnat;
+#endif
+
 /*
  *	SNMP management statistics
  */
@@ -431,6 +435,9 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 		goto drop;
 	}
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	if (!ipv4_conntrack_fastnat)
+#endif
 	/* Remove any debris in the socket control block */
 	memset(IPCB(skb), 0, sizeof(struct inet_skb_parm));
 
