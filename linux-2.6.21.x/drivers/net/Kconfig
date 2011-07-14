@@ -2842,6 +2842,12 @@ config PPP
 	  here and read <file:Documentation/networking/net-modules.txt>.
 	  The module will be called ppp_generic.
 
+config PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
+	bool "PPP prevent drop session"
+	depends on PPP
+	help
+	 If cpu load > max allowed ppp must drop packets.
+
 config PPP_MULTILINK
 	bool "PPP multilink support"
 	depends on PPP

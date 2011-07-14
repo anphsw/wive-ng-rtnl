@@ -1084,6 +1084,7 @@ unsigned long weighted_cpuload(const int cpu)
 {
 	return cpu_rq(cpu)->raw_weighted_load;
 }
+EXPORT_SYMBOL(weighted_cpuload);
 
 #ifdef CONFIG_SMP
 struct migration_req {

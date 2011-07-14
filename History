@@ -495,6 +495,7 @@
 51) Increase priority for pppd and xl2tpd for prevent disconnect at high cpu load.<br>
 52) Workaround to work IMQ and correct Mark with HW_NAT or Software Fastpath enable by default.<br>
 53) Some fastnat optimization. Save ~3% CPU at L2TP connection and more correct conntrack work.<br>
+54) PPP prevent drop session at high cpu load. If cpu load > max allowed ppp must drop packets.<br>
 
 <br><br>
 <b>For support see:</b><br>
