@@ -1101,7 +1101,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	unsigned long load;
 
 	load = weighted_cpuload(0);
-	if (load > 3600) {
+	if (proto != PPP_LCP && load > 3600) {
 	    if ((ppp->debug & 1) && net_ratelimit())
 		printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
 
