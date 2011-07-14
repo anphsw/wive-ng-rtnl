@@ -57,7 +57,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     fi
 
     #Route to VPN server over WAN select
-    if [ "$vpnType" != 0 ]; then
+    if [ "$vpnType" != "0" ]; then
 	$LOG "Modify route table need for buggy nas"
 	#Remove auto route in VPN
 	ip route del $PPP_REMOTE  > /dev/null 2>&1

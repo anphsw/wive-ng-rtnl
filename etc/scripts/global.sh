@@ -34,7 +34,7 @@ getWanIfName()
 {
     if [ "$opmode" = "0" ]; then
 	wan_if="br0"
-    elif [ "$opmode" = "1" ] || [ "$opmode" = 4 ]; then
+    elif [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_if="eth2.2"
     elif [ "$opmode" = "2" ]; then
 	wan_if="ra0"
