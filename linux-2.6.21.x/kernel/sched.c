@@ -734,35 +734,6 @@ enqueue_task_head(struct task_struct *p, struct prio_array *array)
 }
 
 /*
- * __normal_prio - return the priority that is based on the static
- * priority but is modified by bonuses/penalties.
- *
- * We scale the actual sleep average [0 .... MAX_SLEEP_AVG]
- * into the -5 ... 0 ... +5 bonus/penalty range.
- *
- * We use 25% of the full 0...39 priority range so that:
- *
- * 1) nice +19 interactive tasks do not preempt nice 0 CPU hogs.
- * 2) nice -20 CPU hogs do not get preempted by nice 0 tasks.
- *
- * Both properties are important to certain workloads.
- */
-
-static inline int __normal_prio(struct task_struct *p)
-{
-	int bonus, prio;
-
-	bonus = CURRENT_BONUS(p) - MAX_BONUS / 2;
-
-	prio = p->static_prio - bonus;
-	if (prio < MAX_RT_PRIO)
-		prio = MAX_RT_PRIO;
-	if (prio > MAX_PRIO-1)
-		prio = MAX_PRIO-1;
-	return prio;
-}
-
-/*
  * To aid in avoiding the subversion of "niceness" due to uneven distribution
  * of tasks with abnormal "nice" values across CPUs the contribution that
  * each task makes to its run queue's load is weighted according to its
@@ -824,6 +795,35 @@ static inline void dec_nr_running(struct task_struct *p, struct rq *rq)
 {
 	rq->nr_running--;
 	dec_raw_weighted_load(rq, p);
+}
+
+/*
+ * __normal_prio - return the priority that is based on the static
+ * priority but is modified by bonuses/penalties.
+ *
+ * We scale the actual sleep average [0 .... MAX_SLEEP_AVG]
+ * into the -5 ... 0 ... +5 bonus/penalty range.
+ *
+ * We use 25% of the full 0...39 priority range so that:
+ *
+ * 1) nice +19 interactive tasks do not preempt nice 0 CPU hogs.
+ * 2) nice -20 CPU hogs do not get preempted by nice 0 tasks.
+ *
+ * Both properties are important to certain workloads.
+ */
+
+static inline int __normal_prio(struct task_struct *p)
+{
+	int bonus, prio;
+
+	bonus = CURRENT_BONUS(p) - MAX_BONUS / 2;
+
+	prio = p->static_prio - bonus;
+	if (prio < MAX_RT_PRIO)
+		prio = MAX_RT_PRIO;
+	if (prio > MAX_PRIO-1)
+		prio = MAX_PRIO-1;
+	return prio;
 }
 
 /*
