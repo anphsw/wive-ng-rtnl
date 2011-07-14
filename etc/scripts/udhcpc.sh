@@ -64,7 +64,7 @@ case "$1" in
 	    $LOG "Reinit switch"
 	    # Reset switch
 	    resetLanWan
-	    if [ "$opmode" = "1" ] || [ "$opmode" = 4 ]; then
+	    if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 		# In gate mode configure vlans
 		setLanWan
 	    fi
