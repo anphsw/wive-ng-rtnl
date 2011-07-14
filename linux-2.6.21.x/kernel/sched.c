@@ -205,6 +205,18 @@ struct prio_array {
 	struct list_head queue[MAX_PRIO];
 };
 
+static inline int rt_policy(int policy)
+{
+	if (unlikely(policy == SCHED_FIFO) || unlikely(policy == SCHED_RR))
+		return 1;
+	return 0;
+}
+
+static inline int task_has_rt_policy(struct task_struct *p)
+{
+	return rt_policy(p->policy);
+}
+
 /*
  * This is the main, per-CPU runqueue data structure.
  *
@@ -774,7 +786,7 @@ static inline int __normal_prio(struct task_struct *p)
 
 static void set_load_weight(struct task_struct *p)
 {
-	if (has_rt_policy(p)) {
+	if (task_has_rt_policy(p)) {
 #ifdef CONFIG_SMP
 		if (p == task_rq(p)->migration_thread)
 			/*
@@ -825,7 +837,7 @@ static inline int normal_prio(struct task_struct *p)
 {
 	int prio;
 
-	if (has_rt_policy(p))
+	if (task_has_rt_policy(p))
 		prio = MAX_RT_PRIO-1 - p->rt_priority;
 	else
 		prio = __normal_prio(p);
@@ -3897,7 +3909,7 @@ void set_user_nice(struct task_struct *p, long nice)
 	 * it wont have any effect on scheduling until the task is
 	 * not SCHED_NORMAL/SCHED_BATCH:
 	 */
-	if (has_rt_policy(p)) {
+	if (task_has_rt_policy(p)) {
 		p->static_prio = NICE_TO_PRIO(nice);
 		goto out_unlock;
 	}
@@ -4086,14 +4098,14 @@ recheck:
 	    (p->mm && param->sched_priority > MAX_USER_RT_PRIO-1) ||
 	    (!p->mm && param->sched_priority > MAX_RT_PRIO-1))
 		return -EINVAL;
-	if (is_rt_policy(policy) != (param->sched_priority != 0))
+	if (rt_policy(policy) != (param->sched_priority != 0))
 		return -EINVAL;
 
 	/*
 	 * Allow unprivileged RT tasks to decrease priority:
 	 */
 	if (!capable(CAP_SYS_NICE)) {
-		if (is_rt_policy(policy)) {
+		if (rt_policy(policy)) {
 			unsigned long rlim_rtprio;
 			unsigned long flags;
 
