@@ -565,7 +565,7 @@ Process_upnphttp(struct upnphttp * h)
 		}
 		else if(n==0)
 		{
-			syslog(LOG_WARNING, "HTTP Connection closed inexpectedly");
+			syslog(LOG_DEBUG, "HTTP Connection closed inexpectedly");
 			h->state = 100;
 		}
 		else
@@ -595,7 +595,7 @@ Process_upnphttp(struct upnphttp * h)
 		}
 		else if(n==0)
 		{
-			syslog(LOG_WARNING, "HTTP Connection closed inexpectedly");
+			syslog(LOG_DEBUG, "HTTP Connection closed inexpectedly");
 			h->state = 100;
 		}
 		else
