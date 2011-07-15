@@ -16,7 +16,7 @@ LOG="logger -t lld2d"
 
 start() {
     get_param
-    if [ "$lltd" = "1" ]; then
+    if [ "$lltdEnabled" = "1" ]; then
 	$LOG "Starting LLD2D"
 	lld2d $lan_if
     fi
@@ -30,7 +30,7 @@ stop() {
 }
 
 get_param() {
-    lltd=`nvram_get 2860 lltdEnabled`
+    lltdEnabled=`nvram_get 2860 lltdEnabled`
 }
 
 case "$1" in

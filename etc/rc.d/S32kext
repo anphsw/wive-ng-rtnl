@@ -21,8 +21,8 @@ start() {
 	    sysctl -w net.ipv4.bridge_fastpath=0
 	fi
 	#----Bridge STP----------------------------------------------
-        stp=`nvram_get 2860 stpEnabled`
-        if [ "$stp" = "1" ]; then
+        stpEnabled=`nvram_get 2860 stpEnabled`
+        if [ "$stpEnabled" = "1" ]; then
                 brctl setfd br0 15
                 brctl stp br0 1
         else

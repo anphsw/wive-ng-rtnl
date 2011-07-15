@@ -48,15 +48,15 @@ get_txqlen
     ip link set $lan_if down
     #-------------------LAN1----------------
     $LOG "Add LAN1 iface"
-    if [ "$lan_ip" != "" ]; then
-	if [ "$lan_nm" = "" ]; then
-	    lan_nm="255.0.0.0"
+    if [ "$lan_ipaddr" != "" ]; then
+	if [ "$lan_netmask" = "" ]; then
+	    lan_netmask="255.0.0.0"
 	fi
-	ifconfig "$lan_if" "$lan_ip" netmask "$lan_nm" up
+	ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
     else
 	ifconfig "$lan_if" 0.0.0.0 up	
     fi
-    $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ip"
+    $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ipaddr"
 
      #-------------------LAN2----------------
     if [ "$Lan2Enabled" = "1" ]; then
@@ -79,8 +79,8 @@ $LOG "Stop network interfaces..."
 }
 
 get_param() {
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    lan_nm=`nvram_get 2860 lan_netmask`
+    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    lan_netmask=`nvram_get 2860 lan_netmask`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`

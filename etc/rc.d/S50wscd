@@ -16,10 +16,10 @@ LOG="logger -t wscd"
 
 start() {
     get_param
-    if [ "$wsc" = "1" ]; then
+    if [ "$WscModeOption" = "1" ]; then
       $LOG "Starting WPS"
 	if [ "$opmode" = "0" ]; then
-	    wscd -m 1 -a $lan_ip -i ra0 -D &
+	    wscd -m 1 -a $lan_ipaddr -i ra0 -D &
 	else
 	    wscd -m 1 -i ra0 -D &
 	fi
@@ -33,8 +33,8 @@ stop() {
 }
 
 get_param() {
-    wsc=`nvram_get 2860 WscModeOption`
-    lan_ip=`nvram_get 2860 lan_ipaddr`
+    WscModeOption=`nvram_get 2860 WscModeOption`
+    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
 }
 
 case "$1" in

@@ -15,8 +15,8 @@ web_wait
 LOG="logger -t udpxy"
 
 start() {
-     UDPXY=`nvram_get 2860 UDPXYMode`
-    if [ "$UDPXY" != "0" ] && [ "$UDPXY" != "" ]; then
+    UDPXYMode=`nvram_get 2860 UDPXYMode`
+    if [ "$UDPXYMode" != "0" ] && [ "$UDPXYMode" != "" ]; then
         $LOG "UDPXY start"
 	udpxy -m $wan_if -n-20 -c1 -H10 -R-1 -B64k -p81 -l /var/log/udpxy.log
     fi

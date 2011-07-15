@@ -22,12 +22,12 @@ start() {
  if [ "$opmode" = "2" ]; then
     lan_if="eth2"
  fi
-    radvd=`nvram_get 2860 radvdEnabled`
+    radvdEnabled=`nvram_get 2860 radvdEnabled`
     ip -6 addr flush dev sit0
     ip -6 route flush dev sit0
     ip -6 link set sit0 down
     echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
-    if [ "$radvd" = "1" ]; then
+    if [ "$radvdEnabled" = "1" ]; then
       $LOG "Starting radvd"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
 	$LOG "Up sit0 interface"

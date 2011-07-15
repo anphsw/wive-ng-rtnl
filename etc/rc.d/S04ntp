@@ -3,12 +3,12 @@
 LOG="logger -t ntp"
 
 start() {
-    tz=`nvram_get 2860 TZ`
-    if [ "$tz" = "" ]; then
+    TZ=`nvram_get 2860 TZ`
+    if [ "$TZ" = "" ]; then
         tz="MSK-3MSD-4"
     fi
 
-    echo "$tz" > /etc/tmpTZ
+    echo "$TZ" > /etc/tmpTZ
     sed -e 's#.*_\(-*\)0*\(.*\)#GMT-\1\2#' /etc/tmpTZ > /etc/tmpTZ2
     sed -e 's#\(.*\)--\(.*\)#\1\2#' /etc/tmpTZ2 > /etc/TZ
     rm -rf /etc/tmpTZ
@@ -33,10 +33,10 @@ start() {
     web_wait
 
     NTPEnabled=`nvram_get 2860 NTPEnabled`
-    srv=`nvram_get 2860 NTPServerIP`
-    if [ "$NTPEnabled" = "on" ] && [ "$srv" != "" ]; then
+    NTPServerIP=`nvram_get 2860 NTPServerIP`
+    if [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
 	$LOG "Starting NTPD"
-	ntpd -d -p "$srv" &
+	ntpd -d -p "$NTPServerIP" &
     fi
 }
 

@@ -20,7 +20,7 @@ start() {
     #if igmpproxy enable and mode not full bridge
     get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
-    if [ "$igmpen" = "1" ] && [ "$opmode" != "0" ]; then
+    if [ "$igmpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
@@ -55,7 +55,7 @@ stop() {
 }
 
 get_param() {
-    igmpen=`nvram_get 2860 igmpEnabled`
+    igmpEnabled=`nvram_get 2860 igmpEnabled`
     wan_port=`nvram_get 2860 wan_port`
 }
 

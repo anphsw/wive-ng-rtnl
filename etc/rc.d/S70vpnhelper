@@ -14,11 +14,11 @@ start() {
       get_param
 
       #wait connetc to ap in sta mode
-      #if VPN=PPPOE and IFACE=LAN no need wait
+      #if VPN=PPPOE and vpnInterface=LAN no need wait
       if [ "$vpnType" != "0" ]; then
         wait_connect
       else
-	if [ "$IFACE" != "LAN" ]; then
+	if [ "$vpnInterface" != "LAN" ]; then
     	    wait_connect
 	fi
       fi
@@ -28,8 +28,8 @@ start() {
       echo > $ppp/chap-secrets
       echo > $ppp/pap-secrets
       echo > $ppp/connect-errors
-      echo "$USER * $PASSWORD *" > $ppp/chap-secrets
-      echo "$USER * $PASSWORD *" > $ppp/pap-secrets
+      echo "$vpnUser * $vpnPassword *" > $ppp/chap-secrets
+      echo "$vpnUser * $vpnPassword *" > $ppp/pap-secrets
 
       #call to vpn
       if [ "$vpnType" = "0" ]; then
@@ -88,9 +88,9 @@ stop() {
 }
 
 get_param() {
-    IFACE=`nvram_get 2860 vpnInterface`
-    USER=`nvram_get 2860 vpnUser`
-    PASSWORD=`nvram_get 2860 vpnPassword`
+    vpnInterface=`nvram_get 2860 vpnInterface`
+    vpnUser=`nvram_get 2860 vpnUser`
+    vpnPassword=`nvram_get 2860 vpnPassword`
     lanauthpid=`pidof lanauth`
     ppp=/etc/ppp
     if [ "$opmode" = "2" ]; then

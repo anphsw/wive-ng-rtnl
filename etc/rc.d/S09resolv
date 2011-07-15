@@ -13,15 +13,15 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
     rm -f $fname
     touch $fname
     # if nameservers is null add 127.0.0.1
-    if [ "$pd" != "" ] || [ "$sd" != "" ]; then
-	$LOG "Generate resolv DNS1: $pd DNS2: $sd"
-	if [ "$pd" != "" ]; then
-	    echo "nameserver $pd" >> $fname
+    if [ "$wan_primary_dns" != "" ] || [ "$wan_secondary_dns" != "" ]; then
+	$LOG "Generate resolv DNS1: $wan_primary_dns DNS2: $wan_secondary_dns"
+	if [ "$wan_primary_dns" != "" ]; then
+	    echo "nameserver $wan_primary_dns" >> $fname
 	fi
-	if [ "$sd" != "" ]; then
-	    echo "nameserver $sd" >> $fname
+	if [ "$wan_secondary_dns" != "" ]; then
+	    echo "nameserver $wan_secondary_dns" >> $fname
 	fi
-    elif  [ "$pd" = "" ] && [ "$sd" = "" ] && [ "$dnsPEnabled" = "1" ]; then
+    elif  [ "$wan_primary_dns" = "" ] && [ "$wan_secondary_dns" = "" ] && [ "$dnsPEnabled" = "1" ]; then
 	$LOG "Generate resolv at local."
 	echo "nameserver 127.0.0.1" > $fname
     else
@@ -43,8 +43,8 @@ stop() {
 
 get_param() {
     wan_static_dns=`nvram_get 2860 wan_static_dns`
-    pd=`nvram_get 2860 wan_primary_dns`
-    sd=`nvram_get 2860 wan_secondary_dns`
+    wan_primary_dns=`nvram_get 2860 wan_primary_dns`
+    wan_secondary_dns=`nvram_get 2860 wan_secondary_dns`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     fname="/etc/resolv.conf"
     fbak="/etc/resolv_conf.bak"

@@ -13,16 +13,16 @@ stop() {
 
 get_param() {
     IS_WIVE=`nvram_get 2860 IS_WIVE`
-    admID=`nvram_get 2860 Login`
-    admPW=`nvram_get 2860 Password`
+    Login=`nvram_get 2860 Login`
+    Password=`nvram_get 2860 Password`
     opmode=`nvram_get 2860 OperationMode`
     WorkGroup=`nvram_get 2860  WorkGroup`
     SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
     SmbString=`nvram_get 2860  SmbString`
+    HostName=`nvram_get 2860 HostName`
     MAC_TEST=`nvram_get 2860 WAN_MAC_ADDR | grep 00:0B:2B -c`
     WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
     LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`
-    HOSTNAME_NVRAM=`nvram_get 2860 HostName`
     CHECKMAC=`nvram_get 2860 CHECKMAC`
 }
 
@@ -55,16 +55,16 @@ check_nvram()
 	  $LOG "Reset OK... boot..."
 	fi
     #user and password need set
-    if [ "$admID" = "" ] || [ "$admPW" = "" ]; then
+    if [ "$Login" = "" ] || [ "$Password" = "" ]; then
         nvram_set 2860 Login "Admin"
         nvram_set 2860 Password "Admin"
     fi
     #need hostname
-    if [ "$HOSTNAME_NVRAM" = "" ]; then
-	HOSTNAME_NVRAM="Wive-RTNL"
-	nvram_set 2860 HostName "$HOSTNAME_NVRAM"
+    if [ "$HostName" = "" ]; then
+	HostName="Wive-RTNL"
+	nvram_set 2860 HostName "$HostName"
     fi
-    HOSTNAME="$HOSTNAME_NVRAM"
+    HOSTNAME="$HostName"
     #samba configs to
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
 	WorkGroup="LOCALNET"
@@ -98,15 +98,15 @@ check_nvram()
     	    LANMAC="$LAN_MACADDR"
 	fi
     fi
-    # opmode adjustment:
+    # OperationMode adjustment:
     #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
     #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
 
     if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
-	nvram_set 2860 OperationMode 1
+	nvram_set 2860 opmode 1
 	opmode="1"
     elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 OperationMode 1
+	nvram_set 2860 opmode 1
 	opmode="1"
     fi
  fi

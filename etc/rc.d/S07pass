@@ -8,13 +8,13 @@ start() {
     get_param
 
     #generate pass file
-    printf "$admID::0:0:Adminstrator:/:/bin/sh\nnobody:x:99:99:Nobody:/:\n" > /etc/passwd
+    printf "$Login::0:0:Adminstrator:/:/bin/sh\nnobody:x:99:99:Nobody:/:\n" > /etc/passwd
 
     #generate group file
-    printf "$admID:x:0:$admID\nnobody:x:99:\n" > /etc/group
+    printf "$Login:x:0:$Login\nnobody:x:99:\n" > /etc/group
 
     #set new password
-    echo "$admID:$admPW" > /tmp/tmpchpw
+    echo "$Login:$Password" > /tmp/tmpchpw
     chpasswd < /tmp/tmpchpw
     rm -f /tmp/tmpchpw
 }
@@ -24,8 +24,8 @@ stop() {
 }
 
 get_param() {
-    admID=`nvram_get 2860 Login`
-    admPW=`nvram_get 2860 Password`
+    Login=`nvram_get 2860 Login`
+    Password=`nvram_get 2860 Password`
 }
 case "$1" in
 	start)

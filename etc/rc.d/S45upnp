@@ -20,7 +20,7 @@ LOG="logger -t upnpd"
 
 start() {
  get_param
- if [ "$upnp" != "1" ]; then
+ if [ "$upnpEnabled" != "1" ]; then
     exit 0
  fi
     if [ "$opmode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
@@ -31,7 +31,7 @@ start() {
 	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
-            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $lan_ip &
+            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $lan_ipaddr &
 	fi
     fi
 }
@@ -44,8 +44,8 @@ stop() {
 }
 
 get_param() {
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    upnp=`nvram_get 2860 upnpEnabled`
+    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    upnpEnabled=`nvram_get 2860 upnpEnabled`
 }
 
 

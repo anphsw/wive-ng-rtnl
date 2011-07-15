@@ -74,8 +74,8 @@ start() {
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
 	getMacIf
-	if [ "$opmode" = "2" ] && [ "$clone_en" = "1" ] && [ "$clone_mac" != "" ]; then
-	    WMAC="$clone_mac"
+	if [ "$opmode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
+	    WMAC="$macCloneMac"
 	    $LOG "STA Macclone mode. MAC: $WMAC"
 	else
 	    $LOG "AP/STA Normal mode. MAC: $WMAC"
@@ -151,8 +151,8 @@ ra0flushadress()
 }
 
 get_param() {
-    clone_en=`nvram_get 2860 macCloneEnabled`
-    clone_mac=`nvram_get 2860 macCloneMac`
+    macCloneEnabled=`nvram_get 2860 macCloneEnabled`
+    macCloneMac=`nvram_get 2860 macCloneMac`
     ipt_account=`nvram_get 2860 ipt_account`
 }
 
