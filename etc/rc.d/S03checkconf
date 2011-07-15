@@ -103,10 +103,10 @@ check_nvram()
     #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
 
     if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "y" ]; then
-	nvram_set 2860 opmode 1
+	nvram_set 2860 OperationMode 1
 	opmode="1"
     elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 opmode 1
+	nvram_set 2860 OperationMode 1
 	opmode="1"
     fi
  fi
