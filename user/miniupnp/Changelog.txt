@@ -1,4 +1,11 @@
-$Id: Changelog.txt,v 1.236 2011/06/22 21:57:17 nanard Exp $
+$Id: Changelog.txt,v 1.238 2011/07/15 07:48:25 nanard Exp $
+
+2011/07/15:
+  Fixing code with MULTIPLE_EXTERNAL_IP defined.
+
+2011/06/27:
+  IPv6 support for UPnP events.
+  Security checks in UPnP events.
 
 2011/06/22:
   Remote host for GetListOfPortMappings
