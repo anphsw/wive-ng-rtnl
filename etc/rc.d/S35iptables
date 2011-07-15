@@ -198,6 +198,7 @@ start() {
 		    iptables -t filter -p udp -A macipport_filter -j RETURN
 		fi
 	    fi
+
 	    if [ "$parproutedEnabled" != "1" ]; then
 		#enable forward only from local network to wan/ppp
 		iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
@@ -224,9 +225,9 @@ start() {
 	    qos
 	fi
 ###########################################NAT-NAPTM#######################################
-	#masqrade/nat for wan interfaces
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    $LOG "Add NAT rules"
+	    ####################PORTFORWARD#############################
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
 		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
@@ -239,11 +240,12 @@ start() {
 	    fi
 	    ####################UPNPRULES###############################
 	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+		$LOG "Add base upnp rules"
         	iptables -t nat -N MINIUPNPD
         	iptables -t nat -F MINIUPNPD
-        	iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
         	iptables -t filter -N MINIUPNPD
         	iptables -t filter -F MINIUPNPD
+        	iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
         	iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
     	    fi
 	    #######################DMZ##################################
@@ -292,6 +294,7 @@ start() {
 		    fi
 		fi
 	    fi
+	    ###########################################################
 	fi
 #########################################ACCEPT_ESTABLISHED################################
 	iptables -A FORWARD $STATE_EST -j ACCEPT
