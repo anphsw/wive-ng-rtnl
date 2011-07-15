@@ -237,6 +237,15 @@ start() {
 		$LOG "Add portforward rules"
 		/etc/portforward "$wan_ipaddr"
 	    fi
+	    ####################UPNPRULES###############################
+	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+        	iptables -t nat -N MINIUPNPD
+        	iptables -t nat -F MINIUPNPD
+        	iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
+        	iptables -t filter -N MINIUPNPD
+        	iptables -t filter -F MINIUPNPD
+        	iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
+    	    fi
 	    #######################DMZ##################################
 	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
 		iptables -t nat -N DMZ
@@ -284,16 +293,6 @@ start() {
 		fi
 	    fi
 	fi
-###########################################UPNPRULES#######################################
-        #rules for upnp
-	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
-            iptables -t nat -N MINIUPNPD
-            iptables -t nat -F MINIUPNPD
-            iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
-            iptables -t filter -N MINIUPNPD
-            iptables -t filter -F MINIUPNPD
-            iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
-        fi
 #########################################ACCEPT_ESTABLISHED################################
 	iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################VPNRULES#######################################
