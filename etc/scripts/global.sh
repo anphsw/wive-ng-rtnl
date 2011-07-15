@@ -236,10 +236,10 @@ vpn_deadloop_fix()
 get_txqlen()
 {
     #for memory save 16m device uses txqueuelen=100
-    if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
-	txqueuelen="1000"
-    else
+    if [ -f /tmp/is_16ram_dev ]; then
 	txqueuelen="100"
+    else
+	txqueuelen="1000"
     fi
 }
 
