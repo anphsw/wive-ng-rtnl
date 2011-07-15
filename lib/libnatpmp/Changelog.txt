@@ -1,4 +1,7 @@
-$Id: Changelog.txt,v 1.27 2011/06/17 22:57:47 nanard Exp $
+$Id: Changelog.txt,v 1.28 2011/07/15 08:30:10 nanard Exp $
+
+2011/07/15:
+  Put 3 clauses BSD licence at the top of source files.
 
 2011/06/18:
   --no-undefined => -Wl,--no-undefined
