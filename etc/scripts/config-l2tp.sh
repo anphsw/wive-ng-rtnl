@@ -164,10 +164,6 @@ echo "==================START-L2TP-CLIENT======================="
     printf "[global]
     access control = yes
     rand source = dev
-    [lns default]
-    tx bps = 100000000
-    rx bps = 100000000
-    tunnel rws = 8
     [lac $SERVER]
     redial = yes
     redial timeout = 20
@@ -177,6 +173,9 @@ echo "==================START-L2TP-CLIENT======================="
     lns = $SERVER
     name = $USER
     autodial = yes
+    tx bps = 100000000
+    rx bps = 100000000
+    tunnel rws = 8
     pppoptfile = $ppp/options.l2tp
     " >> $ppp/l2tpd.conf
 
