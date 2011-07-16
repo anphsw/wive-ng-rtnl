@@ -498,6 +498,8 @@
 54) PPP prevent drop session at high cpu load. If cpu load > max allowed ppp must drop packets.<br>
 55) Fix MINIUPNP rules position in iptables script(change to PFW->UPNP->DMZ from PFW->DMZ->UPNP).<br>
 56) Update miniupnp and libnatpmp to 1.5.20110715 version.<br>
+57) More safe use strdup in libnvarm.<br>
+58) Try reread flash if return value is 0 (prevent not corrent read in slow SPI flashes).<br>
 
 <br><br>
 <b>For support see:</b><br>
