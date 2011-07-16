@@ -77,7 +77,7 @@ addMBSSID()
 		if [ "$opmode" = "3" ]; then
 		    REALMAC="$WANMAC"
 		else
-		    REALMAC="$MAC"
+		    REALMAC="$WMAC"
 		fi
 		ip link set ra$i down > /dev/null 2>&1
 		ifconfig ra$i hw ether "$REALMAC"
