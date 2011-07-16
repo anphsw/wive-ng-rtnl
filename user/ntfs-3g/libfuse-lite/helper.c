@@ -141,16 +141,44 @@ int fuse_parse_cmdline(struct fuse_args *args, char **mountpoint,
 
 int fuse_daemonize(int foreground)
 {
-    int res;
+	int res;
+	int fd;
 
-    if (!foreground) {
-        res = daemon(0, 0);
-        if (res == -1) {
-            perror("fuse: failed to daemonize program\n");
-            return -1;
-        }
-    }
-    return 0;
+	if (!foreground) {
+		/* uClibc daemon() has problems with pthread and friends */
+		/* workaround from http://www.mail-archive.com/uclibc@uclibc.org/msg01073.html */
+		/* res = daemon(0, 0); */
+		switch (res = fork()) {
+			case -1:
+				return(-1);
+			case 0:
+				break;
+			default:
+				_exit(0);
+		}
+
+		if (res == -1) {
+			perror("fuse: failed to fork()\n");
+			return -1;
+		}
+
+		res=setsid();
+
+		if (res == -1) {
+			perror("fuse: failed to setsid()\n");
+		}
+
+		chdir("/");
+
+		if (fd = open("/dev/null", O_RDWR, 0) != -1) {
+			dup2(fd, STDIN_FILENO);
+			dup2(fd, STDOUT_FILENO);
+			dup2(fd, STDERR_FILENO);
+			if (fd > 2)
+				close(fd);
+		}
+	}
+	return 0;
 }
 
 static struct fuse_chan *fuse_mount_common(const char *mountpoint,
