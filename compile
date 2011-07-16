@@ -35,11 +35,21 @@ else
     exit 1
 fi
 
+#use for product id and model name
+export PRODUCTID="$DEVNAME"
+export MODEL_NAME="$DEVNAME"
+export KERNEL_VER="$VERSIONPKG"
+
+echo "______________________________________________________"
+echo "> Build for $PRODUCTID version $KERNEL_VER <"
+echo "______________________________________________________"
+
 if [ "$2" = "" ]; then
     SAVE_MEM=""
 else
     SAVE_MEM="-savemem"
 fi
+
 
 echo "" > sdk_version.h
 echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
@@ -60,7 +70,7 @@ rm -rfv romfs/*
 rm -rfv images/*
 
 mkdir -p etc/Wireless/RT2860
-ln -s linux-2.6.21.x linux
+ln -sf linux-2.6.21.x linux
 
 echo --------------------------------COPY-CONFIG-----------------------------
 ##############################FOR-ALL-DEVICES#########################
