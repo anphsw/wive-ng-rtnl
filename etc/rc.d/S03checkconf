@@ -64,12 +64,11 @@ check_nvram()
 	HostName="Wive-RTNL"
 	nvram_set 2860 HostName "$HostName"
     fi
-    HOSTNAME="$HostName"
     #samba configs to
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
 	WorkGroup="LOCALNET"
-	SmbNetBIOS="$HOSTNAME"
-	SmbString="$HOSTNAME-SERVER"
+	SmbNetBIOS="$HostName"
+	SmbString="$HostName-SERVER"
 	nvram_set 2860 WorkGroup LOCALNET
 	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
 	nvram_set 2860 SmbString "$SmbString"

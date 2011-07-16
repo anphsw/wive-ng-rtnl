@@ -98,11 +98,6 @@ getSwType()
     fi
 }
 
-getHostName()
-{
-    HOSTNAME=`nvram_get 2860 HostName`
-}
-
 wait_connect()
 #wait connect to ap
 {
@@ -147,8 +142,8 @@ udhcpc_opts()
 	else
 	    GETMTU=""
 	fi
-	getHostName
-	UDHCPCOPTS="-i $wan_if -H $HOSTNAME $REQIP -S -R -T 5 -a \
+	HostName=`nvram_get 2860 HostName`
+	UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
 		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
 		    -O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }

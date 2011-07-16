@@ -23,11 +23,10 @@ start() {
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
 
-    getHostName
-    /bin/hostname $HOSTNAME
-    echo "127.0.0.1	localhost $HOSTNAME.lo" > /etc/hosts
-    echo "$lan_ip	$HOSTNAME.lo" >> /etc/hosts
-    echo "$wan_ip	$HOSTNAME.lo" >> /etc/hosts
+    /bin/hostname $HostName
+    echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
+    echo "$lan_ip	$HostName.lo" >> /etc/hosts
+    echo "$wan_ip	$HostName.lo" >> /etc/hosts
     #read for all write by root
     chmod 644 /etc/hosts > /dev/null 2>&1
 
@@ -112,13 +111,14 @@ stop() {
 
 get_param() {
     #get parametrs
-    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     wan_ip=`nvram_get 2860 wan_ipaddr`
     wan_nm=`nvram_get 2860 wan_netmask`
+    wan_gateway=`nvram_get 2860 wan_gateway`
+    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
-    wan_gateway=`nvram_get 2860 wan_gateway`
+    HostName=`nvram_get 2860 HostName`
+    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
 }
 
 case "$1" in
