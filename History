@@ -500,6 +500,7 @@
 56) Update miniupnp and libnatpmp to 1.5.20110715 version.<br>
 57) Fix script generate for webstr.<br>
 58) Fix mbssid up logic.<br>
+59) Fix fuse_daemonize with uClibc.<br>
 
 <br><br>
 <b>For support see:</b><br>
