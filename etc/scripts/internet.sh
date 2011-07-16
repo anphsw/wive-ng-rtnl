@@ -75,14 +75,13 @@ addMBSSID()
 		#workaround for apcli mode
 		getMacIf
 		if [ "$opmode" = "3" ]; then
-		    ip link set ra$i down > /dev/null 2>&1
-		    ifconfig ra$i hw ether "$WANMAC"
-    		    ip link set ra$i up
+		    REALMAC="$WANMAC"
 		else
-		    ip link set ra$i down > /dev/null 2>&1
-		    ifconfig ra$i hw ether "$WMAC"
-    		    ip link set ra$i up
+		    REALMAC="$MAC"
 		fi
+		ip link set ra$i down > /dev/null 2>&1
+		ifconfig ra$i hw ether "$REALMAC"
+    		ip link set ra$i up
 	    done
 	fi
     fi
