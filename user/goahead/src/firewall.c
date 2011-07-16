@@ -1474,7 +1474,7 @@ void iptablesWebsFilterRun(void)
 				{
 					fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_CHAIN, entry);
 					if (nat_ena)
-						fprintf(fd, "iptables -A %s -p tcp -m tcp -m webstr --host %s -j REJECT --reject-with tcp-reset\n", WEB_FILTER_PRE_CHAIN, entry);
+						fprintf(fd, "iptables -t nat -A %s -p tcp -m tcp -m webstr --host %s -j DROP\n", WEB_FILTER_PRE_CHAIN, entry);
 				}
 				i++;
 			}
