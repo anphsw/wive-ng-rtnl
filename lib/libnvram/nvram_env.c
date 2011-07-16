@@ -172,7 +172,11 @@ void nvram_init(int index)
 			break;
 		}
 		*q = '\0'; //strip '='
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+		fb[index].cache[i].name = sstrdup(p);
+#else
 		fb[index].cache[i].name = strdup(p);
+#endif
 		//printf("  %d '%s'->", i, p);
 
 		p = q + 1; //value
@@ -180,7 +184,11 @@ void nvram_init(int index)
 			LIBNV_PRINT("parsed failed - cannot find '\\0'\n");
 			break;
 		}
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+		fb[index].cache[i].value = sstrdup(p);
+#else
 		fb[index].cache[i].value = strdup(p);
+#endif
 		//printf("'%s'\n", p);
 
 		p = q + 1; //next entry
@@ -279,17 +287,6 @@ char *nvram_bufget(int index, char *name)
 	/* Initial value should be NULL */
 	static char *ret = NULL;
 
-#if 0 //This hack crash goahead...
-	/* If we have some pointer, this means we need to free old value 
-	    we are safe with nvram_get, he do his own strdup.
-	    This hack need fix later!
-	*/
-	if (ret != NULL) {
-	    free(ret);
-	    ret = NULL;
-	}
-#endif     
-
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
 	LIBNV_CHECK_VALID();
@@ -341,14 +338,24 @@ int nvram_bufset(int index, char *name, char *value)
 			LIBNV_ERROR("run out of env cache, please increase MAX_CACHE_ENTRY\n");
 			return -1;
 		}
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+		fb[index].cache[idx].name = sstrdup(name);
+		fb[index].cache[idx].value = sstrdup(value);
+#else
 		fb[index].cache[idx].name = strdup(name);
 		fb[index].cache[idx].value = strdup(value);
+#endif
 	}
 	else {
 		//abandon the previous value
 		FREE(fb[index].cache[idx].value);
+#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+		fb[index].cache[idx].value = sstrdup(value);
+#else
 		fb[index].cache[idx].value = strdup(value);
+#endif
 	}
+
 	LIBNV_PRINT("bufset %d '%s'->'%s'\n", index, name, value);
 	fb[index].dirty = 1;
 	return 0;
