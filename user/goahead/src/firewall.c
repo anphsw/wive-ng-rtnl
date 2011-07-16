@@ -1430,8 +1430,8 @@ void iptablesWebsFilterRun(void)
 			
 			if (nat_ena)
 			{
-				fprintf(fd, "iptables -t filter -N %s\n", WEB_FILTER_PRE_CHAIN);
-				fprintf(fd, "iptables -t filter -A PREROUTING -j %s\n", WEB_FILTER_PRE_CHAIN);
+				fprintf(fd, "iptables -t nat -N %s\n", WEB_FILTER_PRE_CHAIN);
+				fprintf(fd, "iptables -t nat -A PREROUTING -j %s\n", WEB_FILTER_PRE_CHAIN);
 			}
 
 			if (content_filter)
