@@ -2,6 +2,8 @@
 #include "nvram_env.h"
 #include "flash_api.h"
 
+#define TRY_REREAD 2
+
 //#define DEBUG
 
 #ifdef DEBUG
@@ -283,10 +285,11 @@ out:
 
 char *nvram_bufget(int index, char *name)
 {
-	int idx;
+	int idx, count=0;
 	/* Initial value should be NULL */
 	static char *ret = NULL;
 
+retry:
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
 	LIBNV_CHECK_VALID();
@@ -302,20 +305,46 @@ char *nvram_bufget(int index, char *name)
 #else
 			ret = strdup(fb[index].cache[idx].value);
 #endif
-			LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
-
 			//btw, we don't return NULL anymore!
-			if (!ret)
+			//try reread if ret=NULL 
+			if (!ret) {
 			    ret = "";
+#ifdef TRY_REREAD
+			    if (count < TRY_REREAD) {
+				LIBNV_PRINT("try reread nvram");
+				nvram_close(index);
+				count++;
+				nvram_init(index);
+				goto retry;
+			    }
+#endif
+			}
+			count=0;
 
+		    LIBNV_PRINT("bufget %d '%s'->'%s'\n", index, name, ret);
 		    return ret;
 		}
 	}
 
-	//no default value set?
 	//btw, we don't return NULL anymore!
+	//try reread if ret=NULL 
+	if (!ret) {
+	    ret = "";
+#ifdef TRY_REREAD
+	    if (count < TRY_REREAD) {
+		LIBNV_PRINT("try reread nvram");
+		nvram_close(index);
+		count++;
+		nvram_init(index);
+		goto retry;
+	    }
+#endif
+	}
+	count=0;
+
+	//no default value set?
 	LIBNV_PRINT("bufget %d '%s'->''(empty) Warning!\n", index, name);
-	return "";
+	return ret;
 }
 
 int nvram_bufset(int index, char *name, char *value)
