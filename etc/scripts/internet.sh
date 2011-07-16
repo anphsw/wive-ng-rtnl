@@ -66,7 +66,8 @@ addMBSSID()
     if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	    for i in `seq 1 $bssidnum`; do
+	    let "bssrealnum=$bssidnum-1"
+	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i
 		if [ -d /proc/sys/net/ipv6 ]; then
     		    ip -6 addr flush dev ra$i
