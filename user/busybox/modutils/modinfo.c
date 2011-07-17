@@ -133,7 +133,7 @@ int modinfo_main(int argc UNUSED_PARAM, char **argv)
 
 	uname(&uts);
 	parser = config_open2(
-		xasprintf("%s/%s/%s", "/etc", uts.release, CONFIG_DEFAULT_DEPMOD_FILE),
+		xasprintf("%s", CONFIG_DEFAULT_DEPMOD_FILE),
 		xfopen_for_read
 	);
 
