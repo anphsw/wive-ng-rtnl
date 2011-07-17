@@ -5,6 +5,9 @@ APROOTDIR=`pwd`
 if [ ! -f $APROOTDIR/configure ]; then
     autoconf
 fi
+if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake
+fi
 
 CONFOPTS="--host=mipsel-linux --disable-zlib --disable-openpty"
 CONFOPTS="$CONFOPTS --disable-shadow --disable-pam"

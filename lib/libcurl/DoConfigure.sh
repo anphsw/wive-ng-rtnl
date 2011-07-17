@@ -11,6 +11,9 @@ LIBSSL=$FIRMROOT/user/openssl
 if [ ! -f $APROOTDIR/configure ]; then
     autoconf
 fi
+if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake
+fi
 
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu --without-random --without-ssl --disable-debug --disable-curldebug --disable-dependency-tracking" 
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"

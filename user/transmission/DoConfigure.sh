@@ -6,6 +6,9 @@ APROOTDIR=`pwd`
 if [ ! -f $APROOTDIR/configure ]; then
     autoconf
 fi
+if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake
+fi
 
 ./configure --host=mipsel-linux --build=i686-pc-linux-gnu \
 	    --prefix=$APROOTDIR/filesystem --disable-gtk \
