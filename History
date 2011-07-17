@@ -503,6 +503,7 @@
 59) Fix fuse_daemonize with uClibc.<br>
 60) xt_webstr now work with nat offload enabled (Content Filter work OK).<br>
 61) Add hardware led indication update firmware process(Use WPS and SEC LEDs).<br>
+62) Fix modutils code need used /etc for modules.* files(aliases and other).<br>
 
 <br><br>
 <b>For support see:</b><br>
