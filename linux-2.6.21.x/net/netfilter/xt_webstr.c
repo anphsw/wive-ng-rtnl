@@ -50,6 +50,8 @@
 #define BLK_COOKIE      0x04
 #define BLK_PROXY       0x08
 
+extern int web_str_loaded;
+
 typedef char *(*proc_ipt_search) (char *, char *, int, int);
 
 struct ipt_webstr_info {
@@ -457,11 +459,13 @@ static struct xt_match xt_webstr_match[] = {
 
 static int __init init(void)
 {
+	web_str_loaded=1;
 	return xt_register_matches(xt_webstr_match, ARRAY_SIZE(xt_webstr_match));
 }
 
 static void __exit fini(void)
 {
+	web_str_loaded=0;
 	xt_unregister_matches(xt_webstr_match, ARRAY_SIZE(xt_webstr_match));
 }
 

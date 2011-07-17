@@ -501,6 +501,7 @@
 57) Fix script generate for webstr.<br>
 58) Fix mbssid up logic.<br>
 59) Fix fuse_daemonize with uClibc.<br>
+60) xt_webstr now work with nat offload enabled (Content Filter work OK).<br>
 
 <br><br>
 <b>For support see:</b><br>
