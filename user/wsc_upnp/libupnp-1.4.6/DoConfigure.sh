@@ -2,6 +2,10 @@
 
 APROOTDIR=`pwd`
 
+if [ ! -f $APROOTDIR/configure ]; then
+    autoconf
+fi
+
 #to stop reconfigure fix me
 touch *
 

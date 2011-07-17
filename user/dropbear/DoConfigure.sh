@@ -1,6 +1,11 @@
 #!/bin/bash
 
 APROOTDIR=`pwd`
+
+if [ ! -f $APROOTDIR/configure ]; then
+    autoconf
+fi
+
 CONFOPTS="--host=mipsel-linux --disable-zlib --disable-openpty"
 CONFOPTS="$CONFOPTS --disable-shadow --disable-pam"
 CONFOPTS="$CONFOPTS --disable-lastlog --disable-utmp --disable-utmpx"

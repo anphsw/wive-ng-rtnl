@@ -3,6 +3,10 @@
 echo "==================CONFIGURE-TRANSMISSION======================="
 APROOTDIR=`pwd`
 
+if [ ! -f $APROOTDIR/configure ]; then
+    autoconf
+fi
+
 ./configure --host=mipsel-linux --build=i686-pc-linux-gnu \
 	    --prefix=$APROOTDIR/filesystem --disable-gtk \
 	    --disable-nls --enable-lightweight --disable-utp \
