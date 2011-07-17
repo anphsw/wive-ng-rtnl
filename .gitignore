@@ -50,6 +50,10 @@ config.status
 /lib/libevent/autom4te.cache/output.1
 /lib/libevent/autom4te.cache/requests
 /lib/libevent/autom4te.cache/traces.0
+/lib/libevent/config.h
+/lib/libevent/config.h.in~
+/lib/libevent/include/event2/event-config.h
+/lib/libevent/stamp-h1
 /lib/libevent/configure
 /lib/libevent/include/Makefile
 /lib/libevent/libevent_openssl.pc
