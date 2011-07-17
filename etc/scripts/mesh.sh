@@ -1,3 +1,5 @@
+#!/bin/sh
+
 case $1 in
 	"init")
 		brctl delif br0 mesh0

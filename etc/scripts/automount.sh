@@ -1,4 +1,5 @@
 #!/bin/sh
+
 if [ "$ACTION" = "add" ] ; then
     if [ -f /bin/blkid ]; then
 	eval "$(blkid /dev/$MDEV | sed 's/^[^ ]* //;s/\([^ ]*=\)/MDEV_\1/g')"

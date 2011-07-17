@@ -1,12 +1,12 @@
 #!/bin/sh
+
 #
 # $Id: storage.sh,v 1.27.2.1 2008-10-21 09:07:34 steven Exp $
 #
 # usage: storage.sh
 #
-#
+
 PART1=""
-#PART1="/var"
 
 echo "run storage.sh"
 for part in a b c d e f g h i j k l m n o p q r s t u v w x y z
