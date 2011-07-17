@@ -29,6 +29,8 @@
 #include <linux/module.h>
 #include <linux/uio.h>
 
+#include "linux/ralink_gpio.h"
+
 #endif /* __KERNEL__ */
 
 struct erase_info_user {

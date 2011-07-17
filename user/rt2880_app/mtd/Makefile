@@ -1,5 +1,5 @@
 EXEC = mtd_write
-OBJS = mtd.o
+OBJS = led.o mtd.o
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
 
 all: $(EXEC)

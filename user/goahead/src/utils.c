@@ -353,9 +353,9 @@ static int gpioLedSet(int gpio, unsigned int on, unsigned int off,
 	led.rests = rests;
 	led.times = times;
 
-	fd = open("/dev/gpio", O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
-		perror("/dev/gpio");
+		perror(GPIO_DEV);
 		return -1;
 	}
 	if (ioctl(fd, RALINK_GPIO_LED_SET, &led) < 0) {

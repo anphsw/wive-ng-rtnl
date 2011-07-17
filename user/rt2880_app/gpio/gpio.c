@@ -43,8 +43,6 @@
 #include <sys/ioctl.h>
 #include "linux/ralink_gpio.h"
 
-#define GPIO_DEV	"/dev/gpio"
-
 int wr_gpio_num = 11;
 int wr_gpio_flag = 0;
 
@@ -52,7 +50,7 @@ int gpio_set_dir(int dir)
 {
 	int fd;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -70,7 +68,7 @@ int gpio_set_dir_out(int dir)
 {
         int fd;
 
-        fd = open(GPIO_DEV, O_RDONLY);
+        fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
         if (fd < 0) {
                 perror(GPIO_DEV);
                 return -1;
@@ -89,7 +87,7 @@ int gpio_read_bit(int idx, int *value)
 	int fd, req;
 
 	*value = 0;
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -114,7 +112,7 @@ int gpio_write_bit(int idx, int value)
 {
 	int fd, req;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -141,7 +139,7 @@ int gpio_read_byte(int idx, int *value)
 	int fd, req;
 
 	*value = 0;
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -166,7 +164,7 @@ int gpio_write_byte(int idx, int value)
 {
 	int fd, req;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -193,7 +191,7 @@ int gpio_read_int(int *value)
 	int fd;
 
 	*value = 0;
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -211,7 +209,7 @@ int gpio_write_int(int value)
 {
 	int fd;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -229,7 +227,7 @@ int gpio_enb_irq(void)
 {
 	int fd;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -247,7 +245,7 @@ int gpio_dis_irq(void)
 {
 	int fd;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -266,7 +264,7 @@ int gpio_reg_info(int gpio_num)
 	int fd;
 	ralink_gpio_reg_info info;
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return -1;
@@ -370,7 +368,7 @@ ra_gpio_read_bit(int idx)
         int fd, req, value;
 
         value = 0;
-        fd = open(GPIO_DEV, O_RDONLY);
+        fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
         if (fd < 0) {
                 perror(GPIO_DEV);
                 return -1;
@@ -400,7 +398,7 @@ ra_gpio_write_bit(int idx, int value)
 
 	//gpio_set_dir(RALINK_GPIO_DIR_ALLOUT);
 
-        fd = open(GPIO_DEV, O_RDONLY);
+        fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
         if (fd < 0) {
                 perror(GPIO_DEV);
                 return -1;
@@ -495,7 +493,7 @@ void gpio_set_led(int argc, char *argv[])
 		return;
 	}
 
-	fd = open(GPIO_DEV, O_RDONLY);
+	fd = open(GPIO_DEV, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror(GPIO_DEV);
 		return;

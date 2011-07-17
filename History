@@ -502,6 +502,7 @@
 58) Fix mbssid up logic.<br>
 59) Fix fuse_daemonize with uClibc.<br>
 60) xt_webstr now work with nat offload enabled (Content Filter work OK).<br>
+61) Add hardware led indication update firmware process(Use WPS and SEC LEDs).<br>
 
 <br><br>
 <b>For support see:</b><br>

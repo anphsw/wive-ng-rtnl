@@ -38,6 +38,8 @@
 #include <asm/rt2880/rt_mmap.h>
 #endif
 
+#define GPIO_DEV "/dev/gpio"
+
 #if 0 /* BASE SDK CONFIG */
 #define GPIO_LED_WAN_GREEN      12
 #define GPIO_LED_WAN_ORANGE     14
@@ -70,6 +72,10 @@
 #define GPIO_POWER_LED		0
 #endif
 #endif
+
+/* Firmware update indicators */
+#define GPIO_MTD_LED1	GPIO_LED_SEC_GREEN
+#define GPIO_MTD_LED2	GPIO_WPS_LED_GREEN
 
 #define RALINK_GPIO_HAS_5124	1
 //#define RALINK_GPIO_HAS_9524	1

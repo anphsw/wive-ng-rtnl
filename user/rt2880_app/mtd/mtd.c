@@ -61,6 +61,7 @@
 
 #include "linux/autoconf.h"
 #include "mtd.h"
+#include "led.h"
 
 #ifdef CONFIG_MTD_NAND_RALINK
 #define BUFSIZE (0x4000)
@@ -296,6 +297,8 @@ not_nand:
 
 		/* need to erase the next block before writing data to it */
 		while (w > e) {
+		        ledAlways(GPIO_MTD_LED1, LED_ON);
+			ledAlways(GPIO_MTD_LED2, LED_OFF);
 			mtdEraseInfo.start = e;
 			mtdEraseInfo.length = mtdInfo.erasesize;
 
@@ -310,6 +313,8 @@ not_nand:
 			e += mtdInfo.erasesize;
 		}
 
+	        ledAlways(GPIO_MTD_LED1, LED_OFF);
+		ledAlways(GPIO_MTD_LED2, LED_ON);
 		if (!quiet)
 			fprintf(stderr, "\b\b\b[w]");
 
@@ -419,7 +424,8 @@ int getFileSize(char *filename)
 int main (int argc, char **argv)
 {
 	int ch, i, boot, unlocked, offset, len, imagefd = 0;
-	char *erase[MAX_ARGS], *device, *imagefile = "";
+	char *erase[MAX_ARGS], *device = "", *imagefile = "";
+
 	enum {
 		CMD_ERASE,
 		CMD_WRITE,
