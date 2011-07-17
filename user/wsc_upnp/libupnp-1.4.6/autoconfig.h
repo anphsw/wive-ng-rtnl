@@ -153,7 +153,7 @@
 #define _LARGEFILE_SOURCE 1
 
 /* Large files support */
-#define _LARGE_FILE_SOURCE 
+#define _LARGE_FILE_SOURCE /**/
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

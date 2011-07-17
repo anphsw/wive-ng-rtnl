@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "==================CONFIGURE-ZEBRA=============================="
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then

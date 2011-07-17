@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "==================CONFIGURE-DROPBEAR==========================="
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
