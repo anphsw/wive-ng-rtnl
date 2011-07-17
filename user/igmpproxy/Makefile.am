@@ -8,3 +8,7 @@ ChangeLog:
 AUTHORS: ChangeLog
 	( echo "Authors and contributors, in alphabetical order: "; echo; \
 	sed -r "s/^Author: (.*)/\1/;t;d" $< | sort -u ) > $@
+
+romfs:
+	for i in $(DIRS) ; do make -C $$i $@ ; done
+

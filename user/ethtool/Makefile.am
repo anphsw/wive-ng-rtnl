@@ -11,3 +11,5 @@ ethtool_SOURCES = de2104x.c ethtool.c ethtool-copy.h ethtool-util.h natsemi.c \
 dist-hook:
 	cp $(top_srcdir)/ethtool.spec $(distdir)
 
+romfs: install
+	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin

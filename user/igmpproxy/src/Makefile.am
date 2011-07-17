@@ -20,3 +20,7 @@ igmpproxy_SOURCES = \
 	rttable.c \
 	syslog.c \
 	udpsock.c
+
+romfs:
+	$(ROMFSINST) /bin/$(EXEC)
+	$(ROMFSINST) /bin/igmpproxy.sh
