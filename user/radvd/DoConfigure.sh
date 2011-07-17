@@ -10,7 +10,7 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
 fi
 
-CONFOPTS="--host=mipsel-linux --disable-dependency-tracking"
-CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
+CONFOPTS="--host=mipsel-linux"
+CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem --disable-dependency-tracking"
 export LDFLAGS=-L../../lib/libflex
 ./configure $CONFOPTS
