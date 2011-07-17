@@ -89,11 +89,15 @@ config.status
 /user/radvd/configure
 /user/radvd/Makefile.in
 /user/radvd/scanner.c
+/user/radvd/config.h
+/user/radvd/device.c
+/user/radvd/stamp-h1
 /user/transmission/autom4te.cache/output.0
 /user/transmission/autom4te.cache/output.1
 /user/transmission/autom4te.cache/requests
 /user/transmission/autom4te.cache/traces.0
 /user/transmission/configure
+/user/wsc_upnp/libupnp-1.4.6/autom4te.cache/requests
 /user/wsc_upnp/libupnp-1.4.6/autom4te.cache/output.1
 /user/wsc_upnp/libupnp-1.4.6/autom4te.cache/traces.1
 /user/wsc_upnp/libupnp-1.4.6/config.status
