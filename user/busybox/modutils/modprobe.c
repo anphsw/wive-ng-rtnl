@@ -486,11 +486,7 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 	opt = getopt32(argv, INSMOD_OPTS MODPROBE_OPTS INSMOD_ARGS);
 	argv += optind;
 
-	/* Goto modules location */
-	xchdir(CONFIG_DEFAULT_MODULES_DIR);
-	uname(&uts);
-	xchdir(uts.release);
-
+	xchdir("/etc");
 	if (opt & MODPROBE_OPT_LIST_ONLY) {
 		char name[MODULE_NAME_LEN];
 		char *colon, *tokens[2];
@@ -515,6 +511,11 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 		}
 		return EXIT_SUCCESS;
 	}
+
+	/* Goto modules location */
+	xchdir(CONFIG_DEFAULT_MODULES_DIR);
+	uname(&uts);
+	xchdir(uts.release);
 
 	/* Yes, for some reason -l ignores -s... */
 	if (opt & INSMOD_OPT_SYSLOG)
@@ -558,8 +559,9 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 	if (G.probes == NULL)
 		return EXIT_SUCCESS;
 
-	read_config("/etc/modprobe.conf");
-	read_config("/etc/modprobe.d");
+	xchdir("/etc");
+	read_config("modprobe.conf");
+	read_config("modprobe.d");
 	if (ENABLE_FEATURE_MODUTILS_SYMBOLS && G.need_symbols)
 		read_config("modules.symbols");
 	load_modules_dep();
@@ -567,6 +569,11 @@ int modprobe_main(int argc UNUSED_PARAM, char **argv)
 		read_config("modules.alias");
 		load_modules_dep();
 	}
+
+	/* Goto modules location */
+	xchdir(CONFIG_DEFAULT_MODULES_DIR);
+	uname(&uts);
+	xchdir(uts.release);
 
 	rc = 0;
 	while ((me = llist_pop(&G.probes)) != NULL) {

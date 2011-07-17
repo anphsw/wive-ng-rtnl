@@ -212,6 +212,7 @@ int depmod_main(int argc UNUSED_PARAM, char **argv)
 
 	/* Generate dependency and alias files */
 	if (!(option_mask32 & OPT_n))
+		xchdir("/etc");
 		xfreopen_write(CONFIG_DEFAULT_DEPMOD_FILE, stdout);
 	for (m = modules; m != NULL; m = m->next) {
 		printf("%s:", m->name);
@@ -231,7 +232,8 @@ int depmod_main(int argc UNUSED_PARAM, char **argv)
 
 #if ENABLE_FEATURE_MODUTILS_ALIAS
 	if (!(option_mask32 & OPT_n))
-		xfreopen_write("modules.alias", stdout);
+		xchdir("/etc");
+		xfreopen_write("/etc/modules.alias", stdout);
 	for (m = modules; m != NULL; m = m->next) {
 		const char *fname = bb_basename(m->name);
 		int fnlen = strchrnul(fname, '.') - fname;
