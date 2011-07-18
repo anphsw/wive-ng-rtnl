@@ -24,14 +24,13 @@ start() {
     exit 0
  fi
     if [ "$opmode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
-	getWanUpnpIfName
-	EXTIP=`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-        if [ "$EXTIP" != "" ]; then
-	  $LOG "Start upnp at $EXTIP"
+	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+        if [ "$wan_ipaddr" != "" ]; then
+	  $LOG "Start upnp at $wan_ipaddr"
 	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
-            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $EXTIP -a $lan_ipaddr &
+            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $wan_ipaddr -a $lan_ipaddr &
 	fi
     fi
 }

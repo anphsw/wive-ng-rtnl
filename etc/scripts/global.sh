@@ -32,6 +32,7 @@ getMacIf()
 # WAN interface name -> $wan_if
 getWanIfName()
 {
+    #real wan name
     if [ "$opmode" = "0" ]; then
 	wan_if="br0"
     elif [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
@@ -48,14 +49,11 @@ getWanIfName()
     elif [ "$opmode" = "4" ]; then
 	    wan_if="eth2.2"
     fi
-}
 
-getWanUpnpIfName()
-{
+    #upnp wan name
     if [ "$vpnEnabled" = "on" ]; then
         wan_upnp_if="ppp0"
     else
-	getWanIfName
         wan_upnp_if=$wan_if
     fi
 }
@@ -65,17 +63,9 @@ getLanIfName()
 {
     if [ "$opmode" = "2" ]; then
 	lan_if="eth2"
-    else
-	lan_if="br0"
-    fi
-}
-
-# LAN interface name -> $lan_if
-getLan2IfName()
-{
-    if [ "$opmode" = "2" ]; then
 	lan2_if="eth2:9"
     else
+	lan_if="br0"
 	lan2_if="br0:9"
     fi
 }
@@ -281,6 +271,5 @@ drop_disk_caches(){
 
 # get params
 getLanIfName
-getLan2IfName
 getWanIfName
 getSwType
