@@ -16,6 +16,7 @@ config.h.in~
 /etc/Wireless/RT2860/RT2860.dat
 /lib/.config
 /lib/libcurl/curl-config
+/lib/libcurl/lib/curl_config.h
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
 /lib/libcurl/docs/Makefile
