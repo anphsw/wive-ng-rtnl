@@ -8,6 +8,7 @@ fulldump
 autom4te.cache
 config.log
 config.status
+config.h.in~
 /etc/compile-date
 /etc/default/RT2860_default_novlan
 /etc/scripts/config.sh
@@ -122,3 +123,4 @@ config.status
 /user/chillispot/chillispot-1.1.0/stamp-h1
 /user/ntfs-3g/stamp-h1
 /user/zebra/stamp-h1
+/user/zebra/config.h.in~
