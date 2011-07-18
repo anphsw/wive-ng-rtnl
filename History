@@ -511,7 +511,6 @@
 67) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5.<br>
 68) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module(default/optimal 3600, 0-disable, 1000-minimal used).<br>
 
-
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

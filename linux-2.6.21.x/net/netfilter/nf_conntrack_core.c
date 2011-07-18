@@ -1238,34 +1238,39 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if ((pf == PF_INET && protonum == IPPROTO_TCP ) 
+	if (pf == PF_INET && protonum == IPPROTO_TCP ) {
+		/* flag enable disable flt */
+		int flt_enabled=0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	    || (ra_sw_nat_hook_rx && ra_sw_nat_hook_tx)
+		/* hardware nat support */
+		if (ra_sw_nat_hook_rx && ra_sw_nat_hook_tx)
+		    flt_enabled=1; 
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	    || (ipv4_conntrack_fastnat && bcm_nat_bind_hook)
+		/* software fastnat support */
+		if (ipv4_conntrack_fastnat && bcm_nat_bind_hook)
+		    flt_enabled=1; 
 #endif
-	) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-	    /* skip form nat offloaf http post/get/head */
-	    if (web_str_loaded) {
-		struct tcphdr _tcph, *tcph;
-		unsigned char _data[2], *data;
+		/* skip form nat offloaf http post/get/head */
+		if (flt_enabled && web_str_loaded) {
+		    struct tcphdr _tcph, *tcph;
+		    unsigned char _data[2], *data;
 
-		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
-		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
-		    ((data[0] == 'G' && data[1] == 'E') ||
-		     (data[0] == 'P' && data[1] == 'O') ||
-		     (data[0] == 'H' && data[1] == 'E'))) {
-			nat->info.nat_type |= NF_FAST_NAT_DENY;
+		    /* For URL filter; RFC-HTTP: GET, POST, HEAD */
+		    if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
+			(data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+			((data[0] == 'G' && data[1] == 'E') ||
+		        (data[0] == 'P' && data[1] == 'O') ||
+		        (data[0] == 'H' && data[1] == 'E'))) {
+			    nat->info.nat_type |= NF_FAST_NAT_DENY;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-			goto skip_hw;
+			    goto skip_hw;
 #else
-			goto skip_sw;
+			    goto skip_sw;
 #endif
+		    }
 		}
-	    }
 #endif /* XT_MATCH_WEBSTR */
 		/* Other traffic skip section
 		    .........
