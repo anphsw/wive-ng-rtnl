@@ -193,8 +193,8 @@ echo "==================START-L2TP-CLIENT======================="
     $MRU
     $MPPE
     $PEERDNS
-    lcp-echo-failure  30
-    lcp-echo-interval 5
+    lcp-echo-failure  5
+    lcp-echo-interval 30
     $LCPECHO
     " >> $ppp/options.l2tp
 

@@ -128,8 +128,8 @@ cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
 nomp
-lcp-echo-failure  30
-lcp-echo-interval 5
+lcp-echo-failure  20
+lcp-echo-interval 10
 $LCPECHO
 $PAP
 $CHAP

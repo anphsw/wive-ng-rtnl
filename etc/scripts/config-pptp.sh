@@ -152,8 +152,8 @@ echo "==================START-PPTP-CLIENT======================="
     cp -f /etc/ppp/options.template $OPTFILE
     printf "
     nomp
-    lcp-echo-failure  30
-    lcp-echo-interval 5
+    lcp-echo-failure  5
+    lcp-echo-interval 30
     $LCPECHO
     $PAP
     $CHAP
