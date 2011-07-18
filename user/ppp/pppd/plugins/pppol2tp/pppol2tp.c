@@ -24,12 +24,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "pppd.h"
-#include "pathnames.h"
-#include "fsm.h"
-#include "lcp.h"
-#include "ccp.h"
-#include "ipcp.h"
 #include <sys/stat.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -48,6 +42,12 @@
 #include <linux/if_ppp.h>
 #include <linux/if_pppox.h>
 #include <linux/if_pppol2tp.h>
+#include "pppd.h"
+#include "pathnames.h"
+#include "fsm.h"
+#include "lcp.h"
+#include "ccp.h"
+#include "ipcp.h"
 
 /* should be added to system's socket.h... */
 #ifndef SOL_PPPOL2TP
@@ -124,9 +124,7 @@ static int setdevname_pppol2tp(char **argv)
 		struct sockaddr pppol2tp;
 	} s;
 	int len = sizeof(s);
-	char **a;
-	int tmp;
-	int tmp_len = sizeof(tmp);
+	int tmp, tmp_len = sizeof(tmp);
 
 	if (device_got_set)
 		return 0;
@@ -197,9 +195,7 @@ static void send_config_pppol2tp(int mtu,
 			      int pcomp,
 			      int accomp)
 {
-	struct ifreq ifr;
 	int on = 1;
-	int fd;
 	char reorderto[16];
 	char tid[8];
 	char sid[8];
@@ -486,16 +482,6 @@ static void pppol2tp_check_options(void)
 	ip_up_hook = pppol2tp_ip_up_hook;
 	old_ip_down_hook = ip_down_hook;
 	ip_down_hook = pppol2tp_ip_down_hook;
-}
-
-/* Called just before pppd exits.
- */
-static void pppol2tp_cleanup(void)
-{
-	if (pppol2tp_debug_mask & PPPOL2TP_MSG_DEBUG) {
-		dbglog("pppol2tp: exiting.");
-	}
-	disconnect_pppol2tp();
 }
 
 void plugin_init(void)

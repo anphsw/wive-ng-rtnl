@@ -23,12 +23,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "pppd.h"
-#include "pathnames.h"
-#include "fsm.h"
-#include "lcp.h"
-#include "ccp.h"
-#include "ipcp.h"
 #include <sys/stat.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -39,6 +33,12 @@
 #include <signal.h>
 #include <linux/version.h>
 #include <linux/sockios.h>
+#include "pppd.h"
+#include "pathnames.h"
+#include "fsm.h"
+#include "lcp.h"
+#include "ccp.h"
+#include "ipcp.h"
 
 #ifndef aligned_u64
 /* should be defined in sys/types.h */
