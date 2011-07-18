@@ -29,6 +29,18 @@ getMacIf()
     LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
 }
 
+# LAN interface name -> $lan_if
+getLanIfName()
+{
+    if [ "$opmode" = "2" ]; then
+	lan_if="eth2"
+	lan2_if="eth2:9"
+    else
+	lan_if="br0"
+	lan2_if="br0:9"
+    fi
+}
+
 # WAN interface name -> $wan_if
 getWanIfName()
 {
@@ -55,18 +67,6 @@ getWanIfName()
         wan_upnp_if="ppp0"
     else
         wan_upnp_if=$wan_if
-    fi
-}
-
-# LAN interface name -> $lan_if
-getLanIfName()
-{
-    if [ "$opmode" = "2" ]; then
-	lan_if="eth2"
-	lan2_if="eth2:9"
-    else
-	lan_if="br0"
-	lan2_if="br0:9"
     fi
 }
 
