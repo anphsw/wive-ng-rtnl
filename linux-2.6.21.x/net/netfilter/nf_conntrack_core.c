@@ -1246,6 +1246,11 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    || (ipv4_conntrack_fastnat && bcm_nat_bind_hook)
 #endif
 	) {
+	    struct sk_buff *skb = *pskb;
+
+	    if (!skb)
+		goto out_flt;
+
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 	    /* skip form nat offloaf http post/get/head */
 	    if (web_str_loaded) {
@@ -1253,8 +1258,8 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		unsigned char _data[2], *data;
 
 		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
-		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+		if ((tcph = skb_header_pointer(skb, dataoff, sizeof(_tcph), &_tcph)) &&
+		    (data = skb_header_pointer(skb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
 		    ((data[0] == 'G' && data[1] == 'E') ||
 		     (data[0] == 'P' && data[1] == 'O') ||
 		     (data[0] == 'H' && data[1] == 'E'))) {
@@ -1267,21 +1272,22 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		}
 	    }
 #endif /* XT_MATCH_WEBSTR */
-#if defined(CONFIG_TUN) || defined(CONFIG_TUN_MODULE)
+//#if defined(CONFIG_TUN) || defined(CONFIG_TUN_MODULE)
 	    /* Skip tunnels traffic. Workaround for chillispot */
-	    if (strcmp((*pskb)->dev->name, "tun")==0)
+	    if (strcmp(skb->dev->name, "tun")==0)
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 			goto skip_hw;
 #else
 			goto skip_sw;
 #endif
-#endif /* TUN */
+//#endif /* TUN */
 		/* Other traffic skip section
 		    .........
 		    .........
 		    .........
 		*/
 	}
+out_flt:
 #endif /* RA_HW_NAT || BCM_NAT */
 /* end skip section */
 
