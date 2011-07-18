@@ -129,7 +129,7 @@ printf "
 lock
 nomp
 lcp-echo-failure  30
-lcp-echo-interval 10
+lcp-echo-interval 5
 $LCPECHO
 $PAP
 $CHAP
