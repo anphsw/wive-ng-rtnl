@@ -46,6 +46,7 @@ config.status
 /lib/libcurl/tests/Makefile
 /lib/libcurl/tests/server/Makefile
 /lib/libcurl/tests/unit/Makefile
+/lib/libcurl/lib/stamp-h1
 /lib/libevent/autom4te.cache/output.0
 /lib/libevent/autom4te.cache/output.1
 /lib/libevent/autom4te.cache/requests
@@ -65,6 +66,7 @@ config.status
 /lib/libevent/Makefile.in
 /lib/libevent/sample/Makefile
 /lib/libevent/test/Makefile
+/lib/libgmp/stamp-h1
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
 /user/busybox/include/bbconfigopts_bz2.h
@@ -116,3 +118,7 @@ config.status
 /user/wsc_upnp/libupnp-1.4.6/threadutil/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/doc/Makefile
 /user/wsc_upnp/libupnp-1.4.6/upnp/Makefile
+/user/wsc_upnp/libupnp-1.4.6/stamp-h1
+/user/chillispot/chillispot-1.1.0/stamp-h1
+/user/ntfs-3g/stamp-h1
+/user/zebra/stamp-h1
