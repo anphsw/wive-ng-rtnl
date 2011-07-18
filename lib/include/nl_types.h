@@ -30,7 +30,7 @@
 
 __BEGIN_DECLS
 
-#ifdef __UCLIBC_MJN3_ONLY__
+#if 0
 #warning "mjn3 FIXME: None of these prototypes have implementations."
 #endif
 

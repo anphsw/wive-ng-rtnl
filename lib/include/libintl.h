@@ -34,7 +34,7 @@
 
 __BEGIN_DECLS
 
-#ifdef __UCLIBC_MJN3_ONLY__
+#if 0
 #warning "mjn3 FIXME: gettext has a prototype but isn't defined."
 #warning "mjn3 FIXME: __OPTIMIZE__ is never defined."
 #endif
