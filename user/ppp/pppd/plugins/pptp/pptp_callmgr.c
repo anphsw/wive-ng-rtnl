@@ -24,6 +24,7 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <errno.h>
+#include "pppd.h"
 #include "pptp_callmgr.h"
 #include "pptp_ctrl.h"
 #include "pptp_msg.h"
@@ -191,7 +192,10 @@ int callmgr_main(int argc, char **argv, char **envp)
     do {
         int rc;
         fd_set read_set = call_set, write_set;
-        if (pptp_conn_is_dead(conn)) break;
+
+        if (pptp_conn_is_dead(conn)) 
+	    break;
+
         FD_ZERO (&write_set);
         if (pptp_conn_established(conn)) {
 	  FD_SET (unix_sock, &read_set);

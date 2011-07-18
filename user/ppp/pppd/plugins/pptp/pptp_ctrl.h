@@ -40,7 +40,10 @@ void pptp_conn_free(PPTP_CONN * conn);
 void pptp_conn_close(PPTP_CONN * conn, u_int8_t close_reason);
 /* hard close */
 void pptp_conn_destroy(PPTP_CONN * conn);
-
+/* dead test */
+int pptp_conn_is_dead(PPTP_CONN * conn);
+/* free */
+void pptp_conn_free(PPTP_CONN * conn);
 /* Add file descriptors used by pptp to fd_set. */
 void pptp_fd_set(PPTP_CONN * conn, fd_set * read_set, fd_set * write_set, int *max_fd);
 /* handle any pptp file descriptors set in fd_set, and clear them */

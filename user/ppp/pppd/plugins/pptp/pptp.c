@@ -76,7 +76,6 @@ static void launch_callmgr(int call_is,struct in_addr inetaddr, char *phonenr,in
 static int get_call_id(int sock, pid_t gre, pid_t pppd, u_int16_t *peer_call_id);
 
 static int route_add(const struct in_addr inetaddr, struct rtentry *rt);
-static int route_del(struct rtentry *rt);
 
 static option_t Options[] =
 {
@@ -190,6 +189,7 @@ static int pptp_start_client(void)
 
 	if (connect(pptp_fd,(struct sockaddr*)&dst_addr,sizeof(dst_addr)))
 	{
+		close(callmgr_sock);
 		close(pptp_fd);
 		error("PPTP: failed to connect PPTP socket (%s)\n",strerror(errno));
 		return -1;
@@ -213,6 +213,9 @@ static int pptp_connect(void)
 
 static void pptp_disconnect(void)
 {
+	if (pptp_server) 
+	    close(callmgr_sock);
+
 	close(pptp_fd);
 }
 
@@ -247,6 +250,7 @@ static int open_callmgr(int call_id,struct in_addr inetaddr, char *phonenr,int w
                 case 0: /* child */
                 {
                     close (fd);
+		    close(pptp_fd);
                     launch_callmgr(call_id,inetaddr, phonenr,window);
                 }
                 default: /* parent */
@@ -339,17 +343,6 @@ route_ctrl(int ctrl, struct rtentry *rt)
 
 	close(s);
 	return errno;
-}
-
-static int
-route_del(struct rtentry *rt)
-{
-	if (rt->rt_dev) {
-		route_ctrl(SIOCDELRT, rt);
-		free(rt->rt_dev), rt->rt_dev = NULL;
-	}
-
-	return 0;
 }
 
 static int

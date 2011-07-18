@@ -116,7 +116,6 @@ struct PPTP_CALL {
     void * closure;
 };
 
-
 /* PPTP error codes: ----------------------------------------------*/
 
 /* (General Error Codes) */
@@ -222,6 +221,7 @@ static void ctrlp_error( int result, int error, int cause,
     }
 }
 
+#ifdef CONFIG_PPP_DEBUG
 static const char *ctrl_msg_types[] = {
          "invalid control message type",
 /*         (Control Connection Management) */
@@ -244,6 +244,8 @@ static const char *ctrl_msg_types[] = {
 /*         (PPP Session Control) */
          "Set-Link-Info"                              /* 15 */
 };
+#endif
+
 #define MAX_CTRLMSG_TYPE 15
 
 /*** report a sent packet ****************************************************/
@@ -454,15 +456,17 @@ void pptp_conn_destroy(PPTP_CONN * conn)
     int i;
     assert(conn != NULL); assert(conn->call != NULL);
     /* destroy all open calls */
-    for (i = 0; i < vector_size(conn->call); i++)
-        pptp_call_destroy(conn, vector_get_Nth(conn->call, i));
-    /* notify */
-    if (conn->callback != NULL) conn->callback(conn, CONN_CLOSE_DONE);
-    sigpipe_close();
-    close(conn->inet_sock);
-    /* deallocate */
-    vector_destroy(conn->call);
-    conn->conn_state = CONN_DEAD;
+    if( !pptp_conn_is_dead(conn) ) {
+	for (i = 0; i < vector_size(conn->call); i++)
+    	    pptp_call_destroy(conn, vector_get_Nth(conn->call, i));
+	/* notify */
+	if (conn->callback != NULL) conn->callback(conn, CONN_CLOSE_DONE);
+	sigpipe_close();
+	close(conn->inet_sock);
+	/* deallocate */
+	vector_destroy(conn->call);
+	conn->conn_state = CONN_DEAD;
+    }
 }
 
 int pptp_conn_is_dead(PPTP_CONN * conn)
@@ -917,7 +921,7 @@ int ctrlp_disp(PPTP_CONN * conn, void * buffer, size_t size)
                 pptp_reset_timer();
                 /* call pptp_set_link. unless the user specified a quirk
                    and this quirk has a set_link hook, this is a noop */
-                log("Set link (call ID %u, peer's call ID %u).\n");
+                //log("Set link (call ID %u, peer's call ID %u).\n");
                 pptp_set_link(conn, call->peer_call_id);
                 if (call->callback != NULL)
                     call->callback(conn, call, CALL_OPEN_DONE);
