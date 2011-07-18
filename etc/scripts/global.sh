@@ -228,6 +228,25 @@ vpn_deadloop_fix()
     fi
 }
 
+vpn_watchdog()
+{
+    #Count PPPD signal 11 dead for workaround dead tunnel on 
+    #uplink cable down. Fix me later.
+    PPP_DEAD=0
+    PPP_SEG_FATL=`grep "Fatal signal 11" -c < /var/log/messages`
+    #for all type if pppd segfault need restart
+    if [ "$PPP_SEG_FATL" = "1" ]; then
+	PPP_DEAD=1
+    fi
+    if [ "$vpnType" = "1" ]; then
+	#for pptp only if only one pppd process is startes = server connect fail 
+	PPD_NUM_PROC=`ps | grep pppd | grep options.pptp -c`
+	if [ "$PPD_NUM_PROC" = "1" ]; then
+	    PPP_DEAD=1
+	fi
+    fi
+}
+
 get_txqlen()
 {
     #for memory save 16m device uses txqueuelen=100

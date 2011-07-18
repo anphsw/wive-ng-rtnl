@@ -20,9 +20,6 @@ ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
 
-# Count PPPD signal 11 dead for workaround dead tunnel on 
-# uplink cable down. Fix me later.
-PPP_DEAD=`grep "Fatal signal 11" -c < /var/log/messages`
 # Get VPN DGW mode
 vpnDGW=`nvram_get 2860 vpnDGW`
 #If pppoe mode and dgw in pppoe no need replace default gw
@@ -198,6 +195,7 @@ case "$1" in
 	#if dhcp disables restart must from internet.sh
 	#this is restart vpn and others if need
 	if [ "$vpnEnabled" = "on" ]; then
+	    vpn_watchdog
     	    if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
