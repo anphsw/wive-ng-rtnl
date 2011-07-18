@@ -57,7 +57,9 @@ struct option prog_opt[] = {
 	{"chrootdir", 1, 0, 't'},
 	{"version", 0, 0, 'v'},
 	{"help", 0, 0, 'h'},
+#ifdef USE_PRIVSEP
 	{"singleprocess", 0, 0, 's'},
+#endif
 	{NULL, 0, 0, 0}
 };
 
@@ -106,7 +108,9 @@ main(int argc, char *argv[])
 	char *username = NULL;
 	char *chrootdir = NULL;
 	int configtest = 0;
+#ifdef USE_PRIVSEP
 	int singleprocess = 0;
+#endif
 #ifdef HAVE_GETOPT_LONG
 	int opt_idx;
 #endif
@@ -184,9 +188,11 @@ main(int argc, char *argv[])
 		case 'c':
 			configtest = 1;
 			break;
+#ifdef USE_PRIVSEP
 		case 's':
 			singleprocess = 1;
 			break;
+#endif
 		case 'h':
 			usage();
 #ifdef HAVE_GETOPT_LONG
@@ -266,6 +272,7 @@ main(int argc, char *argv[])
 		exit(0);
 	}
 
+#ifdef USE_PRIVSEP
 	/* drop root privileges if requested. */
 	if (username) {
 		if (!singleprocess) {
@@ -279,6 +286,7 @@ main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+#endif
 
 	if ((fd = open(pidfile, O_RDONLY, 0)) > 0)
 	{
@@ -430,7 +438,7 @@ void main_loop(void)
 			if (next)
 				timer_handler(next);
 		}
-		else if ( rc == -1 ) {
+		else if ( rc == -1 && errno != EINTR ) {
 			flog(LOG_ERR, "poll error: %s", strerror(errno));
 		}
 
@@ -740,6 +748,7 @@ drop_root_privileges(const char *username)
 int
 check_conffile_perm(const char *username, const char *conf_file)
 {
+#if CHECK_PERM
 	struct stat stbuf;
 	struct passwd *pw = NULL;
 	FILE *fp = fopen(conf_file, "r");
@@ -771,6 +780,7 @@ check_conffile_perm(const char *username, const char *conf_file)
 		return (-1);
         }
 
+#endif
         return 0;
 }
 
