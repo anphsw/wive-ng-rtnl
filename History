@@ -510,6 +510,7 @@
 66) Expand ppp watchdog.<br>
 67) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5.<br>
 68) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module(default/optimal 3600, 0-disable, 1000-minimal used).<br>
+69) Fix kernel extencion at QoS enabled script.<br>
 
 <br><br>
 <b>For support see:</b><br>
