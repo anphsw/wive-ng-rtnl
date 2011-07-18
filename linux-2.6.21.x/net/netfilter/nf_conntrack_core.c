@@ -1272,7 +1272,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		}
 	    }
 #endif /* XT_MATCH_WEBSTR */
-//#if defined(CONFIG_TUN) || defined(CONFIG_TUN_MODULE)
+#if defined(CONFIG_TUN) || defined(CONFIG_TUN_MODULE)
 	    /* Skip tunnels traffic. Workaround for chillispot */
 	    if (strcmp(skb->dev->name, "tun")==0)
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
@@ -1280,7 +1280,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #else
 			goto skip_sw;
 #endif
-//#endif /* TUN */
+#endif /* TUN */
 		/* Other traffic skip section
 		    .........
 		    .........
