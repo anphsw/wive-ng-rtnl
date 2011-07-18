@@ -22,6 +22,8 @@ get_param() {
     DEBUG=`nvram_get 2860 vpnDebug`
     AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
     LCPECHO=`nvram_get 2860 vpnEnableLCP`
+    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
+    LCPINTR=`nvram_get 2860 vpnLCPInterval`
 }
 
 check_param() {
@@ -156,6 +158,11 @@ echo "==================START-L2TP-CLIENT======================="
 	LCPECHO=""
     fi
 
+    if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
+	LCPFAIL=5
+	LCPINTR=30
+    fi
+
     #clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
@@ -193,8 +200,8 @@ echo "==================START-L2TP-CLIENT======================="
     $MRU
     $MPPE
     $PEERDNS
-    lcp-echo-failure  5
-    lcp-echo-interval 30
+    lcp-echo-failure  $LCPFAIL
+    lcp-echo-interval $LCPINTR
     $LCPECHO
     " >> $ppp/options.l2tp
 

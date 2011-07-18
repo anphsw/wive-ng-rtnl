@@ -24,6 +24,8 @@ get_param() {
     IFACE=`nvram_get 2860 vpnInterface`
     AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
     LCPECHO=`nvram_get 2860 vpnEnableLCP`
+    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
+    LCPINTR=`nvram_get 2860 vpnLCPInterval`
     OPTFILE="/etc/ppp/options.pppoe"
 }
 
@@ -124,12 +126,17 @@ else
     LCPECHO=""
 fi
 
+if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
+    LCPFAIL=5
+    LCPINTR=30
+fi
+
 cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
 nomp
-lcp-echo-failure  20
-lcp-echo-interval 10
+lcp-echo-failure  $LCPFAIL
+lcp-echo-interval $LCPINTR
 $LCPECHO
 $PAP
 $CHAP

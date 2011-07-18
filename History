@@ -509,6 +509,8 @@
 65) Cleanup buildtree and more correct build.<br>
 66) Fix pptp plugin segfault on some time and some ISP.<br>
 67) Expand ppp watchdog.<br>
+68) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5(need add in webUI).<br>
+
 
 <br><br>
 <b>For support see:</b><br>

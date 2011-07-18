@@ -22,6 +22,8 @@ get_param() {
     DEBUG=`nvram_get 2860 vpnDebug`
     AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
     LCPECHO=`nvram_get 2860 vpnEnableLCP`
+    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
+    LCPINTR=`nvram_get 2860 vpnLCPInterval`
     OPTFILE="/etc/ppp/options.pptp"
 }
 
@@ -149,11 +151,16 @@ echo "==================START-PPTP-CLIENT======================="
 	LCPECHO=""
     fi
 
+    if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
+	LCPFAIL=5
+	LCPINTR=30
+    fi
+
     cp -f /etc/ppp/options.template $OPTFILE
     printf "
     nomp
-    lcp-echo-failure  5
-    lcp-echo-interval 30
+    lcp-echo-failure  $LCPFAIL
+    lcp-echo-interval $LCPINTR
     $LCPECHO
     $PAP
     $CHAP
