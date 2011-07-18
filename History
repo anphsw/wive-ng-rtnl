@@ -504,13 +504,12 @@
 60) xt_webstr now work with nat offload enabled (Content Filter work OK).<br>
 61) Add hardware led indication update firmware process(Use WPS and SEC LEDs).<br>
 62) Fix modutils code need used /etc for modules.* files(aliases and other).<br>
-63) Add workaround for work nat offload in chillispot mode(skip offload tun traffic).<br>
-64) Update radvd to stable tree.<br>
-65) Cleanup buildtree and more correct build.<br>
-66) Fix pptp plugin segfault on some time and some ISP.<br>
-67) Expand ppp watchdog.<br>
-68) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5.<br>
-69) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module(default/optimal 3600, 0-disable, 1000-minimal used).<br>
+63) Update radvd to stable tree.<br>
+64) Cleanup buildtree and more correct build.<br>
+65) Fix pptp plugin segfault on some time and some ISP.<br>
+66) Expand ppp watchdog.<br>
+67) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5.<br>
+68) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module(default/optimal 3600, 0-disable, 1000-minimal used).<br>
 
 
 <br><br>
