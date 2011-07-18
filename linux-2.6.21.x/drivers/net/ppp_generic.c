@@ -49,8 +49,11 @@
 #endif
 #include <asm/unaligned.h>
 #include <asm/atomic.h>
+
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 #include <linux/sched.h>
+/* limit cpu load */
+extern int ppp_cpu_load;
 #endif
 
 #define PPP_VERSION	"2.4.2"
@@ -1100,12 +1103,14 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	unsigned long load;
 
-	load = weighted_cpuload(0);
-	if (proto != PPP_LCP && load > 3600) {
-	    if ((ppp->debug & 1) && net_ratelimit())
-		printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
+	if (ppp_cpu_load >= 1000) {
+	    load = weighted_cpuload(0);
+	    if (proto != PPP_LCP && load > ppp_cpu_load) {
+		if ((ppp->debug & 1) && net_ratelimit())
+		    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
 
-	    goto drop;      /* Drop packet ... */
+		goto drop;      /* Drop packet ... */
+	    }
 	}
 #endif
 	if (proto < 0x8000) {

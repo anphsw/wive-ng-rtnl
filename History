@@ -510,6 +510,8 @@
 66) Fix pptp plugin segfault on some time and some ISP.<br>
 67) Expand ppp watchdog.<br>
 68) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5(need add in webUI).<br>
+69) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module.
+    (need add in webUI. default/optimal 3600 ticks, 0-disable, 1000-minimal used).<br>
 
 
 <br><br>

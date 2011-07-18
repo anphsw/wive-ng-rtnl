@@ -109,6 +109,12 @@ start() {
 	    echo "null,null" > /proc/pthrough/pppoe
 	    echo "null,null" > /proc/pthrough/ipv6
     fi
+    if [ "$vpnCpuLimit" != "" ] && [ "$vpnCpuLimit" != "0" ]; then
+	    $LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
+	    sysctl -w net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
+    else
+	    sysctl -w net.ipv4.ppp_cpu_load_limit=0
+    fi
 }
 
 stop() {
@@ -123,6 +129,7 @@ get_param() {
     simple_qos=`nvram_get 2860 simple_qos`
     QoSEnable=`nvram_get 2860 QoSEnable`
     hw_nat_bind=`nvram_get 2860 hw_nat_bind`
+    vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
 }
 
 case "$1" in

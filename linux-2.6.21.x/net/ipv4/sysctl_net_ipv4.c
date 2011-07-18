@@ -36,6 +36,13 @@ int bridge_fast_path_enabled=1;
 EXPORT_SYMBOL(bridge_fast_path_enabled);
 #endif
 
+#ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
+/* limit cpu load disable per default */
+int ppp_cpu_load=0;
+/* export for module support */
+EXPORT_SYMBOL(ppp_cpu_load);
+#endif
+
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 /* send sigusr to dhcpc at media state change */
 int send_sigusr_dhcpc=9;
@@ -833,6 +840,16 @@ ctl_table ipv4_table[] = {
 		.ctl_name	= NET_TCP_ALLOWED_BRIDGE_FASTPATH,
 		.procname	= "bridge_fastpath",
 		.data		= &bridge_fast_path_enabled,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler   = &proc_dointvec
+	},
+#endif
+#ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
+	{
+		.ctl_name	= NET_TCP_PPP_CPU_LOAD,
+		.procname	= "ppp_cpu_load_limit",
+		.data		= &ppp_cpu_load,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler   = &proc_dointvec
