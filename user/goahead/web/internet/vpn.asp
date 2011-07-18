@@ -20,13 +20,13 @@ var pptpACName   = (pptpType == '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : 
 
 function hideHint(ctl)
 {
-	var row = document.getElementById("vpn_hint_row");
+	var row = document.getElementById('vpn_hint_row');
 	row.innerHTML = '';
 }
 
 function showHint(key)
 {
-	var row = document.getElementById("vpn_hint_row");
+	var row = document.getElementById('vpn_hint_row');
 	var form = document.formVPNSetup;
 	var text = '<div class="hint"><font color="#0000ff"><b>HINT:</b></font>&nbsp;';
 	var show = true;
@@ -85,6 +85,20 @@ function showHint(key)
 			text += 'Enable adaptive LCP echo interval.';
 		else if (key=='vpn_pure_pppoe')
 			text += 'Enable pure WAN+PPPoE mode.';
+		else if (key=='vpn_cpu_limit')
+			text += 'This option prevents full CPU load by ppp_generic module. Minimum value is 1000, maximum value is 4000. Zero value disables this option.';
+		else if (key=='vpn_lcp_errors')
+			text += 'If this option is given, pppd will presume the peer to be dead if n LCP ' +
+				'echo-requests are sent without receiving a valid LCP echo-reply. If this happens, ' +
+				'pppd will terminate the connection. Use of this option requires a non-zero value ' +
+				'for the <b>LCP echo interval</b> parameter. This option can be used to enable ' +
+				'pppd to terminate after the physical connection has been broken (e.g., the ' +
+				'modem has hung up) in situations where no hardware modem control lines are available.';
+		else if (key=='vpn_lcp_interval')
+			text += 'If this option is given, pppd will send an LCP echo-request frame to the peer every ' +
+				'specified value of seconds. Normally the peer should respond to the echo-request by ' +
+				'sending an echo-reply. This option can be used with the <b>LCP echo failure</b> option ' +
+				'to detect that the peer is no longer connected.';
 		else if (key=='vpn_type')
 		{
 			text += 'Specify VPN access mode.<p class="val">';
@@ -138,7 +152,9 @@ function vpnSwitchClick(form)
 		form.vpn_peerdns, form.vpn_debug, form.vpn_nat, form.vpn_dgw,
 		form.vpn_mtu_type, form.vpn_pppoe_iface, form.vpn_type,
 		form.vpn_lcp, form.lanauth_access, form.vpn_pure_pppoe,
-		form.vpn_pppoe_service
+		form.vpn_pppoe_service,
+		form.vpn_cpu_limit, form.vpn_lcp_errors, form.vpn_lcp_interval,
+		form.vpn_cpu_limit_type
 		], form.vpn_enabled.checked );
 }
 
@@ -161,6 +177,25 @@ function mtuChange(form)
 	}
 }
 
+function cpuLimitChange(form)
+{
+	var vpn_cpu_limit_select = document.getElementById("vpn_cpu_limit_select");
+	var vpn_cpu_limit_field  = document.getElementById("vpn_cpu_limit_field");
+	
+	if (form.vpn_cpu_limit_type.value == '1')
+	{
+		vpn_cpu_limit_field.style.display = '';
+		vpn_cpu_limit_select.setAttribute("class", "half");
+		vpn_cpu_limit_field.setAttribute("class", "half");
+	}
+	else
+	{
+		vpn_cpu_limit_select.setAttribute("class", "mid");
+		vpn_cpu_limit_field.style.display = 'none';
+		form.vpn_cpu_limit.value = form.vpn_cpu_limit_type.value;
+	}
+}
+
 function bodyOnLoad(form)
 {
 	initializeForm(form);
@@ -173,10 +208,19 @@ function bodyOnLoad(form)
 			form.vpn_mtu_type.value = form.vpn_mtu_select.options[i].value;
 			break;
 		}
+	
+	var vpn_cpu_limit_select = document.getElementById('vpn_cpu_limit_select');
+	for (var i=0; i < vpn_cpu_limit_select.options.length; i++)
+		if (form.vpn_cpu_limit_type.options[i].value == form.vpn_cpu_limit.value)
+		{
+			form.vpn_cpu_limit_type.value = form.vpn_cpu_limit_select.options[i].value;
+			break;
+		}
 
 	vpnSwitchClick(form);
 	selectType(form);
 	mtuChange(form);
+	cpuLimitChange(form);
 	
 	showVPNStatus();
 }
@@ -262,6 +306,8 @@ function initializeForm(form)
 	var vpn_auth   = '<% getCfgGeneral(1, "vpnAuthProtocol"); %>';
 	var lcp        = '<% getCfgGeneral(1, "vpnEnableLCP"); %>';
 	var pure_pppoe = '<% getCfgGeneral(1, "vpnPurePPPOE"); %>';
+	var lcp_errors = '<% getCfgGeneral(1, "vpnLCPFailure"); %>';
+	var lcp_int    = '<% getCfgGeneral(1, "vpnLCPInterval"); %>';
 
 	var kabinet_built = '<% getLANAUTHBuilt(); %>';
 
@@ -284,6 +330,8 @@ function initializeForm(form)
 	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_pure_pppoe.checked = (pure_pppoe == '1');
 	form.vpn_auth_type.value = vpn_auth;
+	form.vpn_lcp_errors.value= lcp_errors;
+	form.vpn_lcp_interval.value = lcp_int;
 	
 	selectType(form);
 }
@@ -303,6 +351,10 @@ function formCheck(form)
 {
 	if ((form.vpn_type.value != '0') || (!form.vpn_enabled.checked))
 		form.vpn_pure_pppoe.checked = false;
+	
+	var vpn_cpu_limit = form.vpn_cpu_limit.value*1;
+	if ((vpn_cpu_limit != 0) && ((vpn_cpu_limit < 1000) || (vpn_cpu_limit > 4000)))
+		alert('Invalid CPU limit value!');
 }
 
 </script>
@@ -426,7 +478,110 @@ tunnel on your Router.
 	</tr>
 </table>
 
-<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none">
+<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none;">
+	<tr onMouseOver="showHint('vpn_cpu_limit')" onMouseOut="hideHint('vpn_cpu_limit')">
+		<td width="50%">
+			<b>CPU limitation:</b>
+		</td>
+		<td width="50%">
+			<input id="vpn_cpu_limit_field" name="vpn_cpu_limit" disabled="disabled"
+				type="text" class="half" style="display: none;"
+				value="<% getCfgGeneral(1, "vpnCpuLimit"); %>" >
+			<select id="vpn_cpu_limit_select" disabled="disabled" name="vpn_cpu_limit_type" onChange="cpuLimitChange(this.form);" class="mid" >
+				<option value="0">Disabled</option>
+				<option value="1" selected="selected">Custom</option>
+				<option value="1000">1000</option>
+				<option value="1100">1100</option>
+				<option value="1200">1200</option>
+				<option value="1300">1300</option>
+				<option value="1400">1400</option>
+				<option value="1500">1500</option>
+				<option value="1600">1600</option>
+				<option value="1700">1700</option>
+				<option value="1800">1800</option>
+				<option value="1900">1900</option>
+				<option value="2000">2000</option>
+				<option value="2100">2100</option>
+				<option value="2200">2200</option>
+				<option value="2300">2300</option>
+				<option value="2400">2400</option>
+				<option value="2500">2500</option>
+				<option value="2600">2600</option>
+				<option value="2700">2700</option>
+				<option value="2800">2800</option>
+				<option value="2900">2900</option>
+				<option value="3000">3000</option>
+				<option value="3100">3100</option>
+				<option value="3200">3200</option>
+				<option value="3300">3300</option>
+				<option value="3400">3400</option>
+				<option value="3500">3500</option>
+				<option value="3600">3600</option>
+				<option value="3700">3700</option>
+				<option value="3800">3800</option>
+				<option value="3900">3900</option>
+				<option value="4000">4000</option>
+			</select>
+		</td>
+	</tr>
+	<tr onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
+		<td width="50%">
+			<b>LCP echo interval:</b>
+		</td>
+		<td width="50%">
+			<select id="vpn_lcp_interval_select" disabled="disabled" name="vpn_lcp_interval" class="mid">
+				<option value="5">5</option>
+				<option value="10">10</option>
+				<option value="15">15</option>
+				<option value="20">20</option>
+				<option value="25">25</option>
+				<option value="30" selected="selected">30</option>
+				<option value="35">35</option>
+				<option value="40">40</option>
+				<option value="45">45</option>
+				<option value="50">50</option>
+				<option value="55">55</option>
+				<option value="60">60</option>
+				<option value="65">65</option>
+				<option value="70">70</option>
+				<option value="75">75</option>
+				<option value="80">80</option>
+				<option value="85">85</option>
+				<option value="90">90</option>
+				<option value="95">95</option>
+				<option value="100">100</option>
+			</select>
+		</td>
+	</tr>
+	<tr onMouseOver="showHint('vpn_lcp_errors')" onMouseOut="hideHint('vpn_lcp_errors')">
+		<td width="50%">
+			<b>LCP echo failure:</b>
+		</td>
+		<td width="50%">
+			<select id="vpn_lcp_errors_select" disabled="disabled" name="vpn_lcp_errors" class="mid">
+				<option value="5" selected="selected">5</option>
+				<option value="10">10</option>
+				<option value="15">15</option>
+				<option value="20">20</option>
+				<option value="25">25</option>
+				<option value="30">30</option>
+				<option value="35">35</option>
+				<option value="40">40</option>
+				<option value="45">45</option>
+				<option value="50">50</option>
+				<option value="55">55</option>
+				<option value="60">60</option>
+				<option value="65">65</option>
+				<option value="70">70</option>
+				<option value="75">75</option>
+				<option value="80">80</option>
+				<option value="85">85</option>
+				<option value="90">90</option>
+				<option value="95">95</option>
+				<option value="100">100</option>
+			</select>
+		</td>
+	</tr>
 	<tr id="vpn_mppe_row">
 		<td width="50%" onMouseOver="showHint('vpn_mppe')" onMouseOut="hideHint('vpn_mppe')" >
 			<input disabled="disabled" name="vpn_mppe" type="checkbox">

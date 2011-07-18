@@ -474,6 +474,9 @@ const parameter_fetch_t vpn_args[] =
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
 	{ T("vpn_pppoe_service"),      "vpnService",           0 },
 	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2 },
+	{ T("vpn_cpu_limit"),          "vpnCpuLimit",          0 },
+	{ T("vpn_lcp_errors"),         "vpnLCPFailure",        0 },
+	{ T("vpn_lcp_interval"),       "vpnLCPInterval",       0 },
 	{ NULL, 0, 0 } // Terminator
 };
 
