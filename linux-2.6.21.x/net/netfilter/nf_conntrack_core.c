@@ -1273,7 +1273,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    .........
 		*/
 	}
-out_flt:
 #endif /* RA_HW_NAT || BCM_NAT */
 /* end skip section */
 
