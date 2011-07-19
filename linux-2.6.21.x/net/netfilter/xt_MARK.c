@@ -46,7 +46,7 @@ target_v0(struct sk_buff **pskb,
 	(*pskb)->mark = markinfo->mark;
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if(ipv4_conntrack_fastnat && nat) {
+	if(ipv4_conntrack_fastnat) {
 	    nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
 	    if (nat)
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
@@ -75,7 +75,7 @@ target_v1(struct sk_buff **pskb,
 	case XT_MARK_SET:
 		mark = markinfo->mark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if(ipv4_conntrack_fastnat && nat) {
+		if(ipv4_conntrack_fastnat) {
 		    nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
 		    if (nat)
 			nat->info.nat_type |= NF_FAST_NAT_DENY;

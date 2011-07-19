@@ -65,8 +65,11 @@ target(struct sk_buff **pskb,
 			if (newmark != ct->mark) {
 				ct->mark = newmark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-				if (ipv4_conntrack_fastnat && (nat = nfct_nat(ct)))
-				    nat->info.nat_type |= NF_FAST_NAT_DENY;
+				if (ipv4_conntrack_fastnat) {
+				    nat = nfct_nat(ct)
+				    if(nat)
+					nat->info.nat_type |= NF_FAST_NAT_DENY;
+				}
 #endif
 				nf_conntrack_event_cache(IPCT_MARK, *pskb);
 			}
