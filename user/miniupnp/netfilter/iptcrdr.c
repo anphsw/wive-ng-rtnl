@@ -34,12 +34,8 @@
 #define ip_nat_range		nf_nat_range
 #define IPTC_HANDLE		struct iptc_handle *
 #else
-/* IPTABLES API version < 1.4.3 */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-#include <linux/netfilter_ipv4/ip_nat.h>
-#else
 #include <linux/netfilter/nf_nat.h>
-#endif
+//#include <net/netfilter/nf_nat.h>
 #define IPTC_HANDLE		iptc_handle_t
 #endif
 
@@ -621,14 +617,15 @@ get_dnat_target(const char * daddr, unsigned short dport)
 	       + IPT_ALIGN(sizeof(struct ip_nat_multi_range));
 	target = calloc(1, size);
 	target->u.target_size = size;
-	strncpy(target->u.user.name, "DNAT", sizeof(target->u.user.name));
+	strncpy(target->u.user.name, "DNAT", IPT_FUNCTION_MAXNAMELEN);
 	/* one ip_nat_range already included in ip_nat_multi_range */
 	mr = (struct ip_nat_multi_range *)&target->data[0];
 	mr->rangesize = 1;
 	range = &mr->range[0];
 	range->min_ip = range->max_ip = inet_addr(daddr);
 	range->flags |= IP_NAT_RANGE_MAP_IPS;
-	range->min.all = range->max.all = htons(dport);
+	range->max.all = htons(dport);
+	range->min.all = htons(dport);
 	range->flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 	return target;
 }
