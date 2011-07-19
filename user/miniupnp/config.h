@@ -33,7 +33,7 @@
 
 /* Uncomment the following line to enable caching of results of
  * the getifstats() function */
-/*#define ENABLE_GETIFSTATS_CACHING*/
+#define ENABLE_GETIFSTATS_CACHING
 /* The cache duration is indicated in seconds */
 #define GETIFSTATS_CACHING_DURATION 2
 
@@ -48,7 +48,7 @@
 #define USE_DAEMON
 
 /* Uncomment the following line to enable lease file support */
-/*#define ENABLE_LEASEFILE*/
+#define ENABLE_LEASEFILE
 
 /* Define one or none of the two following macros in order to make some
  * clients happy. It will change the XML Root Description of the IGD.

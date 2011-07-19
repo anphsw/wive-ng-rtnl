@@ -259,7 +259,7 @@ echo "" >> ${CONFIGFILE}
 
 echo "/* Uncomment the following line to enable caching of results of" >> ${CONFIGFILE}
 echo " * the getifstats() function */" >> ${CONFIGFILE}
-echo "/*#define ENABLE_GETIFSTATS_CACHING*/" >> ${CONFIGFILE}
+echo "#define ENABLE_GETIFSTATS_CACHING" >> ${CONFIGFILE}
 echo "/* The cache duration is indicated in seconds */" >> ${CONFIGFILE}
 echo "#define GETIFSTATS_CACHING_DURATION 2" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
@@ -277,7 +277,7 @@ echo "#define USE_DAEMON" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Uncomment the following line to enable lease file support */" >> ${CONFIGFILE}
-echo "/*#define ENABLE_LEASEFILE*/" >> ${CONFIGFILE}
+echo "#define ENABLE_LEASEFILE" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Define one or none of the two following macros in order to make some" >> ${CONFIGFILE}
