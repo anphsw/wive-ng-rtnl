@@ -19,6 +19,7 @@
 #include <linux/netfilter.h>
 #include <linux/netfilter/nf_conntrack_common.h>
 #include <net/netfilter/nf_conntrack.h>
+extern int ipv4_conntrack_fastnat;
 #endif
 
 MODULE_LICENSE("GPL");
@@ -56,14 +57,16 @@ target_v1(struct sk_buff **pskb,
 	struct  nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
 
-	ct = nf_ct_get(*pskb, &ctinfo);
-	nat = nfct_nat(ct);
+	if (ipv4_conntrack_fastnat) {
+	    ct = nf_ct_get(*pskb, &ctinfo);
+	    nat = nfct_nat(ct);
+	}
 #endif
 	switch (markinfo->mode) {
 	case XT_MARK_SET:
 		mark = markinfo->mark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if(nat)
+		if(ipv4_conntrack_fastnat && nat)
 		    nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
 		break;
