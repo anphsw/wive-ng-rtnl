@@ -238,34 +238,6 @@ start() {
 		$LOG "Add portforward rules"
 		/etc/portforward "$wan_ipaddr"
 	    fi
-	    ####################UPNPRULES###############################
-	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ] && [ "$vpnEnabled" != "on" ]; then
-		$LOG "Add base upnp rules"
-        	iptables -t nat -N MINIUPNPD
-        	iptables -t nat -F MINIUPNPD
-        	iptables -t filter -N MINIUPNPD
-        	iptables -t filter -F MINIUPNPD
-        	iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
-        	iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
-    	    fi
-	    #######################DMZ##################################
-	    if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
-		iptables -t nat -N DMZ
-		iptables -t nat -A PREROUTING -j DMZ
-		$LOG "DMZ enabled for $DMZIPAddress"
-		if [ "$vpnEnabled" = "on" ]; then
-		    if [ "$vpnType" = "1" ]; then
-			#pptp
-			iptables -t nat -A DMZ -p tcp -d $DMZIPAddress --dport 1723 -j RETURN
-			iptables -t nat -A DMZ -p gre -d $DMZIPAddress -j RETURN
-		    elif [ "$vpnType" = "2" ]; then
-			#l2tp
-			iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
-		    fi
-		fi
-		iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
-		iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
-	    fi
 	    #######################NAT##################################
 	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
 		if [ "$vpnPurePPPOE" != "1" ]; then
@@ -301,10 +273,41 @@ start() {
 	    $LOG "Call to add VPN netfilter rules."
 	    /etc/ppp_firewall
 	fi
+############################################OTHERS########################################
+	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
+	    ################################UPNPRULES######################################
+	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ] && [ "$vpnEnabled" != "on" ]; then
+		$LOG "Add base upnp rules"
+    		iptables -t nat -N MINIUPNPD
+    		iptables -t nat -F MINIUPNPD
+    		iptables -t filter -N MINIUPNPD
+    		iptables -t filter -F MINIUPNPD
+    		iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
+    		iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
+    	    fi
+	fi
+############################################DMZ#########################################
+	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
+    	    iptables -t nat -N DMZ
+    	    iptables -t nat -A PREROUTING -j DMZ
+    	    $LOG "DMZ enabled for $DMZIPAddress"
+    	    if [ "$vpnEnabled" = "on" ]; then
+        	if [ "$vpnType" = "1" ]; then
+		    #pptp
+	    	    iptables -t nat -A DMZ -p tcp -d $DMZIPAddress --dport 1723 -j RETURN
+		    iptables -t nat -A DMZ -p gre -d $DMZIPAddress -j RETURN
+		elif [ "$vpnType" = "2" ]; then
+	    	    #l2tp
+	    	    iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
+		fi
+	    fi
+	    iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
+	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
+	fi
 #########################################ACCEPT_ESTABLISHED################################
-	iptables -A FORWARD $STATE_EST -j ACCEPT
+    iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
-	$LOG "Iptables rules add OK..."
+    $LOG "Iptables rules add OK..."
 }
 
 
