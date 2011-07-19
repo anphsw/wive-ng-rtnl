@@ -54,7 +54,7 @@ target_v1(struct sk_buff **pskb,
 	int mark=0;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_nat *nat;
-	struct  nf_conn *ct;
+	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
 
 	if (ipv4_conntrack_fastnat) {

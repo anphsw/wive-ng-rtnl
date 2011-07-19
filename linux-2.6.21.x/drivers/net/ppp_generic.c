@@ -1103,7 +1103,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	unsigned long load;
 
-	if (ppp_cpu_load >= 1000) {
+	if (ppp_cpu_load >= 100) {
 	    load = weighted_cpuload(0);
 	    if (proto != PPP_LCP && load > ppp_cpu_load) {
 		if ((ppp->debug & 1) && net_ratelimit())
