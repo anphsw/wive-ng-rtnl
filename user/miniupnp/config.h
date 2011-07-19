@@ -61,7 +61,7 @@
 /*#define ENABLE_IPV6*/
 
 /* Enable the support of IGD v2 specification */
-/*#define IGD_V2*/
+#define IGD_V2
 
 #ifdef IGD_V2
 /* Enable DeviceProtection service (IGDv2) */
@@ -81,10 +81,10 @@
 #define USE_IFNAME_IN_RULES
 
 /* Experimental NFQUEUE support. */
-/*#define ENABLE_NFQUEUE*/
+/* #define ENABLE_NFQUEUE */
 
 /* Enable to make MiniUPnPd more strict about UPnP conformance
  * and the messages it receive from control points */
-/*#define UPNP_STRICT*/
+#define UPNP_STRICT
 
 #endif

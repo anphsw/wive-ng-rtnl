@@ -293,7 +293,7 @@ echo "/*#define ENABLE_IPV6*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Enable the support of IGD v2 specification */" >> ${CONFIGFILE}
-echo "/*#define IGD_V2*/" >> ${CONFIGFILE}
+echo "#define IGD_V2" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "#ifdef IGD_V2" >> ${CONFIGFILE}
@@ -317,12 +317,12 @@ echo "#define USE_IFNAME_IN_RULES" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Experimental NFQUEUE support. */" >> ${CONFIGFILE}
-echo "/*#define ENABLE_NFQUEUE*/" >> ${CONFIGFILE}
+echo "/* #define ENABLE_NFQUEUE */" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Enable to make MiniUPnPd more strict about UPnP conformance" >> ${CONFIGFILE}
 echo " * and the messages it receive from control points */" >> ${CONFIGFILE}
-echo "/*#define UPNP_STRICT*/" >> ${CONFIGFILE}
+echo "#define UPNP_STRICT" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "#endif" >> ${CONFIGFILE}
