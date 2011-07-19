@@ -1237,7 +1237,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (pf == PF_INET && (protonum == IPPROTO_ICMP || protonum == IPPROTO_TCP || protonum == IPPROTO_GRE)) {
+	if (pf == PF_INET && nat && (protonum == IPPROTO_ICMP || protonum == IPPROTO_TCP || protonum == IPPROTO_GRE)) {
 		/* flag enable disable flt */
 		int nat_offload_enabled=0, need_skip=0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
@@ -1251,7 +1251,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    nat_offload_enabled=1; 
 
 		/* filter gre traffic skip all sw_nat and checks */
-		if (ipv4_conntrack_fastnat && protonum == IPPROTO_GRE && nat) {
+		if (ipv4_conntrack_fastnat && protonum == IPPROTO_GRE) {
 		    nat->info.nat_type |= NF_FAST_NAT_DENY;
 		    goto skip_sw;
 		}
@@ -1264,7 +1264,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 		/* skip http post/get/head traffic for correct webstr work */
-		if (nat_offload_enabled && web_str_loaded && nat && protonum == IPPROTO_TCP) {
+		if (nat_offload_enabled && web_str_loaded && protonum == IPPROTO_TCP) {
 		    struct tcphdr _tcph, *tcph;
 		    unsigned char _data[2], *data;
 
@@ -1291,7 +1291,7 @@ filter:
 		if (need_skip) {
 			/* sw_nat operate only udp/tcp */
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-			if(ipv4_conntrack_fastnat && nat)
+			if(ipv4_conntrack_fastnat)
 			    nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)

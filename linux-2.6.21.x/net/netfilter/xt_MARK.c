@@ -37,8 +37,8 @@ target_v0(struct sk_buff **pskb,
 	  const void *targinfo)
 {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct nf_conn_nat *nat;
-	struct nf_conn *ct;
+	struct nf_conn_nat *nat=NULL;
+	struct nf_conn *ct=NULL;
 	enum ip_conntrack_info ctinfo;
 #endif
 	const struct xt_mark_target_info *markinfo = targinfo;
@@ -64,17 +64,12 @@ target_v1(struct sk_buff **pskb,
 	  const void *targinfo)
 {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct nf_conn_nat *nat;
-	struct nf_conn *ct;
+	struct nf_conn_nat *nat=NULL;
+	struct nf_conn *ct=NULL;
 	enum ip_conntrack_info ctinfo;
 #endif
 	const struct xt_mark_target_info_v1 *markinfo = targinfo;
 	int mark=0;
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	nat=NULL;
-	ct=NULL;
-#endif
 
 	switch (markinfo->mode) {
 	case XT_MARK_SET:

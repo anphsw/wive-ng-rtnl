@@ -513,6 +513,7 @@
 69) Fix kernel extencion at QoS enabled script.<br>
 70) Fixwork pmtu discovery at hw_nat enabled.<br>
 71) xt_MARK now work with sw_nat enabled(disable offload only for marked packets).<br>
+72) Fix regression in conntrack code(kernel crash at filter connections in complex mode offload NAT).<br>
 
 <br><br>
 <b>For support see:</b><br>
