@@ -514,6 +514,9 @@
 70) Fix work pmtu discovery at hw_nat enabled.<br>
 71) xt_MARK now work with sw_nat enabled(disable offload only for marked packets).<br>
 72) Fix regression in conntrack code(kernel crash at filter connections in complex mode offload NAT).<br>
+73) Disable modules autoload from iptables. Need direct modprobe in init scripts.<br>
+74) Replace various uses of num_physpages by totalram_pages. Sizing of memory allocations shouldn't depend 
+    on the number of physical pages found in a system.<br>
 
 <br><br>
 <b>For support see:</b><br>

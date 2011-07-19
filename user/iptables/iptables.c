@@ -1834,6 +1834,11 @@ int iptables_insmod(const char *modname, const char *modprobe, int quiet)
 	char *argv[4];
 	int status;
 
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#endif
+
 	/* If they don't explicitly set it, read out of kernel */
 	if (!modprobe) {
 		buf = get_modprobe();
