@@ -1289,8 +1289,10 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 filter:
 		if (need_skip) {
 			/* sw_nat operate only udp/tcp */
-			if(nat)
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+			if(ipv4_conntrack_fastnat && nat)
 			    nat->info.nat_type |= NF_FAST_NAT_DENY;
+#endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 			goto skip_hw;
 #else
