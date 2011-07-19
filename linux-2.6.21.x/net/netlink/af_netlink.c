@@ -1774,10 +1774,10 @@ static int __init netlink_proto_init(void)
 	if (!nl_table)
 		goto panic;
 
-	if (num_physpages >= (128 * 1024))
-		max = num_physpages >> (21 - PAGE_SHIFT);
+	if (totalram_pages >= (128 * 1024))
+		limit = totalram_pages >> (21 - PAGE_SHIFT);
 	else
-		max = num_physpages >> (23 - PAGE_SHIFT);
+		limit = totalram_pages >> (23 - PAGE_SHIFT);
 
 	order = get_bitmask_order(max) - 1 + PAGE_SHIFT;
 	max = (1UL << order) / sizeof(struct hlist_head);

@@ -400,7 +400,7 @@ void *vmap(struct page **pages, unsigned int count,
 {
 	struct vm_struct *area;
 
-	if (count > num_physpages)
+	if (count > totalram_pages)
 		return NULL;
 
 	area = get_vm_area((count << PAGE_SHIFT), flags);
@@ -485,7 +485,7 @@ static void *__vmalloc_node(unsigned long size, gfp_t gfp_mask, pgprot_t prot,
 	struct vm_struct *area;
 
 	size = PAGE_ALIGN(size);
-	if (!size || (size >> PAGE_SHIFT) > num_physpages)
+	if (!size || (size >> PAGE_SHIFT) > totalram_pages)
 		return NULL;
 
 	area = get_vm_area_node(size, VM_ALLOC, node, gfp_mask);

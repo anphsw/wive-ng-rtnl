@@ -1733,9 +1733,9 @@ int __init nf_conntrack_init(void)
 #if 0
 	if (!nf_conntrack_htable_size) {
 		nf_conntrack_htable_size
-			= (((num_physpages << PAGE_SHIFT) / 16384)
+			= (((totalram_pages << PAGE_SHIFT) / 16384)
 			   / sizeof(struct list_head));
-		if (num_physpages > (1024 * 1024 * 1024 / PAGE_SIZE))
+		if (totalram_pages > (1024 * 1024 * 1024 / PAGE_SIZE))
 			nf_conntrack_htable_size = 8192;
 		if (nf_conntrack_htable_size < 16)
 			nf_conntrack_htable_size = 16;

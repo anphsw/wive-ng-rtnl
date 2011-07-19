@@ -622,13 +622,13 @@ asmlinkage void __init start_kernel(void)
 	if (efi_enabled)
 		efi_enter_virtual_mode();
 #endif
-	fork_init(num_physpages);
+	fork_init(totalram_pages);
 	proc_caches_init();
 	buffer_init();
 	unnamed_dev_init();
 	key_init();
 	security_init();
-	vfs_caches_init(num_physpages);
+	vfs_caches_init(totalram_pages);
 	radix_tree_init();
 	signals_init();
 	/* rootfs populating might need page-writeback */
