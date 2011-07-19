@@ -18,7 +18,6 @@
 #define _LIBIPTC_H
 /* Library which manipulates filtering rules. */
 
-#include <limits.h>
 #include <libiptc/ipt_kernel_headers.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 
@@ -170,7 +169,7 @@ int iptc_set_counter(const ipt_chainlabel chain,
 int iptc_commit(iptc_handle_t *handle);
 
 /* Get raw socket. */
-int iptc_get_raw_socket();
+int iptc_get_raw_socket(void);
 
 /* Translates errno numbers into more human-readable form than strerror. */
 const char *iptc_strerror(int err);
