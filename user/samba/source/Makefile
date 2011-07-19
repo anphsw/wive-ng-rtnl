@@ -40,7 +40,7 @@ SMBLOGFILE = /var/log/samba.log
 NMBLOGFILE = /var/log/nmbd.log
 CONFIGFILE = /etc/smb.conf
 LMHOSTSFILE = /etc/lmhosts
-DRIVERFILE = $(LIBDIR)/printers.def
+DRIVERFILE = /etc/printers.def
 PASSWD_PROGRAM = /bin/passwd
 # This is where smbpasswd et al go
 PRIVATEDIR = $(LIBDIR)
