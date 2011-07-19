@@ -239,7 +239,7 @@ start() {
 		/etc/portforward "$wan_ipaddr"
 	    fi
 	    ####################UPNPRULES###############################
-	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ] && [ "$vpnEnabled" != "on" ]; then
 		$LOG "Add base upnp rules"
         	iptables -t nat -N MINIUPNPD
         	iptables -t nat -F MINIUPNPD
@@ -296,13 +296,13 @@ start() {
 	    fi
 	    ###########################################################
 	fi
-#########################################ACCEPT_ESTABLISHED################################
-	iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################VPNRULES#######################################
 	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
-	    $LOG "Call to add VPN netfilter rules"
+	    $LOG "Call to add VPN netfilter rules."
 	    /etc/ppp_firewall
 	fi
+#########################################ACCEPT_ESTABLISHED################################
+	iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
 	$LOG "Iptables rules add OK..."
 }

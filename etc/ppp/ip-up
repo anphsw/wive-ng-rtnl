@@ -97,8 +97,6 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     fi
 
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
-    ##########################This always after route mod ########################################################################
-
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
     if [ "$NAT" = "on" ] && [ "$opmode" != "0" ]; then
@@ -119,10 +117,17 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
 	    fi
 	fi
+	if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
+	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
+        fi
 	#rules for upnp
-	if [ "$upnp" = "1" ]; then
-    	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
-    	    echo "iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD" >> /etc/ppp_firewall
+	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+    	    echo "iptables -t nat -N MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t nat -F MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t filter -N MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t filter -F MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
     fi
     chmod 777 /etc/ppp_firewall
@@ -138,11 +143,6 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 
     $LOG "Enable forwarding for $PPP_IFACE interface"
     echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
-
-    if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
-	$LOG "Add portforward rules"
-	/etc/portforward_vpn "A" "$PPP_IFACE" "$PPP_LOCAL"
-    fi
 
 #run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
