@@ -25,8 +25,10 @@ extern int ipv4_conntrack_fastnat;
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Marc Boucher <marc@mbsi.ca>");
 MODULE_DESCRIPTION("Xtables: packet mark modification");
+#if 0
 MODULE_ALIAS("ipt_MARK");
 MODULE_ALIAS("ip6t_MARK");
+#endif
 
 static unsigned int
 target_v0(struct sk_buff **pskb,
