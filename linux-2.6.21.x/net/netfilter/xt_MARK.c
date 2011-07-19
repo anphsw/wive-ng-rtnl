@@ -15,6 +15,12 @@
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_MARK.h>
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#include <linux/netfilter.h>
+#include <linux/netfilter/nf_conntrack_common.h>
+#include <net/netfilter/nf_conntrack.h>
+#endif
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Marc Boucher <marc@mbsi.ca>");
 MODULE_DESCRIPTION("Xtables: packet mark modification");
@@ -44,11 +50,22 @@ target_v1(struct sk_buff **pskb,
 	  const void *targinfo)
 {
 	const struct xt_mark_target_info_v1 *markinfo = targinfo;
-	int mark = 0;
+	int mark=0;
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	struct nf_conn_nat *nat;
+	struct  nf_conn *ct;
+	enum ip_conntrack_info ctinfo;
 
+	ct = nf_ct_get(*pskb, &ctinfo);
+	nat = nfct_nat(ct);
+#endif
 	switch (markinfo->mode) {
 	case XT_MARK_SET:
 		mark = markinfo->mark;
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+		if(nat)
+		    nat->info.nat_type |= NF_FAST_NAT_DENY;
+#endif
 		break;
 
 	case XT_MARK_AND:

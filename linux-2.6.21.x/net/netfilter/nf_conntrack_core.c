@@ -1238,22 +1238,32 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (pf == PF_INET && protonum == IPPROTO_TCP ) {
+	if (pf == PF_INET && (protonum == IPPROTO_ICMP || protonum == IPPROTO_TCP || protonum == IPPROTO_GRE)) {
 		/* flag enable disable flt */
-		int flt_enabled=0;
+		int nat_offload_enabled=0, need_skip=0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		/* hardware nat support */
 		if (ra_sw_nat_hook_rx && ra_sw_nat_hook_tx)
-		    flt_enabled=1; 
+		    nat_offload_enabled=1; 
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 		/* software fastnat support */
 		if (ipv4_conntrack_fastnat && bcm_nat_bind_hook)
-		    flt_enabled=1; 
+		    nat_offload_enabled=1; 
+
+		/* filter gre traffic skip all sw_nat and checks */
+		if (nat_offload_enabled && protonum == IPPROTO_GRE)
+		    goto skip_sw;
 #endif
+		/* filter icmp traffic for correct pmtu works. need skip hw_nat/sw_nat */
+		if (nat_offload_enabled && protonum == IPPROTO_ICMP) {
+		    need_skip=1;
+		    goto filter;
+		}
+
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-		/* skip form nat offloaf http post/get/head */
-		if (flt_enabled && web_str_loaded) {
+		/* skip http post/get/head traffic for correct webstr work */
+		if (nat_offload_enabled && web_str_loaded && nat && protonum == IPPROTO_TCP) {
 		    struct tcphdr _tcph, *tcph;
 		    unsigned char _data[2], *data;
 
@@ -1263,20 +1273,30 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 			((data[0] == 'G' && data[1] == 'E') ||
 		        (data[0] == 'P' && data[1] == 'O') ||
 		        (data[0] == 'H' && data[1] == 'E'))) {
-			    nat->info.nat_type |= NF_FAST_NAT_DENY;
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-			    goto skip_hw;
-#else
-			    goto skip_sw;
-#endif
+
+			need_skip=1;
+			goto filter;
 		    }
 		}
-#endif /* XT_MATCH_WEBSTR */
+#endif /* XT_MATCH_WEBSTR */	
 		/* Other traffic skip section
-		    .........
-		    .........
-		    .........
+		    EXAMPLE_CODE:
+		    if (nat_offload_enabled && (need ... rules ...)) {
+			need_skip=1;
+			goto filter;
+		    }
 		*/
+filter:
+		if (need_skip) {
+			/* sw_nat operate only udp/tcp */
+			if(nat)
+			    nat->info.nat_type |= NF_FAST_NAT_DENY;
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+			goto skip_hw;
+#else
+			goto skip_sw;
+#endif
+		}
 	}
 #endif /* RA_HW_NAT || BCM_NAT */
 /* end skip section */

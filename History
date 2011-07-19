@@ -511,6 +511,8 @@
 67) Move lcp options to nvram. Default vpnLCPInterval=30 vpnLCPFailure=5.<br>
 68) Add vpnCpuLimit to nvram. This is prevent full cpu load by ppp_generic module(default/optimal 3600, 0-disable, 1000-minimal used).<br>
 69) Fix kernel extencion at QoS enabled script.<br>
+70) Fixwork pmtu discovery at hw_nat enabled.<br>
+71) xt_MARK now work with sw_nat enabled(disable offload only for marked packets).<br>
 
 <br><br>
 <b>For support see:</b><br>

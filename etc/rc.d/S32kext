@@ -55,13 +55,13 @@ start() {
 	#workarounds coex hw/sw nat and qos
 	#mark correct work only if sw_nat=0
 	#htb/esfq/imq correct work  only if hw_nat=0
-	if [ "$QoSEnable" = "3" ] || [ "$simple_qos" = "1" ]; then
+	if [ "$QoSEnable" = "3" ] ; then
 	    hw_nat=0
 	    sw_nat=0
-	    $LOG "IMQ shaper or simple QoS enabled - HW_NAT/SW_NAT Offload mode must be DISABLE"
-	elif [ "$QoSEnable" = "1" ] || [ "$QoSEnable" = "2" ]; then
+	    $LOG "IMQ shaper enabled - HW_NAT/SW_NAT Offload mode must be DISABLE"
+	elif [ "$QoSEnable" = "1" ] || [ "$QoSEnable" = "2" ] || [ "$simple_qos" = "1" ]; then
 	    hw_nat=0
-	    $LOG "QoS enabled - HW_NAT Offload mode DISABLE"
+	    $LOG "QoS or SimpleQoS enabled - HW_NAT Offload mode DISABLE"
 	fi
 	#configure nat offload
 	if [ "$hw_nat" = "1" ]; then
