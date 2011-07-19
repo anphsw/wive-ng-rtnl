@@ -32,6 +32,13 @@ MODULE_ALIAS("ipt_CONNMARK");
 #include <linux/netfilter/xt_CONNMARK.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#include <linux/netfilter.h>
+#include <linux/netfilter/nf_conntrack_common.h>
+#include <net/netfilter/nf_conntrack.h>
+extern int ipv4_conntrack_fastnat;
+#endif
+
 static unsigned int
 target(struct sk_buff **pskb,
        const struct net_device *in,
@@ -46,6 +53,9 @@ target(struct sk_buff **pskb,
 	u_int32_t diff;
 	u_int32_t mark;
 	u_int32_t newmark;
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	struct nf_conn_nat *nat;
+#endif
 
 	ct = nf_ct_get(*pskb, &ctinfo);
 	if (ct) {
@@ -54,6 +64,10 @@ target(struct sk_buff **pskb,
 			newmark = (ct->mark & ~markinfo->mask) | markinfo->mark;
 			if (newmark != ct->mark) {
 				ct->mark = newmark;
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+				if (ipv4_conntrack_fastnat && (nat = nfct_nat(ct)))
+				    nat->info.nat_type |= NF_FAST_NAT_DENY;
+#endif
 				nf_conntrack_event_cache(IPCT_MARK, *pskb);
 			}
 			break;

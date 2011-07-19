@@ -1227,13 +1227,12 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	help = nfct_help(ct);
-	if (help && help->helper) {
+	if (help && help->helper)
                 is_helper = 1;
-		nat=NULL;
-	} else {
+	else
                 is_helper = 0;
-		nat = nfct_nat(ct);
-	}
+
+	nat = nfct_nat(ct);
 #endif
 
 /* This code section may be used for skip some types traffic */
@@ -1252,8 +1251,10 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    nat_offload_enabled=1; 
 
 		/* filter gre traffic skip all sw_nat and checks */
-		if (nat_offload_enabled && protonum == IPPROTO_GRE)
+		if (ipv4_conntrack_fastnat && protonum == IPPROTO_GRE && nat) {
+		    nat->info.nat_type |= NF_FAST_NAT_DENY;
 		    goto skip_sw;
+		}
 #endif
 		/* filter icmp traffic for correct pmtu works. need skip hw_nat/sw_nat */
 		if (nat_offload_enabled && protonum == IPPROTO_ICMP) {

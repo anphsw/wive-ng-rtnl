@@ -36,9 +36,22 @@ target_v0(struct sk_buff **pskb,
 	  const struct xt_target *target,
 	  const void *targinfo)
 {
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	struct nf_conn_nat *nat;
+	struct nf_conn *ct;
+	enum ip_conntrack_info ctinfo;
+#endif
 	const struct xt_mark_target_info *markinfo = targinfo;
 
 	(*pskb)->mark = markinfo->mark;
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	if(ipv4_conntrack_fastnat && nat) {
+	    nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
+	    if (nat)
+		nat->info.nat_type |= NF_FAST_NAT_DENY;
+	}
+#endif
 	return XT_CONTINUE;
 }
 
@@ -50,24 +63,28 @@ target_v1(struct sk_buff **pskb,
 	  const struct xt_target *target,
 	  const void *targinfo)
 {
-	const struct xt_mark_target_info_v1 *markinfo = targinfo;
-	int mark=0;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_nat *nat;
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
-
-	if (ipv4_conntrack_fastnat) {
-	    ct = nf_ct_get(*pskb, &ctinfo);
-	    nat = nfct_nat(ct);
-	}
 #endif
+	const struct xt_mark_target_info_v1 *markinfo = targinfo;
+	int mark=0;
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	nat=NULL;
+	ct=NULL;
+#endif
+
 	switch (markinfo->mode) {
 	case XT_MARK_SET:
 		mark = markinfo->mark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if(ipv4_conntrack_fastnat && nat)
-		    nat->info.nat_type |= NF_FAST_NAT_DENY;
+		if(ipv4_conntrack_fastnat && nat) {
+		    nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
+		    if (nat)
+			nat->info.nat_type |= NF_FAST_NAT_DENY;
+		}
 #endif
 		break;
 
