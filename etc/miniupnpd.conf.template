@@ -1,5 +1,5 @@
-port=0
 minissdpdsocket=/var/run/minissdpd.sock
+lease_file=/var/upnp_leases
 enable_natpmp=yes
 enable_upnp=yes
 bitrate_up=1000000
