@@ -15,7 +15,7 @@ start() {
 	sysctl -w vm.min_free_kbytes=2304
     else
         CONNTRACK_MAX=800
-        let "HASHSIZE=$CONNTRACK_MAX/8"
+        let "HASHSIZE=$CONNTRACK_MAX/4"
         let "ROUTEMAX=$CONNTRACK_MAX"
 	sysctl -w vm.min_free_kbytes=1088
     fi
