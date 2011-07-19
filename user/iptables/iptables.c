@@ -1802,6 +1802,10 @@ list_entries(const ipt_chainlabel chain, int verbose, int numeric,
 
 static char *get_modprobe(void)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#else
 	int procfile;
 	char *ret;
 
@@ -1826,18 +1830,19 @@ static char *get_modprobe(void)
 	free(ret);
 	close(procfile);
 	return NULL;
+#endif
 }
 
 int iptables_insmod(const char *modname, const char *modprobe, int quiet)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#else
 	char *buf = NULL;
 	char *argv[4];
 	int status;
 
-#ifdef DISABLE_INSMOD
-	/* disable modules autoload */
-	return 0;
-#endif
 
 	/* If they don't explicitly set it, read out of kernel */
 	if (!modprobe) {
@@ -1873,10 +1878,15 @@ int iptables_insmod(const char *modname, const char *modprobe, int quiet)
 	if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		return 0;
 	return -1;
+#endif
 }
 
 int load_iptables_ko(const char *modprobe, int quiet)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#else
 	static int loaded = 0;
 	static int ret = -1;
 
@@ -1886,6 +1896,7 @@ int load_iptables_ko(const char *modprobe, int quiet)
 	}
 
 	return ret;
+#endif
 }
 
 static struct ipt_entry *

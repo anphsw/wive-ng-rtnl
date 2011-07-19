@@ -1754,6 +1754,10 @@ list_entries(const ip6t_chainlabel chain, int verbose, int numeric,
 
 static char *get_modprobe(void)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#else
 	int procfile;
 	char *ret;
 
@@ -1778,10 +1782,15 @@ static char *get_modprobe(void)
 	free(ret);
 	close(procfile);
 	return NULL;
+#endif
 }
 
 int ip6tables_insmod(const char *modname, const char *modprobe, int quiet)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#else
 	char *buf = NULL;
 	char *argv[4];
 	int status;
@@ -1820,10 +1829,15 @@ int ip6tables_insmod(const char *modname, const char *modprobe, int quiet)
 	if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		return 0;
 	return -1;
+#endif
 }
 
 int load_ip6tables_ko(const char *modprobe, int quiet)
 {
+#ifdef DISABLE_INSMOD
+	/* disable modules autoload */
+	return 0;
+#endif
 	static int loaded = 0;
 	static int ret = -1;
 

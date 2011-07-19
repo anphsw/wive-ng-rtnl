@@ -333,10 +333,6 @@ stop() {
 	iptables -P FORWARD DROP > /dev/null 2>&1
 	iptables -P INPUT   DROP > /dev/null 2>&1
 	iptables -P OUTPUT ACCEPT > /dev/null 2>&1
-
-	#some modules remove fix me later
-	rmmod xt_MARK > /dev/null 2>&1
-	rmmod xt_CONNMARK > /dev/null 2>&1
 }
 
 get_param() {
