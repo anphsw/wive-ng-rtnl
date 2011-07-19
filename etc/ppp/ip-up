@@ -127,7 +127,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     	    echo "iptables -t filter -N MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	    echo "iptables -t filter -F MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	    echo "iptables -t filter -A FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
+    	    echo "iptables -t filter -I FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
     fi
     chmod 777 /etc/ppp_firewall

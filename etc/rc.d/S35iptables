@@ -283,7 +283,7 @@ start() {
     		iptables -t filter -N MINIUPNPD
     		iptables -t filter -F MINIUPNPD
     		iptables -t nat -A PREROUTING -i $wan_upnp_if -j MINIUPNPD
-    		iptables -t filter -A FORWARD -i $wan_upnp_if -j MINIUPNPD
+    		iptables -t filter -I FORWARD -i $wan_upnp_if -j MINIUPNPD
     	    fi
 	fi
 ############################################DMZ#########################################
