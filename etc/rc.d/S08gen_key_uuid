@@ -14,7 +14,7 @@ start() {
             fi
             outid="$outid$id"
         done
-        serial=`hostid`
+        serial=`echo "$outid" | cut -f1 -d-`
         $LOG "UPNP UUID is $outid , serial is $serial"
         printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
     else
