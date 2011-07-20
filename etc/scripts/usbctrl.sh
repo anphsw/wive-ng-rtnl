@@ -31,6 +31,9 @@ fi
 [ 0 -eq "${TYPE%%/*}" ] && TYPE=$INTERFACE
 
 case $TYPE in
+    7/*)
+	$LOG "${ACTION} ${idVendor}:${idProduct} may be printer"
+	modprobe -q usblp
     8/6/*)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem in zero CD mode"
@@ -41,8 +44,16 @@ case $TYPE in
 	fi
         ;;
     255/255/255)
-        $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem"
-        modprobe -q usbserial vendor=0x${idVendor} product=0x${idProduct}
+	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
+	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem"
+	    if [ "${idVendor}" != "0af0" ]; then
+		modprobe -q usbserial vendor=0x${idVendor} product=0x${idProduct}
+	    else
+		modprobe -q hso
+	    fi
+	else
+	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow device"
+	fi
         ;;
     *)
         $LOG "${ACTION} ${idVendor}:${idProduct} ${TYPE} ${INTERFACE}"
