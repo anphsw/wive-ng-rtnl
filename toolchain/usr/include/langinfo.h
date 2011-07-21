@@ -614,9 +614,6 @@ extern char *nl_langinfo (nl_item __item) __THROW;
 # include <xlocale.h>
 
 /* Just like nl_langinfo but get the information from the locale object L.  */
-#ifdef __UCLIBC_MJN3_ONLY__
-#warning "mjn3 FIXME: nl_langinfo_l has a prototype but isn't defined."
-#endif
 extern char *nl_langinfo_l (nl_item __item, __locale_t l);
 extern char *__nl_langinfo_l (nl_item __item, __locale_t l);
 

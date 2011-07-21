@@ -287,7 +287,6 @@ extern char *ctime_r (__const time_t *__restrict __timer,
 
 /* Defined in localtime.c.  */
 #ifdef __UCLIBC_MJN3_ONLY__
-#warning "mjn3 FIXME: __tzname, __daylight, and __timezone have a prototype but are not defined."
 extern char *__tzname[2];	/* Current timezone names.  */
 extern int __daylight;		/* If daylight-saving time is ever in use.  */
 extern long int __timezone;	/* Seconds west of UTC.  */
@@ -355,7 +354,6 @@ extern int clock_gettime (clockid_t __clock_id, struct timespec *__tp) __THROW;
 extern int clock_settime (clockid_t __clock_id, __const struct timespec *__tp) __THROW;
 
 #ifdef __UCLIBC_MJN3_ONLY__
-#warning "mjn3 FIXME: a bunch of unimplemented function prototypes."
 #  ifdef __USE_XOPEN2K
 /* High-resolution sleep with the specified clock.
 
@@ -394,7 +392,6 @@ extern int timer_getoverrun (timer_t __timerid) __THROW;
 
 
 #ifdef __UCLIBC_MJN3_ONLY__
-#warning "mjn3 FIXME: a bunch of unimplemented function prototypes."
 # ifdef __USE_XOPEN_EXTENDED
 /* Set to one of the following values to indicate an error.
      1  the DATEMSK environment variable is null or undefined,
