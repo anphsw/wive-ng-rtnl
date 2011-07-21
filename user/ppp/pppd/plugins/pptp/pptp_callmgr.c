@@ -340,7 +340,7 @@ int open_inetsock(struct in_addr inetaddr)
     struct sockaddr_in dest, src;
     int s;
 #ifdef USE_TCP_NODELAY
-    int value = 1;
+    int on = 1;
 #endif
 
     dest.sin_family = AF_INET;
@@ -360,7 +360,7 @@ int open_inetsock(struct in_addr inetaddr)
         }
     }
 #ifdef USE_TCP_NODELAY
-    setsockopt( s, SOL_TCP, TCP_NODELAY, &value, sizeof(value) );
+    setsockopt( s, SOL_TCP, TCP_NODELAY, &on, sizeof(on) );
 #endif
     if (connect(s, (struct sockaddr *) &dest, sizeof(dest)) < 0) {
         warn("connect: %s", strerror(errno));

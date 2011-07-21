@@ -522,6 +522,7 @@
 77) Add blkid need for automount.<br>
 78) PPPOE must flush connections when MAC address changes too.<br>
 79) Usbctl fix device detect.<br>
+80) pppd: pptp plugin some bugfixes.<br>
 
 <br><br>
 <b>For support see:</b><br>
