@@ -399,6 +399,7 @@ clean: modules_clean
 	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
 	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
 	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
+	find $(ROOTDIR) -type d -name 'autom4te.cache' | xargs rm -rf
 
 real_clean mrproper: clean
 	make -C linux mrproper
