@@ -104,6 +104,8 @@ config.h.in~
 /user/transmission/autom4te.cache/output.1
 /user/transmission/autom4te.cache/requests
 /user/transmission/autom4te.cache/traces.0
+/user/transmission/autom4te.cache/traces.1
+/user/transmission/autom4te.cache
 /user/transmission/configure
 /user/wsc_upnp/libupnp-1.4.6/autom4te.cache/requests
 /user/wsc_upnp/libupnp-1.4.6/autom4te.cache/output.1
