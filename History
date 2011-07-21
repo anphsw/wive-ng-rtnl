@@ -518,7 +518,10 @@
 74) Replace various uses of num_physpages by totalram_pages. Sizing of memory allocations shouldn't depend 
     on the number of physical pages found in a system.<br>
 75) Fix upnp work in vpn mode at old kernel+new gcc. This is compiler bug.<br>
-
+76) Transmission update to 2.33 version.<br>
+77) Add blkid need for automount.<br>
+78) PPPOE must flush connections when MAC address changes too.<br>
+79) Usbctl fix device detect.<br>
 
 <br><br>
 <b>For support see:</b><br>
