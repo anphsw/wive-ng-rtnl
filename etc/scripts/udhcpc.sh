@@ -195,19 +195,13 @@ case "$1" in
 	#if dhcp disables restart must from internet.sh
 	#this is restart vpn and others if need
 	if [ "$vpnEnabled" = "on" ]; then
-	    vpn_watchdog
-    	    if [ "$OLD_IP" != "$CUR_IP" ] || [ "$PPP_DEAD" != "0" ]; then
+    	    if [ "$OLD_IP" != "$CUR_IP" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof pppd`
 		service vpnhelper stop
 		#wait ip-down script work
 		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ] || [ "$PPP_DEAD" != "0" ]; then
 		    sleep 10
-		    if [ "$PPP_DEAD" != "0" ]; then
-			service syslog restart
-			sleep 2
-			$LOG "PPP dead. Need restart vpnhelper.."
-		    fi
 		fi
 		$LOG "Restart vpnhelper.."
 		service vpnhelper start
