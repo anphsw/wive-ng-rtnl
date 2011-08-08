@@ -32,7 +32,6 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    os level = $SmbOsLevel" >> $CONFIG
     echo "    interfaces = $lan_if" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
-    echo "    force group = Administrator" >> $CONFIG
     cat /etc/smb.conf.template >> $CONFIG
 
     if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
