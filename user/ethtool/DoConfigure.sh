@@ -4,8 +4,7 @@ echo "==================CONFIGURE-ETHTOOL============================"
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
-    aclocal
-    autoconf
+    sh ./autogen.sh
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
