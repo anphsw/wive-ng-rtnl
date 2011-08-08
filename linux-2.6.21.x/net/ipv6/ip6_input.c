@@ -67,7 +67,7 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 
 	if (skb->pkt_type == PACKET_OTHERHOST) {
 		kfree_skb(skb);
-		return 0;
+		return NET_RX_DROP;
 	}
 
 	rcu_read_lock();
@@ -105,6 +105,15 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 	if (hdr->version != 6)
 		goto err;
 
+	/*
+	 * RFC4291 2.5.3
+	 * A packet received on an interface with a destination address
+	 * of loopback must be dropped.
+	 */
+	if (!(dev->flags & IFF_LOOPBACK) &&
+	    ipv6_addr_loopback(&hdr->daddr))
+		goto err;
+
 	skb->h.raw = (u8 *)(hdr + 1);
 	IP6CB(skb)->nhoff = offsetof(struct ipv6hdr, nexthdr);
 
@@ -127,7 +136,7 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 		if (ipv6_parse_hopopts(&skb) < 0) {
 			IP6_INC_STATS_BH(idev, IPSTATS_MIB_INHDRERRORS);
 			rcu_read_unlock();
-			return 0;
+			return NET_RX_DROP;
 		}
 	}
 
@@ -222,7 +231,7 @@ discard:
 	IP6_INC_STATS_BH(idev, IPSTATS_MIB_INDISCARDS);
 	rcu_read_unlock();
 	kfree_skb(skb);
-	return 0;
+	return NET_RX_DROP;
 }
 
 

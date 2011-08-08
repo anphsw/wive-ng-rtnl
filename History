@@ -529,6 +529,9 @@
 1) Fix use /etc/hosts dnsmasq.<br>
 2) Fix /etc/hosts generate if wan_ip="".<br>
 3) Increase samba buffers size if usb enabled.<br>
+4) Update xl2tpd to 1.3.0 version.<br>
+5) Update miniupnp and libnatpmp to 30072011 version.<br>
+6) Merge ipv6 stable patches from upstream.<br>
 
 <br><br>
 <b>For support see:</b><br>
