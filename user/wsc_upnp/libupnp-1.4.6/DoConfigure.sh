@@ -4,8 +4,8 @@ echo "==================CONFIGURE-LIBUPNP============================"
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
-    aclocal
-    autoconf
+    cp -f configure.3052 configure
+    touch configure.ac
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
