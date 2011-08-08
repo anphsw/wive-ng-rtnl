@@ -873,7 +873,13 @@ int control_finish (struct tunnel *t, struct call *c)
                             "%s: Unable to create password pipe for pppd\n", __FUNCTION__);
                   return -EINVAL;
                 }
-                write (pppd_passwdfd[1], c->lac->password, strlen (c->lac->password));
+                if (-1 == write (pppd_passwdfd[1], c->lac->password, strlen (c->lac->password)))
+                {
+                    l2tp_log (LOG_DEBUG,
+                            "%s: Unable to write password to pipe for pppd\n", __FUNCTION__);
+                    close (pppd_passwdfd[1]);
+                    return -EINVAL;
+                }
                 close (pppd_passwdfd[1]);
 
                 /* clear memory used for password, paranoid?  */
@@ -898,6 +904,8 @@ int control_finish (struct tunnel *t, struct call *c)
         opt_destroy (po);
         if (c->lac)
             c->lac->rtries = 0;
+	if (c->lac->password[0])
+	    close(pppd_passwdfd[0]);
         break;
     case ICCN:
         if (c == t->self)
@@ -1645,15 +1653,14 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
     }
 #endif
 
-    x = write (c->fd, wbuf, pos);
-    if (x < pos)
+    x = 0;
+    while ( pos != x )
     {
-      if (DEBUG)
+      err = write (c->fd, wbuf+x, pos-x);
+      if ( err < 0 ) {
+        if ( errno != EINTR && errno != EAGAIN ) {
 	l2tp_log (LOG_WARNING, "%s: %s(%d)\n", __FUNCTION__, strerror (errno),
 		  errno);
-
-        if (!(errno == EINTR) && !(errno == EAGAIN))
-        {
             /*
                * I guess pppd died.  we'll pretend
                * everything ended normally
@@ -1662,6 +1669,11 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
             c->fd = -1;
             return -EIO;
         }
+        else {
+          continue;  //goto while
+        }
+      }
+      x += err;
     }
     return 0;
 }

@@ -235,9 +235,9 @@ void control_xmit (void *b)
                      t->ourtid);
                 t->self->needclose = 0;
                 t->self->closing = -1;
-        tv.tv_sec = 1;
-            tv.tv_usec = 0;
-            schedule (tv, foo, t);
+    		tv.tv_sec = 1;
+        	tv.tv_usec = 0;
+        	schedule (tv, foo, t);
             }
             else
             {
@@ -246,13 +246,13 @@ void control_xmit (void *b)
                      t->ourtid);
                 strcpy (t->self->errormsg, "Timeout");
                 t->self->needclose = -1;
-        tv.tv_sec = 1;
-            tv.tv_usec = 0;
-            schedule (tv, foo, t);
+    		tv.tv_sec = 1;
+        	tv.tv_usec = 0;
+        	schedule (tv, foo, t);
             }
+	    call_close(t->self);
         }
-	free(buf->rstart);
-	free(buf);
+	toss (buf);
     }
     else
     {
@@ -542,7 +542,7 @@ void network_thread ()
 		do_packet_dump (buf);
 	    }
 	    if (!
-		(c = get_call (tunnel, call, from.sin_addr.s_addr,
+		(c = get_call (tunnel, call, from.sin_addr,
 			       from.sin_port, refme, refhim)))
 	    {
 		if ((c =

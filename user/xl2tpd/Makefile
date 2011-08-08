@@ -95,8 +95,10 @@ CFLAGS+= $(DFLAGS) -Os -fPIC -pipe -Wall -g -fomit-frame-pointer -mno-memcpy -fn
 HDRS=l2tp.h avp.h misc.h control.h call.h scheduler.h file.h aaa.h md5.h
 OBJS=xl2tpd.o pty.o misc.o control.o avp.o call.o network.o avpsend.o scheduler.o file.o aaa.o md5.o
 SRCS=${OBJS:.o=.c} ${HDRS}
+CONTROL_SRCS=xl2tpd-control.c
 #LIBS= $(OSLIBS) # -lefence # efence for malloc checking
 EXEC=xl2tpd
+CONTROL_EXEC=xl2tpd-control
 
 PREFIX?=./filesystem
 SBINDIR?=$(DESTDIR)${PREFIX}/sbin
