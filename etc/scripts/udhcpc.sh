@@ -200,7 +200,7 @@ case "$1" in
 		XL2TPD=`pidof pppd`
 		service vpnhelper stop
 		#wait ip-down script work
-		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ] || [ "$PPP_DEAD" != "0" ]; then
+		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
 		    sleep 10
 		fi
 		$LOG "Restart vpnhelper.."
