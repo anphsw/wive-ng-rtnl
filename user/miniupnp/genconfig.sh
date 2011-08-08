@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: genconfig.sh,v 1.49 2011/06/04 16:20:31 nanard Exp $
+# $Id: genconfig.sh,v 1.50 2011/07/25 16:03:46 nanard Exp $
 # miniupnp daemon
 # http://miniupnp.free.fr or http://miniupnp.tuxfamily.org/
 # (c) 2006-2011 Thomas Bernard
@@ -229,7 +229,7 @@ echo "Please edit config.h for more compilation options."
 
 # define SUPPORT_REMOTEHOST if the FW related code really supports setting
 # a RemoteHost
-if [ "$FW" = "netfilter" ] ; then
+if [ \( "$FW" = "netfilter" \) -o \( "$FW" = "pf" \) -o \( "$FW" = "ipfw" \) ] ; then
 	echo "#define SUPPORT_REMOTEHOST" >> ${CONFIGFILE}
 fi
 
@@ -293,7 +293,7 @@ echo "/*#define ENABLE_IPV6*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Enable the support of IGD v2 specification */" >> ${CONFIGFILE}
-echo "#define IGD_V2" >> ${CONFIGFILE}
+echo "#undef IGD_V2" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "#ifdef IGD_V2" >> ${CONFIGFILE}

@@ -1,4 +1,4 @@
-/* $Id: ifacewatcher.c,v 1.1 2011/05/20 09:33:07 nanard Exp $ */
+/* $Id: ifacewatcher.c,v 1.2 2011/07/30 13:11:39 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2009 Thomas Bernard
@@ -76,6 +76,7 @@ OpenAndConfInterfaceWatchSocket(void)
 	memset(&addr, 0, sizeof(addr));
 	addr.nl_family = AF_NETLINK;
 	addr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
+	/*addr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR;*/
 
 	if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 	{

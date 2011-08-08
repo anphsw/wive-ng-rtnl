@@ -1,4 +1,14 @@
-$Id: Changelog.txt,v 1.238 2011/07/15 07:48:25 nanard Exp $
+$Id: Changelog.txt,v 1.240 2011/07/30 13:14:34 nanard Exp $
+
+2011/07/30:
+  netfilter : Added a tiny_nf_nat.h file to compile with iptables
+    installed headers.
+    include xtables.h instead of iptables.h
+
+VERSION 1.6 : released the 2011/07/25
+
+2011/07/25:
+  Update doc for version 1.6
 
 2011/07/15:
   Fixing code with MULTIPLE_EXTERNAL_IP defined.

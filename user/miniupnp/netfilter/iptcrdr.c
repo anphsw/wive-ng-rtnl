@@ -1,4 +1,4 @@
-/* $Id: iptcrdr.c,v 1.45 2011/06/22 20:34:39 nanard Exp $ */
+/* $Id: iptcrdr.c,v 1.46 2011/07/30 13:14:36 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard
@@ -13,8 +13,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <dlfcn.h>
+#include <xtables.h>
 #include <libiptc/libiptc.h>
-#include <iptables.h>
 
 #include <linux/version.h>
 
@@ -29,7 +29,11 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 #define LIST_POISON2  ((void *) 0x00200200 )
 
-#include <net/netfilter/nf_nat.h>
+#if 0
+#include <linux/netfilter/nf_nat.h>
+#else
+#include "tiny_nf_nat.h"
+#endif
 #define ip_nat_multi_range	nf_nat_multi_range
 #define ip_nat_range		nf_nat_range
 #define IPTC_HANDLE		struct iptc_handle *
