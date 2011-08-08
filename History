@@ -526,8 +526,9 @@
 
 <br>         
 <b>1.9.x</b><br>
-1) Fix use /etc/hosts dnsmasq<br>
-2) Fix /etc/hosts generate if wan_ip=""<br>
+1) Fix use /etc/hosts dnsmasq.<br>
+2) Fix /etc/hosts generate if wan_ip="".<br>
+3) Increase samba buffers size if usb enabled.<br>
 
 <br><br>
 <b>For support see:</b><br>
