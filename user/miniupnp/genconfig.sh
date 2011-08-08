@@ -6,6 +6,8 @@
 # This software is subject to the conditions detailed in the
 # LICENCE file provided within the distribution
 
+echo "==================CONFIGURE-MINIUPNPD======================="
+
 RM="rm -f"
 CONFIGFILE="config.h"
 CONFIGMACRO="__CONFIG_H__"

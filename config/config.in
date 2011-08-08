@@ -77,9 +77,7 @@ if [ "$CONFIG_USER_STORAGE" = "y" ]; then
 fi
 
 dep_bool 'samba server'				CONFIG_USER_SAMBA
-if [ "$CONFIG_USER_SAMBA" = "y" ]; then
-        define_bool CONFIG_USER_STORAGE
-fi
+dep_bool 'dlna server'				CONFIG_USER_MINIDLNA
 
 bool 'go-ahead webserver'				CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable IPv6 support'			CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
