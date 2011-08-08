@@ -53,7 +53,7 @@ dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_USER_LLTD)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
-dir_$(CONFIG_USER_OPENSSL)	   	    += openssl
+#dir_$(CONFIG_USER_OPENSSL)	   	    += openssl
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
@@ -68,7 +68,6 @@ dir_$(CONFIG_USER_ETHTOOL)                  += ethtool
 dir_$(CONFIG_USER_UDPXY)                    += udpxy
 dir_$(CONFIG_USER_WIVE)			    += wive-utils
 dir_$(CONFIG_USER_KABINET)		    += kabinet
-dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
@@ -83,6 +82,9 @@ dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_MINIDLNA)		    += minidlna
 dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
 
+#wifi simle config
+dir_$(CONFIG_USER_WSC)                	    += wsc_upnp
+
 #only ralink apps and scripts
 dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 
@@ -91,12 +93,12 @@ dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
 all: config
-	# ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
-ifeq ($(CONFIG_USER_OPENSSL),y)
 	CC=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-gcc ; \
 	AR=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ar ; \
 	LD=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ld ; \
 	RANLIB=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ranlib ; \
+	# ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+ifeq ($(CONFIG_USER_OPENSSL),y)
 	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
 	cd ..
 endif
