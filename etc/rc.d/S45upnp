@@ -24,6 +24,9 @@ start() {
     exit 0
  fi
     if [ "$opmode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
+	if [ ! -f /var/upnp_leases ]; then
+	    touch /var/upnp_leases
+	fi
 	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
         if [ "$wan_ipaddr" != "" ]; then
 	  $LOG "Start upnp at $wan_ipaddr"
